@@ -20,8 +20,8 @@ package config
 
 // SupplierSCfg is the configuration of supplier service
 type AttributeSCfg struct {
-	Enabled       bool
-	IndexedFields []string
+	Enabled             bool
+	StringIndexedFields []string
 }
 
 func (alS *AttributeSCfg) loadFromJsonCfg(jsnCfg *AttributeSJsonCfg) (err error) {
@@ -31,10 +31,10 @@ func (alS *AttributeSCfg) loadFromJsonCfg(jsnCfg *AttributeSJsonCfg) (err error)
 	if jsnCfg.Enabled != nil {
 		alS.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Indexed_fields != nil {
-		alS.IndexedFields = make([]string, len(*jsnCfg.Indexed_fields))
-		for i, fID := range *jsnCfg.Indexed_fields {
-			alS.IndexedFields[i] = fID
+	if jsnCfg.String_indexed_fields != nil {
+		alS.StringIndexedFields = make([]string, len(*jsnCfg.String_indexed_fields))
+		for i, fID := range *jsnCfg.String_indexed_fields {
+			alS.StringIndexedFields[i] = fID
 		}
 	}
 	return

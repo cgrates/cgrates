@@ -430,7 +430,7 @@ const CGRATES_CFG_JSON = `
 
 "attributes": {							// Attribute service
 	"enabled": false,				// starts attribute service: <true|false>.
-	"indexed_fields": [],			// query indexes based on these fields for faster processing
+	"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 },
 
 
@@ -438,7 +438,7 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,				// starts ResourceLimiter service: <true|false>.
 	"store_interval": "",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
 	"thresholds_conns": [],			// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
-	"indexed_fields": [],			// query indexes based on these fields for faster processing
+	"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 },
 
 
@@ -446,20 +446,20 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,				// starts Stat service: <true|false>.
 	"store_interval": "",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
 	"thresholds_conns": [],			// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
-	"indexed_fields": [],			// query indexes based on these fields for faster processing
+	"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 },
 
 
 "thresholds": {						// Threshold service (*new)
 	"enabled": false,				// starts ThresholdS service: <true|false>.
 	"store_interval": "",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
-	"indexed_fields": [],			// query indexes based on these fields for faster processing
+	"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 },
 
 
 "suppliers": {						// Supplier service (*new)
 	"enabled": false,				// starts SupplierS service: <true|false>.
-	"indexed_fields": [],			// query indexes based on these fields for faster processing
+	"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"rals_conns": [
 		{"address": "*internal"},	// address where to reach the RALs for cost/accounting  <*internal>
 	],

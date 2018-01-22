@@ -27,14 +27,14 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewAttributeService(dm *DataManager, filterS *FilterS, indexedFields []string) (*AttributeService, error) {
-	return &AttributeService{dm: dm, filterS: filterS, indexedFields: indexedFields}, nil
+func NewAttributeService(dm *DataManager, filterS *FilterS, stringIndexedFields []string) (*AttributeService, error) {
+	return &AttributeService{dm: dm, filterS: filterS, stringIndexedFields: stringIndexedFields}, nil
 }
 
 type AttributeService struct {
-	dm            *DataManager
-	filterS       *FilterS
-	indexedFields []string
+	dm                  *DataManager
+	filterS             *FilterS
+	stringIndexedFields []string
 }
 
 // ListenAndServe will initialize the service
@@ -61,7 +61,7 @@ func (alS *AttributeService) matchingAttributeProfilesForEvent(ev *utils.CGREven
 	}
 	attrIdxKey = utils.ConcatenatedKey(ev.Tenant, contextVal)
 	matchingAPs := make(map[string]*AttributeProfile)
-	aPrflIDs, err := matchingItemIDsForEvent(ev.Event, alS.indexedFields,
+	aPrflIDs, err := matchingItemIDsForEvent(ev.Event, alS.stringIndexedFields,
 		alS.dm, utils.AttributeFilterIndexes+attrIdxKey, MetaString)
 	if err != nil {
 		return nil, err

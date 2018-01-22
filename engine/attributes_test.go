@@ -113,9 +113,9 @@ func testPopulateAttrService(t *testing.T) {
 	dmAtr.SetFilter(filter1)
 	dmAtr.SetFilter(filter2)
 	srv = AttributeService{
-		dm:            dmAtr,
-		filterS:       &FilterS{dm: dmAtr},
-		indexedFields: []string{"attributeprofile1", "attributeprofile2"},
+		dm:                  dmAtr,
+		filterS:             &FilterS{dm: dmAtr},
+		stringIndexedFields: []string{"attributeprofile1", "attributeprofile2"},
 	}
 	sev = &utils.CGREvent{
 		Tenant:  "cgrates.org",

@@ -34,30 +34,30 @@ import (
 
 // NewStatService initializes a StatService
 func NewStatService(dm *DataManager, storeInterval time.Duration,
-	thdS rpcclient.RpcClientConnection, filterS *FilterS, indexedFields []string) (ss *StatService, err error) {
+	thdS rpcclient.RpcClientConnection, filterS *FilterS, stringIndexedFields []string) (ss *StatService, err error) {
 	if thdS != nil && reflect.ValueOf(thdS).IsNil() { // fix nil value in interface
 		thdS = nil
 	}
 	return &StatService{
-		dm:               dm,
-		storeInterval:    storeInterval,
-		thdS:             thdS,
-		filterS:          filterS,
-		indexedFields:    indexedFields,
-		storedStatQueues: make(utils.StringMap),
-		stopBackup:       make(chan struct{})}, nil
+		dm:                  dm,
+		storeInterval:       storeInterval,
+		thdS:                thdS,
+		filterS:             filterS,
+		stringIndexedFields: stringIndexedFields,
+		storedStatQueues:    make(utils.StringMap),
+		stopBackup:          make(chan struct{})}, nil
 }
 
 // StatService builds stats for events
 type StatService struct {
-	dm               *DataManager
-	storeInterval    time.Duration
-	thdS             rpcclient.RpcClientConnection // rpc connection towards ThresholdS
-	filterS          *FilterS
-	indexedFields    []string
-	stopBackup       chan struct{}
-	storedStatQueues utils.StringMap // keep a record of stats which need saving, map[statsTenantID]bool
-	ssqMux           sync.RWMutex    // protects storedStatQueues
+	dm                  *DataManager
+	storeInterval       time.Duration
+	thdS                rpcclient.RpcClientConnection // rpc connection towards ThresholdS
+	filterS             *FilterS
+	stringIndexedFields []string
+	stopBackup          chan struct{}
+	storedStatQueues    utils.StringMap // keep a record of stats which need saving, map[statsTenantID]bool
+	ssqMux              sync.RWMutex    // protects storedStatQueues
 }
 
 // ListenAndServe loops keeps the service alive
@@ -141,7 +141,7 @@ func (sS *StatService) StoreStatQueue(sq *StatQueue) (err error) {
 // matchingStatQueuesForEvent returns ordered list of matching resources which are active by the time of the call
 func (sS *StatService) matchingStatQueuesForEvent(ev *utils.CGREvent) (sqs StatQueues, err error) {
 	matchingSQs := make(map[string]*StatQueue)
-	sqIDs, err := matchingItemIDsForEvent(ev.Event, sS.indexedFields, sS.dm, utils.StatFilterIndexes+ev.Tenant, MetaString)
+	sqIDs, err := matchingItemIDsForEvent(ev.Event, sS.stringIndexedFields, sS.dm, utils.StatFilterIndexes+ev.Tenant, MetaString)
 	if err != nil {
 		return nil, err
 	}

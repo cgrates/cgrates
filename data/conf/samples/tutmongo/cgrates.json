@@ -164,7 +164,7 @@
 
 "attributes": {							// Attribute service
 	"enabled": true,				// starts Alias service: <true|false>.
-	"indexed_fields": [],			// query indexes based on these fields for faster processing
+	"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 },
 
 
