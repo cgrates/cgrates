@@ -25,10 +25,11 @@ import (
 )
 
 type StatSCfg struct {
-	Enabled             bool
-	StoreInterval       time.Duration // Dump regularly from cache into dataDB
-	ThresholdSConns     []*HaPoolConfig
-	StringIndexedFields []string
+	Enabled                   bool
+	StoreInterval             time.Duration // Dump regularly from cache into dataDB
+	ThresholdSConns           []*HaPoolConfig
+	StringIndexedFields       []string
+	StringPrefixIndexedFields []string
 }
 
 func (st *StatSCfg) loadFromJsonCfg(jsnCfg *StatServJsonCfg) (err error) {
@@ -54,6 +55,12 @@ func (st *StatSCfg) loadFromJsonCfg(jsnCfg *StatServJsonCfg) (err error) {
 		st.StringIndexedFields = make([]string, len(*jsnCfg.String_indexed_fields))
 		for i, fID := range *jsnCfg.String_indexed_fields {
 			st.StringIndexedFields[i] = fID
+		}
+	}
+	if jsnCfg.Stringprefix_indexed_fields != nil {
+		st.StringPrefixIndexedFields = make([]string, len(*jsnCfg.Stringprefix_indexed_fields))
+		for i, fID := range *jsnCfg.Stringprefix_indexed_fields {
+			st.StringPrefixIndexedFields[i] = fID
 		}
 	}
 	return nil
