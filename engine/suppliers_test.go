@@ -187,10 +187,10 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 	ssd := make(map[string]SuppliersSorter)
 	ssd[utils.MetaWeight] = NewWeightSorter()
 	splserv = SupplierService{
-		dm:            dmspl,
-		filterS:       &FilterS{dm: dmspl},
-		indexedFields: []string{"supplierprofile1", "supplierprofile2"},
-		sorter:        ssd,
+		dm:                  dmspl,
+		filterS:             &FilterS{dm: dmspl},
+		stringIndexedFields: []string{"supplierprofile1", "supplierprofile2"},
+		sorter:              ssd,
 	}
 	ssd[utils.MetaLeastCost] = NewLeastCostSorter(&splserv)
 	argPagEv = &ArgsGetSuppliers{

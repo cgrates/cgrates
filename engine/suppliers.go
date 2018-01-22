@@ -70,15 +70,15 @@ func (lps SupplierProfiles) Sort() {
 
 // NewLCRService initializes a LCRService
 func NewSupplierService(dm *DataManager, timezone string,
-	filterS *FilterS, indexedFields []string, resourceS,
+	filterS *FilterS, stringIndexedFields []string, resourceS,
 	statS rpcclient.RpcClientConnection) (spS *SupplierService, err error) {
 	spS = &SupplierService{
-		dm:            dm,
-		timezone:      timezone,
-		filterS:       filterS,
-		resourceS:     resourceS,
-		statS:         statS,
-		indexedFields: indexedFields}
+		dm:                  dm,
+		timezone:            timezone,
+		filterS:             filterS,
+		resourceS:           resourceS,
+		statS:               statS,
+		stringIndexedFields: stringIndexedFields}
 	if spS.sorter, err = NewSupplierSortDispatcher(spS); err != nil {
 		return nil, err
 	}
@@ -87,10 +87,10 @@ func NewSupplierService(dm *DataManager, timezone string,
 
 // SupplierService is the service computing Supplier queries
 type SupplierService struct {
-	dm            *DataManager
-	timezone      string
-	filterS       *FilterS
-	indexedFields []string
+	dm                  *DataManager
+	timezone            string
+	filterS             *FilterS
+	stringIndexedFields []string
 	resourceS,
 	statS rpcclient.RpcClientConnection
 	sorter SupplierSortDispatcher
@@ -114,7 +114,7 @@ func (spS *SupplierService) Shutdown() error {
 // matchingSupplierProfilesForEvent returns ordered list of matching resources which are active by the time of the call
 func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent) (sPrfls SupplierProfiles, err error) {
 	matchingLPs := make(map[string]*SupplierProfile)
-	sPrflIDs, err := matchingItemIDsForEvent(ev.Event, spS.indexedFields,
+	sPrflIDs, err := matchingItemIDsForEvent(ev.Event, spS.stringIndexedFields,
 		spS.dm, utils.SupplierFilterIndexes+ev.Tenant, MetaString)
 	if err != nil {
 		return nil, err

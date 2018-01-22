@@ -279,7 +279,7 @@ func (rs Resources) allocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 
 // Pas the config as a whole so we can ask access concurrently
 func NewResourceService(dm *DataManager, storeInterval time.Duration,
-	thdS rpcclient.RpcClientConnection, filterS *FilterS, indexedFields []string) (*ResourceService, error) {
+	thdS rpcclient.RpcClientConnection, filterS *FilterS, stringIndexedFields []string) (*ResourceService, error) {
 	if thdS != nil && reflect.ValueOf(thdS).IsNil() {
 		thdS = nil
 	}
@@ -293,16 +293,16 @@ func NewResourceService(dm *DataManager, storeInterval time.Duration,
 
 // ResourceService is the service handling resources
 type ResourceService struct {
-	dm               *DataManager                  // So we can load the data in cache and index it
-	thdS             rpcclient.RpcClientConnection // allows applying filters based on stats
-	filterS          *FilterS
-	indexedFields    []string                     // speed up query on indexes
-	lcEventResources map[string][]*utils.TenantID // cache recording resources for events in alocation phase
-	lcERMux          sync.RWMutex                 // protects the lcEventResources
-	storedResources  utils.StringMap              // keep a record of resources which need saving, map[resID]bool
-	srMux            sync.RWMutex                 // protects storedResources
-	storeInterval    time.Duration                // interval to dump data on
-	stopBackup       chan struct{}                // control storing process
+	dm                  *DataManager                  // So we can load the data in cache and index it
+	thdS                rpcclient.RpcClientConnection // allows applying filters based on stats
+	filterS             *FilterS
+	stringIndexedFields []string                     // speed up query on indexes
+	lcEventResources    map[string][]*utils.TenantID // cache recording resources for events in alocation phase
+	lcERMux             sync.RWMutex                 // protects the lcEventResources
+	storedResources     utils.StringMap              // keep a record of resources which need saving, map[resID]bool
+	srMux               sync.RWMutex                 // protects storedResources
+	storeInterval       time.Duration                // interval to dump data on
+	stopBackup          chan struct{}                // control storing process
 }
 
 // Called to start the service
@@ -434,7 +434,7 @@ func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources)
 // matchingResourcesForEvent returns ordered list of matching resources which are active by the time of the call
 func (rS *ResourceService) matchingResourcesForEvent(tenant string, ev map[string]interface{}) (rs Resources, err error) {
 	matchingResources := make(map[string]*Resource)
-	rIDs, err := matchingItemIDsForEvent(ev, rS.indexedFields, rS.dm, utils.ResourceFilterIndexes+tenant, MetaString)
+	rIDs, err := matchingItemIDsForEvent(ev, rS.stringIndexedFields, rS.dm, utils.ResourceFilterIndexes+tenant, MetaString)
 	if err != nil {
 		return nil, err
 	}

@@ -265,9 +265,9 @@ func TestV1AuthorizeResourceMissingStruct(t *testing.T) {
 	dmresmiss := NewDataManager(data)
 
 	rserv := &ResourceService{
-		dm:            dmresmiss,
-		filterS:       &FilterS{dm: dmresmiss},
-		indexedFields: []string{}, // speed up query on indexes
+		dm:                  dmresmiss,
+		filterS:             &FilterS{dm: dmresmiss},
+		stringIndexedFields: []string{}, // speed up query on indexes
 	}
 	var reply *string
 	argsMissingTenant := utils.ArgRSv1ResourceUsage{

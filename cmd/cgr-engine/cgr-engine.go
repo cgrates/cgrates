@@ -527,7 +527,7 @@ func startAttributeService(internalAttributeSChan chan rpcclient.RpcClientConnec
 	dm *engine.DataManager, server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
-	aS, err := engine.NewAttributeService(dm, filterS, cfg.AttributeSCfg().IndexedFields)
+	aS, err := engine.NewAttributeService(dm, filterS, cfg.AttributeSCfg().StringIndexedFields)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.AttributeS, err.Error()))
 		exitChan <- true
@@ -561,7 +561,7 @@ func startResourceService(internalRsChan, internalThresholdSChan chan rpcclient.
 			return
 		}
 	}
-	rS, err := engine.NewResourceService(dm, cfg.ResourceSCfg().StoreInterval, thdSConn, filterS, cfg.ResourceSCfg().IndexedFields)
+	rS, err := engine.NewResourceService(dm, cfg.ResourceSCfg().StoreInterval, thdSConn, filterS, cfg.ResourceSCfg().StringIndexedFields)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<ResourceS> Could not init, error: %s", err.Error()))
 		exitChan <- true
@@ -598,7 +598,7 @@ func startStatService(internalStatSChan, internalThresholdSChan chan rpcclient.R
 			return
 		}
 	}
-	sS, err := engine.NewStatService(dm, cfg.StatSCfg().StoreInterval, thdSConn, filterS, cfg.StatSCfg().IndexedFields)
+	sS, err := engine.NewStatService(dm, cfg.StatSCfg().StoreInterval, thdSConn, filterS, cfg.StatSCfg().StringIndexedFields)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<StatS> Could not init, error: %s", err.Error()))
 		exitChan <- true
@@ -623,7 +623,7 @@ func startThresholdService(internalThresholdSChan chan rpcclient.RpcClientConnec
 	dm *engine.DataManager, server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
-	tS, err := engine.NewThresholdService(dm, cfg.ThresholdSCfg().IndexedFields,
+	tS, err := engine.NewThresholdService(dm, cfg.ThresholdSCfg().StringIndexedFields,
 		cfg.ThresholdSCfg().StoreInterval, filterS)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<ThresholdS> Could not init, error: %s", err.Error()))
@@ -676,7 +676,7 @@ func startSupplierService(internalSupplierSChan, internalRsChan, internalStatSCh
 		}
 	}
 	splS, err := engine.NewSupplierService(dm, cfg.DefaultTimezone, filterS,
-		cfg.SupplierSCfg().IndexedFields, resourceSConn, statSConn)
+		cfg.SupplierSCfg().StringIndexedFields, resourceSConn, statSConn)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s",
 			utils.SupplierS, err.Error()))

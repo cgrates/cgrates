@@ -112,25 +112,25 @@ func (ts Thresholds) Sort() {
 	sort.Slice(ts, func(i, j int) bool { return ts[i].tPrfl.Weight > ts[j].tPrfl.Weight })
 }
 
-func NewThresholdService(dm *DataManager, indexedFields []string, storeInterval time.Duration,
+func NewThresholdService(dm *DataManager, stringIndexedFields []string, storeInterval time.Duration,
 	filterS *FilterS) (tS *ThresholdService, err error) {
 	return &ThresholdService{dm: dm,
-		indexedFields: indexedFields,
-		storeInterval: storeInterval,
-		filterS:       filterS,
-		stopBackup:    make(chan struct{}),
-		storedTdIDs:   make(utils.StringMap)}, nil
+		stringIndexedFields: stringIndexedFields,
+		storeInterval:       storeInterval,
+		filterS:             filterS,
+		stopBackup:          make(chan struct{}),
+		storedTdIDs:         make(utils.StringMap)}, nil
 }
 
 // ThresholdService manages Threshold execution and storing them to dataDB
 type ThresholdService struct {
-	dm            *DataManager
-	indexedFields []string // fields considered when searching for matching thresholds
-	storeInterval time.Duration
-	filterS       *FilterS
-	stopBackup    chan struct{}
-	storedTdIDs   utils.StringMap // keep a record of stats which need saving, map[statsTenantID]bool
-	stMux         sync.RWMutex    // protects storedTdIDs
+	dm                  *DataManager
+	stringIndexedFields []string // fields considered when searching for matching thresholds
+	storeInterval       time.Duration
+	filterS             *FilterS
+	stopBackup          chan struct{}
+	storedTdIDs         utils.StringMap // keep a record of stats which need saving, map[statsTenantID]bool
+	stMux               sync.RWMutex    // protects storedTdIDs
 }
 
 // Called to start the service
@@ -219,7 +219,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 	if len(args.ThresholdIDs) != 0 {
 		tIDs = args.ThresholdIDs
 	} else {
-		tIDsMap, err := matchingItemIDsForEvent(args.Event, tS.indexedFields, tS.dm, utils.ThresholdFilterIndexes+args.Tenant, MetaString)
+		tIDsMap, err := matchingItemIDsForEvent(args.Event, tS.stringIndexedFields, tS.dm, utils.ThresholdFilterIndexes+args.Tenant, MetaString)
 		if err != nil {
 			return nil, err
 		}

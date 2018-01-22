@@ -25,9 +25,9 @@ import (
 )
 
 type ThresholdSCfg struct {
-	Enabled       bool
-	StoreInterval time.Duration // Dump regularly from cache into dataDB
-	IndexedFields []string
+	Enabled             bool
+	StoreInterval       time.Duration // Dump regularly from cache into dataDB
+	StringIndexedFields []string
 }
 
 func (t *ThresholdSCfg) loadFromJsonCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
@@ -42,10 +42,10 @@ func (t *ThresholdSCfg) loadFromJsonCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 			return err
 		}
 	}
-	if jsnCfg.Indexed_fields != nil {
-		t.IndexedFields = make([]string, len(*jsnCfg.Indexed_fields))
-		for i, fID := range *jsnCfg.Indexed_fields {
-			t.IndexedFields[i] = fID
+	if jsnCfg.String_indexed_fields != nil {
+		t.StringIndexedFields = make([]string, len(*jsnCfg.String_indexed_fields))
+		for i, fID := range *jsnCfg.String_indexed_fields {
+			t.StringIndexedFields[i] = fID
 		}
 	}
 	return nil
