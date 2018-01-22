@@ -23,7 +23,7 @@ import (
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/globalsign/mgo"
+	"github.com/cgrates/mgo"
 )
 
 type v1Mongo struct {

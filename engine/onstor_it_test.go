@@ -1770,7 +1770,7 @@ func testOnStorITResourceProfile(t *testing.T) {
 			ExpiryTime:     time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC)},
 		Limit:      1,
 		Thresholds: []string{"TEST_ACTIONS"},
-		UsageTTL:   time.Duration(1 * time.Millisecond),
+		UsageTTL:   time.Duration(3 * time.Nanosecond),
 	}
 	if _, rcvErr := onStor.GetResourceProfile(rL.Tenant, rL.ID,
 		true, utils.NonTransactional); rcvErr != utils.ErrNotFound {

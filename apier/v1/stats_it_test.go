@@ -20,9 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"math/rand"
 	"net/rpc"
 	"net/rpc/jsonrpc"
@@ -30,6 +27,10 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -73,7 +74,7 @@ func init() {
 var sTestsStatSV1 = []func(t *testing.T){
 	testV1STSLoadConfig,
 	testV1STSInitDataDb,
-	//testV1STSStartEngine,
+	testV1STSStartEngine,
 	testV1STSRpcConn,
 	testV1STSFromFolder,
 	testV1STSGetStats,
