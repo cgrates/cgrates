@@ -31,7 +31,7 @@ import (
 
 const (
 	MetaString         = "*string"
-	MetaStringPrefix   = "*string_prefix"
+	MetaStringPrefix   = "*stringprefix"
 	MetaTimings        = "*timings"
 	MetaRSR            = "*rsr"
 	MetaStatS          = "*stats"
