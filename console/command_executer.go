@@ -107,9 +107,9 @@ func (ce *CommandExecuter) LocalExecute() string {
 }
 
 func ToJSON(line string) (jsn []byte) {
-	if !strings.Contains(line, "=") {
-		line = fmt.Sprintf("Item=\"%s\"", line)
-	}
+	// if !strings.Contains(line, "=") {
+	// 	line = fmt.Sprintf("Item=\"%s\"", line)
+	// }
 	jsn = append(jsn, '{')
 	for _, group := range lineR.FindAllStringSubmatch(line, -1) {
 		if len(group) == 3 {

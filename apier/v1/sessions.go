@@ -43,6 +43,7 @@ func (ssv1 *SessionSv1) Handlers() map[string]interface{} {
 		utils.SessionSv1TerminateSession:         ssv1.BiRpcTerminateSession,
 		utils.SessionSv1ProcessCDR:               ssv1.BiRpcProcessCDR,
 		utils.SessionSv1ProcessEvent:             ssv1.BiRpcProcessEvent,
+		utils.SessionSv1GetActiveSessions:        ssv1.BiRPCV1GetActiveSessions,
 	}
 }
 
@@ -80,6 +81,10 @@ func (ssv1 *SessionSv1) ProcessEvent(args *sessionmanager.V1ProcessEventArgs,
 	return ssv1.SMG.BiRPCv1ProcessEvent(nil, args, rply)
 }
 
+func (ssv1 *SessionSv1) GetActiveSessions(args map[string]string, rply *[]*sessionmanager.ActiveSession) error {
+	return ssv1.SMG.BiRPCV1GetActiveSessions(nil, args, rply)
+}
+
 func (ssv1 *SessionSv1) BiRpcAuthorizeEvent(clnt *rpc2.Client, args *sessionmanager.V1AuthorizeArgs,
 	rply *sessionmanager.V1AuthorizeReply) error {
 	return ssv1.SMG.BiRPCv1AuthorizeEvent(clnt, args, rply)
@@ -112,4 +117,9 @@ func (ssv1 *SessionSv1) BiRpcProcessCDR(clnt *rpc2.Client, cgrEv utils.CGREvent,
 func (ssv1 *SessionSv1) BiRpcProcessEvent(clnt *rpc2.Client, args *sessionmanager.V1ProcessEventArgs,
 	rply *sessionmanager.V1ProcessEventReply) error {
 	return ssv1.SMG.BiRPCv1ProcessEvent(clnt, args, rply)
+}
+
+func (ssv1 *SessionSv1) BiRPCV1GetActiveSessions(clnt *rpc2.Client, args map[string]string,
+	rply *[]*sessionmanager.ActiveSession) error {
+	return ssv1.SMG.BiRPCV1GetActiveSessions(clnt, args, rply)
 }
