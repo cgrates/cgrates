@@ -114,10 +114,29 @@ func (alS *AttributeService) attributeProfileForEvent(ev *utils.CGREvent) (attrP
 	return attrPrfls[0], nil
 }
 
+// AttrSFldNameValue is a helper struct for AttrSDigest deserialization
+type AttrSFieldNameValue struct {
+	FieldName  string
+	FieldValue string
+}
+
 type AttrSProcessEventReply struct {
 	MatchedProfile string
 	AlteredFields  []string
 	CGREvent       *utils.CGREvent
+}
+
+// Digest returns serialized version of alteredFields in AttrSProcessEventReply
+// format fldName1:fldVal1,fldName2:fldVal2
+func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
+	for i, fld := range attrReply.AlteredFields {
+		if i != 0 {
+			rplyDigest += utils.FIELDS_SEP
+		}
+		fldStrVal, _ := attrReply.CGREvent.FieldAsString(fld)
+		rplyDigest += fld + utils.InInFieldSep + fldStrVal
+	}
+	return
 }
 
 // processEvent will match event with attribute profile and do the necessary replacements
