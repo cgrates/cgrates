@@ -26,7 +26,7 @@ import (
 	"reflect"
 
 	"github.com/cgrates/cgrates/utils"
-	"github.com/globalsign/mgo/bson"
+	"github.com/cgrates/mgo/bson"
 	"github.com/ugorji/go/codec"
 )
 

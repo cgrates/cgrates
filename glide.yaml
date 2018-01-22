@@ -31,7 +31,7 @@ import:
   subpackages:
   - websocket
 - package: gopkg.in/fsnotify.v1
-- package: gopkg.in/mgo.v2
+- package: github.com/cgrates/mgo
   subpackages:
   - bson
 - package: github.com/ChrisTrenkamp/goxpath

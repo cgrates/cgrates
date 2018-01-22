@@ -559,7 +559,7 @@ func testV1RsSetResourceProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
-		UsageTTL:          time.Duration(1) * time.Millisecond,
+		UsageTTL:          time.Duration(1) * time.Nanosecond,
 		Limit:             10,
 		AllocationMessage: "MessageAllocation",
 		Blocker:           true,
@@ -633,7 +633,6 @@ func testV1RsUpdateResourceProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	time.Sleep(5 * time.Minute)
 }
 
 func testV1RsGetResourceProfileAfterUpdate(t *testing.T) {

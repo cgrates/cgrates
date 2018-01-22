@@ -25,8 +25,8 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
-	"github.com/globalsign/mgo"
-	"github.com/globalsign/mgo/bson"
+	"github.com/cgrates/mgo"
+	"github.com/cgrates/mgo/bson"
 )
 
 func (ms *MongoStorage) GetTpIds(colName string) ([]string, error) {
