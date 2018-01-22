@@ -141,7 +141,24 @@ func TestSSv1ItAuth(t *testing.T) {
 	if *rply.ResourceAllocation == "" {
 		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
 	}
-	eSplrs := []string{"supplier1", "supplier2"}
+	eSplrs := &engine.SortedSuppliers{
+		ProfileID: "SPL_ACNT_1001",
+		Sorting:   utils.MetaWeight,
+		SortedSuppliers: []*engine.SortedSupplier{
+			&engine.SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					"Weight": 20.0,
+				},
+			},
+			&engine.SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					"Weight": 10.0,
+				},
+			},
+		},
+	}
 	if !reflect.DeepEqual(eSplrs, rply.Suppliers) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eSplrs), utils.ToJSON(rply.Suppliers))
 	}
@@ -166,6 +183,46 @@ func TestSSv1ItAuth(t *testing.T) {
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
 		t.Errorf("expecting: %+v, received: %+v",
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
+	}
+}
+
+func TestSSv1ItAuthWithDigest(t *testing.T) {
+	authUsage := 5 * time.Minute
+	args := &sessionmanager.V1AuthorizeArgs{
+		GetMaxUsage:        true,
+		AuthorizeResources: true,
+		GetSuppliers:       true,
+		GetAttributes:      true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItAuth",
+			Event: map[string]interface{}{
+				utils.OriginID:    "TestSSv1It1",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.Usage:       authUsage,
+			},
+		},
+	}
+	var rply sessionmanager.V1AuthorizeReplyWithDigest
+	if err := sSv1BiRpc.Call(utils.SessionSv1AuthorizeEventWithDigest, args, &rply); err != nil {
+		t.Error(err)
+	}
+	if *rply.MaxUsage != authUsage {
+		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
+	}
+	if *rply.ResourceAllocation == "" {
+		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
+	}
+	eSplrs := utils.StringPointer("supplier1,supplier2")
+	if *eSplrs != *rply.SuppliersDigest {
+		t.Errorf("expecting: %v, received: %v", *eSplrs, *rply.SuppliersDigest)
+	}
+	eAttrs := utils.StringPointer("OfficeGroup:Marketing")
+	if *eAttrs != *rply.AttributesDigest {
+		t.Errorf("expecting: %v, received: %v", *eAttrs, *rply.AttributesDigest)
 	}
 }
 
