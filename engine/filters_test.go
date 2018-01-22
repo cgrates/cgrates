@@ -307,13 +307,13 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		"Account": "1007",
 	}
 	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		failEvent, []string{"*string_prefix:Account:10"}); err != nil {
+		failEvent, []string{"*stringprefix:Account:10"}); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		passEvent, []string{"*string_prefix:Account:10"}); err != nil {
+		passEvent, []string{"*stringprefix:Account:10"}); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)

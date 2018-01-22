@@ -284,7 +284,7 @@ cgrates.org,Threshold1,FLTR_1;FLTR_ACNT_dan,2014-07-29T15:00:00Z,true,10,1s,true
 	filters = `
 #Tenant[0],ID[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5]
 cgrates.org,FLTR_1,*string,Account,1001;1002,2014-07-29T15:00:00Z
-cgrates.org,FLTR_1,*string_prefix,Destination,10;20,2014-07-29T15:00:00Z
+cgrates.org,FLTR_1,*stringprefix,Destination,10;20,2014-07-29T15:00:00Z
 cgrates.org,FLTR_1,*rsr,,Subject(~^1.*1$);Destination(1002),
 cgrates.org,FLTR_ACNT_dan,*string,Account,dan,2014-07-29T15:00:00Z
 cgrates.org,FLTR_DST_DE,*destinations,Destination,DST_DE,2014-07-29T15:00:00Z
@@ -1564,7 +1564,7 @@ func TestLoadFilters(t *testing.T) {
 				},
 				&utils.TPFilter{
 					FieldName: "Destination",
-					Type:      "*string_prefix",
+					Type:      "*stringprefix",
 					Values:    []string{"10", "20"},
 				},
 				&utils.TPFilter{
