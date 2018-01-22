@@ -40,7 +40,7 @@ func TestToJSONValid(t *testing.T) {
 
 func TestToJSONEmpty(t *testing.T) {
 	jsn := ToJSON("")
-	if string(jsn) != `{"Item":""}` {
+	if string(jsn) != `{}` {
 		t.Error("Error empty: ", string(jsn))
 	}
 }
