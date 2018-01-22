@@ -36,18 +36,24 @@ type SessionSv1 struct {
 // Publishes BiJSONRPC methods exported by SessionSv1
 func (ssv1 *SessionSv1) Handlers() map[string]interface{} {
 	return map[string]interface{}{
-		utils.SessionSv1AuthorizeEvent:   ssv1.BiRpcAuthorizeEvent,
-		utils.SessionSv1InitiateSession:  ssv1.BiRpcInitiateSession,
-		utils.SessionSv1UpdateSession:    ssv1.BiRpcUpdateSession,
-		utils.SessionSv1TerminateSession: ssv1.BiRpcTerminateSession,
-		utils.SessionSv1ProcessCDR:       ssv1.BiRpcProcessCDR,
-		utils.SessionSv1ProcessEvent:     ssv1.BiRpcProcessEvent,
+		utils.SessionSv1AuthorizeEvent:           ssv1.BiRpcAuthorizeEvent,
+		utils.SessionSv1AuthorizeEventWithDigest: ssv1.BiRpcAuthorizeEventWithDigest,
+		utils.SessionSv1InitiateSession:          ssv1.BiRpcInitiateSession,
+		utils.SessionSv1UpdateSession:            ssv1.BiRpcUpdateSession,
+		utils.SessionSv1TerminateSession:         ssv1.BiRpcTerminateSession,
+		utils.SessionSv1ProcessCDR:               ssv1.BiRpcProcessCDR,
+		utils.SessionSv1ProcessEvent:             ssv1.BiRpcProcessEvent,
 	}
 }
 
 func (ssv1 *SessionSv1) AuthorizeEvent(args *sessionmanager.V1AuthorizeArgs,
 	rply *sessionmanager.V1AuthorizeReply) error {
 	return ssv1.SMG.BiRPCv1AuthorizeEvent(nil, args, rply)
+}
+
+func (ssv1 *SessionSv1) AuthorizeEventWithDigest(args *sessionmanager.V1AuthorizeArgs,
+	rply *sessionmanager.V1AuthorizeReplyWithDigest) error {
+	return ssv1.SMG.BiRPCv1AuthorizeEventWithDigest(nil, args, rply)
 }
 
 func (ssv1 *SessionSv1) InitiateSession(args *sessionmanager.V1InitSessionArgs,
@@ -77,6 +83,11 @@ func (ssv1 *SessionSv1) ProcessEvent(args *sessionmanager.V1ProcessEventArgs,
 func (ssv1 *SessionSv1) BiRpcAuthorizeEvent(clnt *rpc2.Client, args *sessionmanager.V1AuthorizeArgs,
 	rply *sessionmanager.V1AuthorizeReply) error {
 	return ssv1.SMG.BiRPCv1AuthorizeEvent(clnt, args, rply)
+}
+
+func (ssv1 *SessionSv1) BiRpcAuthorizeEventWithDigest(clnt *rpc2.Client, args *sessionmanager.V1AuthorizeArgs,
+	rply *sessionmanager.V1AuthorizeReplyWithDigest) error {
+	return ssv1.SMG.BiRPCv1AuthorizeEventWithDigest(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRpcInitiateSession(clnt *rpc2.Client, args *sessionmanager.V1InitSessionArgs,

@@ -1371,6 +1371,36 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 	return nil
 }
 
+type V1AuthorizeReplyWithDigest struct {
+	AttributesDigest   *string
+	ResourceAllocation *string
+	MaxUsage           *time.Duration
+	SuppliersDigest    *string
+}
+
+// BiRPCv1AuthorizeEventWithDigest performs authorization for CGREvent based on specific components
+// returning one level fields instead of multiple ones returned by BiRPCv1AuthorizeEvent
+func (smg *SMGeneric) BiRPCv1AuthorizeEventWithDigest(clnt rpcclient.RpcClientConnection,
+	args *V1AuthorizeArgs, authReply *V1AuthorizeReplyWithDigest) (err error) {
+	var initAuthRply V1AuthorizeReply
+	if err = smg.BiRPCv1AuthorizeEvent(clnt, args, &initAuthRply); err != nil {
+		return
+	}
+	if args.GetAttributes {
+		authReply.AttributesDigest = utils.StringPointer(initAuthRply.Attributes.Digest())
+	}
+	if args.AuthorizeResources {
+		authReply.ResourceAllocation = initAuthRply.ResourceAllocation
+	}
+	if args.GetMaxUsage {
+		authReply.MaxUsage = initAuthRply.MaxUsage
+	}
+	if args.GetSuppliers {
+		authReply.SuppliersDigest = utils.StringPointer(initAuthRply.Suppliers.Digest())
+	}
+	return nil
+}
+
 type V1InitSessionArgs struct {
 	GetAttributes     bool
 	AllocateResources bool
