@@ -641,7 +641,7 @@ func TestCgrCfgJSONDefaultSAttributeSCfg(t *testing.T) {
 	eAliasSCfg := &AttributeSCfg{
 		Enabled:             false,
 		StringIndexedFields: nil,
-		PrefixIndexedFields: utils.StringSlicePointer([]string{}),
+		PrefixIndexedFields: &[]string{},
 	}
 	if !reflect.DeepEqual(eAliasSCfg, cgrCfg.attributeSCfg) {
 		t.Errorf("received: %+v, expecting: %+v", eAliasSCfg, cgrCfg.attributeSCfg)
@@ -654,7 +654,7 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 		ThresholdSConns:     []*HaPoolConfig{},
 		StoreInterval:       0,
 		StringIndexedFields: nil,
-		PrefixIndexedFields: utils.StringSlicePointer([]string{}),
+		PrefixIndexedFields: &[]string{},
 	}
 	if !reflect.DeepEqual(cgrCfg.resourceSCfg, eResLiCfg) {
 		t.Errorf("expecting: %s, received: %s", utils.ToJSON(eResLiCfg), utils.ToJSON(cgrCfg.resourceSCfg))
@@ -668,7 +668,7 @@ func TestCgrCfgJSONDefaultStatsCfg(t *testing.T) {
 		StoreInterval:       0,
 		ThresholdSConns:     []*HaPoolConfig{},
 		StringIndexedFields: nil,
-		PrefixIndexedFields: utils.StringSlicePointer([]string{}),
+		PrefixIndexedFields: &[]string{},
 	}
 	if !reflect.DeepEqual(cgrCfg.statsCfg, eStatsCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.statsCfg, eStatsCfg)
@@ -680,7 +680,7 @@ func TestCgrCfgJSONDefaultThresholdSCfg(t *testing.T) {
 		Enabled:             false,
 		StoreInterval:       0,
 		StringIndexedFields: nil,
-		PrefixIndexedFields: utils.StringSlicePointer([]string{}),
+		PrefixIndexedFields: &[]string{},
 	}
 	if !reflect.DeepEqual(eThresholdSCfg, cgrCfg.thresholdSCfg) {
 		t.Errorf("received: %+v, expecting: %+v", eThresholdSCfg, cgrCfg.thresholdSCfg)
@@ -691,7 +691,7 @@ func TestCgrCfgJSONDefaultSupplierSCfg(t *testing.T) {
 	eSupplSCfg := &SupplierSCfg{
 		Enabled:             false,
 		StringIndexedFields: nil,
-		PrefixIndexedFields: utils.StringSlicePointer([]string{}),
+		PrefixIndexedFields: &[]string{},
 
 		RALsConns: []*HaPoolConfig{
 			&HaPoolConfig{Address: "*internal"},
