@@ -26,45 +26,55 @@ import (
 
 // matchingItemIDsForEvent returns the list of item IDs matching fieldName/fieldValue for an event
 // fieldIDs limits the fields which are checked against indexes
-// helper on top of dataDB.MatchReqFilterIndex, adding utils.NOT_AVAILABLE to list of fields queried
-// executes a number of $(len(fields) + 1) queries to dataDB so the size of event influences the speed of return
-func matchingItemIDsForEvent(ev map[string]interface{}, fieldIDs *[]string,
-	dm *DataManager, dbIdxKey, filterType string) (itemIDs utils.StringMap, err error) {
-	if fieldIDs == nil {
-		allFieldIDs := make([]string, len(ev))
-		i := 0
-		for fldID := range ev {
-			allFieldIDs[i] = fldID
-			i += 1
-		}
-		fieldIDs = &allFieldIDs
-	}
+// helper on top of dataDB.MatchReqFilterIndex, adding utils.ANY to list of fields queried
+func matchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldIDs *[]string,
+	dm *DataManager, dbIdxKey string) (itemIDs utils.StringMap, err error) {
 	itemIDs = make(utils.StringMap)
-	for _, fldName := range *fieldIDs {
-		fieldValIf, has := ev[fldName]
-		if !has {
-			continue
+	allFieldIDs := make([]string, len(ev))
+	i := 0
+	for fldID := range ev {
+		allFieldIDs[i] = fldID
+		i += 1
+	}
+	filterIndexTypes := []string{MetaString, MetaPrefix}
+	for i, fieldIDs := range []*[]string{stringFldIDs, prefixFldIDs} { // same routine for both string and prefix filter types
+		if fieldIDs == nil {
+			fieldIDs = &allFieldIDs
 		}
-		fldVal, canCast := utils.CastFieldIfToString(fieldValIf)
-		if !canCast {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> cannot cast field: %s into string", utils.FilterS, fldName))
-			continue
-		}
-		dbItemIDs, err := dm.MatchFilterIndex(dbIdxKey, filterType, fldName, fldVal)
-		if err != nil {
-			if err == utils.ErrNotFound {
+		for _, fldName := range *fieldIDs {
+			fieldValIf, has := ev[fldName]
+			if !has {
 				continue
 			}
-			return nil, err
-		}
-		for itemID := range dbItemIDs {
-			if _, hasIt := itemIDs[itemID]; !hasIt { // Add it to list if not already there
-				itemIDs[itemID] = dbItemIDs[itemID]
+			fldVal, canCast := utils.CastFieldIfToString(fieldValIf)
+			if !canCast {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> cannot cast field: %s into string", utils.FilterS, fldName))
+				continue
+			}
+			fldVals := []string{fldVal} // default is only one fieldValue checked
+			if filterIndexTypes[i] == MetaPrefix {
+				fldVals = utils.SplitPrefix(fldVal, 1) // all prefixes till last digit
+			}
+			var dbItemIDs utils.StringMap // list of items matched in DB
+			for _, val := range fldVals {
+				dbItemIDs, err = dm.MatchFilterIndex(dbIdxKey, filterIndexTypes[i], fldName, val)
+				if err != nil {
+					if err == utils.ErrNotFound {
+						continue
+					}
+					return nil, err
+				}
+				break // we got at least one answer back, longest prefix wins
+			}
+			for itemID := range dbItemIDs {
+				if _, hasIt := itemIDs[itemID]; !hasIt { // Add it to list if not already there
+					itemIDs[itemID] = dbItemIDs[itemID]
+				}
 			}
 		}
 	}
-	dbItemIDs, err := dm.MatchFilterIndex(dbIdxKey, utils.MetaDefault, utils.NOT_AVAILABLE, utils.NOT_AVAILABLE) // add unindexed itemIDs to be checked
+	dbItemIDs, err := dm.MatchFilterIndex(dbIdxKey, utils.MetaDefault, utils.ANY, utils.ANY) // add unindexed itemIDs to be checked
 	if err != nil {
 		if err != utils.ErrNotFound {
 			return nil, err

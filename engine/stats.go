@@ -143,7 +143,8 @@ func (sS *StatService) StoreStatQueue(sq *StatQueue) (err error) {
 // matchingStatQueuesForEvent returns ordered list of matching resources which are active by the time of the call
 func (sS *StatService) matchingStatQueuesForEvent(ev *utils.CGREvent) (sqs StatQueues, err error) {
 	matchingSQs := make(map[string]*StatQueue)
-	sqIDs, err := matchingItemIDsForEvent(ev.Event, sS.stringIndexedFields, sS.dm, utils.StatFilterIndexes+ev.Tenant, MetaString)
+	sqIDs, err := matchingItemIDsForEvent(ev.Event, sS.stringIndexedFields, sS.prefixIndexedFields,
+		sS.dm, utils.StatFilterIndexes+ev.Tenant)
 	if err != nil {
 		return nil, err
 	}

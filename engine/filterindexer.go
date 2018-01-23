@@ -74,27 +74,27 @@ func (rfi *ReqFilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID
 				rfi.chngdIndxKeys[concatKey] = true
 			}
 			rfi.chngdRevIndxKeys[itemID] = true
-		// case MetaStringPrefix:
-		// 	for _, fldVal := range fltr.Values {
-		// 		concatKey := utils.ConcatenatedKey(fltr.FieldName, fldVal)
-		// 		if _, hasIt := rfi.indexes[concatKey]; !hasIt {
-		// 			rfi.indexes[concatKey] = make(utils.StringMap)
-		// 		}
-		// 		rfi.indexes[concatKey][itemID] = true
-		// 		rfi.reveseIndex[itemID][concatKey] = true
-		// 		rfi.chngdIndxKeys[concatKey] = true
-		// 	}
-		// 	rfi.chngdRevIndxKeys[itemID] = true
+		case MetaPrefix:
+			for _, fldVal := range fltr.Values {
+				concatKey := utils.ConcatenatedKey(fltr.FieldName, fldVal)
+				if _, hasIt := rfi.indexes[concatKey]; !hasIt {
+					rfi.indexes[concatKey] = make(utils.StringMap)
+				}
+				rfi.indexes[concatKey][itemID] = true
+				rfi.reveseIndex[itemID][concatKey] = true
+				rfi.chngdIndxKeys[concatKey] = true
+			}
+			rfi.chngdRevIndxKeys[itemID] = true
 		default:
-			naConcatKey := utils.ConcatenatedKey(utils.MetaDefault, utils.NOT_AVAILABLE, utils.NOT_AVAILABLE)
-			if _, hasIt := rfi.indexes[naConcatKey]; !hasIt {
-				rfi.indexes[naConcatKey] = make(utils.StringMap)
+			concatKey := utils.ConcatenatedKey(utils.MetaDefault, utils.ANY, utils.ANY)
+			if _, hasIt := rfi.indexes[concatKey]; !hasIt {
+				rfi.indexes[concatKey] = make(utils.StringMap)
 			}
 			if _, hasIt := rfi.reveseIndex[itemID]; !hasIt {
 				rfi.reveseIndex[itemID] = make(utils.StringMap)
 			}
-			rfi.reveseIndex[itemID][naConcatKey] = true
-			rfi.indexes[naConcatKey][itemID] = true // Fields without real field index will be located in map[NOT_AVAILABLE:NOT_AVAILABLE][rl.ID]
+			rfi.reveseIndex[itemID][concatKey] = true
+			rfi.indexes[concatKey][itemID] = true // Fields without real field index will be located in map[*any:*any][rl.ID]
 		}
 	}
 

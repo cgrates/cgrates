@@ -206,7 +206,7 @@ func testOnStorITSetFilterIndexes(t *testing.T) {
 			"RL2": true,
 			"RL3": true,
 		},
-		utils.ConcatenatedKey(utils.NOT_AVAILABLE, utils.NOT_AVAILABLE): utils.StringMap{
+		utils.ConcatenatedKey(utils.MetaDefault, utils.ANY, utils.ANY): utils.StringMap{
 			"RL4": true,
 			"RL5": true,
 		},
@@ -234,7 +234,7 @@ func testOnStorITGetFilterIndexes(t *testing.T) {
 			"RL2": true,
 			"RL3": true,
 		},
-		utils.ConcatenatedKey(utils.NOT_AVAILABLE, utils.NOT_AVAILABLE): utils.StringMap{
+		utils.ConcatenatedKey(utils.MetaDefault, utils.ANY, utils.ANY): utils.StringMap{
 			"RL4": true,
 			"RL5": true,
 		},
