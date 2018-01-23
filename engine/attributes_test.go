@@ -33,20 +33,7 @@ var (
 	dmAtr *DataManager
 )
 
-var sTestsAttributes = []func(t *testing.T){
-	testPopulateAttrService,
-	testAttributeMatchingAttributeProfilesForEvent,
-	testAttributeProfileForEvent,
-	testAttributeProcessEvent,
-}
-
-func TestAttributes(t *testing.T) {
-	for _, stest := range sTestsAttributes {
-		t.Run("Test Attributes", stest)
-	}
-}
-
-func testPopulateAttrService(t *testing.T) {
+func TestPopulateAttrService(t *testing.T) {
 	var filters1 []*RequestFilter
 	var filters2 []*RequestFilter
 	second := 1 * time.Second
@@ -152,7 +139,7 @@ func testPopulateAttrService(t *testing.T) {
 	}
 }
 
-func testAttributeMatchingAttributeProfilesForEvent(t *testing.T) {
+func TestAttributeMatchingAttributeProfilesForEvent(t *testing.T) {
 	atrpl, err := srv.matchingAttributeProfilesForEvent(sev)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -164,7 +151,7 @@ func testAttributeMatchingAttributeProfilesForEvent(t *testing.T) {
 	}
 }
 
-func testAttributeProfileForEvent(t *testing.T) {
+func TestAttributeProfileForEvent(t *testing.T) {
 	context := utils.MetaRating
 	sev = &utils.CGREvent{
 		Tenant:  "cgrates.org",
@@ -185,7 +172,7 @@ func testAttributeProfileForEvent(t *testing.T) {
 	}
 }
 
-func testAttributeProcessEvent(t *testing.T) {
+func TestAttributeProcessEvent(t *testing.T) {
 	context := utils.MetaRating
 	sev = &utils.CGREvent{
 		Tenant:  "cgrates.org",
