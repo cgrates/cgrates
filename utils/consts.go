@@ -604,6 +604,7 @@ const (
 	SessionSv1ProcessEvent             = "SessionSv1.ProcessEvent"
 	SessionSv1DisconnectSession        = "SessionSv1.DisconnectSession"
 	SessionSv1GetActiveSessions        = "SessionSv1.GetActiveSessions"
+	SessionSv1GetPassiveSessions       = "SessionSv1.GetPassiveSessions"
 	SMGenericV1InitiateSession         = "SMGenericV1.InitiateSession"
 	SMGenericV2InitiateSession         = "SMGenericV2.InitiateSession"
 	SMGenericV2UpdateSession           = "SMGenericV2.UpdateSession"
