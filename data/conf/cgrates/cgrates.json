@@ -300,24 +300,6 @@
 // },
 
 
-// "sm_opensips": {
-// 	"enabled": false,						// starts SessionManager service: <true|false>
-// 	"listen_udp": "127.0.0.1:2020",			// address where to listen for datagram events coming from OpenSIPS
-// 	"rals_conns": [
-// 		{"address": "*internal"}			// address where to reach the Rater <""|*internal|127.0.0.1:2013>
-// 	],
-// 	"cdrs_conns": [
-// 		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
-// 	],
-// 	"create_cdr": false,					// create CDR out of events and sends it to CDRS component
-// 	"debit_interval": "10s",				// interval to perform debits on.
-// 	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
-// 	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
-// 	"events_subscribe_interval": "60s",		// automatic events subscription to OpenSIPS, 0 to disable it
-// 	"mi_addr": "127.0.0.1:8020",			// address where to reach OpenSIPS MI to send session disconnects
-// },
-
-
 // "diameter_agent": {
 // 	"enabled": false,											// enables the diameter agent: <true|false>
 // 	"listen": "127.0.0.1:3868",									// address where to listen for diameter requests <x.y.z.y:1234>

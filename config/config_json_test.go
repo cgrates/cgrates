@@ -572,32 +572,6 @@ func TestSmKamJsonCfg(t *testing.T) {
 	}
 }
 
-func TestSmOsipsJsonCfg(t *testing.T) {
-	eCfg := &SmOsipsJsonCfg{
-		Enabled:    utils.BoolPointer(false),
-		Listen_udp: utils.StringPointer("127.0.0.1:2020"),
-		Rals_conns: &[]*HaPoolJsonCfg{
-			&HaPoolJsonCfg{
-				Address: utils.StringPointer(utils.MetaInternal),
-			}},
-		Cdrs_conns: &[]*HaPoolJsonCfg{
-			&HaPoolJsonCfg{
-				Address: utils.StringPointer(utils.MetaInternal),
-			}},
-		Create_cdr:                utils.BoolPointer(false),
-		Debit_interval:            utils.StringPointer("10s"),
-		Min_call_duration:         utils.StringPointer("0s"),
-		Max_call_duration:         utils.StringPointer("3h"),
-		Events_subscribe_interval: utils.StringPointer("60s"),
-		Mi_addr:                   utils.StringPointer("127.0.0.1:8020"),
-	}
-	if cfg, err := dfCgrJsonCfg.SmOsipsJsonCfg(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg)
-	}
-}
-
 func TestAsteriskAgentJsonCfg(t *testing.T) {
 	eCfg := &AsteriskAgentJsonCfg{
 		Enabled: utils.BoolPointer(false),

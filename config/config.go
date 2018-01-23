@@ -720,11 +720,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return err
 	}
 
-	jsnSmOsipsCfg, err := jsnCfg.SmOsipsJsonCfg()
-	if err != nil {
-		return err
-	}
-
 	jsnSMAstCfg, err := jsnCfg.AsteriskAgentJsonCfg()
 	if err != nil {
 		return err
@@ -1194,12 +1189,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 
 	if jsnSmKamCfg != nil {
 		if err := self.SmKamConfig.loadFromJsonCfg(jsnSmKamCfg); err != nil {
-			return err
-		}
-	}
-
-	if jsnSmOsipsCfg != nil {
-		if err := self.SmOsipsConfig.loadFromJsonCfg(jsnSmOsipsCfg); err != nil {
 			return err
 		}
 	}
