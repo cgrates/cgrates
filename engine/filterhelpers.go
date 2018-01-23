@@ -36,23 +36,32 @@ func matchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 		allFieldIDs[i] = fldID
 		i += 1
 	}
-	filterIndexTypes := []string{MetaString, MetaPrefix}
-	for i, fieldIDs := range []*[]string{stringFldIDs, prefixFldIDs} { // same routine for both string and prefix filter types
+	stringFieldVals := map[string]string{utils.ANY: utils.ANY} // cache here field string values, start with default one
+	filterIndexTypes := []string{MetaString, MetaPrefix, utils.MetaDefault}
+	for i, fieldIDs := range []*[]string{stringFldIDs, prefixFldIDs, nil} { // same routine for both string and prefix filter types
+		if filterIndexTypes[i] == utils.MetaDefault {
+			fieldIDs = &[]string{utils.ANY} // so we can query DB for unindexed filters
+		}
 		if fieldIDs == nil {
 			fieldIDs = &allFieldIDs
 		}
 		for _, fldName := range *fieldIDs {
 			fieldValIf, has := ev[fldName]
-			if !has {
+			if !has && filterIndexTypes[i] != utils.MetaDefault {
 				continue
 			}
-			fldVal, canCast := utils.CastFieldIfToString(fieldValIf)
-			if !canCast {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> cannot cast field: %s into string", utils.FilterS, fldName))
-				continue
+			if _, cached := stringFieldVals[fldName]; !cached {
+				strVal, canCast := utils.CastFieldIfToString(fieldValIf)
+				if !canCast {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> cannot cast field: %s into string", utils.FilterS, fldName))
+					continue
+				}
+				stringFieldVals[fldName] = strVal
 			}
-			fldVals := []string{fldVal} // default is only one fieldValue checked
+			fldVal := stringFieldVals[fldName]
+			fldVals := []string{fldVal}
+			// default is only one fieldValue checked
 			if filterIndexTypes[i] == MetaPrefix {
 				fldVals = utils.SplitPrefix(fldVal, 1) // all prefixes till last digit
 			}
@@ -72,18 +81,6 @@ func matchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 					itemIDs[itemID] = dbItemIDs[itemID]
 				}
 			}
-		}
-	}
-	dbItemIDs, err := dm.MatchFilterIndex(dbIdxKey, utils.MetaDefault, utils.ANY, utils.ANY) // add unindexed itemIDs to be checked
-	if err != nil {
-		if err != utils.ErrNotFound {
-			return nil, err
-		}
-		err = nil // not found is ignored
-	}
-	for itemID := range dbItemIDs {
-		if _, hasIt := itemIDs[itemID]; !hasIt {
-			itemIDs[itemID] = dbItemIDs[itemID]
 		}
 	}
 	return
