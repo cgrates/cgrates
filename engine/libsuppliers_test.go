@@ -149,3 +149,72 @@ func TestLibSuppliersSortWeight(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eSpls.Sorting, result.Sorting)
 	}
 }
+
+func TestSortedSuppliersDigest(t *testing.T) {
+	eSpls := SortedSuppliers{
+		ProfileID: "SPL_WEIGHT_1",
+		Sorting:   utils.MetaWeight,
+		SortedSuppliers: []*SortedSupplier{
+			&SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					"Weight": 20.0,
+				},
+				SupplierParameters: "param2",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					"Weight": 10.0,
+				},
+				SupplierParameters: "param1",
+			},
+		},
+	}
+	exp := "supplier2:param2,supplier1:param1"
+	rcv := eSpls.Digest()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+}
+
+func TestSortedSuppliersDigest2(t *testing.T) {
+	eSpls := SortedSuppliers{
+		ProfileID: "SPL_WEIGHT_1",
+		Sorting:   utils.MetaWeight,
+		SortedSuppliers: []*SortedSupplier{
+			&SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					"Weight": 30.0,
+				},
+				SupplierParameters: "param1",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					"Weight": 20.0,
+				},
+				SupplierParameters: "param2",
+			},
+		},
+	}
+	exp := "supplier1:param1,supplier2:param2"
+	rcv := eSpls.Digest()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+}
+
+func TestSortedSuppliersDigest3(t *testing.T) {
+	eSpls := SortedSuppliers{
+		ProfileID:       "SPL_WEIGHT_1",
+		Sorting:         utils.MetaWeight,
+		SortedSuppliers: []*SortedSupplier{},
+	}
+	exp := ""
+	rcv := eSpls.Digest()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+}

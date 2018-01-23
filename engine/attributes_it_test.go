@@ -119,5 +119,70 @@ func TestNewExternalAttributeProfileFromAttributeProfile(t *testing.T) {
 	if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
+}
 
+func TestAttrSProcessEventReplyDigest(t *testing.T) {
+	eRpl := &AttrSProcessEventReply{
+		MatchedProfile: "ATTR_1",
+		AlteredFields:  []string{"Account", "Subject"},
+		CGREvent: &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "testAttributeSProcessEvent",
+			Context: utils.StringPointer(utils.MetaRating),
+			Event: map[string]interface{}{
+				"Account":     "1001",
+				"Subject":     "1001",
+				"Destination": "+491511231234",
+			},
+		},
+	}
+	expRpl := "Account:1001,Subject:1001"
+	val := eRpl.Digest()
+	if !reflect.DeepEqual(val, expRpl) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expRpl), utils.ToJSON(val))
+	}
+}
+
+func TestAttrSProcessEventReplyDigest2(t *testing.T) {
+	eRpl := &AttrSProcessEventReply{
+		MatchedProfile: "ATTR_1",
+		AlteredFields:  []string{},
+		CGREvent: &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "testAttributeSProcessEvent",
+			Context: utils.StringPointer(utils.MetaRating),
+			Event: map[string]interface{}{
+				"Account":     "1001",
+				"Subject":     "1001",
+				"Destination": "+491511231234",
+			},
+		},
+	}
+	expRpl := ""
+	val := eRpl.Digest()
+	if !reflect.DeepEqual(val, expRpl) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expRpl), utils.ToJSON(val))
+	}
+}
+
+func TestAttrSProcessEventReplyDigest3(t *testing.T) {
+	eRpl := &AttrSProcessEventReply{
+		MatchedProfile: "ATTR_1",
+		AlteredFields:  []string{"Subject"},
+		CGREvent: &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "testAttributeSProcessEvent",
+			Context: utils.StringPointer(utils.MetaRating),
+			Event: map[string]interface{}{
+				"Account":     "1001",
+				"Subject":     "1001",
+				"Destination": "+491511231234",
+			},
+		},
+	}
+	expRpl := "Subject:1001"
+	val := eRpl.Digest()
+	if !reflect.DeepEqual(val, expRpl) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expRpl), utils.ToJSON(val))
+	}
 }
