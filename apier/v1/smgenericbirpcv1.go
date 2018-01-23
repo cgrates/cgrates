@@ -42,7 +42,7 @@ func (self *SMGenericBiRpcV1) Handlers() map[string]interface{} {
 		"SMGenericV1.ProcessCDR":              self.ProcessCDR,
 		"SMGenericV1.GetActiveSessions":       self.GetActiveSessions,
 		"SMGenericV1.GetActiveSessionsCount":  self.GetActiveSessionsCount,
-		"SMGenericV1.GetṔassiveSessions":      self.GetṔassiveSessions,
+		"SMGenericV1.GetPassiveSessions":      self.GetPassiveSessions,
 		"SMGenericV1.GetPassiveSessionsCount": self.GetPassiveSessionsCount,
 		"SMGenericV1.ReplicateActiveSessions": self.ReplicateActiveSessions,
 	}
@@ -86,8 +86,8 @@ func (self *SMGenericBiRpcV1) GetActiveSessionsCount(clnt *rpc2.Client, attrs ma
 	return self.sm.BiRPCV1GetActiveSessionsCount(clnt, attrs, reply)
 }
 
-func (self *SMGenericBiRpcV1) GetṔassiveSessions(clnt *rpc2.Client, attrs map[string]string, reply *[]*sessionmanager.ActiveSession) error {
-	return self.sm.BiRPCV1GetActiveSessions(clnt, attrs, reply)
+func (self *SMGenericBiRpcV1) GetPassiveSessions(clnt *rpc2.Client, attrs map[string]string, reply *[]*sessionmanager.ActiveSession) error {
+	return self.sm.BiRPCV1GetPassiveSessions(clnt, attrs, reply)
 }
 
 func (self *SMGenericBiRpcV1) GetPassiveSessionsCount(clnt *rpc2.Client, attrs map[string]string, reply *int) error {
