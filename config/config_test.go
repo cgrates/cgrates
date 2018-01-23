@@ -588,25 +588,6 @@ func TestCgrCfgJSONDefaultsSMKamConfig(t *testing.T) {
 	}
 }
 
-func TestCgrCfgJSONDefaultsSMOsipsConfig(t *testing.T) {
-	eSmOpCfg := &SmOsipsConfig{
-		Enabled:                 false,
-		ListenUdp:               "127.0.0.1:2020",
-		RALsConns:               []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
-		CDRsConns:               []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
-		CreateCdr:               false,
-		DebitInterval:           10 * time.Second,
-		MinCallDuration:         0 * time.Second,
-		MaxCallDuration:         3 * time.Hour,
-		EventsSubscribeInterval: 60 * time.Second,
-		MiAddr:                  "127.0.0.1:8020",
-	}
-
-	if !reflect.DeepEqual(cgrCfg.SmOsipsConfig, eSmOpCfg) {
-		t.Errorf("received: %+v, expecting: %+v", cgrCfg.SmOsipsConfig, eSmOpCfg)
-	}
-}
-
 func TestCgrCfgJSONDefaultssteriskAgentCfg(t *testing.T) {
 	eAstAgentCfg := &AsteriskAgentCfg{
 		Enabled: false,

@@ -45,7 +45,6 @@ const (
 	SessionSJson       = "sessions"
 	FreeSWITCHAgentJSN = "freeswitch_agent"
 	SMKAM_JSN          = "sm_kamailio"
-	SMOSIPS_JSN        = "sm_opensips"
 	AsteriskAgentJSN   = "asterisk_agent"
 	SM_JSN             = "session_manager"
 	FS_JSN             = "freeswitch"
@@ -264,18 +263,6 @@ func (self CgrJsonCfg) SmKamJsonCfg() (*SmKamJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(SmKamJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (self CgrJsonCfg) SmOsipsJsonCfg() (*SmOsipsJsonCfg, error) {
-	rawCfg, hasKey := self[SMOSIPS_JSN]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(SmOsipsJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

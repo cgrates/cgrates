@@ -343,35 +343,6 @@ func startSmKamailio(internalRaterChan, internalCDRSChan, internalRsChan chan rp
 	exitChan <- true
 }
 
-func startSmOpenSIPS(internalRaterChan, internalCDRSChan chan rpcclient.RpcClientConnection, cdrDb engine.CdrStorage, exitChan chan bool) {
-	var err error
-	utils.Logger.Info("Starting CGRateS SMOpenSIPS service.")
-	var ralsConn, cdrsConn *rpcclient.RpcClientPool
-	if len(cfg.SmOsipsConfig.RALsConns) != 0 {
-		ralsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.SmOsipsConfig.RALsConns, internalRaterChan, cfg.InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<SMOpenSIPS> Could not connect to RALs: %s", err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	if len(cfg.SmOsipsConfig.CDRsConns) != 0 {
-		cdrsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.SmOsipsConfig.CDRsConns, internalCDRSChan, cfg.InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<SMOpenSIPS> Could not connect to CDRs: %s", err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	sm, _ := sessionmanager.NewOSipsSessionManager(cfg.SmOsipsConfig, cfg.Reconnects, ralsConn, cdrsConn, cfg.DefaultTimezone)
-	if err := sm.Connect(); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> error: %s!", err))
-	}
-	exitChan <- true
-}
-
 func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 	cdrDb engine.CdrStorage, dm *engine.DataManager,
 	internalRaterChan, internalPubSubSChan, internalAttributeSChan, internalUserSChan, internalAliaseSChan,
@@ -937,11 +908,6 @@ func main() {
 	// Start SM-Kamailio
 	if cfg.SmKamConfig.Enabled {
 		go startSmKamailio(internalRaterChan, internalCdrSChan, internalRsChan, cdrDb, exitChan)
-	}
-
-	// Start SM-OpenSIPS
-	if cfg.SmOsipsConfig.Enabled {
-		go startSmOpenSIPS(internalRaterChan, internalCdrSChan, cdrDb, exitChan)
 	}
 
 	if cfg.AsteriskAgentCfg().Enabled {
