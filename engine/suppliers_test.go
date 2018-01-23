@@ -193,6 +193,7 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 		sorter:              ssd,
 	}
 	ssd[utils.MetaLeastCost] = NewLeastCostSorter(&splserv)
+
 	argPagEv = &ArgsGetSuppliers{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -207,6 +208,11 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 			},
 		},
 	}
+	var cloneExpTime time.Time
+	expTime := time.Now().Add(time.Duration(20 * time.Minute))
+	if err := utils.Clone(expTime, &cloneExpTime); err != nil {
+		t.Error(err)
+	}
 	sprsmatch = SupplierProfiles{
 		&SupplierProfile{
 			Tenant:    "cgrates.org",
@@ -214,7 +220,7 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 			FilterIDs: []string{"filter3"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     time.Now().Add(time.Duration(20 * time.Minute)),
+				ExpiryTime:     cloneExpTime,
 			},
 			Sorting:       utils.MetaWeight,
 			SortingParams: []string{},
@@ -239,7 +245,7 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 			FilterIDs: []string{"filter4"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     time.Now().Add(time.Duration(20 * time.Minute)),
+				ExpiryTime:     cloneExpTime,
 			},
 			Sorting:       utils.MetaWeight,
 			SortingParams: []string{},

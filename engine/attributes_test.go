@@ -61,6 +61,12 @@ func testPopulateAttrService(t *testing.T) {
 		Substitute: "Al1",
 		Append:     true,
 	}
+	//Need clone because time.Now add extra information and DeepEqual don't like
+	var cloneExpTime time.Time
+	expTime := time.Now().Add(time.Duration(20 * time.Minute))
+	if err := utils.Clone(expTime, &cloneExpTime); err != nil {
+		t.Error(err)
+	}
 	atrPs = AttributeProfiles{
 		&AttributeProfile{
 			Tenant:    "cgrates.org",
@@ -69,7 +75,7 @@ func testPopulateAttrService(t *testing.T) {
 			FilterIDs: []string{"filter1"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     time.Now().Add(time.Duration(20 * time.Minute)),
+				ExpiryTime:     cloneExpTime,
 			},
 			Attributes: attrMap,
 			Weight:     20,
@@ -81,7 +87,7 @@ func testPopulateAttrService(t *testing.T) {
 			FilterIDs: []string{"filter2"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     time.Now().Add(time.Duration(20 * time.Minute)),
+				ExpiryTime:     cloneExpTime,
 			},
 			Attributes: attrMap,
 			Weight:     20,
@@ -151,9 +157,9 @@ func testAttributeMatchingAttributeProfilesForEvent(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(atrPs[0], atrpl[0]) && !reflect.DeepEqual(atrPs[0], atrpl[1]) {
-		t.Errorf("Expecting: %+v, received: %+v", atrPs[0], atrpl[0])
+		t.Errorf("Expecting: %+v, received: %+v ", atrPs[0], atrpl[0])
 	} else if !reflect.DeepEqual(atrPs[1], atrpl[1]) && !reflect.DeepEqual(atrPs[1], atrpl[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", atrPs[1], atrpl[1])
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(atrPs), utils.ToJSON(atrpl))
 	}
 }
 
@@ -174,7 +180,7 @@ func testAttributeProfileForEvent(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(atrPs[0], atrpl) && !reflect.DeepEqual(atrPs[1], atrpl) {
-		t.Errorf("Expecting: %+v, received: %+v", atrPs[0], atrpl)
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(atrPs[0]), utils.ToJSON(atrpl))
 	}
 }
 
