@@ -200,28 +200,28 @@ func (v2ATR v2ActionTrigger) AsThreshold() (thp *engine.ThresholdProfile, th *en
 			filters = append(filters, x)
 		}
 		if v2ATR.Balance.RatingSubject != nil { //MetaLess /RSRfields
-			x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "RatingSubject", []string{*v2ATR.Balance.RatingSubject})
+			x, err := engine.NewRequestFilter(engine.MetaPrefix, "RatingSubject", []string{*v2ATR.Balance.RatingSubject})
 			if err != nil {
 				return nil, nil, nil, err
 			}
 			filters = append(filters, x)
 		}
 		if v2ATR.Balance.Categories != nil { //MetaLess /RSRfields
-			x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "Categories", v2ATR.Balance.Categories.Slice())
+			x, err := engine.NewRequestFilter(engine.MetaPrefix, "Categories", v2ATR.Balance.Categories.Slice())
 			if err != nil {
 				return nil, nil, nil, err
 			}
 			filters = append(filters, x)
 		}
 		if v2ATR.Balance.SharedGroups != nil { //MetaLess /RSRfields
-			x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "SharedGroups", v2ATR.Balance.SharedGroups.Slice())
+			x, err := engine.NewRequestFilter(engine.MetaPrefix, "SharedGroups", v2ATR.Balance.SharedGroups.Slice())
 			if err != nil {
 				return nil, nil, nil, err
 			}
 			filters = append(filters, x)
 		}
 		if v2ATR.Balance.TimingIDs != nil { //MetaLess /RSRfields
-			x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "TimingIDs", v2ATR.Balance.TimingIDs.Slice())
+			x, err := engine.NewRequestFilter(engine.MetaPrefix, "TimingIDs", v2ATR.Balance.TimingIDs.Slice())
 			if err != nil {
 				return nil, nil, nil, err
 			}
@@ -303,28 +303,28 @@ func AsThreshold2(v2ATR engine.ActionTrigger) (thp *engine.ThresholdProfile, th 
 			filters = append(filters, x)
 		}
 		if v2ATR.Balance.RatingSubject != nil { //MetaLess /RSRfields
-			x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "RatingSubject", []string{*v2ATR.Balance.RatingSubject})
+			x, err := engine.NewRequestFilter(engine.MetaPrefix, "RatingSubject", []string{*v2ATR.Balance.RatingSubject})
 			if err != nil {
 				return nil, nil, nil, err
 			}
 			filters = append(filters, x)
 		}
 		if v2ATR.Balance.Categories != nil { //MetaLess /RSRfields
-			x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "Categories", v2ATR.Balance.Categories.Slice())
+			x, err := engine.NewRequestFilter(engine.MetaPrefix, "Categories", v2ATR.Balance.Categories.Slice())
 			if err != nil {
 				return nil, nil, nil, err
 			}
 			filters = append(filters, x)
 		}
 		if v2ATR.Balance.SharedGroups != nil { //MetaLess /RSRfields
-			x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "SharedGroups", v2ATR.Balance.SharedGroups.Slice())
+			x, err := engine.NewRequestFilter(engine.MetaPrefix, "SharedGroups", v2ATR.Balance.SharedGroups.Slice())
 			if err != nil {
 				return nil, nil, nil, err
 			}
 			filters = append(filters, x)
 		}
 		if v2ATR.Balance.TimingIDs != nil { //MetaLess /RSRfields
-			x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "TimingIDs", v2ATR.Balance.TimingIDs.Slice())
+			x, err := engine.NewRequestFilter(engine.MetaPrefix, "TimingIDs", v2ATR.Balance.TimingIDs.Slice())
 			if err != nil {
 				return nil, nil, nil, err
 			}

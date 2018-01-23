@@ -1060,7 +1060,7 @@ func TestTPFilterAsTPFilter(t *testing.T) {
 		&TpFilter{
 			Tpid:              "TEST_TPID",
 			ID:                "Filter1",
-			FilterType:        MetaStringPrefix,
+			FilterType:        MetaPrefix,
 			FilterFieldName:   "Account",
 			FilterFieldValues: "1001;1002",
 		},
@@ -1071,7 +1071,7 @@ func TestTPFilterAsTPFilter(t *testing.T) {
 			ID:   tps[0].ID,
 			Filters: []*utils.TPFilter{
 				&utils.TPFilter{
-					Type:      MetaStringPrefix,
+					Type:      MetaPrefix,
 					FieldName: "Account",
 					Values:    []string{"1001", "1002"},
 				},

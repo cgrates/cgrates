@@ -205,56 +205,56 @@ func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *engine.StatQueue, stq
 	}
 
 	if len(v1Sts.TOR) != 0 {
-		x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "TOR", v1Sts.TOR)
+		x, err := engine.NewRequestFilter(engine.MetaPrefix, "TOR", v1Sts.TOR)
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	}
 	if len(v1Sts.CdrHost) != 0 {
-		x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "CdrHost", v1Sts.CdrHost)
+		x, err := engine.NewRequestFilter(engine.MetaPrefix, "CdrHost", v1Sts.CdrHost)
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	}
 	if len(v1Sts.ReqType) != 0 {
-		x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "ReqType", v1Sts.ReqType)
+		x, err := engine.NewRequestFilter(engine.MetaPrefix, "ReqType", v1Sts.ReqType)
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	}
 	if len(v1Sts.Direction) != 0 {
-		x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "Direction", v1Sts.Direction)
+		x, err := engine.NewRequestFilter(engine.MetaPrefix, "Direction", v1Sts.Direction)
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	}
 	if len(v1Sts.Category) != 0 {
-		x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "Category", v1Sts.Category)
+		x, err := engine.NewRequestFilter(engine.MetaPrefix, "Category", v1Sts.Category)
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	}
 	if len(v1Sts.Account) != 0 {
-		x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "Account", v1Sts.Account)
+		x, err := engine.NewRequestFilter(engine.MetaPrefix, "Account", v1Sts.Account)
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	}
 	if len(v1Sts.Subject) != 0 {
-		x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "Subject", v1Sts.Subject)
+		x, err := engine.NewRequestFilter(engine.MetaPrefix, "Subject", v1Sts.Subject)
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	}
 	if len(v1Sts.Supplier) != 0 {
-		x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "Supplier", v1Sts.Supplier)
+		x, err := engine.NewRequestFilter(engine.MetaPrefix, "Supplier", v1Sts.Supplier)
 		if err != nil {
 			return nil, nil, nil, err
 		}
@@ -287,28 +287,28 @@ func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *engine.StatQueue, stq
 		filters = append(filters, x)
 	}
 	if len(v1Sts.Supplier) != 0 {
-		x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "Supplier", v1Sts.Supplier)
+		x, err := engine.NewRequestFilter(engine.MetaPrefix, "Supplier", v1Sts.Supplier)
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	}
 	if len(v1Sts.DisconnectCause) != 0 {
-		x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "DisconnectCause", v1Sts.DisconnectCause)
+		x, err := engine.NewRequestFilter(engine.MetaPrefix, "DisconnectCause", v1Sts.DisconnectCause)
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	}
 	if len(v1Sts.MediationRunIds) != 0 {
-		x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "MediationRunIds", v1Sts.MediationRunIds)
+		x, err := engine.NewRequestFilter(engine.MetaPrefix, "MediationRunIds", v1Sts.MediationRunIds)
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	}
 	if len(v1Sts.RatedSubject) != 0 {
-		x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "RatedSubject", v1Sts.RatedSubject)
+		x, err := engine.NewRequestFilter(engine.MetaPrefix, "RatedSubject", v1Sts.RatedSubject)
 		if err != nil {
 			return nil, nil, nil, err
 		}

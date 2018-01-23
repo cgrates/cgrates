@@ -121,7 +121,7 @@ func testPopulateAttrService(t *testing.T) {
 	srv = AttributeService{
 		dm:                  dmAtr,
 		filterS:             &FilterS{dm: dmAtr},
-		stringIndexedFields: []string{"attributeprofile1", "attributeprofile2"},
+		stringIndexedFields: utils.StringSlicePointer([]string{"attributeprofile1", "attributeprofile2"}),
 	}
 	sev = &utils.CGREvent{
 		Tenant:  "cgrates.org",

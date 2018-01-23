@@ -70,7 +70,7 @@ func (lps SupplierProfiles) Sort() {
 
 // NewLCRService initializes a LCRService
 func NewSupplierService(dm *DataManager, timezone string,
-	filterS *FilterS, stringIndexedFields []string, resourceS,
+	filterS *FilterS, stringIndexedFields, prefixIndexedFields *[]string, resourceS,
 	statS rpcclient.RpcClientConnection) (spS *SupplierService, err error) {
 	spS = &SupplierService{
 		dm:                  dm,
@@ -78,7 +78,8 @@ func NewSupplierService(dm *DataManager, timezone string,
 		filterS:             filterS,
 		resourceS:           resourceS,
 		statS:               statS,
-		stringIndexedFields: stringIndexedFields}
+		stringIndexedFields: stringIndexedFields,
+		prefixIndexedFields: prefixIndexedFields}
 	if spS.sorter, err = NewSupplierSortDispatcher(spS); err != nil {
 		return nil, err
 	}
@@ -90,7 +91,8 @@ type SupplierService struct {
 	dm                  *DataManager
 	timezone            string
 	filterS             *FilterS
-	stringIndexedFields []string
+	stringIndexedFields *[]string
+	prefixIndexedFields *[]string
 	resourceS,
 	statS rpcclient.RpcClientConnection
 	sorter SupplierSortDispatcher

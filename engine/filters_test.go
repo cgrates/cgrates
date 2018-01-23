@@ -46,37 +46,37 @@ func TestReqFilterPassStringPrefix(t *testing.T) {
 	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
 		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
 		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
-	rf := &RequestFilter{Type: MetaStringPrefix, FieldName: "Category", Values: []string{"call"}}
+	rf := &RequestFilter{Type: MetaPrefix, FieldName: "Category", Values: []string{"call"}}
 	if passes, err := rf.passStringPrefix(cd, ""); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
-	rf = &RequestFilter{Type: MetaStringPrefix, FieldName: "Category", Values: []string{"premium"}}
+	rf = &RequestFilter{Type: MetaPrefix, FieldName: "Category", Values: []string{"premium"}}
 	if passes, err := rf.passStringPrefix(cd, ""); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passes filter")
 	}
-	rf = &RequestFilter{Type: MetaStringPrefix, FieldName: "Destination", Values: []string{"+49"}}
+	rf = &RequestFilter{Type: MetaPrefix, FieldName: "Destination", Values: []string{"+49"}}
 	if passes, err := rf.passStringPrefix(cd, ""); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
-	rf = &RequestFilter{Type: MetaStringPrefix, FieldName: "Destination", Values: []string{"+499"}}
+	rf = &RequestFilter{Type: MetaPrefix, FieldName: "Destination", Values: []string{"+499"}}
 	if passes, err := rf.passStringPrefix(cd, ""); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passes filter")
 	}
-	rf = &RequestFilter{Type: MetaStringPrefix, FieldName: "navigation", Values: []string{"off"}}
+	rf = &RequestFilter{Type: MetaPrefix, FieldName: "navigation", Values: []string{"off"}}
 	if passes, err := rf.passStringPrefix(cd, "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
-	rf = &RequestFilter{Type: MetaStringPrefix, FieldName: "nonexisting", Values: []string{"off"}}
+	rf = &RequestFilter{Type: MetaPrefix, FieldName: "nonexisting", Values: []string{"off"}}
 	if passing, err := rf.passStringPrefix(cd, "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if passing {
@@ -212,11 +212,11 @@ func TestReqFilterNewRequestFilter(t *testing.T) {
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
-	rf, err = NewRequestFilter(MetaStringPrefix, "MetaStringPrefix", []string{"stringPrefix"})
+	rf, err = NewRequestFilter(MetaPrefix, "MetaPrefix", []string{"stringPrefix"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &RequestFilter{Type: MetaStringPrefix, FieldName: "MetaStringPrefix", Values: []string{"stringPrefix"}}
+	erf = &RequestFilter{Type: MetaPrefix, FieldName: "MetaPrefix", Values: []string{"stringPrefix"}}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
@@ -307,13 +307,13 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		"Account": "1007",
 	}
 	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		failEvent, []string{"*stringprefix:Account:10"}); err != nil {
+		failEvent, []string{"*prefix:Account:10"}); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		passEvent, []string{"*stringprefix:Account:10"}); err != nil {
+		passEvent, []string{"*prefix:Account:10"}); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)

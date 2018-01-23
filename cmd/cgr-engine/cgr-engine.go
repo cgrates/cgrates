@@ -527,7 +527,8 @@ func startAttributeService(internalAttributeSChan chan rpcclient.RpcClientConnec
 	dm *engine.DataManager, server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
-	aS, err := engine.NewAttributeService(dm, filterS, cfg.AttributeSCfg().StringIndexedFields)
+	aS, err := engine.NewAttributeService(dm, filterS,
+		cfg.AttributeSCfg().StringIndexedFields, cfg.AttributeSCfg().PrefixIndexedFields)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.AttributeS, err.Error()))
 		exitChan <- true
@@ -561,7 +562,8 @@ func startResourceService(internalRsChan, internalThresholdSChan chan rpcclient.
 			return
 		}
 	}
-	rS, err := engine.NewResourceService(dm, cfg.ResourceSCfg().StoreInterval, thdSConn, filterS, cfg.ResourceSCfg().StringIndexedFields)
+	rS, err := engine.NewResourceService(dm, cfg.ResourceSCfg().StoreInterval,
+		thdSConn, filterS, cfg.ResourceSCfg().StringIndexedFields, cfg.ResourceSCfg().PrefixIndexedFields)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<ResourceS> Could not init, error: %s", err.Error()))
 		exitChan <- true
@@ -598,7 +600,8 @@ func startStatService(internalStatSChan, internalThresholdSChan chan rpcclient.R
 			return
 		}
 	}
-	sS, err := engine.NewStatService(dm, cfg.StatSCfg().StoreInterval, thdSConn, filterS, cfg.StatSCfg().StringIndexedFields)
+	sS, err := engine.NewStatService(dm, cfg.StatSCfg().StoreInterval,
+		thdSConn, filterS, cfg.StatSCfg().StringIndexedFields, cfg.StatSCfg().PrefixIndexedFields)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<StatS> Could not init, error: %s", err.Error()))
 		exitChan <- true
@@ -624,7 +627,7 @@ func startThresholdService(internalThresholdSChan chan rpcclient.RpcClientConnec
 	filterS := <-filterSChan
 	filterSChan <- filterS
 	tS, err := engine.NewThresholdService(dm, cfg.ThresholdSCfg().StringIndexedFields,
-		cfg.ThresholdSCfg().StoreInterval, filterS)
+		cfg.ThresholdSCfg().PrefixIndexedFields, cfg.ThresholdSCfg().StoreInterval, filterS)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<ThresholdS> Could not init, error: %s", err.Error()))
 		exitChan <- true
@@ -675,8 +678,8 @@ func startSupplierService(internalSupplierSChan, internalRsChan, internalStatSCh
 			return
 		}
 	}
-	splS, err := engine.NewSupplierService(dm, cfg.DefaultTimezone, filterS,
-		cfg.SupplierSCfg().StringIndexedFields, resourceSConn, statSConn)
+	splS, err := engine.NewSupplierService(dm, cfg.DefaultTimezone, filterS, cfg.SupplierSCfg().StringIndexedFields,
+		cfg.SupplierSCfg().PrefixIndexedFields, resourceSConn, statSConn)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s",
 			utils.SupplierS, err.Error()))

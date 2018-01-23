@@ -267,7 +267,7 @@ func TestV1AuthorizeResourceMissingStruct(t *testing.T) {
 	rserv := &ResourceService{
 		dm:                  dmresmiss,
 		filterS:             &FilterS{dm: dmresmiss},
-		stringIndexedFields: []string{}, // speed up query on indexes
+		stringIndexedFields: &[]string{}, // speed up query on indexes
 	}
 	var reply *string
 	argsMissingTenant := utils.ArgRSv1ResourceUsage{

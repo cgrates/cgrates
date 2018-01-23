@@ -25,10 +25,10 @@ import (
 )
 
 type ThresholdSCfg struct {
-	Enabled                   bool
-	StoreInterval             time.Duration // Dump regularly from cache into dataDB
-	StringIndexedFields       []string
-	StringPrefixIndexedFields []string
+	Enabled             bool
+	StoreInterval       time.Duration // Dump regularly from cache into dataDB
+	StringIndexedFields *[]string
+	PrefixIndexedFields *[]string
 }
 
 func (t *ThresholdSCfg) loadFromJsonCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
@@ -44,16 +44,18 @@ func (t *ThresholdSCfg) loadFromJsonCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 		}
 	}
 	if jsnCfg.String_indexed_fields != nil {
-		t.StringIndexedFields = make([]string, len(*jsnCfg.String_indexed_fields))
+		sif := make([]string, len(*jsnCfg.String_indexed_fields))
 		for i, fID := range *jsnCfg.String_indexed_fields {
-			t.StringIndexedFields[i] = fID
+			sif[i] = fID
 		}
+		t.StringIndexedFields = &sif
 	}
-	if jsnCfg.Stringprefix_indexed_fields != nil {
-		t.StringPrefixIndexedFields = make([]string, len(*jsnCfg.Stringprefix_indexed_fields))
-		for i, fID := range *jsnCfg.Stringprefix_indexed_fields {
-			t.StringPrefixIndexedFields[i] = fID
+	if jsnCfg.Prefix_indexed_fields != nil {
+		pif := make([]string, len(*jsnCfg.Prefix_indexed_fields))
+		for i, fID := range *jsnCfg.Prefix_indexed_fields {
+			pif[i] = fID
 		}
+		t.PrefixIndexedFields = &pif
 	}
 	return nil
 }

@@ -279,16 +279,19 @@ func (rs Resources) allocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 
 // Pas the config as a whole so we can ask access concurrently
 func NewResourceService(dm *DataManager, storeInterval time.Duration,
-	thdS rpcclient.RpcClientConnection, filterS *FilterS, stringIndexedFields []string) (*ResourceService, error) {
+	thdS rpcclient.RpcClientConnection, filterS *FilterS,
+	stringIndexedFields, prefixIndexedFields *[]string) (*ResourceService, error) {
 	if thdS != nil && reflect.ValueOf(thdS).IsNil() {
 		thdS = nil
 	}
 	return &ResourceService{dm: dm, thdS: thdS,
-		lcEventResources: make(map[string][]*utils.TenantID),
-		storedResources:  make(utils.StringMap),
-		storeInterval:    storeInterval,
-		filterS:          filterS,
-		stopBackup:       make(chan struct{})}, nil
+		lcEventResources:    make(map[string][]*utils.TenantID),
+		storedResources:     make(utils.StringMap),
+		storeInterval:       storeInterval,
+		filterS:             filterS,
+		stringIndexedFields: stringIndexedFields,
+		prefixIndexedFields: prefixIndexedFields,
+		stopBackup:          make(chan struct{})}, nil
 }
 
 // ResourceService is the service handling resources
@@ -296,7 +299,8 @@ type ResourceService struct {
 	dm                  *DataManager                  // So we can load the data in cache and index it
 	thdS                rpcclient.RpcClientConnection // allows applying filters based on stats
 	filterS             *FilterS
-	stringIndexedFields []string                     // speed up query on indexes
+	stringIndexedFields *[]string // speed up query on indexes
+	prefixIndexedFields *[]string
 	lcEventResources    map[string][]*utils.TenantID // cache recording resources for events in alocation phase
 	lcERMux             sync.RWMutex                 // protects the lcEventResources
 	storedResources     utils.StringMap              // keep a record of resources which need saving, map[resID]bool

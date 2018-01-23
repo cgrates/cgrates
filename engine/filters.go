@@ -31,7 +31,7 @@ import (
 
 const (
 	MetaString         = "*string"
-	MetaStringPrefix   = "*stringprefix"
+	MetaPrefix         = "*prefix"
 	MetaTimings        = "*timings"
 	MetaRSR            = "*rsr"
 	MetaStatS          = "*stats"
@@ -126,7 +126,7 @@ func (fS *FilterS) PassFiltersForEvent(tenant string, ev map[string]interface{},
 			switch fltr.Type {
 			case MetaString:
 				pass, err = fltr.passString(ev, "")
-			case MetaStringPrefix:
+			case MetaPrefix:
 				pass, err = fltr.passStringPrefix(ev, "")
 			case MetaTimings:
 				pass, err = fltr.passTimings(ev, "")
@@ -175,15 +175,15 @@ func (f *Filter) Compile() (err error) {
 }
 
 func NewRequestFilter(rfType, fieldName string, vals []string) (*RequestFilter, error) {
-	if !utils.IsSliceMember([]string{MetaString, MetaStringPrefix, MetaTimings, MetaRSR, MetaStatS, MetaDestinations,
+	if !utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaTimings, MetaRSR, MetaStatS, MetaDestinations,
 		MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("Unsupported filter Type: %s", rfType)
 	}
-	if fieldName == "" && utils.IsSliceMember([]string{MetaString, MetaStringPrefix, MetaTimings, MetaDestinations,
+	if fieldName == "" && utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaTimings, MetaDestinations,
 		MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("FieldName is mandatory for Type: %s", rfType)
 	}
-	if len(vals) == 0 && utils.IsSliceMember([]string{MetaString, MetaStringPrefix, MetaTimings, MetaRSR,
+	if len(vals) == 0 && utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaTimings, MetaRSR,
 		MetaDestinations, MetaDestinations, MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("Values is mandatory for Type: %s", rfType)
 	}
@@ -245,7 +245,7 @@ func (fltr *RequestFilter) Pass(req interface{}, extraFieldsLabel string, rpcCln
 	switch fltr.Type {
 	case MetaString:
 		return fltr.passString(req, extraFieldsLabel)
-	case MetaStringPrefix:
+	case MetaPrefix:
 		return fltr.passStringPrefix(req, extraFieldsLabel)
 	case MetaTimings:
 		return fltr.passTimings(req, extraFieldsLabel)

@@ -34,7 +34,7 @@ import (
 
 // NewStatService initializes a StatService
 func NewStatService(dm *DataManager, storeInterval time.Duration,
-	thdS rpcclient.RpcClientConnection, filterS *FilterS, stringIndexedFields []string) (ss *StatService, err error) {
+	thdS rpcclient.RpcClientConnection, filterS *FilterS, stringIndexedFields, prefixIndexedFields *[]string) (ss *StatService, err error) {
 	if thdS != nil && reflect.ValueOf(thdS).IsNil() { // fix nil value in interface
 		thdS = nil
 	}
@@ -44,6 +44,7 @@ func NewStatService(dm *DataManager, storeInterval time.Duration,
 		thdS:                thdS,
 		filterS:             filterS,
 		stringIndexedFields: stringIndexedFields,
+		prefixIndexedFields: prefixIndexedFields,
 		storedStatQueues:    make(utils.StringMap),
 		stopBackup:          make(chan struct{})}, nil
 }
@@ -54,7 +55,8 @@ type StatService struct {
 	storeInterval       time.Duration
 	thdS                rpcclient.RpcClientConnection // rpc connection towards ThresholdS
 	filterS             *FilterS
-	stringIndexedFields []string
+	stringIndexedFields *[]string
+	prefixIndexedFields *[]string
 	stopBackup          chan struct{}
 	storedStatQueues    utils.StringMap // keep a record of stats which need saving, map[statsTenantID]bool
 	ssqMux              sync.RWMutex    // protects storedStatQueues

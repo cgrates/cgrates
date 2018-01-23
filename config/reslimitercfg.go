@@ -25,11 +25,11 @@ import (
 )
 
 type ResourceSConfig struct {
-	Enabled                   bool
-	ThresholdSConns           []*HaPoolConfig // Connections towards StatS
-	StoreInterval             time.Duration   // Dump regularly from cache into dataDB
-	StringIndexedFields       []string
-	StringPrefixIndexedFields []string
+	Enabled             bool
+	ThresholdSConns     []*HaPoolConfig // Connections towards StatS
+	StoreInterval       time.Duration   // Dump regularly from cache into dataDB
+	StringIndexedFields *[]string
+	PrefixIndexedFields *[]string
 }
 
 func (rlcfg *ResourceSConfig) loadFromJsonCfg(jsnCfg *ResourceSJsonCfg) (err error) {
@@ -52,16 +52,18 @@ func (rlcfg *ResourceSConfig) loadFromJsonCfg(jsnCfg *ResourceSJsonCfg) (err err
 		}
 	}
 	if jsnCfg.String_indexed_fields != nil {
-		rlcfg.StringIndexedFields = make([]string, len(*jsnCfg.String_indexed_fields))
+		sif := make([]string, len(*jsnCfg.String_indexed_fields))
 		for i, fID := range *jsnCfg.String_indexed_fields {
-			rlcfg.StringIndexedFields[i] = fID
+			sif[i] = fID
 		}
+		rlcfg.StringIndexedFields = &sif
 	}
-	if jsnCfg.Stringprefix_indexed_fields != nil {
-		rlcfg.StringPrefixIndexedFields = make([]string, len(*jsnCfg.Stringprefix_indexed_fields))
-		for i, fID := range *jsnCfg.Stringprefix_indexed_fields {
-			rlcfg.StringPrefixIndexedFields[i] = fID
+	if jsnCfg.Prefix_indexed_fields != nil {
+		pif := make([]string, len(*jsnCfg.Prefix_indexed_fields))
+		for i, fID := range *jsnCfg.Prefix_indexed_fields {
+			pif[i] = fID
 		}
+		rlcfg.PrefixIndexedFields = &pif
 	}
 	return nil
 }

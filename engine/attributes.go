@@ -27,14 +27,18 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewAttributeService(dm *DataManager, filterS *FilterS, stringIndexedFields []string) (*AttributeService, error) {
-	return &AttributeService{dm: dm, filterS: filterS, stringIndexedFields: stringIndexedFields}, nil
+func NewAttributeService(dm *DataManager, filterS *FilterS,
+	stringIndexedFields, prefixIndexedFields *[]string) (*AttributeService, error) {
+	return &AttributeService{dm: dm, filterS: filterS,
+		stringIndexedFields: stringIndexedFields,
+		prefixIndexedFields: prefixIndexedFields}, nil
 }
 
 type AttributeService struct {
 	dm                  *DataManager
 	filterS             *FilterS
-	stringIndexedFields []string
+	stringIndexedFields *[]string
+	prefixIndexedFields *[]string
 }
 
 // ListenAndServe will initialize the service

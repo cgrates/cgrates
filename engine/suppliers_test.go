@@ -189,7 +189,7 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 	splserv = SupplierService{
 		dm:                  dmspl,
 		filterS:             &FilterS{dm: dmspl},
-		stringIndexedFields: []string{"supplierprofile1", "supplierprofile2"},
+		stringIndexedFields: &[]string{"supplierprofile1", "supplierprofile2"},
 		sorter:              ssd,
 	}
 	ssd[utils.MetaLeastCost] = NewLeastCostSorter(&splserv)

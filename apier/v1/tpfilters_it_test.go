@@ -179,7 +179,7 @@ func testTPFilterUpdateTPFilter(t *testing.T) {
 			Values:    []string{"1001", "1002"},
 		},
 		&utils.TPFilter{
-			Type:      "*stringprefix",
+			Type:      engine.MetaPrefix,
 			FieldName: "Destination",
 			Values:    []string{"10", "20"},
 		},

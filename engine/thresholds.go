@@ -112,10 +112,11 @@ func (ts Thresholds) Sort() {
 	sort.Slice(ts, func(i, j int) bool { return ts[i].tPrfl.Weight > ts[j].tPrfl.Weight })
 }
 
-func NewThresholdService(dm *DataManager, stringIndexedFields []string, storeInterval time.Duration,
+func NewThresholdService(dm *DataManager, stringIndexedFields, prefixIndexedFields *[]string, storeInterval time.Duration,
 	filterS *FilterS) (tS *ThresholdService, err error) {
 	return &ThresholdService{dm: dm,
 		stringIndexedFields: stringIndexedFields,
+		prefixIndexedFields: prefixIndexedFields,
 		storeInterval:       storeInterval,
 		filterS:             filterS,
 		stopBackup:          make(chan struct{}),
@@ -125,7 +126,8 @@ func NewThresholdService(dm *DataManager, stringIndexedFields []string, storeInt
 // ThresholdService manages Threshold execution and storing them to dataDB
 type ThresholdService struct {
 	dm                  *DataManager
-	stringIndexedFields []string // fields considered when searching for matching thresholds
+	stringIndexedFields *[]string // fields considered when searching for matching thresholds
+	prefixIndexedFields *[]string
 	storeInterval       time.Duration
 	filterS             *FilterS
 	stopBackup          chan struct{}
@@ -219,7 +221,8 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 	if len(args.ThresholdIDs) != 0 {
 		tIDs = args.ThresholdIDs
 	} else {
-		tIDsMap, err := matchingItemIDsForEvent(args.Event, tS.stringIndexedFields, tS.dm, utils.ThresholdFilterIndexes+args.Tenant, MetaString)
+		tIDsMap, err := matchingItemIDsForEvent(args.Event, tS.stringIndexedFields,
+			tS.dm, utils.ThresholdFilterIndexes+args.Tenant, MetaString)
 		if err != nil {
 			return nil, err
 		}

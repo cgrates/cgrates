@@ -49,13 +49,13 @@ func Testv2ActionTriggerAsThreshold(t *testing.T) {
 	filters = append(filters, x)
 	x, _ = engine.NewRequestFilter(engine.MetaDestinations, "DestinationIDs", v2ATR.Balance.DestinationIDs.Slice())
 	filters = append(filters, x)
-	x, _ = engine.NewRequestFilter(engine.MetaStringPrefix, "RatingSubject", []string{*v2ATR.Balance.RatingSubject})
+	x, _ = engine.NewRequestFilter(engine.MetaPrefix, "RatingSubject", []string{*v2ATR.Balance.RatingSubject})
 	filters = append(filters, x)
-	x, _ = engine.NewRequestFilter(engine.MetaStringPrefix, "Categories", v2ATR.Balance.Categories.Slice())
+	x, _ = engine.NewRequestFilter(engine.MetaPrefix, "Categories", v2ATR.Balance.Categories.Slice())
 	filters = append(filters, x)
-	x, _ = engine.NewRequestFilter(engine.MetaStringPrefix, "SharedGroups", v2ATR.Balance.SharedGroups.Slice())
+	x, _ = engine.NewRequestFilter(engine.MetaPrefix, "SharedGroups", v2ATR.Balance.SharedGroups.Slice())
 	filters = append(filters, x)
-	x, _ = engine.NewRequestFilter(engine.MetaStringPrefix, "TimingIDs", v2ATR.Balance.TimingIDs.Slice())
+	x, _ = engine.NewRequestFilter(engine.MetaPrefix, "TimingIDs", v2ATR.Balance.TimingIDs.Slice())
 	filters = append(filters, x)
 
 	filter := &engine.Filter{Tenant: config.CgrConfig().DefaultTenant, ID: *v2ATR.Balance.ID, RequestFilters: filters}

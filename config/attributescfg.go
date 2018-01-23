@@ -20,9 +20,9 @@ package config
 
 // SupplierSCfg is the configuration of supplier service
 type AttributeSCfg struct {
-	Enabled                   bool
-	StringIndexedFields       []string
-	StringPrefixIndexedFields []string
+	Enabled             bool
+	StringIndexedFields *[]string
+	PrefixIndexedFields *[]string
 }
 
 func (alS *AttributeSCfg) loadFromJsonCfg(jsnCfg *AttributeSJsonCfg) (err error) {
@@ -33,16 +33,18 @@ func (alS *AttributeSCfg) loadFromJsonCfg(jsnCfg *AttributeSJsonCfg) (err error)
 		alS.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.String_indexed_fields != nil {
-		alS.StringIndexedFields = make([]string, len(*jsnCfg.String_indexed_fields))
+		sif := make([]string, len(*jsnCfg.String_indexed_fields))
 		for i, fID := range *jsnCfg.String_indexed_fields {
-			alS.StringIndexedFields[i] = fID
+			sif[i] = fID
 		}
+		alS.StringIndexedFields = &sif
 	}
-	if jsnCfg.Stringprefix_indexed_fields != nil {
-		alS.StringPrefixIndexedFields = make([]string, len(*jsnCfg.Stringprefix_indexed_fields))
-		for i, fID := range *jsnCfg.Stringprefix_indexed_fields {
-			alS.StringPrefixIndexedFields[i] = fID
+	if jsnCfg.Prefix_indexed_fields != nil {
+		pif := make([]string, len(*jsnCfg.Prefix_indexed_fields))
+		for i, fID := range *jsnCfg.Prefix_indexed_fields {
+			pif[i] = fID
 		}
+		alS.PrefixIndexedFields = &pif
 	}
 	return
 }

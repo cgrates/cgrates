@@ -168,7 +168,7 @@ func testFilterUpdateFilter(t *testing.T) {
 			Values:    []string{"1001", "1002"},
 		},
 		&engine.RequestFilter{
-			FieldName: "*stringprefix",
+			FieldName: engine.MetaPrefix,
 			Type:      "Destination",
 			Values:    []string{"10", "20"},
 		},
