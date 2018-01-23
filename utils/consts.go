@@ -580,9 +580,9 @@ const (
 
 //StatS APIs
 const (
-	StatSv1ProcessEvent             = "StatSv1.ProcessEvent"
-	StatSv1GetQueueIDs              = "StatSv1.GetQueueIDs"
-	StatSv1GetGetQueueStringMetrics = "StatSv1.GetQueueStringMetrics"
+	StatSv1ProcessEvent          = "StatSv1.ProcessEvent"
+	StatSv1GetQueueIDs           = "StatSv1.GetQueueIDs"
+	StatSv1GetQueueStringMetrics = "StatSv1.GetQueueStringMetrics"
 )
 
 //ResourceS APIs
@@ -712,8 +712,8 @@ const (
 	StatFilterRevIndexes      = "sfr_"
 	ThresholdFilterIndexes    = "tfi_"
 	ThresholdFilterRevIndexes = "tfr_"
-	SupplierFilterIndexes     = "sfi_"
-	SupplierFilterRevIndexes  = "sfr_"
+	SupplierFilterIndexes     = "spi_"
+	SupplierFilterRevIndexes  = "spr_"
 	AttributeFilterIndexes    = "afi_"
 	AttributeFilterRevIndexes = "afr_"
 )

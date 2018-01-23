@@ -70,6 +70,7 @@ func matchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 				dbItemIDs, err = dm.MatchFilterIndex(dbIdxKey, filterIndexTypes[i], fldName, val)
 				if err != nil {
 					if err == utils.ErrNotFound {
+						err = nil
 						continue
 					}
 					return nil, err
@@ -82,6 +83,9 @@ func matchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 				}
 			}
 		}
+	}
+	if len(itemIDs) == 0 {
+		return nil, utils.ErrNotFound
 	}
 	return
 }
