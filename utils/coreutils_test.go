@@ -685,15 +685,6 @@ func TestBoolPointer(t *testing.T) {
 	}
 }
 
-func TestFloat64SlicePointer(t *testing.T) {
-	t1 := []float64{1.2, 12.3, 123.4, 1234.5}
-	expected := &t1
-	result := Float64SlicePointer(t1)
-	if *result == nil {
-		t.Error("Expected:", expected, ", received: nil")
-	}
-}
-
 func TestStringMapPointer(t *testing.T) {
 	t1 := map[string]bool{"cgr1": true, "cgr2": true}
 	expected := &t1
