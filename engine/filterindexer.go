@@ -66,7 +66,6 @@ func (rfi *ReqFilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID
 					rfi.indexes[concatKey] = make(utils.StringMap)
 				}
 				rfi.indexes[concatKey][itemID] = true
-
 				if _, hasIt := rfi.reveseIndex[itemID]; !hasIt {
 					rfi.reveseIndex[itemID] = make(utils.StringMap)
 				}
@@ -81,6 +80,9 @@ func (rfi *ReqFilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID
 					rfi.indexes[concatKey] = make(utils.StringMap)
 				}
 				rfi.indexes[concatKey][itemID] = true
+				if _, hasIt := rfi.reveseIndex[itemID]; !hasIt {
+					rfi.reveseIndex[itemID] = make(utils.StringMap)
+				}
 				rfi.reveseIndex[itemID][concatKey] = true
 				rfi.chngdIndxKeys[concatKey] = true
 			}
