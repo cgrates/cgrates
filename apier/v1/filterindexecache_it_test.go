@@ -181,11 +181,8 @@ func testV1FIdxCaProcessEventWithNotFound(t *testing.T) {
 				utils.EventType: utils.BalanceUpdate,
 				utils.Account:   "1001"}}}
 	var hits int
-	eHits := 0
-	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &hits); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &hits); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
-	} else if hits != 0 {
-		t.Errorf("Expecting hits: %d, received: %d", eHits, hits)
 	}
 	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, "cgrates.org", true),
 		nil); err == nil || err != utils.ErrNotFound {
@@ -290,7 +287,7 @@ func testV1FIdxCaGetThresholdFromTP(t *testing.T) {
 		t.Errorf("Expecting hits: %d, received: %d", eHits, hits)
 	}
 	//test to make sure indexes are made as expected
-	idx := map[string]utils.StringMap{"THD_ACNT_BALANCE_1": {"*default:N/A:N/A": true, "*string:Account:1001": true, "*string:Account:1002": true, "*string:EventType:BalanceUpdate": true}}
+	idx := map[string]utils.StringMap{"THD_ACNT_BALANCE_1": {"*default:*any:*any": true, "*string:Account:1001": true, "*string:Account:1002": true, "*string:EventType:BalanceUpdate": true}}
 	fldNameVal := map[string]string{"THD_ACNT_BALANCE_1": ""}
 	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, "cgrates.org", true),
 		fldNameVal); err != nil {
@@ -1422,7 +1419,7 @@ func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 
-	idx := map[string]utils.StringMap{"ResGroup1": {"*default:N/A:N/A": true, "*string:Account:1001": true, "*string:Account:1002": true}}
+	idx := map[string]utils.StringMap{"ResGroup1": {"*default:*any:*any": true, "*string:Account:1001": true, "*string:Account:1002": true}}
 	fldNameVal := map[string]string{"ResGroup1": ""}
 	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", true),
 		fldNameVal); err != nil {

@@ -64,7 +64,7 @@ var (
 	scheduledShutdown = flag.String("scheduled_shutdown", "", "shutdown the engine after this duration")
 	singlecpu         = flag.Bool("singlecpu", false, "Run on single CPU core")
 	syslogger         = flag.String("logger", "", "logger <*syslog|*stdout>")
-	nodeID            = flag.String("node_id", "", "The ID of the engine")
+	nodeID            = flag.String("node_id", "", "The node ID of the engine")
 	logLevel          = flag.Int("log_level", -1, "Log level (0-emergency to 7-debug)")
 
 	cfg *config.CGRConfig

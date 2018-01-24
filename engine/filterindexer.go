@@ -76,7 +76,7 @@ func (rfi *ReqFilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID
 			rfi.chngdRevIndxKeys[itemID] = true
 		case MetaPrefix:
 			for _, fldVal := range fltr.Values {
-				concatKey := utils.ConcatenatedKey(fltr.FieldName, fldVal)
+				concatKey := utils.ConcatenatedKey(fltr.Type, fltr.FieldName, fldVal)
 				if _, hasIt := rfi.indexes[concatKey]; !hasIt {
 					rfi.indexes[concatKey] = make(utils.StringMap)
 				}
