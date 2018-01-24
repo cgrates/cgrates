@@ -1283,10 +1283,12 @@ func testV1FIdxCaGetResourceProfileWithNotFound(t *testing.T) {
 		},
 		Units: 6,
 	}
-	if err := tFIdxCaRpc.Call(utils.ResourceSv1AllocateResources, argsRU, &reply); err == nil || err.Error() != utils.ErrResourceUnavailable.Error() {
+	if err := tFIdxCaRpc.Call(utils.ResourceSv1AllocateResources,
+		argsRU, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, argsRU, &reply); err.Error() != utils.ErrResourceUnauthorized.Error() {
+	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources,
+		argsRU, &reply); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.StatQueueProfilePrefix, "cgrates.org", true),
@@ -1356,13 +1358,15 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 		},
 		Units: 6,
 	}
-	if err := tFIdxCaRpc.Call(utils.ResourceSv1AllocateResources, argsRU, &result); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ResourceSv1AllocateResources,
+		argsRU, &result); err != nil {
 		t.Error(err)
 	} else if result != "Approved" {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, argsRU, &result); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources,
+		argsRU, &result); err != nil {
 		t.Error(err)
 	} else if result != "Approved" {
 		t.Error("Unexpected reply returned", result)
@@ -1419,7 +1423,7 @@ func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 
-	idx := map[string]utils.StringMap{"ResGroup1": {"*default:*any:*any": true, "*string:Account:1001": true, "*string:Account:1002": true}}
+	idx := map[string]utils.StringMap{"ResGroup1": {"*default:*any:*any": true, "*prefix:Destination:10": true, "*prefix:Destination:20": true, "*string:Account:1001": true, "*string:Account:1002": true}}
 	fldNameVal := map[string]string{"ResGroup1": ""}
 	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", true),
 		fldNameVal); err != nil {

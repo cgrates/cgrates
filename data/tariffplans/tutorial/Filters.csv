@@ -11,7 +11,7 @@ cgrates.org,FLTR_ACNT_BALANCE_1,*string,EventType,BalanceUpdate,
 cgrates.org,FLTR_ACNT_BALANCE_1,*gte,Units,10.0,
 cgrates.org,FLTR_ACNT_EXPIRED,*string,Account,1001;1002,2014-07-29T15:00:00Z
 cgrates.org,FLTR_ACNT_EXPIRED,*gte,ExpiryTime,*now,
-cgrates.org,FLTR_STATS_1,*string,Account,1001,
+cgrates.org,FLTR_STATS_1,*string,Account,1002,
 cgrates.org,FLTR_STATS_1,*string,EventType,StatUpdate,2014-07-29T15:00:00Z
 cgrates.org,FLTR_STATS_1,*lt,ASR,40.0,
 cgrates.org,FLTR_STATS_1,*lt,ACD,3m,
