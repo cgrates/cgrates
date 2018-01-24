@@ -550,10 +550,11 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 	}
 }
 
-func TestCgrCfgJSONDefaultsSMFsConfig(t *testing.T) {
+func TestCgrCfgJSONDefaultsFsAgentConfig(t *testing.T) {
 	eFsAgentCfg := &FsAgentConfig{
-		Enabled:             false,
-		SessionSConns:       []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
+		Enabled: false,
+		SessionSConns: []*HaPoolConfig{
+			&HaPoolConfig{Address: "*internal"}},
 		SubscribePark:       true,
 		CreateCdr:           false,
 		ExtraFields:         nil,
@@ -571,20 +572,19 @@ func TestCgrCfgJSONDefaultsSMFsConfig(t *testing.T) {
 	}
 }
 
-func TestCgrCfgJSONDefaultsSMKamConfig(t *testing.T) {
-	eSmKaCfg := &SmKamConfig{
-		Enabled:         false,
-		RALsConns:       []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
-		CDRsConns:       []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
-		RLsConns:        []*HaPoolConfig{},
-		CreateCdr:       false,
-		DebitInterval:   10 * time.Second,
-		MinCallDuration: 0 * time.Second,
-		MaxCallDuration: 3 * time.Hour,
-		EvapiConns:      []*KamConnConfig{&KamConnConfig{Address: "127.0.0.1:8448", Reconnects: 5}},
+func TestCgrCfgJSONDefaultsKamAgentConfig(t *testing.T) {
+	eKamAgentCfg := &KamAgentCfg{
+		Enabled: false,
+		SessionSConns: []*HaPoolConfig{
+			&HaPoolConfig{Address: "*internal"}},
+		CreateCdr: false,
+		EvapiConns: []*KamConnConfig{
+			&KamConnConfig{
+				Address: "127.0.0.1:8448", Reconnects: 5}},
 	}
-	if !reflect.DeepEqual(cgrCfg.SmKamConfig, eSmKaCfg) {
-		t.Errorf("received: %+v, expecting: %+v", cgrCfg.SmKamConfig, eSmKaCfg)
+	if !reflect.DeepEqual(cgrCfg.kamAgentCfg, eKamAgentCfg) {
+		t.Errorf("received: %+v, expecting: %+v",
+			utils.ToJSON(cgrCfg.kamAgentCfg), utils.ToJSON(eKamAgentCfg))
 	}
 }
 

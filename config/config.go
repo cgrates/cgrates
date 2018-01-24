@@ -136,7 +136,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.sessionSCfg = new(SessionSCfg)
 	cfg.cacheConfig = make(CacheConfig)
 	cfg.fsAgentCfg = new(FsAgentConfig)
-	cfg.SmKamConfig = new(SmKamConfig)
+	cfg.kamAgentCfg = new(KamAgentCfg)
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
 	cfg.asteriskAgentCfg = new(AsteriskAgentCfg)
 	cfg.diameterAgentCfg = new(DiameterAgentCfg)
@@ -164,7 +164,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.dfltCdreProfile = cfg.CdreProfiles[utils.META_DEFAULT].Clone() // So default will stay unique, will have nil pointer in case of no defaults loaded which is an extra check
 	cfg.dfltCdrcProfile = cfg.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0].Clone()
 	dfltFsConnConfig = cfg.fsAgentCfg.EventSocketConns[0] // We leave it crashing here on purpose if no Connection defaults defined
-	dfltKamConnConfig = cfg.SmKamConfig.EvapiConns[0]
+	dfltKamConnConfig = cfg.kamAgentCfg.EvapiConns[0]
 	dfltAstConnCfg = cfg.asteriskAgentCfg.AsteriskConns[0]
 	if err := cfg.checkConfigSanity(); err != nil {
 		return nil, err
@@ -325,8 +325,8 @@ type CGRConfig struct {
 	CdreProfiles             map[string]*CdreConfig
 	CdrcProfiles             map[string][]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath][]{Configs}
 	sessionSCfg              *SessionSCfg
-	fsAgentCfg               *FsAgentConfig           // SMFreeSWITCH configuration
-	SmKamConfig              *SmKamConfig             // SM-Kamailio Configuration
+	fsAgentCfg               *FsAgentConfig           // FreeSWITCHAgent configuration
+	kamAgentCfg              *KamAgentCfg             // KamailioAgent Configuration
 	SmOsipsConfig            *SmOsipsConfig           // SMOpenSIPS Configuration
 	asteriskAgentCfg         *AsteriskAgentCfg        // SMAsterisk Configuration
 	diameterAgentCfg         *DiameterAgentCfg        // DiameterAgent configuration
@@ -507,35 +507,23 @@ func (self *CGRConfig) checkConfigSanity() error {
 	if self.fsAgentCfg.Enabled {
 		for _, connCfg := range self.fsAgentCfg.SessionSConns {
 			if connCfg.Address != utils.MetaInternal {
-				return errors.New("Only <*internal> connectivity allowed in in FreeSWITCHAgent towards SessionS for now")
+				return errors.New("only <*internal> connectivity allowed in in <freeswitch_agent> towards <sessions> for now")
 			}
 			if connCfg.Address == utils.MetaInternal &&
 				!self.sessionSCfg.Enabled {
-				return errors.New("SMGeneric not enabled but referenced by FreeSWITCHAgent")
+				return errors.New("<sessions> not enabled but referenced by <freeswitch_agent>")
 			}
 		}
 	}
 	// SM-Kamailio checks
-	if self.SmKamConfig.Enabled {
-		if len(self.SmKamConfig.RALsConns) == 0 {
-			return errors.New("Rater definition is mandatory!")
-		}
-		for _, smKamRaterConn := range self.SmKamConfig.RALsConns {
-			if smKamRaterConn.Address == utils.MetaInternal && !self.RALsEnabled {
-				return errors.New("Rater not enabled but requested by SM-Kamailio component")
+	if self.kamAgentCfg.Enabled {
+		for _, connCfg := range self.kamAgentCfg.SessionSConns {
+			if connCfg.Address != utils.MetaInternal {
+				return errors.New("only <*internal> connectivity allowed in in <kamailio_agent> towards <sessions> for now")
 			}
-		}
-		if len(self.SmKamConfig.CDRsConns) == 0 {
-			return errors.New("Cdrs definition is mandatory!")
-		}
-		for _, smKamCDRSConn := range self.SmKamConfig.CDRsConns {
-			if smKamCDRSConn.Address == utils.MetaInternal && !self.CDRSEnabled {
-				return errors.New("CDRS not enabled but referenced by SM-Kamailio component")
-			}
-		}
-		for _, smKamRLsConn := range self.SmKamConfig.RLsConns {
-			if smKamRLsConn.Address == utils.MetaInternal && !self.resourceSCfg.Enabled {
-				return errors.New("RLs not enabled but requested by SM-Kamailio component")
+			if connCfg.Address == utils.MetaInternal &&
+				!self.sessionSCfg.Enabled {
+				return errors.New("<sessions> not enabled but referenced by <kamailio_agent>")
 			}
 		}
 	}
@@ -715,7 +703,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return err
 	}
 
-	jsnSmKamCfg, err := jsnCfg.SmKamJsonCfg()
+	jsnKamAgentCfg, err := jsnCfg.KamAgentJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -1187,8 +1175,8 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 	}
 
-	if jsnSmKamCfg != nil {
-		if err := self.SmKamConfig.loadFromJsonCfg(jsnSmKamCfg); err != nil {
+	if jsnKamAgentCfg != nil {
+		if err := self.kamAgentCfg.loadFromJsonCfg(jsnKamAgentCfg); err != nil {
 			return err
 		}
 	}
@@ -1349,6 +1337,10 @@ func (cfg *CGRConfig) SessionSCfg() *SessionSCfg {
 
 func (self *CGRConfig) FsAgentCfg() *FsAgentConfig {
 	return self.fsAgentCfg
+}
+
+func (self *CGRConfig) KamAgentCfg() *KamAgentCfg {
+	return self.kamAgentCfg
 }
 
 // ToDo: fix locking here

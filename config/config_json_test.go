@@ -541,22 +541,14 @@ func TestFsAgentJsonCfg(t *testing.T) {
 	}
 }
 
-func TestSmKamJsonCfg(t *testing.T) {
-	eCfg := &SmKamJsonCfg{
+func TestKamAgentJsonCfg(t *testing.T) {
+	eCfg := &KamAgentJsonCfg{
 		Enabled: utils.BoolPointer(false),
-		Rals_conns: &[]*HaPoolJsonCfg{
+		Sessions_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
-		Cdrs_conns: &[]*HaPoolJsonCfg{
-			&HaPoolJsonCfg{
-				Address: utils.StringPointer(utils.MetaInternal),
-			}},
-		Resources_conns:   &[]*HaPoolJsonCfg{},
-		Create_cdr:        utils.BoolPointer(false),
-		Debit_interval:    utils.StringPointer("10s"),
-		Min_call_duration: utils.StringPointer("0s"),
-		Max_call_duration: utils.StringPointer("3h"),
+		Create_cdr: utils.BoolPointer(false),
 		Evapi_conns: &[]*KamConnJsonCfg{
 			&KamConnJsonCfg{
 				Address:    utils.StringPointer("127.0.0.1:8448"),
@@ -564,7 +556,7 @@ func TestSmKamJsonCfg(t *testing.T) {
 			},
 		},
 	}
-	if cfg, err := dfCgrJsonCfg.SmKamJsonCfg(); err != nil {
+	if cfg, err := dfCgrJsonCfg.KamAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expecting: %s, received: %s: ",
