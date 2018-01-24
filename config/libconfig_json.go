@@ -269,16 +269,11 @@ type CacheParamJsonCfg struct {
 type CacheJsonCfg map[string]*CacheParamJsonCfg
 
 // SM-Kamailio config section
-type SmKamJsonCfg struct {
-	Enabled           *bool
-	Rals_conns        *[]*HaPoolJsonCfg
-	Cdrs_conns        *[]*HaPoolJsonCfg
-	Resources_conns   *[]*HaPoolJsonCfg
-	Create_cdr        *bool
-	Debit_interval    *string
-	Min_call_duration *string
-	Max_call_duration *string
-	Evapi_conns       *[]*KamConnJsonCfg
+type KamAgentJsonCfg struct {
+	Enabled        *bool
+	Sessions_conns *[]*HaPoolJsonCfg
+	Create_cdr     *bool
+	Evapi_conns    *[]*KamConnJsonCfg
 }
 
 // Represents one connection instance towards Kamailio

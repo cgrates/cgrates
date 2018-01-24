@@ -334,19 +334,12 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"sm_kamailio": {
+"kamailio_agent": {
 	"enabled": false,						// starts SessionManager service: <true|false>
-	"rals_conns": [
-		{"address": "*internal"}			// address where to reach the Rater <""|*internal|127.0.0.1:2013>
+	"sessions_conns": [
+		{"address": "*internal"}			// connection towards session service: <*internal>
 	],
-	"cdrs_conns": [
-		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
-	],
-	"resources_conns": [],					// address where to reach the ResourceLimiter service, empty to disable functionality: <""|*internal|x.y.z.y:1234>
 	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
-	"debit_interval": "10s",				// interval to perform debits on.
-	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
-	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
 	"evapi_conns":[							// instantiate connections to multiple Kamailio servers
 		{"address": "127.0.0.1:8448", "reconnects": 5}
 	],
