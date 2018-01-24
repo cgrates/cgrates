@@ -64,6 +64,7 @@ var (
 	scheduledShutdown = flag.String("scheduled_shutdown", "", "shutdown the engine after this duration")
 	singlecpu         = flag.Bool("singlecpu", false, "Run on single CPU core")
 	syslogger         = flag.String("logger", "", "logger <*syslog|*stdout>")
+	nodeID            = flag.String("node_id", "", "The ID of the engine")
 	logLevel          = flag.Int("log_level", -1, "Log level (0-emergency to 7-debug)")
 
 	cfg *config.CGRConfig
@@ -808,6 +809,9 @@ func main() {
 		log.Fatalf("Could not parse config: <%s>", err.Error())
 		return
 	}
+	if *nodeID != "" {
+		cfg.NodeID = *nodeID
+	}
 	config.SetCgrConfig(cfg)       // Share the config object
 	cache.NewCache(cfg.CacheCfg()) // init cache
 	// init syslog
@@ -820,7 +824,6 @@ func main() {
 		lgLevel = *logLevel
 	}
 	utils.Logger.SetLogLevel(lgLevel)
-
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
 	var dm *engine.DataManager
