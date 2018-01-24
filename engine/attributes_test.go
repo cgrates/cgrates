@@ -97,7 +97,7 @@ func TestAttributePopulateAttrService(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "attributeprofile4",
 			Contexts:  []string{context},
-			FilterIDs: []string{"dest1"},
+			FilterIDs: []string{"defaultf1"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     cloneExpTime,
@@ -141,7 +141,7 @@ func TestAttributePopulateAttrService(t *testing.T) {
 	filter1 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter1", RequestFilters: filters1}
 	filter2 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter2", RequestFilters: filters2}
 	preffilter1 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "preffilter1", RequestFilters: preffilter}
-	defaultf1 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "dest1", RequestFilters: defaultf}
+	defaultf1 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "defaultf1", RequestFilters: defaultf}
 	dmAtr.SetFilter(filter1)
 	dmAtr.SetFilter(filter2)
 	dmAtr.SetFilter(preffilter1)
