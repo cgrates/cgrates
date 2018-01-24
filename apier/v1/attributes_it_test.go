@@ -52,10 +52,10 @@ var sTestsAlsPrf = []func(t *testing.T){
 	testAttributeSLoadFromFolder,
 	testAttributeSGetAttributeForEvent,
 	testAttributeSProcessEvent,
-	// testAttributeSGetAlsPrfBeforeSet,
-	// testAttributeSSetAlsPrf,
-	// testAttributeSUpdateAlsPrf,
-	// testAttributeSRemAlsPrf,
+	testAttributeSGetAlsPrfBeforeSet,
+	testAttributeSSetAlsPrf,
+	testAttributeSUpdateAlsPrf,
+	testAttributeSRemAlsPrf,
 	testAttributeSKillEngine,
 }
 
