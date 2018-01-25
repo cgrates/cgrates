@@ -40,19 +40,19 @@ func TestPopulateAttrService(t *testing.T) {
 	data, _ := NewMapStorage()
 	dmAtr = NewDataManager(data)
 	context := utils.MetaRating
-	attrMap := make(map[string]map[string]*Attribute)
-	attrMap["FL1"] = make(map[string]*Attribute)
-	attrMap["FL1"]["In1"] = &Attribute{
-		FieldName:  "FL1",
-		Initial:    "In1",
-		Substitute: "Al1",
-		Append:     true,
-	}
 	//Need clone because time.Now add extra information and DeepEqual don't like
 	var cloneExpTime time.Time
 	expTime := time.Now().Add(time.Duration(20 * time.Minute))
 	if err := utils.Clone(expTime, &cloneExpTime); err != nil {
 		t.Error(err)
+	}
+	mapSubstitutes := make(map[string]map[interface{}]*Attribute)
+	mapSubstitutes["FL1"] = make(map[interface{}]*Attribute)
+	mapSubstitutes["FL1"]["In1"] = &Attribute{
+		FieldName:  "FL1",
+		Initial:    "In1",
+		Substitute: "Al1",
+		Append:     true,
 	}
 	atrPs = AttributeProfiles{
 		&AttributeProfile{
@@ -64,8 +64,16 @@ func TestPopulateAttrService(t *testing.T) {
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     cloneExpTime,
 			},
-			Attributes: attrMap,
+			Attributes: []*Attribute{
+				&Attribute{
+					FieldName:  "FL1",
+					Initial:    "In1",
+					Substitute: "Al1",
+					Append:     true,
+				},
+			},
 			Weight:     20,
+			attributes: mapSubstitutes,
 		},
 		&AttributeProfile{
 			Tenant:    "cgrates.org",
@@ -76,8 +84,16 @@ func TestPopulateAttrService(t *testing.T) {
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     cloneExpTime,
 			},
-			Attributes: attrMap,
+			Attributes: []*Attribute{
+				&Attribute{
+					FieldName:  "FL1",
+					Initial:    "In1",
+					Substitute: "Al1",
+					Append:     true,
+				},
+			},
 			Weight:     20,
+			attributes: mapSubstitutes,
 		},
 	}
 	x, err := NewRequestFilter(MetaString, "attributeprofile1", []string{"Attribute"})
@@ -145,7 +161,7 @@ func TestAttributeMatchingAttributeProfilesForEvent(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(atrPs[0], atrpl[0]) && !reflect.DeepEqual(atrPs[0], atrpl[1]) {
-		t.Errorf("Expecting: %+v, received: %+v ", atrPs[0], atrpl[0])
+		t.Errorf("Expecting: %+v, received: %+v ", utils.ToJSON(atrPs[0]), utils.ToJSON(atrpl[0]))
 	} else if !reflect.DeepEqual(atrPs[1], atrpl[1]) && !reflect.DeepEqual(atrPs[1], atrpl[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(atrPs), utils.ToJSON(atrpl))
 	}
@@ -168,7 +184,7 @@ func TestAttributeProfileForEvent(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(atrPs[0], atrpl) && !reflect.DeepEqual(atrPs[1], atrpl) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(atrPs[0]), utils.ToJSON(atrpl))
+		t.Errorf("Expecting: %+v, received: %+v", atrPs[0], atrpl)
 	}
 }
 

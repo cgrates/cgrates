@@ -1175,9 +1175,9 @@ func TestAPItoAttributeProfile(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	attrMap := make(map[string]map[string]*Attribute)
-	attrMap["FL1"] = make(map[string]*Attribute)
-	attrMap["FL1"]["In1"] = &Attribute{
+	mapSubstitutes := make(map[string]map[interface{}]*Attribute)
+	mapSubstitutes["FL1"] = make(map[interface{}]*Attribute)
+	mapSubstitutes["FL1"]["In1"] = &Attribute{
 		FieldName:  "FL1",
 		Initial:    "In1",
 		Substitute: "Al1",
@@ -1191,8 +1191,16 @@ func TestAPItoAttributeProfile(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
-		Attributes: attrMap,
+		Attributes: []*Attribute{
+			&Attribute{
+				FieldName:  "FL1",
+				Initial:    "In1",
+				Substitute: "Al1",
+				Append:     true,
+			},
+		},
 		Weight:     20,
+		attributes: mapSubstitutes,
 	}
 	if rcv, err := APItoAttributeProfile(tpAlsPrf, "UTC"); err != nil {
 		t.Error(err)

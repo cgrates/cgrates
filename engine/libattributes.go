@@ -26,8 +26,8 @@ import (
 
 type Attribute struct {
 	FieldName  string
-	Initial    string
-	Substitute string
+	Initial    interface{}
+	Substitute interface{}
 	Append     bool
 }
 
@@ -36,8 +36,9 @@ type AttributeProfile struct {
 	ID                 string
 	Contexts           []string // bind this AttributeProfile to multiple contexts
 	FilterIDs          []string
-	ActivationInterval *utils.ActivationInterval        // Activation interval
-	Attributes         map[string]map[string]*Attribute // map[FieldName][InitialValue]*Attribute
+	ActivationInterval *utils.ActivationInterval             // Activation interval
+	attributes         map[string]map[interface{}]*Attribute // map[FieldName][InitialValue]*Attribute
+	Attributes         []*Attribute
 	Weight             float64
 }
 
@@ -51,54 +52,4 @@ type AttributeProfiles []*AttributeProfile
 // Sort is part of sort interface, sort based on Weight
 func (aps AttributeProfiles) Sort() {
 	sort.Slice(aps, func(i, j int) bool { return aps[i].Weight > aps[j].Weight })
-}
-
-type ExternalAttributeProfile struct {
-	Tenant             string
-	ID                 string
-	Contexts           []string // bind this AttributeProfile to multiple context
-	FilterIDs          []string
-	ActivationInterval *utils.ActivationInterval // Activation interval
-	Attributes         []*Attribute
-	Weight             float64
-}
-
-func (eap *ExternalAttributeProfile) AsAttributeProfile() *AttributeProfile {
-	alsPrf := &AttributeProfile{
-		Tenant:             eap.Tenant,
-		ID:                 eap.ID,
-		Contexts:           eap.Contexts,
-		FilterIDs:          eap.FilterIDs,
-		ActivationInterval: eap.ActivationInterval,
-		Weight:             eap.Weight,
-	}
-	alsMap := make(map[string]map[string]*Attribute)
-	for _, als := range eap.Attributes {
-		alsMap[als.FieldName] = make(map[string]*Attribute)
-		alsMap[als.FieldName][als.Initial] = als
-	}
-	alsPrf.Attributes = alsMap
-	return alsPrf
-}
-
-func NewExternalAttributeProfileFromAttributeProfile(alsPrf *AttributeProfile) *ExternalAttributeProfile {
-	extals := &ExternalAttributeProfile{
-		Tenant:             alsPrf.Tenant,
-		ID:                 alsPrf.ID,
-		Contexts:           alsPrf.Contexts,
-		ActivationInterval: alsPrf.ActivationInterval,
-		FilterIDs:          alsPrf.FilterIDs,
-		Weight:             alsPrf.Weight,
-	}
-	for key, val := range alsPrf.Attributes {
-		for key2, val2 := range val {
-			extals.Attributes = append(extals.Attributes, &Attribute{
-				FieldName:  key,
-				Initial:    key2,
-				Substitute: val2.Substitute,
-				Append:     val2.Append,
-			})
-		}
-	}
-	return extals
 }
