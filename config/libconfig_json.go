@@ -214,7 +214,7 @@ type SessionSJsonCfg struct {
 	Client_protocol           *float64
 }
 
-// SM-FreeSWITCH config section
+// FreeSWITCHAgent config section
 type FreeswitchAgentJsonCfg struct {
 	Enabled        *bool
 	Sessions_conns *[]*HaPoolJsonCfg

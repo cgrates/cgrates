@@ -177,7 +177,7 @@ CGRateS is capable of four charging modes
 - Asterisk specific communication over ARI and AMI interfaces
 - Bidirectional (subscribing for events as well as sending commands)
 
-2.10.3. SM-FreeSWITCH
+2.10.3. FreeSWITCHAgent
 ~~~~~~~~~~~~~~~~~~~~~
 - FreeSWITCH specific communication interface via ESL
 - Bidirectional (subscribing for events as well as sending commands)
@@ -251,4 +251,3 @@ Packaged together due to common usage
 -------------------------------------
 - Thresholds are monitoring CDRStatS queues and reacting by calling synchronously or asynchronously a set of predefined actions.
 - Various stats metrics can be monitored (min-/max- ASR, ACD, TCD, ACC, TCC, PDD, DDC)
-

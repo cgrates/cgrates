@@ -24,7 +24,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Returns the first cached default value for a SM-FreeSWITCH connection
+// Returns the first cached default value for a FreeSWITCHAgent connection
 func NewDfltHaPoolConfig() *HaPoolConfig {
 	if dfltHaPoolConfig == nil {
 		return new(HaPoolConfig) // No defaults, most probably we are building the defaults now
@@ -56,7 +56,7 @@ func (self *HaPoolConfig) loadFromJsonCfg(jsnCfg *HaPoolJsonCfg) error {
 	return nil
 }
 
-// Returns the first cached default value for a SM-FreeSWITCH connection
+// Returns the first cached default value for a FreeSWITCHAgent connection
 func NewDfltFsConnConfig() *FsConnConfig {
 	if dfltFsConnConfig == nil {
 		return new(FsConnConfig) // No defaults, most probably we are building the defaults now
@@ -272,7 +272,7 @@ func (self *FsAgentConfig) loadFromJsonCfg(jsnCfg *FreeswitchAgentJsonCfg) error
 	return nil
 }
 
-// Returns the first cached default value for a SM-FreeSWITCH connection
+// Returns the first cached default value for a FreeSWITCHAgent connection
 func NewDfltKamConnConfig() *KamConnConfig {
 	if dfltKamConnConfig == nil {
 		return new(KamConnConfig) // No defaults, most probably we are building the defaults now
