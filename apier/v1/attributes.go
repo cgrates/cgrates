@@ -24,7 +24,7 @@ import (
 )
 
 // GetAttributeProfile returns an Attribute Profile
-func (apierV1 *ApierV1) GetAttributeProfile(arg utils.TenantID, reply *engine.ExternalAttributeProfile) error {
+func (apierV1 *ApierV1) GetAttributeProfile(arg utils.TenantID, reply *engine.AttributeProfile) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -34,17 +34,16 @@ func (apierV1 *ApierV1) GetAttributeProfile(arg utils.TenantID, reply *engine.Ex
 		}
 		return err
 	} else {
-		*reply = *engine.NewExternalAttributeProfileFromAttributeProfile(alsPrf)
+		*reply = *alsPrf
 	}
 	return nil
 }
 
 //SetAttributeProfile add/update a new Attribute Profile
-func (apierV1 *ApierV1) SetAttributeProfile(extAls *engine.ExternalAttributeProfile, reply *string) error {
-	if missing := utils.MissingStructFields(extAls, []string{"Tenant", "ID"}); len(missing) != 0 {
+func (apierV1 *ApierV1) SetAttributeProfile(alsPrf *engine.AttributeProfile, reply *string) error {
+	if missing := utils.MissingStructFields(alsPrf, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	alsPrf := extAls.AsAttributeProfile()
 	if err := apierV1.DataManager.SetAttributeProfile(alsPrf, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -90,7 +89,7 @@ func (alSv1 *AttributeSv1) Call(serviceMethod string,
 
 // GetAttributeForEvent  returns matching AttributeProfile for Event
 func (alSv1 *AttributeSv1) GetAttributeForEvent(ev *utils.CGREvent,
-	reply *engine.ExternalAttributeProfile) error {
+	reply *engine.AttributeProfile) error {
 	return alSv1.attrS.V1GetAttributeForEvent(ev, reply)
 }
 

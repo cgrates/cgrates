@@ -1251,7 +1251,7 @@ func testV1FIdxRemoveSupplierProfile(t *testing.T) {
 //AttributeProfile
 func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 	tenant := "cgrates.org"
-	var reply *engine.ExternalAttributeProfile
+	var reply *engine.AttributeProfile
 	filter = &engine.Filter{
 		Tenant: tenant,
 		ID:     "FLTR_1",
@@ -1277,7 +1277,7 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	alsPrf = &engine.ExternalAttributeProfile{
+	alsPrf = &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ApierTest",
 		Contexts:  []string{"*rating"},
@@ -1363,7 +1363,7 @@ func testV1FIdxComputeAttributeProfileIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 	tenant := "cgrates.org"
-	var reply *engine.ExternalAttributeProfile
+	var reply *engine.AttributeProfile
 	filter = &engine.Filter{
 		Tenant: tenant,
 		ID:     "FLTR_2",
@@ -1389,7 +1389,7 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	alsPrf = &engine.ExternalAttributeProfile{
+	alsPrf = &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ApierTest2",
 		Contexts:  []string{"*rating"},
@@ -1504,7 +1504,7 @@ func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	var reply *engine.ExternalAttributeProfile
+	var reply *engine.AttributeProfile
 	if err := tFIdxRpc.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: tenant, ID: "ApierTest2"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
