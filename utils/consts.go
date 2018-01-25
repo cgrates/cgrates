@@ -90,6 +90,7 @@ const (
 	POSTGRES                      = "postgres"
 	MYSQL                         = "mysql"
 	MONGO                         = "mongo"
+	DataManager                   = "DataManager"
 	REDIS                         = "redis"
 	MAPSTOR                       = "mapstor"
 	LOCALHOST                     = "127.0.0.1"

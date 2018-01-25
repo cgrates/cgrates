@@ -147,7 +147,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		utils.FilterPrefix,
 		utils.SupplierProfilePrefix,
 		utils.AttributeProfilePrefix}, prfx) {
-		return utils.NewCGRError(utils.MONGO,
+		return utils.NewCGRError(utils.DataManager,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
 			fmt.Sprintf("prefix <%s> is not a supported cache prefix", prfx))
@@ -155,7 +155,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 	if ids == nil {
 		keyIDs, err := dm.DataDB().GetKeysForPrefix(prfx)
 		if err != nil {
-			return utils.NewCGRError(utils.MONGO,
+			return utils.NewCGRError(utils.DataManager,
 				utils.ServerErrorCaps,
 				err.Error(),
 				fmt.Sprintf("DataManager error <%s> querying keys for prefix: <%s>", err.Error(), prfx))
@@ -240,10 +240,10 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.GetAttributeProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		}
 		if err != nil {
-			return utils.NewCGRError(utils.MONGO,
+			return utils.NewCGRError(utils.DataManager,
 				utils.ServerErrorCaps,
 				err.Error(),
-				fmt.Sprintf("error <%s> querying mongo for category: <%s>, dataID: <%s>", err.Error(), prfx, dataID))
+				fmt.Sprintf("error <%s> querying DataManager for category: <%s>, dataID: <%s>", err.Error(), prfx, dataID))
 		}
 	}
 	return
