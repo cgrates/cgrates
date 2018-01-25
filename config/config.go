@@ -511,7 +511,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 			if connCfg.Address == utils.MetaInternal &&
 				!self.sessionSCfg.Enabled {
-				return errors.New("SMGeneric not enabled but referenced by SM-FreeSWITCH")
+				return errors.New("SMGeneric not enabled but referenced by FreeSWITCHAgent")
 			}
 		}
 	}

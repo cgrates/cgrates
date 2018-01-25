@@ -898,7 +898,7 @@ func main() {
 		go startSessionS(internalSMGChan, internalRaterChan, internalRsChan,
 			internalSupplierSChan, internalAttributeSChan, internalCdrSChan, server, exitChan)
 	}
-	// Start SM-FreeSWITCH
+	// Start FreeSWITCHAgent
 	if cfg.FsAgentCfg().Enabled {
 		go startFsAgent(internalSMGChan, exitChan)
 		// close all sessions on shutdown
