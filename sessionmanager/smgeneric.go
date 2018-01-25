@@ -261,7 +261,7 @@ func (smg *SMGeneric) indexSession(s *SMGSession, passiveSessions bool) {
 			if err == utils.ErrNotFound {
 				fieldVal = utils.NOT_AVAILABLE
 			} else {
-				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Error retrieving field: %s from event: %+v", fieldName, s.EventStart))
+				utils.Logger.Err(fmt.Sprintf("<%s> Error retrieving field: %s from event: %+v", utils.SessionS, fieldName, s.EventStart))
 				continue
 			}
 		}
@@ -410,7 +410,7 @@ func (smg *SMGeneric) sessionStart(evStart SMGenericEvent,
 				rals: smg.rals, cdrsrv: smg.cdrsrv,
 				CD: sessionRun.CallDescriptor, clntConn: clntConn}
 			smg.recordASession(s)
-			//utils.Logger.Info(fmt.Sprintf("<SMGeneric> Starting session: %s, runId: %s", sessionId, s.runId))
+			//utils.Logger.Info(fmt.Sprintf("<%s> Starting session: %s, runId: %s",utils.SessionS, sessionId, s.runId))
 			if smg.cgrCfg.SessionSCfg().DebitInterval != 0 {
 				s.stopDebit = stopDebitChan
 				go s.debitLoop(smg.cgrCfg.SessionSCfg().DebitInterval)
@@ -443,15 +443,15 @@ func (smg *SMGeneric) sessionEnd(cgrID string, usage time.Duration) error {
 			}
 			aTime, err := s.EventStart.GetAnswerTime(utils.META_DEFAULT, smg.Timezone)
 			if err != nil || aTime.IsZero() {
-				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not retrieve answer time for session: %s, runId: %s, aTime: %+v, error: %v",
-					cgrID, s.RunID, aTime, err))
+				utils.Logger.Err(fmt.Sprintf("<%s> Could not retrieve answer time for session: %s, runId: %s, aTime: %+v, error: %v",
+					utils.SessionS, cgrID, s.RunID, aTime, err))
 				continue // Unanswered session
 			}
 			if err := s.close(usage); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not close session: %s, runId: %s, error: %s", cgrID, s.RunID, err.Error()))
+				utils.Logger.Err(fmt.Sprintf("<%s> Could not close session: %s, runId: %s, error: %s", utils.SessionS, cgrID, s.RunID, err.Error()))
 			}
 			if err := s.storeSMCost(); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not save session: %s, runId: %s, error: %s", cgrID, s.RunID, err.Error()))
+				utils.Logger.Err(fmt.Sprintf("<%s> Could not save session: %s, runId: %s, error: %s", utils.SessionS, cgrID, s.RunID, err.Error()))
 			}
 		}
 		return nil, nil
@@ -768,7 +768,7 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 	aSessions := smg.getSessions(cgrID, false)
 	if len(aSessions) == 0 {
 		if aSessions = smg.passiveToActive(cgrID); len(aSessions) == 0 {
-			utils.Logger.Err(fmt.Sprintf("<SMGeneric> SessionUpdate with no active sessions for event: <%s>", cgrID))
+			utils.Logger.Err(fmt.Sprintf("<%s> SessionUpdate with no active sessions for event: <%s>", utils.SessionS, cgrID))
 			err = rpcclient.ErrSessionNotFound
 			return
 		}
@@ -839,7 +839,7 @@ func (smg *SMGeneric) TerminateSession(gev SMGenericEvent, clnt rpcclient.RpcCli
 		aSessions := smg.getSessions(sessionID, false)
 		if len(aSessions) == 0 {
 			if aSessions = smg.passiveToActive(cgrID); len(aSessions) == 0 {
-				utils.Logger.Err(fmt.Sprintf("<SMGeneric> SessionTerminate with no active sessions for cgrID: <%s>", cgrID))
+				utils.Logger.Err(fmt.Sprintf("<%s> SessionTerminate with no active sessions for cgrID: <%s>", utils.SessionS, cgrID))
 				continue
 			}
 		}
@@ -878,7 +878,7 @@ func (smg *SMGeneric) ChargeEvent(gev SMGenericEvent) (maxUsage time.Duration, e
 	for _, sR := range sessionRuns {
 		cc := new(engine.CallCost)
 		if err = smg.rals.Call("Responder.MaxDebit", sR.CallDescriptor, cc); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not Debit CD: %+v, RunID: %s, error: %s", sR.CallDescriptor, sR.DerivedCharger.RunID, err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<%s> Could not Debit CD: %+v, RunID: %s, error: %s", utils.SessionS, sR.CallDescriptor, sR.DerivedCharger.RunID, err.Error()))
 			break
 		}
 		sR.CallCosts = append(sR.CallCosts, cc) // Save it so we can revert on issues
@@ -955,7 +955,7 @@ func (smg *SMGeneric) ChargeEvent(gev SMGenericEvent) (maxUsage time.Duration, e
 		if errStore := smg.cdrsrv.Call("CdrsV1.StoreSMCost", engine.AttrCDRSStoreSMCost{Cost: smCost,
 			CheckDuplicate: true}, &reply); errStore != nil && !strings.HasSuffix(errStore.Error(), utils.ErrExists.Error()) {
 			withErrors = true
-			utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not save CC: %+v, RunID: %s error: %s", cc, sR.DerivedCharger.RunID, errStore.Error()))
+			utils.Logger.Err(fmt.Sprintf("<%s> Could not save CC: %+v, RunID: %s error: %s", utils.SessionS, cc, sR.DerivedCharger.RunID, errStore.Error()))
 		}
 	}
 	if withErrors {

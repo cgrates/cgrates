@@ -472,34 +472,34 @@ func (self *CGRConfig) checkConfigSanity() error {
 	// SMGeneric checks
 	if self.sessionSCfg.Enabled {
 		if len(self.sessionSCfg.RALsConns) == 0 {
-			return errors.New("<SMGeneric> RALs definition is mandatory!")
+			return errors.New("<SessionS> RALs definition is mandatory!")
 		}
 		for _, smgRALsConn := range self.sessionSCfg.RALsConns {
 			if smgRALsConn.Address == utils.MetaInternal && !self.RALsEnabled {
-				return errors.New("<SMGeneric> RALs not enabled but requested by SMGeneric component.")
+				return errors.New("<SessionS> RALs not enabled but requested by SMGeneric component.")
 			}
 		}
 		for _, conn := range self.sessionSCfg.ResSConns {
 			if conn.Address == utils.MetaInternal && !self.resourceSCfg.Enabled {
-				return errors.New("<SMGeneric> ResourceS not enabled but requested by SMGeneric component.")
+				return errors.New("<SessionS> ResourceS not enabled but requested by SMGeneric component.")
 			}
 		}
 		for _, conn := range self.sessionSCfg.SupplSConns {
 			if conn.Address == utils.MetaInternal && !self.supplierSCfg.Enabled {
-				return errors.New("<SMGeneric> SupplierS not enabled but requested by SMGeneric component.")
+				return errors.New("<SessionS> SupplierS not enabled but requested by SMGeneric component.")
 			}
 		}
 		for _, conn := range self.sessionSCfg.AttrSConns {
 			if conn.Address == utils.MetaInternal && !self.attributeSCfg.Enabled {
-				return errors.New("<SMGeneric> AttributeS not enabled but requested by SMGeneric component.")
+				return errors.New("<SessionS> AttributeS not enabled but requested by SMGeneric component.")
 			}
 		}
 		if len(self.sessionSCfg.CDRsConns) == 0 {
-			return errors.New("<SMGeneric> CDRs definition is mandatory!")
+			return errors.New("<SessionS> CDRs definition is mandatory!")
 		}
 		for _, smgCDRSConn := range self.sessionSCfg.CDRsConns {
 			if smgCDRSConn.Address == utils.MetaInternal && !self.CDRSEnabled {
-				return errors.New("<SMGeneric> CDRS not enabled but referenced by SMGeneric component")
+				return errors.New("<SessionS> CDRS not enabled but referenced by SMGeneric component")
 			}
 		}
 	}
