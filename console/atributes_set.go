@@ -24,7 +24,7 @@ func init() {
 	c := &CmdSetAttributes{
 		name:      "attributes_set",
 		rpcMethod: "ApierV1.SetAttributeProfile",
-		rpcParams: &engine.ExternalAttributeProfile{},
+		rpcParams: &engine.AttributeProfile{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -33,7 +33,7 @@ func init() {
 type CmdSetAttributes struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.ExternalAttributeProfile
+	rpcParams *engine.AttributeProfile
 	*CommandExecuter
 }
 
@@ -47,7 +47,7 @@ func (self *CmdSetAttributes) RpcMethod() string {
 
 func (self *CmdSetAttributes) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.ExternalAttributeProfile{}
+		self.rpcParams = &engine.AttributeProfile{}
 	}
 	return self.rpcParams
 }

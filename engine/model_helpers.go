@@ -2773,12 +2773,11 @@ func APItoModelTPAttribute(th *utils.TPAttributeProfile) (mdls TPAttributes) {
 
 func APItoAttributeProfile(tpTH *utils.TPAttributeProfile, timezone string) (th *AttributeProfile, err error) {
 	th = &AttributeProfile{
-		Tenant:     tpTH.Tenant,
-		ID:         tpTH.ID,
-		Weight:     tpTH.Weight,
-		FilterIDs:  []string{},
-		Contexts:   []string{},
-		Attributes: make(map[string]map[string]*Attribute, len(tpTH.Attributes)),
+		Tenant:    tpTH.Tenant,
+		ID:        tpTH.ID,
+		Weight:    tpTH.Weight,
+		FilterIDs: []string{},
+		Contexts:  []string{},
 	}
 	for _, fli := range tpTH.FilterIDs {
 		th.FilterIDs = append(th.FilterIDs, fli)
@@ -2787,10 +2786,15 @@ func APItoAttributeProfile(tpTH *utils.TPAttributeProfile, timezone string) (th 
 		th.Contexts = append(th.Contexts, context)
 	}
 	for _, reqAttr := range tpTH.Attributes {
-		if _, has := th.Attributes[reqAttr.FieldName]; !has {
-			th.Attributes[reqAttr.FieldName] = make(map[string]*Attribute)
-		}
-		th.Attributes[reqAttr.FieldName][reqAttr.Initial] = &Attribute{
+		th.Attributes = append(th.Attributes, &Attribute{
+			Append:     reqAttr.Append,
+			FieldName:  reqAttr.FieldName,
+			Initial:    reqAttr.Initial,
+			Substitute: reqAttr.Substitute,
+		})
+		th.attributes = make(map[string]map[interface{}]*Attribute)
+		th.attributes[reqAttr.FieldName] = make(map[interface{}]*Attribute)
+		th.attributes[reqAttr.FieldName][reqAttr.Initial] = &Attribute{
 			FieldName:  reqAttr.FieldName,
 			Initial:    reqAttr.Initial,
 			Substitute: reqAttr.Substitute,

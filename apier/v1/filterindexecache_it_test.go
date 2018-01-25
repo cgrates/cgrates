@@ -973,7 +973,7 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	alsPrf := &engine.ExternalAttributeProfile{
+	alsPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TEST_PROFILE1",
 		Contexts:  []string{"*rating"},
@@ -1081,7 +1081,7 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	alsPrf := &engine.ExternalAttributeProfile{
+	alsPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TEST_PROFILE1",
 		Contexts:  []string{"*rating"},
@@ -1162,7 +1162,7 @@ func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var reply *engine.ExternalAttributeProfile
+	var reply *engine.AttributeProfile
 	if err := tFIdxCaRpc.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}, &reply); err != nil {
 		t.Error(err)
 	}
@@ -1233,7 +1233,7 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	var sqp *engine.ExternalAttributeProfile
+	var sqp *engine.AttributeProfile
 	//Test the remove
 	if err := tFIdxCaRpc.Call("ApierV1.GetAttributeProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &sqp); err == nil ||

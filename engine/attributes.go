@@ -73,6 +73,7 @@ func (alS *AttributeService) matchingAttributeProfilesForEvent(ev *utils.CGREven
 	lockIDs := utils.PrefixSliceItems(aPrflIDs.Slice(), utils.AttributeFilterIndexes)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
+	//utils.Logger.Debug(fmt.Sprintf("ID %+v", aPrflIDs))
 	for apID := range aPrflIDs {
 		aPrfl, err := alS.dm.GetAttributeProfile(ev.Tenant, apID, false, utils.NonTransactional)
 		if err != nil {
@@ -105,6 +106,7 @@ func (alS *AttributeService) matchingAttributeProfilesForEvent(ev *utils.CGREven
 		i++
 	}
 	aPrfls.Sort()
+	utils.Logger.Debug(fmt.Sprintf("aPrfls %+v", utils.ToJSON(aPrfls)))
 	return
 }
 
@@ -150,7 +152,7 @@ func (alS *AttributeService) processEvent(ev *utils.CGREvent) (rply *AttrSProces
 		return nil, err
 	}
 	rply = &AttrSProcessEventReply{MatchedProfile: attrPrf.ID, CGREvent: ev.Clone()}
-	for fldName, intialMp := range attrPrf.Attributes {
+	for fldName, intialMp := range attrPrf.attributes {
 		initEvValIf, has := ev.Event[fldName]
 		if !has { // we don't have initial in event, try append
 			if anyInitial, has := intialMp[utils.ANY]; has && anyInitial.Append {
@@ -159,14 +161,14 @@ func (alS *AttributeService) processEvent(ev *utils.CGREvent) (rply *AttrSProces
 			}
 			continue
 		}
-		initEvVal, cast := utils.CastFieldIfToString(initEvValIf)
-		if !cast {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> ev: %s, cannot cast field: %+v to string",
-					utils.AttributeS, ev, fldName))
-			continue
-		}
-		attrVal, has := intialMp[initEvVal]
+		// initEvVal, cast := utils.CastFieldIfToString(initEvValIf)
+		// if !cast {
+		// 	utils.Logger.Warning(
+		// 		fmt.Sprintf("<%s> ev: %s, cannot cast field: %+v to string",
+		// 			utils.AttributeS, ev, fldName))
+		// 	continue
+		// }
+		attrVal, has := intialMp[initEvValIf]
 		if !has {
 			attrVal, has = intialMp[utils.ANY]
 		}
@@ -187,7 +189,7 @@ func (alS *AttributeService) processEvent(ev *utils.CGREvent) (rply *AttrSProces
 }
 
 func (alS *AttributeService) V1GetAttributeForEvent(ev *utils.CGREvent,
-	extattrPrf *ExternalAttributeProfile) (err error) {
+	attrPrfl *AttributeProfile) (err error) {
 	attrPrf, err := alS.attributeProfileForEvent(ev)
 	if err != nil {
 		if err != utils.ErrNotFound {
@@ -195,8 +197,7 @@ func (alS *AttributeService) V1GetAttributeForEvent(ev *utils.CGREvent,
 		}
 		return err
 	}
-	eattrPrfl := NewExternalAttributeProfileFromAttributeProfile(attrPrf)
-	*extattrPrf = *eattrPrfl
+	*attrPrfl = *attrPrf
 	return
 }
 

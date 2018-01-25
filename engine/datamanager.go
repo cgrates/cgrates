@@ -1165,6 +1165,16 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, skipCache bool, tr
 		}
 		return nil, err
 	}
+	for _, attr := range alsPrf.Attributes {
+		alsPrf.attributes = make(map[string]map[interface{}]*Attribute)
+		alsPrf.attributes[attr.FieldName] = make(map[interface{}]*Attribute)
+		alsPrf.attributes[attr.FieldName][attr.Initial] = &Attribute{
+			FieldName:  attr.FieldName,
+			Initial:    attr.Initial,
+			Substitute: attr.Substitute,
+			Append:     attr.Append,
+		}
+	}
 	cache.Set(key, alsPrf, cacheCommit(transactionID), transactionID)
 	return
 }
