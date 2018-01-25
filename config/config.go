@@ -131,7 +131,7 @@ func SetCgrConfig(cfg *CGRConfig) {
 func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg := new(CGRConfig)
 	cfg.RALsMaxComputedUsage = make(map[string]time.Duration)
-	cfg.NodeID = utils.GenUUID()
+	cfg.NodeID = utils.UUIDSha1Prefix()
 	cfg.DataFolderPath = "/usr/share/cgrates/"
 	cfg.sessionSCfg = new(SessionSCfg)
 	cfg.cacheConfig = make(CacheConfig)
