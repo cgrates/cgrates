@@ -53,6 +53,11 @@ const (
 	OSIPS_INSUFFICIENT_FUNDS = "INSUFFICIENT_FUNDS"
 	OSIPS_DIALOG_ID          = "dialog_id"
 	OSIPS_SIPCODE            = "sip_code"
+	CGR_SETUPTIME            = "cgr_setuptime"
+	CGR_ANSWERTIME           = "cgr_answertime"
+	CGR_STOPTIME             = "cgr_stoptime"
+	CGR_DURATION             = "cgr_duration"
+	CGR_PDD                  = "cgr_pdd"
 )
 
 func NewOsipsEvent(osipsDagramEvent *osipsdagram.OsipsEvent) (*OsipsEvent, error) {

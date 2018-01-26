@@ -59,11 +59,19 @@ func TestCgrCdrAsCDR(t *testing.T) {
 
 // Make sure the replicated CDR matches the expected CDR
 func TestReplicatedCgrCdrAsCDR(t *testing.T) {
-	cgrCdr := CgrCdr{utils.CGRID: "164b0422fdc6a5117031b427439482c6a4f90e41", utils.TOR: utils.VOICE, utils.OriginID: "dsafdsaf", utils.OriginHost: "192.168.1.1",
-		utils.Source: "internal_test", utils.RequestType: utils.META_RATED,
-		utils.Direction: utils.OUT, utils.Tenant: "cgrates.org", utils.Category: "call",
-		utils.Account: "1001", utils.Subject: "1001", utils.Destination: "1002", utils.SetupTime: "2013-11-07T08:42:20Z", utils.PDD: "0.200", utils.AnswerTime: "2013-11-07T08:42:26Z",
-		utils.Usage: "10s", utils.SUPPLIER: "SUPPL1", utils.DISCONNECT_CAUSE: "NORMAL_CLEARING", utils.COST: "0.12", utils.RATED: "true", "field_extr1": "val_extr1", "fieldextr2": "valextr2"}
+	cgrCdr := CgrCdr{utils.CGRID: "164b0422fdc6a5117031b427439482c6a4f90e41",
+		utils.TOR: utils.VOICE, utils.OriginID: "dsafdsaf",
+		utils.OriginHost:  "192.168.1.1",
+		utils.Source:      "internal_test",
+		utils.RequestType: utils.META_RATED,
+		utils.Tenant:      "cgrates.org", utils.Category: "call",
+		utils.Account: "1001", utils.Subject: "1001",
+		utils.Destination: "1002",
+		utils.SetupTime:   "2013-11-07T08:42:20Z",
+		utils.AnswerTime:  "2013-11-07T08:42:26Z",
+		utils.Usage:       "10s", utils.COST: "0.12",
+		utils.RATED: "true", "field_extr1": "val_extr1",
+		"fieldextr2": "valextr2"}
 	expctRtCdr := &CDR{CGRID: cgrCdr[utils.CGRID],
 		ToR:         cgrCdr[utils.TOR],
 		OriginID:    cgrCdr[utils.OriginID],

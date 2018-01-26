@@ -21,15 +21,12 @@ package agents
 import (
 	"errors"
 	"fmt"
-	"reflect"
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
-	"github.com/cgrates/rpcclient"
 )
 
 func NewFSSessionManager(fsAgentConfig *config.FsAgentConfig,
@@ -222,12 +219,6 @@ func (sm *FSSessionManager) onChannelAnswer(fsev FSEvent, connId string) {
 		sm.disconnectSession(connId, chanUUID, "", utils.ErrServerError.Error())
 		return
 	}
-	if initSessionArgs.AllocateResources {
-		if initReply.ResourceAllocation == nil {
-			sm.disconnectSession(connId, chanUUID, "",
-				utils.ErrUnallocatedResource.Error())
-		}
-	}
 }
 
 func (sm *FSSessionManager) onChannelHangupComplete(fsev FSEvent, connId string) {
@@ -241,14 +232,13 @@ func (sm *FSSessionManager) onChannelHangupComplete(fsev FSEvent, connId string)
 			utils.Logger.Err(
 				fmt.Sprintf("<%s> Could not terminate session with event %s, error: %s",
 					utils.FreeSWITCHAgent, fsev.GetUUID(), err.Error()))
-			return
 		}
 	}
 	if sm.cfg.CreateCdr {
 		cdr := fsev.AsCDR(sm.timezone)
 		if err := sm.smg.Call(utils.SessionSv1ProcessCDR, cdr, &reply); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>",
-				utils.FreeSWITCHAgent, cdr.CGRID, cdr.OriginID, err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<%s> Failed processing CDR: %s,  error: <%s>",
+				utils.FreeSWITCHAgent, utils.ToJSON(cdr), err.Error()))
 		}
 	}
 }
@@ -342,30 +332,8 @@ func (sm *FSSessionManager) Shutdown() (err error) {
 }
 
 // rpcclient.RpcClientConnection interface
-func (fsa *FSSessionManager) Call(serviceMethod string, args interface{}, reply interface{}) error {
-	parts := strings.Split(serviceMethod, ".")
-	if len(parts) != 2 {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	// get method
-	method := reflect.ValueOf(fsa).MethodByName(parts[0][len(parts[0])-2:] + parts[1]) // Inherit the version in the method
-	if !method.IsValid() {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	// construct the params
-	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
-	ret := method.Call(params)
-	if len(ret) != 1 {
-		return utils.ErrServerError
-	}
-	if ret[0].Interface() == nil {
-		return nil
-	}
-	err, ok := ret[0].Interface().(error)
-	if !ok {
-		return utils.ErrServerError
-	}
-	return err
+func (sm *FSSessionManager) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	return utils.APIerRPCCall(sm, serviceMethod, args, reply)
 }
 
 // Internal method to disconnect session in asterisk
