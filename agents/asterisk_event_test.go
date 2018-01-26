@@ -377,6 +377,7 @@ func TestSMAEventUpdateFromEvent(t *testing.T) {
 }
 */
 
+//Here
 func TestSMAEventAsSMGenericEvent(t *testing.T) {
 	var ev map[string]interface{}
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
