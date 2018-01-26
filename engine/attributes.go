@@ -73,7 +73,6 @@ func (alS *AttributeService) matchingAttributeProfilesForEvent(ev *utils.CGREven
 	lockIDs := utils.PrefixSliceItems(aPrflIDs.Slice(), utils.AttributeFilterIndexes)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
-	//utils.Logger.Debug(fmt.Sprintf("ID %+v", aPrflIDs))
 	for apID := range aPrflIDs {
 		aPrfl, err := alS.dm.GetAttributeProfile(ev.Tenant, apID, false, utils.NonTransactional)
 		if err != nil {
@@ -106,7 +105,6 @@ func (alS *AttributeService) matchingAttributeProfilesForEvent(ev *utils.CGREven
 		i++
 	}
 	aPrfls.Sort()
-	utils.Logger.Debug(fmt.Sprintf("aPrfls %+v", utils.ToJSON(aPrfls)))
 	return
 }
 

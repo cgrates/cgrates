@@ -477,12 +477,12 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 		}
 	}
 
-	for tenatid, th := range loader.attributeProfiles {
+	for tenatid, attrPrf := range loader.attributeProfiles {
 		rcv, err := loader.dm.GetAttributeProfile(tenatid.Tenant, tenatid.ID, true, utils.NonTransactional)
 		if err != nil {
-			t.Errorf("Failed GetAttributeProfile, tenant: %s, id: %s,  error: %s ", th.Tenant, th.ID, err.Error())
+			t.Errorf("Failed GetAttributeProfile, tenant: %s, id: %s,  error: %s ", attrPrf.Tenant, attrPrf.ID, err.Error())
 		}
-		sts, err := APItoAttributeProfile(th, "UTC")
+		sts, err := APItoAttributeProfile(attrPrf, "UTC")
 		if err != nil {
 			t.Error(err)
 		}
