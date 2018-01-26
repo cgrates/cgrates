@@ -65,6 +65,7 @@ var sTestsITMigrator = []func(t *testing.T){
 	testMigratorSubscribers,
 	testMigratorTimings,
 	testMigratorThreshold,
+	testMigratorAttributeProfile,
 	//TPS
 	testMigratorTPRatingProfile,
 	testMigratorTPSuppliers,
@@ -1777,6 +1778,164 @@ func testMigratorTimings(t *testing.T) {
 		}
 		if !reflect.DeepEqual(tmg, result) {
 			t.Errorf("Expecting: %v, received: %v", tmg, result)
+		}
+	}
+}
+
+func testMigratorAttributeProfile(t *testing.T) {
+	mapSubstitutes := make(map[string]map[string]*v1Attribute)
+	mapSubstitutes["FL1"] = make(map[string]*v1Attribute)
+	mapSubstitutes["FL1"]["In1"] = &v1Attribute{
+		FieldName:  "FL1",
+		Initial:    "In1",
+		Substitute: "Al1",
+		Append:     true,
+	}
+	v1Attribute := &v1AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile1",
+		Contexts:  []string{utils.MetaRating},
+		FilterIDs: []string{"filter1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: mapSubstitutes,
+		Weight:     20,
+	}
+	attrPrf := &engine.AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile1",
+		Contexts:  []string{utils.MetaRating},
+		FilterIDs: []string{"filter1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: []*engine.Attribute{
+			&engine.Attribute{
+				FieldName:  "FL1",
+				Initial:    "In1",
+				Substitute: "Al1",
+				Append:     true,
+			},
+		},
+		Weight: 20,
+	}
+	filterAttr := &engine.Filter{
+		Tenant: attrPrf.Tenant,
+		ID:     attrPrf.FilterIDs[0],
+		RequestFilters: []*engine.RequestFilter{
+			&engine.RequestFilter{
+				FieldName: "Name",
+				Type:      "Type",
+				Values:    []string{"Val1"},
+			},
+		},
+	}
+	switch {
+	case action == utils.REDIS:
+		if err := mig.dmIN.SetFilter(filterAttr); err != nil {
+			t.Error("Error when setting Filter ", err.Error())
+		}
+		if err := mig.dmIN.SetAttributeProfile(attrPrf, true); err != nil {
+			t.Error("Error when setting attributeProfile ", err.Error())
+		}
+		err := mig.oldDataDB.setV1AttributeProfile(v1Attribute)
+		if err != nil {
+			t.Error("Error when setting V1AttributeProfile ", err.Error())
+		}
+		currentVersion := engine.CurrentDataDBVersions()
+		currentVersion[utils.Attributes] = 1
+		err = mig.dmOut.DataDB().SetVersions(currentVersion, false)
+		if err != nil {
+			t.Error("Error when setting version for attributeProfile ", err.Error())
+		}
+		err, _ = mig.Migrate([]string{utils.MetaAttributes})
+		if err != nil {
+			t.Error("Error when migrating AttributeProfile ", err.Error())
+		}
+		result, err := mig.dmOut.GetAttributeProfile(attrPrf.Tenant, attrPrf.ID, true, utils.NonTransactional)
+		if err != nil {
+			t.Error("Error when getting AttributeProfile ", err.Error())
+		}
+		if !reflect.DeepEqual(attrPrf.Tenant, result.Tenant) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.Tenant, result.Tenant)
+		} else if !reflect.DeepEqual(attrPrf.ID, result.ID) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.ID, result.ID)
+		} else if !reflect.DeepEqual(attrPrf.FilterIDs, result.FilterIDs) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.FilterIDs, result.FilterIDs)
+		} else if !reflect.DeepEqual(attrPrf.Contexts, result.Contexts) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.Contexts, result.Contexts)
+		} else if !reflect.DeepEqual(attrPrf.ActivationInterval, result.ActivationInterval) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.ActivationInterval, result.ActivationInterval)
+		} else if !reflect.DeepEqual(attrPrf.Attributes, result.Attributes) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.Attributes, result.Attributes)
+		}
+	case action == utils.MONGO:
+		if err := mig.dmIN.SetAttributeProfile(attrPrf, true); err != nil {
+			t.Error("Error when setting attributeProfile ", err.Error())
+		}
+		err := mig.oldDataDB.setV1AttributeProfile(v1Attribute)
+		if err != nil {
+			t.Error("Error when setting V1AttributeProfile ", err.Error())
+		}
+		currentVersion := engine.CurrentDataDBVersions()
+		currentVersion[utils.Attributes] = 1
+		err = mig.dmOut.DataDB().SetVersions(currentVersion, false)
+		if err != nil {
+			t.Error("Error when setting version for attributeProfile ", err.Error())
+		}
+		err, _ = mig.Migrate([]string{utils.MetaAttributes})
+		if err != nil {
+			t.Error("Error when migrating attributeProfile ", err.Error())
+		}
+		result, err := mig.dmOut.GetAttributeProfile("cgrates.org", attrPrf.ID, true, utils.NonTransactional)
+		if err != nil {
+			t.Error("Error when getting attributeProfile ", err.Error())
+		}
+		if !reflect.DeepEqual(attrPrf.Tenant, result.Tenant) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.Tenant, result.Tenant)
+		} else if !reflect.DeepEqual(attrPrf.ID, result.ID) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.ID, result.ID)
+		} else if !reflect.DeepEqual(attrPrf.FilterIDs, result.FilterIDs) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.FilterIDs, result.FilterIDs)
+		} else if !reflect.DeepEqual(attrPrf.Contexts, result.Contexts) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.Contexts, result.Contexts)
+		} else if !reflect.DeepEqual(attrPrf.ActivationInterval, result.ActivationInterval) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.ActivationInterval, result.ActivationInterval)
+		} else if !reflect.DeepEqual(attrPrf.Attributes, result.Attributes) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.Attributes, result.Attributes)
+		}
+	case action == Move:
+		if err := mig.dmIN.SetAttributeProfile(attrPrf, true); err != nil {
+			t.Error("Error when setting AttributeProfile ", err.Error())
+		}
+		currentVersion := engine.CurrentDataDBVersions()
+		err := mig.dmOut.DataDB().SetVersions(currentVersion, false)
+		if err != nil {
+			t.Error("Error when setting version for stats ", err.Error())
+		}
+		err, _ = mig.Migrate([]string{utils.MetaAttributes})
+		if err != nil {
+			t.Error("Error when migrating AttributeProfile ", err.Error())
+		}
+		result, err := mig.dmOut.GetAttributeProfile(attrPrf.Tenant, attrPrf.ID, true, utils.NonTransactional)
+		if err != nil {
+			t.Error("Error when getting Stats ", err.Error())
+		}
+		if !reflect.DeepEqual(attrPrf.Tenant, result.Tenant) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.Tenant, result.Tenant)
+		} else if !reflect.DeepEqual(attrPrf.ID, result.ID) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.ID, result.ID)
+		} else if !reflect.DeepEqual(attrPrf.FilterIDs, result.FilterIDs) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.FilterIDs, result.FilterIDs)
+		} else if !reflect.DeepEqual(attrPrf.Contexts, result.Contexts) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.Contexts, result.Contexts)
+		} else if !reflect.DeepEqual(attrPrf.ActivationInterval, result.ActivationInterval) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.ActivationInterval, result.ActivationInterval)
+		} else if !reflect.DeepEqual(attrPrf.Attributes, result.Attributes) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.Attributes, result.Attributes)
 		}
 	}
 }
