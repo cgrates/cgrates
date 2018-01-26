@@ -159,13 +159,6 @@ func (alS *AttributeService) processEvent(ev *utils.CGREvent) (rply *AttrSProces
 			}
 			continue
 		}
-		// initEvVal, cast := utils.CastFieldIfToString(initEvValIf)
-		// if !cast {
-		// 	utils.Logger.Warning(
-		// 		fmt.Sprintf("<%s> ev: %s, cannot cast field: %+v to string",
-		// 			utils.AttributeS, ev, fldName))
-		// 	continue
-		// }
 		attrVal, has := intialMp[initEvValIf]
 		if !has {
 			attrVal, has = intialMp[utils.ANY]

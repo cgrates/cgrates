@@ -225,8 +225,8 @@ func testAttributeSProcessEvent(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRply, &rplyEv) &&
 		!reflect.DeepEqual(eRply2, &rplyEv) { // second for reversed order of attributes
-		t.Errorf("Expecting: %s, Expecting: %s, received: %s",
-			utils.ToJSON(eRply), utils.ToJSON(eRply2), utils.ToJSON(rplyEv))
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
 	}
 }
 
