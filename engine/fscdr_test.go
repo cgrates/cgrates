@@ -525,3 +525,16 @@ func TestFsCdrDDazRSRExtraFields(t *testing.T) {
 		t.Errorf("Unexpected effective_caller_id_number received: %+v", extraFields["effective_caller_id_number"])
 	}
 }
+
+func TestFsCdrFirstDefined(t *testing.T) {
+	fsCdr, _ := NewFSCdr(body, fsCdrCfg)
+	value := fsCdr.firstDefined([]string{utils.CGR_SUBJECT, utils.CGR_ACCOUNT, FS_USERNAME}, FsUsername)
+	if value != "1001" {
+		t.Errorf("Expecting: 1001, received: %s", value)
+	}
+	value = fsCdr.firstDefined([]string{utils.CGR_ACCOUNT, FS_USERNAME}, FsUsername)
+	if value != "1001" {
+		t.Errorf("Expecting: 1001, received: %s", value)
+	}
+
+}
