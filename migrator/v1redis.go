@@ -459,3 +459,45 @@ func (v1rs *v1Redis) setV2ActionTrigger(x *v2ActionTrigger) (err error) {
 	}
 	return
 }
+
+//AttributeProfile methods
+//get
+func (v1rs *v1Redis) getV1AttributeProfile() (v1attrPrf *v1AttributeProfile, err error) {
+	var v1attr *v1AttributeProfile
+	if v1rs.qryIdx == nil {
+		v1rs.dataKeys, err = v1rs.getKeysForPrefix(utils.AttributeProfilePrefix)
+		if err != nil {
+			return
+		} else if len(v1rs.dataKeys) == 0 {
+			return nil, utils.ErrNotFound
+		}
+		v1rs.qryIdx = utils.IntPointer(0)
+	}
+	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
+		strVal, err := v1rs.cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
+		if err != nil {
+			return nil, err
+		}
+		if err := v1rs.ms.Unmarshal(strVal, &v1attr); err != nil {
+			return nil, err
+		}
+		*v1rs.qryIdx = *v1rs.qryIdx + 1
+	} else {
+		v1rs.qryIdx = nil
+		return nil, utils.ErrNoMoreData
+	}
+	return v1attr, nil
+}
+
+//set
+func (v1rs *v1Redis) setV1AttributeProfile(x *v1AttributeProfile) (err error) {
+	key := utils.AttributeProfilePrefix + utils.ConcatenatedKey(x.Tenant, x.ID)
+	bit, err := v1rs.ms.Marshal(x)
+	if err != nil {
+		return err
+	}
+	if err = v1rs.cmd("SET", key, bit).Err; err != nil {
+		return err
+	}
+	return
+}
