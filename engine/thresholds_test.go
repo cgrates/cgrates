@@ -58,6 +58,13 @@ func TestThresholdsPopulateThresholdService(t *testing.T) {
 	var preffilter []*RequestFilter
 	var defaultf []*RequestFilter
 	second := 1 * time.Second
+	thServ = ThresholdService{
+		dm:      dmTH,
+		filterS: &FilterS{dm: dmTH},
+	}
+	ref := NewReqFilterIndexer(dmTH, utils.ThresholdProfilePrefix, "cgrates.org")
+
+	//filter1
 	x, err := NewRequestFilter(MetaString, "Threshold", []string{"ThresholdProfile1"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -73,7 +80,12 @@ func TestThresholdsPopulateThresholdService(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	filters1 = append(filters1, x)
-	x, err = NewRequestFilter(MetaString, "Threshold", []string{"ThresholdProfile1"})
+	filter5 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter5", RequestFilters: filters1}
+	dmTH.SetFilter(filter5)
+	ref.IndexTPFilter(FilterToTPFilter(filter5), "TEST_PROFILE1")
+
+	//filter2
+	x, err = NewRequestFilter(MetaString, "Threshold", []string{"ThresholdProfile2"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -88,30 +100,28 @@ func TestThresholdsPopulateThresholdService(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	filters2 = append(filters2, x)
+	filter6 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter6", RequestFilters: filters2}
+	dmTH.SetFilter(filter6)
+	ref.IndexTPFilter(FilterToTPFilter(filter6), "TEST_PROFILE2")
+	//prefix filter
 	x, err = NewRequestFilter(MetaPrefix, "Threshold", []string{"ThresholdProfilePrefix"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	preffilter = append(preffilter, x)
+	preffilter3 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "preffilter3", RequestFilters: preffilter}
+	dmTH.SetFilter(preffilter3)
+	ref.IndexTPFilter(FilterToTPFilter(preffilter3), "TEST_PROFILE3")
+	//default filter
 	x, err = NewRequestFilter(MetaGreaterOrEqual, "Weight", []string{"200.00"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	defaultf = append(defaultf, x)
-	filter5 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter5", RequestFilters: filters1}
-	filter6 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter6", RequestFilters: filters2}
-	preffilter3 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "preffilter3", RequestFilters: preffilter}
 	defaultf3 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "defaultf3", RequestFilters: defaultf}
-	dmTH.SetFilter(filter5)
-	dmTH.SetFilter(filter6)
-	dmTH.SetFilter(preffilter3)
 	dmTH.SetFilter(defaultf3)
-	thServ = ThresholdService{
-		dm:                  dmTH,
-		filterS:             &FilterS{dm: dmspl},
-		stringIndexedFields: nil,
-		prefixIndexedFields: nil,
-	}
+	ref.IndexTPFilter(FilterToTPFilter(defaultf3), "TEST_PROFILE4")
+
 	tPrfl := []*ThresholdProfile{
 		&ThresholdProfile{
 			Tenant:    "cgrates.org",
@@ -178,11 +188,6 @@ func TestThresholdsPopulateThresholdService(t *testing.T) {
 			t.Errorf("Error: %+v", err)
 		}
 	}
-	ref := NewReqFilterIndexer(dmTH, utils.ThresholdProfilePrefix, "cgrates.org")
-	ref.IndexTPFilter(FilterToTPFilter(filter5), "TEST_PROFILE1")
-	ref.IndexTPFilter(FilterToTPFilter(filter6), "TEST_PROFILE2")
-	ref.IndexTPFilter(FilterToTPFilter(preffilter3), "TEST_PROFILE3")
-	ref.IndexTPFilter(FilterToTPFilter(defaultf3), "TEST_PROFILE4")
 	err = ref.StoreIndexes()
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -194,7 +199,7 @@ func TestThresholdsPopulateThresholdService(t *testing.T) {
 // 		Tenant: "cgrates.org",
 // 		ID:     "utils.CGREvent1",
 // 		Event: map[string]interface{}{
-// 			"Threshold":       "ThresholdProfile1",
+// 			"Threshold":      "ThresholdProfile1",
 // 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 // 			"UsageInterval":  "1s",
 // 			"PddInterval":    "1s",
@@ -206,9 +211,9 @@ func TestThresholdsPopulateThresholdService(t *testing.T) {
 // 	if err != nil {
 // 		t.Errorf("Error: %+v", err)
 // 	}
-// 	if !reflect.DeepEqual(sprsmatch, sprf) {
-// 		t.Errorf("Expecting: %+v, received: %+v", sprsmatch, sprf)
-// 	}//should not pass atm but still return something other than empty string
+// 	if !reflect.DeepEqual(0, sprf) {
+// 		t.Errorf("Expecting: %+v, received: %+v", 0, sprf)
+// 	} //should not pass atm but still return something other than empty string
 // }
 
 // func TestThresholdsprocessEvent(t *testing.T) {
