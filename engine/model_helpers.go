@@ -2785,6 +2785,7 @@ func APItoAttributeProfile(tpTH *utils.TPAttributeProfile, timezone string) (th 
 	for _, context := range tpTH.Contexts {
 		th.Contexts = append(th.Contexts, context)
 	}
+	th.attributes = make(map[string]map[interface{}]*Attribute)
 	for _, reqAttr := range tpTH.Attributes {
 		th.Attributes = append(th.Attributes, &Attribute{
 			Append:     reqAttr.Append,
@@ -2792,7 +2793,6 @@ func APItoAttributeProfile(tpTH *utils.TPAttributeProfile, timezone string) (th 
 			Initial:    reqAttr.Initial,
 			Substitute: reqAttr.Substitute,
 		})
-		th.attributes = make(map[string]map[interface{}]*Attribute)
 		th.attributes[reqAttr.FieldName] = make(map[interface{}]*Attribute)
 		th.attributes[reqAttr.FieldName][reqAttr.Initial] = &Attribute{
 			FieldName:  reqAttr.FieldName,
