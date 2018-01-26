@@ -376,8 +376,8 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 	ref := NewReqFilterIndexer(dmspl, utils.SupplierProfilePrefix, "cgrates.org")
 	ref.IndexTPFilter(FilterToTPFilter(filter3), "supplierprofile1")
 	ref.IndexTPFilter(FilterToTPFilter(filter4), "supplierprofile2")
-	ref.IndexTPFilter(FilterToTPFilter(filter3), "supplierprofile3")
-	ref.IndexTPFilter(FilterToTPFilter(filter4), "supplierprofile4")
+	ref.IndexTPFilter(FilterToTPFilter(preffilter2), "supplierprofile3")
+	ref.IndexTPFilter(FilterToTPFilter(defaultf2), "supplierprofile4")
 	err = ref.StoreIndexes()
 	if err != nil {
 		t.Errorf("Error: %+v", err)
