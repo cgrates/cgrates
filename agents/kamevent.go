@@ -1,0 +1,282 @@
+/*
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
+
+package agents
+
+import (
+	"encoding/json"
+	"strings"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/utils"
+)
+
+const (
+	EVENT                  = "event"
+	CGR_AUTH_REQUEST       = "CGR_AUTH_REQUEST"
+	CGR_AUTH_REPLY         = "CGR_AUTH_REPLY"
+	CGR_SESSION_DISCONNECT = "CGR_SESSION_DISCONNECT"
+	CGR_CALL_START         = "CGR_CALL_START"
+	CGR_CALL_END           = "CGR_CALL_END"
+	KamTRIndex             = "tr_index"
+	KamTRLabel             = "tr_label"
+	KamHashEntry           = "h_entry"
+	KamHashID              = "h_id"
+	KamCGRSubsystems       = "cgr_subsystems"
+	EvapiConnID            = "EvapiConnID" // used to share connID info in event for remote disconnects
+)
+
+var kamReservedFields = []string{EVENT, KamTRIndex, KamTRLabel,
+	KamHashEntry, KamHashID, KamCGRSubsystems}
+
+func NewKamSessionDisconnect(hEntry, hID, reason string) *KamSessionDisconnect {
+	return &KamSessionDisconnect{
+		Event:     CGR_SESSION_DISCONNECT,
+		HashEntry: hEntry,
+		HashId:    hID,
+		Reason:    reason}
+}
+
+type KamSessionDisconnect struct {
+	Event     string
+	HashEntry string
+	HashId    string
+	Reason    string
+}
+
+func (self *KamSessionDisconnect) String() string {
+	mrsh, _ := json.Marshal(self)
+	return string(mrsh)
+}
+
+// NewKamEvent parses bytes received over the wire from Kamailio into KamEvent
+func NewKamEvent(kamEvData []byte) (KamEvent, error) {
+	kev := make(map[string]string)
+	if err := json.Unmarshal(kamEvData, &kev); err != nil {
+		return nil, err
+	}
+	return kev, nil
+}
+
+// KamEvent represents one event received from Kamailio
+type KamEvent map[string]string
+
+func (kev KamEvent) MissingParameter() bool {
+	switch kev[EVENT] {
+	case CGR_AUTH_REQUEST:
+		return utils.IsSliceMember([]string{
+			kev[KamTRIndex],
+			kev[KamTRLabel],
+			kev[utils.SetupTime],
+			kev[utils.Account],
+			kev[utils.Destination],
+		}, "")
+	case CGR_CALL_START:
+		return utils.IsSliceMember([]string{
+			kev[KamHashEntry],
+			kev[KamHashID],
+			kev[utils.OriginID],
+			kev[utils.AnswerTime],
+			kev[utils.Account],
+			kev[utils.Destination],
+		}, "")
+	case CGR_CALL_END:
+		return utils.IsSliceMember([]string{
+			kev[KamHashEntry],
+			kev[KamHashID],
+			kev[utils.OriginID],
+			kev[utils.AnswerTime],
+			kev[utils.Account],
+			kev[utils.Destination],
+		}, "")
+	default: // no/unsupported event
+		return true
+	}
+
+}
+
+// AsMapStringIface converts KamEvent into event used by other subsystems
+func (kev KamEvent) AsMapStringInterface() (mp map[string]interface{}) {
+	mp = make(map[string]interface{})
+	for k, v := range kev {
+		if !utils.IsSliceMember(kamReservedFields, k) { // reserved attributes not getting into event
+			mp[k] = v
+		}
+	}
+	return
+}
+
+// AsCDR converts KamEvent into CDR
+func (kev KamEvent) AsCDR(timezone string) (cdr *engine.CDR) {
+	cdr = new(engine.CDR)
+	for fld, val := range kev { // first ExtraFields so we can overwrite
+		if !utils.IsSliceMember(utils.PrimaryCdrFields, fld) &&
+			!utils.IsSliceMember(kamReservedFields, fld) {
+			cdr.ExtraFields[fld] = val
+		}
+	}
+	cdr.ToR = utils.VOICE
+	cdr.OriginID = kev[utils.OriginID]
+	cdr.OriginHost = kev[utils.OriginHost]
+	cdr.Source = "KamailioEvent"
+	cdr.RequestType = utils.FirstNonEmpty(kev[utils.RequestType], config.CgrConfig().DefaultReqType)
+	cdr.Tenant = utils.FirstNonEmpty(kev[utils.Tenant], config.CgrConfig().DefaultTenant)
+	cdr.Category = utils.FirstNonEmpty(kev[utils.Category], config.CgrConfig().DefaultCategory)
+	cdr.Account = kev[utils.Account]
+	cdr.Subject = kev[utils.Subject]
+	cdr.Destination = kev[utils.Destination]
+	cdr.SetupTime, _ = utils.ParseTimeDetectLayout(kev[utils.SetupTime], timezone)
+	cdr.AnswerTime, _ = utils.ParseTimeDetectLayout(kev[utils.AnswerTime], timezone)
+	cdr.Usage, _ = utils.ParseDurationWithSecs(kev[utils.Usage])
+	cdr.Cost = -1
+	return cdr
+}
+
+// String is used for pretty printing event in logs
+func (kev KamEvent) String() string {
+	mrsh, _ := json.Marshal(kev)
+	return string(mrsh)
+}
+
+func (kev KamEvent) V1AuthorizeArgs() (args *sessionmanager.V1AuthorizeArgs) {
+	args = &sessionmanager.V1AuthorizeArgs{
+		GetMaxUsage: true,
+		CGREvent: utils.CGREvent{
+			Tenant: utils.FirstNonEmpty(kev[utils.Tenant],
+				config.CgrConfig().DefaultTenant),
+			ID:    utils.UUIDSha1Prefix(),
+			Event: kev.AsMapStringInterface(),
+		},
+	}
+	subsystems, has := kev[KamCGRSubsystems]
+	if !has {
+		return
+	}
+	if strings.Index(subsystems, utils.MetaAccounts) == -1 {
+		args.GetMaxUsage = false
+	}
+	if strings.Index(subsystems, utils.MetaResources) != -1 {
+		args.AuthorizeResources = true
+	}
+	if strings.Index(subsystems, utils.MetaSuppliers) != -1 {
+		args.GetSuppliers = true
+	}
+	if strings.Index(subsystems, utils.MetaAttributes) != -1 {
+		args.GetAttributes = true
+	}
+	return
+}
+
+// AsKamAuthReply builds up a Kamailio AuthReply based on arguments and reply from SessionS
+func (kev KamEvent) AsKamAuthReply(authArgs *sessionmanager.V1AuthorizeArgs,
+	authReply *sessionmanager.V1AuthorizeReply, rplyErr error) (kar *KamAuthReply, err error) {
+	kar = &KamAuthReply{Event: CGR_AUTH_REPLY,
+		TransactionIndex: kev[KamTRIndex],
+		TransactionLabel: kev[KamTRLabel],
+	}
+	if rplyErr != nil {
+		kar.Error = rplyErr.Error()
+		return
+	}
+	if authArgs.GetAttributes && authReply.Attributes != nil {
+		kar.Attributes = authReply.Attributes.Digest()
+	}
+	if authArgs.AuthorizeResources {
+		kar.ResourceAllocation = *authReply.ResourceAllocation
+	}
+	if authArgs.GetMaxUsage {
+		if *authReply.MaxUsage == -1 { // For calls different than unlimited, set limits
+			kar.MaxUsage = -1
+		} else {
+			kar.MaxUsage = int(utils.Round(authReply.MaxUsage.Seconds(), 0, utils.ROUNDING_MIDDLE))
+		}
+	}
+	if authArgs.GetSuppliers && authReply.Suppliers != nil {
+		kar.Suppliers = authReply.Suppliers.Digest()
+	}
+	return
+}
+
+// V1InitSessionArgs returns the arguments used in SessionSv1.InitSession
+func (kev KamEvent) V1InitSessionArgs() (args *sessionmanager.V1InitSessionArgs) {
+	args = &sessionmanager.V1InitSessionArgs{ // defaults
+		InitSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: utils.FirstNonEmpty(kev[utils.Tenant],
+				config.CgrConfig().DefaultTenant),
+			ID:    utils.UUIDSha1Prefix(),
+			Event: kev.AsMapStringInterface(),
+		},
+	}
+	subsystems, has := kev[KamCGRSubsystems]
+	if !has {
+		return
+	}
+	if strings.Index(subsystems, utils.MetaAccounts) == -1 {
+		args.InitSession = false
+	}
+	if strings.Index(subsystems, utils.MetaResources) != -1 {
+		args.AllocateResources = true
+	}
+	if strings.Index(subsystems, utils.MetaAttributes) != -1 {
+		args.GetAttributes = true
+	}
+	return
+}
+
+// V1TerminateSessionArgs returns the arguments used in SMGv1.TerminateSession
+func (kev KamEvent) V1TerminateSessionArgs() (args *sessionmanager.V1TerminateSessionArgs) {
+	args = &sessionmanager.V1TerminateSessionArgs{ // defaults
+		TerminateSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: utils.FirstNonEmpty(kev[utils.Tenant],
+				config.CgrConfig().DefaultTenant),
+			ID:    utils.UUIDSha1Prefix(),
+			Event: kev.AsMapStringInterface(),
+		},
+	}
+	subsystems, has := kev[KamCGRSubsystems]
+	if !has {
+		return
+	}
+	if strings.Index(subsystems, utils.MetaAccounts) == -1 {
+		args.TerminateSession = false
+	}
+	if strings.Index(subsystems, utils.MetaResources) != -1 {
+		args.ReleaseResources = true
+	}
+	return
+}
+
+type KamAuthReply struct {
+	Event              string // Kamailio will use this to differentiate between requests and replies
+	TransactionIndex   string // Original transaction index
+	TransactionLabel   string // Original transaction label
+	Attributes         string
+	ResourceAllocation string
+	MaxUsage           int    // Maximum session time in case of success, -1 for unlimited
+	Suppliers          string // List of suppliers, comma separated
+	Error              string // Reply in case of error
+}
+
+func (self *KamAuthReply) String() string {
+	mrsh, _ := json.Marshal(self)
+	return string(mrsh)
+}

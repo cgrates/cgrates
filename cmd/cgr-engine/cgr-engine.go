@@ -305,40 +305,17 @@ func startFsAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan c
 	exitChan <- true
 }
 
-func startSmKamailio(internalRaterChan, internalCDRSChan, internalRsChan chan rpcclient.RpcClientConnection, cdrDb engine.CdrStorage, exitChan chan bool) {
+func startKamAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
 	var err error
-	utils.Logger.Info("Starting CGRateS SMKamailio service.")
-	var ralsConn, cdrsConn, rlSConn *rpcclient.RpcClientPool
-	if len(cfg.SmKamConfig.RALsConns) != 0 {
-		ralsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.SmKamConfig.RALsConns, internalRaterChan, cfg.InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<SMKamailio> Could not connect to RAL: %s", err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	if len(cfg.SmKamConfig.CDRsConns) != 0 {
-		cdrsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.SmKamConfig.CDRsConns, internalCDRSChan, cfg.InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<SMKamailio> Could not connect to CDRs: %s", err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	if len(cfg.SmKamConfig.RLsConns) != 0 {
-		rlSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.SmKamConfig.RLsConns, internalRsChan, cfg.InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<SMKamailio> Could not connect to RLsConns: %s", err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	sm, _ := sessionmanager.NewKamailioSessionManager(cfg.SmKamConfig, ralsConn, cdrsConn, rlSConn, cfg.DefaultTimezone)
-	if err = sm.Connect(); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SMKamailio> error: %s!", err))
+	utils.Logger.Info("Starting Kamailio agent")
+	smgRpcConn := <-internalSMGChan
+	internalSMGChan <- smgRpcConn
+	birpcClnt := utils.NewBiRPCInternalClient(smgRpcConn.(*sessionmanager.SMGeneric))
+	ka := agents.NewKamailioAgent(cfg.KamAgentCfg(),
+		birpcClnt, utils.FirstNonEmpty(cfg.KamAgentCfg().Timezone, cfg.DefaultTimezone))
+
+	if err = ka.Connect(); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> error: %s", utils.KamailioAgent, err))
 	}
 	exitChan <- true
 }
@@ -906,8 +883,8 @@ func main() {
 	}
 
 	// Start SM-Kamailio
-	if cfg.SmKamConfig.Enabled {
-		go startSmKamailio(internalRaterChan, internalCdrSChan, internalRsChan, cdrDb, exitChan)
+	if cfg.KamAgentCfg().Enabled {
+		go startKamAgent(internalSMGChan, exitChan)
 	}
 
 	if cfg.AsteriskAgentCfg().Enabled {

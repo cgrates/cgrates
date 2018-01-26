@@ -35,7 +35,6 @@ func TestSMGenericEventParseFields(t *testing.T) {
 	smGev[utils.EVENT_NAME] = "TEST_EVENT"
 	smGev[utils.TOR] = "*voice"
 	smGev[utils.OriginID] = "12345"
-	smGev[utils.Direction] = "*out"
 	smGev[utils.Account] = "account1"
 	smGev[utils.Subject] = "subject1"
 	smGev[utils.Destination] = "+4986517174963"
@@ -46,9 +45,6 @@ func TestSMGenericEventParseFields(t *testing.T) {
 	smGev[utils.AnswerTime] = "2015-11-09 14:22:02"
 	smGev[utils.Usage] = "1m23s"
 	smGev[utils.LastUsed] = "21s"
-	smGev[utils.PDD] = "300ms"
-	smGev[utils.SUPPLIER] = "supplier1"
-	smGev[utils.DISCONNECT_CAUSE] = "NORMAL_DISCONNECT"
 	smGev[utils.OriginHost] = "127.0.0.1"
 	smGev["Extra1"] = "Value1"
 	smGev["Extra2"] = 5
@@ -63,9 +59,6 @@ func TestSMGenericEventParseFields(t *testing.T) {
 	}
 	if !reflect.DeepEqual(smGev.GetSessionIds(), []string{"12345"}) {
 		t.Error("Unexpected: ", smGev.GetSessionIds())
-	}
-	if smGev.GetDirection(utils.META_DEFAULT) != "*out" {
-		t.Error("Unexpected: ", smGev.GetDirection(utils.META_DEFAULT))
 	}
 	if smGev.GetTOR(utils.META_DEFAULT) != "*voice" {
 		t.Error("Unexpected: ", smGev.GetTOR(utils.META_DEFAULT))
@@ -113,21 +106,11 @@ func TestSMGenericEventParseFields(t *testing.T) {
 	} else if lastUsed != time.Duration(21)*time.Second {
 		t.Error("Unexpected: ", lastUsed)
 	}
-	if pdd, err := smGev.GetPdd(utils.META_DEFAULT); err != nil {
-		t.Error(err)
-	} else if pdd != time.Duration(300)*time.Millisecond {
-		t.Error("Unexpected: ", pdd)
-	}
-	if smGev.GetSupplier(utils.META_DEFAULT) != "supplier1" {
-		t.Error("Unexpected: ", smGev.GetSupplier(utils.META_DEFAULT))
-	}
-	if smGev.GetDisconnectCause(utils.META_DEFAULT) != "NORMAL_DISCONNECT" {
-		t.Error("Unexpected: ", smGev.GetDisconnectCause(utils.META_DEFAULT))
-	}
 	if smGev.GetOriginatorIP(utils.META_DEFAULT) != "127.0.0.1" {
 		t.Error("Unexpected: ", smGev.GetOriginatorIP(utils.META_DEFAULT))
 	}
-	if extrFlds := smGev.GetExtraFields(); !reflect.DeepEqual(extrFlds, map[string]string{"Extra1": "Value1", "Extra2": "5", "LastUsed": "21s"}) {
+	if extrFlds := smGev.GetExtraFields(); !reflect.DeepEqual(extrFlds,
+		map[string]string{"Extra1": "Value1", "Extra2": "5", "LastUsed": "21s"}) {
 		t.Error("Unexpected: ", extrFlds)
 	}
 }
@@ -155,7 +138,6 @@ func TestSMGenericEventAsCDR(t *testing.T) {
 	smGev[utils.EVENT_NAME] = "TEST_EVENT"
 	smGev[utils.TOR] = utils.SMS
 	smGev[utils.OriginID] = "12345"
-	smGev[utils.Direction] = utils.OUT
 	smGev[utils.Account] = "account1"
 	smGev[utils.Subject] = "subject1"
 	smGev[utils.Destination] = "+4986517174963"
@@ -165,9 +147,6 @@ func TestSMGenericEventAsCDR(t *testing.T) {
 	smGev[utils.SetupTime] = "2015-11-09 14:21:24"
 	smGev[utils.AnswerTime] = "2015-11-09 14:22:02"
 	smGev[utils.Usage] = "1m23s"
-	smGev[utils.PDD] = "300ms"
-	smGev[utils.SUPPLIER] = "supplier1"
-	smGev[utils.DISCONNECT_CAUSE] = "NORMAL_DISCONNECT"
 	smGev[utils.OriginHost] = "10.0.3.15"
 	smGev["Extra1"] = "Value1"
 	smGev["Extra2"] = 5

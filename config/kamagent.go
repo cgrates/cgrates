@@ -43,6 +43,7 @@ type KamAgentCfg struct {
 	SessionSConns []*HaPoolConfig
 	CreateCdr     bool
 	EvapiConns    []*KamConnConfig
+	Timezone      string
 }
 
 func (ka *KamAgentCfg) loadFromJsonCfg(jsnCfg *KamAgentJsonCfg) error {

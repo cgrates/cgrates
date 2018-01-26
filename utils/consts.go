@@ -20,8 +20,8 @@ package utils
 
 var (
 	CDRExportFormats = []string{DRYRUN, MetaFileCSV, MetaFileFWV, MetaHTTPjsonCDR, MetaHTTPjsonMap, MetaHTTPjson, META_HTTP_POST, MetaAMQPjsonCDR, MetaAMQPjsonMap}
-	PrimaryCdrFields = []string{CGRID, Source, OriginHost, OriginID, TOR, RequestType, Direction, Tenant, Category, Account, Subject, Destination, SetupTime, PDD, AnswerTime, Usage,
-		SUPPLIER, DISCONNECT_CAUSE, COST, RATED, PartialField, MEDI_RUNID}
+	PrimaryCdrFields = []string{CGRID, Source, OriginHost, OriginID, TOR, RequestType, Tenant, Category, Account, Subject, Destination, SetupTime, AnswerTime, Usage,
+		COST, RATED, PartialField, MEDI_RUNID}
 	GitLastLog                  string // If set, it will be processed as part of versioning
 	PosterTransportContentTypes = map[string]string{
 		MetaHTTPjsonCDR: CONTENT_JSON,
@@ -377,6 +377,8 @@ const (
 	MetaThresholds               = "*thresholds"
 	MetaSuppliers                = "*suppliers"
 	MetaAttributes               = "*attributes"
+	MetaResources                = "*resources"
+	MetaCDRs                     = "*cdrs"
 	Migrator                     = "migrator"
 	UnsupportedMigrationTask     = "unsupported migration task"
 	NoStorDBConnection           = "not connected to StorDB"
@@ -499,6 +501,7 @@ const (
 	MetaSessionS                 = "*sessions"
 	FreeSWITCHAgent              = "FreeSWITCHAgent"
 	MetaDefault                  = "*default"
+	KamailioAgent                = "KamailioAgent"
 )
 
 //MetaMetrics
