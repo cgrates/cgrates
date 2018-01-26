@@ -74,6 +74,7 @@ func (vers Versions) Compare(curent Versions, storType string) string {
 	var x map[string]string
 	m := map[string]string{
 		utils.Accounts:       "cgr-migrator -migrate=*accounts",
+		utils.Attributes:     "cgr-migrator -migrate=*attributes",
 		utils.Actions:        "cgr-migrator -migrate=*actions",
 		utils.ActionTriggers: "cgr-migrator -migrate=*action_triggers",
 		utils.ActionPlans:    "cgr-migrator -migrate=*action_plans",
@@ -82,6 +83,7 @@ func (vers Versions) Compare(curent Versions, storType string) string {
 	}
 	data := map[string]string{
 		utils.Accounts:       "cgr-migrator -migrate=*accounts",
+		utils.Attributes:     "cgr-migrator -migrate=*attributes",
 		utils.Actions:        "cgr-migrator -migrate=*actions",
 		utils.ActionTriggers: "cgr-migrator -migrate=*action_triggers",
 		utils.ActionPlans:    "cgr-migrator -migrate=*action_plans",
@@ -118,6 +120,7 @@ func CurrentDataDBVersions() Versions {
 		utils.SharedGroups:        2,
 		utils.Thresholds:          2,
 		utils.Suppliers:           1,
+		utils.Attributes:          2,
 		utils.Timing:              1,
 		utils.RQF:                 1,
 		utils.Resource:            1,

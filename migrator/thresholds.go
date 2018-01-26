@@ -50,7 +50,7 @@ type v2ActionTriggers []*v2ActionTrigger
 func (m *Migrator) migrateCurrentThresholds() (err error) {
 	var ids []string
 	tenant := config.CgrConfig().DefaultTenant
-	//StatQueue
+	//Thresholds
 	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.ThresholdPrefix)
 	if err != nil {
 		return err
@@ -70,7 +70,7 @@ func (m *Migrator) migrateCurrentThresholds() (err error) {
 			}
 		}
 	}
-	//StatQueueProfile
+	//ThresholdProfiles
 	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.ThresholdProfilePrefix)
 	if err != nil {
 		return err
@@ -166,6 +166,7 @@ func (m *Migrator) migrateThresholds() (err error) {
 	}
 	return
 }
+
 func (v2ATR v2ActionTrigger) AsThreshold() (thp *engine.ThresholdProfile, th *engine.Threshold, filter *engine.Filter, err error) {
 	var filterIDS []string
 	var filters []*engine.RequestFilter
