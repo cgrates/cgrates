@@ -59,8 +59,9 @@ func TestCgrCdrAsCDR(t *testing.T) {
 
 // Make sure the replicated CDR matches the expected CDR
 func TestReplicatedCgrCdrAsCDR(t *testing.T) {
-	cgrCdr := CgrCdr{utils.CGRID: "164b0422fdc6a5117031b427439482c6a4f90e41",
-		utils.TOR: utils.VOICE, utils.OriginID: "dsafdsaf",
+	cgrCdr := CgrCdr{
+		utils.CGRID: "164b0422fdc6a5117031b427439482c6a4f90e41",
+		utils.TOR:   utils.VOICE, utils.OriginID: "dsafdsaf",
 		utils.OriginHost:  "192.168.1.1",
 		utils.Source:      "internal_test",
 		utils.RequestType: utils.META_RATED,
@@ -72,7 +73,8 @@ func TestReplicatedCgrCdrAsCDR(t *testing.T) {
 		utils.Usage:       "10s", utils.COST: "0.12",
 		utils.RATED: "true", "field_extr1": "val_extr1",
 		"fieldextr2": "valextr2"}
-	expctRtCdr := &CDR{CGRID: cgrCdr[utils.CGRID],
+	expctRtCdr := &CDR{
+		CGRID:       cgrCdr[utils.CGRID],
 		ToR:         cgrCdr[utils.TOR],
 		OriginID:    cgrCdr[utils.OriginID],
 		OriginHost:  cgrCdr[utils.OriginHost],

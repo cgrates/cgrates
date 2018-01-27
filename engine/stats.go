@@ -250,7 +250,8 @@ func (sS *StatService) processEvent(ev *utils.CGREvent) (err error) {
 				thEv.Event[metricID] = metric.GetValue()
 			}
 			var hits int
-			if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil {
+			if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil &&
+				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<StatS> error: %s processing event %+v with ThresholdS.", err.Error(), thEv))
 				withErrors = true

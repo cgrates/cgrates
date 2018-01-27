@@ -1305,6 +1305,10 @@ type V1AuthorizeReply struct {
 // BiRPCV1Authorize performs authorization for CGREvent based on specific components
 func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 	args *V1AuthorizeArgs, authReply *V1AuthorizeReply) (err error) {
+	if !args.GetAttributes && !args.AuthorizeResources &&
+		!args.GetMaxUsage && !args.GetSuppliers {
+		return utils.NewErrMandatoryIeMissing("subsystems")
+	}
 	if args.GetAttributes {
 		if smg.attrS == nil {
 			return utils.NewErrNotConnected(utils.AttributeS)
@@ -1335,9 +1339,9 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		if smg.resS == nil {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
-		originID, err := args.CGREvent.FieldAsString(utils.OriginID)
-		if err != nil {
-			return utils.NewErrMandatoryIeMissing(utils.OriginID)
+		originID, _ := args.CGREvent.FieldAsString(utils.OriginID)
+		if originID == "" {
+			originID = utils.UUIDSha1Prefix()
 		}
 		var allocMsg string
 		attrRU := utils.ArgRSv1ResourceUsage{
@@ -1382,6 +1386,10 @@ type V1AuthorizeReplyWithDigest struct {
 // returning one level fields instead of multiple ones returned by BiRPCv1AuthorizeEvent
 func (smg *SMGeneric) BiRPCv1AuthorizeEventWithDigest(clnt rpcclient.RpcClientConnection,
 	args *V1AuthorizeArgs, authReply *V1AuthorizeReplyWithDigest) (err error) {
+	if !args.GetAttributes && !args.AuthorizeResources &&
+		!args.GetMaxUsage && !args.GetSuppliers {
+		return utils.NewErrMandatoryIeMissing("subsystems")
+	}
 	var initAuthRply V1AuthorizeReply
 	if err = smg.BiRPCv1AuthorizeEvent(clnt, args, &initAuthRply); err != nil {
 		return
@@ -1417,6 +1425,9 @@ type V1InitSessionReply struct {
 // BiRPCV2InitiateSession initiates a new session, returns the maximum duration the session can last
 func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 	args *V1InitSessionArgs, rply *V1InitSessionReply) (err error) {
+	if !args.GetAttributes && !args.AllocateResources && !args.InitSession {
+		return utils.NewErrMandatoryIeMissing("subsystems")
+	}
 	if args.GetAttributes {
 		if smg.attrS == nil {
 			return utils.NewErrNotConnected(utils.AttributeS)
@@ -1481,6 +1492,9 @@ type V1UpdateSessionReply struct {
 // BiRPCV1UpdateSession updates an existing session, returning the duration which the session can still last
 func (smg *SMGeneric) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 	args *V1UpdateSessionArgs, rply *V1UpdateSessionReply) (err error) {
+	if !args.GetAttributes && !args.UpdateSession {
+		return utils.NewErrMandatoryIeMissing("subsystems")
+	}
 	if args.GetAttributes {
 		if smg.attrS == nil {
 			return utils.NewErrNotConnected(utils.AttributeS)
@@ -1541,6 +1555,9 @@ type V1TerminateSessionArgs struct {
 // BiRPCV1TerminateSession will stop debit loops as well as release any used resources
 func (smg *SMGeneric) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 	args *V1TerminateSessionArgs, rply *string) (err error) {
+	if !args.TerminateSession && !args.ReleaseResources {
+		return utils.NewErrMandatoryIeMissing("subsystems")
+	}
 	if args.TerminateSession {
 		if smg.rals == nil {
 			return utils.NewErrNotConnected(utils.RALService)
