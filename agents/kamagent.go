@@ -128,6 +128,7 @@ func (ka *KamailioAgent) onCallStart(evData []byte, connID string) {
 		ka.disconnectSession(connID,
 			NewKamSessionDisconnect(kev[KamHashEntry], kev[KamHashID],
 				utils.ErrMandatoryIeMissing.Error()))
+		return
 	}
 	initSessionArgs := kev.V1InitSessionArgs()
 	initSessionArgs.CGREvent.Event[EvapiConnID] = connID // Attach the connection ID so we can properly disconnect later

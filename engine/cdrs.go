@@ -202,7 +202,8 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 		var hits int
 		thEv := &ArgsProcessEvent{
 			CGREvent: *cdr.AsCGREvent()}
-		if err := self.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil {
+		if err := self.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil &&
+			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<CDRS> error: %s processing CDR event %+v with thdS.", err.Error(), thEv))
 		}

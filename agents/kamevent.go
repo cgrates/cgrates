@@ -99,8 +99,6 @@ func (kev KamEvent) MissingParameter() bool {
 		}, "")
 	case CGR_CALL_END:
 		return utils.IsSliceMember([]string{
-			kev[KamHashEntry],
-			kev[KamHashID],
 			kev[utils.OriginID],
 			kev[utils.AnswerTime],
 			kev[utils.Account],
