@@ -24,14 +24,14 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
 )
 
-func NewFSSessionManager(fsAgentConfig *config.FsAgentConfig,
-	smg *utils.BiRPCInternalClient, timezone string) (fsa *FSSessionManager) {
-	fsa = &FSSessionManager{
+func NewFSsessions(fsAgentConfig *config.FsAgentConfig,
+	smg *utils.BiRPCInternalClient, timezone string) (fsa *FSsessions) {
+	fsa = &FSsessions{
 		cfg:         fsAgentConfig,
 		conns:       make(map[string]*fsock.FSock),
 		senderPools: make(map[string]*fsock.FSockPool),
@@ -44,7 +44,7 @@ func NewFSSessionManager(fsAgentConfig *config.FsAgentConfig,
 
 // The freeswitch session manager type holding a buffer for the network connection
 // and the active sessions
-type FSSessionManager struct {
+type FSsessions struct {
 	cfg         *config.FsAgentConfig
 	conns       map[string]*fsock.FSock     // Keep the list here for connection management purposes
 	senderPools map[string]*fsock.FSockPool // Keep sender pools here
@@ -52,7 +52,7 @@ type FSSessionManager struct {
 	timezone    string
 }
 
-func (sm *FSSessionManager) createHandlers() map[string][]func(string, string) {
+func (sm *FSsessions) createHandlers() map[string][]func(string, string) {
 	ca := func(body, connId string) {
 		sm.onChannelAnswer(
 			NewFSEvent(body), connId)
@@ -76,7 +76,7 @@ func (sm *FSSessionManager) createHandlers() map[string][]func(string, string) {
 }
 
 // Sets the call timeout valid of starting of the call
-func (sm *FSSessionManager) setMaxCallDuration(uuid, connId string,
+func (sm *FSsessions) setMaxCallDuration(uuid, connId string,
 	maxDur time.Duration, destNr string) error {
 	if len(sm.cfg.EmptyBalanceContext) != 0 {
 		_, err := sm.conns[connId].SendApiCmd(
@@ -115,7 +115,7 @@ func (sm *FSSessionManager) setMaxCallDuration(uuid, connId string,
 }
 
 // Sends the transfer command to unpark the call to freeswitch
-func (sm *FSSessionManager) unparkCall(uuid, connId, call_dest_nb, notify string) (err error) {
+func (sm *FSsessions) unparkCall(uuid, connId, call_dest_nb, notify string) (err error) {
 	_, err = sm.conns[connId].SendApiCmd(
 		fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", uuid, notify))
 	if err != nil {
@@ -133,12 +133,12 @@ func (sm *FSSessionManager) unparkCall(uuid, connId, call_dest_nb, notify string
 	return
 }
 
-func (sm *FSSessionManager) onChannelPark(fsev FSEvent, connId string) {
+func (sm *FSsessions) onChannelPark(fsev FSEvent, connId string) {
 	if fsev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Not for us
 		return
 	}
 	authArgs := fsev.V1AuthorizeArgs()
-	var authReply sessionmanager.V1AuthorizeReply
+	var authReply sessions.V1AuthorizeReply
 	if err := sm.smg.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> Could not authorize event %s, error: %s",
@@ -198,7 +198,7 @@ func (sm *FSSessionManager) onChannelPark(fsev FSEvent, connId string) {
 		fsev.GetCallDestNr(utils.META_DEFAULT), AUTH_OK)
 }
 
-func (sm *FSSessionManager) onChannelAnswer(fsev FSEvent, connId string) {
+func (sm *FSsessions) onChannelAnswer(fsev FSEvent, connId string) {
 	if fsev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
 		return
 	}
@@ -210,7 +210,7 @@ func (sm *FSSessionManager) onChannelAnswer(fsev FSEvent, connId string) {
 	}
 	initSessionArgs := fsev.V1InitSessionArgs()
 	initSessionArgs.CGREvent.Event[FsConnID] = connId // Attach the connection ID so we can properly disconnect later
-	var initReply sessionmanager.V1InitSessionReply
+	var initReply sessions.V1InitSessionReply
 	if err := sm.smg.Call(utils.SessionSv1InitiateSession,
 		initSessionArgs, &initReply); err != nil {
 		utils.Logger.Err(
@@ -221,7 +221,7 @@ func (sm *FSSessionManager) onChannelAnswer(fsev FSEvent, connId string) {
 	}
 }
 
-func (sm *FSSessionManager) onChannelHangupComplete(fsev FSEvent, connId string) {
+func (sm *FSsessions) onChannelHangupComplete(fsev FSEvent, connId string) {
 	if fsev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
 		return
 	}
@@ -245,7 +245,7 @@ func (sm *FSSessionManager) onChannelHangupComplete(fsev FSEvent, connId string)
 
 // Connects to the freeswitch mod_event_socket server and starts
 // listening for events.
-func (sm *FSSessionManager) Connect() error {
+func (sm *FSsessions) Connect() error {
 	eventFilters := map[string][]string{"Call-Direction": []string{"inbound"}}
 	errChan := make(chan error)
 	for _, connCfg := range sm.cfg.EventSocketConns {
@@ -280,7 +280,7 @@ func (sm *FSSessionManager) Connect() error {
 
 // fsev.GetCallDestNr(utils.META_DEFAULT)
 // Disconnects a session by sending hangup command to freeswitch
-func (sm *FSSessionManager) disconnectSession(connId, uuid, redirectNr, notify string) error {
+func (sm *FSsessions) disconnectSession(connId, uuid, redirectNr, notify string) error {
 	if _, err := sm.conns[connId].SendApiCmd(
 		fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", uuid, notify)); err != nil {
 		utils.Logger.Err(
@@ -317,7 +317,7 @@ func (sm *FSSessionManager) disconnectSession(connId, uuid, redirectNr, notify s
 	return nil
 }
 
-func (sm *FSSessionManager) Shutdown() (err error) {
+func (sm *FSsessions) Shutdown() (err error) {
 	for connId, fSock := range sm.conns {
 		if !fSock.Connected() {
 			utils.Logger.Err(fmt.Sprintf("<%s> Cannot shutdown sessions, fsock not connected for connection id: %s", utils.FreeSWITCHAgent, connId))
@@ -332,13 +332,13 @@ func (sm *FSSessionManager) Shutdown() (err error) {
 }
 
 // rpcclient.RpcClientConnection interface
-func (sm *FSSessionManager) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (sm *FSsessions) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(sm, serviceMethod, args, reply)
 }
 
 // Internal method to disconnect session in asterisk
-func (fsa *FSSessionManager) V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) (err error) {
-	fsEv := sessionmanager.SMGenericEvent(args.EventStart)
+func (fsa *FSsessions) V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) (err error) {
+	fsEv := sessions.SMGenericEvent(args.EventStart)
 	channelID := fsEv.GetOriginID(utils.META_DEFAULT)
 	if err = fsa.disconnectSession(fsEv[FsConnID].(string), channelID, fsEv.GetCallDestNr(utils.META_DEFAULT),
 		utils.ErrInsufficientCredit.Error()); err != nil {

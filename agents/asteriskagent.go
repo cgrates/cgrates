@@ -29,7 +29,7 @@ import (
 
 	"github.com/cgrates/aringo"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -52,7 +52,7 @@ const (
 
 func NewSMAsterisk(cgrCfg *config.CGRConfig, astConnIdx int, smgConn *utils.BiRPCInternalClient) (*SMAsterisk, error) {
 	sma := &SMAsterisk{cgrCfg: cgrCfg, smg: smgConn,
-		eventsCache: make(map[string]*sessionmanager.SMGenericEvent)}
+		eventsCache: make(map[string]*sessions.SMGenericEvent)}
 	sma.smg.SetClientConn(sma) // pass the connection to SMA back into smg so we can receive the disconnects
 	return sma, nil
 }
@@ -64,8 +64,8 @@ type SMAsterisk struct {
 	astConn     *aringo.ARInGO
 	astEvChan   chan map[string]interface{}
 	astErrChan  chan error
-	eventsCache map[string]*sessionmanager.SMGenericEvent // used to gather information about events during various phases
-	evCacheMux  sync.RWMutex                              // Protect eventsCache
+	eventsCache map[string]*sessions.SMGenericEvent // used to gather information about events during various phases
+	evCacheMux  sync.RWMutex                        // Protect eventsCache
 }
 
 func (sma *SMAsterisk) connectAsterisk() (err error) {
@@ -245,7 +245,7 @@ func (sma *SMAsterisk) ServiceShutdown() error {
 
 // Internal method to disconnect session in asterisk
 func (sma *SMAsterisk) V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) error {
-	channelID := sessionmanager.SMGenericEvent(args.EventStart).GetOriginID(utils.META_DEFAULT)
+	channelID := sessions.SMGenericEvent(args.EventStart).GetOriginID(utils.META_DEFAULT)
 	if err := sma.hangupChannel(channelID); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<SMAsterisk> Error: %s when attempting to disconnect channelID: %s",

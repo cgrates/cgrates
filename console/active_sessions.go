@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -62,6 +62,6 @@ func (self *CmdActiveSessions) PostprocessRpcParams() error {
 }
 
 func (self *CmdActiveSessions) RpcResult() interface{} {
-	var sessions *[]*sessionmanager.ActiveSession
+	var sessions *[]*sessions.ActiveSession
 	return &sessions
 }

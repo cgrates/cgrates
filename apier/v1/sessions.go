@@ -20,17 +20,17 @@ package v1
 
 import (
 	"github.com/cenk/rpc2"
-	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewSessionSv1(sm *sessionmanager.SMGeneric) *SessionSv1 {
+func NewSessionSv1(sm *sessions.SMGeneric) *SessionSv1 {
 	return &SessionSv1{SMG: sm}
 }
 
 // SessionSv1 exports RPC from SessionSv1
 type SessionSv1 struct {
-	SMG *sessionmanager.SMGeneric
+	SMG *sessions.SMGeneric
 }
 
 // Publishes BiJSONRPC methods exported by SessionSv1
@@ -48,27 +48,27 @@ func (ssv1 *SessionSv1) Handlers() map[string]interface{} {
 	}
 }
 
-func (ssv1 *SessionSv1) AuthorizeEvent(args *sessionmanager.V1AuthorizeArgs,
-	rply *sessionmanager.V1AuthorizeReply) error {
+func (ssv1 *SessionSv1) AuthorizeEvent(args *sessions.V1AuthorizeArgs,
+	rply *sessions.V1AuthorizeReply) error {
 	return ssv1.SMG.BiRPCv1AuthorizeEvent(nil, args, rply)
 }
 
-func (ssv1 *SessionSv1) AuthorizeEventWithDigest(args *sessionmanager.V1AuthorizeArgs,
-	rply *sessionmanager.V1AuthorizeReplyWithDigest) error {
+func (ssv1 *SessionSv1) AuthorizeEventWithDigest(args *sessions.V1AuthorizeArgs,
+	rply *sessions.V1AuthorizeReplyWithDigest) error {
 	return ssv1.SMG.BiRPCv1AuthorizeEventWithDigest(nil, args, rply)
 }
 
-func (ssv1 *SessionSv1) InitiateSession(args *sessionmanager.V1InitSessionArgs,
-	rply *sessionmanager.V1InitSessionReply) error {
+func (ssv1 *SessionSv1) InitiateSession(args *sessions.V1InitSessionArgs,
+	rply *sessions.V1InitSessionReply) error {
 	return ssv1.SMG.BiRPCv1InitiateSession(nil, args, rply)
 }
 
-func (ssv1 *SessionSv1) UpdateSession(args *sessionmanager.V1UpdateSessionArgs,
-	rply *sessionmanager.V1UpdateSessionReply) error {
+func (ssv1 *SessionSv1) UpdateSession(args *sessions.V1UpdateSessionArgs,
+	rply *sessions.V1UpdateSessionReply) error {
 	return ssv1.SMG.BiRPCv1UpdateSession(nil, args, rply)
 }
 
-func (ssv1 *SessionSv1) TerminateSession(args *sessionmanager.V1TerminateSessionArgs,
+func (ssv1 *SessionSv1) TerminateSession(args *sessions.V1TerminateSessionArgs,
 	rply *string) error {
 	return ssv1.SMG.BiRPCv1TerminateSession(nil, args, rply)
 }
@@ -77,40 +77,40 @@ func (ssv1 *SessionSv1) ProcessCDR(cgrEv utils.CGREvent, rply *string) error {
 	return ssv1.SMG.BiRPCv1ProcessCDR(nil, cgrEv, rply)
 }
 
-func (ssv1 *SessionSv1) ProcessEvent(args *sessionmanager.V1ProcessEventArgs,
-	rply *sessionmanager.V1ProcessEventReply) error {
+func (ssv1 *SessionSv1) ProcessEvent(args *sessions.V1ProcessEventArgs,
+	rply *sessions.V1ProcessEventReply) error {
 	return ssv1.SMG.BiRPCv1ProcessEvent(nil, args, rply)
 }
 
-func (ssv1 *SessionSv1) GetActiveSessions(args map[string]string, rply *[]*sessionmanager.ActiveSession) error {
+func (ssv1 *SessionSv1) GetActiveSessions(args map[string]string, rply *[]*sessions.ActiveSession) error {
 	return ssv1.SMG.BiRPCV1GetActiveSessions(nil, args, rply)
 }
 
-func (ssv1 *SessionSv1) GetPassiveSessions(args map[string]string, rply *[]*sessionmanager.ActiveSession) error {
+func (ssv1 *SessionSv1) GetPassiveSessions(args map[string]string, rply *[]*sessions.ActiveSession) error {
 	return ssv1.SMG.BiRPCV1GetPassiveSessions(nil, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRpcAuthorizeEvent(clnt *rpc2.Client, args *sessionmanager.V1AuthorizeArgs,
-	rply *sessionmanager.V1AuthorizeReply) error {
+func (ssv1 *SessionSv1) BiRpcAuthorizeEvent(clnt *rpc2.Client, args *sessions.V1AuthorizeArgs,
+	rply *sessions.V1AuthorizeReply) error {
 	return ssv1.SMG.BiRPCv1AuthorizeEvent(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRpcAuthorizeEventWithDigest(clnt *rpc2.Client, args *sessionmanager.V1AuthorizeArgs,
-	rply *sessionmanager.V1AuthorizeReplyWithDigest) error {
+func (ssv1 *SessionSv1) BiRpcAuthorizeEventWithDigest(clnt *rpc2.Client, args *sessions.V1AuthorizeArgs,
+	rply *sessions.V1AuthorizeReplyWithDigest) error {
 	return ssv1.SMG.BiRPCv1AuthorizeEventWithDigest(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRpcInitiateSession(clnt *rpc2.Client, args *sessionmanager.V1InitSessionArgs,
-	rply *sessionmanager.V1InitSessionReply) error {
+func (ssv1 *SessionSv1) BiRpcInitiateSession(clnt *rpc2.Client, args *sessions.V1InitSessionArgs,
+	rply *sessions.V1InitSessionReply) error {
 	return ssv1.SMG.BiRPCv1InitiateSession(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRpcUpdateSession(clnt *rpc2.Client, args *sessionmanager.V1UpdateSessionArgs,
-	rply *sessionmanager.V1UpdateSessionReply) error {
+func (ssv1 *SessionSv1) BiRpcUpdateSession(clnt *rpc2.Client, args *sessions.V1UpdateSessionArgs,
+	rply *sessions.V1UpdateSessionReply) error {
 	return ssv1.SMG.BiRPCv1UpdateSession(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRpcTerminateSession(clnt *rpc2.Client, args *sessionmanager.V1TerminateSessionArgs,
+func (ssv1 *SessionSv1) BiRpcTerminateSession(clnt *rpc2.Client, args *sessions.V1TerminateSessionArgs,
 	rply *string) error {
 	return ssv1.SMG.BiRPCv1TerminateSession(clnt, args, rply)
 }
@@ -119,17 +119,17 @@ func (ssv1 *SessionSv1) BiRpcProcessCDR(clnt *rpc2.Client, cgrEv utils.CGREvent,
 	return ssv1.SMG.BiRPCv1ProcessCDR(clnt, cgrEv, rply)
 }
 
-func (ssv1 *SessionSv1) BiRpcProcessEvent(clnt *rpc2.Client, args *sessionmanager.V1ProcessEventArgs,
-	rply *sessionmanager.V1ProcessEventReply) error {
+func (ssv1 *SessionSv1) BiRpcProcessEvent(clnt *rpc2.Client, args *sessions.V1ProcessEventArgs,
+	rply *sessions.V1ProcessEventReply) error {
 	return ssv1.SMG.BiRPCv1ProcessEvent(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCV1GetActiveSessions(clnt *rpc2.Client, args map[string]string,
-	rply *[]*sessionmanager.ActiveSession) error {
+	rply *[]*sessions.ActiveSession) error {
 	return ssv1.SMG.BiRPCV1GetActiveSessions(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCV1GetPassiveSessions(clnt *rpc2.Client, args map[string]string,
-	rply *[]*sessionmanager.ActiveSession) error {
+	rply *[]*sessions.ActiveSession) error {
 	return ssv1.SMG.BiRPCV1GetPassiveSessions(clnt, args, rply)
 }

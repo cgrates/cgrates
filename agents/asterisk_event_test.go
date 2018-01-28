@@ -22,7 +22,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -383,7 +383,7 @@ func TestSMAEventAsSMGenericEvent(t *testing.T) {
 	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
 		t.Error(err)
 	}
-	eSMGEv := &sessionmanager.SMGenericEvent{
+	eSMGEv := &sessions.SMGenericEvent{
 		utils.EVENT_NAME:  SMAAuthorization,
 		utils.OriginID:    "1473681228.6",
 		utils.RequestType: "*prepaid",
@@ -407,7 +407,7 @@ func TestSMAEventUpdateSMGEventAnswered(t *testing.T) {
 		t.Error(err)
 	}
 	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
-	smgEv := &sessionmanager.SMGenericEvent{
+	smgEv := &sessions.SMGenericEvent{
 		utils.EVENT_NAME:  SMAAuthorization,
 		utils.OriginID:    "1473681228.6",
 		utils.RequestType: "*prepaid",
@@ -418,7 +418,7 @@ func TestSMAEventUpdateSMGEventAnswered(t *testing.T) {
 		"extra1":          "val1",
 		"extra2":          "val2",
 	}
-	eSMGEv := &sessionmanager.SMGenericEvent{
+	eSMGEv := &sessions.SMGenericEvent{
 		utils.EVENT_NAME:  SMASessionStart,
 		utils.OriginID:    "1473681228.6",
 		utils.RequestType: "*prepaid",
@@ -441,7 +441,7 @@ func TestSMAEventUpdateSMGEventAnswered(t *testing.T) {
 		t.Error(err)
 	}
 	smaEv = NewSMAsteriskEvent(ev, "127.0.0.1")
-	eSMGEv = &sessionmanager.SMGenericEvent{
+	eSMGEv = &sessions.SMGenericEvent{
 		utils.EVENT_NAME:       SMASessionTerminate,
 		utils.OriginID:         "1473681228.6",
 		utils.RequestType:      "*prepaid",
@@ -463,7 +463,7 @@ func TestSMAEventUpdateSMGEventAnswered(t *testing.T) {
 }
 
 func TestSMAEventUpdateSMGEventUnaswered(t *testing.T) {
-	smgEv := &sessionmanager.SMGenericEvent{
+	smgEv := &sessions.SMGenericEvent{
 		utils.EVENT_NAME:  SMAAuthorization,
 		utils.OriginID:    "1473681228.6",
 		utils.RequestType: "*prepaid",
@@ -474,7 +474,7 @@ func TestSMAEventUpdateSMGEventUnaswered(t *testing.T) {
 		"extra1":          "val1",
 		"extra2":          "val2",
 	}
-	eSMGEv := &sessionmanager.SMGenericEvent{
+	eSMGEv := &sessions.SMGenericEvent{
 		utils.EVENT_NAME:       SMASessionTerminate,
 		utils.OriginID:         "1473681228.6",
 		utils.RequestType:      "*prepaid",
@@ -501,7 +501,7 @@ func TestSMAEventUpdateSMGEventUnaswered(t *testing.T) {
 }
 
 func TestSMAEventUpdateSMGEventBusy(t *testing.T) {
-	smgEv := &sessionmanager.SMGenericEvent{
+	smgEv := &sessions.SMGenericEvent{
 		utils.EVENT_NAME:  SMAAuthorization,
 		utils.OriginID:    "1473681228.6",
 		utils.RequestType: "*prepaid",
@@ -512,7 +512,7 @@ func TestSMAEventUpdateSMGEventBusy(t *testing.T) {
 		"extra1":          "val1",
 		"extra2":          "val2",
 	}
-	eSMGEv := &sessionmanager.SMGenericEvent{
+	eSMGEv := &sessions.SMGenericEvent{
 		utils.EVENT_NAME:       SMASessionTerminate,
 		utils.OriginID:         "1473681228.6",
 		utils.RequestType:      "*prepaid",

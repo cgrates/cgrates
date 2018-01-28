@@ -36,7 +36,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/fiorix/go-diameter/diam"
 	"github.com/fiorix/go-diameter/diam/avp"
@@ -620,7 +620,7 @@ func (self *CCR) AsDiameterMessage() (*diam.Message, error) {
 }
 
 // Extracts data out of CCR into a SMGenericEvent based on the configured template
-func (self *CCR) AsSMGenericEvent(cfgFlds []*config.CfgCdrField) (sessionmanager.SMGenericEvent, error) {
+func (self *CCR) AsSMGenericEvent(cfgFlds []*config.CfgCdrField) (sessions.SMGenericEvent, error) {
 	outMap := make(map[string]string) // work with it so we can append values to keys
 	outMap[utils.EVENT_NAME] = DIAMETER_CCR
 	for _, cfgFld := range cfgFlds {
@@ -641,7 +641,7 @@ func (self *CCR) AsSMGenericEvent(cfgFlds []*config.CfgCdrField) (sessionmanager
 			break
 		}
 	}
-	return sessionmanager.SMGenericEvent(utils.ConvertMapValStrIf(outMap)), nil
+	return sessions.SMGenericEvent(utils.ConvertMapValStrIf(outMap)), nil
 }
 
 func NewBareCCAFromCCR(ccr *CCR, originHost, originRealm string) *CCA {

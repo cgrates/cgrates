@@ -25,7 +25,7 @@ import (
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/kamevapi"
 )
@@ -103,7 +103,7 @@ func (ka *KamailioAgent) onCgrAuth(evData []byte, connID string) {
 		return
 	}
 	authArgs := kev.V1AuthorizeArgs()
-	var authReply sessionmanager.V1AuthorizeReply
+	var authReply sessions.V1AuthorizeReply
 	err = ka.sessionS.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authReply)
 	if kar, err := kev.AsKamAuthReply(authArgs, &authReply, err); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> failed building auth reply for event: %s, error: %s",
@@ -132,7 +132,7 @@ func (ka *KamailioAgent) onCallStart(evData []byte, connID string) {
 	}
 	initSessionArgs := kev.V1InitSessionArgs()
 	initSessionArgs.CGREvent.Event[EvapiConnID] = connID // Attach the connection ID so we can properly disconnect later
-	var initReply sessionmanager.V1InitSessionReply
+	var initReply sessions.V1InitSessionReply
 	if err := ka.sessionS.Call(utils.SessionSv1InitiateSession,
 		initSessionArgs, &initReply); err != nil {
 		utils.Logger.Err(

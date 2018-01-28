@@ -24,7 +24,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -153,8 +153,8 @@ func (kev KamEvent) String() string {
 	return string(mrsh)
 }
 
-func (kev KamEvent) V1AuthorizeArgs() (args *sessionmanager.V1AuthorizeArgs) {
-	args = &sessionmanager.V1AuthorizeArgs{
+func (kev KamEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
+	args = &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
 		CGREvent: utils.CGREvent{
 			Tenant: utils.FirstNonEmpty(kev[utils.Tenant],
@@ -183,8 +183,8 @@ func (kev KamEvent) V1AuthorizeArgs() (args *sessionmanager.V1AuthorizeArgs) {
 }
 
 // AsKamAuthReply builds up a Kamailio AuthReply based on arguments and reply from SessionS
-func (kev KamEvent) AsKamAuthReply(authArgs *sessionmanager.V1AuthorizeArgs,
-	authReply *sessionmanager.V1AuthorizeReply, rplyErr error) (kar *KamAuthReply, err error) {
+func (kev KamEvent) AsKamAuthReply(authArgs *sessions.V1AuthorizeArgs,
+	authReply *sessions.V1AuthorizeReply, rplyErr error) (kar *KamAuthReply, err error) {
 	kar = &KamAuthReply{Event: CGR_AUTH_REPLY,
 		TransactionIndex: kev[KamTRIndex],
 		TransactionLabel: kev[KamTRLabel],
@@ -213,8 +213,8 @@ func (kev KamEvent) AsKamAuthReply(authArgs *sessionmanager.V1AuthorizeArgs,
 }
 
 // V1InitSessionArgs returns the arguments used in SessionSv1.InitSession
-func (kev KamEvent) V1InitSessionArgs() (args *sessionmanager.V1InitSessionArgs) {
-	args = &sessionmanager.V1InitSessionArgs{ // defaults
+func (kev KamEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
+	args = &sessions.V1InitSessionArgs{ // defaults
 		InitSession: true,
 		CGREvent: utils.CGREvent{
 			Tenant: utils.FirstNonEmpty(kev[utils.Tenant],
@@ -240,8 +240,8 @@ func (kev KamEvent) V1InitSessionArgs() (args *sessionmanager.V1InitSessionArgs)
 }
 
 // V1TerminateSessionArgs returns the arguments used in SMGv1.TerminateSession
-func (kev KamEvent) V1TerminateSessionArgs() (args *sessionmanager.V1TerminateSessionArgs) {
-	args = &sessionmanager.V1TerminateSessionArgs{ // defaults
+func (kev KamEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionArgs) {
+	args = &sessions.V1TerminateSessionArgs{ // defaults
 		TerminateSession: true,
 		CGREvent: utils.CGREvent{
 			Tenant: utils.FirstNonEmpty(kev[utils.Tenant],

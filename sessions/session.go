@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package sessionmanager
+package sessions
 
 import (
 	"errors"
@@ -294,4 +294,31 @@ func (self *SMGSession) AsActiveSession(timezone string) *ActiveSession {
 		aSession.MaxCostSoFar = self.CD.MaxCostSoFar
 	}
 	return aSession
+}
+
+// Will be used when displaying active sessions via RPC
+type ActiveSession struct {
+	CGRID         string
+	TOR           string            // type of record, meta-field, should map to one of the TORs hardcoded inside the server <*voice|*data|*sms|*generic>
+	OriginID      string            // represents the unique accounting id given by the telecom switch generating the CDR
+	CdrHost       string            // represents the IP address of the host generating the CDR (automatically populated by the server)
+	CdrSource     string            // formally identifies the source of the CDR (free form field)
+	ReqType       string            // matching the supported request types by the **CGRateS**, accepted values are hardcoded in the server <prepaid|postpaid|pseudoprepaid|rated>
+	Tenant        string            // tenant whom this record belongs
+	Category      string            // free-form filter for this record, matching the category defined in rating profiles.
+	Account       string            // account id (accounting subsystem) the record should be attached to
+	Subject       string            // rating subject (rating subsystem) this record should be attached to
+	Destination   string            // destination to be charged
+	SetupTime     time.Time         // set-up time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
+	AnswerTime    time.Time         // answer time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
+	Usage         time.Duration     // event usage information (eg: in case of tor=*voice this will represent the total duration of a call)
+	ExtraFields   map[string]string // Extra fields to be stored in CDR
+	SMId          string
+	SMConnId      string
+	RunID         string
+	LoopIndex     float64       // indicates the position of this segment in a cost request loop
+	DurationIndex time.Duration // the call duration so far (till TimeEnd)
+	MaxRate       float64
+	MaxRateUnit   time.Duration
+	MaxCostSoFar  float64
 }

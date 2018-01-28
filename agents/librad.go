@@ -24,7 +24,7 @@ import (
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/radigo"
 )
@@ -134,7 +134,7 @@ func radFieldOutVal(pkt *radigo.Packet, processorVars map[string]string,
 
 // radPktAsSMGEvent converts a RADIUS packet into SMGEvent
 func radReqAsSMGEvent(radPkt *radigo.Packet, procVars map[string]string, procFlags utils.StringMap,
-	cfgFlds []*config.CfgCdrField) (smgEv sessionmanager.SMGenericEvent, err error) {
+	cfgFlds []*config.CfgCdrField) (smgEv sessions.SMGenericEvent, err error) {
 	outMap := make(map[string]string) // work with it so we can append values to keys
 	outMap[utils.EVENT_NAME] = EvRadiusReq
 	for _, cfgFld := range cfgFlds {
@@ -164,7 +164,7 @@ func radReqAsSMGEvent(radPkt *radigo.Packet, procVars map[string]string, procFla
 	if len(procFlags) != 0 {
 		outMap[utils.CGRFlags] = procFlags.String()
 	}
-	return sessionmanager.SMGenericEvent(utils.ConvertMapValStrIf(outMap)), nil
+	return sessions.SMGenericEvent(utils.ConvertMapValStrIf(outMap)), nil
 }
 
 // radReplyAppendAttributes appends attributes to a RADIUS reply based on predefined template

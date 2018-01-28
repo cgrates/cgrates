@@ -26,7 +26,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
 )
@@ -369,8 +369,8 @@ func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]interface{}
 }
 
 // V1AuthorizeArgs returns the arguments used in SMGv1.Authorize
-func (fsev FSEvent) V1AuthorizeArgs() (args *sessionmanager.V1AuthorizeArgs) {
-	args = &sessionmanager.V1AuthorizeArgs{ // defaults
+func (fsev FSEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
+	args = &sessions.V1AuthorizeArgs{ // defaults
 		GetMaxUsage: true,
 		CGREvent: utils.CGREvent{
 			Tenant: fsev.GetTenant(utils.META_DEFAULT),
@@ -398,8 +398,8 @@ func (fsev FSEvent) V1AuthorizeArgs() (args *sessionmanager.V1AuthorizeArgs) {
 }
 
 // V1InitSessionArgs returns the arguments used in SessionSv1.InitSession
-func (fsev FSEvent) V1InitSessionArgs() (args *sessionmanager.V1InitSessionArgs) {
-	args = &sessionmanager.V1InitSessionArgs{ // defaults
+func (fsev FSEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
+	args = &sessions.V1InitSessionArgs{ // defaults
 		InitSession: true,
 		CGREvent: utils.CGREvent{
 			Tenant: fsev.GetTenant(utils.META_DEFAULT),
@@ -424,8 +424,8 @@ func (fsev FSEvent) V1InitSessionArgs() (args *sessionmanager.V1InitSessionArgs)
 }
 
 // V1TerminateSessionArgs returns the arguments used in SMGv1.TerminateSession
-func (fsev FSEvent) V1TerminateSessionArgs() (args *sessionmanager.V1TerminateSessionArgs) {
-	args = &sessionmanager.V1TerminateSessionArgs{ // defaults
+func (fsev FSEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionArgs) {
+	args = &sessions.V1TerminateSessionArgs{ // defaults
 		TerminateSession: true,
 		CGREvent: utils.CGREvent{
 			Tenant: fsev.GetTenant(utils.META_DEFAULT),

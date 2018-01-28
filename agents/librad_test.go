@@ -25,7 +25,7 @@ import (
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/radigo"
 )
@@ -235,7 +235,7 @@ func TestRadReqAsSMGEvent(t *testing.T) {
 			Value: utils.ParseRSRFieldsMustCompile("Event-Timestamp;^|;Ascend-User-Acct-Time", utils.INFIELD_SEP)},
 	}
 
-	eSMGEv := sessionmanager.SMGenericEvent{
+	eSMGEv := sessions.SMGenericEvent{
 		utils.EVENT_NAME:  EvRadiusReq,
 		utils.TOR:         utils.VOICE,
 		utils.OriginID:    "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-75c2f57b-51585361",
