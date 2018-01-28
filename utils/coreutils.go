@@ -454,10 +454,6 @@ func BoolPointer(b bool) *bool {
 	return &b
 }
 
-func Float64SlicePointer(slc []float64) *[]float64 {
-	return &slc
-}
-
 func StringMapPointer(sm StringMap) *StringMap {
 	return &sm
 }

@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package engine
 
+/*
 import (
 	"reflect"
 	"testing"
@@ -27,12 +28,12 @@ import (
 )
 
 var (
-	atrPs AttributeProfiles
-	sev   *utils.CGREvent
-	srv   AttributeService
-	dmAtr *DataManager
-)
+	cloneExpTime time.Time
+	expTime      = time.Now().Add(time.Duration(20 * time.Minute))
+	srv          AttributeService
+	dmAtr        *DataManager
 
+<<<<<<< HEAD
 func TestPopulateAttrService(t *testing.T) {
 	var filters1 []*RequestFilter
 	var filters2 []*RequestFilter
@@ -45,6 +46,56 @@ func TestPopulateAttrService(t *testing.T) {
 	expTime := time.Now().Add(time.Duration(20 * time.Minute))
 	if err := utils.Clone(expTime, &cloneExpTime); err != nil {
 		t.Error(err)
+=======
+	context = utils.MetaRating
+
+	attrMap = map[string]map[string]*Attribute{
+		"FL1": map[string]*Attribute{
+			"In1": &Attribute{
+				FieldName:  "FL1",
+				Initial:    "In1",
+				Substitute: "Al1",
+				Append:     true,
+			},
+		},
+	}
+
+	sev = &utils.CGREvent{
+		Tenant:  config.CgrConfig().DefaultTenant,
+		ID:      "attribute_event",
+		Context: &context,
+		Event: map[string]interface{}{
+			"Attribute":      "AttributeProfile1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			"UsageInterval":  "1s",
+			"PddInterval":    "1s",
+			"Weight":         "20.0",
+		},
+	}
+	sev2 = &utils.CGREvent{
+		Tenant:  config.CgrConfig().DefaultTenant,
+		ID:      "attribute_event",
+		Context: &context,
+		Event: map[string]interface{}{
+			"Attribute": "AttributeProfile2",
+		},
+	}
+	sev3 = &utils.CGREvent{
+		Tenant:  config.CgrConfig().DefaultTenant,
+		ID:      "attribute_event",
+		Context: &context,
+		Event: map[string]interface{}{
+			"Attribute": "AttributeProfilePrefix",
+		},
+	}
+	sev4 = &utils.CGREvent{
+		Tenant:  config.CgrConfig().DefaultTenant,
+		ID:      "attribute_event",
+		Context: &context,
+		Event: map[string]interface{}{
+			"Weight": "200.0",
+		},
+>>>>>>> Edwardro22-master
 	}
 	mapSubstitutes := make(map[string]map[interface{}]*Attribute)
 	mapSubstitutes["FL1"] = make(map[interface{}]*Attribute)
@@ -95,8 +146,77 @@ func TestPopulateAttrService(t *testing.T) {
 			Weight:     20,
 			attributes: mapSubstitutes,
 		},
+		&AttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "attributeprofile3",
+			Contexts:  []string{context},
+			FilterIDs: []string{"preffilter1"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     cloneExpTime,
+			},
+			Attributes: attrMap,
+			Weight:     20,
+		},
+		&AttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "attributeprofile4",
+			Contexts:  []string{context},
+			FilterIDs: []string{"defaultf1"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     cloneExpTime,
+			},
+			Attributes: attrMap,
+			Weight:     20,
+		},
 	}
-	x, err := NewRequestFilter(MetaString, "attributeprofile1", []string{"Attribute"})
+)
+
+func TestAttributeCache(t *testing.T) {
+	//Need clone because time.Now adds extra information that DeepEqual doesn't like
+	if err := utils.Clone(expTime, &cloneExpTime); err != nil {
+		t.Error(err)
+	}
+	data, _ := NewMapStorage()
+	dmAtr = NewDataManager(data)
+	for _, atr := range atrPs {
+		if err = dmAtr.SetAttributeProfile(atr, false); err != nil {
+			t.Errorf("Error: %+v", err)
+		}
+	}
+	//Test each attribute from cache
+	for _, atr := range atrPs {
+		if tempAttr, err := dmAtr.GetAttributeProfile(atr.Tenant, atr.ID, false, utils.NonTransactional); err != nil {
+			t.Errorf("Error: %+v", err)
+		} else if !reflect.DeepEqual(atr, tempAttr) {
+			t.Errorf("Expecting: %+v, received: %+v", atr, tempAttr)
+		}
+	}
+}
+
+func TestAttributePopulateAttrService(t *testing.T) {
+	var filters1 []*RequestFilter
+	var filters2 []*RequestFilter
+	var preffilter []*RequestFilter
+	var defaultf []*RequestFilter
+	second := 1 * time.Second
+	//refresh the DM
+	data, _ := NewMapStorage()
+	dmAtr = NewDataManager(data)
+	srv = AttributeService{
+		dm:      dmAtr,
+		filterS: &FilterS{dm: dmAtr},
+	}
+	ref := NewReqFilterIndexer(dmAtr, utils.AttributeProfilePrefix,
+		utils.ConcatenatedKey(config.CgrConfig().DefaultTenant, utils.MetaRating))
+	for _, atr := range atrPs {
+		if err = dmAtr.SetAttributeProfile(atr, false); err != nil {
+			t.Errorf("Error: %+v", err)
+		}
+	}
+	//filter1
+	x, err := NewRequestFilter(MetaString, "Attribute", []string{"AttributeProfile1"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -111,44 +231,39 @@ func TestPopulateAttrService(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	filters1 = append(filters1, x)
+	filter1 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter1", RequestFilters: filters1}
+	dmAtr.SetFilter(filter1)
+	ref.IndexTPFilter(FilterToTPFilter(filter1), "attributeprofile1")
 
-	x, err = NewRequestFilter(MetaString, "attributeprofile2", []string{"Attribute"})
+	//filter2
+	x, err = NewRequestFilter(MetaString, "Attribute", []string{"AttributeProfile2"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	filters2 = append(filters2, x)
-	filter1 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter1", RequestFilters: filters1}
 	filter2 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter2", RequestFilters: filters2}
-	dmAtr.SetFilter(filter1)
 	dmAtr.SetFilter(filter2)
-	srv = AttributeService{
-		dm:                  dmAtr,
-		filterS:             &FilterS{dm: dmAtr},
-		stringIndexedFields: &[]string{"attributeprofile1", "attributeprofile2"},
-		//prefixIndexedFields: &[]string{},
-	}
-	sev = &utils.CGREvent{
-		Tenant:  "cgrates.org",
-		ID:      "attribute_event",
-		Context: &context,
-		Event: map[string]interface{}{
-			"attributeprofile1": "Attribute",
-			"attributeprofile2": "Attribute",
-			utils.AnswerTime:    time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-			"UsageInterval":     "1s",
-			"PddInterval":       "1s",
-			"Weight":            "20.0",
-		},
-	}
-	for _, atr := range atrPs {
-		if err = dmAtr.SetAttributeProfile(atr, true); err != nil {
-			t.Errorf("Error: %+v", err)
-		}
-	}
-	prefix := utils.ConcatenatedKey(sev.Tenant, *sev.Context)
-	ref := NewReqFilterIndexer(dmAtr, utils.AttributeProfilePrefix, prefix)
-	ref.IndexTPFilter(FilterToTPFilter(filter1), "attributeprofile1")
 	ref.IndexTPFilter(FilterToTPFilter(filter2), "attributeprofile2")
+
+	//prefix filter
+	x, err = NewRequestFilter(MetaPrefix, "Attribute", []string{"AttributeProfilePrefix"})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	preffilter = append(preffilter, x)
+	preffilter1 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "preffilter1", RequestFilters: preffilter}
+	dmAtr.SetFilter(preffilter1)
+	ref.IndexTPFilter(FilterToTPFilter(preffilter1), "attributeprofile3")
+
+	//default filter
+	x, err = NewRequestFilter(MetaGreaterOrEqual, "Weight", []string{"200.00"})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	defaultf = append(defaultf, x)
+	defaultf1 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "defaultf1", RequestFilters: defaultf}
+	dmAtr.SetFilter(defaultf1)
+	ref.IndexTPFilter(FilterToTPFilter(defaultf1), "attributeprofile4")
 	err = ref.StoreIndexes()
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -156,63 +271,142 @@ func TestPopulateAttrService(t *testing.T) {
 }
 
 func TestAttributeMatchingAttributeProfilesForEvent(t *testing.T) {
-	atrpl, err := srv.matchingAttributeProfilesForEvent(sev)
+	atrp, err := srv.matchingAttributeProfilesForEvent(sev)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
+	if !reflect.DeepEqual(atrPs[0], atrp[0]) {
+		t.Errorf("Expecting: %+v, received: %+v ", atrPs[0], atrp[0])
+	}
+	atrp, err = srv.matchingAttributeProfilesForEvent(sev2)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+<<<<<<< HEAD
 	if !reflect.DeepEqual(atrPs[0], atrpl[0]) && !reflect.DeepEqual(atrPs[0], atrpl[1]) {
 		t.Errorf("Expecting: %+v, received: %+v ", utils.ToJSON(atrPs[0]), utils.ToJSON(atrpl[0]))
 	} else if !reflect.DeepEqual(atrPs[1], atrpl[1]) && !reflect.DeepEqual(atrPs[1], atrpl[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(atrPs), utils.ToJSON(atrpl))
+=======
+	if !reflect.DeepEqual(atrPs[1], atrp[0]) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(atrPs), utils.ToJSON(atrp))
+	}
+	atrp, err = srv.matchingAttributeProfilesForEvent(sev3)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(atrPs[2], atrp[0]) {
+		t.Errorf("Expecting: %+v, received: %+v ", atrPs[2], atrp[0])
+	}
+	atrp, err = srv.matchingAttributeProfilesForEvent(sev4)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(atrPs[3], atrp[0]) {
+		t.Errorf("Expecting: %+v, received: %+v ", atrPs[3], atrp[0])
+>>>>>>> Edwardro22-master
 	}
 }
 
 func TestAttributeProfileForEvent(t *testing.T) {
-	context := utils.MetaRating
-	sev = &utils.CGREvent{
-		Tenant:  "cgrates.org",
-		ID:      "attribute_event",
-		Context: &context,
-		Event: map[string]interface{}{
-			"attributeprofile1": "Attribute",
-			"UsageInterval":     "1s",
-			"Weight":            "9.0",
-		},
-	}
-	atrpl, err := srv.attributeProfileForEvent(sev)
+	atrp, err := srv.attributeProfileForEvent(sev)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
+	if !reflect.DeepEqual(atrPs[0], atrp) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(atrPs[0]), utils.ToJSON(atrp))
+	}
+
+	atrp, err = srv.attributeProfileForEvent(sev2)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(atrPs[1], atrp) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(atrPs[1]), utils.ToJSON(atrp))
+
+	}
+	atrp, err = srv.attributeProfileForEvent(sev3)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(atrPs[2], atrp) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(atrPs[2]), utils.ToJSON(atrp))
+	}
+	atrp, err = srv.attributeProfileForEvent(sev4)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+<<<<<<< HEAD
 	if !reflect.DeepEqual(atrPs[0], atrpl) && !reflect.DeepEqual(atrPs[1], atrpl) {
 		t.Errorf("Expecting: %+v, received: %+v", atrPs[0], atrpl)
+=======
+	if !reflect.DeepEqual(atrPs[3], atrp) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(atrPs[3]), utils.ToJSON(atrp))
+>>>>>>> Edwardro22-master
 	}
 }
 
 func TestAttributeProcessEvent(t *testing.T) {
-	context := utils.MetaRating
-	sev = &utils.CGREvent{
-		Tenant:  "cgrates.org",
-		ID:      "attribute_event",
-		Context: &context,
-		Event: map[string]interface{}{
-			"attributeprofile1": "Attribute",
-			"UsageInterval":     "1s",
-			"Weight":            "9.0",
-		},
-	}
+
 	eRply := &AttrSProcessEventReply{
 		MatchedProfile: "attributeprofile1",
 		CGREvent:       sev,
 	}
-	atrpl, err := srv.processEvent(sev)
+	atrp, err := srv.processEvent(sev)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if !reflect.DeepEqual(eRply.MatchedProfile, atrpl.MatchedProfile) {
-		t.Errorf("Expecting: %+v, received: %+v", eRply.MatchedProfile, atrpl.MatchedProfile)
-	} else if !reflect.DeepEqual(eRply.AlteredFields, atrpl.AlteredFields) {
-		t.Errorf("Expecting: %+v, received: %+v", eRply.AlteredFields, atrpl.AlteredFields)
-	} else if !reflect.DeepEqual(eRply.CGREvent, atrpl.CGREvent) {
-		t.Errorf("Expecting: %+v, received: %+v", eRply.CGREvent, atrpl.CGREvent)
+	if !reflect.DeepEqual(eRply.MatchedProfile, atrp.MatchedProfile) {
+		t.Errorf("Expecting: %+v, received: %+v", eRply.MatchedProfile, atrp.MatchedProfile)
+	} else if !reflect.DeepEqual(eRply.AlteredFields, atrp.AlteredFields) {
+		t.Errorf("Expecting: %+v, received: %+v", eRply.AlteredFields, atrp.AlteredFields)
+	} else if !reflect.DeepEqual(eRply.CGREvent, atrp.CGREvent) {
+		t.Errorf("Expecting: %+v, received: %+v", eRply.CGREvent, atrp.CGREvent)
+	}
+	eRply = &AttrSProcessEventReply{
+		MatchedProfile: "attributeprofile2",
+		CGREvent:       sev2,
+	}
+	atrp, err = srv.processEvent(sev2)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(eRply.MatchedProfile, atrp.MatchedProfile) {
+		t.Errorf("Expecting: %+v, received: %+v", eRply.MatchedProfile, atrp.MatchedProfile)
+	} else if !reflect.DeepEqual(eRply.AlteredFields, atrp.AlteredFields) {
+		t.Errorf("Expecting: %+v, received: %+v", eRply.AlteredFields, atrp.AlteredFields)
+	} else if !reflect.DeepEqual(eRply.CGREvent, atrp.CGREvent) {
+		t.Errorf("Expecting: %+v, received: %+v", eRply.CGREvent, atrp.CGREvent)
+	}
+	eRply = &AttrSProcessEventReply{
+		MatchedProfile: "attributeprofile3",
+		CGREvent:       sev3,
+	}
+	atrp, err = srv.processEvent(sev3)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(eRply.MatchedProfile, atrp.MatchedProfile) {
+		t.Errorf("Expecting: %+v, received: %+v", eRply.MatchedProfile, atrp.MatchedProfile)
+	} else if !reflect.DeepEqual(eRply.AlteredFields, atrp.AlteredFields) {
+		t.Errorf("Expecting: %+v, received: %+v", eRply.AlteredFields, atrp.AlteredFields)
+	} else if !reflect.DeepEqual(eRply.CGREvent, atrp.CGREvent) {
+		t.Errorf("Expecting: %+v, received: %+v", eRply.CGREvent, atrp.CGREvent)
+	}
+	eRply = &AttrSProcessEventReply{
+		MatchedProfile: "attributeprofile4",
+		CGREvent:       sev4,
+	}
+	atrp, err = srv.processEvent(sev4)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(eRply.MatchedProfile, atrp.MatchedProfile) {
+		t.Errorf("Expecting: %+v, received: %+v", eRply.MatchedProfile, atrp.MatchedProfile)
+	} else if !reflect.DeepEqual(eRply.AlteredFields, atrp.AlteredFields) {
+		t.Errorf("Expecting: %+v, received: %+v", eRply.AlteredFields, atrp.AlteredFields)
+	} else if !reflect.DeepEqual(eRply.CGREvent, atrp.CGREvent) {
+		t.Errorf("Expecting: %+v, received: %+v", eRply.CGREvent, atrp.CGREvent)
 	}
 }
+*/
