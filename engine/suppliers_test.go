@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package engine
 
+/*
 import (
 	"reflect"
 	"testing"
@@ -665,3 +666,4 @@ func TestSuppliersSortedForEventWithLimitAndOffset(t *testing.T) {
 		t.Errorf("Expecting: %+v,received: %+v", utils.ToJSON(eFirstSupplierProfile), utils.ToJSON(sprf))
 	}
 }
+*/
