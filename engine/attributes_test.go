@@ -17,7 +17,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package engine
 
-/*
 import (
 	"reflect"
 	"testing"
@@ -28,29 +27,15 @@ import (
 )
 
 var (
-	cloneExpTime time.Time
-	expTime      = time.Now().Add(time.Duration(20 * time.Minute))
-	srv          AttributeService
-	dmAtr        *DataManager
+	cloneExpTimeAttributes time.Time
+	expTimeAttributes      = time.Now().Add(time.Duration(20 * time.Minute))
+	srv                    AttributeService
+	dmAtr                  *DataManager
 
-<<<<<<< HEAD
-func TestPopulateAttrService(t *testing.T) {
-	var filters1 []*RequestFilter
-	var filters2 []*RequestFilter
-	second := 1 * time.Second
-	data, _ := NewMapStorage()
-	dmAtr = NewDataManager(data)
-	context := utils.MetaRating
-	//Need clone because time.Now add extra information and DeepEqual don't like
-	var cloneExpTime time.Time
-	expTime := time.Now().Add(time.Duration(20 * time.Minute))
-	if err := utils.Clone(expTime, &cloneExpTime); err != nil {
-		t.Error(err)
-=======
 	context = utils.MetaRating
 
-	attrMap = map[string]map[string]*Attribute{
-		"FL1": map[string]*Attribute{
+	mapSubstitutes = map[string]map[interface{}]*Attribute{
+		"FL1": map[interface{}]*Attribute{
 			"In1": &Attribute{
 				FieldName:  "FL1",
 				Initial:    "In1",
@@ -95,16 +80,8 @@ func TestPopulateAttrService(t *testing.T) {
 		Event: map[string]interface{}{
 			"Weight": "200.0",
 		},
->>>>>>> Edwardro22-master
 	}
-	mapSubstitutes := make(map[string]map[interface{}]*Attribute)
-	mapSubstitutes["FL1"] = make(map[interface{}]*Attribute)
-	mapSubstitutes["FL1"]["In1"] = &Attribute{
-		FieldName:  "FL1",
-		Initial:    "In1",
-		Substitute: "Al1",
-		Append:     true,
-	}
+
 	atrPs = AttributeProfiles{
 		&AttributeProfile{
 			Tenant:    "cgrates.org",
@@ -113,7 +90,7 @@ func TestPopulateAttrService(t *testing.T) {
 			FilterIDs: []string{"filter1"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     cloneExpTime,
+				ExpiryTime:     cloneExpTimeAttributes,
 			},
 			Attributes: []*Attribute{
 				&Attribute{
@@ -133,7 +110,7 @@ func TestPopulateAttrService(t *testing.T) {
 			FilterIDs: []string{"filter2"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     cloneExpTime,
+				ExpiryTime:     cloneExpTimeAttributes,
 			},
 			Attributes: []*Attribute{
 				&Attribute{
@@ -153,9 +130,17 @@ func TestPopulateAttrService(t *testing.T) {
 			FilterIDs: []string{"preffilter1"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     cloneExpTime,
+				ExpiryTime:     cloneExpTimeAttributes,
 			},
-			Attributes: attrMap,
+			Attributes: []*Attribute{
+				&Attribute{
+					FieldName:  "FL1",
+					Initial:    "In1",
+					Substitute: "Al1",
+					Append:     true,
+				},
+			},
+			attributes: mapSubstitutes,
 			Weight:     20,
 		},
 		&AttributeProfile{
@@ -165,9 +150,17 @@ func TestPopulateAttrService(t *testing.T) {
 			FilterIDs: []string{"defaultf1"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     cloneExpTime,
+				ExpiryTime:     cloneExpTimeAttributes,
 			},
-			Attributes: attrMap,
+			Attributes: []*Attribute{
+				&Attribute{
+					FieldName:  "FL1",
+					Initial:    "In1",
+					Substitute: "Al1",
+					Append:     true,
+				},
+			},
+			attributes: mapSubstitutes,
 			Weight:     20,
 		},
 	}
@@ -175,7 +168,7 @@ func TestPopulateAttrService(t *testing.T) {
 
 func TestAttributeCache(t *testing.T) {
 	//Need clone because time.Now adds extra information that DeepEqual doesn't like
-	if err := utils.Clone(expTime, &cloneExpTime); err != nil {
+	if err := utils.Clone(expTimeAttributes, &cloneExpTimeAttributes); err != nil {
 		t.Error(err)
 	}
 	data, _ := NewMapStorage()
@@ -282,12 +275,6 @@ func TestAttributeMatchingAttributeProfilesForEvent(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-<<<<<<< HEAD
-	if !reflect.DeepEqual(atrPs[0], atrpl[0]) && !reflect.DeepEqual(atrPs[0], atrpl[1]) {
-		t.Errorf("Expecting: %+v, received: %+v ", utils.ToJSON(atrPs[0]), utils.ToJSON(atrpl[0]))
-	} else if !reflect.DeepEqual(atrPs[1], atrpl[1]) && !reflect.DeepEqual(atrPs[1], atrpl[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(atrPs), utils.ToJSON(atrpl))
-=======
 	if !reflect.DeepEqual(atrPs[1], atrp[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(atrPs), utils.ToJSON(atrp))
 	}
@@ -304,7 +291,6 @@ func TestAttributeMatchingAttributeProfilesForEvent(t *testing.T) {
 	}
 	if !reflect.DeepEqual(atrPs[3], atrp[0]) {
 		t.Errorf("Expecting: %+v, received: %+v ", atrPs[3], atrp[0])
->>>>>>> Edwardro22-master
 	}
 }
 
@@ -336,13 +322,8 @@ func TestAttributeProfileForEvent(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-<<<<<<< HEAD
-	if !reflect.DeepEqual(atrPs[0], atrpl) && !reflect.DeepEqual(atrPs[1], atrpl) {
-		t.Errorf("Expecting: %+v, received: %+v", atrPs[0], atrpl)
-=======
 	if !reflect.DeepEqual(atrPs[3], atrp) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(atrPs[3]), utils.ToJSON(atrp))
->>>>>>> Edwardro22-master
 	}
 }
 
@@ -409,4 +390,3 @@ func TestAttributeProcessEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eRply.CGREvent, atrp.CGREvent)
 	}
 }
-*/
