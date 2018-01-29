@@ -17,7 +17,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package engine
 
-/*
 import (
 	"reflect"
 	"testing"
@@ -28,6 +27,9 @@ import (
 )
 
 var (
+	cloneExpTimeSuppliers time.Time
+	expTimeSuppliers      = time.Now().Add(time.Duration(20 * time.Minute))
+
 	splserv SupplierService
 	dmSPP   *DataManager
 	sppTest = SupplierProfiles{
@@ -37,7 +39,7 @@ var (
 			FilterIDs: []string{"filter3"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     cloneExpTime,
+				ExpiryTime:     cloneExpTimeSuppliers,
 			},
 			Sorting:       utils.MetaWeight,
 			SortingParams: []string{},
@@ -62,7 +64,7 @@ var (
 			FilterIDs: []string{"filter4"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     cloneExpTime,
+				ExpiryTime:     cloneExpTimeSuppliers,
 			},
 			Sorting:       utils.MetaWeight,
 			SortingParams: []string{},
@@ -107,7 +109,7 @@ var (
 			FilterIDs: []string{"preffilter2"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     cloneExpTime,
+				ExpiryTime:     cloneExpTimeSuppliers,
 			},
 			Sorting:       utils.MetaWeight,
 			SortingParams: []string{},
@@ -132,7 +134,7 @@ var (
 			FilterIDs: []string{"defaultf2"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     cloneExpTime,
+				ExpiryTime:     cloneExpTimeSuppliers,
 			},
 			Sorting:       utils.MetaWeight,
 			SortingParams: []string{},
@@ -331,7 +333,7 @@ func TestSuppliersSort(t *testing.T) {
 
 func TestSuppliersCache(t *testing.T) {
 	//Need clone because time.Now adds extra information that DeepEqual doesn't like
-	if err := utils.Clone(expTime, &cloneExpTime); err != nil {
+	if err := utils.Clone(expTimeSuppliers, &cloneExpTimeSuppliers); err != nil {
 		t.Error(err)
 	}
 	data, _ := NewMapStorage()
@@ -666,4 +668,3 @@ func TestSuppliersSortedForEventWithLimitAndOffset(t *testing.T) {
 		t.Errorf("Expecting: %+v,received: %+v", utils.ToJSON(eFirstSupplierProfile), utils.ToJSON(sprf))
 	}
 }
-*/
