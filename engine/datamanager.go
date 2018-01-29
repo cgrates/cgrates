@@ -996,8 +996,8 @@ func (dm *DataManager) GetFilterIndexes(dbKey, filterType string, fldNameVal map
 	return dm.DataDB().GetFilterIndexesDrv(dbKey, filterType, fldNameVal)
 }
 
-func (dm *DataManager) SetFilterIndexes(dbKey string, indexes map[string]utils.StringMap) (err error) {
-	return dm.DataDB().SetFilterIndexesDrv(dbKey, indexes)
+func (dm *DataManager) SetFilterIndexes(dbKey string, indexes map[string]utils.StringMap, commit bool, transactionID string) (err error) {
+	return dm.DataDB().SetFilterIndexesDrv(dbKey, indexes, commit, transactionID)
 }
 
 func (dm *DataManager) RemoveFilterIndexes(dbKey string) (err error) {
@@ -1008,8 +1008,8 @@ func (dm *DataManager) GetFilterReverseIndexes(dbKey string, fldNameVal map[stri
 	return dm.DataDB().GetFilterReverseIndexesDrv(dbKey, fldNameVal)
 }
 
-func (dm *DataManager) SetFilterReverseIndexes(dbKey string, indexes map[string]utils.StringMap) (err error) {
-	return dm.DataDB().SetFilterReverseIndexesDrv(dbKey, indexes)
+func (dm *DataManager) SetFilterReverseIndexes(dbKey string, indexes map[string]utils.StringMap, commit bool, transactionID string) (err error) {
+	return dm.DataDB().SetFilterReverseIndexesDrv(dbKey, indexes, commit, transactionID)
 }
 
 func (dm *DataManager) RemoveFilterReverseIndexes(dbKey string) (err error) {
