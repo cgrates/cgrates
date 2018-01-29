@@ -235,8 +235,8 @@ func (sS *StatService) processEvent(ev *utils.CGREvent) (err error) {
 		}
 		if sS.thdS != nil {
 			var thIDs []string
-			if len(sq.sqPrfl.Thresholds) != 0 {
-				thIDs = sq.sqPrfl.Thresholds
+			if len(sq.sqPrfl.ThresholdIDs) != 0 {
+				thIDs = sq.sqPrfl.ThresholdIDs
 			}
 			thEv := &ArgsProcessEvent{
 				ThresholdIDs: thIDs,

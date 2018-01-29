@@ -94,11 +94,11 @@ func TestV1StatsAsStats(t *testing.T) {
 			&utils.MetricWithParams{MetricID: "*acd", Parameters: ""},
 			&utils.MetricWithParams{MetricID: "*acc", Parameters: ""},
 		},
-		Blocker:    false,
-		Thresholds: []string{"TestB"},
-		Stored:     true,
-		Weight:     float64(0),
-		MinItems:   0,
+		Blocker:      false,
+		ThresholdIDs: []string{"TestB"},
+		Stored:       true,
+		Weight:       float64(0),
+		MinItems:     0,
 	}
 	fltr, _, newsqp, err := v1Sts.AsStatQP()
 	if err != nil {
@@ -122,8 +122,8 @@ func TestV1StatsAsStats(t *testing.T) {
 	if !reflect.DeepEqual(sqp.Metrics, newsqp.Metrics) {
 		t.Errorf("Expecting: %+v, received: %+v", sqp.Metrics, newsqp.Metrics)
 	}
-	if !reflect.DeepEqual(sqp.Thresholds, newsqp.Thresholds) {
-		t.Errorf("Expecting: %+v, received: %+v", sqp.Thresholds, newsqp.Thresholds)
+	if !reflect.DeepEqual(sqp.ThresholdIDs, newsqp.ThresholdIDs) {
+		t.Errorf("Expecting: %+v, received: %+v", sqp.ThresholdIDs, newsqp.ThresholdIDs)
 	}
 	if !reflect.DeepEqual(sqp.Blocker, newsqp.Blocker) {
 		t.Errorf("Expecting: %+v, received: %+v", sqp.Blocker, newsqp.Blocker)

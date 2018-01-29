@@ -436,7 +436,7 @@ CREATE TABLE tp_stats (
   `stored` BOOLEAN NOT NULL,
   `weight` decimal(8,2) NOT NULL,
   `min_items` int(11) NOT NULL,
-  `thresholds` varchar(64) NOT NULL,
+  `threshold_ids` varchar(64) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),

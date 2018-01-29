@@ -1993,14 +1993,14 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 				metricmap[tp.Tenant][tp.ID][metric] = &utils.MetricWithParams{MetricID: metric, Parameters: tp.Parameters}
 			}
 		}
-		if tp.Thresholds != "" {
+		if tp.ThresholdIDs != "" {
 			if _, has := thresholdmap[tp.Tenant]; !has {
 				thresholdmap[tp.Tenant] = make(map[string]map[string]bool)
 			}
 			if _, has := thresholdmap[tp.Tenant][tp.ID]; !has {
 				thresholdmap[tp.Tenant][tp.ID] = make(map[string]bool)
 			}
-			trshSplt := strings.Split(tp.Thresholds, utils.INFIELD_SEP)
+			trshSplt := strings.Split(tp.ThresholdIDs, utils.INFIELD_SEP)
 			for _, trsh := range trshSplt {
 				thresholdmap[tp.Tenant][tp.ID][trsh] = true
 			}
@@ -2051,7 +2051,7 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 					for id, _ := range thresholdmap[st.Tenant] {
 						if st.ID == id {
 							for trsh, _ := range thresholdmap[st.Tenant][id] {
-								st.Thresholds = append(st.Thresholds, trsh)
+								st.ThresholdIDs = append(st.ThresholdIDs, trsh)
 							}
 						}
 					}
@@ -2097,11 +2097,11 @@ func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
 					}
 					mdl.Metrics += val.MetricID
 				}
-				for i, val := range st.Thresholds {
+				for i, val := range st.ThresholdIDs {
 					if i != 0 {
-						mdl.Thresholds += utils.INFIELD_SEP
+						mdl.ThresholdIDs += utils.INFIELD_SEP
 					}
-					mdl.Thresholds += val
+					mdl.ThresholdIDs += val
 				}
 				if st.ActivationInterval != nil {
 					if st.ActivationInterval.ActivationTime != "" {
@@ -2135,8 +2135,8 @@ func APItoStats(tpST *utils.TPStats, timezone string) (st *StatQueueProfile, err
 			return nil, err
 		}
 	}
-	for _, trh := range tpST.Thresholds {
-		st.Thresholds = append(st.Thresholds, trh)
+	for _, trh := range tpST.ThresholdIDs {
+		st.ThresholdIDs = append(st.ThresholdIDs, trh)
 	}
 	for _, fltr := range tpST.FilterIDs {
 		st.FilterIDs = append(st.FilterIDs, fltr)

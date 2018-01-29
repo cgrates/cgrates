@@ -432,7 +432,7 @@ CREATE TABLE tp_stats (
   "stored" BOOLEAN NOT NULL,
   "weight" decimal(8,2) NOT NULL,
   "min_items" INTEGER NOT NULL,
-  "thresholds" varchar(64) NOT NULL,
+  "threshold_ids" varchar(64) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tp_stats_idx ON tp_stats (tpid);

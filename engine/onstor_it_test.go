@@ -116,7 +116,7 @@ func TestOnStorITRedis(t *testing.T) {
 }
 
 func TestOnStorITMongoConnect(t *testing.T) {
-	sleepDelay = 50 * time.Millisecond
+	sleepDelay = 100 * time.Millisecond
 	cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "cdrsv2mongo")
 	mgoITCfg, err := config.NewCGRConfigFromFolder(cdrsMongoCfgPath)
 	if err != nil {
@@ -2025,8 +2025,8 @@ func testOnStorITStatQueueProfile(t *testing.T) {
 		Metrics: []*utils.MetricWithParams{
 			&utils.MetricWithParams{},
 		},
-		Stored:     true,
-		Thresholds: []string{"Thresh1"},
+		Stored:       true,
+		ThresholdIDs: []string{"Thresh1"},
 	}
 	if _, rcvErr := onStor.GetStatQueueProfile(sq.Tenant, sq.ID,
 		false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
@@ -2056,7 +2056,7 @@ func testOnStorITStatQueueProfile(t *testing.T) {
 		t.Errorf("Expected : %+v, but received %+v", expectedR, itm)
 	}
 	//update
-	sq.Thresholds = []string{"TH1", "TH2"}
+	sq.ThresholdIDs = []string{"TH1", "TH2"}
 	if err := onStor.SetStatQueueProfile(sq, false); err != nil {
 		t.Error(err)
 	}

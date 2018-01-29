@@ -1342,7 +1342,7 @@ type TPStats struct {
 	Stored             bool
 	Weight             float64
 	MinItems           int
-	Thresholds         []string
+	ThresholdIDs       []string
 }
 
 type MetricWithParams struct {
