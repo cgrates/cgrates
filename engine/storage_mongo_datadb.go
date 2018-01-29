@@ -167,7 +167,7 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 			Background: false,
 			Sparse:     false,
 		}
-		for _, col := range []string{colRsP, colRes} {
+		for _, col := range []string{colRsP, colRes, colSqs, colSqp, colTps, colThs, colSpp, colAttr, colFlt} {
 			if err = db.C(col).EnsureIndex(idx); err != nil {
 				return
 			}
