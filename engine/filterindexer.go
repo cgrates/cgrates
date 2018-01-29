@@ -131,12 +131,12 @@ func (rfi *ReqFilterIndexer) cacheRemItemType() {
 func (rfi *ReqFilterIndexer) StoreIndexes() (err error) {
 	if err = rfi.dm.SetFilterIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
-		rfi.indexes); err != nil {
+		rfi.indexes, false, utils.NonTransactional); err != nil {
 		return
 	}
 	if err = rfi.dm.SetFilterReverseIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
-		rfi.reveseIndex); err != nil {
+		rfi.reveseIndex, false, utils.NonTransactional); err != nil {
 		return
 	}
 	rfi.cacheRemItemType()
@@ -201,12 +201,12 @@ func (rfi *ReqFilterIndexer) RemoveItemFromIndex(itemID string) (err error) {
 	rfi.reveseIndex[itemID] = make(utils.StringMap) //Force deleting in driver
 	if err = rfi.dm.SetFilterIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
-		rfi.indexes); err != nil {
+		rfi.indexes, false, utils.NonTransactional); err != nil {
 		return
 	}
 	if err = rfi.dm.SetFilterReverseIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
-		rfi.reveseIndex); err != nil {
+		rfi.reveseIndex, false, utils.NonTransactional); err != nil {
 		return
 	}
 	return

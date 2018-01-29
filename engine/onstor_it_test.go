@@ -88,6 +88,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITTestThresholdInlineFilterIndexing,
 	testOnStorITFlush,
 	testOnStorITTestAttributeSubstituteIface,
+	testOnStorITTestStoreFilterIndexesWithTransID,
 	//testOnStorITCacheActionTriggers,
 	//testOnStorITCacheAlias,
 	//testOnStorITCacheReverseAlias,
@@ -215,7 +216,7 @@ func testOnStorITSetFilterIndexes(t *testing.T) {
 	}
 	if err := onStor.SetFilterIndexes(
 		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
-		idxes); err != nil {
+		idxes, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 }
@@ -280,7 +281,7 @@ func testOnStorITGetFilterIndexes(t *testing.T) {
 	}
 	if err := onStor.SetFilterIndexes(
 		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
-		eIdxes); err != nil {
+		eIdxes, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 }
@@ -3263,4 +3264,60 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(attrProfile), utils.ToJSON(rcv))
 	}
+}
+
+func testOnStorITTestStoreFilterIndexesWithTransID(t *testing.T) {
+	tmpKey := "tmp_" + utils.ConcatenatedKey(GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false), "transaction1")
+	idxes := map[string]utils.StringMap{
+		"*string:Account:1001": utils.StringMap{
+			"RL1": true,
+		},
+		"*string:Account:1002": utils.StringMap{
+			"RL1": true,
+			"RL2": true,
+		},
+		"*string:Account:dan": utils.StringMap{
+			"RL2": true,
+		},
+		"*string:Subject:dan": utils.StringMap{
+			"RL2": true,
+			"RL3": true,
+		},
+		utils.ConcatenatedKey(utils.MetaDefault, utils.ANY, utils.ANY): utils.StringMap{
+			"RL4": true,
+			"RL5": true,
+		},
+	}
+	if err := onStor.SetFilterIndexes(
+		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
+		idxes, false, "transaction1"); err != nil {
+		t.Error(err)
+	}
+	if rcv, err := onStor.GetFilterIndexes(tmpKey, MetaString, nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(idxes, rcv) {
+			t.Errorf("Expecting: %+v, received: %+v", idxes, rcv)
+		}
+	}
+	//commit transaction
+	if err := onStor.SetFilterIndexes(
+		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
+		idxes, true, "transaction1"); err != nil {
+		t.Error(err)
+	}
+	//verify if old key was deleted
+	if _, err := onStor.GetFilterIndexes(tmpKey, MetaString, nil); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	//verify new key and check if data was moved
+	newKey := utils.ConcatenatedKey(GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false), "transaction1")
+	if rcv, err := onStor.GetFilterIndexes(newKey, MetaString, nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(idxes, rcv) {
+			t.Errorf("Expecting: %+v, received: %+v", idxes, rcv)
+		}
+	}
+
 }

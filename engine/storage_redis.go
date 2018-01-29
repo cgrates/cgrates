@@ -1385,29 +1385,37 @@ func (rs *RedisStorage) GetFilterIndexesDrv(dbKey, filterType string,
 }
 
 //SetFilterIndexesDrv stores Indexes into DataDB
-func (rs *RedisStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]utils.StringMap) (err error) {
-	mp := make(map[string]string)
-	nameValSls := []interface{}{dbKey}
-	for key, strMp := range indexes {
-		if len(strMp) == 0 { // remove with no more elements inside
-			nameValSls = append(nameValSls, key)
-			continue
-		}
-		if encodedMp, err := rs.ms.Marshal(strMp); err != nil {
-			return err
-		} else {
-			mp[key] = string(encodedMp)
-		}
+func (rs *RedisStorage) SetFilterIndexesDrv(originKey string, indexes map[string]utils.StringMap, commit bool, transactionID string) (err error) {
+	dbKey := originKey
+	if transactionID != "" {
+		dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
 	}
-	if len(nameValSls) != 1 {
-		if err = rs.Cmd("HDEL", nameValSls...).Err; err != nil {
-			return err
+	if commit && transactionID != "" {
+		return rs.Cmd("RENAME", dbKey, utils.ConcatenatedKey(originKey, transactionID)).Err
+	} else {
+		mp := make(map[string]string)
+		nameValSls := []interface{}{dbKey}
+		for key, strMp := range indexes {
+			if len(strMp) == 0 { // remove with no more elements inside
+				nameValSls = append(nameValSls, key)
+				continue
+			}
+			if encodedMp, err := rs.ms.Marshal(strMp); err != nil {
+				return err
+			} else {
+				mp[key] = string(encodedMp)
+			}
 		}
+		if len(nameValSls) != 1 {
+			if err = rs.Cmd("HDEL", nameValSls...).Err; err != nil {
+				return err
+			}
+		}
+		if len(mp) != 0 {
+			return rs.Cmd("HMSET", dbKey, mp).Err
+		}
+		return
 	}
-	if len(mp) != 0 {
-		return rs.Cmd("HMSET", dbKey, mp).Err
-	}
-	return
 }
 
 func (rs *RedisStorage) RemoveFilterIndexesDrv(id string) (err error) {
@@ -1452,30 +1460,37 @@ func (rs *RedisStorage) GetFilterReverseIndexesDrv(dbKey string,
 }
 
 //SetFilterReverseIndexesDrv stores ReverseIndexes into DataDB
-func (rs *RedisStorage) SetFilterReverseIndexesDrv(dbKey string, revIdx map[string]utils.StringMap) (err error) {
-	mp := make(map[string]string)
-	nameValSls := []interface{}{dbKey}
-	for key, strMp := range revIdx {
-		if len(strMp) == 0 { // remove with no more elements inside
-			nameValSls = append(nameValSls, key)
-			continue
-		}
-		if encodedMp, err := rs.ms.Marshal(strMp); err != nil {
-			return err
-		} else {
-			mp[key] = string(encodedMp)
-		}
+func (rs *RedisStorage) SetFilterReverseIndexesDrv(originKey string, revIdx map[string]utils.StringMap, commit bool, transactionID string) (err error) {
+	dbKey := originKey
+	if transactionID != "" {
+		dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
 	}
-	if len(nameValSls) != 1 {
-		if err = rs.Cmd("HDEL", nameValSls...).Err; err != nil {
-			return err
+	if commit && transactionID != "" {
+		return rs.Cmd("RENAME", dbKey, utils.ConcatenatedKey(originKey, transactionID)).Err
+	} else {
+		mp := make(map[string]string)
+		nameValSls := []interface{}{dbKey}
+		for key, strMp := range revIdx {
+			if len(strMp) == 0 { // remove with no more elements inside
+				nameValSls = append(nameValSls, key)
+				continue
+			}
+			if encodedMp, err := rs.ms.Marshal(strMp); err != nil {
+				return err
+			} else {
+				mp[key] = string(encodedMp)
+			}
 		}
+		if len(nameValSls) != 1 {
+			if err = rs.Cmd("HDEL", nameValSls...).Err; err != nil {
+				return err
+			}
+		}
+		if len(mp) != 0 {
+			return rs.Cmd("HMSET", dbKey, mp).Err
+		}
+		return
 	}
-
-	if len(mp) != 0 {
-		return rs.Cmd("HMSET", dbKey, mp).Err
-	}
-	return
 }
 
 //RemoveFilterReverseIndexesDrv removes ReverseIndexes for a specific itemID

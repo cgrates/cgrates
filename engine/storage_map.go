@@ -1268,15 +1268,29 @@ func (ms *MapStorage) GetFilterIndexesDrv(dbKey, filterType string,
 }
 
 //SetFilterIndexesDrv stores Indexes into DataDB
-func (ms *MapStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]utils.StringMap) (err error) {
+func (ms *MapStorage) SetFilterIndexesDrv(originKey string, indexes map[string]utils.StringMap, commit bool, transactionID string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	result, err := ms.ms.Marshal(indexes)
-	if err != nil {
-		return err
+	dbKey := originKey
+	if transactionID != "" {
+		dbKey = "tmp_" + utils.ConcatenatedKey(originKey, transactionID)
 	}
-	ms.dict[dbKey] = result
-	return
+	if commit && transactionID != "" {
+		delete(ms.dict, dbKey)
+		result, err := ms.ms.Marshal(indexes)
+		if err != nil {
+			return err
+		}
+		ms.dict[utils.ConcatenatedKey(originKey, transactionID)] = result
+		return nil
+	} else {
+		result, err := ms.ms.Marshal(indexes)
+		if err != nil {
+			return err
+		}
+		ms.dict[dbKey] = result
+		return nil
+	}
 }
 
 func (ms *MapStorage) RemoveFilterIndexesDrv(id string) (err error) {
@@ -1319,7 +1333,7 @@ func (ms *MapStorage) GetFilterReverseIndexesDrv(dbKey string,
 }
 
 //SetFilterReverseIndexesDrv stores ReverseIndexes into DataDB
-func (ms *MapStorage) SetFilterReverseIndexesDrv(dbKey string, indexes map[string]utils.StringMap) (err error) {
+func (ms *MapStorage) SetFilterReverseIndexesDrv(dbKey string, indexes map[string]utils.StringMap, commit bool, transactionID string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(indexes)
