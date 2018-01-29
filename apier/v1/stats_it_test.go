@@ -328,11 +328,11 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 				Parameters: "",
 			},
 		},
-		Thresholds: []string{"Val1", "Val2"},
-		Blocker:    true,
-		Stored:     true,
-		Weight:     20,
-		MinItems:   1,
+		ThresholdIDs: []string{"Val1", "Val2"},
+		Blocker:      true,
+		Stored:       true,
+		Weight:       20,
+		MinItems:     1,
 	}
 	if err := stsV1Rpc.Call("ApierV1.SetStatQueueProfile", statConfig, &result); err != nil {
 		t.Error(err)

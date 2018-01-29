@@ -34,7 +34,7 @@ type StatQueueProfile struct {
 	QueueLength        int
 	TTL                time.Duration
 	Metrics            []*utils.MetricWithParams // list of metrics to build
-	Thresholds         []string                  // list of thresholds to be checked after changes
+	ThresholdIDs       []string                  // list of thresholds to be checked after changes
 	Blocker            bool                      // blocker flag to stop processing on filters matched
 	Stored             bool
 	Weight             float64

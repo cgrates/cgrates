@@ -329,21 +329,21 @@ func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *engine.StatQueue, stq
 	}
 	filter = &engine.Filter{Tenant: config.CgrConfig().DefaultTenant, ID: v1Sts.Id, RequestFilters: filters}
 	stq = &engine.StatQueueProfile{
-		ID:          v1Sts.Id,
-		QueueLength: v1Sts.QueueLength,
-		Metrics:     []*utils.MetricWithParams{},
-		Tenant:      config.CgrConfig().DefaultTenant,
-		Blocker:     false,
-		Stored:      false,
-		Thresholds:  []string{},
-		FilterIDs:   []string{v1Sts.Id},
+		ID:           v1Sts.Id,
+		QueueLength:  v1Sts.QueueLength,
+		Metrics:      []*utils.MetricWithParams{},
+		Tenant:       config.CgrConfig().DefaultTenant,
+		Blocker:      false,
+		Stored:       false,
+		ThresholdIDs: []string{},
+		FilterIDs:    []string{v1Sts.Id},
 	}
 	if v1Sts.SaveInterval != 0 {
 		stq.Stored = true
 	}
 	if len(v1Sts.Triggers) != 0 {
 		for i, _ := range v1Sts.Triggers {
-			stq.Thresholds = append(stq.Thresholds, v1Sts.Triggers[i].ID)
+			stq.ThresholdIDs = append(stq.ThresholdIDs, v1Sts.Triggers[i].ID)
 		}
 	}
 	sq = &engine.StatQueue{Tenant: config.CgrConfig().DefaultTenant,

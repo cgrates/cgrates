@@ -490,11 +490,11 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 				Parameters: "",
 			},
 		},
-		Thresholds: []string{"Val1", "Val2"},
-		Blocker:    true,
-		Stored:     true,
-		Weight:     20,
-		MinItems:   1,
+		ThresholdIDs: []string{"Val1", "Val2"},
+		Blocker:      true,
+		Stored:       true,
+		Weight:       20,
+		MinItems:     1,
 	}
 	if err := tFIdxRpc.Call("ApierV1.SetStatQueueProfile", statConfig, &result); err != nil {
 		t.Error(err)
@@ -605,11 +605,11 @@ func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 				Parameters: "",
 			},
 		},
-		Thresholds: []string{"Val1", "Val2"},
-		Blocker:    true,
-		Stored:     true,
-		Weight:     20,
-		MinItems:   1,
+		ThresholdIDs: []string{"Val1", "Val2"},
+		Blocker:      true,
+		Stored:       true,
+		Weight:       20,
+		MinItems:     1,
 	}
 	if err := tFIdxRpc.Call("ApierV1.SetStatQueueProfile", statConfig, &result); err != nil {
 		t.Error(err)
