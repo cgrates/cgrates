@@ -1771,9 +1771,9 @@ func testOnStorITResourceProfile(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC)},
-		Limit:      1,
-		Thresholds: []string{"TEST_ACTIONS"},
-		UsageTTL:   time.Duration(3 * time.Nanosecond),
+		Limit:        1,
+		ThresholdIDs: []string{"TEST_ACTIONS"},
+		UsageTTL:     time.Duration(3 * time.Nanosecond),
 	}
 	if _, rcvErr := onStor.GetResourceProfile(rL.Tenant, rL.ID,
 		true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
@@ -1803,7 +1803,7 @@ func testOnStorITResourceProfile(t *testing.T) {
 		t.Errorf("Expected : %+v, but received %+v", expectedR, itm)
 	}
 	//update
-	rL.Thresholds = []string{"TH1", "TH2"}
+	rL.ThresholdIDs = []string{"TH1", "TH2"}
 	if err := onStor.SetResourceProfile(rL, false); err != nil {
 		t.Error(err)
 	}

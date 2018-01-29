@@ -411,7 +411,7 @@ type TpResource struct {
 	Blocker            bool    `index:"7" re:""`
 	Stored             bool    `index:"8" re:""`
 	Weight             float64 `index:"9" re:"\d+\.?\d*"`
-	Thresholds         string  `index:"10" re:""`
+	ThresholdIDs       string  `index:"10" re:""`
 	CreatedAt          time.Time
 }
 

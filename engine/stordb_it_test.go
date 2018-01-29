@@ -1448,14 +1448,14 @@ func testStorDBitCRUDTpResources(t *testing.T) {
 	//WRITE
 	var snd = []*utils.TPResource{
 		&utils.TPResource{
-			TPid:       "testTPid",
-			ID:         "testTag1",
-			Weight:     0.0,
-			Limit:      "test",
-			Thresholds: []string{"1x", "2x"},
-			FilterIDs:  []string{"FILTR_RES_1"},
-			Blocker:    true,
-			Stored:     true,
+			TPid:         "testTPid",
+			ID:           "testTag1",
+			Weight:       0.0,
+			Limit:        "test",
+			ThresholdIDs: []string{"1x", "2x"},
+			FilterIDs:    []string{"FILTR_RES_1"},
+			Blocker:      true,
+			Stored:       true,
 		},
 		&utils.TPResource{
 			TPid:               "testTPid",
@@ -1463,7 +1463,7 @@ func testStorDBitCRUDTpResources(t *testing.T) {
 			ActivationInterval: &utils.TPActivationInterval{ActivationTime: "test"},
 			Weight:             0.0,
 			Limit:              "test",
-			Thresholds:         []string{"1x", "2x"},
+			ThresholdIDs:       []string{"1x", "2x"},
 			FilterIDs:          []string{"FLTR_RES_2"},
 			Blocker:            true,
 			Stored:             false,
@@ -1491,8 +1491,8 @@ func testStorDBitCRUDTpResources(t *testing.T) {
 		if !(reflect.DeepEqual(snd[0].Limit, rcv[0].Limit) || reflect.DeepEqual(snd[0].Limit, rcv[1].Limit)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Limit, rcv[0].Limit, rcv[1].Limit)
 		}
-		if !(reflect.DeepEqual(snd[0].Thresholds, rcv[0].Thresholds) || reflect.DeepEqual(snd[0].Thresholds, rcv[1].Thresholds)) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Thresholds, rcv[0].Thresholds, rcv[1].Thresholds)
+		if !(reflect.DeepEqual(snd[0].ThresholdIDs, rcv[0].ThresholdIDs) || reflect.DeepEqual(snd[0].ThresholdIDs, rcv[1].ThresholdIDs)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].ThresholdIDs, rcv[0].ThresholdIDs, rcv[1].ThresholdIDs)
 		}
 	}
 	// UPDATE
@@ -1521,8 +1521,8 @@ func testStorDBitCRUDTpResources(t *testing.T) {
 		if !(reflect.DeepEqual(snd[0].Limit, rcv[0].Limit) || reflect.DeepEqual(snd[0].Limit, rcv[1].Limit)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Limit, rcv[0].Limit, rcv[1].Limit)
 		}
-		if !(reflect.DeepEqual(snd[0].Thresholds, rcv[0].Thresholds) || reflect.DeepEqual(snd[0].Thresholds, rcv[1].Thresholds)) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Thresholds, rcv[0].Thresholds, rcv[1].Thresholds)
+		if !(reflect.DeepEqual(snd[0].ThresholdIDs, rcv[0].ThresholdIDs) || reflect.DeepEqual(snd[0].ThresholdIDs, rcv[1].ThresholdIDs)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].ThresholdIDs, rcv[0].ThresholdIDs, rcv[1].ThresholdIDs)
 		}
 	}
 	// REMOVE

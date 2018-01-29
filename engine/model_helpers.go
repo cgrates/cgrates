@@ -1855,9 +1855,9 @@ func (tps TpResources) AsTPResources() (result []*utils.TPResource) {
 				rl.ActivationInterval.ActivationTime = aiSplt[0]
 			}
 		}
-		if tp.Thresholds != "" {
-			trshSplt := strings.Split(tp.Thresholds, utils.INFIELD_SEP)
-			rl.Thresholds = append(rl.Thresholds, trshSplt...)
+		if tp.ThresholdIDs != "" {
+			trshSplt := strings.Split(tp.ThresholdIDs, utils.INFIELD_SEP)
+			rl.ThresholdIDs = append(rl.ThresholdIDs, trshSplt...)
 		}
 		if tp.FilterIDs != "" {
 			trshSplt := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
@@ -1897,11 +1897,11 @@ func APItoModelResource(rl *utils.TPResource) (mdls TpResources) {
 						mdl.ActivationInterval += utils.INFIELD_SEP + rl.ActivationInterval.ExpiryTime
 					}
 				}
-				for i, val := range rl.Thresholds {
+				for i, val := range rl.ThresholdIDs {
 					if i != 0 {
-						mdl.Thresholds += utils.INFIELD_SEP
+						mdl.ThresholdIDs += utils.INFIELD_SEP
 					}
-					mdl.Thresholds += val
+					mdl.ThresholdIDs += val
 				}
 			}
 			mdl.FilterIDs = fltr
@@ -1928,8 +1928,8 @@ func APItoResource(tpRL *utils.TPResource, timezone string) (rp *ResourceProfile
 	for _, fltr := range tpRL.FilterIDs {
 		rp.FilterIDs = append(rp.FilterIDs, fltr)
 	}
-	for _, th := range tpRL.Thresholds {
-		rp.Thresholds = append(rp.Thresholds, th)
+	for _, th := range tpRL.ThresholdIDs {
+		rp.ThresholdIDs = append(rp.ThresholdIDs, th)
 	}
 	if tpRL.ActivationInterval != nil {
 		if rp.ActivationInterval, err = tpRL.ActivationInterval.AsActivationInterval(timezone); err != nil {

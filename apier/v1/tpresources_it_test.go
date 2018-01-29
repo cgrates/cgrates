@@ -141,7 +141,7 @@ func testTPResSetTPResource(t *testing.T) {
 		Blocker:           true,
 		Stored:            true,
 		Weight:            20,
-		Thresholds:        []string{"ValOne", "ValTwo"},
+		ThresholdIDs:      []string{"ValOne", "ValTwo"},
 	}
 	var result string
 	if err := tpResRPC.Call("ApierV1.SetTPResource", tpRes, &result); err != nil {

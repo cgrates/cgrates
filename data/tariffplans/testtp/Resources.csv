@@ -1,4 +1,4 @@
-#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],Weight[9],Thresholds[10]
+#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],Weight[9],ThresholdIDs[10]
 cgrates.org,ResGroup1,FLTR_1,2014-07-29T15:00:00Z,1s,7,,false,false,20,
 cgrates.org,ResGroup2,FLTR_DST_FS,2014-07-29T15:00:00Z,3600s,8,SPECIAL_1002,false,true,10,
 cgrates.org,ResGroup3,FLTR_RES_GR3,2014-07-29T15:00:00Z,0s,1,,true,false,20,
