@@ -30,7 +30,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -171,7 +171,7 @@ func TestRPCITLclStatusFirstFailback(t *testing.T) {
 
 // Make sure it executes on the first node supporting the command
 func TestRPCITLclTDirectedRPC(t *testing.T) {
-	var sessions []*sessionmanager.ActiveSession
+	var sessions []*sessions.ActiveSession
 	if err := rpcPoolFirst.Call("SMGenericV1.GetActiveSessions", map[string]string{}, &sessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

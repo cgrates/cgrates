@@ -311,7 +311,7 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *float64) (err
 	return
 }
 
-// Returns MaxSessionTime for an event received in SessionManager, considering DerivedCharging for it
+// Returns MaxSessionTime for an event received in sessions, considering DerivedCharging for it
 func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) (err error) {
 	cacheKey := utils.GET_DERIV_MAX_SESS_TIME + ev.CGRID + ev.RunID
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {

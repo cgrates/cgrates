@@ -31,7 +31,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/fiorix/go-diameter/diam"
 	"github.com/fiorix/go-diameter/diam/avp"
@@ -112,7 +112,7 @@ func TestDmtAgentCCRAsSMGenericEvent(t *testing.T) {
 	if ccr.diamMessage, err = ccr.AsDiameterMessage(); err != nil {
 		t.Error(err)
 	}
-	eSMGE := sessionmanager.SMGenericEvent{"EventName": DIAMETER_CCR,
+	eSMGE := sessions.SMGenericEvent{"EventName": DIAMETER_CCR,
 		"OriginID": "routinga;1442095190;1476802709",
 		"Account":  "*users", "Category": "call",
 		"AnswerTime":  "2015-11-23 12:22:24 +0000 UTC",
