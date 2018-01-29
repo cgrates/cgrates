@@ -765,7 +765,7 @@ func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 		Blocker:           true,
 		Stored:            true,
 		Weight:            20,
-		Thresholds:        []string{"Val1", "Val2"},
+		ThresholdIDs:      []string{"Val1", "Val2"},
 	}
 	if err := tFIdxRpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
 		t.Error(err)
@@ -868,7 +868,7 @@ func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 		Blocker:           true,
 		Stored:            true,
 		Weight:            20,
-		Thresholds:        []string{"Val1", "Val2"},
+		ThresholdIDs:      []string{"Val1", "Val2"},
 	}
 	if err := tFIdxRpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
 		t.Error(err)

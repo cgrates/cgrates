@@ -922,11 +922,11 @@ func testMigratorStats(t *testing.T) {
 			&utils.MetricWithParams{MetricID: "*acd", Parameters: ""},
 			&utils.MetricWithParams{MetricID: "*acc", Parameters: ""},
 		},
-		Thresholds: []string{"Test"},
-		Blocker:    false,
-		Stored:     true,
-		Weight:     float64(0),
-		MinItems:   0,
+		ThresholdIDs: []string{"Test"},
+		Blocker:      false,
+		Stored:       true,
+		Weight:       float64(0),
+		MinItems:     0,
 	}
 	sq := &engine.StatQueue{Tenant: config.CgrConfig().DefaultTenant,
 		ID:        v1Sts.Id,
@@ -978,8 +978,8 @@ func testMigratorStats(t *testing.T) {
 		if !reflect.DeepEqual(sqp.Metrics, result.Metrics) {
 			t.Errorf("Expecting: %+v, received: %+v", sqp.Metrics, result.Metrics)
 		}
-		if !reflect.DeepEqual(sqp.Thresholds, result.Thresholds) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp.Thresholds, result.Thresholds)
+		if !reflect.DeepEqual(sqp.ThresholdIDs, result.ThresholdIDs) {
+			t.Errorf("Expecting: %+v, received: %+v", sqp.ThresholdIDs, result.ThresholdIDs)
 		}
 		if !reflect.DeepEqual(sqp.Blocker, result.Blocker) {
 			t.Errorf("Expecting: %+v, received: %+v", sqp.Blocker, result.Blocker)
@@ -1047,8 +1047,8 @@ func testMigratorStats(t *testing.T) {
 		if !reflect.DeepEqual(sqp.Metrics, result.Metrics) {
 			t.Errorf("Expecting: %+v, received: %+v", sqp.Metrics, result.Metrics)
 		}
-		if !reflect.DeepEqual(sqp.Thresholds, result.Thresholds) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp.Thresholds, result.Thresholds)
+		if !reflect.DeepEqual(sqp.ThresholdIDs, result.ThresholdIDs) {
+			t.Errorf("Expecting: %+v, received: %+v", sqp.ThresholdIDs, result.ThresholdIDs)
 		}
 		if !reflect.DeepEqual(sqp.Blocker, result.Blocker) {
 			t.Errorf("Expecting: %+v, received: %+v", sqp.Blocker, result.Blocker)
@@ -1680,9 +1680,9 @@ func testMigratorResource(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC)},
-		Limit:      1,
-		Thresholds: []string{"TEST_ACTIONS"},
-		UsageTTL:   time.Duration(1 * time.Millisecond),
+		Limit:        1,
+		ThresholdIDs: []string{"TEST_ACTIONS"},
+		UsageTTL:     time.Duration(1 * time.Millisecond),
 	}
 	switch action {
 	case Move:
@@ -2430,11 +2430,11 @@ func testMigratorTpStats(t *testing.T) {
 				&utils.MetricWithParams{MetricID: "MetricValue", Parameters: ""},
 				&utils.MetricWithParams{MetricID: "MetricValueTwo", Parameters: ""},
 			},
-			Blocker:    false,
-			Stored:     false,
-			Weight:     20,
-			MinItems:   1,
-			Thresholds: []string{"ThreshValue", "ThreshValueTwo"},
+			Blocker:      false,
+			Stored:       false,
+			Weight:       20,
+			MinItems:     1,
+			ThresholdIDs: []string{"ThreshValue", "ThreshValueTwo"},
 		},
 	}
 	switch action {
@@ -2526,7 +2526,7 @@ func testMigratorTpResources(t *testing.T) {
 			Blocker:           true,
 			Stored:            true,
 			Weight:            20,
-			Thresholds:        []string{"ValOne", "ValTwo"},
+			ThresholdIDs:      []string{"ValOne", "ValTwo"},
 		},
 	}
 	switch action {

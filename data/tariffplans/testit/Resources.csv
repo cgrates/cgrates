@@ -1,2 +1,2 @@
-#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],Weight[9],Thresholds[10]
+#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],Weight[9],ThresholdIDs[10]
 cgrates.org,RES_ACNT_1001,FLTR_ACCOUNT_1001,,1h,1,,false,false,10,

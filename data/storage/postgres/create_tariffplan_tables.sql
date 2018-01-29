@@ -405,7 +405,7 @@ CREATE TABLE tp_resources (
   "blocker" BOOLEAN NOT NULL,
   "stored" BOOLEAN NOT NULL,
   "weight" NUMERIC(8,2) NOT NULL,
-  "thresholds" varchar(64) NOT NULL,
+  "threshold_ids" varchar(64) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tp_resources_idx ON tp_resources (tpid);

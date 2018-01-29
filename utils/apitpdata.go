@@ -1268,7 +1268,7 @@ type TPResource struct {
 	Blocker            bool // blocker flag to stop processing on filters matched
 	Stored             bool
 	Weight             float64  // Weight to sort the ResourceLimits
-	Thresholds         []string // Thresholds to check after changing Limit
+	ThresholdIDs       []string // Thresholds to check after changing Limit
 }
 
 // TPActivationInterval represents an activation interval for an item

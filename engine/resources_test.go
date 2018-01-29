@@ -58,9 +58,9 @@ func TestRSRecordUsage1(t *testing.T) {
 				ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC).Add(time.Duration(1 * time.Millisecond)),
 			},
-			Weight:     100,
-			Limit:      2,
-			Thresholds: []string{"TEST_ACTIONS"},
+			Weight:       100,
+			Limit:        2,
+			ThresholdIDs: []string{"TEST_ACTIONS"},
 
 			UsageTTL:          time.Duration(1 * time.Millisecond),
 			AllocationMessage: "ALLOC",
@@ -129,10 +129,10 @@ func TestRSRsort(t *testing.T) {
 				ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 			},
 
-			Weight:     50,
-			Limit:      2,
-			Thresholds: []string{"TEST_ACTIONS"},
-			UsageTTL:   time.Duration(1 * time.Millisecond),
+			Weight:       50,
+			Limit:        2,
+			ThresholdIDs: []string{"TEST_ACTIONS"},
+			UsageTTL:     time.Duration(1 * time.Millisecond),
 		},
 		// AllocationMessage: "ALLOC2",
 		Usages: map[string]*ResourceUsage{
@@ -235,7 +235,7 @@ func TestRSCacheSetGet(t *testing.T) {
 			AllocationMessage: "ALLOC_RL",
 			Weight:            50,
 			Limit:             2,
-			Thresholds:        []string{"TEST_ACTIONS"},
+			ThresholdIDs:      []string{"TEST_ACTIONS"},
 			UsageTTL:          time.Duration(1 * time.Millisecond),
 		},
 		Usages: map[string]*ResourceUsage{

@@ -565,7 +565,7 @@ func testV1RsSetResourceProfile(t *testing.T) {
 		Blocker:           true,
 		Stored:            true,
 		Weight:            20,
-		Thresholds:        []string{"Val1", "Val2"},
+		ThresholdIDs:      []string{"Val1", "Val2"},
 	}
 	filter = &engine.Filter{
 		Tenant: "cgrates.org",

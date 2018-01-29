@@ -49,7 +49,7 @@ type ResourceProfile struct {
 	Blocker            bool                      // blocker flag to stop processing on filters matched
 	Stored             bool
 	Weight             float64  // Weight to sort the resources
-	Thresholds         []string // Thresholds to check after changing Limit
+	ThresholdIDs       []string // Thresholds to check after changing Limit
 }
 
 // TenantID returns unique identifier of the ResourceProfile in a multi-tenant environment
@@ -499,8 +499,8 @@ func (rS *ResourceService) processThresholds(r *Resource) (err error) {
 		return
 	}
 	var thIDs []string
-	if len(r.rPrf.Thresholds) != 0 {
-		thIDs = r.rPrf.Thresholds
+	if len(r.rPrf.ThresholdIDs) != 0 {
+		thIDs = r.rPrf.ThresholdIDs
 	}
 	thEv := &ArgsProcessEvent{ThresholdIDs: thIDs,
 		CGREvent: utils.CGREvent{

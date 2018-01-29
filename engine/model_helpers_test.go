@@ -722,13 +722,13 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 			Blocker:            false,
 			Weight:             10.0,
 			Limit:              "45",
-			Thresholds:         "WARN_RES1;WARN_RES2"},
+			ThresholdIDs:       "WARN_RES1;WARN_RES2"},
 		&TpResource{
-			Tpid:       "TEST_TPID",
-			ID:         "ResGroup1",
-			Tenant:     "cgrates.org",
-			FilterIDs:  "FLTR_RES_GR1_1",
-			Thresholds: "WARN3"},
+			Tpid:         "TEST_TPID",
+			ID:           "ResGroup1",
+			Tenant:       "cgrates.org",
+			FilterIDs:    "FLTR_RES_GR1_1",
+			ThresholdIDs: "WARN3"},
 		&TpResource{
 			Tpid:               "TEST_TPID",
 			Tenant:             "cgrates.org",
@@ -749,11 +749,11 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: tps[0].ActivationInterval,
 			},
-			Stored:     tps[0].Stored,
-			Blocker:    tps[0].Blocker,
-			Weight:     tps[0].Weight,
-			Limit:      tps[0].Limit,
-			Thresholds: []string{"WARN_RES1", "WARN_RES2", "WARN3"},
+			Stored:       tps[0].Stored,
+			Blocker:      tps[0].Blocker,
+			Weight:       tps[0].Weight,
+			Limit:        tps[0].Limit,
+			ThresholdIDs: []string{"WARN_RES1", "WARN_RES2", "WARN3"},
 		},
 		&utils.TPResource{
 			TPid:      tps[2].Tpid,
@@ -786,7 +786,7 @@ func TestAPItoResource(t *testing.T) {
 		Blocker:            false,
 		Weight:             10,
 		Limit:              "2",
-		Thresholds:         []string{"TRes1"},
+		ThresholdIDs:       []string{"TRes1"},
 		AllocationMessage:  "asd",
 	}
 	eRL := &ResourceProfile{
@@ -796,7 +796,7 @@ func TestAPItoResource(t *testing.T) {
 		Blocker:           tpRL.Blocker,
 		Weight:            tpRL.Weight,
 		FilterIDs:         []string{"FLTR_RES_GR_1"},
-		Thresholds:        []string{"TRes1"},
+		ThresholdIDs:      []string{"TRes1"},
 		AllocationMessage: tpRL.AllocationMessage,
 		Limit:             2,
 	}

@@ -144,11 +144,11 @@ func testTPStatsSetTPStat(t *testing.T) {
 				Parameters: "Param1",
 			},
 		},
-		Blocker:    false,
-		Stored:     false,
-		Weight:     20,
-		MinItems:   1,
-		Thresholds: []string{"ThreshValue", "ThreshValueTwo"},
+		Blocker:      false,
+		Stored:       false,
+		Weight:       20,
+		MinItems:     1,
+		ThresholdIDs: []string{"ThreshValue", "ThreshValueTwo"},
 	}
 	var result string
 	if err := tpStatRPC.Call("ApierV1.SetTPStat", tpStat, &result); err != nil {
