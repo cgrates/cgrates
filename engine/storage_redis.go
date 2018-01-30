@@ -1391,7 +1391,20 @@ func (rs *RedisStorage) SetFilterIndexesDrv(originKey string, indexes map[string
 		dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
 	}
 	if commit && transactionID != "" {
-		return rs.Cmd("RENAME", dbKey, utils.ConcatenatedKey(originKey, transactionID)).Err
+		mp := make(map[string]string)
+		for key, strMp := range indexes {
+			if encodedMp, err := rs.ms.Marshal(strMp); err != nil {
+				return err
+			} else {
+				mp[key] = string(encodedMp)
+			}
+		}
+		if len(mp) != 0 {
+			if err = rs.Cmd("HMSET", originKey, mp).Err; err != nil {
+				return
+			}
+		}
+		return rs.Cmd("DEL", dbKey).Err
 	} else {
 		mp := make(map[string]string)
 		nameValSls := []interface{}{dbKey}
@@ -1466,7 +1479,20 @@ func (rs *RedisStorage) SetFilterReverseIndexesDrv(originKey string, revIdx map[
 		dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
 	}
 	if commit && transactionID != "" {
-		return rs.Cmd("RENAME", dbKey, utils.ConcatenatedKey(originKey, transactionID)).Err
+		mp := make(map[string]string)
+		for key, strMp := range revIdx {
+			if encodedMp, err := rs.ms.Marshal(strMp); err != nil {
+				return err
+			} else {
+				mp[key] = string(encodedMp)
+			}
+		}
+		if len(mp) != 0 {
+			if err = rs.Cmd("HMSET", originKey, mp).Err; err != nil {
+				return
+			}
+		}
+		return rs.Cmd("DEL", dbKey).Err
 	} else {
 		mp := make(map[string]string)
 		nameValSls := []interface{}{dbKey}
