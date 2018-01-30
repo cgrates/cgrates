@@ -213,15 +213,18 @@ func (ms *MapStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity
-func (ms *MapStorage) HasDataDrv(categ, subject string) (bool, error) {
+func (ms *MapStorage) HasDataDrv(category, subject, tenant string) (bool, error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	switch categ {
+	switch category {
 	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
-		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX,
-		utils.ResourcesPrefix, utils.StatQueuePrefix, utils.ThresholdPrefix,
+		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX:
+		_, exists := ms.dict[category+subject]
+		return exists, nil
+	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,
+		utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
 		utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AttributeProfilePrefix:
-		_, exists := ms.dict[categ+subject]
+		_, exists := ms.dict[category+utils.ConcatenatedKey(tenant, subject)]
 		return exists, nil
 	}
 	return false, errors.New("Unsupported HasData category")

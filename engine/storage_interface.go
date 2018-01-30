@@ -48,7 +48,7 @@ type Storage interface {
 type DataDB interface {
 	Storage
 	Marshaler() Marshaler
-	HasDataDrv(string, string) (bool, error)
+	HasDataDrv(string, string, string) (bool, error)
 	GetRatingPlanDrv(string) (*RatingPlan, error)
 	SetRatingPlanDrv(*RatingPlan) error
 	RemoveRatingPlanDrv(key string) (err error)

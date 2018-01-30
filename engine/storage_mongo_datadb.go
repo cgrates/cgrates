@@ -663,7 +663,7 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 	return
 }
 
-func (ms *MongoStorage) HasDataDrv(category, subject string) (has bool, err error) {
+func (ms *MongoStorage) HasDataDrv(category, subject, tenant string) (has bool, err error) {
 	session := ms.session.Copy()
 	defer session.Close()
 	db := session.DB(ms.db)
@@ -688,22 +688,28 @@ func (ms *MongoStorage) HasDataDrv(category, subject string) (has bool, err erro
 		count, err = db.C(colAcc).Find(bson.M{"id": subject}).Count()
 		has = count > 0
 	case utils.ResourcesPrefix:
-		count, err = db.C(colRes).Find(bson.M{"id": subject}).Count()
+		count, err = db.C(colRes).Find(bson.M{"tenant": tenant, "id": subject}).Count()
+		has = count > 0
+	case utils.ResourceProfilesPrefix:
+		count, err = db.C(colRsP).Find(bson.M{"tenant": tenant, "id": subject}).Count()
 		has = count > 0
 	case utils.StatQueuePrefix:
-		count, err = db.C(colRes).Find(bson.M{"id": subject}).Count()
+		count, err = db.C(colSqs).Find(bson.M{"tenant": tenant, "id": subject}).Count()
+		has = count > 0
+	case utils.StatQueueProfilePrefix:
+		count, err = db.C(colSqp).Find(bson.M{"tenant": tenant, "id": subject}).Count()
 		has = count > 0
 	case utils.ThresholdPrefix:
-		count, err = db.C(colTps).Find(bson.M{"id": subject}).Count()
+		count, err = db.C(colTps).Find(bson.M{"tenant": tenant, "id": subject}).Count()
 		has = count > 0
 	case utils.FilterPrefix:
-		count, err = db.C(colFlt).Find(bson.M{"id": subject}).Count()
+		count, err = db.C(colFlt).Find(bson.M{"tenant": tenant, "id": subject}).Count()
 		has = count > 0
 	case utils.SupplierProfilePrefix:
-		count, err = db.C(colSpp).Find(bson.M{"id": subject}).Count()
+		count, err = db.C(colSpp).Find(bson.M{"tenant": tenant, "id": subject}).Count()
 		has = count > 0
 	case utils.AttributeProfilePrefix:
-		count, err = db.C(colAttr).Find(bson.M{"id": subject}).Count()
+		count, err = db.C(colAttr).Find(bson.M{"tenant": tenant, "id": subject}).Count()
 		has = count > 0
 	default:
 		err = fmt.Errorf("unsupported category in HasData: %s", category)

@@ -264,13 +264,16 @@ func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity
-func (rs *RedisStorage) HasDataDrv(category, subject string) (bool, error) {
+func (rs *RedisStorage) HasDataDrv(category, subject, tenant string) (bool, error) {
 	switch category {
 	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
-		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX,
-		utils.ResourcesPrefix, utils.StatQueuePrefix, utils.ThresholdPrefix,
-		utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AttributeProfilePrefix:
+		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX:
 		i, err := rs.Cmd("EXISTS", category+subject).Int()
+		return i == 1, err
+	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,
+		utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
+		utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AttributeProfilePrefix:
+		i, err := rs.Cmd("EXISTS", category+utils.ConcatenatedKey(tenant, subject)).Int()
 		return i == 1, err
 	}
 	return false, errors.New("unsupported HasData category")
