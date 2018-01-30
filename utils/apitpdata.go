@@ -1387,6 +1387,7 @@ type TPSupplier struct {
 	ResourceIDs        []string // queried in some strategies
 	StatIDs            []string // queried in some strategies
 	Weight             float64
+	Blocker            bool
 	SupplierParameters string
 }
 
@@ -1399,7 +1400,6 @@ type TPSupplierProfile struct {
 	Sorting            string
 	SortingParams      []string
 	Suppliers          []*TPSupplier
-	Blocker            bool
 	Weight             float64
 }
 

@@ -237,11 +237,11 @@ func testV1SplSSetSupplierProfiles(t *testing.T) {
 				ResourceIDs:        []string{"Res1", "ResGroup2"},
 				StatIDs:            []string{"Stat1"},
 				Weight:             20,
+				Blocker:            false,
 				SupplierParameters: "SortingParameter1",
 			},
 		},
-		Blocker: false,
-		Weight:  10,
+		Weight: 10,
 	}
 	var result string
 	if err := splSv1Rpc.Call("ApierV1.SetSupplierProfile", splPrf, &result); err != nil {
@@ -267,6 +267,7 @@ func testV1SplSUpdateSupplierProfiles(t *testing.T) {
 			ResourceIDs:        []string{"Res1", "ResGroup2"},
 			StatIDs:            []string{"Stat1"},
 			Weight:             20,
+			Blocker:            false,
 			SupplierParameters: "SortingParameter1",
 		},
 		&engine.Supplier{
@@ -277,6 +278,7 @@ func testV1SplSUpdateSupplierProfiles(t *testing.T) {
 			ResourceIDs:        []string{"Res2", "ResGroup2"},
 			StatIDs:            []string{"Stat2"},
 			Weight:             20,
+			Blocker:            true,
 			SupplierParameters: "SortingParameter2",
 		},
 	}
@@ -289,6 +291,7 @@ func testV1SplSUpdateSupplierProfiles(t *testing.T) {
 			ResourceIDs:        []string{"Res2", "ResGroup2"},
 			StatIDs:            []string{"Stat2"},
 			Weight:             20,
+			Blocker:            true,
 			SupplierParameters: "SortingParameter2",
 		},
 		&engine.Supplier{
@@ -299,6 +302,7 @@ func testV1SplSUpdateSupplierProfiles(t *testing.T) {
 			ResourceIDs:        []string{"Res1", "ResGroup2"},
 			StatIDs:            []string{"Stat1"},
 			Weight:             20,
+			Blocker:            false,
 			SupplierParameters: "SortingParameter1",
 		},
 	}

@@ -2478,7 +2478,6 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplierProfile) {
 				TPid:          tp.Tpid,
 				Tenant:        tp.Tenant,
 				ID:            tp.ID,
-				Blocker:       tp.Blocker,
 				Sorting:       tp.Sorting,
 				SortingParams: []string{},
 			}
@@ -2490,8 +2489,9 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplierProfile) {
 			sup, found := suppliersMap[tp.ID][tp.SupplierID]
 			if !found {
 				sup = &utils.TPSupplier{
-					ID:     tp.SupplierID,
-					Weight: tp.SupplierWeight,
+					ID:      tp.SupplierID,
+					Weight:  tp.SupplierWeight,
+					Blocker: tp.SupplierBlocker,
 				}
 			}
 			if tp.SupplierParameters != "" {
@@ -2585,7 +2585,6 @@ func APItoModelTPSuppliers(st *utils.TPSupplierProfile) (mdls TpSuppliers) {
 		if i == 0 {
 			mdl.Sorting = st.Sorting
 			mdl.Weight = st.Weight
-			mdl.Blocker = st.Blocker
 			for i, val := range st.FilterIDs {
 				if i != 0 {
 					mdl.FilterIDs += utils.INFIELD_SEP
@@ -2645,7 +2644,6 @@ func APItoSupplierProfile(tpTH *utils.TPSupplierProfile, timezone string) (th *S
 		ID:        tpTH.ID,
 		Sorting:   tpTH.Sorting,
 		Weight:    tpTH.Weight,
-		Blocker:   tpTH.Blocker,
 		Suppliers: make([]*Supplier, len(tpTH.Suppliers)),
 	}
 	for _, stp := range tpTH.SortingParams {
@@ -2663,6 +2661,7 @@ func APItoSupplierProfile(tpTH *utils.TPSupplierProfile, timezone string) (th *S
 		supl := &Supplier{
 			ID:                 suplier.ID,
 			Weight:             suplier.Weight,
+			Blocker:            suplier.Blocker,
 			RatingPlanIDs:      suplier.RatingPlanIDs,
 			FilterIDs:          suplier.FilterIDs,
 			ResourceIDs:        suplier.ResourceIDs,

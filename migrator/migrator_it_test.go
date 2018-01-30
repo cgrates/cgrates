@@ -2012,10 +2012,10 @@ func testMigratorTPSuppliers(t *testing.T) {
 					ResourceIDs:   []string{"ResGroup1"},
 					StatIDs:       []string{"Stat1"},
 					Weight:        10,
+					Blocker:       false,
 				},
 			},
-			Blocker: false,
-			Weight:  20,
+			Weight: 20,
 		},
 	}
 	switch action {
