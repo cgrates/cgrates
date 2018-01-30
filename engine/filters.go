@@ -72,7 +72,7 @@ func (fS *FilterS) connStatS() (err error) {
 
 func NewInlineFilter(content string) (f *InlineFilter, err error) {
 	if len(strings.Split(content, utils.InInFieldSep)) != 3 {
-		return nil, fmt.Errorf("parse error for string: <%s>")
+		return nil, fmt.Errorf("parse error for string: <%s>", content)
 	}
 	contentSplit := strings.Split(content, utils.InInFieldSep)
 	return &InlineFilter{Type: contentSplit[0], FieldName: contentSplit[1], FieldVal: contentSplit[2]}, nil

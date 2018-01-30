@@ -318,5 +318,60 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
+	failEvent = map[string]interface{}{
+		"Tenant": "anotherTenant.org",
+	}
+	passEvent = map[string]interface{}{
+		"Tenant": "cgrates.org",
+	}
+	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
+		failEvent, []string{"*rsr::Tenant(~^cgr.*\\.org$)"}); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
+		passEvent, []string{"*rsr::Tenant(~^cgr.*\\.org$)"}); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
+	cache.Set(utils.REVERSE_DESTINATION_PREFIX+"+49", []string{"DE", "EU_LANDLINE"}, true, "")
+	failEvent = map[string]interface{}{
+		utils.Destination: "+5086517174963",
+	}
+	passEvent = map[string]interface{}{
+		utils.Destination: "+4986517174963",
+	}
+	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
+		failEvent, []string{"*destinations:Destination:EU"}); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
+		passEvent, []string{"*destinations:Destination:EU_LANDLINE"}); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
+	failEvent = map[string]interface{}{
+		utils.Weight: 10,
+	}
+	passEvent = map[string]interface{}{
+		utils.Weight: 20,
+	}
+	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
+		failEvent, []string{"*gte:Weight:20"}); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
+		passEvent, []string{"*gte:Weight:10"}); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
 
 }
