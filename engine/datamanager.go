@@ -988,8 +988,8 @@ func (dm *DataManager) RemoveSubscriber(key string) (err error) {
 	return dm.DataDB().RemoveSubscriberDrv(key)
 }
 
-func (dm *DataManager) HasData(category, subject string) (has bool, err error) {
-	return dm.DataDB().HasDataDrv(category, subject)
+func (dm *DataManager) HasData(category, subject, tenant string) (has bool, err error) {
+	return dm.DataDB().HasDataDrv(category, subject, tenant)
 }
 
 func (dm *DataManager) GetFilterIndexes(dbKey, filterType string, fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {

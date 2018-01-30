@@ -71,7 +71,7 @@ func (self *ApierV1) SetDerivedChargers(attrs AttrSetDerivedChargers, reply *str
 	}
 	dcKey := utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, attrs.Subject)
 	if !attrs.Overwrite {
-		if exists, err := self.DataManager.HasData(utils.DERIVEDCHARGERS_PREFIX, dcKey); err != nil {
+		if exists, err := self.DataManager.HasData(utils.DERIVEDCHARGERS_PREFIX, dcKey, ""); err != nil {
 			return utils.NewErrServerError(err)
 		} else if exists {
 			return utils.ErrExists
