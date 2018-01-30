@@ -131,12 +131,12 @@ func (rfi *ReqFilterIndexer) cacheRemItemType() {
 func (rfi *ReqFilterIndexer) StoreIndexes() (err error) {
 	if err = rfi.dm.SetFilterIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
-		rfi.indexes, false, utils.NonTransactional); err != nil {
+		rfi.indexes, true, utils.NonTransactional); err != nil {
 		return
 	}
 	if err = rfi.dm.SetFilterReverseIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
-		rfi.reveseIndex, false, utils.NonTransactional); err != nil {
+		rfi.reveseIndex, true, utils.NonTransactional); err != nil {
 		return
 	}
 	rfi.cacheRemItemType()

@@ -1956,12 +1956,11 @@ func (ms *MongoStorage) SetFilterIndexesDrv(originKey string, indexes map[string
 	}
 	if commit && transactionID != "" {
 		oldKey := "tmp_" + utils.ConcatenatedKey(originKey, transactionID)
-		newKey := utils.ConcatenatedKey(originKey, transactionID)
 		pairs := []interface{}{}
 		for key, itmMp := range indexes {
 			param := fmt.Sprintf("value.%s", key)
-			pairs = append(pairs, bson.M{"key": newKey})
-			pairs = append(pairs, bson.M{"$set": bson.M{"key": newKey, param: itmMp.Slice()}})
+			pairs = append(pairs, bson.M{"key": originKey})
+			pairs = append(pairs, bson.M{"$set": bson.M{"key": originKey, param: itmMp.Slice()}})
 		}
 		if len(pairs) != 0 {
 			bulk := col.Bulk()
@@ -2043,24 +2042,45 @@ func (ms *MongoStorage) GetFilterReverseIndexesDrv(dbKey string,
 }
 
 //SetFilterReverseIndexesDrv stores ReverseIndexes into DataDB
-func (ms *MongoStorage) SetFilterReverseIndexesDrv(dbKey string, revIdx map[string]utils.StringMap, commit bool, transactionID string) (err error) {
+func (ms *MongoStorage) SetFilterReverseIndexesDrv(originKey string, revIdx map[string]utils.StringMap, commit bool, transactionID string) (err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
-	pairs := []interface{}{}
-	for key, itmMp := range revIdx {
-		param := fmt.Sprintf("value.%s", key)
-		pairs = append(pairs, bson.M{"key": dbKey})
-		if len(itmMp) == 0 {
-			pairs = append(pairs, bson.M{"$unset": bson.M{param: 1}})
-		} else {
-			pairs = append(pairs, bson.M{"$set": bson.M{"key": dbKey, param: itmMp.Slice()}})
-		}
+	dbKey := originKey
+	if transactionID != "" {
+		dbKey = "tmp_" + utils.ConcatenatedKey(originKey, transactionID)
 	}
-	if len(pairs) != 0 {
-		bulk := col.Bulk()
-		bulk.Unordered()
-		bulk.Upsert(pairs...)
-		_, err = bulk.Run()
+	if commit && transactionID != "" {
+		oldKey := "tmp_" + utils.ConcatenatedKey(originKey, transactionID)
+		pairs := []interface{}{}
+		for key, itmMp := range revIdx {
+			param := fmt.Sprintf("value.%s", key)
+			pairs = append(pairs, bson.M{"key": originKey})
+			pairs = append(pairs, bson.M{"$set": bson.M{"key": originKey, param: itmMp.Slice()}})
+		}
+		if len(pairs) != 0 {
+			bulk := col.Bulk()
+			bulk.Unordered()
+			bulk.Upsert(pairs...)
+			_, err = bulk.Run()
+		}
+		return col.Remove(bson.M{"key": oldKey})
+	} else {
+		pairs := []interface{}{}
+		for key, itmMp := range revIdx {
+			param := fmt.Sprintf("value.%s", key)
+			pairs = append(pairs, bson.M{"key": dbKey})
+			if len(itmMp) == 0 {
+				pairs = append(pairs, bson.M{"$unset": bson.M{param: 1}})
+			} else {
+				pairs = append(pairs, bson.M{"$set": bson.M{"key": dbKey, param: itmMp.Slice()}})
+			}
+		}
+		if len(pairs) != 0 {
+			bulk := col.Bulk()
+			bulk.Unordered()
+			bulk.Upsert(pairs...)
+			_, err = bulk.Run()
+		}
 	}
 	return
 }
