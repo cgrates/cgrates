@@ -39,6 +39,7 @@ type Supplier struct {
 	ResourceIDs        []string // queried in some strategies
 	StatIDs            []string // queried in some strategies
 	Weight             float64
+	Blocker            bool // do not process further supplier after this one
 	SupplierParameters string
 }
 
@@ -51,7 +52,6 @@ type SupplierProfile struct {
 	Sorting            string                    // Sorting strategy
 	SortingParams      []string
 	Suppliers          []*Supplier
-	Blocker            bool // do not process further profiles after this one
 	Weight             float64
 }
 
@@ -160,12 +160,6 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent)
 		i++
 	}
 	sPrfls.Sort()
-	for i, sPrfl := range sPrfls {
-		if sPrfl.Blocker { // blocker will stop processing
-			sPrfls = sPrfls[:i+1]
-			break
-		}
-	}
 	return
 }
 

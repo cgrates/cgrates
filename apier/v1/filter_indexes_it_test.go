@@ -1023,10 +1023,10 @@ func testV1FIdxSetSupplierProfileIndexes(t *testing.T) {
 				ResourceIDs:   []string{"Res1", "ResGroup2"},
 				StatIDs:       []string{"Stat1"},
 				Weight:        20,
+				Blocker:       false,
 			},
 		},
-		Blocker: false,
-		Weight:  10,
+		Weight: 10,
 	}
 	if err := tFIdxRpc.Call("ApierV1.SetSupplierProfile", splPrf, &result); err != nil {
 		t.Error(err)
@@ -1132,10 +1132,10 @@ func testV1FIdxSetSecondSupplierProfileIndexes(t *testing.T) {
 				ResourceIDs:   []string{"Res1", "ResGroup2"},
 				StatIDs:       []string{"Stat1"},
 				Weight:        20,
+				Blocker:       false,
 			},
 		},
-		Blocker: false,
-		Weight:  10,
+		Weight: 10,
 	}
 	if err := tFIdxRpc.Call("ApierV1.SetSupplierProfile", splPrf, &result); err != nil {
 		t.Error(err)
