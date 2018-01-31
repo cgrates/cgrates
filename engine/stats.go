@@ -159,8 +159,8 @@ func (sS *StatService) matchingStatQueuesForEvent(ev *utils.CGREvent) (sqs StatQ
 			}
 			return nil, err
 		}
-		if sqPrfl.ActivationInterval != nil &&
-			!sqPrfl.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
+		if sqPrfl.ActivationInterval != nil && ev.Time != nil &&
+			!sqPrfl.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
 			continue
 		}
 		if pass, err := sS.filterS.PassFiltersForEvent(ev.Tenant, ev.Event, sqPrfl.FilterIDs); err != nil {

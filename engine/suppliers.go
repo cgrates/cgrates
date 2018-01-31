@@ -132,16 +132,8 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent)
 			}
 			return nil, err
 		}
-		aTime, err := ev.FieldAsTime(utils.AnswerTime, spS.timezone)
-		if err != nil {
-			if err == utils.ErrNotFound {
-				aTime = time.Now()
-			} else {
-				return nil, err
-			}
-		}
-		if splPrfl.ActivationInterval != nil &&
-			!splPrfl.ActivationInterval.IsActiveAtTime(aTime) { // not active
+		if splPrfl.ActivationInterval != nil && ev.Time != nil &&
+			!splPrfl.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
 			continue
 		}
 		if pass, err := spS.filterS.PassFiltersForEvent(ev.Tenant,
