@@ -570,8 +570,8 @@ func testV1RsSetResourceProfile(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "FLTR_RES_RCFG1",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "*string",
 				Type:      "Account",
 				Values:    []string{"1001", "1002"},
@@ -611,8 +611,8 @@ func testV1RsUpdateResourceProfile(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "FLTR_RES_RCFG2",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "*string",
 				Type:      "Account",
 				Values:    []string{"1001", "1002"},

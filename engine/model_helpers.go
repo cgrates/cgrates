@@ -2421,16 +2421,16 @@ func APItoModelTPFilter(th *utils.TPFilterProfile) (mdls TpFilterS) {
 
 func APItoFilter(tpTH *utils.TPFilterProfile, timezone string) (th *Filter, err error) {
 	th = &Filter{
-		Tenant:         tpTH.Tenant,
-		ID:             tpTH.ID,
-		RequestFilters: make([]*RequestFilter, len(tpTH.Filters)),
+		Tenant: tpTH.Tenant,
+		ID:     tpTH.ID,
+		Rules:  make([]*FilterRule, len(tpTH.Filters)),
 	}
 	for i, f := range tpTH.Filters {
-		rf := &RequestFilter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
+		rf := &FilterRule{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
 		if err := rf.CompileValues(); err != nil {
 			return nil, err
 		}
-		th.RequestFilters[i] = rf
+		th.Rules[i] = rf
 	}
 	if tpTH.ActivationInterval != nil {
 		if th.ActivationInterval, err = tpTH.ActivationInterval.AsActivationInterval(timezone); err != nil {
@@ -2444,9 +2444,9 @@ func FilterToTPFilter(f *Filter) (tpFltr *utils.TPFilterProfile) {
 	tpFltr = &utils.TPFilterProfile{
 		Tenant:  f.Tenant,
 		ID:      f.ID,
-		Filters: make([]*utils.TPFilter, len(f.RequestFilters)),
+		Filters: make([]*utils.TPFilter, len(f.Rules)),
 	}
-	for i, reqFltr := range f.RequestFilters {
+	for i, reqFltr := range f.Rules {
 		tpFltr.Filters[i] = &utils.TPFilter{
 			Type:      reqFltr.Type,
 			FieldName: reqFltr.FieldName,

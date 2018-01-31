@@ -2071,8 +2071,8 @@ func testOnStorITThresholdProfile(t *testing.T) {
 	fp := &Filter{
 		Tenant: "cgrates.org",
 		ID:     "TestFilter2",
-		RequestFilters: []*RequestFilter{
-			&RequestFilter{
+		Rules: []*FilterRule{
+			&FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001", "1002"},
@@ -2233,8 +2233,8 @@ func testOnStorITFilter(t *testing.T) {
 	fp := &Filter{
 		Tenant: "cgrates.org",
 		ID:     "Filter1",
-		RequestFilters: []*RequestFilter{
-			&RequestFilter{
+		Rules: []*FilterRule{
+			&FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001", "1002"},
@@ -2273,13 +2273,13 @@ func testOnStorITFilter(t *testing.T) {
 		t.Errorf("Expected : %+v, but received %+v", len(expectedT), len(itm))
 	}
 	//update
-	fp.RequestFilters = []*RequestFilter{
-		&RequestFilter{
+	fp.Rules = []*FilterRule{
+		&FilterRule{
 			FieldName: "Account",
 			Type:      "*string",
 			Values:    []string{"1001", "1002"},
 		},
-		&RequestFilter{
+		&FilterRule{
 			FieldName: "Destination",
 			Type:      "*string",
 			Values:    []string{"10", "20"},

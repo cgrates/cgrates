@@ -404,12 +404,12 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 	}
 	if withIndex {
 		//remove old ThresholdProfile indexes
-		indexerRemove := NewReqFilterIndexer(dm, utils.ThresholdProfilePrefix, th.Tenant)
+		indexerRemove := NewFilterIndexer(dm, utils.ThresholdProfilePrefix, th.Tenant)
 		if err = indexerRemove.RemoveItemFromIndex(th.ID); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			return
 		}
-		indexer := NewReqFilterIndexer(dm, utils.ThresholdProfilePrefix, th.Tenant)
+		indexer := NewFilterIndexer(dm, utils.ThresholdProfilePrefix, th.Tenant)
 		//Verify matching Filters for every FilterID from ThresholdProfile
 		for _, fltrID := range th.FilterIDs {
 			var fltr *Filter
@@ -430,7 +430,7 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 					return
 				}
 			}
-			for _, flt := range fltr.RequestFilters {
+			for _, flt := range fltr.Rules {
 				if flt.Type != MetaString {
 					continue
 				}
@@ -456,7 +456,7 @@ func (dm *DataManager) RemoveThresholdProfile(tenant, id, transactionID string, 
 	cache.RemKey(utils.ThresholdProfilePrefix+utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
 	if withIndex {
-		return NewReqFilterIndexer(dm, utils.ThresholdProfilePrefix, tenant).RemoveItemFromIndex(id)
+		return NewFilterIndexer(dm, utils.ThresholdProfilePrefix, tenant).RemoveItemFromIndex(id)
 	}
 	return
 }
@@ -490,7 +490,7 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 		return
 	}
 	if withIndex {
-		indexer := NewReqFilterIndexer(dm, utils.StatQueueProfilePrefix, sqp.Tenant)
+		indexer := NewFilterIndexer(dm, utils.StatQueueProfilePrefix, sqp.Tenant)
 		//remove old StatQueueProfile indexes
 		if err = indexer.RemoveItemFromIndex(sqp.ID); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
@@ -516,7 +516,7 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 					return
 				}
 			}
-			for _, flt := range fltr.RequestFilters {
+			for _, flt := range fltr.Rules {
 				if flt.Type != MetaString {
 					continue
 				}
@@ -542,7 +542,7 @@ func (dm *DataManager) RemoveStatQueueProfile(tenant, id, transactionID string, 
 	cache.RemKey(utils.StatQueueProfilePrefix+utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
 	if withIndex {
-		return NewReqFilterIndexer(dm, utils.StatQueueProfilePrefix, tenant).RemoveItemFromIndex(id)
+		return NewFilterIndexer(dm, utils.StatQueueProfilePrefix, tenant).RemoveItemFromIndex(id)
 	}
 	return
 }
@@ -654,7 +654,7 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 	}
 	//to be implemented in tests
 	if withIndex {
-		indexer := NewReqFilterIndexer(dm, utils.ResourceProfilesPrefix, rp.Tenant)
+		indexer := NewFilterIndexer(dm, utils.ResourceProfilesPrefix, rp.Tenant)
 		//remove old ResourceProfiles indexes
 		if err = indexer.RemoveItemFromIndex(rp.ID); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
@@ -680,7 +680,7 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 					return
 				}
 			}
-			for _, flt := range fltr.RequestFilters {
+			for _, flt := range fltr.Rules {
 				if flt.Type != MetaString {
 					continue
 				}
@@ -707,7 +707,7 @@ func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string, w
 	cache.RemKey(utils.ResourceProfilesPrefix+utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
 	if withIndex {
-		return NewReqFilterIndexer(dm, utils.ResourceProfilesPrefix, tenant).RemoveItemFromIndex(id)
+		return NewFilterIndexer(dm, utils.ResourceProfilesPrefix, tenant).RemoveItemFromIndex(id)
 	}
 	return
 }
@@ -1091,7 +1091,7 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 	}
 	//to be implemented in tests
 	if withIndex {
-		indexer := NewReqFilterIndexer(dm, utils.SupplierProfilePrefix, supp.Tenant)
+		indexer := NewFilterIndexer(dm, utils.SupplierProfilePrefix, supp.Tenant)
 		//remove old SupplierProfile indexes
 		if err = indexer.RemoveItemFromIndex(supp.ID); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
@@ -1117,7 +1117,7 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 					return
 				}
 			}
-			for _, flt := range fltr.RequestFilters {
+			for _, flt := range fltr.Rules {
 				if flt.Type != MetaString {
 					continue
 				}
@@ -1143,7 +1143,7 @@ func (dm *DataManager) RemoveSupplierProfile(tenant, id, transactionID string, w
 	cache.RemKey(utils.SupplierProfilePrefix+utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
 	if withIndex {
-		return NewReqFilterIndexer(dm, utils.SupplierProfilePrefix, tenant).RemoveItemFromIndex(id)
+		return NewFilterIndexer(dm, utils.SupplierProfilePrefix, tenant).RemoveItemFromIndex(id)
 	}
 	return
 }
@@ -1205,7 +1205,7 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 					}
 				}
 				if needsRemove {
-					if err = NewReqFilterIndexer(dm, utils.AttributeProfilePrefix,
+					if err = NewFilterIndexer(dm, utils.AttributeProfilePrefix,
 						utils.ConcatenatedKey(ap.Tenant, ctx)).RemoveItemFromIndex(ap.ID); err != nil {
 						return
 					}
@@ -1213,7 +1213,7 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 			}
 		}
 		for _, ctx := range ap.Contexts {
-			indexer := NewReqFilterIndexer(dm, utils.AttributeProfilePrefix, utils.ConcatenatedKey(ap.Tenant, ctx))
+			indexer := NewFilterIndexer(dm, utils.AttributeProfilePrefix, utils.ConcatenatedKey(ap.Tenant, ctx))
 			//Verify matching Filters for every FilterID from AttributeProfile
 			for _, fltrID := range ap.FilterIDs {
 				var fltr *Filter
@@ -1234,7 +1234,7 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 						return
 					}
 				}
-				for _, flt := range fltr.RequestFilters {
+				for _, flt := range fltr.Rules {
 					if flt.Type != MetaString {
 						continue
 					}
@@ -1263,7 +1263,7 @@ func (dm *DataManager) RemoveAttributeProfile(tenant, id string, contexts []stri
 		cacheCommit(transactionID), transactionID)
 	if withIndex {
 		for _, context := range contexts {
-			if err = NewReqFilterIndexer(dm, utils.AttributeProfilePrefix,
+			if err = NewFilterIndexer(dm, utils.AttributeProfilePrefix,
 				utils.ConcatenatedKey(tenant, context)).RemoveItemFromIndex(id); err != nil {
 				return
 			}

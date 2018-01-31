@@ -67,11 +67,11 @@ type TpReader struct {
 	revDests,
 	revAliases,
 	acntActionPlans map[string][]string
-	thdsIndexers map[string]*ReqFilterIndexer // tenant, indexer
-	sqpIndexers  map[string]*ReqFilterIndexer // tenant, indexer
-	resIndexers  map[string]*ReqFilterIndexer // tenant, indexer
-	sppIndexers  map[string]*ReqFilterIndexer // tenant, indexer
-	attrIndexers map[string]*ReqFilterIndexer // tenant:context , indexer
+	thdsIndexers map[string]*FilterIndexer // tenant, indexer
+	sqpIndexers  map[string]*FilterIndexer // tenant, indexer
+	resIndexers  map[string]*FilterIndexer // tenant, indexer
+	sppIndexers  map[string]*FilterIndexer // tenant, indexer
+	attrIndexers map[string]*FilterIndexer // tenant:context , indexer
 }
 
 func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string) *TpReader {
@@ -148,11 +148,11 @@ func (tpr *TpReader) Init() {
 	tpr.revDests = make(map[string][]string)
 	tpr.revAliases = make(map[string][]string)
 	tpr.acntActionPlans = make(map[string][]string)
-	tpr.thdsIndexers = make(map[string]*ReqFilterIndexer)
-	tpr.sqpIndexers = make(map[string]*ReqFilterIndexer)
-	tpr.resIndexers = make(map[string]*ReqFilterIndexer)
-	tpr.sppIndexers = make(map[string]*ReqFilterIndexer)
-	tpr.attrIndexers = make(map[string]*ReqFilterIndexer)
+	tpr.thdsIndexers = make(map[string]*FilterIndexer)
+	tpr.sqpIndexers = make(map[string]*FilterIndexer)
+	tpr.resIndexers = make(map[string]*FilterIndexer)
+	tpr.sppIndexers = make(map[string]*FilterIndexer)
+	tpr.attrIndexers = make(map[string]*FilterIndexer)
 }
 
 func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
@@ -1630,7 +1630,7 @@ func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) (err error) {
 		}
 		// index resource for filters
 		if _, has := tpr.resIndexers[tntID.Tenant]; !has {
-			if tpr.resIndexers[tntID.Tenant] = NewReqFilterIndexer(tpr.dm, utils.ResourceProfilesPrefix, tntID.Tenant); err != nil {
+			if tpr.resIndexers[tntID.Tenant] = NewFilterIndexer(tpr.dm, utils.ResourceProfilesPrefix, tntID.Tenant); err != nil {
 				return
 			}
 		}
@@ -1689,7 +1689,7 @@ func (tpr *TpReader) LoadStatsFiltered(tag string) (err error) {
 		}
 		// index statQueues for filters
 		if _, has := tpr.sqpIndexers[tntID.Tenant]; !has {
-			if tpr.sqpIndexers[tntID.Tenant] = NewReqFilterIndexer(tpr.dm, utils.StatQueueProfilePrefix, tntID.Tenant); err != nil {
+			if tpr.sqpIndexers[tntID.Tenant] = NewFilterIndexer(tpr.dm, utils.StatQueueProfilePrefix, tntID.Tenant); err != nil {
 				return
 			}
 		}
@@ -1748,7 +1748,7 @@ func (tpr *TpReader) LoadThresholdsFiltered(tag string) (err error) {
 		}
 		// index thresholds for filters
 		if _, has := tpr.thdsIndexers[tntID.Tenant]; !has {
-			if tpr.thdsIndexers[tntID.Tenant] = NewReqFilterIndexer(tpr.dm, utils.ThresholdProfilePrefix, tntID.Tenant); err != nil {
+			if tpr.thdsIndexers[tntID.Tenant] = NewFilterIndexer(tpr.dm, utils.ThresholdProfilePrefix, tntID.Tenant); err != nil {
 				return
 			}
 		}
@@ -1824,7 +1824,7 @@ func (tpr *TpReader) LoadSupplierProfilesFiltered(tag string) (err error) {
 		}
 		// index supplier profile for filters
 		if _, has := tpr.sppIndexers[tntID.Tenant]; !has {
-			if tpr.sppIndexers[tntID.Tenant] = NewReqFilterIndexer(tpr.dm, utils.SupplierProfilePrefix, tntID.Tenant); err != nil {
+			if tpr.sppIndexers[tntID.Tenant] = NewFilterIndexer(tpr.dm, utils.SupplierProfilePrefix, tntID.Tenant); err != nil {
 				return
 			}
 		}
@@ -1885,7 +1885,7 @@ func (tpr *TpReader) LoadAttributeProfilesFiltered(tag string) (err error) {
 		for _, context := range attrP.Contexts {
 			attrKey := utils.ConcatenatedKey(tntID.Tenant, context)
 			if _, has := tpr.attrIndexers[attrKey]; !has {
-				if tpr.attrIndexers[attrKey] = NewReqFilterIndexer(tpr.dm, utils.AttributeProfilePrefix, attrKey); err != nil {
+				if tpr.attrIndexers[attrKey] = NewFilterIndexer(tpr.dm, utils.AttributeProfilePrefix, attrKey); err != nil {
 					return
 				}
 			}

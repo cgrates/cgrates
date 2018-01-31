@@ -28,7 +28,7 @@ import (
 )
 
 func Testv2ActionTriggerAsThreshold(t *testing.T) {
-	var filters []*engine.RequestFilter
+	var filters []*engine.FilterRule
 	v2ATR := &v2ActionTrigger{
 		ID:                "test2",              // original csv tag
 		UniqueID:          "testUUID",           // individual id
@@ -45,20 +45,20 @@ func Testv2ActionTriggerAsThreshold(t *testing.T) {
 		Executed:          false,
 		LastExecutionTime: time.Now(),
 	}
-	x, _ := engine.NewRequestFilter(engine.MetaRSR, "Directions", v2ATR.Balance.Directions.Slice())
+	x, _ := engine.NewFilterRule(engine.MetaRSR, "Directions", v2ATR.Balance.Directions.Slice())
 	filters = append(filters, x)
-	x, _ = engine.NewRequestFilter(engine.MetaDestinations, "DestinationIDs", v2ATR.Balance.DestinationIDs.Slice())
+	x, _ = engine.NewFilterRule(engine.MetaDestinations, "DestinationIDs", v2ATR.Balance.DestinationIDs.Slice())
 	filters = append(filters, x)
-	x, _ = engine.NewRequestFilter(engine.MetaPrefix, "RatingSubject", []string{*v2ATR.Balance.RatingSubject})
+	x, _ = engine.NewFilterRule(engine.MetaPrefix, "RatingSubject", []string{*v2ATR.Balance.RatingSubject})
 	filters = append(filters, x)
-	x, _ = engine.NewRequestFilter(engine.MetaPrefix, "Categories", v2ATR.Balance.Categories.Slice())
+	x, _ = engine.NewFilterRule(engine.MetaPrefix, "Categories", v2ATR.Balance.Categories.Slice())
 	filters = append(filters, x)
-	x, _ = engine.NewRequestFilter(engine.MetaPrefix, "SharedGroups", v2ATR.Balance.SharedGroups.Slice())
+	x, _ = engine.NewFilterRule(engine.MetaPrefix, "SharedGroups", v2ATR.Balance.SharedGroups.Slice())
 	filters = append(filters, x)
-	x, _ = engine.NewRequestFilter(engine.MetaPrefix, "TimingIDs", v2ATR.Balance.TimingIDs.Slice())
+	x, _ = engine.NewFilterRule(engine.MetaPrefix, "TimingIDs", v2ATR.Balance.TimingIDs.Slice())
 	filters = append(filters, x)
 
-	filter := &engine.Filter{Tenant: config.CgrConfig().DefaultTenant, ID: *v2ATR.Balance.ID, RequestFilters: filters}
+	filter := &engine.Filter{Tenant: config.CgrConfig().DefaultTenant, ID: *v2ATR.Balance.ID, Rules: filters}
 
 	thp := &engine.ThresholdProfile{
 		ID:                 v2ATR.ID,

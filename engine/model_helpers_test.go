@@ -1102,8 +1102,8 @@ func TestAPItoTPFilter(t *testing.T) {
 	eTPs := &Filter{
 		Tenant: "cgrates.org",
 		ID:     tps.ID,
-		RequestFilters: []*RequestFilter{
-			&RequestFilter{
+		Rules: []*FilterRule{
+			&FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001", "1002"},
@@ -1125,8 +1125,8 @@ func TestFilterToTPFilter(t *testing.T) {
 			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC),
 		},
-		RequestFilters: []*RequestFilter{
-			&RequestFilter{
+		Rules: []*FilterRule{
+			&FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001", "1002"},

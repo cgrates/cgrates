@@ -194,13 +194,13 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "TestFilter",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},
 			},
-			&engine.RequestFilter{
+			&engine.FilterRule{
 				FieldName: utils.EventType,
 				Type:      "*string",
 				Values:    []string{utils.BalanceUpdate},
@@ -303,13 +303,13 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "TestFilter2",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1002"},
 			},
-			&engine.RequestFilter{
+			&engine.FilterRule{
 				FieldName: utils.EventType,
 				Type:      "*string",
 				Values:    []string{utils.AccountUpdate},
@@ -390,13 +390,13 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "TestFilter3",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1003"},
 			},
-			&engine.RequestFilter{
+			&engine.FilterRule{
 				FieldName: utils.EventType,
 				Type:      "*string",
 				Values:    []string{utils.BalanceUpdate},
@@ -573,13 +573,13 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: tenant,
 		ID:     "FLTR_1",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},
 			},
-			&engine.RequestFilter{
+			&engine.FilterRule{
 				FieldName: utils.EventType,
 				Type:      "*string",
 				Values:    []string{utils.AccountUpdate},
@@ -718,13 +718,13 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "FLTR_2",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1002"},
 			},
-			&engine.RequestFilter{
+			&engine.FilterRule{
 				FieldName: utils.EventType,
 				Type:      "*string",
 				Values:    []string{utils.BalanceUpdate},
@@ -794,13 +794,13 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "FLTR_3",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1003"},
 			},
-			&engine.RequestFilter{
+			&engine.FilterRule{
 				FieldName: utils.EventType,
 				Type:      "*string",
 				Values:    []string{utils.AccountUpdate},
@@ -951,13 +951,13 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "TestFilter",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1009"},
 			},
-			&engine.RequestFilter{
+			&engine.FilterRule{
 				FieldName: "Destination",
 				Type:      "*string",
 				Values:    []string{"+491511231234"},
@@ -1059,13 +1059,13 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "TestFilter2",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"2009"},
 			},
-			&engine.RequestFilter{
+			&engine.FilterRule{
 				FieldName: "Destination",
 				Type:      "*string",
 				Values:    []string{"+492511231234"},
@@ -1140,13 +1140,13 @@ func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "TestFilter3",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"3009"},
 			},
-			&engine.RequestFilter{
+			&engine.FilterRule{
 				FieldName: "Destination",
 				Type:      "*string",
 				Values:    []string{"+492511231234"},
@@ -1300,18 +1300,18 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "FLTR_RES_RCFG1",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},
 			},
-			&engine.RequestFilter{
+			&engine.FilterRule{
 				FieldName: "Subject",
 				Type:      "*string",
 				Values:    []string{"1002"},
 			},
-			&engine.RequestFilter{
+			&engine.FilterRule{
 				FieldName: "Destination",
 				Type:      "*string",
 				Values:    []string{"1001"},
@@ -1438,18 +1438,18 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "FLTR_RES_RCFG2",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"2002"},
 			},
-			&engine.RequestFilter{
+			&engine.FilterRule{
 				FieldName: "Subject",
 				Type:      "*string",
 				Values:    []string{"2001"},
 			},
-			&engine.RequestFilter{
+			&engine.FilterRule{
 				FieldName: "Destination",
 				Type:      "*string",
 				Values:    []string{"2002"},
@@ -1516,18 +1516,18 @@ func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "FLTR_RES_RCFG3",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1002"},
 			},
-			&engine.RequestFilter{
+			&engine.FilterRule{
 				FieldName: "Subject",
 				Type:      "*string",
 				Values:    []string{"1001"},
 			},
-			&engine.RequestFilter{
+			&engine.FilterRule{
 				FieldName: "Destination",
 				Type:      "*string",
 				Values:    []string{"1002"},

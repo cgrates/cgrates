@@ -53,72 +53,72 @@ func TestThresholdsSort(t *testing.T) {
 func TestThresholdsPopulateThresholdService(t *testing.T) {
 	data, _ := NewMapStorage()
 	dmTH = NewDataManager(data)
-	var filters1 []*RequestFilter
-	var filters2 []*RequestFilter
-	var preffilter []*RequestFilter
-	var defaultf []*RequestFilter
+	var filters1 []*FilterRule
+	var filters2 []*FilterRule
+	var preffilter []*FilterRule
+	var defaultf []*FilterRule
 	second := 1 * time.Second
 	thServ = ThresholdService{
 		dm:      dmTH,
 		filterS: &FilterS{dm: dmTH},
 	}
-	ref := NewReqFilterIndexer(dmTH, utils.ThresholdProfilePrefix, "cgrates.org")
+	ref := NewFilterIndexer(dmTH, utils.ThresholdProfilePrefix, "cgrates.org")
 
 	//filter1
-	x, err := NewRequestFilter(MetaString, "Threshold", []string{"ThresholdProfile1"})
+	x, err := NewFilterRule(MetaString, "Threshold", []string{"ThresholdProfile1"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	filters1 = append(filters1, x)
-	x, err = NewRequestFilter(MetaGreaterOrEqual, "UsageInterval", []string{second.String()})
+	x, err = NewFilterRule(MetaGreaterOrEqual, "UsageInterval", []string{second.String()})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	filters1 = append(filters1, x)
-	x, err = NewRequestFilter(MetaGreaterOrEqual, "Weight", []string{"9.0"})
+	x, err = NewFilterRule(MetaGreaterOrEqual, "Weight", []string{"9.0"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	filters1 = append(filters1, x)
-	filter5 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter5", RequestFilters: filters1}
+	filter5 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter5", Rules: filters1}
 	dmTH.SetFilter(filter5)
 	ref.IndexTPFilter(FilterToTPFilter(filter5), "TEST_PROFILE1")
 
 	//filter2
-	x, err = NewRequestFilter(MetaString, "Threshold", []string{"ThresholdProfile2"})
+	x, err = NewFilterRule(MetaString, "Threshold", []string{"ThresholdProfile2"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	filters2 = append(filters2, x)
-	x, err = NewRequestFilter(MetaGreaterOrEqual, "PddInterval", []string{second.String()})
+	x, err = NewFilterRule(MetaGreaterOrEqual, "PddInterval", []string{second.String()})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	filters2 = append(filters2, x)
-	x, err = NewRequestFilter(MetaGreaterOrEqual, "Weight", []string{"15.0"})
+	x, err = NewFilterRule(MetaGreaterOrEqual, "Weight", []string{"15.0"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	filters2 = append(filters2, x)
-	filter6 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter6", RequestFilters: filters2}
+	filter6 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter6", Rules: filters2}
 	dmTH.SetFilter(filter6)
 	ref.IndexTPFilter(FilterToTPFilter(filter6), "TEST_PROFILE2")
 	//prefix filter
-	x, err = NewRequestFilter(MetaPrefix, "Threshold", []string{"ThresholdProfilePrefix"})
+	x, err = NewFilterRule(MetaPrefix, "Threshold", []string{"ThresholdProfilePrefix"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	preffilter = append(preffilter, x)
-	preffilter3 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "preffilter3", RequestFilters: preffilter}
+	preffilter3 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "preffilter3", Rules: preffilter}
 	dmTH.SetFilter(preffilter3)
 	ref.IndexTPFilter(FilterToTPFilter(preffilter3), "TEST_PROFILE3")
 	//default filter
-	x, err = NewRequestFilter(MetaGreaterOrEqual, "Weight", []string{"200.00"})
+	x, err = NewFilterRule(MetaGreaterOrEqual, "Weight", []string{"200.00"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	defaultf = append(defaultf, x)
-	defaultf3 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "defaultf3", RequestFilters: defaultf}
+	defaultf3 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "defaultf3", Rules: defaultf}
 	dmTH.SetFilter(defaultf3)
 	ref.IndexTPFilter(FilterToTPFilter(defaultf3), "TEST_PROFILE4")
 

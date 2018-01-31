@@ -26,7 +26,7 @@ import (
 
 // matchingItemIDsForEvent returns the list of item IDs matching fieldName/fieldValue for an event
 // fieldIDs limits the fields which are checked against indexes
-// helper on top of dataDB.MatchReqFilterIndex, adding utils.ANY to list of fields queried
+// helper on top of dataDB.MatchFilterIndex, adding utils.ANY to list of fields queried
 func matchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldIDs *[]string,
 	dm *DataManager, dbIdxKey string) (itemIDs utils.StringMap, err error) {
 	itemIDs = make(utils.StringMap)

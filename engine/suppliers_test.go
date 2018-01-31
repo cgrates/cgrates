@@ -356,71 +356,71 @@ func TestSuppliersCache(t *testing.T) {
 func TestSuppliersPopulateSupplierService(t *testing.T) {
 	data, _ := NewMapStorage()
 	dmSPP = NewDataManager(data)
-	var filters1 []*RequestFilter
-	var filters2 []*RequestFilter
-	var preffilter []*RequestFilter
-	var defaultf []*RequestFilter
+	var filters1 []*FilterRule
+	var filters2 []*FilterRule
+	var preffilter []*FilterRule
+	var defaultf []*FilterRule
 	second := 1 * time.Second
 	//refresh the DM
-	ref := NewReqFilterIndexer(dmSPP, utils.SupplierProfilePrefix, "cgrates.org")
+	ref := NewFilterIndexer(dmSPP, utils.SupplierProfilePrefix, "cgrates.org")
 
 	//filter1
-	x, err := NewRequestFilter(MetaString, "Supplier", []string{"SupplierProfile1"})
+	x, err := NewFilterRule(MetaString, "Supplier", []string{"SupplierProfile1"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	filters1 = append(filters1, x)
-	x, err = NewRequestFilter(MetaGreaterOrEqual, "UsageInterval", []string{second.String()})
+	x, err = NewFilterRule(MetaGreaterOrEqual, "UsageInterval", []string{second.String()})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	filters1 = append(filters1, x)
-	x, err = NewRequestFilter(MetaGreaterOrEqual, "Weight", []string{"9.0"})
+	x, err = NewFilterRule(MetaGreaterOrEqual, "Weight", []string{"9.0"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	filters1 = append(filters1, x)
-	filter3 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter3", RequestFilters: filters1}
+	filter3 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter3", Rules: filters1}
 	dmSPP.SetFilter(filter3)
 	ref.IndexTPFilter(FilterToTPFilter(filter3), "supplierprofile1")
 
 	//filter2
-	x, err = NewRequestFilter(MetaString, "Supplier", []string{"SupplierProfile2"})
+	x, err = NewFilterRule(MetaString, "Supplier", []string{"SupplierProfile2"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	filters2 = append(filters2, x)
-	x, err = NewRequestFilter(MetaGreaterOrEqual, "PddInterval", []string{second.String()})
+	x, err = NewFilterRule(MetaGreaterOrEqual, "PddInterval", []string{second.String()})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	filters2 = append(filters2, x)
-	x, err = NewRequestFilter(MetaGreaterOrEqual, "Weight", []string{"15.0"})
+	x, err = NewFilterRule(MetaGreaterOrEqual, "Weight", []string{"15.0"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	filters2 = append(filters2, x)
-	filter4 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter4", RequestFilters: filters2}
+	filter4 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter4", Rules: filters2}
 	dmSPP.SetFilter(filter4)
 	ref.IndexTPFilter(FilterToTPFilter(filter4), "supplierprofile2")
 
 	//prefix filter
-	x, err = NewRequestFilter(MetaPrefix, "Supplier", []string{"supplierprofilePrefix"})
+	x, err = NewFilterRule(MetaPrefix, "Supplier", []string{"supplierprofilePrefix"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	preffilter = append(preffilter, x)
-	preffilter2 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "preffilter2", RequestFilters: preffilter}
+	preffilter2 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "preffilter2", Rules: preffilter}
 	dmSPP.SetFilter(preffilter2)
 	ref.IndexTPFilter(FilterToTPFilter(preffilter2), "supplierprofile3")
 
 	//default filter
-	x, err = NewRequestFilter(MetaGreaterOrEqual, "Weight", []string{"200.00"})
+	x, err = NewFilterRule(MetaGreaterOrEqual, "Weight", []string{"200.00"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	defaultf = append(defaultf, x)
-	defaultf2 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "defaultf2", RequestFilters: defaultf}
+	defaultf2 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "defaultf2", Rules: defaultf}
 	dmSPP.SetFilter(defaultf2)
 	ref.IndexTPFilter(FilterToTPFilter(defaultf2), "supplierprofile4")
 	splserv = SupplierService{

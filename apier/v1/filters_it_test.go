@@ -130,8 +130,8 @@ func testFilterSetFilter(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "Filter1",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "*string",
 				Type:      "Account",
 				Values:    []string{"1001", "1002"},
@@ -161,13 +161,13 @@ func testFilterGetFilterAfterSet(t *testing.T) {
 }
 
 func testFilterUpdateFilter(t *testing.T) {
-	filter.RequestFilters = []*engine.RequestFilter{
-		&engine.RequestFilter{
+	filter.Rules = []*engine.FilterRule{
+		&engine.FilterRule{
 			FieldName: "*string",
 			Type:      "Account",
 			Values:    []string{"1001", "1002"},
 		},
-		&engine.RequestFilter{
+		&engine.FilterRule{
 			FieldName: engine.MetaPrefix,
 			Type:      "Destination",
 			Values:    []string{"10", "20"},
