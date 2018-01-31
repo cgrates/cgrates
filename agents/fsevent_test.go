@@ -574,6 +574,37 @@ func TestFsEvAsCDR(t *testing.T) {
 	}
 }
 
+func TestFsEvAsMapStringInterface(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	config.SetCgrConfig(cfg)
+	ev := NewFSEvent(hangupEv)
+	setupTime, _ := utils.ParseTimeDetectLayout("1436280728", "")
+	aTime, _ := utils.ParseTimeDetectLayout("1436280728", "")
+	expectedMap := make(map[string]interface{})
+	expectedMap[utils.TOR] = utils.VOICE
+	expectedMap[utils.OriginID] = "e3133bf7-dcde-4daf-9663-9a79ffcef5ad"
+	expectedMap[utils.OriginHost] = "10.0.3.15"
+	expectedMap[utils.Source] = "FS_CHANNEL_HANGUP_COMPLETE"
+	expectedMap[utils.Category] = "call"
+	expectedMap[utils.SetupTime] = setupTime
+	expectedMap[utils.AnswerTime] = aTime
+	expectedMap[utils.RequestType] = utils.META_PREPAID
+	expectedMap[utils.Direction] = "*out"
+	expectedMap[utils.Destination] = "1003"
+	expectedMap[utils.Usage] = time.Duration(66) * time.Second
+	expectedMap[utils.Tenant] = "cgrates.org"
+	expectedMap[utils.Account] = "1001"
+	expectedMap[utils.Subject] = "1001"
+	expectedMap[utils.Cost] = -1
+	expectedMap[utils.PDD] = time.Duration(28) * time.Millisecond
+	expectedMap[utils.DISCONNECT_CAUSE] = "NORMAL_CLEARING"
+	expectedMap[utils.SUPPLIER] = "supplier1"
+
+	if storedMap := ev.AsMapStringInterface(""); !reflect.DeepEqual(expectedMap, storedMap) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedMap, storedMap)
+	}
+}
+
 func TestFsEvGetExtraFields(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	cfg.FsAgentCfg().ExtraFields = []*utils.RSRField{
