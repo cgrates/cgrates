@@ -239,8 +239,8 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 			}
 			return nil, err
 		}
-		if tPrfl.ActivationInterval != nil &&
-			!tPrfl.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
+		if tPrfl.ActivationInterval != nil && args.Time != nil &&
+			!tPrfl.ActivationInterval.IsActiveAtTime(*args.Time) { // not active
 			continue
 		}
 		if pass, err := tS.filterS.PassFiltersForEvent(args.Tenant, args.Event, tPrfl.FilterIDs); err != nil {

@@ -20,7 +20,6 @@ package engine
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
@@ -81,12 +80,8 @@ func (alS *AttributeService) matchingAttributeProfilesForEvent(ev *utils.CGREven
 			}
 			return nil, err
 		}
-		evTime := time.Now()
-		if ev.Time != nil {
-			evTime = *ev.Time
-		}
-		if aPrfl.ActivationInterval != nil &&
-			!aPrfl.ActivationInterval.IsActiveAtTime(evTime) { // not active
+		if aPrfl.ActivationInterval != nil && ev.Time != nil &&
+			!aPrfl.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
 			continue
 		}
 		if pass, err := alS.filterS.PassFiltersForEvent(ev.Tenant,
