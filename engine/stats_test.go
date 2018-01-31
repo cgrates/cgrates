@@ -26,7 +26,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestReqFilterPassStatS(t *testing.T) {
+func TestFilterPassStatS(t *testing.T) {
 	if cgrCfg := config.CgrConfig(); cgrCfg == nil {
 		cgrCfg, _ = config.NewDefaultCGRConfig()
 		config.SetCgrConfig(cgrCfg)

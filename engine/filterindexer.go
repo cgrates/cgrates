@@ -26,18 +26,18 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewReqFilterIndexer(dm *DataManager, itemType, dbKeySuffix string) *ReqFilterIndexer {
-	return &ReqFilterIndexer{dm: dm, itemType: itemType, dbKeySuffix: dbKeySuffix,
+func NewFilterIndexer(dm *DataManager, itemType, dbKeySuffix string) *FilterIndexer {
+	return &FilterIndexer{dm: dm, itemType: itemType, dbKeySuffix: dbKeySuffix,
 		indexes:          make(map[string]utils.StringMap),
 		reveseIndex:      make(map[string]utils.StringMap),
 		chngdIndxKeys:    make(utils.StringMap),
 		chngdRevIndxKeys: make(utils.StringMap)}
 }
 
-// ReqFilterIndexer is a centralized indexer for all data sources using RequestFilter
+// FilterIndexer is a centralized indexer for all data sources using RequestFilter
 // retrieves and stores it's data from/to dataDB
 // not thread safe, meant to be used as logic within other code blocks
-type ReqFilterIndexer struct {
+type FilterIndexer struct {
 	indexes          map[string]utils.StringMap // map[fieldName:fieldValue]utils.StringMap[itemID]
 	reveseIndex      map[string]utils.StringMap // map[itemID]utils.StringMap[fieldName:fieldValue]
 	dm               *DataManager
@@ -48,7 +48,7 @@ type ReqFilterIndexer struct {
 }
 
 // ChangedKeys returns the changed keys from original indexes so we can reload wisely
-func (rfi *ReqFilterIndexer) ChangedKeys(reverse bool) utils.StringMap {
+func (rfi *FilterIndexer) ChangedKeys(reverse bool) utils.StringMap {
 	if reverse {
 		return rfi.chngdRevIndxKeys
 	}
@@ -56,7 +56,7 @@ func (rfi *ReqFilterIndexer) ChangedKeys(reverse bool) utils.StringMap {
 }
 
 // IndexTPFilter parses reqFltrs, adding itemID in the indexes and marks the changed keys in chngdIndxKeys
-func (rfi *ReqFilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID string) {
+func (rfi *FilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID string) {
 	for _, fltr := range tpFltr.Filters {
 		switch fltr.Type {
 		case MetaString:
@@ -103,7 +103,7 @@ func (rfi *ReqFilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID
 	return
 }
 
-func (rfi *ReqFilterIndexer) cacheRemItemType() {
+func (rfi *FilterIndexer) cacheRemItemType() {
 	switch rfi.itemType {
 	case utils.ThresholdProfilePrefix:
 		cache.RemPrefixKey(utils.ThresholdFilterIndexes, true, utils.NonTransactional)
@@ -128,7 +128,7 @@ func (rfi *ReqFilterIndexer) cacheRemItemType() {
 }
 
 // StoreIndexes handles storing the indexes to dataDB
-func (rfi *ReqFilterIndexer) StoreIndexes() (err error) {
+func (rfi *FilterIndexer) StoreIndexes() (err error) {
 	if err = rfi.dm.SetFilterIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
 		rfi.indexes, true, utils.NonTransactional); err != nil {
@@ -143,8 +143,8 @@ func (rfi *ReqFilterIndexer) StoreIndexes() (err error) {
 	return
 }
 
-//Populate the ReqFilterIndexer.reveseIndex for specifil itemID
-func (rfi *ReqFilterIndexer) loadItemReverseIndex(filterType, itemID string) (err error) {
+//Populate the FilterIndexer.reveseIndex for specifil itemID
+func (rfi *FilterIndexer) loadItemReverseIndex(filterType, itemID string) (err error) {
 	rcvReveseIdx, err := rfi.dm.GetFilterReverseIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
 		map[string]string{itemID: ""})
@@ -160,8 +160,8 @@ func (rfi *ReqFilterIndexer) loadItemReverseIndex(filterType, itemID string) (er
 	return err
 }
 
-//Populate ReqFilterIndexer.indexes with specific fieldName:fieldValue , item
-func (rfi *ReqFilterIndexer) loadFldNameFldValIndex(filterType, fldName, fldVal string) error {
+//Populate FilterIndexer.indexes with specific fieldName:fieldValue , item
+func (rfi *FilterIndexer) loadFldNameFldValIndex(filterType, fldName, fldVal string) error {
 	rcvIdx, err := rfi.dm.GetFilterIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), filterType,
 		map[string]string{fldName: fldVal})
@@ -178,7 +178,7 @@ func (rfi *ReqFilterIndexer) loadFldNameFldValIndex(filterType, fldName, fldVal 
 }
 
 //RemoveItemFromIndex remove Indexes for a specific itemID
-func (rfi *ReqFilterIndexer) RemoveItemFromIndex(itemID string) (err error) {
+func (rfi *FilterIndexer) RemoveItemFromIndex(itemID string) (err error) {
 	if err = rfi.loadItemReverseIndex(MetaString, itemID); err != nil {
 		return err
 	}

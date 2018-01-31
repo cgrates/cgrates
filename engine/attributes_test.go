@@ -189,10 +189,10 @@ func TestAttributeCache(t *testing.T) {
 }
 
 func TestAttributePopulateAttrService(t *testing.T) {
-	var filters1 []*RequestFilter
-	var filters2 []*RequestFilter
-	var preffilter []*RequestFilter
-	var defaultf []*RequestFilter
+	var filters1 []*FilterRule
+	var filters2 []*FilterRule
+	var preffilter []*FilterRule
+	var defaultf []*FilterRule
 	second := 1 * time.Second
 	//refresh the DM
 	data, _ := NewMapStorage()
@@ -201,7 +201,7 @@ func TestAttributePopulateAttrService(t *testing.T) {
 		dm:      dmAtr,
 		filterS: &FilterS{dm: dmAtr},
 	}
-	ref := NewReqFilterIndexer(dmAtr, utils.AttributeProfilePrefix,
+	ref := NewFilterIndexer(dmAtr, utils.AttributeProfilePrefix,
 		utils.ConcatenatedKey(config.CgrConfig().DefaultTenant, utils.MetaRating))
 	for _, atr := range atrPs {
 		if err = dmAtr.SetAttributeProfile(atr, false); err != nil {
@@ -209,52 +209,52 @@ func TestAttributePopulateAttrService(t *testing.T) {
 		}
 	}
 	//filter1
-	x, err := NewRequestFilter(MetaString, "Attribute", []string{"AttributeProfile1"})
+	x, err := NewFilterRule(MetaString, "Attribute", []string{"AttributeProfile1"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	filters1 = append(filters1, x)
-	x, err = NewRequestFilter(MetaGreaterOrEqual, "UsageInterval", []string{second.String()})
+	x, err = NewFilterRule(MetaGreaterOrEqual, "UsageInterval", []string{second.String()})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	filters1 = append(filters1, x)
-	x, err = NewRequestFilter(MetaGreaterOrEqual, "Weight", []string{"9.0"})
+	x, err = NewFilterRule(MetaGreaterOrEqual, "Weight", []string{"9.0"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	filters1 = append(filters1, x)
-	filter1 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter1", RequestFilters: filters1}
+	filter1 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter1", Rules: filters1}
 	dmAtr.SetFilter(filter1)
 	ref.IndexTPFilter(FilterToTPFilter(filter1), "attributeprofile1")
 
 	//filter2
-	x, err = NewRequestFilter(MetaString, "Attribute", []string{"AttributeProfile2"})
+	x, err = NewFilterRule(MetaString, "Attribute", []string{"AttributeProfile2"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	filters2 = append(filters2, x)
-	filter2 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter2", RequestFilters: filters2}
+	filter2 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter2", Rules: filters2}
 	dmAtr.SetFilter(filter2)
 	ref.IndexTPFilter(FilterToTPFilter(filter2), "attributeprofile2")
 
 	//prefix filter
-	x, err = NewRequestFilter(MetaPrefix, "Attribute", []string{"AttributeProfilePrefix"})
+	x, err = NewFilterRule(MetaPrefix, "Attribute", []string{"AttributeProfilePrefix"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	preffilter = append(preffilter, x)
-	preffilter1 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "preffilter1", RequestFilters: preffilter}
+	preffilter1 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "preffilter1", Rules: preffilter}
 	dmAtr.SetFilter(preffilter1)
 	ref.IndexTPFilter(FilterToTPFilter(preffilter1), "attributeprofile3")
 
 	//default filter
-	x, err = NewRequestFilter(MetaGreaterOrEqual, "Weight", []string{"200.00"})
+	x, err = NewFilterRule(MetaGreaterOrEqual, "Weight", []string{"200.00"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	defaultf = append(defaultf, x)
-	defaultf1 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "defaultf1", RequestFilters: defaultf}
+	defaultf1 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "defaultf1", Rules: defaultf}
 	dmAtr.SetFilter(defaultf1)
 	ref.IndexTPFilter(FilterToTPFilter(defaultf1), "attributeprofile4")
 	err = ref.StoreIndexes()

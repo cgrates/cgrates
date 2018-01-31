@@ -179,8 +179,8 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: tenant,
 		ID:     "TestFilter",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},
@@ -288,8 +288,8 @@ func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: tenant,
 		ID:     "TestFilter2",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},
@@ -447,8 +447,8 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: tenant,
 		ID:     "FLTR_1",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},
@@ -562,8 +562,8 @@ func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: tenant,
 		ID:     "FLTR_2",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},
@@ -729,8 +729,8 @@ func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: tenant,
 		ID:     "FLTR_RES_RCFG1",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},
@@ -832,8 +832,8 @@ func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: tenant,
 		ID:     "FLTR_2",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},
@@ -985,8 +985,8 @@ func testV1FIdxSetSupplierProfileIndexes(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: tenant,
 		ID:     "FLTR_1",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},
@@ -1094,8 +1094,8 @@ func testV1FIdxSetSecondSupplierProfileIndexes(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: tenant,
 		ID:     "FLTR_2",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},
@@ -1255,8 +1255,8 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: tenant,
 		ID:     "FLTR_1",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},
@@ -1367,8 +1367,8 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: tenant,
 		ID:     "FLTR_2",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},

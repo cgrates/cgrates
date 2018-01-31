@@ -226,8 +226,8 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 	fp := &Filter{
 		Tenant: "cgrates.org",
 		ID:     "Filter1",
-		RequestFilters: []*RequestFilter{
-			&RequestFilter{
+		Rules: []*FilterRule{
+			&FilterRule{
 				FieldName: "EventType",
 				Type:      "*string",
 				Values:    []string{"Event1", "Event2"},
@@ -291,7 +291,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 			"*string:EventType:Event2": true,
 		},
 	}
-	rfi := NewReqFilterIndexer(onStor, utils.ThresholdProfilePrefix, th.Tenant)
+	rfi := NewFilterIndexer(onStor, utils.ThresholdProfilePrefix, th.Tenant)
 	if rcvIdx, err := dataManager.GetFilterIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
 		nil); err != nil {
@@ -314,8 +314,8 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 	fp2 := &Filter{
 		Tenant: "cgrates.org",
 		ID:     "Filter2",
-		RequestFilters: []*RequestFilter{
-			&RequestFilter{
+		Rules: []*FilterRule{
+			&FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001", "1002"},
@@ -381,8 +381,8 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 	fp3 := &Filter{
 		Tenant: "cgrates.org",
 		ID:     "Filter3",
-		RequestFilters: []*RequestFilter{
-			&RequestFilter{
+		Rules: []*FilterRule{
+			&FilterRule{
 				FieldName: "Destination",
 				Type:      "*string",
 				Values:    []string{"10", "20"},
@@ -472,8 +472,8 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 	fp := &Filter{
 		Tenant: "cgrates.org",
 		ID:     "Filter1",
-		RequestFilters: []*RequestFilter{
-			&RequestFilter{
+		Rules: []*FilterRule{
+			&FilterRule{
 				FieldName: "EventType",
 				Type:      "*string",
 				Values:    []string{"Event1", "Event2"},
@@ -524,7 +524,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		},
 	}
 	for _, ctx := range attrProfile.Contexts {
-		rfi := NewReqFilterIndexer(onStor, utils.AttributeProfilePrefix,
+		rfi := NewFilterIndexer(onStor, utils.AttributeProfilePrefix,
 			utils.ConcatenatedKey(attrProfile.Tenant, ctx))
 		if rcvIdx, err := dataManager.GetFilterIndexes(
 			GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
@@ -551,7 +551,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	//check indexes with the new context (con3)
-	rfi := NewReqFilterIndexer(onStor, utils.AttributeProfilePrefix,
+	rfi := NewFilterIndexer(onStor, utils.AttributeProfilePrefix,
 		utils.ConcatenatedKey(attrProfile.Tenant, "con3"))
 	if rcvIdx, err := dataManager.GetFilterIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
@@ -574,7 +574,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 
 	//check if old contexts was delete
 	for _, ctx := range []string{"con1", "con2"} {
-		rfi := NewReqFilterIndexer(onStor, utils.AttributeProfilePrefix,
+		rfi := NewFilterIndexer(onStor, utils.AttributeProfilePrefix,
 			utils.ConcatenatedKey(attrProfile.Tenant, ctx))
 		if _, err := dataManager.GetFilterIndexes(
 			GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
@@ -593,7 +593,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	//check if index is removed
-	rfi = NewReqFilterIndexer(onStor, utils.AttributeProfilePrefix, utils.ConcatenatedKey("cgrates.org", "con3"))
+	rfi = NewFilterIndexer(onStor, utils.AttributeProfilePrefix, utils.ConcatenatedKey("cgrates.org", "con3"))
 	if _, err := dataManager.GetFilterIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
 		nil); err != nil && err != utils.ErrNotFound {
@@ -610,8 +610,8 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 	fp := &Filter{
 		Tenant: "cgrates.org",
 		ID:     "Filter1",
-		RequestFilters: []*RequestFilter{
-			&RequestFilter{
+		Rules: []*FilterRule{
+			&FilterRule{
 				FieldName: "EventType",
 				Type:      "*string",
 				Values:    []string{"Event1", "Event2"},
@@ -654,7 +654,7 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 			"*string:EventType:Event2": true,
 		},
 	}
-	rfi := NewReqFilterIndexer(onStor, utils.ThresholdProfilePrefix, th.Tenant)
+	rfi := NewFilterIndexer(onStor, utils.ThresholdProfilePrefix, th.Tenant)
 	if rcvIdx, err := dataManager.GetFilterIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
 		nil); err != nil {

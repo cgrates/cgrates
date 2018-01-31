@@ -33,38 +33,38 @@ var (
 )
 
 func TestFilterMatchingItemIDsForEvent(t *testing.T) {
-	var stringFilter []*RequestFilter
-	var prefixFilter []*RequestFilter
-	var defaultFilter []*RequestFilter
+	var stringFilter []*FilterRule
+	var prefixFilter []*FilterRule
+	var defaultFilter []*FilterRule
 	stringFilterID := "stringFilterID"
 	prefixFilterID := "prefixFilterID"
 	defaultFilterID := "defaultFilterID"
 	data, _ := NewMapStorage()
 	dmMatch = NewDataManager(data)
 	context := utils.MetaRating
-	x, err := NewRequestFilter(MetaString, "Field", []string{"profile"})
+	x, err := NewFilterRule(MetaString, "Field", []string{"profile"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	stringFilter = append(stringFilter, x)
-	attribStringF := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "stringFilter", RequestFilters: stringFilter}
+	attribStringF := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "stringFilter", Rules: stringFilter}
 	dmMatch.SetFilter(attribStringF)
-	x, err = NewRequestFilter(MetaPrefix, "Field", []string{"profilePrefix"})
+	x, err = NewFilterRule(MetaPrefix, "Field", []string{"profilePrefix"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	prefixFilter = append(prefixFilter, x)
-	attribPrefF := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "prefFilter", RequestFilters: prefixFilter}
+	attribPrefF := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "prefFilter", Rules: prefixFilter}
 	dmMatch.SetFilter(attribPrefF)
-	x, err = NewRequestFilter(MetaGreaterOrEqual, "Weight", []string{"200.00"})
+	x, err = NewFilterRule(MetaGreaterOrEqual, "Weight", []string{"200.00"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	defaultFilter = append(defaultFilter, x)
-	attribDefaultF := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "defaultFilter", RequestFilters: defaultFilter}
+	attribDefaultF := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "defaultFilter", Rules: defaultFilter}
 	dmMatch.SetFilter(attribDefaultF)
 	prefix := utils.ConcatenatedKey(config.CgrConfig().DefaultTenant, context)
-	atrRFI := NewReqFilterIndexer(dmMatch, utils.AttributeProfilePrefix, prefix)
+	atrRFI := NewFilterIndexer(dmMatch, utils.AttributeProfilePrefix, prefix)
 	atrRFI.IndexTPFilter(FilterToTPFilter(attribStringF), stringFilterID)
 	atrRFI.IndexTPFilter(FilterToTPFilter(attribPrefF), prefixFilterID)
 	atrRFI.IndexTPFilter(FilterToTPFilter(attribDefaultF), defaultFilterID)

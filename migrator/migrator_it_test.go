@@ -855,7 +855,7 @@ func testMigratorSharedGroups(t *testing.T) {
 
 func testMigratorStats(t *testing.T) {
 	tim := time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC)
-	var filters []*engine.RequestFilter
+	var filters []*engine.FilterRule
 	v1Sts := &v1Stat{
 		Id:              "test",                         // Config id, unique per config instance
 		QueueLength:     10,                             // Number of items in the stats buffer
@@ -902,14 +902,14 @@ func testMigratorStats(t *testing.T) {
 		},
 	}
 
-	x, _ := engine.NewRequestFilter(engine.MetaGreaterOrEqual, "SetupInterval", []string{v1Sts.SetupInterval[0].String()})
+	x, _ := engine.NewFilterRule(engine.MetaGreaterOrEqual, "SetupInterval", []string{v1Sts.SetupInterval[0].String()})
 	filters = append(filters, x)
-	x, _ = engine.NewRequestFilter(engine.MetaGreaterOrEqual, "UsageInterval", []string{v1Sts.UsageInterval[0].String()})
+	x, _ = engine.NewFilterRule(engine.MetaGreaterOrEqual, "UsageInterval", []string{v1Sts.UsageInterval[0].String()})
 	filters = append(filters, x)
-	x, _ = engine.NewRequestFilter(engine.MetaGreaterOrEqual, "PddInterval", []string{v1Sts.PddInterval[0].String()})
+	x, _ = engine.NewFilterRule(engine.MetaGreaterOrEqual, "PddInterval", []string{v1Sts.PddInterval[0].String()})
 	filters = append(filters, x)
 
-	filter := &engine.Filter{Tenant: config.CgrConfig().DefaultTenant, ID: v1Sts.Id, RequestFilters: filters}
+	filter := &engine.Filter{Tenant: config.CgrConfig().DefaultTenant, ID: v1Sts.Id, Rules: filters}
 
 	sqp := &engine.StatQueueProfile{
 		Tenant:      "cgrates.org",
@@ -1115,7 +1115,7 @@ func testMigratorStats(t *testing.T) {
 func testMigratorThreshold(t *testing.T) {
 	tim := time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC)
 	tenant := config.CgrConfig().DefaultTenant
-	var filters []*engine.RequestFilter
+	var filters []*engine.FilterRule
 	threshold := &v2ActionTrigger{
 		ID:             "test2",              // original csv tag
 		UniqueID:       "testUUID",           // individual id
@@ -1138,13 +1138,13 @@ func testMigratorThreshold(t *testing.T) {
 		Executed:          false,
 		LastExecutionTime: time.Now(),
 	}
-	x, err := engine.NewRequestFilter(engine.MetaRSR, "Directions", threshold.Balance.Directions.Slice())
+	x, err := engine.NewFilterRule(engine.MetaRSR, "Directions", threshold.Balance.Directions.Slice())
 	if err != nil {
-		t.Error("Error when creating new NewRequestFilter", err.Error())
+		t.Error("Error when creating new NewFilterRule", err.Error())
 	}
 	filters = append(filters, x)
 
-	filter := &engine.Filter{Tenant: config.CgrConfig().DefaultTenant, ID: *threshold.Balance.ID, RequestFilters: filters}
+	filter := &engine.Filter{Tenant: config.CgrConfig().DefaultTenant, ID: *threshold.Balance.ID, Rules: filters}
 
 	thp := &engine.ThresholdProfile{
 		ID:                 threshold.ID,
@@ -1634,8 +1634,8 @@ func testMigratorRQF(t *testing.T) {
 	fp := &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "Filter1",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001", "1002"},
@@ -1649,20 +1649,20 @@ func testMigratorRQF(t *testing.T) {
 	switch action {
 	case Move:
 		if err := mig.dmIN.SetFilter(fp); err != nil {
-			t.Error("Error when setting RequestFilter ", err.Error())
+			t.Error("Error when setting FilterRule ", err.Error())
 		}
 		currentVersion := engine.CurrentDataDBVersions()
 		err := mig.dmOut.DataDB().SetVersions(currentVersion, false)
 		if err != nil {
-			t.Error("Error when setting version for RequestFilter ", err.Error())
+			t.Error("Error when setting version for FilterRule ", err.Error())
 		}
 		err, _ = mig.Migrate([]string{utils.MetaRQF})
 		if err != nil {
-			t.Error("Error when migrating RequestFilter ", err.Error())
+			t.Error("Error when migrating FilterRule ", err.Error())
 		}
 		result, err := mig.dmOut.GetFilter(fp.Tenant, fp.ID, true, utils.NonTransactional)
 		if err != nil {
-			t.Error("Error when getting RequestFilter ", err.Error())
+			t.Error("Error when getting FilterRule ", err.Error())
 		}
 		if !reflect.DeepEqual(fp, result) {
 			t.Errorf("Expecting: %v, received: %v", fp, result)
@@ -1671,7 +1671,7 @@ func testMigratorRQF(t *testing.T) {
 }
 
 func testMigratorResource(t *testing.T) {
-	var filters []*engine.RequestFilter
+	var filters []*engine.FilterRule
 	rL := &engine.ResourceProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RL_TEST2",
@@ -1686,10 +1686,10 @@ func testMigratorResource(t *testing.T) {
 	}
 	switch action {
 	case Move:
-		x, _ := engine.NewRequestFilter(engine.MetaGreaterOrEqual, "PddInterval", []string{rL.UsageTTL.String()})
+		x, _ := engine.NewFilterRule(engine.MetaGreaterOrEqual, "PddInterval", []string{rL.UsageTTL.String()})
 		filters = append(filters, x)
 
-		filter := &engine.Filter{Tenant: "cgrates.org", ID: "FLTR_RES_RL_TEST2", RequestFilters: filters}
+		filter := &engine.Filter{Tenant: "cgrates.org", ID: "FLTR_RES_RL_TEST2", Rules: filters}
 
 		if err := mig.dmIN.SetFilter(filter); err != nil {
 			t.Error("Error when setting filter ", err.Error())
@@ -1825,8 +1825,8 @@ func testMigratorAttributeProfile(t *testing.T) {
 	filterAttr := &engine.Filter{
 		Tenant: attrPrf.Tenant,
 		ID:     attrPrf.FilterIDs[0],
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Name",
 				Type:      "Type",
 				Values:    []string{"Val1"},
