@@ -107,7 +107,7 @@ func (self *SQLStorage) IsDBEmpty() (resp bool, err error) {
 		utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPLcrs, utils.TBLTPActions,
 		utils.TBLTPActionTriggers, utils.TBLTPAccountActions, utils.TBLTPDerivedChargers, utils.TBLTPUsers,
 		utils.TBLTPAliases, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
-		utils.TBLTPFilters, utils.SMCostsTBL, utils.CDRsTBL, utils.TBLTPActionPlans,
+		utils.TBLTPFilters, utils.SessionsCostsTBL, utils.CDRsTBL, utils.TBLTPActionPlans,
 		utils.TBLVersions, utils.TBLTPSuppliers, utils.TBLTPAttributes,
 	}
 	for _, tbl := range tbls {
@@ -743,7 +743,7 @@ func (self *SQLStorage) SetSMCost(smc *SMCost) error {
 		return nil
 	}
 	tx := self.db.Begin()
-	cd := &SMCostSQL{
+	cd := &SessionsCostsSQL{
 		Cgrid:       smc.CGRID,
 		RunID:       smc.RunID,
 		OriginHost:  smc.OriginHost,
@@ -764,7 +764,8 @@ func (self *SQLStorage) SetSMCost(smc *SMCost) error {
 func (self *SQLStorage) RemoveSMCost(smc *SMCost) error {
 	tx := self.db.Begin()
 
-	if err := tx.Where(&SMCostSQL{Cgrid: smc.CGRID, RunID: smc.RunID}).Delete(SMCost{}).Error; err != nil {
+	if err := tx.Where(&SessionsCostsSQL{Cgrid: smc.CGRID,
+		RunID: smc.RunID}).Delete(SessionsCostsSQL{}).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -775,7 +776,7 @@ func (self *SQLStorage) RemoveSMCost(smc *SMCost) error {
 // GetSMCosts is used to retrieve one or multiple SMCosts based on filter
 func (self *SQLStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix string) ([]*SMCost, error) {
 	var smCosts []*SMCost
-	filter := &SMCostSQL{}
+	filter := &SessionsCostsSQL{}
 	if cgrid != "" {
 		filter.Cgrid = cgrid
 	}
@@ -789,7 +790,7 @@ func (self *SQLStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix stri
 	if originIDPrefix != "" {
 		q = self.db.Where(filter).Where(fmt.Sprintf("origin_id LIKE '%s%%'", originIDPrefix))
 	}
-	results := make([]*SMCostSQL, 0)
+	results := make([]*SessionsCostsSQL, 0)
 	if err := q.Find(&results).Error; err != nil {
 		return nil, err
 	}

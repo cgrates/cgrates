@@ -370,12 +370,18 @@ func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]interface{}
 
 // V1AuthorizeArgs returns the arguments used in SMGv1.Authorize
 func (fsev FSEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
+	timezone := config.CgrConfig().DefaultTimezone
+	sTime, err := fsev.GetSetupTime(utils.META_DEFAULT, timezone)
+	if err != nil {
+		return
+	}
 	args = &sessions.V1AuthorizeArgs{ // defaults
 		GetMaxUsage: true,
 		CGREvent: utils.CGREvent{
 			Tenant: fsev.GetTenant(utils.META_DEFAULT),
 			ID:     utils.UUIDSha1Prefix(),
-			Event:  fsev.AsMapStringInterface(config.CgrConfig().DefaultTimezone),
+			Time:   &sTime,
+			Event:  fsev.AsMapStringInterface(timezone),
 		},
 	}
 	subsystems, has := fsev[VarCGRSubsystems]
@@ -399,11 +405,17 @@ func (fsev FSEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 
 // V1InitSessionArgs returns the arguments used in SessionSv1.InitSession
 func (fsev FSEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
+	timezone := config.CgrConfig().DefaultTimezone
+	sTime, err := fsev.GetSetupTime(utils.META_DEFAULT, timezone)
+	if err != nil {
+		return
+	}
 	args = &sessions.V1InitSessionArgs{ // defaults
 		InitSession: true,
 		CGREvent: utils.CGREvent{
 			Tenant: fsev.GetTenant(utils.META_DEFAULT),
 			ID:     utils.UUIDSha1Prefix(),
+			Time:   &sTime,
 			Event:  fsev.AsMapStringInterface(config.CgrConfig().DefaultTimezone),
 		},
 	}
@@ -425,11 +437,17 @@ func (fsev FSEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 
 // V1TerminateSessionArgs returns the arguments used in SMGv1.TerminateSession
 func (fsev FSEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionArgs) {
+	timezone := config.CgrConfig().DefaultTimezone
+	sTime, err := fsev.GetSetupTime(utils.META_DEFAULT, timezone)
+	if err != nil {
+		return
+	}
 	args = &sessions.V1TerminateSessionArgs{ // defaults
 		TerminateSession: true,
 		CGREvent: utils.CGREvent{
 			Tenant: fsev.GetTenant(utils.META_DEFAULT),
 			ID:     utils.UUIDSha1Prefix(),
+			Time:   &sTime,
 			Event:  fsev.AsMapStringInterface(config.CgrConfig().DefaultTimezone),
 		},
 	}

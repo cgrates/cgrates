@@ -289,7 +289,7 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 			Background: false,
 			Sparse:     false,
 		}
-		if err = db.C(utils.SMCostsTBL).EnsureIndex(idx); err != nil {
+		if err = db.C(utils.SessionsCostsTBL).EnsureIndex(idx); err != nil {
 			return
 		}
 		idx = mgo.Index{
@@ -299,7 +299,7 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 			Background: false,
 			Sparse:     false,
 		}
-		if err = db.C(utils.SMCostsTBL).EnsureIndex(idx); err != nil {
+		if err = db.C(utils.SessionsCostsTBL).EnsureIndex(idx); err != nil {
 			return
 		}
 		idx = mgo.Index{
@@ -309,7 +309,7 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 			Background: false,
 			Sparse:     false,
 		}
-		if err = db.C(utils.SMCostsTBL).EnsureIndex(idx); err != nil {
+		if err = db.C(utils.SessionsCostsTBL).EnsureIndex(idx); err != nil {
 			return
 		}
 	}
