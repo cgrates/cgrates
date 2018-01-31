@@ -38,8 +38,8 @@ CREATE TABLE cdrs (
   UNIQUE KEY cdrrun (cgrid, run_id, origin_id)
 );
 
-DROP TABLE IF EXISTS sm_costs;
-CREATE TABLE sm_costs (
+DROP TABLE IF EXISTS sessions_costs;
+CREATE TABLE sessions_costs (
   id int(11) NOT NULL AUTO_INCREMENT,
   cgrid char(40) NOT NULL,
   run_id  varchar(64) NOT NULL,
