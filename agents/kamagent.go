@@ -78,7 +78,7 @@ func (self *KamailioAgent) Shutdown() error {
 
 // rpcclient.RpcClientConnection interface
 func (ka *KamailioAgent) Call(serviceMethod string, args interface{}, reply interface{}) error {
-	return utils.APIerRPCCall(ka, serviceMethod, args, reply)
+	return utils.RPCCall(ka, serviceMethod, args, reply)
 }
 
 // onCgrAuth is called when new event of type CGR_AUTH_REQUEST is coming

@@ -333,7 +333,7 @@ func (sm *FSsessions) Shutdown() (err error) {
 
 // rpcclient.RpcClientConnection interface
 func (sm *FSsessions) Call(serviceMethod string, args interface{}, reply interface{}) error {
-	return utils.APIerRPCCall(sm, serviceMethod, args, reply)
+	return utils.RPCCall(sm, serviceMethod, args, reply)
 }
 
 // Internal method to disconnect session in asterisk
