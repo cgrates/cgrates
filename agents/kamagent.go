@@ -170,7 +170,7 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connID string) {
 	}
 	if ka.cfg.CreateCdr || strings.Index(kev[KamCGRSubsystems], utils.MetaCDRs) != -1 {
 		cdr := kev.AsCDR(ka.timezone)
-		if err := ka.sessionS.Call(utils.SessionSv1ProcessCDR, cdr, &reply); err != nil {
+		if err := ka.sessionS.Call(utils.SessionSv1ProcessCDR, cdr.AsCGREvent(), &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("%s> failed processing CDR: %s, error: %s",
 				utils.KamailioAgent, utils.ToJSON(cdr), err.Error()))
 		}

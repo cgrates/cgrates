@@ -236,7 +236,7 @@ func (sm *FSsessions) onChannelHangupComplete(fsev FSEvent, connId string) {
 	}
 	if sm.cfg.CreateCdr {
 		cdr := fsev.AsCDR(sm.timezone)
-		if err := sm.smg.Call(utils.SessionSv1ProcessCDR, cdr, &reply); err != nil {
+		if err := sm.smg.Call(utils.SessionSv1ProcessCDR, cdr.AsCGREvent(), &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Failed processing CDR: %s,  error: <%s>",
 				utils.FreeSWITCHAgent, utils.ToJSON(cdr), err.Error()))
 		}
