@@ -125,6 +125,7 @@ func (kev KamEvent) AsMapStringInterface() (mp map[string]interface{}) {
 // AsCDR converts KamEvent into CDR
 func (kev KamEvent) AsCDR(timezone string) (cdr *engine.CDR) {
 	cdr = new(engine.CDR)
+	cdr.ExtraFields = make(map[string]string)
 	for fld, val := range kev { // first ExtraFields so we can overwrite
 		if !utils.IsSliceMember(utils.PrimaryCdrFields, fld) &&
 			!utils.IsSliceMember(kamReservedFields, fld) {
