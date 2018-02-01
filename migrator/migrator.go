@@ -115,6 +115,8 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			} else {
 				log.Print("Cannot dryRun SetVersions!")
 			}
+		case utils.MetaSessionsCosts:
+			err = m.migrateSessionsCosts()
 		case utils.MetaCostDetails:
 			err = m.migrateCostDetails()
 		case utils.MetaAccounts:

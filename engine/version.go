@@ -90,7 +90,8 @@ func (vers Versions) Compare(curent Versions, storType string) string {
 		utils.SharedGroups:   "cgr-migrator -migrate=*shared_groups",
 	}
 	stor := map[string]string{
-		utils.COST_DETAILS: "cgr-migrator -migrate=*cost_details",
+		utils.COST_DETAILS:  "cgr-migrator -migrate=*cost_details",
+		utils.SessionsCosts: "cgr-migrator -migrate=*sessions_costs",
 	}
 	switch storType {
 	case utils.MONGO:
@@ -141,6 +142,7 @@ func CurrentDataDBVersions() Versions {
 func CurrentStorDBVersions() Versions {
 	return Versions{
 		utils.COST_DETAILS:       2,
+		utils.SessionsCosts:      2,
 		utils.TpRatingPlans:      1,
 		utils.TpFilters:          1,
 		utils.TpDestinationRates: 1,
