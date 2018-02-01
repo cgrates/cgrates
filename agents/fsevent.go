@@ -416,7 +416,7 @@ func (fsev FSEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 			Tenant: fsev.GetTenant(utils.META_DEFAULT),
 			ID:     utils.UUIDSha1Prefix(),
 			Time:   &sTime,
-			Event:  fsev.AsMapStringInterface(config.CgrConfig().DefaultTimezone),
+			Event:  fsev.AsMapStringInterface(timezone),
 		},
 	}
 	subsystems, has := fsev[VarCGRSubsystems]

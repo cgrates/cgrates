@@ -20,8 +20,10 @@ package agents
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -56,6 +58,79 @@ func TestNewKamEvent(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eKamEv, kamEv) {
 		t.Error("Received: ", kamEv)
+	}
+}
+
+func TestKamEvMissingParameter(t *testing.T) {
+	kamEv = KamEvent{EVENT: CGR_CALL_END,
+		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
+		"from_tag": "bf71ad59", "to_tag": "7351fecf",
+		"cgr_reqtype": utils.META_POSTPAID, "cgr_account": "1001",
+		"cgr_answertime": "1419839310", "cgr_duration": "3", "cgr_pdd": "4",
+		utils.CGR_SUPPLIER:         "supplier2",
+		utils.CGR_DISCONNECT_CAUSE: "200"}
+	if missingParam := kamEv.MissingParameter(); missingParam != true {
+		t.Errorf("Expecting: true, received:%+v ", missingParam)
+	}
+}
+
+func TestKamEvAsMapStringInterface(t *testing.T) {
+	kamEv := KamEvent{"event": "CGR_CALL_END",
+		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
+		"from_tag": "bf71ad59", "to_tag": "7351fecf",
+		"cgr_reqtype": utils.META_POSTPAID, "cgr_account": "1001",
+		"cgr_destination": "1002", "cgr_answertime": "1419839310",
+		"cgr_duration": "3", "cgr_pdd": "4",
+		utils.CGR_SUPPLIER:         "supplier2",
+		utils.CGR_DISCONNECT_CAUSE: "200"}
+	expMp := make(map[string]interface{})
+	expMp["cgr_account"] = "1001"
+	expMp["cgr_duration"] = "3"
+	expMp["cgr_pdd"] = "4"
+	expMp["cgr_destination"] = "1002"
+	expMp[utils.CGR_SUPPLIER] = "supplier2"
+	expMp["cgr_answertime"] = "1419839310"
+	expMp[utils.CGR_DISCONNECT_CAUSE] = "200"
+	expMp["callid"] = "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0"
+	expMp["from_tag"] = "bf71ad59"
+	expMp["to_tag"] = "7351fecf"
+	expMp["cgr_reqtype"] = utils.META_POSTPAID
+	rcv := kamEv.AsMapStringInterface()
+	if !reflect.DeepEqual(expMp, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expMp, rcv)
+	}
+}
+
+func TestKamEvAsCDR(t *testing.T) {
+	timezone := config.CgrConfig().DefaultTimezone
+	expMp := make(map[string]string)
+	expMp["cgr_account"] = "1001"
+	expMp["cgr_duration"] = "3"
+	expMp["cgr_pdd"] = "4"
+	expMp["cgr_destination"] = "1002"
+	expMp[utils.CGR_SUPPLIER] = "supplier2"
+	expMp["cgr_answertime"] = "1419839310"
+	expMp[utils.CGR_DISCONNECT_CAUSE] = "200"
+	expMp["callid"] = "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0"
+	expMp["from_tag"] = "bf71ad59"
+	expMp["to_tag"] = "7351fecf"
+	expMp["cgr_reqtype"] = utils.META_POSTPAID
+	kamEv := KamEvent{"event": "CGR_CALL_END",
+		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
+		"from_tag": "bf71ad59", "to_tag": "7351fecf",
+		"cgr_reqtype": utils.META_POSTPAID, "cgr_account": "1001",
+		"cgr_destination": "1002", "cgr_answertime": "1419839310",
+		"cgr_duration": "3", "cgr_pdd": "4",
+		utils.CGR_SUPPLIER:         "supplier2",
+		utils.CGR_DISCONNECT_CAUSE: "200"}
+	eStoredCdr := &engine.CDR{
+		Tenant: "cgrates.org", Category: "call", Source: "KamailioEvent",
+		ToR: "*voice", Usage: 0, RequestType: "*rated",
+		ExtraFields: expMp, Cost: -1,
+	}
+	rcv := kamEv.AsCDR(timezone)
+	if !reflect.DeepEqual(eStoredCdr, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eStoredCdr, rcv)
 	}
 }
 
@@ -98,6 +173,44 @@ func TestKamEvV1AuthorizeArgs(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.GetSuppliers, rcv.GetSuppliers)
 	} else if !reflect.DeepEqual(expected.GetAttributes, rcv.GetAttributes) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.GetAttributes, rcv.GetAttributes)
+	}
+}
+
+func TestKamEvAsKamAuthReply(t *testing.T) {
+	timezone := config.CgrConfig().DefaultTimezone
+	kamEv := KamEvent{"event": "CGR_CALL_END",
+		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
+		"from_tag": "bf71ad59", "to_tag": "7351fecf",
+		"cgr_reqtype": utils.META_POSTPAID, "cgr_account": "1001",
+		"cgr_destination": "1002", "cgr_answertime": "1419839310",
+		"cgr_duration": "3", "cgr_pdd": "4",
+		utils.CGR_SUPPLIER:         "supplier2",
+		utils.CGR_DISCONNECT_CAUSE: "200"}
+	sTime, err := utils.ParseTimeDetectLayout(kamEv[utils.AnswerTime], timezone)
+	if err != nil {
+		return
+	}
+	authArgs := &sessions.V1AuthorizeArgs{
+		GetMaxUsage: true,
+		CGREvent: utils.CGREvent{
+			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
+				config.CgrConfig().DefaultTenant),
+			ID:    utils.UUIDSha1Prefix(),
+			Time:  &sTime,
+			Event: kamEv.AsMapStringInterface(),
+		},
+	}
+	authRply := &sessions.V1AuthorizeReply{
+		MaxUsage: utils.DurationPointer(time.Duration(5 * time.Second)),
+	}
+	expected := &KamAuthReply{
+		Event:    CGR_AUTH_REPLY,
+		MaxUsage: 5,
+	}
+	if rcv, err := kamEv.AsKamAuthReply(authArgs, authRply, nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
 	}
 }
 
