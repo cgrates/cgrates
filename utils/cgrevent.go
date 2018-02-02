@@ -34,6 +34,11 @@ type CGREvent struct {
 	Event   map[string]interface{}
 }
 
+func (ev *CGREvent) HasField(fldName string) (has bool) {
+	_, has = ev.Event[fldName]
+	return
+}
+
 func (ev *CGREvent) CheckMandatoryFields(fldNames []string) error {
 	for _, fldName := range fldNames {
 		if _, has := ev.Event[fldName]; !has {

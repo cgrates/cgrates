@@ -99,7 +99,7 @@
 	"request_processors": [
 		{
 			"id": "KamailioAuth",
-			"request_filter": "*radReqType(*radAuthReq)",
+			"request_filter": "*radReqType(*radAuth)",
 			"request_fields":[
 				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
 					"value": "*prepaid", "mandatory": true},	

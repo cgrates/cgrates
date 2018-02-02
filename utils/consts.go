@@ -504,6 +504,10 @@ const (
 	FreeSWITCHAgent              = "FreeSWITCHAgent"
 	MetaDefault                  = "*default"
 	KamailioAgent                = "KamailioAgent"
+	RadiusAgent                  = "RadiusAgent"
+	DiameterAgent                = "DiameterAgent"
+	Error                        = "Error"
+	MetaCGRReply                 = "*cgrReply"
 )
 
 //MetaMetrics

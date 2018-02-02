@@ -22,12 +22,33 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/radigo"
 )
+
+// processorVars will hold various variables using during request processing
+// here so we can define methods on it
+type processorVars map[string]interface{}
+
+// hasSubsystems will return true on single subsystem being present in processorVars
+func (pv processorVars) hasSubsystems() (has bool) {
+	for _, k := range []string{utils.MetaAccounts, utils.MetaResources,
+		utils.MetaSuppliers, utils.MetaAttributes} {
+		if _, has = pv[k]; has {
+			return
+		}
+	}
+	return
+}
+
+func (pv processorVars) hasVar(k string) (has bool) {
+	_, has = pv[k]
+	return
+}
 
 // radAttrVendorFromPath returns AttributenName and VendorName from path
 // path should be the form attributeName or vendorName/attributeName
@@ -42,12 +63,17 @@ func attrVendorFromPath(path string) (attrName, vendorName string) {
 }
 
 // radPassesFieldFilter checks whether fieldFilter matches either in processorsVars or AVPs of packet
-func radPassesFieldFilter(pkt *radigo.Packet, processorVars map[string]string, fieldFilter *utils.RSRField) (pass bool) {
+func radPassesFieldFilter(pkt *radigo.Packet, processorVars processorVars,
+	fieldFilter *utils.RSRField) (pass bool) {
 	if fieldFilter == nil {
 		return true
 	}
-	if val, hasIt := processorVars[fieldFilter.Id]; hasIt { // ProcessorVars have priority
-		if fieldFilter.FilterPasses(val) {
+	if valIface, hasIt := processorVars[fieldFilter.Id]; hasIt { // ProcessorVars have priority
+		if val, canCast := utils.CastFieldIfToString(valIface); !canCast {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> cannot cast field <%s> to string",
+					utils.RadiusAgent, fieldFilter.Id))
+		} else if fieldFilter.FilterPasses(val) {
 			pass = true
 		}
 		return
@@ -66,14 +92,20 @@ func radPassesFieldFilter(pkt *radigo.Packet, processorVars map[string]string, f
 
 // radComposedFieldValue extracts the field value out of RADIUS packet
 func radComposedFieldValue(pkt *radigo.Packet,
-	processorVars map[string]string, outTpl utils.RSRFields) (outVal string) {
+	processorVars processorVars, outTpl utils.RSRFields) (outVal string) {
 	for _, rsrTpl := range outTpl {
 		if rsrTpl.IsStatic() {
 			outVal += rsrTpl.ParseValue("")
 			continue
 		}
-		if val, hasIt := processorVars[rsrTpl.Id]; hasIt { // ProcessorVars have priority
-			outVal += rsrTpl.ParseValue(val)
+		if valIface, hasIt := processorVars[rsrTpl.Id]; hasIt { // ProcessorVars have priority
+			if val, canCast := utils.CastFieldIfToString(valIface); !canCast {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> cannot cast field <%s> to string",
+						utils.RadiusAgent, rsrTpl.Id))
+			} else {
+				outVal += rsrTpl.ParseValue(val)
+			}
 			continue
 		}
 		for _, avp := range pkt.AttributesWithName(
@@ -85,7 +117,7 @@ func radComposedFieldValue(pkt *radigo.Packet,
 }
 
 // radMetaHandler handles *handler type in configuration fields
-func radMetaHandler(pkt *radigo.Packet, processorVars map[string]string,
+func radMetaHandler(pkt *radigo.Packet, processorVars processorVars,
 	cfgFld *config.CfgCdrField) (outVal string, err error) {
 	handlerArgs := strings.Split(
 		radComposedFieldValue(pkt, processorVars, cfgFld.Value), utils.HandlerArgSep)
@@ -108,7 +140,7 @@ func radMetaHandler(pkt *radigo.Packet, processorVars map[string]string,
 }
 
 // radFieldOutVal formats the field value retrieved from RADIUS packet
-func radFieldOutVal(pkt *radigo.Packet, processorVars map[string]string,
+func radFieldOutVal(pkt *radigo.Packet, processorVars processorVars,
 	cfgFld *config.CfgCdrField) (outVal string, err error) {
 	// different output based on cgrFld.Type
 	switch cfgFld.Type {
@@ -133,10 +165,9 @@ func radFieldOutVal(pkt *radigo.Packet, processorVars map[string]string,
 }
 
 // radPktAsSMGEvent converts a RADIUS packet into SMGEvent
-func radReqAsSMGEvent(radPkt *radigo.Packet, procVars map[string]string, procFlags utils.StringMap,
-	cfgFlds []*config.CfgCdrField) (smgEv sessions.SMGenericEvent, err error) {
+func radReqAsCGREvent(radPkt *radigo.Packet, procVars map[string]interface{}, procFlags utils.StringMap,
+	cfgFlds []*config.CfgCdrField) (cgrEv *utils.CGREvent, err error) {
 	outMap := make(map[string]string) // work with it so we can append values to keys
-	outMap[utils.EVENT_NAME] = EvRadiusReq
 	for _, cfgFld := range cfgFlds {
 		passedAllFilters := true
 		for _, fldFilter := range cfgFld.FieldFilter {
@@ -164,11 +195,18 @@ func radReqAsSMGEvent(radPkt *radigo.Packet, procVars map[string]string, procFla
 	if len(procFlags) != 0 {
 		outMap[utils.CGRFlags] = procFlags.String()
 	}
-	return sessions.SMGenericEvent(utils.ConvertMapValStrIf(outMap)), nil
+	cgrEv = &utils.CGREvent{
+		Tenant: utils.FirstNonEmpty(outMap[utils.Tenant],
+			config.CgrConfig().DefaultTenant),
+		ID:    utils.UUIDSha1Prefix(),
+		Time:  utils.TimePointer(time.Now()),
+		Event: utils.ConvertMapValStrIf(outMap),
+	}
+	return
 }
 
 // radReplyAppendAttributes appends attributes to a RADIUS reply based on predefined template
-func radReplyAppendAttributes(reply *radigo.Packet, procVars map[string]string,
+func radReplyAppendAttributes(reply *radigo.Packet, procVars map[string]interface{},
 	cfgFlds []*config.CfgCdrField) (err error) {
 	for _, cfgFld := range cfgFlds {
 		passedAllFilters := true
@@ -198,6 +236,87 @@ func radReplyAppendAttributes(reply *radigo.Packet, procVars map[string]string,
 		if cfgFld.BreakOnSuccess {
 			break
 		}
+	}
+	return
+}
+
+// radV1AuthorizeArgs returns the arguments needed by SessionSv1.AuthorizeEvent
+func radV1AuthorizeArgs(cgrEv *utils.CGREvent, procVars processorVars) (args *sessions.V1AuthorizeArgs) {
+	args = &sessions.V1AuthorizeArgs{ // defaults
+		GetMaxUsage: true,
+		CGREvent:    *cgrEv,
+	}
+	if !procVars.hasSubsystems() {
+		return
+	}
+	if !procVars.hasVar(utils.MetaAccounts) {
+		args.GetMaxUsage = false
+	}
+	if procVars.hasVar(utils.MetaResources) {
+		args.AuthorizeResources = true
+	}
+	if procVars.hasVar(utils.MetaSuppliers) {
+		args.GetSuppliers = true
+	}
+	if procVars.hasVar(utils.MetaAttributes) {
+		args.GetAttributes = true
+	}
+	return
+}
+
+// radV1InitSessionArgs returns the arguments used in SessionSv1.InitSession
+func radV1InitSessionArgs(cgrEv *utils.CGREvent, procVars processorVars) (args *sessions.V1InitSessionArgs) {
+	args = &sessions.V1InitSessionArgs{ // defaults
+		InitSession: true,
+		CGREvent:    *cgrEv,
+	}
+	if !procVars.hasSubsystems() {
+		return
+	}
+	if !procVars.hasVar(utils.MetaAccounts) {
+		args.InitSession = false
+	}
+	if procVars.hasVar(utils.MetaResources) {
+		args.AllocateResources = true
+	}
+	if procVars.hasVar(utils.MetaAttributes) {
+		args.GetAttributes = true
+	}
+	return
+}
+
+// radV1InitSessionArgs returns the arguments used in SessionSv1.InitSession
+func radV1UpdateSessionArgs(cgrEv *utils.CGREvent, procVars processorVars) (args *sessions.V1UpdateSessionArgs) {
+	args = &sessions.V1UpdateSessionArgs{ // defaults
+		UpdateSession: true,
+		CGREvent:      *cgrEv,
+	}
+	if !procVars.hasSubsystems() {
+		return
+	}
+	if !procVars.hasVar(utils.MetaAccounts) {
+		args.UpdateSession = false
+	}
+	if procVars.hasVar(utils.MetaAttributes) {
+		args.GetAttributes = true
+	}
+	return
+}
+
+// radV1TerminateSessionArgs returns the arguments used in SMGv1.TerminateSession
+func radV1TerminateSessionArgs(cgrEv *utils.CGREvent, procVars processorVars) (args *sessions.V1TerminateSessionArgs) {
+	args = &sessions.V1TerminateSessionArgs{ // defaults
+		TerminateSession: true,
+		CGREvent:         *cgrEv,
+	}
+	if !procVars.hasSubsystems() {
+		return
+	}
+	if !procVars.hasVar(utils.MetaAccounts) {
+		args.TerminateSession = false
+	}
+	if procVars.hasVar(utils.MetaResources) {
+		args.ReleaseResources = true
 	}
 	return
 }

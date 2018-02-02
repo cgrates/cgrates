@@ -1302,6 +1302,30 @@ type V1AuthorizeReply struct {
 	Suppliers          *engine.SortedSuppliers
 }
 
+// AsCGRReply is part of utils.CGRReplier interface
+func (v1AuthReply *V1AuthorizeReply) AsCGRReply() (cgrReply utils.CGRReply, err error) {
+	cgrReply = make(map[string]interface{})
+	if v1AuthReply.Attributes != nil {
+		attrs := make(map[string]interface{})
+		for _, fldName := range v1AuthReply.Attributes.AlteredFields {
+			if v1AuthReply.Attributes.CGREvent.HasField(fldName) {
+				attrs[fldName] = v1AuthReply.Attributes.CGREvent.Event[fldName]
+			}
+		}
+		cgrReply["Attributes"] = attrs
+	}
+	if v1AuthReply.ResourceAllocation != nil {
+		cgrReply["ResourceAllocation"] = *v1AuthReply.ResourceAllocation
+	}
+	if v1AuthReply.MaxUsage != nil {
+		cgrReply["MaxUsage"] = *v1AuthReply.MaxUsage
+	}
+	if v1AuthReply.Suppliers != nil {
+		cgrReply["Suppliers"] = v1AuthReply.Suppliers.Digest()
+	}
+	return
+}
+
 // BiRPCV1Authorize performs authorization for CGREvent based on specific components
 func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 	args *V1AuthorizeArgs, authReply *V1AuthorizeReply) (err error) {
@@ -1422,6 +1446,27 @@ type V1InitSessionReply struct {
 	MaxUsage           *time.Duration
 }
 
+// AsCGRReply is part of utils.CGRReplier interface
+func (v1Rply *V1InitSessionReply) AsCGRReply() (cgrReply utils.CGRReply, err error) {
+	cgrReply = make(map[string]interface{})
+	if v1Rply.Attributes != nil {
+		attrs := make(map[string]interface{})
+		for _, fldName := range v1Rply.Attributes.AlteredFields {
+			if v1Rply.Attributes.CGREvent.HasField(fldName) {
+				attrs[fldName] = v1Rply.Attributes.CGREvent.Event[fldName]
+			}
+		}
+		cgrReply["Attributes"] = attrs
+	}
+	if v1Rply.ResourceAllocation != nil {
+		cgrReply["ResourceAllocation"] = *v1Rply.ResourceAllocation
+	}
+	if v1Rply.MaxUsage != nil {
+		cgrReply["MaxUsage"] = *v1Rply.MaxUsage
+	}
+	return
+}
+
 // BiRPCV2InitiateSession initiates a new session, returns the maximum duration the session can last
 func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 	args *V1InitSessionArgs, rply *V1InitSessionReply) (err error) {
@@ -1489,6 +1534,24 @@ type V1UpdateSessionReply struct {
 	MaxUsage   *time.Duration
 }
 
+// AsCGRReply is part of utils.CGRReplier interface
+func (v1Rply *V1UpdateSessionReply) AsCGRReply() (cgrReply utils.CGRReply, err error) {
+	cgrReply = make(map[string]interface{})
+	if v1Rply.Attributes != nil {
+		attrs := make(map[string]interface{})
+		for _, fldName := range v1Rply.Attributes.AlteredFields {
+			if v1Rply.Attributes.CGREvent.HasField(fldName) {
+				attrs[fldName] = v1Rply.Attributes.CGREvent.Event[fldName]
+			}
+		}
+		cgrReply["Attributes"] = attrs
+	}
+	if v1Rply.MaxUsage != nil {
+		cgrReply["MaxUsage"] = *v1Rply.MaxUsage
+	}
+	return
+}
+
 // BiRPCV1UpdateSession updates an existing session, returning the duration which the session can still last
 func (smg *SMGeneric) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 	args *V1UpdateSessionArgs, rply *V1UpdateSessionReply) (err error) {
@@ -1521,28 +1584,6 @@ func (smg *SMGeneric) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 			rply.MaxUsage = &maxUsage
 		}
 	}
-	/*
-		if args.AllocateResources {
-			if smg.resS == nil {
-				return utils.NewErrNotConnected(utils.ResourceS)
-			}
-			originID, err := args.CGREvent.FieldAsString(utils.OriginID)
-			if err != nil {
-				return utils.NewErrServerError(err)
-			}
-			attrRU := utils.ArgRSv1ResourceUsage{
-				CGREvent: args.CGREvent,
-				UsageID:  originID,
-				Units:    1,
-			}
-			var allocMessage string
-			if err = smg.resS.Call(utils.ResourceSv1AllocateResources,
-				attrRU, &allocMessage); err != nil {
-				return err
-			}
-			rply.ResAllocMessage = allocMessage
-		}
-	*/
 	return
 }
 
