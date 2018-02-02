@@ -50,6 +50,29 @@ func (pv processorVars) hasVar(k string) (has bool) {
 	return
 }
 
+// valAsString returns the string value for fldName
+// returns empty if fldName not found
+func (pv processorVars) valAsString(fldPath string) (val string, err error) {
+	fldName := fldPath
+	if strings.HasPrefix(fldPath, utils.MetaCGRReply) {
+		fldName = utils.MetaCGRReply
+	}
+	if !pv.hasVar(fldName) {
+		return "", errors.New("not found")
+	}
+	if fldName == utils.MetaCGRReply {
+		cgrRply := pv[utils.MetaCGRReply].(*utils.CGRReply)
+		return cgrRply.GetFieldAsString(fldPath, utils.HIERARCHY_SEP)
+	}
+	if valIface, hasIt := pv[fldName]; hasIt { // ProcessorVars have priority
+		var canCast bool
+		if val, canCast = utils.CastFieldIfToString(valIface); !canCast {
+			return "", fmt.Errorf("cannot cast field <%s> to string", fldPath)
+		}
+	}
+	return
+}
+
 // radAttrVendorFromPath returns AttributenName and VendorName from path
 // path should be the form attributeName or vendorName/attributeName
 func attrVendorFromPath(path string) (attrName, vendorName string) {
@@ -98,15 +121,15 @@ func radComposedFieldValue(pkt *radigo.Packet,
 			outVal += rsrTpl.ParseValue("")
 			continue
 		}
-		if valIface, hasIt := processorVars[rsrTpl.Id]; hasIt { // ProcessorVars have priority
-			if val, canCast := utils.CastFieldIfToString(valIface); !canCast {
+		if val, err := processorVars.valAsString(rsrTpl.Id); err != nil {
+			if err.Error() != "not found" {
 				utils.Logger.Warning(
-					fmt.Sprintf("<%s> cannot cast field <%s> to string",
-						utils.RadiusAgent, rsrTpl.Id))
-			} else {
-				outVal += rsrTpl.ParseValue(val)
+					fmt.Sprintf("<%s> %s",
+						utils.RadiusAgent, err.Error()))
+				continue
 			}
-			continue
+		} else {
+			outVal += rsrTpl.ParseValue(val)
 		}
 		for _, avp := range pkt.AttributesWithName(
 			attrVendorFromPath(rsrTpl.Id)) {

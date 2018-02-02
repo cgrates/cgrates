@@ -137,7 +137,8 @@ func TestRadComposedFieldValue(t *testing.T) {
 	}
 	eOut := fmt.Sprintf("%s|flopsy|CGR1", MetaRadAcctStart)
 	if out := radComposedFieldValue(pkt, processorVars{MetaRadReqType: MetaRadAcctStart},
-		utils.ParseRSRFieldsMustCompile(fmt.Sprintf("%s;^|;User-Name;^|;Cisco/Cisco-NAS-Port", MetaRadReqType), utils.INFIELD_SEP)); out != eOut {
+		utils.ParseRSRFieldsMustCompile(fmt.Sprintf("%s;^|;User-Name;^|;Cisco/Cisco-NAS-Port",
+			MetaRadReqType), utils.INFIELD_SEP)); out != eOut {
 		t.Errorf("Expecting: <%s>, received: <%s>", eOut, out)
 	}
 }
