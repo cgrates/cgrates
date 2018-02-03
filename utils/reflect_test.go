@@ -266,3 +266,35 @@ func TestIfaceAsTime(t *testing.T) {
 		t.Error("There should be error")
 	}
 }
+
+func TestIfaceAsFloat64(t *testing.T) {
+	eFloat := 6.0
+	val := interface{}(6.0)
+	if itmConvert, err := IfaceAsFloat64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eFloat {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(time.Duration(6))
+	if itmConvert, err := IfaceAsFloat64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eFloat {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}("6")
+	if itmConvert, err := IfaceAsFloat64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eFloat {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(int64(6))
+	if itmConvert, err := IfaceAsFloat64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eFloat {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}("This is not a float")
+	if _, err := IfaceAsFloat64(val); err == nil {
+		t.Error("expecting error")
+	}
+}

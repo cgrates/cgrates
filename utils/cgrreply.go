@@ -44,12 +44,13 @@ func NewCGRReply(rply CGRReplier, errRply error) (cgrReply CGRReply, err error) 
 // it can be layered, case when interface{} will be castable into map[string]interface{}
 type CGRReply map[string]interface{}
 
-// GetFieldAsString returns the field value as string for the path specified
-func (cgrReply CGRReply) GetFieldAsString(fldPath string, sep string) (fldVal string, err error) {
+// GetField returns the field value as interface{} for the path specified
+func (cgrReply CGRReply) GetField(fldPath string, sep string) (fldVal interface{}, err error) {
 	path := strings.Split(fldPath, sep)
 	lenPath := len(path)
 	if lenPath == 0 {
-		return "", errors.New("empty field path")
+		err = errors.New("empty field path")
+		return
 	}
 	if path[0] == MetaCGRReply {
 		path = path[1:]
@@ -59,21 +60,35 @@ func (cgrReply CGRReply) GetFieldAsString(fldPath string, sep string) (fldVal st
 	var canCast bool
 	for i, spath := range path {
 		if i == lenPath-1 { // lastElement
-			fldValIf, has := lastMp[spath]
+			var has bool
+			fldVal, has = lastMp[spath]
 			if !has {
-				return "", fmt.Errorf("no field with path: <%s>", fldPath)
-			}
-
-			if fldVal, canCast = CastFieldIfToString(fldValIf); !canCast {
-				return "", fmt.Errorf("cannot cast field: %s to string", ToJSON(fldValIf))
+				err = fmt.Errorf("no field with path: <%s>", fldPath)
+				return
 			}
 			return
 		} else {
 			lastMp, canCast = lastMp[spath].(map[string]interface{})
 			if !canCast {
-				return "", fmt.Errorf("cannot cast field: %s to map[string]interface{}", ToJSON(lastMp[spath]))
+				err = fmt.Errorf("cannot cast field: %s to map[string]interface{}", ToJSON(lastMp[spath]))
+				return
 			}
 		}
 	}
-	return "", errors.New("end of function")
+	err = errors.New("end of function")
+	return
+}
+
+// GetFieldAsString returns the field value as string for the path specified
+func (cgrReply CGRReply) GetFieldAsString(fldPath string, sep string) (fldVal string, err error) {
+	var valIface interface{}
+	valIface, err = cgrReply.GetField(fldPath, sep)
+	if err != nil {
+		return
+	}
+	var canCast bool
+	if fldVal, canCast = CastFieldIfToString(valIface); !canCast {
+		return "", fmt.Errorf("cannot cast field: %s to string", ToJSON(valIface))
+	}
+	return
 }

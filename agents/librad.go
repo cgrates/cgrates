@@ -21,6 +21,7 @@ package agents
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -50,6 +51,23 @@ func (pv processorVars) hasVar(k string) (has bool) {
 	return
 }
 
+// valAsInterface returns the string value for fldName
+func (pv processorVars) valAsInterface(fldPath string) (val interface{}, err error) {
+	fldName := fldPath
+	if strings.HasPrefix(fldPath, utils.MetaCGRReply) {
+		fldName = utils.MetaCGRReply
+	}
+	if !pv.hasVar(fldName) {
+		err = errors.New("not found")
+		return
+	}
+	if fldName == utils.MetaCGRReply {
+		cgrRply := pv[utils.MetaCGRReply].(utils.CGRReply)
+		return cgrRply.GetField(fldPath, utils.HIERARCHY_SEP)
+	}
+	return pv[fldName], nil
+}
+
 // valAsString returns the string value for fldName
 // returns empty if fldName not found
 func (pv processorVars) valAsString(fldPath string) (val string, err error) {
@@ -61,10 +79,10 @@ func (pv processorVars) valAsString(fldPath string) (val string, err error) {
 		return "", errors.New("not found")
 	}
 	if fldName == utils.MetaCGRReply {
-		cgrRply := pv[utils.MetaCGRReply].(*utils.CGRReply)
+		cgrRply := pv[utils.MetaCGRReply].(utils.CGRReply)
 		return cgrRply.GetFieldAsString(fldPath, utils.HIERARCHY_SEP)
 	}
-	if valIface, hasIt := pv[fldName]; hasIt { // ProcessorVars have priority
+	if valIface, hasIt := pv[fldName]; hasIt {
 		var canCast bool
 		if val, canCast = utils.CastFieldIfToString(valIface); !canCast {
 			return "", fmt.Errorf("cannot cast field <%s> to string", fldPath)
@@ -140,10 +158,10 @@ func radComposedFieldValue(pkt *radigo.Packet,
 }
 
 // radMetaHandler handles *handler type in configuration fields
-func radMetaHandler(pkt *radigo.Packet, processorVars processorVars,
-	cfgFld *config.CfgCdrField) (outVal string, err error) {
+func radMetaHandler(pkt *radigo.Packet, procVars processorVars,
+	cfgFld *config.CfgCdrField, roundingDecimals int) (outVal string, err error) {
 	handlerArgs := strings.Split(
-		radComposedFieldValue(pkt, processorVars, cfgFld.Value), utils.HandlerArgSep)
+		radComposedFieldValue(pkt, procVars, cfgFld.Value), utils.HandlerArgSep)
 	switch cfgFld.HandlerId {
 	case MetaUsageDifference: // expects tEnd|tStart in the composed val
 		if len(handlerArgs) != 2 {
@@ -158,6 +176,16 @@ func radMetaHandler(pkt *radigo.Packet, processorVars processorVars,
 			return "", err
 		}
 		return tEnd.Sub(tStart).String(), nil
+	case utils.MetaUsageSeconds:
+		if len(handlerArgs) != 1 {
+			return "", errors.New("unexpected number of arguments")
+		}
+		val, err := utils.ParseDurationWithNanosecs(handlerArgs[0])
+		if err != nil {
+			return "", err
+		}
+		return strconv.FormatInt(int64(utils.Round(val.Seconds(),
+			roundingDecimals, utils.ROUNDING_MIDDLE)), 10), nil
 	}
 	return
 }
@@ -175,7 +203,8 @@ func radFieldOutVal(pkt *radigo.Packet, processorVars processorVars,
 	case utils.META_COMPOSED:
 		outVal = radComposedFieldValue(pkt, processorVars, cfgFld.Value)
 	case utils.META_HANDLER:
-		if outVal, err = radMetaHandler(pkt, processorVars, cfgFld); err != nil {
+		if outVal, err = radMetaHandler(pkt, processorVars, cfgFld,
+			config.CgrConfig().RoundingDecimals); err != nil {
 			return "", err
 		}
 	default:

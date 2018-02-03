@@ -66,12 +66,14 @@ func TestRAitResetStorDb(t *testing.T) {
 	}
 }
 
+/*
 // Start CGR Engine
 func TestRAitStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(raCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
+*/
 
 // Connect rpc client to rater
 func TestRAitApierRpcConn(t *testing.T) {
