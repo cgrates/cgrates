@@ -160,7 +160,7 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent)
 func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 	acntIDs, rpIDs []string) (costData map[string]interface{}, err error) {
 	if err = ev.CheckMandatoryFields([]string{utils.Account,
-		utils.Destination, utils.AnswerTime, utils.Usage}); err != nil {
+		utils.Destination, utils.SetupTime, utils.Usage}); err != nil {
 		return
 	}
 	var acnt, subj, dst string
@@ -176,8 +176,8 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 	if dst, err = ev.FieldAsString(utils.Destination); err != nil {
 		return
 	}
-	var aTime time.Time
-	if aTime, err = ev.FieldAsTime(utils.AnswerTime, spS.timezone); err != nil {
+	var sTime time.Time
+	if sTime, err = ev.FieldAsTime(utils.SetupTime, spS.timezone); err != nil {
 		return
 	}
 	var usage time.Duration
@@ -192,8 +192,8 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 			Subject:       subj,
 			Account:       anctID,
 			Destination:   dst,
-			TimeStart:     aTime,
-			TimeEnd:       aTime.Add(usage),
+			TimeStart:     sTime,
+			TimeEnd:       sTime.Add(usage),
 			DurationIndex: usage,
 		}
 		if maxDur, err := cd.GetMaxSessionDuration(); err != nil {
@@ -213,7 +213,7 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 				ev.Tenant, utils.MetaSuppliers, subj),
 			RatingPlanActivations: RatingPlanActivations{
 				&RatingPlanActivation{
-					ActivationTime: aTime,
+					ActivationTime: sTime,
 					RatingPlanId:   rp,
 				},
 			},
@@ -228,8 +228,8 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 			Subject:       subj,
 			Account:       acnt,
 			Destination:   dst,
-			TimeStart:     aTime,
-			TimeEnd:       aTime.Add(usage),
+			TimeStart:     sTime,
+			TimeEnd:       sTime.Add(usage),
 			DurationIndex: usage,
 		}
 		cc, err := cd.GetCost()
