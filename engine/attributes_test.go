@@ -31,10 +31,8 @@ var (
 	expTimeAttributes      = time.Now().Add(time.Duration(20 * time.Minute))
 	srv                    AttributeService
 	dmAtr                  *DataManager
-
-	context = utils.MetaRating
-
-	mapSubstitutes = map[string]map[interface{}]*Attribute{
+	context                = utils.MetaRating
+	mapSubstitutes         = map[string]map[interface{}]*Attribute{
 		"FL1": map[interface{}]*Attribute{
 			"In1": &Attribute{
 				FieldName:  "FL1",
@@ -44,7 +42,6 @@ var (
 			},
 		},
 	}
-
 	sev = &utils.CGREvent{
 		Tenant:  config.CgrConfig().DefaultTenant,
 		ID:      "attribute_event",
@@ -81,7 +78,6 @@ var (
 			"Weight": "200.0",
 		},
 	}
-
 	atrPs = AttributeProfiles{
 		&AttributeProfile{
 			Tenant:    "cgrates.org",
@@ -227,7 +223,6 @@ func TestAttributePopulateAttrService(t *testing.T) {
 	filter1 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter1", Rules: filters1}
 	dmAtr.SetFilter(filter1)
 	ref.IndexTPFilter(FilterToTPFilter(filter1), "attributeprofile1")
-
 	//filter2
 	x, err = NewFilterRule(MetaString, "Attribute", []string{"AttributeProfile2"})
 	if err != nil {
@@ -237,7 +232,6 @@ func TestAttributePopulateAttrService(t *testing.T) {
 	filter2 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter2", Rules: filters2}
 	dmAtr.SetFilter(filter2)
 	ref.IndexTPFilter(FilterToTPFilter(filter2), "attributeprofile2")
-
 	//prefix filter
 	x, err = NewFilterRule(MetaPrefix, "Attribute", []string{"AttributeProfilePrefix"})
 	if err != nil {
@@ -247,7 +241,6 @@ func TestAttributePopulateAttrService(t *testing.T) {
 	preffilter1 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "preffilter1", Rules: preffilter}
 	dmAtr.SetFilter(preffilter1)
 	ref.IndexTPFilter(FilterToTPFilter(preffilter1), "attributeprofile3")
-
 	//default filter
 	x, err = NewFilterRule(MetaGreaterOrEqual, "Weight", []string{"200.00"})
 	if err != nil {
@@ -302,14 +295,12 @@ func TestAttributeProfileForEvent(t *testing.T) {
 	if !reflect.DeepEqual(atrPs[0], atrp) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(atrPs[0]), utils.ToJSON(atrp))
 	}
-
 	atrp, err = srv.attributeProfileForEvent(sev2)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(atrPs[1], atrp) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(atrPs[1]), utils.ToJSON(atrp))
-
 	}
 	atrp, err = srv.attributeProfileForEvent(sev3)
 	if err != nil {
@@ -328,7 +319,6 @@ func TestAttributeProfileForEvent(t *testing.T) {
 }
 
 func TestAttributeProcessEvent(t *testing.T) {
-
 	eRply := &AttrSProcessEventReply{
 		MatchedProfile: "attributeprofile1",
 		CGREvent:       sev,

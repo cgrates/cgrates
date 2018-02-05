@@ -29,10 +29,9 @@ import (
 var (
 	cloneExpTimeSuppliers time.Time
 	expTimeSuppliers      = time.Now().Add(time.Duration(20 * time.Minute))
-
-	splserv SupplierService
-	dmSPP   *DataManager
-	sppTest = SupplierProfiles{
+	splserv               SupplierService
+	dmSPP                 *DataManager
+	sppTest               = SupplierProfiles{
 		&SupplierProfile{
 			Tenant:    "cgrates.org",
 			ID:        "supplierprofile1",

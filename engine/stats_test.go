@@ -31,11 +31,9 @@ import (
 var (
 	cloneExpTimeStats time.Time
 	expTimeStats      = time.Now().Add(time.Duration(20 * time.Minute))
-
-	stsserv StatService
-	dmSTS   *DataManager
-
-	sqps = []*StatQueueProfile{
+	stsserv           StatService
+	dmSTS             *DataManager
+	sqps              = []*StatQueueProfile{
 		&StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "statsprofile1",
@@ -121,14 +119,12 @@ var (
 			MinItems:     1,
 		},
 	}
-
 	stqs = []*StatQueue{
 		&StatQueue{Tenant: "cgrates.org", ID: "statsprofile1", sqPrfl: sqps[0]},
 		&StatQueue{Tenant: "cgrates.org", ID: "statsprofile2", sqPrfl: sqps[1]},
 		&StatQueue{Tenant: "cgrates.org", ID: "statsprofile3", sqPrfl: sqps[2]},
 		&StatQueue{Tenant: "cgrates.org", ID: "statsprofile4", sqPrfl: sqps[3]},
 	}
-
 	evs = []*utils.CGREvent{
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -183,7 +179,6 @@ func TestStatsPopulateStatsService(t *testing.T) {
 		filterS: &FilterS{dm: dmSTS},
 	}
 	ref := NewFilterIndexer(dmSTS, utils.StatQueueProfilePrefix, "cgrates.org")
-
 	//filter1
 	x, err := NewFilterRule(MetaString, "Stats", []string{"StatsProfile1"})
 	if err != nil {
@@ -208,7 +203,6 @@ func TestStatsPopulateStatsService(t *testing.T) {
 	filter7 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter7", Rules: filters1}
 	dmSTS.SetFilter(filter7)
 	ref.IndexTPFilter(FilterToTPFilter(filter7), "statsprofile1")
-
 	//filter2
 	x, err = NewFilterRule(MetaString, "Stats", []string{"StatsProfile2"})
 	if err != nil {
@@ -233,7 +227,6 @@ func TestStatsPopulateStatsService(t *testing.T) {
 	filter8 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter8", Rules: filters2}
 	dmSTS.SetFilter(filter8)
 	ref.IndexTPFilter(FilterToTPFilter(filter8), "statsprofile2")
-
 	//prefix filter
 	x, err = NewFilterRule(MetaPrefix, "Stats", []string{"StatsProfilePrefix"})
 	if err != nil {
@@ -248,7 +241,6 @@ func TestStatsPopulateStatsService(t *testing.T) {
 	preffilter4 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "preffilter4", Rules: preffilter}
 	dmSTS.SetFilter(preffilter4)
 	ref.IndexTPFilter(FilterToTPFilter(preffilter4), "statsprofile3")
-
 	//default filter
 	x, err = NewFilterRule(MetaGreaterOrEqual, "Weight", []string{"200.00"})
 	if err != nil {
@@ -263,15 +255,12 @@ func TestStatsPopulateStatsService(t *testing.T) {
 	defaultf4 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "defaultf4", Rules: defaultf}
 	dmSTS.SetFilter(defaultf4)
 	ref.IndexTPFilter(FilterToTPFilter(defaultf4), "statsprofile4")
-
 	for _, stq := range stqs {
 		dmSTS.SetStatQueue(stq)
 	}
-
 	for _, sqp := range sqps {
 		dmSTS.SetStatQueueProfile(sqp, false)
 	}
-
 	err = ref.StoreIndexes()
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -325,7 +314,6 @@ func TestStatsmatchingStatQueuesForEvent(t *testing.T) {
 	}
 }
 
-//to be updated after thresholds gets fixed
 func TestStatSprocessEvent(t *testing.T) {
 	stq := map[string]string{}
 	reply := ""
