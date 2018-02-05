@@ -1,5 +1,3 @@
-// +build integr
-
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -125,7 +123,7 @@ var (
 		&StatQueue{Tenant: "cgrates.org", ID: "statsprofile3", sqPrfl: sqps[2]},
 		&StatQueue{Tenant: "cgrates.org", ID: "statsprofile4", sqPrfl: sqps[3]},
 	}
-	evs = []*utils.CGREvent{
+	statsEvs = []*utils.CGREvent{
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
@@ -268,7 +266,7 @@ func TestStatsPopulateStatsService(t *testing.T) {
 }
 
 func TestStatsmatchingStatQueuesForEvent(t *testing.T) {
-	msq, err := stsserv.matchingStatQueuesForEvent(evs[0])
+	msq, err := stsserv.matchingStatQueuesForEvent(statsEvs[0])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -279,7 +277,7 @@ func TestStatsmatchingStatQueuesForEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(stqs[0].sqPrfl, msq[0].sqPrfl) {
 		t.Errorf("Expecting: %+v, received: %+v", stqs[0].sqPrfl, msq[0].sqPrfl)
 	}
-	msq, err = stsserv.matchingStatQueuesForEvent(evs[1])
+	msq, err = stsserv.matchingStatQueuesForEvent(statsEvs[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -290,7 +288,7 @@ func TestStatsmatchingStatQueuesForEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(stqs[1].sqPrfl, msq[0].sqPrfl) {
 		t.Errorf("Expecting: %+v, received: %+v", stqs[1].sqPrfl, msq[0].sqPrfl)
 	}
-	msq, err = stsserv.matchingStatQueuesForEvent(evs[2])
+	msq, err = stsserv.matchingStatQueuesForEvent(statsEvs[2])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -301,7 +299,7 @@ func TestStatsmatchingStatQueuesForEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(stqs[2].sqPrfl, msq[0].sqPrfl) {
 		t.Errorf("Expecting: %+v, received: %+v", stqs[2].sqPrfl, msq[0].sqPrfl)
 	}
-	msq, err = stsserv.matchingStatQueuesForEvent(evs[3])
+	msq, err = stsserv.matchingStatQueuesForEvent(statsEvs[3])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -317,7 +315,7 @@ func TestStatsmatchingStatQueuesForEvent(t *testing.T) {
 func TestStatSprocessEvent(t *testing.T) {
 	stq := map[string]string{}
 	reply := ""
-	err := stsserv.V1ProcessEvent(evs[0], &reply)
+	err := stsserv.V1ProcessEvent(statsEvs[0], &reply)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if reply != utils.OK {
@@ -327,7 +325,7 @@ func TestStatSprocessEvent(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	err = stsserv.V1ProcessEvent(evs[1], &reply)
+	err = stsserv.V1ProcessEvent(statsEvs[1], &reply)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if reply != utils.OK {
@@ -337,7 +335,7 @@ func TestStatSprocessEvent(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	err = stsserv.V1ProcessEvent(evs[2], &reply)
+	err = stsserv.V1ProcessEvent(statsEvs[2], &reply)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if reply != utils.OK {
@@ -347,7 +345,7 @@ func TestStatSprocessEvent(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	err = stsserv.V1ProcessEvent(evs[3], &reply)
+	err = stsserv.V1ProcessEvent(statsEvs[3], &reply)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if reply != utils.OK {
