@@ -324,6 +324,7 @@ func (fsev FSEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) str
 	}
 }
 
+// AsCDR converts FSEvent into CDR
 func (fsev FSEvent) AsCDR(timezone string) *engine.CDR {
 	storCdr := new(engine.CDR)
 	storCdr.ToR = utils.VOICE
@@ -342,6 +343,21 @@ func (fsev FSEvent) AsCDR(timezone string) *engine.CDR {
 	storCdr.ExtraFields = fsev.GetExtraFields()
 	storCdr.Cost = -1
 	return storCdr
+}
+
+// AsCGREvent converts FSEvent into CGREvent
+func (fsev FSEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err error) {
+	sTime, err := fsev.GetSetupTime(utils.META_DEFAULT, timezone)
+	if err != nil {
+		return nil, err
+	}
+	cgrEv = &utils.CGREvent{
+		Tenant: fsev.GetTenant(utils.META_DEFAULT),
+		ID:     utils.UUIDSha1Prefix(),
+		Time:   &sTime,
+		Event:  fsev.AsMapStringInterface(timezone),
+	}
+	return cgrEv, nil
 }
 
 // Used with RLs
