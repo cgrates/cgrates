@@ -1118,25 +1118,25 @@ func testMigratorSessionsCosts(t *testing.T) {
 	case Move:
 		currentVersion := engine.CurrentStorDBVersions()
 		currentVersion[utils.SessionsCosts] = 1
-		err := mig.dmOut.DataDB().SetVersions(currentVersion, false)
+		err := mig.OutStorDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for SessionsCosts ", err.Error())
 		}
 		err, _ = mig.Migrate([]string{utils.MetaSessionsCosts})
-		if err == nil {
-			t.Error("Expecting error , received: nil ")
+		if err.Error() != "Wrong version. Please use <cgr-migrator -migrate=*set_versions>" {
+			t.Error("Expecting error , received: %+v ", err)
 		}
-		if vrs, err := mig.dmOut.DataDB().GetVersions(utils.SessionsCosts); err != nil {
+		if vrs, err := mig.OutStorDB().GetVersions(utils.SessionsCosts); err != nil {
 			t.Error(err)
 		} else if vrs[utils.SessionsCosts] != 1 {
 			t.Errorf("Expecting: 1, received: %+v", vrs[utils.SessionsCosts])
 		}
 		currentVersion = engine.CurrentStorDBVersions()
-		err = mig.dmOut.DataDB().SetVersions(currentVersion, false)
+		err = mig.OutStorDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for SessionsCosts ", err.Error())
 		}
-		if vrs, err := mig.dmOut.DataDB().GetVersions(utils.SessionsCosts); err != nil {
+		if vrs, err := mig.OutStorDB().GetVersions(utils.SessionsCosts); err != nil {
 			t.Error(err)
 		} else if vrs[utils.SessionsCosts] != 2 {
 			t.Errorf("Expecting: 2, received: %+v", vrs[utils.SessionsCosts])

@@ -28,21 +28,20 @@ import (
 
 func (m *Migrator) migrateSessionsCosts() (err error) {
 	var vrs engine.Versions
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.OutStorDB().GetVersions(utils.TBLVersions)
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
 			err.Error(),
-			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
+			fmt.Sprintf("error: <%s> when querying OutStorDB for versions", err.Error()))
 	} else if len(vrs) == 0 {
 		return utils.NewCGRError(utils.Migrator,
 			utils.MandatoryIEMissingCaps,
 			utils.UndefinedVersion,
-			"version number is not defined for ActionTriggers model")
+			"version number is not defined for SessionsCosts model")
 	}
 	if vrs[utils.SessionsCosts] == 1 {
-		msg := "Migration needed: please backup cgrates data and run from data/storage the scripts for MySql and Postgres"
-		return errors.New(msg)
+		return errors.New("Wrong version. Please use <cgr-migrator -migrate=*set_versions>")
 	}
 	return nil
 }
