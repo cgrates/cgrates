@@ -40,7 +40,7 @@ func (m *Migrator) migrateSessionsCosts() (err error) {
 			utils.UndefinedVersion,
 			"version number is not defined for SessionsCosts model")
 	}
-	if vrs[utils.SessionsCosts] == 1 {
+	if vrs[utils.SessionsCosts] != 2 {
 		return errors.New("Wrong version. Please use <cgr-migrator -migrate=*set_versions>")
 	}
 	return nil
