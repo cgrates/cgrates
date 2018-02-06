@@ -908,4 +908,14 @@ func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
 		}
 	}
+	eMp := utils.StringMap{
+		"THD_Test": true,
+	}
+	if rcvMp, err := dataManager.MatchFilterIndex(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		utils.MetaDefault, utils.META_ANY, utils.META_ANY); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eMp, rcvMp) {
+		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
+	}
 }
