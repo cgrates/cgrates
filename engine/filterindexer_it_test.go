@@ -54,6 +54,9 @@ var sTests = []func(t *testing.T){
 	testITIsDBEmpty,
 	testITTestStoreFilterIndexesWithTransID,
 	testITTestStoreFilterIndexesWithTransID2,
+	testITFlush,
+	testITIsDBEmpty,
+	testITTestIndexingWithEmptyFltrID,
 }
 
 func TestITRedisConnect(t *testing.T) {
@@ -858,5 +861,51 @@ func testITTestStoreFilterIndexesWithTransID2(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", idxes, rcv)
 		}
 	}
+}
 
+func testITTestIndexingWithEmptyFltrID(t *testing.T) {
+	th := &ThresholdProfile{
+		Tenant:             "cgrates.org",
+		ID:                 "THD_Test",
+		ActivationInterval: &utils.ActivationInterval{},
+		FilterIDs:          []string{},
+		Recurrent:          true,
+		MinSleep:           time.Duration(0 * time.Second),
+		Blocker:            true,
+		Weight:             1.4,
+		ActionIDs:          []string{},
+	}
+
+	if err := dataManager.SetThresholdProfile(th, true); err != nil {
+		t.Error(err)
+	}
+	eIdxes := map[string]utils.StringMap{
+		"*default:*any:*any": utils.StringMap{
+			"THD_Test": true,
+		},
+	}
+	reverseIdxes := map[string]utils.StringMap{
+		"THD_Test": utils.StringMap{
+			"*default:*any:*any": true,
+		},
+	}
+	rfi := NewFilterIndexer(onStor, utils.ThresholdProfilePrefix, th.Tenant)
+	if rcvIdx, err := dataManager.GetFilterIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
+		nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(eIdxes, rcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+		}
+	}
+	if reverseRcvIdx, err := dataManager.GetFilterReverseIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+		nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
+		}
+	}
 }

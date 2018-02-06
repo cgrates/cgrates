@@ -411,9 +411,28 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 		}
 		indexer := NewFilterIndexer(dm, utils.ThresholdProfilePrefix, th.Tenant)
 		//Verify matching Filters for every FilterID from ThresholdProfile
-		for _, fltrID := range th.FilterIDs {
+		fltrIDs := make([]string, len(th.FilterIDs))
+		for i, fltrID := range th.FilterIDs {
+			fltrIDs[i] = fltrID
+		}
+		if len(fltrIDs) == 0 {
+			fltrIDs = []string{utils.META_NONE}
+		}
+		for _, fltrID := range fltrIDs {
 			var fltr *Filter
-			if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+			if fltrID == utils.META_NONE {
+				fltr = &Filter{
+					Tenant: th.Tenant,
+					ID:     th.ID,
+					Rules: []*FilterRule{
+						&FilterRule{
+							Type:      utils.MetaDefault,
+							FieldName: utils.META_ANY,
+							Values:    []string{utils.META_ANY},
+						},
+					},
+				}
+			} else if strings.HasPrefix(fltrID, utils.MetaPrefix) {
 				inFltr, err := NewInlineFilter(fltrID)
 				if err != nil {
 					return err
@@ -497,9 +516,28 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 			return
 		}
 		//Verify matching Filters for every FilterID from StatQueueProfile
-		for _, fltrID := range sqp.FilterIDs {
+		fltrIDs := make([]string, len(sqp.FilterIDs))
+		for i, fltrID := range sqp.FilterIDs {
+			fltrIDs[i] = fltrID
+		}
+		if len(fltrIDs) == 0 {
+			fltrIDs = []string{utils.META_NONE}
+		}
+		for _, fltrID := range fltrIDs {
 			var fltr *Filter
-			if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+			if fltrID == utils.META_NONE {
+				fltr = &Filter{
+					Tenant: sqp.Tenant,
+					ID:     sqp.ID,
+					Rules: []*FilterRule{
+						&FilterRule{
+							Type:      utils.MetaDefault,
+							FieldName: utils.META_ANY,
+							Values:    []string{utils.META_ANY},
+						},
+					},
+				}
+			} else if strings.HasPrefix(fltrID, utils.MetaPrefix) {
 				inFltr, err := NewInlineFilter(fltrID)
 				if err != nil {
 					return err
@@ -573,7 +611,6 @@ func (dm *DataManager) SetTiming(t *utils.TPTiming) (err error) {
 		return
 	}
 	return dm.CacheDataFromDB(utils.TimingsPrefix, []string{t.ID}, true)
-
 }
 
 func (dm *DataManager) RemoveTiming(id, transactionID string) (err error) {
@@ -661,9 +698,28 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 			return
 		}
 		//Verify matching Filters for every FilterID from ResourceProfiles
-		for _, fltrID := range rp.FilterIDs {
+		fltrIDs := make([]string, len(rp.FilterIDs))
+		for i, fltrID := range rp.FilterIDs {
+			fltrIDs[i] = fltrID
+		}
+		if len(fltrIDs) == 0 {
+			fltrIDs = []string{utils.META_NONE}
+		}
+		for _, fltrID := range fltrIDs {
 			var fltr *Filter
-			if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+			if fltrID == utils.META_NONE {
+				fltr = &Filter{
+					Tenant: rp.Tenant,
+					ID:     rp.ID,
+					Rules: []*FilterRule{
+						&FilterRule{
+							Type:      utils.MetaDefault,
+							FieldName: utils.META_ANY,
+							Values:    []string{utils.META_ANY},
+						},
+					},
+				}
+			} else if strings.HasPrefix(fltrID, utils.MetaPrefix) {
 				inFltr, err := NewInlineFilter(fltrID)
 				if err != nil {
 					return err
@@ -1098,9 +1154,28 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 			return
 		}
 		//Verify matching Filters for every FilterID from SupplierProfile
-		for _, fltrID := range supp.FilterIDs {
+		fltrIDs := make([]string, len(supp.FilterIDs))
+		for i, fltrID := range supp.FilterIDs {
+			fltrIDs[i] = fltrID
+		}
+		if len(fltrIDs) == 0 {
+			fltrIDs = []string{utils.META_NONE}
+		}
+		for _, fltrID := range fltrIDs {
 			var fltr *Filter
-			if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+			if fltrID == utils.META_NONE {
+				fltr = &Filter{
+					Tenant: supp.Tenant,
+					ID:     supp.ID,
+					Rules: []*FilterRule{
+						&FilterRule{
+							Type:      utils.MetaDefault,
+							FieldName: utils.META_ANY,
+							Values:    []string{utils.META_ANY},
+						},
+					},
+				}
+			} else if strings.HasPrefix(fltrID, utils.MetaPrefix) {
 				inFltr, err := NewInlineFilter(fltrID)
 				if err != nil {
 					return err
@@ -1215,9 +1290,28 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 		for _, ctx := range ap.Contexts {
 			indexer := NewFilterIndexer(dm, utils.AttributeProfilePrefix, utils.ConcatenatedKey(ap.Tenant, ctx))
 			//Verify matching Filters for every FilterID from AttributeProfile
-			for _, fltrID := range ap.FilterIDs {
+			fltrIDs := make([]string, len(ap.FilterIDs))
+			for i, fltrID := range ap.FilterIDs {
+				fltrIDs[i] = fltrID
+			}
+			if len(fltrIDs) == 0 {
+				fltrIDs = []string{utils.META_NONE}
+			}
+			for _, fltrID := range fltrIDs {
 				var fltr *Filter
-				if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+				if fltrID == utils.META_NONE {
+					fltr = &Filter{
+						Tenant: ap.Tenant,
+						ID:     ap.ID,
+						Rules: []*FilterRule{
+							&FilterRule{
+								Type:      utils.MetaDefault,
+								FieldName: utils.META_ANY,
+								Values:    []string{utils.META_ANY},
+							},
+						},
+					}
+				} else if strings.HasPrefix(fltrID, utils.MetaPrefix) {
 					inFltr, err := NewInlineFilter(fltrID)
 					if err != nil {
 						return err
