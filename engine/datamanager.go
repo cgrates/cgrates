@@ -441,13 +441,13 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 				if err != nil {
 					return err
 				}
-			} else {
-				if fltr, err = dm.GetFilter(th.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-					if err == utils.ErrNotFound {
-						err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, th)
-					}
-					return
+			} else if fltr, err = dm.GetFilter(th.Tenant, fltrID,
+				false, utils.NonTransactional); err != nil {
+				if err == utils.ErrNotFound {
+					err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v",
+						fltrID, th)
 				}
+				return
 			}
 			for _, flt := range fltr.Rules {
 				if flt.Type != MetaString {
@@ -480,7 +480,8 @@ func (dm *DataManager) RemoveThresholdProfile(tenant, id, transactionID string, 
 	return
 }
 
-func (dm *DataManager) GetStatQueueProfile(tenant, id string, skipCache bool, transactionID string) (sqp *StatQueueProfile, err error) {
+func (dm *DataManager) GetStatQueueProfile(tenant, id string, skipCache bool,
+	transactionID string) (sqp *StatQueueProfile, err error) {
 	key := utils.StatQueueProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
@@ -546,13 +547,13 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 				if err != nil {
 					return err
 				}
-			} else {
-				if fltr, err = dm.GetFilter(sqp.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-					if err == utils.ErrNotFound {
-						err = fmt.Errorf("broken reference to filter: %+v for statqueue: %+v", fltrID, sqp)
-					}
-					return
+			} else if fltr, err = dm.GetFilter(sqp.Tenant, fltrID,
+				false, utils.NonTransactional); err != nil {
+				if err == utils.ErrNotFound {
+					err = fmt.Errorf("broken reference to filter: %+v for statqueue: %+v",
+						fltrID, sqp)
 				}
+				return
 			}
 			for _, flt := range fltr.Rules {
 				if flt.Type != MetaString {
@@ -728,20 +729,21 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 				if err != nil {
 					return err
 				}
-			} else {
-				if fltr, err = dm.GetFilter(rp.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-					if err == utils.ErrNotFound {
-						err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, rp)
-					}
-					return
+			} else if fltr, err = dm.GetFilter(rp.Tenant, fltrID,
+				false, utils.NonTransactional); err != nil {
+				if err == utils.ErrNotFound {
+					err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v",
+						fltrID, rp)
 				}
+				return
 			}
 			for _, flt := range fltr.Rules {
 				if flt.Type != MetaString {
 					continue
 				}
 				for _, fldVal := range flt.Values {
-					if err = indexer.loadFldNameFldValIndex(flt.Type, flt.FieldName, fldVal); err != nil && err != utils.ErrNotFound {
+					if err = indexer.loadFldNameFldValIndex(flt.Type,
+						flt.FieldName, fldVal); err != nil && err != utils.ErrNotFound {
 						return err
 					}
 				}
@@ -768,7 +770,8 @@ func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string, w
 	return
 }
 
-func (dm *DataManager) GetActionTriggers(id string, skipCache bool, transactionID string) (attrs ActionTriggers, err error) {
+func (dm *DataManager) GetActionTriggers(id string, skipCache bool,
+	transactionID string) (attrs ActionTriggers, err error) {
 	key := utils.ACTION_TRIGGER_PREFIX + id
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
@@ -797,14 +800,16 @@ func (dm *DataManager) RemoveActionTriggers(id, transactionID string) (err error
 	return
 }
 
-func (dm *DataManager) SetActionTriggers(key string, attr ActionTriggers, transactionID string) (err error) {
+func (dm *DataManager) SetActionTriggers(key string, attr ActionTriggers,
+	transactionID string) (err error) {
 	if err = dm.DataDB().SetActionTriggersDrv(key, attr); err != nil {
 		return
 	}
 	return dm.CacheDataFromDB(utils.ACTION_TRIGGER_PREFIX, []string{key}, true)
 }
 
-func (dm *DataManager) GetSharedGroup(key string, skipCache bool, transactionID string) (sg *SharedGroup, err error) {
+func (dm *DataManager) GetSharedGroup(key string, skipCache bool,
+	transactionID string) (sg *SharedGroup, err error) {
 	cachekey := utils.SHARED_GROUP_PREFIX + key
 	if !skipCache {
 		if x, ok := cache.Get(cachekey); ok {
@@ -876,7 +881,8 @@ func (dm *DataManager) RemoveLCR(id, transactionID string) (err error) {
 	return
 }
 
-func (dm *DataManager) GetDerivedChargers(key string, skipCache bool, transactionID string) (dcs *utils.DerivedChargers, err error) {
+func (dm *DataManager) GetDerivedChargers(key string, skipCache bool,
+	transactionID string) (dcs *utils.DerivedChargers, err error) {
 	cacheKey := utils.DERIVEDCHARGERS_PREFIX + key
 	if !skipCache {
 		if x, ok := cache.Get(cacheKey); ok {
@@ -944,7 +950,8 @@ func (dm *DataManager) RemoveActions(key, transactionID string) (err error) {
 	return
 }
 
-func (dm *DataManager) GetRatingPlan(key string, skipCache bool, transactionID string) (rp *RatingPlan, err error) {
+func (dm *DataManager) GetRatingPlan(key string, skipCache bool,
+	transactionID string) (rp *RatingPlan, err error) {
 	cachekey := utils.RATING_PLAN_PREFIX + key
 	if !skipCache {
 		if x, ok := cache.Get(cachekey); ok {
@@ -980,7 +987,8 @@ func (dm *DataManager) RemoveRatingPlan(key string, transactionID string) (err e
 	return
 }
 
-func (dm *DataManager) GetRatingProfile(key string, skipCache bool, transactionID string) (rpf *RatingProfile, err error) {
+func (dm *DataManager) GetRatingProfile(key string, skipCache bool,
+	transactionID string) (rpf *RatingProfile, err error) {
 	cachekey := utils.RATING_PROFILE_PREFIX + key
 	if !skipCache {
 		if x, ok := cache.Get(cachekey); ok {
@@ -1117,7 +1125,8 @@ func (dm *DataManager) GetAllCdrStats() (css []*CdrStats, err error) {
 	return dm.DataDB().GetAllCdrStatsDrv()
 }
 
-func (dm *DataManager) GetSupplierProfile(tenant, id string, skipCache bool, transactionID string) (supp *SupplierProfile, err error) {
+func (dm *DataManager) GetSupplierProfile(tenant, id string, skipCache bool,
+	transactionID string) (supp *SupplierProfile, err error) {
 	key := utils.SupplierProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
@@ -1184,14 +1193,15 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 				if err != nil {
 					return err
 				}
-			} else {
-				if fltr, err = dm.GetFilter(supp.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-					if err == utils.ErrNotFound {
-						err = fmt.Errorf("broken reference to filter: %+v for SupplierProfile: %+v", fltrID, supp)
-					}
-					return
+			} else if fltr, err = dm.GetFilter(supp.Tenant, fltrID,
+				false, utils.NonTransactional); err != nil {
+				if err == utils.ErrNotFound {
+					err = fmt.Errorf("broken reference to filter: %+v for SupplierProfile: %+v",
+						fltrID, supp)
 				}
+				return
 			}
+
 			for _, flt := range fltr.Rules {
 				if flt.Type != MetaString {
 					continue
@@ -1223,7 +1233,8 @@ func (dm *DataManager) RemoveSupplierProfile(tenant, id, transactionID string, w
 	return
 }
 
-func (dm *DataManager) GetAttributeProfile(tenant, id string, skipCache bool, transactionID string) (alsPrf *AttributeProfile, err error) {
+func (dm *DataManager) GetAttributeProfile(tenant, id string, skipCache bool,
+	transactionID string) (alsPrf *AttributeProfile, err error) {
 	key := utils.AttributeProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	if !skipCache {
 		if x, ok := cache.Get(key); ok {
@@ -1320,13 +1331,13 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 					if err != nil {
 						return err
 					}
-				} else {
-					if fltr, err = dm.GetFilter(ap.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-						if err == utils.ErrNotFound {
-							err = fmt.Errorf("broken reference to filter: %+v for AttributeProfile: %+v", fltrID, ap)
-						}
-						return
+				} else if fltr, err = dm.GetFilter(ap.Tenant, fltrID,
+					false, utils.NonTransactional); err != nil {
+					if err == utils.ErrNotFound {
+						err = fmt.Errorf("broken reference to filter: %+v for AttributeProfile: %+v",
+							fltrID, ap)
 					}
+					return
 				}
 				for _, flt := range fltr.Rules {
 					if flt.Type != MetaString {
