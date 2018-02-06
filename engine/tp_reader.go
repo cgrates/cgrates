@@ -1634,8 +1634,28 @@ func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) (err error) {
 				return
 			}
 		}
-		for _, fltrID := range res.FilterIDs {
-			if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+		fltrIDs := make([]string, len(res.FilterIDs))
+		for i, fltrID := range res.FilterIDs {
+			fltrIDs[i] = fltrID
+		}
+		if len(fltrIDs) == 0 {
+			fltrIDs = []string{utils.META_NONE}
+		}
+		for _, fltrID := range fltrIDs {
+			if fltrID == utils.META_NONE {
+				tpFltr := &utils.TPFilterProfile{
+					Tenant: res.Tenant,
+					ID:     res.ID,
+					Filters: []*utils.TPFilter{
+						&utils.TPFilter{
+							Type:      utils.MetaDefault,
+							FieldName: utils.META_ANY,
+							Values:    []string{utils.META_ANY},
+						},
+					},
+				}
+				tpr.resIndexers[tntID.Tenant].IndexTPFilter(tpFltr, res.ID)
+			} else if strings.HasPrefix(fltrID, utils.MetaPrefix) {
 				inFltr, err := NewInlineFilter(fltrID)
 				if err != nil {
 					return err
@@ -1693,8 +1713,28 @@ func (tpr *TpReader) LoadStatsFiltered(tag string) (err error) {
 				return
 			}
 		}
-		for _, fltrID := range sq.FilterIDs {
-			if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+		fltrIDs := make([]string, len(sq.FilterIDs))
+		for i, fltrID := range sq.FilterIDs {
+			fltrIDs[i] = fltrID
+		}
+		if len(fltrIDs) == 0 {
+			fltrIDs = []string{utils.META_NONE}
+		}
+		for _, fltrID := range fltrIDs {
+			if fltrID == utils.META_NONE {
+				tpFltr := &utils.TPFilterProfile{
+					Tenant: sq.Tenant,
+					ID:     sq.ID,
+					Filters: []*utils.TPFilter{
+						&utils.TPFilter{
+							Type:      utils.MetaDefault,
+							FieldName: utils.META_ANY,
+							Values:    []string{utils.META_ANY},
+						},
+					},
+				}
+				tpr.sqpIndexers[tntID.Tenant].IndexTPFilter(tpFltr, sq.ID)
+			} else if strings.HasPrefix(fltrID, utils.MetaPrefix) {
 				inFltr, err := NewInlineFilter(fltrID)
 				if err != nil {
 					return err
@@ -1752,8 +1792,28 @@ func (tpr *TpReader) LoadThresholdsFiltered(tag string) (err error) {
 				return
 			}
 		}
-		for _, fltrID := range th.FilterIDs {
-			if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+		fltrIDs := make([]string, len(th.FilterIDs))
+		for i, fltrID := range th.FilterIDs {
+			fltrIDs[i] = fltrID
+		}
+		if len(fltrIDs) == 0 {
+			fltrIDs = []string{utils.META_NONE}
+		}
+		for _, fltrID := range fltrIDs {
+			if fltrID == utils.META_NONE {
+				tpFltr := &utils.TPFilterProfile{
+					Tenant: th.Tenant,
+					ID:     th.ID,
+					Filters: []*utils.TPFilter{
+						&utils.TPFilter{
+							Type:      utils.MetaDefault,
+							FieldName: utils.META_ANY,
+							Values:    []string{utils.META_ANY},
+						},
+					},
+				}
+				tpr.thdsIndexers[tntID.Tenant].IndexTPFilter(tpFltr, th.ID)
+			} else if strings.HasPrefix(fltrID, utils.MetaPrefix) {
 				inFltr, err := NewInlineFilter(fltrID)
 				if err != nil {
 					return err
@@ -1828,8 +1888,28 @@ func (tpr *TpReader) LoadSupplierProfilesFiltered(tag string) (err error) {
 				return
 			}
 		}
-		for _, fltrID := range sup.FilterIDs {
-			if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+		fltrIDs := make([]string, len(sup.FilterIDs))
+		for i, fltrID := range sup.FilterIDs {
+			fltrIDs[i] = fltrID
+		}
+		if len(fltrIDs) == 0 {
+			fltrIDs = []string{utils.META_NONE}
+		}
+		for _, fltrID := range fltrIDs {
+			if fltrID == utils.META_NONE {
+				tpFltr := &utils.TPFilterProfile{
+					Tenant: sup.Tenant,
+					ID:     sup.ID,
+					Filters: []*utils.TPFilter{
+						&utils.TPFilter{
+							Type:      utils.MetaDefault,
+							FieldName: utils.META_ANY,
+							Values:    []string{utils.META_ANY},
+						},
+					},
+				}
+				tpr.sppIndexers[tntID.Tenant].IndexTPFilter(tpFltr, sup.ID)
+			} else if strings.HasPrefix(fltrID, utils.MetaPrefix) {
 				inFltr, err := NewInlineFilter(fltrID)
 				if err != nil {
 					return err
@@ -1889,8 +1969,28 @@ func (tpr *TpReader) LoadAttributeProfilesFiltered(tag string) (err error) {
 					return
 				}
 			}
-			for _, fltrID := range attrP.FilterIDs {
-				if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+			fltrIDs := make([]string, len(attrP.FilterIDs))
+			for i, fltrID := range attrP.FilterIDs {
+				fltrIDs[i] = fltrID
+			}
+			if len(fltrIDs) == 0 {
+				fltrIDs = []string{utils.META_NONE}
+			}
+			for _, fltrID := range fltrIDs {
+				if fltrID == utils.META_NONE {
+					tpFltr := &utils.TPFilterProfile{
+						Tenant: attrP.Tenant,
+						ID:     attrP.ID,
+						Filters: []*utils.TPFilter{
+							&utils.TPFilter{
+								Type:      utils.MetaDefault,
+								FieldName: utils.META_ANY,
+								Values:    []string{utils.META_ANY},
+							},
+						},
+					}
+					tpr.attrIndexers[tntID.Tenant].IndexTPFilter(tpFltr, attrP.ID)
+				} else if strings.HasPrefix(fltrID, utils.MetaPrefix) {
 					inFltr, err := NewInlineFilter(fltrID)
 					if err != nil {
 						return err
