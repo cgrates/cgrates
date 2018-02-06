@@ -171,7 +171,7 @@ func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 				utils.Account:     "1001",
 				utils.Subject:     "1001",
 				utils.Destination: "1002",
-				utils.AnswerTime:  time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
 				utils.Usage:       "1m20s",
 			},
 		},
