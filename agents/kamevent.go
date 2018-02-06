@@ -149,6 +149,41 @@ func (kev KamEvent) AsCDR(timezone string) (cdr *engine.CDR) {
 	return cdr
 }
 
+// AsCDR converts KamEvent into CGREvent
+func (kev KamEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err error) {
+	var sTime time.Time
+	switch kev[EVENT] {
+	case CGR_AUTH_REQUEST:
+		sTimePrv, err := utils.ParseTimeDetectLayout(kev[utils.SetupTime], timezone)
+		if err != nil {
+			return nil, err
+		}
+		sTime = sTimePrv
+	case CGR_CALL_START:
+		sTimePrv, err := utils.ParseTimeDetectLayout(kev[utils.AnswerTime], timezone)
+		if err != nil {
+			return nil, err
+		}
+		sTime = sTimePrv
+	case CGR_CALL_END:
+		sTimePrv, err := utils.ParseTimeDetectLayout(kev[utils.AnswerTime], timezone)
+		if err != nil {
+			return nil, err
+		}
+		sTime = sTimePrv
+	default: // no/unsupported event
+		return
+	}
+	cgrEv = &utils.CGREvent{
+		Tenant: utils.FirstNonEmpty(kev[utils.Tenant],
+			config.CgrConfig().DefaultTenant),
+		ID:    utils.UUIDSha1Prefix(),
+		Time:  &sTime,
+		Event: kev.AsMapStringInterface(),
+	}
+	return cgrEv, nil
+}
+
 // String is used for pretty printing event in logs
 func (kev KamEvent) String() string {
 	mrsh, _ := json.Marshal(kev)

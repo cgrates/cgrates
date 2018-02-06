@@ -134,6 +134,38 @@ func TestKamEvAsCDR(t *testing.T) {
 	}
 }
 
+func TestKamEvAsCGREvent(t *testing.T) {
+	timezone := config.CgrConfig().DefaultTimezone
+	kamEv := KamEvent{"event": "CGR_CALL_END",
+		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
+		"from_tag": "bf71ad59", "to_tag": "7351fecf",
+		"cgr_reqtype": utils.META_POSTPAID, "cgr_account": "1001",
+		"cgr_destination": "1002", "cgr_answertime": "1419839310",
+		"cgr_duration": "3", "cgr_pdd": "4",
+		utils.CGR_SUPPLIER:         "supplier2",
+		utils.CGR_DISCONNECT_CAUSE: "200"}
+	sTime, err := utils.ParseTimeDetectLayout(kamEv[utils.AnswerTime], timezone)
+	if err != nil {
+		return
+	}
+	expected := &utils.CGREvent{
+		Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
+			config.CgrConfig().DefaultTenant),
+		ID:    utils.UUIDSha1Prefix(),
+		Time:  &sTime,
+		Event: kamEv.AsMapStringInterface(),
+	}
+	if rcv, err := kamEv.AsCGREvent(timezone); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected.Tenant, rcv.Tenant) {
+		t.Errorf("Expecting: %+v, received: %+v", expected.Tenant, rcv.Tenant)
+	} else if !reflect.DeepEqual(expected.Time, rcv.Time) {
+		t.Errorf("Expecting: %+v, received: %+v", expected.Time, rcv.Time)
+	} else if !reflect.DeepEqual(expected.Event, rcv.Event) {
+		t.Errorf("Expecting: %+v, received: %+v", expected.Event, rcv.Event)
+	}
+}
+
 func TestKamEvV1AuthorizeArgs(t *testing.T) {
 	timezone := config.CgrConfig().DefaultTimezone
 	kamEv := KamEvent{"event": "CGR_CALL_END",

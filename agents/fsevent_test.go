@@ -575,6 +575,30 @@ func TestFsEvAsCDR(t *testing.T) {
 	}
 }
 
+func TestFsEvAsCGREvent(t *testing.T) {
+	timezone := config.CgrConfig().DefaultTimezone
+	ev := NewFSEvent(hangupEv)
+	sTime, err := ev.GetSetupTime(utils.META_DEFAULT, timezone)
+	if err != nil {
+		t.Error(err)
+	}
+	expected := &utils.CGREvent{
+		Tenant: ev.GetTenant(utils.META_DEFAULT),
+		ID:     utils.UUIDSha1Prefix(),
+		Time:   &sTime,
+		Event:  ev.AsMapStringInterface(timezone),
+	}
+	if rcv, err := ev.AsCGREvent(timezone); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected.Tenant, rcv.Tenant) {
+		t.Errorf("Expecting: %+v, received: %+v", expected.Tenant, rcv.Tenant)
+	} else if !reflect.DeepEqual(expected.Time, rcv.Time) {
+		t.Errorf("Expecting: %+v, received: %+v", expected.Time, rcv.Time)
+	} else if !reflect.DeepEqual(expected.Event, rcv.Event) {
+		t.Errorf("Expecting: %+v, received: %+v", expected.Event, rcv.Event)
+	}
+}
+
 func TestFsEvAsMapStringInterface(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
