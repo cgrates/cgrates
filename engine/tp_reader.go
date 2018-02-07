@@ -1655,7 +1655,7 @@ func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) (err error) {
 					},
 				}
 				tpr.resIndexers[tntID.Tenant].IndexTPFilter(tpFltr, res.ID)
-			} else if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+			} else if strings.HasPrefix(fltrID, utils.Meta) {
 				inFltr, err := NewInlineFilter(fltrID)
 				if err != nil {
 					return err
@@ -1734,7 +1734,7 @@ func (tpr *TpReader) LoadStatsFiltered(tag string) (err error) {
 					},
 				}
 				tpr.sqpIndexers[tntID.Tenant].IndexTPFilter(tpFltr, sq.ID)
-			} else if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+			} else if strings.HasPrefix(fltrID, utils.Meta) {
 				inFltr, err := NewInlineFilter(fltrID)
 				if err != nil {
 					return err
@@ -1813,7 +1813,7 @@ func (tpr *TpReader) LoadThresholdsFiltered(tag string) (err error) {
 					},
 				}
 				tpr.thdsIndexers[tntID.Tenant].IndexTPFilter(tpFltr, th.ID)
-			} else if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+			} else if strings.HasPrefix(fltrID, utils.Meta) {
 				inFltr, err := NewInlineFilter(fltrID)
 				if err != nil {
 					return err
@@ -1909,7 +1909,7 @@ func (tpr *TpReader) LoadSupplierProfilesFiltered(tag string) (err error) {
 					},
 				}
 				tpr.sppIndexers[tntID.Tenant].IndexTPFilter(tpFltr, sup.ID)
-			} else if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+			} else if strings.HasPrefix(fltrID, utils.Meta) {
 				inFltr, err := NewInlineFilter(fltrID)
 				if err != nil {
 					return err
@@ -1990,7 +1990,7 @@ func (tpr *TpReader) LoadAttributeProfilesFiltered(tag string) (err error) {
 						},
 					}
 					tpr.attrIndexers[tntID.Tenant].IndexTPFilter(tpFltr, attrP.ID)
-				} else if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+				} else if strings.HasPrefix(fltrID, utils.Meta) {
 					inFltr, err := NewInlineFilter(fltrID)
 					if err != nil {
 						return err

@@ -415,7 +415,7 @@ const (
 	RALService                   = "RALs"
 	CostSource                   = "CostSource"
 	ExtraInfo                    = "ExtraInfo"
-	MetaPrefix                   = "*"
+	Meta                         = "*"
 	EventResourcesPrefix         = "ers_"
 	MetaSysLog                   = "*syslog"
 	MetaStdLog                   = "*stdout"

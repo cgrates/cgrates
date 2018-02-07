@@ -432,7 +432,7 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 						},
 					},
 				}
-			} else if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+			} else if strings.HasPrefix(fltrID, utils.Meta) {
 				inFltr, err := NewInlineFilter(fltrID)
 				if err != nil {
 					return err
@@ -538,7 +538,7 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 						},
 					},
 				}
-			} else if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+			} else if strings.HasPrefix(fltrID, utils.Meta) {
 				inFltr, err := NewInlineFilter(fltrID)
 				if err != nil {
 					return err
@@ -720,7 +720,7 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 						},
 					},
 				}
-			} else if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+			} else if strings.HasPrefix(fltrID, utils.Meta) {
 				inFltr, err := NewInlineFilter(fltrID)
 				if err != nil {
 					return err
@@ -1184,7 +1184,7 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 						},
 					},
 				}
-			} else if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+			} else if strings.HasPrefix(fltrID, utils.Meta) {
 				inFltr, err := NewInlineFilter(fltrID)
 				if err != nil {
 					return err
@@ -1322,7 +1322,7 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 							},
 						},
 					}
-				} else if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+				} else if strings.HasPrefix(fltrID, utils.Meta) {
 					inFltr, err := NewInlineFilter(fltrID)
 					if err != nil {
 						return err
