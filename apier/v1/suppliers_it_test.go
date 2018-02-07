@@ -50,6 +50,7 @@ var sTestsSupplierSV1 = []func(t *testing.T){
 	testV1SplSFromFolder,
 	testV1SplSGetWeightSuppliers,
 	testV1SplSGetLeastCostSuppliers,
+	testV1SplSGetSupplierWithoutFilter,
 	testV1SplSSetSupplierProfiles,
 	testV1SplSUpdateSupplierProfiles,
 	testV1SplSRemSupplierProfiles,
@@ -201,6 +202,39 @@ func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 					utils.Cost:         0.46666,
 					utils.RatingPlanID: "RP_RETAIL1",
 					utils.Weight:       20.0,
+				},
+			},
+		},
+	}
+	var suplsReply engine.SortedSuppliers
+	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
+		ev, &suplsReply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSpls, suplsReply) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
+	}
+}
+
+func testV1SplSGetSupplierWithoutFilter(t *testing.T) {
+	ev := &engine.ArgsGetSuppliers{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1SplSGetSupplierWithoutFilter",
+			Event: map[string]interface{}{
+				utils.Account:     "1008",
+				utils.Destination: "+49",
+			},
+		},
+	}
+	eSpls := engine.SortedSuppliers{
+		ProfileID: "SPL_WEIGHT_2",
+		Sorting:   utils.MetaWeight,
+		SortedSuppliers: []*engine.SortedSupplier{
+			&engine.SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					utils.Weight: 10.0,
 				},
 			},
 		},
