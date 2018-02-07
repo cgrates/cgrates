@@ -57,6 +57,7 @@ var sTests = []func(t *testing.T){
 	testITFlush,
 	testITIsDBEmpty,
 	testITTestIndexingWithEmptyFltrID,
+	testITTestIndexingWithEmptyFltrID2,
 }
 
 func TestITRedisConnect(t *testing.T) {
@@ -910,6 +911,75 @@ func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 	}
 	eMp := utils.StringMap{
 		"THD_Test": true,
+	}
+	if rcvMp, err := dataManager.MatchFilterIndex(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		utils.MetaDefault, utils.META_ANY, utils.META_ANY); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eMp, rcvMp) {
+		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
+	}
+}
+
+func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
+	splProfile := &SupplierProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SPL_Weight",
+		FilterIDs: []string{},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		Sorting:       "*weight",
+		SortingParams: []string{},
+		Suppliers: []*Supplier{
+			&Supplier{
+				ID:                 "supplier1",
+				FilterIDs:          []string{""},
+				AccountIDs:         []string{""},
+				RatingPlanIDs:      []string{""},
+				ResourceIDs:        []string{""},
+				StatIDs:            []string{""},
+				Weight:             10,
+				SupplierParameters: "",
+			},
+		},
+		Weight: 20,
+	}
+
+	if err := dataManager.SetSupplierProfile(splProfile, true); err != nil {
+		t.Error(err)
+	}
+	eIdxes := map[string]utils.StringMap{
+		"*default:*any:*any": utils.StringMap{
+			"SPL_Weight": true,
+		},
+	}
+	reverseIdxes := map[string]utils.StringMap{
+		"SPL_Weight": utils.StringMap{
+			"*default:*any:*any": true,
+		},
+	}
+	rfi := NewFilterIndexer(onStor, utils.SupplierProfilePrefix, splProfile.Tenant)
+	if rcvIdx, err := dataManager.GetFilterIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
+		nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(eIdxes, rcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+		}
+	}
+	if reverseRcvIdx, err := dataManager.GetFilterReverseIndexes(
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+		nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
+		}
+	}
+	eMp := utils.StringMap{
+		"SPL_Weight": true,
 	}
 	if rcvMp, err := dataManager.MatchFilterIndex(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),

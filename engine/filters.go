@@ -104,6 +104,9 @@ func (inFtr *InlineFilter) AsFilter(tenant string) (f *Filter, err error) {
 // there should be at least one filter passing, ie: if filters are not active event will fail to pass
 func (fS *FilterS) PassFiltersForEvent(tenant string, ev map[string]interface{}, filterIDs []string) (pass bool, err error) {
 	var atLeastOneFilterPassing bool
+	if len(filterIDs) == 0 {
+		return true, nil
+	}
 	for _, fltrID := range filterIDs {
 		var f *Filter
 		if strings.HasPrefix(fltrID, utils.MetaPrefix) {

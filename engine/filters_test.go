@@ -373,5 +373,38 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
+}
 
+func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
+	data, _ := NewMapStorage()
+	dmFilterPass := NewDataManager(data)
+	cfg, _ := config.NewDefaultCGRConfig()
+	filterS := FilterS{
+		cfg: cfg,
+		dm:  dmFilterPass,
+	}
+	passEvent1 := map[string]interface{}{
+		utils.Tenant:      "cgrates.org",
+		utils.Account:     "1010",
+		utils.Destination: "+49",
+		utils.Weight:      10,
+	}
+	passEvent2 := map[string]interface{}{
+		utils.Tenant:      "itsyscom.com",
+		utils.Account:     "dan",
+		utils.Destination: "+4986517174963",
+		utils.Weight:      20,
+	}
+	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
+		passEvent1, []string{}); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+	if pass, err := filterS.PassFiltersForEvent("itsyscom.com",
+		passEvent2, []string{}); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
 }
