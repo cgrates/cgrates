@@ -160,7 +160,7 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent)
 func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 	acntIDs, rpIDs []string) (costData map[string]interface{}, err error) {
 	if err = ev.CheckMandatoryFields([]string{utils.Account,
-		utils.Destination, utils.SetupTime, utils.Usage}); err != nil {
+		utils.Destination, utils.SetupTime}); err != nil {
 		return
 	}
 	var acnt, subj, dst string
@@ -180,9 +180,11 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 	if sTime, err = ev.FieldAsTime(utils.SetupTime, spS.timezone); err != nil {
 		return
 	}
-	var usage time.Duration
-	if usage, err = ev.FieldAsDuration(utils.Usage); err != nil {
-		return
+	usage := time.Duration(time.Minute)
+	if _, has := ev.Event[utils.Usage]; has {
+		if usage, err = ev.FieldAsDuration(utils.Usage); err != nil {
+			return
+		}
 	}
 	for _, anctID := range acntIDs {
 		cd := &CallDescriptor{

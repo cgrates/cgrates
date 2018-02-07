@@ -132,14 +132,15 @@ func radPassesFieldFilter(pkt *radigo.Packet, processorVars processorVars,
 }
 
 // radComposedFieldValue extracts the field value out of RADIUS packet
+// procVars have priority over packet variables
 func radComposedFieldValue(pkt *radigo.Packet,
-	processorVars processorVars, outTpl utils.RSRFields) (outVal string) {
+	procVars processorVars, outTpl utils.RSRFields) (outVal string) {
 	for _, rsrTpl := range outTpl {
 		if rsrTpl.IsStatic() {
 			outVal += rsrTpl.ParseValue("")
 			continue
 		}
-		if val, err := processorVars.valAsString(rsrTpl.Id); err != nil {
+		if val, err := procVars.valAsString(rsrTpl.Id); err != nil {
 			if err.Error() != "not found" {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> %s",
@@ -148,6 +149,7 @@ func radComposedFieldValue(pkt *radigo.Packet,
 			}
 		} else {
 			outVal += rsrTpl.ParseValue(val)
+			continue
 		}
 		for _, avp := range pkt.AttributesWithName(
 			attrVendorFromPath(rsrTpl.Id)) {
