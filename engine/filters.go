@@ -109,7 +109,7 @@ func (fS *FilterS) PassFiltersForEvent(tenant string, ev map[string]interface{},
 	}
 	for _, fltrID := range filterIDs {
 		var f *Filter
-		if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+		if strings.HasPrefix(fltrID, utils.Meta) {
 			inFtr, err := NewInlineFilter(fltrID)
 			if err != nil {
 				return false, err
@@ -347,7 +347,7 @@ func (fltr *FilterRule) passStatS(req interface{}, extraFieldsLabel string, stat
 		if err := stats.Call("StatSV1.GetFloatMetrics", threshold.QueueID, &statValues); err != nil {
 			return false, err
 		}
-		val, hasIt := statValues[utils.MetaPrefix+threshold.ThresholdType[len(MetaMinCapPrefix):]]
+		val, hasIt := statValues[utils.Meta+threshold.ThresholdType[len(MetaMinCapPrefix):]]
 		if !hasIt {
 			continue
 		}
