@@ -20,10 +20,13 @@ package agents
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/radigo"
 )
@@ -161,8 +164,7 @@ func TestRadFieldOutVal(t *testing.T) {
 	}
 }
 
-/*
-func TestRadReqAsSMGEvent(t *testing.T) {
+func TestRadReqAsCGREvent(t *testing.T) {
 	pkt := radigo.NewPacket(radigo.AccountingRequest, 1, dictRad, coder, "CGRateS.org")
 	// Sample minimal packet sent by Kamailio
 	if err := pkt.AddAVPWithName("Acct-Status-Type", "2", ""); err != nil {
@@ -234,31 +236,159 @@ func TestRadReqAsSMGEvent(t *testing.T) {
 		&config.CfgCdrField{Tag: "Usage", FieldId: utils.Usage, Type: utils.META_HANDLER, HandlerId: MetaUsageDifference,
 			Value: utils.ParseRSRFieldsMustCompile("Event-Timestamp;^|;Ascend-User-Acct-Time", utils.INFIELD_SEP)},
 	}
-
-	eSMGEv := sessions.SMGenericEvent{
-		utils.TOR:         utils.VOICE,
-		utils.OriginID:    "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-75c2f57b-51585361",
-		utils.RequestType: utils.META_PREPAID,
-		utils.Direction:   utils.OUT,
-		utils.Tenant:      "cgrates.org",
-		utils.Category:    "call",
-		utils.Account:     "1001",
-		utils.Destination: "1002",
-		utils.SetupTime:   "1497106115",
-		utils.AnswerTime:  "1497106115",
-		utils.Usage:       "4s",
-		utils.OriginHost:  "127.0.0.1",
+	eOut := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Time:   utils.TimePointer(time.Now()),
+		Event: map[string]interface{}{
+			utils.Account:     "1001",
+			utils.AnswerTime:  "1497106115",
+			utils.Category:    "call",
+			utils.Destination: "1002",
+			utils.Direction:   utils.META_OUT,
+			utils.OriginHost:  "127.0.0.1",
+			utils.OriginID:    "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-75c2f57b-51585361",
+			utils.RequestType: "*prepaid",
+			utils.SetupTime:   "1497106115",
+			utils.Tenant:      "cgrates.org",
+			utils.TOR:         "*voice",
+			utils.Usage:       "4s",
+		},
 	}
-
-	if smgEv, err := radReqAsSMGEvent(pkt,
-		processorVars{MetaRadReqType: MetaRadAcctStop}, nil, cfgFlds); err != nil {
+	if outVal, err := radReqAsCGREvent(pkt, processorVars{MetaRadReqType: MetaRadAcctStart}, nil, cfgFlds); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eSMGEv, smgEv) {
-		t.Errorf("Expecting: %+v\n, received: %+v", eSMGEv, smgEv)
+	} else if !reflect.DeepEqual(outVal.Tenant, eOut.Tenant) {
+		t.Errorf("Expecting: <%s>, received: <%s>", utils.ToJSON(eOut.Tenant), utils.ToJSON(outVal.Tenant))
+	} else if !reflect.DeepEqual(outVal.Event, eOut.Event) {
+		t.Errorf("Expecting: <%s>, received: <%s>", utils.ToJSON(eOut.Event), utils.ToJSON(outVal.Event))
 	}
 }
 
+func TestRadV1AuthorizeArgs(t *testing.T) {
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Time:   utils.TimePointer(time.Now()),
+		Event: map[string]interface{}{
+			utils.Account:     "1001",
+			utils.AnswerTime:  "1497106115",
+			utils.Category:    "call",
+			utils.Destination: "1002",
+			utils.Direction:   utils.META_OUT,
+			utils.OriginHost:  "127.0.0.1",
+			utils.OriginID:    "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-75c2f57b-51585361",
+			utils.RequestType: "*prepaid",
+			utils.SetupTime:   "1497106115",
+			utils.Tenant:      "cgrates.org",
+			utils.TOR:         "*voice",
+			utils.Usage:       "4s",
+		},
+	}
+	expected := &sessions.V1AuthorizeArgs{
+		GetMaxUsage: true,
+		CGREvent:    *cgrEv,
+	}
+	outVal := radV1AuthorizeArgs(cgrEv, processorVars{MetaRadReqType: MetaRadAcctStart})
 
+	if !reflect.DeepEqual(expected, outVal) {
+		t.Errorf("Expecting: <%s>, received: <%s>", utils.ToJSON(expected), utils.ToJSON(outVal))
+	}
+}
+
+func TestRadV1InitSessionArgs(t *testing.T) {
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Time:   utils.TimePointer(time.Now()),
+		Event: map[string]interface{}{
+			utils.Account:     "1001",
+			utils.AnswerTime:  "1497106115",
+			utils.Category:    "call",
+			utils.Destination: "1002",
+			utils.Direction:   utils.META_OUT,
+			utils.OriginHost:  "127.0.0.1",
+			utils.OriginID:    "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-75c2f57b-51585361",
+			utils.RequestType: "*prepaid",
+			utils.SetupTime:   "1497106115",
+			utils.Tenant:      "cgrates.org",
+			utils.TOR:         "*voice",
+			utils.Usage:       "4s",
+		},
+	}
+	expected := &sessions.V1InitSessionArgs{
+		InitSession: true,
+		CGREvent:    *cgrEv,
+	}
+	outVal := radV1InitSessionArgs(cgrEv, processorVars{MetaRadReqType: MetaRadAcctStart})
+
+	if !reflect.DeepEqual(expected, outVal) {
+		t.Errorf("Expecting: <%s>, received: <%s>", utils.ToJSON(expected), utils.ToJSON(outVal))
+	}
+}
+
+func TestRadV1UpdateSessionArgs(t *testing.T) {
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Time:   utils.TimePointer(time.Now()),
+		Event: map[string]interface{}{
+			utils.Account:     "1001",
+			utils.AnswerTime:  "1497106115",
+			utils.Category:    "call",
+			utils.Destination: "1002",
+			utils.Direction:   utils.META_OUT,
+			utils.OriginHost:  "127.0.0.1",
+			utils.OriginID:    "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-75c2f57b-51585361",
+			utils.RequestType: "*prepaid",
+			utils.SetupTime:   "1497106115",
+			utils.Tenant:      "cgrates.org",
+			utils.TOR:         "*voice",
+			utils.Usage:       "4s",
+		},
+	}
+	expected := &sessions.V1UpdateSessionArgs{
+		UpdateSession: true,
+		CGREvent:      *cgrEv,
+	}
+	outVal := radV1UpdateSessionArgs(cgrEv, processorVars{MetaRadReqType: MetaRadAcctStart})
+
+	if !reflect.DeepEqual(expected, outVal) {
+		t.Errorf("Expecting: <%s>, received: <%s>", utils.ToJSON(expected), utils.ToJSON(outVal))
+	}
+}
+
+func TestRadV1TerminateSessionArgs(t *testing.T) {
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Time:   utils.TimePointer(time.Now()),
+		Event: map[string]interface{}{
+			utils.Account:     "1001",
+			utils.AnswerTime:  "1497106115",
+			utils.Category:    "call",
+			utils.Destination: "1002",
+			utils.Direction:   utils.META_OUT,
+			utils.OriginHost:  "127.0.0.1",
+			utils.OriginID:    "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-75c2f57b-51585361",
+			utils.RequestType: "*prepaid",
+			utils.SetupTime:   "1497106115",
+			utils.Tenant:      "cgrates.org",
+			utils.TOR:         "*voice",
+			utils.Usage:       "4s",
+		},
+	}
+	expected := &sessions.V1TerminateSessionArgs{
+		TerminateSession: true,
+		CGREvent:         *cgrEv,
+	}
+	outVal := radV1TerminateSessionArgs(cgrEv, processorVars{MetaRadReqType: MetaRadAcctStart})
+
+	if !reflect.DeepEqual(expected, outVal) {
+		t.Errorf("Expecting: <%s>, received: <%s>", utils.ToJSON(expected), utils.ToJSON(outVal))
+	}
+}
+
+/*
 func TestRadReplyAppendAttributes(t *testing.T) {
 	rply := radigo.NewPacket(radigo.AccessRequest, 2, dictRad, coder, "CGRateS.org").Reply()
 	rplyFlds := []*config.CfgCdrField{
