@@ -313,7 +313,7 @@ func (self *ApierV2) SetActions(attrs utils.AttrSetActions, reply *string) error
 		}
 	}
 	if !attrs.Overwrite {
-		if exists, err := self.DataManager.HasData(utils.ACTION_PREFIX, attrs.ActionsId); err != nil {
+		if exists, err := self.DataManager.HasData(utils.ACTION_PREFIX, attrs.ActionsId, ""); err != nil {
 			return utils.NewErrServerError(err)
 		} else if exists {
 			return utils.ErrExists

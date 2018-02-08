@@ -26,7 +26,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
 )
@@ -67,14 +67,10 @@ const (
 	IGNOREPARK               = "variable_cgr_ignorepark"
 	FS_VARPREFIX             = "variable_"
 	VarCGRSubsystems         = "variable_cgr_subsystems"
-	SubSAccountS             = "accounts"
-	SubSSupplierS            = "suppliers"
-	SubSResourceS            = "resources"
-	SubSAttributeS           = "attributes"
 	CGRResourceAllocation    = "cgr_resource_allocation"
 	VAR_CGR_DISCONNECT_CAUSE = "variable_" + utils.CGR_DISCONNECT_CAUSE
 	VAR_CGR_CMPUTELCR        = "variable_" + utils.CGR_COMPUTELCR
-	FsConnID                 = "FsConnID" // used to share connID info in event
+	FsConnID                 = "FsConnID" // used to share connID info in event for remote disconnects
 	VarAnswerEpoch           = "variable_answer_epoch"
 )
 
@@ -328,6 +324,7 @@ func (fsev FSEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) str
 	}
 }
 
+// AsCDR converts FSEvent into CDR
 func (fsev FSEvent) AsCDR(timezone string) *engine.CDR {
 	storCdr := new(engine.CDR)
 	storCdr.ToR = utils.VOICE
@@ -346,6 +343,21 @@ func (fsev FSEvent) AsCDR(timezone string) *engine.CDR {
 	storCdr.ExtraFields = fsev.GetExtraFields()
 	storCdr.Cost = -1
 	return storCdr
+}
+
+// AsCGREvent converts FSEvent into CGREvent
+func (fsev FSEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err error) {
+	sTime, err := fsev.GetSetupTime(utils.META_DEFAULT, timezone)
+	if err != nil {
+		return nil, err
+	}
+	cgrEv = &utils.CGREvent{
+		Tenant: fsev.GetTenant(utils.META_DEFAULT),
+		ID:     utils.UUIDSha1Prefix(),
+		Time:   &sTime,
+		Event:  fsev.AsMapStringInterface(timezone),
+	}
+	return cgrEv, nil
 }
 
 // Used with RLs
@@ -373,78 +385,96 @@ func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]interface{}
 }
 
 // V1AuthorizeArgs returns the arguments used in SMGv1.Authorize
-func (fsev FSEvent) V1AuthorizeArgs() (args *sessionmanager.V1AuthorizeArgs) {
-	args = &sessionmanager.V1AuthorizeArgs{ // defaults
+func (fsev FSEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
+	timezone := config.CgrConfig().DefaultTimezone
+	sTime, err := fsev.GetSetupTime(utils.META_DEFAULT, timezone)
+	if err != nil {
+		return
+	}
+	args = &sessions.V1AuthorizeArgs{ // defaults
 		GetMaxUsage: true,
 		CGREvent: utils.CGREvent{
 			Tenant: fsev.GetTenant(utils.META_DEFAULT),
 			ID:     utils.UUIDSha1Prefix(),
-			Event:  fsev.AsMapStringInterface(config.CgrConfig().DefaultTimezone),
+			Time:   &sTime,
+			Event:  fsev.AsMapStringInterface(timezone),
 		},
 	}
 	subsystems, has := fsev[VarCGRSubsystems]
 	if !has {
 		return
 	}
-	if strings.Index(subsystems, SubSAccountS) == -1 {
+	if strings.Index(subsystems, utils.MetaAccounts) == -1 {
 		args.GetMaxUsage = false
 	}
-	if strings.Index(subsystems, SubSResourceS) != -1 {
+	if strings.Index(subsystems, utils.MetaResources) != -1 {
 		args.AuthorizeResources = true
 	}
-	if strings.Index(subsystems, SubSSupplierS) != -1 {
+	if strings.Index(subsystems, utils.MetaSuppliers) != -1 {
 		args.GetSuppliers = true
 	}
-	if strings.Index(subsystems, SubSAttributeS) != -1 {
+	if strings.Index(subsystems, utils.MetaAttributes) != -1 {
 		args.GetAttributes = true
 	}
 	return
 }
 
-// V2InitSessionArgs returns the arguments used in SMGv1.InitSession
-func (fsev FSEvent) V1InitSessionArgs() (args *sessionmanager.V1InitSessionArgs) {
-	args = &sessionmanager.V1InitSessionArgs{ // defaults
+// V1InitSessionArgs returns the arguments used in SessionSv1.InitSession
+func (fsev FSEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
+	timezone := config.CgrConfig().DefaultTimezone
+	sTime, err := fsev.GetSetupTime(utils.META_DEFAULT, timezone)
+	if err != nil {
+		return
+	}
+	args = &sessions.V1InitSessionArgs{ // defaults
 		InitSession: true,
 		CGREvent: utils.CGREvent{
 			Tenant: fsev.GetTenant(utils.META_DEFAULT),
 			ID:     utils.UUIDSha1Prefix(),
-			Event:  fsev.AsMapStringInterface(config.CgrConfig().DefaultTimezone),
+			Time:   &sTime,
+			Event:  fsev.AsMapStringInterface(timezone),
 		},
 	}
 	subsystems, has := fsev[VarCGRSubsystems]
 	if !has {
 		return
 	}
-	if strings.Index(subsystems, SubSAccountS) == -1 {
+	if strings.Index(subsystems, utils.MetaAccounts) == -1 {
 		args.InitSession = false
 	}
-	if strings.Index(subsystems, SubSResourceS) != -1 {
+	if strings.Index(subsystems, utils.MetaResources) != -1 {
 		args.AllocateResources = true
 	}
-	if strings.Index(subsystems, SubSAttributeS) != -1 {
+	if strings.Index(subsystems, utils.MetaAttributes) != -1 {
 		args.GetAttributes = true
 	}
 	return
 }
 
 // V1TerminateSessionArgs returns the arguments used in SMGv1.TerminateSession
-func (fsev FSEvent) V1TerminateSessionArgs() (args *sessionmanager.V1TerminateSessionArgs) {
-	args = &sessionmanager.V1TerminateSessionArgs{ // defaults
+func (fsev FSEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionArgs) {
+	timezone := config.CgrConfig().DefaultTimezone
+	sTime, err := fsev.GetSetupTime(utils.META_DEFAULT, timezone)
+	if err != nil {
+		return
+	}
+	args = &sessions.V1TerminateSessionArgs{ // defaults
 		TerminateSession: true,
 		CGREvent: utils.CGREvent{
 			Tenant: fsev.GetTenant(utils.META_DEFAULT),
 			ID:     utils.UUIDSha1Prefix(),
-			Event:  fsev.AsMapStringInterface(config.CgrConfig().DefaultTimezone),
+			Time:   &sTime,
+			Event:  fsev.AsMapStringInterface(timezone),
 		},
 	}
 	subsystems, has := fsev[VarCGRSubsystems]
 	if !has {
 		return
 	}
-	if strings.Index(subsystems, SubSAccountS) == -1 {
+	if strings.Index(subsystems, utils.MetaAccounts) == -1 {
 		args.TerminateSession = false
 	}
-	if strings.Index(subsystems, SubSResourceS) != -1 {
+	if strings.Index(subsystems, utils.MetaResources) != -1 {
 		args.ReleaseResources = true
 	}
 	return

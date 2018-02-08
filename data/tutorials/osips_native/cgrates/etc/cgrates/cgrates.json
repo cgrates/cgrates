@@ -129,6 +129,7 @@
 "sessions": {
 	"enabled": true,
 	"debit_interval": "10s",
+	"client_protocol": 0,
 },
 
 

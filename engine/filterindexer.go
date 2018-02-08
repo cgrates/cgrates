@@ -26,18 +26,18 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewReqFilterIndexer(dm *DataManager, itemType, dbKeySuffix string) *ReqFilterIndexer {
-	return &ReqFilterIndexer{dm: dm, itemType: itemType, dbKeySuffix: dbKeySuffix,
+func NewFilterIndexer(dm *DataManager, itemType, dbKeySuffix string) *FilterIndexer {
+	return &FilterIndexer{dm: dm, itemType: itemType, dbKeySuffix: dbKeySuffix,
 		indexes:          make(map[string]utils.StringMap),
 		reveseIndex:      make(map[string]utils.StringMap),
 		chngdIndxKeys:    make(utils.StringMap),
 		chngdRevIndxKeys: make(utils.StringMap)}
 }
 
-// ReqFilterIndexer is a centralized indexer for all data sources using RequestFilter
+// FilterIndexer is a centralized indexer for all data sources using RequestFilter
 // retrieves and stores it's data from/to dataDB
 // not thread safe, meant to be used as logic within other code blocks
-type ReqFilterIndexer struct {
+type FilterIndexer struct {
 	indexes          map[string]utils.StringMap // map[fieldName:fieldValue]utils.StringMap[itemID]
 	reveseIndex      map[string]utils.StringMap // map[itemID]utils.StringMap[fieldName:fieldValue]
 	dm               *DataManager
@@ -48,7 +48,7 @@ type ReqFilterIndexer struct {
 }
 
 // ChangedKeys returns the changed keys from original indexes so we can reload wisely
-func (rfi *ReqFilterIndexer) ChangedKeys(reverse bool) utils.StringMap {
+func (rfi *FilterIndexer) ChangedKeys(reverse bool) utils.StringMap {
 	if reverse {
 		return rfi.chngdRevIndxKeys
 	}
@@ -56,80 +56,95 @@ func (rfi *ReqFilterIndexer) ChangedKeys(reverse bool) utils.StringMap {
 }
 
 // IndexTPFilter parses reqFltrs, adding itemID in the indexes and marks the changed keys in chngdIndxKeys
-func (rfi *ReqFilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID string) {
-	var hasMetaString bool
-	if _, hasIt := rfi.reveseIndex[itemID]; !hasIt {
-		rfi.reveseIndex[itemID] = make(utils.StringMap)
-	}
+func (rfi *FilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID string) {
 	for _, fltr := range tpFltr.Filters {
-		if fltr.Type != MetaString {
-			continue
-		}
-		hasMetaString = true // Mark that we found at least one metatring so we don't index globally
-		for _, fldVal := range fltr.Values {
-			concatKey := utils.ConcatenatedKey(fltr.FieldName, fldVal)
+		switch fltr.Type {
+		case MetaString:
+			for _, fldVal := range fltr.Values {
+				concatKey := utils.ConcatenatedKey(fltr.Type, fltr.FieldName, fldVal)
+				if _, hasIt := rfi.indexes[concatKey]; !hasIt {
+					rfi.indexes[concatKey] = make(utils.StringMap)
+				}
+				rfi.indexes[concatKey][itemID] = true
+				if _, hasIt := rfi.reveseIndex[itemID]; !hasIt {
+					rfi.reveseIndex[itemID] = make(utils.StringMap)
+				}
+				rfi.reveseIndex[itemID][concatKey] = true
+				rfi.chngdIndxKeys[concatKey] = true
+			}
+			rfi.chngdRevIndxKeys[itemID] = true
+		case MetaPrefix:
+			for _, fldVal := range fltr.Values {
+				concatKey := utils.ConcatenatedKey(fltr.Type, fltr.FieldName, fldVal)
+				if _, hasIt := rfi.indexes[concatKey]; !hasIt {
+					rfi.indexes[concatKey] = make(utils.StringMap)
+				}
+				rfi.indexes[concatKey][itemID] = true
+				if _, hasIt := rfi.reveseIndex[itemID]; !hasIt {
+					rfi.reveseIndex[itemID] = make(utils.StringMap)
+				}
+				rfi.reveseIndex[itemID][concatKey] = true
+				rfi.chngdIndxKeys[concatKey] = true
+			}
+			rfi.chngdRevIndxKeys[itemID] = true
+		default:
+			concatKey := utils.ConcatenatedKey(utils.MetaDefault, utils.ANY, utils.ANY)
 			if _, hasIt := rfi.indexes[concatKey]; !hasIt {
 				rfi.indexes[concatKey] = make(utils.StringMap)
 			}
-			rfi.indexes[concatKey][itemID] = true
+			if _, hasIt := rfi.reveseIndex[itemID]; !hasIt {
+				rfi.reveseIndex[itemID] = make(utils.StringMap)
+			}
 			rfi.reveseIndex[itemID][concatKey] = true
-			rfi.chngdIndxKeys[concatKey] = true
+			rfi.indexes[concatKey][itemID] = true // Fields without real field index will be located in map[*any:*any][rl.ID]
 		}
-		rfi.chngdRevIndxKeys[itemID] = true
 	}
-	if !hasMetaString {
-		naConcatKey := utils.ConcatenatedKey(utils.NOT_AVAILABLE, utils.NOT_AVAILABLE)
-		if _, hasIt := rfi.indexes[naConcatKey]; !hasIt {
-			rfi.indexes[naConcatKey] = make(utils.StringMap)
-		}
-		rfi.reveseIndex[itemID][naConcatKey] = true
-		rfi.indexes[naConcatKey][itemID] = true // Fields without real field index will be located in map[NOT_AVAILABLE:NOT_AVAILABLE][rl.ID]
-	}
+
 	return
 }
 
-func (rfi *ReqFilterIndexer) cacheRemItemType() {
+func (rfi *FilterIndexer) cacheRemItemType() {
 	switch rfi.itemType {
 	case utils.ThresholdProfilePrefix:
-		cache.RemPrefixKey(utils.ThresholdStringIndex, true, utils.NonTransactional)
-		cache.RemPrefixKey(utils.ThresholdStringRevIndex, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.ThresholdFilterIndexes, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.ThresholdFilterRevIndexes, true, utils.NonTransactional)
 
 	case utils.ResourceProfilesPrefix:
-		cache.RemPrefixKey(utils.ResourceProfilesStringIndex, true, utils.NonTransactional)
-		cache.RemPrefixKey(utils.ResourceProfilesStringRevIndex, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.ResourceFilterIndexes, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.ResourceFilterRevIndexes, true, utils.NonTransactional)
 
 	case utils.StatQueueProfilePrefix:
-		cache.RemPrefixKey(utils.StatQueuesStringIndex, true, utils.NonTransactional)
-		cache.RemPrefixKey(utils.StatQueuesStringRevIndex, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.StatFilterIndexes, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.StatFilterRevIndexes, true, utils.NonTransactional)
 
 	case utils.SupplierProfilePrefix:
-		cache.RemPrefixKey(utils.SupplierProfilesStringIndex, true, utils.NonTransactional)
-		cache.RemPrefixKey(utils.SupplierProfilesStringRevIndex, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.SupplierFilterIndexes, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.SupplierFilterRevIndexes, true, utils.NonTransactional)
 
 	case utils.AttributeProfilePrefix:
-		cache.RemPrefixKey(utils.AttributeProfilesStringIndex, true, utils.NonTransactional)
-		cache.RemPrefixKey(utils.AttributeProfilesStringRevIndex, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.AttributeFilterIndexes, true, utils.NonTransactional)
+		cache.RemPrefixKey(utils.AttributeFilterRevIndexes, true, utils.NonTransactional)
 	}
 }
 
 // StoreIndexes handles storing the indexes to dataDB
-func (rfi *ReqFilterIndexer) StoreIndexes() (err error) {
+func (rfi *FilterIndexer) StoreIndexes() (err error) {
 	if err = rfi.dm.SetFilterIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
-		rfi.indexes); err != nil {
+		rfi.indexes, true, utils.NonTransactional); err != nil {
 		return
 	}
 	if err = rfi.dm.SetFilterReverseIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
-		rfi.reveseIndex); err != nil {
+		rfi.reveseIndex, true, utils.NonTransactional); err != nil {
 		return
 	}
 	rfi.cacheRemItemType()
 	return
 }
 
-//Populate the ReqFilterIndexer.reveseIndex for specifil itemID
-func (rfi *ReqFilterIndexer) loadItemReverseIndex(itemID string) (err error) {
+//Populate the FilterIndexer.reveseIndex for specifil itemID
+func (rfi *FilterIndexer) loadItemReverseIndex(filterType, itemID string) (err error) {
 	rcvReveseIdx, err := rfi.dm.GetFilterReverseIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
 		map[string]string{itemID: ""})
@@ -145,10 +160,10 @@ func (rfi *ReqFilterIndexer) loadItemReverseIndex(itemID string) (err error) {
 	return err
 }
 
-//Populate ReqFilterIndexer.indexes with specific fieldName:fieldValue , item
-func (rfi *ReqFilterIndexer) loadFldNameFldValIndex(fldName, fldVal string) error {
+//Populate FilterIndexer.indexes with specific fieldName:fieldValue , item
+func (rfi *FilterIndexer) loadFldNameFldValIndex(filterType, fldName, fldVal string) error {
 	rcvIdx, err := rfi.dm.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), filterType,
 		map[string]string{fldName: fldVal})
 	if err != nil {
 		return err
@@ -163,16 +178,16 @@ func (rfi *ReqFilterIndexer) loadFldNameFldValIndex(fldName, fldVal string) erro
 }
 
 //RemoveItemFromIndex remove Indexes for a specific itemID
-func (rfi *ReqFilterIndexer) RemoveItemFromIndex(itemID string) (err error) {
-	if err = rfi.loadItemReverseIndex(itemID); err != nil {
+func (rfi *FilterIndexer) RemoveItemFromIndex(itemID string) (err error) {
+	if err = rfi.loadItemReverseIndex(MetaString, itemID); err != nil {
 		return err
 	}
 	for key, _ := range rfi.reveseIndex[itemID] {
 		kSplt := strings.Split(key, utils.CONCATENATED_KEY_SEP)
-		if len(kSplt) != 2 {
+		if len(kSplt) != 3 {
 			return fmt.Errorf("Malformed key in db: %s", key)
 		}
-		if err = rfi.loadFldNameFldValIndex(kSplt[0], kSplt[1]); err != nil {
+		if err = rfi.loadFldNameFldValIndex(kSplt[0], kSplt[1], kSplt[2]); err != nil {
 			return err
 		}
 	}
@@ -186,12 +201,12 @@ func (rfi *ReqFilterIndexer) RemoveItemFromIndex(itemID string) (err error) {
 	rfi.reveseIndex[itemID] = make(utils.StringMap) //Force deleting in driver
 	if err = rfi.dm.SetFilterIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
-		rfi.indexes); err != nil {
+		rfi.indexes, false, utils.NonTransactional); err != nil {
 		return
 	}
 	if err = rfi.dm.SetFilterReverseIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
-		rfi.reveseIndex); err != nil {
+		rfi.reveseIndex, false, utils.NonTransactional); err != nil {
 		return
 	}
 	return
@@ -202,20 +217,20 @@ func GetDBIndexKey(itemType, dbKeySuffix string, reverse bool) (dbKey string) {
 	var idxPrefix, rIdxPrefix string
 	switch itemType {
 	case utils.ThresholdProfilePrefix:
-		idxPrefix = utils.ThresholdStringIndex
-		rIdxPrefix = utils.ThresholdStringRevIndex
+		idxPrefix = utils.ThresholdFilterIndexes
+		rIdxPrefix = utils.ThresholdFilterRevIndexes
 	case utils.ResourceProfilesPrefix:
-		idxPrefix = utils.ResourceProfilesStringIndex
-		rIdxPrefix = utils.ResourceProfilesStringRevIndex
+		idxPrefix = utils.ResourceFilterIndexes
+		rIdxPrefix = utils.ResourceFilterRevIndexes
 	case utils.StatQueueProfilePrefix:
-		idxPrefix = utils.StatQueuesStringIndex
-		rIdxPrefix = utils.StatQueuesStringRevIndex
+		idxPrefix = utils.StatFilterIndexes
+		rIdxPrefix = utils.StatFilterRevIndexes
 	case utils.SupplierProfilePrefix:
-		idxPrefix = utils.SupplierProfilesStringIndex
-		rIdxPrefix = utils.SupplierProfilesStringRevIndex
+		idxPrefix = utils.SupplierFilterIndexes
+		rIdxPrefix = utils.SupplierFilterRevIndexes
 	case utils.AttributeProfilePrefix:
-		idxPrefix = utils.AttributeProfilesStringIndex
-		rIdxPrefix = utils.AttributeProfilesStringRevIndex
+		idxPrefix = utils.AttributeFilterIndexes
+		rIdxPrefix = utils.AttributeFilterRevIndexes
 	}
 	if reverse {
 		return rIdxPrefix + dbKeySuffix

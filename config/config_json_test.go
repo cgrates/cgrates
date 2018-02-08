@@ -221,7 +221,7 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 		Max_open_conns:    utils.IntPointer(100),
 		Max_idle_conns:    utils.IntPointer(10),
 		Conn_max_lifetime: utils.IntPointer(0),
-		Cdrs_indexes:      utils.StringSlicePointer([]string{}),
+		Cdrs_indexes:      &[]string{},
 	}
 	if cfg, err := dfCgrJsonCfg.DbJsonCfg(STORDB_JSN); err != nil {
 		t.Error(err)
@@ -266,10 +266,10 @@ func TestDfSchedulerJsonCfg(t *testing.T) {
 
 func TestDfCdrsJsonCfg(t *testing.T) {
 	eCfg := &CdrsJsonCfg{
-		Enabled:         utils.BoolPointer(false),
-		Extra_fields:    utils.StringSlicePointer([]string{}),
-		Store_cdrs:      utils.BoolPointer(true),
-		Sm_cost_retries: utils.IntPointer(5),
+		Enabled:               utils.BoolPointer(false),
+		Extra_fields:          &[]string{},
+		Store_cdrs:            utils.BoolPointer(true),
+		Sessions_cost_retries: utils.IntPointer(5),
 		Rals_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer("*internal"),
@@ -503,7 +503,8 @@ func TestSmgJsonCfg(t *testing.T) {
 		Min_call_duration:         utils.StringPointer("0s"),
 		Max_call_duration:         utils.StringPointer("3h"),
 		Session_ttl:               utils.StringPointer("0s"),
-		Session_indexes:           utils.StringSlicePointer([]string{}),
+		Session_indexes:           &[]string{},
+		Client_protocol:           utils.Float64Pointer(1.0),
 	}
 	if cfg, err := dfCgrJsonCfg.SessionSJsonCfg(); err != nil {
 		t.Error(err)
@@ -521,7 +522,7 @@ func TestFsAgentJsonCfg(t *testing.T) {
 			}},
 		Subscribe_park:         utils.BoolPointer(true),
 		Create_cdr:             utils.BoolPointer(false),
-		Extra_fields:           utils.StringSlicePointer([]string{}),
+		Extra_fields:           &[]string{},
 		Empty_balance_context:  utils.StringPointer(""),
 		Empty_balance_ann_file: utils.StringPointer(""),
 		Channel_sync_interval:  utils.StringPointer("5m"),
@@ -540,22 +541,14 @@ func TestFsAgentJsonCfg(t *testing.T) {
 	}
 }
 
-func TestSmKamJsonCfg(t *testing.T) {
-	eCfg := &SmKamJsonCfg{
+func TestKamAgentJsonCfg(t *testing.T) {
+	eCfg := &KamAgentJsonCfg{
 		Enabled: utils.BoolPointer(false),
-		Rals_conns: &[]*HaPoolJsonCfg{
+		Sessions_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
-		Cdrs_conns: &[]*HaPoolJsonCfg{
-			&HaPoolJsonCfg{
-				Address: utils.StringPointer(utils.MetaInternal),
-			}},
-		Resources_conns:   &[]*HaPoolJsonCfg{},
-		Create_cdr:        utils.BoolPointer(false),
-		Debit_interval:    utils.StringPointer("10s"),
-		Min_call_duration: utils.StringPointer("0s"),
-		Max_call_duration: utils.StringPointer("3h"),
+		Create_cdr: utils.BoolPointer(false),
 		Evapi_conns: &[]*KamConnJsonCfg{
 			&KamConnJsonCfg{
 				Address:    utils.StringPointer("127.0.0.1:8448"),
@@ -563,37 +556,11 @@ func TestSmKamJsonCfg(t *testing.T) {
 			},
 		},
 	}
-	if cfg, err := dfCgrJsonCfg.SmKamJsonCfg(); err != nil {
+	if cfg, err := dfCgrJsonCfg.KamAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expecting: %s, received: %s: ",
 			utils.ToJSON(eCfg), utils.ToJSON(cfg))
-	}
-}
-
-func TestSmOsipsJsonCfg(t *testing.T) {
-	eCfg := &SmOsipsJsonCfg{
-		Enabled:    utils.BoolPointer(false),
-		Listen_udp: utils.StringPointer("127.0.0.1:2020"),
-		Rals_conns: &[]*HaPoolJsonCfg{
-			&HaPoolJsonCfg{
-				Address: utils.StringPointer(utils.MetaInternal),
-			}},
-		Cdrs_conns: &[]*HaPoolJsonCfg{
-			&HaPoolJsonCfg{
-				Address: utils.StringPointer(utils.MetaInternal),
-			}},
-		Create_cdr:                utils.BoolPointer(false),
-		Debit_interval:            utils.StringPointer("10s"),
-		Min_call_duration:         utils.StringPointer("0s"),
-		Max_call_duration:         utils.StringPointer("3h"),
-		Events_subscribe_interval: utils.StringPointer("60s"),
-		Mi_addr:                   utils.StringPointer("127.0.0.1:8020"),
-	}
-	if cfg, err := dfCgrJsonCfg.SmOsipsJsonCfg(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg)
 	}
 }
 
@@ -704,7 +671,7 @@ func TestDfAliasesServJsonCfg(t *testing.T) {
 func TestDfUserServJsonCfg(t *testing.T) {
 	eCfg := &UserServJsonCfg{
 		Enabled: utils.BoolPointer(false),
-		Indexes: utils.StringSlicePointer([]string{}),
+		Indexes: &[]string{},
 	}
 	if cfg, err := dfCgrJsonCfg.UserServJsonCfg(); err != nil {
 		t.Error(err)
@@ -715,8 +682,9 @@ func TestDfUserServJsonCfg(t *testing.T) {
 
 func TestDfAttributeServJsonCfg(t *testing.T) {
 	eCfg := &AttributeSJsonCfg{
-		Enabled:        utils.BoolPointer(false),
-		Indexed_fields: utils.StringSlicePointer([]string{}),
+		Enabled:               utils.BoolPointer(false),
+		String_indexed_fields: nil,
+		Prefix_indexed_fields: &[]string{},
 	}
 	if cfg, err := dfCgrJsonCfg.AttributeServJsonCfg(); err != nil {
 		t.Error(err)
@@ -738,10 +706,11 @@ func TestDfFilterSJsonCfg(t *testing.T) {
 
 func TestDfResourceLimiterSJsonCfg(t *testing.T) {
 	eCfg := &ResourceSJsonCfg{
-		Enabled:          utils.BoolPointer(false),
-		Thresholds_conns: &[]*HaPoolJsonCfg{},
-		Store_interval:   utils.StringPointer(""),
-		Indexed_fields:   utils.StringSlicePointer([]string{}),
+		Enabled:               utils.BoolPointer(false),
+		Thresholds_conns:      &[]*HaPoolJsonCfg{},
+		Store_interval:        utils.StringPointer(""),
+		String_indexed_fields: nil,
+		Prefix_indexed_fields: &[]string{},
 	}
 	if cfg, err := dfCgrJsonCfg.ResourceSJsonCfg(); err != nil {
 		t.Error(err)
@@ -752,10 +721,11 @@ func TestDfResourceLimiterSJsonCfg(t *testing.T) {
 
 func TestDfStatServiceJsonCfg(t *testing.T) {
 	eCfg := &StatServJsonCfg{
-		Enabled:          utils.BoolPointer(false),
-		Store_interval:   utils.StringPointer(""),
-		Thresholds_conns: &[]*HaPoolJsonCfg{},
-		Indexed_fields:   utils.StringSlicePointer([]string{}),
+		Enabled:               utils.BoolPointer(false),
+		Store_interval:        utils.StringPointer(""),
+		Thresholds_conns:      &[]*HaPoolJsonCfg{},
+		String_indexed_fields: nil,
+		Prefix_indexed_fields: &[]string{},
 	}
 	if cfg, err := dfCgrJsonCfg.StatSJsonCfg(); err != nil {
 		t.Error(err)
@@ -766,21 +736,23 @@ func TestDfStatServiceJsonCfg(t *testing.T) {
 
 func TestDfThresholdSJsonCfg(t *testing.T) {
 	eCfg := &ThresholdSJsonCfg{
-		Enabled:        utils.BoolPointer(false),
-		Store_interval: utils.StringPointer(""),
-		Indexed_fields: utils.StringSlicePointer([]string{}),
+		Enabled:               utils.BoolPointer(false),
+		Store_interval:        utils.StringPointer(""),
+		String_indexed_fields: nil,
+		Prefix_indexed_fields: &[]string{},
 	}
 	if cfg, err := dfCgrJsonCfg.ThresholdSJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Errorf("expecting: %+v, received: %+v", eCfg, cfg)
+		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }
 
 func TestDfSupplierSJsonCfg(t *testing.T) {
 	eCfg := &SupplierSJsonCfg{
-		Enabled:        utils.BoolPointer(false),
-		Indexed_fields: utils.StringSlicePointer([]string{}),
+		Enabled:               utils.BoolPointer(false),
+		String_indexed_fields: nil,
+		Prefix_indexed_fields: &[]string{},
 		Rals_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer("*internal"),

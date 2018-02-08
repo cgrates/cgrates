@@ -28,8 +28,8 @@ import (
 )
 
 func TestV1StatsAsStats(t *testing.T) {
-	tim := time.Date(0001, time.January, 1, 2, 0, 0, 0, time.UTC).Local()
-	var filters []*engine.RequestFilter
+	tim := time.Date(0001, time.January, 1, 2, 0, 0, 0, time.UTC)
+	var filters []*engine.FilterRule
 	v1Sts := &v1Stat{
 		Id:              "test",                         // Config id, unique per config instance
 		QueueLength:     10,                             // Number of items in the stats buffer
@@ -74,14 +74,14 @@ func TestV1StatsAsStats(t *testing.T) {
 		}},
 	}
 
-	x, _ := engine.NewRequestFilter(engine.MetaGreaterOrEqual, "SetupInterval", []string{v1Sts.SetupInterval[0].String()})
+	x, _ := engine.NewFilterRule(engine.MetaGreaterOrEqual, "SetupInterval", []string{v1Sts.SetupInterval[0].String()})
 	filters = append(filters, x)
-	x, _ = engine.NewRequestFilter(engine.MetaGreaterOrEqual, "UsageInterval", []string{v1Sts.UsageInterval[0].String()})
+	x, _ = engine.NewFilterRule(engine.MetaGreaterOrEqual, "UsageInterval", []string{v1Sts.UsageInterval[0].String()})
 	filters = append(filters, x)
-	x, _ = engine.NewRequestFilter(engine.MetaGreaterOrEqual, "PddInterval", []string{v1Sts.PddInterval[0].String()})
+	x, _ = engine.NewFilterRule(engine.MetaGreaterOrEqual, "PddInterval", []string{v1Sts.PddInterval[0].String()})
 	filters = append(filters, x)
 
-	filter := &engine.Filter{Tenant: config.CgrConfig().DefaultTenant, ID: v1Sts.Id, RequestFilters: filters}
+	filter := &engine.Filter{Tenant: config.CgrConfig().DefaultTenant, ID: v1Sts.Id, Rules: filters}
 
 	sqp := &engine.StatQueueProfile{
 		Tenant:      "cgrates.org",
@@ -94,11 +94,11 @@ func TestV1StatsAsStats(t *testing.T) {
 			&utils.MetricWithParams{MetricID: "*acd", Parameters: ""},
 			&utils.MetricWithParams{MetricID: "*acc", Parameters: ""},
 		},
-		Blocker:    false,
-		Thresholds: []string{"TestB"},
-		Stored:     true,
-		Weight:     float64(0),
-		MinItems:   0,
+		Blocker:      false,
+		ThresholdIDs: []string{"TestB"},
+		Stored:       true,
+		Weight:       float64(0),
+		MinItems:     0,
 	}
 	fltr, _, newsqp, err := v1Sts.AsStatQP()
 	if err != nil {
@@ -122,8 +122,8 @@ func TestV1StatsAsStats(t *testing.T) {
 	if !reflect.DeepEqual(sqp.Metrics, newsqp.Metrics) {
 		t.Errorf("Expecting: %+v, received: %+v", sqp.Metrics, newsqp.Metrics)
 	}
-	if !reflect.DeepEqual(sqp.Thresholds, newsqp.Thresholds) {
-		t.Errorf("Expecting: %+v, received: %+v", sqp.Thresholds, newsqp.Thresholds)
+	if !reflect.DeepEqual(sqp.ThresholdIDs, newsqp.ThresholdIDs) {
+		t.Errorf("Expecting: %+v, received: %+v", sqp.ThresholdIDs, newsqp.ThresholdIDs)
 	}
 	if !reflect.DeepEqual(sqp.Blocker, newsqp.Blocker) {
 		t.Errorf("Expecting: %+v, received: %+v", sqp.Blocker, newsqp.Blocker)

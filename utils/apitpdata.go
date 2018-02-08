@@ -1268,7 +1268,7 @@ type TPResource struct {
 	Blocker            bool // blocker flag to stop processing on filters matched
 	Stored             bool
 	Weight             float64  // Weight to sort the ResourceLimits
-	Thresholds         []string // Thresholds to check after changing Limit
+	ThresholdIDs       []string // Thresholds to check after changing Limit
 }
 
 // TPActivationInterval represents an activation interval for an item
@@ -1288,6 +1288,10 @@ type ArgRSv1ResourceUsage struct {
 	Units   float64
 }
 
+func (args *ArgRSv1ResourceUsage) TenantID() string {
+	return ConcatenatedKey(args.CGREvent.Tenant, args.UsageID)
+}
+
 type ArgsComputeFilterIndexes struct {
 	Tenant       string
 	AttributeIDs *[]string
@@ -1295,10 +1299,6 @@ type ArgsComputeFilterIndexes struct {
 	StatIDs      *[]string
 	SupplierIDs  *[]string
 	ThresholdIDs *[]string
-}
-
-func (args *ArgRSv1ResourceUsage) TenantID() string {
-	return ConcatenatedKey(args.CGREvent.Tenant, args.UsageID)
 }
 
 // AsActivationTime converts TPActivationInterval into ActivationInterval
@@ -1342,7 +1342,7 @@ type TPStats struct {
 	Stored             bool
 	Weight             float64
 	MinItems           int
-	Thresholds         []string
+	ThresholdIDs       []string
 }
 
 type MetricWithParams struct {
@@ -1387,6 +1387,7 @@ type TPSupplier struct {
 	ResourceIDs        []string // queried in some strategies
 	StatIDs            []string // queried in some strategies
 	Weight             float64
+	Blocker            bool
 	SupplierParameters string
 }
 
@@ -1399,7 +1400,6 @@ type TPSupplierProfile struct {
 	Sorting            string
 	SortingParams      []string
 	Suppliers          []*TPSupplier
-	Blocker            bool
 	Weight             float64
 }
 

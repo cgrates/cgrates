@@ -44,12 +44,10 @@ const (
 	CDRC_JSN           = "cdrc"
 	SessionSJson       = "sessions"
 	FreeSWITCHAgentJSN = "freeswitch_agent"
-	SMKAM_JSN          = "sm_kamailio"
-	SMOSIPS_JSN        = "sm_opensips"
+	KamailioAgentJSN   = "kamailio_agent"
 	AsteriskAgentJSN   = "asterisk_agent"
 	SM_JSN             = "session_manager"
 	FS_JSN             = "freeswitch"
-	KAMAILIO_JSN       = "kamailio"
 	OSIPS_JSN          = "opensips"
 	DA_JSN             = "diameter_agent"
 	RA_JSN             = "radius_agent"
@@ -258,24 +256,12 @@ func (self CgrJsonCfg) FreeswitchAgentJsonCfg() (*FreeswitchAgentJsonCfg, error)
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) SmKamJsonCfg() (*SmKamJsonCfg, error) {
-	rawCfg, hasKey := self[SMKAM_JSN]
+func (self CgrJsonCfg) KamAgentJsonCfg() (*KamAgentJsonCfg, error) {
+	rawCfg, hasKey := self[KamailioAgentJSN]
 	if !hasKey {
 		return nil, nil
 	}
-	cfg := new(SmKamJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (self CgrJsonCfg) SmOsipsJsonCfg() (*SmOsipsJsonCfg, error) {
-	rawCfg, hasKey := self[SMOSIPS_JSN]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(SmOsipsJsonCfg)
+	cfg := new(KamAgentJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

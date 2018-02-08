@@ -55,7 +55,7 @@ func TestCGREventFieldAsTime(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
 		Event: map[string]interface{}{
-			AnswerTime: time.Now().Local(),
+			AnswerTime: time.Now(),
 		},
 	}
 	seErr := &CGREvent{
@@ -123,7 +123,7 @@ func TestCGREventFieldAsFloat64(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
 		Event: map[string]interface{}{
-			AnswerTime:         time.Now().Local(),
+			AnswerTime:         time.Now(),
 			"supplierprofile1": "Supplier",
 			"UsageInterval":    "54.2",
 			"PddInterval":      "1s",
@@ -171,7 +171,7 @@ func TestCGREventClone(t *testing.T) {
 		Context: &contest,
 		Time:    &now,
 		Event: map[string]interface{}{
-			AnswerTime:         time.Now().Local(),
+			AnswerTime:         time.Now(),
 			"supplierprofile1": "Supplier",
 			"UsageInterval":    "54.2",
 			"PddInterval":      "1s",

@@ -42,6 +42,7 @@ const (
 )
 
 var (
+	DBDefaults        DbDefaults
 	cgrCfg            *CGRConfig     // will be shared
 	dfltFsConnConfig  *FsConnConfig  // Default FreeSWITCH Connection configuration, built out of json default configuration
 	dfltKamConnConfig *KamConnConfig // Default Kamailio Connection configuration
@@ -49,8 +50,72 @@ var (
 	dfltAstConnCfg    *AsteriskConnCfg
 )
 
+func NewDbDefaults() DbDefaults {
+	deflt := DbDefaults{
+		utils.MYSQL: map[string]string{
+			"DbName": "cgrates",
+			"DbPort": "3306",
+			"DbPass": "CGRateS.org",
+		},
+		utils.POSTGRES: map[string]string{
+			"DbName": "cgrates",
+			"DbPort": "5432",
+			"DbPass": "CGRateS.org",
+		},
+		utils.MONGO: map[string]string{
+			"DbName": "cgrates",
+			"DbPort": "27017",
+			"DbPass": "",
+		},
+		utils.REDIS: map[string]string{
+			"DbName": "10",
+			"DbPort": "6379",
+			"DbPass": "",
+		},
+	}
+	return deflt
+}
+
+type DbDefaults map[string]map[string]string
+
+func (dbDflt DbDefaults) DBName(dbType string, flagInput string) string {
+	if flagInput != utils.MetaDynamic {
+		return flagInput
+	}
+	return dbDflt[dbType]["DbName"]
+}
+
+func (DbDefaults) DBUser(dbType string, flagInput string) string {
+	if flagInput != utils.MetaDynamic {
+		return flagInput
+	}
+	return utils.CGRATES
+}
+
+func (DbDefaults) DBHost(dbType string, flagInput string) string {
+	if flagInput != utils.MetaDynamic {
+		return flagInput
+	}
+	return utils.LOCALHOST
+}
+
+func (self DbDefaults) DBPort(dbType string, flagInput string) string {
+	if flagInput != utils.MetaDynamic {
+		return flagInput
+	}
+	return self[dbType]["DbPort"]
+}
+
+func (self DbDefaults) DBPass(dbType string, flagInput string) string {
+	if flagInput != utils.MetaDynamic {
+		return flagInput
+	}
+	return self[dbType]["DbPass"]
+}
+
 func init() {
 	cgrCfg, _ = NewDefaultCGRConfig()
+	DBDefaults = NewDbDefaults()
 }
 
 // Used to retrieve system configuration from other packages
@@ -66,12 +131,12 @@ func SetCgrConfig(cfg *CGRConfig) {
 func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg := new(CGRConfig)
 	cfg.RALsMaxComputedUsage = make(map[string]time.Duration)
-	cfg.NodeID = utils.GenUUID()
+	cfg.NodeID = utils.UUIDSha1Prefix()
 	cfg.DataFolderPath = "/usr/share/cgrates/"
 	cfg.sessionSCfg = new(SessionSCfg)
 	cfg.cacheConfig = make(CacheConfig)
 	cfg.fsAgentCfg = new(FsAgentConfig)
-	cfg.SmKamConfig = new(SmKamConfig)
+	cfg.kamAgentCfg = new(KamAgentCfg)
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
 	cfg.asteriskAgentCfg = new(AsteriskAgentCfg)
 	cfg.diameterAgentCfg = new(DiameterAgentCfg)
@@ -99,7 +164,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.dfltCdreProfile = cfg.CdreProfiles[utils.META_DEFAULT].Clone() // So default will stay unique, will have nil pointer in case of no defaults loaded which is an extra check
 	cfg.dfltCdrcProfile = cfg.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0].Clone()
 	dfltFsConnConfig = cfg.fsAgentCfg.EventSocketConns[0] // We leave it crashing here on purpose if no Connection defaults defined
-	dfltKamConnConfig = cfg.SmKamConfig.EvapiConns[0]
+	dfltKamConnConfig = cfg.kamAgentCfg.EvapiConns[0]
 	dfltAstConnCfg = cfg.asteriskAgentCfg.AsteriskConns[0]
 	if err := cfg.checkConfigSanity(); err != nil {
 		return nil, err
@@ -260,8 +325,8 @@ type CGRConfig struct {
 	CdreProfiles             map[string]*CdreConfig
 	CdrcProfiles             map[string][]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath][]{Configs}
 	sessionSCfg              *SessionSCfg
-	fsAgentCfg               *FsAgentConfig           // SMFreeSWITCH configuration
-	SmKamConfig              *SmKamConfig             // SM-Kamailio Configuration
+	fsAgentCfg               *FsAgentConfig           // FreeSWITCHAgent configuration
+	kamAgentCfg              *KamAgentCfg             // KamailioAgent Configuration
 	SmOsipsConfig            *SmOsipsConfig           // SMOpenSIPS Configuration
 	asteriskAgentCfg         *AsteriskAgentCfg        // SMAsterisk Configuration
 	diameterAgentCfg         *DiameterAgentCfg        // DiameterAgent configuration
@@ -407,34 +472,34 @@ func (self *CGRConfig) checkConfigSanity() error {
 	// SMGeneric checks
 	if self.sessionSCfg.Enabled {
 		if len(self.sessionSCfg.RALsConns) == 0 {
-			return errors.New("<SMGeneric> RALs definition is mandatory!")
+			return errors.New("<SessionS> RALs definition is mandatory!")
 		}
 		for _, smgRALsConn := range self.sessionSCfg.RALsConns {
 			if smgRALsConn.Address == utils.MetaInternal && !self.RALsEnabled {
-				return errors.New("<SMGeneric> RALs not enabled but requested by SMGeneric component.")
+				return errors.New("<SessionS> RALs not enabled but requested by SMGeneric component.")
 			}
 		}
 		for _, conn := range self.sessionSCfg.ResSConns {
 			if conn.Address == utils.MetaInternal && !self.resourceSCfg.Enabled {
-				return errors.New("<SMGeneric> ResourceS not enabled but requested by SMGeneric component.")
+				return errors.New("<SessionS> ResourceS not enabled but requested by SMGeneric component.")
 			}
 		}
 		for _, conn := range self.sessionSCfg.SupplSConns {
 			if conn.Address == utils.MetaInternal && !self.supplierSCfg.Enabled {
-				return errors.New("<SMGeneric> SupplierS not enabled but requested by SMGeneric component.")
+				return errors.New("<SessionS> SupplierS not enabled but requested by SMGeneric component.")
 			}
 		}
 		for _, conn := range self.sessionSCfg.AttrSConns {
 			if conn.Address == utils.MetaInternal && !self.attributeSCfg.Enabled {
-				return errors.New("<SMGeneric> AttributeS not enabled but requested by SMGeneric component.")
+				return errors.New("<SessionS> AttributeS not enabled but requested by SMGeneric component.")
 			}
 		}
 		if len(self.sessionSCfg.CDRsConns) == 0 {
-			return errors.New("<SMGeneric> CDRs definition is mandatory!")
+			return errors.New("<SessionS> CDRs definition is mandatory!")
 		}
 		for _, smgCDRSConn := range self.sessionSCfg.CDRsConns {
 			if smgCDRSConn.Address == utils.MetaInternal && !self.CDRSEnabled {
-				return errors.New("<SMGeneric> CDRS not enabled but referenced by SMGeneric component")
+				return errors.New("<SessionS> CDRS not enabled but referenced by SMGeneric component")
 			}
 		}
 	}
@@ -442,35 +507,23 @@ func (self *CGRConfig) checkConfigSanity() error {
 	if self.fsAgentCfg.Enabled {
 		for _, connCfg := range self.fsAgentCfg.SessionSConns {
 			if connCfg.Address != utils.MetaInternal {
-				return errors.New("Only <*internal> connectivity allowed in in FreeSWITCHAgent towards SessionS for now")
+				return errors.New("only <*internal> connectivity allowed in in <freeswitch_agent> towards <sessions> for now")
 			}
 			if connCfg.Address == utils.MetaInternal &&
 				!self.sessionSCfg.Enabled {
-				return errors.New("SMGeneric not enabled but referenced by SM-FreeSWITCH")
+				return errors.New("<sessions> not enabled but referenced by <freeswitch_agent>")
 			}
 		}
 	}
 	// SM-Kamailio checks
-	if self.SmKamConfig.Enabled {
-		if len(self.SmKamConfig.RALsConns) == 0 {
-			return errors.New("Rater definition is mandatory!")
-		}
-		for _, smKamRaterConn := range self.SmKamConfig.RALsConns {
-			if smKamRaterConn.Address == utils.MetaInternal && !self.RALsEnabled {
-				return errors.New("Rater not enabled but requested by SM-Kamailio component")
+	if self.kamAgentCfg.Enabled {
+		for _, connCfg := range self.kamAgentCfg.SessionSConns {
+			if connCfg.Address != utils.MetaInternal {
+				return errors.New("only <*internal> connectivity allowed in in <kamailio_agent> towards <sessions> for now")
 			}
-		}
-		if len(self.SmKamConfig.CDRsConns) == 0 {
-			return errors.New("Cdrs definition is mandatory!")
-		}
-		for _, smKamCDRSConn := range self.SmKamConfig.CDRsConns {
-			if smKamCDRSConn.Address == utils.MetaInternal && !self.CDRSEnabled {
-				return errors.New("CDRS not enabled but referenced by SM-Kamailio component")
-			}
-		}
-		for _, smKamRLsConn := range self.SmKamConfig.RLsConns {
-			if smKamRLsConn.Address == utils.MetaInternal && !self.resourceSCfg.Enabled {
-				return errors.New("RLs not enabled but requested by SM-Kamailio component")
+			if connCfg.Address == utils.MetaInternal &&
+				!self.sessionSCfg.Enabled {
+				return errors.New("<sessions> not enabled but referenced by <kamailio_agent>")
 			}
 		}
 	}
@@ -650,12 +703,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return err
 	}
 
-	jsnSmKamCfg, err := jsnCfg.SmKamJsonCfg()
-	if err != nil {
-		return err
-	}
-
-	jsnSmOsipsCfg, err := jsnCfg.SmOsipsJsonCfg()
+	jsnKamAgentCfg, err := jsnCfg.KamAgentJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -978,8 +1026,8 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		if jsnCdrsCfg.Store_cdrs != nil {
 			self.CDRSStoreCdrs = *jsnCdrsCfg.Store_cdrs
 		}
-		if jsnCdrsCfg.Sm_cost_retries != nil {
-			self.CDRSSMCostRetries = *jsnCdrsCfg.Sm_cost_retries
+		if jsnCdrsCfg.Sessions_cost_retries != nil {
+			self.CDRSSMCostRetries = *jsnCdrsCfg.Sessions_cost_retries
 		}
 		if jsnCdrsCfg.Rals_conns != nil {
 			self.CDRSRaterConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Rals_conns))
@@ -1127,14 +1175,8 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 	}
 
-	if jsnSmKamCfg != nil {
-		if err := self.SmKamConfig.loadFromJsonCfg(jsnSmKamCfg); err != nil {
-			return err
-		}
-	}
-
-	if jsnSmOsipsCfg != nil {
-		if err := self.SmOsipsConfig.loadFromJsonCfg(jsnSmOsipsCfg); err != nil {
+	if jsnKamAgentCfg != nil {
+		if err := self.kamAgentCfg.loadFromJsonCfg(jsnKamAgentCfg); err != nil {
 			return err
 		}
 	}
@@ -1295,6 +1337,10 @@ func (cfg *CGRConfig) SessionSCfg() *SessionSCfg {
 
 func (self *CGRConfig) FsAgentCfg() *FsAgentConfig {
 	return self.fsAgentCfg
+}
+
+func (self *CGRConfig) KamAgentCfg() *KamAgentCfg {
+	return self.kamAgentCfg
 }
 
 // ToDo: fix locking here

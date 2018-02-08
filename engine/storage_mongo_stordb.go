@@ -20,12 +20,13 @@ package engine
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/utils"
-	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/mgo"
+	"github.com/cgrates/mgo/bson"
 )
 
 func (ms *MongoStorage) GetTpIds(colName string) ([]string, error) {
@@ -892,13 +893,13 @@ func (ms *MongoStorage) SetSMCost(smc *SMCost) error {
 	if smc.CostDetails == nil {
 		return nil
 	}
-	session, col := ms.conn(utils.SMCostsTBL)
+	session, col := ms.conn(utils.SessionsCostsTBL)
 	defer session.Close()
 	return col.Insert(smc)
 }
 
 func (ms *MongoStorage) RemoveSMCost(smc *SMCost) error {
-	session, col := ms.conn(utils.SMCostsTBL)
+	session, col := ms.conn(utils.SessionsCostsTBL)
 	defer session.Close()
 	tx := col.Bulk()
 	tx.Remove(bson.M{"cgrid": smc.CGRID, "runid": smc.RunID}, smc)
@@ -921,7 +922,7 @@ func (ms *MongoStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix stri
 		filter[OriginIDLow] = bson.M{"$regex": bson.RegEx{Pattern: fmt.Sprintf("^%s", originIDPrefix)}}
 	}
 	// Execute query
-	session, col := ms.conn(utils.SMCostsTBL)
+	session, col := ms.conn(utils.SessionsCostsTBL)
 	defer session.Close()
 	iter := col.Find(filter).Iter()
 	var smCost SMCost

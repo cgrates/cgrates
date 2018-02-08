@@ -107,7 +107,7 @@ func (ce *CommandExecuter) LocalExecute() string {
 }
 
 func ToJSON(line string) (jsn []byte) {
-	if !strings.Contains(line, "=") {
+	if !strings.Contains(line, "=") && line != "" {
 		line = fmt.Sprintf("Item=\"%s\"", line)
 	}
 	jsn = append(jsn, '{')

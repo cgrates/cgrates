@@ -142,11 +142,11 @@ func testTPSplPrfSetTPSplPrf(t *testing.T) {
 				ResourceIDs:        []string{"ResGroup1"},
 				StatIDs:            []string{"Stat1"},
 				Weight:             10,
+				Blocker:            false,
 				SupplierParameters: "SortingParam1",
 			},
 		},
-		Blocker: false,
-		Weight:  20,
+		Weight: 20,
 	}
 	var result string
 	if err := tpSplPrfRPC.Call("ApierV1.SetTPSupplierProfile",
@@ -189,6 +189,7 @@ func testTPSplPrfUpdateTPSplPrf(t *testing.T) {
 			ResourceIDs:        []string{"ResGroup1"},
 			StatIDs:            []string{"Stat1"},
 			Weight:             10,
+			Blocker:            true,
 			SupplierParameters: "SortingParam1",
 		},
 		&utils.TPSupplier{
@@ -199,6 +200,7 @@ func testTPSplPrfUpdateTPSplPrf(t *testing.T) {
 			ResourceIDs:        []string{"ResGroup1"},
 			StatIDs:            []string{"Stat1"},
 			Weight:             20,
+			Blocker:            false,
 			SupplierParameters: "SortingParam2",
 		},
 	}
@@ -222,6 +224,7 @@ func testTPSplPrfGetTPSplPrfAfterUpdate(t *testing.T) {
 			ResourceIDs:        []string{"ResGroup1"},
 			StatIDs:            []string{"Stat1"},
 			Weight:             20,
+			Blocker:            false,
 			SupplierParameters: "SortingParam2",
 		},
 		&utils.TPSupplier{
@@ -232,6 +235,7 @@ func testTPSplPrfGetTPSplPrfAfterUpdate(t *testing.T) {
 			ResourceIDs:        []string{"ResGroup1"},
 			StatIDs:            []string{"Stat1"},
 			Weight:             10,
+			Blocker:            true,
 			SupplierParameters: "SortingParam1",
 		},
 	}

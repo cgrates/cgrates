@@ -50,6 +50,7 @@ var sTestsITMigrator = []func(t *testing.T){
 	testMigratorActions,
 	testMigratorSharedGroups,
 	testMigratorStats,
+	testMigratorSessionsCosts,
 	testFlush,
 	testMigratorAlias,
 	//FIXME testMigratorReverseAlias,
@@ -65,6 +66,7 @@ var sTestsITMigrator = []func(t *testing.T){
 	testMigratorSubscribers,
 	testMigratorTimings,
 	testMigratorThreshold,
+	testMigratorAttributeProfile,
 	//TPS
 	testMigratorTPRatingProfile,
 	testMigratorTPSuppliers,
@@ -301,15 +303,15 @@ func testFlush(t *testing.T) {
 }
 
 func testMigratorAccounts(t *testing.T) {
-	v1d := &v1Balance{Value: 100000, Weight: 10, DestinationIds: "NAT", ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}
-	v1b := &v1Balance{Value: 100000, Weight: 10, DestinationIds: "NAT", ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}
-	v1Acc := &v1Account{Id: "*OUT:CUSTOMER_1:rif", BalanceMap: map[string]v1BalanceChain{utils.DATA: v1BalanceChain{v1d}, utils.VOICE: v1BalanceChain{v1b}, utils.MONETARY: v1BalanceChain{&v1Balance{Value: 21, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}}}
+	v1d := &v1Balance{Value: 100000, Weight: 10, DestinationIds: "NAT", ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}
+	v1b := &v1Balance{Value: 100000, Weight: 10, DestinationIds: "NAT", ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}
+	v1Acc := &v1Account{Id: "*OUT:CUSTOMER_1:rif", BalanceMap: map[string]v1BalanceChain{utils.DATA: v1BalanceChain{v1d}, utils.VOICE: v1BalanceChain{v1b}, utils.MONETARY: v1BalanceChain{&v1Balance{Value: 21, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}}}
 
-	v2d := &engine.Balance{Uuid: "", ID: "", Value: 100000, Directions: utils.StringMap{"*OUT": true}, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), Weight: 10, DestinationIDs: utils.StringMap{"NAT": true},
+	v2d := &engine.Balance{Uuid: "", ID: "", Value: 100000, Directions: utils.StringMap{"*OUT": true}, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), Weight: 10, DestinationIDs: utils.StringMap{"NAT": true},
 		RatingSubject: "", Categories: utils.NewStringMap(), SharedGroups: utils.NewStringMap(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}, TimingIDs: utils.NewStringMap(""), Factor: engine.ValueFactor{}}
-	v2b := &engine.Balance{Uuid: "", ID: "", Value: 0.0001, Directions: utils.StringMap{"*OUT": true}, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), Weight: 10, DestinationIDs: utils.StringMap{"NAT": true},
+	v2b := &engine.Balance{Uuid: "", ID: "", Value: 0.0001, Directions: utils.StringMap{"*OUT": true}, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), Weight: 10, DestinationIDs: utils.StringMap{"NAT": true},
 		RatingSubject: "", Categories: utils.NewStringMap(), SharedGroups: utils.NewStringMap(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}, TimingIDs: utils.NewStringMap(""), Factor: engine.ValueFactor{}}
-	m2 := &engine.Balance{Uuid: "", ID: "", Value: 21, Directions: utils.StringMap{"*OUT": true}, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(), DestinationIDs: utils.NewStringMap(""), RatingSubject: "",
+	m2 := &engine.Balance{Uuid: "", ID: "", Value: 21, Directions: utils.StringMap{"*OUT": true}, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), DestinationIDs: utils.NewStringMap(""), RatingSubject: "",
 		Categories: utils.NewStringMap(), SharedGroups: utils.NewStringMap(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}, TimingIDs: utils.NewStringMap(""), Factor: engine.ValueFactor{}}
 	testAccount := &engine.Account{ID: "CUSTOMER_1:rif", BalanceMap: map[string]engine.Balances{utils.DATA: engine.Balances{v2d}, utils.VOICE: engine.Balances{v2b}, utils.MONETARY: engine.Balances{m2}}, UnitCounters: engine.UnitCounters{}, ActionTriggers: engine.ActionTriggers{}}
 	switch {
@@ -462,7 +464,7 @@ func testMigratorActionPlans(t *testing.T) {
 }
 
 func testMigratorActionTriggers(t *testing.T) {
-	tim := time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC).Local()
+	tim := time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC)
 	v1atrs := &v1ActionTriggers{
 		&v1ActionTrigger{
 			Id:                    "Test",
@@ -853,8 +855,8 @@ func testMigratorSharedGroups(t *testing.T) {
 }
 
 func testMigratorStats(t *testing.T) {
-	tim := time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC).Local()
-	var filters []*engine.RequestFilter
+	tim := time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC)
+	var filters []*engine.FilterRule
 	v1Sts := &v1Stat{
 		Id:              "test",                         // Config id, unique per config instance
 		QueueLength:     10,                             // Number of items in the stats buffer
@@ -901,14 +903,14 @@ func testMigratorStats(t *testing.T) {
 		},
 	}
 
-	x, _ := engine.NewRequestFilter(engine.MetaGreaterOrEqual, "SetupInterval", []string{v1Sts.SetupInterval[0].String()})
+	x, _ := engine.NewFilterRule(engine.MetaGreaterOrEqual, "SetupInterval", []string{v1Sts.SetupInterval[0].String()})
 	filters = append(filters, x)
-	x, _ = engine.NewRequestFilter(engine.MetaGreaterOrEqual, "UsageInterval", []string{v1Sts.UsageInterval[0].String()})
+	x, _ = engine.NewFilterRule(engine.MetaGreaterOrEqual, "UsageInterval", []string{v1Sts.UsageInterval[0].String()})
 	filters = append(filters, x)
-	x, _ = engine.NewRequestFilter(engine.MetaGreaterOrEqual, "PddInterval", []string{v1Sts.PddInterval[0].String()})
+	x, _ = engine.NewFilterRule(engine.MetaGreaterOrEqual, "PddInterval", []string{v1Sts.PddInterval[0].String()})
 	filters = append(filters, x)
 
-	filter := &engine.Filter{Tenant: config.CgrConfig().DefaultTenant, ID: v1Sts.Id, RequestFilters: filters}
+	filter := &engine.Filter{Tenant: config.CgrConfig().DefaultTenant, ID: v1Sts.Id, Rules: filters}
 
 	sqp := &engine.StatQueueProfile{
 		Tenant:      "cgrates.org",
@@ -921,11 +923,11 @@ func testMigratorStats(t *testing.T) {
 			&utils.MetricWithParams{MetricID: "*acd", Parameters: ""},
 			&utils.MetricWithParams{MetricID: "*acc", Parameters: ""},
 		},
-		Thresholds: []string{"Test"},
-		Blocker:    false,
-		Stored:     true,
-		Weight:     float64(0),
-		MinItems:   0,
+		ThresholdIDs: []string{"Test"},
+		Blocker:      false,
+		Stored:       true,
+		Weight:       float64(0),
+		MinItems:     0,
 	}
 	sq := &engine.StatQueue{Tenant: config.CgrConfig().DefaultTenant,
 		ID:        v1Sts.Id,
@@ -977,8 +979,8 @@ func testMigratorStats(t *testing.T) {
 		if !reflect.DeepEqual(sqp.Metrics, result.Metrics) {
 			t.Errorf("Expecting: %+v, received: %+v", sqp.Metrics, result.Metrics)
 		}
-		if !reflect.DeepEqual(sqp.Thresholds, result.Thresholds) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp.Thresholds, result.Thresholds)
+		if !reflect.DeepEqual(sqp.ThresholdIDs, result.ThresholdIDs) {
+			t.Errorf("Expecting: %+v, received: %+v", sqp.ThresholdIDs, result.ThresholdIDs)
 		}
 		if !reflect.DeepEqual(sqp.Blocker, result.Blocker) {
 			t.Errorf("Expecting: %+v, received: %+v", sqp.Blocker, result.Blocker)
@@ -1046,8 +1048,8 @@ func testMigratorStats(t *testing.T) {
 		if !reflect.DeepEqual(sqp.Metrics, result.Metrics) {
 			t.Errorf("Expecting: %+v, received: %+v", sqp.Metrics, result.Metrics)
 		}
-		if !reflect.DeepEqual(sqp.Thresholds, result.Thresholds) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp.Thresholds, result.Thresholds)
+		if !reflect.DeepEqual(sqp.ThresholdIDs, result.ThresholdIDs) {
+			t.Errorf("Expecting: %+v, received: %+v", sqp.ThresholdIDs, result.ThresholdIDs)
 		}
 		if !reflect.DeepEqual(sqp.Blocker, result.Blocker) {
 			t.Errorf("Expecting: %+v, received: %+v", sqp.Blocker, result.Blocker)
@@ -1111,10 +1113,41 @@ func testMigratorStats(t *testing.T) {
 	}
 }
 
+func testMigratorSessionsCosts(t *testing.T) {
+	switch action {
+	case Move:
+		currentVersion := engine.CurrentStorDBVersions()
+		currentVersion[utils.SessionsCosts] = 1
+		err := mig.OutStorDB().SetVersions(currentVersion, false)
+		if err != nil {
+			t.Error("Error when setting version for SessionsCosts ", err.Error())
+		}
+		err, _ = mig.Migrate([]string{utils.MetaSessionsCosts})
+		if err.Error() != "Wrong version. Please use <cgr-migrator -migrate=*set_versions>" {
+			t.Error("Expecting error , received: %+v ", err)
+		}
+		if vrs, err := mig.OutStorDB().GetVersions(utils.SessionsCosts); err != nil {
+			t.Error(err)
+		} else if vrs[utils.SessionsCosts] != 1 {
+			t.Errorf("Expecting: 1, received: %+v", vrs[utils.SessionsCosts])
+		}
+		currentVersion = engine.CurrentStorDBVersions()
+		err = mig.OutStorDB().SetVersions(currentVersion, false)
+		if err != nil {
+			t.Error("Error when setting version for SessionsCosts ", err.Error())
+		}
+		if vrs, err := mig.OutStorDB().GetVersions(utils.SessionsCosts); err != nil {
+			t.Error(err)
+		} else if vrs[utils.SessionsCosts] != 2 {
+			t.Errorf("Expecting: 2, received: %+v", vrs[utils.SessionsCosts])
+		}
+	}
+}
+
 func testMigratorThreshold(t *testing.T) {
-	tim := time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC).Local()
+	tim := time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC)
 	tenant := config.CgrConfig().DefaultTenant
-	var filters []*engine.RequestFilter
+	var filters []*engine.FilterRule
 	threshold := &v2ActionTrigger{
 		ID:             "test2",              // original csv tag
 		UniqueID:       "testUUID",           // individual id
@@ -1137,13 +1170,13 @@ func testMigratorThreshold(t *testing.T) {
 		Executed:          false,
 		LastExecutionTime: time.Now(),
 	}
-	x, err := engine.NewRequestFilter(engine.MetaRSRFields, "Directions", threshold.Balance.Directions.Slice())
+	x, err := engine.NewFilterRule(engine.MetaRSR, "Directions", threshold.Balance.Directions.Slice())
 	if err != nil {
-		t.Error("Error when creating new NewRequestFilter", err.Error())
+		t.Error("Error when creating new NewFilterRule", err.Error())
 	}
 	filters = append(filters, x)
 
-	filter := &engine.Filter{Tenant: config.CgrConfig().DefaultTenant, ID: *threshold.Balance.ID, RequestFilters: filters}
+	filter := &engine.Filter{Tenant: config.CgrConfig().DefaultTenant, ID: *threshold.Balance.ID, Rules: filters}
 
 	thp := &engine.ThresholdProfile{
 		ID:                 threshold.ID,
@@ -1337,25 +1370,25 @@ func testMigratorCdrStats(t *testing.T) {
 		TimeWindow:      time.Duration(1) * time.Second, // Will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
 		SaveInterval:    time.Duration(1) * time.Second,
 		Metrics:         []string{engine.ASR, engine.PDD, engine.ACD, engine.TCD, engine.ACC, engine.TCC, engine.DDC},
-		SetupInterval:   []time.Time{time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC).Local()}, // CDRFieldFilter on SetupInterval, 2 or less items (>= start interval,< stop_interval)
-		TOR:             []string{""},                                                                     // CDRFieldFilter on TORs
-		CdrHost:         []string{""},                                                                     // CDRFieldFilter on CdrHosts
-		CdrSource:       []string{""},                                                                     // CDRFieldFilter on CdrSources
-		ReqType:         []string{""},                                                                     // CDRFieldFilter on RequestTypes
-		Direction:       []string{""},                                                                     // CDRFieldFilter on Directions
-		Tenant:          []string{""},                                                                     // CDRFieldFilter on Tenants
-		Category:        []string{""},                                                                     // CDRFieldFilter on Categories
-		Account:         []string{""},                                                                     // CDRFieldFilter on Accounts
-		Subject:         []string{""},                                                                     // CDRFieldFilter on Subjects
-		DestinationIds:  []string{""},                                                                     // CDRFieldFilter on DestinationPrefixes
-		UsageInterval:   []time.Duration{time.Duration(1) * time.Second},                                  // CDRFieldFilter on UsageInterval, 2 or less items (>= Usage, <Usage)
-		PddInterval:     []time.Duration{time.Duration(1) * time.Second},                                  // CDRFieldFilter on PddInterval, 2 or less items (>= Pdd, <Pdd)
-		Supplier:        []string{},                                                                       // CDRFieldFilter on Suppliers
-		DisconnectCause: []string{},                                                                       // Filter on DisconnectCause
-		MediationRunIds: []string{},                                                                       // CDRFieldFilter on MediationRunIds
-		RatedAccount:    []string{},                                                                       // CDRFieldFilter on RatedAccounts
-		RatedSubject:    []string{},                                                                       // CDRFieldFilter on RatedSubjects
-		CostInterval:    []float64{},                                                                      // CDRFieldFilter on CostInterval, 2 or less items, (>=Cost, <Cost)
+		SetupInterval:   []time.Time{time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC)}, // CDRFieldFilter on SetupInterval, 2 or less items (>= start interval,< stop_interval)
+		TOR:             []string{""},                                                             // CDRFieldFilter on TORs
+		CdrHost:         []string{""},                                                             // CDRFieldFilter on CdrHosts
+		CdrSource:       []string{""},                                                             // CDRFieldFilter on CdrSources
+		ReqType:         []string{""},                                                             // CDRFieldFilter on RequestTypes
+		Direction:       []string{""},                                                             // CDRFieldFilter on Directions
+		Tenant:          []string{""},                                                             // CDRFieldFilter on Tenants
+		Category:        []string{""},                                                             // CDRFieldFilter on Categories
+		Account:         []string{""},                                                             // CDRFieldFilter on Accounts
+		Subject:         []string{""},                                                             // CDRFieldFilter on Subjects
+		DestinationIds:  []string{""},                                                             // CDRFieldFilter on DestinationPrefixes
+		UsageInterval:   []time.Duration{time.Duration(1) * time.Second},                          // CDRFieldFilter on UsageInterval, 2 or less items (>= Usage, <Usage)
+		PddInterval:     []time.Duration{time.Duration(1) * time.Second},                          // CDRFieldFilter on PddInterval, 2 or less items (>= Pdd, <Pdd)
+		Supplier:        []string{},                                                               // CDRFieldFilter on Suppliers
+		DisconnectCause: []string{},                                                               // Filter on DisconnectCause
+		MediationRunIds: []string{},                                                               // CDRFieldFilter on MediationRunIds
+		RatedAccount:    []string{},                                                               // CDRFieldFilter on RatedAccounts
+		RatedSubject:    []string{},                                                               // CDRFieldFilter on RatedSubjects
+		CostInterval:    []float64{},                                                              // CDRFieldFilter on CostInterval, 2 or less items, (>=Cost, <Cost)
 	}
 	switch action {
 	case Move:
@@ -1490,7 +1523,7 @@ func testMigratorLCR(t *testing.T) {
 		Subject:   "testOnStorITCRUDLCR",
 		Activations: []*engine.LCRActivation{
 			&engine.LCRActivation{
-				ActivationTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+				ActivationTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 				Entries: []*engine.LCREntry{
 					&engine.LCREntry{
 						DestinationId:  "EU_LANDLINE",
@@ -1600,7 +1633,7 @@ func testMigratorRatingProfile(t *testing.T) {
 		Id: "*out:test:1:trp",
 		RatingPlanActivations: engine.RatingPlanActivations{
 			&engine.RatingPlanActivation{
-				ActivationTime:  time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC).Local(),
+				ActivationTime:  time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC),
 				RatingPlanId:    "TDRT",
 				FallbackKeys:    []string{"*out:test:1:danb", "*out:test:1:rif"},
 				CdrStatQueueIds: []string{},
@@ -1633,35 +1666,35 @@ func testMigratorRQF(t *testing.T) {
 	fp := &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "Filter1",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001", "1002"},
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	switch action {
 	case Move:
 		if err := mig.dmIN.SetFilter(fp); err != nil {
-			t.Error("Error when setting RequestFilter ", err.Error())
+			t.Error("Error when setting FilterRule ", err.Error())
 		}
 		currentVersion := engine.CurrentDataDBVersions()
 		err := mig.dmOut.DataDB().SetVersions(currentVersion, false)
 		if err != nil {
-			t.Error("Error when setting version for RequestFilter ", err.Error())
+			t.Error("Error when setting version for FilterRule ", err.Error())
 		}
 		err, _ = mig.Migrate([]string{utils.MetaRQF})
 		if err != nil {
-			t.Error("Error when migrating RequestFilter ", err.Error())
+			t.Error("Error when migrating FilterRule ", err.Error())
 		}
 		result, err := mig.dmOut.GetFilter(fp.Tenant, fp.ID, true, utils.NonTransactional)
 		if err != nil {
-			t.Error("Error when getting RequestFilter ", err.Error())
+			t.Error("Error when getting FilterRule ", err.Error())
 		}
 		if !reflect.DeepEqual(fp, result) {
 			t.Errorf("Expecting: %v, received: %v", fp, result)
@@ -1670,25 +1703,25 @@ func testMigratorRQF(t *testing.T) {
 }
 
 func testMigratorResource(t *testing.T) {
-	var filters []*engine.RequestFilter
+	var filters []*engine.FilterRule
 	rL := &engine.ResourceProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RL_TEST2",
 		Weight:    10,
 		FilterIDs: []string{"FLTR_RES_RL_TEST2"},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC).Local()},
-		Limit:      1,
-		Thresholds: []string{"TEST_ACTIONS"},
-		UsageTTL:   time.Duration(1 * time.Millisecond),
+			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC)},
+		Limit:        1,
+		ThresholdIDs: []string{"TEST_ACTIONS"},
+		UsageTTL:     time.Duration(1 * time.Millisecond),
 	}
 	switch action {
 	case Move:
-		x, _ := engine.NewRequestFilter(engine.MetaGreaterOrEqual, "PddInterval", []string{rL.UsageTTL.String()})
+		x, _ := engine.NewFilterRule(engine.MetaGreaterOrEqual, "PddInterval", []string{rL.UsageTTL.String()})
 		filters = append(filters, x)
 
-		filter := &engine.Filter{Tenant: "cgrates.org", ID: "FLTR_RES_RL_TEST2", RequestFilters: filters}
+		filter := &engine.Filter{Tenant: "cgrates.org", ID: "FLTR_RES_RL_TEST2", Rules: filters}
 
 		if err := mig.dmIN.SetFilter(filter); err != nil {
 			t.Error("Error when setting filter ", err.Error())
@@ -1717,7 +1750,7 @@ func testMigratorResource(t *testing.T) {
 
 func testMigratorSubscribers(t *testing.T) {
 	sbsc := &engine.SubscriberData{
-		ExpTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+		ExpTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 		Filters: utils.ParseRSRFieldsMustCompile("^*default", utils.INFIELD_SEP)}
 	sbscID := "testOnStorITCRUDSubscribers"
 
@@ -1777,6 +1810,164 @@ func testMigratorTimings(t *testing.T) {
 		}
 		if !reflect.DeepEqual(tmg, result) {
 			t.Errorf("Expecting: %v, received: %v", tmg, result)
+		}
+	}
+}
+
+func testMigratorAttributeProfile(t *testing.T) {
+	mapSubstitutes := make(map[string]map[string]*v1Attribute)
+	mapSubstitutes["FL1"] = make(map[string]*v1Attribute)
+	mapSubstitutes["FL1"]["In1"] = &v1Attribute{
+		FieldName:  "FL1",
+		Initial:    "In1",
+		Substitute: "Al1",
+		Append:     true,
+	}
+	v1Attribute := &v1AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile1",
+		Contexts:  []string{utils.MetaRating},
+		FilterIDs: []string{"filter1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: mapSubstitutes,
+		Weight:     20,
+	}
+	attrPrf := &engine.AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile1",
+		Contexts:  []string{utils.MetaRating},
+		FilterIDs: []string{"filter1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: []*engine.Attribute{
+			&engine.Attribute{
+				FieldName:  "FL1",
+				Initial:    "In1",
+				Substitute: "Al1",
+				Append:     true,
+			},
+		},
+		Weight: 20,
+	}
+	filterAttr := &engine.Filter{
+		Tenant: attrPrf.Tenant,
+		ID:     attrPrf.FilterIDs[0],
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
+				FieldName: "Name",
+				Type:      "Type",
+				Values:    []string{"Val1"},
+			},
+		},
+	}
+	switch {
+	case action == utils.REDIS:
+		if err := mig.dmIN.SetFilter(filterAttr); err != nil {
+			t.Error("Error when setting Filter ", err.Error())
+		}
+		if err := mig.dmIN.SetAttributeProfile(attrPrf, true); err != nil {
+			t.Error("Error when setting attributeProfile ", err.Error())
+		}
+		err := mig.oldDataDB.setV1AttributeProfile(v1Attribute)
+		if err != nil {
+			t.Error("Error when setting V1AttributeProfile ", err.Error())
+		}
+		currentVersion := engine.CurrentDataDBVersions()
+		currentVersion[utils.Attributes] = 1
+		err = mig.dmOut.DataDB().SetVersions(currentVersion, false)
+		if err != nil {
+			t.Error("Error when setting version for attributeProfile ", err.Error())
+		}
+		err, _ = mig.Migrate([]string{utils.MetaAttributes})
+		if err != nil {
+			t.Error("Error when migrating AttributeProfile ", err.Error())
+		}
+		result, err := mig.dmOut.GetAttributeProfile(attrPrf.Tenant, attrPrf.ID, true, utils.NonTransactional)
+		if err != nil {
+			t.Error("Error when getting AttributeProfile ", err.Error())
+		}
+		if !reflect.DeepEqual(attrPrf.Tenant, result.Tenant) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.Tenant, result.Tenant)
+		} else if !reflect.DeepEqual(attrPrf.ID, result.ID) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.ID, result.ID)
+		} else if !reflect.DeepEqual(attrPrf.FilterIDs, result.FilterIDs) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.FilterIDs, result.FilterIDs)
+		} else if !reflect.DeepEqual(attrPrf.Contexts, result.Contexts) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.Contexts, result.Contexts)
+		} else if !reflect.DeepEqual(attrPrf.ActivationInterval, result.ActivationInterval) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.ActivationInterval, result.ActivationInterval)
+		} else if !reflect.DeepEqual(attrPrf.Attributes, result.Attributes) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.Attributes, result.Attributes)
+		}
+	case action == utils.MONGO:
+		if err := mig.dmIN.SetAttributeProfile(attrPrf, true); err != nil {
+			t.Error("Error when setting attributeProfile ", err.Error())
+		}
+		err := mig.oldDataDB.setV1AttributeProfile(v1Attribute)
+		if err != nil {
+			t.Error("Error when setting V1AttributeProfile ", err.Error())
+		}
+		currentVersion := engine.CurrentDataDBVersions()
+		currentVersion[utils.Attributes] = 1
+		err = mig.dmOut.DataDB().SetVersions(currentVersion, false)
+		if err != nil {
+			t.Error("Error when setting version for attributeProfile ", err.Error())
+		}
+		err, _ = mig.Migrate([]string{utils.MetaAttributes})
+		if err != nil {
+			t.Error("Error when migrating attributeProfile ", err.Error())
+		}
+		result, err := mig.dmOut.GetAttributeProfile("cgrates.org", attrPrf.ID, true, utils.NonTransactional)
+		if err != nil {
+			t.Error("Error when getting attributeProfile ", err.Error())
+		}
+		if !reflect.DeepEqual(attrPrf.Tenant, result.Tenant) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.Tenant, result.Tenant)
+		} else if !reflect.DeepEqual(attrPrf.ID, result.ID) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.ID, result.ID)
+		} else if !reflect.DeepEqual(attrPrf.FilterIDs, result.FilterIDs) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.FilterIDs, result.FilterIDs)
+		} else if !reflect.DeepEqual(attrPrf.Contexts, result.Contexts) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.Contexts, result.Contexts)
+		} else if !reflect.DeepEqual(attrPrf.ActivationInterval, result.ActivationInterval) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.ActivationInterval, result.ActivationInterval)
+		} else if !reflect.DeepEqual(attrPrf.Attributes, result.Attributes) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.Attributes, result.Attributes)
+		}
+	case action == Move:
+		if err := mig.dmIN.SetAttributeProfile(attrPrf, true); err != nil {
+			t.Error("Error when setting AttributeProfile ", err.Error())
+		}
+		currentVersion := engine.CurrentDataDBVersions()
+		err := mig.dmOut.DataDB().SetVersions(currentVersion, false)
+		if err != nil {
+			t.Error("Error when setting version for stats ", err.Error())
+		}
+		err, _ = mig.Migrate([]string{utils.MetaAttributes})
+		if err != nil {
+			t.Error("Error when migrating AttributeProfile ", err.Error())
+		}
+		result, err := mig.dmOut.GetAttributeProfile(attrPrf.Tenant, attrPrf.ID, true, utils.NonTransactional)
+		if err != nil {
+			t.Error("Error when getting Stats ", err.Error())
+		}
+		if !reflect.DeepEqual(attrPrf.Tenant, result.Tenant) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.Tenant, result.Tenant)
+		} else if !reflect.DeepEqual(attrPrf.ID, result.ID) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.ID, result.ID)
+		} else if !reflect.DeepEqual(attrPrf.FilterIDs, result.FilterIDs) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.FilterIDs, result.FilterIDs)
+		} else if !reflect.DeepEqual(attrPrf.Contexts, result.Contexts) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.Contexts, result.Contexts)
+		} else if !reflect.DeepEqual(attrPrf.ActivationInterval, result.ActivationInterval) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.ActivationInterval, result.ActivationInterval)
+		} else if !reflect.DeepEqual(attrPrf.Attributes, result.Attributes) {
+			t.Errorf("Expecting: %+v, received: %+v", attrPrf.Attributes, result.Attributes)
 		}
 	}
 }
@@ -1853,10 +2044,10 @@ func testMigratorTPSuppliers(t *testing.T) {
 					ResourceIDs:   []string{"ResGroup1"},
 					StatIDs:       []string{"Stat1"},
 					Weight:        10,
+					Blocker:       false,
 				},
 			},
-			Blocker: false,
-			Weight:  20,
+			Weight: 20,
 		},
 	}
 	switch action {
@@ -2271,11 +2462,11 @@ func testMigratorTpStats(t *testing.T) {
 				&utils.MetricWithParams{MetricID: "MetricValue", Parameters: ""},
 				&utils.MetricWithParams{MetricID: "MetricValueTwo", Parameters: ""},
 			},
-			Blocker:    false,
-			Stored:     false,
-			Weight:     20,
-			MinItems:   1,
-			Thresholds: []string{"ThreshValue", "ThreshValueTwo"},
+			Blocker:      false,
+			Stored:       false,
+			Weight:       20,
+			MinItems:     1,
+			ThresholdIDs: []string{"ThreshValue", "ThreshValueTwo"},
 		},
 	}
 	switch action {
@@ -2367,7 +2558,7 @@ func testMigratorTpResources(t *testing.T) {
 			Blocker:           true,
 			Stored:            true,
 			Weight:            20,
-			Thresholds:        []string{"ValOne", "ValTwo"},
+			ThresholdIDs:      []string{"ValOne", "ValTwo"},
 		},
 	}
 	switch action {

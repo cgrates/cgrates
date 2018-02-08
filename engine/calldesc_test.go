@@ -1893,6 +1893,77 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 		t.Errorf("Account: %s", utils.ToIJSON(resAcnt))
 	}
 }
+func TestCallDescriptorUpdateFromCGREvent(t *testing.T) {
+	context := "*rating"
+	cgrEv := &utils.CGREvent{
+		Tenant:  "cgrates.org",
+		ID:      "Generated",
+		Context: &context,
+		Event: map[string]interface{}{
+			"Account":     "acc1",
+			"AnswerTime":  time.Date(2015, 3, 23, 6, 0, 0, 0, time.UTC),
+			"Category":    "call",
+			"Destination": "0723123113",
+			"Subject":     "acc1",
+			"Tenant":      "cgrates.org",
+			"ToR":         "",
+			"Usage":       time.Duration(30) * time.Minute,
+		},
+	}
+	cd := &CallDescriptor{
+		Direction:    "*out",
+		Category:     "call",
+		Tenant:       "cgrates.org",
+		Subject:      "max",
+		Account:      "max",
+		Destination:  "0723123113",
+		TimeStart:    time.Date(2015, 3, 23, 6, 0, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2015, 3, 23, 6, 30, 0, 0, time.UTC),
+		MaxCostSoFar: 0,
+	}
+	cdExpected := &CallDescriptor{
+		Direction:    "*out",
+		Category:     "call",
+		Tenant:       "cgrates.org",
+		Subject:      "acc1",
+		Account:      "acc1",
+		Destination:  "0723123113",
+		TimeStart:    time.Date(2015, 3, 23, 6, 0, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2015, 3, 23, 6, 30, 0, 0, time.UTC),
+		MaxCostSoFar: 0,
+	}
+	if err := cd.UpdateFromCGREvent(cgrEv, []string{utils.Account, utils.Subject}); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(cd, cdExpected) {
+			t.Errorf("Expecting: %+v, received: %+v", cdExpected, cd)
+		}
+	}
+	cgrEv = &utils.CGREvent{
+		Tenant:  "cgrates.org",
+		ID:      "Generated",
+		Context: &context,
+		Event: map[string]interface{}{
+			"Account":     "acc1",
+			"AnswerTime":  time.Date(2015, 3, 23, 6, 0, 0, 0, time.UTC),
+			"Category":    "call",
+			"Destination": "0723123113",
+			"Subject":     "acc1",
+			"Tenant":      "cgrates.org",
+			"ToR":         "",
+			"Usage":       time.Duration(40) * time.Minute,
+		},
+	}
+	if err := cd.UpdateFromCGREvent(cgrEv, []string{utils.Account, utils.Subject}); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(cd, cdExpected) {
+			t.Errorf("Expecting: %+v, received: %+v", cdExpected, cd)
+		}
+	}
+
+}
+
 func TestCallDescriptorAsCGREvent(t *testing.T) {
 	cd := &CallDescriptor{
 		Direction:    "*out",

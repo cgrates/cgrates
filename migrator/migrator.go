@@ -115,6 +115,8 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			} else {
 				log.Print("Cannot dryRun SetVersions!")
 			}
+		case utils.MetaSessionsCosts:
+			err = m.migrateSessionsCosts()
 		case utils.MetaCostDetails:
 			err = m.migrateCostDetails()
 		case utils.MetaAccounts:
@@ -131,6 +133,8 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			err = m.migrateStats()
 		case utils.MetaThresholds:
 			err = m.migrateThresholds()
+		case utils.MetaAttributes:
+			err = m.migrateAttributeProfile()
 		//only Move
 		case utils.MetaRatingPlans:
 			err = m.migrateRatingPlans()
@@ -228,6 +232,9 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			}
 			if err := m.migrateSupplierProfiles(); err != nil {
 				log.Print("ERROR: ", utils.MetaSuppliers, " ", err)
+			}
+			if err := m.migrateAttributeProfile(); err != nil {
+				log.Print("ERROR: ", utils.MetaAttributes, " ", err)
 			}
 			if err := m.migrateRatingPlans(); err != nil {
 				log.Print("ERROR: ", utils.MetaRatingPlans, " ", err)

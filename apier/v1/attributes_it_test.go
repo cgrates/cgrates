@@ -38,7 +38,7 @@ var (
 	alsPrfCfg       *config.CGRConfig
 	attrSRPC        *rpc.Client
 	alsPrfDataDir   = "/usr/share/cgrates"
-	alsPrf          *engine.ExternalAttributeProfile
+	alsPrf          *engine.AttributeProfile
 	alsPrfDelay     int
 	alsPrfConfigDIR string //run tests for specific configuration
 )
@@ -121,8 +121,10 @@ func testAttributeSRPCConn(t *testing.T) {
 }
 
 func testAttributeSGetAlsPrfBeforeSet(t *testing.T) {
-	var reply *engine.ExternalAttributeProfile
-	if err := attrSRPC.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	var reply *engine.AttributeProfile
+	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"},
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -146,7 +148,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 			utils.Destination: "+491511231234",
 		},
 	}
-	eAttrPrf := &engine.ExternalAttributeProfile{
+	eAttrPrf := &engine.AttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_1",
 		FilterIDs: []string{"*string:Account:1007"},
@@ -169,43 +171,13 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		},
 		Weight: 10.0,
 	}
-	reverseSubstitute := []*engine.Attribute{
-		&engine.Attribute{
-			FieldName:  utils.Subject,
-			Initial:    utils.ANY,
-			Substitute: "1001",
-			Append:     true,
-		},
-		&engine.Attribute{
-			FieldName:  utils.Account,
-			Initial:    utils.ANY,
-			Substitute: "1001",
-			Append:     false,
-		},
-	}
 
-	var attrReply *engine.ExternalAttributeProfile
+	var attrReply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eAttrPrf.Tenant, attrReply.Tenant) {
-		t.Errorf("Expecting: %s, received: %s", eAttrPrf.Tenant, attrReply.Tenant)
-	} else if !reflect.DeepEqual(eAttrPrf.ID, attrReply.ID) {
-		t.Errorf("Expecting: %s, received: %s", eAttrPrf.ID, attrReply.ID)
-	} else if !reflect.DeepEqual(eAttrPrf.Contexts, attrReply.Contexts) {
-		t.Errorf("Expecting: %s, received: %s", eAttrPrf.Contexts, attrReply.Contexts)
-	} else if !reflect.DeepEqual(eAttrPrf.FilterIDs, attrReply.FilterIDs) {
-		t.Errorf("Expecting: %s, received: %s", eAttrPrf.FilterIDs, attrReply.FilterIDs)
-	} else if !reflect.DeepEqual(eAttrPrf.ActivationInterval.ActivationTime.Local(), attrReply.ActivationInterval.ActivationTime.Local()) {
-		t.Errorf("Expecting: %s, received: %s",
-			eAttrPrf.ActivationInterval.ActivationTime.Local(), attrReply.ActivationInterval.ActivationTime.Local())
-	} else if !reflect.DeepEqual(eAttrPrf.ActivationInterval.ExpiryTime.Local(), attrReply.ActivationInterval.ExpiryTime.Local()) {
-		t.Errorf("Expecting: %s, received: %s",
-			eAttrPrf.ActivationInterval.ExpiryTime.Local(), attrReply.ActivationInterval.ExpiryTime.Local())
-	} else if !reflect.DeepEqual(eAttrPrf.Attributes, attrReply.Attributes) && !reflect.DeepEqual(reverseSubstitute, attrReply.Attributes) {
-		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eAttrPrf.Attributes), utils.ToJSON(attrReply.Attributes))
-	} else if !reflect.DeepEqual(eAttrPrf.Weight, attrReply.Weight) {
-		t.Errorf("Expecting: %s, received: %s", eAttrPrf.Weight, attrReply.Weight)
+	} else if !reflect.DeepEqual(eAttrPrf, attrReply) {
+		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eAttrPrf), utils.ToJSON(attrReply))
 	}
 }
 
@@ -215,8 +187,8 @@ func testAttributeSProcessEvent(t *testing.T) {
 		ID:      "testAttributeSProcessEvent",
 		Context: utils.StringPointer(utils.MetaRating),
 		Event: map[string]interface{}{
-			"Account":     "1007",
-			"Destination": "+491511231234",
+			utils.Account:     "1007",
+			utils.Destination: "+491511231234",
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
@@ -227,9 +199,9 @@ func testAttributeSProcessEvent(t *testing.T) {
 			ID:      "testAttributeSProcessEvent",
 			Context: utils.StringPointer(utils.MetaRating),
 			Event: map[string]interface{}{
-				"Account":     "1001",
-				"Subject":     "1001",
-				"Destination": "+491511231234",
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "+491511231234",
 			},
 		},
 	}
@@ -259,14 +231,14 @@ func testAttributeSProcessEvent(t *testing.T) {
 }
 
 func testAttributeSSetAlsPrf(t *testing.T) {
-	alsPrf = &engine.ExternalAttributeProfile{
+	alsPrf = &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ApierTest",
 		Contexts:  []string{"*rating"},
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
@@ -284,17 +256,12 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var reply *engine.ExternalAttributeProfile
-	if err := attrSRPC.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
+	var reply *engine.AttributeProfile
+	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(alsPrf.FilterIDs, reply.FilterIDs) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.FilterIDs, reply.FilterIDs)
-	} else if !reflect.DeepEqual(alsPrf.ActivationInterval, reply.ActivationInterval) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.ActivationInterval, reply.ActivationInterval)
-	} else if !reflect.DeepEqual(len(alsPrf.Attributes), len(reply.Attributes)) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(alsPrf.Attributes), utils.ToJSON(reply.Attributes))
-	} else if !reflect.DeepEqual(alsPrf.ID, reply.ID) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.ID, reply.ID)
+	} else if !reflect.DeepEqual(alsPrf, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
 	}
 }
 
@@ -319,32 +286,28 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var reply *engine.ExternalAttributeProfile
+	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(alsPrf.FilterIDs, reply.FilterIDs) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.FilterIDs, reply.FilterIDs)
-	} else if !reflect.DeepEqual(alsPrf.ActivationInterval, reply.ActivationInterval) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.ActivationInterval, reply.ActivationInterval)
-	} else if !reflect.DeepEqual(len(alsPrf.Attributes), len(reply.Attributes)) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(alsPrf.Attributes), utils.ToJSON(reply.Attributes))
-	} else if !reflect.DeepEqual(alsPrf.ID, reply.ID) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.ID, reply.ID)
+	} else if !reflect.DeepEqual(alsPrf, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
 	}
 }
 
 func testAttributeSRemAlsPrf(t *testing.T) {
 	var resp string
 	if err := attrSRPC.Call("ApierV1.RemAttributeProfile",
-		&ArgRemoveAttrProfile{Tenant: alsPrf.Tenant, ID: alsPrf.ID, Contexts: alsPrf.Contexts}, &resp); err != nil {
+		&ArgRemoveAttrProfile{Tenant: alsPrf.Tenant, ID: alsPrf.ID,
+			Contexts: alsPrf.Contexts}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	var reply *engine.ExternalAttributeProfile
+	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"},
+		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

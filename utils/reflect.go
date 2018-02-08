@@ -158,6 +158,22 @@ func IfaceAsTime(itm interface{}, timezone string) (t time.Time, err error) {
 	return
 }
 
+func IfaceAsFloat64(itm interface{}) (f float64, err error) {
+	switch itm.(type) {
+	case float64:
+		return itm.(float64), nil
+	case time.Duration:
+		return float64(itm.(time.Duration).Nanoseconds()), nil
+	case int64:
+		return float64(itm.(int64)), nil
+	case string:
+		return strconv.ParseFloat(itm.(string), 64)
+	default:
+		err = fmt.Errorf("cannot convert field: %+v to time.Time", itm)
+	}
+	return
+}
+
 // AsMapStringIface converts an item (mostly struct) as map[string]interface{}
 func AsMapStringIface(item interface{}) (map[string]interface{}, error) {
 	out := make(map[string]interface{})

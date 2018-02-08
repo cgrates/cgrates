@@ -20,9 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"math/rand"
 	"net/rpc"
 	"net/rpc/jsonrpc"
@@ -30,6 +27,10 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -153,14 +154,16 @@ func testV1STSGetStats(t *testing.T) {
 	}
 	var metrics map[string]string
 	expectedMetrics := map[string]string{
-		utils.MetaASR: utils.NOT_AVAILABLE,
-		utils.MetaACD: utils.NOT_AVAILABLE,
-		utils.MetaTCC: utils.NOT_AVAILABLE,
-		utils.MetaTCD: utils.NOT_AVAILABLE,
-		utils.MetaACC: utils.NOT_AVAILABLE,
-		utils.MetaPDD: utils.NOT_AVAILABLE,
+		utils.MetaASR:     utils.NOT_AVAILABLE,
+		utils.MetaACD:     utils.NOT_AVAILABLE,
+		utils.MetaTCC:     utils.NOT_AVAILABLE,
+		utils.MetaTCD:     utils.NOT_AVAILABLE,
+		utils.MetaACC:     utils.NOT_AVAILABLE,
+		utils.MetaPDD:     utils.NOT_AVAILABLE,
+		utils.MetaSum:     utils.NOT_AVAILABLE,
+		utils.MetaAverage: utils.NOT_AVAILABLE,
 	}
-	if err := stsV1Rpc.Call(utils.StatSv1GetGetQueueStringMetrics,
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -186,19 +189,22 @@ func testV1STSProcessEvent(t *testing.T) {
 	}
 	//process with one event (should be N/A becaus MinItems is 2)
 	expectedMetrics := map[string]string{
-		utils.MetaASR: utils.NOT_AVAILABLE,
-		utils.MetaACD: utils.NOT_AVAILABLE,
-		utils.MetaTCC: utils.NOT_AVAILABLE,
-		utils.MetaTCD: utils.NOT_AVAILABLE,
-		utils.MetaACC: utils.NOT_AVAILABLE,
-		utils.MetaPDD: utils.NOT_AVAILABLE,
+		utils.MetaASR:     utils.NOT_AVAILABLE,
+		utils.MetaACD:     utils.NOT_AVAILABLE,
+		utils.MetaTCC:     utils.NOT_AVAILABLE,
+		utils.MetaTCD:     utils.NOT_AVAILABLE,
+		utils.MetaACC:     utils.NOT_AVAILABLE,
+		utils.MetaPDD:     utils.NOT_AVAILABLE,
+		utils.MetaSum:     utils.NOT_AVAILABLE,
+		utils.MetaAverage: utils.NOT_AVAILABLE,
 	}
 	var metrics map[string]string
-	if err := stsV1Rpc.Call(utils.StatSv1GetGetQueueStringMetrics, &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics); err != nil {
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics, &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
 	}
+
 	ev2 := utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
@@ -224,23 +230,26 @@ func testV1STSProcessEvent(t *testing.T) {
 		t.Errorf("received reply: %s", reply)
 	}
 	expectedMetrics2 := map[string]string{
-		utils.MetaASR: "66.66667%",
-		utils.MetaACD: "1m30s",
-		utils.MetaACC: "61.5",
-		utils.MetaTCD: "3m0s",
-		utils.MetaTCC: "123",
-		utils.MetaPDD: "4s",
+		utils.MetaASR:     "66.66667%",
+		utils.MetaACD:     "1m30s",
+		utils.MetaACC:     "61.5",
+		utils.MetaTCD:     "3m0s",
+		utils.MetaTCC:     "123",
+		utils.MetaPDD:     "4s",
+		utils.MetaSum:     "0",
+		utils.MetaAverage: utils.NOT_AVAILABLE,
 	}
 	var metrics2 map[string]string
-	if err := stsV1Rpc.Call(utils.StatSv1GetGetQueueStringMetrics, &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics2); err != nil {
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics, &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics2, metrics2) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics2, metrics2)
 	}
+
 }
 
 func testV1STSGetStatsAfterRestart(t *testing.T) {
-	time.Sleep(time.Second)
+	time.Sleep(1 * time.Second)
 	if _, err := engine.StopStartEngine(stsV1CfgPath, statsDelay); err != nil {
 		t.Fatal(err)
 	}
@@ -249,17 +258,21 @@ func testV1STSGetStatsAfterRestart(t *testing.T) {
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
+	time.Sleep(2 * time.Second)
+
 	//get stats metrics after restart
 	expectedMetrics2 := map[string]string{
-		utils.MetaASR: "66.66667%",
-		utils.MetaACD: "1m30s",
-		utils.MetaACC: "61.5",
-		utils.MetaTCD: "3m0s",
-		utils.MetaTCC: "123",
-		utils.MetaPDD: "4s",
+		utils.MetaASR:     "66.66667%",
+		utils.MetaACD:     "1m30s",
+		utils.MetaACC:     "61.5",
+		utils.MetaTCD:     "3m0s",
+		utils.MetaTCC:     "123",
+		utils.MetaPDD:     "4s",
+		utils.MetaSum:     "0",
+		utils.MetaAverage: utils.NOT_AVAILABLE,
 	}
 	var metrics2 map[string]string
-	if err := stsV1Rpc.Call(utils.StatSv1GetGetQueueStringMetrics, &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics2); err != nil {
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics, &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics2, metrics2) {
 		t.Errorf("After restat expecting: %+v, received reply: %s", expectedMetrics2, metrics2)
@@ -272,16 +285,16 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "FLTR_1",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	var result string
@@ -300,8 +313,8 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 		ID:        "TEST_PROFILE1",
 		FilterIDs: []string{"FLTR_1"},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		QueueLength: 10,
 		TTL:         time.Duration(10) * time.Second,
@@ -315,11 +328,11 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 				Parameters: "",
 			},
 		},
-		Thresholds: []string{"Val1", "Val2"},
-		Blocker:    true,
-		Stored:     true,
-		Weight:     20,
-		MinItems:   1,
+		ThresholdIDs: []string{"Val1", "Val2"},
+		Blocker:      true,
+		Stored:       true,
+		Weight:       20,
+		MinItems:     1,
 	}
 	if err := stsV1Rpc.Call("ApierV1.SetStatQueueProfile", statConfig, &result); err != nil {
 		t.Error(err)
@@ -330,7 +343,7 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statConfig, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", statConfig, reply)
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(statConfig), utils.ToJSON(reply))
 	}
 }
 
@@ -339,16 +352,16 @@ func testV1STSUpdateStatQueueProfile(t *testing.T) {
 	filter = &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "FLTR_2",
-		RequestFilters: []*engine.RequestFilter{
-			&engine.RequestFilter{
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	if err := stsV1Rpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
@@ -421,7 +434,7 @@ func BenchmarkSTSV1SetEvent(b *testing.B) {
 func BenchmarkSTSV1GetQueueStringMetrics(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		var metrics map[string]string
-		if err := stsV1Rpc.Call(utils.StatSv1GetGetQueueStringMetrics,
+		if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
 			&utils.TenantID{Tenant: "cgrates.org", ID: "STATS_1"},
 			&metrics); err != nil {
 			b.Error(err)

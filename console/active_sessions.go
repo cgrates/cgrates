@@ -19,14 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
 	c := &CmdActiveSessions{
 		name:      "active_sessions",
-		rpcMethod: "SessionManagerV1.ActiveSessions",
+		rpcMethod: utils.SessionSv1GetActiveSessions,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdActiveSessions struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.AttrGetSMASessions
+	rpcParams interface{}
 	*CommandExecuter
 }
 
@@ -50,16 +50,18 @@ func (self *CmdActiveSessions) RpcMethod() string {
 
 func (self *CmdActiveSessions) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.AttrGetSMASessions{}
+		self.rpcParams = &map[string]string{}
 	}
 	return self.rpcParams
 }
 
 func (self *CmdActiveSessions) PostprocessRpcParams() error {
+	param := self.rpcParams.(*map[string]string)
+	self.rpcParams = param
 	return nil
 }
 
 func (self *CmdActiveSessions) RpcResult() interface{} {
-	var sessions *[]*sessionmanager.ActiveSession
+	var sessions *[]*sessions.ActiveSession
 	return &sessions
 }

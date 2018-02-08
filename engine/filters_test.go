@@ -24,17 +24,17 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestReqFilterPassString(t *testing.T) {
+func TestFilterPassString(t *testing.T) {
 	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
 		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
 		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
-	rf := &RequestFilter{Type: MetaString, FieldName: "Category", Values: []string{"call"}}
+	rf := &FilterRule{Type: MetaString, FieldName: "Category", Values: []string{"call"}}
 	if passes, err := rf.passString(cd, ""); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
-	rf = &RequestFilter{Type: MetaString, FieldName: "Category", Values: []string{"cal"}}
+	rf = &FilterRule{Type: MetaString, FieldName: "Category", Values: []string{"cal"}}
 	if passes, err := rf.passString(cd, ""); err != nil {
 		t.Error(err)
 	} else if passes {
@@ -42,41 +42,41 @@ func TestReqFilterPassString(t *testing.T) {
 	}
 }
 
-func TestReqFilterPassStringPrefix(t *testing.T) {
+func TestFilterPassStringPrefix(t *testing.T) {
 	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
 		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
 		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
-	rf := &RequestFilter{Type: MetaStringPrefix, FieldName: "Category", Values: []string{"call"}}
+	rf := &FilterRule{Type: MetaPrefix, FieldName: "Category", Values: []string{"call"}}
 	if passes, err := rf.passStringPrefix(cd, ""); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
-	rf = &RequestFilter{Type: MetaStringPrefix, FieldName: "Category", Values: []string{"premium"}}
+	rf = &FilterRule{Type: MetaPrefix, FieldName: "Category", Values: []string{"premium"}}
 	if passes, err := rf.passStringPrefix(cd, ""); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passes filter")
 	}
-	rf = &RequestFilter{Type: MetaStringPrefix, FieldName: "Destination", Values: []string{"+49"}}
+	rf = &FilterRule{Type: MetaPrefix, FieldName: "Destination", Values: []string{"+49"}}
 	if passes, err := rf.passStringPrefix(cd, ""); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
-	rf = &RequestFilter{Type: MetaStringPrefix, FieldName: "Destination", Values: []string{"+499"}}
+	rf = &FilterRule{Type: MetaPrefix, FieldName: "Destination", Values: []string{"+499"}}
 	if passes, err := rf.passStringPrefix(cd, ""); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passes filter")
 	}
-	rf = &RequestFilter{Type: MetaStringPrefix, FieldName: "navigation", Values: []string{"off"}}
+	rf = &FilterRule{Type: MetaPrefix, FieldName: "navigation", Values: []string{"off"}}
 	if passes, err := rf.passStringPrefix(cd, "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
-	rf = &RequestFilter{Type: MetaStringPrefix, FieldName: "nonexisting", Values: []string{"off"}}
+	rf = &FilterRule{Type: MetaPrefix, FieldName: "nonexisting", Values: []string{"off"}}
 	if passing, err := rf.passStringPrefix(cd, "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if passing {
@@ -84,45 +84,45 @@ func TestReqFilterPassStringPrefix(t *testing.T) {
 	}
 }
 
-func TestReqFilterPassRSRFields(t *testing.T) {
+func TestFilterPassRSRFields(t *testing.T) {
 	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
 		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
 		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
-	rf, err := NewRequestFilter(MetaRSRFields, "", []string{"Tenant(~^cgr.*\\.org$)"})
+	rf, err := NewFilterRule(MetaRSR, "", []string{"Tenant(~^cgr.*\\.org$)"})
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passRSRFields(cd, "ExtraFields"); err != nil {
+	if passes, err := rf.passRSR(cd, "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passing")
 	}
-	rf, err = NewRequestFilter(MetaRSRFields, "", []string{"navigation(on)"})
+	rf, err = NewFilterRule(MetaRSR, "", []string{"navigation(on)"})
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passRSRFields(cd, "ExtraFields"); err != nil {
+	if passes, err := rf.passRSR(cd, "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passing")
 	}
-	rf, err = NewRequestFilter(MetaRSRFields, "", []string{"navigation(off)"})
+	rf, err = NewFilterRule(MetaRSR, "", []string{"navigation(off)"})
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passRSRFields(cd, "ExtraFields"); err != nil {
+	if passes, err := rf.passRSR(cd, "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passing")
 	}
 }
 
-func TestReqFilterPassDestinations(t *testing.T) {
+func TestFilterPassDestinations(t *testing.T) {
 	cache.Set(utils.REVERSE_DESTINATION_PREFIX+"+49", []string{"DE", "EU_LANDLINE"}, true, "")
 	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
 		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
 		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
-	rf, err := NewRequestFilter(MetaDestinations, "Destination", []string{"DE"})
+	rf, err := NewFilterRule(MetaDestinations, "Destination", []string{"DE"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -131,7 +131,7 @@ func TestReqFilterPassDestinations(t *testing.T) {
 	} else if !passes {
 		t.Error("Not passing")
 	}
-	rf, err = NewRequestFilter(MetaDestinations, "Destination", []string{"RO"})
+	rf, err = NewFilterRule(MetaDestinations, "Destination", []string{"RO"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -142,8 +142,8 @@ func TestReqFilterPassDestinations(t *testing.T) {
 	}
 }
 
-func TestReqFilterPassGreaterThan(t *testing.T) {
-	rf, err := NewRequestFilter(MetaLessThan, "ASR", []string{"40"})
+func TestFilterPassGreaterThan(t *testing.T) {
+	rf, err := NewFilterRule(MetaLessThan, "ASR", []string{"40"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -163,7 +163,7 @@ func TestReqFilterPassGreaterThan(t *testing.T) {
 	} else if passes {
 		t.Error("equal should not be passing")
 	}
-	rf, err = NewRequestFilter(MetaLessOrEqual, "ASR", []string{"40"})
+	rf, err = NewFilterRule(MetaLessOrEqual, "ASR", []string{"40"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -172,7 +172,7 @@ func TestReqFilterPassGreaterThan(t *testing.T) {
 	} else if !passes {
 		t.Error("not passing")
 	}
-	rf, err = NewRequestFilter(MetaGreaterOrEqual, "ASR", []string{"40"})
+	rf, err = NewFilterRule(MetaGreaterOrEqual, "ASR", []string{"40"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -189,7 +189,7 @@ func TestReqFilterPassGreaterThan(t *testing.T) {
 	} else if passes {
 		t.Error("should not pass")
 	}
-	rf, err = NewRequestFilter(MetaGreaterOrEqual, "ACD", []string{"1m50s"})
+	rf, err = NewFilterRule(MetaGreaterOrEqual, "ACD", []string{"1m50s"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -203,68 +203,68 @@ func TestReqFilterPassGreaterThan(t *testing.T) {
 	}
 }
 
-func TestReqFilterNewRequestFilter(t *testing.T) {
-	rf, err := NewRequestFilter(MetaString, "MetaString", []string{"String"})
+func TestFilterNewRequestFilter(t *testing.T) {
+	rf, err := NewFilterRule(MetaString, "MetaString", []string{"String"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf := &RequestFilter{Type: MetaString, FieldName: "MetaString", Values: []string{"String"}}
+	erf := &FilterRule{Type: MetaString, FieldName: "MetaString", Values: []string{"String"}}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
-	rf, err = NewRequestFilter(MetaStringPrefix, "MetaStringPrefix", []string{"stringPrefix"})
+	rf, err = NewFilterRule(MetaPrefix, "MetaPrefix", []string{"stringPrefix"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &RequestFilter{Type: MetaStringPrefix, FieldName: "MetaStringPrefix", Values: []string{"stringPrefix"}}
+	erf = &FilterRule{Type: MetaPrefix, FieldName: "MetaPrefix", Values: []string{"stringPrefix"}}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
-	rf, err = NewRequestFilter(MetaTimings, "MetaTimings", []string{""})
+	rf, err = NewFilterRule(MetaTimings, "MetaTimings", []string{""})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &RequestFilter{Type: MetaTimings, FieldName: "MetaTimings", Values: []string{""}}
+	erf = &FilterRule{Type: MetaTimings, FieldName: "MetaTimings", Values: []string{""}}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
-	rf, err = NewRequestFilter(MetaDestinations, "MetaDestinations", []string{""})
+	rf, err = NewFilterRule(MetaDestinations, "MetaDestinations", []string{""})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &RequestFilter{Type: MetaDestinations, FieldName: "MetaDestinations", Values: []string{""}}
+	erf = &FilterRule{Type: MetaDestinations, FieldName: "MetaDestinations", Values: []string{""}}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
-	rf, err = NewRequestFilter(MetaLessThan, "MetaLessThan", []string{"20"})
+	rf, err = NewFilterRule(MetaLessThan, "MetaLessThan", []string{"20"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &RequestFilter{Type: MetaLessThan, FieldName: "MetaLessThan", Values: []string{"20"}}
+	erf = &FilterRule{Type: MetaLessThan, FieldName: "MetaLessThan", Values: []string{"20"}}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
-	rf, err = NewRequestFilter(MetaLessOrEqual, "MetaLessOrEqual", []string{"20"})
+	rf, err = NewFilterRule(MetaLessOrEqual, "MetaLessOrEqual", []string{"20"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &RequestFilter{Type: MetaLessOrEqual, FieldName: "MetaLessOrEqual", Values: []string{"20"}}
+	erf = &FilterRule{Type: MetaLessOrEqual, FieldName: "MetaLessOrEqual", Values: []string{"20"}}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
-	rf, err = NewRequestFilter(MetaGreaterThan, "MetaGreaterThan", []string{"20"})
+	rf, err = NewFilterRule(MetaGreaterThan, "MetaGreaterThan", []string{"20"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &RequestFilter{Type: MetaGreaterThan, FieldName: "MetaGreaterThan", Values: []string{"20"}}
+	erf = &FilterRule{Type: MetaGreaterThan, FieldName: "MetaGreaterThan", Values: []string{"20"}}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
-	rf, err = NewRequestFilter(MetaGreaterOrEqual, "MetaGreaterOrEqual", []string{"20"})
+	rf, err = NewFilterRule(MetaGreaterOrEqual, "MetaGreaterOrEqual", []string{"20"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &RequestFilter{Type: MetaGreaterOrEqual, FieldName: "MetaGreaterOrEqual", Values: []string{"20"}}
+	erf = &FilterRule{Type: MetaGreaterOrEqual, FieldName: "MetaGreaterOrEqual", Values: []string{"20"}}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
@@ -307,16 +307,104 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		"Account": "1007",
 	}
 	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		failEvent, []string{"*string_prefix:Account:10"}); err != nil {
+		failEvent, []string{"*prefix:Account:10"}); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		passEvent, []string{"*string_prefix:Account:10"}); err != nil {
+		passEvent, []string{"*prefix:Account:10"}); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
+	failEvent = map[string]interface{}{
+		"Tenant": "anotherTenant.org",
+	}
+	passEvent = map[string]interface{}{
+		"Tenant": "cgrates.org",
+	}
+	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
+		failEvent, []string{"*rsr::Tenant(~^cgr.*\\.org$)"}); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
+		passEvent, []string{"*rsr::Tenant(~^cgr.*\\.org$)"}); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
+	cache.Set(utils.REVERSE_DESTINATION_PREFIX+"+49", []string{"DE", "EU_LANDLINE"}, true, "")
+	failEvent = map[string]interface{}{
+		utils.Destination: "+5086517174963",
+	}
+	passEvent = map[string]interface{}{
+		utils.Destination: "+4986517174963",
+	}
+	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
+		failEvent, []string{"*destinations:Destination:EU"}); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
+		passEvent, []string{"*destinations:Destination:EU_LANDLINE"}); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
+	failEvent = map[string]interface{}{
+		utils.Weight: 10,
+	}
+	passEvent = map[string]interface{}{
+		utils.Weight: 20,
+	}
+	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
+		failEvent, []string{"*gte:Weight:20"}); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
+		passEvent, []string{"*gte:Weight:10"}); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
+}
 
+func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
+	data, _ := NewMapStorage()
+	dmFilterPass := NewDataManager(data)
+	cfg, _ := config.NewDefaultCGRConfig()
+	filterS := FilterS{
+		cfg: cfg,
+		dm:  dmFilterPass,
+	}
+	passEvent1 := map[string]interface{}{
+		utils.Tenant:      "cgrates.org",
+		utils.Account:     "1010",
+		utils.Destination: "+49",
+		utils.Weight:      10,
+	}
+	passEvent2 := map[string]interface{}{
+		utils.Tenant:      "itsyscom.com",
+		utils.Account:     "dan",
+		utils.Destination: "+4986517174963",
+		utils.Weight:      20,
+	}
+	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
+		passEvent1, []string{}); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+	if pass, err := filterS.PassFiltersForEvent("itsyscom.com",
+		passEvent2, []string{}); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
 }

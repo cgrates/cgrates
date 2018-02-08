@@ -34,30 +34,32 @@ import (
 
 // NewStatService initializes a StatService
 func NewStatService(dm *DataManager, storeInterval time.Duration,
-	thdS rpcclient.RpcClientConnection, filterS *FilterS, indexedFields []string) (ss *StatService, err error) {
+	thdS rpcclient.RpcClientConnection, filterS *FilterS, stringIndexedFields, prefixIndexedFields *[]string) (ss *StatService, err error) {
 	if thdS != nil && reflect.ValueOf(thdS).IsNil() { // fix nil value in interface
 		thdS = nil
 	}
 	return &StatService{
-		dm:               dm,
-		storeInterval:    storeInterval,
-		thdS:             thdS,
-		filterS:          filterS,
-		indexedFields:    indexedFields,
-		storedStatQueues: make(utils.StringMap),
-		stopBackup:       make(chan struct{})}, nil
+		dm:                  dm,
+		storeInterval:       storeInterval,
+		thdS:                thdS,
+		filterS:             filterS,
+		stringIndexedFields: stringIndexedFields,
+		prefixIndexedFields: prefixIndexedFields,
+		storedStatQueues:    make(utils.StringMap),
+		stopBackup:          make(chan struct{})}, nil
 }
 
 // StatService builds stats for events
 type StatService struct {
-	dm               *DataManager
-	storeInterval    time.Duration
-	thdS             rpcclient.RpcClientConnection // rpc connection towards ThresholdS
-	filterS          *FilterS
-	indexedFields    []string
-	stopBackup       chan struct{}
-	storedStatQueues utils.StringMap // keep a record of stats which need saving, map[statsTenantID]bool
-	ssqMux           sync.RWMutex    // protects storedStatQueues
+	dm                  *DataManager
+	storeInterval       time.Duration
+	thdS                rpcclient.RpcClientConnection // rpc connection towards ThresholdS
+	filterS             *FilterS
+	stringIndexedFields *[]string
+	prefixIndexedFields *[]string
+	stopBackup          chan struct{}
+	storedStatQueues    utils.StringMap // keep a record of stats which need saving, map[statsTenantID]bool
+	ssqMux              sync.RWMutex    // protects storedStatQueues
 }
 
 // ListenAndServe loops keeps the service alive
@@ -141,11 +143,12 @@ func (sS *StatService) StoreStatQueue(sq *StatQueue) (err error) {
 // matchingStatQueuesForEvent returns ordered list of matching resources which are active by the time of the call
 func (sS *StatService) matchingStatQueuesForEvent(ev *utils.CGREvent) (sqs StatQueues, err error) {
 	matchingSQs := make(map[string]*StatQueue)
-	sqIDs, err := matchingItemIDsForEvent(ev.Event, sS.indexedFields, sS.dm, utils.StatQueuesStringIndex+ev.Tenant)
+	sqIDs, err := matchingItemIDsForEvent(ev.Event, sS.stringIndexedFields, sS.prefixIndexedFields,
+		sS.dm, utils.StatFilterIndexes+ev.Tenant)
 	if err != nil {
 		return nil, err
 	}
-	lockIDs := utils.PrefixSliceItems(sqIDs.Slice(), utils.StatQueuesStringIndex)
+	lockIDs := utils.PrefixSliceItems(sqIDs.Slice(), utils.StatFilterIndexes)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for sqID := range sqIDs {
@@ -156,8 +159,8 @@ func (sS *StatService) matchingStatQueuesForEvent(ev *utils.CGREvent) (sqs StatQ
 			}
 			return nil, err
 		}
-		if sqPrfl.ActivationInterval != nil &&
-			!sqPrfl.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
+		if sqPrfl.ActivationInterval != nil && ev.Time != nil &&
+			!sqPrfl.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
 			continue
 		}
 		if pass, err := sS.filterS.PassFiltersForEvent(ev.Tenant, ev.Event, sqPrfl.FilterIDs); err != nil {
@@ -231,19 +234,26 @@ func (sS *StatService) processEvent(ev *utils.CGREvent) (err error) {
 			sS.ssqMux.Unlock()
 		}
 		if sS.thdS != nil {
-			ev := &utils.CGREvent{
-				Tenant: sq.Tenant,
-				ID:     utils.GenUUID(),
-				Event: map[string]interface{}{
-					utils.EventType: utils.StatUpdate,
-					utils.StatID:    sq.ID}}
+			var thIDs []string
+			if len(sq.sqPrfl.ThresholdIDs) != 0 {
+				thIDs = sq.sqPrfl.ThresholdIDs
+			}
+			thEv := &ArgsProcessEvent{
+				ThresholdIDs: thIDs,
+				CGREvent: utils.CGREvent{
+					Tenant: sq.Tenant,
+					ID:     utils.GenUUID(),
+					Event: map[string]interface{}{
+						utils.EventType: utils.StatUpdate,
+						utils.StatID:    sq.ID}}}
 			for metricID, metric := range sq.SQMetrics {
-				ev.Event[metricID] = metric.GetValue()
+				thEv.Event[metricID] = metric.GetValue()
 			}
 			var hits int
-			if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, ev, &hits); err != nil {
+			if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil &&
+				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
-					fmt.Sprintf("<StatS> error: %s processing event %+v with ThresholdS.", err.Error(), ev))
+					fmt.Sprintf("<StatS> error: %s processing event %+v with ThresholdS.", err.Error(), thEv))
 				withErrors = true
 			}
 		}

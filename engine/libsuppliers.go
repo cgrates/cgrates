@@ -21,7 +21,7 @@ package engine
 import (
 	"fmt"
 	"sort"
-	// "time"
+	"strings"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -29,8 +29,8 @@ import (
 // SupplierReply represents one supplier in
 type SortedSupplier struct {
 	SupplierID         string
-	SortingData        map[string]interface{} // store here extra info like cost or stats
 	SupplierParameters string
+	SortingData        map[string]interface{} // store here extra info like cost or stats
 }
 
 // SuppliersReply is returned as part of GetSuppliers call
@@ -45,6 +45,18 @@ func (sSpls *SortedSuppliers) SupplierIDs() (sIDs []string) {
 	sIDs = make([]string, len(sSpls.SortedSuppliers))
 	for i, spl := range sSpls.SortedSuppliers {
 		sIDs[i] = spl.SupplierID
+	}
+	return
+}
+
+// SupplierIDs returns list of suppliers
+func (sSpls *SortedSuppliers) SuppliersWithParams() (sPs []string) {
+	sPs = make([]string, len(sSpls.SortedSuppliers))
+	for i, spl := range sSpls.SortedSuppliers {
+		sPs[i] = spl.SupplierID
+		if spl.SupplierParameters != "" {
+			sPs[i] += utils.InInFieldSep + spl.SupplierParameters
+		}
 	}
 	return
 }
@@ -65,6 +77,17 @@ func (sSpls *SortedSuppliers) SortCost() {
 		}
 		return sSpls.SortedSuppliers[i].SortingData[utils.Cost].(float64) < sSpls.SortedSuppliers[j].SortingData[utils.Cost].(float64)
 	})
+}
+
+// Digest returns list of supplierIDs + parameters for easier outside access
+// format suppl1:suppl1params,suppl2:suppl2params
+func (sSpls *SortedSuppliers) Digest() string {
+	return strings.Join(sSpls.SuppliersWithParams(), utils.FIELDS_SEP)
+}
+
+type SupplierWithParams struct {
+	SupplierName   string
+	SupplierParams string
 }
 
 // SuppliersSorter is the interface which needs to be implemented by supplier sorters

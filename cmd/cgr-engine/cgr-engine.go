@@ -37,7 +37,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/servmanager"
-	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -64,10 +64,10 @@ var (
 	scheduledShutdown = flag.String("scheduled_shutdown", "", "shutdown the engine after this duration")
 	singlecpu         = flag.Bool("singlecpu", false, "Run on single CPU core")
 	syslogger         = flag.String("logger", "", "logger <*syslog|*stdout>")
+	nodeID            = flag.String("node_id", "", "The node ID of the engine")
 	logLevel          = flag.Int("log_level", -1, "Log level (0-emergency to 7-debug)")
 
-	cfg   *config.CGRConfig
-	smRpc *v1.SessionManagerV1
+	cfg *config.CGRConfig
 )
 
 func startCdrcs(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
@@ -180,13 +180,13 @@ func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, in
 			return
 		}
 	}
-	smgReplConns, err := sessionmanager.NewSessionReplicationConns(cfg.SessionSCfg().SessionReplicationConns, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout)
+	smgReplConns, err := sessions.NewSessionReplicationConns(cfg.SessionSCfg().SessionReplicationConns, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to SMGReplicationConnection error: <%s>", utils.SessionS, err.Error()))
 		exitChan <- true
 		return
 	}
-	sm := sessionmanager.NewSMGeneric(cfg, ralsConns, resSConns, suplSConns,
+	sm := sessions.NewSMGeneric(cfg, ralsConns, resSConns, suplSConns,
 		attrSConns, cdrsConn, smgReplConns, cfg.DefaultTimezone)
 	if err = sm.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.SessionS, err))
@@ -217,7 +217,7 @@ func startAsteriskAgent(internalSMGChan chan rpcclient.RpcClientConnection, exit
 	utils.Logger.Info("Starting Asterisk agent")
 	smgRpcConn := <-internalSMGChan
 	internalSMGChan <- smgRpcConn
-	birpcClnt := utils.NewBiRPCInternalClient(smgRpcConn.(*sessionmanager.SMGeneric))
+	birpcClnt := utils.NewBiRPCInternalClient(smgRpcConn.(*sessions.SMGeneric))
 	for connIdx := range cfg.AsteriskAgentCfg().AsteriskConns { // Instantiate connections towards asterisk servers
 		sma, err := agents.NewSMAsterisk(cfg, connIdx, birpcClnt)
 		if err != nil {
@@ -297,79 +297,25 @@ func startFsAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan c
 	utils.Logger.Info("Starting FreeSWITCH agent")
 	smgRpcConn := <-internalSMGChan
 	internalSMGChan <- smgRpcConn
-	birpcClnt := utils.NewBiRPCInternalClient(smgRpcConn.(*sessionmanager.SMGeneric))
-	sm := agents.NewFSSessionManager(cfg.FsAgentCfg(), birpcClnt, cfg.DefaultTimezone)
+	birpcClnt := utils.NewBiRPCInternalClient(smgRpcConn.(*sessions.SMGeneric))
+	sm := agents.NewFSsessions(cfg.FsAgentCfg(), birpcClnt, cfg.DefaultTimezone)
 	if err = sm.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))
 	}
 	exitChan <- true
 }
 
-func startSmKamailio(internalRaterChan, internalCDRSChan, internalRsChan chan rpcclient.RpcClientConnection, cdrDb engine.CdrStorage, exitChan chan bool) {
+func startKamAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
 	var err error
-	utils.Logger.Info("Starting CGRateS SMKamailio service.")
-	var ralsConn, cdrsConn, rlSConn *rpcclient.RpcClientPool
-	if len(cfg.SmKamConfig.RALsConns) != 0 {
-		ralsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.SmKamConfig.RALsConns, internalRaterChan, cfg.InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<SMKamailio> Could not connect to RAL: %s", err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	if len(cfg.SmKamConfig.CDRsConns) != 0 {
-		cdrsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.SmKamConfig.CDRsConns, internalCDRSChan, cfg.InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<SMKamailio> Could not connect to CDRs: %s", err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	if len(cfg.SmKamConfig.RLsConns) != 0 {
-		rlSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.SmKamConfig.RLsConns, internalRsChan, cfg.InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<SMKamailio> Could not connect to RLsConns: %s", err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	sm, _ := sessionmanager.NewKamailioSessionManager(cfg.SmKamConfig, ralsConn, cdrsConn, rlSConn, cfg.DefaultTimezone)
-	smRpc.SMs = append(smRpc.SMs, sm)
-	if err = sm.Connect(); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SMKamailio> error: %s!", err))
-	}
-	exitChan <- true
-}
+	utils.Logger.Info("Starting Kamailio agent")
+	smgRpcConn := <-internalSMGChan
+	internalSMGChan <- smgRpcConn
+	birpcClnt := utils.NewBiRPCInternalClient(smgRpcConn.(*sessions.SMGeneric))
+	ka := agents.NewKamailioAgent(cfg.KamAgentCfg(),
+		birpcClnt, utils.FirstNonEmpty(cfg.KamAgentCfg().Timezone, cfg.DefaultTimezone))
 
-func startSmOpenSIPS(internalRaterChan, internalCDRSChan chan rpcclient.RpcClientConnection, cdrDb engine.CdrStorage, exitChan chan bool) {
-	var err error
-	utils.Logger.Info("Starting CGRateS SMOpenSIPS service.")
-	var ralsConn, cdrsConn *rpcclient.RpcClientPool
-	if len(cfg.SmOsipsConfig.RALsConns) != 0 {
-		ralsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.SmOsipsConfig.RALsConns, internalRaterChan, cfg.InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<SMOpenSIPS> Could not connect to RALs: %s", err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	if len(cfg.SmOsipsConfig.CDRsConns) != 0 {
-		cdrsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.SmOsipsConfig.CDRsConns, internalCDRSChan, cfg.InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<SMOpenSIPS> Could not connect to CDRs: %s", err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	sm, _ := sessionmanager.NewOSipsSessionManager(cfg.SmOsipsConfig, cfg.Reconnects, ralsConn, cdrsConn, cfg.DefaultTimezone)
-	smRpc.SMs = append(smRpc.SMs, sm)
-	if err := sm.Connect(); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> error: %s!", err))
+	if err = ka.Connect(); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> error: %s", utils.KamailioAgent, err))
 	}
 	exitChan <- true
 }
@@ -530,7 +476,8 @@ func startAttributeService(internalAttributeSChan chan rpcclient.RpcClientConnec
 	dm *engine.DataManager, server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
-	aS, err := engine.NewAttributeService(dm, filterS, cfg.AttributeSCfg().IndexedFields)
+	aS, err := engine.NewAttributeService(dm, filterS,
+		cfg.AttributeSCfg().StringIndexedFields, cfg.AttributeSCfg().PrefixIndexedFields)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.AttributeS, err.Error()))
 		exitChan <- true
@@ -564,7 +511,8 @@ func startResourceService(internalRsChan, internalThresholdSChan chan rpcclient.
 			return
 		}
 	}
-	rS, err := engine.NewResourceService(dm, cfg.ResourceSCfg().StoreInterval, thdSConn, filterS, cfg.ResourceSCfg().IndexedFields)
+	rS, err := engine.NewResourceService(dm, cfg.ResourceSCfg().StoreInterval,
+		thdSConn, filterS, cfg.ResourceSCfg().StringIndexedFields, cfg.ResourceSCfg().PrefixIndexedFields)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<ResourceS> Could not init, error: %s", err.Error()))
 		exitChan <- true
@@ -601,7 +549,8 @@ func startStatService(internalStatSChan, internalThresholdSChan chan rpcclient.R
 			return
 		}
 	}
-	sS, err := engine.NewStatService(dm, cfg.StatSCfg().StoreInterval, thdSConn, filterS, cfg.StatSCfg().IndexedFields)
+	sS, err := engine.NewStatService(dm, cfg.StatSCfg().StoreInterval,
+		thdSConn, filterS, cfg.StatSCfg().StringIndexedFields, cfg.StatSCfg().PrefixIndexedFields)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<StatS> Could not init, error: %s", err.Error()))
 		exitChan <- true
@@ -626,8 +575,8 @@ func startThresholdService(internalThresholdSChan chan rpcclient.RpcClientConnec
 	dm *engine.DataManager, server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
-	tS, err := engine.NewThresholdService(dm, cfg.ThresholdSCfg().IndexedFields,
-		cfg.ThresholdSCfg().StoreInterval, filterS)
+	tS, err := engine.NewThresholdService(dm, cfg.ThresholdSCfg().StringIndexedFields,
+		cfg.ThresholdSCfg().PrefixIndexedFields, cfg.ThresholdSCfg().StoreInterval, filterS)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<ThresholdS> Could not init, error: %s", err.Error()))
 		exitChan <- true
@@ -678,8 +627,8 @@ func startSupplierService(internalSupplierSChan, internalRsChan, internalStatSCh
 			return
 		}
 	}
-	splS, err := engine.NewSupplierService(dm, cfg.DefaultTimezone, filterS,
-		cfg.SupplierSCfg().IndexedFields, resourceSConn, statSConn)
+	splS, err := engine.NewSupplierService(dm, cfg.DefaultTimezone, filterS, cfg.SupplierSCfg().StringIndexedFields,
+		cfg.SupplierSCfg().PrefixIndexedFields, resourceSConn, statSConn)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s",
 			utils.SupplierS, err.Error()))
@@ -808,6 +757,9 @@ func main() {
 		log.Fatalf("Could not parse config: <%s>", err.Error())
 		return
 	}
+	if *nodeID != "" {
+		cfg.NodeID = *nodeID
+	}
 	config.SetCgrConfig(cfg)       // Share the config object
 	cache.NewCache(cfg.CacheCfg()) // init cache
 	// init syslog
@@ -820,7 +772,6 @@ func main() {
 		lgLevel = *logLevel
 	}
 	utils.Logger.SetLogLevel(lgLevel)
-
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
 	var dm *engine.DataManager
@@ -924,7 +875,7 @@ func main() {
 		go startSessionS(internalSMGChan, internalRaterChan, internalRsChan,
 			internalSupplierSChan, internalAttributeSChan, internalCdrSChan, server, exitChan)
 	}
-	// Start SM-FreeSWITCH
+	// Start FreeSWITCHAgent
 	if cfg.FsAgentCfg().Enabled {
 		go startFsAgent(internalSMGChan, exitChan)
 		// close all sessions on shutdown
@@ -932,13 +883,8 @@ func main() {
 	}
 
 	// Start SM-Kamailio
-	if cfg.SmKamConfig.Enabled {
-		go startSmKamailio(internalRaterChan, internalCdrSChan, internalRsChan, cdrDb, exitChan)
-	}
-
-	// Start SM-OpenSIPS
-	if cfg.SmOsipsConfig.Enabled {
-		go startSmOpenSIPS(internalRaterChan, internalCdrSChan, cdrDb, exitChan)
+	if cfg.KamAgentCfg().Enabled {
+		go startKamAgent(internalSMGChan, exitChan)
 	}
 
 	if cfg.AsteriskAgentCfg().Enabled {

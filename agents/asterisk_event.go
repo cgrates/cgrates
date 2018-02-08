@@ -21,7 +21,7 @@ package agents
 import (
 	"strings"
 
-	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -174,7 +174,7 @@ func (smaEv *SMAsteriskEvent) ExtraParameters() (extraParams map[string]string) 
 	return
 }
 
-func (smaEv *SMAsteriskEvent) AsSMGenericEvent() *sessionmanager.SMGenericEvent {
+func (smaEv *SMAsteriskEvent) AsSMGenericEvent() *sessions.SMGenericEvent {
 	var evName string
 	switch smaEv.EventType() {
 	case ARIStasisStart:
@@ -184,7 +184,7 @@ func (smaEv *SMAsteriskEvent) AsSMGenericEvent() *sessionmanager.SMGenericEvent 
 	case ARIChannelDestroyed:
 		evName = SMASessionTerminate
 	}
-	smgEv := sessionmanager.SMGenericEvent{utils.EVENT_NAME: evName}
+	smgEv := sessions.SMGenericEvent{utils.EVENT_NAME: evName}
 	smgEv[utils.OriginID] = smaEv.ChannelID()
 	if smaEv.RequestType() != "" {
 		smgEv[utils.RequestType] = smaEv.RequestType()
@@ -213,7 +213,7 @@ func (smaEv *SMAsteriskEvent) AsSMGenericEvent() *sessionmanager.SMGenericEvent 
 
 // Updates fields in smgEv based on own fields
 // Using pointer so we update it directly in cache
-func (smaEv *SMAsteriskEvent) UpdateSMGEvent(smgEv *sessionmanager.SMGenericEvent) error {
+func (smaEv *SMAsteriskEvent) UpdateSMGEvent(smgEv *sessions.SMGenericEvent) error {
 	resSMGEv := *smgEv
 	switch smaEv.EventType() {
 	case ARIChannelStateChange:

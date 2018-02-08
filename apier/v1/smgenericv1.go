@@ -22,51 +22,51 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
 
-func NewSMGenericV1(sm *sessionmanager.SMGeneric) *SMGenericV1 {
+func NewSMGenericV1(sm *sessions.SMGeneric) *SMGenericV1 {
 	return &SMGenericV1{SMG: sm}
 }
 
 // Exports RPC from SMGeneric
 type SMGenericV1 struct {
-	SMG *sessionmanager.SMGeneric
+	SMG *sessions.SMGeneric
 }
 
 // Returns MaxUsage (for calls in seconds), -1 for no limit
-func (self *SMGenericV1) GetMaxUsage(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
+func (self *SMGenericV1) GetMaxUsage(ev sessions.SMGenericEvent, maxUsage *float64) error {
 	return self.SMG.BiRPCV1GetMaxUsage(nil, ev, maxUsage)
 }
 
 // Called on session start, returns the maximum number of seconds the session can last
-func (self *SMGenericV1) InitiateSession(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
+func (self *SMGenericV1) InitiateSession(ev sessions.SMGenericEvent, maxUsage *float64) error {
 	return self.SMG.BiRPCV1InitiateSession(nil, ev, maxUsage)
 }
 
 // Interim updates, returns remaining duration from the rater
-func (self *SMGenericV1) UpdateSession(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
+func (self *SMGenericV1) UpdateSession(ev sessions.SMGenericEvent, maxUsage *float64) error {
 	return self.SMG.BiRPCV1UpdateSession(nil, ev, maxUsage)
 }
 
 // Called on session end, should stop debit loop
-func (self *SMGenericV1) TerminateSession(ev sessionmanager.SMGenericEvent, reply *string) error {
+func (self *SMGenericV1) TerminateSession(ev sessions.SMGenericEvent, reply *string) error {
 	return self.SMG.BiRPCV1TerminateSession(nil, ev, reply)
 }
 
 // Called on individual Events (eg SMS)
-func (self *SMGenericV1) ChargeEvent(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
+func (self *SMGenericV1) ChargeEvent(ev sessions.SMGenericEvent, maxUsage *float64) error {
 	return self.SMG.BiRPCV1ChargeEvent(nil, ev, maxUsage)
 }
 
 // Called on session end, should send the CDR to CDRS
-func (self *SMGenericV1) ProcessCDR(ev sessionmanager.SMGenericEvent, reply *string) error {
+func (self *SMGenericV1) ProcessCDR(ev sessions.SMGenericEvent, reply *string) error {
 	return self.SMG.BiRPCV1ProcessCDR(nil, ev, reply)
 }
 
-func (self *SMGenericV1) GetActiveSessions(attrs map[string]string, reply *[]*sessionmanager.ActiveSession) error {
+func (self *SMGenericV1) GetActiveSessions(attrs map[string]string, reply *[]*sessions.ActiveSession) error {
 	return self.SMG.BiRPCV1GetActiveSessions(nil, attrs, reply)
 }
 
@@ -74,7 +74,7 @@ func (self *SMGenericV1) GetActiveSessionsCount(attrs map[string]string, reply *
 	return self.SMG.BiRPCV1GetActiveSessionsCount(nil, attrs, reply)
 }
 
-func (self *SMGenericV1) GetPassiveSessions(attrs map[string]string, reply *[]*sessionmanager.ActiveSession) error {
+func (self *SMGenericV1) GetPassiveSessions(attrs map[string]string, reply *[]*sessions.ActiveSession) error {
 	return self.SMG.BiRPCV1GetPassiveSessions(nil, attrs, reply)
 }
 
@@ -82,15 +82,15 @@ func (self *SMGenericV1) GetPassiveSessionsCount(attrs map[string]string, reply 
 	return self.SMG.BiRPCV1GetPassiveSessionsCount(nil, attrs, reply)
 }
 
-func (self *SMGenericV1) SetPassiveSessions(args sessionmanager.ArgsSetPassiveSessions, reply *string) error {
+func (self *SMGenericV1) SetPassiveSessions(args sessions.ArgsSetPassiveSessions, reply *string) error {
 	return self.SMG.BiRPCV1SetPassiveSessions(nil, args, reply)
 }
 
-func (self *SMGenericV1) ReplicateActiveSessions(args sessionmanager.ArgsReplicateSessions, reply *string) error {
+func (self *SMGenericV1) ReplicateActiveSessions(args sessions.ArgsReplicateSessions, reply *string) error {
 	return self.SMG.BiRPCV1ReplicateActiveSessions(nil, args, reply)
 }
 
-func (self *SMGenericV1) ReplicatePassiveSessions(args sessionmanager.ArgsReplicateSessions, reply *string) error {
+func (self *SMGenericV1) ReplicatePassiveSessions(args sessions.ArgsReplicateSessions, reply *string) error {
 	return self.SMG.BiRPCV1ReplicatePassiveSessions(nil, args, reply)
 }
 

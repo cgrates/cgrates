@@ -40,33 +40,33 @@ var (
 		"\n <*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups|*stordb|*datadb> ")
 	version = flag.Bool("version", false, "Prints the application version.")
 
-	outDataDBType = flag.String("out_datadb_type", "", "The type of the DataDb Database <*redis|*redis>")
-	outDataDBHost = flag.String("out_datadb_host", config.CgrConfig().DataDbHost, "The DataDb host to connect to.")
-	outDataDBPort = flag.String("out_datadb_port", config.CgrConfig().DataDbPort, "The DataDb port to bind to.")
-	outDataDBName = flag.String("out_datadb_name", config.CgrConfig().DataDbName, "The name/number of the DataDb to connect to.")
-	outDataDBUser = flag.String("out_datadb_user", config.CgrConfig().DataDbUser, "The DataDb user to sign in as.")
-	outDataDBPass = flag.String("out_datadb_passwd", config.CgrConfig().DataDbPass, "The DataDb user's password.")
-
-	outStorDBType = flag.String("out_stordb_type", "", "The type of the StorDB Database <*mysql|*postgres|*mongo>")
-	outStorDBHost = flag.String("out_stordb_host", config.CgrConfig().StorDBHost, "The StorDB host to connect to.")
-	outStorDBPort = flag.String("out_stordb_port", config.CgrConfig().StorDBPort, "The StorDB port to bind to.")
-	outStorDBName = flag.String("out_stordb_name", config.CgrConfig().StorDBName, "The name/number of the StorDB to connect to.")
-	outStorDBUser = flag.String("out_stordb_user", config.CgrConfig().StorDBUser, "The StorDB user to sign in as.")
-	outStorDBPass = flag.String("out_stordb_passwd", config.CgrConfig().StorDBPass, "The StorDB user's password.")
-
 	inDataDBType = flag.String("datadb_type", config.CgrConfig().DataDbType, "The type of the DataDb Database <*redis>")
-	inDataDBHost = flag.String("datadb_host", config.CgrConfig().DataDbHost, "The DataDb host to connect to.")
-	inDataDBPort = flag.String("datadb_port", config.CgrConfig().DataDbPort, "The DataDb port to bind to.")
-	inDataDBName = flag.String("datadb_name", config.CgrConfig().DataDbName, "The name/number of the DataDb to connect to.")
-	inDataDBUser = flag.String("datadb_user", config.CgrConfig().DataDbUser, "The DataDb user to sign in as.")
-	inDataDBPass = flag.String("datadb_passwd", config.CgrConfig().DataDbPass, "The DataDb user's password.")
+	inDataDBHost = flag.String("datadb_host", utils.MetaDynamic, "The DataDb host to connect to.")
+	inDataDBPort = flag.String("datadb_port", utils.MetaDynamic, "The DataDb port to bind to.")
+	inDataDBName = flag.String("datadb_name", utils.MetaDynamic, "The name/number of the DataDb to connect to.")
+	inDataDBUser = flag.String("datadb_user", utils.MetaDynamic, "The DataDb user to sign in as.")
+	inDataDBPass = flag.String("datadb_passwd", utils.MetaDynamic, "The DataDb user's password.")
 
 	inStorDBType = flag.String("stordb_type", config.CgrConfig().StorDBType, "The type of the StorDB Database <*mysql|*postgres>")
-	inStorDBHost = flag.String("stordb_host", config.CgrConfig().StorDBHost, "The StorDB host to connect to.")
-	inStorDBPort = flag.String("stordb_port", config.CgrConfig().StorDBPort, "The StorDB port to bind to.")
-	inStorDBName = flag.String("stordb_name", config.CgrConfig().StorDBName, "The name/number of the StorDB to connect to.")
-	inStorDBUser = flag.String("stordb_user", config.CgrConfig().StorDBUser, "The StorDB user to sign in as.")
-	inStorDBPass = flag.String("stordb_passwd", config.CgrConfig().StorDBPass, "The StorDB user's password.")
+	inStorDBHost = flag.String("stordb_host", utils.MetaDynamic, "The StorDB host to connect to.")
+	inStorDBPort = flag.String("stordb_port", utils.MetaDynamic, "The StorDB port to bind to.")
+	inStorDBName = flag.String("stordb_name", utils.MetaDynamic, "The name/number of the StorDB to connect to.")
+	inStorDBUser = flag.String("stordb_user", utils.MetaDynamic, "The StorDB user to sign in as.")
+	inStorDBPass = flag.String("stordb_passwd", utils.MetaDynamic, "The StorDB user's password.")
+
+	outDataDBType = flag.String("out_datadb_type", utils.MetaDynamic, "The type of the DataDb Database <*redis|*mongo>")
+	outDataDBHost = flag.String("out_datadb_host", utils.MetaDynamic, "The DataDb host to connect to.")
+	outDataDBPort = flag.String("out_datadb_port", utils.MetaDynamic, "The DataDb port to bind to.")
+	outDataDBName = flag.String("out_datadb_name", utils.MetaDynamic, "The name/number of the DataDb to connect to.")
+	outDataDBUser = flag.String("out_datadb_user", utils.MetaDynamic, "The DataDb user to sign in as.")
+	outDataDBPass = flag.String("out_datadb_passwd", utils.MetaDynamic, "The DataDb user's password.")
+
+	outStorDBType = flag.String("out_stordb_type", utils.MetaDynamic, "The type of the StorDB Database <*mysql|*postgres|*mongo>")
+	outStorDBHost = flag.String("out_stordb_host", utils.MetaDynamic, "The StorDB host to connect to.")
+	outStorDBPort = flag.String("out_stordb_port", utils.MetaDynamic, "The StorDB port to bind to.")
+	outStorDBName = flag.String("out_stordb_name", utils.MetaDynamic, "The name/number of the StorDB to connect to.")
+	outStorDBUser = flag.String("out_stordb_user", utils.MetaDynamic, "The StorDB user to sign in as.")
+	outStorDBPass = flag.String("out_stordb_passwd", utils.MetaDynamic, "The StorDB user's password.")
 
 	loadHistorySize = flag.Int("load_history_size", config.CgrConfig().LoadHistorySize, "Limit the number of records in the load history")
 
@@ -86,16 +86,20 @@ func main() {
 		return
 	}
 	*inDataDBType = strings.TrimPrefix(*inDataDBType, "*")
-	var dmIN *engine.DataManager
-	dmIN, _ = engine.ConfigureDataStorage(*inDataDBType, *inDataDBHost, *inDataDBPort,
-		*inDataDBName, *inDataDBUser, *inDataDBPass, *dbDataEncoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
+	*inDataDBHost = config.DBDefaults.DBHost(*inDataDBType, *inDataDBHost)
+	*inDataDBPort = config.DBDefaults.DBPort(*inDataDBType, *inDataDBPort)
+	*inDataDBName = config.DBDefaults.DBName(*inDataDBType, *inDataDBName)
+	*inDataDBUser = config.DBDefaults.DBUser(*inDataDBType, *inDataDBUser)
+	*inDataDBPass = config.DBDefaults.DBPass(*inDataDBType, *inDataDBPass)
+
 	*inStorDBType = strings.TrimPrefix(*inStorDBType, "*")
-	instorDB, err := engine.ConfigureStorStorage(*inStorDBType, *inStorDBHost, *inStorDBPort, *inStorDBName, *inStorDBUser, *inStorDBPass, *inDBDataEncoding,
-		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if *outDataDBType == "" {
+	*inStorDBHost = config.DBDefaults.DBHost(*inStorDBType, *inStorDBHost)
+	*inStorDBPort = config.DBDefaults.DBPort(*inStorDBType, *inStorDBPort)
+	*inStorDBName = config.DBDefaults.DBName(*inStorDBType, *inStorDBName)
+	*inStorDBUser = config.DBDefaults.DBUser(*inStorDBType, *inStorDBUser)
+	*inStorDBPass = config.DBDefaults.DBPass(*inStorDBType, *inStorDBPass)
+
+	if *outDataDBType == utils.MetaDynamic {
 		*outDataDBType = *inDataDBType
 		*outDataDBHost = *inDataDBHost
 		*outDataDBPort = *inDataDBPort
@@ -104,6 +108,29 @@ func main() {
 		*outDataDBPass = *inDataDBPass
 	} else {
 		*outDataDBType = strings.TrimPrefix(*outDataDBType, "*")
+		*outDataDBHost = config.DBDefaults.DBHost(*outDataDBType, *outDataDBHost)
+		*outDataDBPort = config.DBDefaults.DBPort(*outDataDBType, *outDataDBPort)
+		*outDataDBName = config.DBDefaults.DBName(*outDataDBType, *outDataDBName)
+		*outDataDBUser = config.DBDefaults.DBUser(*outDataDBType, *outDataDBUser)
+		*outDataDBPass = config.DBDefaults.DBPass(*outDataDBType, *outDataDBPass)
+	}
+
+	if *outStorDBType != utils.MetaDynamic {
+		*outStorDBType = strings.TrimPrefix(*outStorDBType, "*")
+		*outStorDBHost = config.DBDefaults.DBHost(*outStorDBType, *outStorDBHost)
+		*outStorDBPort = config.DBDefaults.DBPort(*outStorDBType, *outStorDBPort)
+		*outStorDBName = config.DBDefaults.DBName(*outStorDBType, *outStorDBName)
+		*outStorDBUser = config.DBDefaults.DBUser(*outStorDBType, *outStorDBUser)
+		*outStorDBPass = config.DBDefaults.DBPass(*outStorDBType, *outStorDBPass)
+	}
+
+	var dmIN *engine.DataManager
+	dmIN, _ = engine.ConfigureDataStorage(*inDataDBType, *inDataDBHost, *inDataDBPort,
+		*inDataDBName, *inDataDBUser, *inDataDBPass, *dbDataEncoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
+	instorDB, err := engine.ConfigureStorStorage(*inStorDBType, *inStorDBHost, *inStorDBPort, *inStorDBName, *inStorDBUser, *inStorDBPass, *inDBDataEncoding,
+		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
+	if err != nil {
+		log.Fatal(err)
 	}
 	var dmOUT *engine.DataManager
 	dmOUT, _ = engine.ConfigureDataStorage(*outDataDBType, *outDataDBHost, *outDataDBPort,
@@ -112,9 +139,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDB = instorDB
-	if *outStorDBType != "" {
-		*outStorDBType = strings.TrimPrefix(*outStorDBType, "*")
+
+	if *outStorDBType == utils.MetaDynamic {
+		storDB = instorDB
+	} else {
 		storDB, err = engine.ConfigureStorStorage(*outStorDBType, *outStorDBHost, *outStorDBPort, *outStorDBName, *outStorDBUser, *outStorDBPass, *dbDataEncoding,
 			config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 		if err != nil {

@@ -779,22 +779,24 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 			accountId = b.account.ID
 			acntTnt := utils.NewTenantID(accountId)
 			if thresholdS != nil {
-				ev := &utils.CGREvent{
-					Tenant: acntTnt.Tenant,
-					ID:     utils.GenUUID(),
-					Event: map[string]interface{}{
-						utils.EventType:   utils.BalanceUpdate,
-						utils.EventSource: utils.AccountService,
-						utils.Account:     acntTnt.ID,
-						utils.BalanceID:   b.ID,
-						utils.Units:       b.Value}}
+				thEv := &ArgsProcessEvent{
+					CGREvent: utils.CGREvent{
+						Tenant: acntTnt.Tenant,
+						ID:     utils.GenUUID(),
+						Event: map[string]interface{}{
+							utils.EventType:   utils.BalanceUpdate,
+							utils.EventSource: utils.AccountService,
+							utils.Account:     acntTnt.ID,
+							utils.BalanceID:   b.ID,
+							utils.Units:       b.Value}}}
 				if !b.ExpirationDate.IsZero() {
-					ev.Event[utils.ExpiryTime] = b.ExpirationDate.Format(time.RFC3339)
+					thEv.Event[utils.ExpiryTime] = b.ExpirationDate.Format(time.RFC3339)
 				}
 				var hits int
-				if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, ev, &hits); err != nil {
+				if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil &&
+					err.Error() != utils.ErrNotFound.Error() {
 					utils.Logger.Warning(
-						fmt.Sprintf("<AccountS> error: %s processing balance event %+v with ThresholdS.", err.Error(), ev))
+						fmt.Sprintf("<AccountS> error: %s processing balance event %+v with ThresholdS.", err.Error(), thEv))
 				}
 			}
 			//utils.LogStack()
@@ -827,19 +829,21 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 	if len(savedAccounts) != 0 && thresholdS != nil {
 		for _, acnt := range savedAccounts {
 			acntTnt := utils.NewTenantID(acnt.ID)
-			ev := &utils.CGREvent{
-				Tenant: acntTnt.Tenant,
-				ID:     utils.GenUUID(),
-				Event: map[string]interface{}{
-					utils.EventType:     utils.AccountUpdate,
-					utils.EventSource:   utils.AccountService,
-					utils.Account:       acntTnt.ID,
-					utils.AllowNegative: acnt.AllowNegative,
-					utils.Disabled:      acnt.Disabled}}
+			thEv := &ArgsProcessEvent{
+				CGREvent: utils.CGREvent{
+					Tenant: acntTnt.Tenant,
+					ID:     utils.GenUUID(),
+					Event: map[string]interface{}{
+						utils.EventType:     utils.AccountUpdate,
+						utils.EventSource:   utils.AccountService,
+						utils.Account:       acntTnt.ID,
+						utils.AllowNegative: acnt.AllowNegative,
+						utils.Disabled:      acnt.Disabled}}}
 			var hits int
-			if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, ev, &hits); err != nil {
+			if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil &&
+				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
-					fmt.Sprintf("<AccountS> error: %s processing account event %+v with ThresholdS.", err.Error(), ev))
+					fmt.Sprintf("<AccountS> error: %s processing account event %+v with ThresholdS.", err.Error(), thEv))
 			}
 		}
 

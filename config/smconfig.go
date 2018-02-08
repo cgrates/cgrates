@@ -24,7 +24,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Returns the first cached default value for a SM-FreeSWITCH connection
+// Returns the first cached default value for a FreeSWITCHAgent connection
 func NewDfltHaPoolConfig() *HaPoolConfig {
 	if dfltHaPoolConfig == nil {
 		return new(HaPoolConfig) // No defaults, most probably we are building the defaults now
@@ -56,7 +56,7 @@ func (self *HaPoolConfig) loadFromJsonCfg(jsnCfg *HaPoolJsonCfg) error {
 	return nil
 }
 
-// Returns the first cached default value for a SM-FreeSWITCH connection
+// Returns the first cached default value for a FreeSWITCHAgent connection
 func NewDfltFsConnConfig() *FsConnConfig {
 	if dfltFsConnConfig == nil {
 		return new(FsConnConfig) // No defaults, most probably we are building the defaults now
@@ -105,6 +105,7 @@ type SessionSCfg struct {
 	SessionTTLLastUsed      *time.Duration
 	SessionTTLUsage         *time.Duration
 	SessionIndexes          utils.StringMap
+	ClientProtocol          float64
 }
 
 func (self *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) error {
@@ -197,6 +198,9 @@ func (self *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) error {
 	if jsnCfg.Session_indexes != nil {
 		self.SessionIndexes = utils.StringMapFromSlice(*jsnCfg.Session_indexes)
 	}
+	if jsnCfg.Client_protocol != nil {
+		self.ClientProtocol = *jsnCfg.Client_protocol
+	}
 	return nil
 }
 
@@ -268,102 +272,13 @@ func (self *FsAgentConfig) loadFromJsonCfg(jsnCfg *FreeswitchAgentJsonCfg) error
 	return nil
 }
 
-// Returns the first cached default value for a SM-FreeSWITCH connection
+// Returns the first cached default value for a FreeSWITCHAgent connection
 func NewDfltKamConnConfig() *KamConnConfig {
 	if dfltKamConnConfig == nil {
 		return new(KamConnConfig) // No defaults, most probably we are building the defaults now
 	}
 	dfltVal := *dfltKamConnConfig
 	return &dfltVal
-}
-
-// Represents one connection instance towards Kamailio
-type KamConnConfig struct {
-	Address    string
-	Reconnects int
-}
-
-func (self *KamConnConfig) loadFromJsonCfg(jsnCfg *KamConnJsonCfg) error {
-	if jsnCfg == nil {
-		return nil
-	}
-	if jsnCfg.Address != nil {
-		self.Address = *jsnCfg.Address
-	}
-	if jsnCfg.Reconnects != nil {
-		self.Reconnects = *jsnCfg.Reconnects
-	}
-	return nil
-}
-
-// SM-Kamailio config section
-type SmKamConfig struct {
-	Enabled         bool
-	RALsConns       []*HaPoolConfig
-	CDRsConns       []*HaPoolConfig
-	RLsConns        []*HaPoolConfig
-	CreateCdr       bool
-	DebitInterval   time.Duration
-	MinCallDuration time.Duration
-	MaxCallDuration time.Duration
-	EvapiConns      []*KamConnConfig
-}
-
-func (self *SmKamConfig) loadFromJsonCfg(jsnCfg *SmKamJsonCfg) error {
-	if jsnCfg == nil {
-		return nil
-	}
-	var err error
-	if jsnCfg.Enabled != nil {
-		self.Enabled = *jsnCfg.Enabled
-	}
-	if jsnCfg.Rals_conns != nil {
-		self.RALsConns = make([]*HaPoolConfig, len(*jsnCfg.Rals_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Rals_conns {
-			self.RALsConns[idx] = NewDfltHaPoolConfig()
-			self.RALsConns[idx].loadFromJsonCfg(jsnHaCfg)
-		}
-	}
-	if jsnCfg.Cdrs_conns != nil {
-		self.CDRsConns = make([]*HaPoolConfig, len(*jsnCfg.Cdrs_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Cdrs_conns {
-			self.CDRsConns[idx] = NewDfltHaPoolConfig()
-			self.CDRsConns[idx].loadFromJsonCfg(jsnHaCfg)
-		}
-	}
-	if jsnCfg.Resources_conns != nil {
-		self.RLsConns = make([]*HaPoolConfig, len(*jsnCfg.Resources_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Resources_conns {
-			self.RLsConns[idx] = NewDfltHaPoolConfig()
-			self.RLsConns[idx].loadFromJsonCfg(jsnHaCfg)
-		}
-	}
-	if jsnCfg.Create_cdr != nil {
-		self.CreateCdr = *jsnCfg.Create_cdr
-	}
-	if jsnCfg.Debit_interval != nil {
-		if self.DebitInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Debit_interval); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Min_call_duration != nil {
-		if self.MinCallDuration, err = utils.ParseDurationWithNanosecs(*jsnCfg.Min_call_duration); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Max_call_duration != nil {
-		if self.MaxCallDuration, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_call_duration); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Evapi_conns != nil {
-		self.EvapiConns = make([]*KamConnConfig, len(*jsnCfg.Evapi_conns))
-		for idx, jsnConnCfg := range *jsnCfg.Evapi_conns {
-			self.EvapiConns[idx] = NewDfltKamConnConfig()
-			self.EvapiConns[idx].loadFromJsonCfg(jsnConnCfg)
-		}
-	}
-	return nil
 }
 
 // Represents one connection instance towards OpenSIPS, not in use for now but planned for future

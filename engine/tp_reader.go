@@ -67,11 +67,11 @@ type TpReader struct {
 	revDests,
 	revAliases,
 	acntActionPlans map[string][]string
-	thdsIndexers map[string]*ReqFilterIndexer // tenant, indexer
-	sqpIndexers  map[string]*ReqFilterIndexer // tenant, indexer
-	resIndexers  map[string]*ReqFilterIndexer // tenant, indexer
-	sppIndexers  map[string]*ReqFilterIndexer // tenant, indexer
-	attrIndexers map[string]*ReqFilterIndexer // tenant:context , indexer
+	thdsIndexers map[string]*FilterIndexer // tenant, indexer
+	sqpIndexers  map[string]*FilterIndexer // tenant, indexer
+	resIndexers  map[string]*FilterIndexer // tenant, indexer
+	sppIndexers  map[string]*FilterIndexer // tenant, indexer
+	attrIndexers map[string]*FilterIndexer // tenant:context , indexer
 }
 
 func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string) *TpReader {
@@ -148,11 +148,11 @@ func (tpr *TpReader) Init() {
 	tpr.revDests = make(map[string][]string)
 	tpr.revAliases = make(map[string][]string)
 	tpr.acntActionPlans = make(map[string][]string)
-	tpr.thdsIndexers = make(map[string]*ReqFilterIndexer)
-	tpr.sqpIndexers = make(map[string]*ReqFilterIndexer)
-	tpr.resIndexers = make(map[string]*ReqFilterIndexer)
-	tpr.sppIndexers = make(map[string]*ReqFilterIndexer)
-	tpr.attrIndexers = make(map[string]*ReqFilterIndexer)
+	tpr.thdsIndexers = make(map[string]*FilterIndexer)
+	tpr.sqpIndexers = make(map[string]*FilterIndexer)
+	tpr.resIndexers = make(map[string]*FilterIndexer)
+	tpr.sppIndexers = make(map[string]*FilterIndexer)
+	tpr.attrIndexers = make(map[string]*FilterIndexer)
 }
 
 func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
@@ -252,7 +252,7 @@ func (tpr *TpReader) LoadDestinationRates() (err error) {
 				_, destinationExists = tpr.destinations[dr.DestinationId]
 			}
 			if !destinationExists && tpr.dm.dataDB != nil {
-				if destinationExists, err = tpr.dm.HasData(utils.DESTINATION_PREFIX, dr.DestinationId); err != nil {
+				if destinationExists, err = tpr.dm.HasData(utils.DESTINATION_PREFIX, dr.DestinationId, ""); err != nil {
 					return err
 				}
 			}
@@ -321,7 +321,7 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 				}
 				destsExist := len(dms) != 0
 				if !destsExist && tpr.dm.dataDB != nil {
-					if dbExists, err := tpr.dm.HasData(utils.DESTINATION_PREFIX, drate.DestinationId); err != nil {
+					if dbExists, err := tpr.dm.HasData(utils.DESTINATION_PREFIX, drate.DestinationId, ""); err != nil {
 						return false, err
 					} else if dbExists {
 						destsExist = true
@@ -394,7 +394,7 @@ func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *utils.TPRatingProfile)
 			}
 			_, exists := tpr.ratingPlans[tpRa.RatingPlanId]
 			if !exists && tpr.dm.dataDB != nil {
-				if exists, err = tpr.dm.HasData(utils.RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
+				if exists, err = tpr.dm.HasData(utils.RATING_PLAN_PREFIX, tpRa.RatingPlanId, ""); err != nil {
 					return err
 				}
 			}
@@ -434,7 +434,7 @@ func (tpr *TpReader) LoadRatingProfiles() (err error) {
 			}
 			_, exists := tpr.ratingPlans[tpRa.RatingPlanId]
 			if !exists && tpr.dm.dataDB != nil { // Only query if there is a connection, eg on dry run there is none
-				if exists, err = tpr.dm.HasData(utils.RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
+				if exists, err = tpr.dm.HasData(utils.RATING_PLAN_PREFIX, tpRa.RatingPlanId, ""); err != nil {
 					return err
 				}
 			}
@@ -522,7 +522,7 @@ func (tpr *TpReader) LoadLCRs() (err error) {
 				if rule.DestinationId != "" && rule.DestinationId != utils.ANY {
 					_, found := tpr.destinations[rule.DestinationId]
 					if !found && tpr.dm.dataDB != nil {
-						if found, err = tpr.dm.HasData(utils.DESTINATION_PREFIX, rule.DestinationId); err != nil {
+						if found, err = tpr.dm.HasData(utils.DESTINATION_PREFIX, rule.DestinationId, ""); err != nil {
 							return fmt.Errorf("[LCR] error querying dataDb %s", err.Error())
 						}
 					}
@@ -688,7 +688,7 @@ func (tpr *TpReader) LoadActionPlans() (err error) {
 
 			_, exists := tpr.actions[at.ActionsId]
 			if !exists && tpr.dm.dataDB != nil {
-				if exists, err = tpr.dm.HasData(utils.ACTION_PREFIX, at.ActionsId); err != nil {
+				if exists, err = tpr.dm.HasData(utils.ACTION_PREFIX, at.ActionsId, ""); err != nil {
 					return fmt.Errorf("[ActionPlans] Error querying actions: %v - %s", at.ActionsId, err.Error())
 				}
 			}
@@ -1623,19 +1623,39 @@ func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) (err error) {
 	}
 	tpr.resProfiles = mapRsPfls
 	for tntID, res := range mapRsPfls {
-		if has, err := tpr.dm.HasData(utils.ResourcesPrefix, tntID.TenantID()); err != nil {
+		if has, err := tpr.dm.HasData(utils.ResourcesPrefix, tntID.ID, tntID.Tenant); err != nil {
 			return err
 		} else if !has {
 			tpr.resources = append(tpr.resources, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
 		}
 		// index resource for filters
 		if _, has := tpr.resIndexers[tntID.Tenant]; !has {
-			if tpr.resIndexers[tntID.Tenant] = NewReqFilterIndexer(tpr.dm, utils.ResourceProfilesPrefix, tntID.Tenant); err != nil {
+			if tpr.resIndexers[tntID.Tenant] = NewFilterIndexer(tpr.dm, utils.ResourceProfilesPrefix, tntID.Tenant); err != nil {
 				return
 			}
 		}
-		for _, fltrID := range res.FilterIDs {
-			if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+		fltrIDs := make([]string, len(res.FilterIDs))
+		for i, fltrID := range res.FilterIDs {
+			fltrIDs[i] = fltrID
+		}
+		if len(fltrIDs) == 0 {
+			fltrIDs = []string{utils.META_NONE}
+		}
+		for _, fltrID := range fltrIDs {
+			if fltrID == utils.META_NONE {
+				tpFltr := &utils.TPFilterProfile{
+					Tenant: res.Tenant,
+					ID:     res.ID,
+					Filters: []*utils.TPFilter{
+						&utils.TPFilter{
+							Type:      utils.MetaDefault,
+							FieldName: utils.META_ANY,
+							Values:    []string{utils.META_ANY},
+						},
+					},
+				}
+				tpr.resIndexers[tntID.Tenant].IndexTPFilter(tpFltr, res.ID)
+			} else if strings.HasPrefix(fltrID, utils.Meta) {
 				inFltr, err := NewInlineFilter(fltrID)
 				if err != nil {
 					return err
@@ -1682,19 +1702,39 @@ func (tpr *TpReader) LoadStatsFiltered(tag string) (err error) {
 	}
 	tpr.sqProfiles = mapSTs
 	for tntID, sq := range mapSTs {
-		if has, err := tpr.dm.HasData(utils.StatQueuePrefix, tntID.TenantID()); err != nil {
+		if has, err := tpr.dm.HasData(utils.StatQueuePrefix, tntID.ID, tntID.Tenant); err != nil {
 			return err
 		} else if !has {
 			tpr.statQueues = append(tpr.statQueues, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
 		}
 		// index statQueues for filters
 		if _, has := tpr.sqpIndexers[tntID.Tenant]; !has {
-			if tpr.sqpIndexers[tntID.Tenant] = NewReqFilterIndexer(tpr.dm, utils.StatQueueProfilePrefix, tntID.Tenant); err != nil {
+			if tpr.sqpIndexers[tntID.Tenant] = NewFilterIndexer(tpr.dm, utils.StatQueueProfilePrefix, tntID.Tenant); err != nil {
 				return
 			}
 		}
-		for _, fltrID := range sq.FilterIDs {
-			if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+		fltrIDs := make([]string, len(sq.FilterIDs))
+		for i, fltrID := range sq.FilterIDs {
+			fltrIDs[i] = fltrID
+		}
+		if len(fltrIDs) == 0 {
+			fltrIDs = []string{utils.META_NONE}
+		}
+		for _, fltrID := range fltrIDs {
+			if fltrID == utils.META_NONE {
+				tpFltr := &utils.TPFilterProfile{
+					Tenant: sq.Tenant,
+					ID:     sq.ID,
+					Filters: []*utils.TPFilter{
+						&utils.TPFilter{
+							Type:      utils.MetaDefault,
+							FieldName: utils.META_ANY,
+							Values:    []string{utils.META_ANY},
+						},
+					},
+				}
+				tpr.sqpIndexers[tntID.Tenant].IndexTPFilter(tpFltr, sq.ID)
+			} else if strings.HasPrefix(fltrID, utils.Meta) {
 				inFltr, err := NewInlineFilter(fltrID)
 				if err != nil {
 					return err
@@ -1741,19 +1781,39 @@ func (tpr *TpReader) LoadThresholdsFiltered(tag string) (err error) {
 	}
 	tpr.thProfiles = mapTHs
 	for tntID, th := range mapTHs {
-		if has, err := tpr.dm.HasData(utils.ThresholdPrefix, tntID.TenantID()); err != nil {
+		if has, err := tpr.dm.HasData(utils.ThresholdPrefix, tntID.ID, tntID.Tenant); err != nil {
 			return err
 		} else if !has {
 			tpr.thresholds = append(tpr.thresholds, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
 		}
 		// index thresholds for filters
 		if _, has := tpr.thdsIndexers[tntID.Tenant]; !has {
-			if tpr.thdsIndexers[tntID.Tenant] = NewReqFilterIndexer(tpr.dm, utils.ThresholdProfilePrefix, tntID.Tenant); err != nil {
+			if tpr.thdsIndexers[tntID.Tenant] = NewFilterIndexer(tpr.dm, utils.ThresholdProfilePrefix, tntID.Tenant); err != nil {
 				return
 			}
 		}
-		for _, fltrID := range th.FilterIDs {
-			if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+		fltrIDs := make([]string, len(th.FilterIDs))
+		for i, fltrID := range th.FilterIDs {
+			fltrIDs[i] = fltrID
+		}
+		if len(fltrIDs) == 0 {
+			fltrIDs = []string{utils.META_NONE}
+		}
+		for _, fltrID := range fltrIDs {
+			if fltrID == utils.META_NONE {
+				tpFltr := &utils.TPFilterProfile{
+					Tenant: th.Tenant,
+					ID:     th.ID,
+					Filters: []*utils.TPFilter{
+						&utils.TPFilter{
+							Type:      utils.MetaDefault,
+							FieldName: utils.META_ANY,
+							Values:    []string{utils.META_ANY},
+						},
+					},
+				}
+				tpr.thdsIndexers[tntID.Tenant].IndexTPFilter(tpFltr, th.ID)
+			} else if strings.HasPrefix(fltrID, utils.Meta) {
 				inFltr, err := NewInlineFilter(fltrID)
 				if err != nil {
 					return err
@@ -1817,19 +1877,39 @@ func (tpr *TpReader) LoadSupplierProfilesFiltered(tag string) (err error) {
 	}
 	tpr.sppProfiles = mapRsPfls
 	for tntID, sup := range mapRsPfls {
-		if has, err := tpr.dm.HasData(utils.SupplierProfilePrefix, tntID.TenantID()); err != nil {
+		if has, err := tpr.dm.HasData(utils.SupplierProfilePrefix, tntID.ID, tntID.Tenant); err != nil {
 			return err
 		} else if !has {
 			tpr.suppliers = append(tpr.suppliers, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
 		}
 		// index supplier profile for filters
 		if _, has := tpr.sppIndexers[tntID.Tenant]; !has {
-			if tpr.sppIndexers[tntID.Tenant] = NewReqFilterIndexer(tpr.dm, utils.SupplierProfilePrefix, tntID.Tenant); err != nil {
+			if tpr.sppIndexers[tntID.Tenant] = NewFilterIndexer(tpr.dm, utils.SupplierProfilePrefix, tntID.Tenant); err != nil {
 				return
 			}
 		}
-		for _, fltrID := range sup.FilterIDs {
-			if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+		fltrIDs := make([]string, len(sup.FilterIDs))
+		for i, fltrID := range sup.FilterIDs {
+			fltrIDs[i] = fltrID
+		}
+		if len(fltrIDs) == 0 {
+			fltrIDs = []string{utils.META_NONE}
+		}
+		for _, fltrID := range fltrIDs {
+			if fltrID == utils.META_NONE {
+				tpFltr := &utils.TPFilterProfile{
+					Tenant: sup.Tenant,
+					ID:     sup.ID,
+					Filters: []*utils.TPFilter{
+						&utils.TPFilter{
+							Type:      utils.MetaDefault,
+							FieldName: utils.META_ANY,
+							Values:    []string{utils.META_ANY},
+						},
+					},
+				}
+				tpr.sppIndexers[tntID.Tenant].IndexTPFilter(tpFltr, sup.ID)
+			} else if strings.HasPrefix(fltrID, utils.Meta) {
 				inFltr, err := NewInlineFilter(fltrID)
 				if err != nil {
 					return err
@@ -1876,7 +1956,7 @@ func (tpr *TpReader) LoadAttributeProfilesFiltered(tag string) (err error) {
 	}
 	tpr.attributeProfiles = mapRsPfls
 	for tntID, attrP := range mapRsPfls {
-		if has, err := tpr.dm.HasData(utils.AttributeProfilePrefix, tntID.TenantID()); err != nil {
+		if has, err := tpr.dm.HasData(utils.AttributeProfilePrefix, tntID.ID, tntID.Tenant); err != nil {
 			return err
 		} else if !has {
 			tpr.attrTntID = append(tpr.attrTntID, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
@@ -1885,12 +1965,32 @@ func (tpr *TpReader) LoadAttributeProfilesFiltered(tag string) (err error) {
 		for _, context := range attrP.Contexts {
 			attrKey := utils.ConcatenatedKey(tntID.Tenant, context)
 			if _, has := tpr.attrIndexers[attrKey]; !has {
-				if tpr.attrIndexers[attrKey] = NewReqFilterIndexer(tpr.dm, utils.AttributeProfilePrefix, attrKey); err != nil {
+				if tpr.attrIndexers[attrKey] = NewFilterIndexer(tpr.dm, utils.AttributeProfilePrefix, attrKey); err != nil {
 					return
 				}
 			}
-			for _, fltrID := range attrP.FilterIDs {
-				if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+			fltrIDs := make([]string, len(attrP.FilterIDs))
+			for i, fltrID := range attrP.FilterIDs {
+				fltrIDs[i] = fltrID
+			}
+			if len(fltrIDs) == 0 {
+				fltrIDs = []string{utils.META_NONE}
+			}
+			for _, fltrID := range fltrIDs {
+				if fltrID == utils.META_NONE {
+					tpFltr := &utils.TPFilterProfile{
+						Tenant: attrP.Tenant,
+						ID:     attrP.ID,
+						Filters: []*utils.TPFilter{
+							&utils.TPFilter{
+								Type:      utils.MetaDefault,
+								FieldName: utils.META_ANY,
+								Values:    []string{utils.META_ANY},
+							},
+						},
+					}
+					tpr.attrIndexers[tntID.Tenant].IndexTPFilter(tpFltr, attrP.ID)
+				} else if strings.HasPrefix(fltrID, utils.Meta) {
 					inFltr, err := NewInlineFilter(fltrID)
 					if err != nil {
 						return err

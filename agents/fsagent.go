@@ -21,20 +21,17 @@ package agents
 import (
 	"errors"
 	"fmt"
-	"reflect"
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
-	"github.com/cgrates/rpcclient"
 )
 
-func NewFSSessionManager(fsAgentConfig *config.FsAgentConfig,
-	smg *utils.BiRPCInternalClient, timezone string) (fsa *FSSessionManager) {
-	fsa = &FSSessionManager{
+func NewFSsessions(fsAgentConfig *config.FsAgentConfig,
+	smg *utils.BiRPCInternalClient, timezone string) (fsa *FSsessions) {
+	fsa = &FSsessions{
 		cfg:         fsAgentConfig,
 		conns:       make(map[string]*fsock.FSock),
 		senderPools: make(map[string]*fsock.FSockPool),
@@ -47,7 +44,7 @@ func NewFSSessionManager(fsAgentConfig *config.FsAgentConfig,
 
 // The freeswitch session manager type holding a buffer for the network connection
 // and the active sessions
-type FSSessionManager struct {
+type FSsessions struct {
 	cfg         *config.FsAgentConfig
 	conns       map[string]*fsock.FSock     // Keep the list here for connection management purposes
 	senderPools map[string]*fsock.FSockPool // Keep sender pools here
@@ -55,7 +52,7 @@ type FSSessionManager struct {
 	timezone    string
 }
 
-func (sm *FSSessionManager) createHandlers() map[string][]func(string, string) {
+func (sm *FSsessions) createHandlers() map[string][]func(string, string) {
 	ca := func(body, connId string) {
 		sm.onChannelAnswer(
 			NewFSEvent(body), connId)
@@ -79,7 +76,7 @@ func (sm *FSSessionManager) createHandlers() map[string][]func(string, string) {
 }
 
 // Sets the call timeout valid of starting of the call
-func (sm *FSSessionManager) setMaxCallDuration(uuid, connId string,
+func (sm *FSsessions) setMaxCallDuration(uuid, connId string,
 	maxDur time.Duration, destNr string) error {
 	if len(sm.cfg.EmptyBalanceContext) != 0 {
 		_, err := sm.conns[connId].SendApiCmd(
@@ -87,8 +84,8 @@ func (sm *FSSessionManager) setMaxCallDuration(uuid, connId string,
 				uuid, int(maxDur.Seconds()), destNr, sm.cfg.EmptyBalanceContext))
 		if err != nil {
 			utils.Logger.Err(
-				fmt.Sprintf("<SM-FreeSWITCH> Could not transfer the call to empty balance context, error: <%s>, connId: %s",
-					err.Error(), connId))
+				fmt.Sprintf("<%s> Could not transfer the call to empty balance context, error: <%s>, connId: %s",
+					utils.FreeSWITCHAgent, err.Error(), connId))
 			return err
 		}
 		return nil
@@ -97,8 +94,8 @@ func (sm *FSSessionManager) setMaxCallDuration(uuid, connId string,
 			fmt.Sprintf("sched_broadcast +%d %s playback!manager_request::%s aleg\n\n",
 				int(maxDur.Seconds()), uuid, sm.cfg.EmptyBalanceAnnFile)); err != nil {
 			utils.Logger.Err(
-				fmt.Sprintf("<SM-FreeSWITCH> Could not send uuid_broadcast to freeswitch, error: <%s>, connId: %s",
-					err.Error(), connId))
+				fmt.Sprintf("<%s> Could not send uuid_broadcast to freeswitch, error: <%s>, connId: %s",
+					utils.FreeSWITCHAgent, err.Error(), connId))
 			return err
 		}
 		return nil
@@ -108,8 +105,8 @@ func (sm *FSSessionManager) setMaxCallDuration(uuid, connId string,
 				uuid, int(maxDur.Seconds())))
 		if err != nil {
 			utils.Logger.Err(
-				fmt.Sprintf("<SM-FreeSWITCH> Could not send sched_hangup command to freeswitch, error: <%s>, connId: %s",
-					err.Error(), connId))
+				fmt.Sprintf("<%s> Could not send sched_hangup command to freeswitch, error: <%s>, connId: %s",
+					utils.FreeSWITCHAgent, err.Error(), connId))
 			return err
 		}
 		return nil
@@ -118,34 +115,34 @@ func (sm *FSSessionManager) setMaxCallDuration(uuid, connId string,
 }
 
 // Sends the transfer command to unpark the call to freeswitch
-func (sm *FSSessionManager) unparkCall(uuid, connId, call_dest_nb, notify string) (err error) {
+func (sm *FSsessions) unparkCall(uuid, connId, call_dest_nb, notify string) (err error) {
 	_, err = sm.conns[connId].SendApiCmd(
 		fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", uuid, notify))
 	if err != nil {
 		utils.Logger.Err(
-			fmt.Sprintf("<SM-FreeSWITCH> Could not send unpark api notification to freeswitch, error: <%s>, connId: %s",
-				err.Error(), connId))
+			fmt.Sprintf("<%s> Could not send unpark api notification to freeswitch, error: <%s>, connId: %s",
+				utils.FreeSWITCHAgent, err.Error(), connId))
 		return
 	}
 	if _, err = sm.conns[connId].SendApiCmd(
 		fmt.Sprintf("uuid_transfer %s %s\n\n", uuid, call_dest_nb)); err != nil {
 		utils.Logger.Err(
-			fmt.Sprintf("<SM-FreeSWITCH> Could not send unpark api call to freeswitch, error: <%s>, connId: %s",
-				err.Error(), connId))
+			fmt.Sprintf("<%s> Could not send unpark api call to freeswitch, error: <%s>, connId: %s",
+				utils.FreeSWITCHAgent, err.Error(), connId))
 	}
 	return
 }
 
-func (sm *FSSessionManager) onChannelPark(fsev FSEvent, connId string) {
+func (sm *FSsessions) onChannelPark(fsev FSEvent, connId string) {
 	if fsev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Not for us
 		return
 	}
 	authArgs := fsev.V1AuthorizeArgs()
-	var authReply sessionmanager.V1AuthorizeReply
+	var authReply sessions.V1AuthorizeReply
 	if err := sm.smg.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
 		utils.Logger.Err(
-			fmt.Sprintf("<SM-FreeSWITCH> Could not authorize event %s, error: %s",
-				fsev.GetUUID(), err.Error()))
+			fmt.Sprintf("<%s> Could not authorize event %s, error: %s",
+				utils.FreeSWITCHAgent, fsev.GetUUID(), err.Error()))
 		sm.unparkCall(fsev.GetUUID(), connId,
 			fsev.GetCallDestNr(utils.META_DEFAULT), utils.ErrServerError.Error())
 		return
@@ -173,7 +170,7 @@ func (sm *FSSessionManager) onChannelPark(fsev FSEvent, connId string) {
 		}
 	}
 	if authArgs.GetSuppliers {
-		fsArray := SliceAsFsArray(authReply.Suppliers.SupplierIDs())
+		fsArray := SliceAsFsArray(authReply.Suppliers.SuppliersWithParams())
 		if _, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_setvar %s %s %s\n\n",
 			fsev.GetUUID(), utils.CGR_SUPPLIERS, fsArray)); err != nil {
 			utils.Logger.Info(fmt.Sprintf("<%s> error setting suppliers: %s", utils.FreeSWITCHAgent, err.Error()))
@@ -201,7 +198,7 @@ func (sm *FSSessionManager) onChannelPark(fsev FSEvent, connId string) {
 		fsev.GetCallDestNr(utils.META_DEFAULT), AUTH_OK)
 }
 
-func (sm *FSSessionManager) onChannelAnswer(fsev FSEvent, connId string) {
+func (sm *FSsessions) onChannelAnswer(fsev FSEvent, connId string) {
 	if fsev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
 		return
 	}
@@ -213,24 +210,18 @@ func (sm *FSSessionManager) onChannelAnswer(fsev FSEvent, connId string) {
 	}
 	initSessionArgs := fsev.V1InitSessionArgs()
 	initSessionArgs.CGREvent.Event[FsConnID] = connId // Attach the connection ID so we can properly disconnect later
-	var initReply sessionmanager.V1InitSessionReply
+	var initReply sessions.V1InitSessionReply
 	if err := sm.smg.Call(utils.SessionSv1InitiateSession,
 		initSessionArgs, &initReply); err != nil {
 		utils.Logger.Err(
-			fmt.Sprintf("<SM-FreeSWITCH> could not process answer for event %s, error: %s",
-				chanUUID, err.Error()))
+			fmt.Sprintf("<%s> could not process answer for event %s, error: %s",
+				utils.FreeSWITCHAgent, chanUUID, err.Error()))
 		sm.disconnectSession(connId, chanUUID, "", utils.ErrServerError.Error())
 		return
 	}
-	if initSessionArgs.AllocateResources {
-		if initReply.ResourceAllocation == nil {
-			sm.disconnectSession(connId, chanUUID, "",
-				utils.ErrUnallocatedResource.Error())
-		}
-	}
 }
 
-func (sm *FSSessionManager) onChannelHangupComplete(fsev FSEvent, connId string) {
+func (sm *FSsessions) onChannelHangupComplete(fsev FSEvent, connId string) {
 	if fsev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
 		return
 	}
@@ -239,23 +230,25 @@ func (sm *FSSessionManager) onChannelHangupComplete(fsev FSEvent, connId string)
 		if err := sm.smg.Call(utils.SessionSv1TerminateSession,
 			fsev.V1TerminateSessionArgs(), &reply); err != nil {
 			utils.Logger.Err(
-				fmt.Sprintf("<SM-FreeSWITCH> Could not terminate session with event %s, error: %s",
-					fsev.GetUUID(), err.Error()))
-			return
+				fmt.Sprintf("<%s> Could not terminate session with event %s, error: %s",
+					utils.FreeSWITCHAgent, fsev.GetUUID(), err.Error()))
 		}
 	}
 	if sm.cfg.CreateCdr {
-		cdr := fsev.AsCDR(sm.timezone)
-		if err := sm.smg.Call(utils.SessionSv1ProcessCDR, cdr, &reply); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>",
-				cdr.CGRID, cdr.OriginID, err.Error()))
+		cgrEv, err := fsev.AsCGREvent(sm.timezone)
+		if err != nil {
+			return
+		}
+		if err := sm.smg.Call(utils.SessionSv1ProcessCDR, *cgrEv, &reply); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> Failed processing CGREvent: %s,  error: <%s>",
+				utils.FreeSWITCHAgent, utils.ToJSON(cgrEv), err.Error()))
 		}
 	}
 }
 
 // Connects to the freeswitch mod_event_socket server and starts
 // listening for events.
-func (sm *FSSessionManager) Connect() error {
+func (sm *FSsessions) Connect() error {
 	eventFilters := map[string][]string{"Call-Direction": []string{"inbound"}}
 	errChan := make(chan error)
 	for _, connCfg := range sm.cfg.EventSocketConns {
@@ -290,7 +283,7 @@ func (sm *FSSessionManager) Connect() error {
 
 // fsev.GetCallDestNr(utils.META_DEFAULT)
 // Disconnects a session by sending hangup command to freeswitch
-func (sm *FSSessionManager) disconnectSession(connId, uuid, redirectNr, notify string) error {
+func (sm *FSsessions) disconnectSession(connId, uuid, redirectNr, notify string) error {
 	if _, err := sm.conns[connId].SendApiCmd(
 		fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", uuid, notify)); err != nil {
 		utils.Logger.Err(
@@ -302,16 +295,16 @@ func (sm *FSSessionManager) disconnectSession(connId, uuid, redirectNr, notify s
 		if len(sm.cfg.EmptyBalanceContext) != 0 {
 			if _, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_transfer %s %s XML %s\n\n",
 				uuid, redirectNr, sm.cfg.EmptyBalanceContext)); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not transfer the call to empty balance context, error: <%s>, connId: %s",
-					err.Error(), connId))
+				utils.Logger.Err(fmt.Sprintf("<%s> Could not transfer the call to empty balance context, error: <%s>, connId: %s",
+					utils.FreeSWITCHAgent, err.Error(), connId))
 				return err
 			}
 			return nil
 		} else if len(sm.cfg.EmptyBalanceAnnFile) != 0 {
 			if _, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_broadcast %s playback!manager_request::%s aleg\n\n",
 				uuid, sm.cfg.EmptyBalanceAnnFile)); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not send uuid_broadcast to freeswitch, error: <%s>, connId: %s",
-					err.Error(), connId))
+				utils.Logger.Err(fmt.Sprintf("<%s> Could not send uuid_broadcast to freeswitch, error: <%s>, connId: %s",
+					utils.FreeSWITCHAgent, err.Error(), connId))
 				return err
 			}
 			return nil
@@ -320,57 +313,35 @@ func (sm *FSSessionManager) disconnectSession(connId, uuid, redirectNr, notify s
 	if err := sm.conns[connId].SendMsgCmd(uuid,
 		map[string]string{"call-command": "hangup", "hangup-cause": "MANAGER_REQUEST"}); err != nil {
 		utils.Logger.Err(
-			fmt.Sprintf("<SM-FreeSWITCH> Could not send disconect msg to freeswitch, error: <%s>, connId: %s",
-				err.Error(), connId))
+			fmt.Sprintf("<%s> Could not send disconect msg to freeswitch, error: <%s>, connId: %s",
+				utils.FreeSWITCHAgent, err.Error(), connId))
 		return err
 	}
 	return nil
 }
 
-func (sm *FSSessionManager) Shutdown() (err error) {
+func (sm *FSsessions) Shutdown() (err error) {
 	for connId, fSock := range sm.conns {
 		if !fSock.Connected() {
-			utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Cannot shutdown sessions, fsock not connected for connection id: %s", connId))
+			utils.Logger.Err(fmt.Sprintf("<%s> Cannot shutdown sessions, fsock not connected for connection id: %s", utils.FreeSWITCHAgent, connId))
 			continue
 		}
-		utils.Logger.Info(fmt.Sprintf("<SM-FreeSWITCH> Shutting down all sessions on connection id: %s", connId))
+		utils.Logger.Info(fmt.Sprintf("<%s> Shutting down all sessions on connection id: %s", utils.FreeSWITCHAgent, connId))
 		if _, err = fSock.SendApiCmd("hupall MANAGER_REQUEST cgr_reqtype *prepaid"); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Error on calls shutdown: %s, connection id: %s", err.Error(), connId))
+			utils.Logger.Err(fmt.Sprintf("<%s> Error on calls shutdown: %s, connection id: %s", utils.FreeSWITCHAgent, err.Error(), connId))
 		}
 	}
 	return
 }
 
 // rpcclient.RpcClientConnection interface
-func (fsa *FSSessionManager) Call(serviceMethod string, args interface{}, reply interface{}) error {
-	parts := strings.Split(serviceMethod, ".")
-	if len(parts) != 2 {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	// get method
-	method := reflect.ValueOf(fsa).MethodByName(parts[0][len(parts[0])-2:] + parts[1]) // Inherit the version in the method
-	if !method.IsValid() {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	// construct the params
-	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
-	ret := method.Call(params)
-	if len(ret) != 1 {
-		return utils.ErrServerError
-	}
-	if ret[0].Interface() == nil {
-		return nil
-	}
-	err, ok := ret[0].Interface().(error)
-	if !ok {
-		return utils.ErrServerError
-	}
-	return err
+func (sm *FSsessions) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	return utils.RPCCall(sm, serviceMethod, args, reply)
 }
 
 // Internal method to disconnect session in asterisk
-func (fsa *FSSessionManager) V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) (err error) {
-	fsEv := sessionmanager.SMGenericEvent(args.EventStart)
+func (fsa *FSsessions) V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) (err error) {
+	fsEv := sessions.SMGenericEvent(args.EventStart)
 	channelID := fsEv.GetOriginID(utils.META_DEFAULT)
 	if err = fsa.disconnectSession(fsEv[FsConnID].(string), channelID, fsEv.GetCallDestNr(utils.META_DEFAULT),
 		utils.ErrInsufficientCredit.Error()); err != nil {

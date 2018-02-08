@@ -1855,9 +1855,9 @@ func (tps TpResources) AsTPResources() (result []*utils.TPResource) {
 				rl.ActivationInterval.ActivationTime = aiSplt[0]
 			}
 		}
-		if tp.Thresholds != "" {
-			trshSplt := strings.Split(tp.Thresholds, utils.INFIELD_SEP)
-			rl.Thresholds = append(rl.Thresholds, trshSplt...)
+		if tp.ThresholdIDs != "" {
+			trshSplt := strings.Split(tp.ThresholdIDs, utils.INFIELD_SEP)
+			rl.ThresholdIDs = append(rl.ThresholdIDs, trshSplt...)
 		}
 		if tp.FilterIDs != "" {
 			trshSplt := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
@@ -1897,11 +1897,11 @@ func APItoModelResource(rl *utils.TPResource) (mdls TpResources) {
 						mdl.ActivationInterval += utils.INFIELD_SEP + rl.ActivationInterval.ExpiryTime
 					}
 				}
-				for i, val := range rl.Thresholds {
+				for i, val := range rl.ThresholdIDs {
 					if i != 0 {
-						mdl.Thresholds += utils.INFIELD_SEP
+						mdl.ThresholdIDs += utils.INFIELD_SEP
 					}
-					mdl.Thresholds += val
+					mdl.ThresholdIDs += val
 				}
 			}
 			mdl.FilterIDs = fltr
@@ -1928,8 +1928,8 @@ func APItoResource(tpRL *utils.TPResource, timezone string) (rp *ResourceProfile
 	for _, fltr := range tpRL.FilterIDs {
 		rp.FilterIDs = append(rp.FilterIDs, fltr)
 	}
-	for _, th := range tpRL.Thresholds {
-		rp.Thresholds = append(rp.Thresholds, th)
+	for _, th := range tpRL.ThresholdIDs {
+		rp.ThresholdIDs = append(rp.ThresholdIDs, th)
 	}
 	if tpRL.ActivationInterval != nil {
 		if rp.ActivationInterval, err = tpRL.ActivationInterval.AsActivationInterval(timezone); err != nil {
@@ -1993,14 +1993,14 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 				metricmap[tp.Tenant][tp.ID][metric] = &utils.MetricWithParams{MetricID: metric, Parameters: tp.Parameters}
 			}
 		}
-		if tp.Thresholds != "" {
+		if tp.ThresholdIDs != "" {
 			if _, has := thresholdmap[tp.Tenant]; !has {
 				thresholdmap[tp.Tenant] = make(map[string]map[string]bool)
 			}
 			if _, has := thresholdmap[tp.Tenant][tp.ID]; !has {
 				thresholdmap[tp.Tenant][tp.ID] = make(map[string]bool)
 			}
-			trshSplt := strings.Split(tp.Thresholds, utils.INFIELD_SEP)
+			trshSplt := strings.Split(tp.ThresholdIDs, utils.INFIELD_SEP)
 			for _, trsh := range trshSplt {
 				thresholdmap[tp.Tenant][tp.ID][trsh] = true
 			}
@@ -2051,7 +2051,7 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 					for id, _ := range thresholdmap[st.Tenant] {
 						if st.ID == id {
 							for trsh, _ := range thresholdmap[st.Tenant][id] {
-								st.Thresholds = append(st.Thresholds, trsh)
+								st.ThresholdIDs = append(st.ThresholdIDs, trsh)
 							}
 						}
 					}
@@ -2097,11 +2097,11 @@ func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
 					}
 					mdl.Metrics += val.MetricID
 				}
-				for i, val := range st.Thresholds {
+				for i, val := range st.ThresholdIDs {
 					if i != 0 {
-						mdl.Thresholds += utils.INFIELD_SEP
+						mdl.ThresholdIDs += utils.INFIELD_SEP
 					}
-					mdl.Thresholds += val
+					mdl.ThresholdIDs += val
 				}
 				if st.ActivationInterval != nil {
 					if st.ActivationInterval.ActivationTime != "" {
@@ -2135,8 +2135,8 @@ func APItoStats(tpST *utils.TPStats, timezone string) (st *StatQueueProfile, err
 			return nil, err
 		}
 	}
-	for _, trh := range tpST.Thresholds {
-		st.Thresholds = append(st.Thresholds, trh)
+	for _, trh := range tpST.ThresholdIDs {
+		st.ThresholdIDs = append(st.ThresholdIDs, trh)
 	}
 	for _, fltr := range tpST.FilterIDs {
 		st.FilterIDs = append(st.FilterIDs, fltr)
@@ -2421,16 +2421,16 @@ func APItoModelTPFilter(th *utils.TPFilterProfile) (mdls TpFilterS) {
 
 func APItoFilter(tpTH *utils.TPFilterProfile, timezone string) (th *Filter, err error) {
 	th = &Filter{
-		Tenant:         tpTH.Tenant,
-		ID:             tpTH.ID,
-		RequestFilters: make([]*RequestFilter, len(tpTH.Filters)),
+		Tenant: tpTH.Tenant,
+		ID:     tpTH.ID,
+		Rules:  make([]*FilterRule, len(tpTH.Filters)),
 	}
 	for i, f := range tpTH.Filters {
-		rf := &RequestFilter{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
+		rf := &FilterRule{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
 		if err := rf.CompileValues(); err != nil {
 			return nil, err
 		}
-		th.RequestFilters[i] = rf
+		th.Rules[i] = rf
 	}
 	if tpTH.ActivationInterval != nil {
 		if th.ActivationInterval, err = tpTH.ActivationInterval.AsActivationInterval(timezone); err != nil {
@@ -2444,9 +2444,9 @@ func FilterToTPFilter(f *Filter) (tpFltr *utils.TPFilterProfile) {
 	tpFltr = &utils.TPFilterProfile{
 		Tenant:  f.Tenant,
 		ID:      f.ID,
-		Filters: make([]*utils.TPFilter, len(f.RequestFilters)),
+		Filters: make([]*utils.TPFilter, len(f.Rules)),
 	}
-	for i, reqFltr := range f.RequestFilters {
+	for i, reqFltr := range f.Rules {
 		tpFltr.Filters[i] = &utils.TPFilter{
 			Type:      reqFltr.Type,
 			FieldName: reqFltr.FieldName,
@@ -2478,7 +2478,6 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplierProfile) {
 				TPid:          tp.Tpid,
 				Tenant:        tp.Tenant,
 				ID:            tp.ID,
-				Blocker:       tp.Blocker,
 				Sorting:       tp.Sorting,
 				SortingParams: []string{},
 			}
@@ -2490,8 +2489,9 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplierProfile) {
 			sup, found := suppliersMap[tp.ID][tp.SupplierID]
 			if !found {
 				sup = &utils.TPSupplier{
-					ID:     tp.SupplierID,
-					Weight: tp.SupplierWeight,
+					ID:      tp.SupplierID,
+					Weight:  tp.SupplierWeight,
+					Blocker: tp.SupplierBlocker,
 				}
 			}
 			if tp.SupplierParameters != "" {
@@ -2585,7 +2585,6 @@ func APItoModelTPSuppliers(st *utils.TPSupplierProfile) (mdls TpSuppliers) {
 		if i == 0 {
 			mdl.Sorting = st.Sorting
 			mdl.Weight = st.Weight
-			mdl.Blocker = st.Blocker
 			for i, val := range st.FilterIDs {
 				if i != 0 {
 					mdl.FilterIDs += utils.INFIELD_SEP
@@ -2645,7 +2644,6 @@ func APItoSupplierProfile(tpTH *utils.TPSupplierProfile, timezone string) (th *S
 		ID:        tpTH.ID,
 		Sorting:   tpTH.Sorting,
 		Weight:    tpTH.Weight,
-		Blocker:   tpTH.Blocker,
 		Suppliers: make([]*Supplier, len(tpTH.Suppliers)),
 	}
 	for _, stp := range tpTH.SortingParams {
@@ -2663,6 +2661,7 @@ func APItoSupplierProfile(tpTH *utils.TPSupplierProfile, timezone string) (th *S
 		supl := &Supplier{
 			ID:                 suplier.ID,
 			Weight:             suplier.Weight,
+			Blocker:            suplier.Blocker,
 			RatingPlanIDs:      suplier.RatingPlanIDs,
 			FilterIDs:          suplier.FilterIDs,
 			ResourceIDs:        suplier.ResourceIDs,
@@ -2773,12 +2772,11 @@ func APItoModelTPAttribute(th *utils.TPAttributeProfile) (mdls TPAttributes) {
 
 func APItoAttributeProfile(tpTH *utils.TPAttributeProfile, timezone string) (th *AttributeProfile, err error) {
 	th = &AttributeProfile{
-		Tenant:     tpTH.Tenant,
-		ID:         tpTH.ID,
-		Weight:     tpTH.Weight,
-		FilterIDs:  []string{},
-		Contexts:   []string{},
-		Attributes: make(map[string]map[string]*Attribute, len(tpTH.Attributes)),
+		Tenant:    tpTH.Tenant,
+		ID:        tpTH.ID,
+		Weight:    tpTH.Weight,
+		FilterIDs: []string{},
+		Contexts:  []string{},
 	}
 	for _, fli := range tpTH.FilterIDs {
 		th.FilterIDs = append(th.FilterIDs, fli)
@@ -2786,11 +2784,16 @@ func APItoAttributeProfile(tpTH *utils.TPAttributeProfile, timezone string) (th 
 	for _, context := range tpTH.Contexts {
 		th.Contexts = append(th.Contexts, context)
 	}
+	th.attributes = make(map[string]map[interface{}]*Attribute)
 	for _, reqAttr := range tpTH.Attributes {
-		if _, has := th.Attributes[reqAttr.FieldName]; !has {
-			th.Attributes[reqAttr.FieldName] = make(map[string]*Attribute)
-		}
-		th.Attributes[reqAttr.FieldName][reqAttr.Initial] = &Attribute{
+		th.Attributes = append(th.Attributes, &Attribute{
+			Append:     reqAttr.Append,
+			FieldName:  reqAttr.FieldName,
+			Initial:    reqAttr.Initial,
+			Substitute: reqAttr.Substitute,
+		})
+		th.attributes[reqAttr.FieldName] = make(map[interface{}]*Attribute)
+		th.attributes[reqAttr.FieldName][reqAttr.Initial] = &Attribute{
 			FieldName:  reqAttr.FieldName,
 			Initial:    reqAttr.Initial,
 			Substitute: reqAttr.Substitute,

@@ -279,7 +279,6 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 	utils.RegisterRpcParams("UsersV1", &engine.UserMap{})
 	utils.RegisterRpcParams("", &v1.CdrsV1{})
 	utils.RegisterRpcParams("", &v2.CdrsV2{})
-	utils.RegisterRpcParams("", &v1.SessionManagerV1{})
 	utils.RegisterRpcParams("", &v1.SMGenericV1{})
 	utils.RegisterRpcParams("", responder)
 	utils.RegisterRpcParams("", apierRpcV1)

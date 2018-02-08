@@ -45,9 +45,6 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITFlush,
 	testOnStorITIsDBEmpty,
 	testOnStorITSetGetDerivedCharges,
-	testOnStorITSetFilterIndexes,
-	testOnStorITGetFilterIndexes,
-	testOnStorITMatchFilterIndex,
 	testOnStorITCacheDestinations,
 	testOnStorITCacheReverseDestinations,
 	testOnStorITCacheActionPlan,
@@ -83,9 +80,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITAttributeProfile,
 	testOnStorITFlush,
 	testOnStorITIsDBEmpty,
-	testOnStorITTestThresholdFilterIndexes,
-	testOnStorITTestAttributeProfileFilterIndexes,
-	testOnStorITTestThresholdInlineFilterIndexing,
+	testOnStorITTestAttributeSubstituteIface,
 	//testOnStorITCacheActionTriggers,
 	//testOnStorITCacheAlias,
 	//testOnStorITCacheReverseAlias,
@@ -113,7 +108,7 @@ func TestOnStorITRedis(t *testing.T) {
 }
 
 func TestOnStorITMongoConnect(t *testing.T) {
-	sleepDelay = 5 * time.Millisecond
+	sleepDelay = 100 * time.Millisecond
 	cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "cdrsv2mongo")
 	mgoITCfg, err := config.NewCGRConfigFromFolder(cdrsMongoCfgPath)
 	if err != nil {
@@ -187,118 +182,6 @@ func testOnStorITSetGetDerivedCharges(t *testing.T) {
 	}
 	if _, rcvErr := onStor.GetDerivedChargers(keyCharger1, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
-	}
-}
-
-func testOnStorITSetFilterIndexes(t *testing.T) {
-	idxes := map[string]utils.StringMap{
-		"Account:1001": utils.StringMap{
-			"RL1": true,
-		},
-		"Account:1002": utils.StringMap{
-			"RL1": true,
-			"RL2": true,
-		},
-		"Account:dan": utils.StringMap{
-			"RL2": true,
-		},
-		"Subject:dan": utils.StringMap{
-			"RL2": true,
-			"RL3": true,
-		},
-		utils.ConcatenatedKey(utils.NOT_AVAILABLE, utils.NOT_AVAILABLE): utils.StringMap{
-			"RL4": true,
-			"RL5": true,
-		},
-	}
-	if err := onStor.SetFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
-		idxes); err != nil {
-		t.Error(err)
-	}
-}
-
-func testOnStorITGetFilterIndexes(t *testing.T) {
-	eIdxes := map[string]utils.StringMap{
-		"Account:1001": utils.StringMap{
-			"RL1": true,
-		},
-		"Account:1002": utils.StringMap{
-			"RL1": true,
-			"RL2": true,
-		},
-		"Account:dan": utils.StringMap{
-			"RL2": true,
-		},
-		"Subject:dan": utils.StringMap{
-			"RL2": true,
-			"RL3": true,
-		},
-		utils.ConcatenatedKey(utils.NOT_AVAILABLE, utils.NOT_AVAILABLE): utils.StringMap{
-			"RL4": true,
-			"RL5": true,
-		},
-	}
-	sbjDan := map[string]string{
-		"Subject": "dan",
-	}
-	expectedsbjDan := map[string]utils.StringMap{
-		"Subject:dan": utils.StringMap{
-			"RL2": true,
-			"RL3": true,
-		},
-	}
-	if exsbjDan, err := onStor.GetFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
-		sbjDan); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expectedsbjDan, exsbjDan) {
-		t.Errorf("Expecting: %+v, received: %+v", expectedsbjDan, exsbjDan)
-	}
-	if rcv, err := onStor.GetFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
-		nil); err != nil {
-		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(eIdxes, rcv) {
-			t.Errorf("Expecting: %+v, received: %+v", eIdxes, rcv)
-		}
-	}
-	if _, err := onStor.GetFilterIndexes("unknown_key", nil); err == nil || err != utils.ErrNotFound {
-		t.Error(err)
-	}
-	if err := onStor.RemoveFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false)); err != nil {
-		t.Error(err)
-	}
-	_, err := onStor.GetFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false), nil)
-	if err != utils.ErrNotFound {
-		t.Error(err)
-	}
-	if err := onStor.SetFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
-		eIdxes); err != nil {
-		t.Error(err)
-	}
-}
-
-func testOnStorITMatchFilterIndex(t *testing.T) {
-	eMp := utils.StringMap{
-		"RL1": true,
-		"RL2": true,
-	}
-	if rcvMp, err := onStor.MatchFilterIndex(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
-		"Account", "1002"); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eMp, rcvMp) {
-		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
-	}
-	if _, err := onStor.MatchFilterIndex(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
-		"NonexistentField", "1002"); err == nil || err != utils.ErrNotFound {
-		t.Error(err)
 	}
 }
 
@@ -442,9 +325,9 @@ func testOnStorITCacheActionTriggers(t *testing.T) {
 			ThresholdValue:    2,
 			ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
 			ActionsID:         "TEST_ACTIONS",
-			LastExecutionTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-			ExpirationDate:    time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-			ActivationDate:    time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local()},
+			LastExecutionTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
+			ExpirationDate:    time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
+			ActivationDate:    time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC)},
 	}
 	atsID := ats[0].ID
 	if err := onStor.SetActionTriggers(atsID, ats, utils.NonTransactional); err != nil {
@@ -645,7 +528,7 @@ func testOnStorITHasData(t *testing.T) {
 	} else if !reflect.DeepEqual(len(expectedRP), len(itm)) {
 		t.Errorf("Expected : %+v, but received %+v", len(expectedRP), len(itm))
 	}
-	if rcv, err := onStor.HasData(utils.RATING_PLAN_PREFIX, rp.Id); err != nil {
+	if rcv, err := onStor.HasData(utils.RATING_PLAN_PREFIX, rp.Id, ""); err != nil {
 		t.Error(err)
 	} else if rcv != true {
 		t.Errorf("Expecting: true, received: %v", rcv)
@@ -761,10 +644,10 @@ func testOnStorITRatingPlan(t *testing.T) {
 			StartTime: "00:00:00",
 		},
 	}
-	time.Sleep(sleepDelay)
 	if err := onStor.SetRatingPlan(rp, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(sleepDelay)
 	//get from cache
 	if rcv, err := onStor.GetRatingPlan(rp.Id, false, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -797,7 +680,7 @@ func testOnStorITRatingProfile(t *testing.T) {
 		Id: "*out:test:1:trp",
 		RatingPlanActivations: RatingPlanActivations{
 			&RatingPlanActivation{
-				ActivationTime:  time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC).Local(),
+				ActivationTime:  time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC),
 				RatingPlanId:    "TDRT",
 				FallbackKeys:    []string{"*out:test:1:danb", "*out:test:1:rif"},
 				CdrStatQueueIds: []string{},
@@ -815,7 +698,7 @@ func testOnStorITRatingProfile(t *testing.T) {
 		utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rpf, rcv) {
-		t.Errorf("Expecting: %v, received: %v", rpf, rcv)
+		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(rpf), utils.ToJSON(rcv))
 	}
 	//get from database
 	if rcv, err := onStor.GetRatingProfile(rpf.Id, true,
@@ -833,16 +716,16 @@ func testOnStorITRatingProfile(t *testing.T) {
 	//update
 	rpf.RatingPlanActivations = RatingPlanActivations{
 		&RatingPlanActivation{
-			ActivationTime:  time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC).Local(),
+			ActivationTime:  time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC),
 			RatingPlanId:    "TDRT",
 			FallbackKeys:    []string{"*out:test:1:danb", "*out:test:1:teo"},
 			CdrStatQueueIds: []string{},
 		},
 	}
-	time.Sleep(sleepDelay)
 	if err := onStor.SetRatingProfile(rpf, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(sleepDelay)
 	//get from cache
 	if rcv, err := onStor.GetRatingProfile(rpf.Id, false,
 		utils.NonTransactional); err != nil {
@@ -965,7 +848,7 @@ func testOnStorITLCR(t *testing.T) {
 		Subject:   "*any",
 		Activations: []*LCRActivation{
 			&LCRActivation{
-				ActivationTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+				ActivationTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 				Entries: []*LCREntry{
 					&LCREntry{
 						DestinationId:  "EU_LANDLINE",
@@ -1016,7 +899,7 @@ func testOnStorITLCR(t *testing.T) {
 	//update
 	lcr.Activations = []*LCRActivation{
 		&LCRActivation{
-			ActivationTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 			Entries: []*LCREntry{
 				&LCREntry{
 					DestinationId:  "EU_LANDLINE",
@@ -1232,11 +1115,11 @@ func testOnStorITActions(t *testing.T) {
 			},
 		},
 	}
-	time.Sleep(sleepDelay)
 	if err := onStor.SetActions(acts[0].Id,
 		acts, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(sleepDelay)
 	//get from cache
 	if rcv, err := onStor.GetActions(acts[0].Id,
 		false, utils.NonTransactional); err != nil {
@@ -1349,9 +1232,9 @@ func testOnStorITCRUDActionTriggers(t *testing.T) {
 			ThresholdValue:    2,
 			ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
 			ActionsID:         "TEST_ACTIONS",
-			LastExecutionTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-			ExpirationDate:    time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-			ActivationDate:    time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local()},
+			LastExecutionTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
+			ExpirationDate:    time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
+			ActivationDate:    time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC)},
 	}
 	atsID := ats[0].ID
 	if _, rcvErr := onStor.GetActionTriggers(atsID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
@@ -1548,9 +1431,9 @@ func testOnStorITCRUDCdrStatsQueue(t *testing.T) {
 		conf: &CdrStats{Id: "TTT"},
 		Cdrs: []*QCdr{
 			&QCdr{Cost: 9.0,
-				SetupTime:  time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-				AnswerTime: time.Date(2012, 1, 1, 0, 0, 10, 0, time.UTC).Local(),
-				EventTime:  time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+				SetupTime:  time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
+				AnswerTime: time.Date(2012, 1, 1, 0, 0, 10, 0, time.UTC),
+				EventTime:  time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 			}},
 	}
 	if _, rcvErr := onStor.GetCdrStatsQueue(sq.GetId()); rcvErr != utils.ErrNotFound {
@@ -1579,7 +1462,7 @@ func testOnStorITCRUDSubscribers(t *testing.T) {
 		t.Errorf("Received subscribers: %+v", sbs)
 	}
 	sbsc := &SubscriberData{
-		ExpTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+		ExpTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 		Filters: utils.ParseRSRFieldsMustCompile("^*default", utils.INFIELD_SEP)}
 	sbscID := "testOnStorITCRUDSubscribers"
 	if err := onStor.SetSubscriber(sbscID, sbsc); err != nil {
@@ -1766,11 +1649,11 @@ func testOnStorITResourceProfile(t *testing.T) {
 		Weight:    10,
 		FilterIDs: []string{"FLTR_RES_RL_TEST2"},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC).Local()},
-		Limit:      1,
-		Thresholds: []string{"TEST_ACTIONS"},
-		UsageTTL:   time.Duration(1 * time.Millisecond),
+			ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2015, 7, 3, 13, 43, 0, 0, time.UTC)},
+		Limit:        1,
+		ThresholdIDs: []string{"TEST_ACTIONS"},
+		UsageTTL:     time.Duration(3 * time.Nanosecond),
 	}
 	if _, rcvErr := onStor.GetResourceProfile(rL.Tenant, rL.ID,
 		true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
@@ -1800,11 +1683,11 @@ func testOnStorITResourceProfile(t *testing.T) {
 		t.Errorf("Expected : %+v, but received %+v", expectedR, itm)
 	}
 	//update
-	rL.Thresholds = []string{"TH1", "TH2"}
-	time.Sleep(sleepDelay)
+	rL.ThresholdIDs = []string{"TH1", "TH2"}
 	if err := onStor.SetResourceProfile(rL, false); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(sleepDelay)
 	//get from cache
 	if rcv, err := onStor.GetResourceProfile(rL.Tenant, rL.ID,
 		false, utils.NonTransactional); err != nil {
@@ -1842,7 +1725,7 @@ func testOnStorITResource(t *testing.T) {
 		Usages: map[string]*ResourceUsage{
 			"RU1": &ResourceUsage{
 				ID:         "RU1",
-				ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC).Local(),
+				ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC),
 				Units:      2,
 			},
 		},
@@ -1877,10 +1760,10 @@ func testOnStorITResource(t *testing.T) {
 	}
 	//update
 	res.TTLIdx = []string{"RU1", "RU2"}
-	time.Sleep(sleepDelay)
 	if err := onStor.SetResource(res); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(sleepDelay)
 	//get from cache
 	if rcv, err := onStor.GetResource("cgrates.org", "RL1",
 		false, utils.NonTransactional); err != nil {
@@ -1947,10 +1830,10 @@ func testOnStorITTiming(t *testing.T) {
 	}
 	//update
 	tmg.MonthDays = utils.MonthDays{1, 2, 3, 4, 5, 6, 7}
-	time.Sleep(sleepDelay)
 	if err := onStor.SetTiming(tmg); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(sleepDelay)
 	//get from cache
 	if rcv, err := onStor.GetTiming(tmg.ID, false, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -1979,7 +1862,7 @@ func testOnStorITTiming(t *testing.T) {
 }
 
 func testOnStorITCRUDHistory(t *testing.T) {
-	time := time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC).Local()
+	time := time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC)
 	ist := &utils.LoadInstance{"Load", "RatingLoad", "Account", time}
 	if err := onStor.DataDB().AddLoadHistory(ist, 1, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -2022,8 +1905,8 @@ func testOnStorITStatQueueProfile(t *testing.T) {
 		Metrics: []*utils.MetricWithParams{
 			&utils.MetricWithParams{},
 		},
-		Stored:     true,
-		Thresholds: []string{"Thresh1"},
+		Stored:       true,
+		ThresholdIDs: []string{"Thresh1"},
 	}
 	if _, rcvErr := onStor.GetStatQueueProfile(sq.Tenant, sq.ID,
 		false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
@@ -2053,11 +1936,11 @@ func testOnStorITStatQueueProfile(t *testing.T) {
 		t.Errorf("Expected : %+v, but received %+v", expectedR, itm)
 	}
 	//update
-	sq.Thresholds = []string{"TH1", "TH2"}
-	time.Sleep(sleepDelay)
+	sq.ThresholdIDs = []string{"TH1", "TH2"}
 	if err := onStor.SetStatQueueProfile(sq, false); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(sleepDelay)
 	//get from cache
 	if rcv, err := onStor.GetStatQueueProfile(sq.Tenant,
 		sq.ID, false, utils.NonTransactional); err != nil {
@@ -2089,7 +1972,7 @@ func testOnStorITStatQueueProfile(t *testing.T) {
 }
 
 func testOnStorITStatQueue(t *testing.T) {
-	eTime := utils.TimePointer(time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC).Local())
+	eTime := utils.TimePointer(time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC))
 	sq := &StatQueue{
 		Tenant: "cgrates.org",
 		ID:     "Test_StatQueue",
@@ -2150,10 +2033,10 @@ func testOnStorITStatQueue(t *testing.T) {
 			},
 		},
 	}
-	time.Sleep(sleepDelay)
 	if err := onStor.SetStatQueue(sq); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(sleepDelay)
 	//get from cache
 	if rcv, err := onStor.GetStatQueue(sq.Tenant,
 		sq.ID, false, utils.NonTransactional); err != nil {
@@ -2188,16 +2071,16 @@ func testOnStorITThresholdProfile(t *testing.T) {
 	fp := &Filter{
 		Tenant: "cgrates.org",
 		ID:     "TestFilter2",
-		RequestFilters: []*RequestFilter{
-			&RequestFilter{
+		Rules: []*FilterRule{
+			&FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001", "1002"},
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	th := &ThresholdProfile{
@@ -2243,10 +2126,10 @@ func testOnStorITThresholdProfile(t *testing.T) {
 	}
 	//update
 	th.ActionIDs = []string{"Action1", "Action2"}
-	time.Sleep(sleepDelay)
 	if err := onStor.SetThresholdProfile(th, true); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(sleepDelay)
 	//get from cache
 	if rcv, err := onStor.GetThresholdProfile(th.Tenant, th.ID,
 		false, utils.NonTransactional); err != nil {
@@ -2281,7 +2164,7 @@ func testOnStorITThreshold(t *testing.T) {
 	th := &Threshold{
 		Tenant: "cgrates.org",
 		ID:     "TH1",
-		Snooze: time.Date(2016, 10, 1, 0, 0, 0, 0, time.UTC).Local(),
+		Snooze: time.Date(2016, 10, 1, 0, 0, 0, 0, time.UTC),
 		Hits:   10,
 	}
 	if _, rcvErr := onStor.GetThreshold("cgrates.org", "TH1",
@@ -2313,10 +2196,10 @@ func testOnStorITThreshold(t *testing.T) {
 	}
 	//update
 	th.Hits = 20
-	time.Sleep(sleepDelay)
 	if err := onStor.SetThreshold(th); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(sleepDelay)
 	//get from cache
 	if rcv, err := onStor.GetThreshold("cgrates.org", "TH1",
 		false, utils.NonTransactional); err != nil {
@@ -2350,16 +2233,16 @@ func testOnStorITFilter(t *testing.T) {
 	fp := &Filter{
 		Tenant: "cgrates.org",
 		ID:     "Filter1",
-		RequestFilters: []*RequestFilter{
-			&RequestFilter{
+		Rules: []*FilterRule{
+			&FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001", "1002"},
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	if _, rcvErr := onStor.GetFilter("cgrates.org", "Filter1",
@@ -2390,22 +2273,22 @@ func testOnStorITFilter(t *testing.T) {
 		t.Errorf("Expected : %+v, but received %+v", len(expectedT), len(itm))
 	}
 	//update
-	fp.RequestFilters = []*RequestFilter{
-		&RequestFilter{
+	fp.Rules = []*FilterRule{
+		&FilterRule{
 			FieldName: "Account",
 			Type:      "*string",
 			Values:    []string{"1001", "1002"},
 		},
-		&RequestFilter{
+		&FilterRule{
 			FieldName: "Destination",
 			Type:      "*string",
 			Values:    []string{"10", "20"},
 		},
 	}
-	time.Sleep(sleepDelay)
 	if err := onStor.SetFilter(fp); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(sleepDelay)
 	//get from cache
 	if rcv, err := onStor.GetFilter("cgrates.org", "Filter1",
 		false, utils.NonTransactional); err != nil {
@@ -2441,7 +2324,7 @@ func testOnStorITSupplierProfile(t *testing.T) {
 		ID:        "SPRF_1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Sorting:       "*lowest_cost",
 		SortingParams: []string{},
@@ -2509,10 +2392,10 @@ func testOnStorITSupplierProfile(t *testing.T) {
 			SupplierParameters: "param2",
 		},
 	}
-	time.Sleep(sleepDelay)
 	if err := onStor.SetSupplierProfile(splProfile, false); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(sleepDelay)
 	//get from cache
 	if rcv, err := onStor.GetSupplierProfile("cgrates.org", "SPRF_1",
 		false, utils.NonTransactional); err != nil {
@@ -2544,8 +2427,8 @@ func testOnStorITSupplierProfile(t *testing.T) {
 }
 
 func testOnStorITAttributeProfile(t *testing.T) {
-	mapSubstitutes := make(map[string]map[string]*Attribute)
-	mapSubstitutes["FN1"] = make(map[string]*Attribute)
+	mapSubstitutes := make(map[string]map[interface{}]*Attribute)
+	mapSubstitutes["FN1"] = make(map[interface{}]*Attribute)
 	mapSubstitutes["FN1"]["Init1"] = &Attribute{
 		FieldName:  "FN1",
 		Initial:    "Init1",
@@ -2557,11 +2440,19 @@ func testOnStorITAttributeProfile(t *testing.T) {
 		ID:        "AttrPrf1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
-		Contexts:   []string{"con1"},
-		Attributes: mapSubstitutes,
+		Contexts: []string{"con1"},
+		Attributes: []*Attribute{
+			&Attribute{
+				FieldName:  "FN1",
+				Initial:    "Init1",
+				Substitute: "Val1",
+				Append:     true,
+			},
+		},
 		Weight:     20,
+		attributes: mapSubstitutes,
 	}
 	if _, rcvErr := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
 		false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
@@ -2591,11 +2482,11 @@ func testOnStorITAttributeProfile(t *testing.T) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
 	}
 	//update
-	time.Sleep(sleepDelay)
 	attrProfile.Contexts = []string{"con1", "con2", "con3"}
 	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(sleepDelay)
 	//get from cache
 	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
 		false, utils.NonTransactional); err != nil {
@@ -2626,273 +2517,10 @@ func testOnStorITAttributeProfile(t *testing.T) {
 	}
 }
 
-func testOnStorITTestThresholdFilterIndexes(t *testing.T) {
-	fp := &Filter{
-		Tenant: "cgrates.org",
-		ID:     "Filter1",
-		RequestFilters: []*RequestFilter{
-			&RequestFilter{
-				FieldName: "EventType",
-				Type:      "*string",
-				Values:    []string{"Event1", "Event2"},
-			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-		},
-	}
-	if err := onStor.SetFilter(fp); err != nil {
-		t.Error(err)
-	}
-	timeMinSleep := time.Duration(0 * time.Second)
-	th := &ThresholdProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "THD_Test",
-		ActivationInterval: &utils.ActivationInterval{},
-		FilterIDs:          []string{"Filter1"},
-		Recurrent:          true,
-		MinSleep:           timeMinSleep,
-		Blocker:            true,
-		Weight:             1.4,
-		ActionIDs:          []string{},
-	}
-	th2 := &ThresholdProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "THD_Test2",
-		ActivationInterval: &utils.ActivationInterval{},
-		FilterIDs:          []string{"Filter1"},
-		Recurrent:          true,
-		MinSleep:           timeMinSleep,
-		Blocker:            true,
-		Weight:             1.4,
-		ActionIDs:          []string{},
-	}
-
-	if err := onStor.SetThresholdProfile(th, true); err != nil {
-		t.Error(err)
-	}
-	if err := onStor.SetThresholdProfile(th2, true); err != nil {
-		t.Error(err)
-	}
-	eIdxes := map[string]utils.StringMap{
-		"EventType:Event1": utils.StringMap{
-			"THD_Test":  true,
-			"THD_Test2": true,
-		},
-		"EventType:Event2": utils.StringMap{
-			"THD_Test":  true,
-			"THD_Test2": true,
-		},
-	}
-	reverseIdxes := map[string]utils.StringMap{
-		"THD_Test": utils.StringMap{
-			"EventType:Event1": true,
-			"EventType:Event2": true,
-		},
-		"THD_Test2": utils.StringMap{
-			"EventType:Event1": true,
-			"EventType:Event2": true,
-		},
-	}
-	rfi := NewReqFilterIndexer(onStor, utils.ThresholdProfilePrefix, th.Tenant)
-	if rcvIdx, err := onStor.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
-		nil); err != nil {
-		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(eIdxes, rcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
-		}
-	}
-	if reverseRcvIdx, err := onStor.GetFilterReverseIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
-		nil); err != nil {
-		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
-		}
-	}
-	//Replace existing filter (Filter1 -> Filter2)
-	fp2 := &Filter{
-		Tenant: "cgrates.org",
-		ID:     "Filter2",
-		RequestFilters: []*RequestFilter{
-			&RequestFilter{
-				FieldName: "Account",
-				Type:      "*string",
-				Values:    []string{"1001", "1002"},
-			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-		},
-	}
-	if err := onStor.SetFilter(fp2); err != nil {
-		t.Error(err)
-	}
-
-	th.FilterIDs = []string{"Filter2"}
-	if err := onStor.SetThresholdProfile(th, true); err != nil {
-		t.Error(err)
-	}
-	eIdxes = map[string]utils.StringMap{
-		"Account:1001": utils.StringMap{
-			"THD_Test": true,
-		},
-		"Account:1002": utils.StringMap{
-			"THD_Test": true,
-		},
-		"EventType:Event1": utils.StringMap{
-			"THD_Test2": true,
-		},
-		"EventType:Event2": utils.StringMap{
-			"THD_Test2": true,
-		},
-	}
-
-	reverseIdxes = map[string]utils.StringMap{
-		"THD_Test": utils.StringMap{
-			"Account:1001": true,
-			"Account:1002": true,
-		},
-		"THD_Test2": utils.StringMap{
-			"EventType:Event1": true,
-			"EventType:Event2": true,
-		},
-	}
-	if rcvIdx, err := onStor.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
-		nil); err != nil {
-		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(eIdxes, rcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
-		}
-	}
-	if reverseRcvIdx, err := onStor.GetFilterReverseIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
-		nil); err != nil {
-		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
-		}
-	}
-	//replace old filter with two different filters
-	fp3 := &Filter{
-		Tenant: "cgrates.org",
-		ID:     "Filter3",
-		RequestFilters: []*RequestFilter{
-			&RequestFilter{
-				FieldName: "Destination",
-				Type:      "*string",
-				Values:    []string{"10", "20"},
-			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-		},
-	}
-	if err := onStor.SetFilter(fp3); err != nil {
-		t.Error(err)
-	}
-
-	th.FilterIDs = []string{"Filter1", "Filter3"}
-	if err := onStor.SetThresholdProfile(th, true); err != nil {
-		t.Error(err)
-	}
-	eIdxes = map[string]utils.StringMap{
-		"Destination:10": utils.StringMap{
-			"THD_Test": true,
-		},
-		"Destination:20": utils.StringMap{
-			"THD_Test": true,
-		},
-		"EventType:Event1": utils.StringMap{
-			"THD_Test":  true,
-			"THD_Test2": true,
-		},
-		"EventType:Event2": utils.StringMap{
-			"THD_Test":  true,
-			"THD_Test2": true,
-		},
-	}
-	reverseIdxes = map[string]utils.StringMap{
-		"THD_Test": utils.StringMap{
-			"Destination:10":   true,
-			"Destination:20":   true,
-			"EventType:Event1": true,
-			"EventType:Event2": true,
-		},
-		"THD_Test2": utils.StringMap{
-			"EventType:Event1": true,
-			"EventType:Event2": true,
-		},
-	}
-	if rcvIdx, err := onStor.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
-		nil); err != nil {
-		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(eIdxes, rcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
-		}
-	}
-	if reverseRcvIdx, err := onStor.GetFilterReverseIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
-		nil); err != nil {
-		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
-		}
-	}
-	//remove thresholds
-	if err := onStor.RemoveThresholdProfile(th.Tenant,
-		th.ID, utils.NonTransactional, true); err != nil {
-		t.Error(err)
-	}
-	if err := onStor.RemoveThresholdProfile(th2.Tenant,
-		th2.ID, utils.NonTransactional, true); err != nil {
-		t.Error(err)
-	}
-	if _, err := onStor.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
-		nil); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-	if _, err := onStor.GetFilterReverseIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
-		nil); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-}
-
-func testOnStorITTestAttributeProfileFilterIndexes(t *testing.T) {
-	fp := &Filter{
-		Tenant: "cgrates.org",
-		ID:     "Filter1",
-		RequestFilters: []*RequestFilter{
-			&RequestFilter{
-				FieldName: "EventType",
-				Type:      "*string",
-				Values:    []string{"Event1", "Event2"},
-			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-		},
-	}
-	if err := onStor.SetFilter(fp); err != nil {
-		t.Error(err)
-	}
-	mapSubstitutes := make(map[string]map[string]*Attribute)
-	mapSubstitutes["FN1"] = make(map[string]*Attribute)
+func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
+	//set Substitue with type string
+	mapSubstitutes := make(map[string]map[interface{}]*Attribute)
+	mapSubstitutes["FN1"] = make(map[interface{}]*Attribute)
 	mapSubstitutes["FN1"]["Init1"] = &Attribute{
 		FieldName:  "FN1",
 		Initial:    "Init1",
@@ -2901,238 +2529,108 @@ func testOnStorITTestAttributeProfileFilterIndexes(t *testing.T) {
 	}
 	attrProfile := &AttributeProfile{
 		Tenant:    "cgrates.org",
-		ID:        "AttrPrf",
-		FilterIDs: []string{"Filter1"},
+		ID:        "AttrPrf1",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
-		Contexts:   []string{"con1", "con2"},
-		Attributes: mapSubstitutes,
-		Weight:     20,
-	}
-	//Set AttributeProfile with 2 contexts ( con1 , con2)
-	if err := onStor.SetAttributeProfile(attrProfile, true); err != nil {
-		t.Error(err)
-	}
-	eIdxes := map[string]utils.StringMap{
-		"EventType:Event1": utils.StringMap{
-			"AttrPrf": true,
-		},
-		"EventType:Event2": utils.StringMap{
-			"AttrPrf": true,
-		},
-	}
-	reverseIdxes := map[string]utils.StringMap{
-		"AttrPrf": utils.StringMap{
-			"EventType:Event1": true,
-			"EventType:Event2": true,
-		},
-	}
-	for _, ctx := range attrProfile.Contexts {
-		rfi := NewReqFilterIndexer(onStor, utils.AttributeProfilePrefix,
-			utils.ConcatenatedKey(attrProfile.Tenant, ctx))
-		if rcvIdx, err := onStor.GetFilterIndexes(
-			GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
-			nil); err != nil {
-			t.Error(err)
-		} else {
-			if !reflect.DeepEqual(eIdxes, rcvIdx) {
-				t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
-			}
-		}
-		if reverseRcvIdx, err := onStor.GetFilterReverseIndexes(
-			GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
-			nil); err != nil {
-			t.Error(err)
-		} else {
-			if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
-				t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
-			}
-		}
-	}
-	//Set AttributeProfile with 1 new context (con3)
-	attrProfile.Contexts = []string{"con3"}
-	if err := onStor.SetAttributeProfile(attrProfile, true); err != nil {
-		t.Error(err)
-	}
-	//check indexes with the new context (con3)
-	rfi := NewReqFilterIndexer(onStor, utils.AttributeProfilePrefix,
-		utils.ConcatenatedKey(attrProfile.Tenant, "con3"))
-	if rcvIdx, err := onStor.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
-		nil); err != nil {
-		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(eIdxes, rcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
-		}
-	}
-	if reverseRcvIdx, err := onStor.GetFilterReverseIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
-		nil); err != nil {
-		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
-		}
-	}
-
-	//check if old contexts was delete
-	for _, ctx := range []string{"con1", "con2"} {
-		rfi := NewReqFilterIndexer(onStor, utils.AttributeProfilePrefix,
-			utils.ConcatenatedKey(attrProfile.Tenant, ctx))
-		if _, err := onStor.GetFilterIndexes(
-			GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
-			nil); err != nil && err != utils.ErrNotFound {
-			t.Error(err)
-		}
-		if _, err := onStor.GetFilterReverseIndexes(
-			GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
-			nil); err != nil && err != utils.ErrNotFound {
-			t.Error(err)
-		}
-	}
-
-	if err := onStor.RemoveAttributeProfile(attrProfile.Tenant,
-		attrProfile.ID, attrProfile.Contexts, utils.NonTransactional, true); err != nil {
-		t.Error(err)
-	}
-	//check if index is removed
-	rfi = NewReqFilterIndexer(onStor, utils.AttributeProfilePrefix, utils.ConcatenatedKey("cgrates.org", "con3"))
-	if _, err := onStor.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
-		nil); err != nil && err != utils.ErrNotFound {
-		t.Error(err)
-	}
-	if _, err := onStor.GetFilterReverseIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
-		nil); err != nil && err != utils.ErrNotFound {
-		t.Error(err)
-	}
-}
-
-func testOnStorITTestThresholdInlineFilterIndexing(t *testing.T) {
-	fp := &Filter{
-		Tenant: "cgrates.org",
-		ID:     "Filter1",
-		RequestFilters: []*RequestFilter{
-			&RequestFilter{
-				FieldName: "EventType",
-				Type:      "*string",
-				Values:    []string{"Event1", "Event2"},
+		Contexts: []string{"con1"},
+		Attributes: []*Attribute{
+			&Attribute{
+				FieldName:  "FN1",
+				Initial:    "Init1",
+				Substitute: "Val1",
+				Append:     true,
 			},
 		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC).Local(),
+		Weight:     20,
+		attributes: mapSubstitutes,
+	}
+	if _, rcvErr := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
+		false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
+		t.Error(err)
+	}
+	//check cache
+	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
+		false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
+		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
+	}
+	//check database
+	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
+		true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
+		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
+	}
+	//set Substitue with type float
+	mapSubstitutes["FN1"]["Init1"] = &Attribute{
+		FieldName:  "FN1",
+		Initial:    "Init1",
+		Substitute: 123.5,
+		Append:     true,
+	}
+	attrProfile.Attributes = []*Attribute{
+		&Attribute{
+			FieldName:  "FN1",
+			Initial:    "Init1",
+			Substitute: 123.5,
+			Append:     true,
 		},
 	}
-	if err := onStor.SetFilter(fp); err != nil {
+	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
 		t.Error(err)
 	}
-	th := &ThresholdProfile{
-		Tenant:             "cgrates.org",
-		ID:                 "THD_Test",
-		ActivationInterval: &utils.ActivationInterval{},
-		FilterIDs:          []string{"Filter1"},
-		Recurrent:          true,
-		MinSleep:           time.Duration(0 * time.Second),
-		Blocker:            true,
-		Weight:             1.4,
-		ActionIDs:          []string{},
-	}
-
-	if err := onStor.SetThresholdProfile(th, true); err != nil {
+	attrProfile.attributes = mapSubstitutes
+	//check cache
+	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
+		false, utils.NonTransactional); err != nil {
 		t.Error(err)
+	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
+		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(attrProfile), utils.ToJSON(rcv))
 	}
-	eIdxes := map[string]utils.StringMap{
-		"EventType:Event1": utils.StringMap{
-			"THD_Test": true,
-		},
-		"EventType:Event2": utils.StringMap{
-			"THD_Test": true,
-		},
-	}
-	reverseIdxes := map[string]utils.StringMap{
-		"THD_Test": utils.StringMap{
-			"EventType:Event1": true,
-			"EventType:Event2": true,
-		},
-	}
-	rfi := NewReqFilterIndexer(onStor, utils.ThresholdProfilePrefix, th.Tenant)
-	if rcvIdx, err := onStor.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
-		nil); err != nil {
+	//check database
+	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
+		true, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(eIdxes, rcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
-		}
+	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
+		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(attrProfile), utils.ToJSON(rcv))
 	}
-	if reverseRcvIdx, err := onStor.GetFilterReverseIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
-		nil); err != nil {
-		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
-		}
+	//set Substitue with type bool
+	mapSubstitutes["FN1"]["Init1"] = &Attribute{
+		FieldName:  "FN1",
+		Initial:    "Init1",
+		Substitute: true,
+		Append:     true,
 	}
-	//Add an InlineFilter
-	th.FilterIDs = []string{"Filter1", "*string:Account:1001"}
-	if err := onStor.SetThresholdProfile(th, true); err != nil {
-		t.Error(err)
-	}
-	eIdxes = map[string]utils.StringMap{
-		"Account:1001": utils.StringMap{
-			"THD_Test": true,
-		},
-		"EventType:Event1": utils.StringMap{
-			"THD_Test": true,
-		},
-		"EventType:Event2": utils.StringMap{
-			"THD_Test": true,
+	attrProfile.Attributes = []*Attribute{
+		&Attribute{
+			FieldName:  "FN1",
+			Initial:    "Init1",
+			Substitute: true,
+			Append:     true,
 		},
 	}
-
-	reverseIdxes = map[string]utils.StringMap{
-		"THD_Test": utils.StringMap{
-			"Account:1001":     true,
-			"EventType:Event1": true,
-			"EventType:Event2": true,
-		},
-	}
-	if rcvIdx, err := onStor.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
-		nil); err != nil {
-		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(eIdxes, rcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
-		}
-	}
-	if reverseRcvIdx, err := onStor.GetFilterReverseIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
-		nil); err != nil {
-		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
-		}
-	}
-	//remove threshold
-	if err := onStor.RemoveThresholdProfile(th.Tenant,
-		th.ID, utils.NonTransactional, true); err != nil {
+	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
 		t.Error(err)
 	}
-	if _, err := onStor.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
-		nil); err != utils.ErrNotFound {
+	attrProfile.attributes = mapSubstitutes
+	//check cache
+	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
+		false, utils.NonTransactional); err != nil {
 		t.Error(err)
+	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
+		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(attrProfile), utils.ToJSON(rcv))
 	}
-	if _, err := onStor.GetFilterReverseIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
-		nil); err != utils.ErrNotFound {
+	//check database
+	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
+		true, utils.NonTransactional); err != nil {
 		t.Error(err)
+	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
+		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(attrProfile), utils.ToJSON(rcv))
 	}
 }

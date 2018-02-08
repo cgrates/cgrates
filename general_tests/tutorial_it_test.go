@@ -1338,8 +1338,8 @@ func TestTutITPrepaidCDRWithSMCost(t *testing.T) {
 			Destination: "1003",
 			Timespans: []*engine.TimeSpan{
 				&engine.TimeSpan{
-					TimeStart:     time.Date(2016, 4, 6, 13, 30, 0, 0, time.UTC).Local(), // MongoDB saves timestamps in local timezone
-					TimeEnd:       time.Date(2016, 4, 6, 13, 31, 30, 0, time.UTC).Local(),
+					TimeStart:     time.Date(2016, 4, 6, 13, 30, 0, 0, time.UTC),
+					TimeEnd:       time.Date(2016, 4, 6, 13, 31, 30, 0, time.UTC),
 					DurationIndex: 0,
 					RateInterval: &engine.RateInterval{
 						Rating: &engine.RIRate{Rates: engine.RateGroups{

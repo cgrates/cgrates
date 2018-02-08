@@ -23,13 +23,149 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/cache"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
 var (
-	r1, r2        *Resource
-	ru1, ru2, ru3 *ResourceUsage
-	rs            Resources
+	r1, r2               *Resource
+	ru1, ru2, ru3        *ResourceUsage
+	rs                   Resources
+	cloneExpTimeResource time.Time
+	expTimeResource      = time.Now().Add(time.Duration(20 * time.Minute))
+	resserv              ResourceService
+	dmRES                *DataManager
+	resprf               = []*ResourceProfile{
+		&ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "resourcesprofile1", // identifier of this resource
+			FilterIDs: []string{"filter9"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			UsageTTL:          time.Duration(10) * time.Second, // auto-expire the usage after this duration
+			Limit:             10.00,                           // limit value
+			AllocationMessage: "AllocationMessage",             // message returned by the winning resource on allocation
+			Blocker:           false,                           // blocker flag to stop processing on filters matched
+			Stored:            false,
+			Weight:            20.00,        // Weight to sort the resources
+			ThresholdIDs:      []string{""}, // Thresholds to check after changing Limit
+		},
+		&ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "resourcesprofile2", // identifier of this resource
+			FilterIDs: []string{"filter10"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			UsageTTL:          time.Duration(10) * time.Second, // auto-expire the usage after this duration
+			Limit:             10.00,                           // limit value
+			AllocationMessage: "AllocationMessage",             // message returned by the winning resource on allocation
+			Blocker:           false,                           // blocker flag to stop processing on filters matched
+			Stored:            false,
+			Weight:            20.00,        // Weight to sort the resources
+			ThresholdIDs:      []string{""}, // Thresholds to check after changing Limit
+		},
+		&ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "resourcesprofile3", // identifier of this resource
+			FilterIDs: []string{"preffilter5"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			UsageTTL:          time.Duration(10) * time.Second, // auto-expire the usage after this duration
+			Limit:             10.00,                           // limit value
+			AllocationMessage: "AllocationMessage",             // message returned by the winning resource on allocation
+			Blocker:           false,                           // blocker flag to stop processing on filters matched
+			Stored:            false,
+			Weight:            20.00,        // Weight to sort the resources
+			ThresholdIDs:      []string{""}, // Thresholds to check after changing Limit
+		},
+		&ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "resourcesprofile4", // identifier of this resource
+			FilterIDs: []string{"defaultf5"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			UsageTTL:          time.Duration(10) * time.Second, // auto-expire the usage after this duration
+			Limit:             10.00,                           // limit value
+			AllocationMessage: "AllocationMessage",             // message returned by the winning resource on allocation
+			Blocker:           false,                           // blocker flag to stop processing on filters matched
+			Stored:            false,
+			Weight:            20.00,        // Weight to sort the resources
+			ThresholdIDs:      []string{""}, // Thresholds to check after changing Limit
+		},
+	}
+	resourceTest = []*Resource{
+		&Resource{
+			Tenant: "cgrates.org",
+			ID:     "resourcesprofile1",
+			Usages: map[string]*ResourceUsage{},
+			TTLIdx: []string{}, // holds ordered list of ResourceIDs based on their TTL, empty if feature is disabled
+			rPrf:   resprf[0],  // for ordering purposes
+		},
+		&Resource{
+			Tenant: "cgrates.org",
+			ID:     "resourcesprofile2",
+			Usages: map[string]*ResourceUsage{},
+			TTLIdx: []string{}, // holds ordered list of ResourceIDs based on their TTL, empty if feature is disabled
+			rPrf:   resprf[1],  // for ordering purposes
+		},
+		&Resource{
+			Tenant: "cgrates.org",
+			ID:     "resourcesprofile3",
+			Usages: map[string]*ResourceUsage{},
+			TTLIdx: []string{}, // holds ordered list of ResourceIDs based on their TTL, empty if feature is disabled
+			rPrf:   resprf[2],  // for ordering purposes
+		},
+		&Resource{
+			Tenant: "cgrates.org",
+			ID:     "resourcesprofile4",
+			Usages: map[string]*ResourceUsage{},
+			TTLIdx: []string{}, // holds ordered list of ResourceIDs based on their TTL, empty if feature is disabled
+			rPrf:   resprf[3],  // for ordering purposes
+		},
+	}
+	resEvs = []*utils.CGREvent{
+		&utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				"Resources":      "ResourcesProfile1",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+				"UsageInterval":  "1s",
+				"PddInterval":    "1s",
+				"Weight":         "20.0",
+				utils.Usage:      time.Duration(135 * time.Second),
+				utils.COST:       123.0,
+			}},
+		&utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event2",
+			Event: map[string]interface{}{
+				"Resources":      "ResourcesProfile2",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+				"UsageInterval":  "1s",
+				"PddInterval":    "1s",
+				"Weight":         "21.0",
+				utils.Usage:      time.Duration(45 * time.Second),
+			}},
+		&utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event3",
+			Event: map[string]interface{}{
+				"Resources": "ResourcesProfilePrefix",
+				utils.Usage: time.Duration(30 * time.Second),
+			}},
+		&utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event3",
+			Event: map[string]interface{}{
+				"Weight":    "200.0",
+				utils.Usage: time.Duration(65 * time.Second),
+			}},
+	}
 )
 
 func TestRSRecordUsage1(t *testing.T) {
@@ -58,9 +194,9 @@ func TestRSRecordUsage1(t *testing.T) {
 				ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC).Add(time.Duration(1 * time.Millisecond)),
 			},
-			Weight:     100,
-			Limit:      2,
-			Thresholds: []string{"TEST_ACTIONS"},
+			Weight:       100,
+			Limit:        2,
+			ThresholdIDs: []string{"TEST_ACTIONS"},
 
 			UsageTTL:          time.Duration(1 * time.Millisecond),
 			AllocationMessage: "ALLOC",
@@ -129,10 +265,10 @@ func TestRSRsort(t *testing.T) {
 				ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 			},
 
-			Weight:     50,
-			Limit:      2,
-			Thresholds: []string{"TEST_ACTIONS"},
-			UsageTTL:   time.Duration(1 * time.Millisecond),
+			Weight:       50,
+			Limit:        2,
+			ThresholdIDs: []string{"TEST_ACTIONS"},
+			UsageTTL:     time.Duration(1 * time.Millisecond),
 		},
 		// AllocationMessage: "ALLOC2",
 		Usages: map[string]*ResourceUsage{
@@ -235,7 +371,7 @@ func TestRSCacheSetGet(t *testing.T) {
 			AllocationMessage: "ALLOC_RL",
 			Weight:            50,
 			Limit:             2,
-			Thresholds:        []string{"TEST_ACTIONS"},
+			ThresholdIDs:      []string{"TEST_ACTIONS"},
 			UsageTTL:          time.Duration(1 * time.Millisecond),
 		},
 		Usages: map[string]*ResourceUsage{
@@ -265,9 +401,9 @@ func TestV1AuthorizeResourceMissingStruct(t *testing.T) {
 	dmresmiss := NewDataManager(data)
 
 	rserv := &ResourceService{
-		dm:            dmresmiss,
-		filterS:       &FilterS{dm: dmresmiss},
-		indexedFields: []string{}, // speed up query on indexes
+		dm:                  dmresmiss,
+		filterS:             &FilterS{dm: dmresmiss},
+		stringIndexedFields: &[]string{}, // speed up query on indexes
 	}
 	var reply *string
 	argsMissingTenant := utils.ArgRSv1ResourceUsage{
@@ -291,5 +427,153 @@ func TestV1AuthorizeResourceMissingStruct(t *testing.T) {
 	}
 	if err := rserv.V1AuthorizeResources(argsMissingUsageID, reply); err.Error() != "MANDATORY_IE_MISSING: [UsageID]" {
 		t.Error(err.Error())
+	}
+}
+
+func TestRSPopulateResourceService(t *testing.T) {
+	data, _ := NewMapStorage()
+	dmRES = NewDataManager(data)
+	var filters1 []*FilterRule
+	var filters2 []*FilterRule
+	var preffilter []*FilterRule
+	var defaultf []*FilterRule
+	second := 1 * time.Second
+	resserv = ResourceService{
+		dm:      dmRES,
+		filterS: &FilterS{dm: dmRES},
+	}
+	ref := NewFilterIndexer(dmRES, utils.ResourceProfilesPrefix, "cgrates.org")
+	//filter1
+	x, err := NewFilterRule(MetaString, "Resources", []string{"ResourcesProfile1"})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	filters1 = append(filters1, x)
+	x, err = NewFilterRule(MetaGreaterOrEqual, "UsageInterval", []string{second.String()})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	filters1 = append(filters1, x)
+	x, err = NewFilterRule(MetaGreaterOrEqual, utils.Usage, []string{second.String()})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	filters1 = append(filters1, x)
+	x, err = NewFilterRule(MetaGreaterOrEqual, "Weight", []string{"9.0"})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	filters1 = append(filters1, x)
+	filter9 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter9", Rules: filters1}
+	dmRES.SetFilter(filter9)
+	ref.IndexTPFilter(FilterToTPFilter(filter9), "resourcesprofile1")
+	//filter2
+	x, err = NewFilterRule(MetaString, "Resources", []string{"ResourcesProfile2"})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	filters2 = append(filters2, x)
+	x, err = NewFilterRule(MetaGreaterOrEqual, "PddInterval", []string{second.String()})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	filters2 = append(filters2, x)
+	x, err = NewFilterRule(MetaGreaterOrEqual, utils.Usage, []string{second.String()})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	filters2 = append(filters2, x)
+	x, err = NewFilterRule(MetaGreaterOrEqual, "Weight", []string{"15.0"})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	filters2 = append(filters2, x)
+	filter10 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter10", Rules: filters2}
+	dmRES.SetFilter(filter10)
+	ref.IndexTPFilter(FilterToTPFilter(filter10), "resourcesprofile2")
+	//prefix filter
+	x, err = NewFilterRule(MetaPrefix, "Resources", []string{"ResourcesProfilePrefix"})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	preffilter = append(preffilter, x)
+	x, err = NewFilterRule(MetaGreaterOrEqual, utils.Usage, []string{second.String()})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	preffilter = append(preffilter, x)
+	preffilter5 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "preffilter5", Rules: preffilter}
+	dmRES.SetFilter(preffilter5)
+	ref.IndexTPFilter(FilterToTPFilter(preffilter5), "resourcesprofile3")
+	//default filter
+	x, err = NewFilterRule(MetaGreaterOrEqual, "Weight", []string{"200.00"})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	defaultf = append(defaultf, x)
+	x, err = NewFilterRule(MetaGreaterOrEqual, utils.Usage, []string{second.String()})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	defaultf = append(defaultf, x)
+	defaultf5 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "defaultf5", Rules: defaultf}
+	dmRES.SetFilter(defaultf5)
+	ref.IndexTPFilter(FilterToTPFilter(defaultf5), "resourcesprofile4")
+	for _, res := range resourceTest {
+		dmRES.SetResource(res)
+	}
+	for _, resp := range resprf {
+		dmRES.SetResourceProfile(resp, false)
+	}
+	err = ref.StoreIndexes()
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+}
+
+func TestRSmatchingResourcesForEvent(t *testing.T) {
+	mres, err := resserv.matchingResourcesForEvent(resEvs[0])
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(resourceTest[0].Tenant, mres[0].Tenant) {
+		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].Tenant, mres[0].Tenant)
+	} else if !reflect.DeepEqual(resourceTest[0].ID, mres[0].ID) {
+		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].ID, mres[0].ID)
+	} else if !reflect.DeepEqual(resourceTest[0].rPrf, mres[0].rPrf) {
+		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].rPrf, mres[0].rPrf)
+	}
+	mres, err = resserv.matchingResourcesForEvent(resEvs[1])
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(resourceTest[1].Tenant, mres[0].Tenant) {
+		t.Errorf("Expecting: %+v, received: %+v", resourceTest[1].Tenant, mres[0].Tenant)
+	} else if !reflect.DeepEqual(resourceTest[1].ID, mres[0].ID) {
+		t.Errorf("Expecting: %+v, received: %+v", resourceTest[1].ID, mres[0].ID)
+	} else if !reflect.DeepEqual(resourceTest[1].rPrf, mres[0].rPrf) {
+		t.Errorf("Expecting: %+v, received: %+v", resourceTest[1].rPrf, mres[0].rPrf)
+	}
+	mres, err = resserv.matchingResourcesForEvent(resEvs[2])
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(resourceTest[2].Tenant, mres[0].Tenant) {
+		t.Errorf("Expecting: %+v, received: %+v", resourceTest[2].Tenant, mres[0].Tenant)
+	} else if !reflect.DeepEqual(resourceTest[2].ID, mres[0].ID) {
+		t.Errorf("Expecting: %+v, received: %+v", resourceTest[2].ID, mres[0].ID)
+	} else if !reflect.DeepEqual(resourceTest[2].rPrf, mres[0].rPrf) {
+		t.Errorf("Expecting: %+v, received: %+v", resourceTest[2].rPrf, mres[0].rPrf)
+	}
+	mres, err = resserv.matchingResourcesForEvent(resEvs[3])
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(resourceTest[3].Tenant, mres[0].Tenant) {
+		t.Errorf("Expecting: %+v, received: %+v", resourceTest[3].Tenant, mres[0].Tenant)
+	} else if !reflect.DeepEqual(resourceTest[3].ID, mres[0].ID) {
+		t.Errorf("Expecting: %+v, received: %+v", resourceTest[3].ID, mres[0].ID)
+	} else if !reflect.DeepEqual(resourceTest[3].rPrf, mres[0].rPrf) {
+		t.Errorf("Expecting: %+v, received: %+v", resourceTest[3].rPrf, mres[0].rPrf)
 	}
 }

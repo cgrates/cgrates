@@ -99,19 +99,19 @@ type SchedulerJsonCfg struct {
 
 // Cdrs config section
 type CdrsJsonCfg struct {
-	Enabled            *bool
-	Extra_fields       *[]string
-	Store_cdrs         *bool
-	Sm_cost_retries    *int
-	Rals_conns         *[]*HaPoolJsonCfg
-	Pubsubs_conns      *[]*HaPoolJsonCfg
-	Attributes_conns   *[]*HaPoolJsonCfg
-	Users_conns        *[]*HaPoolJsonCfg
-	Aliases_conns      *[]*HaPoolJsonCfg
-	Cdrstats_conns     *[]*HaPoolJsonCfg
-	Thresholds_conns   *[]*HaPoolJsonCfg
-	Stats_conns        *[]*HaPoolJsonCfg
-	Online_cdr_exports *[]string
+	Enabled               *bool
+	Extra_fields          *[]string
+	Store_cdrs            *bool
+	Sessions_cost_retries *int
+	Rals_conns            *[]*HaPoolJsonCfg
+	Pubsubs_conns         *[]*HaPoolJsonCfg
+	Attributes_conns      *[]*HaPoolJsonCfg
+	Users_conns           *[]*HaPoolJsonCfg
+	Aliases_conns         *[]*HaPoolJsonCfg
+	Cdrstats_conns        *[]*HaPoolJsonCfg
+	Thresholds_conns      *[]*HaPoolJsonCfg
+	Stats_conns           *[]*HaPoolJsonCfg
+	Online_cdr_exports    *[]string
 }
 
 type CdrReplicationJsonCfg struct {
@@ -211,9 +211,10 @@ type SessionSJsonCfg struct {
 	Session_ttl_last_used     *string
 	Session_ttl_usage         *string
 	Session_indexes           *[]string
+	Client_protocol           *float64
 }
 
-// SM-FreeSWITCH config section
+// FreeSWITCHAgent config section
 type FreeswitchAgentJsonCfg struct {
 	Enabled        *bool
 	Sessions_conns *[]*HaPoolJsonCfg
@@ -268,16 +269,11 @@ type CacheParamJsonCfg struct {
 type CacheJsonCfg map[string]*CacheParamJsonCfg
 
 // SM-Kamailio config section
-type SmKamJsonCfg struct {
-	Enabled           *bool
-	Rals_conns        *[]*HaPoolJsonCfg
-	Cdrs_conns        *[]*HaPoolJsonCfg
-	Resources_conns   *[]*HaPoolJsonCfg
-	Create_cdr        *bool
-	Debit_interval    *string
-	Min_call_duration *string
-	Max_call_duration *string
-	Evapi_conns       *[]*KamConnJsonCfg
+type KamAgentJsonCfg struct {
+	Enabled        *bool
+	Sessions_conns *[]*HaPoolJsonCfg
+	Create_cdr     *bool
+	Evapi_conns    *[]*KamConnJsonCfg
 }
 
 // Represents one connection instance towards Kamailio
@@ -388,40 +384,45 @@ type UserServJsonCfg struct {
 
 // Attribute service config section
 type AttributeSJsonCfg struct {
-	Enabled        *bool
-	Indexed_fields *[]string
+	Enabled               *bool
+	String_indexed_fields *[]string
+	Prefix_indexed_fields *[]string
 }
 
 // ResourceLimiter service config section
 type ResourceSJsonCfg struct {
-	Enabled          *bool
-	Thresholds_conns *[]*HaPoolJsonCfg
-	Store_interval   *string
-	Indexed_fields   *[]string
+	Enabled               *bool
+	Thresholds_conns      *[]*HaPoolJsonCfg
+	Store_interval        *string
+	String_indexed_fields *[]string
+	Prefix_indexed_fields *[]string
 }
 
 // Stat service config section
 type StatServJsonCfg struct {
-	Enabled          *bool
-	Store_interval   *string
-	Thresholds_conns *[]*HaPoolJsonCfg
-	Indexed_fields   *[]string
+	Enabled               *bool
+	Store_interval        *string
+	Thresholds_conns      *[]*HaPoolJsonCfg
+	String_indexed_fields *[]string
+	Prefix_indexed_fields *[]string
 }
 
 // Threshold service config section
 type ThresholdSJsonCfg struct {
-	Enabled        *bool
-	Store_interval *string
-	Indexed_fields *[]string
+	Enabled               *bool
+	Store_interval        *string
+	String_indexed_fields *[]string
+	Prefix_indexed_fields *[]string
 }
 
 // Supplier service config section
 type SupplierSJsonCfg struct {
-	Enabled         *bool
-	Indexed_fields  *[]string
-	Rals_conns      *[]*HaPoolJsonCfg
-	Resources_conns *[]*HaPoolJsonCfg
-	Stats_conns     *[]*HaPoolJsonCfg
+	Enabled               *bool
+	String_indexed_fields *[]string
+	Prefix_indexed_fields *[]string
+	Rals_conns            *[]*HaPoolJsonCfg
+	Resources_conns       *[]*HaPoolJsonCfg
+	Stats_conns           *[]*HaPoolJsonCfg
 }
 
 // Mailer config section

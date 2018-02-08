@@ -246,3 +246,55 @@ func TestCastFieldIfToString(t *testing.T) {
 		t.Errorf("received: %s", strVal)
 	}
 }
+
+func TestIfaceAsTime(t *testing.T) {
+	timeDate := time.Date(2009, 11, 10, 23, 0, 0, 0, time.UTC)
+	val := interface{}("2009-11-10T23:00:00Z")
+	if itmConvert, converted := IfaceAsTime(val, "UTC"); converted != nil {
+		t.Error("cannot cast time.Time")
+	} else if itmConvert != timeDate {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(timeDate)
+	if itmConvert, converted := IfaceAsTime(val, "UTC"); converted != nil {
+		t.Error("cannot cast time.Time")
+	} else if itmConvert != timeDate {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}("This is not a time")
+	if _, converted := IfaceAsTime(val, "UTC"); converted == nil {
+		t.Error("There should be error")
+	}
+}
+
+func TestIfaceAsFloat64(t *testing.T) {
+	eFloat := 6.0
+	val := interface{}(6.0)
+	if itmConvert, err := IfaceAsFloat64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eFloat {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(time.Duration(6))
+	if itmConvert, err := IfaceAsFloat64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eFloat {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}("6")
+	if itmConvert, err := IfaceAsFloat64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eFloat {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(int64(6))
+	if itmConvert, err := IfaceAsFloat64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eFloat {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}("This is not a float")
+	if _, err := IfaceAsFloat64(val); err == nil {
+		t.Error("expecting error")
+	}
+}

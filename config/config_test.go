@@ -462,6 +462,7 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 		MaxCallDuration:         3 * time.Hour,
 		SessionTTL:              0 * time.Second,
 		SessionIndexes:          utils.StringMap{},
+		ClientProtocol:          1.0,
 	}
 	if !reflect.DeepEqual(eSessionSCfg, cgrCfg.sessionSCfg) {
 		t.Errorf("expecting: %s, received: %s",
@@ -549,10 +550,11 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 	}
 }
 
-func TestCgrCfgJSONDefaultsSMFsConfig(t *testing.T) {
+func TestCgrCfgJSONDefaultsFsAgentConfig(t *testing.T) {
 	eFsAgentCfg := &FsAgentConfig{
-		Enabled:             false,
-		SessionSConns:       []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
+		Enabled: false,
+		SessionSConns: []*HaPoolConfig{
+			&HaPoolConfig{Address: "*internal"}},
 		SubscribePark:       true,
 		CreateCdr:           false,
 		ExtraFields:         nil,
@@ -570,39 +572,19 @@ func TestCgrCfgJSONDefaultsSMFsConfig(t *testing.T) {
 	}
 }
 
-func TestCgrCfgJSONDefaultsSMKamConfig(t *testing.T) {
-	eSmKaCfg := &SmKamConfig{
-		Enabled:         false,
-		RALsConns:       []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
-		CDRsConns:       []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
-		RLsConns:        []*HaPoolConfig{},
-		CreateCdr:       false,
-		DebitInterval:   10 * time.Second,
-		MinCallDuration: 0 * time.Second,
-		MaxCallDuration: 3 * time.Hour,
-		EvapiConns:      []*KamConnConfig{&KamConnConfig{Address: "127.0.0.1:8448", Reconnects: 5}},
+func TestCgrCfgJSONDefaultsKamAgentConfig(t *testing.T) {
+	eKamAgentCfg := &KamAgentCfg{
+		Enabled: false,
+		SessionSConns: []*HaPoolConfig{
+			&HaPoolConfig{Address: "*internal"}},
+		CreateCdr: false,
+		EvapiConns: []*KamConnConfig{
+			&KamConnConfig{
+				Address: "127.0.0.1:8448", Reconnects: 5}},
 	}
-	if !reflect.DeepEqual(cgrCfg.SmKamConfig, eSmKaCfg) {
-		t.Errorf("received: %+v, expecting: %+v", cgrCfg.SmKamConfig, eSmKaCfg)
-	}
-}
-
-func TestCgrCfgJSONDefaultsSMOsipsConfig(t *testing.T) {
-	eSmOpCfg := &SmOsipsConfig{
-		Enabled:                 false,
-		ListenUdp:               "127.0.0.1:2020",
-		RALsConns:               []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
-		CDRsConns:               []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}},
-		CreateCdr:               false,
-		DebitInterval:           10 * time.Second,
-		MinCallDuration:         0 * time.Second,
-		MaxCallDuration:         3 * time.Hour,
-		EventsSubscribeInterval: 60 * time.Second,
-		MiAddr:                  "127.0.0.1:8020",
-	}
-
-	if !reflect.DeepEqual(cgrCfg.SmOsipsConfig, eSmOpCfg) {
-		t.Errorf("received: %+v, expecting: %+v", cgrCfg.SmOsipsConfig, eSmOpCfg)
+	if !reflect.DeepEqual(cgrCfg.kamAgentCfg, eKamAgentCfg) {
+		t.Errorf("received: %+v, expecting: %+v",
+			utils.ToJSON(cgrCfg.kamAgentCfg), utils.ToJSON(eKamAgentCfg))
 	}
 }
 
@@ -657,8 +639,9 @@ func TestCgrCfgJSONDefaultFiltersCfg(t *testing.T) {
 
 func TestCgrCfgJSONDefaultSAttributeSCfg(t *testing.T) {
 	eAliasSCfg := &AttributeSCfg{
-		Enabled:       false,
-		IndexedFields: []string{},
+		Enabled:             false,
+		StringIndexedFields: nil,
+		PrefixIndexedFields: &[]string{},
 	}
 	if !reflect.DeepEqual(eAliasSCfg, cgrCfg.attributeSCfg) {
 		t.Errorf("received: %+v, expecting: %+v", eAliasSCfg, cgrCfg.attributeSCfg)
@@ -667,10 +650,11 @@ func TestCgrCfgJSONDefaultSAttributeSCfg(t *testing.T) {
 
 func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 	eResLiCfg := &ResourceSConfig{
-		Enabled:         false,
-		ThresholdSConns: []*HaPoolConfig{},
-		StoreInterval:   0,
-		IndexedFields:   []string{},
+		Enabled:             false,
+		ThresholdSConns:     []*HaPoolConfig{},
+		StoreInterval:       0,
+		StringIndexedFields: nil,
+		PrefixIndexedFields: &[]string{},
 	}
 	if !reflect.DeepEqual(cgrCfg.resourceSCfg, eResLiCfg) {
 		t.Errorf("expecting: %s, received: %s", utils.ToJSON(eResLiCfg), utils.ToJSON(cgrCfg.resourceSCfg))
@@ -680,10 +664,11 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 
 func TestCgrCfgJSONDefaultStatsCfg(t *testing.T) {
 	eStatsCfg := &StatSCfg{
-		Enabled:         false,
-		StoreInterval:   0,
-		ThresholdSConns: []*HaPoolConfig{},
-		IndexedFields:   []string{},
+		Enabled:             false,
+		StoreInterval:       0,
+		ThresholdSConns:     []*HaPoolConfig{},
+		StringIndexedFields: nil,
+		PrefixIndexedFields: &[]string{},
 	}
 	if !reflect.DeepEqual(cgrCfg.statsCfg, eStatsCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.statsCfg, eStatsCfg)
@@ -692,9 +677,10 @@ func TestCgrCfgJSONDefaultStatsCfg(t *testing.T) {
 
 func TestCgrCfgJSONDefaultThresholdSCfg(t *testing.T) {
 	eThresholdSCfg := &ThresholdSCfg{
-		Enabled:       false,
-		StoreInterval: 0,
-		IndexedFields: []string{},
+		Enabled:             false,
+		StoreInterval:       0,
+		StringIndexedFields: nil,
+		PrefixIndexedFields: &[]string{},
 	}
 	if !reflect.DeepEqual(eThresholdSCfg, cgrCfg.thresholdSCfg) {
 		t.Errorf("received: %+v, expecting: %+v", eThresholdSCfg, cgrCfg.thresholdSCfg)
@@ -703,8 +689,10 @@ func TestCgrCfgJSONDefaultThresholdSCfg(t *testing.T) {
 
 func TestCgrCfgJSONDefaultSupplierSCfg(t *testing.T) {
 	eSupplSCfg := &SupplierSCfg{
-		Enabled:       false,
-		IndexedFields: []string{},
+		Enabled:             false,
+		StringIndexedFields: nil,
+		PrefixIndexedFields: &[]string{},
+
 		RALsConns: []*HaPoolConfig{
 			&HaPoolConfig{Address: "*internal"},
 		},
@@ -889,5 +877,33 @@ func TestRadiusAgentCfg(t *testing.T) {
 	}
 	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.RequestProcessors, testRA.RequestProcessors) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.radiusAgentCfg.RequestProcessors, testRA.RequestProcessors)
+	}
+}
+
+func TestDbDefaults(t *testing.T) {
+	dbdf := NewDbDefaults()
+	flagInput := utils.MetaDynamic
+	dbs := []string{utils.MONGO, utils.REDIS, utils.MYSQL}
+	for _, dbtype := range dbs {
+		host := dbdf.DBHost(dbtype, flagInput)
+		if host != utils.LOCALHOST {
+			t.Errorf("received: %+v, expecting: %+v", host, utils.LOCALHOST)
+		}
+		user := dbdf.DBUser(dbtype, flagInput)
+		if user != utils.CGRATES {
+			t.Errorf("received: %+v, expecting: %+v", user, utils.CGRATES)
+		}
+		port := dbdf.DBPort(dbtype, flagInput)
+		if port != dbdf[dbtype]["DbPort"] {
+			t.Errorf("received: %+v, expecting: %+v", port, dbdf[dbtype]["DbPort"])
+		}
+		name := dbdf.DBName(dbtype, flagInput)
+		if name != dbdf[dbtype]["DbName"] {
+			t.Errorf("received: %+v, expecting: %+v", name, dbdf[dbtype]["DbName"])
+		}
+		pass := dbdf.DBPass(dbtype, flagInput)
+		if pass != dbdf[dbtype]["DbPass"] {
+			t.Errorf("received: %+v, expecting: %+v", pass, dbdf[dbtype]["DbPass"])
+		}
 	}
 }

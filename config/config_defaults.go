@@ -164,7 +164,7 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,						// start the CDR Server service:  <true|false>
 	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs
 	"store_cdrs": true,						// store cdrs in storDb
-	"sm_cost_retries": 5,					// number of queries to sm_costs before recalculating CDR
+	"sessions_cost_retries": 5,					// number of queries to sessions_costs before recalculating CDR
 	"rals_conns": [
 		{"address": "*internal"}			// address where to reach the Rater for cost calculation, empty to disable functionality: <""|*internal|x.y.z.y:1234>
 	],
@@ -298,6 +298,7 @@ const CGRATES_CFG_JSON = `
 	//"session_ttl_last_used": "",			// tweak LastUsed for sessions timing-out, not defined by default
 	//"session_ttl_usage": "",				// tweak Usage for sessions timing-out, not defined by default
 	"session_indexes": [],					// index sessions based on these fields for GetActiveSessions API
+	"client_protocol": 1.0,					// version of protocol to use when acting as JSON-PRC client <"0","1.0">
 },
 
 
@@ -333,42 +334,17 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"sm_kamailio": {
+"kamailio_agent": {
 	"enabled": false,						// starts SessionManager service: <true|false>
-	"rals_conns": [
-		{"address": "*internal"}			// address where to reach the Rater <""|*internal|127.0.0.1:2013>
+	"sessions_conns": [
+		{"address": "*internal"}			// connection towards session service: <*internal>
 	],
-	"cdrs_conns": [
-		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
-	],
-	"resources_conns": [],					// address where to reach the ResourceLimiter service, empty to disable functionality: <""|*internal|x.y.z.y:1234>
 	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
-	"debit_interval": "10s",				// interval to perform debits on.
-	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
-	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
+	"timezone": "",							// timezone of the Kamailio server
 	"evapi_conns":[							// instantiate connections to multiple Kamailio servers
 		{"address": "127.0.0.1:8448", "reconnects": 5}
 	],
 },
-
-
-"sm_opensips": {
-	"enabled": false,						// starts SessionManager service: <true|false>
-	"listen_udp": "127.0.0.1:2020",			// address where to listen for datagram events coming from OpenSIPS
-	"rals_conns": [
-		{"address": "*internal"}			// address where to reach the Rater <""|*internal|127.0.0.1:2013>
-	],
-	"cdrs_conns": [
-		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
-	],
-	"create_cdr": false,					// create CDR out of events and sends it to CDRS component
-	"debit_interval": "10s",				// interval to perform debits on.
-	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
-	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
-	"events_subscribe_interval": "60s",		// automatic events subscription to OpenSIPS, 0 to disable it
-	"mi_addr": "127.0.0.1:8020",			// address where to reach OpenSIPS MI to send session disconnects
-},
-
 
 "diameter_agent": {
 	"enabled": false,											// enables the diameter agent: <true|false>
@@ -427,43 +403,48 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"attributes": {							// Attribute service
-	"enabled": false,				// starts attribute service: <true|false>.
-	"indexed_fields": [],			// query indexes based on these fields for faster processing
+"attributes": {								// Attribute service
+	"enabled": false,						// starts attribute service: <true|false>.
+	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 },
 
 
-"resources": {						// Resource service (*new)
-	"enabled": false,				// starts ResourceLimiter service: <true|false>.
-	"store_interval": "",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
-	"thresholds_conns": [],			// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
-	"indexed_fields": [],			// query indexes based on these fields for faster processing
+"resources": {								// Resource service (*new)
+	"enabled": false,						// starts ResourceLimiter service: <true|false>.
+	"store_interval": "",					// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+	"thresholds_conns": [],					// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
+	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 },
 
 
-"stats": {							// Stat service (*new)
-	"enabled": false,				// starts Stat service: <true|false>.
-	"store_interval": "",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
-	"thresholds_conns": [],			// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
-	"indexed_fields": [],			// query indexes based on these fields for faster processing
+"stats": {									// Stat service (*new)
+	"enabled": false,						// starts Stat service: <true|false>.
+	"store_interval": "",					// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+	"thresholds_conns": [],					// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
+	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 },
 
 
-"thresholds": {						// Threshold service (*new)
-	"enabled": false,				// starts ThresholdS service: <true|false>.
-	"store_interval": "",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
-	"indexed_fields": [],			// query indexes based on these fields for faster processing
+"thresholds": {								// Threshold service (*new)
+	"enabled": false,						// starts ThresholdS service: <true|false>.
+	"store_interval": "",					// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 },
 
 
-"suppliers": {						// Supplier service (*new)
-	"enabled": false,				// starts SupplierS service: <true|false>.
-	"indexed_fields": [],			// query indexes based on these fields for faster processing
+"suppliers": {								// Supplier service (*new)
+	"enabled": false,						// starts SupplierS service: <true|false>.
+	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"rals_conns": [
-		{"address": "*internal"},	// address where to reach the RALs for cost/accounting  <*internal>
+		{"address": "*internal"},			// address where to reach the RALs for cost/accounting  <*internal>
 	],
-	"resources_conns": [],			// address where to reach the Resource service, empty to disable functionality: <""|*internal|x.y.z.y:1234>
-	"stats_conns": [],				// address where to reach the Stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+	"resources_conns": [],					// address where to reach the Resource service, empty to disable functionality: <""|*internal|x.y.z.y:1234>
+	"stats_conns": [],						// address where to reach the Stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 },
 
 

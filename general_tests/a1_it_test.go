@@ -33,7 +33,7 @@ import (
 	"github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -127,7 +127,7 @@ func TestA1itAddBalance1(t *testing.T) {
 }
 
 func TestA1itDataSession1(t *testing.T) {
-	smgEv := sessionmanager.SMGenericEvent{
+	smgEv := sessions.SMGenericEvent{
 		utils.EVENT_NAME:         "INITIATE_SESSION",
 		utils.TOR:                utils.DATA,
 		utils.OriginID:           "504966119",
@@ -151,7 +151,7 @@ func TestA1itDataSession1(t *testing.T) {
 	} else if maxUsage != 10240 {
 		t.Error("Received: ", maxUsage)
 	}
-	smgEv = sessionmanager.SMGenericEvent{
+	smgEv = sessions.SMGenericEvent{
 		utils.EVENT_NAME:         "UPDATE_SESSION",
 		utils.Account:            "rpdata1",
 		utils.Category:           "data1",
@@ -177,7 +177,7 @@ func TestA1itDataSession1(t *testing.T) {
 	} else if maxUsage != 2097152 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
-	smgEv = sessionmanager.SMGenericEvent{
+	smgEv = sessions.SMGenericEvent{
 		utils.EVENT_NAME:     "TERMINATE_SESSION",
 		utils.Account:        "rpdata1",
 		utils.Category:       "data1",

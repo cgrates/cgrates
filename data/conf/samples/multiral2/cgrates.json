@@ -4,6 +4,10 @@
 // Used for multiple RAL configuration tests
 // Starts RAL
 
+"general": {
+		"node_id":"node2",
+},
+
 "listen": {
 	"rpc_json": ":12012",
 	"rpc_gob": ":12013",

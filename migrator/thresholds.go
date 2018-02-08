@@ -50,7 +50,7 @@ type v2ActionTriggers []*v2ActionTrigger
 func (m *Migrator) migrateCurrentThresholds() (err error) {
 	var ids []string
 	tenant := config.CgrConfig().DefaultTenant
-	//StatQueue
+	//Thresholds
 	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.ThresholdPrefix)
 	if err != nil {
 		return err
@@ -70,7 +70,7 @@ func (m *Migrator) migrateCurrentThresholds() (err error) {
 			}
 		}
 	}
-	//StatQueueProfile
+	//ThresholdProfiles
 	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.ThresholdProfilePrefix)
 	if err != nil {
 		return err
@@ -166,12 +166,13 @@ func (m *Migrator) migrateThresholds() (err error) {
 	}
 	return
 }
+
 func (v2ATR v2ActionTrigger) AsThreshold() (thp *engine.ThresholdProfile, th *engine.Threshold, filter *engine.Filter, err error) {
 	var filterIDS []string
-	var filters []*engine.RequestFilter
+	var filters []*engine.FilterRule
 	if v2ATR.Balance.ID != nil && *v2ATR.Balance.ID != "" {
 		if v2ATR.Balance.Directions != nil {
-			x, err := engine.NewRequestFilter(engine.MetaRSRFields, "Directions", v2ATR.Balance.Directions.Slice())
+			x, err := engine.NewFilterRule(engine.MetaRSR, "Directions", v2ATR.Balance.Directions.Slice())
 			if err != nil {
 				return nil, nil, nil, err
 			}
@@ -193,42 +194,42 @@ func (v2ATR v2ActionTrigger) AsThreshold() (thp *engine.ThresholdProfile, th *en
 		// 	filters = append(filters, x)
 		// }
 		if v2ATR.Balance.DestinationIDs != nil { //MetaLess /RSRfields
-			x, err := engine.NewRequestFilter(engine.MetaDestinations, "DestinationIDs", v2ATR.Balance.DestinationIDs.Slice())
+			x, err := engine.NewFilterRule(engine.MetaDestinations, "DestinationIDs", v2ATR.Balance.DestinationIDs.Slice())
 			if err != nil {
 				return nil, nil, nil, err
 			}
 			filters = append(filters, x)
 		}
 		if v2ATR.Balance.RatingSubject != nil { //MetaLess /RSRfields
-			x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "RatingSubject", []string{*v2ATR.Balance.RatingSubject})
+			x, err := engine.NewFilterRule(engine.MetaPrefix, "RatingSubject", []string{*v2ATR.Balance.RatingSubject})
 			if err != nil {
 				return nil, nil, nil, err
 			}
 			filters = append(filters, x)
 		}
 		if v2ATR.Balance.Categories != nil { //MetaLess /RSRfields
-			x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "Categories", v2ATR.Balance.Categories.Slice())
+			x, err := engine.NewFilterRule(engine.MetaPrefix, "Categories", v2ATR.Balance.Categories.Slice())
 			if err != nil {
 				return nil, nil, nil, err
 			}
 			filters = append(filters, x)
 		}
 		if v2ATR.Balance.SharedGroups != nil { //MetaLess /RSRfields
-			x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "SharedGroups", v2ATR.Balance.SharedGroups.Slice())
+			x, err := engine.NewFilterRule(engine.MetaPrefix, "SharedGroups", v2ATR.Balance.SharedGroups.Slice())
 			if err != nil {
 				return nil, nil, nil, err
 			}
 			filters = append(filters, x)
 		}
 		if v2ATR.Balance.TimingIDs != nil { //MetaLess /RSRfields
-			x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "TimingIDs", v2ATR.Balance.TimingIDs.Slice())
+			x, err := engine.NewFilterRule(engine.MetaPrefix, "TimingIDs", v2ATR.Balance.TimingIDs.Slice())
 			if err != nil {
 				return nil, nil, nil, err
 			}
 			filters = append(filters, x)
 		}
 
-		filter = &engine.Filter{Tenant: config.CgrConfig().DefaultTenant, ID: *v2ATR.Balance.ID, RequestFilters: filters}
+		filter = &engine.Filter{Tenant: config.CgrConfig().DefaultTenant, ID: *v2ATR.Balance.ID, Rules: filters}
 		filterIDS = append(filterIDS, filter.ID)
 
 	}
@@ -286,51 +287,51 @@ func (m *Migrator) SasThreshold(v2ATR *engine.ActionTrigger) (err error) {
 
 func AsThreshold2(v2ATR engine.ActionTrigger) (thp *engine.ThresholdProfile, th *engine.Threshold, filter *engine.Filter, err error) {
 	var filterIDS []string
-	var filters []*engine.RequestFilter
+	var filters []*engine.FilterRule
 	if v2ATR.Balance.ID != nil && *v2ATR.Balance.ID != "" {
 		if v2ATR.Balance.Directions != nil {
-			x, err := engine.NewRequestFilter(engine.MetaRSRFields, "Directions", v2ATR.Balance.Directions.Slice())
+			x, err := engine.NewFilterRule(engine.MetaRSR, "Directions", v2ATR.Balance.Directions.Slice())
 			if err != nil {
 				return nil, nil, nil, err
 			}
 			filters = append(filters, x)
 		}
 		if v2ATR.Balance.DestinationIDs != nil { //MetaLess /RSRfields
-			x, err := engine.NewRequestFilter(engine.MetaDestinations, "DestinationIDs", v2ATR.Balance.DestinationIDs.Slice())
+			x, err := engine.NewFilterRule(engine.MetaDestinations, "DestinationIDs", v2ATR.Balance.DestinationIDs.Slice())
 			if err != nil {
 				return nil, nil, nil, err
 			}
 			filters = append(filters, x)
 		}
 		if v2ATR.Balance.RatingSubject != nil { //MetaLess /RSRfields
-			x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "RatingSubject", []string{*v2ATR.Balance.RatingSubject})
+			x, err := engine.NewFilterRule(engine.MetaPrefix, "RatingSubject", []string{*v2ATR.Balance.RatingSubject})
 			if err != nil {
 				return nil, nil, nil, err
 			}
 			filters = append(filters, x)
 		}
 		if v2ATR.Balance.Categories != nil { //MetaLess /RSRfields
-			x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "Categories", v2ATR.Balance.Categories.Slice())
+			x, err := engine.NewFilterRule(engine.MetaPrefix, "Categories", v2ATR.Balance.Categories.Slice())
 			if err != nil {
 				return nil, nil, nil, err
 			}
 			filters = append(filters, x)
 		}
 		if v2ATR.Balance.SharedGroups != nil { //MetaLess /RSRfields
-			x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "SharedGroups", v2ATR.Balance.SharedGroups.Slice())
+			x, err := engine.NewFilterRule(engine.MetaPrefix, "SharedGroups", v2ATR.Balance.SharedGroups.Slice())
 			if err != nil {
 				return nil, nil, nil, err
 			}
 			filters = append(filters, x)
 		}
 		if v2ATR.Balance.TimingIDs != nil { //MetaLess /RSRfields
-			x, err := engine.NewRequestFilter(engine.MetaStringPrefix, "TimingIDs", v2ATR.Balance.TimingIDs.Slice())
+			x, err := engine.NewFilterRule(engine.MetaPrefix, "TimingIDs", v2ATR.Balance.TimingIDs.Slice())
 			if err != nil {
 				return nil, nil, nil, err
 			}
 			filters = append(filters, x)
 		}
-		filter = &engine.Filter{Tenant: config.CgrConfig().DefaultTenant, ID: *v2ATR.Balance.ID, RequestFilters: filters}
+		filter = &engine.Filter{Tenant: config.CgrConfig().DefaultTenant, ID: *v2ATR.Balance.ID, Rules: filters}
 		filterIDS = append(filterIDS, filter.ID)
 	}
 	th = &engine.Threshold{

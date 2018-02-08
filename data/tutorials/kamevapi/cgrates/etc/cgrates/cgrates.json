@@ -10,24 +10,15 @@
     "log_level": 7,
 },
 
-"stor_db": {								// database used to store offline tariff plans and CDRs
-	"db_password": "CGRateS.org",			// password to use when connecting to stordb
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
 },
 
-"rals": {
-	"enabled": true,
-	"cdrstats_conns": [
-		{"address": "*internal"}
-	],
-	"pubsubs_conns": [
-		{"address": "*internal"}
-	],
-	"users_conns": [
-		{"address": "*internal"}
-	],
-	"aliases_conns": [
-		{"address": "*internal"}
-	],
+
+"stor_db": {
+	"db_password": "CGRateS.org",
 },
 
 
@@ -36,85 +27,54 @@
 },
 
 
-"cdrs": {
+"rals": {
 	"enabled": true,
-	"cdrstats_conns": [
+	"thresholds_conns": [
+		{"address": "*internal"}
+	],
+	"stats_conns": [
+		{"address": "*internal"}
+	],
+	"pubsubs_conns": [
+		{"address": "*internal"}
+	],
+	"attributes_conns": [
 		{"address": "*internal"}
 	],
 },
 
 
-"cdrstats": {
+"cdrs": {
 	"enabled": true,
 },
 
 
-"cdre": {
-	"*default": {
-		"cdr_format": "csv",
-		"field_separator": ",",
-		"data_usage_multiply_factor": 1,
-		"sms_usage_multiply_factor": 1,
-        "generic_usage_multiply_factor": 1,
-		"cost_multiply_factor": 1,
-		"cost_rounding_decimals": -1,
-		"cost_shift_digits": 0,
-		"mask_destination_id": "MASKED_DESTINATIONS",
-		"mask_length": 0,
-		"export_dir": "/tmp/cgr_kamevapi/cgrates/cdre",
-		"header_fields": [],
-		"content_fields": [
-			{"tag": "CgrId", "type": "*composed", "value": "CGRID"},
-			{"tag":"RunId", "type": "*composed", "value": "RunID"},
-			{"tag":"Tor", "type": "*composed", "value": "ToR"},
-			{"tag":"AccId", "type": "*composed", "value": "OriginID"},
-			{"tag":"ReqType", "type": "*composed", "value": "RequestType"},
-			{"tag":"Direction", "type": "*composed", "value": "Direction"},
-			{"tag":"Tenant", "type": "*composed", "value": "Tenant"},
-			{"tag":"Category", "type": "*composed", "value": "Category"},
-			{"tag":"Account", "type": "*composed", "value": "Account"},
-			{"tag":"Subject", "type": "*composed", "value": "Subject"},
-			{"tag":"Destination", "type": "*composed", "value": "Destination"},
-			{"tag":"SetupTime", "type": "*datetime", "value": "SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
-			{"tag":"AnswerTime", "type": "*datetime", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
-			{"tag":"Usage", "type": "*composed", "value": "usage"},
-			{"tag":"Cost", "type": "*composed", "value": "cost"},
-		],
-		"trailer_fields": [],
-	},
-	"customer_tpl": {
-		"cdr_format": "csv",
-		"field_separator": ";",
-		"data_usage_multiply_factor": 1,
-		"sms_usage_multiply_factor": 1,
-        "generic_usage_multiply_factor": 1,
-		"cost_multiply_factor": 1,
-		"cost_rounding_decimals": -1,
-		"cost_shift_digits": 0,
-		"mask_destination_id": "MASKED_DESTINATIONS",
-		"mask_length": 0,
-		"export_dir": "/tmp/cgr_kamevapi/cgrates/cdre",
-		"header_fields": [],
-		"content_fields": [	
-			{"tag": "CgrId", "type": "*composed", "value": "CGRID"},
-			{"tag":"AccId", "type": "*composed", "value": "OriginID"},
-			{"tag":"ReqType", "type": "*composed", "value": "RequestType"},
-			{"tag":"Tenant", "type": "*composed", "value": "Tenant"},
-			{"tag":"Category", "type": "*composed", "value": "Category"},
-			{"tag":"Subject", "type": "*composed", "value": "Account"},
-			{"tag":"Destination", "type": "*composed", "value": "~Destination:s/^1(\\d+)/+$1/:s/^\\+(\\d+)/00$1/"},
-			{"tag":"AnswerTime", "type": "*datetime", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
-			{"tag":"Usage", "type": "*composed", "value": "Usage"},
-			{"tag":"Cost", "type": "*composed", "value": "Cost"},
-		],
-		"trailer_fields": [],
-	}
+"sessions": {
+	"enabled": true,
+	"rals_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"cdrs_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"resources_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"suppliers_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"attributes_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"debit_interval": "10s",
 },
 
 
-"sm_kamailio": {
+"kamailio_agent": {
 	"enabled": true,
-	"create_cdr": true,
+	"evapi_conns":[							// instantiate connections to multiple Kamailio servers
+		{"address": "127.0.0.1:8448", "reconnects": 5}
+	],
 },
 
 
@@ -123,14 +83,43 @@
 },
 
 
-"aliases": {
+"attributes": {
 	"enabled": true,
 },
 
 
-"users": {
+"resources": {
 	"enabled": true,
-	"indexes": ["Uuid"],
+	"thresholds_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"stats": {
+	"enabled": true,
+	"thresholds_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"thresholds": {
+	"enabled": true,
+},
+
+
+"suppliers": {
+	"enabled": true,
+	"rals_conns": [
+		{"address": "*internal"}
+	],
+	"resources_conns": [
+		{"address": "*internal"}
+	],
+	"stats_conns": [
+		{"address": "*internal"}	
+	],
 },
 
 

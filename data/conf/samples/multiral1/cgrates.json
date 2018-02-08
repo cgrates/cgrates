@@ -4,6 +4,10 @@
 // Used for multiple RAL configuration tests
 // Starts rater, scheduler
 
+"general": {
+		"node_id":"node1",
+},
+
 "listen": {
 	"rpc_json": ":2012",				// RPC JSON listening address
 	"rpc_gob": ":2013",				// RPC GOB listening address

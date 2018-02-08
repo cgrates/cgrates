@@ -30,7 +30,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/radigo"
 )
@@ -128,7 +128,7 @@ func TestRAitAuth(t *testing.T) {
 	}
 	if len(reply.AVPs) != 1 { // make sure max duration is received
 		t.Errorf("Received AVPs: %+v", reply.AVPs)
-	} else if !reflect.DeepEqual([]byte("session_max_time#10800"), reply.AVPs[0].RawValue) {
+	} else if !reflect.DeepEqual([]byte("session_max_time#3h0m0s"), reply.AVPs[0].RawValue) {
 		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
 	}
 }
@@ -191,7 +191,7 @@ func TestRAitAcctStart(t *testing.T) {
 		t.Errorf("Received AVPs: %+v", reply.AVPs)
 	}
 	// Make sure the sessin is managed by SMG
-	var aSessions []*sessionmanager.ActiveSession
+	var aSessions []*sessions.ActiveSession
 	if err := raRPC.Call("SMGenericV1.GetActiveSessions",
 		map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT, utils.OriginID: "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"},
 		&aSessions); err != nil {
@@ -258,7 +258,7 @@ func TestRAitAcctStop(t *testing.T) {
 		t.Errorf("Received AVPs: %+v", reply.AVPs)
 	}
 	// Make sure the sessin was disconnected from SMG
-	var aSessions []*sessionmanager.ActiveSession
+	var aSessions []*sessions.ActiveSession
 	if err := raRPC.Call("SMGenericV1.GetActiveSessions",
 		map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT, utils.OriginID: "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"},
 		&aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {

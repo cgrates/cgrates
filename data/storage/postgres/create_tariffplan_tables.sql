@@ -405,7 +405,7 @@ CREATE TABLE tp_resources (
   "blocker" BOOLEAN NOT NULL,
   "stored" BOOLEAN NOT NULL,
   "weight" NUMERIC(8,2) NOT NULL,
-  "thresholds" varchar(64) NOT NULL,
+  "threshold_ids" varchar(64) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tp_resources_idx ON tp_resources (tpid);
@@ -432,7 +432,7 @@ CREATE TABLE tp_stats (
   "stored" BOOLEAN NOT NULL,
   "weight" decimal(8,2) NOT NULL,
   "min_items" INTEGER NOT NULL,
-  "thresholds" varchar(64) NOT NULL,
+  "threshold_ids" varchar(64) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tp_stats_idx ON tp_stats (tpid);
@@ -502,8 +502,8 @@ CREATE TABLE tp_suppliers (
   "supplier_resource_ids" varchar(64) NOT NULL,
   "supplier_stat_ids" varchar(64) NOT NULL,
   "supplier_weight" decimal(8,2) NOT NULL,
+  "supplier_blocker" BOOLEAN NOT NULL,
   "supplier_parameters" varchar(64) NOT NULL,
-  "blocker" BOOLEAN NOT NULL,
   "weight" decimal(8,2) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );

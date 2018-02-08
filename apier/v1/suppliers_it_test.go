@@ -50,6 +50,7 @@ var sTestsSupplierSV1 = []func(t *testing.T){
 	testV1SplSFromFolder,
 	testV1SplSGetWeightSuppliers,
 	testV1SplSGetLeastCostSuppliers,
+	testV1SplSGetSupplierWithoutFilter,
 	testV1SplSSetSupplierProfiles,
 	testV1SplSUpdateSupplierProfiles,
 	testV1SplSRemSupplierProfiles,
@@ -123,12 +124,14 @@ func testV1SplSFromFolder(t *testing.T) {
 }
 
 func testV1SplSGetWeightSuppliers(t *testing.T) {
-	ev := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "testV1SplSGetWeightSuppliers",
-		Event: map[string]interface{}{
-			utils.Account:     "1007",
-			utils.Destination: "+491511231234",
+	ev := &engine.ArgsGetSuppliers{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1SplSGetWeightSuppliers",
+			Event: map[string]interface{}{
+				utils.Account:     "1007",
+				utils.Destination: "+491511231234",
+			},
 		},
 	}
 	eSpls := engine.SortedSuppliers{
@@ -160,15 +163,17 @@ func testV1SplSGetWeightSuppliers(t *testing.T) {
 }
 
 func testV1SplSGetLeastCostSuppliers(t *testing.T) {
-	ev := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "testV1SplSGetLeastCostSuppliers",
-		Event: map[string]interface{}{
-			utils.Account:     "1001",
-			utils.Subject:     "1001",
-			utils.Destination: "1002",
-			utils.AnswerTime:  time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
-			utils.Usage:       "1m20s",
+	ev := &engine.ArgsGetSuppliers{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1SplSGetLeastCostSuppliers",
+			Event: map[string]interface{}{
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002",
+				utils.AnswerTime:  time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+				utils.Usage:       "1m20s",
+			},
 		},
 	}
 	eSpls := engine.SortedSuppliers{
@@ -211,6 +216,39 @@ func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 	}
 }
 
+func testV1SplSGetSupplierWithoutFilter(t *testing.T) {
+	ev := &engine.ArgsGetSuppliers{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1SplSGetSupplierWithoutFilter",
+			Event: map[string]interface{}{
+				utils.Account:     "1008",
+				utils.Destination: "+49",
+			},
+		},
+	}
+	eSpls := engine.SortedSuppliers{
+		ProfileID: "SPL_WEIGHT_2",
+		Sorting:   utils.MetaWeight,
+		SortedSuppliers: []*engine.SortedSupplier{
+			&engine.SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					utils.Weight: 10.0,
+				},
+			},
+		},
+	}
+	var suplsReply engine.SortedSuppliers
+	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
+		ev, &suplsReply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSpls, suplsReply) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
+	}
+}
+
 func testV1SplSSetSupplierProfiles(t *testing.T) {
 	var reply *engine.SupplierProfile
 	if err := splSv1Rpc.Call("ApierV1.GetSupplierProfile",
@@ -233,11 +271,11 @@ func testV1SplSSetSupplierProfiles(t *testing.T) {
 				ResourceIDs:        []string{"Res1", "ResGroup2"},
 				StatIDs:            []string{"Stat1"},
 				Weight:             20,
+				Blocker:            false,
 				SupplierParameters: "SortingParameter1",
 			},
 		},
-		Blocker: false,
-		Weight:  10,
+		Weight: 10,
 	}
 	var result string
 	if err := splSv1Rpc.Call("ApierV1.SetSupplierProfile", splPrf, &result); err != nil {
@@ -263,6 +301,7 @@ func testV1SplSUpdateSupplierProfiles(t *testing.T) {
 			ResourceIDs:        []string{"Res1", "ResGroup2"},
 			StatIDs:            []string{"Stat1"},
 			Weight:             20,
+			Blocker:            false,
 			SupplierParameters: "SortingParameter1",
 		},
 		&engine.Supplier{
@@ -273,6 +312,7 @@ func testV1SplSUpdateSupplierProfiles(t *testing.T) {
 			ResourceIDs:        []string{"Res2", "ResGroup2"},
 			StatIDs:            []string{"Stat2"},
 			Weight:             20,
+			Blocker:            true,
 			SupplierParameters: "SortingParameter2",
 		},
 	}
@@ -285,6 +325,7 @@ func testV1SplSUpdateSupplierProfiles(t *testing.T) {
 			ResourceIDs:        []string{"Res2", "ResGroup2"},
 			StatIDs:            []string{"Stat2"},
 			Weight:             20,
+			Blocker:            true,
 			SupplierParameters: "SortingParameter2",
 		},
 		&engine.Supplier{
@@ -295,6 +336,7 @@ func testV1SplSUpdateSupplierProfiles(t *testing.T) {
 			ResourceIDs:        []string{"Res1", "ResGroup2"},
 			StatIDs:            []string{"Stat1"},
 			Weight:             20,
+			Blocker:            false,
 			SupplierParameters: "SortingParameter1",
 		},
 	}

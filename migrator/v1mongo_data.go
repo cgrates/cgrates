@@ -23,7 +23,7 @@ import (
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"gopkg.in/mgo.v2"
+	"github.com/cgrates/mgo"
 )
 
 type v1Mongo struct {
@@ -241,6 +241,29 @@ func (v1ms *v1Mongo) getV2ActionTrigger() (v2at *v2ActionTrigger, err error) {
 //set
 func (v1ms *v1Mongo) setV2ActionTrigger(x *v2ActionTrigger) (err error) {
 	if err := v1ms.session.DB(v1ms.db).C(utils.ACTION_TRIGGER_PREFIX).Insert(x); err != nil {
+		return err
+	}
+	return
+}
+
+//AttributeProfile methods
+//get
+func (v1ms *v1Mongo) getV1AttributeProfile() (v1attrPrf *v1AttributeProfile, err error) {
+	if v1ms.qryIter == nil {
+		v1ms.qryIter = v1ms.session.DB(v1ms.db).C(utils.AttributeProfilePrefix).Find(nil).Iter()
+	}
+	v1ms.qryIter.Next(&v1attrPrf)
+	if v1attrPrf == nil {
+		v1ms.qryIter = nil
+		return nil, utils.ErrNoMoreData
+
+	}
+	return v1attrPrf, nil
+}
+
+//set
+func (v1ms *v1Mongo) setV1AttributeProfile(x *v1AttributeProfile) (err error) {
+	if err := v1ms.session.DB(v1ms.db).C(utils.AttributeProfilePrefix).Insert(x); err != nil {
 		return err
 	}
 	return

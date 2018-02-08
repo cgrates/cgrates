@@ -20,21 +20,24 @@ package engine
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewAttributeService(dm *DataManager, filterS *FilterS, indexedFields []string) (*AttributeService, error) {
-	return &AttributeService{dm: dm, filterS: filterS, indexedFields: indexedFields}, nil
+func NewAttributeService(dm *DataManager, filterS *FilterS,
+	stringIndexedFields, prefixIndexedFields *[]string) (*AttributeService, error) {
+	return &AttributeService{dm: dm, filterS: filterS,
+		stringIndexedFields: stringIndexedFields,
+		prefixIndexedFields: prefixIndexedFields}, nil
 }
 
 type AttributeService struct {
-	dm            *DataManager
-	filterS       *FilterS
-	indexedFields []string
+	dm                  *DataManager
+	filterS             *FilterS
+	stringIndexedFields *[]string
+	prefixIndexedFields *[]string
 }
 
 // ListenAndServe will initialize the service
@@ -61,12 +64,12 @@ func (alS *AttributeService) matchingAttributeProfilesForEvent(ev *utils.CGREven
 	}
 	attrIdxKey = utils.ConcatenatedKey(ev.Tenant, contextVal)
 	matchingAPs := make(map[string]*AttributeProfile)
-	aPrflIDs, err := matchingItemIDsForEvent(ev.Event, alS.indexedFields,
-		alS.dm, utils.AttributeProfilesStringIndex+attrIdxKey)
+	aPrflIDs, err := matchingItemIDsForEvent(ev.Event, alS.stringIndexedFields, alS.prefixIndexedFields,
+		alS.dm, utils.AttributeFilterIndexes+attrIdxKey)
 	if err != nil {
 		return nil, err
 	}
-	lockIDs := utils.PrefixSliceItems(aPrflIDs.Slice(), utils.AttributeProfilesStringIndex)
+	lockIDs := utils.PrefixSliceItems(aPrflIDs.Slice(), utils.AttributeFilterIndexes)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for apID := range aPrflIDs {
@@ -77,12 +80,8 @@ func (alS *AttributeService) matchingAttributeProfilesForEvent(ev *utils.CGREven
 			}
 			return nil, err
 		}
-		evTime := time.Now()
-		if ev.Time != nil {
-			evTime = *ev.Time
-		}
-		if aPrfl.ActivationInterval != nil &&
-			!aPrfl.ActivationInterval.IsActiveAtTime(evTime) { // not active
+		if aPrfl.ActivationInterval != nil && ev.Time != nil &&
+			!aPrfl.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
 			continue
 		}
 		if pass, err := alS.filterS.PassFiltersForEvent(ev.Tenant,
@@ -114,10 +113,29 @@ func (alS *AttributeService) attributeProfileForEvent(ev *utils.CGREvent) (attrP
 	return attrPrfls[0], nil
 }
 
+// AttrSFldNameValue is a helper struct for AttrSDigest deserialization
+type AttrSFieldNameValue struct {
+	FieldName  string
+	FieldValue string
+}
+
 type AttrSProcessEventReply struct {
 	MatchedProfile string
 	AlteredFields  []string
 	CGREvent       *utils.CGREvent
+}
+
+// Digest returns serialized version of alteredFields in AttrSProcessEventReply
+// format fldName1:fldVal1,fldName2:fldVal2
+func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
+	for i, fld := range attrReply.AlteredFields {
+		if i != 0 {
+			rplyDigest += utils.FIELDS_SEP
+		}
+		fldStrVal, _ := attrReply.CGREvent.FieldAsString(fld)
+		rplyDigest += fld + utils.InInFieldSep + fldStrVal
+	}
+	return
 }
 
 // processEvent will match event with attribute profile and do the necessary replacements
@@ -127,7 +145,7 @@ func (alS *AttributeService) processEvent(ev *utils.CGREvent) (rply *AttrSProces
 		return nil, err
 	}
 	rply = &AttrSProcessEventReply{MatchedProfile: attrPrf.ID, CGREvent: ev.Clone()}
-	for fldName, intialMp := range attrPrf.Attributes {
+	for fldName, intialMp := range attrPrf.attributes {
 		initEvValIf, has := ev.Event[fldName]
 		if !has { // we don't have initial in event, try append
 			if anyInitial, has := intialMp[utils.ANY]; has && anyInitial.Append {
@@ -136,14 +154,7 @@ func (alS *AttributeService) processEvent(ev *utils.CGREvent) (rply *AttrSProces
 			}
 			continue
 		}
-		initEvVal, cast := utils.CastFieldIfToString(initEvValIf)
-		if !cast {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> ev: %s, cannot cast field: %s to string",
-					utils.AttributeS, ev, fldName))
-			continue
-		}
-		attrVal, has := intialMp[initEvVal]
+		attrVal, has := intialMp[initEvValIf]
 		if !has {
 			attrVal, has = intialMp[utils.ANY]
 		}
@@ -151,12 +162,20 @@ func (alS *AttributeService) processEvent(ev *utils.CGREvent) (rply *AttrSProces
 			rply.CGREvent.Event[fldName] = attrVal.Substitute
 			rply.AlteredFields = append(rply.AlteredFields, fldName)
 		}
+		for _, valIface := range rply.CGREvent.Event {
+			if valIface == interface{}(utils.MetaAttributes) {
+				return nil, utils.NewCGRError(utils.AttributeSv1ProcessEvent,
+					utils.AttributesNotFoundCaps,
+					utils.AttributesNotFound,
+					utils.AttributesNotFound)
+			}
+		}
 	}
 	return
 }
 
 func (alS *AttributeService) V1GetAttributeForEvent(ev *utils.CGREvent,
-	extattrPrf *ExternalAttributeProfile) (err error) {
+	attrPrfl *AttributeProfile) (err error) {
 	attrPrf, err := alS.attributeProfileForEvent(ev)
 	if err != nil {
 		if err != utils.ErrNotFound {
@@ -164,8 +183,7 @@ func (alS *AttributeService) V1GetAttributeForEvent(ev *utils.CGREvent,
 		}
 		return err
 	}
-	eattrPrfl := NewExternalAttributeProfileFromAttributeProfile(attrPrf)
-	*extattrPrf = *eattrPrfl
+	*attrPrfl = *attrPrf
 	return
 }
 

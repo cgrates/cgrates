@@ -722,13 +722,13 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 			Blocker:            false,
 			Weight:             10.0,
 			Limit:              "45",
-			Thresholds:         "WARN_RES1;WARN_RES2"},
+			ThresholdIDs:       "WARN_RES1;WARN_RES2"},
 		&TpResource{
-			Tpid:       "TEST_TPID",
-			ID:         "ResGroup1",
-			Tenant:     "cgrates.org",
-			FilterIDs:  "FLTR_RES_GR1_1",
-			Thresholds: "WARN3"},
+			Tpid:         "TEST_TPID",
+			ID:           "ResGroup1",
+			Tenant:       "cgrates.org",
+			FilterIDs:    "FLTR_RES_GR1_1",
+			ThresholdIDs: "WARN3"},
 		&TpResource{
 			Tpid:               "TEST_TPID",
 			Tenant:             "cgrates.org",
@@ -749,11 +749,11 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: tps[0].ActivationInterval,
 			},
-			Stored:     tps[0].Stored,
-			Blocker:    tps[0].Blocker,
-			Weight:     tps[0].Weight,
-			Limit:      tps[0].Limit,
-			Thresholds: []string{"WARN_RES1", "WARN_RES2", "WARN3"},
+			Stored:       tps[0].Stored,
+			Blocker:      tps[0].Blocker,
+			Weight:       tps[0].Weight,
+			Limit:        tps[0].Limit,
+			ThresholdIDs: []string{"WARN_RES1", "WARN_RES2", "WARN3"},
 		},
 		&utils.TPResource{
 			TPid:      tps[2].Tpid,
@@ -786,7 +786,7 @@ func TestAPItoResource(t *testing.T) {
 		Blocker:            false,
 		Weight:             10,
 		Limit:              "2",
-		Thresholds:         []string{"TRes1"},
+		ThresholdIDs:       []string{"TRes1"},
 		AllocationMessage:  "asd",
 	}
 	eRL := &ResourceProfile{
@@ -796,7 +796,7 @@ func TestAPItoResource(t *testing.T) {
 		Blocker:           tpRL.Blocker,
 		Weight:            tpRL.Weight,
 		FilterIDs:         []string{"FLTR_RES_GR_1"},
-		Thresholds:        []string{"TRes1"},
+		ThresholdIDs:      []string{"TRes1"},
 		AllocationMessage: tpRL.AllocationMessage,
 		Limit:             2,
 	}
@@ -822,7 +822,7 @@ func TestTPStatsAsTPStats(t *testing.T) {
 			MinItems:           2,
 			Metrics:            "*asr;*acc;*tcc;*acd;*tcd;*pdd",
 			Parameters:         "",
-			Thresholds:         "THRESH1;THRESH2",
+			ThresholdIDs:       "THRESH1;THRESH2",
 			Stored:             true,
 			Blocker:            true,
 			Weight:             20.0,
@@ -838,7 +838,7 @@ func TestTPStatsAsTPStats(t *testing.T) {
 			MinItems:           2,
 			Metrics:            "*sum;*average;*tcc",
 			Parameters:         "BalanceValue",
-			Thresholds:         "THRESH3",
+			ThresholdIDs:       "THRESH3",
 			Stored:             true,
 			Blocker:            true,
 			Weight:             20.0,
@@ -854,7 +854,7 @@ func TestTPStatsAsTPStats(t *testing.T) {
 			MinItems:           2,
 			Metrics:            "*sum;*average;*tcc",
 			Parameters:         "BalanceValue",
-			Thresholds:         "THRESH4",
+			ThresholdIDs:       "THRESH4",
 			Stored:             true,
 			Blocker:            true,
 			Weight:             20.0,
@@ -881,11 +881,11 @@ func TestTPStatsAsTPStats(t *testing.T) {
 				&utils.MetricWithParams{MetricID: "*average", Parameters: "BalanceValue"},
 				&utils.MetricWithParams{MetricID: "*tcc", Parameters: "BalanceValue"},
 			},
-			MinItems:   tps[0].MinItems,
-			Thresholds: []string{"THRESH1", "THRESH2", "THRESH3"},
-			Stored:     tps[0].Stored,
-			Blocker:    tps[0].Blocker,
-			Weight:     tps[0].Weight,
+			MinItems:     tps[0].MinItems,
+			ThresholdIDs: []string{"THRESH1", "THRESH2", "THRESH3"},
+			Stored:       tps[0].Stored,
+			Blocker:      tps[0].Blocker,
+			Weight:       tps[0].Weight,
 		},
 		&utils.TPStats{
 			TPid:      tps[0].Tpid,
@@ -902,11 +902,11 @@ func TestTPStatsAsTPStats(t *testing.T) {
 				&utils.MetricWithParams{MetricID: "*average", Parameters: "BalanceValue"},
 				&utils.MetricWithParams{MetricID: "*tcc", Parameters: "BalanceValue"},
 			},
-			MinItems:   tps[0].MinItems,
-			Thresholds: []string{"THRESH4"},
-			Stored:     tps[0].Stored,
-			Blocker:    tps[0].Blocker,
-			Weight:     tps[0].Weight,
+			MinItems:     tps[0].MinItems,
+			ThresholdIDs: []string{"THRESH4"},
+			Stored:       tps[0].Stored,
+			Blocker:      tps[0].Blocker,
+			Weight:       tps[0].Weight,
 		},
 	}
 	rcvTPs := TpStatsS(tps).AsTPStats()
@@ -949,11 +949,11 @@ func TestAPItoTPStats(t *testing.T) {
 			&utils.MetricWithParams{MetricID: "*acd", Parameters: ""},
 			&utils.MetricWithParams{MetricID: "*acc", Parameters: ""},
 		},
-		MinItems:   1,
-		Thresholds: []string{"THRESH1", "THRESH2"},
-		Stored:     false,
-		Blocker:    false,
-		Weight:     20.0,
+		MinItems:     1,
+		ThresholdIDs: []string{"THRESH1", "THRESH2"},
+		Stored:       false,
+		Blocker:      false,
+		Weight:       20.0,
 	}
 
 	eTPs := &StatQueueProfile{ID: tps.ID,
@@ -963,12 +963,12 @@ func TestAPItoTPStats(t *testing.T) {
 			&utils.MetricWithParams{MetricID: "*acd", Parameters: ""},
 			&utils.MetricWithParams{MetricID: "*acc", Parameters: ""},
 		},
-		Thresholds: []string{"THRESH1", "THRESH2"},
-		FilterIDs:  []string{"FLTR_1"},
-		Stored:     tps.Stored,
-		Blocker:    tps.Blocker,
-		Weight:     20.0,
-		MinItems:   tps.MinItems,
+		ThresholdIDs: []string{"THRESH1", "THRESH2"},
+		FilterIDs:    []string{"FLTR_1"},
+		Stored:       tps.Stored,
+		Blocker:      tps.Blocker,
+		Weight:       20.0,
+		MinItems:     tps.MinItems,
 	}
 	if eTPs.TTL, err = utils.ParseDurationWithNanosecs(tps.TTL); err != nil {
 		t.Errorf("Got error: %+v", err)
@@ -1060,7 +1060,7 @@ func TestTPFilterAsTPFilter(t *testing.T) {
 		&TpFilter{
 			Tpid:              "TEST_TPID",
 			ID:                "Filter1",
-			FilterType:        MetaStringPrefix,
+			FilterType:        MetaPrefix,
 			FilterFieldName:   "Account",
 			FilterFieldValues: "1001;1002",
 		},
@@ -1071,7 +1071,7 @@ func TestTPFilterAsTPFilter(t *testing.T) {
 			ID:   tps[0].ID,
 			Filters: []*utils.TPFilter{
 				&utils.TPFilter{
-					Type:      MetaStringPrefix,
+					Type:      MetaPrefix,
 					FieldName: "Account",
 					Values:    []string{"1001", "1002"},
 				},
@@ -1102,8 +1102,8 @@ func TestAPItoTPFilter(t *testing.T) {
 	eTPs := &Filter{
 		Tenant: "cgrates.org",
 		ID:     tps.ID,
-		RequestFilters: []*RequestFilter{
-			&RequestFilter{
+		Rules: []*FilterRule{
+			&FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001", "1002"},
@@ -1125,8 +1125,8 @@ func TestFilterToTPFilter(t *testing.T) {
 			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC),
 		},
-		RequestFilters: []*RequestFilter{
-			&RequestFilter{
+		Rules: []*FilterRule{
+			&FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001", "1002"},
@@ -1175,9 +1175,9 @@ func TestAPItoAttributeProfile(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	attrMap := make(map[string]map[string]*Attribute)
-	attrMap["FL1"] = make(map[string]*Attribute)
-	attrMap["FL1"]["In1"] = &Attribute{
+	mapSubstitutes := make(map[string]map[interface{}]*Attribute)
+	mapSubstitutes["FL1"] = make(map[interface{}]*Attribute)
+	mapSubstitutes["FL1"]["In1"] = &Attribute{
 		FieldName:  "FL1",
 		Initial:    "In1",
 		Substitute: "Al1",
@@ -1191,8 +1191,16 @@ func TestAPItoAttributeProfile(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
-		Attributes: attrMap,
+		Attributes: []*Attribute{
+			&Attribute{
+				FieldName:  "FL1",
+				Initial:    "In1",
+				Substitute: "Al1",
+				Append:     true,
+			},
+		},
 		Weight:     20,
+		attributes: mapSubstitutes,
 	}
 	if rcv, err := APItoAttributeProfile(tpAlsPrf, "UTC"); err != nil {
 		t.Error(err)

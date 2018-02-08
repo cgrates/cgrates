@@ -31,7 +31,7 @@ import (
 	"github.com/cenk/rpc2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -113,7 +113,7 @@ func TestSSv1ItTPFromFolder(t *testing.T) {
 
 func TestSSv1ItAuth(t *testing.T) {
 	authUsage := 5 * time.Minute
-	args := &sessionmanager.V1AuthorizeArgs{
+	args := &sessions.V1AuthorizeArgs{
 		GetMaxUsage:        true,
 		AuthorizeResources: true,
 		GetSuppliers:       true,
@@ -131,7 +131,7 @@ func TestSSv1ItAuth(t *testing.T) {
 			},
 		},
 	}
-	var rply sessionmanager.V1AuthorizeReply
+	var rply sessions.V1AuthorizeReply
 	if err := sSv1BiRpc.Call(utils.SessionSv1AuthorizeEvent, args, &rply); err != nil {
 		t.Error(err)
 	}
@@ -186,9 +186,49 @@ func TestSSv1ItAuth(t *testing.T) {
 	}
 }
 
+func TestSSv1ItAuthWithDigest(t *testing.T) {
+	authUsage := 5 * time.Minute
+	args := &sessions.V1AuthorizeArgs{
+		GetMaxUsage:        true,
+		AuthorizeResources: true,
+		GetSuppliers:       true,
+		GetAttributes:      true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItAuth",
+			Event: map[string]interface{}{
+				utils.OriginID:    "TestSSv1It1",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.Usage:       authUsage,
+			},
+		},
+	}
+	var rply sessions.V1AuthorizeReplyWithDigest
+	if err := sSv1BiRpc.Call(utils.SessionSv1AuthorizeEventWithDigest, args, &rply); err != nil {
+		t.Error(err)
+	}
+	if *rply.MaxUsage != authUsage {
+		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
+	}
+	if *rply.ResourceAllocation == "" {
+		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
+	}
+	eSplrs := utils.StringPointer("supplier1,supplier2")
+	if *eSplrs != *rply.SuppliersDigest {
+		t.Errorf("expecting: %v, received: %v", *eSplrs, *rply.SuppliersDigest)
+	}
+	eAttrs := utils.StringPointer("OfficeGroup:Marketing")
+	if *eAttrs != *rply.AttributesDigest {
+		t.Errorf("expecting: %v, received: %v", *eAttrs, *rply.AttributesDigest)
+	}
+}
+
 func TestSSv1ItInitiateSession(t *testing.T) {
 	initUsage := 5 * time.Minute
-	args := &sessionmanager.V1InitSessionArgs{
+	args := &sessions.V1InitSessionArgs{
 		InitSession:       true,
 		AllocateResources: true,
 		GetAttributes:     true,
@@ -206,7 +246,7 @@ func TestSSv1ItInitiateSession(t *testing.T) {
 			},
 		},
 	}
-	var rply sessionmanager.V1InitSessionReply
+	var rply sessions.V1InitSessionReply
 	if err := sSv1BiRpc.Call(utils.SessionSv1InitiateSession,
 		args, &rply); err != nil {
 		t.Error(err)
@@ -244,7 +284,7 @@ func TestSSv1ItInitiateSession(t *testing.T) {
 
 func TestSSv1ItUpdateSession(t *testing.T) {
 	reqUsage := 5 * time.Minute
-	args := &sessionmanager.V1UpdateSessionArgs{
+	args := &sessions.V1UpdateSessionArgs{
 		GetAttributes: true,
 		UpdateSession: true,
 		CGREvent: utils.CGREvent{
@@ -261,7 +301,7 @@ func TestSSv1ItUpdateSession(t *testing.T) {
 			},
 		},
 	}
-	var rply sessionmanager.V1UpdateSessionReply
+	var rply sessions.V1UpdateSessionReply
 	if err := sSv1BiRpc.Call(utils.SessionSv1UpdateSession,
 		args, &rply); err != nil {
 		t.Error(err)
@@ -295,7 +335,7 @@ func TestSSv1ItUpdateSession(t *testing.T) {
 }
 
 func TestSSv1ItTerminateSession(t *testing.T) {
-	args := &sessionmanager.V1TerminateSessionArgs{
+	args := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
 		ReleaseResources: true,
 		CGREvent: utils.CGREvent{
@@ -348,7 +388,7 @@ func TestSSv1ItProcessCDR(t *testing.T) {
 
 func TestSSv1ItProcessEvent(t *testing.T) {
 	initUsage := 5 * time.Minute
-	args := &sessionmanager.V1ProcessEventArgs{
+	args := &sessions.V1ProcessEventArgs{
 		AllocateResources: true,
 		Debit:             true,
 		GetAttributes:     true,
@@ -366,7 +406,7 @@ func TestSSv1ItProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	var rply sessionmanager.V1ProcessEventReply
+	var rply sessions.V1ProcessEventReply
 	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessEvent,
 		args, &rply); err != nil {
 		t.Error(err)

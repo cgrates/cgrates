@@ -35,6 +35,7 @@ func TestNewRSRField1(t *testing.T) {
 	}
 	// With filter
 	rulesStr = `~sip_redirected_to:s/sip:\+49(\d+)@/0$1/(086517174963)`
+	// rulesStr = `~sip_redirected_to:s/sip:\+49(\d+)@/0$1/{*usage_seconds;*round:5:*middle}(086517174963)`
 	filter, _ := NewRSRFilter("086517174963")
 	expRSRField2 := &RSRField{Id: "sip_redirected_to", Rules: rulesStr, filters: []*RSRFilter{filter},
 		RSRules: []*ReSearchReplace{&ReSearchReplace{SearchRegexp: regexp.MustCompile(`sip:\+49(\d+)@`), ReplaceTemplate: "0$1"}}}

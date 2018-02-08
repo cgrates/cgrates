@@ -74,6 +74,7 @@ func (vers Versions) Compare(curent Versions, storType string) string {
 	var x map[string]string
 	m := map[string]string{
 		utils.Accounts:       "cgr-migrator -migrate=*accounts",
+		utils.Attributes:     "cgr-migrator -migrate=*attributes",
 		utils.Actions:        "cgr-migrator -migrate=*actions",
 		utils.ActionTriggers: "cgr-migrator -migrate=*action_triggers",
 		utils.ActionPlans:    "cgr-migrator -migrate=*action_plans",
@@ -82,13 +83,15 @@ func (vers Versions) Compare(curent Versions, storType string) string {
 	}
 	data := map[string]string{
 		utils.Accounts:       "cgr-migrator -migrate=*accounts",
+		utils.Attributes:     "cgr-migrator -migrate=*attributes",
 		utils.Actions:        "cgr-migrator -migrate=*actions",
 		utils.ActionTriggers: "cgr-migrator -migrate=*action_triggers",
 		utils.ActionPlans:    "cgr-migrator -migrate=*action_plans",
 		utils.SharedGroups:   "cgr-migrator -migrate=*shared_groups",
 	}
 	stor := map[string]string{
-		utils.COST_DETAILS: "cgr-migrator -migrate=*cost_details",
+		utils.COST_DETAILS:  "cgr-migrator -migrate=*cost_details",
+		utils.SessionsCosts: "cgr-migrator -migrate=*sessions_costs",
 	}
 	switch storType {
 	case utils.MONGO:
@@ -118,6 +121,7 @@ func CurrentDataDBVersions() Versions {
 		utils.SharedGroups:        2,
 		utils.Thresholds:          2,
 		utils.Suppliers:           1,
+		utils.Attributes:          2,
 		utils.Timing:              1,
 		utils.RQF:                 1,
 		utils.Resource:            1,
@@ -138,6 +142,7 @@ func CurrentDataDBVersions() Versions {
 func CurrentStorDBVersions() Versions {
 	return Versions{
 		utils.COST_DETAILS:       2,
+		utils.SessionsCosts:      2,
 		utils.TpRatingPlans:      1,
 		utils.TpFilters:          1,
 		utils.TpDestinationRates: 1,

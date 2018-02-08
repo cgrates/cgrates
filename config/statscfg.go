@@ -25,10 +25,11 @@ import (
 )
 
 type StatSCfg struct {
-	Enabled         bool
-	StoreInterval   time.Duration // Dump regularly from cache into dataDB
-	ThresholdSConns []*HaPoolConfig
-	IndexedFields   []string
+	Enabled             bool
+	StoreInterval       time.Duration // Dump regularly from cache into dataDB
+	ThresholdSConns     []*HaPoolConfig
+	StringIndexedFields *[]string
+	PrefixIndexedFields *[]string
 }
 
 func (st *StatSCfg) loadFromJsonCfg(jsnCfg *StatServJsonCfg) (err error) {
@@ -50,11 +51,19 @@ func (st *StatSCfg) loadFromJsonCfg(jsnCfg *StatServJsonCfg) (err error) {
 			st.ThresholdSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
-	if jsnCfg.Indexed_fields != nil {
-		st.IndexedFields = make([]string, len(*jsnCfg.Indexed_fields))
-		for i, fID := range *jsnCfg.Indexed_fields {
-			st.IndexedFields[i] = fID
+	if jsnCfg.String_indexed_fields != nil {
+		sif := make([]string, len(*jsnCfg.String_indexed_fields))
+		for i, fID := range *jsnCfg.String_indexed_fields {
+			sif[i] = fID
 		}
+		st.StringIndexedFields = &sif
+	}
+	if jsnCfg.Prefix_indexed_fields != nil {
+		pif := make([]string, len(*jsnCfg.Prefix_indexed_fields))
+		for i, fID := range *jsnCfg.Prefix_indexed_fields {
+			pif[i] = fID
+		}
+		st.PrefixIndexedFields = &pif
 	}
 	return nil
 }

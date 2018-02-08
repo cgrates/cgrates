@@ -31,9 +31,9 @@ import (
 
 const (
 	MetaString         = "*string"
-	MetaStringPrefix   = "*string_prefix"
+	MetaPrefix         = "*prefix"
 	MetaTimings        = "*timings"
-	MetaRSRFields      = "*rsr_fields"
+	MetaRSR            = "*rsr"
 	MetaStatS          = "*stats"
 	MetaDestinations   = "*destinations"
 	MetaMinCapPrefix   = "*min_"
@@ -72,7 +72,7 @@ func (fS *FilterS) connStatS() (err error) {
 
 func NewInlineFilter(content string) (f *InlineFilter, err error) {
 	if len(strings.Split(content, utils.InInFieldSep)) != 3 {
-		return nil, fmt.Errorf("parse error for string: <%s>")
+		return nil, fmt.Errorf("parse error for string: <%s>", content)
 	}
 	contentSplit := strings.Split(content, utils.InInFieldSep)
 	return &InlineFilter{Type: contentSplit[0], FieldName: contentSplit[1], FieldVal: contentSplit[2]}, nil
@@ -87,15 +87,15 @@ type InlineFilter struct {
 //AsFilter convert InlineFilter to Filter
 func (inFtr *InlineFilter) AsFilter(tenant string) (f *Filter, err error) {
 	f = &Filter{
-		Tenant:         tenant,
-		ID:             utils.MetaInline,
-		RequestFilters: make([]*RequestFilter, 1),
+		Tenant: tenant,
+		ID:     utils.MetaInline,
+		Rules:  make([]*FilterRule, 1),
 	}
-	rf := &RequestFilter{Type: inFtr.Type, FieldName: inFtr.FieldName, Values: []string{inFtr.FieldVal}}
+	rf := &FilterRule{Type: inFtr.Type, FieldName: inFtr.FieldName, Values: []string{inFtr.FieldVal}}
 	if err := rf.CompileValues(); err != nil {
 		return nil, err
 	}
-	f.RequestFilters[0] = rf
+	f.Rules[0] = rf
 
 	return
 }
@@ -104,9 +104,12 @@ func (inFtr *InlineFilter) AsFilter(tenant string) (f *Filter, err error) {
 // there should be at least one filter passing, ie: if filters are not active event will fail to pass
 func (fS *FilterS) PassFiltersForEvent(tenant string, ev map[string]interface{}, filterIDs []string) (pass bool, err error) {
 	var atLeastOneFilterPassing bool
+	if len(filterIDs) == 0 {
+		return true, nil
+	}
 	for _, fltrID := range filterIDs {
 		var f *Filter
-		if strings.HasPrefix(fltrID, utils.MetaPrefix) {
+		if strings.HasPrefix(fltrID, utils.Meta) {
 			inFtr, err := NewInlineFilter(fltrID)
 			if err != nil {
 				return false, err
@@ -122,18 +125,18 @@ func (fS *FilterS) PassFiltersForEvent(tenant string, ev map[string]interface{},
 			!f.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
 			continue
 		}
-		for _, fltr := range f.RequestFilters {
+		for _, fltr := range f.Rules {
 			switch fltr.Type {
 			case MetaString:
 				pass, err = fltr.passString(ev, "")
-			case MetaStringPrefix:
+			case MetaPrefix:
 				pass, err = fltr.passStringPrefix(ev, "")
 			case MetaTimings:
 				pass, err = fltr.passTimings(ev, "")
 			case MetaDestinations:
 				pass, err = fltr.passDestinations(ev, "")
-			case MetaRSRFields:
-				pass, err = fltr.passRSRFields(ev, "")
+			case MetaRSR:
+				pass, err = fltr.passRSR(ev, "")
 			case MetaStatS:
 				if err = fS.connStatS(); err != nil {
 					return false, err
@@ -156,7 +159,7 @@ func (fS *FilterS) PassFiltersForEvent(tenant string, ev map[string]interface{},
 type Filter struct {
 	Tenant             string
 	ID                 string
-	RequestFilters     []*RequestFilter
+	Rules              []*FilterRule
 	ActivationInterval *utils.ActivationInterval
 }
 
@@ -166,7 +169,7 @@ func (flt *Filter) TenantID() string {
 
 // Compile will compile the underlaying request filters where necessary (ie. regexp rules)
 func (f *Filter) Compile() (err error) {
-	for _, rf := range f.RequestFilters {
+	for _, rf := range f.Rules {
 		if err = rf.CompileValues(); err != nil {
 			return
 		}
@@ -174,20 +177,20 @@ func (f *Filter) Compile() (err error) {
 	return
 }
 
-func NewRequestFilter(rfType, fieldName string, vals []string) (*RequestFilter, error) {
-	if !utils.IsSliceMember([]string{MetaString, MetaStringPrefix, MetaTimings, MetaRSRFields, MetaStatS, MetaDestinations,
+func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error) {
+	if !utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaTimings, MetaRSR, MetaStatS, MetaDestinations,
 		MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("Unsupported filter Type: %s", rfType)
 	}
-	if fieldName == "" && utils.IsSliceMember([]string{MetaString, MetaStringPrefix, MetaTimings, MetaDestinations,
+	if fieldName == "" && utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaTimings, MetaDestinations,
 		MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("FieldName is mandatory for Type: %s", rfType)
 	}
-	if len(vals) == 0 && utils.IsSliceMember([]string{MetaString, MetaStringPrefix, MetaTimings, MetaRSRFields,
+	if len(vals) == 0 && utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaTimings, MetaRSR,
 		MetaDestinations, MetaDestinations, MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("Values is mandatory for Type: %s", rfType)
 	}
-	rf := &RequestFilter{Type: rfType, FieldName: fieldName, Values: vals}
+	rf := &FilterRule{Type: rfType, FieldName: fieldName, Values: vals}
 	if err := rf.CompileValues(); err != nil {
 		return nil, err
 	}
@@ -200,9 +203,9 @@ type RFStatSThreshold struct {
 	ThresholdValue float64
 }
 
-// RequestFilter filters requests coming into various places
+// FilterRule filters requests coming into various places
 // Pass rule: default negative, one mathing rule should pass the filter
-type RequestFilter struct {
+type FilterRule struct {
 	Type            string              // Filter type (*string, *timing, *rsr_filters, *stats, *lt, *lte, *gt, *gte)
 	FieldName       string              // Name of the field providing us the Values to check (used in case of some )
 	Values          []string            // Filter definition
@@ -211,8 +214,8 @@ type RequestFilter struct {
 }
 
 // Separate method to compile RSR fields
-func (rf *RequestFilter) CompileValues() (err error) {
-	if rf.Type == MetaRSRFields {
+func (rf *FilterRule) CompileValues() (err error) {
+	if rf.Type == MetaRSR {
 		if rf.rsrFields, err = utils.ParseRSRFieldsFromSlice(rf.Values); err != nil {
 			return
 		}
@@ -241,18 +244,18 @@ func (rf *RequestFilter) CompileValues() (err error) {
 }
 
 // Pass is the method which should be used from outside.
-func (fltr *RequestFilter) Pass(req interface{}, extraFieldsLabel string, rpcClnt rpcclient.RpcClientConnection) (bool, error) {
+func (fltr *FilterRule) Pass(req interface{}, extraFieldsLabel string, rpcClnt rpcclient.RpcClientConnection) (bool, error) {
 	switch fltr.Type {
 	case MetaString:
 		return fltr.passString(req, extraFieldsLabel)
-	case MetaStringPrefix:
+	case MetaPrefix:
 		return fltr.passStringPrefix(req, extraFieldsLabel)
 	case MetaTimings:
 		return fltr.passTimings(req, extraFieldsLabel)
 	case MetaDestinations:
 		return fltr.passDestinations(req, extraFieldsLabel)
-	case MetaRSRFields:
-		return fltr.passRSRFields(req, extraFieldsLabel)
+	case MetaRSR:
+		return fltr.passRSR(req, extraFieldsLabel)
 	case MetaStatS:
 		return fltr.passStatS(req, extraFieldsLabel, rpcClnt)
 	case MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual:
@@ -262,7 +265,7 @@ func (fltr *RequestFilter) Pass(req interface{}, extraFieldsLabel string, rpcCln
 	}
 }
 
-func (fltr *RequestFilter) passString(req interface{}, extraFieldsLabel string) (bool, error) {
+func (fltr *FilterRule) passString(req interface{}, extraFieldsLabel string) (bool, error) {
 	strVal, err := utils.ReflectFieldAsString(req, fltr.FieldName, extraFieldsLabel)
 	if err != nil {
 		if err == utils.ErrNotFound {
@@ -278,7 +281,7 @@ func (fltr *RequestFilter) passString(req interface{}, extraFieldsLabel string) 
 	return false, nil
 }
 
-func (fltr *RequestFilter) passStringPrefix(req interface{}, extraFieldsLabel string) (bool, error) {
+func (fltr *FilterRule) passStringPrefix(req interface{}, extraFieldsLabel string) (bool, error) {
 	strVal, err := utils.ReflectFieldAsString(req, fltr.FieldName, extraFieldsLabel)
 	if err != nil {
 		if err == utils.ErrNotFound {
@@ -295,11 +298,11 @@ func (fltr *RequestFilter) passStringPrefix(req interface{}, extraFieldsLabel st
 }
 
 // ToDo when Timings will be available in DataDb
-func (fltr *RequestFilter) passTimings(req interface{}, extraFieldsLabel string) (bool, error) {
+func (fltr *FilterRule) passTimings(req interface{}, extraFieldsLabel string) (bool, error) {
 	return false, utils.ErrNotImplemented
 }
 
-func (fltr *RequestFilter) passDestinations(req interface{}, extraFieldsLabel string) (bool, error) {
+func (fltr *FilterRule) passDestinations(req interface{}, extraFieldsLabel string) (bool, error) {
 	dst, err := utils.ReflectFieldAsString(req, fltr.FieldName, extraFieldsLabel)
 	if err != nil {
 		if err == utils.ErrNotFound {
@@ -321,7 +324,7 @@ func (fltr *RequestFilter) passDestinations(req interface{}, extraFieldsLabel st
 	return false, nil
 }
 
-func (fltr *RequestFilter) passRSRFields(req interface{}, extraFieldsLabel string) (bool, error) {
+func (fltr *FilterRule) passRSR(req interface{}, extraFieldsLabel string) (bool, error) {
 	for _, rsrFld := range fltr.rsrFields {
 		if strVal, err := utils.ReflectFieldAsString(req, rsrFld.Id, extraFieldsLabel); err != nil {
 			if err == utils.ErrNotFound {
@@ -335,7 +338,7 @@ func (fltr *RequestFilter) passRSRFields(req interface{}, extraFieldsLabel strin
 	return false, nil
 }
 
-func (fltr *RequestFilter) passStatS(req interface{}, extraFieldsLabel string, stats rpcclient.RpcClientConnection) (bool, error) {
+func (fltr *FilterRule) passStatS(req interface{}, extraFieldsLabel string, stats rpcclient.RpcClientConnection) (bool, error) {
 	if stats == nil || reflect.ValueOf(stats).IsNil() {
 		return false, errors.New("Missing StatS information")
 	}
@@ -344,7 +347,7 @@ func (fltr *RequestFilter) passStatS(req interface{}, extraFieldsLabel string, s
 		if err := stats.Call("StatSV1.GetFloatMetrics", threshold.QueueID, &statValues); err != nil {
 			return false, err
 		}
-		val, hasIt := statValues[utils.MetaPrefix+threshold.ThresholdType[len(MetaMinCapPrefix):]]
+		val, hasIt := statValues[utils.Meta+threshold.ThresholdType[len(MetaMinCapPrefix):]]
 		if !hasIt {
 			continue
 		}
@@ -359,7 +362,7 @@ func (fltr *RequestFilter) passStatS(req interface{}, extraFieldsLabel string, s
 	return false, nil
 }
 
-func (fltr *RequestFilter) passGreaterThan(req interface{}, extraFieldsLabel string) (bool, error) {
+func (fltr *FilterRule) passGreaterThan(req interface{}, extraFieldsLabel string) (bool, error) {
 	fldIf, err := utils.ReflectFieldInterface(req, fltr.FieldName, extraFieldsLabel)
 	if err != nil {
 		if err == utils.ErrNotFound {

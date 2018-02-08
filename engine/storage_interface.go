@@ -26,8 +26,8 @@ import (
 	"reflect"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/mgo/bson"
 	"github.com/ugorji/go/codec"
-	"gopkg.in/mgo.v2/bson"
 )
 
 type Storage interface {
@@ -48,7 +48,7 @@ type Storage interface {
 type DataDB interface {
 	Storage
 	Marshaler() Marshaler
-	HasDataDrv(string, string) (bool, error)
+	HasDataDrv(string, string, string) (bool, error)
 	GetRatingPlanDrv(string) (*RatingPlan, error)
 	SetRatingPlanDrv(*RatingPlan) error
 	RemoveRatingPlanDrv(key string) (err error)
@@ -117,13 +117,13 @@ type DataDB interface {
 	RemoveTimingDrv(string) error
 	GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error)
 	AddLoadHistory(*utils.LoadInstance, int, string) error
-	GetFilterIndexesDrv(dbKey string, fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error)
-	SetFilterIndexesDrv(dbKey string, indexes map[string]utils.StringMap) (err error)
+	GetFilterIndexesDrv(dbKey, filterType string, fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error)
+	SetFilterIndexesDrv(dbKey string, indexes map[string]utils.StringMap, commit bool, transactionID string) (err error)
 	RemoveFilterIndexesDrv(id string) (err error)
 	GetFilterReverseIndexesDrv(dbKey string, fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error)
-	SetFilterReverseIndexesDrv(dbKey string, indexes map[string]utils.StringMap) (err error)
+	SetFilterReverseIndexesDrv(dbKey string, indexes map[string]utils.StringMap, commit bool, transactionID string) (err error)
 	RemoveFilterReverseIndexesDrv(dbKey string) (err error)
-	MatchFilterIndexDrv(dbKey, fieldName, fieldVal string) (itemIDs utils.StringMap, err error)
+	MatchFilterIndexDrv(dbKey, filterType, fieldName, fieldVal string) (itemIDs utils.StringMap, err error)
 	GetStatQueueProfileDrv(tenant string, ID string) (sq *StatQueueProfile, err error)
 	SetStatQueueProfileDrv(sq *StatQueueProfile) (err error)
 	RemStatQueueProfileDrv(tenant, id string) (err error)

@@ -264,13 +264,16 @@ func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity
-func (rs *RedisStorage) HasDataDrv(category, subject string) (bool, error) {
+func (rs *RedisStorage) HasDataDrv(category, subject, tenant string) (bool, error) {
 	switch category {
 	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
-		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX,
-		utils.ResourcesPrefix, utils.StatQueuePrefix, utils.ThresholdPrefix,
-		utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AttributeProfilePrefix:
+		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX:
 		i, err := rs.Cmd("EXISTS", category+subject).Int()
+		return i == 1, err
+	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,
+		utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
+		utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AttributeProfilePrefix:
+		i, err := rs.Cmd("EXISTS", category+utils.ConcatenatedKey(tenant, subject)).Int()
 		return i == 1, err
 	}
 	return false, errors.New("unsupported HasData category")
@@ -1347,7 +1350,7 @@ func (rs *RedisStorage) RemoveTimingDrv(id string) (err error) {
 }
 
 //GetFilterIndexesDrv retrieves Indexes from dataDB
-func (rs *RedisStorage) GetFilterIndexesDrv(dbKey string,
+func (rs *RedisStorage) GetFilterIndexesDrv(dbKey, filterType string,
 	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	mp := make(map[string]string)
 	if len(fldNameVal) == 0 {
@@ -1360,14 +1363,14 @@ func (rs *RedisStorage) GetFilterIndexesDrv(dbKey string,
 	} else {
 		var itmMpStrLst []string
 		for fldName, fldVal := range fldNameVal {
-			concatNameVal := utils.ConcatenatedKey(fldName, fldVal)
-			itmMpStrLst, err = rs.Cmd("HMGET", dbKey, concatNameVal).List()
+			concatTypeNameVal := utils.ConcatenatedKey(filterType, fldName, fldVal)
+			itmMpStrLst, err = rs.Cmd("HMGET", dbKey, concatTypeNameVal).List()
 			if err != nil {
 				return
 			} else if itmMpStrLst[0] == "" {
 				return nil, utils.ErrNotFound
 			}
-			mp[concatNameVal] = itmMpStrLst[0]
+			mp[concatTypeNameVal] = itmMpStrLst[0]
 		}
 	}
 	indexes = make(map[string]utils.StringMap)
@@ -1385,29 +1388,50 @@ func (rs *RedisStorage) GetFilterIndexesDrv(dbKey string,
 }
 
 //SetFilterIndexesDrv stores Indexes into DataDB
-func (rs *RedisStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]utils.StringMap) (err error) {
-	mp := make(map[string]string)
-	nameValSls := []interface{}{dbKey}
-	for key, strMp := range indexes {
-		if len(strMp) == 0 { // remove with no more elements inside
-			nameValSls = append(nameValSls, key)
-			continue
-		}
-		if encodedMp, err := rs.ms.Marshal(strMp); err != nil {
-			return err
-		} else {
-			mp[key] = string(encodedMp)
-		}
+func (rs *RedisStorage) SetFilterIndexesDrv(originKey string, indexes map[string]utils.StringMap, commit bool, transactionID string) (err error) {
+	dbKey := originKey
+	if transactionID != "" {
+		dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
 	}
-	if len(nameValSls) != 1 {
-		if err = rs.Cmd("HDEL", nameValSls...).Err; err != nil {
-			return err
+	if commit && transactionID != "" {
+		mp := make(map[string]string)
+		for key, strMp := range indexes {
+			if encodedMp, err := rs.ms.Marshal(strMp); err != nil {
+				return err
+			} else {
+				mp[key] = string(encodedMp)
+			}
 		}
+		if len(mp) != 0 {
+			if err = rs.Cmd("HMSET", originKey, mp).Err; err != nil {
+				return
+			}
+		}
+		return rs.Cmd("DEL", dbKey).Err
+	} else {
+		mp := make(map[string]string)
+		nameValSls := []interface{}{dbKey}
+		for key, strMp := range indexes {
+			if len(strMp) == 0 { // remove with no more elements inside
+				nameValSls = append(nameValSls, key)
+				continue
+			}
+			if encodedMp, err := rs.ms.Marshal(strMp); err != nil {
+				return err
+			} else {
+				mp[key] = string(encodedMp)
+			}
+		}
+		if len(nameValSls) != 1 {
+			if err = rs.Cmd("HDEL", nameValSls...).Err; err != nil {
+				return err
+			}
+		}
+		if len(mp) != 0 {
+			return rs.Cmd("HMSET", dbKey, mp).Err
+		}
+		return
 	}
-	if len(mp) != 0 {
-		return rs.Cmd("HMSET", dbKey, mp).Err
-	}
-	return
 }
 
 func (rs *RedisStorage) RemoveFilterIndexesDrv(id string) (err error) {
@@ -1452,30 +1476,50 @@ func (rs *RedisStorage) GetFilterReverseIndexesDrv(dbKey string,
 }
 
 //SetFilterReverseIndexesDrv stores ReverseIndexes into DataDB
-func (rs *RedisStorage) SetFilterReverseIndexesDrv(dbKey string, revIdx map[string]utils.StringMap) (err error) {
-	mp := make(map[string]string)
-	nameValSls := []interface{}{dbKey}
-	for key, strMp := range revIdx {
-		if len(strMp) == 0 { // remove with no more elements inside
-			nameValSls = append(nameValSls, key)
-			continue
-		}
-		if encodedMp, err := rs.ms.Marshal(strMp); err != nil {
-			return err
-		} else {
-			mp[key] = string(encodedMp)
-		}
+func (rs *RedisStorage) SetFilterReverseIndexesDrv(originKey string, revIdx map[string]utils.StringMap, commit bool, transactionID string) (err error) {
+	dbKey := originKey
+	if transactionID != "" {
+		dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
 	}
-	if len(nameValSls) != 1 {
-		if err = rs.Cmd("HDEL", nameValSls...).Err; err != nil {
-			return err
+	if commit && transactionID != "" {
+		mp := make(map[string]string)
+		for key, strMp := range revIdx {
+			if encodedMp, err := rs.ms.Marshal(strMp); err != nil {
+				return err
+			} else {
+				mp[key] = string(encodedMp)
+			}
 		}
+		if len(mp) != 0 {
+			if err = rs.Cmd("HMSET", originKey, mp).Err; err != nil {
+				return
+			}
+		}
+		return rs.Cmd("DEL", dbKey).Err
+	} else {
+		mp := make(map[string]string)
+		nameValSls := []interface{}{dbKey}
+		for key, strMp := range revIdx {
+			if len(strMp) == 0 { // remove with no more elements inside
+				nameValSls = append(nameValSls, key)
+				continue
+			}
+			if encodedMp, err := rs.ms.Marshal(strMp); err != nil {
+				return err
+			} else {
+				mp[key] = string(encodedMp)
+			}
+		}
+		if len(nameValSls) != 1 {
+			if err = rs.Cmd("HDEL", nameValSls...).Err; err != nil {
+				return err
+			}
+		}
+		if len(mp) != 0 {
+			return rs.Cmd("HMSET", dbKey, mp).Err
+		}
+		return
 	}
-
-	if len(mp) != 0 {
-		return rs.Cmd("HMSET", dbKey, mp).Err
-	}
-	return
 }
 
 //RemoveFilterReverseIndexesDrv removes ReverseIndexes for a specific itemID
@@ -1483,8 +1527,8 @@ func (rs *RedisStorage) RemoveFilterReverseIndexesDrv(dbKey string) (err error) 
 	return rs.Cmd("DEL", dbKey).Err
 }
 
-func (rs *RedisStorage) MatchFilterIndexDrv(dbKey, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
-	fieldValKey := utils.ConcatenatedKey(fldName, fldVal)
+func (rs *RedisStorage) MatchFilterIndexDrv(dbKey, filterType, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
+	fieldValKey := utils.ConcatenatedKey(filterType, fldName, fldVal)
 	fldValBytes, err := rs.Cmd("HGET", dbKey, fieldValKey).Bytes()
 	if err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
@@ -1675,7 +1719,7 @@ func (rs *RedisStorage) GetFilterDrv(tenant, id string) (r *Filter, err error) {
 	if err = rs.ms.Unmarshal(values, &r); err != nil {
 		return
 	}
-	for _, fltr := range r.RequestFilters {
+	for _, fltr := range r.Rules {
 		if err = fltr.CompileValues(); err != nil {
 			return
 		}

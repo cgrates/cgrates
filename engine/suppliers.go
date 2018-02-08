@@ -39,6 +39,7 @@ type Supplier struct {
 	ResourceIDs        []string // queried in some strategies
 	StatIDs            []string // queried in some strategies
 	Weight             float64
+	Blocker            bool // do not process further supplier after this one
 	SupplierParameters string
 }
 
@@ -51,7 +52,6 @@ type SupplierProfile struct {
 	Sorting            string                    // Sorting strategy
 	SortingParams      []string
 	Suppliers          []*Supplier
-	Blocker            bool // do not process further profiles after this one
 	Weight             float64
 }
 
@@ -70,15 +70,16 @@ func (lps SupplierProfiles) Sort() {
 
 // NewLCRService initializes a LCRService
 func NewSupplierService(dm *DataManager, timezone string,
-	filterS *FilterS, indexedFields []string, resourceS,
+	filterS *FilterS, stringIndexedFields, prefixIndexedFields *[]string, resourceS,
 	statS rpcclient.RpcClientConnection) (spS *SupplierService, err error) {
 	spS = &SupplierService{
-		dm:            dm,
-		timezone:      timezone,
-		filterS:       filterS,
-		resourceS:     resourceS,
-		statS:         statS,
-		indexedFields: indexedFields}
+		dm:                  dm,
+		timezone:            timezone,
+		filterS:             filterS,
+		resourceS:           resourceS,
+		statS:               statS,
+		stringIndexedFields: stringIndexedFields,
+		prefixIndexedFields: prefixIndexedFields}
 	if spS.sorter, err = NewSupplierSortDispatcher(spS); err != nil {
 		return nil, err
 	}
@@ -87,10 +88,11 @@ func NewSupplierService(dm *DataManager, timezone string,
 
 // SupplierService is the service computing Supplier queries
 type SupplierService struct {
-	dm            *DataManager
-	timezone      string
-	filterS       *FilterS
-	indexedFields []string
+	dm                  *DataManager
+	timezone            string
+	filterS             *FilterS
+	stringIndexedFields *[]string
+	prefixIndexedFields *[]string
 	resourceS,
 	statS rpcclient.RpcClientConnection
 	sorter SupplierSortDispatcher
@@ -114,12 +116,12 @@ func (spS *SupplierService) Shutdown() error {
 // matchingSupplierProfilesForEvent returns ordered list of matching resources which are active by the time of the call
 func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent) (sPrfls SupplierProfiles, err error) {
 	matchingLPs := make(map[string]*SupplierProfile)
-	sPrflIDs, err := matchingItemIDsForEvent(ev.Event, spS.indexedFields,
-		spS.dm, utils.SupplierProfilesStringIndex+ev.Tenant)
+	sPrflIDs, err := matchingItemIDsForEvent(ev.Event, spS.stringIndexedFields,
+		spS.prefixIndexedFields, spS.dm, utils.SupplierFilterIndexes+ev.Tenant)
 	if err != nil {
 		return nil, err
 	}
-	lockIDs := utils.PrefixSliceItems(sPrflIDs.Slice(), utils.SupplierProfilesStringIndex)
+	lockIDs := utils.PrefixSliceItems(sPrflIDs.Slice(), utils.SupplierFilterIndexes)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for lpID := range sPrflIDs {
@@ -130,16 +132,8 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent)
 			}
 			return nil, err
 		}
-		aTime, err := ev.FieldAsTime(utils.AnswerTime, spS.timezone)
-		if err != nil {
-			if err == utils.ErrNotFound {
-				aTime = time.Now()
-			} else {
-				return nil, err
-			}
-		}
-		if splPrfl.ActivationInterval != nil &&
-			!splPrfl.ActivationInterval.IsActiveAtTime(aTime) { // not active
+		if splPrfl.ActivationInterval != nil && ev.Time != nil &&
+			!splPrfl.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
 			continue
 		}
 		if pass, err := spS.filterS.PassFiltersForEvent(ev.Tenant,
@@ -158,12 +152,6 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent)
 		i++
 	}
 	sPrfls.Sort()
-	for i, sPrfl := range sPrfls {
-		if sPrfl.Blocker { // blocker will stop processing
-			sPrfls = sPrfls[:i+1]
-			break
-		}
-	}
 	return
 }
 
@@ -172,7 +160,7 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent)
 func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 	acntIDs, rpIDs []string) (costData map[string]interface{}, err error) {
 	if err = ev.CheckMandatoryFields([]string{utils.Account,
-		utils.Destination, utils.AnswerTime, utils.Usage}); err != nil {
+		utils.Destination, utils.SetupTime}); err != nil {
 		return
 	}
 	var acnt, subj, dst string
@@ -188,13 +176,15 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 	if dst, err = ev.FieldAsString(utils.Destination); err != nil {
 		return
 	}
-	var aTime time.Time
-	if aTime, err = ev.FieldAsTime(utils.AnswerTime, spS.timezone); err != nil {
+	var sTime time.Time
+	if sTime, err = ev.FieldAsTime(utils.SetupTime, spS.timezone); err != nil {
 		return
 	}
-	var usage time.Duration
-	if usage, err = ev.FieldAsDuration(utils.Usage); err != nil {
-		return
+	usage := time.Duration(time.Minute)
+	if _, has := ev.Event[utils.Usage]; has {
+		if usage, err = ev.FieldAsDuration(utils.Usage); err != nil {
+			return
+		}
 	}
 	for _, anctID := range acntIDs {
 		cd := &CallDescriptor{
@@ -204,8 +194,8 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 			Subject:       subj,
 			Account:       anctID,
 			Destination:   dst,
-			TimeStart:     aTime,
-			TimeEnd:       aTime.Add(usage),
+			TimeStart:     sTime,
+			TimeEnd:       sTime.Add(usage),
 			DurationIndex: usage,
 		}
 		if maxDur, err := cd.GetMaxSessionDuration(); err != nil {
@@ -225,7 +215,7 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 				ev.Tenant, utils.MetaSuppliers, subj),
 			RatingPlanActivations: RatingPlanActivations{
 				&RatingPlanActivation{
-					ActivationTime: aTime,
+					ActivationTime: sTime,
 					RatingPlanId:   rp,
 				},
 			},
@@ -240,8 +230,8 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 			Subject:       subj,
 			Account:       acnt,
 			Destination:   dst,
-			TimeStart:     aTime,
-			TimeEnd:       aTime.Add(usage),
+			TimeStart:     sTime,
+			TimeEnd:       sTime.Add(usage),
 			DurationIndex: usage,
 		}
 		cc, err := cd.GetCost()
@@ -273,9 +263,9 @@ func (spS *SupplierService) resourceUsage(resIDs []string) (tUsage float64, err 
 
 // supliersForEvent will return the list of valid supplier IDs
 // for event based on filters and sorting algorithms
-func (spS *SupplierService) sortedSuppliersForEvent(ev *utils.CGREvent) (sortedSuppls *SortedSuppliers, err error) {
+func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sortedSuppls *SortedSuppliers, err error) {
 	var suppPrfls SupplierProfiles
-	if suppPrfls, err = spS.matchingSupplierProfilesForEvent(ev); err != nil {
+	if suppPrfls, err = spS.matchingSupplierProfilesForEvent(&args.CGREvent); err != nil {
 		return
 	} else if len(suppPrfls) == 0 {
 		return nil, utils.ErrNotFound
@@ -284,8 +274,8 @@ func (spS *SupplierService) sortedSuppliersForEvent(ev *utils.CGREvent) (sortedS
 	var spls []*Supplier
 	for _, s := range splPrfl.Suppliers {
 		if len(s.FilterIDs) != 0 { // filters should be applied, check them here
-			if pass, err := spS.filterS.PassFiltersForEvent(ev.Tenant,
-				ev.Event, s.FilterIDs); err != nil {
+			if pass, err := spS.filterS.PassFiltersForEvent(args.Tenant,
+				args.Event, s.FilterIDs); err != nil {
 				return nil, err
 			} else if !pass {
 				continue
@@ -293,12 +283,31 @@ func (spS *SupplierService) sortedSuppliersForEvent(ev *utils.CGREvent) (sortedS
 		}
 		spls = append(spls, s)
 	}
-	return spS.sorter.SortSuppliers(splPrfl.ID, splPrfl.Sorting, spls, ev)
+	sortedSuppliers, err := spS.sorter.SortSuppliers(splPrfl.ID, splPrfl.Sorting, spls, &args.CGREvent)
+	if err != nil {
+		return nil, err
+	}
+	if args.Paginator.Offset != nil {
+		if *args.Paginator.Offset <= len(sortedSuppliers.SortedSuppliers) {
+			sortedSuppliers.SortedSuppliers = sortedSuppliers.SortedSuppliers[*args.Paginator.Offset:]
+		}
+	}
+	if args.Paginator.Limit != nil {
+		if *args.Paginator.Limit <= len(sortedSuppliers.SortedSuppliers) {
+			sortedSuppliers.SortedSuppliers = sortedSuppliers.SortedSuppliers[:*args.Paginator.Limit]
+		}
+	}
+	return sortedSuppliers, nil
+}
+
+type ArgsGetSuppliers struct {
+	utils.CGREvent
+	utils.Paginator
 }
 
 // V1GetSuppliersForEvent returns the list of valid supplier IDs
-func (spS *SupplierService) V1GetSuppliers(args *utils.CGREvent, reply *SortedSuppliers) (err error) {
-	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 {
+func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *SortedSuppliers) (err error) {
+	if missing := utils.MissingStructFields(&args.CGREvent, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	sSps, err := spS.sortedSuppliersForEvent(args)

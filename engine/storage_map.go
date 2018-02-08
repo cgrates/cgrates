@@ -213,15 +213,18 @@ func (ms *MapStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity
-func (ms *MapStorage) HasDataDrv(categ, subject string) (bool, error) {
+func (ms *MapStorage) HasDataDrv(category, subject, tenant string) (bool, error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	switch categ {
+	switch category {
 	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
-		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX,
-		utils.ResourcesPrefix, utils.StatQueuePrefix, utils.ThresholdPrefix,
+		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX:
+		_, exists := ms.dict[category+subject]
+		return exists, nil
+	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,
+		utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
 		utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AttributeProfilePrefix:
-		_, exists := ms.dict[categ+subject]
+		_, exists := ms.dict[category+utils.ConcatenatedKey(tenant, subject)]
 		return exists, nil
 	}
 	return false, errors.New("Unsupported HasData category")
@@ -1233,7 +1236,7 @@ func (ms *MapStorage) RemoveTimingDrv(id string) error {
 }
 
 //GetFilterIndexesDrv retrieves Indexes from dataDB
-func (ms *MapStorage) GetFilterIndexesDrv(dbKey string,
+func (ms *MapStorage) GetFilterIndexesDrv(dbKey, filterType string,
 	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
@@ -1249,11 +1252,11 @@ func (ms *MapStorage) GetFilterIndexesDrv(dbKey string,
 		}
 		indexes = make(map[string]utils.StringMap)
 		for fldName, fldVal := range fldNameVal {
-			if _, has := indexes[utils.ConcatenatedKey(fldName, fldVal)]; !has {
-				indexes[utils.ConcatenatedKey(fldName, fldVal)] = make(utils.StringMap)
+			if _, has := indexes[utils.ConcatenatedKey(filterType, fldName, fldVal)]; !has {
+				indexes[utils.ConcatenatedKey(filterType, fldName, fldVal)] = make(utils.StringMap)
 			}
-			if len(rcvidx[utils.ConcatenatedKey(fldName, fldVal)]) != 0 {
-				indexes[utils.ConcatenatedKey(fldName, fldVal)] = rcvidx[utils.ConcatenatedKey(fldName, fldVal)]
+			if len(rcvidx[utils.ConcatenatedKey(filterType, fldName, fldVal)]) != 0 {
+				indexes[utils.ConcatenatedKey(filterType, fldName, fldVal)] = rcvidx[utils.ConcatenatedKey(fldName, fldVal)]
 			}
 		}
 
@@ -1268,15 +1271,29 @@ func (ms *MapStorage) GetFilterIndexesDrv(dbKey string,
 }
 
 //SetFilterIndexesDrv stores Indexes into DataDB
-func (ms *MapStorage) SetFilterIndexesDrv(dbKey string, indexes map[string]utils.StringMap) (err error) {
+func (ms *MapStorage) SetFilterIndexesDrv(originKey string, indexes map[string]utils.StringMap, commit bool, transactionID string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	result, err := ms.ms.Marshal(indexes)
-	if err != nil {
-		return err
+	dbKey := originKey
+	if transactionID != "" {
+		dbKey = "tmp_" + utils.ConcatenatedKey(originKey, transactionID)
 	}
-	ms.dict[dbKey] = result
-	return
+	if commit && transactionID != "" {
+		delete(ms.dict, dbKey)
+		result, err := ms.ms.Marshal(indexes)
+		if err != nil {
+			return err
+		}
+		ms.dict[originKey] = result
+		return nil
+	} else {
+		result, err := ms.ms.Marshal(indexes)
+		if err != nil {
+			return err
+		}
+		ms.dict[dbKey] = result
+		return nil
+	}
 }
 
 func (ms *MapStorage) RemoveFilterIndexesDrv(id string) (err error) {
@@ -1319,15 +1336,29 @@ func (ms *MapStorage) GetFilterReverseIndexesDrv(dbKey string,
 }
 
 //SetFilterReverseIndexesDrv stores ReverseIndexes into DataDB
-func (ms *MapStorage) SetFilterReverseIndexesDrv(dbKey string, indexes map[string]utils.StringMap) (err error) {
+func (ms *MapStorage) SetFilterReverseIndexesDrv(originKey string, revIdx map[string]utils.StringMap, commit bool, transactionID string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	result, err := ms.ms.Marshal(indexes)
-	if err != nil {
-		return err
+	dbKey := originKey
+	if transactionID != "" {
+		dbKey = "tmp_" + utils.ConcatenatedKey(originKey, transactionID)
 	}
-	ms.dict[dbKey] = result
-	return
+	if commit && transactionID != "" {
+		delete(ms.dict, dbKey)
+		result, err := ms.ms.Marshal(revIdx)
+		if err != nil {
+			return err
+		}
+		ms.dict[originKey] = result
+		return nil
+	} else {
+		result, err := ms.ms.Marshal(revIdx)
+		if err != nil {
+			return err
+		}
+		ms.dict[dbKey] = result
+		return nil
+	}
 }
 
 //RemoveFilterReverseIndexesDrv removes ReverseIndexes for a specific itemID
@@ -1338,7 +1369,7 @@ func (ms *MapStorage) RemoveFilterReverseIndexesDrv(dbKey string) (err error) {
 	return
 }
 
-func (ms *MapStorage) MatchFilterIndexDrv(dbKey, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
+func (ms *MapStorage) MatchFilterIndexDrv(dbKey, filterType, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	values, ok := ms.dict[dbKey]
@@ -1349,8 +1380,8 @@ func (ms *MapStorage) MatchFilterIndexDrv(dbKey, fldName, fldVal string) (itemID
 	if err = ms.ms.Unmarshal(values, &indexes); err != nil {
 		return nil, err
 	}
-	if _, hasIt := indexes[utils.ConcatenatedKey(fldName, fldVal)]; hasIt {
-		itemIDs = indexes[utils.ConcatenatedKey(fldName, fldVal)]
+	if _, hasIt := indexes[utils.ConcatenatedKey(filterType, fldName, fldVal)]; hasIt {
+		itemIDs = indexes[utils.ConcatenatedKey(filterType, fldName, fldVal)]
 	}
 	if len(itemIDs) == 0 {
 		return nil, utils.ErrNotFound
@@ -1510,7 +1541,7 @@ func (ms *MapStorage) GetFilterDrv(tenant, id string) (r *Filter, err error) {
 	if err != nil {
 		return nil, err
 	}
-	for _, fltr := range r.RequestFilters {
+	for _, fltr := range r.Rules {
 		if err := fltr.CompileValues(); err != nil {
 			return nil, err
 		}

@@ -49,7 +49,7 @@ type ResourceProfile struct {
 	Blocker            bool                      // blocker flag to stop processing on filters matched
 	Stored             bool
 	Weight             float64  // Weight to sort the resources
-	Thresholds         []string // Thresholds to check after changing Limit
+	ThresholdIDs       []string // Thresholds to check after changing Limit
 }
 
 // TenantID returns unique identifier of the ResourceProfile in a multi-tenant environment
@@ -279,30 +279,34 @@ func (rs Resources) allocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 
 // Pas the config as a whole so we can ask access concurrently
 func NewResourceService(dm *DataManager, storeInterval time.Duration,
-	thdS rpcclient.RpcClientConnection, filterS *FilterS, indexedFields []string) (*ResourceService, error) {
+	thdS rpcclient.RpcClientConnection, filterS *FilterS,
+	stringIndexedFields, prefixIndexedFields *[]string) (*ResourceService, error) {
 	if thdS != nil && reflect.ValueOf(thdS).IsNil() {
 		thdS = nil
 	}
 	return &ResourceService{dm: dm, thdS: thdS,
-		lcEventResources: make(map[string][]*utils.TenantID),
-		storedResources:  make(utils.StringMap),
-		storeInterval:    storeInterval,
-		filterS:          filterS,
-		stopBackup:       make(chan struct{})}, nil
+		lcEventResources:    make(map[string][]*utils.TenantID),
+		storedResources:     make(utils.StringMap),
+		storeInterval:       storeInterval,
+		filterS:             filterS,
+		stringIndexedFields: stringIndexedFields,
+		prefixIndexedFields: prefixIndexedFields,
+		stopBackup:          make(chan struct{})}, nil
 }
 
 // ResourceService is the service handling resources
 type ResourceService struct {
-	dm               *DataManager                  // So we can load the data in cache and index it
-	thdS             rpcclient.RpcClientConnection // allows applying filters based on stats
-	filterS          *FilterS
-	indexedFields    []string                     // speed up query on indexes
-	lcEventResources map[string][]*utils.TenantID // cache recording resources for events in alocation phase
-	lcERMux          sync.RWMutex                 // protects the lcEventResources
-	storedResources  utils.StringMap              // keep a record of resources which need saving, map[resID]bool
-	srMux            sync.RWMutex                 // protects storedResources
-	storeInterval    time.Duration                // interval to dump data on
-	stopBackup       chan struct{}                // control storing process
+	dm                  *DataManager                  // So we can load the data in cache and index it
+	thdS                rpcclient.RpcClientConnection // allows applying filters based on stats
+	filterS             *FilterS
+	stringIndexedFields *[]string // speed up query on indexes
+	prefixIndexedFields *[]string
+	lcEventResources    map[string][]*utils.TenantID // cache recording resources for events in alocation phase
+	lcERMux             sync.RWMutex                 // protects the lcEventResources
+	storedResources     utils.StringMap              // keep a record of resources which need saving, map[resID]bool
+	srMux               sync.RWMutex                 // protects storedResources
+	storeInterval       time.Duration                // interval to dump data on
+	stopBackup          chan struct{}                // control storing process
 }
 
 // Called to start the service
@@ -432,28 +436,29 @@ func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources)
 }
 
 // matchingResourcesForEvent returns ordered list of matching resources which are active by the time of the call
-func (rS *ResourceService) matchingResourcesForEvent(tenant string, ev map[string]interface{}) (rs Resources, err error) {
+func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent) (rs Resources, err error) {
 	matchingResources := make(map[string]*Resource)
-	rIDs, err := matchingItemIDsForEvent(ev, rS.indexedFields, rS.dm, utils.ResourceProfilesStringIndex+tenant)
+	rIDs, err := matchingItemIDsForEvent(ev.Event, rS.stringIndexedFields, rS.prefixIndexedFields,
+		rS.dm, utils.ResourceFilterIndexes+ev.Tenant)
 	if err != nil {
 		return nil, err
 	}
-	lockIDs := utils.PrefixSliceItems(rIDs.Slice(), utils.ResourceProfilesStringIndex)
+	lockIDs := utils.PrefixSliceItems(rIDs.Slice(), utils.ResourceFilterIndexes)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for resName := range rIDs {
-		rPrf, err := rS.dm.GetResourceProfile(tenant, resName, false, utils.NonTransactional)
+		rPrf, err := rS.dm.GetResourceProfile(ev.Tenant, resName, false, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
 			}
 			return nil, err
 		}
-		if rPrf.ActivationInterval != nil &&
-			!rPrf.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
+		if rPrf.ActivationInterval != nil && ev.Time != nil &&
+			!rPrf.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
 			continue
 		}
-		if pass, err := rS.filterS.PassFiltersForEvent(tenant, ev, rPrf.FilterIDs); err != nil {
+		if pass, err := rS.filterS.PassFiltersForEvent(ev.Tenant, ev.Event, rPrf.FilterIDs); err != nil {
 			return nil, err
 		} else if !pass {
 			continue
@@ -493,17 +498,23 @@ func (rS *ResourceService) processThresholds(r *Resource) (err error) {
 	if rS.thdS == nil {
 		return
 	}
-	ev := &utils.CGREvent{
-		Tenant: r.Tenant,
-		ID:     utils.GenUUID(),
-		Event: map[string]interface{}{
-			utils.EventType:  utils.ResourceUpdate,
-			utils.ResourceID: r.ID,
-			utils.Usage:      r.totalUsage()}}
+	var thIDs []string
+	if len(r.rPrf.ThresholdIDs) != 0 {
+		thIDs = r.rPrf.ThresholdIDs
+	}
+	thEv := &ArgsProcessEvent{ThresholdIDs: thIDs,
+		CGREvent: utils.CGREvent{
+			Tenant: r.Tenant,
+			ID:     utils.GenUUID(),
+			Event: map[string]interface{}{
+				utils.EventType:  utils.ResourceUpdate,
+				utils.ResourceID: r.ID,
+				utils.Usage:      r.totalUsage()}}}
 	var hits int
-	if err = thresholdS.Call(utils.ThresholdSv1ProcessEvent, ev, &hits); err != nil {
+	if err = thresholdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil &&
+		err.Error() != utils.ErrNotFound.Error() {
 		utils.Logger.Warning(
-			fmt.Sprintf("<ResourceS> error: %s processing event %+v with ThresholdS.", err.Error(), ev))
+			fmt.Sprintf("<ResourceS> error: %s processing event %+v with ThresholdS.", err.Error(), thEv))
 	}
 	return
 }
@@ -518,7 +529,7 @@ func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, 
 		mtcRLs = rS.cachedResourcesForEvent(args.TenantID())
 	}
 	if mtcRLs == nil {
-		if mtcRLs, err = rS.matchingResourcesForEvent(args.CGREvent.Tenant, args.CGREvent.Event); err != nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(&args.CGREvent); err != nil {
 			return err
 		}
 		cache.Set(utils.EventResourcesPrefix+args.TenantID(), mtcRLs.tenantIDs(), true, "")
@@ -541,7 +552,7 @@ func (rS *ResourceService) V1AuthorizeResources(args utils.ArgRSv1ResourceUsage,
 	}
 	mtcRLs := rS.cachedResourcesForEvent(args.TenantID())
 	if mtcRLs == nil {
-		if mtcRLs, err = rS.matchingResourcesForEvent(args.CGREvent.Tenant, args.CGREvent.Event); err != nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(&args.CGREvent); err != nil {
 			return err
 		}
 		cache.Set(utils.EventResourcesPrefix+args.TenantID(), mtcRLs.tenantIDs(), true, "")
@@ -572,7 +583,7 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 	var wasCached bool
 	mtcRLs := rS.cachedResourcesForEvent(args.UsageID)
 	if mtcRLs == nil {
-		if mtcRLs, err = rS.matchingResourcesForEvent(args.CGREvent.Tenant, args.CGREvent.Event); err != nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(&args.CGREvent); err != nil {
 			return
 		}
 	} else {
@@ -627,7 +638,7 @@ func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, re
 	}
 	mtcRLs := rS.cachedResourcesForEvent(args.UsageID)
 	if mtcRLs == nil {
-		if mtcRLs, err = rS.matchingResourcesForEvent(args.CGREvent.Tenant, args.CGREvent.Event); err != nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(&args.CGREvent); err != nil {
 			return
 		}
 	}

@@ -411,7 +411,7 @@ type TpResource struct {
 	Blocker            bool    `index:"7" re:""`
 	Stored             bool    `index:"8" re:""`
 	Weight             float64 `index:"9" re:"\d+\.?\d*"`
-	Thresholds         string  `index:"10" re:""`
+	ThresholdIDs       string  `index:"10" re:""`
 	CreatedAt          time.Time
 }
 
@@ -430,7 +430,7 @@ type TpStats struct {
 	Stored             bool    `index:"9" re:""`
 	Weight             float64 `index:"10" re:"\d+\.?\d*"`
 	MinItems           int     `index:"11" re:""`
-	Thresholds         string  `index:"12" re:""`
+	ThresholdIDs       string  `index:"12" re:""`
 	CreatedAt          time.Time
 }
 
@@ -494,7 +494,7 @@ func (t CDRsql) TableName() string {
 	return utils.CDRsTBL
 }
 
-type SMCostSQL struct {
+type SessionsCostsSQL struct {
 	ID          int64
 	Cgrid       string
 	RunID       string
@@ -507,8 +507,8 @@ type SMCostSQL struct {
 	DeletedAt   *time.Time
 }
 
-func (t SMCostSQL) TableName() string {
-	return utils.SMCostsTBL
+func (t SessionsCostsSQL) TableName() string {
+	return utils.SessionsCostsTBL
 }
 
 type TBLVersion struct {
@@ -537,8 +537,8 @@ type TpSupplier struct {
 	SupplierResourceIDs   string  `index:"10" re:""`
 	SupplierStatIDs       string  `index:"11" re:""`
 	SupplierWeight        float64 `index:"12" re:"\d+\.?\d*"`
-	SupplierParameters    string  `index:"13" re:""`
-	Blocker               bool    `index:"14" re:""`
+	SupplierBlocker       bool    `index:"13" re:""`
+	SupplierParameters    string  `index:"14" re:""`
 	Weight                float64 `index:"15" re:"\d+\.?\d*"`
 	CreatedAt             time.Time
 }
