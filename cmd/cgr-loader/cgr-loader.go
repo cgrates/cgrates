@@ -67,6 +67,7 @@ var (
 	loadHistorySize = flag.Int("load_history_size", config.CgrConfig().LoadHistorySize, "Limit the number of records in the load history")
 	timezone        = flag.String("timezone", config.CgrConfig().DefaultTimezone, `Timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>`)
 	disable_reverse = flag.Bool("disable_reverse_mappings", false, "Will disable reverse mappings rebuilding")
+	flush_stordb    = flag.Bool("flush_stordb", false, "Remove tariff plan data for id from the database")
 	remove          = flag.Bool("remove", false, "Will remove any data from db that matches data files")
 )
 
@@ -118,9 +119,16 @@ func main() {
 	}
 	// Init necessary db connections, only if not already
 	if !*dryRun { // make sure we do not need db connections on dry run, also not importing into any stordb
+		//tpid_remove
+
 		if *toStorDb { // Import files from a directory into storDb
 			if *tpid == "" {
 				log.Fatal("TPid required, please define it via *-tpid* command argument.")
+			}
+			if *flush_stordb {
+				if err = storDb.RemTpData("", *tpid, map[string]string{}); err != nil {
+					log.Fatal(err)
+				}
 			}
 			csvImporter := engine.TPCSVImporter{
 				TPid:     *tpid,
