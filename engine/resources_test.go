@@ -531,6 +531,62 @@ func TestRSPopulateResourceService(t *testing.T) {
 	}
 }
 
+func TestCachedResourcesForEvent(t *testing.T) {
+	data, _ := NewMapStorage()
+	dmRES = NewDataManager(data)
+	resS := ResourceService{
+		dm:      dmRES,
+		filterS: &FilterS{dm: dmRES},
+	}
+	args := &utils.ArgRSv1ResourceUsage{
+		CGREvent: *resEvs[0],
+		UsageID:  "IDF",
+		Units:    10.0,
+	}
+	val := []*utils.TenantID{
+		&utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "RL",
+		},
+	}
+	resources := []*Resource{
+		&Resource{
+			Tenant: "cgrates.org",
+			ID:     "RL",
+			rPrf: &ResourceProfile{
+				Tenant:    "cgrates.org",
+				ID:        "RL",
+				FilterIDs: []string{"FLTR_RES_RL"},
+				ActivationInterval: &utils.ActivationInterval{
+					ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+					ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+				},
+				AllocationMessage: "ALLOC_RL",
+				Weight:            50,
+				Limit:             2,
+				ThresholdIDs:      []string{"TEST_ACTIONS"},
+				UsageTTL:          time.Duration(1 * time.Millisecond),
+			},
+			Usages: map[string]*ResourceUsage{
+				"RU2": &ResourceUsage{
+					Tenant:     "cgrates.org",
+					ID:         "RU2",
+					ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
+					Units:      2,
+				},
+			},
+			tUsage: utils.Float64Pointer(2),
+			dirty:  utils.BoolPointer(true),
+		},
+	}
+	cache.Set(utils.ResourcesPrefix+resources[0].TenantID(), resources[0], true, "")
+	cache.Set(utils.EventResourcesPrefix+args.TenantID(), val, true, "")
+	rcv := resS.cachedResourcesForEvent(args.TenantID())
+	if !reflect.DeepEqual(resources[0], rcv[0]) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(resources[0]), utils.ToJSON(rcv[0]))
+	}
+}
+
 func TestRSmatchingResourcesForEvent(t *testing.T) {
 	mres, err := resserv.matchingResourcesForEvent(resEvs[0])
 	if err != nil {
