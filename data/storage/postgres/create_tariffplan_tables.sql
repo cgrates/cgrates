@@ -43,7 +43,7 @@ CREATE TABLE tp_rates (
   tpid VARCHAR(64) NOT NULL,
   tag VARCHAR(64) NOT NULL,
   connect_fee NUMERIC(7,4) NOT NULL,
-  rate NUMERIC(7,4) NOT NULL,
+  rate NUMERIC(10,4) NOT NULL,
   rate_unit VARCHAR(16) NOT NULL,
   rate_increment VARCHAR(16) NOT NULL,
   group_interval_start VARCHAR(16) NOT NULL,
