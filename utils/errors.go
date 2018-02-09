@@ -132,3 +132,7 @@ func APIErrorHandler(errIn error) (err error) {
 	cgrErr.ActivateAPIError()
 	return cgrErr
 }
+
+func NewErrStringCast(valIface interface{}) error {
+	return fmt.Errorf("cannot cast value: %v to string", valIface)
+}

@@ -158,6 +158,23 @@ func IfaceAsTime(itm interface{}, timezone string) (t time.Time, err error) {
 	return
 }
 
+func IfaceAsDuration(itm interface{}) (d time.Duration, err error) {
+	switch itm.(type) {
+	case time.Duration:
+		return itm.(time.Duration), nil
+	case float64:
+		return time.Duration(int64(itm.(float64) * float64(time.Second))), nil
+	case int64:
+		return time.Duration(itm.(int64)), nil
+	case string:
+		return ParseDurationWithNanosecs(itm.(string))
+
+	default:
+		err = fmt.Errorf("cannot convert field: %+v to time.Time", itm)
+	}
+	return
+}
+
 func IfaceAsFloat64(itm interface{}) (f float64, err error) {
 	switch itm.(type) {
 	case float64:
