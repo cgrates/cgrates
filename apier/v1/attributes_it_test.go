@@ -50,12 +50,14 @@ var sTestsAlsPrf = []func(t *testing.T){
 	testAttributeSStartEngine,
 	testAttributeSRPCConn,
 	testAttributeSLoadFromFolder,
-	testAttributeSGetAttributeForEvent,
-	testAttributeSProcessEvent,
-	testAttributeSGetAlsPrfBeforeSet,
-	testAttributeSSetAlsPrf,
-	testAttributeSUpdateAlsPrf,
-	testAttributeSRemAlsPrf,
+	// testAttributeSGetAttributeForEvent,
+	testAttributeSGetAttributeForEventNotFound,
+	testAttributeSGetAttributeForEventWithMetaAnyContext,
+	// testAttributeSProcessEvent,
+	// testAttributeSGetAlsPrfBeforeSet,
+	// testAttributeSSetAlsPrf,
+	// testAttributeSUpdateAlsPrf,
+	// testAttributeSRemAlsPrf,
 	testAttributeSKillEngine,
 }
 
@@ -181,6 +183,103 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 	}
 }
 
+func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
+	ev := &utils.CGREvent{
+		Tenant:  "cgrates.org",
+		ID:      "testAttributeSGetAttributeForEventWihMetaAnyContext",
+		Context: utils.StringPointer(utils.MetaCDRs),
+		Event: map[string]interface{}{
+			utils.Account:     "dan",
+			utils.Destination: "+491511231234",
+		},
+	}
+	eAttrPrf2 := &engine.AttributeProfile{
+		Tenant:    ev.Tenant,
+		ID:        "ATTR_3",
+		FilterIDs: []string{"*string:Account:dan"},
+		Contexts:  []string{utils.MetaRating},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
+		Attributes: []*engine.Attribute{
+			&engine.Attribute{
+				FieldName:  utils.Account,
+				Initial:    utils.ANY,
+				Substitute: "1001",
+				Append:     false,
+			},
+		},
+		Weight: 10.0,
+	}
+	var result string
+	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", eAttrPrf2, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var reply *engine.AttributeProfile
+	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_3"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eAttrPrf2, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", eAttrPrf2, reply)
+	}
+	var attrReply *engine.AttributeProfile
+	if err := attrSRPC.Call(utils.AttributeSv1GetAttributeForEvent,
+		ev, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+}
+
+func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
+	ev := &utils.CGREvent{
+		Tenant:  "cgrates.org",
+		ID:      "testAttributeSGetAttributeForEventWihMetaAnyContext",
+		Context: utils.StringPointer(utils.MetaCDRs),
+		Event: map[string]interface{}{
+			utils.Account:     "dan",
+			utils.Destination: "+491511231234",
+		},
+	}
+	eAttrPrf2 := &engine.AttributeProfile{
+		Tenant:    ev.Tenant,
+		ID:        "ATTR_2",
+		FilterIDs: []string{"*string:Account:dan"},
+		Contexts:  []string{utils.META_ANY},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
+		Attributes: []*engine.Attribute{
+			&engine.Attribute{
+				FieldName:  utils.Account,
+				Initial:    utils.ANY,
+				Substitute: "1001",
+				Append:     false,
+			},
+		},
+		Weight: 10.0,
+	}
+	var result string
+	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", eAttrPrf2, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var reply *engine.AttributeProfile
+	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_2"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eAttrPrf2, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", eAttrPrf2, reply)
+	}
+	var attrReply *engine.AttributeProfile
+	if err := attrSRPC.Call(utils.AttributeSv1GetAttributeForEvent,
+		ev, &attrReply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eAttrPrf2, attrReply) {
+		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eAttrPrf2), utils.ToJSON(attrReply))
+	}
+
+}
 func testAttributeSProcessEvent(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant:  "cgrates.org",
