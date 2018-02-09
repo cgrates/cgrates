@@ -60,9 +60,9 @@ imports:
 - name: github.com/gorhill/cronexpr
   version: f0984319b44273e83de132089ae42b1810f4933b
 - name: github.com/jinzhu/gorm
-  version: 0f2ceb5a775714a46bc344976324e3e439f8cdcc
+  version: 48e41440afa6a741a3e345f2cfbabca08f6fb1ac
 - name: github.com/jinzhu/inflection
-  version: 74387dc39a75e970e7a3ae6a3386b5bd2e5c5cff
+  version: 1c35d901db3da928c72a72d8458480cc9ade058f
 - name: github.com/kr/pty
   version: ce7fa45920dc37a92de8377972e52bc55ffa8d57
 - name: github.com/lib/pq
