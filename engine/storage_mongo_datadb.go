@@ -1148,8 +1148,11 @@ func (ms *MongoStorage) SetAccount(acc *Account) error {
 func (ms *MongoStorage) RemoveAccount(key string) error {
 	session, col := ms.conn(colAcc)
 	defer session.Close()
-	return col.Remove(bson.M{"id": key})
-
+	err := col.Remove(bson.M{"id": key})
+	if err == mgo.ErrNotFound {
+		err = utils.ErrNotFound
+	}
+	return err
 }
 
 func (ms *MongoStorage) GetCdrStatsQueueDrv(key string) (sq *CDRStatsQueue, err error) {
