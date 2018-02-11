@@ -1398,7 +1398,7 @@ type TPSupplierProfile struct {
 	FilterIDs          []string
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
 	Sorting            string
-	SortingParams      []string
+	SortingParameters  []string
 	Suppliers          []*TPSupplier
 	Weight             float64
 }

@@ -2326,8 +2326,8 @@ func testOnStorITSupplierProfile(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
-		Sorting:       "*lowest_cost",
-		SortingParams: []string{},
+		Sorting:           "*lowest_cost",
+		SortingParameters: []string{},
 		Suppliers: []*Supplier{
 			&Supplier{
 				ID:                 "supplier1",

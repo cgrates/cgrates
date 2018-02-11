@@ -40,8 +40,8 @@ var (
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     cloneExpTimeSuppliers,
 			},
-			Sorting:       utils.MetaWeight,
-			SortingParams: []string{},
+			Sorting:           utils.MetaWeight,
+			SortingParameters: []string{},
 			Suppliers: []*Supplier{
 				&Supplier{
 					ID:                 "supplier1",
@@ -65,8 +65,8 @@ var (
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     cloneExpTimeSuppliers,
 			},
-			Sorting:       utils.MetaWeight,
-			SortingParams: []string{},
+			Sorting:           utils.MetaWeight,
+			SortingParameters: []string{},
 			Suppliers: []*Supplier{
 				&Supplier{
 					ID:                 "supplier2",
@@ -110,8 +110,8 @@ var (
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     cloneExpTimeSuppliers,
 			},
-			Sorting:       utils.MetaWeight,
-			SortingParams: []string{},
+			Sorting:           utils.MetaWeight,
+			SortingParameters: []string{},
 			Suppliers: []*Supplier{
 				&Supplier{
 					ID:                 "supplier1",
@@ -135,8 +135,8 @@ var (
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     cloneExpTimeSuppliers,
 			},
-			Sorting:       utils.MetaWeight,
-			SortingParams: []string{},
+			Sorting:           utils.MetaWeight,
+			SortingParameters: []string{},
 			Suppliers: []*Supplier{
 				&Supplier{
 					ID:                 "supplier2",
@@ -229,8 +229,8 @@ func TestSuppliersSort(t *testing.T) {
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-			Sorting:       "",
-			SortingParams: []string{},
+			Sorting:           "",
+			SortingParameters: []string{},
 			Suppliers: []*Supplier{
 				&Supplier{
 					ID:                 "supplier1",
@@ -254,8 +254,8 @@ func TestSuppliersSort(t *testing.T) {
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-			Sorting:       "",
-			SortingParams: []string{},
+			Sorting:           "",
+			SortingParameters: []string{},
 			Suppliers: []*Supplier{
 				&Supplier{
 					ID:                 "supplier1",
@@ -281,8 +281,8 @@ func TestSuppliersSort(t *testing.T) {
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-			Sorting:       "",
-			SortingParams: []string{},
+			Sorting:           "",
+			SortingParameters: []string{},
 			Suppliers: []*Supplier{
 				&Supplier{
 					ID:                 "supplier1",
@@ -306,8 +306,8 @@ func TestSuppliersSort(t *testing.T) {
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-			Sorting:       "",
-			SortingParams: []string{},
+			Sorting:           "",
+			SortingParameters: []string{},
 			Suppliers: []*Supplier{
 				&Supplier{
 					ID:                 "supplier1",

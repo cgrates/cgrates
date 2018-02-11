@@ -2033,8 +2033,8 @@ func testMigratorTPSuppliers(t *testing.T) {
 				ActivationTime: "2014-07-29T15:00:00Z",
 				ExpiryTime:     "",
 			},
-			Sorting:       "*lowest_cost",
-			SortingParams: []string{},
+			Sorting:           "*lowest_cost",
+			SortingParameters: []string{"Parameter1"},
 			Suppliers: []*utils.TPSupplier{
 				&utils.TPSupplier{
 					ID:            "supplier1",
@@ -2069,7 +2069,7 @@ func testMigratorTPSuppliers(t *testing.T) {
 			t.Error("Error when getting TPSupplier ", err.Error())
 		}
 		if !reflect.DeepEqual(tpSplPr, result) {
-			t.Errorf("Expecting: %+v, received: %+v", tpSplPr, result)
+			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(tpSplPr), utils.ToJSON(result))
 		}
 	}
 }

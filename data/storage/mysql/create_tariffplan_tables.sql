@@ -502,7 +502,7 @@ CREATE TABLE tp_suppliers (
   `filter_ids` varchar(64) NOT NULL,
   `activation_interval` varchar(64) NOT NULL,
   `sorting` varchar(32) NOT NULL,
-  `sorting_params` varchar(64) NOT NULL,
+  `sorting_parameters` varchar(64) NOT NULL,
   `supplier_id` varchar(32) NOT NULL,
   `supplier_filter_ids` varchar(64) NOT NULL,
   `supplier_account_ids` varchar(64) NOT NULL,

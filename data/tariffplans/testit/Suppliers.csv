@@ -1,3 +1,3 @@
-#Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParams,SupplierID,SupplierFilterIDs,SupplierAccountIDs,SupplierRatingPlanIDs,SupplierResourceIDs,SupplierStatIDs,SupplierWeight,SupplierBlocker,SupplierParameters,Weight
+#Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParameters,SupplierID,SupplierFilterIDs,SupplierAccountIDs,SupplierRatingPlanIDs,SupplierResourceIDs,SupplierStatIDs,SupplierWeight,SupplierBlocker,SupplierParameters,Weight
 cgrates.org,SPL_ACNT_1001,FLTR_ACCOUNT_1001,,*weight,,supplier1,,,,,,20,,,10
 cgrates.org,SPL_ACNT_1001,,,,,supplier2,,,,,,10,,,
