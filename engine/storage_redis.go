@@ -659,7 +659,6 @@ func (rs *RedisStorage) SetAccount(ub *Account) (err error) {
 
 func (rs *RedisStorage) RemoveAccount(key string) (err error) {
 	err = rs.Cmd("DEL", utils.ACCOUNT_PREFIX+key).Err
-	utils.Logger.Debug(fmt.Sprintf("Error from RemoiveAccoutn: %+v", err))
 	if err == redis.ErrRespNil {
 		err = utils.ErrNotFound
 	}

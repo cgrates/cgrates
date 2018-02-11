@@ -291,7 +291,7 @@ cgrates.org,FLTR_DST_DE,*destinations,Destination,DST_DE,2014-07-29T15:00:00Z
 cgrates.org,FLTR_DST_NL,*destinations,Destination,DST_NL,2014-07-29T15:00:00Z
 `
 	sppProfiles = `
-#Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParams,SupplierID,SupplierFilterIDs,SupplierAccountIDs,SupplierRatingPlanIDs,SupplierResourceIDs,SupplierStatIDs,SupplierWeight,SupplierBlocker,SupplierParameters,Weight
+#Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParameters,SupplierID,SupplierFilterIDs,SupplierAccountIDs,SupplierRatingPlanIDs,SupplierResourceIDs,SupplierStatIDs,SupplierWeight,SupplierBlocker,SupplierParameters,Weight
 cgrates.org,SPP_1,FLTR_ACNT_dan,2014-07-29T15:00:00Z,*lowest_cost,,supplier1,FLTR_ACNT_dan,Account1;Account1_1,RPL_1,ResGroup1,Stat1,10,true,param1,20
 cgrates.org,SPP_1,,,,,supplier1,,,RPL_2,ResGroup2,,10,,,
 cgrates.org,SPP_1,,,,,supplier1,FLTR_DST_DE,Account2,RPL_3,ResGroup3,Stat2,10,,,
@@ -1641,8 +1641,8 @@ func TestLoadSupplierProfiles(t *testing.T) {
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
-			Sorting:       "*lowest_cost",
-			SortingParams: []string{},
+			Sorting:           "*lowest_cost",
+			SortingParameters: []string{},
 			Suppliers: []*utils.TPSupplier{
 				&utils.TPSupplier{
 					ID:                 "supplier1",

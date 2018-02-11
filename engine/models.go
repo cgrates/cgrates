@@ -529,7 +529,7 @@ type TpSupplier struct {
 	FilterIDs             string  `index:"2" re:""`
 	ActivationInterval    string  `index:"3" re:""`
 	Sorting               string  `index:"4" re:""`
-	SortingParams         string  `index:"5" re:""`
+	SortingParameters     string  `index:"5" re:""`
 	SupplierID            string  `index:"6" re:""`
 	SupplierFilterIDs     string  `index:"7" re:""`
 	SupplierAccountIDs    string  `index:"8" re:""`

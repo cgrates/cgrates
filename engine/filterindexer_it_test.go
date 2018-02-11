@@ -929,8 +929,8 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
-		Sorting:       "*weight",
-		SortingParams: []string{},
+		Sorting:           "*weight",
+		SortingParameters: []string{},
 		Suppliers: []*Supplier{
 			&Supplier{
 				ID:                 "supplier1",

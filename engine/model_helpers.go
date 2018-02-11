@@ -2475,11 +2475,11 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplierProfile) {
 		th, found := mst[tp.ID]
 		if !found {
 			th = &utils.TPSupplierProfile{
-				TPid:          tp.Tpid,
-				Tenant:        tp.Tenant,
-				ID:            tp.ID,
-				Sorting:       tp.Sorting,
-				SortingParams: []string{},
+				TPid:              tp.Tpid,
+				Tenant:            tp.Tenant,
+				ID:                tp.ID,
+				Sorting:           tp.Sorting,
+				SortingParameters: []string{},
 			}
 		}
 		if tp.SupplierID != "" {
@@ -2500,7 +2500,6 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplierProfile) {
 			if tp.SupplierFilterIDs != "" {
 				supFilterSplit := strings.Split(tp.SupplierFilterIDs, utils.INFIELD_SEP)
 				sup.FilterIDs = append(sup.FilterIDs, supFilterSplit...)
-
 			}
 			if tp.SupplierRatingplanIDs != "" {
 				ratingPlanSplit := strings.Split(tp.SupplierRatingplanIDs, utils.INFIELD_SEP)
@@ -2520,9 +2519,9 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplierProfile) {
 			}
 			suppliersMap[tp.ID][tp.SupplierID] = sup
 		}
-		if tp.SortingParams != "" {
-			sortingParamSplit := strings.Split(tp.SortingParams, utils.INFIELD_SEP)
-			th.SortingParams = append(th.SortingParams, sortingParamSplit...)
+		if tp.SortingParameters != "" {
+			sortingParameterSplit := strings.Split(tp.SortingParameters, utils.INFIELD_SEP)
+			th.SortingParameters = append(th.SortingParameters, sortingParameterSplit...)
 		}
 		if tp.Weight != 0 {
 			th.Weight = tp.Weight
@@ -2591,6 +2590,12 @@ func APItoModelTPSuppliers(st *utils.TPSupplierProfile) (mdls TpSuppliers) {
 				}
 				mdl.FilterIDs += val
 			}
+			for i, val := range st.SortingParameters {
+				if i != 0 {
+					mdl.SortingParameters += utils.INFIELD_SEP
+				}
+				mdl.SortingParameters += val
+			}
 			if st.ActivationInterval != nil {
 				if st.ActivationInterval.ActivationTime != "" {
 					mdl.ActivationInterval = st.ActivationInterval.ActivationTime
@@ -2646,8 +2651,8 @@ func APItoSupplierProfile(tpTH *utils.TPSupplierProfile, timezone string) (th *S
 		Weight:    tpTH.Weight,
 		Suppliers: make([]*Supplier, len(tpTH.Suppliers)),
 	}
-	for _, stp := range tpTH.SortingParams {
-		th.SortingParams = append(th.SortingParams, stp)
+	for _, stp := range tpTH.SortingParameters {
+		th.SortingParameters = append(th.SortingParameters, stp)
 	}
 	for _, fli := range tpTH.FilterIDs {
 		th.FilterIDs = append(th.FilterIDs, fli)

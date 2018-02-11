@@ -257,11 +257,11 @@ func testV1SplSSetSupplierProfiles(t *testing.T) {
 		t.Error(err)
 	}
 	splPrf = &engine.SupplierProfile{
-		Tenant:        "cgrates.org",
-		ID:            "TEST_PROFILE1",
-		FilterIDs:     []string{"FLTR_1"},
-		Sorting:       "Sort1",
-		SortingParams: []string{"Param1", "Param2"},
+		Tenant:            "cgrates.org",
+		ID:                "TEST_PROFILE1",
+		FilterIDs:         []string{"FLTR_1"},
+		Sorting:           "Sort1",
+		SortingParameters: []string{"Param1", "Param2"},
 		Suppliers: []*engine.Supplier{
 			&engine.Supplier{
 				ID:                 "SPL1",

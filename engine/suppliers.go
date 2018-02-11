@@ -50,7 +50,7 @@ type SupplierProfile struct {
 	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval // Activation interval
 	Sorting            string                    // Sorting strategy
-	SortingParams      []string
+	SortingParameters  []string
 	Suppliers          []*Supplier
 	Weight             float64
 }
