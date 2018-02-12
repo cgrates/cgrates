@@ -1284,8 +1284,9 @@ type AttrRLsCache struct {
 
 type ArgRSv1ResourceUsage struct {
 	CGREvent
-	UsageID string // ResourceUsage Identifier
-	Units   float64
+	UsageID  string // ResourceUsage Identifier
+	UsageTTL *time.Duration
+	Units    float64
 }
 
 func (args *ArgRSv1ResourceUsage) TenantID() string {

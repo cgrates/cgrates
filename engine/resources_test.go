@@ -33,6 +33,7 @@ var (
 	rs                   Resources
 	cloneExpTimeResource time.Time
 	expTimeResource      = time.Now().Add(time.Duration(20 * time.Minute))
+	timeDurationExample  = time.Duration(10) * time.Second
 	resserv              ResourceService
 	dmRES                *DataManager
 	resprf               = []*ResourceProfile{
@@ -588,7 +589,7 @@ func TestCachedResourcesForEvent(t *testing.T) {
 }
 
 func TestRSmatchingResourcesForEvent(t *testing.T) {
-	mres, err := resserv.matchingResourcesForEvent(resEvs[0])
+	mres, err := resserv.matchingResourcesForEvent(resEvs[0], &timeDurationExample)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -599,7 +600,7 @@ func TestRSmatchingResourcesForEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(resourceTest[0].rPrf, mres[0].rPrf) {
 		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].rPrf, mres[0].rPrf)
 	}
-	mres, err = resserv.matchingResourcesForEvent(resEvs[1])
+	mres, err = resserv.matchingResourcesForEvent(resEvs[1], &timeDurationExample)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -610,7 +611,7 @@ func TestRSmatchingResourcesForEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(resourceTest[1].rPrf, mres[0].rPrf) {
 		t.Errorf("Expecting: %+v, received: %+v", resourceTest[1].rPrf, mres[0].rPrf)
 	}
-	mres, err = resserv.matchingResourcesForEvent(resEvs[2])
+	mres, err = resserv.matchingResourcesForEvent(resEvs[2], &timeDurationExample)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -621,7 +622,7 @@ func TestRSmatchingResourcesForEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(resourceTest[2].rPrf, mres[0].rPrf) {
 		t.Errorf("Expecting: %+v, received: %+v", resourceTest[2].rPrf, mres[0].rPrf)
 	}
-	mres, err = resserv.matchingResourcesForEvent(resEvs[3])
+	mres, err = resserv.matchingResourcesForEvent(resEvs[3], &timeDurationExample)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
