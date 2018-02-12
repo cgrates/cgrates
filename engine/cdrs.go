@@ -238,12 +238,15 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, cdrstats, 
 	for _, cdrRun := range cdrRuns {
 		if self.attrS != nil {
 			var rplyEv AttrSProcessEventReply
+			cgrEv := cdrRun.AsCGREvent()
+			cgrEv.Context = utils.StringPointer(utils.MetaCDRs)
 			if err = self.attrS.Call(utils.AttributeSv1ProcessEvent,
-				cdrRun.AsCGREvent(), &rplyEv); err != nil {
-				return
-			}
-			if err = cdrRun.UpdateFromCGREvent(rplyEv.CGREvent,
-				rplyEv.AlteredFields); err != nil {
+				cgrEv, &rplyEv); err == nil {
+				if err = cdrRun.UpdateFromCGREvent(rplyEv.CGREvent,
+					rplyEv.AlteredFields); err != nil {
+					return
+				}
+			} else if err.Error() != utils.ErrNotFound.Error() {
 				return
 			}
 		}

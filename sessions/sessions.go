@@ -1383,9 +1383,11 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		if smg.splS == nil {
 			return utils.NewErrNotConnected(utils.SupplierS)
 		}
+		cgrEv := args.CGREvent.Clone()
+		cgrEv.Event[utils.Usage] = time.Duration(time.Minute)
 		var splsReply engine.SortedSuppliers
 		sArgs := &engine.ArgsGetSuppliers{
-			CGREvent:  args.CGREvent,
+			CGREvent:  *cgrEv,
 			Paginator: args.Paginator,
 		}
 		if err = smg.splS.Call(utils.SupplierSv1GetSuppliers,
