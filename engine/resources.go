@@ -436,7 +436,7 @@ func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources)
 }
 
 // matchingResourcesForEvent returns ordered list of matching resources which are active by the time of the call
-func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent) (rs Resources, err error) {
+func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent, usageTTL *time.Duration) (rs Resources, err error) {
 	matchingResources := make(map[string]*Resource)
 	rIDs, err := matchingItemIDsForEvent(ev.Event, rS.stringIndexedFields, rS.prefixIndexedFields,
 		rS.dm, utils.ResourceFilterIndexes+ev.Tenant)
@@ -470,7 +470,11 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent) (rs Res
 		if rPrf.Stored && r.dirty == nil {
 			r.dirty = utils.BoolPointer(false)
 		}
-		if rPrf.UsageTTL >= 0 {
+		if usageTTL != nil {
+			if *usageTTL != 0 {
+				r.ttl = usageTTL
+			}
+		} else if rPrf.UsageTTL >= 0 {
 			r.ttl = utils.DurationPointer(rPrf.UsageTTL)
 		}
 		r.rPrf = rPrf
@@ -529,7 +533,7 @@ func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, 
 		mtcRLs = rS.cachedResourcesForEvent(args.TenantID())
 	}
 	if mtcRLs == nil {
-		if mtcRLs, err = rS.matchingResourcesForEvent(&args.CGREvent); err != nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(&args.CGREvent, args.UsageTTL); err != nil {
 			return err
 		}
 		cache.Set(utils.EventResourcesPrefix+args.TenantID(), mtcRLs.tenantIDs(), true, "")
@@ -552,7 +556,7 @@ func (rS *ResourceService) V1AuthorizeResources(args utils.ArgRSv1ResourceUsage,
 	}
 	mtcRLs := rS.cachedResourcesForEvent(args.TenantID())
 	if mtcRLs == nil {
-		if mtcRLs, err = rS.matchingResourcesForEvent(&args.CGREvent); err != nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(&args.CGREvent, args.UsageTTL); err != nil {
 			return err
 		}
 		cache.Set(utils.EventResourcesPrefix+args.TenantID(), mtcRLs.tenantIDs(), true, "")
@@ -583,7 +587,7 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 	var wasCached bool
 	mtcRLs := rS.cachedResourcesForEvent(args.UsageID)
 	if mtcRLs == nil {
-		if mtcRLs, err = rS.matchingResourcesForEvent(&args.CGREvent); err != nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(&args.CGREvent, args.UsageTTL); err != nil {
 			return
 		}
 	} else {
@@ -638,7 +642,7 @@ func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, re
 	}
 	mtcRLs := rS.cachedResourcesForEvent(args.UsageID)
 	if mtcRLs == nil {
-		if mtcRLs, err = rS.matchingResourcesForEvent(&args.CGREvent); err != nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(&args.CGREvent, args.UsageTTL); err != nil {
 			return
 		}
 	}
