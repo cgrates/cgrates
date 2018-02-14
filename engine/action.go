@@ -764,10 +764,13 @@ func setExpiryAction(account *Account, sq *CDRStatsQueueTriggered, a *Action, ac
 	if account == nil {
 		return errors.New("nil account")
 	}
-	if account.BalanceMap == nil {
-		account.BalanceMap = make(map[string]Balances)
+	balanceType := a.Balance.GetType()
+	for _, b := range account.BalanceMap[balanceType] {
+		if b.MatchFilter(a.Balance, false, true) {
+			b.ExpirationDate = a.Balance.GetExpirationDate()
+		}
 	}
-	return account.debitBalanceAction(a, false, false, true)
+	return nil
 }
 
 // Structure to store actions according to weight

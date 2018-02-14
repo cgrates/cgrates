@@ -203,23 +203,14 @@ func (ub *Account) debitBalanceAction(a *Action, reset, resetIfNegative, resetEx
 			continue // just to be safe (cleaned expired balances above)
 		}
 		b.account = ub
-		//if resetExpiry if false we do normal match otherwise modify
-		if resetExpiry {
-			if b.MatchFilter(a.Balance, false, resetExpiry) {
-				b.ExpirationDate = a.Balance.GetExpirationDate()
-				b.dirty = true
-				found = true
+		if b.MatchFilter(a.Balance, false, resetExpiry) {
+			if reset || (resetIfNegative && b.Value < 0) {
+				b.SetValue(0)
 			}
-		} else {
-			if b.MatchFilter(a.Balance, false, resetExpiry) {
-				if reset || (resetIfNegative && b.Value < 0) {
-					b.SetValue(0)
-				}
-				b.SubstractValue(bClone.GetValue())
-				b.dirty = true
-				found = true
-				a.balanceValue = b.GetValue()
-			}
+			b.SubstractValue(bClone.GetValue())
+			b.dirty = true
+			found = true
+			a.balanceValue = b.GetValue()
 		}
 	}
 	// if it is not found then we add it to the list
