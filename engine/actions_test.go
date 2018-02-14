@@ -2449,7 +2449,107 @@ func TestActionCdrlogBalanceValue(t *testing.T) {
 	if len(cdrs) != 2 ||
 		cdrs[0].ExtraFields["BalanceValue"] != "11.1" ||
 		cdrs[1].ExtraFields["BalanceValue"] != "9" {
-		t.Errorf("Wrong cdrlogs: %", utils.ToIJSON(cdrs))
+		t.Errorf("Wrong cdrlogs: %s", utils.ToIJSON(cdrs))
+	}
+}
+
+func TestActionTopUpZeroNegative(t *testing.T) {
+	account := &Account{
+		ID: "cgrates.org:zeroNegative",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
+				&Balance{
+					ID:    "Bal1",
+					Value: -10,
+				},
+				&Balance{
+					ID:    "Bal2",
+					Value: 5,
+				},
+			},
+		},
+	}
+	err := dm.DataDB().SetAccount(account)
+	if err != nil {
+		t.Error("Error setting account: ", err)
+	}
+	at := &ActionTiming{
+		accountIDs: utils.StringMap{"cgrates.org:zeroNegative": true},
+		Timing:     &RateInterval{},
+		actions: []*Action{
+			&Action{
+				Id:         "ZeroMonetary",
+				ActionType: TopUpZeroNegative,
+				Balance: &BalanceFilter{
+					Type: utils.StringPointer(utils.MONETARY),
+				},
+			},
+		},
+	}
+	err = at.Execute(nil, nil)
+	acc, err := dm.DataDB().GetAccount("cgrates.org:zeroNegative")
+	if err != nil || acc == nil {
+		t.Error("Error getting account: ", acc, err)
+	}
+	//Verify value for first balance(Bal1) should be 0 after execute action TopUpZeroNegative
+	if acc.BalanceMap[utils.MONETARY][0].Value != 0 {
+		t.Errorf("Expecting 0, received: %+v", acc.BalanceMap[utils.MONETARY][0].Value)
+	}
+	//Verify value for secound balance(Bal2) should be the same
+	if acc.BalanceMap[utils.MONETARY][1].Value != 5 {
+		t.Errorf("Expecting 5, received: %+v", acc.BalanceMap[utils.MONETARY][1].Value)
+	}
+}
+
+func TestActionSetExpiry(t *testing.T) {
+	var cloneTimeNowPlus24h time.Time
+	timeNowPlus24h := time.Now().Add(time.Duration(24 * time.Hour))
+	//Need clone because time.Now adds extra information that DeepEqual doesn't like
+	if err := utils.Clone(timeNowPlus24h, &cloneTimeNowPlus24h); err != nil {
+		t.Error(err)
+	}
+	account := &Account{
+		ID: "cgrates.org:zeroNegative",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
+				&Balance{
+					ID:    "Bal1",
+					Value: -10,
+				},
+				&Balance{
+					ID:    "Bal2",
+					Value: 5,
+				},
+			},
+		},
+	}
+	err := dm.DataDB().SetAccount(account)
+	if err != nil {
+		t.Error("Error setting account: ", err)
+	}
+	at := &ActionTiming{
+		accountIDs: utils.StringMap{"cgrates.org:zeroNegative": true},
+		Timing:     &RateInterval{},
+		actions: []*Action{
+			&Action{
+				Id:         "SetExpiry",
+				ActionType: SetExpiry,
+				Balance: &BalanceFilter{
+					ID:             utils.StringPointer("Bal1"),
+					Type:           utils.StringPointer(utils.MONETARY),
+					ExpirationDate: utils.TimePointer(cloneTimeNowPlus24h),
+				},
+			},
+		},
+	}
+	err = at.Execute(nil, nil)
+	acc, err := dm.DataDB().GetAccount("cgrates.org:zeroNegative")
+	if err != nil || acc == nil {
+		t.Error("Error getting account: ", acc, err)
+	}
+	//Verify ExpirationDate for first balance(Bal1)
+	if acc.BalanceMap[utils.MONETARY][0].ExpirationDate != cloneTimeNowPlus24h {
+		t.Errorf("Expecting: %+v, received: %+v", cloneTimeNowPlus24h, acc.BalanceMap[utils.MONETARY][0].ExpirationDate)
 	}
 }
 

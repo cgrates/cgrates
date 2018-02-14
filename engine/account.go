@@ -140,7 +140,6 @@ func (acc *Account) setBalanceAction(a *Action) error {
 			acc.BalanceMap[*a.Balance.Type] = append(acc.BalanceMap[*a.Balance.Type], balance)
 		}
 	}
-
 	if a.Balance.ID != nil && *a.Balance.ID == utils.META_DEFAULT { // treat it separately since modifyBalance sets expiry and others parameters, not specific for *default
 		if a.Balance.Value != nil {
 			balance.ID = *a.Balance.ID
@@ -185,7 +184,7 @@ func (acc *Account) setBalanceAction(a *Action) error {
 
 // Debits some amount of user's specified balance adding the balance if it does not exists.
 // Returns the remaining credit in user's balance.
-func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
+func (ub *Account) debitBalanceAction(a *Action, reset, resetIfNegative, resetExpiry bool) error {
 	if a == nil {
 		return errors.New("nil action")
 	}
@@ -204,14 +203,23 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 			continue // just to be safe (cleaned expired balances above)
 		}
 		b.account = ub
-		if b.MatchFilter(a.Balance, false) {
-			if reset {
-				b.SetValue(0)
+		//if resetExpiry if false we do normal match otherwise modify
+		if resetExpiry {
+			if b.MatchFilter(a.Balance, false, resetExpiry) {
+				b.ExpirationDate = a.Balance.GetExpirationDate()
+				b.dirty = true
+				found = true
 			}
-			b.SubstractValue(bClone.GetValue())
-			b.dirty = true
-			found = true
-			a.balanceValue = b.GetValue()
+		} else {
+			if b.MatchFilter(a.Balance, false, resetExpiry) {
+				if reset || (resetIfNegative && b.Value < 0) {
+					b.SetValue(0)
+				}
+				b.SubstractValue(bClone.GetValue())
+				b.dirty = true
+				found = true
+				a.balanceValue = b.GetValue()
+			}
 		}
 	}
 	// if it is not found then we add it to the list

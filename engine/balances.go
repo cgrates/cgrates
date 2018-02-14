@@ -71,7 +71,7 @@ func (b *Balance) Equal(o *Balance) bool {
 		b.Blocker == o.Blocker
 }
 
-func (b *Balance) MatchFilter(o *BalanceFilter, skipIds bool) bool {
+func (b *Balance) MatchFilter(o *BalanceFilter, skipIds, skipExpiry bool) bool {
 	if o == nil {
 		return true
 	}
@@ -81,8 +81,12 @@ func (b *Balance) MatchFilter(o *BalanceFilter, skipIds bool) bool {
 	if !skipIds && o.ID != nil && *o.ID != "" {
 		return b.ID == *o.ID
 	}
-	return (o.ExpirationDate == nil || b.ExpirationDate.Equal(*o.ExpirationDate)) &&
-		(o.Weight == nil || b.Weight == *o.Weight) &&
+	if !skipExpiry {
+		if o.ExpirationDate != nil && !b.ExpirationDate.Equal(*o.ExpirationDate) {
+			return false
+		}
+	}
+	return (o.Weight == nil || b.Weight == *o.Weight) &&
 		(o.Blocker == nil || b.Blocker == *o.Blocker) &&
 		(o.Disabled == nil || b.Disabled == *o.Disabled) &&
 		(o.DestinationIDs == nil || b.DestinationIDs.Includes(*o.DestinationIDs)) &&

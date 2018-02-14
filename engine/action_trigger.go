@@ -145,7 +145,7 @@ func (at *ActionTrigger) Match(a *Action) bool {
 		thresholdType = t.ThresholdType == "" || at.ThresholdType == t.ThresholdType
 	}
 
-	return thresholdType && at.Balance.CreateBalance().MatchFilter(a.Balance, false)
+	return thresholdType && at.Balance.CreateBalance().MatchFilter(a.Balance, false, false)
 }
 
 func (at *ActionTrigger) CreateBalance() *Balance {
