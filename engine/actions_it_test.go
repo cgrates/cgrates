@@ -39,7 +39,6 @@ var actsLclCfgPath = path.Join(*dataDir, "conf", "samples", "actions")
 var waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
 
 func TestActionsitInitCfg(t *testing.T) {
-
 	// Init config first
 	var err error
 	actsLclCfg, err = config.NewCGRConfigFromFolder(actsLclCfgPath)
@@ -51,7 +50,6 @@ func TestActionsitInitCfg(t *testing.T) {
 }
 
 func TestActionsitInitCdrDb(t *testing.T) {
-
 	if err := InitStorDb(actsLclCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +57,6 @@ func TestActionsitInitCdrDb(t *testing.T) {
 
 // Finds cgr-engine executable and starts it with default configuration
 func TestActionsitStartEngine(t *testing.T) {
-
 	if _, err := StartEngine(actsLclCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
@@ -67,7 +64,6 @@ func TestActionsitStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func TestActionsitRpcConn(t *testing.T) {
-
 	var err error
 	time.Sleep(500 * time.Millisecond)
 	actsLclRpc, err = jsonrpc.Dial("tcp", actsLclCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
@@ -121,7 +117,6 @@ func TestActionsitSetCdrlogDebit(t *testing.T) {
 }
 
 func TestActionsitSetCdrlogTopup(t *testing.T) {
-
 	var reply string
 	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan2905"}
 	if err := actsLclRpc.Call("ApierV1.SetAccount", attrsSetAccount, &reply); err != nil {

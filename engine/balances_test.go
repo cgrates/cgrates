@@ -90,7 +90,7 @@ func TestBalanceEqual(t *testing.T) {
 func TestBalanceMatchFilter(t *testing.T) {
 	mb1 := &Balance{Weight: 1, precision: 1, RatingSubject: "1", DestinationIDs: utils.StringMap{}}
 	mb2 := &BalanceFilter{Weight: utils.Float64Pointer(1), RatingSubject: nil, DestinationIDs: nil}
-	if !mb1.MatchFilter(mb2, false) {
+	if !mb1.MatchFilter(mb2, false, false) {
 		t.Errorf("Match filter failure: %+v == %+v", mb1, mb2)
 	}
 }
@@ -98,7 +98,7 @@ func TestBalanceMatchFilter(t *testing.T) {
 func TestBalanceMatchFilterEmpty(t *testing.T) {
 	mb1 := &Balance{Weight: 1, precision: 1, RatingSubject: "1", DestinationIDs: utils.StringMap{}}
 	mb2 := &BalanceFilter{}
-	if !mb1.MatchFilter(mb2, false) {
+	if !mb1.MatchFilter(mb2, false, false) {
 		t.Errorf("Match filter failure: %+v == %+v", mb1, mb2)
 	}
 }
@@ -106,7 +106,7 @@ func TestBalanceMatchFilterEmpty(t *testing.T) {
 func TestBalanceMatchFilterId(t *testing.T) {
 	mb1 := &Balance{ID: "T1", Weight: 2, precision: 2, RatingSubject: "2", DestinationIDs: utils.NewStringMap("NAT")}
 	mb2 := &BalanceFilter{ID: utils.StringPointer("T1"), Weight: utils.Float64Pointer(1), RatingSubject: utils.StringPointer("1"), DestinationIDs: nil}
-	if !mb1.MatchFilter(mb2, false) {
+	if !mb1.MatchFilter(mb2, false, false) {
 		t.Errorf("Match filter failure: %+v == %+v", mb1, mb2)
 	}
 }
@@ -114,7 +114,7 @@ func TestBalanceMatchFilterId(t *testing.T) {
 func TestBalanceMatchFilterDiffId(t *testing.T) {
 	mb1 := &Balance{ID: "T1", Weight: 1, precision: 1, RatingSubject: "1", DestinationIDs: utils.StringMap{}}
 	mb2 := &BalanceFilter{ID: utils.StringPointer("T2"), Weight: utils.Float64Pointer(1), RatingSubject: utils.StringPointer("1"), DestinationIDs: nil}
-	if mb1.MatchFilter(mb2, false) {
+	if mb1.MatchFilter(mb2, false, false) {
 		t.Errorf("Match filter failure: %+v != %+v", mb1, mb2)
 	}
 }

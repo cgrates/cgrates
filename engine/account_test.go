@@ -969,7 +969,7 @@ func TestAccountdebitBalance(t *testing.T) {
 		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 	}
 	a := &Action{Balance: newMb}
-	ub.debitBalanceAction(a, false)
+	ub.debitBalanceAction(a, false, false, false)
 	if len(ub.BalanceMap[utils.VOICE]) != 3 || !ub.BalanceMap[utils.VOICE][2].DestinationIDs.Equal(*newMb.DestinationIDs) {
 		t.Errorf("Error adding minute bucket! %d %+v %+v", len(ub.BalanceMap[utils.VOICE]), ub.BalanceMap[utils.VOICE][2], newMb)
 	}
@@ -1012,7 +1012,7 @@ func TestAccountdebitBalanceExists(t *testing.T) {
 		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 	}
 	a := &Action{Balance: newMb}
-	ub.debitBalanceAction(a, false)
+	ub.debitBalanceAction(a, false, false, false)
 	if len(ub.BalanceMap[utils.VOICE]) != 2 || ub.BalanceMap[utils.VOICE][0].GetValue() != 25 {
 		t.Error("Error adding minute bucket!")
 	}
@@ -1024,7 +1024,7 @@ func TestAccountAddMinuteNil(t *testing.T) {
 		AllowNegative: true,
 		BalanceMap:    map[string]Balances{utils.SMS: Balances{&Balance{Value: 14}}, utils.DATA: Balances{&Balance{Value: 1024}}, utils.VOICE: Balances{&Balance{Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}}, &Balance{Weight: 10, DestinationIDs: utils.StringMap{"RET": true}}}},
 	}
-	ub.debitBalanceAction(nil, false)
+	ub.debitBalanceAction(nil, false, false, false)
 	if len(ub.BalanceMap[utils.VOICE]) != 2 {
 		t.Error("Error adding minute bucket!")
 	}
@@ -1051,17 +1051,17 @@ func TestAccountAddMinutBucketEmpty(t *testing.T) {
 	}
 	ub := &Account{}
 	a := &Action{Balance: mb1}
-	ub.debitBalanceAction(a, false)
+	ub.debitBalanceAction(a, false, false, false)
 	if len(ub.BalanceMap[utils.VOICE]) != 1 {
 		t.Error("Error adding minute bucket: ", ub.BalanceMap[utils.VOICE])
 	}
 	a = &Action{Balance: mb2}
-	ub.debitBalanceAction(a, false)
+	ub.debitBalanceAction(a, false, false, false)
 	if len(ub.BalanceMap[utils.VOICE]) != 1 || ub.BalanceMap[utils.VOICE][0].GetValue() != 20 {
 		t.Error("Error adding minute bucket: ", ub.BalanceMap[utils.VOICE])
 	}
 	a = &Action{Balance: mb3}
-	ub.debitBalanceAction(a, false)
+	ub.debitBalanceAction(a, false, false, false)
 	if len(ub.BalanceMap[utils.VOICE]) != 2 {
 		t.Error("Error adding minute bucket: ", ub.BalanceMap[utils.VOICE])
 	}

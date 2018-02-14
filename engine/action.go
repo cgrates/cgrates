@@ -79,6 +79,8 @@ const (
 	SET_DDESTINATIONS         = "*set_ddestinations"
 	TRANSFER_MONETARY_DEFAULT = "*transfer_monetary_default"
 	CGR_RPC                   = "*cgr_rpc"
+	TopUpZeroNegative         = "*topup_zero_negative"
+	SetExpiry                 = "*set_expiry"
 )
 
 func (a *Action) Clone() *Action {
@@ -115,6 +117,8 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		SET_BALANCE:               setBalanceAction,
 		TRANSFER_MONETARY_DEFAULT: transferMonetaryDefaultAction,
 		CGR_RPC:                   cgrRPCAction,
+		TopUpZeroNegative:         topupZeroNegativeAction,
+		SetExpiry:                 setExpiryAction,
 	}
 	f, exists := actionFuncMap[typ]
 	return f, exists
@@ -310,7 +314,7 @@ func topupResetAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Ac
 	}
 	c := a.Clone()
 	genericMakeNegative(c)
-	err = genericDebit(ub, c, true)
+	err = genericDebit(ub, c, true, false)
 	a.balanceValue = c.balanceValue
 	return
 }
@@ -321,7 +325,7 @@ func topupAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions
 	}
 	c := a.Clone()
 	genericMakeNegative(c)
-	err = genericDebit(ub, c, false)
+	err = genericDebit(ub, c, false, false)
 	a.balanceValue = c.balanceValue
 	return
 }
@@ -333,14 +337,14 @@ func debitResetAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Ac
 	if ub.BalanceMap == nil { // Init the map since otherwise will get error if nil
 		ub.BalanceMap = make(map[string]Balances, 0)
 	}
-	return genericDebit(ub, a, true)
+	return genericDebit(ub, a, true, false)
 }
 
 func debitAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
-	err = genericDebit(ub, a, false)
+	err = genericDebit(ub, a, false, false)
 	return
 }
 
@@ -360,14 +364,14 @@ func genericMakeNegative(a *Action) {
 	}
 }
 
-func genericDebit(ub *Account, a *Action, reset bool) (err error) {
+func genericDebit(ub *Account, a *Action, reset, resetExpiry bool) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
 	if ub.BalanceMap == nil {
 		ub.BalanceMap = make(map[string]Balances)
 	}
-	return ub.debitBalanceAction(a, reset)
+	return ub.debitBalanceAction(a, reset, false, resetExpiry)
 }
 
 func enableAccountAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) (err error) {
@@ -544,7 +548,6 @@ func setddestinations(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Ac
 }
 
 func removeAccountAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) error {
-
 	var accID string
 	if ub != nil {
 		accID = ub.ID
@@ -615,7 +618,7 @@ func removeBalanceAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs
 	bChain := ub.BalanceMap[a.Balance.GetType()]
 	found := false
 	for i := 0; i < len(bChain); i++ {
-		if bChain[i].MatchFilter(a.Balance, false) {
+		if bChain[i].MatchFilter(a.Balance, false, false) {
 			// delete without preserving order
 			bChain[i] = bChain[len(bChain)-1]
 			bChain = bChain[:len(bChain)-1]
@@ -650,7 +653,7 @@ func transferMonetaryDefaultAction(acc *Account, sq *CDRStatsQueueTriggered, a *
 	for _, balance := range bChain {
 		if balance.Uuid != defaultBalance.Uuid &&
 			balance.ID != defaultBalance.ID && // extra caution
-			balance.MatchFilter(a.Balance, false) {
+			balance.MatchFilter(a.Balance, false, false) {
 			if balance.Value > 0 {
 				defaultBalance.Value += balance.Value
 				balance.Value = 0
@@ -745,6 +748,26 @@ func cgrRPCAction(account *Account, sq *CDRStatsQueueTriggered, a *Action, acs A
 		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %s err: %v", utils.ToJSON(out), err))
 	}()
 	return nil
+}
+
+func topupZeroNegativeAction(account *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) error {
+	if account == nil {
+		return errors.New("nil account")
+	}
+	if account.BalanceMap == nil {
+		account.BalanceMap = make(map[string]Balances)
+	}
+	return account.debitBalanceAction(a, false, true, false)
+}
+
+func setExpiryAction(account *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) error {
+	if account == nil {
+		return errors.New("nil account")
+	}
+	if account.BalanceMap == nil {
+		account.BalanceMap = make(map[string]Balances)
+	}
+	return account.debitBalanceAction(a, false, false, true)
 }
 
 // Structure to store actions according to weight
