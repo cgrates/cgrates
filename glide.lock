@@ -56,7 +56,7 @@ imports:
   - diam/sm/smparser
   - diam/sm/smpeer
 - name: github.com/go-sql-driver/mysql
-  version: 0b58b37b664c21f3010e836f1b931e1d0b0b0685
+  version: bc14601d1bd56421dd60f561e6052c9ed77f9daf
 - name: github.com/gorhill/cronexpr
   version: f0984319b44273e83de132089ae42b1810f4933b
 - name: github.com/jinzhu/gorm
