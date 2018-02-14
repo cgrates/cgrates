@@ -184,7 +184,7 @@ func (acc *Account) setBalanceAction(a *Action) error {
 
 // Debits some amount of user's specified balance adding the balance if it does not exists.
 // Returns the remaining credit in user's balance.
-func (ub *Account) debitBalanceAction(a *Action, reset, resetIfNegative, resetExpiry bool) error {
+func (ub *Account) debitBalanceAction(a *Action, reset, resetIfNegative bool) error {
 	if a == nil {
 		return errors.New("nil action")
 	}
@@ -203,7 +203,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset, resetIfNegative, resetEx
 			continue // just to be safe (cleaned expired balances above)
 		}
 		b.account = ub
-		if b.MatchFilter(a.Balance, false, resetExpiry) {
+		if b.MatchFilter(a.Balance, false, false) {
 			if reset || (resetIfNegative && b.Value < 0) {
 				b.SetValue(0)
 			}

@@ -314,7 +314,7 @@ func topupResetAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Ac
 	}
 	c := a.Clone()
 	genericMakeNegative(c)
-	err = genericDebit(ub, c, true, false)
+	err = genericDebit(ub, c, true)
 	a.balanceValue = c.balanceValue
 	return
 }
@@ -325,7 +325,7 @@ func topupAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions
 	}
 	c := a.Clone()
 	genericMakeNegative(c)
-	err = genericDebit(ub, c, false, false)
+	err = genericDebit(ub, c, false)
 	a.balanceValue = c.balanceValue
 	return
 }
@@ -337,14 +337,14 @@ func debitResetAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Ac
 	if ub.BalanceMap == nil { // Init the map since otherwise will get error if nil
 		ub.BalanceMap = make(map[string]Balances, 0)
 	}
-	return genericDebit(ub, a, true, false)
+	return genericDebit(ub, a, true)
 }
 
 func debitAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
-	err = genericDebit(ub, a, false, false)
+	err = genericDebit(ub, a, false)
 	return
 }
 
@@ -364,14 +364,14 @@ func genericMakeNegative(a *Action) {
 	}
 }
 
-func genericDebit(ub *Account, a *Action, reset, resetExpiry bool) (err error) {
+func genericDebit(ub *Account, a *Action, reset bool) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
 	if ub.BalanceMap == nil {
 		ub.BalanceMap = make(map[string]Balances)
 	}
-	return ub.debitBalanceAction(a, reset, false, resetExpiry)
+	return ub.debitBalanceAction(a, reset, false)
 }
 
 func enableAccountAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) (err error) {
@@ -757,7 +757,7 @@ func topupZeroNegativeAction(account *Account, sq *CDRStatsQueueTriggered, a *Ac
 	if account.BalanceMap == nil {
 		account.BalanceMap = make(map[string]Balances)
 	}
-	return account.debitBalanceAction(a, false, true, false)
+	return account.debitBalanceAction(a, false, true)
 }
 
 func setExpiryAction(account *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) error {
