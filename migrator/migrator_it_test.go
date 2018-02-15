@@ -1826,7 +1826,7 @@ func testMigratorAttributeProfile(t *testing.T) {
 	v1Attribute := &v1AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
-		Contexts:  []string{utils.MetaRating},
+		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"filter1"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -1838,7 +1838,7 @@ func testMigratorAttributeProfile(t *testing.T) {
 	attrPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
-		Contexts:  []string{utils.MetaRating},
+		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"filter1"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),

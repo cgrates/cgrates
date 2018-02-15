@@ -135,6 +135,9 @@ type AttrSProcessEventReply struct {
 // format fldName1:fldVal1,fldName2:fldVal2
 func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
 	for i, fld := range attrReply.AlteredFields {
+		if _, has := attrReply.CGREvent.Event[fld]; !has {
+			continue //maybe removed
+		}
 		if i != 0 {
 			rplyDigest += utils.FIELDS_SEP
 		}
@@ -151,30 +154,28 @@ func (alS *AttributeService) processEvent(ev *utils.CGREvent) (rply *AttrSProces
 		return nil, err
 	}
 	rply = &AttrSProcessEventReply{MatchedProfile: attrPrf.ID, CGREvent: ev.Clone()}
-	for fldName, intialMp := range attrPrf.attributes {
+	for fldName, initialMp := range attrPrf.attributes {
 		initEvValIf, has := ev.Event[fldName]
-		if !has { // we don't have initial in event, try append
-			if anyInitial, has := intialMp[utils.ANY]; has && anyInitial.Append {
-				if anyInitial.Substitute == interface{}(utils.META_NONE) {
-					delete(rply.CGREvent.Event, fldName)
-				} else {
-					rply.CGREvent.Event[fldName] = anyInitial.Substitute
-					rply.AlteredFields = append(rply.AlteredFields, fldName)
-				}
+		if !has {
+			anyInitial, hasAny := initialMp[utils.ANY]
+			if hasAny && anyInitial.Append &&
+				initialMp[utils.ANY].Substitute != interface{}(utils.META_NONE) {
+				rply.CGREvent.Event[fldName] = anyInitial.Substitute
 			}
+			rply.AlteredFields = append(rply.AlteredFields, fldName)
 			continue
 		}
-		attrVal, has := intialMp[initEvValIf]
+		attrVal, has := initialMp[initEvValIf]
 		if !has {
-			attrVal, has = intialMp[utils.ANY]
+			attrVal, has = initialMp[utils.ANY]
 		}
 		if has {
 			if attrVal.Substitute == interface{}(utils.META_NONE) {
 				delete(rply.CGREvent.Event, fldName)
 			} else {
 				rply.CGREvent.Event[fldName] = attrVal.Substitute
-				rply.AlteredFields = append(rply.AlteredFields, fldName)
 			}
+			rply.AlteredFields = append(rply.AlteredFields, fldName)
 		}
 		for _, valIface := range rply.CGREvent.Event {
 			if valIface == interface{}(utils.MetaAttributes) {

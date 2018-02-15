@@ -31,7 +31,7 @@ var (
 	expTimeAttributes      = time.Now().Add(time.Duration(20 * time.Minute))
 	srv                    AttributeService
 	dmAtr                  *DataManager
-	context                = utils.MetaRating
+	context                = utils.MetaSessionS
 	mapSubstitutes         = map[string]map[interface{}]*Attribute{
 		"FL1": map[interface{}]*Attribute{
 			"In1": &Attribute{
@@ -198,7 +198,7 @@ func TestAttributePopulateAttrService(t *testing.T) {
 		filterS: &FilterS{dm: dmAtr},
 	}
 	ref := NewFilterIndexer(dmAtr, utils.AttributeProfilePrefix,
-		utils.ConcatenatedKey(config.CgrConfig().DefaultTenant, utils.MetaRating))
+		utils.ConcatenatedKey(config.CgrConfig().DefaultTenant, utils.MetaSessionS))
 	for _, atr := range atrPs {
 		if err = dmAtr.SetAttributeProfile(atr, false); err != nil {
 			t.Errorf("Error: %+v", err)
@@ -321,6 +321,7 @@ func TestAttributeProfileForEvent(t *testing.T) {
 func TestAttributeProcessEvent(t *testing.T) {
 	eRply := &AttrSProcessEventReply{
 		MatchedProfile: "attributeprofile1",
+		AlteredFields:  []string{"FL1"},
 		CGREvent:       sev,
 	}
 	atrp, err := srv.processEvent(sev)
@@ -336,6 +337,7 @@ func TestAttributeProcessEvent(t *testing.T) {
 	}
 	eRply = &AttrSProcessEventReply{
 		MatchedProfile: "attributeprofile2",
+		AlteredFields:  []string{"FL1"},
 		CGREvent:       sev2,
 	}
 	atrp, err = srv.processEvent(sev2)
@@ -351,6 +353,7 @@ func TestAttributeProcessEvent(t *testing.T) {
 	}
 	eRply = &AttrSProcessEventReply{
 		MatchedProfile: "attributeprofile3",
+		AlteredFields:  []string{"FL1"},
 		CGREvent:       sev3,
 	}
 	atrp, err = srv.processEvent(sev3)
@@ -366,6 +369,7 @@ func TestAttributeProcessEvent(t *testing.T) {
 	}
 	eRply = &AttrSProcessEventReply{
 		MatchedProfile: "attributeprofile4",
+		AlteredFields:  []string{"FL1"},
 		CGREvent:       sev4,
 	}
 	atrp, err = srv.processEvent(sev4)
@@ -384,15 +388,15 @@ func TestAttributeProcessEvent(t *testing.T) {
 func TestAttrSProcessEventReplyDigest(t *testing.T) {
 	eRpl := &AttrSProcessEventReply{
 		MatchedProfile: "ATTR_1",
-		AlteredFields:  []string{"Account", "Subject"},
+		AlteredFields:  []string{utils.Account, utils.Subject},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSProcessEvent",
-			Context: utils.StringPointer(utils.MetaRating),
+			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
-				"Account":     "1001",
-				"Subject":     "1001",
-				"Destination": "+491511231234",
+				utils.Account:      "1001",
+				utils.Subject:      "1001",
+				utils.Destinations: "+491511231234",
 			},
 		},
 	}
@@ -410,11 +414,11 @@ func TestAttrSProcessEventReplyDigest2(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSProcessEvent",
-			Context: utils.StringPointer(utils.MetaRating),
+			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
-				"Account":     "1001",
-				"Subject":     "1001",
-				"Destination": "+491511231234",
+				utils.Account:      "1001",
+				utils.Subject:      "1001",
+				utils.Destinations: "+491511231234",
 			},
 		},
 	}
@@ -432,15 +436,36 @@ func TestAttrSProcessEventReplyDigest3(t *testing.T) {
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSProcessEvent",
-			Context: utils.StringPointer(utils.MetaRating),
+			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
-				"Account":     "1001",
-				"Subject":     "1001",
-				"Destination": "+491511231234",
+				utils.Account:      "1001",
+				utils.Subject:      "1001",
+				utils.Destinations: "+491511231234",
 			},
 		},
 	}
 	expRpl := "Subject:1001"
+	val := eRpl.Digest()
+	if !reflect.DeepEqual(val, expRpl) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expRpl), utils.ToJSON(val))
+	}
+}
+
+func TestAttrSProcessEventReplyDigest4(t *testing.T) {
+	eRpl := &AttrSProcessEventReply{
+		MatchedProfile: "ATTR_1",
+		AlteredFields:  []string{"Subject"},
+		CGREvent: &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "testAttributeSProcessEvent",
+			Context: utils.StringPointer(utils.MetaSessionS),
+			Event: map[string]interface{}{
+				utils.Account:      "1001",
+				utils.Destinations: "+491511231234",
+			},
+		},
+	}
+	expRpl := ""
 	val := eRpl.Digest()
 	if !reflect.DeepEqual(val, expRpl) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expRpl), utils.ToJSON(val))

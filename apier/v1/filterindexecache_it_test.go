@@ -196,7 +196,7 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 		ID:     "TestFilter",
 		Rules: []*engine.FilterRule{
 			&engine.FilterRule{
-				FieldName: "Account",
+				FieldName: utils.Account,
 				Type:      "*string",
 				Values:    []string{"1001"},
 			},
@@ -305,7 +305,7 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 		ID:     "TestFilter2",
 		Rules: []*engine.FilterRule{
 			&engine.FilterRule{
-				FieldName: "Account",
+				FieldName: utils.Account,
 				Type:      "*string",
 				Values:    []string{"1002"},
 			},
@@ -392,7 +392,7 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 		ID:     "TestFilter3",
 		Rules: []*engine.FilterRule{
 			&engine.FilterRule{
-				FieldName: "Account",
+				FieldName: utils.Account,
 				Type:      "*string",
 				Values:    []string{"1003"},
 			},
@@ -575,7 +575,7 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 		ID:     "FLTR_1",
 		Rules: []*engine.FilterRule{
 			&engine.FilterRule{
-				FieldName: "Account",
+				FieldName: utils.Account,
 				Type:      "*string",
 				Values:    []string{"1001"},
 			},
@@ -720,7 +720,7 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 		ID:     "FLTR_2",
 		Rules: []*engine.FilterRule{
 			&engine.FilterRule{
-				FieldName: "Account",
+				FieldName: utils.Account,
 				Type:      "*string",
 				Values:    []string{"1002"},
 			},
@@ -796,7 +796,7 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 		ID:     "FLTR_3",
 		Rules: []*engine.FilterRule{
 			&engine.FilterRule{
-				FieldName: "Account",
+				FieldName: utils.Account,
 				Type:      "*string",
 				Values:    []string{"1003"},
 			},
@@ -930,10 +930,10 @@ func testV1FIdxCaProcessAttributeProfileEventWithNotFound(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant:  "cgrates.org",
 		ID:      "testAttributeSProcessEvent",
-		Context: utils.StringPointer(utils.MetaRating),
+		Context: utils.StringPointer(utils.MetaSessionS),
 		Event: map[string]interface{}{
-			"Account":     "3009",
-			"Destination": "+492511231234",
+			utils.Account:     "3009",
+			utils.Destination: "+492511231234",
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
@@ -953,12 +953,12 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 		ID:     "TestFilter",
 		Rules: []*engine.FilterRule{
 			&engine.FilterRule{
-				FieldName: "Account",
+				FieldName: utils.Account,
 				Type:      "*string",
 				Values:    []string{"1009"},
 			},
 			&engine.FilterRule{
-				FieldName: "Destination",
+				FieldName: utils.Destination,
 				Type:      "*string",
 				Values:    []string{"+491511231234"},
 			},
@@ -976,21 +976,21 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 	alsPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TEST_PROFILE1",
-		Contexts:  []string{"*rating"},
+		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"TestFilter"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FieldName:  "Account",
-				Initial:    "*any",
+				FieldName:  utils.Account,
+				Initial:    utils.META_ANY,
 				Substitute: "1001",
 				Append:     false,
 			},
 			&engine.Attribute{
-				FieldName:  "Subject",
-				Initial:    "*any",
+				FieldName:  utils.Subject,
+				Initial:    utils.META_ANY,
 				Substitute: "1001",
 				Append:     true,
 			},
@@ -1006,10 +1006,10 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant:  "cgrates.org",
 		ID:      "testAttributeSProcessEvent",
-		Context: utils.StringPointer(utils.MetaRating),
+		Context: utils.StringPointer(utils.MetaSessionS),
 		Event: map[string]interface{}{
-			"Account":     "1009",
-			"Destination": "+491511231234",
+			utils.Account:     "1009",
+			utils.Destination: "+491511231234",
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
@@ -1019,7 +1019,7 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 	//test to make sure indexes are made as expected
 	fldNameVal := map[string]string{"TEST_PROFILE1": ""}
 	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE1": {"*string:Account:1009": true, "*string:Destination:+491511231234": true}}
-	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, "cgrates.org:*rating", true),
+	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, "cgrates.org:*sessions", true),
 		fldNameVal); err != nil {
 		t.Error(err)
 	}
@@ -1033,10 +1033,10 @@ func testV1FIdxCaGetAttributeProfileFromTP(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant:  "cgrates.org",
 		ID:      "testAttributeSProcessEvent",
-		Context: utils.StringPointer(utils.MetaRating),
+		Context: utils.StringPointer(utils.MetaSessionS),
 		Event: map[string]interface{}{
-			"Account":     "1007",
-			"Destination": "+491511231234",
+			utils.Account:     "1007",
+			utils.Destination: "+491511231234",
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
@@ -1046,7 +1046,7 @@ func testV1FIdxCaGetAttributeProfileFromTP(t *testing.T) {
 	//test to make sure indexes are made as expected
 	idx := map[string]utils.StringMap{"ATTR_1": {"*string:Account:1007": true}}
 	fldNameVal := map[string]string{"ATTR_1": ""}
-	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, "cgrates.org:*rating", true),
+	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, "cgrates.org:*sessions", true),
 		fldNameVal); err != nil {
 		t.Error(err)
 	}
@@ -1061,12 +1061,12 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 		ID:     "TestFilter2",
 		Rules: []*engine.FilterRule{
 			&engine.FilterRule{
-				FieldName: "Account",
+				FieldName: utils.Account,
 				Type:      "*string",
 				Values:    []string{"2009"},
 			},
 			&engine.FilterRule{
-				FieldName: "Destination",
+				FieldName: utils.Destination,
 				Type:      "*string",
 				Values:    []string{"+492511231234"},
 			},
@@ -1084,20 +1084,20 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 	alsPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TEST_PROFILE1",
-		Contexts:  []string{"*rating"},
+		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"TestFilter2"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FieldName:  "Account",
-				Initial:    "*any",
+				FieldName:  utils.Account,
+				Initial:    utils.META_ANY,
 				Substitute: "1001",
 				Append:     false,
 			},
 			&engine.Attribute{
-				FieldName:  "Subject",
+				FieldName:  utils.Subject,
 				Initial:    "*any",
 				Substitute: "1001",
 				Append:     true,
@@ -1114,10 +1114,10 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant:  "cgrates.org",
 		ID:      "testAttributeSProcessEvent",
-		Context: utils.StringPointer(utils.MetaRating),
+		Context: utils.StringPointer(utils.MetaSessionS),
 		Event: map[string]interface{}{
-			"Account":     "2009",
-			"Destination": "+492511231234",
+			utils.Account:     "2009",
+			utils.Destination: "+492511231234",
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
@@ -1127,7 +1127,7 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 	//test to make sure indexes are made as expected
 	idx := map[string]utils.StringMap{"TEST_PROFILE1": {"*string:Account:2009": true, "*string:Destination:+492511231234": true}}
 	fldNameVal := map[string]string{"TEST_PROFILE1": ""}
-	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, "cgrates.org:*rating", true),
+	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, "cgrates.org:*sessions", true),
 		fldNameVal); err != nil {
 		t.Error(err)
 	}
@@ -1142,12 +1142,12 @@ func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
 		ID:     "TestFilter3",
 		Rules: []*engine.FilterRule{
 			&engine.FilterRule{
-				FieldName: "Account",
+				FieldName: utils.Account,
 				Type:      "*string",
 				Values:    []string{"3009"},
 			},
 			&engine.FilterRule{
-				FieldName: "Destination",
+				FieldName: utils.Destination,
 				Type:      "*string",
 				Values:    []string{"+492511231234"},
 			},
@@ -1176,10 +1176,10 @@ func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant:  "cgrates.org",
 		ID:      "testAttributeSProcessEvent",
-		Context: utils.StringPointer(utils.MetaRating),
+		Context: utils.StringPointer(utils.MetaSessionS),
 		Event: map[string]interface{}{
-			"Account":     "3009",
-			"Destination": "+492511231234",
+			utils.Account:     "3009",
+			utils.Destination: "+492511231234",
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
@@ -1189,7 +1189,7 @@ func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
 	//test to make sure indexes are made as expected
 	idx := map[string]utils.StringMap{"ATTR_1": {"*string:Account:3009": true, "*string:Destination:+492511231234": true}}
 	fldNameVal := map[string]string{"ATTR_1": ""}
-	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, "cgrates.org:*rating", true),
+	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, "cgrates.org:*sessions", true),
 		fldNameVal); err != nil {
 		t.Error(err)
 	}
@@ -1203,10 +1203,10 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant:  "cgrates.org",
 		ID:      "testAttributeSProcessEvent",
-		Context: utils.StringPointer(utils.MetaRating),
+		Context: utils.StringPointer(utils.MetaSessionS),
 		Event: map[string]interface{}{
-			"Account":     "3009",
-			"Destination": "+492511231234",
+			utils.Account:     "3009",
+			utils.Destination: "+492511231234",
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply
@@ -1217,10 +1217,10 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 	ev2 := &utils.CGREvent{
 		Tenant:  "cgrates.org",
 		ID:      "testAttributeSProcessEvent",
-		Context: utils.StringPointer(utils.MetaRating),
+		Context: utils.StringPointer(utils.MetaSessionS),
 		Event: map[string]interface{}{
-			"Account":     "2009",
-			"Destination": "+492511231234",
+			utils.Account:     "2009",
+			utils.Destination: "+492511231234",
 		},
 	}
 	if err := tFIdxCaRpc.Call(utils.AttributeSv1ProcessEvent, ev2, &rplyEv); err != nil {
@@ -1228,7 +1228,7 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 	}
 	//Remove threshold profile that was set form api
 	if err := tFIdxCaRpc.Call("ApierV1.RemAttributeProfile", &ArgRemoveAttrProfile{Tenant: "cgrates.org",
-		ID: "TEST_PROFILE1", Contexts: []string{"*rating"}}, &resp); err != nil {
+		ID: "TEST_PROFILE1", Contexts: []string{utils.MetaSessionS}}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -1242,7 +1242,7 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 	}
 	//Remove threshold profile that was set form tariffplan
 	if err := tFIdxCaRpc.Call("ApierV1.RemAttributeProfile", &ArgRemoveAttrProfile{Tenant: "cgrates.org",
-		ID: "ATTR_1", Contexts: []string{"*rating"}}, &resp); err != nil {
+		ID: "ATTR_1", Contexts: []string{utils.MetaSessionS}}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -1277,9 +1277,9 @@ func testV1FIdxCaGetResourceProfileWithNotFound(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002"},
+				utils.Account:     "1002",
+				utils.Subject:     "1001",
+				utils.Destination: "1002"},
 		},
 		Units: 6,
 	}
@@ -1302,17 +1302,17 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 		ID:     "FLTR_RES_RCFG1",
 		Rules: []*engine.FilterRule{
 			&engine.FilterRule{
-				FieldName: "Account",
+				FieldName: utils.Account,
 				Type:      "*string",
 				Values:    []string{"1001"},
 			},
 			&engine.FilterRule{
-				FieldName: "Subject",
+				FieldName: utils.Subject,
 				Type:      "*string",
 				Values:    []string{"1002"},
 			},
 			&engine.FilterRule{
-				FieldName: "Destination",
+				FieldName: utils.Destination,
 				Type:      "*string",
 				Values:    []string{"1001"},
 			},
@@ -1352,9 +1352,9 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
-				"Account":     "1001",
-				"Subject":     "1002",
-				"Destination": "1001"},
+				utils.Account:     "1001",
+				utils.Subject:     "1002",
+				utils.Destination: "1001"},
 		},
 		Units: 6,
 	}
@@ -1389,9 +1389,9 @@ func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
-				"Account":     "1001",
-				"Subject":     "1002",
-				"Destination": "1001"},
+				utils.Account:     "1001",
+				utils.Subject:     "1002",
+				utils.Destination: "1001"},
 		},
 		Units: 6,
 	}
@@ -1411,9 +1411,9 @@ func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002"},
+				utils.Account:     "1002",
+				utils.Subject:     "1001",
+				utils.Destination: "1002"},
 		},
 		Units: 6,
 	}
@@ -1440,17 +1440,17 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 		ID:     "FLTR_RES_RCFG2",
 		Rules: []*engine.FilterRule{
 			&engine.FilterRule{
-				FieldName: "Account",
+				FieldName: utils.Account,
 				Type:      "*string",
 				Values:    []string{"2002"},
 			},
 			&engine.FilterRule{
-				FieldName: "Subject",
+				FieldName: utils.Subject,
 				Type:      "*string",
 				Values:    []string{"2001"},
 			},
 			&engine.FilterRule{
-				FieldName: "Destination",
+				FieldName: utils.Destination,
 				Type:      "*string",
 				Values:    []string{"2002"},
 			},
@@ -1490,9 +1490,9 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
-				"Account":     "2002",
-				"Subject":     "2001",
-				"Destination": "2002"},
+				utils.Account:     "2002",
+				utils.Subject:     "2001",
+				utils.Destination: "2002"},
 		},
 		Units: 6,
 	}
@@ -1518,17 +1518,17 @@ func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
 		ID:     "FLTR_RES_RCFG3",
 		Rules: []*engine.FilterRule{
 			&engine.FilterRule{
-				FieldName: "Account",
+				FieldName: utils.Account,
 				Type:      "*string",
 				Values:    []string{"1002"},
 			},
 			&engine.FilterRule{
-				FieldName: "Subject",
+				FieldName: utils.Subject,
 				Type:      "*string",
 				Values:    []string{"1001"},
 			},
 			&engine.FilterRule{
-				FieldName: "Destination",
+				FieldName: utils.Destination,
 				Type:      "*string",
 				Values:    []string{"1002"},
 			},
@@ -1562,9 +1562,9 @@ func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002"},
+				utils.Account:     "1002",
+				utils.Subject:     "1001",
+				utils.Destination: "1002"},
 		},
 		Units: 6,
 	}
@@ -1591,9 +1591,9 @@ func testV1FIdxCaRemoveResourceProfile(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
-				"Account":     "2002",
-				"Subject":     "2001",
-				"Destination": "2002"},
+				utils.Account:     "2002",
+				utils.Subject:     "2001",
+				utils.Destination: "2002"},
 		},
 		Units: 6,
 	}
@@ -1612,9 +1612,9 @@ func testV1FIdxCaRemoveResourceProfile(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
-				"Account":     "1002",
-				"Subject":     "1001",
-				"Destination": "1002"},
+				utils.Account:     "1002",
+				utils.Subject:     "1001",
+				utils.Destination: "1002"},
 		},
 		Units: 6,
 	}

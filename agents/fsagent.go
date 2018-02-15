@@ -181,6 +181,9 @@ func (sm *FSsessions) onChannelPark(fsev FSEvent, connId string) {
 	if authArgs.GetAttributes {
 		if authReply.Attributes != nil {
 			for _, fldName := range authReply.Attributes.AlteredFields {
+				if _, has := authReply.Attributes.CGREvent.Event[fldName]; !has {
+					continue //maybe removed
+				}
 				if _, err := sm.conns[connId].SendApiCmd(
 					fmt.Sprintf("uuid_setvar %s %s %s\n\n", fsev.GetUUID(), fldName,
 						authReply.Attributes.CGREvent.Event[fldName])); err != nil {

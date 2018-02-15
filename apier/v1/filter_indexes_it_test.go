@@ -1280,7 +1280,7 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 	alsPrf = &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ApierTest",
-		Contexts:  []string{"*rating"},
+		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"FLTR_1"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -1392,7 +1392,7 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 	alsPrf = &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ApierTest2",
-		Contexts:  []string{"*rating"},
+		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"FLTR_2"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -1493,13 +1493,13 @@ func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 		t.Errorf("Error: %+v", reply2)
 	}
 	if err := tFIdxRpc.Call("ApierV1.RemAttributeProfile",
-		&ArgRemoveAttrProfile{Tenant: "cgrates.org", ID: "ApierTest", Contexts: []string{"*rating"}}, &resp); err != nil {
+		&ArgRemoveAttrProfile{Tenant: "cgrates.org", ID: "ApierTest", Contexts: []string{utils.MetaSessionS}}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
 	if err := tFIdxRpc.Call("ApierV1.RemAttributeProfile",
-		&ArgRemoveAttrProfile{Tenant: "cgrates.org", ID: "ApierTest2", Contexts: []string{"*rating"}}, &resp); err != nil {
+		&ArgRemoveAttrProfile{Tenant: "cgrates.org", ID: "ApierTest2", Contexts: []string{utils.MetaSessionS}}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
