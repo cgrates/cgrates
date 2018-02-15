@@ -54,6 +54,8 @@ var sTestsAlsPrf = []func(t *testing.T){
 	testAttributeSGetAttributeForEventNotFound,
 	testAttributeSGetAttributeForEventWithMetaAnyContext,
 	testAttributeSProcessEvent,
+	testAttributeSProcessEventWithNoneSubstitute,
+	testAttributeSProcessEventWithNoneSubstitute2,
 	testAttributeSGetAlsPrfBeforeSet,
 	testAttributeSSetAlsPrf,
 	testAttributeSUpdateAlsPrf,
@@ -228,7 +230,6 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 		ev, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-
 }
 
 func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
@@ -278,8 +279,8 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 	} else if !reflect.DeepEqual(eAttrPrf2, attrReply) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eAttrPrf2), utils.ToJSON(attrReply))
 	}
-
 }
+
 func testAttributeSProcessEvent(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant:  "cgrates.org",
@@ -324,6 +325,135 @@ func testAttributeSProcessEvent(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRply, &rplyEv) &&
 		!reflect.DeepEqual(eRply2, &rplyEv) { // second for reversed order of attributes
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
+	}
+}
+
+func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
+	ev := &utils.CGREvent{
+		Tenant:  "cgrates.org",
+		ID:      "testAttributeSWithNoneSubstitute",
+		Context: utils.StringPointer(utils.MetaRating),
+		Event: map[string]interface{}{
+			utils.Account:     "1008",
+			utils.Destination: "+491511231234",
+		},
+	}
+	alsPrf = &engine.AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "AttributeWithNonSubstitute",
+		Contexts:  []string{"*rating"},
+		FilterIDs: []string{"*string:Account:1008"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		Attributes: []*engine.Attribute{
+			&engine.Attribute{
+				FieldName:  "Account",
+				Initial:    "1008",
+				Substitute: "1001",
+				Append:     false,
+			},
+			&engine.Attribute{
+				FieldName:  "Subject",
+				Initial:    "*any",
+				Substitute: "*none",
+				Append:     true,
+			},
+		},
+		Weight: 20,
+	}
+	var result string
+	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	eRply := &engine.AttrSProcessEventReply{
+		MatchedProfile: "AttributeWithNonSubstitute",
+		AlteredFields:  []string{"Account"},
+		CGREvent: &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "testAttributeSWithNoneSubstitute",
+			Context: utils.StringPointer(utils.MetaRating),
+			Event: map[string]interface{}{
+				utils.Account:     "1001",
+				utils.Destination: "+491511231234",
+			},
+		},
+	}
+	var rplyEv engine.AttrSProcessEventReply
+	if err := attrSRPC.Call(utils.AttributeSv1ProcessEvent,
+		ev, &rplyEv); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eRply, &rplyEv) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
+	}
+}
+
+func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
+	ev := &utils.CGREvent{
+		Tenant:  "cgrates.org",
+		ID:      "testAttributeSWithNoneSubstitute",
+		Context: utils.StringPointer(utils.MetaRating),
+		Event: map[string]interface{}{
+			utils.Account:     "1008",
+			utils.Subject:     "1008",
+			utils.Destination: "+491511231234",
+		},
+	}
+	alsPrf = &engine.AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "AttributeWithNonSubstitute",
+		Contexts:  []string{"*rating"},
+		FilterIDs: []string{"*string:Account:1008"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		Attributes: []*engine.Attribute{
+			&engine.Attribute{
+				FieldName:  "Account",
+				Initial:    "1008",
+				Substitute: "1001",
+				Append:     false,
+			},
+			&engine.Attribute{
+				FieldName:  "Subject",
+				Initial:    "*any",
+				Substitute: "*none",
+				Append:     false,
+			},
+		},
+		Weight: 20,
+	}
+	var result string
+	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	eRply := &engine.AttrSProcessEventReply{
+		MatchedProfile: "AttributeWithNonSubstitute",
+		AlteredFields:  []string{"Account"},
+		CGREvent: &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "testAttributeSWithNoneSubstitute",
+			Context: utils.StringPointer(utils.MetaRating),
+			Event: map[string]interface{}{
+				utils.Account:     "1001",
+				utils.Destination: "+491511231234",
+			},
+		},
+	}
+	var rplyEv engine.AttrSProcessEventReply
+	if err := attrSRPC.Call(utils.AttributeSv1ProcessEvent,
+		ev, &rplyEv); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eRply, &rplyEv) {
 		t.Errorf("Expecting: %s, received: %s",
 			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
 	}
