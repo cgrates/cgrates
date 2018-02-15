@@ -56,6 +56,7 @@ var sTestsAlsPrf = []func(t *testing.T){
 	testAttributeSProcessEvent,
 	testAttributeSProcessEventWithNoneSubstitute,
 	testAttributeSProcessEventWithNoneSubstitute2,
+	testAttributeSProcessEventWithNoneSubstitute3,
 	testAttributeSGetAlsPrfBeforeSet,
 	testAttributeSSetAlsPrf,
 	testAttributeSUpdateAlsPrf,
@@ -146,7 +147,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant:  "cgrates.org",
 		ID:      "testAttributeSGetAttributeForEvent",
-		Context: utils.StringPointer(utils.MetaRating),
+		Context: utils.StringPointer(utils.MetaSessionS),
 		Event: map[string]interface{}{
 			utils.Account:     "1007",
 			utils.Destination: "+491511231234",
@@ -156,7 +157,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_1",
 		FilterIDs: []string{"*string:Account:1007"},
-		Contexts:  []string{utils.MetaRating},
+		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 		Attributes: []*engine.Attribute{
@@ -199,7 +200,7 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_3",
 		FilterIDs: []string{"*string:Account:dan"},
-		Contexts:  []string{utils.MetaRating},
+		Contexts:  []string{utils.MetaSessionS},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 		Attributes: []*engine.Attribute{
@@ -285,7 +286,7 @@ func testAttributeSProcessEvent(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant:  "cgrates.org",
 		ID:      "testAttributeSProcessEvent",
-		Context: utils.StringPointer(utils.MetaRating),
+		Context: utils.StringPointer(utils.MetaSessionS),
 		Event: map[string]interface{}{
 			utils.Account:     "1007",
 			utils.Destination: "+491511231234",
@@ -293,11 +294,11 @@ func testAttributeSProcessEvent(t *testing.T) {
 	}
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfile: "ATTR_1",
-		AlteredFields:  []string{"Subject", "Account"},
+		AlteredFields:  []string{utils.Subject, utils.Account},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSProcessEvent",
-			Context: utils.StringPointer(utils.MetaRating),
+			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
 				utils.Account:     "1001",
 				utils.Subject:     "1001",
@@ -307,14 +308,14 @@ func testAttributeSProcessEvent(t *testing.T) {
 	}
 	eRply2 := &engine.AttrSProcessEventReply{
 		MatchedProfile: "ATTR_1",
-		AlteredFields:  []string{"Account", "Subject"},
+		AlteredFields:  []string{utils.Account, utils.Subject},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSProcessEvent",
-			Context: utils.StringPointer(utils.MetaRating),
+			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
-				"Account":     "1001",
-				"Subject":     "1001",
+				utils.Account: "1001",
+				utils.Subject: "1001",
 				"Destination": "+491511231234",
 			},
 		},
@@ -334,7 +335,7 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant:  "cgrates.org",
 		ID:      "testAttributeSWithNoneSubstitute",
-		Context: utils.StringPointer(utils.MetaRating),
+		Context: utils.StringPointer(utils.MetaSessionS),
 		Event: map[string]interface{}{
 			utils.Account:     "1008",
 			utils.Destination: "+491511231234",
@@ -343,7 +344,7 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 	alsPrf = &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttributeWithNonSubstitute",
-		Contexts:  []string{"*rating"},
+		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
 		FilterIDs: []string{"*string:Account:1008"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -351,14 +352,14 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FieldName:  "Account",
+				FieldName:  utils.Account,
 				Initial:    "1008",
 				Substitute: "1001",
 				Append:     false,
 			},
 			&engine.Attribute{
-				FieldName:  "Subject",
-				Initial:    "*any",
+				FieldName:  utils.Subject,
+				Initial:    utils.ANY,
 				Substitute: "*none",
 				Append:     true,
 			},
@@ -373,11 +374,24 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 	}
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfile: "AttributeWithNonSubstitute",
-		AlteredFields:  []string{"Account"},
+		AlteredFields:  []string{utils.Account, utils.Subject},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSWithNoneSubstitute",
-			Context: utils.StringPointer(utils.MetaRating),
+			Context: utils.StringPointer(utils.MetaSessionS),
+			Event: map[string]interface{}{
+				utils.Account:     "1001",
+				utils.Destination: "+491511231234",
+			},
+		},
+	}
+	eRply2 := &engine.AttrSProcessEventReply{
+		MatchedProfile: "AttributeWithNonSubstitute",
+		AlteredFields:  []string{utils.Subject, utils.Account},
+		CGREvent: &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "testAttributeSWithNoneSubstitute",
+			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
 				utils.Account:     "1001",
 				utils.Destination: "+491511231234",
@@ -388,7 +402,8 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 	if err := attrSRPC.Call(utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eRply, &rplyEv) {
+	} else if !reflect.DeepEqual(eRply, &rplyEv) &&
+		!reflect.DeepEqual(eRply2, &rplyEv) {
 		t.Errorf("Expecting: %s, received: %s",
 			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
 	}
@@ -398,7 +413,7 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 	ev := &utils.CGREvent{
 		Tenant:  "cgrates.org",
 		ID:      "testAttributeSWithNoneSubstitute",
-		Context: utils.StringPointer(utils.MetaRating),
+		Context: utils.StringPointer(utils.MetaSessionS),
 		Event: map[string]interface{}{
 			utils.Account:     "1008",
 			utils.Subject:     "1008",
@@ -408,7 +423,7 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 	alsPrf = &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttributeWithNonSubstitute",
-		Contexts:  []string{"*rating"},
+		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:Account:1008"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -416,15 +431,15 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FieldName:  "Account",
+				FieldName:  utils.Account,
 				Initial:    "1008",
 				Substitute: "1001",
 				Append:     false,
 			},
 			&engine.Attribute{
-				FieldName:  "Subject",
-				Initial:    "*any",
-				Substitute: "*none",
+				FieldName:  utils.Subject,
+				Initial:    utils.ANY,
+				Substitute: utils.META_NONE,
 				Append:     false,
 			},
 		},
@@ -438,11 +453,24 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 	}
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfile: "AttributeWithNonSubstitute",
-		AlteredFields:  []string{"Account"},
+		AlteredFields:  []string{"Account", "Subject"},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSWithNoneSubstitute",
-			Context: utils.StringPointer(utils.MetaRating),
+			Context: utils.StringPointer(utils.MetaSessionS),
+			Event: map[string]interface{}{
+				utils.Account:     "1001",
+				utils.Destination: "+491511231234",
+			},
+		},
+	}
+	eRply2 := &engine.AttrSProcessEventReply{
+		MatchedProfile: "AttributeWithNonSubstitute",
+		AlteredFields:  []string{utils.Subject, utils.Account},
+		CGREvent: &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "testAttributeSWithNoneSubstitute",
+			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
 				utils.Account:     "1001",
 				utils.Destination: "+491511231234",
@@ -453,7 +481,86 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 	if err := attrSRPC.Call(utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eRply, &rplyEv) {
+	} else if !reflect.DeepEqual(eRply, &rplyEv) &&
+		!reflect.DeepEqual(eRply2, &rplyEv) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
+	}
+}
+
+func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
+	ev := &utils.CGREvent{
+		Tenant:  "cgrates.org",
+		ID:      "testAttributeSWithNoneSubstitute",
+		Context: utils.StringPointer(utils.MetaSessionS),
+		Event: map[string]interface{}{
+			utils.Account:     "1008",
+			utils.Destination: "+491511231234",
+		},
+	}
+	alsPrf = &engine.AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "AttributeWithNonSubstitute",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:Account:1008"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		Attributes: []*engine.Attribute{
+			&engine.Attribute{
+				FieldName:  utils.Account,
+				Initial:    "1008",
+				Substitute: "1001",
+				Append:     false,
+			},
+			&engine.Attribute{
+				FieldName:  utils.Subject,
+				Initial:    "1008",
+				Substitute: utils.META_NONE,
+				Append:     false,
+			},
+		},
+		Weight: 20,
+	}
+	var result string
+	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	eRply := &engine.AttrSProcessEventReply{
+		MatchedProfile: "AttributeWithNonSubstitute",
+		AlteredFields:  []string{"Account", "Subject"},
+		CGREvent: &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "testAttributeSWithNoneSubstitute",
+			Context: utils.StringPointer(utils.MetaSessionS),
+			Event: map[string]interface{}{
+				utils.Account:     "1001",
+				utils.Destination: "+491511231234",
+			},
+		},
+	}
+	eRply2 := &engine.AttrSProcessEventReply{
+		MatchedProfile: "AttributeWithNonSubstitute",
+		AlteredFields:  []string{utils.Subject, utils.Account},
+		CGREvent: &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "testAttributeSWithNoneSubstitute",
+			Context: utils.StringPointer(utils.MetaSessionS),
+			Event: map[string]interface{}{
+				utils.Account:     "1001",
+				utils.Destination: "+491511231234",
+			},
+		},
+	}
+	var rplyEv engine.AttrSProcessEventReply
+	if err := attrSRPC.Call(utils.AttributeSv1ProcessEvent,
+		ev, &rplyEv); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eRply, &rplyEv) &&
+		!reflect.DeepEqual(eRply2, &rplyEv) {
 		t.Errorf("Expecting: %s, received: %s",
 			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
 	}
@@ -463,7 +570,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 	alsPrf = &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ApierTest",
-		Contexts:  []string{"*rating"},
+		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),

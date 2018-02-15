@@ -804,6 +804,9 @@ func (cdr *CDR) AsCGREvent() *utils.CGREvent {
 // UpdateFromCGREvent will update CDR with event fields from CGREvent
 func (cdr *CDR) UpdateFromCGREvent(cgrEv *utils.CGREvent, fields []string) (err error) {
 	for _, fldName := range fields {
+		if _, has := cgrEv.Event[fldName]; !has {
+			continue //maybe removed
+		}
 		switch fldName {
 		case utils.OriginHost:
 			if cdr.OriginHost, err = cgrEv.FieldAsString(fldName); err != nil {
