@@ -155,8 +155,12 @@ func (alS *AttributeService) processEvent(ev *utils.CGREvent) (rply *AttrSProces
 		initEvValIf, has := ev.Event[fldName]
 		if !has { // we don't have initial in event, try append
 			if anyInitial, has := intialMp[utils.ANY]; has && anyInitial.Append {
-				rply.CGREvent.Event[fldName] = anyInitial.Substitute
-				rply.AlteredFields = append(rply.AlteredFields, fldName)
+				if anyInitial.Substitute == interface{}(utils.META_NONE) {
+					delete(rply.CGREvent.Event, fldName)
+				} else {
+					rply.CGREvent.Event[fldName] = anyInitial.Substitute
+					rply.AlteredFields = append(rply.AlteredFields, fldName)
+				}
 			}
 			continue
 		}
@@ -165,8 +169,12 @@ func (alS *AttributeService) processEvent(ev *utils.CGREvent) (rply *AttrSProces
 			attrVal, has = intialMp[utils.ANY]
 		}
 		if has {
-			rply.CGREvent.Event[fldName] = attrVal.Substitute
-			rply.AlteredFields = append(rply.AlteredFields, fldName)
+			if attrVal.Substitute == interface{}(utils.META_NONE) {
+				delete(rply.CGREvent.Event, fldName)
+			} else {
+				rply.CGREvent.Event[fldName] = attrVal.Substitute
+				rply.AlteredFields = append(rply.AlteredFields, fldName)
+			}
 		}
 		for _, valIface := range rply.CGREvent.Event {
 			if valIface == interface{}(utils.MetaAttributes) {
