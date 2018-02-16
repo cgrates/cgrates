@@ -1259,12 +1259,14 @@ func (ms *MapStorage) GetFilterIndexesDrv(dbKey, filterType string,
 				indexes[utils.ConcatenatedKey(filterType, fldName, fldVal)] = rcvidx[utils.ConcatenatedKey(fldName, fldVal)]
 			}
 		}
-
 		return
 	} else {
 		err = ms.ms.Unmarshal(values, &indexes)
 		if err != nil {
 			return nil, err
+		}
+		if len(indexes) == 0 {
+			return nil, utils.ErrNotFound
 		}
 	}
 	return
@@ -1287,6 +1289,12 @@ func (ms *MapStorage) SetFilterIndexesDrv(originKey string, indexes map[string]u
 		ms.dict[originKey] = result
 		return nil
 	} else {
+		for key, strMp := range indexes {
+			if len(strMp) == 0 { // remove with no more elements inside
+				delete(indexes, key)
+				continue
+			}
+		}
 		result, err := ms.ms.Marshal(indexes)
 		if err != nil {
 			return err
@@ -1331,6 +1339,9 @@ func (ms *MapStorage) GetFilterReverseIndexesDrv(dbKey string,
 		if err != nil {
 			return nil, err
 		}
+		if len(indexes) == 0 {
+			return nil, utils.ErrNotFound
+		}
 	}
 	return
 }
@@ -1352,6 +1363,12 @@ func (ms *MapStorage) SetFilterReverseIndexesDrv(originKey string, revIdx map[st
 		ms.dict[originKey] = result
 		return nil
 	} else {
+		for key, strMp := range revIdx {
+			if len(strMp) == 0 { // remove with no more elements inside
+				delete(revIdx, key)
+				continue
+			}
+		}
 		result, err := ms.ms.Marshal(revIdx)
 		if err != nil {
 			return err

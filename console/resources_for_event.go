@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -28,6 +27,7 @@ func init() {
 	c := &CmdGetResourceForEvent{
 		name:      "resources_for_event",
 		rpcMethod: "ResourceSv1.GetResourcesForEvent",
+		rpcParams: &utils.ArgRSv1ResourceUsage{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -37,7 +37,7 @@ func init() {
 type CmdGetResourceForEvent struct {
 	name      string
 	rpcMethod string
-	rpcParams interface{}
+	rpcParams *utils.ArgRSv1ResourceUsage
 	*CommandExecuter
 }
 
@@ -51,33 +51,16 @@ func (self *CmdGetResourceForEvent) RpcMethod() string {
 
 func (self *CmdGetResourceForEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		mp := make(map[string]interface{})
-		self.rpcParams = &mp
+		self.rpcParams = &utils.ArgRSv1ResourceUsage{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetResourceForEvent) PostprocessRpcParams() error { //utils.CGREvent
-	var tenant string
-	param := self.rpcParams.(*map[string]interface{})
-	if (*param)[utils.Tenant] != nil && (*param)[utils.Tenant].(string) != "" {
-		tenant = (*param)[utils.Tenant].(string)
-		delete((*param), utils.Tenant)
-	} else {
-		tenant = config.CgrConfig().DefaultTenant
-	}
-	argres := utils.ArgRSv1ResourceUsage{
-		CGREvent: utils.CGREvent{
-			Tenant: tenant,
-			ID:     utils.UUIDSha1Prefix(),
-			Event:  *param,
-		},
-	}
-	self.rpcParams = argres
+func (self *CmdGetResourceForEvent) PostprocessRpcParams() error {
 	return nil
 }
 
 func (self *CmdGetResourceForEvent) RpcResult() interface{} {
-	atr := engine.Resources{}
+	var atr *engine.Resources
 	return &atr
 }

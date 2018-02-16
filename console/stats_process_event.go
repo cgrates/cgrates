@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -27,6 +26,7 @@ func init() {
 	c := &CmdStatQueueProcessEvent{
 		name:      "stats_process_event",
 		rpcMethod: "StatSv1.ProcessEvent",
+		rpcParams: &utils.CGREvent{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdStatQueueProcessEvent struct {
 	name      string
 	rpcMethod string
-	rpcParams interface{}
+	rpcParams *utils.CGREvent
 	*CommandExecuter
 }
 
@@ -50,31 +50,16 @@ func (self *CmdStatQueueProcessEvent) RpcMethod() string {
 
 func (self *CmdStatQueueProcessEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		mp := make(map[string]interface{})
-		self.rpcParams = &mp
+		self.rpcParams = &utils.CGREvent{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdStatQueueProcessEvent) PostprocessRpcParams() error { //utils.CGREvent
-	var tenant string
-	param := self.rpcParams.(*map[string]interface{})
-	if (*param)[utils.Tenant] != nil && (*param)[utils.Tenant].(string) != "" {
-		tenant = (*param)[utils.Tenant].(string)
-		delete((*param), utils.Tenant)
-	} else {
-		tenant = config.CgrConfig().DefaultTenant
-	}
-	cgrev := utils.CGREvent{
-		Tenant: tenant,
-		ID:     utils.UUIDSha1Prefix(),
-		Event:  *param,
-	}
-	self.rpcParams = cgrev
+func (self *CmdStatQueueProcessEvent) PostprocessRpcParams() error {
 	return nil
 }
 
 func (self *CmdStatQueueProcessEvent) RpcResult() interface{} {
-	var s string
-	return &s
+	var atr string
+	return &atr
 }

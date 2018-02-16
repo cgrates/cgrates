@@ -471,3 +471,105 @@ func TestAttrSProcessEventReplyDigest4(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expRpl), utils.ToJSON(val))
 	}
 }
+
+func TestAttributeIndexer(t *testing.T) {
+	//refresh the DM
+	data, _ := NewMapStorage()
+	dmAtr = NewDataManager(data)
+	if err := dmAtr.DataDB().Flush(""); err != nil {
+		t.Error(err)
+	}
+	if test, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
+		t.Error(err)
+	} else if test != true {
+		t.Errorf("\nExpecting: true got :%+v", test)
+	}
+	attrPrf := &AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "AttrPrf",
+		Contexts:  []string{utils.META_ANY},
+		FilterIDs: []string{"*string:Account:1007"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     cloneExpTimeAttributes,
+		},
+		Attributes: []*Attribute{
+			&Attribute{
+				FieldName:  utils.Account,
+				Initial:    utils.META_ANY,
+				Substitute: "1001",
+				Append:     true,
+			},
+		},
+		Weight: 20,
+	}
+	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	eIdxes := map[string]utils.StringMap{
+		"*string:Account:1007": utils.StringMap{
+			"AttrPrf": true,
+		},
+	}
+	reverseIdxes := map[string]utils.StringMap{
+		"AttrPrf": utils.StringMap{
+			"*string:Account:1007": true,
+		},
+	}
+	rfi1 := NewFilterIndexer(dmAtr, utils.AttributeProfilePrefix,
+		utils.ConcatenatedKey(attrPrf.Tenant, utils.META_ANY))
+	if rcvIdx, err := dmAtr.GetFilterIndexes(
+		GetDBIndexKey(rfi1.itemType, rfi1.dbKeySuffix, false), MetaString,
+		nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(eIdxes, rcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+		}
+	}
+	if reverseRcvIdx, err := dmAtr.GetFilterReverseIndexes(
+		GetDBIndexKey(rfi1.itemType, rfi1.dbKeySuffix, true),
+		nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
+		}
+	}
+	//Set AttributeProfile with new context (*sessions)
+	attrPrf.Contexts = []string{utils.MetaSessionS}
+	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+		t.Error(err)
+	}
+	rfi2 := NewFilterIndexer(dmAtr, utils.AttributeProfilePrefix,
+		utils.ConcatenatedKey(attrPrf.Tenant, utils.MetaSessionS))
+	if rcvIdx, err := dmAtr.GetFilterIndexes(
+		GetDBIndexKey(rfi2.itemType, rfi2.dbKeySuffix, false), MetaString,
+		nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(eIdxes, rcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+		}
+	}
+	if reverseRcvIdx, err := dmAtr.GetFilterReverseIndexes(
+		GetDBIndexKey(rfi2.itemType, rfi2.dbKeySuffix, true),
+		nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
+		}
+	}
+	//verify if old index was deleted ( context *any)
+	if _, err := dmAtr.GetFilterIndexes(
+		GetDBIndexKey(rfi1.itemType, rfi1.dbKeySuffix, false), MetaString,
+		nil); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if _, err := dmAtr.GetFilterReverseIndexes(
+		GetDBIndexKey(rfi1.itemType, rfi1.dbKeySuffix, true),
+		nil); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
