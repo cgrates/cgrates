@@ -19,63 +19,47 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdStatsQueueProcessEvent{
-		name:      "stats_process_event",
+	c := &CmdStatsQueueForEvent{
+		name:      "stats_for_event",
 		rpcMethod: "StatSv1.GetStatQueuesForEvent",
+		rpcParams: &utils.CGREvent{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdStatsQueueProcessEvent struct {
+type CmdStatsQueueForEvent struct {
 	name      string
 	rpcMethod string
-	rpcParams interface{}
+	rpcParams *utils.CGREvent
 	*CommandExecuter
 }
 
-func (self *CmdStatsQueueProcessEvent) Name() string {
+func (self *CmdStatsQueueForEvent) Name() string {
 	return self.name
 }
 
-func (self *CmdStatsQueueProcessEvent) RpcMethod() string {
+func (self *CmdStatsQueueForEvent) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdStatsQueueProcessEvent) RpcParams(reset bool) interface{} {
+func (self *CmdStatsQueueForEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		mp := make(map[string]interface{})
-		self.rpcParams = &mp
+		self.rpcParams = &utils.CGREvent{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdStatsQueueProcessEvent) PostprocessRpcParams() error { //utils.CGREvent
-	var tenant string
-	param := self.rpcParams.(*map[string]interface{})
-	if (*param)[utils.Tenant] != nil && (*param)[utils.Tenant].(string) != "" {
-		tenant = (*param)[utils.Tenant].(string)
-		delete((*param), utils.Tenant)
-	} else {
-		tenant = config.CgrConfig().DefaultTenant
-	}
-	cgrev := utils.CGREvent{
-		Tenant: tenant,
-		ID:     utils.UUIDSha1Prefix(),
-		Event:  *param,
-	}
-	self.rpcParams = cgrev
+func (self *CmdStatsQueueForEvent) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdStatsQueueProcessEvent) RpcResult() interface{} {
-	s := engine.StatQueues{}
-	return &s
+func (self *CmdStatsQueueForEvent) RpcResult() interface{} {
+	var atr *[]string
+	return &atr
 }

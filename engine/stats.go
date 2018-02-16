@@ -276,13 +276,19 @@ func (sS *StatService) V1ProcessEvent(ev *utils.CGREvent, reply *string) (err er
 }
 
 // V1StatQueuesForEvent implements StatV1 method for processing an Event
-func (sS *StatService) V1GetStatQueuesForEvent(ev *utils.CGREvent, reply *StatQueues) (err error) {
+func (sS *StatService) V1GetStatQueuesForEvent(ev *utils.CGREvent, reply *[]string) (err error) {
 	if missing := utils.MissingStructFields(ev, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	var sQs StatQueues
-	if sQs, err = sS.matchingStatQueuesForEvent(ev); err == nil {
-		*reply = sQs
+	if sQs, err = sS.matchingStatQueuesForEvent(ev); err != nil {
+		return
+	} else {
+		ids := make([]string, len(sQs))
+		for i, sq := range sQs {
+			ids[i] = sq.ID
+		}
+		*reply = ids
 	}
 	return
 }
