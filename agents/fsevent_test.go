@@ -23,7 +23,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -554,24 +553,6 @@ func TestParseEventValue(t *testing.T) {
 	}
 	if parsed := ev.ParseEventValue(&utils.RSRField{Id: "Hangup-Cause"}, ""); parsed != "NORMAL_CLEARING" {
 		t.Error("Unexpected result parsed", parsed)
-	}
-}
-
-func TestFsEvAsCDR(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
-	config.SetCgrConfig(cfg)
-	ev := NewFSEvent(hangupEv)
-	setupTime, _ := utils.ParseTimeDetectLayout("1436280728", "")
-	aTime, _ := utils.ParseTimeDetectLayout("1436280728", "")
-	eStoredCdr := &engine.CDR{
-		ToR: utils.VOICE, OriginID: "e3133bf7-dcde-4daf-9663-9a79ffcef5ad",
-		OriginHost: "10.0.3.15", Source: "FS_CHANNEL_HANGUP_COMPLETE", RequestType: utils.META_PREPAID,
-		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001",
-		Destination: "1003", SetupTime: setupTime, AnswerTime: aTime,
-		Usage:       time.Duration(66) * time.Second,
-		ExtraFields: make(map[string]string), Cost: -1}
-	if storedCdr := ev.AsCDR(""); !reflect.DeepEqual(eStoredCdr, storedCdr) {
-		t.Errorf("Expecting: %+v, received: %+v", eStoredCdr, storedCdr)
 	}
 }
 

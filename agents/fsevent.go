@@ -25,7 +25,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
@@ -324,27 +323,6 @@ func (fsev FSEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) str
 	}
 }
 
-// AsCDR converts FSEvent into CDR
-func (fsev FSEvent) AsCDR(timezone string) *engine.CDR {
-	storCdr := new(engine.CDR)
-	storCdr.ToR = utils.VOICE
-	storCdr.OriginID = fsev.GetUUID()
-	storCdr.OriginHost = fsev.GetOriginatorIP(utils.META_DEFAULT)
-	storCdr.Source = "FS_" + fsev.GetName()
-	storCdr.RequestType = fsev.GetReqType(utils.META_DEFAULT)
-	storCdr.Tenant = fsev.GetTenant(utils.META_DEFAULT)
-	storCdr.Category = fsev.GetCategory(utils.META_DEFAULT)
-	storCdr.Account = fsev.GetAccount(utils.META_DEFAULT)
-	storCdr.Subject = fsev.GetSubject(utils.META_DEFAULT)
-	storCdr.Destination = fsev.GetDestination(utils.META_DEFAULT)
-	storCdr.SetupTime, _ = fsev.GetSetupTime(utils.META_DEFAULT, timezone)
-	storCdr.AnswerTime, _ = fsev.GetAnswerTime(utils.META_DEFAULT, timezone)
-	storCdr.Usage, _ = fsev.GetDuration(utils.META_DEFAULT)
-	storCdr.ExtraFields = fsev.GetExtraFields()
-	storCdr.Cost = -1
-	return storCdr
-}
-
 // AsCGREvent converts FSEvent into CGREvent
 func (fsev FSEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err error) {
 	sTime, err := fsev.GetSetupTime(utils.META_DEFAULT, timezone)
@@ -363,6 +341,9 @@ func (fsev FSEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err erro
 // Used with RLs
 func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]interface{} {
 	mp := make(map[string]interface{})
+	for fld, val := range fsev.GetExtraFields() {
+		mp[fld] = val
+	}
 	mp[utils.TOR] = utils.VOICE
 	mp[utils.OriginID] = fsev.GetUUID()
 	mp[utils.OriginHost] = fsev.GetOriginatorIP(utils.META_DEFAULT)
