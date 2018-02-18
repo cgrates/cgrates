@@ -278,6 +278,7 @@ const (
 	CGR_COMPUTELCR                = "cgr_computelcr"
 	CGR_SUPPLIERS                 = "cgr_suppliers"
 	CGRFlags                      = "cgr_flags"
+	CGRHost                       = "cgr_host"
 	KAM_FLATSTORE                 = "kamailio_flatstore"
 	OSIPS_FLATSTORE               = "opensips_flatstore"
 	MAX_DEBIT_CACHE_PREFIX        = "MAX_DEBIT_"

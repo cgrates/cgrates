@@ -41,6 +41,7 @@ const (
 	REQTYPE                  = "variable_" + utils.CGR_REQTYPE //prepaid or postpaid
 	CATEGORY                 = "variable_" + utils.CGR_CATEGORY
 	VAR_CGR_SUPPLIER         = "variable_" + utils.CGR_SUPPLIER
+	VarCGRHost               = "variable_" + utils.CGRHost
 	UUID                     = "Unique-ID" // -Unique ID for this call leg
 	CSTMID                   = "variable_" + utils.CGR_TENANT
 	CALL_DEST_NR             = "Caller-Destination-Number"
@@ -258,7 +259,7 @@ func (fsev FSEvent) GetOriginatorIP(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	return utils.FirstNonEmpty(fsev[fieldName], fsev[FS_IPv4])
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[VarCGRHost], fsev[FS_IPv4])
 }
 
 func (fsev FSEvent) GetExtraFields() map[string]string {

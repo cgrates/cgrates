@@ -139,7 +139,7 @@ func (fsCdr FSCdr) AsCDR(timezone string) *CDR {
 	storCdr.CGRID = fsCdr.getCGRID()
 	storCdr.ToR = utils.VOICE
 	storCdr.OriginID = fsCdr.vars[FS_UUID]
-	storCdr.OriginHost = fsCdr.vars[FS_IP]
+	storCdr.OriginHost = utils.FirstNonEmpty(fsCdr.vars[utils.CGRHost], fsCdr.vars[FS_IP])
 	storCdr.Source = FS_CDR_SOURCE
 	storCdr.RequestType = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_REQTYPE], fsCdr.cgrCfg.DefaultReqType)
 	storCdr.Tenant = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_TENANT], fsCdr.cgrCfg.DefaultTenant)
