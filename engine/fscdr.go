@@ -73,7 +73,8 @@ type FSCdr struct {
 }
 
 func (fsCdr FSCdr) getCGRID() string {
-	return utils.Sha1(fsCdr.vars[FS_UUID], fsCdr.vars[FsIPv4])
+	return utils.Sha1(fsCdr.vars[FS_UUID],
+		utils.FirstNonEmpty(fsCdr.vars[utils.CGRHost], fsCdr.vars[FS_IP]))
 }
 
 func (fsCdr FSCdr) getExtraFields() map[string]string {
