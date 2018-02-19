@@ -124,7 +124,7 @@ func TestFwvitRpcConn(t *testing.T) {
 func TestFwvitProcessFiles(t *testing.T) {
 	fileName := "test1.fwv"
 	if err := ioutil.WriteFile(path.Join("/tmp", fileName), []byte(FW_CDR_FILE1), 0644); err != nil {
-		t.Fatal(err.Error)
+		t.Fatal(err.Error())
 	}
 	if err := os.Rename(path.Join("/tmp", fileName), path.Join(fwvCdrcCfg.CdrInDir, fileName)); err != nil {
 		t.Fatal(err)

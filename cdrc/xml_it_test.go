@@ -94,7 +94,7 @@ func TestXmlITHandleCdr1File(t *testing.T) {
 	fileName := "file1.xml"
 	tmpFilePath := path.Join("/tmp", fileName)
 	if err := ioutil.WriteFile(tmpFilePath, []byte(cdrXmlBroadsoft), 0644); err != nil {
-		t.Fatal(err.Error)
+		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join(xmlPathIn1, fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
