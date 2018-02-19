@@ -160,7 +160,7 @@ func (sm *FSsessions) onChannelPark(fsev FSEvent, connId string) {
 	}
 	if authArgs.AuthorizeResources {
 		if _, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_setvar %s %s %s\n\n",
-			fsev.GetUUID(), CGRResourceAllocation, authReply.ResourceAllocation)); err != nil {
+			fsev.GetUUID(), CGRResourceAllocation, *authReply.ResourceAllocation)); err != nil {
 			utils.Logger.Info(
 				fmt.Sprintf("<%s> error %s setting channel variabile: %s",
 					utils.FreeSWITCHAgent, err.Error(), CGRResourceAllocation))

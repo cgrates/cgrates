@@ -503,7 +503,7 @@ func (self *CdrServer) replicateCDRs(cdrs []*CDR) (err error) {
 			continue
 		}
 		if err = cdre.ExportCDRs(); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<CDRS> Replicating CDR: %+v, got error: <%s>", err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<CDRS> Replicating CDR: %+v, got error: <%s>",cdrs, err.Error()))
 			continue
 		}
 	}

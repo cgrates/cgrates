@@ -69,18 +69,18 @@ func TestCGRReplyGetFieldAsString(t *testing.T) {
 	if strVal, err := cgrRply.GetFieldAsString("*cgrReply>Error", ">"); err != nil {
 		t.Error(err)
 	} else if strVal != "" {
-		t.Error("received: <%s>", strVal)
+		t.Errorf("received: <%s>", strVal)
 	}
 	eVal := "Val1"
 	if strVal, err := cgrRply.GetFieldAsString("*cgrReply>FirstLevel>SecondLevel>ThirdLevel>Fld1", ">"); err != nil {
 		t.Error(err)
 	} else if strVal != eVal {
-		t.Error("expecting: <%s> received: <%s>", eVal, strVal)
+		t.Errorf("expecting: <%s> received: <%s>", eVal, strVal)
 	}
 	eVal = "ValAnotherFirstLevel"
 	if strVal, err := cgrRply.GetFieldAsString("*cgrReply>AnotherFirstLevel", ">"); err != nil {
 		t.Error(err)
 	} else if strVal != eVal {
-		t.Error("expecting: <%s> received: <%s>", eVal, strVal)
+		t.Errorf("expecting: <%s> received: <%s>", eVal, strVal)
 	}
 }

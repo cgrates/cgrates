@@ -34,42 +34,42 @@ func TestReflectFieldAsStringOnStruct(t *testing.T) {
 	if strVal, err := ReflectFieldAsString(mystruct, "Title", "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if strVal != "Title1" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(mystruct, "Count", "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if strVal != "5" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(mystruct, "Count64", "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if strVal != "6" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(mystruct, "Val", "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if strVal != "7.3" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(mystruct, "a", "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if strVal != "Title2" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(mystruct, "b", "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if strVal != "15" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(mystruct, "c", "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if strVal != "16" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(mystruct, "d", "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if strVal != "17.3" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 }
 
@@ -79,42 +79,42 @@ func TestReflectFieldAsStringOnMap(t *testing.T) {
 	if strVal, err := ReflectFieldAsString(myMap, "Title", ""); err != nil {
 		t.Error(err)
 	} else if strVal != "Title1" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(myMap, "Count", ""); err != nil {
 		t.Error(err)
 	} else if strVal != "5" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(myMap, "Count64", ""); err != nil {
 		t.Error(err)
 	} else if strVal != "6" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(myMap, "Val", ""); err != nil {
 		t.Error(err)
 	} else if strVal != "7.3" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(myMap, "a", ""); err != nil {
 		t.Error(err)
 	} else if strVal != "Title2" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(myMap, "b", ""); err != nil {
 		t.Error(err)
 	} else if strVal != "15" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(myMap, "c", ""); err != nil {
 		t.Error(err)
 	} else if strVal != "16" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(myMap, "d", ""); err != nil {
 		t.Error(err)
 	} else if strVal != "17.3" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 }
 
