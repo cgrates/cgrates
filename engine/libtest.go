@@ -95,7 +95,7 @@ func StartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 		}
 	}
 	if !connected {
-		return nil, fmt.Errorf("engine did not open port <%d>", cfg.RPCJSONListen)
+		return nil, fmt.Errorf("engine did not open port <%s>", cfg.RPCJSONListen)
 	}
 	return engine, nil
 }

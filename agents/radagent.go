@@ -167,7 +167,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 		return false, err
 	}
 	if reqProcessor.DryRun {
-		utils.Logger.Info(fmt.Sprintf("<%s> DRY_RUN, CGREvent: %s", utils.ToJSON(cgrEv)))
+		utils.Logger.Info(fmt.Sprintf("<%s> DRY_RUN, CGREvent: %s",utils.RadiusAgent, utils.ToJSON(cgrEv)))
 	} else { // process with RPC
 		switch procVars[MetaRadReqType] {
 		case MetaRadAuth:
@@ -215,7 +215,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 		return false, err
 	}
 	if reqProcessor.DryRun {
-		utils.Logger.Info(fmt.Sprintf("<RadiusAgent> DRY_RUN, radius reply: %s", reply))
+		utils.Logger.Info(fmt.Sprintf("<RadiusAgent> DRY_RUN, radius reply: %+v", reply))
 	}
 	return true, nil
 }

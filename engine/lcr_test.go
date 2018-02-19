@@ -233,7 +233,7 @@ func TestLcrRequestAsCallDescriptor(t *testing.T) {
 	callDur := time.Duration(1) * time.Minute
 	lcrReq := &LcrRequest{Account: "2001", SetupTime: sTime.String()}
 	if _, err := lcrReq.AsCallDescriptor(""); err == nil || err != utils.ErrMandatoryIeMissing {
-		t.Error("Unexpected error received: %v", err)
+		t.Errorf("Unexpected error received: %v", err)
 	}
 	lcrReq = &LcrRequest{Account: "2001", Destination: "2002", SetupTime: sTime.String()}
 	eCd := &CallDescriptor{

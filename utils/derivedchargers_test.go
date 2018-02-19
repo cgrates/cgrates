@@ -66,7 +66,7 @@ func TestNewDerivedCharger(t *testing.T) {
 	}
 	if dc1, err := NewDerivedCharger("test1", "", "reqtype1", "direction1", "tenant1", "tor1", "account1", "subject1", "destination1",
 		"setuptime1", "pdd1", "answertime1", "duration1", "supplier1", "NORMAL_CLEARING", "rated1", "cost1"); err != nil {
-		t.Error("Unexpected error", err.Error)
+		t.Error("Unexpected error", err.Error())
 	} else if !reflect.DeepEqual(edc1, dc1) {
 		t.Errorf("Expecting: %v, received: %v", edc1, dc1)
 	}

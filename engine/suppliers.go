@@ -201,7 +201,7 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 		if maxDur, err := cd.GetMaxSessionDuration(); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> ignoring cost for account: %s, err: %s",
-					anctID, err.Error()))
+					utils.SupplierS,anctID, err.Error()))
 		} else if maxDur >= usage {
 			return map[string]interface{}{
 				utils.Cost:    0.0,
