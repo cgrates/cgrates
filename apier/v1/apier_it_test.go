@@ -1472,14 +1472,14 @@ func TestApierITSetDestination(t *testing.T) {
 	if err := rater.Call("ApierV1.GetDestination", attrs.Id, &rcvDestination); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if !reflect.DeepEqual(eDestination, rcvDestination) {
-		t.Error("Expecting: %+v, received: %+v", eDestination, rcvDestination)
+		t.Errorf("Expecting: %+v, received: %+v", eDestination, rcvDestination)
 	}
 	eRcvIDs := []string{attrs.Id}
 	var rcvIDs []string
 	if err := rater.Call("ApierV1.GetReverseDestination", attrs.Prefixes[0], &rcvIDs); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if !reflect.DeepEqual(eRcvIDs, rcvIDs) {
-		t.Error("Expecting: %+v, received: %+v", eRcvIDs, rcvIDs)
+		t.Errorf("Expecting: %+v, received: %+v", eRcvIDs, rcvIDs)
 	}
 }
 
