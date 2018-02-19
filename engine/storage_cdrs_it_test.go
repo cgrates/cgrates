@@ -677,7 +677,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{MaxCost: utils.Float64Pointer(0.0)}, false); err != nil {
 		return fmt.Errorf("testGetCDRs #68, err: %v", err)
 	} else if len(CDRs) != 5 {
-		return fmt.Errorf("testGetCDRs #69, unexpected number of CDRs returned: ", CDRs)
+		return fmt.Errorf("testGetCDRs #69, unexpected number of CDRs returned: %+v", CDRs)
 	} else {
 		for i, cdr := range CDRs {
 			if i == 0 {

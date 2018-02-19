@@ -115,7 +115,7 @@ func TestCsvITHandleCdr1File(t *testing.T) {
 	fileName := "file1.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
 	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent1), 0644); err != nil {
-		t.Fatal(err.Error)
+		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join("/tmp/cdrctests/csvit1/in", fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
@@ -127,7 +127,7 @@ func TestCsvITHandleCdr2File(t *testing.T) {
 	fileName := "file2.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
 	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent2), 0644); err != nil {
-		t.Fatal(err.Error)
+		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join("/tmp/cdrctests/csvit2/in", fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)

@@ -134,7 +134,7 @@ dbafe9c8614c785a65aabd116dd3959c3c56f7f7,default,*voice,dsafdsag,rated,*out,cgra
 	fileName := "file1.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
 	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent1), 0644); err != nil {
-		t.Fatal(err.Error)
+		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join("/tmp/cgrates/cdrc1/in", fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
@@ -149,7 +149,7 @@ func TestMCDRCHandleCdr2File(t *testing.T) {
 	fileName := "file2.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
 	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent), 0644); err != nil {
-		t.Fatal(err.Error)
+		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join("/tmp/cgrates/cdrc2/in", fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
@@ -163,7 +163,7 @@ func TestMCDRCHandleCdr3File(t *testing.T) {
 	fileName := "file3.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
 	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent), 0644); err != nil {
-		t.Fatal(err.Error)
+		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join("/tmp/cgrates/cdrc3/in", fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)

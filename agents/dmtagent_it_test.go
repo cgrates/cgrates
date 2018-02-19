@@ -486,7 +486,7 @@ func TestDmtAgentSendCCRSMS(t *testing.T) {
 			t.Errorf("Unexpected CDR Usage received, cdr: %+v ", cdrs[0])
 		}
 		if cdrs[0].Cost != 0.6 {
-			t.Errorf("Unexpected CDR Cost received, cdr: %+v ", cdrs[0])
+			t.Errorf("Unexpected CDR Cost received, cdr: %+v ", cdrs[0].Cost)
 		}
 	}
 }

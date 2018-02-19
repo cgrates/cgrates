@@ -215,7 +215,7 @@ func TestSMGDataLastUsedMultipleUpdates(t *testing.T) {
 	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", totalVal)
+		t.Errorf("Expected: %f, received: %f",eAcntVal, totalVal)
 	}
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
@@ -243,7 +243,7 @@ func TestSMGDataLastUsedMultipleUpdates(t *testing.T) {
 	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", totalVal)
+		t.Errorf("Expected: %f, received: %f",eAcntVal, totalVal)
 	}
 	aSessions := make([]*ActiveSession, 0)
 	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
@@ -278,13 +278,13 @@ func TestSMGDataLastUsedMultipleUpdates(t *testing.T) {
 	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", totalVal)
+		t.Errorf("Expected: %f, received: %f",eAcntVal, totalVal)
 	}
 	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 ||
 		aSessions[0].Usage != time.Duration(15360) {
-		t.Errorf("wrong active sessions: %f", aSessions[0].Usage)
+		t.Errorf("wrong active sessions: %v", aSessions[0].Usage)
 	}
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
@@ -312,7 +312,7 @@ func TestSMGDataLastUsedMultipleUpdates(t *testing.T) {
 	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", totalVal)
+		t.Errorf("Expected: %f, received: %f",eAcntVal, totalVal)
 	}
 	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
 		t.Error(err)
@@ -345,13 +345,13 @@ func TestSMGDataLastUsedMultipleUpdates(t *testing.T) {
 	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", totalVal)
+		t.Errorf("Expected: %f, received: %f",eAcntVal, totalVal)
 	}
 	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 ||
 		aSessions[0].Usage != time.Duration(14336) { // 14MB in use
-		t.Errorf("wrong active sessions: %f", aSessions[0].Usage)
+		t.Errorf("wrong active sessions: %v", aSessions[0].Usage)
 	}
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
@@ -376,7 +376,7 @@ func TestSMGDataLastUsedMultipleUpdates(t *testing.T) {
 	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", totalVal)
+		t.Errorf("Expected: %f, received: %f",eAcntVal, totalVal)
 	}
 	if err := smgRPC.Call("SMGenericV1.GetActiveSessions",
 		nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -421,7 +421,7 @@ func TestSMGDataTTLExpired(t *testing.T) {
 	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", totalVal)
+		t.Errorf("Expected: %f, received: %f",eAcntVal, totalVal)
 	}
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:      "TEST_EVENT",
@@ -480,7 +480,7 @@ func TestSMGDataTTLExpMultiUpdates(t *testing.T) {
 	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", totalVal)
+		t.Errorf("Expected: %f, received: %f",eAcntVal, totalVal)
 	}
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
@@ -578,7 +578,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", totalVal)
+		t.Errorf("Expected: %f, received: %f",eAcntVal, totalVal)
 	}
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
@@ -740,7 +740,7 @@ func TestSMGDataTTLUsageProtection(t *testing.T) {
 	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", totalVal)
+		t.Errorf("Expected: %f, received: %f",eAcntVal, totalVal)
 	}
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
