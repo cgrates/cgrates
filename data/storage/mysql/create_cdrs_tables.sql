@@ -38,7 +38,7 @@ CREATE TABLE sessions_costs (
   cgrid varchar(40) NOT NULL,
   run_id  varchar(64) NOT NULL,
   origin_host varchar(64) NOT NULL,
-  origin_id varchar(64) NOT NULL,
+  origin_id varchar(128) NOT NULL,
   cost_source varchar(64) NOT NULL,
   `usage` BIGINT NOT NULL,
   cost_details MEDIUMTEXT,

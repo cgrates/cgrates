@@ -41,7 +41,7 @@ CREATE TABLE sessions_costs (
   cgrid VARCHAR(40) NOT NULL,
   run_id  VARCHAR(64) NOT NULL,
   origin_host VARCHAR(64) NOT NULL,
-  origin_id VARCHAR(64) NOT NULL,
+  origin_id VARCHAR(128) NOT NULL,
   cost_source VARCHAR(64) NOT NULL,
   usage BIGINT NOT NULL,
   cost_details jsonb,
