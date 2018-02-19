@@ -73,7 +73,6 @@ type FSCdr struct {
 }
 
 func (fsCdr FSCdr) getCGRID() string {
-	fmt.Printf(utils.FirstNonEmpty(fsCdr.vars[utils.CGRHost], fsCdr.vars[FS_IP]))
 	return utils.Sha1(fsCdr.vars[FS_UUID],
 		utils.FirstNonEmpty(fsCdr.vars[utils.CGRHost], fsCdr.vars[FsIPv4]))
 }
