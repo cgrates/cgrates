@@ -289,6 +289,7 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, cdrstats, 
 			if ratedCDR.CostDetails != nil {
 				ratedCDR.CostDetails.UpdateCost()
 				ratedCDR.CostDetails.UpdateRatedUsage()
+				ratedCDR.CostDetails.Timespans.Compress()
 			}
 			if err := self.cdrDb.SetCDR(ratedCDR, true); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<CDRS> Storing rated CDR %+v, got error: %s", ratedCDR, err.Error()))
@@ -503,7 +504,7 @@ func (self *CdrServer) replicateCDRs(cdrs []*CDR) (err error) {
 			continue
 		}
 		if err = cdre.ExportCDRs(); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<CDRS> Replicating CDR: %+v, got error: <%s>",cdrs, err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<CDRS> Replicating CDR: %+v, got error: <%s>", cdrs, err.Error()))
 			continue
 		}
 	}
@@ -595,6 +596,7 @@ func (cdrs *CdrServer) V2StoreSMCost(args ArgsV2CDRSStoreSMCost, reply *string) 
 			utils.Logger.Err(fmt.Sprintf("<CDRS> RefundRounding for cc: %+v, got error: %s", cc, err.Error()))
 		}
 	}
+	cc.Timespans.Compress() // Compress increments before storing the cost
 	if err := cdrs.storeSMCost(&SMCost{
 		CGRID:       args.Cost.CGRID,
 		RunID:       args.Cost.RunID,
