@@ -1152,15 +1152,12 @@ func testMigratorSessionsCosts(t *testing.T) {
 			qry = fmt.Sprint("CREATE TABLE sm_costs (  id int(11) NOT NULL AUTO_INCREMENT,  cgrid varchar(40) NOT NULL,  run_id  varchar(64) NOT NULL,  origin_host varchar(64) NOT NULL,  origin_id varchar(128) NOT NULL,  cost_source varchar(64) NOT NULL,  `usage` BIGINT NOT NULL,  cost_details MEDIUMTEXT,  created_at TIMESTAMP NULL,deleted_at TIMESTAMP NULL,  PRIMARY KEY (`id`),UNIQUE KEY costid (cgrid, run_id),KEY origin_idx (origin_host, origin_id),KEY run_origin_idx (run_id, origin_id),KEY deleted_at_idx (deleted_at));")
 		}
 		if _, err := mig.OutStorDB().(*engine.SQLStorage).Db.Exec("DROP TABLE IF EXISTS sessions_costs;"); err != nil {
-			fmt.Printf("Eroare in test : %+v", err)
 			t.Error(err)
 		}
 		if _, err := mig.OutStorDB().(*engine.SQLStorage).Db.Exec("DROP TABLE IF EXISTS sm_costs;"); err != nil {
-			fmt.Printf("Eroare in test : %+v", err)
 			t.Error(err)
 		}
 		if _, err := mig.OutStorDB().(*engine.SQLStorage).Db.Exec(qry); err != nil {
-			fmt.Printf("Eroare in test : %+v", err)
 			t.Error(err)
 		}
 		err, _ = mig.Migrate([]string{utils.MetaSessionsCosts})
