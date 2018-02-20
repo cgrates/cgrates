@@ -18,6 +18,7 @@ package migrator
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"path"
 	"reflect"
@@ -30,6 +31,7 @@ import (
 )
 
 var (
+	isPostgres      bool
 	path_in         string
 	path_out        string
 	cfg_in          *config.CGRConfig
@@ -134,6 +136,7 @@ func TestMigratorITPostgresConnect(t *testing.T) {
 
 func TestMigratorITPostgres(t *testing.T) {
 	action = utils.REDIS
+	isPostgres = true
 	for _, stest := range sTestsITMigrator {
 		t.Run("TestITMigratorOnPostgres", stest)
 	}
@@ -181,6 +184,7 @@ func TestMigratorITRedisConnect(t *testing.T) {
 
 func TestMigratorITRedis(t *testing.T) {
 	action = utils.REDIS
+	isPostgres = false
 	for _, stest := range sTestsITMigrator {
 		t.Run("TestITMigratorOnRedis", stest)
 	}
@@ -1115,27 +1119,51 @@ func testMigratorStats(t *testing.T) {
 
 func testMigratorSessionsCosts(t *testing.T) {
 	switch action {
-	case Move:
+	case utils.REDIS:
 		currentVersion := engine.CurrentStorDBVersions()
 		currentVersion[utils.SessionsCosts] = 1
 		err := mig.OutStorDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for SessionsCosts ", err.Error())
 		}
-		err, _ = mig.Migrate([]string{utils.MetaSessionsCosts})
-		if err.Error() != "Wrong version. Please use <cgr-migrator -migrate=*set_versions>" {
-			t.Error("Expecting error , received: %+v ", err)
-		}
 		if vrs, err := mig.OutStorDB().GetVersions(utils.SessionsCosts); err != nil {
 			t.Error(err)
 		} else if vrs[utils.SessionsCosts] != 1 {
 			t.Errorf("Expecting: 1, received: %+v", vrs[utils.SessionsCosts])
 		}
-		currentVersion = engine.CurrentStorDBVersions()
-		err = mig.OutStorDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for SessionsCosts ", err.Error())
+		var qry string
+		if isPostgres {
+			qry = `
+	CREATE TABLE sm_costs (
+	  id SERIAL PRIMARY KEY,
+	  cgrid VARCHAR(40) NOT NULL,
+	  run_id  VARCHAR(64) NOT NULL,
+	  origin_host VARCHAR(64) NOT NULL,
+	  origin_id VARCHAR(128) NOT NULL,
+	  cost_source VARCHAR(64) NOT NULL,
+	  usage BIGINT NOT NULL,
+	  cost_details jsonb,
+	  created_at TIMESTAMP WITH TIME ZONE,
+	  deleted_at TIMESTAMP WITH TIME ZONE NULL,
+	  UNIQUE (cgrid, run_id)
+	);
+		`
+		} else {
+			qry = fmt.Sprint("CREATE TABLE sm_costs (  id int(11) NOT NULL AUTO_INCREMENT,  cgrid varchar(40) NOT NULL,  run_id  varchar(64) NOT NULL,  origin_host varchar(64) NOT NULL,  origin_id varchar(128) NOT NULL,  cost_source varchar(64) NOT NULL,  `usage` BIGINT NOT NULL,  cost_details MEDIUMTEXT,  created_at TIMESTAMP NULL,deleted_at TIMESTAMP NULL,  PRIMARY KEY (`id`),UNIQUE KEY costid (cgrid, run_id),KEY origin_idx (origin_host, origin_id),KEY run_origin_idx (run_id, origin_id),KEY deleted_at_idx (deleted_at));")
 		}
+		if _, err := mig.OutStorDB().(*engine.SQLStorage).Db.Exec("DROP TABLE IF EXISTS sessions_costs;"); err != nil {
+			fmt.Printf("Eroare in test : %+v", err)
+			t.Error(err)
+		}
+		if _, err := mig.OutStorDB().(*engine.SQLStorage).Db.Exec("DROP TABLE IF EXISTS sm_costs;"); err != nil {
+			fmt.Printf("Eroare in test : %+v", err)
+			t.Error(err)
+		}
+		if _, err := mig.OutStorDB().(*engine.SQLStorage).Db.Exec(qry); err != nil {
+			fmt.Printf("Eroare in test : %+v", err)
+			t.Error(err)
+		}
+		err, _ = mig.Migrate([]string{utils.MetaSessionsCosts})
 		if vrs, err := mig.OutStorDB().GetVersions(utils.SessionsCosts); err != nil {
 			t.Error(err)
 		} else if vrs[utils.SessionsCosts] != 2 {
