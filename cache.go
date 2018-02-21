@@ -20,23 +20,21 @@ const (
 	DisabledCaching  = 0
 )
 
-// A key may be any value that is comparable. See http://golang.org/ref/spec#Comparison_operators
-type key interface{}
-
 type cachedItem struct {
-	key        key
+	itemID     string
 	value      interface{}
 	expiryTime time.Time
+	groupIDs   []string // list of group this item belongs to
 }
 
 // Cache is an LRU/TTL cache. It is safe for concurrent access.
 type Cache struct {
-	// simple locking for now, ToDo: try locking per key
 	sync.RWMutex
 	// cache holds the items
-	cache map[key]*cachedItem
+	cache  map[string]*cachedItem
+	groups map[string]map[string]struct{} // map[groupID]map[itemKey]struct{}
 	// onEvicted will execute specific function if defined when an item will be removed
-	onEvicted func(k key, value interface{})
+	onEvicted func(itmID string, value interface{})
 	// maxEntries represents maximum number of entries allowed by LRU cache mechanism
 	// -1 for unlimited caching, 0 for disabling caching
 	maxEntries int
@@ -46,24 +44,25 @@ type Cache struct {
 	staticTTL bool
 
 	lruIdx  *list.List
-	lruRefs map[key]*list.Element // index the list element based on it's key in cache
+	lruRefs map[string]*list.Element // index the list element based on it's key in cache
 	ttlIdx  *list.List
-	ttlRefs map[key]*list.Element // index the list element based on it' key in cache
+	ttlRefs map[string]*list.Element // index the list element based on it' key in cache
 }
 
 // New initializes a new cache.
 func New(maxEntries int, ttl time.Duration, staticTTL bool,
-	onEvicted func(k key, value interface{})) (c *Cache) {
+	onEvicted func(itmID string, value interface{})) (c *Cache) {
 	c = &Cache{
-		cache:      make(map[key]*cachedItem),
+		cache:      make(map[string]*cachedItem),
+		groups:     make(map[string]map[string]struct{}),
 		onEvicted:  onEvicted,
 		maxEntries: maxEntries,
 		ttl:        ttl,
 		staticTTL:  staticTTL,
 		lruIdx:     list.New(),
-		lruRefs:    make(map[key]*list.Element),
+		lruRefs:    make(map[string]*list.Element),
 		ttlIdx:     list.New(),
-		ttlRefs:    make(map[key]*list.Element),
+		ttlRefs:    make(map[string]*list.Element),
 	}
 	if c.ttl > 0 {
 		go c.cleanExpired()
@@ -71,52 +70,56 @@ func New(maxEntries int, ttl time.Duration, staticTTL bool,
 	return
 }
 
-// Get looks up a key's value from the cache.
-func (c *Cache) Get(k key) (value interface{}, ok bool) {
+// Get looks up a key's value from the cache
+func (c *Cache) Get(itmID string) (value interface{}, ok bool) {
 	c.Lock()
 	defer c.Unlock()
-	ci, has := c.cache[k]
+	ci, has := c.cache[itmID]
 	if !has {
 		return
 	}
 	value, ok = ci.value, true
 	if c.maxEntries != UnlimitedCaching { // update lru indexes
-		c.lruIdx.MoveToFront(c.lruRefs[k])
+		c.lruIdx.MoveToFront(c.lruRefs[itmID])
 	}
 	if c.ttl > 0 && !c.staticTTL { // update ttl indexes
 		ci.expiryTime = time.Now().Add(c.ttl)
-		c.ttlIdx.MoveToFront(c.ttlRefs[k])
+		c.ttlIdx.MoveToFront(c.ttlRefs[itmID])
 	}
 	return
 }
 
 // Set sets/adds a value to the cache.
-func (c *Cache) Set(k key, value interface{}) {
+func (c *Cache) Set(itmID string, value interface{}, grpIDs []string) {
 	if c.maxEntries == DisabledCaching {
 		return
 	}
 	c.Lock()
 	defer c.Unlock()
 	now := time.Now()
-	if ci, ok := c.cache[k]; ok {
+	if ci, ok := c.cache[itmID]; ok {
 		ci.value = value
+		c.remItemFromGroups(itmID, ci.groupIDs)
+		ci.groupIDs = grpIDs
+		c.addItemToGroups(itmID, grpIDs)
 		if c.maxEntries != UnlimitedCaching { // update lru indexes
-			c.lruIdx.MoveToFront(c.lruRefs[k])
+			c.lruIdx.MoveToFront(c.lruRefs[itmID])
 		}
 		if c.ttl > 0 && !c.staticTTL { // update ttl indexes
 			ci.expiryTime = now.Add(c.ttl)
-			c.ttlIdx.MoveToFront(c.ttlRefs[k])
+			c.ttlIdx.MoveToFront(c.ttlRefs[itmID])
 		}
 		return
 	}
-	ci := &cachedItem{key: k, value: value}
-	c.cache[k] = ci
+	ci := &cachedItem{itemID: itmID, value: value, groupIDs: grpIDs}
+	c.cache[itmID] = ci
+	c.addItemToGroups(itmID, grpIDs)
 	if c.maxEntries != UnlimitedCaching {
-		c.lruRefs[k] = c.lruIdx.PushFront(ci)
+		c.lruRefs[itmID] = c.lruIdx.PushFront(ci)
 	}
 	if c.ttl > 0 {
 		ci.expiryTime = now.Add(c.ttl)
-		c.ttlRefs[k] = c.ttlIdx.PushFront(ci)
+		c.ttlRefs[itmID] = c.ttlIdx.PushFront(ci)
 	}
 	if c.maxEntries != UnlimitedCaching {
 		var lElm *list.Element
@@ -124,48 +127,64 @@ func (c *Cache) Set(k key, value interface{}) {
 			lElm = c.lruIdx.Back()
 		}
 		if lElm != nil {
-			c.removeKey(lElm.Value.(*cachedItem).key)
+			c.removeItem(lElm.Value.(*cachedItem).itemID)
 		}
 	}
 }
 
 // Remove removes the provided key from the cache.
-func (c *Cache) Remove(k key) {
+func (c *Cache) Remove(itmID string) {
 	c.Lock()
-	defer c.Unlock()
-	c.removeKey(k)
+	c.removeItem(itmID)
+	c.Unlock()
 }
 
-// Keys returns a slice with all keys in the cache
-func (c *Cache) Keys() (ks []key) {
+// Items returns a slice with all keys in the cache
+func (c *Cache) Items() (itmIDs []string) {
 	c.RLock()
-	ks = make([]key, len(c.cache))
+	itmIDs = make([]string, len(c.cache))
 	i := 0
-	for k := range c.cache {
-		ks[i] = k
+	for itmID := range c.cache {
+		itmIDs[i] = itmID
 		i++
 	}
 	c.RUnlock()
 	return
 }
 
+// GroupLength returns the length of a group
+func (c *Cache) GroupLength(grpID string) int {
+	c.RLock()
+	defer c.RUnlock()
+	return len(c.groups[grpID])
+}
+
+func (c *Cache) RemoveGroup(grpID string) {
+	c.Lock()
+	for itmID := range c.groups[grpID] {
+		c.removeItem(itmID)
+	}
+	c.Unlock()
+}
+
 // removeElement completely removes an Element from the cache
-func (c *Cache) removeKey(k key) {
-	ci, has := c.cache[k]
+func (c *Cache) removeItem(itmID string) {
+	ci, has := c.cache[itmID]
 	if !has {
 		return
 	}
 	if c.maxEntries != UnlimitedCaching {
-		c.lruIdx.Remove(c.lruRefs[k])
-		delete(c.lruRefs, k)
+		c.lruIdx.Remove(c.lruRefs[itmID])
+		delete(c.lruRefs, itmID)
 	}
 	if c.ttl > 0 {
-		c.ttlIdx.Remove(c.ttlRefs[k])
-		delete(c.ttlRefs, k)
+		c.ttlIdx.Remove(c.ttlRefs[itmID])
+		delete(c.ttlRefs, itmID)
 	}
-	delete(c.cache, ci.key)
+	c.remItemFromGroups(ci.itemID, ci.groupIDs)
+	delete(c.cache, ci.itemID)
 	if c.onEvicted != nil {
-		c.onEvicted(ci.key, ci.value)
+		c.onEvicted(ci.itemID, ci.value)
 	}
 }
 
@@ -185,8 +204,28 @@ func (c *Cache) cleanExpired() {
 			time.Sleep(ci.expiryTime.Sub(now))
 			continue
 		}
-		c.removeKey(ci.key)
+		c.removeItem(ci.itemID)
 		c.Unlock()
+	}
+}
+
+// addItemToGroups adds and item to a group
+func (c *Cache) addItemToGroups(itmKey string, groupIDs []string) {
+	for _, grpID := range groupIDs {
+		if _, has := c.groups[grpID]; !has {
+			c.groups[grpID] = make(map[string]struct{})
+		}
+		c.groups[grpID][itmKey] = struct{}{}
+	}
+}
+
+// remItemFromGroups removes an item with itemKey from groups
+func (c *Cache) remItemFromGroups(itmKey string, groupIDs []string) {
+	for _, grpID := range groupIDs {
+		delete(c.groups[grpID], itmKey)
+		if len(c.groups[grpID]) == 0 {
+			delete(c.groups, grpID)
+		}
 	}
 }
 
@@ -203,12 +242,13 @@ func (c *Cache) Clear() {
 	defer c.Unlock()
 	if c.onEvicted != nil {
 		for _, ci := range c.cache {
-			c.onEvicted(ci.key, ci.value)
+			c.onEvicted(ci.itemID, ci.value)
 		}
 	}
-	c.cache = make(map[key]*cachedItem)
+	c.cache = make(map[string]*cachedItem)
+	c.groups = make(map[string]map[string]struct{})
 	c.lruIdx = c.lruIdx.Init()
-	c.lruRefs = make(map[key]*list.Element)
+	c.lruRefs = make(map[string]*list.Element)
 	c.ttlIdx = c.ttlIdx.Init()
-	c.ttlRefs = make(map[key]*list.Element)
+	c.ttlRefs = make(map[string]*list.Element)
 }
