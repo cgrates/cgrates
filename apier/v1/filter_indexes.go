@@ -25,6 +25,195 @@ import (
 	"strings"
 )
 
+type AttrGetFilterIndexes struct {
+	Tenant      string
+	Context     string
+	ItemType    string
+	FilterType  string
+	FilterField string
+	FilterValue string
+	utils.Paginator
+}
+
+func (self *ApierV1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string) (err error) {
+	var indexes map[string]utils.StringMap
+	var indexedslice []string
+	indexesFilter := make(map[string]utils.StringMap)
+	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ItemType"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	key := arg.Tenant
+	switch arg.ItemType {
+	case utils.MetaThresholds:
+		arg.ItemType = utils.ThresholdProfilePrefix
+	case utils.MetaSuppliers:
+		arg.ItemType = utils.SupplierProfilePrefix
+	case utils.MetaStats:
+		arg.ItemType = utils.StatQueueProfilePrefix
+	case utils.MetaResources:
+		arg.ItemType = utils.ResourceProfilesPrefix
+	case utils.MetaAttributes:
+		if missing := utils.MissingStructFields(&arg, []string{"Context"}); len(missing) != 0 { //Params missing
+			return utils.NewErrMandatoryIeMissing(missing...)
+		}
+		arg.ItemType = utils.AttributeProfilePrefix
+		key = utils.ConcatenatedKey(arg.Tenant, arg.Context)
+	}
+	if indexes, err = self.DataManager.GetFilterIndexes(engine.GetDBIndexKey(arg.ItemType, key, false),
+		"", nil); err != nil {
+		return err
+	}
+	if arg.FilterType != "" {
+		for val, strmap := range indexes {
+			if strings.HasPrefix(val, arg.FilterType) {
+				indexesFilter[val] = make(utils.StringMap)
+				indexesFilter[val] = strmap
+				for _, value := range strmap.Slice() {
+					indexedslice = append(indexedslice, utils.ConcatenatedKey(val, value))
+				}
+			}
+		}
+		if len(indexedslice) == 0 {
+			return utils.ErrNotFound
+		}
+	}
+	if arg.FilterField != "" {
+		if len(indexedslice) == 0 {
+			indexesFilter = make(map[string]utils.StringMap)
+			for val, strmap := range indexes {
+				if strings.Index(val, arg.FilterField) != -1 {
+					indexesFilter[val] = make(utils.StringMap)
+					indexesFilter[val] = strmap
+					for _, value := range strmap.Slice() {
+						indexedslice = append(indexedslice, utils.ConcatenatedKey(val, value))
+					}
+				}
+			}
+			if len(indexedslice) == 0 {
+				return utils.ErrNotFound
+			}
+		} else {
+			cloneIndexSlice := []string{}
+			for val, strmap := range indexesFilter {
+				if strings.Index(val, arg.FilterField) != -1 {
+					for _, value := range strmap.Slice() {
+						cloneIndexSlice = append(cloneIndexSlice, utils.ConcatenatedKey(val, value))
+					}
+				}
+			}
+			if len(cloneIndexSlice) == 0 {
+				return utils.ErrNotFound
+			}
+			indexedslice = cloneIndexSlice
+		}
+	}
+	if arg.FilterValue != "" {
+		if len(indexedslice) == 0 {
+			for val, strmap := range indexes {
+				if strings.Index(val, arg.FilterValue) != -1 {
+					for _, value := range strmap.Slice() {
+						indexedslice = append(indexedslice, utils.ConcatenatedKey(val, value))
+					}
+				}
+			}
+			if len(indexedslice) == 0 {
+				return utils.ErrNotFound
+			}
+		} else {
+			cloneIndexSlice := []string{}
+			for val, strmap := range indexesFilter {
+				if strings.Index(val, arg.FilterValue) != -1 {
+					for _, value := range strmap.Slice() {
+						cloneIndexSlice = append(cloneIndexSlice, utils.ConcatenatedKey(val, value))
+					}
+				}
+			}
+			if len(cloneIndexSlice) == 0 {
+				return utils.ErrNotFound
+			}
+			indexedslice = cloneIndexSlice
+		}
+	}
+	if len(indexedslice) == 0 {
+		for val, strmap := range indexes {
+			for _, value := range strmap.Slice() {
+				indexedslice = append(indexedslice, utils.ConcatenatedKey(val, value))
+			}
+		}
+	}
+	if arg.Paginator.Limit != nil || arg.Paginator.Offset != nil || arg.Paginator.SearchTerm != "" {
+		*reply = arg.Paginator.PaginateStringSlice(indexedslice)
+	} else {
+		*reply = indexedslice
+	}
+	return nil
+}
+
+type AttrGetFilterReverseIndexes struct {
+	Tenant      string
+	Context     string
+	ItemType    string
+	ItemIDs     []string
+	FilterType  string
+	FilterField string
+	FilterValue string
+	utils.Paginator
+}
+
+func (self *ApierV1) GetFilterReverseIndexes(arg AttrGetFilterReverseIndexes, reply *[]string) (err error) {
+	var indexes map[string]utils.StringMap
+	var indexedslice []string
+	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ItemType"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	key := arg.Tenant
+	switch arg.ItemType {
+	case utils.MetaThresholds:
+		arg.ItemType = utils.ThresholdProfilePrefix
+	case utils.MetaSuppliers:
+		arg.ItemType = utils.SupplierProfilePrefix
+	case utils.MetaStats:
+		arg.ItemType = utils.StatQueueProfilePrefix
+	case utils.MetaResources:
+		arg.ItemType = utils.ResourceProfilesPrefix
+	case utils.MetaAttributes:
+		if missing := utils.MissingStructFields(&arg, []string{"Context"}); len(missing) != 0 { //Params missing
+			return utils.NewErrMandatoryIeMissing(missing...)
+		}
+		arg.ItemType = utils.AttributeProfilePrefix
+		key = utils.ConcatenatedKey(arg.Tenant, arg.Context)
+	}
+	if arg.ItemIDs != nil {
+		for _, itemID := range arg.ItemIDs {
+			indexes, err = self.DataManager.GetFilterReverseIndexes(engine.GetDBIndexKey(arg.ItemType, key, true), map[string]string{itemID: ""})
+			if err != nil {
+				return err
+			}
+			for val, strmap := range indexes {
+				for _, value := range strmap.Slice() {
+					indexedslice = append(indexedslice, utils.ConcatenatedKey(val, value))
+				}
+			}
+		}
+	} else {
+		indexes, err = self.DataManager.GetFilterReverseIndexes(engine.GetDBIndexKey(arg.ItemType, key, true), nil)
+		if err != nil {
+			return err
+		}
+		for val, strmap := range indexes {
+			for _, value := range strmap.Slice() {
+				indexedslice = append(indexedslice, utils.ConcatenatedKey(val, value))
+			}
+		}
+	}
+	if arg.Paginator.Limit != nil || arg.Paginator.Offset != nil || arg.Paginator.SearchTerm != "" {
+		*reply = arg.Paginator.PaginateStringSlice(indexedslice)
+	} else {
+		*reply = indexedslice
+	}
+	return nil
+}
+
 func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, reply *string) error {
 	//ThresholdProfile Indexes
 	if err := self.computeThresholdIndexes(args.Tenant, args.ThresholdIDs); err != nil {
