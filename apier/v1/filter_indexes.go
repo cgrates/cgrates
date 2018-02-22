@@ -150,13 +150,10 @@ func (self *ApierV1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string)
 }
 
 type AttrGetFilterReverseIndexes struct {
-	Tenant      string
-	Context     string
-	ItemType    string
-	ItemIDs     []string
-	FilterType  string
-	FilterField string
-	FilterValue string
+	Tenant   string
+	Context  string
+	ItemType string
+	ItemIDs  []string
 	utils.Paginator
 }
 
