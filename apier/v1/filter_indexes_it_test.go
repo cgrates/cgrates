@@ -80,6 +80,13 @@ var sTestsFilterIndexesSV1 = []func(t *testing.T){
 	testV1FIdxSecondComputeAttributeProfileIndexes,
 	testV1FIdxRemoveAttributeProfile,
 
+	testFlush,
+	testV1FIdxPopulateDatabase,
+	testV1FIdxGetFilterIndexes1,
+	testV1FIdxGetFilterIndexes2,
+	testV1FIdxGetFilterIndexes3,
+	testV1FIdxGetFilterIndexes4,
+
 	testV1FIdxStopEngine,
 }
 
@@ -1520,6 +1527,165 @@ func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 	if _, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, tenant, true),
 		nil); err != nil && err != utils.ErrNotFound {
 		t.Error(err)
+	}
+}
+
+func testV1FIdxPopulateDatabase(t *testing.T) {
+	var result string
+	resPrf := &engine.ResourceProfile{
+		Tenant: "cgrates.org",
+		ID:     "ResProfile1",
+		FilterIDs: []string{"*string:Account:1001",
+			"*string:Destination:1001",
+			"*string:Destination:2001",
+			"*string:Account:1002",
+			"*prefix:Account:10",
+			"*string:Destination:1001",
+			"*prefix:Destination:20",
+			"*string:Account:1002"},
+	}
+	if err := tFIdxRpc.Call("ApierV1.SetResourceProfile", resPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	resPrf = &engine.ResourceProfile{
+		Tenant: "cgrates.org",
+		ID:     "ResProfile2",
+		FilterIDs: []string{"*string:Account:1001",
+			"*string:Destination:1001",
+			"*string:Destination:2001",
+			"*string:Account:2002",
+			"*prefix:Account:10",
+			"*string:Destination:2001",
+			"*prefix:Destination:20",
+			"*string:Account:1002"},
+	}
+	if err := tFIdxRpc.Call("ApierV1.SetResourceProfile", resPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	resPrf = &engine.ResourceProfile{
+		Tenant: "cgrates.org",
+		ID:     "ResProfile3",
+		FilterIDs: []string{"*string:Account:3001",
+			"*string:Destination:1001",
+			"*string:Destination:2001",
+			"*string:Account:1002",
+			"*prefix:Account:10",
+			"*prefix:Destination:1001",
+			"*prefix:Destination:200",
+			"*string:Account:1003"},
+	}
+	if err := tFIdxRpc.Call("ApierV1.SetResourceProfile", resPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+}
+
+func testV1FIdxGetFilterIndexes1(t *testing.T) {
+	arg := &AttrGetFilterIndexes{
+		Tenant:   "cgrates.org",
+		ItemType: "*resources",
+	}
+	expectedIndexes := []string{
+		"*string:Account:1003:ResProfile3",
+		"*string:Account:3001:ResProfile3",
+		"*prefix:Destination:200:ResProfile3",
+		"*string:Destination:1001:ResProfile1",
+		"*string:Destination:1001:ResProfile2",
+		"*string:Destination:1001:ResProfile3",
+		"*string:Account:1002:ResProfile1",
+		"*string:Account:1002:ResProfile2",
+		"*string:Account:1002:ResProfile3",
+		"*string:Account:1001:ResProfile1",
+		"*string:Account:1001:ResProfile2",
+		"*string:Destination:2001:ResProfile3",
+		"*string:Destination:2001:ResProfile1",
+		"*string:Destination:2001:ResProfile2",
+		"*prefix:Destination:1001:ResProfile3",
+		"*string:Account:2002:ResProfile2",
+		"*prefix:Account:10:ResProfile3",
+		"*prefix:Destination:20:ResProfile2"}
+	reply := []string{}
+	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", arg, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(len(expectedIndexes), len(reply)) {
+		t.Errorf("Expecting: %+v, received: %+v", len(expectedIndexes), len(reply))
+	}
+}
+
+func testV1FIdxGetFilterIndexes2(t *testing.T) {
+	arg := &AttrGetFilterIndexes{
+		Tenant:     "cgrates.org",
+		ItemType:   "*resources",
+		FilterType: "*string",
+	}
+	expectedIndexes := []string{
+		"*string:Account:1003:ResProfile3",
+		"*string:Account:3001:ResProfile3",
+		"*string:Destination:1001:ResProfile1",
+		"*string:Destination:1001:ResProfile2",
+		"*string:Destination:1001:ResProfile3",
+		"*string:Account:1002:ResProfile1",
+		"*string:Account:1002:ResProfile2",
+		"*string:Account:1002:ResProfile3",
+		"*string:Account:1001:ResProfile1",
+		"*string:Account:1001:ResProfile2",
+		"*string:Destination:2001:ResProfile3",
+		"*string:Destination:2001:ResProfile1",
+		"*string:Destination:2001:ResProfile2",
+		"*string:Account:2002:ResProfile2"}
+	reply := []string{}
+	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", arg, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(len(expectedIndexes), len(reply)) {
+		t.Errorf("Expecting: %+v, received: %+v", len(expectedIndexes), len(reply))
+	}
+}
+
+func testV1FIdxGetFilterIndexes3(t *testing.T) {
+	arg := &AttrGetFilterIndexes{
+		Tenant:     "cgrates.org",
+		ItemType:   "*resources",
+		FilterType: "*prefix",
+	}
+	expectedIndexes := []string{
+		"*prefix:Destination:200:ResProfile3",
+		"*prefix:Destination:1001:ResProfile3",
+		"*prefix:Account:10:ResProfile3",
+		"*prefix:Destination:20:ResProfile2"}
+	reply := []string{}
+	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", arg, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(len(expectedIndexes), len(reply)) {
+		t.Errorf("Expecting: %+v, received: %+v", len(expectedIndexes), len(reply))
+	}
+}
+
+func testV1FIdxGetFilterIndexes4(t *testing.T) {
+	arg := &AttrGetFilterIndexes{
+		Tenant:      "cgrates.org",
+		ItemType:    "*resources",
+		FilterType:  "*string",
+		FilterField: "Account",
+	}
+	expectedIndexes := []string{
+		"*string:Account:1003:ResProfile3",
+		"*string:Account:3001:ResProfile3",
+		"*string:Account:1002:ResProfile1",
+		"*string:Account:1002:ResProfile2",
+		"*string:Account:1002:ResProfile3",
+		"*string:Account:1001:ResProfile1",
+		"*string:Account:1001:ResProfile2",
+		"*string:Account:2002:ResProfile2"}
+	reply := []string{}
+	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", arg, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(len(expectedIndexes), len(reply)) {
+		t.Errorf("Expecting: %+v, received: %+v", len(expectedIndexes), len(reply))
 	}
 }
 
