@@ -37,7 +37,7 @@ type AttrGetFilterIndexes struct {
 
 func (self *ApierV1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string) (err error) {
 	var indexes map[string]utils.StringMap
-	var indexedslice []string
+	var indexedSlice []string
 	indexesFilter := make(map[string]utils.StringMap)
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ItemType"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -69,31 +69,31 @@ func (self *ApierV1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string)
 				indexesFilter[val] = make(utils.StringMap)
 				indexesFilter[val] = strmap
 				for _, value := range strmap.Slice() {
-					indexedslice = append(indexedslice, utils.ConcatenatedKey(val, value))
+					indexedSlice = append(indexedSlice, utils.ConcatenatedKey(val, value))
 				}
 			}
 		}
-		if len(indexedslice) == 0 {
+		if len(indexedSlice) == 0 {
 			return utils.ErrNotFound
 		}
 	}
 	if arg.FilterField != "" {
-		if len(indexedslice) == 0 {
+		if len(indexedSlice) == 0 {
 			indexesFilter = make(map[string]utils.StringMap)
 			for val, strmap := range indexes {
 				if strings.Index(val, arg.FilterField) != -1 {
 					indexesFilter[val] = make(utils.StringMap)
 					indexesFilter[val] = strmap
 					for _, value := range strmap.Slice() {
-						indexedslice = append(indexedslice, utils.ConcatenatedKey(val, value))
+						indexedSlice = append(indexedSlice, utils.ConcatenatedKey(val, value))
 					}
 				}
 			}
-			if len(indexedslice) == 0 {
+			if len(indexedSlice) == 0 {
 				return utils.ErrNotFound
 			}
 		} else {
-			cloneIndexSlice := []string{}
+			var cloneIndexSlice []string
 			for val, strmap := range indexesFilter {
 				if strings.Index(val, arg.FilterField) != -1 {
 					for _, value := range strmap.Slice() {
@@ -104,23 +104,23 @@ func (self *ApierV1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string)
 			if len(cloneIndexSlice) == 0 {
 				return utils.ErrNotFound
 			}
-			indexedslice = cloneIndexSlice
+			indexedSlice = cloneIndexSlice
 		}
 	}
 	if arg.FilterValue != "" {
-		if len(indexedslice) == 0 {
+		if len(indexedSlice) == 0 {
 			for val, strmap := range indexes {
 				if strings.Index(val, arg.FilterValue) != -1 {
 					for _, value := range strmap.Slice() {
-						indexedslice = append(indexedslice, utils.ConcatenatedKey(val, value))
+						indexedSlice = append(indexedSlice, utils.ConcatenatedKey(val, value))
 					}
 				}
 			}
-			if len(indexedslice) == 0 {
+			if len(indexedSlice) == 0 {
 				return utils.ErrNotFound
 			}
 		} else {
-			cloneIndexSlice := []string{}
+			var cloneIndexSlice []string
 			for val, strmap := range indexesFilter {
 				if strings.Index(val, arg.FilterValue) != -1 {
 					for _, value := range strmap.Slice() {
@@ -131,35 +131,39 @@ func (self *ApierV1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string)
 			if len(cloneIndexSlice) == 0 {
 				return utils.ErrNotFound
 			}
-			indexedslice = cloneIndexSlice
+			indexedSlice = cloneIndexSlice
 		}
 	}
-	if len(indexedslice) == 0 {
+	if len(indexedSlice) == 0 {
 		for val, strmap := range indexes {
 			for _, value := range strmap.Slice() {
-				indexedslice = append(indexedslice, utils.ConcatenatedKey(val, value))
+				indexedSlice = append(indexedSlice, utils.ConcatenatedKey(val, value))
 			}
 		}
 	}
 	if arg.Paginator.Limit != nil || arg.Paginator.Offset != nil || arg.Paginator.SearchTerm != "" {
-		*reply = arg.Paginator.PaginateStringSlice(indexedslice)
+		*reply = arg.Paginator.PaginateStringSlice(indexedSlice)
 	} else {
-		*reply = indexedslice
+		*reply = indexedSlice
 	}
 	return nil
 }
 
 type AttrGetFilterReverseIndexes struct {
-	Tenant   string
-	Context  string
-	ItemType string
-	ItemIDs  []string
+	Tenant      string
+	Context     string
+	ItemType    string
+	ItemIDs     []string
+	FilterType  string
+	FilterField string
+	FilterValue string
 	utils.Paginator
 }
 
 func (self *ApierV1) GetFilterReverseIndexes(arg AttrGetFilterReverseIndexes, reply *[]string) (err error) {
 	var indexes map[string]utils.StringMap
-	var indexedslice []string
+	var indexedSlice []string
+	indexesFilter := make(map[string]utils.StringMap)
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ItemType"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -181,15 +185,17 @@ func (self *ApierV1) GetFilterReverseIndexes(arg AttrGetFilterReverseIndexes, re
 		key = utils.ConcatenatedKey(arg.Tenant, arg.Context)
 	}
 	if arg.ItemIDs != nil {
+		indexes = make(map[string]utils.StringMap)
 		for _, itemID := range arg.ItemIDs {
-			indexes, err = self.DataManager.GetFilterReverseIndexes(engine.GetDBIndexKey(arg.ItemType, key, true), map[string]string{itemID: ""})
-			if err != nil {
+			if tmpIndexes, err := self.DataManager.GetFilterReverseIndexes(
+				engine.GetDBIndexKey(arg.ItemType, key, true), map[string]string{itemID: ""}); err != nil {
 				return err
-			}
-			for val, strmap := range indexes {
-				for _, value := range strmap.Slice() {
-					indexedslice = append(indexedslice, utils.ConcatenatedKey(val, value))
+			} else {
+				for key, val := range tmpIndexes {
+					indexes[key] = make(utils.StringMap)
+					indexes[key] = val
 				}
+
 			}
 		}
 	} else {
@@ -197,16 +203,89 @@ func (self *ApierV1) GetFilterReverseIndexes(arg AttrGetFilterReverseIndexes, re
 		if err != nil {
 			return err
 		}
+	}
+	if arg.FilterType != "" {
+		for val, strmap := range indexes {
+			indexesFilter[val] = make(utils.StringMap)
+			for _, value := range strmap.Slice() {
+				if strings.HasPrefix(value, arg.FilterType) {
+					indexesFilter[val][value] = true
+					indexedSlice = append(indexedSlice, utils.ConcatenatedKey(val, value))
+				}
+			}
+		}
+		if len(indexedSlice) == 0 {
+			return utils.ErrNotFound
+		}
+	}
+	if arg.FilterField != "" {
+		if len(indexedSlice) == 0 {
+			indexesFilter = make(map[string]utils.StringMap)
+			for val, strmap := range indexes {
+				indexesFilter[val] = make(utils.StringMap)
+				for _, value := range strmap.Slice() {
+					if strings.Index(value, arg.FilterField) != -1 {
+						indexesFilter[val][value] = true
+						indexedSlice = append(indexedSlice, utils.ConcatenatedKey(val, value))
+					}
+				}
+			}
+			if len(indexedSlice) == 0 {
+				return utils.ErrNotFound
+			}
+		} else {
+			var cloneIndexSlice []string
+			for val, strmap := range indexesFilter {
+				for _, value := range strmap.Slice() {
+					if strings.Index(value, arg.FilterField) != -1 {
+						cloneIndexSlice = append(cloneIndexSlice, utils.ConcatenatedKey(val, value))
+					}
+				}
+			}
+			if len(cloneIndexSlice) == 0 {
+				return utils.ErrNotFound
+			}
+			indexedSlice = cloneIndexSlice
+		}
+	}
+	if arg.FilterValue != "" {
+		if len(indexedSlice) == 0 {
+			for val, strmap := range indexes {
+				for _, value := range strmap.Slice() {
+					if strings.Index(value, arg.FilterValue) != -1 {
+						indexedSlice = append(indexedSlice, utils.ConcatenatedKey(val, value))
+					}
+				}
+			}
+			if len(indexedSlice) == 0 {
+				return utils.ErrNotFound
+			}
+		} else {
+			var cloneIndexSlice []string
+			for val, strmap := range indexesFilter {
+				for _, value := range strmap.Slice() {
+					if strings.Index(value, arg.FilterValue) != -1 {
+						cloneIndexSlice = append(cloneIndexSlice, utils.ConcatenatedKey(val, value))
+					}
+				}
+			}
+			if len(cloneIndexSlice) == 0 {
+				return utils.ErrNotFound
+			}
+			indexedSlice = cloneIndexSlice
+		}
+	}
+	if len(indexedSlice) == 0 {
 		for val, strmap := range indexes {
 			for _, value := range strmap.Slice() {
-				indexedslice = append(indexedslice, utils.ConcatenatedKey(val, value))
+				indexedSlice = append(indexedSlice, utils.ConcatenatedKey(val, value))
 			}
 		}
 	}
 	if arg.Paginator.Limit != nil || arg.Paginator.Offset != nil || arg.Paginator.SearchTerm != "" {
-		*reply = arg.Paginator.PaginateStringSlice(indexedslice)
+		*reply = arg.Paginator.PaginateStringSlice(indexedSlice)
 	} else {
-		*reply = indexedslice
+		*reply = indexedSlice
 	}
 	return nil
 }
