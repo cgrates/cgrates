@@ -107,7 +107,7 @@ func Set(key string, value interface{}, commit bool, transID string) {
 			cacheMux.Lock()
 			defer cacheMux.Unlock()
 		}
-		cache.Put(key, value)
+		cache.Put(key, value, nil)
 		//log.Println("ADD: ", key)
 	} else {
 		transBufMux.Lock()

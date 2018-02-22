@@ -27,7 +27,7 @@ import (
 )
 
 type cacheStore interface {
-	Put(string, interface{})
+	Put(string, interface{}, []string)
 	Get(string) (interface{}, bool)
 	Delete(string)
 	DeletePrefix(string)
@@ -64,8 +64,8 @@ func (cs cacheLRUTTL) cacheInstance(instID string) (c *ltcache.Cache) {
 	return
 }
 
-func (cs cacheLRUTTL) Put(key string, value interface{}) {
-	cs.cacheInstance(key[:PREFIX_LEN]).Set(key[PREFIX_LEN:], value)
+func (cs cacheLRUTTL) Put(key string, value interface{}, grpIDs []string) {
+	cs.cacheInstance(key[:PREFIX_LEN]).Set(key[PREFIX_LEN:], value, grpIDs)
 }
 
 func (cs cacheLRUTTL) Get(key string) (interface{}, bool) {
@@ -92,8 +92,7 @@ func (cs cacheLRUTTL) CountEntriesForPrefix(prefix string) (cnt int) {
 func (cs cacheLRUTTL) GetKeysForPrefix(prefix string) (keys []string) {
 	prefix, key := prefix[:PREFIX_LEN], prefix[PREFIX_LEN:]
 	if c, ok := cs[prefix]; ok {
-		for _, ifKey := range c.Keys() {
-			iterKey := ifKey.(string)
+		for _, iterKey := range c.Items() {
 			if len(key) == 0 || strings.HasPrefix(iterKey, key) {
 				keys = append(keys, prefix+iterKey)
 			}
