@@ -16,10 +16,10 @@ import (
 
 var testCIs = []*cachedItem{
 	&cachedItem{itemID: "1", value: "one"},
-	&cachedItem{itemID: "2", value: "two"},
-	&cachedItem{itemID: "3", value: "three"},
-	&cachedItem{itemID: "4", value: "four"},
-	&cachedItem{itemID: "5", value: "five"},
+	&cachedItem{itemID: "2", value: "two", groupIDs: []string{"grp1"}},
+	&cachedItem{itemID: "3", value: "three", groupIDs: []string{"grp1", "grp2"}},
+	&cachedItem{itemID: "4", value: "four", groupIDs: []string{"grp1", "grp2", "grp3"}},
+	&cachedItem{itemID: "5", value: "five", groupIDs: []string{"grp4"}},
 }
 var lastEvicted string
 
@@ -27,10 +27,21 @@ func TestSetGetRemNoIndexes(t *testing.T) {
 	cache := New(UnlimitedCaching, 0, false,
 		func(itmID string, v interface{}) { lastEvicted = itmID })
 	for _, ci := range testCIs {
-		cache.Set(ci.itemID, ci.value, nil)
+		cache.Set(ci.itemID, ci.value, ci.groupIDs)
 	}
 	if len(cache.cache) != 5 {
 		t.Errorf("Wrong intems in cache: %+v", cache.cache)
+	}
+	if len(cache.groups) != 4 {
+		t.Errorf("Wrong intems in groups: %+v", cache.groups)
+	} else if len(cache.groups["grp1"]) != 3 {
+		t.Errorf("Wrong intems in group: %+v", cache.groups["grp1"])
+	} else if len(cache.groups["grp2"]) != 2 {
+		t.Errorf("Wrong intems in group: %+v", cache.groups["grp2"])
+	} else if len(cache.groups["grp3"]) != 1 {
+		t.Errorf("Wrong intems in group: %+v", cache.groups["grp3"])
+	} else if len(cache.groups["grp4"]) != 1 {
+		t.Errorf("Wrong intems in group: %+v", cache.groups["grp4"])
 	}
 	if cache.lruIdx.Len() != 0 {
 		t.Errorf("Wrong items in lru index: %+v", cache.lruIdx)
@@ -52,16 +63,30 @@ func TestSetGetRemNoIndexes(t *testing.T) {
 	if ks := cache.Items(); len(ks) != 5 {
 		t.Errorf("wrong keys: %+v", ks)
 	}
-	cache.Set("2", "twice", nil)
+	cache.Set("2", "twice", []string{"grp21"})
 	if val, has := cache.Get("2"); !has {
 		t.Error("item not in cache")
 	} else if val.(string) != "twice" {
 		t.Errorf("wrong item value: %v", val)
 	}
+	if len(cache.groups) != 5 {
+		t.Errorf("Wrong intems in groups: %+v", cache.groups)
+	} else if len(cache.groups["grp1"]) != 2 { // one gone through set
+		t.Errorf("Wrong intems in group: %+v", cache.groups["grp1"])
+	} else if len(cache.groups["grp21"]) != 1 {
+		t.Errorf("Wrong intems in group: %+v", cache.groups["grp21"])
+	}
 	if lastEvicted != "" {
 		t.Error("lastEvicted var should be empty")
 	}
 	cache.Remove("2")
+	if len(cache.groups) != 4 {
+		t.Errorf("Wrong intems in groups: %+v", cache.groups)
+	} else if len(cache.groups["grp1"]) != 2 {
+		t.Errorf("Wrong intems in group: %+v", cache.groups["grp1"])
+	} else if len(cache.groups["grp21"]) != 0 {
+		t.Errorf("Wrong intems in group: %+v", cache.groups["grp21"])
+	}
 	if lastEvicted != "2" { // onEvicted should populate this var
 		t.Error("lastEvicted var should be 2")
 	}
@@ -74,10 +99,34 @@ func TestSetGetRemNoIndexes(t *testing.T) {
 	if cache.Len() != 4 {
 		t.Errorf("Wrong intems in cache: %+v", cache.cache)
 	}
+	cache.Remove("3")
+	if len(cache.groups) != 4 {
+		t.Errorf("Wrong intems in groups: %+v", cache.groups)
+	} else if len(cache.groups["grp1"]) != 1 {
+		t.Errorf("Wrong intems in group: %+v", cache.groups["grp1"])
+	} else if len(cache.groups["grp2"]) != 1 {
+		t.Errorf("Wrong intems in group: %+v", cache.groups["grp2"])
+	} else if len(cache.groups["grp3"]) != 1 {
+		t.Errorf("Wrong intems in group: %+v", cache.groups["grp3"])
+	} else if len(cache.groups["grp4"]) != 1 {
+		t.Errorf("Wrong intems in group: %+v", cache.groups["grp4"])
+	}
+	cache.RemoveGroup("nonexistent")
+	cache.RemoveGroup("grp1")
+	if len(cache.cache) != 2 {
+		t.Errorf("Wrong intems in cache: %+v", cache.cache)
+	}
+	if len(cache.groups) != 1 {
+		t.Errorf("Wrong intems in groups: %+v", cache.groups)
+	} else if len(cache.groups["grp4"]) != 1 {
+		t.Errorf("Wrong intems in group: %+v", cache.groups["grp4"])
+	}
+	cache.RemoveGroup("grp1")
 	cache.Clear()
 	if cache.Len() != 0 {
 		t.Errorf("Wrong intems in cache: %+v", cache.cache)
 	}
+
 }
 
 func TestSetGetRemLRU(t *testing.T) {
