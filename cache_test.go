@@ -15,16 +15,16 @@ import (
 )
 
 var testCIs = []*cachedItem{
-	&cachedItem{itemID: "1", value: "one"},
-	&cachedItem{itemID: "2", value: "two", groupIDs: []string{"grp1"}},
-	&cachedItem{itemID: "3", value: "three", groupIDs: []string{"grp1", "grp2"}},
-	&cachedItem{itemID: "4", value: "four", groupIDs: []string{"grp1", "grp2", "grp3"}},
-	&cachedItem{itemID: "5", value: "five", groupIDs: []string{"grp4"}},
+	&cachedItem{itemID: "_1_", value: "one"},
+	&cachedItem{itemID: "_2_", value: "two", groupIDs: []string{"grp1"}},
+	&cachedItem{itemID: "_3_", value: "three", groupIDs: []string{"grp1", "grp2"}},
+	&cachedItem{itemID: "_4_", value: "four", groupIDs: []string{"grp1", "grp2", "grp3"}},
+	&cachedItem{itemID: "_5_", value: "five", groupIDs: []string{"grp4"}},
 }
 var lastEvicted string
 
 func TestSetGetRemNoIndexes(t *testing.T) {
-	cache := New(UnlimitedCaching, 0, false,
+	cache := NewCache(UnlimitedCaching, 0, false,
 		func(itmID string, v interface{}) { lastEvicted = itmID })
 	for _, ci := range testCIs {
 		cache.Set(ci.itemID, ci.value, ci.groupIDs)
@@ -55,16 +55,31 @@ func TestSetGetRemNoIndexes(t *testing.T) {
 	if len(cache.ttlRefs) != 0 {
 		t.Errorf("Wrong items in ttl index: %+v", cache.ttlRefs)
 	}
-	if val, has := cache.Get("2"); !has {
+	if itmIDs := cache.GetItemIDs(""); len(itmIDs) != 5 {
+		t.Errorf("received: %+v", itmIDs)
+	}
+	if itmIDs := cache.GetItemIDs("_"); len(itmIDs) != 5 {
+		t.Errorf("received: %+v", itmIDs)
+	}
+	if itmIDs := cache.GetItemIDs("_1"); len(itmIDs) != 1 {
+		t.Errorf("received: %+v", itmIDs)
+	}
+	if itmIDs := cache.GetItemIDs("_1_"); len(itmIDs) != 1 {
+		t.Errorf("received: %+v", itmIDs)
+	}
+	if itmIDs := cache.GetItemIDs("_1__"); len(itmIDs) != 0 {
+		t.Errorf("received: %+v", itmIDs)
+	}
+	if val, has := cache.Get("_2_"); !has {
 		t.Error("item not in cache")
 	} else if val.(string) != "two" {
 		t.Errorf("wrong item value: %v", val)
 	}
-	if ks := cache.Items(); len(ks) != 5 {
-		t.Errorf("wrong keys: %+v", ks)
+	if len(cache.cache) != 5 {
+		t.Errorf("wrong keys: %+v", cache.cache)
 	}
-	cache.Set("2", "twice", []string{"grp21"})
-	if val, has := cache.Get("2"); !has {
+	cache.Set("_2_", "twice", []string{"grp21"})
+	if val, has := cache.Get("_2_"); !has {
 		t.Error("item not in cache")
 	} else if val.(string) != "twice" {
 		t.Errorf("wrong item value: %v", val)
@@ -79,7 +94,7 @@ func TestSetGetRemNoIndexes(t *testing.T) {
 	if lastEvicted != "" {
 		t.Error("lastEvicted var should be empty")
 	}
-	cache.Remove("2")
+	cache.RemoveItem("_2_")
 	if len(cache.groups) != 4 {
 		t.Errorf("Wrong intems in groups: %+v", cache.groups)
 	} else if len(cache.groups["grp1"]) != 2 {
@@ -87,10 +102,10 @@ func TestSetGetRemNoIndexes(t *testing.T) {
 	} else if len(cache.groups["grp21"]) != 0 {
 		t.Errorf("Wrong intems in group: %+v", cache.groups["grp21"])
 	}
-	if lastEvicted != "2" { // onEvicted should populate this var
+	if lastEvicted != "_2_" { // onEvicted should populate this var
 		t.Error("lastEvicted var should be 2")
 	}
-	if _, has := cache.Get("2"); has {
+	if _, has := cache.Get("_2_"); has {
 		t.Error("item still in cache")
 	}
 	if len(cache.cache) != 4 {
@@ -99,7 +114,7 @@ func TestSetGetRemNoIndexes(t *testing.T) {
 	if cache.Len() != 4 {
 		t.Errorf("Wrong intems in cache: %+v", cache.cache)
 	}
-	cache.Remove("3")
+	cache.RemoveItem("_3_")
 	if len(cache.groups) != 4 {
 		t.Errorf("Wrong intems in groups: %+v", cache.groups)
 	} else if len(cache.groups["grp1"]) != 1 {
@@ -130,7 +145,7 @@ func TestSetGetRemNoIndexes(t *testing.T) {
 }
 
 func TestSetGetRemLRU(t *testing.T) {
-	cache := New(3, 0, false, nil)
+	cache := NewCache(3, 0, false, nil)
 	for _, ci := range testCIs {
 		cache.Set(ci.itemID, ci.value, nil)
 	}
@@ -140,9 +155,9 @@ func TestSetGetRemLRU(t *testing.T) {
 	if cache.lruIdx.Len() != 3 {
 		t.Errorf("Wrong items in lru index: %+v", cache.lruIdx)
 	}
-	if cache.lruIdx.Front().Value.(*cachedItem).itemID != "5" {
+	if cache.lruIdx.Front().Value.(*cachedItem).itemID != "_5_" {
 		t.Errorf("Wrong order of items in the lru index: %+v", cache.lruIdx)
-	} else if cache.lruIdx.Back().Value.(*cachedItem).itemID != "3" {
+	} else if cache.lruIdx.Back().Value.(*cachedItem).itemID != "_3_" {
 		t.Errorf("Wrong order of items in the lru index: %+v", cache.lruIdx)
 	}
 	if len(cache.lruRefs) != 3 {
@@ -158,8 +173,8 @@ func TestSetGetRemLRU(t *testing.T) {
 		t.Error("item still in cache")
 	}
 	// rewrite and reposition 3
-	cache.Set("3", "third", nil)
-	if val, has := cache.Get("3"); !has {
+	cache.Set("_3_", "third", nil)
+	if val, has := cache.Get("_3_"); !has {
 		t.Error("item not in cache")
 	} else if val.(string) != "third" {
 		t.Errorf("wrong item value: %v", val)
@@ -167,13 +182,13 @@ func TestSetGetRemLRU(t *testing.T) {
 	if cache.lruIdx.Len() != 3 {
 		t.Errorf("Wrong items in lru index: %+v", cache.lruIdx)
 	}
-	if cache.lruIdx.Front().Value.(*cachedItem).itemID != "3" {
+	if cache.lruIdx.Front().Value.(*cachedItem).itemID != "_3_" {
 		t.Errorf("Wrong order of items in the lru index: %+v", cache.lruIdx)
-	} else if cache.lruIdx.Back().Value.(*cachedItem).itemID != "4" {
+	} else if cache.lruIdx.Back().Value.(*cachedItem).itemID != "_4_" {
 		t.Errorf("Wrong order of items in the lru index: %+v", cache.lruIdx)
 	}
-	cache.Set("2", "second", nil)
-	if val, has := cache.Get("2"); !has {
+	cache.Set("_2_", "second", nil)
+	if val, has := cache.Get("_2_"); !has {
 		t.Error("item not in cache")
 	} else if val.(string) != "second" {
 		t.Errorf("wrong item value: %v", val)
@@ -181,17 +196,17 @@ func TestSetGetRemLRU(t *testing.T) {
 	if cache.lruIdx.Len() != 3 {
 		t.Errorf("Wrong items in lru index: %+v", cache.lruIdx)
 	}
-	if cache.lruIdx.Front().Value.(*cachedItem).itemID != "2" {
+	if cache.lruIdx.Front().Value.(*cachedItem).itemID != "_2_" {
 		t.Errorf("Wrong order of items in the lru index: %+v", cache.lruIdx)
-	} else if cache.lruIdx.Back().Value.(*cachedItem).itemID != "5" {
+	} else if cache.lruIdx.Back().Value.(*cachedItem).itemID != "_5_" {
 		t.Errorf("Wrong order of items in the lru index: %+v", cache.lruIdx)
 	}
 	// 4 should have been removed
-	if _, has := cache.Get("4"); has {
+	if _, has := cache.Get("_4_"); has {
 		t.Error("item still in cache")
 	}
-	cache.Remove("2")
-	if _, has := cache.Get("2"); has {
+	cache.RemoveItem("_2_")
+	if _, has := cache.Get("_2_"); has {
 		t.Error("item still in cache")
 	}
 	if len(cache.cache) != 2 {
@@ -203,9 +218,9 @@ func TestSetGetRemLRU(t *testing.T) {
 	if len(cache.lruRefs) != 2 {
 		t.Errorf("Wrong items in lru references: %+v", cache.lruRefs)
 	}
-	if cache.lruIdx.Front().Value.(*cachedItem).itemID != "3" {
+	if cache.lruIdx.Front().Value.(*cachedItem).itemID != "_3_" {
 		t.Errorf("Wrong order of items in the lru index: %+v", cache.lruIdx)
-	} else if cache.lruIdx.Back().Value.(*cachedItem).itemID != "5" {
+	} else if cache.lruIdx.Back().Value.(*cachedItem).itemID != "_5_" {
 		t.Errorf("Wrong order of items in the lru index: %+v", cache.lruIdx)
 	}
 	cache.Clear()
@@ -215,7 +230,7 @@ func TestSetGetRemLRU(t *testing.T) {
 }
 
 func TestSetGetRemTTLDynamic(t *testing.T) {
-	cache := New(UnlimitedCaching, time.Duration(10*time.Millisecond), false, nil)
+	cache := NewCache(UnlimitedCaching, time.Duration(10*time.Millisecond), false, nil)
 	for _, ci := range testCIs {
 		cache.Set(ci.itemID, ci.value, nil)
 	}
@@ -235,7 +250,7 @@ func TestSetGetRemTTLDynamic(t *testing.T) {
 		t.Errorf("Wrong items in ttl index: %+v", cache.ttlRefs)
 	}
 	time.Sleep(time.Duration(6 * time.Millisecond))
-	if _, has := cache.Get("2"); !has {
+	if _, has := cache.Get("_2_"); !has {
 		t.Error("item not in cache")
 	}
 	time.Sleep(time.Duration(6 * time.Millisecond))
@@ -251,7 +266,7 @@ func TestSetGetRemTTLDynamic(t *testing.T) {
 }
 
 func TestSetGetRemTTLStatic(t *testing.T) {
-	cache := New(UnlimitedCaching, time.Duration(10*time.Millisecond), true, nil)
+	cache := NewCache(UnlimitedCaching, time.Duration(10*time.Millisecond), true, nil)
 	for _, ci := range testCIs {
 		cache.Set(ci.itemID, ci.value, nil)
 	}
@@ -259,7 +274,7 @@ func TestSetGetRemTTLStatic(t *testing.T) {
 		t.Errorf("Wrong intems in cache: %+v", cache.cache)
 	}
 	time.Sleep(time.Duration(6 * time.Millisecond))
-	if _, has := cache.Get("2"); !has {
+	if _, has := cache.Get("_2_"); !has {
 		t.Error("item not in cache")
 	}
 	time.Sleep(time.Duration(6 * time.Millisecond))
@@ -270,7 +285,7 @@ func TestSetGetRemTTLStatic(t *testing.T) {
 
 func TestSetGetRemLRUttl(t *testing.T) {
 	nrItems := 3
-	cache := New(nrItems, time.Duration(10*time.Millisecond), false, nil)
+	cache := NewCache(nrItems, time.Duration(10*time.Millisecond), false, nil)
 	for _, ci := range testCIs {
 		cache.Set(ci.itemID, ci.value, nil)
 	}
@@ -290,8 +305,8 @@ func TestSetGetRemLRUttl(t *testing.T) {
 		t.Errorf("Wrong items in ttl index: %+v", cache.ttlRefs)
 	}
 	time.Sleep(time.Duration(6 * time.Millisecond))
-	cache.Remove("4")
-	cache.Set("3", "third", nil)
+	cache.RemoveItem("_4_")
+	cache.Set("_3_", "third", nil)
 	nrItems = 2
 	if cache.Len() != nrItems {
 		t.Errorf("Wrong intems in cache: %+v", cache.cache)
@@ -328,7 +343,7 @@ func TestSetGetRemLRUttl(t *testing.T) {
 }
 
 func TestCacheDisabled(t *testing.T) {
-	cache := New(DisabledCaching, time.Duration(10*time.Millisecond), false, nil)
+	cache := NewCache(DisabledCaching, time.Duration(10*time.Millisecond), false, nil)
 	for _, ci := range testCIs {
 		cache.Set(ci.itemID, ci.value, nil)
 		if _, has := cache.Get(ci.itemID); has {
@@ -350,12 +365,12 @@ func TestCacheDisabled(t *testing.T) {
 	if len(cache.ttlRefs) != 0 {
 		t.Errorf("Wrong items in ttl index: %+v", cache.ttlRefs)
 	}
-	cache.Remove("4")
+	cache.RemoveItem("4")
 }
 
 // BenchmarkSetSimpleCache 	10000000	       228 ns/op
 func BenchmarkSetSimpleCache(b *testing.B) {
-	cache := New(UnlimitedCaching, 0, false, nil)
+	cache := NewCache(UnlimitedCaching, 0, false, nil)
 	rand.Seed(time.Now().UTC().UnixNano())
 	min, max := 0, len(testCIs)-1 // so we can have random index
 	for n := 0; n < b.N; n++ {
@@ -366,7 +381,7 @@ func BenchmarkSetSimpleCache(b *testing.B) {
 
 // BenchmarkGetSimpleCache 	20000000	        99.7 ns/op
 func BenchmarkGetSimpleCache(b *testing.B) {
-	cache := New(UnlimitedCaching, 0, false, nil)
+	cache := NewCache(UnlimitedCaching, 0, false, nil)
 	for _, ci := range testCIs {
 		cache.Set(ci.itemID, ci.value, nil)
 	}
@@ -380,7 +395,7 @@ func BenchmarkGetSimpleCache(b *testing.B) {
 
 // BenchmarkSetLRU         	 5000000	       316 ns/op
 func BenchmarkSetLRU(b *testing.B) {
-	cache := New(3, 0, false, nil)
+	cache := NewCache(3, 0, false, nil)
 	rand.Seed(time.Now().UTC().UnixNano())
 	min, max := 0, len(testCIs)-1 // so we can have random index
 	for n := 0; n < b.N; n++ {
@@ -391,7 +406,7 @@ func BenchmarkSetLRU(b *testing.B) {
 
 // BenchmarkGetLRU         	20000000	       114 ns/op
 func BenchmarkGetLRU(b *testing.B) {
-	cache := New(3, 0, false, nil)
+	cache := NewCache(3, 0, false, nil)
 	for _, ci := range testCIs {
 		cache.Set(ci.itemID, ci.value, nil)
 	}
@@ -405,7 +420,7 @@ func BenchmarkGetLRU(b *testing.B) {
 
 // BenchmarkSetTTL         	50000000	        30.4 ns/op
 func BenchmarkSetTTL(b *testing.B) {
-	cache := New(0, time.Duration(time.Millisecond), false, nil)
+	cache := NewCache(0, time.Duration(time.Millisecond), false, nil)
 	rand.Seed(time.Now().UTC().UnixNano())
 	min, max := 0, len(testCIs)-1 // so we can have random index
 	for n := 0; n < b.N; n++ {
@@ -416,7 +431,7 @@ func BenchmarkSetTTL(b *testing.B) {
 
 // BenchmarkGetTTL         	20000000	        88.4 ns/op
 func BenchmarkGetTTL(b *testing.B) {
-	cache := New(0, time.Duration(5*time.Millisecond), false, nil)
+	cache := NewCache(0, time.Duration(5*time.Millisecond), false, nil)
 	for _, ci := range testCIs {
 		cache.Set(ci.itemID, ci.value, nil)
 	}
@@ -430,7 +445,7 @@ func BenchmarkGetTTL(b *testing.B) {
 
 // BenchmarkSetLRUttl      	 5000000	       373 ns/op
 func BenchmarkSetLRUttl(b *testing.B) {
-	cache := New(3, time.Duration(time.Millisecond), false, nil)
+	cache := NewCache(3, time.Duration(time.Millisecond), false, nil)
 	rand.Seed(time.Now().UTC().UnixNano())
 	min, max := 0, len(testCIs)-1 // so we can have random index
 	for n := 0; n < b.N; n++ {
@@ -441,7 +456,7 @@ func BenchmarkSetLRUttl(b *testing.B) {
 
 // BenchmarkGetLRUttl      	10000000	       187 ns/op
 func BenchmarkGetLRUttl(b *testing.B) {
-	cache := New(3, time.Duration(5*time.Millisecond), false, nil)
+	cache := NewCache(3, time.Duration(5*time.Millisecond), false, nil)
 	for _, ci := range testCIs {
 		cache.Set(ci.itemID, ci.value, nil)
 	}

@@ -5,6 +5,9 @@ Some of it's properties:
  * Both LRU or TTL enforcements are optional and independent of each other.
  * Thread safe through the use of unique lock, making each operation atomic.
  * TTL refresh on get/set optional through the use of static setting.
+ * Item groups for groupped remove
+ * Transactional if TransCache is used
+ * Multiple instances if TransCache is used
 
 ## Installation ##
 
@@ -22,13 +25,23 @@ Copyright (C) ITsysCOM GmbH. All Rights Reserved.
 package main
 
 func main() {
-	cache := New(3, time.Duration(10*time.Millisecond), false, 
+	cache := NewCache(3, time.Duration(10*time.Millisecond), false, 
 		func(k key, v interface{}) { fmt.Printf("Evicted key: %v, value: %v", k, v)})
 	cache.Set("key1": "val1")
 	cache.Get("key1")
-	cache.Rem("key1")
+	cache.RemoveItem("key1")
 	cache.Set(1, 1)
-	cache.Rem(1)
+	cache.RemoveItem(1)
+	tc := NewTransCache(map[string]*CacheConfig{
+		"dst_": &CacheConfig{MaxItems: -1},
+		"rpf_": &CacheConfig{MaxItems: -1}})
+	transID := tc.BeginTransaction()
+	tc.Set("aaa_", "t31", "test", nil, false, transID)
+	tc.Set("bbb_", "t32", "test", nil, false, transID)
+	tc.CommitTransaction(transID)
+	transID2 := tc.BeginTransaction()
+	tc.Set("ccc_", "t31", "test", nil, false, transID2)
+	tc.RollbackTransaction(transID2)
 }
 ```
 

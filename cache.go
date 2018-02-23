@@ -11,6 +11,7 @@ package ltcache
 
 import (
 	"container/list"
+	"strings"
 	"sync"
 	"time"
 )
@@ -50,7 +51,7 @@ type Cache struct {
 }
 
 // New initializes a new cache.
-func New(maxEntries int, ttl time.Duration, staticTTL bool,
+func NewCache(maxEntries int, ttl time.Duration, staticTTL bool,
 	onEvicted func(itmID string, value interface{})) (c *Cache) {
 	c = &Cache{
 		cache:      make(map[string]*cachedItem),
@@ -133,20 +134,19 @@ func (c *Cache) Set(itmID string, value interface{}, grpIDs []string) {
 }
 
 // Remove removes the provided key from the cache.
-func (c *Cache) Remove(itmID string) {
+func (c *Cache) RemoveItem(itmID string) {
 	c.Lock()
 	c.removeItem(itmID)
 	c.Unlock()
 }
 
-// Items returns a slice with all keys in the cache
-func (c *Cache) Items() (itmIDs []string) {
+// GetItemIDs returns a list of items matching prefix
+func (c *Cache) GetItemIDs(prfx string) (itmIDs []string) {
 	c.RLock()
-	itmIDs = make([]string, len(c.cache))
-	i := 0
 	for itmID := range c.cache {
-		itmIDs[i] = itmID
-		i++
+		if strings.HasPrefix(itmID, prfx) {
+			itmIDs = append(itmIDs, itmID)
+		}
 	}
 	c.RUnlock()
 	return
