@@ -123,7 +123,7 @@ func (tc *TransCache) CommitTransaction(transID string) {
 		case AddItem:
 			tc.Set(item.cacheID, item.itemID, item.value, item.groupIDs, true, transID)
 		case RemoveItem:
-			tc.RemoveItem(item.cacheID, item.itemID, true, transID)
+			tc.Remove(item.cacheID, item.itemID, true, transID)
 		case RemoveGroup:
 			if len(item.groupIDs) >= 1 {
 				tc.RemoveGroup(item.cacheID, item.groupIDs[0], true, transID)
@@ -163,13 +163,13 @@ func (tc *TransCache) Set(chID, itmID string, value interface{},
 }
 
 // RempveItem removes an item from the cache
-func (tc *TransCache) RemoveItem(chID, itmID string, commit bool, transID string) {
+func (tc *TransCache) Remove(chID, itmID string, commit bool, transID string) {
 	if commit {
 		if transID == "" { // Lock per operation not transaction
 			tc.cacheMux.Lock()
 			defer tc.cacheMux.Unlock()
 		}
-		tc.cacheInstance(chID).RemoveItem(itmID)
+		tc.cacheInstance(chID).Remove(itmID)
 	} else {
 		tc.transBufMux.Lock()
 		tc.transactionBuffer[transID] = append(tc.transactionBuffer[transID],

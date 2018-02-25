@@ -18,7 +18,7 @@ func TestRemKey(t *testing.T) {
 	if t1, ok := tc.Get("t11_", "mm"); !ok || t1 != "test" {
 		t.Error("Error setting cache: ", ok, t1)
 	}
-	tc.RemoveItem("t11_", "mm", true, "")
+	tc.Remove("t11_", "mm", true, "")
 	if t1, ok := tc.Get("t11_", "mm"); ok || t1 == "test" {
 		t.Error("Error removing cached key")
 	}
@@ -32,7 +32,7 @@ func TestTransaction(t *testing.T) {
 		t.Error("Error in transaction cache")
 	}
 	tc.Set("mmm_", "t12", "test", nil, false, transID)
-	tc.RemoveItem("mmm_", "t11", false, transID)
+	tc.Remove("mmm_", "t11", false, transID)
 	if _, hasTransID := tc.transactionBuffer[transID]; !hasTransID {
 		t.Error("Does not have transactionID")
 	}
@@ -49,12 +49,12 @@ func TestTransaction(t *testing.T) {
 
 }
 
-func TestTransactionRemoveItem(t *testing.T) {
+func TestTransactionRemove(t *testing.T) {
 	tc := NewTransCache(map[string]*CacheConfig{})
 	transID := tc.BeginTransaction()
 	tc.Set("t21_", "mm", "test", nil, false, transID)
 	tc.Set("t21_", "nn", "test", nil, false, transID)
-	tc.RemoveItem("t21_", "mm", false, transID)
+	tc.Remove("t21_", "mm", false, transID)
 	if _, hasTransID := tc.transactionBuffer[transID]; !hasTransID {
 		t.Error("Does not have transactionID")
 	}
@@ -117,8 +117,8 @@ func TestTransactionRollback(t *testing.T) {
 func TestTransactionRemBefore(t *testing.T) {
 	tc := NewTransCache(map[string]*CacheConfig{})
 	transID := tc.BeginTransaction()
-	tc.RemoveItem("t41_", "mm", false, transID)
-	tc.RemoveItem("t41_", "nn", false, transID)
+	tc.Remove("t41_", "mm", false, transID)
+	tc.Remove("t41_", "nn", false, transID)
 	tc.Set("t41_", "mm", "test", nil, false, transID)
 	tc.Set("t41_", "nn", "test", nil, false, transID)
 	tc.CommitTransaction(transID)

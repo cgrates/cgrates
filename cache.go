@@ -128,15 +128,15 @@ func (c *Cache) Set(itmID string, value interface{}, grpIDs []string) {
 			lElm = c.lruIdx.Back()
 		}
 		if lElm != nil {
-			c.removeItem(lElm.Value.(*cachedItem).itemID)
+			c.remove(lElm.Value.(*cachedItem).itemID)
 		}
 	}
 }
 
 // Remove removes the provided key from the cache.
-func (c *Cache) RemoveItem(itmID string) {
+func (c *Cache) Remove(itmID string) {
 	c.Lock()
-	c.removeItem(itmID)
+	c.remove(itmID)
 	c.Unlock()
 }
 
@@ -162,13 +162,13 @@ func (c *Cache) GroupLength(grpID string) int {
 func (c *Cache) RemoveGroup(grpID string) {
 	c.Lock()
 	for itmID := range c.groups[grpID] {
-		c.removeItem(itmID)
+		c.remove(itmID)
 	}
 	c.Unlock()
 }
 
-// removeElement completely removes an Element from the cache
-func (c *Cache) removeItem(itmID string) {
+// remove completely removes an Element from the cache
+func (c *Cache) remove(itmID string) {
 	ci, has := c.cache[itmID]
 	if !has {
 		return
@@ -204,7 +204,7 @@ func (c *Cache) cleanExpired() {
 			time.Sleep(ci.expiryTime.Sub(now))
 			continue
 		}
-		c.removeItem(ci.itemID)
+		c.remove(ci.itemID)
 		c.Unlock()
 	}
 }

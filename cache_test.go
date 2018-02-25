@@ -94,7 +94,7 @@ func TestSetGetRemNoIndexes(t *testing.T) {
 	if lastEvicted != "" {
 		t.Error("lastEvicted var should be empty")
 	}
-	cache.RemoveItem("_2_")
+	cache.Remove("_2_")
 	if len(cache.groups) != 4 {
 		t.Errorf("Wrong intems in groups: %+v", cache.groups)
 	} else if len(cache.groups["grp1"]) != 2 {
@@ -114,7 +114,7 @@ func TestSetGetRemNoIndexes(t *testing.T) {
 	if cache.Len() != 4 {
 		t.Errorf("Wrong intems in cache: %+v", cache.cache)
 	}
-	cache.RemoveItem("_3_")
+	cache.Remove("_3_")
 	if len(cache.groups) != 4 {
 		t.Errorf("Wrong intems in groups: %+v", cache.groups)
 	} else if len(cache.groups["grp1"]) != 1 {
@@ -205,7 +205,7 @@ func TestSetGetRemLRU(t *testing.T) {
 	if _, has := cache.Get("_4_"); has {
 		t.Error("item still in cache")
 	}
-	cache.RemoveItem("_2_")
+	cache.Remove("_2_")
 	if _, has := cache.Get("_2_"); has {
 		t.Error("item still in cache")
 	}
@@ -305,7 +305,7 @@ func TestSetGetRemLRUttl(t *testing.T) {
 		t.Errorf("Wrong items in ttl index: %+v", cache.ttlRefs)
 	}
 	time.Sleep(time.Duration(6 * time.Millisecond))
-	cache.RemoveItem("_4_")
+	cache.Remove("_4_")
 	cache.Set("_3_", "third", nil)
 	nrItems = 2
 	if cache.Len() != nrItems {
@@ -365,7 +365,7 @@ func TestCacheDisabled(t *testing.T) {
 	if len(cache.ttlRefs) != 0 {
 		t.Errorf("Wrong items in ttl index: %+v", cache.ttlRefs)
 	}
-	cache.RemoveItem("4")
+	cache.Remove("4")
 }
 
 // BenchmarkSetSimpleCache 	10000000	       228 ns/op

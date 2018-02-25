@@ -29,9 +29,9 @@ func main() {
 		func(k key, v interface{}) { fmt.Printf("Evicted key: %v, value: %v", k, v)})
 	cache.Set("key1": "val1")
 	cache.Get("key1")
-	cache.RemoveItem("key1")
+	cache.Remove("key1")
 	cache.Set(1, 1)
-	cache.RemoveItem(1)
+	cache.Remove(1)
 	tc := NewTransCache(map[string]*CacheConfig{
 		"dst_": &CacheConfig{MaxItems: -1},
 		"rpf_": &CacheConfig{MaxItems: -1}})
