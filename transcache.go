@@ -178,6 +178,22 @@ func (tc *TransCache) Remove(chID, itmID string, commit bool, transID string) {
 	}
 }
 
+// GetGroupItems returns all items in a group. Nil if group does not exist
+func (tc *TransCache) GetGroupItemIDs(chID, grpID string) (itmIDs []string) {
+	tc.cacheMux.RLock()
+	itmIDs = tc.cacheInstance(chID).GetGroupItemIDs(grpID)
+	tc.cacheMux.RUnlock()
+	return
+}
+
+// GetGroupItems returns all items in a group. Nil if group does not exist
+func (tc *TransCache) GetGroupItems(chID, grpID string) (itms []interface{}) {
+	tc.cacheMux.RLock()
+	itms = tc.cacheInstance(chID).GetGroupItems(grpID)
+	tc.cacheMux.RUnlock()
+	return
+}
+
 // RemoveGroup removes a group of items out of cache
 func (tc *TransCache) RemoveGroup(chID, grpID string, commit bool, transID string) {
 	if commit {

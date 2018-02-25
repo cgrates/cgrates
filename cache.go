@@ -159,6 +159,28 @@ func (c *Cache) GroupLength(grpID string) int {
 	return len(c.groups[grpID])
 }
 
+func (c *Cache) getGroupItemIDs(grpID string) (itmIDs []string) {
+	for itmID := range c.groups[grpID] {
+		itmIDs = append(itmIDs, itmID)
+	}
+	return
+}
+
+func (c *Cache) GetGroupItemIDs(grpID string) (itmIDs []string) {
+	c.RLock()
+	itmIDs = c.getGroupItemIDs(grpID)
+	c.RUnlock()
+	return
+}
+
+func (c *Cache) GetGroupItems(grpID string) (itms []interface{}) {
+	for _, itmID := range c.GetGroupItemIDs(grpID) {
+		itm, _ := c.Get(itmID)
+		itms = append(itms, itm)
+	}
+	return
+}
+
 func (c *Cache) RemoveGroup(grpID string) {
 	c.Lock()
 	for itmID := range c.groups[grpID] {

@@ -144,6 +144,20 @@ func TestSetGetRemNoIndexes(t *testing.T) {
 
 }
 
+func TestGetGroupItems(t *testing.T) {
+	cache := NewCache(UnlimitedCaching, 0, false,
+		func(itmID string, v interface{}) { lastEvicted = itmID })
+	for _, ci := range testCIs {
+		cache.Set(ci.itemID, ci.value, ci.groupIDs)
+	}
+	if grpItms := cache.GetGroupItems("grp1"); len(grpItms) != 3 {
+		t.Errorf("wrong group items: %+v", grpItms)
+	}
+	if grpItms := cache.GetGroupItems("nonexsitent"); grpItms != nil {
+		t.Errorf("wrong group items: %+v", grpItms)
+	}
+}
+
 func TestSetGetRemLRU(t *testing.T) {
 	cache := NewCache(3, 0, false, nil)
 	for _, ci := range testCIs {

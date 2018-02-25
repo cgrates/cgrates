@@ -130,6 +130,18 @@ func TestTransactionRemBefore(t *testing.T) {
 	}
 }
 
+func TestTCGetGroupItems(t *testing.T) {
+	tc := NewTransCache(map[string]*CacheConfig{})
+	tc.Set("xxx_", "t1", "test", []string{"grp1"}, true, "")
+	tc.Set("xxx_", "t2", "test", []string{"grp1"}, true, "")
+	if grpItms := tc.GetGroupItems("xxx_", "grp1"); len(grpItms) != 2 {
+		t.Errorf("Received group items: %+v", grpItms)
+	}
+	if grpItms := tc.GetGroupItems("xxx_", "nonexsitent"); grpItms != nil {
+		t.Errorf("Received group items: %+v", grpItms)
+	}
+}
+
 func TestRemGroup(t *testing.T) {
 	tc := NewTransCache(map[string]*CacheConfig{})
 	tc.Set("xxx_", "t1", "test", []string{"grp1"}, true, "")
