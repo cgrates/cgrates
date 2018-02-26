@@ -21,7 +21,7 @@ package console
 import "github.com/cgrates/cgrates/engine"
 
 func init() {
-	c := &CmdSetSuppliers{
+	c := &CmdSetSupplier{
 		name:      "supplier_set",
 		rpcMethod: "ApierV1.SetSupplierProfile",
 		rpcParams: &engine.SupplierProfile{},
@@ -30,33 +30,33 @@ func init() {
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-type CmdSetSuppliers struct {
+type CmdSetSupplier struct {
 	name      string
 	rpcMethod string
 	rpcParams *engine.SupplierProfile
 	*CommandExecuter
 }
 
-func (self *CmdSetSuppliers) Name() string {
+func (self *CmdSetSupplier) Name() string {
 	return self.name
 }
 
-func (self *CmdSetSuppliers) RpcMethod() string {
+func (self *CmdSetSupplier) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetSuppliers) RpcParams(reset bool) interface{} {
+func (self *CmdSetSupplier) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.SupplierProfile{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdSetSuppliers) PostprocessRpcParams() error {
+func (self *CmdSetSupplier) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetSuppliers) RpcResult() interface{} {
+func (self *CmdSetSupplier) RpcResult() interface{} {
 	var s string
 	return &s
 }
