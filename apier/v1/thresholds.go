@@ -94,6 +94,9 @@ func (apierV1 *ApierV1) RemThresholdProfile(args *utils.TenantID, reply *string)
 	if err := apierV1.DataManager.RemoveThresholdProfile(args.Tenant, args.ID, utils.NonTransactional, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	if err := apierV1.DataManager.RemoveThreshold(args.Tenant, args.ID, utils.NonTransactional); err != nil {
+		return utils.APIErrorHandler(err)
+	}
 	*reply = utils.OK
 	return nil
 }

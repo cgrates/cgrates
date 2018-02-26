@@ -94,10 +94,10 @@ func (apierV1 *ApierV1) RemResourceProfile(arg utils.TenantID, reply *string) er
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := apierV1.DataManager.RemoveResourceProfile(arg.Tenant, arg.ID, utils.NonTransactional, true); err != nil {
-		if err.Error() != utils.ErrNotFound.Error() {
-			err = utils.NewErrServerError(err)
-		}
-		return err
+		return utils.APIErrorHandler(err)
+	}
+	if err := apierV1.DataManager.RemoveResource(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
+		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return nil
