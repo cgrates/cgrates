@@ -148,7 +148,7 @@ func (r *Resource) recordUsage(ru *ResourceUsage) (err error) {
 	if _, hasID := r.Usages[ru.ID]; hasID {
 		return fmt.Errorf("duplicate resource usage with id: %s", ru.TenantID())
 	}
-	if r.ttl != nil {
+	if r.ttl != nil && *r.ttl != -1 {
 		if *r.ttl == 0 {
 			return // no recording for ttl of 0
 		}
@@ -206,7 +206,7 @@ func (rs Resources) recordUsage(ru *ResourceUsage) (err error) {
 	}
 	if err != nil {
 		for _, r := range rs[:nonReservedIdx] {
-			r.clearUsage(ru.TenantID()) // best effort
+			r.clearUsage(ru.ID) // best effort
 		}
 	}
 	return
@@ -254,6 +254,9 @@ func (rs Resources) allocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 	// Simulate resource usage
 	for _, r := range rs {
 		r.removeExpiredUnits()
+		if _, hasID := r.Usages[ru.ID]; hasID { // update
+			r.clearUsage(ru.ID)
+		}
 		if r.rPrf.Limit >= r.totalUsage()+ru.Units {
 			if alcMessage == "" {
 				if r.rPrf.AllocationMessage != "" {
