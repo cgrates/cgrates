@@ -33,10 +33,9 @@ func init() {
 }
 
 type CmdSuppliersSort struct {
-	name       string
-	rpcMethod  string
-	rpcParams  *engine.ArgsGetSuppliers
-	clientArgs []string
+	name      string
+	rpcMethod string
+	rpcParams *engine.ArgsGetSuppliers
 	*CommandExecuter
 }
 
