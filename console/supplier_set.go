@@ -18,49 +18,45 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
+import "github.com/cgrates/cgrates/engine"
 
 func init() {
-	c := &CmdSuppliersSort{
-		name:      "suppliers_get",
-		rpcMethod: "SupplierSv1.GetSuppliers",
-		rpcParams: new(utils.CGREvent),
+	c := &CmdSetSuppliers{
+		name:      "supplier_set",
+		rpcMethod: "ApierV1.SetSupplierProfile",
+		rpcParams: &engine.SupplierProfile{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-type CmdSuppliersSort struct {
-	name       string
-	rpcMethod  string
-	rpcParams  *utils.CGREvent
-	clientArgs []string
+type CmdSetSuppliers struct {
+	name      string
+	rpcMethod string
+	rpcParams *engine.SupplierProfile
 	*CommandExecuter
 }
 
-func (self *CmdSuppliersSort) Name() string {
+func (self *CmdSetSuppliers) Name() string {
 	return self.name
 }
 
-func (self *CmdSuppliersSort) RpcMethod() string {
+func (self *CmdSetSuppliers) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSuppliersSort) RpcParams(reset bool) interface{} {
+func (self *CmdSetSuppliers) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(utils.CGREvent)
+		self.rpcParams = &engine.SupplierProfile{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdSuppliersSort) PostprocessRpcParams() error {
+func (self *CmdSetSuppliers) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSuppliersSort) RpcResult() interface{} {
-	atr := engine.SupplierProfile{}
-	return &atr
+func (self *CmdSetSuppliers) RpcResult() interface{} {
+	var s string
+	return &s
 }

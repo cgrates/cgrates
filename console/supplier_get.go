@@ -18,45 +18,48 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+)
 
 func init() {
-	c := &CmdRemoveSuppliers{
-		name:      "suppliers_remove",
-		rpcMethod: "ApierV1.RemSupplierProfile",
+	c := &CmdGetSupplier{
+		name:      "supplier_get",
+		rpcMethod: "ApierV1.GetSupplierProfile",
 		rpcParams: &utils.TenantID{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-type CmdRemoveSuppliers struct {
+type CmdGetSupplier struct {
 	name      string
 	rpcMethod string
 	rpcParams *utils.TenantID
 	*CommandExecuter
 }
 
-func (self *CmdRemoveSuppliers) Name() string {
+func (self *CmdGetSupplier) Name() string {
 	return self.name
 }
 
-func (self *CmdRemoveSuppliers) RpcMethod() string {
+func (self *CmdGetSupplier) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemoveSuppliers) RpcParams(reset bool) interface{} {
+func (self *CmdGetSupplier) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantID{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdRemoveSuppliers) PostprocessRpcParams() error {
+func (self *CmdGetSupplier) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemoveSuppliers) RpcResult() interface{} {
-	var s string
-	return &s
+func (self *CmdGetSupplier) RpcResult() interface{} {
+	atr := engine.SupplierProfile{}
+	return &atr
 }

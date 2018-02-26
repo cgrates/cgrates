@@ -20,46 +20,46 @@ package console
 
 import (
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdGetSuppliers{
+	c := &CmdSuppliersSort{
 		name:      "suppliers",
-		rpcMethod: "ApierV1.GetSupplierProfile",
-		rpcParams: &utils.TenantID{},
+		rpcMethod: "SupplierSv1.GetSuppliers",
+		rpcParams: &engine.ArgsGetSuppliers{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-type CmdGetSuppliers struct {
-	name      string
-	rpcMethod string
-	rpcParams *utils.TenantID
+type CmdSuppliersSort struct {
+	name       string
+	rpcMethod  string
+	rpcParams  *engine.ArgsGetSuppliers
+	clientArgs []string
 	*CommandExecuter
 }
 
-func (self *CmdGetSuppliers) Name() string {
+func (self *CmdSuppliersSort) Name() string {
 	return self.name
 }
 
-func (self *CmdGetSuppliers) RpcMethod() string {
+func (self *CmdSuppliersSort) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetSuppliers) RpcParams(reset bool) interface{} {
+func (self *CmdSuppliersSort) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantID{}
+		self.rpcParams = &engine.ArgsGetSuppliers{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetSuppliers) PostprocessRpcParams() error {
+func (self *CmdSuppliersSort) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetSuppliers) RpcResult() interface{} {
-	atr := engine.SupplierProfile{}
+func (self *CmdSuppliersSort) RpcResult() interface{} {
+	var atr *engine.SortedSuppliers
 	return &atr
 }
