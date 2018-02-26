@@ -336,7 +336,7 @@ func TestRSAllocateResource(t *testing.T) {
 	if alcMessage, err := rs.allocateResource(ru1, true); err != nil {
 		t.Error(err.Error())
 	} else {
-		if alcMessage != "RL2" {
+		if alcMessage != "ALLOC" {
 			t.Errorf("Wrong allocation message: %v", alcMessage)
 		}
 	}
@@ -350,8 +350,8 @@ func TestRSAllocateResource(t *testing.T) {
 	}
 
 	ru2.Units = 0
-	if _, err := rs.allocateResource(ru2, false); err == nil {
-		t.Error("Duplicate ResourceUsage id should not be allowed")
+	if _, err := rs.allocateResource(ru2, false); err != nil {
+		t.Error(err)
 	}
 }
 

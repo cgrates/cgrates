@@ -196,7 +196,7 @@ func testV1RsTTL0(t *testing.T) {
 		argsRU, &reply); err != nil {
 		t.Error(err)
 	}
-	// second allocation should be also allowed
+	// overwrite the first allocation
 	argsRU = utils.ArgRSv1ResourceUsage{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -205,7 +205,7 @@ func testV1RsTTL0(t *testing.T) {
 				"Destination": "3002"},
 		},
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
-		Units:   1,
+		Units:   2,
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources, argsRU, &reply); err != nil {
 		t.Error(err)
@@ -219,13 +219,13 @@ func testV1RsTTL0(t *testing.T) {
 				"Destination": "3002"},
 		},
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e22",
-		Units:   2,
+		Units:   4,
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources, argsRU, &reply); err == nil ||
 		err.Error() != utils.ErrResourceUnavailable.Error() {
 		t.Error(err)
 	}
-	// make sure no usage was recorded
+	// check the record
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
 		CGREvent: utils.CGREvent{
@@ -235,6 +235,22 @@ func testV1RsTTL0(t *testing.T) {
 				"Destination": "3002"},
 		},
 	}
+	expiryTime, err := utils.ParseTimeDetectLayout("0001-01-01T00:00:00Z", "")
+	if err != nil {
+		t.Error(err)
+	}
+	expectedResources := &engine.Resource{
+		Tenant: "cgrates.org",
+		ID:     "ResGroup3",
+		Usages: map[string]*engine.ResourceUsage{
+			"651a8db2-4f67-4cf8-b622-169e8a482e21": &engine.ResourceUsage{
+				Tenant:     "cgrates.org",
+				ID:         "651a8db2-4f67-4cf8-b622-169e8a482e21",
+				ExpiryTime: expiryTime,
+				Units:      2,
+			},
+		},
+	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent,
 		args, &rs); err != nil {
 		t.Error(err)
@@ -242,8 +258,8 @@ func testV1RsTTL0(t *testing.T) {
 		t.Errorf("Resources: %+v", rs)
 	} else {
 		res := *rs
-		if len(res[0].Usages) != 0 || len(res[0].TTLIdx) != 0 {
-			t.Errorf("Resource should have no usage records in: %+v", res[0])
+		if !reflect.DeepEqual(expectedResources, res[0]) {
+			t.Errorf("Expecting: %+v, received: %+v", expectedResources, res[0])
 		}
 	}
 	// release should not give out errors

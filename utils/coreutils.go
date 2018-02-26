@@ -294,6 +294,9 @@ func ParseDurationWithNanosecs(durStr string) (d time.Duration, err error) {
 	if durStr == "" {
 		return
 	}
+	if durStr == UNLIMITED {
+		durStr = "-1"
+	}
 	if _, err = strconv.ParseFloat(durStr, 64); err == nil { // Seconds format considered
 		durStr += "ns"
 	}
