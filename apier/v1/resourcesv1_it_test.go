@@ -258,8 +258,12 @@ func testV1RsTTL0(t *testing.T) {
 		t.Errorf("Resources: %+v", rs)
 	} else {
 		res := *rs
-		if !reflect.DeepEqual(expectedResources, res[0]) {
-			t.Errorf("Expecting: %+v, received: %+v", expectedResources, res[0])
+		if !reflect.DeepEqual(expectedResources.Tenant, res[0].Tenant) {
+			t.Errorf("Expecting: %+v, received: %+v", expectedResources.Tenant, res[0].Tenant)
+		} else if !reflect.DeepEqual(expectedResources.ID, res[0].ID) {
+			t.Errorf("Expecting: %+v, received: %+v", expectedResources.ID, res[0].ID)
+		} else if !reflect.DeepEqual(expectedResources.Usages, res[0].Usages) {
+			t.Errorf("Expecting: %+v, received: %+v", expectedResources.Usages, res[0].Usages)
 		}
 	}
 	// release should not give out errors

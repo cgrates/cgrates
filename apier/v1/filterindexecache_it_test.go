@@ -1419,7 +1419,7 @@ func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 	}
 	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources, argsReU, &reply); err != nil {
 		t.Error(err)
-	} else if reply != "Approved" {
+	} else if reply != "ResGroup1" {
 		t.Error("Unexpected reply returned", reply)
 	}
 

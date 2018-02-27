@@ -461,7 +461,7 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 			}
 			indexer.IndexTPFilter(FilterToTPFilter(fltr), th.ID)
 		}
-		if err = indexer.StoreIndexes(); err != nil {
+		if err = indexer.StoreIndexes(utils.NonTransactional); err != nil {
 			return
 		}
 	}
@@ -567,7 +567,7 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 			}
 			indexer.IndexTPFilter(FilterToTPFilter(fltr), sqp.ID)
 		}
-		if err = indexer.StoreIndexes(); err != nil {
+		if err = indexer.StoreIndexes(utils.NonTransactional); err != nil {
 			return
 		}
 	}
@@ -750,7 +750,7 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 			}
 			indexer.IndexTPFilter(FilterToTPFilter(fltr), rp.ID)
 		}
-		if err = indexer.StoreIndexes(); err != nil {
+		if err = indexer.StoreIndexes(utils.NonTransactional); err != nil {
 			return
 		}
 		cache.RemPrefixKey(utils.EventResourcesPrefix, true, utils.NonTransactional)
@@ -1214,7 +1214,7 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 			}
 			indexer.IndexTPFilter(FilterToTPFilter(fltr), supp.ID)
 		}
-		if err = indexer.StoreIndexes(); err != nil {
+		if err = indexer.StoreIndexes(utils.NonTransactional); err != nil {
 			return
 		}
 	}
@@ -1351,7 +1351,7 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 				}
 				indexer.IndexTPFilter(FilterToTPFilter(fltr), ap.ID)
 			}
-			if err = indexer.StoreIndexes(); err != nil {
+			if err = indexer.StoreIndexes(utils.NonTransactional); err != nil {
 				return
 			}
 		}

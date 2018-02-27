@@ -222,16 +222,15 @@ func (sS *StatService) processEvent(ev *utils.CGREvent) (err error) {
 					sq.TenantID(), ev.TenantID(), err.Error()))
 			withErrors = true
 		}
-		if sS.storeInterval == 0 || sq.dirty == nil { // don't save
-			continue
-		}
-		if sS.storeInterval == -1 {
-			sS.StoreStatQueue(sq)
-		} else {
-			*sq.dirty = true // mark it to be saved
-			sS.ssqMux.Lock()
-			sS.storedStatQueues[sq.TenantID()] = true
-			sS.ssqMux.Unlock()
+		if sS.storeInterval != 0 && sq.dirty != nil { // don't save
+			if sS.storeInterval == -1 {
+				sS.StoreStatQueue(sq)
+			} else {
+				*sq.dirty = true // mark it to be saved
+				sS.ssqMux.Lock()
+				sS.storedStatQueues[sq.TenantID()] = true
+				sS.ssqMux.Unlock()
+			}
 		}
 		if sS.thdS != nil {
 			var thIDs []string
@@ -250,7 +249,7 @@ func (sS *StatService) processEvent(ev *utils.CGREvent) (err error) {
 				thEv.Event[metricID] = metric.GetValue()
 			}
 			var hits int
-			if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil &&
+			if err := sS.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<StatS> error: %s processing event %+v with ThresholdS.", err.Error(), thEv))

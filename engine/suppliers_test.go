@@ -433,7 +433,7 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 	for _, spr := range sppTest {
 		dmSPP.SetSupplierProfile(spr, false)
 	}
-	err = ref.StoreIndexes()
+	err = ref.StoreIndexes(utils.NonTransactional)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}

@@ -68,7 +68,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	atrRFI.IndexTPFilter(FilterToTPFilter(attribStringF), stringFilterID)
 	atrRFI.IndexTPFilter(FilterToTPFilter(attribPrefF), prefixFilterID)
 	atrRFI.IndexTPFilter(FilterToTPFilter(attribDefaultF), defaultFilterID)
-	err = atrRFI.StoreIndexes()
+	err = atrRFI.StoreIndexes(utils.NonTransactional)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}

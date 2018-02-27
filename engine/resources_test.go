@@ -525,7 +525,7 @@ func TestRSPopulateResourceService(t *testing.T) {
 	for _, resp := range resprf {
 		dmRES.SetResourceProfile(resp, false)
 	}
-	err = ref.StoreIndexes()
+	err = ref.StoreIndexes(utils.NonTransactional)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
