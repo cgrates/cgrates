@@ -21,7 +21,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -68,8 +67,10 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,,false,false,10`
 	}
 	csvr.WriteToDatabase(false, false, false)
 
-	cache.Flush()
-	dbAcntActs.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	engine.Cache.Clear(nil)
+	dbAcntActs.LoadDataDBCache(nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	expectAcnt := &engine.Account{ID: "cgrates.org:1"}
 	if acnt, err := dbAcntActs.DataDB().GetAccount("cgrates.org:1"); err != nil {
