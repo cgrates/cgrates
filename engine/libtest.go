@@ -42,7 +42,7 @@ func InitDataDb(cfg *config.CGRConfig) error {
 	if err := dm.DataDB().Flush(""); err != nil {
 		return err
 	}
-	dm.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	//dm.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	//	Write version before starting
 	if err := SetDBVersions(dm.dataDB); err != nil {
 		return err

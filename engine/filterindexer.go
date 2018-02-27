@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -103,27 +102,24 @@ func (rfi *FilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID st
 	return
 }
 
-func (rfi *FilterIndexer) cacheRemItemType() {
+func (rfi *FilterIndexer) cacheRemItemType() { // ToDo: tune here by removing per item
 	switch rfi.itemType {
+
 	case utils.ThresholdProfilePrefix:
-		cache.RemPrefixKey(utils.ThresholdFilterIndexes, true, utils.NonTransactional)
-		cache.RemPrefixKey(utils.ThresholdFilterRevIndexes, true, utils.NonTransactional)
+		Cache.Clear([]string{utils.CacheThresholdFilterIndexes, utils.CacheThresholdFilterRevIndexes})
 
 	case utils.ResourceProfilesPrefix:
-		cache.RemPrefixKey(utils.ResourceFilterIndexes, true, utils.NonTransactional)
-		cache.RemPrefixKey(utils.ResourceFilterRevIndexes, true, utils.NonTransactional)
+		Cache.Clear([]string{utils.CacheResourceFilterIndexes, utils.CacheResourceFilterRevIndexes})
 
 	case utils.StatQueueProfilePrefix:
-		cache.RemPrefixKey(utils.StatFilterIndexes, true, utils.NonTransactional)
-		cache.RemPrefixKey(utils.StatFilterRevIndexes, true, utils.NonTransactional)
+		Cache.Clear([]string{utils.CacheStatFilterIndexes, utils.CacheStatFilterRevIndexes})
 
 	case utils.SupplierProfilePrefix:
-		cache.RemPrefixKey(utils.SupplierFilterIndexes, true, utils.NonTransactional)
-		cache.RemPrefixKey(utils.SupplierFilterRevIndexes, true, utils.NonTransactional)
+		Cache.Clear([]string{utils.CacheSupplierFilterIndexes, utils.CacheSupplierFilterRevIndexes})
 
 	case utils.AttributeProfilePrefix:
-		cache.RemPrefixKey(utils.AttributeFilterIndexes, true, utils.NonTransactional)
-		cache.RemPrefixKey(utils.AttributeFilterRevIndexes, true, utils.NonTransactional)
+		Cache.Clear([]string{utils.CacheAttributeFilterIndexes, utils.CacheAttributeFilterRevIndexes})
+
 	}
 }
 

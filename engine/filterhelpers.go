@@ -28,7 +28,7 @@ import (
 // fieldIDs limits the fields which are checked against indexes
 // helper on top of dataDB.MatchFilterIndex, adding utils.ANY to list of fields queried
 func matchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldIDs *[]string,
-	dm *DataManager, dbIdxKey string) (itemIDs utils.StringMap, err error) {
+	dm *DataManager, cacheID, itemIDPrefix string) (itemIDs utils.StringMap, err error) {
 	itemIDs = make(utils.StringMap)
 	allFieldIDs := make([]string, len(ev))
 	i := 0
@@ -67,7 +67,7 @@ func matchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 			}
 			var dbItemIDs utils.StringMap // list of items matched in DB
 			for _, val := range fldVals {
-				dbItemIDs, err = dm.MatchFilterIndex(dbIdxKey, filterIndexTypes[i], fldName, val)
+				dbItemIDs, err = dm.MatchFilterIndex(cacheID, itemIDPrefix, filterIndexTypes[i], fldName, val)
 				if err != nil {
 					if err == utils.ErrNotFound {
 						err = nil

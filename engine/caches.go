@@ -19,19 +19,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"sync"
-
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/ltcache"
 )
 
+var Cache *ltcache.TransCache
+
+func init() {
+	InitCache(nil)
+}
+
+// InitCache will instantiate the cache with specific or default configuraiton
+func InitCache(cfg config.CacheConfig) {
+	if cfg == nil {
+		cfg = config.CgrConfig().CacheCfg()
+	}
+	Cache = ltcache.NewTransCache(cfg.AsTransCacheConfig())
+}
+
 func NewCacheS(cfg *config.CGRConfig, dm *DataManager) (c *CacheS) {
+	InitCache(cfg.CacheCfg()) // make sure we use the same config as package shared one
 	c = &CacheS{cfg: cfg, dm: dm,
 		cItems: make(map[string]chan struct{})}
 	for k := range cfg.CacheCfg() {
 		c.cItems[k] = make(chan struct{})
 	}
-	cache.NewCache(cfg.CacheCfg()) // init cache
 	return
 }
 
@@ -39,6 +51,5 @@ func NewCacheS(cfg *config.CGRConfig, dm *DataManager) (c *CacheS) {
 type CacheS struct {
 	cfg    *config.CGRConfig
 	dm     *DataManager
-	cItems map[string]chan struct{} // signal receiving of the
-	lMux   sync.RWMutex
+	cItems map[string]chan struct{} // signal precaching done
 }

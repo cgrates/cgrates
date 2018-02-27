@@ -78,10 +78,6 @@ func (self *SQLStorage) RebuildReverseForPrefix(prefix string) error {
 	return utils.ErrNotImplemented
 }
 
-func (self *SQLStorage) PreloadCacheForPrefix(prefix string) error {
-	return utils.ErrNotImplemented
-}
-
 func (self *SQLStorage) CreateTablesFromScript(scriptPath string) error {
 	fileContent, err := ioutil.ReadFile(scriptPath)
 	if err != nil {

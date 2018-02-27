@@ -31,7 +31,6 @@ import (
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/apier/v2"
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/cdrc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -769,8 +768,8 @@ func main() {
 	if *nodeID != "" {
 		cfg.NodeID = *nodeID
 	}
-	config.SetCgrConfig(cfg)       // Share the config object
-	cache.NewCache(cfg.CacheCfg()) // init cache
+	config.SetCgrConfig(cfg) // Share the config object
+	engine.InitCache(cfg.CacheCfg())
 	// init syslog
 	if err = initLogger(cfg); err != nil {
 		log.Fatalf("Could not initialize syslog connection, err: <%s>", err.Error())

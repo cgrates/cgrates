@@ -25,7 +25,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -52,17 +51,17 @@ type Responder struct {
 	Timeout          time.Duration
 	Timezone         string
 	MaxComputedUsage map[string]time.Duration
-	responseCache    *cache.ResponseCache
+	responseCache    *utils.ResponseCache
 }
 
 func (rs *Responder) SetTimeToLive(timeToLive time.Duration, out *int) error {
-	rs.responseCache = cache.NewResponseCache(timeToLive)
+	rs.responseCache = utils.NewResponseCache(timeToLive)
 	return nil
 }
 
-func (rs *Responder) getCache() *cache.ResponseCache {
+func (rs *Responder) getCache() *utils.ResponseCache {
 	if rs.responseCache == nil {
-		rs.responseCache = cache.NewResponseCache(0)
+		rs.responseCache = utils.NewResponseCache(0)
 	}
 	return rs.responseCache
 }
@@ -184,14 +183,14 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 	}
 	r, e := arg.MaxDebit()
 	if e != nil {
-		rs.getCache().Cache(cacheKey, &cache.CacheItem{
+		rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{
 			Err: e,
 		})
 		return e
 	} else if r != nil {
 		*reply = *r
 	}
-	rs.getCache().Cache(cacheKey, &cache.CacheItem{
+	rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{
 		Value: reply,
 		Err:   err,
 	})
@@ -224,7 +223,7 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err 
 			Subject:     arg.Subject,
 			Context:     utils.MetaRating,
 		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
-		rs.getCache().Cache(cacheKey, &cache.CacheItem{
+		rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{
 			Err: err,
 		})
 		return err
@@ -233,7 +232,7 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err 
 		return utils.ErrMaxUsageExceeded
 	}
 	err = arg.RefundIncrements()
-	rs.getCache().Cache(cacheKey, &cache.CacheItem{
+	rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{
 		Value: reply,
 		Err:   err,
 	})
@@ -266,7 +265,7 @@ func (rs *Responder) RefundRounding(arg *CallDescriptor, reply *float64) (err er
 			Subject:     arg.Subject,
 			Context:     utils.MetaRating,
 		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
-		rs.getCache().Cache(cacheKey, &cache.CacheItem{
+		rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{
 			Err: err,
 		})
 		return err
@@ -275,7 +274,7 @@ func (rs *Responder) RefundRounding(arg *CallDescriptor, reply *float64) (err er
 		return utils.ErrMaxUsageExceeded
 	}
 	err = arg.RefundRounding()
-	rs.getCache().Cache(cacheKey, &cache.CacheItem{
+	rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{
 		Value: reply,
 		Err:   err,
 	})
@@ -325,7 +324,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) (err erro
 	}
 	// replace user profile fields
 	if err := LoadUserProfile(ev, utils.EXTRA_FIELDS); err != nil {
-		rs.getCache().Cache(cacheKey, &cache.CacheItem{Err: err})
+		rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
 		return err
 	}
 	// replace aliases
@@ -339,7 +338,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) (err erro
 			Subject:     ev.Subject,
 			Context:     utils.MetaRating,
 		}, ev, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
-		rs.getCache().Cache(cacheKey, &cache.CacheItem{Err: err})
+		rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
 		return err
 	}
 	if !rs.usageAllowed(ev.ToR, ev.Usage) {
@@ -351,7 +350,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) (err erro
 		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
 	dcs := &utils.DerivedChargers{}
 	if err := rs.GetDerivedChargers(attrsDC, dcs); err != nil {
-		rs.getCache().Cache(cacheKey, &cache.CacheItem{Err: err})
+		rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
 		return err
 	}
 	dcs, _ = dcs.AppendDefaultRun()
@@ -372,12 +371,12 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) (err erro
 		}
 		startTime, err := ev.GetSetupTime(utils.META_DEFAULT, rs.Timezone)
 		if err != nil {
-			rs.getCache().Cache(cacheKey, &cache.CacheItem{Err: err})
+			rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
 			return err
 		}
 		usage, err := ev.GetDuration(utils.META_DEFAULT)
 		if err != nil {
-			rs.getCache().Cache(cacheKey, &cache.CacheItem{Err: err})
+			rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
 			return err
 		}
 		if usage == 0 {
@@ -400,7 +399,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) (err erro
 		err = rs.GetMaxSessionTime(cd, &remainingDuration)
 		if err != nil {
 			*reply = 0
-			rs.getCache().Cache(cacheKey, &cache.CacheItem{Err: err})
+			rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
 			return err
 		}
 		if utils.IsSliceMember([]string{utils.META_POSTPAID, utils.POSTPAID}, ev.GetReqType(dc.RequestTypeField)) {
@@ -415,7 +414,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) (err erro
 		}
 	}
 	*reply = maxCallDuration
-	rs.getCache().Cache(cacheKey, &cache.CacheItem{Value: reply})
+	rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Value: reply})
 	return nil
 }
 
@@ -458,7 +457,7 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) (err error) {
 	//utils.Logger.Info(fmt.Sprintf("Derived chargers for: %+v", attrsDC))
 	dcs := &utils.DerivedChargers{}
 	if err := rs.GetDerivedChargers(attrsDC, dcs); err != nil {
-		rs.getCache().Cache(cacheKey, &cache.CacheItem{
+		rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{
 			Err: err,
 		})
 		return err
@@ -474,13 +473,13 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) (err error) {
 		if err != nil || startTime.IsZero() { // AnswerTime not parsable, try SetupTime
 			startTime, err = ev.GetSetupTime(dc.SetupTimeField, rs.Timezone)
 			if err != nil {
-				rs.getCache().Cache(cacheKey, &cache.CacheItem{Err: err})
+				rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
 				return errors.New("Error parsing answer event start time")
 			}
 		}
 		endTime, err := ev.GetEndTime("", rs.Timezone)
 		if err != nil {
-			rs.getCache().Cache(cacheKey, &cache.CacheItem{Err: err})
+			rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
 			return errors.New("Error parsing answer event end time")
 		}
 		extraFields := ev.GetExtraFields()
@@ -507,7 +506,7 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) (err error) {
 	}
 	//utils.Logger.Info(fmt.Sprintf("RUNS: %v", len(sesRuns)))
 	*sRuns = sesRuns
-	rs.getCache().Cache(cacheKey, &cache.CacheItem{Value: sRuns})
+	rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Value: sRuns})
 	return nil
 }
 
@@ -547,7 +546,7 @@ func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) (err error) {
 			Subject:     cd.Subject,
 			Context:     utils.MetaRating,
 		}, cd, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
-		rs.getCache().Cache(cacheKey, &cache.CacheItem{Err: err})
+		rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
 		return err
 	}
 	if !rs.usageAllowed(cd.TOR, cd.GetDuration()) {
@@ -555,7 +554,7 @@ func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) (err error) {
 	}
 	lcrCost, err := attrs.CallDescriptor.GetLCR(rs.CdrStats, attrs.LCRFilter, attrs.Paginator)
 	if err != nil {
-		rs.getCache().Cache(cacheKey, &cache.CacheItem{Err: err})
+		rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
 		return err
 	}
 	if lcrCost.Entry != nil && lcrCost.Entry.Strategy == LCR_STRATEGY_LOAD {
@@ -563,7 +562,7 @@ func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) (err error) {
 			suppl.Cost = -1 // In case of load distribution we don't calculate costs
 		}
 	}
-	rs.getCache().Cache(cacheKey, &cache.CacheItem{Value: lcrCost})
+	rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Value: lcrCost})
 	*reply = *lcrCost
 	return nil
 }

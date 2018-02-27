@@ -16,26 +16,21 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package cache
+package utils
 
 import (
-	"errors"
 	"sync"
 	"time"
-
-	"github.com/cgrates/cgrates/utils"
 )
 
-var ErrNotFound = errors.New("NOT_FOUND")
-
-type CacheItem struct {
+type ResponseCacheItem struct {
 	Value interface{}
 	Err   error
 }
 
 type ResponseCache struct {
 	ttl       time.Duration
-	cache     map[string]*CacheItem
+	cache     map[string]*ResponseCacheItem
 	semaphore map[string]chan bool // used for waiting till the first goroutine processes the response
 	mu        sync.RWMutex
 }
@@ -43,13 +38,13 @@ type ResponseCache struct {
 func NewResponseCache(ttl time.Duration) *ResponseCache {
 	return &ResponseCache{
 		ttl:       ttl,
-		cache:     make(map[string]*CacheItem),
+		cache:     make(map[string]*ResponseCacheItem),
 		semaphore: make(map[string]chan bool),
 		mu:        sync.RWMutex{},
 	}
 }
 
-func (rc *ResponseCache) Cache(key string, item *CacheItem) {
+func (rc *ResponseCache) Cache(key string, item *ResponseCacheItem) {
 	if rc.ttl == 0 {
 		return
 	}
@@ -68,9 +63,9 @@ func (rc *ResponseCache) Cache(key string, item *CacheItem) {
 	}()
 }
 
-func (rc *ResponseCache) Get(key string) (*CacheItem, error) {
+func (rc *ResponseCache) Get(key string) (*ResponseCacheItem, error) {
 	if rc.ttl == 0 {
-		return nil, utils.ErrNotImplemented
+		return nil, ErrNotImplemented
 	}
 	rc.mu.RLock()
 	item, ok := rc.cache[key]

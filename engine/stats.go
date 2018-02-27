@@ -25,7 +25,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -108,8 +107,10 @@ func (sS *StatService) storeStats() {
 		if sID == "" {
 			break // no more keys, backup completed
 		}
-		if sqIf, ok := cache.Get(utils.StatQueuePrefix + sID); !ok || sqIf == nil {
-			utils.Logger.Warning(fmt.Sprintf("<StatS> failed retrieving from cache stat queue with ID: %s", sID))
+		if sqIf, ok := Cache.Get(utils.CacheStatQueues, sID); !ok || sqIf == nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> failed retrieving from cache stat queue with ID: %s",
+					utils.StatService, sID))
 		} else if err := sS.StoreStatQueue(sqIf.(*StatQueue)); err != nil {
 			failedSqIDs = append(failedSqIDs, sID) // record failure so we can schedule it for next backup
 		}
@@ -144,7 +145,7 @@ func (sS *StatService) StoreStatQueue(sq *StatQueue) (err error) {
 func (sS *StatService) matchingStatQueuesForEvent(ev *utils.CGREvent) (sqs StatQueues, err error) {
 	matchingSQs := make(map[string]*StatQueue)
 	sqIDs, err := matchingItemIDsForEvent(ev.Event, sS.stringIndexedFields, sS.prefixIndexedFields,
-		sS.dm, utils.StatFilterIndexes+ev.Tenant)
+		sS.dm, utils.CacheStatFilterIndexes, ev.Tenant)
 	if err != nil {
 		return nil, err
 	}

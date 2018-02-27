@@ -26,7 +26,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -114,7 +113,7 @@ type CdrServer struct {
 	thdS          rpcclient.RpcClientConnection
 	stats         rpcclient.RpcClientConnection
 	guard         *guardian.GuardianLock
-	responseCache *cache.ResponseCache
+	responseCache *utils.ResponseCache
 	httpPoster    *utils.HTTPPoster // used for replication
 }
 
@@ -122,13 +121,13 @@ func (self *CdrServer) Timezone() string {
 	return self.cgrCfg.DefaultTimezone
 }
 func (self *CdrServer) SetTimeToLive(timeToLive time.Duration, out *int) error {
-	self.responseCache = cache.NewResponseCache(timeToLive)
+	self.responseCache = utils.NewResponseCache(timeToLive)
 	return nil
 }
 
-func (self *CdrServer) getCache() *cache.ResponseCache {
+func (self *CdrServer) getCache() *utils.ResponseCache {
 	if self.responseCache == nil {
-		self.responseCache = cache.NewResponseCache(0)
+		self.responseCache = utils.NewResponseCache(0)
 	}
 	return self.responseCache
 }
@@ -539,10 +538,10 @@ func (self *CdrServer) V1ProcessCDR(cdr *CDR, reply *string) error {
 		return item.Err
 	}
 	if err := self.processCdr(cdr); err != nil {
-		self.getCache().Cache(cacheKey, &cache.CacheItem{Err: err})
+		self.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
 		return utils.NewErrServerError(err)
 	}
-	self.getCache().Cache(cacheKey, &cache.CacheItem{Value: utils.OK})
+	self.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Value: utils.OK})
 	*reply = utils.OK
 	return nil
 }
@@ -562,10 +561,10 @@ func (self *CdrServer) V1StoreSMCost(attr AttrCDRSStoreSMCost, reply *string) er
 		return item.Err
 	}
 	if err := self.storeSMCost(attr.Cost, attr.CheckDuplicate); err != nil {
-		self.getCache().Cache(cacheKey, &cache.CacheItem{Err: err})
+		self.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
 		return utils.NewErrServerError(err)
 	}
-	self.getCache().Cache(cacheKey, &cache.CacheItem{Value: utils.OK})
+	self.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Value: utils.OK})
 	*reply = utils.OK
 	return nil
 }
@@ -606,11 +605,11 @@ func (cdrs *CdrServer) V2StoreSMCost(args ArgsV2CDRSStoreSMCost, reply *string) 
 		Usage:       args.Cost.Usage,
 		CostDetails: cc,
 	}, args.CheckDuplicate); err != nil {
-		cdrs.getCache().Cache(cacheKey, &cache.CacheItem{Err: err})
+		cdrs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
-	cdrs.getCache().Cache(cacheKey, &cache.CacheItem{Value: *reply})
+	cdrs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Value: *reply})
 	return nil
 
 }

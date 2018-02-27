@@ -18,12 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"github.com/cgrates/cgrates/cache"
-	"github.com/cgrates/cgrates/utils"
 	"log"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -378,8 +378,8 @@ func init() {
 		log.Print("error in LoadAttributeProfiles:", err)
 	}
 	csvr.WriteToDatabase(false, false, false)
-	cache.Flush()
-	dm.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	Cache.Clear(nil)
+	//dm.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 }
 
 func TestLoadDestinations(t *testing.T) {

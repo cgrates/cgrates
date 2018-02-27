@@ -23,7 +23,6 @@ import (
 	"sort"
 	"time"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -117,7 +116,7 @@ func (spS *SupplierService) Shutdown() error {
 func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent) (sPrfls SupplierProfiles, err error) {
 	matchingLPs := make(map[string]*SupplierProfile)
 	sPrflIDs, err := matchingItemIDsForEvent(ev.Event, spS.stringIndexedFields,
-		spS.prefixIndexedFields, spS.dm, utils.SupplierFilterIndexes+ev.Tenant)
+		spS.prefixIndexedFields, spS.dm, utils.CacheSupplierFilterIndexes, ev.Tenant)
 	if err != nil {
 		return nil, err
 	}
@@ -201,7 +200,7 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 		if maxDur, err := cd.GetMaxSessionDuration(); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> ignoring cost for account: %s, err: %s",
-					utils.SupplierS,anctID, err.Error()))
+					utils.SupplierS, anctID, err.Error()))
 		} else if maxDur >= usage {
 			return map[string]interface{}{
 				utils.Cost:    0.0,
@@ -221,8 +220,8 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 			},
 		}
 		// force cache set so it can be picked by calldescriptor for cost calculation
-		cacheKey := utils.RATING_PROFILE_PREFIX + rPrfl.Id
-		cache.Set(cacheKey, rPrfl, true, utils.NonTransactional)
+		Cache.Set(utils.CacheRatingProfiles, rPrfl.Id, rPrfl, nil,
+			true, utils.NonTransactional)
 		cd := &CallDescriptor{
 			Direction:     utils.OUT,
 			Category:      utils.MetaSuppliers,
@@ -235,7 +234,8 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 			DurationIndex: usage,
 		}
 		cc, err := cd.GetCost()
-		cache.RemKey(cacheKey, true, utils.NonTransactional) // Remove here so we don't overload memory
+		Cache.Remove(utils.CacheRatingProfiles, rPrfl.Id,
+			true, utils.NonTransactional) // Remove here so we don't overload memory
 		if err != nil {
 			if err != utils.ErrNotFound {
 				return nil, err

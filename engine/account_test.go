@@ -1022,7 +1022,12 @@ func TestAccountAddMinuteNil(t *testing.T) {
 	ub := &Account{
 		ID:            "rif",
 		AllowNegative: true,
-		BalanceMap:    map[string]Balances{utils.SMS: Balances{&Balance{Value: 14}}, utils.DATA: Balances{&Balance{Value: 1024}}, utils.VOICE: Balances{&Balance{Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}}, &Balance{Weight: 10, DestinationIDs: utils.StringMap{"RET": true}}}},
+		BalanceMap: map[string]Balances{
+			utils.SMS:  Balances{&Balance{Value: 14}},
+			utils.DATA: Balances{&Balance{Value: 1024}},
+			utils.VOICE: Balances{
+				&Balance{Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}},
+				&Balance{Weight: 10, DestinationIDs: utils.StringMap{"RET": true}}}},
 	}
 	ub.debitBalanceAction(nil, false, false)
 	if len(ub.BalanceMap[utils.VOICE]) != 2 {

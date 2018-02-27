@@ -83,7 +83,8 @@ type DataDB interface {
 	SetActionPlan(string, *ActionPlan, bool, string) error
 	RemoveActionPlan(key string, transactionID string) error
 	GetAllActionPlans() (map[string]*ActionPlan, error)
-	GetAccountActionPlans(acntID string, skipCache bool, transactionID string) (apIDs []string, err error)
+	GetAccountActionPlans(acntID string, skipCache bool,
+		transactionID string) (apIDs []string, err error)
 	SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error)
 	RemAccountActionPlans(acntID string, apIDs []string) (err error)
 	PushTask(*Task) error
@@ -117,13 +118,18 @@ type DataDB interface {
 	RemoveTimingDrv(string) error
 	GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error)
 	AddLoadHistory(*utils.LoadInstance, int, string) error
-	GetFilterIndexesDrv(dbKey, filterType string, fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error)
-	SetFilterIndexesDrv(dbKey string, indexes map[string]utils.StringMap, commit bool, transactionID string) (err error)
+	GetFilterIndexesDrv(dbKey, filterType string,
+		fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error)
+	SetFilterIndexesDrv(dbKey string, indexes map[string]utils.StringMap,
+		commit bool, transactionID string) (err error)
 	RemoveFilterIndexesDrv(id string) (err error)
-	GetFilterReverseIndexesDrv(dbKey string, fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error)
-	SetFilterReverseIndexesDrv(dbKey string, indexes map[string]utils.StringMap, commit bool, transactionID string) (err error)
+	GetFilterReverseIndexesDrv(dbKey string,
+		fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error)
+	SetFilterReverseIndexesDrv(dbKey string, indexes map[string]utils.StringMap,
+		commit bool, transactionID string) (err error)
 	RemoveFilterReverseIndexesDrv(dbKey string) (err error)
-	MatchFilterIndexDrv(dbKey, filterType, fieldName, fieldVal string) (itemIDs utils.StringMap, err error)
+	MatchFilterIndexDrv(cacheID, itemIDPrefix,
+		filterType, fieldName, fieldVal string) (itemIDs utils.StringMap, err error)
 	GetStatQueueProfileDrv(tenant string, ID string) (sq *StatQueueProfile, err error)
 	SetStatQueueProfileDrv(sq *StatQueueProfile) (err error)
 	RemStatQueueProfileDrv(tenant, id string) (err error)
@@ -171,7 +177,8 @@ type LoadStorage interface {
 // LoadReader reads from .csv or TP tables and provides the data ready for the tp_db or data_db.
 type LoadReader interface {
 	GetTpIds(string) ([]string, error)
-	GetTpTableIds(string, string, utils.TPDistinctIds, map[string]string, *utils.Paginator) ([]string, error)
+	GetTpTableIds(string, string, utils.TPDistinctIds,
+		map[string]string, *utils.Paginator) ([]string, error)
 	GetTPTimings(string, string) ([]*utils.ApierTPTiming, error)
 	GetTPDestinations(string, string) ([]*utils.TPDestination, error)
 	GetTPRates(string, string) ([]*utils.TPRate, error)

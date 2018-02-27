@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
 type CacheParamConfig struct {
@@ -67,4 +68,16 @@ func (self CacheConfig) loadFromJsonCfg(jsnCfg *CacheJsonCfg) (err error) {
 		self[kJsn] = val
 	}
 	return nil
+}
+
+func (cCfg CacheConfig) AsTransCacheConfig() (tcCfg map[string]*ltcache.CacheConfig) {
+	tcCfg = make(map[string]*ltcache.CacheConfig, len(cCfg))
+	for k, cPcfg := range cCfg {
+		tcCfg[k] = &ltcache.CacheConfig{
+			MaxItems:  cPcfg.Limit,
+			TTL:       cPcfg.TTL,
+			StaticTTL: cPcfg.StaticTTL,
+		}
+	}
+	return
 }

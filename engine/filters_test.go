@@ -19,7 +19,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -118,10 +117,15 @@ func TestFilterPassRSRFields(t *testing.T) {
 }
 
 func TestFilterPassDestinations(t *testing.T) {
-	cache.Set(utils.REVERSE_DESTINATION_PREFIX+"+49", []string{"DE", "EU_LANDLINE"}, true, "")
-	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
-		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
-		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
+	Cache.Set(utils.CacheReverseDestinations, "+49",
+		[]string{"DE", "EU_LANDLINE"}, nil, true, "")
+	cd := &CallDescriptor{Direction: "*out",
+		Category: "call", Tenant: "cgrates.org",
+		Subject: "dan", Destination: "+4986517174963",
+		TimeStart:     time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
+		DurationIndex: 132 * time.Second,
+		ExtraFields:   map[string]string{"navigation": "off"}}
 	rf, err := NewFilterRule(MetaDestinations, "Destination", []string{"DE"})
 	if err != nil {
 		t.Error(err)
@@ -336,7 +340,8 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
-	cache.Set(utils.REVERSE_DESTINATION_PREFIX+"+49", []string{"DE", "EU_LANDLINE"}, true, "")
+	Cache.Set(utils.CacheReverseDestinations, "+49",
+		[]string{"DE", "EU_LANDLINE"}, nil, true, "")
 	failEvent = map[string]interface{}{
 		utils.Destination: "+5086517174963",
 	}

@@ -25,7 +25,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -1566,12 +1565,12 @@ func TestActionSetDDestination(t *testing.T) {
 		t.Error("Error storing destination: ", d, err)
 	}
 	dm.DataDB().GetReverseDestination("111", false, utils.NonTransactional)
-	x1, found := cache.Get(utils.REVERSE_DESTINATION_PREFIX + "111")
+	x1, found := Cache.Get(utils.CacheReverseDestinations, "111")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
 	dm.DataDB().GetReverseDestination("222", false, utils.NonTransactional)
-	x1, found = cache.Get(utils.REVERSE_DESTINATION_PREFIX + "222")
+	x1, found = Cache.Get(utils.CacheReverseDestinations, "222")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
@@ -1586,21 +1585,21 @@ func TestActionSetDDestination(t *testing.T) {
 	}
 
 	var ok bool
-	x1, ok = cache.Get(utils.REVERSE_DESTINATION_PREFIX + "111")
+	x1, ok = Cache.Get(utils.CacheReverseDestinations, "111")
 	if ok {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	x1, ok = cache.Get(utils.REVERSE_DESTINATION_PREFIX + "222")
+	x1, ok = Cache.Get(utils.CacheReverseDestinations, "222")
 	if ok {
 		t.Error("Error cacheing destination: ", x1)
 	}
 	dm.DataDB().GetReverseDestination("333", false, utils.NonTransactional)
-	x1, found = cache.Get(utils.REVERSE_DESTINATION_PREFIX + "333")
+	x1, found = Cache.Get(utils.CacheReverseDestinations, "333")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
 	dm.DataDB().GetReverseDestination("666", false, utils.NonTransactional)
-	x1, found = cache.Get(utils.REVERSE_DESTINATION_PREFIX + "666")
+	x1, found = Cache.Get(utils.CacheReverseDestinations, "666")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
@@ -2720,8 +2719,8 @@ func TestCacheGetClonedActions(t *testing.T) {
 			Weight: float64(10),
 		},
 	}
-	cache.Set("MYTEST", actions, true, "")
-	clned, err := cache.GetCloned("MYTEST")
+	Cache.Set(utils.CacheActions, "MYTEST", actions, nil, true, "")
+	clned, err := Cache.GetCloned(utils.CacheActions, "MYTEST")
 	if err != nil {
 		t.Error(err)
 	}

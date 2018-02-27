@@ -19,11 +19,9 @@ package engine
 
 import (
 	"encoding/json"
-
-	"github.com/cgrates/cgrates/cache"
-	"github.com/cgrates/cgrates/utils"
-
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestDestinationStoreRestore(t *testing.T) {
@@ -82,7 +80,7 @@ func TestDestinationGetExists(t *testing.T) {
 
 func TestDestinationReverseGetExistsCache(t *testing.T) {
 	dm.DataDB().GetReverseDestination("0256", false, utils.NonTransactional)
-	if _, ok := cache.Get(utils.REVERSE_DESTINATION_PREFIX + "0256"); !ok {
+	if _, ok := Cache.Get(utils.CacheReverseDestinations, "0256"); !ok {
 		t.Error("Destination not cached:", err)
 	}
 }
@@ -96,7 +94,7 @@ func TestDestinationGetNotExists(t *testing.T) {
 
 func TestDestinationGetNotExistsCache(t *testing.T) {
 	dm.DataDB().GetDestination("not existing", false, utils.NonTransactional)
-	if d, ok := cache.Get("not existing"); ok {
+	if d, ok := Cache.Get(utils.CacheDestinations, "not existing"); ok {
 		t.Error("Bad destination cached: ", d)
 	}
 }

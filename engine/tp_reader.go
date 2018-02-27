@@ -25,7 +25,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/structmatcher"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -157,13 +156,13 @@ func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
 		dst := NewDestinationFromTPDestination(tpDst)
 		// ToDo: Fix transactions at onlineDB level
 		if err = tpr.dm.DataDB().SetDestination(dst, transID); err != nil {
-			cache.RollbackTransaction(transID)
+			Cache.RollbackTransaction(transID)
 		}
 		if err = tpr.dm.DataDB().SetReverseDestination(dst, transID); err != nil {
-			cache.RollbackTransaction(transID)
+			Cache.RollbackTransaction(transID)
 		}
 	}
-	cache.CommitTransaction(transID)
+	Cache.CommitTransaction(transID)
 	return true, nil
 }
 

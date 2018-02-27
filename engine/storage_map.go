@@ -26,7 +26,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -339,16 +338,16 @@ func (ms *MapStorage) GetDestination(key string, skipCache bool, transactionID s
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	cCommit := cacheCommit(transactionID)
-	key = utils.DESTINATION_PREFIX + key
+
 	if !skipCache {
-		if x, ok := cache.Get(key); ok {
+		if x, ok := Cache.Get(utils.CacheDestinations, key); ok {
 			if x != nil {
 				return x.(*Destination), nil
 			}
 			return nil, utils.ErrNotFound
 		}
 	}
-	if values, ok := ms.dict[key]; ok {
+	if values, ok := ms.dict[utils.DESTINATION_PREFIX+key]; ok {
 		b := bytes.NewBuffer(values)
 		r, err := zlib.NewReader(b)
 		if err != nil {
@@ -362,16 +361,15 @@ func (ms *MapStorage) GetDestination(key string, skipCache bool, transactionID s
 		dest = new(Destination)
 		err = ms.ms.Unmarshal(out, &dest)
 		if err != nil {
-			cache.Set(key, nil, cCommit, transactionID)
+			Cache.Set(utils.CacheDestinations, key, nil, nil, cCommit, transactionID)
 			return nil, utils.ErrNotFound
 		}
 	}
 	if dest == nil {
-		cache.Set(key, nil, cCommit, transactionID)
+		Cache.Set(utils.CacheDestinations, key, nil, nil, cCommit, transactionID)
 		return nil, utils.ErrNotFound
 	}
-	cache.Set(key, dest, cCommit, transactionID)
-
+	Cache.Set(utils.CacheDestinations, key, dest, nil, cCommit, transactionID)
 	return
 }
 
@@ -383,70 +381,69 @@ func (ms *MapStorage) SetDestination(dest *Destination, transactionID string) (e
 	w := zlib.NewWriter(&b)
 	w.Write(result)
 	w.Close()
-	key := utils.DESTINATION_PREFIX + dest.Id
-	ms.dict[key] = b.Bytes()
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
+	ms.dict[utils.DESTINATION_PREFIX+dest.Id] = b.Bytes()
+	Cache.Remove(utils.CacheDestinations, dest.Id,
+		cacheCommit(transactionID), transactionID)
 	return
 }
 
-func (ms *MapStorage) GetReverseDestination(prefix string, skipCache bool, transactionID string) (ids []string, err error) {
+func (ms *MapStorage) GetReverseDestination(prefix string,
+	skipCache bool, transactionID string) (ids []string, err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	prefix = utils.REVERSE_DESTINATION_PREFIX + prefix
 	if !skipCache {
-		if x, ok := cache.Get(prefix); ok {
+		if x, ok := Cache.Get(utils.CacheReverseDestinations, prefix); ok {
 			if x != nil {
 				return x.([]string), nil
 			}
 			return nil, utils.ErrNotFound
 		}
 	}
-	if idMap, ok := ms.dict.smembers(prefix, ms.ms); !ok {
-		cache.Set(prefix, nil, cacheCommit(transactionID), transactionID)
+	if idMap, ok := ms.dict.smembers(utils.REVERSE_DESTINATION_PREFIX+prefix, ms.ms); !ok {
+		Cache.Set(utils.CacheReverseDestinations, prefix, nil, nil,
+			cacheCommit(transactionID), transactionID)
 		return nil, utils.ErrNotFound
 	} else {
 		ids = idMap.Slice()
 	}
-	cache.Set(prefix, ids, cacheCommit(transactionID), transactionID)
+	Cache.Set(utils.CacheReverseDestinations, prefix, ids, nil,
+		cacheCommit(transactionID), transactionID)
 	return
 }
 
 func (ms *MapStorage) SetReverseDestination(dest *Destination, transactionID string) (err error) {
 	for _, p := range dest.Prefixes {
-		key := utils.REVERSE_DESTINATION_PREFIX + p
 		ms.mu.Lock()
-		ms.dict.sadd(key, dest.Id, ms.ms)
+		ms.dict.sadd(utils.REVERSE_DESTINATION_PREFIX+p, dest.Id, ms.ms)
 		ms.mu.Unlock()
-		cache.RemKey(key, cacheCommit(transactionID), transactionID)
+		Cache.Remove(utils.CacheReverseDestinations, p,
+			cacheCommit(transactionID), transactionID)
 	}
 	return
 }
 
 func (ms *MapStorage) RemoveDestination(destID string, transactionID string) (err error) {
-	key := utils.DESTINATION_PREFIX + destID
 	// get destination for prefix list
 	d, err := ms.GetDestination(destID, false, transactionID)
 	if err != nil {
 		return
 	}
-
 	ms.mu.Lock()
-	delete(ms.dict, key)
+	delete(ms.dict, utils.DESTINATION_PREFIX+destID)
 	ms.mu.Unlock()
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
-
+	Cache.Remove(utils.CacheDestinations, destID,
+		cacheCommit(transactionID), transactionID)
 	for _, prefix := range d.Prefixes {
 		ms.mu.Lock()
 		ms.dict.srem(utils.REVERSE_DESTINATION_PREFIX+prefix, destID, ms.ms)
 		ms.mu.Unlock()
 		ms.GetReverseDestination(prefix, true, transactionID) // it will recache the destination
 	}
-
 	return
 }
 
-func (ms *MapStorage) UpdateReverseDestination(oldDest, newDest *Destination, transactionID string) error {
-	//log.Printf("Old: %+v, New: %+v", oldDest, newDest)
+func (ms *MapStorage) UpdateReverseDestination(oldDest, newDest *Destination,
+	transactionID string) error {
 	var obsoletePrefixes []string
 	var addedPrefixes []string
 	var found bool
@@ -462,7 +459,6 @@ func (ms *MapStorage) UpdateReverseDestination(oldDest, newDest *Destination, tr
 			obsoletePrefixes = append(obsoletePrefixes, oldPrefix)
 		}
 	}
-
 	for _, newPrefix := range newDest.Prefixes {
 		found = false
 		for _, oldPrefix := range oldDest.Prefixes {
@@ -475,8 +471,6 @@ func (ms *MapStorage) UpdateReverseDestination(oldDest, newDest *Destination, tr
 			addedPrefixes = append(addedPrefixes, newPrefix)
 		}
 	}
-	//log.Print("Obsolete prefixes: ", obsoletePrefixes)
-	//log.Print("Added prefixes: ", addedPrefixes)
 	// remove id for all obsolete prefixes
 	cCommit := cacheCommit(transactionID)
 	var err error
@@ -484,15 +478,16 @@ func (ms *MapStorage) UpdateReverseDestination(oldDest, newDest *Destination, tr
 		ms.mu.Lock()
 		ms.dict.srem(utils.REVERSE_DESTINATION_PREFIX+obsoletePrefix, oldDest.Id, ms.ms)
 		ms.mu.Unlock()
-		cache.RemKey(utils.REVERSE_DESTINATION_PREFIX+obsoletePrefix, cCommit, transactionID)
+		Cache.Remove(utils.CacheReverseDestinations, obsoletePrefix,
+			cCommit, transactionID)
 	}
-
 	// add the id to all new prefixes
 	for _, addedPrefix := range addedPrefixes {
 		ms.mu.Lock()
 		ms.dict.sadd(utils.REVERSE_DESTINATION_PREFIX+addedPrefix, newDest.Id, ms.ms)
 		ms.mu.Unlock()
-		cache.RemKey(utils.REVERSE_DESTINATION_PREFIX+addedPrefix, cCommit, transactionID)
+		Cache.Remove(utils.CacheReverseDestinations, addedPrefix,
+			cCommit, transactionID)
 	}
 	return err
 }
@@ -500,8 +495,7 @@ func (ms *MapStorage) UpdateReverseDestination(oldDest, newDest *Destination, tr
 func (ms *MapStorage) GetActionsDrv(key string) (as Actions, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	cachekey := utils.ACTION_PREFIX + key
-	if values, ok := ms.dict[cachekey]; ok {
+	if values, ok := ms.dict[utils.ACTION_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &as)
 	} else {
 		return nil, utils.ErrNotFound
@@ -512,16 +506,14 @@ func (ms *MapStorage) GetActionsDrv(key string) (as Actions, err error) {
 func (ms *MapStorage) SetActionsDrv(key string, as Actions) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	cachekey := utils.ACTION_PREFIX + key
 	result, err := ms.ms.Marshal(&as)
-	ms.dict[cachekey] = result
+	ms.dict[utils.ACTION_PREFIX+key] = result
 	return
 }
 
 func (ms *MapStorage) RemoveActionsDrv(key string) (err error) {
-	cachekey := utils.ACTION_PREFIX + key
 	ms.mu.Lock()
-	delete(ms.dict, cachekey)
+	delete(ms.dict, utils.ACTION_PREFIX+key)
 	ms.mu.Unlock()
 	return
 }
@@ -529,8 +521,7 @@ func (ms *MapStorage) RemoveActionsDrv(key string) (err error) {
 func (ms *MapStorage) GetSharedGroupDrv(key string) (sg *SharedGroup, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	cachekey := utils.SHARED_GROUP_PREFIX + key
-	if values, ok := ms.dict[cachekey]; ok {
+	if values, ok := ms.dict[utils.SHARED_GROUP_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &sg)
 		if err != nil {
 			return nil, err
@@ -623,7 +614,6 @@ func (ms *MapStorage) SetCdrStatsQueueDrv(sq *CDRStatsQueue) (err error) {
 func (ms *MapStorage) RemoveCdrStatsQueueDrv(id string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-
 	delete(ms.dict, id)
 	return
 }
@@ -667,6 +657,7 @@ func (ms *MapStorage) SetUserDrv(up *UserProfile) error {
 	ms.dict[utils.USERS_PREFIX+up.GetId()] = result
 	return nil
 }
+
 func (ms *MapStorage) GetUserDrv(key string) (up *UserProfile, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
@@ -700,69 +691,72 @@ func (ms *MapStorage) RemoveUserDrv(key string) error {
 	return nil
 }
 
-func (ms *MapStorage) GetAlias(key string, skipCache bool, transactionID string) (al *Alias, err error) {
+func (ms *MapStorage) GetAlias(key string, skipCache bool,
+	transactionID string) (al *Alias, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	cacheKey := utils.ALIASES_PREFIX + key
 	cCommit := cacheCommit(transactionID)
 	if !skipCache {
-		if x, ok := cache.Get(cacheKey); ok {
+		if x, ok := Cache.Get(utils.CacheAliases, key); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
 			return x.(*Alias), nil
 		}
 	}
-	if values, ok := ms.dict[cacheKey]; ok {
+	if values, ok := ms.dict[utils.ALIASES_PREFIX+key]; ok {
 		al = &Alias{Values: make(AliasValues, 0)}
 		al.SetId(key)
 		if err = ms.ms.Unmarshal(values, &al.Values); err != nil {
 			return nil, err
 		}
 	} else {
-		cache.Set(cacheKey, nil, cCommit, transactionID)
+		Cache.Set(utils.CacheAliases, key, nil, nil,
+			cCommit, transactionID)
 		return nil, utils.ErrNotFound
 	}
-	cache.Set(cacheKey, al, cCommit, transactionID)
+	Cache.Set(utils.CacheAliases, key, al, nil,
+		cCommit, transactionID)
 	return
 
 }
 
 func (ms *MapStorage) SetAlias(al *Alias, transactionID string) error {
-
 	result, err := ms.ms.Marshal(al.Values)
 	if err != nil {
 		return err
 	}
-	key := utils.ALIASES_PREFIX + al.GetId()
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	ms.dict[key] = result
-	cache.RemKey(key, cacheCommit(transactionID), transactionID)
+	ms.dict[utils.ALIASES_PREFIX+al.GetId()] = result
+	Cache.Remove(utils.CacheAliases, al.GetId(),
+		cacheCommit(transactionID), transactionID)
 	return nil
 }
 
-func (ms *MapStorage) GetReverseAlias(reverseID string, skipCache bool, transactionID string) (ids []string, err error) {
+func (ms *MapStorage) GetReverseAlias(reverseID string,
+	skipCache bool, transactionID string) (ids []string, err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	key := utils.REVERSE_ALIASES_PREFIX + reverseID
 	if !skipCache {
-		if x, ok := cache.Get(key); ok {
+		if x, ok := Cache.Get(utils.CacheReverseAliases, reverseID); ok {
 			if x != nil {
 				return x.([]string), nil
 			}
 			return nil, utils.ErrNotFound
 		}
 	}
-
 	cCommit := cacheCommit(transactionID)
-	if idMap, ok := ms.dict.smembers(key, ms.ms); len(idMap) > 0 && ok {
+	if idMap, ok := ms.dict.smembers(utils.REVERSE_ALIASES_PREFIX+reverseID,
+		ms.ms); len(idMap) > 0 && ok {
 		ids = idMap.Slice()
 	} else {
-		cache.Set(key, nil, cCommit, transactionID)
+		Cache.Set(utils.CacheReverseAliases, reverseID, nil, nil,
+			cCommit, transactionID)
 		return nil, utils.ErrNotFound
 	}
-	cache.Set(key, ids, cCommit, transactionID)
+	Cache.Set(utils.CacheReverseAliases, reverseID, ids,
+		nil, cCommit, transactionID)
 	return
 }
 
@@ -771,13 +765,13 @@ func (ms *MapStorage) SetReverseAlias(al *Alias, transactionID string) (err erro
 	for _, value := range al.Values {
 		for target, pairs := range value.Pairs {
 			for _, alias := range pairs {
-				rKey := strings.Join([]string{utils.REVERSE_ALIASES_PREFIX, alias, target, al.Context}, "")
+				rAlID := strings.Join([]string{alias, target, al.Context}, "")
 				id := utils.ConcatenatedKey(al.GetId(), value.DestinationId)
 				ms.mu.Lock()
-				ms.dict.sadd(rKey, id, ms.ms)
+				ms.dict.sadd(utils.REVERSE_ALIASES_PREFIX+rAlID, id, ms.ms)
 				ms.mu.Unlock()
-
-				cache.RemKey(rKey, cCommit, transactionID)
+				Cache.Remove(utils.CacheReverseAliases, rAlID,
+					cCommit, transactionID)
 			}
 		}
 	}
@@ -790,36 +784,30 @@ func (ms *MapStorage) RemoveAlias(key string, transactionID string) error {
 	if err != nil {
 		return err
 	}
-
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	key = utils.ALIASES_PREFIX + key
-
 	aliasValues := make(AliasValues, 0)
-	if values, ok := ms.dict[key]; ok {
+	if values, ok := ms.dict[utils.ALIASES_PREFIX+key]; ok {
 		ms.ms.Unmarshal(values, &aliasValues)
 	}
-	delete(ms.dict, key)
+	delete(ms.dict, utils.ALIASES_PREFIX+key)
 	cCommit := cacheCommit(transactionID)
-	cache.RemKey(key, cCommit, transactionID)
+	Cache.Remove(utils.CacheAliases, key, cCommit, transactionID)
 	for _, value := range al.Values {
 		tmpKey := utils.ConcatenatedKey(al.GetId(), value.DestinationId)
 		for target, pairs := range value.Pairs {
 			for _, alias := range pairs {
-				rKey := utils.REVERSE_ALIASES_PREFIX + alias + target + al.Context
-				ms.dict.srem(rKey, tmpKey, ms.ms)
-				cache.RemKey(rKey, cCommit, transactionID)
-				/*_, err = ms.GetReverseAlias(rKey, true) // recache
-				if err != nil {
-					return err
-				}*/
+				rID := alias + target + al.Context
+				ms.dict.srem(utils.REVERSE_ALIASES_PREFIX+rID, tmpKey, ms.ms)
+				Cache.Remove(utils.CacheReverseAliases, rID, cCommit, transactionID)
 			}
 		}
 	}
 	return nil
 }
 
-func (ms *MapStorage) GetLoadHistory(limitItems int, skipCache bool, transactionID string) ([]*utils.LoadInstance, error) {
+func (ms *MapStorage) GetLoadHistory(limitItems int,
+	skipCache bool, transactionID string) ([]*utils.LoadInstance, error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	return nil, nil
@@ -834,8 +822,7 @@ func (ms *MapStorage) AddLoadHistory(*utils.LoadInstance, int, string) error {
 func (ms *MapStorage) GetActionTriggersDrv(key string) (atrs ActionTriggers, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	key = utils.ACTION_TRIGGER_PREFIX + key
-	if values, ok := ms.dict[key]; ok {
+	if values, ok := ms.dict[utils.ACTION_TRIGGER_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &atrs)
 	} else {
 		return nil, utils.ErrNotFound
@@ -866,38 +853,43 @@ func (ms *MapStorage) RemoveActionTriggersDrv(key string) (err error) {
 func (ms *MapStorage) GetActionPlan(key string, skipCache bool, transactionID string) (ats *ActionPlan, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	key = utils.ACTION_PLAN_PREFIX + key
 	if !skipCache {
-		if x, ok := cache.Get(key); ok {
+		if x, ok := Cache.Get(utils.CacheActionPlans, key); ok {
 			if x != nil {
 				return x.(*ActionPlan), nil
 			}
 			return nil, utils.ErrNotFound
 		}
 	}
-	if values, ok := ms.dict[key]; ok {
+	cCommit := cacheCommit(transactionID)
+	if values, ok := ms.dict[utils.ACTION_PLAN_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &ats)
 	} else {
-		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+		Cache.Set(utils.CacheActionPlans, key, nil, nil,
+			cCommit, transactionID)
 		return nil, utils.ErrNotFound
 	}
-	cache.Set(key, ats, cacheCommit(transactionID), transactionID)
+	Cache.Set(utils.CacheActionPlans, key, ats, nil,
+		cCommit, transactionID)
 	return
 }
 
-func (ms *MapStorage) SetActionPlan(key string, ats *ActionPlan, overwrite bool, transactionID string) (err error) {
+func (ms *MapStorage) SetActionPlan(key string, ats *ActionPlan,
+	overwrite bool, transactionID string) (err error) {
 	cCommit := cacheCommit(transactionID)
 	if len(ats.ActionTimings) == 0 {
 		ms.mu.Lock()
 		defer ms.mu.Unlock()
 		// delete the key
 		delete(ms.dict, utils.ACTION_PLAN_PREFIX+key)
-		cache.RemKey(utils.ACTION_PLAN_PREFIX+key, cCommit, transactionID)
+		Cache.Remove(utils.CacheActionPlans, key,
+			cCommit, transactionID)
 		return
 	}
 	if !overwrite {
 		// get existing action plan to merge the account ids
-		if existingAts, _ := ms.GetActionPlan(key, true, transactionID); existingAts != nil {
+		if existingAts, _ := ms.GetActionPlan(key, true,
+			transactionID); existingAts != nil {
 			if ats.AccountIDs == nil && len(existingAts.AccountIDs) > 0 {
 				ats.AccountIDs = make(utils.StringMap)
 			}
@@ -910,7 +902,7 @@ func (ms *MapStorage) SetActionPlan(key string, ats *ActionPlan, overwrite bool,
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(&ats)
 	ms.dict[utils.ACTION_PLAN_PREFIX+key] = result
-	cache.RemKey(utils.ACTION_PLAN_PREFIX+key, cCommit, transactionID)
+	Cache.Remove(utils.CacheActionPlans, key, cCommit, transactionID)
 	return
 }
 
@@ -919,7 +911,7 @@ func (ms *MapStorage) RemoveActionPlan(key string, transactionID string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	delete(ms.dict, utils.ACTION_PLAN_PREFIX+key)
-	cache.RemKey(utils.ACTION_PLAN_PREFIX+key, cCommit, transactionID)
+	Cache.Remove(utils.CacheActionPlans, key, cCommit, transactionID)
 	return nil
 }
 
@@ -939,28 +931,30 @@ func (ms *MapStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error
 	return
 }
 
-func (ms *MapStorage) GetAccountActionPlans(acntID string, skipCache bool, transactionID string) (apIDs []string, err error) {
+func (ms *MapStorage) GetAccountActionPlans(acntID string,
+	skipCache bool, transactionID string) (apIDs []string, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	key := utils.AccountActionPlansPrefix + acntID
 	if !skipCache {
-		if x, ok := cache.Get(key); ok {
+		if x, ok := Cache.Get(utils.CacheAccountActionPlans, acntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
 			return x.([]string), nil
 		}
 	}
-	values, ok := ms.dict[key]
+	values, ok := ms.dict[utils.AccountActionPlansPrefix+acntID]
 	if !ok {
-		cache.Set(key, nil, cacheCommit(transactionID), transactionID)
+		Cache.Set(utils.CacheAccountActionPlans, acntID, nil, nil,
+			cacheCommit(transactionID), transactionID)
 		err = utils.ErrNotFound
 		return nil, err
 	}
 	if err = ms.ms.Unmarshal(values, &apIDs); err != nil {
 		return nil, err
 	}
-	cache.Set(key, apIDs, cacheCommit(transactionID), transactionID)
+	Cache.Set(utils.CacheAccountActionPlans, acntID, apIDs, nil,
+		cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -1046,8 +1040,7 @@ func (ms *MapStorage) PopTask() (t *Task, err error) {
 func (ms *MapStorage) GetDerivedChargersDrv(key string) (dcs *utils.DerivedChargers, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	key = utils.DERIVEDCHARGERS_PREFIX + key
-	if values, ok := ms.dict[key]; ok {
+	if values, ok := ms.dict[utils.DERIVEDCHARGERS_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &dcs)
 	} else {
 		return nil, utils.ErrNotFound
@@ -1055,19 +1048,21 @@ func (ms *MapStorage) GetDerivedChargersDrv(key string) (dcs *utils.DerivedCharg
 	return
 }
 
-func (ms *MapStorage) SetDerivedChargers(key string, dcs *utils.DerivedChargers, transactionID string) error {
+func (ms *MapStorage) SetDerivedChargers(key string,
+	dcs *utils.DerivedChargers, transactionID string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	cCommit := cacheCommit(transactionID)
-	key = utils.DERIVEDCHARGERS_PREFIX + key
 	if dcs == nil || len(dcs.Chargers) == 0 {
-		delete(ms.dict, key)
-		cache.RemKey(key, cCommit, transactionID)
+		delete(ms.dict, utils.DERIVEDCHARGERS_PREFIX+key)
+		Cache.Remove(utils.CacheDerivedChargers, key,
+			cCommit, transactionID)
 		return nil
 	}
 	result, err := ms.ms.Marshal(dcs)
 	ms.dict[key] = result
-	cache.RemKey(key, cCommit, transactionID)
+	Cache.Remove(utils.CacheDerivedChargers, key,
+		cCommit, transactionID)
 	return err
 }
 
@@ -1076,7 +1071,7 @@ func (ms *MapStorage) RemoveDerivedChargersDrv(id, transactionID string) (err er
 	defer ms.mu.Unlock()
 	cCommit := cacheCommit(transactionID)
 	delete(ms.dict, id)
-	cache.RemKey(id, cCommit, transactionID)
+	Cache.Remove(utils.CacheDerivedChargers, id, cCommit, transactionID)
 	return
 }
 
@@ -1386,10 +1381,11 @@ func (ms *MapStorage) RemoveFilterReverseIndexesDrv(dbKey string) (err error) {
 	return
 }
 
-func (ms *MapStorage) MatchFilterIndexDrv(dbKey, filterType, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
+func (ms *MapStorage) MatchFilterIndexDrv(cacheID, itemIDPrefix,
+	filterType, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	values, ok := ms.dict[dbKey]
+	values, ok := ms.dict[utils.ConcatenatedKey(utils.CacheInstanceToPrefix[cacheID], itemIDPrefix)]
 	if !ok {
 		return nil, utils.ErrNotFound
 	}

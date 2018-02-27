@@ -21,7 +21,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -46,8 +45,8 @@ func TestCacheGetCloned(t *testing.T) {
 		Id:         "test",
 		AccountIDs: utils.StringMap{"one": true, "two": true, "three": true},
 	}
-	cache.Set("MYTESTAPL", at1, true, "")
-	clned, err := cache.GetCloned("MYTESTAPL")
+	Cache.Set(utils.CacheActionPlans, "MYTESTAPL", at1, nil, true, "")
+	clned, err := Cache.GetCloned(utils.CacheActionPlans, "MYTESTAPL")
 	if err != nil {
 		t.Error(err)
 	}

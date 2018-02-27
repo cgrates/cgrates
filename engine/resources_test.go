@@ -22,7 +22,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -385,9 +384,8 @@ func TestRSCacheSetGet(t *testing.T) {
 		tUsage: utils.Float64Pointer(2),
 		dirty:  utils.BoolPointer(true),
 	}
-	key := utils.ResourcesPrefix + r.TenantID()
-	cache.Set(key, r, true, "")
-	if x, ok := cache.Get(key); !ok {
+	Cache.Set(utils.CacheResources, r.TenantID(), r, nil, true, "")
+	if x, ok := Cache.Get(utils.CacheResources, r.TenantID()); !ok {
 		t.Error("not in cache")
 	} else if x == nil {
 		t.Error("nil resource")
@@ -579,11 +577,14 @@ func TestCachedResourcesForEvent(t *testing.T) {
 			dirty:  utils.BoolPointer(true),
 		},
 	}
-	cache.Set(utils.ResourcesPrefix+resources[0].TenantID(), resources[0], true, "")
-	cache.Set(utils.EventResourcesPrefix+args.TenantID(), val, true, "")
+	Cache.Set(utils.CacheResources, resources[0].TenantID(),
+		resources[0], nil, true, "")
+	Cache.Set(utils.CacheEventResources, args.TenantID(),
+		val, nil, true, "")
 	rcv := resS.cachedResourcesForEvent(args.TenantID())
 	if !reflect.DeepEqual(resources[0], rcv[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(resources[0]), utils.ToJSON(rcv[0]))
+		t.Errorf("Expecting: %+v, received: %+v",
+			utils.ToJSON(resources[0]), utils.ToJSON(rcv[0]))
 	}
 }
 

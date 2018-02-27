@@ -26,7 +26,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
@@ -104,7 +103,7 @@ func NewSMGeneric(cgrCfg *config.CGRConfig, rals, resS, thdS,
 		pSessionsIndex:     make(map[string]map[string]map[string]utils.StringMap),
 		pSessionsRIndex:    make(map[string][]*riFieldNameVal),
 		sessionTerminators: make(map[string]*smgSessionTerminator),
-		responseCache:      cache.NewResponseCache(cgrCfg.ResponseCacheTTL)}
+		responseCache:      utils.NewResponseCache(cgrCfg.ResponseCacheTTL)}
 }
 
 type SMGeneric struct {
@@ -130,7 +129,7 @@ type SMGeneric struct {
 	pSIMux             sync.RWMutex                                     // protects pSessionsIndex
 	sessionTerminators map[string]*smgSessionTerminator                 // terminate and cleanup the session if timer expires
 	sTsMux             sync.RWMutex                                     // protects sessionTerminators
-	responseCache      *cache.ResponseCache                             // cache replies here
+	responseCache      *utils.ResponseCache                             // cache replies here
 }
 
 // riFieldNameVal is a reverse index entry
@@ -694,7 +693,7 @@ func (smg *SMGeneric) GetMaxUsage(gev SMGenericEvent) (maxUsage time.Duration, e
 	if item, err := smg.responseCache.Get(cacheKey); err == nil && item != nil {
 		return (item.Value.(time.Duration)), item.Err
 	}
-	defer smg.responseCache.Cache(cacheKey, &cache.CacheItem{Value: maxUsage, Err: err})
+	defer smg.responseCache.Cache(cacheKey, &utils.ResponseCacheItem{Value: maxUsage, Err: err})
 	storedCdr := gev.AsCDR(config.CgrConfig(), smg.Timezone)
 	var maxDur float64
 	if err = smg.rals.Call("Responder.GetDerivedMaxSessionTime", storedCdr, &maxDur); err != nil {
@@ -711,7 +710,7 @@ func (smg *SMGeneric) InitiateSession(gev SMGenericEvent, clnt rpcclient.RpcClie
 	if item, err := smg.responseCache.Get(cacheKey); err == nil && item != nil {
 		return item.Value.(time.Duration), item.Err
 	}
-	defer smg.responseCache.Cache(cacheKey, &cache.CacheItem{Value: maxUsage, Err: err}) // schedule response caching
+	defer smg.responseCache.Cache(cacheKey, &utils.ResponseCacheItem{Value: maxUsage, Err: err}) // schedule response caching
 	smg.deletePassiveSessions(cgrID)
 	if err = smg.sessionStart(gev, clnt); err != nil {
 		smg.sessionEnd(cgrID, 0)
@@ -735,7 +734,7 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 	if item, err := smg.responseCache.Get(cacheKey); err == nil && item != nil {
 		return item.Value.(time.Duration), item.Err
 	}
-	defer smg.responseCache.Cache(cacheKey, &cache.CacheItem{Value: maxUsage, Err: err})
+	defer smg.responseCache.Cache(cacheKey, &utils.ResponseCacheItem{Value: maxUsage, Err: err})
 	if smg.cgrCfg.SessionSCfg().DebitInterval != 0 { // Not possible to update a session with debit loop active
 		err = errors.New("ACTIVE_DEBIT_LOOP")
 		return
@@ -801,7 +800,7 @@ func (smg *SMGeneric) TerminateSession(gev SMGenericEvent, clnt rpcclient.RpcCli
 	if item, err := smg.responseCache.Get(cacheKey); err == nil && item != nil {
 		return item.Err
 	}
-	defer smg.responseCache.Cache(cacheKey, &cache.CacheItem{Err: err})
+	defer smg.responseCache.Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
 	if gev.HasField(utils.InitialOriginID) {
 		initialCGRID := gev.GetCGRID(utils.InitialOriginID)
 		err = smg.sessionRelocate(initialCGRID, cgrID, gev.GetOriginID(utils.META_DEFAULT))
@@ -872,7 +871,7 @@ func (smg *SMGeneric) ChargeEvent(gev SMGenericEvent) (maxUsage time.Duration, e
 	if item, err := smg.responseCache.Get(cacheKey); err == nil && item != nil {
 		return item.Value.(time.Duration), item.Err
 	}
-	defer smg.responseCache.Cache(cacheKey, &cache.CacheItem{Value: maxUsage, Err: err})
+	defer smg.responseCache.Cache(cacheKey, &utils.ResponseCacheItem{Value: maxUsage, Err: err})
 	var sessionRuns []*engine.SessionRun
 	if err = smg.rals.Call("Responder.GetSessionRuns", gev.AsCDR(smg.cgrCfg, smg.Timezone), &sessionRuns); err != nil {
 		return
@@ -976,7 +975,7 @@ func (smg *SMGeneric) ProcessCDR(gev SMGenericEvent) (err error) {
 	if item, err := smg.responseCache.Get(cacheKey); err == nil && item != nil {
 		return item.Err
 	}
-	defer smg.responseCache.Cache(cacheKey, &cache.CacheItem{Err: err})
+	defer smg.responseCache.Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
 	var reply string
 	if err = smg.cdrsrv.Call("CdrsV1.ProcessCDR",
 		gev.AsCDR(smg.cgrCfg, smg.Timezone), &reply); err != nil {

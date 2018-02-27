@@ -25,7 +25,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -181,7 +180,7 @@ func (tS *ThresholdService) storeThresholds() {
 		if tID == "" {
 			break // no more keys, backup completed
 		}
-		if tIf, ok := cache.Get(utils.ThresholdPrefix + tID); !ok || tIf == nil {
+		if tIf, ok := Cache.Get(utils.CacheThresholds, tID); !ok || tIf == nil {
 			utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed retrieving from cache resource with ID: %s", tID))
 		} else if err := tS.StoreThreshold(tIf.(*Threshold)); err != nil {
 			failedTdIDs = append(failedTdIDs, tID) // record failure so we can schedule it for next backup
@@ -222,7 +221,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 		tIDs = args.ThresholdIDs
 	} else {
 		tIDsMap, err := matchingItemIDsForEvent(args.Event, tS.stringIndexedFields,
-			tS.prefixIndexedFields, tS.dm, utils.ThresholdFilterIndexes+args.Tenant)
+			tS.prefixIndexedFields, tS.dm, utils.CacheThresholdFilterIndexes, args.Tenant)
 		if err != nil {
 			return nil, err
 		}

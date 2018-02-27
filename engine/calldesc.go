@@ -21,13 +21,10 @@ package engine
 import (
 	"errors"
 	"fmt"
-	"log"
-
 	"sort"
 	"strings"
 	"time"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -43,7 +40,6 @@ const (
 )
 
 func init() {
-	var err error
 	var data DataDB
 	switch DB {
 	case "map":
@@ -52,16 +48,6 @@ func init() {
 			config.SetCgrConfig(cgrCfg)
 		}
 		data, _ = NewMapStorage()
-	case utils.MONGO:
-		data, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_data_test", "", "", utils.DataDB, nil, config.CacheConfig{utils.CacheRatingPlans: &config.CacheParamConfig{Precache: true}}, 10)
-		if err != nil {
-			log.Fatal(err)
-		}
-	case utils.REDIS:
-		data, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK, utils.REDIS_MAX_CONNS, config.CacheConfig{utils.CacheRatingPlans: &config.CacheParamConfig{Precache: true}}, 10)
-		if err != nil {
-			log.Fatal(err)
-		}
 	}
 	dm = NewDataManager(data)
 }
@@ -1106,21 +1092,20 @@ func (cd *CallDescriptor) GetLCR(stats rpcclient.RpcClientConnection, lcrFltr *L
 			category = lcr.Category
 		}
 		ratingProfileSearchKey := utils.ConcatenatedKey(lcr.Direction, lcr.Tenant, lcrCost.Entry.RPCategory)
-		searchKey := utils.RATING_PROFILE_PREFIX + ratingProfileSearchKey
-		suppliers := cache.GetEntryKeys(searchKey)
+		suppliers := Cache.GetItemIDs(utils.CacheRatingProfiles, ratingProfileSearchKey)
 		if len(suppliers) == 0 { // Most probably the data was not cached, do it here, #ToDo: move logic in RAL service
-			suppliers, err = dm.DataDB().GetKeysForPrefix(searchKey)
+			suppliers, err = dm.DataDB().GetKeysForPrefix(utils.RATING_PROFILE_PREFIX + ratingProfileSearchKey)
 			if err != nil {
 				return nil, err
 			}
 			transID := utils.GenUUID()
 			for _, dbKey := range suppliers {
 				if _, err := dm.GetRatingProfile(dbKey[len(utils.RATING_PROFILE_PREFIX):], true, transID); err != nil { // cache the keys here
-					cache.RollbackTransaction(transID)
+					Cache.RollbackTransaction(transID)
 					return nil, err
 				}
 			}
-			cache.CommitTransaction(transID)
+			Cache.CommitTransaction(transID)
 		}
 		for _, supplier := range suppliers {
 			split := strings.Split(supplier, ":")
