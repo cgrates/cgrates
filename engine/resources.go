@@ -518,7 +518,7 @@ func (rS *ResourceService) processThresholds(r *Resource) (err error) {
 				utils.ResourceID: r.ID,
 				utils.Usage:      r.totalUsage()}}}
 	var hits int
-	if err = thresholdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil &&
+	if err = rS.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
 		utils.Logger.Warning(
 			fmt.Sprintf("<ResourceS> error: %s processing event %+v with ThresholdS.", err.Error(), thEv))

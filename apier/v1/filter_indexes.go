@@ -292,30 +292,30 @@ func (self *ApierV1) GetFilterReverseIndexes(arg AttrGetFilterReverseIndexes, re
 
 func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, reply *string) error {
 	//ThresholdProfile Indexes
-	if err := self.computeThresholdIndexes(args.Tenant, args.ThresholdIDs); err != nil {
+	if err := self.computeThresholdIndexes(args.Tenant, args.ThresholdIDs, args.TransactionID); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//StatQueueProfile Indexes
-	if err := self.computeStatIndexes(args.Tenant, args.StatIDs); err != nil {
+	if err := self.computeStatIndexes(args.Tenant, args.StatIDs, args.TransactionID); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//ResourceProfile Indexes
-	if err := self.computeResourceIndexes(args.Tenant, args.ResourceIDs); err != nil {
+	if err := self.computeResourceIndexes(args.Tenant, args.ResourceIDs, args.TransactionID); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//SupplierProfile Indexes
-	if err := self.computeSupplierIndexes(args.Tenant, args.SupplierIDs); err != nil {
+	if err := self.computeSupplierIndexes(args.Tenant, args.SupplierIDs, args.TransactionID); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//AttributeProfile Indexes
-	if err := self.computeAttributeIndexes(args.Tenant, args.AttributeIDs); err != nil {
+	if err := self.computeAttributeIndexes(args.Tenant, args.AttributeIDs, args.TransactionID); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-func (self *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string) error {
+func (self *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string, transactionID string) error {
 	var thresholdIDs []string
 	thdsIndexers := engine.NewFilterIndexer(self.DataManager, utils.ThresholdProfilePrefix, tenant)
 	if thIDs == nil {
@@ -364,13 +364,13 @@ func (self *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string) err
 			}
 		}
 	}
-	if err := thdsIndexers.StoreIndexes(); err != nil {
+	if err := thdsIndexers.StoreIndexes(transactionID); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (self *ApierV1) computeAttributeIndexes(tenant string, attrIDs *[]string) error {
+func (self *ApierV1) computeAttributeIndexes(tenant string, attrIDs *[]string, transactionID string) error {
 	var attributeIDs []string
 	attrIndexers := engine.NewFilterIndexer(self.DataManager, utils.AttributeProfilePrefix, tenant)
 	if attrIDs == nil {
@@ -425,13 +425,13 @@ func (self *ApierV1) computeAttributeIndexes(tenant string, attrIDs *[]string) e
 			}
 		}
 	}
-	if err := attrIndexers.StoreIndexes(); err != nil {
+	if err := attrIndexers.StoreIndexes(transactionID); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (self *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string) error {
+func (self *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string, transactionID string) error {
 	var resourceIDs []string
 	rpIndexers := engine.NewFilterIndexer(self.DataManager, utils.ResourceProfilesPrefix, tenant)
 	if rsIDs == nil {
@@ -484,13 +484,13 @@ func (self *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string) erro
 			}
 		}
 	}
-	if err := rpIndexers.StoreIndexes(); err != nil {
+	if err := rpIndexers.StoreIndexes(transactionID); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (self *ApierV1) computeStatIndexes(tenant string, stIDs *[]string) error {
+func (self *ApierV1) computeStatIndexes(tenant string, stIDs *[]string, transactionID string) error {
 	var statIDs []string
 	sqpIndexers := engine.NewFilterIndexer(self.DataManager, utils.StatQueueProfilePrefix, tenant)
 	if stIDs == nil {
@@ -543,13 +543,13 @@ func (self *ApierV1) computeStatIndexes(tenant string, stIDs *[]string) error {
 			}
 		}
 	}
-	if err := sqpIndexers.StoreIndexes(); err != nil {
+	if err := sqpIndexers.StoreIndexes(transactionID); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (self *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string) error {
+func (self *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string, transactionID string) error {
 	var supplierIDs []string
 	sppIndexers := engine.NewFilterIndexer(self.DataManager, utils.SupplierProfilePrefix, tenant)
 	if sppIDs == nil {
@@ -603,7 +603,7 @@ func (self *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string) err
 			}
 		}
 	}
-	if err := sppIndexers.StoreIndexes(); err != nil {
+	if err := sppIndexers.StoreIndexes(transactionID); err != nil {
 		return err
 	}
 	return nil
