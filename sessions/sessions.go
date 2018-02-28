@@ -64,7 +64,7 @@ type SMGReplicationConn struct {
 	Synchronous bool
 }
 
-func NewSMGeneric(cgrCfg *config.CGRConfig, rals, resS,
+func NewSMGeneric(cgrCfg *config.CGRConfig, rals, resS, thdS,
 	splS, attrS, cdrsrv rpcclient.RpcClientConnection,
 	smgReplConns []*SMGReplicationConn, timezone string) *SMGeneric {
 	ssIdxCfg := cgrCfg.SessionSCfg().SessionIndexes
@@ -74,6 +74,9 @@ func NewSMGeneric(cgrCfg *config.CGRConfig, rals, resS,
 	}
 	if resS != nil && reflect.ValueOf(resS).IsNil() {
 		resS = nil
+	}
+	if thdS != nil && reflect.ValueOf(thdS).IsNil() {
+		thdS = nil
 	}
 	if splS != nil && reflect.ValueOf(splS).IsNil() {
 		splS = nil
@@ -87,6 +90,7 @@ func NewSMGeneric(cgrCfg *config.CGRConfig, rals, resS,
 	return &SMGeneric{cgrCfg: cgrCfg,
 		rals:               rals,
 		resS:               resS,
+		thdS:               thdS,
 		splS:               splS,
 		attrS:              attrS,
 		cdrsrv:             cdrsrv,
@@ -107,6 +111,7 @@ type SMGeneric struct {
 	cgrCfg             *config.CGRConfig             // Separate from smCfg since there can be multiple
 	rals               rpcclient.RpcClientConnection // RALs connections
 	resS               rpcclient.RpcClientConnection // ResourceS connections
+	thdS               rpcclient.RpcClientConnection // ThresholdS connections
 	splS               rpcclient.RpcClientConnection // SupplierS connections
 	attrS              rpcclient.RpcClientConnection // AttributeS connections
 	cdrsrv             rpcclient.RpcClientConnection // CDR server connections

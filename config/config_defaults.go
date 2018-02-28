@@ -287,6 +287,7 @@ const CGRATES_CFG_JSON = `
 		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
 	],
 	"resources_conns": [],					// address where to reach the ResourceS <""|*internal|127.0.0.1:2013>
+	"thresholds_conns": [],					// address where to reach the ThresholdS <""|*internal|127.0.0.1:2013>
 	"suppliers_conns": [],					// address where to reach the SupplierS <""|*internal|127.0.0.1:2013>
 	"attributes_conns": [],					// address where to reach the AttributeS <""|*internal|127.0.0.1:2013>
 	"session_replication_conns": [],		// replicate sessions towards these session services

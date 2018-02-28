@@ -63,6 +63,9 @@
 	"resources_conns": [
 		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
+	"thresholds_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
 	"suppliers_conns": [
 		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
