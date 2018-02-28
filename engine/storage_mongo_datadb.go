@@ -1964,6 +1964,10 @@ func (ms *MongoStorage) SetFilterIndexesDrv(originKey string, indexes map[string
 	}
 	if commit && transactionID != "" {
 		oldKey := "tmp_" + utils.ConcatenatedKey(originKey, transactionID)
+		err = col.Remove(bson.M{"key": originKey})
+		if err != nil && err != mgo.ErrNotFound {
+			return
+		}
 		pairs := []interface{}{}
 		for key, itmMp := range indexes {
 			param := fmt.Sprintf("value.%s", key)
@@ -2059,6 +2063,10 @@ func (ms *MongoStorage) SetFilterReverseIndexesDrv(originKey string, revIdx map[
 	}
 	if commit && transactionID != "" {
 		oldKey := "tmp_" + utils.ConcatenatedKey(originKey, transactionID)
+		err = col.Remove(bson.M{"key": originKey})
+		if err != nil && err != mgo.ErrNotFound {
+			return
+		}
 		pairs := []interface{}{}
 		for key, itmMp := range revIdx {
 			param := fmt.Sprintf("value.%s", key)

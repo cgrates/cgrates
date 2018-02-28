@@ -1294,13 +1294,12 @@ func (args *ArgRSv1ResourceUsage) TenantID() string {
 }
 
 type ArgsComputeFilterIndexes struct {
-	Tenant        string
-	AttributeIDs  *[]string
-	ResourceIDs   *[]string
-	StatIDs       *[]string
-	SupplierIDs   *[]string
-	ThresholdIDs  *[]string
-	TransactionID string
+	Tenant       string
+	AttributeIDs *[]string
+	ResourceIDs  *[]string
+	StatIDs      *[]string
+	SupplierIDs  *[]string
+	ThresholdIDs *[]string
 }
 
 // AsActivationTime converts TPActivationInterval into ActivationInterval
