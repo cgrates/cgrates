@@ -21,6 +21,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
 func NewDataManager(dataDB DataDB) *DataManager {
@@ -956,7 +957,7 @@ func (dm *DataManager) RemoveDerivedChargers(id, transactionID string) (err erro
 func (dm *DataManager) GetActions(key string, skipCache bool, transactionID string) (as Actions, err error) {
 	if !skipCache {
 		if x, err := Cache.GetCloned(utils.CacheActions, key); err != nil {
-			if err.Error() != utils.ItemNotFound {
+			if err != ltcache.ErrNotFound {
 				return nil, err
 			}
 		} else if x == nil {

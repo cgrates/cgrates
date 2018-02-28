@@ -29,6 +29,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 	"github.com/mediocregopher/radix.v2/pool"
 	"github.com/mediocregopher/radix.v2/redis"
 )
@@ -1007,7 +1008,7 @@ func (rs *RedisStorage) GetActionPlan(key string, skipCache bool,
 	transactionID string) (ats *ActionPlan, err error) {
 	if !skipCache {
 		if x, err := Cache.GetCloned(utils.CacheActionPlans, key); err != nil {
-			if err.Error() != utils.ItemNotFound { // Only consider cache if item was found
+			if err != ltcache.ErrNotFound { // Only consider cache if item was found
 				return nil, err
 			}
 		} else if x == nil { // item was placed nil in cache
