@@ -397,7 +397,11 @@ func (self *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string, tra
 	for _, id := range thresholdIDs {
 		th, err := self.DataManager.GetThresholdProfile(tenant, id, false, utils.NonTransactional)
 		if err != nil {
+<<<<<<< HEAD
 			return nil, err
+=======
+			return err
+>>>>>>> Indexes with tmp_ key will overwrite existing one
 		}
 		fltrIDs := make([]string, len(th.FilterIDs))
 		for i, fltrID := range th.FilterIDs {
@@ -423,11 +427,19 @@ func (self *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string, tra
 			} else if strings.HasPrefix(fltrID, utils.Meta) {
 				inFltr, err := engine.NewInlineFilter(fltrID)
 				if err != nil {
+<<<<<<< HEAD
 					return nil, err
 				}
 				fltr, err = inFltr.AsFilter(th.Tenant)
 				if err != nil {
 					return nil, err
+=======
+					return err
+				}
+				fltr, err = inFltr.AsFilter(th.Tenant)
+				if err != nil {
+					return err
+>>>>>>> Indexes with tmp_ key will overwrite existing one
 				}
 			} else if fltr, err = self.DataManager.GetFilter(th.Tenant, fltrID,
 				false, utils.NonTransactional); err != nil {
@@ -451,7 +463,17 @@ func (self *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string, tra
 			return nil, err
 		}
 	}
+<<<<<<< HEAD
 	return thdsIndexers, nil
+=======
+	if err := thdsIndexers.StoreIndexes(transactionID); err != nil {
+		return err
+	}
+	if err := thdsIndexers.StoreIndexes(utils.NonTransactional); err != nil {
+		return err
+	}
+	return nil
+>>>>>>> Indexes with tmp_ key will overwrite existing one
 }
 
 func (self *ApierV1) computeAttributeIndexes(tenant string, attrIDs *[]string, transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
@@ -474,7 +496,11 @@ func (self *ApierV1) computeAttributeIndexes(tenant string, attrIDs *[]string, t
 		ap, err := self.DataManager.GetAttributeProfile(tenant, id,
 			false, utils.NonTransactional)
 		if err != nil {
+<<<<<<< HEAD
 			return nil, err
+=======
+			return err
+>>>>>>> Indexes with tmp_ key will overwrite existing one
 		}
 		fltrIDs := make([]string, len(ap.FilterIDs))
 		for i, fltrID := range ap.FilterIDs {
@@ -500,11 +526,19 @@ func (self *ApierV1) computeAttributeIndexes(tenant string, attrIDs *[]string, t
 			} else if strings.HasPrefix(fltrID, utils.Meta) {
 				inFltr, err := engine.NewInlineFilter(fltrID)
 				if err != nil {
+<<<<<<< HEAD
 					return nil, err
 				}
 				fltr, err = inFltr.AsFilter(ap.Tenant)
 				if err != nil {
 					return nil, err
+=======
+					return err
+				}
+				fltr, err = inFltr.AsFilter(ap.Tenant)
+				if err != nil {
+					return err
+>>>>>>> Indexes with tmp_ key will overwrite existing one
 				}
 			} else if fltr, err = self.DataManager.GetFilter(ap.Tenant, fltrID,
 				false, utils.NonTransactional); err != nil {
@@ -517,6 +551,7 @@ func (self *ApierV1) computeAttributeIndexes(tenant string, attrIDs *[]string, t
 				attrIndexers.IndexTPFilter(engine.FilterToTPFilter(fltr), ap.ID)
 			}
 		}
+
 	}
 	if transactionID == utils.NonTransactional {
 		if err := attrIndexers.StoreIndexes(true, transactionID); err != nil {
@@ -528,7 +563,17 @@ func (self *ApierV1) computeAttributeIndexes(tenant string, attrIDs *[]string, t
 			return nil, err
 		}
 	}
+<<<<<<< HEAD
 	return attrIndexers, nil
+=======
+	if err := attrIndexers.StoreIndexes(transactionID); err != nil {
+		return err
+	}
+	if err := attrIndexers.StoreIndexes(utils.NonTransactional); err != nil {
+		return err
+	}
+	return nil
+>>>>>>> Indexes with tmp_ key will overwrite existing one
 }
 
 func (self *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string, transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
@@ -551,7 +596,11 @@ func (self *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string, tran
 		rp, err := self.DataManager.GetResourceProfile(tenant, id,
 			false, utils.NonTransactional)
 		if err != nil {
+<<<<<<< HEAD
 			return nil, err
+=======
+			return err
+>>>>>>> Indexes with tmp_ key will overwrite existing one
 		}
 		fltrIDs := make([]string, len(rp.FilterIDs))
 		for i, fltrID := range rp.FilterIDs {
@@ -577,11 +626,19 @@ func (self *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string, tran
 			} else if strings.HasPrefix(fltrID, utils.Meta) {
 				inFltr, err := engine.NewInlineFilter(fltrID)
 				if err != nil {
+<<<<<<< HEAD
 					return nil, err
 				}
 				fltr, err = inFltr.AsFilter(rp.Tenant)
 				if err != nil {
 					return nil, err
+=======
+					return err
+				}
+				fltr, err = inFltr.AsFilter(rp.Tenant)
+				if err != nil {
+					return err
+>>>>>>> Indexes with tmp_ key will overwrite existing one
 				}
 			} else if fltr, err = self.DataManager.GetFilter(rp.Tenant, fltrID,
 				false, utils.NonTransactional); err != nil {
@@ -605,7 +662,17 @@ func (self *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string, tran
 			return nil, err
 		}
 	}
+<<<<<<< HEAD
 	return rpIndexers, nil
+=======
+	if err := rpIndexers.StoreIndexes(transactionID); err != nil {
+		return err
+	}
+	if err := rpIndexers.StoreIndexes(utils.NonTransactional); err != nil {
+		return err
+	}
+	return nil
+>>>>>>> Indexes with tmp_ key will overwrite existing one
 }
 
 func (self *ApierV1) computeStatIndexes(tenant string, stIDs *[]string, transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
@@ -628,7 +695,11 @@ func (self *ApierV1) computeStatIndexes(tenant string, stIDs *[]string, transact
 		sqp, err := self.DataManager.GetStatQueueProfile(tenant, id,
 			false, utils.NonTransactional)
 		if err != nil {
+<<<<<<< HEAD
 			return nil, err
+=======
+			return err
+>>>>>>> Indexes with tmp_ key will overwrite existing one
 		}
 		fltrIDs := make([]string, len(sqp.FilterIDs))
 		for i, fltrID := range sqp.FilterIDs {
@@ -654,11 +725,19 @@ func (self *ApierV1) computeStatIndexes(tenant string, stIDs *[]string, transact
 			} else if strings.HasPrefix(fltrID, utils.Meta) {
 				inFltr, err := engine.NewInlineFilter(fltrID)
 				if err != nil {
+<<<<<<< HEAD
 					return nil, err
 				}
 				fltr, err = inFltr.AsFilter(sqp.Tenant)
 				if err != nil {
 					return nil, err
+=======
+					return err
+				}
+				fltr, err = inFltr.AsFilter(sqp.Tenant)
+				if err != nil {
+					return err
+>>>>>>> Indexes with tmp_ key will overwrite existing one
 				}
 			} else if fltr, err = self.DataManager.GetFilter(sqp.Tenant, fltrID,
 				false, utils.NonTransactional); err != nil {
@@ -682,7 +761,17 @@ func (self *ApierV1) computeStatIndexes(tenant string, stIDs *[]string, transact
 			return nil, err
 		}
 	}
+<<<<<<< HEAD
 	return sqpIndexers, nil
+=======
+	if err := sqpIndexers.StoreIndexes(transactionID); err != nil {
+		return err
+	}
+	if err := sqpIndexers.StoreIndexes(utils.NonTransactional); err != nil {
+		return err
+	}
+	return nil
+>>>>>>> Indexes with tmp_ key will overwrite existing one
 }
 
 func (self *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string, transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
@@ -705,7 +794,11 @@ func (self *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string, tra
 		spp, err := self.DataManager.GetSupplierProfile(tenant, id,
 			false, utils.NonTransactional)
 		if err != nil {
+<<<<<<< HEAD
 			return nil, err
+=======
+			return err
+>>>>>>> Indexes with tmp_ key will overwrite existing one
 		}
 		fltrIDs := make([]string, len(spp.FilterIDs))
 		for i, fltrID := range spp.FilterIDs {
@@ -731,11 +824,19 @@ func (self *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string, tra
 			} else if strings.HasPrefix(fltrID, utils.Meta) {
 				inFltr, err := engine.NewInlineFilter(fltrID)
 				if err != nil {
+<<<<<<< HEAD
 					return nil, err
 				}
 				fltr, err = inFltr.AsFilter(spp.Tenant)
 				if err != nil {
 					return nil, err
+=======
+					return err
+				}
+				fltr, err = inFltr.AsFilter(spp.Tenant)
+				if err != nil {
+					return err
+>>>>>>> Indexes with tmp_ key will overwrite existing one
 				}
 			} else if fltr, err = self.DataManager.GetFilter(spp.Tenant, fltrID,
 				false, utils.NonTransactional); err != nil {
@@ -759,5 +860,23 @@ func (self *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string, tra
 			return nil, err
 		}
 	}
+<<<<<<< HEAD
 	return sppIndexers, nil
+=======
+	if err := sppIndexers.StoreIndexes(transactionID); err != nil {
+		if err := self.DataManager.RemoveFilterIndexes(engine.GetDBIndexKey(utils.SupplierProfilePrefix,
+			tenant, false)); err != nil {
+			return err
+		}
+		if err := self.DataManager.RemoveFilterReverseIndexes(engine.GetDBIndexKey(utils.SupplierProfilePrefix,
+			tenant, true)); err != nil {
+			return err
+		}
+	} else {
+		if err := sppIndexers.StoreIndexes(utils.NonTransactional); err != nil {
+			return err
+		}
+	}
+	return nil
+>>>>>>> Indexes with tmp_ key will overwrite existing one
 }
