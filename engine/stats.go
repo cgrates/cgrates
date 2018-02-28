@@ -232,22 +232,22 @@ func (sS *StatService) processEvent(ev *utils.CGREvent) (err error) {
 				sS.ssqMux.Unlock()
 			}
 		}
+		var thIDs []string
+		if len(sq.sqPrfl.ThresholdIDs) != 0 {
+			thIDs = sq.sqPrfl.ThresholdIDs
+		}
+		thEv := &ArgsProcessEvent{
+			ThresholdIDs: thIDs,
+			CGREvent: utils.CGREvent{
+				Tenant: sq.Tenant,
+				ID:     utils.GenUUID(),
+				Event: map[string]interface{}{
+					utils.EventType: utils.StatUpdate,
+					utils.StatID:    sq.ID}}}
+		for metricID, metric := range sq.SQMetrics {
+			thEv.Event[metricID] = metric.GetValue()
+		}
 		if sS.thdS != nil {
-			var thIDs []string
-			if len(sq.sqPrfl.ThresholdIDs) != 0 {
-				thIDs = sq.sqPrfl.ThresholdIDs
-			}
-			thEv := &ArgsProcessEvent{
-				ThresholdIDs: thIDs,
-				CGREvent: utils.CGREvent{
-					Tenant: sq.Tenant,
-					ID:     utils.GenUUID(),
-					Event: map[string]interface{}{
-						utils.EventType: utils.StatUpdate,
-						utils.StatID:    sq.ID}}}
-			for metricID, metric := range sq.SQMetrics {
-				thEv.Event[metricID] = metric.GetValue()
-			}
 			var hits int
 			if err := sS.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
