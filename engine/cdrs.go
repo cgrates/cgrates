@@ -222,7 +222,7 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 	}
 	if self.rals != nil && !cdr.Rated { // CDRs not rated will be processed by Rating
 		go self.deriveRateStoreStatsReplicate(cdr, self.cgrCfg.CDRSStoreCdrs,
-			self.cdrstats != nil, len(self.cgrCfg.CDRSOnlineCDRExports) != 0)
+			true, len(self.cgrCfg.CDRSOnlineCDRExports) != 0)
 	}
 	return nil
 }

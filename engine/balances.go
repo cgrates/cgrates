@@ -782,20 +782,20 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 			}
 			accountId = b.account.ID
 			acntTnt := utils.NewTenantID(accountId)
+			thEv := &ArgsProcessEvent{
+				CGREvent: utils.CGREvent{
+					Tenant: acntTnt.Tenant,
+					ID:     utils.GenUUID(),
+					Event: map[string]interface{}{
+						utils.EventType:   utils.BalanceUpdate,
+						utils.EventSource: utils.AccountService,
+						utils.Account:     acntTnt.ID,
+						utils.BalanceID:   b.ID,
+						utils.Units:       b.Value}}}
+			if !b.ExpirationDate.IsZero() {
+				thEv.Event[utils.ExpiryTime] = b.ExpirationDate.Format(time.RFC3339)
+			}
 			if thresholdS != nil {
-				thEv := &ArgsProcessEvent{
-					CGREvent: utils.CGREvent{
-						Tenant: acntTnt.Tenant,
-						ID:     utils.GenUUID(),
-						Event: map[string]interface{}{
-							utils.EventType:   utils.BalanceUpdate,
-							utils.EventSource: utils.AccountService,
-							utils.Account:     acntTnt.ID,
-							utils.BalanceID:   b.ID,
-							utils.Units:       b.Value}}}
-				if !b.ExpirationDate.IsZero() {
-					thEv.Event[utils.ExpiryTime] = b.ExpirationDate.Format(time.RFC3339)
-				}
 				var hits int
 				if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil &&
 					err.Error() != utils.ErrNotFound.Error() {
