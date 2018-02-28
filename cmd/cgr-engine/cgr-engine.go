@@ -130,11 +130,11 @@ func startCdrc(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConne
 	}
 }
 
-func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, internalSupplierSChan,
+func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, internalThresholdSChan, internalSupplierSChan,
 	internalAttrSChan, internalCDRSChan chan rpcclient.RpcClientConnection, server *utils.Server, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS Session service.")
 	var err error
-	var ralsConns, resSConns, suplSConns, attrSConns, cdrsConn *rpcclient.RpcClientPool
+	var ralsConns, resSConns, threshSConns, suplSConns, attrSConns, cdrsConn *rpcclient.RpcClientPool
 	if len(cfg.SessionSCfg().RALsConns) != 0 {
 		ralsConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.SessionSCfg().RALsConns, internalRaterChan, cfg.InternalTtl)
@@ -149,6 +149,15 @@ func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, in
 			cfg.SessionSCfg().ResSConns, internalResourceSChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ResourceS: %s", utils.SessionS, err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+	if len(cfg.SessionSCfg().ThreshSConns) != 0 {
+		threshSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.SessionSCfg().ThreshSConns, internalThresholdSChan, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ThresholdS: %s", utils.SessionS, err.Error()))
 			exitChan <- true
 			return
 		}
@@ -186,7 +195,7 @@ func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, in
 		exitChan <- true
 		return
 	}
-	sm := sessions.NewSMGeneric(cfg, ralsConns, resSConns, suplSConns,
+	sm := sessions.NewSMGeneric(cfg, ralsConns, resSConns, threshSConns, suplSConns,
 		attrSConns, cdrsConn, smgReplConns, cfg.DefaultTimezone)
 	if err = sm.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.SessionS, err))
@@ -872,7 +881,7 @@ func main() {
 
 	// Start SM-Generic
 	if cfg.SessionSCfg().Enabled {
-		go startSessionS(internalSMGChan, internalRaterChan, internalRsChan,
+		go startSessionS(internalSMGChan, internalRaterChan, internalRsChan, internalThresholdSChan,
 			internalSupplierSChan, internalAttributeSChan, internalCdrSChan, server, exitChan)
 	}
 	// Start FreeSWITCHAgent

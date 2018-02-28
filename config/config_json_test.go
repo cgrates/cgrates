@@ -496,6 +496,7 @@ func TestSmgJsonCfg(t *testing.T) {
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
 		Resources_conns:           &[]*HaPoolJsonCfg{},
+		Thresholds_conns:          &[]*HaPoolJsonCfg{},
 		Suppliers_conns:           &[]*HaPoolJsonCfg{},
 		Attributes_conns:          &[]*HaPoolJsonCfg{},
 		Session_replication_conns: &[]*HaPoolJsonCfg{},
