@@ -37,24 +37,24 @@ var (
 
 // subtests to be executed for each confDIR
 var sTests = []func(t *testing.T){
-	// testITFlush,
-	// testITIsDBEmpty,
-	// testITSetFilterIndexes,
-	// testITGetFilterIndexes,
-	// testITMatchFilterIndex,
-	// testITFlush,
-	// testITIsDBEmpty,
-	// testITTestThresholdFilterIndexes,
-	// testITTestAttributeProfileFilterIndexes,
-	// testITTestThresholdInlineFilterIndexing,
+	testITFlush,
+	testITIsDBEmpty,
+	testITSetFilterIndexes,
+	testITGetFilterIndexes,
+	testITMatchFilterIndex,
+	testITFlush,
+	testITIsDBEmpty,
+	testITTestThresholdFilterIndexes,
+	testITTestAttributeProfileFilterIndexes,
+	testITTestThresholdInlineFilterIndexing,
 	testITFlush,
 	testITIsDBEmpty,
 	testITTestStoreFilterIndexesWithTransID,
 	testITTestStoreFilterIndexesWithTransID2,
-	// testITFlush,
-	// testITIsDBEmpty,
-	// testITTestIndexingWithEmptyFltrID,
-	// testITTestIndexingWithEmptyFltrID2,
+	testITFlush,
+	testITIsDBEmpty,
+	testITTestIndexingWithEmptyFltrID,
+	testITTestIndexingWithEmptyFltrID2,
 }
 
 func TestFilterIndexerITRedis(t *testing.T) {
