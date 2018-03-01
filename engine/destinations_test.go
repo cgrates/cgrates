@@ -36,13 +36,17 @@ func TestDestinationStoreRestore(t *testing.T) {
 }
 
 func TestDestinationStorageStore(t *testing.T) {
-	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
+	nationale := &Destination{Id: "nat",
+		Prefixes: []string{"0257", "0256", "0723"}}
 	err := dm.DataDB().SetDestination(nationale, utils.NonTransactional)
 	if err != nil {
 		t.Error("Error storing destination: ", err)
 	}
-	result, err := dm.DataDB().GetDestination(nationale.Id, false, utils.NonTransactional)
-	if nationale.containsPrefix("0257") == 0 || nationale.containsPrefix("0256") == 0 || nationale.containsPrefix("0723") == 0 {
+	result, err := dm.DataDB().GetDestination(nationale.Id,
+		false, utils.NonTransactional)
+	if nationale.containsPrefix("0257") == 0 ||
+		nationale.containsPrefix("0256") == 0 ||
+		nationale.containsPrefix("0723") == 0 {
 		t.Errorf("Expected %q was %q", nationale, result)
 	}
 }
@@ -86,38 +90,34 @@ func TestDestinationReverseGetExistsCache(t *testing.T) {
 }
 
 func TestDestinationGetNotExists(t *testing.T) {
+	if d, ok := Cache.Get(utils.CacheDestinations, "not existing"); ok {
+		t.Error("Bad destination cached: ", d)
+	}
 	d, err := dm.DataDB().GetDestination("not existing", false, utils.NonTransactional)
 	if d != nil {
 		t.Error("Got false destination: ", d, err)
 	}
 }
 
-func TestDestinationGetNotExistsCache(t *testing.T) {
-	dm.DataDB().GetDestination("not existing", false, utils.NonTransactional)
-	if d, ok := Cache.Get(utils.CacheDestinations, "not existing"); ok {
-		t.Error("Bad destination cached: ", d)
-	}
-}
-
-func TestCachedDestHasPrefix(t *testing.T) {
+func TestDestinationCachedDestHasPrefix(t *testing.T) {
 	if !CachedDestHasPrefix("NAT", "0256") {
 		t.Error("Could not find prefix in destination")
 	}
 }
 
-func TestCachedDestHasWrongPrefix(t *testing.T) {
+func TestDestinationCachedDestHasWrongPrefix(t *testing.T) {
 	if CachedDestHasPrefix("NAT", "771") {
 		t.Error("Prefix should not belong to destination")
 	}
 }
 
-func TestNonCachedDestRightPrefix(t *testing.T) {
+func TestDestinationNonCachedDestRightPrefix(t *testing.T) {
 	if CachedDestHasPrefix("FAKE", "0256") {
 		t.Error("Destination should not belong to prefix")
 	}
 }
 
-func TestNonCachedDestWrongPrefix(t *testing.T) {
+func TestDestinationNonCachedDestWrongPrefix(t *testing.T) {
 	if CachedDestHasPrefix("FAKE", "771") {
 		t.Error("Both arguments should be fake")
 	}

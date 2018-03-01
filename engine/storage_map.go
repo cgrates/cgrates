@@ -1060,7 +1060,7 @@ func (ms *MapStorage) SetDerivedChargers(key string,
 		return nil
 	}
 	result, err := ms.ms.Marshal(dcs)
-	ms.dict[key] = result
+	ms.dict[utils.DERIVEDCHARGERS_PREFIX+key] = result
 	Cache.Remove(utils.CacheDerivedChargers, key,
 		cCommit, transactionID)
 	return err
@@ -1385,7 +1385,7 @@ func (ms *MapStorage) MatchFilterIndexDrv(cacheID, itemIDPrefix,
 	filterType, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	values, ok := ms.dict[utils.ConcatenatedKey(utils.CacheInstanceToPrefix[cacheID], itemIDPrefix)]
+	values, ok := ms.dict[utils.CacheInstanceToPrefix[cacheID]+itemIDPrefix]
 	if !ok {
 		return nil, utils.ErrNotFound
 	}

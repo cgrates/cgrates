@@ -33,9 +33,7 @@ var (
 )
 
 func TestFilterMatchingItemIDsForEvent(t *testing.T) {
-	var stringFilter []*FilterRule
-	var prefixFilter []*FilterRule
-	var defaultFilter []*FilterRule
+	var stringFilter, prefixFilter, defaultFilter []*FilterRule
 	stringFilterID := "stringFilterID"
 	prefixFilterID := "prefixFilterID"
 	defaultFilterID := "defaultFilterID"
@@ -47,21 +45,24 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	stringFilter = append(stringFilter, x)
-	attribStringF := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "stringFilter", Rules: stringFilter}
+	attribStringF := &Filter{Tenant: config.CgrConfig().DefaultTenant,
+		ID: "stringFilter", Rules: stringFilter}
 	dmMatch.SetFilter(attribStringF)
 	x, err = NewFilterRule(MetaPrefix, "Field", []string{"profilePrefix"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	prefixFilter = append(prefixFilter, x)
-	attribPrefF := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "prefFilter", Rules: prefixFilter}
+	attribPrefF := &Filter{Tenant: config.CgrConfig().DefaultTenant,
+		ID: "prefFilter", Rules: prefixFilter}
 	dmMatch.SetFilter(attribPrefF)
 	x, err = NewFilterRule(MetaGreaterOrEqual, "Weight", []string{"200.00"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	defaultFilter = append(defaultFilter, x)
-	attribDefaultF := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "defaultFilter", Rules: defaultFilter}
+	attribDefaultF := &Filter{Tenant: config.CgrConfig().DefaultTenant,
+		ID: "defaultFilter", Rules: defaultFilter}
 	dmMatch.SetFilter(attribDefaultF)
 	prefix := utils.ConcatenatedKey(config.CgrConfig().DefaultTenant, context)
 	atrRFI := NewFilterIndexer(dmMatch, utils.AttributeProfilePrefix, prefix)
@@ -89,7 +90,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 		"Field": "profilePrefix",
 	}
 	aPrflIDs, err = matchingItemIDsForEvent(matchEV, nil, nil,
-		dmMatch, utils.AttributeFilterIndexes, prefix)
+		dmMatch, utils.CacheAttributeFilterIndexes, prefix)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}

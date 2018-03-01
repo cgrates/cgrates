@@ -176,7 +176,8 @@ func TestAttributeCache(t *testing.T) {
 	}
 	//Test each attribute from cache
 	for _, atr := range atrPs {
-		if tempAttr, err := dmAtr.GetAttributeProfile(atr.Tenant, atr.ID, false, utils.NonTransactional); err != nil {
+		if tempAttr, err := dmAtr.GetAttributeProfile(atr.Tenant, atr.ID,
+			false, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(atr, tempAttr) {
 			t.Errorf("Expecting: %+v, received: %+v", atr, tempAttr)

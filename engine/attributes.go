@@ -65,7 +65,7 @@ func (alS *AttributeService) matchingAttributeProfilesForEvent(ev *utils.CGREven
 	attrIdxKey = utils.ConcatenatedKey(ev.Tenant, contextVal)
 	matchingAPs := make(map[string]*AttributeProfile)
 	aPrflIDs, err := matchingItemIDsForEvent(ev.Event, alS.stringIndexedFields, alS.prefixIndexedFields,
-		alS.dm, utils.AttributeFilterIndexes, attrIdxKey)
+		alS.dm, utils.CacheAttributeFilterIndexes, attrIdxKey)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			return nil, err
