@@ -1295,6 +1295,7 @@ func (args *ArgRSv1ResourceUsage) TenantID() string {
 
 type ArgsComputeFilterIndexes struct {
 	Tenant       string
+	Context      string
 	AttributeIDs *[]string
 	ResourceIDs  *[]string
 	StatIDs      *[]string

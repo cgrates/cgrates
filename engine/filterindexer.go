@@ -128,15 +128,15 @@ func (rfi *FilterIndexer) cacheRemItemType() {
 }
 
 // StoreIndexes handles storing the indexes to dataDB
-func (rfi *FilterIndexer) StoreIndexes(transactionID string) (err error) {
+func (rfi *FilterIndexer) StoreIndexes(commit bool, transactionID string) (err error) {
 	if err = rfi.dm.SetFilterIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
-		rfi.indexes, true, transactionID); err != nil {
+		rfi.indexes, commit, transactionID); err != nil {
 		return
 	}
 	if err = rfi.dm.SetFilterReverseIndexes(
 		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
-		rfi.reveseIndex, true, transactionID); err != nil {
+		rfi.reveseIndex, commit, transactionID); err != nil {
 		return
 	}
 	rfi.cacheRemItemType()

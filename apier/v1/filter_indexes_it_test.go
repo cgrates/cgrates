@@ -54,6 +54,7 @@ var sTestsFilterIndexesSV1 = []func(t *testing.T){
 	testV1FIdxComputeThresholdsIndexes,
 	testV1FIdxSetSecondThresholdProfile,
 	testV1FIdxSecondComputeThresholdsIndexes,
+	testV1FIdxThirdComputeThresholdsIndexes,
 	testV1FIdxRemoveThresholdProfile,
 
 	testV1FIdxSetStatQueueProfileIndexes,
@@ -256,10 +257,10 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 
 func testV1FIdxComputeThresholdsIndexes(t *testing.T) {
 	tenant := "cgrates.org"
-	emptySlice := []string{}
 	var reply2 string
+	emptySlice := []string{}
 	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexes{
-		Tenant:       "cgrates.org",
+		Tenant:       tenant,
 		ThresholdIDs: nil,
 		AttributeIDs: &emptySlice,
 		ResourceIDs:  &emptySlice,
@@ -299,7 +300,7 @@ func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 			&engine.FilterRule{
 				FieldName: "Account",
 				Type:      "*string",
-				Values:    []string{"1001"},
+				Values:    []string{"1002"},
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
@@ -357,7 +358,6 @@ func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 		nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
-
 }
 
 func testV1FIdxSecondComputeThresholdsIndexes(t *testing.T) {
@@ -378,7 +378,7 @@ func testV1FIdxSecondComputeThresholdsIndexes(t *testing.T) {
 	if reply2 != utils.OK {
 		t.Errorf("Error: %+v", reply2)
 	}
-	expectedIDX := map[string]utils.StringMap{"*string:Account:1001": {"TEST_PROFILE2": true}}
+	expectedIDX := map[string]utils.StringMap{"*string:Account:1002": {"TEST_PROFILE2": true}}
 	indexes, err := onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, tenant, false), engine.MetaString, nil)
 	if err != nil {
 		t.Error(err)
@@ -386,7 +386,52 @@ func testV1FIdxSecondComputeThresholdsIndexes(t *testing.T) {
 	if !reflect.DeepEqual(expectedIDX, indexes) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedIDX, utils.ToJSON(indexes))
 	}
-	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE2": {"*string:Account:1001": true}}
+	expectedRevIDX := map[string]utils.StringMap{"TEST_PROFILE2": {"*string:Account:1002": true}}
+	indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, tenant, true), nil)
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(expectedRevIDX, indexes) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedRevIDX, utils.ToJSON(indexes))
+	}
+}
+
+func testV1FIdxThirdComputeThresholdsIndexes(t *testing.T) {
+	tenant := "cgrates.org"
+	emptySlice := []string{}
+	var reply2 string
+	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexes{
+		Tenant:       "cgrates.org",
+		ThresholdIDs: nil,
+		AttributeIDs: &emptySlice,
+		ResourceIDs:  &emptySlice,
+		StatIDs:      &emptySlice,
+		SupplierIDs:  &emptySlice,
+	}, &reply2); err != nil {
+		t.Error(err)
+	}
+	if reply2 != utils.OK {
+		t.Errorf("Error: %+v", reply2)
+	}
+	expectedIDX := map[string]utils.StringMap{
+		"*string:Account:1001": {
+			"TEST_PROFILE1": true},
+		"*string:Account:1002": {
+			"TEST_PROFILE2": true},
+	}
+	indexes, err := onStor.GetFilterIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, tenant, false), engine.MetaString, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(expectedIDX, indexes) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedIDX, utils.ToJSON(indexes))
+	}
+	expectedRevIDX := map[string]utils.StringMap{
+		"TEST_PROFILE1": {
+			"*string:Account:1001": true},
+		"TEST_PROFILE2": {
+			"*string:Account:1002": true},
+	}
 	indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, tenant, true), nil)
 	if err != nil {
 		t.Error(err)

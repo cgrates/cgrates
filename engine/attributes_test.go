@@ -250,7 +250,7 @@ func TestAttributePopulateAttrService(t *testing.T) {
 	defaultf1 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "defaultf1", Rules: defaultf}
 	dmAtr.SetFilter(defaultf1)
 	ref.IndexTPFilter(FilterToTPFilter(defaultf1), "attributeprofile4")
-	err = ref.StoreIndexes(utils.NonTransactional)
+	err = ref.StoreIndexes(true, utils.NonTransactional)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
