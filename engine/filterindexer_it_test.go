@@ -26,14 +26,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
 var (
-	redisDB     *RedisStorage
-	mongoDB     *MongoStorage
 	dataManager *DataManager
 	cfgDBName   string
 )
@@ -45,7 +42,7 @@ var sTests = []func(t *testing.T){
 	testITSetFilterIndexes,
 	testITGetFilterIndexes,
 	testITMatchFilterIndex,
-	testITFlush,
+	/*testITFlush,
 	testITIsDBEmpty,
 	testITTestThresholdFilterIndexes,
 	testITTestAttributeProfileFilterIndexes,
@@ -58,40 +55,36 @@ var sTests = []func(t *testing.T){
 	testITIsDBEmpty,
 	testITTestIndexingWithEmptyFltrID,
 	testITTestIndexingWithEmptyFltrID2,
+	*/
 }
 
-func TestITRedisConnect(t *testing.T) {
+func TestFilterIndexerITRedis(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
-	redisDB, err = NewRedisStorage(fmt.Sprintf("%s:%s", cfg.DataDbHost, cfg.DataDbPort), 4,
+	redisDB, err := NewRedisStorage(fmt.Sprintf("%s:%s", cfg.DataDbHost, cfg.DataDbPort), 4,
 		cfg.DataDbPass, cfg.DBDataEncoding, utils.REDIS_MAX_CONNS, nil, 1)
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	}
 	cfgDBName = cfg.DataDbName
-}
-
-func TestITRedis(t *testing.T) {
 	dataManager = NewDataManager(redisDB)
 	for _, stest := range sTests {
 		t.Run("TestITRedis", stest)
 	}
 }
 
-func TestITMongoConnect(t *testing.T) {
+func TestFilterIndexerITMongo(t *testing.T) {
 	cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "cdrsv2mongo")
 	mgoITCfg, err := config.NewCGRConfigFromFolder(cdrsMongoCfgPath)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if mongoDB, err = NewMongoStorage(mgoITCfg.StorDBHost, mgoITCfg.StorDBPort,
+	mongoDB, err := NewMongoStorage(mgoITCfg.StorDBHost, mgoITCfg.StorDBPort,
 		mgoITCfg.StorDBName, mgoITCfg.StorDBUser, mgoITCfg.StorDBPass,
-		utils.StorDB, nil, mgoITCfg.CacheCfg(), mgoITCfg.LoadHistorySize); err != nil {
+		utils.StorDB, nil, mgoITCfg.CacheCfg(), mgoITCfg.LoadHistorySize)
+	if err != nil {
 		t.Fatal(err)
 	}
 	cfgDBName = mgoITCfg.StorDBName
-}
-
-func TestITMongo(t *testing.T) {
 	dataManager = NewDataManager(mongoDB)
 	for _, stest := range sTests {
 		t.Run("TestITMongo", stest)
@@ -102,7 +95,7 @@ func testITFlush(t *testing.T) {
 	if err := dataManager.DataDB().Flush(""); err != nil {
 		t.Error(err)
 	}
-	cache.Flush()
+	Cache.Clear(nil)
 }
 
 func testITIsDBEmpty(t *testing.T) {
@@ -213,14 +206,14 @@ func testITMatchFilterIndex(t *testing.T) {
 		"RL2": true,
 	}
 	if rcvMp, err := dataManager.MatchFilterIndex(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
+		utils.CacheResourceFilterIndexes, "cgrates.org",
 		MetaString, "Account", "1002"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
 	}
 	if _, err := dataManager.MatchFilterIndex(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
+		utils.CacheResourceFilterIndexes, "cgrates.org",
 		MetaString, "NonexistentField", "1002"); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -885,8 +878,7 @@ func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 	eMp := utils.StringMap{
 		"THD_Test": true,
 	}
-	if rcvMp, err := dataManager.MatchFilterIndex(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+	if rcvMp, err := dataManager.MatchFilterIndex(utils.CacheThresholdFilterIndexes, th.Tenant,
 		utils.MetaDefault, utils.META_ANY, utils.META_ANY); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
@@ -954,8 +946,7 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 	eMp := utils.StringMap{
 		"SPL_Weight": true,
 	}
-	if rcvMp, err := dataManager.MatchFilterIndex(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+	if rcvMp, err := dataManager.MatchFilterIndex(utils.CacheSupplierFilterIndexes, splProfile.Tenant,
 		utils.MetaDefault, utils.META_ANY, utils.META_ANY); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {

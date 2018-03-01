@@ -1221,7 +1221,7 @@ func (rs *RedisStorage) SetDerivedChargers(key string,
 	if marshaled, err = rs.ms.Marshal(dcs); err != nil {
 		return
 	}
-	if err = rs.Cmd("SET", key, marshaled).Err; err != nil {
+	if err = rs.Cmd("SET", utils.DERIVEDCHARGERS_PREFIX+key, marshaled).Err; err != nil {
 		return
 	}
 	return
@@ -1524,8 +1524,7 @@ func (rs *RedisStorage) MatchFilterIndexDrv(cacheID, itemIDPrefix,
 	filterType, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
 	fieldValKey := utils.ConcatenatedKey(filterType, fldName, fldVal)
 	fldValBytes, err := rs.Cmd("HGET",
-		utils.ConcatenatedKey(utils.CacheInstanceToPrefix[cacheID],
-			itemIDPrefix), fieldValKey).Bytes()
+		utils.CacheInstanceToPrefix[cacheID]+itemIDPrefix, fieldValKey).Bytes()
 	if err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
 			err = utils.ErrNotFound

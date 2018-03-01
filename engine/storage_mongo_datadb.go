@@ -2145,7 +2145,7 @@ func (ms *MongoStorage) MatchFilterIndexDrv(cacheID, itemIDPrefix,
 	fldKey := fmt.Sprintf("value.%s",
 		utils.ConcatenatedKey(filterType, fldName, fldVal))
 	if err = col.Find(
-		bson.M{"key": utils.ConcatenatedKey(utils.CacheInstanceToPrefix[cacheID], itemIDPrefix),
+		bson.M{"key": utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix,
 			fldKey: bson.M{"$exists": true}}).Select(bson.M{fldKey: true}).One(&result); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound

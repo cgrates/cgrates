@@ -27,7 +27,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -133,7 +132,7 @@ func testOnStorITFlush(t *testing.T) {
 	if err := onStor.DataDB().Flush(""); err != nil {
 		t.Error(err)
 	}
-	cache.Flush()
+	Cache.Clear(nil)
 }
 
 func testOnStorITIsDBEmpty(t *testing.T) {
@@ -194,19 +193,19 @@ func testOnStorITCacheDestinations(t *testing.T) {
 		t.Error(err)
 	}
 
-	if _, hasIt := cache.Get(utils.DESTINATION_PREFIX + dst.Id); hasIt {
+	if _, hasIt := Cache.Get(utils.CacheDestinations, dst.Id); hasIt {
 		t.Error("Already in cache")
 	}
 	if err := onStor.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{dst.Id}, true); err != nil { // Should not cache due to mustBeCached
 		t.Error(err)
 	}
-	if _, hasIt := cache.Get(utils.DESTINATION_PREFIX + dst.Id); hasIt {
+	if _, hasIt := Cache.Get(utils.CacheDestinations, dst.Id); hasIt {
 		t.Error("Should not be in cache")
 	}
 	if err := onStor.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{dst.Id}, false); err != nil {
 		t.Error(err)
 	}
-	if itm, hasIt := cache.Get(utils.DESTINATION_PREFIX + dst.Id); !hasIt {
+	if itm, hasIt := Cache.Get(utils.CacheDestinations, dst.Id); !hasIt {
 		t.Error("Did not cache")
 	} else if !reflect.DeepEqual(dst, itm.(*Destination)) {
 		t.Error("Wrong item in the cache")
@@ -219,7 +218,7 @@ func testOnStorITCacheReverseDestinations(t *testing.T) {
 		t.Error(err)
 	}
 	for _, prfx := range dst.Prefixes {
-		if _, hasIt := cache.Get(utils.REVERSE_DESTINATION_PREFIX + dst.Id); hasIt {
+		if _, hasIt := Cache.Get(utils.CacheReverseDestinations, dst.Id); hasIt {
 			t.Errorf("Prefix: %s already in cache", prfx)
 		}
 	}
@@ -227,7 +226,7 @@ func testOnStorITCacheReverseDestinations(t *testing.T) {
 		t.Error(err)
 	}
 	for _, prfx := range dst.Prefixes {
-		if itm, hasIt := cache.Get(utils.REVERSE_DESTINATION_PREFIX + prfx); !hasIt {
+		if itm, hasIt := Cache.Get(utils.CacheReverseDestinations, prfx); !hasIt {
 			t.Error("Did not cache")
 		} else if !reflect.DeepEqual([]string{dst.Id}, itm.([]string)) {
 			t.Error("Wrong item in the cache")
@@ -279,13 +278,13 @@ func testOnStorITCacheActionPlan(t *testing.T) {
 	} else if !reflect.DeepEqual(expectedCAp, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedCAp, itm)
 	}
-	if _, hasIt := cache.Get(utils.ACTION_PLAN_PREFIX + ap.Id); hasIt {
+	if _, hasIt := Cache.Get(utils.CacheActionPlans, ap.Id); hasIt {
 		t.Error("Already in cache")
 	}
 	if err := onStor.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{ap.Id}, false); err != nil {
 		t.Error(err)
 	}
-	if itm, hasIt := cache.Get(utils.ACTION_PLAN_PREFIX + ap.Id); !hasIt {
+	if itm, hasIt := Cache.Get(utils.CacheActionPlans, ap.Id); !hasIt {
 		t.Error("Did not cache")
 	} else if rcv := itm.(*ActionPlan); !reflect.DeepEqual(ap, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", ap, rcv)
@@ -304,13 +303,13 @@ func testOnStorITCacheAccountActionPlans(t *testing.T) {
 	if err := onStor.DataDB().SetAccountActionPlans(acntID, aAPs, true); err != nil {
 		t.Error(err)
 	}
-	if _, hasIt := cache.Get(utils.AccountActionPlansPrefix + acntID); hasIt {
+	if _, hasIt := Cache.Get(utils.CacheAccountActionPlans, acntID); hasIt {
 		t.Error("Already in cache")
 	}
 	if err := onStor.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{acntID}, false); err != nil {
 		t.Error(err)
 	}
-	if itm, hasIt := cache.Get(utils.AccountActionPlansPrefix + acntID); !hasIt {
+	if itm, hasIt := Cache.Get(utils.CacheAccountActionPlans, acntID); !hasIt {
 		t.Error("Did not cache")
 	} else if rcv := itm.([]string); !reflect.DeepEqual(aAPs, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", aAPs, rcv)
@@ -339,13 +338,13 @@ func testOnStorITCacheActionTriggers(t *testing.T) {
 	} else if !reflect.DeepEqual(expectedCAt, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedCAt, itm)
 	}
-	if _, hasIt := cache.Get(utils.ACTION_TRIGGER_PREFIX + atsID); hasIt {
+	if _, hasIt := Cache.Get(utils.CacheActionTriggers, atsID); hasIt {
 		t.Error("Already in cache")
 	}
 	if err := onStor.CacheDataFromDB(utils.ACTION_TRIGGER_PREFIX, []string{atsID}, false); err != nil {
 		t.Error(err)
 	}
-	if itm, hasIt := cache.Get(utils.ACTION_TRIGGER_PREFIX + atsID); !hasIt {
+	if itm, hasIt := Cache.Get(utils.CacheActionTriggers, atsID); !hasIt {
 		t.Error("Did not cache")
 	} else if rcv := itm.(ActionTriggers); !reflect.DeepEqual(ats, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", ats, rcv)
@@ -369,13 +368,13 @@ func testOnStorITCacheDerivedChargers(t *testing.T) {
 	if err := onStor.DataDB().SetDerivedChargers(keyDCS, dcs, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if _, hasIt := cache.Get(utils.DERIVEDCHARGERS_PREFIX + keyDCS); hasIt {
+	if _, hasIt := Cache.Get(utils.CacheDerivedChargers, keyDCS); hasIt {
 		t.Error("Already in cache")
 	}
 	if err := onStor.CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX, []string{keyDCS}, false); err != nil {
 		t.Error(err)
 	}
-	if itm, hasIt := cache.Get(utils.DERIVEDCHARGERS_PREFIX + keyDCS); !hasIt {
+	if itm, hasIt := Cache.Get(utils.CacheDerivedChargers, keyDCS); !hasIt {
 		t.Error("Did not cache")
 	} else if rcv := itm.(*utils.DerivedChargers); !reflect.DeepEqual(dcs, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", dcs, rcv)
@@ -421,13 +420,13 @@ func testOnStorITCacheAlias(t *testing.T) {
 	} else if !reflect.DeepEqual(expectedCA, itm) {
 		t.Errorf("Expected : %+v, but received %+v", expectedCA, itm)
 	}
-	if _, hasIt := cache.Get(utils.ALIASES_PREFIX + als.GetId()); hasIt {
+	if _, hasIt := Cache.Get(utils.CacheAliases, als.GetId()); hasIt {
 		t.Error("Already in cache")
 	}
 	if err := onStor.CacheDataFromDB(utils.ALIASES_PREFIX, []string{als.GetId()}, false); err != nil {
 		t.Error(err)
 	}
-	if itm, hasIt := cache.Get(utils.ALIASES_PREFIX + als.GetId()); !hasIt {
+	if itm, hasIt := Cache.Get(utils.CacheAliases, als.GetId()); !hasIt {
 		t.Error("Did not cache")
 	} else if rcv := itm.(*Alias); !reflect.DeepEqual(als, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", als, rcv)
@@ -468,14 +467,14 @@ func testOnStorITCacheReverseAlias(t *testing.T) {
 		t.Error(err)
 	}
 	rvAlsID := strings.Join([]string{als.Values[1].Pairs["Account"]["dan"], "Account", als.Context}, "")
-	if _, hasIt := cache.Get(utils.REVERSE_ALIASES_PREFIX + rvAlsID); hasIt {
+	if _, hasIt := Cache.Get(utils.CacheReverseAliases, rvAlsID); hasIt {
 		t.Error("Already in cache")
 	}
 	if err := onStor.CacheDataFromDB(utils.REVERSE_ALIASES_PREFIX, []string{rvAlsID}, false); err != nil {
 		t.Error(err)
 	}
 	eRvrsAls := []string{utils.ConcatenatedKey(als.GetId(), als.Values[1].DestinationId)}
-	if itm, hasIt := cache.Get(utils.REVERSE_ALIASES_PREFIX + rvAlsID); !hasIt {
+	if itm, hasIt := Cache.Get(utils.CacheReverseAliases, rvAlsID); !hasIt {
 		t.Error("Did not cache")
 	} else if rcv := itm.([]string); !reflect.DeepEqual(eRvrsAls, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eRvrsAls, rcv)
