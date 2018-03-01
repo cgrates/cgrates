@@ -188,7 +188,7 @@ func TestThresholdsPopulateThresholdService(t *testing.T) {
 			t.Errorf("Error: %+v", err)
 		}
 	}
-	err = ref.StoreIndexes(utils.NonTransactional)
+	err = ref.StoreIndexes(true, utils.NonTransactional)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}

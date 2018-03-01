@@ -259,7 +259,7 @@ func TestStatsPopulateStatsService(t *testing.T) {
 	for _, sqp := range sqps {
 		dmSTS.SetStatQueueProfile(sqp, false)
 	}
-	err = ref.StoreIndexes(utils.NonTransactional)
+	err = ref.StoreIndexes(true, utils.NonTransactional)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
