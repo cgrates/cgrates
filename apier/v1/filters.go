@@ -51,8 +51,8 @@ func (self *ApierV1) GetFilter(arg utils.TenantID, reply *engine.Filter) error {
 	return nil
 }
 
-//RemFilter  remove a specific filter
-func (self *ApierV1) RemFilter(arg utils.TenantID, reply *string) error {
+//RemoveFilter  remove a specific filter
+func (self *ApierV1) RemoveFilter(arg utils.TenantID, reply *string) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

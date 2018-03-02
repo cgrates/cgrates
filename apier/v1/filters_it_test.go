@@ -52,7 +52,7 @@ var sTestsFilter = []func(t *testing.T){
 	testFilterGetFilterAfterSet,
 	testFilterUpdateFilter,
 	testFilterGetFilterAfterUpdate,
-	testFilterRemFilter,
+	testFilterRemoveFilter,
 	testFilterGetFilterAfterRemove,
 	testFilterKillEngine,
 }
@@ -190,9 +190,9 @@ func testFilterGetFilterAfterUpdate(t *testing.T) {
 	}
 }
 
-func testFilterRemFilter(t *testing.T) {
+func testFilterRemoveFilter(t *testing.T) {
 	var resp string
-	if err := filterRPC.Call("ApierV1.RemFilter", &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &resp); err != nil {
+	if err := filterRPC.Call("ApierV1.RemoveFilter", &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
