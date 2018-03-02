@@ -398,6 +398,9 @@ func (fsev FSEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 	if strings.Index(subsystems, utils.MetaAttributes) != -1 {
 		args.GetAttributes = true
 	}
+	if strings.Index(subsystems, utils.MetaThresholds) != -1 {
+		*args.ProcessThreshold = true
+	}
 	return
 }
 
@@ -430,6 +433,9 @@ func (fsev FSEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 	if strings.Index(subsystems, utils.MetaAttributes) != -1 {
 		args.GetAttributes = true
 	}
+	if strings.Index(subsystems, utils.MetaThresholds) != -1 {
+		*args.ProcessThreshold = true
+	}
 	return
 }
 
@@ -458,6 +464,9 @@ func (fsev FSEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionA
 	}
 	if strings.Index(subsystems, utils.MetaResources) != -1 {
 		args.ReleaseResources = true
+	}
+	if strings.Index(subsystems, utils.MetaThresholds) != -1 {
+		*args.ProcessThreshold = true
 	}
 	return
 }

@@ -1296,6 +1296,7 @@ type V1AuthorizeArgs struct {
 	AuthorizeResources bool
 	GetMaxUsage        bool
 	GetSuppliers       bool
+	ProcessThreshold   *bool
 	utils.CGREvent
 	utils.Paginator
 }
@@ -1305,6 +1306,7 @@ type V1AuthorizeReply struct {
 	ResourceAllocation *string
 	MaxUsage           *time.Duration
 	Suppliers          *engine.SortedSuppliers
+	ThresholdHits      *int
 }
 
 // AsCGRReply is part of utils.CGRReplier interface
@@ -1403,6 +1405,25 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 			authReply.Suppliers = &splsReply
 		}
 	}
+	checkThresholds := smg.thdS != nil
+	if args.ProcessThreshold != nil {
+		checkThresholds = *args.ProcessThreshold
+	}
+	if checkThresholds {
+		if smg.thdS == nil {
+			return utils.NewErrNotConnected(utils.ThresholdS)
+		}
+		var hits int
+		thEv := &engine.ArgsProcessEvent{
+			CGREvent: args.CGREvent,
+		}
+		if err := smg.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil &&
+			err.Error() != utils.ErrNotFound.Error() {
+			utils.Logger.Warning(
+				fmt.Sprintf("<SessionS> error: %s processing event %+v with ThresholdS.", err.Error(), thEv))
+		}
+		authReply.ThresholdHits = &hits
+	}
 	return nil
 }
 
@@ -1444,6 +1465,7 @@ type V1InitSessionArgs struct {
 	GetAttributes     bool
 	AllocateResources bool
 	InitSession       bool
+	ProcessThreshold  *bool
 	utils.CGREvent
 }
 
@@ -1451,6 +1473,7 @@ type V1InitSessionReply struct {
 	Attributes         *engine.AttrSProcessEventReply
 	ResourceAllocation *string
 	MaxUsage           *time.Duration
+	ThresholdHits      *int
 }
 
 // AsCGRReply is part of utils.CGRReplier interface
@@ -1504,7 +1527,6 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		if err != nil {
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
-		//
 		attrRU := utils.ArgRSv1ResourceUsage{
 			CGREvent: args.CGREvent,
 			UsageID:  originID,
@@ -1526,6 +1548,25 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		} else {
 			rply.MaxUsage = &maxUsage
 		}
+	}
+	checkThresholds := smg.thdS != nil
+	if args.ProcessThreshold != nil {
+		checkThresholds = *args.ProcessThreshold
+	}
+	if checkThresholds {
+		if smg.thdS == nil {
+			return utils.NewErrNotConnected(utils.ThresholdS)
+		}
+		var hits int
+		thEv := &engine.ArgsProcessEvent{
+			CGREvent: args.CGREvent,
+		}
+		if err := smg.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil &&
+			err.Error() != utils.ErrNotFound.Error() {
+			utils.Logger.Warning(
+				fmt.Sprintf("<SessionS> error: %s processing event %+v with ThresholdS.", err.Error(), thEv))
+		}
+		rply.ThresholdHits = &hits
 	}
 	return
 }
@@ -1597,6 +1638,7 @@ func (smg *SMGeneric) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 type V1TerminateSessionArgs struct {
 	TerminateSession bool
 	ReleaseResources bool
+	ProcessThreshold *bool
 	utils.CGREvent
 }
 
@@ -1632,6 +1674,25 @@ func (smg *SMGeneric) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection
 			argsRU, &reply); err != nil {
 			return utils.NewErrResourceS(err)
 		}
+	}
+	checkThresholds := smg.thdS != nil
+	if args.ProcessThreshold != nil {
+		checkThresholds = *args.ProcessThreshold
+	}
+	if checkThresholds {
+		if smg.thdS == nil {
+			return utils.NewErrNotConnected(utils.ThresholdS)
+		}
+		var hits int
+		thEv := &engine.ArgsProcessEvent{
+			CGREvent: args.CGREvent,
+		}
+		if err := smg.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil &&
+			err.Error() != utils.ErrNotFound.Error() {
+			utils.Logger.Warning(
+				fmt.Sprintf("<SessionS> error: %s processing event %+v with ThresholdS.", err.Error(), thEv))
+		}
+		// authReply.ThresholdHits = &hits
 	}
 	*rply = utils.OK
 	return
