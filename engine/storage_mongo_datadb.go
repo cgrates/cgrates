@@ -1934,7 +1934,7 @@ func (ms *MongoStorage) RemoveTimingDrv(id string) (err error) {
 }
 
 // GetFilterIndexesDrv retrieves Indexes from dataDB
-func (ms *MongoStorage) GetFilterIndexesDrv(dbKey, filterType string,
+func (ms *MongoStorage) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType string,
 	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
@@ -1942,10 +1942,12 @@ func (ms *MongoStorage) GetFilterIndexesDrv(dbKey, filterType string,
 		Key   string
 		Value map[string][]string
 	}
+	dbKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
 	findParam := bson.M{"key": dbKey}
 	if len(fldNameVal) != 0 {
 		for fldName, fldValue := range fldNameVal {
-			qryFltr := fmt.Sprintf("value.%s", utils.ConcatenatedKey(filterType, fldName, fldValue))
+			qryFltr := fmt.Sprintf("value.%s",
+				utils.ConcatenatedKey(filterType, fldName, fldValue))
 			if err = col.Find(bson.M{"key": dbKey, qryFltr: bson.M{"$exists": true}}).Select(
 				bson.M{qryFltr: true}).One(&result); err != nil {
 				if err == mgo.ErrNotFound {

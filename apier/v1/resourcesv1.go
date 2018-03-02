@@ -81,7 +81,10 @@ func (apierV1 *ApierV1) SetResourceProfile(res *engine.ResourceProfile, reply *s
 	if err := apierV1.DataManager.SetResourceProfile(res, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierV1.DataManager.SetResource(&engine.Resource{Tenant: res.Tenant, ID: res.ID, Usages: make(map[string]*engine.ResourceUsage)}); err != nil {
+	if err := apierV1.DataManager.SetResource(
+		&engine.Resource{Tenant: res.Tenant,
+			ID:     res.ID,
+			Usages: make(map[string]*engine.ResourceUsage)}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

@@ -118,7 +118,7 @@ type DataDB interface {
 	RemoveTimingDrv(string) error
 	GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error)
 	AddLoadHistory(*utils.LoadInstance, int, string) error
-	GetFilterIndexesDrv(dbKey, filterType string,
+	GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType string,
 		fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error)
 	SetFilterIndexesDrv(dbKey string, indexes map[string]utils.StringMap,
 		commit bool, transactionID string) (err error)

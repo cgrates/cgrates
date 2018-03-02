@@ -79,18 +79,14 @@ var sTestsFilterIndexesSV1Ca = []func(t *testing.T){
 	testV1FIdxCaRemoveResourceProfile,
 }
 
-func TestFIdxCaV1ITMySQLConnect(t *testing.T) {
+// Test start here
+func TestFIdxCaV1ITMySQL(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
-	rdsITdb, err = engine.NewRedisStorage(fmt.Sprintf("%s:%s", cfg.DataDbHost, cfg.DataDbPort), 10,
+	rdsITdb, err := engine.NewRedisStorage(fmt.Sprintf("%s:%s", cfg.DataDbHost, cfg.DataDbPort), 10,
 		cfg.DataDbPass, cfg.DBDataEncoding, utils.REDIS_MAX_CONNS, nil, 1)
-
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	}
-}
-
-// Test start here
-func TestFIdxCaV1ITMySQL(t *testing.T) {
 	onStor = engine.NewDataManager(rdsITdb)
 	tSv1ConfDIR = "tutmysql"
 	for _, stest := range sTestsFilterIndexesSV1Ca {
@@ -98,20 +94,18 @@ func TestFIdxCaV1ITMySQL(t *testing.T) {
 	}
 }
 
-func TestFIdxCaV1ITMongoConnect(t *testing.T) {
+func TestFIdxCaV1ITMongo(t *testing.T) {
 	cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
 	mgoITCfg, err := config.NewCGRConfigFromFolder(cdrsMongoCfgPath)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if mgoITdb, err = engine.NewMongoStorage(mgoITCfg.DataDbHost, mgoITCfg.DataDbPort,
+	mgoITdb, err := engine.NewMongoStorage(mgoITCfg.DataDbHost, mgoITCfg.DataDbPort,
 		mgoITCfg.DataDbName, mgoITCfg.DataDbUser, mgoITCfg.DataDbPass,
-		utils.DataDB, nil, mgoITCfg.CacheCfg(), mgoITCfg.LoadHistorySize); err != nil {
+		utils.DataDB, nil, mgoITCfg.CacheCfg(), mgoITCfg.LoadHistorySize)
+	if err != nil {
 		t.Fatal(err)
 	}
-}
-
-func TestFIdxCaV1ITMongo(t *testing.T) {
 	onStor = engine.NewDataManager(mgoITdb)
 	tSv1ConfDIR = "tutmongo"
 	time.Sleep(time.Duration(2 * time.Second)) // give time for engine to start
@@ -413,7 +407,6 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 	}
 
 	var reply *engine.ThresholdProfile
-
 	if err := tFIdxCaRpc.Call("ApierV1.GetThresholdProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_BALANCE_1"}, &reply); err != nil {
 		t.Error(err)
@@ -539,7 +532,8 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 	}
 	//test to make sure indexes are made as expected
 	fldNameVal2 := map[string]string{"THD_ACNT_BALANCE_1": "", "TEST_PROFILE1": ""}
-	if _, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ThresholdProfilePrefix, "cgrates.org", true),
+	if _, err = onStor.GetFilterReverseIndexes(
+		engine.GetDBIndexKey(utils.ThresholdProfilePrefix, "cgrates.org", true),
 		fldNameVal2); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -1263,7 +1257,8 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 	}
 	//test to make sure indexes are made as expected
 	fldNameVal2 := map[string]string{"ATTR_1": "", "TEST_PROFILE1": ""}
-	if _, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.AttributeProfilePrefix, "cgrates.org:*rating", true),
+	if _, err = onStor.GetFilterReverseIndexes(
+		engine.GetDBIndexKey(utils.AttributeProfilePrefix, "cgrates.org:*rating", true),
 		fldNameVal2); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -1423,9 +1418,15 @@ func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 
-	idx := map[string]utils.StringMap{"ResGroup1": {"*default:*any:*any": true, "*prefix:Destination:10": true, "*prefix:Destination:20": true, "*string:Account:1001": true, "*string:Account:1002": true}}
+	idx := map[string]utils.StringMap{
+		"ResGroup1": {"*default:*any:*any": true,
+			"*prefix:Destination:10": true,
+			"*prefix:Destination:20": true,
+			"*string:Account:1001":   true,
+			"*string:Account:1002":   true}}
 	fldNameVal := map[string]string{"ResGroup1": ""}
-	if indexes, err = onStor.GetFilterReverseIndexes(engine.GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", true),
+	if indexes, err = onStor.GetFilterReverseIndexes(
+		engine.GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", true),
 		fldNameVal); err != nil {
 		t.Error(err)
 	}
@@ -1480,7 +1481,8 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 		Weight:            20,
 		ThresholdIDs:      []string{"Val1", "Val2"},
 	}
-	if err := tFIdxCaRpc.Call("ApierV1.SetResourceProfile", rlsConfig, &result); err != nil {
+	if err := tFIdxCaRpc.Call("ApierV1.SetResourceProfile",
+		rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

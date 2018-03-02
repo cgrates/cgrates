@@ -159,7 +159,7 @@ func (rfi *FilterIndexer) loadItemReverseIndex(filterType, itemID string) (err e
 //Populate FilterIndexer.indexes with specific fieldName:fieldValue , item
 func (rfi *FilterIndexer) loadFldNameFldValIndex(filterType, fldName, fldVal string) error {
 	rcvIdx, err := rfi.dm.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), filterType,
+		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix, filterType,
 		map[string]string{fldName: fldVal})
 	if err != nil {
 		return err

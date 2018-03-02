@@ -59,8 +59,8 @@ func (self *ApierV1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string)
 		arg.ItemType = utils.AttributeProfilePrefix
 		key = utils.ConcatenatedKey(arg.Tenant, arg.Context)
 	}
-	if indexes, err = self.DataManager.GetFilterIndexes(engine.GetDBIndexKey(arg.ItemType, key, false),
-		"", nil); err != nil {
+	if indexes, err = self.DataManager.GetFilterIndexes(
+		utils.PrefixToIndexCache[arg.ItemType], key, "", nil); err != nil {
 		return err
 	}
 	if arg.FilterType != "" {

@@ -1107,8 +1107,9 @@ func (dm *DataManager) HasData(category, subject, tenant string) (has bool, err 
 	return dm.DataDB().HasDataDrv(category, subject, tenant)
 }
 
-func (dm *DataManager) GetFilterIndexes(dbKey, filterType string, fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
-	return dm.DataDB().GetFilterIndexesDrv(dbKey, filterType, fldNameVal)
+func (dm *DataManager) GetFilterIndexes(cacheID, itemIDPrefix, filterType string,
+	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
+	return dm.DataDB().GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType, fldNameVal)
 }
 
 func (dm *DataManager) SetFilterIndexes(dbKey string, indexes map[string]utils.StringMap, commit bool, transactionID string) (err error) {

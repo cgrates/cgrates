@@ -26,8 +26,10 @@ import (
 )
 
 var (
-	NAT = &Destination{Id: "NAT", Prefixes: []string{"0257", "0256", "0723"}}
-	RET = &Destination{Id: "RET", Prefixes: []string{"0723", "0724"}}
+	NAT = &Destination{Id: "NAT",
+		Prefixes: []string{"0257", "0256", "0723"}}
+	RET = &Destination{Id: "RET",
+		Prefixes: []string{"0723", "0724"}}
 )
 
 func TestBalanceStoreRestore(t *testing.T) {

@@ -1231,18 +1231,18 @@ func (ms *MapStorage) RemoveTimingDrv(id string) error {
 }
 
 //GetFilterIndexesDrv retrieves Indexes from dataDB
-func (ms *MapStorage) GetFilterIndexesDrv(dbKey, filterType string,
+func (ms *MapStorage) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType string,
 	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
+	dbKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
 	values, ok := ms.dict[dbKey]
 	if !ok {
 		return nil, utils.ErrNotFound
 	}
 	if len(fldNameVal) != 0 {
 		rcvidx := make(map[string]utils.StringMap)
-		err = ms.ms.Unmarshal(values, &rcvidx)
-		if err != nil {
+		if err = ms.ms.Unmarshal(values, &rcvidx); err != nil {
 			return nil, err
 		}
 		indexes = make(map[string]utils.StringMap)
@@ -1256,8 +1256,7 @@ func (ms *MapStorage) GetFilterIndexesDrv(dbKey, filterType string,
 		}
 		return
 	} else {
-		err = ms.ms.Unmarshal(values, &indexes)
-		if err != nil {
+		if err = ms.ms.Unmarshal(values, &indexes); err != nil {
 			return nil, err
 		}
 		if len(indexes) == 0 {

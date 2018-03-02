@@ -78,6 +78,20 @@ var (
 		CacheAttributeFilterRevIndexes: AttributeFilterRevIndexes,
 	}
 	CachePrefixToInstance map[string]string // will be built on init
+	PrefixToIndexCache    = map[string]string{
+		ThresholdProfilePrefix: CacheThresholdFilterIndexes,
+		ResourceProfilesPrefix: CacheResourceFilterIndexes,
+		StatQueueProfilePrefix: CacheStatFilterIndexes,
+		SupplierProfilePrefix:  CacheSupplierFilterIndexes,
+		AttributeProfilePrefix: CacheAttributeFilterIndexes,
+	}
+	PrefixToRevIndexCache = map[string]string{
+		ThresholdProfilePrefix: CacheThresholdFilterRevIndexes,
+		ResourceProfilesPrefix: CacheResourceFilterRevIndexes,
+		StatQueueProfilePrefix: CacheStatFilterRevIndexes,
+		SupplierProfilePrefix:  CacheSupplierFilterRevIndexes,
+		AttributeProfilePrefix: CacheAttributeFilterRevIndexes,
+	}
 )
 
 const (

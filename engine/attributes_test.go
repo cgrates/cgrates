@@ -519,9 +519,8 @@ func TestAttributeIndexer(t *testing.T) {
 	}
 	rfi1 := NewFilterIndexer(dmAtr, utils.AttributeProfilePrefix,
 		utils.ConcatenatedKey(attrPrf.Tenant, utils.META_ANY))
-	if rcvIdx, err := dmAtr.GetFilterIndexes(
-		GetDBIndexKey(rfi1.itemType, rfi1.dbKeySuffix, false), MetaString,
-		nil); err != nil {
+	if rcvIdx, err := dmAtr.GetFilterIndexes(utils.PrefixToIndexCache[rfi1.itemType],
+		rfi1.dbKeySuffix, MetaString, nil); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
@@ -544,9 +543,8 @@ func TestAttributeIndexer(t *testing.T) {
 	}
 	rfi2 := NewFilterIndexer(dmAtr, utils.AttributeProfilePrefix,
 		utils.ConcatenatedKey(attrPrf.Tenant, utils.MetaSessionS))
-	if rcvIdx, err := dmAtr.GetFilterIndexes(
-		GetDBIndexKey(rfi2.itemType, rfi2.dbKeySuffix, false), MetaString,
-		nil); err != nil {
+	if rcvIdx, err := dmAtr.GetFilterIndexes(utils.PrefixToIndexCache[rfi2.itemType],
+		rfi2.dbKeySuffix, MetaString, nil); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
@@ -563,9 +561,8 @@ func TestAttributeIndexer(t *testing.T) {
 		}
 	}
 	//verify if old index was deleted ( context *any)
-	if _, err := dmAtr.GetFilterIndexes(
-		GetDBIndexKey(rfi1.itemType, rfi1.dbKeySuffix, false), MetaString,
-		nil); err != utils.ErrNotFound {
+	if _, err := dmAtr.GetFilterIndexes(utils.PrefixToIndexCache[rfi1.itemType],
+		rfi1.dbKeySuffix, MetaString, nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if _, err := dmAtr.GetFilterReverseIndexes(
