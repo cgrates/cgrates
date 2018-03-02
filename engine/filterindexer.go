@@ -126,8 +126,8 @@ func (rfi *FilterIndexer) cacheRemItemType() { // ToDo: tune here by removing pe
 // StoreIndexes handles storing the indexes to dataDB
 func (rfi *FilterIndexer) StoreIndexes(commit bool, transactionID string) (err error) {
 	if err = rfi.dm.SetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
-		rfi.indexes, commit, transactionID); err != nil {
+		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
+		rfi.indexes, commit, utils.NonTransactional); err != nil {
 		return
 	}
 	if err = rfi.dm.SetFilterReverseIndexes(
@@ -196,7 +196,7 @@ func (rfi *FilterIndexer) RemoveItemFromIndex(itemID string) (err error) {
 	}
 	rfi.reveseIndex[itemID] = make(utils.StringMap) //Force deleting in driver
 	if err = rfi.dm.SetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false),
+		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
 		rfi.indexes, false, utils.NonTransactional); err != nil {
 		return
 	}

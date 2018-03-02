@@ -1112,8 +1112,9 @@ func (dm *DataManager) GetFilterIndexes(cacheID, itemIDPrefix, filterType string
 	return dm.DataDB().GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType, fldNameVal)
 }
 
-func (dm *DataManager) SetFilterIndexes(dbKey string, indexes map[string]utils.StringMap, commit bool, transactionID string) (err error) {
-	return dm.DataDB().SetFilterIndexesDrv(dbKey, indexes, commit, transactionID)
+func (dm *DataManager) SetFilterIndexes(cacheID, itemIDPrefix string,
+	indexes map[string]utils.StringMap, commit bool, transactionID string) (err error) {
+	return dm.DataDB().SetFilterIndexesDrv(cacheID, itemIDPrefix, indexes, commit, transactionID)
 }
 
 func (dm *DataManager) RemoveFilterIndexes(dbKey string) (err error) {

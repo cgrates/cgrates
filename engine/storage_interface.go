@@ -120,8 +120,8 @@ type DataDB interface {
 	AddLoadHistory(*utils.LoadInstance, int, string) error
 	GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType string,
 		fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error)
-	SetFilterIndexesDrv(dbKey string, indexes map[string]utils.StringMap,
-		commit bool, transactionID string) (err error)
+	SetFilterIndexesDrv(cacheID, itemIDPrefix string,
+		indexes map[string]utils.StringMap, commit bool, transactionID string) (err error)
 	RemoveFilterIndexesDrv(id string) (err error)
 	GetFilterReverseIndexesDrv(dbKey string,
 		fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error)

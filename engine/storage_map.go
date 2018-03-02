@@ -1267,12 +1267,13 @@ func (ms *MapStorage) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType stri
 }
 
 //SetFilterIndexesDrv stores Indexes into DataDB
-func (ms *MapStorage) SetFilterIndexesDrv(originKey string, indexes map[string]utils.StringMap, commit bool, transactionID string) (err error) {
+func (ms *MapStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
+	indexes map[string]utils.StringMap, commit bool, transactionID string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	dbKey := originKey
+	dbKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
 	if transactionID != "" {
-		dbKey = "tmp_" + utils.ConcatenatedKey(originKey, transactionID)
+		dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
 	}
 	if commit && transactionID != "" {
 		delete(ms.dict, dbKey)
@@ -1280,7 +1281,7 @@ func (ms *MapStorage) SetFilterIndexesDrv(originKey string, indexes map[string]u
 		if err != nil {
 			return err
 		}
-		ms.dict[originKey] = result
+		ms.dict[dbKey] = result
 		return nil
 	} else {
 		for key, strMp := range indexes {
