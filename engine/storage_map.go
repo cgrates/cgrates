@@ -1299,18 +1299,19 @@ func (ms *MapStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 	}
 }
 
-func (ms *MapStorage) RemoveFilterIndexesDrv(id string) (err error) {
+func (ms *MapStorage) RemoveFilterIndexesDrv(cacheID, itemIDPrefix string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	delete(ms.dict, id)
+	delete(ms.dict, utils.CacheInstanceToPrefix[cacheID]+itemIDPrefix)
 	return
 }
 
 //GetFilterReverseIndexesDrv retrieves ReverseIndexes from dataDB
-func (ms *MapStorage) GetFilterReverseIndexesDrv(dbKey string,
+func (ms *MapStorage) GetFilterReverseIndexesDrv(cacheID, itemIDPrefix string,
 	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
+	dbKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
 	values, ok := ms.dict[dbKey]
 	if !ok {
 		return nil, utils.ErrNotFound

@@ -122,8 +122,8 @@ type DataDB interface {
 		fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error)
 	SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 		indexes map[string]utils.StringMap, commit bool, transactionID string) (err error)
-	RemoveFilterIndexesDrv(id string) (err error)
-	GetFilterReverseIndexesDrv(dbKey string,
+	RemoveFilterIndexesDrv(cacheID, itemIDPrefix string) (err error)
+	GetFilterReverseIndexesDrv(cacheID, itemIDPrefix string,
 		fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error)
 	SetFilterReverseIndexesDrv(dbKey string, indexes map[string]utils.StringMap,
 		commit bool, transactionID string) (err error)

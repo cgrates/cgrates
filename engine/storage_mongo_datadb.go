@@ -2025,10 +2025,10 @@ func (ms *MongoStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 	return
 }
 
-func (ms *MongoStorage) RemoveFilterIndexesDrv(dbKey string) (err error) {
+func (ms *MongoStorage) RemoveFilterIndexesDrv(cacheID, itemIDPrefix string) (err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
-	err = col.Remove(bson.M{"key": dbKey})
+	err = col.Remove(bson.M{"key": utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix})
 	// redis compatibility
 	if err == mgo.ErrNotFound {
 		err = nil
@@ -2037,10 +2037,11 @@ func (ms *MongoStorage) RemoveFilterIndexesDrv(dbKey string) (err error) {
 }
 
 // GetFilterReverseIndexesDrv retrieves ReverseIndexes from dataDB
-func (ms *MongoStorage) GetFilterReverseIndexesDrv(dbKey string,
+func (ms *MongoStorage) GetFilterReverseIndexesDrv(cacheID, itemIDPrefix string,
 	fldNameVal map[string]string) (revIdx map[string]utils.StringMap, err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
+	dbKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
 	var result struct {
 		Key   string
 		Value map[string][]string

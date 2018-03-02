@@ -142,7 +142,7 @@ func (rfi *FilterIndexer) StoreIndexes(commit bool, transactionID string) (err e
 //Populate the FilterIndexer.reveseIndex for specifil itemID
 func (rfi *FilterIndexer) loadItemReverseIndex(filterType, itemID string) (err error) {
 	rcvReveseIdx, err := rfi.dm.GetFilterReverseIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+		utils.PrefixToRevIndexCache[rfi.itemType], rfi.dbKeySuffix,
 		map[string]string{itemID: ""})
 	if err != nil {
 		return err

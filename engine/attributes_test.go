@@ -528,8 +528,7 @@ func TestAttributeIndexer(t *testing.T) {
 		}
 	}
 	if reverseRcvIdx, err := dmAtr.GetFilterReverseIndexes(
-		GetDBIndexKey(rfi1.itemType, rfi1.dbKeySuffix, true),
-		nil); err != nil {
+		utils.PrefixToRevIndexCache[rfi1.itemType], rfi1.dbKeySuffix, nil); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
@@ -552,13 +551,10 @@ func TestAttributeIndexer(t *testing.T) {
 		}
 	}
 	if reverseRcvIdx, err := dmAtr.GetFilterReverseIndexes(
-		GetDBIndexKey(rfi2.itemType, rfi2.dbKeySuffix, true),
-		nil); err != nil {
+		utils.PrefixToRevIndexCache[rfi2.itemType], rfi2.dbKeySuffix, nil); err != nil {
 		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
-		}
+	} else if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
 	}
 	//verify if old index was deleted ( context *any)
 	if _, err := dmAtr.GetFilterIndexes(utils.PrefixToIndexCache[rfi1.itemType],
@@ -566,8 +562,7 @@ func TestAttributeIndexer(t *testing.T) {
 		t.Error(err)
 	}
 	if _, err := dmAtr.GetFilterReverseIndexes(
-		GetDBIndexKey(rfi1.itemType, rfi1.dbKeySuffix, true),
-		nil); err != utils.ErrNotFound {
+		utils.PrefixToRevIndexCache[rfi1.itemType], rfi1.dbKeySuffix, nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }

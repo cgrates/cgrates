@@ -1442,14 +1442,15 @@ func (rs *RedisStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 	}
 }
 
-func (rs *RedisStorage) RemoveFilterIndexesDrv(id string) (err error) {
-	return rs.Cmd("DEL", id).Err
+func (rs *RedisStorage) RemoveFilterIndexesDrv(cacheID, itemIDPrefix string) (err error) {
+	return rs.Cmd("DEL", utils.CacheInstanceToPrefix[cacheID]+itemIDPrefix).Err
 }
 
 //GetFilterReverseIndexesDrv retrieves ReverseIndexes from dataDB
-func (rs *RedisStorage) GetFilterReverseIndexesDrv(dbKey string,
+func (rs *RedisStorage) GetFilterReverseIndexesDrv(cacheID, itemIDPrefix string,
 	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	mp := make(map[string]string)
+	dbKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
 	if len(fldNameVal) == 0 {
 		mp, err = rs.Cmd("HGETALL", dbKey).Map()
 		if err != nil {
