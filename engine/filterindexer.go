@@ -207,29 +207,3 @@ func (rfi *FilterIndexer) RemoveItemFromIndex(itemID string) (err error) {
 	}
 	return
 }
-
-//GetDBIndexKey return the dbKey for an specific item
-func GetDBIndexKey(itemType, dbKeySuffix string, reverse bool) (dbKey string) {
-	var idxPrefix, rIdxPrefix string
-	switch itemType {
-	case utils.ThresholdProfilePrefix:
-		idxPrefix = utils.ThresholdFilterIndexes
-		rIdxPrefix = utils.ThresholdFilterRevIndexes
-	case utils.ResourceProfilesPrefix:
-		idxPrefix = utils.ResourceFilterIndexes
-		rIdxPrefix = utils.ResourceFilterRevIndexes
-	case utils.StatQueueProfilePrefix:
-		idxPrefix = utils.StatFilterIndexes
-		rIdxPrefix = utils.StatFilterRevIndexes
-	case utils.SupplierProfilePrefix:
-		idxPrefix = utils.SupplierFilterIndexes
-		rIdxPrefix = utils.SupplierFilterRevIndexes
-	case utils.AttributeProfilePrefix:
-		idxPrefix = utils.AttributeFilterIndexes
-		rIdxPrefix = utils.AttributeFilterRevIndexes
-	}
-	if reverse {
-		return rIdxPrefix + dbKeySuffix
-	}
-	return idxPrefix + dbKeySuffix
-}

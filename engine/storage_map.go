@@ -1376,10 +1376,10 @@ func (ms *MapStorage) SetFilterReverseIndexesDrv(cacheID, itemIDPrefix string,
 }
 
 //RemoveFilterReverseIndexesDrv removes ReverseIndexes for a specific itemID
-func (ms *MapStorage) RemoveFilterReverseIndexesDrv(dbKey string) (err error) {
+func (ms *MapStorage) RemoveFilterReverseIndexesDrv(cacheID, itemIDPrefix string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	delete(ms.dict, dbKey)
+	delete(ms.dict, utils.CacheInstanceToPrefix[cacheID]+itemIDPrefix)
 	return
 }
 

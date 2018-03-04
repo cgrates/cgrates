@@ -439,9 +439,20 @@ func (self *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string, tra
 			}
 		}
 	}
+<<<<<<< HEAD
 	if transactionID == utils.NonTransactional {
 		if err := thdsIndexers.StoreIndexes(true, transactionID); err != nil {
 			return nil, err
+=======
+	if thIDs == nil {
+		if err := self.DataManager.RemoveFilterIndexes(utils.PrefixToIndexCache[utils.ThresholdProfilePrefix],
+			tenant); err != nil {
+			return err
+		}
+		if err := self.DataManager.RemoveFilterReverseIndexes(utils.PrefixToIndexCache[utils.ThresholdProfilePrefix],
+			tenant); err != nil {
+			return err
+>>>>>>> DataManager RemoveReverseIndexes using cacheID and itemIDPrefix
 		}
 		return nil, nil
 	} else {
@@ -514,9 +525,20 @@ func (self *ApierV1) computeAttributeIndexes(tenant string, attrIDs *[]string, t
 			}
 		}
 	}
+<<<<<<< HEAD
 	if transactionID == utils.NonTransactional {
 		if err := attrIndexers.StoreIndexes(true, transactionID); err != nil {
 			return nil, err
+=======
+	if attrIDs == nil {
+		if err := self.DataManager.RemoveFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
+			tenant); err != nil {
+			return err
+		}
+		if err := self.DataManager.RemoveFilterReverseIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
+			tenant); err != nil {
+			return err
+>>>>>>> DataManager RemoveReverseIndexes using cacheID and itemIDPrefix
 		}
 		return nil, nil
 	} else {
@@ -589,9 +611,20 @@ func (self *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string, tran
 			}
 		}
 	}
+<<<<<<< HEAD
 	if transactionID == utils.NonTransactional {
 		if err := rpIndexers.StoreIndexes(true, transactionID); err != nil {
 			return nil, err
+=======
+	if rsIDs == nil {
+		if err := self.DataManager.RemoveFilterIndexes(utils.PrefixToIndexCache[utils.ResourceProfilesPrefix],
+			tenant); err != nil {
+			return err
+		}
+		if err := self.DataManager.RemoveFilterReverseIndexes(utils.PrefixToIndexCache[utils.ResourceProfilesPrefix],
+			tenant); err != nil {
+			return err
+>>>>>>> DataManager RemoveReverseIndexes using cacheID and itemIDPrefix
 		}
 		return nil, nil
 	} else {
@@ -664,9 +697,20 @@ func (self *ApierV1) computeStatIndexes(tenant string, stIDs *[]string, transact
 			}
 		}
 	}
+<<<<<<< HEAD
 	if transactionID == utils.NonTransactional {
 		if err := sqpIndexers.StoreIndexes(true, transactionID); err != nil {
 			return nil, err
+=======
+	if stIDs == nil {
+		if err := self.DataManager.RemoveFilterIndexes(utils.PrefixToIndexCache[utils.StatQueueProfilePrefix],
+			tenant); err != nil {
+			return err
+		}
+		if err := self.DataManager.RemoveFilterReverseIndexes(utils.PrefixToIndexCache[utils.StatQueueProfilePrefix],
+			tenant); err != nil {
+			return err
+>>>>>>> DataManager RemoveReverseIndexes using cacheID and itemIDPrefix
 		}
 		return nil, nil
 	} else {
@@ -739,6 +783,7 @@ func (self *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string, tra
 			}
 		}
 	}
+<<<<<<< HEAD
 	if transactionID == utils.NonTransactional {
 		if err := sppIndexers.StoreIndexes(true, transactionID); err != nil {
 			return nil, err

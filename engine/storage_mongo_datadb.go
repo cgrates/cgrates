@@ -2130,10 +2130,10 @@ func (ms *MongoStorage) SetFilterReverseIndexesDrv(cacheID, itemIDPrefix string,
 }
 
 //RemoveFilterReverseIndexesDrv removes ReverseIndexes for a specific itemID
-func (ms *MongoStorage) RemoveFilterReverseIndexesDrv(dbKey string) (err error) {
+func (ms *MongoStorage) RemoveFilterReverseIndexesDrv(cacheID, itemIDPrefix string) (err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
-	err = col.Remove(bson.M{"key": dbKey})
+	err = col.Remove(bson.M{"key": utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix})
 	//redis compatibility
 	if err == mgo.ErrNotFound {
 		err = nil

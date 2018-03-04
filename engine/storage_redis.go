@@ -1521,8 +1521,9 @@ func (rs *RedisStorage) SetFilterReverseIndexesDrv(cacheID, itemIDPrefix string,
 }
 
 //RemoveFilterReverseIndexesDrv removes ReverseIndexes for a specific itemID
-func (rs *RedisStorage) RemoveFilterReverseIndexesDrv(dbKey string) (err error) {
-	return rs.Cmd("DEL", dbKey).Err
+func (rs *RedisStorage) RemoveFilterReverseIndexesDrv(cacheID,
+	itemIDPrefix string) (err error) {
+	return rs.Cmd("DEL", utils.CacheInstanceToPrefix[cacheID]+itemIDPrefix).Err
 }
 
 func (rs *RedisStorage) MatchFilterIndexDrv(cacheID, itemIDPrefix,
