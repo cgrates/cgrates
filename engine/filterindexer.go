@@ -127,11 +127,11 @@ func (rfi *FilterIndexer) cacheRemItemType() { // ToDo: tune here by removing pe
 func (rfi *FilterIndexer) StoreIndexes(commit bool, transactionID string) (err error) {
 	if err = rfi.dm.SetFilterIndexes(
 		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
-		rfi.indexes, commit, utils.NonTransactional); err != nil {
+		rfi.indexes, commit, transactionID); err != nil {
 		return
 	}
 	if err = rfi.dm.SetFilterReverseIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+		utils.PrefixToRevIndexCache[rfi.itemType], rfi.dbKeySuffix,
 		rfi.reveseIndex, commit, transactionID); err != nil {
 		return
 	}
@@ -201,7 +201,7 @@ func (rfi *FilterIndexer) RemoveItemFromIndex(itemID string) (err error) {
 		return
 	}
 	if err = rfi.dm.SetFilterReverseIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+		utils.PrefixToRevIndexCache[rfi.itemType], rfi.dbKeySuffix,
 		rfi.reveseIndex, false, utils.NonTransactional); err != nil {
 		return
 	}

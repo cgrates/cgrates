@@ -1343,12 +1343,13 @@ func (ms *MapStorage) GetFilterReverseIndexesDrv(cacheID, itemIDPrefix string,
 }
 
 //SetFilterReverseIndexesDrv stores ReverseIndexes into DataDB
-func (ms *MapStorage) SetFilterReverseIndexesDrv(originKey string, revIdx map[string]utils.StringMap, commit bool, transactionID string) (err error) {
+func (ms *MapStorage) SetFilterReverseIndexesDrv(cacheID, itemIDPrefix string,
+	revIdx map[string]utils.StringMap, commit bool, transactionID string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	dbKey := originKey
+	dbKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
 	if transactionID != "" {
-		dbKey = "tmp_" + utils.ConcatenatedKey(originKey, transactionID)
+		dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
 	}
 	if commit && transactionID != "" {
 		delete(ms.dict, dbKey)
@@ -1356,7 +1357,7 @@ func (ms *MapStorage) SetFilterReverseIndexesDrv(originKey string, revIdx map[st
 		if err != nil {
 			return err
 		}
-		ms.dict[originKey] = result
+		ms.dict[dbKey] = result
 		return nil
 	} else {
 		for key, strMp := range revIdx {
