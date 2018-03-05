@@ -633,7 +633,7 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 
 func testAttributeSRemAlsPrf(t *testing.T) {
 	var resp string
-	if err := attrSRPC.Call("ApierV1.RemAttributeProfile",
+	if err := attrSRPC.Call("ApierV1.RemoveAttributeProfile",
 		&ArgRemoveAttrProfile{Tenant: alsPrf.Tenant, ID: alsPrf.ID,
 			Contexts: alsPrf.Contexts}, &resp); err != nil {
 		t.Error(err)
