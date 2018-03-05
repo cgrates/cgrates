@@ -1983,7 +1983,7 @@ func (ms *MongoStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 	originKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
 	dbKey := originKey
 	if transactionID != "" {
-		dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
+		dbKey = "tmp_" + utils.ConcatenatedKey(originKey, transactionID)
 	}
 	if commit && transactionID != "" {
 		oldKey := "tmp_" + utils.ConcatenatedKey(originKey, transactionID)
@@ -1994,8 +1994,8 @@ func (ms *MongoStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 		pairs := []interface{}{}
 		for key, itmMp := range indexes {
 			param := fmt.Sprintf("value.%s", key)
-			pairs = append(pairs, bson.M{"key": dbKey})
-			pairs = append(pairs, bson.M{"$set": bson.M{"key": dbKey, param: itmMp.Slice()}})
+			pairs = append(pairs, bson.M{"key": originKey})
+			pairs = append(pairs, bson.M{"$set": bson.M{"key": originKey, param: itmMp.Slice()}})
 		}
 		if len(pairs) != 0 {
 			bulk := col.Bulk()
@@ -2181,7 +2181,7 @@ func (ms *MongoStorage) GetStatQueueProfileDrv(tenant string, id string) (sq *St
 func (ms *MongoStorage) SetStatQueueProfileDrv(sq *StatQueueProfile) (err error) {
 	session, col := ms.conn(colSqp)
 	defer session.Close()
-	_, err = col.UpsertId(bson.M{"tennat": sq.Tenant, "id": sq.ID}, sq)
+	_, err = col.UpsertId(bson.M{"tenant": sq.Tenant, "id": sq.ID}, sq)
 	return
 }
 

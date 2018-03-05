@@ -379,14 +379,16 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 
 func (self *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string, transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
 	var thresholdIDs []string
-	thdsIndexers := engine.NewFilterIndexer(self.DataManager, utils.ThresholdProfilePrefix, tenant)
+	thdsIndexers := engine.NewFilterIndexer(self.DataManager,
+		utils.ThresholdProfilePrefix, tenant)
 	if thIDs == nil {
 		ids, err := self.DataManager.DataDB().GetKeysForPrefix(utils.ThresholdProfilePrefix)
 		if err != nil {
 			return nil, err
 		}
 		for _, id := range ids {
-			thresholdIDs = append(thresholdIDs, strings.Split(id, utils.CONCATENATED_KEY_SEP)[1])
+			thresholdIDs = append(thresholdIDs,
+				strings.Split(id, utils.CONCATENATED_KEY_SEP)[1])
 		}
 	} else {
 		thresholdIDs = *thIDs
@@ -439,20 +441,9 @@ func (self *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string, tra
 			}
 		}
 	}
-<<<<<<< HEAD
 	if transactionID == utils.NonTransactional {
 		if err := thdsIndexers.StoreIndexes(true, transactionID); err != nil {
 			return nil, err
-=======
-	if thIDs == nil {
-		if err := self.DataManager.RemoveFilterIndexes(utils.PrefixToIndexCache[utils.ThresholdProfilePrefix],
-			tenant); err != nil {
-			return err
-		}
-		if err := self.DataManager.RemoveFilterReverseIndexes(utils.PrefixToIndexCache[utils.ThresholdProfilePrefix],
-			tenant); err != nil {
-			return err
->>>>>>> DataManager RemoveReverseIndexes using cacheID and itemIDPrefix
 		}
 		return nil, nil
 	} else {
@@ -465,7 +456,8 @@ func (self *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string, tra
 
 func (self *ApierV1) computeAttributeIndexes(tenant string, attrIDs *[]string, transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
 	var attributeIDs []string
-	attrIndexers := engine.NewFilterIndexer(self.DataManager, utils.AttributeProfilePrefix, tenant)
+	attrIndexers := engine.NewFilterIndexer(self.DataManager,
+		utils.AttributeProfilePrefix, tenant)
 	if attrIDs == nil {
 		ids, err := self.DataManager.DataDB().GetKeysForPrefix(utils.AttributeProfilePrefix)
 		if err != nil {
@@ -479,7 +471,8 @@ func (self *ApierV1) computeAttributeIndexes(tenant string, attrIDs *[]string, t
 		transactionID = utils.NonTransactional
 	}
 	for _, id := range attributeIDs {
-		ap, err := self.DataManager.GetAttributeProfile(tenant, id, false, utils.NonTransactional)
+		ap, err := self.DataManager.GetAttributeProfile(tenant, id,
+			false, utils.NonTransactional)
 		if err != nil {
 			return nil, err
 		}
@@ -525,20 +518,9 @@ func (self *ApierV1) computeAttributeIndexes(tenant string, attrIDs *[]string, t
 			}
 		}
 	}
-<<<<<<< HEAD
 	if transactionID == utils.NonTransactional {
 		if err := attrIndexers.StoreIndexes(true, transactionID); err != nil {
 			return nil, err
-=======
-	if attrIDs == nil {
-		if err := self.DataManager.RemoveFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
-			tenant); err != nil {
-			return err
-		}
-		if err := self.DataManager.RemoveFilterReverseIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
-			tenant); err != nil {
-			return err
->>>>>>> DataManager RemoveReverseIndexes using cacheID and itemIDPrefix
 		}
 		return nil, nil
 	} else {
@@ -551,7 +533,8 @@ func (self *ApierV1) computeAttributeIndexes(tenant string, attrIDs *[]string, t
 
 func (self *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string, transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
 	var resourceIDs []string
-	rpIndexers := engine.NewFilterIndexer(self.DataManager, utils.ResourceProfilesPrefix, tenant)
+	rpIndexers := engine.NewFilterIndexer(self.DataManager,
+		utils.ResourceProfilesPrefix, tenant)
 	if rsIDs == nil {
 		ids, err := self.DataManager.DataDB().GetKeysForPrefix(utils.ResourceProfilesPrefix)
 		if err != nil {
@@ -565,7 +548,8 @@ func (self *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string, tran
 		transactionID = utils.NonTransactional
 	}
 	for _, id := range resourceIDs {
-		rp, err := self.DataManager.GetResourceProfile(tenant, id, false, utils.NonTransactional)
+		rp, err := self.DataManager.GetResourceProfile(tenant, id,
+			false, utils.NonTransactional)
 		if err != nil {
 			return nil, err
 		}
@@ -611,20 +595,9 @@ func (self *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string, tran
 			}
 		}
 	}
-<<<<<<< HEAD
 	if transactionID == utils.NonTransactional {
 		if err := rpIndexers.StoreIndexes(true, transactionID); err != nil {
 			return nil, err
-=======
-	if rsIDs == nil {
-		if err := self.DataManager.RemoveFilterIndexes(utils.PrefixToIndexCache[utils.ResourceProfilesPrefix],
-			tenant); err != nil {
-			return err
-		}
-		if err := self.DataManager.RemoveFilterReverseIndexes(utils.PrefixToIndexCache[utils.ResourceProfilesPrefix],
-			tenant); err != nil {
-			return err
->>>>>>> DataManager RemoveReverseIndexes using cacheID and itemIDPrefix
 		}
 		return nil, nil
 	} else {
@@ -637,7 +610,8 @@ func (self *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string, tran
 
 func (self *ApierV1) computeStatIndexes(tenant string, stIDs *[]string, transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
 	var statIDs []string
-	sqpIndexers := engine.NewFilterIndexer(self.DataManager, utils.StatQueueProfilePrefix, tenant)
+	sqpIndexers := engine.NewFilterIndexer(self.DataManager,
+		utils.StatQueueProfilePrefix, tenant)
 	if stIDs == nil {
 		ids, err := self.DataManager.DataDB().GetKeysForPrefix(utils.StatQueueProfilePrefix)
 		if err != nil {
@@ -651,7 +625,8 @@ func (self *ApierV1) computeStatIndexes(tenant string, stIDs *[]string, transact
 		transactionID = utils.NonTransactional
 	}
 	for _, id := range statIDs {
-		sqp, err := self.DataManager.GetStatQueueProfile(tenant, id, false, utils.NonTransactional)
+		sqp, err := self.DataManager.GetStatQueueProfile(tenant, id,
+			false, utils.NonTransactional)
 		if err != nil {
 			return nil, err
 		}
@@ -697,20 +672,9 @@ func (self *ApierV1) computeStatIndexes(tenant string, stIDs *[]string, transact
 			}
 		}
 	}
-<<<<<<< HEAD
 	if transactionID == utils.NonTransactional {
 		if err := sqpIndexers.StoreIndexes(true, transactionID); err != nil {
 			return nil, err
-=======
-	if stIDs == nil {
-		if err := self.DataManager.RemoveFilterIndexes(utils.PrefixToIndexCache[utils.StatQueueProfilePrefix],
-			tenant); err != nil {
-			return err
-		}
-		if err := self.DataManager.RemoveFilterReverseIndexes(utils.PrefixToIndexCache[utils.StatQueueProfilePrefix],
-			tenant); err != nil {
-			return err
->>>>>>> DataManager RemoveReverseIndexes using cacheID and itemIDPrefix
 		}
 		return nil, nil
 	} else {
@@ -723,7 +687,8 @@ func (self *ApierV1) computeStatIndexes(tenant string, stIDs *[]string, transact
 
 func (self *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string, transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
 	var supplierIDs []string
-	sppIndexers := engine.NewFilterIndexer(self.DataManager, utils.SupplierProfilePrefix, tenant)
+	sppIndexers := engine.NewFilterIndexer(self.DataManager,
+		utils.SupplierProfilePrefix, tenant)
 	if sppIDs == nil {
 		ids, err := self.DataManager.DataDB().GetKeysForPrefix(utils.SupplierProfilePrefix)
 		if err != nil {
@@ -737,7 +702,8 @@ func (self *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string, tra
 		transactionID = utils.NonTransactional
 	}
 	for _, id := range supplierIDs {
-		spp, err := self.DataManager.GetSupplierProfile(tenant, id, false, utils.NonTransactional)
+		spp, err := self.DataManager.GetSupplierProfile(tenant, id,
+			false, utils.NonTransactional)
 		if err != nil {
 			return nil, err
 		}
@@ -783,7 +749,6 @@ func (self *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string, tra
 			}
 		}
 	}
-<<<<<<< HEAD
 	if transactionID == utils.NonTransactional {
 		if err := sppIndexers.StoreIndexes(true, transactionID); err != nil {
 			return nil, err

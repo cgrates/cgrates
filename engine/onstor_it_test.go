@@ -89,7 +89,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	//testOnStorITCRUDReverseAlias,
 }
 
-func TestOnStorITRedisConnect(t *testing.T) {
+func TestOnStorITRedis(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	rdsITdb, err = NewRedisStorage(fmt.Sprintf("%s:%s", cfg.DataDbHost, cfg.DataDbPort), 4,
 		cfg.DataDbPass, cfg.DBDataEncoding, utils.REDIS_MAX_CONNS, nil, 1)
@@ -97,16 +97,13 @@ func TestOnStorITRedisConnect(t *testing.T) {
 		t.Fatal("Could not connect to Redis", err.Error())
 	}
 	onStorCfg = cfg.DataDbName
-}
-
-func TestOnStorITRedis(t *testing.T) {
 	onStor = NewDataManager(rdsITdb)
 	for _, stest := range sTestsOnStorIT {
 		t.Run("TestOnStorITRedis", stest)
 	}
 }
 
-func TestOnStorITMongoConnect(t *testing.T) {
+func TestOnStorITMongo(t *testing.T) {
 	sleepDelay = 100 * time.Millisecond
 	cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "cdrsv2mongo")
 	mgoITCfg, err := config.NewCGRConfigFromFolder(cdrsMongoCfgPath)
@@ -119,9 +116,6 @@ func TestOnStorITMongoConnect(t *testing.T) {
 		t.Fatal(err)
 	}
 	onStorCfg = mgoITCfg.StorDBName
-}
-
-func TestOnStorITMongo(t *testing.T) {
 	onStor = NewDataManager(mgoITdb)
 	for _, stest := range sTestsOnStorIT {
 		t.Run("TestOnStorITMongo", stest)

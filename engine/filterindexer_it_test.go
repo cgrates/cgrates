@@ -42,7 +42,7 @@ var sTests = []func(t *testing.T){
 	testITSetFilterIndexes,
 	testITGetFilterIndexes,
 	testITMatchFilterIndex,
-	/*testITFlush,
+	testITFlush,
 	testITIsDBEmpty,
 	testITTestThresholdFilterIndexes,
 	testITTestAttributeProfileFilterIndexes,
@@ -55,7 +55,6 @@ var sTests = []func(t *testing.T){
 	testITIsDBEmpty,
 	testITTestIndexingWithEmptyFltrID,
 	testITTestIndexingWithEmptyFltrID2,
-	*/
 }
 
 func TestFilterIndexerITRedis(t *testing.T) {
@@ -129,7 +128,7 @@ func testITSetFilterIndexes(t *testing.T) {
 		},
 	}
 	if err := dataManager.SetFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
+		utils.PrefixToIndexCache[utils.ResourceProfilesPrefix], "cgrates.org",
 		idxes, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
@@ -166,36 +165,37 @@ func testITGetFilterIndexes(t *testing.T) {
 		},
 	}
 	if exsbjDan, err := dataManager.GetFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false), MetaString,
-		sbjDan); err != nil {
+		utils.PrefixToIndexCache[utils.ResourceProfilesPrefix],
+		"cgrates.org", MetaString, sbjDan); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedsbjDan, exsbjDan) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedsbjDan, exsbjDan)
 	}
 	if rcv, err := dataManager.GetFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false), MetaString,
-		nil); err != nil {
+		utils.PrefixToIndexCache[utils.ResourceProfilesPrefix],
+		"cgrates.org", MetaString, nil); err != nil {
 		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(eIdxes, rcv) {
-			t.Errorf("Expecting: %+v, received: %+v", eIdxes, rcv)
-		}
+	} else if !reflect.DeepEqual(eIdxes, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eIdxes, rcv)
 	}
-	if _, err := dataManager.GetFilterIndexes("unknown_key", MetaString, nil); err == nil || err != utils.ErrNotFound {
+	if _, err := dataManager.GetFilterIndexes("unknown_key", "unkonwn_tenant",
+		MetaString, nil); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if err := dataManager.RemoveFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false)); err != nil {
+		utils.PrefixToRevIndexCache[utils.ResourceProfilesPrefix],
+		"cgrates.org"); err != nil {
 		t.Error(err)
 	}
 	_, err := dataManager.GetFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false), MetaString, nil)
+		utils.PrefixToRevIndexCache[utils.ResourceProfilesPrefix],
+		"cgrates.org", MetaString, nil)
 	if err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if err := dataManager.SetFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
-		eIdxes, false, utils.NonTransactional); err != nil {
+		utils.PrefixToRevIndexCache[utils.ResourceProfilesPrefix],
+		"cgrates.org", eIdxes, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 }
@@ -214,7 +214,8 @@ func testITMatchFilterIndex(t *testing.T) {
 	}
 	if _, err := dataManager.MatchFilterIndex(
 		utils.CacheResourceFilterIndexes, "cgrates.org",
-		MetaString, "NonexistentField", "1002"); err == nil || err != utils.ErrNotFound {
+		MetaString, "NonexistentField", "1002"); err == nil ||
+		err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -290,22 +291,18 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 	}
 	rfi := NewFilterIndexer(onStor, utils.ThresholdProfilePrefix, th.Tenant)
 	if rcvIdx, err := dataManager.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
-		nil); err != nil {
+		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
+		MetaString, nil); err != nil {
 		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(eIdxes, rcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
-		}
+	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
 	}
 	if reverseRcvIdx, err := dataManager.GetFilterReverseIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+		utils.PrefixToRevIndexCache[rfi.itemType], rfi.dbKeySuffix,
 		nil); err != nil {
 		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
-		}
+	} else if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
 	}
 	//Replace existing filter (Filter1 -> Filter2)
 	fp2 := &Filter{
@@ -357,22 +354,18 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		},
 	}
 	if rcvIdx, err := dataManager.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
-		nil); err != nil {
+		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
+		MetaString, nil); err != nil {
 		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(eIdxes, rcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
-		}
+	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
 	}
 	if reverseRcvIdx, err := dataManager.GetFilterReverseIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+		utils.PrefixToRevIndexCache[rfi.itemType], rfi.dbKeySuffix,
 		nil); err != nil {
 		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
-		}
+	} else if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
 	}
 	//replace old filter with two different filters
 	fp3 := &Filter{
@@ -427,22 +420,18 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		},
 	}
 	if rcvIdx, err := dataManager.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
-		nil); err != nil {
+		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
+		MetaString, nil); err != nil {
 		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(eIdxes, rcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
-		}
+	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
 	}
 	if reverseRcvIdx, err := dataManager.GetFilterReverseIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+		utils.PrefixToRevIndexCache[rfi.itemType], rfi.dbKeySuffix,
 		nil); err != nil {
 		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
-		}
+	} else if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
 	}
 	//remove thresholds
 	if err := dataManager.RemoveThresholdProfile(th.Tenant,
@@ -454,12 +443,12 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	if _, err := dataManager.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
-		nil); err != utils.ErrNotFound {
+		utils.PrefixToRevIndexCache[rfi.itemType], rfi.dbKeySuffix,
+		MetaString, nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if _, err := dataManager.GetFilterReverseIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+		utils.PrefixToRevIndexCache[rfi.itemType], rfi.dbKeySuffix,
 		nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -524,22 +513,18 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		rfi := NewFilterIndexer(onStor, utils.AttributeProfilePrefix,
 			utils.ConcatenatedKey(attrProfile.Tenant, ctx))
 		if rcvIdx, err := dataManager.GetFilterIndexes(
-			GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
-			nil); err != nil {
+			utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
+			MetaString, nil); err != nil {
 			t.Error(err)
-		} else {
-			if !reflect.DeepEqual(eIdxes, rcvIdx) {
-				t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
-			}
+		} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
 		}
 		if reverseRcvIdx, err := dataManager.GetFilterReverseIndexes(
-			GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+			utils.PrefixToRevIndexCache[rfi.itemType], rfi.dbKeySuffix,
 			nil); err != nil {
 			t.Error(err)
-		} else {
-			if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
-				t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
-			}
+		} else if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
 		}
 	}
 	//Set AttributeProfile with 1 new context (con3)
@@ -551,35 +536,30 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 	rfi := NewFilterIndexer(onStor, utils.AttributeProfilePrefix,
 		utils.ConcatenatedKey(attrProfile.Tenant, "con3"))
 	if rcvIdx, err := dataManager.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
-		nil); err != nil {
+		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
+		MetaString, nil); err != nil {
 		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(eIdxes, rcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
-		}
+	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
 	}
 	if reverseRcvIdx, err := dataManager.GetFilterReverseIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+		utils.PrefixToRevIndexCache[rfi.itemType], rfi.dbKeySuffix,
 		nil); err != nil {
 		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
-		}
+	} else if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
 	}
-
 	//check if old contexts was delete
 	for _, ctx := range []string{"con1", "con2"} {
 		rfi := NewFilterIndexer(onStor, utils.AttributeProfilePrefix,
 			utils.ConcatenatedKey(attrProfile.Tenant, ctx))
 		if _, err := dataManager.GetFilterIndexes(
-			GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
-			nil); err != nil && err != utils.ErrNotFound {
+			utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
+			MetaString, nil); err != nil && err != utils.ErrNotFound {
 			t.Error(err)
 		}
 		if _, err := dataManager.GetFilterReverseIndexes(
-			GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+			utils.PrefixToRevIndexCache[rfi.itemType], rfi.dbKeySuffix,
 			nil); err != nil && err != utils.ErrNotFound {
 			t.Error(err)
 		}
@@ -590,14 +570,15 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	//check if index is removed
-	rfi = NewFilterIndexer(onStor, utils.AttributeProfilePrefix, utils.ConcatenatedKey("cgrates.org", "con3"))
+	rfi = NewFilterIndexer(onStor, utils.AttributeProfilePrefix,
+		utils.ConcatenatedKey("cgrates.org", "con3"))
 	if _, err := dataManager.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
-		nil); err != nil && err != utils.ErrNotFound {
+		utils.PrefixToRevIndexCache[rfi.itemType], rfi.dbKeySuffix,
+		MetaString, nil); err != nil && err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if _, err := dataManager.GetFilterReverseIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+		utils.PrefixToRevIndexCache[rfi.itemType], rfi.dbKeySuffix,
 		nil); err != nil && err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -653,22 +634,18 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 	}
 	rfi := NewFilterIndexer(onStor, utils.ThresholdProfilePrefix, th.Tenant)
 	if rcvIdx, err := dataManager.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
-		nil); err != nil {
+		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
+		MetaString, nil); err != nil {
 		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(eIdxes, rcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
-		}
+	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
 	}
 	if reverseRcvIdx, err := dataManager.GetFilterReverseIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+		utils.PrefixToRevIndexCache[rfi.itemType], rfi.dbKeySuffix,
 		nil); err != nil {
 		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
-		}
+	} else if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
 	}
 	//Add an InlineFilter
 	th.FilterIDs = []string{"Filter1", "*string:Account:1001"}
@@ -695,22 +672,18 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 		},
 	}
 	if rcvIdx, err := dataManager.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
-		nil); err != nil {
+		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
+		MetaString, nil); err != nil {
 		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(eIdxes, rcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
-		}
+	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
 	}
 	if reverseRcvIdx, err := dataManager.GetFilterReverseIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+		utils.PrefixToRevIndexCache[rfi.itemType], rfi.dbKeySuffix,
 		nil); err != nil {
 		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
-		}
+	} else if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
 	}
 	//remove threshold
 	if err := dataManager.RemoveThresholdProfile(th.Tenant,
@@ -718,19 +691,18 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 		t.Error(err)
 	}
 	if _, err := dataManager.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
-		nil); err != utils.ErrNotFound {
+		utils.PrefixToRevIndexCache[rfi.itemType], rfi.dbKeySuffix,
+		MetaString, nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if _, err := dataManager.GetFilterReverseIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
+		utils.PrefixToRevIndexCache[rfi.itemType], rfi.dbKeySuffix,
 		nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
 
 func testITTestStoreFilterIndexesWithTransID(t *testing.T) {
-	tmpKey := utils.TEMP_DESTINATION_PREFIX + utils.ConcatenatedKey(GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false), "transaction1")
 	idxes := map[string]utils.StringMap{
 		"*string:Account:1001": utils.StringMap{
 			"RL1": true,
@@ -746,47 +718,34 @@ func testITTestStoreFilterIndexesWithTransID(t *testing.T) {
 			"RL2": true,
 			"RL3": true,
 		},
-		utils.ConcatenatedKey(utils.MetaDefault, utils.ANY, utils.ANY): utils.StringMap{
+		utils.ConcatenatedKey(utils.MetaDefault,
+			utils.ANY, utils.ANY): utils.StringMap{
 			"RL4": true,
 			"RL5": true,
 		},
 	}
 	if err := dataManager.SetFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
+		utils.PrefixToIndexCache[utils.ResourceProfilesPrefix], "cgrates.org",
 		idxes, false, "transaction1"); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := dataManager.GetFilterIndexes(tmpKey, MetaString, nil); err != nil {
-		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(idxes, rcv) {
-			t.Errorf("Expecting: %+v, received: %+v", idxes, rcv)
-		}
-	}
 	//commit transaction
 	if err := dataManager.SetFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
-		idxes, true, "transaction1"); err != nil {
-		t.Error(err)
-	}
-	//verify if old key was deleted
-	if _, err := dataManager.GetFilterIndexes(tmpKey, MetaString, nil); err != utils.ErrNotFound {
+		utils.PrefixToIndexCache[utils.ResourceProfilesPrefix],
+		"cgrates.org", idxes, true, "transaction1"); err != nil {
 		t.Error(err)
 	}
 	//verify new key and check if data was moved
 	if rcv, err := dataManager.GetFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
+		utils.PrefixToIndexCache[utils.ResourceProfilesPrefix], "cgrates.org",
 		MetaString, nil); err != nil {
 		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(idxes, rcv) {
-			t.Errorf("Expecting: %+v, received: %+v", idxes, rcv)
-		}
+	} else if !reflect.DeepEqual(idxes, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", idxes, rcv)
 	}
 }
 
 func testITTestStoreFilterIndexesWithTransID2(t *testing.T) {
-	tmpKey := utils.TEMP_DESTINATION_PREFIX + utils.ConcatenatedKey(GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false), "transaction1")
 	idxes := map[string]utils.StringMap{
 		"*string:Event:Event1": utils.StringMap{
 			"RL1": true,
@@ -797,36 +756,52 @@ func testITTestStoreFilterIndexesWithTransID2(t *testing.T) {
 		},
 	}
 	if err := dataManager.SetFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
+		utils.PrefixToIndexCache[utils.ResourceProfilesPrefix], "cgrates.org",
 		idxes, false, "transaction1"); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := dataManager.GetFilterIndexes(tmpKey, MetaString, nil); err != nil {
-		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(idxes, rcv) {
-			t.Errorf("Expecting: %+v, received: %+v", idxes, rcv)
-		}
-	}
 	//commit transaction
 	if err := dataManager.SetFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
+		utils.PrefixToIndexCache[utils.ResourceProfilesPrefix], "cgrates.org",
 		idxes, true, "transaction1"); err != nil {
 		t.Error(err)
 	}
-	//verify if old key was deleted
-	if _, err := dataManager.GetFilterIndexes(tmpKey, MetaString, nil); err != utils.ErrNotFound {
-		t.Error(err)
+
+	idxes = map[string]utils.StringMap{
+		"*string:Account:1001": utils.StringMap{
+			"RL1": true,
+		},
+		"*string:Account:1002": utils.StringMap{
+			"RL1": true,
+			"RL2": true,
+		},
+		"*string:Account:dan": utils.StringMap{
+			"RL2": true,
+		},
+		"*string:Subject:dan": utils.StringMap{
+			"RL2": true,
+			"RL3": true,
+		},
+		utils.ConcatenatedKey(utils.MetaDefault,
+			utils.ANY, utils.ANY): utils.StringMap{
+			"RL4": true,
+			"RL5": true,
+		},
+		"*string:Event:Event1": utils.StringMap{
+			"RL1": true,
+		},
+		"*string:Event:Event2": utils.StringMap{
+			"RL1": true,
+			"RL2": true,
+		},
 	}
 	//verify new key and check if data was moved
 	if rcv, err := dataManager.GetFilterIndexes(
-		GetDBIndexKey(utils.ResourceProfilesPrefix, "cgrates.org", false),
-		MetaString, nil); err != nil {
+		utils.PrefixToIndexCache[utils.ResourceProfilesPrefix],
+		"cgrates.org", MetaString, nil); err != nil {
 		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(idxes, rcv) {
-			t.Errorf("Expecting: %+v, received: %+v", idxes, rcv)
-		}
+	} else if !reflect.DeepEqual(idxes, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", idxes, rcv)
 	}
 }
 
@@ -858,8 +833,8 @@ func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 	}
 	rfi := NewFilterIndexer(onStor, utils.ThresholdProfilePrefix, th.Tenant)
 	if rcvIdx, err := dataManager.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
-		nil); err != nil {
+		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
+		MetaString, nil); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
@@ -867,8 +842,8 @@ func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 		}
 	}
 	if reverseRcvIdx, err := dataManager.GetFilterReverseIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
-		nil); err != nil {
+		utils.PrefixToRevIndexCache[rfi.itemType],
+		rfi.dbKeySuffix, nil); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
@@ -926,8 +901,8 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 	}
 	rfi := NewFilterIndexer(onStor, utils.SupplierProfilePrefix, splProfile.Tenant)
 	if rcvIdx, err := dataManager.GetFilterIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, false), MetaString,
-		nil); err != nil {
+		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
+		MetaString, nil); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
@@ -935,8 +910,8 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 		}
 	}
 	if reverseRcvIdx, err := dataManager.GetFilterReverseIndexes(
-		GetDBIndexKey(rfi.itemType, rfi.dbKeySuffix, true),
-		nil); err != nil {
+		utils.PrefixToRevIndexCache[rfi.itemType],
+		rfi.dbKeySuffix, nil); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
@@ -946,8 +921,8 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 	eMp := utils.StringMap{
 		"SPL_Weight": true,
 	}
-	if rcvMp, err := dataManager.MatchFilterIndex(utils.CacheSupplierFilterIndexes, splProfile.Tenant,
-		utils.MetaDefault, utils.META_ANY, utils.META_ANY); err != nil {
+	if rcvMp, err := dataManager.MatchFilterIndex(utils.CacheSupplierFilterIndexes,
+		splProfile.Tenant, utils.MetaDefault, utils.META_ANY, utils.META_ANY); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)

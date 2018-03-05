@@ -480,6 +480,7 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 		if err = indexer.StoreIndexes(true, utils.NonTransactional); err != nil {
 			return
 		}
+		Cache.Clear([]string{utils.CacheEventResources})
 	}
 	return
 }
@@ -719,7 +720,8 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 	if err = dm.DataDB().SetResourceProfileDrv(rp); err != nil {
 		return err
 	}
-	if err = dm.CacheDataFromDB(utils.ResourceProfilesPrefix, []string{rp.TenantID()}, true); err != nil {
+	if err = dm.CacheDataFromDB(utils.ResourceProfilesPrefix,
+		[]string{rp.TenantID()}, true); err != nil {
 		return
 	}
 	//to be implemented in tests
@@ -785,7 +787,7 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 		if err = indexer.StoreIndexes(true, utils.NonTransactional); err != nil {
 			return
 		}
-		Cache.Clear([]string{utils.CacheResourceProfiles})
+		Cache.Clear([]string{utils.CacheEventResources})
 	}
 	return
 }
