@@ -245,7 +245,7 @@ func (kev KamEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 		args.GetAttributes = true
 	}
 	if strings.Index(subsystems, utils.MetaThresholds) != -1 {
-		*args.ProcessThreshold = true
+		args.ProcessThreshold = utils.BoolPointer(true)
 	}
 	return
 }
@@ -333,7 +333,7 @@ func (kev KamEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 		args.GetAttributes = true
 	}
 	if strings.Index(subsystems, utils.MetaThresholds) != -1 {
-		*args.ProcessThreshold = true
+		args.ProcessThreshold = utils.BoolPointer(true)
 	}
 	return
 }
@@ -385,7 +385,7 @@ func (kev KamEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionA
 		args.ReleaseResources = true
 	}
 	if strings.Index(subsystems, utils.MetaThresholds) != -1 {
-		*args.ProcessThreshold = true
+		args.ProcessThreshold = utils.BoolPointer(true)
 	}
 	return
 }
