@@ -88,8 +88,8 @@ func (apierV1 *ApierV1) SetResourceProfile(res *engine.ResourceProfile, reply *s
 	return nil
 }
 
-//RemResourceProfile remove a specific resource configuration
-func (apierV1 *ApierV1) RemResourceProfile(arg utils.TenantID, reply *string) error {
+//RemoveResourceProfile remove a specific resource configuration
+func (apierV1 *ApierV1) RemoveResourceProfile(arg utils.TenantID, reply *string) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

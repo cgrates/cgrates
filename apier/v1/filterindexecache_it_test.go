@@ -1624,13 +1624,13 @@ func testV1FIdxCaRemoveResourceProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", resp)
 	}
 
-	if err := tFIdxCaRpc.Call("ApierV1.RemResourceProfile",
+	if err := tFIdxCaRpc.Call("ApierV1.RemoveResourceProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "RCFG1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	if err := tFIdxCaRpc.Call("ApierV1.RemResourceProfile",
+	if err := tFIdxCaRpc.Call("ApierV1.RemoveResourceProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {

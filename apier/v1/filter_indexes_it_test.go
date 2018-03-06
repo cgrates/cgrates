@@ -1000,13 +1000,13 @@ func testV1FIdxRemoveResourceProfile(t *testing.T) {
 	if reply2 != utils.OK {
 		t.Errorf("Error: %+v", reply2)
 	}
-	if err := tFIdxRpc.Call("ApierV1.RemResourceProfile",
+	if err := tFIdxRpc.Call("ApierV1.RemoveResourceProfile",
 		&utils.TenantID{Tenant: tenant, ID: "RCFG1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	if err := tFIdxRpc.Call("ApierV1.RemResourceProfile",
+	if err := tFIdxRpc.Call("ApierV1.RemoveResourceProfile",
 		&utils.TenantID{Tenant: tenant, ID: "RCFG2"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
