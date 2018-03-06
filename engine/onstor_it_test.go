@@ -2051,7 +2051,7 @@ func testOnStorITStatQueue(t *testing.T) {
 	} else if !reflect.DeepEqual(sq, rcv) {
 		t.Errorf("Expecting: %v, received: %v", sq, rcv)
 	}
-	if err := onStor.RemStatQueue(sq.Tenant, sq.ID,
+	if err := onStor.RemoveStatQueue(sq.Tenant, sq.ID,
 		utils.NonTransactional); err != nil {
 		t.Error(err)
 	}

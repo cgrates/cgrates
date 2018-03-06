@@ -2681,7 +2681,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 		log.Print("StatQueues:")
 	}
 	for _, sqTntID := range tpr.statQueues {
-		if err = tpr.dm.RemStatQueue(sqTntID.Tenant, sqTntID.ID, utils.NonTransactional); err != nil {
+		if err = tpr.dm.RemoveStatQueue(sqTntID.Tenant, sqTntID.ID, utils.NonTransactional); err != nil {
 			return
 		}
 		if verbose {
