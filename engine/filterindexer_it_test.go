@@ -755,45 +755,34 @@ func testITTestStoreFilterIndexesWithTransID2(t *testing.T) {
 			"RL2": true,
 		},
 	}
+	transID := "transaction1"
 	if err := dataManager.SetFilterIndexes(
 		utils.PrefixToIndexCache[utils.ResourceProfilesPrefix], "cgrates.org",
-		idxes, false, "transaction1"); err != nil {
+		idxes, false, transID); err != nil {
 		t.Error(err)
 	}
+	/* #FixMe: add transactionID to GetFilterIndexes so we can check the content of temporary key
+	if rcv, err := dataManager.GetFilterIndexes(
+		utils.TEMP_DESTINATION_PREFIX+utils.PrefixToIndexCache[utils.ResourceProfilesPrefix],
+		utils.ConcatenatedKey("cgrates.org", transID),
+		MetaString, nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(idxes, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", idxes, rcv)
+	}
+	*/
 	//commit transaction
 	if err := dataManager.SetFilterIndexes(
 		utils.PrefixToIndexCache[utils.ResourceProfilesPrefix], "cgrates.org",
-		idxes, true, "transaction1"); err != nil {
+		idxes, true, transID); err != nil {
 		t.Error(err)
 	}
-
-	idxes = map[string]utils.StringMap{
-		"*string:Account:1001": utils.StringMap{
-			"RL1": true,
-		},
-		"*string:Account:1002": utils.StringMap{
-			"RL1": true,
-			"RL2": true,
-		},
-		"*string:Account:dan": utils.StringMap{
-			"RL2": true,
-		},
-		"*string:Subject:dan": utils.StringMap{
-			"RL2": true,
-			"RL3": true,
-		},
-		utils.ConcatenatedKey(utils.MetaDefault,
-			utils.ANY, utils.ANY): utils.StringMap{
-			"RL4": true,
-			"RL5": true,
-		},
-		"*string:Event:Event1": utils.StringMap{
-			"RL1": true,
-		},
-		"*string:Event:Event2": utils.StringMap{
-			"RL1": true,
-			"RL2": true,
-		},
+	//verify if old key was deleted
+	if _, err := dataManager.GetFilterIndexes(
+		"tmp_"+utils.PrefixToIndexCache[utils.ResourceProfilesPrefix],
+		utils.ConcatenatedKey("cgrates.org", transID),
+		MetaString, nil); err != utils.ErrNotFound {
+		t.Error(err)
 	}
 	//verify new key and check if data was moved
 	if rcv, err := dataManager.GetFilterIndexes(

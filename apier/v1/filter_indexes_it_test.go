@@ -253,14 +253,15 @@ func testV1FIdxComputeThresholdsIndexes(t *testing.T) {
 	tenant := "cgrates.org"
 	var reply2 string
 	emptySlice := []string{}
-	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexes{
-		Tenant:       tenant,
-		ThresholdIDs: nil,
-		AttributeIDs: &emptySlice,
-		ResourceIDs:  &emptySlice,
-		StatIDs:      &emptySlice,
-		SupplierIDs:  &emptySlice,
-	}, &reply2); err != nil {
+	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes,
+		utils.ArgsComputeFilterIndexes{
+			Tenant:       tenant,
+			ThresholdIDs: nil,
+			AttributeIDs: &emptySlice,
+			ResourceIDs:  &emptySlice,
+			StatIDs:      &emptySlice,
+			SupplierIDs:  &emptySlice,
+		}, &reply2); err != nil {
 		t.Error(err)
 	}
 	if reply2 != utils.OK {
