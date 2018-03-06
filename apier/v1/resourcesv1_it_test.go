@@ -667,7 +667,7 @@ func testV1RsGetResourceProfileAfterUpdate(t *testing.T) {
 
 func testV1RsRemResourceProfile(t *testing.T) {
 	var resp string
-	if err := rlsV1Rpc.Call("ApierV1.RemResourceProfile",
+	if err := rlsV1Rpc.Call("ApierV1.RemoveResourceProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: rlsConfig.ID}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
