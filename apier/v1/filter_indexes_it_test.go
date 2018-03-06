@@ -1544,13 +1544,13 @@ func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 	if reply2 != utils.OK {
 		t.Errorf("Error: %+v", reply2)
 	}
-	if err := tFIdxRpc.Call("ApierV1.RemAttributeProfile",
+	if err := tFIdxRpc.Call("ApierV1.RemoveAttributeProfile",
 		&ArgRemoveAttrProfile{Tenant: "cgrates.org", ID: "ApierTest", Contexts: []string{utils.MetaSessionS}}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	if err := tFIdxRpc.Call("ApierV1.RemAttributeProfile",
+	if err := tFIdxRpc.Call("ApierV1.RemoveAttributeProfile",
 		&ArgRemoveAttrProfile{Tenant: "cgrates.org", ID: "ApierTest2", Contexts: []string{utils.MetaSessionS}}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {

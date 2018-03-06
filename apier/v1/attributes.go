@@ -57,8 +57,8 @@ type ArgRemoveAttrProfile struct {
 	Contexts []string
 }
 
-//RemAttributeProfile remove a specific Attribute Profile
-func (apierV1 *ApierV1) RemAttributeProfile(arg *ArgRemoveAttrProfile, reply *string) error {
+//RemoveAttributeProfile remove a specific Attribute Profile
+func (apierV1 *ApierV1) RemoveAttributeProfile(arg *ArgRemoveAttrProfile, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID", "Contexts"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
