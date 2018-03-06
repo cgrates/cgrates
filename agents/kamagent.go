@@ -103,6 +103,11 @@ func (ka *KamailioAgent) onCgrAuth(evData []byte, connID string) {
 		return
 	}
 	authArgs := kev.V1AuthorizeArgs()
+	if authArgs == nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate auth session arguments",
+			utils.KamailioAgent, kev[utils.OriginID]))
+		return
+	}
 	var authReply sessions.V1AuthorizeReply
 	err = ka.sessionS.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authReply)
 	if kar, err := kev.AsKamAuthReply(authArgs, &authReply, err); err != nil {
@@ -131,6 +136,11 @@ func (ka *KamailioAgent) onCallStart(evData []byte, connID string) {
 		return
 	}
 	initSessionArgs := kev.V1InitSessionArgs()
+	if initSessionArgs == nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate init session arguments",
+			utils.KamailioAgent, kev[utils.OriginID]))
+		return
+	}
 	initSessionArgs.CGREvent.Event[EvapiConnID] = connID // Attach the connection ID so we can properly disconnect later
 	var initReply sessions.V1InitSessionReply
 	if err := ka.sessionS.Call(utils.SessionSv1InitiateSession,
@@ -160,9 +170,15 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connID string) {
 			utils.KamailioAgent, kev[utils.OriginID]))
 		return
 	}
+	tsArgs := kev.V1TerminateSessionArgs()
+	if tsArgs == nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate terminate session arguments",
+			utils.KamailioAgent, kev[utils.OriginID]))
+		return
+	}
 	var reply string
 	if err := ka.sessionS.Call(utils.SessionSv1TerminateSession,
-		kev.V1TerminateSessionArgs(), &reply); err != nil {
+		tsArgs, &reply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> could not terminate session with event %s, error: %s",
 				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
