@@ -287,8 +287,8 @@ func (dm *DataManager) SetStatQueue(sq *StatQueue) (err error) {
 	return dm.CacheDataFromDB(utils.StatQueuePrefix, []string{sq.TenantID()}, true)
 }
 
-// RemStatQueue removes the StoredStatQueue and clears the cache for StatQueue
-func (dm *DataManager) RemStatQueue(tenant, id string, transactionID string) (err error) {
+// RemoveStatQueue removes the StoredStatQueue and clears the cache for StatQueue
+func (dm *DataManager) RemoveStatQueue(tenant, id string, transactionID string) (err error) {
 	if err = dm.dataDB.RemStoredStatQueueDrv(tenant, id); err != nil {
 		return
 	}

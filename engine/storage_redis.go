@@ -1611,7 +1611,7 @@ func (rs *RedisStorage) SetStoredStatQueueDrv(sq *StoredStatQueue) (err error) {
 	return rs.Cmd("SET", utils.StatQueuePrefix+sq.SqID(), result).Err
 }
 
-// RemStatQueue removes a StatsQueue
+// RemoveStatQueue removes a StatsQueue
 func (rs *RedisStorage) RemStoredStatQueueDrv(tenant, id string) (err error) {
 	key := utils.StatQueuePrefix + utils.ConcatenatedKey(tenant, id)
 	if err = rs.Cmd("DEL", key).Err; err != nil {

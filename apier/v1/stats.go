@@ -68,7 +68,7 @@ func (apierV1 *ApierV1) RemStatQueueProfile(args *utils.TenantID, reply *string)
 	if err := apierV1.DataManager.RemoveStatQueueProfile(args.Tenant, args.ID, utils.NonTransactional, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierV1.DataManager.RemStatQueue(args.Tenant, args.ID, utils.NonTransactional); err != nil {
+	if err := apierV1.DataManager.RemoveStatQueue(args.Tenant, args.ID, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

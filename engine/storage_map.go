@@ -1468,7 +1468,7 @@ func (ms *MapStorage) SetStoredStatQueueDrv(sq *StoredStatQueue) (err error) {
 	return
 }
 
-// RemStatQueue removes a StatsQueue
+// RemoveStatQueue removes a StatsQueue
 func (ms *MapStorage) RemStoredStatQueueDrv(tenant, id string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
