@@ -263,6 +263,11 @@ func TestSetGetRemTTLDynamic(t *testing.T) {
 	if len(cache.ttlRefs) != 5 {
 		t.Errorf("Wrong items in ttl index: %+v", cache.ttlRefs)
 	}
+	if expTime, has := cache.GetItemExpiryTime(testCIs[0].itemID); !has {
+		t.Errorf("cannot find item with id: %s", testCIs[0].itemID)
+	} else if time.Now().After(expTime) {
+		t.Errorf("wrong time replied: %v", expTime)
+	}
 	time.Sleep(time.Duration(6 * time.Millisecond))
 	if _, has := cache.Get("_2_"); !has {
 		t.Error("item not in cache")

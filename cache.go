@@ -90,6 +90,18 @@ func (c *Cache) Get(itmID string) (value interface{}, ok bool) {
 	return
 }
 
+func (c *Cache) GetItemExpiryTime(itmID string) (exp time.Time, ok bool) {
+	c.RLock()
+	defer c.RUnlock()
+	var ci *cachedItem
+	ci, ok = c.cache[itmID]
+	if !ok {
+		return
+	}
+	exp = ci.expiryTime
+	return
+}
+
 // Set sets/adds a value to the cache.
 func (c *Cache) Set(itmID string, value interface{}, grpIDs []string) {
 	if c.maxEntries == DisabledCaching {

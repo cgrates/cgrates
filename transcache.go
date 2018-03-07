@@ -254,3 +254,10 @@ func (tc *TransCache) GetItemIDs(chID, prfx string) (itmIDs []string) {
 	tc.cacheMux.RUnlock()
 	return
 }
+
+// GetItemExpiryTime returns a list of item IDs matching prefix
+func (tc *TransCache) GetItemExpiryTime(chID, itmID string) (exp time.Time, ok bool) {
+	tc.cacheMux.RLock()
+	defer tc.cacheMux.RUnlock()
+	return tc.cacheInstance(chID).GetItemExpiryTime(itmID)
+}
