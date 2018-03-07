@@ -51,8 +51,8 @@ func (apierV1 *ApierV1) SetSupplierProfile(spp *engine.SupplierProfile, reply *s
 	return nil
 }
 
-//RemSupplierProfile remove a specific Supplier configuration
-func (apierV1 *ApierV1) RemSupplierProfile(arg utils.TenantID, reply *string) error {
+//RemoveSupplierProfile remove a specific Supplier configuration
+func (apierV1 *ApierV1) RemoveSupplierProfile(arg utils.TenantID, reply *string) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

@@ -2253,6 +2253,7 @@ func (ms *MongoStorage) SetThresholdProfileDrv(tp *ThresholdProfile) (err error)
 func (ms *MongoStorage) RemThresholdProfileDrv(tenant, id string) (err error) {
 	session, col := ms.conn(colTps)
 	defer session.Close()
+	utils.Logger.Debug(fmt.Sprintf("dbKey %+v", session))
 	err = col.Remove(bson.M{"tenant": tenant, "id": id})
 	if err != nil {
 		return err
