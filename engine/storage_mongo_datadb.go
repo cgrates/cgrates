@@ -2249,7 +2249,7 @@ func (ms *MongoStorage) SetThresholdProfileDrv(tp *ThresholdProfile) (err error)
 	return
 }
 
-// RemThresholdProfile removes a ThresholdProfile from dataDB/cache
+// RemoveThresholdProfile removes a ThresholdProfile from dataDB/cache
 func (ms *MongoStorage) RemThresholdProfileDrv(tenant, id string) (err error) {
 	session, col := ms.conn(colTps)
 	defer session.Close()

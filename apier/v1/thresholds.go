@@ -87,7 +87,7 @@ func (apierV1 *ApierV1) SetThresholdProfile(thp *engine.ThresholdProfile, reply 
 }
 
 // Remove a specific Threshold Profile
-func (apierV1 *ApierV1) RemThresholdProfile(args *utils.TenantID, reply *string) error {
+func (apierV1 *ApierV1) RemoveThresholdProfile(args *utils.TenantID, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

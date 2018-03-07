@@ -510,7 +510,7 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 		t.Errorf("Expecting hits: %d, received: %d", eHits, hits)
 	}
 	//Remove threshold profile that was set form api
-	if err := tFIdxCaRpc.Call("ApierV1.RemThresholdProfile",
+	if err := tFIdxCaRpc.Call("ApierV1.RemoveThresholdProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -524,7 +524,7 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 		t.Error(err)
 	}
 	//Remove threshold profile that was set form tariffplan
-	if err := tFIdxCaRpc.Call("ApierV1.RemThresholdProfile",
+	if err := tFIdxCaRpc.Call("ApierV1.RemoveThresholdProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_BALANCE_1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {

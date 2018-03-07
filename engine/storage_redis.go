@@ -1671,7 +1671,7 @@ func (rs *RedisStorage) SetThresholdProfileDrv(tp *ThresholdProfile) (err error)
 	return rs.Cmd("SET", utils.ThresholdProfilePrefix+tp.TenantID(), result).Err
 }
 
-// RemThresholdProfile removes a ThresholdProfile from dataDB/cache
+// RemoveThresholdProfile removes a ThresholdProfile from dataDB/cache
 func (rs *RedisStorage) RemThresholdProfileDrv(tenant, id string) (err error) {
 	key := utils.ThresholdProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	err = rs.Cmd("DEL", key).Err

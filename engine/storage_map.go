@@ -1502,7 +1502,7 @@ func (ms *MapStorage) SetThresholdProfileDrv(tp *ThresholdProfile) (err error) {
 	return
 }
 
-// RemThresholdProfile removes a ThresholdProfile from dataDB/cache
+// RemoveThresholdProfile removes a ThresholdProfile from dataDB/cache
 func (ms *MapStorage) RemThresholdProfileDrv(tenant, id string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
