@@ -46,6 +46,12 @@
 },
 
 
+"thresholds": {
+	"enabled": true,
+	"store_interval": "1s",
+},
+
+
 "suppliers": {
 	"enabled": true,
 },

@@ -1295,7 +1295,7 @@ type V1AuthorizeArgs struct {
 	AuthorizeResources bool
 	GetMaxUsage        bool
 	GetSuppliers       bool
-	ProcessThreshold   *bool
+	ProcessThresholds  *bool
 	utils.CGREvent
 	utils.Paginator
 }
@@ -1328,6 +1328,9 @@ func (v1AuthReply *V1AuthorizeReply) AsCGRReply() (cgrReply utils.CGRReply, err 
 	}
 	if v1AuthReply.Suppliers != nil {
 		cgrReply["Suppliers"] = v1AuthReply.Suppliers.Digest()
+	}
+	if v1AuthReply.ThresholdHits != nil {
+		cgrReply["ThresholdHits"] = *v1AuthReply.ThresholdHits
 	}
 	return
 }
@@ -1405,8 +1408,8 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		}
 	}
 	checkThresholds := smg.thdS != nil
-	if args.ProcessThreshold != nil {
-		checkThresholds = *args.ProcessThreshold
+	if args.ProcessThresholds != nil {
+		checkThresholds = *args.ProcessThresholds
 	}
 	if checkThresholds {
 		if smg.thdS == nil {
@@ -1464,7 +1467,7 @@ type V1InitSessionArgs struct {
 	GetAttributes     bool
 	AllocateResources bool
 	InitSession       bool
-	ProcessThreshold  *bool
+	ProcessThresholds *bool
 	utils.CGREvent
 }
 
@@ -1492,6 +1495,9 @@ func (v1Rply *V1InitSessionReply) AsCGRReply() (cgrReply utils.CGRReply, err err
 	}
 	if v1Rply.MaxUsage != nil {
 		cgrReply["MaxUsage"] = *v1Rply.MaxUsage
+	}
+	if v1Rply.ThresholdHits != nil {
+		cgrReply["ThresholdHits"] = *v1Rply.ThresholdHits
 	}
 	return
 }
@@ -1549,8 +1555,8 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		}
 	}
 	checkThresholds := smg.thdS != nil
-	if args.ProcessThreshold != nil {
-		checkThresholds = *args.ProcessThreshold
+	if args.ProcessThresholds != nil {
+		checkThresholds = *args.ProcessThresholds
 	}
 	if checkThresholds {
 		if smg.thdS == nil {
@@ -1635,9 +1641,9 @@ func (smg *SMGeneric) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 }
 
 type V1TerminateSessionArgs struct {
-	TerminateSession bool
-	ReleaseResources bool
-	ProcessThreshold *bool
+	TerminateSession  bool
+	ReleaseResources  bool
+	ProcessThresholds *bool
 	utils.CGREvent
 }
 
@@ -1675,8 +1681,8 @@ func (smg *SMGeneric) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection
 		}
 	}
 	checkThresholds := smg.thdS != nil
-	if args.ProcessThreshold != nil {
-		checkThresholds = *args.ProcessThreshold
+	if args.ProcessThresholds != nil {
+		checkThresholds = *args.ProcessThresholds
 	}
 	if checkThresholds {
 		if smg.thdS == nil {
