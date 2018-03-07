@@ -19,7 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
+	"time"
+
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
@@ -55,6 +58,9 @@ func (self *CmdSuppliersSort) RpcParams(reset bool) interface{} {
 }
 
 func (self *CmdSuppliersSort) PostprocessRpcParams() error {
+	if self.rpcParams.CGREvent.Time == nil {
+		self.rpcParams.CGREvent.Time = utils.TimePointer(time.Now())
+	}
 	return nil
 }
 
