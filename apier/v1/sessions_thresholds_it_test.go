@@ -171,7 +171,7 @@ func TestSessionSv1ItGetThreshold(t *testing.T) {
 func TestSessionSv1ItAuth(t *testing.T) {
 	args := &sessions.V1AuthorizeArgs{
 		AuthorizeResources: true,
-		ProcessThreshold:   utils.BoolPointer(true),
+		ProcessThresholds:  utils.BoolPointer(true),
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
@@ -236,7 +236,7 @@ func TestSessionSv1ItInitiateSession(t *testing.T) {
 		InitSession:       true,
 		AllocateResources: true,
 		GetAttributes:     true,
-		ProcessThreshold:  utils.BoolPointer(true),
+		ProcessThresholds: utils.BoolPointer(true),
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItInitiateSession",
@@ -296,9 +296,9 @@ func TestSessionSv1ItInitiateSession(t *testing.T) {
 
 func TestSessionSv1ItTerminateSession(t *testing.T) {
 	args := &sessions.V1TerminateSessionArgs{
-		TerminateSession: true,
-		ReleaseResources: true,
-		ProcessThreshold: utils.BoolPointer(true),
+		TerminateSession:  true,
+		ReleaseResources:  true,
+		ProcessThresholds: utils.BoolPointer(true),
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItTerminateSession",

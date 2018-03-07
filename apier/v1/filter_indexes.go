@@ -199,7 +199,8 @@ func (self *ApierV1) GetFilterReverseIndexes(arg AttrGetFilterReverseIndexes, re
 			}
 		}
 	} else {
-		indexes, err = self.DataManager.GetFilterReverseIndexes(utils.PrefixToRevIndexCache[arg.ItemType], key, nil)
+		indexes, err = self.DataManager.GetFilterReverseIndexes(
+			utils.PrefixToRevIndexCache[arg.ItemType], key, nil)
 		if err != nil {
 			return err
 		}
@@ -743,7 +744,7 @@ func (self *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string, tra
 		if err := sppIndexers.StoreIndexes(true, transactionID); err != nil {
 			return nil, err
 		}
-		return nil, err
+		return nil, nil
 	} else {
 		if err := sppIndexers.StoreIndexes(false, transactionID); err != nil {
 			return nil, err
