@@ -52,6 +52,15 @@
 },
 
 
+"stats": {
+	"enabled": true,
+	"store_interval": "1s",
+	"thresholds_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
 "suppliers": {
 	"enabled": true,
 },
@@ -70,6 +79,9 @@
 		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 	"thresholds_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"stats_conns": [
 		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 	"suppliers_conns": [

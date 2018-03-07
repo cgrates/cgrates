@@ -455,6 +455,7 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 			&HaPoolConfig{Address: "*internal"}},
 		ResSConns:               []*HaPoolConfig{},
 		ThreshSConns:            []*HaPoolConfig{},
+		StatSConns:              []*HaPoolConfig{},
 		SupplSConns:             []*HaPoolConfig{},
 		AttrSConns:              []*HaPoolConfig{},
 		SessionReplicationConns: []*HaPoolConfig{},

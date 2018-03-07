@@ -94,6 +94,7 @@ type SessionSCfg struct {
 	RALsConns               []*HaPoolConfig
 	ResSConns               []*HaPoolConfig
 	ThreshSConns            []*HaPoolConfig
+	StatSConns              []*HaPoolConfig
 	SupplSConns             []*HaPoolConfig
 	AttrSConns              []*HaPoolConfig
 	CDRsConns               []*HaPoolConfig
@@ -139,6 +140,13 @@ func (self *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) error {
 		for idx, jsnHaCfg := range *jsnCfg.Thresholds_conns {
 			self.ThreshSConns[idx] = NewDfltHaPoolConfig()
 			self.ThreshSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
+	}
+	if jsnCfg.Stats_conns != nil {
+		self.StatSConns = make([]*HaPoolConfig, len(*jsnCfg.Stats_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Stats_conns {
+			self.StatSConns[idx] = NewDfltHaPoolConfig()
+			self.StatSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Suppliers_conns != nil {

@@ -288,6 +288,7 @@ const CGRATES_CFG_JSON = `
 	],
 	"resources_conns": [],					// address where to reach the ResourceS <""|*internal|127.0.0.1:2013>
 	"thresholds_conns": [],					// address where to reach the ThresholdS <""|*internal|127.0.0.1:2013>
+	"stats_conns": [],						// address where to reach the StatS <""|*internal|127.0.0.1:2013>
 	"suppliers_conns": [],					// address where to reach the SupplierS <""|*internal|127.0.0.1:2013>
 	"attributes_conns": [],					// address where to reach the AttributeS <""|*internal|127.0.0.1:2013>
 	"session_replication_conns": [],		// replicate sessions towards these session services
