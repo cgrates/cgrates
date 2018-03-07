@@ -200,6 +200,7 @@ type SessionSJsonCfg struct {
 	Rals_conns                *[]*HaPoolJsonCfg
 	Resources_conns           *[]*HaPoolJsonCfg
 	Thresholds_conns          *[]*HaPoolJsonCfg
+	Stats_conns               *[]*HaPoolJsonCfg
 	Suppliers_conns           *[]*HaPoolJsonCfg
 	Cdrs_conns                *[]*HaPoolJsonCfg
 	Session_replication_conns *[]*HaPoolJsonCfg

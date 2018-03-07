@@ -489,6 +489,11 @@ func (self *CGRConfig) checkConfigSanity() error {
 				return errors.New("<SessionS> ThresholdS not enabled but requested by SMGeneric component.")
 			}
 		}
+		for _, conn := range self.sessionSCfg.StatSConns {
+			if conn.Address == utils.MetaInternal && !self.statsCfg.Enabled {
+				return errors.New("<SessionS> StatS not enabled but requested by SMGeneric component.")
+			}
+		}
 		for _, conn := range self.sessionSCfg.SupplSConns {
 			if conn.Address == utils.MetaInternal && !self.supplierSCfg.Enabled {
 				return errors.New("<SessionS> SupplierS not enabled but requested by SMGeneric component.")

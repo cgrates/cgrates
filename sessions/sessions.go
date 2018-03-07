@@ -64,7 +64,7 @@ type SMGReplicationConn struct {
 }
 
 func NewSMGeneric(cgrCfg *config.CGRConfig, rals, resS, thdS,
-	splS, attrS, cdrsrv rpcclient.RpcClientConnection,
+	statS, splS, attrS, cdrsrv rpcclient.RpcClientConnection,
 	smgReplConns []*SMGReplicationConn, timezone string) *SMGeneric {
 	ssIdxCfg := cgrCfg.SessionSCfg().SessionIndexes
 	ssIdxCfg[utils.OriginID] = true // Make sure we have indexing for OriginID since it is a requirement on prefix searching
@@ -76,6 +76,9 @@ func NewSMGeneric(cgrCfg *config.CGRConfig, rals, resS, thdS,
 	}
 	if thdS != nil && reflect.ValueOf(thdS).IsNil() {
 		thdS = nil
+	}
+	if statS != nil && reflect.ValueOf(statS).IsNil() {
+		statS = nil
 	}
 	if splS != nil && reflect.ValueOf(splS).IsNil() {
 		splS = nil
@@ -90,6 +93,7 @@ func NewSMGeneric(cgrCfg *config.CGRConfig, rals, resS, thdS,
 		rals:               rals,
 		resS:               resS,
 		thdS:               thdS,
+		statS:              statS,
 		splS:               splS,
 		attrS:              attrS,
 		cdrsrv:             cdrsrv,
@@ -111,6 +115,7 @@ type SMGeneric struct {
 	rals               rpcclient.RpcClientConnection // RALs connections
 	resS               rpcclient.RpcClientConnection // ResourceS connections
 	thdS               rpcclient.RpcClientConnection // ThresholdS connections
+	statS              rpcclient.RpcClientConnection // StatS connections
 	splS               rpcclient.RpcClientConnection // SupplierS connections
 	attrS              rpcclient.RpcClientConnection // AttributeS connections
 	cdrsrv             rpcclient.RpcClientConnection // CDR server connections
