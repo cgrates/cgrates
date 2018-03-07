@@ -442,7 +442,7 @@ func testV1TSUpdateThresholdProfile(t *testing.T) {
 
 func testV1TSRemoveThresholdProfile(t *testing.T) {
 	var resp string
-	if err := tSv1Rpc.Call("ApierV1.RemThresholdProfile",
+	if err := tSv1Rpc.Call("ApierV1.RemoveThresholdProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {

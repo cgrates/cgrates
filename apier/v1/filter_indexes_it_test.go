@@ -475,13 +475,13 @@ func testV1FIdxRemoveThresholdProfile(t *testing.T) {
 	if reply2 != utils.OK {
 		t.Errorf("Error: %+v", reply2)
 	}
-	if err := tFIdxRpc.Call("ApierV1.RemThresholdProfile",
+	if err := tFIdxRpc.Call("ApierV1.RemoveThresholdProfile",
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	if err := tFIdxRpc.Call("ApierV1.RemThresholdProfile",
+	if err := tFIdxRpc.Call("ApierV1.RemoveThresholdProfile",
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -1339,13 +1339,13 @@ func testV1FIdxRemoveSupplierProfile(t *testing.T) {
 	if reply2 != utils.OK {
 		t.Errorf("Error: %+v", reply2)
 	}
-	if err := tFIdxRpc.Call("ApierV1.RemSupplierProfile",
+	if err := tFIdxRpc.Call("ApierV1.RemoveSupplierProfile",
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	if err := tFIdxRpc.Call("ApierV1.RemSupplierProfile",
+	if err := tFIdxRpc.Call("ApierV1.RemoveSupplierProfile",
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
