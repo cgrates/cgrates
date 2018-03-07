@@ -2096,8 +2096,8 @@ func (ms *MongoStorage) SetFilterReverseIndexesDrv(cacheID, itemIDPrefix string,
 		pairs := []interface{}{}
 		for key, itmMp := range revIdx {
 			param := fmt.Sprintf("value.%s", key)
-			pairs = append(pairs, bson.M{"key": dbKey})
-			pairs = append(pairs, bson.M{"$set": bson.M{"key": dbKey,
+			pairs = append(pairs, bson.M{"key": originKey})
+			pairs = append(pairs, bson.M{"$set": bson.M{"key": originKey,
 				param: itmMp.Slice()}})
 		}
 		if len(pairs) != 0 {

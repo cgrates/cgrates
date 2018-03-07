@@ -480,7 +480,6 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 		if err = indexer.StoreIndexes(true, utils.NonTransactional); err != nil {
 			return
 		}
-		Cache.Clear([]string{utils.CacheEventResources})
 	}
 	return
 }

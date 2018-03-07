@@ -235,7 +235,7 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 		tenant); err != nil {
 		t.Error(err)
 	}
-	if err := onStor.RemoveFilterReverseIndexes(utils.PrefixToIndexCache[utils.ThresholdProfilePrefix],
+	if err := onStor.RemoveFilterReverseIndexes(utils.PrefixToRevIndexCache[utils.ThresholdProfilePrefix],
 		tenant); err != nil {
 		t.Error(err)
 	}
@@ -243,7 +243,7 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 		tenant, engine.MetaString, nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
-	if _, err = onStor.GetFilterReverseIndexes(utils.PrefixToIndexCache[utils.ThresholdProfilePrefix],
+	if _, err = onStor.GetFilterReverseIndexes(utils.PrefixToRevIndexCache[utils.ThresholdProfilePrefix],
 		tenant, nil); err != nil && err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -253,7 +253,6 @@ func testV1FIdxComputeThresholdsIndexes(t *testing.T) {
 	tenant := "cgrates.org"
 	var reply2 string
 	emptySlice := []string{}
-<<<<<<< HEAD
 	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes,
 		utils.ArgsComputeFilterIndexes{
 			Tenant:       tenant,
@@ -263,16 +262,6 @@ func testV1FIdxComputeThresholdsIndexes(t *testing.T) {
 			StatIDs:      &emptySlice,
 			SupplierIDs:  &emptySlice,
 		}, &reply2); err != nil {
-=======
-	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexes{
-		Tenant:       tenant,
-		ThresholdIDs: nil,
-		AttributeIDs: &emptySlice,
-		ResourceIDs:  &emptySlice,
-		StatIDs:      &emptySlice,
-		SupplierIDs:  &emptySlice,
-	}, &reply2); err != nil {
->>>>>>> Update ComputeFilterIndexer to consider transactionID
 		t.Error(err)
 	}
 	if reply2 != utils.OK {
