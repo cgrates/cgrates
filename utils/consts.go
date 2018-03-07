@@ -521,6 +521,7 @@ const (
 	DiameterAgent                = "DiameterAgent"
 	Error                        = "Error"
 	MetaCGRReply                 = "*cgrReply"
+	CacheS                       = "CacheS"
 )
 
 //MetaMetrics

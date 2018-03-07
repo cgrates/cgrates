@@ -125,7 +125,8 @@ func (dm *DataManager) PreloadCacheForPrefix(prefix string) error {
 }
 
 func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached bool) (err error) {
-	if !utils.IsSliceMember([]string{utils.DESTINATION_PREFIX,
+	if !utils.IsSliceMember([]string{
+		utils.DESTINATION_PREFIX,
 		utils.REVERSE_DESTINATION_PREFIX,
 		utils.RATING_PLAN_PREFIX,
 		utils.RATING_PROFILE_PREFIX,

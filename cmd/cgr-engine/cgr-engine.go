@@ -492,10 +492,13 @@ func startUsersServer(internalUserSChan chan rpcclient.RpcClientConnection, dm *
 }
 
 // startAttributeService fires up the AttributeS
-func startAttributeService(internalAttributeSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
-	dm *engine.DataManager, server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
+func startAttributeService(internalAttributeSChan chan rpcclient.RpcClientConnection,
+	cacheS *engine.CacheS, cfg *config.CGRConfig, dm *engine.DataManager,
+	server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
+	<-cacheS.GetPrecacheChannel(utils.CacheAttributeProfiles)
+
 	aS, err := engine.NewAttributeService(dm, filterS,
 		cfg.AttributeSCfg().StringIndexedFields, cfg.AttributeSCfg().PrefixIndexedFields)
 	if err != nil {
@@ -516,7 +519,8 @@ func startAttributeService(internalAttributeSChan chan rpcclient.RpcClientConnec
 	internalAttributeSChan <- aSv1
 }
 
-func startResourceService(internalRsChan, internalThresholdSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
+func startResourceService(internalRsChan chan rpcclient.RpcClientConnection, cacheS *engine.CacheS,
+	internalThresholdSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
 	dm *engine.DataManager, server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
 	var err error
 	var thdSConn *rpcclient.RpcClientPool
@@ -531,6 +535,9 @@ func startResourceService(internalRsChan, internalThresholdSChan chan rpcclient.
 			return
 		}
 	}
+	<-cacheS.GetPrecacheChannel(utils.CacheResourceProfiles)
+	<-cacheS.GetPrecacheChannel(utils.CacheResources)
+
 	rS, err := engine.NewResourceService(dm, cfg.ResourceSCfg().StoreInterval,
 		thdSConn, filterS, cfg.ResourceSCfg().StringIndexedFields, cfg.ResourceSCfg().PrefixIndexedFields)
 	if err != nil {
@@ -554,7 +561,8 @@ func startResourceService(internalRsChan, internalThresholdSChan chan rpcclient.
 }
 
 // startStatService fires up the StatS
-func startStatService(internalStatSChan, internalThresholdSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
+func startStatService(internalStatSChan chan rpcclient.RpcClientConnection, cacheS *engine.CacheS,
+	internalThresholdSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
 	dm *engine.DataManager, server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
 	var err error
 	var thdSConn *rpcclient.RpcClientPool
@@ -569,6 +577,9 @@ func startStatService(internalStatSChan, internalThresholdSChan chan rpcclient.R
 			return
 		}
 	}
+	<-cacheS.GetPrecacheChannel(utils.CacheStatQueueProfiles)
+	<-cacheS.GetPrecacheChannel(utils.CacheStatQueues)
+
 	sS, err := engine.NewStatService(dm, cfg.StatSCfg().StoreInterval,
 		thdSConn, filterS, cfg.StatSCfg().StringIndexedFields, cfg.StatSCfg().PrefixIndexedFields)
 	if err != nil {
@@ -591,10 +602,14 @@ func startStatService(internalStatSChan, internalThresholdSChan chan rpcclient.R
 }
 
 // startThresholdService fires up the ThresholdS
-func startThresholdService(internalThresholdSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
-	dm *engine.DataManager, server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
+func startThresholdService(internalThresholdSChan chan rpcclient.RpcClientConnection,
+	cacheS *engine.CacheS, cfg *config.CGRConfig, dm *engine.DataManager,
+	server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
+	<-cacheS.GetPrecacheChannel(utils.CacheThresholdProfiles)
+	<-cacheS.GetPrecacheChannel(utils.CacheThresholds)
+
 	tS, err := engine.NewThresholdService(dm, cfg.ThresholdSCfg().StringIndexedFields,
 		cfg.ThresholdSCfg().PrefixIndexedFields, cfg.ThresholdSCfg().StoreInterval, filterS)
 	if err != nil {
@@ -617,8 +632,10 @@ func startThresholdService(internalThresholdSChan chan rpcclient.RpcClientConnec
 }
 
 // startSupplierService fires up the ThresholdS
-func startSupplierService(internalSupplierSChan, internalRsChan, internalStatSChan chan rpcclient.RpcClientConnection,
-	cfg *config.CGRConfig, dm *engine.DataManager, server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
+func startSupplierService(internalSupplierSChan chan rpcclient.RpcClientConnection, cacheS *engine.CacheS,
+	internalRsChan, internalStatSChan chan rpcclient.RpcClientConnection,
+	cfg *config.CGRConfig, dm *engine.DataManager, server *utils.Server,
+	exitChan chan bool, filterSChan chan *engine.FilterS) {
 	var err error
 	filterS := <-filterSChan
 	filterSChan <- filterS
@@ -647,6 +664,8 @@ func startSupplierService(internalSupplierSChan, internalRsChan, internalStatSCh
 			return
 		}
 	}
+	<-cacheS.GetPrecacheChannel(utils.CacheSupplierProfiles)
+
 	splS, err := engine.NewSupplierService(dm, cfg.DefaultTimezone, filterS, cfg.SupplierSCfg().StringIndexedFields,
 		cfg.SupplierSCfg().PrefixIndexedFields, resourceSConn, statSConn)
 	if err != nil {
@@ -670,10 +689,10 @@ func startSupplierService(internalSupplierSChan, internalRsChan, internalStatSCh
 }
 
 // startFilterService fires up the FilterS
-func startFilterService(filterSChan chan *engine.FilterS,
+func startFilterService(filterSChan chan *engine.FilterS, cacheS *engine.CacheS,
 	internalStatSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
 	dm *engine.DataManager, exitChan chan bool) {
-
+	<-cacheS.GetPrecacheChannel(utils.CacheFilters)
 	filterSChan <- engine.NewFilterS(cfg, internalStatSChan, dm)
 
 }
@@ -781,7 +800,7 @@ func main() {
 		cfg.NodeID = *nodeID
 	}
 	config.SetCgrConfig(cfg) // Share the config object
-	engine.InitCache(cfg.CacheCfg())
+
 	// init syslog
 	if err = initLogger(cfg); err != nil {
 		log.Fatalf("Could not initialize syslog connection, err: <%s>", err.Error())
@@ -795,39 +814,34 @@ func main() {
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
 	var dm *engine.DataManager
-
-	if cfg.RALsEnabled || cfg.CDRStatsEnabled || cfg.PubSubServerEnabled ||
-		cfg.AliasesServerEnabled || cfg.UserServerEnabled || cfg.SchedulerEnabled {
-		dm, err = engine.ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort,
-			cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheCfg(), cfg.LoadHistorySize)
-		if err != nil { // Cannot configure getter database, show stopper
-			utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
-			return
-		}
-		defer dm.DataDB().Close()
-		engine.SetDataStorage(dm)
-		if err := engine.CheckVersions(dm.DataDB()); err != nil {
-			fmt.Println(err.Error())
-			return
-		}
+	// FixMe: add here exceptions if running only CDRC
+	dm, err = engine.ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort,
+		cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheCfg(), cfg.LoadHistorySize)
+	if err != nil { // Cannot configure getter database, show stopper
+		utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
+		return
 	}
-	if cfg.RALsEnabled || cfg.CDRSEnabled || cfg.SchedulerEnabled { // Only connect to storDb if necessary
-		storDb, err := engine.ConfigureStorStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort,
-			cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding, cfg.StorDBMaxOpenConns,
-			cfg.StorDBMaxIdleConns, cfg.StorDBConnMaxLifetime, cfg.StorDBCDRSIndexes)
-		if err != nil { // Cannot configure logger database, show stopper
-			utils.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting!", err))
-			return
-		}
-		defer storDb.Close()
-		// loadDb,cdrDb and storDb are all mapped on the same stordb storage
-		loadDb = storDb.(engine.LoadStorage)
-		cdrDb = storDb.(engine.CdrStorage)
-		engine.SetCdrStorage(cdrDb)
-		if err := engine.CheckVersions(storDb); err != nil {
-			fmt.Println(err.Error())
-			return
-		}
+	defer dm.DataDB().Close()
+	engine.SetDataStorage(dm)
+	if err := engine.CheckVersions(dm.DataDB()); err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	storDb, err := engine.ConfigureStorStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort,
+		cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding, cfg.StorDBMaxOpenConns,
+		cfg.StorDBMaxIdleConns, cfg.StorDBConnMaxLifetime, cfg.StorDBCDRSIndexes)
+	if err != nil { // Cannot configure logger database, show stopper
+		utils.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting!", err))
+		return
+	}
+	defer storDb.Close()
+	// loadDb,cdrDb and storDb are all mapped on the same stordb storage
+	loadDb = storDb.(engine.LoadStorage)
+	cdrDb = storDb.(engine.CdrStorage)
+	engine.SetCdrStorage(cdrDb)
+	if err := engine.CheckVersions(storDb); err != nil {
+		fmt.Println(err.Error())
+		return
 	}
 
 	// Done initing DBs
@@ -836,6 +850,18 @@ func main() {
 	engine.SetLcrSubjectPrefixMatching(cfg.LcrSubjectPrefixMatching)
 	stopHandled := false
 
+	// init cache
+	cacheS := engine.NewCacheS(cfg, dm)
+	go func() {
+		if err := cacheS.Precache(); err != nil {
+			errCGR := err.(*utils.CGRError)
+			errCGR.ActivateLongError()
+			utils.Logger.Crit(fmt.Sprintf("<%s> error: %s on precache",
+				utils.CacheS, err.Error()))
+			exitChan <- true
+		}
+	}()
+
 	// Rpc/http server
 	server := new(utils.Server)
 
@@ -843,7 +869,6 @@ func main() {
 
 	// Define internal connections via channels
 	internalRaterChan := make(chan rpcclient.RpcClientConnection, 1)
-	cacheDoneChan := make(chan struct{}, 1)
 	internalCdrSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalCdrStatSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalPubSubSChan := make(chan rpcclient.RpcClientConnection, 1)
@@ -858,11 +883,11 @@ func main() {
 	filterSChan := make(chan *engine.FilterS, 1)
 
 	// Start ServiceManager
-	srvManager := servmanager.NewServiceManager(cfg, dm, exitChan, cacheDoneChan)
+	srvManager := servmanager.NewServiceManager(cfg, dm, exitChan, cacheS)
 
 	// Start rater service
 	if cfg.RALsEnabled {
-		go startRater(internalRaterChan, cacheDoneChan, internalThresholdSChan,
+		go startRater(internalRaterChan, cacheS, internalThresholdSChan,
 			internalCdrStatSChan, internalStatSChan,
 			internalPubSubSChan, internalAttributeSChan,
 			internalUserSChan, internalAliaseSChan,
@@ -934,28 +959,32 @@ func main() {
 		go startUsersServer(internalUserSChan, dm, server, exitChan)
 	}
 	// Start FilterS
-	go startFilterService(filterSChan, internalStatSChan, cfg, dm, exitChan)
+	go startFilterService(filterSChan, cacheS, internalStatSChan, cfg, dm, exitChan)
 
 	if cfg.AttributeSCfg().Enabled {
-		go startAttributeService(internalAttributeSChan, cfg, dm, server, exitChan, filterSChan)
+		go startAttributeService(internalAttributeSChan, cacheS,
+			cfg, dm, server, exitChan, filterSChan)
 	}
 
 	// Start RL service
 	if cfg.ResourceSCfg().Enabled {
-		go startResourceService(internalRsChan,
+		go startResourceService(internalRsChan, cacheS,
 			internalThresholdSChan, cfg, dm, server, exitChan, filterSChan)
 	}
 
 	if cfg.StatSCfg().Enabled {
-		go startStatService(internalStatSChan, internalThresholdSChan, cfg, dm, server, exitChan, filterSChan)
+		go startStatService(internalStatSChan, cacheS,
+			internalThresholdSChan, cfg, dm, server, exitChan, filterSChan)
 	}
 
 	if cfg.ThresholdSCfg().Enabled {
-		go startThresholdService(internalThresholdSChan, cfg, dm, server, exitChan, filterSChan)
+		go startThresholdService(internalThresholdSChan, cacheS,
+			cfg, dm, server, exitChan, filterSChan)
 	}
 
 	if cfg.SupplierSCfg().Enabled {
-		go startSupplierService(internalSupplierSChan, internalRsChan, internalStatSChan,
+		go startSupplierService(internalSupplierSChan, cacheS,
+			internalRsChan, internalStatSChan,
 			cfg, dm, server, exitChan, filterSChan)
 	}
 

@@ -20,6 +20,7 @@ package engine
 
 import (
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
 )
 
@@ -27,6 +28,33 @@ var Cache *ltcache.TransCache
 
 func init() {
 	InitCache(nil)
+}
+
+var precachedPartitions = []string{
+	utils.CacheDestinations,
+	utils.CacheReverseDestinations,
+	utils.CacheRatingPlans,
+	utils.CacheRatingProfiles,
+	utils.CacheLCRRules,
+	utils.CacheActions,
+	utils.CacheActionPlans,
+	utils.CacheAccountActionPlans,
+	utils.CacheActionTriggers,
+	utils.CacheSharedGroups,
+	utils.CacheAliases,
+	utils.CacheReverseAliases,
+	utils.CacheDerivedChargers,
+	utils.CacheResourceProfiles,
+	utils.CacheResources,
+	utils.CacheEventResources,
+	utils.CacheTimings,
+	utils.CacheStatQueueProfiles,
+	utils.CacheStatQueues,
+	utils.CacheThresholdProfiles,
+	utils.CacheThresholds,
+	utils.CacheFilters,
+	utils.CacheSupplierProfiles,
+	utils.CacheAttributeProfiles,
 }
 
 // InitCache will instantiate the cache with specific or default configuraiton
@@ -37,19 +65,46 @@ func InitCache(cfg config.CacheConfig) {
 	Cache = ltcache.NewTransCache(cfg.AsTransCacheConfig())
 }
 
+// NewCacheS initializes the Cache service
 func NewCacheS(cfg *config.CGRConfig, dm *DataManager) (c *CacheS) {
-	InitCache(cfg.CacheCfg()) // make sure we use the same config as package shared one
+	InitCache(cfg.CacheCfg()) // to make sure we start with correct config
 	c = &CacheS{cfg: cfg, dm: dm,
-		cItems: make(map[string]chan struct{})}
-	for k := range cfg.CacheCfg() {
-		c.cItems[k] = make(chan struct{})
+		pcItems: make(map[string]chan struct{})}
+	for cacheID := range cfg.CacheCfg() {
+		if !utils.IsSliceMember(precachedPartitions, cacheID) {
+			continue
+		}
+		c.pcItems[cacheID] = make(chan struct{})
 	}
 	return
 }
 
-// CacheS deals with cache preload and other cache related tasks
+// CacheS deals with cache preload and other cache related tasks/APIs
 type CacheS struct {
-	cfg    *config.CGRConfig
-	dm     *DataManager
-	cItems map[string]chan struct{} // signal precaching done
+	cfg     *config.CGRConfig
+	dm      *DataManager
+	pcItems map[string]chan struct{} // signal precaching
+}
+
+// GetChannel returns the channel used to signal precaching
+func (chS *CacheS) GetPrecacheChannel(chID string) chan struct{} {
+	return chS.pcItems[chID]
+}
+
+// Precache loads data from DataDB into cache at engine start
+func (chS *CacheS) Precache() (err error) {
+	for cacheID, cacheCfg := range chS.cfg.CacheCfg() {
+		if !utils.IsSliceMember(precachedPartitions, cacheID) {
+			continue
+		}
+		if cacheCfg.Precache {
+			if err = chS.dm.CacheDataFromDB(
+				utils.CacheInstanceToPrefix[cacheID], nil,
+				false); err != nil {
+				return
+			}
+		}
+		close(chS.pcItems[cacheID])
+	}
+	return
 }

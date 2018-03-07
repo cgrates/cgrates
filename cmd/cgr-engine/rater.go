@@ -30,95 +30,30 @@ import (
 )
 
 // Starts rater and reports on chan
-func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneChan chan struct{},
+func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *engine.CacheS,
 	internalThdSChan, internalCdrStatSChan, internalStatSChan, internalPubSubSChan,
 	internalAttributeSChan, internalUserSChan, internalAliaseSChan chan rpcclient.RpcClientConnection,
 	serviceManager *servmanager.ServiceManager, server *utils.Server,
 	dm *engine.DataManager, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, stopHandled *bool, exitChan chan bool) {
 	var waitTasks []chan struct{}
-	cacheCfg := cfg.CacheCfg()
-	//Cache load
 	cacheTaskChan := make(chan struct{})
 	waitTasks = append(waitTasks, cacheTaskChan)
-	go func() {
+	go func() { //Wait for cache load
 		defer close(cacheTaskChan)
-		var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs, sppIDs, alsPrfIDs []string
-		if cCfg, has := cacheCfg[utils.CacheDestinations]; !has || !cCfg.Precache {
-			dstIDs = make([]string, 0) // Don't cache any
-		}
-		if cCfg, has := cacheCfg[utils.CacheReverseDestinations]; !has || !cCfg.Precache {
-			rvDstIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheRatingPlans]; !has || !cCfg.Precache {
-			rplIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheRatingProfiles]; !has || !cCfg.Precache {
-			rpfIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheActions]; !has || !cCfg.Precache {
-			actIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheActionPlans]; !has || !cCfg.Precache {
-			aplIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheAccountActionPlans]; !has || !cCfg.Precache {
-			aapIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheActionTriggers]; !has || !cCfg.Precache {
-			atrgIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheSharedGroups]; !has || !cCfg.Precache {
-			sgIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheLCRRules]; !has || !cCfg.Precache {
-			lcrIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheDerivedChargers]; !has || !cCfg.Precache {
-			dcIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheAliases]; !has || !cCfg.Precache {
-			alsIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheReverseAliases]; !has || !cCfg.Precache {
-			rvAlsIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheResourceProfiles]; !has || !cCfg.Precache {
-			rspIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheResources]; !has || !cCfg.Precache {
-			resIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheStatQueues]; !has || !cCfg.Precache {
-			stqIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheStatQueueProfiles]; !has || !cCfg.Precache {
-			stqpIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheThresholds]; !has || !cCfg.Precache {
-			thIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheThresholdProfiles]; !has || !cCfg.Precache {
-			thpIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheFilters]; !has || !cCfg.Precache {
-			fltrIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheSupplierProfiles]; !has || !cCfg.Precache {
-			sppIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheAttributeProfiles]; !has || !cCfg.Precache {
-			alsPrfIDs = make([]string, 0)
-		}
-
-		// ToDo: Add here timings
-		if err := dm.LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs,
-			atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs,
-			stqpIDs, thIDs, thpIDs, fltrIDs, sppIDs, alsPrfIDs); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<RALs> Cache rating error: %s", err.Error()))
-			exitChan <- true
-			return
-		}
-		cacheDoneChan <- struct{}{}
+		<-cacheS.GetPrecacheChannel(utils.CacheDestinations)
+		<-cacheS.GetPrecacheChannel(utils.CacheReverseDestinations)
+		<-cacheS.GetPrecacheChannel(utils.CacheRatingPlans)
+		<-cacheS.GetPrecacheChannel(utils.CacheRatingProfiles)
+		<-cacheS.GetPrecacheChannel(utils.CacheActions)
+		<-cacheS.GetPrecacheChannel(utils.CacheActionPlans)
+		<-cacheS.GetPrecacheChannel(utils.CacheAccountActionPlans)
+		<-cacheS.GetPrecacheChannel(utils.CacheActionTriggers)
+		<-cacheS.GetPrecacheChannel(utils.CacheActionTriggers)
+		<-cacheS.GetPrecacheChannel(utils.CacheSharedGroups)
+		<-cacheS.GetPrecacheChannel(utils.CacheLCRRules)
+		<-cacheS.GetPrecacheChannel(utils.CacheDerivedChargers)
+		<-cacheS.GetPrecacheChannel(utils.CacheAliases)
+		<-cacheS.GetPrecacheChannel(utils.CacheReverseAliases)
 	}()
 
 	var thdS *rpcclient.RpcClientPool
