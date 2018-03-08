@@ -131,6 +131,12 @@ type ArgsGetCacheItem struct {
 	ItemID  string
 }
 
+func (chS *CacheS) V1HasItem(args *ArgsGetCacheItem,
+	reply *bool) (err error) {
+	*reply = Cache.HasItem(args.CacheID, args.ItemID)
+	return
+}
+
 func (chS *CacheS) V1GetItemExpiryTime(args *ArgsGetCacheItem,
 	reply *time.Time) (err error) {
 	if expTime, has := Cache.GetItemExpiryTime(args.CacheID, args.ItemID); !has {

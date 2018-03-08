@@ -39,6 +39,12 @@ func (chSv1 *CacheSv1) GetItemIDs(args *engine.ArgsGetCacheItemIDs,
 	return chSv1.cacheS.V1GetItemIDs(args, reply)
 }
 
+// HasItem verifies the existence of an Item in cache
+func (chSv1 *CacheSv1) HasItem(args *engine.ArgsGetCacheItem,
+	reply *bool) error {
+	return chSv1.cacheS.V1HasItem(args, reply)
+}
+
 // GetItemExpiryTime returns the expiryTime for an item
 func (chSv1 *CacheSv1) GetItemExpiryTime(args *engine.ArgsGetCacheItem,
 	reply *time.Time) error {
