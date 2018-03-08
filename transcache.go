@@ -255,9 +255,17 @@ func (tc *TransCache) GetItemIDs(chID, prfx string) (itmIDs []string) {
 	return
 }
 
-// GetItemExpiryTime returns a list of item IDs matching prefix
+// GetItemExpiryTime returns the expiry time of an item, ok is false if not found
 func (tc *TransCache) GetItemExpiryTime(chID, itmID string) (exp time.Time, ok bool) {
 	tc.cacheMux.RLock()
 	defer tc.cacheMux.RUnlock()
 	return tc.cacheInstance(chID).GetItemExpiryTime(itmID)
+}
+
+// HasItem verifies if Item is in the cache
+func (tc *TransCache) HasItem(chID, itmID string) (has bool) {
+	tc.cacheMux.RLock()
+	has = tc.cacheInstance(chID).HasItem(itmID)
+	tc.cacheMux.RUnlock()
+	return
 }

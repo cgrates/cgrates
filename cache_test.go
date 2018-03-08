@@ -268,6 +268,12 @@ func TestSetGetRemTTLDynamic(t *testing.T) {
 	} else if time.Now().After(expTime) {
 		t.Errorf("wrong time replied: %v", expTime)
 	}
+	if has := cache.HasItem(testCIs[0].itemID); !has {
+		t.Errorf("cannot find item with id: %s", testCIs[0].itemID)
+	}
+	if has := cache.HasItem("nonexistent"); has {
+		t.Error("item should not be in")
+	}
 	time.Sleep(time.Duration(6 * time.Millisecond))
 	if _, has := cache.Get("_2_"); !has {
 		t.Error("item not in cache")
