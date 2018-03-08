@@ -153,3 +153,10 @@ func (chS *CacheS) V1RemoveItem(args *ArgsGetCacheItem,
 	*reply = utils.OK
 	return
 }
+
+func (chS *CacheS) V1Clear(cacheIDs []string,
+	reply *string) (err error) {
+	Cache.Clear(cacheIDs)
+	*reply = utils.OK
+	return
+}
