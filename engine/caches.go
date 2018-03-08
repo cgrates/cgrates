@@ -111,6 +111,21 @@ func (chS *CacheS) Precache() (err error) {
 	return
 }
 
+type ArgsGetCacheItemIDs struct {
+	CacheID      string
+	ItemIDPrefix string
+}
+
+func (chS *CacheS) V1GetItemIDs(args *ArgsGetCacheItemIDs,
+	reply *[]string) (err error) {
+	if itmIDs := Cache.GetItemIDs(args.CacheID, args.ItemIDPrefix); len(itmIDs) == 0 {
+		return utils.ErrNotFound
+	} else {
+		*reply = itmIDs
+	}
+	return
+}
+
 type ArgsGetCacheItem struct {
 	CacheID string
 	ItemID  string
@@ -126,17 +141,9 @@ func (chS *CacheS) V1GetItemExpiryTime(args *ArgsGetCacheItem,
 	return
 }
 
-type ArgsGetCacheItemIDs struct {
-	CacheID      string
-	ItemIDPrefix string
-}
-
-func (chS *CacheS) V1GetItemIDs(args *ArgsGetCacheItemIDs,
-	reply *[]string) (err error) {
-	if itmIDs := Cache.GetItemIDs(args.CacheID, args.ItemIDPrefix); len(itmIDs) == 0 {
-		return utils.ErrNotFound
-	} else {
-		*reply = itmIDs
-	}
+func (chS *CacheS) V1RemoveItem(args *ArgsGetCacheItem,
+	reply *string) (err error) {
+	Cache.Remove(args.CacheID, args.ItemID, true, utils.NonTransactional)
+	*reply = utils.OK
 	return
 }
