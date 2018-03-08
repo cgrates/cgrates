@@ -70,7 +70,7 @@ func NewSupplierSv1(splS *engine.SupplierService) *SupplierSv1 {
 	return &SupplierSv1{splS: splS}
 }
 
-// Exports RPC from RLs
+// Exports RPC from SupplierS
 type SupplierSv1 struct {
 	splS *engine.SupplierService
 }

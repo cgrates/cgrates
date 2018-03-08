@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"time"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
@@ -105,6 +107,21 @@ func (chS *CacheS) Precache() (err error) {
 			}
 		}
 		close(chS.pcItems[cacheID])
+	}
+	return
+}
+
+type ArgsGetCacheItem struct {
+	CacheID string
+	ItemID  string
+}
+
+func (chS *CacheS) V1GetItemExpiryTime(args *ArgsGetCacheItem,
+	reply *time.Time) (err error) {
+	if expTime, has := Cache.GetItemExpiryTime(args.CacheID, args.ItemID); !has {
+		return utils.ErrNotFound
+	} else {
+		*reply = expTime
 	}
 	return
 }
