@@ -125,3 +125,18 @@ func (chS *CacheS) V1GetItemExpiryTime(args *ArgsGetCacheItem,
 	}
 	return
 }
+
+type ArgsGetCacheItemIDs struct {
+	CacheID      string
+	ItemIDPrefix string
+}
+
+func (chS *CacheS) V1GetItemIDs(args *ArgsGetCacheItemIDs,
+	reply *[]string) (err error) {
+	if itmIDs := Cache.GetItemIDs(args.CacheID, args.ItemIDPrefix); len(itmIDs) == 0 {
+		return utils.ErrNotFound
+	} else {
+		*reply = itmIDs
+	}
+	return
+}

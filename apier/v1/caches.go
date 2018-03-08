@@ -33,8 +33,14 @@ type CacheSv1 struct {
 	cacheS *engine.CacheS
 }
 
-// GetItemExpiryTime re
+// GetItemExpiryTime returns the expiryTime for an item
 func (chSv1 *CacheSv1) GetItemExpiryTime(args *engine.ArgsGetCacheItem,
 	reply *time.Time) error {
 	return chSv1.cacheS.V1GetItemExpiryTime(args, reply)
+}
+
+// GetItemExpiryTime returns the expiryTime for an item
+func (chSv1 *CacheSv1) GetItemIDs(args *engine.ArgsGetCacheItemIDs,
+	reply *[]string) error {
+	return chSv1.cacheS.V1GetItemIDs(args, reply)
 }
