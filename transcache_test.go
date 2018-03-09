@@ -214,6 +214,38 @@ func TestCacheConcurrent(t *testing.T) {
 	wg.Wait()
 }
 
+type TenantID struct {
+	Tenant string
+	ID     string
+}
+
+func (tID *TenantID) Clone() (interface{}, error) {
+	tClone := new(TenantID)
+	*tClone = *tID
+	return tClone, nil
+}
+
+func TestGetClone(t *testing.T) {
+	tc := NewTransCache(map[string]*CacheConfig{})
+	a := &TenantID{Tenant: "cgrates.org", ID: "ID#1"}
+	tc.Set("t11_", "mm", a, nil, true, "")
+	if t1, ok := tc.Get("t11_", "mm"); !ok {
+		t.Error("Error setting cache: ", ok, t1)
+	}
+	if x, err := tc.GetCloned("t11_", "mm"); err != nil {
+		t.Error(err)
+	} else {
+		tcCloned := x.(*TenantID)
+		if !reflect.DeepEqual(tcCloned, a) {
+			t.Errorf("Expecting: %+v, received: %+v", a, tcCloned)
+		}
+		a.ID = "ID#2"
+		if reflect.DeepEqual(tcCloned, a) {
+			t.Errorf("Expecting: %+v, received: %+v", a, tcCloned)
+		}
+	}
+}
+
 //BenchmarkSet            	 3000000	       469 ns/op
 func BenchmarkSet(b *testing.B) {
 	cacheItems := [][]string{
