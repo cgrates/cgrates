@@ -190,7 +190,7 @@ func TestCacheGetStats(t *testing.T) {
 		"part1": &CacheStats{Items: 5, Groups: 4},
 		"part2": &CacheStats{Items: 4, Groups: 3},
 	}
-	if cs := tc.GetCacheStats(); reflect.DeepEqual(eCs, cs) {
+	if cs := tc.GetCacheStats(nil); reflect.DeepEqual(eCs, cs) {
 		t.Errorf("expecting: %+v, received: %+v", eCs, cs)
 	}
 }

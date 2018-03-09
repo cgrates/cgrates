@@ -271,10 +271,15 @@ func (tc *TransCache) HasItem(chID, itmID string) (has bool) {
 }
 
 // GetCacheStats returns on overview of full cache
-func (tc *TransCache) GetCacheStats() (cs map[string]*CacheStats) {
+func (tc *TransCache) GetCacheStats(chIDs []string) (cs map[string]*CacheStats) {
 	cs = make(map[string]*CacheStats)
 	tc.cacheMux.RLock()
-	for chID := range tc.cache {
+	if len(chIDs) == 0 {
+		for chID := range tc.cache {
+			chIDs = append(chIDs, chID)
+		}
+	}
+	for _, chID := range chIDs {
 		cs[chID] = tc.cacheInstance(chID).GetCacheStats()
 	}
 	tc.cacheMux.RUnlock()
