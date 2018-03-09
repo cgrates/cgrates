@@ -70,6 +70,13 @@ func (chSv1 *CacheSv1) GetCacheStats(cacheIDs []string,
 	return chSv1.cacheS.V1GetCacheStats(cacheIDs, rply)
 }
 
+// PrecacheStatus checks status of active precache processes
 func (chSv1 *CacheSv1) PrecacheStatus(cacheIDs []string, rply *map[string]string) error {
 	return chSv1.cacheS.V1PrecacheStatus(cacheIDs, rply)
+}
+
+// GetGroupItemIDs returns a list of itemIDs in a cache group
+func (chSv1 *CacheSv1) GetGroupItemIDs(args *engine.ArgsGetGroupItems,
+	rply *[]string) (err error) {
+	return chSv1.cacheS.V1GetGroupItemIDs(args, rply)
 }

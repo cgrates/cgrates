@@ -190,3 +190,14 @@ func (chS *CacheS) V1PrecacheStatus(cacheIDs []string, rply *map[string]string) 
 	*rply = pCacheStatus
 	return
 }
+
+type ArgsGetGroupItems struct {
+	CacheID string
+	GroupID string
+}
+
+func (chS *CacheS) V1GetGroupItemIDs(args *ArgsGetGroupItems,
+	rply *[]string) (err error) {
+	*rply = Cache.GetGroupItemIDs(args.CacheID, args.GroupID)
+	return
+}
