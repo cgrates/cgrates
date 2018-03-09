@@ -850,8 +850,12 @@ func main() {
 	engine.SetLcrSubjectPrefixMatching(cfg.LcrSubjectPrefixMatching)
 	stopHandled := false
 
+	// Rpc/http server
+	server := new(utils.Server)
+
 	// init cache
 	cacheS := engine.NewCacheS(cfg, dm)
+	server.RpcRegister(v1.NewCacheSv1(cacheS)) // before pre-caching so we can check status via API
 	go func() {
 		if err := cacheS.Precache(); err != nil {
 			errCGR := err.(*utils.CGRError)
@@ -861,9 +865,6 @@ func main() {
 			exitChan <- true
 		}
 	}()
-
-	// Rpc/http server
-	server := new(utils.Server)
 
 	// Async starts here, will follow cgrates.json start order
 
