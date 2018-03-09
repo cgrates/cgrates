@@ -401,6 +401,9 @@ func (fsev FSEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 	if strings.Index(subsystems, utils.MetaThresholds) != -1 {
 		args.ProcessThresholds = utils.BoolPointer(true)
 	}
+	if strings.Index(subsystems, utils.MetaStats) != -1 {
+		args.ProcessStatQueues = utils.BoolPointer(true)
+	}
 	return
 }
 
@@ -436,6 +439,9 @@ func (fsev FSEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 	if strings.Index(subsystems, utils.MetaThresholds) != -1 {
 		args.ProcessThresholds = utils.BoolPointer(true)
 	}
+	if strings.Index(subsystems, utils.MetaStats) != -1 {
+		args.ProcessStatQueues = utils.BoolPointer(true)
+	}
 	return
 }
 
@@ -467,6 +473,9 @@ func (fsev FSEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionA
 	}
 	if strings.Index(subsystems, utils.MetaThresholds) != -1 {
 		args.ProcessThresholds = utils.BoolPointer(true)
+	}
+	if strings.Index(subsystems, utils.MetaStats) != -1 {
+		args.ProcessStatQueues = utils.BoolPointer(true)
 	}
 	return
 }
