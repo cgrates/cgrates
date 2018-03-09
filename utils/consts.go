@@ -729,6 +729,8 @@ const (
 	CacheSupplierFilterRevIndexes  = "supplier_filter_revindexes"
 	CacheAttributeFilterIndexes    = "attribute_filter_indexes"
 	CacheAttributeFilterRevIndexes = "attribute_filter_revindexes"
+	MetaPrecaching                 = "*precaching"
+	MetaReady                      = "*ready"
 )
 
 //Prefix for indexing

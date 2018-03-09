@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -165,5 +166,27 @@ func (chS *CacheS) V1GetCacheStats(cacheIDs []string,
 	rply *map[string]*ltcache.CacheStats) (err error) {
 	cs := Cache.GetCacheStats(cacheIDs)
 	*rply = cs
+	return
+}
+
+func (chS *CacheS) V1PrecacheStatus(cacheIDs []string, rply *map[string]string) (err error) {
+	if len(cacheIDs) == 0 {
+		for _, cacheID := range precachedPartitions {
+			cacheIDs = append(cacheIDs, cacheID)
+		}
+	}
+	pCacheStatus := make(map[string]string)
+	for _, cacheID := range cacheIDs {
+		if _, has := chS.pcItems[cacheID]; !has {
+			return fmt.Errorf("unknown cacheID: %s", cacheID)
+		}
+		select {
+		case <-chS.GetPrecacheChannel(cacheID):
+			pCacheStatus[cacheID] = utils.MetaReady
+		default:
+			pCacheStatus[cacheID] = utils.MetaPrecaching
+		}
+	}
+	*rply = pCacheStatus
 	return
 }

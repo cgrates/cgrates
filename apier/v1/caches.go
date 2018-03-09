@@ -69,3 +69,7 @@ func (chSv1 *CacheSv1) GetCacheStats(cacheIDs []string,
 	rply *map[string]*ltcache.CacheStats) error {
 	return chSv1.cacheS.V1GetCacheStats(cacheIDs, rply)
 }
+
+func (chSv1 *CacheSv1) PrecacheStatus(cacheIDs []string, rply *map[string]string) error {
+	return chSv1.cacheS.V1PrecacheStatus(cacheIDs, rply)
+}
