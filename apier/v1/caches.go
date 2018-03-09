@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/ltcache"
 )
 
 func NewCacheSv1(cacheS *engine.CacheS) *CacheSv1 {
@@ -61,4 +62,10 @@ func (chSv1 *CacheSv1) RemoveItem(args *engine.ArgsGetCacheItem,
 func (chSv1 *CacheSv1) Clear(cacheIDs []string,
 	reply *string) error {
 	return chSv1.cacheS.V1Clear(cacheIDs, reply)
+}
+
+// GetCacheStats returns CacheStats filtered by cacheIDs
+func (chSv1 *CacheSv1) GetCacheStats(cacheIDs []string,
+	rply *map[string]*ltcache.CacheStats) error {
+	return chSv1.cacheS.V1GetCacheStats(cacheIDs, rply)
 }

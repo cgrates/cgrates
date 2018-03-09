@@ -160,3 +160,10 @@ func (chS *CacheS) V1Clear(cacheIDs []string,
 	*reply = utils.OK
 	return
 }
+
+func (chS *CacheS) V1GetCacheStats(cacheIDs []string,
+	rply *map[string]*ltcache.CacheStats) (err error) {
+	cs := Cache.GetCacheStats(cacheIDs)
+	*rply = cs
+	return
+}
