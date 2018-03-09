@@ -247,6 +247,9 @@ func (kev KamEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 	if strings.Index(subsystems, utils.MetaThresholds) != -1 {
 		args.ProcessThresholds = utils.BoolPointer(true)
 	}
+	if strings.Index(subsystems, utils.MetaStats) != -1 {
+		args.ProcessStatQueues = utils.BoolPointer(true)
+	}
 	return
 }
 
@@ -279,6 +282,9 @@ func (kev KamEvent) AsKamAuthReply(authArgs *sessions.V1AuthorizeArgs,
 	}
 	if authArgs.ProcessThresholds != nil && *authArgs.ProcessThresholds {
 		kar.ThresholdHits = *authReply.ThresholdHits
+	}
+	if authArgs.ProcessStatQueues != nil && *authArgs.ProcessStatQueues {
+		kar.StatReply = *authReply.StatReply
 	}
 	return
 }
@@ -335,6 +341,9 @@ func (kev KamEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 	if strings.Index(subsystems, utils.MetaThresholds) != -1 {
 		args.ProcessThresholds = utils.BoolPointer(true)
 	}
+	if strings.Index(subsystems, utils.MetaStats) != -1 {
+		args.ProcessStatQueues = utils.BoolPointer(true)
+	}
 	return
 }
 
@@ -387,6 +396,9 @@ func (kev KamEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionA
 	if strings.Index(subsystems, utils.MetaThresholds) != -1 {
 		args.ProcessThresholds = utils.BoolPointer(true)
 	}
+	if strings.Index(subsystems, utils.MetaStats) != -1 {
+		args.ProcessStatQueues = utils.BoolPointer(true)
+	}
 	return
 }
 
@@ -399,6 +411,7 @@ type KamAuthReply struct {
 	MaxUsage           int    // Maximum session time in case of success, -1 for unlimited
 	Suppliers          string // List of suppliers, comma separated
 	ThresholdHits      int
+	StatReply          string
 	Error              string // Reply in case of error
 }
 
