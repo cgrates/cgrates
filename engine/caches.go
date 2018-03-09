@@ -191,13 +191,22 @@ func (chS *CacheS) V1PrecacheStatus(cacheIDs []string, rply *map[string]string) 
 	return
 }
 
-type ArgsGetGroupItems struct {
+type ArgsGetGroup struct {
 	CacheID string
 	GroupID string
 }
 
-func (chS *CacheS) V1GetGroupItemIDs(args *ArgsGetGroupItems,
+func (chS *CacheS) V1HasGroup(args *ArgsGetGroup,
+	rply *bool) (err error) {
+	*rply = Cache.HasGroup(args.CacheID, args.GroupID)
+	return
+}
+
+func (chS *CacheS) V1GetGroupItemIDs(args *ArgsGetGroup,
 	rply *[]string) (err error) {
+	if has := Cache.HasGroup(args.CacheID, args.GroupID); !has {
+		return utils.ErrNotFound
+	}
 	*rply = Cache.GetGroupItemIDs(args.CacheID, args.GroupID)
 	return
 }

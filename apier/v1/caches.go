@@ -75,8 +75,14 @@ func (chSv1 *CacheSv1) PrecacheStatus(cacheIDs []string, rply *map[string]string
 	return chSv1.cacheS.V1PrecacheStatus(cacheIDs, rply)
 }
 
+// HasGroup checks existence of a group in cache
+func (chSv1 *CacheSv1) HasGroup(args *engine.ArgsGetGroup,
+	rply *bool) (err error) {
+	return chSv1.cacheS.V1HasGroup(args, rply)
+}
+
 // GetGroupItemIDs returns a list of itemIDs in a cache group
-func (chSv1 *CacheSv1) GetGroupItemIDs(args *engine.ArgsGetGroupItems,
+func (chSv1 *CacheSv1) GetGroupItemIDs(args *engine.ArgsGetGroup,
 	rply *[]string) (err error) {
 	return chSv1.cacheS.V1GetGroupItemIDs(args, rply)
 }
