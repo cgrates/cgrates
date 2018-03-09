@@ -7,6 +7,7 @@ package ltcache
 
 import (
 	"math/rand"
+	"reflect"
 	"sync"
 	"testing"
 	"time"
@@ -165,6 +166,32 @@ func TestCacheCount(t *testing.T) {
 	tc.Set("dst_", "A5", "5", nil, true, "")
 	if itms := tc.GetItemIDs("dst_", ""); len(itms) != 4 {
 		t.Errorf("Error getting item ids: %+v", itms)
+	}
+}
+
+func TestCacheGetStats(t *testing.T) {
+	tc := NewTransCache(map[string]*CacheConfig{
+		"part1": &CacheConfig{MaxItems: -1},
+		"part2": &CacheConfig{MaxItems: -1}})
+	testCIs := []*cachedItem{
+		&cachedItem{itemID: "_1_", value: "one"},
+		&cachedItem{itemID: "_2_", value: "two", groupIDs: []string{"grp1"}},
+		&cachedItem{itemID: "_3_", value: "three", groupIDs: []string{"grp1", "grp2"}},
+		&cachedItem{itemID: "_4_", value: "four", groupIDs: []string{"grp1", "grp2", "grp3"}},
+		&cachedItem{itemID: "_5_", value: "five", groupIDs: []string{"grp4"}},
+	}
+	for _, ci := range testCIs {
+		tc.Set("part1", ci.itemID, ci.value, ci.groupIDs, true, "")
+	}
+	for _, ci := range testCIs[:4] {
+		tc.Set("part2", ci.itemID, ci.value, ci.groupIDs, true, "")
+	}
+	eCs := map[string]*CacheStats{
+		"part1": &CacheStats{Items: 5, Groups: 4},
+		"part2": &CacheStats{Items: 4, Groups: 3},
+	}
+	if cs := tc.GetCacheStats(); reflect.DeepEqual(eCs, cs) {
+		t.Errorf("expecting: %+v, received: %+v", eCs, cs)
 	}
 }
 

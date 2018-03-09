@@ -293,3 +293,16 @@ func (c *Cache) Clear() {
 	c.ttlIdx = c.ttlIdx.Init()
 	c.ttlRefs = make(map[string]*list.Element)
 }
+
+type CacheStats struct {
+	Items  int
+	Groups int
+}
+
+// GetStats will return the CacheStats for this instance
+func (c *Cache) GetCacheStats() (cs *CacheStats) {
+	c.RLock()
+	cs = &CacheStats{Items: len(c.cache), Groups: len(c.groups)}
+	c.RUnlock()
+	return
+}

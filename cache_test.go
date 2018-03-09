@@ -10,6 +10,7 @@ package ltcache
 
 import (
 	"math/rand"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -77,6 +78,10 @@ func TestSetGetRemNoIndexes(t *testing.T) {
 	}
 	if len(cache.cache) != 5 {
 		t.Errorf("wrong keys: %+v", cache.cache)
+	}
+	eCs := &CacheStats{Items: 5, Groups: 4}
+	if cs := cache.GetCacheStats(); !reflect.DeepEqual(eCs, cs) {
+		t.Errorf("expecting: %+v, received: %+v", eCs, cs)
 	}
 	cache.Set("_2_", "twice", []string{"grp21"})
 	if val, has := cache.Get("_2_"); !has {
