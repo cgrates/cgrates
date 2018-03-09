@@ -210,3 +210,10 @@ func (chS *CacheS) V1GetGroupItemIDs(args *ArgsGetGroup,
 	*rply = Cache.GetGroupItemIDs(args.CacheID, args.GroupID)
 	return
 }
+
+func (chS *CacheS) V1RemoveGroup(args *ArgsGetGroup,
+	rply *string) (err error) {
+	Cache.RemoveGroup(args.CacheID, args.GroupID, true, utils.NonTransactional)
+	*rply = utils.OK
+	return
+}

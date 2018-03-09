@@ -86,3 +86,9 @@ func (chSv1 *CacheSv1) GetGroupItemIDs(args *engine.ArgsGetGroup,
 	rply *[]string) (err error) {
 	return chSv1.cacheS.V1GetGroupItemIDs(args, rply)
 }
+
+// RemoveGroup will remove a group and all items belonging to it from cache
+func (chSv1 *CacheSv1) RemoveGroup(args *engine.ArgsGetGroup,
+	rply *string) (err error) {
+	return chSv1.cacheS.V1RemoveGroup(args, rply)
+}
