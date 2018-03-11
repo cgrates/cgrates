@@ -677,7 +677,8 @@ func (dm *DataManager) SetResource(rs *Resource) (err error) {
 	if err = dm.DataDB().SetResourceDrv(rs); err != nil {
 		return
 	}
-	if err = dm.CacheDataFromDB(utils.CacheResources,
+	if err = dm.CacheDataFromDB(
+		utils.CacheInstanceToPrefix[utils.CacheResources],
 		[]string{rs.TenantID()}, true); err != nil {
 		return
 	}
