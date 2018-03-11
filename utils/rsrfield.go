@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-	"time"
 )
 
 func NewRSRField(fldStr string) (fld *RSRField, err error) {
@@ -102,6 +101,7 @@ type RSRField struct {
 	staticValue string             // If defined, enforces parsing always to this value
 	RSRules     []*ReSearchReplace // Rules to use when processing field value
 	filters     []*RSRFilter       // The value to compare when used as filter
+	converters  []RSRConverter     // set of converters to apply on output
 }
 
 // IsParsed finds out whether this RSRField was already parsed or RAW state
@@ -306,31 +306,47 @@ func (flds RSRFields) ParseRules() (err error) {
 	return
 }
 
-// RSRTransformer represents functions which should format input into output
-type RSRTransformer interface {
-	Transform(interface{}) (interface{}, error)
+// RSRConverter represents functions which should convert input into output
+type RSRConverter interface {
+	Convert(interface{}) (interface{}, error)
+	ConvertAsString(interface{}) (string, error)
 }
 
-func NewRSRTransformer(params interface{}) (trns RSRTransformer, err error) {
+// NewRSRConverter is a factory of transformers
+func NewRSRConverter(params string) (
+	rsrConv RSRConverter, err error) {
 	switch {
 	case params == MetaUsageSeconds:
-		return NewUsageSecondsRSRTransformer(params)
+		return NewUsageSecondsRSRConverter(params)
 	default:
-		return nil, fmt.Errorf("unsupported handler definition: <%s>", params)
+		return nil,
+			fmt.Errorf("unsupported transformer definition: <%s>", params)
 	}
 }
 
-func NewUsageSecondsRSRTransformer(params interface{}) (trns RSRTransformer, err error) {
-	return new(UsageSecondsRSRTransformer), nil
+func NewUsageSecondsRSRConverter(params string) (
+	hdlr RSRConverter, err error) {
+	return new(UsageSecondsRSRConverter), nil
 }
 
-// UsageSecondsRSRTransformer transforms a time.Duration into seconds as float64
-type UsageSecondsRSRTransformer struct{}
+// UsageSecondsRSRConverter transforms
+type UsageSecondsRSRConverter struct{}
 
-func (mS *UsageSecondsRSRTransformer) Transform(in interface{}) (out interface{}, err error) {
-	var dur time.Duration
-	if dur, err = IfaceAsDuration(in); err != nil {
-		return
+func (mS *UsageSecondsRSRConverter) Convert(in interface{}) (
+	out interface{}, err error) {
+	return
+}
+
+func (mS *UsageSecondsRSRConverter) ConvertAsString(in interface{}) (
+	out string, err error) {
+	outIface, err := mS.Convert(in)
+	if err != nil {
+		return "", err
 	}
-	return dur.Seconds(), nil
+	var canCast bool
+	out, canCast = CastFieldIfToString(outIface)
+	if !canCast {
+		return "", NewErrStringCast(outIface)
+	}
+	return
 }
