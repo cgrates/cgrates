@@ -1312,7 +1312,6 @@ type V1AuthorizeReply struct {
 	MaxUsage           *time.Duration
 	Suppliers          *engine.SortedSuppliers
 	ThresholdHits      *int
-	StatReply          *string
 }
 
 // AsCGRReply is part of utils.CGRReplier interface
@@ -1338,9 +1337,6 @@ func (v1AuthReply *V1AuthorizeReply) AsCGRReply() (cgrReply utils.CGRReply, err 
 	}
 	if v1AuthReply.ThresholdHits != nil {
 		cgrReply["ThresholdHits"] = *v1AuthReply.ThresholdHits
-	}
-	if v1AuthReply.StatReply != nil {
-		cgrReply["StatReply"] = *v1AuthReply.StatReply
 	}
 	return
 }
@@ -1450,7 +1446,6 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 			utils.Logger.Warning(
 				fmt.Sprintf("<SessionS> error: %s processing event %+v with StatS.", err.Error(), args.CGREvent))
 		}
-		authReply.StatReply = &statReply
 	}
 	return nil
 }
@@ -1503,7 +1498,6 @@ type V1InitSessionReply struct {
 	ResourceAllocation *string
 	MaxUsage           *time.Duration
 	ThresholdHits      *int
-	StatReply          *string
 }
 
 // AsCGRReply is part of utils.CGRReplier interface
@@ -1526,9 +1520,6 @@ func (v1Rply *V1InitSessionReply) AsCGRReply() (cgrReply utils.CGRReply, err err
 	}
 	if v1Rply.ThresholdHits != nil {
 		cgrReply["ThresholdHits"] = *v1Rply.ThresholdHits
-	}
-	if v1Rply.StatReply != nil {
-		cgrReply["StatReply"] = *v1Rply.StatReply
 	}
 	return
 }
@@ -1618,7 +1609,6 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 			utils.Logger.Warning(
 				fmt.Sprintf("<SessionS> error: %s processing event %+v with StatS.", err.Error(), args.CGREvent))
 		}
-		rply.StatReply = &statReply
 	}
 	return
 }

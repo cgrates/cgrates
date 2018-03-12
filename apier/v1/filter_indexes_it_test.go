@@ -1725,24 +1725,27 @@ func testV1FIdxGetFilterIndexes1(t *testing.T) {
 		ItemType: "*resources",
 	}
 	expectedIndexes := []string{
-		"*string:Account:1003:ResProfile3",
 		"*string:Account:3001:ResProfile3",
-		"*prefix:Destination:200:ResProfile3",
 		"*string:Destination:1001:ResProfile1",
 		"*string:Destination:1001:ResProfile2",
 		"*string:Destination:1001:ResProfile3",
 		"*string:Account:1002:ResProfile1",
 		"*string:Account:1002:ResProfile2",
 		"*string:Account:1002:ResProfile3",
+		"*string:Account:1003:ResProfile3",
+		"*prefix:Destination:20:ResProfile1",
+		"*prefix:Destination:20:ResProfile2",
 		"*string:Account:1001:ResProfile1",
 		"*string:Account:1001:ResProfile2",
-		"*string:Destination:2001:ResProfile3",
+		"*string:Account:2002:ResProfile2",
+		"*prefix:Destination:1001:ResProfile3",
+		"*prefix:Destination:200:ResProfile3",
 		"*string:Destination:2001:ResProfile1",
 		"*string:Destination:2001:ResProfile2",
-		"*prefix:Destination:1001:ResProfile3",
-		"*string:Account:2002:ResProfile2",
-		"*prefix:Account:10:ResProfile3",
-		"*prefix:Destination:20:ResProfile2"}
+		"*string:Destination:2001:ResProfile3",
+		"*prefix:Account:10:ResProfile1",
+		"*prefix:Account:10:ResProfile2",
+		"*prefix:Account:10:ResProfile3"}
 	reply := []string{}
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", arg, &reply); err != nil {
 		t.Error(err)
@@ -1787,10 +1790,13 @@ func testV1FIdxGetFilterIndexes3(t *testing.T) {
 		FilterType: "*prefix",
 	}
 	expectedIndexes := []string{
-		"*prefix:Destination:200:ResProfile3",
-		"*prefix:Destination:1001:ResProfile3",
+		"*prefix:Destination:20:ResProfile1",
+		"*prefix:Destination:20:ResProfile2",
+		"*prefix:Account:10:ResProfile1",
+		"*prefix:Account:10:ResProfile2",
 		"*prefix:Account:10:ResProfile3",
-		"*prefix:Destination:20:ResProfile2"}
+		"*prefix:Destination:200:ResProfile3",
+		"*prefix:Destination:1001:ResProfile3"}
 	reply := []string{}
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", arg, &reply); err != nil {
 		t.Error(err)
