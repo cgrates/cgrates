@@ -638,6 +638,10 @@ const (
 	SMGenericV2UpdateSession           = "SMGenericV2.UpdateSession"
 )
 
+const (
+	CacheSv1GetCacheStats = "CacheSv1.GetCacheStats"
+)
+
 //CSV file name
 const (
 	TIMINGS_CSV           = "Timings.csv"
