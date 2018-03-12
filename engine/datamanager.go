@@ -468,12 +468,12 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 			for _, flt := range fltr.Rules {
 				var fldType, fldName string
 				var fldVals []string
-				if !utils.IsSliceMember([]string{MetaString, MetaPrefix}, flt.Type) {
-					fldType, fldName = utils.MetaDefault, utils.META_ANY
-					fldVals = []string{utils.META_ANY}
-				} else {
+				if utils.IsSliceMember([]string{MetaString, MetaPrefix}, flt.Type) {
 					fldType, fldName = flt.Type, flt.FieldName
 					fldVals = flt.Values
+				} else {
+					fldType, fldName = utils.MetaDefault, utils.META_ANY
+					fldVals = []string{utils.META_ANY}
 				}
 				for _, fldVal := range fldVals {
 					if err = indexer.loadFldNameFldValIndex(fldType,
@@ -586,12 +586,12 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 			for _, flt := range fltr.Rules {
 				var fldType, fldName string
 				var fldVals []string
-				if !utils.IsSliceMember([]string{MetaString, MetaPrefix}, flt.Type) {
-					fldType, fldName = utils.MetaDefault, utils.META_ANY
-					fldVals = []string{utils.META_ANY}
-				} else {
+				if utils.IsSliceMember([]string{MetaString, MetaPrefix}, flt.Type) {
 					fldType, fldName = flt.Type, flt.FieldName
 					fldVals = flt.Values
+				} else {
+					fldType, fldName = utils.MetaDefault, utils.META_ANY
+					fldVals = []string{utils.META_ANY}
 				}
 				for _, fldVal := range fldVals {
 					if err = indexer.loadFldNameFldValIndex(fldType,
@@ -788,12 +788,12 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 			for _, flt := range fltr.Rules {
 				var fldType, fldName string
 				var fldVals []string
-				if !utils.IsSliceMember([]string{MetaString, MetaPrefix}, flt.Type) {
-					fldType, fldName = utils.MetaDefault, utils.META_ANY
-					fldVals = []string{utils.META_ANY}
-				} else {
+				if utils.IsSliceMember([]string{MetaString, MetaPrefix}, flt.Type) {
 					fldType, fldName = flt.Type, flt.FieldName
 					fldVals = flt.Values
+				} else {
+					fldType, fldName = utils.MetaDefault, utils.META_ANY
+					fldVals = []string{utils.META_ANY}
 				}
 				for _, fldVal := range fldVals {
 					if err = indexer.loadFldNameFldValIndex(fldType,
@@ -1287,12 +1287,12 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 			for _, flt := range fltr.Rules {
 				var fldType, fldName string
 				var fldVals []string
-				if !utils.IsSliceMember([]string{MetaString, MetaPrefix}, flt.Type) {
-					fldType, fldName = utils.MetaDefault, utils.META_ANY
-					fldVals = []string{utils.META_ANY}
-				} else {
+				if utils.IsSliceMember([]string{MetaString, MetaPrefix}, flt.Type) {
 					fldType, fldName = flt.Type, flt.FieldName
 					fldVals = flt.Values
+				} else {
+					fldType, fldName = utils.MetaDefault, utils.META_ANY
+					fldVals = []string{utils.META_ANY}
 				}
 				for _, fldVal := range fldVals {
 					if err = indexer.loadFldNameFldValIndex(fldType,
@@ -1433,12 +1433,12 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 				for _, flt := range fltr.Rules {
 					var fldType, fldName string
 					var fldVals []string
-					if !utils.IsSliceMember([]string{MetaString, MetaPrefix}, flt.Type) {
-						fldType, fldName = utils.MetaDefault, utils.META_ANY
-						fldVals = []string{utils.META_ANY}
-					} else {
+					if utils.IsSliceMember([]string{MetaString, MetaPrefix}, flt.Type) {
 						fldType, fldName = flt.Type, flt.FieldName
 						fldVals = flt.Values
+					} else {
+						fldType, fldName = utils.MetaDefault, utils.META_ANY
+						fldVals = []string{utils.META_ANY}
 					}
 					for _, fldVal := range fldVals {
 						if err = indexer.loadFldNameFldValIndex(fldType,
