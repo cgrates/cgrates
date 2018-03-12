@@ -19,14 +19,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
+	"time"
+
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
 	c := &CmdThresholdProcessEvent{
 		name:      "thresholds_process_event",
 		rpcMethod: "ThresholdSv1.ProcessEvent",
-		rpcParams: &engine.ArgsProcessEvent{},
+		rpcParams: new(engine.ArgsProcessEvent),
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -55,6 +58,9 @@ func (self *CmdThresholdProcessEvent) RpcParams(reset bool) interface{} {
 }
 
 func (self *CmdThresholdProcessEvent) PostprocessRpcParams() error {
+	if self.rpcParams.Time == nil {
+		self.rpcParams.Time = utils.TimePointer(time.Now())
+	}
 	return nil
 }
 
