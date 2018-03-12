@@ -300,6 +300,7 @@ variable_progressmsec: 28
 variable_answermsec: 500
 variable_waitmsec: 500
 variable_progress_mediamsec: 28
+variable_cgr_acd: 30
 variable_flow_billmsec: 65539
 variable_uduration: 65539698
 variable_billusec: 65039704
@@ -603,9 +604,9 @@ func TestFsEvAsMapStringInterface(t *testing.T) {
 	expectedMap[utils.Subject] = "1001"
 	expectedMap[utils.Cost] = -1
 	expectedMap[utils.PDD] = time.Duration(28) * time.Millisecond
+	expectedMap[utils.ACD] = time.Duration(30) * time.Second
 	expectedMap[utils.DISCONNECT_CAUSE] = "NORMAL_CLEARING"
 	expectedMap[utils.SUPPLIER] = "supplier1"
-
 	if storedMap := ev.AsMapStringInterface(""); !reflect.DeepEqual(expectedMap, storedMap) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedMap, storedMap)
 	}

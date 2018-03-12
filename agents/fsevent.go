@@ -72,6 +72,7 @@ const (
 	VAR_CGR_CMPUTELCR        = "variable_" + utils.CGR_COMPUTELCR
 	FsConnID                 = "FsConnID" // used to share connID info in event for remote disconnects
 	VarAnswerEpoch           = "variable_answer_epoch"
+	VarCGRACD                = "variable_" + utils.CGR_ACD
 )
 
 func NewFSEvent(strEv string) (fsev FSEvent) {
@@ -93,6 +94,7 @@ func (fsev FSEvent) String() (result string) {
 func (fsev FSEvent) GetName() string {
 	return fsev[NAME]
 }
+
 func (fsev FSEvent) GetDirection(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
@@ -138,18 +140,22 @@ func (fsev FSEvent) GetCategory(fieldName string) string {
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[CATEGORY], config.CgrConfig().DefaultCategory)
 }
+
 func (fsev FSEvent) GetUUID() string {
 	return fsev[UUID]
 }
+
 func (fsev FSEvent) GetSessionIds() []string {
 	return []string{fsev.GetUUID()}
 }
+
 func (fsev FSEvent) GetTenant(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[CSTMID], config.CgrConfig().DefaultTenant)
 }
+
 func (fsev FSEvent) GetReqType(fieldName string) string {
 	var reqTypeDetected = ""                     // Used to automatically disable processing of the request
 	if fsev["variable_process_cdr"] == "false" { // FS will not generated CDR here
@@ -162,6 +168,7 @@ func (fsev FSEvent) GetReqType(fieldName string) string {
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[REQTYPE], reqTypeDetected, config.CgrConfig().DefaultReqType)
 }
+
 func (fsev FSEvent) MissingParameter(timezone string) string {
 	if strings.TrimSpace(fsev.GetDirection(utils.META_DEFAULT)) == "" {
 		return utils.Direction
@@ -189,6 +196,7 @@ func (fsev FSEvent) MissingParameter(timezone string) string {
 	}
 	return ""
 }
+
 func (fsev FSEvent) GetSetupTime(fieldName, timezone string) (t time.Time, err error) {
 	fsSTimeStr, hasKey := fsev[SETUP_TIME]
 	if hasKey && fsSTimeStr != "0" {
@@ -201,6 +209,7 @@ func (fsev FSEvent) GetSetupTime(fieldName, timezone string) (t time.Time, err e
 	}
 	return utils.ParseTimeDetectLayout(sTimeStr, timezone)
 }
+
 func (fsev FSEvent) GetAnswerTime(fieldName, timezone string) (t time.Time, err error) {
 	fsATimeStr, hasKey := fsev[ANSWER_TIME]
 	if hasKey && fsATimeStr != "0" {
@@ -239,6 +248,21 @@ func (fsev FSEvent) GetPdd(fieldName string) (time.Duration, error) {
 		PDDStr = fsev[fieldName]
 	}
 	return utils.ParseDurationWithSecs(PDDStr)
+}
+
+func (fsev FSEvent) GetADC(fieldName string) (time.Duration, error) {
+	var ACDStr string
+	if utils.IsSliceMember([]string{utils.ACD, utils.META_DEFAULT}, fieldName) {
+		ACDStr = utils.FirstNonEmpty(fsev[VarCGRACD])
+		if len(ACDStr) != 0 {
+			ACDStr = ACDStr + "s" //  ACD is in seconds and CGR expects it in seconds
+		}
+	} else if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		ACDStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	} else {
+		ACDStr = fsev[fieldName]
+	}
+	return utils.ParseDurationWithSecs(ACDStr)
 }
 
 func (fsev FSEvent) GetSupplier(fieldName string) string {
@@ -360,6 +384,7 @@ func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]interface{}
 	mp[utils.AnswerTime], _ = fsev.GetAnswerTime(utils.META_DEFAULT, timezone)
 	mp[utils.Usage], _ = fsev.GetDuration(utils.META_DEFAULT)
 	mp[utils.PDD], _ = fsev.GetPdd(utils.META_DEFAULT)
+	mp[utils.ACD], _ = fsev.GetADC(utils.META_DEFAULT)
 	mp[utils.COST] = -1
 	mp[utils.SUPPLIER] = fsev.GetSupplier(utils.META_DEFAULT)
 	mp[utils.DISCONNECT_CAUSE] = fsev.GetDisconnectCause(utils.META_DEFAULT)
