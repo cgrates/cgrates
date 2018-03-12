@@ -466,12 +466,18 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 				return
 			}
 			for _, flt := range fltr.Rules {
-				if flt.Type != MetaString {
-					continue
+				var fldType, fldName string
+				var fldVals []string
+				if !utils.IsSliceMember([]string{MetaString, MetaPrefix}, flt.Type) {
+					fldType, fldName = utils.MetaDefault, utils.META_ANY
+					fldVals = []string{utils.META_ANY}
+				} else {
+					fldType, fldName = flt.Type, flt.FieldName
+					fldVals = flt.Values
 				}
-				for _, fldVal := range flt.Values {
-					if err = indexer.loadFldNameFldValIndex(flt.Type,
-						flt.FieldName, fldVal); err != nil && err != utils.ErrNotFound {
+				for _, fldVal := range fldVals {
+					if err = indexer.loadFldNameFldValIndex(fldType,
+						fldName, fldVal); err != nil && err != utils.ErrNotFound {
 						return err
 					}
 				}
@@ -578,12 +584,18 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 				return
 			}
 			for _, flt := range fltr.Rules {
-				if flt.Type != MetaString {
-					continue
+				var fldType, fldName string
+				var fldVals []string
+				if !utils.IsSliceMember([]string{MetaString, MetaPrefix}, flt.Type) {
+					fldType, fldName = utils.MetaDefault, utils.META_ANY
+					fldVals = []string{utils.META_ANY}
+				} else {
+					fldType, fldName = flt.Type, flt.FieldName
+					fldVals = flt.Values
 				}
-				for _, fldVal := range flt.Values {
-					if err = indexer.loadFldNameFldValIndex(flt.Type,
-						flt.FieldName, fldVal); err != nil && err != utils.ErrNotFound {
+				for _, fldVal := range fldVals {
+					if err = indexer.loadFldNameFldValIndex(fldType,
+						fldName, fldVal); err != nil && err != utils.ErrNotFound {
 						return err
 					}
 				}
@@ -774,12 +786,18 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 				return
 			}
 			for _, flt := range fltr.Rules {
-				if flt.Type != MetaString {
-					continue
+				var fldType, fldName string
+				var fldVals []string
+				if !utils.IsSliceMember([]string{MetaString, MetaPrefix}, flt.Type) {
+					fldType, fldName = utils.MetaDefault, utils.META_ANY
+					fldVals = []string{utils.META_ANY}
+				} else {
+					fldType, fldName = flt.Type, flt.FieldName
+					fldVals = flt.Values
 				}
-				for _, fldVal := range flt.Values {
-					if err = indexer.loadFldNameFldValIndex(flt.Type,
-						flt.FieldName, fldVal); err != nil && err != utils.ErrNotFound {
+				for _, fldVal := range fldVals {
+					if err = indexer.loadFldNameFldValIndex(fldType,
+						fldName, fldVal); err != nil && err != utils.ErrNotFound {
 						return err
 					}
 				}
@@ -1266,13 +1284,19 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 				}
 				return
 			}
-
 			for _, flt := range fltr.Rules {
-				if flt.Type != MetaString {
-					continue
+				var fldType, fldName string
+				var fldVals []string
+				if !utils.IsSliceMember([]string{MetaString, MetaPrefix}, flt.Type) {
+					fldType, fldName = utils.MetaDefault, utils.META_ANY
+					fldVals = []string{utils.META_ANY}
+				} else {
+					fldType, fldName = flt.Type, flt.FieldName
+					fldVals = flt.Values
 				}
-				for _, fldVal := range flt.Values {
-					if err = indexer.loadFldNameFldValIndex(flt.Type, flt.FieldName, fldVal); err != nil && err != utils.ErrNotFound {
+				for _, fldVal := range fldVals {
+					if err = indexer.loadFldNameFldValIndex(fldType,
+						fldName, fldVal); err != nil && err != utils.ErrNotFound {
 						return err
 					}
 				}
@@ -1407,11 +1431,18 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 					return
 				}
 				for _, flt := range fltr.Rules {
-					if flt.Type != MetaString {
-						continue
+					var fldType, fldName string
+					var fldVals []string
+					if !utils.IsSliceMember([]string{MetaString, MetaPrefix}, flt.Type) {
+						fldType, fldName = utils.MetaDefault, utils.META_ANY
+						fldVals = []string{utils.META_ANY}
+					} else {
+						fldType, fldName = flt.Type, flt.FieldName
+						fldVals = flt.Values
 					}
-					for _, fldVal := range flt.Values {
-						if err = indexer.loadFldNameFldValIndex(flt.Type, flt.FieldName, fldVal); err != nil && err != utils.ErrNotFound {
+					for _, fldVal := range fldVals {
+						if err = indexer.loadFldNameFldValIndex(fldType,
+							fldName, fldVal); err != nil && err != utils.ErrNotFound {
 							return err
 						}
 					}

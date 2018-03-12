@@ -56,10 +56,6 @@ func (rfi *FilterIndexer) ChangedKeys(reverse bool) utils.StringMap {
 
 // IndexTPFilter parses reqFltrs, adding itemID in the indexes and marks the changed keys in chngdIndxKeys
 func (rfi *FilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID string) {
-	concatKey := utils.ConcatenatedKey(utils.MetaDefault, utils.ANY, utils.ANY)
-	if _, hasIt := rfi.indexes[concatKey]; !hasIt {
-		rfi.indexes[concatKey] = make(utils.StringMap)
-	}
 	for _, fltr := range tpFltr.Filters {
 		switch fltr.Type {
 		case MetaString:
@@ -91,6 +87,10 @@ func (rfi *FilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID st
 			}
 			rfi.chngdRevIndxKeys[itemID] = true
 		default:
+			concatKey := utils.ConcatenatedKey(utils.MetaDefault, utils.ANY, utils.ANY)
+			if _, hasIt := rfi.indexes[concatKey]; !hasIt {
+				rfi.indexes[concatKey] = make(utils.StringMap)
+			}
 			if _, hasIt := rfi.reveseIndex[itemID]; !hasIt {
 				rfi.reveseIndex[itemID] = make(utils.StringMap)
 			}
@@ -98,7 +98,6 @@ func (rfi *FilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID st
 			rfi.indexes[concatKey][itemID] = true // Fields without real field index will be located in map[*any:*any][rl.ID]
 		}
 	}
-
 	return
 }
 

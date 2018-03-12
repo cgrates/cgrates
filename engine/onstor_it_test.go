@@ -104,7 +104,7 @@ func TestOnStorITRedis(t *testing.T) {
 }
 
 func TestOnStorITMongo(t *testing.T) {
-	sleepDelay = 100 * time.Millisecond
+	sleepDelay = 500 * time.Millisecond
 	cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "cdrsv2mongo")
 	mgoITCfg, err := config.NewCGRConfigFromFolder(cdrsMongoCfgPath)
 	if err != nil {
