@@ -522,6 +522,7 @@ const (
 	Error                        = "Error"
 	MetaCGRReply                 = "*cgrReply"
 	CacheS                       = "CacheS"
+	CGR_ACD                      = "cgr_acd"
 )
 
 //MetaMetrics
