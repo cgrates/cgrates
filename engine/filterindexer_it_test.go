@@ -55,6 +55,9 @@ var sTests = []func(t *testing.T){
 	testITIsDBEmpty,
 	testITTestIndexingWithEmptyFltrID,
 	testITTestIndexingWithEmptyFltrID2,
+	testITFlush,
+	testITIsDBEmpty,
+	testITTestIndexingThresholds,
 }
 
 func TestFilterIndexerITRedis(t *testing.T) {
@@ -962,6 +965,95 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 	}
 	if rcvMp, err := dataManager.MatchFilterIndex(utils.CacheSupplierFilterIndexes,
 		splProfile.Tenant, utils.MetaDefault, utils.META_ANY, utils.META_ANY); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eMp, rcvMp) {
+		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
+	}
+}
+
+func testITTestIndexingThresholds(t *testing.T) {
+	th := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH1",
+		FilterIDs: []string{"*string:Account:1001", "*gt:Balance:1000"},
+		ActionIDs: []string{},
+	}
+	th2 := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH2",
+		FilterIDs: []string{"*string:Account:1001", "*gt:Balance:1000"},
+		ActionIDs: []string{},
+	}
+	th3 := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH3",
+		FilterIDs: []string{"*string:Account:1002", "*lt:Balance:1000"},
+		ActionIDs: []string{},
+	}
+	rfi := NewFilterIndexer(onStor, utils.ThresholdProfilePrefix, th.Tenant)
+	if err := dataManager.SetThresholdProfile(th, true); err != nil {
+		t.Error(err)
+	}
+	if err := dataManager.SetThresholdProfile(th2, true); err != nil {
+		t.Error(err)
+	}
+	if err := dataManager.SetThresholdProfile(th3, true); err != nil {
+		t.Error(err)
+	}
+	eIdxes := map[string]utils.StringMap{
+		"*default:*any:*any": utils.StringMap{
+			"TH1": true,
+			"TH2": true,
+			"TH3": true,
+		},
+		"*string:Account:1001": utils.StringMap{
+			"TH1": true,
+			"TH2": true,
+		},
+		"*string:Account:1002": utils.StringMap{
+			"TH3": true,
+		},
+	}
+	reverseIdxes := map[string]utils.StringMap{
+		"TH1": utils.StringMap{
+			"*default:*any:*any":   true,
+			"*string:Account:1001": true,
+		},
+		"TH2": utils.StringMap{
+			"*default:*any:*any":   true,
+			"*string:Account:1001": true,
+		},
+		"TH3": utils.StringMap{
+			"*default:*any:*any":   true,
+			"*string:Account:1002": true,
+		},
+	}
+
+	if rcvIdx, err := dataManager.GetFilterIndexes(
+		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
+		MetaString, nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(eIdxes, rcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+		}
+	}
+	if reverseRcvIdx, err := dataManager.GetFilterReverseIndexes(
+		utils.PrefixToRevIndexCache[rfi.itemType],
+		rfi.dbKeySuffix, nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
+		}
+	}
+	eMp := utils.StringMap{
+		"TH1": true,
+		"TH2": true,
+		"TH3": true,
+	}
+	if rcvMp, err := dataManager.MatchFilterIndex(utils.CacheThresholdFilterIndexes, th.Tenant,
+		utils.MetaDefault, utils.META_ANY, utils.META_ANY); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
