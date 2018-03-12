@@ -806,17 +806,35 @@ func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 		Weight:             1.4,
 		ActionIDs:          []string{},
 	}
+	th2 := &ThresholdProfile{
+		Tenant:             "cgrates.org",
+		ID:                 "THD_Test2",
+		ActivationInterval: &utils.ActivationInterval{},
+		FilterIDs:          []string{},
+		Recurrent:          true,
+		MinSleep:           time.Duration(0 * time.Second),
+		Blocker:            true,
+		Weight:             1.4,
+		ActionIDs:          []string{},
+	}
 
 	if err := dataManager.SetThresholdProfile(th, true); err != nil {
 		t.Error(err)
 	}
+	if err := dataManager.SetThresholdProfile(th2, true); err != nil {
+		t.Error(err)
+	}
 	eIdxes := map[string]utils.StringMap{
 		"*default:*any:*any": utils.StringMap{
-			"THD_Test": true,
+			"THD_Test":  true,
+			"THD_Test2": true,
 		},
 	}
 	reverseIdxes := map[string]utils.StringMap{
 		"THD_Test": utils.StringMap{
+			"*default:*any:*any": true,
+		},
+		"THD_Test2": utils.StringMap{
 			"*default:*any:*any": true,
 		},
 	}
@@ -840,7 +858,8 @@ func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 		}
 	}
 	eMp := utils.StringMap{
-		"THD_Test": true,
+		"THD_Test":  true,
+		"THD_Test2": true,
 	}
 	if rcvMp, err := dataManager.MatchFilterIndex(utils.CacheThresholdFilterIndexes, th.Tenant,
 		utils.MetaDefault, utils.META_ANY, utils.META_ANY); err != nil {
@@ -874,17 +893,47 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 		},
 		Weight: 20,
 	}
+	splProfile2 := &SupplierProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SPL_Weight2",
+		FilterIDs: []string{},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		Sorting:           "*weight",
+		SortingParameters: []string{},
+		Suppliers: []*Supplier{
+			&Supplier{
+				ID:                 "supplier1",
+				FilterIDs:          []string{""},
+				AccountIDs:         []string{""},
+				RatingPlanIDs:      []string{""},
+				ResourceIDs:        []string{""},
+				StatIDs:            []string{""},
+				Weight:             10,
+				SupplierParameters: "",
+			},
+		},
+		Weight: 20,
+	}
 
 	if err := dataManager.SetSupplierProfile(splProfile, true); err != nil {
 		t.Error(err)
 	}
+	if err := dataManager.SetSupplierProfile(splProfile2, true); err != nil {
+		t.Error(err)
+	}
 	eIdxes := map[string]utils.StringMap{
 		"*default:*any:*any": utils.StringMap{
-			"SPL_Weight": true,
+			"SPL_Weight":  true,
+			"SPL_Weight2": true,
 		},
 	}
 	reverseIdxes := map[string]utils.StringMap{
 		"SPL_Weight": utils.StringMap{
+			"*default:*any:*any": true,
+		},
+		"SPL_Weight2": utils.StringMap{
 			"*default:*any:*any": true,
 		},
 	}
@@ -908,7 +957,8 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 		}
 	}
 	eMp := utils.StringMap{
-		"SPL_Weight": true,
+		"SPL_Weight":  true,
+		"SPL_Weight2": true,
 	}
 	if rcvMp, err := dataManager.MatchFilterIndex(utils.CacheSupplierFilterIndexes,
 		splProfile.Tenant, utils.MetaDefault, utils.META_ANY, utils.META_ANY); err != nil {
