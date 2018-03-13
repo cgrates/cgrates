@@ -638,8 +638,18 @@ const (
 	SMGenericV2UpdateSession           = "SMGenericV2.UpdateSession"
 )
 
+// Cache
 const (
-	CacheSv1GetCacheStats = "CacheSv1.GetCacheStats"
+	CacheSv1GetCacheStats     = "CacheSv1.GetCacheStats"
+	CacheSv1GetItemIDs        = "CacheSv1.GetItemIDs"
+	CacheSv1HasItem           = "CacheSv1.HasItem"
+	CacheSv1GetItemExpiryTime = "CacheSv1.GetItemExpiryTime"
+	CacheSv1RemoveItem        = "CacheSv1.RemoveItem"
+	CacheSv1PrecacheStatus    = "CacheSv1.PrecacheStatus"
+	CacheSv1HasGroup          = "CacheSv1.HasGroup"
+	CacheSv1GetGroupItemIDs   = "CacheSv1.GetGroupItemIDs"
+	CacheSv1RemoveGroup       = "CacheSv1.RemoveGroup"
+	CacheSv1Clear             = "CacheSv1.Clear"
 )
 
 //CSV file name
