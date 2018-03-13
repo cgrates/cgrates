@@ -760,6 +760,78 @@ func TestDfSupplierSJsonCfg(t *testing.T) {
 	}
 }
 
+func TestDfLoaderSJsonCfg(t *testing.T) {
+	dataType := &LoaderSJsonDataType{
+		Type:      utils.StringPointer(utils.MetaAttributes),
+		File_name: utils.StringPointer("Attributes.csv"),
+		Fields: &[]*CdrFieldJsonCfg{
+			&CdrFieldJsonCfg{Tag: utils.StringPointer("TenantID"),
+				Field_id:  utils.StringPointer(utils.Tenant),
+				Type:      utils.StringPointer(utils.META_COMPOSED),
+				Value:     utils.StringPointer("0"),
+				Mandatory: utils.BoolPointer(true)},
+			&CdrFieldJsonCfg{Tag: utils.StringPointer("ProfileID"),
+				Field_id:  utils.StringPointer(utils.ID),
+				Type:      utils.StringPointer(utils.META_COMPOSED),
+				Value:     utils.StringPointer("1"),
+				Mandatory: utils.BoolPointer(true)},
+			&CdrFieldJsonCfg{Tag: utils.StringPointer("Contexts"),
+				Field_id: utils.StringPointer(utils.Contexts),
+				Type:     utils.StringPointer(utils.META_COMPOSED),
+				Value:    utils.StringPointer("2")},
+			&CdrFieldJsonCfg{Tag: utils.StringPointer("FilterIDs"),
+				Field_id: utils.StringPointer(utils.FilterIDs),
+				Type:     utils.StringPointer(utils.META_COMPOSED),
+				Value:    utils.StringPointer("3")},
+			&CdrFieldJsonCfg{Tag: utils.StringPointer("ActivationInterval"),
+				Field_id: utils.StringPointer("ActivationInterval"),
+				Type:     utils.StringPointer(utils.META_COMPOSED),
+				Value:    utils.StringPointer("4")},
+			&CdrFieldJsonCfg{Tag: utils.StringPointer("FieldName"),
+				Field_id: utils.StringPointer(utils.FieldName),
+				Type:     utils.StringPointer(utils.META_COMPOSED),
+				Value:    utils.StringPointer("5")},
+			&CdrFieldJsonCfg{Tag: utils.StringPointer("Initial"),
+				Field_id: utils.StringPointer(utils.Initial),
+				Type:     utils.StringPointer(utils.META_COMPOSED),
+				Value:    utils.StringPointer("6")},
+			&CdrFieldJsonCfg{Tag: utils.StringPointer("Substitute"),
+				Field_id: utils.StringPointer(utils.Substitute),
+				Type:     utils.StringPointer(utils.META_COMPOSED),
+				Value:    utils.StringPointer("7")},
+			&CdrFieldJsonCfg{Tag: utils.StringPointer("Append"),
+				Field_id: utils.StringPointer(utils.Append),
+				Type:     utils.StringPointer(utils.META_COMPOSED),
+				Value:    utils.StringPointer("8")},
+			&CdrFieldJsonCfg{Tag: utils.StringPointer("Weight"),
+				Field_id: utils.StringPointer(utils.Weight),
+				Type:     utils.StringPointer(utils.META_COMPOSED),
+				Value:    utils.StringPointer("9")},
+		},
+	}
+	eCfg := []*LoaderSJsonCfg{
+		&LoaderSJsonCfg{
+			ID:      utils.StringPointer(utils.META_DEFAULT),
+			Enabled: utils.BoolPointer(false),
+			Dry_run: utils.BoolPointer(false),
+			Caches_conns: &[]*HaPoolJsonCfg{&HaPoolJsonCfg{
+				Address: utils.StringPointer(utils.MetaInternal),
+			}},
+			Field_separator: utils.StringPointer(","),
+			Max_open_files:  utils.IntPointer(1024),
+			Tp_in_dir:       utils.StringPointer("/var/spool/cgrates/tploader/in"),
+			Tp_out_dir:      utils.StringPointer("/var/spool/cgrates/tploader/out"),
+			Data:            &[]*LoaderSJsonDataType{dataType},
+		},
+	}
+	if cfg, err := dfCgrJsonCfg.LoaderSJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Errorf("Expecting: \n%s\n, received: \n%s\n: ",
+			utils.ToIJSON(eCfg), utils.ToIJSON(cfg))
+	}
+}
+
 func TestDfMailerJsonCfg(t *testing.T) {
 	eCfg := &MailerJsonCfg{
 		Server:        utils.StringPointer("localhost"),

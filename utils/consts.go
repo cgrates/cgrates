@@ -156,6 +156,7 @@ const (
 	Tenant                        = "Tenant"
 	Category                      = "Category"
 	Context                       = "Context"
+	Contexts                      = "Contexts"
 	Account                       = "Account"
 	Subject                       = "Subject"
 	Destination                   = "Destination"
@@ -523,6 +524,11 @@ const (
 	MetaCGRReply                 = "*cgrReply"
 	CacheS                       = "CacheS"
 	CGR_ACD                      = "cgr_acd"
+	FilterIDs                    = "FilterIDs"
+	FieldName                    = "FieldName"
+	Initial                      = "Initial"
+	Substitute                   = "Substitute"
+	Append                       = "Append"
 )
 
 //MetaMetrics

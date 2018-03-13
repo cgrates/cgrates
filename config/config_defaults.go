@@ -450,6 +450,41 @@ const CGRATES_CFG_JSON = `
 },
 
 
+"loaders": [
+	{
+		"id": "*default",									// identifier of the Loader
+		"enabled": false,									// starts as service: <true|false>.
+		"dry_run": false,									// do not send the CDRs to CDRS, just parse them
+		"caches_conns": [
+			{"address": "*internal"},                       // address where to reach the CacheS for data reload, empty for no reloads  <""|*internal|x.y.z.y:1234>
+		],
+		"field_separator": ",",								// separator used in case of csv files
+		"max_open_files": 1024,								// maximum simultaneous files to process, 0 for unlimited
+		"tp_in_dir": "/var/spool/cgrates/tploader/in",		// absolute path towards the directory where the CDRs are stored
+		"tp_out_dir": "/var/spool/cgrates/tploader/out",	// absolute path towards the directory where processed CDRs will be moved
+	
+		"data":[											// data profiles to load
+			{
+				"type": "*attributes",						// data source type
+				"file_name": "Attributes.csv", 				// file name in the tp_in_dir
+				"fields": [
+					{"tag": "TenantID", "field_id": "Tenant", "type": "*composed", "value": "0", "mandatory": true},
+					{"tag": "ProfileID", "field_id": "ID", "type": "*composed", "value": "1", "mandatory": true},
+					{"tag": "Contexts", "field_id": "Contexts", "type": "*composed", "value": "2"},
+					{"tag": "FilterIDs", "field_id": "FilterIDs", "type": "*composed", "value": "3"},
+					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*composed", "value": "4"},
+					{"tag": "FieldName", "field_id": "FieldName", "type": "*composed", "value": "5"},
+					{"tag": "Initial", "field_id": "Initial", "type": "*composed", "value": "6"},
+					{"tag": "Substitute", "field_id": "Substitute", "type": "*composed", "value": "7"},
+					{"tag": "Append", "field_id": "Append", "type": "*composed", "value": "8"},
+					{"tag": "Weight", "field_id": "Weight", "type": "*composed", "value": "9"},
+				],
+			},
+		],
+	},
+],
+
+
 "mailer": {
 	"server": "localhost",								// the server to use when sending emails out
 	"auth_user": "cgrates",								// authenticate to email server using this user

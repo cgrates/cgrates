@@ -427,6 +427,24 @@ type SupplierSJsonCfg struct {
 	Stats_conns           *[]*HaPoolJsonCfg
 }
 
+type LoaderSJsonDataType struct {
+	Type      *string
+	File_name *string
+	Fields    *[]*CdrFieldJsonCfg
+}
+
+type LoaderSJsonCfg struct {
+	ID              *string
+	Enabled         *bool
+	Dry_run         *bool
+	Caches_conns    *[]*HaPoolJsonCfg
+	Field_separator *string
+	Max_open_files  *int
+	Tp_in_dir       *string
+	Tp_out_dir      *string
+	Data            *[]*LoaderSJsonDataType
+}
+
 // Mailer config section
 type MailerJsonCfg struct {
 	Server        *string
