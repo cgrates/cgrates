@@ -391,6 +391,7 @@ var body = []byte(`{
 		}
 	}]
 }`)
+
 var fsCdrCfg *config.CGRConfig
 
 func TestFsCdrInterfaces(t *testing.T) {
@@ -536,5 +537,4 @@ func TestFsCdrFirstDefined(t *testing.T) {
 	if value != "1001" {
 		t.Errorf("Expecting: 1001, received: %s", value)
 	}
-
 }
