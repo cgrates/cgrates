@@ -41,6 +41,7 @@ const (
 	FS_HANGUP_TIME        = "end_epoch"
 	FS_DURATION           = "billsec"
 	FS_USERNAME           = "user_name"
+	FS_IP                 = "sip_local_network_addr"
 	FS_CDR_SOURCE         = "freeswitch_json"
 	FS_SIP_REQUSER        = "sip_req_user" // Apps like FusionPBX do not set dialed_extension, alternative being destination_number but that comes in customer profile, not in vars
 	FS_PROGRESS_MEDIAMSEC = "progress_mediamsec"
@@ -138,7 +139,7 @@ func (fsCdr FSCdr) AsCDR(timezone string) *CDR {
 	storCdr.CGRID = fsCdr.getCGRID()
 	storCdr.ToR = utils.VOICE
 	storCdr.OriginID = fsCdr.vars[FS_UUID]
-	storCdr.OriginHost = fsCdr.vars[FsIPv4]
+	storCdr.OriginHost = fsCdr.vars[FS_IP]
 	storCdr.Source = FS_CDR_SOURCE
 	storCdr.RequestType = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_REQTYPE], fsCdr.cgrCfg.DefaultReqType)
 	storCdr.Tenant = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_TENANT], fsCdr.cgrCfg.DefaultTenant)
