@@ -825,14 +825,17 @@ func TestCgrCfgJSONDefaultsHTTP(t *testing.T) {
 	if cgrCfg.HTTPWSURL != "/ws" {
 		t.Error(cgrCfg.HTTPWSURL)
 	}
+	if cgrCfg.HTTPFreeswitchCDRsURL != "/freeswitch_json" {
+		t.Error(cgrCfg.HTTPFreeswitchCDRsURL)
+	}
+	if cgrCfg.HTTPCDRsURL != "/cdr_http" {
+		t.Error(cgrCfg.HTTPCDRsURL)
+	}
 	if cgrCfg.HTTPUseBasicAuth != false {
 		t.Error(cgrCfg.HTTPUseBasicAuth)
 	}
 	if !reflect.DeepEqual(cgrCfg.HTTPAuthUsers, map[string]string{}) {
 		t.Error(cgrCfg.HTTPAuthUsers)
-	}
-	if cgrCfg.HTTPFreeswitchCDRSURL != "/freeswitchcdrs" {
-		t.Error(cgrCfg.HTTPFreeswitchCDRSURL)
 	}
 }
 
