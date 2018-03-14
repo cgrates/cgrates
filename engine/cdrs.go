@@ -148,9 +148,9 @@ func (self *CdrServer) ProcessExternalCdr(eCDR *ExternalCDR) error {
 }
 
 func (self *CdrServer) storeSMCost(smCost *SMCost, checkDuplicate bool) error {
-	smCost.CostDetails.UpdateCost()                                              // make sure the total cost reflect the increments
-	smCost.CostDetails.UpdateRatedUsage()                                        // make sure rated usage is updated
-	lockKey := utils.CDRS_SOURCE + smCost.CGRID + smCost.RunID + smCost.OriginID // Will lock on this ID
+	smCost.CostDetails.UpdateCost()                                           // make sure the total cost reflect the increments
+	smCost.CostDetails.UpdateRatedUsage()                                     // make sure rated usage is updated
+	lockKey := utils.MetaCDRs + smCost.CGRID + smCost.RunID + smCost.OriginID // Will lock on this ID
 	if checkDuplicate {
 		_, err := self.guard.Guard(func() (interface{}, error) {
 			smCosts, err := self.cdrDb.GetSMCosts(smCost.CGRID, smCost.RunID, "", "")
@@ -444,7 +444,7 @@ func (self *CdrServer) rateCDR(cdr *CDR) ([]*CDR, error) {
 		} else { //calculate CDR as for pseudoprepaid
 			utils.Logger.Warning(
 				fmt.Sprintf("<Cdrs> WARNING: Could not find CallCostLog for cgrid: %s, source: %s, runid: %s, originID: %s, will recalculate",
-					cdr.CGRID, utils.SESSION_MANAGER_SOURCE, cdr.RunID, cdr.OriginID))
+					cdr.CGRID, utils.MetaSessionS, cdr.RunID, cdr.OriginID))
 			qryCC, err = self.getCostFromRater(cdr)
 		}
 	} else {
@@ -488,7 +488,7 @@ func (self *CdrServer) getCostFromRater(cdr *CDR) (*CallCost, error) {
 	if err != nil {
 		return cc, err
 	}
-	cdr.CostSource = utils.CDRS_SOURCE
+	cdr.CostSource = utils.MetaCDRs
 	return cc, nil
 }
 
