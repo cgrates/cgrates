@@ -831,6 +831,9 @@ func TestCgrCfgJSONDefaultsHTTP(t *testing.T) {
 	if !reflect.DeepEqual(cgrCfg.HTTPAuthUsers, map[string]string{}) {
 		t.Error(cgrCfg.HTTPAuthUsers)
 	}
+	if cgrCfg.HTTPFreeswitchCDRSURL != "/freeswitchcdrs" {
+		t.Error(cgrCfg.HTTPFreeswitchCDRSURL)
+	}
 }
 
 func TestRadiusAgentCfg(t *testing.T) {

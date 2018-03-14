@@ -946,10 +946,11 @@ func TestNewCgrJsonCfgFromFile(t *testing.T) {
 
 func TestDfHttpJsonCfg(t *testing.T) {
 	eCfg := &HTTPJsonCfg{
-		Json_rpc_url:   utils.StringPointer("/jsonrpc"),
-		Ws_url:         utils.StringPointer("/ws"),
-		Use_basic_auth: utils.BoolPointer(false),
-		Auth_users:     utils.MapStringStringPointer(map[string]string{})}
+		Json_rpc_url:        utils.StringPointer("/jsonrpc"),
+		Ws_url:              utils.StringPointer("/ws"),
+		Use_basic_auth:      utils.BoolPointer(false),
+		Auth_users:          utils.MapStringStringPointer(map[string]string{}),
+		Freeswitch_cdrs_url: utils.StringPointer("/freeswitchcdrs")}
 	if cfg, err := dfCgrJsonCfg.HttpJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {

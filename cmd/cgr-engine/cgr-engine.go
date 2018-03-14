@@ -728,6 +728,7 @@ func startRpc(server *utils.Server, internalRaterChan,
 		cfg.HTTPWSURL,
 		cfg.HTTPUseBasicAuth,
 		cfg.HTTPAuthUsers,
+		cfg.HTTPFreeswitchCDRSURL,
 	)
 }
 
