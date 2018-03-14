@@ -272,10 +272,11 @@ type CGRConfig struct {
 	RPCGOBListen             string            // RPC GOB listening address
 	HTTPListen               string            // HTTP listening address
 	HTTPJsonRPCURL           string            // JSON RPC relative URL ("" to disable)
+	HTTPFreeswitchCDRsURL    string            // Freeswitch CDRS relative URL ("" to disable)
+	HTTPCDRsURL              string            // CDRS relative URL ("" to disable)
 	HTTPWSURL                string            // WebSocket relative URL ("" to disable)
 	HTTPUseBasicAuth         bool              // Use basic auth for HTTP API
 	HTTPAuthUsers            map[string]string // Basic auth user:password map (base64 passwords)
-	HTTPFreeswitchCDRSURL    string            // Freeswitch CDRS relative URL ("" to disable)
 	DefaultReqType           string            // Use this request type if not defined on top
 	DefaultCategory          string            // set default type of record
 	DefaultTenant            string            // set default tenant
@@ -940,14 +941,17 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		if jsnHttpCfg.Ws_url != nil {
 			self.HTTPWSURL = *jsnHttpCfg.Ws_url
 		}
+		if jsnHttpCfg.Freeswitch_cdrs_url != nil {
+			self.HTTPFreeswitchCDRsURL = *jsnHttpCfg.Freeswitch_cdrs_url
+		}
+		if jsnHttpCfg.Http_Cdrs != nil {
+			self.HTTPCDRsURL = *jsnHttpCfg.Http_Cdrs
+		}
 		if jsnHttpCfg.Use_basic_auth != nil {
 			self.HTTPUseBasicAuth = *jsnHttpCfg.Use_basic_auth
 		}
 		if jsnHttpCfg.Auth_users != nil {
 			self.HTTPAuthUsers = *jsnHttpCfg.Auth_users
-		}
-		if jsnHttpCfg.Freeswitch_cdrs_url != nil {
-			self.HTTPFreeswitchCDRSURL = *jsnHttpCfg.Freeswitch_cdrs_url
 		}
 	}
 

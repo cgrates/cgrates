@@ -53,9 +53,10 @@ type ListenJsonCfg struct {
 type HTTPJsonCfg struct {
 	Json_rpc_url        *string
 	Ws_url              *string
+	Freeswitch_cdrs_url *string
+	Http_Cdrs           *string
 	Use_basic_auth      *bool
 	Auth_users          *map[string]string
-	Freeswitch_cdrs_url *string
 }
 
 // Database config

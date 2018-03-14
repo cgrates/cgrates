@@ -174,7 +174,7 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
-	useBasicAuth bool, userList map[string]string, freeswitchCDRSURL string) {
+	freeswitchCDRSURL string, cdrsURL string, useBasicAuth bool, userList map[string]string) {
 	s.RLock()
 	enabled := s.rpcEnabled
 	s.RUnlock()
@@ -192,7 +192,6 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 			http.HandleFunc(jsonRPCURL, handleRequest)
 		}
 	}
-
 	if enabled && wsRPCURL != "" {
 		s.Lock()
 		s.httpEnabled = true
@@ -209,25 +208,12 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 			http.Handle(wsRPCURL, wsHandler)
 		}
 	}
-
 	if !s.httpEnabled {
 		return
 	}
 	if useBasicAuth {
 		Logger.Info("<HTTP> enabling basic auth")
 	}
-	if enabled && freeswitchCDRSURL != "" {
-		s.Lock()
-		s.httpEnabled = true
-		s.Unlock()
-		Logger.Info("<HTTP> enabling handler for FreeswitchCDRS-URL")
-		if useBasicAuth {
-			http.HandleFunc(freeswitchCDRSURL, use(handleRequest, basicAuth(userList)))
-		} else {
-			http.HandleFunc(freeswitchCDRSURL, handleRequest)
-		}
-	}
-
 	Logger.Info(fmt.Sprintf("<HTTP> start listening at <%s>", addr))
 	http.ListenAndServe(addr, nil)
 }
