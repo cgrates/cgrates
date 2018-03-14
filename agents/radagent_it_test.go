@@ -275,7 +275,7 @@ func TestRAitAcctStop(t *testing.T) {
 		if cdrs[0].Usage != "4s" {
 			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
 		}
-		if cdrs[0].CostSource != utils.SESSION_MANAGER_SOURCE {
+		if cdrs[0].CostSource != utils.MetaSessionS {
 			t.Errorf("Unexpected CDR CostSource received for CDR: %v", cdrs[0])
 		}
 		if cdrs[0].Cost != 0.01 {

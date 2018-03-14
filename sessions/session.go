@@ -243,7 +243,7 @@ func (self *SMGSession) storeSMCost() error {
 	self.mux.Unlock()
 	smCost := &engine.V2SMCost{
 		CGRID:       self.CGRID,
-		CostSource:  utils.SESSION_MANAGER_SOURCE,
+		CostSource:  utils.MetaSessionS,
 		RunID:       self.RunID,
 		OriginHost:  self.EventStart.GetOriginatorIP(utils.META_DEFAULT),
 		OriginID:    self.EventStart.GetOriginID(utils.META_DEFAULT),

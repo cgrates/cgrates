@@ -189,7 +189,7 @@ func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	} else {
 		if cdrs[0].Usage != "10ms" {
 			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
-		} else if cdrs[0].CostSource != utils.SESSION_MANAGER_SOURCE {
+		} else if cdrs[0].CostSource != utils.MetaSessionS {
 			t.Errorf("Unexpected CDR CostSource received, cdr: %v %+v ", cdrs[0].CostSource, cdrs[0])
 		}
 	}
@@ -262,7 +262,7 @@ func TestSMGBiRPCSessionOriginatorTerminate(t *testing.T) {
 	} else {
 		if cdrs[0].Usage != "7ms" {
 			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
-		} else if cdrs[0].CostSource != utils.SESSION_MANAGER_SOURCE {
+		} else if cdrs[0].CostSource != utils.MetaSessionS {
 			t.Errorf("Unexpected CDR CostSource received, cdr: %v %+v ", cdrs[0].CostSource, cdrs[0])
 		}
 	}

@@ -955,7 +955,7 @@ func (smg *SMGeneric) ChargeEvent(gev SMGenericEvent) (maxUsage time.Duration, e
 		var reply string
 		smCost := &engine.SMCost{
 			CGRID:       cgrID,
-			CostSource:  utils.SESSION_MANAGER_SOURCE,
+			CostSource:  utils.MetaSessionS,
 			RunID:       sR.DerivedCharger.RunID,
 			OriginHost:  gev.GetOriginatorIP(utils.META_DEFAULT),
 			OriginID:    gev.GetOriginID(utils.META_DEFAULT),
