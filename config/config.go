@@ -275,6 +275,7 @@ type CGRConfig struct {
 	HTTPWSURL                string            // WebSocket relative URL ("" to disable)
 	HTTPUseBasicAuth         bool              // Use basic auth for HTTP API
 	HTTPAuthUsers            map[string]string // Basic auth user:password map (base64 passwords)
+	HTTPFreeswitchCDRSURL    string            // Freeswitch CDRS relative URL ("" to disable)
 	DefaultReqType           string            // Use this request type if not defined on top
 	DefaultCategory          string            // set default type of record
 	DefaultTenant            string            // set default tenant
@@ -944,6 +945,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 		if jsnHttpCfg.Auth_users != nil {
 			self.HTTPAuthUsers = *jsnHttpCfg.Auth_users
+		}
+		if jsnHttpCfg.Freeswitch_cdrs_url != nil {
+			self.HTTPFreeswitchCDRSURL = *jsnHttpCfg.Freeswitch_cdrs_url
 		}
 	}
 
