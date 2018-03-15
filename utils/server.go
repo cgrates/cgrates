@@ -174,7 +174,7 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
-	freeswitchCDRSURL string, cdrsURL string, useBasicAuth bool, userList map[string]string) {
+	useBasicAuth bool, userList map[string]string) {
 	s.RLock()
 	enabled := s.rpcEnabled
 	s.RUnlock()
