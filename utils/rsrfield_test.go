@@ -65,7 +65,7 @@ func TestNewRSRField1(t *testing.T) {
 				ReplaceTemplate: "0$1"}},
 		filters: []*RSRFilter{filter},
 		converters: []DataConverter{
-			new(UsageSecondsConverter), new(RoundConverter)}}
+			new(UsageSecondsConverter), &RoundConverter{Decimals: 5, Method: "*middle"}}}
 	if rsrField, err := NewRSRField(rulesStr); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if !reflect.DeepEqual(expRSRField, rsrField) {

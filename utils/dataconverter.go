@@ -20,6 +20,7 @@ package utils
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -36,7 +37,7 @@ func NewDataConverter(params string) (
 	case params == MetaUsageSeconds:
 		return NewUsageSecondsConverter(params[:len(MetaUsageSeconds)])
 	case strings.HasPrefix(params, MetaRound):
-		return NewRoundConverter(params[:len(MetaRound)])
+		return NewRoundConverter(params[len(MetaRound)+1:])
 	default:
 		return nil,
 			fmt.Errorf("unsupported converter definition: <%s>",
@@ -71,13 +72,34 @@ func (mS *UsageSecondsConverter) ConvertAsString(in interface{}) (
 	return
 }
 
-func NewRoundConverter(params string) (
-	hdlr DataConverter, err error) {
-	return new(RoundConverter), nil
+func NewRoundConverter(params string) (hdlr DataConverter, err error) {
+	fmt.Printf("NewRoundConverter, params: <%s>", params)
+	rc := new(RoundConverter)
+	paramsSplt := strings.Split(params, InInFieldSep)
+	switch len(paramsSplt) {
+	case 2:
+		rc.Method = paramsSplt[1]
+		fallthrough
+	case 1:
+		if rc.Decimals, err = strconv.Atoi(paramsSplt[0]); err != nil {
+			return nil, fmt.Errorf("%s converter needs integer as decimals, have: <%s>",
+				MetaRound, paramsSplt[0])
+		}
+		fallthrough
+	case 0:
+		rc.Method = ROUNDING_MIDDLE
+	default:
+		return nil, fmt.Errorf("unsupported %s converter parameters: <%s>",
+			MetaRound, params)
+	}
+	return rc, nil
 }
 
 // UsageSecondsDataConverter transforms
-type RoundConverter struct{}
+type RoundConverter struct {
+	Decimals int
+	Method   string
+}
 
 func (mS *RoundConverter) Convert(in interface{}) (
 	out interface{}, err error) {
