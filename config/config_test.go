@@ -915,3 +915,75 @@ func TestDbDefaults(t *testing.T) {
 		}
 	}
 }
+
+func TestLoaderDefaults(t *testing.T) {
+	eCfg := []*LoaderSConfig{
+		&LoaderSConfig{
+			Id:      utils.META_DEFAULT,
+			Enabled: false,
+			DryRun:  false,
+			CacheSConns: []*HaPoolConfig{
+				&HaPoolConfig{
+					Address: utils.MetaInternal,
+				},
+			},
+			FieldSeparator: ",",
+			MaxOpenFiles:   1024,
+			TpInDir:        "/var/spool/cgrates/tploader/in",
+			TpOutDir:       "/var/spool/cgrates/tploader/out",
+			Data: []*LoaderSDataType{
+				&LoaderSDataType{
+					Type:     utils.MetaAttributes,
+					Filename: utils.AttributesCsv,
+					Fields: []*CfgCdrField{
+						&CfgCdrField{Tag: "TenantID",
+							FieldId:   "Tenant",
+							Type:      utils.META_COMPOSED,
+							Value:     utils.ParseRSRFieldsMustCompile("0", utils.INFIELD_SEP),
+							Mandatory: true},
+						&CfgCdrField{Tag: "ProfileID",
+							FieldId:   "ID",
+							Type:      utils.META_COMPOSED,
+							Value:     utils.ParseRSRFieldsMustCompile("1", utils.INFIELD_SEP),
+							Mandatory: true},
+						&CfgCdrField{Tag: "Contexts",
+							FieldId: "Contexts",
+							Type:    utils.META_COMPOSED,
+							Value:   utils.ParseRSRFieldsMustCompile("2", utils.INFIELD_SEP)},
+						&CfgCdrField{Tag: "FilterIDs",
+							FieldId: "FilterIDs",
+							Type:    utils.META_COMPOSED,
+							Value:   utils.ParseRSRFieldsMustCompile("3", utils.INFIELD_SEP)},
+						&CfgCdrField{Tag: "ActivationInterval",
+							FieldId: "ActivationInterval",
+							Type:    utils.META_COMPOSED,
+							Value:   utils.ParseRSRFieldsMustCompile("4", utils.INFIELD_SEP)},
+						&CfgCdrField{Tag: "FieldName",
+							FieldId: "FieldName",
+							Type:    utils.META_COMPOSED,
+							Value:   utils.ParseRSRFieldsMustCompile("5", utils.INFIELD_SEP)},
+						&CfgCdrField{Tag: "Initial",
+							FieldId: "Initial",
+							Type:    utils.META_COMPOSED,
+							Value:   utils.ParseRSRFieldsMustCompile("6", utils.INFIELD_SEP)},
+						&CfgCdrField{Tag: "Substitute",
+							FieldId: "Substitute",
+							Type:    utils.META_COMPOSED,
+							Value:   utils.ParseRSRFieldsMustCompile("7", utils.INFIELD_SEP)},
+						&CfgCdrField{Tag: "Append",
+							FieldId: "Append",
+							Type:    utils.META_COMPOSED,
+							Value:   utils.ParseRSRFieldsMustCompile("8", utils.INFIELD_SEP)},
+						&CfgCdrField{Tag: "Weight",
+							FieldId: "Weight",
+							Type:    utils.META_COMPOSED,
+							Value:   utils.ParseRSRFieldsMustCompile("9", utils.INFIELD_SEP)},
+					},
+				},
+			},
+		},
+	}
+	if !reflect.DeepEqual(eCfg, cgrCfg.LoaderProfiles) {
+		t.Errorf("received: %+v, expecting: %+v", eCfg, cgrCfg.LoaderProfiles)
+	}
+}
