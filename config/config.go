@@ -42,12 +42,14 @@ const (
 )
 
 var (
-	DBDefaults        DbDefaults
-	cgrCfg            *CGRConfig     // will be shared
-	dfltFsConnConfig  *FsConnConfig  // Default FreeSWITCH Connection configuration, built out of json default configuration
-	dfltKamConnConfig *KamConnConfig // Default Kamailio Connection configuration
-	dfltHaPoolConfig  *HaPoolConfig
-	dfltAstConnCfg    *AsteriskConnCfg
+	DBDefaults                DbDefaults
+	cgrCfg                    *CGRConfig     // will be shared
+	dfltFsConnConfig          *FsConnConfig  // Default FreeSWITCH Connection configuration, built out of json default configuration
+	dfltKamConnConfig         *KamConnConfig // Default Kamailio Connection configuration
+	dfltHaPoolConfig          *HaPoolConfig
+	dfltAstConnCfg            *AsteriskConnCfg
+	dfltLoadersConfig         *LoaderSConfig
+	dfltLoaderSDataTypeConfig *LoaderSDataType
 )
 
 func NewDbDefaults() DbDefaults {
@@ -341,6 +343,7 @@ type CGRConfig struct {
 	statsCfg                 *StatSCfg                // Configuration for StatS
 	thresholdSCfg            *ThresholdSCfg           // configuration for ThresholdS
 	supplierSCfg             *SupplierSCfg            // configuration for SupplierS
+	LoaderProfiles           []*LoaderSConfig         // configuration for Loader
 	MailerServer             string                   // The server to use when sending emails out
 	MailerAuthUser           string                   // Authenticate to email server using this user
 	MailerAuthPass           string                   // Authenticate to email server with this password
@@ -773,6 +776,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return err
 	}
 
+	jsnLoaderSCfg, err := jsnCfg.LoaderSJsonCfg()
+	if err != nil {
+		return err
+	}
+
 	jsnMailerCfg, err := jsnCfg.MailerJsonCfg()
 	if err != nil {
 		return err
@@ -1129,6 +1137,17 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			}
 		}
 	}
+
+	if jsnLoaderSCfg != nil {
+		if self.LoaderProfiles == nil {
+			self.LoaderProfiles = make([]*LoaderSConfig, len(jsnLoaderSCfg))
+		}
+		for idx, profile := range jsnLoaderSCfg {
+			self.LoaderProfiles[idx] = NewDfltLoadersConfig()
+			self.LoaderProfiles[idx].loadFromJsonCfg(profile)
+		}
+	}
+
 	if jsnCdrcCfg != nil {
 		if self.CdrcProfiles == nil {
 			self.CdrcProfiles = make(map[string][]*CdrcConfig)
