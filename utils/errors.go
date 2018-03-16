@@ -104,19 +104,19 @@ func NewErrNotConnected(serv string) error {
 }
 
 func NewErrRALs(err error) error {
-	return fmt.Errorf("RALS_ERROR: %s", err)
+	return fmt.Errorf("RALS_ERROR:%s", err)
 }
 
 func NewErrResourceS(err error) error {
-	return fmt.Errorf("RESOURCES_ERROR: %s", err)
+	return fmt.Errorf("RESOURCES_ERROR:%s", err)
 }
 
 func NewErrSupplierS(err error) error {
-	return fmt.Errorf("SUPPLIERS_ERROR: %s", err)
+	return fmt.Errorf("SUPPLIERS_ERROR:%s", err)
 }
 
 func NewErrAttributeS(err error) error {
-	return fmt.Errorf("ATTRIBUTES_ERROR: %s", err)
+	return fmt.Errorf("ATTRIBUTES_ERROR:%s", err)
 }
 
 // Centralized returns for APIs
