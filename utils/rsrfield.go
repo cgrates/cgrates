@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -124,9 +125,28 @@ type RSRField struct {
 	converters  []DataConverter    // set of converters to apply on output
 }
 
+// Parse will parse the value out considering converters and filters
+func (rsrf *RSRField) Parse(value string) (out string, err error) {
+	if out = rsrf.ParseValue(value); out == "" {
+		return
+	}
+	for _, cnv := range rsrf.converters {
+		if out, err = cnv.ConvertAsString(out); err != nil {
+			return
+		}
+	}
+	if !rsrf.FilterPasses(out) {
+		return "", errors.New("filter not passing")
+	}
+	return
+}
+
 // IsParsed finds out whether this RSRField was already parsed or RAW state
 func (rsrf *RSRField) IsParsed() bool {
-	return rsrf.staticValue != "" || rsrf.RSRules != nil || rsrf.filters != nil
+	return rsrf.staticValue != "" ||
+		rsrf.RSRules != nil ||
+		rsrf.filters != nil ||
+		rsrf.converters != nil
 }
 
 // Compile parses Rules string and repopulates other fields
