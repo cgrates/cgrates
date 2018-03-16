@@ -43,6 +43,26 @@ func NewRSRField(fldStr string) (fld *RSRField, err error) {
 		fldStr = fldStr[:fltrStart] // Take the filter part out before compiling further
 
 	}
+	if idxConverters := strings.Index(fldStr, "{*"); idxConverters != -1 { // converters in the string
+		if !strings.HasSuffix(fldStr, "}") {
+			return nil,
+				fmt.Errorf("Invalid converter value in string: %s, err: invalid converter terminator",
+					fldStr)
+		}
+		convertersStr := fldStr[idxConverters+1 : len(fldStr)-1] // strip also {}
+		convsSplt := strings.Split(convertersStr, INFIELD_SEP)
+		rsrField.converters = make([]DataConverter, len(convsSplt))
+		for i, convStr := range convsSplt {
+			if conv, err := NewDataConverter(convStr); err != nil {
+				return nil,
+					fmt.Errorf("Invalid converter value in string: %s, err: %s",
+						convStr, err.Error())
+			} else {
+				rsrField.converters[i] = conv
+			}
+		}
+		fldStr = fldStr[:idxConverters]
+	}
 	if strings.HasPrefix(fldStr, STATIC_VALUE_PREFIX) { // Special case when RSR is defined as static header/value
 		var staticHdr, staticVal string
 		if splt := strings.Split(fldStr, STATIC_HDRVAL_SEP); len(splt) == 2 { // Using / as separator since ':' is often use in date/time fields
@@ -101,7 +121,7 @@ type RSRField struct {
 	staticValue string             // If defined, enforces parsing always to this value
 	RSRules     []*ReSearchReplace // Rules to use when processing field value
 	filters     []*RSRFilter       // The value to compare when used as filter
-	converters  []RSRConverter     // set of converters to apply on output
+	converters  []DataConverter    // set of converters to apply on output
 }
 
 // IsParsed finds out whether this RSRField was already parsed or RAW state
@@ -302,51 +322,6 @@ func (flds RSRFields) ParseRules() (err error) {
 		if err = rsrFld.ParseRules(); err != nil {
 			break
 		}
-	}
-	return
-}
-
-// RSRConverter represents functions which should convert input into output
-type RSRConverter interface {
-	Convert(interface{}) (interface{}, error)
-	ConvertAsString(interface{}) (string, error)
-}
-
-// NewRSRConverter is a factory of transformers
-func NewRSRConverter(params string) (
-	rsrConv RSRConverter, err error) {
-	switch {
-	case params == MetaUsageSeconds:
-		return NewUsageSecondsRSRConverter(params)
-	default:
-		return nil,
-			fmt.Errorf("unsupported transformer definition: <%s>", params)
-	}
-}
-
-func NewUsageSecondsRSRConverter(params string) (
-	hdlr RSRConverter, err error) {
-	return new(UsageSecondsRSRConverter), nil
-}
-
-// UsageSecondsRSRConverter transforms
-type UsageSecondsRSRConverter struct{}
-
-func (mS *UsageSecondsRSRConverter) Convert(in interface{}) (
-	out interface{}, err error) {
-	return
-}
-
-func (mS *UsageSecondsRSRConverter) ConvertAsString(in interface{}) (
-	out string, err error) {
-	outIface, err := mS.Convert(in)
-	if err != nil {
-		return "", err
-	}
-	var canCast bool
-	out, canCast = CastFieldIfToString(outIface)
-	if !canCast {
-		return "", NewErrStringCast(outIface)
 	}
 	return
 }

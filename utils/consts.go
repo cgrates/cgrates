@@ -528,6 +528,7 @@ const (
 	Initial                      = "Initial"
 	Substitute                   = "Substitute"
 	Append                       = "Append"
+	MetaRound                    = "*round"
 )
 
 //MetaMetrics

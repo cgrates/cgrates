@@ -25,24 +25,51 @@ import (
 
 func TestNewRSRField1(t *testing.T) {
 	// Normal case
-	rulesStr := `~sip_redirected_to:s/sip:\+49(\d+)@/0$1/`
-	expRSRField1 := &RSRField{Id: "sip_redirected_to", Rules: rulesStr,
-		RSRules: []*ReSearchReplace{&ReSearchReplace{SearchRegexp: regexp.MustCompile(`sip:\+49(\d+)@`), ReplaceTemplate: "0$1"}}}
+	rulesStr := `~sip_redirected_to:s/sip:\+49(\d+)@/0$1/(someval)`
+	filter, _ := NewRSRFilter("someval")
+	expRSRField1 := &RSRField{
+		Id:    "sip_redirected_to",
+		Rules: rulesStr,
+		RSRules: []*ReSearchReplace{
+			&ReSearchReplace{
+				SearchRegexp:    regexp.MustCompile(`sip:\+49(\d+)@`),
+				ReplaceTemplate: "0$1"}},
+		filters:    []*RSRFilter{filter},
+		converters: nil}
 	if rsrField, err := NewRSRField(rulesStr); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if !reflect.DeepEqual(expRSRField1, rsrField) {
-		t.Errorf("Expecting: %v, received: %v", expRSRField1, rsrField)
+		t.Errorf("Expecting: %+v, received: %+v",
+			expRSRField1, rsrField)
 	}
 	// With filter
 	rulesStr = `~sip_redirected_to:s/sip:\+49(\d+)@/0$1/(086517174963)`
 	// rulesStr = `~sip_redirected_to:s/sip:\+49(\d+)@/0$1/{*usage_seconds;*round:5:*middle}(086517174963)`
-	filter, _ := NewRSRFilter("086517174963")
+	filter, _ = NewRSRFilter("086517174963")
 	expRSRField2 := &RSRField{Id: "sip_redirected_to", Rules: rulesStr, filters: []*RSRFilter{filter},
 		RSRules: []*ReSearchReplace{&ReSearchReplace{SearchRegexp: regexp.MustCompile(`sip:\+49(\d+)@`), ReplaceTemplate: "0$1"}}}
 	if rsrField, err := NewRSRField(rulesStr); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if !reflect.DeepEqual(expRSRField2, rsrField) {
 		t.Errorf("Expecting: %v, received: %v", expRSRField2, rsrField)
+	}
+	// with dataConverters
+	rulesStr = `~sip_redirected_to:s/sip:\+49(\d+)@/0$1/{*usage_seconds;*round:5:*middle}(086517174963)`
+	filter, _ = NewRSRFilter("086517174963")
+	expRSRField := &RSRField{
+		Id:    "sip_redirected_to",
+		Rules: rulesStr,
+		RSRules: []*ReSearchReplace{
+			&ReSearchReplace{
+				SearchRegexp:    regexp.MustCompile(`sip:\+49(\d+)@`),
+				ReplaceTemplate: "0$1"}},
+		filters: []*RSRFilter{filter},
+		converters: []DataConverter{
+			new(UsageSecondsConverter), new(RoundConverter)}}
+	if rsrField, err := NewRSRField(rulesStr); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if !reflect.DeepEqual(expRSRField, rsrField) {
+		t.Errorf("Expecting: %+v, received: %+v", expRSRField, rsrField)
 	}
 	// Separator escaped
 	rulesStr = `~sip_redirected_to:s\/sip:\+49(\d+)@/0$1/`
