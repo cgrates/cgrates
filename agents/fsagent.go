@@ -144,7 +144,7 @@ func (sm *FSsessions) onChannelPark(fsev FSEvent, connId string) {
 			fmt.Sprintf("<%s> Could not authorize event %s, error: %s",
 				utils.FreeSWITCHAgent, fsev.GetUUID(), err.Error()))
 		sm.unparkCall(fsev.GetUUID(), connId,
-			fsev.GetCallDestNr(utils.META_DEFAULT), utils.ErrServerError.Error())
+			fsev.GetCallDestNr(utils.META_DEFAULT), err.Error())
 		return
 	}
 	if authArgs.GetMaxUsage {
@@ -165,7 +165,7 @@ func (sm *FSsessions) onChannelPark(fsev FSEvent, connId string) {
 				fmt.Sprintf("<%s> error %s setting channel variabile: %s",
 					utils.FreeSWITCHAgent, err.Error(), CGRResourceAllocation))
 			sm.unparkCall(fsev.GetUUID(), connId,
-				fsev.GetCallDestNr(utils.META_DEFAULT), utils.ErrServerError.Error())
+				fsev.GetCallDestNr(utils.META_DEFAULT), err.Error())
 			return
 		}
 	}
@@ -174,7 +174,7 @@ func (sm *FSsessions) onChannelPark(fsev FSEvent, connId string) {
 		if _, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_setvar %s %s %s\n\n",
 			fsev.GetUUID(), utils.CGR_SUPPLIERS, fsArray)); err != nil {
 			utils.Logger.Info(fmt.Sprintf("<%s> error setting suppliers: %s", utils.FreeSWITCHAgent, err.Error()))
-			sm.unparkCall(fsev.GetUUID(), connId, fsev.GetCallDestNr(utils.META_DEFAULT), utils.ErrServerError.Error())
+			sm.unparkCall(fsev.GetUUID(), connId, fsev.GetCallDestNr(utils.META_DEFAULT), err.Error())
 			return
 		}
 	}
@@ -191,7 +191,7 @@ func (sm *FSsessions) onChannelPark(fsev FSEvent, connId string) {
 						fmt.Sprintf("<%s> error %s setting channel variabile: %s",
 							utils.FreeSWITCHAgent, err.Error(), fldName))
 					sm.unparkCall(fsev.GetUUID(), connId,
-						fsev.GetCallDestNr(utils.META_DEFAULT), utils.ErrServerError.Error())
+						fsev.GetCallDestNr(utils.META_DEFAULT), err.Error())
 					return
 				}
 			}
@@ -219,7 +219,7 @@ func (sm *FSsessions) onChannelAnswer(fsev FSEvent, connId string) {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> could not process answer for event %s, error: %s",
 				utils.FreeSWITCHAgent, chanUUID, err.Error()))
-		sm.disconnectSession(connId, chanUUID, "", utils.ErrServerError.Error())
+		sm.disconnectSession(connId, chanUUID, "", err.Error())
 		return
 	}
 }
