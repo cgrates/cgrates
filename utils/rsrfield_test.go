@@ -503,4 +503,15 @@ func TestRSRFldParse(t *testing.T) {
 	} else if out != eOut {
 		t.Errorf("expecting: %s, received: %s", eOut, out)
 	}
+	rulesStr = `Usage{*usage_seconds}`
+	rsrField, err = NewRSRField(rulesStr)
+	if err != nil {
+		t.Error(err)
+	}
+	eOut = "10"
+	if out, err := rsrField.Parse("10000000000"); err != nil {
+		t.Error(err)
+	} else if out != eOut {
+		t.Errorf("expecting: %s, received: %s", eOut, out)
+	}
 }
