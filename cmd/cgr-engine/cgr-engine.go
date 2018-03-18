@@ -814,36 +814,41 @@ func main() {
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
 	var dm *engine.DataManager
-	// FixMe: add here exceptions if running only CDRC
-	dm, err = engine.ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort,
-		cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheCfg(), cfg.LoadHistorySize)
-	if err != nil { // Cannot configure getter database, show stopper
-		utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
-		return
+	if cfg.RALsEnabled || cfg.CDRStatsEnabled || cfg.PubSubServerEnabled ||
+		cfg.AliasesServerEnabled || cfg.UserServerEnabled || cfg.SchedulerEnabled ||
+		cfg.AttributeSCfg().Enabled || cfg.ResourceSCfg().Enabled || cfg.StatSCfg().Enabled ||
+		cfg.ThresholdSCfg().Enabled || cfg.SupplierSCfg().Enabled { // Some services can run without db, ie: SessionS or CDRC
+		dm, err = engine.ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort,
+			cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheCfg(), cfg.LoadHistorySize)
+		if err != nil { // Cannot configure getter database, show stopper
+			utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
+			return
+		}
+		defer dm.DataDB().Close()
+		engine.SetDataStorage(dm)
+		if err := engine.CheckVersions(dm.DataDB()); err != nil {
+			fmt.Println(err.Error())
+			return
+		}
 	}
-	defer dm.DataDB().Close()
-	engine.SetDataStorage(dm)
-	if err := engine.CheckVersions(dm.DataDB()); err != nil {
-		fmt.Println(err.Error())
-		return
+	if cfg.RALsEnabled || cfg.CDRSEnabled {
+		storDb, err := engine.ConfigureStorStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort,
+			cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding, cfg.StorDBMaxOpenConns,
+			cfg.StorDBMaxIdleConns, cfg.StorDBConnMaxLifetime, cfg.StorDBCDRSIndexes)
+		if err != nil { // Cannot configure logger database, show stopper
+			utils.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting!", err))
+			return
+		}
+		defer storDb.Close()
+		// loadDb,cdrDb and storDb are all mapped on the same stordb storage
+		loadDb = storDb.(engine.LoadStorage)
+		cdrDb = storDb.(engine.CdrStorage)
+		engine.SetCdrStorage(cdrDb)
+		if err := engine.CheckVersions(storDb); err != nil {
+			fmt.Println(err.Error())
+			return
+		}
 	}
-	storDb, err := engine.ConfigureStorStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort,
-		cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding, cfg.StorDBMaxOpenConns,
-		cfg.StorDBMaxIdleConns, cfg.StorDBConnMaxLifetime, cfg.StorDBCDRSIndexes)
-	if err != nil { // Cannot configure logger database, show stopper
-		utils.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting!", err))
-		return
-	}
-	defer storDb.Close()
-	// loadDb,cdrDb and storDb are all mapped on the same stordb storage
-	loadDb = storDb.(engine.LoadStorage)
-	cdrDb = storDb.(engine.CdrStorage)
-	engine.SetCdrStorage(cdrDb)
-	if err := engine.CheckVersions(storDb); err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-
 	// Done initing DBs
 	engine.SetRoundingDecimals(cfg.RoundingDecimals)
 	engine.SetRpSubjectPrefixMatching(cfg.RpSubjectPrefixMatching)
