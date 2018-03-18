@@ -474,3 +474,33 @@ func TestParseRules(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", rsrField, newRSRFld)
 	}
 }
+
+func TestRSRFldParse(t *testing.T) {
+	// with dataConverters
+	rulesStr := `~Usage:s/(\d+)/${1}ms/{*usage_seconds;*round:1:*middle}(2.2)`
+	rsrField, err := NewRSRField(rulesStr)
+	if err != nil {
+		t.Error(err)
+	}
+	eOut := "2.2"
+	if out, err := rsrField.Parse("2210"); err != nil {
+		t.Error(err)
+	} else if out != eOut {
+		t.Errorf("expecting: %s, received: %s", eOut, out)
+	}
+	rulesStr = `~Usage:s/(\d+)/${1}ms/{*usage_seconds;*round:1:*middle}(2.21)`
+	rsrField, _ = NewRSRField(rulesStr)
+	if _, err := rsrField.Parse("2210"); err == nil || err.Error() != "filter not passing" {
+		t.Error(err)
+	}
+	rulesStr = `~Usage:s/(\d+)/${1}ms/{*usage_seconds;*round}`
+	if rsrField, err = NewRSRField(rulesStr); err != nil {
+		t.Error(err)
+	}
+	eOut = "2"
+	if out, err := rsrField.Parse("2210"); err != nil {
+		t.Error(err)
+	} else if out != eOut {
+		t.Errorf("expecting: %s, received: %s", eOut, out)
+	}
+}

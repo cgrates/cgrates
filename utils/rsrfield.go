@@ -122,7 +122,7 @@ type RSRField struct {
 	staticValue string             // If defined, enforces parsing always to this value
 	RSRules     []*ReSearchReplace // Rules to use when processing field value
 	filters     []*RSRFilter       // The value to compare when used as filter
-	converters  []DataConverter    // set of converters to apply on output
+	converters  DataConverters     // set of converters to apply on output
 }
 
 // Parse will parse the value out considering converters and filters
@@ -130,12 +130,10 @@ func (rsrf *RSRField) Parse(value string) (out string, err error) {
 	if out = rsrf.ParseValue(value); out == "" {
 		return
 	}
-	for _, cnv := range rsrf.converters {
-		if out, err = cnv.ConvertAsString(out); err != nil {
-			return
-		}
+	if out, err = rsrf.converters.ConvertString(out); err != nil {
+		return
 	}
-	if !rsrf.FilterPasses(out) {
+	if !rsrf.FiltersPassing(out) {
 		return "", errors.New("filter not passing")
 	}
 	return
@@ -185,6 +183,18 @@ func (rsrf *RSRField) RegexpMatched() bool { // Investigate whether we had a reg
 		}
 	}
 	return false
+}
+
+func (rsrf *RSRField) FiltersPassing(value string) bool {
+	if len(rsrf.filters) == 0 { // No filters
+		return true
+	}
+	for _, fltr := range rsrf.filters {
+		if !fltr.Pass(value) {
+			return false
+		}
+	}
+	return true
 }
 
 func (rsrf *RSRField) FilterPasses(value string) bool {

@@ -22,12 +22,32 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 )
+
+// DataConverters groups together multiple converters,
+// executing optimized conversions
+type DataConverters []DataConverter
+
+// ConvertString converts from and to string
+func (dcs DataConverters) ConvertString(in string) (out string, err error) {
+	outIface := interface{}(in)
+	for _, cnv := range dcs {
+		if outIface, err = cnv.Convert(outIface); err != nil {
+			return
+		}
+	}
+	var canCast bool
+	out, canCast = CastFieldIfToString(outIface)
+	if !canCast {
+		return "", NewErrStringCast(outIface)
+	}
+	return
+}
 
 // DataConverter represents functions which should convert input into output
 type DataConverter interface {
 	Convert(interface{}) (interface{}, error)
-	ConvertAsString(interface{}) (string, error)
 }
 
 // NewDataConverter is a factory of converters
@@ -35,8 +55,11 @@ func NewDataConverter(params string) (
 	conv DataConverter, err error) {
 	switch {
 	case params == MetaUsageSeconds:
-		return NewUsageSecondsConverter(params[:len(MetaUsageSeconds)])
+		return NewUsageSecondsConverter("")
 	case strings.HasPrefix(params, MetaRound):
+		if len(params) == len(MetaRound) { // no extra params, defaults implied
+			return NewRoundConverter("")
+		}
 		return NewRoundConverter(params[len(MetaRound)+1:])
 	default:
 		return nil,
@@ -50,32 +73,25 @@ func NewUsageSecondsConverter(params string) (
 	return new(UsageSecondsConverter), nil
 }
 
-// UsageSecondsDataConverter transforms
+// UsageSecondsDataConverter converts duration into seconds encapsulated in float64
 type UsageSecondsConverter struct{}
 
 func (mS *UsageSecondsConverter) Convert(in interface{}) (
 	out interface{}, err error) {
-	return
-}
-
-func (mS *UsageSecondsConverter) ConvertAsString(in interface{}) (
-	out string, err error) {
-	outIface, err := mS.Convert(in)
-	if err != nil {
-		return "", err
+	var inDur time.Duration
+	if inDur, err = IfaceAsDuration(in); err != nil {
+		return nil, err
 	}
-	var canCast bool
-	out, canCast = CastFieldIfToString(outIface)
-	if !canCast {
-		return "", NewErrStringCast(outIface)
-	}
+	out = inDur.Seconds()
 	return
 }
 
 func NewRoundConverter(params string) (hdlr DataConverter, err error) {
-	fmt.Printf("NewRoundConverter, params: <%s>", params)
 	rc := new(RoundConverter)
-	paramsSplt := strings.Split(params, InInFieldSep)
+	var paramsSplt []string
+	if params != "" {
+		paramsSplt = strings.Split(params, InInFieldSep)
+	}
 	switch len(paramsSplt) {
 	case 2:
 		rc.Method = paramsSplt[1]
@@ -95,27 +111,18 @@ func NewRoundConverter(params string) (hdlr DataConverter, err error) {
 	return rc, nil
 }
 
-// UsageSecondsDataConverter transforms
+// RoundConverter will round floats
 type RoundConverter struct {
 	Decimals int
 	Method   string
 }
 
-func (mS *RoundConverter) Convert(in interface{}) (
+func (rnd *RoundConverter) Convert(in interface{}) (
 	out interface{}, err error) {
-	return
-}
-
-func (mS *RoundConverter) ConvertAsString(in interface{}) (
-	out string, err error) {
-	outIface, err := mS.Convert(in)
-	if err != nil {
-		return "", err
+	var inFloat float64
+	if inFloat, err = IfaceAsFloat64(in); err != nil {
+		return
 	}
-	var canCast bool
-	out, canCast = CastFieldIfToString(outIface)
-	if !canCast {
-		return "", NewErrStringCast(outIface)
-	}
+	out = Round(inFloat, rnd.Decimals, rnd.Method)
 	return
 }
