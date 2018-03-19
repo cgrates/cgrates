@@ -919,9 +919,11 @@ func TestDbDefaults(t *testing.T) {
 func TestLoaderDefaults(t *testing.T) {
 	eCfg := []*LoaderSConfig{
 		&LoaderSConfig{
-			Id:      utils.META_DEFAULT,
-			Enabled: false,
-			DryRun:  false,
+			Id:           utils.META_DEFAULT,
+			Enabled:      false,
+			DryRun:       false,
+			RunDelay:     0,
+			LockFileName: "cgr.lock",
 			CacheSConns: []*HaPoolConfig{
 				&HaPoolConfig{
 					Address: utils.MetaInternal,
@@ -983,7 +985,7 @@ func TestLoaderDefaults(t *testing.T) {
 			},
 		},
 	}
-	if !reflect.DeepEqual(eCfg, cgrCfg.LoaderProfiles) {
-		t.Errorf("received: %+v, expecting: %+v", eCfg, cgrCfg.LoaderProfiles)
+	if !reflect.DeepEqual(eCfg, cgrCfg.loaderSCfg) {
+		t.Errorf("received: %+v, expecting: %+v", eCfg, cgrCfg.loaderSCfg)
 	}
 }

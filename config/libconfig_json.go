@@ -439,6 +439,8 @@ type LoaderSJsonCfg struct {
 	ID              *string
 	Enabled         *bool
 	Dry_run         *bool
+	Run_delay       *int
+	Lock_filename   *string
 	Caches_conns    *[]*HaPoolJsonCfg
 	Field_separator *string
 	Max_open_files  *int

@@ -457,8 +457,10 @@ const CGRATES_CFG_JSON = `
 		"id": "*default",									// identifier of the Loader
 		"enabled": false,									// starts as service: <true|false>.
 		"dry_run": false,									// do not send the CDRs to CDRS, just parse them
+		"run_delay": 0,										// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
+		"lock_filename": "cgr.lock",						// Filename containing concurrency lock in case of delayed processing
 		"caches_conns": [
-			{"address": "*internal"},                       // address where to reach the CacheS for data reload, empty for no reloads  <""|*internal|x.y.z.y:1234>
+			{"address": "*internal"},						// address where to reach the CacheS for data reload, empty for no reloads  <""|*internal|x.y.z.y:1234>
 		],
 		"field_separator": ",",								// separator used in case of csv files
 		"max_open_files": 1024,								// maximum simultaneous files to process, 0 for unlimited
@@ -468,7 +470,7 @@ const CGRATES_CFG_JSON = `
 		"data":[											// data profiles to load
 			{
 				"type": "*attributes",						// data source type
-				"file_name": "Attributes.csv", 				// file name in the tp_in_dir
+				"file_name": "Attributes.csv",				// file name in the tp_in_dir
 				"fields": [
 					{"tag": "TenantID", "field_id": "Tenant", "type": "*composed", "value": "0", "mandatory": true},
 					{"tag": "ProfileID", "field_id": "ID", "type": "*composed", "value": "1", "mandatory": true},
