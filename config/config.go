@@ -345,7 +345,7 @@ type CGRConfig struct {
 	statsCfg                 *StatSCfg                // Configuration for StatS
 	thresholdSCfg            *ThresholdSCfg           // configuration for ThresholdS
 	supplierSCfg             *SupplierSCfg            // configuration for SupplierS
-	LoaderProfiles           []*LoaderSConfig         // configuration for Loader
+	loaderSCfg               []*LoaderSConfig         // configuration for Loader
 	MailerServer             string                   // The server to use when sending emails out
 	MailerAuthUser           string                   // Authenticate to email server using this user
 	MailerAuthPass           string                   // Authenticate to email server with this password
@@ -474,6 +474,23 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
+	// Loaders sanity checks
+	for _, ldrSCfg := range self.loaderSCfg {
+		if !ldrSCfg.Enabled {
+			continue
+		}
+		for _, dir := range []string{ldrSCfg.TpInDir} {
+			if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
+				fmt.Errorf("Nonexistent folder: %s", dir)
+			}
+		}
+		for _, dir := range []string{ldrSCfg.TpOutDir} {
+			if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
+				fmt.Errorf("Nonexistent folder: %s", dir)
+			}
+		}
+	}
+
 	// SMGeneric checks
 	if self.sessionSCfg.Enabled {
 		if len(self.sessionSCfg.RALsConns) == 0 {
@@ -1147,12 +1164,12 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	}
 
 	if jsnLoaderSCfg != nil {
-		if self.LoaderProfiles == nil {
-			self.LoaderProfiles = make([]*LoaderSConfig, len(jsnLoaderSCfg))
+		if self.loaderSCfg == nil {
+			self.loaderSCfg = make([]*LoaderSConfig, len(jsnLoaderSCfg))
 		}
 		for idx, profile := range jsnLoaderSCfg {
-			self.LoaderProfiles[idx] = NewDfltLoadersConfig()
-			self.LoaderProfiles[idx].loadFromJsonCfg(profile)
+			self.loaderSCfg[idx] = NewDfltLoadersConfig()
+			self.loaderSCfg[idx].loadFromJsonCfg(profile)
 		}
 	}
 
@@ -1391,4 +1408,8 @@ func (cfg *CGRConfig) FilterSCfg() *FilterSCfg {
 
 func (cfg *CGRConfig) CacheCfg() CacheConfig {
 	return cfg.cacheConfig
+}
+
+func (cfg *CGRConfig) LoaderSCfg() []*LoaderSConfig {
+	return cfg.loaderSCfg
 }

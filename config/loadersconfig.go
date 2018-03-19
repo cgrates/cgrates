@@ -18,6 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import (
+	"time"
+)
+
 func NewDfltLoadersConfig() *LoaderSConfig {
 	if dfltLoadersConfig == nil {
 		return new(LoaderSConfig)
@@ -30,6 +34,8 @@ type LoaderSConfig struct {
 	Id             string
 	Enabled        bool
 	DryRun         bool
+	RunDelay       time.Duration
+	LockFileName   string
 	CacheSConns    []*HaPoolConfig
 	FieldSeparator string
 	MaxOpenFiles   int
@@ -84,6 +90,12 @@ func (self *LoaderSConfig) loadFromJsonCfg(jsnCfg *LoaderSJsonCfg) error {
 	if jsnCfg.Dry_run != nil {
 		self.DryRun = *jsnCfg.Dry_run
 	}
+	if jsnCfg.Run_delay != nil {
+		self.RunDelay = time.Duration(*jsnCfg.Run_delay) * time.Second
+	}
+	if jsnCfg.Lock_filename != nil {
+		self.LockFileName = *jsnCfg.Lock_filename
+	}
 	if jsnCfg.Caches_conns != nil {
 		self.CacheSConns = make([]*HaPoolConfig, len(*jsnCfg.Caches_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Caches_conns {
@@ -119,6 +131,8 @@ func (self *LoaderSConfig) Clone() *LoaderSConfig {
 	clnLoader.Id = self.Id
 	clnLoader.Enabled = self.Enabled
 	clnLoader.DryRun = self.DryRun
+	clnLoader.RunDelay = self.RunDelay
+	clnLoader.LockFileName = self.LockFileName
 	clnLoader.CacheSConns = make([]*HaPoolConfig, len(self.CacheSConns))
 	for idx, cdrConn := range self.CacheSConns {
 		clonedVal := *cdrConn
