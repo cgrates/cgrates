@@ -24,6 +24,9 @@ func init() {
 	c := &CmdGetMaxUsage{
 		name:      "maxusage",
 		rpcMethod: "ApierV1.GetMaxUsage",
+		clientArgs: []string{"ToR", "RequestType", "Tenant",
+			"Category", "Account", "Subject", "Destination",
+			"SetupTime", "AnswerTime", "Usage", "ExtraFields"},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -48,7 +51,7 @@ func (self *CmdGetMaxUsage) RpcMethod() string {
 
 func (self *CmdGetMaxUsage) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.UsageRecord{}
+		self.rpcParams = new(engine.UsageRecord)
 	}
 	return self.rpcParams
 }
