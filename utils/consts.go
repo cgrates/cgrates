@@ -529,6 +529,7 @@ const (
 	Substitute                   = "Substitute"
 	Append                       = "Append"
 	MetaRound                    = "*round"
+	LoaderS                      = "LoaderS"
 )
 
 //MetaMetrics
