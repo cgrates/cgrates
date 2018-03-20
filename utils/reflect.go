@@ -170,7 +170,7 @@ func IfaceAsDuration(itm interface{}) (d time.Duration, err error) {
 		return ParseDurationWithNanosecs(itm.(string))
 
 	default:
-		err = fmt.Errorf("cannot convert field: %+v to time.Time", itm)
+		err = fmt.Errorf("cannot convert field: %+v to time.Duration", itm)
 	}
 	return
 }
@@ -186,7 +186,7 @@ func IfaceAsFloat64(itm interface{}) (f float64, err error) {
 	case string:
 		return strconv.ParseFloat(itm.(string), 64)
 	default:
-		err = fmt.Errorf("cannot convert field: %+v to time.Time", itm)
+		err = fmt.Errorf("cannot convert field: %+v to float64", itm)
 	}
 	return
 }

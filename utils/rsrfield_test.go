@@ -44,7 +44,7 @@ func TestNewRSRField1(t *testing.T) {
 	}
 	// With filter
 	rulesStr = `~sip_redirected_to:s/sip:\+49(\d+)@/0$1/(086517174963)`
-	// rulesStr = `~sip_redirected_to:s/sip:\+49(\d+)@/0$1/{*usage_seconds;*round:5:*middle}(086517174963)`
+	// rulesStr = `~sip_redirected_to:s/sip:\+49(\d+)@/0$1/{*duration_seconds;*round:5:*middle}(086517174963)`
 	filter, _ = NewRSRFilter("086517174963")
 	expRSRField2 := &RSRField{Id: "sip_redirected_to", Rules: rulesStr, filters: []*RSRFilter{filter},
 		RSRules: []*ReSearchReplace{&ReSearchReplace{SearchRegexp: regexp.MustCompile(`sip:\+49(\d+)@`), ReplaceTemplate: "0$1"}}}
@@ -54,7 +54,7 @@ func TestNewRSRField1(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", expRSRField2, rsrField)
 	}
 	// with dataConverters
-	rulesStr = `~sip_redirected_to:s/sip:\+49(\d+)@/0$1/{*usage_seconds;*round:5:*middle}(086517174963)`
+	rulesStr = `~sip_redirected_to:s/sip:\+49(\d+)@/0$1/{*duration_seconds;*round:5:*middle}(086517174963)`
 	filter, _ = NewRSRFilter("086517174963")
 	expRSRField := &RSRField{
 		Id:    "sip_redirected_to",
@@ -65,7 +65,7 @@ func TestNewRSRField1(t *testing.T) {
 				ReplaceTemplate: "0$1"}},
 		filters: []*RSRFilter{filter},
 		converters: []DataConverter{
-			new(UsageSecondsConverter), &RoundConverter{Decimals: 5, Method: "*middle"}}}
+			new(DurationSecondsConverter), &RoundConverter{Decimals: 5, Method: "*middle"}}}
 	if rsrField, err := NewRSRField(rulesStr); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if !reflect.DeepEqual(expRSRField, rsrField) {
@@ -477,7 +477,7 @@ func TestParseRules(t *testing.T) {
 
 func TestRSRFldParse(t *testing.T) {
 	// with dataConverters
-	rulesStr := `~Usage:s/(\d+)/${1}ms/{*usage_seconds;*round:1:*middle}(2.2)`
+	rulesStr := `~Usage:s/(\d+)/${1}ms/{*duration_seconds;*round:1:*middle}(2.2)`
 	rsrField, err := NewRSRField(rulesStr)
 	if err != nil {
 		t.Error(err)
@@ -488,12 +488,12 @@ func TestRSRFldParse(t *testing.T) {
 	} else if out != eOut {
 		t.Errorf("expecting: %s, received: %s", eOut, out)
 	}
-	rulesStr = `~Usage:s/(\d+)/${1}ms/{*usage_seconds;*round:1:*middle}(2.21)`
+	rulesStr = `~Usage:s/(\d+)/${1}ms/{*duration_seconds;*round:1:*middle}(2.21)`
 	rsrField, _ = NewRSRField(rulesStr)
 	if _, err := rsrField.Parse("2210"); err == nil || err.Error() != "filter not passing" {
 		t.Error(err)
 	}
-	rulesStr = `~Usage:s/(\d+)/${1}ms/{*usage_seconds;*round}`
+	rulesStr = `~Usage:s/(\d+)/${1}ms/{*duration_seconds;*round}`
 	if rsrField, err = NewRSRField(rulesStr); err != nil {
 		t.Error(err)
 	}
@@ -503,7 +503,7 @@ func TestRSRFldParse(t *testing.T) {
 	} else if out != eOut {
 		t.Errorf("expecting: %s, received: %s", eOut, out)
 	}
-	rulesStr = `Usage{*usage_seconds}`
+	rulesStr = `Usage{*duration_seconds}`
 	rsrField, err = NewRSRField(rulesStr)
 	if err != nil {
 		t.Error(err)
