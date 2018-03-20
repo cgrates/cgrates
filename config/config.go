@@ -479,12 +479,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 		if !ldrSCfg.Enabled {
 			continue
 		}
-		for _, dir := range []string{ldrSCfg.TpInDir} {
-			if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
-				fmt.Errorf("Nonexistent folder: %s", dir)
-			}
-		}
-		for _, dir := range []string{ldrSCfg.TpOutDir} {
+		for _, dir := range []string{ldrSCfg.TpInDir, ldrSCfg.TpOutDir} {
 			if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
 				fmt.Errorf("Nonexistent folder: %s", dir)
 			}

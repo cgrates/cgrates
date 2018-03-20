@@ -923,7 +923,7 @@ func TestLoaderDefaults(t *testing.T) {
 			Enabled:      false,
 			DryRun:       false,
 			RunDelay:     0,
-			LockFileName: "cgr.lock",
+			LockFileName: ".cgr.lock",
 			CacheSConns: []*HaPoolConfig{
 				&HaPoolConfig{
 					Address: utils.MetaInternal,

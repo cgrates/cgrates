@@ -458,7 +458,7 @@ const CGRATES_CFG_JSON = `
 		"enabled": false,									// starts as service: <true|false>.
 		"dry_run": false,									// do not send the CDRs to CDRS, just parse them
 		"run_delay": 0,										// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
-		"lock_filename": "cgr.lock",						// Filename containing concurrency lock in case of delayed processing
+		"lock_filename": ".cgr.lock",						// Filename containing concurrency lock in case of delayed processing
 		"caches_conns": [
 			{"address": "*internal"},						// address where to reach the CacheS for data reload, empty for no reloads  <""|*internal|x.y.z.y:1234>
 		],
