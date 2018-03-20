@@ -27,16 +27,16 @@
 "rals": {
 	"enabled": true,
 	"thresholds_conns": [
-		{"address": "*internal"}
+		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 	"stats_conns": [
-		{"address": "*internal"}
+		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 	"pubsubs_conns": [
-		{"address": "*internal"}
+		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 	"attributes_conns": [
-		{"address": "*internal"}
+		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 },
 
@@ -63,12 +63,21 @@
 	"attributes_conns": [
 		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
+	"stats_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"thresholds_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
 	"debit_interval": "10s",
 },
 
 
 "freeswitch_agent": {
 	"enabled": true,
+	"sessions_conns": [
+		{"address": "*internal"}
+	],
 },
 
 
@@ -79,14 +88,17 @@
 
 "attributes": {
 	"enabled": true,
+	"string_indexed_fields": ["Account"],			
 },
 
 
 "resources": {
 	"enabled": true,
 	"thresholds_conns": [
-		{"address": "*internal"}
+		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
+	"string_indexed_fields": ["Account"],
+	"prefix_indexed_fields": ["Destination"],
 },
 
 
@@ -95,11 +107,13 @@
 	"thresholds_conns": [
 		{"address": "*internal"}
 	],
+	"string_indexed_fields": ["Account","EventType"],
 },
 
 
 "thresholds": {
 	"enabled": true,
+	"string_indexed_fields": ["Account","EventType","StatID","ResourceID"],
 },
 
 
@@ -114,6 +128,8 @@
 	"stats_conns": [
 		{"address": "*internal"}	
 	],
+	"string_indexed_fields": ["Account"],
+	"prefix_indexed_fields": ["Destination"],
 },
 
 
