@@ -583,7 +583,7 @@ const (
 	MetaTpDestinations     = "*tp_destinations"
 	MetaTpRatingPlan       = "*tp_rating_plan"
 	MetaTpRatingProfile    = "*tp_rating_profile"
-	MetaUsageSeconds       = "*usage_seconds"
+	MetaUsageSeconds       = "*duration_seconds"
 )
 
 // MetaFilterIndexesAPIs

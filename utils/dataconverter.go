@@ -55,7 +55,7 @@ func NewDataConverter(params string) (
 	conv DataConverter, err error) {
 	switch {
 	case params == MetaUsageSeconds:
-		return NewUsageSecondsConverter("")
+		return NewDurationSecondsConverter("")
 	case strings.HasPrefix(params, MetaRound):
 		if len(params) == len(MetaRound) { // no extra params, defaults implied
 			return NewRoundConverter("")
@@ -68,15 +68,15 @@ func NewDataConverter(params string) (
 	}
 }
 
-func NewUsageSecondsConverter(params string) (
+func NewDurationSecondsConverter(params string) (
 	hdlr DataConverter, err error) {
-	return new(UsageSecondsConverter), nil
+	return new(DurationSecondsConverter), nil
 }
 
 // UsageSecondsDataConverter converts duration into seconds encapsulated in float64
-type UsageSecondsConverter struct{}
+type DurationSecondsConverter struct{}
 
-func (mS *UsageSecondsConverter) Convert(in interface{}) (
+func (mS *DurationSecondsConverter) Convert(in interface{}) (
 	out interface{}, err error) {
 	var inDur time.Duration
 	if inDur, err = IfaceAsDuration(in); err != nil {
