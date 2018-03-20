@@ -815,7 +815,7 @@ func TestDfLoaderSJsonCfg(t *testing.T) {
 			Enabled:       utils.BoolPointer(false),
 			Dry_run:       utils.BoolPointer(false),
 			Run_delay:     utils.IntPointer(0),
-			Lock_filename: utils.StringPointer("cgr.lock"),
+			Lock_filename: utils.StringPointer(".cgr.lock"),
 			Caches_conns: &[]*HaPoolJsonCfg{&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
