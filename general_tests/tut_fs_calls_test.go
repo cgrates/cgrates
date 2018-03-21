@@ -147,7 +147,7 @@ func TestFSCallCall1001To1002(t *testing.T) {
 
 // GetActiveSessions
 func TestFSCallGetActiveSessions(t *testing.T) {
-	time.Sleep(time.Duration(150 * time.Millisecond)) // Allow Session to start
+	time.Sleep(time.Duration(200 * time.Millisecond)) // Allow Session to start
 	var reply *[]*sessions.ActiveSession
 	expected := &[]*sessions.ActiveSession{
 		&sessions.ActiveSession{
@@ -175,6 +175,31 @@ func TestFSCallGetActiveSessions(t *testing.T) {
 			t.Errorf("Expected: %s, received: %s", (*expected)[0].Destination, (*reply)[0].Destination)
 		}
 	}
+}
+
+func TestFSCallCheckResourceAllocation(t *testing.T) {
+	var rs *engine.Resources
+	args := &utils.ArgRSv1ResourceUsage{
+		CGREvent: utils.CGREvent{
+			Tenant:  "cgrates.org",
+			Context: utils.StringPointer("*sessions"),
+			Event: map[string]interface{}{
+				"Account":     "1001",
+				"Category":    "call",
+				"Destination": "1002",
+				"RequestType": "*prepaid",
+				"Source":      "FS_CHANNEL_ANSWER",
+				"Subject":     "1001",
+				"Supplier":    "",
+				"Tenant":      "cgrates.org",
+				"ToR":         "*voice"},
+		}}
+	if err := tutFsCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
+		t.Error(err)
+	} else {
+		t.Errorf("Resources: %+v", utils.ToJSON(rs))
+	}
+
 }
 
 // get account while call is on
@@ -205,15 +230,12 @@ func TestFSCallAccount1001(t *testing.T) {
 // Make sure account was debited properly
 func TestTutFsCalls1001Cdrs(t *testing.T) {
 	var reply []*engine.ExternalCDR
-	//var CGRID string // Share  with getCostDetails
-	//var cCost engine.CallCost
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}, DestinationPrefixes: []string{"1002"}}
 	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		//CGRID = reply[0].CGRID
 		if reply[0].Source != "freeswitch_json" {
 			t.Errorf("Unexpected Source for CDR: %+v", reply[0])
 		}
@@ -227,20 +249,7 @@ func TestTutFsCalls1001Cdrs(t *testing.T) {
 			t.Errorf("Unexpected Cost for CDR: %+v", reply[0])
 		}
 	}
-
-	var cc *engine.SMCost
-	attrs := utils.AttrGetCallCost{
-		CgrId: reply[0].CGRID,
-		RunId: reply[0].RunID,
-	}
-
-	if err := tutFsCallsRpc.Call("ApierV1.GetCallCostLog", attrs, &cc); err != nil {
-		t.Error(err.Error())
-	}
-	if cc.CostSource != utils.MetaSessionS {
-		t.Errorf("Expected: *sessions, received: %+v", cc.CostSource)
-	}
-
+	// verifica CDR in sessions_cost si daca il gaseste il scrie cu *sessions la cost_source
 }
 
 // check resource for release
