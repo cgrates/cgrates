@@ -1456,7 +1456,7 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 type V1AuthorizeReplyWithDigest struct {
 	AttributesDigest   *string
 	ResourceAllocation *string
-	MaxUsage           *time.Duration
+	MaxUsage           *float64 // special treat returning time.Duration.Seconds()
 	SuppliersDigest    *string
 }
 
@@ -1479,7 +1479,7 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEventWithDigest(clnt rpcclient.RpcClientCo
 		authReply.ResourceAllocation = initAuthRply.ResourceAllocation
 	}
 	if args.GetMaxUsage {
-		authReply.MaxUsage = initAuthRply.MaxUsage
+		authReply.MaxUsage = utils.Float64Pointer(initAuthRply.MaxUsage.Seconds())
 	}
 	if args.GetSuppliers {
 		authReply.SuppliersDigest = utils.StringPointer(initAuthRply.Suppliers.Digest())

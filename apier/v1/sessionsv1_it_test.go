@@ -210,7 +210,7 @@ func TestSSv1ItAuthWithDigest(t *testing.T) {
 	if err := sSv1BiRpc.Call(utils.SessionSv1AuthorizeEventWithDigest, args, &rply); err != nil {
 		t.Error(err)
 	}
-	if *rply.MaxUsage != authUsage {
+	if *rply.MaxUsage != authUsage.Seconds() {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	if *rply.ResourceAllocation == "" {
