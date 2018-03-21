@@ -114,8 +114,8 @@ imports:
   - language
   - runes
   - transform
-- name: gopkg.in/fsnotify.v1
-  version: a8a77c9133d2d6fd8334f3260d06f60e8d80a5fb
+- name: github.com/fsnotify/fsnotify
+  version: c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9
 - name: github.com/cgrates/mgo
   version: 8c7a1328d9b01236687f383e686a9c610441ddc7
   subpackages:

@@ -30,7 +30,7 @@ import:
 - package: golang.org/x/net
   subpackages:
   - websocket
-- package: gopkg.in/fsnotify.v1
+- package: github.com/fsnotify/fsnotify
 - package: github.com/cgrates/mgo
   subpackages:
   - bson
