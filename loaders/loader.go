@@ -43,6 +43,7 @@ type Loader struct {
 	fieldSep     string
 	dataTpls     []*config.LoaderSDataType
 	rdrs         map[string]map[string]*openedCSVFile // map[loaderType]map[fileName]*openedCSVFile for common incremental read
+	procRows     int                                  // keep here the last processed row in the file/-s
 }
 
 // lockFolder will attempt to lock the folder by creating the lock file
