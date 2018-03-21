@@ -76,7 +76,7 @@ func TestFSCallStartFS(t *testing.T) {
 }
 
 // Start CGR Engine
-func TestTutFsCallsStartEngine(t *testing.T) {
+func TestFSCallStartEngine(t *testing.T) {
 	engine.KillProcName("cgr-engine", *waitRater)
 	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "fs_evsock", "cgrates", "etc", "init.d", "cgrates"), "start", 100); err != nil {
 		t.Fatal(err)
@@ -97,6 +97,7 @@ func TestFSCallRpcConn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 // Load the tariff plan, creating accounts and their balances
@@ -136,6 +137,29 @@ func TestFSCallStartPjsuaListener(t *testing.T) {
 	}
 }
 
+func TestFSCallCheckResourceBeforeAllocation(t *testing.T) {
+	var rs *engine.Resources
+	args := &utils.ArgRSv1ResourceUsage{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002"},
+		}}
+	if err := tutFsCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
+		t.Error(err)
+	} else if len(*rs) != 2 {
+		t.Errorf("Resources: %+v", rs)
+	}
+	for _, r := range *rs {
+		if r.ID == "ResGroup1" &&
+			(len(r.Usages) != 0 || len(r.TTLIdx) != 0) {
+			t.Errorf("Unexpected resource: %+v", r)
+		}
+	}
+}
+
 // Call from 1001 (prepaid) to 1002
 func TestFSCallCall1001To1002(t *testing.T) {
 	if err := engine.PjsuaCallUri(
@@ -143,11 +167,20 @@ func TestFSCallCall1001To1002(t *testing.T) {
 		"sip:1002@192.168.56.202", "sip:192.168.56.202:5060", time.Duration(67)*time.Second, 5071); err != nil {
 		t.Fatal(err)
 	}
+	time.Sleep(1 * time.Second)
+}
+
+// Call from 1002 (postpaid) to 1001
+func TestFSCallCall1002To1001(t *testing.T) {
+	if err := engine.PjsuaCallUri(
+		&engine.PjsuaAccount{Id: "sip:1002@192.168.56.202", Username: "1002", Password: "CGRateS.org", Realm: "*"},
+		"sip:1001@192.168.56.202", "sip:192.168.56.202:5060", time.Duration(65)*time.Second, 5072); err != nil {
+		t.Fatal(err)
+	}
 }
 
 // GetActiveSessions
 func TestFSCallGetActiveSessions(t *testing.T) {
-	time.Sleep(time.Duration(200 * time.Millisecond)) // Allow Session to start
 	var reply *[]*sessions.ActiveSession
 	expected := &[]*sessions.ActiveSession{
 		&sessions.ActiveSession{
@@ -181,29 +214,26 @@ func TestFSCallCheckResourceAllocation(t *testing.T) {
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
 		CGREvent: utils.CGREvent{
-			Tenant:  "cgrates.org",
-			Context: utils.StringPointer("*sessions"),
+			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
-				"Account":     "1001",
-				"Category":    "call",
-				"Destination": "1002",
-				"RequestType": "*prepaid",
-				"Source":      "FS_CHANNEL_ANSWER",
-				"Subject":     "1001",
-				"Supplier":    "",
-				"Tenant":      "cgrates.org",
-				"ToR":         "*voice"},
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002"},
 		}}
 	if err := tutFsCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Error(err)
-	} else {
-		t.Errorf("Resources: %+v", utils.ToJSON(rs))
+	} else if len(*rs) != 2 {
+		t.Errorf("Resources: %+v", rs)
 	}
-
+	for _, r := range *rs {
+		if r.ID == "ResGroup1" &&
+			(len(r.Usages) != 1 || len(r.TTLIdx) != 1) {
+			t.Errorf("Unexpected resource: %+v", r)
+		}
+	}
 }
 
 // get account while call is on
-// check resource for alocation
 // add threshold non recurent
 // while call is on threshold is there
 // for 1001 -> 1002 non recurent
@@ -211,7 +241,7 @@ func TestFSCallCheckResourceAllocation(t *testing.T) {
 
 // Make sure account was debited properly
 func TestFSCallAccount1001(t *testing.T) {
-	time.Sleep(time.Duration(75) * time.Second) // Allow calls to finish before start querying the results
+	time.Sleep(time.Duration(80) * time.Second) // Allow calls to finish before start querying the results
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := tutFsCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
@@ -223,9 +253,32 @@ func TestFSCallAccount1001(t *testing.T) {
 	}
 }
 
+func TestFSCallCheckResourceRelease(t *testing.T) {
+	var rs *engine.Resources
+	args := &utils.ArgRSv1ResourceUsage{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002"},
+		}}
+	if err := tutFsCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
+		t.Error(err)
+	} else if len(*rs) != 2 {
+		t.Errorf("Resources: %+v", rs)
+	}
+	for _, r := range *rs {
+		if r.ID == "ResGroup1" &&
+			(len(r.Usages) != 0 || len(r.TTLIdx) != 0) {
+			t.Errorf("Unexpected resource: %+v", r)
+		}
+	}
+}
+
 // after call end threshold should't be there
 
-//get cdr and check source of cdr to be *sessions
+// get cdr and check source of cdr to be *sessions
 
 // Make sure account was debited properly
 func TestTutFsCalls1001Cdrs(t *testing.T) {
@@ -252,8 +305,19 @@ func TestTutFsCalls1001Cdrs(t *testing.T) {
 	// verifica CDR in sessions_cost si daca il gaseste il scrie cu *sessions la cost_source
 }
 
-// check resource for release
-// check stats for ACD & ACC
+func TestFSCallStatMetrics2(t *testing.T) {
+	var metrics map[string]string
+	expectedMetrics := map[string]string{
+		utils.MetaTCC: "0",
+		utils.MetaTCD: "2m12s",
+	}
+	if err := tutFsCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2"}, &metrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
+	}
+}
 
 func TestFSCallStopPjsuaListener(t *testing.T) {
 	tutFsCallsPjSuaListener.Write([]byte("q\n")) // Close pjsua
