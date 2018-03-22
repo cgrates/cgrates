@@ -308,7 +308,7 @@ func TestTutFsCalls1001Cdrs(t *testing.T) {
 func TestFSCallStatMetrics2(t *testing.T) {
 	var metrics map[string]string
 	expectedMetrics := map[string]string{
-		utils.MetaTCC: "0",
+		utils.MetaTCC: "1.8451",
 		utils.MetaTCD: "2m12s",
 	}
 	if err := tutFsCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
