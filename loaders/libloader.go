@@ -62,9 +62,15 @@ func (ld LoaderData) UpdateFromCSV(fileName string, record []string,
 		}
 		switch cfgFld.Type {
 		case utils.META_COMPOSED:
-			if valOrig, canCast := ld[cfgFld.FieldId].(string); canCast {
+			if _, has := ld[cfgFld.FieldId]; !has {
+				ld[cfgFld.FieldId] = valStr
+			} else if valOrig, canCast := ld[cfgFld.FieldId].(string); canCast {
 				valOrig += valStr
 				ld[cfgFld.FieldId] = valOrig
+			}
+		case utils.MetaString:
+			if _, has := ld[cfgFld.FieldId]; !has {
+				ld[cfgFld.FieldId] = valStr
 			}
 		}
 	}

@@ -330,6 +330,7 @@ const (
 	TRIGGER_BALANCE_EXPIRED      = "*balance_expired"
 	HIERARCHY_SEP                = ">"
 	META_COMPOSED                = "*composed"
+	MetaString                   = "*string"
 	NegativePrefix               = "!"
 	MatchStartPrefix             = "^"
 	MatchEndPrefix               = "$"
