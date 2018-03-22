@@ -417,7 +417,8 @@ func (smg *SMGeneric) sessionStart(evStart SMGenericEvent,
 			s := &SMGSession{CGRID: cgrID, EventStart: evStart,
 				RunID: sessionRun.DerivedCharger.RunID, Timezone: smg.Timezone,
 				rals: smg.rals, cdrsrv: smg.cdrsrv,
-				CD: sessionRun.CallDescriptor, clntConn: clntConn}
+				CD: sessionRun.CallDescriptor, clntConn: clntConn,
+				clientProto: smg.cgrCfg.SessionSCfg().ClientProtocol}
 			smg.recordASession(s)
 			//utils.Logger.Info(fmt.Sprintf("<%s> Starting session: %s, runId: %s",utils.SessionS, sessionId, s.runId))
 			if smg.cgrCfg.SessionSCfg().DebitInterval != 0 {
