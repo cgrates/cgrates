@@ -1473,7 +1473,7 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEventWithDigest(clnt rpcclient.RpcClientCo
 	if err = smg.BiRPCv1AuthorizeEvent(clnt, args, &initAuthRply); err != nil {
 		return
 	}
-	if args.GetAttributes {
+	if args.GetAttributes && initAuthRply.Attributes != nil {
 		authReply.AttributesDigest = utils.StringPointer(initAuthRply.Attributes.Digest())
 	}
 	if args.AuthorizeResources {
