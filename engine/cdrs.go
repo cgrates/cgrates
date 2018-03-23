@@ -443,8 +443,8 @@ func (self *CdrServer) rateCDR(cdr *CDR) ([]*CDR, error) {
 			return cdrsRated, nil
 		} else { //calculate CDR as for pseudoprepaid
 			utils.Logger.Warning(
-				fmt.Sprintf("<Cdrs> WARNING: Could not find CallCostLog for cgrid: %s, source: %s, runid: %s, originID: %s, will recalculate",
-					cdr.CGRID, utils.MetaSessionS, cdr.RunID, cdr.OriginID))
+				fmt.Sprintf("<Cdrs> WARNING: Could not find CallCostLog for cgrid: %s, source: %s, runid: %s, originID: %s originHost: %s, will recalculate",
+					cdr.CGRID, utils.MetaSessionS, cdr.RunID, cdr.OriginID, cdr.OriginHost))
 			qryCC, err = self.getCostFromRater(cdr)
 		}
 	} else {
