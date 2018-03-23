@@ -29,5 +29,11 @@ cgrates.org,FLTR_RES_GR3,*string,Account,3001,2014-07-29T15:00:00Z
 cgrates.org,FLTR_CDRS,*cdr_stats,,CDRST1:*min_ASR:34;CDRST_1001:*min_ASR:20,2014-07-29T15:00:00Z
 cgrates.org,FLTR_STS1,*string,Account,1001;1002,2014-07-29T15:00:00Z
 cgrates.org,FLTR_CDR_UPDATE,*string,EventType,CDR,2014-07-29T15:00:00Z
-cgrates.org,FLTR_ACNT_1001_1002,*string,Account,1001;1002,2014-07-29T15:00:00Z
-cgrates.org,FLTR_ACNT_1001_1002,*string,RunID,*default,
+cgrates.org,FLTR_ACNT_1011_1012,*string,Account,1011;1012,2014-07-29T15:00:00Z
+cgrates.org,FLTR_ACNT_1011_1012,*string,RunID,*default,
+cgrates.org,FLTR_ACNT_1011,*string,Account,1011,2014-07-29T15:00:00Z
+cgrates.org,FLTR_ACNT_1012,*string,Account,1012,2014-07-29T15:00:00Z
+cgrates.org,FLTR_2,*string,Account,1011;1012,2014-07-29T15:00:00Z
+cgrates.org,FLTR_2,*prefix,Destination,10;20,
+cgrates.org,FLTR_2,*rsr,,Subject(~^1.*1$);Destination(1012),
+
