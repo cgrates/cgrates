@@ -21,10 +21,12 @@ package loaders
 import (
 	"encoding/csv"
 	"fmt"
+	"io"
 	"os"
 	"path"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -36,14 +38,33 @@ type openedCSVFile struct {
 
 // Loader is one instance loading from a folder
 type Loader struct {
-	tpInDir      string
-	tpOutDir     string
-	lockFilename string
-	cacheSConns  []*config.HaPoolConfig
-	fieldSep     string
-	dataTpls     []*config.LoaderSDataType
-	rdrs         map[string]map[string]*openedCSVFile // map[loaderType]map[fileName]*openedCSVFile for common incremental read
-	procRows     int                                  // keep here the last processed row in the file/-s
+	ldrID         string
+	tpInDir       string
+	tpOutDir      string
+	lockFilename  string
+	cacheSConns   []*config.HaPoolConfig
+	fieldSep      string
+	dataTpls      map[string][]*config.CfgCdrField     // map[loaderType]*config.CfgCdrField
+	rdrs          map[string]map[string]*openedCSVFile // map[loaderType]map[fileName]*openedCSVFile for common incremental read
+	procRows      int                                  // keep here the last processed row in the file/-s
+	bufLoaderData map[string][]LoaderData              // cache of data read, indexed on tenantID
+	dm            *engine.DataManager
+	timezone      string
+}
+
+// ProcessFolder will process the content in the folder with locking
+func (ldr *Loader) ProcessFolder() (err error) {
+	if err = ldr.lockFolder(); err != nil {
+		return
+	}
+	defer ldr.unlockFolder()
+	for ldrType := range ldr.rdrs {
+		if err = ldr.processFiles(ldrType); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<%s> loaderType: <%s>, err: %s",
+				utils.LoaderS, ldrType, err.Error()))
+		}
+	}
+	return
 }
 
 // lockFolder will attempt to lock the folder by creating the lock file
@@ -58,27 +79,6 @@ func (ldr *Loader) unlockFolder() (err error) {
 		ldr.lockFilename))
 }
 
-// ProcessFolder will process the content in the folder with locking
-func (ldr *Loader) ProcessFolder() (err error) {
-	if err = ldr.lockFolder(); err != nil {
-		return
-	}
-	defer ldr.unlockFolder()
-	for loaderType := range ldr.rdrs {
-		switch loaderType {
-		case utils.MetaAttributes:
-			if err = ldr.processAttributes(); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> loaderType: <%s>, err: %s",
-					utils.LoaderS, loaderType, err.Error()))
-			}
-		default:
-			utils.Logger.Warning(fmt.Sprintf("<%s> unsupported loaderType: <%s>",
-				utils.LoaderS, loaderType))
-		}
-	}
-	return
-}
-
 // unreferenceFile will cleanup an used file by closing and removing from referece map
 func (ldr *Loader) unreferenceFile(loaderType, fileName string) (err error) {
 	openedCSVFile := ldr.rdrs[loaderType][fileName]
@@ -86,18 +86,96 @@ func (ldr *Loader) unreferenceFile(loaderType, fileName string) (err error) {
 	return openedCSVFile.fd.Close()
 }
 
-// processAttributes contains the procedure for loading Attributes
-func (ldr *Loader) processAttributes() (err error) {
-	// open files as csv readers
-	for fName := range ldr.rdrs[utils.MetaAttributes] {
+func (ldr *Loader) storeLoadedData(loaderType string,
+	lds map[string][]LoaderData) (err error) {
+	switch loaderType {
+	case utils.MetaAttributes:
+		for _, lDataSet := range lds {
+			attrModels := make(engine.TPAttributes, len(lDataSet))
+			for i, ld := range lDataSet {
+				attrModels[i] = new(engine.TPAttribute)
+				if err = utils.UpdateStructWithIfaceMap(attrModels[i], ld); err != nil {
+					return
+				}
+			}
+			for _, tpApf := range attrModels.AsTPAttributes() {
+				if apf, err := engine.APItoAttributeProfile(tpApf, ldr.timezone); err != nil {
+					return err
+				} else if err := ldr.dm.SetAttributeProfile(apf, true); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return
+}
+
+func (ldr *Loader) processFiles(loaderType string) (err error) {
+	for fName := range ldr.rdrs[loaderType] {
 		var fd *os.File
 		if fd, err = os.Open(path.Join(ldr.tpInDir, fName)); err != nil {
 			return err
 		}
-		ldr.rdrs[utils.MetaAttributes][fName] = &openedCSVFile{
+		ldr.rdrs[loaderType][fName] = &openedCSVFile{
 			fileName: fName, fd: fd, csvRdr: csv.NewReader(fd)}
-		defer ldr.unreferenceFile(utils.MetaAttributes, fName)
+		defer ldr.unreferenceFile(loaderType, fName)
 	}
 	// start processing lines
+	keepLooping := true // controls looping
+	lineNr := 0
+	for keepLooping {
+		lineNr += 1
+		var hasErrors bool
+		lData := make(LoaderData) // one row
+		for fName, rdr := range ldr.rdrs[loaderType] {
+			var record []string
+			if record, err = rdr.csvRdr.Read(); err != nil {
+				if err == io.EOF {
+					keepLooping = false
+					break
+				}
+				hasErrors = true
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> <%s> reading line: %d, error: %s",
+						utils.LoaderS, ldr.ldrID, lineNr, err.Error()))
+			}
+			if hasErrors { // if any of the readers will give errors, we ignore the line
+				continue
+			}
+			if err := lData.UpdateFromCSV(fName, record,
+				ldr.dataTpls[utils.MetaAttributes]); err != nil {
+				fmt.Sprintf("<%s> <%s> line: %d, error: %s",
+					utils.LoaderS, ldr.ldrID, lineNr, err.Error())
+				hasErrors = true
+				continue
+			}
+			// Record from map
+			// update dataDB
+		}
+		tntID := lData.TenantID()
+		if _, has := ldr.bufLoaderData[tntID]; !has &&
+			len(ldr.bufLoaderData) == 1 { // process previous records before going futher
+			var prevTntID string
+			for prevTntID = range ldr.bufLoaderData {
+				break // have stolen the existing key in buffer
+			}
+			if err = ldr.storeLoadedData(loaderType,
+				map[string][]LoaderData{prevTntID: ldr.bufLoaderData[prevTntID]}); err != nil {
+				return
+			}
+			delete(ldr.bufLoaderData, prevTntID)
+		}
+		ldr.bufLoaderData[tntID] = append(ldr.bufLoaderData[tntID], lData)
+	}
+	// proceed with last element in bufLoaderData
+	var tntID string
+	for tntID = range ldr.bufLoaderData {
+		break // get the first tenantID
+	}
+	if err = ldr.storeLoadedData(loaderType,
+		map[string][]LoaderData{tntID: ldr.bufLoaderData[tntID]}); err != nil {
+		return
+	}
+	delete(ldr.bufLoaderData, tntID)
 	return
 }

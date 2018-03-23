@@ -168,3 +168,45 @@ func TestStructFromMapStringInterfaceValue(t *testing.T) {
 		t.Errorf("error converting structure value: %s", ToIJSON(rt))
 	}
 }
+
+func TestUpdateStructWithIfaceMap(t *testing.T) {
+	type myStruct struct {
+		String string
+		Bool   bool
+		Float  float64
+		Int    int64
+	}
+	s := new(myStruct)
+	mp := map[string]interface{}{
+		"String": "s",
+		"Bool":   true,
+		"Float":  6.4,
+		"Int":    2,
+	}
+	eStruct := &myStruct{
+		String: "s",
+		Bool:   true,
+		Float:  6.4,
+		Int:    2,
+	}
+	if err := UpdateStructWithIfaceMap(s, mp); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eStruct, s) {
+		t.Errorf("expecting: %+v, received: %+v", eStruct, s)
+	}
+	mp = map[string]interface{}{
+		"String": "aaa",
+		"Bool":   false,
+	}
+	eStruct = &myStruct{
+		String: "aaa",
+		Bool:   false,
+		Float:  6.4,
+		Int:    2,
+	}
+	if err := UpdateStructWithIfaceMap(s, mp); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eStruct, s) {
+		t.Errorf("expecting: %+v, received: %+v", eStruct, s)
+	}
+}

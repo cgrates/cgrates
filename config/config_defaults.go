@@ -466,7 +466,6 @@ const CGRATES_CFG_JSON = `
 		"max_open_files": 1024,								// maximum simultaneous files to process, 0 for unlimited
 		"tp_in_dir": "/var/spool/cgrates/tploader/in",		// absolute path towards the directory where the CDRs are stored
 		"tp_out_dir": "/var/spool/cgrates/tploader/out",	// absolute path towards the directory where processed CDRs will be moved
-	
 		"data":[											// data profiles to load
 			{
 				"type": "*attributes",						// data source type

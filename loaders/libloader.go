@@ -29,6 +29,12 @@ import (
 
 type LoaderData map[string]interface{}
 
+func (ld LoaderData) TenantID() string {
+	tnt := ld[utils.Tenant].(string)
+	prflID := ld[utils.ID].(string)
+	return utils.ConcatenatedKey(tnt, prflID)
+}
+
 // UpdateFromCSV will update LoaderData with data received from fileName,
 // contained in record and processed with cfgTpl
 func (ld LoaderData) UpdateFromCSV(fileName string, record []string,

@@ -251,3 +251,43 @@ func UpdateStructWithStrMap(s interface{}, m map[string]string) []string {
 	}
 	return notMatched
 }
+
+// UpdateStructWithIfaceMap will update struct fields with values coming from map
+// if map values are not matching the ones in strcut convertion is being attempted
+// ToDo: add here more fields
+func UpdateStructWithIfaceMap(s interface{}, mp map[string]interface{}) (err error) {
+	for key, val := range mp {
+		fld := reflect.ValueOf(s).Elem().FieldByName(key)
+		if fld.IsValid() {
+			switch fld.Kind() {
+			case reflect.Bool:
+				if valBool, err := IfaceAsBool(val); err != nil {
+					return err
+				} else {
+					fld.SetBool(valBool)
+				}
+			case reflect.Int, reflect.Int64:
+				if valInt, err := IfaceAsInt64(val); err != nil {
+					return err
+				} else {
+					fld.SetInt(valInt)
+				}
+			case reflect.Float64:
+				if valFlt, err := IfaceAsFloat64(val); err != nil {
+					return err
+				} else {
+					fld.SetFloat(valFlt)
+				}
+			case reflect.String:
+				if valStr, canCast := CastFieldIfToString(val); !canCast {
+					return fmt.Errorf("cannot convert field: %+v to string", val)
+				} else {
+					fld.SetString(valStr)
+				}
+			default: // improper use of function
+				return fmt.Errorf("cannot update unsupported struct field: %+v", fld)
+			}
+		}
+	}
+	return
+}

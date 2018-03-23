@@ -175,6 +175,22 @@ func IfaceAsDuration(itm interface{}) (d time.Duration, err error) {
 	return
 }
 
+func IfaceAsInt64(itm interface{}) (i int64, err error) {
+	switch itm.(type) {
+	case int:
+		return int64(itm.(int)), nil
+	case time.Duration:
+		return itm.(time.Duration).Nanoseconds(), nil
+	case int64:
+		return itm.(int64), nil
+	case string:
+		return strconv.ParseInt(itm.(string), 10, 64)
+	default:
+		err = fmt.Errorf("cannot convert field: %+v to int", itm)
+	}
+	return
+}
+
 func IfaceAsFloat64(itm interface{}) (f float64, err error) {
 	switch itm.(type) {
 	case float64:
@@ -187,6 +203,24 @@ func IfaceAsFloat64(itm interface{}) (f float64, err error) {
 		return strconv.ParseFloat(itm.(string), 64)
 	default:
 		err = fmt.Errorf("cannot convert field: %+v to float64", itm)
+	}
+	return
+}
+
+func IfaceAsBool(itm interface{}) (b bool, err error) {
+	switch itm.(type) {
+	case bool:
+		return itm.(bool), nil
+	case string:
+		return strconv.ParseBool(itm.(string))
+	case int:
+		return itm.(int) > 0, nil
+	case int64:
+		return itm.(int64) > 0, nil
+	case float64:
+		return itm.(float64) > 0, nil
+	default:
+		err = fmt.Errorf("cannot convert field: %+v to bool", itm)
 	}
 	return
 }
