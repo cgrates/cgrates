@@ -44,8 +44,10 @@ const (
 	EvapiConnID            = "EvapiConnID" // used to share connID info in event for remote disconnects
 )
 
-var kamReservedFields = []string{EVENT, KamTRIndex, KamTRLabel,
-	KamHashEntry, KamHashID, KamCGRSubsystems}
+var (
+	kamReservedEventFields = []string{EVENT, KamTRIndex, KamTRLabel, KamCGRSubsystems}
+	kamReservedCDRFields   = append(kamReservedEventFields, KamHashEntry, KamHashID) // HashEntry and id are needed in events for disconnects
+)
 
 func NewKamSessionDisconnect(hEntry, hID, reason string) *KamSessionDisconnect {
 	return &KamSessionDisconnect{
@@ -118,7 +120,7 @@ func (kev KamEvent) AsMapStringInterface() (mp map[string]interface{}) {
 		if k == utils.Usage {
 			v += "s" // mark the Usage as seconds
 		}
-		if !utils.IsSliceMember(kamReservedFields, k) { // reserved attributes not getting into event
+		if !utils.IsSliceMember(kamReservedEventFields, k) { // reserved attributes not getting into event
 			mp[k] = v
 		}
 	}
@@ -131,7 +133,7 @@ func (kev KamEvent) AsCDR(timezone string) (cdr *engine.CDR) {
 	cdr.ExtraFields = make(map[string]string)
 	for fld, val := range kev { // first ExtraFields so we can overwrite
 		if !utils.IsSliceMember(utils.PrimaryCdrFields, fld) &&
-			!utils.IsSliceMember(kamReservedFields, fld) {
+			!utils.IsSliceMember(kamReservedCDRFields, fld) {
 			cdr.ExtraFields[fld] = val
 		}
 	}
