@@ -114,3 +114,8 @@ func (stsv1 *StatSv1) GetQueueStringMetrics(args *utils.TenantID, reply *map[str
 func (stsv1 *StatSv1) GetQueueFloatMetrics(args *utils.TenantID, reply *map[string]float64) (err error) {
 	return stsv1.sS.V1GetQueueFloatMetrics(args, reply)
 }
+
+func (stSv1 *StatSv1) Ping(ign string, reply *string) error {
+	*reply = utils.Pong
+	return nil
+}

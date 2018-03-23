@@ -98,3 +98,8 @@ func (alSv1 *AttributeSv1) ProcessEvent(ev *utils.CGREvent,
 	reply *engine.AttrSProcessEventReply) error {
 	return alSv1.attrS.V1ProcessEvent(ev, reply)
 }
+
+func (alSv1 *AttributeSv1) Ping(ign string, reply *string) error {
+	*reply = utils.Pong
+	return nil
+}

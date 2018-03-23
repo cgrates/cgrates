@@ -531,6 +531,7 @@ const (
 	Append                       = "Append"
 	MetaRound                    = "*round"
 	LoaderS                      = "LoaderS"
+	Pong                         = "Pong"
 )
 
 //MetaMetrics
@@ -599,12 +600,14 @@ const (
 // MetaSupplierAPIs
 const (
 	SupplierSv1GetSuppliers = "SupplierSv1.GetSuppliers"
+	SupplierSv1Ping         = "SupplierSv1.Ping"
 )
 
 // AttributeS APIs
 const (
 	AttributeSv1GetAttributeForEvent = "AttributeSv1.GetAttributeForEvent"
 	AttributeSv1ProcessEvent         = "AttributeSv1.ProcessEvent"
+	AttributeSv1Ping                 = "AttributeSv1.Ping"
 )
 
 //ThresholdS APIs
@@ -612,6 +615,7 @@ const (
 	ThresholdSv1ProcessEvent    = "ThresholdSv1.ProcessEvent"
 	ThresholdSv1GetThreshold    = "ThresholdSv1.GetThreshold"
 	ThresholdSv1GetThresholdIDs = "ThresholdSv1.GetThresholdIDs"
+	ThresholdSv1Ping            = "ThresholdSv1.Ping"
 )
 
 //StatS APIs
@@ -619,6 +623,7 @@ const (
 	StatSv1ProcessEvent          = "StatSv1.ProcessEvent"
 	StatSv1GetQueueIDs           = "StatSv1.GetQueueIDs"
 	StatSv1GetQueueStringMetrics = "StatSv1.GetQueueStringMetrics"
+	StatSv1Ping                  = "StatSv1.Ping"
 )
 
 //ResourceS APIs
@@ -627,6 +632,7 @@ const (
 	ResourceSv1GetResourcesForEvent = "ResourceSv1.GetResourcesForEvent"
 	ResourceSv1AllocateResources    = "ResourceSv1.AllocateResources"
 	ResourceSv1ReleaseResources     = "ResourceSv1.ReleaseResources"
+	ResourceSv1Ping                 = "ResourceSv1.Ping"
 )
 
 //SessionS APIs
@@ -644,6 +650,7 @@ const (
 	SMGenericV1InitiateSession         = "SMGenericV1.InitiateSession"
 	SMGenericV2InitiateSession         = "SMGenericV2.InitiateSession"
 	SMGenericV2UpdateSession           = "SMGenericV2.UpdateSession"
+	SessionSv1Ping                     = "SessionSv1.Ping"
 )
 
 // Cache

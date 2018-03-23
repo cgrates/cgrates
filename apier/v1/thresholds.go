@@ -100,3 +100,8 @@ func (apierV1 *ApierV1) RemoveThresholdProfile(args *utils.TenantID, reply *stri
 	*reply = utils.OK
 	return nil
 }
+
+func (tSv1 *ThresholdSv1) Ping(ign string, reply *string) error {
+	*reply = utils.Pong
+	return nil
+}

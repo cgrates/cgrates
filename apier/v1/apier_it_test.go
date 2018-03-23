@@ -1821,6 +1821,35 @@ func TestApierGetStorDBVesions(t *testing.T) {
 	}
 }
 
+func TestApierPing(t *testing.T) {
+	var reply string
+	if err := rater.Call(utils.StatSv1Ping, "", &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
+	}
+	if err := rater.Call(utils.ResourceSv1Ping, "", &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
+	}
+	if err := rater.Call(utils.SupplierSv1Ping, "", &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
+	}
+	if err := rater.Call(utils.ThresholdSv1Ping, "", &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
+	}
+	if err := rater.Call(utils.AttributeSv1Ping, "", &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
+	}
+}
+
 // Simply kill the engine after we are done with tests within this file
 func TestApierStopEngine(t *testing.T) {
 	exec.Command("pkill", "cgr-engine").Run()

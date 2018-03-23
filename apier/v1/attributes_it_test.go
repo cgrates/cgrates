@@ -61,6 +61,7 @@ var sTestsAlsPrf = []func(t *testing.T){
 	testAttributeSSetAlsPrf,
 	testAttributeSUpdateAlsPrf,
 	testAttributeSRemAlsPrf,
+	testAttributeSPing,
 	testAttributeSKillEngine,
 }
 
@@ -645,6 +646,15 @@ func testAttributeSRemAlsPrf(t *testing.T) {
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
+	}
+}
+
+func testAttributeSPing(t *testing.T) {
+	var resp string
+	if err := attrSRPC.Call(utils.AttributeSv1Ping, "", &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.Pong {
+		t.Error("Unexpected reply returned", resp)
 	}
 }
 

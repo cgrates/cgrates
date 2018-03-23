@@ -441,6 +441,15 @@ func TestSSv1ItProcessEvent(t *testing.T) {
 	}
 }
 
+func TestV1STSSessionPing(t *testing.T) {
+	var resp string
+	if err := sSv1BiRpc.Call(utils.SessionSv1Ping, "", &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.Pong {
+		t.Error("Unexpected reply returned", resp)
+	}
+}
+
 func TestSSv1ItStopCgrEngine(t *testing.T) {
 	if err := sSv1BiRpc.Close(); err != nil { // Close the connection so we don't get EOF warnings from client
 		t.Error(err)

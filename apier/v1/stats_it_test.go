@@ -83,6 +83,7 @@ var sTestsStatSV1 = []func(t *testing.T){
 	testV1STSSetStatQueueProfile,
 	testV1STSUpdateStatQueueProfile,
 	testV1STSRemoveStatQueueProfile,
+	testV1STSStatsPing,
 	testV1STSStopEngine,
 }
 
@@ -397,6 +398,15 @@ func testV1STSRemoveStatQueueProfile(t *testing.T) {
 	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &sqp); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
+	}
+}
+
+func testV1STSStatsPing(t *testing.T) {
+	var resp string
+	if err := stsV1Rpc.Call(utils.StatSv1Ping, "", &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.Pong {
+		t.Error("Unexpected reply returned", resp)
 	}
 }
 

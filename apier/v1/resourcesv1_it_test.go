@@ -61,6 +61,7 @@ var sTestsRLSV1 = []func(t *testing.T){
 	testV1RsGetResourceProfileAfterUpdate,
 	testV1RsRemResourceProfile,
 	testV1RsGetResourceProfileAfterDelete,
+	testV1RsResourcePing,
 	testV1RsStopEngine,
 }
 
@@ -681,6 +682,15 @@ func testV1RsGetResourceProfileAfterDelete(t *testing.T) {
 		&utils.TenantID{Tenant: "cgrates.org", ID: "RCFG1"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
+	}
+}
+
+func testV1RsResourcePing(t *testing.T) {
+	var resp string
+	if err := rlsV1Rpc.Call(utils.ResourceSv1Ping, "", &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.Pong {
+		t.Error("Unexpected reply returned", resp)
 	}
 }
 

@@ -54,6 +54,7 @@ var sTestsSupplierSV1 = []func(t *testing.T){
 	testV1SplSSetSupplierProfiles,
 	testV1SplSUpdateSupplierProfiles,
 	testV1SplSRemSupplierProfiles,
+	testV1SplSupplierPing,
 	testV1SplSStopEngine,
 }
 
@@ -365,6 +366,15 @@ func testV1SplSRemSupplierProfiles(t *testing.T) {
 	var reply *engine.SupplierProfile
 	if err := splSv1Rpc.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
+	}
+}
+
+func testV1SplSupplierPing(t *testing.T) {
+	var resp string
+	if err := splSv1Rpc.Call(utils.SupplierSv1Ping, "", &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.Pong {
+		t.Error("Unexpected reply returned", resp)
 	}
 }
 
