@@ -133,3 +133,8 @@ func (ssv1 *SessionSv1) BiRPCV1GetPassiveSessions(clnt *rpc2.Client, args map[st
 	rply *[]*sessions.ActiveSession) error {
 	return ssv1.SMG.BiRPCV1GetPassiveSessions(clnt, args, rply)
 }
+
+func (ssv1 *SessionSv1) Ping(ign string, reply *string) error {
+	*reply = utils.Pong
+	return nil
+}

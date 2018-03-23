@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
 )
 
@@ -91,4 +92,9 @@ func (chSv1 *CacheSv1) GetGroupItemIDs(args *engine.ArgsGetGroup,
 func (chSv1 *CacheSv1) RemoveGroup(args *engine.ArgsGetGroup,
 	rply *string) (err error) {
 	return chSv1.cacheS.V1RemoveGroup(args, rply)
+}
+
+func (chSv1 *CacheSv1) Ping(ign string, reply *string) error {
+	*reply = utils.Pong
+	return nil
 }

@@ -86,3 +86,8 @@ func (splv1 *SupplierSv1) GetSuppliers(args *engine.ArgsGetSuppliers,
 	reply *engine.SortedSuppliers) error {
 	return splv1.splS.V1GetSuppliers(args, reply)
 }
+
+func (splv1 *SupplierSv1) Ping(ign string, reply *string) error {
+	*reply = utils.Pong
+	return nil
+}
