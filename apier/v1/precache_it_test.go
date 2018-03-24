@@ -46,9 +46,9 @@ var (
 var sTestsPrecache = []func(t *testing.T){
 	testPrecacheInitCfg,
 	testPrecacheResetDataDB,
-	//testPrecacheStartEngine,
+	testPrecacheStartEngine,
 	testPrecacheRpcConn,
-	// testPrecacheGetCacheStatsBeforeLoad,
+	testPrecacheGetCacheStatsBeforeLoad,
 	testPrecacheFromFolder,
 	testPrecacheRestartEngine,
 	testPrecacheGetItemIDs,
@@ -112,11 +112,9 @@ func testPrecacheGetItemIDs(t *testing.T) {
 		CacheID: "*default",
 	}
 	var reply *[]string
-	expected := []string{}
-	if err := precacheRPC.Call(utils.CacheSv1GetItemIDs, args, &reply); err != nil {
-		t.Error(err.Error())
-	} else if !reflect.DeepEqual(reply, expected) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(reply))
+	if err := precacheRPC.Call(utils.CacheSv1GetItemIDs, args, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
 	}
 }
 
@@ -125,7 +123,7 @@ func testPrecacheGetCacheStatsBeforeLoad(t *testing.T) {
 	cacheIDs := []string{}
 	expectedStats := &map[string]*ltcache.CacheStats{
 		"*default": &ltcache.CacheStats{
-			Items:  1,
+			Items:  0,
 			Groups: 0,
 		},
 		"account_action_plans": &ltcache.CacheStats{
@@ -301,11 +299,11 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 	cacheIDs := []string{}
 	expectedStats := &map[string]*ltcache.CacheStats{
 		"*default": &ltcache.CacheStats{
-			Items:  1,
+			Items:  0,
 			Groups: 0,
 		},
 		"account_action_plans": &ltcache.CacheStats{
-			Items:  5,
+			Items:  7,
 			Groups: 0,
 		},
 		"action_plans": &ltcache.CacheStats{
@@ -345,7 +343,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"destinations": &ltcache.CacheStats{
-			Items:  5,
+			Items:  8,
 			Groups: 0,
 		},
 		"event_resources": &ltcache.CacheStats{
@@ -353,7 +351,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"filters": &ltcache.CacheStats{
-			Items:  16, // expected to have 16 items
+			Items:  20, // expected to have 16 items
 			Groups: 0,
 		},
 		"lcr_rules": &ltcache.CacheStats{
@@ -361,11 +359,11 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"rating_plans": &ltcache.CacheStats{
-			Items:  4, // expected to have 4 items
+			Items:  6, // expected to have 4 items
 			Groups: 0,
 		},
 		"rating_profiles": &ltcache.CacheStats{
-			Items:  10, // expected to have 10 items
+			Items:  12, // expected to have 10 items
 			Groups: 0,
 		},
 		"resource_filter_indexes": &ltcache.CacheStats{
@@ -377,11 +375,11 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"resource_profiles": &ltcache.CacheStats{
-			Items:  3,
+			Items:  4,
 			Groups: 0,
 		},
 		"resources": &ltcache.CacheStats{
-			Items:  3, //expected to have 3 items
+			Items:  4, //expected to have 3 items
 			Groups: 0,
 		},
 		"reverse_aliases": &ltcache.CacheStats{
@@ -389,7 +387,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"reverse_destinations": &ltcache.CacheStats{
-			Items:  7,
+			Items:  10,
 			Groups: 0,
 		},
 		"shared_groups": &ltcache.CacheStats{
@@ -405,11 +403,11 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"statqueue_profiles": &ltcache.CacheStats{
-			Items:  1,
+			Items:  2,
 			Groups: 0,
 		},
 		"statqueues": &ltcache.CacheStats{
-			Items:  1, // expected to have 1 item
+			Items:  2, // expected to have 1 item
 			Groups: 0,
 		},
 		"supplier_filter_indexes": &ltcache.CacheStats{
@@ -421,7 +419,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"supplier_profiles": &ltcache.CacheStats{
-			Items:  3, // expected to have 3 items
+			Items:  4, // expected to have 3 items
 			Groups: 0,
 		},
 		"threshold_filter_indexes": &ltcache.CacheStats{
@@ -433,11 +431,11 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"threshold_profiles": &ltcache.CacheStats{
-			Items:  7,
+			Items:  9,
 			Groups: 0,
 		},
 		"thresholds": &ltcache.CacheStats{
-			Items:  7, // expected to have 7 items
+			Items:  9, // expected to have 7 items
 			Groups: 0,
 		},
 		"timings": &ltcache.CacheStats{

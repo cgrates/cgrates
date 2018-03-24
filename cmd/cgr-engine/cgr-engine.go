@@ -469,12 +469,13 @@ func startPubSubServer(internalPubSubSChan chan rpcclient.RpcClientConnection, d
 func startAliasesServer(internalAliaseSChan chan rpcclient.RpcClientConnection, dm *engine.DataManager, server *utils.Server, exitChan chan bool) {
 	aliasesServer := engine.NewAliasHandler(dm)
 	server.RpcRegisterName("AliasesV1", aliasesServer)
-	loadHist, err := dm.DataDB().GetLoadHistory(1, true, utils.NonTransactional)
+	/*loadHist, err := dm.DataDB().GetLoadHistory(1, true, utils.NonTransactional)
 	if err != nil || len(loadHist) == 0 {
 		utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHist, err))
 		internalAliaseSChan <- aliasesServer
 		return
 	}
+	*/
 	internalAliaseSChan <- aliasesServer
 }
 
