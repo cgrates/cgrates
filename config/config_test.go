@@ -930,7 +930,6 @@ func TestLoaderDefaults(t *testing.T) {
 				},
 			},
 			FieldSeparator: ",",
-			MaxOpenFiles:   1024,
 			TpInDir:        "/var/spool/cgrates/tploader/in",
 			TpOutDir:       "/var/spool/cgrates/tploader/out",
 			Data: []*LoaderSDataType{

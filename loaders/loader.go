@@ -24,6 +24,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -36,8 +37,42 @@ type openedCSVFile struct {
 	csvRdr   *csv.Reader
 }
 
+func NewLoader(dm *engine.DataManager, cfg *config.LoaderSConfig,
+	timezone string) (ldr *Loader, err error) {
+	ldr = &Loader{
+		enabled:       cfg.Enabled,
+		dryRun:        cfg.DryRun,
+		tpInDir:       cfg.TpInDir,
+		tpOutDir:      cfg.TpOutDir,
+		lockFilename:  cfg.LockFileName,
+		fieldSep:      cfg.FieldSeparator,
+		dataTpls:      make(map[string][]*config.CfgCdrField),
+		rdrs:          make(map[string]map[string]*openedCSVFile),
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            dm,
+		timezone:      timezone,
+	}
+	for _, ldrData := range cfg.Data {
+		ldr.dataTpls[ldrData.Type] = ldrData.Fields
+		ldr.rdrs[ldrData.Type] = make(map[string]*openedCSVFile)
+		if ldrData.Filename != "" {
+			ldr.rdrs[ldrData.Type][ldrData.Filename] = nil
+		}
+		for _, cfgFld := range ldrData.Fields { // add all possible files to be opened
+			for _, cfgFldVal := range cfgFld.Value {
+				if idx := strings.Index(cfgFldVal.Id, utils.InInFieldSep); idx != -1 {
+					ldr.rdrs[ldrData.Type][cfgFldVal.Id[:idx]] = nil
+				}
+			}
+		}
+	}
+	return
+}
+
 // Loader is one instance loading from a folder
 type Loader struct {
+	enabled       bool
+	dryRun        bool
 	ldrID         string
 	tpInDir       string
 	tpOutDir      string

@@ -18,7 +18,27 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package loaders
 
+import (
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+)
+
+func NewLoaderS(dm *engine.DataManager, cfg []*config.LoaderSConfig,
+	timezone string) (ldrS *LoaderS, err error) {
+	return
+}
+
 // LoaderS is the Loader service handling independent Loaders
 type LoaderS struct {
 	loaders map[string]*Loader
+}
+
+// isEnabled returns true if at least one loader is enabled
+func (ldrS *LoaderS) isEnabled() bool {
+	for _, ldr := range ldrS.loaders {
+		if ldr.enabled {
+			return true
+		}
+	}
+	return false
 }

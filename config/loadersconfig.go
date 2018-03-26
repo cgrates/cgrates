@@ -38,7 +38,6 @@ type LoaderSConfig struct {
 	LockFileName   string
 	CacheSConns    []*HaPoolConfig
 	FieldSeparator string
-	MaxOpenFiles   int
 	TpInDir        string
 	TpOutDir       string
 	Data           []*LoaderSDataType
@@ -106,9 +105,6 @@ func (self *LoaderSConfig) loadFromJsonCfg(jsnCfg *LoaderSJsonCfg) error {
 	if jsnCfg.Field_separator != nil {
 		self.FieldSeparator = *jsnCfg.Field_separator
 	}
-	if jsnCfg.Max_open_files != nil {
-		self.MaxOpenFiles = *jsnCfg.Max_open_files
-	}
 	if jsnCfg.Tp_in_dir != nil {
 		self.TpInDir = *jsnCfg.Tp_in_dir
 	}
@@ -139,7 +135,6 @@ func (self *LoaderSConfig) Clone() *LoaderSConfig {
 		clnLoader.CacheSConns[idx] = &clonedVal
 	}
 	clnLoader.FieldSeparator = self.FieldSeparator
-	clnLoader.MaxOpenFiles = self.MaxOpenFiles
 	clnLoader.TpInDir = self.TpInDir
 	clnLoader.TpOutDir = self.TpOutDir
 	clnLoader.Data = make([]*LoaderSDataType, len(self.Data))

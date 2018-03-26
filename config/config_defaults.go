@@ -463,7 +463,6 @@ const CGRATES_CFG_JSON = `
 			{"address": "*internal"},						// address where to reach the CacheS for data reload, empty for no reloads  <""|*internal|x.y.z.y:1234>
 		],
 		"field_separator": ",",								// separator used in case of csv files
-		"max_open_files": 1024,								// maximum simultaneous files to process, 0 for unlimited
 		"tp_in_dir": "/var/spool/cgrates/tploader/in",		// absolute path towards the directory where the CDRs are stored
 		"tp_out_dir": "/var/spool/cgrates/tploader/out",	// absolute path towards the directory where processed CDRs will be moved
 		"data":[											// data profiles to load

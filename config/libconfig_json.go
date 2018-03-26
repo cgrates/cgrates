@@ -443,7 +443,6 @@ type LoaderSJsonCfg struct {
 	Lock_filename   *string
 	Caches_conns    *[]*HaPoolJsonCfg
 	Field_separator *string
-	Max_open_files  *int
 	Tp_in_dir       *string
 	Tp_out_dir      *string
 	Data            *[]*LoaderSJsonDataType

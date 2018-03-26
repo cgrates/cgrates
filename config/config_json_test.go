@@ -820,7 +820,6 @@ func TestDfLoaderSJsonCfg(t *testing.T) {
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
 			Field_separator: utils.StringPointer(","),
-			Max_open_files:  utils.IntPointer(1024),
 			Tp_in_dir:       utils.StringPointer("/var/spool/cgrates/tploader/in"),
 			Tp_out_dir:      utils.StringPointer("/var/spool/cgrates/tploader/out"),
 			Data:            &[]*LoaderSJsonDataType{dataType},
