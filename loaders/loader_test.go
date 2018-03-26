@@ -31,16 +31,14 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var attrsCSV = `#Tenant,ID,Contexts,FilterIDs,ActivationInterval,FieldName,Initial,Substitute,Append,Weight
+func TestLoaderProcessContentSingleFile(t *testing.T) {
+	attrsCSV := `#Tenant,ID,Contexts,FilterIDs,ActivationInterval,FieldName,Initial,Substitute,Append,Weight
 cgrates.org,TestLoader1,*sessions;*cdrs,*string:Account:1007,2014-01-14T00:00:00Z,Account,*any,1001,false,10
 cgrates.org,TestLoader1,lcr,*string:Account:1008;*string:Account:1009,,Subject,*any,1001,true,
 `
-
-func TestLoaderProcessContentSingleFile(t *testing.T) {
 	data, _ := engine.NewMapStorage()
 	ldr := &Loader{
-		ldrID: "TestLoaderProcessContent",
-		//rdrs          map[string]map[string]*openedCSVFile
+		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
 		dm:            engine.NewDataManager(data),
 		timezone:      "UTC",
@@ -125,7 +123,99 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 			}},
 		Weight: 10.0,
 	}
+	if len(ldr.bufLoaderData) != 0 {
+		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
+	}
 	if ap, err := ldr.dm.GetAttributeProfile("cgrates.org", "TestLoader1",
+		false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eAP.Attributes, ap.Attributes) {
+		t.Errorf("expecting: %s, received: %s",
+			utils.ToJSON(eAP), utils.ToJSON(ap))
+	}
+}
+
+func TestLoaderProcessContentMultiFiles(t *testing.T) {
+	file1CSV := `ignored,ignored,ignored,ignored,ignored,Subject,*any,1001,ignored,ignored`
+	file2CSV := `ignored,TestLoader2`
+	data, _ := engine.NewMapStorage()
+	ldr := &Loader{
+		ldrID:         "TestLoaderProcessContentMultiFiles",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.CfgCdrField{
+		utils.MetaAttributes: []*config.CfgCdrField{
+			&config.CfgCdrField{Tag: "TenantID",
+				FieldId:   "Tenant",
+				Type:      utils.MetaString,
+				Value:     utils.ParseRSRFieldsMustCompile("^cgrates.org", utils.INFIELD_SEP),
+				Mandatory: true},
+			&config.CfgCdrField{Tag: "ProfileID",
+				FieldId:   "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     utils.ParseRSRFieldsMustCompile("File2.csv:1", utils.INFIELD_SEP),
+				Mandatory: true},
+			&config.CfgCdrField{Tag: "Contexts",
+				FieldId: "Contexts",
+				Type:    utils.MetaString,
+				Value:   utils.ParseRSRFieldsMustCompile("^*any", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "FieldName",
+				FieldId: "FieldName",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("File1.csv:5", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "Initial",
+				FieldId: "Initial",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("File1.csv:6", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "Substitute",
+				FieldId: "Substitute",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("File1.csv:7", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "Append",
+				FieldId: "Append",
+				Type:    utils.MetaString,
+				Value:   utils.ParseRSRFieldsMustCompile("^true", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "Weight",
+				FieldId: "Weight",
+				Type:    utils.MetaString,
+				Value:   utils.ParseRSRFieldsMustCompile("^10", utils.INFIELD_SEP)},
+		},
+	}
+	rdr1 := ioutil.NopCloser(strings.NewReader(file1CSV))
+	csvRdr1 := csv.NewReader(rdr1)
+	csvRdr1.Comment = '#'
+	rdr2 := ioutil.NopCloser(strings.NewReader(file2CSV))
+	csvRdr2 := csv.NewReader(rdr2)
+	csvRdr2.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaAttributes: map[string]*openedCSVFile{
+			"File1.csv": &openedCSVFile{fileName: "File1.csv",
+				rdr: rdr1, csvRdr: csvRdr1},
+			"File2.csv": &openedCSVFile{fileName: "File2.csv",
+				rdr: rdr2, csvRdr: csvRdr2}},
+	}
+	if err := ldr.processContent(utils.MetaAttributes); err != nil {
+		t.Error(err)
+	}
+	eAP := &engine.AttributeProfile{
+		Tenant:   "cgrates.org",
+		ID:       "TestLoader2",
+		Contexts: []string{utils.ANY},
+		Attributes: []*engine.Attribute{
+			&engine.Attribute{
+				FieldName:  "Subject",
+				Initial:    utils.ANY,
+				Substitute: "1001",
+				Append:     true,
+			}},
+		Weight: 10.0,
+	}
+	if len(ldr.bufLoaderData) != 0 {
+		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
+	}
+	if ap, err := ldr.dm.GetAttributeProfile("cgrates.org", "TestLoader2",
 		false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eAP.Attributes, ap.Attributes) {
