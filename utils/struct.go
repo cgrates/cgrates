@@ -261,18 +261,27 @@ func UpdateStructWithIfaceMap(s interface{}, mp map[string]interface{}) (err err
 		if fld.IsValid() {
 			switch fld.Kind() {
 			case reflect.Bool:
+				if val == "" { // auto-populate defaults so we can parse empty strings
+					val = false
+				}
 				if valBool, err := IfaceAsBool(val); err != nil {
 					return err
 				} else {
 					fld.SetBool(valBool)
 				}
 			case reflect.Int, reflect.Int64:
+				if val == "" {
+					val = 0
+				}
 				if valInt, err := IfaceAsInt64(val); err != nil {
 					return err
 				} else {
 					fld.SetInt(valInt)
 				}
 			case reflect.Float64:
+				if val == "" {
+					val = 0.0
+				}
 				if valFlt, err := IfaceAsFloat64(val); err != nil {
 					return err
 				} else {

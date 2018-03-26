@@ -32,7 +32,7 @@ import (
 
 type openedCSVFile struct {
 	fileName string
-	fd       *os.File
+	rdr      io.ReadCloser // keep reference so we can close it when done
 	csvRdr   *csv.Reader
 }
 
@@ -59,7 +59,12 @@ func (ldr *Loader) ProcessFolder() (err error) {
 	}
 	defer ldr.unlockFolder()
 	for ldrType := range ldr.rdrs {
-		if err = ldr.processFiles(ldrType); err != nil {
+		if err = ldr.openFiles(ldrType); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<%s> loaderType: <%s> cannot open files, err: %s",
+				utils.LoaderS, ldrType, err.Error()))
+			continue
+		}
+		if err = ldr.processContent(ldrType); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> loaderType: <%s>, err: %s",
 				utils.LoaderS, ldrType, err.Error()))
 		}
@@ -83,7 +88,7 @@ func (ldr *Loader) unlockFolder() (err error) {
 func (ldr *Loader) unreferenceFile(loaderType, fileName string) (err error) {
 	openedCSVFile := ldr.rdrs[loaderType][fileName]
 	ldr.rdrs[loaderType][fileName] = nil
-	return openedCSVFile.fd.Close()
+	return openedCSVFile.rdr.Close()
 }
 
 func (ldr *Loader) storeLoadedData(loaderType string,
@@ -110,16 +115,20 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 	return
 }
 
-func (ldr *Loader) processFiles(loaderType string) (err error) {
+func (ldr *Loader) openFiles(loaderType string) (err error) {
 	for fName := range ldr.rdrs[loaderType] {
-		var fd *os.File
-		if fd, err = os.Open(path.Join(ldr.tpInDir, fName)); err != nil {
+		var rdr *os.File
+		if rdr, err = os.Open(path.Join(ldr.tpInDir, fName)); err != nil {
 			return err
 		}
 		ldr.rdrs[loaderType][fName] = &openedCSVFile{
-			fileName: fName, fd: fd, csvRdr: csv.NewReader(fd)}
+			fileName: fName, rdr: rdr, csvRdr: csv.NewReader(rdr)}
 		defer ldr.unreferenceFile(loaderType, fName)
 	}
+	return
+}
+
+func (ldr *Loader) processContent(loaderType string) (err error) {
 	// start processing lines
 	keepLooping := true // controls looping
 	lineNr := 0
@@ -151,6 +160,9 @@ func (ldr *Loader) processFiles(loaderType string) (err error) {
 			}
 			// Record from map
 			// update dataDB
+		}
+		if len(lData) == 0 { // no data, could be the last line in file
+			continue
 		}
 		tntID := lData.TenantID()
 		if _, has := ldr.bufLoaderData[tntID]; !has &&
