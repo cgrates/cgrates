@@ -116,6 +116,31 @@ func TestStructExtraFields(t *testing.T) {
 	}
 }
 
+func TestSetStructExtraFields(t *testing.T) {
+	ts := struct {
+		Name        string
+		Surname     string
+		Address     string
+		ExtraFields map[string]string
+	}{
+		Name:        "1",
+		Surname:     "2",
+		Address:     "3",
+		ExtraFields: make(map[string]string),
+	}
+	s := "ExtraFields"
+	m := map[string]string{
+		"k1": "v1",
+		"k2": "v2",
+		"k3": "v3",
+	}
+	SetMapExtraFields(ts, m, s)
+	efMap := GetMapExtraFields(ts, "ExtraFields")
+	if !reflect.DeepEqual(efMap, ts.ExtraFields) {
+		t.Errorf("expected: %v got: %v", ts.ExtraFields, efMap)
+	}
+}
+
 func TestStructFromMapStringInterface(t *testing.T) {
 	ts := &struct {
 		Name     string
@@ -210,3 +235,43 @@ func TestUpdateStructWithIfaceMap(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", eStruct, s)
 	}
 }
+
+func TestNonemptyStructFields(t *testing.T) {
+	var attr = struct {
+		Tenant          string
+		Direction       bool
+		Account         string
+		Type            string
+		ActionTimingsId string
+	}{"bevoip.eu", true, "testaccount", META_PREPAID, ""}
+	mapStruct := NonemptyStructFields(&attr)
+	expMapStruct := map[string]interface{}{
+		"Tenant":    "bevoip.eu",
+		"Direction": true,
+		"Account":   "testaccount",
+		"Type":      META_PREPAID,
+	}
+	if !reflect.DeepEqual(expMapStruct, mapStruct) {
+		t.Errorf("expecting: %+v, received: %+v", expMapStruct, mapStruct)
+	}
+}
+
+/*
+func TestToMapMapStringInterface(t *testing.T) {
+	var attr = struct {
+		Tenant    string
+		Direction bool
+		Account   string
+		Type      string
+	}{"bevoip.eu", true, "testaccount", META_PREPAID}
+	mapStruct := ToMapMapStringInterface(&attr)
+	expMapStruct := map[string]interface{}{
+		"Tenant":    "bevoip.eu",
+		"Direction": true,
+		"Account":   "testaccount",
+		"Type":      META_PREPAID,
+	}
+	if !reflect.DeepEqual(expMapStruct, mapStruct) {
+		t.Errorf("expecting: %+v, received: %+v", expMapStruct, mapStruct)
+	}
+}*/
