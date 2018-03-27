@@ -6,6 +6,10 @@
 // This file contains the default configuration hardcoded into CGRateS.
 // This is what you get when you load CGRateS with an empty configuration file.
 
+"general": {
+	"log_level":7,
+},
+
 
 "listen": {
 	"rpc_json": ":2012",
@@ -36,7 +40,7 @@
 		{"address": "*internal"}
 	],
 	"attributes_conns": [
-		{"address": "*internal"}
+		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 },
 
@@ -62,13 +66,13 @@
 		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 	"resources_conns": [
-		{"address": "*internal"}
+		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 	"suppliers_conns": [
-		{"address": "*internal"}
+		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 	"attributes_conns": [
-		{"address": "*internal"}
+		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 	"stats_conns": [
 		{"address": "127.0.0.1:2012", "transport": "*json"}
@@ -114,13 +118,13 @@
 	"thresholds_conns": [
 		{"address": "*internal"}
 	],
-	"string_indexed_fields": ["Account","EventType"],
+	"string_indexed_fields": ["Account"],
 },
 
 
 "thresholds": {
 	"enabled": true,
-	"string_indexed_fields": ["Account","EventType","StatID","ResourceID"],
+	"string_indexed_fields": ["Account"],
 },
 
 

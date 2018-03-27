@@ -53,20 +53,23 @@ var sTestsCalls = []func(t *testing.T){
 	testCallRpcConn,
 	testCallLoadTariffPlanFromFolder,
 	testCallAccountsBefore,
-	testCallStartPjsuaListener,
+	testCallStatMetricsBefore,
 	testCallCheckResourceBeforeAllocation,
 	testCallCheckThreshold1001Before,
 	testCallCheckThreshold1002Before,
+	testCallStartPjsuaListener,
 	testCallCall1001To1002,
-	testCallCall1002To1001,
 	testCallGetActiveSessions,
+	testCallCall1002To1001,
+	testCallCall1001To1003,
 	testCallCheckResourceAllocation,
 	testCallAccount1001,
+	testCall1001Cdrs,
+	testCall1002Cdrs,
+	testCallStatMetrics,
+	testCallCheckResourceRelease,
 	testCallCheckThreshold1001After,
 	testCallCheckThreshold1002After,
-	testCallCheckResourceRelease,
-	testCall1001Cdrs,
-	testCallStatMetrics,
 	testCallStopPjsuaListener,
 	testCallStopCgrEngine,
 	testCallStopFS,
@@ -74,7 +77,6 @@ var sTestsCalls = []func(t *testing.T){
 
 //Test start here
 func TestFSCall(t *testing.T) {
-
 	for _, stest := range sTestsCalls {
 		t.Run("", stest)
 	}
@@ -140,12 +142,10 @@ func testCallRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func testCallLoadTariffPlanFromFolder(t *testing.T) {
-	reply := ""
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	var reply string
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial2")}
 	if err := tutFsCallsRpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error(err)
-	} else if reply != "OK" {
-		t.Error(reply)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
@@ -156,22 +156,29 @@ func testCallAccountsBefore(t *testing.T) {
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := tutFsCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 { // Make sure we debitted
+	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 {
 		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+	var reply2 *engine.Account
+	attrs2 := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1002"}
+	if err := tutFsCallsRpc.Call("ApierV2.GetAccount", attrs2, &reply2); err != nil {
+		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
+	} else if reply2.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 {
+		t.Errorf("Calling ApierV1.GetBalance received: %f", reply2.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 }
 
-// Start Pjsua as listener and register it to receive calls
-func testCallStartPjsuaListener(t *testing.T) {
-	var err error
-	acnts := []*engine.PjsuaAccount{
-		&engine.PjsuaAccount{Id: "sip:1011@192.168.56.202",
-			Username: "1011", Password: "CGRateS.org", Realm: "*", Registrar: "sip:192.168.56.202:5060"},
-		&engine.PjsuaAccount{Id: "sip:1012@192.168.56.202",
-			Username: "1012", Password: "CGRateS.org", Realm: "*", Registrar: "sip:192.168.56.202:5060"}}
-	if tutFsCallsPjSuaListener, err = engine.StartPjsuaListener(
-		acnts, 5070, time.Duration(*waitRater)*time.Millisecond); err != nil {
-		t.Fatal(err)
+func testCallStatMetricsBefore(t *testing.T) {
+	var metrics map[string]string
+	expectedMetrics := map[string]string{
+		utils.MetaTCC: utils.NOT_AVAILABLE,
+		utils.MetaTCD: utils.NOT_AVAILABLE,
+	}
+	if err := tutFsCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2"}, &metrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
 	}
 }
 
@@ -181,9 +188,9 @@ func testCallCheckResourceBeforeAllocation(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
-				utils.Account:     "1011",
-				utils.Subject:     "1011",
-				utils.Destination: "1012"},
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002"},
 		}}
 	if err := tutFsCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Error(err)
@@ -191,7 +198,7 @@ func testCallCheckResourceBeforeAllocation(t *testing.T) {
 		t.Errorf("Resources: %+v", utils.ToJSON(rs))
 	}
 	for _, r := range *rs {
-		if r.ID == "ResGroup4" &&
+		if r.ID == "ResGroup1" &&
 			(len(r.Usages) != 0 || len(r.TTLIdx) != 0) {
 			t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))
 		}
@@ -200,9 +207,9 @@ func testCallCheckResourceBeforeAllocation(t *testing.T) {
 
 func testCallCheckThreshold1001Before(t *testing.T) {
 	var td engine.Threshold
-	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1011", Hits: 0}
+	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1001", Hits: 0}
 	if err := tutFsCallsRpc.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1011"}, &td); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}, &td); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd, td) {
 		t.Errorf("expecting: %+v, received: %+v", eTd, td)
@@ -211,32 +218,37 @@ func testCallCheckThreshold1001Before(t *testing.T) {
 
 func testCallCheckThreshold1002Before(t *testing.T) {
 	var td engine.Threshold
-	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1012", Hits: 0}
+	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1002", Hits: 0}
 	if err := tutFsCallsRpc.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1012"}, &td); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1002"}, &td); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd, td) {
 		t.Errorf("expecting: %+v, received: %+v", eTd, td)
 	}
 }
 
+// Start Pjsua as listener and register it to receive calls
+func testCallStartPjsuaListener(t *testing.T) {
+	var err error
+	acnts := []*engine.PjsuaAccount{
+		&engine.PjsuaAccount{Id: "sip:1001@192.168.56.202",
+			Username: "1001", Password: "CGRateS.org", Realm: "*", Registrar: "sip:192.168.56.202:5060"},
+		&engine.PjsuaAccount{Id: "sip:1002@192.168.56.202",
+			Username: "1002", Password: "CGRateS.org", Realm: "*", Registrar: "sip:192.168.56.202:5060"}}
+	if tutFsCallsPjSuaListener, err = engine.StartPjsuaListener(
+		acnts, 5070, time.Duration(*waitRater)*time.Millisecond); err != nil {
+		t.Fatal(err)
+	}
+}
+
 // Call from 1001 (prepaid) to 1002
 func testCallCall1001To1002(t *testing.T) {
 	if err := engine.PjsuaCallUri(
-		&engine.PjsuaAccount{Id: "sip:1011@192.168.56.202", Username: "1011", Password: "CGRateS.org", Realm: "*"},
-		"sip:1012@192.168.56.202", "sip:192.168.56.202:5060", time.Duration(67)*time.Second, 5071); err != nil {
+		&engine.PjsuaAccount{Id: "sip:1001@192.168.56.202", Username: "1001", Password: "CGRateS.org", Realm: "*"},
+		"sip:1002@192.168.56.202", "sip:192.168.56.202:5060", time.Duration(67)*time.Second, 5071); err != nil {
 		t.Fatal(err)
 	}
 	time.Sleep(1 * time.Second)
-}
-
-// Call from 1002 (postpaid) to 1001
-func testCallCall1002To1001(t *testing.T) {
-	if err := engine.PjsuaCallUri(
-		&engine.PjsuaAccount{Id: "sip:1012@192.168.56.202", Username: "1012", Password: "CGRateS.org", Realm: "*"},
-		"sip:1011@192.168.56.202", "sip:192.168.56.202:5060", time.Duration(65)*time.Second, 5072); err != nil {
-		t.Fatal(err)
-	}
 }
 
 // GetActiveSessions
@@ -248,9 +260,9 @@ func testCallGetActiveSessions(t *testing.T) {
 			ReqType:     "*prepaid",
 			Tenant:      "cgrates.org",
 			Category:    "call",
-			Account:     "1011",
-			Subject:     "1011",
-			Destination: "1012",
+			Account:     "1001",
+			Subject:     "1001",
+			Destination: "1002",
 		},
 	}
 	if err := tutFsCallsRpc.Call("SessionSv1.GetActiveSessions",
@@ -270,6 +282,24 @@ func testCallGetActiveSessions(t *testing.T) {
 	}
 }
 
+// Call from 1002 (postpaid) to 1001
+func testCallCall1002To1001(t *testing.T) {
+	if err := engine.PjsuaCallUri(
+		&engine.PjsuaAccount{Id: "sip:1002@192.168.56.202", Username: "1002", Password: "CGRateS.org", Realm: "*"},
+		"sip:1001@192.168.56.202", "sip:192.168.56.202:5060", time.Duration(65)*time.Second, 5072); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Call from 1001 (prepaid) to 1003 limit to 12 seconds
+func testCallCall1001To1003(t *testing.T) {
+	if err := engine.PjsuaCallUri(
+		&engine.PjsuaAccount{Id: "sip:1001@192.168.56.202", Username: "1001", Password: "CGRateS.org", Realm: "*"},
+		"sip:1003@192.168.56.202", "sip:192.168.56.202:5060", time.Duration(60)*time.Second, 5073); err != nil {
+		t.Fatal(err)
+	}
+}
+
 // Check if the resource was Allocated
 func testCallCheckResourceAllocation(t *testing.T) {
 	var rs *engine.Resources
@@ -277,9 +307,9 @@ func testCallCheckResourceAllocation(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
-				utils.Account:     "1011",
-				utils.Subject:     "1011",
-				utils.Destination: "1012"},
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002"},
 		}}
 	if err := tutFsCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Error(err)
@@ -287,7 +317,7 @@ func testCallCheckResourceAllocation(t *testing.T) {
 		t.Errorf("Resources: %+v", utils.ToJSON(rs))
 	}
 	for _, r := range *rs {
-		if r.ID == "ResGroup4" &&
+		if r.ID == "ResGroup1" &&
 			(len(r.Usages) != 1 || len(r.TTLIdx) != 1) {
 			t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))
 		}
@@ -298,7 +328,7 @@ func testCallCheckResourceAllocation(t *testing.T) {
 func testCallAccount1001(t *testing.T) {
 	time.Sleep(time.Duration(80) * time.Second) // Allow calls to finish before start querying the results
 	var reply *engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1011"}
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := tutFsCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
 		t.Error(err.Error())
 	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() == 10.0 { // Make sure we debitted
@@ -308,57 +338,47 @@ func testCallAccount1001(t *testing.T) {
 	}
 }
 
-func testCallCheckThreshold1001After(t *testing.T) {
-	var td engine.Threshold
-	if err := tutFsCallsRpc.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1011"}, &td); err != nil &&
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-}
+// Make sure account was debited properly
+func testCall1001Cdrs(t *testing.T) {
+	var reply []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}}
+	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(reply) != 2 {
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	} else {
+		for _, cdr := range reply {
+			if cdr.Source != "freeswitch_json" {
+				t.Errorf("Unexpected Source for CDR: %+v", cdr.Source)
+			}
+			if cdr.RequestType != utils.META_PREPAID {
+				t.Errorf("Unexpected RequestType for CDR: %+v", cdr.RequestType)
+			}
+			if cdr.Destination == "1002" {
+				if cdr.Usage != "1m7s" && cdr.Usage != "1m8s" { // Usage as seconds
+					t.Errorf("Unexpected Usage for CDR: %+v", cdr.Usage)
+				}
+				if cdr.CostSource != utils.MetaSessionS {
+					t.Errorf("Unexpected CostSource for CDR: %+v", cdr.CostSource)
+				}
+			} else {
+				if cdr.Usage != "12s" && cdr.Usage != "13s" { // Usage as seconds
+					t.Errorf("Unexpected Usage for CDR: %+v", cdr.Usage)
+				}
+				if cdr.CostSource != utils.MetaSessionS {
+					t.Errorf("Unexpected CostSource for CDR: %+v", cdr.CostSource)
+				}
+			}
 
-func testCallCheckThreshold1002After(t *testing.T) {
-	var td engine.Threshold
-	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1012", Hits: 4}
-	if err := tutFsCallsRpc.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1012"}, &td); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eTd.Tenant, td.Tenant) {
-		t.Errorf("expecting: %+v, received: %+v", eTd.Tenant, td.Tenant)
-	} else if !reflect.DeepEqual(eTd.ID, td.ID) {
-		t.Errorf("expecting: %+v, received: %+v", eTd.ID, td.ID)
-	} else if !reflect.DeepEqual(eTd.Hits, td.Hits) {
-		t.Errorf("expecting: %+v, received: %+v", eTd.Hits, td.Hits)
-	}
-}
-
-func testCallCheckResourceRelease(t *testing.T) {
-	var rs *engine.Resources
-	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.Account:     "1011",
-				utils.Subject:     "1011",
-				utils.Destination: "1012"},
-		}}
-	if err := tutFsCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
-		t.Error(err)
-	} else if len(*rs) != 2 {
-		t.Errorf("Resources: %+v", rs)
-	}
-	for _, r := range *rs {
-		if r.ID == "ResGroup4" &&
-			(len(r.Usages) != 0 || len(r.TTLIdx) != 0) {
-			t.Errorf("Unexpected resource: %+v", r)
 		}
+
 	}
 }
 
 // Make sure account was debited properly
-func testCall1001Cdrs(t *testing.T) {
+func testCall1002Cdrs(t *testing.T) {
 	var reply []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{"1011"}, DestinationPrefixes: []string{"1012"}}
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{"1002"}, DestinationPrefixes: []string{"1001"}}
 	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
@@ -367,13 +387,13 @@ func testCall1001Cdrs(t *testing.T) {
 		if reply[0].Source != "freeswitch_json" {
 			t.Errorf("Unexpected Source for CDR: %+v", reply[0].Source)
 		}
-		if reply[0].RequestType != utils.META_PREPAID {
+		if reply[0].RequestType != utils.META_POSTPAID {
 			t.Errorf("Unexpected RequestType for CDR: %+v", reply[0].RequestType)
 		}
-		if reply[0].Usage != "1m7s" { // Usage as seconds
+		if reply[0].Usage != "1m5s" { // Usage as seconds
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0].Usage)
 		}
-		if reply[0].CostSource != utils.MetaSessionS {
+		if reply[0].CostSource != utils.MetaCDRs {
 			t.Errorf("Unexpected CostSource for CDR: %+v", reply[0].CostSource)
 		}
 	}
@@ -390,6 +410,53 @@ func testCallStatMetrics(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
+	}
+}
+
+func testCallCheckResourceRelease(t *testing.T) {
+	var rs *engine.Resources
+	args := &utils.ArgRSv1ResourceUsage{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002"},
+		}}
+	if err := tutFsCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
+		t.Error(err)
+	} else if len(*rs) != 2 {
+		t.Errorf("Resources: %+v", rs)
+	}
+	for _, r := range *rs {
+		if r.ID == "ResGroup1" &&
+			(len(r.Usages) != 0 || len(r.TTLIdx) != 0) {
+			t.Errorf("Unexpected resource: %+v", r)
+		}
+	}
+}
+
+func testCallCheckThreshold1001After(t *testing.T) {
+	var td engine.Threshold
+	if err := tutFsCallsRpc.Call(utils.ThresholdSv1GetThreshold,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}, &td); err != nil &&
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testCallCheckThreshold1002After(t *testing.T) {
+	var td engine.Threshold
+	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1002", Hits: 4}
+	if err := tutFsCallsRpc.Call(utils.ThresholdSv1GetThreshold,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1002"}, &td); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eTd.Tenant, td.Tenant) {
+		t.Errorf("expecting: %+v, received: %+v", eTd.Tenant, td.Tenant)
+	} else if !reflect.DeepEqual(eTd.ID, td.ID) {
+		t.Errorf("expecting: %+v, received: %+v", eTd.ID, td.ID)
+	} else if !reflect.DeepEqual(eTd.Hits, td.Hits) {
+		t.Errorf("expecting: %+v, received: %+v", eTd.Hits, td.Hits)
 	}
 }
 
