@@ -325,3 +325,78 @@ func TestIfaceAsFloat64(t *testing.T) {
 		t.Error("expecting error")
 	}
 }
+
+func TestIfaceAsInt64(t *testing.T) {
+	eInt := int64(3)
+	val := interface{}(3)
+	if itmConvert, err := IfaceAsInt64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eInt {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(time.Duration(3))
+	if itmConvert, err := IfaceAsInt64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eInt {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}("3")
+	if itmConvert, err := IfaceAsInt64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eInt {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(int64(3))
+	if itmConvert, err := IfaceAsInt64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eInt {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}("This is not an integer")
+	if _, err := IfaceAsInt64(val); err == nil {
+		t.Error("expecting error")
+	}
+}
+
+func TestIfaceAsBool(t *testing.T) {
+	val := interface{}(true)
+	if itmConvert, err := IfaceAsBool(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != true {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}("true")
+	if itmConvert, err := IfaceAsBool(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != true {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(0)
+	if itmConvert, err := IfaceAsBool(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != false {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(1)
+	if itmConvert, err := IfaceAsBool(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != true {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(0.0)
+	if itmConvert, err := IfaceAsBool(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != false {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(1.0)
+	if itmConvert, err := IfaceAsBool(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != true {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}("This is not a bool")
+	if _, err := IfaceAsBool(val); err == nil {
+		t.Error("expecting error")
+	}
+}
