@@ -1840,12 +1840,10 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		utils.REVERSE_ALIASES_PREFIX} {
 		loadedIDs, _ := loader.GetLoadedIds(prfx)
 		if err := self.DataManager.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
-			utils.Logger.Debug(fmt.Sprintf("Error here  : %+v", err))
 			return utils.NewErrServerError(err)
 		}
 	}
 	aps, _ := loader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
-	utils.Logger.Debug(fmt.Sprintf("ActionPlanPrefix : %+v", aps))
 	cstKeys, _ := loader.GetLoadedIds(utils.CDR_STATS_PREFIX)
 	userKeys, _ := loader.GetLoadedIds(utils.USERS_PREFIX)
 
