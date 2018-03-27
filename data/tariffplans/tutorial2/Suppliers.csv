@@ -1,0 +1,5 @@
+#Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParamameters,SupplierID,SupplierFilterIDs,SupplierAccountIDs,SupplierRatingPlanIDs,SupplierResourceIDs,SupplierStatIDs,SupplierWeight,SupplierBlocker,SupplierParameters,Weight
+cgrates.org,SPL_LEASTCOST_2,,2017-11-27T00:00:00Z,*weight,,supplier1,,,RP_1001,,,10,,,10
+cgrates.org,SPL_LEASTCOST_1,FLTR_1,2017-11-27T00:00:00Z,*least_cost,,supplier1,,,RP_1002,,,10,false,,10
+cgrates.org,SPL_LEASTCOST_1,,,,,supplier2,,,RP_1001,,,20,,,
+cgrates.org,SPL_LEASTCOST_1,,,,,supplier3,,,RP_1002,,,15,,,

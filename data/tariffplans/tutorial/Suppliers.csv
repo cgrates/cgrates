@@ -6,6 +6,3 @@ cgrates.org,SPL_WEIGHT_1,FLTR_ACNT_1007,,,,supplier3,FLTR_ACNT_dan,,,,,15,,,
 cgrates.org,SPL_LEASTCOST_1,FLTR_1,2017-11-27T00:00:00Z,*least_cost,,supplier1,,,RP_SPECIAL_1002,,,10,false,,10
 cgrates.org,SPL_LEASTCOST_1,,,,,supplier2,,,RP_RETAIL1,,,20,,,
 cgrates.org,SPL_LEASTCOST_1,,,,,supplier3,,,RP_SPECIAL_1002,,,15,,,
-cgrates.org,SPL_LEASTCOST_2,FLTR_2,2017-11-27T00:00:00Z,*least_cost,,supplier1,,,RP_1012,,,10,false,,10
-cgrates.org,SPL_LEASTCOST_2,,,,,supplier2,,,RP_1011,,,20,,,
-cgrates.org,SPL_LEASTCOST_2,,,,,supplier3,,,RP_1012,,,15,,,
