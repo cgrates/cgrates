@@ -22,15 +22,15 @@ import (
 	"time"
 )
 
-func NewDfltLoadersConfig() *LoaderSConfig {
-	if dfltLoadersConfig == nil {
-		return new(LoaderSConfig)
+func NewDfltLoaderConfig() *LoaderConfig {
+	if dfltLoaderConfig == nil {
+		return new(LoaderConfig)
 	}
-	dfltVal := *dfltLoadersConfig
+	dfltVal := *dfltLoaderConfig
 	return &dfltVal
 }
 
-type LoaderSConfig struct {
+type LoaderConfig struct { // rename to LoaderConfig
 	Id             string
 	Enabled        bool
 	DryRun         bool
@@ -40,24 +40,24 @@ type LoaderSConfig struct {
 	FieldSeparator string
 	TpInDir        string
 	TpOutDir       string
-	Data           []*LoaderSDataType
+	Data           []*LoaderDataType
 }
 
-func NewDfltLoaderSDataTypeConfig() *LoaderSDataType {
-	if dfltLoaderSDataTypeConfig == nil {
-		return new(LoaderSDataType) // No defaults, most probably we are building the defaults now
+func NewDfltLoaderDataTypeConfig() *LoaderDataType {
+	if dfltLoaderDataTypeConfig == nil {
+		return new(LoaderDataType) // No defaults, most probably we are building the defaults now
 	}
-	dfltVal := *dfltLoaderSDataTypeConfig // Copy the value instead of it's pointer
+	dfltVal := *dfltLoaderDataTypeConfig // Copy the value instead of it's pointer
 	return &dfltVal
 }
 
-type LoaderSDataType struct {
+type LoaderDataType struct { //rename to LoaderDataType
 	Type     string
 	Filename string
 	Fields   []*CfgCdrField
 }
 
-func (self *LoaderSDataType) loadFromJsonCfg(jsnCfg *LoaderSJsonDataType) error {
+func (self *LoaderDataType) loadFromJsonCfg(jsnCfg *LoaderJsonDataType) error {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -76,7 +76,7 @@ func (self *LoaderSDataType) loadFromJsonCfg(jsnCfg *LoaderSJsonDataType) error 
 	return nil
 }
 
-func (self *LoaderSConfig) loadFromJsonCfg(jsnCfg *LoaderSJsonCfg) error {
+func (self *LoaderConfig) loadFromJsonCfg(jsnCfg *LoaderJsonCfg) error {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -112,9 +112,9 @@ func (self *LoaderSConfig) loadFromJsonCfg(jsnCfg *LoaderSJsonCfg) error {
 		self.TpOutDir = *jsnCfg.Tp_out_dir
 	}
 	if jsnCfg.Data != nil {
-		self.Data = make([]*LoaderSDataType, len(*jsnCfg.Data))
+		self.Data = make([]*LoaderDataType, len(*jsnCfg.Data))
 		for idx, jsnLoCfg := range *jsnCfg.Data {
-			self.Data[idx] = NewDfltLoaderSDataTypeConfig()
+			self.Data[idx] = NewDfltLoaderDataTypeConfig()
 			self.Data[idx].loadFromJsonCfg(jsnLoCfg)
 		}
 	}
@@ -122,8 +122,8 @@ func (self *LoaderSConfig) loadFromJsonCfg(jsnCfg *LoaderSJsonCfg) error {
 }
 
 // Clone itself into a new LoadersConfig
-func (self *LoaderSConfig) Clone() *LoaderSConfig {
-	clnLoader := new(LoaderSConfig)
+func (self *LoaderConfig) Clone() *LoaderConfig {
+	clnLoader := new(LoaderConfig)
 	clnLoader.Id = self.Id
 	clnLoader.Enabled = self.Enabled
 	clnLoader.DryRun = self.DryRun
@@ -137,7 +137,7 @@ func (self *LoaderSConfig) Clone() *LoaderSConfig {
 	clnLoader.FieldSeparator = self.FieldSeparator
 	clnLoader.TpInDir = self.TpInDir
 	clnLoader.TpOutDir = self.TpOutDir
-	clnLoader.Data = make([]*LoaderSDataType, len(self.Data))
+	clnLoader.Data = make([]*LoaderDataType, len(self.Data))
 	for idx, fld := range self.Data {
 		clonedVal := *fld
 		clnLoader.Data[idx] = &clonedVal

@@ -760,8 +760,8 @@ func TestDfSupplierSJsonCfg(t *testing.T) {
 	}
 }
 
-func TestDfLoaderSJsonCfg(t *testing.T) {
-	dataType := &LoaderSJsonDataType{
+func TestDfLoaderJsonCfg(t *testing.T) {
+	dataType := &LoaderJsonDataType{
 		Type:      utils.StringPointer(utils.MetaAttributes),
 		File_name: utils.StringPointer("Attributes.csv"),
 		Fields: &[]*CdrFieldJsonCfg{
@@ -809,8 +809,8 @@ func TestDfLoaderSJsonCfg(t *testing.T) {
 				Value:    utils.StringPointer("9")},
 		},
 	}
-	eCfg := []*LoaderSJsonCfg{
-		&LoaderSJsonCfg{
+	eCfg := []*LoaderJsonCfg{
+		&LoaderJsonCfg{
 			ID:            utils.StringPointer(utils.META_DEFAULT),
 			Enabled:       utils.BoolPointer(false),
 			Dry_run:       utils.BoolPointer(false),
@@ -822,10 +822,10 @@ func TestDfLoaderSJsonCfg(t *testing.T) {
 			Field_separator: utils.StringPointer(","),
 			Tp_in_dir:       utils.StringPointer("/var/spool/cgrates/tploader/in"),
 			Tp_out_dir:      utils.StringPointer("/var/spool/cgrates/tploader/out"),
-			Data:            &[]*LoaderSJsonDataType{dataType},
+			Data:            &[]*LoaderJsonDataType{dataType},
 		},
 	}
-	if cfg, err := dfCgrJsonCfg.LoaderSJsonCfg(); err != nil {
+	if cfg, err := dfCgrJsonCfg.LoaderJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expecting: \n%s\n, received: \n%s\n: ",
