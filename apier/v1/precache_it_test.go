@@ -280,6 +280,7 @@ func testPrecacheFromFolder(t *testing.T) {
 	if err := precacheRPC.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(200 * time.Millisecond)
 }
 
 func testPrecacheRestartEngine(t *testing.T) {
@@ -303,7 +304,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"account_action_plans": &ltcache.CacheStats{
-			Items:  7,
+			Items:  5,
 			Groups: 0,
 		},
 		"action_plans": &ltcache.CacheStats{
@@ -351,7 +352,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"filters": &ltcache.CacheStats{
-			Items:  20, // expected to have 16 items
+			Items:  16, // expected to have 16 items
 			Groups: 0,
 		},
 		"lcr_rules": &ltcache.CacheStats{
@@ -359,11 +360,11 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"rating_plans": &ltcache.CacheStats{
-			Items:  6, // expected to have 4 items
+			Items:  4, // expected to have 4 items
 			Groups: 0,
 		},
 		"rating_profiles": &ltcache.CacheStats{
-			Items:  12, // expected to have 10 items
+			Items:  10, // expected to have 10 items
 			Groups: 0,
 		},
 		"resource_filter_indexes": &ltcache.CacheStats{
@@ -379,7 +380,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"resources": &ltcache.CacheStats{
-			Items:  4, //expected to have 3 items
+			Items:  3, //expected to have 3 items
 			Groups: 0,
 		},
 		"reverse_aliases": &ltcache.CacheStats{
@@ -407,7 +408,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"statqueues": &ltcache.CacheStats{
-			Items:  2, // expected to have 1 item
+			Items:  1, // expected to have 1 item
 			Groups: 0,
 		},
 		"supplier_filter_indexes": &ltcache.CacheStats{
@@ -419,7 +420,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"supplier_profiles": &ltcache.CacheStats{
-			Items:  4, // expected to have 3 items
+			Items:  3, // expected to have 3 items
 			Groups: 0,
 		},
 		"threshold_filter_indexes": &ltcache.CacheStats{
@@ -435,7 +436,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"thresholds": &ltcache.CacheStats{
-			Items:  9, // expected to have 7 items
+			Items:  7, // expected to have 7 items
 			Groups: 0,
 		},
 		"timings": &ltcache.CacheStats{

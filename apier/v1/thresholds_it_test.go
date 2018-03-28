@@ -233,7 +233,7 @@ func testV1TSFromFolder(t *testing.T) {
 
 func testV1TSGetThresholds(t *testing.T) {
 	var tIDs []string
-	expectedIDs := []string{"THD_RES_1", "THD_STATS_2", "THD_STATS_1", "THD_ACNT_BALANCE_1", "THD_ACNT_1011", "THD_ACNT_1012", "THD_ACNT_EXPIRED", "THD_STATS_3", "THD_CDRS_1"}
+	expectedIDs := []string{"THD_RES_1", "THD_STATS_2", "THD_STATS_1", "THD_ACNT_BALANCE_1", "THD_ACNT_EXPIRED", "THD_STATS_3", "THD_CDRS_1"}
 	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThresholdIDs, "cgrates.org", &tIDs); err != nil {
 		t.Error(err)
 	} else if len(expectedIDs) != len(tIDs) {
@@ -309,7 +309,7 @@ func testV1TSProcessEvent(t *testing.T) {
 
 func testV1TSGetThresholdsAfterProcess(t *testing.T) {
 	var tIDs []string
-	expectedIDs := []string{"THD_RES_1", "THD_STATS_2", "THD_STATS_1", "THD_ACNT_1011", "THD_ACNT_1012", "THD_ACNT_BALANCE_1", "THD_ACNT_EXPIRED"}
+	expectedIDs := []string{"THD_RES_1", "THD_STATS_2", "THD_STATS_1", "THD_ACNT_BALANCE_1", "THD_ACNT_EXPIRED"}
 	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThresholdIDs, "cgrates.org", &tIDs); err != nil {
 		t.Error(err)
 	} else if len(expectedIDs) != len(tIDs) { // THD_STATS_3 is not reccurent, so it was removed
