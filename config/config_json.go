@@ -61,7 +61,7 @@ const (
 	THRESHOLDS_JSON    = "thresholds"
 	SupplierSJson      = "suppliers"
 	FILTERS_JSON       = "filters"
-	LoaderSJson        = "loaders"
+	LoaderJson         = "loaders"
 	MAILER_JSN         = "mailer"
 	SURETAX_JSON       = "suretax"
 )
@@ -401,12 +401,12 @@ func (self CgrJsonCfg) SupplierSJsonCfg() (*SupplierSJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) LoaderSJsonCfg() ([]*LoaderSJsonCfg, error) {
-	rawCfg, hasKey := self[LoaderSJson]
+func (self CgrJsonCfg) LoaderJsonCfg() ([]*LoaderJsonCfg, error) {
+	rawCfg, hasKey := self[LoaderJson]
 	if !hasKey {
 		return nil, nil
 	}
-	cfg := make([]*LoaderSJsonCfg, 0)
+	cfg := make([]*LoaderJsonCfg, 0)
 	if err := json.Unmarshal(*rawCfg, &cfg); err != nil {
 		return nil, err
 	}
