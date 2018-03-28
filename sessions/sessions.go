@@ -706,6 +706,10 @@ func (smg *SMGeneric) GetMaxUsage(gev SMGenericEvent) (maxUsage time.Duration, e
 		return
 	}
 	maxUsage = time.Duration(maxDur)
+	if maxUsage != time.Duration(-1*time.Second) &&
+		maxUsage < smg.cgrCfg.SessionSCfg().MinCallDuration {
+		return 0, errors.New("UNAUTHORIZED_MIN_DURATION")
+	}
 	return
 }
 
