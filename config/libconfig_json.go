@@ -429,13 +429,13 @@ type SupplierSJsonCfg struct {
 	Stats_conns           *[]*HaPoolJsonCfg
 }
 
-type LoaderSJsonDataType struct {
+type LoaderJsonDataType struct {
 	Type      *string
 	File_name *string
 	Fields    *[]*CdrFieldJsonCfg
 }
 
-type LoaderSJsonCfg struct {
+type LoaderJsonCfg struct {
 	ID              *string
 	Enabled         *bool
 	Dry_run         *bool
@@ -445,7 +445,7 @@ type LoaderSJsonCfg struct {
 	Field_separator *string
 	Tp_in_dir       *string
 	Tp_out_dir      *string
-	Data            *[]*LoaderSJsonDataType
+	Data            *[]*LoaderJsonDataType
 }
 
 // Mailer config section

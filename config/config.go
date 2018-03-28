@@ -42,14 +42,14 @@ const (
 )
 
 var (
-	DBDefaults                DbDefaults
-	cgrCfg                    *CGRConfig     // will be shared
-	dfltFsConnConfig          *FsConnConfig  // Default FreeSWITCH Connection configuration, built out of json default configuration
-	dfltKamConnConfig         *KamConnConfig // Default Kamailio Connection configuration
-	dfltHaPoolConfig          *HaPoolConfig
-	dfltAstConnCfg            *AsteriskConnCfg
-	dfltLoadersConfig         *LoaderSConfig
-	dfltLoaderSDataTypeConfig *LoaderSDataType
+	DBDefaults               DbDefaults
+	cgrCfg                   *CGRConfig     // will be shared
+	dfltFsConnConfig         *FsConnConfig  // Default FreeSWITCH Connection configuration, built out of json default configuration
+	dfltKamConnConfig        *KamConnConfig // Default Kamailio Connection configuration
+	dfltHaPoolConfig         *HaPoolConfig
+	dfltAstConnCfg           *AsteriskConnCfg
+	dfltLoaderConfig         *LoaderConfig
+	dfltLoaderDataTypeConfig *LoaderDataType
 )
 
 func NewDbDefaults() DbDefaults {
@@ -345,7 +345,7 @@ type CGRConfig struct {
 	statsCfg                 *StatSCfg                // Configuration for StatS
 	thresholdSCfg            *ThresholdSCfg           // configuration for ThresholdS
 	supplierSCfg             *SupplierSCfg            // configuration for SupplierS
-	loaderSCfg               []*LoaderSConfig         // configuration for Loader
+	loaderCfg                []*LoaderConfig          // configuration for Loader
 	MailerServer             string                   // The server to use when sending emails out
 	MailerAuthUser           string                   // Authenticate to email server using this user
 	MailerAuthPass           string                   // Authenticate to email server with this password
@@ -475,13 +475,24 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// Loaders sanity checks
-	for _, ldrSCfg := range self.loaderSCfg {
+	for _, ldrSCfg := range self.loaderCfg {
 		if !ldrSCfg.Enabled {
 			continue
 		}
 		for _, dir := range []string{ldrSCfg.TpInDir, ldrSCfg.TpOutDir} {
 			if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
-				fmt.Errorf("Nonexistent folder: %s", dir)
+				return fmt.Errorf("<%s> Nonexistent folder: %s", utils.LoaderS, dir)
+			}
+		}
+		for _, data := range ldrSCfg.Data {
+			if data.Type != utils.MetaAttributes {
+				return fmt.Errorf("<%s> unsupported data type %s", utils.LoaderS, data.Type)
+			}
+
+			for _, field := range data.Fields {
+				if field.Type != utils.META_COMPOSED && field.Type != utils.MetaString {
+					return fmt.Errorf("<%s> invalid field type %s for %s at %s", utils.LoaderS, field.Type, data.Type, field.Tag)
+				}
 			}
 		}
 	}
@@ -790,7 +801,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return err
 	}
 
-	jsnLoaderSCfg, err := jsnCfg.LoaderSJsonCfg()
+	jsnLoaderCfg, err := jsnCfg.LoaderJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -1158,13 +1169,13 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 	}
 
-	if jsnLoaderSCfg != nil {
-		if self.loaderSCfg == nil {
-			self.loaderSCfg = make([]*LoaderSConfig, len(jsnLoaderSCfg))
+	if jsnLoaderCfg != nil {
+		if self.loaderCfg == nil {
+			self.loaderCfg = make([]*LoaderConfig, len(jsnLoaderCfg))
 		}
-		for idx, profile := range jsnLoaderSCfg {
-			self.loaderSCfg[idx] = NewDfltLoadersConfig()
-			self.loaderSCfg[idx].loadFromJsonCfg(profile)
+		for idx, profile := range jsnLoaderCfg {
+			self.loaderCfg[idx] = NewDfltLoaderConfig()
+			self.loaderCfg[idx].loadFromJsonCfg(profile)
 		}
 	}
 
@@ -1405,6 +1416,6 @@ func (cfg *CGRConfig) CacheCfg() CacheConfig {
 	return cfg.cacheConfig
 }
 
-func (cfg *CGRConfig) LoaderSCfg() []*LoaderSConfig {
-	return cfg.loaderSCfg
+func (cfg *CGRConfig) LoaderCfg() []*LoaderConfig {
+	return cfg.loaderCfg
 }

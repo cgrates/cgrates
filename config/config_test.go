@@ -917,8 +917,8 @@ func TestDbDefaults(t *testing.T) {
 }
 
 func TestLoaderDefaults(t *testing.T) {
-	eCfg := []*LoaderSConfig{
-		&LoaderSConfig{
+	eCfg := []*LoaderConfig{
+		&LoaderConfig{
 			Id:           utils.META_DEFAULT,
 			Enabled:      false,
 			DryRun:       false,
@@ -930,10 +930,10 @@ func TestLoaderDefaults(t *testing.T) {
 				},
 			},
 			FieldSeparator: ",",
-			TpInDir:        "/var/spool/cgrates/loader/in",
-			TpOutDir:       "/var/spool/cgrates/loader/out",
-			Data: []*LoaderSDataType{
-				&LoaderSDataType{
+			TpInDir:        "/var/spool/cgrates/tploader/in",
+			TpOutDir:       "/var/spool/cgrates/tploader/out",
+			Data: []*LoaderDataType{
+				&LoaderDataType{
 					Type:     utils.MetaAttributes,
 					Filename: utils.AttributesCsv,
 					Fields: []*CfgCdrField{
@@ -984,7 +984,7 @@ func TestLoaderDefaults(t *testing.T) {
 			},
 		},
 	}
-	if !reflect.DeepEqual(eCfg, cgrCfg.loaderSCfg) {
-		t.Errorf("received: %+v, expecting: %+v", eCfg, cgrCfg.loaderSCfg)
+	if !reflect.DeepEqual(eCfg, cgrCfg.loaderCfg) {
+		t.Errorf("received: %+v, expecting: %+v", eCfg, cgrCfg.loaderCfg)
 	}
 }
