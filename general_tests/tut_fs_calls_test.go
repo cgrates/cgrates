@@ -234,7 +234,10 @@ func testCallStartPjsuaListener(t *testing.T) {
 		&engine.PjsuaAccount{Id: "sip:1001@192.168.56.202",
 			Username: "1001", Password: "CGRateS.org", Realm: "*", Registrar: "sip:192.168.56.202:5060"},
 		&engine.PjsuaAccount{Id: "sip:1002@192.168.56.202",
-			Username: "1002", Password: "CGRateS.org", Realm: "*", Registrar: "sip:192.168.56.202:5060"}}
+			Username: "1002", Password: "CGRateS.org", Realm: "*", Registrar: "sip:192.168.56.202:5060"},
+		&engine.PjsuaAccount{Id: "sip:1003@192.168.56.202",
+			Username: "1003", Password: "CGRateS.org", Realm: "*", Registrar: "sip:192.168.56.202:5060"},
+	}
 	if tutFsCallsPjSuaListener, err = engine.StartPjsuaListener(
 		acnts, 5070, time.Duration(*waitRater)*time.Millisecond); err != nil {
 		t.Fatal(err)
@@ -361,7 +364,7 @@ func testCall1001Cdrs(t *testing.T) {
 				if cdr.CostSource != utils.MetaSessionS {
 					t.Errorf("Unexpected CostSource for CDR: %+v", cdr.CostSource)
 				}
-			} else {
+			} else if cdr.Destination == "1003" {
 				if cdr.Usage != "12s" && cdr.Usage != "13s" { // Usage as seconds
 					t.Errorf("Unexpected Usage for CDR: %+v", cdr.Usage)
 				}
@@ -369,9 +372,7 @@ func testCall1001Cdrs(t *testing.T) {
 					t.Errorf("Unexpected CostSource for CDR: %+v", cdr.CostSource)
 				}
 			}
-
 		}
-
 	}
 }
 
@@ -402,8 +403,8 @@ func testCall1002Cdrs(t *testing.T) {
 func testCallStatMetrics(t *testing.T) {
 	var metrics map[string]string
 	expectedMetrics := map[string]string{
-		utils.MetaTCC: "0.91589",
-		utils.MetaTCD: "2m12s",
+		utils.MetaTCC: "1.35009",
+		utils.MetaTCD: "2m25s",
 	}
 	if err := tutFsCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2"}, &metrics); err != nil {
