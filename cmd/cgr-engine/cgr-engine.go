@@ -34,6 +34,7 @@ import (
 	"github.com/cgrates/cgrates/cdrc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/sessions"
@@ -698,6 +699,17 @@ func startFilterService(filterSChan chan *engine.FilterS, cacheS *engine.CacheS,
 
 }
 
+// loaderService will start and register APIs for LoaderService if enabled
+func loaderService(cacheS *engine.CacheS, cfg *config.CGRConfig,
+	dm *engine.DataManager, server *utils.Server, exitChan chan bool) {
+	ldrS := loaders.NewLoaderService(dm, cfg.LoaderSCfg(), cfg.DefaultTimezone)
+	if !ldrS.Enabled() {
+		return
+	}
+	go ldrS.ListenAndServe(exitChan)
+	server.RpcRegister(v1.NewLoaderSv1(ldrS))
+}
+
 func startRpc(server *utils.Server, internalRaterChan,
 	internalCdrSChan, internalCdrStatSChan, internalPubSubSChan, internalUserSChan,
 	internalAliaseSChan, internalRsChan, internalStatSChan, internalSMGChan chan rpcclient.RpcClientConnection) {
@@ -994,6 +1006,8 @@ func main() {
 			internalRsChan, internalStatSChan,
 			cfg, dm, server, exitChan, filterSChan)
 	}
+
+	go loaderService(cacheS, cfg, dm, server, exitChan)
 
 	// Serve rpc connections
 	go startRpc(server, internalRaterChan, internalCdrSChan, internalCdrStatSChan,

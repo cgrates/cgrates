@@ -38,7 +38,7 @@ type openedCSVFile struct {
 }
 
 func NewLoader(dm *engine.DataManager, cfg *config.LoaderSConfig,
-	timezone string) (ldr *Loader, err error) {
+	timezone string) (ldr *Loader) {
 	ldr = &Loader{
 		enabled:       cfg.Enabled,
 		dryRun:        cfg.DryRun,
@@ -87,6 +87,13 @@ type Loader struct {
 	timezone      string
 }
 
+func (ldr *Loader) ListenAndServe(exitChan chan struct{}) (err error) {
+	utils.Logger.Info(fmt.Sprintf("Starting <%s-%s>", utils.LoaderS, ldr.ldrID))
+	e := <-exitChan
+	exitChan <- e // put back for the others listening for shutdown request
+	return
+}
+
 // ProcessFolder will process the content in the folder with locking
 func (ldr *Loader) ProcessFolder() (err error) {
 	if err = ldr.lockFolder(); err != nil {
@@ -95,13 +102,13 @@ func (ldr *Loader) ProcessFolder() (err error) {
 	defer ldr.unlockFolder()
 	for ldrType := range ldr.rdrs {
 		if err = ldr.openFiles(ldrType); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<%s> loaderType: <%s> cannot open files, err: %s",
-				utils.LoaderS, ldrType, err.Error()))
+			utils.Logger.Warning(fmt.Sprintf("<%s-%s> loaderType: <%s> cannot open files, err: %s",
+				utils.LoaderS, ldr.ldrID, ldrType, err.Error()))
 			continue
 		}
 		if err = ldr.processContent(ldrType); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<%s> loaderType: <%s>, err: %s",
-				utils.LoaderS, ldrType, err.Error()))
+			utils.Logger.Warning(fmt.Sprintf("<%s-%s> loaderType: <%s>, err: %s",
+				utils.LoaderS, ldr.ldrID, ldrType, err.Error()))
 		}
 	}
 	return
