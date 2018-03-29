@@ -930,8 +930,8 @@ func TestLoaderDefaults(t *testing.T) {
 				},
 			},
 			FieldSeparator: ",",
-			TpInDir:        "/var/spool/cgrates/tploader/in",
-			TpOutDir:       "/var/spool/cgrates/tploader/out",
+			TpInDir:        "/var/spool/cgrates/loader/in",
+			TpOutDir:       "/var/spool/cgrates/loader/out",
 			Data: []*LoaderDataType{
 				&LoaderDataType{
 					Type:     utils.MetaAttributes,
