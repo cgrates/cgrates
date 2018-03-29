@@ -92,6 +92,7 @@ type SupplierService struct {
 	filterS             *FilterS
 	stringIndexedFields *[]string
 	prefixIndexedFields *[]string
+	maxCost             *float64
 	resourceS,
 	statS rpcclient.RpcClientConnection
 	sorter SupplierSortDispatcher
@@ -265,6 +266,8 @@ func (spS *SupplierService) resourceUsage(resIDs []string) (tUsage float64, err 
 // for event based on filters and sorting algorithms
 func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sortedSuppls *SortedSuppliers, err error) {
 	var suppPrfls SupplierProfiles
+	utils.Logger.Debug(fmt.Sprintf("args.maxcost %+v", args.MaxCost))
+	spS.maxCost = utils.Float64Pointer(args.MaxCost)
 	if suppPrfls, err = spS.matchingSupplierProfilesForEvent(&args.CGREvent); err != nil {
 		return
 	} else if len(suppPrfls) == 0 {
@@ -301,6 +304,8 @@ func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sor
 }
 
 type ArgsGetSuppliers struct {
+	IgnoreError bool
+	MaxCost     float64
 	utils.CGREvent
 	utils.Paginator
 }

@@ -41,6 +41,7 @@ func (lcs *LeastCostSorter) SortSuppliers(prflID string,
 		Sorting:         lcs.sorting,
 		SortedSuppliers: make([]*SortedSupplier, 0)}
 	for _, s := range suppls {
+		utils.Logger.Debug(fmt.Sprintf("s : %+v \n", s))
 		costData, err := lcs.spS.costForEvent(ev, s.AccountIDs, s.RatingPlanIDs)
 		if err != nil {
 			return nil, err
@@ -48,6 +49,14 @@ func (lcs *LeastCostSorter) SortSuppliers(prflID string,
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> profile: %s ignoring supplier with ID: %s, missing cost information",
 					utils.SupplierS, prflID, s.ID))
+			continue
+		}
+		cost, err := utils.IfaceAsFloat64(costData[utils.Cost])
+		if err != nil {
+			return nil, err
+		}
+		utils.Logger.Debug(fmt.Sprintf("maxCost : %+v and cost costData[utils.Cost] %+v", float64(*lcs.spS.maxCost), cost))
+		if cost > float64(*lcs.spS.maxCost) {
 			continue
 		}
 		srtData := map[string]interface{}{
@@ -60,6 +69,10 @@ func (lcs *LeastCostSorter) SortSuppliers(prflID string,
 			SupplierID:         s.ID,
 			SortingData:        srtData,
 			SupplierParameters: s.SupplierParameters})
+	}
+	utils.Logger.Debug(fmt.Sprintf("sortedSuppls : %+v \n", sortedSuppls))
+	if len(sortedSuppls.SortedSuppliers) == 0 {
+		return nil, utils.ErrNotFound
 	}
 	sortedSuppls.SortCost()
 	return
