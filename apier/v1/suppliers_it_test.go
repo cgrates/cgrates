@@ -165,6 +165,7 @@ func testV1SplSGetWeightSuppliers(t *testing.T) {
 
 func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 	ev := &engine.ArgsGetSuppliers{
+		//MaxCost: 0.020,
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetLeastCostSuppliers",
