@@ -702,7 +702,7 @@ func startFilterService(filterSChan chan *engine.FilterS, cacheS *engine.CacheS,
 // loaderService will start and register APIs for LoaderService if enabled
 func loaderService(cacheS *engine.CacheS, cfg *config.CGRConfig,
 	dm *engine.DataManager, server *utils.Server, exitChan chan bool) {
-	ldrS := loaders.NewLoaderService(dm, cfg.LoaderSCfg(), cfg.DefaultTimezone)
+	ldrS := loaders.NewLoaderService(dm, cfg.LoaderCfg(), cfg.DefaultTimezone)
 	if !ldrS.Enabled() {
 		return
 	}
