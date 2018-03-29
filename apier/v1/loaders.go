@@ -37,3 +37,8 @@ func (ldrSv1 *LoaderSv1) Call(serviceMethod string,
 	args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(ldrSv1, serviceMethod, args, reply)
 }
+
+func (ldrSv1 *LoaderSv1) Load(args *loaders.ArgsProcessFolder,
+	rply *string) error {
+	return ldrSv1.ldrS.V1Load(args, rply)
+}

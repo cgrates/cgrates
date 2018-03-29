@@ -19,8 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package loaders
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func NewLoaderService(dm *engine.DataManager, ldrsCfg []*config.LoaderSConfig,
@@ -62,5 +66,36 @@ func (ldrS *LoaderService) ListenAndServe(exitChan chan bool) (err error) {
 	case <-ldrExitChan:
 		exitChan <- true
 	}
+	return
+}
+
+type ArgsProcessFolder struct {
+	LoaderID  string
+	ForceLock bool
+}
+
+func (ldrS *LoaderService) V1Load(args *ArgsProcessFolder,
+	rply *string) (err error) {
+	if args.LoaderID == "" {
+		args.LoaderID = utils.META_DEFAULT
+	}
+	ldr, has := ldrS.ldrs[args.LoaderID]
+	if !has {
+		return fmt.Errorf("UNKNOWN_LOADER: %s", args.LoaderID)
+	}
+	if locked, err := ldr.isFolderLocked(); err != nil {
+		return utils.NewErrServerError(err)
+	} else if locked {
+		if args.ForceLock {
+			if err := ldr.unlockFolder(); err != nil {
+				return utils.NewErrServerError(err)
+			}
+		}
+		return errors.New("ANOTHER_LOADER_RUNNING")
+	}
+	if err := ldr.ProcessFolder(); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	*rply = utils.OK
 	return
 }

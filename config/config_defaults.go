@@ -458,13 +458,13 @@ const CGRATES_CFG_JSON = `
 		"enabled": false,									// starts as service: <true|false>.
 		"dry_run": false,									// do not send the CDRs to CDRS, just parse them
 		"run_delay": 0,										// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
-		"lock_filename": ".cgr.lock",						// Filename containing concurrency lock in case of delayed processing
+		"lock_filename": ".cgr.lck",						// Filename containing concurrency lock in case of delayed processing
 		"caches_conns": [
 			{"address": "*internal"},						// address where to reach the CacheS for data reload, empty for no reloads  <""|*internal|x.y.z.y:1234>
 		],
 		"field_separator": ",",								// separator used in case of csv files
-		"tp_in_dir": "/var/spool/cgrates/tploader/in",		// absolute path towards the directory where the CDRs are stored
-		"tp_out_dir": "/var/spool/cgrates/tploader/out",	// absolute path towards the directory where processed CDRs will be moved
+		"tp_in_dir": "/var/spool/cgrates/loader/in",		// absolute path towards the directory where the CDRs are stored
+		"tp_out_dir": "/var/spool/cgrates/loader/out",	// absolute path towards the directory where processed CDRs will be moved
 		"data":[											// data profiles to load
 			{
 				"type": "*attributes",						// data source type

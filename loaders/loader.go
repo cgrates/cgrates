@@ -22,6 +22,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path"
 	"strings"
@@ -42,6 +43,7 @@ func NewLoader(dm *engine.DataManager, cfg *config.LoaderSConfig,
 	ldr = &Loader{
 		enabled:       cfg.Enabled,
 		dryRun:        cfg.DryRun,
+		ldrID:         cfg.Id,
 		tpInDir:       cfg.TpInDir,
 		tpOutDir:      cfg.TpOutDir,
 		lockFilename:  cfg.LockFileName,
@@ -101,17 +103,13 @@ func (ldr *Loader) ProcessFolder() (err error) {
 	}
 	defer ldr.unlockFolder()
 	for ldrType := range ldr.rdrs {
-		if err = ldr.openFiles(ldrType); err != nil {
+		if err = ldr.processFiles(ldrType); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s-%s> loaderType: <%s> cannot open files, err: %s",
 				utils.LoaderS, ldr.ldrID, ldrType, err.Error()))
 			continue
 		}
-		if err = ldr.processContent(ldrType); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<%s-%s> loaderType: <%s>, err: %s",
-				utils.LoaderS, ldr.ldrID, ldrType, err.Error()))
-		}
 	}
-	return
+	return ldr.moveFiles()
 }
 
 // lockFolder will attempt to lock the folder by creating the lock file
@@ -126,6 +124,17 @@ func (ldr *Loader) unlockFolder() (err error) {
 		ldr.lockFilename))
 }
 
+func (ldr *Loader) isFolderLocked() (locked bool, err error) {
+	if _, err = os.Stat(path.Join(ldr.tpInDir,
+		ldr.lockFilename)); err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return
+}
+
 // unreferenceFile will cleanup an used file by closing and removing from referece map
 func (ldr *Loader) unreferenceFile(loaderType, fileName string) (err error) {
 	openedCSVFile := ldr.rdrs[loaderType][fileName]
@@ -133,39 +142,36 @@ func (ldr *Loader) unreferenceFile(loaderType, fileName string) (err error) {
 	return openedCSVFile.rdr.Close()
 }
 
-func (ldr *Loader) storeLoadedData(loaderType string,
-	lds map[string][]LoaderData) (err error) {
-	switch loaderType {
-	case utils.MetaAttributes:
-		for _, lDataSet := range lds {
-			attrModels := make(engine.TPAttributes, len(lDataSet))
-			for i, ld := range lDataSet {
-				attrModels[i] = new(engine.TPAttribute)
-				if err = utils.UpdateStructWithIfaceMap(attrModels[i], ld); err != nil {
-					return
-				}
-			}
-			for _, tpApf := range attrModels.AsTPAttributes() {
-				if apf, err := engine.APItoAttributeProfile(tpApf, ldr.timezone); err != nil {
-					return err
-				} else if err := ldr.dm.SetAttributeProfile(apf, true); err != nil {
-					return err
-				}
-			}
+func (ldr *Loader) moveFiles() (err error) {
+	filesInDir, _ := ioutil.ReadDir(ldr.tpInDir)
+	for _, file := range filesInDir {
+		fName := file.Name()
+		if fName == ldr.lockFilename {
+			continue
+		}
+		oldPath := path.Join(ldr.tpInDir, fName)
+		newPath := path.Join(ldr.tpOutDir, fName)
+		if err = os.Rename(oldPath, newPath); err != nil {
+			return
 		}
 	}
 	return
 }
 
-func (ldr *Loader) openFiles(loaderType string) (err error) {
+func (ldr *Loader) processFiles(loaderType string) (err error) {
 	for fName := range ldr.rdrs[loaderType] {
 		var rdr *os.File
 		if rdr, err = os.Open(path.Join(ldr.tpInDir, fName)); err != nil {
 			return err
 		}
+		csvReader := csv.NewReader(rdr)
+		csvReader.Comment = '#'
 		ldr.rdrs[loaderType][fName] = &openedCSVFile{
-			fileName: fName, rdr: rdr, csvRdr: csv.NewReader(rdr)}
+			fileName: fName, rdr: rdr, csvRdr: csvReader}
 		defer ldr.unreferenceFile(loaderType, fName)
+		if err = ldr.processContent(loaderType); err != nil {
+			return
+		}
 	}
 	return
 }
@@ -231,5 +237,37 @@ func (ldr *Loader) processContent(loaderType string) (err error) {
 		return
 	}
 	delete(ldr.bufLoaderData, tntID)
+	return
+}
+
+func (ldr *Loader) storeLoadedData(loaderType string,
+	lds map[string][]LoaderData) (err error) {
+	switch loaderType {
+	case utils.MetaAttributes:
+		for _, lDataSet := range lds {
+			attrModels := make(engine.TPAttributes, len(lDataSet))
+			for i, ld := range lDataSet {
+				attrModels[i] = new(engine.TPAttribute)
+				if err = utils.UpdateStructWithIfaceMap(attrModels[i], ld); err != nil {
+					return
+				}
+			}
+			for _, tpApf := range attrModels.AsTPAttributes() {
+				apf, err := engine.APItoAttributeProfile(tpApf, ldr.timezone)
+				if err != nil {
+					return err
+				}
+				if ldr.dryRun {
+					utils.Logger.Info(
+						fmt.Sprintf("<%s-%s> DRY_RUN: AttributeProfile: %s",
+							utils.LoaderS, ldr.ldrID, utils.ToJSON(apf)))
+					continue
+				}
+				if err := ldr.dm.SetAttributeProfile(apf, true); err != nil {
+					return err
+				}
+			}
+		}
+	}
 	return
 }

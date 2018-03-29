@@ -923,15 +923,15 @@ func TestLoaderDefaults(t *testing.T) {
 			Enabled:      false,
 			DryRun:       false,
 			RunDelay:     0,
-			LockFileName: ".cgr.lock",
+			LockFileName: ".cgr.lck",
 			CacheSConns: []*HaPoolConfig{
 				&HaPoolConfig{
 					Address: utils.MetaInternal,
 				},
 			},
 			FieldSeparator: ",",
-			TpInDir:        "/var/spool/cgrates/tploader/in",
-			TpOutDir:       "/var/spool/cgrates/tploader/out",
+			TpInDir:        "/var/spool/cgrates/loader/in",
+			TpOutDir:       "/var/spool/cgrates/loader/out",
 			Data: []*LoaderSDataType{
 				&LoaderSDataType{
 					Type:     utils.MetaAttributes,
