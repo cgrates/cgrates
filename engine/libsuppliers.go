@@ -108,12 +108,12 @@ func NewSupplierSortDispatcher(lcrS *SupplierService) (ssd SupplierSortDispatche
 type SupplierSortDispatcher map[string]SuppliersSorter
 
 func (ssd SupplierSortDispatcher) SortSuppliers(prflID, strategy string,
-	suppls []*Supplier, suplEv *utils.CGREvent, extraFields *extraOptions) (sortedSuppls *SortedSuppliers, err error) {
+	suppls []*Supplier, suplEv *utils.CGREvent, extraFilters *extraOptions) (sortedSuppls *SortedSuppliers, err error) {
 	sd, has := ssd[strategy]
 	if !has {
 		return nil, fmt.Errorf("unsupported sorting strategy: %s", strategy)
 	}
-	return sd.SortSuppliers(prflID, suppls, suplEv, extraFields)
+	return sd.SortSuppliers(prflID, suppls, suplEv, extraFilters)
 }
 
 func NewWeightSorter() *WeightSorter {
@@ -126,7 +126,7 @@ type WeightSorter struct {
 }
 
 func (ws *WeightSorter) SortSuppliers(prflID string,
-	suppls []*Supplier, suplEv *utils.CGREvent, extraFields *extraOptions) (sortedSuppls *SortedSuppliers, err error) {
+	suppls []*Supplier, suplEv *utils.CGREvent, extraFilters *extraOptions) (sortedSuppls *SortedSuppliers, err error) {
 	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
 		Sorting:         ws.sorting,
 		SortedSuppliers: make([]*SortedSupplier, len(suppls))}

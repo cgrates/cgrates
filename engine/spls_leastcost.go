@@ -41,8 +41,8 @@ type extraOptions struct {
 	ignoreErrors bool
 }
 
-func (lcs *LeastCostSorter) SortSuppliers(prflID string,
-	suppls []*Supplier, ev *utils.CGREvent, extraFilters *extraOptions) (sortedSuppls *SortedSuppliers, err error) {
+func (lcs *LeastCostSorter) SortSuppliers(prflID string, suppls []*Supplier,
+	ev *utils.CGREvent, extraFilters *extraOptions) (sortedSuppls *SortedSuppliers, err error) {
 	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
 		Sorting:         lcs.sorting,
 		SortedSuppliers: make([]*SortedSupplier, 0)}
