@@ -312,8 +312,6 @@ type ArgsGetSuppliers struct {
 	utils.Paginator
 }
 
-//de convertit din ArgsGetSuppliers in argsGetSuppliers
-
 func (args *ArgsGetSuppliers) asOptsGetSuppliers(supp []*Supplier) (out *optsGetSuppliers, err error) {
 	out = new(optsGetSuppliers)
 	if args.MaxCost != "" {
