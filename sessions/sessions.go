@@ -1301,12 +1301,14 @@ func (smg *SMGeneric) BiRPCV1ReplicatePassiveSessions(clnt rpcclient.RpcClientCo
 }
 
 type V1AuthorizeArgs struct {
-	GetAttributes      bool
-	AuthorizeResources bool
-	GetMaxUsage        bool
-	GetSuppliers       bool
-	ProcessThresholds  *bool
-	ProcessStatQueues  *bool
+	GetAttributes         bool
+	AuthorizeResources    bool
+	GetMaxUsage           bool
+	GetSuppliers          bool
+	SuppliersMaxCost      string
+	SuppliersIgnoreErrors bool
+	ProcessThresholds     *bool
+	ProcessStatQueues     *bool
 	utils.CGREvent
 	utils.Paginator
 }
@@ -1410,8 +1412,10 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		}
 		var splsReply engine.SortedSuppliers
 		sArgs := &engine.ArgsGetSuppliers{
-			CGREvent:  *cgrEv,
-			Paginator: args.Paginator,
+			IgnoreErrors: args.SuppliersIgnoreErrors,
+			MaxCost:      args.SuppliersMaxCost,
+			CGREvent:     *cgrEv,
+			Paginator:    args.Paginator,
 		}
 		if err = smg.splS.Call(utils.SupplierSv1GetSuppliers,
 			sArgs, &splsReply); err != nil {

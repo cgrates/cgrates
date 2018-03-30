@@ -532,6 +532,7 @@ const (
 	MetaRound                    = "*round"
 	LoaderS                      = "LoaderS"
 	Pong                         = "Pong"
+	MetaEventCost                = "*event_cost"
 )
 
 //MetaMetrics

@@ -45,7 +45,7 @@ var sTestsSupplierSV1 = []func(t *testing.T){
 	testV1SplSLoadConfig,
 	testV1SplSInitDataDb,
 	testV1SplSResetStorDb,
-	testV1SplSStartEngine,
+	//testV1SplSStartEngine,
 	testV1SplSRpcConn,
 	testV1SplSFromFolder,
 	testV1SplSGetWeightSuppliers,
@@ -221,7 +221,7 @@ func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 
 func testV1SplSGetLeastCostSuppliersWithMaxCost(t *testing.T) {
 	ev := &engine.ArgsGetSuppliers{
-		MaxCost: 0.30,
+		MaxCost: "0.30",
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetLeastCostSuppliers",
@@ -268,7 +268,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost(t *testing.T) {
 
 func testV1SplSGetLeastCostSuppliersWithMaxCostNotFound(t *testing.T) {
 	ev := &engine.ArgsGetSuppliers{
-		MaxCost: 0.001,
+		MaxCost: "0.001",
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetLeastCostSuppliers",
