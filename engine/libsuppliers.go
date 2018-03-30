@@ -92,7 +92,7 @@ type SupplierWithParams struct {
 
 // SuppliersSorter is the interface which needs to be implemented by supplier sorters
 type SuppliersSorter interface {
-	SortSuppliers(string, []*Supplier, *utils.CGREvent) (*SortedSuppliers, error)
+	SortSuppliers(string, []*Supplier, *utils.CGREvent, *extraOptions) (*SortedSuppliers, error)
 }
 
 // NewSupplierSortDispatcher constructs SupplierSortDispatcher
@@ -108,12 +108,12 @@ func NewSupplierSortDispatcher(lcrS *SupplierService) (ssd SupplierSortDispatche
 type SupplierSortDispatcher map[string]SuppliersSorter
 
 func (ssd SupplierSortDispatcher) SortSuppliers(prflID, strategy string,
-	suppls []*Supplier, suplEv *utils.CGREvent) (sortedSuppls *SortedSuppliers, err error) {
+	suppls []*Supplier, suplEv *utils.CGREvent, extraFields *extraOptions) (sortedSuppls *SortedSuppliers, err error) {
 	sd, has := ssd[strategy]
 	if !has {
 		return nil, fmt.Errorf("unsupported sorting strategy: %s", strategy)
 	}
-	return sd.SortSuppliers(prflID, suppls, suplEv)
+	return sd.SortSuppliers(prflID, suppls, suplEv, extraFields)
 }
 
 func NewWeightSorter() *WeightSorter {
@@ -126,7 +126,7 @@ type WeightSorter struct {
 }
 
 func (ws *WeightSorter) SortSuppliers(prflID string,
-	suppls []*Supplier, suplEv *utils.CGREvent) (sortedSuppls *SortedSuppliers, err error) {
+	suppls []*Supplier, suplEv *utils.CGREvent, extraFields *extraOptions) (sortedSuppls *SortedSuppliers, err error) {
 	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
 		Sorting:         ws.sorting,
 		SortedSuppliers: make([]*SortedSupplier, len(suppls))}
