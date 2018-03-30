@@ -137,7 +137,7 @@ func TestLibSuppliersSortWeight(t *testing.T) {
 		Event:  make(map[string]interface{}),
 	}
 	ws := NewWeightSorter()
-	result, err := ws.SortSuppliers("SPL_WEIGHT_1", spl, se)
+	result, err := ws.SortSuppliers("SPL_WEIGHT_1", spl, se, nil)
 	if err != nil {
 		t.Error(err)
 	}
