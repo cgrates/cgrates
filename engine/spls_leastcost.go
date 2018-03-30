@@ -55,7 +55,7 @@ func (lcs *LeastCostSorter) SortSuppliers(prflID string,
 		if err != nil {
 			return nil, err
 		}
-		utils.Logger.Debug(fmt.Sprintf("maxCost : %+v and cost costData[utils.Cost] %+v", float64(*lcs.spS.maxCost), cost))
+
 		if cost > *lcs.spS.maxCost && *lcs.spS.maxCost != 0 {
 			continue
 		}
@@ -70,7 +70,6 @@ func (lcs *LeastCostSorter) SortSuppliers(prflID string,
 			SortingData:        srtData,
 			SupplierParameters: s.SupplierParameters})
 	}
-	utils.Logger.Debug(fmt.Sprintf("sortedSuppls : %+v \n", sortedSuppls))
 	if len(sortedSuppls.SortedSuppliers) == 0 {
 		return nil, utils.ErrNotFound
 	}
