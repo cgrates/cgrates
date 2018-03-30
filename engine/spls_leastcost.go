@@ -56,7 +56,7 @@ func (lcs *LeastCostSorter) SortSuppliers(prflID string,
 			return nil, err
 		}
 		utils.Logger.Debug(fmt.Sprintf("maxCost : %+v and cost costData[utils.Cost] %+v", float64(*lcs.spS.maxCost), cost))
-		if cost > float64(*lcs.spS.maxCost) {
+		if cost > *lcs.spS.maxCost && *lcs.spS.maxCost != 0 {
 			continue
 		}
 		srtData := map[string]interface{}{
