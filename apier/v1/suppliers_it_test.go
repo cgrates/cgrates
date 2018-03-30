@@ -51,6 +51,7 @@ var sTestsSupplierSV1 = []func(t *testing.T){
 	testV1SplSGetWeightSuppliers,
 	testV1SplSGetLeastCostSuppliers,
 	testV1SplSGetLeastCostSuppliersWithMaxCost,
+	testV1SplSGetLeastCostSuppliersWithMaxCostNotFound,
 	testV1SplSGetSupplierWithoutFilter,
 	testV1SplSSetSupplierProfiles,
 	testV1SplSUpdateSupplierProfiles,
@@ -262,6 +263,28 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost(t *testing.T) {
 	} else if !reflect.DeepEqual(eSpls, suplsReply) {
 		t.Errorf("Expecting: %s, received: %s",
 			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
+	}
+}
+
+func testV1SplSGetLeastCostSuppliersWithMaxCostNotFound(t *testing.T) {
+	ev := &engine.ArgsGetSuppliers{
+		MaxCost: 0.001,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1SplSGetLeastCostSuppliers",
+			Event: map[string]interface{}{
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+				utils.Usage:       "1m20s",
+			},
+		},
+	}
+	var suplsReply engine.SortedSuppliers
+	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
+		ev, &suplsReply); err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
 	}
 }
 
