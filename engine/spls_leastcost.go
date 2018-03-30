@@ -35,14 +35,8 @@ type LeastCostSorter struct {
 	spS     *SupplierService
 }
 
-// LeastCostSorter sorts suppliers based on their cost
-type extraOpts struct {
-	maxCost      float64
-	ignoreErrors bool
-}
-
 func (lcs *LeastCostSorter) SortSuppliers(prflID string, suppls []*Supplier,
-	ev *utils.CGREvent, extraOpts *extraOpts) (sortedSuppls *SortedSuppliers, err error) {
+	ev *utils.CGREvent, extraOpts *optsGetSuppliers) (sortedSuppls *SortedSuppliers, err error) {
 	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
 		Sorting:         lcs.sorting,
 		SortedSuppliers: make([]*SortedSupplier, 0)}

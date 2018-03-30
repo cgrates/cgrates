@@ -21,6 +21,7 @@ package engine
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -283,8 +284,11 @@ func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sor
 		}
 		spls = append(spls, s)
 	}
-	sortedSuppliers, err := spS.sorter.SortSuppliers(splPrfl.ID, splPrfl.Sorting, spls, &args.CGREvent,
-		&extraOpts{maxCost: args.MaxCost, ignoreErrors: args.IgnoreError})
+	extraOpts, err := args.asOptsGetSuppliers()
+	if err != nil {
+		return nil, err
+	}
+	sortedSuppliers, err := spS.sorter.SortSuppliers(splPrfl.ID, splPrfl.Sorting, spls, &args.CGREvent, extraOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -302,10 +306,39 @@ func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sor
 }
 
 type ArgsGetSuppliers struct {
-	IgnoreError bool
-	MaxCost     float64
+	IgnoreErrors bool
+	MaxCost      string
 	utils.CGREvent
 	utils.Paginator
+}
+
+//de convertit din ArgsGetSuppliers in argsGetSuppliers
+
+func (args *ArgsGetSuppliers) asOptsGetSuppliers() (out *optsGetSuppliers, err error) {
+	out = new(optsGetSuppliers)
+	if args.MaxCost != "" {
+		if args.MaxCost == utils.MetaEventCost {
+			val, err := strconv.ParseFloat(args.MaxCost, 64)
+			if err != nil {
+				return nil, err
+			}
+			out.maxCost = val
+			//implement
+		} else {
+			val, err := strconv.ParseFloat(args.MaxCost, 64)
+			if err != nil {
+				return nil, err
+			}
+			out.maxCost = val
+		}
+	}
+	out.ignoreErrors = args.IgnoreErrors
+	return
+}
+
+type optsGetSuppliers struct {
+	ignoreErrors bool
+	maxCost      float64
 }
 
 // V1GetSuppliersForEvent returns the list of valid supplier IDs
