@@ -45,12 +45,13 @@ var sTestsSupplierSV1 = []func(t *testing.T){
 	testV1SplSLoadConfig,
 	testV1SplSInitDataDb,
 	testV1SplSResetStorDb,
-	//testV1SplSStartEngine,
+	testV1SplSStartEngine,
 	testV1SplSRpcConn,
 	testV1SplSFromFolder,
 	testV1SplSGetWeightSuppliers,
 	testV1SplSGetLeastCostSuppliers,
 	testV1SplSGetLeastCostSuppliersWithMaxCost,
+	testV1SplSGetLeastCostSuppliersWithMaxCost2,
 	testV1SplSGetLeastCostSuppliersWithMaxCostNotFound,
 	testV1SplSGetSupplierWithoutFilter,
 	testV1SplSSetSupplierProfiles,
@@ -285,6 +286,61 @@ func testV1SplSGetLeastCostSuppliersWithMaxCostNotFound(t *testing.T) {
 	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
 		ev, &suplsReply); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
+	}
+}
+
+func testV1SplSGetLeastCostSuppliersWithMaxCost2(t *testing.T) {
+	ev := &engine.ArgsGetSuppliers{
+		MaxCost: utils.MetaEventCost,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1SplSGetLeastCostSuppliers",
+			Event: map[string]interface{}{
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2014, 01, 14, 0, 0, 0, 0, time.UTC),
+				utils.Usage:       "2m20s",
+			},
+		},
+	}
+	eSpls := engine.SortedSuppliers{
+		ProfileID: "SPL_LEASTCOST_1",
+		Sorting:   utils.MetaLeastCost,
+		SortedSuppliers: []*engine.SortedSupplier{
+			&engine.SortedSupplier{
+				SupplierID: "supplier3",
+				SortingData: map[string]interface{}{
+					utils.Cost:         0.03,
+					utils.RatingPlanID: "RP_SPECIAL_1002",
+					utils.Weight:       15.0,
+				},
+			},
+			&engine.SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					utils.Cost:         0.03,
+					utils.RatingPlanID: "RP_SPECIAL_1002",
+					utils.Weight:       10.0,
+				},
+			},
+			&engine.SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					utils.Cost:         0.1664,
+					utils.RatingPlanID: "RP_RETAIL1",
+					utils.Weight:       20.0,
+				},
+			},
+		},
+	}
+	var suplsReply engine.SortedSuppliers
+	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
+		ev, &suplsReply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSpls, suplsReply) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
 	}
 }
 
