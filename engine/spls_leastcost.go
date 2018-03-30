@@ -36,20 +36,20 @@ type LeastCostSorter struct {
 }
 
 // LeastCostSorter sorts suppliers based on their cost
-type extraOptions struct {
-	maxCost      *float64
+type extraOpts struct {
+	maxCost      float64
 	ignoreErrors bool
 }
 
 func (lcs *LeastCostSorter) SortSuppliers(prflID string, suppls []*Supplier,
-	ev *utils.CGREvent, extraFilters *extraOptions) (sortedSuppls *SortedSuppliers, err error) {
+	ev *utils.CGREvent, extraOpts *extraOpts) (sortedSuppls *SortedSuppliers, err error) {
 	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
 		Sorting:         lcs.sorting,
 		SortedSuppliers: make([]*SortedSupplier, 0)}
 	for _, s := range suppls {
 		costData, err := lcs.spS.costForEvent(ev, s.AccountIDs, s.RatingPlanIDs)
 		if err != nil {
-			if extraFilters.ignoreErrors {
+			if extraOpts.ignoreErrors {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> profile: %s ignoring supplier with ID: %s, err: %s",
 						utils.SupplierS, prflID, s.ID, err.Error()))
@@ -62,7 +62,7 @@ func (lcs *LeastCostSorter) SortSuppliers(prflID string, suppls []*Supplier,
 					utils.SupplierS, prflID, s.ID))
 			continue
 		}
-		if costData[utils.Cost].(float64) > *extraFilters.maxCost && *extraFilters.maxCost != 0 {
+		if extraOpts.maxCost != 0 && costData[utils.Cost].(float64) > extraOpts.maxCost {
 			continue
 		}
 		srtData := map[string]interface{}{

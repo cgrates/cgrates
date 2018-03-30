@@ -284,7 +284,7 @@ func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sor
 		spls = append(spls, s)
 	}
 	sortedSuppliers, err := spS.sorter.SortSuppliers(splPrfl.ID, splPrfl.Sorting, spls, &args.CGREvent,
-		&extraOptions{maxCost: utils.Float64Pointer(args.MaxCost), ignoreErrors: args.IgnoreError})
+		&extraOpts{maxCost: args.MaxCost, ignoreErrors: args.IgnoreError})
 	if err != nil {
 		return nil, err
 	}
