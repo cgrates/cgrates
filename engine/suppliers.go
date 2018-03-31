@@ -180,6 +180,7 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 	if sTime, err = ev.FieldAsTime(utils.SetupTime, spS.timezone); err != nil {
 		return
 	}
+	var usage time.Duration
 	if usage, err = ev.FieldAsDuration(utils.Usage); err != nil {
 		return
 	}
