@@ -285,7 +285,7 @@ func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sor
 		}
 		spls = append(spls, s)
 	}
-	extraOpts, err := args.asOptsGetSuppliers(spls) // convert suppliers arguments into internal options used to limit data
+	extraOpts, err := args.asOptsGetSuppliers() // convert suppliers arguments into internal options used to limit data
 	if err != nil {
 		return nil, err
 	}
@@ -314,7 +314,7 @@ type ArgsGetSuppliers struct {
 	utils.Paginator
 }
 
-func (args *ArgsGetSuppliers) asOptsGetSuppliers(supp []*Supplier) (opts *optsGetSuppliers, err error) {
+func (args *ArgsGetSuppliers) asOptsGetSuppliers() (opts *optsGetSuppliers, err error) {
 	opts = &optsGetSuppliers{ignoreErrors: args.IgnoreErrors}
 	if args.MaxCost == utils.MetaEventCost { // dynamic cost needs to be calculated from event
 		if err = args.CGREvent.CheckMandatoryFields([]string{utils.Account,
