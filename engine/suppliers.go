@@ -180,11 +180,8 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 	if sTime, err = ev.FieldAsTime(utils.SetupTime, spS.timezone); err != nil {
 		return
 	}
-	usage := time.Duration(time.Minute)
-	if _, has := ev.Event[utils.Usage]; has {
-		if usage, err = ev.FieldAsDuration(utils.Usage); err != nil {
-			return
-		}
+	if usage, err = ev.FieldAsDuration(utils.Usage); err != nil {
+		return
 	}
 	for _, anctID := range acntIDs {
 		cd := &CallDescriptor{
@@ -265,6 +262,9 @@ func (spS *SupplierService) resourceUsage(resIDs []string) (tUsage float64, err 
 // supliersForEvent will return the list of valid supplier IDs
 // for event based on filters and sorting algorithms
 func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sortedSuppls *SortedSuppliers, err error) {
+	if _, has := args.CGREvent.Event[utils.Usage]; !has {
+		args.CGREvent.Event[utils.Usage] = time.Duration(time.Minute) // make sure we have default set for Usage
+	}
 	var suppPrfls SupplierProfiles
 	if suppPrfls, err = spS.matchingSupplierProfilesForEvent(&args.CGREvent); err != nil {
 		return
@@ -284,11 +284,12 @@ func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sor
 		}
 		spls = append(spls, s)
 	}
-	extraOpts, err := args.asOptsGetSuppliers(spls)
+	extraOpts, err := args.asOptsGetSuppliers(spls) // convert suppliers arguments into internal options used to limit data
 	if err != nil {
 		return nil, err
 	}
-	sortedSuppliers, err := spS.sorter.SortSuppliers(splPrfl.ID, splPrfl.Sorting, spls, &args.CGREvent, extraOpts)
+	sortedSuppliers, err := spS.sorter.SortSuppliers(splPrfl.ID, splPrfl.Sorting,
+		spls, &args.CGREvent, extraOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -307,115 +308,39 @@ func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sor
 
 type ArgsGetSuppliers struct {
 	IgnoreErrors bool
-	MaxCost      string
+	MaxCost      string // toDo: try with interface{} here
 	utils.CGREvent
 	utils.Paginator
 }
 
-func (args *ArgsGetSuppliers) asOptsGetSuppliers(supp []*Supplier) (out *optsGetSuppliers, err error) {
-	out = new(optsGetSuppliers)
-	if args.MaxCost != "" {
-		if args.MaxCost == utils.MetaEventCost {
-			val, err := out.costForEvent(&args.CGREvent, supp)
-			if err != nil {
-				return nil, err
-			}
-			out.maxCost = val
+func (args *ArgsGetSuppliers) asOptsGetSuppliers(supp []*Supplier) (opts *optsGetSuppliers, err error) {
+	opts = &optsGetSuppliers{ignoreErrors: args.IgnoreErrors}
+	if args.MaxCost == utils.MetaEventCost { // dynamic cost needs to be calculated from event
+		if err = args.CGREvent.CheckMandatoryFields([]string{utils.Account,
+			utils.Destination, utils.SetupTime, utils.Usage}); err != nil {
+			return
+		}
+		cd, err := NewCallDescriptorFromCGREvent(&args.CGREvent, config.CgrConfig().DefaultTimezone)
+		if err != nil {
+			return nil, err
+		}
+		if cc, err := cd.GetCost(); err != nil {
+			return nil, err
 		} else {
-			val, err := strconv.ParseFloat(args.MaxCost, 64)
-			if err != nil {
-				return nil, err
-			}
-			out.maxCost = val
+			opts.maxCost = cc.Cost
+		}
+	} else if args.MaxCost != "" {
+		if opts.maxCost, err = strconv.ParseFloat(args.MaxCost,
+			64); err != nil {
+			return nil, err
 		}
 	}
-	out.ignoreErrors = args.IgnoreErrors
 	return
 }
 
 type optsGetSuppliers struct {
 	ignoreErrors bool
 	maxCost      float64
-}
-
-func (args *optsGetSuppliers) costForEvent(ev *utils.CGREvent, suppls []*Supplier) (val float64, err error) {
-	if err = ev.CheckMandatoryFields([]string{utils.Account,
-		utils.Destination, utils.SetupTime}); err != nil {
-		return
-	}
-	var acnt, subj, dst, tenant string
-	if acnt, err = ev.FieldAsString(utils.Account); err != nil {
-		return
-	}
-	if subj, err = ev.FieldAsString(utils.Account); err != nil {
-		if err != utils.ErrNotFound {
-			return
-		}
-		subj = acnt
-	}
-	if dst, err = ev.FieldAsString(utils.Destination); err != nil {
-		return
-	}
-	if tenant, err = ev.FieldAsString(utils.Tenant); err != nil {
-		if err != utils.ErrNotFound {
-			return
-		}
-		tenant = config.CgrConfig().DefaultTenant
-	}
-	var sTime time.Time
-	if sTime, err = ev.FieldAsTime(utils.SetupTime, config.CgrConfig().DefaultTimezone); err != nil {
-		return
-	}
-	usage := time.Duration(time.Minute)
-	if _, has := ev.Event[utils.Usage]; has {
-		if usage, err = ev.FieldAsDuration(utils.Usage); err != nil {
-			return
-		}
-	}
-	// not sure here how to do or from where get ratingPlan for cost
-	maxCost := -1.0
-	for _, s := range suppls {
-		for _, rp := range s.RatingPlanIDs { // loop through RatingPlans until we find one without errors
-			rPrfl := &RatingProfile{
-				Id: utils.ConcatenatedKey(utils.OUT,
-					tenant, utils.MetaSuppliers, subj),
-				RatingPlanActivations: RatingPlanActivations{
-					&RatingPlanActivation{
-						ActivationTime: sTime,
-						RatingPlanId:   rp,
-					},
-				},
-			}
-			// force cache set so it can be picked by calldescriptor for cost calculation
-			Cache.Set(utils.CacheRatingProfiles, rPrfl.Id, rPrfl, nil,
-				true, utils.NonTransactional)
-			cd := &CallDescriptor{
-				Direction:     utils.OUT,
-				Category:      utils.MetaSuppliers,
-				Tenant:        tenant,
-				Subject:       subj,
-				Account:       acnt,
-				Destination:   dst,
-				TimeStart:     sTime,
-				TimeEnd:       sTime.Add(usage),
-				DurationIndex: usage,
-			}
-			cc, err := cd.GetCost()
-			Cache.Remove(utils.CacheRatingProfiles, rPrfl.Id,
-				true, utils.NonTransactional) // Remove here so we don't overload memory
-			if err != nil {
-				if err != utils.ErrNotFound {
-					return 0.0, err
-				}
-				continue
-			}
-			ec := NewEventCostFromCallCost(cc, "", "")
-			if ec.GetCost() > maxCost {
-				maxCost = ec.GetCost()
-			}
-		}
-	}
-	return maxCost, nil
 }
 
 // V1GetSuppliersForEvent returns the list of valid supplier IDs

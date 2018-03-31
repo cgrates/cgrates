@@ -1406,7 +1406,6 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 			return utils.NewErrNotConnected(utils.SupplierS)
 		}
 		cgrEv := args.CGREvent.Clone()
-		cgrEv.Event[utils.Usage] = time.Duration(time.Minute)
 		if acd, has := cgrEv.Event[utils.ACD]; has {
 			cgrEv.Event[utils.Usage] = acd
 		}

@@ -113,6 +113,52 @@ func Publish(event CgrEvent) {
 	}
 }
 
+// NewCallDescriptorFromCGREvent converts a CGREvent into CallDescriptor
+func NewCallDescriptorFromCGREvent(cgrEv *utils.CGREvent,
+	timezone string) (cd *CallDescriptor, err error) {
+	cd = &CallDescriptor{Direction: utils.OUT, Tenant: cgrEv.Tenant}
+	if _, has := cgrEv.Event[utils.Category]; has {
+		if cd.Category, err = cgrEv.FieldAsString(utils.Category); err != nil {
+			return nil, err
+		}
+	}
+	if cd.Account, err = cgrEv.FieldAsString(utils.Account); err != nil {
+		return
+	}
+	if cd.Subject, err = cgrEv.FieldAsString(utils.Subject); err != nil {
+		if err != utils.ErrNotFound {
+			return
+		}
+		cd.Subject = cd.Account
+	}
+	if cd.Destination, err = cgrEv.FieldAsString(utils.Destination); err != nil {
+		return nil, err
+	}
+	if cd.TimeStart, err = cgrEv.FieldAsTime(utils.SetupTime,
+		timezone); err != nil {
+		return nil, err
+	}
+	if _, has := cgrEv.Event[utils.AnswerTime]; has { // AnswerTime takes precendence for TimeStart
+		if aTime, err := cgrEv.FieldAsTime(utils.AnswerTime,
+			timezone); err != nil {
+			return nil, err
+		} else if !aTime.IsZero() {
+			cd.TimeStart = aTime
+		}
+	}
+	if usage, err := cgrEv.FieldAsDuration(utils.Usage); err != nil {
+		return nil, err
+	} else {
+		cd.TimeEnd = cd.TimeStart.Add(usage)
+	}
+	if _, has := cgrEv.Event[utils.TOR]; has {
+		if cd.TOR, err = cgrEv.FieldAsString(utils.TOR); err != nil {
+			return nil, err
+		}
+	}
+	return
+}
+
 /*
 The input stucture that contains call information.
 */

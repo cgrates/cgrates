@@ -284,7 +284,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCostNotFound(t *testing.T) {
 	}
 	var suplsReply engine.SortedSuppliers
 	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
-		ev, &suplsReply); err.Error() != utils.ErrNotFound.Error() {
+		ev, &suplsReply); err != nil && err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
