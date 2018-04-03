@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -675,9 +674,7 @@ func TestSuppliersAsOptsGetSuppliers(t *testing.T) {
 		ignoreErrors: false,
 		maxCost:      0.0,
 	}
-	fmt.Printf("Pointer spl: %+v\n", spl)
 	sprf, err := s.asOptsGetSuppliers()
-	fmt.Printf("Pointer sprf: %+v\n", sprf)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
