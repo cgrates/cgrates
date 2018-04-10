@@ -144,6 +144,9 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.diameterAgentCfg = new(DiameterAgentCfg)
 	cfg.radiusAgentCfg = new(RadiusAgentCfg)
 	cfg.filterSCfg = new(FilterSCfg)
+	cfg.dispatcherSCfg = &DispatcherSCfg{
+		Enabled: true,
+	}
 	cfg.ConfigReloads = make(map[string]chan struct{})
 	cfg.ConfigReloads[utils.CDRC] = make(chan struct{}, 1)
 	cfg.ConfigReloads[utils.CDRC] <- struct{}{} // Unlock the channel
@@ -346,6 +349,7 @@ type CGRConfig struct {
 	thresholdSCfg            *ThresholdSCfg           // configuration for ThresholdS
 	supplierSCfg             *SupplierSCfg            // configuration for SupplierS
 	loaderCfg                []*LoaderConfig          // configuration for Loader
+	dispatcherSCfg           *DispatcherSCfg          // configuration for Dispatcher
 	MailerServer             string                   // The server to use when sending emails out
 	MailerAuthUser           string                   // Authenticate to email server using this user
 	MailerAuthPass           string                   // Authenticate to email server with this password
@@ -657,7 +661,9 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
-
+	// DispaterS checks
+	if self.dispatcherSCfg != nil && self.dispatcherSCfg.Enabled {
+	}
 	return nil
 }
 
@@ -812,6 +818,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	}
 
 	jsnSureTaxCfg, err := jsnCfg.SureTaxJsonCfg()
+	if err != nil {
+		return err
+	}
+
+	jsnDispatcherCfg, err := jsnCfg.DispatcherSJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -1345,6 +1356,15 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			return err
 		}
 		if err := self.sureTaxCfg.loadFromJsonCfg(jsnSureTaxCfg); err != nil {
+			return err
+		}
+	}
+
+	if jsnDispatcherCfg != nil {
+		if self.dispatcherSCfg == nil {
+			self.dispatcherSCfg = new(DispatcherSCfg)
+		}
+		if self.dispatcherSCfg.loadFromJsonCfg(jsnDispatcherCfg); err != nil {
 			return err
 		}
 	}
