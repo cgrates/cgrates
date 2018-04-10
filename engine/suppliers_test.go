@@ -669,16 +669,51 @@ func TestSuppliersSortedForEventWithLimitAndOffset(t *testing.T) {
 }
 
 func TestSuppliersAsOptsGetSuppliers(t *testing.T) {
-	var s ArgsGetSuppliers
+	s := &ArgsGetSuppliers{
+		IgnoreErrors: false,
+		MaxCost:      "10.0",
+	}
 	spl := &optsGetSuppliers{
 		ignoreErrors: false,
-		maxCost:      0.0,
+		maxCost:      10.0,
 	}
 	sprf, err := s.asOptsGetSuppliers()
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(spl, sprf) {
-		t.Errorf("Expecting: %+v,received: %+v", utils.ToJSON(spl), utils.ToJSON(sprf))
+		t.Errorf("Expecting: %+v,received: %+v", spl, sprf)
+	}
+}
+
+func TestSuppliersAsOptsGetSuppliersIgnoreErrors(t *testing.T) {
+	s := &ArgsGetSuppliers{
+		IgnoreErrors: false,
+	}
+	spl := &optsGetSuppliers{
+		ignoreErrors: false,
+	}
+	sprf, err := s.asOptsGetSuppliers()
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(spl, sprf) {
+		t.Errorf("Expecting: %+v,received: %+v", spl, sprf)
+	}
+}
+
+func TestSuppliersAsOptsGetSuppliersMaxCost(t *testing.T) {
+	s := &ArgsGetSuppliers{
+		MaxCost: "10.0",
+	}
+	spl := &optsGetSuppliers{
+		maxCost: 10.0,
+	}
+	sprf, err := s.asOptsGetSuppliers()
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(spl, sprf) {
+		t.Errorf("Expecting: %+v,received: %+v", spl, sprf)
 	}
 }
