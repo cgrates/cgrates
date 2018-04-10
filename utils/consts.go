@@ -533,6 +533,8 @@ const (
 	LoaderS                      = "LoaderS"
 	Pong                         = "Pong"
 	MetaEventCost                = "*event_cost"
+	MetaSuppliersEventCost       = "*suppliers_event_cost"
+	MetaSuppliersIgnoreErrors    = "*suppliers_ignore_errors"
 )
 
 //MetaMetrics

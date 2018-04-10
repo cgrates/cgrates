@@ -242,6 +242,12 @@ func (kev KamEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 	}
 	if strings.Index(subsystems, utils.MetaSuppliers) != -1 {
 		args.GetSuppliers = true
+		if strings.Index(subsystems, utils.MetaSuppliersEventCost) != -1 {
+			args.SuppliersMaxCost = utils.MetaEventCost
+		}
+		if strings.Index(subsystems, utils.MetaSuppliersIgnoreErrors) != -1 {
+			args.SuppliersIgnoreErrors = true
+		}
 	}
 	if strings.Index(subsystems, utils.MetaAttributes) != -1 {
 		args.GetAttributes = true

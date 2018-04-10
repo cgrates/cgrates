@@ -175,7 +175,8 @@ func TestKamEvV1AuthorizeArgs(t *testing.T) {
 		"cgr_destination": "1002", "cgr_answertime": "1419839310",
 		"cgr_duration": "3", "cgr_pdd": "4",
 		utils.CGR_SUPPLIER:         "supplier2",
-		utils.CGR_DISCONNECT_CAUSE: "200"}
+		utils.CGR_DISCONNECT_CAUSE: "200",
+		KamCGRSubsystems:           "*accounts;**suppliers_event_cost;*suppliers_ignore_errors"}
 	sTime, err := utils.ParseTimeDetectLayout(kamEv[utils.AnswerTime], timezone)
 	if err != nil {
 		return
@@ -189,6 +190,9 @@ func TestKamEvV1AuthorizeArgs(t *testing.T) {
 			Time:  &sTime,
 			Event: kamEv.AsMapStringInterface(),
 		},
+		GetSuppliers:          true,
+		SuppliersIgnoreErrors: true,
+		SuppliersMaxCost:      utils.MetaEventCost,
 	}
 	rcv := kamEv.V1AuthorizeArgs()
 	if !reflect.DeepEqual(expected.CGREvent.Tenant, rcv.CGREvent.Tenant) {
@@ -205,6 +209,10 @@ func TestKamEvV1AuthorizeArgs(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.GetSuppliers, rcv.GetSuppliers)
 	} else if !reflect.DeepEqual(expected.GetAttributes, rcv.GetAttributes) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.GetAttributes, rcv.GetAttributes)
+	} else if !reflect.DeepEqual(expected.SuppliersMaxCost, rcv.SuppliersMaxCost) {
+		t.Errorf("Expecting: %+v, received: %+v", expected.SuppliersMaxCost, rcv.SuppliersMaxCost)
+	} else if !reflect.DeepEqual(expected.SuppliersIgnoreErrors, rcv.SuppliersIgnoreErrors) {
+		t.Errorf("Expecting: %+v, received: %+v", expected.SuppliersIgnoreErrors, rcv.SuppliersIgnoreErrors)
 	}
 }
 
