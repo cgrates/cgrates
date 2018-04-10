@@ -297,10 +297,11 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost2(t *testing.T) {
 			ID:     "testV1SplSGetLeastCostSuppliers",
 			Event: map[string]interface{}{
 				utils.Account:     "1001",
-				utils.Subject:     "1001",
+				utils.Subject:     "SPECIAL_1002",
 				utils.Destination: "1002",
 				utils.SetupTime:   time.Date(2014, 01, 14, 0, 0, 0, 0, time.UTC),
 				utils.Usage:       "2m20s",
+				utils.Category:    "call",
 			},
 		},
 	}
@@ -322,14 +323,6 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost2(t *testing.T) {
 					utils.Cost:         0.03,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
 					utils.Weight:       10.0,
-				},
-			},
-			&engine.SortedSupplier{
-				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
-					utils.Cost:         0.1664,
-					utils.RatingPlanID: "RP_RETAIL1",
-					utils.Weight:       20.0,
 				},
 			},
 		},
