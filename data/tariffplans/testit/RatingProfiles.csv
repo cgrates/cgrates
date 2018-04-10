@@ -1,2 +1,3 @@
 #Direction,Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject,CdrStatQueueIds
 *out,cgrates.org,call,*any,2018-01-01T00:00:00Z,RP_TESTIT1,,
+*out,cgrates.org,call,SPECIAL_1002,2014-01-14T00:00:00Z,RP_SPECIAL_1002,,
