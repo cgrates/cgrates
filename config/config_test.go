@@ -287,13 +287,11 @@ func TestCgrCfgJSONDefaultsStorDB(t *testing.T) {
 }
 
 func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
-	//asd
 	eHaPoolcfg := []*HaPoolConfig{}
 
 	if cgrCfg.RALsEnabled != false {
 		t.Error(cgrCfg.RALsEnabled)
 	}
-
 	if !reflect.DeepEqual(cgrCfg.RALsThresholdSConns, eHaPoolcfg) {
 		t.Error(cgrCfg.RALsThresholdSConns)
 	}
@@ -986,5 +984,14 @@ func TestLoaderDefaults(t *testing.T) {
 	}
 	if !reflect.DeepEqual(eCfg, cgrCfg.loaderCfg) {
 		t.Errorf("received: %+v, expecting: %+v", eCfg, cgrCfg.loaderCfg)
+	}
+}
+
+func TestCgrCfgJSONDefaultDispatcherSCfg(t *testing.T) {
+	eDspSCfg := &DispatcherSCfg{
+		Enabled: true,
+	}
+	if !reflect.DeepEqual(cgrCfg.dispatcherSCfg, eDspSCfg) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.dispatcherSCfg, eDspSCfg)
 	}
 }

@@ -559,6 +559,7 @@ const (
 	StatService = "StatS"
 	FilterS     = "FilterS"
 	ThresholdS  = "ThresholdS"
+	DispatcherS = "DispatcherS"
 )
 
 //Migrator Metas

@@ -1007,6 +1007,14 @@ func main() {
 			cfg, dm, server, exitChan, filterSChan)
 	}
 
+	if cfg.DispatcherSCfg().Enabled {
+		/*
+			go startDispatcherService(internalSupplierSChan, cacheS,
+				internalRsChan, internalStatSChan,
+				cfg, dm, server, exitChan, filterSChan)
+		*/
+	}
+
 	go loaderService(cacheS, cfg, dm, server, exitChan)
 
 	// Serve rpc connections

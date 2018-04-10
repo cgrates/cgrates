@@ -960,3 +960,17 @@ func TestDfHttpJsonCfg(t *testing.T) {
 		t.Error("Received: ", cfg)
 	}
 }
+
+// Will be activated after finish config struct
+/*
+func TestDfDispatcherSJsonCfg(t *testing.T) {
+	eCfg := &DispatcherSJsonCfg{
+		Enabled: utils.BoolPointer(true),
+	}
+	if cfg, err := dfCgrJsonCfg.DispatcherSJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Errorf("expecting: %+v, received: %+v", eCfg, cfg)
+	}
+}
+*/

@@ -485,3 +485,8 @@ type SureTaxJsonCfg struct {
 	Sales_type_code         *string
 	Tax_exemption_code_list *string
 }
+
+// Dispatcher service config section
+type DispatcherSJsonCfg struct {
+	Enabled *bool
+}
