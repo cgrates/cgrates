@@ -300,7 +300,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost2(t *testing.T) {
 				utils.Subject:     "SPECIAL_1002",
 				utils.Destination: "1002",
 				utils.SetupTime:   time.Date(2014, 01, 14, 0, 0, 0, 0, time.UTC),
-				utils.Usage:       "2m20s",
+				utils.Usage:       "10m20s",
 				utils.Category:    "call",
 			},
 		},
@@ -312,7 +312,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost2(t *testing.T) {
 			&engine.SortedSupplier{
 				SupplierID: "supplier3",
 				SortingData: map[string]interface{}{
-					utils.Cost:         0.03,
+					utils.Cost:         0.11,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
 					utils.Weight:       15.0,
 				},
@@ -320,7 +320,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost2(t *testing.T) {
 			&engine.SortedSupplier{
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
-					utils.Cost:         0.03,
+					utils.Cost:         0.11,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
 					utils.Weight:       10.0,
 				},
