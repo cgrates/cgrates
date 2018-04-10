@@ -56,7 +56,8 @@ func (lcs *LeastCostSorter) SortSuppliers(prflID string, suppls []*Supplier,
 					utils.SupplierS, prflID, s.ID))
 			continue
 		}
-		if extraOpts.maxCost != 0 && costData[utils.Cost].(float64) > extraOpts.maxCost {
+		if extraOpts.maxCost != 0 &&
+			costData[utils.Cost].(float64) > extraOpts.maxCost {
 			continue
 		}
 		srtData := map[string]interface{}{
@@ -65,10 +66,11 @@ func (lcs *LeastCostSorter) SortSuppliers(prflID string, suppls []*Supplier,
 		for k, v := range costData {
 			srtData[k] = v
 		}
-		sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers, &SortedSupplier{
-			SupplierID:         s.ID,
-			SortingData:        srtData,
-			SupplierParameters: s.SupplierParameters})
+		sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers,
+			&SortedSupplier{
+				SupplierID:         s.ID,
+				SortingData:        srtData,
+				SupplierParameters: s.SupplierParameters})
 	}
 	if len(sortedSuppls.SortedSuppliers) == 0 {
 		return nil, utils.ErrNotFound
