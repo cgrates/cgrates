@@ -120,7 +120,7 @@ func testV1SplSRpcConn(t *testing.T) {
 
 func testV1SplSFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
 	if err := splSv1Rpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error(err)
 	}
@@ -172,8 +172,8 @@ func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetLeastCostSuppliers",
 			Event: map[string]interface{}{
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
+				utils.Account:     "1003",
+				utils.Subject:     "1003",
 				utils.Destination: "1002",
 				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
 				utils.Usage:       "1m20s",
@@ -187,7 +187,7 @@ func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 			&engine.SortedSupplier{
 				SupplierID: "supplier3",
 				SortingData: map[string]interface{}{
-					utils.Cost:         0.02,
+					utils.Cost:         0.0136,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
 					utils.Weight:       15.0,
 				},
@@ -195,7 +195,7 @@ func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 			&engine.SortedSupplier{
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
-					utils.Cost:         0.02,
+					utils.Cost:         0.0136,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
 					utils.Weight:       10.0,
 				},
@@ -227,7 +227,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetLeastCostSuppliers",
 			Event: map[string]interface{}{
-				utils.Account:     "1001",
+				utils.Account:     "1003",
 				utils.Subject:     "1001",
 				utils.Destination: "1002",
 				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
@@ -242,7 +242,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost(t *testing.T) {
 			&engine.SortedSupplier{
 				SupplierID: "supplier3",
 				SortingData: map[string]interface{}{
-					utils.Cost:         0.02,
+					utils.Cost:         0.0136,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
 					utils.Weight:       15.0,
 				},
@@ -250,7 +250,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost(t *testing.T) {
 			&engine.SortedSupplier{
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
-					utils.Cost:         0.02,
+					utils.Cost:         0.0136,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
 					utils.Weight:       10.0,
 				},
@@ -274,7 +274,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCostNotFound(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetLeastCostSuppliers",
 			Event: map[string]interface{}{
-				utils.Account:     "1001",
+				utils.Account:     "1003",
 				utils.Subject:     "1001",
 				utils.Destination: "1002",
 				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
@@ -296,7 +296,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost2(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetLeastCostSuppliers",
 			Event: map[string]interface{}{
-				utils.Account:     "1001",
+				utils.Account:     "1003",
 				utils.Subject:     "SPECIAL_1002",
 				utils.Destination: "1002",
 				utils.SetupTime:   time.Date(2014, 01, 14, 0, 0, 0, 0, time.UTC),
@@ -312,7 +312,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost2(t *testing.T) {
 			&engine.SortedSupplier{
 				SupplierID: "supplier3",
 				SortingData: map[string]interface{}{
-					utils.Cost:         0.11,
+					utils.Cost:         0.1054,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
 					utils.Weight:       15.0,
 				},
@@ -320,7 +320,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost2(t *testing.T) {
 			&engine.SortedSupplier{
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
-					utils.Cost:         0.11,
+					utils.Cost:         0.1054,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
 					utils.Weight:       10.0,
 				},
