@@ -393,6 +393,7 @@ const (
 	MetaSuppliers                = "*suppliers"
 	MetaAttributes               = "*attributes"
 	MetaResources                = "*resources"
+	MetaFilters                  = "*filters"
 	MetaCDRs                     = "*cdrs"
 	Migrator                     = "migrator"
 	UnsupportedMigrationTask     = "unsupported migration task"
@@ -660,6 +661,12 @@ const (
 // DispatcherS APIs
 const (
 	DispatcherSv1Ping = "DispatcherSv1.Ping"
+)
+
+// LoaderS APIs
+const (
+	LoaderSv1Load = "LoaderSv1.Load"
+	LoaderSv1Ping = "LoaderSv1.Ping"
 )
 
 // Cache

@@ -199,8 +199,9 @@ func (ldr *Loader) processContent(loaderType string) (err error) {
 			if hasErrors { // if any of the readers will give errors, we ignore the line
 				continue
 			}
+
 			if err := lData.UpdateFromCSV(fName, record,
-				ldr.dataTpls[utils.MetaAttributes]); err != nil {
+				ldr.dataTpls[loaderType]); err != nil {
 				fmt.Sprintf("<%s> <%s> line: %d, error: %s",
 					utils.LoaderS, ldr.ldrID, lineNr, err.Error())
 				hasErrors = true
@@ -264,6 +265,58 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 					continue
 				}
 				if err := ldr.dm.SetAttributeProfile(apf, true); err != nil {
+					return err
+				}
+			}
+		}
+	case utils.MetaResources:
+		for _, lDataSet := range lds {
+			resModels := make(engine.TpResources, len(lDataSet))
+			for i, ld := range lDataSet {
+				resModels[i] = new(engine.TpResource)
+				if err = utils.UpdateStructWithIfaceMap(resModels[i], ld); err != nil {
+					return
+				}
+			}
+
+			for _, tpRes := range resModels.AsTPResources() {
+				res, err := engine.APItoResource(tpRes, ldr.timezone)
+				if err != nil {
+					return err
+				}
+				if ldr.dryRun {
+					utils.Logger.Info(
+						fmt.Sprintf("<%s-%s> DRY_RUN: ResourceProfile: %s",
+							utils.LoaderS, ldr.ldrID, utils.ToJSON(res)))
+					continue
+				}
+				if err := ldr.dm.SetResourceProfile(res, true); err != nil {
+					return err
+				}
+			}
+		}
+	case utils.MetaFilters:
+		for _, lDataSet := range lds {
+			fltrModels := make(engine.TpFilterS, len(lDataSet))
+			for i, ld := range lDataSet {
+				fltrModels[i] = new(engine.TpFilter)
+				if err = utils.UpdateStructWithIfaceMap(fltrModels[i], ld); err != nil {
+					return
+				}
+			}
+
+			for _, tpFltr := range fltrModels.AsTPFilter() {
+				fltrPrf, err := engine.APItoFilter(tpFltr, ldr.timezone)
+				if err != nil {
+					return err
+				}
+				if ldr.dryRun {
+					utils.Logger.Info(
+						fmt.Sprintf("<%s-%s> DRY_RUN: Filter: %s",
+							utils.LoaderS, ldr.ldrID, utils.ToJSON(fltrPrf)))
+					continue
+				}
+				if err := ldr.dm.SetFilter(fltrPrf); err != nil {
 					return err
 				}
 			}

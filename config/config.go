@@ -489,7 +489,8 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		for _, data := range ldrSCfg.Data {
-			if data.Type != utils.MetaAttributes {
+			if !utils.IsSliceMember([]string{utils.MetaAttributes,
+				utils.MetaResources, utils.MetaFilters}, data.Type) {
 				return fmt.Errorf("<%s> unsupported data type %s", utils.LoaderS, data.Type)
 			}
 

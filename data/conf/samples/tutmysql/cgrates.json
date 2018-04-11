@@ -14,6 +14,12 @@
 	"http": ":2080",
 },
 
+"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_type": "redis",						// data_db type: <redis|mongo>
+	"db_port": 6379, 						// data_db port to reach the database
+	"db_name": "10", 						// data_db database name to connect to
+	
+},
 
 "stor_db": {
 	"db_password": "CGRateS.org",
@@ -111,7 +117,7 @@
 
 "loaders": [
 	{
-		"id": "*default",									// identifier of the Loader
+		"id": "FilterResourceLoader",									// identifier of the Loader
 		"enabled": false,									// starts as service: <true|false>.
 		"dry_run": false,									// do not send the CDRs to CDRS, just parse them
 		"run_delay": 0,										// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
@@ -120,23 +126,36 @@
 			{"address": "*internal"},						// address where to reach the CacheS for data reload, empty for no reloads  <""|*internal|x.y.z.y:1234>
 		],
 		"field_separator": ",",								// separator used in case of csv files
-		"tp_in_dir": "/var/spool/cgrates/tploader/in",		// absolute path towards the directory where the CDRs are stored
-		"tp_out_dir": "/tmp",	// absolute path towards the directory where processed CDRs will be moved
-		"data":[											// data profiles to load
+		"tp_in_dir": "/tmp/In",		// absolute path towards the directory where the CDRs are stored
+		"tp_out_dir": "/tmp/Out",	// absolute path towards the directory where processed CDRs will be moved
+		"data":[	
 			{
-				"type": "*attributes",						// data source type
-				"file_name": "Attributes.csv",				// file name in the tp_in_dir
+				"type": "*filters",						// data source type
+				"file_name": "Filters.csv",				// file name in the tp_in_dir
 				"fields": [
-					{"tag": "TenantID", "field_id": "Tenant", "type": "*composed", "value": "0", "mandatory": true},
-					{"tag": "ProfileID", "field_id": "ID", "type": "*composed", "value": "1", "mandatory": true},
-					{"tag": "Contexts", "field_id": "Contexts", "type": "*composed", "value": "2"},
-					{"tag": "FilterIDs", "field_id": "FilterIDs", "type": "*composed", "value": "3"},
-					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*composed", "value": "4"},
-					{"tag": "FieldName", "field_id": "FieldName", "type": "*composed", "value": "5"},
-					{"tag": "Initial", "field_id": "Initial", "type": "*composed", "value": "6"},
-					{"tag": "Substitute", "field_id": "Substitute", "type": "*composed", "value": "7"},
-					{"tag": "Append", "field_id": "Append", "type": "*composed", "value": "8"},
+					{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "0", "mandatory": true},
+					{"tag": "ID", "field_id": "ID", "type": "*composed", "value": "1", "mandatory": true},
+					{"tag": "FilterType", "field_id": "FilterType", "type": "*composed", "value": "2"},
+					{"tag": "FilterFieldName", "field_id": "FilterFieldName", "type": "*composed", "value": "3"},
+					{"tag": "FilterFieldValues", "field_id": "FilterFieldValues", "type": "*composed", "value": "4"},
+					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*composed", "value": "5"},
+				],
+			},	
+			{
+				"type": "*resources",						// data source type
+				"file_name": "Resources.csv",				// file name in the tp_in_dir
+				"fields": [
+					{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "0", "mandatory": true},
+					{"tag": "ID", "field_id": "ID", "type": "*composed", "value": "1", "mandatory": true},
+					{"tag": "FilterIDs", "field_id": "FilterIDs", "type": "*composed", "value": "2"},
+					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*composed", "value": "3"},
+					{"tag": "TTL", "field_id": "UsageTTL", "type": "*composed", "value": "4"},
+					{"tag": "Limit", "field_id": "Limit", "type": "*composed", "value": "5"},
+					{"tag": "AllocationMessage", "field_id": "AllocationMessage", "type": "*composed", "value": "6"},
+					{"tag": "Blocker", "field_id": "Blocker", "type": "*composed", "value": "7"},
+					{"tag": "Stored", "field_id": "Stored", "type": "*composed", "value": "8"},
 					{"tag": "Weight", "field_id": "Weight", "type": "*composed", "value": "9"},
+					{"tag": "ThresholdIDs", "field_id": "ThresholdIDs", "type": "*composed", "value": "10"},
 				],
 			},
 		],
