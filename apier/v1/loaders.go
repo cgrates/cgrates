@@ -42,3 +42,8 @@ func (ldrSv1 *LoaderSv1) Load(args *loaders.ArgsProcessFolder,
 	rply *string) error {
 	return ldrSv1.ldrS.V1Load(args, rply)
 }
+
+func (rsv1 *LoaderSv1) Ping(ign string, reply *string) error {
+	*reply = utils.Pong
+	return nil
+}
