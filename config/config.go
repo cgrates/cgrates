@@ -1439,3 +1439,7 @@ func (cfg *CGRConfig) CacheCfg() CacheConfig {
 func (cfg *CGRConfig) LoaderCfg() []*LoaderConfig {
 	return cfg.loaderCfg
 }
+
+func (cfg *CGRConfig) DispatcherSCfg() *DispatcherSCfg {
+	return cfg.dispatcherSCfg
+}
