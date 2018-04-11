@@ -19,17 +19,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatcher
 
 import (
+	"fmt"
+
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewDispatcherService initializes a DispatcherService
-func NewDispatcherService() (dspS *DispatcherService, err error) {
-	dspS = &DispatcherService{}
-	return
+func NewDispatcherService(dm *engine.DataManager) (*DispatcherService, error) {
+	return &DispatcherService{dm: dm}, nil
+
 }
 
 // DispatcherService  is the service handling dispatcher
 type DispatcherService struct {
+	dm *engine.DataManager
 }
 
 // ListenAndServe will initialize the service

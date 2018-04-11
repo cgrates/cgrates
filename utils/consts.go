@@ -614,7 +614,7 @@ const (
 	AttributeSv1Ping                 = "AttributeSv1.Ping"
 )
 
-//ThresholdS APIs
+// ThresholdS APIs
 const (
 	ThresholdSv1ProcessEvent    = "ThresholdSv1.ProcessEvent"
 	ThresholdSv1GetThreshold    = "ThresholdSv1.GetThreshold"
@@ -622,7 +622,7 @@ const (
 	ThresholdSv1Ping            = "ThresholdSv1.Ping"
 )
 
-//StatS APIs
+// StatS APIs
 const (
 	StatSv1ProcessEvent          = "StatSv1.ProcessEvent"
 	StatSv1GetQueueIDs           = "StatSv1.GetQueueIDs"
@@ -630,7 +630,7 @@ const (
 	StatSv1Ping                  = "StatSv1.Ping"
 )
 
-//ResourceS APIs
+// ResourceS APIs
 const (
 	ResourceSv1AuthorizeResources   = "ResourceSv1.AuthorizeResources"
 	ResourceSv1GetResourcesForEvent = "ResourceSv1.GetResourcesForEvent"
@@ -639,7 +639,7 @@ const (
 	ResourceSv1Ping                 = "ResourceSv1.Ping"
 )
 
-//SessionS APIs
+// SessionS APIs
 const (
 	SessionSv1AuthorizeEvent           = "SessionSv1.AuthorizeEvent"
 	SessionSv1AuthorizeEventWithDigest = "SessionSv1.AuthorizeEventWithDigest"
@@ -655,6 +655,11 @@ const (
 	SMGenericV2InitiateSession         = "SMGenericV2.InitiateSession"
 	SMGenericV2UpdateSession           = "SMGenericV2.UpdateSession"
 	SessionSv1Ping                     = "SessionSv1.Ping"
+)
+
+// DispatcherS APIs
+const (
+	DispatcherSv1Ping = "DispatcherSv1.Ping"
 )
 
 // Cache

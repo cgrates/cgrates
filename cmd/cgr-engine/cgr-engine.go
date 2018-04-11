@@ -33,6 +33,7 @@ import (
 	"github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/cdrc"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/dispatcher"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/scheduler"
@@ -696,7 +697,6 @@ func startFilterService(filterSChan chan *engine.FilterS, cacheS *engine.CacheS,
 	dm *engine.DataManager, exitChan chan bool) {
 	<-cacheS.GetPrecacheChannel(utils.CacheFilters)
 	filterSChan <- engine.NewFilterS(cfg, internalStatSChan, dm)
-
 }
 
 // loaderService will start and register APIs for LoaderService if enabled
@@ -708,6 +708,31 @@ func loaderService(cacheS *engine.CacheS, cfg *config.CGRConfig,
 	}
 	go ldrS.ListenAndServe(exitChan)
 	server.RpcRegister(v1.NewLoaderSv1(ldrS))
+}
+
+// startDispatcherService fires up the DispatcherS
+func startDispatcherService(internalDispatcherSChan chan rpcclient.RpcClientConnection,
+	cacheS *engine.CacheS, dm *engine.DataManager,
+	server *utils.Server, exitChan chan bool) {
+	<-cacheS.GetPrecacheChannel(utils.CacheAttributeProfiles)
+
+	dspS, err := dispatcher.NewDispatcherService(dm)
+	if err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.DispatcherS, err.Error()))
+		exitChan <- true
+		return
+	}
+	go func() {
+		if err := dspS.ListenAndServe(exitChan); err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Error: %s listening for packets", utils.DispatcherS, err.Error()))
+		}
+		dspS.Shutdown()
+		exitChan <- true
+		return
+	}()
+	dspSv1 := v1.NewDispatcherSv1(dspS)
+	server.RpcRegister(dspSv1)
+	internalDispatcherSChan <- dspSv1
 }
 
 func startRpc(server *utils.Server, internalRaterChan,
@@ -900,6 +925,7 @@ func main() {
 	internalThresholdSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalSupplierSChan := make(chan rpcclient.RpcClientConnection, 1)
 	filterSChan := make(chan *engine.FilterS, 1)
+	internalDispatcherSChan := make(chan rpcclient.RpcClientConnection, 1)
 
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, dm, exitChan, cacheS)
@@ -1008,11 +1034,8 @@ func main() {
 	}
 
 	if cfg.DispatcherSCfg().Enabled {
-		/*
-			go startDispatcherService(internalSupplierSChan, cacheS,
-				internalRsChan, internalStatSChan,
-				cfg, dm, server, exitChan, filterSChan)
-		*/
+		go startDispatcherService(internalDispatcherSChan, cacheS,
+			dm, server, exitChan)
 	}
 
 	go loaderService(cacheS, cfg, dm, server, exitChan)
