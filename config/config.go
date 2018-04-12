@@ -171,6 +171,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	dfltFsConnConfig = cfg.fsAgentCfg.EventSocketConns[0] // We leave it crashing here on purpose if no Connection defaults defined
 	dfltKamConnConfig = cfg.kamAgentCfg.EvapiConns[0]
 	dfltAstConnCfg = cfg.asteriskAgentCfg.AsteriskConns[0]
+	dfltLoaderConfig = cfg.loaderCfg[0].Clone()
 	if err := cfg.checkConfigSanity(); err != nil {
 		return nil, err
 	}
@@ -490,7 +491,8 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 		for _, data := range ldrSCfg.Data {
 			if !utils.IsSliceMember([]string{utils.MetaAttributes,
-				utils.MetaResources, utils.MetaFilters}, data.Type) {
+				utils.MetaResources, utils.MetaFilters, utils.MetaStats,
+				utils.MetaSuppliers, utils.MetaThresholds}, data.Type) {
 				return fmt.Errorf("<%s> unsupported data type %s", utils.LoaderS, data.Type)
 			}
 
@@ -670,7 +672,6 @@ func (self *CGRConfig) checkConfigSanity() error {
 
 // Loads from json configuration object, will be used for defaults, config from file and reload, might need lock
 func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
-
 	// Load sections out of JSON config, stop on error
 	jsnGeneralCfg, err := jsnCfg.GeneralJsonCfg()
 	if err != nil {
@@ -1182,9 +1183,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	}
 
 	if jsnLoaderCfg != nil {
-		if self.loaderCfg == nil {
-			self.loaderCfg = make([]*LoaderConfig, len(jsnLoaderCfg))
-		}
+		self.loaderCfg = make([]*LoaderConfig, len(jsnLoaderCfg))
 		for idx, profile := range jsnLoaderCfg {
 			self.loaderCfg[idx] = NewDfltLoaderConfig()
 			self.loaderCfg[idx].loadFromJsonCfg(profile)
