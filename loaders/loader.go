@@ -321,6 +321,83 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				}
 			}
 		}
+	case utils.MetaStats:
+		for _, lDataSet := range lds {
+			stsModels := make(engine.TpStatsS, len(lDataSet))
+			for i, ld := range lDataSet {
+				stsModels[i] = new(engine.TpStats)
+				if err = utils.UpdateStructWithIfaceMap(stsModels[i], ld); err != nil {
+					return
+				}
+			}
+			for _, tpSts := range stsModels.AsTPStats() {
+				stsPrf, err := engine.APItoStats(tpSts, ldr.timezone)
+				if err != nil {
+					return err
+				}
+				if ldr.dryRun {
+					utils.Logger.Info(
+						fmt.Sprintf("<%s-%s> DRY_RUN: StatsQueueProfile: %s",
+							utils.LoaderS, ldr.ldrID, utils.ToJSON(stsPrf)))
+					continue
+				}
+				if err := ldr.dm.SetStatQueueProfile(stsPrf, true); err != nil {
+					return err
+				}
+			}
+		}
+	case utils.MetaThresholds:
+		for _, lDataSet := range lds {
+			thModels := make(engine.TpThresholdS, len(lDataSet))
+			for i, ld := range lDataSet {
+				thModels[i] = new(engine.TpThreshold)
+				if err = utils.UpdateStructWithIfaceMap(thModels[i], ld); err != nil {
+					return
+				}
+			}
+
+			for _, tpTh := range thModels.AsTPThreshold() {
+				thPrf, err := engine.APItoThresholdProfile(tpTh, ldr.timezone)
+				if err != nil {
+					return err
+				}
+				if ldr.dryRun {
+					utils.Logger.Info(
+						fmt.Sprintf("<%s-%s> DRY_RUN: ThresholdProfile: %s",
+							utils.LoaderS, ldr.ldrID, utils.ToJSON(thPrf)))
+					continue
+				}
+				if err := ldr.dm.SetThresholdProfile(thPrf, true); err != nil {
+					return err
+				}
+			}
+		}
+	case utils.MetaSuppliers:
+		for _, lDataSet := range lds {
+			sppModels := make(engine.TpSuppliers, len(lDataSet))
+			for i, ld := range lDataSet {
+				sppModels[i] = new(engine.TpSupplier)
+				if err = utils.UpdateStructWithIfaceMap(sppModels[i], ld); err != nil {
+					return
+				}
+			}
+
+			for _, tpSpp := range sppModels.AsTPSuppliers() {
+				spPrf, err := engine.APItoSupplierProfile(tpSpp, ldr.timezone)
+				if err != nil {
+					return err
+				}
+				if ldr.dryRun {
+					utils.Logger.Info(
+						fmt.Sprintf("<%s-%s> DRY_RUN: SupplierProfile: %s",
+							utils.LoaderS, ldr.ldrID, utils.ToJSON(spPrf)))
+					continue
+				}
+				if err := ldr.dm.SetSupplierProfile(spPrf, true); err != nil {
+					return err
+				}
+			}
+		}
 	}
 	return
 }

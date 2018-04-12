@@ -58,10 +58,10 @@ type LoaderDataType struct { //rename to LoaderDataType
 }
 
 func (self *LoaderDataType) loadFromJsonCfg(jsnCfg *LoaderJsonDataType) error {
+
 	if jsnCfg == nil {
 		return nil
 	}
-	var err error
 	if jsnCfg.Type != nil {
 		self.Type = *jsnCfg.Type
 	}
@@ -69,8 +69,10 @@ func (self *LoaderDataType) loadFromJsonCfg(jsnCfg *LoaderJsonDataType) error {
 		self.Filename = *jsnCfg.File_name
 	}
 	if jsnCfg.Fields != nil {
-		if self.Fields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Fields); err != nil {
+		if fields, err := CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Fields); err != nil {
 			return err
+		} else {
+			self.Fields = fields
 		}
 	}
 	return nil
@@ -96,11 +98,12 @@ func (self *LoaderConfig) loadFromJsonCfg(jsnCfg *LoaderJsonCfg) error {
 		self.LockFileName = *jsnCfg.Lock_filename
 	}
 	if jsnCfg.Caches_conns != nil {
-		self.CacheSConns = make([]*HaPoolConfig, len(*jsnCfg.Caches_conns))
+		cacheConns := make([]*HaPoolConfig, len(*jsnCfg.Caches_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Caches_conns {
-			self.CacheSConns[idx] = NewDfltHaPoolConfig()
-			self.CacheSConns[idx].loadFromJsonCfg(jsnHaCfg)
+			cacheConns[idx] = NewDfltHaPoolConfig()
+			cacheConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
+		self.CacheSConns = cacheConns
 	}
 	if jsnCfg.Field_separator != nil {
 		self.FieldSeparator = *jsnCfg.Field_separator
@@ -112,12 +115,14 @@ func (self *LoaderConfig) loadFromJsonCfg(jsnCfg *LoaderJsonCfg) error {
 		self.TpOutDir = *jsnCfg.Tp_out_dir
 	}
 	if jsnCfg.Data != nil {
-		self.Data = make([]*LoaderDataType, len(*jsnCfg.Data))
+		data := make([]*LoaderDataType, len(*jsnCfg.Data))
 		for idx, jsnLoCfg := range *jsnCfg.Data {
-			self.Data[idx] = NewDfltLoaderDataTypeConfig()
-			self.Data[idx].loadFromJsonCfg(jsnLoCfg)
+			data[idx] = NewDfltLoaderDataTypeConfig()
+			data[idx].loadFromJsonCfg(jsnLoCfg)
 		}
+		self.Data = data
 	}
+
 	return nil
 }
 
