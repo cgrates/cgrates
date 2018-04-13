@@ -18,45 +18,70 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"github.com/cgrates/cgrates/utils"
+)
 
 func init() {
-	c := &CmdResourcePing{
-		name:      "resource_ping",
-		rpcMethod: utils.ResourceSv1Ping,
+	c := &CmdApierPing{
+		name: "ping",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdResourcePing struct {
+type CmdApierPing struct {
 	name      string
 	rpcMethod string
-	rpcParams *EmptyWrapper
+	rpcParams *StringWrapper
 	*CommandExecuter
 }
 
-func (self *CmdResourcePing) Name() string {
+type ArgsPing struct {
+	MethodName string
+}
+
+func (self *CmdApierPing) Name() string {
 	return self.name
 }
 
-func (self *CmdResourcePing) RpcMethod() string {
+func (self *CmdApierPing) RpcMethod() string {
+	switch self.rpcParams.Item {
+	case "suppliers":
+		return utils.SupplierSv1Ping
+	case "attributes":
+		return utils.AttributeSv1Ping
+	case "resources":
+		return utils.ResourceSv1Ping
+	case "stats":
+		return utils.StatSv1Ping
+	case "thresholds":
+		return utils.ThresholdSv1Ping
+	case "sessions":
+		return utils.SessionSv1Ping
+	case "loader":
+		return utils.LoaderSv1Ping
+	case "dispatcher":
+		return utils.DispatcherSv1Ping
+	default:
+	}
 	return self.rpcMethod
 }
 
-func (self *CmdResourcePing) RpcParams(reset bool) interface{} {
+func (self *CmdApierPing) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &EmptyWrapper{}
+		self.rpcParams = &StringWrapper{}
 	}
+
 	return self.rpcParams
 }
 
-func (self *CmdResourcePing) PostprocessRpcParams() error {
+func (self *CmdApierPing) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdResourcePing) RpcResult() interface{} {
+func (self *CmdApierPing) RpcResult() interface{} {
 	var s string
 	return &s
 }

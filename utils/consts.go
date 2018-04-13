@@ -596,6 +596,7 @@ const (
 // MetaFilterIndexesAPIs
 const (
 	ApierV1ComputeFilterIndexes = "ApierV1.ComputeFilterIndexes"
+	ApierV1Ping                 = "ApierV1.Ping"
 )
 
 const (
@@ -681,6 +682,18 @@ const (
 	CacheSv1GetGroupItemIDs   = "CacheSv1.GetGroupItemIDs"
 	CacheSv1RemoveGroup       = "CacheSv1.RemoveGroup"
 	CacheSv1Clear             = "CacheSv1.Clear"
+)
+
+// Scheduler
+
+const (
+	SchedulerPing = "Scheduler.Ping"
+)
+
+// Cdrc
+
+const (
+	CdrcPing = "Cdrc.Ping"
 )
 
 //CSV file name
