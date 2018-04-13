@@ -670,11 +670,11 @@ func TestSuppliersSortedForEventWithLimitAndOffset(t *testing.T) {
 
 func TestSuppliersAsOptsGetSuppliers(t *testing.T) {
 	s := &ArgsGetSuppliers{
-		IgnoreErrors: false,
+		IgnoreErrors: true,
 		MaxCost:      "10.0",
 	}
 	spl := &optsGetSuppliers{
-		ignoreErrors: false,
+		ignoreErrors: true,
 		maxCost:      10.0,
 	}
 	sprf, err := s.asOptsGetSuppliers()
@@ -688,10 +688,10 @@ func TestSuppliersAsOptsGetSuppliers(t *testing.T) {
 
 func TestSuppliersAsOptsGetSuppliersIgnoreErrors(t *testing.T) {
 	s := &ArgsGetSuppliers{
-		IgnoreErrors: false,
+		IgnoreErrors: true,
 	}
 	spl := &optsGetSuppliers{
-		ignoreErrors: false,
+		ignoreErrors: true,
 	}
 	sprf, err := s.asOptsGetSuppliers()
 	if err != nil {
