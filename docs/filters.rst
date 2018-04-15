@@ -33,7 +33,7 @@ Filter rule
 Definition::
 
  type FilterRule struct {
-	Type            string              // Filter type (*string, *timing, *rsr_filters, *stats, *lt, *lte, *gt, *gte)
+	Type            string              // Filter type (*string, *timing, *rsr, *stats, *lt, *lte, *gt, *gte)
 	FieldName       string              // Name of the field providing us the Values to check (used in case of some )
 	Values          []string            // Filter definition
  }
@@ -43,11 +43,9 @@ The matching logic of each FilterRule is given by it's type.
 
 The following types are implemented:
 
-- *\*string* will match in full the *FieldName* with at least one value defined inside *Values*. Any of them matching will match the FilterRule. 
-   It is indexed for performance and, in order to be enabled, the subsystem configuration where the Filter profile is used needs to have the parameter *string_indexed_fields* nil or contain the Filter profile ID inside.
+- *\*string* will match in full the *FieldName* with at least one value defined inside *Values*. Any of them matching will match the FilterRule. It is indexed for performance and, in order to be enabled, the subsystem configuration where the Filter profile is used needs to have the parameter *string_indexed_fields* nil or contain the Filter profile ID inside.
 
-- *\*prefix* will match at beginning of *FieldName* one of the values defined inside *Values*.
-   It is indexed for performance and, in order to be enabled, the subsystem configuration where the Filter profile is used needs to have the parameter *prefix_indexed_fields* nil or contain the Filter profile ID inside.
+- *\*prefix* will match at beginning of *FieldName* one of the values defined inside *Values*. It is indexed for performance and, in order to be enabled, the subsystem configuration where the Filter profile is used needs to have the parameter *prefix_indexed_fields* nil or contain the Filter profile ID inside.
 
 - *\*timings* will compare the time contained in *FieldName* with one of the TimingIDs defined in Values.
 
