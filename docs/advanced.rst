@@ -9,8 +9,8 @@
    cdrclient
    cdrexporter
    cdrstats
-   lcr
    derived_charging
    ratinglogic
+   filters
 
 
