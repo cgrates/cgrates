@@ -701,6 +701,9 @@ func (smg *SMGeneric) GetMaxUsage(gev SMGenericEvent) (maxUsage time.Duration, e
 	}
 	defer smg.responseCache.Cache(cacheKey, &utils.ResponseCacheItem{Value: maxUsage, Err: err})
 	storedCdr := gev.AsCDR(config.CgrConfig(), smg.Timezone)
+	if _, has := gev[utils.Usage]; !has { // make sure we have a minimum duration configured
+		storedCdr.Usage = smg.cgrCfg.SessionSCfg().MaxCallDuration
+	}
 	var maxDur float64
 	if err = smg.rals.Call("Responder.GetDerivedMaxSessionTime", storedCdr, &maxDur); err != nil {
 		return
