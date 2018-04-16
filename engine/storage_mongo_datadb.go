@@ -105,15 +105,17 @@ func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes
 	if user != "" && pass != "" {
 		url = fmt.Sprintf("%s:%s@%s", user, pass, url)
 	}
+	var dbName string
 	if db != "" {
 		url += "/" + db
+		dbName = strings.Split(db, "?")[0] // remove extra info after ?
 	}
 	session, err := mgo.Dial(url)
 	if err != nil {
 		return nil, err
 	}
 	session.SetMode(mgo.Strong, true)
-	ms = &MongoStorage{db: db, session: session, storageType: storageType, ms: NewCodecMsgpackMarshaler(),
+	ms = &MongoStorage{db: dbName, session: session, storageType: storageType, ms: NewCodecMsgpackMarshaler(),
 		cacheCfg: cacheCfg, loadHistorySize: loadHistorySize, cdrsIndexes: cdrsIndexes}
 	if cNames, err := session.DB(ms.db).CollectionNames(); err != nil {
 		return nil, err
