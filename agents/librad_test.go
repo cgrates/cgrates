@@ -83,7 +83,7 @@ func TestAttrVendorFromPath(t *testing.T) {
 		vendorName != "" {
 		t.Error("failed")
 	}
-	if attrName, vendorName := attrVendorFromPath("Cisco/Cisco-NAS-Port"); attrName != "Cisco-NAS-Port" ||
+	if attrName, vendorName := attrVendorFromPath("Cisco>Cisco-NAS-Port"); attrName != "Cisco-NAS-Port" ||
 		vendorName != "Cisco" {
 		t.Error("failed")
 	}
@@ -109,11 +109,11 @@ func TestRadPassesFieldFilter(t *testing.T) {
 		t.Error("passing invalid filter value")
 	}
 	if !radPassesFieldFilter(pkt, nil,
-		utils.NewRSRFieldMustCompile("Cisco/Cisco-NAS-Port(CGR1)")) {
+		utils.NewRSRFieldMustCompile("Cisco>Cisco-NAS-Port(CGR1)")) {
 		t.Error("not passing valid filter")
 	}
 	if radPassesFieldFilter(pkt, nil,
-		utils.NewRSRFieldMustCompile("Cisco/Cisco-NAS-Port(notmatching)")) {
+		utils.NewRSRFieldMustCompile("Cisco>Cisco-NAS-Port(notmatching)")) {
 		t.Error("passing invalid filter value")
 	}
 	if !radPassesFieldFilter(pkt, processorVars{MetaRadReqType: MetaRadAuth},
@@ -140,7 +140,7 @@ func TestRadComposedFieldValue(t *testing.T) {
 	}
 	eOut := fmt.Sprintf("%s|flopsy|CGR1", MetaRadAcctStart)
 	if out := radComposedFieldValue(pkt, processorVars{MetaRadReqType: MetaRadAcctStart},
-		utils.ParseRSRFieldsMustCompile(fmt.Sprintf("%s;^|;User-Name;^|;Cisco/Cisco-NAS-Port",
+		utils.ParseRSRFieldsMustCompile(fmt.Sprintf("%s;^|;User-Name;^|;Cisco>Cisco-NAS-Port",
 			MetaRadReqType), utils.INFIELD_SEP)); out != eOut {
 		t.Errorf("Expecting: <%s>, received: <%s>", eOut, out)
 	}
@@ -156,7 +156,7 @@ func TestRadFieldOutVal(t *testing.T) {
 	}
 	eOut := fmt.Sprintf("%s|flopsy|CGR1", MetaRadAcctStart)
 	cfgFld := &config.CfgCdrField{Tag: "ComposedTest", Type: utils.META_COMPOSED, FieldId: utils.Destination,
-		Value: utils.ParseRSRFieldsMustCompile(fmt.Sprintf("%s;^|;User-Name;^|;Cisco/Cisco-NAS-Port", MetaRadReqType), utils.INFIELD_SEP), Mandatory: true}
+		Value: utils.ParseRSRFieldsMustCompile(fmt.Sprintf("%s;^|;User-Name;^|;Cisco>Cisco-NAS-Port", MetaRadReqType), utils.INFIELD_SEP), Mandatory: true}
 	if outVal, err := radFieldOutVal(pkt, processorVars{MetaRadReqType: MetaRadAcctStart}, cfgFld); err != nil {
 		t.Error(err)
 	} else if outVal != eOut {

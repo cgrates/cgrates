@@ -94,7 +94,7 @@ func (pv processorVars) valAsString(fldPath string) (val string, err error) {
 // radAttrVendorFromPath returns AttributenName and VendorName from path
 // path should be the form attributeName or vendorName/attributeName
 func attrVendorFromPath(path string) (attrName, vendorName string) {
-	splt := strings.Split(path, "/")
+	splt := strings.Split(path, utils.HIERARCHY_SEP)
 	if len(splt) > 1 {
 		vendorName, attrName = splt[0], splt[1]
 	} else {
