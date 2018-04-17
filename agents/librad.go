@@ -79,7 +79,7 @@ func (pv processorVars) valAsString(fldPath string) (val string, err error) {
 		return "", errors.New("not found")
 	}
 	if fldName == utils.MetaCGRReply {
-		cgrRply := pv[utils.MetaCGRReply].(utils.CGRReply)
+		cgrRply := pv[utils.MetaCGRReply].(*utils.CGRReply)
 		return cgrRply.GetFieldAsString(fldPath, utils.HIERARCHY_SEP)
 	}
 	if valIface, hasIt := pv[fldName]; hasIt {
@@ -137,7 +137,13 @@ func radComposedFieldValue(pkt *radigo.Packet,
 	procVars processorVars, outTpl utils.RSRFields) (outVal string) {
 	for _, rsrTpl := range outTpl {
 		if rsrTpl.IsStatic() {
-			outVal += rsrTpl.ParseValue("")
+			if parsed, err := rsrTpl.Parse(""); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> %s",
+						utils.RadiusAgent, err.Error()))
+			} else {
+				outVal += parsed
+			}
 			continue
 		}
 		if val, err := procVars.valAsString(rsrTpl.Id); err != nil {
@@ -148,12 +154,24 @@ func radComposedFieldValue(pkt *radigo.Packet,
 				continue
 			}
 		} else {
-			outVal += rsrTpl.ParseValue(val)
+			if parsed, err := rsrTpl.Parse(val); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> %s",
+						utils.RadiusAgent, err.Error()))
+			} else {
+				outVal += parsed
+			}
 			continue
 		}
 		for _, avp := range pkt.AttributesWithName(
 			attrVendorFromPath(rsrTpl.Id)) {
-			outVal += rsrTpl.ParseValue(avp.GetStringValue())
+			if parsed, err := rsrTpl.Parse(avp.GetStringValue()); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> %s",
+						utils.RadiusAgent, err.Error()))
+			} else {
+				outVal += parsed
+			}
 		}
 	}
 	return outVal
@@ -178,7 +196,7 @@ func radMetaHandler(pkt *radigo.Packet, procVars processorVars,
 			return "", err
 		}
 		return tEnd.Sub(tStart).String(), nil
-	case utils.MetaUsageSeconds:
+	case utils.MetaDurationSeconds:
 		if len(handlerArgs) != 1 {
 			return "", errors.New("unexpected number of arguments")
 		}

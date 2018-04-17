@@ -590,7 +590,12 @@ const (
 	MetaTpDestinations     = "*tp_destinations"
 	MetaTpRatingPlan       = "*tp_rating_plan"
 	MetaTpRatingProfile    = "*tp_rating_profile"
-	MetaUsageSeconds       = "*duration_seconds"
+	MetaDurationSeconds    = "*duration_seconds"
+	CapAttributes          = "Attributes"
+	CapResourceAllocation  = "ResourceAllocation"
+	CapMaxUsage            = "MaxUsage"
+	CapSuppliers           = "Suppliers"
+	CapThresholdHits       = "ThresholdHits"
 )
 
 // MetaFilterIndexesAPIs

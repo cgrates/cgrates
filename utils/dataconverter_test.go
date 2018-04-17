@@ -24,7 +24,7 @@ import (
 )
 
 func TestNewDataConverter(t *testing.T) {
-	a, err := NewDataConverter(MetaUsageSeconds)
+	a, err := NewDataConverter(MetaDurationSeconds)
 	if err != nil {
 		t.Error(err.Error())
 	}

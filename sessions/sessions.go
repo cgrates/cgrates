@@ -1334,19 +1334,19 @@ func (v1AuthReply *V1AuthorizeReply) AsCGRReply() (cgrReply utils.CGRReply, err 
 				attrs[fldName] = v1AuthReply.Attributes.CGREvent.Event[fldName]
 			}
 		}
-		cgrReply["Attributes"] = attrs
+		cgrReply[utils.CapAttributes] = attrs
 	}
 	if v1AuthReply.ResourceAllocation != nil {
-		cgrReply["ResourceAllocation"] = *v1AuthReply.ResourceAllocation
+		cgrReply[utils.CapResourceAllocation] = *v1AuthReply.ResourceAllocation
 	}
 	if v1AuthReply.MaxUsage != nil {
-		cgrReply["MaxUsage"] = *v1AuthReply.MaxUsage
+		cgrReply[utils.CapMaxUsage] = *v1AuthReply.MaxUsage
 	}
 	if v1AuthReply.Suppliers != nil {
-		cgrReply["Suppliers"] = v1AuthReply.Suppliers.Digest()
+		cgrReply[utils.CapSuppliers] = v1AuthReply.Suppliers.Digest()
 	}
 	if v1AuthReply.ThresholdHits != nil {
-		cgrReply["ThresholdHits"] = *v1AuthReply.ThresholdHits
+		cgrReply[utils.CapThresholdHits] = *v1AuthReply.ThresholdHits
 	}
 	return
 }
@@ -1524,16 +1524,16 @@ func (v1Rply *V1InitSessionReply) AsCGRReply() (cgrReply utils.CGRReply, err err
 				attrs[fldName] = v1Rply.Attributes.CGREvent.Event[fldName]
 			}
 		}
-		cgrReply["Attributes"] = attrs
+		cgrReply[utils.CapAttributes] = attrs
 	}
 	if v1Rply.ResourceAllocation != nil {
-		cgrReply["ResourceAllocation"] = *v1Rply.ResourceAllocation
+		cgrReply[utils.CapResourceAllocation] = *v1Rply.ResourceAllocation
 	}
 	if v1Rply.MaxUsage != nil {
-		cgrReply["MaxUsage"] = *v1Rply.MaxUsage
+		cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
 	}
 	if v1Rply.ThresholdHits != nil {
-		cgrReply["ThresholdHits"] = *v1Rply.ThresholdHits
+		cgrReply[utils.CapThresholdHits] = *v1Rply.ThresholdHits
 	}
 	return
 }
@@ -1648,10 +1648,10 @@ func (v1Rply *V1UpdateSessionReply) AsCGRReply() (cgrReply utils.CGRReply, err e
 				attrs[fldName] = v1Rply.Attributes.CGREvent.Event[fldName]
 			}
 		}
-		cgrReply["Attributes"] = attrs
+		cgrReply[utils.CapAttributes] = attrs
 	}
 	if v1Rply.MaxUsage != nil {
-		cgrReply["MaxUsage"] = *v1Rply.MaxUsage
+		cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
 	}
 	return
 }

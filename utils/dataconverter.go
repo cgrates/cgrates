@@ -54,7 +54,7 @@ type DataConverter interface {
 func NewDataConverter(params string) (
 	conv DataConverter, err error) {
 	switch {
-	case params == MetaUsageSeconds:
+	case params == MetaDurationSeconds:
 		return NewDurationSecondsConverter("")
 	case strings.HasPrefix(params, MetaRound):
 		if len(params) == len(MetaRound) { // no extra params, defaults implied

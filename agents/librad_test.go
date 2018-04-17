@@ -388,16 +388,23 @@ func TestRadV1TerminateSessionArgs(t *testing.T) {
 	}
 }
 
-/*
 func TestRadReplyAppendAttributes(t *testing.T) {
 	rply := radigo.NewPacket(radigo.AccessRequest, 2, dictRad, coder, "CGRateS.org").Reply()
 	rplyFlds := []*config.CfgCdrField{
-		&config.CfgCdrField{Tag: "ReplyCode", FieldId: MetaRadReplyCode, Type: utils.META_CONSTANT,
-			Value: utils.ParseRSRFieldsMustCompile("AccessAccept", utils.INFIELD_SEP)},
+		&config.CfgCdrField{Tag: "ReplyCode", FieldId: MetaRadReplyCode, Type: utils.META_COMPOSED,
+			Value: utils.ParseRSRFieldsMustCompile("*cgrReply>Attributes>RadReply", utils.INFIELD_SEP)},
 		&config.CfgCdrField{Tag: "Acct-Session-Time", FieldId: "Acct-Session-Time", Type: utils.META_COMPOSED,
-			Value: utils.ParseRSRFieldsMustCompile("~*cgrMaxUsage:s/(\\d*)\\d{9}$/$1/", utils.INFIELD_SEP)},
+			Value: utils.ParseRSRFieldsMustCompile("*cgrReply>MaxUsage{*duration_seconds}", utils.INFIELD_SEP)},
 	}
-	if err := radReplyAppendAttributes(rply, processorVars{MetaCGRMaxUsage: "30000000000"}, rplyFlds); err != nil {
+	procVars := make(processorVars)
+	procVars[utils.MetaCGRReply] = &utils.CGRReply{
+		utils.CapAttributes: map[string]interface{}{
+			"RadReply":    "AccessAccept",
+			utils.Account: "1001",
+		},
+		utils.CapMaxUsage: time.Duration(time.Hour),
+	}
+	if err := radReplyAppendAttributes(rply, procVars, rplyFlds); err != nil {
 		t.Error(err)
 	}
 	if rply.Code != radigo.AccessAccept {
@@ -405,8 +412,7 @@ func TestRadReplyAppendAttributes(t *testing.T) {
 	}
 	if avps := rply.AttributesWithName("Acct-Session-Time", ""); len(avps) == 0 {
 		t.Error("Cannot find Acct-Session-Time in reply")
-	} else if avps[0].GetStringValue() != "30" {
-		t.Errorf("Expecting: 30, received: %s", avps[0].GetStringValue())
+	} else if avps[0].GetStringValue() != "3600" {
+		t.Errorf("Expecting: 3600, received: %s", avps[0].GetStringValue())
 	}
 }
-*/
