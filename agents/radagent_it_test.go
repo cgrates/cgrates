@@ -118,7 +118,6 @@ func TestRAitAuth(t *testing.T) {
 	if err := authReq.AddAVPWithName("Event-Timestamp", "1497106115", ""); err != nil {
 		t.Error(err)
 	}
-
 	reply, err := raAuthClnt.SendRequest(authReq)
 	if err != nil {
 		t.Error(err)
@@ -128,7 +127,7 @@ func TestRAitAuth(t *testing.T) {
 	}
 	if len(reply.AVPs) != 1 { // make sure max duration is received
 		t.Errorf("Received AVPs: %+v", reply.AVPs)
-	} else if !reflect.DeepEqual([]byte("session_max_time#3h0m0s"), reply.AVPs[0].RawValue) {
+	} else if !reflect.DeepEqual([]byte("session_max_time#10800"), reply.AVPs[0].RawValue) {
 		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
 	}
 }

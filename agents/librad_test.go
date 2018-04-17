@@ -397,7 +397,7 @@ func TestRadReplyAppendAttributes(t *testing.T) {
 			Value: utils.ParseRSRFieldsMustCompile("*cgrReply>MaxUsage{*duration_seconds}", utils.INFIELD_SEP)},
 	}
 	procVars := make(processorVars)
-	procVars[utils.MetaCGRReply] = &utils.CGRReply{
+	procVars[utils.MetaCGRReply] = utils.CGRReply{
 		utils.CapAttributes: map[string]interface{}{
 			"RadReply":    "AccessAccept",
 			utils.Account: "1001",

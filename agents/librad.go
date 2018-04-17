@@ -79,7 +79,7 @@ func (pv processorVars) valAsString(fldPath string) (val string, err error) {
 		return "", errors.New("not found")
 	}
 	if fldName == utils.MetaCGRReply {
-		cgrRply := pv[utils.MetaCGRReply].(*utils.CGRReply)
+		cgrRply := pv[utils.MetaCGRReply].(utils.CGRReply)
 		return cgrRply.GetFieldAsString(fldPath, utils.HIERARCHY_SEP)
 	}
 	if valIface, hasIt := pv[fldName]; hasIt {
