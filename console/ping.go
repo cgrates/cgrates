@@ -48,21 +48,21 @@ func (self *CmdApierPing) Name() string {
 
 func (self *CmdApierPing) RpcMethod() string {
 	switch self.rpcParams.Item {
-	case "suppliers":
+	case utils.SupplierS:
 		return utils.SupplierSv1Ping
-	case "attributes":
+	case utils.AttributeS:
 		return utils.AttributeSv1Ping
-	case "resources":
+	case utils.ResourceS:
 		return utils.ResourceSv1Ping
-	case "stats":
+	case utils.StatService:
 		return utils.StatSv1Ping
-	case "thresholds":
+	case utils.ThresholdS:
 		return utils.ThresholdSv1Ping
-	case "sessions":
+	case utils.SessionS:
 		return utils.SessionSv1Ping
-	case "loader":
+	case utils.LoaderS:
 		return utils.LoaderSv1Ping
-	case "dispatcher":
+	case utils.DispatcherS:
 		return utils.DispatcherSv1Ping
 	default:
 	}

@@ -354,6 +354,8 @@ cgrates.org,FLTR_1,*rsr,,Subject(~^1.*1$);Destination(1002),
 cgrates.org,FLTR_ACNT_dan,*string,Account,dan,2014-07-29T15:00:00Z
 cgrates.org,FLTR_DST_DE,*destinations,Destination,DST_DE,2014-07-29T15:00:00Z
 cgrates.org,FLTR_DST_NL,*destinations,Destination,DST_NL,2014-07-29T15:00:00Z
+cgrates.org,FLTR_ACNT_1001,*string,Account,1001,2014-07-29T15:00:00Z
+cgrates.org,FLTR_ACNT_1002,*string,Account,1002,2014-07-29T15:00:00Z
 `
 	data, _ := engine.NewMapStorage()
 	ldr := &Loader{
@@ -462,5 +464,469 @@ cgrates.org,FLTR_DST_NL,*destinations,Destination,DST_NL,2014-07-29T15:00:00Z
 	} else if !reflect.DeepEqual(eFltr2, fltr) {
 		t.Errorf("expecting: %s, received: %s",
 			utils.ToJSON(eFltr2), utils.ToJSON(fltr))
+	}
+}
+
+func TestLoaderProcessThresholds(t *testing.T) {
+	thresholdCSV := `
+#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],Recurrent[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10]
+cgrates.org,THD_ACNT_1001,*string:Account:1001,2014-07-29T15:00:00Z,false,1,1s,false,10,ACT_LOG_WARNING,false
+cgrates.org,THD_ACNT_1002,*string:Account:1002,2014-07-29T15:00:00Z,true,1,1s,true,10,ACT_LOG_WARNING,true
+`
+	data, _ := engine.NewMapStorage()
+	ldr := &Loader{
+		ldrID:         "TestLoaderProcessContent",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.CfgCdrField{
+		utils.MetaThresholds: []*config.CfgCdrField{
+			&config.CfgCdrField{Tag: "TenantID",
+				FieldId:   "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     utils.ParseRSRFieldsMustCompile("0", utils.INFIELD_SEP),
+				Mandatory: true},
+			&config.CfgCdrField{Tag: "ProfileID",
+				FieldId:   "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     utils.ParseRSRFieldsMustCompile("1", utils.INFIELD_SEP),
+				Mandatory: true},
+			&config.CfgCdrField{Tag: "FilterIDs",
+				FieldId: "FilterIDs",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("2", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "ActivationInterval",
+				FieldId: "ActivationInterval",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("3", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "Recurrent",
+				FieldId: "Recurrent",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("4", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "MinHits",
+				FieldId: "MinHits",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("5", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "MinSleep",
+				FieldId: "MinSleep",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("6", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "Blocker",
+				FieldId: "Blocker",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("7", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "Weight",
+				FieldId: "Weight",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("8", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "ActionIDs",
+				FieldId: "ActionIDs",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("9", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "Async",
+				FieldId: "Async",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("10", utils.INFIELD_SEP)},
+		},
+	}
+	rdr := ioutil.NopCloser(strings.NewReader(thresholdCSV))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaThresholds: map[string]*openedCSVFile{
+			"Thresholds.csv": &openedCSVFile{fileName: "Thresholds.csv",
+				rdr: rdr, csvRdr: csvRdr}},
+	}
+	if err := ldr.processContent(utils.MetaThresholds); err != nil {
+		t.Error(err)
+	}
+	if len(ldr.bufLoaderData) != 0 {
+		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
+	}
+	eTh1 := &engine.ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "THD_ACNT_1001",
+		FilterIDs: []string{"*string:Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC)},
+		Recurrent: false,
+		MinHits:   1,
+		MinSleep:  time.Duration(1 * time.Second),
+		Blocker:   false,
+		Weight:    10,
+		ActionIDs: []string{"ACT_LOG_WARNING"},
+		Async:     false,
+	}
+	eTh2 := &engine.ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "THD_ACNT_1002",
+		FilterIDs: []string{"*string:Account:1002"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC)},
+		Recurrent: true,
+		MinHits:   1,
+		MinSleep:  time.Duration(1 * time.Second),
+		Blocker:   true,
+		Weight:    10,
+		ActionIDs: []string{"ACT_LOG_WARNING"},
+		Async:     true,
+	}
+	if aps, err := ldr.dm.GetThresholdProfile("cgrates.org", "THD_ACNT_1001",
+		false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eTh1, aps) {
+		t.Errorf("expecting: %s, received: %s",
+			utils.ToJSON(eTh1), utils.ToJSON(aps))
+	}
+	if aps, err := ldr.dm.GetThresholdProfile("cgrates.org", "THD_ACNT_1002",
+		false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eTh2, aps) {
+		t.Errorf("expecting: %s, received: %s",
+			utils.ToJSON(eTh2), utils.ToJSON(aps))
+	}
+}
+
+// pentru stats,
+
+func TestLoaderProcessStats(t *testing.T) {
+	statsCSV := `
+#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],Metrics[6],MetricParams[7],Blocker[8],Stored[9],Weight[10],MinItems[11],ThresholdIDs[12]
+cgrates.org,Stats1,*string:Account:1001;*string:Account:1002,2014-07-29T15:00:00Z,100,1s,*asr;*acc;*tcc;*acd;*tcd;*pdd,,true,true,20,2,THRESH1;THRESH2
+cgrates.org,Stats1,*string:Account:1003,2014-07-29T15:00:00Z,100,1s,*sum;*average,Value,true,true,20,2,THRESH1;THRESH2
+`
+	data, _ := engine.NewMapStorage()
+	ldr := &Loader{
+		ldrID:         "TestLoaderProcessContent",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.CfgCdrField{
+		utils.MetaStats: []*config.CfgCdrField{
+			&config.CfgCdrField{Tag: "TenantID",
+				FieldId:   "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     utils.ParseRSRFieldsMustCompile("0", utils.INFIELD_SEP),
+				Mandatory: true},
+			&config.CfgCdrField{Tag: "ProfileID",
+				FieldId:   "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     utils.ParseRSRFieldsMustCompile("1", utils.INFIELD_SEP),
+				Mandatory: true},
+			&config.CfgCdrField{Tag: "FilterIDs",
+				FieldId: "FilterIDs",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("2", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "ActivationInterval",
+				FieldId: "ActivationInterval",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("3", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "QueueLength",
+				FieldId: "QueueLength",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("4", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "TTL",
+				FieldId: "TTL",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("5", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "Metrics",
+				FieldId: "Metrics",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("6", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "MetricParams",
+				FieldId: "Parameters",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("7", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "Blocker",
+				FieldId: "Blocker",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("8", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "Stored",
+				FieldId: "Stored",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("9", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "Weight",
+				FieldId: "Weight",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("10", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "MinItems",
+				FieldId: "MinItems",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("11", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "ThresholdIDs",
+				FieldId: "ThresholdIDs",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("12", utils.INFIELD_SEP)},
+		},
+	}
+	rdr := ioutil.NopCloser(strings.NewReader(statsCSV))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaStats: map[string]*openedCSVFile{
+			"Stats.csv": &openedCSVFile{fileName: "Stats.csv",
+				rdr: rdr, csvRdr: csvRdr}},
+	}
+	if err := ldr.processContent(utils.MetaStats); err != nil {
+		t.Error(err)
+	}
+	if len(ldr.bufLoaderData) != 0 {
+		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
+	}
+	eSt1 := &engine.StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "Stats1",
+		FilterIDs: []string{"*string:Account:1001", "*string:Account:1002", "*string:Account:1003"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 29, 15, 00, 0, 0, time.UTC),
+		},
+		QueueLength: 100,
+		TTL:         time.Duration(1 * time.Second),
+		Metrics: []*utils.MetricWithParams{
+			&utils.MetricWithParams{
+				MetricID: utils.MetaASR,
+			},
+			&utils.MetricWithParams{
+				MetricID: utils.MetaACC,
+			},
+			&utils.MetricWithParams{
+				MetricID: utils.MetaTCC,
+			},
+			&utils.MetricWithParams{
+				MetricID: utils.MetaACD,
+			},
+			&utils.MetricWithParams{
+				MetricID: utils.MetaTCD,
+			},
+			&utils.MetricWithParams{
+				MetricID: utils.MetaPDD,
+			},
+			&utils.MetricWithParams{
+				MetricID:   utils.MetaSum,
+				Parameters: "Value",
+			},
+			&utils.MetricWithParams{
+				MetricID:   utils.MetaAverage,
+				Parameters: "Value",
+			},
+		},
+		Blocker:      true,
+		Stored:       true,
+		Weight:       20,
+		MinItems:     2,
+		ThresholdIDs: []string{"THRESH1", "THRESH2"},
+	}
+	if aps, err := ldr.dm.GetStatQueueProfile("cgrates.org", "Stats1",
+		false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSt1.Tenant, aps.Tenant) {
+		t.Errorf("expecting: %s, received: %s", eSt1.Tenant, aps.Tenant)
+	} else if !reflect.DeepEqual(eSt1.ID, aps.ID) {
+		t.Errorf("expecting: %s, received: %s", eSt1.ID, aps.ID)
+	} else if !reflect.DeepEqual(len(eSt1.FilterIDs), len(aps.FilterIDs)) {
+		t.Errorf("expecting: %d, received: %d", len(eSt1.FilterIDs), len(aps.FilterIDs))
+	} else if !reflect.DeepEqual(eSt1.ActivationInterval, aps.ActivationInterval) {
+		t.Errorf("expecting: %s, received: %s", eSt1.ActivationInterval, aps.ActivationInterval)
+	} else if !reflect.DeepEqual(eSt1.QueueLength, aps.QueueLength) {
+		t.Errorf("expecting: %+v, received: %+v", eSt1.QueueLength, aps.QueueLength)
+	} else if !reflect.DeepEqual(eSt1.TTL, aps.TTL) {
+		t.Errorf("expecting: %+v, received: %+v", eSt1.TTL, aps.TTL)
+	} else if !reflect.DeepEqual(len(eSt1.Metrics), len(aps.Metrics)) {
+		t.Errorf("expecting: %d, received: %d", len(eSt1.Metrics), len(aps.Metrics))
+	} else if !reflect.DeepEqual(eSt1.Blocker, aps.Blocker) {
+		t.Errorf("expecting: %t, received: %t", eSt1.Blocker, aps.Blocker)
+	} else if !reflect.DeepEqual(eSt1.Stored, aps.Stored) {
+		t.Errorf("expecting: %t, received: %t", eSt1.Stored, aps.Stored)
+	} else if !reflect.DeepEqual(eSt1.Weight, aps.Weight) {
+		t.Errorf("expecting: %+v, received: %+v", eSt1.Weight, aps.Weight)
+	} else if !reflect.DeepEqual(eSt1.MinItems, aps.MinItems) {
+		t.Errorf("expecting: %+v, received: %+v", eSt1.MinItems, aps.MinItems)
+	} else if !reflect.DeepEqual(len(eSt1.ThresholdIDs), len(aps.ThresholdIDs)) {
+		t.Errorf("expecting: %d, received: %d", len(eSt1.ThresholdIDs), len(aps.ThresholdIDs))
+	}
+}
+
+func TestLoaderProcessSuppliers(t *testing.T) {
+	supplierCSV := `
+#Tenant[0],ID[1],FilterIDs[2],ActivationInterval[3],Sorting[4],SortingParamameters[5],SupplierID[6],SupplierFilterIDs[7],SupplierAccountIDs[8],SupplierRatingPlanIDs[9],SupplierResourceIDs[10],SupplierStatIDs[11],SupplierWeight[12],SupplierBlocker[13],SupplierParameters[14],Weight[15]
+cgrates.org,SPL_WEIGHT_2,,2017-11-27T00:00:00Z,*weight,,supplier1,,,,,,10,,,5
+cgrates.org,SPL_WEIGHT_1,FLTR_DST_DE,2017-11-27T00:00:00Z,*weight,,supplier1,,,,,,10,,,10
+cgrates.org,SPL_WEIGHT_1,FLTR_DST_DE,,,,supplier2,,,,,,20,,,
+cgrates.org,SPL_WEIGHT_1,*string:Account:1007,,,,supplier3,FLTR_ACNT_dan,,,,,15,,,
+cgrates.org,SPL_LEASTCOST_1,FLTR_1,2017-11-27T00:00:00Z,*least_cost,,supplier1,,,RP_SPECIAL_1002,resource_spl1,,10,false,,10
+cgrates.org,SPL_LEASTCOST_1,,,,,supplier2,,,RP_RETAIL1,resource_spl2,,20,,,
+`
+	data, _ := engine.NewMapStorage()
+	ldr := &Loader{
+		ldrID:         "TestLoaderProcessContent",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.CfgCdrField{
+		utils.MetaSuppliers: []*config.CfgCdrField{
+			&config.CfgCdrField{Tag: "TenantID",
+				FieldId:   "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     utils.ParseRSRFieldsMustCompile("0", utils.INFIELD_SEP),
+				Mandatory: true},
+			&config.CfgCdrField{Tag: "ProfileID",
+				FieldId:   "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     utils.ParseRSRFieldsMustCompile("1", utils.INFIELD_SEP),
+				Mandatory: true},
+			&config.CfgCdrField{Tag: "FilterIDs",
+				FieldId: "FilterIDs",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("2", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "ActivationInterval",
+				FieldId: "ActivationInterval",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("3", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "Sorting",
+				FieldId: "Sorting",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("4", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "SortingParamameters",
+				FieldId: "SortingParamameters",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("5", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "SupplierID",
+				FieldId: "SupplierID",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("6", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "SupplierFilterIDs",
+				FieldId: "SupplierFilterIDs",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("7", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "SupplierAccountIDs",
+				FieldId: "SupplierAccountIDs",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("8", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "SupplierRatingPlanIDs",
+				FieldId: "SupplierRatingplanIDs",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("9", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "SupplierResourceIDs",
+				FieldId: "SupplierResourceIDs",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("10", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "SupplierStatIDs",
+				FieldId: "SupplierStatIDs",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("11", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "SupplierWeight",
+				FieldId: "SupplierWeight",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("12", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "SupplierBlocker",
+				FieldId: "SupplierBlocker",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("13", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "SupplierParameters",
+				FieldId: "SupplierParameters",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("14", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "Weight",
+				FieldId: "Weight",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("15", utils.INFIELD_SEP)},
+		},
+	}
+	rdr := ioutil.NopCloser(strings.NewReader(supplierCSV))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaSuppliers: map[string]*openedCSVFile{
+			"Suppliers.csv": &openedCSVFile{fileName: "Suppliers.csv",
+				rdr: rdr, csvRdr: csvRdr}},
+	}
+	if err := ldr.processContent(utils.MetaSuppliers); err != nil {
+		t.Error(err)
+	}
+	if len(ldr.bufLoaderData) != 0 {
+		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
+	}
+	eSp1 := &engine.SupplierProfile{
+		Tenant: "cgrates.org",
+		ID:     "SPL_WEIGHT_2",
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2017, 11, 27, 0, 0, 0, 0, time.UTC),
+		},
+		Sorting: "*weight",
+		Suppliers: []*engine.Supplier{
+			&engine.Supplier{
+				ID:     "supplier1",
+				Weight: 10,
+			},
+		},
+		Weight: 5,
+	}
+	eSp3 := &engine.SupplierProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SPL_LEASTCOST_1",
+		FilterIDs: []string{"FLTR_1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2017, 11, 27, 0, 0, 0, 0, time.UTC),
+		},
+		Sorting: "*least_cost",
+		Suppliers: []*engine.Supplier{
+			&engine.Supplier{
+				ID:            "supplier1",
+				RatingPlanIDs: []string{"RP_SPECIAL_1002"},
+				ResourceIDs:   []string{"resource_spl1"},
+				Blocker:       false,
+				Weight:        10,
+			},
+			&engine.Supplier{
+				ID:            "supplier2",
+				RatingPlanIDs: []string{"RP_RETAIL1"},
+				ResourceIDs:   []string{"resource_spl2"},
+				Weight:        20,
+			},
+		},
+		Weight: 10,
+	}
+	eSp3reverse := &engine.SupplierProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SPL_LEASTCOST_1",
+		FilterIDs: []string{"FLTR_1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2017, 11, 27, 0, 0, 0, 0, time.UTC),
+		},
+		Sorting: "*least_cost",
+		Suppliers: []*engine.Supplier{
+			&engine.Supplier{
+				ID:            "supplier2",
+				RatingPlanIDs: []string{"RP_RETAIL1"},
+				ResourceIDs:   []string{"resource_spl2"},
+				Weight:        20,
+			},
+			&engine.Supplier{
+				ID:            "supplier1",
+				RatingPlanIDs: []string{"RP_SPECIAL_1002"},
+				ResourceIDs:   []string{"resource_spl1"},
+				Blocker:       false,
+				Weight:        10,
+			},
+		},
+		Weight: 10,
+	}
+	if aps, err := ldr.dm.GetSupplierProfile("cgrates.org", "SPL_WEIGHT_2",
+		false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSp1, aps) {
+		t.Errorf("expecting: %s, received: %s",
+			utils.ToJSON(eSp1), utils.ToJSON(aps))
+	}
+
+	if aps, err := ldr.dm.GetSupplierProfile("cgrates.org", "SPL_LEASTCOST_1",
+		false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSp3, aps) && !reflect.DeepEqual(eSp3reverse, aps) {
+		t.Errorf("expecting: %s, received: %s",
+			utils.ToJSON(eSp3), utils.ToJSON(aps))
 	}
 }
