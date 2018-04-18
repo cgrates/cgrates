@@ -63,6 +63,7 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @basitengr | Abdul Basit |
 | @ghenry | Gavin Henry |
 | @Anevo | Cezar Vulcu |
+| @deanone-noc | dean one noc |
 
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
