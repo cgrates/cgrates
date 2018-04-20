@@ -563,6 +563,18 @@ const (
 	DispatcherS = "DispatcherS"
 )
 
+// Lower service names
+const (
+	LowerSessions    = "sessions"
+	LowerAttributes  = "attributes"
+	LowerSuppliers   = "suppliers"
+	LowerResources   = "resources"
+	LowerStatService = "stats"
+	LowerThresholds  = "thresholds"
+	LowerDispatchers = "dispatchers"
+	LowerLoader      = "loader"
+)
+
 //Migrator Metas
 const (
 	MetaSetVersions        = "*set_versions"
