@@ -20,6 +20,7 @@ package console
 
 import (
 	"github.com/cgrates/cgrates/utils"
+	"strings"
 )
 
 func init() {
@@ -48,21 +49,21 @@ func (self *CmdApierPing) Name() string {
 
 func (self *CmdApierPing) RpcMethod() string {
 	switch self.rpcParams.Item {
-	case utils.SupplierS:
+	case strings.ToLower(utils.SupplierS):
 		return utils.SupplierSv1Ping
-	case utils.AttributeS:
+	case strings.ToLower(utils.AttributeS):
 		return utils.AttributeSv1Ping
-	case utils.ResourceS:
+	case strings.ToLower(utils.ResourceS):
 		return utils.ResourceSv1Ping
-	case utils.StatService:
+	case strings.ToLower(utils.StatService):
 		return utils.StatSv1Ping
-	case utils.ThresholdS:
+	case strings.ToLower(utils.ThresholdS):
 		return utils.ThresholdSv1Ping
-	case utils.SessionS:
+	case strings.ToLower(utils.SessionS):
 		return utils.SessionSv1Ping
-	case utils.LoaderS:
+	case strings.ToLower(utils.LoaderS):
 		return utils.LoaderSv1Ping
-	case utils.DispatcherS:
+	case strings.ToLower(utils.DispatcherS):
 		return utils.DispatcherSv1Ping
 	default:
 	}

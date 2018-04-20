@@ -292,6 +292,18 @@
 
 "sessions": {
 	"enabled": true,
+	"suppliers_conns": [
+		{"address": "*internal"}
+	],
+	"resources_conns": [
+		{"address": "*internal"}
+	],
+	"attributes_conns": [
+		{"address": "*internal"}
+	],
+	"rals_conns": [
+		{"address": "*internal"}
+	],
 },
 
 
