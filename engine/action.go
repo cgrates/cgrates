@@ -81,6 +81,7 @@ const (
 	CGR_RPC                   = "*cgr_rpc"
 	TopUpZeroNegative         = "*topup_zero_negative"
 	SetExpiry                 = "*set_expiry"
+	MetaPublishAccount        = "*publish_account"
 )
 
 func (a *Action) Clone() *Action {
@@ -119,6 +120,7 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		CGR_RPC:                   cgrRPCAction,
 		TopUpZeroNegative:         topupZeroNegativeAction,
 		SetExpiry:                 setExpiryAction,
+		MetaPublishAccount:        publishAccount,
 	}
 	f, exists := actionFuncMap[typ]
 	return f, exists
@@ -768,6 +770,24 @@ func setExpiryAction(account *Account, sq *CDRStatsQueueTriggered, a *Action, ac
 	for _, b := range account.BalanceMap[balanceType] {
 		if b.MatchFilter(a.Balance, false, true) {
 			b.ExpirationDate = a.Balance.GetExpirationDate()
+		}
+	}
+	return nil
+}
+
+// publishAccount will publish the account as well as each balance received to ThresholdS
+func publishAccount(acnt *Account, sq *CDRStatsQueueTriggered,
+	a *Action, acs Actions) error {
+	if acnt == nil {
+		return errors.New("nil account")
+	}
+	acnt.Publish()
+	for bType := range acnt.BalanceMap {
+		for _, b := range acnt.BalanceMap[bType] {
+			if b.account == nil {
+				b.account = acnt
+			}
+			b.Publish()
 		}
 	}
 	return nil
