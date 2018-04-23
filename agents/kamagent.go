@@ -108,6 +108,8 @@ func (ka *KamailioAgent) onCgrAuth(evData []byte, connID string) {
 			utils.KamailioAgent, kev[utils.OriginID]))
 		return
 	}
+	ipv4Addr := strings.Split(ka.conns[connID].RemoteAddr().String(), ":")[0]
+	authArgs.CGREvent.Event[utils.OriginHost] = ipv4Addr
 	var authReply sessions.V1AuthorizeReply
 	err = ka.sessionS.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authReply)
 	if kar, err := kev.AsKamAuthReply(authArgs, &authReply, err); err != nil {
@@ -142,6 +144,8 @@ func (ka *KamailioAgent) onCallStart(evData []byte, connID string) {
 		return
 	}
 	initSessionArgs.CGREvent.Event[EvapiConnID] = connID // Attach the connection ID so we can properly disconnect later
+	ipv4Addr := strings.Split(ka.conns[connID].RemoteAddr().String(), ":")[0]
+	initSessionArgs.CGREvent.Event[utils.OriginHost] = ipv4Addr
 	var initReply sessions.V1InitSessionReply
 	if err := ka.sessionS.Call(utils.SessionSv1InitiateSession,
 		initSessionArgs, &initReply); err != nil {
@@ -177,6 +181,8 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connID string) {
 		return
 	}
 	var reply string
+	ipv4Addr := strings.Split(ka.conns[connID].RemoteAddr().String(), ":")[0]
+	tsArgs.CGREvent.Event[utils.OriginHost] = ipv4Addr
 	if err := ka.sessionS.Call(utils.SessionSv1TerminateSession,
 		tsArgs, &reply); err != nil {
 		utils.Logger.Err(
@@ -189,6 +195,8 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connID string) {
 		if err != nil {
 			return
 		}
+		ipv4Addr := strings.Split(ka.conns[connID].RemoteAddr().String(), ":")[0]
+		cgrEv.Event[utils.OriginHost] = ipv4Addr
 		if err := ka.sessionS.Call(utils.SessionSv1ProcessCDR, *cgrEv, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("%s> failed processing CGREvent: %s, error: %s",
 				utils.KamailioAgent, utils.ToJSON(cgrEv), err.Error()))
