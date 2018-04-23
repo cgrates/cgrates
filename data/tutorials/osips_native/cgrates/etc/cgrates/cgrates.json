@@ -46,6 +46,7 @@
 
 "sessions": {
 	"enabled": true,
+	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
 	"rals_conns": [
 		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
