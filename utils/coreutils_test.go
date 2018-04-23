@@ -272,10 +272,26 @@ func TestParseDatePlus(t *testing.T) {
 }
 
 func TestParseDateMonthly(t *testing.T) {
-	date, err := ParseDate("*monthly")
 	expected := time.Now().AddDate(0, 1, 0)
-	if err != nil || expected.Sub(date).Seconds() > 1 {
-		t.Error("error parsing date: ", expected.Sub(date).Seconds())
+	if date, err := ParseDate("*monthly"); err != nil {
+		t.Error(err)
+	} else if expected.Sub(date).Seconds() > 1 {
+		t.Errorf("received: %+v", date)
+	}
+}
+
+func TestParseDateMonthEnd(t *testing.T) {
+	expected := GetEndOfMonth(time.Now())
+	if date, err := ParseDate("*month_end"); err != nil {
+		t.Error(err)
+	} else if !date.Equal(expected) {
+		t.Errorf("received: %+v", date)
+	}
+	expected = GetEndOfMonth(time.Now()).Add(time.Hour).Add(2 * time.Minute)
+	if date, err := ParseDate("*month_end+1h2m"); err != nil {
+		t.Error(err)
+	} else if !date.Equal(expected) {
+		t.Errorf("expecting: %+v, received: %+v", expected, date)
 	}
 }
 

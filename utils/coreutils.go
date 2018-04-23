@@ -237,8 +237,15 @@ func ParseDate(date string) (expDate time.Time, err error) {
 		expDate = time.Now().AddDate(0, 1, 0) // add one month
 	case date == "*yearly":
 		expDate = time.Now().AddDate(1, 0, 0) // add one year
-	case date == "*month_end":
+	case strings.HasPrefix(date, "*month_end"):
 		expDate = GetEndOfMonth(time.Now())
+		if eDurIdx := strings.Index(date, "+"); eDurIdx != -1 {
+			var extraDur time.Duration
+			if extraDur, err = time.ParseDuration(date[eDurIdx+1:]); err != nil {
+				return
+			}
+			expDate = expDate.Add(extraDur)
+		}
 	case strings.HasSuffix(date, "Z") || strings.Index(date, "+") != -1: // Allow both Z and +hh:mm format
 		expDate, err = time.Parse(time.RFC3339, date)
 	default:
@@ -248,7 +255,7 @@ func ParseDate(date string) (expDate time.Time, err error) {
 		}
 		expDate = time.Unix(unix, 0)
 	}
-	return expDate, err
+	return
 }
 
 // returns a number equal or larger than the amount that exactly
