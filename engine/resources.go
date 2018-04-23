@@ -530,8 +530,10 @@ func (rS *ResourceService) processThresholds(r *Resource) (err error) {
 
 // V1ResourcesForEvent returns active resource configs matching the event
 func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, reply *Resources) (err error) {
-	if args.CGREvent.Tenant == "" {
-		return utils.NewErrMandatoryIeMissing("Tenant")
+	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	} else if args.CGREvent.Event == nil {
+		return utils.NewErrMandatoryIeMissing("Event")
 	}
 	var mtcRLs Resources
 	if args.UsageID != "" { // only cached if UsageID is present
@@ -558,6 +560,9 @@ func (rS *ResourceService) V1AuthorizeResources(args utils.ArgRSv1ResourceUsage,
 	}
 	if missing := utils.MissingStructFields(&args, []string{"UsageID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if args.CGREvent.Event == nil {
+		return utils.NewErrMandatoryIeMissing("Event")
 	}
 	mtcRLs := rS.cachedResourcesForEvent(args.TenantID())
 	if mtcRLs == nil {
@@ -588,6 +593,9 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 	}
 	if missing := utils.MissingStructFields(&args, []string{"UsageID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if args.CGREvent.Event == nil {
+		return utils.NewErrMandatoryIeMissing("Event")
 	}
 	var wasCached bool
 	mtcRLs := rS.cachedResourcesForEvent(args.UsageID)
@@ -644,6 +652,9 @@ func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, re
 	}
 	if missing := utils.MissingStructFields(&args, []string{"UsageID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if args.CGREvent.Event == nil {
+		return utils.NewErrMandatoryIeMissing("Event")
 	}
 	mtcRLs := rS.cachedResourcesForEvent(args.UsageID)
 	if mtcRLs == nil {

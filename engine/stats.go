@@ -268,6 +268,8 @@ func (sS *StatService) processEvent(ev *utils.CGREvent) (err error) {
 func (sS *StatService) V1ProcessEvent(ev *utils.CGREvent, reply *string) (err error) {
 	if missing := utils.MissingStructFields(ev, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
+	} else if ev.Event == nil {
+		return utils.NewErrMandatoryIeMissing("Event")
 	}
 	if err = sS.processEvent(ev); err == nil {
 		*reply = utils.OK
@@ -279,6 +281,8 @@ func (sS *StatService) V1ProcessEvent(ev *utils.CGREvent, reply *string) (err er
 func (sS *StatService) V1GetStatQueuesForEvent(ev *utils.CGREvent, reply *[]string) (err error) {
 	if missing := utils.MissingStructFields(ev, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
+	} else if ev.Event == nil {
+		return utils.NewErrMandatoryIeMissing("Event")
 	}
 	var sQs StatQueues
 	if sQs, err = sS.matchingStatQueuesForEvent(ev); err != nil {

@@ -348,6 +348,8 @@ type optsGetSuppliers struct {
 func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *SortedSuppliers) (err error) {
 	if missing := utils.MissingStructFields(&args.CGREvent, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
+	} else if args.CGREvent.Event == nil {
+		return utils.NewErrMandatoryIeMissing("Event")
 	}
 	sSps, err := spS.sortedSuppliersForEvent(args)
 	if err != nil {

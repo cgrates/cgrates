@@ -328,6 +328,8 @@ func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (hits int, err 
 func (tS *ThresholdService) V1ProcessEvent(args *ArgsProcessEvent, reply *int) (err error) {
 	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
+	} else if args.CGREvent.Event == nil {
+		return utils.NewErrMandatoryIeMissing("Event")
 	}
 	if hits, err := tS.processEvent(args); err != nil {
 		return err
@@ -341,6 +343,8 @@ func (tS *ThresholdService) V1ProcessEvent(args *ArgsProcessEvent, reply *int) (
 func (tS *ThresholdService) V1GetThresholdsForEvent(args *ArgsProcessEvent, reply *Thresholds) (err error) {
 	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
+	} else if args.CGREvent.Event == nil {
+		return utils.NewErrMandatoryIeMissing("Event")
 	}
 	var ts Thresholds
 	if ts, err = tS.matchingThresholdsForEvent(args); err == nil {

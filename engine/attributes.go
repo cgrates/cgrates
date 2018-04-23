@@ -204,6 +204,9 @@ func (alS *AttributeService) V1GetAttributeForEvent(ev *utils.CGREvent,
 
 func (alS *AttributeService) V1ProcessEvent(ev *utils.CGREvent,
 	reply *AttrSProcessEventReply) (err error) {
+	if ev.Event == nil {
+		return utils.NewErrMandatoryIeMissing("Event")
+	}
 	evReply, err := alS.processEvent(ev)
 	if err != nil {
 		if err != utils.ErrNotFound {
