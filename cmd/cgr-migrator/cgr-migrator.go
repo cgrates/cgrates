@@ -125,18 +125,29 @@ func main() {
 	}
 
 	var dmIN *engine.DataManager
-	dmIN, _ = engine.ConfigureDataStorage(*inDataDBType, *inDataDBHost, *inDataDBPort,
-		*inDataDBName, *inDataDBUser, *inDataDBPass, *dbDataEncoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
-	instorDB, err := engine.ConfigureStorStorage(*inStorDBType, *inStorDBHost, *inStorDBPort, *inStorDBName, *inStorDBUser, *inStorDBPass, *inDBDataEncoding,
-		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
-	if err != nil {
+	var err error
+	if dmIN, err = engine.ConfigureDataStorage(*inDataDBType, *inDataDBHost, *inDataDBPort,
+		*inDataDBName, *inDataDBUser, *inDataDBPass, *dbDataEncoding,
+		config.CgrConfig().CacheCfg(), *loadHistorySize); err != nil {
+		log.Fatal(err)
+	}
+	var instorDB engine.Storage
+	if instorDB, err = engine.ConfigureStorStorage(*inStorDBType, *inStorDBHost, *inStorDBPort,
+		*inStorDBName, *inStorDBUser, *inStorDBPass, *inDBDataEncoding,
+		config.CgrConfig().StorDBMaxOpenConns,
+		config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDBCDRSIndexes); err != nil {
 		log.Fatal(err)
 	}
 	var dmOUT *engine.DataManager
-	dmOUT, _ = engine.ConfigureDataStorage(*outDataDBType, *outDataDBHost, *outDataDBPort,
-		*outDataDBName, *outDataDBUser, *outDataDBPass, *dbDataEncoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
-	outDataDB, err := migrator.ConfigureV1DataStorage(*outDataDBType, *outDataDBHost, *outDataDBPort, *outDataDBName, *outDataDBUser, *outDataDBPass, *dbDataEncoding)
-	if err != nil {
+	if dmOUT, err = engine.ConfigureDataStorage(*outDataDBType, *outDataDBHost, *outDataDBPort,
+		*outDataDBName, *outDataDBUser, *outDataDBPass, *dbDataEncoding,
+		config.CgrConfig().CacheCfg(), *loadHistorySize); err != nil {
+		log.Fatal(err)
+	}
+	var outDataDB migrator.MigratorDataDB
+	if outDataDB, err = migrator.ConfigureV1DataStorage(*outDataDBType, *outDataDBHost, *outDataDBPort,
+		*outDataDBName, *outDataDBUser, *outDataDBPass, *dbDataEncoding); err != nil {
 		log.Fatal(err)
 	}
 

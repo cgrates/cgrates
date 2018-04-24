@@ -26,6 +26,12 @@ import (
 	"github.com/cgrates/mgo"
 )
 
+const (
+	v2AccountsCol          = "accounts"
+	v1ActionTriggersCol    = "action_triggers"
+	v1AttributeProfilesCol = "attribute_profiles"
+)
+
 type v1Mongo struct {
 	session *mgo.Session
 	db      string
@@ -95,7 +101,7 @@ func (v1ms *v1Mongo) setV1Account(x *v1Account) (err error) {
 //get
 func (v1ms *v1Mongo) getv2Account() (v2Acnt *v2Account, err error) {
 	if v1ms.qryIter == nil {
-		v1ms.qryIter = v1ms.session.DB(v1ms.db).C(utils.ACCOUNT_PREFIX).Find(nil).Iter()
+		v1ms.qryIter = v1ms.session.DB(v1ms.db).C(v2AccountsCol).Find(nil).Iter()
 	}
 	v1ms.qryIter.Next(&v2Acnt)
 
@@ -109,7 +115,7 @@ func (v1ms *v1Mongo) getv2Account() (v2Acnt *v2Account, err error) {
 
 //set
 func (v1ms *v1Mongo) setV2Account(x *v2Account) (err error) {
-	if err := v1ms.session.DB(v1ms.db).C(utils.ACCOUNT_PREFIX).Insert(x); err != nil {
+	if err := v1ms.session.DB(v1ms.db).C(v2AccountsCol).Insert(x); err != nil {
 		return err
 	}
 	return
@@ -227,7 +233,7 @@ func (v1ms *v1Mongo) setV1Stats(x *v1Stat) (err error) {
 //get
 func (v1ms *v1Mongo) getV2ActionTrigger() (v2at *v2ActionTrigger, err error) {
 	if v1ms.qryIter == nil {
-		v1ms.qryIter = v1ms.session.DB(v1ms.db).C(utils.ACTION_TRIGGER_PREFIX).Find(nil).Iter()
+		v1ms.qryIter = v1ms.session.DB(v1ms.db).C(v1ActionTriggersCol).Find(nil).Iter()
 	}
 	v1ms.qryIter.Next(&v2at)
 	if v2at == nil {
@@ -240,7 +246,7 @@ func (v1ms *v1Mongo) getV2ActionTrigger() (v2at *v2ActionTrigger, err error) {
 
 //set
 func (v1ms *v1Mongo) setV2ActionTrigger(x *v2ActionTrigger) (err error) {
-	if err := v1ms.session.DB(v1ms.db).C(utils.ACTION_TRIGGER_PREFIX).Insert(x); err != nil {
+	if err := v1ms.session.DB(v1ms.db).C(v1ActionTriggersCol).Insert(x); err != nil {
 		return err
 	}
 	return
@@ -250,7 +256,7 @@ func (v1ms *v1Mongo) setV2ActionTrigger(x *v2ActionTrigger) (err error) {
 //get
 func (v1ms *v1Mongo) getV1AttributeProfile() (v1attrPrf *v1AttributeProfile, err error) {
 	if v1ms.qryIter == nil {
-		v1ms.qryIter = v1ms.session.DB(v1ms.db).C(utils.AttributeProfilePrefix).Find(nil).Iter()
+		v1ms.qryIter = v1ms.session.DB(v1ms.db).C(v1AttributeProfilesCol).Find(nil).Iter()
 	}
 	v1ms.qryIter.Next(&v1attrPrf)
 	if v1attrPrf == nil {
@@ -263,7 +269,7 @@ func (v1ms *v1Mongo) getV1AttributeProfile() (v1attrPrf *v1AttributeProfile, err
 
 //set
 func (v1ms *v1Mongo) setV1AttributeProfile(x *v1AttributeProfile) (err error) {
-	if err := v1ms.session.DB(v1ms.db).C(utils.AttributeProfilePrefix).Insert(x); err != nil {
+	if err := v1ms.session.DB(v1ms.db).C(v1AttributeProfilesCol).Insert(x); err != nil {
 		return err
 	}
 	return

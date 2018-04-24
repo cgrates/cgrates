@@ -28,7 +28,8 @@ import (
 
 func NewMigrator(dmIN *engine.DataManager, dmOut *engine.DataManager, dataDBType, dataDBEncoding string,
 	storDB engine.Storage, storDBType string, oldDataDB MigratorDataDB, oldDataDBType, oldDataDBEncoding string,
-	oldStorDB engine.Storage, oldStorDBType string, dryRun bool, sameDataDB bool, sameStorDB bool, datadb_versions bool, stordb_versions bool) (m *Migrator, err error) {
+	oldStorDB engine.Storage, oldStorDBType string, dryRun bool, sameDataDB bool, sameStorDB bool,
+	datadb_versions bool, stordb_versions bool) (m *Migrator, err error) {
 	var mrshlr engine.Marshaler
 	var oldmrshlr engine.Marshaler
 	if dataDBEncoding == utils.MSGPACK {
@@ -86,12 +87,7 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 				fmt.Sprintf("task <%s> is not a supported migration task", taskID))
 		case utils.MetaSetVersions:
 			if m.dryRun != true {
-				if err := m.storDB.SetVersions(engine.CurrentDBVersions(m.storDBType), true); err != nil {
-					return utils.NewCGRError(utils.Migrator,
-						utils.ServerErrorCaps,
-						err.Error(),
-						fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error())), nil
-				}
+
 				if err := m.dmOut.DataDB().SetVersions(engine.CurrentDBVersions(m.dataDBType), true); err != nil {
 					return utils.NewCGRError(utils.Migrator,
 						utils.ServerErrorCaps,
@@ -105,6 +101,13 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 					}
 					log.Print("After migrate, DataDB versions :", vrs)
 				}
+
+				if err := m.storDB.SetVersions(engine.CurrentDBVersions(m.storDBType), true); err != nil {
+					return utils.NewCGRError(utils.Migrator,
+						utils.ServerErrorCaps,
+						err.Error(),
+						fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error())), nil
+				}
 				if m.stordb_versions {
 					vrs, err := m.storDB.GetVersions(utils.TBLVersions)
 					if err != nil {
@@ -112,6 +115,7 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 					}
 					log.Print("After migrate, StorDB versions :", vrs)
 				}
+
 			} else {
 				log.Print("Cannot dryRun SetVersions!")
 			}

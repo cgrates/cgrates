@@ -80,7 +80,7 @@ func (m *Migrator) migrateV1Accounts() (err error) {
 	}
 	if m.dryRun != true {
 		// All done, update version wtih current one
-		vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.Accounts]}
+		vrs := engine.Versions{utils.Accounts: engine.CurrentDataDBVersions()[utils.Accounts]}
 		if err = m.dmOut.DataDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
@@ -113,7 +113,7 @@ func (m *Migrator) migrateV2Accounts() (err error) {
 	}
 	if m.dryRun != true {
 		// All done, update version wtih current one
-		vrs := engine.Versions{utils.Accounts: engine.CurrentStorDBVersions()[utils.Accounts]}
+		vrs := engine.Versions{utils.Accounts: engine.CurrentDataDBVersions()[utils.Accounts]}
 		if err = m.dmOut.DataDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
@@ -126,8 +126,7 @@ func (m *Migrator) migrateV2Accounts() (err error) {
 
 func (m *Migrator) migrateAccounts() (err error) {
 	var vrs engine.Versions
-	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.dmIN.DataDB().GetVersions(utils.TBLVersions)
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -137,8 +136,9 @@ func (m *Migrator) migrateAccounts() (err error) {
 		return utils.NewCGRError(utils.Migrator,
 			utils.MandatoryIEMissingCaps,
 			utils.UndefinedVersion,
-			"version number is not defined for ActionTriggers model")
+			"version number is not defined for Actions")
 	}
+	current := engine.CurrentDataDBVersions()
 	switch vrs[utils.Accounts] {
 	case current[utils.Accounts]:
 		if m.sameDataDB {
