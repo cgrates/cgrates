@@ -224,6 +224,7 @@ func testCallCheckResourceBeforeAllocation(t *testing.T) {
 	args := &utils.ArgRSv1ResourceUsage{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     "ResourceEvent",
 			Event: map[string]interface{}{
 				utils.Account:     "1001",
 				utils.Subject:     "1001",
@@ -346,6 +347,7 @@ func testCallCheckResourceAllocation(t *testing.T) {
 	args := &utils.ArgRSv1ResourceUsage{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     "ResourceAllocation",
 			Event: map[string]interface{}{
 				utils.Account:     "1001",
 				utils.Subject:     "1001",
@@ -456,6 +458,7 @@ func testCallCheckResourceRelease(t *testing.T) {
 	args := &utils.ArgRSv1ResourceUsage{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     "ResourceRelease",
 			Event: map[string]interface{}{
 				utils.Account:     "1001",
 				utils.Subject:     "1001",
