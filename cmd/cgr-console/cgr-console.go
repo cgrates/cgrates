@@ -25,6 +25,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -49,9 +50,19 @@ func executeCommand(command string) {
 	}
 	if strings.TrimSpace(command) == "help" {
 		commands := console.GetCommands()
+		orderedKeys := make([]string, len(commands))
 		fmt.Println("Commands:")
-		for name, cmd := range commands {
-			fmt.Print(name, cmd.Usage())
+		for name, _ := range commands {
+			if name != "" {
+				orderedKeys = append(orderedKeys, name)
+			}
+		}
+		sort.Strings(orderedKeys)
+		for _, name := range orderedKeys {
+			if commands[name] == nil {
+				continue
+			}
+			fmt.Println(name, commands[name].Usage())
 		}
 		return
 	}

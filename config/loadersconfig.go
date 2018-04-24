@@ -22,15 +22,15 @@ import (
 	"time"
 )
 
-func NewDfltLoaderConfig() *LoaderConfig {
+func NewDfltLoaderSConfig() *LoaderSConfig {
 	if dfltLoaderConfig == nil {
-		return new(LoaderConfig)
+		return new(LoaderSConfig)
 	}
 	dfltVal := *dfltLoaderConfig
 	return &dfltVal
 }
 
-type LoaderConfig struct { // rename to LoaderConfig
+type LoaderSConfig struct { // rename to LoaderSConfig
 	Id             string
 	Enabled        bool
 	DryRun         bool
@@ -78,7 +78,7 @@ func (self *LoaderDataType) loadFromJsonCfg(jsnCfg *LoaderJsonDataType) error {
 	return nil
 }
 
-func (self *LoaderConfig) loadFromJsonCfg(jsnCfg *LoaderJsonCfg) error {
+func (self *LoaderSConfig) loadFromJsonCfg(jsnCfg *LoaderJsonCfg) error {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -127,8 +127,8 @@ func (self *LoaderConfig) loadFromJsonCfg(jsnCfg *LoaderJsonCfg) error {
 }
 
 // Clone itself into a new LoadersConfig
-func (self *LoaderConfig) Clone() *LoaderConfig {
-	clnLoader := new(LoaderConfig)
+func (self *LoaderSConfig) Clone() *LoaderSConfig {
+	clnLoader := new(LoaderSConfig)
 	clnLoader.Id = self.Id
 	clnLoader.Enabled = self.Enabled
 	clnLoader.DryRun = self.DryRun

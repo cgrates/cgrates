@@ -38,7 +38,7 @@ type openedCSVFile struct {
 	csvRdr   *csv.Reader
 }
 
-func NewLoader(dm *engine.DataManager, cfg *config.LoaderConfig,
+func NewLoader(dm *engine.DataManager, cfg *config.LoaderSConfig,
 	timezone string) (ldr *Loader) {
 	ldr = &Loader{
 		enabled:       cfg.Enabled,

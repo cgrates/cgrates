@@ -565,14 +565,14 @@ const (
 
 // Lower service names
 const (
-	LowerSessions    = "sessions"
-	LowerAttributes  = "attributes"
-	LowerSuppliers   = "suppliers"
-	LowerResources   = "resources"
-	LowerStatService = "stats"
-	LowerThresholds  = "thresholds"
-	LowerDispatchers = "dispatchers"
-	LowerLoader      = "loader"
+	SessionsLow    = "sessions"
+	AttributesLow  = "attributes"
+	SuppliersLow   = "suppliers"
+	ResourcesLow   = "resources"
+	StatServiceLow = "stats"
+	ThresholdsLow  = "thresholds"
+	DispatchersLow = "dispatchers"
+	LoaderLow      = "loader"
 )
 
 //Migrator Metas
