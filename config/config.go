@@ -48,7 +48,7 @@ var (
 	dfltKamConnConfig        *KamConnConfig // Default Kamailio Connection configuration
 	dfltHaPoolConfig         *HaPoolConfig
 	dfltAstConnCfg           *AsteriskConnCfg
-	dfltLoaderConfig         *LoaderConfig
+	dfltLoaderConfig         *LoaderSConfig
 	dfltLoaderDataTypeConfig *LoaderDataType
 )
 
@@ -349,7 +349,7 @@ type CGRConfig struct {
 	statsCfg                 *StatSCfg                // Configuration for StatS
 	thresholdSCfg            *ThresholdSCfg           // configuration for ThresholdS
 	supplierSCfg             *SupplierSCfg            // configuration for SupplierS
-	loaderCfg                []*LoaderConfig          // configuration for Loader
+	loaderCfg                []*LoaderSConfig         // configuration for Loader
 	dispatcherSCfg           *DispatcherSCfg          // configuration for Dispatcher
 	MailerServer             string                   // The server to use when sending emails out
 	MailerAuthUser           string                   // Authenticate to email server using this user
@@ -1183,9 +1183,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	}
 
 	if jsnLoaderCfg != nil {
-		self.loaderCfg = make([]*LoaderConfig, len(jsnLoaderCfg))
+		self.loaderCfg = make([]*LoaderSConfig, len(jsnLoaderCfg))
 		for idx, profile := range jsnLoaderCfg {
-			self.loaderCfg[idx] = NewDfltLoaderConfig()
+			self.loaderCfg[idx] = NewDfltLoaderSConfig()
 			self.loaderCfg[idx].loadFromJsonCfg(profile)
 		}
 	}
@@ -1436,7 +1436,7 @@ func (cfg *CGRConfig) CacheCfg() CacheConfig {
 	return cfg.cacheConfig
 }
 
-func (cfg *CGRConfig) LoaderCfg() []*LoaderConfig {
+func (cfg *CGRConfig) LoaderCfg() []*LoaderSConfig {
 	return cfg.loaderCfg
 }
 

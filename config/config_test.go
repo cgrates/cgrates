@@ -915,8 +915,8 @@ func TestDbDefaults(t *testing.T) {
 }
 
 func TestCgrCfgLoaderDefaults(t *testing.T) {
-	eCfg := []*LoaderConfig{
-		&LoaderConfig{
+	eCfg := []*LoaderSConfig{
+		&LoaderSConfig{
 			Id:           utils.META_DEFAULT,
 			Enabled:      false,
 			DryRun:       false,
