@@ -794,7 +794,8 @@ func RPCCall(inst interface{}, serviceMethod string, args interface{}, reply int
 	if len(methodSplit) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod
 	}
-	method := reflect.ValueOf(inst).MethodByName(methodSplit[0][len(methodSplit[0])-2:] + methodSplit[1])
+	method := reflect.ValueOf(inst).MethodByName(
+		strings.ToUpper(methodSplit[0][len(methodSplit[0])-2:]) + methodSplit[1])
 	if !method.IsValid() {
 		return rpcclient.ErrUnsupporteServiceMethod
 	}

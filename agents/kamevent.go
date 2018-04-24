@@ -124,6 +124,7 @@ func (kev KamEvent) AsMapStringInterface() (mp map[string]interface{}) {
 			mp[k] = v
 		}
 	}
+	mp[utils.EVENT_NAME] = utils.KamailioAgent
 	return
 }
 
