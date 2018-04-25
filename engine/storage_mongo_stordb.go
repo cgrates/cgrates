@@ -1294,11 +1294,18 @@ func (ms *MongoStorage) SetTPAttributes(tpSPs []*utils.TPAttributeProfile) (err 
 func (ms *MongoStorage) GetVersions(itm string) (vrs Versions, err error) {
 	session, col := ms.conn(colVer)
 	defer session.Close()
-	if err = col.Find(bson.M{}).One(&vrs); err != nil {
+	proj := bson.M{} // projection params
+	if itm != "" {
+		proj[itm] = 1
+	}
+	if err = col.Find(bson.M{}).Select(proj).One(&vrs); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
 		}
 		return nil, err
+	}
+	if len(vrs) == 0 {
+		return nil, utils.ErrNotFound
 	}
 	return
 }
@@ -1307,27 +1314,33 @@ func (ms *MongoStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
 	session, col := ms.conn(colVer)
 	defer session.Close()
 	if overwrite {
-		if err = ms.RemoveVersions(vrs); err != nil {
-			return err
-		}
+		_, err = col.Upsert(bson.M{}, &vrs)
+		return
 	}
-	if _, err = col.Upsert(bson.M{}, &vrs); err != nil {
-		return err
-	}
-
+	_, err = col.Upsert(bson.M{}, bson.M{"$set": &vrs})
 	return
 }
 
 func (ms *MongoStorage) RemoveVersions(vrs Versions) (err error) {
 	session, col := ms.conn(colVer)
 	defer session.Close()
-	err = col.Remove(bson.M{})
+	if len(vrs) != 0 {
+		var pairs []interface{}
+		for k := range vrs {
+			pairs = append(pairs, bson.M{}) // match first
+			pairs = append(pairs, bson.M{"$unset": bson.M{k: 1}})
+		}
+		bulk := col.Bulk()
+		bulk.Unordered()
+		bulk.Upsert(pairs...)
+		_, err = bulk.Run()
+	} else {
+		err = col.Remove(bson.M{})
+	}
 	if err == mgo.ErrNotFound {
 		err = utils.ErrNotFound
-	} else {
-		return err
 	}
-	return nil
+	return
 }
 
 func (ms *MongoStorage) GetStorageType() string {

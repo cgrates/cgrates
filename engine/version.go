@@ -32,7 +32,7 @@ func CheckVersions(storage Storage) error {
 	// get current db version
 	storType := storage.GetStorageType()
 	x := CurrentDBVersions(storType)
-	dbVersion, err := storage.GetVersions(utils.TBLVersions)
+	dbVersion, err := storage.GetVersions("")
 	if err == utils.ErrNotFound {
 		empty, err := storage.IsDBEmpty()
 		if err != nil {

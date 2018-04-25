@@ -56,7 +56,7 @@ func (m *Migrator) migrateCurrentTPactionplans() (err error) {
 func (m *Migrator) migrateTPactionplans() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.OutStorDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.OutStorDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

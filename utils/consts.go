@@ -426,7 +426,7 @@ const (
 	Thresholds                   = "Thresholds"
 	Suppliers                    = "Suppliers"
 	Attributes                   = "Attributes"
-	StatS                        = "stats"
+	StatS                        = "Stats"
 	RALService                   = "RALs"
 	CostSource                   = "CostSource"
 	ExtraInfo                    = "ExtraInfo"

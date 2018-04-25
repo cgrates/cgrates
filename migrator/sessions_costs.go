@@ -29,7 +29,7 @@ import (
 
 func (m *Migrator) migrateSessionsCosts() (err error) {
 	var vrs engine.Versions
-	vrs, err = m.OutStorDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.OutStorDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

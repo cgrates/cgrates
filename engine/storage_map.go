@@ -1669,7 +1669,7 @@ func (ms *MapStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
 	var result []byte
 	var x Versions
 	if !overwrite {
-		x, err = ms.GetVersions(utils.TBLVersions)
+		x, err = ms.GetVersions("")
 		if err != nil {
 			return err
 		}

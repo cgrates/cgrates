@@ -172,7 +172,7 @@ func main() {
 		log.Fatal(err)
 	}
 	if *datadb_versions {
-		vrs, _ := dmOUT.DataDB().GetVersions(utils.TBLVersions)
+		vrs, _ := dmOUT.DataDB().GetVersions("")
 		if len(vrs) != 0 {
 			log.Printf("DataDB versions : %+v\n", vrs)
 		} else {
@@ -180,7 +180,7 @@ func main() {
 		}
 	}
 	if *stordb_versions {
-		vrs, _ := storDB.GetVersions(utils.TBLVersions)
+		vrs, _ := storDB.GetVersions("")
 		if len(vrs) != 0 {
 			log.Printf("StorDB versions : %+v\n", vrs)
 		} else {

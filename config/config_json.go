@@ -24,7 +24,6 @@ import (
 	"os"
 
 	"github.com/DisposaBoy/JsonConfigReader"
-	"github.com/cgrates/cgrates/utils"
 )
 
 const (
@@ -367,7 +366,7 @@ func (self CgrJsonCfg) ResourceSJsonCfg() (*ResourceSJsonCfg, error) {
 }
 
 func (self CgrJsonCfg) StatSJsonCfg() (*StatServJsonCfg, error) {
-	rawCfg, hasKey := self[utils.StatS]
+	rawCfg, hasKey := self[STATS_JSON]
 	if !hasKey {
 		return nil, nil
 	}

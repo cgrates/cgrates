@@ -23,9 +23,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Queries all versions from stordb
-func (self *ApierV1) GetStorDBVersions(arg string, reply *engine.Versions) error {
-	if vrs, err := self.StorDb.GetVersions(utils.TBLVersions); err != nil {
+// Queries all versions from dataDB
+func (self *ApierV1) GetDataDBVersions(arg string, reply *engine.Versions) error {
+	if vrs, err := self.DataManager.DataDB().GetVersions(""); err != nil {
 		return utils.NewErrServerError(err)
 	} else if len(vrs) == 0 {
 		return utils.ErrNotFound
@@ -36,8 +36,8 @@ func (self *ApierV1) GetStorDBVersions(arg string, reply *engine.Versions) error
 }
 
 // Queries all versions from stordb
-func (self *ApierV1) GetDataDBVersions(arg string, reply *engine.Versions) error {
-	if vrs, err := self.DataManager.DataDB().GetVersions(utils.TBLVersions); err != nil {
+func (self *ApierV1) GetStorDBVersions(arg string, reply *engine.Versions) error {
+	if vrs, err := self.StorDb.GetVersions(""); err != nil {
 		return utils.NewErrServerError(err)
 	} else if len(vrs) == 0 {
 		return utils.ErrNotFound

@@ -57,7 +57,7 @@ func (m *Migrator) migrateCurrentTPfilters() (err error) {
 func (m *Migrator) migrateTPfilters() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.OutStorDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.OutStorDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

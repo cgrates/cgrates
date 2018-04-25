@@ -49,6 +49,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCacheActionPlan,
 	testOnStorITCacheAccountActionPlans,
 	testOnStorITCacheDerivedChargers,
+
 	// ToDo: test cache flush for a prefix
 	// ToDo: testOnStorITLoadAccountingCache
 	testOnStorITHasData,
@@ -1868,22 +1869,61 @@ func testOnStorITCRUDHistory(t *testing.T) {
 }
 
 func testOnStorITCRUDStructVersion(t *testing.T) {
-	CurrentVersion := Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
-	if _, rcvErr := onStor.DataDB().GetVersions(utils.TBLVersions); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
-	}
-	if err := onStor.DataDB().SetVersions(CurrentVersion, false); err != nil {
+	if _, err := onStor.DataDB().GetVersions(utils.Accounts); err != utils.ErrNotFound {
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetVersions(utils.TBLVersions); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(CurrentVersion, rcv) {
-		t.Errorf("Expecting: %v, received: %v", CurrentVersion, rcv)
-	} else if err = onStor.DataDB().RemoveVersions(rcv); err != nil {
+	vrs := Versions{utils.Accounts: 3, utils.Actions: 2, utils.ActionTriggers: 2,
+		utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 1}
+	if err := onStor.DataDB().SetVersions(vrs, false); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.DataDB().GetVersions(utils.TBLVersions); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
+	if rcv, err := onStor.DataDB().GetVersions(""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(vrs, rcv) {
+		t.Errorf("Expecting: %v, received: %v", vrs, rcv)
+	}
+	delete(vrs, utils.SharedGroups)
+	if err := onStor.DataDB().SetVersions(vrs, true); err != nil { // overwrite
+		t.Error(err)
+	}
+	if rcv, err := onStor.DataDB().GetVersions(""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(vrs, rcv) {
+		t.Errorf("Expecting: %v, received: %v", vrs, rcv)
+	}
+	eAcnts := Versions{utils.Accounts: vrs[utils.Accounts]}
+	if rcv, err := onStor.DataDB().GetVersions(utils.Accounts); err != nil { //query one element
+		t.Error(err)
+	} else if !reflect.DeepEqual(eAcnts, rcv) {
+		t.Errorf("Expecting: %v, received: %v", eAcnts, rcv)
+	}
+	if _, err := onStor.DataDB().GetVersions(utils.NOT_AVAILABLE); err != utils.ErrNotFound { //query non-existent
+		t.Error(err)
+	}
+	eAcnts[utils.Accounts] = 2
+	vrs[utils.Accounts] = eAcnts[utils.Accounts]
+	if err := onStor.DataDB().SetVersions(eAcnts, false); err != nil { // change one element
+		t.Error(err)
+	}
+	if rcv, err := onStor.DataDB().GetVersions(""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(vrs, rcv) {
+		t.Errorf("Expecting: %v, received: %v", vrs, rcv)
+	}
+	if err = onStor.DataDB().RemoveVersions(eAcnts); err != nil { // remove one element
+		t.Error(err)
+	}
+	delete(vrs, utils.Accounts)
+	if rcv, err := onStor.DataDB().GetVersions(""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(vrs, rcv) {
+		t.Errorf("Expecting: %v, received: %v", vrs, rcv)
+	}
+	if err = onStor.DataDB().RemoveVersions(nil); err != nil { // remove one element
+		t.Error(err)
+	}
+	if _, err := onStor.DataDB().GetVersions(""); err != utils.ErrNotFound { //query non-existent
+		t.Error(err)
 	}
 }
 

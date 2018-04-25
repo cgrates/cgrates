@@ -55,7 +55,7 @@ func (m *Migrator) migrateCurrentSupplierProfile() (err error) {
 func (m *Migrator) migrateSupplierProfiles() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.dmOut.DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

@@ -95,7 +95,7 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 						fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error())), nil
 				}
 				if m.datadb_versions {
-					vrs, err := m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+					vrs, err := m.dmOut.DataDB().GetVersions("")
 					if err != nil {
 						return err, nil
 					}
@@ -109,7 +109,7 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 						fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error())), nil
 				}
 				if m.stordb_versions {
-					vrs, err := m.storDB.GetVersions(utils.TBLVersions)
+					vrs, err := m.storDB.GetVersions("")
 					if err != nil {
 						return err, nil
 					}

@@ -153,13 +153,13 @@ func testVersion(t *testing.T) {
 	}
 
 	//dataDB
-	if _, rcvErr := dm3.DataDB().GetVersions(utils.TBLVersions); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := dm3.DataDB().GetVersions(""); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := CheckVersions(dm3.DataDB()); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := dm3.DataDB().GetVersions(utils.TBLVersions); err != nil {
+	if rcv, err := dm3.DataDB().GetVersions(""); err != nil {
 		t.Error(err)
 	} else if len(currentVersion) != len(rcv) {
 		t.Errorf("Expecting: %v, received: %v", currentVersion, rcv)
@@ -167,7 +167,7 @@ func testVersion(t *testing.T) {
 	if err = dm3.DataDB().RemoveVersions(currentVersion); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := dm3.DataDB().GetVersions(utils.TBLVersions); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := dm3.DataDB().GetVersions(""); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := dm3.DataDB().SetVersions(testVersion, false); err != nil {
@@ -197,7 +197,7 @@ func testVersion(t *testing.T) {
 	if err := CheckVersions(storageDb); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := storageDb.GetVersions(utils.TBLVersions); err != nil {
+	if rcv, err := storageDb.GetVersions(""); err != nil {
 		t.Error(err)
 	} else if len(currentVersion) != len(rcv) {
 		t.Errorf("Expecting: %v, received: %v", currentVersion, rcv)
@@ -205,7 +205,7 @@ func testVersion(t *testing.T) {
 	if err = storageDb.RemoveVersions(currentVersion); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := storageDb.GetVersions(utils.TBLVersions); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := storageDb.GetVersions(""); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := storageDb.SetVersions(testVersion, false); err != nil {

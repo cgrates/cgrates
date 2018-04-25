@@ -50,6 +50,9 @@ func TestActionsitInitCfg(t *testing.T) {
 }
 
 func TestActionsitInitCdrDb(t *testing.T) {
+	if err := InitDataDb(actsLclCfg); err != nil { // need it for versions
+		t.Fatal(err)
+	}
 	if err := InitStorDb(actsLclCfg); err != nil {
 		t.Fatal(err)
 	}

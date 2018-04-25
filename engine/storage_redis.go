@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"strconv"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
@@ -1544,11 +1545,25 @@ func (rs *RedisStorage) MatchFilterIndexDrv(cacheID, itemIDPrefix,
 }
 
 func (rs *RedisStorage) GetVersions(itm string) (vrs Versions, err error) {
-	x, err := rs.Cmd("HGETALL", itm).Map()
+	if itm != "" {
+		fldVal, err := rs.Cmd("HGET", utils.TBLVersions, itm).Str()
+		if err != nil {
+			if err == redis.ErrRespNil {
+				err = utils.ErrNotFound
+			}
+			return nil, err
+		}
+		intVal, err := strconv.ParseInt(fldVal, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		return Versions{itm: intVal}, nil
+	}
+	mp, err := rs.Cmd("HGETALL", utils.TBLVersions).Map()
 	if err != nil {
 		return nil, err
 	}
-	vrs, err = utils.MapStringToInt64(x)
+	vrs, err = utils.MapStringToInt64(mp)
 	if err != nil {
 		return nil, err
 	}
@@ -1560,7 +1575,7 @@ func (rs *RedisStorage) GetVersions(itm string) (vrs Versions, err error) {
 
 func (rs *RedisStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
 	if overwrite {
-		if err = rs.RemoveVersions(vrs); err != nil {
+		if err = rs.RemoveVersions(nil); err != nil {
 			return
 		}
 	}
@@ -1568,14 +1583,16 @@ func (rs *RedisStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
 }
 
 func (rs *RedisStorage) RemoveVersions(vrs Versions) (err error) {
-	for key, _ := range vrs {
-		err = rs.Cmd("HDEL", utils.TBLVersions, key).Err
-		if err != nil {
-			return err
+	if len(vrs) != 0 {
+		for key, _ := range vrs {
+			err = rs.Cmd("HDEL", utils.TBLVersions, key).Err
+			if err != nil {
+				return err
+			}
 		}
+		return
 	}
-
-	return
+	return rs.Cmd("DEL", utils.TBLVersions).Err
 }
 
 // GetStatQueueProfileDrv retrieves a StatQueueProfile from dataDB

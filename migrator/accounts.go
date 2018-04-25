@@ -126,7 +126,7 @@ func (m *Migrator) migrateV2Accounts() (err error) {
 
 func (m *Migrator) migrateAccounts() (err error) {
 	var vrs engine.Versions
-	vrs, err = m.dmIN.DataDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.dmIN.DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
