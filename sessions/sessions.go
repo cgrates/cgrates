@@ -730,7 +730,7 @@ func (smg *SMGeneric) InitiateSession(gev SMGenericEvent, clnt rpcclient.RpcClie
 		return
 	}
 	if smg.cgrCfg.SessionSCfg().DebitInterval != 0 { // Session handled by debit loop
-		maxUsage = time.Duration(-1 * time.Second)
+		maxUsage = time.Duration(-1)
 		return
 	}
 	maxUsage, err = smg.UpdateSession(gev, clnt)
@@ -793,7 +793,7 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 	defer smg.replicateSessionsWithID(gev.GetCGRID(utils.META_DEFAULT), false, smg.smgReplConns)
 	for _, s := range aSessions[cgrID] {
 		if s.RunID == utils.META_NONE {
-			maxUsage = time.Duration(-1 * time.Second)
+			maxUsage = time.Duration(-1)
 			continue
 		}
 		var maxDur time.Duration
@@ -1358,6 +1358,12 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		!args.GetMaxUsage && !args.GetSuppliers {
 		return utils.NewErrMandatoryIeMissing("subsystems")
 	}
+	if args.CGREvent.Tenant == "" {
+		args.CGREvent.Tenant = smg.cgrCfg.DefaultTenant
+	}
+	if args.CGREvent.ID == "" {
+		args.CGREvent.ID = utils.GenUUID()
+	}
 	if args.GetAttributes {
 		if smg.attrS == nil {
 			return utils.NewErrNotConnected(utils.AttributeS)
@@ -1479,6 +1485,7 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEventWithDigest(clnt rpcclient.RpcClientCo
 		!args.GetMaxUsage && !args.GetSuppliers {
 		return utils.NewErrMandatoryIeMissing("subsystems")
 	}
+
 	var initAuthRply V1AuthorizeReply
 	if err = smg.BiRPCv1AuthorizeEvent(clnt, args, &initAuthRply); err != nil {
 		return
@@ -1490,7 +1497,10 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEventWithDigest(clnt rpcclient.RpcClientCo
 		authReply.ResourceAllocation = initAuthRply.ResourceAllocation
 	}
 	if args.GetMaxUsage {
-		authReply.MaxUsage = utils.Float64Pointer(initAuthRply.MaxUsage.Seconds())
+		authReply.MaxUsage = utils.Float64Pointer(-1.0)
+		if *initAuthRply.MaxUsage != time.Duration(-1) {
+			authReply.MaxUsage = utils.Float64Pointer(initAuthRply.MaxUsage.Seconds())
+		}
 	}
 	if args.GetSuppliers {
 		authReply.SuppliersDigest = utils.StringPointer(initAuthRply.Suppliers.Digest())
@@ -1543,6 +1553,12 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 	args *V1InitSessionArgs, rply *V1InitSessionReply) (err error) {
 	if !args.GetAttributes && !args.AllocateResources && !args.InitSession {
 		return utils.NewErrMandatoryIeMissing("subsystems")
+	}
+	if args.CGREvent.Tenant == "" {
+		args.CGREvent.Tenant = smg.cgrCfg.DefaultTenant
+	}
+	if args.CGREvent.ID == "" {
+		args.CGREvent.ID = utils.GenUUID()
 	}
 	if args.GetAttributes {
 		if smg.attrS == nil {
@@ -1662,6 +1678,12 @@ func (smg *SMGeneric) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 	if !args.GetAttributes && !args.UpdateSession {
 		return utils.NewErrMandatoryIeMissing("subsystems")
 	}
+	if args.CGREvent.Tenant == "" {
+		args.CGREvent.Tenant = smg.cgrCfg.DefaultTenant
+	}
+	if args.CGREvent.ID == "" {
+		args.CGREvent.ID = utils.GenUUID()
+	}
 	if args.GetAttributes {
 		if smg.attrS == nil {
 			return utils.NewErrNotConnected(utils.AttributeS)
@@ -1704,6 +1726,12 @@ func (smg *SMGeneric) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection
 	args *V1TerminateSessionArgs, rply *string) (err error) {
 	if !args.TerminateSession && !args.ReleaseResources {
 		return utils.NewErrMandatoryIeMissing("subsystems")
+	}
+	if args.CGREvent.Tenant == "" {
+		args.CGREvent.Tenant = smg.cgrCfg.DefaultTenant
+	}
+	if args.CGREvent.ID == "" {
+		args.CGREvent.ID = utils.GenUUID()
 	}
 	if args.TerminateSession {
 		if smg.rals == nil {
@@ -1795,6 +1823,12 @@ type V1ProcessEventReply struct {
 // Called on session end, should send the CDR to CDRS
 func (smg *SMGeneric) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 	args *V1ProcessEventArgs, rply *V1ProcessEventReply) (err error) {
+	if args.CGREvent.Tenant == "" {
+		args.CGREvent.Tenant = smg.cgrCfg.DefaultTenant
+	}
+	if args.CGREvent.ID == "" {
+		args.CGREvent.ID = utils.GenUUID()
+	}
 	if args.AllocateResources {
 		if smg.resS == nil {
 			return utils.NewErrNotConnected(utils.ResourceS)

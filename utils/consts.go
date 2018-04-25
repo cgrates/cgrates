@@ -516,11 +516,7 @@ const (
 	Cost                         = "Cost"
 	RatingPlanID                 = "RatingPlanID"
 	MetaSessionS                 = "*sessions"
-	FreeSWITCHAgent              = "FreeSWITCHAgent"
 	MetaDefault                  = "*default"
-	KamailioAgent                = "KamailioAgent"
-	RadiusAgent                  = "RadiusAgent"
-	DiameterAgent                = "DiameterAgent"
 	Error                        = "Error"
 	MetaCGRReply                 = "*cgrReply"
 	CacheS                       = "CacheS"
@@ -531,14 +527,16 @@ const (
 	Substitute                   = "Substitute"
 	Append                       = "Append"
 	MetaRound                    = "*round"
-	LoaderS                      = "LoaderS"
 	Pong                         = "Pong"
 	MetaEventCost                = "*event_cost"
 	MetaSuppliersEventCost       = "*suppliers_event_cost"
 	MetaSuppliersIgnoreErrors    = "*suppliers_ignore_errors"
+	Freeswitch                   = "freeswitch"
+	Kamailio                     = "kamailio"
+	Opensips                     = "opensips"
 )
 
-//MetaMetrics
+// MetaMetrics
 const (
 	MetaASR     = "*asr"
 	MetaACD     = "*acd"
@@ -551,7 +549,7 @@ const (
 	MetaAverage = "*average"
 )
 
-//Services
+// Services
 const (
 	SessionS    = "SessionS"
 	AttributeS  = "AttributeS"
@@ -561,6 +559,7 @@ const (
 	FilterS     = "FilterS"
 	ThresholdS  = "ThresholdS"
 	DispatcherS = "DispatcherS"
+	LoaderS     = "LoaderS"
 )
 
 // Lower service names
@@ -575,7 +574,7 @@ const (
 	LoaderLow      = "loader"
 )
 
-//Migrator Metas
+// Migrator Metas
 const (
 	MetaSetVersions        = "*set_versions"
 	MetaTpRatingPlans      = "*tp_rating_plans"
@@ -702,13 +701,11 @@ const (
 )
 
 // Scheduler
-
 const (
 	SchedulerPing = "Scheduler.Ping"
 )
 
 // Cdrc
-
 const (
 	CdrcPing = "Cdrc.Ping"
 )
@@ -739,7 +736,7 @@ const (
 	AttributesCsv         = "Attributes.csv"
 )
 
-//Table Name
+// Table Name
 const (
 	TBLTPTimings          = "tp_timings"
 	TBLTPDestinations     = "tp_destinations"
@@ -768,7 +765,7 @@ const (
 	TBLVersions           = "versions"
 )
 
-//Cache Name
+// Cache Name
 const (
 	CacheDestinations              = "destinations"
 	CacheReverseDestinations       = "reverse_destinations"
@@ -809,7 +806,7 @@ const (
 	MetaReady                      = "*ready"
 )
 
-//Prefix for indexing
+// Prefix for indexing
 const (
 	ResourceFilterIndexes     = "rfi_"
 	ResourceFilterRevIndexes  = "rfr_"
@@ -821,6 +818,14 @@ const (
 	SupplierFilterRevIndexes  = "spr_"
 	AttributeFilterIndexes    = "afi_"
 	AttributeFilterRevIndexes = "afr_"
+)
+
+// Agents
+const (
+	KamailioAgent   = "KamailioAgent"
+	RadiusAgent     = "RadiusAgent"
+	DiameterAgent   = "DiameterAgent"
+	FreeSWITCHAgent = "FreeSWITCHAgent"
 )
 
 func buildCacheInstRevPrefixes() {

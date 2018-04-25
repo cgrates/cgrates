@@ -10,7 +10,7 @@ We got OpenSIPS_ installed via following commands:
 ::
 
  apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 049AD65B
- echo "deb http://apt.opensips.org stretch 2.4-releases" >>/etc/apt/sources.list
+ echo "deb http://apt.opensips.org jessie 2.4-nightly" >/etc/apt/sources.list.d/opensips.list
  apt-get update
  apt-get install opensips opensips-cgrates-module
 
