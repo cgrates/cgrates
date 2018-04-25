@@ -123,4 +123,6 @@ imports:
   - internal/json
   - internal/sasl
   - internal/scram
+- name: github.com/dlintw/goconf
+  version: dcc070983490608a14480e3bf943bad464785df5
 testImports: []
