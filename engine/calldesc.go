@@ -899,7 +899,8 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 }
 
 // refundIncrements has no locks
-func (cd *CallDescriptor) refundIncrements() (err error) {
+// returns the updated account referenced by the CallDescriptor
+func (cd *CallDescriptor) refundIncrements() (acnt *Account, err error) {
 	accountsCache := make(map[string]*Account)
 	for _, increment := range cd.Increments {
 		account, found := accountsCache[increment.BalanceInfo.AccountID]
@@ -935,11 +936,12 @@ func (cd *CallDescriptor) refundIncrements() (err error) {
 			account.countUnits(-increment.Cost, utils.MONETARY, cc, balance)
 		}
 	}
+	acnt = accountsCache[utils.ConcatenatedKey(cd.Tenant, cd.Account)]
 	return
 
 }
 
-func (cd *CallDescriptor) RefundIncrements() (err error) {
+func (cd *CallDescriptor) RefundIncrements() (acnt *Account, err error) {
 	// get account list for locking
 	// all must be locked in order to use cache
 	cd.Increments.Decompress()
@@ -953,7 +955,7 @@ func (cd *CallDescriptor) RefundIncrements() (err error) {
 		}
 	}
 	_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) {
-		err = cd.refundIncrements()
+		acnt, err = cd.refundIncrements()
 		return
 	}, 0, accMap.Slice()...)
 	return

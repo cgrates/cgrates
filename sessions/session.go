@@ -230,8 +230,12 @@ func (self *SMGSession) refund(usage time.Duration) (err error) {
 		TOR:         self.CD.TOR,
 		Increments:  incrmts,
 	}
-	var reply float64
-	return self.rals.Call("Responder.RefundIncrements", cd, &reply)
+	var acnt engine.Account
+	err = self.rals.Call("Responder.RefundIncrements", cd, &acnt)
+	if acnt.ID != "" { // Account info updated, update also cached AccountSummary
+		self.EventCost.AccountSummary = acnt.AsAccountSummary()
+	}
+	return
 }
 
 // storeSMCost will send the SMCost to CDRs for storing
@@ -251,8 +255,9 @@ func (self *SMGSession) storeSMCost() error {
 		CostDetails: self.EventCost,
 	}
 	var reply string
-	if err := self.cdrsrv.Call("CdrsV2.StoreSMCost", engine.ArgsV2CDRSStoreSMCost{Cost: smCost,
-		CheckDuplicate: true}, &reply); err != nil {
+	if err := self.cdrsrv.Call("CdrsV2.StoreSMCost",
+		engine.ArgsV2CDRSStoreSMCost{Cost: smCost,
+			CheckDuplicate: true}, &reply); err != nil {
 		if err == utils.ErrExists {
 			self.refund(self.CD.GetDuration()) // Refund entire duration
 		} else {

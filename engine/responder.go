@@ -197,11 +197,11 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 	return
 }
 
-func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err error) {
+func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *Account) (err error) {
 	cacheKey := utils.REFUND_INCR_CACHE_PREFIX + arg.CgrID + arg.RunID
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
 		if item.Value != nil {
-			*reply = *(item.Value.(*float64))
+			*reply = *(item.Value.(*Account))
 		}
 		return item.Err
 	}
@@ -229,9 +229,20 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err 
 		return err
 	}
 	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
-		return utils.ErrMaxUsageExceeded
+		err = utils.ErrMaxUsageExceeded
+		rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{
+			Err: err,
+		})
+		return
 	}
-	err = arg.RefundIncrements()
+	if acnt, err := arg.RefundIncrements(); err != nil {
+		rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{
+			Err: err,
+		})
+		return err
+	} else if acnt != nil {
+		*reply = *acnt
+	}
 	rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{
 		Value: reply,
 		Err:   err,
