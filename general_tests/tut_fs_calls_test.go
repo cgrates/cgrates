@@ -22,6 +22,7 @@ package general_tests
 
 import (
 	"flag"
+	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"os"
@@ -43,6 +44,7 @@ var waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for r
 var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 var fsConfig = flag.String("fsConfig", "/usr/share/cgrates/tutorials/fs_evsock", "FreeSwitch tutorial folder")
 var kamConfig = flag.String("kamConfig", "/usr/share/cgrates/tutorials/kamevapi", "Kamailio tutorial folder")
+var oSipsConfig = flag.String("osConfig", "/usr/share/cgrates/tutorials/osips_native", "OpenSips tutorial folder")
 var optConf string
 
 var sTestsCalls = []func(t *testing.T){
@@ -78,15 +80,22 @@ var sTestsCalls = []func(t *testing.T){
 }
 
 //Test start here
-func TestFSCall(t *testing.T) {
-	optConf = "freeswitch"
+func TestFSCalls(t *testing.T) {
+	optConf = utils.Freeswitch
 	for _, stest := range sTestsCalls {
 		t.Run("", stest)
 	}
 }
 
-func TestKamCall(t *testing.T) {
-	optConf = "kamailio"
+func TestKamCalls(t *testing.T) {
+	optConf = utils.Kamailio
+	for _, stest := range sTestsCalls {
+		t.Run("", stest)
+	}
+}
+
+func TestOSCalls(t *testing.T) {
+	optConf = utils.Opensips
 	for _, stest := range sTestsCalls {
 		t.Run("", stest)
 	}
@@ -95,13 +104,18 @@ func TestKamCall(t *testing.T) {
 func testCallInitCfg(t *testing.T) {
 	// Init config first
 	var err error
-	if optConf == "freeswitch" {
-		tutFsCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "tutorials", "fs_evsock", "cgrates", "etc", "cgrates"))
+	if optConf == utils.Freeswitch {
+		tutFsCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*fsConfig, "cgrates", "etc", "cgrates"))
 		if err != nil {
 			t.Error(err)
 		}
-	} else if optConf == "kamailio" {
-		tutFsCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "tutorials", "kamevapi", "cgrates", "etc", "cgrates"))
+	} else if optConf == utils.Kamailio {
+		tutFsCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*kamConfig, "cgrates", "etc", "cgrates"))
+		if err != nil {
+			t.Error(err)
+		}
+	} else if optConf == utils.Opensips {
+		tutFsCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*oSipsConfig, "cgrates", "etc", "cgrates"))
 		if err != nil {
 			t.Error(err)
 		}
@@ -127,14 +141,19 @@ func testCallResetStorDb(t *testing.T) {
 
 // start FS server
 func testCallStartFS(t *testing.T) {
-	if optConf == "freeswitch" {
-		engine.KillProcName("freeswitch", 5000)
-		if err := engine.CallScript(path.Join(*dataDir, "tutorials", "fs_evsock", "freeswitch", "etc", "init.d", "freeswitch"), "start", 3000); err != nil {
+	if optConf == utils.Freeswitch {
+		engine.KillProcName(utils.Freeswitch, 5000)
+		if err := engine.CallScript(path.Join(*fsConfig, "freeswitch", "etc", "init.d", "freeswitch"), "start", 3000); err != nil {
 			t.Fatal(err)
 		}
-	} else if optConf == "kamailio" {
-		engine.KillProcName("kamailio", 5000)
-		if err := engine.CallScript(path.Join(*dataDir, "tutorials", "kamevapi", "kamailio", "etc", "init.d", "kamailio"), "start", 3000); err != nil {
+	} else if optConf == utils.Kamailio {
+		engine.KillProcName(utils.Kamailio, 5000)
+		if err := engine.CallScript(path.Join(*kamConfig, "kamailio", "etc", "init.d", "kamailio"), "start", 3000); err != nil {
+			t.Fatal(err)
+		}
+	} else if optConf == utils.Opensips {
+		engine.KillProcName(utils.Kamailio, 5000)
+		if err := engine.CallScript(path.Join(*oSipsConfig, "opensips", "etc", "init.d", "opensips"), "start", 3000); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -143,12 +162,16 @@ func testCallStartFS(t *testing.T) {
 // Start CGR Engine
 func testCallStartEngine(t *testing.T) {
 	engine.KillProcName("cgr-engine", *waitRater)
-	if optConf == "freeswitch" {
-		if err := engine.CallScript(path.Join(*dataDir, "tutorials", "fs_evsock", "cgrates", "etc", "init.d", "cgrates"), "start", 100); err != nil {
+	if optConf == utils.Freeswitch {
+		if err := engine.CallScript(path.Join(*fsConfig, "cgrates", "etc", "init.d", "cgrates"), "start", 100); err != nil {
 			t.Fatal(err)
 		}
-	} else if optConf == "kamailio" {
-		if err := engine.CallScript(path.Join(*dataDir, "tutorials", "kamevapi", "cgrates", "etc", "init.d", "cgrates"), "start", 100); err != nil {
+	} else if optConf == utils.Kamailio {
+		if err := engine.CallScript(path.Join(*kamConfig, "cgrates", "etc", "init.d", "cgrates"), "start", 100); err != nil {
+			t.Fatal(err)
+		}
+	} else if optConf == utils.Opensips {
+		if err := engine.CallScript(path.Join(*oSipsConfig, "cgrates", "etc", "init.d", "cgrates"), "start", 100); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -156,12 +179,16 @@ func testCallStartEngine(t *testing.T) {
 
 // Restart FS so we make sure reconnects are working
 func testCallRestartFS(t *testing.T) {
-	if optConf == "freeswitch" {
-		if err := engine.CallScript(path.Join(*dataDir, "tutorials", "fs_evsock", "freeswitch", "etc", "init.d", "freeswitch"), "restart", 5000); err != nil {
+	if optConf == utils.Freeswitch {
+		if err := engine.CallScript(path.Join(*fsConfig, "freeswitch", "etc", "init.d", "freeswitch"), "restart", 5000); err != nil {
 			t.Fatal(err)
 		}
-	} else if optConf == "kamailio" {
-		if err := engine.CallScript(path.Join(*dataDir, "tutorials", "kamevapi", "kamailio", "etc", "init.d", "kamailio"), "restart", 5000); err != nil {
+	} else if optConf == utils.Kamailio {
+		if err := engine.CallScript(path.Join(*kamConfig, "kamailio", "etc", "init.d", "kamailio"), "restart", 5000); err != nil {
+			t.Fatal(err)
+		}
+	} else if optConf == utils.Opensips {
+		if err := engine.CallScript(path.Join(*oSipsConfig, "opensips", "etc", "init.d", "opensips"), "restart", 5000); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -269,12 +296,12 @@ func testCallCheckThreshold1002Before(t *testing.T) {
 func testCallStartPjsuaListener(t *testing.T) {
 	var err error
 	acnts := []*engine.PjsuaAccount{
-		&engine.PjsuaAccount{Id: "sip:1001@192.168.56.203",
-			Username: "1001", Password: "CGRateS.org", Realm: "*", Registrar: "sip:192.168.56.203:5060"},
-		&engine.PjsuaAccount{Id: "sip:1002@192.168.56.203",
-			Username: "1002", Password: "CGRateS.org", Realm: "*", Registrar: "sip:192.168.56.203:5060"},
-		&engine.PjsuaAccount{Id: "sip:1003@192.168.56.203",
-			Username: "1003", Password: "CGRateS.org", Realm: "*", Registrar: "sip:192.168.56.203:5060"},
+		&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1",
+			Username: "1001", Password: "CGRateS.org", Realm: "*", Registrar: "sip:127.0.0.1:5080"},
+		&engine.PjsuaAccount{Id: "sip:1002@127.0.0.1",
+			Username: "1002", Password: "CGRateS.org", Realm: "*", Registrar: "sip:127.0.0.1:5080"},
+		&engine.PjsuaAccount{Id: "sip:1003@127.0.0.1",
+			Username: "1003", Password: "CGRateS.org", Realm: "*", Registrar: "sip:127.0.0.1:5080"},
 	}
 	if tutFsCallsPjSuaListener, err = engine.StartPjsuaListener(
 		acnts, 5070, time.Duration(*waitRater)*time.Millisecond); err != nil {
@@ -285,8 +312,8 @@ func testCallStartPjsuaListener(t *testing.T) {
 // Call from 1001 (prepaid) to 1002
 func testCallCall1001To1002(t *testing.T) {
 	if err := engine.PjsuaCallUri(
-		&engine.PjsuaAccount{Id: "sip:1001@192.168.56.203", Username: "1001", Password: "CGRateS.org", Realm: "*"},
-		"sip:1002@192.168.56.203", "sip:192.168.56.203:5060", time.Duration(67)*time.Second, 5071); err != nil {
+		&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "CGRateS.org", Realm: "*"},
+		"sip:1002@127.0.0.1", "sip:127.0.0.1:5080", time.Duration(67)*time.Second, 5071); err != nil {
 		t.Fatal(err)
 	}
 	time.Sleep(1 * time.Second)
@@ -297,7 +324,6 @@ func testCallGetActiveSessions(t *testing.T) {
 	var reply *[]*sessions.ActiveSession
 	expected := &[]*sessions.ActiveSession{
 		&sessions.ActiveSession{
-			TOR:         "*voice",
 			ReqType:     "*prepaid",
 			Tenant:      "cgrates.org",
 			Category:    "call",
@@ -306,14 +332,12 @@ func testCallGetActiveSessions(t *testing.T) {
 			Destination: "1002",
 		},
 	}
-	if err := tutFsCallsRpc.Call("SessionSv1.GetActiveSessions",
+	if err := tutFsCallsRpc.Call(utils.SessionSv1GetActiveSessions,
 		&map[string]string{}, &reply); err != nil {
 		t.Error("Got error on SessionSv1.GetActiveSessions: ", err.Error())
 	} else {
 		// compare some fields (eg. CGRId is generated)
-		if !reflect.DeepEqual((*expected)[0].TOR, (*reply)[0].TOR) {
-			t.Errorf("Expected: %s, received: %s", (*expected)[0].TOR, (*reply)[0].TOR)
-		} else if !reflect.DeepEqual((*expected)[0].ReqType, (*reply)[0].ReqType) {
+		if !reflect.DeepEqual((*expected)[0].ReqType, (*reply)[0].ReqType) {
 			t.Errorf("Expected: %s, received: %s", (*expected)[0].ReqType, (*reply)[0].ReqType)
 		} else if !reflect.DeepEqual((*expected)[0].Account, (*reply)[0].Account) {
 			t.Errorf("Expected: %s, received: %s", (*expected)[0].Account, (*reply)[0].Account)
@@ -326,8 +350,8 @@ func testCallGetActiveSessions(t *testing.T) {
 // Call from 1002 (postpaid) to 1001
 func testCallCall1002To1001(t *testing.T) {
 	if err := engine.PjsuaCallUri(
-		&engine.PjsuaAccount{Id: "sip:1002@192.168.56.203", Username: "1002", Password: "CGRateS.org", Realm: "*"},
-		"sip:1001@192.168.56.203", "sip:192.168.56.203:5060", time.Duration(65)*time.Second, 5072); err != nil {
+		&engine.PjsuaAccount{Id: "sip:1002@127.0.0.1", Username: "1002", Password: "CGRateS.org", Realm: "*"},
+		"sip:1001@127.0.0.1", "sip:127.0.0.1:5080", time.Duration(65)*time.Second, 5072); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -335,8 +359,8 @@ func testCallCall1002To1001(t *testing.T) {
 // Call from 1001 (prepaid) to 1003 limit to 12 seconds
 func testCallCall1001To1003(t *testing.T) {
 	if err := engine.PjsuaCallUri(
-		&engine.PjsuaAccount{Id: "sip:1001@192.168.56.203", Username: "1001", Password: "CGRateS.org", Realm: "*"},
-		"sip:1003@192.168.56.203", "sip:192.168.56.203:5060", time.Duration(60)*time.Second, 5073); err != nil {
+		&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "CGRateS.org", Realm: "*"},
+		"sip:1003@127.0.0.1", "sip:127.0.0.1:5080", time.Duration(60)*time.Second, 5073); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -359,6 +383,7 @@ func testCallCheckResourceAllocation(t *testing.T) {
 		t.Errorf("Resources: %+v", utils.ToJSON(rs))
 	}
 	for _, r := range *rs {
+		utils.Logger.Debug(fmt.Sprintf("Resource : %+v\n", r))
 		if r.ID == "ResGroup1" &&
 			(len(r.Usages) != 1 || len(r.TTLIdx) != 1) {
 			t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))
@@ -390,7 +415,7 @@ func testCall1001Cdrs(t *testing.T) {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
 		for _, cdr := range reply {
-			if cdr.Source != "freeswitch_json" {
+			if cdr.Source != "freeswitch_json" && cdr.Source != "SMG_KamailioAgent" {
 				t.Errorf("Unexpected Source for CDR: %+v", cdr.Source)
 			}
 			if cdr.RequestType != utils.META_PREPAID {
@@ -424,7 +449,7 @@ func testCall1002Cdrs(t *testing.T) {
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].Source != "freeswitch_json" {
+		if reply[0].Source != "freeswitch_json" && reply[0].Source != "SMG_KamailioAgent" {
 			t.Errorf("Unexpected Source for CDR: %+v", reply[0].Source)
 		}
 		if reply[0].RequestType != utils.META_POSTPAID {
@@ -441,15 +466,20 @@ func testCall1002Cdrs(t *testing.T) {
 
 func testCallStatMetrics(t *testing.T) {
 	var metrics map[string]string
-	expectedMetrics := map[string]string{
+	expectedMetrics1 := map[string]string{
 		utils.MetaTCC: "1.35009",
 		utils.MetaTCD: "2m25s",
+	}
+	expectedMetrics2 := map[string]string{
+		utils.MetaTCC: "1.34009",
+		utils.MetaTCD: "2m24s",
 	}
 	if err := tutFsCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2"}, &metrics); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
-		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
+	} else if !reflect.DeepEqual(expectedMetrics1, metrics) &&
+		!reflect.DeepEqual(expectedMetrics2, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics1, metrics)
 	}
 }
 
@@ -513,9 +543,11 @@ func testCallStopCgrEngine(t *testing.T) {
 }
 
 func testCallStopFS(t *testing.T) {
-	if optConf == "freeswitch" {
-		engine.KillProcName("freeswitch", 1000)
-	} else if optConf == "kamailio" {
-		engine.KillProcName("kamailio", 1000)
+	if optConf == utils.Freeswitch {
+		engine.KillProcName(utils.Freeswitch, 1000)
+	} else if optConf == utils.Kamailio {
+		engine.KillProcName(utils.Kamailio, 1000)
+	} else if optConf == utils.Opensips {
+		engine.KillProcName(utils.Opensips, 1000)
 	}
 }
