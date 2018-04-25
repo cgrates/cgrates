@@ -22,7 +22,6 @@ import (
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
-	"github.com/dlintw/goconf"
 )
 
 func TestCgrLoaderCfgSetDefault(t *testing.T) {
@@ -107,44 +106,5 @@ func TestCgrLoaderCfgNewDefault(t *testing.T) {
 
 	if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expected: %+v, received: %+v", expected, rcv)
-	}
-}
-
-func TestCgrLoaderCfgLoad(t *testing.T) {
-	cfgPath := "/usr/share/cgrates/conf/cgrates/cgr-loader.cfg"
-	c, err := goconf.ReadConfigFile(cfgPath)
-	if err != nil {
-		t.Error(err)
-	}
-	rcv := &LoaderCfg{}
-	if err := rcv.loadConfig(c); err != nil {
-		t.Error(err)
-	}
-	expected := &LoaderCfg{
-		DataDBType:      "redis",
-		DataDBHost:      "127.0.0.1",
-		DataDBPort:      "6379",
-		DataDBName:      "10",
-		DataDBUser:      "cgrates",
-		DataDBPass:      "testdatapw",
-		StorDBType:      "mysql",
-		StorDBHost:      "127.0.0.1",
-		StorDBPort:      "3306",
-		StorDBName:      "cgrates",
-		StorDBUser:      "cgrates",
-		StorDBPass:      "teststorpw",
-		Tpid:            "testtpid",
-		DataPath:        "./",
-		RpcEncoding:     "json",
-		RalsAddress:     "testRALsAddress",
-		CdrstatsAddress: "testcdrstatsaddress",
-		UsersAddress:    "testuseraddress",
-		RunId:           "testrunId",
-		LoadHistorySize: 10,
-		Timezone:        "Local",
-		DisableReverse:  false,
-	}
-	if !reflect.DeepEqual(expected, rcv) {
-		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }

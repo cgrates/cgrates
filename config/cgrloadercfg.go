@@ -26,9 +26,9 @@ import (
 	"github.com/dlintw/goconf"
 )
 
-func NewLoaderConfig(cfgPath *string) (lCfg *LoaderCfg, err error) {
+func NewLoaderConfig(cfgPath string) (lCfg *LoaderCfg, err error) {
 	lCfg = NewDefaultLoaderConfig()
-	c, err := goconf.ReadConfigFile(*cfgPath)
+	c, err := goconf.ReadConfigFile(cfgPath)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("Could not open the configuration file: %s", err))
 	}
