@@ -93,6 +93,7 @@ func (srvMngr *ServiceManager) StopScheduler() error {
 			utils.ServiceNotRunning,
 			"the scheduler is not running")
 	}
+	utils.Logger.Info("<ServiceManager> Stoping CGRateS Scheduler.")
 	srvMngr.cfg.SchedulerEnabled = false
 	sched.Shutdown()
 	return nil
