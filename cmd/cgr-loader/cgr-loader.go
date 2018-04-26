@@ -87,9 +87,8 @@ func main() {
 
 	lCfg, err := config.NewLoaderConfig(*config_path)
 	if err != nil {
-		fmt.Printf("Error loading config file %+v", err)
+		log.Fatalf("Error loading config file: %v", err)
 	}
-	fmt.Printf("Config before changing DataDBType: %+v \n \n", utils.ToJSON(lCfg))
 
 	if *datadb_type != "" {
 		lCfg.DataDBType = *datadb_type
@@ -178,8 +177,6 @@ func main() {
 	if *disable_reverse != false {
 		lCfg.DisableReverse = *disable_reverse
 	}
-
-	fmt.Printf("Config after changing DataDBType: %+v \n \n", utils.ToJSON(lCfg))
 
 	if !*toStorDb {
 		dm, errDataDB = engine.ConfigureDataStorage(lCfg.DataDBType, lCfg.DataDBHost, lCfg.DataDBPort, lCfg.DataDBName,
