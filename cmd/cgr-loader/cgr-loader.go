@@ -47,7 +47,7 @@ var (
 	stor_db_user = flag.String("stordb_user", "", "The storDb user to sign in as.")
 	stor_db_pass = flag.String("stordb_passwd", "", "The storDb user's password.")
 
-	dbdata_encoding = flag.String("dbdata_encoding", config.CgrConfig().DBDataEncoding, "The encoding used to store object data in strings")
+	dbdata_encoding = flag.String("dbdata_encoding", "", "The encoding used to store object data in strings")
 
 	flush           = flag.Bool("flushdb", false, "Flush the database before importing")
 	tpid            = flag.String("tpid", "", "The tariff plan id from the database")
@@ -141,6 +141,10 @@ func main() {
 		lCfg.StorDBPass = *stor_db_pass
 	}
 
+	if *dbdata_encoding != "" {
+		lCfg.DBDataEncoding = *dbdata_encoding
+	}
+
 	if *loadHistorySize != 0 {
 		lCfg.LoadHistorySize = *loadHistorySize
 	}
@@ -161,14 +165,6 @@ func main() {
 		lCfg.RalsAddress = *ralsAddress
 	}
 
-	if *cdrstatsAddress != "" {
-		lCfg.CdrstatsAddress = *cdrstatsAddress
-	}
-
-	if *usersAddress != "" {
-		lCfg.UsersAddress = *usersAddress
-	}
-
 	if *runId != "" {
 		lCfg.RunId = *runId
 	}
@@ -183,10 +179,10 @@ func main() {
 
 	if !*toStorDb {
 		dm, errDataDB = engine.ConfigureDataStorage(lCfg.DataDBType, lCfg.DataDBHost, lCfg.DataDBPort, lCfg.DataDBName,
-			lCfg.DataDBUser, lCfg.DataDBPass, *dbdata_encoding, config.CgrConfig().CacheCfg(), lCfg.LoadHistorySize)
+			lCfg.DataDBUser, lCfg.DataDBPass, lCfg.DBDataEncoding, config.CgrConfig().CacheCfg(), lCfg.LoadHistorySize)
 	}
 	if *fromStorDb || *toStorDb {
-		storDb, errStorDb = engine.ConfigureLoadStorage(lCfg.StorDBType, lCfg.StorDBHost, lCfg.StorDBPort, lCfg.StorDBName, lCfg.StorDBUser, lCfg.StorDBPass, *dbdata_encoding,
+		storDb, errStorDb = engine.ConfigureLoadStorage(lCfg.StorDBType, lCfg.StorDBHost, lCfg.StorDBPort, lCfg.StorDBName, lCfg.StorDBUser, lCfg.StorDBPass, lCfg.DBDataEncoding,
 			config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 	}
 	// Stop on db errors
@@ -263,7 +259,7 @@ func main() {
 		)
 	}
 
-	tpReader := engine.NewTpReader(dm.DataDB(), loader, *tpid, lCfg.Timezone)
+	tpReader := engine.NewTpReader(dm.DataDB(), loader, lCfg.Tpid, lCfg.Timezone)
 	err = tpReader.LoadAll()
 	if err != nil {
 		log.Fatal(err)
@@ -288,11 +284,11 @@ func main() {
 	} else {
 		log.Print("WARNING: Rates automatic cache reloading is disabled!")
 	}
-	if lCfg.CdrstatsAddress != "" { // Init connection to rater so we can reload it's data
-		if lCfg.CdrstatsAddress == lCfg.RalsAddress {
+	if *cdrstatsAddress != "" { // Init connection to rater so we can reload it's data
+		if *cdrstatsAddress == lCfg.RalsAddress {
 			cdrstats = rater
 		} else {
-			if cdrstats, err = rpcclient.NewRpcClient("tcp", lCfg.CdrstatsAddress, 3, 3,
+			if cdrstats, err = rpcclient.NewRpcClient("tcp", *cdrstatsAddress, 3, 3,
 				time.Duration(1*time.Second), time.Duration(5*time.Minute), lCfg.RpcEncoding, nil, false); err != nil {
 				log.Fatalf("Could not connect to CDRStatS API: %s", err.Error())
 				return
@@ -301,11 +297,11 @@ func main() {
 	} else {
 		log.Print("WARNING: CDRStats automatic data reload is disabled!")
 	}
-	if lCfg.UsersAddress != "" { // Init connection to rater so we can reload it's data
-		if lCfg.UsersAddress == lCfg.RalsAddress {
+	if *usersAddress != "" { // Init connection to rater so we can reload it's data
+		if *usersAddress == lCfg.RalsAddress {
 			users = rater
 		} else {
-			if users, err = rpcclient.NewRpcClient("tcp", lCfg.UsersAddress, 3, 3,
+			if users, err = rpcclient.NewRpcClient("tcp", *usersAddress, 3, 3,
 				time.Duration(1*time.Second), time.Duration(5*time.Minute), lCfg.RpcEncoding, nil, false); err != nil {
 				log.Fatalf("Could not connect to UserS API: %s", err.Error())
 				return

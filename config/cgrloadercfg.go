@@ -51,13 +51,13 @@ type LoaderCfg struct {
 	DataDBName      string
 	DataDBUser      string
 	DataDBPass      string
-	DataDBEncoding  string
 	StorDBType      string
 	StorDBHost      string
 	StorDBPort      string
 	StorDBName      string
 	StorDBUser      string
 	StorDBPass      string
+	DBDataEncoding  string
 	Flush           bool
 	Tpid            string
 	DataPath        string
@@ -93,6 +93,7 @@ func (lCfg *LoaderCfg) setDefaults() {
 	lCfg.StorDBName = utils.MetaDynamic
 	lCfg.StorDBUser = utils.MetaDynamic
 	lCfg.StorDBPass = utils.MetaDynamic
+	lCfg.DBDataEncoding = cgrCfg.DBDataEncoding
 	lCfg.Flush = false
 	lCfg.Tpid = ""
 	lCfg.DataPath = "./"
@@ -117,68 +118,65 @@ func (lCfg *LoaderCfg) setDefaults() {
 
 func (ldrCfg *LoaderCfg) loadConfig(c *goconf.ConfigFile) (err error) {
 	var hasOpt bool
-	//dataDB
-	if hasOpt = c.HasOption("dataDB", "db_type"); hasOpt {
-		ldrCfg.DataDBType, err = c.GetString("dataDB", "db_type")
+	//data_db
+	if hasOpt = c.HasOption("data_db", "db_type"); hasOpt {
+		ldrCfg.DataDBType, err = c.GetString("data_db", "db_type")
 	}
-	if hasOpt = c.HasOption("dataDB", "db_host"); hasOpt {
-		ldrCfg.DataDBHost, err = c.GetString("dataDB", "db_host")
+	if hasOpt = c.HasOption("data_db", "db_host"); hasOpt {
+		ldrCfg.DataDBHost, err = c.GetString("data_db", "db_host")
 	}
-	if hasOpt = c.HasOption("dataDB", "db_port"); hasOpt {
-		ldrCfg.DataDBPort, err = c.GetString("dataDB", "db_port")
+	if hasOpt = c.HasOption("data_db", "db_port"); hasOpt {
+		ldrCfg.DataDBPort, err = c.GetString("data_db", "db_port")
 	}
-	if hasOpt = c.HasOption("dataDB", "db_name"); hasOpt {
-		ldrCfg.DataDBName, err = c.GetString("dataDB", "db_name")
+	if hasOpt = c.HasOption("data_db", "db_name"); hasOpt {
+		ldrCfg.DataDBName, err = c.GetString("data_db", "db_name")
 	}
-	if hasOpt = c.HasOption("dataDB", "db_user"); hasOpt {
-		ldrCfg.DataDBUser, err = c.GetString("dataDB", "db_user")
+	if hasOpt = c.HasOption("data_db", "db_user"); hasOpt {
+		ldrCfg.DataDBUser, err = c.GetString("data_db", "db_user")
 	}
-	if hasOpt = c.HasOption("dataDB", "db_password"); hasOpt {
-		ldrCfg.DataDBPass, err = c.GetString("dataDB", "db_password")
+	if hasOpt = c.HasOption("data_db", "db_password"); hasOpt {
+		ldrCfg.DataDBPass, err = c.GetString("data_db", "db_password")
 	}
-	//storDB
-	if hasOpt = c.HasOption("storDB", "db_type"); hasOpt {
-		ldrCfg.StorDBType, err = c.GetString("storDB", "db_type")
+	//stor_db
+	if hasOpt = c.HasOption("stor_db", "db_type"); hasOpt {
+		ldrCfg.StorDBType, err = c.GetString("stor_db", "db_type")
 	}
-	if hasOpt = c.HasOption("storDB", "db_host"); hasOpt {
-		ldrCfg.StorDBHost, err = c.GetString("storDB", "db_host")
+	if hasOpt = c.HasOption("stor_db", "db_host"); hasOpt {
+		ldrCfg.StorDBHost, err = c.GetString("stor_db", "db_host")
 	}
-	if hasOpt = c.HasOption("storDB", "db_port"); hasOpt {
-		ldrCfg.StorDBPort, err = c.GetString("storDB", "db_port")
+	if hasOpt = c.HasOption("stor_db", "db_port"); hasOpt {
+		ldrCfg.StorDBPort, err = c.GetString("stor_db", "db_port")
 	}
-	if hasOpt = c.HasOption("storDB", "db_name"); hasOpt {
-		ldrCfg.StorDBName, err = c.GetString("storDB", "db_name")
+	if hasOpt = c.HasOption("stor_db", "db_name"); hasOpt {
+		ldrCfg.StorDBName, err = c.GetString("stor_db", "db_name")
 	}
-	if hasOpt = c.HasOption("storDB", "db_user"); hasOpt {
-		ldrCfg.StorDBUser, err = c.GetString("storDB", "db_user")
+	if hasOpt = c.HasOption("stor_db", "db_user"); hasOpt {
+		ldrCfg.StorDBUser, err = c.GetString("stor_db", "db_user")
 	}
-	if hasOpt = c.HasOption("storDB", "db_password"); hasOpt {
-		ldrCfg.StorDBPass, err = c.GetString("storDB", "db_password")
+	if hasOpt = c.HasOption("stor_db", "db_password"); hasOpt {
+		ldrCfg.StorDBPass, err = c.GetString("stor_db", "db_password")
 	}
 	//general
+	if hasOpt = c.HasOption("general", "dbdata_encoding"); hasOpt {
+		ldrCfg.DBDataEncoding, err = c.GetString("general", "dbdata_encoding")
+	}
 	if hasOpt = c.HasOption("general", "tpid"); hasOpt {
 		ldrCfg.Tpid, err = c.GetString("general", "tpid")
 	}
-	if hasOpt = c.HasOption("general", "dataPath"); hasOpt {
-		ldrCfg.DataPath, err = c.GetString("general", "dataPath")
+	if hasOpt = c.HasOption("general", "data_path"); hasOpt {
+		ldrCfg.DataPath, err = c.GetString("general", "data_path")
 	}
-	if hasOpt = c.HasOption("general", "rpcEncoding"); hasOpt {
-		ldrCfg.RpcEncoding, err = c.GetString("general", "rpcEncoding")
+	if hasOpt = c.HasOption("general", "rpc_encoding"); hasOpt {
+		ldrCfg.RpcEncoding, err = c.GetString("general", "rpc_encoding")
 	}
-	if hasOpt = c.HasOption("general", "ralsAddress"); hasOpt {
-		ldrCfg.RalsAddress, err = c.GetString("general", "ralsAddress")
+	if hasOpt = c.HasOption("general", "rals_address"); hasOpt {
+		ldrCfg.RalsAddress, err = c.GetString("general", "rals_address")
 	}
-	if hasOpt = c.HasOption("general", "cdrstatsAddress"); hasOpt {
-		ldrCfg.CdrstatsAddress, err = c.GetString("general", "cdrstatsAddress")
+	if hasOpt = c.HasOption("general", "runid"); hasOpt {
+		ldrCfg.RunId, err = c.GetString("general", "runid")
 	}
-	if hasOpt = c.HasOption("general", "usersAddress"); hasOpt {
-		ldrCfg.UsersAddress, err = c.GetString("general", "usersAddress")
-	}
-	if hasOpt = c.HasOption("general", "runId"); hasOpt {
-		ldrCfg.RunId, err = c.GetString("general", "runId")
-	}
-	if hasOpt = c.HasOption("general", "loadHistorySize"); hasOpt {
-		ldrCfg.LoadHistorySize, err = c.GetInt("general", "loadHistorySize")
+	if hasOpt = c.HasOption("general", "load_history_size"); hasOpt {
+		ldrCfg.LoadHistorySize, err = c.GetInt("general", "load_history_size")
 	}
 	if hasOpt = c.HasOption("general", "timezone"); hasOpt {
 		ldrCfg.Timezone, err = c.GetString("general", "timezone")
