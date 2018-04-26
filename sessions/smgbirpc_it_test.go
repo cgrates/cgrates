@@ -150,7 +150,7 @@ func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
-	if maxUsage != -1 {
+	if maxUsage != -1e-09 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
 	// Make sure we are receiving a disconnect event
@@ -231,7 +231,7 @@ func TestSMGBiRPCSessionOriginatorTerminate(t *testing.T) {
 		smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
-	if maxUsage != -1 {
+	if maxUsage != -1e-09 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
 	time.Sleep(time.Duration(10 * time.Millisecond)) // Give time for  debits to occur

@@ -2092,8 +2092,7 @@ func testMigratorTPSuppliers(t *testing.T) {
 		result, err := mig.OutStorDB().GetTPSuppliers(tpSplPr[0].TPid, tpSplPr[0].ID)
 		if err != nil {
 			t.Error("Error when getting TPSupplier ", err.Error())
-		}
-		if !reflect.DeepEqual(tpSplPr, result) {
+		} else if !reflect.DeepEqual(tpSplPr, result) {
 			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(tpSplPr), utils.ToJSON(result))
 		}
 	}
