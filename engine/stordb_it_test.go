@@ -1732,7 +1732,6 @@ func testStorDBitCRUDCDRs(t *testing.T) {
 		if !(reflect.DeepEqual(snd[0].Partial, rcv[0].Partial) || reflect.DeepEqual(snd[0].Partial, rcv[1].Partial)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Partial, rcv[0].Partial, rcv[1].Partial)
 		}
-		// investighate here
 		if !reflect.DeepEqual(snd[0].CostDetails, rcv[0].CostDetails) {
 			t.Errorf("Expecting: %+v, received: %+v", snd[0].CostDetails, rcv[0].CostDetails)
 		}

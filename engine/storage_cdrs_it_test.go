@@ -214,9 +214,6 @@ func testSMCosts(cfg *config.CGRConfig) error {
 	} else if len(rcvSMC) == 0 {
 		return errors.New("testSMCosts #5, no SMCosts received")
 	}
-	// else if len(cc.EventCost) != len(rcvSMC[0].EventCost) { // cc.Timespans[0].RateInterval.Rating.Rates[0], rcvCC.Timespans[0].RateInterval.Rating.Rates[0])
-	// 	return fmt.Errorf("testSMCosts #6, expecting: %+v, received: %+s", EventCost, utils.ToIJSON(rcvSMC[0].EventCost))
-	// }
 	// Test query per prefix
 	for i := 0; i < 3; i++ {
 		if err := cdrStorage.SetSMCost(&SMCost{CGRID: "164b0422fdc6a5117031b427439482c6a4f90e5" + strconv.Itoa(i),
