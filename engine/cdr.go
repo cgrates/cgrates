@@ -98,7 +98,7 @@ type CDR struct {
 	Rated       bool              // Mark the CDR as rated so we do not process it during rating
 	CostSource  string            // The source of this cost
 	Cost        float64
-	CostDetails *CallCost // Attach the cost details to CDR when possible
+	CostDetails *EventCost // Attach the cost details to CDR when possible
 }
 
 func (cdr *CDR) CostDetailsJson() string {

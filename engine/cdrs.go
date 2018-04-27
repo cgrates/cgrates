@@ -148,8 +148,7 @@ func (self *CdrServer) ProcessExternalCdr(eCDR *ExternalCDR) error {
 }
 
 func (self *CdrServer) storeSMCost(smCost *SMCost, checkDuplicate bool) error {
-	smCost.CostDetails.UpdateCost()                                           // make sure the total cost reflect the increments
-	smCost.CostDetails.UpdateRatedUsage()                                     // make sure rated usage is updated
+	smCost.CostDetails.Compute()                                              // make sure the total cost reflect the increment
 	lockKey := utils.MetaCDRs + smCost.CGRID + smCost.RunID + smCost.OriginID // Will lock on this ID
 	if checkDuplicate {
 		_, err := self.guard.Guard(func() (interface{}, error) {
@@ -188,10 +187,6 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 		cdr.Cost = -1.0
 	}
 	if self.cgrCfg.CDRSStoreCdrs { // Store RawCDRs, this we do sync so we can reply with the status
-		if cdr.CostDetails != nil {
-			cdr.CostDetails.UpdateCost()
-			cdr.CostDetails.UpdateRatedUsage()
-		}
 		if err := self.cdrDb.SetCDR(cdr, false); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<CDRS> Storing primary CDR %+v, got error: %s", cdr, err.Error()))
 			return err // Error is propagated back and we don't continue processing the CDR if we cannot store it
@@ -285,11 +280,6 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, cdrstats, 
 	// Store rated CDRs
 	if store {
 		for _, ratedCDR := range ratedCDRs {
-			if ratedCDR.CostDetails != nil {
-				ratedCDR.CostDetails.UpdateCost()
-				ratedCDR.CostDetails.UpdateRatedUsage()
-				ratedCDR.CostDetails.Timespans.Compress()
-			}
 			if err := self.cdrDb.SetCDR(ratedCDR, true); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<CDRS> Storing rated CDR %+v, got error: %s", ratedCDR, err.Error()))
 			}
@@ -435,7 +425,7 @@ func (self *CdrServer) rateCDR(cdr *CDR) ([]*CDR, error) {
 				if cdr.Usage == 0 {
 					cdrClone.Usage = smCost.Usage
 				}
-				cdrClone.Cost = smCost.CostDetails.Cost
+				cdrClone.Cost = smCost.CostDetails.GetCost()
 				cdrClone.CostDetails = smCost.CostDetails
 				cdrClone.CostSource = smCost.CostSource
 				cdrsRated = append(cdrsRated, cdrClone)
@@ -454,7 +444,7 @@ func (self *CdrServer) rateCDR(cdr *CDR) ([]*CDR, error) {
 		return nil, err
 	} else if qryCC != nil {
 		cdr.Cost = qryCC.Cost
-		cdr.CostDetails = qryCC
+		cdr.CostDetails = NewEventCostFromCallCost(qryCC, cdr.CGRID, cdr.RunID)
 	}
 	return []*CDR{cdr}, nil
 }
@@ -595,7 +585,6 @@ func (cdrs *CdrServer) V2StoreSMCost(args ArgsV2CDRSStoreSMCost, reply *string) 
 			utils.Logger.Err(fmt.Sprintf("<CDRS> RefundRounding for cc: %+v, got error: %s", cc, err.Error()))
 		}
 	}
-	cc.Timespans.Compress() // Compress increments before storing the cost
 	if err := cdrs.storeSMCost(&SMCost{
 		CGRID:       args.Cost.CGRID,
 		RunID:       args.Cost.RunID,
@@ -603,7 +592,7 @@ func (cdrs *CdrServer) V2StoreSMCost(args ArgsV2CDRSStoreSMCost, reply *string) 
 		OriginID:    args.Cost.OriginID,
 		CostSource:  args.Cost.CostSource,
 		Usage:       args.Cost.Usage,
-		CostDetails: cc,
+		CostDetails: args.Cost.CostDetails,
 	}, args.CheckDuplicate); err != nil {
 		cdrs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
 		return utils.NewErrServerError(err)

@@ -745,7 +745,7 @@ func (self *SQLStorage) SetSMCost(smc *SMCost) error {
 		OriginHost:  smc.OriginHost,
 		OriginID:    smc.OriginID,
 		CostSource:  smc.CostSource,
-		CostDetails: smc.CostDetails.AsJSON(),
+		CostDetails: utils.ToJSON(smc.CostDetails),
 		Usage:       smc.Usage.Nanoseconds(),
 		CreatedAt:   time.Now(),
 	}
@@ -801,7 +801,7 @@ func (self *SQLStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix stri
 			OriginID:    result.OriginID,
 			CostSource:  result.CostSource,
 			Usage:       time.Duration(result.Usage),
-			CostDetails: &CallCost{},
+			CostDetails: new(EventCost),
 		}
 		if err := json.Unmarshal([]byte(result.CostDetails), smc.CostDetails); err != nil {
 			return nil, err

@@ -123,7 +123,7 @@ type SMCost struct {
 	OriginID    string
 	CostSource  string
 	Usage       time.Duration
-	CostDetails *CallCost
+	CostDetails *EventCost
 }
 
 type AttrCDRSStoreSMCost struct {

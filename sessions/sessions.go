@@ -967,7 +967,7 @@ func (smg *SMGeneric) ChargeEvent(gev SMGenericEvent) (maxUsage time.Duration, e
 			RunID:       sR.DerivedCharger.RunID,
 			OriginHost:  gev.GetOriginatorIP(utils.META_DEFAULT),
 			OriginID:    gev.GetOriginID(utils.META_DEFAULT),
-			CostDetails: cc,
+			CostDetails: engine.NewEventCostFromCallCost(cc, cgrID, sR.DerivedCharger.RunID),
 		}
 		if errStore := smg.cdrsrv.Call("CdrsV1.StoreSMCost", engine.AttrCDRSStoreSMCost{Cost: smCost,
 			CheckDuplicate: true}, &reply); errStore != nil && !strings.HasSuffix(errStore.Error(), utils.ErrExists.Error()) {

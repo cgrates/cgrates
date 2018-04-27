@@ -25,6 +25,32 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+var (
+	dataDBVers = map[string]string{
+		utils.Accounts:       "cgr-migrator -migrate=*accounts",
+		utils.Attributes:     "cgr-migrator -migrate=*attributes",
+		utils.Actions:        "cgr-migrator -migrate=*actions",
+		utils.ActionTriggers: "cgr-migrator -migrate=*action_triggers",
+		utils.ActionPlans:    "cgr-migrator -migrate=*action_plans",
+		utils.SharedGroups:   "cgr-migrator -migrate=*shared_groups",
+	}
+	storDBVers = map[string]string{
+		utils.COST_DETAILS:  "cgr-migrator -migrate=*cost_details",
+		utils.SessionsCosts: "cgr-migrator -migrate=*sessions_costs",
+	}
+	allVers map[string]string // init will fill this with a merge of data+stor
+)
+
+func init() {
+	allVers = make(map[string]string)
+	for k, v := range dataDBVers {
+		allVers[k] = v
+	}
+	for k, v := range storDBVers {
+		allVers[k] = v
+	}
+}
+
 // Versions will keep trac of various item versions
 type Versions map[string]int64 // map[item]versionNr
 
@@ -72,36 +98,15 @@ func SetDBVersions(storage Storage) error {
 
 func (vers Versions) Compare(curent Versions, storType string) string {
 	var x map[string]string
-	m := map[string]string{
-		utils.Accounts:       "cgr-migrator -migrate=*accounts",
-		utils.Attributes:     "cgr-migrator -migrate=*attributes",
-		utils.Actions:        "cgr-migrator -migrate=*actions",
-		utils.ActionTriggers: "cgr-migrator -migrate=*action_triggers",
-		utils.ActionPlans:    "cgr-migrator -migrate=*action_plans",
-		utils.SharedGroups:   "cgr-migrator -migrate=*shared_groups",
-		utils.COST_DETAILS:   "cgr-migrator -migrate=*cost_details",
-	}
-	data := map[string]string{
-		utils.Accounts:       "cgr-migrator -migrate=*accounts",
-		utils.Attributes:     "cgr-migrator -migrate=*attributes",
-		utils.Actions:        "cgr-migrator -migrate=*actions",
-		utils.ActionTriggers: "cgr-migrator -migrate=*action_triggers",
-		utils.ActionPlans:    "cgr-migrator -migrate=*action_plans",
-		utils.SharedGroups:   "cgr-migrator -migrate=*shared_groups",
-	}
-	stor := map[string]string{
-		utils.COST_DETAILS:  "cgr-migrator -migrate=*cost_details",
-		utils.SessionsCosts: "cgr-migrator -migrate=*sessions_costs",
-	}
 	switch storType {
 	case utils.MONGO:
-		x = m
+		x = allVers
 	case utils.POSTGRES, utils.MYSQL:
-		x = stor
+		x = storDBVers
 	case utils.REDIS:
-		x = data
+		x = dataDBVers
 	case utils.MAPSTOR:
-		x = m
+		x = allVers
 	}
 	for y, val := range x {
 		if vers[y] != curent[y] {
@@ -141,8 +146,9 @@ func CurrentDataDBVersions() Versions {
 
 func CurrentStorDBVersions() Versions {
 	return Versions{
-		utils.COST_DETAILS:       2,
-		utils.SessionsCosts:      2,
+		utils.COST_DETAILS:       3,
+		utils.SessionsCosts:      3,
+		utils.CDRs:               2,
 		utils.TpRatingPlans:      1,
 		utils.TpFilters:          1,
 		utils.TpDestinationRates: 1,
