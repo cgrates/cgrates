@@ -69,7 +69,7 @@ var (
 	disable_reverse = flag.Bool("disable_reverse_mappings", false, "Will disable reverse mappings rebuilding")
 	flush_stordb    = flag.Bool("flush_stordb", false, "Remove tariff plan data for id from the database")
 	remove          = flag.Bool("remove", false, "Will remove any data from db that matches data files")
-	config_path     = flag.String("config_path", "/etc/cgrates/cgr-loader.cfg", "Full path towards configuration file")
+	config_path     = flag.String("config_path", "", "Full path towards configuration file")
 )
 
 func main() {
@@ -85,9 +85,12 @@ func main() {
 	var rater, cdrstats, users rpcclient.RpcClientConnection
 	var loader engine.LoadReader
 
-	lCfg, err := config.NewLoaderConfig(*config_path)
-	if err != nil {
-		log.Fatalf("Error loading config file: %v", err)
+	lCfg := config.NewDefaultLoaderConfig()
+	if *config_path != "" {
+		lCfg, err = config.NewLoaderConfig(*config_path)
+		if err != nil {
+			log.Fatalf("Error loading config file: %v", err)
+		}
 	}
 
 	if *datadb_type != "" {
