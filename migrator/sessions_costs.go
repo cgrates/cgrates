@@ -21,13 +21,12 @@ package migrator
 import (
 	"database/sql"
 	"fmt"
-	"log"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (m *Migrator) migrateSessionsCosts() (err error) {
+func (m *Migrator) migrateSessionSCosts() (err error) {
 	var vrs engine.Versions
 	vrs, err = m.OutStorDB().GetVersions("")
 	if err != nil {
@@ -41,7 +40,8 @@ func (m *Migrator) migrateSessionsCosts() (err error) {
 			utils.UndefinedVersion,
 			"version number is not defined for SessionsCosts model")
 	}
-	if vrs[utils.SessionsCosts] < 2 {
+	switch vrs[utils.SessionSCosts] {
+	case 0, 1:
 		var isPostGres bool
 		var storSQL *sql.DB
 		switch m.storDBType {
@@ -62,17 +62,22 @@ func (m *Migrator) migrateSessionsCosts() (err error) {
 			qry = "ALTER TABLE sm_costs RENAME TO sessions_costs"
 		}
 		if _, err := storSQL.Exec(qry); err != nil {
-			log.Print(err)
 			return err
 		}
-		m.stats[utils.SessionsCosts] = 2
-		vrs = engine.Versions{utils.SessionsCosts: engine.CurrentStorDBVersions()[utils.SessionsCosts]}
-		if err := m.storDB.SetVersions(vrs, false); err != nil {
-			return utils.NewCGRError(utils.Migrator,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error: <%s> when updating SessionsCosts version into StorDB", err.Error()))
+		fallthrough // incremental updates
+	case 2: // Simply removing them should be enough since if the system is offline they are most probably stale already
+		if err := m.storDB.RemoveSMCost(nil); err != nil {
+			return err
 		}
+
+	}
+	m.stats[utils.SessionSCosts] = -1
+	vrs = engine.Versions{utils.SessionSCosts: engine.CurrentStorDBVersions()[utils.SessionSCosts]}
+	if err := m.storDB.SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating SessionsCosts version into StorDB", err.Error()))
 	}
 	return nil
 }

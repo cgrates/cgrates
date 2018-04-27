@@ -34,7 +34,7 @@ var (
 	sameDataDB      = true
 	sameStorDB      = true
 	outDataDB       migrator.MigratorDataDB
-	storDB          engine.Storage
+	storDB          engine.StorDB
 	oDBDataEncoding string
 	migrate         = flag.String("migrate", "", "Fire up automatic migration "+
 		"\n <*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups|*stordb|*datadb> ")
@@ -131,9 +131,9 @@ func main() {
 		config.CgrConfig().CacheCfg(), *loadHistorySize); err != nil {
 		log.Fatal(err)
 	}
-	var instorDB engine.Storage
-	if instorDB, err = engine.ConfigureStorStorage(*inStorDBType, *inStorDBHost, *inStorDBPort,
-		*inStorDBName, *inStorDBUser, *inStorDBPass, *inDBDataEncoding,
+	var instorDB engine.StorDB
+	if instorDB, err = engine.ConfigureStorDB(*inStorDBType, *inStorDBHost, *inStorDBPort,
+		*inStorDBName, *inStorDBUser, *inStorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns,
 		config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime,
 		config.CgrConfig().StorDBCDRSIndexes); err != nil {
@@ -154,7 +154,7 @@ func main() {
 	if *outStorDBType == utils.MetaDynamic {
 		storDB = instorDB
 	} else {
-		storDB, err = engine.ConfigureStorStorage(*outStorDBType, *outStorDBHost, *outStorDBPort, *outStorDBName, *outStorDBUser, *outStorDBPass, *dbDataEncoding,
+		storDB, err = engine.ConfigureStorDB(*outStorDBType, *outStorDBHost, *outStorDBPort, *outStorDBName, *outStorDBUser, *outStorDBPass,
 			config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 		if err != nil {
 			log.Fatal(err)

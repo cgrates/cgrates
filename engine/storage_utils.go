@@ -115,6 +115,25 @@ func ConfigureCdrStorage(db_type, host, port, name, user, pass string, maxConn, 
 	return d, nil
 }
 
+func ConfigureStorDB(db_type, host, port, name, user, pass string, maxConn, maxIdleConn, connMaxLifetime int, cdrsIndexes []string) (db StorDB, err error) {
+	var d StorDB
+	switch db_type {
+	case utils.POSTGRES:
+		d, err = NewPostgresStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
+	case utils.MYSQL:
+		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
+	case utils.MONGO:
+		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, cdrsIndexes, nil, 1)
+	default:
+		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are [%s, %s, %s]",
+			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES))
+	}
+	if err != nil {
+		return nil, err
+	}
+	return d, nil
+}
+
 // Stores one Cost coming from SM
 type SMCost struct {
 	CGRID       string

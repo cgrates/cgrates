@@ -27,8 +27,8 @@ import (
 )
 
 func NewMigrator(dmIN *engine.DataManager, dmOut *engine.DataManager, dataDBType, dataDBEncoding string,
-	storDB engine.Storage, storDBType string, oldDataDB MigratorDataDB, oldDataDBType, oldDataDBEncoding string,
-	oldStorDB engine.Storage, oldStorDBType string, dryRun bool, sameDataDB bool, sameStorDB bool,
+	storDB engine.StorDB, storDBType string, oldDataDB MigratorDataDB, oldDataDBType, oldDataDBEncoding string,
+	oldStorDB engine.StorDB, oldStorDBType string, dryRun bool, sameDataDB bool, sameStorDB bool,
 	datadb_versions bool, stordb_versions bool) (m *Migrator, err error) {
 	var mrshlr engine.Marshaler
 	var oldmrshlr engine.Marshaler
@@ -59,12 +59,12 @@ type Migrator struct {
 	dmIN            *engine.DataManager //oldatadb
 	dmOut           *engine.DataManager
 	dataDBType      string
-	storDB          engine.Storage
+	storDB          engine.StorDB
 	storDBType      string
 	mrshlr          engine.Marshaler
 	oldDataDB       MigratorDataDB
 	oldDataDBType   string
-	oldStorDB       engine.Storage
+	oldStorDB       engine.StorDB
 	oldStorDBType   string
 	oldmrshlr       engine.Marshaler
 	dryRun          bool
@@ -120,7 +120,7 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 				log.Print("Cannot dryRun SetVersions!")
 			}
 		case utils.MetaSessionsCosts:
-			err = m.migrateSessionsCosts()
+			err = m.migrateSessionSCosts()
 		case utils.MetaCostDetails:
 			err = m.migrateCostDetails()
 		case utils.MetaAccounts:
@@ -170,7 +170,7 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			err = m.migrateDerivedChargers()
 		case utils.MetaSuppliers:
 			err = m.migrateSupplierProfiles()
-			//TPS
+			//TPs
 		case utils.MetaTpRatingPlans:
 			err = m.migrateTPratingplans()
 		case utils.MetaTpFilters:

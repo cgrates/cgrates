@@ -456,6 +456,7 @@ const (
 	Action                       = "Action"
 	MetaNow                      = "*now"
 	SessionsCosts                = "SessionsCosts"
+	SessionSCosts                = "SessionSCosts"
 	TpRatingPlans                = "TpRatingPlans"
 	TpFilters                    = "TpFilters"
 	TpDestinationRates           = "TpDestinationRates"

@@ -36,7 +36,7 @@ var (
 	}
 	storDBVers = map[string]string{
 		utils.COST_DETAILS:  "cgr-migrator -migrate=*cost_details",
-		utils.SessionsCosts: "cgr-migrator -migrate=*sessions_costs",
+		utils.SessionSCosts: "cgr-migrator -migrate=*sessions_costs",
 	}
 	allVers map[string]string // init will fill this with a merge of data+stor
 )
@@ -146,7 +146,7 @@ func CurrentDataDBVersions() Versions {
 
 func CurrentStorDBVersions() Versions {
 	return Versions{
-		utils.COST_DETAILS:       3,
+		utils.COST_DETAILS:       2,
 		utils.SessionsCosts:      3,
 		utils.CDRs:               2,
 		utils.TpRatingPlans:      1,

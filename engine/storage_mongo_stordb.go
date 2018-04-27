@@ -901,8 +901,12 @@ func (ms *MongoStorage) SetSMCost(smc *SMCost) error {
 func (ms *MongoStorage) RemoveSMCost(smc *SMCost) error {
 	session, col := ms.conn(utils.SessionsCostsTBL)
 	defer session.Close()
+	remParams := bson.M{}
+	if smc != nil {
+		remParams = bson.M{"cgrid": smc.CGRID, "runid": smc.RunID}
+	}
 	tx := col.Bulk()
-	tx.Remove(bson.M{"cgrid": smc.CGRID, "runid": smc.RunID}, smc)
+	tx.RemoveAll(remParams)
 	_, err := tx.Run()
 	return err
 }
