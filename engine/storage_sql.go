@@ -759,9 +759,12 @@ func (self *SQLStorage) SetSMCost(smc *SMCost) error {
 
 func (self *SQLStorage) RemoveSMCost(smc *SMCost) error {
 	tx := self.db.Begin()
-
-	if err := tx.Where(&SessionsCostsSQL{Cgrid: smc.CGRID,
-		RunID: smc.RunID}).Delete(SessionsCostsSQL{}).Error; err != nil {
+	var rmParam *SessionsCostsSQL
+	if smc != nil {
+		rmParam = &SessionsCostsSQL{Cgrid: smc.CGRID,
+			RunID: smc.RunID}
+	}
+	if err := tx.Where(rmParam).Delete(SessionsCostsSQL{}).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
