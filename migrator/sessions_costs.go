@@ -77,7 +77,7 @@ func (m *Migrator) migrateSessionSCosts() (err error) {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
 			err.Error(),
-			fmt.Sprintf("error: <%s> when updating SessionsCosts version into StorDB", err.Error()))
+			fmt.Sprintf("error: <%s> when updating SessionSCosts version into StorDB", err.Error()))
 	}
 	return nil
 }

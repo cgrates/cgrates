@@ -115,14 +115,14 @@ func TestMigratorITPostgresConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDB, err := engine.ConfigureStorStorage(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
-		cfg_in.StorDBUser, cfg_in.StorDBPass, cfg_in.DBDataEncoding,
+	storDB, err := engine.ConfigureStorDB(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
+		cfg_in.StorDBUser, cfg_in.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
-	oldstorDB, err := engine.ConfigureStorStorage(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
-		cfg_in.StorDBUser, cfg_in.StorDBPass, cfg_in.DBDataEncoding,
+	oldstorDB, err := engine.ConfigureStorDB(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
+		cfg_in.StorDBUser, cfg_in.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
@@ -163,14 +163,14 @@ func TestMigratorITRedisConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDB, err := engine.ConfigureStorStorage(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
-		cfg_in.StorDBUser, cfg_in.StorDBPass, cfg_in.DBDataEncoding,
+	storDB, err := engine.ConfigureStorDB(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
+		cfg_in.StorDBUser, cfg_in.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
-	oldstorDB, err := engine.ConfigureStorStorage(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
-		cfg_in.StorDBUser, cfg_in.StorDBPass, cfg_in.DBDataEncoding,
+	oldstorDB, err := engine.ConfigureStorDB(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
+		cfg_in.StorDBUser, cfg_in.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
@@ -211,14 +211,14 @@ func TestMigratorITMongoConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDB, err := engine.ConfigureStorStorage(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
-		cfg_in.StorDBUser, cfg_in.StorDBPass, cfg_in.DBDataEncoding,
+	storDB, err := engine.ConfigureStorDB(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
+		cfg_in.StorDBUser, cfg_in.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
-	oldstorDB, err := engine.ConfigureStorStorage(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
-		cfg_in.StorDBUser, cfg_in.StorDBPass, cfg_in.DBDataEncoding,
+	oldstorDB, err := engine.ConfigureStorDB(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
+		cfg_in.StorDBUser, cfg_in.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
@@ -263,14 +263,14 @@ func TestMigratorITMoveConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDB, err := engine.ConfigureStorStorage(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
-		cfg_in.StorDBUser, cfg_in.StorDBPass, cfg_in.DBDataEncoding,
+	storDB, err := engine.ConfigureStorDB(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
+		cfg_in.StorDBUser, cfg_in.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
-	oldstorDB, err := engine.ConfigureStorStorage(cfg_out.StorDBType, cfg_out.StorDBHost, cfg_out.StorDBPort, cfg_out.StorDBName,
-		cfg_out.StorDBUser, cfg_out.StorDBPass, cfg_out.DBDataEncoding,
+	oldstorDB, err := engine.ConfigureStorDB(cfg_out.StorDBType, cfg_out.StorDBHost, cfg_out.StorDBPort, cfg_out.StorDBName,
+		cfg_out.StorDBUser, cfg_out.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
@@ -1121,15 +1121,15 @@ func testMigratorSessionsCosts(t *testing.T) {
 	switch action {
 	case utils.REDIS:
 		currentVersion := engine.CurrentStorDBVersions()
-		currentVersion[utils.SessionsCosts] = 1
+		currentVersion[utils.SessionSCosts] = 1
 		err := mig.OutStorDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for SessionsCosts ", err.Error())
 		}
-		if vrs, err := mig.OutStorDB().GetVersions(utils.SessionsCosts); err != nil {
+		if vrs, err := mig.OutStorDB().GetVersions(utils.SessionSCosts); err != nil {
 			t.Error(err)
-		} else if vrs[utils.SessionsCosts] != 1 {
-			t.Errorf("Expecting: 1, received: %+v", vrs[utils.SessionsCosts])
+		} else if vrs[utils.SessionSCosts] != 1 {
+			t.Errorf("Expecting: 1, received: %+v", vrs[utils.SessionSCosts])
 		}
 		var qry string
 		if isPostgres {
@@ -1161,10 +1161,10 @@ func testMigratorSessionsCosts(t *testing.T) {
 			t.Error(err)
 		}
 		err, _ = mig.Migrate([]string{utils.MetaSessionsCosts})
-		if vrs, err := mig.OutStorDB().GetVersions(utils.SessionsCosts); err != nil {
+		if vrs, err := mig.OutStorDB().GetVersions(utils.SessionSCosts); err != nil {
 			t.Error(err)
-		} else if vrs[utils.SessionsCosts] != 2 {
-			t.Errorf("Expecting: 2, received: %+v", vrs[utils.SessionsCosts])
+		} else if vrs[utils.SessionSCosts] != 3 {
+			t.Errorf("Expecting: 3, received: %+v", vrs[utils.SessionSCosts])
 		}
 	}
 }

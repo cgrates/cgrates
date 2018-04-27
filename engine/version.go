@@ -147,7 +147,7 @@ func CurrentDataDBVersions() Versions {
 func CurrentStorDBVersions() Versions {
 	return Versions{
 		utils.COST_DETAILS:       2,
-		utils.SessionsCosts:      3,
+		utils.SessionSCosts:      3,
 		utils.CDRs:               2,
 		utils.TpRatingPlans:      1,
 		utils.TpFilters:          1,
