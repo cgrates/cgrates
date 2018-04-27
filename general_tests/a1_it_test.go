@@ -214,9 +214,11 @@ func TestA1itDataSession1(t *testing.T) {
 			t.Errorf("Unexpected CDR Usage received, cdr: %+v ", cdrs[0])
 		}
 		var cc engine.CallCost
-		if err := json.Unmarshal([]byte(cdrs[0].CostDetails), &cc); err != nil {
+		var ec engine.EventCost
+		if err := json.Unmarshal([]byte(cdrs[0].CostDetails), &ec); err != nil {
 			t.Error(err)
 		}
+		cc = *ec.AsCallCost()
 		if len(cc.Timespans) != 3 {
 			t.Errorf("Unexpected number of timespans: %+v", len(cc.Timespans))
 		}

@@ -32,6 +32,7 @@ func NewBareEventCost() *EventCost {
 		RatingFilters: make(RatingFilters),
 		Rates:         make(ChargedRates),
 		Timings:       make(ChargedTimings),
+		Charges:       make([]*ChargingInterval, 0),
 	}
 }
 

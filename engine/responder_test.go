@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"encoding/gob"
 	"reflect"
 	"testing"
 	"time"
@@ -568,78 +570,77 @@ func TestResponderGetLCR(t *testing.T) {
 	*/
 }
 
-/*
-FixMe with EventCost here instead of CallCost
 func TestResponderGobSMCost(t *testing.T) {
+	cc := &CallCost{
+		Direction:   "*out",
+		Category:    "generic",
+		Tenant:      "cgrates.org",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "data",
+		TOR:         "*data",
+		Cost:        0,
+		Timespans: TimeSpans{&TimeSpan{
+			TimeStart: time.Date(2016, 1, 5, 12, 30, 10, 0, time.UTC),
+			TimeEnd:   time.Date(2016, 1, 5, 12, 55, 46, 0, time.UTC),
+			Cost:      0,
+			RateInterval: &RateInterval{
+				Timing: nil,
+				Rating: &RIRate{
+					ConnectFee:       0,
+					RoundingMethod:   "",
+					RoundingDecimals: 0,
+					MaxCost:          0,
+					MaxCostStrategy:  "",
+					Rates: RateGroups{&Rate{
+						GroupIntervalStart: 0,
+						Value:              0,
+						RateIncrement:      1 * time.Second,
+						RateUnit:           1 * time.Second,
+					},
+					},
+				},
+				Weight: 0,
+			},
+			DurationIndex: 0,
+			Increments: Increments{&Increment{
+				Duration: 1 * time.Second,
+				Cost:     0,
+				BalanceInfo: &DebitInfo{
+					Unit: &UnitInfo{
+						UUID:          "fa0aa280-2b76-4b5b-bb06-174f84b8c321",
+						ID:            "",
+						Value:         100864,
+						DestinationID: "data",
+						Consumed:      1,
+						TOR:           "*data",
+						RateInterval:  nil,
+					},
+					Monetary:  nil,
+					AccountID: "cgrates.org:1001",
+				},
+				CompressFactor: 1536,
+			},
+			},
+			RoundIncrement: nil,
+			MatchedSubject: "fa0aa280-2b76-4b5b-bb06-174f84b8c321",
+			MatchedPrefix:  "data",
+			MatchedDestId:  "*any",
+			RatingPlanId:   "*none",
+			CompressFactor: 1,
+		},
+		},
+		RatedUsage: 1536,
+	}
 	attr := AttrCDRSStoreSMCost{
 		Cost: &SMCost{
-			CGRID:      "b783a8bcaa356570436983cd8a0e6de4993f9ba6",
-			RunID:      "*default",
-			OriginHost: "",
-			OriginID:   "testdatagrp_grp1",
-			CostSource: "SMR",
-			Usage:      1536,
-			CostDetails: &CallCost{
-				Direction:   "*out",
-				Category:    "generic",
-				Tenant:      "cgrates.org",
-				Subject:     "1001",
-				Account:     "1001",
-				Destination: "data",
-				TOR:         "*data",
-				Cost:        0,
-				Timespans: TimeSpans{&TimeSpan{
-					TimeStart: time.Date(2016, 1, 5, 12, 30, 10, 0, time.UTC),
-					TimeEnd:   time.Date(2016, 1, 5, 12, 55, 46, 0, time.UTC),
-					Cost:      0,
-					RateInterval: &RateInterval{
-						Timing: nil,
-						Rating: &RIRate{
-							ConnectFee:       0,
-							RoundingMethod:   "",
-							RoundingDecimals: 0,
-							MaxCost:          0,
-							MaxCostStrategy:  "",
-							Rates: RateGroups{&Rate{
-								GroupIntervalStart: 0,
-								Value:              0,
-								RateIncrement:      1 * time.Second,
-								RateUnit:           1 * time.Second,
-							},
-							},
-						},
-						Weight: 0,
-					},
-					DurationIndex: 0,
-					Increments: Increments{&Increment{
-						Duration: 1 * time.Second,
-						Cost:     0,
-						BalanceInfo: &DebitInfo{
-							Unit: &UnitInfo{
-								UUID:          "fa0aa280-2b76-4b5b-bb06-174f84b8c321",
-								ID:            "",
-								Value:         100864,
-								DestinationID: "data",
-								Consumed:      1,
-								TOR:           "*data",
-								RateInterval:  nil,
-							},
-							Monetary:  nil,
-							AccountID: "cgrates.org:1001",
-						},
-						CompressFactor: 1536,
-					},
-					},
-					RoundIncrement: nil,
-					MatchedSubject: "fa0aa280-2b76-4b5b-bb06-174f84b8c321",
-					MatchedPrefix:  "data",
-					MatchedDestId:  "*any",
-					RatingPlanId:   "*none",
-					CompressFactor: 1,
-				},
-				},
-				RatedUsage: 1536,
-			},
+			CGRID:       "b783a8bcaa356570436983cd8a0e6de4993f9ba6",
+			RunID:       utils.META_DEFAULT,
+			OriginHost:  "",
+			OriginID:    "testdatagrp_grp1",
+			CostSource:  "SMR",
+			Usage:       1536,
+			CostDetails: NewEventCostFromCallCost(cc, "b783a8bcaa356570436983cd8a0e6de4993f9ba6", utils.META_DEFAULT),
 		},
 		CheckDuplicate: false,
 	}
@@ -662,4 +663,3 @@ func TestResponderGobSMCost(t *testing.T) {
 		t.Error("wrong transmission")
 	}
 }
-*/

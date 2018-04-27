@@ -1327,27 +1327,28 @@ func TestTutITPrepaidCDRWithSMCost(t *testing.T) {
 		SetupTime: time.Date(2016, 4, 6, 13, 29, 24, 0, time.UTC), AnswerTime: time.Date(2016, 4, 6, 13, 30, 0, 0, time.UTC),
 		Usage:       time.Duration(90) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}
-	smCost := &engine.SMCost{CGRID: cdr.CGRID,
-		RunID:      utils.META_DEFAULT,
-		OriginHost: cdr.OriginHost,
-		OriginID:   cdr.OriginID,
-		CostSource: "TestTutITPrepaidCDRWithSMCost",
-		Usage:      cdr.Usage,
-		CostDetails: &engine.CallCost{
-			Direction:   utils.OUT,
-			Destination: "1003",
-			Timespans: []*engine.TimeSpan{
-				&engine.TimeSpan{
-					TimeStart:     time.Date(2016, 4, 6, 13, 30, 0, 0, time.UTC),
-					TimeEnd:       time.Date(2016, 4, 6, 13, 31, 30, 0, time.UTC),
-					DurationIndex: 0,
-					RateInterval: &engine.RateInterval{
-						Rating: &engine.RIRate{Rates: engine.RateGroups{
-							&engine.Rate{GroupIntervalStart: 0, Value: 0.01, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-				},
+
+	cc := &engine.CallCost{
+		Direction:   utils.OUT,
+		Destination: "1003",
+		Timespans: []*engine.TimeSpan{
+			&engine.TimeSpan{
+				TimeStart:     time.Date(2016, 4, 6, 13, 30, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2016, 4, 6, 13, 31, 30, 0, time.UTC),
+				DurationIndex: 0,
+				RateInterval: &engine.RateInterval{
+					Rating: &engine.RIRate{Rates: engine.RateGroups{
+						&engine.Rate{GroupIntervalStart: 0, Value: 0.01, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
-			TOR: utils.VOICE,
 		},
+		TOR: utils.VOICE}
+	smCost := &engine.SMCost{CGRID: cdr.CGRID,
+		RunID:       utils.META_DEFAULT,
+		OriginHost:  cdr.OriginHost,
+		OriginID:    cdr.OriginID,
+		CostSource:  "TestTutITPrepaidCDRWithSMCost",
+		Usage:       cdr.Usage,
+		CostDetails: engine.NewEventCostFromCallCost(cc, cdr.CGRID, utils.META_DEFAULT),
 	}
 	var reply string
 	if err := tutLocalRpc.Call("CdrsV1.StoreSMCost", &engine.AttrCDRSStoreSMCost{Cost: smCost}, &reply); err != nil {
@@ -1369,10 +1370,10 @@ func TestTutITPrepaidCDRWithSMCost(t *testing.T) {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
 	} else {
 		if cdrs[0].OriginID != cdr.OriginID {
-			t.Errorf("Unexpected OriginID for Cdr received: %+v", cdrs[0])
+			t.Errorf("Unexpected OriginID for Cdr received: %+v", cdrs[0].OriginID)
 		}
 		if cdrs[0].Cost != 0.9 {
-			t.Errorf("Unexpected Cost for Cdr received: %+v", cdrs[0])
+			t.Errorf("Unexpected Cost for Cdr received: %+v", cdrs[0].Cost)
 		}
 	}
 }
