@@ -1243,3 +1243,21 @@ func TestDfDispatcherSJsonCfg(t *testing.T) {
 	}
 }
 */
+
+func TestDfLoaderCfg(t *testing.T) {
+	eCfg := &LoaderCfgJson{
+		Tpid:            utils.StringPointer(""),
+		Data_path:       utils.StringPointer(""),
+		Runid:           utils.StringPointer(""),
+		Disable_reverse: utils.BoolPointer(false),
+		Caches_conns: &[]*HaPoolJsonCfg{&HaPoolJsonCfg{
+			Address:   utils.StringPointer("127.0.0.1:2012"),
+			Transport: utils.StringPointer(utils.MetaJSONrpc),
+		}},
+	}
+	if cfg, err := dfCgrJsonCfg.LoaderCfgJson(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
+	}
+}

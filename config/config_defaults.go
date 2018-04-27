@@ -611,5 +611,14 @@ const CGRATES_CFG_JSON = `
 	"tax_exemption_code_list": "",			// template extracting tax exemption code list out of StoredCdr; <$RSRFields>
 },
 
+"loader": {
+	"tpid": "",
+	"data_path": "",
+	"runid": "",
+	"disable_reverse": false,
+	"caches_conns":[
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+},
 
 }`

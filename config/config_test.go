@@ -1264,3 +1264,21 @@ func TestCgrCfgJSONDefaultDispatcherSCfg(t *testing.T) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.dispatcherSCfg, eDspSCfg)
 	}
 }
+
+func TestCgrLoaderCfgDefault(t *testing.T) {
+	eLdrCfg := &LoaderCgrCfg{
+		TpID:           "",
+		DataPath:       "",
+		RunID:          "",
+		DisableReverse: false,
+		CachesConns: []*HaPoolConfig{
+			&HaPoolConfig{
+				Address:   "127.0.0.1:2012",
+				Transport: utils.MetaJSONrpc,
+			},
+		},
+	}
+	if !reflect.DeepEqual(cgrCfg.LoaderCgrConfig, eLdrCfg) {
+		t.Errorf("received: %+v, expecting: %+v", utils.ToJSON(cgrCfg.LoaderCgrConfig), utils.ToJSON(eLdrCfg))
+	}
+}

@@ -64,6 +64,7 @@ const (
 	MAILER_JSN         = "mailer"
 	SURETAX_JSON       = "suretax"
 	DispatcherSJson    = "dispatcher"
+	CgrLoaderCfgJson   = "loader"
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -443,6 +444,18 @@ func (self CgrJsonCfg) DispatcherSJsonCfg() (*DispatcherSJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(DispatcherSJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (self CgrJsonCfg) LoaderCfgJson() (*LoaderCfgJson, error) {
+	rawCfg, hasKey := self[CgrLoaderCfgJson]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(LoaderCfgJson)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}
