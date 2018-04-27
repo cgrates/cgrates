@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"log"
 	"path"
-	//"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -33,6 +32,7 @@ import (
 )
 
 var (
+	cfgDir      = flag.String("config_dir", utils.CONFIG_DIR, "Configuration directory path.")
 	datadb_type = flag.String("datadb_type", "", "The type of the DataDb database <*redis|*mongo>")
 	datadb_host = flag.String("datadb_host", "", "The DataDb host to connect to.")
 	datadb_port = flag.String("datadb_port", "", "The DataDb port to bind to.")
@@ -59,7 +59,7 @@ var (
 	stats           = flag.Bool("stats", false, "Generates statsistics about given data.")
 	fromStorDb      = flag.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
 	toStorDb        = flag.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
-	rpcEncoding     = flag.String("rpc_encoding", "", "RPC encoding used <gob|json>")
+	rpcEncoding     = flag.String("rpc_encoding", "*json", "RPC encoding used <gob|json>")
 	ralsAddress     = flag.String("rals", "", "Rater service to contact for cache reloads, empty to disable automatic cache reloads")
 	cdrstatsAddress = flag.String("cdrstats", "", "CDRStats service to contact for data reloads, empty to disable automatic data reloads")
 	usersAddress    = flag.String("users", "", "Users service to contact for data reloads, empty to disable automatic data reloads")
@@ -69,7 +69,10 @@ var (
 	disable_reverse = flag.Bool("disable_reverse_mappings", false, "Will disable reverse mappings rebuilding")
 	flush_stordb    = flag.Bool("flush_stordb", false, "Remove tariff plan data for id from the database")
 	remove          = flag.Bool("remove", false, "Will remove any data from db that matches data files")
+<<<<<<< HEAD
 	config_path     = flag.String("config_path", "", "Full path towards configuration file")
+=======
+>>>>>>> Loader using config from JSON folder
 )
 
 func main() {
@@ -85,36 +88,42 @@ func main() {
 	var rater, cdrstats, users rpcclient.RpcClientConnection
 	var loader engine.LoadReader
 
+<<<<<<< HEAD
 	lCfg := config.NewDefaultLoaderConfig()
 	if *config_path != "" {
 		lCfg, err = config.NewLoaderConfig(*config_path)
 		if err != nil {
 			log.Fatalf("Error loading config file: %v", err)
 		}
+=======
+	lCfg, err := config.NewCGRConfigFromFolder(*cfgDir)
+	if err != nil {
+		log.Fatalf("Error loading config file %+v", err)
+>>>>>>> Loader using config from JSON folder
 	}
 
 	if *datadb_type != "" {
-		lCfg.DataDBType = *datadb_type
+		lCfg.DataDbType = *datadb_type
 	}
 
 	if *datadb_host != "" {
-		lCfg.DataDBHost = *datadb_host
+		lCfg.DataDbHost = *datadb_host
 	}
 
 	if *datadb_port != "" {
-		lCfg.DataDBPort = *datadb_port
+		lCfg.DataDbPort = *datadb_port
 	}
 
 	if *datadb_name != "" {
-		lCfg.DataDBName = *datadb_name
+		lCfg.DataDbName = *datadb_name
 	}
 
 	if *datadb_user != "" {
-		lCfg.DataDBUser = *datadb_user
+		lCfg.DataDbUser = *datadb_user
 	}
 
 	if *datadb_pass != "" {
-		lCfg.DataDBPass = *datadb_pass
+		lCfg.DataDbPass = *datadb_pass
 	}
 
 	if *stor_db_type != "" {
@@ -150,36 +159,36 @@ func main() {
 	}
 
 	if *tpid != "" {
-		lCfg.Tpid = *tpid
+		lCfg.LoaderCgrConfig.TpID = *tpid
 	}
 
 	if *dataPath != "" {
-		lCfg.DataPath = *dataPath
+		lCfg.LoaderCgrConfig.DataPath = *dataPath
 	}
 
-	if *rpcEncoding != "" {
-		lCfg.RpcEncoding = *rpcEncoding
-	}
-
-	if *ralsAddress != "" {
-		lCfg.RalsAddress = *ralsAddress
+	if *ralsAddress == "" {
+		if *rpcEncoding == "*json" {
+			*ralsAddress = lCfg.RPCJSONListen
+		} else if *rpcEncoding == "*gob" {
+			*ralsAddress = lCfg.RPCGOBListen
+		}
 	}
 
 	if *runId != "" {
-		lCfg.RunId = *runId
+		lCfg.LoaderCgrConfig.RunID = *runId
 	}
 
 	if *timezone != "" {
-		lCfg.Timezone = *timezone
+		lCfg.DefaultTimezone = *timezone
 	}
 
 	if *disable_reverse != false {
-		lCfg.DisableReverse = *disable_reverse
+		lCfg.LoaderCgrConfig.DisableReverse = *disable_reverse
 	}
 
 	if !*toStorDb {
-		dm, errDataDB = engine.ConfigureDataStorage(lCfg.DataDBType, lCfg.DataDBHost, lCfg.DataDBPort, lCfg.DataDBName,
-			lCfg.DataDBUser, lCfg.DataDBPass, lCfg.DBDataEncoding, config.CgrConfig().CacheCfg(), lCfg.LoadHistorySize)
+		dm, errDataDB = engine.ConfigureDataStorage(lCfg.DataDbType, lCfg.DataDbHost, lCfg.DataDbPort, lCfg.DataDbName,
+			lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding, config.CgrConfig().CacheCfg(), lCfg.LoadHistorySize)
 	}
 	if *fromStorDb || *toStorDb {
 		storDb, errStorDb = engine.ConfigureLoadStorage(lCfg.StorDBType, lCfg.StorDBHost, lCfg.StorDBPort, lCfg.StorDBName, lCfg.StorDBUser, lCfg.StorDBPass, lCfg.DBDataEncoding,
@@ -191,7 +200,7 @@ func main() {
 			log.Fatalf("Could not open database connection: %v", err)
 		}
 	}
-	// Defer databases opened to be closed when we are done
+	// Defer databases opened to be closed when we are donecontact
 	for _, db := range []engine.Storage{dm.DataDB(), storDb} {
 		if db != nil {
 			defer db.Close()
@@ -202,21 +211,21 @@ func main() {
 		//tpid_remove
 
 		if *toStorDb { // Import files from a directory into storDb
-			if lCfg.Tpid == "" {
+			if *tpid == "" {
 				log.Fatal("TPid required, please define it via *-tpid* command argument.")
 			}
 			if *flush_stordb {
-				if err = storDb.RemTpData("", lCfg.Tpid, map[string]string{}); err != nil {
+				if err = storDb.RemTpData("", *tpid, map[string]string{}); err != nil {
 					log.Fatal(err)
 				}
 			}
 			csvImporter := engine.TPCSVImporter{
-				TPid:     lCfg.Tpid,
+				TPid:     *tpid,
 				StorDb:   storDb,
-				DirPath:  lCfg.DataPath,
+				DirPath:  *dataPath,
 				Sep:      ',',
 				Verbose:  *verbose,
-				ImportId: lCfg.RunId,
+				ImportId: *runId,
 			}
 			if errImport := csvImporter.Run(); errImport != nil {
 				log.Fatal(errImport)
@@ -234,32 +243,32 @@ func main() {
 			}
 		}*/
 		loader = engine.NewFileCSVStorage(',',
-			path.Join(lCfg.DataPath, utils.DESTINATIONS_CSV),
-			path.Join(lCfg.DataPath, utils.TIMINGS_CSV),
-			path.Join(lCfg.DataPath, utils.RATES_CSV),
-			path.Join(lCfg.DataPath, utils.DESTINATION_RATES_CSV),
-			path.Join(lCfg.DataPath, utils.RATING_PLANS_CSV),
-			path.Join(lCfg.DataPath, utils.RATING_PROFILES_CSV),
-			path.Join(lCfg.DataPath, utils.SHARED_GROUPS_CSV),
-			path.Join(lCfg.DataPath, utils.LCRS_CSV),
-			path.Join(lCfg.DataPath, utils.ACTIONS_CSV),
-			path.Join(lCfg.DataPath, utils.ACTION_PLANS_CSV),
-			path.Join(lCfg.DataPath, utils.ACTION_TRIGGERS_CSV),
-			path.Join(lCfg.DataPath, utils.ACCOUNT_ACTIONS_CSV),
-			path.Join(lCfg.DataPath, utils.DERIVED_CHARGERS_CSV),
-			path.Join(lCfg.DataPath, utils.CDR_STATS_CSV),
-			path.Join(lCfg.DataPath, utils.USERS_CSV),
-			path.Join(lCfg.DataPath, utils.ALIASES_CSV),
-			path.Join(lCfg.DataPath, utils.ResourcesCsv),
-			path.Join(lCfg.DataPath, utils.StatsCsv),
-			path.Join(lCfg.DataPath, utils.ThresholdsCsv),
-			path.Join(lCfg.DataPath, utils.FiltersCsv),
-			path.Join(lCfg.DataPath, utils.SuppliersCsv),
-			path.Join(lCfg.DataPath, utils.AttributesCsv),
+			path.Join(*dataPath, utils.DESTINATIONS_CSV),
+			path.Join(*dataPath, utils.TIMINGS_CSV),
+			path.Join(*dataPath, utils.RATES_CSV),
+			path.Join(*dataPath, utils.DESTINATION_RATES_CSV),
+			path.Join(*dataPath, utils.RATING_PLANS_CSV),
+			path.Join(*dataPath, utils.RATING_PROFILES_CSV),
+			path.Join(*dataPath, utils.SHARED_GROUPS_CSV),
+			path.Join(*dataPath, utils.LCRS_CSV),
+			path.Join(*dataPath, utils.ACTIONS_CSV),
+			path.Join(*dataPath, utils.ACTION_PLANS_CSV),
+			path.Join(*dataPath, utils.ACTION_TRIGGERS_CSV),
+			path.Join(*dataPath, utils.ACCOUNT_ACTIONS_CSV),
+			path.Join(*dataPath, utils.DERIVED_CHARGERS_CSV),
+			path.Join(*dataPath, utils.CDR_STATS_CSV),
+			path.Join(*dataPath, utils.USERS_CSV),
+			path.Join(*dataPath, utils.ALIASES_CSV),
+			path.Join(*dataPath, utils.ResourcesCsv),
+			path.Join(*dataPath, utils.StatsCsv),
+			path.Join(*dataPath, utils.ThresholdsCsv),
+			path.Join(*dataPath, utils.FiltersCsv),
+			path.Join(*dataPath, utils.SuppliersCsv),
+			path.Join(*dataPath, utils.AttributesCsv),
 		)
 	}
 
-	tpReader := engine.NewTpReader(dm.DataDB(), loader, lCfg.Tpid, lCfg.Timezone)
+	tpReader := engine.NewTpReader(dm.DataDB(), loader, *tpid, lCfg.DefaultTimezone)
 	err = tpReader.LoadAll()
 	if err != nil {
 		log.Fatal(err)
@@ -275,9 +284,9 @@ func main() {
 	if *dryRun { // We were just asked to parse the data, not saving it
 		return
 	}
-	if lCfg.RalsAddress != "" { // Init connection to rater so we can reload it's data
-		if rater, err = rpcclient.NewRpcClient("tcp", lCfg.RalsAddress, 3, 3,
-			time.Duration(1*time.Second), time.Duration(5*time.Minute), lCfg.RpcEncoding, nil, false); err != nil {
+	if *ralsAddress != "" { // Init connection to rater so we can reload it's data
+		if rater, err = rpcclient.NewRpcClient("tcp", *ralsAddress, 3, 3,
+			time.Duration(1*time.Second), time.Duration(5*time.Minute), *rpcEncoding, nil, false); err != nil {
 			log.Fatalf("Could not connect to RALs: %s", err.Error())
 			return
 		}
@@ -285,11 +294,11 @@ func main() {
 		log.Print("WARNING: Rates automatic cache reloading is disabled!")
 	}
 	if *cdrstatsAddress != "" { // Init connection to rater so we can reload it's data
-		if *cdrstatsAddress == lCfg.RalsAddress {
+		if *cdrstatsAddress == *ralsAddress {
 			cdrstats = rater
 		} else {
 			if cdrstats, err = rpcclient.NewRpcClient("tcp", *cdrstatsAddress, 3, 3,
-				time.Duration(1*time.Second), time.Duration(5*time.Minute), lCfg.RpcEncoding, nil, false); err != nil {
+				time.Duration(1*time.Second), time.Duration(5*time.Minute), *rpcEncoding, nil, false); err != nil {
 				log.Fatalf("Could not connect to CDRStatS API: %s", err.Error())
 				return
 			}
@@ -298,11 +307,11 @@ func main() {
 		log.Print("WARNING: CDRStats automatic data reload is disabled!")
 	}
 	if *usersAddress != "" { // Init connection to rater so we can reload it's data
-		if *usersAddress == lCfg.RalsAddress {
+		if *usersAddress == *ralsAddress {
 			users = rater
 		} else {
 			if users, err = rpcclient.NewRpcClient("tcp", *usersAddress, 3, 3,
-				time.Duration(1*time.Second), time.Duration(5*time.Minute), lCfg.RpcEncoding, nil, false); err != nil {
+				time.Duration(1*time.Second), time.Duration(5*time.Minute), *rpcEncoding, nil, false); err != nil {
 				log.Fatalf("Could not connect to UserS API: %s", err.Error())
 				return
 			}
@@ -312,7 +321,7 @@ func main() {
 	}
 	if !*remove {
 		// write maps to database
-		if err := tpReader.WriteToDatabase(*flush, *verbose, lCfg.DisableReverse); err != nil {
+		if err := tpReader.WriteToDatabase(*flush, *verbose, *disable_reverse); err != nil {
 			log.Fatal("Could not write to database: ", err)
 		}
 		var dstIds, revDstIDs, rplIds, rpfIds, actIds, aapIDs, shgIds, alsIds, lcrIds, dcsIds, rspIDs, resIDs, aatIDs, ralsIDs []string
@@ -411,7 +420,7 @@ func main() {
 			}
 		}
 	} else {
-		if err := tpReader.RemoveFromDatabase(*verbose, lCfg.DisableReverse); err != nil {
+		if err := tpReader.RemoveFromDatabase(*verbose, *disable_reverse); err != nil {
 			log.Fatal("Could not delete from database: ", err)
 		}
 	}
