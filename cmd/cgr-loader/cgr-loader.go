@@ -69,10 +69,6 @@ var (
 	disable_reverse = flag.Bool("disable_reverse_mappings", false, "Will disable reverse mappings rebuilding")
 	flush_stordb    = flag.Bool("flush_stordb", false, "Remove tariff plan data for id from the database")
 	remove          = flag.Bool("remove", false, "Will remove any data from db that matches data files")
-<<<<<<< HEAD
-	config_path     = flag.String("config_path", "", "Full path towards configuration file")
-=======
->>>>>>> Loader using config from JSON folder
 )
 
 func main() {
@@ -88,18 +84,9 @@ func main() {
 	var rater, cdrstats, users rpcclient.RpcClientConnection
 	var loader engine.LoadReader
 
-<<<<<<< HEAD
-	lCfg := config.NewDefaultLoaderConfig()
-	if *config_path != "" {
-		lCfg, err = config.NewLoaderConfig(*config_path)
-		if err != nil {
-			log.Fatalf("Error loading config file: %v", err)
-		}
-=======
 	lCfg, err := config.NewCGRConfigFromFolder(*cfgDir)
 	if err != nil {
 		log.Fatalf("Error loading config file %+v", err)
->>>>>>> Loader using config from JSON folder
 	}
 
 	if *datadb_type != "" {
