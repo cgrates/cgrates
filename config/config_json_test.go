@@ -1248,7 +1248,6 @@ func TestDfLoaderCfg(t *testing.T) {
 	eCfg := &LoaderCfgJson{
 		Tpid:            utils.StringPointer(""),
 		Data_path:       utils.StringPointer(""),
-		Runid:           utils.StringPointer(""),
 		Disable_reverse: utils.BoolPointer(false),
 		Caches_conns: &[]*HaPoolJsonCfg{&HaPoolJsonCfg{
 			Address:   utils.StringPointer("127.0.0.1:2012"),

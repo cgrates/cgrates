@@ -494,7 +494,6 @@ type DispatcherSJsonCfg struct {
 type LoaderCfgJson struct {
 	Tpid            *string
 	Data_path       *string
-	Runid           *string
 	Disable_reverse *bool
 	Caches_conns    *[]*HaPoolJsonCfg
 }

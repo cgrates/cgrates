@@ -1269,7 +1269,6 @@ func TestCgrLoaderCfgDefault(t *testing.T) {
 	eLdrCfg := &LoaderCgrCfg{
 		TpID:           "",
 		DataPath:       "",
-		RunID:          "",
 		DisableReverse: false,
 		CachesConns: []*HaPoolConfig{
 			&HaPoolConfig{

@@ -21,7 +21,6 @@ package config
 type LoaderCgrCfg struct {
 	TpID           string
 	DataPath       string
-	RunID          string
 	DisableReverse bool
 	CachesConns    []*HaPoolConfig
 }
@@ -32,9 +31,6 @@ func (ld *LoaderCgrCfg) loadFromJsonCfg(jsnCfg *LoaderCfgJson) (err error) {
 	}
 	if jsnCfg.Data_path != nil {
 		ld.DataPath = *jsnCfg.Data_path
-	}
-	if jsnCfg.Runid != nil {
-		ld.RunID = *jsnCfg.Runid
 	}
 	if jsnCfg.Disable_reverse != nil {
 		ld.DisableReverse = *jsnCfg.Disable_reverse
