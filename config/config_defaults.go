@@ -611,14 +611,15 @@ const CGRATES_CFG_JSON = `
 	"tax_exemption_code_list": "",			// template extracting tax exemption code list out of StoredCdr; <$RSRFields>
 },
 
-"loader": {
-	"tpid": "",
-	"data_path": "",
-	"runid": "",
-	"disable_reverse": false,
-	"caches_conns":[
+
+"loader": {									// loader for tariff plans out of .csv files
+	"tpid": "",								// tariff plan identificator
+	"data_path": "",						// path towards tariff plan files
+	"disable_reverse": false,				// disable reverse computing
+	"caches_conns":[						// addresses towards cacheS components for reloads
 		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 },
+
 
 }`

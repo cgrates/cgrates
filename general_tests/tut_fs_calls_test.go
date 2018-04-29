@@ -383,7 +383,6 @@ func testCallCheckResourceAllocation(t *testing.T) {
 		t.Errorf("Resources: %+v", utils.ToJSON(rs))
 	}
 	for _, r := range *rs {
-		utils.Logger.Debug(fmt.Sprintf("Resource : %+v\n", r))
 		if r.ID == "ResGroup1" &&
 			(len(r.Usages) != 1 || len(r.TTLIdx) != 1) {
 			t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))

@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"log"
 	"path"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -292,7 +293,8 @@ func main() {
 		if cacheS, err = rpcclient.NewRpcClient("tcp",
 			ldrCfg.LoaderCgrConfig.CachesConns[0].Address, 3, 3,
 			time.Duration(1*time.Second), time.Duration(5*time.Minute),
-			*rpcEncoding, nil, false); err != nil {
+			strings.TrimPrefix(ldrCfg.LoaderCgrConfig.CachesConns[0].Transport, utils.Meta),
+			nil, false); err != nil {
 			log.Fatalf("Could not connect to CacheS: %s", err.Error())
 			return
 		}
@@ -308,7 +310,7 @@ func main() {
 		} else {
 			if userS, err = rpcclient.NewRpcClient("tcp", *usersAddress, 3, 3,
 				time.Duration(1*time.Second), time.Duration(5*time.Minute),
-				*rpcEncoding, nil, false); err != nil {
+				strings.TrimPrefix(*rpcEncoding, utils.Meta), nil, false); err != nil {
 				log.Fatalf("Could not connect to UserS API: %s", err.Error())
 				return
 			}
@@ -340,6 +342,11 @@ func main() {
 			ralsIDs, _ = tpReader.GetLoadedIds(utils.REVERSE_ALIASES_PREFIX)
 		}
 		aps, _ := tpReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
+		// for users reloading
+		var userIds []string
+		if userS != nil {
+			userIds, _ = tpReader.GetLoadedIds(utils.USERS_PREFIX)
+		}
 		// release the reader with it's structures
 		tpReader.Init()
 
@@ -378,6 +385,16 @@ func main() {
 				}
 				if err = cacheS.Call("ApierV1.ReloadScheduler", "", &reply); err != nil {
 					log.Printf("WARNING: Got error on scheduler reload: %s\n", err.Error())
+				}
+			}
+
+			if userS != nil && len(userIds) > 0 {
+				if *verbose {
+					log.Print("Reloading Users data")
+				}
+				var reply string
+				if err := userS.Call("UsersV1.ReloadUsers", "", &reply); err != nil {
+					log.Printf("WARNING: Failed reloading users data, error: %s\n", err.Error())
 				}
 			}
 
