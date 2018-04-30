@@ -264,7 +264,7 @@ func TestRadReqAsCGREvent(t *testing.T) {
 	}
 }
 
-func TestRadV1AuthorizeArgs(t *testing.T) {
+func TestPVAsV1AuthorizeArgs(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
@@ -288,14 +288,14 @@ func TestRadV1AuthorizeArgs(t *testing.T) {
 		GetMaxUsage: true,
 		CGREvent:    *cgrEv,
 	}
-	outVal := radV1AuthorizeArgs(cgrEv, processorVars{MetaRadReqType: MetaRadAcctStart})
+	outVal := processorVars{MetaRadReqType: MetaRadAcctStart}.asV1AuthorizeArgs(cgrEv)
 
 	if !reflect.DeepEqual(expected, outVal) {
 		t.Errorf("Expecting: <%s>, received: <%s>", utils.ToJSON(expected), utils.ToJSON(outVal))
 	}
 }
 
-func TestRadV1InitSessionArgs(t *testing.T) {
+func TestPVAsV1InitSessionArgs(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
@@ -319,14 +319,13 @@ func TestRadV1InitSessionArgs(t *testing.T) {
 		InitSession: true,
 		CGREvent:    *cgrEv,
 	}
-	outVal := radV1InitSessionArgs(cgrEv, processorVars{MetaRadReqType: MetaRadAcctStart})
-
+	outVal := processorVars{MetaRadReqType: MetaRadAcctStart}.asV1InitSessionArgs(cgrEv)
 	if !reflect.DeepEqual(expected, outVal) {
 		t.Errorf("Expecting: <%s>, received: <%s>", utils.ToJSON(expected), utils.ToJSON(outVal))
 	}
 }
 
-func TestRadV1UpdateSessionArgs(t *testing.T) {
+func TestPVAsV1UpdateSessionArgs(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
@@ -350,14 +349,13 @@ func TestRadV1UpdateSessionArgs(t *testing.T) {
 		UpdateSession: true,
 		CGREvent:      *cgrEv,
 	}
-	outVal := radV1UpdateSessionArgs(cgrEv, processorVars{MetaRadReqType: MetaRadAcctStart})
-
+	outVal := processorVars{MetaRadReqType: MetaRadAcctStart}.asV1UpdateSessionArgs(cgrEv)
 	if !reflect.DeepEqual(expected, outVal) {
 		t.Errorf("Expecting: <%s>, received: <%s>", utils.ToJSON(expected), utils.ToJSON(outVal))
 	}
 }
 
-func TestRadV1TerminateSessionArgs(t *testing.T) {
+func TestPVAsTerminateSessionArgs(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
@@ -381,8 +379,7 @@ func TestRadV1TerminateSessionArgs(t *testing.T) {
 		TerminateSession: true,
 		CGREvent:         *cgrEv,
 	}
-	outVal := radV1TerminateSessionArgs(cgrEv, processorVars{MetaRadReqType: MetaRadAcctStart})
-
+	outVal := processorVars{MetaRadReqType: MetaRadAcctStart}.asV1TerminateSessionArgs(cgrEv)
 	if !reflect.DeepEqual(expected, outVal) {
 		t.Errorf("Expecting: <%s>, received: <%s>", utils.ToJSON(expected), utils.ToJSON(outVal))
 	}

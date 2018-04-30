@@ -167,34 +167,34 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 		return false, err
 	}
 	if reqProcessor.DryRun {
-		utils.Logger.Info(fmt.Sprintf("<%s> DRY_RUN, CGREvent: %s",utils.RadiusAgent, utils.ToJSON(cgrEv)))
+		utils.Logger.Info(fmt.Sprintf("<%s> DRY_RUN, CGREvent: %s", utils.RadiusAgent, utils.ToJSON(cgrEv)))
 	} else { // process with RPC
 		switch procVars[MetaRadReqType] {
 		case MetaRadAuth:
 			var authReply sessions.V1AuthorizeReply
 			err = ra.sessionS.Call(utils.SessionSv1AuthorizeEvent,
-				radV1AuthorizeArgs(cgrEv, procVars), &authReply)
+				procVars.asV1AuthorizeArgs(cgrEv), &authReply)
 			if procVars[utils.MetaCGRReply], err = utils.NewCGRReply(&authReply, err); err != nil {
 				return
 			}
 		case MetaRadAcctStart:
 			var initReply sessions.V1InitSessionReply
 			err = ra.sessionS.Call(utils.SessionSv1InitiateSession,
-				radV1InitSessionArgs(cgrEv, procVars), &initReply)
+				procVars.asV1InitSessionArgs(cgrEv), &initReply)
 			if procVars[utils.MetaCGRReply], err = utils.NewCGRReply(&initReply, err); err != nil {
 				return
 			}
 		case MetaRadAcctUpdate:
 			var updateReply sessions.V1UpdateSessionReply
 			err = ra.sessionS.Call(utils.SessionSv1UpdateSession,
-				radV1UpdateSessionArgs(cgrEv, procVars), &updateReply)
+				procVars.asV1UpdateSessionArgs(cgrEv), &updateReply)
 			if procVars[utils.MetaCGRReply], err = utils.NewCGRReply(&updateReply, err); err != nil {
 				return
 			}
 		case MetaRadAcctStop:
 			var rpl string
 			if err = ra.sessionS.Call(utils.SessionSv1TerminateSession,
-				radV1TerminateSessionArgs(cgrEv, procVars), &rpl); err != nil {
+				procVars.asV1TerminateSessionArgs(cgrEv), &rpl); err != nil {
 				procVars[utils.MetaCGRReply] = &utils.CGRReply{utils.Error: err.Error()}
 			}
 			if ra.cgrCfg.RadiusAgentCfg().CreateCDR {

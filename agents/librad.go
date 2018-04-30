@@ -91,6 +91,87 @@ func (pv processorVars) valAsString(fldPath string) (val string, err error) {
 	return
 }
 
+// asV1AuthorizeArgs returns the arguments needed by SessionSv1.AuthorizeEvent
+func (pv processorVars) asV1AuthorizeArgs(cgrEv *utils.CGREvent) (args *sessions.V1AuthorizeArgs) {
+	args = &sessions.V1AuthorizeArgs{ // defaults
+		GetMaxUsage: true,
+		CGREvent:    *cgrEv,
+	}
+	if !pv.hasSubsystems() {
+		return
+	}
+	if !pv.hasVar(utils.MetaAccounts) {
+		args.GetMaxUsage = false
+	}
+	if pv.hasVar(utils.MetaResources) {
+		args.AuthorizeResources = true
+	}
+	if pv.hasVar(utils.MetaSuppliers) {
+		args.GetSuppliers = true
+	}
+	if pv.hasVar(utils.MetaAttributes) {
+		args.GetAttributes = true
+	}
+	return
+}
+
+// asV1InitSessionArgs returns the arguments used in SessionSv1.InitSession
+func (pv processorVars) asV1InitSessionArgs(cgrEv *utils.CGREvent) (args *sessions.V1InitSessionArgs) {
+	args = &sessions.V1InitSessionArgs{ // defaults
+		InitSession: true,
+		CGREvent:    *cgrEv,
+	}
+	if !pv.hasSubsystems() {
+		return
+	}
+	if !pv.hasVar(utils.MetaAccounts) {
+		args.InitSession = false
+	}
+	if pv.hasVar(utils.MetaResources) {
+		args.AllocateResources = true
+	}
+	if pv.hasVar(utils.MetaAttributes) {
+		args.GetAttributes = true
+	}
+	return
+}
+
+// asV1UpdateSessionArgs returns the arguments used in SessionSv1.InitSession
+func (pv processorVars) asV1UpdateSessionArgs(cgrEv *utils.CGREvent) (args *sessions.V1UpdateSessionArgs) {
+	args = &sessions.V1UpdateSessionArgs{ // defaults
+		UpdateSession: true,
+		CGREvent:      *cgrEv,
+	}
+	if !pv.hasSubsystems() {
+		return
+	}
+	if !pv.hasVar(utils.MetaAccounts) {
+		args.UpdateSession = false
+	}
+	if pv.hasVar(utils.MetaAttributes) {
+		args.GetAttributes = true
+	}
+	return
+}
+
+// asV1TerminateSessionArgs returns the arguments used in SMGv1.TerminateSession
+func (pv processorVars) asV1TerminateSessionArgs(cgrEv *utils.CGREvent) (args *sessions.V1TerminateSessionArgs) {
+	args = &sessions.V1TerminateSessionArgs{ // defaults
+		TerminateSession: true,
+		CGREvent:         *cgrEv,
+	}
+	if !pv.hasSubsystems() {
+		return
+	}
+	if !pv.hasVar(utils.MetaAccounts) {
+		args.TerminateSession = false
+	}
+	if pv.hasVar(utils.MetaResources) {
+		args.ReleaseResources = true
+	}
+	return
+}
+
 // radAttrVendorFromPath returns AttributenName and VendorName from path
 // path should be the form attributeName or vendorName/attributeName
 func attrVendorFromPath(path string) (attrName, vendorName string) {
@@ -308,87 +389,6 @@ func radReplyAppendAttributes(reply *radigo.Packet, procVars map[string]interfac
 		if cfgFld.BreakOnSuccess {
 			break
 		}
-	}
-	return
-}
-
-// radV1AuthorizeArgs returns the arguments needed by SessionSv1.AuthorizeEvent
-func radV1AuthorizeArgs(cgrEv *utils.CGREvent, procVars processorVars) (args *sessions.V1AuthorizeArgs) {
-	args = &sessions.V1AuthorizeArgs{ // defaults
-		GetMaxUsage: true,
-		CGREvent:    *cgrEv,
-	}
-	if !procVars.hasSubsystems() {
-		return
-	}
-	if !procVars.hasVar(utils.MetaAccounts) {
-		args.GetMaxUsage = false
-	}
-	if procVars.hasVar(utils.MetaResources) {
-		args.AuthorizeResources = true
-	}
-	if procVars.hasVar(utils.MetaSuppliers) {
-		args.GetSuppliers = true
-	}
-	if procVars.hasVar(utils.MetaAttributes) {
-		args.GetAttributes = true
-	}
-	return
-}
-
-// radV1InitSessionArgs returns the arguments used in SessionSv1.InitSession
-func radV1InitSessionArgs(cgrEv *utils.CGREvent, procVars processorVars) (args *sessions.V1InitSessionArgs) {
-	args = &sessions.V1InitSessionArgs{ // defaults
-		InitSession: true,
-		CGREvent:    *cgrEv,
-	}
-	if !procVars.hasSubsystems() {
-		return
-	}
-	if !procVars.hasVar(utils.MetaAccounts) {
-		args.InitSession = false
-	}
-	if procVars.hasVar(utils.MetaResources) {
-		args.AllocateResources = true
-	}
-	if procVars.hasVar(utils.MetaAttributes) {
-		args.GetAttributes = true
-	}
-	return
-}
-
-// radV1InitSessionArgs returns the arguments used in SessionSv1.InitSession
-func radV1UpdateSessionArgs(cgrEv *utils.CGREvent, procVars processorVars) (args *sessions.V1UpdateSessionArgs) {
-	args = &sessions.V1UpdateSessionArgs{ // defaults
-		UpdateSession: true,
-		CGREvent:      *cgrEv,
-	}
-	if !procVars.hasSubsystems() {
-		return
-	}
-	if !procVars.hasVar(utils.MetaAccounts) {
-		args.UpdateSession = false
-	}
-	if procVars.hasVar(utils.MetaAttributes) {
-		args.GetAttributes = true
-	}
-	return
-}
-
-// radV1TerminateSessionArgs returns the arguments used in SMGv1.TerminateSession
-func radV1TerminateSessionArgs(cgrEv *utils.CGREvent, procVars processorVars) (args *sessions.V1TerminateSessionArgs) {
-	args = &sessions.V1TerminateSessionArgs{ // defaults
-		TerminateSession: true,
-		CGREvent:         *cgrEv,
-	}
-	if !procVars.hasSubsystems() {
-		return
-	}
-	if !procVars.hasVar(utils.MetaAccounts) {
-		args.TerminateSession = false
-	}
-	if procVars.hasVar(utils.MetaResources) {
-		args.ReleaseResources = true
 	}
 	return
 }
