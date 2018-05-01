@@ -1856,6 +1856,27 @@ type V1ProcessEventReply struct {
 	Attributes         *engine.AttrSProcessEventReply
 }
 
+// AsCGRReply is part of utils.CGRReplier interface
+func (v1Rply *V1ProcessEventReply) AsCGRReply() (cgrReply utils.CGRReply, err error) {
+	cgrReply = make(map[string]interface{})
+	if v1Rply.MaxUsage != nil {
+		cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
+	}
+	if v1Rply.ResourceAllocation != nil {
+		cgrReply[utils.CapResourceAllocation] = *v1Rply.ResourceAllocation
+	}
+	if v1Rply.Attributes != nil {
+		attrs := make(map[string]interface{})
+		for _, fldName := range v1Rply.Attributes.AlteredFields {
+			if v1Rply.Attributes.CGREvent.HasField(fldName) {
+				attrs[fldName] = v1Rply.Attributes.CGREvent.Event[fldName]
+			}
+		}
+		cgrReply[utils.CapAttributes] = attrs
+	}
+	return
+}
+
 // Called on session end, should send the CDR to CDRS
 func (smg *SMGeneric) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 	args *V1ProcessEventArgs, rply *V1ProcessEventReply) (err error) {

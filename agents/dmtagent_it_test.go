@@ -171,7 +171,7 @@ func TestDmtAgentPopulateCCTotalOctets(t *testing.T) {
 	ccr.diamMessage = ccr.AsBareDiameterMessage()
 	cca := NewBareCCAFromCCR(ccr, "cgr-da", "cgrates.org")
 	if err := cca.SetProcessorAVPs(daRP,
-		map[string]string{CGRError: "", CGRMaxUsage: "153600"}); err != nil {
+		processorVars{CGRError: "", CGRMaxUsage: "153600"}); err != nil {
 		t.Error(err)
 	}
 	if avps, err := cca.diamMessage.FindAVPsWithPath([]interface{}{
@@ -207,12 +207,14 @@ func TestDmtAgentResetStorDb(t *testing.T) {
 	}
 }
 
+/*
 // Start CGR Engine
 func TestDmtAgentStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(daCfgPath, 4000); err != nil {
 		t.Fatal(err)
 	}
 }
+*/
 
 // Connect rpc client to rater
 func TestDmtAgentApierRpcConn(t *testing.T) {

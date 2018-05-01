@@ -197,7 +197,8 @@ func TestFieldOutVal(t *testing.T) {
 		t.Error("Should have error")
 	}
 	eOut = "360"
-	if fldOut, err := fieldOutVal(m, cfgFld, time.Duration(0), map[string]string{"CGRError": "INSUFFICIENT_CREDIT"}); err != nil {
+	if fldOut, err := fieldOutVal(m, cfgFld, time.Duration(0),
+		processorVars{"CGRError": "INSUFFICIENT_CREDIT"}); err != nil {
 		t.Error(err)
 	} else if fldOut != eOut {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", eOut, fldOut)
@@ -423,7 +424,7 @@ func TestCCASetProcessorAVPs(t *testing.T) {
 			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(0)),             // Subscription-Id-Type
 			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("33708000003")), // Subscription-Id-Data
 		}})
-	if err := cca.SetProcessorAVPs(reqProcessor, map[string]string{}); err != nil {
+	if err := cca.SetProcessorAVPs(reqProcessor, processorVars{}); err != nil {
 		t.Error(err)
 	} else if ccaMsg := cca.AsDiameterMessage(); !reflect.DeepEqual(eMessage, ccaMsg) {
 		t.Errorf("Expecting: %+v, received: %+v", eMessage, ccaMsg)

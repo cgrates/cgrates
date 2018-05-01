@@ -199,10 +199,9 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 			}
 			if ra.cgrCfg.RadiusAgentCfg().CreateCDR {
 				if errCdr := ra.sessionS.Call(utils.SessionSv1ProcessCDR, *cgrEv, &rpl); errCdr != nil {
-					procVars[utils.MetaCGRReply] = &utils.CGRReply{utils.Error: err.Error()}
 					err = errCdr
+					procVars[utils.MetaCGRReply] = &utils.CGRReply{utils.Error: err.Error()}
 				}
-
 			}
 			if err != nil {
 				return
@@ -211,6 +210,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 			err = fmt.Errorf("unsupported radius request type: <%s>", procVars[MetaRadReqType])
 		}
 	}
+
 	if err := radReplyAppendAttributes(reply, procVars, reqProcessor.ReplyFields); err != nil {
 		return false, err
 	}

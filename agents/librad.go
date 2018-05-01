@@ -172,6 +172,26 @@ func (pv processorVars) asV1TerminateSessionArgs(cgrEv *utils.CGREvent) (args *s
 	return
 }
 
+func (pv processorVars) asV1ProcessEventArgs(cgrEv *utils.CGREvent) (args *sessions.V1ProcessEventArgs) {
+	args = &sessions.V1ProcessEventArgs{ // defaults
+		Debit:    true,
+		CGREvent: *cgrEv,
+	}
+	if !pv.hasSubsystems() {
+		return
+	}
+	if !pv.hasVar(utils.MetaAccounts) {
+		args.Debit = false
+	}
+	if pv.hasVar(utils.MetaResources) {
+		args.AllocateResources = true
+	}
+	if pv.hasVar(utils.MetaAttributes) {
+		args.GetAttributes = true
+	}
+	return
+}
+
 // radAttrVendorFromPath returns AttributenName and VendorName from path
 // path should be the form attributeName or vendorName/attributeName
 func attrVendorFromPath(path string) (attrName, vendorName string) {

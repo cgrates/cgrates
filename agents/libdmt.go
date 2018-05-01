@@ -179,7 +179,7 @@ func avpValAsString(a *diam.AVP) string {
 }
 
 // Handler for meta functions
-func metaHandler(m *diam.Message, processorVars map[string]string,
+func metaHandler(m *diam.Message, procVars processorVars,
 	tag, arg string, dur time.Duration) (string, error) {
 	switch tag {
 	case META_CCR_USAGE:
@@ -225,9 +225,9 @@ func metaHandler(m *diam.Message, processorVars map[string]string,
 
 // metaValueExponent will multiply the float value with the exponent provided.
 // Expects 2 arguments in template separated by |
-func metaValueExponent(m *diam.Message, processorVars map[string]string,
+func metaValueExponent(m *diam.Message, procVars processorVars,
 	argsTpl utils.RSRFields, roundingDecimals int) (string, error) {
-	valStr := composedFieldvalue(m, argsTpl, 0, processorVars)
+	valStr := composedFieldvalue(m, argsTpl, 0, procVars)
 	handlerArgs := strings.Split(valStr, utils.HandlerArgSep)
 	if len(handlerArgs) != 2 {
 		return "", errors.New("Unexpected number of arguments")
@@ -244,9 +244,9 @@ func metaValueExponent(m *diam.Message, processorVars map[string]string,
 	return strconv.FormatFloat(utils.Round(res, roundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
 }
 
-func metaSum(m *diam.Message, processorVars map[string]string,
+func metaSum(m *diam.Message, procVars processorVars,
 	argsTpl utils.RSRFields, passAtIndex, roundingDecimals int) (string, error) {
-	valStr := composedFieldvalue(m, argsTpl, passAtIndex, processorVars)
+	valStr := composedFieldvalue(m, argsTpl, passAtIndex, procVars)
 	handlerArgs := strings.Split(valStr, utils.HandlerArgSep)
 	var summed float64
 	for _, arg := range handlerArgs {
@@ -275,12 +275,13 @@ func avpsWithPath(m *diam.Message, rsrFld *utils.RSRField) ([]*diam.AVP, error) 
 		splitIntoInterface(rsrFld.Id, utils.HIERARCHY_SEP), dict.UndefinedVendorID)
 }
 
-func passesFieldFilter(m *diam.Message, fieldFilter *utils.RSRField, processorVars map[string]string) (bool, int) {
+func passesFieldFilter(m *diam.Message, fieldFilter *utils.RSRField, procVars processorVars) (bool, int) {
 	if fieldFilter == nil {
 		return true, 0
 	}
-	if val, hasIt := processorVars[fieldFilter.Id]; hasIt { // ProcessorVars have priority
-		if fieldFilter.FilterPasses(val) {
+	if val, hasIt := procVars[fieldFilter.Id]; hasIt { // ProcessorVars have priority
+		valStr, _ := utils.CastFieldIfToString(val)
+		if fieldFilter.FilterPasses(valStr) {
 			return true, 0
 		}
 		return false, 0
@@ -302,14 +303,15 @@ func passesFieldFilter(m *diam.Message, fieldFilter *utils.RSRField, processorVa
 	return false, 0
 }
 
-func composedFieldvalue(m *diam.Message, outTpl utils.RSRFields, avpIdx int, processorVars map[string]string) string {
+func composedFieldvalue(m *diam.Message, outTpl utils.RSRFields, avpIdx int, procVars processorVars) string {
 	var outVal string
 	for _, rsrTpl := range outTpl {
 		if rsrTpl.IsStatic() {
 			outVal += rsrTpl.ParseValue("")
 		} else {
-			if val, hasIt := processorVars[rsrTpl.Id]; hasIt { // ProcessorVars have priority
-				outVal += rsrTpl.ParseValue(val)
+			if val, hasIt := procVars[rsrTpl.Id]; hasIt { // ProcessorVars have priority
+				valStr, _ := utils.CastFieldIfToString(val)
+				outVal += rsrTpl.ParseValue(valStr)
 				continue
 			}
 			matchingAvps, err := avpsWithPath(m, rsrTpl)
@@ -380,13 +382,13 @@ func serializeAVPValueFromString(dictAVP *dict.AVP, valStr, timezone string) ([]
 }
 
 func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField,
-	extraParam interface{}, processorVars map[string]string) (fmtValOut string, err error) {
+	extraParam interface{}, procVars processorVars) (fmtValOut string, err error) {
 	var outVal string
 	passAtIndex := -1
 	passedAllFilters := true
 	for _, fldFilter := range cfgFld.FieldFilter {
 		var pass bool
-		if pass, passAtIndex = passesFieldFilter(m, fldFilter, processorVars); !pass {
+		if pass, passAtIndex = passesFieldFilter(m, fldFilter, procVars); !pass {
 			passedAllFilters = false
 			break
 		}
@@ -406,19 +408,19 @@ func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField,
 	case utils.META_HANDLER:
 		switch cfgFld.HandlerId {
 		case META_VALUE_EXPONENT:
-			outVal, err = metaValueExponent(m, processorVars, cfgFld.Value, 10) // FixMe: add here configured number of decimals
+			outVal, err = metaValueExponent(m, procVars, cfgFld.Value, 10) // FixMe: add here configured number of decimals
 		case META_SUM:
-			outVal, err = metaSum(m, processorVars, cfgFld.Value, passAtIndex, 10)
+			outVal, err = metaSum(m, procVars, cfgFld.Value, passAtIndex, 10)
 		default:
-			outVal, err = metaHandler(m, processorVars, cfgFld.HandlerId, cfgFld.Layout, extraParam.(time.Duration))
+			outVal, err = metaHandler(m, procVars, cfgFld.HandlerId, cfgFld.Layout, extraParam.(time.Duration))
 			if err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<Diameter> Ignoring processing of metafunction: %s, error: %s", cfgFld.HandlerId, err.Error()))
 			}
 		}
 	case utils.META_COMPOSED:
-		outVal = composedFieldvalue(m, cfgFld.Value, 0, processorVars)
+		outVal = composedFieldvalue(m, cfgFld.Value, 0, procVars)
 	case utils.MetaGrouped: // GroupedAVP
-		outVal = composedFieldvalue(m, cfgFld.Value, passAtIndex, processorVars)
+		outVal = composedFieldvalue(m, cfgFld.Value, passAtIndex, procVars)
 	}
 	if fmtValOut, err = utils.FmtFieldWidth(cfgFld.Tag, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<Diameter> Error when processing field template with tag: %s, error: %s", cfgFld.Tag, err.Error()))
@@ -692,7 +694,7 @@ func (self *CCA) AsDiameterMessage() *diam.Message {
 }
 
 // SetProcessorAVPs will add AVPs to self.diameterMessage based on template defined in processor.CCAFields
-func (self *CCA) SetProcessorAVPs(reqProcessor *config.DARequestProcessor, processorVars map[string]string) error {
+func (self *CCA) SetProcessorAVPs(reqProcessor *config.DARequestProcessor, processorVars processorVars) error {
 	for _, cfgFld := range reqProcessor.CCAFields {
 		fmtOut, err := fieldOutVal(self.ccrMessage, cfgFld, nil, processorVars)
 		if err == ErrFilterNotPassing { // Field not in or filter not passing, try match in answer
