@@ -263,19 +263,24 @@ func TestMigratorITMoveConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDB, err := engine.ConfigureStorDB(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
+	storDBIn, err := engine.ConfigureStorDB(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
 		cfg_in.StorDBUser, cfg_in.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
-	oldstorDB, err := engine.ConfigureStorDB(cfg_out.StorDBType, cfg_out.StorDBHost, cfg_out.StorDBPort, cfg_out.StorDBName,
+	storDBOut, err := engine.ConfigureStorDB(cfg_out.StorDBType, cfg_out.StorDBHost, cfg_out.StorDBPort, cfg_out.StorDBName,
 		cfg_out.StorDBUser, cfg_out.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
-	mig, err = NewMigrator(dataDB2, dataDB, cfg_in.DataDbType, cfg_in.DBDataEncoding, storDB, cfg_in.StorDBType, oldDataDB,
+	oldstorDB, err := ConfigureV1StorDB(cfg_out.StorDBType, cfg_out.StorDBHost, cfg_out.StorDBPort, cfg_out.StorDBName,
+		cfg_out.StorDBUser, cfg_out.StorDBPass)
+	if err != nil {
+		log.Fatal(err)
+	}
+	mig, err = NewMigrator(dataDB2, dataDB, cfg_in.DataDbType, cfg_in.DBDataEncoding, storDBOut, storDBIn, cfg_in.StorDBType, oldDataDB,
 		cfg_in.DataDbType, cfg_in.DBDataEncoding, oldstorDB, cfg_in.StorDBType, false, false, false, false, false)
 	if err != nil {
 		log.Fatal(err)
@@ -295,12 +300,12 @@ func testFlush(t *testing.T) {
 		t.Error("Error  ", err.Error())
 	}
 	if path_out != "" {
-		if err := mig.InStorDB().Flush(path.Join(cfg_in.DataFolderPath, "storage", cfg_in.StorDBType)); err != nil {
+		if err := mig.storDBIn.Flush(path.Join(cfg_in.DataFolderPath, "storage", cfg_in.StorDBType)); err != nil {
 			t.Error(err)
 		}
 	}
 	if path_out != "" {
-		if err := mig.OutStorDB().Flush(path.Join(cfg_out.DataFolderPath, "storage", cfg_out.StorDBType)); err != nil {
+		if err := mig.storDBOut.Flush(path.Join(cfg_out.DataFolderPath, "storage", cfg_out.StorDBType)); err != nil {
 			t.Error(err)
 		}
 	}

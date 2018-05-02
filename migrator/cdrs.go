@@ -30,23 +30,22 @@ func (m *Migrator) migrateCurrentCDRs() (err error) {
 	if m.sameStorDB { // no move
 		return
 	}
-	cdrs, _, err := m.storDB.GetCDRs(new(utils.CDRsFilter), false)
+	cdrs, _, err := m.storDBIn.GetCDRs(new(utils.CDRsFilter), false)
 	if err != nil {
 		return err
 	}
-	/*
-		for _, cdr := range cdrs {
-			if err := m.oldStorDB.SetCDR(cdr, true); err != nil {
-				return err
-			}
+	for _, cdr := range cdrs {
+		if err := m.storDBOut.SetCDR(cdr, true); err != nil {
+			return err
 		}
-	*/
+	}
 	return
 }
 
 func (m *Migrator) migrateCDRs() (err error) {
 	var vrs engine.Versions
-	vrs, err = m.dmIN.DataDB().GetVersions("")
+	current := engine.CurrentStorDBVersions()
+	vrs, err = m.storDBOut.GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -58,10 +57,13 @@ func (m *Migrator) migrateCDRs() (err error) {
 			utils.UndefinedVersion,
 			"version number is not defined for Actions")
 	}
-	current := engine.CurrentDataDBVersions()
 	switch vrs[utils.CDRs] {
 	case current[utils.CDRs]:
-		return m.migrateCurrentCDRs()
+
+	case 1:
+		if err := m.migrateV1CDRs(); err != nil {
+			return err
+		}
 	}
 	return
 }
@@ -79,7 +81,7 @@ func (m *Migrator) migrateV1CDRs() (err error) {
 		if v1CDR != nil {
 			cdr := v1CDR.V1toV2Cdr()
 			if m.dryRun != true {
-				if err = m.storDB.SetCDR(cdr, true); err != nil {
+				if err = m.storDBOut.SetCDR(cdr, true); err != nil {
 					return err
 				}
 				m.stats[utils.CDRs] += 1
@@ -89,7 +91,7 @@ func (m *Migrator) migrateV1CDRs() (err error) {
 	if m.dryRun != true {
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.CDRs: engine.CurrentStorDBVersions()[utils.CDRs]}
-		if err = m.storDB.SetVersions(vrs, false); err != nil {
+		if err = m.storDBOut.SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),
@@ -99,7 +101,6 @@ func (m *Migrator) migrateV1CDRs() (err error) {
 	return
 }
 
-//
 type v1Cdrs struct {
 	CGRID       string
 	RunID       string

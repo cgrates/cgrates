@@ -30,13 +30,13 @@ import (
 )
 
 func (m *Migrator) migrateCostDetails() (err error) {
-	if m.storDB == nil {
+	if m.storDBOut == nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.MandatoryIEMissingCaps,
 			utils.NoStorDBConnection,
 			"no connection to StorDB")
 	}
-	vrs, err := m.storDB.GetVersions(utils.COST_DETAILS)
+	vrs, err := m.storDBOut.GetVersions(utils.COST_DETAILS)
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -55,9 +55,9 @@ func (m *Migrator) migrateCostDetails() (err error) {
 	var storSQL *sql.DB
 	switch m.storDBType {
 	case utils.MYSQL:
-		storSQL = m.storDB.(*engine.SQLStorage).Db
+		storSQL = m.storDBOut.(*engine.SQLStorage).Db
 	case utils.POSTGRES:
-		storSQL = m.storDB.(*engine.SQLStorage).Db
+		storSQL = m.storDBOut.(*engine.SQLStorage).Db
 	default:
 		return utils.NewCGRError(utils.Migrator,
 			utils.MandatoryIEMissingCaps,
@@ -112,7 +112,7 @@ func (m *Migrator) migrateCostDetails() (err error) {
 			m.stats[utils.COST_DETAILS] += 1
 			// All done, update version wtih current one
 			vrs = engine.Versions{utils.COST_DETAILS: engine.CurrentStorDBVersions()[utils.COST_DETAILS]}
-			if err := m.storDB.SetVersions(vrs, false); err != nil {
+			if err := m.storDBOut.SetVersions(vrs, false); err != nil {
 				return utils.NewCGRError(utils.Migrator,
 					utils.ServerErrorCaps,
 					err.Error(),

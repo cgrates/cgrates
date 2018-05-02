@@ -25,7 +25,7 @@ import (
 
 //CDR methods
 //get
-func (v1ms *v1Mongo) getv1CDR() (v1Cdr *v1Cdrs, err error) {
+func (v1ms *v1Mongo) getV1CDR() (v1Cdr *v1Cdrs, err error) {
 	if v1ms.qryIter == nil {
 		v1ms.qryIter = v1ms.session.DB(v1ms.db).C(engine.ColCDRs).Find(nil).Iter()
 	}

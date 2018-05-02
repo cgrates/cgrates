@@ -26,25 +26,25 @@ import (
 )
 
 func (m *Migrator) migrateCurrentTPthresholds() (err error) {
-	tpids, err := m.InStorDB().GetTpIds(utils.TBLTPThresholds)
+	tpids, err := m.storDBIn.GetTpIds(utils.TBLTPThresholds)
 	if err != nil {
 		return err
 	}
 
 	for _, tpid := range tpids {
-		ids, err := m.InStorDB().GetTpTableIds(tpid, utils.TBLTPThresholds, utils.TPDistinctIds{"id"}, map[string]string{}, nil)
+		ids, err := m.storDBIn.GetTpTableIds(tpid, utils.TBLTPThresholds, utils.TPDistinctIds{"id"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
 		for _, id := range ids {
 
-			dest, err := m.InStorDB().GetTPThresholds(tpid, id)
+			dest, err := m.storDBIn.GetTPThresholds(tpid, id)
 			if err != nil {
 				return err
 			}
 			if dest != nil {
 				if m.dryRun != true {
-					if err := m.OutStorDB().SetTPThresholds(dest); err != nil {
+					if err := m.storDBOut.SetTPThresholds(dest); err != nil {
 						return err
 					}
 					m.stats[utils.TpThresholds] += 1
@@ -58,7 +58,7 @@ func (m *Migrator) migrateCurrentTPthresholds() (err error) {
 func (m *Migrator) migrateTPthresholds() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.OutStorDB().GetVersions("")
+	vrs, err = m.storDBOut.GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

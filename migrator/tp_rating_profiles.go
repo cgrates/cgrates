@@ -27,19 +27,19 @@ import (
 
 func (m *Migrator) migrateCurrentTPratingprofiles() (err error) {
 
-	tpids, err := m.InStorDB().GetTpIds(utils.TBLTPRateProfiles)
+	tpids, err := m.storDBIn.GetTpIds(utils.TBLTPRateProfiles)
 	if err != nil {
 		return err
 	}
 
 	for _, tpid := range tpids {
-		dest, err := m.InStorDB().GetTPRatingProfiles(&utils.TPRatingProfile{TPid: tpid})
+		dest, err := m.storDBIn.GetTPRatingProfiles(&utils.TPRatingProfile{TPid: tpid})
 		if err != nil {
 			return err
 		}
 		if dest != nil {
 			if m.dryRun != true {
-				if err := m.OutStorDB().SetTPRatingProfiles(dest); err != nil {
+				if err := m.storDBOut.SetTPRatingProfiles(dest); err != nil {
 					return err
 				}
 				m.stats[utils.TpRatingProfiles] += 1
@@ -52,7 +52,7 @@ func (m *Migrator) migrateCurrentTPratingprofiles() (err error) {
 func (m *Migrator) migrateTPratingprofiles() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.OutStorDB().GetVersions("")
+	vrs, err = m.storDBOut.GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

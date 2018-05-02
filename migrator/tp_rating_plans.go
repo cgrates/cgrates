@@ -26,24 +26,24 @@ import (
 )
 
 func (m *Migrator) migrateCurrentTPratingplans() (err error) {
-	tpids, err := m.InStorDB().GetTpIds(utils.TBLTPRatingPlans)
+	tpids, err := m.storDBIn.GetTpIds(utils.TBLTPRatingPlans)
 	if err != nil {
 		return err
 	}
 	for _, tpid := range tpids {
-		ids, err := m.InStorDB().GetTpTableIds(tpid, utils.TBLTPRatingPlans, utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
+		ids, err := m.storDBIn.GetTpTableIds(tpid, utils.TBLTPRatingPlans, utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
 		if len(ids) != 0 {
 			for _, id := range ids {
-				rps, err := m.InStorDB().GetTPRatingPlans(tpid, id, nil)
+				rps, err := m.storDBIn.GetTPRatingPlans(tpid, id, nil)
 				if err != nil {
 					return err
 				}
 				if rps != nil {
 					if m.dryRun != true {
-						if err := m.OutStorDB().SetTPRatingPlans(rps); err != nil {
+						if err := m.storDBOut.SetTPRatingPlans(rps); err != nil {
 							return err
 						}
 						m.stats[utils.TpRatingPlans] += 1
@@ -58,7 +58,7 @@ func (m *Migrator) migrateCurrentTPratingplans() (err error) {
 func (m *Migrator) migrateTPratingplans() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.OutStorDB().GetVersions("")
+	vrs, err = m.storDBOut.GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

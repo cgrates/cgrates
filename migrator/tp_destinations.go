@@ -26,23 +26,23 @@ import (
 )
 
 func (m *Migrator) migrateCurrentTPDestinations() (err error) {
-	tpids, err := m.InStorDB().GetTpIds(utils.TBLTPDestinations)
+	tpids, err := m.storDBIn.GetTpIds(utils.TBLTPDestinations)
 	if err != nil {
 		return err
 	}
 	for _, tpid := range tpids {
-		ids, err := m.InStorDB().GetTpTableIds(tpid, utils.TBLTPDestinations, utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
+		ids, err := m.storDBIn.GetTpTableIds(tpid, utils.TBLTPDestinations, utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
 		for _, id := range ids {
-			dest, err := m.InStorDB().GetTPDestinations(tpid, id)
+			dest, err := m.storDBIn.GetTPDestinations(tpid, id)
 			if err != nil {
 				return err
 			}
 			if dest != nil {
 				if m.dryRun != true {
-					if err := m.OutStorDB().SetTPDestinations(dest); err != nil {
+					if err := m.storDBOut.SetTPDestinations(dest); err != nil {
 						return err
 					}
 					m.stats[utils.TpDestinations] += 1
@@ -56,7 +56,7 @@ func (m *Migrator) migrateCurrentTPDestinations() (err error) {
 func (m *Migrator) migrateTPDestinations() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.OutStorDB().GetVersions("")
+	vrs, err = m.storDBOut.GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
