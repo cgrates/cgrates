@@ -20,6 +20,7 @@ package migrator
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -56,15 +57,17 @@ func newv1MongoStorage(host, port, db, user, pass, storageType string, cdrsIndex
 	if user != "" && pass != "" {
 		url = fmt.Sprintf("%s:%s@%s", user, pass, url)
 	}
+	var dbName string
 	if db != "" {
 		url += "/" + db
+		dbName = strings.Split(db, "?")[0] // remove extra info after ?
 	}
 	session, err := mgo.Dial(url)
 	if err != nil {
 		return nil, err
 	}
 	session.SetMode(mgo.Strong, true)
-	v1ms = &v1Mongo{db: db, session: session, v1ms: engine.NewCodecMsgpackMarshaler()}
+	v1ms = &v1Mongo{db: dbName, session: session, v1ms: engine.NewCodecMsgpackMarshaler()}
 	return
 }
 func (v1ms *v1Mongo) Close() {}
