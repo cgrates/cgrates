@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -54,10 +53,18 @@ func ConfigureV1DataStorage(db_type, host, port, name, user, pass, marshaler str
 	return d, nil
 }
 
-func (m *Migrator) InStorDB() engine.LoadStorage {
-	return m.oldStorDB.(engine.LoadStorage)
-}
-
-func (m *Migrator) OutStorDB() engine.LoadStorage {
-	return m.storDB.(engine.LoadStorage)
+func ConfigureV1StorDB(db_type, host, port, name, user, pass string) (db MigratorStorDB, err error) {
+	var d MigratorStorDB
+	switch db_type {
+	case utils.MONGO:
+		d, err = newv1MongoStorage(host, port, name, user, pass, utils.StorDB, nil)
+		db = d.(MigratorStorDB)
+	default:
+		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are '%s'",
+			db_type, utils.MONGO))
+	}
+	if err != nil {
+		return nil, err
+	}
+	return d, nil
 }

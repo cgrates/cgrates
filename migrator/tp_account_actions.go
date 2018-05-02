@@ -26,18 +26,18 @@ import (
 )
 
 func (m *Migrator) migrateCurrentTPaccountAcction() (err error) {
-	tpids, err := m.InStorDB().GetTpIds(utils.TBLTPAccountActions)
+	tpids, err := m.storDBIn.GetTpIds(utils.TBLTPAccountActions)
 	if err != nil {
 		return err
 	}
 	for _, tpid := range tpids {
-		dest, err := m.InStorDB().GetTPAccountActions(&utils.TPAccountActions{TPid: tpid})
+		dest, err := m.storDBIn.GetTPAccountActions(&utils.TPAccountActions{TPid: tpid})
 		if err != nil {
 			return err
 		}
 		if dest != nil {
 			if m.dryRun != true {
-				if err := m.OutStorDB().SetTPAccountActions(dest); err != nil {
+				if err := m.storDBOut.SetTPAccountActions(dest); err != nil {
 					return err
 				}
 				m.stats[utils.TpAccountActionsV] += 1
@@ -50,7 +50,7 @@ func (m *Migrator) migrateCurrentTPaccountAcction() (err error) {
 func (m *Migrator) migrateTPaccountacction() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.OutStorDB().GetVersions("")
+	vrs, err = m.storDBOut.GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

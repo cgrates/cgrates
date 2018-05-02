@@ -26,19 +26,19 @@ import (
 )
 
 func (m *Migrator) migrateCurrentTPusers() (err error) {
-	tpids, err := m.InStorDB().GetTpIds(utils.TBLTPUsers)
+	tpids, err := m.storDBIn.GetTpIds(utils.TBLTPUsers)
 	if err != nil {
 		return err
 	}
 
 	for _, tpid := range tpids {
-		dest, err := m.InStorDB().GetTPUsers(&utils.TPUsers{TPid: tpid})
+		dest, err := m.storDBIn.GetTPUsers(&utils.TPUsers{TPid: tpid})
 		if err != nil {
 			return err
 		}
 		if dest != nil {
 			if m.dryRun != true {
-				if err := m.OutStorDB().SetTPUsers(dest); err != nil {
+				if err := m.storDBOut.SetTPUsers(dest); err != nil {
 					return err
 				}
 				m.stats[utils.TpUsers] += 1
@@ -52,7 +52,7 @@ func (m *Migrator) migrateCurrentTPusers() (err error) {
 func (m *Migrator) migrateTPusers() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.OutStorDB().GetVersions("")
+	vrs, err = m.storDBOut.GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

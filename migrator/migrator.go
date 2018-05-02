@@ -27,7 +27,7 @@ import (
 )
 
 func NewMigrator(dmIN *engine.DataManager, dmOut *engine.DataManager, dataDBType, dataDBEncoding string,
-	storDB engine.StorDB, storDBType string, oldDataDB MigratorDataDB, oldDataDBType, oldDataDBEncoding string,
+	storDBIn engine.StorDB, storDBOut engine.StorDB, storDBType string, oldDataDB MigratorDataDB, oldDataDBType, oldDataDBEncoding string,
 	oldStorDB MigratorStorDB, oldStorDBType string, dryRun bool, sameDataDB bool, sameStorDB bool,
 	datadb_versions bool, stordb_versions bool) (m *Migrator, err error) {
 	var mrshlr engine.Marshaler
@@ -44,9 +44,9 @@ func NewMigrator(dmIN *engine.DataManager, dmOut *engine.DataManager, dataDBType
 	stats := make(map[string]int)
 
 	m = &Migrator{
-		dmOut: dmOut, dataDBType: dataDBType,
-		storDB: storDB, storDBType: storDBType,
-		mrshlr: mrshlr, dmIN: dmIN,
+		dmOut: dmOut, dmIN: dmIN, dataDBType: dataDBType,
+		storDBIn: storDBIn, storDBOut: storDBOut, storDBType: storDBType,
+		mrshlr:    mrshlr,
 		oldDataDB: oldDataDB, oldDataDBType: oldDataDBType,
 		oldStorDB: oldStorDB, oldStorDBType: oldStorDBType,
 		oldmrshlr: oldmrshlr, dryRun: dryRun, sameDataDB: sameDataDB, sameStorDB: sameStorDB,
@@ -59,7 +59,8 @@ type Migrator struct {
 	dmIN            *engine.DataManager //oldatadb
 	dmOut           *engine.DataManager
 	dataDBType      string
-	storDB          engine.StorDB
+	storDBIn        engine.StorDB //oldStorDB
+	storDBOut       engine.StorDB
 	storDBType      string
 	mrshlr          engine.Marshaler
 	oldDataDB       MigratorDataDB
@@ -102,14 +103,14 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 					log.Print("After migrate, DataDB versions :", vrs)
 				}
 
-				if err := m.storDB.SetVersions(engine.CurrentDBVersions(m.storDBType), true); err != nil {
+				if err := m.storDBOut.SetVersions(engine.CurrentDBVersions(m.storDBType), true); err != nil {
 					return utils.NewCGRError(utils.Migrator,
 						utils.ServerErrorCaps,
 						err.Error(),
 						fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error())), nil
 				}
 				if m.stordb_versions {
-					vrs, err := m.storDB.GetVersions("")
+					vrs, err := m.storDBOut.GetVersions("")
 					if err != nil {
 						return err, nil
 					}

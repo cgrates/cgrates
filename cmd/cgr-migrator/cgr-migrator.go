@@ -191,8 +191,9 @@ func main() {
 		config.CgrConfig().CacheCfg(), 0); err != nil {
 		log.Fatal(err)
 	}
-	if instorDB, err = engine.ConfigureStorDB(mgrCfg.StorDBType, mgrCfg.StorDBHost, mgrCfg.StorDBPort,
-		mgrCfg.StorDBName, mgrCfg.StorDBUser, mgrCfg.StorDBPass,
+	var storDBIn engine.StorDB
+	if storDBIn, err = engine.ConfigureStorDB(*inStorDBType, *inStorDBHost, *inStorDBPort,
+		*inStorDBName, *inStorDBUser, *inStorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns,
 		config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime,
 		config.CgrConfig().StorDBCDRSIndexes); err != nil {
@@ -203,19 +204,22 @@ func main() {
 		config.CgrConfig().CacheCfg(), 0); err != nil {
 		log.Fatal(err)
 	}
+	var storDBOut engine.StorDB
+	if storDBOut, err = engine.ConfigureStorDB(*outStorDBType, *outStorDBHost, *outStorDBPort,
+		*outStorDBName, *outStorDBUser, *outStorDBPass,
+		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns,
+		config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes); err != nil {
+		log.Fatal(err)
+	}
+	var outDataDB migrator.MigratorDataDB
 	if outDataDB, err = migrator.ConfigureV1DataStorage(*outDataDBType, *outDataDBHost, *outDataDBPort,
 		*outDataDBName, *outDataDBUser, *outDataDBPass, mgrCfg.DBDataEncoding); err != nil {
 		log.Fatal(err)
 	}
-
-	if *outStorDBType == utils.MetaDynamic {
-		storDB = instorDB
-	} else {
-		storDB, err = engine.ConfigureStorDB(*outStorDBType, *outStorDBHost, *outStorDBPort, *outStorDBName, *outStorDBUser, *outStorDBPass,
-			config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
-		if err != nil {
-			log.Fatal(err)
-		}
+	var outStorDB migrator.MigratorStorDB
+	if outStorDB, err = migrator.ConfigureV1StorDB(*outStorDBType, *outStorDBHost, *outStorDBPort,
+		*outStorDBName, *outStorDBUser, *outStorDBPass); err != nil {
+		log.Fatal(err)
 	}
 	if mgrCfg.DataDbName != *outDataDBName || mgrCfg.DataDbType != *outDataDBType || mgrCfg.DataDbHost != *outDataDBHost {
 		sameDataDB = false

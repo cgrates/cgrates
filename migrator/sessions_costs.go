@@ -28,7 +28,7 @@ import (
 
 func (m *Migrator) migrateSessionSCosts() (err error) {
 	var vrs engine.Versions
-	vrs, err = m.OutStorDB().GetVersions("")
+	vrs, err = m.storDBOut.GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -47,10 +47,10 @@ func (m *Migrator) migrateSessionSCosts() (err error) {
 		switch m.storDBType {
 		case utils.MYSQL:
 			isPostGres = false
-			storSQL = m.storDB.(*engine.SQLStorage).Db
+			storSQL = m.storDBOut.(*engine.SQLStorage).Db
 		case utils.POSTGRES:
 			isPostGres = true
-			storSQL = m.storDB.(*engine.SQLStorage).Db
+			storSQL = m.storDBOut.(*engine.SQLStorage).Db
 		default:
 			return utils.NewCGRError(utils.Migrator,
 				utils.MandatoryIEMissingCaps,
@@ -66,14 +66,14 @@ func (m *Migrator) migrateSessionSCosts() (err error) {
 		}
 		fallthrough // incremental updates
 	case 2: // Simply removing them should be enough since if the system is offline they are most probably stale already
-		if err := m.storDB.RemoveSMCost(nil); err != nil {
+		if err := m.storDBOut.RemoveSMCost(nil); err != nil {
 			return err
 		}
 
 	}
 	m.stats[utils.SessionSCosts] = -1
 	vrs = engine.Versions{utils.SessionSCosts: engine.CurrentStorDBVersions()[utils.SessionSCosts]}
-	if err := m.storDB.SetVersions(vrs, false); err != nil {
+	if err := m.storDBOut.SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
 			err.Error(),
