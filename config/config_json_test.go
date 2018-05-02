@@ -1249,10 +1249,17 @@ func TestDfLoaderCfg(t *testing.T) {
 		Tpid:            utils.StringPointer(""),
 		Data_path:       utils.StringPointer(""),
 		Disable_reverse: utils.BoolPointer(false),
-		Caches_conns: &[]*HaPoolJsonCfg{&HaPoolJsonCfg{
-			Address:   utils.StringPointer("127.0.0.1:2012"),
-			Transport: utils.StringPointer(utils.MetaJSONrpc),
-		}},
+		Caches_conns: &[]*HaPoolJsonCfg{
+			&HaPoolJsonCfg{
+				Address:   utils.StringPointer("127.0.0.1:2012"),
+				Transport: utils.StringPointer(utils.MetaJSONrpc),
+			},
+		},
+		Scheduler_conns: &[]*HaPoolJsonCfg{
+			&HaPoolJsonCfg{
+				Address: utils.StringPointer("127.0.0.1:2012"),
+			},
+		},
 	}
 	if cfg, err := dfCgrJsonCfg.LoaderCfgJson(); err != nil {
 		t.Error(err)

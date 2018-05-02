@@ -619,6 +619,9 @@ const CGRATES_CFG_JSON = `
 	"caches_conns":[						// addresses towards cacheS components for reloads
 		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
+	"scheduler_conns": [
+		{"address": "127.0.0.1:2012"}
+	],
 },
 
 

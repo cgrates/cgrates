@@ -23,6 +23,7 @@ type LoaderCgrCfg struct {
 	DataPath       string
 	DisableReverse bool
 	CachesConns    []*HaPoolConfig
+	SchedulerConns []*HaPoolConfig
 }
 
 func (ld *LoaderCgrCfg) loadFromJsonCfg(jsnCfg *LoaderCfgJson) (err error) {
@@ -40,6 +41,13 @@ func (ld *LoaderCgrCfg) loadFromJsonCfg(jsnCfg *LoaderCfgJson) (err error) {
 		for idx, jsnHaCfg := range *jsnCfg.Caches_conns {
 			ld.CachesConns[idx] = NewDfltHaPoolConfig()
 			ld.CachesConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
+	}
+	if jsnCfg.Scheduler_conns != nil {
+		ld.SchedulerConns = make([]*HaPoolConfig, len(*jsnCfg.Scheduler_conns))
+		for idx, jsnScheHaCfg := range *jsnCfg.Scheduler_conns {
+			ld.SchedulerConns[idx] = NewDfltHaPoolConfig()
+			ld.SchedulerConns[idx].loadFromJsonCfg(jsnScheHaCfg)
 		}
 	}
 	return nil
