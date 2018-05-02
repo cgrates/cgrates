@@ -323,8 +323,8 @@ func testMigratorAccounts(t *testing.T) {
 	m2 := &engine.Balance{Uuid: "", ID: "", Value: 21, Directions: utils.StringMap{"*OUT": true}, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), DestinationIDs: utils.NewStringMap(""), RatingSubject: "",
 		Categories: utils.NewStringMap(), SharedGroups: utils.NewStringMap(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}, TimingIDs: utils.NewStringMap(""), Factor: engine.ValueFactor{}}
 	testAccount := &engine.Account{ID: "CUSTOMER_1:rif", BalanceMap: map[string]engine.Balances{utils.DATA: engine.Balances{v2d}, utils.VOICE: engine.Balances{v2b}, utils.MONETARY: engine.Balances{m2}}, UnitCounters: engine.UnitCounters{}, ActionTriggers: engine.ActionTriggers{}}
-	switch {
-	case action == utils.REDIS:
+	switch action {
+	case utils.REDIS, utils.MONGO:
 		err := mig.oldDataDB.setV1Account(v1Acc)
 		if err != nil {
 			t.Error("Error when setting v1 Accounts ", err.Error())
@@ -347,28 +347,7 @@ func testMigratorAccounts(t *testing.T) {
 		} else if !reflect.DeepEqual(testAccount, result) {
 			t.Errorf("Expecting: %+v, received: %+v", testAccount, result)
 		}
-	case action == utils.MONGO:
-		err := mig.oldDataDB.setV1Account(v1Acc)
-		if err != nil {
-			t.Error("Error when marshaling ", err.Error())
-		}
-		currentVersion := engine.Versions{utils.StatS: 2, utils.Thresholds: 2, utils.Accounts: 1, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
-		err = mig.dmOut.DataDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for Accounts ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaAccounts})
-		if err != nil {
-			t.Error("Error when migrating Accounts ", err.Error())
-		}
-		result, err := mig.dmOut.DataDB().GetAccount(testAccount.ID)
-		if err != nil {
-			t.Error("Error when getting Accounts ", err.Error())
-		}
-		if !reflect.DeepEqual(testAccount, result) {
-			t.Errorf("Expecting: %+v, received: %+v", testAccount, result)
-		}
-	case action == Move:
+	case Move:
 		if err := mig.dmIN.DataDB().SetAccount(testAccount); err != nil {
 			log.Print("GOT ERR DMIN", err)
 		}
@@ -394,8 +373,8 @@ func testMigratorAccounts(t *testing.T) {
 func testMigratorActionPlans(t *testing.T) {
 	v1ap := &v1ActionPlans{&v1ActionPlan{Id: "test", AccountIds: []string{"one"}, Timing: &engine.RateInterval{Timing: &engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}
 	ap := &engine.ActionPlan{Id: "test", AccountIDs: utils.StringMap{"one": true}, ActionTimings: []*engine.ActionTiming{&engine.ActionTiming{Timing: &engine.RateInterval{Timing: &engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}}
-	switch {
-	case action == utils.REDIS:
+	switch action {
+	case utils.REDIS, utils.Mongo:
 		err := mig.oldDataDB.setV1ActionPlans(v1ap)
 		if err != nil {
 			t.Error("Error when setting v1 ActionPlan ", err.Error())
@@ -420,32 +399,7 @@ func testMigratorActionPlans(t *testing.T) {
 		} else if ap.ActionTimings[0].Weight != result.ActionTimings[0].Weight || ap.ActionTimings[0].ActionsID != result.ActionTimings[0].ActionsID {
 			t.Errorf("Expecting: %+v, received: %+v", ap.ActionTimings[0].Weight, result.ActionTimings[0].Weight)
 		}
-	case action == utils.MONGO:
-		err := mig.oldDataDB.setV1ActionPlans(v1ap)
-		if err != nil {
-			t.Error("Error when setting v1 ActionPlans ", err.Error())
-		}
-		currentVersion := engine.Versions{utils.StatS: 2, utils.Thresholds: 2, utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 1, utils.SharedGroups: 2}
-		err = mig.dmOut.DataDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for ActionPlan ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaActionPlans})
-		if err != nil {
-			t.Error("Error when migrating ActionPlans ", err.Error())
-		}
-		result, err := mig.dmOut.DataDB().GetActionPlan(ap.Id, true, utils.NonTransactional)
-		if err != nil {
-			t.Error("Error when getting ActionPlan ", err.Error())
-		}
-		if ap.Id != result.Id || !reflect.DeepEqual(ap.AccountIDs, result.AccountIDs) {
-			t.Errorf("Expecting: %+v, received: %+v", *ap, result)
-		} else if !reflect.DeepEqual(ap.ActionTimings[0].Timing, result.ActionTimings[0].Timing) {
-			t.Errorf("Expecting: %+v, received: %+v", ap.ActionTimings[0].Timing, result.ActionTimings[0].Timing)
-		} else if ap.ActionTimings[0].Weight != result.ActionTimings[0].Weight || ap.ActionTimings[0].ActionsID != result.ActionTimings[0].ActionsID {
-			t.Errorf("Expecting: %+v, received: %+v", ap.ActionTimings[0].Weight, result.ActionTimings[0].Weight)
-		}
-	case action == Move:
+	case Move:
 		if err := mig.dmIN.DataDB().SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
 			t.Error("Error when setting ActionPlan ", err.Error())
 		}
@@ -504,8 +458,8 @@ func testMigratorActionTriggers(t *testing.T) {
 			Executed:          true,
 		},
 	}
-	switch {
-	case action == utils.REDIS:
+	switch action {
+	case utils.REDIS, utils.MONGO:
 		err := mig.oldDataDB.setV1ActionTriggers(v1atrs)
 		if err != nil {
 			t.Error("Error when setting v1 ActionTriggers ", err.Error())
@@ -586,13 +540,7 @@ func testMigratorActionTriggers(t *testing.T) {
 		} else if !reflect.DeepEqual(atrs[0].Balance.Blocker, result[0].Balance.Blocker) {
 			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance.Blocker, result[0].Balance.Blocker)
 		}
-	case action == utils.MONGO:
-		err, _ := mig.Migrate([]string{utils.MetaActionTriggers})
-		if err != nil && err != utils.ErrNotImplemented {
-			t.Error("Error when migrating ActionTriggers ", err.Error())
-		}
-
-	case action == Move:
+	case Move:
 		if err := mig.dmIN.SetActionTriggers(atrs[0].ID, atrs, utils.NonTransactional); err != nil {
 			t.Error("Error when setting ActionPlan ", err.Error())
 		}
@@ -715,8 +663,8 @@ func testMigratorActions(t *testing.T) {
 			},
 		},
 	}
-	switch {
-	case action == utils.REDIS:
+	switch action {
+	case utils.REDIS, utils.MONGO:
 		err := mig.oldDataDB.setV1Actions(v1act)
 		if err != nil {
 			t.Error("Error when setting v1 Actions ", err.Error())
@@ -737,29 +685,7 @@ func testMigratorActions(t *testing.T) {
 		if !reflect.DeepEqual(*act, result) {
 			t.Errorf("Expecting: %+v, received: %+v", *act, result)
 		}
-
-	case action == utils.MONGO:
-		err := mig.oldDataDB.setV1Actions(v1act)
-		if err != nil {
-			t.Error("Error when setting v1 Actions ", err.Error())
-		}
-		currentVersion := engine.Versions{utils.StatS: 2, utils.Thresholds: 2, utils.Accounts: 2, utils.Actions: 1, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
-		err = mig.dmOut.DataDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for Actions ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaActions})
-		if err != nil {
-			t.Error("Error when migrating Actions ", err.Error())
-		}
-		result, err := mig.dmOut.GetActions((*v1act)[0].Id, true, utils.NonTransactional)
-		if err != nil {
-			t.Error("Error when getting Actions ", err.Error())
-		}
-		if !reflect.DeepEqual(*act, result) {
-			t.Errorf("Expecting: %+v, received: %+v", *act, result)
-		}
-	case action == Move:
+	case Move:
 		if err := mig.dmIN.SetActions((*v1act)[0].Id, *act, utils.NonTransactional); err != nil {
 			t.Error("Error when setting ActionPlan ", err.Error())
 		}
@@ -797,8 +723,8 @@ func testMigratorSharedGroups(t *testing.T) {
 		},
 		MemberIds: utils.NewStringMap("1", "2", "3"),
 	}
-	switch {
-	case action == utils.REDIS:
+	switch action {
+	case utils.REDIS, utils.MONGO:
 		err := mig.oldDataDB.setV1SharedGroup(v1sqp)
 		if err != nil {
 			t.Error("Error when setting v1 SharedGroup ", err.Error())
@@ -819,28 +745,7 @@ func testMigratorSharedGroups(t *testing.T) {
 		if !reflect.DeepEqual(sqp, result) {
 			t.Errorf("Expecting: %+v, received: %+v", sqp, result)
 		}
-	case action == utils.MONGO:
-		err := mig.oldDataDB.setV1SharedGroup(v1sqp)
-		if err != nil {
-			t.Error("Error when setting v1 SharedGroup ", err.Error())
-		}
-		currentVersion := engine.Versions{utils.StatS: 2, utils.Thresholds: 2, utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 1}
-		err = mig.dmOut.DataDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for SharedGroup ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaSharedGroups})
-		if err != nil {
-			t.Error("Error when migrating SharedGroup ", err.Error())
-		}
-		result, err := mig.dmOut.GetSharedGroup(v1sqp.Id, true, utils.NonTransactional)
-		if err != nil {
-			t.Error("Error when getting SharedGroup ", err.Error())
-		}
-		if !reflect.DeepEqual(sqp, result) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp, result)
-		}
-	case action == Move:
+	case Move:
 		if err := mig.dmIN.SetSharedGroup(sqp, utils.NonTransactional); err != nil {
 			t.Error("Error when setting SharedGroup ", err.Error())
 		}
@@ -951,8 +856,8 @@ func testMigratorStats(t *testing.T) {
 			}
 		}
 	}
-	switch {
-	case action == utils.REDIS:
+	switch action {
+	case utils.REDIS, utils.MONGO:
 		err := mig.oldDataDB.setV1Stats(v1Sts)
 		if err != nil {
 			t.Error("Error when setting v1Stat ", err.Error())
@@ -1021,75 +926,7 @@ func testMigratorStats(t *testing.T) {
 		if !reflect.DeepEqual(sq.ID, result2.ID) {
 			t.Errorf("Expecting: %+v, received: %+v", sq.ID, result2.ID)
 		}
-	case action == utils.MONGO:
-		err := mig.oldDataDB.setV1Stats(v1Sts)
-		if err != nil {
-			t.Error("Error when setting v1Stat ", err.Error())
-		}
-		currentVersion := engine.Versions{utils.StatS: 1, utils.Thresholds: 2, utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
-		err = mig.dmOut.DataDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for stats ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaStats})
-		if err != nil {
-			t.Error("Error when migrating Stats ", err.Error())
-		}
-		result, err := mig.dmOut.GetStatQueueProfile("cgrates.org", v1Sts.Id, true, utils.NonTransactional)
-		if err != nil {
-			t.Error("Error when getting Stats ", err.Error())
-		}
-		if !reflect.DeepEqual(sqp.Tenant, result.Tenant) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp.Tenant, result.Tenant)
-		}
-		if !reflect.DeepEqual(sqp.ID, result.ID) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp.ID, result.ID)
-		}
-		if !reflect.DeepEqual(sqp.FilterIDs, result.FilterIDs) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp.FilterIDs, result.FilterIDs)
-		}
-		if !reflect.DeepEqual(sqp.QueueLength, result.QueueLength) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp.QueueLength, result.QueueLength)
-		}
-		if !reflect.DeepEqual(sqp.TTL, result.TTL) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp.TTL, result.TTL)
-		}
-		if !reflect.DeepEqual(sqp.Metrics, result.Metrics) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp.Metrics, result.Metrics)
-		}
-		if !reflect.DeepEqual(sqp.ThresholdIDs, result.ThresholdIDs) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp.ThresholdIDs, result.ThresholdIDs)
-		}
-		if !reflect.DeepEqual(sqp.Blocker, result.Blocker) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp.Blocker, result.Blocker)
-		}
-		if !reflect.DeepEqual(sqp.Stored, result.Stored) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp.Stored, result.Stored)
-		}
-		if !reflect.DeepEqual(sqp.Weight, result.Weight) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp.Weight, result.Weight)
-		}
-		if !reflect.DeepEqual(sqp, result) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp, result)
-		}
-		result1, err := mig.dmOut.GetFilter("cgrates.org", v1Sts.Id, true, utils.NonTransactional)
-		if err != nil {
-			t.Error("Error when getting Stats ", err.Error())
-		}
-		if !reflect.DeepEqual(filter.ActivationInterval, result1.ActivationInterval) {
-			t.Errorf("Expecting: %+v, received: %+v", filter.ActivationInterval, result1.ActivationInterval)
-		}
-		if !reflect.DeepEqual(filter.Tenant, result1.Tenant) {
-			t.Errorf("Expecting: %+v, received: %+v", filter.Tenant, result1.Tenant)
-		}
-		result2, err := mig.dmOut.GetStatQueue("cgrates.org", sq.ID, true, utils.NonTransactional)
-		if err != nil {
-			t.Error("Error when getting Stats ", err.Error())
-		}
-		if !reflect.DeepEqual(sq.ID, result2.ID) {
-			t.Errorf("Expecting: %+v, received: %+v", sq.ID, result2.ID)
-		}
-	case action == Move:
+	case Move:
 		if err := mig.dmIN.SetStatQueueProfile(sqp, true); err != nil {
 			t.Error("Error when setting Stats ", err.Error())
 		}
@@ -1692,6 +1529,7 @@ func testMigratorRatingProfile(t *testing.T) {
 		}
 	}
 }
+
 func testMigratorRQF(t *testing.T) {
 	fp := &engine.Filter{
 		Tenant: "cgrates.org",
