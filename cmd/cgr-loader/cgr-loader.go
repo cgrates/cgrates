@@ -86,6 +86,7 @@ var (
 	rpcEncoding   = flag.String("rpc_encoding", utils.MetaJSONrpc, "RPC encoding used <gob|json>")
 	cacheSAddress = flag.String("caches_address", dfltCfg.LoaderCgrConfig.CachesConns[0].Address,
 		"CacheS component to contact for cache reloads, empty to disable automatic cache reloads")
+	schedulerAddress = flag.String("scheduler_address", dfltCfg.LoaderCgrConfig.SchedulerConns[0].Address, "")
 
 	importID       = flag.String("import_id", "", "Uniquely identify an import/load, postpended to some automatic fields")
 	timezone       = flag.String("timezone", "", `Timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>`)
@@ -181,6 +182,14 @@ func main() {
 		if *cacheSAddress != "" {
 			ldrCfg.LoaderCgrConfig.CachesConns = append(ldrCfg.LoaderCgrConfig.CachesConns,
 				&config.HaPoolConfig{Address: *cacheSAddress})
+		}
+	}
+
+	if *schedulerAddress != dfltCfg.LoaderCgrConfig.SchedulerConns[0].Address {
+		ldrCfg.LoaderCgrConfig.SchedulerConns = make([]*config.HaPoolConfig, 0)
+		if *schedulerAddress != "" {
+			ldrCfg.LoaderCgrConfig.SchedulerConns = append(ldrCfg.LoaderCgrConfig.SchedulerConns,
+				&config.HaPoolConfig{Address: *schedulerAddress})
 		}
 	}
 

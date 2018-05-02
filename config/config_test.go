@@ -1276,6 +1276,11 @@ func TestCgrLoaderCfgDefault(t *testing.T) {
 				Transport: utils.MetaJSONrpc,
 			},
 		},
+		SchedulerConns: []*HaPoolConfig{
+			&HaPoolConfig{
+				Address: "127.0.0.1:2012",
+			},
+		},
 	}
 	if !reflect.DeepEqual(cgrCfg.LoaderCgrConfig, eLdrCfg) {
 		t.Errorf("received: %+v, expecting: %+v", utils.ToJSON(cgrCfg.LoaderCgrConfig), utils.ToJSON(eLdrCfg))

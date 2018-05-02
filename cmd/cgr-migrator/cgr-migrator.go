@@ -109,8 +109,6 @@ func main() {
 
 	ldrCfg := config.CgrConfig()
 
-	//fmt.Printf("Before change: %+v \n \n", ldrCfg)
-
 	if *inDataDBType != dfltCfg.DataDbType {
 		ldrCfg.DataDbType = *inDataDBType
 	}
@@ -162,8 +160,6 @@ func main() {
 	if *inDBDataEncoding != "" {
 		ldrCfg.DBDataEncoding = *inDBDataEncoding
 	}
-
-	//fmt.Printf("After change: %+v \n \n", ldrCfg)
 
 	if *outDataDBType == utils.MetaDynamic {
 		*outDataDBType = ldrCfg.DataDbType
