@@ -613,11 +613,18 @@ const (
 // MetaFilterIndexesAPIs
 const (
 	ApierV1ComputeFilterIndexes = "ApierV1.ComputeFilterIndexes"
+	ApierV1ReloadCache          = "ApierV1.ReloadCache"
+	ApierV1ReloadScheduler      = "ApierV1.ReloadScheduler"
 	ApierV1Ping                 = "ApierV1.Ping"
 )
 
 const (
 	ApierV2LoadTariffPlanFromFolder = "ApierV2.LoadTariffPlanFromFolder"
+)
+
+// MetaUsersAPIs
+const (
+	UsersV1ReloadUsers = "UsersV1.ReloadUsers"
 )
 
 // MetaSupplierAPIs

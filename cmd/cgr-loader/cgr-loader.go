@@ -333,7 +333,7 @@ func main() {
 		if err := tpReader.WriteToDatabase(*flush, *verbose, *disableReverse); err != nil {
 			log.Fatal("Could not write to database: ", err)
 		}
-		var dstIds, revDstIDs, rplIds, rpfIds, actIds, aapIDs, shgIds, alsIds, lcrIds, dcsIds, rspIDs, resIDs, aatIDs, ralsIDs []string
+		var dstIds, revDstIDs, rplIds, rpfIds, actIds, aapIDs, shgIds, alsIds, lcrIds, dcsIds, rspIDs, resIDs, aatIDs, ralsIDs, stqIDs, stqpIDs, trsIDs, trspfIDs, flrIDs, spfIDs, apfIDs []string
 		if cacheS != nil {
 			dstIds, _ = tpReader.GetLoadedIds(utils.DESTINATION_PREFIX)
 			revDstIDs, _ = tpReader.GetLoadedIds(utils.REVERSE_DESTINATION_PREFIX)
@@ -349,6 +349,13 @@ func main() {
 			resIDs, _ = tpReader.GetLoadedIds(utils.ResourcesPrefix)
 			aatIDs, _ = tpReader.GetLoadedIds(utils.ACTION_TRIGGER_PREFIX)
 			ralsIDs, _ = tpReader.GetLoadedIds(utils.REVERSE_ALIASES_PREFIX)
+			stqIDs, _ = tpReader.GetLoadedIds(utils.StatQueuePrefix)
+			stqpIDs, _ = tpReader.GetLoadedIds(utils.StatQueueProfilePrefix)
+			trsIDs, _ = tpReader.GetLoadedIds(utils.ThresholdPrefix)
+			trspfIDs, _ = tpReader.GetLoadedIds(utils.ThresholdProfilePrefix)
+			flrIDs, _ = tpReader.GetLoadedIds(utils.FilterPrefix)
+			spfIDs, _ = tpReader.GetLoadedIds(utils.SupplierProfilePrefix)
+			apfIDs, _ = tpReader.GetLoadedIds(utils.AttributeProfilePrefix)
 		}
 		aps, _ := tpReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
 		// for users reloading
@@ -366,7 +373,7 @@ func main() {
 			if *verbose {
 				log.Print("Reloading cache")
 			}
-			if err = cacheS.Call("ApierV1.ReloadCache",
+			if err = cacheS.Call(utils.ApierV1ReloadCache,
 				utils.AttrReloadCache{ArgsCache: utils.ArgsCache{
 					DestinationIDs:        &dstIds,
 					ReverseDestinationIDs: &revDstIDs,
@@ -375,14 +382,21 @@ func main() {
 					ActionIDs:             &actIds,
 					ActionPlanIDs:         &aps,
 					AccountActionPlanIDs:  &aapIDs,
-					ActionTriggerIDs:      &aatIDs,
 					SharedGroupIDs:        &shgIds,
+					AliasIDs:              &alsIds,
 					LCRids:                &lcrIds,
 					DerivedChargerIDs:     &dcsIds,
-					AliasIDs:              &alsIds,
-					ReverseAliasIDs:       &ralsIDs,
 					ResourceProfileIDs:    &rspIDs,
-					ResourceIDs:           &resIDs},
+					ResourceIDs:           &resIDs,
+					ActionTriggerIDs:      &aatIDs,
+					ReverseAliasIDs:       &ralsIDs,
+					StatsQueueIDs:         &stqIDs,
+					StatsQueueProfileIDs:  &stqpIDs,
+					ThresholdIDs:          &trsIDs,
+					ThresholdProfileIDs:   &trspfIDs,
+					FilterIDs:             &flrIDs,
+					SupplierProfileIDs:    &spfIDs,
+					AttributeProfileIDs:   &apfIDs},
 					FlushAll: *flush,
 				}, &reply); err != nil {
 				log.Printf("WARNING: Got error on cache reload: %s\n", err.Error())
@@ -392,7 +406,7 @@ func main() {
 				if *verbose {
 					log.Print("Reloading scheduler")
 				}
-				if err = cacheS.Call("ApierV1.ReloadScheduler", "", &reply); err != nil {
+				if err = cacheS.Call(utils.ApierV1ReloadScheduler, "", &reply); err != nil {
 					log.Printf("WARNING: Got error on scheduler reload: %s\n", err.Error())
 				}
 			}
@@ -402,7 +416,7 @@ func main() {
 					log.Print("Reloading Users data")
 				}
 				var reply string
-				if err := userS.Call("UsersV1.ReloadUsers", "", &reply); err != nil {
+				if err := userS.Call(utils.UsersV1ReloadUsers, "", &reply); err != nil {
 					log.Printf("WARNING: Failed reloading users data, error: %s\n", err.Error())
 				}
 			}
