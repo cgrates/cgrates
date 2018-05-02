@@ -947,7 +947,7 @@ func (ms *MongoStorage) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
 	if cdr.OrderID == 0 {
 		cdr.OrderID = ms.cnter.Next()
 	}
-	session, col := ms.conn(utils.CDRsTBL)
+	session, col := ms.conn(ColCDRs)
 	defer session.Close()
 	if allowUpdate {
 		_, err = col.Upsert(bson.M{CGRIDLow: cdr.CGRID, RunIDLow: cdr.RunID}, cdr)
@@ -989,7 +989,7 @@ func (ms *MongoStorage) cleanEmptyFilters(filters bson.M) {
 	}
 }
 
-//  _, err := col(utils.CDRsTBL).UpdateAll(bson.M{CGRIDLow: bson.M{"$in": cgrIds}}, bson.M{"$set": bson.M{"deleted_at": time.Now()}})
+//  _, err := col(ColCDRs).UpdateAll(bson.M{CGRIDLow: bson.M{"$in": cgrIds}}, bson.M{"$set": bson.M{"deleted_at": time.Now()}})
 func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR, int64, error) {
 	var minUsage, maxUsage *time.Duration
 	if len(qryFltr.MinUsage) != 0 {
@@ -1103,7 +1103,7 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	}
 	//file.WriteString(fmt.Sprintf("AFTER: %v\n", utils.ToIJSON(filters)))
 	//file.Close()
-	session, col := ms.conn(utils.CDRsTBL)
+	session, col := ms.conn(ColCDRs)
 	defer session.Close()
 	if remove {
 		if chgd, err := col.RemoveAll(filters); err != nil {

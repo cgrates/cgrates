@@ -67,6 +67,7 @@ const (
 	colFlt   = "filters"
 	colSpp   = "supplier_profiles"
 	colAttr  = "attribute_profiles"
+	ColCDRs  = "cdrs"
 )
 
 var (

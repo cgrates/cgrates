@@ -28,7 +28,7 @@ import (
 
 func NewMigrator(dmIN *engine.DataManager, dmOut *engine.DataManager, dataDBType, dataDBEncoding string,
 	storDB engine.StorDB, storDBType string, oldDataDB MigratorDataDB, oldDataDBType, oldDataDBEncoding string,
-	oldStorDB engine.StorDB, oldStorDBType string, dryRun bool, sameDataDB bool, sameStorDB bool,
+	oldStorDB MigratorStorDB, oldStorDBType string, dryRun bool, sameDataDB bool, sameStorDB bool,
 	datadb_versions bool, stordb_versions bool) (m *Migrator, err error) {
 	var mrshlr engine.Marshaler
 	var oldmrshlr engine.Marshaler
@@ -64,7 +64,7 @@ type Migrator struct {
 	mrshlr          engine.Marshaler
 	oldDataDB       MigratorDataDB
 	oldDataDBType   string
-	oldStorDB       engine.StorDB
+	oldStorDB       MigratorStorDB
 	oldStorDBType   string
 	oldmrshlr       engine.Marshaler
 	dryRun          bool
