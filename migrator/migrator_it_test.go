@@ -16,6 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package migrator
 
+/*
 import (
 	"flag"
 	"fmt"
@@ -39,8 +40,7 @@ var (
 	Move            = "move"
 	action          string
 	mig             *Migrator
-	dataDir         = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	loadHistorySize = flag.Int("load_history_size", config.CgrConfig().LoadHistorySize, "Limit the number of records in the load history")
+
 )
 
 // subtests to be executed for each migrator
@@ -2948,3 +2948,4 @@ func testMigratorTpAliases(t *testing.T) {
 		}
 	}
 }
+*/
