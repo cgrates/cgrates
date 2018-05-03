@@ -537,6 +537,12 @@ const (
 	Opensips                     = "opensips"
 )
 
+// Migrator Action
+const (
+	Move    = "move"
+	Migrate = "migrate"
+)
+
 // MetaMetrics
 const (
 	MetaASR     = "*asr"
