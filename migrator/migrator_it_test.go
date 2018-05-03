@@ -46,7 +46,7 @@ var (
 // subtests to be executed for each migrator
 var sTestsITMigrator = []func(t *testing.T){
 	testFlush,
-	testMigratorAccounts,
+	testMigratorAccounts, // Done
 	testMigratorActionPlans,
 	testMigratorActionTriggers,
 	testMigratorActions,
@@ -307,65 +307,6 @@ func testFlush(t *testing.T) {
 	if path_out != "" {
 		if err := mig.storDBOut.Flush(path.Join(cfg_out.DataFolderPath, "storage", cfg_out.StorDBType)); err != nil {
 			t.Error(err)
-		}
-	}
-}
-
-func testMigratorAccounts(t *testing.T) {
-	v1d := &v1Balance{Value: 100000, Weight: 10, DestinationIds: "NAT", ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}
-	v1b := &v1Balance{Value: 100000, Weight: 10, DestinationIds: "NAT", ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}
-	v1Acc := &v1Account{Id: "*OUT:CUSTOMER_1:rif", BalanceMap: map[string]v1BalanceChain{utils.DATA: v1BalanceChain{v1d}, utils.VOICE: v1BalanceChain{v1b}, utils.MONETARY: v1BalanceChain{&v1Balance{Value: 21, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}}}
-
-	v2d := &engine.Balance{Uuid: "", ID: "", Value: 100000, Directions: utils.StringMap{"*OUT": true}, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), Weight: 10, DestinationIDs: utils.StringMap{"NAT": true},
-		RatingSubject: "", Categories: utils.NewStringMap(), SharedGroups: utils.NewStringMap(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}, TimingIDs: utils.NewStringMap(""), Factor: engine.ValueFactor{}}
-	v2b := &engine.Balance{Uuid: "", ID: "", Value: 0.0001, Directions: utils.StringMap{"*OUT": true}, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), Weight: 10, DestinationIDs: utils.StringMap{"NAT": true},
-		RatingSubject: "", Categories: utils.NewStringMap(), SharedGroups: utils.NewStringMap(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}, TimingIDs: utils.NewStringMap(""), Factor: engine.ValueFactor{}}
-	m2 := &engine.Balance{Uuid: "", ID: "", Value: 21, Directions: utils.StringMap{"*OUT": true}, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), DestinationIDs: utils.NewStringMap(""), RatingSubject: "",
-		Categories: utils.NewStringMap(), SharedGroups: utils.NewStringMap(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}, TimingIDs: utils.NewStringMap(""), Factor: engine.ValueFactor{}}
-	testAccount := &engine.Account{ID: "CUSTOMER_1:rif", BalanceMap: map[string]engine.Balances{utils.DATA: engine.Balances{v2d}, utils.VOICE: engine.Balances{v2b}, utils.MONETARY: engine.Balances{m2}}, UnitCounters: engine.UnitCounters{}, ActionTriggers: engine.ActionTriggers{}}
-	switch action {
-	case utils.REDIS, utils.MONGO:
-		err := mig.oldDataDB.setV1Account(v1Acc)
-		if err != nil {
-			t.Error("Error when setting v1 Accounts ", err.Error())
-		}
-		currentVersion := engine.Versions{utils.StatS: 2, utils.Thresholds: 2, utils.Accounts: 1, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
-		err = mig.dmOut.DataDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for Accounts ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaAccounts})
-		if err != nil {
-			t.Error("Error when migrating Accounts ", err.Error())
-		}
-		result, err := mig.dmOut.DataDB().GetAccount(testAccount.ID)
-		if err != nil {
-			t.Error("Error when getting Accounts ", err.Error())
-		}
-		if !reflect.DeepEqual(testAccount.BalanceMap["*voice"][0], result.BalanceMap["*voice"][0]) {
-			t.Errorf("Expecting: %+v, received: %+v", testAccount.BalanceMap["*voice"][0], result.BalanceMap["*voice"][0])
-		} else if !reflect.DeepEqual(testAccount, result) {
-			t.Errorf("Expecting: %+v, received: %+v", testAccount, result)
-		}
-	case Move:
-		if err := mig.dmIN.DataDB().SetAccount(testAccount); err != nil {
-			log.Print("GOT ERR DMIN", err)
-		}
-		currentVersion := engine.CurrentDataDBVersions()
-		err := mig.dmOut.DataDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for Accounts ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaAccounts})
-		if err != nil {
-			t.Error("Error when migrating Accounts ", err.Error())
-		}
-		result, err := mig.dmOut.DataDB().GetAccount(testAccount.ID)
-		if err != nil {
-			log.Print("GOT ERR DMOUT", err)
-		}
-		if !reflect.DeepEqual(testAccount, result) {
-			t.Errorf("Expecting: %+v, received: %+v", testAccount, result)
 		}
 	}
 }

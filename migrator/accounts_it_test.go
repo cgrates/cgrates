@@ -49,19 +49,83 @@ var sTestsAccIT = []func(t *testing.T){
 	testAccITMigrateAndMove,
 }
 
-func TestAccountITaccMigratorrateRedisConnection(t *testing.T) {
-
+func TestAccountITRedisConnection(t *testing.T) {
+	var err error
+	accPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	accCfgIn, err = config.NewCGRConfigFromFolder(accPathIn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dataDBIn, err := engine.ConfigureDataStorage(accCfgIn.DataDbType,
+		accCfgIn.DataDbHost, accCfgIn.DataDbPort, accCfgIn.DataDbName,
+		accCfgIn.DataDbUser, accCfgIn.DataDbPass, accCfgIn.DBDataEncoding,
+		config.CgrConfig().CacheCfg(), *loadHistorySize)
+	if err != nil {
+		log.Fatal(err)
+	}
+	dataDBOut, err := engine.ConfigureDataStorage(accCfgIn.DataDbType,
+		accCfgIn.DataDbHost, accCfgIn.DataDbPort, accCfgIn.DataDbName,
+		accCfgIn.DataDbUser, accCfgIn.DataDbPass, accCfgIn.DBDataEncoding,
+		config.CgrConfig().CacheCfg(), *loadHistorySize)
+	if err != nil {
+		log.Fatal(err)
+	}
+	oldDataDB, err := ConfigureV1DataStorage(accCfgIn.DataDbType,
+		accCfgIn.DataDbHost, accCfgIn.DataDbPort, accCfgIn.DataDbName,
+		accCfgIn.DataDbUser, accCfgIn.DataDbPass, accCfgIn.DBDataEncoding)
+	if err != nil {
+		log.Fatal(err)
+	}
+	accMigrator, err = NewMigrator(dataDBIn, dataDBOut, accCfgIn.DataDbType,
+		accCfgIn.DBDataEncoding, nil, nil, accCfgIn.StorDBType, oldDataDB,
+		accCfgIn.DataDbType, accCfgIn.DBDataEncoding, nil, accCfgIn.StorDBType,
+		false, false, false, false, false)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
-func TestAccountITaccMigratorrateRedis(t *testing.T) {
+func TestAccountITRedis(t *testing.T) {
 	accAction = utils.Migrate
 	for _, stest := range sTestsAccIT {
 		t.Run("TestAccountITMigrateRedis", stest)
 	}
-
 }
 
 func TestAccountITMongoConnection(t *testing.T) {
+	var err error
+	accPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	accCfgIn, err = config.NewCGRConfigFromFolder(accPathIn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dataDBIn, err := engine.ConfigureDataStorage(accCfgIn.DataDbType,
+		accCfgIn.DataDbHost, accCfgIn.DataDbPort, accCfgIn.DataDbName,
+		accCfgIn.DataDbUser, accCfgIn.DataDbPass, accCfgIn.DBDataEncoding,
+		config.CgrConfig().CacheCfg(), *loadHistorySize)
+	if err != nil {
+		log.Fatal(err)
+	}
+	dataDBOut, err := engine.ConfigureDataStorage(accCfgIn.DataDbType,
+		accCfgIn.DataDbHost, accCfgIn.DataDbPort, accCfgIn.DataDbName,
+		accCfgIn.DataDbUser, accCfgIn.DataDbPass, accCfgIn.DBDataEncoding,
+		config.CgrConfig().CacheCfg(), *loadHistorySize)
+	if err != nil {
+		log.Fatal(err)
+	}
+	oldDataDB, err := ConfigureV1DataStorage(accCfgIn.DataDbType,
+		accCfgIn.DataDbHost, accCfgIn.DataDbPort, accCfgIn.DataDbName,
+		accCfgIn.DataDbUser, accCfgIn.DataDbPass, accCfgIn.DBDataEncoding)
+	if err != nil {
+		log.Fatal(err)
+	}
+	accMigrator, err = NewMigrator(dataDBIn, dataDBOut, accCfgIn.DataDbType,
+		accCfgIn.DBDataEncoding, nil, nil, accCfgIn.StorDBType, oldDataDB,
+		accCfgIn.DataDbType, accCfgIn.DBDataEncoding, nil, accCfgIn.StorDBType,
+		false, false, false, false, false)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 }
 
@@ -73,24 +137,25 @@ func TestAccountITMongo(t *testing.T) {
 }
 
 func TestAccountITMoveConnection(t *testing.T) {
-	accPathIn := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	accCfgIn, err := config.NewCGRConfigFromFolder(accPathIn)
+	var err error
+	accPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	accCfgIn, err = config.NewCGRConfigFromFolder(accPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	accPathOut := path.Join(*dataDir, "conf", "samples", "tutmysql")
-	accCfgOut, err := config.NewCGRConfigFromFolder(accPathOut)
+	accPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	accCfgOut, err = config.NewCGRConfigFromFolder(accPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
-	dataDB, err := engine.ConfigureDataStorage(accCfgIn.DataDbType,
+	dataDBIn, err := engine.ConfigureDataStorage(accCfgIn.DataDbType,
 		accCfgIn.DataDbHost, accCfgIn.DataDbPort, accCfgIn.DataDbName,
 		accCfgIn.DataDbUser, accCfgIn.DataDbPass, accCfgIn.DBDataEncoding,
 		config.CgrConfig().CacheCfg(), *loadHistorySize)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDB2, err := engine.ConfigureDataStorage(accCfgOut.DataDbType,
+	dataDBOut, err := engine.ConfigureDataStorage(accCfgOut.DataDbType,
 		accCfgOut.DataDbHost, accCfgOut.DataDbPort, accCfgOut.DataDbName,
 		accCfgOut.DataDbUser, accCfgOut.DataDbPass, accCfgOut.DBDataEncoding,
 		config.CgrConfig().CacheCfg(), *loadHistorySize)
@@ -103,7 +168,7 @@ func TestAccountITMoveConnection(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	accMigrator, err = NewMigrator(dataDB2, dataDB, accCfgIn.DataDbType,
+	accMigrator, err = NewMigrator(dataDBIn, dataDBOut, accCfgIn.DataDbType,
 		accCfgIn.DBDataEncoding, nil, nil, accCfgIn.StorDBType, oldDataDB,
 		accCfgIn.DataDbType, accCfgIn.DBDataEncoding, nil, accCfgIn.StorDBType,
 		false, false, false, false, false)
@@ -205,7 +270,8 @@ func testAccITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when setting v1 Accounts ", err.Error())
 		}
-		currentVersion := engine.Versions{utils.StatS: 2,
+		currentVersion := engine.Versions{
+			utils.StatS:          2,
 			utils.Thresholds:     2,
 			utils.Accounts:       1,
 			utils.Actions:        2,
