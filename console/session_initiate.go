@@ -28,7 +28,7 @@ import (
 func init() {
 	c := &CmdSessionsInitiate{
 		name:      "session_initiate",
-		rpcMethod: utils.SessionSv1InitiateSession,
+		rpcMethod: utils.SessionSv1InitiateSessionWithDigest,
 		rpcParams: &sessions.V1InitSessionArgs{},
 	}
 	commands[c.Name()] = c

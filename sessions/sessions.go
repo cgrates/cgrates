@@ -1643,6 +1643,42 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 	return
 }
 
+type V1InitReplyWithDigest struct {
+	AttributesDigest   *string
+	ResourceAllocation *string
+	MaxUsage           *float64
+	//ThresholdsHits     *int
+}
+
+func (smg *SMGeneric) BiRPCv1InitiateSessionWithDigest(clnt rpcclient.RpcClientConnection,
+	args *V1InitSessionArgs, initReply *V1InitReplyWithDigest) (err error) {
+	if !args.GetAttributes && !args.AllocateResources &&
+		!args.InitSession {
+		return utils.NewErrMandatoryIeMissing("subsystems")
+	}
+	var initSessionRply V1InitSessionReply
+	if err = smg.BiRPCv1InitiateSession(clnt, args, &initSessionRply); err != nil {
+		return
+	}
+
+	if args.GetAttributes && initSessionRply.Attributes != nil {
+		initReply.AttributesDigest = utils.StringPointer(initSessionRply.Attributes.Digest())
+	}
+
+	if args.AllocateResources {
+		initReply.ResourceAllocation = initSessionRply.ResourceAllocation
+	}
+
+	if args.InitSession {
+		initReply.MaxUsage = utils.Float64Pointer(-1.0)
+		if *initSessionRply.MaxUsage != time.Duration(-1) {
+			initReply.MaxUsage = utils.Float64Pointer(initSessionRply.MaxUsage.Seconds())
+		}
+	}
+
+	return nil
+}
+
 type V1UpdateSessionArgs struct {
 	GetAttributes bool
 	UpdateSession bool

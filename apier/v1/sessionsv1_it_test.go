@@ -282,6 +282,44 @@ func TestSSv1ItInitiateSession(t *testing.T) {
 	}
 }
 
+func TestSSv1ItInitiateSessionWithDigest(t *testing.T) {
+	initUsage := time.Duration(5 * time.Minute)
+	args := &sessions.V1InitSessionArgs{
+		InitSession:       true,
+		AllocateResources: true,
+		GetAttributes:     true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItInitiateSession",
+			Event: map[string]interface{}{
+				utils.OriginID:    "TestSSv1It1",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       initUsage,
+			},
+		},
+	}
+	var rply sessions.V1InitReplyWithDigest
+	if err := sSv1BiRpc.Call(utils.SessionSv1InitiateSessionWithDigest,
+		args, &rply); err != nil {
+		t.Error(err)
+	}
+	if *rply.MaxUsage != initUsage.Seconds() {
+		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
+	}
+	if *rply.ResourceAllocation != "RES_ACNT_1001" {
+		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
+	}
+	eAttrs := utils.StringPointer("OfficeGroup:Marketing")
+	if !reflect.DeepEqual(eAttrs, rply.AttributesDigest) {
+		t.Errorf("expecting: %+v, received: %+v",
+			utils.ToJSON(eAttrs), utils.ToJSON(rply.AttributesDigest))
+	}
+}
+
 func TestSSv1ItUpdateSession(t *testing.T) {
 	reqUsage := 5 * time.Minute
 	args := &sessions.V1UpdateSessionArgs{
