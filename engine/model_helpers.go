@@ -1990,7 +1990,8 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 			}
 			metricSplit := strings.Split(tp.Metrics, utils.INFIELD_SEP)
 			for _, metric := range metricSplit {
-				metricmap[tp.Tenant][tp.ID][metric] = &utils.MetricWithParams{MetricID: metric, Parameters: tp.Parameters}
+				metricmap[tp.Tenant][tp.ID][metric] = &utils.MetricWithParams{
+					MetricID: metric, Parameters: tp.Parameters}
 			}
 		}
 		if tp.ThresholdIDs != "" {
@@ -2094,8 +2095,10 @@ func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
 				for i, val := range st.Metrics {
 					if i != 0 {
 						mdl.Metrics += utils.INFIELD_SEP
+						mdl.Parameters += utils.INFIELD_SEP
 					}
 					mdl.Metrics += val.MetricID
+					mdl.Parameters += val.Parameters
 				}
 				for i, val := range st.ThresholdIDs {
 					if i != 0 {

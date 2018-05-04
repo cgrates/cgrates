@@ -129,7 +129,7 @@ func testTpStatsITPopulate(t *testing.T) {
 			Stored:       false,
 			Weight:       20,
 			MinItems:     1,
-			ThresholdIDs: []string{"ThreshValue", "ThreshValueTwo"},
+			ThresholdIDs: []string{"ThreshValueTwo"},
 		},
 	}
 	if err := tpStatsMigrator.storDBIn.SetTPStats(tpStats); err != nil {
@@ -156,7 +156,8 @@ func testTpStatsITCheckData(t *testing.T) {
 		t.Error("Error when getting TpFilter ", err.Error())
 	}
 	if !reflect.DeepEqual(tpStats[0], result[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", tpStats[0], result[0])
+		t.Errorf("Expecting: %+v, received: %+v",
+			utils.ToJSON(tpStats[0]), utils.ToJSON(result[0]))
 	}
 	result, err = tpStatsMigrator.storDBIn.GetTPStats(
 		tpStats[0].TPid, tpStats[0].ID)

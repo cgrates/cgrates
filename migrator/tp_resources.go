@@ -32,20 +32,27 @@ func (m *Migrator) migrateCurrentTPresources() (err error) {
 	}
 
 	for _, tpid := range tpids {
-		ids, err := m.storDBIn.GetTpTableIds(tpid, utils.TBLTPResources, utils.TPDistinctIds{"id"}, map[string]string{}, nil)
+		ids, err := m.storDBIn.GetTpTableIds(tpid, utils.TBLTPResources,
+			utils.TPDistinctIds{"id"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
 		for _, id := range ids {
 
-			dest, err := m.storDBIn.GetTPResources(tpid, id)
+			resources, err := m.storDBIn.GetTPResources(tpid, id)
 			if err != nil {
 				return err
 			}
-			if dest != nil {
+			if resources != nil {
 				if m.dryRun != true {
-					if err := m.storDBOut.SetTPResources(dest); err != nil {
+					if err := m.storDBOut.SetTPResources(resources); err != nil {
 						return err
+					}
+					for _, resource := range resources {
+						if err := m.storDBIn.RemTpData(utils.TBLTPResources, resource.TPid,
+							map[string]string{"id": resource.ID}); err != nil {
+							return err
+						}
 					}
 					m.stats[utils.TpResources] += 1
 				}
