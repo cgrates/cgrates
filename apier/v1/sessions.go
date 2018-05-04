@@ -36,15 +36,16 @@ type SessionSv1 struct {
 // Publishes BiJSONRPC methods exported by SessionSv1
 func (ssv1 *SessionSv1) Handlers() map[string]interface{} {
 	return map[string]interface{}{
-		utils.SessionSv1AuthorizeEvent:           ssv1.BiRpcAuthorizeEvent,
-		utils.SessionSv1AuthorizeEventWithDigest: ssv1.BiRpcAuthorizeEventWithDigest,
-		utils.SessionSv1InitiateSession:          ssv1.BiRpcInitiateSession,
-		utils.SessionSv1UpdateSession:            ssv1.BiRpcUpdateSession,
-		utils.SessionSv1TerminateSession:         ssv1.BiRpcTerminateSession,
-		utils.SessionSv1ProcessCDR:               ssv1.BiRpcProcessCDR,
-		utils.SessionSv1ProcessEvent:             ssv1.BiRpcProcessEvent,
-		utils.SessionSv1GetActiveSessions:        ssv1.BiRPCV1GetActiveSessions,
-		utils.SessionSv1GetPassiveSessions:       ssv1.BiRPCV1GetPassiveSessions,
+		utils.SessionSv1AuthorizeEvent:            ssv1.BiRpcAuthorizeEvent,
+		utils.SessionSv1AuthorizeEventWithDigest:  ssv1.BiRpcAuthorizeEventWithDigest,
+		utils.SessionSv1InitiateSession:           ssv1.BiRpcInitiateSession,
+		utils.SessionSv1InitiateSessionWithDigest: ssv1.BiRpcInitiateSessionWithDigest,
+		utils.SessionSv1UpdateSession:             ssv1.BiRpcUpdateSession,
+		utils.SessionSv1TerminateSession:          ssv1.BiRpcTerminateSession,
+		utils.SessionSv1ProcessCDR:                ssv1.BiRpcProcessCDR,
+		utils.SessionSv1ProcessEvent:              ssv1.BiRpcProcessEvent,
+		utils.SessionSv1GetActiveSessions:         ssv1.BiRPCV1GetActiveSessions,
+		utils.SessionSv1GetPassiveSessions:        ssv1.BiRPCV1GetPassiveSessions,
 	}
 }
 
@@ -61,6 +62,11 @@ func (ssv1 *SessionSv1) AuthorizeEventWithDigest(args *sessions.V1AuthorizeArgs,
 func (ssv1 *SessionSv1) InitiateSession(args *sessions.V1InitSessionArgs,
 	rply *sessions.V1InitSessionReply) error {
 	return ssv1.SMG.BiRPCv1InitiateSession(nil, args, rply)
+}
+
+func (ssv1 *SessionSv1) InitiateSessionWithDigest(args *sessions.V1InitSessionArgs,
+	rply *sessions.V1InitReplyWithDigest) error {
+	return ssv1.SMG.BiRPCv1InitiateSessionWithDigest(nil, args, rply)
 }
 
 func (ssv1 *SessionSv1) UpdateSession(args *sessions.V1UpdateSessionArgs,
@@ -103,6 +109,11 @@ func (ssv1 *SessionSv1) BiRpcAuthorizeEventWithDigest(clnt *rpc2.Client, args *s
 func (ssv1 *SessionSv1) BiRpcInitiateSession(clnt *rpc2.Client, args *sessions.V1InitSessionArgs,
 	rply *sessions.V1InitSessionReply) error {
 	return ssv1.SMG.BiRPCv1InitiateSession(clnt, args, rply)
+}
+
+func (ssv1 *SessionSv1) BiRpcInitiateSessionWithDigest(clnt *rpc2.Client, args *sessions.V1InitSessionArgs,
+	rply *sessions.V1InitReplyWithDigest) error {
+	return ssv1.SMG.BiRPCv1InitiateSessionWithDigest(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRpcUpdateSession(clnt *rpc2.Client, args *sessions.V1UpdateSessionArgs,

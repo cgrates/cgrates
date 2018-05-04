@@ -667,20 +667,21 @@ const (
 
 // SessionS APIs
 const (
-	SessionSv1AuthorizeEvent           = "SessionSv1.AuthorizeEvent"
-	SessionSv1AuthorizeEventWithDigest = "SessionSv1.AuthorizeEventWithDigest"
-	SessionSv1InitiateSession          = "SessionSv1.InitiateSession"
-	SessionSv1UpdateSession            = "SessionSv1.UpdateSession"
-	SessionSv1TerminateSession         = "SessionSv1.TerminateSession"
-	SessionSv1ProcessCDR               = "SessionSv1.ProcessCDR"
-	SessionSv1ProcessEvent             = "SessionSv1.ProcessEvent"
-	SessionSv1DisconnectSession        = "SessionSv1.DisconnectSession"
-	SessionSv1GetActiveSessions        = "SessionSv1.GetActiveSessions"
-	SessionSv1GetPassiveSessions       = "SessionSv1.GetPassiveSessions"
-	SMGenericV1InitiateSession         = "SMGenericV1.InitiateSession"
-	SMGenericV2InitiateSession         = "SMGenericV2.InitiateSession"
-	SMGenericV2UpdateSession           = "SMGenericV2.UpdateSession"
-	SessionSv1Ping                     = "SessionSv1.Ping"
+	SessionSv1AuthorizeEvent            = "SessionSv1.AuthorizeEvent"
+	SessionSv1AuthorizeEventWithDigest  = "SessionSv1.AuthorizeEventWithDigest"
+	SessionSv1InitiateSession           = "SessionSv1.InitiateSession"
+	SessionSv1InitiateSessionWithDigest = "SessionSv1.InitiateSessionWithDigest"
+	SessionSv1UpdateSession             = "SessionSv1.UpdateSession"
+	SessionSv1TerminateSession          = "SessionSv1.TerminateSession"
+	SessionSv1ProcessCDR                = "SessionSv1.ProcessCDR"
+	SessionSv1ProcessEvent              = "SessionSv1.ProcessEvent"
+	SessionSv1DisconnectSession         = "SessionSv1.DisconnectSession"
+	SessionSv1GetActiveSessions         = "SessionSv1.GetActiveSessions"
+	SessionSv1GetPassiveSessions        = "SessionSv1.GetPassiveSessions"
+	SMGenericV1InitiateSession          = "SMGenericV1.InitiateSession"
+	SMGenericV2InitiateSession          = "SMGenericV2.InitiateSession"
+	SMGenericV2UpdateSession            = "SMGenericV2.UpdateSession"
+	SessionSv1Ping                      = "SessionSv1.Ping"
 )
 
 // DispatcherS APIs
