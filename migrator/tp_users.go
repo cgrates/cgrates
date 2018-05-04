@@ -32,14 +32,20 @@ func (m *Migrator) migrateCurrentTPusers() (err error) {
 	}
 
 	for _, tpid := range tpids {
-		dest, err := m.storDBIn.GetTPUsers(&utils.TPUsers{TPid: tpid})
+		users, err := m.storDBIn.GetTPUsers(&utils.TPUsers{TPid: tpid})
 		if err != nil {
 			return err
 		}
-		if dest != nil {
+		if users != nil {
 			if m.dryRun != true {
-				if err := m.storDBOut.SetTPUsers(dest); err != nil {
+				if err := m.storDBOut.SetTPUsers(users); err != nil {
 					return err
+				}
+				for _, user := range users {
+					if err := m.storDBIn.RemTpData(utils.TBLTPUsers, user.TPid,
+						map[string]string{"tenant": user.Tenant, "user_name": user.UserName}); err != nil {
+						return err
+					}
 				}
 				m.stats[utils.TpUsers] += 1
 			}

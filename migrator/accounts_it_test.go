@@ -51,7 +51,7 @@ var sTestsAccIT = []func(t *testing.T){
 
 func TestAccountITRedisConnection(t *testing.T) {
 	var err error
-	accPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	accPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
 	accCfgIn, err = config.NewCGRConfigFromFolder(accPathIn)
 	if err != nil {
 		t.Fatal(err)
@@ -94,7 +94,7 @@ func TestAccountITRedis(t *testing.T) {
 
 func TestAccountITMongoConnection(t *testing.T) {
 	var err error
-	accPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	accPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
 	accCfgIn, err = config.NewCGRConfigFromFolder(accPathIn)
 	if err != nil {
 		t.Fatal(err)
@@ -126,7 +126,6 @@ func TestAccountITMongoConnection(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 }
 
 func TestAccountITMongo(t *testing.T) {

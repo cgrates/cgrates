@@ -32,21 +32,29 @@ func (m *Migrator) migrateCurrentTPSuppliers() (err error) {
 	}
 
 	for _, tpid := range tpids {
-		ids, err := m.storDBIn.GetTpTableIds(tpid, utils.TBLTPSuppliers, utils.TPDistinctIds{"id"}, map[string]string{}, nil)
+		ids, err := m.storDBIn.GetTpTableIds(tpid, utils.TBLTPSuppliers,
+			utils.TPDistinctIds{"id"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
 		for _, id := range ids {
 
-			dest, err := m.storDBIn.GetTPSuppliers(tpid, id)
+			suppliers, err := m.storDBIn.GetTPSuppliers(tpid, id)
 			if err != nil {
 				return err
 			}
-			if dest != nil {
+			if suppliers != nil {
 				if m.dryRun != true {
-					if err := m.storDBOut.SetTPSuppliers(dest); err != nil {
+					if err := m.storDBOut.SetTPSuppliers(suppliers); err != nil {
 						return err
 					}
+					for _, suppliers := range suppliers {
+						if err := m.storDBIn.RemTpData(utils.TBLTPSuppliers, attrs.TPid,
+							map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
+							return err
+						}
+					}
+
 					m.stats[utils.TpSuppliers] += 1
 				}
 			}

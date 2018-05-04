@@ -26,9 +26,12 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewMigrator(dmIN *engine.DataManager, dmOut *engine.DataManager, dataDBType, dataDBEncoding string,
-	storDBIn engine.StorDB, storDBOut engine.StorDB, storDBType string, oldDataDB MigratorDataDB, oldDataDBType, oldDataDBEncoding string,
-	oldStorDB MigratorStorDB, oldStorDBType string, dryRun bool, sameDataDB bool, sameStorDB bool,
+func NewMigrator(dmIN *engine.DataManager, dmOut *engine.DataManager,
+	dataDBType, dataDBEncoding string,
+	storDBIn engine.StorDB, storDBOut engine.StorDB, storDBType string,
+	oldDataDB MigratorDataDB, oldDataDBType, oldDataDBEncoding string,
+	oldStorDB MigratorStorDB, oldStorDBType string,
+	dryRun bool, sameDataDB bool, sameStorDB bool,
 	datadb_versions bool, stordb_versions bool) (m *Migrator, err error) {
 	var mrshlr engine.Marshaler
 	var oldmrshlr engine.Marshaler

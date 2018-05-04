@@ -41,7 +41,7 @@ func (v1ms *v1Mongo) getV1CDR() (v1Cdr *v1Cdrs, err error) {
 
 //set
 func (v1ms *v1Mongo) setV1CDR(v1Cdr *v1Cdrs) (err error) {
-	if err := v1ms.session.DB(v1ms.db).C(engine.ColCDRs).Insert(v1Cdr); err != nil {
+	if err = v1ms.session.DB(v1ms.db).C(engine.ColCDRs).Insert(v1Cdr); err != nil {
 		return err
 	}
 	return

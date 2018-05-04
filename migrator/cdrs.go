@@ -59,7 +59,9 @@ func (m *Migrator) migrateCDRs() (err error) {
 	}
 	switch vrs[utils.CDRs] {
 	case current[utils.CDRs]:
-
+		if err := m.migrateCurrentCDRs(); err != nil {
+			return err
+		}
 	case 1:
 		if err := m.migrateV1CDRs(); err != nil {
 			return err
