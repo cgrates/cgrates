@@ -151,11 +151,6 @@ func testCdrITMigrateAndMove(t *testing.T) {
 	if err != nil {
 		t.Error("Error when setting version for CDRs ", err.Error())
 	}
-	if rcvCDRs, _, err := cdrMigrator.storDBOut.GetCDRs(new(utils.CDRsFilter), false); err != utils.ErrNotFound {
-		t.Error(err)
-	} else if len(rcvCDRs) != 0 {
-		t.Errorf("Unexpected number of CDRs returned: %d", len(rcvCDRs))
-	}
 	err, _ = cdrMigrator.Migrate([]string{utils.MetaCDRs})
 	if err != nil {
 		t.Error("Error when migrating CDRs ", err.Error())
