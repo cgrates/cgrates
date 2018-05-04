@@ -48,9 +48,9 @@ func (m *Migrator) migrateCurrentTPSuppliers() (err error) {
 					if err := m.storDBOut.SetTPSuppliers(suppliers); err != nil {
 						return err
 					}
-					for _, suppliers := range suppliers {
-						if err := m.storDBIn.RemTpData(utils.TBLTPSuppliers, attrs.TPid,
-							map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
+					for _, supplier := range suppliers {
+						if err := m.storDBIn.RemTpData(utils.TBLTPSuppliers, supplier.TPid,
+							map[string]string{"tenant": supplier.Tenant, "id": supplier.ID}); err != nil {
 							return err
 						}
 					}
