@@ -18,144 +18,144 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-// package migrator
+package migrator
 
-// import (
-// 	"log"
-// 	"path"
-// 	"reflect"
-// 	"testing"
+import (
+	"log"
+	"path"
+	"reflect"
+	"testing"
 
-// 	"github.com/cgrates/cgrates/config"
-// 	"github.com/cgrates/cgrates/engine"
-// 	"github.com/cgrates/cgrates/utils"
-// )
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+)
 
-// var (
-// 	tpResPathIn   string
-// 	tpResPathOut  string
-// 	tpResCfgIn    *config.CGRConfig
-// 	tpResCfgOut   *config.CGRConfig
-// 	tpResMigrator *Migrator
-// 	tpResources   []*utils.TPResource
-// )
+var (
+	tpResPathIn   string
+	tpResPathOut  string
+	tpResCfgIn    *config.CGRConfig
+	tpResCfgOut   *config.CGRConfig
+	tpResMigrator *Migrator
+	tpResources   []*utils.TPResource
+)
 
-// var sTestsTpResIT = []func(t *testing.T){
-// 	testTpResITConnect,
-// 	testTpResITFlush,
-// 	testTpResITPopulate,
-// 	testTpResITMove,
-// 	testTpResITCheckData,
-// }
+var sTestsTpResIT = []func(t *testing.T){
+	testTpResITConnect,
+	testTpResITFlush,
+	testTpResITPopulate,
+	testTpResITMove,
+	testTpResITCheckData,
+}
 
-// func TestTpResMove(t *testing.T) {
-// 	for _, stest := range sTestsTpResIT {
-// 		t.Run("TestTpResMove", stest)
-// 	}
-// }
+func TestTpResMove(t *testing.T) {
+	for _, stest := range sTestsTpResIT {
+		t.Run("TestTpResMove", stest)
+	}
+}
 
-// func testTpResITConnect(t *testing.T) {
-// 	var err error
-// 	tpResPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-// 	tpResCfgIn, err = config.NewCGRConfigFromFolder(tpResPathIn)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	tpResPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
-// 	tpResCfgOut, err = config.NewCGRConfigFromFolder(tpResPathOut)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	storDBIn, err := engine.ConfigureStorDB(tpResCfgIn.StorDBType, tpResCfgIn.StorDBHost,
-// 		tpResCfgIn.StorDBPort, tpResCfgIn.StorDBName,
-// 		tpResCfgIn.StorDBUser, tpResCfgIn.StorDBPass,
-// 		config.CgrConfig().StorDBMaxOpenConns,
-// 		config.CgrConfig().StorDBMaxIdleConns,
-// 		config.CgrConfig().StorDBConnMaxLifetime,
-// 		config.CgrConfig().StorDBCDRSIndexes)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	storDBOut, err := engine.ConfigureStorDB(tpResCfgOut.StorDBType,
-// 		tpResCfgOut.StorDBHost, tpResCfgOut.StorDBPort, tpResCfgOut.StorDBName,
-// 		tpResCfgOut.StorDBUser, tpResCfgOut.StorDBPass,
-// 		config.CgrConfig().StorDBMaxOpenConns,
-// 		config.CgrConfig().StorDBMaxIdleConns,
-// 		config.CgrConfig().StorDBConnMaxLifetime,
-// 		config.CgrConfig().StorDBCDRSIndexes)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	tpResMigrator, err = NewMigrator(nil, nil, tpResCfgIn.DataDbType,
-// 		tpResCfgIn.DBDataEncoding, storDBIn, storDBOut, tpResCfgIn.StorDBType, nil,
-// 		tpResCfgIn.DataDbType, tpResCfgIn.DBDataEncoding, nil,
-// 		tpResCfgIn.StorDBType, false, false, false, false, false)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// }
+func testTpResITConnect(t *testing.T) {
+	var err error
+	tpResPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	tpResCfgIn, err = config.NewCGRConfigFromFolder(tpResPathIn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tpResPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	tpResCfgOut, err = config.NewCGRConfigFromFolder(tpResPathOut)
+	if err != nil {
+		t.Fatal(err)
+	}
+	storDBIn, err := engine.ConfigureStorDB(tpResCfgIn.StorDBType, tpResCfgIn.StorDBHost,
+		tpResCfgIn.StorDBPort, tpResCfgIn.StorDBName,
+		tpResCfgIn.StorDBUser, tpResCfgIn.StorDBPass,
+		config.CgrConfig().StorDBMaxOpenConns,
+		config.CgrConfig().StorDBMaxIdleConns,
+		config.CgrConfig().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDBCDRSIndexes)
+	if err != nil {
+		log.Fatal(err)
+	}
+	storDBOut, err := engine.ConfigureStorDB(tpResCfgOut.StorDBType,
+		tpResCfgOut.StorDBHost, tpResCfgOut.StorDBPort, tpResCfgOut.StorDBName,
+		tpResCfgOut.StorDBUser, tpResCfgOut.StorDBPass,
+		config.CgrConfig().StorDBMaxOpenConns,
+		config.CgrConfig().StorDBMaxIdleConns,
+		config.CgrConfig().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDBCDRSIndexes)
+	if err != nil {
+		log.Fatal(err)
+	}
+	tpResMigrator, err = NewMigrator(nil, nil, tpResCfgIn.DataDbType,
+		tpResCfgIn.DBDataEncoding, storDBIn, storDBOut, tpResCfgIn.StorDBType, nil,
+		tpResCfgIn.DataDbType, tpResCfgIn.DBDataEncoding, nil,
+		tpResCfgIn.StorDBType, false, false, false, false, false)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
 
-// func testTpResITFlush(t *testing.T) {
-// 	if err := tpResMigrator.storDBIn.Flush(
-// 		path.Join(tpResCfgIn.DataFolderPath, "storage", tpResCfgIn.StorDBType)); err != nil {
-// 		t.Error(err)
-// 	}
+func testTpResITFlush(t *testing.T) {
+	if err := tpResMigrator.storDBIn.Flush(
+		path.Join(tpResCfgIn.DataFolderPath, "storage", tpResCfgIn.StorDBType)); err != nil {
+		t.Error(err)
+	}
 
-// 	if err := tpResMigrator.storDBOut.Flush(
-// 		path.Join(tpResCfgOut.DataFolderPath, "storage", tpResCfgOut.StorDBType)); err != nil {
-// 		t.Error(err)
-// 	}
-// }
+	if err := tpResMigrator.storDBOut.Flush(
+		path.Join(tpResCfgOut.DataFolderPath, "storage", tpResCfgOut.StorDBType)); err != nil {
+		t.Error(err)
+	}
+}
 
-// func testTpResITPopulate(t *testing.T) {
-// 	tpResources = []*utils.TPResource{
-// 		&utils.TPResource{
-// 			Tenant:    "cgrates.org",
-// 			TPid:      "TPR1",
-// 			ID:        "ResGroup1",
-// 			FilterIDs: []string{"FLTR_1"},
-// 			ActivationInterval: &utils.TPActivationInterval{
-// 				ActivationTime: "2014-07-29T15:00:00Z",
-// 				ExpiryTime:     "",
-// 			},
-// 			UsageTTL:          "1s",
-// 			Limit:             "7",
-// 			AllocationMessage: "",
-// 			Blocker:           true,
-// 			Stored:            true,
-// 			Weight:            20,
-// 			ThresholdIDs:      []string{"ValOne", "ValTwo"},
-// 		},
-// 	}
-// 	if err := tpResMigrator.storDBIn.SetTPResources(tpResources); err != nil {
-// 		t.Error("Error when setting TpFilter ", err.Error())
-// 	}
-// 	currentVersion := engine.CurrentStorDBVersions()
-// 	err := tpResMigrator.storDBOut.SetVersions(currentVersion, false)
-// 	if err != nil {
-// 		t.Error("Error when setting version for TpFilter ", err.Error())
-// 	}
-// }
+func testTpResITPopulate(t *testing.T) {
+	tpResources = []*utils.TPResource{
+		&utils.TPResource{
+			Tenant:    "cgrates.org",
+			TPid:      "TPR1",
+			ID:        "ResGroup1",
+			FilterIDs: []string{"FLTR_1"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+				ExpiryTime:     "",
+			},
+			UsageTTL:          "1s",
+			Limit:             "7",
+			AllocationMessage: "",
+			Blocker:           true,
+			Stored:            true,
+			Weight:            20,
+			ThresholdIDs:      []string{"ValOne", "ValTwo"},
+		},
+	}
+	if err := tpResMigrator.storDBIn.SetTPResources(tpResources); err != nil {
+		t.Error("Error when setting TpFilter ", err.Error())
+	}
+	currentVersion := engine.CurrentStorDBVersions()
+	err := tpResMigrator.storDBOut.SetVersions(currentVersion, false)
+	if err != nil {
+		t.Error("Error when setting version for TpFilter ", err.Error())
+	}
+}
 
-// func testTpResITMove(t *testing.T) {
-// 	err, _ := tpResMigrator.Migrate([]string{utils.MetaTpResources})
-// 	if err != nil {
-// 		t.Error("Error when migrating TpFilter ", err.Error())
-// 	}
-// }
+func testTpResITMove(t *testing.T) {
+	err, _ := tpResMigrator.Migrate([]string{utils.MetaTpResources})
+	if err != nil {
+		t.Error("Error when migrating TpFilter ", err.Error())
+	}
+}
 
-// func testTpResITCheckData(t *testing.T) {
-// 	result, err := tpResMigrator.storDBOut.GetTPResources(
-// 		tpResources[0].TPid, tpResources[0].ID)
-// 	if err != nil {
-// 		t.Error("Error when getting TpFilter ", err.Error())
-// 	}
-// 	if !reflect.DeepEqual(tpResources[0], result[0]) {
-// 		t.Errorf("Expecting: %+v, received: %+v", tpResources[0], result[0])
-// 	}
-// 	result, err = tpResMigrator.storDBIn.GetTPResources(
-// 		tpResources[0].TPid, tpResources[0].ID)
-// 	if err != utils.ErrNotFound {
-// 		t.Error(err)
-// 	}
-// }
+func testTpResITCheckData(t *testing.T) {
+	result, err := tpResMigrator.storDBOut.GetTPResources(
+		tpResources[0].TPid, tpResources[0].ID)
+	if err != nil {
+		t.Error("Error when getting TpFilter ", err.Error())
+	}
+	if !reflect.DeepEqual(tpResources[0], result[0]) {
+		t.Errorf("Expecting: %+v, received: %+v", tpResources[0], result[0])
+	}
+	result, err = tpResMigrator.storDBIn.GetTPResources(
+		tpResources[0].TPid, tpResources[0].ID)
+	if err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}

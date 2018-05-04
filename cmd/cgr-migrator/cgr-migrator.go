@@ -227,8 +227,10 @@ func main() {
 	if mgrCfg.StorDBName != *outStorDBName || mgrCfg.StorDBType != *outStorDBName || mgrCfg.StorDBHost != *outStorDBHost {
 		sameStorDB = false
 	}
-	m, err := migrator.NewMigrator(dmIN, dmOUT, mgrCfg.DataDbType, mgrCfg.DBDataEncoding, storDB, mgrCfg.StorDBType, outDataDB,
-		*outDataDBType, mgrCfg.DBDataEncoding, instorDB, *outStorDBType, *dryRun, sameDataDB, sameStorDB, *datadb_versions, *stordb_versions)
+	m, err := migrator.NewMigrator(dmIN, dmOUT, mgrCfg.DataDbType, mgrCfg.DBDataEncoding,
+		storDBIn, storDBOut, mgrCfg.StorDBType, outDataDB,
+		*outDataDBType, mgrCfg.DBDataEncoding, outStorDB,
+		*outStorDBType, *dryRun, sameDataDB, sameStorDB, *datadb_versions, *stordb_versions)
 	if err != nil {
 		log.Fatal(err)
 	}
