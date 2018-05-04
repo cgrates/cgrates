@@ -31,19 +31,26 @@ func (m *Migrator) migrateCurrentTPfilters() (err error) {
 		return err
 	}
 	for _, tpid := range tpids {
-		ids, err := m.storDBIn.GetTpTableIds(tpid, utils.TBLTPFilters, utils.TPDistinctIds{"id"}, map[string]string{}, nil)
+		ids, err := m.storDBIn.GetTpTableIds(tpid, utils.TBLTPFilters,
+			utils.TPDistinctIds{"id"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
 		for _, id := range ids {
-			dest, err := m.storDBIn.GetTPFilters(tpid, id)
+			fltrs, err := m.storDBIn.GetTPFilters(tpid, id)
 			if err != nil {
 				return err
 			}
-			if dest != nil {
+			if fltrs != nil {
 				if m.dryRun != true {
-					if err := m.storDBOut.SetTPFilters(dest); err != nil {
+					if err := m.storDBOut.SetTPFilters(fltrs); err != nil {
 						return err
+					}
+					for _, fltr := range fltrs {
+						if err := m.storDBIn.RemTpData(utils.TBLTPFilters,
+							fltr.TPid, map[string]string{"tenant": fltr.Tenant, "id": fltr.ID}); err != nil {
+							return err
+						}
 					}
 					m.stats[utils.TpFilters] += 1
 				}

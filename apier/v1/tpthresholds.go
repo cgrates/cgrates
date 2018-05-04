@@ -80,10 +80,10 @@ func (self *ApierV1) GetTPThresholdIDs(attrs AttrGetTPThresholdIds, reply *[]str
 
 // Removes specific Threshold on Tariff plan
 func (self *ApierV1) RemTPThreshold(attrs AttrGetTPThreshold, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBLTPThresholds, attrs.TPid, map[string]string{"id": attrs.ID}); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBLTPThresholds, attrs.TPid, map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = utils.OK

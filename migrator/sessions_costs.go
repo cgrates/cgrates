@@ -69,7 +69,6 @@ func (m *Migrator) migrateSessionSCosts() (err error) {
 		if err := m.storDBOut.RemoveSMCost(nil); err != nil {
 			return err
 		}
-
 	}
 	m.stats[utils.SessionSCosts] = -1
 	vrs = engine.Versions{utils.SessionSCosts: engine.CurrentStorDBVersions()[utils.SessionSCosts]}

@@ -32,12 +32,12 @@ func (m *Migrator) migrateCurrentTPTiming() (err error) {
 	}
 
 	for _, tpid := range tpids {
-		ids, err := m.storDBIn.GetTpTableIds(tpid, utils.TBLTPTimings, utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
+		ids, err := m.storDBIn.GetTpTableIds(tpid, utils.TBLTPTimings,
+			utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
 		for _, id := range ids {
-
 			tm, err := m.storDBIn.GetTPTimings(tpid, id)
 			if err != nil {
 				return err
@@ -46,6 +46,12 @@ func (m *Migrator) migrateCurrentTPTiming() (err error) {
 				if m.dryRun != true {
 					if err := m.storDBOut.SetTPTimings(tm); err != nil {
 						return err
+					}
+					for _, timing := range tm {
+						if err := m.storDBIn.RemTpData(utils.TBLTPTimings,
+							timing.TPid, map[string]string{"tag": timing.ID}); err != nil {
+							return err
+						}
 					}
 					m.stats[utils.TpTiming] += 1
 				}
