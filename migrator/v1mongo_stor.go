@@ -46,3 +46,35 @@ func (v1ms *v1Mongo) setV1CDR(v1Cdr *v1Cdrs) (err error) {
 	}
 	return
 }
+
+//SMCost methods
+//get
+func (v1ms *v1Mongo) getSMCost() (v2Cost *v2SessionsCost, err error) {
+	if v1ms.qryIter == nil {
+		v1ms.qryIter = v1ms.session.DB(v1ms.db).C(utils.SessionsCostsTBL).Find(nil).Iter()
+	}
+	v1ms.qryIter.Next(&v2Cost)
+
+	if v2Cost == nil {
+		v1ms.qryIter = nil
+		return nil, utils.ErrNoMoreData
+
+	}
+	return v2Cost, nil
+}
+
+//set
+func (v1ms *v1Mongo) setSMCost(v2Cost *v2SessionsCost) (err error) {
+	if err = v1ms.session.DB(v1ms.db).C(utils.SessionsCostsTBL).Insert(v2Cost); err != nil {
+		return err
+	}
+	return
+}
+
+//remove
+func (v1ms *v1Mongo) remSMCost(v2Cost *v2SessionsCost) (err error) {
+	if err = v1ms.session.DB(v1ms.db).C(utils.SessionsCostsTBL).Remove(nil); err != nil {
+		return err
+	}
+	return
+}

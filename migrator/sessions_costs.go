@@ -21,13 +21,34 @@ package migrator
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
+func (m *Migrator) migrateCurrentSessionSCost() (err error) {
+	if m.sameStorDB { // no move
+		return
+	}
+	smCosts, err := m.storDBIn.GetSMCosts("", "", "", "")
+	if err != nil {
+		return err
+	}
+	for _, smCost := range smCosts {
+		if err := m.storDBOut.SetSMCost(smCost); err != nil {
+			return err
+		}
+		if err := m.storDBIn.RemoveSMCost(smCost); err != nil {
+			return err
+		}
+	}
+	return
+}
+
 func (m *Migrator) migrateSessionSCosts() (err error) {
 	var vrs engine.Versions
+	current := engine.CurrentStorDBVersions()
 	vrs, err = m.storDBOut.GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
@@ -66,17 +87,72 @@ func (m *Migrator) migrateSessionSCosts() (err error) {
 		}
 		fallthrough // incremental updates
 	case 2: // Simply removing them should be enough since if the system is offline they are most probably stale already
-		if err := m.storDBOut.RemoveSMCost(nil); err != nil {
+		if err := m.migrateV2SessionSCosts(); err != nil {
+			return err
+		}
+	case current[utils.SessionSCosts]:
+		if err := m.migrateCurrentSessionSCost(); err != nil {
 			return err
 		}
 	}
-	m.stats[utils.SessionSCosts] = -1
-	vrs = engine.Versions{utils.SessionSCosts: engine.CurrentStorDBVersions()[utils.SessionSCosts]}
-	if err := m.storDBOut.SetVersions(vrs, false); err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when updating SessionSCosts version into StorDB", err.Error()))
-	}
 	return nil
+}
+
+func (m *Migrator) migrateV2SessionSCosts() (err error) {
+	var v2Cost *v2SessionsCost
+	for {
+		v2Cost, err = m.oldStorDB.getSMCost()
+		if err != nil && err != utils.ErrNoMoreData {
+			return err
+		}
+		if err == utils.ErrNoMoreData {
+			break
+		}
+		if v2Cost != nil {
+			smCost := v2Cost.V2toV3Cost()
+			if m.dryRun != true {
+				if err = m.storDBOut.SetSMCost(smCost); err != nil {
+					return err
+				}
+				if err = m.oldStorDB.remSMCost(v2Cost); err != nil {
+					return err
+				}
+				m.stats[utils.SessionSCosts] += 1
+			}
+		}
+	}
+	if m.dryRun != true {
+		// All done, update version wtih current one
+		vrs := engine.Versions{utils.CDRs: engine.CurrentStorDBVersions()[utils.SessionSCosts]}
+		if err = m.storDBOut.SetVersions(vrs, false); err != nil {
+			return utils.NewCGRError(utils.Migrator,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error: <%s> when updating SessionSCosts version into StorDB", err.Error()))
+		}
+	}
+	return
+}
+
+type v2SessionsCost struct {
+	CGRID       string
+	RunID       string
+	OriginHost  string
+	OriginID    string
+	CostSource  string
+	Usage       time.Duration
+	CostDetails *engine.CallCost
+}
+
+func (v2Cost v2SessionsCost) V2toV3Cost() (cost *engine.SMCost) {
+	cost = &engine.SMCost{
+		CGRID:       v2Cost.CGRID,
+		RunID:       v2Cost.RunID,
+		OriginHost:  v2Cost.OriginHost,
+		OriginID:    v2Cost.OriginID,
+		Usage:       v2Cost.Usage,
+		CostSource:  v2Cost.CostSource,
+		CostDetails: engine.NewEventCostFromCallCost(v2Cost.CostDetails, v2Cost.CGRID, v2Cost.RunID),
+	}
+	return
 }
