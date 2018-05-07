@@ -307,7 +307,7 @@ func TestRSRFilterPass(t *testing.T) {
 	if fltr.Pass("any") {
 		t.Error("Passing!")
 	}
-	fltr, err = NewRSRFilter("full_match") // Full string pass
+	fltr, err = NewRSRFilter("^full_match$") // Full string pass
 	if err != nil {
 		t.Error(err)
 	}
@@ -411,6 +411,50 @@ func TestRSRFilterPass(t *testing.T) {
 		t.Error("Not passing!")
 	}
 	if fltr.Pass("") {
+		t.Error("Passing!")
+	}
+	fltr, err = NewRSRFilter("indexed_match") // Indexed match
+	if err != nil {
+		t.Error(err)
+	}
+	if !fltr.Pass("indexed_match") {
+		t.Error("Not passing!")
+	}
+	if !fltr.Pass("suf_indexed_match") {
+		t.Error("Not passing!")
+	}
+	if !fltr.Pass("indexed_match_pref") {
+		t.Error("Not passing!")
+	}
+	if !fltr.Pass("suf_indexed_match_pref") {
+		t.Error("Not passing!")
+	}
+	if fltr.Pass("indexed_matc") {
+		t.Error("Passing!")
+	}
+	if fltr.Pass("") {
+		t.Error("Passing!")
+	}
+	fltr, err = NewRSRFilter("!indexed_match") // Negative indexed match
+	if err != nil {
+		t.Error(err)
+	}
+	if fltr.Pass("indexed_match") {
+		t.Error("passing!")
+	}
+	if fltr.Pass("suf_indexed_match") {
+		t.Error("passing!")
+	}
+	if fltr.Pass("indexed_match_pref") {
+		t.Error("passing!")
+	}
+	if fltr.Pass("suf_indexed_match_pref") {
+		t.Error("passing!")
+	}
+	if !fltr.Pass("indexed_matc") {
+		t.Error("not passing!")
+	}
+	if !fltr.Pass("") {
 		t.Error("Passing!")
 	}
 }

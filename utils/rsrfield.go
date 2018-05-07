@@ -251,13 +251,16 @@ func (rsrFltr *RSRFilter) Pass(val string) bool {
 		return len(val) == 0 != rsrFltr.negative
 	}
 	if rsrFltr.filterRule[:1] == MatchStartPrefix {
+		if rsrFltr.filterRule[len(rsrFltr.filterRule)-1:] == MatchEndPrefix { // starts with ^ and ends with $, exact match
+			return val == rsrFltr.filterRule[1:len(rsrFltr.filterRule)-1] != rsrFltr.negative
+		}
 		return strings.HasPrefix(val, rsrFltr.filterRule[1:]) != rsrFltr.negative
 	}
 	lastIdx := len(rsrFltr.filterRule) - 1
 	if rsrFltr.filterRule[lastIdx:] == MatchEndPrefix {
 		return strings.HasSuffix(val, rsrFltr.filterRule[:lastIdx]) != rsrFltr.negative
 	}
-	return val == rsrFltr.filterRule != rsrFltr.negative
+	return (strings.Index(val, rsrFltr.filterRule) != -1) != rsrFltr.negative // default is string index
 }
 
 func ParseRSRFilters(fldsStr, sep string) (RSRFilters, error) {
