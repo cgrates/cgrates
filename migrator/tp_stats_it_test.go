@@ -133,19 +133,19 @@ func testTpStatsITPopulate(t *testing.T) {
 		},
 	}
 	if err := tpStatsMigrator.storDBIn.SetTPStats(tpStats); err != nil {
-		t.Error("Error when setting TpFilter ", err.Error())
+		t.Error("Error when setting TpStat ", err.Error())
 	}
 	currentVersion := engine.CurrentStorDBVersions()
 	err := tpStatsMigrator.storDBOut.SetVersions(currentVersion, false)
 	if err != nil {
-		t.Error("Error when setting version for TpFilter ", err.Error())
+		t.Error("Error when setting version for TpStat ", err.Error())
 	}
 }
 
 func testTpStatsITMove(t *testing.T) {
 	err, _ := tpStatsMigrator.Migrate([]string{utils.MetaTpStats})
 	if err != nil {
-		t.Error("Error when migrating TpFilter ", err.Error())
+		t.Error("Error when migrating TpStat ", err.Error())
 	}
 }
 
@@ -153,7 +153,7 @@ func testTpStatsITCheckData(t *testing.T) {
 	result, err := tpStatsMigrator.storDBOut.GetTPStats(
 		tpStats[0].TPid, tpStats[0].ID)
 	if err != nil {
-		t.Error("Error when getting TpFilter ", err.Error())
+		t.Error("Error when getting TpStat ", err.Error())
 	}
 	if !reflect.DeepEqual(tpStats[0], result[0]) {
 		t.Errorf("Expecting: %+v, received: %+v",
