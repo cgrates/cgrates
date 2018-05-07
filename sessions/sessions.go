@@ -1348,6 +1348,7 @@ func (v1AuthReply *V1AuthorizeReply) AsCGRReply() (cgrReply utils.CGRReply, err 
 	if v1AuthReply.ThresholdHits != nil {
 		cgrReply[utils.CapThresholdHits] = *v1AuthReply.ThresholdHits
 	}
+	cgrReply[utils.Error] = "" // so we can compare in filters
 	return
 }
 
@@ -1545,6 +1546,7 @@ func (v1Rply *V1InitSessionReply) AsCGRReply() (cgrReply utils.CGRReply, err err
 	if v1Rply.ThresholdHits != nil {
 		cgrReply[utils.CapThresholdHits] = *v1Rply.ThresholdHits
 	}
+	cgrReply[utils.Error] = ""
 	return
 }
 
@@ -1705,6 +1707,7 @@ func (v1Rply *V1UpdateSessionReply) AsCGRReply() (cgrReply utils.CGRReply, err e
 	if v1Rply.MaxUsage != nil {
 		cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
 	}
+	cgrReply[utils.Error] = ""
 	return
 }
 
@@ -1874,6 +1877,7 @@ func (v1Rply *V1ProcessEventReply) AsCGRReply() (cgrReply utils.CGRReply, err er
 		}
 		cgrReply[utils.CapAttributes] = attrs
 	}
+	cgrReply[utils.Error] = ""
 	return
 }
 

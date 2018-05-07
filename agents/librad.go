@@ -76,7 +76,7 @@ func (pv processorVars) valAsString(fldPath string) (val string, err error) {
 		fldName = utils.MetaCGRReply
 	}
 	if !pv.hasVar(fldName) {
-		return "", errors.New("not found")
+		return "", utils.ErrNotFoundNoCaps
 	}
 	if fldName == utils.MetaCGRReply {
 		cgrRply := pv[utils.MetaCGRReply].(utils.CGRReply)

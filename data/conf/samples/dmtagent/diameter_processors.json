@@ -65,9 +65,9 @@
 				{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "Requested-Service-Unit>CC-Time", "mandatory": true},
 			],
 			"cca_fields":[
-				{"tag": "ResultCode",  "field_filter":"CGRError(ACCOUNT_NOT_FOUND)", 
+				{"tag": "ResultCode",  "field_filter":"*cgrReply>Error(ACCOUNT_NOT_FOUND)", 
 					"field_id": "Result-Code", "type": "*constant", "value": "5030"},
-				{"tag": "ResultCode",  "field_filter":"CGRError(USER_NOT_FOUND)", 
+				{"tag": "ResultCode",  "field_filter":"*cgrReply>Error(USER_NOT_FOUND)", 
 					"field_id": "Result-Code", "type": "*constant", "value": "5030"},
 			],
 		},

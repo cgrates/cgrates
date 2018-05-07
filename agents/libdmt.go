@@ -279,12 +279,18 @@ func passesFieldFilter(m *diam.Message, fieldFilter *utils.RSRField, procVars pr
 	if fieldFilter == nil {
 		return true, 0
 	}
-	if val, hasIt := procVars[fieldFilter.Id]; hasIt { // ProcessorVars have priority
-		valStr, _ := utils.CastFieldIfToString(val)
-		if fieldFilter.FilterPasses(valStr) {
-			return true, 0
+	// check procVars before AVPs
+	if val, err := procVars.valAsString(fieldFilter.Id); err != utils.ErrNotFoundNoCaps {
+		if err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<RSRFilter> parsing value: <%s> as string, error: <%s>",
+					fieldFilter.Id, err.Error()))
+			return false, 0
 		}
-		return false, 0
+		if !fieldFilter.FilterPasses(val) {
+			return false, 0
+		}
+		return true, 0
 	}
 	avps, err := avpsWithPath(m, fieldFilter)
 	if err != nil {
@@ -303,36 +309,52 @@ func passesFieldFilter(m *diam.Message, fieldFilter *utils.RSRField, procVars pr
 	return false, 0
 }
 
-func composedFieldvalue(m *diam.Message, outTpl utils.RSRFields, avpIdx int, procVars processorVars) string {
-	var outVal string
+func composedFieldvalue(m *diam.Message, outTpl utils.RSRFields, avpIdx int, procVars processorVars) (outVal string) {
+	var err error
 	for _, rsrTpl := range outTpl {
-		if rsrTpl.IsStatic() {
-			outVal += rsrTpl.ParseValue("")
-		} else {
-			if val, hasIt := procVars[rsrTpl.Id]; hasIt { // ProcessorVars have priority
-				valStr, _ := utils.CastFieldIfToString(val)
-				outVal += rsrTpl.ParseValue(valStr)
-				continue
-			}
-			matchingAvps, err := avpsWithPath(m, rsrTpl)
-			if err != nil || len(matchingAvps) == 0 {
-				if err != nil {
-					utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Error matching AVPS: %s", err.Error()))
+		var valToParse string
+		if !rsrTpl.IsStatic() { // for Static we will parse empty valToParse bellow
+			// check procVars before AVPs
+			if valToParse, err = procVars.valAsString(rsrTpl.Id); err != nil {
+				if err != utils.ErrNotFoundNoCaps {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> %s", utils.DiameterAgent, err.Error()))
+					continue
 				}
-				continue
+				// not found in processorVars, look in AVPs
+				// AVPs from here
+				matchingAvps, err := avpsWithPath(m, rsrTpl)
+				if err != nil || len(matchingAvps) == 0 {
+					if err != nil {
+						utils.Logger.Err(fmt.Sprintf("<%s> Error matching AVPS: %s",
+							utils.DiameterAgent, err.Error()))
+					}
+					continue
+				}
+				if len(matchingAvps) <= avpIdx {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> Cannot retrieve AVP with index %d for field template with id: %s",
+							utils.DiameterAgent, avpIdx, rsrTpl.Id))
+					continue // Not convertible, ignore
+				}
+				if matchingAvps[0].Data.Type() == diam.GroupedAVPType {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> Value for field template with id: %s is matching a group AVP, ignoring.",
+							utils.DiameterAgent, rsrTpl.Id))
+					continue // Not convertible, ignore
+				}
+				valToParse = avpValAsString(matchingAvps[avpIdx])
 			}
-			if len(matchingAvps) <= avpIdx {
-				utils.Logger.Warning(fmt.Sprintf("<Diameter> Cannot retrieve AVP with index %d for field template with id: %s", avpIdx, rsrTpl.Id))
-				continue // Not convertible, ignore
-			}
-			if matchingAvps[0].Data.Type() == diam.GroupedAVPType {
-				utils.Logger.Warning(fmt.Sprintf("<Diameter> Value for field template with id: %s is matching a group AVP, ignoring.", rsrTpl.Id))
-				continue // Not convertible, ignore
-			}
-			outVal += rsrTpl.ParseValue(avpValAsString(matchingAvps[avpIdx]))
+		}
+		if parsed, err := rsrTpl.Parse(valToParse); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> %s",
+					utils.DiameterAgent, err.Error()))
+		} else {
+			outVal += parsed
 		}
 	}
-	return outVal
+	return
 }
 
 // Used to return the encoded value based on what AVP understands for it's type

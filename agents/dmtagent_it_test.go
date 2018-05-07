@@ -207,14 +207,12 @@ func TestDmtAgentResetStorDb(t *testing.T) {
 	}
 }
 
-/*
 // Start CGR Engine
 func TestDmtAgentStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(daCfgPath, 4000); err != nil {
 		t.Fatal(err)
 	}
 }
-*/
 
 // Connect rpc client to rater
 func TestDmtAgentApierRpcConn(t *testing.T) {
@@ -245,8 +243,8 @@ func TestDmtAgentConnectDiameterClient(t *testing.T) {
 
 // cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1004" TimeStart="2015-11-07T08:42:26Z" TimeEnd="2015-11-07T08:47:26Z"'
 func TestDmtAgentSendCCRInit(t *testing.T) {
-	cdr := &engine.CDR{CGRID: utils.Sha1("testccr1",
-		time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+	cdr := &engine.CDR{
+		CGRID:   utils.Sha1("testccr1", time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()),
 		OrderID: 123, ToR: utils.VOICE, OriginID: "testccr1", OriginHost: "192.168.1.1",
 		Source: utils.UNIT_TEST, RequestType: utils.META_RATED,
 		Tenant: "cgrates.org", Category: "call", Account: "1001",
@@ -259,7 +257,8 @@ func TestDmtAgentSendCCRInit(t *testing.T) {
 	ccr := storedCdrToCCR(cdr, "UNIT_TEST",
 		daCfg.DiameterAgentCfg().OriginRealm,
 		daCfg.DiameterAgentCfg().VendorId,
-		daCfg.DiameterAgentCfg().ProductName, utils.DIAMETER_FIRMWARE_REVISION,
+		daCfg.DiameterAgentCfg().ProductName,
+		utils.DIAMETER_FIRMWARE_REVISION,
 		daCfg.DiameterAgentCfg().DebitInterval, false)
 	m, err := ccr.AsDiameterMessage()
 	if err != nil {
@@ -366,14 +365,23 @@ func TestDmtAgentSendCCRUpdate2(t *testing.T) {
 }
 
 func TestDmtAgentSendCCRTerminate(t *testing.T) {
-	cdr := &engine.CDR{CGRID: utils.Sha1("testccr1", time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE,
-		OriginID: "testccr1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED,
-		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1004",
-		SetupTime: time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2015, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
-		Usage: time.Duration(610) * time.Second, ExtraFields: map[string]string{"Service-Context-Id": "voice@huawei.com"},
+	cdr := &engine.CDR{
+		CGRID:   utils.Sha1("testccr1", time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+		OrderID: 123, ToR: utils.VOICE,
+		OriginID: "testccr1", OriginHost: "192.168.1.1",
+		Source: utils.UNIT_TEST, RequestType: utils.META_RATED,
+		Tenant: "cgrates.org", Category: "call", Account: "1001",
+		Subject: "1001", Destination: "1004",
+		SetupTime:   time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC),
+		AnswerTime:  time.Date(2015, 11, 7, 8, 42, 26, 0, time.UTC),
+		RunID:       utils.DEFAULT_RUNID,
+		Usage:       time.Duration(610) * time.Second,
+		ExtraFields: map[string]string{"Service-Context-Id": "voice@huawei.com"},
 	}
-	ccr := storedCdrToCCR(cdr, "UNIT_TEST", daCfg.DiameterAgentCfg().OriginRealm, daCfg.DiameterAgentCfg().VendorId,
-		daCfg.DiameterAgentCfg().ProductName, utils.DIAMETER_FIRMWARE_REVISION, daCfg.DiameterAgentCfg().DebitInterval, true)
+	ccr := storedCdrToCCR(cdr, "UNIT_TEST", daCfg.DiameterAgentCfg().OriginRealm,
+		daCfg.DiameterAgentCfg().VendorId,
+		daCfg.DiameterAgentCfg().ProductName, utils.DIAMETER_FIRMWARE_REVISION,
+		daCfg.DiameterAgentCfg().DebitInterval, true)
 	m, err := ccr.AsDiameterMessage()
 	if err != nil {
 		t.Error(err)
@@ -386,20 +394,14 @@ func TestDmtAgentSendCCRTerminate(t *testing.T) {
 	if msg == nil {
 		t.Fatal("No answer to CCR terminate received")
 	}
-	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
-		t.Error(err)
-	} else if len(avps) == 0 {
-		t.Error("Granted-Service-Unit not found")
-	} else if strCCTime := avpValAsString(avps[0]); strCCTime != "0" {
-		t.Errorf("Expecting 0, received: %s", strCCTime)
-	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 9.243500
 	if err := apierRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal { // Should also consider derived charges which double the cost of 6m10s - 2x0.7584
-		t.Errorf("Expected: %v, received: %v", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+		t.Errorf("Expected: %v, received: %v",
+			eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 }
 

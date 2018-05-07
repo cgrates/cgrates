@@ -133,7 +133,6 @@ func (da DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProce
 			return false, ErrDiameterRatingFailed
 		}
 	}
-	procVars[CGRResultCode] = strconv.Itoa(diam.Success)
 	if reqProcessor.DryRun { // DryRun does not send over network
 		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> SMGenericEvent: %+v", smgEv))
 		procVars[CGRResultCode] = strconv.Itoa(diam.LimitedSuccess)
@@ -190,36 +189,11 @@ func (da DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProce
 				}
 			}
 		}
-		/*if err != nil {
-			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v, API error: %s", ccr.diamMessage, err))
-			switch { // Prettify some errors
-			case strings.HasSuffix(err.Error(), utils.ErrAccountNotFound.Error()):
-				procVars[CGRError] = utils.ErrAccountNotFound.Error()
-			case strings.HasSuffix(err.Error(), utils.ErrUserNotFound.Error()):
-				procVars[CGRError] = utils.ErrUserNotFound.Error()
-			case strings.HasSuffix(err.Error(), utils.ErrInsufficientCredit.Error()):
-				procVars[CGRError] = utils.ErrInsufficientCredit.Error()
-			case strings.HasSuffix(err.Error(), utils.ErrAccountDisabled.Error()):
-				procVars[CGRError] = utils.ErrAccountDisabled.Error()
-			case strings.HasSuffix(err.Error(), utils.ErrRatingPlanNotFound.Error()):
-				procVars[CGRError] = utils.ErrRatingPlanNotFound.Error()
-			case strings.HasSuffix(err.Error(), utils.ErrUnauthorizedDestination.Error()):
-				procVars[CGRError] = utils.ErrUnauthorizedDestination.Error()
-			default: // Unknown error
-				procVars[CGRError] = err.Error()
-				procVars[CGRResultCode] = strconv.Itoa(DiameterRatingFailed)
-			}
-		}
-		*/
-		/*if prevMaxUsageStr, hasKey := procVars[CGRMaxUsage]; hasKey {
-			prevMaxUsage, _ := utils.ParseDurationWithNanosecs(prevMaxUsageStr)
-			if prevMaxUsage < maxUsage {
-				maxUsage = prevMaxUsage
-			}
-		}
-		*/
 	}
-	diamCode, _ := procVars.valAsString(CGRResultCode)
+	diamCode := strconv.Itoa(diam.Success)
+	if procVars.hasVar(CGRResultCode) {
+		diamCode, _ = procVars.valAsString(CGRResultCode)
+	}
 	if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, diamCode,
 		false, da.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
 		return false, err

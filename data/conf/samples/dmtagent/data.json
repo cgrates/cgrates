@@ -22,8 +22,8 @@
 				{"tag": "Usage", "field_id": "Usage", "type": "*constant", "value": "2048"},
 			],
 			"cca_fields": [
-				{"tag": "ResultCode", "field_id": "Result-Code", "type": "*constant", "value": "^2001"},
-				{"tag": "ResultCode", "field_filter": "CGRMaxUsage(0)", "field_id": "Result-Code", "type": "*constant", "value": "4010"},
+				{"tag": "ResultCode", "field_filter": "*cgrReply>MaxUsage(^0$)", 
+					"field_id": "Result-Code", "type": "*constant", "value": "4010"},
 			],
 		},
 		{
@@ -49,8 +49,8 @@
 					"value": "Multiple-Services-Credit-Control>Used-Service-Unit>CC-Input-Octets;^|;Multiple-Services-Credit-Control>Used-Service-Unit>CC-Output-Octets"},
 			],
 			"cca_fields": [
-				{"tag": "ResultCode", "field_id": "Result-Code", "type": "*constant", "value": "^2001"},
-				{"tag": "ResultCode", "field_filter": "CGRMaxUsage(0)", "field_id": "Result-Code", "type": "*constant", "value": "4010"},
+				{"tag": "ResultCode", "field_filter": "*cgrReply>MaxUsage(^0$)", 
+					"field_id": "Result-Code", "type": "*constant", "value": "4010"},
 			],
 		},
 		{
@@ -76,8 +76,8 @@
 					"value": "Multiple-Services-Credit-Control>Used-Service-Unit>CC-Input-Octets;^|;Multiple-Services-Credit-Control>Used-Service-Unit>CC-Output-Octets"},
 			],
 			"cca_fields": [
-				{"tag": "ResultCode", "field_id": "Result-Code", "type": "*constant", "value": "^2001"},
-				{"tag": "ResultCode", "field_filter": "CGRMaxUsage(0)", "field_id": "Result-Code", "type": "*constant", "value": "4010"},
+				{"tag": "ResultCode", "field_filter": "*cgrReply>MaxUsage(^0$)", 
+					"field_id": "Result-Code", "type": "*constant", "value": "4010"},
 			],
 		},
 		{
@@ -99,9 +99,6 @@
 				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "Event-Timestamp", "mandatory": true},
 				{"tag": "LastUsed", "field_id": "LastUsed", "type": "*handler", "handler_id": "*sum", 
 					"value": "Multiple-Services-Credit-Control>Used-Service-Unit>CC-Input-Octets;^|;Multiple-Services-Credit-Control>Used-Service-Unit>CC-Output-Octets"},
-			],
-			"cca_fields": [
-				{"tag": "ResultCode", "field_id": "Result-Code", "type": "*constant", "value": "^2001"}
 			],
 		},
 	]
