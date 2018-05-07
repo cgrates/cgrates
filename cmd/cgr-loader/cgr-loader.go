@@ -292,10 +292,7 @@ func main() {
 	if err = tpReader.LoadAll(); err != nil {
 		log.Fatal(err)
 	}
-	/*if *verbose {
-		tpReader.ShowStatistics()
-	}
-	*/
+
 	if *dryRun { // We were just asked to parse the data, not saving it
 		return
 	}

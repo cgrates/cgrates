@@ -12,7 +12,7 @@ ifeq ($(GIT_DATE),)
 	exit 1
 endif
 
-JESSIE_VERSION=$(shell dpkg-parsechangelog -S Version -l jessie/changelog 2> /dev/null)
+JESSIE_VERSION=$(shell dpkg-parsechangelog -S Version -ljessie/changelog 2> /dev/null)
 
 ifeq ($(JESSIE_VERSION),)
 	echo "Error: Failed to extract version from jessie changelog"
@@ -21,7 +21,7 @@ endif
 
 JESSIE_PKG_VERSION=$(JESSIE_VERSION)+$(GIT_DATE)+$(GIT_COMMIT)
 
-SQUEEZE_VERSION=$(shell dpkg-parsechangelog -S Version -l squeeze/changelog 2> /dev/null)
+SQUEEZE_VERSION=$(shell dpkg-parsechangelog -S Version -lsqueeze/changelog 2> /dev/null)
 
 ifeq ($(SQUEEZE_VERSION),)
 	echo "Error: Failed to extract version from squeeze changelog"
