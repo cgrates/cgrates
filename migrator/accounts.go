@@ -143,22 +143,19 @@ func (m *Migrator) migrateAccounts() (err error) {
 	}
 	current := engine.CurrentDataDBVersions()
 	switch vrs[utils.Accounts] {
-	case current[utils.Accounts]:
-		if m.sameDataDB {
-			return
-		}
-		if err := m.migrateCurrentAccounts(); err != nil {
-			return err
-		}
-		return
+
 	case 1:
-		if err := m.migrateV1Accounts(); err != nil {
-			return err
-		}
+		return m.migrateV1Accounts()
 	case 2:
 		if err := m.migrateV2Accounts(); err != nil {
 			return err
 		}
+		fallthrough
+	case current[utils.Accounts]:
+		if m.sameDataDB {
+			return
+		}
+		return m.migrateCurrentAccounts()
 	}
 	return
 }

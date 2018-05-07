@@ -59,6 +59,9 @@ func ConfigureV1StorDB(db_type, host, port, name, user, pass string) (db Migrato
 	case utils.MONGO:
 		d, err = newv1MongoStorage(host, port, name, user, pass, utils.StorDB, nil)
 		db = d.(MigratorStorDB)
+	case utils.MYSQL:
+		d, err = newSqlStorage(host, port, name, user, pass)
+		db = d.(MigratorStorDB)
 	default:
 		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are '%s'",
 			db_type, utils.MONGO))

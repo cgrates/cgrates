@@ -94,6 +94,55 @@ func TestSessionCostITMongo(t *testing.T) {
 	}
 }
 
+func TestSessionCostITMySqlConnection(t *testing.T) {
+	var err error
+	sCostPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	sCostCfgIn, err = config.NewCGRConfigFromFolder(sCostPathIn)
+	if err != nil {
+		t.Error(err)
+	}
+	storDBIn, err := engine.ConfigureStorDB(sCostCfgIn.StorDBType, sCostCfgIn.StorDBHost,
+		sCostCfgIn.StorDBPort, sCostCfgIn.StorDBName,
+		sCostCfgIn.StorDBUser, sCostCfgIn.StorDBPass,
+		config.CgrConfig().StorDBMaxOpenConns,
+		config.CgrConfig().StorDBMaxIdleConns,
+		config.CgrConfig().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDBCDRSIndexes)
+	if err != nil {
+		t.Error(err)
+	}
+	storDBOut, err := engine.ConfigureStorDB(sCostCfgIn.StorDBType,
+		sCostCfgIn.StorDBHost, sCostCfgIn.StorDBPort, sCostCfgIn.StorDBName,
+		sCostCfgIn.StorDBUser, sCostCfgIn.StorDBPass,
+		config.CgrConfig().StorDBMaxOpenConns,
+		config.CgrConfig().StorDBMaxIdleConns,
+		config.CgrConfig().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDBCDRSIndexes)
+	if err != nil {
+		t.Error(err)
+	}
+	oldStorDB, err := ConfigureV1StorDB(sCostCfgIn.StorDBType,
+		sCostCfgIn.StorDBHost, sCostCfgIn.StorDBPort, sCostCfgIn.StorDBName,
+		sCostCfgIn.StorDBUser, sCostCfgIn.StorDBPass)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sCostMigrator, err = NewMigrator(nil, nil, sCostCfgIn.DataDbType,
+		sCostCfgIn.DBDataEncoding, storDBIn, storDBOut, sCostCfgIn.StorDBType, nil,
+		sCostCfgIn.DataDbType, sCostCfgIn.DBDataEncoding, oldStorDB, sCostCfgIn.StorDBType,
+		false, false, false, false, false)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestSessionCostITMySql(t *testing.T) {
+	for _, stest := range sTestssCostIT {
+		t.Run("TestSessionSCostITMigrateMySql", stest)
+	}
+}
+
 func testSessionCostITFlush(t *testing.T) {
 	if err := sCostMigrator.storDBOut.Flush(
 		path.Join(sCostCfgIn.DataFolderPath, "storage", sCostCfgIn.StorDBType)); err != nil {

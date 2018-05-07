@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -58,12 +59,12 @@ func (m *Migrator) migrateCDRs() (err error) {
 			"version number is not defined for Actions")
 	}
 	switch vrs[utils.CDRs] {
-	case current[utils.CDRs]:
-		if err := m.migrateCurrentCDRs(); err != nil {
-			return err
-		}
 	case 1:
 		if err := m.migrateV1CDRs(); err != nil {
+			return err
+		}
+	case current[utils.CDRs]:
+		if err := m.migrateCurrentCDRs(); err != nil {
 			return err
 		}
 	}
@@ -160,5 +161,65 @@ func (v1Cdr v1Cdrs) V1toV2Cdr() (cdr *engine.CDR) {
 			cdr.ExtraFields[key] = value
 		}
 	}
+	return
+}
+
+func NewV1CDRFromCDRSql(cdrSql *engine.CDRsql) (cdr *v1Cdrs, err error) {
+	cdr = new(v1Cdrs)
+	cdr.CGRID = cdrSql.Cgrid
+	cdr.RunID = cdrSql.RunID
+	cdr.OriginHost = cdrSql.OriginHost
+	cdr.Source = cdrSql.Source
+	cdr.OriginID = cdrSql.OriginID
+	cdr.OrderID = cdrSql.ID
+	cdr.ToR = cdrSql.TOR
+	cdr.RequestType = cdrSql.RequestType
+	cdr.Tenant = cdrSql.Tenant
+	cdr.Category = cdrSql.Category
+	cdr.Account = cdrSql.Account
+	cdr.Subject = cdrSql.Subject
+	cdr.Destination = cdrSql.Destination
+	cdr.SetupTime = cdrSql.SetupTime
+	cdr.AnswerTime = cdrSql.AnswerTime
+	cdr.Usage = time.Duration(cdrSql.Usage)
+	cdr.CostSource = cdrSql.CostSource
+	cdr.Cost = cdrSql.Cost
+	cdr.ExtraInfo = cdrSql.ExtraInfo
+	if cdrSql.ExtraFields != "" {
+		if err = json.Unmarshal([]byte(cdrSql.ExtraFields), &cdr.ExtraFields); err != nil {
+			return nil, err
+		}
+	}
+	if cdrSql.CostDetails != "" {
+		if err = json.Unmarshal([]byte(cdrSql.CostDetails), &cdr.CostDetails); err != nil {
+			return nil, err
+		}
+	}
+	return
+}
+
+func (cdr v1Cdrs) AsCDRsql() (cdrSql *engine.CDRsql) {
+	cdrSql = new(engine.CDRsql)
+	cdrSql.Cgrid = cdr.CGRID
+	cdrSql.RunID = cdr.RunID
+	cdrSql.OriginHost = cdr.OriginHost
+	cdrSql.Source = cdr.Source
+	cdrSql.OriginID = cdr.OriginID
+	cdrSql.TOR = cdr.ToR
+	cdrSql.RequestType = cdr.RequestType
+	cdrSql.Tenant = cdr.Tenant
+	cdrSql.Category = cdr.Category
+	cdrSql.Account = cdr.Account
+	cdrSql.Subject = cdr.Subject
+	cdrSql.Destination = cdr.Destination
+	cdrSql.SetupTime = cdr.SetupTime
+	cdrSql.AnswerTime = cdr.AnswerTime
+	cdrSql.Usage = cdr.Usage.Nanoseconds()
+	cdrSql.ExtraFields = utils.ToJSON(cdr.ExtraFields)
+	cdrSql.CostSource = cdr.CostSource
+	cdrSql.Cost = cdr.Cost
+	cdrSql.CostDetails = utils.ToJSON(cdr.CostDetails)
+	cdrSql.ExtraInfo = cdr.ExtraInfo
+	cdrSql.CreatedAt = time.Now()
 	return
 }

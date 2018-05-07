@@ -20,6 +20,7 @@ package migrator
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -154,5 +155,33 @@ func (v2Cost v2SessionsCost) V2toV3Cost() (cost *engine.SMCost) {
 		CostSource:  v2Cost.CostSource,
 		CostDetails: engine.NewEventCostFromCallCost(v2Cost.CostDetails, v2Cost.CGRID, v2Cost.RunID),
 	}
+	return
+}
+
+func NewV2SessionsCostFromSessionsCostSql(smSql *engine.SessionsCostsSQL) (smV2 *v2SessionsCost, err error) {
+	smV2 = new(v2SessionsCost)
+	smV2.CGRID = smSql.Cgrid
+	smV2.RunID = smSql.RunID
+	smV2.OriginHost = smSql.OriginHost
+	smV2.OriginID = smSql.OriginID
+	smV2.CostSource = smSql.CostSource
+	smV2.Usage = time.Duration(smSql.Usage)
+	smV2.CostDetails = new(engine.CallCost)
+	if err := json.Unmarshal([]byte(smSql.CostDetails), smV2.CostDetails); err != nil {
+		return nil, err
+	}
+	return
+}
+
+func (v2Cost v2SessionsCost) AsSessionsCostSql() (smSql *engine.SessionsCostsSQL) {
+	smSql = new(engine.SessionsCostsSQL)
+	smSql.Cgrid = v2Cost.CGRID
+	smSql.RunID = v2Cost.RunID
+	smSql.OriginHost = v2Cost.OriginHost
+	smSql.OriginID = v2Cost.OriginID
+	smSql.CostSource = v2Cost.CostSource
+	smSql.CostDetails = utils.ToJSON(v2Cost.CostDetails)
+	smSql.Usage = v2Cost.Usage.Nanoseconds()
+	smSql.CreatedAt = time.Now()
 	return
 }
