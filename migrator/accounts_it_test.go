@@ -117,9 +117,9 @@ func testAccITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	oldDataDB, err := ConfigureV1DataStorage(accCfgOut.DataDbType,
-		accCfgOut.DataDbHost, accCfgOut.DataDbPort, accCfgOut.DataDbName,
-		accCfgOut.DataDbUser, accCfgOut.DataDbPass, accCfgOut.DBDataEncoding)
+	oldDataDB, err := ConfigureV1DataStorage(accCfgIn.DataDbType,
+		accCfgIn.DataDbHost, accCfgIn.DataDbPort, accCfgIn.DataDbName,
+		accCfgIn.DataDbUser, accCfgIn.DataDbPass, accCfgIn.DBDataEncoding)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -230,10 +230,24 @@ func testAccITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when setting version for Accounts ", err.Error())
 		}
+
+		if vrs, err := accMigrator.dmOut.DataDB().GetVersions(""); err != nil {
+			t.Error(err)
+		} else if vrs[utils.Accounts] != 1 {
+			t.Errorf("Unexpected version returned: %d", vrs[utils.Accounts])
+		}
+
 		err, _ = accMigrator.Migrate([]string{utils.MetaAccounts})
 		if err != nil {
 			t.Error("Error when migrating Accounts ", err.Error())
 		}
+
+		if vrs, err := accMigrator.dmOut.DataDB().GetVersions(""); err != nil {
+			t.Error(err)
+		} else if vrs[utils.Accounts] != 3 {
+			t.Errorf("Unexpected version returned: %d", vrs[utils.Accounts])
+		}
+
 		result, err := accMigrator.dmOut.DataDB().GetAccount(testAccount.ID)
 		if err != nil {
 			t.Error("Error when getting Accounts ", err.Error())

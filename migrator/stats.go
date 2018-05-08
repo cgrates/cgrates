@@ -144,7 +144,7 @@ func (m *Migrator) migrateV1CDRSTATS() (err error) {
 	}
 	if m.dryRun != true {
 		// All done, update version wtih current one
-		vrs := engine.Versions{utils.StatS: engine.CurrentStorDBVersions()[utils.StatS]}
+		vrs := engine.Versions{utils.StatS: engine.CurrentDataDBVersions()[utils.StatS]}
 		if err = m.dmOut.DataDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
@@ -171,6 +171,10 @@ func (m *Migrator) migrateStats() (err error) {
 			"version number is not defined for ActionTriggers model")
 	}
 	switch vrs[utils.StatS] {
+	case 1:
+		if err := m.migrateV1CDRSTATS(); err != nil {
+			return err
+		}
 	case current[utils.StatS]:
 		if m.sameDataDB {
 			return
@@ -179,11 +183,6 @@ func (m *Migrator) migrateStats() (err error) {
 			return err
 		}
 		return
-
-	case 1:
-		if err := m.migrateV1CDRSTATS(); err != nil {
-			return err
-		}
 	}
 	return
 }
@@ -191,13 +190,15 @@ func (m *Migrator) migrateStats() (err error) {
 func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *engine.StatQueue, stq *engine.StatQueueProfile, err error) {
 	var filters []*engine.FilterRule
 	if len(v1Sts.SetupInterval) == 1 {
-		x, err := engine.NewFilterRule(engine.MetaGreaterOrEqual, "SetupInterval", []string{v1Sts.SetupInterval[0].String()})
+		x, err := engine.NewFilterRule(engine.MetaGreaterOrEqual,
+			"SetupInterval", []string{v1Sts.SetupInterval[0].String()})
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	} else if len(v1Sts.SetupInterval) == 2 {
-		x, err := engine.NewFilterRule(engine.MetaLessThan, "SetupInterval", []string{v1Sts.SetupInterval[1].String()})
+		x, err := engine.NewFilterRule(engine.MetaLessThan,
+			"SetupInterval", []string{v1Sts.SetupInterval[1].String()})
 		if err != nil {
 			return nil, nil, nil, err
 		}
