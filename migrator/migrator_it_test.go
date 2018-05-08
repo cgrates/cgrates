@@ -52,7 +52,7 @@ var sTestsITMigrator = []func(t *testing.T){
 	testMigratorActions,
 	testMigratorSharedGroups,
 	testMigratorStats,
-	testMigratorSessionsCosts,
+	testMigratorSessionsCosts, // Done
 	testFlush,
 	testMigratorAlias,
 	//FIXME testMigratorReverseAlias,

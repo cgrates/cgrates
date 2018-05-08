@@ -41,66 +41,36 @@ var (
 )
 
 var sTestsCdrIT = []func(t *testing.T){
+	testCdrITConnect,
 	testCdrITFlush,
 	testCdrITMigrateAndMove,
 }
 
-func TestCdrITMongoConnection(t *testing.T) {
+func TestCdrITMongo(t *testing.T) {
 	var err error
 	cdrPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
 	cdrCfgIn, err = config.NewCGRConfigFromFolder(cdrPathIn)
 	if err != nil {
 		t.Error(err)
 	}
-	storDBIn, err := engine.ConfigureStorDB(cdrCfgIn.StorDBType, cdrCfgIn.StorDBHost,
-		cdrCfgIn.StorDBPort, cdrCfgIn.StorDBName,
-		cdrCfgIn.StorDBUser, cdrCfgIn.StorDBPass,
-		config.CgrConfig().StorDBMaxOpenConns,
-		config.CgrConfig().StorDBMaxIdleConns,
-		config.CgrConfig().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDBCDRSIndexes)
-	if err != nil {
-		t.Error(err)
-	}
-	storDBOut, err := engine.ConfigureStorDB(cdrCfgIn.StorDBType,
-		cdrCfgIn.StorDBHost, cdrCfgIn.StorDBPort, cdrCfgIn.StorDBName,
-		cdrCfgIn.StorDBUser, cdrCfgIn.StorDBPass,
-		config.CgrConfig().StorDBMaxOpenConns,
-		config.CgrConfig().StorDBMaxIdleConns,
-		config.CgrConfig().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDBCDRSIndexes)
-	if err != nil {
-		t.Error(err)
-	}
-	oldStorDB, err := ConfigureV1StorDB(cdrCfgIn.StorDBType,
-		cdrCfgIn.StorDBHost, cdrCfgIn.StorDBPort, cdrCfgIn.StorDBName,
-		cdrCfgIn.StorDBUser, cdrCfgIn.StorDBPass)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	cdrMigrator, err = NewMigrator(nil, nil, cdrCfgIn.DataDbType,
-		cdrCfgIn.DBDataEncoding, storDBIn, storDBOut, cdrCfgIn.StorDBType, nil,
-		cdrCfgIn.DataDbType, cdrCfgIn.DBDataEncoding, oldStorDB, cdrCfgIn.StorDBType,
-		false, false, false, false, false)
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func TestCdrITMongo(t *testing.T) {
 	for _, stest := range sTestsCdrIT {
 		t.Run("TestCdrITMigrateMongo", stest)
 	}
 }
 
-func TestCdrITMySqlConnection(t *testing.T) {
+func TestCdrITMySql(t *testing.T) {
 	var err error
 	cdrPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
 	cdrCfgIn, err = config.NewCGRConfigFromFolder(cdrPathIn)
 	if err != nil {
 		t.Error(err)
 	}
+	for _, stest := range sTestsCdrIT {
+		t.Run("TestCdrITMigrateMySql", stest)
+	}
+}
+
+func testCdrITConnect(t *testing.T) {
 	storDBIn, err := engine.ConfigureStorDB(cdrCfgIn.StorDBType, cdrCfgIn.StorDBHost,
 		cdrCfgIn.StorDBPort, cdrCfgIn.StorDBName,
 		cdrCfgIn.StorDBUser, cdrCfgIn.StorDBPass,
@@ -134,12 +104,6 @@ func TestCdrITMySqlConnection(t *testing.T) {
 		false, false, false, false, false)
 	if err != nil {
 		t.Error(err)
-	}
-}
-
-func TestCdrITMySql(t *testing.T) {
-	for _, stest := range sTestsCdrIT {
-		t.Run("TestCdrITMigrateMySql", stest)
 	}
 }
 
