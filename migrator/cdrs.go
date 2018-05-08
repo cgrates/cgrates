@@ -130,7 +130,7 @@ type v1Cdrs struct {
 	CostDetails *engine.CallCost // Attach the cost details to CDR when possible
 }
 
-func (v1Cdr v1Cdrs) V1toV2Cdr() (cdr *engine.CDR) {
+func (v1Cdr *v1Cdrs) V1toV2Cdr() (cdr *engine.CDR) {
 	cdr = &engine.CDR{
 		CGRID:       v1Cdr.CGRID,
 		RunID:       v1Cdr.RunID,
@@ -198,7 +198,7 @@ func NewV1CDRFromCDRSql(cdrSql *engine.CDRsql) (cdr *v1Cdrs, err error) {
 	return
 }
 
-func (cdr v1Cdrs) AsCDRsql() (cdrSql *engine.CDRsql) {
+func (cdr *v1Cdrs) AsCDRsql() (cdrSql *engine.CDRsql) {
 	cdrSql = new(engine.CDRsql)
 	cdrSql.Cgrid = cdr.CGRID
 	cdrSql.RunID = cdr.RunID

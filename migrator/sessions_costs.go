@@ -87,7 +87,7 @@ func (m *Migrator) migrateSessionSCosts() (err error) {
 			return err
 		}
 		fallthrough // incremental updates
-	case 2: // Simply removing them should be enough since if the system is offline they are most probably stale already
+	case 2:
 		if err := m.migrateV2SessionSCosts(); err != nil {
 			return err
 		}
@@ -124,7 +124,7 @@ func (m *Migrator) migrateV2SessionSCosts() (err error) {
 	}
 	if m.dryRun != true {
 		// All done, update version wtih current one
-		vrs := engine.Versions{utils.CDRs: engine.CurrentStorDBVersions()[utils.SessionSCosts]}
+		vrs := engine.Versions{utils.SessionSCosts: engine.CurrentStorDBVersions()[utils.SessionSCosts]}
 		if err = m.storDBOut.SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
@@ -145,7 +145,7 @@ type v2SessionsCost struct {
 	CostDetails *engine.CallCost
 }
 
-func (v2Cost v2SessionsCost) V2toV3Cost() (cost *engine.SMCost) {
+func (v2Cost *v2SessionsCost) V2toV3Cost() (cost *engine.SMCost) {
 	cost = &engine.SMCost{
 		CGRID:       v2Cost.CGRID,
 		RunID:       v2Cost.RunID,
@@ -173,7 +173,7 @@ func NewV2SessionsCostFromSessionsCostSql(smSql *engine.SessionsCostsSQL) (smV2 
 	return
 }
 
-func (v2Cost v2SessionsCost) AsSessionsCostSql() (smSql *engine.SessionsCostsSQL) {
+func (v2Cost *v2SessionsCost) AsSessionsCostSql() (smSql *engine.SessionsCostsSQL) {
 	smSql = new(engine.SessionsCostsSQL)
 	smSql.Cgrid = v2Cost.CGRID
 	smSql.RunID = v2Cost.RunID

@@ -190,21 +190,29 @@ func testSessionCostITMigrateAndMove(t *testing.T) {
 		t.Error(err)
 	}
 	currentVersion := engine.Versions{
-		utils.COST_DETAILS:  2,
 		utils.SessionSCosts: 2,
-		utils.CDRs:          1,
 	}
 	err = sCostMigrator.storDBOut.SetVersions(currentVersion, false)
 	if err != nil {
-		t.Error("Error when setting version for CDRs ", err.Error())
+		t.Error("Error when setting version for SessionsCosts ", err.Error())
+	}
+	if vrs, err := sCostMigrator.storDBOut.GetVersions(""); err != nil {
+		t.Error(err)
+	} else if vrs[utils.SessionSCosts] != 2 {
+		t.Errorf("Unexpected version returned: %d", vrs[utils.SessionSCosts])
 	}
 	err, _ = sCostMigrator.Migrate([]string{utils.MetaSessionsCosts})
 	if err != nil {
-		t.Error("Error when migrating CDRs ", err.Error())
+		t.Error("Error when migrating SessionsCosts ", err.Error())
 	}
 	if rcvCosts, err := sCostMigrator.storDBOut.GetSMCosts("", utils.DEFAULT_RUNID, "", ""); err != nil {
 		t.Error(err)
 	} else if len(rcvCosts) != 1 {
-		t.Errorf("Unexpected number of CDRs returned: %d", len(rcvCosts))
+		t.Errorf("Unexpected number of SessionsCosts returned: %d", len(rcvCosts))
+	}
+	if vrs, err := sCostMigrator.storDBOut.GetVersions(""); err != nil {
+		t.Error(err)
+	} else if vrs[utils.SessionSCosts] != 3 {
+		t.Errorf("Unexpected version returned: %d", vrs[utils.SessionSCosts])
 	}
 }

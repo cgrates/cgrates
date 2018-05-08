@@ -192,13 +192,17 @@ func testCdrITMigrateAndMove(t *testing.T) {
 		t.Error(err)
 	}
 	currentVersion := engine.Versions{
-		utils.COST_DETAILS:  2,
-		utils.SessionSCosts: 3,
-		utils.CDRs:          1,
+		utils.COST_DETAILS: 2,
+		utils.CDRs:         1,
 	}
 	err = cdrMigrator.storDBOut.SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for CDRs ", err.Error())
+	}
+	if vrs, err := cdrMigrator.storDBOut.GetVersions(""); err != nil {
+		t.Error(err)
+	} else if vrs[utils.CDRs] != 1 {
+		t.Errorf("Unexpected version returned: %d", vrs[utils.CDRs])
 	}
 	err, _ = cdrMigrator.Migrate([]string{utils.MetaCDRs})
 	if err != nil {
@@ -208,5 +212,10 @@ func testCdrITMigrateAndMove(t *testing.T) {
 		t.Error(err)
 	} else if len(rcvCDRs) != 1 {
 		t.Errorf("Unexpected number of CDRs returned: %d", len(rcvCDRs))
+	}
+	if vrs, err := cdrMigrator.storDBOut.GetVersions(""); err != nil {
+		t.Error(err)
+	} else if vrs[utils.CDRs] != 2 {
+		t.Errorf("Unexpected version returned: %d", vrs[utils.CDRs])
 	}
 }
