@@ -197,39 +197,13 @@ func (kev KamEvent) String() string {
 }
 
 func (kev KamEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
-	timezone := config.CgrConfig().DefaultTimezone
-	var sTime time.Time
-	switch kev[EVENT] {
-	case CGR_AUTH_REQUEST:
-		sTimePrv, err := utils.ParseTimeDetectLayout(kev[utils.SetupTime], timezone)
-		if err != nil {
-			return
-		}
-		sTime = sTimePrv
-	case CGR_CALL_START:
-		sTimePrv, err := utils.ParseTimeDetectLayout(kev[utils.AnswerTime], timezone)
-		if err != nil {
-			return
-		}
-		sTime = sTimePrv
-	case CGR_CALL_END:
-		sTimePrv, err := utils.ParseTimeDetectLayout(kev[utils.AnswerTime], timezone)
-		if err != nil {
-			return
-		}
-		sTime = sTimePrv
-	default: // no/unsupported event
+	cgrEv, err := kev.AsCGREvent(config.CgrConfig().DefaultTimezone)
+	if err != nil {
 		return
 	}
 	args = &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
-		CGREvent: utils.CGREvent{
-			Tenant: utils.FirstNonEmpty(kev[utils.Tenant],
-				config.CgrConfig().DefaultTenant),
-			ID:    utils.UUIDSha1Prefix(),
-			Time:  &sTime,
-			Event: kev.AsMapStringInterface(),
-		},
+		CGREvent:    *cgrEv,
 	}
 	subsystems, has := kev[KamCGRSubsystems]
 	if !has {
@@ -297,39 +271,13 @@ func (kev KamEvent) AsKamAuthReply(authArgs *sessions.V1AuthorizeArgs,
 
 // V1InitSessionArgs returns the arguments used in SessionSv1.InitSession
 func (kev KamEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
-	timezone := config.CgrConfig().DefaultTimezone
-	var sTime time.Time
-	switch kev[EVENT] {
-	case CGR_AUTH_REQUEST:
-		sTimePrv, err := utils.ParseTimeDetectLayout(kev[utils.SetupTime], timezone)
-		if err != nil {
-			return
-		}
-		sTime = sTimePrv
-	case CGR_CALL_START:
-		sTimePrv, err := utils.ParseTimeDetectLayout(kev[utils.AnswerTime], timezone)
-		if err != nil {
-			return
-		}
-		sTime = sTimePrv
-	case CGR_CALL_END:
-		sTimePrv, err := utils.ParseTimeDetectLayout(kev[utils.AnswerTime], timezone)
-		if err != nil {
-			return
-		}
-		sTime = sTimePrv
-	default: // no/unsupported event
+	cgrEv, err := kev.AsCGREvent(config.CgrConfig().DefaultTimezone)
+	if err != nil {
 		return
 	}
 	args = &sessions.V1InitSessionArgs{ // defaults
 		InitSession: true,
-		CGREvent: utils.CGREvent{
-			Tenant: utils.FirstNonEmpty(kev[utils.Tenant],
-				config.CgrConfig().DefaultTenant),
-			ID:    utils.UUIDSha1Prefix(),
-			Time:  &sTime,
-			Event: kev.AsMapStringInterface(),
-		},
+		CGREvent:    *cgrEv,
 	}
 	subsystems, has := kev[KamCGRSubsystems]
 	if !has {
@@ -355,39 +303,13 @@ func (kev KamEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 
 // V1TerminateSessionArgs returns the arguments used in SMGv1.TerminateSession
 func (kev KamEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionArgs) {
-	timezone := config.CgrConfig().DefaultTimezone
-	var sTime time.Time
-	switch kev[EVENT] {
-	case CGR_AUTH_REQUEST:
-		sTimePrv, err := utils.ParseTimeDetectLayout(kev[utils.SetupTime], timezone)
-		if err != nil {
-			return
-		}
-		sTime = sTimePrv
-	case CGR_CALL_START:
-		sTimePrv, err := utils.ParseTimeDetectLayout(kev[utils.AnswerTime], timezone)
-		if err != nil {
-			return
-		}
-		sTime = sTimePrv
-	case CGR_CALL_END:
-		sTimePrv, err := utils.ParseTimeDetectLayout(kev[utils.AnswerTime], timezone)
-		if err != nil {
-			return
-		}
-		sTime = sTimePrv
-	default: // no/unsupported event
+	cgrEv, err := kev.AsCGREvent(config.CgrConfig().DefaultTimezone)
+	if err != nil {
 		return
 	}
 	args = &sessions.V1TerminateSessionArgs{ // defaults
 		TerminateSession: true,
-		CGREvent: utils.CGREvent{
-			Tenant: utils.FirstNonEmpty(kev[utils.Tenant],
-				config.CgrConfig().DefaultTenant),
-			ID:    utils.UUIDSha1Prefix(),
-			Time:  &sTime,
-			Event: kev.AsMapStringInterface(),
-		},
+		CGREvent:         *cgrEv,
 	}
 	subsystems, has := kev[KamCGRSubsystems]
 	if !has {
