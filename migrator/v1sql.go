@@ -29,9 +29,9 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-type sqlStorage struct {
-	Db      *sql.DB
-	db      *gorm.DB
+type migratorSQL struct {
+	storDB  *engine.StorDB
+	sqlDB   *sql.DB
 	rowIter *sql.Rows
 }
 

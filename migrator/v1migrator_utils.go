@@ -26,8 +26,13 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func ConfigureV1DataStorage(db_type, host, port, name, user, pass, marshaler string) (db MigratorDataDB, err error) {
+func NewMigratorDataDB(db_type, host, port, name, user, pass, marshaler string) {
+
+}
+
+func ConfigureV1DataStorage() (db MigratorDataDB, err error) {
 	var d MigratorDataDB
+	d.DataManger().(engine.RedisStoarage)
 	switch db_type {
 	case utils.REDIS:
 		var db_nb int

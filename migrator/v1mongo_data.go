@@ -33,10 +33,9 @@ const (
 	v1AttributeProfilesCol = "attribute_profiles"
 )
 
-type v1Mongo struct {
-	session *mgo.Session
-	db      string
-	v1ms    engine.Marshaler
+type mongoMigrator struct {
+	dm      *engine.DataManager
+	mgoDB   *engine.MongoStorage
 	qryIter *mgo.Iter
 }
 
@@ -47,6 +46,10 @@ type AcKeyValue struct {
 type AtKeyValue struct {
 	Key   string
 	Value v1ActionPlans
+}
+
+func newmongoMigrator(dm *engine.DataManager) {
+
 }
 
 func newv1MongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes []string) (v1ms *v1Mongo, err error) {

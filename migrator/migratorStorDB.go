@@ -21,7 +21,8 @@ package migrator
 type MigratorStorDB interface {
 	getV1CDR() (v1Cdr *v1Cdrs, err error)
 	setV1CDR(v1Cdr *v1Cdrs) (err error)
-	getSMCost() (v2Cost *v2SessionsCost, err error)
-	setSMCost(v2Cost *v2SessionsCost) (err error)
-	remSMCost(v2Cost *v2SessionsCost) (err error)
+	getV2SMCost() (v2Cost *v2SessionsCost, err error)
+	setV2SMCost(v2Cost *v2SessionsCost) (err error)
+	remV2SMCost(v2Cost *v2SessionsCost) (err error)
+	StorDB() engine.StorDB
 }

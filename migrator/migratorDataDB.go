@@ -38,4 +38,5 @@ type MigratorDataDB interface {
 	setV2Account(x *v2Account) (err error)
 	getV1AttributeProfile() (v1attrPrf *v1AttributeProfile, err error)
 	setV1AttributeProfile(x *v1AttributeProfile) (err error)
+	DataManager() *engine.DataManager
 }

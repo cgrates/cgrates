@@ -26,13 +26,14 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewMigrator(dmIN *engine.DataManager, dmOut *engine.DataManager,
-	dataDBType, dataDBEncoding string,
-	storDBIn engine.StorDB, storDBOut engine.StorDB, storDBType string,
-	oldDataDB MigratorDataDB, oldDataDBType, oldDataDBEncoding string,
-	oldStorDB MigratorStorDB, oldStorDBType string,
-	dryRun bool, sameDataDB bool, sameStorDB bool,
-	datadb_versions bool, stordb_versions bool) (m *Migrator, err error) {
+func NewMigrator(
+	dmIN MigratorDataDB,
+	dmOut MigratorDataDB,
+	storDBIn MigratorStorDB,
+	storDBOut MigratorStorDB,
+	dryRun bool,
+	sameDataDB bool,
+	sameStorDB bool) (m *Migrator, err error) {
 	var mrshlr engine.Marshaler
 	var oldmrshlr engine.Marshaler
 	if dataDBEncoding == utils.MSGPACK {
@@ -47,36 +48,26 @@ func NewMigrator(dmIN *engine.DataManager, dmOut *engine.DataManager,
 	stats := make(map[string]int)
 
 	m = &Migrator{
-		dmOut: dmOut, dmIN: dmIN, dataDBType: dataDBType,
-		storDBIn: storDBIn, storDBOut: storDBOut, storDBType: storDBType,
-		mrshlr:    mrshlr,
-		oldDataDB: oldDataDB, oldDataDBType: oldDataDBType,
-		oldStorDB: oldStorDB, oldStorDBType: oldStorDBType,
-		oldmrshlr: oldmrshlr, dryRun: dryRun, sameDataDB: sameDataDB, sameStorDB: sameStorDB,
-		datadb_versions: datadb_versions, stordb_versions: stordb_versions, stats: stats,
+		dmOut:      dmOut,
+		dmIN:       dmIN,
+		storDBIn:   storDBIn,
+		storDBOut:  storDBOut,
+		storDBType: storDBType,
+		dryRun:     dryRun, sameDataDB: sameDataDB, sameStorDB: sameStorDB,
+		stats: stats,
 	}
 	return m, err
 }
 
 type Migrator struct {
-	dmIN            *engine.DataManager //oldatadb
-	dmOut           *engine.DataManager
-	dataDBType      string
-	storDBIn        engine.StorDB //oldStorDB
-	storDBOut       engine.StorDB
-	storDBType      string
-	mrshlr          engine.Marshaler
-	oldDataDB       MigratorDataDB
-	oldDataDBType   string
-	oldStorDB       MigratorStorDB
-	oldStorDBType   string
-	oldmrshlr       engine.Marshaler
-	dryRun          bool
-	sameDataDB      bool
-	sameStorDB      bool
-	datadb_versions bool
-	stordb_versions bool
-	stats           map[string]int
+	dmIN       MigratorDataDB
+	dmOut      MigratorDataDB
+	storDBIn   MigratorStorDB
+	storDBOut  MigratorStorDB
+	dryRun     bool
+	sameDataDB bool
+	sameStorDB bool
+	stats      map[string]int
 }
 
 // Migrate implements the tasks to migrate, used as a dispatcher to the individual methods
@@ -91,33 +82,17 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 				fmt.Sprintf("task <%s> is not a supported migration task", taskID))
 		case utils.MetaSetVersions:
 			if m.dryRun != true {
-
 				if err := m.dmOut.DataDB().SetVersions(engine.CurrentDBVersions(m.dataDBType), true); err != nil {
 					return utils.NewCGRError(utils.Migrator,
 						utils.ServerErrorCaps,
 						err.Error(),
 						fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error())), nil
 				}
-				if m.datadb_versions {
-					vrs, err := m.dmOut.DataDB().GetVersions("")
-					if err != nil {
-						return err, nil
-					}
-					log.Print("After migrate, DataDB versions :", vrs)
-				}
-
 				if err := m.storDBOut.SetVersions(engine.CurrentDBVersions(m.storDBType), true); err != nil {
 					return utils.NewCGRError(utils.Migrator,
 						utils.ServerErrorCaps,
 						err.Error(),
 						fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error())), nil
-				}
-				if m.stordb_versions {
-					vrs, err := m.storDBOut.GetVersions("")
-					if err != nil {
-						return err, nil
-					}
-					log.Print("After migrate, StorDB versions :", vrs)
 				}
 
 			} else {
