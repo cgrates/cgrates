@@ -26,30 +26,30 @@ import (
 )
 
 func (m *Migrator) migrateCurrentTPstats() (err error) {
-	tpids, err := m.storDBIn.GetTpIds(utils.TBLTPStats)
+	tpids, err := m.storDBIn.StorDB().GetTpIds(utils.TBLTPStats)
 	if err != nil {
 		return err
 	}
 
 	for _, tpid := range tpids {
-		ids, err := m.storDBIn.GetTpTableIds(tpid, utils.TBLTPStats,
+		ids, err := m.storDBIn.StorDB().GetTpTableIds(tpid, utils.TBLTPStats,
 			utils.TPDistinctIds{"id"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
 		for _, id := range ids {
 
-			stats, err := m.storDBIn.GetTPStats(tpid, id)
+			stats, err := m.storDBIn.StorDB().GetTPStats(tpid, id)
 			if err != nil {
 				return err
 			}
 			if stats != nil {
 				if m.dryRun != true {
-					if err := m.storDBOut.SetTPStats(stats); err != nil {
+					if err := m.storDBOut.StorDB().SetTPStats(stats); err != nil {
 						return err
 					}
 					for _, stat := range stats {
-						if err := m.storDBIn.RemTpData(utils.TBLTPStats, stat.TPid,
+						if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPStats, stat.TPid,
 							map[string]string{"id": stat.ID}); err != nil {
 							return err
 						}
@@ -65,7 +65,7 @@ func (m *Migrator) migrateCurrentTPstats() (err error) {
 func (m *Migrator) migrateTPstats() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.storDBOut.GetVersions("")
+	vrs, err = m.storDBOut.StorDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

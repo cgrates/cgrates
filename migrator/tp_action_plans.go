@@ -26,27 +26,28 @@ import (
 )
 
 func (m *Migrator) migrateCurrentTPactionplans() (err error) {
-	tpids, err := m.storDBIn.GetTpIds(utils.TBLTPActionPlans)
+	tpids, err := m.storDBIn.StorDB().GetTpIds(utils.TBLTPActionPlans)
 	if err != nil {
 		return err
 	}
 	for _, tpid := range tpids {
-		ids, err := m.storDBIn.GetTpTableIds(tpid, utils.TBLTPActionPlans, utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
+		ids, err := m.storDBIn.StorDB().GetTpTableIds(tpid, utils.TBLTPActionPlans, utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
 		for _, id := range ids {
-			actPln, err := m.storDBIn.GetTPActionPlans(tpid, id)
+			actPln, err := m.storDBIn.StorDB().GetTPActionPlans(tpid, id)
 			if err != nil {
 				return err
 			}
 			if actPln != nil {
 				if m.dryRun != true {
-					if err := m.storDBOut.SetTPActionPlans(actPln); err != nil {
+					if err := m.storDBOut.StorDB().SetTPActionPlans(actPln); err != nil {
 						return err
 					}
 					for _, act := range actPln {
-						if err := m.storDBIn.RemTpData(utils.TBLTPActionPlans, act.TPid, map[string]string{"tag": act.ID}); err != nil {
+						if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPActionPlans,
+							act.TPid, map[string]string{"tag": act.ID}); err != nil {
 							return err
 						}
 					}
@@ -61,7 +62,7 @@ func (m *Migrator) migrateCurrentTPactionplans() (err error) {
 func (m *Migrator) migrateTPactionplans() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.storDBOut.GetVersions("")
+	vrs, err = m.storDBOut.StorDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

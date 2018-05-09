@@ -26,24 +26,24 @@ import (
 )
 
 func (m *Migrator) migrateCurrentTPrates() (err error) {
-	tpids, err := m.storDBIn.GetTpIds(utils.TBLTPRates)
+	tpids, err := m.storDBIn.StorDB().GetTpIds(utils.TBLTPRates)
 	if err != nil {
 		return err
 	}
 	for _, tpid := range tpids {
-		ids, err := m.storDBIn.GetTpTableIds(tpid, utils.TBLTPRates, utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
+		ids, err := m.storDBIn.StorDB().GetTpTableIds(tpid, utils.TBLTPRates, utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
 		for _, id := range ids {
 
-			dest, err := m.storDBIn.GetTPRates(tpid, id)
+			dest, err := m.storDBIn.StorDB().GetTPRates(tpid, id)
 			if err != nil {
 				return err
 			}
 			if dest != nil {
 				if m.dryRun != true {
-					if err := m.storDBOut.SetTPRates(dest); err != nil {
+					if err := m.storDBOut.StorDB().SetTPRates(dest); err != nil {
 						return err
 					}
 					m.stats[utils.TpRates] += 1
@@ -57,7 +57,7 @@ func (m *Migrator) migrateCurrentTPrates() (err error) {
 func (m *Migrator) migrateTPrates() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.storDBOut.GetVersions("")
+	vrs, err = m.storDBOut.StorDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

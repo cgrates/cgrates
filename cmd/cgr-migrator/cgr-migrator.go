@@ -25,7 +25,6 @@ import (
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/migrator"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -34,15 +33,11 @@ const ()
 
 var (
 	sameDataDB, sameStorDB bool
-	dmIN, dmOUT            *engine.DataManager
-	outDataDB              migrator.MigratorDataDB
-	storDBIn, storDBOut    engine.StorDB
+	dmIN, dmOUT            migrator.MigratorDataDB
+	storDBIn, storDBOut    migrator.MigratorStorDB
 	err                    error
-
-	oDBDataEncoding string
-
-	dfltCfg = config.CgrConfig()
-	cfgDir  = flag.String("config_dir", "",
+	dfltCfg                = config.CgrConfig()
+	cfgDir                 = flag.String("config_dir", "",
 		"Configuration directory path.")
 
 	migrate = flag.String("migrate", "", "fire up automatic migration "+
@@ -106,10 +101,6 @@ var (
 	outStorDBPass = flag.String("out_stordb_passwd", utils.MetaStorDB,
 		"output StorDB password")
 
-	datadb_versions = flag.Bool("datadb_versions", false,
-		"print DataDB versions")
-	stordb_versions = flag.Bool("stordb_versions", false,
-		"print StorDB versions")
 	dryRun = flag.Bool("dry_run", false,
 		"parse loaded data for consistency and errors, without storing it")
 	verbose = flag.Bool("verbose", false, "enable detailed verbose logging output")
@@ -227,7 +218,7 @@ func main() {
 		*outStorDBName == mgrCfg.StorDBName &&
 		*outDBDataEncoding == mgrCfg.DBDataEncoding
 
-	if dmIN, err = engine.ConfigureDataStorage(mgrCfg.DataDbType,
+	if dmIN, err = migrator.NewMigratorDataDB(mgrCfg.DataDbType,
 		mgrCfg.DataDbHost, mgrCfg.DataDbPort,
 		mgrCfg.DataDbName, mgrCfg.DataDbUser,
 		mgrCfg.DataDbPass, mgrCfg.DBDataEncoding,
@@ -237,7 +228,7 @@ func main() {
 
 	if sameDataDB {
 		dmOUT = dmIN
-	} else if dmOUT, err = engine.ConfigureDataStorage(*outDataDBType,
+	} else if dmOUT, err = migrator.NewMigratorDataDB(*outDataDBType,
 		*outDataDBHost, *outDataDBPort,
 		*outDataDBName, *outDataDBUser,
 		*outDataDBPass, *outDBDataEncoding,
@@ -245,7 +236,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if storDBIn, err = engine.ConfigureStorDB(*inStorDBType,
+	if storDBIn, err = migrator.NewMigratorStorDB(*inStorDBType,
 		*inStorDBHost, *inStorDBPort,
 		*inStorDBName, *inStorDBUser, *inStorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns,
@@ -257,7 +248,7 @@ func main() {
 
 	if sameStorDB {
 		storDBOut = storDBIn
-	} else if storDBOut, err = engine.ConfigureStorDB(*outStorDBType,
+	} else if storDBOut, err = migrator.NewMigratorStorDB(*outStorDBType,
 		*outStorDBHost, *outStorDBPort,
 		*outStorDBName, *outStorDBUser,
 		*outStorDBPass,
@@ -268,46 +259,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var outDataDB migrator.MigratorDataDB
-	if outDataDB, err = migrator.ConfigureV1DataStorage(*inDataDBType,
-		*inDataDBHost, *inDataDBPort,
-		*inDataDBName, *inDataDBUser,
-		*inDataDBPass, *inDBDataEncoding); err != nil {
-		log.Fatal(err)
-	}
-
-	var outStorDB migrator.MigratorStorDB
-	/* FixMe with interfaces
-	if outStorDB, err = migrator.ConfigureV1StorDB(*inStorDBType,
-		*inStorDBHost, *inStorDBPort,
-		*inStorDBName, *inStorDBUser,
-		*inStorDBPass); err != nil {
-		log.Fatal(err)
-	}
-	*/
-
-	m, err := migrator.NewMigrator(dmIN, dmOUT, mgrCfg.DataDbType, mgrCfg.DBDataEncoding,
-		storDBIn, storDBOut, mgrCfg.StorDBType, outDataDB,
-		*outDataDBType, mgrCfg.DBDataEncoding, outStorDB,
-		*outStorDBType, *dryRun, sameDataDB, sameStorDB, *datadb_versions, *stordb_versions)
+	m, err := migrator.NewMigrator(dmIN, dmOUT,
+		storDBIn, storDBOut,
+		*dryRun, sameDataDB, sameStorDB)
 	if err != nil {
 		log.Fatal(err)
-	}
-	if *datadb_versions {
-		vrs, _ := dmOUT.DataDB().GetVersions("")
-		if len(vrs) != 0 {
-			log.Printf("DataDB versions : %+v\n", vrs)
-		} else {
-			log.Printf("DataDB versions not_found")
-		}
-	}
-	if *stordb_versions {
-		vrs, _ := storDBOut.GetVersions("")
-		if len(vrs) != 0 {
-			log.Printf("StorDB versions : %+v\n", vrs)
-		} else {
-			log.Printf("StorDB versions not_found")
-		}
 	}
 	if migrate != nil && *migrate != "" { // Run migrator
 		migrstats := make(map[string]int)

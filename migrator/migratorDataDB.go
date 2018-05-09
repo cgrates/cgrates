@@ -23,7 +23,6 @@ import (
 )
 
 type MigratorDataDB interface {
-	getKeysForPrefix(prefix string) ([]string, error)
 	getv1Account() (v1Acnt *v1Account, err error)
 	setV1Account(x *v1Account) (err error)
 	getV1ActionPlans() (v1aps *v1ActionPlans, err error)

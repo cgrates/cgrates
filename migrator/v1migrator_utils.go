@@ -20,8 +20,10 @@ package migrator
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -30,45 +32,44 @@ func NewMigratorDataDB(db_type, host, port, name, user, pass, marshaler string,
 	dm, err := engine.ConfigureDataStorage(db_type,
 		host, port, name, user, pass, marshaler,
 		cacheCfg, loadHistorySize)
+	var d MigratorDataDB
 	if err != nil {
 		return nil, err
 	}
 	switch db_type {
 	case utils.REDIS:
-		d := newRedisMigrator(dm)
-		db = d.(MigratorDataDB)
+		d = newRedisMigrator(dm)
 	case utils.MONGO:
-		d := newMongoMigrator(dm)
+		d = newMongoMigrator(dm)
 		db = d.(MigratorDataDB)
 	default:
 		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are '%s' or '%s'",
 			db_type, utils.REDIS, utils.MONGO))
 	}
+	return d, nil
 }
 
-/*
-
-func NewMigratorStorDB(db_type, host, port, name, user, pass, marshaler string,
-	cacheCfg config.CacheConfig, loadHistorySize int) (db MigratorDataDB, err error) {
-	dm, err := engine.ConfigureStorStorage(db_type,
-		host, port, name, user, pass, marshaler,
-		cacheCfg, loadHistorySize)
+func NewMigratorStorDB(db_type, host, port, name, user, pass string,
+	maxConn, maxIdleConn, connMaxLifetime int, cdrsIndexes []string) (db MigratorStorDB, err error) {
+	var d MigratorStorDB
+	storDb, err := engine.ConfigureStorDB(db_type, host, port, name, user, pass,
+		maxConn, maxIdleConn, connMaxLifetime, cdrsIndexes)
 	if err != nil {
 		return nil, err
 	}
 	switch db_type {
 	case utils.MONGO:
-		d := newRedisMigrator(dm)
-		db = d.(MigratorDataDB)
+		d = newMongoStorDBMigrator(storDb)
+		db = d.(MigratorStorDB)
 	case utils.MYSQL:
-		d := newMongoMigrator(dm)
-		db = d.(MigratorDataDB)
+		d = newMigratorSQL(storDb)
+		db = d.(MigratorStorDB)
 	default:
 		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are '%s' or '%s'",
-			db_type, utils.REDIS, utils.MONGO))
+			db_type, utils.MONGO, utils.MYSQL))
 	}
+	return d, nil
 }
-*/
 
 /*
 
