@@ -29,14 +29,18 @@ import (
 	"github.com/mediocregopher/radix.v2/redis"
 )
 
-type v1Redis struct {
-	dbPool   *pool.Pool
-	ms       engine.Marshaler
+type redisMigrator struct {
+	dm       *engine.DataManager
+	rds *engine.RedisStorage 
 	dataKeys []string
 	qryIdx   *int
 }
 
-func newv1RedisStorage(address string, db int, pass, mrshlerStr string) (*v1Redis, error) {
+func newredisMigrator(dm *engine.Datamnager) ( rM *redisMigrator, error) {
+	rM.rds = dm.DataDB().(*engine.RedisStorage)
+
+
+
 	df := func(network, addr string) (*redis.Client, error) {
 		client, err := redis.Dial(network, addr)
 		if err != nil {
