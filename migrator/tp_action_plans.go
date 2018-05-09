@@ -36,14 +36,19 @@ func (m *Migrator) migrateCurrentTPactionplans() (err error) {
 			return err
 		}
 		for _, id := range ids {
-			dest, err := m.storDBIn.GetTPActionPlans(tpid, id)
+			actPln, err := m.storDBIn.GetTPActionPlans(tpid, id)
 			if err != nil {
 				return err
 			}
-			if dest != nil {
+			if actPln != nil {
 				if m.dryRun != true {
-					if err := m.storDBOut.SetTPActionPlans(dest); err != nil {
+					if err := m.storDBOut.SetTPActionPlans(actPln); err != nil {
 						return err
+					}
+					for _, act := range actPln {
+						if err := m.storDBIn.RemTpData(utils.TBLTPActionPlans, act.TPid, map[string]string{"tag": act.ID}); err != nil {
+							return err
+						}
 					}
 					m.stats[utils.TpActionPlans] += 1
 				}

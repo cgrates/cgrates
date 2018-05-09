@@ -36,14 +36,19 @@ func (m *Migrator) migrateCurrentTPactiontriggers() (err error) {
 			return err
 		}
 		for _, id := range ids {
-			dest, err := m.storDBIn.GetTPActionTriggers(tpid, id)
+			actTrg, err := m.storDBIn.GetTPActionTriggers(tpid, id)
 			if err != nil {
 				return err
 			}
-			if dest != nil {
+			if actTrg != nil {
 				if m.dryRun != true {
-					if err := m.storDBOut.SetTPActionTriggers(dest); err != nil {
+					if err := m.storDBOut.SetTPActionTriggers(actTrg); err != nil {
 						return err
+					}
+					for _, act := range actTrg {
+						if err := m.storDBIn.RemTpData(utils.TBLTPActionTriggers, act.TPid, map[string]string{"tag": act.ID}); err != nil {
+							return err
+						}
 					}
 					m.stats[utils.TpActionTriggers] += 1
 				}

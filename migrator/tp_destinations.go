@@ -36,14 +36,19 @@ func (m *Migrator) migrateCurrentTPDestinations() (err error) {
 			return err
 		}
 		for _, id := range ids {
-			dest, err := m.storDBIn.GetTPDestinations(tpid, id)
+			destinations, err := m.storDBIn.GetTPDestinations(tpid, id)
 			if err != nil {
 				return err
 			}
-			if dest != nil {
+			if destinations != nil {
 				if m.dryRun != true {
-					if err := m.storDBOut.SetTPDestinations(dest); err != nil {
+					if err := m.storDBOut.SetTPDestinations(destinations); err != nil {
 						return err
+					}
+					for _, dest := range destinations {
+						if err := m.storDBIn.RemTpData(utils.TBLTPDestinations, dest.TPid, map[string]string{"tag": dest.ID}); err != nil {
+							return err
+						}
 					}
 					m.stats[utils.TpDestinations] += 1
 				}
