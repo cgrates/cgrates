@@ -26,30 +26,30 @@ import (
 )
 
 func (m *Migrator) migrateCurrentTPSuppliers() (err error) {
-	tpids, err := m.storDBIn.GetTpIds(utils.TBLTPSuppliers)
+	tpids, err := m.storDBIn.StorDB().GetTpIds(utils.TBLTPSuppliers)
 	if err != nil {
 		return err
 	}
 
 	for _, tpid := range tpids {
-		ids, err := m.storDBIn.GetTpTableIds(tpid, utils.TBLTPSuppliers,
+		ids, err := m.storDBIn.StorDB().GetTpTableIds(tpid, utils.TBLTPSuppliers,
 			utils.TPDistinctIds{"id"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
 		for _, id := range ids {
 
-			suppliers, err := m.storDBIn.GetTPSuppliers(tpid, id)
+			suppliers, err := m.storDBIn.StorDB().GetTPSuppliers(tpid, id)
 			if err != nil {
 				return err
 			}
 			if suppliers != nil {
 				if m.dryRun != true {
-					if err := m.storDBOut.SetTPSuppliers(suppliers); err != nil {
+					if err := m.storDBOut.StorDB().SetTPSuppliers(suppliers); err != nil {
 						return err
 					}
 					for _, supplier := range suppliers {
-						if err := m.storDBIn.RemTpData(utils.TBLTPSuppliers, supplier.TPid,
+						if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPSuppliers, supplier.TPid,
 							map[string]string{"tenant": supplier.Tenant, "id": supplier.ID}); err != nil {
 							return err
 						}
@@ -66,7 +66,7 @@ func (m *Migrator) migrateCurrentTPSuppliers() (err error) {
 func (m *Migrator) migrateTPSuppliers() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.storDBOut.GetVersions("")
+	vrs, err = m.storDBOut.StorDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

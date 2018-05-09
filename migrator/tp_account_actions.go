@@ -26,22 +26,22 @@ import (
 )
 
 func (m *Migrator) migrateCurrentTPaccountAcction() (err error) {
-	tpids, err := m.storDBIn.GetTpIds(utils.TBLTPAccountActions)
+	tpids, err := m.storDBIn.StorDB().GetTpIds(utils.TBLTPAccountActions)
 	if err != nil {
 		return err
 	}
 	for _, tpid := range tpids {
-		accAct, err := m.storDBIn.GetTPAccountActions(&utils.TPAccountActions{TPid: tpid})
+		accAct, err := m.storDBIn.StorDB().GetTPAccountActions(&utils.TPAccountActions{TPid: tpid})
 		if err != nil {
 			return err
 		}
 		if accAct != nil {
 			if m.dryRun != true {
-				if err := m.storDBOut.SetTPAccountActions(accAct); err != nil {
+				if err := m.storDBOut.StorDB().SetTPAccountActions(accAct); err != nil {
 					return err
 				}
 				for _, acc := range accAct {
-					if err := m.storDBIn.RemTpData(utils.TBLTPAccountActions, acc.TPid,
+					if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPAccountActions, acc.TPid,
 						map[string]string{"loadid": acc.LoadId, "tenant": acc.Tenant, "account": acc.Account}); err != nil {
 						return err
 					}
@@ -56,7 +56,7 @@ func (m *Migrator) migrateCurrentTPaccountAcction() (err error) {
 func (m *Migrator) migrateTPaccountacction() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.storDBOut.GetVersions("")
+	vrs, err = m.storDBOut.StorDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

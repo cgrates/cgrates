@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package migrator
 
+/*
 import (
 	"log"
 	"path"
@@ -158,3 +159,4 @@ func testTpTresITCheckData(t *testing.T) {
 		t.Error(err)
 	}
 }
+*/

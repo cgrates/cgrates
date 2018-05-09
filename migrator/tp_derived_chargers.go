@@ -26,24 +26,24 @@ import (
 )
 
 func (m *Migrator) migrateCurrentTPderivedchargers() (err error) {
-	tpids, err := m.storDBIn.GetTpIds(utils.TBLTPDerivedChargers)
+	tpids, err := m.storDBIn.StorDB().GetTpIds(utils.TBLTPDerivedChargers)
 	if err != nil {
 		return err
 	}
 
 	for _, tpid := range tpids {
 
-		derivedChargers, err := m.storDBIn.GetTPDerivedChargers(&utils.TPDerivedChargers{TPid: tpid})
+		derivedChargers, err := m.storDBIn.StorDB().GetTPDerivedChargers(&utils.TPDerivedChargers{TPid: tpid})
 		if err != nil {
 			return err
 		}
 		if derivedChargers != nil {
 			if m.dryRun != true {
-				if err := m.storDBOut.SetTPDerivedChargers(derivedChargers); err != nil {
+				if err := m.storDBOut.StorDB().SetTPDerivedChargers(derivedChargers); err != nil {
 					return err
 				}
 				for _, der := range derivedChargers {
-					if err := m.storDBIn.RemTpData(utils.TBLTPDerivedChargers,
+					if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPDerivedChargers,
 						der.TPid, map[string]string{"loadid": der.LoadId, "direction": der.Direction,
 							"tenant": der.Tenant, "category": der.Category, "account": der.Account, "subject": der.Subject}); err != nil {
 						return err
@@ -59,7 +59,7 @@ func (m *Migrator) migrateCurrentTPderivedchargers() (err error) {
 func (m *Migrator) migrateTPderivedchargers() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.storDBOut.GetVersions("")
+	vrs, err = m.storDBOut.StorDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

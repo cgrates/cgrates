@@ -26,12 +26,12 @@ import (
 )
 
 func (m *Migrator) migrateCurrentTPaliases() (err error) {
-	tpids, err := m.storDBIn.GetTpIds(utils.TBLTPAliases)
+	tpids, err := m.storDBIn.StorDB().GetTpIds(utils.TBLTPAliases)
 	if err != nil {
 		return err
 	}
 	for _, tpid := range tpids {
-		alias, err := m.storDBIn.GetTPAliases(&utils.TPAliases{TPid: tpid})
+		alias, err := m.storDBIn.StorDB().GetTPAliases(&utils.TPAliases{TPid: tpid})
 		if err != nil {
 			return err
 		}
@@ -40,11 +40,11 @@ func (m *Migrator) migrateCurrentTPaliases() (err error) {
 		}
 		if alias != nil {
 			if m.dryRun != true {
-				if err := m.storDBOut.SetTPAliases(alias); err != nil {
+				if err := m.storDBOut.StorDB().SetTPAliases(alias); err != nil {
 					return err
 				}
 				for _, ali := range alias {
-					if err := m.storDBIn.RemTpData(utils.TBLTPAliases, ali.TPid, map[string]string{"tag": ali.GetId()}); err != nil {
+					if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPAliases, ali.TPid, map[string]string{"tag": ali.GetId()}); err != nil {
 						return err
 					}
 				}
@@ -59,7 +59,7 @@ func (m *Migrator) migrateCurrentTPaliases() (err error) {
 func (m *Migrator) migrateTPaliases() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.storDBOut.GetVersions("")
+	vrs, err = m.storDBOut.StorDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

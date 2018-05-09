@@ -103,38 +103,31 @@ func TestAccountITMove(t *testing.T) {
 }
 
 func testAccITConnect(t *testing.T) {
-	dataDBIn, err := engine.ConfigureDataStorage(accCfgIn.DataDbType,
+	dataDBIn, err := NewMigratorDataDB(accCfgIn.DataDbType,
 		accCfgIn.DataDbHost, accCfgIn.DataDbPort, accCfgIn.DataDbName,
 		accCfgIn.DataDbUser, accCfgIn.DataDbPass, accCfgIn.DBDataEncoding,
 		config.CgrConfig().CacheCfg(), *loadHistorySize)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := engine.ConfigureDataStorage(accCfgOut.DataDbType,
+	dataDBOut, err := NewMigratorDataDB(accCfgOut.DataDbType,
 		accCfgOut.DataDbHost, accCfgOut.DataDbPort, accCfgOut.DataDbName,
 		accCfgOut.DataDbUser, accCfgOut.DataDbPass, accCfgOut.DBDataEncoding,
 		config.CgrConfig().CacheCfg(), *loadHistorySize)
 	if err != nil {
 		log.Fatal(err)
 	}
-	oldDataDB, err := ConfigureV1DataStorage(accCfgIn.DataDbType,
-		accCfgIn.DataDbHost, accCfgIn.DataDbPort, accCfgIn.DataDbName,
-		accCfgIn.DataDbUser, accCfgIn.DataDbPass, accCfgIn.DBDataEncoding)
-	if err != nil {
-		log.Fatal(err)
-	}
-	accMigrator, err = NewMigrator(dataDBIn, dataDBOut, accCfgIn.DataDbType,
-		accCfgIn.DBDataEncoding, nil, nil, accCfgIn.StorDBType, oldDataDB,
-		accCfgIn.DataDbType, accCfgIn.DBDataEncoding, nil, accCfgIn.StorDBType,
-		false, false, false, false, false)
+	accMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+		nil, nil,
+		false, false, false)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
 func testAccITFlush(t *testing.T) {
-	accMigrator.dmOut.DataDB().Flush("")
-	if err := engine.SetDBVersions(accMigrator.dmOut.DataDB()); err != nil {
+	accMigrator.dmOut.DataManager().DataDB().Flush("")
+	if err := engine.SetDBVersions(accMigrator.dmOut.DataManager().DataDB()); err != nil {
 		t.Error("Error  ", err.Error())
 	}
 }
@@ -214,7 +207,7 @@ func testAccITMigrateAndMove(t *testing.T) {
 		ActionTriggers: engine.ActionTriggers{}}
 	switch accAction {
 	case utils.Migrate:
-		err := accMigrator.oldDataDB.setV1Account(v1Acc)
+		err := accMigrator.dmIN.setV1Account(v1Acc)
 		if err != nil {
 			t.Error("Error when setting v1 Accounts ", err.Error())
 		}
@@ -226,12 +219,12 @@ func testAccITMigrateAndMove(t *testing.T) {
 			utils.ActionTriggers: 2,
 			utils.ActionPlans:    2,
 			utils.SharedGroups:   2}
-		err = accMigrator.dmOut.DataDB().SetVersions(currentVersion, false)
+		err = accMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for Accounts ", err.Error())
 		}
 
-		if vrs, err := accMigrator.dmOut.DataDB().GetVersions(""); err != nil {
+		if vrs, err := accMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 			t.Error(err)
 		} else if vrs[utils.Accounts] != 1 {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.Accounts])
@@ -242,13 +235,13 @@ func testAccITMigrateAndMove(t *testing.T) {
 			t.Error("Error when migrating Accounts ", err.Error())
 		}
 
-		if vrs, err := accMigrator.dmOut.DataDB().GetVersions(""); err != nil {
+		if vrs, err := accMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 			t.Error(err)
 		} else if vrs[utils.Accounts] != 3 {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.Accounts])
 		}
 
-		result, err := accMigrator.dmOut.DataDB().GetAccount(testAccount.ID)
+		result, err := accMigrator.dmOut.DataManager().DataDB().GetAccount(testAccount.ID)
 		if err != nil {
 			t.Error("Error when getting Accounts ", err.Error())
 		}
@@ -258,11 +251,11 @@ func testAccITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", testAccount, result)
 		}
 	case utils.Move:
-		if err := accMigrator.dmIN.DataDB().SetAccount(testAccount); err != nil {
+		if err := accMigrator.dmIN.DataManager().DataDB().SetAccount(testAccount); err != nil {
 			log.Print("GOT ERR DMIN", err)
 		}
 		currentVersion := engine.CurrentDataDBVersions()
-		err := accMigrator.dmOut.DataDB().SetVersions(currentVersion, false)
+		err := accMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for Accounts ", err.Error())
 		}
@@ -270,14 +263,14 @@ func testAccITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when accMigratorrating Accounts ", err.Error())
 		}
-		result, err := accMigrator.dmOut.DataDB().GetAccount(testAccount.ID)
+		result, err := accMigrator.dmOut.DataManager().DataDB().GetAccount(testAccount.ID)
 		if err != nil {
 			t.Error(err)
 		}
 		if !reflect.DeepEqual(testAccount, result) {
 			t.Errorf("Expecting: %+v, received: %+v", testAccount, result)
 		}
-		result, err = accMigrator.dmIN.DataDB().GetAccount(testAccount.ID)
+		result, err = accMigrator.dmIN.DataManager().DataDB().GetAccount(testAccount.ID)
 		if err != utils.ErrNotFound {
 			t.Error(err)
 		}

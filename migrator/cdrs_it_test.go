@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
-	"log"
 	"path"
 	"testing"
 	"time"
@@ -71,7 +70,7 @@ func TestCdrITMySql(t *testing.T) {
 }
 
 func testCdrITConnect(t *testing.T) {
-	storDBIn, err := engine.ConfigureStorDB(cdrCfgIn.StorDBType, cdrCfgIn.StorDBHost,
+	storDBIn, err := NewMigratorStorDB(cdrCfgIn.StorDBType, cdrCfgIn.StorDBHost,
 		cdrCfgIn.StorDBPort, cdrCfgIn.StorDBName,
 		cdrCfgIn.StorDBUser, cdrCfgIn.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns,
@@ -81,7 +80,7 @@ func testCdrITConnect(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	storDBOut, err := engine.ConfigureStorDB(cdrCfgIn.StorDBType,
+	storDBOut, err := NewMigratorStorDB(cdrCfgIn.StorDBType,
 		cdrCfgIn.StorDBHost, cdrCfgIn.StorDBPort, cdrCfgIn.StorDBName,
 		cdrCfgIn.StorDBUser, cdrCfgIn.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns,
@@ -91,24 +90,17 @@ func testCdrITConnect(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	oldStorDB, err := ConfigureV1StorDB(cdrCfgIn.StorDBType,
-		cdrCfgIn.StorDBHost, cdrCfgIn.StorDBPort, cdrCfgIn.StorDBName,
-		cdrCfgIn.StorDBUser, cdrCfgIn.StorDBPass)
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	cdrMigrator, err = NewMigrator(nil, nil, cdrCfgIn.DataDbType,
-		cdrCfgIn.DBDataEncoding, storDBIn, storDBOut, cdrCfgIn.StorDBType, nil,
-		cdrCfgIn.DataDbType, cdrCfgIn.DBDataEncoding, oldStorDB, cdrCfgIn.StorDBType,
-		false, false, false, false, false)
+	cdrMigrator, err = NewMigrator(nil, nil,
+		storDBIn, storDBOut,
+		false, false, false)
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func testCdrITFlush(t *testing.T) {
-	if err := cdrMigrator.storDBOut.Flush(
+	if err := cdrMigrator.storDBOut.StorDB().Flush(
 		path.Join(cdrCfgIn.DataFolderPath, "storage", cdrCfgIn.StorDBType)); err != nil {
 		t.Error(err)
 	}
@@ -152,18 +144,18 @@ func testCdrITMigrateAndMove(t *testing.T) {
 		CostDetails: cc,
 	}
 	var err error
-	if err = cdrMigrator.oldStorDB.setV1CDR(v1Cdr); err != nil {
+	if err = cdrMigrator.storDBIn.setV1CDR(v1Cdr); err != nil {
 		t.Error(err)
 	}
 	currentVersion := engine.Versions{
 		utils.COST_DETAILS: 2,
 		utils.CDRs:         1,
 	}
-	err = cdrMigrator.storDBOut.SetVersions(currentVersion, false)
+	err = cdrMigrator.storDBOut.StorDB().SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for CDRs ", err.Error())
 	}
-	if vrs, err := cdrMigrator.storDBOut.GetVersions(""); err != nil {
+	if vrs, err := cdrMigrator.storDBOut.StorDB().GetVersions(""); err != nil {
 		t.Error(err)
 	} else if vrs[utils.CDRs] != 1 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.CDRs])
@@ -172,12 +164,12 @@ func testCdrITMigrateAndMove(t *testing.T) {
 	if err != nil {
 		t.Error("Error when migrating CDRs ", err.Error())
 	}
-	if rcvCDRs, _, err := cdrMigrator.storDBOut.GetCDRs(new(utils.CDRsFilter), false); err != nil {
+	if rcvCDRs, _, err := cdrMigrator.storDBOut.StorDB().GetCDRs(new(utils.CDRsFilter), false); err != nil {
 		t.Error(err)
 	} else if len(rcvCDRs) != 1 {
 		t.Errorf("Unexpected number of CDRs returned: %d", len(rcvCDRs))
 	}
-	if vrs, err := cdrMigrator.storDBOut.GetVersions(""); err != nil {
+	if vrs, err := cdrMigrator.storDBOut.StorDB().GetVersions(""); err != nil {
 		t.Error(err)
 	} else if vrs[utils.CDRs] != 2 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.CDRs])

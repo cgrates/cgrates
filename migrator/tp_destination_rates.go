@@ -26,27 +26,27 @@ import (
 )
 
 func (m *Migrator) migrateCurrentTPdestinationrates() (err error) {
-	tpids, err := m.storDBIn.GetTpIds(utils.TBLTPDestinationRates)
+	tpids, err := m.storDBIn.StorDB().GetTpIds(utils.TBLTPDestinationRates)
 	if err != nil {
 		return err
 	}
 	for _, tpid := range tpids {
-		ids, err := m.storDBIn.GetTpTableIds(tpid, utils.TBLTPDestinationRates, utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
+		ids, err := m.storDBIn.StorDB().GetTpTableIds(tpid, utils.TBLTPDestinationRates, utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
 		for _, id := range ids {
-			destRate, err := m.storDBIn.GetTPDestinationRates(tpid, id, nil)
+			destRate, err := m.storDBIn.StorDB().GetTPDestinationRates(tpid, id, nil)
 			if err != nil {
 				return err
 			}
 			if destRate != nil {
 				if m.dryRun != true {
-					if err := m.storDBOut.SetTPDestinationRates(destRate); err != nil {
+					if err := m.storDBOut.StorDB().SetTPDestinationRates(destRate); err != nil {
 						return err
 					}
 					for _, dest := range destRate {
-						if err := m.storDBIn.RemTpData(utils.TBLTPDestinationRates, dest.TPid, map[string]string{"tag": dest.ID}); err != nil {
+						if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPDestinationRates, dest.TPid, map[string]string{"tag": dest.ID}); err != nil {
 							return err
 						}
 					}
@@ -61,7 +61,7 @@ func (m *Migrator) migrateCurrentTPdestinationrates() (err error) {
 func (m *Migrator) migrateTPdestinationrates() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.storDBOut.GetVersions("")
+	vrs, err = m.storDBOut.StorDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

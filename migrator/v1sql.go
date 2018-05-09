@@ -27,33 +27,44 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type migratorSQL struct {
-	storDB  *engine.StorDB
-	sqlDB   *sql.DB
-	rowIter *sql.Rows
+func newMigratorSQL(stor engine.StorDB) (sqlMig *migratorSQL) {
+	return &migratorSQL{
+		storDB:     &stor,
+		sqlStorage: stor.(*engine.SQLStorage),
+	}
 }
 
-func (sqlStorage *migratorSQL) getV1CDR() (v1Cdr *v1Cdrs, err error) {
-	if sqlStorage.rowIter == nil {
-		sqlStorage.rowIter, err = sqlStorage.Db.Query("SELECT * FROM cdrs")
+type migratorSQL struct {
+	storDB     *engine.StorDB
+	sqlStorage *engine.SQLStorage
+	rowIter    *sql.Rows
+}
+
+func (sqlMig *migratorSQL) StorDB() engine.StorDB {
+	return *sqlMig.storDB
+}
+
+func (mgSQL *migratorSQL) getV1CDR() (v1Cdr *v1Cdrs, err error) {
+	if mgSQL.rowIter == nil {
+		mgSQL.rowIter, err = mgSQL.sqlStorage.Db.Query("SELECT * FROM cdrs")
 		if err != nil {
 			return nil, err
 		}
 	}
 	cdrSql := new(engine.CDRsql)
-	sqlStorage.rowIter.Scan(&cdrSql)
+	mgSQL.rowIter.Scan(&cdrSql)
 	v1Cdr, err = NewV1CDRFromCDRSql(cdrSql)
 
-	if sqlStorage.rowIter.Next() {
+	if mgSQL.rowIter.Next() {
 		v1Cdr = nil
-		sqlStorage.rowIter = nil
+		mgSQL.rowIter = nil
 		return nil, utils.ErrNoMoreData
 	}
 	return v1Cdr, nil
 }
 
-func (sqlStorage *migratorSQL) setV1CDR(v1Cdr *v1Cdrs) (err error) {
-	tx := sqlStorage.db.Begin()
+func (mgSQL *migratorSQL) setV1CDR(v1Cdr *v1Cdrs) (err error) {
+	tx := mgSQL.sqlStorage.ExportGormDB().Begin()
 	cdrSql := v1Cdr.AsCDRsql()
 	cdrSql.CreatedAt = time.Now()
 	saved := tx.Save(cdrSql)
@@ -64,27 +75,27 @@ func (sqlStorage *migratorSQL) setV1CDR(v1Cdr *v1Cdrs) (err error) {
 	return nil
 }
 
-func (sqlStorage *migratorSQL) getSMCost() (v2Cost *v2SessionsCost, err error) {
-	if sqlStorage.rowIter == nil {
-		sqlStorage.rowIter, err = sqlStorage.Db.Query("SELECT * FROM sessions_costs")
+func (mgSQL *migratorSQL) getV2SMCost() (v2Cost *v2SessionsCost, err error) {
+	if mgSQL.rowIter == nil {
+		mgSQL.rowIter, err = mgSQL.sqlStorage.Db.Query("SELECT * FROM sessions_costs")
 		if err != nil {
 			return nil, err
 		}
 	}
 	scSql := new(engine.SessionsCostsSQL)
-	sqlStorage.rowIter.Scan(&scSql)
+	mgSQL.rowIter.Scan(&scSql)
 	v2Cost, err = NewV2SessionsCostFromSessionsCostSql(scSql)
 
-	if sqlStorage.rowIter.Next() {
+	if mgSQL.rowIter.Next() {
 		v2Cost = nil
-		sqlStorage.rowIter = nil
+		mgSQL.rowIter = nil
 		return nil, utils.ErrNoMoreData
 	}
 	return v2Cost, nil
 }
 
-func (sqlStorage *migratorSQL) setSMCost(v2Cost *v2SessionsCost) (err error) {
-	tx := sqlStorage.db.Begin()
+func (mgSQL *migratorSQL) setV2SMCost(v2Cost *v2SessionsCost) (err error) {
+	tx := mgSQL.sqlStorage.ExportGormDB().Begin()
 	smSql := v2Cost.AsSessionsCostSql()
 	smSql.CreatedAt = time.Now()
 	saved := tx.Save(smSql)
@@ -95,8 +106,8 @@ func (sqlStorage *migratorSQL) setSMCost(v2Cost *v2SessionsCost) (err error) {
 	return
 }
 
-func (sqlStorage *migratorSQL) remSMCost(v2Cost *v2SessionsCost) (err error) {
-	tx := sqlStorage.db.Begin()
+func (mgSQL *migratorSQL) remV2SMCost(v2Cost *v2SessionsCost) (err error) {
+	tx := mgSQL.sqlStorage.ExportGormDB().Begin()
 	var rmParam *engine.SessionsCostsSQL
 	if v2Cost != nil {
 		rmParam = &engine.SessionsCostsSQL{Cgrid: v2Cost.CGRID,

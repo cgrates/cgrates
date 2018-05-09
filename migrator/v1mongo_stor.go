@@ -21,13 +21,32 @@ package migrator
 import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/mgo"
 )
+
+func newMongoStorDBMigrator(stor engine.StorDB) (mgoMig *mongoStorDBMigrator) {
+	return &mongoStorDBMigrator{
+		storDB:  &stor,
+		mgoDB:   stor.(*engine.MongoStorage),
+		qryIter: nil,
+	}
+}
+
+type mongoStorDBMigrator struct {
+	storDB  *engine.StorDB
+	mgoDB   *engine.MongoStorage
+	qryIter *mgo.Iter
+}
+
+func (mgoMig *mongoStorDBMigrator) StorDB() engine.StorDB {
+	return *mgoMig.storDB
+}
 
 //CDR methods
 //get
-func (v1ms *mongoMigrator) getV1CDR() (v1Cdr *v1Cdrs, err error) {
+func (v1ms *mongoStorDBMigrator) getV1CDR() (v1Cdr *v1Cdrs, err error) {
 	if v1ms.qryIter == nil {
-		v1ms.qryIter = v1ms.session.DB(v1ms.db).C(engine.ColCDRs).Find(nil).Iter()
+		v1ms.qryIter = v1ms.mgoDB.DB().C(engine.ColCDRs).Find(nil).Iter()
 	}
 	v1ms.qryIter.Next(&v1Cdr)
 
@@ -40,8 +59,8 @@ func (v1ms *mongoMigrator) getV1CDR() (v1Cdr *v1Cdrs, err error) {
 }
 
 //set
-func (v1ms *mongoMigrator) setV1CDR(v1Cdr *v1Cdrs) (err error) {
-	if err = v1ms.session.DB(v1ms.db).C(engine.ColCDRs).Insert(v1Cdr); err != nil {
+func (v1ms *mongoStorDBMigrator) setV1CDR(v1Cdr *v1Cdrs) (err error) {
+	if err = v1ms.mgoDB.DB().C(engine.ColCDRs).Insert(v1Cdr); err != nil {
 		return err
 	}
 	return
@@ -49,9 +68,9 @@ func (v1ms *mongoMigrator) setV1CDR(v1Cdr *v1Cdrs) (err error) {
 
 //SMCost methods
 //get
-func (v1ms *mongoMigrator) getSMCost() (v2Cost *v2SessionsCost, err error) {
+func (v1ms *mongoStorDBMigrator) getV2SMCost() (v2Cost *v2SessionsCost, err error) {
 	if v1ms.qryIter == nil {
-		v1ms.qryIter = v1ms.session.DB(v1ms.db).C(utils.SessionsCostsTBL).Find(nil).Iter()
+		v1ms.qryIter = v1ms.mgoDB.DB().C(utils.SessionsCostsTBL).Find(nil).Iter()
 	}
 	v1ms.qryIter.Next(&v2Cost)
 
@@ -64,16 +83,16 @@ func (v1ms *mongoMigrator) getSMCost() (v2Cost *v2SessionsCost, err error) {
 }
 
 //set
-func (v1ms *mongoMigrator) setSMCost(v2Cost *v2SessionsCost) (err error) {
-	if err = v1ms.session.DB(v1ms.db).C(utils.SessionsCostsTBL).Insert(v2Cost); err != nil {
+func (v1ms *mongoStorDBMigrator) setV2SMCost(v2Cost *v2SessionsCost) (err error) {
+	if err = v1ms.mgoDB.DB().C(utils.SessionsCostsTBL).Insert(v2Cost); err != nil {
 		return err
 	}
 	return
 }
 
 //remove
-func (v1ms *mongoMigrator) remSMCost(v2Cost *v2SessionsCost) (err error) {
-	if err = v1ms.session.DB(v1ms.db).C(utils.SessionsCostsTBL).Remove(nil); err != nil {
+func (v1ms *mongoStorDBMigrator) remV2SMCost(v2Cost *v2SessionsCost) (err error) {
+	if err = v1ms.mgoDB.DB().C(utils.SessionsCostsTBL).Remove(nil); err != nil {
 		return err
 	}
 	return

@@ -26,25 +26,25 @@ import (
 )
 
 func (m *Migrator) migrateCurrentTPsharedgroups() (err error) {
-	tpids, err := m.storDBIn.GetTpIds(utils.TBLTPSharedGroups)
+	tpids, err := m.storDBIn.StorDB().GetTpIds(utils.TBLTPSharedGroups)
 	if err != nil {
 		return err
 	}
 
 	for _, tpid := range tpids {
-		ids, err := m.storDBIn.GetTpTableIds(tpid, utils.TBLTPSharedGroups, utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
+		ids, err := m.storDBIn.StorDB().GetTpTableIds(tpid, utils.TBLTPSharedGroups, utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
 		for _, id := range ids {
 
-			dest, err := m.storDBIn.GetTPSharedGroups(tpid, id)
+			dest, err := m.storDBIn.StorDB().GetTPSharedGroups(tpid, id)
 			if err != nil {
 				return err
 			}
 			if dest != nil {
 				if m.dryRun != true {
-					if err := m.storDBOut.SetTPSharedGroups(dest); err != nil {
+					if err := m.storDBOut.StorDB().SetTPSharedGroups(dest); err != nil {
 						return err
 					}
 					m.stats[utils.TpSharedGroups] += 1
@@ -58,7 +58,7 @@ func (m *Migrator) migrateCurrentTPsharedgroups() (err error) {
 func (m *Migrator) migrateTPsharedgroups() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.storDBOut.GetVersions("")
+	vrs, err = m.storDBOut.StorDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

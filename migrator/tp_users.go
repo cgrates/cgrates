@@ -26,23 +26,23 @@ import (
 )
 
 func (m *Migrator) migrateCurrentTPusers() (err error) {
-	tpids, err := m.storDBIn.GetTpIds(utils.TBLTPUsers)
+	tpids, err := m.storDBIn.StorDB().GetTpIds(utils.TBLTPUsers)
 	if err != nil {
 		return err
 	}
 
 	for _, tpid := range tpids {
-		users, err := m.storDBIn.GetTPUsers(&utils.TPUsers{TPid: tpid})
+		users, err := m.storDBIn.StorDB().GetTPUsers(&utils.TPUsers{TPid: tpid})
 		if err != nil {
 			return err
 		}
 		if users != nil {
 			if m.dryRun != true {
-				if err := m.storDBOut.SetTPUsers(users); err != nil {
+				if err := m.storDBOut.StorDB().SetTPUsers(users); err != nil {
 					return err
 				}
 				for _, user := range users {
-					if err := m.storDBIn.RemTpData(utils.TBLTPUsers, user.TPid,
+					if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPUsers, user.TPid,
 						map[string]string{"tenant": user.Tenant, "user_name": user.UserName}); err != nil {
 						return err
 					}
@@ -58,7 +58,7 @@ func (m *Migrator) migrateCurrentTPusers() (err error) {
 func (m *Migrator) migrateTPusers() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.storDBOut.GetVersions("")
+	vrs, err = m.storDBOut.StorDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

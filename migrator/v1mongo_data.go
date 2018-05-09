@@ -46,8 +46,15 @@ type AtKeyValue struct {
 }
 
 func newMongoMigrator(dm *engine.DataManager) (mgoMig *mongoMigrator) {
-	mgoMig.dm = dm
-	mgoMig.mgoDB = dm.DataDB().(*engine.MongoStorage)
+	return &mongoMigrator{
+		dm:      dm,
+		mgoDB:   dm.DataDB().(*engine.MongoStorage),
+		qryIter: nil,
+	}
+}
+
+func (mgoMig *mongoMigrator) DataManager() *engine.DataManager {
+	return mgoMig.dm
 }
 
 //Account methods
@@ -55,7 +62,7 @@ func newMongoMigrator(dm *engine.DataManager) (mgoMig *mongoMigrator) {
 //get
 func (v1ms *mongoMigrator) getv1Account() (v1Acnt *v1Account, err error) {
 	if v1ms.qryIter == nil {
-		v1ms.qryIter = v1ms.session.DB(v1ms.db).C(v1AccountDBPrefix).Find(nil).Iter()
+		v1ms.qryIter = v1ms.mgoDB.DB().C(v1AccountDBPrefix).Find(nil).Iter()
 	}
 	v1ms.qryIter.Next(&v1Acnt)
 
@@ -69,7 +76,7 @@ func (v1ms *mongoMigrator) getv1Account() (v1Acnt *v1Account, err error) {
 
 //set
 func (v1ms *mongoMigrator) setV1Account(x *v1Account) (err error) {
-	if err := v1ms.session.DB(v1ms.db).C(v1AccountDBPrefix).Insert(x); err != nil {
+	if err := v1ms.mgoDB.DB().C(v1AccountDBPrefix).Insert(x); err != nil {
 		return err
 	}
 	return
@@ -79,7 +86,7 @@ func (v1ms *mongoMigrator) setV1Account(x *v1Account) (err error) {
 //get
 func (v1ms *mongoMigrator) getv2Account() (v2Acnt *v2Account, err error) {
 	if v1ms.qryIter == nil {
-		v1ms.qryIter = v1ms.session.DB(v1ms.db).C(v2AccountsCol).Find(nil).Iter()
+		v1ms.qryIter = v1ms.mgoDB.DB().C(v2AccountsCol).Find(nil).Iter()
 	}
 	v1ms.qryIter.Next(&v2Acnt)
 
@@ -93,7 +100,7 @@ func (v1ms *mongoMigrator) getv2Account() (v2Acnt *v2Account, err error) {
 
 //set
 func (v1ms *mongoMigrator) setV2Account(x *v2Account) (err error) {
-	if err := v1ms.session.DB(v1ms.db).C(v2AccountsCol).Insert(x); err != nil {
+	if err := v1ms.mgoDB.DB().C(v2AccountsCol).Insert(x); err != nil {
 		return err
 	}
 	return
@@ -104,7 +111,7 @@ func (v1ms *mongoMigrator) setV2Account(x *v2Account) (err error) {
 func (v1ms *mongoMigrator) getV1ActionPlans() (v1aps *v1ActionPlans, err error) {
 	var strct *AtKeyValue
 	if v1ms.qryIter == nil {
-		v1ms.qryIter = v1ms.session.DB(v1ms.db).C("actiontimings").Find(nil).Iter()
+		v1ms.qryIter = v1ms.mgoDB.DB().C("actiontimings").Find(nil).Iter()
 	}
 	v1ms.qryIter.Next(&strct)
 	if strct == nil {
@@ -118,7 +125,7 @@ func (v1ms *mongoMigrator) getV1ActionPlans() (v1aps *v1ActionPlans, err error) 
 //set
 func (v1ms *mongoMigrator) setV1ActionPlans(x *v1ActionPlans) (err error) {
 	key := utils.ACTION_PLAN_PREFIX + (*x)[0].Id
-	if err := v1ms.session.DB(v1ms.db).C("actiontimings").Insert(&AtKeyValue{key, *x}); err != nil {
+	if err := v1ms.mgoDB.DB().C("actiontimings").Insert(&AtKeyValue{key, *x}); err != nil {
 		return err
 	}
 	return
@@ -129,7 +136,7 @@ func (v1ms *mongoMigrator) setV1ActionPlans(x *v1ActionPlans) (err error) {
 func (v1ms *mongoMigrator) getV1Actions() (v1acs *v1Actions, err error) {
 	var strct *AcKeyValue
 	if v1ms.qryIter == nil {
-		v1ms.qryIter = v1ms.session.DB(v1ms.db).C("actions").Find(nil).Iter()
+		v1ms.qryIter = v1ms.mgoDB.DB().C("actions").Find(nil).Iter()
 	}
 	v1ms.qryIter.Next(&strct)
 	if strct == nil {
@@ -144,7 +151,7 @@ func (v1ms *mongoMigrator) getV1Actions() (v1acs *v1Actions, err error) {
 //set
 func (v1ms *mongoMigrator) setV1Actions(x *v1Actions) (err error) {
 	key := utils.ACTION_PREFIX + (*x)[0].Id
-	if err := v1ms.session.DB(v1ms.db).C("actions").Insert(&AcKeyValue{key, *x}); err != nil {
+	if err := v1ms.mgoDB.DB().C("actions").Insert(&AcKeyValue{key, *x}); err != nil {
 		return err
 	}
 	return
@@ -165,7 +172,7 @@ func (v1ms *mongoMigrator) setV1ActionTriggers(x *v1ActionTriggers) (err error) 
 //get
 func (v1ms *mongoMigrator) getV1SharedGroup() (v1sg *v1SharedGroup, err error) {
 	if v1ms.qryIter == nil {
-		v1ms.qryIter = v1ms.session.DB(v1ms.db).C(utils.SHARED_GROUP_PREFIX).Find(nil).Iter()
+		v1ms.qryIter = v1ms.mgoDB.DB().C(utils.SHARED_GROUP_PREFIX).Find(nil).Iter()
 	}
 	v1ms.qryIter.Next(&v1sg)
 	if v1sg == nil {
@@ -178,7 +185,7 @@ func (v1ms *mongoMigrator) getV1SharedGroup() (v1sg *v1SharedGroup, err error) {
 
 //set
 func (v1ms *mongoMigrator) setV1SharedGroup(x *v1SharedGroup) (err error) {
-	if err := v1ms.session.DB(v1ms.db).C(utils.SHARED_GROUP_PREFIX).Insert(x); err != nil {
+	if err := v1ms.mgoDB.DB().C(utils.SHARED_GROUP_PREFIX).Insert(x); err != nil {
 		return err
 	}
 	return
@@ -188,7 +195,7 @@ func (v1ms *mongoMigrator) setV1SharedGroup(x *v1SharedGroup) (err error) {
 //get
 func (v1ms *mongoMigrator) getV1Stats() (v1st *v1Stat, err error) {
 	if v1ms.qryIter == nil {
-		v1ms.qryIter = v1ms.session.DB(v1ms.db).C(utils.CDR_STATS_PREFIX).Find(nil).Iter()
+		v1ms.qryIter = v1ms.mgoDB.DB().C(utils.CDR_STATS_PREFIX).Find(nil).Iter()
 	}
 	v1ms.qryIter.Next(&v1st)
 	if v1st == nil {
@@ -201,7 +208,7 @@ func (v1ms *mongoMigrator) getV1Stats() (v1st *v1Stat, err error) {
 
 //set
 func (v1ms *mongoMigrator) setV1Stats(x *v1Stat) (err error) {
-	if err := v1ms.session.DB(v1ms.db).C(utils.CDR_STATS_PREFIX).Insert(x); err != nil {
+	if err := v1ms.mgoDB.DB().C(utils.CDR_STATS_PREFIX).Insert(x); err != nil {
 		return err
 	}
 	return
@@ -211,7 +218,7 @@ func (v1ms *mongoMigrator) setV1Stats(x *v1Stat) (err error) {
 //get
 func (v1ms *mongoMigrator) getV2ActionTrigger() (v2at *v2ActionTrigger, err error) {
 	if v1ms.qryIter == nil {
-		v1ms.qryIter = v1ms.session.DB(v1ms.db).C(v1ActionTriggersCol).Find(nil).Iter()
+		v1ms.qryIter = v1ms.mgoDB.DB().C(v1ActionTriggersCol).Find(nil).Iter()
 	}
 	v1ms.qryIter.Next(&v2at)
 	if v2at == nil {
@@ -224,7 +231,7 @@ func (v1ms *mongoMigrator) getV2ActionTrigger() (v2at *v2ActionTrigger, err erro
 
 //set
 func (v1ms *mongoMigrator) setV2ActionTrigger(x *v2ActionTrigger) (err error) {
-	if err := v1ms.session.DB(v1ms.db).C(v1ActionTriggersCol).Insert(x); err != nil {
+	if err := v1ms.mgoDB.DB().C(v1ActionTriggersCol).Insert(x); err != nil {
 		return err
 	}
 	return
@@ -234,7 +241,7 @@ func (v1ms *mongoMigrator) setV2ActionTrigger(x *v2ActionTrigger) (err error) {
 //get
 func (v1ms *mongoMigrator) getV1AttributeProfile() (v1attrPrf *v1AttributeProfile, err error) {
 	if v1ms.qryIter == nil {
-		v1ms.qryIter = v1ms.session.DB(v1ms.db).C(v1AttributeProfilesCol).Find(nil).Iter()
+		v1ms.qryIter = v1ms.mgoDB.DB().C(v1AttributeProfilesCol).Find(nil).Iter()
 	}
 	v1ms.qryIter.Next(&v1attrPrf)
 	if v1attrPrf == nil {
@@ -247,7 +254,7 @@ func (v1ms *mongoMigrator) getV1AttributeProfile() (v1attrPrf *v1AttributeProfil
 
 //set
 func (v1ms *mongoMigrator) setV1AttributeProfile(x *v1AttributeProfile) (err error) {
-	if err := v1ms.session.DB(v1ms.db).C(v1AttributeProfilesCol).Insert(x); err != nil {
+	if err := v1ms.mgoDB.DB().C(v1AttributeProfilesCol).Insert(x); err != nil {
 		return err
 	}
 	return

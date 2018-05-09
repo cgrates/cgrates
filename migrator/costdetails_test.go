@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package migrator
 
+/*
 import (
 	"encoding/json"
 	"testing"
@@ -45,3 +46,4 @@ func TestV1CostDetailsAsCostDetails2(t *testing.T) {
 	_ = v1CC.AsCallCost()
 
 }
+*/
