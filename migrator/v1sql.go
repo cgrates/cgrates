@@ -20,13 +20,11 @@ package migrator
 
 import (
 	"database/sql"
-	"fmt"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/jinzhu/gorm"
 )
 
 type migratorSQL struct {
@@ -35,19 +33,7 @@ type migratorSQL struct {
 	rowIter *sql.Rows
 }
 
-func newSqlStorage(host, port, name, user, password string) (*sqlStorage, error) {
-	connectString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES,NO_AUTO_CREATE_USER'", user, password, host, port, name)
-	db, err := gorm.Open("mysql", connectString)
-	if err != nil {
-		return nil, err
-	}
-	if err = db.DB().Ping(); err != nil {
-		return nil, err
-	}
-	return &sqlStorage{Db: db.DB(), db: db}, nil
-}
-
-func (sqlStorage *sqlStorage) getV1CDR() (v1Cdr *v1Cdrs, err error) {
+func (sqlStorage *migratorSQL) getV1CDR() (v1Cdr *v1Cdrs, err error) {
 	if sqlStorage.rowIter == nil {
 		sqlStorage.rowIter, err = sqlStorage.Db.Query("SELECT * FROM cdrs")
 		if err != nil {
@@ -66,7 +52,7 @@ func (sqlStorage *sqlStorage) getV1CDR() (v1Cdr *v1Cdrs, err error) {
 	return v1Cdr, nil
 }
 
-func (sqlStorage *sqlStorage) setV1CDR(v1Cdr *v1Cdrs) (err error) {
+func (sqlStorage *migratorSQL) setV1CDR(v1Cdr *v1Cdrs) (err error) {
 	tx := sqlStorage.db.Begin()
 	cdrSql := v1Cdr.AsCDRsql()
 	cdrSql.CreatedAt = time.Now()
@@ -78,7 +64,7 @@ func (sqlStorage *sqlStorage) setV1CDR(v1Cdr *v1Cdrs) (err error) {
 	return nil
 }
 
-func (sqlStorage *sqlStorage) getSMCost() (v2Cost *v2SessionsCost, err error) {
+func (sqlStorage *migratorSQL) getSMCost() (v2Cost *v2SessionsCost, err error) {
 	if sqlStorage.rowIter == nil {
 		sqlStorage.rowIter, err = sqlStorage.Db.Query("SELECT * FROM sessions_costs")
 		if err != nil {
@@ -97,7 +83,7 @@ func (sqlStorage *sqlStorage) getSMCost() (v2Cost *v2SessionsCost, err error) {
 	return v2Cost, nil
 }
 
-func (sqlStorage *sqlStorage) setSMCost(v2Cost *v2SessionsCost) (err error) {
+func (sqlStorage *migratorSQL) setSMCost(v2Cost *v2SessionsCost) (err error) {
 	tx := sqlStorage.db.Begin()
 	smSql := v2Cost.AsSessionsCostSql()
 	smSql.CreatedAt = time.Now()
@@ -109,7 +95,7 @@ func (sqlStorage *sqlStorage) setSMCost(v2Cost *v2SessionsCost) (err error) {
 	return
 }
 
-func (sqlStorage *sqlStorage) remSMCost(v2Cost *v2SessionsCost) (err error) {
+func (sqlStorage *migratorSQL) remSMCost(v2Cost *v2SessionsCost) (err error) {
 	tx := sqlStorage.db.Begin()
 	var rmParam *engine.SessionsCostsSQL
 	if v2Cost != nil {

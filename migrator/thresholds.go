@@ -51,19 +51,19 @@ func (m *Migrator) migrateCurrentThresholds() (err error) {
 	var ids []string
 	tenant := config.CgrConfig().DefaultTenant
 	//Thresholds
-	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.ThresholdPrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ThresholdPrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.ThresholdPrefix+tenant+":")
-		ths, err := m.dmIN.GetThreshold(tenant, idg, true, utils.NonTransactional)
+		ths, err := m.dmIN.DataManager().GetThreshold(tenant, idg, true, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if ths != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.SetThreshold(ths); err != nil {
+				if err := m.dmOut.DataManager().SetThreshold(ths); err != nil {
 					return err
 				}
 				m.stats[utils.Thresholds] += 1
@@ -71,19 +71,19 @@ func (m *Migrator) migrateCurrentThresholds() (err error) {
 		}
 	}
 	//ThresholdProfiles
-	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.ThresholdProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ThresholdProfilePrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.ThresholdProfilePrefix+tenant+":")
-		ths, err := m.dmIN.GetThresholdProfile(tenant, idg, true, utils.NonTransactional)
+		ths, err := m.dmIN.DataManager().GetThresholdProfile(tenant, idg, true, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if ths != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.SetThresholdProfile(ths, true); err != nil {
+				if err := m.dmOut.DataManager().SetThresholdProfile(ths, true); err != nil {
 					return err
 				}
 			}
@@ -95,7 +95,7 @@ func (m *Migrator) migrateCurrentThresholds() (err error) {
 func (m *Migrator) migrateV2ActionTriggers() (err error) {
 	var v2ACT *v2ActionTrigger
 	for {
-		v2ACT, err = m.oldDataDB.getV2ActionTrigger()
+		v2ACT, err = m.dmIN.getV2ActionTrigger()
 		if err != nil && err != utils.ErrNoMoreData {
 			return err
 		}
@@ -108,13 +108,13 @@ func (m *Migrator) migrateV2ActionTriggers() (err error) {
 				return err
 			}
 			if m.dryRun != true {
-				if err := m.dmOut.SetFilter(filter); err != nil {
+				if err := m.dmOut.DataManager().SetFilter(filter); err != nil {
 					return err
 				}
-				if err := m.dmOut.SetThreshold(th); err != nil {
+				if err := m.dmOut.DataManager().SetThreshold(th); err != nil {
 					return err
 				}
-				if err := m.dmOut.SetThresholdProfile(thp, true); err != nil {
+				if err := m.dmOut.DataManager().SetThresholdProfile(thp, true); err != nil {
 					return err
 				}
 				m.stats[utils.Thresholds] += 1
@@ -124,7 +124,7 @@ func (m *Migrator) migrateV2ActionTriggers() (err error) {
 	if m.dryRun != true {
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.Thresholds: engine.CurrentStorDBVersions()[utils.Thresholds]}
-		if err = m.dmOut.DataDB().SetVersions(vrs, false); err != nil {
+		if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),
@@ -137,7 +137,7 @@ func (m *Migrator) migrateV2ActionTriggers() (err error) {
 func (m *Migrator) migrateThresholds() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions("")
+	vrs, err = m.dmOut.DataManager().DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -250,7 +250,7 @@ func (v2ATR v2ActionTrigger) AsThreshold() (thp *engine.ThresholdProfile, th *en
 
 func (m *Migrator) SasThreshold(v2ATR *engine.ActionTrigger) (err error) {
 	var vrs engine.Versions
-	if m.dmOut.DataDB() == nil {
+	if m.dmOut.DataManager().DataDB() == nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.MandatoryIEMissingCaps,
 			utils.NoStorDBConnection,
@@ -262,21 +262,21 @@ func (m *Migrator) SasThreshold(v2ATR *engine.ActionTrigger) (err error) {
 			return err
 		}
 		if filter != nil {
-			if err := m.dmOut.SetFilter(filter); err != nil {
+			if err := m.dmOut.DataManager().SetFilter(filter); err != nil {
 				return err
 			}
 		}
-		if err := m.dmOut.SetThreshold(th); err != nil {
+		if err := m.dmOut.DataManager().SetThreshold(th); err != nil {
 			return err
 		}
-		if err := m.dmOut.SetThresholdProfile(thp, true); err != nil {
+		if err := m.dmOut.DataManager().SetThresholdProfile(thp, true); err != nil {
 			return err
 		}
 		m.stats[utils.Thresholds] += 1
 	}
 	// All done, update version wtih current one
 	vrs = engine.Versions{utils.Thresholds: engine.CurrentStorDBVersions()[utils.Thresholds]}
-	if err = m.dmOut.DataDB().SetVersions(vrs, false); err != nil {
+	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
 			err.Error(),

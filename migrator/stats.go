@@ -63,19 +63,19 @@ func (m *Migrator) migrateCurrentStats() (err error) {
 	var ids []string
 	tenant := config.CgrConfig().DefaultTenant
 	//StatQueue
-	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.StatQueuePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.StatQueuePrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.StatQueuePrefix+tenant+":")
-		sgs, err := m.dmIN.GetStatQueue(tenant, idg, true, utils.NonTransactional)
+		sgs, err := m.dmIN.DataManager().GetStatQueue(tenant, idg, true, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if sgs != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.SetStatQueue(sgs); err != nil {
+				if err := m.dmOut.DataManager().SetStatQueue(sgs); err != nil {
 					return err
 				}
 				m.stats[utils.StatS] += 1
@@ -83,19 +83,19 @@ func (m *Migrator) migrateCurrentStats() (err error) {
 		}
 	}
 	//StatQueueProfile
-	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.StatQueueProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.StatQueueProfilePrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.StatQueueProfilePrefix+tenant+":")
-		sgs, err := m.dmIN.GetStatQueueProfile(tenant, idg, true, utils.NonTransactional)
+		sgs, err := m.dmIN.DataManager().GetStatQueueProfile(tenant, idg, true, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if sgs != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.SetStatQueueProfile(sgs, true); err != nil {
+				if err := m.dmOut.DataManager().SetStatQueueProfile(sgs, true); err != nil {
 					return err
 				}
 			}
@@ -108,7 +108,7 @@ func (m *Migrator) migrateCurrentStats() (err error) {
 func (m *Migrator) migrateV1CDRSTATS() (err error) {
 	var v1Sts *v1Stat
 	for {
-		v1Sts, err = m.oldDataDB.getV1Stats()
+		v1Sts, err = m.dmIN.getV1Stats()
 		if err != nil && err != utils.ErrNoMoreData {
 			return err
 		}
@@ -129,13 +129,13 @@ func (m *Migrator) migrateV1CDRSTATS() (err error) {
 				return err
 			}
 			if !m.dryRun {
-				if err := m.dmOut.SetFilter(filter); err != nil {
+				if err := m.dmOut.DataManager().SetFilter(filter); err != nil {
 					return err
 				}
-				if err := m.dmOut.SetStatQueue(sq); err != nil {
+				if err := m.dmOut.DataManager().SetStatQueue(sq); err != nil {
 					return err
 				}
-				if err := m.dmOut.SetStatQueueProfile(sts, true); err != nil {
+				if err := m.dmOut.DataManager().SetStatQueueProfile(sts, true); err != nil {
 					return err
 				}
 				m.stats[utils.StatS] += 1
@@ -145,7 +145,7 @@ func (m *Migrator) migrateV1CDRSTATS() (err error) {
 	if m.dryRun != true {
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.StatS: engine.CurrentDataDBVersions()[utils.StatS]}
-		if err = m.dmOut.DataDB().SetVersions(vrs, false); err != nil {
+		if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),
@@ -158,7 +158,7 @@ func (m *Migrator) migrateV1CDRSTATS() (err error) {
 func (m *Migrator) migrateStats() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions("")
+	vrs, err = m.dmOut.DataManager().DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
-	"database/sql"
+	//"database/sql"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -32,15 +32,15 @@ func (m *Migrator) migrateCurrentSessionSCost() (err error) {
 	if m.sameStorDB { // no move
 		return
 	}
-	smCosts, err := m.storDBIn.GetSMCosts("", "", "", "")
+	smCosts, err := m.storDBIn.StorDB().GetSMCosts("", "", "", "")
 	if err != nil {
 		return err
 	}
 	for _, smCost := range smCosts {
-		if err := m.storDBOut.SetSMCost(smCost); err != nil {
+		if err := m.storDBOut.StorDB().SetSMCost(smCost); err != nil {
 			return err
 		}
-		if err := m.storDBIn.RemoveSMCost(smCost); err != nil {
+		if err := m.storDBIn.StorDB().RemoveSMCost(smCost); err != nil {
 			return err
 		}
 	}
@@ -50,7 +50,7 @@ func (m *Migrator) migrateCurrentSessionSCost() (err error) {
 func (m *Migrator) migrateSessionSCosts() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.storDBOut.GetVersions("")
+	vrs, err = m.storDBOut.StorDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -63,30 +63,30 @@ func (m *Migrator) migrateSessionSCosts() (err error) {
 			"version number is not defined for SessionsCosts model")
 	}
 	switch vrs[utils.SessionSCosts] {
-	case 0, 1:
-		var isPostGres bool
-		var storSQL *sql.DB
-		switch m.storDBType {
-		case utils.MYSQL:
-			isPostGres = false
-			storSQL = m.storDBOut.(*engine.SQLStorage).Db
-		case utils.POSTGRES:
-			isPostGres = true
-			storSQL = m.storDBOut.(*engine.SQLStorage).Db
-		default:
-			return utils.NewCGRError(utils.Migrator,
-				utils.MandatoryIEMissingCaps,
-				utils.UnsupportedDB,
-				fmt.Sprintf("unsupported database type: <%s>", m.storDBType))
-		}
-		qry := "RENAME TABLE sm_costs TO sessions_costs;"
-		if isPostGres {
-			qry = "ALTER TABLE sm_costs RENAME TO sessions_costs"
-		}
-		if _, err := storSQL.Exec(qry); err != nil {
-			return err
-		}
-		fallthrough // incremental updates
+	// case 0, 1:
+	// 	var isPostGres bool
+	// 	var storSQL *sql.DB
+	// 	switch m.storDBType {
+	// 	case utils.MYSQL:
+	// 		isPostGres = false
+	// 		storSQL = m.storDBOut.(*engine.SQLStorage).Db
+	// 	case utils.POSTGRES:
+	// 		isPostGres = true
+	// 		storSQL = m.storDBOut.(*engine.SQLStorage).Db
+	// 	default:
+	// 		return utils.NewCGRError(utils.Migrator,
+	// 			utils.MandatoryIEMissingCaps,
+	// 			utils.UnsupportedDB,
+	// 			fmt.Sprintf("unsupported database type: <%s>", m.storDBType))
+	// 	}
+	// 	qry := "RENAME TABLE sm_costs TO sessions_costs;"
+	// 	if isPostGres {
+	// 		qry = "ALTER TABLE sm_costs RENAME TO sessions_costs"
+	// 	}
+	// 	if _, err := storSQL.Exec(qry); err != nil {
+	// 		return err
+	// 	}
+	// 	fallthrough // incremental updates
 	case 2:
 		if err := m.migrateV2SessionSCosts(); err != nil {
 			return err
@@ -102,7 +102,7 @@ func (m *Migrator) migrateSessionSCosts() (err error) {
 func (m *Migrator) migrateV2SessionSCosts() (err error) {
 	var v2Cost *v2SessionsCost
 	for {
-		v2Cost, err = m.oldStorDB.getSMCost()
+		v2Cost, err = m.storDBIn.getV2SMCost()
 		if err != nil && err != utils.ErrNoMoreData {
 			return err
 		}
@@ -112,10 +112,10 @@ func (m *Migrator) migrateV2SessionSCosts() (err error) {
 		if v2Cost != nil {
 			smCost := v2Cost.V2toV3Cost()
 			if m.dryRun != true {
-				if err = m.storDBOut.SetSMCost(smCost); err != nil {
+				if err = m.storDBOut.StorDB().SetSMCost(smCost); err != nil {
 					return err
 				}
-				if err = m.oldStorDB.remSMCost(v2Cost); err != nil {
+				if err = m.storDBIn.remV2SMCost(v2Cost); err != nil {
 					return err
 				}
 				m.stats[utils.SessionSCosts] += 1
@@ -125,7 +125,7 @@ func (m *Migrator) migrateV2SessionSCosts() (err error) {
 	if m.dryRun != true {
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.SessionSCosts: engine.CurrentStorDBVersions()[utils.SessionSCosts]}
-		if err = m.storDBOut.SetVersions(vrs, false); err != nil {
+		if err = m.storDBOut.StorDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),

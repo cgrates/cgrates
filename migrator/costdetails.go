@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package migrator
 
+/*
 import (
 	"database/sql"
 	"encoding/json"
@@ -36,7 +37,7 @@ func (m *Migrator) migrateCostDetails() (err error) {
 			utils.NoStorDBConnection,
 			"no connection to StorDB")
 	}
-	vrs, err := m.storDBOut.GetVersions(utils.COST_DETAILS)
+	vrs, err := m.storDBOut.StorDB().GetVersions(utils.COST_DETAILS)
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -212,3 +213,4 @@ func (v1cc *v1CallCost) AsCallCost() (cc *engine.CallCost) {
 	}
 	return
 }
+*/

@@ -30,7 +30,8 @@ import (
 
 // Various helpers to deal with database
 
-func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler string, cacheCfg config.CacheConfig, loadHistorySize int) (dm *DataManager, err error) {
+func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler string,
+	cacheCfg config.CacheConfig, loadHistorySize int) (dm *DataManager, err error) {
 	var d DataDB
 	switch db_type {
 	case utils.REDIS:
@@ -58,7 +59,8 @@ func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler strin
 	return dm, nil
 }
 
-func ConfigureStorStorage(db_type, host, port, name, user, pass, marshaler string, maxConn, maxIdleConn, connMaxLifetime int, cdrsIndexes []string) (db Storage, err error) {
+func ConfigureStorStorage(db_type, host, port, name, user, pass, marshaler string,
+	maxConn, maxIdleConn, connMaxLifetime int, cdrsIndexes []string) (db Storage, err error) {
 	var d Storage
 	switch db_type {
 	case utils.MONGO:
@@ -77,7 +79,8 @@ func ConfigureStorStorage(db_type, host, port, name, user, pass, marshaler strin
 	return d, nil
 }
 
-func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler string, maxConn, maxIdleConn, connMaxLifetime int, cdrsIndexes []string) (db LoadStorage, err error) {
+func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler string,
+	maxConn, maxIdleConn, connMaxLifetime int, cdrsIndexes []string) (db LoadStorage, err error) {
 	var d LoadStorage
 	switch db_type {
 	case utils.POSTGRES:
@@ -96,7 +99,8 @@ func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler strin
 	return d, nil
 }
 
-func ConfigureCdrStorage(db_type, host, port, name, user, pass string, maxConn, maxIdleConn, connMaxLifetime int, cdrsIndexes []string) (db CdrStorage, err error) {
+func ConfigureCdrStorage(db_type, host, port, name, user, pass string,
+	maxConn, maxIdleConn, connMaxLifetime int, cdrsIndexes []string) (db CdrStorage, err error) {
 	var d CdrStorage
 	switch db_type {
 	case utils.POSTGRES:
@@ -115,7 +119,8 @@ func ConfigureCdrStorage(db_type, host, port, name, user, pass string, maxConn, 
 	return d, nil
 }
 
-func ConfigureStorDB(db_type, host, port, name, user, pass string, maxConn, maxIdleConn, connMaxLifetime int, cdrsIndexes []string) (db StorDB, err error) {
+func ConfigureStorDB(db_type, host, port, name, user, pass string,
+	maxConn, maxIdleConn, connMaxLifetime int, cdrsIndexes []string) (db StorDB, err error) {
 	var d StorDB
 	switch db_type {
 	case utils.POSTGRES:

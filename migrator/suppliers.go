@@ -30,19 +30,19 @@ import (
 func (m *Migrator) migrateCurrentSupplierProfile() (err error) {
 	var ids []string
 	tenant := config.CgrConfig().DefaultTenant
-	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.SupplierProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.SupplierProfilePrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.SupplierProfilePrefix)
-		splp, err := m.dmIN.GetSupplierProfile(tenant, idg, true, utils.NonTransactional)
+		splp, err := m.dmIN.DataManager().GetSupplierProfile(tenant, idg, true, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if splp != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.SetSupplierProfile(splp, true); err != nil {
+				if err := m.dmOut.DataManager().SetSupplierProfile(splp, true); err != nil {
 					return err
 				}
 				m.stats[utils.Suppliers] += 1
@@ -55,7 +55,7 @@ func (m *Migrator) migrateCurrentSupplierProfile() (err error) {
 func (m *Migrator) migrateSupplierProfiles() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions("")
+	vrs, err = m.dmOut.DataManager().DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

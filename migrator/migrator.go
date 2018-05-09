@@ -34,26 +34,13 @@ func NewMigrator(
 	dryRun bool,
 	sameDataDB bool,
 	sameStorDB bool) (m *Migrator, err error) {
-	var mrshlr engine.Marshaler
-	var oldmrshlr engine.Marshaler
-	if dataDBEncoding == utils.MSGPACK {
-		mrshlr = engine.NewCodecMsgpackMarshaler()
-	} else if dataDBEncoding == utils.JSON {
-		mrshlr = new(engine.JSONMarshaler)
-	} else if oldDataDBEncoding == utils.MSGPACK {
-		oldmrshlr = engine.NewCodecMsgpackMarshaler()
-	} else if oldDataDBEncoding == utils.JSON {
-		oldmrshlr = new(engine.JSONMarshaler)
-	}
 	stats := make(map[string]int)
-
 	m = &Migrator{
-		dmOut:      dmOut,
-		dmIN:       dmIN,
-		storDBIn:   storDBIn,
-		storDBOut:  storDBOut,
-		storDBType: storDBType,
-		dryRun:     dryRun, sameDataDB: sameDataDB, sameStorDB: sameStorDB,
+		dmOut:     dmOut,
+		dmIN:      dmIN,
+		storDBIn:  storDBIn,
+		storDBOut: storDBOut,
+		dryRun:    dryRun, sameDataDB: sameDataDB, sameStorDB: sameStorDB,
 		stats: stats,
 	}
 	return m, err
@@ -82,13 +69,15 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 				fmt.Sprintf("task <%s> is not a supported migration task", taskID))
 		case utils.MetaSetVersions:
 			if m.dryRun != true {
-				if err := m.dmOut.DataDB().SetVersions(engine.CurrentDBVersions(m.dataDBType), true); err != nil {
+				if err := m.dmOut.DataManager().DataDB().SetVersions(
+					engine.CurrentDBVersions(m.dmOut.DataManager().DataDB().GetStorageType()), true); err != nil {
 					return utils.NewCGRError(utils.Migrator,
 						utils.ServerErrorCaps,
 						err.Error(),
 						fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error())), nil
 				}
-				if err := m.storDBOut.SetVersions(engine.CurrentDBVersions(m.storDBType), true); err != nil {
+				if err := m.storDBOut.StorDB().SetVersions(
+					engine.CurrentDBVersions(m.storDBOut.StorDB().GetStorageType()), true); err != nil {
 					return utils.NewCGRError(utils.Migrator,
 						utils.ServerErrorCaps,
 						err.Error(),
@@ -102,8 +91,8 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			err = m.migrateCDRs()
 		case utils.MetaSessionsCosts:
 			err = m.migrateSessionSCosts()
-		case utils.MetaCostDetails:
-			err = m.migrateCostDetails()
+		// case utils.MetaCostDetails:
+		// 	err = m.migrateCostDetails()
 		case utils.MetaAccounts:
 			err = m.migrateAccounts()
 		case utils.MetaActionPlans:

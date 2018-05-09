@@ -31,12 +31,12 @@ func (m *Migrator) migrateCurrentCDRs() (err error) {
 	if m.sameStorDB { // no move
 		return
 	}
-	cdrs, _, err := m.storDBIn.GetCDRs(new(utils.CDRsFilter), false)
+	cdrs, _, err := m.storDBIn.StorDB().GetCDRs(new(utils.CDRsFilter), false)
 	if err != nil {
 		return err
 	}
 	for _, cdr := range cdrs {
-		if err := m.storDBOut.SetCDR(cdr, true); err != nil {
+		if err := m.storDBOut.StorDB().SetCDR(cdr, true); err != nil {
 			return err
 		}
 	}
@@ -46,7 +46,7 @@ func (m *Migrator) migrateCurrentCDRs() (err error) {
 func (m *Migrator) migrateCDRs() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.storDBOut.GetVersions("")
+	vrs, err = m.storDBOut.StorDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -74,7 +74,7 @@ func (m *Migrator) migrateCDRs() (err error) {
 func (m *Migrator) migrateV1CDRs() (err error) {
 	var v1CDR *v1Cdrs
 	for {
-		v1CDR, err = m.oldStorDB.getV1CDR()
+		v1CDR, err = m.storDBIn.getV1CDR()
 		if err != nil && err != utils.ErrNoMoreData {
 			return err
 		}
@@ -84,7 +84,7 @@ func (m *Migrator) migrateV1CDRs() (err error) {
 		if v1CDR != nil {
 			cdr := v1CDR.V1toV2Cdr()
 			if m.dryRun != true {
-				if err = m.storDBOut.SetCDR(cdr, true); err != nil {
+				if err = m.storDBOut.StorDB().SetCDR(cdr, true); err != nil {
 					return err
 				}
 				m.stats[utils.CDRs] += 1
@@ -94,7 +94,7 @@ func (m *Migrator) migrateV1CDRs() (err error) {
 	if m.dryRun != true {
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.CDRs: engine.CurrentStorDBVersions()[utils.CDRs]}
-		if err = m.storDBOut.SetVersions(vrs, false); err != nil {
+		if err = m.storDBOut.StorDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),

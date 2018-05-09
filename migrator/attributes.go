@@ -48,19 +48,19 @@ type v1AttributeProfile struct {
 func (m *Migrator) migrateCurrentAttributeProfile() (err error) {
 	var ids []string
 	tenant := config.CgrConfig().DefaultTenant
-	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.AttributeProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.AttributeProfilePrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.AttributeProfilePrefix+tenant+":")
-		attrPrf, err := m.dmIN.GetAttributeProfile(tenant, idg, true, utils.NonTransactional)
+		attrPrf, err := m.dmIN.DataManager().GetAttributeProfile(tenant, idg, true, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if attrPrf != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.SetAttributeProfile(attrPrf, true); err != nil {
+				if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
 					return err
 				}
 			}
@@ -72,7 +72,7 @@ func (m *Migrator) migrateCurrentAttributeProfile() (err error) {
 func (m *Migrator) migrateV1Attributes() (err error) {
 	var v1Attr *v1AttributeProfile
 	for {
-		v1Attr, err = m.oldDataDB.getV1AttributeProfile()
+		v1Attr, err = m.dmIN.getV1AttributeProfile()
 		if err != nil && err != utils.ErrNoMoreData {
 			return err
 		}
@@ -85,10 +85,10 @@ func (m *Migrator) migrateV1Attributes() (err error) {
 				return err
 			}
 			if m.dryRun != true {
-				if err := m.dmOut.DataDB().SetAttributeProfileDrv(attrPrf); err != nil {
+				if err := m.dmOut.DataManager().DataDB().SetAttributeProfileDrv(attrPrf); err != nil {
 					return err
 				}
-				if err := m.dmOut.SetAttributeProfile(attrPrf, true); err != nil {
+				if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
 					return err
 				}
 				m.stats[utils.Attributes] += 1
@@ -98,7 +98,7 @@ func (m *Migrator) migrateV1Attributes() (err error) {
 	if m.dryRun != true {
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.Attributes: engine.CurrentStorDBVersions()[utils.Attributes]}
-		if err = m.dmOut.DataDB().SetVersions(vrs, false); err != nil {
+		if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),
@@ -111,7 +111,7 @@ func (m *Migrator) migrateV1Attributes() (err error) {
 func (m *Migrator) migrateAttributeProfile() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions("")
+	vrs, err = m.dmOut.DataManager().DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

@@ -25,7 +25,7 @@ import (
 
 //CDR methods
 //get
-func (v1ms *v1Mongo) getV1CDR() (v1Cdr *v1Cdrs, err error) {
+func (v1ms *mongoMigrator) getV1CDR() (v1Cdr *v1Cdrs, err error) {
 	if v1ms.qryIter == nil {
 		v1ms.qryIter = v1ms.session.DB(v1ms.db).C(engine.ColCDRs).Find(nil).Iter()
 	}
@@ -40,7 +40,7 @@ func (v1ms *v1Mongo) getV1CDR() (v1Cdr *v1Cdrs, err error) {
 }
 
 //set
-func (v1ms *v1Mongo) setV1CDR(v1Cdr *v1Cdrs) (err error) {
+func (v1ms *mongoMigrator) setV1CDR(v1Cdr *v1Cdrs) (err error) {
 	if err = v1ms.session.DB(v1ms.db).C(engine.ColCDRs).Insert(v1Cdr); err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func (v1ms *v1Mongo) setV1CDR(v1Cdr *v1Cdrs) (err error) {
 
 //SMCost methods
 //get
-func (v1ms *v1Mongo) getSMCost() (v2Cost *v2SessionsCost, err error) {
+func (v1ms *mongoMigrator) getSMCost() (v2Cost *v2SessionsCost, err error) {
 	if v1ms.qryIter == nil {
 		v1ms.qryIter = v1ms.session.DB(v1ms.db).C(utils.SessionsCostsTBL).Find(nil).Iter()
 	}
@@ -64,7 +64,7 @@ func (v1ms *v1Mongo) getSMCost() (v2Cost *v2SessionsCost, err error) {
 }
 
 //set
-func (v1ms *v1Mongo) setSMCost(v2Cost *v2SessionsCost) (err error) {
+func (v1ms *mongoMigrator) setSMCost(v2Cost *v2SessionsCost) (err error) {
 	if err = v1ms.session.DB(v1ms.db).C(utils.SessionsCostsTBL).Insert(v2Cost); err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func (v1ms *v1Mongo) setSMCost(v2Cost *v2SessionsCost) (err error) {
 }
 
 //remove
-func (v1ms *v1Mongo) remSMCost(v2Cost *v2SessionsCost) (err error) {
+func (v1ms *mongoMigrator) remSMCost(v2Cost *v2SessionsCost) (err error) {
 	if err = v1ms.session.DB(v1ms.db).C(utils.SessionsCostsTBL).Remove(nil); err != nil {
 		return err
 	}
