@@ -38,17 +38,39 @@ type itemLock struct {
 	sync.Mutex
 }
 
+// lock() executes combined lock with increasing counter
+func (il *itemLock) lock() {
+	atomic.AddInt64(&il.cnt, 1)
+	il.Lock()
+}
+
 // unlock() executes combined lock with autoremoving lock from Guardian
 func (il *itemLock) unlock() {
 	atomic.AddInt64(&il.cnt, -1)
-	if atomic.LoadInt64(&il.cnt) == 0 { // last lock in the queue
+	cnt := atomic.LoadInt64(&il.cnt)
+	if cnt < 0 { // already unlocked
+		return
+	}
+	if cnt == 0 { // last lock in the queue
 		Guardian.Lock()
-		if il.cnt == 0 { // assurance that our counter was not modified in between read and lock
-			delete(Guardian.locksMap, il.keyID)
-		}
+		delete(Guardian.locksMap, il.keyID)
 		Guardian.Unlock()
 	}
-	il.Unlock() // will unlock a single count so the next one waiting for lock can proceed
+	il.Unlock()
+}
+
+type itemLocks []*itemLock
+
+func (ils itemLocks) lock() {
+	for _, itmLock := range ils {
+		itmLock.lock()
+	}
+}
+
+func (ils itemLocks) unlock() {
+	for _, itmLock := range ils {
+		itmLock.unlock()
+	}
 }
 
 // GuardianLock is an optimized locking system per locking key
@@ -59,7 +81,7 @@ type GuardianLock struct {
 
 // lockItems locks a set of lockIDs
 // returning the lock structs so they can be later unlocked
-func (guard *GuardianLock) lockItems(lockIDs []string) (itmLocks []*itemLock) {
+func (guard *GuardianLock) lockItems(lockIDs []string) (itmLocks itemLocks) {
 	guard.Lock()
 	for _, lockID := range lockIDs {
 		var itmLock *itemLock
@@ -68,23 +90,15 @@ func (guard *GuardianLock) lockItems(lockIDs []string) (itmLocks []*itemLock) {
 			itmLock = newItemLock(lockID)
 			guard.locksMap[lockID] = itmLock
 		}
-		atomic.AddInt64(&itmLock.cnt, 1)
 		itmLocks = append(itmLocks, itmLock)
 	}
 	guard.Unlock()
-	for _, itmLock := range itmLocks {
-		itmLock.Lock()
-	}
+
+	itmLocks.lock()
 	return
 }
 
-// unlockItems will unlock the items provided
-func (guard *GuardianLock) unlockItems(itmLocks []*itemLock) {
-	for _, itmLock := range itmLocks {
-		itmLock.unlock()
-	}
-}
-
+// Guard executes the handler between locks
 func (guard *GuardianLock) Guard(handler func() (interface{}, error), timeout time.Duration, lockIDs ...string) (reply interface{}, err error) {
 	itmLocks := guard.lockItems(lockIDs)
 
@@ -111,7 +125,8 @@ func (guard *GuardianLock) Guard(handler func() (interface{}, error), timeout ti
 		case reply = <-rplyChan:
 		}
 	}
-	guard.unlockItems(itmLocks)
+
+	itmLocks.unlock()
 	return
 }
 
@@ -129,7 +144,7 @@ func (guard *GuardianLock) GuardIDs(timeout time.Duration, lockIDs ...string) {
 
 // UnguardTimed attempts to unlock a set of locks based on their locksUUID
 func (guard *GuardianLock) UnguardIDs(lockIDs ...string) {
-	var itmLocks []*itemLock
+	var itmLocks itemLocks
 	guard.RLock()
 	for _, lockID := range lockIDs {
 		var itmLock *itemLock
@@ -139,6 +154,6 @@ func (guard *GuardianLock) UnguardIDs(lockIDs ...string) {
 		}
 	}
 	guard.RUnlock()
-	guard.unlockItems(itmLocks)
+	itmLocks.unlock()
 	return
 }
