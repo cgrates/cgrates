@@ -19,124 +19,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
-	"fmt"
-
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
-
-	"github.com/mediocregopher/radix.v2/pool"
-	"github.com/mediocregopher/radix.v2/redis"
 )
 
 type redisMigrator struct {
 	dm       *engine.DataManager
-	rds *engine.RedisStorage 
+	rds      *engine.RedisStorage
 	dataKeys []string
 	qryIdx   *int
 }
 
-func newredisMigrator(dm *engine.Datamnager) ( rM *redisMigrator, error) {
+func newRedisMigrator(dm *engine.DataManager) (rM *redisMigrator) {
+	rM.dm = dm
 	rM.rds = dm.DataDB().(*engine.RedisStorage)
-
-
-
-	df := func(network, addr string) (*redis.Client, error) {
-		client, err := redis.Dial(network, addr)
-		if err != nil {
-			return nil, err
-		}
-		if len(pass) != 0 {
-			if err = client.Cmd("AUTH", pass).Err; err != nil {
-				client.Close()
-				return nil, err
-			}
-		}
-		if db != 0 {
-			if err = client.Cmd("SELECT", db).Err; err != nil {
-				client.Close()
-				return nil, err
-			}
-		}
-		return client, nil
-	}
-	p, err := pool.NewCustom("tcp", address, 1, df)
-	if err != nil {
-		return nil, err
-	}
-	var mrshler engine.Marshaler
-	if mrshlerStr == utils.MSGPACK {
-		mrshler = engine.NewCodecMsgpackMarshaler()
-	} else if mrshlerStr == utils.JSON {
-		mrshler = new(engine.JSONMarshaler)
-	} else {
-		return nil, fmt.Errorf("Unsupported marshaler: %v", mrshlerStr)
-	}
-	return &v1Redis{dbPool: p, ms: mrshler}, nil
-}
-
-// This CMD function get a connection from the pool.
-// Handles automatic failover in case of network disconnects
-func (v1rs *v1Redis) cmd(cmd string, args ...interface{}) *redis.Resp {
-	c1, err := v1rs.dbPool.Get()
-	if err != nil {
-		return redis.NewResp(err)
-	}
-	result := c1.Cmd(cmd, args...)
-	if result.IsType(redis.IOErr) { // Failover mecaneism
-		utils.Logger.Warning(fmt.Sprintf("<RedisStorage> error <%s>, attempting failover.", result.Err.Error()))
-		c2, err := v1rs.dbPool.Get()
-		if err == nil {
-			if result2 := c2.Cmd(cmd, args...); !result2.IsType(redis.IOErr) {
-				v1rs.dbPool.Put(c2)
-				return result2
-			}
-		}
-	} else {
-		v1rs.dbPool.Put(c1)
-	}
-	return result
-}
-func (v1rs *v1Redis) Close() {}
-
-func (v1rs *v1Redis) getKeysForPrefix(prefix string) ([]string, error) {
-	r := v1rs.cmd("KEYS", prefix+"*")
-	if r.Err != nil {
-		return nil, r.Err
-	}
-	return r.List()
-}
-
-// Adds a single load instance to load history
-func (v1rs *v1Redis) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize int, transactionID string) error {
-	if loadHistSize == 0 { // Load history disabled
-		return nil
-	}
-	marshaled, err := v1rs.ms.Marshal(&ldInst)
-	if err != nil {
-		return err
-	}
-	_, err = guardian.Guardian.Guard(func() (interface{}, error) { // Make sure we do it locked since other instance can modify history while we read it
-		histLen, err := v1rs.cmd("LLEN", utils.LOADINST_KEY).Int()
-		if err != nil {
-			return nil, err
-		}
-		if histLen >= loadHistSize { // Have hit maximum history allowed, remove oldest element in order to add new one
-			if err := v1rs.cmd("RPOP", utils.LOADINST_KEY).Err; err != nil {
-				return nil, err
-			}
-		}
-		err = v1rs.cmd("LPUSH", utils.LOADINST_KEY, marshaled).Err
-		return nil, err
-	}, 0, utils.LOADINST_KEY)
-
-	return err
 }
 
 //Account methods
 //V1
 //get
-func (v1rs *v1Redis) getv1Account() (v1Acnt *v1Account, err error) {
+func (v1rs *redisMigrator) getv1Account() (v1Acnt *v1Account, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.getKeysForPrefix(v1AccountDBPrefix)
 		if err != nil {
@@ -164,7 +66,7 @@ func (v1rs *v1Redis) getv1Account() (v1Acnt *v1Account, err error) {
 }
 
 //set
-func (v1rs *v1Redis) setV1Account(x *v1Account) (err error) {
+func (v1rs *redisMigrator) setV1Account(x *v1Account) (err error) {
 	key := v1AccountDBPrefix + x.Id
 	bit, err := v1rs.ms.Marshal(x)
 	if err != nil {
@@ -178,7 +80,7 @@ func (v1rs *v1Redis) setV1Account(x *v1Account) (err error) {
 
 //V2
 //get
-func (v1rs *v1Redis) getv2Account() (v2Acnt *v2Account, err error) {
+func (v1rs *redisMigrator) getv2Account() (v2Acnt *v2Account, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.getKeysForPrefix(utils.ACCOUNT_PREFIX)
 		if err != nil {
@@ -206,7 +108,7 @@ func (v1rs *v1Redis) getv2Account() (v2Acnt *v2Account, err error) {
 }
 
 //set
-func (v1rs *v1Redis) setV2Account(x *v2Account) (err error) {
+func (v1rs *redisMigrator) setV2Account(x *v2Account) (err error) {
 	key := utils.ACCOUNT_PREFIX + x.ID
 	bit, err := v1rs.ms.Marshal(x)
 	if err != nil {
@@ -220,7 +122,7 @@ func (v1rs *v1Redis) setV2Account(x *v2Account) (err error) {
 
 //ActionPlans methods
 //get
-func (v1rs *v1Redis) getV1ActionPlans() (v1aps *v1ActionPlans, err error) {
+func (v1rs *redisMigrator) getV1ActionPlans() (v1aps *v1ActionPlans, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.getKeysForPrefix(utils.ACTION_PLAN_PREFIX)
 		if err != nil {
@@ -247,7 +149,7 @@ func (v1rs *v1Redis) getV1ActionPlans() (v1aps *v1ActionPlans, err error) {
 }
 
 //set
-func (v1rs *v1Redis) setV1ActionPlans(x *v1ActionPlans) (err error) {
+func (v1rs *redisMigrator) setV1ActionPlans(x *v1ActionPlans) (err error) {
 	key := utils.ACTION_PLAN_PREFIX + (*x)[0].Id
 	bit, err := v1rs.ms.Marshal(x)
 	if err != nil {
@@ -261,7 +163,7 @@ func (v1rs *v1Redis) setV1ActionPlans(x *v1ActionPlans) (err error) {
 
 //Actions methods
 //get
-func (v1rs *v1Redis) getV1Actions() (v1acs *v1Actions, err error) {
+func (v1rs *redisMigrator) getV1Actions() (v1acs *v1Actions, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.getKeysForPrefix(utils.ACTION_PREFIX)
 		if err != nil {
@@ -288,7 +190,7 @@ func (v1rs *v1Redis) getV1Actions() (v1acs *v1Actions, err error) {
 }
 
 //set
-func (v1rs *v1Redis) setV1Actions(x *v1Actions) (err error) {
+func (v1rs *redisMigrator) setV1Actions(x *v1Actions) (err error) {
 	key := utils.ACTION_PREFIX + (*x)[0].Id
 	bit, err := v1rs.ms.Marshal(x)
 	if err != nil {
@@ -302,7 +204,7 @@ func (v1rs *v1Redis) setV1Actions(x *v1Actions) (err error) {
 
 //ActionTriggers methods
 //get
-func (v1rs *v1Redis) getV1ActionTriggers() (v1acts *v1ActionTriggers, err error) {
+func (v1rs *redisMigrator) getV1ActionTriggers() (v1acts *v1ActionTriggers, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.getKeysForPrefix(utils.ACTION_TRIGGER_PREFIX)
 		if err != nil {
@@ -329,7 +231,7 @@ func (v1rs *v1Redis) getV1ActionTriggers() (v1acts *v1ActionTriggers, err error)
 }
 
 //set
-func (v1rs *v1Redis) setV1ActionTriggers(x *v1ActionTriggers) (err error) {
+func (v1rs *redisMigrator) setV1ActionTriggers(x *v1ActionTriggers) (err error) {
 	key := utils.ACTION_TRIGGER_PREFIX + (*x)[0].Id
 	bit, err := v1rs.ms.Marshal(x)
 	if err != nil {
@@ -343,7 +245,7 @@ func (v1rs *v1Redis) setV1ActionTriggers(x *v1ActionTriggers) (err error) {
 
 //SharedGroup methods
 //get
-func (v1rs *v1Redis) getV1SharedGroup() (v1sg *v1SharedGroup, err error) {
+func (v1rs *redisMigrator) getV1SharedGroup() (v1sg *v1SharedGroup, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.getKeysForPrefix(utils.SHARED_GROUP_PREFIX)
 		if err != nil {
@@ -370,7 +272,7 @@ func (v1rs *v1Redis) getV1SharedGroup() (v1sg *v1SharedGroup, err error) {
 }
 
 //set
-func (v1rs *v1Redis) setV1SharedGroup(x *v1SharedGroup) (err error) {
+func (v1rs *redisMigrator) setV1SharedGroup(x *v1SharedGroup) (err error) {
 	key := utils.SHARED_GROUP_PREFIX + x.Id
 	bit, err := v1rs.ms.Marshal(x)
 	if err != nil {
@@ -384,7 +286,7 @@ func (v1rs *v1Redis) setV1SharedGroup(x *v1SharedGroup) (err error) {
 
 //Stats methods
 //get
-func (v1rs *v1Redis) getV1Stats() (v1st *v1Stat, err error) {
+func (v1rs *redisMigrator) getV1Stats() (v1st *v1Stat, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.getKeysForPrefix(utils.CDR_STATS_PREFIX)
 		if err != nil {
@@ -411,7 +313,7 @@ func (v1rs *v1Redis) getV1Stats() (v1st *v1Stat, err error) {
 }
 
 //set
-func (v1rs *v1Redis) setV1Stats(x *v1Stat) (err error) {
+func (v1rs *redisMigrator) setV1Stats(x *v1Stat) (err error) {
 	key := utils.CDR_STATS_PREFIX + x.Id
 	bit, err := v1rs.ms.Marshal(x)
 	if err != nil {
@@ -425,7 +327,7 @@ func (v1rs *v1Redis) setV1Stats(x *v1Stat) (err error) {
 
 //Action  methods
 //get
-func (v1rs *v1Redis) getV2ActionTrigger() (v2at *v2ActionTrigger, err error) {
+func (v1rs *redisMigrator) getV2ActionTrigger() (v2at *v2ActionTrigger, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.getKeysForPrefix(utils.ACTION_TRIGGER_PREFIX)
 		if err != nil {
@@ -452,7 +354,7 @@ func (v1rs *v1Redis) getV2ActionTrigger() (v2at *v2ActionTrigger, err error) {
 }
 
 //set
-func (v1rs *v1Redis) setV2ActionTrigger(x *v2ActionTrigger) (err error) {
+func (v1rs *redisMigrator) setV2ActionTrigger(x *v2ActionTrigger) (err error) {
 	key := utils.ACTION_TRIGGER_PREFIX + x.ID
 	bit, err := v1rs.ms.Marshal(x)
 	if err != nil {
@@ -466,7 +368,7 @@ func (v1rs *v1Redis) setV2ActionTrigger(x *v2ActionTrigger) (err error) {
 
 //AttributeProfile methods
 //get
-func (v1rs *v1Redis) getV1AttributeProfile() (v1attrPrf *v1AttributeProfile, err error) {
+func (v1rs *redisMigrator) getV1AttributeProfile() (v1attrPrf *v1AttributeProfile, err error) {
 	var v1attr *v1AttributeProfile
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.getKeysForPrefix(utils.AttributeProfilePrefix)
@@ -494,7 +396,7 @@ func (v1rs *v1Redis) getV1AttributeProfile() (v1attrPrf *v1AttributeProfile, err
 }
 
 //set
-func (v1rs *v1Redis) setV1AttributeProfile(x *v1AttributeProfile) (err error) {
+func (v1rs *redisMigrator) setV1AttributeProfile(x *v1AttributeProfile) (err error) {
 	key := utils.AttributeProfilePrefix + utils.ConcatenatedKey(x.Tenant, x.ID)
 	bit, err := v1rs.ms.Marshal(x)
 	if err != nil {

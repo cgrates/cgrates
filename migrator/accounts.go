@@ -36,22 +36,22 @@ const (
 
 func (m *Migrator) migrateCurrentAccounts() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.ACCOUNT_PREFIX)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ACCOUNT_PREFIX)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.ACCOUNT_PREFIX)
-		acc, err := m.dmIN.DataDB().GetAccount(idg)
+		acc, err := m.dmIN.DataManager().DataDB().GetAccount(idg)
 		if err != nil {
 			return err
 		}
 		if acc != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.DataDB().SetAccount(acc); err != nil {
+				if err := m.dmOut.DataManager().DataDB().SetAccount(acc); err != nil {
 					return err
 				}
-				if err := m.dmIN.DataDB().RemoveAccount(idg); err != nil {
+				if err := m.dmIN.DataManager().DataDB().RemoveAccount(idg); err != nil {
 					return err
 				}
 				m.stats[utils.Accounts] += 1
@@ -64,7 +64,7 @@ func (m *Migrator) migrateCurrentAccounts() (err error) {
 func (m *Migrator) migrateV1Accounts() (err error) {
 	var v1Acnt *v1Account
 	for {
-		v1Acnt, err = m.oldDataDB.getv1Account()
+		v1Acnt, err = m.dmIN.getv1Account()
 		if err != nil && err != utils.ErrNoMoreData {
 			return err
 		}
@@ -74,7 +74,7 @@ func (m *Migrator) migrateV1Accounts() (err error) {
 		if v1Acnt != nil {
 			acnt := v1Acnt.V1toV3Account()
 			if m.dryRun != true {
-				if err = m.dmOut.DataDB().SetAccount(acnt); err != nil {
+				if err = m.dmOut.DataManager().DataDB().SetAccount(acnt); err != nil {
 					return err
 				}
 				m.stats[utils.Accounts] += 1
@@ -84,7 +84,7 @@ func (m *Migrator) migrateV1Accounts() (err error) {
 	if m.dryRun != true {
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.Accounts: engine.CurrentDataDBVersions()[utils.Accounts]}
-		if err = m.dmOut.DataDB().SetVersions(vrs, false); err != nil {
+		if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),
@@ -97,7 +97,7 @@ func (m *Migrator) migrateV1Accounts() (err error) {
 func (m *Migrator) migrateV2Accounts() (err error) {
 	var v2Acnt *v2Account
 	for {
-		v2Acnt, err = m.oldDataDB.getv2Account()
+		v2Acnt, err = m.dmIN.getv2Account()
 		if err != nil && err != utils.ErrNoMoreData {
 			return err
 		}
@@ -107,7 +107,7 @@ func (m *Migrator) migrateV2Accounts() (err error) {
 		if v2Acnt != nil {
 			acnt := v2Acnt.V2toV3Account()
 			if m.dryRun != true {
-				if err = m.dmOut.DataDB().SetAccount(acnt); err != nil {
+				if err = m.dmOut.DataManager().DataDB().SetAccount(acnt); err != nil {
 					return err
 				}
 				m.stats[utils.Accounts] += 1
@@ -117,7 +117,7 @@ func (m *Migrator) migrateV2Accounts() (err error) {
 	if m.dryRun != true {
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.Accounts: engine.CurrentDataDBVersions()[utils.Accounts]}
-		if err = m.dmOut.DataDB().SetVersions(vrs, false); err != nil {
+		if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),
@@ -129,7 +129,7 @@ func (m *Migrator) migrateV2Accounts() (err error) {
 
 func (m *Migrator) migrateAccounts() (err error) {
 	var vrs engine.Versions
-	vrs, err = m.dmIN.DataDB().GetVersions("")
+	vrs, err = m.dmIN.DataManager().DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

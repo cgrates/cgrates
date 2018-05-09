@@ -20,43 +20,57 @@ package migrator
 
 import (
 	"errors"
-	"fmt"
-	"strconv"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewMigratorDataDB(db_type, host, port, name, user, pass, marshaler string) {
-
-}
-
-func ConfigureV1DataStorage() (db MigratorDataDB, err error) {
-	var d MigratorDataDB
-	d.DataManger().(engine.RedisStoarage)
+func NewMigratorDataDB(db_type, host, port, name, user, pass, marshaler string,
+	cacheCfg config.CacheConfig, loadHistorySize int) (db MigratorDataDB, err error) {
+	dm, err := engine.ConfigureDataStorage(db_type,
+		host, port, name, user, pass, marshaler,
+		cacheCfg, loadHistorySize)
+	if err != nil {
+		return nil, err
+	}
 	switch db_type {
 	case utils.REDIS:
-		var db_nb int
-		db_nb, err = strconv.Atoi(name)
-		if err != nil {
-			utils.Logger.Crit("Redis db name must be an integer!")
-			return nil, err
-		}
-		if port != "" {
-			host += ":" + port
-		}
-		d, err = newv1RedisStorage(host, db_nb, pass, marshaler)
+		d := newRedisMigrator(dm)
+		db = d.(MigratorDataDB)
 	case utils.MONGO:
-		d, err = newv1MongoStorage(host, port, name, user, pass, utils.DataDB, nil)
+		d := newMongoMigrator(dm)
 		db = d.(MigratorDataDB)
 	default:
 		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are '%s' or '%s'",
 			db_type, utils.REDIS, utils.MONGO))
 	}
+}
+
+/*
+
+func NewMigratorStorDB(db_type, host, port, name, user, pass, marshaler string,
+	cacheCfg config.CacheConfig, loadHistorySize int) (db MigratorDataDB, err error) {
+	dm, err := engine.ConfigureStorStorage(db_type,
+		host, port, name, user, pass, marshaler,
+		cacheCfg, loadHistorySize)
 	if err != nil {
 		return nil, err
 	}
-	return d, nil
+	switch db_type {
+	case utils.MONGO:
+		d := newRedisMigrator(dm)
+		db = d.(MigratorDataDB)
+	case utils.MYSQL:
+		d := newMongoMigrator(dm)
+		db = d.(MigratorDataDB)
+	default:
+		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are '%s' or '%s'",
+			db_type, utils.REDIS, utils.MONGO))
+	}
 }
+*/
+
+/*
 
 func ConfigureV1StorDB(db_type, host, port, name, user, pass string) (db MigratorStorDB, err error) {
 	var d MigratorStorDB
@@ -76,3 +90,4 @@ func ConfigureV1StorDB(db_type, host, port, name, user, pass string) (db Migrato
 	}
 	return d, nil
 }
+*/

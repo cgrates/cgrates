@@ -18,6 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package migrator
 
+import (
+	"github.com/cgrates/cgrates/engine"
+)
+
 type MigratorDataDB interface {
 	getKeysForPrefix(prefix string) ([]string, error)
 	getv1Account() (v1Acnt *v1Account, err error)

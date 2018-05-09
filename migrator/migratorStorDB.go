@@ -18,6 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package migrator
 
+import (
+	"github.com/cgrates/cgrates/engine"
+)
+
 type MigratorStorDB interface {
 	getV1CDR() (v1Cdr *v1Cdrs, err error)
 	setV1CDR(v1Cdr *v1Cdrs) (err error)
