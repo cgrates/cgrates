@@ -31,17 +31,22 @@ func (m *Migrator) migrateCurrentTPaliases() (err error) {
 		return err
 	}
 	for _, tpid := range tpids {
-		dests, err := m.storDBIn.GetTPAliases(&utils.TPAliases{TPid: tpid})
+		alias, err := m.storDBIn.GetTPAliases(&utils.TPAliases{TPid: tpid})
 		if err != nil {
 			return err
 		}
-		for _, dest := range dests {
+		for _, dest := range alias {
 			dest.TPid = tpid
 		}
-		if dests != nil {
+		if alias != nil {
 			if m.dryRun != true {
-				if err := m.storDBOut.SetTPAliases(dests); err != nil {
+				if err := m.storDBOut.SetTPAliases(alias); err != nil {
 					return err
+				}
+				for _, ali := range alias {
+					if err := m.storDBIn.RemTpData(utils.TBLTPAliases, ali.TPid, map[string]string{"tag": ali.GetId()}); err != nil {
+						return err
+					}
 				}
 				m.stats[utils.TpAliases] += 1
 			}

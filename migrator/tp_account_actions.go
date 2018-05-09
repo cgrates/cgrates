@@ -31,14 +31,20 @@ func (m *Migrator) migrateCurrentTPaccountAcction() (err error) {
 		return err
 	}
 	for _, tpid := range tpids {
-		dest, err := m.storDBIn.GetTPAccountActions(&utils.TPAccountActions{TPid: tpid})
+		accAct, err := m.storDBIn.GetTPAccountActions(&utils.TPAccountActions{TPid: tpid})
 		if err != nil {
 			return err
 		}
-		if dest != nil {
+		if accAct != nil {
 			if m.dryRun != true {
-				if err := m.storDBOut.SetTPAccountActions(dest); err != nil {
+				if err := m.storDBOut.SetTPAccountActions(accAct); err != nil {
 					return err
+				}
+				for _, acc := range accAct {
+					if err := m.storDBIn.RemTpData(utils.TBLTPAccountActions, acc.TPid,
+						map[string]string{"loadid": acc.LoadId, "tenant": acc.Tenant, "account": acc.Account}); err != nil {
+						return err
+					}
 				}
 				m.stats[utils.TpAccountActionsV] += 1
 			}
