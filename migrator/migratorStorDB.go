@@ -25,6 +25,8 @@ import (
 type MigratorStorDB interface {
 	getV1CDR() (v1Cdr *v1Cdrs, err error)
 	setV1CDR(v1Cdr *v1Cdrs) (err error)
+	createV1SMCosts() (err error)
+	renameV1SMCosts() (err error)
 	getV2SMCost() (v2Cost *v2SessionsCost, err error)
 	setV2SMCost(v2Cost *v2SessionsCost) (err error)
 	remV2SMCost(v2Cost *v2SessionsCost) (err error)

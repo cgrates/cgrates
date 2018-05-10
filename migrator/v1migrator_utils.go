@@ -64,6 +64,9 @@ func NewMigratorStorDB(db_type, host, port, name, user, pass string,
 	case utils.MYSQL:
 		d = newMigratorSQL(storDb)
 		db = d.(MigratorStorDB)
+	case utils.POSTGRES:
+		d = newMigratorSQL(storDb)
+		db = d.(MigratorStorDB)
 	default:
 		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are '%s' or '%s'",
 			db_type, utils.MONGO, utils.MYSQL))

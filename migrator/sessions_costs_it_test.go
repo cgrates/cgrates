@@ -20,9 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package migrator
 
-/*
 import (
-	"log"
 	"path"
 	"testing"
 	"time"
@@ -42,67 +40,46 @@ var (
 )
 
 var sTestssCostIT = []func(t *testing.T){
+	testSessionCostITConnect,
+	testSessionCostITRename,
 	testSessionCostITFlush,
-	testSessionCostITMigrateAndMove,
+	testSessionCostITMigrate,
 }
 
-func TestSessionCostITMongoConnection(t *testing.T) {
+func TestSessionCostITMongo(t *testing.T) {
 	var err error
 	sCostPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
 	sCostCfgIn, err = config.NewCGRConfigFromFolder(sCostPathIn)
 	if err != nil {
 		t.Error(err)
 	}
-	storDBIn, err := engine.ConfigureStorDB(sCostCfgIn.StorDBType, sCostCfgIn.StorDBHost,
-		sCostCfgIn.StorDBPort, sCostCfgIn.StorDBName,
-		sCostCfgIn.StorDBUser, sCostCfgIn.StorDBPass,
-		config.CgrConfig().StorDBMaxOpenConns,
-		config.CgrConfig().StorDBMaxIdleConns,
-		config.CgrConfig().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDBCDRSIndexes)
+	sCostCfgOut, err = config.NewCGRConfigFromFolder(sCostPathIn)
 	if err != nil {
 		t.Error(err)
 	}
-	storDBOut, err := engine.ConfigureStorDB(sCostCfgIn.StorDBType,
-		sCostCfgIn.StorDBHost, sCostCfgIn.StorDBPort, sCostCfgIn.StorDBName,
-		sCostCfgIn.StorDBUser, sCostCfgIn.StorDBPass,
-		config.CgrConfig().StorDBMaxOpenConns,
-		config.CgrConfig().StorDBMaxIdleConns,
-		config.CgrConfig().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDBCDRSIndexes)
-	if err != nil {
-		t.Error(err)
-	}
-	oldStorDB, err := ConfigureV1StorDB(sCostCfgIn.StorDBType,
-		sCostCfgIn.StorDBHost, sCostCfgIn.StorDBPort, sCostCfgIn.StorDBName,
-		sCostCfgIn.StorDBUser, sCostCfgIn.StorDBPass)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	sCostMigrator, err = NewMigrator(nil, nil, sCostCfgIn.DataDbType,
-		sCostCfgIn.DBDataEncoding, storDBIn, storDBOut, sCostCfgIn.StorDBType, nil,
-		sCostCfgIn.DataDbType, sCostCfgIn.DBDataEncoding, oldStorDB, sCostCfgIn.StorDBType,
-		false, false, false, false, false)
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func TestSessionCostITMongo(t *testing.T) {
 	for _, stest := range sTestssCostIT {
 		t.Run("TestSessionSCostITMigrateMongo", stest)
 	}
 }
 
-func TestSessionCostITMySqlConnection(t *testing.T) {
+func TestSessionCostITMySql(t *testing.T) {
 	var err error
 	sCostPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
 	sCostCfgIn, err = config.NewCGRConfigFromFolder(sCostPathIn)
 	if err != nil {
 		t.Error(err)
 	}
-	storDBIn, err := engine.ConfigureStorDB(sCostCfgIn.StorDBType, sCostCfgIn.StorDBHost,
+	sCostCfgOut, err = config.NewCGRConfigFromFolder(sCostPathIn)
+	if err != nil {
+		t.Error(err)
+	}
+	for _, stest := range sTestssCostIT {
+		t.Run("TestSessionSCostITMigrateMySql", stest)
+	}
+}
+
+func testSessionCostITConnect(t *testing.T) {
+	storDBIn, err := NewMigratorStorDB(sCostCfgIn.StorDBType, sCostCfgIn.StorDBHost,
 		sCostCfgIn.StorDBPort, sCostCfgIn.StorDBName,
 		sCostCfgIn.StorDBUser, sCostCfgIn.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns,
@@ -112,9 +89,9 @@ func TestSessionCostITMySqlConnection(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	storDBOut, err := engine.ConfigureStorDB(sCostCfgIn.StorDBType,
-		sCostCfgIn.StorDBHost, sCostCfgIn.StorDBPort, sCostCfgIn.StorDBName,
-		sCostCfgIn.StorDBUser, sCostCfgIn.StorDBPass,
+	storDBOut, err := NewMigratorStorDB(sCostCfgOut.StorDBType,
+		sCostCfgOut.StorDBHost, sCostCfgOut.StorDBPort, sCostCfgOut.StorDBName,
+		sCostCfgOut.StorDBUser, sCostCfgOut.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns,
 		config.CgrConfig().StorDBMaxIdleConns,
 		config.CgrConfig().StorDBConnMaxLifetime,
@@ -122,36 +99,51 @@ func TestSessionCostITMySqlConnection(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	oldStorDB, err := ConfigureV1StorDB(sCostCfgIn.StorDBType,
-		sCostCfgIn.StorDBHost, sCostCfgIn.StorDBPort, sCostCfgIn.StorDBName,
-		sCostCfgIn.StorDBUser, sCostCfgIn.StorDBPass)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	sCostMigrator, err = NewMigrator(nil, nil, sCostCfgIn.DataDbType,
-		sCostCfgIn.DBDataEncoding, storDBIn, storDBOut, sCostCfgIn.StorDBType, nil,
-		sCostCfgIn.DataDbType, sCostCfgIn.DBDataEncoding, oldStorDB, sCostCfgIn.StorDBType,
-		false, false, false, false, false)
+	sCostMigrator, err = NewMigrator(nil, nil,
+		storDBIn, storDBOut,
+		false, false, false)
 	if err != nil {
 		t.Error(err)
 	}
 }
 
-func TestSessionCostITMySql(t *testing.T) {
-	for _, stest := range sTestssCostIT {
-		t.Run("TestSessionSCostITMigrateMySql", stest)
+func testSessionCostITRename(t *testing.T) {
+	var err error
+	if err = sCostMigrator.storDBIn.createV1SMCosts(); err != nil {
+		t.Error(err)
 	}
+	currentVersion := engine.Versions{
+		utils.SessionSCosts: 1,
+	}
+	err = sCostMigrator.storDBOut.StorDB().SetVersions(currentVersion, false)
+	if err != nil {
+		t.Error("Error when setting version for SessionsCosts ", err.Error())
+	}
+	if vrs, err := sCostMigrator.storDBOut.StorDB().GetVersions(""); err != nil {
+		t.Error(err)
+	} else if vrs[utils.SessionSCosts] != 1 {
+		t.Errorf("Unexpected version returned: %d", vrs[utils.SessionSCosts])
+	}
+	err, _ = sCostMigrator.Migrate([]string{utils.MetaSessionsCosts})
+	if err != nil {
+		t.Error("Error when migrating SessionsCosts ", err.Error())
+	}
+	if vrs, err := sCostMigrator.storDBOut.StorDB().GetVersions(""); err != nil {
+		t.Error(err)
+	} else if vrs[utils.SessionSCosts] != 2 {
+		t.Errorf("Unexpected version returned: %d", vrs[utils.SessionSCosts])
+	}
+
 }
 
 func testSessionCostITFlush(t *testing.T) {
-	if err := sCostMigrator.storDBOut.Flush(
+	if err := sCostMigrator.storDBOut.StorDB().Flush(
 		path.Join(sCostCfgIn.DataFolderPath, "storage", sCostCfgIn.StorDBType)); err != nil {
 		t.Error(err)
 	}
 }
 
-func testSessionCostITMigrateAndMove(t *testing.T) {
+func testSessionCostITMigrate(t *testing.T) {
 	cc := &engine.CallCost{
 		Direction:   utils.OUT,
 		Cost:        1.23,
@@ -187,17 +179,17 @@ func testSessionCostITMigrateAndMove(t *testing.T) {
 		CostDetails: cc,
 	}
 	var err error
-	if err = sCostMigrator.oldStorDB.setSMCost(v2Cost); err != nil {
+	if err = sCostMigrator.storDBIn.setV2SMCost(v2Cost); err != nil {
 		t.Error(err)
 	}
 	currentVersion := engine.Versions{
 		utils.SessionSCosts: 2,
 	}
-	err = sCostMigrator.storDBOut.SetVersions(currentVersion, false)
+	err = sCostMigrator.storDBOut.StorDB().SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for SessionsCosts ", err.Error())
 	}
-	if vrs, err := sCostMigrator.storDBOut.GetVersions(""); err != nil {
+	if vrs, err := sCostMigrator.storDBOut.StorDB().GetVersions(""); err != nil {
 		t.Error(err)
 	} else if vrs[utils.SessionSCosts] != 2 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.SessionSCosts])
@@ -206,15 +198,14 @@ func testSessionCostITMigrateAndMove(t *testing.T) {
 	if err != nil {
 		t.Error("Error when migrating SessionsCosts ", err.Error())
 	}
-	if rcvCosts, err := sCostMigrator.storDBOut.GetSMCosts("", utils.DEFAULT_RUNID, "", ""); err != nil {
+	if rcvCosts, err := sCostMigrator.storDBOut.StorDB().GetSMCosts("", utils.DEFAULT_RUNID, "", ""); err != nil {
 		t.Error(err)
 	} else if len(rcvCosts) != 1 {
 		t.Errorf("Unexpected number of SessionsCosts returned: %d", len(rcvCosts))
 	}
-	if vrs, err := sCostMigrator.storDBOut.GetVersions(""); err != nil {
+	if vrs, err := sCostMigrator.storDBOut.StorDB().GetVersions(""); err != nil {
 		t.Error(err)
 	} else if vrs[utils.SessionSCosts] != 3 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.SessionSCosts])
 	}
 }
-*/
