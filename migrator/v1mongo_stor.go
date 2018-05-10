@@ -22,6 +22,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/mgo"
+	"github.com/cgrates/mgo/bson"
 )
 
 func newMongoStorDBMigrator(stor engine.StorDB) (mgoMig *mongoStorDBMigrator) {
@@ -67,6 +68,23 @@ func (v1ms *mongoStorDBMigrator) setV1CDR(v1Cdr *v1Cdrs) (err error) {
 }
 
 //SMCost methods
+//rename
+func (v1ms *mongoStorDBMigrator) renameV1SMCosts() (err error) {
+	if err = v1ms.mgoDB.DB().C(utils.OldSMCosts).DropCollection(); err != nil {
+		return err
+	}
+	result := make(map[string]string)
+	return v1ms.mgoDB.DB().Run(bson.D{{"create", utils.SessionsCostsTBL}}, result)
+}
+
+func (v1ms *mongoStorDBMigrator) createV1SMCosts() (err error) {
+	err = v1ms.mgoDB.DB().C(utils.OldSMCosts).DropCollection()
+	err = v1ms.mgoDB.DB().C(utils.SessionsCostsTBL).DropCollection()
+	result := make(map[string]string)
+	return v1ms.mgoDB.DB().Run(bson.D{{"create", utils.OldSMCosts},
+		{"size", 1024}}, result)
+}
+
 //get
 func (v1ms *mongoStorDBMigrator) getV2SMCost() (v2Cost *v2SessionsCost, err error) {
 	if v1ms.qryIter == nil {

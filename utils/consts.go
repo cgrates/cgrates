@@ -778,6 +778,7 @@ const (
 	TBLTPSuppliers        = "tp_suppliers"
 	TBLTPAttributes       = "tp_attributes"
 	TBLVersions           = "versions"
+	OldSMCosts            = "sm_costs"
 )
 
 // Cache Name

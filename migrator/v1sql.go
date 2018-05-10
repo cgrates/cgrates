@@ -20,6 +20,7 @@ package migrator
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
@@ -73,6 +74,48 @@ func (mgSQL *migratorSQL) setV1CDR(v1Cdr *v1Cdrs) (err error) {
 	}
 	tx.Commit()
 	return nil
+}
+
+func (mgSQL *migratorSQL) renameV1SMCosts() (err error) {
+	qry := "RENAME TABLE sm_costs TO sessions_costs;"
+	if mgSQL.StorDB().GetStorageType() == utils.POSTGRES {
+		qry = "ALTER TABLE sm_costs RENAME TO sessions_costs"
+	}
+	if _, err := mgSQL.sqlStorage.Db.Exec(qry); err != nil {
+		return err
+	}
+	return
+}
+
+func (mgSQL *migratorSQL) createV1SMCosts() (err error) {
+	qry := fmt.Sprint("CREATE TABLE sm_costs (  id int(11) NOT NULL AUTO_INCREMENT,  cgrid varchar(40) NOT NULL,  run_id  varchar(64) NOT NULL,  origin_host varchar(64) NOT NULL,  origin_id varchar(128) NOT NULL,  cost_source varchar(64) NOT NULL,  `usage` BIGINT NOT NULL,  cost_details MEDIUMTEXT,  created_at TIMESTAMP NULL,deleted_at TIMESTAMP NULL,  PRIMARY KEY (`id`),UNIQUE KEY costid (cgrid, run_id),KEY origin_idx (origin_host, origin_id),KEY run_origin_idx (run_id, origin_id),KEY deleted_at_idx (deleted_at));")
+	if mgSQL.StorDB().GetStorageType() == utils.POSTGRES {
+		qry = `
+	CREATE TABLE sm_costs (
+	  id SERIAL PRIMARY KEY,
+	  cgrid VARCHAR(40) NOT NULL,
+	  run_id  VARCHAR(64) NOT NULL,
+	  origin_host VARCHAR(64) NOT NULL,
+	  origin_id VARCHAR(128) NOT NULL,
+	  cost_source VARCHAR(64) NOT NULL,
+	  usage BIGINT NOT NULL,
+	  cost_details jsonb,
+	  created_at TIMESTAMP WITH TIME ZONE,
+	  deleted_at TIMESTAMP WITH TIME ZONE NULL,
+	  UNIQUE (cgrid, run_id)
+	);
+		`
+	}
+	if _, err := mgSQL.sqlStorage.Db.Exec("DROP TABLE IF EXISTS sessions_costs;"); err != nil {
+		return err
+	}
+	if _, err := mgSQL.sqlStorage.Db.Exec("DROP TABLE IF EXISTS sm_costs;"); err != nil {
+		return err
+	}
+	if _, err := mgSQL.sqlStorage.Db.Exec(qry); err != nil {
+		return err
+	}
+	return
 }
 
 func (mgSQL *migratorSQL) getV2SMCost() (v2Cost *v2SessionsCost, err error) {
