@@ -54,7 +54,7 @@ type PartialRecordsCache struct {
 	cdrs             rpcclient.RpcClientConnection
 	partialRecords   map[string]*PartialCDRRecord // [OriginID]*PartialRecord
 	dumpTimers       map[string]*time.Timer       // [OriginID]*time.Timer which can be canceled or reset
-	guard            *guardian.GuardianLock
+	guard            *guardian.GuardianLocker
 }
 
 // Dumps the cache into a .unpaired file in the outdir and cleans cache after

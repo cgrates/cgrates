@@ -19,44 +19,52 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package guardian
 
 import (
+	"fmt"
 	"sync"
-	"sync/atomic"
 	"time"
 )
 
 // global package variable
-var Guardian = &GuardianLock{locksMap: make(map[string]*itemLock)}
+var Guardian = &GuardianLocker{locksMap: make(map[string]*itemLock)}
 
-func newItemLock(keyID string) *itemLock {
-	return &itemLock{keyID: keyID}
+func newItemLock(keyID string) (il *itemLock) {
+	il = &itemLock{keyID: keyID}
+	il.lock() // need to return it already locked so we don't have concurrency on creation/unlock
+	return
 }
 
 // itemLock represents one lock with key autodestroy
 type itemLock struct {
-	keyID string // store it so we know what to destroy
-	cnt   int64
-	sync.Mutex
+	keyID  string // store it so we know what to destroy
+	cnt    int64
+	cntLck sync.Mutex // protect the counter
+	lk     sync.Mutex // real lock
 }
 
 // lock() executes combined lock with increasing counter
 func (il *itemLock) lock() {
-	atomic.AddInt64(&il.cnt, 1)
-	il.Lock()
+	il.cntLck.Lock()
+	il.cnt += 1
+	il.cntLck.Unlock()
+	il.lk.Lock()
 }
 
 // unlock() executes combined lock with autoremoving lock from Guardian
 func (il *itemLock) unlock() {
-	atomic.AddInt64(&il.cnt, -1)
-	cnt := atomic.LoadInt64(&il.cnt)
-	if cnt < 0 { // already unlocked
+	il.cntLck.Lock()
+	if il.cnt < 1 { // already unlocked
+		fmt.Sprintf("<Guardian> itemLock with id: %s with counter smaller than 0", il.keyID)
+		il.cntLck.Unlock()
 		return
 	}
-	if cnt == 0 { // last lock in the queue
+	il.cnt -= 1
+	if il.cnt == 0 { // last lock in the queue
 		Guardian.Lock()
 		delete(Guardian.locksMap, il.keyID)
 		Guardian.Unlock()
 	}
-	il.Unlock()
+	il.lk.Unlock()
+	il.cntLck.Unlock()
 }
 
 type itemLocks []*itemLock
@@ -73,33 +81,34 @@ func (ils itemLocks) unlock() {
 	}
 }
 
-// GuardianLock is an optimized locking system per locking key
-type GuardianLock struct {
+// GuardianLocker is an optimized locking system per locking key
+type GuardianLocker struct {
 	locksMap     map[string]*itemLock
 	sync.RWMutex // protects the maps
 }
 
 // lockItems locks a set of lockIDs
 // returning the lock structs so they can be later unlocked
-func (guard *GuardianLock) lockItems(lockIDs []string) (itmLocks itemLocks) {
+func (guard *GuardianLocker) lockItems(lockIDs []string) (itmLocks itemLocks) {
 	guard.Lock()
+	var toLockItms itemLocks
 	for _, lockID := range lockIDs {
-		var itmLock *itemLock
 		itmLock, exists := guard.locksMap[lockID]
 		if !exists {
 			itmLock = newItemLock(lockID)
 			guard.locksMap[lockID] = itmLock
+		} else {
+			toLockItms = append(toLockItms, itmLock)
 		}
 		itmLocks = append(itmLocks, itmLock)
 	}
 	guard.Unlock()
-
-	itmLocks.lock()
+	toLockItms.lock()
 	return
 }
 
 // Guard executes the handler between locks
-func (guard *GuardianLock) Guard(handler func() (interface{}, error), timeout time.Duration, lockIDs ...string) (reply interface{}, err error) {
+func (guard *GuardianLocker) Guard(handler func() (interface{}, error), timeout time.Duration, lockIDs ...string) (reply interface{}, err error) {
 	itmLocks := guard.lockItems(lockIDs)
 
 	rplyChan := make(chan interface{})
@@ -131,7 +140,7 @@ func (guard *GuardianLock) Guard(handler func() (interface{}, error), timeout ti
 }
 
 // GuardTimed aquires a lock for duration
-func (guard *GuardianLock) GuardIDs(timeout time.Duration, lockIDs ...string) {
+func (guard *GuardianLocker) GuardIDs(timeout time.Duration, lockIDs ...string) {
 	guard.lockItems(lockIDs)
 	if timeout != 0 {
 		go func(timeout time.Duration, lockIDs ...string) {
@@ -143,7 +152,7 @@ func (guard *GuardianLock) GuardIDs(timeout time.Duration, lockIDs ...string) {
 }
 
 // UnguardTimed attempts to unlock a set of locks based on their locksUUID
-func (guard *GuardianLock) UnguardIDs(lockIDs ...string) {
+func (guard *GuardianLocker) UnguardIDs(lockIDs ...string) {
 	var itmLocks itemLocks
 	guard.RLock()
 	for _, lockID := range lockIDs {

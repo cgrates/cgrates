@@ -112,7 +112,7 @@ type CdrServer struct {
 	cdrstats      rpcclient.RpcClientConnection
 	thdS          rpcclient.RpcClientConnection
 	stats         rpcclient.RpcClientConnection
-	guard         *guardian.GuardianLock
+	guard         *guardian.GuardianLocker
 	responseCache *utils.ResponseCache
 	httpPoster    *utils.HTTPPoster // used for replication
 }

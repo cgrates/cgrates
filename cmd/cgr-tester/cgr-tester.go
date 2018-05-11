@@ -58,6 +58,8 @@ var (
 	version         = flag.Bool("version", false, "Prints the application version.")
 	nilDuration     = time.Duration(0)
 	usage           = flag.String("usage", "1m", "The duration to use in call simulation.")
+	fPath           = flag.String("file_path", "", "read requests from file with path")
+	reqSep          = flag.String("req_separator", "\n\n", "separator for requests in file")
 )
 
 func durInternalRater(cd *engine.CallDescriptor) (time.Duration, error) {
@@ -154,6 +156,18 @@ func main() {
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
 	}
+	if *fPath != "" {
+		frt, err := NewFileReaderTester(*fPath, *raterAddress,
+			*parallel, *runs, []byte(*reqSep))
+		if err != nil {
+			log.Fatal(err)
+		}
+		if err := frt.Test(); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
+
 	var timeparsed time.Duration
 	var err error
 	tstart := time.Now()

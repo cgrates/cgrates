@@ -208,7 +208,7 @@ func TestCgrCfgJSONDefaultsGeneral(t *testing.T) {
 	if cgrCfg.InternalTtl != 2*time.Minute {
 		t.Error(cgrCfg.InternalTtl)
 	}
-	if cgrCfg.LockingTimeout != 5*time.Second {
+	if cgrCfg.LockingTimeout != 0 {
 		t.Error(cgrCfg.LockingTimeout)
 	}
 	if cgrCfg.Logger != utils.MetaSysLog {
