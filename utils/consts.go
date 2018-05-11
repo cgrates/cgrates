@@ -842,6 +842,7 @@ const (
 	RadiusAgent     = "RadiusAgent"
 	DiameterAgent   = "DiameterAgent"
 	FreeSWITCHAgent = "FreeSWITCHAgent"
+	AsteriskAgent   = "AsteriskAgent"
 )
 
 func buildCacheInstRevPrefixes() {
