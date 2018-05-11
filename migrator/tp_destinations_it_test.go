@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package migrator
 
-/*
 import (
 	"log"
 	"path"
@@ -67,7 +66,7 @@ func testTpDstITConnect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	storDBIn, err := engine.ConfigureStorDB(tpDstCfgIn.StorDBType, tpDstCfgIn.StorDBHost,
+	storDBIn, err := NewMigratorStorDB(tpDstCfgIn.StorDBType, tpDstCfgIn.StorDBHost,
 		tpDstCfgIn.StorDBPort, tpDstCfgIn.StorDBName,
 		tpDstCfgIn.StorDBUser, tpDstCfgIn.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns,
@@ -77,7 +76,7 @@ func testTpDstITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDBOut, err := engine.ConfigureStorDB(tpDstCfgOut.StorDBType,
+	storDBOut, err := NewMigratorStorDB(tpDstCfgOut.StorDBType,
 		tpDstCfgOut.StorDBHost, tpDstCfgOut.StorDBPort, tpDstCfgOut.StorDBName,
 		tpDstCfgOut.StorDBUser, tpDstCfgOut.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns,
@@ -87,22 +86,19 @@ func testTpDstITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	tpDstMigrator, err = NewMigrator(nil, nil, tpDstCfgIn.DataDbType,
-		tpDstCfgIn.DBDataEncoding, storDBIn, storDBOut, tpDstCfgIn.StorDBType, nil,
-		tpDstCfgIn.DataDbType, tpDstCfgIn.DBDataEncoding, nil,
-		tpDstCfgIn.StorDBType, false, false, false, false, false)
+	tpDstMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
 func testTpDstITFlush(t *testing.T) {
-	if err := tpDstMigrator.storDBIn.Flush(
+	if err := tpDstMigrator.storDBIn.StorDB().Flush(
 		path.Join(tpDstCfgIn.DataFolderPath, "storage", tpDstCfgIn.StorDBType)); err != nil {
 		t.Error(err)
 	}
 
-	if err := tpDstMigrator.storDBOut.Flush(
+	if err := tpDstMigrator.storDBOut.StorDB().Flush(
 		path.Join(tpDstCfgOut.DataFolderPath, "storage", tpDstCfgOut.StorDBType)); err != nil {
 		t.Error(err)
 	}
@@ -116,11 +112,11 @@ func testTpDstITPopulate(t *testing.T) {
 			Prefixes: []string{"+49", "+4915"},
 		},
 	}
-	if err := tpDstMigrator.storDBIn.SetTPDestinations(tpDestination); err != nil {
+	if err := tpDstMigrator.storDBIn.StorDB().SetTPDestinations(tpDestination); err != nil {
 		t.Error("Error when setting TpDestination ", err.Error())
 	}
 	currentVersion := engine.CurrentStorDBVersions()
-	err := tpDstMigrator.storDBOut.SetVersions(currentVersion, false)
+	err := tpDstMigrator.storDBOut.StorDB().SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for TpDestination ", err.Error())
 	}
@@ -134,7 +130,7 @@ func testTpDstITMove(t *testing.T) {
 }
 
 func testTpDstITCheckData(t *testing.T) {
-	result, err := tpDstMigrator.storDBOut.GetTPDestinations(
+	result, err := tpDstMigrator.storDBOut.StorDB().GetTPDestinations(
 		tpDestination[0].TPid, tpDestination[0].ID)
 	if err != nil {
 		t.Error("Error when getting TpDestination ", err.Error())
@@ -143,10 +139,9 @@ func testTpDstITCheckData(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v",
 			utils.ToJSON(tpDestination[0]), utils.ToJSON(result[0]))
 	}
-	result, err = tpDstMigrator.storDBIn.GetTPDestinations(
+	result, err = tpDstMigrator.storDBIn.StorDB().GetTPDestinations(
 		tpDestination[0].TPid, tpDestination[0].ID)
 	if err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
-*/

@@ -20,161 +20,158 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package migrator
 
-// import (
-// 	"log"
-// 	"path"
-// 	"reflect"
-// 	"testing"
+import (
+	"log"
+	"path"
+	"reflect"
+	"testing"
 
-// 	"github.com/cgrates/cgrates/config"
-// 	"github.com/cgrates/cgrates/engine"
-// 	"github.com/cgrates/cgrates/utils"
-// )
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+)
 
-// var (
-// 	tpAliPathIn   string
-// 	tpAliPathOut  string
-// 	tpAliCfgIn    *config.CGRConfig
-// 	tpAliCfgOut   *config.CGRConfig
-// 	tpAliMigrator *Migrator
-// 	tpAliases     []*utils.TPAliases
-// )
+var (
+	tpAliPathIn   string
+	tpAliPathOut  string
+	tpAliCfgIn    *config.CGRConfig
+	tpAliCfgOut   *config.CGRConfig
+	tpAliMigrator *Migrator
+	tpAliases     []*utils.TPAliases
+)
 
-// var sTestsTpAliIT = []func(t *testing.T){
-// 	testTpAliITConnect,
-// 	testTpAliITFlush,
-// 	testTpAliITPopulate,
-// 	testTpAliITMove,
-// 	testTpAliITCheckData,
-// }
+var sTestsTpAliIT = []func(t *testing.T){
+	testTpAliITConnect,
+	testTpAliITFlush,
+	testTpAliITPopulate,
+	testTpAliITMove,
+	testTpAliITCheckData,
+}
 
-// func TestTpAliMove(t *testing.T) {
-// 	for _, stest := range sTestsTpAliIT {
-// 		t.Run("TestTpAliMove", stest)
-// 	}
-// }
+func TestTpAliMove(t *testing.T) {
+	for _, stest := range sTestsTpAliIT {
+		t.Run("TestTpAliMove", stest)
+	}
+}
 
-// func testTpAliITConnect(t *testing.T) {
-// 	var err error
-// 	tpAliPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-// 	tpAliCfgIn, err = config.NewCGRConfigFromFolder(tpAliPathIn)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	tpAliPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
-// 	tpAliCfgOut, err = config.NewCGRConfigFromFolder(tpAliPathOut)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	storDBIn, err := engine.ConfigureStorDB(tpAliCfgIn.StorDBType, tpAliCfgIn.StorDBHost,
-// 		tpAliCfgIn.StorDBPort, tpAliCfgIn.StorDBName,
-// 		tpAliCfgIn.StorDBUser, tpAliCfgIn.StorDBPass,
-// 		config.CgrConfig().StorDBMaxOpenConns,
-// 		config.CgrConfig().StorDBMaxIdleConns,
-// 		config.CgrConfig().StorDBConnMaxLifetime,
-// 		config.CgrConfig().StorDBCDRSIndexes)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	storDBOut, err := engine.ConfigureStorDB(tpAliCfgOut.StorDBType,
-// 		tpAliCfgOut.StorDBHost, tpAliCfgOut.StorDBPort, tpAliCfgOut.StorDBName,
-// 		tpAliCfgOut.StorDBUser, tpAliCfgOut.StorDBPass,
-// 		config.CgrConfig().StorDBMaxOpenConns,
-// 		config.CgrConfig().StorDBMaxIdleConns,
-// 		config.CgrConfig().StorDBConnMaxLifetime,
-// 		config.CgrConfig().StorDBCDRSIndexes)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	tpAliMigrator, err = NewMigrator(nil, nil, tpAliCfgIn.DataDbType,
-// 		tpAliCfgIn.DBDataEncoding, storDBIn, storDBOut, tpAliCfgIn.StorDBType, nil,
-// 		tpAliCfgIn.DataDbType, tpAliCfgIn.DBDataEncoding, nil,
-// 		tpAliCfgIn.StorDBType, false, false, false, false, false)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// }
+func testTpAliITConnect(t *testing.T) {
+	var err error
+	tpAliPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	tpAliCfgIn, err = config.NewCGRConfigFromFolder(tpAliPathIn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tpAliPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	tpAliCfgOut, err = config.NewCGRConfigFromFolder(tpAliPathOut)
+	if err != nil {
+		t.Fatal(err)
+	}
+	storDBIn, err := NewMigratorStorDB(tpAliCfgIn.StorDBType, tpAliCfgIn.StorDBHost,
+		tpAliCfgIn.StorDBPort, tpAliCfgIn.StorDBName,
+		tpAliCfgIn.StorDBUser, tpAliCfgIn.StorDBPass,
+		config.CgrConfig().StorDBMaxOpenConns,
+		config.CgrConfig().StorDBMaxIdleConns,
+		config.CgrConfig().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDBCDRSIndexes)
+	if err != nil {
+		log.Fatal(err)
+	}
+	storDBOut, err := NewMigratorStorDB(tpAliCfgOut.StorDBType,
+		tpAliCfgOut.StorDBHost, tpAliCfgOut.StorDBPort, tpAliCfgOut.StorDBName,
+		tpAliCfgOut.StorDBUser, tpAliCfgOut.StorDBPass,
+		config.CgrConfig().StorDBMaxOpenConns,
+		config.CgrConfig().StorDBMaxIdleConns,
+		config.CgrConfig().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDBCDRSIndexes)
+	if err != nil {
+		log.Fatal(err)
+	}
+	tpAliMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
 
-// func testTpAliITFlush(t *testing.T) {
-// 	if err := tpAliMigrator.storDBIn.Flush(
-// 		path.Join(tpAliCfgIn.DataFolderPath, "storage", tpAliCfgIn.StorDBType)); err != nil {
-// 		t.Error(err)
-// 	}
+func testTpAliITFlush(t *testing.T) {
+	if err := tpAliMigrator.storDBIn.StorDB().Flush(
+		path.Join(tpAliCfgIn.DataFolderPath, "storage", tpAliCfgIn.StorDBType)); err != nil {
+		t.Error(err)
+	}
 
-// 	if err := tpAliMigrator.storDBOut.Flush(
-// 		path.Join(tpAliCfgOut.DataFolderPath, "storage", tpAliCfgOut.StorDBType)); err != nil {
-// 		t.Error(err)
-// 	}
-// }
+	if err := tpAliMigrator.storDBOut.StorDB().Flush(
+		path.Join(tpAliCfgOut.DataFolderPath, "storage", tpAliCfgOut.StorDBType)); err != nil {
+		t.Error(err)
+	}
+}
 
-// func testTpAliITPopulate(t *testing.T) {
-// 	tpAliases = []*utils.TPAliases{
-// 		&utils.TPAliases{
-// 			TPid:      "testTPid1",
-// 			Direction: "*out",
-// 			Tenant:    "cgrates.org",
-// 			Category:  "call",
-// 			Account:   "1006",
-// 			Subject:   "1006",
-// 			Context:   "*rating",
-// 			Values: []*utils.TPAliasValue{
-// 				&utils.TPAliasValue{
-// 					DestinationId: "*any",
-// 					Target:        "Subject",
-// 					Original:      "1006",
-// 					Alias:         "1001",
-// 					Weight:        2,
-// 				},
-// 			},
-// 		},
-// 		&utils.TPAliases{
-// 			TPid:      "testTPid2",
-// 			Direction: "*out",
-// 			Tenant:    "cgrates.org",
-// 			Category:  "call",
-// 			Account:   "1001",
-// 			Subject:   "1001",
-// 			Context:   "*rating",
-// 			Values: []*utils.TPAliasValue{
-// 				&utils.TPAliasValue{
-// 					DestinationId: "*any",
-// 					Target:        "Subject",
-// 					Original:      "1001",
-// 					Alias:         "1002",
-// 					Weight:        2,
-// 				},
-// 			},
-// 		},
-// 	}
-// 	if err := tpAliMigrator.storDBIn.SetTPAliases(tpAliases); err != nil {
-// 		t.Error("Error when setting TpAliases ", err.Error())
-// 	}
-// 	currentVersion := engine.CurrentStorDBVersions()
-// 	err := tpAliMigrator.storDBOut.SetVersions(currentVersion, false)
-// 	if err != nil {
-// 		t.Error("Error when setting version for TpAliases ", err.Error())
-// 	}
-// }
+func testTpAliITPopulate(t *testing.T) {
+	tpAliases = []*utils.TPAliases{
+		&utils.TPAliases{
+			TPid:      "testTPid1",
+			Direction: "*out",
+			Tenant:    "cgrates.org",
+			Category:  "call",
+			Account:   "1006",
+			Subject:   "1006",
+			Context:   "*rating",
+			Values: []*utils.TPAliasValue{
+				&utils.TPAliasValue{
+					DestinationId: "*any",
+					Target:        "Subject",
+					Original:      "1006",
+					Alias:         "1001",
+					Weight:        2,
+				},
+			},
+		},
+		&utils.TPAliases{
+			TPid:      "testTPid2",
+			Direction: "*out",
+			Tenant:    "cgrates.org",
+			Category:  "call",
+			Account:   "1001",
+			Subject:   "1001",
+			Context:   "*rating",
+			Values: []*utils.TPAliasValue{
+				&utils.TPAliasValue{
+					DestinationId: "*any",
+					Target:        "Subject",
+					Original:      "1001",
+					Alias:         "1002",
+					Weight:        2,
+				},
+			},
+		},
+	}
+	if err := tpAliMigrator.storDBIn.StorDB().SetTPAliases(tpAliases); err != nil {
+		t.Error("Error when setting TpAliases ", err.Error())
+	}
+	currentVersion := engine.CurrentStorDBVersions()
+	err := tpAliMigrator.storDBOut.StorDB().SetVersions(currentVersion, false)
+	if err != nil {
+		t.Error("Error when setting version for TpAliases ", err.Error())
+	}
+}
 
-// func testTpAliITMove(t *testing.T) {
-// 	err, _ := tpAliMigrator.Migrate([]string{utils.MetaTpAliases})
-// 	if err != nil {
-// 		t.Error("Error when migrating TpAliases ", err.Error())
-// 	}
-// }
+func testTpAliITMove(t *testing.T) {
+	err, _ := tpAliMigrator.Migrate([]string{utils.MetaTpAliases})
+	if err != nil {
+		t.Error("Error when migrating TpAliases ", err.Error())
+	}
+}
 
-// func testTpAliITCheckData(t *testing.T) {
-// 	filter := &utils.TPAliases{TPid: tpAliases[0].TPid}
-// 	result, err := tpAliMigrator.storDBOut.GetTPAliases(filter)
-// 	if err != nil {
-// 		t.Error("Error when getting TpAliases ", err.Error())
-// 	}
-// 	if !reflect.DeepEqual(tpAliases[0], result[0]) {
-// 		t.Errorf("Expecting: %+v, received: %+v",
-// 			utils.ToJSON(tpAliases[0]), utils.ToJSON(result[0]))
-// 	}
-// 	result, err = tpAliMigrator.storDBIn.GetTPAliases(filter)
-// 	if err != utils.ErrNotFound {
-// 		t.Error(err)
-// 	}
-// }
+func testTpAliITCheckData(t *testing.T) {
+	filter := &utils.TPAliases{TPid: tpAliases[0].TPid}
+	result, err := tpAliMigrator.storDBOut.StorDB().GetTPAliases(filter)
+	if err != nil {
+		t.Error("Error when getting TpAliases ", err.Error())
+	}
+	if !reflect.DeepEqual(tpAliases[0], result[0]) {
+		t.Errorf("Expecting: %+v, received: %+v",
+			utils.ToJSON(tpAliases[0]), utils.ToJSON(result[0]))
+	}
+	result, err = tpAliMigrator.storDBIn.StorDB().GetTPAliases(filter)
+	if err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}

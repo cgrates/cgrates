@@ -38,14 +38,20 @@ func (m *Migrator) migrateCurrentTPsharedgroups() (err error) {
 		}
 		for _, id := range ids {
 
-			dest, err := m.storDBIn.StorDB().GetTPSharedGroups(tpid, id)
+			sharedGroup, err := m.storDBIn.StorDB().GetTPSharedGroups(tpid, id)
 			if err != nil {
 				return err
 			}
-			if dest != nil {
+			if sharedGroup != nil {
 				if m.dryRun != true {
-					if err := m.storDBOut.StorDB().SetTPSharedGroups(dest); err != nil {
+					if err := m.storDBOut.StorDB().SetTPSharedGroups(sharedGroup); err != nil {
 						return err
+					}
+					for _, shrGr := range sharedGroup {
+						if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPSharedGroups, shrGr.TPid,
+							map[string]string{"id": shrGr.ID}); err != nil {
+							return err
+						}
 					}
 					m.stats[utils.TpSharedGroups] += 1
 				}

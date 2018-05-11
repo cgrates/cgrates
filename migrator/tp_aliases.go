@@ -44,7 +44,8 @@ func (m *Migrator) migrateCurrentTPaliases() (err error) {
 					return err
 				}
 				for _, ali := range alias {
-					if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPAliases, ali.TPid, map[string]string{"tag": ali.GetId()}); err != nil {
+					if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPAliases, ali.TPid, map[string]string{"direction": ali.Direction,
+						"tenant": ali.Tenant, "category": ali.Category, "account": ali.Account, "subject": ali.Subject, "context": ali.Context}); err != nil {
 						return err
 					}
 				}

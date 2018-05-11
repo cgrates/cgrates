@@ -37,14 +37,19 @@ func (m *Migrator) migrateCurrentTPrates() (err error) {
 		}
 		for _, id := range ids {
 
-			dest, err := m.storDBIn.StorDB().GetTPRates(tpid, id)
+			rates, err := m.storDBIn.StorDB().GetTPRates(tpid, id)
 			if err != nil {
 				return err
 			}
-			if dest != nil {
+			if rates != nil {
 				if m.dryRun != true {
-					if err := m.storDBOut.StorDB().SetTPRates(dest); err != nil {
+					if err := m.storDBOut.StorDB().SetTPRates(rates); err != nil {
 						return err
+					}
+					for _, rate := range rates {
+						if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPRates, rate.TPid, map[string]string{"tag": rate.ID}); err != nil {
+							return err
+						}
 					}
 					m.stats[utils.TpRates] += 1
 				}

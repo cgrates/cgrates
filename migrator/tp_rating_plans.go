@@ -37,14 +37,19 @@ func (m *Migrator) migrateCurrentTPratingplans() (err error) {
 		}
 		if len(ids) != 0 {
 			for _, id := range ids {
-				rps, err := m.storDBIn.StorDB().GetTPRatingPlans(tpid, id, nil)
+				ratingPlan, err := m.storDBIn.StorDB().GetTPRatingPlans(tpid, id, nil)
 				if err != nil {
 					return err
 				}
-				if rps != nil {
+				if ratingPlan != nil {
 					if m.dryRun != true {
-						if err := m.storDBOut.StorDB().SetTPRatingPlans(rps); err != nil {
+						if err := m.storDBOut.StorDB().SetTPRatingPlans(ratingPlan); err != nil {
 							return err
+						}
+						for _, ratPln := range ratingPlan {
+							if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPRatingPlans, ratPln.TPid, map[string]string{"tag": ratPln.ID}); err != nil {
+								return err
+							}
 						}
 						m.stats[utils.TpRatingPlans] += 1
 					}

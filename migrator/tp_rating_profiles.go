@@ -33,14 +33,20 @@ func (m *Migrator) migrateCurrentTPratingprofiles() (err error) {
 	}
 
 	for _, tpid := range tpids {
-		dest, err := m.storDBIn.StorDB().GetTPRatingProfiles(&utils.TPRatingProfile{TPid: tpid})
+		ratingProfile, err := m.storDBIn.StorDB().GetTPRatingProfiles(&utils.TPRatingProfile{TPid: tpid})
 		if err != nil {
 			return err
 		}
-		if dest != nil {
+		if ratingProfile != nil {
 			if m.dryRun != true {
-				if err := m.storDBOut.StorDB().SetTPRatingProfiles(dest); err != nil {
+				if err := m.storDBOut.StorDB().SetTPRatingProfiles(ratingProfile); err != nil {
 					return err
+				}
+				for _, ratPrf := range ratingProfile {
+					if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPRateProfiles, ratPrf.TPid, map[string]string{"loadid": ratPrf.LoadId,
+						"direction": ratPrf.Direction, "tenant": ratPrf.Tenant, "category": ratPrf.Category, "subject": ratPrf.Subject}); err != nil {
+						return err
+					}
 				}
 				m.stats[utils.TpRatingProfiles] += 1
 			}

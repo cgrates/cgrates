@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package migrator
 
-/*
 import (
 	"log"
 	"path"
@@ -67,7 +66,7 @@ func testTpFltrITConnect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	storDBIn, err := engine.ConfigureStorDB(tpFltrCfgIn.StorDBType, tpFltrCfgIn.StorDBHost,
+	storDBIn, err := NewMigratorStorDB(tpFltrCfgIn.StorDBType, tpFltrCfgIn.StorDBHost,
 		tpFltrCfgIn.StorDBPort, tpFltrCfgIn.StorDBName,
 		tpFltrCfgIn.StorDBUser, tpFltrCfgIn.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns,
@@ -77,7 +76,7 @@ func testTpFltrITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDBOut, err := engine.ConfigureStorDB(tpFltrCfgOut.StorDBType,
+	storDBOut, err := NewMigratorStorDB(tpFltrCfgOut.StorDBType,
 		tpFltrCfgOut.StorDBHost, tpFltrCfgOut.StorDBPort, tpFltrCfgOut.StorDBName,
 		tpFltrCfgOut.StorDBUser, tpFltrCfgOut.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns,
@@ -87,22 +86,19 @@ func testTpFltrITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	tpFltrMigrator, err = NewMigrator(nil, nil, tpFltrCfgIn.DataDbType,
-		tpFltrCfgIn.DBDataEncoding, storDBIn, storDBOut, tpFltrCfgIn.StorDBType, nil,
-		tpFltrCfgIn.DataDbType, tpFltrCfgIn.DBDataEncoding, nil,
-		tpFltrCfgIn.StorDBType, false, false, false, false, false)
+	tpFltrMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
 func testTpFltrITFlush(t *testing.T) {
-	if err := tpFltrMigrator.storDBIn.Flush(
+	if err := tpFltrMigrator.storDBIn.StorDB().Flush(
 		path.Join(tpFltrCfgIn.DataFolderPath, "storage", tpFltrCfgIn.StorDBType)); err != nil {
 		t.Error(err)
 	}
 
-	if err := tpFltrMigrator.storDBOut.Flush(
+	if err := tpFltrMigrator.storDBOut.StorDB().Flush(
 		path.Join(tpFltrCfgOut.DataFolderPath, "storage", tpFltrCfgOut.StorDBType)); err != nil {
 		t.Error(err)
 	}
@@ -127,11 +123,11 @@ func testTpFltrITPopulate(t *testing.T) {
 			},
 		},
 	}
-	if err := tpFltrMigrator.storDBIn.SetTPFilters(tpFilters); err != nil {
+	if err := tpFltrMigrator.storDBIn.StorDB().SetTPFilters(tpFilters); err != nil {
 		t.Error("Error when setting TpFilter ", err.Error())
 	}
 	currentVersion := engine.CurrentStorDBVersions()
-	err := tpFltrMigrator.storDBOut.SetVersions(currentVersion, false)
+	err := tpFltrMigrator.storDBOut.StorDB().SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for TpFilter ", err.Error())
 	}
@@ -145,7 +141,7 @@ func testTpFltrITMove(t *testing.T) {
 }
 
 func testTpFltrITCheckData(t *testing.T) {
-	result, err := tpFltrMigrator.storDBOut.GetTPFilters(
+	result, err := tpFltrMigrator.storDBOut.StorDB().GetTPFilters(
 		tpFilters[0].TPid, tpFilters[0].ID)
 	if err != nil {
 		t.Error("Error when getting TpFilter ", err.Error())
@@ -153,10 +149,9 @@ func testTpFltrITCheckData(t *testing.T) {
 	if !reflect.DeepEqual(tpFilters[0], result[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", tpFilters[0], result[0])
 	}
-	result, err = tpFltrMigrator.storDBIn.GetTPFilters(
+	result, err = tpFltrMigrator.storDBIn.StorDB().GetTPFilters(
 		tpFilters[0].TPid, tpFilters[0].ID)
 	if err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
-*/
