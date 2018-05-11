@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package migrator
 
-/*
 import (
 	"log"
 	"path"
@@ -67,7 +66,7 @@ func testTpActTrgITConnect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	storDBIn, err := engine.ConfigureStorDB(tpActTrgCfgIn.StorDBType, tpActTrgCfgIn.StorDBHost,
+	storDBIn, err := NewMigratorStorDB(tpActTrgCfgIn.StorDBType, tpActTrgCfgIn.StorDBHost,
 		tpActTrgCfgIn.StorDBPort, tpActTrgCfgIn.StorDBName,
 		tpActTrgCfgIn.StorDBUser, tpActTrgCfgIn.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns,
@@ -77,7 +76,7 @@ func testTpActTrgITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDBOut, err := engine.ConfigureStorDB(tpActTrgCfgOut.StorDBType,
+	storDBOut, err := NewMigratorStorDB(tpActTrgCfgOut.StorDBType,
 		tpActTrgCfgOut.StorDBHost, tpActTrgCfgOut.StorDBPort, tpActTrgCfgOut.StorDBName,
 		tpActTrgCfgOut.StorDBUser, tpActTrgCfgOut.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns,
@@ -87,22 +86,19 @@ func testTpActTrgITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	tpActTrgMigrator, err = NewMigrator(nil, nil, tpActTrgCfgIn.DataDbType,
-		tpActTrgCfgIn.DBDataEncoding, storDBIn, storDBOut, tpActTrgCfgIn.StorDBType, nil,
-		tpActTrgCfgIn.DataDbType, tpActTrgCfgIn.DBDataEncoding, nil,
-		tpActTrgCfgIn.StorDBType, false, false, false, false, false)
+	tpActTrgMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
 func testTpActTrgITFlush(t *testing.T) {
-	if err := tpActTrgMigrator.storDBIn.Flush(
+	if err := tpActTrgMigrator.storDBIn.StorDB().Flush(
 		path.Join(tpActTrgCfgIn.DataFolderPath, "storage", tpActTrgCfgIn.StorDBType)); err != nil {
 		t.Error(err)
 	}
 
-	if err := tpActTrgMigrator.storDBOut.Flush(
+	if err := tpActTrgMigrator.storDBOut.StorDB().Flush(
 		path.Join(tpActTrgCfgOut.DataFolderPath, "storage", tpActTrgCfgOut.StorDBType)); err != nil {
 		t.Error(err)
 	}
@@ -167,11 +163,11 @@ func testTpActTrgITPopulate(t *testing.T) {
 			},
 		},
 	}
-	if err := tpActTrgMigrator.storDBIn.SetTPActionTriggers(tpActionTriggers); err != nil {
+	if err := tpActTrgMigrator.storDBIn.StorDB().SetTPActionTriggers(tpActionTriggers); err != nil {
 		t.Error("Error when setting TpActionTriggers ", err.Error())
 	}
 	currentVersion := engine.CurrentStorDBVersions()
-	err := tpActTrgMigrator.storDBOut.SetVersions(currentVersion, false)
+	err := tpActTrgMigrator.storDBOut.StorDB().SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for TpActionTriggers ", err.Error())
 	}
@@ -185,7 +181,7 @@ func testTpActTrgITMove(t *testing.T) {
 }
 
 func testTpActTrgITCheckData(t *testing.T) {
-	result, err := tpActTrgMigrator.storDBOut.GetTPActionTriggers(
+	result, err := tpActTrgMigrator.storDBOut.StorDB().GetTPActionTriggers(
 		tpActionTriggers[0].TPid, tpActionTriggers[0].ID)
 	if err != nil {
 		t.Error("Error when getting TpActionTriggers ", err.Error())
@@ -194,10 +190,9 @@ func testTpActTrgITCheckData(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v",
 			utils.ToJSON(tpActionTriggers[0]), utils.ToJSON(result[0]))
 	}
-	result, err = tpActTrgMigrator.storDBIn.GetTPActionTriggers(
+	result, err = tpActTrgMigrator.storDBIn.StorDB().GetTPActionTriggers(
 		tpActionTriggers[0].TPid, tpActionTriggers[0].ID)
 	if err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
-*/

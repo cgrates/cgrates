@@ -36,14 +36,19 @@ func (m *Migrator) migrateCurrentTPcdrstats() (err error) {
 			return err
 		}
 		for _, id := range ids {
-			dest, err := m.storDBIn.StorDB().GetTPCdrStats(tpid, id)
+			cdrStat, err := m.storDBIn.StorDB().GetTPCdrStats(tpid, id)
 			if err != nil {
 				return err
 			}
-			if dest != nil {
+			if cdrStat != nil {
 				if m.dryRun != true {
-					if err := m.storDBOut.StorDB().SetTPCdrStats(dest); err != nil {
+					if err := m.storDBOut.StorDB().SetTPCdrStats(cdrStat); err != nil {
 						return err
+					}
+					for _, cdrSt := range cdrStat {
+						if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPCdrStats, cdrSt.TPid, map[string]string{"tag": cdrSt.ID}); err != nil {
+							return err
+						}
 					}
 					m.stats[utils.TpCdrStats] += 1
 				}

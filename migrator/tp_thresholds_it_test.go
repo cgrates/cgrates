@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package migrator
 
-/*
 import (
 	"log"
 	"path"
@@ -67,7 +66,7 @@ func testTpTresITConnect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	storDBIn, err := engine.ConfigureStorDB(tpTresCfgIn.StorDBType, tpTresCfgIn.StorDBHost,
+	storDBIn, err := NewMigratorStorDB(tpTresCfgIn.StorDBType, tpTresCfgIn.StorDBHost,
 		tpTresCfgIn.StorDBPort, tpTresCfgIn.StorDBName,
 		tpTresCfgIn.StorDBUser, tpTresCfgIn.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns,
@@ -77,7 +76,7 @@ func testTpTresITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDBOut, err := engine.ConfigureStorDB(tpTresCfgOut.StorDBType,
+	storDBOut, err := NewMigratorStorDB(tpTresCfgOut.StorDBType,
 		tpTresCfgOut.StorDBHost, tpTresCfgOut.StorDBPort, tpTresCfgOut.StorDBName,
 		tpTresCfgOut.StorDBUser, tpTresCfgOut.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns,
@@ -87,22 +86,19 @@ func testTpTresITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	tpTresMigrator, err = NewMigrator(nil, nil, tpTresCfgIn.DataDbType,
-		tpTresCfgIn.DBDataEncoding, storDBIn, storDBOut, tpTresCfgIn.StorDBType, nil,
-		tpTresCfgIn.DataDbType, tpTresCfgIn.DBDataEncoding, nil,
-		tpTresCfgIn.StorDBType, false, false, false, false, false)
+	tpTresMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
 func testTpTresITFlush(t *testing.T) {
-	if err := tpTresMigrator.storDBIn.Flush(
+	if err := tpTresMigrator.storDBIn.StorDB().Flush(
 		path.Join(tpTresCfgIn.DataFolderPath, "storage", tpTresCfgIn.StorDBType)); err != nil {
 		t.Error(err)
 	}
 
-	if err := tpTresMigrator.storDBOut.Flush(
+	if err := tpTresMigrator.storDBOut.StorDB().Flush(
 		path.Join(tpTresCfgOut.DataFolderPath, "storage", tpTresCfgOut.StorDBType)); err != nil {
 		t.Error(err)
 	}
@@ -127,36 +123,35 @@ func testTpTresITPopulate(t *testing.T) {
 			Async:     true,
 		},
 	}
-	if err := tpTresMigrator.storDBIn.SetTPThresholds(tpThresholds); err != nil {
-		t.Error("Error when setting TpFilter ", err.Error())
+	if err := tpTresMigrator.storDBIn.StorDB().SetTPThresholds(tpThresholds); err != nil {
+		t.Error("Error when setting TpThresholds ", err.Error())
 	}
 	currentVersion := engine.CurrentStorDBVersions()
-	err := tpTresMigrator.storDBOut.SetVersions(currentVersion, false)
+	err := tpTresMigrator.storDBOut.StorDB().SetVersions(currentVersion, false)
 	if err != nil {
-		t.Error("Error when setting version for TpFilter ", err.Error())
+		t.Error("Error when setting version for TpThresholds ", err.Error())
 	}
 }
 
 func testTpTresITMove(t *testing.T) {
 	err, _ := tpTresMigrator.Migrate([]string{utils.MetaTpThresholds})
 	if err != nil {
-		t.Error("Error when migrating TpFilter ", err.Error())
+		t.Error("Error when migrating TpThresholds ", err.Error())
 	}
 }
 
 func testTpTresITCheckData(t *testing.T) {
-	result, err := tpTresMigrator.storDBOut.GetTPThresholds(
+	result, err := tpTresMigrator.storDBOut.StorDB().GetTPThresholds(
 		tpThresholds[0].TPid, tpThresholds[0].ID)
 	if err != nil {
-		t.Error("Error when getting TpFilter ", err.Error())
+		t.Error("Error when getting TpThresholds ", err.Error())
 	}
 	if !reflect.DeepEqual(tpThresholds[0], result[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", tpThresholds[0], result[0])
 	}
-	result, err = tpTresMigrator.storDBIn.GetTPThresholds(
+	result, err = tpTresMigrator.storDBIn.StorDB().GetTPThresholds(
 		tpThresholds[0].TPid, tpThresholds[0].ID)
 	if err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
-*/

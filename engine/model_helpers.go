@@ -1637,6 +1637,7 @@ func (tps TpAliases) AsMapTPAliases() (map[string]*utils.TPAliases, error) {
 		var found bool
 		if as, found = result[tp.GetId()]; !found {
 			as = &utils.TPAliases{
+				TPid:      tp.Tpid,
 				Direction: tp.Direction,
 				Tenant:    tp.Tenant,
 				Category:  tp.Category,

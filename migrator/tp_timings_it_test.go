@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package migrator
 
-/*
 import (
 	"log"
 	"path"
@@ -67,7 +66,7 @@ func testTpTimITConnect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	storDBIn, err := engine.ConfigureStorDB(tpTimCfgIn.StorDBType, tpTimCfgIn.StorDBHost,
+	storDBIn, err := NewMigratorStorDB(tpTimCfgIn.StorDBType, tpTimCfgIn.StorDBHost,
 		tpTimCfgIn.StorDBPort, tpTimCfgIn.StorDBName,
 		tpTimCfgIn.StorDBUser, tpTimCfgIn.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns,
@@ -77,7 +76,7 @@ func testTpTimITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDBOut, err := engine.ConfigureStorDB(tpTimCfgOut.StorDBType,
+	storDBOut, err := NewMigratorStorDB(tpTimCfgOut.StorDBType,
 		tpTimCfgOut.StorDBHost, tpTimCfgOut.StorDBPort, tpTimCfgOut.StorDBName,
 		tpTimCfgOut.StorDBUser, tpTimCfgOut.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns,
@@ -87,22 +86,19 @@ func testTpTimITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	tpTimMigrator, err = NewMigrator(nil, nil, tpTimCfgIn.DataDbType,
-		tpTimCfgIn.DBDataEncoding, storDBIn, storDBOut, tpTimCfgIn.StorDBType, nil,
-		tpTimCfgIn.DataDbType, tpTimCfgIn.DBDataEncoding, nil,
-		tpTimCfgIn.StorDBType, false, false, false, false, false)
+	tpTimMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
 func testTpTimITFlush(t *testing.T) {
-	if err := tpTimMigrator.storDBIn.Flush(
+	if err := tpTimMigrator.storDBIn.StorDB().Flush(
 		path.Join(tpTimCfgIn.DataFolderPath, "storage", tpTimCfgIn.StorDBType)); err != nil {
 		t.Error(err)
 	}
 
-	if err := tpTimMigrator.storDBOut.Flush(
+	if err := tpTimMigrator.storDBOut.StorDB().Flush(
 		path.Join(tpTimCfgOut.DataFolderPath, "storage", tpTimCfgOut.StorDBType)); err != nil {
 		t.Error(err)
 	}
@@ -120,11 +116,11 @@ func testTpTimITPopulate(t *testing.T) {
 			Time:      "15:00:00Z",
 		},
 	}
-	if err := tpTimMigrator.storDBIn.SetTPTimings(tpTimings); err != nil {
-		t.Error("Error when setting TpFilter ", err.Error())
+	if err := tpTimMigrator.storDBIn.StorDB().SetTPTimings(tpTimings); err != nil {
+		t.Error("Error when setting TpTimings ", err.Error())
 	}
 	currentVersion := engine.CurrentStorDBVersions()
-	err := tpTimMigrator.storDBOut.SetVersions(currentVersion, false)
+	err := tpTimMigrator.storDBOut.StorDB().SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for TpTimings ", err.Error())
 	}
@@ -138,7 +134,7 @@ func testTpTimITMove(t *testing.T) {
 }
 
 func testTpTimITCheckData(t *testing.T) {
-	result, err := tpTimMigrator.storDBOut.GetTPTimings(
+	result, err := tpTimMigrator.storDBOut.StorDB().GetTPTimings(
 		tpTimings[0].TPid, tpTimings[0].ID)
 	if err != nil {
 		t.Error("Error when getting TpTimings ", err.Error())
@@ -146,10 +142,9 @@ func testTpTimITCheckData(t *testing.T) {
 	if !reflect.DeepEqual(tpTimings[0], result[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", tpTimings[0], result[0])
 	}
-	result, err = tpTimMigrator.storDBIn.GetTPTimings(
+	result, err = tpTimMigrator.storDBIn.StorDB().GetTPTimings(
 		tpTimings[0].TPid, tpTimings[0].ID)
 	if err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
-*/

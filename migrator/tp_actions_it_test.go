@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package migrator
 
-/*
 import (
 	"log"
 	"path"
@@ -67,7 +66,7 @@ func testTpActITConnect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	storDBIn, err := engine.ConfigureStorDB(tpActCfgIn.StorDBType, tpActCfgIn.StorDBHost,
+	storDBIn, err := NewMigratorStorDB(tpActCfgIn.StorDBType, tpActCfgIn.StorDBHost,
 		tpActCfgIn.StorDBPort, tpActCfgIn.StorDBName,
 		tpActCfgIn.StorDBUser, tpActCfgIn.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns,
@@ -77,7 +76,7 @@ func testTpActITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDBOut, err := engine.ConfigureStorDB(tpActCfgOut.StorDBType,
+	storDBOut, err := NewMigratorStorDB(tpActCfgOut.StorDBType,
 		tpActCfgOut.StorDBHost, tpActCfgOut.StorDBPort, tpActCfgOut.StorDBName,
 		tpActCfgOut.StorDBUser, tpActCfgOut.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns,
@@ -87,22 +86,19 @@ func testTpActITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	tpActMigrator, err = NewMigrator(nil, nil, tpActCfgIn.DataDbType,
-		tpActCfgIn.DBDataEncoding, storDBIn, storDBOut, tpActCfgIn.StorDBType, nil,
-		tpActCfgIn.DataDbType, tpActCfgIn.DBDataEncoding, nil,
-		tpActCfgIn.StorDBType, false, false, false, false, false)
+	tpActMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
 func testTpActITFlush(t *testing.T) {
-	if err := tpActMigrator.storDBIn.Flush(
+	if err := tpActMigrator.storDBIn.StorDB().Flush(
 		path.Join(tpActCfgIn.DataFolderPath, "storage", tpActCfgIn.StorDBType)); err != nil {
 		t.Error(err)
 	}
 
-	if err := tpActMigrator.storDBOut.Flush(
+	if err := tpActMigrator.storDBOut.StorDB().Flush(
 		path.Join(tpActCfgOut.DataFolderPath, "storage", tpActCfgOut.StorDBType)); err != nil {
 		t.Error(err)
 	}
@@ -157,11 +153,11 @@ func testTpActITPopulate(t *testing.T) {
 			},
 		},
 	}
-	if err := tpActMigrator.storDBIn.SetTPActions(tpActions); err != nil {
+	if err := tpActMigrator.storDBIn.StorDB().SetTPActions(tpActions); err != nil {
 		t.Error("Error when setting TpActions ", err.Error())
 	}
 	currentVersion := engine.CurrentStorDBVersions()
-	err := tpActMigrator.storDBOut.SetVersions(currentVersion, false)
+	err := tpActMigrator.storDBOut.StorDB().SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for TpActions ", err.Error())
 	}
@@ -175,7 +171,7 @@ func testTpActITMove(t *testing.T) {
 }
 
 func testTpActITCheckData(t *testing.T) {
-	result, err := tpActMigrator.storDBOut.GetTPActions(
+	result, err := tpActMigrator.storDBOut.StorDB().GetTPActions(
 		tpActions[0].TPid, tpActions[0].ID)
 	if err != nil {
 		t.Error("Error when getting TpActions ", err.Error())
@@ -184,10 +180,9 @@ func testTpActITCheckData(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v",
 			utils.ToJSON(tpActions[0]), utils.ToJSON(result[0]))
 	}
-	result, err = tpActMigrator.storDBIn.GetTPActions(
+	result, err = tpActMigrator.storDBIn.StorDB().GetTPActions(
 		tpActions[0].TPid, tpActions[0].ID)
 	if err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
-*/
