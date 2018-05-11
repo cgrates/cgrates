@@ -21,6 +21,7 @@ package agents
 import (
 	"strings"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -227,6 +228,7 @@ func (smaEv *SMAsteriskEvent) UpdateSMGEvent(smgEv *sessions.SMGenericEvent) err
 		if _, hasIt := resSMGEv[utils.AnswerTime]; !hasIt {
 			resSMGEv[utils.Usage] = "0s"
 		} else {
+
 			if aTime, err := smgEv.GetAnswerTime(utils.META_DEFAULT, ""); err != nil {
 				return err
 			} else if aTime.IsZero() {
@@ -242,4 +244,196 @@ func (smaEv *SMAsteriskEvent) UpdateSMGEvent(smgEv *sessions.SMGenericEvent) err
 	}
 	*smgEv = resSMGEv
 	return nil
+}
+
+func (smaEv *SMAsteriskEvent) UpdateCGREvent(cgrEv *utils.CGREvent) error {
+	resCGREv := *cgrEv
+	switch smaEv.EventType() {
+	case ARIChannelStateChange:
+		if smaEv.ChannelState() == channelUp {
+			resCGREv.Event[utils.EVENT_NAME] = SMASessionStart
+			resCGREv.Event[utils.AnswerTime] = smaEv.Timestamp()
+		}
+	case ARIChannelDestroyed:
+		resCGREv.Event[utils.EVENT_NAME] = SMASessionTerminate
+		resCGREv.Event[utils.DISCONNECT_CAUSE] = smaEv.DisconnectCause()
+		if _, hasIt := resCGREv.Event[utils.AnswerTime]; !hasIt {
+			resCGREv.Event[utils.Usage] = "0s"
+		} else {
+			if aTime, err := utils.IfaceAsTime(resCGREv.Event[utils.AnswerTime], config.CgrConfig().DefaultTimezone); err != nil {
+				return err
+			} else if aTime.IsZero() {
+				resCGREv.Event[utils.Usage] = "0s"
+			} else {
+				actualTime, err := utils.ParseTimeDetectLayout(smaEv.Timestamp(), "")
+				if err != nil {
+					return err
+				}
+				resCGREv.Event[utils.Usage] = actualTime.Sub(aTime).String()
+			}
+		}
+	}
+	*cgrEv = resCGREv
+	return nil
+}
+
+func (smaEv *SMAsteriskEvent) AsMapStringInterface() (mp map[string]interface{}) {
+	mp = make(map[string]interface{})
+	var evName string
+	switch smaEv.EventType() {
+	case ARIStasisStart:
+		evName = SMAAuthorization
+	case ARIChannelStateChange:
+		evName = SMASessionStart
+	case ARIChannelDestroyed:
+		evName = SMASessionTerminate
+	}
+	mp[utils.EVENT_NAME] = evName
+	mp[utils.OriginID] = smaEv.ChannelID()
+	if smaEv.RequestType() != "" {
+		mp[utils.RequestType] = smaEv.RequestType()
+	}
+	if smaEv.Tenant() != "" {
+		mp[utils.Tenant] = smaEv.Tenant()
+	}
+	if smaEv.Category() != "" {
+		mp[utils.Category] = smaEv.Category()
+	}
+	if smaEv.Subject() != "" {
+		mp[utils.Subject] = smaEv.Subject()
+	}
+	mp[utils.OriginHost] = smaEv.OriginatorIP()
+	mp[utils.Account] = smaEv.Account()
+	mp[utils.Destination] = smaEv.Destination()
+	mp[utils.SetupTime] = smaEv.Timestamp()
+	if smaEv.Supplier() != "" {
+		mp[utils.SUPPLIER] = smaEv.Supplier()
+	}
+	for extraKey, extraVal := range smaEv.ExtraParameters() { // Append extraParameters
+		mp[extraKey] = extraVal
+	}
+	return
+}
+
+// AsCDR converts KamEvent into CGREvent
+func (smaEv *SMAsteriskEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err error) {
+	setupTime, err := utils.ParseTimeDetectLayout(
+		smaEv.Timestamp(), timezone)
+	if err != nil {
+		return
+	}
+	cgrEv = &utils.CGREvent{
+		Tenant: utils.FirstNonEmpty(smaEv.Tenant(),
+			config.CgrConfig().DefaultTenant),
+		ID:    utils.UUIDSha1Prefix(),
+		Time:  &setupTime,
+		Event: smaEv.AsMapStringInterface(),
+	}
+	return cgrEv, nil
+}
+
+func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
+	cgrEv, err := smaEv.AsCGREvent(config.CgrConfig().DefaultTimezone)
+	if err != nil {
+		return
+	}
+	args = &sessions.V1AuthorizeArgs{
+		GetMaxUsage: true,
+		CGREvent:    *cgrEv,
+	}
+	// For the moment hardcoded only GetMaxUsage : true
+	/*
+		subsystems, has := kev[KamCGRSubsystems]
+		if !has {
+			return
+		}
+		if strings.Index(subsystems, utils.MetaAccounts) == -1 {
+			args.GetMaxUsage = false
+		}
+		if strings.Index(subsystems, utils.MetaResources) != -1 {
+			args.AuthorizeResources = true
+		}
+		if strings.Index(subsystems, utils.MetaSuppliers) != -1 {
+			args.GetSuppliers = true
+			if strings.Index(subsystems, utils.MetaSuppliersEventCost) != -1 {
+				args.SuppliersMaxCost = utils.MetaEventCost
+			}
+			if strings.Index(subsystems, utils.MetaSuppliersIgnoreErrors) != -1 {
+				args.SuppliersIgnoreErrors = true
+			}
+		}
+		if strings.Index(subsystems, utils.MetaAttributes) != -1 {
+			args.GetAttributes = true
+		}
+		if strings.Index(subsystems, utils.MetaThresholds) != -1 {
+			args.ProcessThresholds = utils.BoolPointer(true)
+		}
+		if strings.Index(subsystems, utils.MetaStats) != -1 {
+			args.ProcessStatQueues = utils.BoolPointer(true)
+		}
+	*/
+	return
+}
+
+func (smaEv *SMAsteriskEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
+	cgrEv, err := smaEv.AsCGREvent(config.CgrConfig().DefaultTimezone)
+	if err != nil {
+		return
+	}
+	args = &sessions.V1InitSessionArgs{ // defaults
+		InitSession: true,
+		CGREvent:    *cgrEv,
+	}
+	/*
+		subsystems, has := kev[KamCGRSubsystems]
+		if !has {
+			return
+		}
+		if strings.Index(subsystems, utils.MetaAccounts) == -1 {
+			args.InitSession = false
+		}
+		if strings.Index(subsystems, utils.MetaResources) != -1 {
+			args.AllocateResources = true
+		}
+		if strings.Index(subsystems, utils.MetaAttributes) != -1 {
+			args.GetAttributes = true
+		}
+		if strings.Index(subsystems, utils.MetaThresholds) != -1 {
+			args.ProcessThresholds = utils.BoolPointer(true)
+		}
+		if strings.Index(subsystems, utils.MetaStats) != -1 {
+			args.ProcessStatQueues = utils.BoolPointer(true)
+		}
+	*/
+	return
+}
+
+func (smaEv *SMAsteriskEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionArgs) {
+	cgrEv, err := smaEv.AsCGREvent(config.CgrConfig().DefaultTimezone)
+	if err != nil {
+		return
+	}
+	args = &sessions.V1TerminateSessionArgs{ // defaults
+		TerminateSession: true,
+		CGREvent:         *cgrEv,
+	}
+	/*
+		subsystems, has := kev[KamCGRSubsystems]
+		if !has {
+			return
+		}
+		if strings.Index(subsystems, utils.MetaAccounts) == -1 {
+			args.TerminateSession = false
+		}
+		if strings.Index(subsystems, utils.MetaResources) != -1 {
+			args.ReleaseResources = true
+		}
+		if strings.Index(subsystems, utils.MetaThresholds) != -1 {
+			args.ProcessThresholds = utils.BoolPointer(true)
+		}
+		if strings.Index(subsystems, utils.MetaStats) != -1 {
+			args.ProcessStatQueues = utils.BoolPointer(true)
+		}
+	*/
+	return
 }

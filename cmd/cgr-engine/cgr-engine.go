@@ -241,7 +241,7 @@ func startAsteriskAgent(internalSMGChan chan rpcclient.RpcClientConnection, exit
 	internalSMGChan <- smgRpcConn
 	birpcClnt := utils.NewBiRPCInternalClient(smgRpcConn.(*sessions.SMGeneric))
 	for connIdx := range cfg.AsteriskAgentCfg().AsteriskConns { // Instantiate connections towards asterisk servers
-		sma, err := agents.NewSMAsterisk(cfg, connIdx, birpcClnt)
+		sma, err := agents.NewAsteriskAgent(cfg, connIdx, birpcClnt)
 		if err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SMAsterisk> error: %s!", err))
 			exitChan <- true
