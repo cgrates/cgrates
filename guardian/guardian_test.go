@@ -142,7 +142,7 @@ func TestGuardianGuardIDs(t *testing.T) {
 	}
 	Guardian.Unlock()
 
-	time.Sleep(lockDur + secLockDur + time.Millisecond) // give time to unlock before proceeding
+	time.Sleep(lockDur + secLockDur + 10*time.Millisecond) // give time to unlock before proceeding
 
 	// make sure all counters were removed
 	for _, lockID := range lockIDs {
