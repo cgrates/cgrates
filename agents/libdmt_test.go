@@ -509,7 +509,28 @@ func TestCCRAsSMGenericEvent(t *testing.T) {
 
 func TestPassesFieldFilter(t *testing.T) {
 	m := diam.NewRequest(diam.CreditControl, 4, nil) // Multiple-Services-Credit-Control>Rating-Group
-	if pass, _ := passesFieldFilter(m, utils.ParseRSRFieldsMustCompile("Multiple-Services-Credit-Control>Rating-Group(^$)", utils.INFIELD_SEP)[0], nil); !pass {
+	if pass, _ := passesFieldFilter(m,
+		utils.ParseRSRFieldsMustCompile("Multiple-Services-Credit-Control>Rating-Group(^$)",
+			utils.INFIELD_SEP)[0], nil); !pass {
 		t.Error("Does not pass")
+	}
+	procVars := processorVars{
+		utils.MetaCGRReply: utils.CGRReply{
+			utils.CapAttributes: map[string]interface{}{
+				"RadReply":    "AccessAccept",
+				utils.Account: "1001",
+			},
+			utils.CapMaxUsage: time.Duration(0),
+		},
+	}
+	if pass, _ := passesFieldFilter(nil,
+		utils.ParseRSRFieldsMustCompile("*cgrReply>MaxUsage(^0s$)", utils.INFIELD_SEP)[0],
+		procVars); !pass {
+		t.Error("not passing valid filter")
+	}
+	if pass, _ := passesFieldFilter(nil,
+		utils.ParseRSRFieldsMustCompile("*cgrReply>MaxUsage{*duration_seconds}(^0$)", utils.INFIELD_SEP)[0],
+		procVars); !pass {
+		t.Error("not passing valid filter")
 	}
 }

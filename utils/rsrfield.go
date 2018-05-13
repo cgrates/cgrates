@@ -201,6 +201,7 @@ func (rsrf *RSRField) FilterPasses(value string) bool {
 	if len(rsrf.filters) == 0 { // No filters
 		return true
 	}
+
 	parsedVal := rsrf.ParseValue(value)
 	filterPasses := false
 	for _, fltr := range rsrf.filters {
@@ -209,6 +210,17 @@ func (rsrf *RSRField) FilterPasses(value string) bool {
 		}
 	}
 	return filterPasses
+}
+
+func (rsrf *RSRField) FilterPassesWithConvert(value string) (pass bool) {
+	if len(rsrf.filters) == 0 { // No filters
+		return true
+	}
+	var err error
+	if value, err = rsrf.converters.ConvertString(value); err != nil {
+		return
+	}
+	return rsrf.FiltersPassing(rsrf.ParseValue(value))
 }
 
 // NewRSRFilter instantiates a new RSRFilter, setting it's properties

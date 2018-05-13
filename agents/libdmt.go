@@ -287,7 +287,7 @@ func passesFieldFilter(m *diam.Message, fieldFilter *utils.RSRField, procVars pr
 					fieldFilter.Id, err.Error()))
 			return false, 0
 		}
-		if !fieldFilter.FilterPasses(val) {
+		if !fieldFilter.FilterPassesWithConvert(val) {
 			return false, 0
 		}
 		return true, 0
@@ -297,12 +297,12 @@ func passesFieldFilter(m *diam.Message, fieldFilter *utils.RSRField, procVars pr
 		return false, 0
 	}
 	if len(avps) == 0 { // No AVP found in request, treat it same as empty
-		if fieldFilter.FilterPasses("") {
+		if fieldFilter.FilterPassesWithConvert("") {
 			return true, -1
 		}
 	}
 	for avpIdx, avpVal := range avps { // First match wins due to index
-		if fieldFilter.FilterPasses(avpValAsString(avpVal)) {
+		if fieldFilter.FilterPassesWithConvert(avpValAsString(avpVal)) {
 			return true, avpIdx
 		}
 	}
