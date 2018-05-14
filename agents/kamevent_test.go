@@ -144,7 +144,8 @@ func TestKamEvAsCGREvent(t *testing.T) {
 		"cgr_destination": "1002", "cgr_answertime": "1419839310",
 		"cgr_duration": "3", "cgr_pdd": "4",
 		utils.CGR_SUPPLIER:         "supplier2",
-		utils.CGR_DISCONNECT_CAUSE: "200"}
+		utils.CGR_DISCONNECT_CAUSE: "200",
+		KamCGRContext:              "account_profile"}
 	sTime, err := utils.ParseTimeDetectLayout(kamEv[utils.AnswerTime], timezone)
 	if err != nil {
 		return
@@ -152,9 +153,10 @@ func TestKamEvAsCGREvent(t *testing.T) {
 	expected := &utils.CGREvent{
 		Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 			config.CgrConfig().DefaultTenant),
-		ID:    utils.UUIDSha1Prefix(),
-		Time:  &sTime,
-		Event: kamEv.AsMapStringInterface(),
+		ID:      utils.UUIDSha1Prefix(),
+		Time:    &sTime,
+		Context: utils.StringPointer("account_profile"),
+		Event:   kamEv.AsMapStringInterface(),
 	}
 	if rcv, err := kamEv.AsCGREvent(timezone); err != nil {
 		t.Error(err)

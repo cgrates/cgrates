@@ -42,6 +42,7 @@ const (
 	KamHashID              = "h_id"
 	KamReplyRoute          = "reply_route"
 	KamCGRSubsystems       = "cgr_subsystems"
+	KamCGRContext          = "cgr_context"
 	EvapiConnID            = "EvapiConnID" // used to share connID info in event for remote disconnects
 )
 
@@ -88,9 +89,6 @@ func (kev KamEvent) MissingParameter() bool {
 		return utils.IsSliceMember([]string{
 			kev[KamTRIndex],
 			kev[KamTRLabel],
-			kev[utils.SetupTime],
-			kev[utils.Account],
-			kev[utils.Destination],
 		}, "")
 	case CGR_CALL_START:
 		return utils.IsSliceMember([]string{
@@ -187,6 +185,9 @@ func (kev KamEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err erro
 		ID:    utils.UUIDSha1Prefix(),
 		Time:  &sTime,
 		Event: kev.AsMapStringInterface(),
+	}
+	if ctx, has := kev[KamCGRContext]; has {
+		cgrEv.Context = utils.StringPointer(ctx)
 	}
 	return cgrEv, nil
 }
