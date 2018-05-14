@@ -40,12 +40,13 @@ const (
 	KamTRLabel             = "tr_label"
 	KamHashEntry           = "h_entry"
 	KamHashID              = "h_id"
+	KamReplyRoute          = "reply_route"
 	KamCGRSubsystems       = "cgr_subsystems"
 	EvapiConnID            = "EvapiConnID" // used to share connID info in event for remote disconnects
 )
 
 var (
-	kamReservedEventFields = []string{EVENT, KamTRIndex, KamTRLabel, KamCGRSubsystems}
+	kamReservedEventFields = []string{EVENT, KamTRIndex, KamTRLabel, KamCGRSubsystems, KamReplyRoute}
 	kamReservedCDRFields   = append(kamReservedEventFields, KamHashEntry, KamHashID) // HashEntry and id are needed in events for disconnects
 )
 
@@ -239,7 +240,11 @@ func (kev KamEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 // AsKamAuthReply builds up a Kamailio AuthReply based on arguments and reply from SessionS
 func (kev KamEvent) AsKamAuthReply(authArgs *sessions.V1AuthorizeArgs,
 	authReply *sessions.V1AuthorizeReply, rplyErr error) (kar *KamAuthReply, err error) {
-	kar = &KamAuthReply{Event: CGR_AUTH_REPLY,
+	evName := CGR_AUTH_REPLY
+	if kamRouReply, has := kev[KamReplyRoute]; has {
+		evName = kamRouReply
+	}
+	kar = &KamAuthReply{Event: evName,
 		TransactionIndex: kev[KamTRIndex],
 		TransactionLabel: kev[KamTRLabel],
 	}

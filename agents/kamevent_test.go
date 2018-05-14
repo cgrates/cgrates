@@ -253,6 +253,45 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
 	}
+	kamEv = KamEvent{"event": "CGR_PROFILE_REQUEST",
+		"Tenant": "cgrates.org", "Account": "1001",
+		KamReplyRoute: "CGR_PROFILE_REPLY"}
+	authArgs = &sessions.V1AuthorizeArgs{
+		GetAttributes: true,
+		CGREvent: utils.CGREvent{
+			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
+				config.CgrConfig().DefaultTenant),
+			ID:    utils.UUIDSha1Prefix(),
+			Time:  &sTime,
+			Event: kamEv.AsMapStringInterface(),
+		},
+	}
+	authRply = &sessions.V1AuthorizeReply{
+		Attributes: &engine.AttrSProcessEventReply{
+			MatchedProfile: "ATTR_1001_ACCOUNT_PROFILE",
+			AlteredFields:  []string{"Password", utils.RequestType},
+			CGREvent: &utils.CGREvent{
+				Tenant:  "cgrates.org",
+				ID:      "TestKamEvAsKamAuthReply",
+				Context: utils.StringPointer("account_profile"),
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.Account:     "1001",
+					"Password":        "check123",
+					utils.RequestType: utils.META_PREPAID,
+				},
+			},
+		},
+	}
+	expected = &KamAuthReply{
+		Event:      "CGR_PROFILE_REPLY",
+		Attributes: "Password:check123,RequestType:*prepaid",
+	}
+	if rcv, err := kamEv.AsKamAuthReply(authArgs, authRply, nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
 }
 
 func TestKamEvV1InitSessionArgs(t *testing.T) {
