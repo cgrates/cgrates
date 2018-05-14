@@ -102,6 +102,42 @@ func TestAccountITMove(t *testing.T) {
 	}
 }
 
+func TestAccountITMoveEncoding(t *testing.T) {
+	var err error
+	accPathIn = path.Join(*dataDir, "conf", "samples", "tutmongojson")
+	accCfgIn, err = config.NewCGRConfigFromFolder(accPathIn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	accPathOut = path.Join(*dataDir, "conf", "samples", "tutmongomsgpack")
+	accCfgOut, err = config.NewCGRConfigFromFolder(accPathOut)
+	if err != nil {
+		t.Fatal(err)
+	}
+	accAction = utils.Move
+	for _, stest := range sTestsAccIT {
+		t.Run("TestAccountITMove", stest)
+	}
+}
+
+func TestAccountITMoveEncoding2(t *testing.T) {
+	var err error
+	accPathIn = path.Join(*dataDir, "conf", "samples", "tutmysqljson")
+	accCfgIn, err = config.NewCGRConfigFromFolder(accPathIn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	accPathOut = path.Join(*dataDir, "conf", "samples", "tutmysqlmsgpack")
+	accCfgOut, err = config.NewCGRConfigFromFolder(accPathOut)
+	if err != nil {
+		t.Fatal(err)
+	}
+	accAction = utils.Move
+	for _, stest := range sTestsAccIT {
+		t.Run("TestAccountITMove", stest)
+	}
+}
+
 func testAccITConnect(t *testing.T) {
 	dataDBIn, err := NewMigratorDataDB(accCfgIn.DataDbType,
 		accCfgIn.DataDbHost, accCfgIn.DataDbPort, accCfgIn.DataDbName,
