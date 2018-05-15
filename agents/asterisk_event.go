@@ -175,85 +175,12 @@ func (smaEv *SMAsteriskEvent) ExtraParameters() (extraParams map[string]string) 
 	return
 }
 
-func (smaEv *SMAsteriskEvent) AsSMGenericEvent() *sessions.SMGenericEvent {
-	var evName string
-	switch smaEv.EventType() {
-	case ARIStasisStart:
-		evName = SMAAuthorization
-	case ARIChannelStateChange:
-		evName = SMASessionStart
-	case ARIChannelDestroyed:
-		evName = SMASessionTerminate
-	}
-	smgEv := sessions.SMGenericEvent{utils.EVENT_NAME: evName}
-	smgEv[utils.OriginID] = smaEv.ChannelID()
-	if smaEv.RequestType() != "" {
-		smgEv[utils.RequestType] = smaEv.RequestType()
-	}
-	if smaEv.Tenant() != "" {
-		smgEv[utils.Tenant] = smaEv.Tenant()
-	}
-	if smaEv.Category() != "" {
-		smgEv[utils.Category] = smaEv.Category()
-	}
-	if smaEv.Subject() != "" {
-		smgEv[utils.Subject] = smaEv.Subject()
-	}
-	smgEv[utils.OriginHost] = smaEv.OriginatorIP()
-	smgEv[utils.Account] = smaEv.Account()
-	smgEv[utils.Destination] = smaEv.Destination()
-	smgEv[utils.SetupTime] = smaEv.Timestamp()
-	if smaEv.Supplier() != "" {
-		smgEv[utils.SUPPLIER] = smaEv.Supplier()
-	}
-	for extraKey, extraVal := range smaEv.ExtraParameters() { // Append extraParameters
-		smgEv[extraKey] = extraVal
-	}
-	return &smgEv
-}
-
-// Updates fields in smgEv based on own fields
-// Using pointer so we update it directly in cache
-func (smaEv *SMAsteriskEvent) UpdateSMGEvent(smgEv *sessions.SMGenericEvent) error {
-	resSMGEv := *smgEv
-	switch smaEv.EventType() {
-	case ARIChannelStateChange:
-		if smaEv.ChannelState() == channelUp {
-			resSMGEv[utils.EVENT_NAME] = SMASessionStart
-			resSMGEv[utils.AnswerTime] = smaEv.Timestamp()
-		}
-	case ARIChannelDestroyed:
-		resSMGEv[utils.EVENT_NAME] = SMASessionTerminate
-		resSMGEv[utils.DISCONNECT_CAUSE] = smaEv.DisconnectCause()
-		if _, hasIt := resSMGEv[utils.AnswerTime]; !hasIt {
-			resSMGEv[utils.Usage] = "0s"
-		} else {
-
-			if aTime, err := smgEv.GetAnswerTime(utils.META_DEFAULT, ""); err != nil {
-				return err
-			} else if aTime.IsZero() {
-				resSMGEv[utils.Usage] = "0s"
-			} else {
-				actualTime, err := utils.ParseTimeDetectLayout(smaEv.Timestamp(), "")
-				if err != nil {
-					return err
-				}
-				resSMGEv[utils.Usage] = actualTime.Sub(aTime).String()
-			}
-		}
-	}
-	*smgEv = resSMGEv
-	return nil
-}
-
 func (smaEv *SMAsteriskEvent) UpdateCGREvent(cgrEv *utils.CGREvent) error {
 	resCGREv := *cgrEv
 	switch smaEv.EventType() {
 	case ARIChannelStateChange:
-		if smaEv.ChannelState() == channelUp {
-			resCGREv.Event[utils.EVENT_NAME] = SMASessionStart
-			resCGREv.Event[utils.AnswerTime] = smaEv.Timestamp()
-		}
+		resCGREv.Event[utils.EVENT_NAME] = SMASessionStart
+		resCGREv.Event[utils.AnswerTime] = smaEv.Timestamp()
 	case ARIChannelDestroyed:
 		resCGREv.Event[utils.EVENT_NAME] = SMASessionTerminate
 		resCGREv.Event[utils.DISCONNECT_CAUSE] = smaEv.DisconnectCause()
@@ -305,7 +232,7 @@ func (smaEv *SMAsteriskEvent) AsMapStringInterface() (mp map[string]interface{})
 	mp[utils.OriginHost] = smaEv.OriginatorIP()
 	mp[utils.Account] = smaEv.Account()
 	mp[utils.Destination] = smaEv.Destination()
-	mp[utils.SetupTime] = smaEv.Timestamp()
+	mp[utils.SetupTime] = smaEv.SetupTime()
 	if smaEv.Supplier() != "" {
 		mp[utils.SUPPLIER] = smaEv.Supplier()
 	}
@@ -375,14 +302,10 @@ func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs)
 	return
 }
 
-func (smaEv *SMAsteriskEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
-	cgrEv, err := smaEv.AsCGREvent(config.CgrConfig().DefaultTimezone)
-	if err != nil {
-		return
-	}
+func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEv utils.CGREvent) (args *sessions.V1InitSessionArgs) {
 	args = &sessions.V1InitSessionArgs{ // defaults
 		InitSession: true,
-		CGREvent:    *cgrEv,
+		CGREvent:    cgrEv,
 	}
 	/*
 		subsystems, has := kev[KamCGRSubsystems]
@@ -408,14 +331,10 @@ func (smaEv *SMAsteriskEvent) V1InitSessionArgs() (args *sessions.V1InitSessionA
 	return
 }
 
-func (smaEv *SMAsteriskEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionArgs) {
-	cgrEv, err := smaEv.AsCGREvent(config.CgrConfig().DefaultTimezone)
-	if err != nil {
-		return
-	}
+func (smaEv *SMAsteriskEvent) V1TerminateSessionArgs(cgrEv utils.CGREvent) (args *sessions.V1TerminateSessionArgs) {
 	args = &sessions.V1TerminateSessionArgs{ // defaults
 		TerminateSession: true,
-		CGREvent:         *cgrEv,
+		CGREvent:         cgrEv,
 	}
 	/*
 		subsystems, has := kev[KamCGRSubsystems]

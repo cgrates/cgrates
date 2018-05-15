@@ -1,4 +1,4 @@
-// +build newcall
+// +build call
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
@@ -22,7 +22,6 @@ package general_tests
 
 import (
 	"flag"
-	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"os"
@@ -37,14 +36,15 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var tutFsCallsCfg *config.CGRConfig
-var tutFsCallsRpc *rpc.Client
-var tutFsCallsPjSuaListener *os.File
+var tutorialCallsCfg *config.CGRConfig
+var tutorialCallsRpc *rpc.Client
+var tutorialCallsPjSuaListener *os.File
 var waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
 var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 var fsConfig = flag.String("fsConfig", "/usr/share/cgrates/tutorials/fs_evsock", "FreeSwitch tutorial folder")
 var kamConfig = flag.String("kamConfig", "/usr/share/cgrates/tutorials/kamevapi", "Kamailio tutorial folder")
 var oSipsConfig = flag.String("osConfig", "/usr/share/cgrates/tutorials/osips_native", "OpenSips tutorial folder")
+var ariConf = flag.String("ariConf", "/usr/share/cgrates/tutorials/asterisk_ari", "Asterisk tutorial folder")
 var optConf string
 
 var sTestsCalls = []func(t *testing.T){
@@ -80,22 +80,29 @@ var sTestsCalls = []func(t *testing.T){
 }
 
 //Test start here
-func TestFSCalls(t *testing.T) {
+func TestFreeswitchCalls(t *testing.T) {
 	optConf = utils.Freeswitch
 	for _, stest := range sTestsCalls {
 		t.Run("", stest)
 	}
 }
 
-func TestKamCalls(t *testing.T) {
+func TestKamailioCalls(t *testing.T) {
 	optConf = utils.Kamailio
 	for _, stest := range sTestsCalls {
 		t.Run("", stest)
 	}
 }
 
-func TestOSCalls(t *testing.T) {
+func TestOpensipsCalls(t *testing.T) {
 	optConf = utils.Opensips
+	for _, stest := range sTestsCalls {
+		t.Run("", stest)
+	}
+}
+
+func TestAsteriskCalls(t *testing.T) {
+	optConf = utils.Asterisk
 	for _, stest := range sTestsCalls {
 		t.Run("", stest)
 	}
@@ -105,36 +112,41 @@ func testCallInitCfg(t *testing.T) {
 	// Init config first
 	var err error
 	if optConf == utils.Freeswitch {
-		tutFsCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*fsConfig, "cgrates", "etc", "cgrates"))
+		tutorialCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*fsConfig, "cgrates", "etc", "cgrates"))
 		if err != nil {
 			t.Error(err)
 		}
 	} else if optConf == utils.Kamailio {
-		tutFsCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*kamConfig, "cgrates", "etc", "cgrates"))
+		tutorialCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*kamConfig, "cgrates", "etc", "cgrates"))
 		if err != nil {
 			t.Error(err)
 		}
 	} else if optConf == utils.Opensips {
-		tutFsCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*oSipsConfig, "cgrates", "etc", "cgrates"))
+		tutorialCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*oSipsConfig, "cgrates", "etc", "cgrates"))
+		if err != nil {
+			t.Error(err)
+		}
+	} else if optConf == utils.Asterisk {
+		tutorialCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*ariConf, "cgrates", "etc", "cgrates"))
 		if err != nil {
 			t.Error(err)
 		}
 	}
 
-	tutFsCallsCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tutFsCallsCfg)
+	tutorialCallsCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	config.SetCgrConfig(tutorialCallsCfg)
 }
 
 // Remove data in both rating and accounting db
 func testCallResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(tutFsCallsCfg); err != nil {
+	if err := engine.InitDataDb(tutorialCallsCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
 func testCallResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(tutFsCallsCfg); err != nil {
+	if err := engine.InitStorDb(tutorialCallsCfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -156,6 +168,11 @@ func testCallStartFS(t *testing.T) {
 		if err := engine.CallScript(path.Join(*oSipsConfig, "opensips", "etc", "init.d", "opensips"), "start", 3000); err != nil {
 			t.Fatal(err)
 		}
+	} else if optConf == utils.Asterisk {
+		engine.KillProcName(utils.Asterisk, 5000)
+		if err := engine.CallScript(path.Join(*ariConf, "asterisk", "etc", "init.d", "asterisk"), "start", 3000); err != nil {
+			t.Fatal(err)
+		}
 	}
 }
 
@@ -172,6 +189,10 @@ func testCallStartEngine(t *testing.T) {
 		}
 	} else if optConf == utils.Opensips {
 		if err := engine.CallScript(path.Join(*oSipsConfig, "cgrates", "etc", "init.d", "cgrates"), "start", 100); err != nil {
+			t.Fatal(err)
+		}
+	} else if optConf == utils.Asterisk {
+		if err := engine.CallScript(path.Join(*ariConf, "cgrates", "etc", "init.d", "cgrates"), "start", 100); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -191,13 +212,17 @@ func testCallRestartFS(t *testing.T) {
 		if err := engine.CallScript(path.Join(*oSipsConfig, "opensips", "etc", "init.d", "opensips"), "restart", 5000); err != nil {
 			t.Fatal(err)
 		}
+	} else if optConf == utils.Asterisk {
+		if err := engine.CallScript(path.Join(*ariConf, "asterisk", "etc", "init.d", "asterisk"), "restart", 5000); err != nil {
+			t.Fatal(err)
+		}
 	}
 }
 
 // Connect rpc client to rater
 func testCallRpcConn(t *testing.T) {
 	var err error
-	tutFsCallsRpc, err = jsonrpc.Dial("tcp", tutFsCallsCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tutorialCallsRpc, err = jsonrpc.Dial("tcp", tutorialCallsCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -208,7 +233,7 @@ func testCallRpcConn(t *testing.T) {
 func testCallLoadTariffPlanFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial2")}
-	if err := tutFsCallsRpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+	if err := tutorialCallsRpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -218,14 +243,14 @@ func testCallLoadTariffPlanFromFolder(t *testing.T) {
 func testCallAccountsBefore(t *testing.T) {
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := tutFsCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
+	if err := tutorialCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 {
 		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 	var reply2 *engine.Account
 	attrs2 := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1002"}
-	if err := tutFsCallsRpc.Call("ApierV2.GetAccount", attrs2, &reply2); err != nil {
+	if err := tutorialCallsRpc.Call("ApierV2.GetAccount", attrs2, &reply2); err != nil {
 		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
 	} else if reply2.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 {
 		t.Errorf("Calling ApierV1.GetBalance received: %f", reply2.BalanceMap[utils.MONETARY].GetTotalValue())
@@ -238,7 +263,7 @@ func testCallStatMetricsBefore(t *testing.T) {
 		utils.MetaTCC: utils.NOT_AVAILABLE,
 		utils.MetaTCD: utils.NOT_AVAILABLE,
 	}
-	if err := tutFsCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
+	if err := tutorialCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2"}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -257,7 +282,7 @@ func testCallCheckResourceBeforeAllocation(t *testing.T) {
 				utils.Subject:     "1001",
 				utils.Destination: "1002"},
 		}}
-	if err := tutFsCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
+	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Error(err)
 	} else if len(*rs) != 2 {
 		t.Errorf("Resources: %+v", utils.ToJSON(rs))
@@ -273,7 +298,7 @@ func testCallCheckResourceBeforeAllocation(t *testing.T) {
 func testCallCheckThreshold1001Before(t *testing.T) {
 	var td engine.Threshold
 	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1001", Hits: 0}
-	if err := tutFsCallsRpc.Call(utils.ThresholdSv1GetThreshold,
+	if err := tutorialCallsRpc.Call(utils.ThresholdSv1GetThreshold,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}, &td); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd, td) {
@@ -284,7 +309,7 @@ func testCallCheckThreshold1001Before(t *testing.T) {
 func testCallCheckThreshold1002Before(t *testing.T) {
 	var td engine.Threshold
 	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1002", Hits: 0}
-	if err := tutFsCallsRpc.Call(utils.ThresholdSv1GetThreshold,
+	if err := tutorialCallsRpc.Call(utils.ThresholdSv1GetThreshold,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1002"}, &td); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd, td) {
@@ -303,7 +328,7 @@ func testCallStartPjsuaListener(t *testing.T) {
 		&engine.PjsuaAccount{Id: "sip:1003@127.0.0.1",
 			Username: "1003", Password: "CGRateS.org", Realm: "*", Registrar: "sip:127.0.0.1:5080"},
 	}
-	if tutFsCallsPjSuaListener, err = engine.StartPjsuaListener(
+	if tutorialCallsPjSuaListener, err = engine.StartPjsuaListener(
 		acnts, 5070, time.Duration(*waitRater)*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
@@ -332,7 +357,7 @@ func testCallGetActiveSessions(t *testing.T) {
 			Destination: "1002",
 		},
 	}
-	if err := tutFsCallsRpc.Call(utils.SessionSv1GetActiveSessions,
+	if err := tutorialCallsRpc.Call(utils.SessionSv1GetActiveSessions,
 		&map[string]string{}, &reply); err != nil {
 		t.Error("Got error on SessionSv1.GetActiveSessions: ", err.Error())
 	} else {
@@ -377,7 +402,7 @@ func testCallCheckResourceAllocation(t *testing.T) {
 				utils.Subject:     "1001",
 				utils.Destination: "1002"},
 		}}
-	if err := tutFsCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
+	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Error(err)
 	} else if len(*rs) != 2 {
 		t.Errorf("Resources: %+v", utils.ToJSON(rs))
@@ -395,7 +420,7 @@ func testCallAccount1001(t *testing.T) {
 	time.Sleep(time.Duration(80) * time.Second) // Allow calls to finish before start querying the results
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := tutFsCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
+	if err := tutorialCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
 		t.Error(err.Error())
 	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() == 10.0 { // Make sure we debitted
 		t.Errorf("Expected: 10, received: %+v", reply.BalanceMap[utils.MONETARY].GetTotalValue())
@@ -408,15 +433,12 @@ func testCallAccount1001(t *testing.T) {
 func testCall1001Cdrs(t *testing.T) {
 	var reply []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}}
-	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
+	if err := tutorialCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
 		for _, cdr := range reply {
-			if cdr.Source != "freeswitch_json" && cdr.Source != "SMG_KamailioAgent" {
-				t.Errorf("Unexpected Source for CDR: %+v", cdr.Source)
-			}
 			if cdr.RequestType != utils.META_PREPAID {
 				t.Errorf("Unexpected RequestType for CDR: %+v", cdr.RequestType)
 			}
@@ -443,14 +465,11 @@ func testCall1001Cdrs(t *testing.T) {
 func testCall1002Cdrs(t *testing.T) {
 	var reply []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{"1002"}, DestinationPrefixes: []string{"1001"}}
-	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
+	if err := tutorialCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].Source != "freeswitch_json" && reply[0].Source != "SMG_KamailioAgent" {
-			t.Errorf("Unexpected Source for CDR: %+v", reply[0].Source)
-		}
 		if reply[0].RequestType != utils.META_POSTPAID {
 			t.Errorf("Unexpected RequestType for CDR: %+v", reply[0].RequestType)
 		}
@@ -473,7 +492,7 @@ func testCallStatMetrics(t *testing.T) {
 		utils.MetaTCC: "1.34009",
 		utils.MetaTCD: "2m24s",
 	}
-	if err := tutFsCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
+	if err := tutorialCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2"}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics1, metrics) &&
@@ -493,7 +512,7 @@ func testCallCheckResourceRelease(t *testing.T) {
 				utils.Subject:     "1001",
 				utils.Destination: "1002"},
 		}}
-	if err := tutFsCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
+	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Error(err)
 	} else if len(*rs) != 2 {
 		t.Errorf("Resources: %+v", rs)
@@ -508,7 +527,7 @@ func testCallCheckResourceRelease(t *testing.T) {
 
 func testCallCheckThreshold1001After(t *testing.T) {
 	var td engine.Threshold
-	if err := tutFsCallsRpc.Call(utils.ThresholdSv1GetThreshold,
+	if err := tutorialCallsRpc.Call(utils.ThresholdSv1GetThreshold,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}, &td); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -518,7 +537,7 @@ func testCallCheckThreshold1001After(t *testing.T) {
 func testCallCheckThreshold1002After(t *testing.T) {
 	var td engine.Threshold
 	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1002", Hits: 4}
-	if err := tutFsCallsRpc.Call(utils.ThresholdSv1GetThreshold,
+	if err := tutorialCallsRpc.Call(utils.ThresholdSv1GetThreshold,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1002"}, &td); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd.Tenant, td.Tenant) {
@@ -531,8 +550,8 @@ func testCallCheckThreshold1002After(t *testing.T) {
 }
 
 func testCallStopPjsuaListener(t *testing.T) {
-	tutFsCallsPjSuaListener.Write([]byte("q\n")) // Close pjsua
-	time.Sleep(time.Duration(1) * time.Second)   // Allow pjsua to finish it's tasks, eg un-REGISTER
+	tutorialCallsPjSuaListener.Write([]byte("q\n")) // Close pjsua
+	time.Sleep(time.Duration(1) * time.Second)      // Allow pjsua to finish it's tasks, eg un-REGISTER
 }
 
 func testCallStopCgrEngine(t *testing.T) {
@@ -548,5 +567,7 @@ func testCallStopFS(t *testing.T) {
 		engine.KillProcName(utils.Kamailio, 1000)
 	} else if optConf == utils.Opensips {
 		engine.KillProcName(utils.Opensips, 1000)
+	} else if optConf == utils.Asterisk {
+		engine.KillProcName(utils.Asterisk, 1000)
 	}
 }
