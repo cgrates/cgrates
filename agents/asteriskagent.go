@@ -155,11 +155,11 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 	} else if *authReply.MaxUsage != time.Duration(-1) {
 		//  Set absolute timeout for non-postpaid calls
 		if _, err := sma.astConn.Call(aringo.HTTP_POST,
-			fmt.Sprintf("http://%s/ari/channels/%s/variable?variable=%s", // Asterisk having issue with variable terminating empty so harcoding param in url
+			fmt.Sprintf("http://%s/ari/channels/%s/variable?variable=%s&value=%d", // Asterisk having issue with variable terminating empty so harcoding param in url
 				sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address,
-				ev.ChannelID(), CGRMaxSessionTime),
+				ev.ChannelID(), CGRMaxSessionTime, int64(authReply.MaxUsage.Seconds()*1000)),
 			url.Values{"value": {strconv.FormatFloat(
-				float64(authReply.MaxUsage.Miliseconds(), 'f', -1, 64)}}); err != nil { // Asterisk expects value in ms
+				authReply.MaxUsage.Seconds()*1000, 'f', -1, 64)}}); err != nil { // Asterisk expects value in ms
 			utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when setting %s for channelID: %s",
 				utils.AsteriskAgent, err.Error(), CGRMaxSessionTime, ev.ChannelID()))
 			// Since we got error, disconnect channel
