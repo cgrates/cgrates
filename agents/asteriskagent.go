@@ -136,8 +136,6 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 			utils.AsteriskAgent, ev.ChannelID()))
 		return
 	}
-	// var maxUsage float64
-	// smgEv := ev.AsSMGenericEvent()
 	var authReply sessions.V1AuthorizeReply
 	if err := sma.smg.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to authorize session for channelID: %s",
@@ -161,7 +159,7 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 				sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address,
 				ev.ChannelID(), CGRMaxSessionTime),
 			url.Values{"value": {strconv.FormatFloat(
-				float64(authReply.MaxUsage.Nanoseconds())*1000, 'f', -1, 64)}}); err != nil { // Asterisk expects value in ms
+				float64(authReply.MaxUsage.Miliseconds(), 'f', -1, 64)}}); err != nil { // Asterisk expects value in ms
 			utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when setting %s for channelID: %s",
 				utils.AsteriskAgent, err.Error(), CGRMaxSessionTime, ev.ChannelID()))
 			// Since we got error, disconnect channel
@@ -190,18 +188,33 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 		return
 	}
 	sma.evCacheMux.RLock()
-	_, hasIt := sma.eventsCache[ev.ChannelID()]
+	cgrEv, hasIt := sma.eventsCache[ev.ChannelID()]
 	sma.evCacheMux.RUnlock()
 	if !hasIt { // Not handled by us
 		return
 	}
-
-	initSessionArgs := ev.V1InitSessionArgs()
+	sma.evCacheMux.Lock()
+	err := ev.UpdateCGREvent(cgrEv) // Updates the event directly in the cache
+	sma.evCacheMux.Unlock()
+	if err != nil {
+		utils.Logger.Err(
+			fmt.Sprintf("<%s> Error: %s when attempting to initiate session for channelID: %s",
+				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
+		if err := sma.hangupChannel(ev.ChannelID()); err != nil {
+			utils.Logger.Err(
+				fmt.Sprintf("<%s> Error: %s when attempting to disconnect channelID: %s",
+					utils.AsteriskAgent, err.Error(), ev.ChannelID()))
+		}
+		return
+	}
+	// populate init session args
+	initSessionArgs := ev.V1InitSessionArgs(*cgrEv)
 	if initSessionArgs == nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate init session arguments",
 			utils.AsteriskAgent, ev.ChannelID()))
 		return
 	}
+
 	//initit Session
 	var initReply sessions.V1InitSessionReply
 	if err := sma.smg.Call(utils.SessionSv1InitiateSession,
@@ -223,63 +236,19 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 		}
 		return
 	}
-	sma.evCacheMux.Lock()
-	err := ev.UpdateCGREvent(&initSessionArgs.CGREvent) // Updates the event directly in the cache
-	sma.evCacheMux.Unlock()
-	if err != nil {
-		utils.Logger.Err(
-			fmt.Sprintf("<%s> Error: %s when attempting to initiate session for channelID: %s",
-				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
-		if err := sma.hangupChannel(ev.ChannelID()); err != nil {
-			utils.Logger.Err(
-				fmt.Sprintf("<%s> Error: %s when attempting to disconnect channelID: %s",
-					utils.AsteriskAgent, err.Error(), ev.ChannelID()))
-		}
-		return
-	}
+
 }
 
 // Channel disconnect
 func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 	sma.evCacheMux.RLock()
-	_, hasIt := sma.eventsCache[ev.ChannelID()]
+	cgrEv, hasIt := sma.eventsCache[ev.ChannelID()]
 	sma.evCacheMux.RUnlock()
 	if !hasIt { // Not handled by us
 		return
 	}
-
-	//terminate session
-	tsArgs := ev.V1TerminateSessionArgs()
-	if tsArgs == nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate terminate session arguments",
-			utils.AsteriskAgent, ev.ChannelID()))
-		return
-	}
-	var reply string
-	if err := sma.smg.Call(utils.SessionSv1TerminateSession,
-		tsArgs, &reply); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to terminate session for channelID: %s",
-			utils.AsteriskAgent, err.Error(), ev.ChannelID()))
-	}
-	if sma.cgrCfg.AsteriskAgentCfg().CreateCDR {
-		setupTime, err := utils.ParseTimeDetectLayout(
-			ev.SetupTime(), config.CgrConfig().DefaultTimezone)
-		if err != nil {
-			return
-		}
-		cgrEv := utils.CGREvent{
-			Tenant: ev.Tenant(),
-			ID:     utils.UUIDSha1Prefix(),
-			Time:   &setupTime,
-			Event:  ev.AsMapStringInterface(),
-		}
-		if err := sma.smg.Call(utils.SessionSv1ProcessCDR, cgrEv, &reply); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to process CDR for channelID: %s",
-				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
-		}
-	}
 	sma.evCacheMux.Lock()
-	err := ev.UpdateCGREvent(&tsArgs.CGREvent) // Updates the event directly in the cache
+	err := ev.UpdateCGREvent(cgrEv) // Updates the event directly in the cache
 	sma.evCacheMux.Unlock()
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to initiate session for channelID: %s",
@@ -290,6 +259,27 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 		}
 		return
 	}
+	// populate terminate session args
+	tsArgs := ev.V1TerminateSessionArgs(*cgrEv)
+	if tsArgs == nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate terminate session arguments",
+			utils.AsteriskAgent, ev.ChannelID()))
+		return
+	}
+
+	var reply string
+	if err := sma.smg.Call(utils.SessionSv1TerminateSession,
+		tsArgs, &reply); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to terminate session for channelID: %s",
+			utils.AsteriskAgent, err.Error(), ev.ChannelID()))
+	}
+	if sma.cgrCfg.AsteriskAgentCfg().CreateCDR {
+		if err := sma.smg.Call(utils.SessionSv1ProcessCDR, *cgrEv, &reply); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to process CDR for channelID: %s",
+				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
+		}
+	}
+
 }
 
 // Called to shutdown the service

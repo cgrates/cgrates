@@ -535,6 +535,7 @@ const (
 	Freeswitch                   = "freeswitch"
 	Kamailio                     = "kamailio"
 	Opensips                     = "opensips"
+	Asterisk                     = "asterisk"
 )
 
 // Migrator Action
