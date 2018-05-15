@@ -175,8 +175,8 @@ func testTrsITMigrateAndMove(t *testing.T) {
 		ThresholdValue: 5.32,
 		Recurrent:      false,                          // reset excuted flag each run
 		MinSleep:       time.Duration(5) * time.Second, // Minimum duration between two executions in case of recurrent triggers
-		ExpirationDate: time.Now(),
-		ActivationDate: time.Now(),
+		ExpirationDate: tim,
+		ActivationDate: tim,
 		Balance: &engine.BalanceFilter{
 			ID:             utils.StringPointer("TESTZ"),
 			Timings:        []*engine.RITiming{},
@@ -196,22 +196,14 @@ func testTrsITMigrateAndMove(t *testing.T) {
 	}
 	filters = append(filters, x)
 
-	filter := &engine.Filter{Tenant: config.CgrConfig().DefaultTenant, ID: *v1trs.Balance.ID, Rules: filters}
-
 	tresProf := &engine.ThresholdProfile{
 		ID:                 v1trs.ID,
 		Tenant:             config.CgrConfig().DefaultTenant,
-		FilterIDs:          []string{filter.ID},
-		Blocker:            false,
 		Weight:             v1trs.Weight,
 		ActivationInterval: &utils.ActivationInterval{v1trs.ExpirationDate, v1trs.ActivationDate},
 		MinSleep:           v1trs.MinSleep,
 	}
-	tres := &engine.Threshold{
-		Tenant: config.CgrConfig().DefaultTenant,
-		ID:     v1trs.ID,
-	}
-	switch accAction {
+	switch trsThresholds {
 	case utils.Migrate:
 		err := trsMigrator.dmIN.setV2ActionTrigger(v1trs)
 		if err != nil {
@@ -226,15 +218,23 @@ func testTrsITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when migrating Thresholds ", err.Error())
 		}
-		result, err := trsMigrator.dmOut.DataManager().DataDB().GetThresholdDrv(tresProf.Tenant, tresProf.ID)
+		result, err := trsMigrator.dmOut.DataManager().GetThresholdProfile(tresProf.Tenant, tresProf.ID, false, utils.NonTransactional)
 		if err != nil {
 			t.Error("Error when getting Thresholds ", err.Error())
 		}
-		if !reflect.DeepEqual(&tres, result) {
-			t.Errorf("Expecting: %+v, received: %+v", &tres, result)
+		if !reflect.DeepEqual(tresProf.ID, result.ID) {
+			t.Errorf("Expecting: %+v, received: %+v", tresProf.ID, result.ID)
+		} else if !reflect.DeepEqual(tresProf.Tenant, result.Tenant) {
+			t.Errorf("Expecting: %+v, received: %+v", tresProf.Tenant, result.Tenant)
+		} else if !reflect.DeepEqual(tresProf.Weight, result.Weight) {
+			t.Errorf("Expecting: %+v, received: %+v", tresProf.Weight, result.Weight)
+		} else if !reflect.DeepEqual(tresProf.ActivationInterval, result.ActivationInterval) {
+			t.Errorf("Expecting: %+v, received: %+v", tresProf.ActivationInterval, result.ActivationInterval)
+		} else if !reflect.DeepEqual(tresProf.MinSleep, result.MinSleep) {
+			t.Errorf("Expecting: %+v, received: %+v", tresProf.MinSleep, result.MinSleep)
 		}
 	case utils.Move:
-		if err := trsMigrator.dmIN.DataManager().DataDB().SetThresholdDrv(tres); err != nil {
+		if err := trsMigrator.dmIN.DataManager().SetThresholdProfile(tresProf, false); err != nil {
 			t.Error("Error when setting Thresholds ", err.Error())
 		}
 		currentVersion := engine.CurrentDataDBVersions()
@@ -246,12 +246,20 @@ func testTrsITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when migrating Thresholds ", err.Error())
 		}
-		result, err := trsMigrator.dmOut.DataManager().DataDB().GetThresholdDrv(tresProf.Tenant, tresProf.ID)
+		result, err := trsMigrator.dmOut.DataManager().GetThresholdProfile(tresProf.Tenant, tresProf.ID, false, utils.NonTransactional)
 		if err != nil {
 			t.Error("Error when getting Thresholds ", err.Error())
 		}
-		if !reflect.DeepEqual(&tres, result) {
-			t.Errorf("Expecting: %+v, received: %+v", &tres, result)
+		if !reflect.DeepEqual(tresProf.ID, result.ID) {
+			t.Errorf("Expecting: %+v, received: %+v", tresProf.ID, result.ID)
+		} else if !reflect.DeepEqual(tresProf.Tenant, result.Tenant) {
+			t.Errorf("Expecting: %+v, received: %+v", tresProf.Tenant, result.Tenant)
+		} else if !reflect.DeepEqual(tresProf.Weight, result.Weight) {
+			t.Errorf("Expecting: %+v, received: %+v", tresProf.Weight, result.Weight)
+		} else if !reflect.DeepEqual(tresProf.ActivationInterval, result.ActivationInterval) {
+			t.Errorf("Expecting: %+v, received: %+v", tresProf.ActivationInterval, result.ActivationInterval)
+		} else if !reflect.DeepEqual(tresProf.MinSleep, result.MinSleep) {
+			t.Errorf("Expecting: %+v, received: %+v", tresProf.MinSleep, result.MinSleep)
 		}
 	}
 }

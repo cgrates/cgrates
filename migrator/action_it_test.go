@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
-	//"flag"
 	"log"
 	"path"
 	"reflect"
@@ -117,6 +116,7 @@ func TestActionITMoveEncoding(t *testing.T) {
 	}
 }
 
+/*
 func TestActionITMoveEncoding2(t *testing.T) {
 	var err error
 	actPathIn = path.Join(*dataDir, "conf", "samples", "tutmysqljson")
@@ -133,7 +133,7 @@ func TestActionITMoveEncoding2(t *testing.T) {
 	for _, stest := range sTestsActIT {
 		t.Run("TestActionITMoveEncoding2", stest)
 	}
-}
+}*/
 
 func testActITConnect(t *testing.T) {
 	dataDBIn, err := NewMigratorDataDB(actCfgIn.DataDbType,
@@ -166,26 +166,31 @@ func testActITFlush(t *testing.T) {
 }
 
 func testActITMigrateAndMove(t *testing.T) {
-	v1act := &v1Actions{
-		&v1Action{
-			Id:               "test",
-			ActionType:       "",
-			BalanceType:      "",
-			Direction:        "INBOUND",
-			ExtraParameters:  "",
-			ExpirationString: "",
-			Balance: &v1Balance{
-				Timings: []*engine.RITiming{
-					&engine.RITiming{
-						Years:     utils.Years{},
-						Months:    utils.Months{},
-						MonthDays: utils.MonthDays{},
-						WeekDays:  utils.WeekDays{},
-					},
-				},
-			},
+	timingSlice := []*engine.RITiming{
+		&engine.RITiming{
+			Years:     utils.Years{},
+			Months:    utils.Months{},
+			MonthDays: utils.MonthDays{},
+			WeekDays:  utils.WeekDays{},
 		},
 	}
+
+	v1act := &v1Action{
+		Id:               "test",
+		ActionType:       "",
+		BalanceType:      "",
+		Direction:        "INBOUND",
+		ExtraParameters:  "",
+		ExpirationString: "",
+		Balance: &v1Balance{
+			Timings: timingSlice,
+		},
+	}
+
+	v1acts := &v1Actions{
+		v1act,
+	}
+
 	act := &engine.Actions{
 		&engine.Action{
 			Id:               "test",
@@ -194,20 +199,13 @@ func testActITMigrateAndMove(t *testing.T) {
 			ExpirationString: "",
 			Weight:           0.00,
 			Balance: &engine.BalanceFilter{
-				Timings: []*engine.RITiming{
-					&engine.RITiming{
-						Years:     utils.Years{},
-						Months:    utils.Months{},
-						MonthDays: utils.MonthDays{},
-						WeekDays:  utils.WeekDays{},
-					},
-				},
+				Timings: timingSlice,
 			},
 		},
 	}
-	switch accAction {
+	switch actAction {
 	case utils.Migrate:
-		err := actMigrator.dmIN.setV1Actions(v1act)
+		err := actMigrator.dmIN.setV1Actions(v1acts)
 		if err != nil {
 			t.Error("Error when setting v1 Actions ", err.Error())
 		}
@@ -220,15 +218,15 @@ func testActITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when migrating Actions ", err.Error())
 		}
-		result, err := actMigrator.dmOut.DataManager().GetActions((*v1act)[0].Id, true, utils.NonTransactional)
+		result, err := actMigrator.dmOut.DataManager().GetActions(v1act.Id, true, utils.NonTransactional)
 		if err != nil {
 			t.Error("Error when getting Actions ", err.Error())
 		}
-		if !reflect.DeepEqual(*act, result) {
-			t.Errorf("Expecting: %+v, received: %+v", *act, result)
+		if !reflect.DeepEqual(act, &result) {
+			t.Errorf("Expecting: %+v, received: %+v", act, &result)
 		}
 	case utils.Move:
-		if err := actMigrator.dmIN.DataManager().SetActions((*v1act)[0].Id, *act, utils.NonTransactional); err != nil {
+		if err := actMigrator.dmIN.DataManager().SetActions(v1act.Id, *act, utils.NonTransactional); err != nil {
 			t.Error("Error when setting ActionPlan ", err.Error())
 		}
 		currentVersion := engine.CurrentDataDBVersions()
@@ -240,12 +238,12 @@ func testActITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when migrating Actions ", err.Error())
 		}
-		result, err := actMigrator.dmOut.DataManager().GetActions((*v1act)[0].Id, true, utils.NonTransactional)
+		result, err := actMigrator.dmOut.DataManager().GetActions(v1act.Id, true, utils.NonTransactional)
 		if err != nil {
 			t.Error("Error when getting Actions ", err.Error())
 		}
-		if !reflect.DeepEqual(*act, result) {
-			t.Errorf("Expecting: %+v, received: %+v", *act, result)
+		if !reflect.DeepEqual(act, &result) {
+			t.Errorf("Expecting: %+v, received: %+v", act, &result)
 		}
 	}
 }

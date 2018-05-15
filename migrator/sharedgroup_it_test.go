@@ -180,7 +180,7 @@ func testShrGrpITMigrateAndMove(t *testing.T) {
 		MemberIds: utils.NewStringMap("1", "2", "3"),
 	}
 
-	switch accAction {
+	switch shrSharedGroup {
 	case utils.Migrate:
 		err := shrGrpMigrator.dmIN.setV1SharedGroup(v1shrGrp)
 		if err != nil {
@@ -195,15 +195,15 @@ func testShrGrpITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when migrating SharedGroup ", err.Error())
 		}
-		result, err := shrGrpMigrator.dmOut.DataManager().DataDB().GetSharedGroupDrv(v1shrGrp.Id)
+		result, err := shrGrpMigrator.dmOut.DataManager().GetSharedGroup(v1shrGrp.Id, true, utils.NonTransactional)
 		if err != nil {
 			t.Error("Error when getting SharedGroup ", err.Error())
 		}
-		if !reflect.DeepEqual(&shrGrp, result) {
-			t.Errorf("Expecting: %+v, received: %+v", &shrGrp, result)
+		if !reflect.DeepEqual(shrGrp, result) {
+			t.Errorf("Expecting: %+v, received: %+v", shrGrp, result)
 		}
 	case utils.Move:
-		if err := shrGrpMigrator.dmIN.DataManager().DataDB().SetSharedGroupDrv(shrGrp); err != nil {
+		if err := shrGrpMigrator.dmIN.DataManager().SetSharedGroup(shrGrp, utils.NonTransactional); err != nil {
 			t.Error("Error when setting SharedGroup ", err.Error())
 		}
 		currentVersion := engine.CurrentDataDBVersions()
@@ -215,12 +215,12 @@ func testShrGrpITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when migrating SharedGroup ", err.Error())
 		}
-		result, err := shrGrpMigrator.dmOut.DataManager().DataDB().GetSharedGroupDrv(v1shrGrp.Id)
+		result, err := shrGrpMigrator.dmOut.DataManager().GetSharedGroup(v1shrGrp.Id, true, utils.NonTransactional)
 		if err != nil {
 			t.Error("Error when getting SharedGroup ", err.Error())
 		}
-		if !reflect.DeepEqual(&shrGrp, result) {
-			t.Errorf("Expecting: %+v, received: %+v", &shrGrp, result)
+		if !reflect.DeepEqual(shrGrp, result) {
+			t.Errorf("Expecting: %+v, received: %+v", shrGrp, result)
 		}
 	}
 }
