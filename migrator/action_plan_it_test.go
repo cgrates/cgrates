@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
-	//"flag"
 	"log"
 	"path"
 	"reflect"
@@ -166,17 +165,19 @@ func testActPlnITFlush(t *testing.T) {
 }
 
 func testActPlnITMigrateAndMove(t *testing.T) {
+	timingSlice := &engine.RITiming{
+		Years:     utils.Years{},
+		Months:    utils.Months{},
+		MonthDays: utils.MonthDays{},
+		WeekDays:  utils.WeekDays{},
+	}
+
 	v1actPln := &v1ActionPlans{
 		&v1ActionPlan{
 			Id:         "test",
 			AccountIds: []string{"one"},
 			Timing: &engine.RateInterval{
-				Timing: &engine.RITiming{
-					Years:     utils.Years{},
-					Months:    utils.Months{},
-					MonthDays: utils.MonthDays{},
-					WeekDays:  utils.WeekDays{},
-				},
+				Timing: timingSlice,
 			},
 		},
 	}
@@ -187,18 +188,13 @@ func testActPlnITMigrateAndMove(t *testing.T) {
 		ActionTimings: []*engine.ActionTiming{
 			&engine.ActionTiming{
 				Timing: &engine.RateInterval{
-					Timing: &engine.RITiming{
-						Years:     utils.Years{},
-						Months:    utils.Months{},
-						MonthDays: utils.MonthDays{},
-						WeekDays:  utils.WeekDays{},
-					},
+					Timing: timingSlice,
 				},
 			},
 		},
 	}
 
-	switch accAction {
+	switch actActionPlan {
 	case utils.Migrate:
 		err := actPlnMigrator.dmIN.setV1ActionPlans(v1actPln)
 		if err != nil {
@@ -209,7 +205,7 @@ func testActPlnITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when setting version for ActionPlan ", err.Error())
 		}
-		err, _ = actPlnMigrator.Migrate([]string{utils.AccountActionPlansPrefix})
+		err, _ = actPlnMigrator.Migrate([]string{utils.MetaActionPlans})
 		if err != nil {
 			t.Error("Error when migrating ActionPlan ", err.Error())
 		}
@@ -217,8 +213,13 @@ func testActPlnITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when getting ActionPlan ", err.Error())
 		}
-		if !reflect.DeepEqual(*actPln, result) {
-			t.Errorf("Expecting: %+v, received: %+v", *actPln, result)
+		// compared fields, uuid is generated in ActionTiming
+		if !reflect.DeepEqual(actPln.Id, result.Id) {
+			t.Errorf("Expecting: %+v, received: %+v", actPln.Id, result.Id)
+		} else if !reflect.DeepEqual(actPln.AccountIDs, result.AccountIDs) {
+			t.Errorf("Expecting: %+v, received: %+v", actPln.AccountIDs, result.AccountIDs)
+		} else if !reflect.DeepEqual(actPln.ActionTimings[0].Timing, result.ActionTimings[0].Timing) {
+			t.Errorf("Expecting: %+v, received: %+v", actPln.ActionTimings[0].Timing, result.ActionTimings[0].Timing)
 		}
 	case utils.Move:
 		if err := actPlnMigrator.dmIN.DataManager().DataDB().SetActionPlan((*v1actPln)[0].Id, actPln, true, utils.NonTransactional); err != nil {
@@ -229,7 +230,7 @@ func testActPlnITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when setting version for ActionPlan ", err.Error())
 		}
-		err, _ = actPlnMigrator.Migrate([]string{utils.MetaActions})
+		err, _ = actPlnMigrator.Migrate([]string{utils.MetaActionPlans})
 		if err != nil {
 			t.Error("Error when migrating ActionPlan ", err.Error())
 		}
@@ -237,8 +238,13 @@ func testActPlnITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when getting ActionPlan ", err.Error())
 		}
-		if !reflect.DeepEqual(*actPln, result) {
-			t.Errorf("Expecting: %+v, received: %+v", *actPln, result)
+		// compared fields, uuid is generated in ActionTiming
+		if !reflect.DeepEqual(actPln.Id, result.Id) {
+			t.Errorf("Expecting: %+v, received: %+v", actPln.Id, result.Id)
+		} else if !reflect.DeepEqual(actPln.AccountIDs, result.AccountIDs) {
+			t.Errorf("Expecting: %+v, received: %+v", actPln.AccountIDs, result.AccountIDs)
+		} else if !reflect.DeepEqual(actPln.ActionTimings[0].Timing, result.ActionTimings[0].Timing) {
+			t.Errorf("Expecting: %+v, received: %+v", actPln.ActionTimings[0].Timing, result.ActionTimings[0].Timing)
 		}
 	}
 }
