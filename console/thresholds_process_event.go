@@ -65,6 +65,6 @@ func (self *CmdThresholdProcessEvent) PostprocessRpcParams() error {
 }
 
 func (self *CmdThresholdProcessEvent) RpcResult() interface{} {
-	var s int
-	return &s
+	var ids []string
+	return &ids
 }

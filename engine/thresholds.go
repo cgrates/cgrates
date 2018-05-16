@@ -280,20 +280,21 @@ type ArgsProcessEvent struct {
 }
 
 // processEvent processes a new event, dispatching to matching thresholds
-func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (hits int, err error) {
+func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (eventIDs []string, err error) {
 	matchTs, err := tS.matchingThresholdsForEvent(args)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
-	hits = len(matchTs)
 	var withErrors bool
+	var evIds []string
 	for _, t := range matchTs {
+		evIds = append(evIds, utils.ConcatenatedKey(t.TenantID(), args.CGREvent.ID))
 		t.Hits += 1
 		err = t.ProcessEvent(args, tS.dm)
 		if err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<ThresholdService> threshold: %s, ignoring event: %s, error: %s",
-					t.TenantID(), args.TenantID(), err.Error()))
+					t.TenantID(), args.CGREvent.TenantID(), err.Error()))
 			withErrors = true
 			continue
 		}
@@ -318,6 +319,11 @@ func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (hits int, err 
 			tS.stMux.Unlock()
 		}
 	}
+	if len(evIds) != 0 {
+		eventIDs = append(eventIDs, evIds...)
+	} else {
+		eventIDs = []string{}
+	}
 	if withErrors {
 		err = utils.ErrPartiallyExecuted
 	}
@@ -325,16 +331,16 @@ func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (hits int, err 
 }
 
 // V1ProcessEvent implements ThresholdService method for processing an Event
-func (tS *ThresholdService) V1ProcessEvent(args *ArgsProcessEvent, reply *int) (err error) {
+func (tS *ThresholdService) V1ProcessEvent(args *ArgsProcessEvent, reply *[]string) (err error) {
 	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	} else if args.CGREvent.Event == nil {
 		return utils.NewErrMandatoryIeMissing("Event")
 	}
-	if hits, err := tS.processEvent(args); err != nil {
+	if ids, err := tS.processEvent(args); err != nil {
 		return err
 	} else {
-		*reply = hits
+		*reply = ids
 	}
 	return
 }

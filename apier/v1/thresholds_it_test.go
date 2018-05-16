@@ -191,7 +191,7 @@ func testV1TSLoadConfig(t *testing.T) {
 	case "tutmongo": // Mongo needs more time to reset db, need to investigate
 		thdsDelay = 4000
 	default:
-		thdsDelay = 1000
+		thdsDelay = 2000
 	}
 }
 
@@ -250,60 +250,61 @@ func testV1TSGetThresholds(t *testing.T) {
 }
 
 func testV1TSProcessEvent(t *testing.T) {
-	var hits int
-	eHits := 0
-	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[0], &hits); err != nil {
+	var ids []string
+	eIDs := []string{}
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[0], &ids); err != nil {
 		t.Error(err)
-	} else if hits != eHits {
-		t.Errorf("Expecting hits: %d, received: %d", eHits, hits)
+	} else if !reflect.DeepEqual(ids, eIDs) {
+		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
-	eHits = 1
-	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[1], &hits); err != nil {
+	eIDs = []string{"cgrates.org:THD_ACNT_BALANCE_1:event2"}
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[1], &ids); err != nil {
 		t.Error(err)
-	} else if hits != eHits {
-		t.Errorf("Expecting hits: %d, received: %d", eHits, hits)
+	} else if !reflect.DeepEqual(ids, eIDs) {
+		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
-	eHits = 1
-	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[2], &hits); err != nil {
+	eIDs = []string{"cgrates.org:THD_STATS_1:event3"}
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[2], &ids); err != nil {
 		t.Error(err)
-	} else if hits != eHits {
-		t.Errorf("Expecting hits: %d, received: %d", eHits, hits)
+	} else if !reflect.DeepEqual(ids, eIDs) {
+		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
-	eHits = 2
-	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[3], &hits); err != nil {
+	eIDs = []string{"cgrates.org:THD_STATS_2:event4", "cgrates.org:THD_STATS_1:event4"}
+	eIDs2 := []string{"cgrates.org:THD_STATS_1:event4", "cgrates.org:THD_STATS_2:event4"}
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[3], &ids); err != nil {
 		t.Error(err)
-	} else if hits != eHits {
-		t.Errorf("Expecting hits: %d, received: %d", eHits, hits)
+	} else if !reflect.DeepEqual(ids, eIDs) && !reflect.DeepEqual(ids, eIDs2) {
+		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
-	eHits = 1
-	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[4], &hits); err != nil {
+	eIDs = []string{"cgrates.org:THD_STATS_3:event5"}
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[4], &ids); err != nil {
 		t.Error(err)
-	} else if hits != eHits {
-		t.Errorf("Expecting hits: %d, received: %d", eHits, hits)
+	} else if !reflect.DeepEqual(ids, eIDs) {
+		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
-	eHits = 1
-	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[5], &hits); err != nil {
+	eIDs = []string{"cgrates.org:THD_RES_1:event6"}
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[5], &ids); err != nil {
 		t.Error(err)
-	} else if hits != eHits {
-		t.Errorf("Expecting hits: %d, received: %d", eHits, hits)
+	} else if !reflect.DeepEqual(ids, eIDs) {
+		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
-	eHits = 1
-	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[6], &hits); err != nil {
+	eIDs = []string{"cgrates.org:THD_RES_1:event6"}
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[6], &ids); err != nil {
 		t.Error(err)
-	} else if hits != eHits {
-		t.Errorf("Expecting hits: %d, received: %d", eHits, hits)
+	} else if !reflect.DeepEqual(ids, eIDs) {
+		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
-	eHits = 1
-	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[7], &hits); err != nil {
+	eIDs = []string{"cgrates.org:THD_RES_1:event6"}
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[7], &ids); err != nil {
 		t.Error(err)
-	} else if hits != eHits {
-		t.Errorf("Expecting hits: %d, received: %d", eHits, hits)
+	} else if !reflect.DeepEqual(ids, eIDs) {
+		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
-	eHits = 1
-	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[8], &hits); err != nil {
+	eIDs = []string{"cgrates.org:THD_CDRS_1:cdrev1"}
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[8], &ids); err != nil {
 		t.Error(err)
-	} else if hits != eHits {
-		t.Errorf("Expecting hits: %d, received: %d", eHits, hits)
+	} else if !reflect.DeepEqual(ids, eIDs) {
+		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
 }
 
@@ -334,6 +335,7 @@ func testV1TSGetThresholdsAfterRestart(t *testing.T) {
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
+	time.Sleep(time.Duration(1 * time.Second))
 	var td engine.Threshold
 	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThreshold,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_BALANCE_1"}, &td); err != nil {
@@ -341,7 +343,6 @@ func testV1TSGetThresholdsAfterRestart(t *testing.T) {
 	} else if td.Snooze.IsZero() { // make sure Snooze time was reset during execution
 		t.Errorf("received: %+v", td)
 	}
-	time.Sleep(time.Duration(1 * time.Second))
 }
 
 func testV1TSSetThresholdProfile(t *testing.T) {

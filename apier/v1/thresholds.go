@@ -54,8 +54,8 @@ func (tSv1 *ThresholdSv1) GetThreshold(tntID *utils.TenantID, t *engine.Threshol
 }
 
 // ProcessEvent will process an Event
-func (tSv1 *ThresholdSv1) ProcessEvent(args *engine.ArgsProcessEvent, hits *int) error {
-	return tSv1.tS.V1ProcessEvent(args, hits)
+func (tSv1 *ThresholdSv1) ProcessEvent(args *engine.ArgsProcessEvent, tIDs *[]string) error {
+	return tSv1.tS.V1ProcessEvent(args, tIDs)
 }
 
 // GetThresholdProfile returns a Threshold Profile
