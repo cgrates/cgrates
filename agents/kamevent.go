@@ -47,7 +47,7 @@ const (
 )
 
 var (
-	kamReservedEventFields = []string{EVENT, KamTRIndex, KamTRLabel, KamCGRSubsystems, KamReplyRoute}
+	kamReservedEventFields = []string{EVENT, KamTRIndex, KamTRLabel, KamCGRSubsystems, KamCGRContext, KamReplyRoute}
 	kamReservedCDRFields   = append(kamReservedEventFields, KamHashEntry, KamHashID) // HashEntry and id are needed in events for disconnects
 )
 
