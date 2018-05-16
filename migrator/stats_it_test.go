@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package migrator
 
-/*
 import (
 	"log"
 	"path"
@@ -102,38 +101,31 @@ func TestStatsQueueITMove(t *testing.T) {
 }
 
 func testStsITConnect(t *testing.T) {
-	dataDBIn, err := engine.ConfigureDataStorage(stsCfgIn.DataDbType,
+	dataDBIn, err := NewMigratorDataDB(stsCfgIn.DataDbType,
 		stsCfgIn.DataDbHost, stsCfgIn.DataDbPort, stsCfgIn.DataDbName,
 		stsCfgIn.DataDbUser, stsCfgIn.DataDbPass, stsCfgIn.DBDataEncoding,
 		config.CgrConfig().CacheCfg(), *loadHistorySize)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := engine.ConfigureDataStorage(stsCfgOut.DataDbType,
+	dataDBOut, err := NewMigratorDataDB(stsCfgOut.DataDbType,
 		stsCfgOut.DataDbHost, stsCfgOut.DataDbPort, stsCfgOut.DataDbName,
 		stsCfgOut.DataDbUser, stsCfgOut.DataDbPass, stsCfgOut.DBDataEncoding,
 		config.CgrConfig().CacheCfg(), *loadHistorySize)
 	if err != nil {
 		log.Fatal(err)
 	}
-	oldDataDB, err := ConfigureV1DataStorage(stsCfgIn.DataDbType,
-		stsCfgIn.DataDbHost, stsCfgIn.DataDbPort, stsCfgIn.DataDbName,
-		stsCfgIn.DataDbUser, stsCfgIn.DataDbPass, stsCfgIn.DBDataEncoding)
-	if err != nil {
-		log.Fatal(err)
-	}
-	stsMigrator, err = NewMigrator(dataDBIn, dataDBOut, stsCfgIn.DataDbType,
-		stsCfgIn.DBDataEncoding, nil, nil, stsCfgIn.StorDBType, oldDataDB,
-		stsCfgIn.DataDbType, stsCfgIn.DBDataEncoding, nil, stsCfgIn.StorDBType,
-		false, false, false, false, false)
+	stsMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+		nil, nil,
+		false, false, false)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
 func testStsITFlush(t *testing.T) {
-	stsMigrator.dmOut.DataDB().Flush("")
-	if err := engine.SetDBVersions(stsMigrator.dmOut.DataDB()); err != nil {
+	stsMigrator.dmOut.DataManager().DataDB().Flush("")
+	if err := engine.SetDBVersions(stsMigrator.dmOut.DataManager().DataDB()); err != nil {
 		t.Error("Error  ", err.Error())
 	}
 }
@@ -237,7 +229,7 @@ func testStsITMigrateAndMove(t *testing.T) {
 	}
 	switch stsAction {
 	case utils.Migrate:
-		err := stsMigrator.oldDataDB.setV1Stats(v1Sts)
+		err := stsMigrator.dmIN.setV1Stats(v1Sts)
 		if err != nil {
 			t.Error("Error when setting v1Stat ", err.Error())
 		}
@@ -249,7 +241,7 @@ func testStsITMigrateAndMove(t *testing.T) {
 			utils.ActionTriggers: 2,
 			utils.ActionPlans:    2,
 			utils.SharedGroups:   2}
-		err = stsMigrator.dmOut.DataDB().SetVersions(currentVersion, false)
+		err = stsMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for stats ", err.Error())
 		}
@@ -258,8 +250,7 @@ func testStsITMigrateAndMove(t *testing.T) {
 			t.Error("Error when migrating Stats ", err.Error())
 		}
 
-		result, err := stsMigrator.dmOut.GetStatQueueProfile("cgrates.org",
-			v1Sts.Id, true, utils.NonTransactional)
+		result, err := stsMigrator.dmOut.DataManager().DataDB().GetStatQueueProfileDrv("cgrates.org", v1Sts.Id)
 		if err != nil {
 			t.Error("Error when getting Stats ", err.Error())
 		}
@@ -267,8 +258,7 @@ func testStsITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", sqp, result)
 		}
 
-		result1, err := stsMigrator.dmOut.GetFilter("cgrates.org",
-			v1Sts.Id, true, utils.NonTransactional)
+		result1, err := stsMigrator.dmOut.DataManager().DataDB().GetFilterDrv("cgrates.org", v1Sts.Id)
 		if err != nil {
 			t.Error("Error when getting Stats ", err.Error())
 		}
@@ -278,7 +268,7 @@ func testStsITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", len(filter.Rules), len(result1.Rules))
 		}
 
-		result2, err := stsMigrator.dmOut.GetStatQueue("cgrates.org", sq.ID, true, utils.NonTransactional)
+		result2, err := stsMigrator.dmOut.DataManager().GetStatQueue("cgrates.org", sq.ID, true, utils.NonTransactional)
 		if err != nil {
 			t.Error("Error when getting Stats ", err.Error())
 		}
@@ -287,14 +277,14 @@ func testStsITMigrateAndMove(t *testing.T) {
 		}
 
 	case utils.Move:
-		if err := stsMigrator.dmIN.SetStatQueueProfile(sqp, true); err != nil {
+		if err := stsMigrator.dmIN.DataManager().DataDB().SetStatQueueProfileDrv(sqp); err != nil {
 			t.Error("Error when setting Stats ", err.Error())
 		}
-		if err := stsMigrator.dmIN.SetStatQueue(sq); err != nil {
+		if err := stsMigrator.dmIN.DataManager().SetStatQueue(sq); err != nil {
 			t.Error("Error when setting Stats ", err.Error())
 		}
 		currentVersion := engine.CurrentDataDBVersions()
-		err := stsMigrator.dmOut.DataDB().SetVersions(currentVersion, false)
+		err := stsMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for stats ", err.Error())
 		}
@@ -302,11 +292,11 @@ func testStsITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when migrating Stats ", err.Error())
 		}
-		result, err := stsMigrator.dmOut.GetStatQueueProfile(sqp.Tenant, sqp.ID, true, utils.NonTransactional)
+		result, err := stsMigrator.dmOut.DataManager().DataDB().GetStatQueueProfileDrv(sqp.Tenant, sqp.ID)
 		if err != nil {
 			t.Error("Error when getting Stats ", err.Error())
 		}
-		result1, err := stsMigrator.dmOut.GetStatQueue(sq.Tenant, sq.ID, true, utils.NonTransactional)
+		result1, err := stsMigrator.dmOut.DataManager().GetStatQueue(sq.Tenant, sq.ID, true, utils.NonTransactional)
 		if err != nil {
 			t.Error("Error when getting Stats ", err.Error())
 		}
@@ -319,4 +309,3 @@ func testStsITMigrateAndMove(t *testing.T) {
 	}
 
 }
-*/

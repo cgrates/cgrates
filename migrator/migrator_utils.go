@@ -64,31 +64,12 @@ func NewMigratorStorDB(db_type, host, port, name, user, pass string,
 	case utils.MYSQL:
 		d = newMigratorSQL(storDb)
 		db = d.(MigratorStorDB)
+	case utils.POSTGRES:
+		d = newMigratorSQL(storDb)
+		db = d.(MigratorStorDB)
 	default:
 		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are '%s' or '%s'",
 			db_type, utils.MONGO, utils.MYSQL))
 	}
 	return d, nil
 }
-
-/*
-
-func ConfigureV1StorDB(db_type, host, port, name, user, pass string) (db MigratorStorDB, err error) {
-	var d MigratorStorDB
-	switch db_type {
-	case utils.MONGO:
-		d, err = newv1MongoStorage(host, port, name, user, pass, utils.StorDB, nil)
-		db = d.(MigratorStorDB)
-	case utils.MYSQL:
-		d, err = newSqlStorage(host, port, name, user, pass)
-		db = d.(MigratorStorDB)
-	default:
-		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are '%s'",
-			db_type, utils.MONGO))
-	}
-	if err != nil {
-		return nil, err
-	}
-	return d, nil
-}
-*/

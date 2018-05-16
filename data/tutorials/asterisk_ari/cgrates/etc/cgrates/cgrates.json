@@ -4,61 +4,80 @@
 // Copyright (C) ITsysCOM GmbH
 
 "general": {
-	"http_skip_tls_verify": false,							// if enabled Http Client will accept any TLS certificate
-	"rounding_decimals": 5,									// system level precision for floats
-	"dbdata_encoding": "msgpack",							// encoding used to store object data in strings: <msgpack|json>
-	"tpexport_dir": "/var/spool/cgrates/tpe",				// path towards export folder for offline Tariff Plans
-	"httpposter_attempts": 3,								// number of http attempts before considering request failed (eg: *call_url)
-	"default_request_type": "*rated",						// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
-	"default_category": "call",								// default category to consider when missing from requests
-	"default_tenant": "cgrates.org",						// default tenant to consider when missing from requests
-	"default_timezone": "Local",							// default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-	"connect_attempts": 3,									// initial server connect attempts
-	"reconnects": -1,										// number of retries in case of connection lost
-	"connect_timeout": "1s",								// consider connection unsuccessful on timeout, 0 to disable the feature
-	"reply_timeout": "2s",									// consider connection down for replies taking longer than this value
-	"response_cache_ttl": "0s",								// the life span of a cached response
-	"internal_ttl": "2m",									// maximum duration to wait for internal connections before giving up
-	"locking_timeout": "5s",								// timeout internal locks to avoid deadlocks
-	"cache_dump_dir": "",									 // cache dump for faster start (leave empty to disable)
+    "log_level": 7,
 },
 
 
-"rals": {
-	"enabled": true,
-	"cdrstats_conns": [
-		{"address": "*internal"}
-	],
-	"pubsubs_conns": [
-		{"address": "*internal"}
-	],
-	"users_conns": [
-		{"address": "*internal"}
-	],
-	"aliases_conns": [
-		{"address": "*internal"}
-	],
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
 },
 
-"stor_db": {								// database used to store offline tariff plans and CDRs
-	"db_password": "CGRateS.org",			// password to use when connecting to stordb
+
+"stor_db": {
+	"db_password": "CGRateS.org",
 },
+
 
 "scheduler": {
 	"enabled": true,
 },
 
 
-"cdrs": {
-	"enabled": true,						// start the CDR Server service:  <true|false>
-	"cdrstats_conns": [
+"rals": {
+	"enabled": true,
+	"thresholds_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"stats_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"pubsubs_conns": [
 		{"address": "*internal"}
+	],
+	"attributes_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 },
 
 
-"cdrstats": {
-	"enabled": true,						// starts the cdrstats service: <true|false>
+"cdrs": {
+	"enabled": true,
+	"sessions_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"stats_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"sessions_cost_retries": 5,
+},
+
+
+"sessions": {
+	"enabled": true,
+	"rals_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"cdrs_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"resources_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"suppliers_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"attributes_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"stats_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"thresholds_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"debit_interval": "10s",
 },
 
 
@@ -125,33 +144,68 @@
 },
 
 
-"sessions": {
-	"enabled": true,
-	"debit_interval": "5s",					// interval to perform debits on.
-},
-
-"sm_asterisk": {
-	"enabled": true,												// starts Asterisk SessionManager service: <true|false>
+"asterisk_agent": {
+	"enabled": true,	
+	"sessions_conns": [
+		{"address": "*internal"}			
+	],	
 	"create_cdr": true,
-	"asterisk_conns":[												// instantiate connections to multiple Asterisk servers
+	"asterisk_conns":[											
 		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 10}
 	],
 },
 
 
 "pubsubs": {
-	"enabled": true,				// starts PubSub service: <true|false>.
+	"enabled": true,
 },
 
 
-"aliases": {
-	"enabled": true,				// starts PubSub service: <true|false>.
+"attributes": {
+	"enabled": true,
+	"string_indexed_fields": ["Account"],			
 },
 
 
-"users": {
-	"enabled": true,				// starts User service: <true|false>.
-	"indexes": ["Uuid"],			// user profile field indexes
+"resources": {
+	"enabled": true,
+	"thresholds_conns": [
+		{"address": "*internal"}
+	],
+	"string_indexed_fields": ["Account"],
+	"prefix_indexed_fields": ["Destination"],
 },
+
+
+"stats": {
+	"enabled": true,
+	"thresholds_conns": [
+		{"address": "*internal"}
+	],
+	"string_indexed_fields": ["Account"],
+},
+
+
+"thresholds": {
+	"enabled": true,
+	"string_indexed_fields": ["Account"],
+},
+
+
+"suppliers": {
+	"enabled": true,
+	"rals_conns": [
+		{"address": "*internal"}
+	],
+	"resources_conns": [
+		{"address": "*internal"}
+	],
+	"stats_conns": [
+		{"address": "*internal"}	
+	],
+	"string_indexed_fields": ["Account"],
+	"prefix_indexed_fields": ["Destination"],
+},
+
 
 }

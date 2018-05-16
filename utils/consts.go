@@ -535,6 +535,7 @@ const (
 	Freeswitch                   = "freeswitch"
 	Kamailio                     = "kamailio"
 	Opensips                     = "opensips"
+	Asterisk                     = "asterisk"
 )
 
 // Migrator Action
@@ -778,6 +779,7 @@ const (
 	TBLTPSuppliers        = "tp_suppliers"
 	TBLTPAttributes       = "tp_attributes"
 	TBLVersions           = "versions"
+	OldSMCosts            = "sm_costs"
 )
 
 // Cache Name
@@ -841,6 +843,7 @@ const (
 	RadiusAgent     = "RadiusAgent"
 	DiameterAgent   = "DiameterAgent"
 	FreeSWITCHAgent = "FreeSWITCHAgent"
+	AsteriskAgent   = "AsteriskAgent"
 )
 
 func buildCacheInstRevPrefixes() {

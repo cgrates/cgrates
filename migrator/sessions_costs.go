@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
-	//"database/sql"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -63,30 +62,10 @@ func (m *Migrator) migrateSessionSCosts() (err error) {
 			"version number is not defined for SessionsCosts model")
 	}
 	switch vrs[utils.SessionSCosts] {
-	// case 0, 1:
-	// 	var isPostGres bool
-	// 	var storSQL *sql.DB
-	// 	switch m.storDBType {
-	// 	case utils.MYSQL:
-	// 		isPostGres = false
-	// 		storSQL = m.storDBOut.(*engine.SQLStorage).Db
-	// 	case utils.POSTGRES:
-	// 		isPostGres = true
-	// 		storSQL = m.storDBOut.(*engine.SQLStorage).Db
-	// 	default:
-	// 		return utils.NewCGRError(utils.Migrator,
-	// 			utils.MandatoryIEMissingCaps,
-	// 			utils.UnsupportedDB,
-	// 			fmt.Sprintf("unsupported database type: <%s>", m.storDBType))
-	// 	}
-	// 	qry := "RENAME TABLE sm_costs TO sessions_costs;"
-	// 	if isPostGres {
-	// 		qry = "ALTER TABLE sm_costs RENAME TO sessions_costs"
-	// 	}
-	// 	if _, err := storSQL.Exec(qry); err != nil {
-	// 		return err
-	// 	}
-	// 	fallthrough // incremental updates
+	case 0, 1:
+		if err := m.migrateV1SessionSCosts(); err != nil {
+			return err
+		}
 	case 2:
 		if err := m.migrateV2SessionSCosts(); err != nil {
 			return err
@@ -97,6 +76,22 @@ func (m *Migrator) migrateSessionSCosts() (err error) {
 		}
 	}
 	return nil
+}
+
+func (m *Migrator) migrateV1SessionSCosts() (err error) {
+	if err = m.storDBIn.renameV1SMCosts(); err != nil {
+		return err
+	}
+	if m.dryRun != true {
+		vrs := engine.Versions{utils.SessionSCosts: 2}
+		if err = m.storDBOut.StorDB().SetVersions(vrs, false); err != nil {
+			return utils.NewCGRError(utils.Migrator,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error: <%s> when updating SessionSCosts version into StorDB", err.Error()))
+		}
+	}
+	return
 }
 
 func (m *Migrator) migrateV2SessionSCosts() (err error) {
