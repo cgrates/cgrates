@@ -81,7 +81,7 @@
 "kamailio_agent": {
 	"enabled": true,
 	"evapi_conns":[							// instantiate connections to multiple Kamailio servers
-		{"address": "127.0.0.1:8448", "reconnects": 5}
+		{"address": "192.168.56.102:8448", "reconnects": 5}
 	],
 	"sessions_conns": [
 		{"address": "*internal"}			// connection towards session service: <*internal>
