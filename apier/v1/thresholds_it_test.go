@@ -257,50 +257,48 @@ func testV1TSProcessEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
-	eIDs = []string{"cgrates.org:THD_ACNT_BALANCE_1:event2"}
+	eIDs = []string{"THD_ACNT_BALANCE_1"}
 	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[1], &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
-	eIDs = []string{"cgrates.org:THD_STATS_1:event3"}
+	eIDs = []string{"THD_STATS_1"}
 	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[2], &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
-	eIDs = []string{"cgrates.org:THD_STATS_2:event4", "cgrates.org:THD_STATS_1:event4"}
-	eIDs2 := []string{"cgrates.org:THD_STATS_1:event4", "cgrates.org:THD_STATS_2:event4"}
+	eIDs = []string{"THD_STATS_2", "THD_STATS_1"}
+	eIDs2 := []string{"THD_STATS_1", "THD_STATS_2"}
 	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[3], &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) && !reflect.DeepEqual(ids, eIDs2) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
-	eIDs = []string{"cgrates.org:THD_STATS_3:event5"}
+	eIDs = []string{"THD_STATS_3"}
 	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[4], &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
-	eIDs = []string{"cgrates.org:THD_RES_1:event6"}
+	eIDs = []string{"THD_RES_1"}
 	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[5], &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
-	eIDs = []string{"cgrates.org:THD_RES_1:event6"}
 	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[6], &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
-	eIDs = []string{"cgrates.org:THD_RES_1:event6"}
 	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[7], &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
-	eIDs = []string{"cgrates.org:THD_CDRS_1:cdrev1"}
+	eIDs = []string{"THD_CDRS_1"}
 	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[8], &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {

@@ -193,8 +193,8 @@ func TestSessionSv1ItAuth(t *testing.T) {
 	if *rply.ResourceAllocation == "" {
 		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
 	}
-	if *rply.ThresholdHits != 1 {
-		t.Errorf("Unexpected ThresholdHits: %v", *rply.ThresholdHits)
+	if !reflect.DeepEqual(*rply.ThresholdIDs, []string{"THD_ACNT_1001"}) {
+		t.Errorf("Unexpected ThresholdIDs: %v", *rply.ThresholdIDs)
 	}
 	// Hit threshold and execute action (topup with 10 units)
 	expectedAccount := &engine.Account{
@@ -258,8 +258,8 @@ func TestSessionSv1ItInitiateSession(t *testing.T) {
 		args, &rply); err != nil {
 		t.Error(err)
 	}
-	if *rply.ThresholdHits != 1 {
-		t.Errorf("Unexpected ThresholdHits: %v", *rply.ThresholdHits)
+	if !reflect.DeepEqual(*rply.ThresholdIDs, []string{"THD_ACNT_1001"}) {
+		t.Errorf("Unexpected ThresholdIDs: %v", *rply.ThresholdIDs)
 	}
 	expectedAccount := &engine.Account{
 		ID: "cgrates.org:1001",

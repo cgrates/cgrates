@@ -1321,7 +1321,7 @@ type V1AuthorizeReply struct {
 	ResourceAllocation *string
 	MaxUsage           *time.Duration
 	Suppliers          *engine.SortedSuppliers
-	ThresholdHits      *int
+	ThresholdIDs       *[]string
 }
 
 // AsCGRReply is part of utils.CGRReplier interface
@@ -1345,8 +1345,8 @@ func (v1AuthReply *V1AuthorizeReply) AsCGRReply() (cgrReply utils.CGRReply, err 
 	if v1AuthReply.Suppliers != nil {
 		cgrReply[utils.CapSuppliers] = v1AuthReply.Suppliers.Digest()
 	}
-	if v1AuthReply.ThresholdHits != nil {
-		cgrReply[utils.CapThresholdHits] = *v1AuthReply.ThresholdHits
+	if v1AuthReply.ThresholdIDs != nil {
+		cgrReply[utils.CapThresholdHits] = *v1AuthReply.ThresholdIDs
 	}
 	cgrReply[utils.Error] = "" // so we can compare in filters
 	return
@@ -1442,16 +1442,16 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		if smg.thdS == nil {
 			return utils.NewErrNotConnected(utils.ThresholdS)
 		}
-		var hits int
+		var tIDs []string
 		thEv := &engine.ArgsProcessEvent{
 			CGREvent: args.CGREvent,
 		}
-		if err := smg.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil &&
+		if err := smg.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<SessionS> error: %s processing event %+v with ThresholdS.", err.Error(), thEv))
 		}
-		authReply.ThresholdHits = &hits
+		authReply.ThresholdIDs = &tIDs
 	}
 	checkStatQueues := smg.statS != nil
 	if args.ProcessStatQueues != nil {
@@ -1522,7 +1522,7 @@ type V1InitSessionReply struct {
 	Attributes         *engine.AttrSProcessEventReply
 	ResourceAllocation *string
 	MaxUsage           *time.Duration
-	ThresholdHits      *int
+	ThresholdIDs       *[]string
 }
 
 // AsCGRReply is part of utils.CGRReplier interface
@@ -1543,8 +1543,8 @@ func (v1Rply *V1InitSessionReply) AsCGRReply() (cgrReply utils.CGRReply, err err
 	if v1Rply.MaxUsage != nil {
 		cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
 	}
-	if v1Rply.ThresholdHits != nil {
-		cgrReply[utils.CapThresholdHits] = *v1Rply.ThresholdHits
+	if v1Rply.ThresholdIDs != nil {
+		cgrReply[utils.CapThresholdHits] = *v1Rply.ThresholdIDs
 	}
 	cgrReply[utils.Error] = ""
 	return
@@ -1616,16 +1616,16 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		if smg.thdS == nil {
 			return utils.NewErrNotConnected(utils.ThresholdS)
 		}
-		var hits int
+		var tIDs []string
 		thEv := &engine.ArgsProcessEvent{
 			CGREvent: args.CGREvent,
 		}
-		if err := smg.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil &&
+		if err := smg.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<SessionS> error: %s processing event %+v with ThresholdS.", err.Error(), thEv))
 		}
-		rply.ThresholdHits = &hits
+		rply.ThresholdIDs = &tIDs
 	}
 	checkStatQueues := smg.statS != nil
 	if args.ProcessStatQueues != nil {
@@ -1807,11 +1807,11 @@ func (smg *SMGeneric) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection
 		if smg.thdS == nil {
 			return utils.NewErrNotConnected(utils.ThresholdS)
 		}
-		var hits int
+		var tIDs []string
 		thEv := &engine.ArgsProcessEvent{
 			CGREvent: args.CGREvent,
 		}
-		if err := smg.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil &&
+		if err := smg.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<SessionS> error: %s processing event %+v with ThresholdS.", err.Error(), thEv))

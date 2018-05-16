@@ -280,15 +280,15 @@ type ArgsProcessEvent struct {
 }
 
 // processEvent processes a new event, dispatching to matching thresholds
-func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (eventIDs []string, err error) {
+func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (thresholdsIDs []string, err error) {
 	matchTs, err := tS.matchingThresholdsForEvent(args)
 	if err != nil {
 		return nil, err
 	}
 	var withErrors bool
-	var evIds []string
+	var tIDs []string
 	for _, t := range matchTs {
-		evIds = append(evIds, utils.ConcatenatedKey(t.TenantID(), args.CGREvent.ID))
+		tIDs = append(tIDs, t.ID)
 		t.Hits += 1
 		err = t.ProcessEvent(args, tS.dm)
 		if err != nil {
@@ -319,10 +319,10 @@ func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (eventIDs []str
 			tS.stMux.Unlock()
 		}
 	}
-	if len(evIds) != 0 {
-		eventIDs = append(eventIDs, evIds...)
+	if len(tIDs) != 0 {
+		thresholdsIDs = append(thresholdsIDs, tIDs...)
 	} else {
-		eventIDs = []string{}
+		thresholdsIDs = []string{}
 	}
 	if withErrors {
 		err = utils.ErrPartiallyExecuted
