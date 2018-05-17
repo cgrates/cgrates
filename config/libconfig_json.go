@@ -498,3 +498,18 @@ type LoaderCfgJson struct {
 	Caches_conns    *[]*HaPoolJsonCfg
 	Scheduler_conns *[]*HaPoolJsonCfg
 }
+
+type MigratorCfgJson struct {
+	Out_dataDB_type     *string
+	Out_dataDB_host     *string
+	Out_dataDB_port     *string
+	Out_dataDB_name     *string
+	Out_dataDB_user     *string
+	Out_dataDB_password *string
+	Out_storDB_type     *string
+	Out_storDB_host     *string
+	Out_storDB_port     *string
+	Out_storDB_name     *string
+	Out_storDB_user     *string
+	Out_storDB_password *string
+}

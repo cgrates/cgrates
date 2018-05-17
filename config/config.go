@@ -359,6 +359,7 @@ type CGRConfig struct {
 	sureTaxCfg               *SureTaxCfg              // Load here SureTax configuration, as pointer so we can have runtime reloads in the future
 	ConfigReloads            map[string]chan struct{} // Signals to specific entities that a config reload should occur
 	LoaderCgrConfig          *LoaderCgrCfg
+	MigratorCgrConfig        *MigratorCgrCfg
 	// Cache defaults loaded from json and needing clones
 	dfltCdreProfile *CdreConfig // Default cdreConfig profile
 	dfltCdrcProfile *CdrcConfig // Default cdrcConfig profile
@@ -831,6 +832,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	}
 
 	jsnLoaderCgrCfg, err := jsnCfg.LoaderCfgJson()
+	if err != nil {
+		return nil
+	}
+
+	jsnMigratorCgrCfg, err := jsnCfg.MigratorCfgJson()
 	if err != nil {
 		return nil
 	}
@@ -1384,6 +1390,15 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 	}
 
+	if jsnMigratorCgrCfg != nil {
+		if self.MigratorCgrConfig == nil {
+			self.MigratorCgrConfig = new(MigratorCgrCfg)
+		}
+		if self.MigratorCgrConfig.loadFromJsonCfg(jsnMigratorCgrCfg); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -1461,4 +1476,8 @@ func (cfg *CGRConfig) DispatcherSCfg() *DispatcherSCfg {
 
 func (cfg *CGRConfig) LoaderCgrCfg() *LoaderCgrCfg {
 	return cfg.LoaderCgrConfig
+}
+
+func (cfg *CGRConfig) MigratorCgrCfg() *MigratorCgrCfg {
+	return cfg.MigratorCgrConfig
 }

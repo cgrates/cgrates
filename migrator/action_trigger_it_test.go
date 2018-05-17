@@ -103,12 +103,12 @@ func TestActionTriggerITMove(t *testing.T) {
 
 func TestActionTriggerITMoveEncoding(t *testing.T) {
 	var err error
-	actTrgPathIn = path.Join(*dataDir, "conf", "samples", "tutmongojson")
+	actTrgPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
 	actTrgCfgIn, err = config.NewCGRConfigFromFolder(actTrgPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	actTrgPathOut = path.Join(*dataDir, "conf", "samples", "tutmongomsgpack")
+	actTrgPathOut = path.Join(*dataDir, "conf", "samples", "tutmongojson")
 	actTrgCfgOut, err = config.NewCGRConfigFromFolder(actTrgPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -121,12 +121,12 @@ func TestActionTriggerITMoveEncoding(t *testing.T) {
 
 func TestActionTriggerITMoveEncoding2(t *testing.T) {
 	var err error
-	actTrgPathIn = path.Join(*dataDir, "conf", "samples", "tutmysqljson")
+	actTrgPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
 	actTrgCfgIn, err = config.NewCGRConfigFromFolder(actTrgPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	actTrgPathOut = path.Join(*dataDir, "conf", "samples", "tutmysqlmsgpack")
+	actTrgPathOut = path.Join(*dataDir, "conf", "samples", "tutmysqljson")
 	actTrgCfgOut, err = config.NewCGRConfigFromFolder(actTrgPathOut)
 	if err != nil {
 		t.Fatal(err)
