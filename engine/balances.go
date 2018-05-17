@@ -715,8 +715,8 @@ func (b *Balance) Publish() {
 	if !b.ExpirationDate.IsZero() {
 		thEv.Event[utils.ExpiryTime] = b.ExpirationDate.Format(time.RFC3339)
 	}
-	var hits int
-	if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil &&
+	var tIDs []string
+	if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
 		utils.Logger.Warning(
 			fmt.Sprintf("<AccountS> error: %s processing balance event %+v with ThresholdS.",
@@ -825,8 +825,8 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 				thEv.Event[utils.ExpiryTime] = b.ExpirationDate.Format(time.RFC3339)
 			}
 			if thresholdS != nil {
-				var hits int
-				if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil &&
+				var tIDs []string
+				if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 					err.Error() != utils.ErrNotFound.Error() {
 					utils.Logger.Warning(
 						fmt.Sprintf("<AccountS> error: %s processing balance event %+v with ThresholdS.",
@@ -873,8 +873,8 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 						utils.Account:       acntTnt.ID,
 						utils.AllowNegative: acnt.AllowNegative,
 						utils.Disabled:      acnt.Disabled}}}
-			var hits int
-			if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil &&
+			var tIDs []string
+			if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<AccountS> error: %s processing account event %+v with ThresholdS.", err.Error(), thEv))
