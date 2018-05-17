@@ -65,6 +65,7 @@ const (
 	SURETAX_JSON       = "suretax"
 	DispatcherSJson    = "dispatcher"
 	CgrLoaderCfgJson   = "loader"
+	CgrMigratorCfgJson = "migrator"
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -456,6 +457,18 @@ func (self CgrJsonCfg) LoaderCfgJson() (*LoaderCfgJson, error) {
 		return nil, nil
 	}
 	cfg := new(LoaderCfgJson)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (self CgrJsonCfg) MigratorCfgJson() (*MigratorCfgJson, error) {
+	rawCfg, hasKey := self[CgrMigratorCfgJson]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(MigratorCfgJson)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

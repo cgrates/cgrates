@@ -104,12 +104,12 @@ func TestAccountITMove(t *testing.T) {
 
 func TestAccountITMoveEncoding(t *testing.T) {
 	var err error
-	accPathIn = path.Join(*dataDir, "conf", "samples", "tutmongojson")
+	accPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
 	accCfgIn, err = config.NewCGRConfigFromFolder(accPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	accPathOut = path.Join(*dataDir, "conf", "samples", "tutmongomsgpack")
+	accPathOut = path.Join(*dataDir, "conf", "samples", "tutmongojson")
 	accCfgOut, err = config.NewCGRConfigFromFolder(accPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -122,12 +122,12 @@ func TestAccountITMoveEncoding(t *testing.T) {
 
 func TestAccountITMoveEncoding2(t *testing.T) {
 	var err error
-	accPathIn = path.Join(*dataDir, "conf", "samples", "tutmysqljson")
+	accPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
 	accCfgIn, err = config.NewCGRConfigFromFolder(accPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	accPathOut = path.Join(*dataDir, "conf", "samples", "tutmysqlmsgpack")
+	accPathOut = path.Join(*dataDir, "conf", "samples", "tutmysqljson")
 	accCfgOut, err = config.NewCGRConfigFromFolder(accPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -240,7 +240,8 @@ func testAccITMigrateAndMove(t *testing.T) {
 			utils.VOICE:    engine.Balances{v2b},
 			utils.MONETARY: engine.Balances{m2}},
 		UnitCounters:   engine.UnitCounters{},
-		ActionTriggers: engine.ActionTriggers{}}
+		ActionTriggers: engine.ActionTriggers{},
+	}
 	switch accAction {
 	case utils.Migrate:
 		err := accMigrator.dmIN.setV1Account(v1Acc)

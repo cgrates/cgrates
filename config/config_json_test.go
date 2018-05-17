@@ -1267,3 +1267,25 @@ func TestDfLoaderCfg(t *testing.T) {
 		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }
+
+func TestDfMigratorCfg(t *testing.T) {
+	eCfg := &MigratorCfgJson{
+		Out_dataDB_type:     utils.StringPointer("redis"),
+		Out_dataDB_host:     utils.StringPointer("127.0.0.1"),
+		Out_dataDB_port:     utils.StringPointer("6379"),
+		Out_dataDB_name:     utils.StringPointer("10"),
+		Out_dataDB_user:     utils.StringPointer("cgrates"),
+		Out_dataDB_password: utils.StringPointer(""),
+		Out_storDB_type:     utils.StringPointer("mysql"),
+		Out_storDB_host:     utils.StringPointer("127.0.0.1"),
+		Out_storDB_port:     utils.StringPointer("3306"),
+		Out_storDB_name:     utils.StringPointer("cgrates"),
+		Out_storDB_user:     utils.StringPointer("cgrates"),
+		Out_storDB_password: utils.StringPointer(""),
+	}
+	if cfg, err := dfCgrJsonCfg.MigratorCfgJson(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
+	}
+}

@@ -1286,3 +1286,23 @@ func TestCgrLoaderCfgDefault(t *testing.T) {
 		t.Errorf("received: %+v, expecting: %+v", utils.ToJSON(cgrCfg.LoaderCgrConfig), utils.ToJSON(eLdrCfg))
 	}
 }
+
+func TestCgrMigratorCfgDefault(t *testing.T) {
+	eMgrCfg := &MigratorCgrCfg{
+		OutDataDBType:     "redis",
+		OutDataDBHost:     "127.0.0.1",
+		OutDataDBPort:     "6379",
+		OutDataDBName:     "10",
+		OutDataDBUser:     "cgrates",
+		OutDataDBPassword: "",
+		OutStorDBType:     "mysql",
+		OutStorDBHost:     "127.0.0.1",
+		OutStorDBPort:     "3306",
+		OutStorDBName:     "cgrates",
+		OutStorDBUser:     "cgrates",
+		OutStorDBPassword: "",
+	}
+	if !reflect.DeepEqual(cgrCfg.MigratorCgrConfig, eMgrCfg) {
+		t.Errorf("received: %+v, expecting: %+v", utils.ToJSON(cgrCfg.MigratorCgrConfig), utils.ToJSON(eMgrCfg))
+	}
+}

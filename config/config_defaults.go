@@ -624,5 +624,19 @@ const CGRATES_CFG_JSON = `
 	],
 },
 
+"migrator": {
+	"out_datadb_type": "redis",
+	"out_datadb_host": "127.0.0.1",
+	"out_datadb_port": "6379",
+	"out_datadb_name": "10",
+	"out_datadb_user": "cgrates",
+	"out_datadb_password": "",
+	"out_stordb_type": "mysql",
+	"out_stordb_host": "127.0.0.1",
+	"out_stordb_port": "3306",
+	"out_stordb_name": "cgrates",
+	"out_stordb_user": "cgrates",
+	"out_stordb_password": "",
+},
 
 }`

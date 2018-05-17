@@ -100,12 +100,12 @@ func TestActionPlanITMove(t *testing.T) {
 
 func TestActionPlanITMoveEncoding(t *testing.T) {
 	var err error
-	actPlnPathIn = path.Join(*dataDir, "conf", "samples", "tutmongojson")
+	actPlnPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
 	actPlnCfgIn, err = config.NewCGRConfigFromFolder(actPlnPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	actPlnPathOut = path.Join(*dataDir, "conf", "samples", "tutmongomsgpack")
+	actPlnPathOut = path.Join(*dataDir, "conf", "samples", "tutmongojson")
 	actPlnCfgOut, err = config.NewCGRConfigFromFolder(actPlnPathOut)
 	if err != nil {
 		t.Fatal(err)
@@ -118,12 +118,12 @@ func TestActionPlanITMoveEncoding(t *testing.T) {
 
 func TestActionPlanITMoveEncoding2(t *testing.T) {
 	var err error
-	actPlnPathIn = path.Join(*dataDir, "conf", "samples", "tutmysqljson")
+	actPlnPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
 	actPlnCfgIn, err = config.NewCGRConfigFromFolder(actPlnPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	actPlnPathOut = path.Join(*dataDir, "conf", "samples", "tutmysqlmsgpack")
+	actPlnPathOut = path.Join(*dataDir, "conf", "samples", "tutmysqljson")
 	actPlnCfgOut, err = config.NewCGRConfigFromFolder(actPlnPathOut)
 	if err != nil {
 		t.Fatal(err)
