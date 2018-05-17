@@ -1089,9 +1089,9 @@ func (acnt *Account) Publish() {
 				utils.Account:       acntTnt.ID,
 				utils.AllowNegative: acnt.AllowNegative,
 				utils.Disabled:      acnt.Disabled}}}
-	var hits int
+	var tIDs []string
 	if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent,
-		thEv, &hits); err != nil &&
+		thEv, &tIDs); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
 		utils.Logger.Warning(
 			fmt.Sprintf("<AccountS> error: %s processing account event %+v with ThresholdS.", err.Error(), thEv))

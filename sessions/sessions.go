@@ -1476,6 +1476,7 @@ type V1AuthorizeReplyWithDigest struct {
 	ResourceAllocation *string
 	MaxUsage           *float64 // special treat returning time.Duration.Seconds()
 	SuppliersDigest    *string
+	Thresholds         *string
 }
 
 // BiRPCv1AuthorizeEventWithDigest performs authorization for CGREvent based on specific components
@@ -1486,7 +1487,6 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEventWithDigest(clnt rpcclient.RpcClientCo
 		!args.GetMaxUsage && !args.GetSuppliers {
 		return utils.NewErrMandatoryIeMissing("subsystems")
 	}
-
 	var initAuthRply V1AuthorizeReply
 	if err = smg.BiRPCv1AuthorizeEvent(clnt, args, &initAuthRply); err != nil {
 		return
@@ -1505,6 +1505,10 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEventWithDigest(clnt rpcclient.RpcClientCo
 	}
 	if args.GetSuppliers {
 		authReply.SuppliersDigest = utils.StringPointer(initAuthRply.Suppliers.Digest())
+	}
+	if *args.ProcessThresholds {
+		authReply.Thresholds = utils.StringPointer(
+			strings.Join(*initAuthRply.ThresholdIDs, utils.FIELDS_SEP))
 	}
 	return nil
 }
@@ -1649,7 +1653,7 @@ type V1InitReplyWithDigest struct {
 	AttributesDigest   *string
 	ResourceAllocation *string
 	MaxUsage           *float64
-	//ThresholdsHits     *int
+	Thresholds         *string
 }
 
 func (smg *SMGeneric) BiRPCv1InitiateSessionWithDigest(clnt rpcclient.RpcClientConnection,
@@ -1678,6 +1682,10 @@ func (smg *SMGeneric) BiRPCv1InitiateSessionWithDigest(clnt rpcclient.RpcClientC
 		}
 	}
 
+	if *args.ProcessThresholds {
+		initReply.Thresholds = utils.StringPointer(
+			strings.Join(*initSessionRply.ThresholdIDs, utils.FIELDS_SEP))
+	}
 	return nil
 }
 
