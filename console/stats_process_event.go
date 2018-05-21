@@ -65,6 +65,6 @@ func (self *CmdStatQueueProcessEvent) PostprocessRpcParams() error {
 }
 
 func (self *CmdStatQueueProcessEvent) RpcResult() interface{} {
-	var atr string
+	var atr []string
 	return &atr
 }

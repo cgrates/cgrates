@@ -96,7 +96,7 @@ func (stsv1 *StatSv1) GetQueueIDs(tenant string, qIDs *[]string) error {
 }
 
 // ProcessEvent returns processes a new Event
-func (stsv1 *StatSv1) ProcessEvent(ev *utils.CGREvent, reply *string) error {
+func (stsv1 *StatSv1) ProcessEvent(ev *utils.CGREvent, reply *[]string) error {
 	return stsv1.sS.V1ProcessEvent(ev, reply)
 }
 

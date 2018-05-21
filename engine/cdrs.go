@@ -208,7 +208,7 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 		go self.cdrstats.Call("CDRStatsV1.AppendCDR", cdr, &out)
 	}
 	if self.stats != nil {
-		var reply string
+		var reply []string
 		go self.stats.Call(utils.StatSv1ProcessEvent, cdr.AsCGREvent(), &reply)
 	}
 	if len(self.cgrCfg.CDRSOnlineCDRExports) != 0 { // Replicate raw CDR
@@ -295,7 +295,7 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, cdrstats, 
 				}
 			}
 			if self.stats != nil {
-				var reply string
+				var reply []string
 				go self.stats.Call(utils.StatSv1ProcessEvent, ratedCDR.AsCGREvent(), &reply)
 			}
 		}

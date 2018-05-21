@@ -273,6 +273,9 @@ func (kev KamEvent) AsKamAuthReply(authArgs *sessions.V1AuthorizeArgs,
 	if authArgs.ProcessThresholds != nil && *authArgs.ProcessThresholds {
 		kar.Thresholds = strings.Join(*authReply.ThresholdIDs, utils.FIELDS_SEP)
 	}
+	if authArgs.ProcessStatQueues != nil && *authArgs.ProcessStatQueues {
+		kar.StatQueues = strings.Join(*authReply.StatQueueIDs, utils.FIELDS_SEP)
+	}
 	return
 }
 
@@ -346,6 +349,7 @@ type KamAuthReply struct {
 	MaxUsage           int    // Maximum session time in case of success, -1 for unlimited
 	Suppliers          string // List of suppliers, comma separated
 	Thresholds         string
+	StatQueues         string
 	Error              string // Reply in case of error
 }
 
