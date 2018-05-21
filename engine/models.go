@@ -441,7 +441,7 @@ type TpThreshold struct {
 	ID                 string  `index:"1" re:""`
 	FilterIDs          string  `index:"2" re:""`
 	ActivationInterval string  `index:"3" re:""`
-	Recurrent          bool    `index:"4" re:""`
+	MaxHits            int     `index:"4" re:""`
 	MinHits            int     `index:"5" re:""`
 	MinSleep           string  `index:"6" re:""`
 	Blocker            bool    `index:"7" re:""`
