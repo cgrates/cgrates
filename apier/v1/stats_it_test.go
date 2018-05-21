@@ -112,7 +112,7 @@ func testV1STSLoadConfig(t *testing.T) {
 	case "tutmongo": // Mongo needs more time to reset db, need to investigate
 		statsDelay = 4000
 	default:
-		statsDelay = 1000
+		statsDelay = 2000
 	}
 }
 
@@ -142,7 +142,7 @@ func testV1STSFromFolder(t *testing.T) {
 	if err := stsV1Rpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(1000) * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 }
 
 func testV1STSGetStats(t *testing.T) {
@@ -173,7 +173,8 @@ func testV1STSGetStats(t *testing.T) {
 }
 
 func testV1STSProcessEvent(t *testing.T) {
-	var reply string
+	var reply []string
+	expected := []string{"Stats1"}
 	ev1 := utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
@@ -185,8 +186,8 @@ func testV1STSProcessEvent(t *testing.T) {
 			utils.PDD:        time.Duration(12 * time.Second)}}
 	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("received reply: %s", reply)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 	//process with one event (should be N/A becaus MinItems is 2)
 	expectedMetrics := map[string]string{
@@ -200,7 +201,8 @@ func testV1STSProcessEvent(t *testing.T) {
 		utils.MetaAverage: utils.NOT_AVAILABLE,
 	}
 	var metrics map[string]string
-	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics, &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics); err != nil {
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
@@ -215,8 +217,8 @@ func testV1STSProcessEvent(t *testing.T) {
 			utils.Usage:      time.Duration(45 * time.Second)}}
 	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &ev2, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("received reply: %s", reply)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 	ev3 := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -227,8 +229,8 @@ func testV1STSProcessEvent(t *testing.T) {
 			utils.Usage:     0}}
 	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &ev3, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("received reply: %s", reply)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 	expectedMetrics2 := map[string]string{
 		utils.MetaASR:     "66.66667%",
@@ -259,7 +261,7 @@ func testV1STSGetStatsAfterRestart(t *testing.T) {
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
-	time.Sleep(2 * time.Second)
+	time.Sleep(1 * time.Second)
 
 	//get stats metrics after restart
 	expectedMetrics2 := map[string]string{
@@ -278,7 +280,7 @@ func testV1STSGetStatsAfterRestart(t *testing.T) {
 	} else if !reflect.DeepEqual(expectedMetrics2, metrics2) {
 		t.Errorf("After restat expecting: %+v, received reply: %s", expectedMetrics2, metrics2)
 	}
-	time.Sleep(time.Duration(1 * time.Second))
+	time.Sleep(1 * time.Second)
 }
 
 func testV1STSSetStatQueueProfile(t *testing.T) {

@@ -214,16 +214,18 @@ func (ss *StatService) Call(serviceMethod string, args interface{}, reply interf
 
 // processEvent processes a new event, dispatching to matching queues
 // queues matching are also cached to speed up
-func (sS *StatService) processEvent(ev *utils.CGREvent) (err error) {
+func (sS *StatService) processEvent(ev *utils.CGREvent) (statQueueIDs []string, err error) {
 	matchSQs, err := sS.matchingStatQueuesForEvent(ev)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if len(matchSQs) == 0 {
-		return utils.ErrNotFound
+		return nil, utils.ErrNotFound
 	}
+	var stsIDs []string
 	var withErrors bool
 	for _, sq := range matchSQs {
+		stsIDs = append(stsIDs, sq.ID)
 		lkID := utils.StatQueuePrefix + sq.TenantID()
 		guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lkID)
 		err = sq.ProcessEvent(ev)
@@ -269,6 +271,11 @@ func (sS *StatService) processEvent(ev *utils.CGREvent) (err error) {
 			}
 		}
 	}
+	if len(stsIDs) != 0 {
+		statQueueIDs = append(statQueueIDs, stsIDs...)
+	} else {
+		statQueueIDs = []string{}
+	}
 	if withErrors {
 		err = utils.ErrPartiallyExecuted
 	}
@@ -276,14 +283,16 @@ func (sS *StatService) processEvent(ev *utils.CGREvent) (err error) {
 }
 
 // V1ProcessEvent implements StatV1 method for processing an Event
-func (sS *StatService) V1ProcessEvent(ev *utils.CGREvent, reply *string) (err error) {
+func (sS *StatService) V1ProcessEvent(ev *utils.CGREvent, reply *[]string) (err error) {
 	if missing := utils.MissingStructFields(ev, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	} else if ev.Event == nil {
 		return utils.NewErrMandatoryIeMissing("Event")
 	}
-	if err = sS.processEvent(ev); err == nil {
-		*reply = utils.OK
+	if ids, err := sS.processEvent(ev); err != nil {
+		return err
+	} else {
+		*reply = ids
 	}
 	return
 }

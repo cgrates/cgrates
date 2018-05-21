@@ -614,7 +614,8 @@ const (
 	CapResourceAllocation  = "ResourceAllocation"
 	CapMaxUsage            = "MaxUsage"
 	CapSuppliers           = "Suppliers"
-	CapThresholdHits       = "ThresholdHits"
+	CapThresholds          = "Thresholds"
+	CapStatQueues          = "StatQueues"
 )
 
 // MetaFilterIndexesAPIs

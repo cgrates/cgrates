@@ -51,6 +51,7 @@ func handleDisconnectSession(clnt *rpc2.Client,
 }
 
 func TestSSv1ItInitCfg(t *testing.T) {
+	var err error
 	sSv1CfgPath = path.Join(*dataDir, "conf", "samples", "sessions")
 	// Init config first
 	sSv1Cfg, err = config.NewCGRConfigFromFolder(sSv1CfgPath)
