@@ -130,7 +130,7 @@ func TestThresholdsPopulateThresholdService(t *testing.T) {
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
-			Recurrent: false,
+			MaxHits:   12,
 			MinSleep:  time.Duration(5 * time.Minute),
 			Blocker:   false,
 			Weight:    20.0,
@@ -144,7 +144,7 @@ func TestThresholdsPopulateThresholdService(t *testing.T) {
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
-			Recurrent: false,
+			MaxHits:   12,
 			MinSleep:  time.Duration(5 * time.Minute),
 			Blocker:   false,
 			Weight:    20.0,
@@ -158,7 +158,7 @@ func TestThresholdsPopulateThresholdService(t *testing.T) {
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
-			Recurrent: false,
+			MaxHits:   12,
 			MinSleep:  time.Duration(5 * time.Minute),
 			Blocker:   false,
 			Weight:    20.0,
@@ -172,7 +172,7 @@ func TestThresholdsPopulateThresholdService(t *testing.T) {
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
-			Recurrent: false,
+			MaxHits:   12,
 			MinSleep:  time.Duration(5 * time.Minute),
 			Blocker:   false,
 			Weight:    20.0,

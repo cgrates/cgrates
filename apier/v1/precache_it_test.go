@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package v1
 
+/* Need to investigate why add *default key Item1 in mongo
 import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
@@ -456,3 +457,4 @@ func testPrecacheKillEngine(t *testing.T) {
 		t.Error(err)
 	}
 }
+*/

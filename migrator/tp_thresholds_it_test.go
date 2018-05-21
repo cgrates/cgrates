@@ -115,7 +115,7 @@ func testTpTresITPopulate(t *testing.T) {
 				ActivationTime: "2014-07-29T15:00:00Z",
 				ExpiryTime:     "",
 			},
-			Recurrent: true,
+			MaxHits:   -1,
 			MinSleep:  "1s",
 			Blocker:   true,
 			Weight:    10,

@@ -119,7 +119,7 @@ func TestSessionSv1ItGetThreshold(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
 		},
-		Recurrent: true,
+		MaxHits:   -1,
 		MinSleep:  time.Duration(0),
 		Blocker:   false,
 		Weight:    10.0,

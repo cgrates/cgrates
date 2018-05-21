@@ -90,7 +90,7 @@ func testV1RsLoadConfig(t *testing.T) {
 	case "tutmongo": // Mongo needs more time to reset db, need to investigate
 		resDelay = 4000
 	default:
-		resDelay = 1000
+		resDelay = 2000
 	}
 }
 
@@ -136,6 +136,7 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 	args := &utils.ArgRSv1ResourceUsage{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     "Event1",
 			Event:  map[string]interface{}{"Unknown": "unknown"},
 		},
 	}
@@ -231,6 +232,7 @@ func testV1RsTTL0(t *testing.T) {
 	args := &utils.ArgRSv1ResourceUsage{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     "Event2",
 			Event: map[string]interface{}{
 				"Account":     "3001",
 				"Destination": "3002"},
@@ -459,6 +461,7 @@ func testV1RsReleaseResource(t *testing.T) {
 	args := &utils.ArgRSv1ResourceUsage{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     "Event5",
 			Event: map[string]interface{}{
 				"Account":     "1002",
 				"Subject":     "1001",
@@ -501,6 +504,7 @@ func testV1RsDBStore(t *testing.T) {
 	args := &utils.ArgRSv1ResourceUsage{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     "Event3",
 			Event: map[string]interface{}{
 				"Account":     "1002",
 				"Subject":     "1001",
@@ -532,10 +536,12 @@ func testV1RsDBStore(t *testing.T) {
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
+	time.Sleep(100 * time.Millisecond)
 	rs = new(engine.Resources)
 	args = &utils.ArgRSv1ResourceUsage{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     "Event4",
 			Event: map[string]interface{}{
 				"Account":     "1002",
 				"Subject":     "1001",

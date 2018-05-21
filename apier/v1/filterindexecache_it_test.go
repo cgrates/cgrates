@@ -217,12 +217,12 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
-		MinHits:   1,
-		Recurrent: true,
-		MinSleep:  time.Duration(5 * time.Minute),
-		Blocker:   false,
-		Weight:    20.0,
-		Async:     true,
+		MinHits:  1,
+		MaxHits:  -1,
+		MinSleep: time.Duration(5 * time.Minute),
+		Blocker:  false,
+		Weight:   20.0,
+		Async:    true,
 	}
 
 	if err := tFIdxCaRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
@@ -336,11 +336,11 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
-		Recurrent: true,
-		MinSleep:  time.Duration(5 * time.Minute),
-		Blocker:   false,
-		Weight:    20.0,
-		Async:     true,
+		MaxHits:  -1,
+		MinSleep: time.Duration(5 * time.Minute),
+		Blocker:  false,
+		Weight:   20.0,
+		Async:    true,
 	}
 	if err := tFIdxCaRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
 		t.Error(err)

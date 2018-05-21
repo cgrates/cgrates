@@ -2121,7 +2121,7 @@ func testOnStorITThresholdProfile(t *testing.T) {
 		ID:                 "test",
 		ActivationInterval: &utils.ActivationInterval{},
 		FilterIDs:          []string{"TestFilter2"},
-		Recurrent:          true,
+		MaxHits:            12,
 		MinSleep:           time.Duration(0 * time.Second),
 		Blocker:            true,
 		Weight:             1.4,

@@ -35,7 +35,7 @@ type ThresholdProfile struct {
 	ID                 string
 	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval // Time when this limit becomes active and expires
-	Recurrent          bool
+	MaxHits            int
 	MinHits            int
 	MinSleep           time.Duration
 	Blocker            bool    // blocker flag to stop processing on filters matched
@@ -70,6 +70,9 @@ func (t *Threshold) ProcessEvent(args *ArgsProcessEvent, dm *DataManager) (err e
 		return
 	}
 	if t.Hits < t.tPrfl.MinHits { // number of hits was not met, will not execute actions
+		return
+	}
+	if t.tPrfl.MaxHits != -1 && t.Hits > t.tPrfl.MaxHits {
 		return
 	}
 	acnt, _ := args.FieldAsString(utils.Account)
@@ -251,7 +254,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 		if err != nil {
 			return nil, err
 		}
-		if tPrfl.Recurrent && t.dirty == nil {
+		if t.dirty == nil || tPrfl.MaxHits == -1 || t.Hits < tPrfl.MaxHits {
 			t.dirty = utils.BoolPointer(false)
 		}
 		t.tPrfl = tPrfl
@@ -298,7 +301,7 @@ func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (thresholdsIDs 
 			withErrors = true
 			continue
 		}
-		if t.dirty == nil { // one time threshold
+		if t.dirty == nil || t.Hits == t.tPrfl.MaxHits { // one time threshold
 			if err = tS.dm.RemoveThreshold(t.Tenant, t.ID, utils.NonTransactional); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<ThresholdService> failed removing non-recurrent threshold: %s, error: %s",
