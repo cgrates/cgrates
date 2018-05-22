@@ -35,10 +35,15 @@ import (
 )
 
 var (
-	cgrConfig, _    = config.NewDefaultCGRConfig()
-	cpuprofile      = flag.String("cpuprofile", "", "write cpu profile to file")
-	memprofile      = flag.String("memprofile", "", "write memory profile to this file")
-	runs            = flag.Int("runs", 10000, "stress cycle number")
+	cgrConfig, _ = config.NewDefaultCGRConfig()
+	tstCfg       = config.CgrConfig()
+	cpuprofile   = flag.String("cpuprofile", "", "write cpu profile to file")
+	memprofile   = flag.String("memprofile", "", "write memory profile to this file")
+	runs         = flag.Int("runs", 10000, "stress cycle number")
+
+	cfgDir = flag.String("config_dir", "",
+		"Configuration directory path.")
+
 	parallel        = flag.Int("parallel", 0, "run n requests in parallel")
 	datadb_type     = flag.String("datadb_type", cgrConfig.DataDbType, "The type of the DataDb database <redis>")
 	datadb_host     = flag.String("datadb_host", cgrConfig.DataDbHost, "The DataDb host to connect to.")
@@ -60,11 +65,13 @@ var (
 	usage           = flag.String("usage", "1m", "The duration to use in call simulation.")
 	fPath           = flag.String("file_path", "", "read requests from file with path")
 	reqSep          = flag.String("req_separator", "\n\n", "separator for requests in file")
+
+	err error
 )
 
 func durInternalRater(cd *engine.CallDescriptor) (time.Duration, error) {
-	dm, err := engine.ConfigureDataStorage(*datadb_type, *datadb_host, *datadb_port,
-		*datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding, cgrConfig.CacheCfg(), *loadHistorySize)
+	dm, err := engine.ConfigureDataStorage(tstCfg.DataDbType, tstCfg.DataDbHost, tstCfg.DataDbPort,
+		tstCfg.DataDbName, tstCfg.DataDbUser, tstCfg.DataDbPass, tstCfg.DBDataEncoding, cgrConfig.CacheCfg(), *loadHistorySize)
 	if err != nil {
 		return nilDuration, fmt.Errorf("Could not connect to data database: %s", err.Error())
 	}
@@ -148,6 +155,36 @@ func main() {
 		fmt.Println(utils.GetCGRVersion())
 		return
 	}
+
+	tstCfg := cgrConfig
+	if *cfgDir != "" {
+		if tstCfg, err = config.NewCGRConfigFromFolder(*cfgDir); err != nil {
+			log.Fatalf("error loading config file %s", err.Error())
+		}
+	}
+
+	if *datadb_type != cgrConfig.DataDbType {
+		tstCfg.DataDbType = *datadb_type
+	}
+	if *datadb_host != cgrConfig.DataDbHost {
+		tstCfg.DataDbHost = *datadb_host
+	}
+	if *datadb_port != cgrConfig.DataDbPort {
+		tstCfg.DataDbPort = *datadb_port
+	}
+	if *datadb_name != cgrConfig.DataDbName {
+		tstCfg.DataDbName = *datadb_name
+	}
+	if *datadb_user != cgrConfig.DataDbUser {
+		tstCfg.DataDbUser = *datadb_user
+	}
+	if *datadb_pass != cgrConfig.DataDbPass {
+		tstCfg.DataDbPass = *datadb_pass
+	}
+	if *dbdata_encoding != "" {
+		tstCfg.DBDataEncoding = *dbdata_encoding
+	}
+
 	if *cpuprofile != "" {
 		f, err := os.Create(*cpuprofile)
 		if err != nil {
