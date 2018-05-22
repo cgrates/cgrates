@@ -28,6 +28,7 @@ const (
 	v2AccountsCol          = "accounts"
 	v1ActionTriggersCol    = "action_triggers"
 	v1AttributeProfilesCol = "attribute_profiles"
+	v2ThresholdProfileCol  = "threshold_profiles"
 )
 
 type mongoMigrator struct {
@@ -255,6 +256,29 @@ func (v1ms *mongoMigrator) getV1AttributeProfile() (v1attrPrf *v1AttributeProfil
 //set
 func (v1ms *mongoMigrator) setV1AttributeProfile(x *v1AttributeProfile) (err error) {
 	if err := v1ms.mgoDB.DB().C(v1AttributeProfilesCol).Insert(x); err != nil {
+		return err
+	}
+	return
+}
+
+//ThresholdProfile methods
+//get
+func (v1ms *mongoMigrator) getV2ThresholdProfile() (v2T *v2Threshold, err error) {
+	if v1ms.qryIter == nil {
+		v1ms.qryIter = v1ms.mgoDB.DB().C(v2ThresholdProfileCol).Find(nil).Iter()
+	}
+	v1ms.qryIter.Next(&v2T)
+	if v2T == nil {
+		v1ms.qryIter = nil
+		return nil, utils.ErrNoMoreData
+
+	}
+	return v2T, nil
+}
+
+//set
+func (v1ms *mongoMigrator) setV2ThresholdProfile(x *v2Threshold) (err error) {
+	if err := v1ms.mgoDB.DB().C(v2ThresholdProfileCol).Insert(x); err != nil {
 		return err
 	}
 	return

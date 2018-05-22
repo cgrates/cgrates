@@ -33,6 +33,7 @@ var (
 		utils.ActionTriggers: "cgr-migrator -migrate=*action_triggers",
 		utils.ActionPlans:    "cgr-migrator -migrate=*action_plans",
 		utils.SharedGroups:   "cgr-migrator -migrate=*shared_groups",
+		utils.Thresholds:     "cgr-migrator -migrate=*thresholds",
 	}
 	storDBVers = map[string]string{
 		utils.COST_DETAILS:  "cgr-migrator -migrate=*cost_details",
@@ -124,7 +125,7 @@ func CurrentDataDBVersions() Versions {
 		utils.ActionTriggers:      2,
 		utils.ActionPlans:         2,
 		utils.SharedGroups:        2,
-		utils.Thresholds:          2,
+		utils.Thresholds:          3,
 		utils.Suppliers:           1,
 		utils.Attributes:          2,
 		utils.Timing:              1,

@@ -1276,6 +1276,7 @@ func TestDfMigratorCfg(t *testing.T) {
 		Out_dataDB_name:     utils.StringPointer("10"),
 		Out_dataDB_user:     utils.StringPointer("cgrates"),
 		Out_dataDB_password: utils.StringPointer(""),
+		Out_dataDB_encoding: utils.StringPointer("msgpack"),
 		Out_storDB_type:     utils.StringPointer("mysql"),
 		Out_storDB_host:     utils.StringPointer("127.0.0.1"),
 		Out_storDB_port:     utils.StringPointer("3306"),

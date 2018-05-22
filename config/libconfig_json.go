@@ -488,7 +488,15 @@ type SureTaxJsonCfg struct {
 
 // Dispatcher service config section
 type DispatcherSJsonCfg struct {
-	Enabled *bool
+	Enabled              *bool
+	Rals_conns           *[]*HaPoolJsonCfg
+	Resources_conns      *[]*HaPoolJsonCfg
+	Thresholds_conns     *[]*HaPoolJsonCfg
+	Stats_conns          *[]*HaPoolJsonCfg
+	Suppliers_conns      *[]*HaPoolJsonCfg
+	Attributes_conns     *[]*HaPoolJsonCfg
+	Sessions_conns       *[]*HaPoolJsonCfg
+	Dispatching_strategy *string
 }
 
 type LoaderCfgJson struct {
@@ -506,6 +514,7 @@ type MigratorCfgJson struct {
 	Out_dataDB_name     *string
 	Out_dataDB_user     *string
 	Out_dataDB_password *string
+	Out_dataDB_encoding *string
 	Out_storDB_type     *string
 	Out_storDB_host     *string
 	Out_storDB_port     *string
