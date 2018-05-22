@@ -65,6 +65,7 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @Anevo | Cezar Vulcu |
 | @deanone-noc | dean one noc |
 | @cruzccl | Carlos Cruz Luengo |
+| @petekelly | Peter Kelly |
 
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
