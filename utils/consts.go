@@ -618,6 +618,14 @@ const (
 	CapStatQueues          = "StatQueues"
 )
 
+// DispatcherStrategy
+const (
+	MetaRandom   = "*random"
+	MetaBalancer = "*balancer"
+	MetaOrdered  = "*ordered"
+	MetaCircular = "*circular"
+)
+
 // MetaFilterIndexesAPIs
 const (
 	ApierV1ComputeFilterIndexes = "ApierV1.ComputeFilterIndexes"

@@ -1256,6 +1256,7 @@ func TestCgrLoaderCfgITDefaults(t *testing.T) {
 	}
 }
 
+/* Will be activated after finish dispatcher config
 func TestCgrCfgJSONDefaultDispatcherSCfg(t *testing.T) {
 	eDspSCfg := &DispatcherSCfg{
 		Enabled: true,
@@ -1264,7 +1265,7 @@ func TestCgrCfgJSONDefaultDispatcherSCfg(t *testing.T) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.dispatcherSCfg, eDspSCfg)
 	}
 }
-
+*/
 func TestCgrLoaderCfgDefault(t *testing.T) {
 	eLdrCfg := &LoaderCgrCfg{
 		TpID:           "",
@@ -1295,6 +1296,7 @@ func TestCgrMigratorCfgDefault(t *testing.T) {
 		OutDataDBName:     "10",
 		OutDataDBUser:     "cgrates",
 		OutDataDBPassword: "",
+		OutDataDBEncoding: "msgpack",
 		OutStorDBType:     "mysql",
 		OutStorDBHost:     "127.0.0.1",
 		OutStorDBPort:     "3306",

@@ -624,6 +624,7 @@ const CGRATES_CFG_JSON = `
 	],
 },
 
+
 "migrator": {
 	"out_datadb_type": "redis",
 	"out_datadb_host": "127.0.0.1",
@@ -631,6 +632,7 @@ const CGRATES_CFG_JSON = `
 	"out_datadb_name": "10",
 	"out_datadb_user": "cgrates",
 	"out_datadb_password": "",
+	"out_datadb_encoding" : "msgpack",
 	"out_stordb_type": "mysql",
 	"out_stordb_host": "127.0.0.1",
 	"out_stordb_port": "3306",
@@ -638,5 +640,23 @@ const CGRATES_CFG_JSON = `
 	"out_stordb_user": "cgrates",
 	"out_stordb_password": "",
 },
+
+
+"dispatcher":{
+	"enabled": false,						// starts DispatcherS service: <true|false>.
+	"rals_conns": [
+		{"address": "*internal"},			// address where to reach the RALs for dispatcherS  <*internal>
+	],
+	"resources_conns": [],					// address where to reach the ResourceS <""|*internal|127.0.0.1:2013>
+	"thresholds_conns": [],					// address where to reach the ThresholdS <""|*internal|127.0.0.1:2013>
+	"stats_conns": [],						// address where to reach the StatS <""|*internal|127.0.0.1:2013>
+	"suppliers_conns": [],					// address where to reach the SupplierS <""|*internal|127.0.0.1:2013>
+	"attributes_conns": [],					// address where to reach the AttributeS <""|*internal|127.0.0.1:2013>
+	"sessions_conns": [
+		{"address": "*internal"}								// connection towards SessionService
+	],
+	"dispatching_strategy":"*random"		// strategy for dispatching <*random|*balancer|*ordered|*circular>
+},
+
 
 }`

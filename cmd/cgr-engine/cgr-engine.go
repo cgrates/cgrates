@@ -634,7 +634,7 @@ func startThresholdService(internalThresholdSChan chan rpcclient.RpcClientConnec
 	internalThresholdSChan <- tSv1
 }
 
-// startSupplierService fires up the ThresholdS
+// startSupplierService fires up the SupplierS
 func startSupplierService(internalSupplierSChan chan rpcclient.RpcClientConnection, cacheS *engine.CacheS,
 	internalRsChan, internalStatSChan chan rpcclient.RpcClientConnection,
 	cfg *config.CGRConfig, dm *engine.DataManager, server *utils.Server,
