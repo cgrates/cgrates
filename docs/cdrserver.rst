@@ -41,7 +41,23 @@ Extra fields: any field coming in via the http request and not a member of prima
 Example of sample CDR generated simply using curl:
 ::
 
-curl --data "ToR=*voice&Source=curl_cdr&OrderID=abcde&OriginHost=192.168.1.2&Source=sbc1&OriginID=qwerty3234567&ToR=*voice&RequestType=*raw&Tenant=192.168.56.66&Category=call&Account=1004&Subject=1004&Destination=%2B4986517174963&SetupTime=2018-05-21 12:32:50+00&AnswerTime=2018-05-21 12:32:56+00&Usage=306&CostSource=*cdrs" http://127.0.0.1:2080/cdr_http
+ curl --data "ToR=*voice \
+  &Source=curl_cdr \
+  &OrderID=abcde \
+  &OriginHost=192.168.1.2 \
+  &Source=sbc1 \
+  &OriginID=qwerty3234567 \
+  &ToR=*voice \
+  &RequestType=*raw \
+  &Tenant=192.168.56.66 \
+  &Category=call \
+  &Account=1004 \
+  &Subject=1004 \
+  &Destination=%2B4986517174963 \
+  &SetupTime=2018-05-21 12:32:50+00 \
+  &AnswerTime=2018-05-21 12:32:56+00 \
+  &Usage=306 \
+  &CostSource=*cdrs" http://127.0.0.1:2080/cdr_http
 
 
 
@@ -105,5 +121,5 @@ The simplified StoredCdr object is represented by following:
    AnswerTime     time.Time         // answer time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
    Usage          time.Duration     // event usage information (eg: in case of tor=*voice this will represent the total duration of a call)
    ExtraFields    map[string]string // Extra fields to be stored in CDR
-}
+ }
 
