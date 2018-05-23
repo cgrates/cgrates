@@ -147,6 +147,9 @@ func (m *Migrator) migrateV2Thresholds() (err error) {
 		if v2T != nil {
 			th := v2T.V2toV3Threshold()
 			if m.dryRun != true {
+				if err = m.dmIN.remV2ThresholdProfile(v2T.Tenant, v2T.ID); err != nil {
+					return err
+				}
 				if err = m.dmOut.DataManager().SetThresholdProfile(th, true); err != nil {
 					return err
 				}

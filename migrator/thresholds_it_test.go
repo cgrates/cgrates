@@ -203,6 +203,71 @@ func testTrsITMigrateAndMove(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{v1trs.ExpirationDate, v1trs.ActivationDate},
 		MinSleep:           v1trs.MinSleep,
 	}
+
+	v2trs := &v2Threshold{
+		Tenant:    "cgrates.org",
+		ID:        "th_rec",
+		FilterIDs: []string{},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		Recurrent: true,
+		MinHits:   0,
+		MinSleep:  time.Duration(5 * time.Minute),
+		Blocker:   false,
+		Weight:    20.0,
+		ActionIDs: []string{},
+		Async:     false,
+	}
+
+	tresProf2 := &engine.ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "th_rec",
+		FilterIDs: []string{},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		MaxHits:   -1,
+		MinHits:   0,
+		MinSleep:  time.Duration(5 * time.Minute),
+		Blocker:   false,
+		Weight:    20.0,
+		ActionIDs: []string{},
+		Async:     false,
+	}
+
+	v2trs_nonrec := &v2Threshold{
+		Tenant:    "cgrates.org",
+		ID:        "th_nonrec",
+		FilterIDs: []string{},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		Recurrent: false,
+		MinHits:   0,
+		MinSleep:  time.Duration(5 * time.Minute),
+		Blocker:   false,
+		Weight:    20.0,
+		ActionIDs: []string{},
+		Async:     false,
+	}
+
+	tresProf3 := &engine.ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "th_nonrec",
+		FilterIDs: []string{},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		MaxHits:   1,
+		MinHits:   0,
+		MinSleep:  time.Duration(5 * time.Minute),
+		Blocker:   false,
+		Weight:    20.0,
+		ActionIDs: []string{},
+		Async:     false,
+	}
+
 	switch trsThresholds {
 	case utils.Migrate:
 		err := trsMigrator.dmIN.setV2ActionTrigger(v1trs)
@@ -233,6 +298,42 @@ func testTrsITMigrateAndMove(t *testing.T) {
 		} else if !reflect.DeepEqual(tresProf.MinSleep, result.MinSleep) {
 			t.Errorf("Expecting: %+v, received: %+v", tresProf.MinSleep, result.MinSleep)
 		}
+		//Migrate V2Threshold to NewThreshold
+		err = trsMigrator.dmIN.setV2ThresholdProfile(v2trs)
+		if err != nil {
+			t.Error("Error when setting v1 Thresholds ", err.Error())
+		}
+		err = trsMigrator.dmIN.setV2ThresholdProfile(v2trs_nonrec)
+		if err != nil {
+			t.Error("Error when setting v1 Thresholds ", err.Error())
+		}
+
+		currentVersion = engine.Versions{utils.StatS: 2, utils.Thresholds: 2, utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
+		err = trsMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
+		if err != nil {
+			t.Error("Error when setting version for Thresholds ", err.Error())
+		}
+		err, _ = trsMigrator.Migrate([]string{utils.MetaThresholds})
+		if err != nil {
+			t.Error("Error when migrating Thresholds ", err.Error())
+		}
+
+		result, err = trsMigrator.dmOut.DataManager().GetThresholdProfile(tresProf2.Tenant, tresProf2.ID, false, utils.NonTransactional)
+		if err != nil {
+			t.Error("Error when getting Thresholds ", err.Error())
+		}
+		if !reflect.DeepEqual(tresProf2, result) {
+			t.Errorf("Expectong: %+v, received: %+v", utils.ToJSON(tresProf2), utils.ToJSON(result))
+		}
+
+		result, err = trsMigrator.dmOut.DataManager().GetThresholdProfile(tresProf3.Tenant, tresProf3.ID, false, utils.NonTransactional)
+		if err != nil {
+			t.Error("Error when getting Thresholds ", err.Error())
+		}
+		if !reflect.DeepEqual(tresProf3, result) {
+			t.Errorf("Expectong: %+v, received: %+v", utils.ToJSON(tresProf3), utils.ToJSON(result))
+		}
+
 	case utils.Move:
 		if err := trsMigrator.dmIN.DataManager().SetThresholdProfile(tresProf, false); err != nil {
 			t.Error("Error when setting Thresholds ", err.Error())

@@ -22,6 +22,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/mgo"
+	"github.com/cgrates/mgo/bson"
 )
 
 const (
@@ -282,4 +283,9 @@ func (v1ms *mongoMigrator) setV2ThresholdProfile(x *v2Threshold) (err error) {
 		return err
 	}
 	return
+}
+
+//rem
+func (v1ms *mongoMigrator) remV2ThresholdProfile(tenant, id string) (err error) {
+	return v1ms.mgoDB.DB().C(v2ThresholdProfileCol).Remove(bson.M{"tenant": tenant, "id": id})
 }
