@@ -455,3 +455,9 @@ func (v1rs *redisMigrator) setV2ThresholdProfile(x *v2Threshold) (err error) {
 	}
 	return
 }
+
+//rem
+func (v1rs *redisMigrator) remV2ThresholdProfile(tenant, id string) (err error) {
+	key := utils.ThresholdProfilePrefix + utils.ConcatenatedKey(tenant, id)
+	return v1rs.rds.Cmd("DEL", key).Err
+}
