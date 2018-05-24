@@ -837,6 +837,7 @@ func main() {
 	if *nodeID != "" {
 		cfg.NodeID = *nodeID
 	}
+	fmt.Printf("\ncfg.DigestSeparator %+v,\n cfg.DigestEqual %+v\n", cfg.DigestSeparator, cfg.DigestEqual)
 	config.SetCgrConfig(cfg) // Share the config object
 
 	// init syslog

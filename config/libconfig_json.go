@@ -40,6 +40,8 @@ type GeneralJsonCfg struct {
 	Response_cache_ttl   *string
 	Internal_ttl         *string
 	Locking_timeout      *string
+	Digest_separator     *string
+	Digest_equal         *string
 }
 
 // Listen config section

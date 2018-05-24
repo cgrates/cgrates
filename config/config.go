@@ -295,9 +295,11 @@ type CGRConfig struct {
 	HttpSkipTlsVerify        bool              // If enabled Http Client will accept any TLS certificate
 	TpExportPath             string            // Path towards export folder for offline Tariff Plans
 	PosterAttempts           int
-	FailedPostsDir           string          // Directory path where we store failed http requests
-	MaxCallDuration          time.Duration   // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
-	LockingTimeout           time.Duration   // locking mechanism timeout to avoid deadlocks
+	FailedPostsDir           string        // Directory path where we store failed http requests
+	MaxCallDuration          time.Duration // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
+	LockingTimeout           time.Duration // locking mechanism timeout to avoid deadlocks
+	DigestSeparator          string
+	DigestEqual              string
 	Logger                   string          // dictates the way logs are displayed/stored
 	LogLevel                 int             // system wide log level, nothing higher than this will be logged
 	RALsEnabled              bool            // start standalone server (no balancer)
@@ -326,7 +328,7 @@ type CGRConfig struct {
 	CDRSThresholdSConns      []*HaPoolConfig // address where to reach the thresholds service
 	CDRSStatSConns           []*HaPoolConfig
 	CDRSOnlineCDRExports     []string      // list of CDRE templates to use for real-time CDR exports
-	CDRStatsEnabled          bool          // Enable CDR Stats service
+	CDRStatsEnabled          bool          // Enable CDR Stats servicedigest_separator = ","
 	CDRStatsSaveInterval     time.Duration // Save interval duration
 	CdreProfiles             map[string]*CdreConfig
 	CdrcProfiles             map[string][]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath][]{Configs}
@@ -1006,6 +1008,12 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			if self.LockingTimeout, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.Locking_timeout); err != nil {
 				return err
 			}
+		}
+		if jsnGeneralCfg.Digest_separator != nil {
+			self.DigestSeparator = *jsnGeneralCfg.Digest_separator
+		}
+		if jsnGeneralCfg.Digest_equal != nil {
+			self.DigestEqual = *jsnGeneralCfg.Digest_equal
 		}
 	}
 

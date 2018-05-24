@@ -48,6 +48,8 @@ const CGRATES_CFG_JSON = `
 	"response_cache_ttl": "0s",								// the life span of a cached response
 	"internal_ttl": "2m",									// maximum duration to wait for internal connections before giving up
 	"locking_timeout": "0",								// timeout internal locks to avoid deadlocks
+	"digest_separator": ",",
+	"digest_equal": ":",
 },
 
 
