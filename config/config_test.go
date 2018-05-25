@@ -65,6 +65,76 @@ func TestCgrCfgLoadWithDefaults(t *testing.T) {
 	}
 }
 
+func TestCgrCfgDataDBPortWithoutDynamic(t *testing.T) {
+	JSN_CFG := `
+{
+"data_db": {
+	"db_type": "mongo",
+	}
+}`
+
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(JSN_CFG); err != nil {
+		t.Error(err)
+	} else if cgrCfg.DataDbType != utils.MONGO {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbType, utils.MONGO)
+	} else if cgrCfg.DataDbPort != "6379" {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbPort, "6379")
+	}
+}
+
+func TestCgrCfgDataDBPortWithDymanic(t *testing.T) {
+	JSN_CFG := `
+{
+"data_db": {
+	"db_type": "mongo",
+	"db_port": -1,
+	}
+}`
+
+	if cgrCfg, err := NewCGRConfigFromJsonString(JSN_CFG); err != nil {
+		t.Error(err)
+	} else if cgrCfg.DataDbType != utils.MONGO {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbType, utils.MONGO)
+	} else if cgrCfg.DataDbPort != "27017" {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbPort, "27017")
+	}
+}
+
+func TestCgrCfgStorDBPortWithoutDynamic(t *testing.T) {
+	JSN_CFG := `
+{
+"stor_db": {
+	"db_type": "mongo",
+	}
+}`
+
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(JSN_CFG); err != nil {
+		t.Error(err)
+	} else if cgrCfg.StorDBType != utils.MONGO {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDBType, utils.MONGO)
+	} else if cgrCfg.StorDBPort != "3306" {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDBPort, "3306")
+	}
+}
+
+func TestCgrCfgStorDBPortWithDymanic(t *testing.T) {
+	JSN_CFG := `
+{
+"stor_db": {
+	"db_type": "mongo",
+	"db_port": -1,
+	}
+}`
+
+	if cgrCfg, err := NewCGRConfigFromJsonString(JSN_CFG); err != nil {
+		t.Error(err)
+	} else if cgrCfg.StorDBType != utils.MONGO {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDBType, utils.MONGO)
+	} else if cgrCfg.StorDBPort != "27017" {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDBPort, "27017")
+	}
+}
+
 func TestCgrCfgCDRC(t *testing.T) {
 	JSN_RAW_CFG := `
 {
@@ -216,6 +286,12 @@ func TestCgrCfgJSONDefaultsGeneral(t *testing.T) {
 	}
 	if cgrCfg.LogLevel != 6 {
 		t.Error(cgrCfg.LogLevel)
+	}
+	if cgrCfg.DigestSeparator != "," {
+		t.Error(cgrCfg.DigestSeparator)
+	}
+	if cgrCfg.DigestEqual != ":" {
+		t.Error(cgrCfg.DigestEqual)
 	}
 }
 
