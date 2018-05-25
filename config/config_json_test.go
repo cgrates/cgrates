@@ -1232,19 +1232,32 @@ func TestDfHttpJsonCfg(t *testing.T) {
 	}
 }
 
-// Will be activated after finish config struct
-/*
 func TestDfDispatcherSJsonCfg(t *testing.T) {
 	eCfg := &DispatcherSJsonCfg{
-		Enabled: utils.BoolPointer(true),
+		Enabled: utils.BoolPointer(false),
+		Rals_conns: &[]*HaPoolJsonCfg{
+			&HaPoolJsonCfg{
+				Address: utils.StringPointer(utils.MetaInternal),
+			},
+		},
+		Resources_conns:  &[]*HaPoolJsonCfg{},
+		Thresholds_conns: &[]*HaPoolJsonCfg{},
+		Stats_conns:      &[]*HaPoolJsonCfg{},
+		Suppliers_conns:  &[]*HaPoolJsonCfg{},
+		Attributes_conns: &[]*HaPoolJsonCfg{},
+		Sessions_conns: &[]*HaPoolJsonCfg{
+			&HaPoolJsonCfg{
+				Address: utils.StringPointer(utils.MetaInternal),
+			},
+		},
+		Dispatching_strategy: utils.StringPointer(utils.MetaRandom),
 	}
 	if cfg, err := dfCgrJsonCfg.DispatcherSJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Errorf("expecting: %+v, received: %+v", eCfg, cfg)
+		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }
-*/
 
 func TestDfLoaderCfg(t *testing.T) {
 	eCfg := &LoaderCfgJson{

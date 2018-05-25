@@ -668,40 +668,41 @@ func (self *CGRConfig) checkConfigSanity() error {
 	}
 	// DispaterS checks
 	if self.dispatcherSCfg != nil && self.dispatcherSCfg.Enabled {
-		for _, connCfg := range self.dispatcherSCfg.RALsConns {
-			if connCfg.Address != utils.MetaInternal {
-				return errors.New("Only <*internal> connectivity allowed in DispatcherS for now")
-			}
-			if connCfg.Address == utils.MetaInternal && !self.RALsEnabled {
-				return errors.New("RALs not enabled but requested by DispatcherS component.")
-			}
-		}
-
-		for _, connCfg := range self.dispatcherSCfg.ResSConns {
-			if connCfg.Address == utils.MetaInternal && !self.resourceSCfg.Enabled {
-				return errors.New("ResourceS not enabled but requested by DispatcherS component.")
-			}
-		}
-		for _, connCfg := range self.dispatcherSCfg.StatSConns {
-			if connCfg.Address == utils.MetaInternal && !self.resourceSCfg.Enabled {
-				return errors.New("StatS not enabled but requested by DispatherS component.")
-			}
-		}
-		for _, connCfg := range self.dispatcherSCfg.ThreshSConns {
-			if connCfg.Address == utils.MetaInternal && !self.thresholdSCfg.Enabled {
-				return errors.New("ThresholdS not enabled but requested by DispatherS component.")
-			}
-		}
-		for _, connCfg := range self.dispatcherSCfg.SupplSConns {
-			if connCfg.Address == utils.MetaInternal && !self.thresholdSCfg.Enabled {
-				return errors.New("SupplierS not enabled but requested by DispatherS component.")
-			}
-		}
-		for _, connCfg := range self.dispatcherSCfg.AttrSConns {
-			if connCfg.Address == utils.MetaInternal && !self.thresholdSCfg.Enabled {
-				return errors.New("AttributeS not enabled but requested by DispatherS component.")
-			}
-		}
+		// for _, connCfg := range self.dispatcherSCfg.RALsConns {
+		// 	if connCfg.Address == utils.MetaInternal && !self.RALsEnabled {
+		// 		return errors.New("RALs not enabled but requested by DispatcherS component.")
+		// 	}
+		// }
+		// for _, connCfg := range self.dispatcherSCfg.ResSConns {
+		// 	if connCfg.Address == utils.MetaInternal && !self.resourceSCfg.Enabled {
+		// 		return errors.New("ResourceS not enabled but requested by DispatcherS component.")
+		// 	}
+		// }
+		// for _, connCfg := range self.dispatcherSCfg.StatSConns {
+		// 	if connCfg.Address == utils.MetaInternal && !self.resourceSCfg.Enabled {
+		// 		return errors.New("StatS not enabled but requested by DispatherS component.")
+		// 	}
+		// }
+		// for _, connCfg := range self.dispatcherSCfg.ThreshSConns {
+		// 	if connCfg.Address == utils.MetaInternal && !self.thresholdSCfg.Enabled {
+		// 		return errors.New("ThresholdS not enabled but requested by DispatherS component.")
+		// 	}
+		// }
+		// for _, connCfg := range self.dispatcherSCfg.SupplSConns {
+		// 	if connCfg.Address == utils.MetaInternal && !self.thresholdSCfg.Enabled {
+		// 		return errors.New("SupplierS not enabled but requested by DispatherS component.")
+		// 	}
+		// }
+		// for _, connCfg := range self.dispatcherSCfg.AttrSConns {
+		// 	if connCfg.Address == utils.MetaInternal && !self.thresholdSCfg.Enabled {
+		// 		return errors.New("AttributeS not enabled but requested by DispatherS component.")
+		// 	}
+		// }
+		// for _, connCfg := range self.dispatcherSCfg.SessionSConns {
+		// 	if connCfg.Address == utils.MetaInternal && !self.sessionSCfg.Enabled {
+		// 		return errors.New("SessionS not enabled but requested by DispatherS component.")
+		// 	}
+		// }
 		if !utils.IsSliceMember([]string{utils.MetaRandom, utils.MetaBalancer, utils.MetaOrdered,
 			utils.MetaCircular}, self.dispatcherSCfg.DispatchingStrategy) {
 			return fmt.Errorf("<%s> unsupported dispatching strategy %s",

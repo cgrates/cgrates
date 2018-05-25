@@ -20,25 +20,49 @@ package v1
 
 import (
 	"github.com/cgrates/cgrates/dispatcher"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewDispatcherSv1(dps *dispatcher.DispatcherService) *DispatcherSv1 {
-	return &DispatcherSv1{dpsS: dps}
+func NewDispatcherThresholdSv1(dps *dispatcher.DispatcherService) *DispatcherThresholdSv1 {
+	return &DispatcherThresholdSv1{dS: dps}
 }
 
 // Exports RPC from RLs
-type DispatcherSv1 struct {
-	dpsS *dispatcher.DispatcherService
+type DispatcherThresholdSv1 struct {
+	dS *dispatcher.DispatcherService
 }
 
-// Call implements rpcclient.RpcClientConnection interface for internal RPC
-func (dpsS *DispatcherSv1) Call(serviceMethod string,
-	args interface{}, reply interface{}) error {
-	return utils.APIerRPCCall(dpsS, serviceMethod, args, reply)
+// Ping implements ThresholdSv1Ping
+func (dT *DispatcherThresholdSv1) Ping(ign string, reply *string) error {
+	return dT.dS.ThresholdSv1Ping(ign, reply)
 }
 
-func (dpsS *DispatcherSv1) Ping(ign string, reply *string) error {
-	*reply = utils.Pong
-	return nil
+// GetThresholdIDs implements ThresholdSv1GetThresholdIDs
+func (dT *DispatcherThresholdSv1) GetThresholdIDs(tenant string, tIDs *[]string) error {
+	return dT.dS.ThresholdSv1GetThresholdIDs(tenant, tIDs)
+}
+
+// GetThreshold implements ThresholdSv1GetThreshold
+func (dT *DispatcherThresholdSv1) GetThreshold(tntID *utils.TenantID, t *engine.Threshold) error {
+	return dT.dS.ThresholdSv1GetThreshold(tntID, t)
+}
+
+// ProcessEvent implements ThresholdSv1ProcessEvent
+func (dT *DispatcherThresholdSv1) ProcessEvent(args *engine.ArgsProcessEvent, tIDs *[]string) error {
+	return dT.dS.ThresholdSv1ProcessEvent(args, tIDs)
+}
+
+func NewDispatcherStatSv1(dps *dispatcher.DispatcherService) *DispatcherStatSv1 {
+	return &DispatcherStatSv1{dS: dps}
+}
+
+// Exports RPC from RLs
+type DispatcherStatSv1 struct {
+	dS *dispatcher.DispatcherService
+}
+
+// Ping implements StatSv1Ping
+func (dSts *DispatcherStatSv1) Ping(ign string, reply *string) error {
+	return dSts.dS.StatSv1Ping(ign, reply)
 }
