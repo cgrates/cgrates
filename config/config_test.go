@@ -1332,16 +1332,31 @@ func TestCgrLoaderCfgITDefaults(t *testing.T) {
 	}
 }
 
-/* Will be activated after finish dispatcher config
 func TestCgrCfgJSONDefaultDispatcherSCfg(t *testing.T) {
 	eDspSCfg := &DispatcherSCfg{
-		Enabled: true,
+		Enabled: false,
+		RALsConns: []*HaPoolConfig{
+			&HaPoolConfig{
+				Address: utils.MetaInternal,
+			},
+		},
+		ResSConns:    []*HaPoolConfig{},
+		ThreshSConns: []*HaPoolConfig{},
+		StatSConns:   []*HaPoolConfig{},
+		SupplSConns:  []*HaPoolConfig{},
+		AttrSConns:   []*HaPoolConfig{},
+		SessionSConns: []*HaPoolConfig{
+			&HaPoolConfig{
+				Address: utils.MetaInternal,
+			},
+		},
+		DispatchingStrategy: utils.MetaRandom,
 	}
 	if !reflect.DeepEqual(cgrCfg.dispatcherSCfg, eDspSCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.dispatcherSCfg, eDspSCfg)
 	}
 }
-*/
+
 func TestCgrLoaderCfgDefault(t *testing.T) {
 	eLdrCfg := &LoaderCgrCfg{
 		TpID:           "",

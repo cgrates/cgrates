@@ -711,12 +711,81 @@ func loaderService(cacheS *engine.CacheS, cfg *config.CGRConfig,
 }
 
 // startDispatcherService fires up the DispatcherS
-func startDispatcherService(internalDispatcherSChan chan rpcclient.RpcClientConnection,
+func startDispatcherService(internalDispatcherSChan, internalSMGChan,
+	internalRaterChan, internalResourceSChan, internalThresholdSChan,
+	internalStatSChan, internalSupplierSChan, internalAttrSChan chan rpcclient.RpcClientConnection,
 	cacheS *engine.CacheS, dm *engine.DataManager,
 	server *utils.Server, exitChan chan bool) {
-	<-cacheS.GetPrecacheChannel(utils.CacheAttributeProfiles)
-
-	dspS, err := dispatcher.NewDispatcherService(dm)
+	utils.Logger.Info("Starting CGRateS Dispatcher service.")
+	var err error
+	var ralsConns, resSConns, threshSConns, statSConns, suplSConns, attrSConns, sessionsSConns *rpcclient.RpcClientPool
+	if len(cfg.DispatcherSCfg().RALsConns) != 0 {
+		ralsConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
+			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.DispatcherSCfg().RALsConns, internalRaterChan, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to RALs: %s", utils.DispatcherS, err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+	if len(cfg.DispatcherSCfg().ResSConns) != 0 {
+		resSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
+			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.DispatcherSCfg().ResSConns, internalResourceSChan, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ResourceS: %s", utils.DispatcherS, err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+	if len(cfg.DispatcherSCfg().ThreshSConns) != 0 {
+		threshSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.DispatcherSCfg().ThreshSConns, internalThresholdSChan, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ThresholdS: %s", utils.DispatcherS, err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+	if len(cfg.DispatcherSCfg().StatSConns) != 0 {
+		statSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.DispatcherSCfg().StatSConns, internalStatSChan, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to StatS: %s", utils.DispatcherS, err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+	if len(cfg.DispatcherSCfg().SupplSConns) != 0 {
+		suplSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.DispatcherSCfg().SupplSConns, internalSupplierSChan, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to SupplierS: %s", utils.DispatcherS, err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+	if len(cfg.DispatcherSCfg().AttrSConns) != 0 {
+		attrSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.DispatcherSCfg().AttrSConns, internalAttrSChan, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to AttributeS: %s", utils.DispatcherS, err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+	if len(cfg.DispatcherSCfg().SessionSConns) != 0 {
+		sessionsSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.DispatcherSCfg().SessionSConns, internalSMGChan, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to SessionS: %s", utils.DispatcherS, err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+	dspS, err := dispatcher.NewDispatcherService(dm, ralsConns, resSConns, threshSConns, statSConns,
+		suplSConns, attrSConns, sessionsSConns)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.DispatcherS, err.Error()))
 		exitChan <- true
@@ -730,14 +799,20 @@ func startDispatcherService(internalDispatcherSChan chan rpcclient.RpcClientConn
 		exitChan <- true
 		return
 	}()
-	dspSv1 := v1.NewDispatcherSv1(dspS)
-	server.RpcRegister(dspSv1)
-	internalDispatcherSChan <- dspSv1
+	if !cfg.ThresholdSCfg().Enabled && len(cfg.DispatcherSCfg().ThreshSConns) != 0 {
+		server.RpcRegisterName(utils.ThresholdSv1,
+			v1.NewDispatcherThresholdSv1(dspS))
+	}
+	if !cfg.StatSCfg().Enabled && len(cfg.DispatcherSCfg().StatSConns) != 0 {
+		server.RpcRegisterName(utils.StatSv1,
+			v1.NewDispatcherStatSv1(dspS))
+	}
 }
 
 func startRpc(server *utils.Server, internalRaterChan,
 	internalCdrSChan, internalCdrStatSChan, internalPubSubSChan, internalUserSChan,
-	internalAliaseSChan, internalRsChan, internalStatSChan, internalSMGChan chan rpcclient.RpcClientConnection) {
+	internalAliaseSChan, internalRsChan, internalStatSChan,
+	internalSMGChan, internalDispatcherSChan chan rpcclient.RpcClientConnection) {
 	select { // Any of the rpc methods will unlock listening to rpc requests
 	case resp := <-internalRaterChan:
 		internalRaterChan <- resp
@@ -757,6 +832,8 @@ func startRpc(server *utils.Server, internalRaterChan,
 		internalRsChan <- rls
 	case statS := <-internalStatSChan:
 		internalStatSChan <- statS
+	case dispatcherS := <-internalDispatcherSChan:
+		internalDispatcherSChan <- dispatcherS
 	}
 	go server.ServeJSON(cfg.RPCJSONListen)
 	go server.ServeGOB(cfg.RPCGOBListen)
@@ -1034,7 +1111,9 @@ func main() {
 	}
 
 	if cfg.DispatcherSCfg().Enabled {
-		go startDispatcherService(internalDispatcherSChan, cacheS,
+		go startDispatcherService(internalDispatcherSChan, internalSMGChan,
+			internalRaterChan, internalRsChan, internalThresholdSChan,
+			internalStatSChan, internalSupplierSChan, internalAttributeSChan, cacheS,
 			dm, server, exitChan)
 	}
 
@@ -1042,7 +1121,8 @@ func main() {
 
 	// Serve rpc connections
 	go startRpc(server, internalRaterChan, internalCdrSChan, internalCdrStatSChan,
-		internalPubSubSChan, internalUserSChan, internalAliaseSChan, internalRsChan, internalStatSChan, internalSMGChan)
+		internalPubSubSChan, internalUserSChan, internalAliaseSChan, internalRsChan,
+		internalStatSChan, internalSMGChan, internalDispatcherSChan)
 	<-exitChan
 
 	if *memprofile != "" {

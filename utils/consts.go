@@ -629,6 +629,8 @@ const (
 	MetaBalancer = "*balancer"
 	MetaOrdered  = "*ordered"
 	MetaCircular = "*circular"
+	ThresholdSv1 = "ThresholdSv1"
+	StatSv1      = "StatSv1"
 )
 
 // MetaFilterIndexesAPIs
