@@ -1234,22 +1234,14 @@ func TestDfHttpJsonCfg(t *testing.T) {
 
 func TestDfDispatcherSJsonCfg(t *testing.T) {
 	eCfg := &DispatcherSJsonCfg{
-		Enabled: utils.BoolPointer(false),
-		Rals_conns: &[]*HaPoolJsonCfg{
-			&HaPoolJsonCfg{
-				Address: utils.StringPointer(utils.MetaInternal),
-			},
-		},
-		Resources_conns:  &[]*HaPoolJsonCfg{},
-		Thresholds_conns: &[]*HaPoolJsonCfg{},
-		Stats_conns:      &[]*HaPoolJsonCfg{},
-		Suppliers_conns:  &[]*HaPoolJsonCfg{},
-		Attributes_conns: &[]*HaPoolJsonCfg{},
-		Sessions_conns: &[]*HaPoolJsonCfg{
-			&HaPoolJsonCfg{
-				Address: utils.StringPointer(utils.MetaInternal),
-			},
-		},
+		Enabled:              utils.BoolPointer(false),
+		Rals_conns:           &[]*HaPoolJsonCfg{},
+		Resources_conns:      &[]*HaPoolJsonCfg{},
+		Thresholds_conns:     &[]*HaPoolJsonCfg{},
+		Stats_conns:          &[]*HaPoolJsonCfg{},
+		Suppliers_conns:      &[]*HaPoolJsonCfg{},
+		Attributes_conns:     &[]*HaPoolJsonCfg{},
+		Sessions_conns:       &[]*HaPoolJsonCfg{},
 		Dispatching_strategy: utils.StringPointer(utils.MetaRandom),
 	}
 	if cfg, err := dfCgrJsonCfg.DispatcherSJsonCfg(); err != nil {
