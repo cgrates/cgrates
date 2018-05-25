@@ -1334,22 +1334,14 @@ func TestCgrLoaderCfgITDefaults(t *testing.T) {
 
 func TestCgrCfgJSONDefaultDispatcherSCfg(t *testing.T) {
 	eDspSCfg := &DispatcherSCfg{
-		Enabled: false,
-		RALsConns: []*HaPoolConfig{
-			&HaPoolConfig{
-				Address: utils.MetaInternal,
-			},
-		},
-		ResSConns:    []*HaPoolConfig{},
-		ThreshSConns: []*HaPoolConfig{},
-		StatSConns:   []*HaPoolConfig{},
-		SupplSConns:  []*HaPoolConfig{},
-		AttrSConns:   []*HaPoolConfig{},
-		SessionSConns: []*HaPoolConfig{
-			&HaPoolConfig{
-				Address: utils.MetaInternal,
-			},
-		},
+		Enabled:             false,
+		RALsConns:           []*HaPoolConfig{},
+		ResSConns:           []*HaPoolConfig{},
+		ThreshSConns:        []*HaPoolConfig{},
+		StatSConns:          []*HaPoolConfig{},
+		SupplSConns:         []*HaPoolConfig{},
+		AttrSConns:          []*HaPoolConfig{},
+		SessionSConns:       []*HaPoolConfig{},
 		DispatchingStrategy: utils.MetaRandom,
 	}
 	if !reflect.DeepEqual(cgrCfg.dispatcherSCfg, eDspSCfg) {
