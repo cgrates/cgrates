@@ -328,7 +328,7 @@ type CGRConfig struct {
 	CDRSThresholdSConns      []*HaPoolConfig // address where to reach the thresholds service
 	CDRSStatSConns           []*HaPoolConfig
 	CDRSOnlineCDRExports     []string      // list of CDRE templates to use for real-time CDR exports
-	CDRStatsEnabled          bool          // Enable CDR Stats servicedigest_separator = ","
+	CDRStatsEnabled          bool          // Enable CDR Stats service
 	CDRStatsSaveInterval     time.Duration // Save interval duration
 	CdreProfiles             map[string]*CdreConfig
 	CdrcProfiles             map[string][]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath][]{Configs}
@@ -888,7 +888,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			self.DataDbHost = *jsnDataDbCfg.Db_host
 		}
 		if jsnDataDbCfg.Db_port != nil {
-			self.DataDbPort = strconv.Itoa(*jsnDataDbCfg.Db_port)
+			port := strconv.Itoa(*jsnDataDbCfg.Db_port)
+			if port == "-1" {
+				port = utils.MetaDynamic
+			}
+			self.DataDbPort = NewDbDefaults().DBPort(*jsnDataDbCfg.Db_type, port)
 		}
 		if jsnDataDbCfg.Db_name != nil {
 			self.DataDbName = *jsnDataDbCfg.Db_name
@@ -912,7 +916,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			self.StorDBHost = *jsnStorDbCfg.Db_host
 		}
 		if jsnStorDbCfg.Db_port != nil {
-			self.StorDBPort = strconv.Itoa(*jsnStorDbCfg.Db_port)
+			port := strconv.Itoa(*jsnStorDbCfg.Db_port)
+			if port == "-1" {
+				port = utils.MetaDynamic
+			}
+			self.StorDBPort = NewDbDefaults().DBPort(*jsnStorDbCfg.Db_type, port)
 		}
 		if jsnStorDbCfg.Db_name != nil {
 			self.StorDBName = *jsnStorDbCfg.Db_name
