@@ -1322,6 +1322,7 @@ type V1AuthorizeReply struct {
 	MaxUsage           *time.Duration
 	Suppliers          *engine.SortedSuppliers
 	ThresholdIDs       *[]string
+	StatQueueIDs       *[]string
 }
 
 // AsCGRReply is part of utils.CGRReplier interface
@@ -1346,7 +1347,10 @@ func (v1AuthReply *V1AuthorizeReply) AsCGRReply() (cgrReply utils.CGRReply, err 
 		cgrReply[utils.CapSuppliers] = v1AuthReply.Suppliers.Digest()
 	}
 	if v1AuthReply.ThresholdIDs != nil {
-		cgrReply[utils.CapThresholdHits] = *v1AuthReply.ThresholdIDs
+		cgrReply[utils.CapThresholds] = *v1AuthReply.ThresholdIDs
+	}
+	if v1AuthReply.StatQueueIDs != nil {
+		cgrReply[utils.CapStatQueues] = *v1AuthReply.StatQueueIDs
 	}
 	cgrReply[utils.Error] = "" // so we can compare in filters
 	return
@@ -1461,12 +1465,13 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		if smg.statS == nil {
 			return utils.NewErrNotConnected(utils.StatService)
 		}
-		var statReply string
+		var statReply []string
 		if err := smg.statS.Call(utils.StatSv1ProcessEvent, &args.CGREvent, &statReply); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<SessionS> error: %s processing event %+v with StatS.", err.Error(), args.CGREvent))
 		}
+		authReply.StatQueueIDs = &statReply
 	}
 	return nil
 }
@@ -1477,6 +1482,7 @@ type V1AuthorizeReplyWithDigest struct {
 	MaxUsage           *float64 // special treat returning time.Duration.Seconds()
 	SuppliersDigest    *string
 	Thresholds         *string
+	StatQueues         *string
 }
 
 // BiRPCv1AuthorizeEventWithDigest performs authorization for CGREvent based on specific components
@@ -1506,9 +1512,13 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEventWithDigest(clnt rpcclient.RpcClientCo
 	if args.GetSuppliers {
 		authReply.SuppliersDigest = utils.StringPointer(initAuthRply.Suppliers.Digest())
 	}
-	if *args.ProcessThresholds {
+	if args.ProcessThresholds != nil && *args.ProcessThresholds {
 		authReply.Thresholds = utils.StringPointer(
 			strings.Join(*initAuthRply.ThresholdIDs, utils.FIELDS_SEP))
+	}
+	if args.ProcessStatQueues != nil && *args.ProcessStatQueues {
+		authReply.StatQueues = utils.StringPointer(
+			strings.Join(*initAuthRply.StatQueueIDs, utils.FIELDS_SEP))
 	}
 	return nil
 }
@@ -1527,6 +1537,7 @@ type V1InitSessionReply struct {
 	ResourceAllocation *string
 	MaxUsage           *time.Duration
 	ThresholdIDs       *[]string
+	StatQueueIDs       *[]string
 }
 
 // AsCGRReply is part of utils.CGRReplier interface
@@ -1548,7 +1559,10 @@ func (v1Rply *V1InitSessionReply) AsCGRReply() (cgrReply utils.CGRReply, err err
 		cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
 	}
 	if v1Rply.ThresholdIDs != nil {
-		cgrReply[utils.CapThresholdHits] = *v1Rply.ThresholdIDs
+		cgrReply[utils.CapThresholds] = *v1Rply.ThresholdIDs
+	}
+	if v1Rply.StatQueueIDs != nil {
+		cgrReply[utils.CapStatQueues] = *v1Rply.StatQueueIDs
 	}
 	cgrReply[utils.Error] = ""
 	return
@@ -1639,12 +1653,13 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		if smg.statS == nil {
 			return utils.NewErrNotConnected(utils.StatService)
 		}
-		var statReply string
+		var statReply []string
 		if err := smg.statS.Call(utils.StatSv1ProcessEvent, &args.CGREvent, &statReply); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<SessionS> error: %s processing event %+v with StatS.", err.Error(), args.CGREvent))
 		}
+		rply.StatQueueIDs = &statReply
 	}
 	return
 }
@@ -1654,6 +1669,7 @@ type V1InitReplyWithDigest struct {
 	ResourceAllocation *string
 	MaxUsage           *float64
 	Thresholds         *string
+	StatQueues         *string
 }
 
 func (smg *SMGeneric) BiRPCv1InitiateSessionWithDigest(clnt rpcclient.RpcClientConnection,
@@ -1682,9 +1698,13 @@ func (smg *SMGeneric) BiRPCv1InitiateSessionWithDigest(clnt rpcclient.RpcClientC
 		}
 	}
 
-	if *args.ProcessThresholds {
+	if args.ProcessThresholds != nil && *args.ProcessThresholds {
 		initReply.Thresholds = utils.StringPointer(
 			strings.Join(*initSessionRply.ThresholdIDs, utils.FIELDS_SEP))
+	}
+	if args.ProcessStatQueues != nil && *args.ProcessStatQueues {
+		initReply.StatQueues = utils.StringPointer(
+			strings.Join(*initSessionRply.StatQueueIDs, utils.FIELDS_SEP))
 	}
 	return nil
 }
@@ -1833,7 +1853,7 @@ func (smg *SMGeneric) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection
 		if smg.statS == nil {
 			return utils.NewErrNotConnected(utils.StatService)
 		}
-		var statReply string
+		var statReply []string
 		if err := smg.statS.Call(utils.StatSv1ProcessEvent, &args.CGREvent, &statReply); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(

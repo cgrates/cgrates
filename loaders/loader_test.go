@@ -469,9 +469,9 @@ cgrates.org,FLTR_ACNT_1002,*string,Account,1002,2014-07-29T15:00:00Z
 
 func TestLoaderProcessThresholds(t *testing.T) {
 	thresholdCSV := `
-#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],Recurrent[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10]
-cgrates.org,THD_ACNT_1001,*string:Account:1001,2014-07-29T15:00:00Z,false,1,1s,false,10,ACT_LOG_WARNING,false
-cgrates.org,THD_ACNT_1002,*string:Account:1002,2014-07-29T15:00:00Z,true,1,1s,true,10,ACT_LOG_WARNING,true
+#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10]
+cgrates.org,THD_ACNT_1001,*string:Account:1001,2014-07-29T15:00:00Z,1,1,1s,false,10,ACT_LOG_WARNING,false
+cgrates.org,THD_ACNT_1002,*string:Account:1002,2014-07-29T15:00:00Z,-1,1,1s,true,10,ACT_LOG_WARNING,true
 `
 	data, _ := engine.NewMapStorage()
 	ldr := &Loader{
@@ -500,8 +500,8 @@ cgrates.org,THD_ACNT_1002,*string:Account:1002,2014-07-29T15:00:00Z,true,1,1s,tr
 				FieldId: "ActivationInterval",
 				Type:    utils.META_COMPOSED,
 				Value:   utils.ParseRSRFieldsMustCompile("3", utils.INFIELD_SEP)},
-			&config.CfgCdrField{Tag: "Recurrent",
-				FieldId: "Recurrent",
+			&config.CfgCdrField{Tag: "MaxHits",
+				FieldId: "MaxHits",
 				Type:    utils.META_COMPOSED,
 				Value:   utils.ParseRSRFieldsMustCompile("4", utils.INFIELD_SEP)},
 			&config.CfgCdrField{Tag: "MinHits",
@@ -550,7 +550,7 @@ cgrates.org,THD_ACNT_1002,*string:Account:1002,2014-07-29T15:00:00Z,true,1,1s,tr
 		FilterIDs: []string{"*string:Account:1001"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC)},
-		Recurrent: false,
+		MaxHits:   1,
 		MinHits:   1,
 		MinSleep:  time.Duration(1 * time.Second),
 		Blocker:   false,
@@ -564,7 +564,7 @@ cgrates.org,THD_ACNT_1002,*string:Account:1002,2014-07-29T15:00:00Z,true,1,1s,tr
 		FilterIDs: []string{"*string:Account:1002"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC)},
-		Recurrent: true,
+		MaxHits:   -1,
 		MinHits:   1,
 		MinSleep:  time.Duration(1 * time.Second),
 		Blocker:   true,
@@ -587,8 +587,6 @@ cgrates.org,THD_ACNT_1002,*string:Account:1002,2014-07-29T15:00:00Z,true,1,1s,tr
 			utils.ToJSON(eTh2), utils.ToJSON(aps))
 	}
 }
-
-// pentru stats,
 
 func TestLoaderProcessStats(t *testing.T) {
 	statsCSV := `

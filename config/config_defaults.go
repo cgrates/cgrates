@@ -48,6 +48,8 @@ const CGRATES_CFG_JSON = `
 	"response_cache_ttl": "0s",								// the life span of a cached response
 	"internal_ttl": "2m",									// maximum duration to wait for internal connections before giving up
 	"locking_timeout": "0",								// timeout internal locks to avoid deadlocks
+	"digest_separator": ",",
+	"digest_equal": ":",
 },
 
 
@@ -538,7 +540,7 @@ const CGRATES_CFG_JSON = `
 					{"tag": "ID", "field_id": "ID", "type": "*composed", "value": "1", "mandatory": true},
 					{"tag": "FilterIDs", "field_id": "FilterIDs", "type": "*composed", "value": "2"},
 					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*composed", "value": "3"},
-					{"tag": "Recurrent", "field_id": "Recurrent", "type": "*composed", "value": "4"},
+					{"tag": "MaxHits", "field_id": "MaxHits", "type": "*composed", "value": "4"},
 					{"tag": "MinHits", "field_id": "MinHits", "type": "*composed", "value": "5"},
 					{"tag": "MinSleep", "field_id": "MinSleep", "type": "*composed", "value": "6"},
 					{"tag": "Blocker", "field_id": "Blocker", "type": "*composed", "value": "7"},
@@ -624,6 +626,7 @@ const CGRATES_CFG_JSON = `
 	],
 },
 
+
 "migrator": {
 	"out_datadb_type": "redis",
 	"out_datadb_host": "127.0.0.1",
@@ -631,6 +634,7 @@ const CGRATES_CFG_JSON = `
 	"out_datadb_name": "10",
 	"out_datadb_user": "cgrates",
 	"out_datadb_password": "",
+	"out_datadb_encoding" : "msgpack",
 	"out_stordb_type": "mysql",
 	"out_stordb_host": "127.0.0.1",
 	"out_stordb_port": "3306",
@@ -638,5 +642,23 @@ const CGRATES_CFG_JSON = `
 	"out_stordb_user": "cgrates",
 	"out_stordb_password": "",
 },
+
+
+"dispatcher":{
+	"enabled": false,						// starts DispatcherS service: <true|false>.
+	"rals_conns": [
+		{"address": "*internal"},			// address where to reach the RALs for dispatcherS  <*internal>
+	],
+	"resources_conns": [],					// address where to reach the ResourceS <""|*internal|127.0.0.1:2013>
+	"thresholds_conns": [],					// address where to reach the ThresholdS <""|*internal|127.0.0.1:2013>
+	"stats_conns": [],						// address where to reach the StatS <""|*internal|127.0.0.1:2013>
+	"suppliers_conns": [],					// address where to reach the SupplierS <""|*internal|127.0.0.1:2013>
+	"attributes_conns": [],					// address where to reach the AttributeS <""|*internal|127.0.0.1:2013>
+	"sessions_conns": [
+		{"address": "*internal"}								// connection towards SessionService
+	],
+	"dispatching_strategy":"*random"		// strategy for dispatching <*random|*balancer|*ordered|*circular>
+},
+
 
 }`

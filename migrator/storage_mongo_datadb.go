@@ -22,12 +22,14 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/mgo"
+	"github.com/cgrates/mgo/bson"
 )
 
 const (
 	v2AccountsCol          = "accounts"
 	v1ActionTriggersCol    = "action_triggers"
 	v1AttributeProfilesCol = "attribute_profiles"
+	v2ThresholdProfileCol  = "threshold_profiles"
 )
 
 type mongoMigrator struct {
@@ -258,4 +260,32 @@ func (v1ms *mongoMigrator) setV1AttributeProfile(x *v1AttributeProfile) (err err
 		return err
 	}
 	return
+}
+
+//ThresholdProfile methods
+//get
+func (v1ms *mongoMigrator) getV2ThresholdProfile() (v2T *v2Threshold, err error) {
+	if v1ms.qryIter == nil {
+		v1ms.qryIter = v1ms.mgoDB.DB().C(v2ThresholdProfileCol).Find(nil).Iter()
+	}
+	v1ms.qryIter.Next(&v2T)
+	if v2T == nil {
+		v1ms.qryIter = nil
+		return nil, utils.ErrNoMoreData
+
+	}
+	return v2T, nil
+}
+
+//set
+func (v1ms *mongoMigrator) setV2ThresholdProfile(x *v2Threshold) (err error) {
+	if err := v1ms.mgoDB.DB().C(v2ThresholdProfileCol).Insert(x); err != nil {
+		return err
+	}
+	return
+}
+
+//rem
+func (v1ms *mongoMigrator) remV2ThresholdProfile(tenant, id string) (err error) {
+	return v1ms.mgoDB.DB().C(v2ThresholdProfileCol).Remove(bson.M{"tenant": tenant, "id": id})
 }

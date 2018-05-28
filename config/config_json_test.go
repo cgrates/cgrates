@@ -58,6 +58,8 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Response_cache_ttl:   utils.StringPointer("0s"),
 		Internal_ttl:         utils.StringPointer("2m"),
 		Locking_timeout:      utils.StringPointer("0"),
+		Digest_separator:     utils.StringPointer(","),
+		Digest_equal:         utils.StringPointer(":"),
 	}
 	if gCfg, err := dfCgrJsonCfg.GeneralJsonCfg(); err != nil {
 		t.Error(err)
@@ -989,8 +991,8 @@ func TestDfLoaderJsonCfg(t *testing.T) {
 							Field_id: utils.StringPointer("ActivationInterval"),
 							Type:     utils.StringPointer(utils.META_COMPOSED),
 							Value:    utils.StringPointer("3")},
-						&CdrFieldJsonCfg{Tag: utils.StringPointer("Recurrent"),
-							Field_id: utils.StringPointer("Recurrent"),
+						&CdrFieldJsonCfg{Tag: utils.StringPointer("MaxHits"),
+							Field_id: utils.StringPointer("MaxHits"),
 							Type:     utils.StringPointer(utils.META_COMPOSED),
 							Value:    utils.StringPointer("4")},
 						&CdrFieldJsonCfg{Tag: utils.StringPointer("MinHits"),
@@ -1276,6 +1278,7 @@ func TestDfMigratorCfg(t *testing.T) {
 		Out_dataDB_name:     utils.StringPointer("10"),
 		Out_dataDB_user:     utils.StringPointer("cgrates"),
 		Out_dataDB_password: utils.StringPointer(""),
+		Out_dataDB_encoding: utils.StringPointer("msgpack"),
 		Out_storDB_type:     utils.StringPointer("mysql"),
 		Out_storDB_host:     utils.StringPointer("127.0.0.1"),
 		Out_storDB_port:     utils.StringPointer("3306"),

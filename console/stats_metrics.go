@@ -19,52 +19,47 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"time"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdStatQueueProcessEvent{
-		name:      "stats_process_event",
-		rpcMethod: "StatSv1.ProcessEvent",
-		rpcParams: &utils.CGREvent{},
+	c := &CmdGetStatQueueStringMetrics{
+		name:      "stats_metrics",
+		rpcMethod: "StatSv1.GetQueueStringMetrics",
+		rpcParams: &utils.TenantID{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdStatQueueProcessEvent struct {
+type CmdGetStatQueueStringMetrics struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.CGREvent
+	rpcParams *utils.TenantID
 	*CommandExecuter
 }
 
-func (self *CmdStatQueueProcessEvent) Name() string {
+func (self *CmdGetStatQueueStringMetrics) Name() string {
 	return self.name
 }
 
-func (self *CmdStatQueueProcessEvent) RpcMethod() string {
+func (self *CmdGetStatQueueStringMetrics) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdStatQueueProcessEvent) RpcParams(reset bool) interface{} {
+func (self *CmdGetStatQueueStringMetrics) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.CGREvent{}
+		self.rpcParams = &utils.TenantID{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdStatQueueProcessEvent) PostprocessRpcParams() error {
-	if self.rpcParams.Time == nil {
-		self.rpcParams.Time = utils.TimePointer(time.Now())
-	}
+func (self *CmdGetStatQueueStringMetrics) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdStatQueueProcessEvent) RpcResult() interface{} {
-	var atr []string
-	return &atr
+func (self *CmdGetStatQueueStringMetrics) RpcResult() interface{} {
+	var atr *map[string]string
+	return atr
 }

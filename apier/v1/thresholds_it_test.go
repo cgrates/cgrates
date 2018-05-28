@@ -162,6 +162,7 @@ var sTestsThresholdSV1 = []func(t *testing.T){
 	testV1TSSetThresholdProfile,
 	testV1TSUpdateThresholdProfile,
 	testV1TSRemoveThresholdProfile,
+	testV1TSMaxHits,
 	testV1TSStopEngine,
 }
 
@@ -380,7 +381,7 @@ func testV1TSSetThresholdProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
-		Recurrent: true,
+		MaxHits:   -1,
 		MinSleep:  time.Duration(5 * time.Minute),
 		Blocker:   false,
 		Weight:    20.0,
@@ -453,6 +454,79 @@ func testV1TSRemoveThresholdProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
+}
+
+func testV1TSMaxHits(t *testing.T) {
+	var reply string
+	// check if exist
+	if err := tSv1Rpc.Call("ApierV1.GetThresholdProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TH3"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	tPrfl = &engine.ThresholdProfile{
+		Tenant:  "cgrates.org",
+		ID:      "TH3",
+		MaxHits: 3,
+	}
+	//set
+	if err := tSv1Rpc.Call("ApierV1.SetThresholdProfile", tPrfl, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	var ids []string
+	eIDs := []string{"TH3"}
+	thEvent := &utils.CGREvent{ // hitting TH3
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.Account: "1002",
+		},
+	}
+	//process event
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, thEvent, &ids); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ids, eIDs) {
+		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
+	}
+	//check threshold after first process ( hits : 1)
+	var td engine.Threshold
+	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "TH3", Hits: 1}
+	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThreshold,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TH3"}, &td); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eTd.Hits, td.Hits) {
+		t.Errorf("expecting: %+v, received: %+v", eTd, td)
+	}
+	//process event
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, thEvent, &ids); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ids, eIDs) {
+		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
+	}
+	//check threshold after second process ( hits : 2)
+	eTd.Hits = 2
+	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThreshold,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TH3"}, &td); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eTd.Hits, td.Hits) {
+		t.Errorf("expecting: %+v, received: %+v", eTd, td)
+	}
+	//process event
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, thEvent, &ids); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ids, eIDs) {
+		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
+	}
+	//check threshold after third process (reached the maximum hits and should be removed)
+	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThreshold,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TH3"}, &td); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
 }
 
 func testV1TSStopEngine(t *testing.T) {

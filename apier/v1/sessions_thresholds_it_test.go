@@ -51,6 +51,7 @@ func handleDisconnectSession2(clnt *rpc2.Client,
 }
 
 func TestSessionSv1ItInitCfg(t *testing.T) {
+	var err error
 	sSv1CfgPath2 = path.Join(*dataDir, "conf", "samples", "sessions")
 	// Init config first
 	sSv1Cfg2, err = config.NewCGRConfigFromFolder(sSv1CfgPath2)
@@ -118,7 +119,7 @@ func TestSessionSv1ItGetThreshold(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
 		},
-		Recurrent: true,
+		MaxHits:   -1,
 		MinSleep:  time.Duration(0),
 		Blocker:   false,
 		Weight:    10.0,

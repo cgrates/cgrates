@@ -413,3 +413,51 @@ func (v1rs *redisMigrator) setV1AttributeProfile(x *v1AttributeProfile) (err err
 	}
 	return
 }
+
+//ThresholdProfile methods
+//get
+func (v1rs *redisMigrator) getV2ThresholdProfile() (v2T *v2Threshold, err error) {
+	var v2Th *v2Threshold
+	if v1rs.qryIdx == nil {
+		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(utils.ThresholdProfilePrefix)
+		if err != nil {
+			return
+		} else if len(v1rs.dataKeys) == 0 {
+			return nil, utils.ErrNotFound
+		}
+		v1rs.qryIdx = utils.IntPointer(0)
+	}
+	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
+		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
+		if err != nil {
+			return nil, err
+		}
+		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v2Th); err != nil {
+			return nil, err
+		}
+		*v1rs.qryIdx = *v1rs.qryIdx + 1
+	} else {
+		v1rs.qryIdx = nil
+		return nil, utils.ErrNoMoreData
+	}
+	return v2Th, nil
+}
+
+//set
+func (v1rs *redisMigrator) setV2ThresholdProfile(x *v2Threshold) (err error) {
+	key := utils.ThresholdProfilePrefix + utils.ConcatenatedKey(x.Tenant, x.ID)
+	bit, err := v1rs.rds.Marshaler().Marshal(x)
+	if err != nil {
+		return err
+	}
+	if err = v1rs.rds.Cmd("SET", key, bit).Err; err != nil {
+		return err
+	}
+	return
+}
+
+//rem
+func (v1rs *redisMigrator) remV2ThresholdProfile(tenant, id string) (err error) {
+	key := utils.ThresholdProfilePrefix + utils.ConcatenatedKey(tenant, id)
+	return v1rs.rds.Cmd("DEL", key).Err
+}

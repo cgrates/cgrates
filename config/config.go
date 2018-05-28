@@ -144,9 +144,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.diameterAgentCfg = new(DiameterAgentCfg)
 	cfg.radiusAgentCfg = new(RadiusAgentCfg)
 	cfg.filterSCfg = new(FilterSCfg)
-	cfg.dispatcherSCfg = &DispatcherSCfg{
-		Enabled: true,
-	}
+	cfg.dispatcherSCfg = new(DispatcherSCfg)
 	cfg.ConfigReloads = make(map[string]chan struct{})
 	cfg.ConfigReloads[utils.CDRC] = make(chan struct{}, 1)
 	cfg.ConfigReloads[utils.CDRC] <- struct{}{} // Unlock the channel
@@ -297,9 +295,11 @@ type CGRConfig struct {
 	HttpSkipTlsVerify        bool              // If enabled Http Client will accept any TLS certificate
 	TpExportPath             string            // Path towards export folder for offline Tariff Plans
 	PosterAttempts           int
-	FailedPostsDir           string          // Directory path where we store failed http requests
-	MaxCallDuration          time.Duration   // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
-	LockingTimeout           time.Duration   // locking mechanism timeout to avoid deadlocks
+	FailedPostsDir           string        // Directory path where we store failed http requests
+	MaxCallDuration          time.Duration // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
+	LockingTimeout           time.Duration // locking mechanism timeout to avoid deadlocks
+	DigestSeparator          string
+	DigestEqual              string
 	Logger                   string          // dictates the way logs are displayed/stored
 	LogLevel                 int             // system wide log level, nothing higher than this will be logged
 	RALsEnabled              bool            // start standalone server (no balancer)
@@ -668,6 +668,45 @@ func (self *CGRConfig) checkConfigSanity() error {
 	}
 	// DispaterS checks
 	if self.dispatcherSCfg != nil && self.dispatcherSCfg.Enabled {
+		for _, connCfg := range self.dispatcherSCfg.RALsConns {
+			if connCfg.Address != utils.MetaInternal {
+				return errors.New("Only <*internal> connectivity allowed in DispatcherS for now")
+			}
+			if connCfg.Address == utils.MetaInternal && !self.RALsEnabled {
+				return errors.New("RALs not enabled but requested by DispatcherS component.")
+			}
+		}
+
+		for _, connCfg := range self.dispatcherSCfg.ResSConns {
+			if connCfg.Address == utils.MetaInternal && !self.resourceSCfg.Enabled {
+				return errors.New("ResourceS not enabled but requested by DispatcherS component.")
+			}
+		}
+		for _, connCfg := range self.dispatcherSCfg.StatSConns {
+			if connCfg.Address == utils.MetaInternal && !self.resourceSCfg.Enabled {
+				return errors.New("StatS not enabled but requested by DispatherS component.")
+			}
+		}
+		for _, connCfg := range self.dispatcherSCfg.ThreshSConns {
+			if connCfg.Address == utils.MetaInternal && !self.thresholdSCfg.Enabled {
+				return errors.New("ThresholdS not enabled but requested by DispatherS component.")
+			}
+		}
+		for _, connCfg := range self.dispatcherSCfg.SupplSConns {
+			if connCfg.Address == utils.MetaInternal && !self.thresholdSCfg.Enabled {
+				return errors.New("SupplierS not enabled but requested by DispatherS component.")
+			}
+		}
+		for _, connCfg := range self.dispatcherSCfg.AttrSConns {
+			if connCfg.Address == utils.MetaInternal && !self.thresholdSCfg.Enabled {
+				return errors.New("AttributeS not enabled but requested by DispatherS component.")
+			}
+		}
+		if !utils.IsSliceMember([]string{utils.MetaRandom, utils.MetaBalancer, utils.MetaOrdered,
+			utils.MetaCircular}, self.dispatcherSCfg.DispatchingStrategy) {
+			return fmt.Errorf("<%s> unsupported dispatching strategy %s",
+				utils.DispatcherS, self.dispatcherSCfg.DispatchingStrategy)
+		}
 	}
 	return nil
 }
@@ -849,7 +888,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			self.DataDbHost = *jsnDataDbCfg.Db_host
 		}
 		if jsnDataDbCfg.Db_port != nil {
-			self.DataDbPort = strconv.Itoa(*jsnDataDbCfg.Db_port)
+			port := strconv.Itoa(*jsnDataDbCfg.Db_port)
+			if port == "-1" {
+				port = utils.MetaDynamic
+			}
+			self.DataDbPort = NewDbDefaults().DBPort(*jsnDataDbCfg.Db_type, port)
 		}
 		if jsnDataDbCfg.Db_name != nil {
 			self.DataDbName = *jsnDataDbCfg.Db_name
@@ -873,7 +916,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			self.StorDBHost = *jsnStorDbCfg.Db_host
 		}
 		if jsnStorDbCfg.Db_port != nil {
-			self.StorDBPort = strconv.Itoa(*jsnStorDbCfg.Db_port)
+			port := strconv.Itoa(*jsnStorDbCfg.Db_port)
+			if port == "-1" {
+				port = utils.MetaDynamic
+			}
+			self.StorDBPort = NewDbDefaults().DBPort(*jsnStorDbCfg.Db_type, port)
 		}
 		if jsnStorDbCfg.Db_name != nil {
 			self.StorDBName = *jsnStorDbCfg.Db_name
@@ -969,6 +1016,12 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			if self.LockingTimeout, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.Locking_timeout); err != nil {
 				return err
 			}
+		}
+		if jsnGeneralCfg.Digest_separator != nil {
+			self.DigestSeparator = *jsnGeneralCfg.Digest_separator
+		}
+		if jsnGeneralCfg.Digest_equal != nil {
+			self.DigestEqual = *jsnGeneralCfg.Digest_equal
 		}
 	}
 

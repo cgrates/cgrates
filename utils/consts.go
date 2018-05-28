@@ -619,6 +619,16 @@ const (
 	CapMaxUsage             = "MaxUsage"
 	CapSuppliers            = "Suppliers"
 	CapThresholdHits        = "ThresholdHits"
+	CapThresholds           = "Thresholds"
+	CapStatQueues           = "StatQueues"
+)
+
+// DispatcherStrategy
+const (
+	MetaRandom   = "*random"
+	MetaBalancer = "*balancer"
+	MetaOrdered  = "*ordered"
+	MetaCircular = "*circular"
 )
 
 // MetaFilterIndexesAPIs

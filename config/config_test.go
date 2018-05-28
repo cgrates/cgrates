@@ -65,6 +65,76 @@ func TestCgrCfgLoadWithDefaults(t *testing.T) {
 	}
 }
 
+func TestCgrCfgDataDBPortWithoutDynamic(t *testing.T) {
+	JSN_CFG := `
+{
+"data_db": {
+	"db_type": "mongo",
+	}
+}`
+
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(JSN_CFG); err != nil {
+		t.Error(err)
+	} else if cgrCfg.DataDbType != utils.MONGO {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbType, utils.MONGO)
+	} else if cgrCfg.DataDbPort != "6379" {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbPort, "6379")
+	}
+}
+
+func TestCgrCfgDataDBPortWithDymanic(t *testing.T) {
+	JSN_CFG := `
+{
+"data_db": {
+	"db_type": "mongo",
+	"db_port": -1,
+	}
+}`
+
+	if cgrCfg, err := NewCGRConfigFromJsonString(JSN_CFG); err != nil {
+		t.Error(err)
+	} else if cgrCfg.DataDbType != utils.MONGO {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbType, utils.MONGO)
+	} else if cgrCfg.DataDbPort != "27017" {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbPort, "27017")
+	}
+}
+
+func TestCgrCfgStorDBPortWithoutDynamic(t *testing.T) {
+	JSN_CFG := `
+{
+"stor_db": {
+	"db_type": "mongo",
+	}
+}`
+
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(JSN_CFG); err != nil {
+		t.Error(err)
+	} else if cgrCfg.StorDBType != utils.MONGO {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDBType, utils.MONGO)
+	} else if cgrCfg.StorDBPort != "3306" {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDBPort, "3306")
+	}
+}
+
+func TestCgrCfgStorDBPortWithDymanic(t *testing.T) {
+	JSN_CFG := `
+{
+"stor_db": {
+	"db_type": "mongo",
+	"db_port": -1,
+	}
+}`
+
+	if cgrCfg, err := NewCGRConfigFromJsonString(JSN_CFG); err != nil {
+		t.Error(err)
+	} else if cgrCfg.StorDBType != utils.MONGO {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDBType, utils.MONGO)
+	} else if cgrCfg.StorDBPort != "27017" {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDBPort, "27017")
+	}
+}
+
 func TestCgrCfgCDRC(t *testing.T) {
 	JSN_RAW_CFG := `
 {
@@ -216,6 +286,12 @@ func TestCgrCfgJSONDefaultsGeneral(t *testing.T) {
 	}
 	if cgrCfg.LogLevel != 6 {
 		t.Error(cgrCfg.LogLevel)
+	}
+	if cgrCfg.DigestSeparator != "," {
+		t.Error(cgrCfg.DigestSeparator)
+	}
+	if cgrCfg.DigestEqual != ":" {
+		t.Error(cgrCfg.DigestEqual)
 	}
 }
 
@@ -1145,8 +1221,8 @@ func TestCgrLoaderCfgITDefaults(t *testing.T) {
 							FieldId: "ActivationInterval",
 							Type:    utils.META_COMPOSED,
 							Value:   utils.ParseRSRFieldsMustCompile("3", utils.INFIELD_SEP)},
-						&CfgCdrField{Tag: "Recurrent",
-							FieldId: "Recurrent",
+						&CfgCdrField{Tag: "MaxHits",
+							FieldId: "MaxHits",
 							Type:    utils.META_COMPOSED,
 							Value:   utils.ParseRSRFieldsMustCompile("4", utils.INFIELD_SEP)},
 						&CfgCdrField{Tag: "MinHits",
@@ -1256,6 +1332,7 @@ func TestCgrLoaderCfgITDefaults(t *testing.T) {
 	}
 }
 
+/* Will be activated after finish dispatcher config
 func TestCgrCfgJSONDefaultDispatcherSCfg(t *testing.T) {
 	eDspSCfg := &DispatcherSCfg{
 		Enabled: true,
@@ -1264,7 +1341,7 @@ func TestCgrCfgJSONDefaultDispatcherSCfg(t *testing.T) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.dispatcherSCfg, eDspSCfg)
 	}
 }
-
+*/
 func TestCgrLoaderCfgDefault(t *testing.T) {
 	eLdrCfg := &LoaderCgrCfg{
 		TpID:           "",
@@ -1295,6 +1372,7 @@ func TestCgrMigratorCfgDefault(t *testing.T) {
 		OutDataDBName:     "10",
 		OutDataDBUser:     "cgrates",
 		OutDataDBPassword: "",
+		OutDataDBEncoding: "msgpack",
 		OutStorDBType:     "mysql",
 		OutStorDBHost:     "127.0.0.1",
 		OutStorDBPort:     "3306",

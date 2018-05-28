@@ -314,42 +314,46 @@ func TestStatsmatchingStatQueuesForEvent(t *testing.T) {
 
 func TestStatSprocessEvent(t *testing.T) {
 	stq := map[string]string{}
-	reply := ""
+	reply := []string{}
+	expected := []string{"statsprofile1"}
 	err := stsserv.V1ProcessEvent(statsEvs[0], &reply)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
-	} else if reply != utils.OK {
-		t.Errorf("received reply: %s", reply)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 	err = stsserv.V1GetQueueStringMetrics(&utils.TenantID{Tenant: stqs[0].Tenant, ID: stqs[0].ID}, &stq)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
+	expected = []string{"statsprofile2"}
 	err = stsserv.V1ProcessEvent(statsEvs[1], &reply)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
-	} else if reply != utils.OK {
-		t.Errorf("received reply: %s", reply)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 	err = stsserv.V1GetQueueStringMetrics(&utils.TenantID{Tenant: stqs[1].Tenant, ID: stqs[1].ID}, &stq)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
+	expected = []string{"statsprofile3"}
 	err = stsserv.V1ProcessEvent(statsEvs[2], &reply)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
-	} else if reply != utils.OK {
-		t.Errorf("received reply: %s", reply)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 	err = stsserv.V1GetQueueStringMetrics(&utils.TenantID{Tenant: stqs[2].Tenant, ID: stqs[2].ID}, &stq)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
+	expected = []string{"statsprofile4"}
 	err = stsserv.V1ProcessEvent(statsEvs[3], &reply)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
-	} else if reply != utils.OK {
-		t.Errorf("received reply: %s", reply)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 	err = stsserv.V1GetQueueStringMetrics(&utils.TenantID{Tenant: stqs[3].Tenant, ID: stqs[3].ID}, &stq)
 	if err != nil {

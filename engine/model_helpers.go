@@ -2161,14 +2161,14 @@ func (tps TpThresholdS) AsTPThreshold() (result []*utils.TPThreshold) {
 		th, found := mst[tp.ID]
 		if !found {
 			th = &utils.TPThreshold{
-				TPid:      tp.Tpid,
-				Tenant:    tp.Tenant,
-				ID:        tp.ID,
-				Blocker:   tp.Blocker,
-				Recurrent: tp.Recurrent,
-				MinHits:   tp.MinHits,
-				MinSleep:  tp.MinSleep,
-				Async:     tp.Async,
+				TPid:     tp.Tpid,
+				Tenant:   tp.Tenant,
+				ID:       tp.ID,
+				Blocker:  tp.Blocker,
+				MaxHits:  tp.MaxHits,
+				MinHits:  tp.MinHits,
+				MinSleep: tp.MinSleep,
+				Async:    tp.Async,
 			}
 		}
 		if tp.ActionIDs != "" {
@@ -2224,7 +2224,7 @@ func APItoModelTPThreshold(th *utils.TPThreshold) (mdls TpThresholdS) {
 				if i == 0 {
 					mdl.Blocker = th.Blocker
 					mdl.Weight = th.Weight
-					mdl.Recurrent = th.Recurrent
+					mdl.MaxHits = th.MaxHits
 					mdl.MinHits = th.MinHits
 					mdl.MinSleep = th.MinSleep
 					mdl.Async = th.Async
@@ -2262,7 +2262,7 @@ func APItoModelTPThreshold(th *utils.TPThreshold) (mdls TpThresholdS) {
 				if i == 0 {
 					mdl.Blocker = th.Blocker
 					mdl.Weight = th.Weight
-					mdl.Recurrent = th.Recurrent
+					mdl.MaxHits = th.MaxHits
 					mdl.MinHits = th.MinHits
 					mdl.MinSleep = th.MinSleep
 					mdl.Async = th.Async
@@ -2300,7 +2300,7 @@ func APItoModelTPThreshold(th *utils.TPThreshold) (mdls TpThresholdS) {
 				if i == 0 {
 					mdl.Blocker = th.Blocker
 					mdl.Weight = th.Weight
-					mdl.Recurrent = th.Recurrent
+					mdl.MaxHits = th.MaxHits
 					mdl.MinHits = th.MinHits
 					mdl.MinSleep = th.MinSleep
 					mdl.Async = th.Async
@@ -2323,13 +2323,13 @@ func APItoModelTPThreshold(th *utils.TPThreshold) (mdls TpThresholdS) {
 
 func APItoThresholdProfile(tpTH *utils.TPThreshold, timezone string) (th *ThresholdProfile, err error) {
 	th = &ThresholdProfile{
-		Tenant:    tpTH.Tenant,
-		ID:        tpTH.ID,
-		Recurrent: tpTH.Recurrent,
-		MinHits:   tpTH.MinHits,
-		Weight:    tpTH.Weight,
-		Blocker:   tpTH.Blocker,
-		Async:     tpTH.Async,
+		Tenant:  tpTH.Tenant,
+		ID:      tpTH.ID,
+		MaxHits: tpTH.MaxHits,
+		MinHits: tpTH.MinHits,
+		Weight:  tpTH.Weight,
+		Blocker: tpTH.Blocker,
+		Async:   tpTH.Async,
 	}
 	if tpTH.MinSleep != "" {
 		if th.MinSleep, err = utils.ParseDurationWithNanosecs(tpTH.MinSleep); err != nil {

@@ -173,7 +173,7 @@
 					{"tag": "ID", "field_id": "ID", "type": "*composed", "value": "1", "mandatory": true},
 					{"tag": "FilterIDs", "field_id": "FilterIDs", "type": "*composed", "value": "2"},
 					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*composed", "value": "3"},
-					{"tag": "Recurrent", "field_id": "Recurrent", "type": "*composed", "value": "4"},
+					{"tag": "MaxHits", "field_id": "MaxHits", "type": "*composed", "value": "4"},
 					{"tag": "MinHits", "field_id": "MinHits", "type": "*composed", "value": "5"},
 					{"tag": "MinSleep", "field_id": "MinSleep", "type": "*composed", "value": "6"},
 					{"tag": "Blocker", "field_id": "Blocker", "type": "*composed", "value": "7"},
@@ -305,6 +305,11 @@
 		{"address": "*internal"}
 	],
 },
+
+
+"migrator":{
+	"out_stordb_password": "CGRateS.org",
+}
 
 
 }

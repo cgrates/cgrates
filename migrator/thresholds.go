@@ -134,6 +134,42 @@ func (m *Migrator) migrateV2ActionTriggers() (err error) {
 	return
 }
 
+func (m *Migrator) migrateV2Thresholds() (err error) {
+	var v2T *v2Threshold
+	for {
+		v2T, err = m.dmIN.getV2ThresholdProfile()
+		if err != nil && err != utils.ErrNoMoreData {
+			return err
+		}
+		if err == utils.ErrNoMoreData {
+			break
+		}
+		if v2T != nil {
+			th := v2T.V2toV3Threshold()
+			if m.dryRun != true {
+				if err = m.dmIN.remV2ThresholdProfile(v2T.Tenant, v2T.ID); err != nil {
+					return err
+				}
+				if err = m.dmOut.DataManager().SetThresholdProfile(th, true); err != nil {
+					return err
+				}
+				m.stats[utils.Thresholds] += 1
+			}
+		}
+	}
+	if m.dryRun != true {
+		// All done, update version wtih current one
+		vrs := engine.Versions{utils.Thresholds: engine.CurrentDataDBVersions()[utils.Thresholds]}
+		if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
+			return utils.NewCGRError(utils.Migrator,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error: <%s> when updating Thresholds version into dataDB", err.Error()))
+		}
+	}
+	return
+}
+
 func (m *Migrator) migrateThresholds() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
@@ -160,9 +196,10 @@ func (m *Migrator) migrateThresholds() (err error) {
 		return
 
 	case 1:
-		if err := m.migrateV2ActionTriggers(); err != nil {
-			return err
-		}
+		return m.migrateV2ActionTriggers()
+
+	case 2:
+		return m.migrateV2Thresholds()
 	}
 	return
 }
@@ -349,4 +386,39 @@ func AsThreshold2(v2ATR engine.ActionTrigger) (thp *engine.ThresholdProfile, th 
 	}
 
 	return thp, th, filter, nil
+}
+
+type v2Threshold struct {
+	Tenant             string
+	ID                 string
+	FilterIDs          []string
+	ActivationInterval *utils.ActivationInterval // Time when this limit becomes active and expires
+	Recurrent          bool
+	MinHits            int
+	MinSleep           time.Duration
+	Blocker            bool    // blocker flag to stop processing on filters matched
+	Weight             float64 // Weight to sort the thresholds
+	ActionIDs          []string
+	Async              bool
+}
+
+func (v2T v2Threshold) V2toV3Threshold() (th *engine.ThresholdProfile) {
+	th = &engine.ThresholdProfile{
+		Tenant:             v2T.Tenant,
+		ID:                 v2T.ID,
+		FilterIDs:          v2T.FilterIDs,
+		ActivationInterval: v2T.ActivationInterval,
+		MinHits:            v2T.MinHits,
+		MinSleep:           v2T.MinSleep,
+		Blocker:            v2T.Blocker,
+		Weight:             v2T.Weight,
+		ActionIDs:          v2T.ActionIDs,
+		Async:              v2T.Async,
+	}
+	if v2T.Recurrent == true {
+		th.MaxHits = -1
+	} else {
+		th.MaxHits = 1
+	}
+	return
 }

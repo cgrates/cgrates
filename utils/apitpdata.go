@@ -1358,7 +1358,7 @@ type TPThreshold struct {
 	ID                 string
 	FilterIDs          []string
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
-	Recurrent          bool
+	MaxHits            int
 	MinHits            int
 	MinSleep           string
 	Blocker            bool    // blocker flag to stop processing on filters matched

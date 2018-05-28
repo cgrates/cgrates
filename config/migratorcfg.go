@@ -25,6 +25,7 @@ type MigratorCgrCfg struct {
 	OutDataDBName     string
 	OutDataDBUser     string
 	OutDataDBPassword string
+	OutDataDBEncoding string
 	OutStorDBType     string
 	OutStorDBHost     string
 	OutStorDBPort     string
@@ -52,6 +53,9 @@ func (mg *MigratorCgrCfg) loadFromJsonCfg(jsnCfg *MigratorCfgJson) (err error) {
 	}
 	if jsnCfg.Out_dataDB_password != nil {
 		mg.OutDataDBPassword = *jsnCfg.Out_dataDB_password
+	}
+	if jsnCfg.Out_dataDB_encoding != nil {
+		mg.OutDataDBEncoding = *jsnCfg.Out_dataDB_encoding
 	}
 
 	if jsnCfg.Out_storDB_type != nil {
