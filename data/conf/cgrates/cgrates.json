@@ -26,7 +26,9 @@
 // 	"reply_timeout": "2s",									// consider connection down for replies taking longer than this value
 // 	"response_cache_ttl": "0s",								// the life span of a cached response
 // 	"internal_ttl": "2m",									// maximum duration to wait for internal connections before giving up
-// 	"locking_timeout": "5s",								// timeout internal locks to avoid deadlocks
+// 	"locking_timeout": "0",								// timeout internal locks to avoid deadlocks
+// 	"digest_separator": ",",
+// 	"digest_equal": ":",
 // },
 
 
@@ -62,11 +64,13 @@
 // },
 
 
-// "http": {									// HTTP server configuration
-// 	"json_rpc_url": "/jsonrpc",				// JSON RPC relative URL ("" to disable)
-// 	"ws_url": "/ws",						// WebSockets relative URL ("" to disable)
-// 	"use_basic_auth": false,				// use basic authentication
-// 	"auth_users": {}						// basic authentication usernames and base64-encoded passwords (eg: { "username1": "cGFzc3dvcmQ=", "username2": "cGFzc3dvcmQy "})
+// "http": {										// HTTP server configuration
+// 	"json_rpc_url": "/jsonrpc",					// JSON RPC relative URL ("" to disable)
+// 	"ws_url": "/ws",							// WebSockets relative URL ("" to disable)
+// 	"freeswitch_cdrs_url": "/freeswitch_json",	// Freeswitch CDRS relative URL ("" to disable)
+// 	"http_cdrs": "/cdr_http",					// CDRS relative URL ("" to disable)
+// 	"use_basic_auth": false,					// use basic authentication
+// 	"auth_users": {},							// basic authentication usernames and base64-encoded passwords (eg: { "username1": "cGFzc3dvcmQ=", "username2": "cGFzc3dvcmQy "})
 // },
 
 
@@ -99,14 +103,14 @@
 // 	"threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control threshold profiles caching
 // 	"thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control thresholds caching
 // 	"filters": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control filters caching
-// 	"supplier_profiles": {"limit": -1, "ttl": "", "static_ttl": false},							// control supplier profile caching
-// 	"attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false},						// control attribute profile caching
+// 	"supplier_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control supplier profile caching
+// 	"attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control attribute profile caching
 // 	"resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control resource filter indexes caching
 // 	"resource_filter_revindexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control resource filter reverse indexes caching
-// 	"stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false},						// control stat filter indexes caching
+// 	"stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 						// control stat filter indexes caching
 // 	"stat_filter_revindexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control stat filter reverse indexes caching
 // 	"threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control threshold filter indexes caching
-// 	"threshold_filter_revindexes" : {"limit": -1, "ttl": "", "static_ttl": false},				// control threshold filter reverse indexes caching
+// 	"threshold_filter_revindexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control threshold filter reverse indexes caching
 // 	"supplier_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control supplier filter indexes caching
 // 	"supplier_filter_revindexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control supplier filter reverse indexes caching
 // 	"attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control attribute filter indexes caching
@@ -143,7 +147,7 @@
 // 	"enabled": false,						// start the CDR Server service:  <true|false>
 // 	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs
 // 	"store_cdrs": true,						// store cdrs in storDb
-// 	"sessions_cost_retries": 5,					// number of queries to sessions_cost before recalculating CDR
+// 	"sessions_cost_retries": 5,				// number of queries to sessions_costs before recalculating CDR
 // 	"rals_conns": [
 // 		{"address": "*internal"}			// address where to reach the Rater for cost calculation, empty to disable functionality: <""|*internal|x.y.z.y:1234>
 // 	],
@@ -303,6 +307,8 @@
 // 	"subscribe_park": true,					// subscribe via fsock to receive park events
 // 	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
 // 	"extra_fields": [],						// extra fields to store in auth/CDRs when creating them
+// 	//"min_dur_low_balance": "5s",			// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debit_interval)
+// 	//"low_balance_ann_file": "",			// file to be played when low balance is reached for prepaid calls
 // 	"empty_balance_context": "",			// if defined, prepaid calls will be transferred to this context on empty balance
 // 	"empty_balance_ann_file": "",			// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
 // 	"channel_sync_interval": "5m",			// sync channels with freeswitch regularly
@@ -383,8 +389,8 @@
 // },
 
 
-// "attributes": {								// Attribute service
-//  "enabled": false,						// starts attribute service: <true|false>.
+// "attributes": {							// Attribute service
+// 	"enabled": false,						// starts attribute service: <true|false>.
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 // },
@@ -428,10 +434,132 @@
 // },
 
 
+// "loaders": [
+// 	{
+// 		"id": "*default",									// identifier of the Loader
+// 		"enabled": false,									// starts as service: <true|false>.
+// 		"dry_run": false,									// do not send the CDRs to CDRS, just parse them
+// 		"run_delay": 0,										// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
+// 		"lock_filename": ".cgr.lck",						// Filename containing concurrency lock in case of delayed processing
+// 		"caches_conns": [
+// 			{"address": "*internal"},						// address where to reach the CacheS for data reload, empty for no reloads  <""|*internal|x.y.z.y:1234>
+// 		],
+// 		"field_separator": ",",								// separator used in case of csv files
+// 		"tp_in_dir": "/var/spool/cgrates/loader/in",		// absolute path towards the directory where the CDRs are stored
+// 		"tp_out_dir": "/var/spool/cgrates/loader/out",	// absolute path towards the directory where processed CDRs will be moved
+// 		"data":[											// data profiles to load
+// 			{
+// 				"type": "*attributes",						// data source type
+// 				"file_name": "Attributes.csv",				// file name in the tp_in_dir
+// 				"fields": [
+// 					{"tag": "TenantID", "field_id": "Tenant", "type": "*composed", "value": "0", "mandatory": true},
+// 					{"tag": "ProfileID", "field_id": "ID", "type": "*composed", "value": "1", "mandatory": true},
+// 					{"tag": "Contexts", "field_id": "Contexts", "type": "*composed", "value": "2"},
+// 					{"tag": "FilterIDs", "field_id": "FilterIDs", "type": "*composed", "value": "3"},
+// 					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*composed", "value": "4"},
+// 					{"tag": "FieldName", "field_id": "FieldName", "type": "*composed", "value": "5"},
+// 					{"tag": "Initial", "field_id": "Initial", "type": "*composed", "value": "6"},
+// 					{"tag": "Substitute", "field_id": "Substitute", "type": "*composed", "value": "7"},
+// 					{"tag": "Append", "field_id": "Append", "type": "*composed", "value": "8"},
+// 					{"tag": "Weight", "field_id": "Weight", "type": "*composed", "value": "9"},
+// 				],
+// 			},
+// 			{
+// 				"type": "*filters",						// data source type
+// 				"file_name": "Filters.csv",				// file name in the tp_in_dir
+// 				"fields": [
+// 					{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "0", "mandatory": true},
+// 					{"tag": "ID", "field_id": "ID", "type": "*composed", "value": "1", "mandatory": true},
+// 					{"tag": "FilterType", "field_id": "FilterType", "type": "*composed", "value": "2"},
+// 					{"tag": "FilterFieldName", "field_id": "FilterFieldName", "type": "*composed", "value": "3"},
+// 					{"tag": "FilterFieldValues", "field_id": "FilterFieldValues", "type": "*composed", "value": "4"},
+// 					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*composed", "value": "5"},
+// 				],
+// 			},	
+// 			{
+// 				"type": "*resources",						// data source type
+// 				"file_name": "Resources.csv",				// file name in the tp_in_dir
+// 				"fields": [
+// 					{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "0", "mandatory": true},
+// 					{"tag": "ID", "field_id": "ID", "type": "*composed", "value": "1", "mandatory": true},
+// 					{"tag": "FilterIDs", "field_id": "FilterIDs", "type": "*composed", "value": "2"},
+// 					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*composed", "value": "3"},
+// 					{"tag": "TTL", "field_id": "UsageTTL", "type": "*composed", "value": "4"},
+// 					{"tag": "Limit", "field_id": "Limit", "type": "*composed", "value": "5"},
+// 					{"tag": "AllocationMessage", "field_id": "AllocationMessage", "type": "*composed", "value": "6"},
+// 					{"tag": "Blocker", "field_id": "Blocker", "type": "*composed", "value": "7"},
+// 					{"tag": "Stored", "field_id": "Stored", "type": "*composed", "value": "8"},
+// 					{"tag": "Weight", "field_id": "Weight", "type": "*composed", "value": "9"},
+// 					{"tag": "ThresholdIDs", "field_id": "ThresholdIDs", "type": "*composed", "value": "10"},
+// 				],
+// 			},
+// 			{
+// 				"type": "*stats",						// data source type
+// 				"file_name": "Stats.csv",				// file name in the tp_in_dir
+// 				"fields": [
+// 					{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "0", "mandatory": true},
+// 					{"tag": "ID", "field_id": "ID", "type": "*composed", "value": "1", "mandatory": true},
+// 					{"tag": "FilterIDs", "field_id": "FilterIDs", "type": "*composed", "value": "2"},
+// 					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*composed", "value": "3"},
+// 					{"tag": "QueueLength", "field_id": "QueueLength", "type": "*composed", "value": "4"},
+// 					{"tag": "TTL", "field_id": "TTL", "type": "*composed", "value": "5"},
+// 					{"tag": "Metrics", "field_id": "Metrics", "type": "*composed", "value": "6"},
+// 					{"tag": "MetricParams", "field_id": "Parameters", "type": "*composed", "value": "7"},
+// 					{"tag": "Blocker", "field_id": "Blocker", "type": "*composed", "value": "8"},
+// 					{"tag": "Stored", "field_id": "Stored", "type": "*composed", "value": "9"},
+// 					{"tag": "Weight", "field_id": "Weight", "type": "*composed", "value": "10"},
+// 					{"tag": "MinItems", "field_id": "MinItems", "type": "*composed", "value": "11"},
+// 					{"tag": "ThresholdIDs", "field_id": "ThresholdIDs", "type": "*composed", "value": "12"},
+// 				],
+// 			},
+// 			{
+// 				"type": "*thresholds",						// data source type
+// 				"file_name": "Thresholds.csv",				// file name in the tp_in_dir
+// 				"fields": [
+// 					{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "0", "mandatory": true},
+// 					{"tag": "ID", "field_id": "ID", "type": "*composed", "value": "1", "mandatory": true},
+// 					{"tag": "FilterIDs", "field_id": "FilterIDs", "type": "*composed", "value": "2"},
+// 					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*composed", "value": "3"},
+// 					{"tag": "MaxHits", "field_id": "MaxHits", "type": "*composed", "value": "4"},
+// 					{"tag": "MinHits", "field_id": "MinHits", "type": "*composed", "value": "5"},
+// 					{"tag": "MinSleep", "field_id": "MinSleep", "type": "*composed", "value": "6"},
+// 					{"tag": "Blocker", "field_id": "Blocker", "type": "*composed", "value": "7"},
+// 					{"tag": "Weight", "field_id": "Weight", "type": "*composed", "value": "8"},
+// 					{"tag": "ActionIDs", "field_id": "ActionIDs", "type": "*composed", "value": "9"},
+// 					{"tag": "Async", "field_id": "Async", "type": "*composed", "value": "10"},
+// 				],
+// 			},
+// 			{
+// 				"type": "*suppliers",						// data source type
+// 				"file_name": "Suppliers.csv",				// file name in the tp_in_dir
+// 				"fields": [
+// 					{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "0", "mandatory": true},
+// 					{"tag": "ID", "field_id": "ID", "type": "*composed", "value": "1", "mandatory": true},
+// 					{"tag": "FilterIDs", "field_id": "FilterIDs", "type": "*composed", "value": "2"},
+// 					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*composed", "value": "3"},
+// 					{"tag": "Sorting", "field_id": "Sorting", "type": "*composed", "value": "4"},
+// 					{"tag": "SortingParamameters", "field_id": "SortingParamameters", "type": "*composed", "value": "5"},
+// 					{"tag": "SupplierID", "field_id": "SupplierID", "type": "*composed", "value": "6"},
+// 					{"tag": "SupplierFilterIDs", "field_id": "SupplierFilterIDs", "type": "*composed", "value": "7"},
+// 					{"tag": "SupplierAccountIDs", "field_id": "SupplierAccountIDs", "type": "*composed", "value": "8"},
+// 					{"tag": "SupplierRatingPlanIDs", "field_id": "SupplierRatingPlanIDs", "type": "*composed", "value": "9"},
+// 					{"tag": "SupplierResourceIDs", "field_id": "SupplierResourceIDs", "type": "*composed", "value": "10"},
+// 					{"tag": "SupplierStatIDs", "field_id": "SupplierStatIDs", "type": "*composed", "value": "11"},
+// 					{"tag": "SupplierWeight", "field_id": "SupplierWeight", "type": "*composed", "value": "12"},
+// 					{"tag": "SupplierBlocker", "field_id": "SupplierBlocker", "type": "*composed", "value": "13"},
+// 					{"tag": "SupplierParameters", "field_id": "SupplierParameters", "type": "*composed", "value": "14"},
+// 					{"tag": "Weight", "field_id": "Weight", "type": "*composed", "value": "15"},
+// 				],
+// 			},
+// 		],
+// 	},
+// ],
+
+
 // "mailer": {
-//  "server": "localhost",								// the server to use when sending emails out
-//  "auth_user": "cgrates",								// authenticate to email server using this user
-//  "auth_password": "CGRateS.org",						// authenticate to email server with this password
+// 	"server": "localhost",								// the server to use when sending emails out
+// 	"auth_user": "cgrates",								// authenticate to email server using this user
+// 	"auth_password": "CGRateS.org",						// authenticate to email server with this password
 // 	"from_address": "cgr-mailer@localhost.localdomain"	// from address used when sending emails out
 // },
 
@@ -466,4 +594,51 @@
 // },
 
 
-}
+// "loader": {									// loader for tariff plans out of .csv files
+// 	"tpid": "",								// tariff plan identificator
+// 	"data_path": "",						// path towards tariff plan files
+// 	"disable_reverse": false,				// disable reverse computing
+// 	"caches_conns":[						// addresses towards cacheS components for reloads
+// 		{"address": "127.0.0.1:2012", "transport": "*json"}
+// 	],
+// 	"scheduler_conns": [
+// 		{"address": "127.0.0.1:2012"}
+// 	],
+// },
+
+
+// "migrator": {
+// 	"out_datadb_type": "redis",
+// 	"out_datadb_host": "127.0.0.1",
+// 	"out_datadb_port": "6379",
+// 	"out_datadb_name": "10",
+// 	"out_datadb_user": "cgrates",
+// 	"out_datadb_password": "",
+// 	"out_datadb_encoding" : "msgpack",
+// 	"out_stordb_type": "mysql",
+// 	"out_stordb_host": "127.0.0.1",
+// 	"out_stordb_port": "3306",
+// 	"out_stordb_name": "cgrates",
+// 	"out_stordb_user": "cgrates",
+// 	"out_stordb_password": "",
+// },
+
+
+// "dispatcher":{
+// 	"enabled": false,						// starts DispatcherS service: <true|false>.
+// 	"rals_conns": [
+// 		{"address": "*internal"},			// address where to reach the RALs for dispatcherS  <*internal>
+// 	],
+// 	"resources_conns": [],					// address where to reach the ResourceS <""|*internal|127.0.0.1:2013>
+// 	"thresholds_conns": [],					// address where to reach the ThresholdS <""|*internal|127.0.0.1:2013>
+// 	"stats_conns": [],						// address where to reach the StatS <""|*internal|127.0.0.1:2013>
+// 	"suppliers_conns": [],					// address where to reach the SupplierS <""|*internal|127.0.0.1:2013>
+// 	"attributes_conns": [],					// address where to reach the AttributeS <""|*internal|127.0.0.1:2013>
+// 	"sessions_conns": [
+// 		{"address": "*internal"}								// connection towards SessionService
+// 	],
+// 	"dispatching_strategy":"*random"		// strategy for dispatching <*random|*balancer|*ordered|*circular>
+// },
+
+
+}`

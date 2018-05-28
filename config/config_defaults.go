@@ -168,7 +168,7 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,						// start the CDR Server service:  <true|false>
 	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs
 	"store_cdrs": true,						// store cdrs in storDb
-	"sessions_cost_retries": 5,					// number of queries to sessions_costs before recalculating CDR
+	"sessions_cost_retries": 5,				// number of queries to sessions_costs before recalculating CDR
 	"rals_conns": [
 		{"address": "*internal"}			// address where to reach the Rater for cost calculation, empty to disable functionality: <""|*internal|x.y.z.y:1234>
 	],
@@ -352,6 +352,7 @@ const CGRATES_CFG_JSON = `
 	],
 },
 
+
 "diameter_agent": {
 	"enabled": false,											// enables the diameter agent: <true|false>
 	"listen": "127.0.0.1:3868",									// address where to listen for diameter requests <x.y.z.y:1234>
@@ -466,7 +467,7 @@ const CGRATES_CFG_JSON = `
 		],
 		"field_separator": ",",								// separator used in case of csv files
 		"tp_in_dir": "/var/spool/cgrates/loader/in",		// absolute path towards the directory where the CDRs are stored
-		"tp_out_dir": "/var/spool/cgrates/loader/out",	// absolute path towards the directory where processed CDRs will be moved
+		"tp_out_dir": "/var/spool/cgrates/loader/out",		// absolute path towards the directory where processed CDRs will be moved
 		"data":[											// data profiles to load
 			{
 				"type": "*attributes",						// data source type
