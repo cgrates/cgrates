@@ -23,7 +23,7 @@ package general_tests
 import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
-	"os"
+	//"os"
 	"path"
 	"testing"
 	"time"
@@ -129,7 +129,8 @@ func testCDREExportNotFound(t *testing.T) {
 		ExportTemplate: utils.StringPointer("TestTutITExportCDR"),
 		RPCCDRsFilter:  utils.RPCCDRsFilter{},
 	}
-	if err := cdreRPC.Call("ApierV1.ExportCDRs", exportArgs, &replyExport); err.Error() != utils.ErrNotFound.Error() {
+	if err := cdreRPC.Call("ApierV1.ExportCDRs", exportArgs,
+		&replyExport); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -165,10 +166,10 @@ func testCDREExport(t *testing.T) {
 	} else if replyExport.TotalRecords != 1 {
 		t.Errorf("Unexpected total records: %+v", replyExport.TotalRecords)
 	}
-	expFilePath := path.Join(*exportArgs.ExportPath, *exportArgs.ExportFileName)
-	if err := os.Remove(expFilePath); err != nil {
-		t.Error(err)
-	}
+	//expFilePath := path.Join(*exportArgs.ExportPath, *exportArgs.ExportFileName)
+	//if err := os.Remove(expFilePath); err != nil {
+	//	t.Error(err)
+	//}
 }
 
 func testCDREStopEngine(t *testing.T) {

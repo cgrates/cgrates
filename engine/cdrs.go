@@ -180,7 +180,7 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 	if cdr.Subject == "" { // Use account information as rating subject if missing
 		cdr.Subject = cdr.Account
 	}
-	if !cdr.Rated { // Enforce the RunID if CDR is not rated
+	if !cdr.PreRated { // Enforce the RunID if CDR is not rated
 		cdr.RunID = utils.MetaRaw
 	}
 	if cdr.RunID == utils.MetaRaw {
@@ -214,7 +214,7 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 	if len(self.cgrCfg.CDRSOnlineCDRExports) != 0 { // Replicate raw CDR
 		self.replicateCDRs([]*CDR{cdr})
 	}
-	if self.rals != nil && !cdr.Rated { // CDRs not rated will be processed by Rating
+	if self.rals != nil && !cdr.PreRated { // CDRs not rated will be processed by Rating
 		go self.deriveRateStoreStatsReplicate(cdr, self.cgrCfg.CDRSStoreCdrs,
 			true, len(self.cgrCfg.CDRSOnlineCDRExports) != 0)
 	}
@@ -349,7 +349,7 @@ func (self *CdrServer) deriveCdrs(cdr *CDR) (drvdCDRs []*CDR, err error) {
 		runFilters, _ := utils.ParseRSRFields(dc.RunFilters, utils.INFIELD_SEP)
 		matchingAllFilters := true
 		for _, dcRunFilter := range runFilters {
-			if !dcRunFilter.FilterPasses(cdr.FieldAsString(dcRunFilter)) {
+			if _, err := cdr.FieldAsString(dcRunFilter); err != nil {
 				matchingAllFilters = false
 				break
 			}
@@ -366,7 +366,7 @@ func (self *CdrServer) deriveCdrs(cdr *CDR) (drvdCDRs []*CDR, err error) {
 		dcSTimeFld, _ := utils.NewRSRField(dc.SetupTimeField)
 		dcATimeFld, _ := utils.NewRSRField(dc.AnswerTimeField)
 		dcDurFld, _ := utils.NewRSRField(dc.UsageField)
-		dcRatedFld, _ := utils.NewRSRField(dc.RatedField)
+		dcRatedFld, _ := utils.NewRSRField(dc.PreRatedField)
 		dcCostFld, _ := utils.NewRSRField(dc.CostField)
 
 		dcExtraFields := []*utils.RSRField{}
@@ -380,7 +380,7 @@ func (self *CdrServer) deriveCdrs(cdr *CDR) (drvdCDRs []*CDR, err error) {
 			utils.Logger.Err(fmt.Sprintf("Could not fork CGR with cgrid %s, run: %s, error: %s", cdr.CGRID, dc.RunID, err.Error()))
 			continue // do not add it to the forked CDR list
 		}
-		if !forkedCdr.Rated {
+		if !forkedCdr.PreRated {
 			forkedCdr.Cost = -1.0 // Make sure that un-rated CDRs start with Cost -1
 		}
 		cdrRuns = append(cdrRuns, forkedCdr)

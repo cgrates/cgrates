@@ -31,8 +31,8 @@ func TestCsvRecordToCDR(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
 	cdrcConfig := cgrConfig.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0]
 	cdrcConfig.CdrSourceId = "TEST_CDRC"
-	cdrcConfig.ContentFields = append(cdrcConfig.ContentFields, &config.CfgCdrField{Tag: "RunID", Type: utils.META_COMPOSED,
-		FieldId: utils.MEDI_RUNID, Value: utils.ParseRSRFieldsMustCompile("^*default", utils.INFIELD_SEP)})
+	cdrcConfig.ContentFields = append(cdrcConfig.ContentFields, &config.CfgCdrField{Tag: utils.RunID, Type: utils.META_COMPOSED,
+		FieldId: utils.RunID, Value: utils.ParseRSRFieldsMustCompile("^*default", utils.INFIELD_SEP)})
 	csvProcessor := &CsvRecordsProcessor{dfltCdrcCfg: cdrcConfig, cdrcCfgs: []*config.CdrcConfig{cdrcConfig}}
 	cdrRow := []string{"firstField", "secondField"}
 	_, err := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig)
@@ -73,7 +73,7 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
 	cdrcConfig := cgrConfig.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0]
 	cdrcConfig.CdrSourceId = "TEST_CDRC"
-	cdrcConfig.ContentFields = []*config.CfgCdrField{&config.CfgCdrField{Tag: "TORField", Type: utils.META_COMPOSED, FieldId: utils.TOR, Value: []*utils.RSRField{&utils.RSRField{Id: "0"}}},
+	cdrcConfig.ContentFields = []*config.CfgCdrField{&config.CfgCdrField{Tag: "TORField", Type: utils.META_COMPOSED, FieldId: utils.ToR, Value: []*utils.RSRField{&utils.RSRField{Id: "0"}}},
 		&config.CfgCdrField{Tag: "UsageField", Type: utils.META_COMPOSED, FieldId: utils.Usage, Value: []*utils.RSRField{&utils.RSRField{Id: "1"}}}}
 	csvProcessor := &CsvRecordsProcessor{dfltCdrcCfg: cdrcConfig, cdrcCfgs: []*config.CdrcConfig{cdrcConfig}}
 	csvProcessor.cdrcCfgs[0].DataUsageMultiplyFactor = 0

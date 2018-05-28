@@ -49,7 +49,7 @@ func (self SMGenericEvent) GetName() string {
 
 func (self SMGenericEvent) GetTOR(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
-		fieldName = utils.TOR
+		fieldName = utils.ToR
 	}
 	result, _ := utils.CastFieldIfToString(self[fieldName])
 	return result
@@ -359,58 +359,56 @@ func (self SMGenericEvent) MissingParameter(timezone string) bool {
 	return true // Unhandled event
 }
 
-func (self SMGenericEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) string {
+func (self SMGenericEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) (parsed string, err error) {
 	switch rsrFld.Id {
 	case utils.CGRID:
-		return rsrFld.ParseValue(self.GetCGRID(utils.META_DEFAULT))
-	case utils.TOR:
-		return rsrFld.ParseValue(utils.VOICE)
+		rsrFld.Parse(self.GetCGRID(utils.META_DEFAULT))
+	case utils.ToR:
+		return rsrFld.Parse(utils.VOICE)
 	case utils.OriginID:
-		return rsrFld.ParseValue(self.GetOriginID(utils.META_DEFAULT))
+		return rsrFld.Parse(self.GetOriginID(utils.META_DEFAULT))
 	case utils.OriginHost:
-		return rsrFld.ParseValue(self.GetOriginatorIP(utils.META_DEFAULT))
+		return rsrFld.Parse(self.GetOriginatorIP(utils.META_DEFAULT))
 	case utils.Source:
-		return rsrFld.ParseValue(self.GetName())
+		return rsrFld.Parse(self.GetName())
 	case utils.RequestType:
-		return rsrFld.ParseValue(self.GetReqType(utils.META_DEFAULT))
+		return rsrFld.Parse(self.GetReqType(utils.META_DEFAULT))
 	case utils.Direction:
-		return rsrFld.ParseValue(self.GetDirection(utils.META_DEFAULT))
+		return rsrFld.Parse(self.GetDirection(utils.META_DEFAULT))
 	case utils.Tenant:
-		return rsrFld.ParseValue(self.GetTenant(utils.META_DEFAULT))
+		return rsrFld.Parse(self.GetTenant(utils.META_DEFAULT))
 	case utils.Category:
-		return rsrFld.ParseValue(self.GetCategory(utils.META_DEFAULT))
+		return rsrFld.Parse(self.GetCategory(utils.META_DEFAULT))
 	case utils.Account:
-		return rsrFld.ParseValue(self.GetAccount(utils.META_DEFAULT))
+		return rsrFld.Parse(self.GetAccount(utils.META_DEFAULT))
 	case utils.Subject:
-		return rsrFld.ParseValue(self.GetSubject(utils.META_DEFAULT))
+		return rsrFld.Parse(self.GetSubject(utils.META_DEFAULT))
 	case utils.Destination:
-		return rsrFld.ParseValue(self.GetDestination(utils.META_DEFAULT))
+		return rsrFld.Parse(self.GetDestination(utils.META_DEFAULT))
 	case utils.SetupTime:
 		st, _ := self.GetSetupTime(utils.META_DEFAULT, timezone)
-		return rsrFld.ParseValue(st.String())
+		return rsrFld.Parse(st.String())
 	case utils.AnswerTime:
 		at, _ := self.GetAnswerTime(utils.META_DEFAULT, timezone)
-		return rsrFld.ParseValue(at.String())
+		return rsrFld.Parse(at.String())
 	case utils.Usage:
 		dur, _ := self.GetUsage(utils.META_DEFAULT)
-		return rsrFld.ParseValue(strconv.FormatInt(dur.Nanoseconds(), 10))
+		return rsrFld.Parse(strconv.FormatInt(dur.Nanoseconds(), 10))
 	case utils.PDD:
 		pdd, _ := self.GetPdd(utils.META_DEFAULT)
-		return rsrFld.ParseValue(strconv.FormatFloat(pdd.Seconds(), 'f', -1, 64))
+		return rsrFld.Parse(strconv.FormatFloat(pdd.Seconds(), 'f', -1, 64))
 	case utils.SUPPLIER:
-		return rsrFld.ParseValue(self.GetSupplier(utils.META_DEFAULT))
+		return rsrFld.Parse(self.GetSupplier(utils.META_DEFAULT))
 	case utils.DISCONNECT_CAUSE:
-		return rsrFld.ParseValue(self.GetDisconnectCause(utils.META_DEFAULT))
-	case utils.MEDI_RUNID:
-		return rsrFld.ParseValue(utils.META_DEFAULT)
+		return rsrFld.Parse(self.GetDisconnectCause(utils.META_DEFAULT))
+	case utils.RunID:
+		return rsrFld.Parse(utils.META_DEFAULT)
 	case utils.COST:
-		return rsrFld.ParseValue(strconv.FormatFloat(-1, 'f', -1, 64)) // Recommended to use FormatCost
+		return rsrFld.Parse(strconv.FormatFloat(-1, 'f', -1, 64)) // Recommended to use FormatCost
 	default:
-		strVal, _ := utils.CastFieldIfToString(self[rsrFld.Id])
-		val := rsrFld.ParseValue(strVal)
-		return val
+		return rsrFld.Parse(self[rsrFld.Id])
 	}
-	return ""
+	return
 }
 
 func (self SMGenericEvent) PassesFieldFilter(*utils.RSRField) (bool, string) {

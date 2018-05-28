@@ -202,8 +202,6 @@ func main() {
 		*outDBDataEncoding = mgrCfg.DBDataEncoding
 	}
 
-	fmt.Printf("After change: %+v\n", utils.ToJSON(mgrCfg.MigratorCgrConfig))
-
 	sameDataDB = mgrCfg.MigratorCgrConfig.OutDataDBType == mgrCfg.DataDbType &&
 		mgrCfg.MigratorCgrConfig.OutDataDBHost == mgrCfg.DataDbHost &&
 		mgrCfg.MigratorCgrConfig.OutDataDBPort == mgrCfg.DataDbPort &&

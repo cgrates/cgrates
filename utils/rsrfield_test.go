@@ -124,31 +124,43 @@ func TestConvertPlusNationalAnd00(t *testing.T) {
 	} else if !reflect.DeepEqual(rsrField, expectRSRField) {
 		t.Errorf("Expecting: %v, received: %v", expectRSRField, rsrField)
 	}
-	if parsedVal := rsrField.ParseValue("+4986517174963"); parsedVal != "086517174963" {
+	if parsedVal, err := rsrField.Parse("+4986517174963"); err != nil {
+		t.Error(err)
+	} else if parsedVal != "086517174963" {
 		t.Errorf("Expecting: 086517174963, received: %s", parsedVal)
 	}
-	if parsedVal := rsrField.ParseValue("+3186517174963"); parsedVal != "003186517174963" {
+	if parsedVal, err := rsrField.Parse("+3186517174963"); err != nil {
+		t.Error(err)
+	} else if parsedVal != "003186517174963" {
 		t.Errorf("Expecting: 003186517174963, received: %s", parsedVal)
 	}
 }
 
 func TestRSRParseStatic(t *testing.T) {
 	rulesStr := "^static_header::static_value/"
-	if rsrField, err := NewRSRField(rulesStr); err != nil {
+	rsrField, err := NewRSRField(rulesStr)
+	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rsrField, &RSRField{Id: "static_header", Rules: rulesStr,
 		staticValue: "static_value"}) {
 		t.Errorf("Unexpected RSRField received: %v", rsrField)
-	} else if parsed := rsrField.ParseValue("dynamic_value"); parsed != "static_value" {
+	}
+	if parsed, err := rsrField.Parse("dynamic_value"); err != nil {
+		t.Error(err)
+	} else if parsed != "static_value" {
 		t.Errorf("Expected: %s, received: %s", "static_value", parsed)
 	}
 	rulesStr = `^static_hdrvalue`
-	if rsrField, err := NewRSRField(rulesStr); err != nil {
+	rsrField, err = NewRSRField(rulesStr)
+	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rsrField, &RSRField{Id: "static_hdrvalue", Rules: rulesStr,
 		staticValue: "static_hdrvalue"}) {
 		t.Errorf("Unexpected RSRField received: %v", rsrField)
-	} else if parsed := rsrField.ParseValue("dynamic_value"); parsed != "static_hdrvalue" {
+	}
+	if parsed, err := rsrField.Parse("dynamic_value"); err != nil {
+		t.Error(err)
+	} else if parsed != "static_hdrvalue" {
 		t.Errorf("Expected: %s, received: %s", "static_hdrvalue", parsed)
 	}
 }
@@ -164,7 +176,9 @@ func TestConvertDurToSecs(t *testing.T) {
 	} else if !reflect.DeepEqual(rsrField, expectRSRField) {
 		t.Errorf("Expecting: %v, received: %v", expectRSRField, rsrField)
 	}
-	if parsedVal := rsrField.ParseValue("640113"); parsedVal != "640113s" {
+	if parsedVal, err := rsrField.Parse("640113"); err != nil {
+		t.Error(err)
+	} else if parsedVal != "640113s" {
 		t.Errorf("Expecting: 640113s, received: %s", parsedVal)
 	}
 }
@@ -180,7 +194,9 @@ func TestPrefix164(t *testing.T) {
 	} else if !reflect.DeepEqual(rsrField, expectRSRField) {
 		t.Errorf("Expecting: %v, received: %v", expectRSRField, rsrField)
 	}
-	if parsedVal := rsrField.ParseValue("4986517174960"); parsedVal != "+4986517174960" {
+	if parsedVal, err := rsrField.Parse("4986517174960"); err != nil {
+		t.Error(err)
+	} else if parsedVal != "+4986517174960" {
 		t.Errorf("Expecting: +4986517174960, received: %s", parsedVal)
 	}
 }
@@ -222,11 +238,18 @@ func TestParseRSRFields(t *testing.T) {
 }
 
 func TestParseCdrcDn1(t *testing.T) {
-	if rl, err := NewRSRField(`~1:s/^00(\d+)(?:[a-zA-Z].{3})*0*([1-9]\d+)$/+$1$2/:s/^\+49(18\d{2})$/+491400$1/`); err != nil {
+	rl, err := NewRSRField(`~1:s/^00(\d+)(?:[a-zA-Z].{3})*0*([1-9]\d+)$/+$1$2/:s/^\+49(18\d{2})$/+491400$1/`)
+	if err != nil {
 		t.Error("Unexpected error: ", err)
-	} else if parsed := rl.ParseValue("0049ABOC0630415354"); parsed != "+49630415354" {
+	}
+	if parsed, err := rl.Parse("0049ABOC0630415354"); err != nil {
+		t.Error(err)
+	} else if parsed != "+49630415354" {
 		t.Errorf("Expecting: +49630415354, received: %s", parsed)
-	} else if parsed2 := rl.ParseValue("00491888"); parsed2 != "+4914001888" {
+	}
+	if parsed2, err := rl.Parse("00491888"); err != nil {
+		t.Error(err)
+	} else if parsed2 != "+4914001888" {
 		t.Errorf("Expecting: +4914001888, received: %s", parsed2)
 	}
 }
@@ -236,17 +259,19 @@ func TestFilterPasses(t *testing.T) {
 	if err != nil {
 		t.Error("Unexpected error: ", err)
 	}
-	if rl.FilterPasses("0031ABOC0630415354") {
+	if _, err = rl.Parse("0031ABOC0630415354"); err == nil ||
+		err != ErrFilterNotPassingNoCaps {
 		t.Error("Passing filter")
 	}
 	rl, err = NewRSRField(`~1:s/^$/_empty_/(_empty_)`)
 	if err != nil {
 		t.Error("Unexpected error: ", err)
 	}
-	if !rl.FilterPasses("") {
+	if _, err = rl.Parse(""); err == ErrFilterNotPassingNoCaps {
 		t.Error("Not passing filter")
 	}
-	if rl.FilterPasses("Non empty") {
+	if _, err = rl.Parse("Non empty"); err == nil ||
+		err != ErrFilterNotPassingNoCaps {
 		t.Error("Passing filter")
 	}
 }
@@ -272,7 +297,9 @@ func TestRSRCostDetails(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if parsedVal := rsrField.ParseValue(fieldsStr1); parsedVal != "Canada" {
+	if parsedVal, err := rsrField.Parse(fieldsStr1); err != nil {
+		t.Error(err)
+	} else if parsedVal != "Canada" {
 		t.Errorf("Expecting: Canada, received: %s", parsedVal)
 	}
 	fieldsStr2 := `{"Direction":"*out","Category":"call","Tenant":"sip.test.cgrates.org","Subject":"dan","Account":"dan","Destination":"+4986517174963","TOR":"*voice","Cost":0,"Timespans":[{"TimeStart":"2015-05-13T15:03:34+02:00","TimeEnd":"2015-05-13T15:03:38+02:00","Cost":0,"RateInterval":{"Timing":{"Years":[],"Months":[],"MonthDays":[],"WeekDays":[],"StartTime":"00:00:00","EndTime":""},"Rating":{"ConnectFee":0,"RoundingMethod":"*middle","RoundingDecimals":4,"MaxCost":0,"MaxCostStrategy":"","Rates":[{"GroupIntervalStart":0,"Value":0,"RateIncrement":1000000000,"RateUnit":60000000000}]},"Weight":10},"DurationIndex":4000000000,"Increments":[{"Duration":1000000000,"Cost":0,"BalanceInfo":{"Unit":null,"Monetary":null,"AccountID":""},"CompressFactor":4}],"RoundIncrement":null,"MatchedSubject":"*out:sip.test.cgrates.org:call:*any","MatchedPrefix":"+31800","MatchedDestId":"CST_49800_DE080","RatingPlanId":"ISC_V","CompressFactor":1}],"RatedUsage":4}`
@@ -281,7 +308,9 @@ func TestRSRCostDetails(t *testing.T) {
 		t.Error(err)
 	}
 	eMatch := "DE080"
-	if parsedVal := rsrField.ParseValue(fieldsStr2); parsedVal != eMatch {
+	if parsedVal, err := rsrField.Parse(fieldsStr2); err != nil {
+		t.Error(err)
+	} else if parsedVal != eMatch {
 		t.Errorf("Expecting: <%s>, received: <%s>", eMatch, parsedVal)
 	}
 }
@@ -492,25 +521,25 @@ func TestIsParsed(t *testing.T) {
 	rulesStr := `^static_hdrvalue`
 	if rsrField, err := NewRSRField(rulesStr); err != nil {
 		t.Error(err)
-	} else if !rsrField.IsParsed() {
-		t.Error("Not parsed")
+	} else if !rsrField.IsCompiled() {
+		t.Error("Not compiled")
 	}
 	rulesStr = `~effective_caller_id_number:s/(\d+)/+$1/`
 	if rsrField, err := NewRSRField(rulesStr); err != nil {
 		t.Error(err)
-	} else if !rsrField.IsParsed() {
-		t.Error("Not parsed")
+	} else if !rsrField.IsCompiled() {
+		t.Error("Not compiled")
 	}
 	rsrField := &RSRField{Rules: rulesStr}
-	if rsrField.IsParsed() {
-		t.Error("Is parsed")
+	if rsrField.IsCompiled() {
+		t.Error("Is compiled")
 	}
 }
 
-func TestParseRules(t *testing.T) {
+func TestCompileRules(t *testing.T) {
 	rulesStr := `^static_hdrvalue`
 	rsrField := &RSRField{Rules: rulesStr}
-	if err := rsrField.ParseRules(); err != nil {
+	if err := rsrField.Compile(); err != nil {
 		t.Error(err)
 	}
 	newRSRFld, _ := NewRSRField(rulesStr)

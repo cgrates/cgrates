@@ -72,11 +72,11 @@ const (
 
 var (
 	CGRIDLow           = strings.ToLower(utils.CGRID)
-	RunIDLow           = strings.ToLower(utils.MEDI_RUNID)
-	OrderIDLow         = strings.ToLower(utils.ORDERID)
+	RunIDLow           = strings.ToLower(utils.RunID)
+	OrderIDLow         = strings.ToLower(utils.OrderID)
 	OriginHostLow      = strings.ToLower(utils.OriginHost)
 	OriginIDLow        = strings.ToLower(utils.OriginID)
-	ToRLow             = strings.ToLower(utils.TOR)
+	ToRLow             = strings.ToLower(utils.ToR)
 	CDRHostLow         = strings.ToLower(utils.OriginHost)
 	CDRSourceLow       = strings.ToLower(utils.Source)
 	RequestTypeLow     = strings.ToLower(utils.RequestType)
@@ -93,7 +93,7 @@ var (
 	UpdatedAtLow       = strings.ToLower(utils.UpdatedAt)
 	UsageLow           = strings.ToLower(utils.Usage)
 	PDDLow             = strings.ToLower(utils.PDD)
-	CostDetailsLow     = strings.ToLower(utils.COST_DETAILS)
+	CostDetailsLow     = strings.ToLower(utils.CostDetails)
 	DestinationLow     = strings.ToLower(utils.Destination)
 	CostLow            = strings.ToLower(utils.COST)
 )

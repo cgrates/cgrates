@@ -33,7 +33,7 @@ var err error
 func TestSMGenericEventParseFields(t *testing.T) {
 	smGev := SMGenericEvent{}
 	smGev[utils.EVENT_NAME] = "TEST_EVENT"
-	smGev[utils.TOR] = "*voice"
+	smGev[utils.ToR] = "*voice"
 	smGev[utils.OriginID] = "12345"
 	smGev[utils.Account] = "account1"
 	smGev[utils.Subject] = "subject1"
@@ -136,7 +136,7 @@ func TestSMGenericEventGetSessionTTL(t *testing.T) {
 func TestSMGenericEventAsCDR(t *testing.T) {
 	smGev := SMGenericEvent{}
 	smGev[utils.EVENT_NAME] = "TEST_EVENT"
-	smGev[utils.TOR] = utils.SMS
+	smGev[utils.ToR] = utils.SMS
 	smGev[utils.OriginID] = "12345"
 	smGev[utils.Account] = "account1"
 	smGev[utils.Subject] = "subject1"
@@ -166,7 +166,7 @@ func TestSMGenericEventAsCDR(t *testing.T) {
 func TestSMGenericEventAsLcrRequest(t *testing.T) {
 	smGev := SMGenericEvent{}
 	smGev[utils.EVENT_NAME] = "TEST_EVENT"
-	smGev[utils.TOR] = utils.VOICE
+	smGev[utils.ToR] = utils.VOICE
 	smGev[utils.OriginID] = "12345"
 	smGev[utils.Direction] = utils.OUT
 	smGev[utils.Account] = "account1"
@@ -194,13 +194,13 @@ func TestSMGenericEventAsLcrRequest(t *testing.T) {
 func TestSMGenericEventGetFieldAsString(t *testing.T) {
 	smGev := SMGenericEvent{}
 	smGev[utils.EVENT_NAME] = "TEST_EVENT"
-	smGev[utils.TOR] = utils.VOICE
+	smGev[utils.ToR] = utils.VOICE
 	smGev[utils.OriginID] = "12345"
 	smGev[utils.Direction] = utils.OUT
 	smGev[utils.Account] = "account1"
 	smGev[utils.Subject] = "subject1"
 	eFldVal := utils.VOICE
-	if strVal, err := smGev.GetFieldAsString(utils.TOR); err != nil {
+	if strVal, err := smGev.GetFieldAsString(utils.ToR); err != nil {
 		t.Error(err)
 	} else if strVal != eFldVal {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", eFldVal, strVal)

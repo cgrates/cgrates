@@ -287,7 +287,7 @@ func passesFieldFilter(m *diam.Message, fieldFilter *utils.RSRField, procVars pr
 					fieldFilter.Id, err.Error()))
 			return false, 0
 		}
-		if !fieldFilter.FilterPassesWithConvert(val) {
+		if _, err := fieldFilter.Parse(val); err != nil {
 			return false, 0
 		}
 		return true, 0
@@ -297,12 +297,13 @@ func passesFieldFilter(m *diam.Message, fieldFilter *utils.RSRField, procVars pr
 		return false, 0
 	}
 	if len(avps) == 0 { // No AVP found in request, treat it same as empty
-		if fieldFilter.FilterPassesWithConvert("") {
-			return true, -1
+		if _, err := fieldFilter.Parse(""); err != nil {
+			return false, 0
 		}
+		return true, -1
 	}
 	for avpIdx, avpVal := range avps { // First match wins due to index
-		if fieldFilter.FilterPassesWithConvert(avpValAsString(avpVal)) {
+		if _, err = fieldFilter.Parse(avpValAsString(avpVal)); err == nil {
 			return true, avpIdx
 		}
 	}
@@ -444,7 +445,8 @@ func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField,
 	case utils.MetaGrouped: // GroupedAVP
 		outVal = composedFieldvalue(m, cfgFld.Value, passAtIndex, procVars)
 	}
-	if fmtValOut, err = utils.FmtFieldWidth(cfgFld.Tag, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
+	if fmtValOut, err = utils.FmtFieldWidth(cfgFld.Tag, outVal, cfgFld.Width,
+		cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<Diameter> Error when processing field template with tag: %s, error: %s", cfgFld.Tag, err.Error()))
 		return "", err
 	}

@@ -225,6 +225,35 @@ func IfaceAsBool(itm interface{}) (b bool, err error) {
 	return
 }
 
+func IfaceAsString(fld interface{}) (out string, err error) {
+	switch fld.(type) {
+	case int:
+		return strconv.Itoa(fld.(int)), nil
+	case int64:
+		return strconv.FormatInt(fld.(int64), 10), nil
+	case bool:
+		return strconv.FormatBool(fld.(bool)), nil
+	case float64:
+		return strconv.FormatFloat(fld.(float64), 'f', -1, 64), nil
+	case []uint8:
+		if byteVal, canCast := fld.([]byte); !canCast {
+			return "", ErrNotConvertibleNoCaps
+		} else {
+			return string(byteVal), nil
+		}
+	case time.Duration:
+		return fld.(time.Duration).String(), nil
+	case time.Time:
+		return fld.(time.Time).Format(time.RFC3339), nil
+	default: // Maybe we are lucky and the value converts to string
+		if out, canCast := fld.(string); !canCast {
+			return "", ErrNotConvertibleNoCaps
+		} else {
+			return out, nil
+		}
+	}
+}
+
 // AsMapStringIface converts an item (mostly struct) as map[string]interface{}
 func AsMapStringIface(item interface{}) (map[string]interface{}, error) {
 	out := make(map[string]interface{})

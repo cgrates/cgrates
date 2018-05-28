@@ -40,7 +40,7 @@ type CgrEvent map[string]string
 
 func (ce CgrEvent) PassFilters(rsrFields utils.RSRFields) bool {
 	for _, rsrFld := range rsrFields {
-		if !rsrFld.FilterPasses(ce[rsrFld.Id]) {
+		if _, err := rsrFld.Parse(ce[rsrFld.Id]); err != nil {
 			return false
 		}
 	}
@@ -75,7 +75,7 @@ func NewPubSub(dm *DataManager, ttlVerify bool) (*PubSub, error) {
 		ps.subscribers = subs
 	}
 	for _, sData := range ps.subscribers {
-		if err := sData.Filters.ParseRules(); err != nil { // Parse rules into regexp objects
+		if err := sData.Filters.Compile(); err != nil { // Parse rules into regexp objects
 			utils.Logger.Err(fmt.Sprintf("<PubSub> Error <%s> when parsing rules out of subscriber data: %+v", err.Error(), sData))
 		}
 	}

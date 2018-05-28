@@ -50,6 +50,8 @@ var (
 	ErrMaxUsageExceeded        = errors.New("MAX_USAGE_EXCEEDED")
 	ErrUnallocatedResource     = errors.New("UNALLOCATED_RESOURCE")
 	ErrNotFoundNoCaps          = errors.New("not found")
+	ErrFilterNotPassingNoCaps  = errors.New("filter not passing")
+	ErrNotConvertibleNoCaps    = errors.New("not convertible")
 )
 
 // NewCGRError initialises a new CGRError

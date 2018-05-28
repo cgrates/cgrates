@@ -151,8 +151,8 @@ func NewCallDescriptorFromCGREvent(cgrEv *utils.CGREvent,
 	} else {
 		cd.TimeEnd = cd.TimeStart.Add(usage)
 	}
-	if _, has := cgrEv.Event[utils.TOR]; has {
-		if cd.TOR, err = cgrEv.FieldAsString(utils.TOR); err != nil {
+	if _, has := cgrEv.Event[utils.ToR]; has {
+		if cd.TOR, err = cgrEv.FieldAsString(utils.ToR); err != nil {
 			return nil, err
 		}
 	}
@@ -199,7 +199,7 @@ func (cd *CallDescriptor) AsCGREvent() *utils.CGREvent {
 	for k, v := range cd.ExtraFields {
 		cgrEv.Event[k] = v
 	}
-	cgrEv.Event[utils.TOR] = cd.TOR
+	cgrEv.Event[utils.ToR] = cd.TOR
 	cgrEv.Event[utils.Tenant] = cd.Tenant
 	cgrEv.Event[utils.Category] = cd.Category
 	cgrEv.Event[utils.Account] = cd.Account
@@ -216,7 +216,7 @@ func (cd *CallDescriptor) AsCGREvent() *utils.CGREvent {
 func (cd *CallDescriptor) UpdateFromCGREvent(cgrEv *utils.CGREvent, fields []string) (err error) {
 	for _, fldName := range fields {
 		switch fldName {
-		case utils.TOR:
+		case utils.ToR:
 			if cd.TOR, err = cgrEv.FieldAsString(fldName); err != nil {
 				return
 			}

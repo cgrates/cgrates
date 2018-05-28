@@ -85,7 +85,10 @@ func (fsCdr FSCdr) getExtraFields() map[string]string {
 		if !foundInVars {
 			origFieldVal = fsCdr.searchExtraField(field.Id, fsCdr.body)
 		}
-		extraFields[field.Id] = field.ParseValue(origFieldVal)
+		if parsed, err := field.Parse(origFieldVal); err == nil {
+			extraFields[field.Id] = parsed
+		}
+
 	}
 	return extraFields
 }

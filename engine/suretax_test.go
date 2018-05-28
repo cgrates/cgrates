@@ -39,7 +39,7 @@ func TestNewSureTaxRequest(t *testing.T) {
 		RunID:       utils.DEFAULT_RUNID,
 		Usage:       time.Duration(12) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		Cost:        1.01, Rated: true,
+		Cost:        1.01, PreRated: true,
 	}
 	cfg, _ := config.NewDefaultCGRConfig()
 	stCfg := cfg.SureTaxCfg()

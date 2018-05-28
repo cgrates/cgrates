@@ -151,7 +151,7 @@ func (v1Cdr *v1Cdrs) V1toV2Cdr() (cdr *engine.CDR) {
 		ExtraFields: make(map[string]string),
 		ExtraInfo:   v1Cdr.ExtraInfo,
 		Partial:     v1Cdr.Partial,
-		Rated:       v1Cdr.Rated,
+		PreRated:    v1Cdr.Rated,
 		CostSource:  v1Cdr.CostSource,
 		Cost:        v1Cdr.Cost,
 		CostDetails: engine.NewEventCostFromCallCost(v1Cdr.CostDetails, v1Cdr.CGRID, v1Cdr.RunID),

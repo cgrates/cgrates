@@ -142,7 +142,6 @@ func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.CDR, error) {
 }
 
 func (self *FwvRecordsProcessor) recordPassesCfgFilter(record string, cdrcCfg *config.CdrcConfig) bool {
-	filterPasses := true
 	for _, rsrFilter := range cdrcCfg.CdrFilter {
 		if rsrFilter == nil { // Nil filter does not need to match anything
 			continue
@@ -150,12 +149,11 @@ func (self *FwvRecordsProcessor) recordPassesCfgFilter(record string, cdrcCfg *c
 		if cfgFieldIdx, _ := strconv.Atoi(rsrFilter.Id); len(record) <= cfgFieldIdx {
 			fmt.Errorf("Ignoring record: %v - cannot compile filter %+v", record, rsrFilter)
 			return false
-		} else if !rsrFilter.FilterPasses(record[cfgFieldIdx:]) {
-			filterPasses = false
-			break
+		} else if _, err := rsrFilter.Parse(record[cfgFieldIdx:]); err != nil {
+			return false
 		}
 	}
-	return filterPasses
+	return true
 }
 
 // Converts a record (header or normal) to CDR
@@ -185,12 +183,24 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *confi
 		case utils.META_COMPOSED:
 			for _, cfgFieldRSR := range cdrFldCfg.Value {
 				if cfgFieldRSR.IsStatic() {
-					fieldVal += cfgFieldRSR.ParseValue("")
-				} else { // Dynamic value extracted using index
-					if cfgFieldIdx, _ := strconv.Atoi(cfgFieldRSR.Id); len(record) <= cfgFieldIdx {
-						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s", record, cdrFldCfg.Tag)
+					if parsed, err := cfgFieldRSR.Parse(""); err != nil {
+						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s, err: %s",
+							record, cdrFldCfg.Tag, err.Error())
 					} else {
-						fieldVal += cfgFieldRSR.ParseValue(fwvValue(record, cfgFieldIdx, cdrFldCfg.Width, cdrFldCfg.Padding))
+						fieldVal += parsed
+					}
+				} else { // Dynamic value extracted using index
+					cfgFieldIdx, _ := strconv.Atoi(cfgFieldRSR.Id)
+					if len(record) <= cfgFieldIdx {
+						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s",
+							record, cdrFldCfg.Tag)
+					}
+					if parsed, err := cfgFieldRSR.Parse(fwvValue(record, cfgFieldIdx,
+						cdrFldCfg.Width, cdrFldCfg.Padding)); err != nil {
+						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s, err: %s",
+							record, cdrFldCfg.Tag, err.Error())
+					} else {
+						fieldVal += parsed
 					}
 				}
 			}
@@ -214,7 +224,12 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *confi
 		var outValByte []byte
 		var fieldVal, httpAddr string
 		for _, rsrFld := range httpFieldCfg.Value {
-			httpAddr += rsrFld.ParseValue("")
+			if parsed, err := rsrFld.Parse(""); err != nil {
+				return nil, fmt.Errorf("Ignoring record: %v - cannot extract http address, err: %s",
+					record, err.Error())
+			} else {
+				httpAddr += parsed
+			}
 		}
 		var jsn []byte
 		jsn, err = json.Marshal(storedCdr)

@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"errors"
 	"reflect"
 	"runtime"
 	"strings"
@@ -356,9 +355,9 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) (err erro
 		return utils.ErrMaxUsageExceeded
 	}
 	maxCallDuration := -1.0
-	attrsDC := &utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT),
-		Category: ev.GetCategory(utils.META_DEFAULT), Direction: utils.OUT,
-		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
+	attrsDC := &utils.AttrDerivedChargers{Tenant: ev.Tenant,
+		Category: ev.Category, Direction: utils.OUT,
+		Account: ev.Account, Subject: ev.Subject}
 	dcs := &utils.DerivedChargers{}
 	if err := rs.GetDerivedChargers(attrsDC, dcs); err != nil {
 		rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
@@ -366,13 +365,10 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) (err erro
 	}
 	dcs, _ = dcs.AppendDefaultRun()
 	for _, dc := range dcs.Chargers {
-		if utils.IsSliceMember([]string{utils.META_RATED, utils.RATED}, ev.GetReqType(dc.RequestTypeField)) { // Only consider prepaid and pseudoprepaid for MaxSessionTime
-			continue
-		}
 		runFilters, _ := utils.ParseRSRFields(dc.RunFilters, utils.INFIELD_SEP)
 		matchingAllFilters := true
 		for _, dcRunFilter := range runFilters {
-			if !dcRunFilter.FilterPasses(ev.FieldAsString(dcRunFilter)) {
+			if _, err := ev.FieldAsString(dcRunFilter); err != nil {
 				matchingAllFilters = false
 				break
 			}
@@ -380,31 +376,40 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) (err erro
 		if !matchingAllFilters { // Do not process the derived charger further if not all filters were matched
 			continue
 		}
-		startTime, err := ev.GetSetupTime(utils.META_DEFAULT, rs.Timezone)
+		forkedCDR, err := ev.ForkCdr(dc.RunID, utils.NewRSRFieldMustCompile(dc.RequestTypeField),
+			utils.NewRSRFieldMustCompile(dc.TenantField), utils.NewRSRFieldMustCompile(dc.CategoryField),
+			utils.NewRSRFieldMustCompile(dc.AccountField), utils.NewRSRFieldMustCompile(dc.SubjectField),
+			utils.NewRSRFieldMustCompile(dc.DestinationField), utils.NewRSRFieldMustCompile(dc.SetupTimeField),
+			utils.NewRSRFieldMustCompile(dc.AnswerTimeField), utils.NewRSRFieldMustCompile(dc.UsageField),
+			utils.NewRSRFieldMustCompile(dc.PreRatedField), utils.NewRSRFieldMustCompile(dc.CostField),
+			nil, false, rs.Timezone)
 		if err != nil {
-			rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
 			return err
 		}
-		usage, err := ev.GetDuration(utils.META_DEFAULT)
-		if err != nil {
-			rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
-			return err
+		if !utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID,
+			utils.META_PSEUDOPREPAID, utils.PSEUDOPREPAID},
+			forkedCDR.RequestType) { // Only consider prepaid and pseudoprepaid for MaxSessionTime
+			continue
 		}
-		if usage == 0 {
-			usage = config.CgrConfig().MaxCallDuration
+		if forkedCDR.Usage == 0 {
+			forkedCDR.Usage = config.CgrConfig().MaxCallDuration
+		}
+		setupTime := forkedCDR.SetupTime
+		if setupTime.IsZero() {
+			setupTime = forkedCDR.AnswerTime
 		}
 		cd := &CallDescriptor{
-			CgrID:       ev.GetCgrId(rs.Timezone),
-			RunID:       dc.RunID,
-			TOR:         ev.ToR,
+			CgrID:       forkedCDR.CGRID,
+			RunID:       forkedCDR.RunID,
+			TOR:         forkedCDR.ToR,
 			Direction:   utils.OUT,
-			Tenant:      ev.GetTenant(dc.TenantField),
-			Category:    ev.GetCategory(dc.CategoryField),
-			Subject:     ev.GetSubject(dc.SubjectField),
-			Account:     ev.GetAccount(dc.AccountField),
-			Destination: ev.GetDestination(dc.DestinationField),
-			TimeStart:   startTime,
-			TimeEnd:     startTime.Add(usage),
+			Tenant:      forkedCDR.Tenant,
+			Category:    forkedCDR.Category,
+			Subject:     forkedCDR.Subject,
+			Account:     forkedCDR.Account,
+			Destination: forkedCDR.Destination,
+			TimeStart:   setupTime,
+			TimeEnd:     setupTime.Add(forkedCDR.Usage),
 		}
 		var remainingDuration float64
 		err = rs.GetMaxSessionTime(cd, &remainingDuration)
@@ -412,10 +417,6 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) (err erro
 			*reply = 0
 			rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
 			return err
-		}
-		if utils.IsSliceMember([]string{utils.META_POSTPAID, utils.POSTPAID}, ev.GetReqType(dc.RequestTypeField)) {
-			// Only consider prepaid and pseudoprepaid for MaxSessionTime, do it here for unauthorized destination error check
-			continue
 		}
 		// Set maxCallDuration, smallest out of all forked sessions
 		if maxCallDuration == -1.0 { // first time we set it /not initialized yet
@@ -461,10 +462,10 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) (err error) {
 	}
 
 	//utils.Logger.Info(fmt.Sprintf("DC after: %+v", ev))
-	attrsDC := &utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT),
-		Category: ev.GetCategory(utils.META_DEFAULT), Direction: utils.OUT,
-		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT),
-		Destination: ev.GetDestination(utils.META_DEFAULT)}
+	attrsDC := &utils.AttrDerivedChargers{Tenant: ev.Tenant,
+		Category: ev.Category, Direction: utils.OUT,
+		Account: ev.Account, Subject: ev.Subject,
+		Destination: ev.Destination}
 	//utils.Logger.Info(fmt.Sprintf("Derived chargers for: %+v", attrsDC))
 	dcs := &utils.DerivedChargers{}
 	if err := rs.GetDerivedChargers(attrsDC, dcs); err != nil {
@@ -477,37 +478,37 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) (err error) {
 	//utils.Logger.Info(fmt.Sprintf("DCS: %v", len(dcs.Chargers)))
 	sesRuns := make([]*SessionRun, 0)
 	for _, dc := range dcs.Chargers {
-		if !utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, ev.GetReqType(dc.RequestTypeField)) {
+		forkedCDR, err := ev.ForkCdr(dc.RunID, utils.NewRSRFieldMustCompile(dc.RequestTypeField),
+			utils.NewRSRFieldMustCompile(dc.TenantField), utils.NewRSRFieldMustCompile(dc.CategoryField),
+			utils.NewRSRFieldMustCompile(dc.AccountField), utils.NewRSRFieldMustCompile(dc.SubjectField),
+			utils.NewRSRFieldMustCompile(dc.DestinationField), utils.NewRSRFieldMustCompile(dc.SetupTimeField),
+			utils.NewRSRFieldMustCompile(dc.AnswerTimeField), utils.NewRSRFieldMustCompile(dc.UsageField),
+			utils.NewRSRFieldMustCompile(dc.PreRatedField), utils.NewRSRFieldMustCompile(dc.CostField),
+			nil, false, rs.Timezone)
+		if err != nil {
+			return err
+		}
+		if !utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, forkedCDR.RequestType) {
 			continue // We only consider prepaid sessions
 		}
-		startTime, err := ev.GetAnswerTime(dc.AnswerTimeField, rs.Timezone)
-		if err != nil || startTime.IsZero() { // AnswerTime not parsable, try SetupTime
-			startTime, err = ev.GetSetupTime(dc.SetupTimeField, rs.Timezone)
-			if err != nil {
-				rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
-				return errors.New("Error parsing answer event start time")
-			}
+		startTime := forkedCDR.AnswerTime
+		if startTime.IsZero() { // AnswerTime not parsable, try SetupTime
+			startTime = forkedCDR.SetupTime
 		}
-		endTime, err := ev.GetEndTime("", rs.Timezone)
-		if err != nil {
-			rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
-			return errors.New("Error parsing answer event end time")
-		}
-		extraFields := ev.GetExtraFields()
 		cd := &CallDescriptor{
-			CgrID:       ev.GetCgrId(rs.Timezone),
-			RunID:       dc.RunID,
-			TOR:         ev.ToR,
+			CgrID:       forkedCDR.CGRID,
+			RunID:       forkedCDR.RunID,
+			TOR:         forkedCDR.ToR,
 			Direction:   utils.OUT,
-			Tenant:      ev.GetTenant(dc.TenantField),
-			Category:    ev.GetCategory(dc.CategoryField),
-			Subject:     ev.GetSubject(dc.SubjectField),
-			Account:     ev.GetAccount(dc.AccountField),
-			Destination: ev.GetDestination(dc.DestinationField),
+			Tenant:      forkedCDR.Tenant,
+			Category:    forkedCDR.Category,
+			Subject:     forkedCDR.Subject,
+			Account:     forkedCDR.Account,
+			Destination: forkedCDR.Destination,
 			TimeStart:   startTime,
-			TimeEnd:     endTime,
-			ExtraFields: extraFields}
-		if flagsStr, hasFlags := extraFields[utils.CGRFlags]; hasFlags { // Force duration from extra fields
+			TimeEnd:     startTime.Add(forkedCDR.Usage),
+			ExtraFields: ev.ExtraFields}
+		if flagsStr, hasFlags := ev.ExtraFields[utils.CGRFlags]; hasFlags { // Force duration from extra fields
 			flags := utils.StringMapFromSlice(strings.Split(flagsStr, utils.INFIELD_SEP))
 			if _, hasFD := flags[utils.FlagForceDuration]; hasFD {
 				cd.ForceDuration = true

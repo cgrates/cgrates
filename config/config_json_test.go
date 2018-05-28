@@ -300,10 +300,10 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 			Value: utils.StringPointer(utils.CGRID)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("RunID"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer(utils.MEDI_RUNID)},
+			Value: utils.StringPointer(utils.RunID)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("TOR"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer(utils.TOR)},
+			Value: utils.StringPointer(utils.ToR)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("OriginID"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer(utils.OriginID)},
@@ -368,7 +368,7 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 func TestDfCdrcJsonCfg(t *testing.T) {
 	eFields := []*CdrFieldJsonCfg{}
 	cdrFields := []*CdrFieldJsonCfg{
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("TOR"), Field_id: utils.StringPointer(utils.TOR), Type: utils.StringPointer(utils.META_COMPOSED),
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("TOR"), Field_id: utils.StringPointer(utils.ToR), Type: utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer("2"), Mandatory: utils.BoolPointer(true)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("OriginID"), Field_id: utils.StringPointer(utils.OriginID), Type: utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer("3"), Mandatory: utils.BoolPointer(true)},
@@ -397,10 +397,10 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 			Value: utils.StringPointer(utils.CGRID)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("RunID"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer(utils.MEDI_RUNID)},
+			Value: utils.StringPointer(utils.RunID)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("TOR"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer(utils.TOR)},
+			Value: utils.StringPointer(utils.ToR)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("OriginID"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer(utils.OriginID)},
@@ -1164,7 +1164,7 @@ func TestNewCgrJsonCfgFromFile(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eCfg, gCfg)
 	}
 	cdrFields := []*CdrFieldJsonCfg{
-		&CdrFieldJsonCfg{Field_id: utils.StringPointer(utils.TOR), Value: utils.StringPointer("~7:s/^(voice|data|sms|mms|generic)$/*$1/")},
+		&CdrFieldJsonCfg{Field_id: utils.StringPointer(utils.ToR), Value: utils.StringPointer("~7:s/^(voice|data|sms|mms|generic)$/*$1/")},
 		&CdrFieldJsonCfg{Field_id: utils.StringPointer(utils.AnswerTime), Value: utils.StringPointer("1")},
 		&CdrFieldJsonCfg{Field_id: utils.StringPointer(utils.Usage), Value: utils.StringPointer(`~9:s/^(\d+)$/${1}s/`)},
 	}

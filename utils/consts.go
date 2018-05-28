@@ -20,8 +20,8 @@ package utils
 
 var (
 	CDRExportFormats = []string{DRYRUN, MetaFileCSV, MetaFileFWV, MetaHTTPjsonCDR, MetaHTTPjsonMap, MetaHTTPjson, META_HTTP_POST, MetaAMQPjsonCDR, MetaAMQPjsonMap}
-	PrimaryCdrFields = []string{CGRID, Source, OriginHost, OriginID, TOR, RequestType, Tenant, Category, Account, Subject, Destination, SetupTime, AnswerTime, Usage,
-		COST, RATED, PartialField, MEDI_RUNID}
+	PrimaryCdrFields = []string{CGRID, Source, OriginHost, OriginID, ToR, RequestType, Tenant, Category, Account, Subject, Destination, SetupTime, AnswerTime, Usage,
+		COST, RATED, Partial, RunID}
 	GitLastLog                  string // If set, it will be processed as part of versioning
 	PosterTransportContentTypes = map[string]string{
 		MetaHTTPjsonCDR: CONTENT_JSON,
@@ -144,8 +144,8 @@ const (
 	MSGPACK                       = "msgpack"
 	CSV_LOAD                      = "CSVLOAD"
 	CGRID                         = "CGRID"
-	TOR                           = "ToR"
-	ORDERID                       = "OrderID"
+	ToR                           = "ToR"
+	OrderID                       = "OrderID"
 	OriginID                      = "OriginID"
 	InitialOriginID               = "InitialOriginID"
 	OriginIDPrefix                = "OriginIDPrefix"
@@ -166,12 +166,12 @@ const (
 	LastUsed                      = "LastUsed"
 	PDD                           = "PDD"
 	SUPPLIER                      = "Supplier"
-	MEDI_RUNID                    = "RunID"
+	RunID                         = "RunID"
 	COST                          = "Cost"
-	COST_DETAILS                  = "CostDetails"
+	CostDetails                   = "CostDetails"
 	RATED                         = "rated"
-	RATED_FLD                     = "Rated"
-	PartialField                  = "Partial"
+	Partial                       = "Partial"
+	PreRated                      = "PreRated"
 	DEFAULT_RUNID                 = "*default"
 	META_DEFAULT                  = "*default"
 	STATIC_VALUE_PREFIX           = "^"
@@ -536,6 +536,7 @@ const (
 	Kamailio                     = "kamailio"
 	Opensips                     = "opensips"
 	Asterisk                     = "asterisk"
+	SchedulerS                   = "SchedulerS"
 )
 
 // Migrator Action

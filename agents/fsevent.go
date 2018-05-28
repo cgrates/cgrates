@@ -288,62 +288,65 @@ func (fsev FSEvent) GetOriginatorIP(fieldName string) string {
 func (fsev FSEvent) GetExtraFields() map[string]string {
 	extraFields := make(map[string]string)
 	for _, fldRule := range config.CgrConfig().FsAgentCfg().ExtraFields {
-		extraFields[fldRule.Id] = fsev.ParseEventValue(fldRule, config.CgrConfig().DefaultTimezone)
+		if parsed, err := fsev.ParseEventValue(fldRule, config.CgrConfig().DefaultTimezone); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<%s> error: %s parsing event rule: %+v", utils.FreeSWITCHAgent, err.Error(), fldRule))
+		} else {
+			extraFields[fldRule.Id] = parsed
+		}
 	}
 	return extraFields
 }
 
 // Used in derived charging and sittuations when we need to run regexp on fields
-func (fsev FSEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) string {
+func (fsev FSEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) (parsed string, err error) {
 	switch rsrFld.Id {
-	case utils.TOR:
-		return rsrFld.ParseValue(utils.VOICE)
+	case utils.ToR:
+		return rsrFld.Parse(utils.VOICE)
 	case utils.OriginID:
-		return rsrFld.ParseValue(fsev.GetUUID())
+		return rsrFld.Parse(fsev.GetUUID())
 	case utils.OriginHost:
-		return rsrFld.ParseValue(fsev["FreeSWITCH-IPv4"])
+		return rsrFld.Parse(fsev["FreeSWITCH-IPv4"])
 	case utils.Source:
-		return rsrFld.ParseValue("FS_EVENT")
+		return rsrFld.Parse("FS_EVENT")
 	case utils.RequestType:
-		return rsrFld.ParseValue(fsev.GetReqType(""))
+		return rsrFld.Parse(fsev.GetReqType(""))
 	case utils.Direction:
-		return rsrFld.ParseValue(fsev.GetDirection(""))
+		return rsrFld.Parse(fsev.GetDirection(""))
 	case utils.Tenant:
-		return rsrFld.ParseValue(fsev.GetTenant(""))
+		return rsrFld.Parse(fsev.GetTenant(""))
 	case utils.Category:
-		return rsrFld.ParseValue(fsev.GetCategory(""))
+		return rsrFld.Parse(fsev.GetCategory(""))
 	case utils.Account:
-		return rsrFld.ParseValue(fsev.GetAccount(""))
+		return rsrFld.Parse(fsev.GetAccount(""))
 	case utils.Subject:
-		return rsrFld.ParseValue(fsev.GetSubject(""))
+		return rsrFld.Parse(fsev.GetSubject(""))
 	case utils.Destination:
-		return rsrFld.ParseValue(fsev.GetDestination(""))
+		return rsrFld.Parse(fsev.GetDestination(""))
 	case utils.SetupTime:
 		st, _ := fsev.GetSetupTime("", timezone)
-		return rsrFld.ParseValue(st.String())
+		return rsrFld.Parse(st.String())
 	case utils.AnswerTime:
 		at, _ := fsev.GetAnswerTime("", timezone)
-		return rsrFld.ParseValue(at.String())
+		return rsrFld.Parse(at.String())
 	case utils.Usage:
 		dur, _ := fsev.GetDuration("")
-		return rsrFld.ParseValue(strconv.FormatInt(dur.Nanoseconds(), 10))
+		return rsrFld.Parse(strconv.FormatInt(dur.Nanoseconds(), 10))
 	case utils.PDD:
 		PDD, _ := fsev.GetPdd(utils.META_DEFAULT)
-		return rsrFld.ParseValue(strconv.FormatFloat(PDD.Seconds(), 'f', -1, 64))
+		return rsrFld.Parse(strconv.FormatFloat(PDD.Seconds(), 'f', -1, 64))
 	case utils.SUPPLIER:
-		return rsrFld.ParseValue(fsev.GetSupplier(""))
+		return rsrFld.Parse(fsev.GetSupplier(""))
 	case utils.DISCONNECT_CAUSE:
-		return rsrFld.ParseValue(fsev.GetDisconnectCause(""))
-	case utils.MEDI_RUNID:
-		return rsrFld.ParseValue(utils.DEFAULT_RUNID)
-	case utils.COST:
-		return rsrFld.ParseValue(strconv.FormatFloat(-1, 'f', -1, 64)) // Recommended to use FormatCost
+		return rsrFld.Parse(fsev.GetDisconnectCause(""))
+	case utils.RunID:
+		return rsrFld.Parse(utils.DEFAULT_RUNID)
+	case utils.Cost:
+		return rsrFld.Parse(strconv.FormatFloat(-1, 'f', -1, 64)) // Recommended to use FormatCost
 	default:
-		val := rsrFld.ParseValue(fsev[rsrFld.Id])
-		if val == "" { // Trying looking for variable_+ Id also if the first one not found
-			val = rsrFld.ParseValue(fsev[FS_VARPREFIX+rsrFld.Id])
+		if parsed, err = rsrFld.Parse(fsev[rsrFld.Id]); err != nil {
+			parsed, err = rsrFld.Parse(fsev[FS_VARPREFIX+rsrFld.Id])
 		}
-		return val
+		return
 	}
 }
 
@@ -368,7 +371,7 @@ func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]interface{}
 	for fld, val := range fsev.GetExtraFields() {
 		mp[fld] = val
 	}
-	mp[utils.TOR] = utils.VOICE
+	mp[utils.ToR] = utils.VOICE
 	mp[utils.OriginID] = fsev.GetUUID()
 	mp[utils.OriginHost] = fsev.GetOriginatorIP(utils.META_DEFAULT)
 	mp[utils.Source] = "FS_" + fsev.GetName()

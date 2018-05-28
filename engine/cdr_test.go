@@ -19,18 +19,13 @@ package engine
 
 import (
 	"reflect"
+	"strconv"
 	"testing"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
-
-func TestCDRInterfaces(t *testing.T) {
-	CDR := new(CDR)
-	var _ RawCdr = CDR
-	var _ Event = CDR
-}
 
 func TestNewCDRFromExternalCDR(t *testing.T) {
 	extCdr := &ExternalCDR{
@@ -39,7 +34,7 @@ func TestNewCDRFromExternalCDR(t *testing.T) {
 		Source: utils.UNIT_TEST, RequestType: utils.META_RATED,
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: "2013-11-07T08:42:20Z", AnswerTime: "2013-11-07T08:42:26Z", RunID: utils.DEFAULT_RUNID,
-		Usage: "10", Cost: 1.01, Rated: true,
+		Usage: "10", Cost: 1.01, PreRated: true,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
 	eStorCdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
@@ -49,7 +44,7 @@ func TestNewCDRFromExternalCDR(t *testing.T) {
 		Subject: "1001", Destination: "1002",
 		SetupTime:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		Usage:      time.Duration(10), Cost: 1.01, Rated: true,
+		Usage:      time.Duration(10), Cost: 1.01, PreRated: true,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
 	if CDR, err := NewCDRFromExternalCDR(extCdr, ""); err != nil {
@@ -68,7 +63,7 @@ func TestCDRClone(t *testing.T) {
 		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		RunID:      utils.DEFAULT_RUNID, Usage: time.Duration(10),
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		Cost:        1.01, Rated: true,
+		Cost:        1.01, PreRated: true,
 	}
 	if clnStorCdr := storCdr.Clone(); !reflect.DeepEqual(storCdr, clnStorCdr) {
 		t.Errorf("Expecting: %+v, received: %+v", storCdr, clnStorCdr)
@@ -85,45 +80,135 @@ func TestFieldAsString(t *testing.T) {
 		Usage: time.Duration(10) * time.Second, Cost: 1.01,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
-	if cdr.FieldAsString(&utils.RSRField{Id: utils.CGRID}) != cdr.CGRID ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.ORDERID}) != "123" ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.TOR}) != utils.VOICE ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.OriginID}) != cdr.OriginID ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.OriginHost}) != cdr.OriginHost ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.Source}) != cdr.Source ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.RequestType}) != cdr.RequestType ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.Category}) != cdr.Category ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.Account}) != cdr.Account ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.Subject}) != cdr.Subject ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.Destination}) != cdr.Destination ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.SetupTime}) != cdr.SetupTime.Format(time.RFC3339) ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.AnswerTime}) != cdr.AnswerTime.Format(time.RFC3339) ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.Usage}) != "10s" ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.MEDI_RUNID}) != cdr.RunID ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.COST}) != "1.01" ||
-		cdr.FieldAsString(&utils.RSRField{Id: "field_extr1"}) != cdr.ExtraFields["field_extr1"] ||
-		cdr.FieldAsString(&utils.RSRField{Id: "fieldextr2"}) != cdr.ExtraFields["fieldextr2"] ||
-		cdr.FieldAsString(&utils.RSRField{Id: "dummy_field"}) != "" {
-		t.Error("Unexpected filed value received",
-			cdr.FieldAsString(&utils.RSRField{Id: utils.CGRID}) != cdr.CGRID,
-			cdr.FieldAsString(&utils.RSRField{Id: utils.ORDERID}) != "123",
-			cdr.FieldAsString(&utils.RSRField{Id: utils.TOR}) != utils.VOICE,
-			cdr.FieldAsString(&utils.RSRField{Id: utils.OriginID}) != cdr.OriginID,
-			cdr.FieldAsString(&utils.RSRField{Id: utils.OriginHost}) != cdr.OriginHost,
-			cdr.FieldAsString(&utils.RSRField{Id: utils.Source}) != cdr.Source,
-			cdr.FieldAsString(&utils.RSRField{Id: utils.RequestType}) != cdr.RequestType,
-			cdr.FieldAsString(&utils.RSRField{Id: utils.Category}) != cdr.Category,
-			cdr.FieldAsString(&utils.RSRField{Id: utils.Account}) != cdr.Account,
-			cdr.FieldAsString(&utils.RSRField{Id: utils.Subject}) != cdr.Subject,
-			cdr.FieldAsString(&utils.RSRField{Id: utils.Destination}) != cdr.Destination,
-			cdr.FieldAsString(&utils.RSRField{Id: utils.SetupTime}) != cdr.SetupTime.Format(time.RFC3339),
-			cdr.FieldAsString(&utils.RSRField{Id: utils.AnswerTime}) != cdr.AnswerTime.Format(time.RFC3339),
-			cdr.FieldAsString(&utils.RSRField{Id: utils.Usage}) != "10s",
-			cdr.FieldAsString(&utils.RSRField{Id: utils.MEDI_RUNID}) != cdr.RunID,
-			cdr.FieldAsString(&utils.RSRField{Id: utils.COST}) != "1.01",
-			cdr.FieldAsString(&utils.RSRField{Id: "field_extr1"}) != cdr.ExtraFields["field_extr1"],
-			cdr.FieldAsString(&utils.RSRField{Id: "fieldextr2"}) != cdr.ExtraFields["fieldextr2"],
-			cdr.FieldAsString(&utils.RSRField{Id: "dummy_field"}) != "")
+	fldName := utils.CGRID
+	eFldVal := cdr.CGRID
+	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+		t.Error(err)
+	} else if fldVal != eFldVal {
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+	}
+	fldName = utils.OrderID
+	eFldVal = strconv.FormatInt(cdr.OrderID, 10)
+	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+		t.Error(err)
+	} else if fldVal != eFldVal {
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+	}
+	fldName = utils.ToR
+	eFldVal = cdr.ToR
+	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+		t.Error(err)
+	} else if fldVal != eFldVal {
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+	}
+	fldName = utils.OriginID
+	eFldVal = cdr.OriginID
+	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+		t.Error(err)
+	} else if fldVal != eFldVal {
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+	}
+	fldName = utils.OriginHost
+	eFldVal = cdr.OriginHost
+	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+		t.Error(err)
+	} else if fldVal != eFldVal {
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+	}
+	fldName = utils.Source
+	eFldVal = cdr.Source
+	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+		t.Error(err)
+	} else if fldVal != eFldVal {
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+	}
+	fldName = utils.RequestType
+	eFldVal = cdr.RequestType
+	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+		t.Error(err)
+	} else if fldVal != eFldVal {
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+	}
+	fldName = utils.Category
+	eFldVal = cdr.Category
+	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+		t.Error(err)
+	} else if fldVal != eFldVal {
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+	}
+	fldName = utils.Account
+	eFldVal = cdr.Account
+	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+		t.Error(err)
+	} else if fldVal != eFldVal {
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+	}
+	fldName = utils.Subject
+	eFldVal = cdr.Subject
+	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+		t.Error(err)
+	} else if fldVal != eFldVal {
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+	}
+	fldName = utils.Destination
+	eFldVal = cdr.Destination
+	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+		t.Error(err)
+	} else if fldVal != eFldVal {
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+	}
+	fldName = utils.SetupTime
+	eFldVal = cdr.SetupTime.Format(time.RFC3339)
+	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+		t.Error(err)
+	} else if fldVal != eFldVal {
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+	}
+	fldName = utils.AnswerTime
+	eFldVal = cdr.AnswerTime.Format(time.RFC3339)
+	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+		t.Error(err)
+	} else if fldVal != eFldVal {
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+	}
+	fldName = utils.Usage
+	eFldVal = "10s"
+	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+		t.Error(err)
+	} else if fldVal != eFldVal {
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+	}
+	fldName = utils.RunID
+	eFldVal = cdr.RunID
+	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+		t.Error(err)
+	} else if fldVal != eFldVal {
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+	}
+	fldName = utils.Cost
+	eFldVal = strconv.FormatFloat(cdr.Cost, 'f', -1, 64)
+	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+		t.Error(err)
+	} else if fldVal != eFldVal {
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+	}
+	fldName = "field_extr1"
+	eFldVal = cdr.ExtraFields["field_extr1"]
+	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+		t.Error(err)
+	} else if fldVal != eFldVal {
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+	}
+	fldName = "fieldextr2"
+	eFldVal = cdr.ExtraFields["fieldextr2"]
+	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+		t.Error(err)
+	} else if fldVal != eFldVal {
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+	}
+	fldName = "dummy_field"
+	if _, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != utils.ErrNotFound {
+		t.Error(err)
 	}
 }
 
@@ -184,28 +269,6 @@ func TestFormatCost(t *testing.T) {
 	}
 	if cdr.FormatCost(2, 3) != "101.001" {
 		t.Error("Unexpected format of the cost: ", cdr.FormatCost(2, 3))
-	}
-}
-
-func TestFormatUsage(t *testing.T) {
-	cdr := CDR{Usage: time.Duration(10) * time.Second}
-	if cdr.FormatUsage(utils.SECONDS) != "10" {
-		t.Error("Wrong usage format: ", cdr.FormatUsage(utils.SECONDS))
-	}
-	if cdr.FormatUsage("default") != "10" {
-		t.Error("Wrong usage format: ", cdr.FormatUsage("default"))
-	}
-	cdr = CDR{ToR: utils.DATA, Usage: time.Duration(1640113000000000)}
-	if cdr.FormatUsage("default") != "1640113" {
-		t.Error("Wrong usage format: ", cdr.FormatUsage("default"))
-	}
-	cdr = CDR{Usage: time.Duration(2) * time.Millisecond}
-	if cdr.FormatUsage("default") != "0.002" {
-		t.Error("Wrong usage format: ", cdr.FormatUsage("default"))
-	}
-	cdr = CDR{Usage: time.Duration(1002) * time.Millisecond}
-	if cdr.FormatUsage("default") != "1.002" {
-		t.Error("Wrong usage format: ", cdr.FormatUsage("default"))
 	}
 }
 
@@ -285,21 +348,21 @@ func TestCDRForkCdr(t *testing.T) {
 	rtSampleCdrOut, err := storCdr.ForkCdr("sample_run1", &utils.RSRField{Id: utils.RequestType}, &utils.RSRField{Id: utils.Tenant},
 		&utils.RSRField{Id: utils.Category}, &utils.RSRField{Id: utils.Account}, &utils.RSRField{Id: utils.Subject}, &utils.RSRField{Id: utils.Destination},
 		&utils.RSRField{Id: utils.SetupTime}, &utils.RSRField{Id: utils.AnswerTime}, &utils.RSRField{Id: utils.Usage},
-		&utils.RSRField{Id: utils.RATED_FLD}, &utils.RSRField{Id: utils.COST},
+		&utils.RSRField{Id: utils.PreRated}, &utils.RSRField{Id: utils.COST},
 		[]*utils.RSRField{&utils.RSRField{Id: "field_extr1"}, &utils.RSRField{Id: "field_extr2"}}, true, "")
 	if err != nil {
 		t.Error("Unexpected error received", err)
 	}
-	expctSplRatedCdr := &CDR{CGRID: storCdr.CGRID, ToR: utils.VOICE, OriginID: "dsafdsaf",
+	expctSplPreRatedCdr := &CDR{CGRID: storCdr.CGRID, ToR: utils.VOICE, OriginID: "dsafdsaf",
 		OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED,
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		Usage:       time.Duration(10) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "field_extr2": "valextr2"},
-		RunID:       "sample_run1", Rated: false, Cost: 1.01}
-	if !reflect.DeepEqual(expctSplRatedCdr, rtSampleCdrOut) {
-		t.Errorf("Expected: %v, received: %v", expctSplRatedCdr, rtSampleCdrOut)
+		RunID:       "sample_run1", PreRated: false, Cost: 1.01}
+	if !reflect.DeepEqual(expctSplPreRatedCdr, rtSampleCdrOut) {
+		t.Errorf("Expected: %v, received: %v", expctSplPreRatedCdr, rtSampleCdrOut)
 	}
 }
 
@@ -322,29 +385,31 @@ func TestCDRForkCdrStaticVals(t *testing.T) {
 	rsrStST, _ := utils.NewRSRField("^2013-12-07T08:42:24Z")
 	rsrStAT, _ := utils.NewRSRField("^2013-12-07T08:42:26Z")
 	rsrStDur, _ := utils.NewRSRField("^12s")
-	rsrStRated, _ := utils.NewRSRField("^true")
+	rsrStPreRated, _ := utils.NewRSRField("^true")
 	rsrStCost, _ := utils.NewRSRField("^1.2")
 	rtCdrOut2, err := storCdr.ForkCdr("wholesale_run", rsrStPostpaid, rsrStCgr, rsrStPC, rsrStFA, rsrStFS, &utils.RSRField{Id: utils.Destination},
-		rsrStST, rsrStAT, rsrStDur, rsrStRated, rsrStCost, []*utils.RSRField{}, true, "")
+		rsrStST, rsrStAT, rsrStDur, rsrStPreRated, rsrStCost, []*utils.RSRField{}, true, "")
 	if err != nil {
 		t.Error("Unexpected error received", err)
 	}
-	expctRatedCdr2 := &CDR{CGRID: storCdr.CGRID, ToR: utils.VOICE, OriginID: "dsafdsaf",
+	expctPreRatedCdr2 := &CDR{CGRID: storCdr.CGRID, ToR: utils.VOICE, OriginID: "dsafdsaf",
 		OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_POSTPAID,
 		Tenant: "cgrates.com", Category: "premium_call", Account: "first_account",
 		Subject: "first_subject", Destination: "1002",
 		SetupTime:  time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
 		AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage:      time.Duration(12) * time.Second, Rated: true, Cost: 1.2,
+		Usage:      time.Duration(12) * time.Second, PreRated: true, Cost: 1.2,
 		ExtraFields: map[string]string{}, RunID: "wholesale_run"}
-	if !reflect.DeepEqual(rtCdrOut2, expctRatedCdr2) {
-		t.Errorf("Received: %v, expected: %v", rtCdrOut2, expctRatedCdr2)
+	if !reflect.DeepEqual(rtCdrOut2, expctPreRatedCdr2) {
+		t.Errorf("Received: %v, expected: %v", rtCdrOut2, expctPreRatedCdr2)
 	}
 	_, err = storCdr.ForkCdr("wholesale_run", &utils.RSRField{Id: "dummy_header"},
-		&utils.RSRField{Id: utils.Tenant}, &utils.RSRField{Id: utils.TOR}, &utils.RSRField{Id: utils.Account},
-		&utils.RSRField{Id: utils.Subject}, &utils.RSRField{Id: utils.Destination},
-		&utils.RSRField{Id: utils.SetupTime}, &utils.RSRField{Id: utils.AnswerTime}, &utils.RSRField{Id: utils.Usage},
-		&utils.RSRField{Id: utils.RATED_FLD}, &utils.RSRField{Id: utils.COST}, []*utils.RSRField{}, true, "")
+		&utils.RSRField{Id: utils.Tenant}, &utils.RSRField{Id: utils.ToR},
+		&utils.RSRField{Id: utils.Account}, &utils.RSRField{Id: utils.Subject},
+		&utils.RSRField{Id: utils.Destination}, &utils.RSRField{Id: utils.SetupTime},
+		&utils.RSRField{Id: utils.AnswerTime}, &utils.RSRField{Id: utils.Usage},
+		&utils.RSRField{Id: utils.PreRated}, &utils.RSRField{Id: utils.COST},
+		[]*utils.RSRField{}, true, "")
 	if err == nil {
 		t.Error("Failed to detect missing header")
 	}
@@ -410,69 +475,6 @@ func TestCDRAsExternalCDR(t *testing.T) {
 	}
 }
 
-func TestCDREventFields(t *testing.T) {
-	cdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
-		OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
-		Source: "test", RequestType: utils.META_RATED, Tenant: "cgrates.org",
-		Category: "call", Account: "dan", Subject: "dans", Destination: "1002",
-		SetupTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		AnswerTime: time.Date(2013, 11, 7, 8, 42, 27, 0, time.UTC),
-		RunID:      utils.DEFAULT_RUNID, Usage: time.Duration(10) * time.Second,
-		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01}
-
-	if ev := cdr.AsEvent(""); ev != Event(cdr) {
-		t.Error("Received: ", ev)
-	}
-	if res := cdr.GetName(); res != "test" {
-		t.Error("Received: ", res)
-	}
-	if res := cdr.GetCgrId(""); res != utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()) {
-		t.Error("Received: ", res)
-	}
-	if res := cdr.GetUUID(); res != "dsafdsaf" {
-		t.Error("Received: ", res)
-	}
-	if res := cdr.GetSubject(utils.META_DEFAULT); res != "dans" {
-		t.Error("Received: ", res)
-	}
-	if res := cdr.GetAccount(utils.META_DEFAULT); res != "dan" {
-		t.Error("Received: ", res)
-	}
-	if res := cdr.GetDestination(utils.META_DEFAULT); res != "1002" {
-		t.Error("Received: ", res)
-	}
-	if res := cdr.GetCallDestNr(utils.META_DEFAULT); res != "1002" {
-		t.Error("Received: ", res)
-	}
-	if res := cdr.GetCategory(utils.META_DEFAULT); res != "call" {
-		t.Error("Received: ", res)
-	}
-	if res := cdr.GetTenant(utils.META_DEFAULT); res != "cgrates.org" {
-		t.Error("Received: ", res)
-	}
-	if res := cdr.GetReqType(utils.META_DEFAULT); res != utils.META_RATED {
-		t.Error("Received: ", res)
-	}
-	if st, _ := cdr.GetSetupTime(utils.META_DEFAULT, ""); st != time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC) {
-		t.Error("Received: ", st)
-	}
-	if at, _ := cdr.GetAnswerTime(utils.META_DEFAULT, ""); at != time.Date(2013, 11, 7, 8, 42, 27, 0, time.UTC) {
-		t.Error("Received: ", at)
-	}
-	if et, _ := cdr.GetEndTime(utils.META_DEFAULT, ""); et != time.Date(2013, 11, 7, 8, 42, 37, 0, time.UTC) {
-		t.Error("Received: ", et)
-	}
-	if dur, _ := cdr.GetDuration(utils.META_DEFAULT); dur != cdr.Usage {
-		t.Error("Received: ", dur)
-	}
-	if res := cdr.GetOriginatorIP(utils.META_DEFAULT); res != cdr.OriginHost {
-		t.Error("Received: ", res)
-	}
-	if extraFlds := cdr.GetExtraFields(); !reflect.DeepEqual(cdr.ExtraFields, extraFlds) {
-		t.Error("Received: ", extraFlds)
-	}
-}
-
 func TesUsageReqAsCDR(t *testing.T) {
 	setupReq := &UsageRecord{ToR: utils.VOICE, RequestType: utils.META_RATED,
 		Tenant: "cgrates.org", Category: "call",
@@ -515,17 +517,17 @@ func TestUsageReqAsCD(t *testing.T) {
 
 func TestCDRParseFieldValue(t *testing.T) {
 	cdr := new(CDR)
-	if err := cdr.ParseFieldValue(utils.PartialField, "true", ""); err != nil {
+	if err := cdr.ParseFieldValue(utils.Partial, "true", ""); err != nil {
 		t.Error(err)
 	} else if !cdr.Partial {
 		t.Errorf("Received cdr: %+v", cdr)
 	}
-	if err := cdr.ParseFieldValue(utils.ORDERID, "5", ""); err != nil {
+	if err := cdr.ParseFieldValue(utils.OrderID, "5", ""); err != nil {
 		t.Error(err)
 	} else if cdr.OrderID != 5 {
 		t.Errorf("Received cdr: %+v", cdr)
 	}
-	if err := cdr.ParseFieldValue(utils.MEDI_RUNID, "*default", ""); err != nil {
+	if err := cdr.ParseFieldValue(utils.RunID, "*default", ""); err != nil {
 		t.Error(err)
 	} else if cdr.RunID != "*default" {
 		t.Errorf("Received cdr: %+v", cdr)
@@ -555,34 +557,32 @@ func TestCDRAsMapStringIface(t *testing.T) {
 	}
 
 	mp := map[string]interface{}{
-		"field_extr1":      "val_extr1",
-		"fieldextr2":       "valextr2",
-		utils.CGRID:        cdr.CGRID,
-		utils.MEDI_RUNID:   utils.DEFAULT_RUNID,
-		utils.ORDERID:      cdr.OrderID,
-		utils.OriginHost:   "192.168.1.1",
-		utils.Source:       utils.UNIT_TEST,
-		utils.OriginID:     "dsafdsaf",
-		utils.TOR:          utils.VOICE,
-		utils.RequestType:  utils.META_RATED,
-		utils.Tenant:       "cgrates.org",
-		utils.Category:     "call",
-		utils.Account:      "1002",
-		utils.Subject:      "1001",
-		utils.Destination:  "+4986517174963",
-		utils.SetupTime:    time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
-		utils.AnswerTime:   time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		utils.Usage:        time.Duration(10) * time.Second,
-		utils.CostSource:   cdr.CostSource,
-		utils.COST:         1.01,
-		utils.COST_DETAILS: cdr.CostDetails,
-		utils.RATED:        false,
-		utils.PartialField: false,
-		utils.ExtraInfo:    cdr.ExtraInfo,
+		"field_extr1":     "val_extr1",
+		"fieldextr2":      "valextr2",
+		utils.CGRID:       cdr.CGRID,
+		utils.RunID:       utils.DEFAULT_RUNID,
+		utils.OrderID:     cdr.OrderID,
+		utils.OriginHost:  "192.168.1.1",
+		utils.Source:      utils.UNIT_TEST,
+		utils.OriginID:    "dsafdsaf",
+		utils.ToR:         utils.VOICE,
+		utils.RequestType: utils.META_RATED,
+		utils.Tenant:      "cgrates.org",
+		utils.Category:    "call",
+		utils.Account:     "1002",
+		utils.Subject:     "1001",
+		utils.Destination: "+4986517174963",
+		utils.SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+		utils.AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		utils.Usage:       time.Duration(10) * time.Second,
+		utils.CostSource:  cdr.CostSource,
+		utils.Cost:        1.01,
+		utils.CostDetails: cdr.CostDetails,
+		utils.PreRated:    false,
+		utils.Partial:     false,
+		utils.ExtraInfo:   cdr.ExtraInfo,
 	}
-	if cdrMp, err := cdr.AsMapStringIface(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(mp, cdrMp) {
+	if cdrMp := cdr.AsMapStringIface(); !reflect.DeepEqual(mp, cdrMp) {
 		t.Errorf("Expecting: %+v, received: %+v", mp, cdrMp)
 	}
 
@@ -809,7 +809,7 @@ func TestCDRAsCGREvent(t *testing.T) {
 	var costdetails *EventCost
 	eCGREvent := utils.CGREvent{
 		Tenant: "cgrates.org",
-		ID:     "Generated",
+		ID:     "GenePreRated",
 		Event: map[string]interface{}{
 			"Account":     "1001",
 			"AnswerTime":  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
@@ -824,7 +824,7 @@ func TestCDRAsCGREvent(t *testing.T) {
 			"OriginHost":  "192.168.1.1",
 			"OriginID":    "dsafdsaf",
 			"Partial":     false,
-			"RequestType": "*rated",
+			"RequestType": utils.META_RATED,
 			"RunID":       "*default",
 			"SetupTime":   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 			"Source":      "UNIT_TEST",
@@ -834,7 +834,7 @@ func TestCDRAsCGREvent(t *testing.T) {
 			"Usage":       time.Duration(10) * time.Second,
 			"field_extr1": "val_extr1",
 			"fieldextr2":  "valextr2",
-			"rated":       false,
+			"PreRated":    false,
 		},
 	}
 	cgrEvent := cdr.AsCGREvent()
@@ -845,7 +845,8 @@ func TestCDRAsCGREvent(t *testing.T) {
 		if _, has := cgrEvent.Event[fldName]; !has {
 			t.Errorf("Expecting: %+v, received: %+v", fldName, nil)
 		} else if fldVal != cgrEvent.Event[fldName] {
-			t.Errorf("Expecting: %s:%+v, received: %s:%+v", fldName, eCGREvent.Event[fldName], fldName, cgrEvent.Event[fldName])
+			t.Errorf("Expecting: %s:%+v, received: %s:%+v",
+				fldName, eCGREvent.Event[fldName], fldName, cgrEvent.Event[fldName])
 		}
 	}
 }
@@ -874,7 +875,7 @@ func TestCDRUpdateFromCGREvent(t *testing.T) {
 	var costdetails *CallCost
 	cgrEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
-		ID:     "Generated",
+		ID:     "GenePreRated",
 		Event: map[string]interface{}{
 			"Account":     "1001",
 			"AnswerTime":  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
@@ -889,7 +890,7 @@ func TestCDRUpdateFromCGREvent(t *testing.T) {
 			"OriginHost":  "192.168.1.2",
 			"OriginID":    "dsafdsaf",
 			"Partial":     false,
-			"RequestType": "*rated",
+			"RequestType": "*PreRated",
 			"RunID":       "*default",
 			"SetupTime":   time.Date(2013, 11, 7, 8, 42, 23, 0, time.UTC),
 			"Source":      "UNIT_TEST",
@@ -899,7 +900,7 @@ func TestCDRUpdateFromCGREvent(t *testing.T) {
 			"Usage":       time.Duration(13) * time.Second,
 			"field_extr1": "val_extr1",
 			"fieldextr2":  "valextr2",
-			"rated":       false,
+			"PreRated":    false,
 		},
 	}
 	eCDR := &CDR{

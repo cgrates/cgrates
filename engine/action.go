@@ -153,39 +153,124 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 	for _, rsrFld := range rsrFlds {
 		switch rsrFld.Id {
 		case "AccountID":
-			parsedValue += rsrFld.ParseValue(acnt.ID)
+			if parsed, err := rsrFld.Parse(acnt.ID); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
+					utils.SchedulerS, err.Error(), rsrFld))
+			} else {
+				parsedValue += parsed
+			}
 		case "Directions":
-			parsedValue += rsrFld.ParseValue(b.Directions.String())
+			if parsed, err := rsrFld.Parse(b.Directions.String()); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
+					utils.SchedulerS, err.Error(), rsrFld))
+			} else {
+				parsedValue += parsed
+			}
 		case utils.Tenant:
-			parsedValue += rsrFld.ParseValue(dta.Tenant)
+			if parsed, err := rsrFld.Parse(dta.Tenant); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
+					utils.SchedulerS, err.Error(), rsrFld))
+			} else {
+				parsedValue += parsed
+			}
 		case utils.Account:
-			parsedValue += rsrFld.ParseValue(dta.Account)
+			if parsed, err := rsrFld.Parse(dta.Account); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
+					utils.SchedulerS, err.Error(), rsrFld))
+			} else {
+				parsedValue += parsed
+			}
 		case "ActionID":
-			parsedValue += rsrFld.ParseValue(action.Id)
+			if parsed, err := rsrFld.Parse(action.Id); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
+					utils.SchedulerS, err.Error(), rsrFld))
+			} else {
+				parsedValue += parsed
+			}
 		case "ActionType":
-			parsedValue += rsrFld.ParseValue(action.ActionType)
+			if parsed, err := rsrFld.Parse(action.ActionType); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
+					utils.SchedulerS, err.Error(), rsrFld))
+			} else {
+				parsedValue += parsed
+			}
 		case "ActionValue":
-			parsedValue += rsrFld.ParseValue(strconv.FormatFloat(b.GetValue(), 'f', -1, 64))
+			if parsed, err := rsrFld.Parse(strconv.FormatFloat(b.GetValue(), 'f', -1, 64)); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
+					utils.SchedulerS, err.Error(), rsrFld))
+			} else {
+				parsedValue += parsed
+			}
 		case "BalanceType":
-			parsedValue += rsrFld.ParseValue(action.Balance.GetType())
+			if parsed, err := rsrFld.Parse(action.Balance.GetType()); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
+					utils.SchedulerS, err.Error(), rsrFld))
+			} else {
+				parsedValue += parsed
+			}
 		case "BalanceUUID":
-			parsedValue += rsrFld.ParseValue(b.Uuid)
+			if parsed, err := rsrFld.Parse(b.Uuid); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
+					utils.SchedulerS, err.Error(), rsrFld))
+			} else {
+				parsedValue += parsed
+			}
 		case "BalanceID":
-			parsedValue += rsrFld.ParseValue(b.ID)
+			if parsed, err := rsrFld.Parse(b.ID); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
+					utils.SchedulerS, err.Error(), rsrFld))
+			} else {
+				parsedValue += parsed
+			}
 		case "BalanceValue":
-			parsedValue += rsrFld.ParseValue(strconv.FormatFloat(action.balanceValue, 'f', -1, 64))
+			if parsed, err := rsrFld.Parse(strconv.FormatFloat(action.balanceValue, 'f', -1, 64)); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
+					utils.SchedulerS, err.Error(), rsrFld))
+			} else {
+				parsedValue += parsed
+			}
 		case "DestinationIDs":
-			parsedValue += rsrFld.ParseValue(b.DestinationIDs.String())
+			if parsed, err := rsrFld.Parse(b.DestinationIDs.String()); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
+					utils.SchedulerS, err.Error(), rsrFld))
+			} else {
+				parsedValue += parsed
+			}
 		case "ExtraParameters":
-			parsedValue += rsrFld.ParseValue(action.ExtraParameters)
+			if parsed, err := rsrFld.Parse(action.ExtraParameters); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
+					utils.SchedulerS, err.Error(), rsrFld))
+			} else {
+				parsedValue += parsed
+			}
 		case "RatingSubject":
-			parsedValue += rsrFld.ParseValue(b.RatingSubject)
+			if parsed, err := rsrFld.Parse(b.RatingSubject); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
+					utils.SchedulerS, err.Error(), rsrFld))
+			} else {
+				parsedValue += parsed
+			}
 		case utils.Category:
-			parsedValue += rsrFld.ParseValue(action.Balance.Categories.String())
+			if parsed, err := rsrFld.Parse(action.Balance.Categories.String()); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
+					utils.SchedulerS, err.Error(), rsrFld))
+			} else {
+				parsedValue += parsed
+			}
 		case "SharedGroups":
-			parsedValue += rsrFld.ParseValue(action.Balance.SharedGroups.String())
+			if parsed, err := rsrFld.Parse(action.Balance.SharedGroups.String()); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
+					utils.SchedulerS, err.Error(), rsrFld))
+			} else {
+				parsedValue += parsed
+			}
 		default:
-			parsedValue += rsrFld.ParseValue("") // Mostly for static values
+			if parsed, err := rsrFld.Parse(""); err != nil { // Mostly for static values
+				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
+					utils.SchedulerS, err.Error(), rsrFld))
+			} else {
+				parsedValue += parsed
+			}
 		}
 	}
 	return parsedValue
@@ -193,7 +278,7 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 
 func cdrLogAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) (err error) {
 	defaultTemplate := map[string]utils.RSRFields{
-		utils.TOR:         utils.ParseRSRFieldsMustCompile("BalanceType", utils.INFIELD_SEP),
+		utils.ToR:         utils.ParseRSRFieldsMustCompile("BalanceType", utils.INFIELD_SEP),
 		utils.OriginHost:  utils.ParseRSRFieldsMustCompile("^127.0.0.1", utils.INFIELD_SEP),
 		utils.RequestType: utils.ParseRSRFieldsMustCompile("^"+utils.META_PREPAID, utils.INFIELD_SEP),
 		utils.Tenant:      utils.ParseRSRFieldsMustCompile(utils.Tenant, utils.INFIELD_SEP),

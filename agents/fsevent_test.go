@@ -498,63 +498,63 @@ func TestParseEventValue(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
 	ev := NewFSEvent(hangupEv)
-	if tor := ev.ParseEventValue(&utils.RSRField{Id: utils.TOR}, ""); tor != utils.VOICE {
+	if tor, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.ToR}, ""); tor != utils.VOICE {
 		t.Error("Unexpected tor parsed", tor)
 	}
-	if accid := ev.ParseEventValue(&utils.RSRField{Id: utils.OriginID}, ""); accid != "e3133bf7-dcde-4daf-9663-9a79ffcef5ad" {
+	if accid, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.OriginID}, ""); accid != "e3133bf7-dcde-4daf-9663-9a79ffcef5ad" {
 		t.Error("Unexpected result parsed", accid)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.OriginHost}, ""); parsed != "10.0.3.15" {
+	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.OriginHost}, ""); parsed != "10.0.3.15" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.Source}, ""); parsed != "FS_EVENT" {
+	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.Source}, ""); parsed != "FS_EVENT" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.RequestType}, ""); parsed != utils.META_PREPAID {
+	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.RequestType}, ""); parsed != utils.META_PREPAID {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.Direction}, ""); parsed != utils.OUT {
+	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.Direction}, ""); parsed != utils.OUT {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.Tenant}, ""); parsed != "cgrates.org" {
+	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.Tenant}, ""); parsed != "cgrates.org" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.Category}, ""); parsed != "call" {
+	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.Category}, ""); parsed != "call" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.Account}, ""); parsed != "1001" {
+	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.Account}, ""); parsed != "1001" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.Subject}, ""); parsed != "1001" {
+	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.Subject}, ""); parsed != "1001" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.Destination}, ""); parsed != "1003" {
+	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.Destination}, ""); parsed != "1003" {
 		t.Error("Unexpected result parsed", parsed)
 	}
 	sTime, _ := utils.ParseTimeDetectLayout("1436280728471153"[:len("1436280728471153")-6], "") // We discard nanoseconds information so we can correlate csv
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.SetupTime}, ""); parsed != sTime.String() {
+	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.SetupTime}, ""); parsed != sTime.String() {
 		t.Errorf("Expecting: %s, parsed: %s", sTime.String(), parsed)
 	}
 	aTime, _ := utils.ParseTimeDetectLayout("1436280728971147"[:len("1436280728971147")-6], "")
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.AnswerTime}, ""); parsed != aTime.String() {
+	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.AnswerTime}, ""); parsed != aTime.String() {
 		t.Errorf("Expecting: %s, parsed: %s", aTime.String(), parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.Usage}, ""); parsed != "66000000000" {
+	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.Usage}, ""); parsed != "66000000000" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.PDD}, ""); parsed != "0.028" {
+	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.PDD}, ""); parsed != "0.028" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.SUPPLIER}, ""); parsed != "supplier1" {
+	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.SUPPLIER}, ""); parsed != "supplier1" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.MEDI_RUNID}, ""); parsed != utils.DEFAULT_RUNID {
+	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.RunID}, ""); parsed != utils.DEFAULT_RUNID {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.COST}, ""); parsed != "-1" {
+	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.COST}, ""); parsed != "-1" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: "Hangup-Cause"}, ""); parsed != "NORMAL_CLEARING" {
+	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: "Hangup-Cause"}, ""); parsed != "NORMAL_CLEARING" {
 		t.Error("Unexpected result parsed", parsed)
 	}
 }
@@ -590,7 +590,7 @@ func TestFsEvAsMapStringInterface(t *testing.T) {
 	setupTime, _ := utils.ParseTimeDetectLayout("1436280728", "")
 	aTime, _ := utils.ParseTimeDetectLayout("1436280728", "")
 	expectedMap := make(map[string]interface{})
-	expectedMap[utils.TOR] = utils.VOICE
+	expectedMap[utils.ToR] = utils.VOICE
 	expectedMap[utils.OriginID] = "e3133bf7-dcde-4daf-9663-9a79ffcef5ad"
 	expectedMap[utils.OriginHost] = "10.0.3.15"
 	expectedMap[utils.Source] = "FS_CHANNEL_HANGUP_COMPLETE"

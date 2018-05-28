@@ -33,9 +33,10 @@ func TestCgrCdrInterfaces(t *testing.T) {
 }
 
 func TestCgrCdrAsCDR(t *testing.T) {
-	cgrCdr := CgrCdr{utils.TOR: utils.VOICE, utils.OriginID: "dsafdsaf", utils.OriginHost: "192.168.1.1",
-		utils.Source: "internal_test", utils.RequestType: utils.META_RATED,
-		utils.Tenant: "cgrates.org", utils.Category: "call",
+	cgrCdr := CgrCdr{utils.ToR: utils.VOICE, utils.OriginID: "dsafdsaf",
+		utils.OriginHost: "192.168.1.1", utils.Source: "internal_test",
+		utils.RequestType: utils.META_RATED,
+		utils.Tenant:      "cgrates.org", utils.Category: "call",
 		utils.Account: "1001", utils.Subject: "1001", utils.Destination: "1002",
 		utils.SetupTime: "2013-11-07T08:42:20Z", utils.AnswerTime: "2013-11-07T08:42:26Z",
 		utils.Usage: "10s", "field_extr1": "val_extr1", "fieldextr2": "valextr2"}
@@ -61,7 +62,7 @@ func TestCgrCdrAsCDR(t *testing.T) {
 func TestReplicatedCgrCdrAsCDR(t *testing.T) {
 	cgrCdr := CgrCdr{
 		utils.CGRID: "164b0422fdc6a5117031b427439482c6a4f90e41",
-		utils.TOR:   utils.VOICE, utils.OriginID: "dsafdsaf",
+		utils.ToR:   utils.VOICE, utils.OriginID: "dsafdsaf",
 		utils.OriginHost:  "192.168.1.1",
 		utils.Source:      "internal_test",
 		utils.RequestType: utils.META_RATED,
@@ -75,7 +76,7 @@ func TestReplicatedCgrCdrAsCDR(t *testing.T) {
 		"fieldextr2": "valextr2"}
 	expctRtCdr := &CDR{
 		CGRID:       cgrCdr[utils.CGRID],
-		ToR:         cgrCdr[utils.TOR],
+		ToR:         cgrCdr[utils.ToR],
 		OriginID:    cgrCdr[utils.OriginID],
 		OriginHost:  cgrCdr[utils.OriginHost],
 		Source:      cgrCdr[utils.Source],
@@ -89,7 +90,7 @@ func TestReplicatedCgrCdrAsCDR(t *testing.T) {
 		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		Usage:       time.Duration(10) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		Cost:        0.12, Rated: true,
+		Cost:        0.12, PreRated: true,
 	}
 	if CDR := cgrCdr.AsCDR(""); !reflect.DeepEqual(expctRtCdr, CDR) {
 		t.Errorf("Expecting %v, received: %v", expctRtCdr, CDR)

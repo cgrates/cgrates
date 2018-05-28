@@ -339,7 +339,7 @@ func (smg *SMGeneric) getSessionIDsMatchingIndexes(fltrs map[string]string, pass
 	defer idxMux.RUnlock()
 	matchedIndexes := make(map[string]string)
 	matchingSessions := make(utils.StringMap)
-	runID := fltrs[utils.MEDI_RUNID]
+	runID := fltrs[utils.RunID]
 	checkNr := 0
 	for fltrName, fltrVal := range fltrs {
 		checkNr += 1
@@ -640,7 +640,7 @@ func (smg *SMGeneric) asActiveSessions(fltrs map[string]string, count, passiveSe
 		return
 	}
 	for fltrFldName := range fltrs {
-		if _, alreadyChecked := checkedFilters[fltrFldName]; alreadyChecked && fltrFldName != utils.MEDI_RUNID { // Optimize further checks, RunID should stay since it can create bugs
+		if _, alreadyChecked := checkedFilters[fltrFldName]; alreadyChecked && fltrFldName != utils.RunID { // Optimize further checks, RunID should stay since it can create bugs
 			delete(fltrs, fltrFldName)
 		}
 	}
@@ -665,8 +665,8 @@ func (smg *SMGeneric) asActiveSessions(fltrs map[string]string, count, passiveSe
 			if err != nil {
 				return nil, 0, err
 			}
-			if _, hasRunID := sMp[utils.MEDI_RUNID]; !hasRunID {
-				sMp[utils.MEDI_RUNID] = utils.META_DEFAULT
+			if _, hasRunID := sMp[utils.RunID]; !hasRunID {
+				sMp[utils.RunID] = utils.META_DEFAULT
 			}
 			matchingAll := true
 			for fltrFldName, fltrFldVal := range fltrs {

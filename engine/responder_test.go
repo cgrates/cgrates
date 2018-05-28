@@ -141,42 +141,72 @@ func TestResponderGetSessionRuns(t *testing.T) {
 		RunID:      utils.DEFAULT_RUNID, Usage: time.Duration(10) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01}
 	keyCharger1 := utils.ConcatenatedKey("*out", testTenant, "call", "dan2", "dan2")
-	dfDC := &utils.DerivedCharger{RunID: utils.DEFAULT_RUNID, RequestTypeField: utils.META_DEFAULT, DirectionField: utils.META_DEFAULT, TenantField: utils.META_DEFAULT,
-		CategoryField: utils.META_DEFAULT, AccountField: utils.META_DEFAULT, SubjectField: utils.META_DEFAULT, DestinationField: utils.META_DEFAULT,
-		SetupTimeField: utils.META_DEFAULT, PDDField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT, SupplierField: utils.META_DEFAULT,
-		DisconnectCauseField: utils.META_DEFAULT, CostField: utils.META_DEFAULT, RatedField: utils.META_DEFAULT}
-	extra1DC := &utils.DerivedCharger{RunID: "extra1", RequestTypeField: "^" + utils.META_PREPAID, DirectionField: utils.META_DEFAULT, TenantField: utils.META_DEFAULT,
-		CategoryField: "^0", AccountField: "^minitsboy", SubjectField: "^rif", DestinationField: "^0256",
-		SetupTimeField: utils.META_DEFAULT, PDDField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT, SupplierField: utils.META_DEFAULT}
-	extra2DC := &utils.DerivedCharger{RunID: "extra2", RequestTypeField: utils.META_DEFAULT, DirectionField: utils.META_DEFAULT, TenantField: utils.META_DEFAULT,
-		CategoryField: utils.META_DEFAULT, AccountField: "^ivo", SubjectField: "^ivo", DestinationField: utils.META_DEFAULT,
-		SetupTimeField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT, SupplierField: utils.META_DEFAULT}
-	extra3DC := &utils.DerivedCharger{RunID: "extra3", RequestTypeField: "^" + utils.META_PSEUDOPREPAID, DirectionField: utils.META_DEFAULT, TenantField: utils.META_DEFAULT,
-		CategoryField: "^0", AccountField: "^minu", SubjectField: "^rif", DestinationField: "^0256",
-		SetupTimeField: utils.META_DEFAULT, PDDField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT, SupplierField: utils.META_DEFAULT,
-		DisconnectCauseField: utils.META_DEFAULT}
+	dfDC := &utils.DerivedCharger{
+		RunID: utils.DEFAULT_RUNID, RequestTypeField: utils.META_DEFAULT,
+		DirectionField: utils.META_DEFAULT, TenantField: utils.META_DEFAULT,
+		CategoryField: utils.META_DEFAULT, AccountField: utils.META_DEFAULT,
+		SubjectField: utils.META_DEFAULT, DestinationField: utils.META_DEFAULT,
+		SetupTimeField: utils.META_DEFAULT, PDDField: utils.META_DEFAULT,
+		AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT,
+		SupplierField: utils.META_DEFAULT, DisconnectCauseField: utils.META_DEFAULT,
+		CostField: utils.META_DEFAULT, PreRatedField: utils.META_DEFAULT}
+	extra1DC := &utils.DerivedCharger{
+		RunID: "extra1", RequestTypeField: "^" + utils.META_PREPAID,
+		DirectionField: utils.META_DEFAULT, TenantField: utils.META_DEFAULT,
+		CategoryField: "^0", AccountField: "^minitsboy", SubjectField: "^rif",
+		DestinationField: "^0256", SetupTimeField: utils.META_DEFAULT,
+		PDDField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT,
+		UsageField: utils.META_DEFAULT, SupplierField: utils.META_DEFAULT}
+	extra2DC := &utils.DerivedCharger{
+		RunID: "extra2", RequestTypeField: utils.META_DEFAULT,
+		DirectionField: utils.META_DEFAULT, TenantField: utils.META_DEFAULT,
+		CategoryField: utils.META_DEFAULT, AccountField: "^ivo", SubjectField: "^ivo",
+		DestinationField: utils.META_DEFAULT, SetupTimeField: utils.META_DEFAULT,
+		AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT,
+		SupplierField: utils.META_DEFAULT}
+	extra3DC := &utils.DerivedCharger{
+		RunID: "extra3", RequestTypeField: "^" + utils.META_PSEUDOPREPAID,
+		DirectionField: utils.META_DEFAULT, TenantField: utils.META_DEFAULT,
+		CategoryField: "^0", AccountField: "^minu",
+		SubjectField: "^rif", DestinationField: "^0256",
+		SetupTimeField: utils.META_DEFAULT, PDDField: utils.META_DEFAULT,
+		AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT,
+		SupplierField: utils.META_DEFAULT, DisconnectCauseField: utils.META_DEFAULT}
 	charger1 := &utils.DerivedChargers{Chargers: []*utils.DerivedCharger{extra1DC, extra2DC, extra3DC}}
-	if err := dm.DataDB().SetDerivedChargers(keyCharger1, charger1, utils.NonTransactional); err != nil {
+	if err := dm.DataDB().SetDerivedChargers(keyCharger1, charger1,
+		utils.NonTransactional); err != nil {
 		t.Error("Error on setting DerivedChargers", err.Error())
 	}
 	sesRuns := make([]*SessionRun, 0)
 	eSRuns := []*SessionRun{
 		&SessionRun{DerivedCharger: extra1DC,
-			CallDescriptor: &CallDescriptor{CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), RunID: "extra1", Direction: "*out", Category: "0",
-				Tenant: "vdf", Subject: "rif", Account: "minitsboy", Destination: "0256", TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), TimeEnd: time.Date(2013, 11, 7, 8, 42, 36, 0, time.UTC), TOR: utils.VOICE, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}},
+			CallDescriptor: &CallDescriptor{
+				CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+				RunID: "extra1", Direction: "*out", Category: "0",
+				Tenant: "vdf", Subject: "rif", Account: "minitsboy",
+				Destination: "0256", TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+				TimeEnd: time.Date(2013, 11, 7, 8, 42, 36, 0, time.UTC), TOR: utils.VOICE,
+				ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}},
 		&SessionRun{DerivedCharger: extra2DC,
-			CallDescriptor: &CallDescriptor{CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), RunID: "extra2", Direction: "*out", Category: "call",
-				Tenant: "vdf", Subject: "ivo", Account: "ivo", Destination: "1002", TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), TimeEnd: time.Date(2013, 11, 7, 8, 42, 36, 0, time.UTC), TOR: utils.VOICE, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}},
+			CallDescriptor: &CallDescriptor{
+				CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+				RunID: "extra2", Direction: "*out", Category: "call",
+				Tenant: "vdf", Subject: "ivo", Account: "ivo", Destination: "1002",
+				TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+				TimeEnd:   time.Date(2013, 11, 7, 8, 42, 36, 0, time.UTC), TOR: utils.VOICE,
+				ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}},
 		&SessionRun{DerivedCharger: dfDC,
-			CallDescriptor: &CallDescriptor{CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), RunID: "*default", Direction: "*out", Category: "call",
-				Tenant: "vdf", Subject: "dan2", Account: "dan2", Destination: "1002", TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), TimeEnd: time.Date(2013, 11, 7, 8, 42, 36, 0, time.UTC), TOR: utils.VOICE, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}}}
+			CallDescriptor: &CallDescriptor{
+				CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+				RunID: "*default", Direction: "*out", Category: "call",
+				Tenant: "vdf", Subject: "dan2", Account: "dan2", Destination: "1002",
+				TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+				TimeEnd:   time.Date(2013, 11, 7, 8, 42, 36, 0, time.UTC), TOR: utils.VOICE,
+				ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}}}
 	if err := rsponder.GetSessionRuns(cdr, &sesRuns); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSRuns, sesRuns) {
-		for _, sr := range sesRuns {
-			t.Logf("sr cd: %s", utils.ToIJSON(sr.CallDescriptor))
-		}
-		t.Errorf("Expecting: %+v, received: %+v", eSRuns, sesRuns)
+		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eSRuns), utils.ToJSON(sesRuns))
 	}
 }
 

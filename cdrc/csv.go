@@ -103,19 +103,19 @@ func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.CDR, 
 	recordCdrs := make([]*engine.CDR, 0)    // More CDRs based on the number of filters and field templates
 	for _, cdrcCfg := range self.cdrcCfgs { // cdrFields coming from more templates will produce individual storCdr records
 		// Make sure filters are matching
-		filterBreak := false
+		passes := true
 		for _, rsrFilter := range cdrcCfg.CdrFilter {
 			if rsrFilter == nil { // Nil filter does not need to match anything
 				continue
 			}
 			if cfgFieldIdx, _ := strconv.Atoi(rsrFilter.Id); len(record) <= cfgFieldIdx {
 				return nil, fmt.Errorf("Ignoring record: %v - cannot compile filter %+v", record, rsrFilter)
-			} else if !rsrFilter.FilterPasses(record[cfgFieldIdx]) {
-				filterBreak = true
+			} else if _, err := rsrFilter.Parse(record[cfgFieldIdx]); err != nil {
+				passes = false
 				break
 			}
 		}
-		if filterBreak { // Stop importing cdrc fields profile due to non matching filter
+		if !passes { // Stop importing cdrc fields profile due to non matching filter
 			continue
 		}
 		storedCdr, err := self.recordToStoredCdr(record, cdrcCfg)
@@ -142,19 +142,19 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 	var err error
 	var lazyHttpFields []*config.CfgCdrField
 	for _, cdrFldCfg := range cdrcCfg.ContentFields {
-		filterBreak := false
+		passes := true
 		for _, rsrFilter := range cdrFldCfg.FieldFilter {
 			if rsrFilter == nil { // Nil filter does not need to match anything
 				continue
 			}
 			if cfgFieldIdx, _ := strconv.Atoi(rsrFilter.Id); len(record) <= cfgFieldIdx {
 				return nil, fmt.Errorf("Ignoring record: %v - cannot compile field filter %+v", record, rsrFilter)
-			} else if !rsrFilter.FilterPasses(record[cfgFieldIdx]) {
-				filterBreak = true
+			} else if _, err := rsrFilter.Parse(record[cfgFieldIdx]); err != nil {
+				passes = false
 				break
 			}
 		}
-		if filterBreak { // Stop processing this field template since it's filters are not matching
+		if !passes { // Stop processing this field template since it's filters are not matching
 			continue
 		}
 		if utils.IsSliceMember([]string{utils.KAM_FLATSTORE, utils.OSIPS_FLATSTORE}, self.dfltCdrcCfg.CdrFormat) { // Hardcode some values in case of flatstore
@@ -171,12 +171,21 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 		case utils.META_COMPOSED, utils.MetaUnixTimestamp:
 			for _, cfgFieldRSR := range cdrFldCfg.Value {
 				if cfgFieldRSR.IsStatic() {
-					fieldVal += cfgFieldRSR.ParseValue("")
+					if parsed, err := cfgFieldRSR.Parse(""); err != nil {
+						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s, err: %s",
+							record, cdrFldCfg.Tag, err.Error())
+					} else {
+						fieldVal += parsed
+					}
 				} else { // Dynamic value extracted using index
 					if cfgFieldIdx, _ := strconv.Atoi(cfgFieldRSR.Id); len(record) <= cfgFieldIdx {
 						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s", record, cdrFldCfg.Tag)
 					} else {
-						strVal := cfgFieldRSR.ParseValue(record[cfgFieldIdx])
+						strVal, err := cfgFieldRSR.Parse(record[cfgFieldIdx])
+						if err != nil {
+							return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s, err: %s",
+								record, cdrFldCfg.Tag, err.Error())
+						}
 						if cdrFldCfg.Type == utils.MetaUnixTimestamp {
 							t, _ := utils.ParseTimeDetectLayout(strVal, self.timezone)
 							strVal = strconv.Itoa(int(t.Unix()))
@@ -202,7 +211,12 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 		var outValByte []byte
 		var fieldVal, httpAddr string
 		for _, rsrFld := range httpFieldCfg.Value {
-			httpAddr += rsrFld.ParseValue("")
+			if parsed, err := rsrFld.Parse(""); err != nil {
+				return nil, fmt.Errorf("Ignoring record: %v - cannot extract http address for field %+v, err: %s",
+					record, rsrFld, err.Error())
+			} else {
+				httpAddr += parsed
+			}
 		}
 		var jsn []byte
 		jsn, err = json.Marshal(storedCdr)

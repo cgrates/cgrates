@@ -64,7 +64,12 @@ func (ld LoaderData) UpdateFromCSV(fileName string, record []string,
 			} else if len(record) <= cfgFieldIdx {
 				return fmt.Errorf("Ignoring record: %v - cannot extract field %s", record, cfgFld.Tag)
 			}
-			valStr += rsrFld.ParseValue(record[cfgFieldIdx])
+			if parsed, err := rsrFld.Parse(record[cfgFieldIdx]); err != nil {
+				return err
+			} else {
+				valStr += parsed
+			}
+
 		}
 		switch cfgFld.Type {
 		case utils.META_COMPOSED:

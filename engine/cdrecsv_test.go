@@ -53,7 +53,7 @@ func TestCsvCdrWriter(t *testing.T) {
 	if err := cdre.writeCsv(csvWriter); err != nil {
 		t.Error("Unexpected error: ", err)
 	}
-	expected := `dbafe9c8614c785a65aabd116dd3959c3c56f7f6,*default,*voice,dsafdsaf,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10,1.01000`
+	expected := `dbafe9c8614c785a65aabd116dd3959c3c56f7f6,*default,*voice,dsafdsaf,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10s,1.01000`
 	result := strings.TrimSpace(writer.String())
 	if result != expected {
 		t.Errorf("Expected: \n%s received: \n%s.", expected, result)
@@ -88,7 +88,7 @@ func TestAlternativeFieldSeparator(t *testing.T) {
 	if err := cdre.writeCsv(csvWriter); err != nil {
 		t.Error("Unexpected error: ", err)
 	}
-	expected := `dbafe9c8614c785a65aabd116dd3959c3c56f7f6|*default|*voice|dsafdsaf|*rated|cgrates.org|call|1001|1001|1002|2013-11-07T08:42:25Z|2013-11-07T08:42:26Z|10|1.01000`
+	expected := `dbafe9c8614c785a65aabd116dd3959c3c56f7f6|*default|*voice|dsafdsaf|*rated|cgrates.org|call|1001|1001|1002|2013-11-07T08:42:25Z|2013-11-07T08:42:26Z|10s|1.01000`
 	result := strings.TrimSpace(writer.String())
 	if result != expected {
 		t.Errorf("Expected: \n%s received: \n%s.", expected, result)

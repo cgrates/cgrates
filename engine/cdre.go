@@ -120,22 +120,23 @@ func (cdre *CDRExporter) metaHandler(tag, arg string) (string, error) {
 	case META_NRCDRS:
 		return strconv.Itoa(cdre.numberOfRecords), nil
 	case META_DURCDRS:
-		emulatedCdr := &CDR{ToR: utils.VOICE, Usage: cdre.totalDuration}
-		return emulatedCdr.FormatUsage(arg), nil
+		cdr := &CDR{ToR: utils.VOICE, Usage: cdre.totalDuration}
+		return cdr.FieldAsString(&utils.RSRField{Id: utils.Usage})
 	case META_SMSUSAGE:
-		emulatedCdr := &CDR{ToR: utils.SMS, Usage: cdre.totalSmsUsage}
-		return emulatedCdr.FormatUsage(arg), nil
+		cdr := &CDR{ToR: utils.SMS, Usage: cdre.totalDuration}
+		return cdr.FieldAsString(&utils.RSRField{Id: utils.Usage})
 	case META_MMSUSAGE:
-		emulatedCdr := &CDR{ToR: utils.MMS, Usage: cdre.totalMmsUsage}
-		return emulatedCdr.FormatUsage(arg), nil
+		cdr := &CDR{ToR: utils.MMS, Usage: cdre.totalDuration}
+		return cdr.FieldAsString(&utils.RSRField{Id: utils.Usage})
 	case META_GENERICUSAGE:
-		emulatedCdr := &CDR{ToR: utils.GENERIC, Usage: cdre.totalGenericUsage}
-		return emulatedCdr.FormatUsage(arg), nil
+		cdr := &CDR{ToR: utils.GENERIC, Usage: cdre.totalDuration}
+		return cdr.FieldAsString(&utils.RSRField{Id: utils.Usage})
 	case META_DATAUSAGE:
-		emulatedCdr := &CDR{ToR: utils.DATA, Usage: cdre.totalDataUsage}
-		return emulatedCdr.FormatUsage(arg), nil
+		cdr := &CDR{ToR: utils.DATA, Usage: cdre.totalDuration}
+		return cdr.FieldAsString(&utils.RSRField{Id: utils.Usage})
 	case META_COSTCDRS:
-		return strconv.FormatFloat(utils.Round(cdre.totalCost, cdre.roundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
+		return strconv.FormatFloat(utils.Round(cdre.totalCost,
+			cdre.roundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
 	default:
 		return "", fmt.Errorf("Unsupported METATAG: %s", tag)
 	}
@@ -341,7 +342,7 @@ func (cdre *CDRExporter) processCDRs() (err error) {
 		}
 		passesFilters := true
 		for _, cdrFltr := range cdre.exportTemplate.CDRFilter {
-			if !cdrFltr.FilterPasses(cdr.FieldAsString(cdrFltr)) {
+			if _, err := cdr.FieldAsString(cdrFltr); err != nil {
 				passesFilters = false
 				break
 			}
@@ -353,7 +354,7 @@ func (cdre *CDRExporter) processCDRs() (err error) {
 			utils.IsSliceMember([]string{utils.MetaFileCSV, utils.MetaFileFWV}, cdre.exportFormat) {
 			wg.Add(1) // wait for synchronous or file ones since these need to be done before continuing
 		}
-		go func(cdr *CDR) {
+		go func(cdre *CDRExporter, cdr *CDR) {
 			if err := cdre.processCDR(cdr); err != nil {
 				cdre.Lock()
 				cdre.negativeExports[cdr.CGRID] = err.Error()
@@ -367,7 +368,7 @@ func (cdre *CDRExporter) processCDRs() (err error) {
 				utils.IsSliceMember([]string{utils.MetaFileCSV, utils.MetaFileFWV}, cdre.exportFormat) {
 				wg.Done()
 			}
-		}(cdr)
+		}(cdre, cdr)
 	}
 	wg.Wait()
 	// Process header and trailer after processing cdrs since the metatag functions can access stats out of built cdrs

@@ -139,7 +139,7 @@ func (xmlProc *XMLRecordsProcessor) ProcessNextRecord() (cdrs []*engine.CDR, err
 			absolutePath := utils.ParseHierarchyPath(rsrFltr.Id, "")
 			relPath := utils.HierarchyPath(absolutePath[len(xmlProc.cdrPath)-1:]) // Need relative path to the xmlElmnt
 			fieldVal, _ := elementText(cdrXML, relPath.AsString("/", true))
-			if !rsrFltr.FilterPasses(fieldVal) {
+			if _, err := rsrFltr.Parse(fieldVal); err != nil {
 				filtersPassing = false
 				break
 			}
@@ -168,14 +168,22 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity tree.Res, cdrcCfg *con
 		if cdrFldCfg.Type == utils.META_COMPOSED {
 			for _, cfgFieldRSR := range cdrFldCfg.Value {
 				if cfgFieldRSR.IsStatic() {
-					fldVals[cdrFldCfg.FieldId] += cfgFieldRSR.ParseValue("")
+					if parsed, err := cfgFieldRSR.Parse(""); err != nil {
+						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s, err: %s",
+							xmlEntity, cdrFldCfg.Tag, err.Error())
+					} else {
+						fldVals[cdrFldCfg.FieldId] += parsed
+					}
+
 				} else { // Dynamic value extracted using path
 					absolutePath := utils.ParseHierarchyPath(cfgFieldRSR.Id, "")
 					relPath := utils.HierarchyPath(absolutePath[len(xmlProc.cdrPath)-1:]) // Need relative path to the xmlElmnt
 					if elmntText, err := elementText(xmlEntity, relPath.AsString("/", true)); err != nil && err != utils.ErrNotFound {
 						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s, err: %s", xmlEntity, cdrFldCfg.Tag, err.Error())
+					} else if parsed, err := cfgFieldRSR.Parse(elmntText); err != nil {
+						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s, err: %s", xmlEntity, cdrFldCfg.Tag, err.Error())
 					} else {
-						fldVals[cdrFldCfg.FieldId] += cfgFieldRSR.ParseValue(elmntText)
+						fldVals[cdrFldCfg.FieldId] += parsed
 					}
 				}
 			}
@@ -202,7 +210,11 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity tree.Res, cdrcCfg *con
 		var outValByte []byte
 		var fieldVal, httpAddr string
 		for _, rsrFld := range httpFieldCfg.Value {
-			httpAddr += rsrFld.ParseValue("")
+			if parsed, err := rsrFld.Parse(""); err != nil {
+				return nil, fmt.Errorf("Ignoring record: %v - cannot extract http address, err: %s", xmlEntity, err.Error())
+			} else {
+				httpAddr += parsed
+			}
 		}
 		var jsn []byte
 		jsn, err = json.Marshal(cdr)

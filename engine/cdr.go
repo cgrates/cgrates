@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"math"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -36,7 +35,7 @@ func NewCDRFromExternalCDR(extCdr *ExternalCDR, timezone string) (*CDR, error) {
 		OriginID: extCdr.OriginID, OriginHost: extCdr.OriginHost,
 		Source: extCdr.Source, RequestType: extCdr.RequestType, Tenant: extCdr.Tenant, Category: extCdr.Category,
 		Account: extCdr.Account, Subject: extCdr.Subject, Destination: extCdr.Destination,
-		CostSource: extCdr.CostSource, Cost: extCdr.Cost, Rated: extCdr.Rated}
+		CostSource: extCdr.CostSource, Cost: extCdr.Cost, PreRated: extCdr.PreRated}
 	if extCdr.SetupTime != "" {
 		if cdr.SetupTime, err = utils.ParseTimeDetectLayout(extCdr.SetupTime, timezone); err != nil {
 			return nil, err
@@ -95,7 +94,7 @@ type CDR struct {
 	ExtraFields map[string]string // Extra fields to be stored in CDR
 	ExtraInfo   string            // Container for extra information related to this CDR, eg: populated with error reason in case of error on calculation
 	Partial     bool              // Used for partial record processing by CDRC
-	Rated       bool              // Mark the CDR as rated so we do not process it during rating
+	PreRated    bool              // Mark the CDR as rated so we do not process it during rating
 	CostSource  string            // The source of this cost
 	Cost        float64
 	CostDetails *EventCost // Attach the cost details to CDR when possible
@@ -129,79 +128,44 @@ func (cdr *CDR) FormatCost(shiftDecimals, roundDecimals int) string {
 	return strconv.FormatFloat(cost, 'f', roundDecimals, 64)
 }
 
-// Formats usage on export
-func (cdr *CDR) FormatUsage(layout string) string {
-	if utils.IsSliceMember([]string{utils.DATA, utils.SMS, utils.MMS, utils.GENERIC}, cdr.ToR) {
-		return strconv.FormatFloat(utils.Round(cdr.Usage.Seconds(), 0, utils.ROUNDING_MIDDLE), 'f', -1, 64)
+// Used to retrieve fields as string, primary fields are const labeled
+func (cdr *CDR) FieldAsString(rsrFld *utils.RSRField) (parsed string, err error) {
+	if rsrFld.IsStatic() { // Static values do not care about headers
+		parsed, err = rsrFld.Parse("")
+		return
 	}
-	switch layout {
-	default:
-		return strconv.FormatFloat(float64(cdr.Usage.Nanoseconds())/1000000000, 'f', -1, 64)
+	fldIface, err := utils.ReflectFieldInterface(cdr, rsrFld.Id, "ExtraFields")
+	if err != nil {
+		return "", err
 	}
+	return rsrFld.Parse(fldIface)
 }
 
-// Used to retrieve fields as string, primary fields are const labeled
-func (cdr *CDR) FieldAsString(rsrFld *utils.RSRField) string {
-	if rsrFld.IsStatic() { // Static values do not care about headers
-		return rsrFld.ParseValue("")
+// concatenates values of multiple fields defined in template, used eg in CDR templates
+func (cdr *CDR) FieldsAsString(rsrFlds utils.RSRFields) (fldVal string) {
+	for _, rsrFld := range rsrFlds {
+		if fldStr, err := cdr.FieldAsString(rsrFld); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing field with template: %+v",
+					utils.CDR, err.Error(), rsrFld))
+		} else {
+			fldVal += fldStr
+		}
 	}
-	switch rsrFld.Id {
-	case utils.CGRID:
-		return rsrFld.ParseValue(cdr.CGRID)
-	case utils.ORDERID:
-		return rsrFld.ParseValue(strconv.FormatInt(cdr.OrderID, 10))
-	case utils.TOR:
-		return rsrFld.ParseValue(cdr.ToR)
-	case utils.OriginID:
-		return rsrFld.ParseValue(cdr.OriginID)
-	case utils.OriginHost:
-		return rsrFld.ParseValue(cdr.OriginHost)
-	case utils.Source:
-		return rsrFld.ParseValue(cdr.Source)
-	case utils.RequestType:
-		return rsrFld.ParseValue(cdr.RequestType)
-	case utils.Tenant:
-		return rsrFld.ParseValue(cdr.Tenant)
-	case utils.Category:
-		return rsrFld.ParseValue(cdr.Category)
-	case utils.Account:
-		return rsrFld.ParseValue(cdr.Account)
-	case utils.Subject:
-		return rsrFld.ParseValue(cdr.Subject)
-	case utils.Destination:
-		return rsrFld.ParseValue(cdr.Destination)
-	case utils.SetupTime:
-		return rsrFld.ParseValue(cdr.SetupTime.Format(time.RFC3339))
-	case utils.AnswerTime:
-		return rsrFld.ParseValue(cdr.AnswerTime.Format(time.RFC3339))
-	case utils.Usage:
-		return cdr.Usage.String()
-	case utils.MEDI_RUNID:
-		return rsrFld.ParseValue(cdr.RunID)
-	case utils.RATED_FLD:
-		return rsrFld.ParseValue(strconv.FormatBool(cdr.Rated))
-	case utils.COST:
-		return rsrFld.ParseValue(strconv.FormatFloat(cdr.Cost, 'f', -1, 64)) // Recommended to use FormatCost
-	case utils.COST_DETAILS:
-		return rsrFld.ParseValue(cdr.CostDetailsJson())
-	case utils.PartialField:
-		return rsrFld.ParseValue(strconv.FormatBool(cdr.Partial))
-	default:
-		return rsrFld.ParseValue(cdr.ExtraFields[rsrFld.Id])
-	}
+	return
 }
 
 // Populates the field with id from value; strings are appended to original one
 func (cdr *CDR) ParseFieldValue(fieldId, fieldVal, timezone string) error {
 	var err error
 	switch fieldId {
-	case utils.ORDERID:
+	case utils.OrderID:
 		if cdr.OrderID, err = strconv.ParseInt(fieldVal, 10, 64); err != nil {
 			return err
 		}
-	case utils.TOR:
+	case utils.ToR:
 		cdr.ToR += fieldVal
-	case utils.MEDI_RUNID:
+	case utils.RunID:
 		cdr.RunID += fieldVal
 	case utils.OriginID:
 		cdr.OriginID += fieldVal
@@ -217,8 +181,8 @@ func (cdr *CDR) ParseFieldValue(fieldId, fieldVal, timezone string) error {
 		cdr.Subject += fieldVal
 	case utils.Destination:
 		cdr.Destination += fieldVal
-	case utils.RATED_FLD:
-		cdr.Rated, _ = strconv.ParseBool(fieldVal)
+	case utils.PreRated:
+		cdr.PreRated, _ = strconv.ParseBool(fieldVal)
 	case utils.SetupTime:
 		if cdr.SetupTime, err = utils.ParseTimeDetectLayout(fieldVal, timezone); err != nil {
 			return fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())
@@ -235,25 +199,12 @@ func (cdr *CDR) ParseFieldValue(fieldId, fieldVal, timezone string) error {
 		if cdr.Cost, err = strconv.ParseFloat(fieldVal, 64); err != nil {
 			return fmt.Errorf("Cannot parse cost field with value: %s, err: %s", fieldVal, err.Error())
 		}
-	case utils.PartialField:
+	case utils.Partial:
 		cdr.Partial, _ = strconv.ParseBool(fieldVal)
 	default: // Extra fields will not match predefined so they all show up here
 		cdr.ExtraFields[fieldId] += fieldVal
 	}
 	return nil
-}
-
-// concatenates values of multiple fields defined in template, used eg in CDR templates
-func (cdr *CDR) FieldsAsString(rsrFlds utils.RSRFields) string {
-	var fldVal string
-	for _, rsrFld := range rsrFlds {
-		fldVal += cdr.FieldAsString(rsrFld)
-	}
-	return fldVal
-}
-
-func (cdr *CDR) AsCDR(timezone string) *CDR {
-	return cdr
 }
 
 func (cdr *CDR) Clone() *CDR {
@@ -262,8 +213,39 @@ func (cdr *CDR) Clone() *CDR {
 	return &clnedCDR
 }
 
+func (cdr *CDR) AsMapStringIface() (mp map[string]interface{}) {
+	mp = make(map[string]interface{})
+	for fld, val := range cdr.ExtraFields {
+		mp[fld] = val
+	}
+	mp[utils.CGRID] = cdr.CGRID
+	mp[utils.RunID] = cdr.RunID
+	mp[utils.OrderID] = cdr.OrderID
+	mp[utils.OriginHost] = cdr.OriginHost
+	mp[utils.Source] = cdr.Source
+	mp[utils.OriginID] = cdr.OriginID
+	mp[utils.ToR] = cdr.ToR
+	mp[utils.RequestType] = cdr.RequestType
+	mp[utils.Tenant] = cdr.Tenant
+	mp[utils.Category] = cdr.Category
+	mp[utils.Account] = cdr.Account
+	mp[utils.Subject] = cdr.Subject
+	mp[utils.Destination] = cdr.Destination
+	mp[utils.SetupTime] = cdr.SetupTime
+	mp[utils.AnswerTime] = cdr.AnswerTime
+	mp[utils.Usage] = cdr.Usage
+	mp[utils.ExtraInfo] = cdr.ExtraInfo
+	mp[utils.Partial] = cdr.Partial
+	mp[utils.PreRated] = cdr.PreRated
+	mp[utils.CostSource] = cdr.CostSource
+	mp[utils.Cost] = cdr.Cost
+	mp[utils.CostDetails] = cdr.CostDetails
+	return
+}
+
 // Used in mediation, primaryMandatory marks whether missing field out of request represents error or can be ignored
-func (cdr *CDR) ForkCdr(runId string, RequestTypeFld, tenantFld, categFld, accountFld, subjectFld, destFld, setupTimeFld,
+func (cdr *CDR) ForkCdr(runId string, RequestTypeFld, tenantFld,
+	categFld, accountFld, subjectFld, destFld, setupTimeFld,
 	answerTimeFld, durationFld, ratedFld, costFld *utils.RSRField,
 	extraFlds []*utils.RSRField, primaryMandatory bool, timezone string) (*CDR, error) {
 	if RequestTypeFld == nil {
@@ -324,13 +306,13 @@ func (cdr *CDR) ForkCdr(runId string, RequestTypeFld, tenantFld, categFld, accou
 		ratedFld, _ = utils.NewRSRField(utils.META_DEFAULT)
 	}
 	if ratedFld.Id == utils.META_DEFAULT {
-		ratedFld.Id = utils.RATED_FLD
+		ratedFld.Id = utils.PreRated
 	}
 	if costFld == nil {
 		costFld, _ = utils.NewRSRField(utils.META_DEFAULT)
 	}
 	if costFld.Id == utils.META_DEFAULT {
-		costFld.Id = utils.COST
+		costFld.Id = utils.Cost
 	}
 	var err error
 	frkStorCdr := new(CDR)
@@ -341,55 +323,55 @@ func (cdr *CDR) ForkCdr(runId string, RequestTypeFld, tenantFld, categFld, accou
 	frkStorCdr.OriginID = cdr.OriginID
 	frkStorCdr.OriginHost = cdr.OriginHost
 	frkStorCdr.Source = cdr.Source
-	frkStorCdr.RequestType = cdr.FieldAsString(RequestTypeFld)
+	frkStorCdr.RequestType, _ = cdr.FieldAsString(RequestTypeFld)
 	if primaryMandatory && len(frkStorCdr.RequestType) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing(utils.RequestType, RequestTypeFld.Id)
 	}
-	frkStorCdr.Tenant = cdr.FieldAsString(tenantFld)
+	frkStorCdr.Tenant, _ = cdr.FieldAsString(tenantFld)
 	if primaryMandatory && len(frkStorCdr.Tenant) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing(utils.Tenant, tenantFld.Id)
 	}
-	frkStorCdr.Category = cdr.FieldAsString(categFld)
+	frkStorCdr.Category, _ = cdr.FieldAsString(categFld)
 	if primaryMandatory && len(frkStorCdr.Category) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing(utils.Category, categFld.Id)
 	}
-	frkStorCdr.Account = cdr.FieldAsString(accountFld)
+	frkStorCdr.Account, _ = cdr.FieldAsString(accountFld)
 	if primaryMandatory && len(frkStorCdr.Account) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing(utils.Account, accountFld.Id)
 	}
-	frkStorCdr.Subject = cdr.FieldAsString(subjectFld)
+	frkStorCdr.Subject, _ = cdr.FieldAsString(subjectFld)
 	if primaryMandatory && len(frkStorCdr.Subject) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing(utils.Subject, subjectFld.Id)
 	}
-	frkStorCdr.Destination = cdr.FieldAsString(destFld)
+	frkStorCdr.Destination, _ = cdr.FieldAsString(destFld)
 	if primaryMandatory && len(frkStorCdr.Destination) == 0 && frkStorCdr.ToR == utils.VOICE {
 		return nil, utils.NewErrMandatoryIeMissing(utils.Destination, destFld.Id)
 	}
-	sTimeStr := cdr.FieldAsString(setupTimeFld)
+	sTimeStr, _ := cdr.FieldAsString(setupTimeFld)
 	if primaryMandatory && len(sTimeStr) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing(utils.SetupTime, setupTimeFld.Id)
 	} else if frkStorCdr.SetupTime, err = utils.ParseTimeDetectLayout(sTimeStr, timezone); err != nil {
 		return nil, err
 	}
-	aTimeStr := cdr.FieldAsString(answerTimeFld)
+	aTimeStr, _ := cdr.FieldAsString(answerTimeFld)
 	if primaryMandatory && len(aTimeStr) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing(utils.AnswerTime, answerTimeFld.Id)
 	} else if frkStorCdr.AnswerTime, err = utils.ParseTimeDetectLayout(aTimeStr, timezone); err != nil {
 		return nil, err
 	}
-	durStr := cdr.FieldAsString(durationFld)
+	durStr, _ := cdr.FieldAsString(durationFld)
 	if primaryMandatory && len(durStr) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing(utils.Usage, durationFld.Id)
 	} else if frkStorCdr.Usage, err = utils.ParseDurationWithNanosecs(durStr); err != nil {
 		return nil, err
 	}
-	ratedStr := cdr.FieldAsString(ratedFld)
+	ratedStr, _ := cdr.FieldAsString(ratedFld)
 	if primaryMandatory && len(ratedStr) == 0 {
-		return nil, utils.NewErrMandatoryIeMissing(utils.RATED_FLD, ratedFld.Id)
-	} else if frkStorCdr.Rated, err = strconv.ParseBool(ratedStr); err != nil {
+		return nil, utils.NewErrMandatoryIeMissing(utils.PreRated, ratedFld.Id)
+	} else if frkStorCdr.PreRated, err = strconv.ParseBool(ratedStr); err != nil {
 		return nil, err
 	}
-	costStr := cdr.FieldAsString(costFld)
+	costStr, _ := cdr.FieldAsString(costFld)
 	if primaryMandatory && len(costStr) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing(utils.COST, costFld.Id)
 	} else if frkStorCdr.Cost, err = strconv.ParseFloat(costStr, 64); err != nil {
@@ -397,7 +379,7 @@ func (cdr *CDR) ForkCdr(runId string, RequestTypeFld, tenantFld, categFld, accou
 	}
 	frkStorCdr.ExtraFields = make(map[string]string, len(extraFlds))
 	for _, fld := range extraFlds {
-		frkStorCdr.ExtraFields[fld.Id] = cdr.FieldAsString(fld)
+		frkStorCdr.ExtraFields[fld.Id], _ = cdr.FieldAsString(fld)
 	}
 	return frkStorCdr, nil
 }
@@ -431,171 +413,37 @@ func (cdr *CDR) AsExternalCDR() *ExternalCDR {
 		Cost:        cdr.Cost,
 		CostDetails: cdr.CostDetailsJson(),
 		ExtraInfo:   cdr.ExtraInfo,
-		Rated:       cdr.Rated,
+		PreRated:    cdr.PreRated,
 	}
 }
 
-// Implementation of Event interface, used in tests
-func (cdr *CDR) AsEvent(ignored string) Event {
-	return Event(cdr)
-}
-func (cdr *CDR) ComputeLcr() bool {
-	return false
-}
-func (cdr *CDR) GetName() string {
-	return cdr.Source
-}
-func (cdr *CDR) GetCgrId(timezone string) string {
-	return cdr.CGRID
-}
-func (cdr *CDR) GetUUID() string {
-	return cdr.OriginID
-}
-func (cdr *CDR) GetSessionIds() []string {
-	return []string{cdr.GetUUID()}
-}
-func (cdr *CDR) GetSubject(fieldName string) string {
-	if utils.IsSliceMember([]string{utils.Subject, utils.META_DEFAULT, ""}, fieldName) {
-		return cdr.Subject
-	}
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
-	}
-	return cdr.FieldAsString(&utils.RSRField{Id: fieldName})
-}
-func (cdr *CDR) GetAccount(fieldName string) string {
-	if utils.IsSliceMember([]string{utils.Account, utils.META_DEFAULT, ""}, fieldName) {
-		return cdr.Account
-	}
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
-	}
-	return cdr.FieldAsString(&utils.RSRField{Id: fieldName})
-}
-func (cdr *CDR) GetDestination(fieldName string) string {
-	if utils.IsSliceMember([]string{utils.Destination, utils.META_DEFAULT, ""}, fieldName) {
-		return cdr.Destination
-	}
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
-	}
-	return cdr.FieldAsString(&utils.RSRField{Id: fieldName})
-}
-func (cdr *CDR) GetCallDestNr(fieldName string) string {
-	if utils.IsSliceMember([]string{utils.Destination, utils.META_DEFAULT, ""}, fieldName) {
-		return cdr.Destination
-	}
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
-	}
-	return cdr.FieldAsString(&utils.RSRField{Id: fieldName})
-}
-func (cdr *CDR) GetCategory(fieldName string) string {
-	if utils.IsSliceMember([]string{utils.Category, utils.META_DEFAULT, ""}, fieldName) {
-		return cdr.Category
-	}
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
-	}
-	return cdr.FieldAsString(&utils.RSRField{Id: fieldName})
-}
-func (cdr *CDR) GetTenant(fieldName string) string {
-	if utils.IsSliceMember([]string{utils.Tenant, utils.META_DEFAULT, ""}, fieldName) {
-		return cdr.Tenant
-	}
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
-	}
-	return cdr.FieldAsString(&utils.RSRField{Id: fieldName})
-}
-func (cdr *CDR) GetReqType(fieldName string) string {
-	if utils.IsSliceMember([]string{utils.RequestType, utils.META_DEFAULT, ""}, fieldName) {
-		return cdr.RequestType
-	}
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
-	}
-	return cdr.FieldAsString(&utils.RSRField{Id: fieldName})
-}
-func (cdr *CDR) GetSetupTime(fieldName, timezone string) (time.Time, error) {
-	if utils.IsSliceMember([]string{utils.SetupTime, utils.META_DEFAULT, ""}, fieldName) {
-		return cdr.SetupTime, nil
-	}
-	var sTimeVal string
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		sTimeVal = fieldName[len(utils.STATIC_VALUE_PREFIX):]
-	} else {
-		sTimeVal = cdr.FieldAsString(&utils.RSRField{Id: fieldName})
-	}
-	return utils.ParseTimeDetectLayout(sTimeVal, timezone)
-}
-func (cdr *CDR) GetAnswerTime(fieldName, timezone string) (time.Time, error) {
-	if utils.IsSliceMember([]string{utils.AnswerTime, utils.META_DEFAULT, ""}, fieldName) {
-		return cdr.AnswerTime, nil
-	}
-	var aTimeVal string
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		aTimeVal = fieldName[len(utils.STATIC_VALUE_PREFIX):]
-	} else {
-		aTimeVal = cdr.FieldAsString(&utils.RSRField{Id: fieldName})
-	}
-	return utils.ParseTimeDetectLayout(aTimeVal, timezone)
-}
-func (cdr *CDR) GetEndTime(fieldName, timezone string) (time.Time, error) {
-	return cdr.AnswerTime.Add(cdr.Usage), nil
-}
-func (cdr *CDR) GetDuration(fieldName string) (time.Duration, error) {
-	if utils.IsSliceMember([]string{utils.Usage, utils.META_DEFAULT, ""}, fieldName) {
-		return cdr.Usage, nil
-	}
-	var durVal string
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		durVal = fieldName[len(utils.STATIC_VALUE_PREFIX):]
-	} else {
-		durVal = cdr.FieldAsString(&utils.RSRField{Id: fieldName})
-	}
-	return utils.ParseDurationWithNanosecs(durVal)
-}
-func (cdr *CDR) GetOriginatorIP(fieldName string) string {
-	if utils.IsSliceMember([]string{utils.OriginHost, utils.META_DEFAULT, ""}, fieldName) {
-		return cdr.OriginHost
-	}
-	return cdr.FieldAsString(&utils.RSRField{Id: fieldName})
-}
-func (cdr *CDR) GetExtraFields() map[string]string {
-	return cdr.ExtraFields
-}
-func (cdr *CDR) MissingParameter(timezone string) bool {
-	return len(cdr.OriginID) == 0 ||
-		len(cdr.Category) == 0 ||
-		len(cdr.Tenant) == 0 ||
-		len(cdr.Account) == 0 ||
-		len(cdr.Destination) == 0
-}
-func (cdr *CDR) ParseEventValue(rsrFld *utils.RSRField, timezone string) string {
-	return cdr.FieldAsString(rsrFld)
-}
 func (cdr *CDR) String() string {
 	mrsh, _ := json.Marshal(cdr)
 	return string(mrsh)
 }
 
+// combimedCdrFieldVal groups together CDRs with same CGRID and combines their values matching filter field ID
 func (cdr *CDR) combimedCdrFieldVal(cfgCdrFld *config.CfgCdrField, groupCDRs []*CDR) (string, error) {
 	var combinedVal string // Will result as combination of the field values, filters must match
 	for _, filterRule := range cfgCdrFld.FieldFilter {
-		if !filterRule.FilterPasses(cdr.FieldAsString(&utils.RSRField{Id: filterRule.Id})) { // Filter will activate the rule to extract the content
+		pairingVal, err := cdr.FieldAsString(&utils.RSRField{Id: filterRule.Id})
+		if err != nil { // Filter not passing
 			continue
 		}
-		pairingVal := cdr.FieldAsString(filterRule)
 		for _, grpCDR := range groupCDRs {
 			if cdr.CGRID != grpCDR.CGRID {
 				continue // We only care about cdrs with same primary cdr behind
 			}
-			if grpCDR.FieldAsString(&utils.RSRField{Id: filterRule.Id}) != pairingVal { // First CDR with field equal with ours
+			if valStr, _ := grpCDR.FieldAsString(&utils.RSRField{Id: filterRule.Id}); valStr != pairingVal { // First CDR with field equal with ours
 				continue
 			}
 			for _, rsrRule := range cfgCdrFld.Value {
-				combinedVal += grpCDR.FieldAsString(rsrRule)
+				if parsed, err := grpCDR.FieldAsString(rsrRule); err != nil {
+					return "", err
+				} else {
+					combinedVal += parsed
+				}
+
 			}
 		}
 	}
@@ -603,43 +451,44 @@ func (cdr *CDR) combimedCdrFieldVal(cfgCdrFld *config.CfgCdrField, groupCDRs []*
 }
 
 // Extracts the value specified by cfgHdr out of cdr, used for export values
-func (cdr *CDR) exportFieldValue(cfgCdrFld *config.CfgCdrField) (string, error) {
-	passesFilters := true
+func (cdr *CDR) exportFieldValue(cfgCdrFld *config.CfgCdrField) (retVal string, err error) {
 	for _, cdfFltr := range cfgCdrFld.FieldFilter {
-		if !cdfFltr.FilterPasses(cdr.FieldAsString(cdfFltr)) {
-			passesFilters = false
-			break
+		if _, err := cdr.FieldAsString(cdfFltr); err != nil {
+			return "", fmt.Errorf("filters not passing")
 		}
 	}
-	if !passesFilters { // Not passes filters, ignore this replication
-		return "", fmt.Errorf("filters not passing")
-	}
-	var retVal string // Concatenate the resulting values
 	for _, rsrFld := range cfgCdrFld.Value {
 		var cdrVal string
 		switch rsrFld.Id {
 		case utils.COST:
-			cdrVal = cdr.FormatCost(cfgCdrFld.CostShiftDigits, cfgCdrFld.RoundingDecimals)
-		case utils.Usage:
-			cdrVal = cdr.FormatUsage(cfgCdrFld.Layout)
+			cdrVal = cdr.FormatCost(cfgCdrFld.CostShiftDigits,
+				cfgCdrFld.RoundingDecimals)
 		case utils.SetupTime:
 			cdrVal = cdr.SetupTime.Format(cfgCdrFld.Layout)
 		case utils.AnswerTime: // Format time based on layout
 			cdrVal = cdr.AnswerTime.Format(cfgCdrFld.Layout)
 		case utils.Destination:
-			cdrVal = cdr.FieldAsString(rsrFld)
-			if cfgCdrFld.MaskLen != -1 && len(cfgCdrFld.MaskDestID) != 0 && CachedDestHasPrefix(cfgCdrFld.MaskDestID, cdrVal) {
+			cdrVal, err = cdr.FieldAsString(rsrFld)
+			if err != nil {
+				return "", err
+			}
+			if cfgCdrFld.MaskLen != -1 && len(cfgCdrFld.MaskDestID) != 0 &&
+				CachedDestHasPrefix(cfgCdrFld.MaskDestID, cdrVal) {
 				cdrVal = utils.MaskSuffix(cdrVal, cfgCdrFld.MaskLen)
 			}
 		default:
-			cdrVal = cdr.FieldAsString(rsrFld)
+			cdrVal, err = cdr.FieldAsString(rsrFld)
+			if err != nil {
+				return "", err
+			}
 		}
 		retVal += cdrVal
 	}
-	return retVal, nil
+	return
 }
 
-func (cdr *CDR) formatField(cfgFld *config.CfgCdrField, httpSkipTlsCheck bool, groupedCDRs []*CDR) (fmtOut string, err error) {
+func (cdr *CDR) formatField(cfgFld *config.CfgCdrField, httpSkipTlsCheck bool,
+	groupedCDRs []*CDR) (fmtOut string, err error) {
 	layout := cfgFld.Layout
 	if layout == "" {
 		layout = time.RFC3339
@@ -687,42 +536,12 @@ func (cdr *CDR) formatField(cfgFld *config.CfgCdrField, httpSkipTlsCheck bool, g
 			outVal = "0"
 		}
 	}
-	if err != nil {
+	if err != nil &&
+		(err != utils.ErrNotFound || cfgFld.Mandatory) {
 		return "", err
 	}
 	return utils.FmtFieldWidth(cfgFld.Tag, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory)
 
-}
-
-// Part of event interface
-func (cdr *CDR) AsMapStringIface() (mp map[string]interface{}, err error) {
-	mp = make(map[string]interface{})
-	for k, v := range cdr.ExtraFields {
-		mp[k] = v
-	}
-	mp[utils.CGRID] = cdr.CGRID
-	mp[utils.MEDI_RUNID] = cdr.RunID
-	mp[utils.ORDERID] = cdr.OrderID
-	mp[utils.OriginHost] = cdr.OriginHost
-	mp[utils.Source] = cdr.Source
-	mp[utils.OriginID] = cdr.OriginID
-	mp[utils.TOR] = cdr.ToR
-	mp[utils.RequestType] = cdr.RequestType
-	mp[utils.Tenant] = cdr.Tenant
-	mp[utils.Category] = cdr.Category
-	mp[utils.Account] = cdr.Account
-	mp[utils.Subject] = cdr.Subject
-	mp[utils.Destination] = cdr.Destination
-	mp[utils.SetupTime] = cdr.SetupTime
-	mp[utils.AnswerTime] = cdr.AnswerTime
-	mp[utils.Usage] = cdr.Usage
-	mp[utils.CostSource] = cdr.CostSource
-	mp[utils.COST] = cdr.Cost
-	mp[utils.COST_DETAILS] = cdr.CostDetails
-	mp[utils.ExtraInfo] = cdr.ExtraInfo
-	mp[utils.RATED] = cdr.Rated
-	mp[utils.PartialField] = cdr.Partial
-	return
 }
 
 // Used in place where we need to export the CDR based on an export template
@@ -793,11 +612,10 @@ func (cdr *CDR) AsCDRsql() (cdrSql *CDRsql) {
 }
 
 func (cdr *CDR) AsCGREvent() *utils.CGREvent {
-	cdrIf, _ := cdr.AsMapStringIface()
 	return &utils.CGREvent{
 		Tenant: cdr.Tenant,
 		ID:     utils.UUIDSha1Prefix(),
-		Event:  cdrIf,
+		Event:  cdr.AsMapStringIface(),
 	}
 }
 
@@ -816,7 +634,7 @@ func (cdr *CDR) UpdateFromCGREvent(cgrEv *utils.CGREvent, fields []string) (err 
 			if cdr.Source, err = cgrEv.FieldAsString(fldName); err != nil {
 				return
 			}
-		case utils.TOR:
+		case utils.ToR:
 			if cdr.ToR, err = cgrEv.FieldAsString(fldName); err != nil {
 				return
 			}
@@ -924,7 +742,7 @@ type ExternalCDR struct {
 	Cost        float64
 	CostDetails string
 	ExtraInfo   string
-	Rated       bool // Mark the CDR as rated so we do not process it during mediation
+	PreRated    bool // Mark the CDR as rated so we do not process it during mediation
 }
 
 // Used when authorizing requests from outside, eg ApierV1.GetMaxUsage

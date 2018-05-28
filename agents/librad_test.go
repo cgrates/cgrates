@@ -211,7 +211,7 @@ func TestRadReqAsCGREvent(t *testing.T) {
 	}
 
 	cfgFlds := []*config.CfgCdrField{
-		&config.CfgCdrField{Tag: "TOR", FieldId: utils.TOR, Type: utils.META_CONSTANT,
+		&config.CfgCdrField{Tag: "TOR", FieldId: utils.ToR, Type: utils.META_CONSTANT,
 			Value: utils.ParseRSRFieldsMustCompile(utils.VOICE, utils.INFIELD_SEP)},
 		&config.CfgCdrField{Tag: "OriginID", FieldId: utils.OriginID, Type: utils.META_COMPOSED,
 			Value: utils.ParseRSRFieldsMustCompile("Acct-Session-Id;^-;Sip-From-Tag;^-;Sip-To-Tag", utils.INFIELD_SEP)},
@@ -251,7 +251,7 @@ func TestRadReqAsCGREvent(t *testing.T) {
 			utils.RequestType: "*prepaid",
 			utils.SetupTime:   "1497106115",
 			utils.Tenant:      "cgrates.org",
-			utils.TOR:         "*voice",
+			utils.ToR:         "*voice",
 			utils.Usage:       "4s",
 		},
 	}
@@ -280,7 +280,7 @@ func TestPVAsV1AuthorizeArgs(t *testing.T) {
 			utils.RequestType: "*prepaid",
 			utils.SetupTime:   "1497106115",
 			utils.Tenant:      "cgrates.org",
-			utils.TOR:         "*voice",
+			utils.ToR:         "*voice",
 			utils.Usage:       "4s",
 		},
 	}
@@ -311,7 +311,7 @@ func TestPVAsV1InitSessionArgs(t *testing.T) {
 			utils.RequestType: "*prepaid",
 			utils.SetupTime:   "1497106115",
 			utils.Tenant:      "cgrates.org",
-			utils.TOR:         "*voice",
+			utils.ToR:         "*voice",
 			utils.Usage:       "4s",
 		},
 	}
@@ -341,7 +341,7 @@ func TestPVAsV1UpdateSessionArgs(t *testing.T) {
 			utils.RequestType: "*prepaid",
 			utils.SetupTime:   "1497106115",
 			utils.Tenant:      "cgrates.org",
-			utils.TOR:         "*voice",
+			utils.ToR:         "*voice",
 			utils.Usage:       "4s",
 		},
 	}
@@ -371,7 +371,7 @@ func TestPVAsTerminateSessionArgs(t *testing.T) {
 			utils.RequestType: "*prepaid",
 			utils.SetupTime:   "1497106115",
 			utils.Tenant:      "cgrates.org",
-			utils.TOR:         "*voice",
+			utils.ToR:         "*voice",
 			utils.Usage:       "4s",
 		},
 	}

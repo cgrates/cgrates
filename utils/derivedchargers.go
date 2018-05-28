@@ -25,7 +25,7 @@ import (
 
 // Wraps regexp compiling in case of rsr fields
 func NewDerivedCharger(runId, runFilters, reqTypeFld, dirFld, tenantFld, catFld, acntFld, subjFld, dstFld, sTimeFld, pddFld, aTimeFld, durFld,
-	supplFld, dCauseFld, ratedFld, costFld string) (dc *DerivedCharger, err error) {
+	supplFld, dCauseFld, preRatedFld, costFld string) (dc *DerivedCharger, err error) {
 	if len(runId) == 0 {
 		return nil, errors.New("Empty run id field")
 	}
@@ -114,9 +114,9 @@ func NewDerivedCharger(runId, runFilters, reqTypeFld, dirFld, tenantFld, catFld,
 			return nil, err
 		}
 	}
-	dc.RatedField = ratedFld
-	if strings.HasPrefix(dc.RatedField, REGEXP_PREFIX) || strings.HasPrefix(dc.RatedField, STATIC_VALUE_PREFIX) {
-		if dc.rsrRatedField, err = NewRSRField(dc.RatedField); err != nil {
+	dc.PreRatedField = preRatedFld
+	if strings.HasPrefix(dc.PreRatedField, REGEXP_PREFIX) || strings.HasPrefix(dc.PreRatedField, STATIC_VALUE_PREFIX) {
+		if dc.rsrPreRatedField, err = NewRSRField(dc.PreRatedField); err != nil {
 			return nil, err
 		}
 	}
@@ -146,7 +146,7 @@ type DerivedCharger struct {
 	SupplierField           string      // Field containing supplier information
 	DisconnectCauseField    string      // Field containing disconnect cause information
 	CostField               string      // Field containing cost information
-	RatedField              string      // Field marking rated request in CDR
+	PreRatedField           string      // Field marking rated request in CDR
 	rsrRunFilters           []*RSRField // Storage for compiled Regexp in case of RSRFields
 	rsrRequestTypeField     *RSRField
 	rsrDirectionField       *RSRField
@@ -162,7 +162,7 @@ type DerivedCharger struct {
 	rsrSupplierField        *RSRField
 	rsrDisconnectCauseField *RSRField
 	rsrCostField            *RSRField
-	rsrRatedField           *RSRField
+	rsrPreRatedField        *RSRField
 }
 
 func (dc *DerivedCharger) Equal(other *DerivedCharger) bool {
@@ -182,7 +182,7 @@ func (dc *DerivedCharger) Equal(other *DerivedCharger) bool {
 		dc.SupplierField == other.SupplierField &&
 		dc.DisconnectCauseField == other.DisconnectCauseField &&
 		dc.CostField == other.CostField &&
-		dc.RatedField == other.RatedField
+		dc.PreRatedField == other.PreRatedField
 }
 
 func DerivedChargersKey(direction, tenant, category, account, subject string) string {
@@ -209,8 +209,10 @@ func (dcs *DerivedChargers) Append(dc *DerivedCharger) (*DerivedChargers, error)
 }
 
 func (dcs *DerivedChargers) AppendDefaultRun() (*DerivedChargers, error) {
-	dcDf, _ := NewDerivedCharger(DEFAULT_RUNID, "", META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT,
-		META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT)
+	dcDf, _ := NewDerivedCharger(DEFAULT_RUNID, "", META_DEFAULT, META_DEFAULT,
+		META_DEFAULT, META_DEFAULT, META_DEFAULT,
+		META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT,
+		META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT)
 	dcs.Chargers = append(dcs.Chargers, dcDf)
 	return dcs, nil
 }

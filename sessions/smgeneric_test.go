@@ -37,7 +37,7 @@ func TestSMGSessionIndexing(t *testing.T) {
 	smg := NewSMGeneric(smgCfg, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
 	smGev := SMGenericEvent{
 		utils.EVENT_NAME:       "TEST_EVENT",
-		utils.TOR:              "*voice",
+		utils.ToR:              "*voice",
 		utils.OriginID:         "12345",
 		utils.Direction:        "*out",
 		utils.Account:          "account1",
@@ -392,7 +392,7 @@ func TestSMGActiveSessions(t *testing.T) {
 	smg := NewSMGeneric(smgCfg, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
 	smGev1 := SMGenericEvent{
 		utils.EVENT_NAME:       "TEST_EVENT",
-		utils.TOR:              "*voice",
+		utils.ToR:              "*voice",
 		utils.OriginID:         "111",
 		utils.Direction:        "*out",
 		utils.Account:          "account1",
@@ -416,7 +416,7 @@ func TestSMGActiveSessions(t *testing.T) {
 	smg.recordASession(&SMGSession{CGRID: smGev1.GetCGRID(utils.META_DEFAULT), RunID: utils.META_DEFAULT, EventStart: smGev1})
 	smGev2 := SMGenericEvent{
 		utils.EVENT_NAME:       "TEST_EVENT",
-		utils.TOR:              "*voice",
+		utils.ToR:              "*voice",
 		utils.OriginID:         "222",
 		utils.Direction:        "*out",
 		utils.Account:          "account2",
@@ -445,7 +445,7 @@ func TestSMGActiveSessions(t *testing.T) {
 	} else if len(aSessions) != 1 {
 		t.Errorf("Received sessions: %+v", aSessions)
 	}
-	if aSessions, _, err := smg.asActiveSessions(map[string]string{utils.TOR: "*voice"}, false, false); err != nil {
+	if aSessions, _, err := smg.asActiveSessions(map[string]string{utils.ToR: "*voice"}, false, false); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
 		t.Errorf("Received sessions: %+v", aSessions)
@@ -469,7 +469,7 @@ func TestGetPassiveSessions(t *testing.T) {
 	}
 	smGev1 := SMGenericEvent{
 		utils.EVENT_NAME:       "TEST_EVENT",
-		utils.TOR:              "*voice",
+		utils.ToR:              "*voice",
 		utils.OriginID:         "12345",
 		utils.Direction:        "*out",
 		utils.Account:          "account1",
@@ -496,7 +496,7 @@ func TestGetPassiveSessions(t *testing.T) {
 	smg.passiveSessions[smgSession11.CGRID] = []*SMGSession{smgSession11, smgSession12}
 	smGev2 := SMGenericEvent{
 		utils.EVENT_NAME:       "TEST_EVENT",
-		utils.TOR:              "*voice",
+		utils.ToR:              "*voice",
 		utils.OriginID:         "23456",
 		utils.Direction:        "*out",
 		utils.Account:          "account1",

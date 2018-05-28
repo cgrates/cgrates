@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -125,22 +124,8 @@ type RSRField struct {
 	converters  DataConverters     // set of converters to apply on output
 }
 
-// Parse will parse the value out considering converters and filters
-func (rsrf *RSRField) Parse(value string) (out string, err error) {
-	if out = rsrf.ParseValue(value); out == "" {
-		return
-	}
-	if out, err = rsrf.converters.ConvertString(out); err != nil {
-		return
-	}
-	if !rsrf.FiltersPassing(out) {
-		return "", errors.New("filter not passing")
-	}
-	return
-}
-
-// IsParsed finds out whether this RSRField was already parsed or RAW state
-func (rsrf *RSRField) IsParsed() bool {
+// IsCompiled finds out whether this RSRField was already parsed or RAW state
+func (rsrf *RSRField) IsCompiled() bool {
 	return rsrf.staticValue != "" ||
 		rsrf.RSRules != nil ||
 		rsrf.filters != nil ||
@@ -148,7 +133,7 @@ func (rsrf *RSRField) IsParsed() bool {
 }
 
 // Compile parses Rules string and repopulates other fields
-func (rsrf *RSRField) ParseRules() error {
+func (rsrf *RSRField) Compile() error {
 	if newRSRFld, err := NewRSRField(rsrf.Rules); err != nil {
 		return err
 	} else if newRSRFld != nil {
@@ -159,8 +144,23 @@ func (rsrf *RSRField) ParseRules() error {
 	return nil
 }
 
-// Parse the field value from a string
-func (rsrf *RSRField) ParseValue(value string) string {
+// IsStatic detects if a RSRField is a static value
+func (rsrf *RSRField) IsStatic() bool {
+	return len(rsrf.staticValue) != 0
+}
+
+// RegexpMatched will investigate whether we had a regexp match through the rules
+func (rsrf *RSRField) RegexpMatched() bool {
+	for _, rsrule := range rsrf.RSRules {
+		if rsrule.Matched {
+			return true
+		}
+	}
+	return false
+}
+
+// parseValue the field value from a string
+func (rsrf *RSRField) parseValue(value string) string {
 	if len(rsrf.staticValue) != 0 { // Enforce parsing of static values
 		return rsrf.staticValue
 	}
@@ -172,23 +172,7 @@ func (rsrf *RSRField) ParseValue(value string) string {
 	return value
 }
 
-func (rsrf *RSRField) IsStatic() bool {
-	return len(rsrf.staticValue) != 0
-}
-
-func (rsrf *RSRField) RegexpMatched() bool { // Investigate whether we had a regexp match through the rules
-	for _, rsrule := range rsrf.RSRules {
-		if rsrule.Matched {
-			return true
-		}
-	}
-	return false
-}
-
-func (rsrf *RSRField) FiltersPassing(value string) bool {
-	if len(rsrf.filters) == 0 { // No filters
-		return true
-	}
+func (rsrf *RSRField) filtersPassing(value string) bool {
 	for _, fltr := range rsrf.filters {
 		if !fltr.Pass(value) {
 			return false
@@ -197,30 +181,19 @@ func (rsrf *RSRField) FiltersPassing(value string) bool {
 	return true
 }
 
-func (rsrf *RSRField) FilterPasses(value string) bool {
-	if len(rsrf.filters) == 0 { // No filters
-		return true
-	}
-
-	parsedVal := rsrf.ParseValue(value)
-	filterPasses := false
-	for _, fltr := range rsrf.filters {
-		if fltr.Pass(parsedVal) {
-			filterPasses = true
-		}
-	}
-	return filterPasses
-}
-
-func (rsrf *RSRField) FilterPassesWithConvert(value string) (pass bool) {
-	if len(rsrf.filters) == 0 { // No filters
-		return true
-	}
-	var err error
-	if value, err = rsrf.converters.ConvertString(value); err != nil {
+// Parse will parse the value out considering converters and filters
+func (rsrf *RSRField) Parse(value interface{}) (out string, err error) {
+	if out, err = IfaceAsString(value); err != nil {
 		return
 	}
-	return rsrf.FiltersPassing(rsrf.ParseValue(value))
+	out = rsrf.parseValue(out)
+	if out, err = rsrf.converters.ConvertString(out); err != nil {
+		return
+	}
+	if !rsrf.filtersPassing(out) {
+		return "", ErrFilterNotPassingNoCaps
+	}
+	return
 }
 
 // NewRSRFilter instantiates a new RSRFilter, setting it's properties
@@ -362,9 +335,9 @@ func (flds RSRFields) Id() string {
 	return flds[0].Id
 }
 
-func (flds RSRFields) ParseRules() (err error) {
+func (flds RSRFields) Compile() (err error) {
 	for _, rsrFld := range flds {
-		if err = rsrFld.ParseRules(); err != nil {
+		if err = rsrFld.Compile(); err != nil {
 			break
 		}
 	}

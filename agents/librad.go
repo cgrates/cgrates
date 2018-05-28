@@ -215,7 +215,7 @@ func radPassesFieldFilter(pkt *radigo.Packet, processorVars processorVars,
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> cannot cast field <%s> to string",
 					utils.RadiusAgent, fieldFilter.Id))
-		} else if fieldFilter.FilterPasses(val) {
+		} else if _, err := fieldFilter.Parse(val); err == nil {
 			pass = true
 		}
 		return
@@ -225,7 +225,7 @@ func radPassesFieldFilter(pkt *radigo.Packet, processorVars processorVars,
 		return
 	}
 	for _, avp := range avps { // they all need to match the filter
-		if !fieldFilter.FilterPasses(avp.GetStringValue()) {
+		if _, err := fieldFilter.Parse(avp.GetStringValue()); err != nil {
 			return
 		}
 	}

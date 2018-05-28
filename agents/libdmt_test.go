@@ -173,7 +173,7 @@ func TestFieldOutVal(t *testing.T) {
 	m.NewAVP("Requested-Service-Unit", avp.Mbit, 0, &diam.GroupedAVP{
 		AVP: []*diam.AVP{
 			diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(360))}}) // CC-Time
-	cfgFld := &config.CfgCdrField{Tag: "StaticTest", Type: utils.META_COMPOSED, FieldId: utils.TOR,
+	cfgFld := &config.CfgCdrField{Tag: "StaticTest", Type: utils.META_COMPOSED, FieldId: utils.ToR,
 		Value: utils.ParseRSRFieldsMustCompile("^*voice", utils.INFIELD_SEP), Mandatory: true}
 	eOut := "*voice"
 	if fldOut, err := fieldOutVal(m, cfgFld, time.Duration(0), nil); err != nil {

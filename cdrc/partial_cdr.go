@@ -234,7 +234,7 @@ func (partCDR *PartialCDRRecord) MergeCDRs() *engine.CDR {
 					updated = true
 				}
 			case bool:
-				if v || cdrRVal.Type().Field(i).Name == utils.PartialField { // Partial field is always updated, even if false
+				if v || cdrRVal.Type().Field(i).Name == utils.Partial { // Partial field is always updated, even if false
 					updated = true
 				}
 			case time.Time:

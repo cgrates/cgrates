@@ -326,12 +326,14 @@ func (fltr *FilterRule) passDestinations(req interface{}, extraFieldsLabel strin
 
 func (fltr *FilterRule) passRSR(req interface{}, extraFieldsLabel string) (bool, error) {
 	for _, rsrFld := range fltr.rsrFields {
-		if strVal, err := utils.ReflectFieldAsString(req, rsrFld.Id, extraFieldsLabel); err != nil {
+		fldIface, err := utils.ReflectFieldInterface(req, rsrFld.Id, utils.EXTRA_FIELDS)
+		if err != nil {
 			if err == utils.ErrNotFound {
 				return false, nil
 			}
 			return false, err
-		} else if rsrFld.FilterPasses(strVal) {
+		}
+		if _, err := rsrFld.Parse(fldIface); err == nil {
 			return true, nil
 		}
 	}
