@@ -61,6 +61,11 @@ func NewDataConverter(params string) (
 			return NewRoundConverter("")
 		}
 		return NewRoundConverter(params[len(MetaRound)+1:])
+	case strings.HasPrefix(params, MetaMultiply):
+		if len(params) == len(MetaMultiply) { // no extra params, defaults implied
+			return NewMultiplyConverter("")
+		}
+		return NewMultiplyConverter(params[len(MetaMultiply)+1:])
 	default:
 		return nil,
 			fmt.Errorf("unsupported converter definition: <%s>",
@@ -124,5 +129,33 @@ func (rnd *RoundConverter) Convert(in interface{}) (
 		return
 	}
 	out = Round(inFloat, rnd.Decimals, rnd.Method)
+	return
+}
+
+func NewMultiplyConverter(constructParams string) (
+	hdlr DataConverter, err error) {
+	if constructParams == "" {
+		return nil, ErrMandatoryIeMissingNoCaps
+	}
+	var val float64
+	if val, err = strconv.ParseFloat(constructParams, 64); err != nil {
+		return
+	}
+	return &MultiplyConverter{Value: val}, nil
+}
+
+// MultiplyConverter multiplies input with value in params
+// encapsulates the output as float64 value
+type MultiplyConverter struct {
+	Value float64
+}
+
+func (m *MultiplyConverter) Convert(in interface{}) (
+	out interface{}, err error) {
+	var inFloat64 float64
+	if inFloat64, err = IfaceAsFloat64(in); err != nil {
+		return nil, err
+	}
+	out = inFloat64 * m.Value
 	return
 }

@@ -537,6 +537,8 @@ const (
 	Opensips                     = "opensips"
 	Asterisk                     = "asterisk"
 	SchedulerS                   = "SchedulerS"
+	MetaMultiply                 = "*multiply"
+	MetaDivide                   = "*divide"
 )
 
 // Migrator Action

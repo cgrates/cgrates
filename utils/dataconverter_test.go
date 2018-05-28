@@ -141,3 +141,25 @@ func TestRoundConverterTime(t *testing.T) {
 		t.Errorf("Expected %+v received: %+v", expV, val)
 	}
 }
+
+func TestMultiplyConverter(t *testing.T) {
+	eMpl := &MultiplyConverter{1024.0}
+	m, err := NewMultiplyConverter("1024.0")
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eMpl, m) {
+		t.Errorf("expecting: %+v, received: %+v", eMpl, m)
+	}
+	expOut := 2048.0
+	if out, err := m.Convert(time.Duration(2)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expOut, out) {
+		t.Errorf("expecting: %+v, received: %+v", expOut, out)
+	}
+	expOut = 1536.0
+	if out, err := m.Convert(1.5); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expOut, out) {
+		t.Errorf("expecting: %+v, received: %+v", expOut, out)
+	}
+}
