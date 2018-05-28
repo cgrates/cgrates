@@ -52,6 +52,19 @@ func TestConvertFloatToSeconds(t *testing.T) {
 	}
 }
 
+func TestConvertDurNanoseconds(t *testing.T) {
+	d, err := NewDataConverter(MetaDurationNanoseconds)
+	if err != nil {
+		t.Error(err.Error())
+	}
+	expVal := int64(102)
+	if i, err := d.Convert(time.Duration(102)); err != nil {
+		t.Error(err.Error())
+	} else if expVal != i {
+		t.Errorf("expecting: %d, received: %d", expVal, i)
+	}
+}
+
 func TestRoundConverterFloat64(t *testing.T) {
 	b, err := NewDataConverter("*round:2")
 	if err != nil {

@@ -56,6 +56,8 @@ func NewDataConverter(params string) (
 	switch {
 	case params == MetaDurationSeconds:
 		return NewDurationSecondsConverter("")
+	case params == MetaDurationNanoseconds:
+		return NewDurationNanosecondsConverter("")
 	case strings.HasPrefix(params, MetaRound):
 		if len(params) == len(MetaRound) { // no extra params, defaults implied
 			return NewRoundConverter("")
@@ -83,7 +85,7 @@ func NewDurationSecondsConverter(params string) (
 	return new(DurationSecondsConverter), nil
 }
 
-// UsageSecondsDataConverter converts duration into seconds encapsulated in float64
+// DurationSecondsConverter converts duration into seconds encapsulated in float64
 type DurationSecondsConverter struct{}
 
 func (mS *DurationSecondsConverter) Convert(in interface{}) (
@@ -93,6 +95,24 @@ func (mS *DurationSecondsConverter) Convert(in interface{}) (
 		return nil, err
 	}
 	out = inDur.Seconds()
+	return
+}
+
+func NewDurationNanosecondsConverter(params string) (
+	hdlr DataConverter, err error) {
+	return new(DurationNanosecondsConverter), nil
+}
+
+// DurationNanosecondsConverter converts duration into nanoseconds encapsulated in int64
+type DurationNanosecondsConverter struct{}
+
+func (mS *DurationNanosecondsConverter) Convert(in interface{}) (
+	out interface{}, err error) {
+	var inDur time.Duration
+	if inDur, err = IfaceAsDuration(in); err != nil {
+		return nil, err
+	}
+	out = inDur.Nanoseconds()
 	return
 }
 
