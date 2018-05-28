@@ -632,8 +632,10 @@ func TestCDRAsExportRecord(t *testing.T) {
 	}
 	fltr, _ := utils.ParseRSRFields("Tenant(itsyscom.com)", utils.INFIELD_SEP)
 	cfgCdrFld = &config.CfgCdrField{Tag: "destination", Type: utils.META_COMPOSED, FieldId: utils.Destination, Value: val, FieldFilter: fltr, Timezone: "UTC"}
-	if _, err := cdr.AsExportRecord([]*config.CfgCdrField{cfgCdrFld}, false, nil, 0); err == nil {
-		t.Error("Failed to use filter")
+	if rcrd, err := cdr.AsExportRecord([]*config.CfgCdrField{cfgCdrFld}, false, nil, 0); err != nil {
+		t.Error(err)
+	} else if len(rcrd) != 0 {
+		t.Error("failed using filter")
 	}
 	// Test MetaDateTime
 	val, _ = utils.ParseRSRFields("stop_time", utils.INFIELD_SEP)
@@ -646,9 +648,12 @@ func TestCDRAsExportRecord(t *testing.T) {
 	}
 	// Test filter
 	fltr, _ = utils.ParseRSRFields("Tenant(itsyscom.com)", utils.INFIELD_SEP)
-	cfgCdrFld = &config.CfgCdrField{Tag: "stop_time", Type: utils.MetaDateTime, FieldId: "stop_time", Value: val, FieldFilter: fltr, Layout: layout, Timezone: "UTC"}
-	if _, err := cdr.AsExportRecord([]*config.CfgCdrField{cfgCdrFld}, false, nil, 0); err == nil {
-		t.Error("Received empty error", err)
+	cfgCdrFld = &config.CfgCdrField{Tag: "stop_time", Type: utils.MetaDateTime,
+		FieldId: "stop_time", Value: val, FieldFilter: fltr, Layout: layout, Timezone: "UTC"}
+	if rcrd, err := cdr.AsExportRecord([]*config.CfgCdrField{cfgCdrFld}, false, nil, 0); err != nil {
+		t.Error(err)
+	} else if len(rcrd) != 0 {
+		t.Error("failed using filter")
 	}
 	val, _ = utils.ParseRSRFields("fieldextr2", utils.INFIELD_SEP)
 	cfgCdrFld = &config.CfgCdrField{Tag: "stop_time", Type: utils.MetaDateTime, FieldId: "stop_time", Value: val, Layout: layout, Timezone: "UTC"}

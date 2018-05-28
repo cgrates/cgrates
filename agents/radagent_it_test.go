@@ -192,7 +192,8 @@ func TestRAitAcctStart(t *testing.T) {
 	// Make sure the sessin is managed by SMG
 	var aSessions []*sessions.ActiveSession
 	if err := raRPC.Call("SMGenericV1.GetActiveSessions",
-		map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT, utils.OriginID: "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"},
+		map[string]string{utils.RunID: utils.META_DEFAULT,
+			utils.OriginID: "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"},
 		&aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
@@ -259,7 +260,7 @@ func TestRAitAcctStop(t *testing.T) {
 	// Make sure the sessin was disconnected from SMG
 	var aSessions []*sessions.ActiveSession
 	if err := raRPC.Call("SMGenericV1.GetActiveSessions",
-		map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT, utils.OriginID: "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"},
+		map[string]string{utils.RunID: utils.META_DEFAULT, utils.OriginID: "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"},
 		&aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

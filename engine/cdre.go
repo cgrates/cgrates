@@ -283,7 +283,7 @@ func (cdre *CDRExporter) processCDR(cdr *CDR) (err error) {
 	case utils.MetaFileFWV, utils.MetaFileCSV:
 		var cdrRow []string
 		cdrRow, err = cdr.AsExportRecord(cdre.exportTemplate.ContentFields, cdre.httpSkipTlsCheck, cdre.cdrs, cdre.roundingDecimals)
-		if len(cdrRow) == 0 { // No CDR data, most likely no configuration fields defined
+		if len(cdrRow) == 0 && err == nil { // No CDR data, most likely no configuration fields defined
 			return
 		} else {
 			cdre.Lock()
