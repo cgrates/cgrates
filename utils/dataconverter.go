@@ -66,6 +66,11 @@ func NewDataConverter(params string) (
 			return NewMultiplyConverter("")
 		}
 		return NewMultiplyConverter(params[len(MetaMultiply)+1:])
+	case strings.HasPrefix(params, MetaDivide):
+		if len(params) == len(MetaDivide) { // no extra params, defaults implied
+			return NewDivideConverter("")
+		}
+		return NewDivideConverter(params[len(MetaDivide)+1:])
 	default:
 		return nil,
 			fmt.Errorf("unsupported converter definition: <%s>",
@@ -157,5 +162,33 @@ func (m *MultiplyConverter) Convert(in interface{}) (
 		return nil, err
 	}
 	out = inFloat64 * m.Value
+	return
+}
+
+func NewDivideConverter(constructParams string) (
+	hdlr DataConverter, err error) {
+	if constructParams == "" {
+		return nil, ErrMandatoryIeMissingNoCaps
+	}
+	var val float64
+	if val, err = strconv.ParseFloat(constructParams, 64); err != nil {
+		return
+	}
+	return &DivideConverter{Value: val}, nil
+}
+
+// DivideConverter divides input with value in params
+// encapsulates the output as float64 value
+type DivideConverter struct {
+	Value float64
+}
+
+func (m *DivideConverter) Convert(in interface{}) (
+	out interface{}, err error) {
+	var inFloat64 float64
+	if inFloat64, err = IfaceAsFloat64(in); err != nil {
+		return nil, err
+	}
+	out = inFloat64 / m.Value
 	return
 }

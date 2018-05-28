@@ -38,7 +38,7 @@ func TestNewDataConverter(t *testing.T) {
 }
 
 func TestConvertFloatToSeconds(t *testing.T) {
-	b, err := NewDurationSecondsConverter("")
+	b, err := NewDataConverter(MetaDurationSeconds)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -53,7 +53,7 @@ func TestConvertFloatToSeconds(t *testing.T) {
 }
 
 func TestRoundConverterFloat64(t *testing.T) {
-	b, err := NewRoundConverter("2")
+	b, err := NewDataConverter("*round:2")
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -77,7 +77,7 @@ func TestRoundConverterFloat64(t *testing.T) {
 //testRoundconv string / float / int / time
 
 func TestRoundConverterString(t *testing.T) {
-	b, err := NewRoundConverter("2")
+	b, err := NewDataConverter("*round:2")
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -99,7 +99,7 @@ func TestRoundConverterString(t *testing.T) {
 }
 
 func TestRoundConverterInt64(t *testing.T) {
-	b, err := NewRoundConverter("2")
+	b, err := NewDataConverter("*round:2")
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -121,7 +121,7 @@ func TestRoundConverterInt64(t *testing.T) {
 }
 
 func TestRoundConverterTime(t *testing.T) {
-	b, err := NewRoundConverter("2")
+	b, err := NewDataConverter("*round:2")
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -144,7 +144,7 @@ func TestRoundConverterTime(t *testing.T) {
 
 func TestMultiplyConverter(t *testing.T) {
 	eMpl := &MultiplyConverter{1024.0}
-	m, err := NewMultiplyConverter("1024.0")
+	m, err := NewDataConverter("*multiply:1024.0")
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMpl, m) {
@@ -158,6 +158,28 @@ func TestMultiplyConverter(t *testing.T) {
 	}
 	expOut = 1536.0
 	if out, err := m.Convert(1.5); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expOut, out) {
+		t.Errorf("expecting: %+v, received: %+v", expOut, out)
+	}
+}
+
+func TestDivideConverter(t *testing.T) {
+	eDvd := &DivideConverter{1024.0}
+	d, err := NewDataConverter("*divide:1024.0")
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eDvd, d) {
+		t.Errorf("expecting: %+v, received: %+v", eDvd, d)
+	}
+	expOut := 2.0
+	if out, err := d.Convert(time.Duration(2048)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expOut, out) {
+		t.Errorf("expecting: %+v, received: %+v", expOut, out)
+	}
+	expOut = 1.5
+	if out, err := d.Convert(1536.0); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expOut, out) {
 		t.Errorf("expecting: %+v, received: %+v", expOut, out)
