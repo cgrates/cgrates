@@ -631,6 +631,9 @@ const (
 	MetaCircular = "*circular"
 	ThresholdSv1 = "ThresholdSv1"
 	StatSv1      = "StatSv1"
+	ResourceSv1  = "ResourceSv1"
+	SupplierSv1  = "SupplierSv1"
+	AttributeSv1 = "AttributeSv1"
 )
 
 // MetaFilterIndexesAPIs
@@ -665,10 +668,11 @@ const (
 
 // ThresholdS APIs
 const (
-	ThresholdSv1ProcessEvent    = "ThresholdSv1.ProcessEvent"
-	ThresholdSv1GetThreshold    = "ThresholdSv1.GetThreshold"
-	ThresholdSv1GetThresholdIDs = "ThresholdSv1.GetThresholdIDs"
-	ThresholdSv1Ping            = "ThresholdSv1.Ping"
+	ThresholdSv1ProcessEvent          = "ThresholdSv1.ProcessEvent"
+	ThresholdSv1GetThreshold          = "ThresholdSv1.GetThreshold"
+	ThresholdSv1GetThresholdIDs       = "ThresholdSv1.GetThresholdIDs"
+	ThresholdSv1Ping                  = "ThresholdSv1.Ping"
+	ThresholdSv1GetThresholdsForEvent = "ThresholdSv1.GetThresholdsForEvent"
 )
 
 // StatS APIs
@@ -677,6 +681,7 @@ const (
 	StatSv1GetQueueIDs           = "StatSv1.GetQueueIDs"
 	StatSv1GetQueueStringMetrics = "StatSv1.GetQueueStringMetrics"
 	StatSv1Ping                  = "StatSv1.Ping"
+	StatSv1GetStatQueuesForEvent = "StatSv1.GetStatQueuesForEvent"
 )
 
 // ResourceS APIs

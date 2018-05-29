@@ -28,7 +28,7 @@ import (
 func init() {
 	c := &CmdAttributesProcessEvent{
 		name:      "attributes_process_event",
-		rpcMethod: "AttributeSv1.ProcessEvent",
+		rpcMethod: utils.AttributeSv1ProcessEvent,
 		rpcParams: &utils.CGREvent{},
 	}
 	commands[c.Name()] = c

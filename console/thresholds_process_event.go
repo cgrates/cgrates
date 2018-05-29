@@ -28,7 +28,7 @@ import (
 func init() {
 	c := &CmdThresholdProcessEvent{
 		name:      "thresholds_process_event",
-		rpcMethod: "ThresholdSv1.ProcessEvent",
+		rpcMethod: utils.ThresholdSv1ProcessEvent,
 		rpcParams: new(engine.ArgsProcessEvent),
 	}
 	commands[c.Name()] = c

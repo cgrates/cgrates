@@ -20,12 +20,13 @@ package console
 
 import (
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
 	c := &CmdThresholdsForEvent{
 		name:      "thresholds_for_event",
-		rpcMethod: "ThresholdSv1.GetThresholdsForEvent",
+		rpcMethod: utils.ThresholdSv1GetThresholdsForEvent,
 		rpcParams: &engine.ArgsProcessEvent{},
 	}
 	commands[c.Name()] = c

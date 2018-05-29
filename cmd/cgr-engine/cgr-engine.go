@@ -711,9 +711,7 @@ func loaderService(cacheS *engine.CacheS, cfg *config.CGRConfig,
 }
 
 // startDispatcherService fires up the DispatcherS
-func startDispatcherService(internalDispatcherSChan, internalSMGChan,
-	internalRaterChan, internalResourceSChan, internalThresholdSChan,
-	internalStatSChan, internalSupplierSChan, internalAttrSChan chan rpcclient.RpcClientConnection,
+func startDispatcherService(internalDispatcherSChan, internalRaterChan chan rpcclient.RpcClientConnection,
 	cacheS *engine.CacheS, dm *engine.DataManager,
 	server *utils.Server, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS Dispatcher service.")
@@ -725,61 +723,6 @@ func startDispatcherService(internalDispatcherSChan, internalSMGChan,
 			cfg.DispatcherSCfg().RALsConns, internalRaterChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to RALs: %s", utils.DispatcherS, err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	if len(cfg.DispatcherSCfg().ResSConns) != 0 {
-		resSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
-			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.DispatcherSCfg().ResSConns, internalResourceSChan, cfg.InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ResourceS: %s", utils.DispatcherS, err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	if len(cfg.DispatcherSCfg().ThreshSConns) != 0 {
-		threshSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.DispatcherSCfg().ThreshSConns, internalThresholdSChan, cfg.InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ThresholdS: %s", utils.DispatcherS, err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	if len(cfg.DispatcherSCfg().StatSConns) != 0 {
-		statSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.DispatcherSCfg().StatSConns, internalStatSChan, cfg.InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to StatS: %s", utils.DispatcherS, err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	if len(cfg.DispatcherSCfg().SupplSConns) != 0 {
-		suplSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.DispatcherSCfg().SupplSConns, internalSupplierSChan, cfg.InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to SupplierS: %s", utils.DispatcherS, err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	if len(cfg.DispatcherSCfg().AttrSConns) != 0 {
-		attrSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.DispatcherSCfg().AttrSConns, internalAttrSChan, cfg.InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to AttributeS: %s", utils.DispatcherS, err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	if len(cfg.DispatcherSCfg().SessionSConns) != 0 {
-		sessionsSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.DispatcherSCfg().SessionSConns, internalSMGChan, cfg.InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to SessionS: %s", utils.DispatcherS, err.Error()))
 			exitChan <- true
 			return
 		}
@@ -806,6 +749,18 @@ func startDispatcherService(internalDispatcherSChan, internalSMGChan,
 	if !cfg.StatSCfg().Enabled && len(cfg.DispatcherSCfg().StatSConns) != 0 {
 		server.RpcRegisterName(utils.StatSv1,
 			v1.NewDispatcherStatSv1(dspS))
+	}
+	if !cfg.ResourceSCfg().Enabled && len(cfg.DispatcherSCfg().ResSConns) != 0 {
+		server.RpcRegisterName(utils.ResourceSv1,
+			v1.NewDispatcherResourceSv1(dspS))
+	}
+	if !cfg.SupplierSCfg().Enabled && len(cfg.DispatcherSCfg().SupplSConns) != 0 {
+		server.RpcRegisterName(utils.SupplierSv1,
+			v1.NewDispatcherSupplierSv1(dspS))
+	}
+	if !cfg.AttributeSCfg().Enabled && len(cfg.DispatcherSCfg().AttrSConns) != 0 {
+		server.RpcRegisterName(utils.AttributeSv1,
+			v1.NewDispatcherAttributeSv1(dspS))
 	}
 }
 
@@ -1112,10 +1067,8 @@ func main() {
 	}
 
 	if cfg.DispatcherSCfg().Enabled {
-		go startDispatcherService(internalDispatcherSChan, internalSMGChan,
-			internalRaterChan, internalRsChan, internalThresholdSChan,
-			internalStatSChan, internalSupplierSChan, internalAttributeSChan, cacheS,
-			dm, server, exitChan)
+		go startDispatcherService(internalDispatcherSChan,
+			internalRaterChan, cacheS, dm, server, exitChan)
 	}
 
 	go loaderService(cacheS, cfg, dm, server, exitChan)
