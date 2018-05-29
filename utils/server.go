@@ -20,6 +20,9 @@ package utils
 
 import (
 	"bytes"
+	"crypto/rand"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"io"
 	"log"
@@ -274,4 +277,67 @@ func (r *rpcRequest) Call() io.Reader {
 	go jsonrpc.ServeConn(r)
 	<-r.done
 	return r.rw
+}
+
+func (s *Server) ServeTLS(addr string) {
+	s.RLock()
+	enabled := s.rpcEnabled
+	s.RUnlock()
+	if !enabled {
+		return
+	}
+
+	cert, err := tls.LoadX509KeyPair("/home/teo/go/src/github.com/TeoV/GoRPCServerClientOverTLS/server1.crt",
+		"/home/teo/go/src/github.com/TeoV/GoRPCServerClientOverTLS/server.key")
+	if err != nil {
+		log.Fatalf("Error: %s when load server keys", err)
+	}
+
+	if len(cert.Certificate) != 2 {
+		log.Fatal("server1.crt should have 2 concatenated certificates: server + CA")
+	}
+
+	ca, err := x509.ParseCertificate(cert.Certificate[1])
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	certPool := x509.NewCertPool()
+	certPool.AddCert(ca)
+	config := tls.Config{
+		Certificates: []tls.Certificate{cert},
+		ClientAuth:   tls.RequireAndVerifyClientCert,
+		ClientCAs:    certPool,
+	}
+
+	config.Rand = rand.Reader
+	service := ":2022"
+	listener, err := tls.Listen("tcp", service, &config)
+	if err != nil {
+		log.Fatalf("Error: %s when listening", err)
+	}
+
+	Logger.Info(fmt.Sprintf("Starting CGRateS TLS server at <%s>.", service))
+	errCnt := 0
+	var lastErrorTime time.Time
+	for {
+		conn, err := listener.Accept()
+		defer conn.Close()
+		if err != nil {
+			Logger.Err(fmt.Sprintf("<CGRServer> TLS accept error: <%s>", err.Error()))
+			now := time.Now()
+			if now.Sub(lastErrorTime) > time.Duration(5*time.Second) {
+				errCnt = 0 // reset error count if last error was more than 5 seconds ago
+			}
+			lastErrorTime = time.Now()
+			errCnt += 1
+			if errCnt > 50 { // Too many errors in short interval, network buffer failure most probably
+				break
+			}
+			continue
+		}
+		//utils.Logger.Info(fmt.Sprintf("<CGRServer> New incoming connection: %v", conn.RemoteAddr()))
+		go rpc.ServeConn(conn)
+	}
+
 }
