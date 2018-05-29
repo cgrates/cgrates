@@ -28,7 +28,7 @@ import (
 func init() {
 	c := &CmdSuppliersSort{
 		name:      "suppliers",
-		rpcMethod: "SupplierSv1.GetSuppliers",
+		rpcMethod: utils.SupplierSv1GetSuppliers,
 		rpcParams: &engine.ArgsGetSuppliers{},
 	}
 	commands[c.Name()] = c

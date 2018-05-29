@@ -136,3 +136,106 @@ func (dS *DispatcherService) StatSv1Ping(ign string, reply *string) error {
 	}
 	return nil
 }
+
+func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(ev *utils.CGREvent, reply *[]string) error {
+	if dS.statS != nil {
+		if err := dS.statS.Call(utils.StatSv1GetStatQueuesForEvent, ev, reply); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<DispatcherS> error: %s StatS.", err.Error()))
+		}
+	}
+	return nil
+}
+
+func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *utils.TenantID, reply *map[string]string) error {
+	if dS.statS != nil {
+		if err := dS.statS.Call(utils.StatSv1GetQueueStringMetrics, args, reply); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<DispatcherS> error: %s StatS.", err.Error()))
+		}
+	}
+	return nil
+}
+
+func (dS *DispatcherService) StatSv1ProcessEvent(ev *utils.CGREvent, reply *[]string) error {
+	if dS.statS != nil {
+		if err := dS.statS.Call(utils.StatSv1ProcessEvent, ev, reply); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<DispatcherS> error: %s StatS.", err.Error()))
+		}
+	}
+	return nil
+}
+
+func (dS *DispatcherService) ResourceSv1Ping(ign string, reply *string) error {
+	if dS.resS != nil {
+		if err := dS.resS.Call(utils.ResourceSv1Ping, ign, reply); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<DispatcherS> error: %s ResourceS.", err.Error()))
+		}
+	}
+	return nil
+}
+
+func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args utils.ArgRSv1ResourceUsage, reply *engine.Resources) error {
+	if dS.resS != nil {
+		if err := dS.resS.Call(utils.ResourceSv1GetResourcesForEvent, args, reply); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<DispatcherS> error: %s ResourceS.", err.Error()))
+		}
+	}
+	return nil
+}
+
+func (dS *DispatcherService) SupplierSv1Ping(ign string, reply *string) error {
+	if dS.splS != nil {
+		if err := dS.splS.Call(utils.SupplierSv1Ping, ign, reply); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<DispatcherS> error: %s SupplierS.", err.Error()))
+		}
+	}
+	return nil
+}
+
+func (dS *DispatcherService) SupplierSv1GetSuppliers(args *engine.ArgsGetSuppliers,
+	reply *engine.SortedSuppliers) error {
+	if dS.splS != nil {
+		if err := dS.splS.Call(utils.SupplierSv1GetSuppliers, args, reply); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<DispatcherS> error: %s SupplierS.", err.Error()))
+		}
+	}
+	return nil
+}
+
+func (dS *DispatcherService) AttributeSv1Ping(ign string, reply *string) error {
+	if dS.attrS != nil {
+		if err := dS.attrS.Call(utils.AttributeSv1Ping, ign, reply); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<DispatcherS> error: %s AttributeS.", err.Error()))
+		}
+	}
+	return nil
+}
+
+func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(ev *utils.CGREvent,
+	reply *engine.AttributeProfile) error {
+	if dS.attrS != nil {
+		if err := dS.attrS.Call(utils.AttributeSv1GetAttributeForEvent, ev, reply); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<DispatcherS> error: %s AttributeS.", err.Error()))
+		}
+	}
+	return nil
+}
+
+func (dS *DispatcherService) AttributeSv1ProcessEvent(ev *utils.CGREvent,
+	reply *engine.AttrSProcessEventReply) error {
+	if dS.attrS != nil {
+		if err := dS.attrS.Call(utils.AttributeSv1ProcessEvent, ev, reply); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<DispatcherS> error: %s AttributeS.", err.Error()))
+		}
+	}
+	return nil
+}

@@ -114,14 +114,14 @@ func executeCommand(command string) {
 			fmt.Println(string(result))
 		}
 
-		//TLS call
+		// TLS call
 		if rpcErr := client2.Call(cmd.RpcMethod(), param, res); rpcErr != nil {
-			fmt.Println("Error executing command: " + rpcErr.Error())
+			fmt.Println("<TLS> Error executing command: " + rpcErr.Error())
 		} else {
 			result, _ := json.MarshalIndent(res, "", " ")
 			fmt.Println(string(result))
 		}
-		//
+		// End TLS call
 	} else {
 		fmt.Println(cmd.LocalExecute())
 	}
@@ -141,7 +141,7 @@ func main() {
 		log.Fatal("Could not connect to server " + *server)
 	}
 
-	//TLS connection
+	// TLS connection
 	cert, err := tls.LoadX509KeyPair("/home/teo/go/src/github.com/TeoV/GoRPCServerClientOverTLS/client1.crt",
 		"/home/teo/go/src/github.com/TeoV/GoRPCServerClientOverTLS/client.key")
 	if err != nil {
@@ -166,7 +166,8 @@ func main() {
 		log.Fatalf("Error: %s when dialing", err)
 	}
 	client2 = rpc.NewClient(conn)
-	//
+	// End TLS connection
+
 	if len(flag.Args()) != 0 {
 		executeCommand(strings.Join(flag.Args(), " "))
 		return

@@ -25,7 +25,7 @@ import (
 func init() {
 	c := &CmdStatsQueueForEvent{
 		name:      "stats_for_event",
-		rpcMethod: "StatSv1.GetStatQueuesForEvent",
+		rpcMethod: utils.StatSv1GetStatQueuesForEvent,
 		rpcParams: &utils.CGREvent{},
 	}
 	commands[c.Name()] = c

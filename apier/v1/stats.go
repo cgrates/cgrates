@@ -100,6 +100,7 @@ func (stsv1 *StatSv1) ProcessEvent(ev *utils.CGREvent, reply *[]string) error {
 	return stsv1.sS.V1ProcessEvent(ev, reply)
 }
 
+//
 // GetQueueIDs returns the list of queues IDs in the system
 func (stsv1 *StatSv1) GetStatQueuesForEvent(ev *utils.CGREvent, reply *[]string) (err error) {
 	return stsv1.sS.V1GetStatQueuesForEvent(ev, reply)

@@ -28,7 +28,7 @@ import (
 func init() {
 	c := &CmdGetResourceForEvent{
 		name:      "resources_for_event",
-		rpcMethod: "ResourceSv1.GetResourcesForEvent",
+		rpcMethod: utils.ResourceSv1GetResourcesForEvent,
 		rpcParams: &utils.ArgRSv1ResourceUsage{},
 	}
 	commands[c.Name()] = c
