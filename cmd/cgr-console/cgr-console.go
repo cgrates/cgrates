@@ -19,11 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
 	"log"
+	"net/rpc"
 	"os"
 	"sort"
 	"strings"
@@ -42,6 +45,7 @@ var (
 	server       = flag.String("server", "127.0.0.1:2012", "server address host:port")
 	rpc_encoding = flag.String("rpc_encoding", "json", "RPC encoding used <gob|json>")
 	client       *rpcclient.RpcClient
+	client2      *rpc.Client
 )
 
 func executeCommand(command string) {
@@ -109,6 +113,15 @@ func executeCommand(command string) {
 			result, _ := json.MarshalIndent(res, "", " ")
 			fmt.Println(string(result))
 		}
+
+		//TLS call
+		if rpcErr := client2.Call(cmd.RpcMethod(), param, res); rpcErr != nil {
+			fmt.Println("Error executing command: " + rpcErr.Error())
+		} else {
+			result, _ := json.MarshalIndent(res, "", " ")
+			fmt.Println(string(result))
+		}
+		//
 	} else {
 		fmt.Println(cmd.LocalExecute())
 	}
@@ -128,6 +141,32 @@ func main() {
 		log.Fatal("Could not connect to server " + *server)
 	}
 
+	//TLS connection
+	cert, err := tls.LoadX509KeyPair("/home/teo/go/src/github.com/TeoV/GoRPCServerClientOverTLS/client1.crt",
+		"/home/teo/go/src/github.com/TeoV/GoRPCServerClientOverTLS/client.key")
+	if err != nil {
+		log.Fatalf("Error: %s when load client keys", err)
+	}
+	if len(cert.Certificate) != 2 {
+		log.Fatal("client1.crt should have 2 concatenated certificates: client + CA")
+	}
+	ca, err := x509.ParseCertificate(cert.Certificate[1])
+	if err != nil {
+		log.Fatal(err)
+	}
+	certPool := x509.NewCertPool()
+	certPool.AddCert(ca)
+	config := tls.Config{
+		Certificates: []tls.Certificate{cert},
+		//InsecureSkipVerify: true,
+		RootCAs: certPool,
+	}
+	conn, err := tls.Dial("tcp", "localhost:2022", &config)
+	if err != nil {
+		log.Fatalf("Error: %s when dialing", err)
+	}
+	client2 = rpc.NewClient(conn)
+	//
 	if len(flag.Args()) != 0 {
 		executeCommand(strings.Join(flag.Args(), " "))
 		return

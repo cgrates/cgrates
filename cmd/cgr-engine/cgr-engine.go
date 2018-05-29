@@ -844,6 +844,7 @@ func startRpc(server *utils.Server, internalRaterChan,
 		cfg.HTTPUseBasicAuth,
 		cfg.HTTPAuthUsers,
 	)
+	go server.ServeTLS(cfg.RPCJSONListen)
 }
 
 func writePid() {
