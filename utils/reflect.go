@@ -50,8 +50,12 @@ func CastFieldIfToString(fld interface{}) (string, bool) {
 	case time.Duration:
 		strVal = fld.(time.Duration).String()
 		converted = true
+	case string:
+		strVal = fld.(string)
+		converted = true
 	default: // Maybe we are lucky and the value converts to string
-		strVal, converted = fld.(string)
+		strVal = ToJSON(fld)
+		converted = true
 	}
 	return strVal, converted
 }
@@ -245,12 +249,10 @@ func IfaceAsString(fld interface{}) (out string, err error) {
 		return fld.(time.Duration).String(), nil
 	case time.Time:
 		return fld.(time.Time).Format(time.RFC3339), nil
+	case string:
+		return fld.(string), nil
 	default: // Maybe we are lucky and the value converts to string
-		if out, canCast := fld.(string); !canCast {
-			return "", ErrNotConvertibleNoCaps
-		} else {
-			return out, nil
-		}
+		return ToJSON(fld), nil
 	}
 }
 

@@ -558,6 +558,8 @@ func (cdr *CDR) AsExportRecord(exportFields []*config.CfgCdrField, httpSkipTlsCh
 			if err == utils.ErrFilterNotPassingNoCaps {
 				continue // not exporting this field value
 			}
+			utils.Logger.Warning(fmt.Sprintf("<CDR> error: %s exporting field: %s, CDR: %s\n",
+				err.Error(), utils.ToJSON(cfgFld), utils.ToJSON(cdr)))
 			return nil, err
 		} else {
 			expRecord = append(expRecord, fmtOut)
