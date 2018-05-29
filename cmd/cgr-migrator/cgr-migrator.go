@@ -143,25 +143,39 @@ func main() {
 	}
 
 	// outDataDB
-	if *outDataDBType != utils.MetaDataDB {
+	if *outDataDBType == utils.MetaDataDB {
+		mgrCfg.MigratorCgrConfig.OutDataDBType = mgrCfg.DataDbType
+	} else {
 		mgrCfg.MigratorCgrConfig.OutDataDBType = strings.TrimPrefix(*outDataDBType, "*")
 	}
-	if *outDataDBHost != utils.MetaDataDB {
+	if *outDataDBHost == utils.MetaDataDB {
+		mgrCfg.MigratorCgrConfig.OutDataDBHost = mgrCfg.DataDbHost
+	} else {
 		mgrCfg.MigratorCgrConfig.OutDataDBHost = *outDataDBHost
 	}
-	if *outDataDBPort != utils.MetaDataDB {
+	if *outDataDBPort == utils.MetaDataDB {
+		mgrCfg.MigratorCgrConfig.OutDataDBPort = mgrCfg.DataDbPort
+	} else {
 		mgrCfg.MigratorCgrConfig.OutDataDBPort = *outDataDBPort
 	}
-	if *outDataDBName != utils.MetaDataDB {
+	if *outDataDBName == utils.MetaDataDB {
+		mgrCfg.MigratorCgrConfig.OutDataDBName = mgrCfg.DataDbName
+	} else {
 		mgrCfg.MigratorCgrConfig.OutDataDBName = *outDataDBName
 	}
-	if *outDataDBUser != utils.MetaDataDB {
+	if *outDataDBUser == utils.MetaDataDB {
+		mgrCfg.MigratorCgrConfig.OutDataDBUser = mgrCfg.DataDbUser
+	} else {
 		mgrCfg.MigratorCgrConfig.OutDataDBUser = *outDataDBUser
 	}
-	if *outDataDBPass != utils.MetaDataDB {
+	if *outDataDBPass == utils.MetaDataDB {
+		mgrCfg.MigratorCgrConfig.OutDataDBPassword = mgrCfg.DataDbPass
+	} else {
 		mgrCfg.MigratorCgrConfig.OutDataDBPassword = *outDataDBPass
 	}
-	if *outDBDataEncoding != utils.MetaDataDB {
+	if *outDBDataEncoding == utils.MetaDataDB {
+		mgrCfg.MigratorCgrConfig.OutDataDBEncoding = mgrCfg.DBDataEncoding
+	} else {
 		mgrCfg.MigratorCgrConfig.OutDataDBEncoding = *outDBDataEncoding
 	}
 
@@ -186,26 +200,35 @@ func main() {
 	}
 
 	// outStorDB
-	if *outStorDBType != utils.MetaStorDB {
+	if *outStorDBType == utils.MetaStorDB {
+		mgrCfg.MigratorCgrConfig.OutStorDBType = mgrCfg.StorDBType
+	} else {
 		mgrCfg.MigratorCgrConfig.OutStorDBType = strings.TrimPrefix(*outStorDBType, "*")
 	}
-	if *outStorDBHost != utils.MetaStorDB {
+	if *outStorDBHost == utils.MetaStorDB {
+		mgrCfg.MigratorCgrConfig.OutStorDBHost = mgrCfg.StorDBHost
+	} else {
 		mgrCfg.MigratorCgrConfig.OutStorDBHost = *outStorDBHost
 	}
-	if *outStorDBPort != utils.MetaStorDB {
+	if *outStorDBPort == utils.MetaStorDB {
+		mgrCfg.MigratorCgrConfig.OutStorDBPort = mgrCfg.StorDBPort
+	} else {
 		mgrCfg.MigratorCgrConfig.OutStorDBPort = *outStorDBPort
 	}
-	if *outStorDBName != utils.MetaStorDB {
+	if *outStorDBName == utils.MetaStorDB {
+		mgrCfg.MigratorCgrConfig.OutStorDBName = mgrCfg.StorDBName
+	} else {
 		mgrCfg.MigratorCgrConfig.OutStorDBName = *outStorDBName
 	}
-	if *outStorDBUser != utils.MetaStorDB {
+	if *outStorDBUser == utils.MetaStorDB {
+		mgrCfg.MigratorCgrConfig.OutStorDBUser = mgrCfg.StorDBUser
+	} else {
 		mgrCfg.MigratorCgrConfig.OutStorDBUser = *outStorDBUser
 	}
-	if *outStorDBPass != utils.MetaStorDB {
+	if *outStorDBPass == utils.MetaStorDB {
+		mgrCfg.MigratorCgrConfig.OutStorDBPassword = mgrCfg.StorDBPass
+	} else {
 		mgrCfg.MigratorCgrConfig.OutStorDBPassword = *outStorDBPass
-	}
-	if *outDBDataEncoding != "" {
-		*outDBDataEncoding = mgrCfg.DBDataEncoding
 	}
 
 	sameDataDB = mgrCfg.MigratorCgrConfig.OutDataDBType == mgrCfg.DataDbType &&
