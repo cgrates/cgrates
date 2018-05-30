@@ -47,7 +47,7 @@ func NewSessionReplicationConns(conns []*config.HaPoolConfig, reconnects int,
 	connTimeout, replyTimeout time.Duration) (smgConns []*SMGReplicationConn, err error) {
 	smgConns = make([]*SMGReplicationConn, len(conns))
 	for i, replConnCfg := range conns {
-		if replCon, err := rpcclient.NewRpcClient("tcp", replConnCfg.Address, 0, reconnects,
+		if replCon, err := rpcclient.NewRpcClient("tcp", replConnCfg.Address, "", "", 0, reconnects,
 			connTimeout, replyTimeout, replConnCfg.Transport[1:], nil, true); err != nil {
 			return nil, err
 		} else {

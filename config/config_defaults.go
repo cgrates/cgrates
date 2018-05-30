@@ -47,7 +47,7 @@ const CGRATES_CFG_JSON = `
 	"reply_timeout": "2s",									// consider connection down for replies taking longer than this value
 	"response_cache_ttl": "0s",								// the life span of a cached response
 	"internal_ttl": "2m",									// maximum duration to wait for internal connections before giving up
-	"locking_timeout": "0",								// timeout internal locks to avoid deadlocks
+	"locking_timeout": "0",									// timeout internal locks to avoid deadlocks
 	"digest_separator": ",",
 	"digest_equal": ":",
 },
@@ -82,6 +82,11 @@ const CGRATES_CFG_JSON = `
 	"rpc_json": "127.0.0.1:2012",			// RPC JSON listening address
 	"rpc_gob": "127.0.0.1:2013",			// RPC GOB listening address
 	"http": "127.0.0.1:2080",				// HTTP listening address
+	"rpc_json_tls" : "127.0.0.1:2022",		// RPC JSON TLS listening address
+	"rpc_gob_tls": "127.0.0.1:2023",		// RPC GOB TLS listening address
+	"http_tls": "127.0.0.1:2280",			// HTTP TLS listening address
+	"tls_server_certificate" : "",			// path to server certificate(must conatin server.crt + ca.crt)
+	"tls_server_key":"",					// path to server key
 },
 
 

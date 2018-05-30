@@ -135,6 +135,25 @@ func TestCgrCfgStorDBPortWithDymanic(t *testing.T) {
 	}
 }
 
+func TestCgrCfgListener(t *testing.T) {
+	JSN_CFG := `
+{
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+	}
+}`
+
+	if cgrCfg, err := NewCGRConfigFromJsonString(JSN_CFG); err != nil {
+		t.Error(err)
+	} else if cgrCfg.RPCGOBTLSListen != "" {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.RPCGOBTLSListen, "")
+	} else if cgrCfg.RPCJSONTLSListen != "" {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.RPCJSONTLSListen, "")
+	}
+}
+
 func TestCgrCfgCDRC(t *testing.T) {
 	JSN_RAW_CFG := `
 {
@@ -293,6 +312,12 @@ func TestCgrCfgJSONDefaultsGeneral(t *testing.T) {
 	if cgrCfg.DigestEqual != ":" {
 		t.Error(cgrCfg.DigestEqual)
 	}
+	if cgrCfg.TLSServerCerificate != "" {
+		t.Error(cgrCfg.TLSServerCerificate)
+	}
+	if cgrCfg.TLSServerKey != "" {
+		t.Error(cgrCfg.TLSServerKey)
+	}
 }
 
 func TestCgrCfgJSONDefaultsListen(t *testing.T) {
@@ -303,6 +328,15 @@ func TestCgrCfgJSONDefaultsListen(t *testing.T) {
 		t.Error(cgrCfg.RPCGOBListen)
 	}
 	if cgrCfg.HTTPListen != "127.0.0.1:2080" {
+		t.Error(cgrCfg.HTTPListen)
+	}
+	if cgrCfg.RPCJSONTLSListen != "127.0.0.1:2022" {
+		t.Error(cgrCfg.RPCJSONListen)
+	}
+	if cgrCfg.RPCGOBTLSListen != "127.0.0.1:2023" {
+		t.Error(cgrCfg.RPCGOBListen)
+	}
+	if cgrCfg.HTTPTLSListen != "127.0.0.1:2280" {
 		t.Error(cgrCfg.HTTPListen)
 	}
 }

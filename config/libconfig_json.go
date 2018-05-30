@@ -46,9 +46,14 @@ type GeneralJsonCfg struct {
 
 // Listen config section
 type ListenJsonCfg struct {
-	Rpc_json *string
-	Rpc_gob  *string
-	Http     *string
+	Rpc_json               *string
+	Rpc_gob                *string
+	Http                   *string
+	Rpc_json_tls           *string
+	Rpc_gob_tls            *string
+	Http_tls               *string
+	Tls_server_certificate *string
+	Tls_server_key         *string
 }
 
 // HTTP config section
