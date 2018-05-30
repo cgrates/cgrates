@@ -97,7 +97,7 @@ func TestSMGRplcInitiate(t *testing.T) {
 	}
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "123451",
 		utils.Direction:   utils.OUT,
 		utils.Account:     "1001",
@@ -232,7 +232,7 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 	}
 	smgEv1 := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "123451",
 		utils.Direction:   utils.OUT,
 		utils.Account:     "1001",
@@ -247,7 +247,7 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 	}
 	smgEv2 := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "123481",
 		utils.Direction:   utils.OUT,
 		utils.Account:     "1002",

@@ -1726,8 +1726,8 @@ func testStorDBitCRUDCDRs(t *testing.T) {
 		if !(reflect.DeepEqual(snd[0].ExtraInfo, rcv[0].ExtraInfo) || reflect.DeepEqual(snd[0].ExtraInfo, rcv[1].ExtraInfo)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].ExtraInfo, rcv[0].ExtraInfo, rcv[1].ExtraInfo)
 		}
-		if !(reflect.DeepEqual(snd[0].Rated, rcv[0].Rated) || reflect.DeepEqual(snd[0].Rated, rcv[1].Rated)) {
-			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Rated, rcv[0].Rated, rcv[1].Rated)
+		if !(reflect.DeepEqual(snd[0].PreRated, rcv[0].PreRated) || reflect.DeepEqual(snd[0].PreRated, rcv[1].PreRated)) {
+			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].PreRated, rcv[0].PreRated, rcv[1].PreRated)
 		}
 		if !(reflect.DeepEqual(snd[0].Partial, rcv[0].Partial) || reflect.DeepEqual(snd[0].Partial, rcv[1].Partial)) {
 			t.Errorf("Expecting: %+v, received: %+v || %+v", snd[0].Partial, rcv[0].Partial, rcv[1].Partial)
@@ -1829,7 +1829,7 @@ func testStorDBitFlush(t *testing.T) {
 
 func testStorDBitCRUDVersions(t *testing.T) {
 	// CREATE
-	vrs := Versions{utils.COST_DETAILS: 1}
+	vrs := Versions{utils.CostDetails: 1}
 	if err := storDB.SetVersions(vrs, true); err != nil {
 		t.Error(err)
 	}
@@ -1840,7 +1840,7 @@ func testStorDBitCRUDVersions(t *testing.T) {
 	}
 
 	// UPDATE
-	vrs = Versions{utils.COST_DETAILS: 2, "OTHER_KEY": 1}
+	vrs = Versions{utils.CostDetails: 2, "OTHER_KEY": 1}
 	if err := storDB.SetVersions(vrs, false); err != nil {
 		t.Error(err)
 	}
@@ -1855,9 +1855,9 @@ func testStorDBitCRUDVersions(t *testing.T) {
 	if err := storDB.RemoveVersions(vrs); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := storDB.GetVersions(utils.COST_DETAILS); err != nil {
+	if rcv, err := storDB.GetVersions(utils.CostDetails); err != nil {
 		t.Error(err)
-	} else if len(rcv) != 1 || rcv[utils.COST_DETAILS] != 2 {
+	} else if len(rcv) != 1 || rcv[utils.CostDetails] != 2 {
 		t.Errorf("Received: %+v", rcv)
 	}
 

@@ -353,11 +353,11 @@ func testOnStorITCacheDerivedChargers(t *testing.T) {
 			&utils.DerivedCharger{RunID: "extra1", RunFilters: "^filteredHeader1/filterValue1/", RequestTypeField: "^prepaid", DirectionField: utils.META_DEFAULT,
 				TenantField: utils.META_DEFAULT, CategoryField: utils.META_DEFAULT, AccountField: "rif", SubjectField: "rif", DestinationField: utils.META_DEFAULT,
 				SetupTimeField: utils.META_DEFAULT, PDDField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT,
-				SupplierField: utils.META_DEFAULT, DisconnectCauseField: utils.META_DEFAULT, CostField: utils.META_DEFAULT, RatedField: utils.META_DEFAULT},
+				SupplierField: utils.META_DEFAULT, DisconnectCauseField: utils.META_DEFAULT, CostField: utils.META_DEFAULT, PreRatedField: utils.META_DEFAULT},
 			&utils.DerivedCharger{RunID: "extra2", RequestTypeField: utils.META_DEFAULT, DirectionField: utils.META_DEFAULT, TenantField: utils.META_DEFAULT,
 				CategoryField: utils.META_DEFAULT, AccountField: "ivo", SubjectField: "ivo", DestinationField: utils.META_DEFAULT,
 				SetupTimeField: utils.META_DEFAULT, PDDField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT,
-				SupplierField: utils.META_DEFAULT, DisconnectCauseField: utils.META_DEFAULT, CostField: utils.META_DEFAULT, RatedField: utils.META_DEFAULT},
+				SupplierField: utils.META_DEFAULT, DisconnectCauseField: utils.META_DEFAULT, CostField: utils.META_DEFAULT, PreRatedField: utils.META_DEFAULT},
 		}}
 	keyDCS := utils.ConcatenatedKey("*out", "itsyscom.com", "call", "dan", "dan")
 	if err := onStor.DataDB().SetDerivedChargers(keyDCS, dcs, utils.NonTransactional); err != nil {
@@ -1873,7 +1873,7 @@ func testOnStorITCRUDStructVersion(t *testing.T) {
 		t.Error(err)
 	}
 	vrs := Versions{utils.Accounts: 3, utils.Actions: 2, utils.ActionTriggers: 2,
-		utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 1}
+		utils.ActionPlans: 2, utils.SharedGroups: 2, utils.CostDetails: 1}
 	if err := onStor.DataDB().SetVersions(vrs, false); err != nil {
 		t.Error(err)
 	}

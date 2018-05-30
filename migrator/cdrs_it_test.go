@@ -148,8 +148,8 @@ func testCdrITMigrateAndMove(t *testing.T) {
 		t.Error(err)
 	}
 	currentVersion := engine.Versions{
-		utils.COST_DETAILS: 2,
-		utils.CDRs:         1,
+		utils.CostDetails: 2,
+		utils.CDRs:        1,
 	}
 	err = cdrMigrator.storDBOut.StorDB().SetVersions(currentVersion, false)
 	if err != nil {
