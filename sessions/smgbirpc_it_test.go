@@ -133,7 +133,7 @@ func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	}
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "123451",
 		utils.Direction:   utils.OUT,
 		utils.Account:     attrSetBalance.Account,
@@ -214,7 +214,7 @@ func TestSMGBiRPCSessionOriginatorTerminate(t *testing.T) {
 	}
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "123452",
 		utils.Direction:   utils.OUT,
 		utils.Account:     attrSetBalance.Account,

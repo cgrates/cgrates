@@ -94,7 +94,7 @@ func TestSMGVoiceTPFromFolder(t *testing.T) {
 func TestSMGVoiceMonetaryRefund(t *testing.T) {
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "123451",
 		utils.Direction:   utils.OUT,
 		utils.Account:     "1001",
@@ -125,7 +125,7 @@ func TestSMGVoiceMonetaryRefund(t *testing.T) {
 	}
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "123451",
 		utils.Direction:   utils.OUT,
 		utils.Account:     "1001",
@@ -153,7 +153,7 @@ func TestSMGVoiceMonetaryRefund(t *testing.T) {
 func TestSMGVoiceVoiceRefund(t *testing.T) {
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "123452",
 		utils.Direction:   utils.OUT,
 		utils.Account:     "1001",
@@ -185,7 +185,7 @@ func TestSMGVoiceVoiceRefund(t *testing.T) {
 	}
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "123452",
 		utils.Direction:   utils.OUT,
 		utils.Account:     "1001",
@@ -220,7 +220,7 @@ func TestSMGVoiceMixedRefund(t *testing.T) {
 	//t.Logf("Initial voice: %f", acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "123453",
 		utils.Direction:   utils.OUT,
 		utils.Account:     "1001",
@@ -252,7 +252,7 @@ func TestSMGVoiceMixedRefund(t *testing.T) {
 	}
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "123453",
 		utils.Direction:   utils.OUT,
 		utils.Account:     "1001",
@@ -292,7 +292,7 @@ func TestSMGVoiceLastUsed(t *testing.T) {
 	}
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "12350",
 		utils.Direction:   utils.OUT,
 		utils.Account:     "1001",
@@ -320,7 +320,7 @@ func TestSMGVoiceLastUsed(t *testing.T) {
 	}
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "12350",
 		utils.Direction:   utils.OUT,
 		utils.Account:     "1001",
@@ -346,7 +346,7 @@ func TestSMGVoiceLastUsed(t *testing.T) {
 	}
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "12350",
 		utils.Direction:   utils.OUT,
 		utils.Account:     "1001",
@@ -372,7 +372,7 @@ func TestSMGVoiceLastUsed(t *testing.T) {
 	}
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "12350",
 		utils.Direction:   utils.OUT,
 		utils.Account:     "1001",
@@ -406,7 +406,7 @@ func TestSMGVoiceLastUsedEnd(t *testing.T) {
 	}
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "1234911",
 		utils.Direction:   utils.OUT,
 		utils.Account:     "1001",
@@ -434,7 +434,7 @@ func TestSMGVoiceLastUsedEnd(t *testing.T) {
 	}
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "1234911",
 		utils.Direction:   utils.OUT,
 		utils.Account:     "1001",
@@ -460,7 +460,7 @@ func TestSMGVoiceLastUsedEnd(t *testing.T) {
 	}
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "1234911",
 		utils.Direction:   utils.OUT,
 		utils.Account:     "1001",
@@ -494,7 +494,7 @@ func TestSMGVoiceLastUsedNotFixed(t *testing.T) {
 	}
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "1234922",
 		utils.Direction:   utils.OUT,
 		utils.Account:     "1001",
@@ -522,7 +522,7 @@ func TestSMGVoiceLastUsedNotFixed(t *testing.T) {
 	}
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "1234922",
 		utils.Direction:   utils.OUT,
 		utils.Account:     "1001",
@@ -548,7 +548,7 @@ func TestSMGVoiceLastUsedNotFixed(t *testing.T) {
 	}
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "1234922",
 		utils.Direction:   utils.OUT,
 		utils.Account:     "1001",
@@ -582,7 +582,7 @@ func TestSMGVoiceSessionTTL(t *testing.T) {
 	}
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT_SESSION_TTL",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "12360",
 		utils.Direction:   utils.OUT,
 		utils.Account:     "1001",
@@ -605,7 +605,7 @@ func TestSMGVoiceSessionTTL(t *testing.T) {
 	}
 	var aSessions []*ActiveSession
 	if err := smgRPC.Call("SMGenericV1.GetActiveSessions",
-		map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT, utils.OriginID: "12360"}, &aSessions); err != nil {
+		map[string]string{utils.RunID: utils.META_DEFAULT, utils.OriginID: "12360"}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
@@ -620,7 +620,7 @@ func TestSMGVoiceSessionTTL(t *testing.T) {
 	}
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT_SESSION_TTL",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "12360",
 		utils.Direction:   utils.OUT,
 		utils.Account:     "1001",
@@ -639,7 +639,7 @@ func TestSMGVoiceSessionTTL(t *testing.T) {
 	if maxUsage != time.Duration(120*time.Second) {
 		t.Error("Bad max usage: ", maxUsage)
 	}
-	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT, utils.OriginID: "12360"}, &aSessions); err != nil {
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.RunID: utils.META_DEFAULT, utils.OriginID: "12360"}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
@@ -694,7 +694,7 @@ func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
 	}
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT_SESSION_TTL_RELOCATE",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "12361",
 		utils.Direction:   utils.OUT,
 		utils.Account:     "TestTTLWithRelocate",
@@ -716,7 +716,7 @@ func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
 		t.Error("Bad max usage: ", maxUsage)
 	}
 	var aSessions []*ActiveSession
-	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT,
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.RunID: utils.META_DEFAULT,
 		utils.OriginID: smgEv.GetOriginID(utils.META_DEFAULT)}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
@@ -732,7 +732,7 @@ func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
 	}
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:      smgEv[utils.EVENT_NAME],
-		utils.TOR:             smgEv[utils.TOR],
+		utils.ToR:             smgEv[utils.ToR],
 		utils.InitialOriginID: smgEv[utils.OriginID],
 		utils.OriginID:        "12362",
 		utils.Direction:       smgEv[utils.Direction],
@@ -754,7 +754,7 @@ func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
 	}
 	time.Sleep(time.Duration(20) * time.Millisecond)
 	if err := smgRPC.Call("SMGenericV1.GetActiveSessions",
-		map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT,
+		map[string]string{utils.RunID: utils.META_DEFAULT,
 			utils.OriginID: smgEv.GetOriginID(utils.META_DEFAULT)}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
@@ -779,7 +779,7 @@ func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
 			eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 	if err := smgRPC.Call("SMGenericV1.GetActiveSessions",
-		map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT,
+		map[string]string{utils.RunID: utils.META_DEFAULT,
 			utils.OriginID: smgEv.GetOriginID(utils.META_DEFAULT)},
 		&aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
@@ -819,7 +819,7 @@ func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	}
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT_RELOCATE_ORIGPREFIX",
-		utils.TOR:         utils.VOICE,
+		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "12371",
 		utils.Direction:   utils.OUT,
 		utils.Account:     attrSetBalance.Account,
@@ -841,7 +841,7 @@ func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	}
 	time.Sleep(time.Duration(20) * time.Millisecond)
 	var aSessions []*ActiveSession
-	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT,
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.RunID: utils.META_DEFAULT,
 		utils.OriginID: smgEv.GetOriginID(utils.META_DEFAULT)}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
@@ -857,7 +857,7 @@ func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	}
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:      smgEv[utils.EVENT_NAME],
-		utils.TOR:             smgEv[utils.TOR],
+		utils.ToR:             smgEv[utils.ToR],
 		utils.InitialOriginID: smgEv[utils.OriginID],
 		utils.OriginID:        "12372-1",
 		utils.Direction:       smgEv[utils.Direction],
@@ -877,7 +877,7 @@ func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		t.Error("Bad max usage: ", maxUsage)
 	}
 	time.Sleep(time.Duration(20) * time.Millisecond)
-	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT,
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.RunID: utils.META_DEFAULT,
 		utils.OriginID: "12372-1"}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
@@ -893,7 +893,7 @@ func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	}
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:     smgEv[utils.EVENT_NAME],
-		utils.TOR:            smgEv[utils.TOR],
+		utils.ToR:            smgEv[utils.ToR],
 		utils.OriginIDPrefix: "12372",
 		utils.Direction:      smgEv[utils.Direction],
 		utils.Account:        smgEv[utils.Account],
@@ -909,7 +909,7 @@ func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(10) * time.Millisecond)
-	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT,
+	if err := smgRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.RunID: utils.META_DEFAULT,
 		utils.OriginID: "12372-1"}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}

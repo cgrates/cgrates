@@ -129,7 +129,7 @@ func TestA1itAddBalance1(t *testing.T) {
 func TestA1itDataSession1(t *testing.T) {
 	smgEv := sessions.SMGenericEvent{
 		utils.EVENT_NAME:         "INITIATE_SESSION",
-		utils.TOR:                utils.DATA,
+		utils.ToR:                utils.DATA,
 		utils.OriginID:           "504966119",
 		utils.Direction:          utils.OUT,
 		utils.Account:            "rpdata1",
@@ -166,7 +166,7 @@ func TestA1itDataSession1(t *testing.T) {
 		utils.SessionTTLUsage:    "0s",
 		utils.Subject:            "rpdata1",
 		utils.Tenant:             "cgrates.org",
-		utils.TOR:                utils.DATA,
+		utils.ToR:                utils.DATA,
 		utils.SetupTime:          "2017-03-03 11:39:32 +0100 CET",
 		utils.AnswerTime:         "2017-03-03 11:39:32 +0100 CET",
 		utils.Usage:              "2097152",
@@ -191,7 +191,7 @@ func TestA1itDataSession1(t *testing.T) {
 		utils.AnswerTime:     "2017-03-03 11:39:32 +0100 CET",
 		utils.Subject:        "rpdata1",
 		utils.Tenant:         "cgrates.org",
-		utils.TOR:            utils.DATA,
+		utils.ToR:            utils.DATA,
 	}
 	var rpl string
 	if err = a1rpc.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {

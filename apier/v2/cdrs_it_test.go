@@ -148,7 +148,7 @@ func testV2CDRsProcessCdrRated(t *testing.T) {
 		Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2015, 12, 13, 18, 15, 26, 0, time.UTC), AnswerTime: time.Date(2015, 12, 13, 18, 15, 26, 0, time.UTC),
 		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		Cost: 1.01, CostSource: "TestV2CdrsMongoProcessCdrRated", Rated: true,
+		Cost: 1.01, CostSource: "TestV2CdrsMongoProcessCdrRated", PreRated: true,
 	}
 	var reply string
 	if err := cdrsRpc.Call("CdrsV2.ProcessCdr", cdr, &reply); err != nil {
@@ -232,7 +232,7 @@ func testV2CDRsProcessPrepaidCdr(t *testing.T) {
 			OriginHost: "192.168.1.1", Source: "TestV2CdrsMongoProcessPrepaidCdr1", RequestType: utils.META_PREPAID, Tenant: "cgrates.org",
 			Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
-			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, Rated: true,
+			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, PreRated: true,
 		},
 		&engine.CDR{CGRID: utils.Sha1("abcdeftg2", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsaf",
 			OriginHost: "192.168.1.1", Source: "TestV2CdrsMongoProcessPrepaidCdr2", RequestType: utils.META_PREPAID, Tenant: "cgrates.org",
