@@ -394,6 +394,17 @@ const CGRATES_CFG_JSON = `
 },
 
 
+"conecto_agent": {												// agent for cnc.to MVNE platform
+	"enabled": false,											// enables the conecto agent: <true|false>
+	"http_url": "/conecto",										// relative URL for requests coming in from Conecto platform
+	"sessions_conns": [
+		{"address": "*internal"}								// connection towards SessionService
+	],
+	"timezone": "",												// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
+	"request_processors": [],
+},
+
+
 "pubsubs": {
 	"enabled": false,				// starts PubSub service: <true|false>.
 },

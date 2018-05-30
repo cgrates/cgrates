@@ -365,6 +365,24 @@ type RAReqProcessorJsnCfg struct {
 	Reply_fields        *[]*CdrFieldJsonCfg
 }
 
+// Conecto Agent configuration section
+type ConectoAgentJsonCfg struct {
+	Enabled            *bool
+	Http_url           *string
+	Sessions_conns     *[]*HaPoolJsonCfg
+	Timezone           *string
+	Request_processors *[]*CncProcessorJsnCfg
+}
+
+type CncProcessorJsnCfg struct {
+	Id             *string
+	Dry_run        *bool
+	Filters        *[]string
+	Flags          *[]string
+	Request_fields *[]*CdrFieldJsonCfg
+	Reply_fields   *[]*CdrFieldJsonCfg
+}
+
 // History server config section
 type HistServJsonCfg struct {
 	Enabled       *bool
