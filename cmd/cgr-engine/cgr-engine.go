@@ -790,6 +790,7 @@ func startRpc(server *utils.Server, internalRaterChan,
 	case dispatcherS := <-internalDispatcherSChan:
 		internalDispatcherSChan <- dispatcherS
 	}
+
 	go server.ServeJSON(cfg.RPCJSONListen)
 	go server.ServeGOB(cfg.RPCGOBListen)
 	go server.ServeHTTP(
@@ -799,7 +800,29 @@ func startRpc(server *utils.Server, internalRaterChan,
 		cfg.HTTPUseBasicAuth,
 		cfg.HTTPAuthUsers,
 	)
-	go server.ServeTLS(cfg.RPCJSONListen)
+	if cfg.RPCGOBTLSListen != "" {
+		if cfg.TLSServerCerificate == "" || cfg.TLSServerKey == "" {
+			utils.Logger.Warning("WARNING: missing TLS certificate/key file!")
+		} else {
+			go server.ServeGOBTLS(
+				cfg.RPCGOBTLSListen,
+				cfg.TLSServerCerificate,
+				cfg.TLSServerKey,
+			)
+		}
+	}
+	if cfg.RPCJSONTLSListen != "" {
+		if cfg.TLSServerCerificate == "" || cfg.TLSServerKey == "" {
+			utils.Logger.Warning("WARNING: missing TLS certificate/key file!")
+		} else {
+			go server.ServeJSONTLS(
+				cfg.RPCJSONTLSListen,
+				cfg.TLSServerCerificate,
+				cfg.TLSServerKey,
+			)
+		}
+	}
+
 }
 
 func writePid() {

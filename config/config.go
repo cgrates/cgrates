@@ -275,6 +275,11 @@ type CGRConfig struct {
 	RPCJSONListen            string            // RPC JSON listening address
 	RPCGOBListen             string            // RPC GOB listening address
 	HTTPListen               string            // HTTP listening address
+	RPCJSONTLSListen         string            // RPC JSON TLS listening address
+	RPCGOBTLSListen          string            // RPC GOB TLS listening address
+	HTTPTLSListen            string            // HTTP TLS listening address
+	TLSServerCerificate      string            // path to server certificate
+	TLSServerKey             string            // path to server key
 	HTTPJsonRPCURL           string            // JSON RPC relative URL ("" to disable)
 	HTTPFreeswitchCDRsURL    string            // Freeswitch CDRS relative URL ("" to disable)
 	HTTPCDRsURL              string            // CDRS relative URL ("" to disable)
@@ -505,8 +510,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
-
-	// SMGeneric checks
+	// SessionS checks
 	if self.sessionSCfg.Enabled {
 		if len(self.sessionSCfg.RALsConns) == 0 {
 			return errors.New("<SessionS> RALs definition is mandatory!")
@@ -550,7 +554,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
-	// SMFreeSWITCH checks
+	// FreeSWITCHAgent checks
 	if self.fsAgentCfg.Enabled {
 		for _, connCfg := range self.fsAgentCfg.SessionSConns {
 			if connCfg.Address != utils.MetaInternal {
@@ -562,7 +566,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
-	// SM-Kamailio checks
+	// KamailioAgent checks
 	if self.kamAgentCfg.Enabled {
 		for _, connCfg := range self.kamAgentCfg.SessionSConns {
 			if connCfg.Address != utils.MetaInternal {
@@ -594,7 +598,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
-	// SMAsterisk checks
+	// AsteriskAgent checks
 	if self.asteriskAgentCfg.Enabled {
 		/*if len(self.asteriskAgentCfg.SessionSConns) == 0 {
 			return errors.New("<SMAsterisk> SMG definition is mandatory!")
@@ -629,7 +633,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
-	// ResourceLimiter checks
+	// ResourceS checks
 	if self.resourceSCfg != nil && self.resourceSCfg.Enabled {
 		for _, connCfg := range self.resourceSCfg.ThresholdSConns {
 			if connCfg.Address == utils.MetaInternal && !self.thresholdSCfg.Enabled {
@@ -637,7 +641,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
-	// Stat checks
+	// StatS checks
 	if self.statsCfg != nil && self.statsCfg.Enabled {
 		for _, connCfg := range self.statsCfg.ThresholdSConns {
 			if connCfg.Address == utils.MetaInternal && !self.thresholdSCfg.Enabled {
@@ -1006,6 +1010,22 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 		if jsnListenCfg.Http != nil {
 			self.HTTPListen = *jsnListenCfg.Http
+		}
+		if jsnListenCfg.Rpc_json_tls != nil && *jsnListenCfg.Rpc_json_tls != "" {
+			self.RPCJSONTLSListen = *jsnListenCfg.Rpc_json_tls
+		}
+		if jsnListenCfg.Rpc_gob_tls != nil && *jsnListenCfg.Rpc_gob_tls != "" {
+			self.RPCGOBTLSListen = *jsnListenCfg.Rpc_gob_tls
+
+		}
+		if jsnListenCfg.Http_tls != nil && *jsnListenCfg.Http_tls != "" {
+			self.HTTPTLSListen = *jsnListenCfg.Http_tls
+		}
+		if jsnListenCfg.Tls_server_certificate != nil && *jsnListenCfg.Tls_server_certificate != "" {
+			self.TLSServerCerificate = *jsnListenCfg.Tls_server_certificate
+		}
+		if jsnListenCfg.Tls_server_key != nil && *jsnListenCfg.Tls_server_key != "" {
+			self.TLSServerKey = *jsnListenCfg.Tls_server_key
 		}
 	}
 

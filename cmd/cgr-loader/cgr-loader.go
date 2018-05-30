@@ -298,7 +298,7 @@ func main() {
 	}
 	if len(ldrCfg.LoaderCgrConfig.CachesConns) != 0 { // Init connection to CacheS so we can reload it's data
 		if cacheS, err = rpcclient.NewRpcClient("tcp",
-			ldrCfg.LoaderCgrConfig.CachesConns[0].Address, 3, 3,
+			ldrCfg.LoaderCgrConfig.CachesConns[0].Address, "", "", 3, 3,
 			time.Duration(1*time.Second), time.Duration(5*time.Minute),
 			strings.TrimPrefix(ldrCfg.LoaderCgrConfig.CachesConns[0].Transport, utils.Meta),
 			nil, false); err != nil {
@@ -315,7 +315,7 @@ func main() {
 			*usersAddress == ldrCfg.LoaderCgrConfig.CachesConns[0].Address {
 			userS = cacheS
 		} else {
-			if userS, err = rpcclient.NewRpcClient("tcp", *usersAddress, 3, 3,
+			if userS, err = rpcclient.NewRpcClient("tcp", *usersAddress, "", "", 3, 3,
 				time.Duration(1*time.Second), time.Duration(5*time.Minute),
 				strings.TrimPrefix(*rpcEncoding, utils.Meta), nil, false); err != nil {
 				log.Fatalf("Could not connect to UserS API: %s", err.Error())
