@@ -96,6 +96,7 @@ func (da DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProce
 	}
 	if !reqProcessor.AppendCCA {
 		*cca = *NewBareCCAFromCCR(ccr, da.cgrCfg.DiameterAgentCfg().OriginHost, da.cgrCfg.DiameterAgentCfg().OriginRealm)
+		procVars = make(processorVars)
 	}
 	smgEv, err := ccr.AsSMGenericEvent(reqProcessor.CCRFields)
 	if err != nil {
@@ -110,6 +111,9 @@ func (da DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProce
 	}
 	if len(reqProcessor.Flags) != 0 {
 		smgEv[utils.CGRFlags] = reqProcessor.Flags.String() // Populate CGRFlags automatically
+		for flag, val := range reqProcessor.Flags {
+			procVars[flag] = val
+		}
 	}
 	if reqProcessor.PublishEvent && da.pubsubs != nil {
 		evt, err := smgEv.AsMapStringString()

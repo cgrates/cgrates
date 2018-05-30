@@ -289,7 +289,6 @@ func TestPVAsV1AuthorizeArgs(t *testing.T) {
 		CGREvent:    *cgrEv,
 	}
 	outVal := processorVars{MetaRadReqType: MetaRadAcctStart}.asV1AuthorizeArgs(cgrEv)
-
 	if !reflect.DeepEqual(expected, outVal) {
 		t.Errorf("Expecting: <%s>, received: <%s>", utils.ToJSON(expected), utils.ToJSON(outVal))
 	}
@@ -322,6 +321,17 @@ func TestPVAsV1InitSessionArgs(t *testing.T) {
 	outVal := processorVars{MetaRadReqType: MetaRadAcctStart}.asV1InitSessionArgs(cgrEv)
 	if !reflect.DeepEqual(expected, outVal) {
 		t.Errorf("Expecting: <%s>, received: <%s>", utils.ToJSON(expected), utils.ToJSON(outVal))
+	}
+	eInitArgs := &sessions.V1InitSessionArgs{
+		InitSession:       false,
+		AllocateResources: true,
+		GetAttributes:     true,
+		CGREvent:          *cgrEv,
+	}
+	initArgs := processorVars{MetaRadReqType: MetaRadAcctStart, utils.MetaResources: true,
+		utils.MetaAttributes: true}.asV1InitSessionArgs(cgrEv)
+	if !reflect.DeepEqual(eInitArgs, initArgs) {
+		t.Errorf("expecting: %+v, received: %+v", eInitArgs, initArgs)
 	}
 }
 

@@ -7,7 +7,7 @@
 			"id": "VoiceInit",									// formal identifier of this processor
 			"dry_run": false,									// do not send the events to SMG, just log them
 			"request_filter": "Service-Context-Id(^voice);CC-Request-Type(1)",		// filter requests processed by this processor
-			"continue_on_success": false,				// continue to the next template if executed
+			"flags": ["*accounts"],
 			"ccr_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "^*voice", "mandatory": true},
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "Session-Id", "mandatory": true},
@@ -38,7 +38,7 @@
 			"id": "VoiceUpdate",									// formal identifier of this processor
 			"dry_run": false,									// do not send the events to SMG, just log them
 			"request_filter": "Service-Context-Id(^voice);CC-Request-Type(2)",		// filter requests processed by this processor
-			"continue_on_success": false,				// continue to the next template if executed
+			"flags": ["*accounts"],
 			"ccr_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "^*voice", "mandatory": true},
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "Session-Id", "mandatory": true},
@@ -64,7 +64,7 @@
 			"id": "VoiceTerminate",									// formal identifier of this processor
 			"dry_run": false,									// do not send the events to SMG, just log them
 			"request_filter": "Service-Context-Id(^voice);CC-Request-Type(3)",		// filter requests processed by this processor
-			"continue_on_success": false,				// continue to the next template if executed
+			"flags": ["*accounts"],
 			"ccr_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "^*voice", "mandatory": true},
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "Session-Id", "mandatory": true},
