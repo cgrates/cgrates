@@ -45,7 +45,6 @@ var (
 	certificate_path = flag.String("crt_path", "", "path to certificate for tls connection")
 	key_path         = flag.String("key_path", "", "path to key for tls connection")
 	client           *rpcclient.RpcClient
-	client2          *rpc.Client
 )
 
 func executeCommand(command string) {
@@ -94,7 +93,6 @@ func executeCommand(command string) {
 	if cmd.RpcMethod() != "" {
 		res := cmd.RpcResult()
 		param := cmd.RpcParams(false)
-		//log.Print(reflect.TypeOf(param))
 		switch param.(type) {
 		case *console.EmptyWrapper:
 			param = ""
