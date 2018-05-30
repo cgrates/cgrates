@@ -222,6 +222,18 @@ func TestFieldOutVal(t *testing.T) {
 	} else if fldOut != eOut {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", eOut, fldOut)
 	}
+	cfgFld = &config.CfgCdrField{Tag: "TestMultipleFiltersEmptyReply", Type: utils.META_COMPOSED, FieldId: "Account",
+		FieldFilter: utils.ParseRSRFieldsMustCompile("*cgrReply>Error(^$);*cgrReply>MaxUsage(!300);*cgrReply>MaxUsage(!0)", utils.INFIELD_SEP),
+		Value:       utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Data", utils.INFIELD_SEP), Mandatory: true}
+	procVars := processorVars{
+		utils.MetaCGRReply: utils.CGRReply{
+			utils.Error: "RALS_ERROR:NOT_FOUND",
+		},
+	}
+	if _, err := fieldOutVal(m, cfgFld, time.Duration(0),
+		procVars); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestSerializeAVPValueFromString(t *testing.T) {
