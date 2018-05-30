@@ -189,7 +189,7 @@ func testVersion(t *testing.T) {
 	case utils.POSTGRES, utils.MYSQL:
 		currentVersion = storDbVersions
 		testVersion = allVersions
-		testVersion[utils.COST_DETAILS] = 1
+		testVersion[utils.CostDetails] = 1
 		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*cost_details>"
 	}
 	//storageDb

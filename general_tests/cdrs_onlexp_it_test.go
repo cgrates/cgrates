@@ -96,7 +96,7 @@ func TestCDRsOnExpHttpCdrReplication(t *testing.T) {
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		RunID: utils.DEFAULT_RUNID, Cost: 1.201, Rated: true}
+		RunID: utils.DEFAULT_RUNID, Cost: 1.201, PreRated: true}
 	var reply string
 	if err := cdrsMasterRpc.Call("CdrsV2.ProcessCdr", testCdr1, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -184,7 +184,7 @@ func TestCDRsOnExpAMQPReplication(t *testing.T) {
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		RunID: utils.DEFAULT_RUNID, Cost: 1.201, Rated: true}
+		RunID: utils.DEFAULT_RUNID, Cost: 1.201, PreRated: true}
 	var reply string
 	if err := cdrsMasterRpc.Call("CdrsV2.ProcessCdr", testCdr, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())

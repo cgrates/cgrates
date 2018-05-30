@@ -236,12 +236,14 @@ func TestSessionSv1ItInitiateSession(t *testing.T) {
 	args := &sessions.V1InitSessionArgs{
 		InitSession:       true,
 		AllocateResources: true,
-		GetAttributes:     true,
 		ProcessThresholds: utils.BoolPointer(true),
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItInitiateSession",
 			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "TestSSv1It1",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1001",
