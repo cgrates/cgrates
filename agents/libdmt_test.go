@@ -230,8 +230,7 @@ func TestFieldOutVal(t *testing.T) {
 			utils.Error: "RALS_ERROR:NOT_FOUND",
 		},
 	}
-	if _, err := fieldOutVal(m, cfgFld, time.Duration(0),
-		procVars); err != nil {
+	if _, err := fieldOutVal(m, cfgFld, time.Duration(0), procVars); err != ErrFilterNotPassing {
 		t.Error(err)
 	}
 }
