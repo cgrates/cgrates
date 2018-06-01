@@ -143,6 +143,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.asteriskAgentCfg = new(AsteriskAgentCfg)
 	cfg.diameterAgentCfg = new(DiameterAgentCfg)
 	cfg.radiusAgentCfg = new(RadiusAgentCfg)
+	cfg.conectoAgentCfg = new(ConectoAgentCfg)
 	cfg.filterSCfg = new(FilterSCfg)
 	cfg.dispatcherSCfg = new(DispatcherSCfg)
 	cfg.ConfigReloads = make(map[string]chan struct{})
@@ -346,6 +347,7 @@ type CGRConfig struct {
 	asteriskAgentCfg         *AsteriskAgentCfg        // SMAsterisk Configuration
 	diameterAgentCfg         *DiameterAgentCfg        // DiameterAgent configuration
 	radiusAgentCfg           *RadiusAgentCfg          // RadiusAgent configuration
+	conectoAgentCfg          *ConectoAgentCfg         // ConectoAgent configuration
 	filterSCfg               *FilterSCfg              // FilterS configuration
 	PubSubServerEnabled      bool                     // Starts PubSub as server: <true|false>.
 	AliasesServerEnabled     bool                     // Starts PubSub as server: <true|false>.
@@ -635,7 +637,16 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
-	// ResourceS checks
+	// conectoAgent checks
+	if self.conectoAgentCfg.Enabled {
+		for _, sSConn := range self.conectoAgentCfg.SessionSConns {
+			if sSConn.Address == utils.MetaInternal &&
+				!self.sessionSCfg.Enabled {
+				return errors.New("SessionS not enabled but referenced by ConectoAgent component")
+			}
+		}
+	}
+	// ResourceLimiter checks
 	if self.resourceSCfg != nil && self.resourceSCfg.Enabled {
 		for _, connCfg := range self.resourceSCfg.ThresholdSConns {
 			if connCfg.Address == utils.MetaInternal && !self.thresholdSCfg.Enabled {
@@ -778,6 +789,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	}
 
 	jsnRACfg, err := jsnCfg.RadiusAgentJsonCfg()
+	if err != nil {
+		return err
+	}
+
+	jsnCncAgntCfg, err := jsnCfg.ConectoAgentJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -1329,6 +1345,12 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 	}
 
+	if jsnCncAgntCfg != nil {
+		if err := self.conectoAgentCfg.loadFromJsonCfg(jsnCncAgntCfg); err != nil {
+			return err
+		}
+	}
+
 	if jsnPubSubServCfg != nil {
 		if jsnPubSubServCfg.Enabled != nil {
 			self.PubSubServerEnabled = *jsnPubSubServCfg.Enabled
@@ -1503,6 +1525,10 @@ func (self *CGRConfig) KamAgentCfg() *KamAgentCfg {
 // ToDo: fix locking here
 func (self *CGRConfig) AsteriskAgentCfg() *AsteriskAgentCfg {
 	return self.asteriskAgentCfg
+}
+
+func (self *CGRConfig) ConectoAgentCfg() *ConectoAgentCfg {
+	return self.conectoAgentCfg
 }
 
 func (cfg *CGRConfig) FilterSCfg() *FilterSCfg {

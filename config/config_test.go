@@ -996,6 +996,20 @@ func TestRadiusAgentCfg(t *testing.T) {
 	}
 }
 
+func TestConectoAgentCfg(t *testing.T) {
+	expct := &ConectoAgentCfg{
+		Enabled:  false,
+		HttpUrl:  "/conecto",
+		Timezone: "",
+		SessionSConns: []*HaPoolConfig{
+			&HaPoolConfig{Address: utils.MetaInternal}},
+		RequestProcessors: nil,
+	}
+	if !reflect.DeepEqual(expct, cgrCfg.conectoAgentCfg) {
+		t.Errorf("expecting: %s, received: %s", utils.ToJSON(expct), utils.ToJSON(cgrCfg.conectoAgentCfg))
+	}
+}
+
 func TestDbDefaults(t *testing.T) {
 	dbdf := NewDbDefaults()
 	flagInput := utils.MetaDynamic
