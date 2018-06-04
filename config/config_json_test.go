@@ -183,6 +183,8 @@ func TestDfListenJsonCfg(t *testing.T) {
 		Http_tls:               utils.StringPointer("127.0.0.1:2280"),
 		Tls_server_certificate: utils.StringPointer(""),
 		Tls_server_key:         utils.StringPointer(""),
+		Tls_client_certificate: utils.StringPointer(""),
+		Tls_client_key:         utils.StringPointer(""),
 	}
 	if cfg, err := dfCgrJsonCfg.ListenJsonCfg(); err != nil {
 		t.Error(err)

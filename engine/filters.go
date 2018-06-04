@@ -65,7 +65,8 @@ func (fS *FilterS) connStatS() (err error) {
 	if fS.statSConns != nil { // connection was populated between locks
 		return
 	}
-	fS.statSConns, err = NewRPCPool(rpcclient.POOL_FIRST, fS.cfg.ConnectAttempts, fS.cfg.Reconnects, fS.cfg.ConnectTimeout, fS.cfg.ReplyTimeout,
+	fS.statSConns, err = NewRPCPool(rpcclient.POOL_FIRST, fS.cfg.TLSClientKey, fS.cfg.TLSClientCerificate,
+		fS.cfg.ConnectAttempts, fS.cfg.Reconnects, fS.cfg.ConnectTimeout, fS.cfg.ReplyTimeout,
 		fS.cfg.FilterSCfg().StatSConns, fS.statSChan, fS.cfg.InternalTtl)
 	return
 }

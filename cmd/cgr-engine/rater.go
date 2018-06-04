@@ -62,7 +62,8 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		go func() {
 			defer close(thdsTaskChan)
 			var err error
-			thdS, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			thdS, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
+				cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 				cfg.RALsThresholdSConns, internalThdSChan, cfg.InternalTtl)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to ThresholdS, error: %s", err.Error()))
@@ -79,7 +80,8 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		go func() {
 			defer close(cdrstatTaskChan)
 			var err error
-			cdrStats, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cdrStats, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
+				cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 				cfg.RALsCDRStatSConns, internalCdrStatSChan, cfg.InternalTtl)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to CDRStatS, error: %s", err.Error()))
@@ -96,7 +98,8 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		go func() {
 			defer close(statsTaskChan)
 			var err error
-			stats, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			stats, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
+				cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 				cfg.RALsStatSConns, internalStatSChan, cfg.InternalTtl)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to StatS, error: %s", err.Error()))
@@ -111,7 +114,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		waitTasks = append(waitTasks, pubsubTaskChan)
 		go func() {
 			defer close(pubsubTaskChan)
-			if pubSubSConns, err := engine.NewRPCPool(rpcclient.POOL_FIRST,
+			if pubSubSConns, err := engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
 				cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 				cfg.RALsPubSubSConns, internalPubSubSChan, cfg.InternalTtl); err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to PubSubS: %s", err.Error()))
@@ -130,7 +133,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		go func() {
 			defer close(attrsTaskChan)
 			var err error
-			attrS, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts,
+			attrS, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate, cfg.ConnectAttempts,
 				cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 				cfg.RALsAttributeSConns, internalAttributeSChan, cfg.InternalTtl)
 			if err != nil {
@@ -147,7 +150,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		waitTasks = append(waitTasks, aliasesTaskChan)
 		go func() {
 			defer close(aliasesTaskChan)
-			if aliaseSCons, err := engine.NewRPCPool(rpcclient.POOL_FIRST,
+			if aliaseSCons, err := engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
 				cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 				cfg.RALsAliasSConns, internalAliaseSChan, cfg.InternalTtl); err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to AliaseS, error: %s", err.Error()))
@@ -166,7 +169,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		go func() {
 			defer close(usersTaskChan)
 			var err error
-			if usersConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
+			if usersConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
 				cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 				cfg.RALsUserSConns, internalUserSChan, cfg.InternalTtl); err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect UserS, error: %s", err.Error()))

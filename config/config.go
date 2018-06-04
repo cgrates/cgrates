@@ -280,6 +280,8 @@ type CGRConfig struct {
 	HTTPTLSListen            string            // HTTP TLS listening address
 	TLSServerCerificate      string            // path to server certificate
 	TLSServerKey             string            // path to server key
+	TLSClientCerificate      string            // path to client certificate
+	TLSClientKey             string            // path to client key
 	HTTPJsonRPCURL           string            // JSON RPC relative URL ("" to disable)
 	HTTPFreeswitchCDRsURL    string            // Freeswitch CDRS relative URL ("" to disable)
 	HTTPCDRsURL              string            // CDRS relative URL ("" to disable)
@@ -1026,6 +1028,12 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 		if jsnListenCfg.Tls_server_key != nil && *jsnListenCfg.Tls_server_key != "" {
 			self.TLSServerKey = *jsnListenCfg.Tls_server_key
+		}
+		if jsnListenCfg.Tls_client_certificate != nil && *jsnListenCfg.Tls_client_certificate != "" {
+			self.TLSClientCerificate = *jsnListenCfg.Tls_client_certificate
+		}
+		if jsnListenCfg.Tls_client_key != nil && *jsnListenCfg.Tls_client_key != "" {
+			self.TLSClientKey = *jsnListenCfg.Tls_client_key
 		}
 	}
 

@@ -87,6 +87,8 @@ const CGRATES_CFG_JSON = `
 	"http_tls": "127.0.0.1:2280",			// HTTP TLS listening address
 	"tls_server_certificate" : "",			// path to server certificate(must conatin server.crt + ca.crt)
 	"tls_server_key":"",					// path to server key
+	"tls_client_certificate" : "",			// path to client certificate(must conatin client.crt + ca.crt)
+	"tls_client_key":"",					// path to client key
 },
 
 
