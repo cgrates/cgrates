@@ -12,10 +12,6 @@
 	"rpc_json": ":2012",
 	"rpc_gob": ":2013",
 	"http": ":2080",
-	"rpc_json_tls":":2022",
-	"rpc_gob_tls":":2023",
-	"tls_server_certificate" : "/usr/share/cgrates/server.crt",			// path to server certificate(must conatin server.crt + ca.crt)
-	"tls_server_key":"/usr/share/cgrates/server.key",					// path to server key
 },
 
 "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
