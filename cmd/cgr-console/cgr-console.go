@@ -36,7 +36,7 @@ import (
 )
 
 var (
-	history_fn       = os.Getenv("HOME") + "/.cgr_history"
+	historyFN        = os.Getenv("HOME") + "/.cgr_history"
 	version          = flag.Bool("version", false, "Prints the application version.")
 	verbose          = flag.Bool("verbose", false, "Show extra info about command execution.")
 	server           = flag.String("server", "127.0.0.1:2012", "server address host:port")
@@ -160,7 +160,7 @@ func main() {
 		return
 	})
 
-	if f, err := os.Open(history_fn); err == nil {
+	if f, err := os.Open(historyFN); err == nil {
 		line.ReadHistory(f)
 		f.Close()
 	}
@@ -186,7 +186,7 @@ func main() {
 		}
 	}
 
-	if f, err := os.Create(history_fn); err != nil {
+	if f, err := os.Create(historyFN); err != nil {
 		log.Print("Error writing history file: ", err)
 	} else {
 		line.WriteHistory(f)
