@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/rpc"
 	"os"
 	"sort"
 	"strings"
