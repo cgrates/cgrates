@@ -22,7 +22,7 @@ imports:
 - name: github.com/cgrates/radigo
   version: 69d4269e21990c0f120b8e60d5b75d533db7f3dd
 - name: github.com/cgrates/rpcclient
-  version: dddae42e9344e877627cd4b7aba075d63b452c0b
+  version: 2d76d0851135995493b0bbf9393267a63d986e83
 - name: github.com/ChrisTrenkamp/goxpath
   version: 4aad8d0161aae7d17df4755d2c1e86cd1fcaaab6
   subpackages:
