@@ -78,7 +78,7 @@ func TestRPCITLclStartSecondEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestRPCITLclRpcConnPoolFirst(t *testing.T) {
 	rpcPoolFirst = rpcclient.NewRpcClientPool(rpcclient.POOL_FIRST, 0)
-	rpcRAL1, err = rpcclient.NewRpcClient("tcp", rpcITCfg1.RPCJSONListen, 3, 1,
+	rpcRAL1, err = rpcclient.NewRpcClient("tcp", rpcITCfg1.RPCJSONListen, "", "", 3, 1,
 		time.Duration(1*time.Second), time.Duration(2*time.Second), rpcclient.JSON_RPC, nil, false)
 	if err == nil {
 		t.Fatal("Should receive cannot connect error here")
@@ -312,13 +312,13 @@ func TestRPCITRmtRpcConnPool(t *testing.T) {
 		return
 	}
 	rpcPoolFirst = rpcclient.NewRpcClientPool(rpcclient.POOL_FIRST, 0)
-	rpcRALRmt, err := rpcclient.NewRpcClient("tcp", RemoteRALsAddr1, 1, 1,
+	rpcRALRmt, err := rpcclient.NewRpcClient("tcp", RemoteRALsAddr1, "", "", 1, 1,
 		time.Duration(1*time.Second), time.Duration(2*time.Second), rpcclient.JSON_RPC, nil, false)
 	if err != nil {
 		t.Fatal(err)
 	}
 	rpcPoolFirst.AddClient(rpcRALRmt)
-	rpcRAL1, err = rpcclient.NewRpcClient("tcp", RemoteRALsAddr2, 1, 1,
+	rpcRAL1, err = rpcclient.NewRpcClient("tcp", RemoteRALsAddr2, "", "", 1, 1,
 		time.Duration(1*time.Second), time.Duration(2*time.Second), rpcclient.JSON_RPC, nil, false)
 	if err != nil {
 		t.Fatal(err)
