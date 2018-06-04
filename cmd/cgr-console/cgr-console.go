@@ -36,14 +36,14 @@ import (
 )
 
 var (
-	historyFN        = os.Getenv("HOME") + "/.cgr_history"
-	version          = flag.Bool("version", false, "Prints the application version.")
-	verbose          = flag.Bool("verbose", false, "Show extra info about command execution.")
-	server           = flag.String("server", "127.0.0.1:2012", "server address host:port")
-	rpc_encoding     = flag.String("rpc_encoding", "json", "RPC encoding used <gob|json>")
-	certificate_path = flag.String("crt_path", "", "path to certificate for tls connection")
-	key_path         = flag.String("key_path", "", "path to key for tls connection")
-	client           *rpcclient.RpcClient
+	historyFN       = os.Getenv("HOME") + "/.cgr_history"
+	version         = flag.Bool("version", false, "Prints the application version.")
+	verbose         = flag.Bool("verbose", false, "Show extra info about command execution.")
+	server          = flag.String("server", "127.0.0.1:2012", "server address host:port")
+	rpcEncoding     = flag.String("rpc_encoding", "json", "RPC encoding used <gob|json>")
+	certificatePath = flag.String("crt_path", "", "path to certificate for tls connection")
+	keyPath         = flag.String("key_path", "", "path to key for tls connection")
+	client          *rpcclient.RpcClient
 )
 
 func executeCommand(command string) {
@@ -121,8 +121,8 @@ func main() {
 		return
 	}
 	var err error
-	client, err = rpcclient.NewRpcClient("tcp", *server, *key_path, *certificate_path, 3, 3,
-		time.Duration(1*time.Second), time.Duration(5*time.Minute), *rpc_encoding, nil, false)
+	client, err = rpcclient.NewRpcClient("tcp", *server, *keyPath, *certificatePath, 3, 3,
+		time.Duration(1*time.Second), time.Duration(5*time.Minute), *rpcEncoding, nil, false)
 	if err != nil {
 		flag.PrintDefaults()
 		log.Fatal("Could not connect to server " + *server)
