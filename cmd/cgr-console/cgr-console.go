@@ -40,7 +40,7 @@ var (
 	version          = flag.Bool("version", false, "Prints the application version.")
 	verbose          = flag.Bool("verbose", false, "Show extra info about command execution.")
 	server           = flag.String("server", "127.0.0.1:2012", "server address host:port")
-	rpc_encoding     = flag.String("rpc_encoding", "json", "RPC encoding used <gob|json|json_tls|gob_tls>")
+	rpc_encoding     = flag.String("rpc_encoding", "json", "RPC encoding used <gob|json>")
 	certificate_path = flag.String("crt_path", "", "path to certificate for tls connection")
 	key_path         = flag.String("key_path", "", "path to key for tls connection")
 	client           *rpcclient.RpcClient

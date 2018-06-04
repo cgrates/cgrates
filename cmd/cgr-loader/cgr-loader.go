@@ -49,6 +49,8 @@ var (
 		"The DataDb user to sign in as.")
 	dataDBPasswd = flag.String("datadb_passwd", dfltCfg.DataDbPass,
 		"The DataDb user's password.")
+	dbDataEncoding = flag.String("dbdata_encoding", dfltCfg.DBDataEncoding,
+		"The encoding used to store object data in strings")
 
 	storDBType = flag.String("stordb_type", dfltCfg.StorDBType,
 		"The type of the storDb database <*mysql|*postgres|*mongo>")
@@ -63,9 +65,6 @@ var (
 	storDBPasswd = flag.String("stordb_passwd", dfltCfg.StorDBPass,
 		"The storDb user's password.")
 
-	dbDataEncoding = flag.String("dbdata_encoding", dfltCfg.DBDataEncoding,
-		"The encoding used to store object data in strings")
-
 	flush = flag.Bool("flushdb", false,
 		"Flush the database before importing")
 	tpid = flag.String("tpid", dfltCfg.LoaderCgrConfig.TpID,
@@ -78,8 +77,6 @@ var (
 		"Enable detailed verbose logging output")
 	dryRun = flag.Bool("dry_run", false,
 		"When true will not save loaded data to dataDb but just parse it for consistency and errors.")
-	//validate = flag.Bool("validate", false,
-	//	"When true will run various check on the loaded data to check for structural errors")
 
 	fromStorDB    = flag.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
 	toStorDB      = flag.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
@@ -298,7 +295,8 @@ func main() {
 	}
 	if len(ldrCfg.LoaderCgrConfig.CachesConns) != 0 { // Init connection to CacheS so we can reload it's data
 		if cacheS, err = rpcclient.NewRpcClient("tcp",
-			ldrCfg.LoaderCgrConfig.CachesConns[0].Address, "", "", 3, 3,
+			ldrCfg.LoaderCgrConfig.CachesConns[0].Address,
+			ldrCfg.TLSClientKey, ldrCfg.TLSClientCerificate, 3, 3,
 			time.Duration(1*time.Second), time.Duration(5*time.Minute),
 			strings.TrimPrefix(ldrCfg.LoaderCgrConfig.CachesConns[0].Transport, utils.Meta),
 			nil, false); err != nil {
@@ -315,7 +313,8 @@ func main() {
 			*usersAddress == ldrCfg.LoaderCgrConfig.CachesConns[0].Address {
 			userS = cacheS
 		} else {
-			if userS, err = rpcclient.NewRpcClient("tcp", *usersAddress, "", "", 3, 3,
+			if userS, err = rpcclient.NewRpcClient("tcp", *usersAddress,
+				ldrCfg.TLSClientKey, ldrCfg.TLSClientCerificate, 3, 3,
 				time.Duration(1*time.Second), time.Duration(5*time.Minute),
 				strings.TrimPrefix(*rpcEncoding, utils.Meta), nil, false); err != nil {
 				log.Fatalf("Could not connect to UserS API: %s", err.Error())
