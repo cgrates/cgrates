@@ -241,6 +241,43 @@ func TestCgrCfgCDRC(t *testing.T) {
 	}
 }
 
+func TestHttpAgentCfg(t *testing.T) {
+	JSN_RAW_CFG := `
+{
+"http_agent": [
+	{
+		"url": "/conecto",					// relative URL for requests coming in
+		"sessions_conns": [
+			{"address": "*internal"}		// connection towards SessionService
+		],
+		"timezone": "",						// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
+		"request_payload":	"*url",			// source of input data <*url>
+		"reply_payload":	"*xml",			// type of output data <*xml>
+		"request_processors": [],
+	}
+],
+}
+	`
+	eCgrCfg, _ := NewDefaultCGRConfig()
+	eCgrCfg.httpAgentCfg = []*HttpAgentCfg{
+		&HttpAgentCfg{
+			Url:            "/conecto",
+			Timezone:       "",
+			RequestPayload: utils.MetaUrl,
+			ReplyPayload:   utils.MetaXml,
+			SessionSConns: []*HaPoolConfig{
+				&HaPoolConfig{Address: utils.MetaInternal}},
+			RequestProcessors: nil,
+		},
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(JSN_RAW_CFG); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCgrCfg.HttpAgentCfg(), cgrCfg.HttpAgentCfg()) {
+		t.Errorf("Expected: %s, received: %s",
+			utils.ToJSON(eCgrCfg.httpAgentCfg), utils.ToJSON(cgrCfg.httpAgentCfg))
+	}
+}
+
 func TestCgrCfgLoadJSONDefaults(t *testing.T) {
 	cgrCfg, err = NewDefaultCGRConfig()
 	if err != nil {
@@ -993,20 +1030,6 @@ func TestRadiusAgentCfg(t *testing.T) {
 	}
 	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.RequestProcessors, testRA.RequestProcessors) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.radiusAgentCfg.RequestProcessors, testRA.RequestProcessors)
-	}
-}
-
-func TestConectoAgentCfg(t *testing.T) {
-	expct := &ConectoAgentCfg{
-		Enabled:  false,
-		HttpUrl:  "/conecto",
-		Timezone: "",
-		SessionSConns: []*HaPoolConfig{
-			&HaPoolConfig{Address: utils.MetaInternal}},
-		RequestProcessors: nil,
-	}
-	if !reflect.DeepEqual(expct, cgrCfg.conectoAgentCfg) {
-		t.Errorf("expecting: %s, received: %s", utils.ToJSON(expct), utils.ToJSON(cgrCfg.conectoAgentCfg))
 	}
 }
 

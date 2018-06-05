@@ -22,23 +22,21 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type ConectoAgentCfg struct {
-	Enabled           bool
-	HttpUrl           string
+type HttpAgentCfg struct {
+	Url               string
 	SessionSConns     []*HaPoolConfig
 	Timezone          string
-	RequestProcessors []*CncProcessorCfg
+	RequestPayload    string
+	ReplyPayload      string
+	RequestProcessors []*HttpAgntProcCfg
 }
 
-func (ca *ConectoAgentCfg) loadFromJsonCfg(jsnCfg *ConectoAgentJsonCfg) error {
+func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg) error {
 	if jsnCfg == nil {
 		return nil
 	}
-	if jsnCfg.Enabled != nil {
-		ca.Enabled = *jsnCfg.Enabled
-	}
-	if jsnCfg.Http_url != nil {
-		ca.HttpUrl = *jsnCfg.Http_url
+	if jsnCfg.Url != nil {
+		ca.Url = *jsnCfg.Url
 	}
 	if jsnCfg.Sessions_conns != nil {
 		ca.SessionSConns = make([]*HaPoolConfig, len(*jsnCfg.Sessions_conns))
@@ -50,9 +48,15 @@ func (ca *ConectoAgentCfg) loadFromJsonCfg(jsnCfg *ConectoAgentJsonCfg) error {
 	if jsnCfg.Timezone != nil {
 		ca.Timezone = *jsnCfg.Timezone
 	}
+	if jsnCfg.Request_payload != nil {
+		ca.RequestPayload = *jsnCfg.Request_payload
+	}
+	if jsnCfg.Reply_payload != nil {
+		ca.ReplyPayload = *jsnCfg.Reply_payload
+	}
 	if jsnCfg.Request_processors != nil {
 		for _, reqProcJsn := range *jsnCfg.Request_processors {
-			rp := new(CncProcessorCfg)
+			rp := new(HttpAgntProcCfg)
 			var haveID bool
 			for _, rpSet := range ca.RequestProcessors {
 				if reqProcJsn.Id != nil && rpSet.Id == *reqProcJsn.Id {
@@ -72,7 +76,7 @@ func (ca *ConectoAgentCfg) loadFromJsonCfg(jsnCfg *ConectoAgentJsonCfg) error {
 	return nil
 }
 
-type CncProcessorCfg struct {
+type HttpAgntProcCfg struct {
 	Id            string
 	DryRun        bool
 	Filters       []string
@@ -81,32 +85,32 @@ type CncProcessorCfg struct {
 	ReplyFields   []*CfgCdrField
 }
 
-func (cp *CncProcessorCfg) loadFromJsonCfg(jsnCfg *CncProcessorJsnCfg) (err error) {
+func (ha *HttpAgntProcCfg) loadFromJsonCfg(jsnCfg *HttpAgentProcessorJsnCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
 	if jsnCfg.Id != nil {
-		cp.Id = *jsnCfg.Id
+		ha.Id = *jsnCfg.Id
 	}
 	if jsnCfg.Dry_run != nil {
-		cp.DryRun = *jsnCfg.Dry_run
+		ha.DryRun = *jsnCfg.Dry_run
 	}
 	if jsnCfg.Filters != nil {
-		cp.Filters = make([]string, len(*jsnCfg.Filters))
+		ha.Filters = make([]string, len(*jsnCfg.Filters))
 		for i, fltr := range *jsnCfg.Filters {
-			cp.Filters[i] = fltr
+			ha.Filters[i] = fltr
 		}
 	}
 	if jsnCfg.Flags != nil {
-		cp.Flags = utils.StringMapFromSlice(*jsnCfg.Flags)
+		ha.Flags = utils.StringMapFromSlice(*jsnCfg.Flags)
 	}
 	if jsnCfg.Request_fields != nil {
-		if cp.RequestFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Request_fields); err != nil {
+		if ha.RequestFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Request_fields); err != nil {
 			return
 		}
 	}
 	if jsnCfg.Reply_fields != nil {
-		if cp.ReplyFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Reply_fields); err != nil {
+		if ha.ReplyFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Reply_fields); err != nil {
 			return
 		}
 	}

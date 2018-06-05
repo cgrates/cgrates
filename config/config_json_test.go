@@ -648,22 +648,12 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 	}
 }
 
-func TestConectoAgentJsonCfg(t *testing.T) {
-	eCfg := &ConectoAgentJsonCfg{
-		Enabled:  utils.BoolPointer(false),
-		Http_url: utils.StringPointer("/conecto"),
-		Sessions_conns: &[]*HaPoolJsonCfg{
-			&HaPoolJsonCfg{
-				Address: utils.StringPointer(utils.MetaInternal),
-			}},
-		Timezone:           utils.StringPointer(""),
-		Request_processors: &[]*CncProcessorJsnCfg{},
-	}
-	if cfg, err := dfCgrJsonCfg.ConectoAgentJsonCfg(); err != nil {
+func TestHttpAgentJsonCfg(t *testing.T) {
+	eCfg := &[]*HttpAgentJsonCfg{}
+	if cfg, err := dfCgrJsonCfg.HttpAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		rcv := *cfg.Request_processors
-		t.Errorf("Received: %+v", rcv)
+		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }
 

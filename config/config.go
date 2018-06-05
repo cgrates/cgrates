@@ -143,7 +143,6 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.asteriskAgentCfg = new(AsteriskAgentCfg)
 	cfg.diameterAgentCfg = new(DiameterAgentCfg)
 	cfg.radiusAgentCfg = new(RadiusAgentCfg)
-	cfg.conectoAgentCfg = new(ConectoAgentCfg)
 	cfg.filterSCfg = new(FilterSCfg)
 	cfg.dispatcherSCfg = new(DispatcherSCfg)
 	cfg.ConfigReloads = make(map[string]chan struct{})
@@ -347,7 +346,7 @@ type CGRConfig struct {
 	asteriskAgentCfg         *AsteriskAgentCfg        // SMAsterisk Configuration
 	diameterAgentCfg         *DiameterAgentCfg        // DiameterAgent configuration
 	radiusAgentCfg           *RadiusAgentCfg          // RadiusAgent configuration
-	conectoAgentCfg          *ConectoAgentCfg         // ConectoAgent configuration
+	httpAgentCfg             []*HttpAgentCfg          // HttpAgent configuration
 	filterSCfg               *FilterSCfg              // FilterS configuration
 	PubSubServerEnabled      bool                     // Starts PubSub as server: <true|false>.
 	AliasesServerEnabled     bool                     // Starts PubSub as server: <true|false>.
@@ -637,12 +636,12 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
-	// conectoAgent checks
-	if self.conectoAgentCfg.Enabled {
-		for _, sSConn := range self.conectoAgentCfg.SessionSConns {
+	for _, httpAgentCfg := range self.httpAgentCfg {
+		// httpAgent checks
+		for _, sSConn := range httpAgentCfg.SessionSConns {
 			if sSConn.Address == utils.MetaInternal &&
 				!self.sessionSCfg.Enabled {
-				return errors.New("SessionS not enabled but referenced by ConectoAgent component")
+				return errors.New("SessionS not enabled but referenced by HttpAgent component")
 			}
 		}
 	}
@@ -793,7 +792,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return err
 	}
 
-	jsnCncAgntCfg, err := jsnCfg.ConectoAgentJsonCfg()
+	jsnHttpAgntCfg, err := jsnCfg.HttpAgentJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -1345,9 +1344,13 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 	}
 
-	if jsnCncAgntCfg != nil {
-		if err := self.conectoAgentCfg.loadFromJsonCfg(jsnCncAgntCfg); err != nil {
-			return err
+	if jsnHttpAgntCfg != nil {
+		self.httpAgentCfg = make([]*HttpAgentCfg, len(*jsnHttpAgntCfg))
+		for i, jsnCfg := range *jsnHttpAgntCfg {
+			self.httpAgentCfg[i] = new(HttpAgentCfg)
+			if err := self.httpAgentCfg[i].loadFromJsonCfg(jsnCfg); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -1527,8 +1530,8 @@ func (self *CGRConfig) AsteriskAgentCfg() *AsteriskAgentCfg {
 	return self.asteriskAgentCfg
 }
 
-func (self *CGRConfig) ConectoAgentCfg() *ConectoAgentCfg {
-	return self.conectoAgentCfg
+func (self *CGRConfig) HttpAgentCfg() []*HttpAgentCfg {
+	return self.httpAgentCfg
 }
 
 func (cfg *CGRConfig) FilterSCfg() *FilterSCfg {

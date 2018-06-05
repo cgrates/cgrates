@@ -539,6 +539,8 @@ const (
 	SchedulerS                   = "SchedulerS"
 	MetaMultiply                 = "*multiply"
 	MetaDivide                   = "*divide"
+	MetaUrl                      = "*url"
+	MetaXml                      = "*xml"
 )
 
 // Migrator Action

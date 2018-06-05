@@ -373,15 +373,16 @@ type RAReqProcessorJsnCfg struct {
 }
 
 // Conecto Agent configuration section
-type ConectoAgentJsonCfg struct {
-	Enabled            *bool
-	Http_url           *string
+type HttpAgentJsonCfg struct {
+	Url                *string
 	Sessions_conns     *[]*HaPoolJsonCfg
 	Timezone           *string
-	Request_processors *[]*CncProcessorJsnCfg
+	Request_payload    *string
+	Reply_payload      *string
+	Request_processors *[]*HttpAgentProcessorJsnCfg
 }
 
-type CncProcessorJsnCfg struct {
+type HttpAgentProcessorJsnCfg struct {
 	Id             *string
 	Dry_run        *bool
 	Filters        *[]string
