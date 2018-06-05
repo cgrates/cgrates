@@ -189,6 +189,7 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 		s.Lock()
 		s.httpEnabled = true
 		s.Unlock()
+
 		Logger.Info("<HTTP> enabling handler for JSON-RPC")
 		if useBasicAuth {
 			http.HandleFunc(jsonRPCURL, use(handleRequest, basicAuth(userList)))
@@ -379,4 +380,52 @@ func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey string) {
 		}
 		go jsonrpc.ServeConn(conn)
 	}
+}
+
+func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey string, jsonRPCURL string, wsRPCURL string,
+	useBasicAuth bool, userList map[string]string) {
+	s.RLock()
+	enabled := s.rpcEnabled
+	s.RUnlock()
+	if !enabled {
+		return
+	}
+	mux := http.NewServeMux()
+	if enabled && jsonRPCURL != "" {
+		s.Lock()
+		s.httpEnabled = true
+		s.Unlock()
+		Logger.Info("<HTTPTLS> enabling handler for JSON-RPC")
+		if useBasicAuth {
+			mux.HandleFunc(jsonRPCURL, use(handleRequest, basicAuth(userList)))
+		} else {
+			mux.HandleFunc(jsonRPCURL, handleRequest)
+		}
+	}
+	if enabled && wsRPCURL != "" {
+		s.Lock()
+		s.httpEnabled = true
+		s.Unlock()
+		Logger.Info("<HTTPTLS> enabling handler for WebSocket connections")
+		wsHandler := websocket.Handler(func(ws *websocket.Conn) {
+			jsonrpc.ServeConn(ws)
+		})
+		if useBasicAuth {
+			mux.HandleFunc(wsRPCURL, use(func(w http.ResponseWriter, r *http.Request) {
+				wsHandler.ServeHTTP(w, r)
+			}, basicAuth(userList)))
+		} else {
+			mux.Handle(wsRPCURL, wsHandler)
+		}
+	}
+	if !s.httpEnabled {
+		return
+	}
+	if useBasicAuth {
+		Logger.Info("<HTTPTLS> enabling basic auth")
+	}
+
+	Logger.Info(fmt.Sprintf("<HTTPTLS> start listening at <%s>", addr))
+
+	http.ListenAndServeTLS(addr, serverCrt, serverKey, mux)
 }
