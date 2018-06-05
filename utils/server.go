@@ -424,8 +424,6 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey string, jsonRPCURL stri
 	if useBasicAuth {
 		Logger.Info("<HTTPTLS> enabling basic auth")
 	}
-
 	Logger.Info(fmt.Sprintf("<HTTPTLS> start listening at <%s>", addr))
-
 	http.ListenAndServeTLS(addr, serverCrt, serverKey, mux)
 }
