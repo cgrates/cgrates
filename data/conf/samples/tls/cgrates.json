@@ -14,11 +14,23 @@
 	"http": ":2080",
 	"rpc_json_tls":":2022",
 	"rpc_gob_tls":":2023",
+	"http_tls": ":2280",			
 	"tls_server_certificate" : "/usr/share/cgrates/tls/serverCA.crt",			// path to server certificate(must conatin server.crt + ca.crt)
 	"tls_server_key":"/usr/share/cgrates/tls/server.key",					// path to server key
 	"tls_client_certificate" : "/usr/share/cgrates/tls/clientCA.crt",			// path to client certificate(must conatin client.crt + ca.crt)
 	"tls_client_key":"/usr/share/cgrates/tls/client.key",					// path to client key
 },
+
+
+"http": {										// HTTP server configuration
+	"json_rpc_url": "/jsonrpc",					// JSON RPC relative URL ("" to disable)
+	"ws_url": "/ws",							// WebSockets relative URL ("" to disable)
+	"freeswitch_cdrs_url": "/freeswitch_json",	// Freeswitch CDRS relative URL ("" to disable)
+	"http_cdrs": "/cdr_http",					// CDRS relative URL ("" to disable)
+	"use_basic_auth": false,					// use basic authentication
+	"auth_users": {},							// basic authentication usernames and base64-encoded passwords (eg: { "username1": "cGFzc3dvcmQ=", "username2": "cGFzc3dvcmQy "})
+},
+
 
 "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
 	"db_type": "redis",						// data_db type: <redis|mongo>

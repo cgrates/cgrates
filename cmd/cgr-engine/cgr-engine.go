@@ -838,6 +838,21 @@ func startRpc(server *utils.Server, internalRaterChan,
 			)
 		}
 	}
+	if cfg.HTTPTLSListen != "" {
+		if cfg.TLSServerCerificate == "" || cfg.TLSServerKey == "" {
+			utils.Logger.Warning("WARNING: missing TLS certificate/key file!")
+		} else {
+			go server.ServeHTTPTLS(
+				cfg.HTTPTLSListen,
+				cfg.TLSServerCerificate,
+				cfg.TLSServerKey,
+				cfg.HTTPJsonRPCURL,
+				cfg.HTTPWSURL,
+				cfg.HTTPUseBasicAuth,
+				cfg.HTTPAuthUsers,
+			)
+		}
+	}
 
 }
 

@@ -35,6 +35,7 @@ var (
 	tlsCfg           *config.CGRConfig
 	tlsRpcClientJson *rpcclient.RpcClient
 	tlsRpcClientGob  *rpcclient.RpcClient
+	tlsHTTPJson      *rpcclient.RpcClient
 	tlsConfDIR       string //run tests for specific configuration
 	tlsDelay         int
 )
@@ -92,6 +93,13 @@ func testTLSRpcConn(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %s when dialing", err)
 	}
+
+	tlsHTTPJson, err = rpcclient.NewRpcClient("tcp", "https://localhost:2280/jsonrpc", tlsCfg.TLSClientKey,
+		tlsCfg.TLSClientCerificate, 3, 3,
+		time.Duration(1*time.Second), time.Duration(5*time.Minute), rpcclient.JSON_HTTP, nil, false)
+	if err != nil {
+		t.Errorf("Error: %s when dialing", err)
+	}
 }
 
 func testTLSPing(t *testing.T) {
@@ -107,10 +115,18 @@ func testTLSPing(t *testing.T) {
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
+	if err := tlsHTTPJson.Call(utils.ThresholdSv1Ping, "", &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
+	}
 	if err := tlsRpcClientJson.Call(utils.DispatcherSv1Ping, "", &reply); err == nil {
 		t.Error(err)
 	}
 	if err := tlsRpcClientGob.Call(utils.DispatcherSv1Ping, "", &reply); err == nil {
+		t.Error(err)
+	}
+	if err := tlsHTTPJson.Call(utils.DispatcherSv1Ping, "", &reply); err == nil {
 		t.Error(err)
 	}
 }
