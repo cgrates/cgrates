@@ -82,8 +82,11 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdForEvent(args *ArgsProcessE
 	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
 		return
 	}
-	mp := utils.ParseStringMap(rplyEv.CGREvent.Event[utils.APIMethods].(string))
-	if !mp.HasKey(utils.ThresholdSv1GetThresholdsForEvent) {
+	var apiMethods string
+	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
+		return
+	}
+	if !utils.ParseStringMap(apiMethods).HasKey(utils.ThresholdSv1GetThresholdsForEvent) {
 		return utils.ErrUnauthorizedApi
 	}
 	return dS.thdS.Call(utils.ThresholdSv1GetThresholdsForEvent, args.TenantID, t)
@@ -106,8 +109,11 @@ func (dS *DispatcherService) ThresholdSv1ProcessEvent(args *ArgsProcessEventWith
 	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
 		return
 	}
-	mp := utils.ParseStringMap(rplyEv.CGREvent.Event[utils.APIMethods].(string))
-	if !mp.HasKey(utils.ThresholdSv1ProcessEvent) {
+	var apiMethods string
+	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
+		return
+	}
+	if !utils.ParseStringMap(apiMethods).HasKey(utils.ThresholdSv1ProcessEvent) {
 		return utils.ErrUnauthorizedApi
 	}
 	return dS.thdS.Call(utils.ThresholdSv1ProcessEvent, args.ArgsProcessEvent, tIDs)

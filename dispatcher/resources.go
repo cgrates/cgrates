@@ -49,8 +49,11 @@ func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args ArgsV1ResUsage
 	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
 		return
 	}
-	mp := utils.ParseStringMap(rplyEv.CGREvent.Event[utils.APIMethods].(string))
-	if !mp.HasKey(utils.ResourceSv1GetResourcesForEvent) {
+	var apiMethods string
+	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
+		return
+	}
+	if !utils.ParseStringMap(apiMethods).HasKey(utils.ResourceSv1GetResourcesForEvent) {
 		return utils.ErrUnauthorizedApi
 	}
 	return dS.resS.Call(utils.ResourceSv1GetResourcesForEvent, args.ArgRSv1ResourceUsage, reply)
