@@ -1161,6 +1161,9 @@ func main() {
 		go startRadiusAgent(internalSMGChan, exitChan)
 	}
 
+	if len(cfg.HttpAgentCfg()) != 0 {
+		go startHTTPAgent(internalSMGChan, exitChan, server)
+
 	// Start PubSubS service
 	if cfg.PubSubServerEnabled {
 		go startPubSubServer(internalPubSubSChan, dm, server, exitChan)
