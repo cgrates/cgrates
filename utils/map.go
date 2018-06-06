@@ -176,6 +176,11 @@ func (sm StringMap) Join(mps ...StringMap) {
 	}
 }
 
+func (sm StringMap) HasKey(key string) (has bool) {
+	_, has = sm[key]
+	return
+}
+
 /*
 func NoDots(m map[string]struct{}) map[string]struct{} {
 	return MapKeysReplace(m, ".", "．")

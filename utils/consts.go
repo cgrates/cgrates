@@ -541,6 +541,7 @@ const (
 	MetaDivide                   = "*divide"
 	MetaUrl                      = "*url"
 	MetaXml                      = "*xml"
+	ApiKey                       = "apikey"
 )
 
 // Migrator Action
@@ -625,7 +626,7 @@ const (
 	CapStatQueues           = "StatQueues"
 )
 
-// DispatcherStrategy
+// Dispatcher Const
 const (
 	MetaRandom   = "*random"
 	MetaBalancer = "*balancer"
@@ -636,6 +637,9 @@ const (
 	ResourceSv1  = "ResourceSv1"
 	SupplierSv1  = "SupplierSv1"
 	AttributeSv1 = "AttributeSv1"
+	MetaAuth     = "*auth"
+	APIKey       = "APIKey"
+	APIMethods   = "APIMethods"
 )
 
 // MetaFilterIndexesAPIs

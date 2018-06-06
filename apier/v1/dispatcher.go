@@ -38,20 +38,22 @@ func (dT *DispatcherThresholdSv1) Ping(ign string, reply *string) error {
 	return dT.dS.ThresholdSv1Ping(ign, reply)
 }
 
+/* To be implemented in console
 // GetThresholdIDs implements ThresholdSv1GetThresholdIDs
 func (dT *DispatcherThresholdSv1) GetThresholdIDs(tenant string,
 	tIDs *[]string) error {
 	return dT.dS.ThresholdSv1GetThresholdIDs(tenant, tIDs)
 }
+*/
 
 // GetThreshold implements ThresholdSv1GetThreshold
-func (dT *DispatcherThresholdSv1) GetThreshold(tntID *utils.TenantID,
+func (dT *DispatcherThresholdSv1) GetThresholdsForEvent(tntID *dispatcher.ArgsProcessEventWithApiKey,
 	t *engine.Threshold) error {
-	return dT.dS.ThresholdSv1GetThreshold(tntID, t)
+	return dT.dS.ThresholdSv1GetThresholdForEvent(tntID, t)
 }
 
 // ProcessEvent implements ThresholdSv1ProcessEvent
-func (dT *DispatcherThresholdSv1) ProcessEvent(args *engine.ArgsProcessEvent,
+func (dT *DispatcherThresholdSv1) ProcessEvent(args *dispatcher.ArgsProcessEventWithApiKey,
 	tIDs *[]string) error {
 	return dT.dS.ThresholdSv1ProcessEvent(args, tIDs)
 }
@@ -71,19 +73,19 @@ func (dSts *DispatcherStatSv1) Ping(ign string, reply *string) error {
 }
 
 // GetStatQueuesForEvent implements StatSv1GetStatQueuesForEvent
-func (dSts *DispatcherStatSv1) GetStatQueuesForEvent(ev *utils.CGREvent, reply *[]string) error {
-	return dSts.dS.StatSv1GetStatQueuesForEvent(ev, reply)
+func (dSts *DispatcherStatSv1) GetStatQueuesForEvent(args *dispatcher.CGREvWithApiKey, reply *[]string) error {
+	return dSts.dS.StatSv1GetStatQueuesForEvent(args, reply)
 }
 
 // GetQueueStringMetrics implements StatSv1GetQueueStringMetrics
-func (dSts *DispatcherStatSv1) GetQueueStringMetrics(args *utils.TenantID,
+func (dSts *DispatcherStatSv1) GetQueueStringMetrics(args *dispatcher.TntIDWithApiKey,
 	reply *map[string]string) error {
 	return dSts.dS.StatSv1GetQueueStringMetrics(args, reply)
 }
 
 // GetQueueStringMetrics implements StatSv1ProcessEvent
-func (dSts *DispatcherStatSv1) ProcessEvent(ev *utils.CGREvent, reply *[]string) error {
-	return dSts.dS.StatSv1ProcessEvent(ev, reply)
+func (dSts *DispatcherStatSv1) ProcessEvent(args *dispatcher.CGREvWithApiKey, reply *[]string) error {
+	return dSts.dS.StatSv1ProcessEvent(args, reply)
 }
 
 func NewDispatcherResourceSv1(dps *dispatcher.DispatcherService) *DispatcherResourceSv1 {
@@ -101,7 +103,7 @@ func (dRs *DispatcherResourceSv1) Ping(ign string, reply *string) error {
 }
 
 // GetResourcesForEvent implements ResourceSv1GetResourcesForEvent
-func (dRs *DispatcherResourceSv1) GetResourcesForEvent(args utils.ArgRSv1ResourceUsage,
+func (dRs *DispatcherResourceSv1) GetResourcesForEvent(args dispatcher.ArgsV1ResUsageWithApiKey,
 	reply *engine.Resources) error {
 	return dRs.dRs.ResourceSv1GetResourcesForEvent(args, reply)
 }
