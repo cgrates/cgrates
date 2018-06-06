@@ -77,12 +77,13 @@ func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg) error {
 }
 
 type HttpAgntProcCfg struct {
-	Id            string
-	DryRun        bool
-	Filters       []string
-	Flags         utils.StringMap
-	RequestFields []*CfgCdrField
-	ReplyFields   []*CfgCdrField
+	Id                string
+	DryRun            bool
+	Filters           []string
+	Flags             utils.StringMap
+	ContinueOnSuccess bool
+	RequestFields     []*CfgCdrField
+	ReplyFields       []*CfgCdrField
 }
 
 func (ha *HttpAgntProcCfg) loadFromJsonCfg(jsnCfg *HttpAgentProcessorJsnCfg) (err error) {
@@ -103,6 +104,9 @@ func (ha *HttpAgntProcCfg) loadFromJsonCfg(jsnCfg *HttpAgentProcessorJsnCfg) (er
 	}
 	if jsnCfg.Flags != nil {
 		ha.Flags = utils.StringMapFromSlice(*jsnCfg.Flags)
+	}
+	if jsnCfg.Continue_on_success != nil {
+		ha.ContinueOnSuccess = *jsnCfg.Continue_on_success
 	}
 	if jsnCfg.Request_fields != nil {
 		if ha.RequestFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Request_fields); err != nil {

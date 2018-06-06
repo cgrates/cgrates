@@ -383,12 +383,13 @@ type HttpAgentJsonCfg struct {
 }
 
 type HttpAgentProcessorJsnCfg struct {
-	Id             *string
-	Dry_run        *bool
-	Filters        *[]string
-	Flags          *[]string
-	Request_fields *[]*CdrFieldJsonCfg
-	Reply_fields   *[]*CdrFieldJsonCfg
+	Id                  *string
+	Dry_run             *bool
+	Filters             *[]string
+	Flags               *[]string
+	Continue_on_success *bool
+	Request_fields      *[]*CdrFieldJsonCfg
+	Reply_fields        *[]*CdrFieldJsonCfg
 }
 
 // History server config section
