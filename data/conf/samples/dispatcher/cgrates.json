@@ -5,6 +5,7 @@
 
 "general": {
 	"log_level": 7,
+	"node_id":"Dispatcher",
 },
 
 
@@ -12,10 +13,6 @@
 	"rpc_json": ":2012",
 	"rpc_gob": ":2013",
 	"http": ":2080",
-	"rpc_json_tls":":2022",
-	"rpc_gob_tls":":2023",
-	"tls_server_certificate" : "/usr/share/cgrates/server.crt",			// path to server certificate(must conatin server.crt + ca.crt)
-	"tls_server_key":"/usr/share/cgrates/server.key",					// path to server key
 },
 
 "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
@@ -35,11 +32,31 @@
 },
 
 
+"resources": {								// Resource service (*new)
+	"enabled": false,						// starts ResourceLimiter service: <true|false>.
+},
+
+
 "dispatcher":{
-	"enabled": true,
-	"thresholds_conns": [
-		{"address": "192.168.56.204:2012", "transport": "*json"}
+	"enabled": true,						// starts DispatcherS service: <true|false>.
+	"rals_conns": [
+		{"address": "*internal"},
 	],	
+	"resources_conns": [
+		{"address": "192.168.56.204:2012", "transport": "*json"},
+	],					
+	"thresholds_conns": [
+		{"address": "192.168.56.204:2012", "transport": "*json"},
+	],					
+	"stats_conns": [
+		{"address": "192.168.56.204:2012", "transport": "*json"},
+	],						
+	"suppliers_conns": [
+		{"address": "192.168.56.204:2012", "transport": "*json"},
+	],					
+	"attributes_conns": [
+		{"address": "192.168.56.204:2012", "transport": "*json"},
+	],					
 	"dispatching_strategy":"*random",		
 },
 

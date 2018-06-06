@@ -53,6 +53,7 @@ var (
 	ErrFilterNotPassingNoCaps   = errors.New("filter not passing")
 	ErrNotConvertibleNoCaps     = errors.New("not convertible")
 	ErrMandatoryIeMissingNoCaps = errors.New("mandatory information missing")
+	ErrUnauthorizedApi          = errors.New("UNAUTHORIZED_API")
 )
 
 // NewCGRError initialises a new CGRError

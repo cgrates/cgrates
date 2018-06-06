@@ -743,6 +743,66 @@ func startDispatcherService(internalDispatcherSChan, internalRaterChan chan rpcc
 			return
 		}
 	}
+	if len(cfg.DispatcherSCfg().ResSConns) != 0 {
+		resSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
+			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.DispatcherSCfg().ResSConns, nil, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ResoruceS: %s", utils.DispatcherS, err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+	if len(cfg.DispatcherSCfg().ThreshSConns) != 0 {
+		threshSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
+			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.DispatcherSCfg().ThreshSConns, nil, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ThresholdS: %s", utils.DispatcherS, err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+	if len(cfg.DispatcherSCfg().StatSConns) != 0 {
+		statSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
+			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.DispatcherSCfg().StatSConns, nil, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to StatQueueS: %s", utils.DispatcherS, err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+	if len(cfg.DispatcherSCfg().SupplSConns) != 0 {
+		suplSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
+			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.DispatcherSCfg().SupplSConns, nil, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to SupplierS: %s", utils.DispatcherS, err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+	if len(cfg.DispatcherSCfg().AttrSConns) != 0 {
+		attrSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
+			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.DispatcherSCfg().AttrSConns, nil, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to AttributeS: %s", utils.DispatcherS, err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+	if len(cfg.DispatcherSCfg().SessionSConns) != 0 {
+		sessionsSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
+			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.DispatcherSCfg().SessionSConns, nil, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to SessionS: %s", utils.DispatcherS, err.Error()))
+			exitChan <- true
+			return
+		}
+	}
 	dspS, err := dispatcher.NewDispatcherService(dm, ralsConns, resSConns, threshSConns, statSConns,
 		suplSConns, attrSConns, sessionsSConns)
 	if err != nil {
@@ -778,6 +838,7 @@ func startDispatcherService(internalDispatcherSChan, internalRaterChan chan rpcc
 		server.RpcRegisterName(utils.AttributeSv1,
 			v1.NewDispatcherAttributeSv1(dspS))
 	}
+
 }
 
 func startRpc(server *utils.Server, internalRaterChan,

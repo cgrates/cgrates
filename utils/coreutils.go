@@ -838,3 +838,8 @@ func APIerRPCCall(inst interface{}, serviceMethod string, args interface{}, repl
 	}
 	return err
 }
+
+type AuthStruct struct {
+	Tenant string
+	ApiKey string
+}

@@ -103,3 +103,14 @@ func TestMapStringToInt64(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", t1, t3)
 	}
 }
+
+func TestMapHasKey(t *testing.T) {
+	mp := ParseStringMap("Item1;Item2;Item3")
+	if mp.HasKey("Item1") != true {
+		t.Errorf("Expecting: true, received: %+v", mp.HasKey("Item1"))
+	}
+	if mp.HasKey("Item4") != false {
+		t.Errorf("Expecting: true, received: %+v", mp.HasKey("Item4"))
+	}
+
+}
