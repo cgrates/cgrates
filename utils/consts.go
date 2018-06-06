@@ -871,6 +871,7 @@ const (
 	DiameterAgent   = "DiameterAgent"
 	FreeSWITCHAgent = "FreeSWITCHAgent"
 	AsteriskAgent   = "AsteriskAgent"
+	HTTPAgent       = "HTTPAgent"
 )
 
 func buildCacheInstRevPrefixes() {

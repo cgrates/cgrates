@@ -350,6 +350,30 @@ func startKamAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan 
 	exitChan <- true
 }
 
+func startHTTPAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan chan bool, server *utils.Server) {
+	utils.Logger.Info("Starting HTTP agent")
+	var err error
+	for _, agntCfg := range cfg.HttpAgentCfg() {
+		var sSConn *rpcclient.RpcClientPool
+		if len(agntCfg.SessionSConns) != 0 {
+			sSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey,
+				cfg.TLSClientCerificate, cfg.ConnectAttempts, cfg.Reconnects,
+				cfg.ConnectTimeout, cfg.ReplyTimeout,
+				agntCfg.SessionSConns, internalSMGChan, cfg.InternalTtl)
+			if err != nil {
+				utils.Logger.Crit(fmt.Sprintf("<%s> could not connect to %s, error: %s",
+					utils.HTTPAgent, utils.SessionS, err.Error()))
+				exitChan <- true
+				return
+			}
+		}
+		server.RegisterHttpHandler(agntCfg.Url,
+			agents.NewHttpAgent(sSConn, agntCfg.Timezone, agntCfg.RequestPayload,
+				agntCfg.ReplyPayload, agntCfg.RequestProcessors))
+	}
+	exitChan <- true
+}
+
 func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 	cdrDb engine.CdrStorage, dm *engine.DataManager,
 	internalRaterChan, internalPubSubSChan, internalAttributeSChan, internalUserSChan, internalAliaseSChan,

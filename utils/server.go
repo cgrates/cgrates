@@ -68,6 +68,13 @@ func (s *Server) RegisterHttpFunc(pattern string, handler func(http.ResponseWrit
 	s.Unlock()
 }
 
+func (s *Server) RegisterHttpHandler(pattern string, handler http.Handler) {
+	http.Handle(pattern, handler)
+	s.Lock()
+	s.httpEnabled = true
+	s.Unlock()
+}
+
 // Registers a new BiJsonRpc name
 func (s *Server) BiRPCRegisterName(method string, handlerFunc interface{}) {
 	s.RLock()
