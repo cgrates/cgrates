@@ -52,8 +52,11 @@ func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *CGREvWithApiKey,
 	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
 		return
 	}
-	mp := utils.ParseStringMap(rplyEv.CGREvent.Event[utils.APIMethods].(string))
-	if !mp.HasKey(utils.StatSv1GetStatQueuesForEvent) {
+	var apiMethods string
+	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
+		return
+	}
+	if !utils.ParseStringMap(apiMethods).HasKey(utils.StatSv1GetStatQueuesForEvent) {
 		return utils.ErrUnauthorizedApi
 	}
 	return dS.statS.Call(utils.StatSv1GetStatQueuesForEvent, args.CGREvent, reply)
@@ -76,8 +79,11 @@ func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *TntIDWithApiKey,
 	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
 		return
 	}
-	mp := utils.ParseStringMap(rplyEv.CGREvent.Event[utils.APIMethods].(string))
-	if !mp.HasKey(utils.StatSv1GetQueueStringMetrics) {
+	var apiMethods string
+	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
+		return
+	}
+	if !utils.ParseStringMap(apiMethods).HasKey(utils.StatSv1GetQueueStringMetrics) {
 		return utils.ErrUnauthorizedApi
 	}
 	return dS.statS.Call(utils.StatSv1GetQueueStringMetrics, args.TenantID, reply)
@@ -100,8 +106,11 @@ func (dS *DispatcherService) StatSv1ProcessEvent(args *CGREvWithApiKey,
 	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
 		return
 	}
-	mp := utils.ParseStringMap(rplyEv.CGREvent.Event[utils.APIMethods].(string))
-	if !mp.HasKey(utils.StatSv1ProcessEvent) {
+	var apiMethods string
+	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
+		return
+	}
+	if !utils.ParseStringMap(apiMethods).HasKey(utils.StatSv1ProcessEvent) {
 		return utils.ErrUnauthorizedApi
 	}
 	return dS.statS.Call(utils.StatSv1ProcessEvent, args.CGREvent, reply)
