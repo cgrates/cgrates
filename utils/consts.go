@@ -628,18 +628,19 @@ const (
 
 // Dispatcher Const
 const (
-	MetaRandom   = "*random"
-	MetaBalancer = "*balancer"
-	MetaOrdered  = "*ordered"
-	MetaCircular = "*circular"
-	ThresholdSv1 = "ThresholdSv1"
-	StatSv1      = "StatSv1"
-	ResourceSv1  = "ResourceSv1"
-	SupplierSv1  = "SupplierSv1"
-	AttributeSv1 = "AttributeSv1"
-	MetaAuth     = "*auth"
-	APIKey       = "APIKey"
-	APIMethods   = "APIMethods"
+	MetaFirst     = "*first"
+	MetaRandom    = "*random"
+	MetaBroadcast = "*broadcast"
+	MetaNext      = "*next"
+	ThresholdSv1  = "ThresholdSv1"
+	StatSv1       = "StatSv1"
+	ResourceSv1   = "ResourceSv1"
+	SupplierSv1   = "SupplierSv1"
+	AttributeSv1  = "AttributeSv1"
+	SessionSv1    = "SessionSv1"
+	MetaAuth      = "*auth"
+	APIKey        = "APIKey"
+	APIMethods    = "APIMethods"
 )
 
 // MetaFilterIndexesAPIs

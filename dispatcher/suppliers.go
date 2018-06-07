@@ -19,29 +19,44 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatcher
 
 import (
-	"fmt"
+	"time"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func (dS *DispatcherService) SupplierSv1Ping(ign string, reply *string) error {
-	if dS.splS != nil {
-		if err := dS.splS.Call(utils.SupplierSv1Ping, ign, reply); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<DispatcherS> error: %s SupplierS.", err.Error()))
-		}
+	if dS.splS == nil {
+		return utils.NewErrNotConnected(utils.SupplierS)
 	}
-	return nil
+	return dS.splS.Call(utils.SupplierSv1Ping, ign, reply)
 }
 
-func (dS *DispatcherService) SupplierSv1GetSuppliers(args *engine.ArgsGetSuppliers,
-	reply *engine.SortedSuppliers) error {
-	if dS.splS != nil {
-		if err := dS.splS.Call(utils.SupplierSv1GetSuppliers, args, reply); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<DispatcherS> error: %s SupplierS.", err.Error()))
-		}
+func (dS *DispatcherService) SupplierSv1GetSuppliers(args *ArgsGetSuppliersWithApiKey,
+	reply *engine.SortedSuppliers) (err error) {
+	if dS.splS == nil {
+		return utils.NewErrNotConnected(utils.SupplierS)
 	}
-	return nil
+	ev := &utils.CGREvent{
+		Tenant:  args.Tenant,
+		ID:      utils.UUIDSha1Prefix(),
+		Context: utils.StringPointer(utils.MetaAuth),
+		Time:    utils.TimePointer(time.Now()),
+		Event: map[string]interface{}{
+			utils.APIKey: args.APIKey,
+		},
+	}
+	var rplyEv engine.AttrSProcessEventReply
+	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
+		return
+	}
+	var apiMethods string
+	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
+		return
+	}
+	if !utils.ParseStringMap(apiMethods).HasKey(utils.SupplierSv1GetSuppliers) {
+		return utils.ErrUnauthorizedApi
+	}
+	return dS.splS.Call(utils.SupplierSv1GetSuppliers, args.ArgsGetSuppliers, reply)
+
 }

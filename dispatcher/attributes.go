@@ -19,54 +19,73 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatcher
 
 import (
-	"fmt"
+	"time"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func (dS *DispatcherService) AttributeSv1Ping(ign string, reply *string) error {
-	if dS.attrS != nil {
-
-		if err := dS.attrS.Call(utils.AttributeSv1Ping, ign, reply); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<DispatcherS> error: %s AttributeS.", err.Error()))
-		}
+	if dS.attrS == nil {
+		return utils.NewErrNotConnected(utils.ResourceS)
 	}
-	return nil
+	return dS.attrS.Call(utils.AttributeSv1Ping, ign, reply)
 }
 
-func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(ev *utils.CGREvent,
-	reply *engine.AttributeProfile) error {
-	if dS.attrS != nil {
-		if err := dS.attrS.Call(utils.AttributeSv1GetAttributeForEvent, ev, reply); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<DispatcherS> error: %s AttributeS.", err.Error()))
-		}
+func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(args *CGREvWithApiKey,
+	reply *engine.AttributeProfile) (err error) {
+	if dS.attrS == nil {
+		return utils.NewErrNotConnected(utils.ResourceS)
 	}
-	return nil
+	ev := &utils.CGREvent{
+		Tenant:  args.Tenant,
+		ID:      utils.UUIDSha1Prefix(),
+		Context: utils.StringPointer(utils.MetaAuth),
+		Time:    utils.TimePointer(time.Now()),
+		Event: map[string]interface{}{
+			utils.APIKey: args.APIKey,
+		},
+	}
+	var rplyEv engine.AttrSProcessEventReply
+	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
+		return
+	}
+	var apiMethods string
+	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
+		return
+	}
+	if !utils.ParseStringMap(apiMethods).HasKey(utils.AttributeSv1GetAttributeForEvent) {
+		return utils.ErrUnauthorizedApi
+	}
+	return dS.attrS.Call(utils.AttributeSv1GetAttributeForEvent, args.CGREvent, reply)
+
 }
 
-func (dS *DispatcherService) AttributeSv1ProcessEvent(ev *utils.CGREvent,
+func (dS *DispatcherService) AttributeSv1ProcessEvent(args *CGREvWithApiKey,
 	reply *engine.AttrSProcessEventReply) (err error) {
 	if dS.attrS == nil {
-		return utils.NewErrNotConnected(utils.AttributeS)
+		return utils.NewErrNotConnected(utils.ResourceS)
 	}
-	if err = dS.attrS.Call(utils.AttributeSv1ProcessEvent, ev, reply); err != nil {
-		utils.Logger.Warning(
-			fmt.Sprintf("<DispatcherS> error: %s AttributeS.", err.Error()))
+	ev := &utils.CGREvent{
+		Tenant:  args.Tenant,
+		ID:      utils.UUIDSha1Prefix(),
+		Context: utils.StringPointer(utils.MetaAuth),
+		Time:    utils.TimePointer(time.Now()),
+		Event: map[string]interface{}{
+			utils.APIKey: args.APIKey,
+		},
 	}
-	return
-}
+	var rplyEv engine.AttrSProcessEventReply
+	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
+		return
+	}
+	var apiMethods string
+	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
+		return
+	}
+	if !utils.ParseStringMap(apiMethods).HasKey(utils.AttributeSv1ProcessEvent) {
+		return utils.ErrUnauthorizedApi
+	}
+	return dS.attrS.Call(utils.AttributeSv1ProcessEvent, args.CGREvent, reply)
 
-func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,
-	reply *engine.AttrSProcessEventReply) (err error) {
-	if dS.attrS == nil {
-		return utils.NewErrNotConnected(utils.AttributeS)
-	}
-	if err = dS.attrS.Call(utils.AttributeSv1ProcessEvent, ev, reply); err != nil {
-		utils.Logger.Warning(
-			fmt.Sprintf("<DispatcherS> error: %s AttributeS.", err.Error()))
-	}
-	return
 }

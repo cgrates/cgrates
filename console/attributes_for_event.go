@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
+	"github.com/cgrates/cgrates/dispatcher"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -27,7 +28,7 @@ func init() {
 	c := &CmdGetAttributeForEvent{
 		name:      "attributes_for_event",
 		rpcMethod: utils.AttributeSv1GetAttributeForEvent,
-		rpcParams: &utils.CGREvent{},
+		rpcParams: &dispatcher.CGREvWithApiKey{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +37,7 @@ func init() {
 type CmdGetAttributeForEvent struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.CGREvent
+	rpcParams *dispatcher.CGREvWithApiKey
 	*CommandExecuter
 }
 
@@ -50,7 +51,7 @@ func (self *CmdGetAttributeForEvent) RpcMethod() string {
 
 func (self *CmdGetAttributeForEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.CGREvent{}
+		self.rpcParams = &dispatcher.CGREvWithApiKey{}
 	}
 	return self.rpcParams
 }

@@ -19,20 +19,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatcher
 
 import (
-	"fmt"
+	"time"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func (dS *DispatcherService) StatSv1Ping(ign string, reply *string) error {
-	if dS.statS != nil {
-		if err := dS.statS.Call(utils.StatSv1Ping, ign, reply); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<DispatcherS> error: %s StatS.", err.Error()))
-		}
+	if dS.statS == nil {
+		return utils.NewErrNotConnected(utils.StatS)
 	}
-	return nil
+	return dS.statS.Call(utils.StatSv1Ping, ign, reply)
 }
 
 func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *CGREvWithApiKey,
@@ -44,6 +41,7 @@ func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *CGREvWithApiKey,
 		Tenant:  args.Tenant,
 		ID:      utils.UUIDSha1Prefix(),
 		Context: utils.StringPointer(utils.MetaAuth),
+		Time:    utils.TimePointer(time.Now()),
 		Event: map[string]interface{}{
 			utils.APIKey: args.APIKey,
 		},
@@ -71,6 +69,7 @@ func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *TntIDWithApiKey,
 		Tenant:  args.Tenant,
 		ID:      utils.UUIDSha1Prefix(),
 		Context: utils.StringPointer(utils.MetaAuth),
+		Time:    utils.TimePointer(time.Now()),
 		Event: map[string]interface{}{
 			utils.APIKey: args.APIKey,
 		},
@@ -98,6 +97,7 @@ func (dS *DispatcherService) StatSv1ProcessEvent(args *CGREvWithApiKey,
 		Tenant:  args.Tenant,
 		ID:      utils.UUIDSha1Prefix(),
 		Context: utils.StringPointer(utils.MetaAuth),
+		Time:    utils.TimePointer(time.Now()),
 		Event: map[string]interface{}{
 			utils.APIKey: args.APIKey,
 		},

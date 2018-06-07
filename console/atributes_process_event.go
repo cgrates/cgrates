@@ -21,6 +21,7 @@ package console
 import (
 	"time"
 
+	"github.com/cgrates/cgrates/dispatcher"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -29,7 +30,7 @@ func init() {
 	c := &CmdAttributesProcessEvent{
 		name:      "attributes_process_event",
 		rpcMethod: utils.AttributeSv1ProcessEvent,
-		rpcParams: &utils.CGREvent{},
+		rpcParams: &dispatcher.CGREvWithApiKey{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -38,7 +39,7 @@ func init() {
 type CmdAttributesProcessEvent struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.CGREvent
+	rpcParams *dispatcher.CGREvWithApiKey
 	*CommandExecuter
 }
 
@@ -52,12 +53,12 @@ func (self *CmdAttributesProcessEvent) RpcMethod() string {
 
 func (self *CmdAttributesProcessEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.CGREvent{}
+		self.rpcParams = &dispatcher.CGREvWithApiKey{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdAttributesProcessEvent) PostprocessRpcParams() error { //utils.CGREvent
+func (self *CmdAttributesProcessEvent) PostprocessRpcParams() error {
 	if self.rpcParams.Time == nil {
 		self.rpcParams.Time = utils.TimePointer(time.Now())
 	}

@@ -1259,7 +1259,7 @@ func TestDfDispatcherSJsonCfg(t *testing.T) {
 		Suppliers_conns:      &[]*HaPoolJsonCfg{},
 		Attributes_conns:     &[]*HaPoolJsonCfg{},
 		Sessions_conns:       &[]*HaPoolJsonCfg{},
-		Dispatching_strategy: utils.StringPointer(utils.MetaRandom),
+		Dispatching_strategy: utils.StringPointer(utils.MetaFirst),
 	}
 	if cfg, err := dfCgrJsonCfg.DispatcherSJsonCfg(); err != nil {
 		t.Error(err)
