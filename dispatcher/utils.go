@@ -20,6 +20,7 @@ package dispatcher
 
 import (
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -46,4 +47,34 @@ type ArgsV1ResUsageWithApiKey struct {
 type ArgsProcessEventWithApiKey struct {
 	APIKey string
 	engine.ArgsProcessEvent
+}
+
+type ArgsGetSuppliersWithApiKey struct {
+	APIKey string
+	engine.ArgsGetSuppliers
+}
+
+type AuthorizeArgsWithApiKey struct {
+	APIKey string
+	sessions.V1AuthorizeArgs
+}
+
+type InitArgsWithApiKey struct {
+	APIKey string
+	sessions.V1InitSessionArgs
+}
+
+type ProcessEventWithApiKey struct {
+	APIKey string
+	sessions.V1ProcessEventArgs
+}
+
+type TerminateSessionWithApiKey struct {
+	APIKey string
+	sessions.V1TerminateSessionArgs
+}
+
+type UpdateSessionWithApiKey struct {
+	APIKey string
+	sessions.V1UpdateSessionArgs
 }

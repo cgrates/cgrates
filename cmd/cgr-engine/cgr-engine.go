@@ -26,6 +26,7 @@ import (
 	"runtime"
 	"runtime/pprof"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/agents"
@@ -757,8 +758,11 @@ func startDispatcherService(internalDispatcherSChan, internalRaterChan chan rpcc
 	utils.Logger.Info("Starting CGRateS Dispatcher service.")
 	var err error
 	var ralsConns, resSConns, threshSConns, statSConns, suplSConns, attrSConns, sessionsSConns *rpcclient.RpcClientPool
+
+	cfg.DispatcherSCfg().DispatchingStrategy = strings.TrimPrefix(cfg.DispatcherSCfg().DispatchingStrategy,
+		utils.Meta) // remote * from DispatchingStrategy
 	if len(cfg.DispatcherSCfg().RALsConns) != 0 {
-		ralsConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
+		ralsConns, err = engine.NewRPCPool(cfg.DispatcherSCfg().DispatchingStrategy, cfg.TLSClientKey, cfg.TLSClientCerificate,
 			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.DispatcherSCfg().RALsConns, internalRaterChan, cfg.InternalTtl)
 		if err != nil {
@@ -768,7 +772,7 @@ func startDispatcherService(internalDispatcherSChan, internalRaterChan chan rpcc
 		}
 	}
 	if len(cfg.DispatcherSCfg().ResSConns) != 0 {
-		resSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
+		resSConns, err = engine.NewRPCPool(cfg.DispatcherSCfg().DispatchingStrategy, cfg.TLSClientKey, cfg.TLSClientCerificate,
 			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.DispatcherSCfg().ResSConns, nil, cfg.InternalTtl)
 		if err != nil {
@@ -778,7 +782,7 @@ func startDispatcherService(internalDispatcherSChan, internalRaterChan chan rpcc
 		}
 	}
 	if len(cfg.DispatcherSCfg().ThreshSConns) != 0 {
-		threshSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
+		threshSConns, err = engine.NewRPCPool(cfg.DispatcherSCfg().DispatchingStrategy, cfg.TLSClientKey, cfg.TLSClientCerificate,
 			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.DispatcherSCfg().ThreshSConns, nil, cfg.InternalTtl)
 		if err != nil {
@@ -788,7 +792,7 @@ func startDispatcherService(internalDispatcherSChan, internalRaterChan chan rpcc
 		}
 	}
 	if len(cfg.DispatcherSCfg().StatSConns) != 0 {
-		statSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
+		statSConns, err = engine.NewRPCPool(cfg.DispatcherSCfg().DispatchingStrategy, cfg.TLSClientKey, cfg.TLSClientCerificate,
 			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.DispatcherSCfg().StatSConns, nil, cfg.InternalTtl)
 		if err != nil {
@@ -798,7 +802,7 @@ func startDispatcherService(internalDispatcherSChan, internalRaterChan chan rpcc
 		}
 	}
 	if len(cfg.DispatcherSCfg().SupplSConns) != 0 {
-		suplSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
+		suplSConns, err = engine.NewRPCPool(cfg.DispatcherSCfg().DispatchingStrategy, cfg.TLSClientKey, cfg.TLSClientCerificate,
 			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.DispatcherSCfg().SupplSConns, nil, cfg.InternalTtl)
 		if err != nil {
@@ -808,7 +812,7 @@ func startDispatcherService(internalDispatcherSChan, internalRaterChan chan rpcc
 		}
 	}
 	if len(cfg.DispatcherSCfg().AttrSConns) != 0 {
-		attrSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
+		attrSConns, err = engine.NewRPCPool(cfg.DispatcherSCfg().DispatchingStrategy, cfg.TLSClientKey, cfg.TLSClientCerificate,
 			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.DispatcherSCfg().AttrSConns, nil, cfg.InternalTtl)
 		if err != nil {
@@ -818,7 +822,7 @@ func startDispatcherService(internalDispatcherSChan, internalRaterChan chan rpcc
 		}
 	}
 	if len(cfg.DispatcherSCfg().SessionSConns) != 0 {
-		sessionsSConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
+		sessionsSConns, err = engine.NewRPCPool(cfg.DispatcherSCfg().DispatchingStrategy, cfg.TLSClientKey, cfg.TLSClientCerificate,
 			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.DispatcherSCfg().SessionSConns, nil, cfg.InternalTtl)
 		if err != nil {
@@ -861,6 +865,10 @@ func startDispatcherService(internalDispatcherSChan, internalRaterChan chan rpcc
 	if !cfg.AttributeSCfg().Enabled && len(cfg.DispatcherSCfg().AttrSConns) != 0 {
 		server.RpcRegisterName(utils.AttributeSv1,
 			v1.NewDispatcherAttributeSv1(dspS))
+	}
+	if !cfg.SessionSCfg().Enabled && len(cfg.DispatcherSCfg().SessionSConns) != 0 {
+		server.RpcRegisterName(utils.SessionSv1,
+			v1.NewDispatcherSessionSv1(dspS))
 	}
 
 }

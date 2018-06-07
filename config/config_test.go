@@ -1413,7 +1413,7 @@ func TestCgrCfgJSONDefaultDispatcherSCfg(t *testing.T) {
 		SupplSConns:         []*HaPoolConfig{},
 		AttrSConns:          []*HaPoolConfig{},
 		SessionSConns:       []*HaPoolConfig{},
-		DispatchingStrategy: utils.MetaRandom,
+		DispatchingStrategy: utils.MetaFirst,
 	}
 	if !reflect.DeepEqual(cgrCfg.dispatcherSCfg, eDspSCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.dispatcherSCfg, eDspSCfg)

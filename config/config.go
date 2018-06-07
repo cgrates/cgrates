@@ -684,8 +684,8 @@ func (self *CGRConfig) checkConfigSanity() error {
 	}
 	// DispaterS checks
 	if self.dispatcherSCfg != nil && self.dispatcherSCfg.Enabled {
-		if !utils.IsSliceMember([]string{utils.MetaRandom, utils.MetaBalancer, utils.MetaOrdered,
-			utils.MetaCircular}, self.dispatcherSCfg.DispatchingStrategy) {
+		if !utils.IsSliceMember([]string{utils.MetaFirst, utils.MetaRandom, utils.MetaNext,
+			utils.MetaBroadcast}, self.dispatcherSCfg.DispatchingStrategy) {
 			return fmt.Errorf("<%s> unsupported dispatching strategy %s",
 				utils.DispatcherS, self.dispatcherSCfg.DispatchingStrategy)
 		}

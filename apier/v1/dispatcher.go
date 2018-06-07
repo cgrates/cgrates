@@ -21,7 +21,7 @@ package v1
 import (
 	"github.com/cgrates/cgrates/dispatcher"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/cgrates/sessions"
 )
 
 func NewDispatcherThresholdSv1(dps *dispatcher.DispatcherService) *DispatcherThresholdSv1 {
@@ -123,7 +123,7 @@ func (dSup *DispatcherSupplierSv1) Ping(ign string, reply *string) error {
 }
 
 // GetSuppliers implements SupplierSv1GetSuppliers
-func (dSup *DispatcherSupplierSv1) GetSuppliers(args *engine.ArgsGetSuppliers,
+func (dSup *DispatcherSupplierSv1) GetSuppliers(args *dispatcher.ArgsGetSuppliersWithApiKey,
 	reply *engine.SortedSuppliers) error {
 	return dSup.dSup.SupplierSv1GetSuppliers(args, reply)
 }
@@ -143,13 +143,63 @@ func (dA *DispatcherAttributeSv1) Ping(ign string, reply *string) error {
 }
 
 // GetAttributeForEvent implements AttributeSv1GetAttributeForEvent
-func (dA *DispatcherAttributeSv1) GetAttributeForEvent(ev *utils.CGREvent,
+func (dA *DispatcherAttributeSv1) GetAttributeForEvent(ev *dispatcher.CGREvWithApiKey,
 	reply *engine.AttributeProfile) error {
 	return dA.dA.AttributeSv1GetAttributeForEvent(ev, reply)
 }
 
 // ProcessEvent implements AttributeSv1ProcessEvent
-func (dA *DispatcherAttributeSv1) ProcessEvent(ev *utils.CGREvent,
+func (dA *DispatcherAttributeSv1) ProcessEvent(ev *dispatcher.CGREvWithApiKey,
 	reply *engine.AttrSProcessEventReply) error {
 	return dA.dA.AttributeSv1ProcessEvent(ev, reply)
+}
+
+func NewDispatcherSessionSv1(dps *dispatcher.DispatcherService) *DispatcherSessionSv1 {
+	return &DispatcherSessionSv1{dS: dps}
+}
+
+// Exports RPC from RLs
+type DispatcherSessionSv1 struct {
+	dS *dispatcher.DispatcherService
+}
+
+// Ping implements SessionSv1Ping
+func (dS *DispatcherSessionSv1) Ping(ign string, reply *string) error {
+	return dS.dS.SessionSv1Ping(ign, reply)
+}
+
+// AuthorizeEventWithDigest implements AttributeSv1ProcessEvent
+func (dS *DispatcherSessionSv1) AuthorizeEventWithDigest(args *dispatcher.AuthorizeArgsWithApiKey,
+	reply *sessions.V1AuthorizeReplyWithDigest) error {
+	return dS.dS.SessionSv1AuthorizeEventWithDigest(args, reply)
+}
+
+// InitiateSessionWithDigest implements SessionSv1InitiateSessionWithDigest
+func (dS *DispatcherSessionSv1) InitiateSessionWithDigest(args *dispatcher.InitArgsWithApiKey,
+	reply *sessions.V1InitSessionReply) (err error) {
+	return dS.dS.SessionSv1InitiateSessionWithDigest(args, reply)
+}
+
+// ProcessCDR implements SessionSv1ProcessCDR
+func (dS *DispatcherSessionSv1) ProcessCDR(args *dispatcher.CGREvWithApiKey,
+	reply *string) (err error) {
+	return dS.dS.SessionSv1ProcessCDR(args, reply)
+}
+
+// ProcessEvent implements SessionSv1ProcessEvent
+func (dS *DispatcherSessionSv1) ProcessEvent(args *dispatcher.ProcessEventWithApiKey,
+	reply *sessions.V1ProcessEventReply) (err error) {
+	return dS.dS.SessionSv1ProcessEvent(args, reply)
+}
+
+// TerminateSession implements SessionSv1TerminateSession
+func (dS *DispatcherSessionSv1) TerminateSession(args *dispatcher.TerminateSessionWithApiKey,
+	reply *string) (err error) {
+	return dS.dS.SessionSv1TerminateSession(args, reply)
+}
+
+// UpdateSession implements SessionSv1UpdateSession
+func (dS *DispatcherSessionSv1) UpdateSession(args *dispatcher.UpdateSessionWithApiKey,
+	reply *sessions.V1UpdateSessionReply) (err error) {
+	return dS.dS.SessionSv1UpdateSession(args, reply)
 }

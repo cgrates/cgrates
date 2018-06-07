@@ -665,7 +665,7 @@ const CGRATES_CFG_JSON = `
 	"suppliers_conns": [],					// address where to reach the SupplierS <""|*internal|127.0.0.1:2013>
 	"attributes_conns": [],					// address where to reach the AttributeS <""|*internal|127.0.0.1:2013>
 	"sessions_conns": [],					// connection towards SessionService
-	"dispatching_strategy":"*random",		// strategy for dispatching <*random|*balancer|*ordered|*circular>
+	"dispatching_strategy":"*first",		// strategy for dispatching <*first|*random|*next|*broadcast>
 },
 
 

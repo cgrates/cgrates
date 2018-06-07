@@ -86,3 +86,11 @@ func (dS *DispatcherService) Shutdown() error {
 	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown complete", utils.DispatcherS))
 	return nil
 }
+
+func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,
+	reply *engine.AttrSProcessEventReply) (err error) {
+	if dS.attrS == nil {
+		return utils.NewErrNotConnected(utils.AttributeS)
+	}
+	return dS.attrS.Call(utils.AttributeSv1ProcessEvent, ev, reply)
+}
