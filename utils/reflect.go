@@ -27,6 +27,9 @@ import (
 )
 
 func CastFieldIfToString(fld interface{}) (string, bool) {
+	if fld == nil {
+		return "", true
+	}
 	var strVal string
 	var converted bool
 	switch fld.(type) {

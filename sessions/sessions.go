@@ -717,13 +717,15 @@ func (smg *SMGeneric) GetMaxUsage(gev SMGenericEvent) (maxUsage time.Duration, e
 }
 
 // Called on session start
-func (smg *SMGeneric) InitiateSession(gev SMGenericEvent, clnt rpcclient.RpcClientConnection) (maxUsage time.Duration, err error) {
+func (smg *SMGeneric) InitiateSession(gev SMGenericEvent,
+	clnt rpcclient.RpcClientConnection) (maxUsage time.Duration, err error) {
 	cgrID := gev.GetCGRID(utils.META_DEFAULT)
 	cacheKey := "InitiateSession" + cgrID
 	if item, err := smg.responseCache.Get(cacheKey); err == nil && item != nil {
 		return item.Value.(time.Duration), item.Err
 	}
-	defer smg.responseCache.Cache(cacheKey, &utils.ResponseCacheItem{Value: maxUsage, Err: err}) // schedule response caching
+	defer smg.responseCache.Cache(cacheKey,
+		&utils.ResponseCacheItem{Value: maxUsage, Err: err}) // schedule response caching
 	smg.deletePassiveSessions(cgrID)
 	if err = smg.sessionStart(gev, clnt); err != nil {
 		smg.sessionEnd(cgrID, 0)
@@ -741,20 +743,23 @@ func (smg *SMGeneric) InitiateSession(gev SMGenericEvent, clnt rpcclient.RpcClie
 }
 
 // Execute debits for usage/maxUsage
-func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClientConnection) (maxUsage time.Duration, err error) {
+func (smg *SMGeneric) UpdateSession(gev SMGenericEvent,
+	clnt rpcclient.RpcClientConnection) (maxUsage time.Duration, err error) {
 	cgrID := gev.GetCGRID(utils.META_DEFAULT)
 	cacheKey := "UpdateSession" + cgrID
 	if item, err := smg.responseCache.Get(cacheKey); err == nil && item != nil {
 		return item.Value.(time.Duration), item.Err
 	}
-	defer smg.responseCache.Cache(cacheKey, &utils.ResponseCacheItem{Value: maxUsage, Err: err})
+	defer smg.responseCache.Cache(cacheKey,
+		&utils.ResponseCacheItem{Value: maxUsage, Err: err})
 	if smg.cgrCfg.SessionSCfg().DebitInterval != 0 { // Not possible to update a session with debit loop active
 		err = errors.New("ACTIVE_DEBIT_LOOP")
 		return
 	}
 	if gev.HasField(utils.InitialOriginID) {
 		initialCGRID := gev.GetCGRID(utils.InitialOriginID)
-		err = smg.sessionRelocate(initialCGRID, cgrID, gev.GetOriginID(utils.META_DEFAULT))
+		err = smg.sessionRelocate(initialCGRID,
+			cgrID, gev.GetOriginID(utils.META_DEFAULT))
 		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
 			err = smg.sessionStart(gev, clnt)
 		}
@@ -785,12 +790,15 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 	aSessions := smg.getSessions(cgrID, false)
 	if len(aSessions) == 0 {
 		if aSessions = smg.passiveToActive(cgrID); len(aSessions) == 0 {
-			utils.Logger.Err(fmt.Sprintf("<%s> SessionUpdate with no active sessions for event: <%s>", utils.SessionS, cgrID))
+			utils.Logger.Err(
+				fmt.Sprintf("<%s> SessionUpdate with no active sessions for event: <%s>",
+					utils.SessionS, cgrID))
 			err = rpcclient.ErrSessionNotFound
 			return
 		}
 	}
-	defer smg.replicateSessionsWithID(gev.GetCGRID(utils.META_DEFAULT), false, smg.smgReplConns)
+	defer smg.replicateSessionsWithID(gev.GetCGRID(utils.META_DEFAULT),
+		false, smg.smgReplConns)
 	for _, s := range aSessions[cgrID] {
 		if s.RunID == utils.META_NONE {
 			maxUsage = time.Duration(-1)
@@ -807,7 +815,8 @@ func (smg *SMGeneric) UpdateSession(gev SMGenericEvent, clnt rpcclient.RpcClient
 }
 
 // Called on session end, should stop debit loop
-func (smg *SMGeneric) TerminateSession(gev SMGenericEvent, clnt rpcclient.RpcClientConnection) (err error) {
+func (smg *SMGeneric) TerminateSession(gev SMGenericEvent,
+	clnt rpcclient.RpcClientConnection) (err error) {
 	cgrID := gev.GetCGRID(utils.META_DEFAULT)
 	cacheKey := "TerminateSession" + cgrID
 	if item, err := smg.responseCache.Get(cacheKey); err == nil && item != nil {
@@ -816,7 +825,8 @@ func (smg *SMGeneric) TerminateSession(gev SMGenericEvent, clnt rpcclient.RpcCli
 	defer smg.responseCache.Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
 	if gev.HasField(utils.InitialOriginID) {
 		initialCGRID := gev.GetCGRID(utils.InitialOriginID)
-		err = smg.sessionRelocate(initialCGRID, cgrID, gev.GetOriginID(utils.META_DEFAULT))
+		err = smg.sessionRelocate(initialCGRID, cgrID,
+			gev.GetOriginID(utils.META_DEFAULT))
 		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
 			err = smg.sessionStart(gev, clnt)
 		}

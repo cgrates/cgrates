@@ -418,15 +418,20 @@ func (self SMGenericEvent) PassesFieldFilter(*utils.RSRField) (bool, string) {
 func (self SMGenericEvent) AsCDR(cfg *config.CGRConfig, timezone string) *engine.CDR {
 	storCdr := engine.NewCDRWithDefaults(cfg)
 	storCdr.CGRID = self.GetCGRID(utils.META_DEFAULT)
-	storCdr.ToR = utils.FirstNonEmpty(self.GetTOR(utils.META_DEFAULT), storCdr.ToR) // Keep default if none in the event
+	storCdr.ToR = utils.FirstNonEmpty(self.GetTOR(utils.META_DEFAULT),
+		storCdr.ToR) // Keep default if none in the event
 	storCdr.OriginID = self.GetOriginID(utils.META_DEFAULT)
 	storCdr.OriginHost = self.GetOriginatorIP(utils.META_DEFAULT)
 	storCdr.Source = self.GetCdrSource()
-	storCdr.RequestType = utils.FirstNonEmpty(self.GetReqType(utils.META_DEFAULT), storCdr.RequestType)
-	storCdr.Tenant = utils.FirstNonEmpty(self.GetTenant(utils.META_DEFAULT), storCdr.Tenant)
-	storCdr.Category = utils.FirstNonEmpty(self.GetCategory(utils.META_DEFAULT), storCdr.Category)
+	storCdr.RequestType = utils.FirstNonEmpty(self.GetReqType(utils.META_DEFAULT),
+		storCdr.RequestType)
+	storCdr.Tenant = utils.FirstNonEmpty(self.GetTenant(utils.META_DEFAULT),
+		storCdr.Tenant)
+	storCdr.Category = utils.FirstNonEmpty(self.GetCategory(utils.META_DEFAULT),
+		storCdr.Category)
 	storCdr.Account = self.GetAccount(utils.META_DEFAULT)
-	storCdr.Subject = self.GetSubject(utils.META_DEFAULT)
+	storCdr.Subject = utils.FirstNonEmpty(self.GetSubject(utils.META_DEFAULT),
+		self.GetAccount(utils.META_DEFAULT))
 	storCdr.Destination = self.GetDestination(utils.META_DEFAULT)
 	storCdr.SetupTime, _ = self.GetSetupTime(utils.META_DEFAULT, timezone)
 	storCdr.AnswerTime, _ = self.GetAnswerTime(utils.META_DEFAULT, timezone)

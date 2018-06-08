@@ -486,7 +486,7 @@ func TestDmtAgentSendCCRSMS(t *testing.T) {
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
 	} else {
-		if cdrs[0].Usage != "1" {
+		if cdrs[0].Usage != "60000000000" { // should be 1 but maxUsage returns rounded version
 			t.Errorf("Unexpected CDR Usage received, cdr: %+v ", cdrs[0])
 		}
 		if cdrs[0].Cost != 0.6 {

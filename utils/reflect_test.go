@@ -245,6 +245,9 @@ func TestCastFieldIfToString(t *testing.T) {
 	} else if strVal != "1s" {
 		t.Errorf("received: %s", strVal)
 	}
+	if resVal, converted := CastIfToString(nil); converted || resVal != "" {
+		t.Errorf("received: %s", resVal)
+	}
 }
 
 func TestIfaceAsTime(t *testing.T) {
