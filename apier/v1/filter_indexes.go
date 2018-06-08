@@ -419,15 +419,6 @@ func (self *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string, tra
 						},
 					},
 				}
-			} else if strings.HasPrefix(fltrID, utils.Meta) {
-				inFltr, err := engine.NewInlineFilter(fltrID)
-				if err != nil {
-					return nil, err
-				}
-				fltr, err = inFltr.AsFilter(th.Tenant)
-				if err != nil {
-					return nil, err
-				}
 			} else if fltr, err = self.DataManager.GetFilter(th.Tenant, fltrID,
 				false, utils.NonTransactional); err != nil {
 				if err == utils.ErrNotFound {
@@ -493,15 +484,6 @@ func (self *ApierV1) computeAttributeIndexes(tenant string, attrIDs *[]string, t
 							Values:    []string{utils.META_ANY},
 						},
 					},
-				}
-			} else if strings.HasPrefix(fltrID, utils.Meta) {
-				inFltr, err := engine.NewInlineFilter(fltrID)
-				if err != nil {
-					return nil, err
-				}
-				fltr, err = inFltr.AsFilter(ap.Tenant)
-				if err != nil {
-					return nil, err
 				}
 			} else if fltr, err = self.DataManager.GetFilter(ap.Tenant, fltrID,
 				false, utils.NonTransactional); err != nil {
@@ -569,15 +551,6 @@ func (self *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string, tran
 						},
 					},
 				}
-			} else if strings.HasPrefix(fltrID, utils.Meta) {
-				inFltr, err := engine.NewInlineFilter(fltrID)
-				if err != nil {
-					return nil, err
-				}
-				fltr, err = inFltr.AsFilter(rp.Tenant)
-				if err != nil {
-					return nil, err
-				}
 			} else if fltr, err = self.DataManager.GetFilter(rp.Tenant, fltrID,
 				false, utils.NonTransactional); err != nil {
 				if err == utils.ErrNotFound {
@@ -644,15 +617,6 @@ func (self *ApierV1) computeStatIndexes(tenant string, stIDs *[]string, transact
 						},
 					},
 				}
-			} else if strings.HasPrefix(fltrID, utils.Meta) {
-				inFltr, err := engine.NewInlineFilter(fltrID)
-				if err != nil {
-					return nil, err
-				}
-				fltr, err = inFltr.AsFilter(sqp.Tenant)
-				if err != nil {
-					return nil, err
-				}
 			} else if fltr, err = self.DataManager.GetFilter(sqp.Tenant, fltrID,
 				false, utils.NonTransactional); err != nil {
 				if err == utils.ErrNotFound {
@@ -718,15 +682,6 @@ func (self *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string, tra
 							Values:    []string{utils.META_ANY},
 						},
 					},
-				}
-			} else if strings.HasPrefix(fltrID, utils.Meta) {
-				inFltr, err := engine.NewInlineFilter(fltrID)
-				if err != nil {
-					return nil, err
-				}
-				fltr, err = inFltr.AsFilter(spp.Tenant)
-				if err != nil {
-					return nil, err
 				}
 			} else if fltr, err = self.DataManager.GetFilter(spp.Tenant, fltrID,
 				false, utils.NonTransactional); err != nil {

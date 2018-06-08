@@ -314,7 +314,11 @@ func (dm *DataManager) GetFilter(tenant, id string,
 			return x.(*Filter), nil
 		}
 	}
-	fltr, err = dm.dataDB.GetFilterDrv(tenant, id)
+	if strings.HasPrefix(id, utils.Meta) {
+		fltr, err = NewFilterFromInline(tenant, id)
+	} else {
+		fltr, err = dm.dataDB.GetFilterDrv(tenant, id)
+	}
 	if err != nil {
 		if err == utils.ErrNotFound {
 			Cache.Set(utils.CacheFilters, tntID, nil, nil,
@@ -448,15 +452,6 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 						},
 					},
 				}
-			} else if strings.HasPrefix(fltrID, utils.Meta) {
-				inFltr, err := NewInlineFilter(fltrID)
-				if err != nil {
-					return err
-				}
-				fltr, err = inFltr.AsFilter(th.Tenant)
-				if err != nil {
-					return err
-				}
 			} else if fltr, err = dm.GetFilter(th.Tenant, fltrID,
 				false, utils.NonTransactional); err != nil {
 				if err == utils.ErrNotFound {
@@ -565,15 +560,6 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 							Values:    []string{utils.META_ANY},
 						},
 					},
-				}
-			} else if strings.HasPrefix(fltrID, utils.Meta) {
-				inFltr, err := NewInlineFilter(fltrID)
-				if err != nil {
-					return err
-				}
-				fltr, err = inFltr.AsFilter(sqp.Tenant)
-				if err != nil {
-					return err
 				}
 			} else if fltr, err = dm.GetFilter(sqp.Tenant, fltrID,
 				false, utils.NonTransactional); err != nil {
@@ -767,15 +753,6 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 							Values:    []string{utils.META_ANY},
 						},
 					},
-				}
-			} else if strings.HasPrefix(fltrID, utils.Meta) {
-				inFltr, err := NewInlineFilter(fltrID)
-				if err != nil {
-					return err
-				}
-				fltr, err = inFltr.AsFilter(rp.Tenant)
-				if err != nil {
-					return err
 				}
 			} else if fltr, err = dm.GetFilter(rp.Tenant, fltrID,
 				false, utils.NonTransactional); err != nil {
@@ -1267,15 +1244,6 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 						},
 					},
 				}
-			} else if strings.HasPrefix(fltrID, utils.Meta) {
-				inFltr, err := NewInlineFilter(fltrID)
-				if err != nil {
-					return err
-				}
-				fltr, err = inFltr.AsFilter(supp.Tenant)
-				if err != nil {
-					return err
-				}
 			} else if fltr, err = dm.GetFilter(supp.Tenant, fltrID,
 				false, utils.NonTransactional); err != nil {
 				if err == utils.ErrNotFound {
@@ -1412,15 +1380,6 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 								Values:    []string{utils.META_ANY},
 							},
 						},
-					}
-				} else if strings.HasPrefix(fltrID, utils.Meta) {
-					inFltr, err := NewInlineFilter(fltrID)
-					if err != nil {
-						return err
-					}
-					fltr, err = inFltr.AsFilter(ap.Tenant)
-					if err != nil {
-						return err
 					}
 				} else if fltr, err = dm.GetFilter(ap.Tenant, fltrID,
 					false, utils.NonTransactional); err != nil {

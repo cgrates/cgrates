@@ -71,36 +71,6 @@ func (fS *FilterS) connStatS() (err error) {
 	return
 }
 
-func NewInlineFilter(content string) (f *InlineFilter, err error) {
-	if len(strings.Split(content, utils.InInFieldSep)) != 3 {
-		return nil, fmt.Errorf("parse error for string: <%s>", content)
-	}
-	contentSplit := strings.Split(content, utils.InInFieldSep)
-	return &InlineFilter{Type: contentSplit[0], FieldName: contentSplit[1], FieldVal: contentSplit[2]}, nil
-}
-
-type InlineFilter struct {
-	Type      string
-	FieldName string
-	FieldVal  string
-}
-
-//AsFilter convert InlineFilter to Filter
-func (inFtr *InlineFilter) AsFilter(tenant string) (f *Filter, err error) {
-	f = &Filter{
-		Tenant: tenant,
-		ID:     utils.MetaInline,
-		Rules:  make([]*FilterRule, 1),
-	}
-	rf := &FilterRule{Type: inFtr.Type, FieldName: inFtr.FieldName, Values: []string{inFtr.FieldVal}}
-	if err := rf.CompileValues(); err != nil {
-		return nil, err
-	}
-	f.Rules[0] = rf
-
-	return
-}
-
 // PassFiltersForEvent will check all filters wihin filterIDs and require them passing for event
 // there should be at least one filter passing, ie: if filters are not active event will fail to pass
 func (fS *FilterS) PassFiltersForEvent(tenant string, ev map[string]interface{}, filterIDs []string) (pass bool, err error) {
@@ -109,18 +79,9 @@ func (fS *FilterS) PassFiltersForEvent(tenant string, ev map[string]interface{},
 		return true, nil
 	}
 	for _, fltrID := range filterIDs {
-		var f *Filter
-		if strings.HasPrefix(fltrID, utils.Meta) {
-			inFtr, err := NewInlineFilter(fltrID)
-			if err != nil {
-				return false, err
-			}
-			f, err = inFtr.AsFilter(tenant)
-		} else {
-			f, err = fS.dm.GetFilter(tenant, fltrID, false, utils.NonTransactional)
-			if err != nil {
-				return false, err
-			}
+		f, err := fS.dm.GetFilter(tenant, fltrID, false, utils.NonTransactional)
+		if err != nil {
+			return false, err
 		}
 		if f.ActivationInterval != nil &&
 			!f.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
@@ -155,6 +116,27 @@ func (fS *FilterS) PassFiltersForEvent(tenant string, ev map[string]interface{},
 		atLeastOneFilterPassing = true
 	}
 	return atLeastOneFilterPassing, nil
+}
+
+// NewFilterFromInline parses an inline rule into a compiled Filter
+func NewFilterFromInline(tenant, inlnRule string) (f *Filter, err error) {
+	ruleSplt := strings.Split(inlnRule, utils.InInFieldSep)
+	if len(ruleSplt) != 3 {
+		return nil, fmt.Errorf("inline parse error for string: <%s>", inlnRule)
+	}
+	f = &Filter{
+		Tenant: tenant,
+		ID:     inlnRule,
+		Rules: []*FilterRule{
+			&FilterRule{
+				Type:      ruleSplt[0],
+				FieldName: ruleSplt[1],
+				Values:    strings.Split(ruleSplt[2], utils.INFIELD_SEP)}},
+	}
+	if err = f.Compile(); err != nil {
+		return nil, err
+	}
+	return
 }
 
 type Filter struct {
