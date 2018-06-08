@@ -930,11 +930,12 @@ func (smg *SMGeneric) ChargeEvent(gev SMGenericEvent) (maxUsage time.Duration, e
 				cd.CgrID = cgrID
 				cd.RunID = sR.CallDescriptor.RunID
 				cd.Increments.Compress()
-				var response float64
-				errRefund := smg.rals.Call("Responder.RefundIncrements", cd, &response)
+				var acnt engine.Account
+				errRefund := smg.rals.Call("Responder.RefundIncrements", cd, &acnt)
 				if errRefund != nil {
 					return 0, errRefund
 				}
+				cc.AccountSummary = acnt.AsAccountSummary() // Update AccountSummary
 			}
 		}
 		return

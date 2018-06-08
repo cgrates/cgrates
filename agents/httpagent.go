@@ -47,18 +47,19 @@ type HTTPAgent struct {
 
 // ServeHTTP implements http.Handler interface
 func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	_, err := newHAReqDecoder(ha.reqPayload, req) // dcdr
+	dcdr, err := newHAReqDecoder(ha.reqPayload, req) // dcdr will provide information from request
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error creating decoder: %s",
 				utils.HTTPAgent, err.Error()))
+		return
 	}
 	var processed bool
 	procVars := make(processorVars)
 	rpl := newHTTPReplyFields()
 	for _, reqProcessor := range ha.reqProcessors {
 		var lclProcessed bool
-		if lclProcessed, err = ha.processRequest(reqProcessor, req,
+		if lclProcessed, err = ha.processRequest(reqProcessor, dcdr,
 			procVars, rpl); lclProcessed {
 			processed = lclProcessed
 		}
@@ -67,19 +68,35 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 	if err != nil {
-		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s processing request: %s, process vars: %+v",
-			utils.HTTPAgent, err.Error(), utils.ToJSON(req), procVars))
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %s processing request: %s, process vars: %+v",
+				utils.HTTPAgent, err.Error(), utils.ToJSON(req), procVars))
 		return // FixMe with returning some error on HTTP level
 	} else if !processed {
-		utils.Logger.Warning(fmt.Sprintf("<%s> no request processor enabled, ignoring request %s, process vars: %+v",
-			utils.RadiusAgent, utils.ToJSON(req), procVars))
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> no request processor enabled, ignoring request %s, process vars: %+v",
+				utils.HTTPAgent, utils.ToJSON(req), procVars))
 		return // FixMe with returning some error on HTTP level
+	}
+	encdr, err := newHAReplyEncoder(ha.rplyPayload, w)
+	if err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error creating reply encoder: %s",
+				utils.HTTPAgent, err.Error()))
+		return
+	}
+	if err = encdr.encode(rpl); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %s encoding out %s",
+				utils.HTTPAgent, err.Error(), utils.ToJSON(rpl)))
+		return
 	}
 }
 
 // processRequest represents one processor processing the request
 func (ha *HTTPAgent) processRequest(reqProc *config.HttpAgntProcCfg,
-	req *http.Request, procVars processorVars,
+	dcdr httpAgentReqDecoder, procVars processorVars,
 	reply *httpReplyFields) (processed bool, err error) {
+
 	return
 }
