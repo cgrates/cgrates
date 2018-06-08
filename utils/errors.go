@@ -21,6 +21,7 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"strings"
 )
 
 var (
@@ -54,6 +55,7 @@ var (
 	ErrNotConvertibleNoCaps     = errors.New("not convertible")
 	ErrMandatoryIeMissingNoCaps = errors.New("mandatory information missing")
 	ErrUnauthorizedApi          = errors.New("UNAUTHORIZED_API")
+	RalsErrorPrfx               = "RALS_ERROR"
 )
 
 // NewCGRError initialises a new CGRError
@@ -109,7 +111,7 @@ func NewErrNotConnected(serv string) error {
 }
 
 func NewErrRALs(err error) error {
-	return fmt.Errorf("RALS_ERROR:%s", err)
+	return fmt.Errorf("%s:%s", RalsErrorPrfx, err)
 }
 
 func NewErrResourceS(err error) error {
@@ -140,4 +142,11 @@ func APIErrorHandler(errIn error) (err error) {
 
 func NewErrStringCast(valIface interface{}) error {
 	return fmt.Errorf("cannot cast value: %v to string", valIface)
+}
+
+func ErrHasPrefix(err error, prfx string) (has bool) {
+	if err == nil {
+		return
+	}
+	return strings.HasPrefix(err.Error(), prfx)
 }

@@ -180,8 +180,10 @@ func (da DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProce
 				var evntRply sessions.V1ProcessEventReply
 				err = da.sessionS.Call(utils.SessionSv1ProcessEvent,
 					procVars.asV1ProcessEventArgs(cgrEv), &evntRply)
-				if evntRply.MaxUsage != nil && *evntRply.MaxUsage == 0 {
-					cgrEv.Event[utils.Usage] = 0 // prevent CDR to be written
+				if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
+					cgrEv.Event[utils.Usage] = 0 // avoid further debits
+				} else if evntRply.MaxUsage != nil {
+					cgrEv.Event[utils.Usage] = *evntRply.MaxUsage // make sure the CDR reflects the debit
 				}
 				if procVars[utils.MetaCGRReply], err = utils.NewCGRReply(&evntRply, err); err != nil {
 					return
