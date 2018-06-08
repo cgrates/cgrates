@@ -61,11 +61,7 @@ func (pv processorVars) valAsInterface(fldPath string) (val interface{}, err err
 		err = errors.New("not found")
 		return
 	}
-	if fldName == utils.MetaCGRReply {
-		cgrRply := pv[utils.MetaCGRReply].(utils.CGRReply)
-		return cgrRply.GetField(fldPath, utils.HIERARCHY_SEP)
-	}
-	return pv[fldName], nil
+	return utils.NavigableMap(pv).GetField(fldPath, utils.HIERARCHY_SEP)
 }
 
 // valAsString returns the string value for fldName
@@ -78,17 +74,7 @@ func (pv processorVars) valAsString(fldPath string) (val string, err error) {
 	if !pv.hasVar(fldName) {
 		return "", utils.ErrNotFoundNoCaps
 	}
-	if fldName == utils.MetaCGRReply {
-		cgrRply := pv[utils.MetaCGRReply].(utils.CGRReply)
-		return cgrRply.GetFieldAsString(fldPath, utils.HIERARCHY_SEP)
-	}
-	if valIface, hasIt := pv[fldName]; hasIt {
-		var canCast bool
-		if val, canCast = utils.CastFieldIfToString(valIface); !canCast {
-			return "", fmt.Errorf("cannot cast field <%s> to string", fldPath)
-		}
-	}
-	return
+	return utils.NavigableMap(pv).GetFieldAsString(fldPath, utils.HIERARCHY_SEP)
 }
 
 // asV1AuthorizeArgs returns the arguments needed by SessionSv1.AuthorizeEvent

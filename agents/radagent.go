@@ -195,12 +195,12 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 			var rpl string
 			if err = ra.sessionS.Call(utils.SessionSv1TerminateSession,
 				procVars.asV1TerminateSessionArgs(cgrEv), &rpl); err != nil {
-				procVars[utils.MetaCGRReply] = utils.CGRReply{utils.Error: err.Error()}
+				procVars[utils.MetaCGRReply] = map[string]interface{}{utils.Error: err.Error()}
 			}
 			if ra.cgrCfg.RadiusAgentCfg().CreateCDR {
 				if errCdr := ra.sessionS.Call(utils.SessionSv1ProcessCDR, *cgrEv, &rpl); errCdr != nil {
 					err = errCdr
-					procVars[utils.MetaCGRReply] = utils.CGRReply{utils.Error: err.Error()}
+					procVars[utils.MetaCGRReply] = map[string]interface{}{utils.Error: err.Error()}
 				}
 			}
 			if err != nil {

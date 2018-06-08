@@ -19,6 +19,7 @@ package utils
 
 import (
 	"errors"
+	"reflect"
 	"testing"
 )
 
@@ -48,5 +49,36 @@ func TestNavMapGetFieldAsString(t *testing.T) {
 	fPath := "NonExisting>AnotherFirstLevel"
 	if _, err := nM.GetFieldAsString(fPath, ">"); err.Error() != errors.New("no map at path: <NonExisting>").Error() {
 		t.Error(err)
+	}
+}
+
+type myEv map[string]interface{}
+
+func (ev myEv) AsNavigableMap() (map[string]interface{}, error) {
+	return NavigableMap(ev), nil
+}
+
+func TestCGRReplyNew(t *testing.T) {
+	eCgrRply := map[string]interface{}{
+		Error: "some",
+	}
+	if rpl, err := NewCGRReply(nil, errors.New("some")); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCgrRply, rpl) {
+		t.Errorf("Expecting: %+v, received: %+v", ToJSON(eCgrRply), ToJSON(rpl))
+	}
+	ev := myEv{
+		"FirstLevel": map[string]interface{}{
+			"SecondLevel": map[string]interface{}{
+				"Fld1": "Val1",
+			},
+		},
+	}
+	eCgrRply = ev
+	eCgrRply[Error] = ""
+	if rpl, err := NewCGRReply(NavigableMapper(ev), nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCgrRply, rpl) {
+		t.Errorf("Expecting: %+v, received: %+v", eCgrRply, rpl)
 	}
 }

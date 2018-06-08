@@ -24,6 +24,11 @@ import (
 	"strings"
 )
 
+// CGRReplier is the interface supported by replies convertible to CGRReply
+type NavigableMapper interface {
+	AsNavigableMap() (map[string]interface{}, error)
+}
+
 // NavigableMap is a map who's values can be navigated via path
 type NavigableMap map[string]interface{}
 
@@ -53,7 +58,7 @@ func (nM NavigableMap) GetField(fldPath string, sep string) (fldVal interface{},
 			}
 			lastMp, canCast = elmnt.(map[string]interface{})
 			if !canCast {
-				err = fmt.Errorf("cannot cast field: %s to map[string]interface{}", ToJSON(lastMp[spath]))
+				err = fmt.Errorf("cannot cast field: %s to map[string]interface{}", ToJSON(elmnt))
 				return
 			}
 		}
@@ -73,5 +78,17 @@ func (nM NavigableMap) GetFieldAsString(fldPath string, sep string) (fldVal stri
 	if fldVal, canCast = CastFieldIfToString(valIface); !canCast {
 		return "", fmt.Errorf("cannot cast field: %s to string", ToJSON(valIface))
 	}
+	return
+}
+
+// NewCGRReply is specific to replies coming from CGRateS
+func NewCGRReply(rply NavigableMapper, errRply error) (nM map[string]interface{}, err error) {
+	if errRply != nil {
+		return NavigableMap{Error: errRply.Error()}, nil
+	}
+	if nM, err = rply.AsNavigableMap(); err != nil {
+		return
+	}
+	nM[Error] = "" // enforce empty error
 	return
 }

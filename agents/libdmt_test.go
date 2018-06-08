@@ -226,7 +226,7 @@ func TestFieldOutVal(t *testing.T) {
 		FieldFilter: utils.ParseRSRFieldsMustCompile("*cgrReply>Error(^$);*cgrReply>MaxUsage(!300);*cgrReply>MaxUsage(!0)", utils.INFIELD_SEP),
 		Value:       utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Data", utils.INFIELD_SEP), Mandatory: true}
 	procVars := processorVars{
-		utils.MetaCGRReply: utils.CGRReply{
+		utils.MetaCGRReply: utils.NavigableMap{
 			utils.Error: "RALS_ERROR:NOT_FOUND",
 		},
 	}
@@ -526,12 +526,13 @@ func TestPassesFieldFilter(t *testing.T) {
 		t.Error("Does not pass")
 	}
 	procVars := processorVars{
-		utils.MetaCGRReply: utils.CGRReply{
+		utils.MetaCGRReply: map[string]interface{}{
 			utils.CapAttributes: map[string]interface{}{
 				"RadReply":    "AccessAccept",
 				utils.Account: "1001",
 			},
 			utils.CapMaxUsage: time.Duration(0),
+			utils.Error:       "",
 		},
 	}
 	if pass, _ := passesFieldFilter(nil,
@@ -541,6 +542,11 @@ func TestPassesFieldFilter(t *testing.T) {
 	}
 	if pass, _ := passesFieldFilter(nil,
 		utils.ParseRSRFieldsMustCompile("*cgrReply>MaxUsage{*duration_seconds}(^0$)", utils.INFIELD_SEP)[0],
+		procVars); !pass {
+		t.Error("not passing valid filter")
+	}
+	if pass, _ := passesFieldFilter(nil,
+		utils.ParseRSRFieldsMustCompile("*cgrReply>Error(^$)", utils.INFIELD_SEP)[0],
 		procVars); !pass {
 		t.Error("not passing valid filter")
 	}

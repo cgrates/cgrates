@@ -174,12 +174,15 @@ func (da DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProce
 			if ccr.CCRequestType == 3 {
 				if err = da.sessionS.Call(utils.SessionSv1TerminateSession,
 					procVars.asV1TerminateSessionArgs(cgrEv), &rpl); err != nil {
-					procVars[utils.MetaCGRReply] = utils.CGRReply{utils.Error: err.Error()}
+					procVars[utils.MetaCGRReply] = map[string]interface{}{utils.Error: err.Error()}
 				}
 			} else if ccr.CCRequestType == 4 {
 				var evntRply sessions.V1ProcessEventReply
 				err = da.sessionS.Call(utils.SessionSv1ProcessEvent,
 					procVars.asV1ProcessEventArgs(cgrEv), &evntRply)
+				if evntRply.MaxUsage != nil && *evntRply.MaxUsage == 0 {
+					cgrEv.Event[utils.Usage] = 0 // prevent CDR to be written
+				}
 				if procVars[utils.MetaCGRReply], err = utils.NewCGRReply(&evntRply, err); err != nil {
 					return
 				}
@@ -189,7 +192,7 @@ func (da DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProce
 					!strings.HasSuffix(err.Error(), utils.ErrNoActiveSession.Error())) { // Check if CDR requires session
 				if errCdr := da.sessionS.Call(utils.SessionSv1ProcessCDR, *cgrEv, &rpl); errCdr != nil {
 					err = errCdr
-					procVars[utils.MetaCGRReply] = utils.CGRReply{utils.Error: err.Error()}
+					procVars[utils.MetaCGRReply] = map[string]interface{}{utils.Error: err.Error()}
 				}
 			}
 		}

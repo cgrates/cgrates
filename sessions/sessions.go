@@ -1327,7 +1327,7 @@ type V1AuthorizeReply struct {
 }
 
 // AsCGRReply is part of utils.CGRReplier interface
-func (v1AuthReply *V1AuthorizeReply) AsCGRReply() (cgrReply utils.CGRReply, err error) {
+func (v1AuthReply *V1AuthorizeReply) AsNavigableMap() (cgrReply map[string]interface{}, err error) {
 	cgrReply = make(map[string]interface{})
 	if v1AuthReply.Attributes != nil {
 		attrs := make(map[string]interface{})
@@ -1542,7 +1542,7 @@ type V1InitSessionReply struct {
 }
 
 // AsCGRReply is part of utils.CGRReplier interface
-func (v1Rply *V1InitSessionReply) AsCGRReply() (cgrReply utils.CGRReply, err error) {
+func (v1Rply *V1InitSessionReply) AsNavigableMap() (cgrReply map[string]interface{}, err error) {
 	cgrReply = make(map[string]interface{})
 	if v1Rply.Attributes != nil {
 		attrs := make(map[string]interface{})
@@ -1722,7 +1722,7 @@ type V1UpdateSessionReply struct {
 }
 
 // AsCGRReply is part of utils.CGRReplier interface
-func (v1Rply *V1UpdateSessionReply) AsCGRReply() (cgrReply utils.CGRReply, err error) {
+func (v1Rply *V1UpdateSessionReply) AsNavigableMap() (cgrReply map[string]interface{}, err error) {
 	cgrReply = make(map[string]interface{})
 	if v1Rply.Attributes != nil {
 		attrs := make(map[string]interface{})
@@ -1889,7 +1889,7 @@ type V1ProcessEventReply struct {
 }
 
 // AsCGRReply is part of utils.CGRReplier interface
-func (v1Rply *V1ProcessEventReply) AsCGRReply() (cgrReply utils.CGRReply, err error) {
+func (v1Rply *V1ProcessEventReply) AsNavigableMap() (cgrReply map[string]interface{}, err error) {
 	cgrReply = make(map[string]interface{})
 	if v1Rply.MaxUsage != nil {
 		cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
