@@ -53,7 +53,7 @@ func NewFilterS(cfg *config.CGRConfig, statSChan chan rpcclient.RpcClientConnect
 type FilterS struct {
 	cfg        *config.CGRConfig
 	statSChan  chan rpcclient.RpcClientConnection // reference towards internal statS connection, used for lazy connect
-	statSConns *rpcclient.RpcClientPool
+	statSConns rpcclient.RpcClientConnection
 	sSConnMux  sync.RWMutex // make sure only one goroutine attempts connecting
 	dm         *DataManager
 }
@@ -74,7 +74,6 @@ func (fS *FilterS) connStatS() (err error) {
 // PassFiltersForEvent will check all filters wihin filterIDs and require them passing for event
 // there should be at least one filter passing, ie: if filters are not active event will fail to pass
 func (fS *FilterS) PassFiltersForEvent(tenant string, ev map[string]interface{}, filterIDs []string) (pass bool, err error) {
-	var atLeastOneFilterPassing bool
 	if len(filterIDs) == 0 {
 		return true, nil
 	}
@@ -88,34 +87,13 @@ func (fS *FilterS) PassFiltersForEvent(tenant string, ev map[string]interface{},
 			continue
 		}
 		for _, fltr := range f.Rules {
-			switch fltr.Type {
-			case MetaString:
-				pass, err = fltr.passString(ev, "")
-			case MetaPrefix:
-				pass, err = fltr.passStringPrefix(ev, "")
-			case MetaTimings:
-				pass, err = fltr.passTimings(ev, "")
-			case MetaDestinations:
-				pass, err = fltr.passDestinations(ev, "")
-			case MetaRSR:
-				pass, err = fltr.passRSR(ev, "")
-			case MetaStatS:
-				if err = fS.connStatS(); err != nil {
-					return false, err
-				}
-				pass, err = fltr.passStatS(ev, "", fS.statSConns)
-			case MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual:
-				pass, err = fltr.passGreaterThan(ev, "")
-			default:
-				return false, fmt.Errorf("tenant: %s filter: %s unsupported filter type: <%s>", tenant, fltrID, fltr.Type)
-			}
-			if !pass || err != nil {
+			if pass, err = fltr.Pass(ev, fS.statSConns); err != nil || !pass {
 				return pass, err
 			}
 		}
-		atLeastOneFilterPassing = true
+		pass = true
 	}
-	return atLeastOneFilterPassing, nil
+	return
 }
 
 // NewFilterFromInline parses an inline rule into a compiled Filter
@@ -227,29 +205,29 @@ func (rf *FilterRule) CompileValues() (err error) {
 }
 
 // Pass is the method which should be used from outside.
-func (fltr *FilterRule) Pass(req interface{}, extraFieldsLabel string, rpcClnt rpcclient.RpcClientConnection) (bool, error) {
+func (fltr *FilterRule) Pass(req interface{}, rpcClnt rpcclient.RpcClientConnection) (bool, error) {
 	switch fltr.Type {
 	case MetaString:
-		return fltr.passString(req, extraFieldsLabel)
+		return fltr.passString(req)
 	case MetaPrefix:
-		return fltr.passStringPrefix(req, extraFieldsLabel)
+		return fltr.passStringPrefix(req)
 	case MetaTimings:
-		return fltr.passTimings(req, extraFieldsLabel)
+		return fltr.passTimings(req)
 	case MetaDestinations:
-		return fltr.passDestinations(req, extraFieldsLabel)
+		return fltr.passDestinations(req)
 	case MetaRSR:
-		return fltr.passRSR(req, extraFieldsLabel)
+		return fltr.passRSR(req)
 	case MetaStatS:
-		return fltr.passStatS(req, extraFieldsLabel, rpcClnt)
+		return fltr.passStatS(req, rpcClnt)
 	case MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual:
-		return fltr.passGreaterThan(req, extraFieldsLabel)
+		return fltr.passGreaterThan(req)
 	default:
 		return false, utils.ErrNotImplemented
 	}
 }
 
-func (fltr *FilterRule) passString(req interface{}, extraFieldsLabel string) (bool, error) {
-	strVal, err := utils.ReflectFieldAsString(req, fltr.FieldName, extraFieldsLabel)
+func (fltr *FilterRule) passString(req interface{}) (bool, error) {
+	strVal, err := utils.ReflectFieldAsString(req, fltr.FieldName, utils.EXTRA_FIELDS)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -264,8 +242,8 @@ func (fltr *FilterRule) passString(req interface{}, extraFieldsLabel string) (bo
 	return false, nil
 }
 
-func (fltr *FilterRule) passStringPrefix(req interface{}, extraFieldsLabel string) (bool, error) {
-	strVal, err := utils.ReflectFieldAsString(req, fltr.FieldName, extraFieldsLabel)
+func (fltr *FilterRule) passStringPrefix(req interface{}) (bool, error) {
+	strVal, err := utils.ReflectFieldAsString(req, fltr.FieldName, utils.EXTRA_FIELDS)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -281,12 +259,12 @@ func (fltr *FilterRule) passStringPrefix(req interface{}, extraFieldsLabel strin
 }
 
 // ToDo when Timings will be available in DataDb
-func (fltr *FilterRule) passTimings(req interface{}, extraFieldsLabel string) (bool, error) {
+func (fltr *FilterRule) passTimings(req interface{}) (bool, error) {
 	return false, utils.ErrNotImplemented
 }
 
-func (fltr *FilterRule) passDestinations(req interface{}, extraFieldsLabel string) (bool, error) {
-	dst, err := utils.ReflectFieldAsString(req, fltr.FieldName, extraFieldsLabel)
+func (fltr *FilterRule) passDestinations(req interface{}) (bool, error) {
+	dst, err := utils.ReflectFieldAsString(req, fltr.FieldName, utils.EXTRA_FIELDS)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -307,7 +285,7 @@ func (fltr *FilterRule) passDestinations(req interface{}, extraFieldsLabel strin
 	return false, nil
 }
 
-func (fltr *FilterRule) passRSR(req interface{}, extraFieldsLabel string) (bool, error) {
+func (fltr *FilterRule) passRSR(req interface{}) (bool, error) {
 	for _, rsrFld := range fltr.rsrFields {
 		fldIface, err := utils.ReflectFieldInterface(req, rsrFld.Id, utils.EXTRA_FIELDS)
 		if err != nil {
@@ -323,7 +301,8 @@ func (fltr *FilterRule) passRSR(req interface{}, extraFieldsLabel string) (bool,
 	return false, nil
 }
 
-func (fltr *FilterRule) passStatS(req interface{}, extraFieldsLabel string, stats rpcclient.RpcClientConnection) (bool, error) {
+func (fltr *FilterRule) passStatS(req interface{},
+	stats rpcclient.RpcClientConnection) (bool, error) {
 	if stats == nil || reflect.ValueOf(stats).IsNil() {
 		return false, errors.New("Missing StatS information")
 	}
@@ -347,8 +326,8 @@ func (fltr *FilterRule) passStatS(req interface{}, extraFieldsLabel string, stat
 	return false, nil
 }
 
-func (fltr *FilterRule) passGreaterThan(req interface{}, extraFieldsLabel string) (bool, error) {
-	fldIf, err := utils.ReflectFieldInterface(req, fltr.FieldName, extraFieldsLabel)
+func (fltr *FilterRule) passGreaterThan(req interface{}) (bool, error) {
+	fldIf, err := utils.ReflectFieldInterface(req, fltr.FieldName, utils.EXTRA_FIELDS)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil

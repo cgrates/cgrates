@@ -28,13 +28,13 @@ func TestFilterPassString(t *testing.T) {
 		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
 		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
 	rf := &FilterRule{Type: MetaString, FieldName: "Category", Values: []string{"call"}}
-	if passes, err := rf.passString(cd, ""); err != nil {
+	if passes, err := rf.passString(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
 	rf = &FilterRule{Type: MetaString, FieldName: "Category", Values: []string{"cal"}}
-	if passes, err := rf.passString(cd, ""); err != nil {
+	if passes, err := rf.passString(cd); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Filter passes")
@@ -46,37 +46,37 @@ func TestFilterPassStringPrefix(t *testing.T) {
 		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
 		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
 	rf := &FilterRule{Type: MetaPrefix, FieldName: "Category", Values: []string{"call"}}
-	if passes, err := rf.passStringPrefix(cd, ""); err != nil {
+	if passes, err := rf.passStringPrefix(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
 	rf = &FilterRule{Type: MetaPrefix, FieldName: "Category", Values: []string{"premium"}}
-	if passes, err := rf.passStringPrefix(cd, ""); err != nil {
+	if passes, err := rf.passStringPrefix(cd); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passes filter")
 	}
 	rf = &FilterRule{Type: MetaPrefix, FieldName: "Destination", Values: []string{"+49"}}
-	if passes, err := rf.passStringPrefix(cd, ""); err != nil {
+	if passes, err := rf.passStringPrefix(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
 	rf = &FilterRule{Type: MetaPrefix, FieldName: "Destination", Values: []string{"+499"}}
-	if passes, err := rf.passStringPrefix(cd, ""); err != nil {
+	if passes, err := rf.passStringPrefix(cd); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passes filter")
 	}
 	rf = &FilterRule{Type: MetaPrefix, FieldName: "navigation", Values: []string{"off"}}
-	if passes, err := rf.passStringPrefix(cd, "ExtraFields"); err != nil {
+	if passes, err := rf.passStringPrefix(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
 	rf = &FilterRule{Type: MetaPrefix, FieldName: "nonexisting", Values: []string{"off"}}
-	if passing, err := rf.passStringPrefix(cd, "ExtraFields"); err != nil {
+	if passing, err := rf.passStringPrefix(cd); err != nil {
 		t.Error(err)
 	} else if passing {
 		t.Error("Passes filter")
@@ -91,7 +91,7 @@ func TestFilterPassRSRFields(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passRSR(cd, "ExtraFields"); err != nil {
+	if passes, err := rf.passRSR(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passing")
@@ -100,7 +100,7 @@ func TestFilterPassRSRFields(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passRSR(cd, "ExtraFields"); err != nil {
+	if passes, err := rf.passRSR(cd); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passing")
@@ -109,7 +109,7 @@ func TestFilterPassRSRFields(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passRSR(cd, "ExtraFields"); err != nil {
+	if passes, err := rf.passRSR(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passing")
@@ -130,7 +130,7 @@ func TestFilterPassDestinations(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passDestinations(cd, "ExtraFields"); err != nil {
+	if passes, err := rf.passDestinations(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passing")
@@ -139,7 +139,7 @@ func TestFilterPassDestinations(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passDestinations(cd, "ExtraFields"); err != nil {
+	if passes, err := rf.passDestinations(cd); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passing")
@@ -154,7 +154,7 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	ev := map[string]interface{}{
 		"ASR": 20,
 	}
-	if passes, err := rf.passGreaterThan(ev, ""); err != nil {
+	if passes, err := rf.passGreaterThan(ev); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("not passing")
@@ -162,7 +162,7 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	ev = map[string]interface{}{
 		"ASR": 40,
 	}
-	if passes, err := rf.passGreaterThan(ev, ""); err != nil {
+	if passes, err := rf.passGreaterThan(ev); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("equal should not be passing")
@@ -171,7 +171,7 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passGreaterThan(ev, ""); err != nil {
+	if passes, err := rf.passGreaterThan(ev); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("not passing")
@@ -180,7 +180,7 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passGreaterThan(ev, ""); err != nil {
+	if passes, err := rf.passGreaterThan(ev); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("not passing")
@@ -188,7 +188,7 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	ev = map[string]interface{}{
 		"ASR": 20,
 	}
-	if passes, err := rf.passGreaterThan(ev, ""); err != nil {
+	if passes, err := rf.passGreaterThan(ev); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("should not pass")
@@ -200,7 +200,7 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	ev = map[string]interface{}{
 		"ACD": time.Duration(2 * time.Minute),
 	}
-	if passes, err := rf.passGreaterThan(ev, ""); err != nil {
+	if passes, err := rf.passGreaterThan(ev); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("not pass")
