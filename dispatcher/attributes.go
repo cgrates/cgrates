@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatcher
 
 import (
-	"time"
-
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -41,7 +39,6 @@ func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(args *CGREvWithApi
 		Tenant:  args.Tenant,
 		ID:      utils.UUIDSha1Prefix(),
 		Context: utils.StringPointer(utils.MetaAuth),
-		Time:    utils.TimePointer(time.Now()),
 		Event: map[string]interface{}{
 			utils.APIKey: args.APIKey,
 		},
@@ -70,7 +67,6 @@ func (dS *DispatcherService) AttributeSv1ProcessEvent(args *CGREvWithApiKey,
 		Tenant:  args.Tenant,
 		ID:      utils.UUIDSha1Prefix(),
 		Context: utils.StringPointer(utils.MetaAuth),
-		Time:    utils.TimePointer(time.Now()),
 		Event: map[string]interface{}{
 			utils.APIKey: args.APIKey,
 		},

@@ -20,6 +20,7 @@ package dispatcher
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -35,38 +36,8 @@ func (dS *DispatcherService) ThresholdSv1Ping(ign string, reply *string) error {
 	return nil
 }
 
-/* To be implemented (+console)
-func (dS *DispatcherService) ThresholdSv1GetThresholdIDs(tenant string, tIDs *[]string) (err error) {
-	if dS.thdS == nil {
-		return utils.NewErrNotConnected(utils.ThresholdS)
-	}
-		ev := &utils.CGREvent{
-			Tenant:  args.Tenant,
-			ID:      utils.UUIDSha1Prefix(),
-			Context: utils.StringPointer(utils.MetaAuth),
-			Time:    args.ArgRSv1ResourceUsage.Time,
-			Event: map[string]interface{}{
-				utils.APIKey: args.APIKey,
-			},
-		}
-		var rplyEv engine.AttrSProcessEventReply
-		if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
-			return
-		}
-		mp := utils.ParseStringMap(rplyEv.CGREvent.Event[utils.APIMethods])
-		if !mp.HasKey(utils.ResourceSv1GetResourcesForEvent) {
-			return utils.ErrUnauthorizedApi
-		}
-	if err = dS.thdS.Call(utils.ThresholdSv1GetThresholdIDs, tenant, tIDs); err != nil {
-		utils.Logger.Warning(
-			fmt.Sprintf("<DispatcherS> error: %s ThresholdS.", err.Error()))
-	}
-	return
-}
-*/
-
-func (dS *DispatcherService) ThresholdSv1GetThresholdForEvent(args *ArgsProcessEventWithApiKey,
-	t *engine.Threshold) (err error) {
+func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(args *ArgsProcessEventWithApiKey,
+	t *engine.Thresholds) (err error) {
 	if dS.thdS == nil {
 		return utils.NewErrNotConnected(utils.ThresholdS)
 	}
@@ -74,6 +45,7 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdForEvent(args *ArgsProcessE
 		Tenant:  args.Tenant,
 		ID:      utils.UUIDSha1Prefix(),
 		Context: utils.StringPointer(utils.MetaAuth),
+		Time:    utils.TimePointer(time.Now()),
 		Event: map[string]interface{}{
 			utils.APIKey: args.APIKey,
 		},
@@ -89,7 +61,7 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdForEvent(args *ArgsProcessE
 	if !utils.ParseStringMap(apiMethods).HasKey(utils.ThresholdSv1GetThresholdsForEvent) {
 		return utils.ErrUnauthorizedApi
 	}
-	return dS.thdS.Call(utils.ThresholdSv1GetThresholdsForEvent, args.TenantID, t)
+	return dS.thdS.Call(utils.ThresholdSv1GetThresholdsForEvent, args.ArgsProcessEvent, t)
 }
 
 func (dS *DispatcherService) ThresholdSv1ProcessEvent(args *ArgsProcessEventWithApiKey,
@@ -101,6 +73,7 @@ func (dS *DispatcherService) ThresholdSv1ProcessEvent(args *ArgsProcessEventWith
 		Tenant:  args.Tenant,
 		ID:      utils.UUIDSha1Prefix(),
 		Context: utils.StringPointer(utils.MetaAuth),
+		Time:    utils.TimePointer(time.Now()),
 		Event: map[string]interface{}{
 			utils.APIKey: args.APIKey,
 		},
@@ -117,5 +90,4 @@ func (dS *DispatcherService) ThresholdSv1ProcessEvent(args *ArgsProcessEventWith
 		return utils.ErrUnauthorizedApi
 	}
 	return dS.thdS.Call(utils.ThresholdSv1ProcessEvent, args.ArgsProcessEvent, tIDs)
-
 }

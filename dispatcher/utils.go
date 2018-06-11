@@ -19,9 +19,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatcher
 
 import (
+	"time"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
+)
+
+var ( //var used in all tests
+	dspDelay   = 1000
+	dspDataDir = "/usr/share/cgrates"
+	nowTime    = time.Now()
 )
 
 type CGREvWithApiKey struct {

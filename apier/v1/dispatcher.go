@@ -38,18 +38,10 @@ func (dT *DispatcherThresholdSv1) Ping(ign string, reply *string) error {
 	return dT.dS.ThresholdSv1Ping(ign, reply)
 }
 
-/* To be implemented in console
-// GetThresholdIDs implements ThresholdSv1GetThresholdIDs
-func (dT *DispatcherThresholdSv1) GetThresholdIDs(tenant string,
-	tIDs *[]string) error {
-	return dT.dS.ThresholdSv1GetThresholdIDs(tenant, tIDs)
-}
-*/
-
-// GetThreshold implements ThresholdSv1GetThreshold
+// GetThresholdsForEvent implements ThresholdSv1GetThresholdsForEvent
 func (dT *DispatcherThresholdSv1) GetThresholdsForEvent(tntID *dispatcher.ArgsProcessEventWithApiKey,
-	t *engine.Threshold) error {
-	return dT.dS.ThresholdSv1GetThresholdForEvent(tntID, t)
+	t *engine.Thresholds) error {
+	return dT.dS.ThresholdSv1GetThresholdsForEvent(tntID, t)
 }
 
 // ProcessEvent implements ThresholdSv1ProcessEvent
