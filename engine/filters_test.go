@@ -84,9 +84,12 @@ func TestFilterPassStringPrefix(t *testing.T) {
 }
 
 func TestFilterPassRSRFields(t *testing.T) {
-	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
-		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
-		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
+	cd := &CallDescriptor{Direction: "*out", Category: "call",
+		Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
+		TimeStart:     time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
+		DurationIndex: 132 * time.Second,
+		ExtraFields:   map[string]string{"navigation": "off"}}
 	rf, err := NewFilterRule(MetaRSR, "", []string{"Tenant(~^cgr.*\\.org$)"})
 	if err != nil {
 		t.Error(err)
@@ -151,7 +154,7 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	ev := map[string]interface{}{
+	ev := utils.NavigableMap{
 		"ASR": 20,
 	}
 	if passes, err := rf.passGreaterThan(ev); err != nil {
@@ -288,18 +291,18 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	passEvent := map[string]interface{}{
 		"Account": "1007",
 	}
-	if _, err := filterS.PassFiltersForEvent("cgrates.org",
-		nil, []string{"*string:Account:1007:error"}); err == nil {
+	if _, err := filterS.Pass("cgrates.org",
+		[]string{"*string:Account:1007:error"}, nil); err == nil {
 		t.Errorf(err.Error())
 	}
-	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		failEvent, []string{"*string:Account:1007"}); err != nil {
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*string:Account:1007"}, utils.NavigableMap(failEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		passEvent, []string{"*string:Account:1007"}); err != nil {
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*string:Account:1007"}, utils.NavigableMap(passEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
@@ -310,14 +313,14 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	passEvent = map[string]interface{}{
 		"Account": "1007",
 	}
-	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		failEvent, []string{"*prefix:Account:10"}); err != nil {
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*prefix:Account:10"}, utils.NavigableMap(failEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		passEvent, []string{"*prefix:Account:10"}); err != nil {
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*prefix:Account:10"}, utils.NavigableMap(passEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
@@ -328,14 +331,14 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	passEvent = map[string]interface{}{
 		"Tenant": "cgrates.org",
 	}
-	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		failEvent, []string{"*rsr::Tenant(~^cgr.*\\.org$)"}); err != nil {
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*rsr::Tenant(~^cgr.*\\.org$)"}, utils.NavigableMap(failEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		passEvent, []string{"*rsr::Tenant(~^cgr.*\\.org$)"}); err != nil {
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*rsr::Tenant(~^cgr.*\\.org$)"}, utils.NavigableMap(passEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
@@ -348,14 +351,14 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	passEvent = map[string]interface{}{
 		utils.Destination: "+4986517174963",
 	}
-	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		failEvent, []string{"*destinations:Destination:EU"}); err != nil {
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*destinations:Destination:EU"}, utils.NavigableMap(failEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		passEvent, []string{"*destinations:Destination:EU_LANDLINE"}); err != nil {
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*destinations:Destination:EU_LANDLINE"}, utils.NavigableMap(passEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
@@ -366,14 +369,14 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	passEvent = map[string]interface{}{
 		utils.Weight: 20,
 	}
-	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		failEvent, []string{"*gte:Weight:20"}); err != nil {
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*gte:Weight:20"}, utils.NavigableMap(failEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		passEvent, []string{"*gte:Weight:10"}); err != nil {
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*gte:Weight:10"}, utils.NavigableMap(passEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
@@ -400,14 +403,14 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 		utils.Destination: "+4986517174963",
 		utils.Weight:      20,
 	}
-	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		passEvent1, []string{}); err != nil {
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{}, utils.NavigableMap(passEvent1)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	if pass, err := filterS.PassFiltersForEvent("itsyscom.com",
-		passEvent2, []string{}); err != nil {
+	if pass, err := filterS.Pass("itsyscom.com",
+		[]string{}, utils.NavigableMap(passEvent2)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)

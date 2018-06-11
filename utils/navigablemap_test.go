@@ -20,6 +20,7 @@ package utils
 import (
 	"errors"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -35,19 +36,22 @@ func TestNavMapGetFieldAsString(t *testing.T) {
 		"AnotherFirstLevel": "ValAnotherFirstLevel",
 	}
 	eVal := "Val1"
-	if strVal, err := nM.GetFieldAsString("FirstLevel>SecondLevel>ThirdLevel>Fld1", ">"); err != nil {
+	if strVal, err := nM.FieldAsString(
+		strings.Split("FirstLevel>SecondLevel>ThirdLevel>Fld1", ">")); err != nil {
 		t.Error(err)
 	} else if strVal != eVal {
 		t.Errorf("expecting: <%s> received: <%s>", eVal, strVal)
 	}
 	eVal = "ValAnotherFirstLevel"
-	if strVal, err := nM.GetFieldAsString("AnotherFirstLevel", ">"); err != nil {
+	if strVal, err := nM.FieldAsString(
+		strings.Split("AnotherFirstLevel", ">")); err != nil {
 		t.Error(err)
 	} else if strVal != eVal {
 		t.Errorf("expecting: <%s> received: <%s>", eVal, strVal)
 	}
 	fPath := "NonExisting>AnotherFirstLevel"
-	if _, err := nM.GetFieldAsString(fPath, ">"); err.Error() != errors.New("no map at path: <NonExisting>").Error() {
+	if _, err := nM.FieldAsString(strings.Split(fPath, ">")); err.Error() !=
+		errors.New("no map at path: <NonExisting>").Error() {
 		t.Error(err)
 	}
 }

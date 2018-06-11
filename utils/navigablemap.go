@@ -21,7 +21,6 @@ package utils
 import (
 	"errors"
 	"fmt"
-	"strings"
 )
 
 // CGRReplier is the interface supported by replies convertible to CGRReply
@@ -32,22 +31,21 @@ type NavigableMapper interface {
 // NavigableMap is a map who's values can be navigated via path
 type NavigableMap map[string]interface{}
 
-// GetField returns the field value as interface{} for the path specified
-func (nM NavigableMap) GetField(fldPath string, sep string) (fldVal interface{}, err error) {
-	path := strings.Split(fldPath, sep)
-	lenPath := len(path)
+// FieldAsInterface returns the field value as interface{} for the path specified
+// implements DataProvider
+func (nM NavigableMap) FieldAsInterface(fldPath []string) (fldVal interface{}, err error) {
+	lenPath := len(fldPath)
 	if lenPath == 0 {
 		return nil, errors.New("empty field path")
 	}
 	lastMp := nM // last map when layered
 	var canCast bool
-	for i, spath := range path {
+	for i, spath := range fldPath {
 		if i == lenPath-1 { // lastElement
 			var has bool
 			fldVal, has = lastMp[spath]
 			if !has {
-				err = fmt.Errorf("no field with path: <%s>", fldPath)
-				return
+				return nil, ErrNotFound
 			}
 			return
 		} else {
@@ -58,7 +56,8 @@ func (nM NavigableMap) GetField(fldPath string, sep string) (fldVal interface{},
 			}
 			lastMp, canCast = elmnt.(map[string]interface{})
 			if !canCast {
-				err = fmt.Errorf("cannot cast field: %s to map[string]interface{}", ToJSON(elmnt))
+				err = fmt.Errorf("cannot cast field: %s to map[string]interface{}",
+					ToJSON(elmnt))
 				return
 			}
 		}
@@ -67,10 +66,11 @@ func (nM NavigableMap) GetField(fldPath string, sep string) (fldVal interface{},
 	return
 }
 
-// GetFieldAsString returns the field value as string for the path specified
-func (nM NavigableMap) GetFieldAsString(fldPath string, sep string) (fldVal string, err error) {
+// FieldAsString returns the field value as string for the path specified
+// implements DataProvider
+func (nM NavigableMap) FieldAsString(fldPath []string) (fldVal string, err error) {
 	var valIface interface{}
-	valIface, err = nM.GetField(fldPath, sep)
+	valIface, err = nM.FieldAsInterface(fldPath)
 	if err != nil {
 		return
 	}
@@ -79,6 +79,10 @@ func (nM NavigableMap) GetFieldAsString(fldPath string, sep string) (fldVal stri
 		return "", fmt.Errorf("cannot cast field: %s to string", ToJSON(valIface))
 	}
 	return
+}
+
+func (nM NavigableMap) String() string {
+	return ToJSON(nM)
 }
 
 // NewCGRReply is specific to replies coming from CGRateS

@@ -1433,3 +1433,24 @@ func (cd *CallDescriptor) AccountSummary() *AccountSummary {
 	}
 	return cd.account.AsAccountSummary()
 }
+
+// FieldAsInterface is part of utils.DataProvider
+func (cd *CallDescriptor) FieldAsInterface(fldPath []string) (fldVal interface{}, err error) {
+	if len(fldPath) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return utils.ReflectFieldInterface(cd, fldPath[0], utils.EXTRA_FIELDS)
+}
+
+// FieldAsString is part of utils.DataProvider
+func (cd *CallDescriptor) FieldAsString(fldPath []string) (fldVal string, err error) {
+	if len(fldPath) == 0 {
+		return "", utils.ErrNotFound
+	}
+	return utils.ReflectFieldAsString(cd, fldPath[0], utils.EXTRA_FIELDS)
+}
+
+// String is part of utils.DataProvider
+func (cd *CallDescriptor) String() string {
+	return utils.ToJSON(cd)
+}

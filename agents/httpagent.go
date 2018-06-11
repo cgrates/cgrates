@@ -21,14 +21,17 @@ package agents
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
 
 // NewHttpAgent will construct a HTTPAgent
 func NewHTTPAgent(sessionS rpcclient.RpcClientConnection,
+	filterS *engine.FilterS,
 	timezone, reqPayload, rplyPayload string,
 	reqProcessors []*config.HttpAgntProcCfg) *HTTPAgent {
 	return &HTTPAgent{sessionS: sessionS, timezone: timezone,
@@ -39,6 +42,7 @@ func NewHTTPAgent(sessionS rpcclient.RpcClientConnection,
 // HTTPAgent is a handler for HTTP requests
 type HTTPAgent struct {
 	sessionS rpcclient.RpcClientConnection
+	filterS  *engine.FilterS
 	timezone,
 	reqPayload,
 	rplyPayload string
@@ -47,7 +51,7 @@ type HTTPAgent struct {
 
 // ServeHTTP implements http.Handler interface
 func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	dcdr, err := newHAReqDecoder(ha.reqPayload, req) // dcdr will provide information from request
+	dcdr, err := newHADataProvider(ha.reqPayload, req) // dcdr will provide information from request
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error creating decoder: %s",
@@ -63,7 +67,8 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			procVars, rpl); lclProcessed {
 			processed = lclProcessed
 		}
-		if err != nil || (lclProcessed && !reqProcessor.ContinueOnSuccess) {
+		if err != nil ||
+			(lclProcessed && !reqProcessor.ContinueOnSuccess) {
 			break
 		}
 	}
@@ -94,9 +99,34 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 // processRequest represents one processor processing the request
-func (ha *HTTPAgent) processRequest(reqProc *config.HttpAgntProcCfg,
-	dcdr httpAgentReqDecoder, procVars processorVars,
+func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
+	dP utils.DataProvider, procVars processorVars,
 	reply *httpReplyFields) (processed bool, err error) {
 
+	tnt, err := dP.FieldAsString([]string{utils.Tenant})
+	if err != nil {
+		return false, err
+	}
+	if pass, err := ha.filterS.Pass(tnt, reqProcessor.Filters, dP); err != nil {
+		return false, err
+	} else if !pass {
+		return false, nil
+	}
+	for k, v := range reqProcessor.Flags { // update procVars with flags from processor
+		procVars[k] = strconv.FormatBool(v)
+	}
+	if reqProcessor.DryRun {
+		utils.Logger.Info(fmt.Sprintf("<%s> DRY_RUN, RADIUS request: %s", utils.RadiusAgent, dP))
+		utils.Logger.Info(fmt.Sprintf("<%s> DRY_RUN, process variabiles: %+v", utils.RadiusAgent, procVars))
+	}
+	/*
+		cgrEv, err := radReqAsCGREvent(req, procVars, reqProcessor.Flags, reqProcessor.RequestFields)
+		if err != nil {
+			return false, err
+		}
+		if reqProcessor.DryRun {
+			utils.Logger.Info(fmt.Sprintf("<%s> DRY_RUN, CGREvent: %s", utils.RadiusAgent, utils.ToJSON(cgrEv)))
+		}
+	*/
 	return
 }

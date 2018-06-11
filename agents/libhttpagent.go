@@ -21,12 +21,14 @@ package agents
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 // httpReplyField is one field written in HTTP reply
 type httpReplyField struct {
-	fldPath,
-	fldVal string
+	fldPath string
+	fldVal  string
 }
 
 func newHTTPReplyFields() *httpReplyFields {
@@ -42,17 +44,12 @@ type httpReplyFields struct {
 }
 
 // newHAReqDecoder produces decoders
-func newHAReqDecoder(dcdType string,
-	req *http.Request) (rD httpAgentReqDecoder, err error) {
-	switch dcdType {
+func newHADataProvider(dpType string,
+	req *http.Request) (dP utils.DataProvider, err error) {
+	switch dpType {
 	default:
-		return nil, fmt.Errorf("unsupported decoder type <%s>", dcdType)
+		return nil, fmt.Errorf("unsupported decoder type <%s>", dpType)
 	}
-}
-
-// httpAgentReqDecoder will decode request values
-type httpAgentReqDecoder interface {
-	getFieldVal(fldPath string) (interface{}, error)
 }
 
 // newHAReplyEncoder constructs a httpAgentReqDecoder based on encoder type

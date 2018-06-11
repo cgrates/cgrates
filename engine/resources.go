@@ -463,7 +463,8 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent, usageTT
 			!rPrf.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
 			continue
 		}
-		if pass, err := rS.filterS.PassFiltersForEvent(ev.Tenant, ev.Event, rPrf.FilterIDs); err != nil {
+		if pass, err := rS.filterS.Pass(ev.Tenant, rPrf.FilterIDs,
+			utils.NavigableMap(ev.Event)); err != nil {
 			return nil, err
 		} else if !pass {
 			continue

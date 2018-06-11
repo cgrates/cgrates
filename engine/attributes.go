@@ -90,8 +90,8 @@ func (alS *AttributeService) matchingAttributeProfilesForEvent(ev *utils.CGREven
 			!aPrfl.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
 			continue
 		}
-		if pass, err := alS.filterS.PassFiltersForEvent(ev.Tenant,
-			ev.Event, aPrfl.FilterIDs); err != nil {
+		if pass, err := alS.filterS.Pass(ev.Tenant, aPrfl.FilterIDs,
+			utils.NavigableMap(ev.Event)); err != nil {
 			return nil, err
 		} else if !pass {
 			continue

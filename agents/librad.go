@@ -61,7 +61,7 @@ func (pv processorVars) valAsInterface(fldPath string) (val interface{}, err err
 		err = errors.New("not found")
 		return
 	}
-	return utils.NavigableMap(pv).GetField(fldPath, utils.HIERARCHY_SEP)
+	return utils.NavigableMap(pv).FieldAsInterface(strings.Split(fldPath, utils.HIERARCHY_SEP))
 }
 
 // valAsString returns the string value for fldName
@@ -74,7 +74,7 @@ func (pv processorVars) valAsString(fldPath string) (val string, err error) {
 	if !pv.hasVar(fldName) {
 		return "", utils.ErrNotFoundNoCaps
 	}
-	return utils.NavigableMap(pv).GetFieldAsString(fldPath, utils.HIERARCHY_SEP)
+	return utils.NavigableMap(pv).FieldAsString(strings.Split(fldPath, utils.HIERARCHY_SEP))
 }
 
 // asV1AuthorizeArgs returns the arguments needed by SessionSv1.AuthorizeEvent

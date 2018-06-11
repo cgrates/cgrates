@@ -351,7 +351,10 @@ func startKamAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan 
 	exitChan <- true
 }
 
-func startHTTPAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan chan bool, server *utils.Server) {
+func startHTTPAgent(internalSMGChan chan rpcclient.RpcClientConnection,
+	exitChan chan bool, server *utils.Server, filterSChan chan *engine.FilterS) {
+	filterS := <-filterSChan
+	filterSChan <- filterS
 	utils.Logger.Info("Starting HTTP agent")
 	var err error
 	for _, agntCfg := range cfg.HttpAgentCfg() {
@@ -369,7 +372,7 @@ func startHTTPAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan
 			}
 		}
 		server.RegisterHttpHandler(agntCfg.Url,
-			agents.NewHTTPAgent(sSConn, agntCfg.Timezone, agntCfg.RequestPayload,
+			agents.NewHTTPAgent(sSConn, filterS, agntCfg.Timezone, agntCfg.RequestPayload,
 				agntCfg.ReplyPayload, agntCfg.RequestProcessors))
 	}
 	exitChan <- true
@@ -546,13 +549,17 @@ func startAttributeService(internalAttributeSChan chan rpcclient.RpcClientConnec
 	aS, err := engine.NewAttributeService(dm, filterS,
 		cfg.AttributeSCfg().StringIndexedFields, cfg.AttributeSCfg().PrefixIndexedFields)
 	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.AttributeS, err.Error()))
+		utils.Logger.Crit(
+			fmt.Sprintf("<%s> Could not init, error: %s",
+				utils.AttributeS, err.Error()))
 		exitChan <- true
 		return
 	}
 	go func() {
 		if err := aS.ListenAndServe(exitChan); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Error: %s listening for packets", utils.AttributeS, err.Error()))
+			utils.Logger.Crit(
+				fmt.Sprintf("<%s> Error: %s listening for packets",
+					utils.AttributeS, err.Error()))
 		}
 		aS.Shutdown()
 		exitChan <- true
@@ -1170,7 +1177,7 @@ func main() {
 	}
 
 	if len(cfg.HttpAgentCfg()) != 0 {
-		go startHTTPAgent(internalSMGChan, exitChan, server)
+		go startHTTPAgent(internalSMGChan, exitChan, server, filterSChan)
 	}
 
 	// Start PubSubS service

@@ -168,7 +168,8 @@ func (sS *StatService) matchingStatQueuesForEvent(ev *utils.CGREvent) (sqs StatQ
 			!sqPrfl.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
 			continue
 		}
-		if pass, err := sS.filterS.PassFiltersForEvent(ev.Tenant, ev.Event, sqPrfl.FilterIDs); err != nil {
+		if pass, err := sS.filterS.Pass(ev.Tenant, sqPrfl.FilterIDs,
+			utils.NavigableMap(ev.Event)); err != nil {
 			return nil, err
 		} else if !pass {
 			continue

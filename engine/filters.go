@@ -65,15 +65,19 @@ func (fS *FilterS) connStatS() (err error) {
 	if fS.statSConns != nil { // connection was populated between locks
 		return
 	}
-	fS.statSConns, err = NewRPCPool(rpcclient.POOL_FIRST, fS.cfg.TLSClientKey, fS.cfg.TLSClientCerificate,
-		fS.cfg.ConnectAttempts, fS.cfg.Reconnects, fS.cfg.ConnectTimeout, fS.cfg.ReplyTimeout,
-		fS.cfg.FilterSCfg().StatSConns, fS.statSChan, fS.cfg.InternalTtl)
+	fS.statSConns, err = NewRPCPool(rpcclient.POOL_FIRST,
+		fS.cfg.TLSClientKey, fS.cfg.TLSClientCerificate,
+		fS.cfg.ConnectAttempts, fS.cfg.Reconnects,
+		fS.cfg.ConnectTimeout, fS.cfg.ReplyTimeout,
+		fS.cfg.FilterSCfg().StatSConns,
+		fS.statSChan, fS.cfg.InternalTtl)
 	return
 }
 
-// PassFiltersForEvent will check all filters wihin filterIDs and require them passing for event
+// Pass will check all filters wihin filterIDs and require them passing for dataProvider
 // there should be at least one filter passing, ie: if filters are not active event will fail to pass
-func (fS *FilterS) PassFiltersForEvent(tenant string, ev map[string]interface{}, filterIDs []string) (pass bool, err error) {
+// receives the event as utils.DataProvider so we can accept undecoded data (ie: HttpRequest)
+func (fS *FilterS) Pass(tenant string, filterIDs []string, ev utils.DataProvider) (pass bool, err error) {
 	if len(filterIDs) == 0 {
 		return true, nil
 	}
@@ -205,29 +209,29 @@ func (rf *FilterRule) CompileValues() (err error) {
 }
 
 // Pass is the method which should be used from outside.
-func (fltr *FilterRule) Pass(req interface{}, rpcClnt rpcclient.RpcClientConnection) (bool, error) {
+func (fltr *FilterRule) Pass(dP utils.DataProvider, rpcClnt rpcclient.RpcClientConnection) (bool, error) {
 	switch fltr.Type {
 	case MetaString:
-		return fltr.passString(req)
+		return fltr.passString(dP)
 	case MetaPrefix:
-		return fltr.passStringPrefix(req)
+		return fltr.passStringPrefix(dP)
 	case MetaTimings:
-		return fltr.passTimings(req)
+		return fltr.passTimings(dP)
 	case MetaDestinations:
-		return fltr.passDestinations(req)
+		return fltr.passDestinations(dP)
 	case MetaRSR:
-		return fltr.passRSR(req)
+		return fltr.passRSR(dP)
 	case MetaStatS:
-		return fltr.passStatS(req, rpcClnt)
+		return fltr.passStatS(dP, rpcClnt)
 	case MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual:
-		return fltr.passGreaterThan(req)
+		return fltr.passGreaterThan(dP)
 	default:
 		return false, utils.ErrNotImplemented
 	}
 }
 
-func (fltr *FilterRule) passString(req interface{}) (bool, error) {
-	strVal, err := utils.ReflectFieldAsString(req, fltr.FieldName, utils.EXTRA_FIELDS)
+func (fltr *FilterRule) passString(dP utils.DataProvider) (bool, error) {
+	strVal, err := dP.FieldAsString(strings.Split(fltr.FieldName, utils.HIERARCHY_SEP))
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -242,8 +246,8 @@ func (fltr *FilterRule) passString(req interface{}) (bool, error) {
 	return false, nil
 }
 
-func (fltr *FilterRule) passStringPrefix(req interface{}) (bool, error) {
-	strVal, err := utils.ReflectFieldAsString(req, fltr.FieldName, utils.EXTRA_FIELDS)
+func (fltr *FilterRule) passStringPrefix(dP utils.DataProvider) (bool, error) {
+	strVal, err := dP.FieldAsString(strings.Split(fltr.FieldName, utils.HIERARCHY_SEP))
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -259,12 +263,12 @@ func (fltr *FilterRule) passStringPrefix(req interface{}) (bool, error) {
 }
 
 // ToDo when Timings will be available in DataDb
-func (fltr *FilterRule) passTimings(req interface{}) (bool, error) {
+func (fltr *FilterRule) passTimings(dP utils.DataProvider) (bool, error) {
 	return false, utils.ErrNotImplemented
 }
 
-func (fltr *FilterRule) passDestinations(req interface{}) (bool, error) {
-	dst, err := utils.ReflectFieldAsString(req, fltr.FieldName, utils.EXTRA_FIELDS)
+func (fltr *FilterRule) passDestinations(dP utils.DataProvider) (bool, error) {
+	dst, err := dP.FieldAsString(strings.Split(fltr.FieldName, utils.HIERARCHY_SEP))
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -285,9 +289,9 @@ func (fltr *FilterRule) passDestinations(req interface{}) (bool, error) {
 	return false, nil
 }
 
-func (fltr *FilterRule) passRSR(req interface{}) (bool, error) {
+func (fltr *FilterRule) passRSR(dP utils.DataProvider) (bool, error) {
 	for _, rsrFld := range fltr.rsrFields {
-		fldIface, err := utils.ReflectFieldInterface(req, rsrFld.Id, utils.EXTRA_FIELDS)
+		fldIface, err := dP.FieldAsInterface(strings.Split(rsrFld.Id, utils.HIERARCHY_SEP))
 		if err != nil {
 			if err == utils.ErrNotFound {
 				return false, nil
@@ -301,7 +305,7 @@ func (fltr *FilterRule) passRSR(req interface{}) (bool, error) {
 	return false, nil
 }
 
-func (fltr *FilterRule) passStatS(req interface{},
+func (fltr *FilterRule) passStatS(dP utils.DataProvider,
 	stats rpcclient.RpcClientConnection) (bool, error) {
 	if stats == nil || reflect.ValueOf(stats).IsNil() {
 		return false, errors.New("Missing StatS information")
@@ -326,8 +330,8 @@ func (fltr *FilterRule) passStatS(req interface{},
 	return false, nil
 }
 
-func (fltr *FilterRule) passGreaterThan(req interface{}) (bool, error) {
-	fldIf, err := utils.ReflectFieldInterface(req, fltr.FieldName, utils.EXTRA_FIELDS)
+func (fltr *FilterRule) passGreaterThan(dP utils.DataProvider) (bool, error) {
+	fldIf, err := dP.FieldAsInterface(strings.Split(fltr.FieldName, utils.HIERARCHY_SEP))
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
