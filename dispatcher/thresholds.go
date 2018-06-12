@@ -19,21 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatcher
 
 import (
-	"fmt"
-	"time"
-
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func (dS *DispatcherService) ThresholdSv1Ping(ign string, reply *string) error {
-	if dS.thdS != nil {
-		if err := dS.thdS.Call(utils.ThresholdSv1Ping, ign, reply); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<DispatcherS> error: %s ThresholdS.", err.Error()))
-		}
+	if dS.thdS == nil {
+		return utils.NewErrNotConnected(utils.ThresholdS)
 	}
-	return nil
+	return dS.thdS.Call(utils.ThresholdSv1Ping, ign, reply)
 }
 
 func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(args *ArgsProcessEventWithApiKey,
@@ -45,7 +39,7 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(args *ArgsProcess
 		Tenant:  args.Tenant,
 		ID:      utils.UUIDSha1Prefix(),
 		Context: utils.StringPointer(utils.MetaAuth),
-		Time:    utils.TimePointer(time.Now()),
+		Time:    args.ArgsProcessEvent.CGREvent.Time,
 		Event: map[string]interface{}{
 			utils.APIKey: args.APIKey,
 		},
@@ -73,7 +67,7 @@ func (dS *DispatcherService) ThresholdSv1ProcessEvent(args *ArgsProcessEventWith
 		Tenant:  args.Tenant,
 		ID:      utils.UUIDSha1Prefix(),
 		Context: utils.StringPointer(utils.MetaAuth),
-		Time:    utils.TimePointer(time.Now()),
+		Time:    args.ArgsProcessEvent.CGREvent.Time,
 		Event: map[string]interface{}{
 			utils.APIKey: args.APIKey,
 		},
