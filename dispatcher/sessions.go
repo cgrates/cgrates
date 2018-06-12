@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatcher
 
 import (
-	"time"
-
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
@@ -42,7 +40,7 @@ func (dS *DispatcherService) SessionSv1AuthorizeEventWithDigest(args *AuthorizeA
 		Tenant:  args.Tenant,
 		ID:      utils.UUIDSha1Prefix(),
 		Context: utils.StringPointer(utils.MetaAuth),
-		Time:    utils.TimePointer(time.Now()),
+		Time:    args.V1AuthorizeArgs.CGREvent.Time,
 		Event: map[string]interface{}{
 			utils.APIKey: args.APIKey,
 		},
@@ -70,7 +68,7 @@ func (dS *DispatcherService) SessionSv1InitiateSessionWithDigest(args *InitArgsW
 		Tenant:  args.Tenant,
 		ID:      utils.UUIDSha1Prefix(),
 		Context: utils.StringPointer(utils.MetaAuth),
-		Time:    utils.TimePointer(time.Now()),
+		Time:    args.V1InitSessionArgs.CGREvent.Time,
 		Event: map[string]interface{}{
 			utils.APIKey: args.APIKey,
 		},
@@ -98,7 +96,7 @@ func (dS *DispatcherService) SessionSv1ProcessCDR(args *CGREvWithApiKey,
 		Tenant:  args.Tenant,
 		ID:      utils.UUIDSha1Prefix(),
 		Context: utils.StringPointer(utils.MetaAuth),
-		Time:    utils.TimePointer(time.Now()),
+		Time:    args.CGREvent.Time,
 		Event: map[string]interface{}{
 			utils.APIKey: args.APIKey,
 		},
@@ -126,7 +124,7 @@ func (dS *DispatcherService) SessionSv1ProcessEvent(args *ProcessEventWithApiKey
 		Tenant:  args.Tenant,
 		ID:      utils.UUIDSha1Prefix(),
 		Context: utils.StringPointer(utils.MetaAuth),
-		Time:    utils.TimePointer(time.Now()),
+		Time:    args.V1ProcessEventArgs.CGREvent.Time,
 		Event: map[string]interface{}{
 			utils.APIKey: args.APIKey,
 		},
@@ -154,7 +152,7 @@ func (dS *DispatcherService) SessionSv1TerminateSession(args *TerminateSessionWi
 		Tenant:  args.Tenant,
 		ID:      utils.UUIDSha1Prefix(),
 		Context: utils.StringPointer(utils.MetaAuth),
-		Time:    utils.TimePointer(time.Now()),
+		Time:    args.V1TerminateSessionArgs.CGREvent.Time,
 		Event: map[string]interface{}{
 			utils.APIKey: args.APIKey,
 		},
@@ -182,7 +180,7 @@ func (dS *DispatcherService) SessionSv1UpdateSession(args *UpdateSessionWithApiK
 		Tenant:  args.Tenant,
 		ID:      utils.UUIDSha1Prefix(),
 		Context: utils.StringPointer(utils.MetaAuth),
-		Time:    utils.TimePointer(time.Now()),
+		Time:    args.V1UpdateSessionArgs.CGREvent.Time,
 		Event: map[string]interface{}{
 			utils.APIKey: args.APIKey,
 		},

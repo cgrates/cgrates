@@ -39,6 +39,7 @@ func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(args *CGREvWithApi
 		Tenant:  args.Tenant,
 		ID:      utils.UUIDSha1Prefix(),
 		Context: utils.StringPointer(utils.MetaAuth),
+		Time:    args.CGREvent.Time,
 		Event: map[string]interface{}{
 			utils.APIKey: args.APIKey,
 		},
@@ -67,6 +68,7 @@ func (dS *DispatcherService) AttributeSv1ProcessEvent(args *CGREvWithApiKey,
 		Tenant:  args.Tenant,
 		ID:      utils.UUIDSha1Prefix(),
 		Context: utils.StringPointer(utils.MetaAuth),
+		Time:    args.CGREvent.Time,
 		Event: map[string]interface{}{
 			utils.APIKey: args.APIKey,
 		},
