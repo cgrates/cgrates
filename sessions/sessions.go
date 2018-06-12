@@ -1336,8 +1336,8 @@ type V1AuthorizeReply struct {
 	StatQueueIDs       *[]string
 }
 
-// AsCGRReply is part of utils.CGRReplier interface
-func (v1AuthReply *V1AuthorizeReply) AsNavigableMap() (cgrReply map[string]interface{}, err error) {
+// AsNavigableMap is part of engine.NavigableMapper interface
+func (v1AuthReply *V1AuthorizeReply) AsNavigableMap(ignr []*config.CfgCdrField) (cgrReply engine.NavigableMap, err error) {
 	cgrReply = make(map[string]interface{})
 	if v1AuthReply.Attributes != nil {
 		attrs := make(map[string]interface{})
@@ -1551,8 +1551,8 @@ type V1InitSessionReply struct {
 	StatQueueIDs       *[]string
 }
 
-// AsCGRReply is part of utils.CGRReplier interface
-func (v1Rply *V1InitSessionReply) AsNavigableMap() (cgrReply map[string]interface{}, err error) {
+// AsNavigableMap is part of engine.NavigableMapper interface
+func (v1Rply *V1InitSessionReply) AsNavigableMap(ignr []*config.CfgCdrField) (cgrReply engine.NavigableMap, err error) {
 	cgrReply = make(map[string]interface{})
 	if v1Rply.Attributes != nil {
 		attrs := make(map[string]interface{})
@@ -1731,8 +1731,8 @@ type V1UpdateSessionReply struct {
 	MaxUsage   *time.Duration
 }
 
-// AsCGRReply is part of utils.CGRReplier interface
-func (v1Rply *V1UpdateSessionReply) AsNavigableMap() (cgrReply map[string]interface{}, err error) {
+// AsNavigableMap is part of engine.NavigableMapper interface
+func (v1Rply *V1UpdateSessionReply) AsNavigableMap(ignr []*config.CfgCdrField) (cgrReply engine.NavigableMap, err error) {
 	cgrReply = make(map[string]interface{})
 	if v1Rply.Attributes != nil {
 		attrs := make(map[string]interface{})
@@ -1898,8 +1898,8 @@ type V1ProcessEventReply struct {
 	Attributes         *engine.AttrSProcessEventReply
 }
 
-// AsCGRReply is part of utils.CGRReplier interface
-func (v1Rply *V1ProcessEventReply) AsNavigableMap() (cgrReply map[string]interface{}, err error) {
+// AsNavigableMap is part of engine.NavigableMapper interface
+func (v1Rply *V1ProcessEventReply) AsNavigableMap(ignr []*config.CfgCdrField) (cgrReply engine.NavigableMap, err error) {
 	cgrReply = make(map[string]interface{})
 	if v1Rply.MaxUsage != nil {
 		cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage

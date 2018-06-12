@@ -100,7 +100,7 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 // processRequest represents one processor processing the request
 func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
-	dP utils.DataProvider, procVars processorVars,
+	dP engine.DataProvider, procVars processorVars,
 	reply *httpReplyFields) (processed bool, err error) {
 
 	tnt, err := dP.FieldAsString([]string{utils.Tenant})

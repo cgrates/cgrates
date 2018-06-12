@@ -246,7 +246,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 			continue
 		}
 		if pass, err := tS.filterS.Pass(args.Tenant, tPrfl.FilterIDs,
-			utils.NavigableMap(args.Event)); err != nil {
+			NavigableMap(args.Event)); err != nil {
 			return nil, err
 		} else if !pass {
 			continue

@@ -16,16 +16,19 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package utils
+package engine
 
 import (
 	"errors"
 	"fmt"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 )
 
 // CGRReplier is the interface supported by replies convertible to CGRReply
 type NavigableMapper interface {
-	AsNavigableMap() (map[string]interface{}, error)
+	AsNavigableMap([]*config.CfgCdrField) (NavigableMap, error)
 }
 
 // NavigableMap is a map who's values can be navigated via path
@@ -45,7 +48,7 @@ func (nM NavigableMap) FieldAsInterface(fldPath []string) (fldVal interface{}, e
 			var has bool
 			fldVal, has = lastMp[spath]
 			if !has {
-				return nil, ErrNotFound
+				return nil, utils.ErrNotFound
 			}
 			return
 		} else {
@@ -57,7 +60,7 @@ func (nM NavigableMap) FieldAsInterface(fldPath []string) (fldVal interface{}, e
 			lastMp, canCast = elmnt.(map[string]interface{})
 			if !canCast {
 				err = fmt.Errorf("cannot cast field: %s to map[string]interface{}",
-					ToJSON(elmnt))
+					utils.ToJSON(elmnt))
 				return
 			}
 		}
@@ -75,24 +78,17 @@ func (nM NavigableMap) FieldAsString(fldPath []string) (fldVal string, err error
 		return
 	}
 	var canCast bool
-	if fldVal, canCast = CastFieldIfToString(valIface); !canCast {
-		return "", fmt.Errorf("cannot cast field: %s to string", ToJSON(valIface))
+	if fldVal, canCast = utils.CastFieldIfToString(valIface); !canCast {
+		return "", fmt.Errorf("cannot cast field: %s to string", utils.ToJSON(valIface))
 	}
 	return
 }
 
 func (nM NavigableMap) String() string {
-	return ToJSON(nM)
+	return utils.ToJSON(nM)
 }
 
-// NewCGRReply is specific to replies coming from CGRateS
-func NewCGRReply(rply NavigableMapper, errRply error) (nM map[string]interface{}, err error) {
-	if errRply != nil {
-		return NavigableMap{Error: errRply.Error()}, nil
-	}
-	if nM, err = rply.AsNavigableMap(); err != nil {
-		return
-	}
-	nM[Error] = "" // enforce empty error
+// AsNavigableMap implements both NavigableMapper as well as DataProvider interfaces
+func (nM NavigableMap) AsNavigableMap(tpl []*config.CfgCdrField) (oNM NavigableMap, err error) {
 	return
 }

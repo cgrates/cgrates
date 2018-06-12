@@ -174,21 +174,21 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 			var authReply sessions.V1AuthorizeReply
 			err = ra.sessionS.Call(utils.SessionSv1AuthorizeEvent,
 				procVars.asV1AuthorizeArgs(cgrEv), &authReply)
-			if procVars[utils.MetaCGRReply], err = utils.NewCGRReply(&authReply, err); err != nil {
+			if procVars[utils.MetaCGRReply], err = NewCGRReply(&authReply, err); err != nil {
 				return
 			}
 		case MetaRadAcctStart:
 			var initReply sessions.V1InitSessionReply
 			err = ra.sessionS.Call(utils.SessionSv1InitiateSession,
 				procVars.asV1InitSessionArgs(cgrEv), &initReply)
-			if procVars[utils.MetaCGRReply], err = utils.NewCGRReply(&initReply, err); err != nil {
+			if procVars[utils.MetaCGRReply], err = NewCGRReply(&initReply, err); err != nil {
 				return
 			}
 		case MetaRadAcctUpdate:
 			var updateReply sessions.V1UpdateSessionReply
 			err = ra.sessionS.Call(utils.SessionSv1UpdateSession,
 				procVars.asV1UpdateSessionArgs(cgrEv), &updateReply)
-			if procVars[utils.MetaCGRReply], err = utils.NewCGRReply(&updateReply, err); err != nil {
+			if procVars[utils.MetaCGRReply], err = NewCGRReply(&updateReply, err); err != nil {
 				return
 			}
 		case MetaRadAcctStop:

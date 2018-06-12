@@ -137,7 +137,7 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent)
 			continue
 		}
 		if pass, err := spS.filterS.Pass(ev.Tenant, splPrfl.FilterIDs,
-			utils.NavigableMap(ev.Event)); err != nil {
+			NavigableMap(ev.Event)); err != nil {
 			return nil, err
 		} else if !pass {
 			continue
@@ -277,7 +277,7 @@ func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sor
 	for _, s := range splPrfl.Suppliers {
 		if len(s.FilterIDs) != 0 { // filters should be applied, check them here
 			if pass, err := spS.filterS.Pass(args.Tenant, s.FilterIDs,
-				utils.NavigableMap(args.Event)); err != nil {
+				NavigableMap(args.Event)); err != nil {
 				return nil, err
 			} else if !pass {
 				continue

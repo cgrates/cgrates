@@ -159,14 +159,14 @@ func (da DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProce
 			var initReply sessions.V1InitSessionReply
 			err = da.sessionS.Call(utils.SessionSv1InitiateSession,
 				procVars.asV1InitSessionArgs(cgrEv), &initReply)
-			if procVars[utils.MetaCGRReply], err = utils.NewCGRReply(&initReply, err); err != nil {
+			if procVars[utils.MetaCGRReply], err = NewCGRReply(&initReply, err); err != nil {
 				return
 			}
 		case 2:
 			var updateReply sessions.V1UpdateSessionReply
 			err = da.sessionS.Call(utils.SessionSv1UpdateSession,
 				procVars.asV1UpdateSessionArgs(cgrEv), &updateReply)
-			if procVars[utils.MetaCGRReply], err = utils.NewCGRReply(&updateReply, err); err != nil {
+			if procVars[utils.MetaCGRReply], err = NewCGRReply(&updateReply, err); err != nil {
 				return
 			}
 		case 3, 4: // Handle them together since we generate CDR for them
@@ -185,7 +185,7 @@ func (da DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProce
 				} else if evntRply.MaxUsage != nil {
 					cgrEv.Event[utils.Usage] = *evntRply.MaxUsage // make sure the CDR reflects the debit
 				}
-				if procVars[utils.MetaCGRReply], err = utils.NewCGRReply(&evntRply, err); err != nil {
+				if procVars[utils.MetaCGRReply], err = NewCGRReply(&evntRply, err); err != nil {
 					return
 				}
 			}

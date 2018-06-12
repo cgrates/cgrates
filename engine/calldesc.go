@@ -1454,3 +1454,8 @@ func (cd *CallDescriptor) FieldAsString(fldPath []string) (fldVal string, err er
 func (cd *CallDescriptor) String() string {
 	return utils.ToJSON(cd)
 }
+
+// AsNavigableMap is part of utils.DataProvider
+func (cd *CallDescriptor) AsNavigableMap(tpl []*config.CfgCdrField) (nM NavigableMap, err error) {
+	return
+}

@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/radigo"
@@ -61,7 +62,7 @@ func (pv processorVars) valAsInterface(fldPath string) (val interface{}, err err
 		err = errors.New("not found")
 		return
 	}
-	return utils.NavigableMap(pv).FieldAsInterface(strings.Split(fldPath, utils.HIERARCHY_SEP))
+	return engine.NavigableMap(pv).FieldAsInterface(strings.Split(fldPath, utils.HIERARCHY_SEP))
 }
 
 // valAsString returns the string value for fldName
@@ -74,7 +75,7 @@ func (pv processorVars) valAsString(fldPath string) (val string, err error) {
 	if !pv.hasVar(fldName) {
 		return "", utils.ErrNotFoundNoCaps
 	}
-	return utils.NavigableMap(pv).FieldAsString(strings.Split(fldPath, utils.HIERARCHY_SEP))
+	return engine.NavigableMap(pv).FieldAsString(strings.Split(fldPath, utils.HIERARCHY_SEP))
 }
 
 // asV1AuthorizeArgs returns the arguments needed by SessionSv1.AuthorizeEvent
@@ -397,4 +398,19 @@ func radReplyAppendAttributes(reply *radigo.Packet, procVars map[string]interfac
 		}
 	}
 	return
+}
+
+// NewCGRReply is specific to replies coming from CGRateS
+func NewCGRReply(rply engine.NavigableMapper,
+	errRply error) (mp map[string]interface{}, err error) {
+	if errRply != nil {
+		return map[string]interface{}{
+			utils.Error: errRply.Error()}, nil
+	}
+	nM, err := rply.AsNavigableMap(nil)
+	if err != nil {
+		return nil, err
+	}
+	nM[utils.Error] = ""                   // enforce empty error
+	return map[string]interface{}(nM), nil // convert from NM to map due to decapsulation later
 }

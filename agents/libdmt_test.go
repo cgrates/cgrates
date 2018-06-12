@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/fiorix/go-diameter/diam"
@@ -38,7 +39,8 @@ import (
 var err error
 
 func TestDisectUsageForCCR(t *testing.T) {
-	if reqType, reqNr, reqCCTime, usedCCTime := disectUsageForCCR(time.Duration(0)*time.Second, time.Duration(300)*time.Second, false); reqType != 1 || reqNr != 0 || reqCCTime != 300 || usedCCTime != 0 {
+	if reqType, reqNr, reqCCTime, usedCCTime := disectUsageForCCR(time.Duration(0)*time.Second,
+		time.Duration(300)*time.Second, false); reqType != 1 || reqNr != 0 || reqCCTime != 300 || usedCCTime != 0 {
 		t.Error(reqType, reqNr, reqCCTime, usedCCTime)
 	}
 	if reqType, reqNr, reqCCTime, usedCCTime := disectUsageForCCR(time.Duration(35)*time.Second, time.Duration(300)*time.Second, false); reqType != 2 || reqNr != 0 || reqCCTime != 300 || usedCCTime != 35 {
@@ -226,7 +228,7 @@ func TestFieldOutVal(t *testing.T) {
 		FieldFilter: utils.ParseRSRFieldsMustCompile("*cgrReply>Error(^$);*cgrReply>MaxUsage(!300);*cgrReply>MaxUsage(!0)", utils.INFIELD_SEP),
 		Value:       utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Data", utils.INFIELD_SEP), Mandatory: true}
 	procVars := processorVars{
-		utils.MetaCGRReply: utils.NavigableMap{
+		utils.MetaCGRReply: engine.NavigableMap{
 			utils.Error: "RALS_ERROR:NOT_FOUND",
 		},
 	}

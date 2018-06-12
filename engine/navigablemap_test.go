@@ -15,11 +15,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package utils
+package engine
 
 import (
 	"errors"
-	"reflect"
 	"strings"
 	"testing"
 )
@@ -60,29 +59,4 @@ type myEv map[string]interface{}
 
 func (ev myEv) AsNavigableMap() (map[string]interface{}, error) {
 	return NavigableMap(ev), nil
-}
-
-func TestCGRReplyNew(t *testing.T) {
-	eCgrRply := map[string]interface{}{
-		Error: "some",
-	}
-	if rpl, err := NewCGRReply(nil, errors.New("some")); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCgrRply, rpl) {
-		t.Errorf("Expecting: %+v, received: %+v", ToJSON(eCgrRply), ToJSON(rpl))
-	}
-	ev := myEv{
-		"FirstLevel": map[string]interface{}{
-			"SecondLevel": map[string]interface{}{
-				"Fld1": "Val1",
-			},
-		},
-	}
-	eCgrRply = ev
-	eCgrRply[Error] = ""
-	if rpl, err := NewCGRReply(NavigableMapper(ev), nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCgrRply, rpl) {
-		t.Errorf("Expecting: %+v, received: %+v", eCgrRply, rpl)
-	}
 }

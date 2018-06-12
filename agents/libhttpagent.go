@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/cgrates/engine"
 )
 
 // httpReplyField is one field written in HTTP reply
@@ -45,7 +45,7 @@ type httpReplyFields struct {
 
 // newHAReqDecoder produces decoders
 func newHADataProvider(dpType string,
-	req *http.Request) (dP utils.DataProvider, err error) {
+	req *http.Request) (dP engine.DataProvider, err error) {
 	switch dpType {
 	default:
 		return nil, fmt.Errorf("unsupported decoder type <%s>", dpType)

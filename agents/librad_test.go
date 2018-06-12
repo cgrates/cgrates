@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -26,6 +27,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/radigo"
@@ -421,5 +423,36 @@ func TestRadReplyAppendAttributes(t *testing.T) {
 		t.Error("Cannot find Acct-Session-Time in reply")
 	} else if avps[0].GetStringValue() != "3600" {
 		t.Errorf("Expecting: 3600, received: %s", avps[0].GetStringValue())
+	}
+}
+
+type myEv map[string]interface{}
+
+func (ev myEv) AsNavigableMap(tpl []*config.CfgCdrField) (engine.NavigableMap, error) {
+	return engine.NavigableMap(ev), nil
+}
+
+func TestNewCGRReply(t *testing.T) {
+	eCgrRply := map[string]interface{}{
+		utils.Error: "some",
+	}
+	if rpl, err := NewCGRReply(nil, errors.New("some")); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCgrRply, rpl) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eCgrRply), utils.ToJSON(rpl))
+	}
+	ev := myEv{
+		"FirstLevel": map[string]interface{}{
+			"SecondLevel": map[string]interface{}{
+				"Fld1": "Val1",
+			},
+		},
+	}
+	eCgrRply = ev
+	eCgrRply[utils.Error] = ""
+	if rpl, err := NewCGRReply(engine.NavigableMapper(ev), nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCgrRply, rpl) {
+		t.Errorf("Expecting: %+v, received: %+v", eCgrRply, rpl)
 	}
 }
