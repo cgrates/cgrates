@@ -154,16 +154,16 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	ev := NavigableMap{
-		"ASR": 20,
+	ev := &NavigableMap{
+		data: map[string]interface{}{"ASR": 20},
 	}
 	if passes, err := rf.passGreaterThan(ev); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("not passing")
 	}
-	ev = map[string]interface{}{
-		"ASR": 40,
+	ev = &NavigableMap{
+		data: map[string]interface{}{"ASR": 40},
 	}
 	if passes, err := rf.passGreaterThan(ev); err != nil {
 		t.Error(err)
@@ -188,8 +188,8 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	} else if !passes {
 		t.Error("not passing")
 	}
-	ev = map[string]interface{}{
-		"ASR": 20,
+	ev = &NavigableMap{
+		data: map[string]interface{}{"ASR": 20},
 	}
 	if passes, err := rf.passGreaterThan(ev); err != nil {
 		t.Error(err)
@@ -200,8 +200,8 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	ev = map[string]interface{}{
-		"ACD": time.Duration(2 * time.Minute),
+	ev = &NavigableMap{
+		data: map[string]interface{}{"ACD": time.Duration(2 * time.Minute)},
 	}
 	if passes, err := rf.passGreaterThan(ev); err != nil {
 		t.Error(err)
@@ -296,13 +296,13 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*string:Account:1007"}, NavigableMap(failEvent)); err != nil {
+		[]string{"*string:Account:1007"}, NewNavigableMap(failEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*string:Account:1007"}, NavigableMap(passEvent)); err != nil {
+		[]string{"*string:Account:1007"}, NewNavigableMap(passEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
@@ -314,13 +314,13 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		"Account": "1007",
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*prefix:Account:10"}, NavigableMap(failEvent)); err != nil {
+		[]string{"*prefix:Account:10"}, NewNavigableMap(failEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*prefix:Account:10"}, NavigableMap(passEvent)); err != nil {
+		[]string{"*prefix:Account:10"}, NewNavigableMap(passEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
@@ -332,13 +332,13 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		"Tenant": "cgrates.org",
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::Tenant(~^cgr.*\\.org$)"}, NavigableMap(failEvent)); err != nil {
+		[]string{"*rsr::Tenant(~^cgr.*\\.org$)"}, NewNavigableMap(failEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::Tenant(~^cgr.*\\.org$)"}, NavigableMap(passEvent)); err != nil {
+		[]string{"*rsr::Tenant(~^cgr.*\\.org$)"}, NewNavigableMap(passEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
@@ -352,13 +352,13 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		utils.Destination: "+4986517174963",
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*destinations:Destination:EU"}, NavigableMap(failEvent)); err != nil {
+		[]string{"*destinations:Destination:EU"}, NewNavigableMap(failEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*destinations:Destination:EU_LANDLINE"}, NavigableMap(passEvent)); err != nil {
+		[]string{"*destinations:Destination:EU_LANDLINE"}, NewNavigableMap(passEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
@@ -370,13 +370,13 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		utils.Weight: 20,
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*gte:Weight:20"}, NavigableMap(failEvent)); err != nil {
+		[]string{"*gte:Weight:20"}, NewNavigableMap(failEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*gte:Weight:10"}, NavigableMap(passEvent)); err != nil {
+		[]string{"*gte:Weight:10"}, NewNavigableMap(passEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
@@ -404,13 +404,13 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 		utils.Weight:      20,
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{}, NavigableMap(passEvent1)); err != nil {
+		[]string{}, NewNavigableMap(passEvent1)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.Pass("itsyscom.com",
-		[]string{}, NavigableMap(passEvent2)); err != nil {
+		[]string{}, NewNavigableMap(passEvent2)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)

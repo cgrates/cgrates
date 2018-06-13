@@ -28,20 +28,50 @@ import (
 
 // CGRReplier is the interface supported by replies convertible to CGRReply
 type NavigableMapper interface {
-	AsNavigableMap([]*config.CfgCdrField) (NavigableMap, error)
+	AsNavigableMap([]*config.CfgCdrField) (*NavigableMap, error)
+}
+
+// NewNavigableMap constructs a NavigableMap
+func NewNavigableMap(data map[string]interface{}) *NavigableMap {
+	if data == nil {
+		data = make(map[string]interface{})
+	}
+	return &NavigableMap{data: data}
 }
 
 // NavigableMap is a map who's values can be navigated via path
-type NavigableMap map[string]interface{}
+// data can be retrieved as ordered
+// NavigableMap is not thread safe due to performance demands, could come back if needed
+type NavigableMap struct {
+	data  map[string]interface{} // layered map
+	order [][]string             // order of field paths
+}
+
+// Add will add items into NavigableMap populating also order
+func (nM *NavigableMap) Add(path []string, data interface{}) {
+	nM.order = append(nM.order)
+	mp := nM.data
+	for i, spath := range path {
+		_, has := mp[spath]
+		if !has {
+			if i == len(path)-1 { // last path
+				mp[spath] = data
+				return
+			}
+			mp[spath] = make(map[string]interface{})
+		}
+		mp = mp[spath].(map[string]interface{}) // so we can check further down
+	}
+}
 
 // FieldAsInterface returns the field value as interface{} for the path specified
 // implements DataProvider
-func (nM NavigableMap) FieldAsInterface(fldPath []string) (fldVal interface{}, err error) {
+func (nM *NavigableMap) FieldAsInterface(fldPath []string) (fldVal interface{}, err error) {
 	lenPath := len(fldPath)
 	if lenPath == 0 {
 		return nil, errors.New("empty field path")
 	}
-	lastMp := nM // last map when layered
+	lastMp := nM.data // last map when layered
 	var canCast bool
 	for i, spath := range fldPath {
 		if i == lenPath-1 { // lastElement
@@ -71,7 +101,7 @@ func (nM NavigableMap) FieldAsInterface(fldPath []string) (fldVal interface{}, e
 
 // FieldAsString returns the field value as string for the path specified
 // implements DataProvider
-func (nM NavigableMap) FieldAsString(fldPath []string) (fldVal string, err error) {
+func (nM *NavigableMap) FieldAsString(fldPath []string) (fldVal string, err error) {
 	var valIface interface{}
 	valIface, err = nM.FieldAsInterface(fldPath)
 	if err != nil {
@@ -84,11 +114,51 @@ func (nM NavigableMap) FieldAsString(fldPath []string) (fldVal string, err error
 	return
 }
 
-func (nM NavigableMap) String() string {
-	return utils.ToJSON(nM)
+func (nM *NavigableMap) String() string {
+	return utils.ToJSON(nM.data)
+}
+
+// AsMapStringInterface returns the data out of map, ignoring the order part
+func (nM *NavigableMap) AsMapStringInterface() map[string]interface{} {
+	return nM.data
+}
+
+type NMItem struct {
+	Path []string    // path in map
+	Data interface{} // value of the element
+}
+
+// indexMapElements will recursively go through map and index the element paths into elmns
+func indexMapElements(mp map[string]interface{}, path []string, elms *[]*NMItem) {
+	for k, v := range mp {
+		vPath := append(path, k)
+		if mpIface, isMap := v.(map[string]interface{}); isMap {
+			indexMapElements(mpIface, vPath, elms)
+		} else {
+			elmsOut := append(*elms, &NMItem{vPath, v})
+			*elms = elmsOut
+		}
+	}
+}
+
+// Items returns the items in map, ordered by order information
+func (nM *NavigableMap) Items() (itms []*NMItem) {
+	if len(nM.data) == 0 {
+		return
+	}
+	if len(nM.order) == 0 {
+		indexMapElements(nM.data, []string{}, &itms)
+		return
+	}
+	itms = make([]*NMItem, len(nM.order))
+	for i, path := range nM.order {
+		val, _ := nM.FieldAsInterface(path)
+		itms[i] = &NMItem{Data: val, Path: path}
+	}
+	return
 }
 
 // AsNavigableMap implements both NavigableMapper as well as DataProvider interfaces
-func (nM NavigableMap) AsNavigableMap(tpl []*config.CfgCdrField) (oNM NavigableMap, err error) {
-	return
+func (nM *NavigableMap) AsNavigableMap(tpl []*config.CfgCdrField) (oNM *NavigableMap, err error) {
+	return nil, utils.ErrNotImplemented
 }

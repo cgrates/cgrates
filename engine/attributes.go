@@ -91,7 +91,7 @@ func (alS *AttributeService) matchingAttributeProfilesForEvent(ev *utils.CGREven
 			continue
 		}
 		if pass, err := alS.filterS.Pass(ev.Tenant, aPrfl.FilterIDs,
-			NavigableMap(ev.Event)); err != nil {
+			NewNavigableMap(ev.Event)); err != nil {
 			return nil, err
 		} else if !pass {
 			continue

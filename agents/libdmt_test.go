@@ -27,7 +27,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/fiorix/go-diameter/diam"
@@ -215,24 +214,35 @@ func TestFieldOutVal(t *testing.T) {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", eOut, fldOut)
 	}
 	// Without groupedAVP, we shoud get the first subscriptionId
-	cfgFld = &config.CfgCdrField{Tag: "Grouped2", Type: utils.MetaGrouped, FieldId: "Account",
-		FieldFilter: utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Type(1)", utils.INFIELD_SEP),
-		Value:       utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Data", utils.INFIELD_SEP), Mandatory: true}
+	cfgFld = &config.CfgCdrField{
+		Tag:  "Grouped2",
+		Type: utils.MetaGrouped, FieldId: "Account",
+		FieldFilter: utils.ParseRSRFieldsMustCompile(
+			"Subscription-Id>Subscription-Id-Type(1)", utils.INFIELD_SEP),
+		Value: utils.ParseRSRFieldsMustCompile(
+			"Subscription-Id>Subscription-Id-Data", utils.INFIELD_SEP), Mandatory: true}
 	eOut = "208708000003"
 	if fldOut, err := fieldOutVal(m, cfgFld, time.Duration(0), nil); err != nil {
 		t.Error(err)
 	} else if fldOut != eOut {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", eOut, fldOut)
 	}
-	cfgFld = &config.CfgCdrField{Tag: "TestMultipleFiltersEmptyReply", Type: utils.META_COMPOSED, FieldId: "Account",
-		FieldFilter: utils.ParseRSRFieldsMustCompile("*cgrReply>Error(^$);*cgrReply>MaxUsage(!300);*cgrReply>MaxUsage(!0)", utils.INFIELD_SEP),
-		Value:       utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Data", utils.INFIELD_SEP), Mandatory: true}
+	cfgFld = &config.CfgCdrField{
+		Tag:  "TestMultipleFiltersEmptyReply",
+		Type: utils.META_COMPOSED, FieldId: "Account",
+		FieldFilter: utils.ParseRSRFieldsMustCompile(
+			"*cgrReply>Error(^$);*cgrReply>MaxUsage(!300);*cgrReply>MaxUsage(!0)",
+			utils.INFIELD_SEP),
+		Value: utils.ParseRSRFieldsMustCompile(
+			"Subscription-Id>Subscription-Id-Data", utils.INFIELD_SEP),
+		Mandatory: true}
 	procVars := processorVars{
-		utils.MetaCGRReply: engine.NavigableMap{
+		utils.MetaCGRReply: map[string]interface{}{
 			utils.Error: "RALS_ERROR:NOT_FOUND",
 		},
 	}
-	if _, err := fieldOutVal(m, cfgFld, time.Duration(0), procVars); err != ErrFilterNotPassing {
+	if _, err := fieldOutVal(m, cfgFld, time.Duration(0),
+		procVars); err != ErrFilterNotPassing {
 		t.Error(err)
 	}
 }

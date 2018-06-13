@@ -428,8 +428,8 @@ func TestRadReplyAppendAttributes(t *testing.T) {
 
 type myEv map[string]interface{}
 
-func (ev myEv) AsNavigableMap(tpl []*config.CfgCdrField) (engine.NavigableMap, error) {
-	return engine.NavigableMap(ev), nil
+func (ev myEv) AsNavigableMap(tpl []*config.CfgCdrField) (*engine.NavigableMap, error) {
+	return engine.NewNavigableMap(ev), nil
 }
 
 func TestNewCGRReply(t *testing.T) {
@@ -439,7 +439,8 @@ func TestNewCGRReply(t *testing.T) {
 	if rpl, err := NewCGRReply(nil, errors.New("some")); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCgrRply, rpl) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eCgrRply), utils.ToJSON(rpl))
+		t.Errorf("Expecting: %+v, received: %+v",
+			utils.ToJSON(eCgrRply), utils.ToJSON(rpl))
 	}
 	ev := myEv{
 		"FirstLevel": map[string]interface{}{

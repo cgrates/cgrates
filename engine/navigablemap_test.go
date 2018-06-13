@@ -24,15 +24,17 @@ import (
 )
 
 func TestNavMapGetFieldAsString(t *testing.T) {
-	nM := NavigableMap{
-		"FirstLevel": map[string]interface{}{
-			"SecondLevel": map[string]interface{}{
-				"ThirdLevel": map[string]interface{}{
-					"Fld1": "Val1",
+	nM := &NavigableMap{
+		data: map[string]interface{}{
+			"FirstLevel": map[string]interface{}{
+				"SecondLevel": map[string]interface{}{
+					"ThirdLevel": map[string]interface{}{
+						"Fld1": "Val1",
+					},
 				},
 			},
+			"AnotherFirstLevel": "ValAnotherFirstLevel",
 		},
-		"AnotherFirstLevel": "ValAnotherFirstLevel",
 	}
 	eVal := "Val1"
 	if strVal, err := nM.FieldAsString(
@@ -57,6 +59,6 @@ func TestNavMapGetFieldAsString(t *testing.T) {
 
 type myEv map[string]interface{}
 
-func (ev myEv) AsNavigableMap() (map[string]interface{}, error) {
-	return NavigableMap(ev), nil
+func (ev myEv) AsNavigableMap() (*NavigableMap, error) {
+	return NewNavigableMap(ev), nil
 }

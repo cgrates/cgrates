@@ -25,24 +25,6 @@ import (
 	"github.com/cgrates/cgrates/engine"
 )
 
-// httpReplyField is one field written in HTTP reply
-type httpReplyField struct {
-	fldPath string
-	fldVal  string
-}
-
-func newHTTPReplyFields() *httpReplyFields {
-	return &httpReplyFields{indexed: make(map[string]*httpReplyField),
-		ordered: make([]*httpReplyField, 0)}
-}
-
-// httpReplyFields is the reply which will be written to HTTP
-// both flds and ordered are pointig towards same httpReplyField
-type httpReplyFields struct {
-	indexed map[string]*httpReplyField // map[fldPath]*httpReplyField
-	ordered []*httpReplyField          // keep order for export
-}
-
 // newHAReqDecoder produces decoders
 func newHADataProvider(dpType string,
 	req *http.Request) (dP engine.DataProvider, err error) {
@@ -61,8 +43,8 @@ func newHAReplyEncoder(encType string,
 	}
 }
 
-// httpAgentReplyEncoder will encode fields from httpReplyFields
+// httpAgentReplyEncoder will encode  []*engine.NMElement
 // and write content to http writer
 type httpAgentReplyEncoder interface {
-	encode(*httpReplyFields) error
+	encode(*engine.NavigableMap) error
 }

@@ -1456,6 +1456,6 @@ func (cd *CallDescriptor) String() string {
 }
 
 // AsNavigableMap is part of utils.DataProvider
-func (cd *CallDescriptor) AsNavigableMap(tpl []*config.CfgCdrField) (nM NavigableMap, err error) {
-	return
+func (cd *CallDescriptor) AsNavigableMap(tpl []*config.CfgCdrField) (nM *NavigableMap, err error) {
+	return nil, utils.ErrNotImplemented
 }

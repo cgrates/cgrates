@@ -60,7 +60,7 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 	var processed bool
 	procVars := make(processorVars)
-	rpl := newHTTPReplyFields()
+	rpl := engine.NewNavigableMap(nil)
 	for _, reqProcessor := range ha.reqProcessors {
 		var lclProcessed bool
 		if lclProcessed, err = ha.processRequest(reqProcessor, dcdr,
@@ -101,8 +101,7 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 // processRequest represents one processor processing the request
 func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 	dP engine.DataProvider, procVars processorVars,
-	reply *httpReplyFields) (processed bool, err error) {
-
+	reply *engine.NavigableMap) (processed bool, err error) {
 	tnt, err := dP.FieldAsString([]string{utils.Tenant})
 	if err != nil {
 		return false, err
@@ -116,11 +115,11 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 		procVars[k] = strconv.FormatBool(v)
 	}
 	if reqProcessor.DryRun {
-		utils.Logger.Info(fmt.Sprintf("<%s> DRY_RUN, RADIUS request: %s", utils.RadiusAgent, dP))
-		utils.Logger.Info(fmt.Sprintf("<%s> DRY_RUN, process variabiles: %+v", utils.RadiusAgent, procVars))
+		utils.Logger.Info(fmt.Sprintf("<%s> DRY_RUN, HTTP request: %s", utils.HTTPAgent, dP))
+		utils.Logger.Info(fmt.Sprintf("<%s> DRY_RUN, process variables: %+v", utils.HTTPAgent, procVars))
 	}
 	/*
-		cgrEv, err := radReqAsCGREvent(req, procVars, reqProcessor.Flags, reqProcessor.RequestFields)
+		ev, err := radReqAsCGREvent(req, procVars, reqProcessor.Flags, reqProcessor.RequestFields)
 		if err != nil {
 			return false, err
 		}

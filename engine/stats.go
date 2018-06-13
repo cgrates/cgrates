@@ -169,7 +169,7 @@ func (sS *StatService) matchingStatQueuesForEvent(ev *utils.CGREvent) (sqs StatQ
 			continue
 		}
 		if pass, err := sS.filterS.Pass(ev.Tenant, sqPrfl.FilterIDs,
-			NavigableMap(ev.Event)); err != nil {
+			NewNavigableMap(ev.Event)); err != nil {
 			return nil, err
 		} else if !pass {
 			continue

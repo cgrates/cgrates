@@ -464,7 +464,7 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent, usageTT
 			continue
 		}
 		if pass, err := rS.filterS.Pass(ev.Tenant, rPrf.FilterIDs,
-			NavigableMap(ev.Event)); err != nil {
+			NewNavigableMap(ev.Event)); err != nil {
 			return nil, err
 		} else if !pass {
 			continue

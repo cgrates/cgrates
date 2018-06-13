@@ -62,7 +62,7 @@ func (pv processorVars) valAsInterface(fldPath string) (val interface{}, err err
 		err = errors.New("not found")
 		return
 	}
-	return engine.NavigableMap(pv).FieldAsInterface(strings.Split(fldPath, utils.HIERARCHY_SEP))
+	return engine.NewNavigableMap(pv).FieldAsInterface(strings.Split(fldPath, utils.HIERARCHY_SEP))
 }
 
 // valAsString returns the string value for fldName
@@ -75,7 +75,7 @@ func (pv processorVars) valAsString(fldPath string) (val string, err error) {
 	if !pv.hasVar(fldName) {
 		return "", utils.ErrNotFoundNoCaps
 	}
-	return engine.NavigableMap(pv).FieldAsString(strings.Split(fldPath, utils.HIERARCHY_SEP))
+	return engine.NewNavigableMap(pv).FieldAsString(strings.Split(fldPath, utils.HIERARCHY_SEP))
 }
 
 // asV1AuthorizeArgs returns the arguments needed by SessionSv1.AuthorizeEvent
@@ -411,6 +411,7 @@ func NewCGRReply(rply engine.NavigableMapper,
 	if err != nil {
 		return nil, err
 	}
-	nM[utils.Error] = ""                   // enforce empty error
-	return map[string]interface{}(nM), nil // convert from NM to map due to decapsulation later
+	mp = nM.AsMapStringInterface()
+	mp[utils.Error] = "" // enforce empty error
+	return mp, nil
 }

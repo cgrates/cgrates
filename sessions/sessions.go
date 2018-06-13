@@ -1337,8 +1337,9 @@ type V1AuthorizeReply struct {
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1AuthReply *V1AuthorizeReply) AsNavigableMap(ignr []*config.CfgCdrField) (cgrReply engine.NavigableMap, err error) {
-	cgrReply = make(map[string]interface{})
+func (v1AuthReply *V1AuthorizeReply) AsNavigableMap(
+	ignr []*config.CfgCdrField) (*engine.NavigableMap, error) {
+	cgrReply := make(map[string]interface{})
 	if v1AuthReply.Attributes != nil {
 		attrs := make(map[string]interface{})
 		for _, fldName := range v1AuthReply.Attributes.AlteredFields {
@@ -1363,8 +1364,7 @@ func (v1AuthReply *V1AuthorizeReply) AsNavigableMap(ignr []*config.CfgCdrField) 
 	if v1AuthReply.StatQueueIDs != nil {
 		cgrReply[utils.CapStatQueues] = *v1AuthReply.StatQueueIDs
 	}
-	cgrReply[utils.Error] = "" // so we can compare in filters
-	return
+	return engine.NewNavigableMap(cgrReply), nil
 }
 
 // BiRPCV1Authorize performs authorization for CGREvent based on specific components
@@ -1552,8 +1552,9 @@ type V1InitSessionReply struct {
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1InitSessionReply) AsNavigableMap(ignr []*config.CfgCdrField) (cgrReply engine.NavigableMap, err error) {
-	cgrReply = make(map[string]interface{})
+func (v1Rply *V1InitSessionReply) AsNavigableMap(
+	ignr []*config.CfgCdrField) (*engine.NavigableMap, error) {
+	cgrReply := make(map[string]interface{})
 	if v1Rply.Attributes != nil {
 		attrs := make(map[string]interface{})
 		for _, fldName := range v1Rply.Attributes.AlteredFields {
@@ -1575,8 +1576,7 @@ func (v1Rply *V1InitSessionReply) AsNavigableMap(ignr []*config.CfgCdrField) (cg
 	if v1Rply.StatQueueIDs != nil {
 		cgrReply[utils.CapStatQueues] = *v1Rply.StatQueueIDs
 	}
-	cgrReply[utils.Error] = ""
-	return
+	return engine.NewNavigableMap(cgrReply), nil
 }
 
 // BiRPCV2InitiateSession initiates a new session, returns the maximum duration the session can last
@@ -1732,8 +1732,9 @@ type V1UpdateSessionReply struct {
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1UpdateSessionReply) AsNavigableMap(ignr []*config.CfgCdrField) (cgrReply engine.NavigableMap, err error) {
-	cgrReply = make(map[string]interface{})
+func (v1Rply *V1UpdateSessionReply) AsNavigableMap(
+	ignr []*config.CfgCdrField) (*engine.NavigableMap, error) {
+	cgrReply := make(map[string]interface{})
 	if v1Rply.Attributes != nil {
 		attrs := make(map[string]interface{})
 		for _, fldName := range v1Rply.Attributes.AlteredFields {
@@ -1746,8 +1747,7 @@ func (v1Rply *V1UpdateSessionReply) AsNavigableMap(ignr []*config.CfgCdrField) (
 	if v1Rply.MaxUsage != nil {
 		cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
 	}
-	cgrReply[utils.Error] = ""
-	return
+	return engine.NewNavigableMap(cgrReply), nil
 }
 
 // BiRPCV1UpdateSession updates an existing session, returning the duration which the session can still last
@@ -1899,8 +1899,9 @@ type V1ProcessEventReply struct {
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1ProcessEventReply) AsNavigableMap(ignr []*config.CfgCdrField) (cgrReply engine.NavigableMap, err error) {
-	cgrReply = make(map[string]interface{})
+func (v1Rply *V1ProcessEventReply) AsNavigableMap(
+	ignr []*config.CfgCdrField) (*engine.NavigableMap, error) {
+	cgrReply := make(map[string]interface{})
 	if v1Rply.MaxUsage != nil {
 		cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
 	}
@@ -1916,8 +1917,7 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap(ignr []*config.CfgCdrField) (c
 		}
 		cgrReply[utils.CapAttributes] = attrs
 	}
-	cgrReply[utils.Error] = ""
-	return
+	return engine.NewNavigableMap(cgrReply), nil
 }
 
 // Called on session end, should send the CDR to CDRS

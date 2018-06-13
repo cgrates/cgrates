@@ -27,5 +27,5 @@ type DataProvider interface {
 	FieldAsInterface(fldPath []string) (interface{}, error)
 	FieldAsString(fldPath []string) (string, error)
 	String() string // printable versin of data
-	AsNavigableMap(cfgFlds []*config.CfgCdrField) (NavigableMap, error)
+	AsNavigableMap([]*config.CfgCdrField) (*NavigableMap, error)
 }
