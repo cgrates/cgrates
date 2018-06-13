@@ -1551,15 +1551,26 @@ func TestLoadStatQueueProfiles(t *testing.T) {
 	}
 	for _, stKey := range stKeys {
 		if len(csvr.sqProfiles) != len(eStats) {
-			t.Errorf("Failed to load StatQueueProfiles: %s", len(csvr.sqProfiles))
-		} else if !reflect.DeepEqual(eStats[stKey].Tenant, csvr.sqProfiles[stKey].Tenant) {
-			t.Errorf("Expecting: %+v, received: %+v", eStats[stKey].Tenant, csvr.sqProfiles[stKey].Tenant)
-		} else if !reflect.DeepEqual(eStats[stKey].ID, csvr.sqProfiles[stKey].ID) {
-			t.Errorf("Expecting: %+v, received: %+v", eStats[stKey].ID, csvr.sqProfiles[stKey].ID)
-		} else if !reflect.DeepEqual(len(eStats[stKey].ThresholdIDs), len(csvr.sqProfiles[stKey].ThresholdIDs)) {
-			t.Errorf("Expecting: %+v, received: %+v", len(eStats[stKey].ThresholdIDs), len(csvr.sqProfiles[stKey].ThresholdIDs))
-		} else if !reflect.DeepEqual(len(eStats[stKey].Metrics), len(csvr.sqProfiles[stKey].Metrics)) {
-			t.Errorf("Expecting: %+v, received: %+v", len(eStats[stKey].Metrics), len(csvr.sqProfiles[stKey].Metrics))
+			t.Errorf("Failed to load StatQueueProfiles: %s",
+				utils.ToJSON(csvr.sqProfiles))
+		} else if !reflect.DeepEqual(eStats[stKey].Tenant,
+			csvr.sqProfiles[stKey].Tenant) {
+			t.Errorf("Expecting: %s, received: %s",
+				eStats[stKey].Tenant, csvr.sqProfiles[stKey].Tenant)
+		} else if !reflect.DeepEqual(eStats[stKey].ID,
+			csvr.sqProfiles[stKey].ID) {
+			t.Errorf("Expecting: %s, received: %s",
+				eStats[stKey].ID, csvr.sqProfiles[stKey].ID)
+		} else if !reflect.DeepEqual(len(eStats[stKey].ThresholdIDs),
+			len(csvr.sqProfiles[stKey].ThresholdIDs)) {
+			t.Errorf("Expecting: %s, received: %s",
+				utils.ToJSON(eStats[stKey].ThresholdIDs),
+				utils.ToJSON(csvr.sqProfiles[stKey].ThresholdIDs))
+		} else if !reflect.DeepEqual(len(eStats[stKey].Metrics),
+			len(csvr.sqProfiles[stKey].Metrics)) {
+			t.Errorf("Expecting: %s, received: %s",
+				utils.ToJSON(eStats[stKey].Metrics),
+				utils.ToJSON(csvr.sqProfiles[stKey].Metrics))
 		}
 	}
 }
