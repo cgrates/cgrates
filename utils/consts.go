@@ -163,6 +163,7 @@ const (
 	SetupTime                     = "SetupTime"
 	AnswerTime                    = "AnswerTime"
 	Usage                         = "Usage"
+	Value                         = "Value"
 	LastUsed                      = "LastUsed"
 	PDD                           = "PDD"
 	SUPPLIER                      = "Supplier"

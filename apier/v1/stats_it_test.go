@@ -76,6 +76,7 @@ var sTestsStatSV1 = []func(t *testing.T){
 	testV1STSInitDataDb,
 	testV1STSStartEngine,
 	testV1STSRpcConn,
+	testV1STSRpcConn,
 	testV1STSFromFolder,
 	testV1STSGetStats,
 	testV1STSProcessEvent,
@@ -155,14 +156,16 @@ func testV1STSGetStats(t *testing.T) {
 	}
 	var metrics map[string]string
 	expectedMetrics := map[string]string{
-		utils.MetaASR:     utils.NOT_AVAILABLE,
-		utils.MetaACD:     utils.NOT_AVAILABLE,
-		utils.MetaTCC:     utils.NOT_AVAILABLE,
-		utils.MetaTCD:     utils.NOT_AVAILABLE,
-		utils.MetaACC:     utils.NOT_AVAILABLE,
-		utils.MetaPDD:     utils.NOT_AVAILABLE,
-		utils.MetaSum:     utils.NOT_AVAILABLE,
-		utils.MetaAverage: utils.NOT_AVAILABLE,
+		utils.MetaASR:                                         utils.NOT_AVAILABLE,
+		utils.MetaACD:                                         utils.NOT_AVAILABLE,
+		utils.MetaTCC:                                         utils.NOT_AVAILABLE,
+		utils.MetaTCD:                                         utils.NOT_AVAILABLE,
+		utils.MetaACC:                                         utils.NOT_AVAILABLE,
+		utils.MetaPDD:                                         utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaSum, utils.Value):     utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaAverage, utils.Value): utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaSum, utils.Usage):     utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaAverage, utils.Usage): utils.NOT_AVAILABLE,
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}, &metrics); err != nil {
@@ -191,14 +194,16 @@ func testV1STSProcessEvent(t *testing.T) {
 	}
 	//process with one event (should be N/A becaus MinItems is 2)
 	expectedMetrics := map[string]string{
-		utils.MetaASR:     utils.NOT_AVAILABLE,
-		utils.MetaACD:     utils.NOT_AVAILABLE,
-		utils.MetaTCC:     utils.NOT_AVAILABLE,
-		utils.MetaTCD:     utils.NOT_AVAILABLE,
-		utils.MetaACC:     utils.NOT_AVAILABLE,
-		utils.MetaPDD:     utils.NOT_AVAILABLE,
-		utils.MetaSum:     utils.NOT_AVAILABLE,
-		utils.MetaAverage: utils.NOT_AVAILABLE,
+		utils.MetaASR:                                         utils.NOT_AVAILABLE,
+		utils.MetaACD:                                         utils.NOT_AVAILABLE,
+		utils.MetaTCC:                                         utils.NOT_AVAILABLE,
+		utils.MetaTCD:                                         utils.NOT_AVAILABLE,
+		utils.MetaACC:                                         utils.NOT_AVAILABLE,
+		utils.MetaPDD:                                         utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaSum, utils.Value):     utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaAverage, utils.Value): utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaSum, utils.Usage):     utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaAverage, utils.Usage): utils.NOT_AVAILABLE,
 	}
 	var metrics map[string]string
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
@@ -233,14 +238,16 @@ func testV1STSProcessEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 	expectedMetrics2 := map[string]string{
-		utils.MetaASR:     "66.66667%",
-		utils.MetaACD:     "1m30s",
-		utils.MetaACC:     "61.5",
-		utils.MetaTCD:     "3m0s",
-		utils.MetaTCC:     "123",
-		utils.MetaPDD:     "4s",
-		utils.MetaSum:     "0",
-		utils.MetaAverage: utils.NOT_AVAILABLE,
+		utils.MetaASR:                                         "66.66667%",
+		utils.MetaACD:                                         "1m30s",
+		utils.MetaACC:                                         "61.5",
+		utils.MetaTCD:                                         "3m0s",
+		utils.MetaTCC:                                         "123",
+		utils.MetaPDD:                                         "4s",
+		utils.ConcatenatedKey(utils.MetaSum, utils.Value):     "0",
+		utils.ConcatenatedKey(utils.MetaAverage, utils.Value): utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaSum, utils.Usage):     "180000000000",
+		utils.ConcatenatedKey(utils.MetaAverage, utils.Usage): "90000000000",
 	}
 	var metrics2 map[string]string
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics, &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics2); err != nil {
@@ -265,14 +272,16 @@ func testV1STSGetStatsAfterRestart(t *testing.T) {
 
 	//get stats metrics after restart
 	expectedMetrics2 := map[string]string{
-		utils.MetaASR:     "66.66667%",
-		utils.MetaACD:     "1m30s",
-		utils.MetaACC:     "61.5",
-		utils.MetaTCD:     "3m0s",
-		utils.MetaTCC:     "123",
-		utils.MetaPDD:     "4s",
-		utils.MetaSum:     "0",
-		utils.MetaAverage: utils.NOT_AVAILABLE,
+		utils.MetaASR:                                         "66.66667%",
+		utils.MetaACD:                                         "1m30s",
+		utils.MetaACC:                                         "61.5",
+		utils.MetaTCD:                                         "3m0s",
+		utils.MetaTCC:                                         "123",
+		utils.MetaPDD:                                         "4s",
+		utils.ConcatenatedKey(utils.MetaSum, utils.Value):     "0",
+		utils.ConcatenatedKey(utils.MetaAverage, utils.Value): utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaSum, utils.Usage):     "180000000000",
+		utils.ConcatenatedKey(utils.MetaAverage, utils.Usage): "90000000000",
 	}
 	var metrics2 map[string]string
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics, &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics2); err != nil {
