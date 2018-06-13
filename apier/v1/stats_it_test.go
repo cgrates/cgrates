@@ -76,7 +76,6 @@ var sTestsStatSV1 = []func(t *testing.T){
 	testV1STSInitDataDb,
 	testV1STSStartEngine,
 	testV1STSRpcConn,
-	testV1STSRpcConn,
 	testV1STSFromFolder,
 	testV1STSGetStats,
 	testV1STSProcessEvent,
