@@ -190,46 +190,83 @@ func TestApierTPTimingAsExportSlice(t *testing.T) {
 	}
 }
 
-/*
 func TestAPItoModelStats(t *testing.T) {
 	tpS := &utils.TPStats{
-		TPid: "TPS1",
-		ID:   "Stat1",
-		Filters: []*utils.TPRequestFilter{
-			&utils.TPRequestFilter{
-				Type:      "*string",
-				FieldName: "Account",
-				Values:    []string{"1002"},
-			},
-		},
+		TPid:      "TPS1",
+		Tenant:    "cgrates.org",
+		ID:        "Stat1",
+		FilterIDs: []string{"*string:Account:1002"},
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-29T15:00:00Z",
 			ExpiryTime:     "",
 		},
-		TTL:        "1",
-		Metrics:    []string{"MetricValue"},
-		Blocker:    true,
-		Stored:     true,
-		Weight:     20,
-		Thresholds: nil,
+		QueueLength: 100,
+		TTL:         "1s",
+		Metrics: []*utils.MetricWithParams{
+			&utils.MetricWithParams{
+				MetricID:   "*tcc",
+				Parameters: "",
+			},
+			&utils.MetricWithParams{
+				MetricID:   "*sum:Value",
+				Parameters: "Value",
+			},
+			&utils.MetricWithParams{
+				MetricID:   "*average:Value",
+				Parameters: "Value",
+			},
+			&utils.MetricWithParams{
+				MetricID:   "*sum:Cost",
+				Parameters: "Cost",
+			},
+			&utils.MetricWithParams{
+				MetricID:   "*average:Usage",
+				Parameters: "Usage",
+			},
+		},
+		Blocker:      true,
+		Stored:       true,
+		Weight:       20,
+		MinItems:     2,
+		ThresholdIDs: []string{"Th1", "Th2", "Th3", "Th4"},
 	}
-	expectedSlc := [][]string{
-		[]string{,"TPS1", "*Stat1", "*string", "*Account", "1002", "2014-07-29T15:00:00Z","","1","MetricValue",},
+	rcv := APItoModelStats(tpS)
+	eRcv := []*TpStats{
+		&TpStats{
+			Tpid:               "TPS1",
+			Tenant:             "cgrates.org",
+			ID:                 "Stat1",
+			FilterIDs:          "*string:Account:1002",
+			ActivationInterval: "2014-07-29T15:00:00Z",
+			QueueLength:        100,
+			TTL:                "1s",
+			MinItems:           2,
+			Metrics:            "*tcc;*sum:Value;*average:Value;*sum:Cost;*average:Usage",
+			Parameters:         "Value;Cost;Usage",
+			ThresholdIDs:       "Th1;Th2;Th3;Th4",
+			Stored:             true,
+			Blocker:            true,
+			Weight:             20.0,
+		},
 	}
-	expectedtpS := APItoModelStats(tpS)
-	var slc [][]string
-	lc, err := csvDump(expectedtpS)
-	if err != nil {
-		t.Error("Error dumping to csv: ", err)
-	}
-	slc = append(slc, lc)
-
-	if !reflect.DeepEqual(expectedtpS, tpS) {
-		t.Errorf("Expecting: %+v, received: %+v", expectedtpS, slc)
+	if !reflect.DeepEqual(eRcv[0].Tenant, rcv[0].Tenant) {
+		t.Errorf("Expecting: %+v, received: %+v", eRcv[0].Tenant, rcv[0].Tenant)
+	} else if !reflect.DeepEqual(eRcv[0].ID, rcv[0].ID) {
+		t.Errorf("Expecting: %+v, received: %+v", eRcv[0].ID, rcv[0].ID)
+	} else if !reflect.DeepEqual(eRcv[0].FilterIDs, rcv[0].FilterIDs) {
+		t.Errorf("Expecting: %+v, received: %+v", eRcv[0].FilterIDs, rcv[0].FilterIDs)
+	} else if !reflect.DeepEqual(eRcv[0].ActivationInterval, rcv[0].ActivationInterval) {
+		t.Errorf("Expecting: %+v, received: %+v", eRcv[0].ActivationInterval, rcv[0].ActivationInterval)
+	} else if !reflect.DeepEqual(eRcv[0].QueueLength, rcv[0].QueueLength) {
+		t.Errorf("Expecting: %+v, received: %+v", eRcv[0].QueueLength, rcv[0].QueueLength)
+	} else if !reflect.DeepEqual(len(eRcv[0].Metrics), len(rcv[0].Metrics)) {
+		t.Errorf("Expecting: %+v, received: %+v", len(eRcv[0].Metrics), len(rcv[0].Metrics))
+	} else if !reflect.DeepEqual(len(eRcv[0].Parameters), len(rcv[0].Parameters)) {
+		t.Errorf("Expecting: %+v, received: %+v", len(eRcv[0].Parameters), len(rcv[0].Parameters))
+	} else if !reflect.DeepEqual(len(eRcv[0].ThresholdIDs), len(rcv[0].ThresholdIDs)) {
+		t.Errorf("Expecting: %+v, received: %+v", len(eRcv[0].ThresholdIDs), len(rcv[0].ThresholdIDs))
 	}
 }
-
-*/
 
 func TestTPRatingPlanAsExportSlice(t *testing.T) {
 	tpRpln := &utils.TPRatingPlan{
@@ -877,9 +914,9 @@ func TestTPStatsAsTPStats(t *testing.T) {
 				&utils.MetricWithParams{MetricID: "*acd", Parameters: ""},
 				&utils.MetricWithParams{MetricID: "*tcd", Parameters: ""},
 				&utils.MetricWithParams{MetricID: "*pdd", Parameters: ""},
-				&utils.MetricWithParams{MetricID: "*sum", Parameters: "BalanceValue"},
-				&utils.MetricWithParams{MetricID: "*average", Parameters: "BalanceValue"},
-				&utils.MetricWithParams{MetricID: "*tcc", Parameters: "BalanceValue"},
+				&utils.MetricWithParams{MetricID: "*sum:BalanceValue", Parameters: "BalanceValue"},
+				&utils.MetricWithParams{MetricID: "*average:BalanceValue", Parameters: "BalanceValue"},
+				&utils.MetricWithParams{MetricID: "*tcc:BalanceValue", Parameters: "BalanceValue"},
 			},
 			MinItems:     tps[0].MinItems,
 			ThresholdIDs: []string{"THRESH1", "THRESH2", "THRESH3"},
@@ -898,9 +935,9 @@ func TestTPStatsAsTPStats(t *testing.T) {
 			QueueLength: tps[0].QueueLength,
 			TTL:         tps[0].TTL,
 			Metrics: []*utils.MetricWithParams{
-				&utils.MetricWithParams{MetricID: "*sum", Parameters: "BalanceValue"},
-				&utils.MetricWithParams{MetricID: "*average", Parameters: "BalanceValue"},
-				&utils.MetricWithParams{MetricID: "*tcc", Parameters: "BalanceValue"},
+				&utils.MetricWithParams{MetricID: "*sum:BalanceValue", Parameters: "BalanceValue"},
+				&utils.MetricWithParams{MetricID: "*average:BalanceValue", Parameters: "BalanceValue"},
+				&utils.MetricWithParams{MetricID: "*tcc:BalanceValue", Parameters: "BalanceValue"},
 			},
 			MinItems:     tps[0].MinItems,
 			ThresholdIDs: []string{"THRESH4"},

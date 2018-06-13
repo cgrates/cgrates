@@ -20,10 +20,12 @@ package engine
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"strconv"
-	"time"
 )
 
 // NewStatMetric instantiates the StatMetric
@@ -40,10 +42,11 @@ func NewStatMetric(metricID string, minItems int, extraParams string) (sm StatMe
 		utils.MetaSum:     NewStatSum,
 		utils.MetaAverage: NewStatAverage,
 	}
-	if _, has := metrics[metricID]; !has {
-		return nil, fmt.Errorf("unsupported metric: %s", metricID)
+	metricType := strings.Split(metricID, utils.InInFieldSep)[0]
+	if _, has := metrics[metricType]; !has {
+		return nil, fmt.Errorf("unsupported metric type <%s>", metricType)
 	}
-	return metrics[metricID](minItems, extraParams)
+	return metrics[metricType](minItems, extraParams)
 }
 
 // StatMetric is the interface which a metric should implement

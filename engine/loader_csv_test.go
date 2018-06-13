@@ -271,9 +271,10 @@ cgrates.org,ResGroup22,FLTR_ACNT_dan,2014-07-29T15:00:00Z,3600s,2,premium_call,t
 `
 	stats = `
 #Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],Metrics[6],Blocker[7],Stored[8],Weight[9],MinItems[10],Thresholds[11]
-cgrates.org,Stats1,FLTR_1,2014-07-29T15:00:00Z,100,1s,*asr;*acc;*tcc;*acd;*tcd;*pdd,value,true,true,20,2,THRESH1;THRESH2
-cgrates.org,Stats2,FLTR_1,2014-07-29T15:00:00Z,100,1s,*asr;*acc;*tcc;*acd;*tcd;*pdd,value,true,true,20,2,THRESH1;THRESH2
-cgrates.org,Stats3,FLTR_1,2014-07-29T15:00:00Z,100,1s,*asr;*acc;*tcc;*acd;*tcd;*pdd,,true,true,20,2,THRESH1;THRESH2
+cgrates.org,TestStats,FLTR_1,2014-07-29T15:00:00Z,100,1s,*sum;*average,Value,true,true,20,2,Th1;Th2
+cgrates.org,TestStats,,,,,*sum,Usage,true,true,20,2,
+cgrates.org,TestStats2,FLTR_1,2014-07-29T15:00:00Z,100,1s,*sum;*average,Value;Usage,true,true,20,2,Th
+cgrates.org,TestStats2,,,,,*sum;*average,Cost,true,true,20,2,
 `
 
 	thresholds = `
@@ -1469,69 +1470,100 @@ func TestLoadResourceProfiles(t *testing.T) {
 	}
 }
 
-/*
-func TestLoadStatProfiles(t *testing.T) {
+func TestLoadStatQueueProfiles(t *testing.T) {
 	eStats := map[utils.TenantID]*utils.TPStats{
-		utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}: &utils.TPStats{
+		utils.TenantID{Tenant: "cgrates.org", ID: "TestStats"}: &utils.TPStats{
 			Tenant:    "cgrates.org",
 			TPid:      testTPID,
-			ID:        "Stats1",
+			ID:        "TestStats",
 			FilterIDs: []string{"FLTR_1"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
 			QueueLength: 100,
 			TTL:         "1s",
-			Metrics:     []string{"*asr", "*acc", "*tcc", "*acd", "*tcd", "*pdd"},
-			Thresholds:  []string{"THRESH1", "THRESH2"},
-			Blocker:     true,
-			Stored:      true,
-			Weight:      20,
-			MinItems:    2,
+			Metrics: []*utils.MetricWithParams{
+				&utils.MetricWithParams{
+					MetricID:   "*sum:Value",
+					Parameters: "Value",
+				},
+				&utils.MetricWithParams{
+					MetricID:   "*average:Value",
+					Parameters: "Value",
+				},
+				&utils.MetricWithParams{
+					MetricID:   "*sum:Usage",
+					Parameters: "Usage",
+				},
+			},
+			ThresholdIDs: []string{"Th1", "Th2"},
+			Blocker:      true,
+			Stored:       true,
+			Weight:       20,
+			MinItems:     2,
 		},
-		utils.TenantID{Tenant: "cgrates.org", ID: "Stats2"}: &utils.TPStats{
+		utils.TenantID{Tenant: "cgrates.org", ID: "TestStats2"}: &utils.TPStats{
 			Tenant:    "cgrates.org",
 			TPid:      testTPID,
-			ID:        "Stats2",
+			ID:        "TestStats2",
 			FilterIDs: []string{"FLTR_1"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
 			QueueLength: 100,
 			TTL:         "1s",
-			Metrics:     []string{"*asr", "*acc", "*tcc", "*acd", "*tcd", "*pdd"},
-			Thresholds:  []string{"THRESH1", "THRESH2"},
-			Blocker:     true,
-			Stored:      true,
-			Weight:      20,
-			MinItems:    2,
-		},
-		utils.TenantID{Tenant: "cgrates.org", ID: "Stats3"}: &utils.TPStats{
-			Tenant:    "cgrates.org",
-			TPid:      testTPID,
-			ID:        "Stats3",
-			FilterIDs: []string{"FLTR_1"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
+			Metrics: []*utils.MetricWithParams{
+				&utils.MetricWithParams{
+					MetricID:   "*sum:Value",
+					Parameters: "Value",
+				},
+				&utils.MetricWithParams{
+					MetricID:   "*average:Value",
+					Parameters: "Value",
+				},
+				&utils.MetricWithParams{
+					MetricID:   "*sum:Usage",
+					Parameters: "Usage",
+				},
+				&utils.MetricWithParams{
+					MetricID:   "*average:Usage",
+					Parameters: "Usage",
+				},
+				&utils.MetricWithParams{
+					MetricID:   "*sum:Cost",
+					Parameters: "Cost",
+				},
+				&utils.MetricWithParams{
+					MetricID:   "*average:Cost",
+					Parameters: "Cost",
+				},
 			},
-			QueueLength: 100,
-			TTL:         "1s",
-			Metrics:     []string{"*asr", "*acc", "*tcc", "*acd", "*tcd", "*pdd"},
-			Thresholds:  []string{"THRESH1", "THRESH2"},
-			Blocker:     true,
-			Stored:      true,
-			Weight:      20,
-			MinItems:    2,
+			ThresholdIDs: []string{"Th"},
+			Blocker:      true,
+			Stored:       true,
+			Weight:       20,
+			MinItems:     2,
 		},
 	}
-	stKey := utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}
-	if len(csvr.sqProfiles) != len(eStats) {
-		t.Errorf("Failed to load StatQueueProfiles: %s", len(csvr.sqProfiles))
-	} else if !reflect.DeepEqual(eStats[stKey], csvr.sqProfiles[stKey]) {
-		t.Errorf("Expecting: %+v, received: %+v", eStats[stKey], csvr.sqProfiles[stKey])
+	stKeys := []utils.TenantID{
+		utils.TenantID{Tenant: "cgrates.org", ID: "TestStats"},
+		utils.TenantID{Tenant: "cgrates.org", ID: "TestStats2"},
+	}
+	for _, stKey := range stKeys {
+		if len(csvr.sqProfiles) != len(eStats) {
+			t.Errorf("Failed to load StatQueueProfiles: %s", len(csvr.sqProfiles))
+		} else if !reflect.DeepEqual(eStats[stKey].Tenant, csvr.sqProfiles[stKey].Tenant) {
+			t.Errorf("Expecting: %+v, received: %+v", eStats[stKey].Tenant, csvr.sqProfiles[stKey].Tenant)
+		} else if !reflect.DeepEqual(eStats[stKey].ID, csvr.sqProfiles[stKey].ID) {
+			t.Errorf("Expecting: %+v, received: %+v", eStats[stKey].ID, csvr.sqProfiles[stKey].ID)
+		} else if !reflect.DeepEqual(len(eStats[stKey].ThresholdIDs), len(csvr.sqProfiles[stKey].ThresholdIDs)) {
+			t.Errorf("Expecting: %+v, received: %+v", len(eStats[stKey].ThresholdIDs), len(csvr.sqProfiles[stKey].ThresholdIDs))
+		} else if !reflect.DeepEqual(len(eStats[stKey].Metrics), len(csvr.sqProfiles[stKey].Metrics)) {
+			t.Errorf("Expecting: %+v, received: %+v", len(eStats[stKey].Metrics), len(csvr.sqProfiles[stKey].Metrics))
+		}
 	}
 }
-*/
+
 func TestLoadThresholdProfiles(t *testing.T) {
 	eThresholds := map[utils.TenantID]*utils.TPThreshold{
 		utils.TenantID{Tenant: "cgrates.org", ID: "Threshold1"}: &utils.TPThreshold{
@@ -1742,15 +1774,11 @@ func TestLoadstatQueues(t *testing.T) {
 	eStatQueues := []*utils.TenantID{
 		&utils.TenantID{
 			Tenant: "cgrates.org",
-			ID:     "Stats1",
+			ID:     "TestStats",
 		},
 		&utils.TenantID{
 			Tenant: "cgrates.org",
-			ID:     "Stats2",
-		},
-		&utils.TenantID{
-			Tenant: "cgrates.org",
-			ID:     "Stats3",
+			ID:     "TestStats2",
 		},
 	}
 

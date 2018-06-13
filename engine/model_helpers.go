@@ -1991,8 +1991,16 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 			}
 			metricSplit := strings.Split(tp.Metrics, utils.INFIELD_SEP)
 			for _, metric := range metricSplit {
-				metricmap[tp.Tenant][tp.ID][metric] = &utils.MetricWithParams{
-					MetricID: metric, Parameters: tp.Parameters}
+				if tp.Parameters != "" {
+					paramSplit := strings.Split(tp.Parameters, utils.INFIELD_SEP)
+					for _, param := range paramSplit {
+						metricmap[tp.Tenant][tp.ID][utils.ConcatenatedKey(metric, param)] = &utils.MetricWithParams{
+							MetricID: utils.ConcatenatedKey(metric, param), Parameters: param}
+					}
+				} else {
+					metricmap[tp.Tenant][tp.ID][metric] = &utils.MetricWithParams{
+						MetricID: metric, Parameters: tp.Parameters}
+				}
 			}
 		}
 		if tp.ThresholdIDs != "" {
@@ -2078,6 +2086,7 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 }
 
 func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
+	var paramSlice []string
 	if st != nil {
 		for i, fltr := range st.FilterIDs {
 			mdl := &TpStats{
@@ -2096,10 +2105,21 @@ func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
 				for i, val := range st.Metrics {
 					if i != 0 {
 						mdl.Metrics += utils.INFIELD_SEP
-						mdl.Parameters += utils.INFIELD_SEP
 					}
 					mdl.Metrics += val.MetricID
-					mdl.Parameters += val.Parameters
+				}
+
+				for _, val := range st.Metrics {
+					if val.Parameters != "" {
+						paramSlice = append(paramSlice, val.Parameters)
+
+					}
+				}
+				for i, val := range utils.StringMapFromSlice(paramSlice).Slice() {
+					if i != 0 {
+						mdl.Parameters += utils.INFIELD_SEP
+					}
+					mdl.Parameters += val
 				}
 				for i, val := range st.ThresholdIDs {
 					if i != 0 {
