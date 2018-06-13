@@ -13,7 +13,7 @@ CREATE TABLE cdrs (
  tor VARCHAR(16) NOT NULL,
  request_type VARCHAR(24) NOT NULL,
  tenant VARCHAR(64) NOT NULL,
- category VARCHAR(32) NOT NULL,
+ category VARCHAR(64) NOT NULL,
  account VARCHAR(128) NOT NULL,
  subject VARCHAR(128) NOT NULL,
  destination VARCHAR(128) NOT NULL,
