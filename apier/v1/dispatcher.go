@@ -95,7 +95,7 @@ func (dRs *DispatcherResourceSv1) Ping(ign string, reply *string) error {
 }
 
 // GetResourcesForEvent implements ResourceSv1GetResourcesForEvent
-func (dRs *DispatcherResourceSv1) GetResourcesForEvent(args dispatcher.ArgsV1ResUsageWithApiKey,
+func (dRs *DispatcherResourceSv1) GetResourcesForEvent(args *dispatcher.ArgsV1ResUsageWithApiKey,
 	reply *engine.Resources) error {
 	return dRs.dRs.ResourceSv1GetResourcesForEvent(args, reply)
 }

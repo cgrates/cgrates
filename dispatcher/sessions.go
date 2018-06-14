@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatcher
 
 import (
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -36,25 +35,9 @@ func (dS *DispatcherService) SessionSv1AuthorizeEventWithDigest(args *AuthorizeA
 	if dS.sessionS == nil {
 		return utils.NewErrNotConnected(utils.SessionS)
 	}
-	ev := &utils.CGREvent{
-		Tenant:  args.Tenant,
-		ID:      utils.UUIDSha1Prefix(),
-		Context: utils.StringPointer(utils.MetaAuth),
-		Time:    args.V1AuthorizeArgs.CGREvent.Time,
-		Event: map[string]interface{}{
-			utils.APIKey: args.APIKey,
-		},
-	}
-	var rplyEv engine.AttrSProcessEventReply
-	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
+	if err = dS.authorizeMethod(args.APIKey, args.V1AuthorizeArgs.CGREvent.Tenant,
+		utils.SessionSv1AuthorizeEventWithDigest, args.V1AuthorizeArgs.CGREvent.Time); err != nil {
 		return
-	}
-	var apiMethods string
-	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
-		return
-	}
-	if !utils.ParseStringMap(apiMethods).HasKey(utils.SessionSv1AuthorizeEventWithDigest) {
-		return utils.ErrUnauthorizedApi
 	}
 	return dS.sessionS.Call(utils.SessionSv1AuthorizeEventWithDigest, args.V1AuthorizeArgs, reply)
 }
@@ -64,25 +47,9 @@ func (dS *DispatcherService) SessionSv1InitiateSessionWithDigest(args *InitArgsW
 	if dS.sessionS == nil {
 		return utils.NewErrNotConnected(utils.SessionS)
 	}
-	ev := &utils.CGREvent{
-		Tenant:  args.Tenant,
-		ID:      utils.UUIDSha1Prefix(),
-		Context: utils.StringPointer(utils.MetaAuth),
-		Time:    args.V1InitSessionArgs.CGREvent.Time,
-		Event: map[string]interface{}{
-			utils.APIKey: args.APIKey,
-		},
-	}
-	var rplyEv engine.AttrSProcessEventReply
-	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
+	if err = dS.authorizeMethod(args.APIKey, args.V1InitSessionArgs.CGREvent.Tenant,
+		utils.SessionSv1InitiateSessionWithDigest, args.V1InitSessionArgs.CGREvent.Time); err != nil {
 		return
-	}
-	var apiMethods string
-	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
-		return
-	}
-	if !utils.ParseStringMap(apiMethods).HasKey(utils.SessionSv1InitiateSessionWithDigest) {
-		return utils.ErrUnauthorizedApi
 	}
 	return dS.sessionS.Call(utils.SessionSv1InitiateSessionWithDigest, args.V1InitSessionArgs, reply)
 }
@@ -92,25 +59,9 @@ func (dS *DispatcherService) SessionSv1ProcessCDR(args *CGREvWithApiKey,
 	if dS.sessionS == nil {
 		return utils.NewErrNotConnected(utils.SessionS)
 	}
-	ev := &utils.CGREvent{
-		Tenant:  args.Tenant,
-		ID:      utils.UUIDSha1Prefix(),
-		Context: utils.StringPointer(utils.MetaAuth),
-		Time:    args.CGREvent.Time,
-		Event: map[string]interface{}{
-			utils.APIKey: args.APIKey,
-		},
-	}
-	var rplyEv engine.AttrSProcessEventReply
-	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
+	if err = dS.authorizeMethod(args.APIKey, args.CGREvent.Tenant,
+		utils.SessionSv1ProcessCDR, args.CGREvent.Time); err != nil {
 		return
-	}
-	var apiMethods string
-	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
-		return
-	}
-	if !utils.ParseStringMap(apiMethods).HasKey(utils.SessionSv1ProcessCDR) {
-		return utils.ErrUnauthorizedApi
 	}
 	return dS.sessionS.Call(utils.SessionSv1ProcessCDR, args.CGREvent, reply)
 }
@@ -120,25 +71,9 @@ func (dS *DispatcherService) SessionSv1ProcessEvent(args *ProcessEventWithApiKey
 	if dS.sessionS == nil {
 		return utils.NewErrNotConnected(utils.SessionS)
 	}
-	ev := &utils.CGREvent{
-		Tenant:  args.Tenant,
-		ID:      utils.UUIDSha1Prefix(),
-		Context: utils.StringPointer(utils.MetaAuth),
-		Time:    args.V1ProcessEventArgs.CGREvent.Time,
-		Event: map[string]interface{}{
-			utils.APIKey: args.APIKey,
-		},
-	}
-	var rplyEv engine.AttrSProcessEventReply
-	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
+	if err = dS.authorizeMethod(args.APIKey, args.V1ProcessEventArgs.CGREvent.Tenant,
+		utils.SessionSv1ProcessEvent, args.V1ProcessEventArgs.CGREvent.Time); err != nil {
 		return
-	}
-	var apiMethods string
-	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
-		return
-	}
-	if !utils.ParseStringMap(apiMethods).HasKey(utils.SessionSv1ProcessEvent) {
-		return utils.ErrUnauthorizedApi
 	}
 	return dS.sessionS.Call(utils.SessionSv1ProcessEvent, args.V1ProcessEventArgs, reply)
 }
@@ -148,25 +83,9 @@ func (dS *DispatcherService) SessionSv1TerminateSession(args *TerminateSessionWi
 	if dS.sessionS == nil {
 		return utils.NewErrNotConnected(utils.SessionS)
 	}
-	ev := &utils.CGREvent{
-		Tenant:  args.Tenant,
-		ID:      utils.UUIDSha1Prefix(),
-		Context: utils.StringPointer(utils.MetaAuth),
-		Time:    args.V1TerminateSessionArgs.CGREvent.Time,
-		Event: map[string]interface{}{
-			utils.APIKey: args.APIKey,
-		},
-	}
-	var rplyEv engine.AttrSProcessEventReply
-	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
+	if err = dS.authorizeMethod(args.APIKey, args.V1TerminateSessionArgs.CGREvent.Tenant,
+		utils.SessionSv1TerminateSession, args.V1TerminateSessionArgs.CGREvent.Time); err != nil {
 		return
-	}
-	var apiMethods string
-	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
-		return
-	}
-	if !utils.ParseStringMap(apiMethods).HasKey(utils.SessionSv1TerminateSession) {
-		return utils.ErrUnauthorizedApi
 	}
 	return dS.sessionS.Call(utils.SessionSv1TerminateSession, args.V1TerminateSessionArgs, reply)
 }
@@ -176,25 +95,9 @@ func (dS *DispatcherService) SessionSv1UpdateSession(args *UpdateSessionWithApiK
 	if dS.sessionS == nil {
 		return utils.NewErrNotConnected(utils.SessionS)
 	}
-	ev := &utils.CGREvent{
-		Tenant:  args.Tenant,
-		ID:      utils.UUIDSha1Prefix(),
-		Context: utils.StringPointer(utils.MetaAuth),
-		Time:    args.V1UpdateSessionArgs.CGREvent.Time,
-		Event: map[string]interface{}{
-			utils.APIKey: args.APIKey,
-		},
-	}
-	var rplyEv engine.AttrSProcessEventReply
-	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
+	if err = dS.authorizeMethod(args.APIKey, args.V1UpdateSessionArgs.CGREvent.Tenant,
+		utils.SessionSv1UpdateSession, args.V1UpdateSessionArgs.CGREvent.Time); err != nil {
 		return
-	}
-	var apiMethods string
-	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
-		return
-	}
-	if !utils.ParseStringMap(apiMethods).HasKey(utils.SessionSv1UpdateSession) {
-		return utils.ErrUnauthorizedApi
 	}
 	return dS.sessionS.Call(utils.SessionSv1UpdateSession, args.V1UpdateSessionArgs, reply)
 }

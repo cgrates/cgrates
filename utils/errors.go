@@ -55,6 +55,7 @@ var (
 	ErrNotConvertibleNoCaps     = errors.New("not convertible")
 	ErrMandatoryIeMissingNoCaps = errors.New("mandatory information missing")
 	ErrUnauthorizedApi          = errors.New("UNAUTHORIZED_API")
+	ErrUnknownApiKey            = errors.New("UNKNOWN_API_KEY")
 	RalsErrorPrfx               = "RALS_ERROR"
 )
 
