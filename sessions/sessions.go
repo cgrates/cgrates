@@ -121,11 +121,11 @@ type SMGeneric struct {
 	cdrsrv       rpcclient.RpcClientConnection // CDR server connections
 	smgReplConns []*SMGReplicationConn         // list of connections where we will replicate our session data
 	Timezone     string
-
+	/* Part of new project
 	param               map[*rpc2.Client]struct{}
 	toBeRemovedSessions map[string][]*SMGSession
 	realActiveSession   map[string]struct{}
-
+	*/
 	activeSessions     map[string][]*SMGSession // group sessions per sessionId, multiple runs based on derived charging
 	aSessionsMux       sync.RWMutex
 	ssIdxCfg           utils.StringMap                                  // index configuration
