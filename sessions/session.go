@@ -53,6 +53,11 @@ type SMGSession struct {
 
 }
 
+type SessionID struct {
+	OriginHost string
+	OriginID   string
+}
+
 // Called in case of automatic debits
 func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 	loopIndex := 0

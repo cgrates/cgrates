@@ -111,16 +111,21 @@ func NewSMGeneric(cgrCfg *config.CGRConfig, rals, resS, thdS,
 }
 
 type SMGeneric struct {
-	cgrCfg             *config.CGRConfig             // Separate from smCfg since there can be multiple
-	rals               rpcclient.RpcClientConnection // RALs connections
-	resS               rpcclient.RpcClientConnection // ResourceS connections
-	thdS               rpcclient.RpcClientConnection // ThresholdS connections
-	statS              rpcclient.RpcClientConnection // StatS connections
-	splS               rpcclient.RpcClientConnection // SupplierS connections
-	attrS              rpcclient.RpcClientConnection // AttributeS connections
-	cdrsrv             rpcclient.RpcClientConnection // CDR server connections
-	smgReplConns       []*SMGReplicationConn         // list of connections where we will replicate our session data
-	Timezone           string
+	cgrCfg       *config.CGRConfig             // Separate from smCfg since there can be multiple
+	rals         rpcclient.RpcClientConnection // RALs connections
+	resS         rpcclient.RpcClientConnection // ResourceS connections
+	thdS         rpcclient.RpcClientConnection // ThresholdS connections
+	statS        rpcclient.RpcClientConnection // StatS connections
+	splS         rpcclient.RpcClientConnection // SupplierS connections
+	attrS        rpcclient.RpcClientConnection // AttributeS connections
+	cdrsrv       rpcclient.RpcClientConnection // CDR server connections
+	smgReplConns []*SMGReplicationConn         // list of connections where we will replicate our session data
+	Timezone     string
+
+	param               map[*rpc2.Client]struct{}
+	toBeRemovedSessions map[string][]*SMGSession
+	realActiveSession   map[string]struct{}
+
 	activeSessions     map[string][]*SMGSession // group sessions per sessionId, multiple runs based on derived charging
 	aSessionsMux       sync.RWMutex
 	ssIdxCfg           utils.StringMap                                  // index configuration
@@ -1974,4 +1979,8 @@ func (smg *SMGeneric) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 		rply.Attributes = &rplyEv
 	}
 	return nil
+}
+
+func (smg *SMGeneric) syncSessions() {
+
 }
