@@ -75,3 +75,11 @@ func PrefixSliceItems(slc []string, prfx string) (out []string) {
 	}
 	return
 }
+
+// StripSlicePrefix will strip a number of items from the beginning of the slice
+func StripSlicePrefix(slc []string, nrItems int) []string {
+	if len(slc) < nrItems {
+		return []string{}
+	}
+	return slc[nrItems:]
+}

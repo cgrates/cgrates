@@ -17,7 +17,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package utils
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestAvg(t *testing.T) {
 	values := []float64{1, 2, 3}
@@ -34,5 +37,20 @@ func TestAvgEmpty(t *testing.T) {
 	expected := 0.0
 	if expected != result {
 		t.Errorf("Wrong Avg: expected %v got %v", expected, result)
+	}
+}
+
+func TestStripSlicePrefix(t *testing.T) {
+	eSlc := make([]string, 0)
+	if retSlc := StripSlicePrefix([]string{}, 2); !reflect.DeepEqual(eSlc, retSlc) {
+		t.Errorf("expecting: %+v, received: %+v", eSlc, retSlc)
+	}
+	eSlc = []string{"1", "2"}
+	if retSlc := StripSlicePrefix([]string{"0", "1", "2"}, 1); !reflect.DeepEqual(eSlc, retSlc) {
+		t.Errorf("expecting: %+v, received: %+v", eSlc, retSlc)
+	}
+	eSlc = []string{}
+	if retSlc := StripSlicePrefix([]string{"0", "1", "2"}, 3); !reflect.DeepEqual(eSlc, retSlc) {
+		t.Errorf("expecting: %+v, received: %+v", eSlc, retSlc)
 	}
 }

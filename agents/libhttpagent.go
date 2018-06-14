@@ -25,7 +25,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 )
 
-// newHAReqDecoder produces decoders
+// newHADataProvider constructs a DataProvider
 func newHADataProvider(dpType string,
 	req *http.Request) (dP engine.DataProvider, err error) {
 	switch dpType {

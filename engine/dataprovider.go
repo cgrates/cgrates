@@ -24,8 +24,8 @@ import (
 
 // DataProvider is a data source from multiple formats
 type DataProvider interface {
+	String() string // printable version of data
 	FieldAsInterface(fldPath []string) (interface{}, error)
 	FieldAsString(fldPath []string) (string, error)
-	String() string // printable versin of data
 	AsNavigableMap([]*config.CfgCdrField) (*NavigableMap, error)
 }

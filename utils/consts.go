@@ -543,6 +543,9 @@ const (
 	MetaUrl                      = "*url"
 	MetaXml                      = "*xml"
 	ApiKey                       = "apikey"
+	MetaRequest                  = "*request"
+	MetaVars                     = "*vars"
+	MetaReply                    = "*reply"
 )
 
 // Migrator Action

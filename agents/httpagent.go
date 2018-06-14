@@ -21,7 +21,6 @@ package agents
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -58,13 +57,11 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 				utils.HTTPAgent, err.Error()))
 		return
 	}
+	agReq := newAgentRequest(dcdr)
 	var processed bool
-	procVars := make(processorVars)
-	rpl := engine.NewNavigableMap(nil)
 	for _, reqProcessor := range ha.reqProcessors {
 		var lclProcessed bool
-		if lclProcessed, err = ha.processRequest(reqProcessor, dcdr,
-			procVars, rpl); lclProcessed {
+		if lclProcessed, err = ha.processRequest(reqProcessor, agReq); lclProcessed {
 			processed = lclProcessed
 		}
 		if err != nil ||
@@ -74,13 +71,13 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 	if err != nil {
 		utils.Logger.Warning(
-			fmt.Sprintf("<%s> error: %s processing request: %s, process vars: %+v",
-				utils.HTTPAgent, err.Error(), utils.ToJSON(req), procVars))
+			fmt.Sprintf("<%s> error: %s processing request: %s",
+				utils.HTTPAgent, err.Error(), utils.ToJSON(req)))
 		return // FixMe with returning some error on HTTP level
 	} else if !processed {
 		utils.Logger.Warning(
-			fmt.Sprintf("<%s> no request processor enabled, ignoring request %s, process vars: %+v",
-				utils.HTTPAgent, utils.ToJSON(req), procVars))
+			fmt.Sprintf("<%s> no request processor enabled, ignoring request %s",
+				utils.HTTPAgent, utils.ToJSON(req)))
 		return // FixMe with returning some error on HTTP level
 	}
 	encdr, err := newHAReplyEncoder(ha.rplyPayload, w)
@@ -90,33 +87,28 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 				utils.HTTPAgent, err.Error()))
 		return
 	}
-	if err = encdr.encode(rpl); err != nil {
+	if err = encdr.encode(agReq.Reply); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s encoding out %s",
-				utils.HTTPAgent, err.Error(), utils.ToJSON(rpl)))
+				utils.HTTPAgent, err.Error(), utils.ToJSON(agReq.Reply)))
 		return
 	}
 }
 
 // processRequest represents one processor processing the request
 func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
-	dP engine.DataProvider, procVars processorVars,
-	reply *engine.NavigableMap) (processed bool, err error) {
-	tnt, err := dP.FieldAsString([]string{utils.Tenant})
+	agReq *AgentRequest) (processed bool, err error) {
+	tnt, err := agReq.Request.FieldAsString([]string{utils.Tenant})
 	if err != nil {
 		return false, err
 	}
-	if pass, err := ha.filterS.Pass(tnt, reqProcessor.Filters, dP); err != nil {
+	if pass, err := ha.filterS.Pass(tnt, reqProcessor.Filters, agReq); err != nil {
 		return false, err
 	} else if !pass {
 		return false, nil
 	}
-	for k, v := range reqProcessor.Flags { // update procVars with flags from processor
-		procVars[k] = strconv.FormatBool(v)
-	}
 	if reqProcessor.DryRun {
-		utils.Logger.Info(fmt.Sprintf("<%s> DRY_RUN, HTTP request: %s", utils.HTTPAgent, dP))
-		utils.Logger.Info(fmt.Sprintf("<%s> DRY_RUN, process variables: %+v", utils.HTTPAgent, procVars))
+		utils.Logger.Info(fmt.Sprintf("<%s> DRY_RUN, HTTP request: %s", utils.HTTPAgent, agReq))
 	}
 	/*
 		ev, err := radReqAsCGREvent(req, procVars, reqProcessor.Flags, reqProcessor.RequestFields)
