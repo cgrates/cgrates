@@ -25,7 +25,7 @@ import (
 
 func (dS *DispatcherService) AttributeSv1Ping(ign string, reply *string) error {
 	if dS.attrS == nil {
-		return utils.NewErrNotConnected(utils.ResourceS)
+		return utils.NewErrNotConnected(utils.AttributeS)
 	}
 	return dS.attrS.Call(utils.AttributeSv1Ping, ign, reply)
 }
@@ -33,27 +33,11 @@ func (dS *DispatcherService) AttributeSv1Ping(ign string, reply *string) error {
 func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(args *CGREvWithApiKey,
 	reply *engine.AttributeProfile) (err error) {
 	if dS.attrS == nil {
-		return utils.NewErrNotConnected(utils.ResourceS)
+		return utils.NewErrNotConnected(utils.AttributeS)
 	}
-	ev := &utils.CGREvent{
-		Tenant:  args.Tenant,
-		ID:      utils.UUIDSha1Prefix(),
-		Context: utils.StringPointer(utils.MetaAuth),
-		Time:    args.CGREvent.Time,
-		Event: map[string]interface{}{
-			utils.APIKey: args.APIKey,
-		},
-	}
-	var rplyEv engine.AttrSProcessEventReply
-	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
+	if err = dS.authorizeMethod(args.APIKey, args.CGREvent.Tenant,
+		utils.AttributeSv1GetAttributeForEvent, args.CGREvent.Time); err != nil {
 		return
-	}
-	var apiMethods string
-	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
-		return
-	}
-	if !utils.ParseStringMap(apiMethods).HasKey(utils.AttributeSv1GetAttributeForEvent) {
-		return utils.ErrUnauthorizedApi
 	}
 	return dS.attrS.Call(utils.AttributeSv1GetAttributeForEvent, args.CGREvent, reply)
 
@@ -62,27 +46,11 @@ func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(args *CGREvWithApi
 func (dS *DispatcherService) AttributeSv1ProcessEvent(args *CGREvWithApiKey,
 	reply *engine.AttrSProcessEventReply) (err error) {
 	if dS.attrS == nil {
-		return utils.NewErrNotConnected(utils.ResourceS)
+		return utils.NewErrNotConnected(utils.AttributeS)
 	}
-	ev := &utils.CGREvent{
-		Tenant:  args.Tenant,
-		ID:      utils.UUIDSha1Prefix(),
-		Context: utils.StringPointer(utils.MetaAuth),
-		Time:    args.CGREvent.Time,
-		Event: map[string]interface{}{
-			utils.APIKey: args.APIKey,
-		},
-	}
-	var rplyEv engine.AttrSProcessEventReply
-	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
+	if err = dS.authorizeMethod(args.APIKey, args.CGREvent.Tenant,
+		utils.AttributeSv1ProcessEvent, args.CGREvent.Time); err != nil {
 		return
-	}
-	var apiMethods string
-	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
-		return
-	}
-	if !utils.ParseStringMap(apiMethods).HasKey(utils.AttributeSv1ProcessEvent) {
-		return utils.ErrUnauthorizedApi
 	}
 	return dS.attrS.Call(utils.AttributeSv1ProcessEvent, args.CGREvent, reply)
 

@@ -35,25 +35,9 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(args *ArgsProcess
 	if dS.thdS == nil {
 		return utils.NewErrNotConnected(utils.ThresholdS)
 	}
-	ev := &utils.CGREvent{
-		Tenant:  args.Tenant,
-		ID:      utils.UUIDSha1Prefix(),
-		Context: utils.StringPointer(utils.MetaAuth),
-		Time:    args.ArgsProcessEvent.CGREvent.Time,
-		Event: map[string]interface{}{
-			utils.APIKey: args.APIKey,
-		},
-	}
-	var rplyEv engine.AttrSProcessEventReply
-	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
+	if err = dS.authorizeMethod(args.APIKey, args.ArgsProcessEvent.CGREvent.Tenant,
+		utils.ThresholdSv1GetThresholdsForEvent, args.ArgsProcessEvent.CGREvent.Time); err != nil {
 		return
-	}
-	var apiMethods string
-	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
-		return
-	}
-	if !utils.ParseStringMap(apiMethods).HasKey(utils.ThresholdSv1GetThresholdsForEvent) {
-		return utils.ErrUnauthorizedApi
 	}
 	return dS.thdS.Call(utils.ThresholdSv1GetThresholdsForEvent, args.ArgsProcessEvent, t)
 }
@@ -63,25 +47,9 @@ func (dS *DispatcherService) ThresholdSv1ProcessEvent(args *ArgsProcessEventWith
 	if dS.thdS == nil {
 		return utils.NewErrNotConnected(utils.ThresholdS)
 	}
-	ev := &utils.CGREvent{
-		Tenant:  args.Tenant,
-		ID:      utils.UUIDSha1Prefix(),
-		Context: utils.StringPointer(utils.MetaAuth),
-		Time:    args.ArgsProcessEvent.CGREvent.Time,
-		Event: map[string]interface{}{
-			utils.APIKey: args.APIKey,
-		},
-	}
-	var rplyEv engine.AttrSProcessEventReply
-	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
+	if err = dS.authorizeMethod(args.APIKey, args.ArgsProcessEvent.CGREvent.Tenant,
+		utils.ThresholdSv1ProcessEvent, args.ArgsProcessEvent.CGREvent.Time); err != nil {
 		return
-	}
-	var apiMethods string
-	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
-		return
-	}
-	if !utils.ParseStringMap(apiMethods).HasKey(utils.ThresholdSv1ProcessEvent) {
-		return utils.ErrUnauthorizedApi
 	}
 	return dS.thdS.Call(utils.ThresholdSv1ProcessEvent, args.ArgsProcessEvent, tIDs)
 }

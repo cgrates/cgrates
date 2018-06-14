@@ -21,6 +21,7 @@ package dispatcher
 import (
 	"fmt"
 	"reflect"
+	"time"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -92,5 +93,38 @@ func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,
 	if dS.attrS == nil {
 		return utils.NewErrNotConnected(utils.AttributeS)
 	}
-	return dS.attrS.Call(utils.AttributeSv1ProcessEvent, ev, reply)
+	if err = dS.attrS.Call(utils.AttributeSv1ProcessEvent, ev, reply); err != nil {
+		if err.Error() == utils.ErrNotFound.Error() {
+			err = utils.ErrUnknownApiKey
+		}
+		return
+	}
+	return
+}
+
+func (dS *DispatcherService) authorizeMethod(apiKey, tenant, method string, evTime *time.Time) (err error) {
+	if apiKey == "" {
+		return utils.NewErrMandatoryIeMissing(utils.APIKey)
+	}
+	ev := &utils.CGREvent{
+		Tenant:  tenant,
+		ID:      utils.UUIDSha1Prefix(),
+		Context: utils.StringPointer(utils.MetaAuth),
+		Time:    evTime,
+		Event: map[string]interface{}{
+			utils.APIKey: apiKey,
+		},
+	}
+	var rplyEv engine.AttrSProcessEventReply
+	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
+		return
+	}
+	var apiMethods string
+	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
+		return
+	}
+	if !utils.ParseStringMap(apiMethods).HasKey(method) {
+		return utils.ErrUnauthorizedApi
+	}
+	return
 }

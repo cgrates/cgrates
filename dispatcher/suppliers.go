@@ -35,25 +35,9 @@ func (dS *DispatcherService) SupplierSv1GetSuppliers(args *ArgsGetSuppliersWithA
 	if dS.splS == nil {
 		return utils.NewErrNotConnected(utils.SupplierS)
 	}
-	ev := &utils.CGREvent{
-		Tenant:  args.Tenant,
-		ID:      utils.UUIDSha1Prefix(),
-		Context: utils.StringPointer(utils.MetaAuth),
-		Time:    args.ArgsGetSuppliers.CGREvent.Time,
-		Event: map[string]interface{}{
-			utils.APIKey: args.APIKey,
-		},
-	}
-	var rplyEv engine.AttrSProcessEventReply
-	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
+	if err = dS.authorizeMethod(args.APIKey, args.ArgsGetSuppliers.CGREvent.Tenant,
+		utils.SupplierSv1GetSuppliers, args.ArgsGetSuppliers.CGREvent.Time); err != nil {
 		return
-	}
-	var apiMethods string
-	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
-		return
-	}
-	if !utils.ParseStringMap(apiMethods).HasKey(utils.SupplierSv1GetSuppliers) {
-		return utils.ErrUnauthorizedApi
 	}
 	return dS.splS.Call(utils.SupplierSv1GetSuppliers, args.ArgsGetSuppliers, reply)
 

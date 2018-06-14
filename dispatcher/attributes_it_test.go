@@ -51,6 +51,8 @@ var sTestsDspAttr = []func(t *testing.T){
 	testDspAttrPing,
 	testDspAttrLoadData,
 	testDspAttrAddAttributesWithPermision,
+	testDspAttrTestMissingApiKey,
+	testDspAttrTestUnknownApiKey,
 	testDspAttrTestAuthKey,
 	testDspAttrAddAttributesWithPermision2,
 	testDspAttrTestAuthKey2,
@@ -175,6 +177,43 @@ func testDspAttrAddAttributesWithPermision(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(alsPrf, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
+	}
+}
+
+func testDspAttrTestMissingApiKey(t *testing.T) {
+	args := &CGREvWithApiKey{
+		CGREvent: utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "testAttributeSGetAttributeForEvent",
+			Context: utils.StringPointer("simpleauth"),
+			Event: map[string]interface{}{
+				utils.Account: "1001",
+			},
+		},
+	}
+	var attrReply *engine.AttributeProfile
+	if err := dspAttrRPC.Call(utils.AttributeSv1GetAttributeForEvent,
+		args, &attrReply); err.Error() != utils.NewErrMandatoryIeMissing(utils.APIKey).Error() {
+		t.Error(err)
+	}
+}
+
+func testDspAttrTestUnknownApiKey(t *testing.T) {
+	args := &CGREvWithApiKey{
+		APIKey: "1234",
+		CGREvent: utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "testAttributeSGetAttributeForEvent",
+			Context: utils.StringPointer("simpleauth"),
+			Event: map[string]interface{}{
+				utils.Account: "1001",
+			},
+		},
+	}
+	var attrReply *engine.AttributeProfile
+	if err := dspAttrRPC.Call(utils.AttributeSv1GetAttributeForEvent,
+		args, &attrReply); err.Error() != utils.ErrUnknownApiKey.Error() {
+		t.Error(err)
 	}
 }
 

@@ -30,29 +30,13 @@ func (dS *DispatcherService) ResourceSv1Ping(ign string, rpl *string) (err error
 	return dS.resS.Call(utils.ResourceSv1Ping, ign, rpl)
 }
 
-func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args ArgsV1ResUsageWithApiKey, reply *engine.Resources) (err error) {
+func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args *ArgsV1ResUsageWithApiKey, reply *engine.Resources) (err error) {
 	if dS.resS == nil {
 		return utils.NewErrNotConnected(utils.ResourceS)
 	}
-	ev := &utils.CGREvent{
-		Tenant:  args.Tenant,
-		ID:      utils.UUIDSha1Prefix(),
-		Context: utils.StringPointer(utils.MetaAuth),
-		Time:    args.ArgRSv1ResourceUsage.CGREvent.Time,
-		Event: map[string]interface{}{
-			utils.APIKey: args.APIKey,
-		},
-	}
-	var rplyEv engine.AttrSProcessEventReply
-	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
+	if err = dS.authorizeMethod(args.APIKey, args.ArgRSv1ResourceUsage.CGREvent.Tenant,
+		utils.ResourceSv1GetResourcesForEvent, args.ArgRSv1ResourceUsage.CGREvent.Time); err != nil {
 		return
-	}
-	var apiMethods string
-	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
-		return
-	}
-	if !utils.ParseStringMap(apiMethods).HasKey(utils.ResourceSv1GetResourcesForEvent) {
-		return utils.ErrUnauthorizedApi
 	}
 	return dS.resS.Call(utils.ResourceSv1GetResourcesForEvent, args.ArgRSv1ResourceUsage, reply)
 
