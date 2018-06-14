@@ -237,7 +237,7 @@ func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, in
 		for method, handler := range ssv1.Handlers() {
 			server.BiRPCRegisterName(method, handler)
 		}
-		server.ServeBiJSON(cfg.SessionSCfg().ListenBijson)
+		server.ServeBiJSON(cfg.SessionSCfg().ListenBijson, sm.OnConnect, sm.OnDisconnect)
 		exitChan <- true
 	}
 }
