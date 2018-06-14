@@ -36,8 +36,8 @@ func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *CGREvWithApiKey,
 	if dS.statS == nil {
 		return utils.NewErrNotConnected(utils.StatS)
 	}
-	if err = dS.authorizeMethod(args.APIKey, args.CGREvent.Tenant,
-		utils.StatSv1GetStatQueuesForEvent, args.CGREvent.Time); err != nil {
+	if err = dS.authorize(utils.StatSv1GetStatQueuesForEvent, args.CGREvent.Tenant,
+		args.APIKey, args.CGREvent.Time); err != nil {
 		return
 	}
 	return dS.statS.Call(utils.StatSv1GetStatQueuesForEvent, args.CGREvent, reply)
@@ -49,8 +49,8 @@ func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *TntIDWithApiKey,
 		return utils.NewErrNotConnected(utils.StatS)
 	}
 	nowTime := time.Now()
-	if err = dS.authorizeMethod(args.APIKey, args.TenantID.Tenant,
-		utils.StatSv1GetQueueStringMetrics, &nowTime); err != nil {
+	if err = dS.authorize(utils.StatSv1GetQueueStringMetrics, args.TenantID.Tenant,
+		args.APIKey, &nowTime); err != nil {
 		return
 	}
 	return dS.statS.Call(utils.StatSv1GetQueueStringMetrics, args.TenantID, reply)
@@ -61,8 +61,8 @@ func (dS *DispatcherService) StatSv1ProcessEvent(args *CGREvWithApiKey,
 	if dS.statS == nil {
 		return utils.NewErrNotConnected(utils.StatS)
 	}
-	if err = dS.authorizeMethod(args.APIKey, args.CGREvent.Tenant,
-		utils.StatSv1ProcessEvent, args.CGREvent.Time); err != nil {
+	if err = dS.authorize(utils.StatSv1ProcessEvent, args.CGREvent.Tenant,
+		args.APIKey, args.CGREvent.Time); err != nil {
 		return
 	}
 	return dS.statS.Call(utils.StatSv1ProcessEvent, args.CGREvent, reply)

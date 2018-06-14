@@ -35,8 +35,8 @@ func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(args *CGREvWithApi
 	if dS.attrS == nil {
 		return utils.NewErrNotConnected(utils.AttributeS)
 	}
-	if err = dS.authorizeMethod(args.APIKey, args.CGREvent.Tenant,
-		utils.AttributeSv1GetAttributeForEvent, args.CGREvent.Time); err != nil {
+	if err = dS.authorize(utils.AttributeSv1GetAttributeForEvent, args.CGREvent.Tenant,
+		args.APIKey, args.CGREvent.Time); err != nil {
 		return
 	}
 	return dS.attrS.Call(utils.AttributeSv1GetAttributeForEvent, args.CGREvent, reply)
@@ -48,8 +48,8 @@ func (dS *DispatcherService) AttributeSv1ProcessEvent(args *CGREvWithApiKey,
 	if dS.attrS == nil {
 		return utils.NewErrNotConnected(utils.AttributeS)
 	}
-	if err = dS.authorizeMethod(args.APIKey, args.CGREvent.Tenant,
-		utils.AttributeSv1ProcessEvent, args.CGREvent.Time); err != nil {
+	if err = dS.authorize(utils.AttributeSv1ProcessEvent, args.CGREvent.Tenant,
+		args.APIKey, args.CGREvent.Time); err != nil {
 		return
 	}
 	return dS.attrS.Call(utils.AttributeSv1ProcessEvent, args.CGREvent, reply)

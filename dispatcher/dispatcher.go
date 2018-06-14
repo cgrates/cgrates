@@ -102,7 +102,7 @@ func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,
 	return
 }
 
-func (dS *DispatcherService) authorizeMethod(apiKey, tenant, method string, evTime *time.Time) (err error) {
+func (dS *DispatcherService) authorize(method, tenant, apiKey string, evTime *time.Time) (err error) {
 	if apiKey == "" {
 		return utils.NewErrMandatoryIeMissing(utils.APIKey)
 	}
