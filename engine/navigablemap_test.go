@@ -316,6 +316,110 @@ func TestNavMapItems2(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eItems), utils.ToJSON(nM.Items()))
 	}
 }
+
+func TestNavMapOrder(t *testing.T) {
+	myData := map[string]interface{}{
+		"FirstLevel": map[string]interface{}{
+			"SecondLevel": map[string]interface{}{
+				"ThirdLevel": map[string]interface{}{
+					"Fld1": "Val1",
+				},
+			},
+		},
+		"FistLever2": map[string]interface{}{
+			"SecondLevel2": map[string]interface{}{
+				"Field2": "Value2",
+			},
+			"Field3": "Value3",
+		},
+		"Field4": "Val4",
+	}
+	order := make([][]string, 4)
+	order[0] = make([]string, 4)
+	order[0] = []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"}
+	order[1] = make([]string, 3)
+	order[1] = []string{"FistLever2", "SecondLevel2", "Field2"}
+	order[2] = make([]string, 2)
+	order[2] = []string{"FistLever2", "Field3"}
+	order[3] = make([]string, 3)
+	order[3] = []string{"Field4"}
+	nM := NewNavigableMap(myData)
+	nM.order = order
+	eItems := []*NMItem{
+		&NMItem{
+			Path: []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
+			Data: "Val1",
+		},
+		&NMItem{
+			Path: []string{"FistLever2", "SecondLevel2", "Field2"},
+			Data: "Value2",
+		},
+		&NMItem{
+			Path: []string{"FistLever2", "Field3"},
+			Data: "Value3",
+		},
+		&NMItem{
+			Path: []string{"Field4"},
+			Data: "Val4",
+		},
+	}
+	if !reflect.DeepEqual(nM.Items(), eItems) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eItems), utils.ToJSON(nM.Items()))
+	}
+}
+
+func TestNavMapOrder2(t *testing.T) {
+	myData := map[string]interface{}{
+		"FirstLevel": map[string]interface{}{
+			"SecondLevel": map[string]interface{}{
+				"ThirdLevel": map[string]interface{}{
+					"Fld1": "Val1",
+				},
+			},
+		},
+		"FistLever2": map[string]interface{}{
+			"SecondLevel2": map[string]interface{}{
+				"Field2": "Value2",
+			},
+			"Field3": "Value3",
+		},
+		"Field4": "Val4",
+	}
+	order := make([][]string, 4)
+	order[0] = make([]string, 3)
+	order[0] = []string{"FistLever2", "SecondLevel2", "Field2"}
+	order[1] = make([]string, 3)
+	order[1] = []string{"Field4"}
+	order[2] = make([]string, 2)
+	order[2] = []string{"FistLever2", "Field3"}
+	order[3] = make([]string, 4)
+	order[3] = []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"}
+
+	nM := NewNavigableMap(myData)
+	nM.order = order
+	eItems := []*NMItem{
+		&NMItem{
+			Path: []string{"FistLever2", "SecondLevel2", "Field2"},
+			Data: "Value2",
+		},
+		&NMItem{
+			Path: []string{"Field4"},
+			Data: "Val4",
+		},
+		&NMItem{
+			Path: []string{"FistLever2", "Field3"},
+			Data: "Value3",
+		},
+		&NMItem{
+			Path: []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
+			Data: "Val1",
+		},
+	}
+	if !reflect.DeepEqual(nM.Items(), eItems) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eItems), utils.ToJSON(nM.Items()))
+	}
+}
+
 func TestNavMapIndexMapElementes(t *testing.T) {
 	var elmsOut []*NMItem
 	ifaceMap := map[string]interface{}{
