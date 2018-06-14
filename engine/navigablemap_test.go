@@ -334,15 +334,12 @@ func TestNavMapOrder(t *testing.T) {
 		},
 		"Field4": "Val4",
 	}
-	order := make([][]string, 4)
-	order[0] = make([]string, 4)
-	order[0] = []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"}
-	order[1] = make([]string, 3)
-	order[1] = []string{"FistLever2", "SecondLevel2", "Field2"}
-	order[2] = make([]string, 2)
-	order[2] = []string{"FistLever2", "Field3"}
-	order[3] = make([]string, 3)
-	order[3] = []string{"Field4"}
+	order := [][]string{
+		[]string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
+		[]string{"FistLever2", "SecondLevel2", "Field2"},
+		[]string{"FistLever2", "Field3"},
+		[]string{"Field4"},
+	}
 	nM := NewNavigableMap(myData)
 	nM.order = order
 	eItems := []*NMItem{
@@ -385,16 +382,12 @@ func TestNavMapOrder2(t *testing.T) {
 		},
 		"Field4": "Val4",
 	}
-	order := make([][]string, 4)
-	order[0] = make([]string, 3)
-	order[0] = []string{"FistLever2", "SecondLevel2", "Field2"}
-	order[1] = make([]string, 3)
-	order[1] = []string{"Field4"}
-	order[2] = make([]string, 2)
-	order[2] = []string{"FistLever2", "Field3"}
-	order[3] = make([]string, 4)
-	order[3] = []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"}
-
+	order := [][]string{
+		[]string{"FistLever2", "SecondLevel2", "Field2"},
+		[]string{"Field4"},
+		[]string{"FistLever2", "Field3"},
+		[]string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
+	}
 	nM := NewNavigableMap(myData)
 	nM.order = order
 	eItems := []*NMItem{
