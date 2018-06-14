@@ -26,6 +26,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cenk/rpc2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
@@ -99,6 +100,7 @@ func NewSMGeneric(cgrCfg *config.CGRConfig, rals, resS, thdS,
 		cdrsrv:             cdrsrv,
 		smgReplConns:       smgReplConns,
 		Timezone:           timezone,
+		biJsonConns:        make(map[*rpc2.Client]struct{}),
 		activeSessions:     make(map[string][]*SMGSession),
 		ssIdxCfg:           ssIdxCfg,
 		aSessionsIndex:     make(map[string]map[string]map[string]utils.StringMap),
@@ -111,22 +113,18 @@ func NewSMGeneric(cgrCfg *config.CGRConfig, rals, resS, thdS,
 }
 
 type SMGeneric struct {
-	cgrCfg       *config.CGRConfig             // Separate from smCfg since there can be multiple
-	rals         rpcclient.RpcClientConnection // RALs connections
-	resS         rpcclient.RpcClientConnection // ResourceS connections
-	thdS         rpcclient.RpcClientConnection // ThresholdS connections
-	statS        rpcclient.RpcClientConnection // StatS connections
-	splS         rpcclient.RpcClientConnection // SupplierS connections
-	attrS        rpcclient.RpcClientConnection // AttributeS connections
-	cdrsrv       rpcclient.RpcClientConnection // CDR server connections
-	smgReplConns []*SMGReplicationConn         // list of connections where we will replicate our session data
-	Timezone     string
-	/* Part of new project
-	param               map[*rpc2.Client]struct{}
-	toBeRemovedSessions map[string][]*SMGSession
-	realActiveSession   map[string]struct{}
-	*/
-	activeSessions     map[string][]*SMGSession // group sessions per sessionId, multiple runs based on derived charging
+	cgrCfg             *config.CGRConfig             // Separate from smCfg since there can be multiple
+	rals               rpcclient.RpcClientConnection // RALs connections
+	resS               rpcclient.RpcClientConnection // ResourceS connections
+	thdS               rpcclient.RpcClientConnection // ThresholdS connections
+	statS              rpcclient.RpcClientConnection // StatS connections
+	splS               rpcclient.RpcClientConnection // SupplierS connections
+	attrS              rpcclient.RpcClientConnection // AttributeS connections
+	cdrsrv             rpcclient.RpcClientConnection // CDR server connections
+	smgReplConns       []*SMGReplicationConn         // list of connections where we will replicate our session data
+	Timezone           string
+	biJsonConns        map[*rpc2.Client]struct{} // index BiJSONConnection so we can sync them later
+	activeSessions     map[string][]*SMGSession  // group sessions per sessionId, multiple runs based on derived charging
 	aSessionsMux       sync.RWMutex
 	ssIdxCfg           utils.StringMap                                  // index configuration
 	aSessionsIndex     map[string]map[string]map[string]utils.StringMap // map[fieldName]map[fieldValue][runID]utils.StringMap[cgrID]
@@ -1981,6 +1979,16 @@ func (smg *SMGeneric) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 	return nil
 }
 
-func (smg *SMGeneric) syncSessions() {
+func (smg *SMGeneric) OnConnect(c *rpc2.Client) {
+	var s struct{}
+	smg.biJsonConns[c] = s
+}
 
+func (smg *SMGeneric) OnDisconnect(c *rpc2.Client) {
+	delete(smg.biJsonConns, c)
+}
+
+func (smg *SMGeneric) syncSessions() {
+	// var toBeRemovedSessions map[string][]*SMGSession
+	// var realActiveSession map[string]struct{}
 }

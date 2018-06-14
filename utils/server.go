@@ -230,7 +230,7 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 	http.ListenAndServe(addr, nil)
 }
 
-func (s *Server) ServeBiJSON(addr string) {
+func (s *Server) ServeBiJSON(addr string, onConn func(*rpc2.Client), onDis func(*rpc2.Client)) {
 	s.RLock()
 	isNil := s.birpcSrv == nil
 	s.RUnlock()
@@ -241,6 +241,8 @@ func (s *Server) ServeBiJSON(addr string) {
 	if e != nil {
 		log.Fatal("ServeBiJSON listen error:", e)
 	}
+	s.birpcSrv.OnConnect(onConn)
+	s.birpcSrv.OnDisconnect(onDis)
 	Logger.Info(fmt.Sprintf("Starting CGRateS BiJSON server at <%s>", addr))
 	for {
 		conn, err := lBiJSON.Accept()

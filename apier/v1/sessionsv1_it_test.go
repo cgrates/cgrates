@@ -100,6 +100,15 @@ func TestSSv1ItRpcConn(t *testing.T) {
 	dummyClnt.Close() // close so we don't get EOF error when disconnecting server
 }
 
+func TestV1STSSessionPing(t *testing.T) {
+	var resp string
+	if err := sSv1BiRpc.Call(utils.SessionSv1Ping, "", &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.Pong {
+		t.Error("Unexpected reply returned", resp)
+	}
+}
+
 // Load the tariff plan, creating accounts and their balances
 func TestSSv1ItTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{
@@ -516,15 +525,6 @@ func TestSSv1ItProcessEvent(t *testing.T) {
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
 		t.Errorf("expecting: %+v, received: %+v",
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
-	}
-}
-
-func TestV1STSSessionPing(t *testing.T) {
-	var resp string
-	if err := sSv1BiRpc.Call(utils.SessionSv1Ping, "", &resp); err != nil {
-		t.Error(err)
-	} else if resp != utils.Pong {
-		t.Error("Unexpected reply returned", resp)
 	}
 }
 
