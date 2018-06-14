@@ -30,12 +30,13 @@ func (dS *DispatcherService) ResourceSv1Ping(ign string, rpl *string) (err error
 	return dS.resS.Call(utils.ResourceSv1Ping, ign, rpl)
 }
 
-func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args *ArgsV1ResUsageWithApiKey, reply *engine.Resources) (err error) {
+func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args *ArgsV1ResUsageWithApiKey,
+	reply *engine.Resources) (err error) {
 	if dS.resS == nil {
 		return utils.NewErrNotConnected(utils.ResourceS)
 	}
-	if err = dS.authorizeMethod(args.APIKey, args.ArgRSv1ResourceUsage.CGREvent.Tenant,
-		utils.ResourceSv1GetResourcesForEvent, args.ArgRSv1ResourceUsage.CGREvent.Time); err != nil {
+	if err = dS.authorize(utils.ResourceSv1GetResourcesForEvent, args.ArgRSv1ResourceUsage.CGREvent.Tenant,
+		args.APIKey, args.ArgRSv1ResourceUsage.CGREvent.Time); err != nil {
 		return
 	}
 	return dS.resS.Call(utils.ResourceSv1GetResourcesForEvent, args.ArgRSv1ResourceUsage, reply)

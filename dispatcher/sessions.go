@@ -35,8 +35,8 @@ func (dS *DispatcherService) SessionSv1AuthorizeEventWithDigest(args *AuthorizeA
 	if dS.sessionS == nil {
 		return utils.NewErrNotConnected(utils.SessionS)
 	}
-	if err = dS.authorizeMethod(args.APIKey, args.V1AuthorizeArgs.CGREvent.Tenant,
-		utils.SessionSv1AuthorizeEventWithDigest, args.V1AuthorizeArgs.CGREvent.Time); err != nil {
+	if err = dS.authorize(utils.SessionSv1AuthorizeEventWithDigest, args.V1AuthorizeArgs.CGREvent.Tenant,
+		args.APIKey, args.V1AuthorizeArgs.CGREvent.Time); err != nil {
 		return
 	}
 	return dS.sessionS.Call(utils.SessionSv1AuthorizeEventWithDigest, args.V1AuthorizeArgs, reply)
@@ -47,8 +47,8 @@ func (dS *DispatcherService) SessionSv1InitiateSessionWithDigest(args *InitArgsW
 	if dS.sessionS == nil {
 		return utils.NewErrNotConnected(utils.SessionS)
 	}
-	if err = dS.authorizeMethod(args.APIKey, args.V1InitSessionArgs.CGREvent.Tenant,
-		utils.SessionSv1InitiateSessionWithDigest, args.V1InitSessionArgs.CGREvent.Time); err != nil {
+	if err = dS.authorize(utils.SessionSv1InitiateSessionWithDigest, args.V1InitSessionArgs.CGREvent.Tenant,
+		args.APIKey, args.V1InitSessionArgs.CGREvent.Time); err != nil {
 		return
 	}
 	return dS.sessionS.Call(utils.SessionSv1InitiateSessionWithDigest, args.V1InitSessionArgs, reply)
@@ -59,8 +59,8 @@ func (dS *DispatcherService) SessionSv1ProcessCDR(args *CGREvWithApiKey,
 	if dS.sessionS == nil {
 		return utils.NewErrNotConnected(utils.SessionS)
 	}
-	if err = dS.authorizeMethod(args.APIKey, args.CGREvent.Tenant,
-		utils.SessionSv1ProcessCDR, args.CGREvent.Time); err != nil {
+	if err = dS.authorize(utils.SessionSv1ProcessCDR, args.CGREvent.Tenant,
+		args.APIKey, args.CGREvent.Time); err != nil {
 		return
 	}
 	return dS.sessionS.Call(utils.SessionSv1ProcessCDR, args.CGREvent, reply)
@@ -71,8 +71,8 @@ func (dS *DispatcherService) SessionSv1ProcessEvent(args *ProcessEventWithApiKey
 	if dS.sessionS == nil {
 		return utils.NewErrNotConnected(utils.SessionS)
 	}
-	if err = dS.authorizeMethod(args.APIKey, args.V1ProcessEventArgs.CGREvent.Tenant,
-		utils.SessionSv1ProcessEvent, args.V1ProcessEventArgs.CGREvent.Time); err != nil {
+	if err = dS.authorize(utils.SessionSv1ProcessEvent, args.V1ProcessEventArgs.CGREvent.Tenant,
+		args.APIKey, args.V1ProcessEventArgs.CGREvent.Time); err != nil {
 		return
 	}
 	return dS.sessionS.Call(utils.SessionSv1ProcessEvent, args.V1ProcessEventArgs, reply)
@@ -83,8 +83,8 @@ func (dS *DispatcherService) SessionSv1TerminateSession(args *TerminateSessionWi
 	if dS.sessionS == nil {
 		return utils.NewErrNotConnected(utils.SessionS)
 	}
-	if err = dS.authorizeMethod(args.APIKey, args.V1TerminateSessionArgs.CGREvent.Tenant,
-		utils.SessionSv1TerminateSession, args.V1TerminateSessionArgs.CGREvent.Time); err != nil {
+	if err = dS.authorize(utils.SessionSv1TerminateSession, args.V1TerminateSessionArgs.CGREvent.Tenant,
+		args.APIKey, args.V1TerminateSessionArgs.CGREvent.Time); err != nil {
 		return
 	}
 	return dS.sessionS.Call(utils.SessionSv1TerminateSession, args.V1TerminateSessionArgs, reply)
@@ -95,8 +95,8 @@ func (dS *DispatcherService) SessionSv1UpdateSession(args *UpdateSessionWithApiK
 	if dS.sessionS == nil {
 		return utils.NewErrNotConnected(utils.SessionS)
 	}
-	if err = dS.authorizeMethod(args.APIKey, args.V1UpdateSessionArgs.CGREvent.Tenant,
-		utils.SessionSv1UpdateSession, args.V1UpdateSessionArgs.CGREvent.Time); err != nil {
+	if err = dS.authorize(utils.SessionSv1UpdateSession, args.V1UpdateSessionArgs.CGREvent.Tenant,
+		args.APIKey, args.V1UpdateSessionArgs.CGREvent.Time); err != nil {
 		return
 	}
 	return dS.sessionS.Call(utils.SessionSv1UpdateSession, args.V1UpdateSessionArgs, reply)

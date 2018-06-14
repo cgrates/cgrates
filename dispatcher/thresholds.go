@@ -35,8 +35,8 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(args *ArgsProcess
 	if dS.thdS == nil {
 		return utils.NewErrNotConnected(utils.ThresholdS)
 	}
-	if err = dS.authorizeMethod(args.APIKey, args.ArgsProcessEvent.CGREvent.Tenant,
-		utils.ThresholdSv1GetThresholdsForEvent, args.ArgsProcessEvent.CGREvent.Time); err != nil {
+	if err = dS.authorize(utils.ThresholdSv1GetThresholdsForEvent, args.ArgsProcessEvent.CGREvent.Tenant,
+		args.APIKey, args.ArgsProcessEvent.CGREvent.Time); err != nil {
 		return
 	}
 	return dS.thdS.Call(utils.ThresholdSv1GetThresholdsForEvent, args.ArgsProcessEvent, t)
@@ -47,8 +47,8 @@ func (dS *DispatcherService) ThresholdSv1ProcessEvent(args *ArgsProcessEventWith
 	if dS.thdS == nil {
 		return utils.NewErrNotConnected(utils.ThresholdS)
 	}
-	if err = dS.authorizeMethod(args.APIKey, args.ArgsProcessEvent.CGREvent.Tenant,
-		utils.ThresholdSv1ProcessEvent, args.ArgsProcessEvent.CGREvent.Time); err != nil {
+	if err = dS.authorize(utils.ThresholdSv1ProcessEvent, args.ArgsProcessEvent.CGREvent.Tenant,
+		args.APIKey, args.ArgsProcessEvent.CGREvent.Time); err != nil {
 		return
 	}
 	return dS.thdS.Call(utils.ThresholdSv1ProcessEvent, args.ArgsProcessEvent, tIDs)

@@ -35,8 +35,8 @@ func (dS *DispatcherService) SupplierSv1GetSuppliers(args *ArgsGetSuppliersWithA
 	if dS.splS == nil {
 		return utils.NewErrNotConnected(utils.SupplierS)
 	}
-	if err = dS.authorizeMethod(args.APIKey, args.ArgsGetSuppliers.CGREvent.Tenant,
-		utils.SupplierSv1GetSuppliers, args.ArgsGetSuppliers.CGREvent.Time); err != nil {
+	if err = dS.authorize(utils.SupplierSv1GetSuppliers, args.ArgsGetSuppliers.CGREvent.Tenant,
+		args.APIKey, args.ArgsGetSuppliers.CGREvent.Time); err != nil {
 		return
 	}
 	return dS.splS.Call(utils.SupplierSv1GetSuppliers, args.ArgsGetSuppliers, reply)
