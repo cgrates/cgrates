@@ -352,7 +352,8 @@ func startKamAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan 
 }
 
 func startHTTPAgent(internalSMGChan chan rpcclient.RpcClientConnection,
-	exitChan chan bool, server *utils.Server, filterSChan chan *engine.FilterS) {
+	exitChan chan bool, server *utils.Server,
+	filterSChan chan *engine.FilterS, dfltTenant string) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
 	utils.Logger.Info("Starting HTTP agent")
@@ -372,7 +373,8 @@ func startHTTPAgent(internalSMGChan chan rpcclient.RpcClientConnection,
 			}
 		}
 		server.RegisterHttpHandler(agntCfg.Url,
-			agents.NewHTTPAgent(sSConn, filterS, agntCfg.Timezone, agntCfg.RequestPayload,
+			agents.NewHTTPAgent(sSConn, filterS, agntCfg.Tenant, dfltTenant,
+				agntCfg.Timezone, agntCfg.RequestPayload,
 				agntCfg.ReplyPayload, agntCfg.RequestProcessors))
 	}
 	exitChan <- true
@@ -1177,7 +1179,7 @@ func main() {
 	}
 
 	if len(cfg.HttpAgentCfg()) != 0 {
-		go startHTTPAgent(internalSMGChan, exitChan, server, filterSChan)
+		go startHTTPAgent(internalSMGChan, exitChan, server, filterSChan, cfg.DefaultTenant)
 	}
 
 	// Start PubSubS service

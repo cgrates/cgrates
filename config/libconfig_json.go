@@ -376,6 +376,7 @@ type RAReqProcessorJsnCfg struct {
 type HttpAgentJsonCfg struct {
 	Url                *string
 	Sessions_conns     *[]*HaPoolJsonCfg
+	Tenant             *string
 	Timezone           *string
 	Request_payload    *string
 	Reply_payload      *string

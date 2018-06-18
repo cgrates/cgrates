@@ -25,13 +25,14 @@ import (
 type HttpAgentCfg struct {
 	Url               string
 	SessionSConns     []*HaPoolConfig
+	Tenant            utils.RSRFields
 	Timezone          string
 	RequestPayload    string
 	ReplyPayload      string
 	RequestProcessors []*HttpAgntProcCfg
 }
 
-func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg) error {
+func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -43,6 +44,12 @@ func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg) error {
 		for idx, jsnHaCfg := range *jsnCfg.Sessions_conns {
 			ca.SessionSConns[idx] = NewDfltHaPoolConfig()
 			ca.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
+	}
+	if jsnCfg.Tenant != nil {
+		if ca.Tenant, err = utils.ParseRSRFields(*jsnCfg.Tenant,
+			utils.INFIELD_SEP); err != nil {
+			return
 		}
 	}
 	if jsnCfg.Timezone != nil {

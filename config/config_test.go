@@ -250,6 +250,7 @@ func TestHttpAgentCfg(t *testing.T) {
 		"sessions_conns": [
 			{"address": "*internal"}		// connection towards SessionService
 		],
+		"tenant": "^cgrates.org",
 		"timezone": "",						// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
 		"request_payload":	"*url",			// source of input data <*url>
 		"reply_payload":	"*xml",			// type of output data <*xml>
@@ -261,7 +262,9 @@ func TestHttpAgentCfg(t *testing.T) {
 	eCgrCfg, _ := NewDefaultCGRConfig()
 	eCgrCfg.httpAgentCfg = []*HttpAgentCfg{
 		&HttpAgentCfg{
-			Url:            "/conecto",
+			Url: "/conecto",
+			Tenant: utils.ParseRSRFieldsMustCompile("^cgrates.org",
+				utils.INFIELD_SEP),
 			Timezone:       "",
 			RequestPayload: utils.MetaUrl,
 			ReplyPayload:   utils.MetaXml,

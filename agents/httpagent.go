@@ -21,6 +21,7 @@ package agents
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -29,19 +30,23 @@ import (
 )
 
 // NewHttpAgent will construct a HTTPAgent
-func NewHTTPAgent(sessionS rpcclient.RpcClientConnection,
-	filterS *engine.FilterS,
-	timezone, reqPayload, rplyPayload string,
+func NewHTTPAgent(
+	sessionS rpcclient.RpcClientConnection,
+	filterS *engine.FilterS, tenantCfg utils.RSRFields,
+	dfltTenant, timezone, reqPayload, rplyPayload string,
 	reqProcessors []*config.HttpAgntProcCfg) *HTTPAgent {
-	return &HTTPAgent{sessionS: sessionS, timezone: timezone,
+	return &HTTPAgent{sessionS: sessionS,
+		dfltTenant: dfltTenant, timezone: timezone,
 		reqPayload: reqPayload, rplyPayload: rplyPayload,
 		reqProcessors: reqProcessors}
 }
 
 // HTTPAgent is a handler for HTTP requests
 type HTTPAgent struct {
-	sessionS rpcclient.RpcClientConnection
-	filterS  *engine.FilterS
+	sessionS  rpcclient.RpcClientConnection
+	filterS   *engine.FilterS
+	tenantCfg utils.RSRFields
+	dfltTenant,
 	timezone,
 	reqPayload,
 	rplyPayload string
@@ -57,7 +62,7 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 				utils.HTTPAgent, err.Error()))
 		return
 	}
-	agReq := newAgentRequest(dcdr)
+	agReq := newAgentRequest(dcdr, ha.tenantCfg, ha.dfltTenant)
 	var processed bool
 	for _, reqProcessor := range ha.reqProcessors {
 		var lclProcessed bool
@@ -98,18 +103,29 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 // processRequest represents one processor processing the request
 func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 	agReq *AgentRequest) (processed bool, err error) {
-	tnt, err := agReq.Request.FieldAsString([]string{utils.Tenant})
+	if pass, err := ha.filterS.Pass(agReq.Tenant,
+		reqProcessor.Filters, agReq); err != nil || !pass {
+		return pass, err
+	}
+	reqEv, err := agReq.AsNavigableMap(reqProcessor.RequestFields)
 	if err != nil {
 		return false, err
 	}
-	if pass, err := ha.filterS.Pass(tnt, reqProcessor.Filters, agReq); err != nil {
-		return false, err
-	} else if !pass {
-		return false, nil
+	cgrEv := &utils.CGREvent{
+		Tenant: agReq.Tenant,
+		ID:     utils.UUIDSha1Prefix(),
+		Time:   utils.TimePointer(time.Now()),
+		Event:  reqEv.AsMapStringInterface(),
 	}
 	if reqProcessor.DryRun {
-		utils.Logger.Info(fmt.Sprintf("<%s> DRY_RUN, HTTP request: %s", utils.HTTPAgent, agReq))
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, HTTP request: %s",
+				utils.HTTPAgent, reqProcessor.Id, utils.ToJSON(agReq.Request)))
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, CGREvent: %s",
+				utils.HTTPAgent, reqProcessor.Id, agReq))
 	}
+	fmt.Printf("cgrEv: %+v", cgrEv)
 	/*
 		ev, err := radReqAsCGREvent(req, procVars, reqProcessor.Flags, reqProcessor.RequestFields)
 		if err != nil {
