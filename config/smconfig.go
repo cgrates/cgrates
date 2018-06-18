@@ -87,7 +87,7 @@ func (self *FsConnConfig) loadFromJsonCfg(jsnCfg *FsConnJsonCfg) error {
 		self.Reconnects = *jsnCfg.Reconnects
 	}
 	self.Alias = self.Address
-	if jsnCfg.Alias != nil {
+	if jsnCfg.Alias != nil && *jsnCfg.Alias != "" {
 		self.Alias = *jsnCfg.Alias
 	}
 

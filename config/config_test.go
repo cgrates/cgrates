@@ -43,8 +43,8 @@ func TestCgrCfgLoadWithDefaults(t *testing.T) {
 "freeswitch_agent": {
 	"enabled": true,				// starts SessionManager service: <true|false>
 	"event_socket_conns":[					// instantiate connections to multiple FreeSWITCH servers
-		{"address": "1.2.3.4:8021", "password": "ClueCon", "reconnects": 3, "alias":""},
-		{"address": "1.2.3.5:8021", "password": "ClueCon", "reconnects": 5, "alias":""}
+		{"address": "1.2.3.4:8021", "password": "ClueCon", "reconnects": 3, "alias":"123"},
+		{"address": "1.2.3.5:8021", "password": "ClueCon", "reconnects": 5, "alias":"124"}
 	],
 },
 
@@ -55,8 +55,8 @@ func TestCgrCfgLoadWithDefaults(t *testing.T) {
 	}
 	eCgrCfg.fsAgentCfg.Enabled = true
 	eCgrCfg.fsAgentCfg.EventSocketConns = []*FsConnConfig{
-		&FsConnConfig{Address: "1.2.3.4:8021", Password: "ClueCon", Reconnects: 3, Alias: ""},
-		&FsConnConfig{Address: "1.2.3.5:8021", Password: "ClueCon", Reconnects: 5, Alias: ""},
+		&FsConnConfig{Address: "1.2.3.4:8021", Password: "ClueCon", Reconnects: 3, Alias: "123"},
+		&FsConnConfig{Address: "1.2.3.5:8021", Password: "ClueCon", Reconnects: 5, Alias: "124"},
 	}
 	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(JSN_CFG); err != nil {
 		t.Error(err)
@@ -714,7 +714,7 @@ func TestCgrCfgJSONDefaultsFsAgentConfig(t *testing.T) {
 		MaxWaitConnection:   2 * time.Second,
 		EventSocketConns: []*FsConnConfig{
 			&FsConnConfig{Address: "127.0.0.1:8021",
-				Password: "ClueCon", Reconnects: 5, Alias: ""}},
+				Password: "ClueCon", Reconnects: 5, Alias: "127.0.0.1:8021"}},
 	}
 
 	if !reflect.DeepEqual(cgrCfg.fsAgentCfg, eFsAgentCfg) {

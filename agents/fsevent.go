@@ -306,7 +306,7 @@ func (fsev FSEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) (pa
 	case utils.OriginID:
 		return rsrFld.Parse(fsev.GetUUID())
 	case utils.OriginHost:
-		return rsrFld.Parse(fsev["FreeSWITCH-IPv4"])
+		return rsrFld.Parse(utils.FirstNonEmpty(fsev[VarCGROriginHost], fsev[FS_IPv4]))
 	case utils.Source:
 		return rsrFld.Parse("FS_EVENT")
 	case utils.RequestType:

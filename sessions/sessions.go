@@ -2007,7 +2007,6 @@ func (smg *SMGeneric) syncSessions() {
 		rpcClnts = append(rpcClnts, conn)
 	}
 	queriedCGRIDs := make(utils.StringMap)
-	utils.Logger.Info("Enter on sync --------------")
 	for _, conn := range rpcClnts {
 		var queriedSessionIDs []*SessionID
 		if conn != nil {
@@ -2017,28 +2016,23 @@ func (smg *SMGeneric) syncSessions() {
 					fmt.Sprintf("error quering session ids : %+v", err))
 				continue
 			}
-			utils.Logger.Info(fmt.Sprintf("queriedSessionIDs : %+v", utils.ToJSON(queriedSessionIDs)))
 			for _, sessionID := range queriedSessionIDs {
 				queriedCGRIDs[sessionID.CGRID()] = true
 			}
 		}
 	}
-	utils.Logger.Info(fmt.Sprintf("queriedCGRIDs : %+v", queriedCGRIDs))
 	smg.aSessionsMux.RLock()
-	utils.Logger.Info(fmt.Sprintf("smg.activeSessions : %+v", smg.activeSessions))
-	for cgrid, _ := range smg.activeSessions {
+	for cgrid, smgSessions := range smg.activeSessions {
 		if _, has := queriedCGRIDs[cgrid]; has {
-			utils.Logger.Info("gaseste CGRID")
 			continue
 		}
-		utils.Logger.Info("nu gaseste CGRID")
-		// for _, session := range smgSessions {
-		// 	tmtr := &smgSessionTerminator{
-		// 		ttlLastUsed: &session.LastUsage,
-		// 		ttlUsage:    &session.TotalUsage,
-		// 	}
-		// 	smg.ttlTerminate(session, tmtr)
-		// }
+		for _, session := range smgSessions {
+			tmtr := &smgSessionTerminator{
+				ttlLastUsed: &session.LastUsage,
+				ttlUsage:    &session.TotalUsage,
+			}
+			smg.ttlTerminate(session, tmtr)
+		}
 	}
 	smg.aSessionsMux.RUnlock()
 }
