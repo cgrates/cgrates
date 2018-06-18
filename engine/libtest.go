@@ -209,6 +209,14 @@ func KillProcName(procName string, waitMs int) error {
 	return nil
 }
 
+func ForceKillProcName(procName string, waitMs int) error {
+	if err := exec.Command("pkill", "-9", procName).Run(); err != nil {
+		return err
+	}
+	time.Sleep(time.Duration(waitMs) * time.Millisecond)
+	return nil
+}
+
 func CallScript(scriptPath string, subcommand string, waitMs int) error {
 	if err := exec.Command(scriptPath, subcommand).Run(); err != nil {
 		return err

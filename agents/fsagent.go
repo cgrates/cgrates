@@ -21,7 +21,6 @@ package agents
 import (
 	"errors"
 	"fmt"
-	//"net"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -248,6 +247,7 @@ func (sm *FSsessions) onChannelHangupComplete(fsev FSEvent, connId string) {
 		return
 	}
 	var reply string
+	fsev[VarCGROriginHost] = sm.conns[connId].cfg.Alias
 	if fsev[VarAnswerEpoch] != "0" { // call was answered
 		if err := sm.smg.Call(utils.SessionSv1TerminateSession,
 			fsev.V1TerminateSessionArgs(), &reply); err != nil {
