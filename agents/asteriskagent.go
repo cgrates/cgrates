@@ -303,3 +303,7 @@ func (sma *AsteriskAgent) V1DisconnectSession(args utils.AttrDisconnectSession, 
 func (sma *AsteriskAgent) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.RPCCall(sma, serviceMethod, args, reply)
 }
+
+func (fsa *AsteriskAgent) V1GetActiveSessionIDs(ignParam string, sessionIDs *[]*sessions.SessionID) (err error) {
+	return utils.ErrNotImplemented
+}

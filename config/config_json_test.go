@@ -507,6 +507,7 @@ func TestSmgJsonCfg(t *testing.T) {
 		Session_ttl:               utils.StringPointer("0s"),
 		Session_indexes:           &[]string{},
 		Client_protocol:           utils.Float64Pointer(1.0),
+		Channel_sync_interval:     utils.StringPointer("5m"),
 	}
 	if cfg, err := dfCgrJsonCfg.SessionSJsonCfg(); err != nil {
 		t.Error(err)
@@ -527,13 +528,13 @@ func TestFsAgentJsonCfg(t *testing.T) {
 		Extra_fields:           &[]string{},
 		Empty_balance_context:  utils.StringPointer(""),
 		Empty_balance_ann_file: utils.StringPointer(""),
-		Channel_sync_interval:  utils.StringPointer("5m"),
 		Max_wait_connection:    utils.StringPointer("2s"),
 		Event_socket_conns: &[]*FsConnJsonCfg{
 			&FsConnJsonCfg{
 				Address:    utils.StringPointer("127.0.0.1:8021"),
 				Password:   utils.StringPointer("ClueCon"),
 				Reconnects: utils.IntPointer(5),
+				Alias:      utils.StringPointer(""),
 			}},
 	}
 	if cfg, err := dfCgrJsonCfg.FreeswitchAgentJsonCfg(); err != nil {

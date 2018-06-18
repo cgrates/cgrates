@@ -123,6 +123,7 @@ type SMGeneric struct {
 	cdrsrv             rpcclient.RpcClientConnection // CDR server connections
 	smgReplConns       []*SMGReplicationConn         // list of connections where we will replicate our session data
 	Timezone           string
+	intBiJSONConns     []rpcclient.RpcClientConnection
 	biJsonConns        map[*rpc2.Client]struct{} // index BiJSONConnection so we can sync them later
 	activeSessions     map[string][]*SMGSession  // group sessions per sessionId, multiple runs based on derived charging
 	aSessionsMux       sync.RWMutex
@@ -1012,6 +1013,15 @@ func (smg *SMGeneric) ProcessCDR(gev SMGenericEvent) (err error) {
 }
 
 func (smg *SMGeneric) Connect() error {
+	if smg.cgrCfg.SessionSCfg().ChannelSyncInterval != 0 {
+		go func() {
+			for { // Schedule sync channels to run repetately
+				time.Sleep(smg.cgrCfg.SessionSCfg().ChannelSyncInterval)
+				smg.syncSessions()
+			}
+
+		}()
+	}
 	return nil
 }
 
@@ -1979,16 +1989,63 @@ func (smg *SMGeneric) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 	return nil
 }
 
-func (smg *SMGeneric) OnConnect(c *rpc2.Client) {
+func (smg *SMGeneric) OnBiJSONConnect(c *rpc2.Client) {
 	var s struct{}
 	smg.biJsonConns[c] = s
 }
 
-func (smg *SMGeneric) OnDisconnect(c *rpc2.Client) {
+func (smg *SMGeneric) OnBiJSONDisconnect(c *rpc2.Client) {
 	delete(smg.biJsonConns, c)
 }
 
 func (smg *SMGeneric) syncSessions() {
-	// var toBeRemovedSessions map[string][]*SMGSession
-	// var realActiveSession map[string]struct{}
+	var rpcClnts []rpcclient.RpcClientConnection
+	for _, conn := range smg.intBiJSONConns {
+		rpcClnts = append(rpcClnts, conn)
+	}
+	for conn := range smg.biJsonConns {
+		rpcClnts = append(rpcClnts, conn)
+	}
+	queriedCGRIDs := make(utils.StringMap)
+	utils.Logger.Info("Enter on sync --------------")
+	for _, conn := range rpcClnts {
+		var queriedSessionIDs []*SessionID
+		if conn != nil {
+			if err := conn.Call(utils.SessionSv1GetActiveSessionIDs,
+				"", &queriedSessionIDs); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("error quering session ids : %+v", err))
+				continue
+			}
+			utils.Logger.Info(fmt.Sprintf("queriedSessionIDs : %+v", utils.ToJSON(queriedSessionIDs)))
+			for _, sessionID := range queriedSessionIDs {
+				queriedCGRIDs[sessionID.CGRID()] = true
+			}
+		}
+	}
+	utils.Logger.Info(fmt.Sprintf("queriedCGRIDs : %+v", queriedCGRIDs))
+	smg.aSessionsMux.RLock()
+	utils.Logger.Info(fmt.Sprintf("smg.activeSessions : %+v", smg.activeSessions))
+	for cgrid, _ := range smg.activeSessions {
+		if _, has := queriedCGRIDs[cgrid]; has {
+			utils.Logger.Info("gaseste CGRID")
+			continue
+		}
+		utils.Logger.Info("nu gaseste CGRID")
+		// for _, session := range smgSessions {
+		// 	tmtr := &smgSessionTerminator{
+		// 		ttlLastUsed: &session.LastUsage,
+		// 		ttlUsage:    &session.TotalUsage,
+		// 	}
+		// 	smg.ttlTerminate(session, tmtr)
+		// }
+	}
+	smg.aSessionsMux.RUnlock()
+}
+
+func (smg *SMGeneric) BiRPCv1RegisterInternalBiJSONConn(clnt rpcclient.RpcClientConnection,
+	ignParam string, reply *string) error {
+	smg.intBiJSONConns = append(smg.intBiJSONConns, clnt)
+	*reply = utils.OK
+	return nil
 }

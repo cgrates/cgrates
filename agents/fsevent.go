@@ -72,6 +72,7 @@ const (
 	FsConnID                 = "FsConnID" // used to share connID info in event for remote disconnects
 	VarAnswerEpoch           = "variable_answer_epoch"
 	VarCGRACD                = "variable_" + utils.CGR_ACD
+	VarCGROriginHost         = "variable_" + utils.CGROriginHost
 )
 
 func NewFSEvent(strEv string) (fsev FSEvent) {
@@ -282,7 +283,7 @@ func (fsev FSEvent) GetOriginatorIP(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	return utils.FirstNonEmpty(fsev[fieldName], fsev[FS_IPv4])
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[VarCGROriginHost], fsev[FS_IPv4])
 }
 
 func (fsev FSEvent) GetExtraFields() map[string]string {

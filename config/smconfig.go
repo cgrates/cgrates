@@ -70,6 +70,7 @@ type FsConnConfig struct {
 	Address    string
 	Password   string
 	Reconnects int
+	Alias      string
 }
 
 func (self *FsConnConfig) loadFromJsonCfg(jsnCfg *FsConnJsonCfg) error {
@@ -85,6 +86,11 @@ func (self *FsConnConfig) loadFromJsonCfg(jsnCfg *FsConnJsonCfg) error {
 	if jsnCfg.Reconnects != nil {
 		self.Reconnects = *jsnCfg.Reconnects
 	}
+	self.Alias = self.Address
+	if jsnCfg.Alias != nil {
+		self.Alias = *jsnCfg.Alias
+	}
+
 	return nil
 }
 
@@ -108,6 +114,7 @@ type SessionSCfg struct {
 	SessionTTLUsage         *time.Duration
 	SessionIndexes          utils.StringMap
 	ClientProtocol          float64
+	ChannelSyncInterval     time.Duration
 }
 
 func (self *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) error {
@@ -217,6 +224,11 @@ func (self *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) error {
 	if jsnCfg.Client_protocol != nil {
 		self.ClientProtocol = *jsnCfg.Client_protocol
 	}
+	if jsnCfg.Channel_sync_interval != nil {
+		if self.ChannelSyncInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Channel_sync_interval); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -230,7 +242,6 @@ type FsAgentConfig struct {
 	//LowBalanceAnnFile   string
 	EmptyBalanceContext string
 	EmptyBalanceAnnFile string
-	ChannelSyncInterval time.Duration
 	MaxWaitConnection   time.Duration
 	EventSocketConns    []*FsConnConfig
 }
@@ -267,11 +278,6 @@ func (self *FsAgentConfig) loadFromJsonCfg(jsnCfg *FreeswitchAgentJsonCfg) error
 
 	if jsnCfg.Empty_balance_ann_file != nil {
 		self.EmptyBalanceAnnFile = *jsnCfg.Empty_balance_ann_file
-	}
-	if jsnCfg.Channel_sync_interval != nil {
-		if self.ChannelSyncInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Channel_sync_interval); err != nil {
-			return err
-		}
 	}
 	if jsnCfg.Max_wait_connection != nil {
 		if self.MaxWaitConnection, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_wait_connection); err != nil {

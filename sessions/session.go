@@ -58,6 +58,10 @@ type SessionID struct {
 	OriginID   string
 }
 
+func (s *SessionID) CGRID() string {
+	return utils.Sha1(s.OriginID, s.OriginHost)
+}
+
 // Called in case of automatic debits
 func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 	loopIndex := 0

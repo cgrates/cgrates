@@ -21,6 +21,7 @@ package agents
 import (
 	"fmt"
 	"log"
+	"net"
 	"regexp"
 	"strings"
 
@@ -108,7 +109,12 @@ func (ka *KamailioAgent) onCgrAuth(evData []byte, connID string) {
 			utils.KamailioAgent, kev[utils.OriginID]))
 		return
 	}
-	authArgs.CGREvent.Event[utils.OriginHost] = strings.Split(ka.conns[connID].RemoteAddr().String(), ":")[0]
+	host, _, err := net.SplitHostPort(ka.conns[connID].RemoteAddr().String())
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> Error: %+v,", utils.KamailioAgent, err))
+		return
+	}
+	authArgs.CGREvent.Event[utils.OriginHost] = host
 	var authReply sessions.V1AuthorizeReply
 	err = ka.sessionS.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authReply)
 	if kar, err := kev.AsKamAuthReply(authArgs, &authReply, err); err != nil {
@@ -143,7 +149,12 @@ func (ka *KamailioAgent) onCallStart(evData []byte, connID string) {
 		return
 	}
 	initSessionArgs.CGREvent.Event[EvapiConnID] = connID // Attach the connection ID so we can properly disconnect later
-	initSessionArgs.CGREvent.Event[utils.OriginHost] = strings.Split(ka.conns[connID].RemoteAddr().String(), ":")[0]
+	host, _, err := net.SplitHostPort(ka.conns[connID].RemoteAddr().String())
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> Error: %+v,", utils.KamailioAgent, err))
+		return
+	}
+	initSessionArgs.CGREvent.Event[utils.OriginHost] = host
 	var initReply sessions.V1InitSessionReply
 	if err := ka.sessionS.Call(utils.SessionSv1InitiateSession,
 		initSessionArgs, &initReply); err != nil {
@@ -179,7 +190,12 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connID string) {
 		return
 	}
 	var reply string
-	tsArgs.CGREvent.Event[utils.OriginHost] = strings.Split(ka.conns[connID].RemoteAddr().String(), ":")[0]
+	host, _, err := net.SplitHostPort(ka.conns[connID].RemoteAddr().String())
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> Error: %+v,", utils.KamailioAgent, err))
+		return
+	}
+	tsArgs.CGREvent.Event[utils.OriginHost] = host
 	if err := ka.sessionS.Call(utils.SessionSv1TerminateSession,
 		tsArgs, &reply); err != nil {
 		utils.Logger.Err(
@@ -192,7 +208,12 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connID string) {
 		if err != nil {
 			return
 		}
-		cgrEv.Event[utils.OriginHost] = strings.Split(ka.conns[connID].RemoteAddr().String(), ":")[0]
+		host, _, err := net.SplitHostPort(ka.conns[connID].RemoteAddr().String())
+		if err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> Error: %+v,", utils.KamailioAgent, err))
+			return
+		}
+		cgrEv.Event[utils.OriginHost] = host
 		if err := ka.sessionS.Call(utils.SessionSv1ProcessCDR, *cgrEv, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("%s> failed processing CGREvent: %s, error: %s",
 				utils.KamailioAgent, utils.ToJSON(cgrEv), err.Error()))
@@ -221,4 +242,9 @@ func (ka *KamailioAgent) V1DisconnectSession(args utils.AttrDisconnectSession, r
 	}
 	*reply = utils.OK
 	return
+}
+
+func (fsa *KamailioAgent) V1GetActiveSessionIDs(ignParam string, sessionIDs *[]*sessions.SessionID) (err error) {
+
+	return utils.ErrNotImplemented
 }
