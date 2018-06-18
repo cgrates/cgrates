@@ -72,7 +72,8 @@ type FSCdr struct {
 }
 
 func (fsCdr FSCdr) getCGRID() string {
-	return utils.Sha1(fsCdr.vars[FS_UUID], fsCdr.vars[FsIPv4])
+	return utils.Sha1(fsCdr.vars[FS_UUID],
+		utils.FirstNonEmpty(fsCdr.vars[utils.CGROriginHost], fsCdr.vars[FsIPv4]))
 }
 
 func (fsCdr FSCdr) getExtraFields() map[string]string {
@@ -141,7 +142,7 @@ func (fsCdr FSCdr) AsCDR(timezone string) *CDR {
 	storCdr.CGRID = fsCdr.getCGRID()
 	storCdr.ToR = utils.VOICE
 	storCdr.OriginID = fsCdr.vars[FS_UUID]
-	storCdr.OriginHost = fsCdr.vars[FsIPv4]
+	storCdr.OriginHost = utils.FirstNonEmpty(fsCdr.vars[utils.CGROriginHost], fsCdr.vars[FsIPv4])
 	storCdr.Source = FS_CDR_SOURCE
 	storCdr.RequestType = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_REQTYPE], fsCdr.cgrCfg.DefaultReqType)
 	storCdr.Tenant = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_TENANT], fsCdr.cgrCfg.DefaultTenant)

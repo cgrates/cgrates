@@ -74,6 +74,7 @@ var sTestsCalls = []func(t *testing.T){
 	testCallCheckResourceRelease,
 	testCallCheckThreshold1001After,
 	testCallCheckThreshold1002After,
+	//de completat
 	testCallStopPjsuaListener,
 	testCallStopCgrEngine,
 	testCallStopFS,

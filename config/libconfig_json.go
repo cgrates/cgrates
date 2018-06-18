@@ -225,6 +225,7 @@ type SessionSJsonCfg struct {
 	Session_ttl_usage         *string
 	Session_indexes           *[]string
 	Client_protocol           *float64
+	Channel_sync_interval     *string
 }
 
 // FreeSWITCHAgent config section
@@ -238,7 +239,6 @@ type FreeswitchAgentJsonCfg struct {
 	//Low_balance_ann_file   *string
 	Empty_balance_context  *string
 	Empty_balance_ann_file *string
-	Channel_sync_interval  *string
 	Max_wait_connection    *string
 	Event_socket_conns     *[]*FsConnJsonCfg
 }
@@ -248,6 +248,7 @@ type FsConnJsonCfg struct {
 	Address    *string
 	Password   *string
 	Reconnects *int
+	Alias      *string
 }
 
 // Represents one connection instance towards a rater/cdrs server

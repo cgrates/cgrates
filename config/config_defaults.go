@@ -312,6 +312,7 @@ const CGRATES_CFG_JSON = `
 	//"session_ttl_usage": "",				// tweak Usage for sessions timing-out, not defined by default
 	"session_indexes": [],					// index sessions based on these fields for GetActiveSessions API
 	"client_protocol": 1.0,					// version of protocol to use when acting as JSON-PRC client <"0","1.0">
+	"channel_sync_interval": "5m",			// sync channels regularly
 },
 
 
@@ -339,10 +340,9 @@ const CGRATES_CFG_JSON = `
 	//"low_balance_ann_file": "",			// file to be played when low balance is reached for prepaid calls
 	"empty_balance_context": "",			// if defined, prepaid calls will be transferred to this context on empty balance
 	"empty_balance_ann_file": "",			// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
-	"channel_sync_interval": "5m",			// sync channels with freeswitch regularly
 	"max_wait_connection": "2s",			// maximum duration to wait for a connection to be retrieved from the pool
 	"event_socket_conns":[					// instantiate connections to multiple FreeSWITCH servers
-		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5}
+		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5,"alias":""}
 	],
 },
 

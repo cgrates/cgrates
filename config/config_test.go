@@ -43,8 +43,8 @@ func TestCgrCfgLoadWithDefaults(t *testing.T) {
 "freeswitch_agent": {
 	"enabled": true,				// starts SessionManager service: <true|false>
 	"event_socket_conns":[					// instantiate connections to multiple FreeSWITCH servers
-		{"address": "1.2.3.4:8021", "password": "ClueCon", "reconnects": 3},
-		{"address": "1.2.3.5:8021", "password": "ClueCon", "reconnects": 5}
+		{"address": "1.2.3.4:8021", "password": "ClueCon", "reconnects": 3, "alias":""},
+		{"address": "1.2.3.5:8021", "password": "ClueCon", "reconnects": 5, "alias":""}
 	],
 },
 
@@ -55,8 +55,8 @@ func TestCgrCfgLoadWithDefaults(t *testing.T) {
 	}
 	eCgrCfg.fsAgentCfg.Enabled = true
 	eCgrCfg.fsAgentCfg.EventSocketConns = []*FsConnConfig{
-		&FsConnConfig{Address: "1.2.3.4:8021", Password: "ClueCon", Reconnects: 3},
-		&FsConnConfig{Address: "1.2.3.5:8021", Password: "ClueCon", Reconnects: 5},
+		&FsConnConfig{Address: "1.2.3.4:8021", Password: "ClueCon", Reconnects: 3, Alias: ""},
+		&FsConnConfig{Address: "1.2.3.5:8021", Password: "ClueCon", Reconnects: 5, Alias: ""},
 	}
 	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(JSN_CFG); err != nil {
 		t.Error(err)
@@ -613,6 +613,7 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 		SessionTTL:              0 * time.Second,
 		SessionIndexes:          utils.StringMap{},
 		ClientProtocol:          1.0,
+		ChannelSyncInterval:     5 * time.Minute,
 	}
 	if !reflect.DeepEqual(eSessionSCfg, cgrCfg.sessionSCfg) {
 		t.Errorf("expecting: %s, received: %s",
@@ -710,11 +711,10 @@ func TestCgrCfgJSONDefaultsFsAgentConfig(t *testing.T) {
 		ExtraFields:         nil,
 		EmptyBalanceContext: "",
 		EmptyBalanceAnnFile: "",
-		ChannelSyncInterval: 5 * time.Minute,
 		MaxWaitConnection:   2 * time.Second,
 		EventSocketConns: []*FsConnConfig{
 			&FsConnConfig{Address: "127.0.0.1:8021",
-				Password: "ClueCon", Reconnects: 5}},
+				Password: "ClueCon", Reconnects: 5, Alias: ""}},
 	}
 
 	if !reflect.DeepEqual(cgrCfg.fsAgentCfg, eFsAgentCfg) {

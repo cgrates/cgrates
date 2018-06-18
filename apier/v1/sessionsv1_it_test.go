@@ -50,6 +50,11 @@ func handleDisconnectSession(clnt *rpc2.Client,
 	return nil
 }
 
+func handleGetSessionIDs(clnt *rpc2.Client,
+	ignParam string, sessionIDs *[]*sessions.SessionID) error {
+	return nil
+}
+
 func TestSSv1ItInitCfg(t *testing.T) {
 	var err error
 	sSv1CfgPath = path.Join(*dataDir, "conf", "samples", "sessions")
@@ -88,7 +93,8 @@ func TestSSv1ItRpcConn(t *testing.T) {
 		t.Fatal(err)
 	}
 	clntHandlers := map[string]interface{}{
-		utils.SessionSv1DisconnectSession: handleDisconnectSession,
+		utils.SessionSv1DisconnectSession:   handleDisconnectSession,
+		utils.SessionSv1GetActiveSessionIDs: handleGetSessionIDs,
 	}
 	if sSv1BiRpc, err = utils.NewBiJSONrpcClient(sSv1Cfg.SessionSCfg().ListenBijson,
 		clntHandlers); err != nil {
