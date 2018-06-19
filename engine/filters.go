@@ -44,7 +44,8 @@ const (
 	MetaGreaterOrEqual = "*gte"
 )
 
-func NewFilterS(cfg *config.CGRConfig, statSChan chan rpcclient.RpcClientConnection, dm *DataManager) *FilterS {
+func NewFilterS(cfg *config.CGRConfig,
+	statSChan chan rpcclient.RpcClientConnection, dm *DataManager) *FilterS {
 	return &FilterS{statSChan: statSChan, dm: dm}
 }
 
@@ -77,12 +78,14 @@ func (fS *FilterS) connStatS() (err error) {
 // Pass will check all filters wihin filterIDs and require them passing for dataProvider
 // there should be at least one filter passing, ie: if filters are not active event will fail to pass
 // receives the event as DataProvider so we can accept undecoded data (ie: HttpRequest)
-func (fS *FilterS) Pass(tenant string, filterIDs []string, ev DataProvider) (pass bool, err error) {
+func (fS *FilterS) Pass(tenant string, filterIDs []string,
+	ev DataProvider) (pass bool, err error) {
 	if len(filterIDs) == 0 {
 		return true, nil
 	}
 	for _, fltrID := range filterIDs {
-		f, err := fS.dm.GetFilter(tenant, fltrID, false, utils.NonTransactional)
+		f, err := fS.dm.GetFilter(tenant, fltrID,
+			false, utils.NonTransactional)
 		if err != nil {
 			return false, err
 		}
@@ -143,16 +146,19 @@ func (f *Filter) Compile() (err error) {
 }
 
 func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error) {
-	if !utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaTimings, MetaRSR, MetaStatS, MetaDestinations,
+	if !utils.IsSliceMember([]string{MetaString, MetaPrefix,
+		MetaTimings, MetaRSR, MetaStatS, MetaDestinations,
 		MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("Unsupported filter Type: %s", rfType)
 	}
-	if fieldName == "" && utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaTimings, MetaDestinations,
-		MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
+	if fieldName == "" && utils.IsSliceMember([]string{MetaString,
+		MetaPrefix, MetaTimings, MetaDestinations, MetaLessThan,
+		MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("FieldName is mandatory for Type: %s", rfType)
 	}
-	if len(vals) == 0 && utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaTimings, MetaRSR,
-		MetaDestinations, MetaDestinations, MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
+	if len(vals) == 0 && utils.IsSliceMember([]string{MetaString, MetaPrefix,
+		MetaTimings, MetaRSR, MetaDestinations, MetaDestinations, MetaLessThan,
+		MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("Values is mandatory for Type: %s", rfType)
 	}
 	rf := &FilterRule{Type: rfType, FieldName: fieldName, Values: vals}
@@ -194,7 +200,8 @@ func (rf *FilterRule) CompileValues() (err error) {
 			st := &RFStatSThreshold{QueueID: valSplt[0], ThresholdType: valSplt[1]}
 			if len(st.ThresholdType) < len(MetaMinCapPrefix)+1 {
 				return fmt.Errorf("Value %s contains a unsupported ThresholdType format", val)
-			} else if !strings.HasPrefix(st.ThresholdType, MetaMinCapPrefix) && !strings.HasPrefix(st.ThresholdType, MetaMaxCapPrefix) {
+			} else if !strings.HasPrefix(st.ThresholdType, MetaMinCapPrefix) &&
+				!strings.HasPrefix(st.ThresholdType, MetaMaxCapPrefix) {
 				return fmt.Errorf("Value %s contains unsupported ThresholdType prefix", val)
 			}
 			if tv, err := strconv.ParseFloat(valSplt[2], 64); err != nil {

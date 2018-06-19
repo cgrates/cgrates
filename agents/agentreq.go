@@ -28,12 +28,13 @@ import (
 )
 
 func newAgentRequest(req engine.DataProvider, tntTpl utils.RSRFields,
-	dfltTenant string) (ar *AgentRequest) {
+	dfltTenant string, filterS *engine.FilterS) (ar *AgentRequest) {
 	ar = &AgentRequest{
 		Request:  req,
 		Vars:     engine.NewNavigableMap(nil),
 		CGRReply: engine.NewNavigableMap(nil),
 		Reply:    engine.NewNavigableMap(nil),
+		filterS:  filterS,
 	}
 	// populate tenant
 	if tntIf, err := ar.ParseField(
@@ -54,6 +55,7 @@ type AgentRequest struct {
 	Vars     *engine.NavigableMap // shared data
 	CGRReply *engine.NavigableMap
 	Reply    *engine.NavigableMap
+	filterS  *engine.FilterS
 }
 
 // String implements engine.DataProvider
@@ -94,9 +96,23 @@ func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) 
 }
 
 // AsNavigableMap implements engine.DataProvider
-func (ar *AgentRequest) AsNavigableMap([]*config.CfgCdrField) (
+func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.CfgCdrField) (
 	nM *engine.NavigableMap, err error) {
-	return nil, utils.ErrNotImplemented
+	nM = engine.NewNavigableMap(nil)
+	for _, tplFld := range tplFlds {
+		if pass, err := ar.filterS.Pass(ar.Tenant,
+			tplFld.Filters, ar); err != nil {
+			return nil, err
+		} else if !pass {
+			continue
+		}
+		if out, err := ar.ParseField(tplFld); err != nil {
+			return nil, err
+		} else {
+			nM.Set(strings.Split(tplFld.FieldId, utils.HIERARCHY_SEP), out, true)
+		}
+	}
+	return
 }
 
 // parseField outputs the value based on the template item

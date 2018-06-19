@@ -50,6 +50,12 @@ func NewCfgCdrFieldFromCdrFieldJsonCfg(jsnCfgFld *CdrFieldJsonCfg) (*CfgCdrField
 			return nil, err
 		}
 	}
+	if jsnCfgFld.Filters != nil {
+		cfgFld.Filters = make([]string, len(*jsnCfgFld.Filters))
+		for i, fltr := range *jsnCfgFld.Filters {
+			cfgFld.Filters[i] = fltr
+		}
+	}
 	if jsnCfgFld.Width != nil {
 		cfgFld.Width = *jsnCfgFld.Width
 	}
@@ -87,9 +93,10 @@ func NewCfgCdrFieldFromCdrFieldJsonCfg(jsnCfgFld *CdrFieldJsonCfg) (*CfgCdrField
 }
 
 type CfgCdrField struct {
-	Tag              string // Identifier for the administrator
-	Type             string // Type of field
-	FieldId          string // Field identifier
+	Tag              string   // Identifier for the administrator
+	Type             string   // Type of field
+	FieldId          string   // Field identifier
+	Filters          []string // list of filter profiles
 	HandlerId        string
 	Value            utils.RSRFields
 	Append           bool

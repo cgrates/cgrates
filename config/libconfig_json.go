@@ -153,6 +153,7 @@ type CdrFieldJsonCfg struct {
 	Padding              *string
 	Layout               *string
 	Field_filter         *string
+	Filters              *[]string
 	Mandatory            *bool
 	Cost_shift_digits    *int
 	Rounding_decimals    *int

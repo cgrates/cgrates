@@ -64,7 +64,7 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 				utils.HTTPAgent, err.Error()))
 		return
 	}
-	agReq := newAgentRequest(dcdr, ha.tenantCfg, ha.dfltTenant)
+	agReq := newAgentRequest(dcdr, ha.tenantCfg, ha.dfltTenant, ha.filterS)
 	var processed bool
 	for _, reqProcessor := range ha.reqProcessors {
 		var lclProcessed bool
