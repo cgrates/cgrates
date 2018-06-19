@@ -312,7 +312,7 @@ const CGRATES_CFG_JSON = `
 	//"session_ttl_usage": "",				// tweak Usage for sessions timing-out, not defined by default
 	"session_indexes": [],					// index sessions based on these fields for GetActiveSessions API
 	"client_protocol": 1.0,					// version of protocol to use when acting as JSON-PRC client <"0","1.0">
-	"channel_sync_interval": "5m",			// sync channels regularly
+	"channel_sync_interval": "0",			// sync channels regularly (0 to disable sync session)
 },
 
 
