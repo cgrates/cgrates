@@ -151,7 +151,7 @@ func TestSMGenericEventAsCDR(t *testing.T) {
 	smGev["Extra1"] = "Value1"
 	smGev["Extra2"] = 5
 	eStoredCdr := &engine.CDR{CGRID: "70c4d16dce41d1f2777b4e8442cff39cf87f5f19",
-		ToR: utils.SMS, OriginID: "12345", OriginHost: "10.0.3.15", Source: "SMG_TEST_EVENT",
+		ToR: utils.SMS, OriginID: "12345", OriginHost: "10.0.3.15", Source: "*sessions_TEST_EVENT",
 		RequestType: utils.META_PREPAID,
 		Tenant:      "cgrates.org", Category: "call", Account: "account1", Subject: "subject1",
 		Destination: "+4986517174963", SetupTime: time.Date(2015, 11, 9, 14, 21, 24, 0, time.UTC),
