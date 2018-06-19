@@ -310,7 +310,11 @@ func (self SMGenericEvent) GetOriginatorIP(fieldName string) string {
 }
 
 func (self SMGenericEvent) GetCdrSource() string {
-	return utils.SMG + "_" + self.GetName()
+	if self.GetName() != "" {
+		return utils.MetaSessionS + "_" + self.GetName()
+	}
+	return utils.MetaSessionS
+
 }
 
 func (self SMGenericEvent) GetExtraFields() map[string]string {

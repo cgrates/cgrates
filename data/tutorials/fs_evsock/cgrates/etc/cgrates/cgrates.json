@@ -80,7 +80,7 @@
 	"thresholds_conns": [
 		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
-	"debit_interval": "10s",
+	"debit_interval": "5s",
 	"channel_sync_interval":"5s",
 },
 
@@ -89,6 +89,9 @@
 	"enabled": true,
 	"sessions_conns": [
 		{"address": "*internal"}
+	],
+	"event_socket_conns":[
+		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": -1,"alias":""}
 	],
 },
 

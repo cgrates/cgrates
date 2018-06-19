@@ -2021,20 +2021,24 @@ func (smg *SMGeneric) syncSessions() {
 			}
 		}
 	}
+	var toBeRemoved []string
 	smg.aSessionsMux.RLock()
-	for cgrid, smgSessions := range smg.activeSessions {
-		if _, has := queriedCGRIDs[cgrid]; has {
-			continue
-		}
-		for _, session := range smgSessions {
-			tmtr := &smgSessionTerminator{
-				ttlLastUsed: &session.LastUsage,
-				ttlUsage:    &session.TotalUsage,
-			}
-			smg.ttlTerminate(session, tmtr)
+	for cgrid := range smg.activeSessions {
+		if _, has := queriedCGRIDs[cgrid]; !has {
+			toBeRemoved = append(toBeRemoved, cgrid)
 		}
 	}
 	smg.aSessionsMux.RUnlock()
+	for _, cgrID := range toBeRemoved {
+		aSessions := smg.getSessions(cgrID, false)
+		if len(aSessions[cgrID]) == 0 {
+			continue
+		}
+		terminator := &smgSessionTerminator{
+			ttl: time.Duration(0),
+		}
+		smg.ttlTerminate(aSessions[cgrID][0], terminator)
+	}
 }
 
 func (smg *SMGeneric) BiRPCv1RegisterInternalBiJSONConn(clnt rpcclient.RpcClientConnection,
