@@ -148,16 +148,16 @@ func TestNavMapAdd(t *testing.T) {
 	nM := NewNavigableMap(nil)
 	path := []string{"FistLever2", "SecondLevel2", "Field2"}
 	data := "Value2"
-	nM.Add(path, data)
+	nM.Set(path, data, true)
 	path = []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"}
 	data = "Val1"
-	nM.Add(path, data)
+	nM.Set(path, data, true)
 	path = []string{"FistLever2", "Field3"}
 	data = "Value3"
-	nM.Add(path, data)
+	nM.Set(path, data, true)
 	path = []string{"Field4"}
 	data = "Val4"
-	nM.Add(path, data)
+	nM.Set(path, data, true)
 	eNavMap := NavigableMap{
 		data: map[string]interface{}{
 			"FirstLevel": map[string]interface{}{
@@ -190,19 +190,19 @@ func TestNavMapAdd2(t *testing.T) {
 	nM := NewNavigableMap(nil)
 	path := []string{"FistLever2", "SecondLevel2", "Field2"}
 	data := 123
-	nM.Add(path, data)
+	nM.Set(path, data, true)
 	path = []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"}
 	data1 := 123.123
-	nM.Add(path, data1)
+	nM.Set(path, data1, true)
 	path = []string{"FistLever2", "Field3"}
 	data2 := "Value3"
-	nM.Add(path, data2)
+	nM.Set(path, data2, true)
 	path = []string{"Field4"}
 	data3 := &testStruct{
 		Item1: "Ten",
 		Item2: 10,
 	}
-	nM.Add(path, data3)
+	nM.Set(path, data3, true)
 	eNavMap := NavigableMap{
 		data: map[string]interface{}{
 			"FirstLevel": map[string]interface{}{

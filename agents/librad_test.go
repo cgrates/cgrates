@@ -433,9 +433,9 @@ func (ev myEv) AsNavigableMap(tpl []*config.CfgCdrField) (*engine.NavigableMap, 
 }
 
 func TestNewCGRReply(t *testing.T) {
-	eCgrRply := map[string]interface{}{
+	eCgrRply := engine.NewNavigableMap(map[string]interface{}{
 		utils.Error: "some",
-	}
+	})
 	if rpl, err := NewCGRReply(nil, errors.New("some")); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCgrRply, rpl) {
@@ -449,8 +449,8 @@ func TestNewCGRReply(t *testing.T) {
 			},
 		},
 	}
-	eCgrRply = ev
-	eCgrRply[utils.Error] = ""
+	eCgrRply = engine.NewNavigableMap(ev)
+	eCgrRply.Set([]string{utils.Error}, "", false)
 	if rpl, err := NewCGRReply(engine.NavigableMapper(ev), nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCgrRply, rpl) {

@@ -386,7 +386,6 @@ type HttpAgentJsonCfg struct {
 
 type HttpAgentProcessorJsnCfg struct {
 	Id                  *string
-	Dry_run             *bool
 	Filters             *[]string
 	Flags               *[]string
 	Continue_on_success *bool

@@ -402,16 +402,15 @@ func radReplyAppendAttributes(reply *radigo.Packet, procVars map[string]interfac
 
 // NewCGRReply is specific to replies coming from CGRateS
 func NewCGRReply(rply engine.NavigableMapper,
-	errRply error) (mp map[string]interface{}, err error) {
+	errRply error) (mp *engine.NavigableMap, err error) {
 	if errRply != nil {
-		return map[string]interface{}{
-			utils.Error: errRply.Error()}, nil
+		return engine.NewNavigableMap(map[string]interface{}{
+			utils.Error: errRply.Error()}), nil
 	}
-	nM, err := rply.AsNavigableMap(nil)
+	mp, err = rply.AsNavigableMap(nil)
 	if err != nil {
 		return nil, err
 	}
-	mp = nM.AsMapStringInterface()
-	mp[utils.Error] = "" // enforce empty error
+	mp.Set([]string{utils.Error}, "", false) // enforce empty error
 	return mp, nil
 }

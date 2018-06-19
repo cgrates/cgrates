@@ -85,7 +85,6 @@ func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg) (err error) {
 
 type HttpAgntProcCfg struct {
 	Id                string
-	DryRun            bool
 	Filters           []string
 	Flags             utils.StringMap
 	ContinueOnSuccess bool
@@ -99,9 +98,6 @@ func (ha *HttpAgntProcCfg) loadFromJsonCfg(jsnCfg *HttpAgentProcessorJsnCfg) (er
 	}
 	if jsnCfg.Id != nil {
 		ha.Id = *jsnCfg.Id
-	}
-	if jsnCfg.Dry_run != nil {
-		ha.DryRun = *jsnCfg.Dry_run
 	}
 	if jsnCfg.Filters != nil {
 		ha.Filters = make([]string, len(*jsnCfg.Filters))

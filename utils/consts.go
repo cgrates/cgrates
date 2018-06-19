@@ -547,6 +547,11 @@ const (
 	MetaVars                     = "*vars"
 	MetaReply                    = "*reply"
 	CGROriginHost                = "cgr_originhost"
+	MetaInitiate                 = "*initiate"
+	MetaUpdate                   = "*update"
+	MetaTerminate                = "*terminate"
+	MetaEvent                    = "*event"
+	MetaDryRun                   = "*dryrun"
 )
 
 // Migrator Action

@@ -1327,15 +1327,35 @@ func (smg *SMGeneric) BiRPCV1ReplicatePassiveSessions(clnt rpcclient.RpcClientCo
 	return
 }
 
+// NewV1AuthorizeArgs is a constructor for V1AuthorizeArgs
+func NewV1AuthorizeArgs(attrs, res, maxUsage, thrslds,
+	statQueues, suppls, supplsIgnoreErrs, supplsEventCost bool,
+	cgrEv utils.CGREvent) (args *V1AuthorizeArgs) {
+	args = &V1AuthorizeArgs{
+		GetAttributes:         attrs,
+		AuthorizeResources:    res,
+		GetMaxUsage:           maxUsage,
+		ProcessThresholds:     thrslds,
+		ProcessStats:          statQueues,
+		SuppliersIgnoreErrors: supplsIgnoreErrs,
+		GetSuppliers:          suppls,
+		CGREvent:              cgrEv,
+	}
+	if supplsEventCost {
+		args.SuppliersMaxCost = utils.MetaSuppliersEventCost
+	}
+	return
+}
+
 type V1AuthorizeArgs struct {
 	GetAttributes         bool
 	AuthorizeResources    bool
 	GetMaxUsage           bool
+	ProcessThresholds     bool
+	ProcessStats          bool
 	GetSuppliers          bool
 	SuppliersMaxCost      string
 	SuppliersIgnoreErrors bool
-	ProcessThresholds     *bool
-	ProcessStatQueues     *bool
 	utils.CGREvent
 	utils.Paginator
 }
@@ -1462,11 +1482,7 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 			authReply.Suppliers = &splsReply
 		}
 	}
-	checkThresholds := smg.thdS != nil
-	if args.ProcessThresholds != nil {
-		checkThresholds = *args.ProcessThresholds
-	}
-	if checkThresholds {
+	if smg.thdS != nil && args.ProcessThresholds {
 		if smg.thdS == nil {
 			return utils.NewErrNotConnected(utils.ThresholdS)
 		}
@@ -1481,11 +1497,7 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		}
 		authReply.ThresholdIDs = &tIDs
 	}
-	checkStatQueues := smg.statS != nil
-	if args.ProcessStatQueues != nil {
-		checkStatQueues = *args.ProcessStatQueues
-	}
-	if checkStatQueues {
+	if smg.statS != nil && args.ProcessStats {
 		if smg.statS == nil {
 			return utils.NewErrNotConnected(utils.StatService)
 		}
@@ -1536,23 +1548,35 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEventWithDigest(clnt rpcclient.RpcClientCo
 	if args.GetSuppliers {
 		authReply.SuppliersDigest = utils.StringPointer(initAuthRply.Suppliers.Digest())
 	}
-	if args.ProcessThresholds != nil && *args.ProcessThresholds {
+	if args.ProcessThresholds {
 		authReply.Thresholds = utils.StringPointer(
 			strings.Join(*initAuthRply.ThresholdIDs, utils.FIELDS_SEP))
 	}
-	if args.ProcessStatQueues != nil && *args.ProcessStatQueues {
+	if args.ProcessStats {
 		authReply.StatQueues = utils.StringPointer(
 			strings.Join(*initAuthRply.StatQueueIDs, utils.FIELDS_SEP))
 	}
 	return nil
 }
 
+func NewV1InitSessionArgs(attrs, resrc, acnt, thrslds, stats bool,
+	cgrEv utils.CGREvent) *V1InitSessionArgs {
+	return &V1InitSessionArgs{
+		GetAttributes:     attrs,
+		AllocateResources: resrc,
+		InitSession:       acnt,
+		ProcessThresholds: thrslds,
+		ProcessStats:      stats,
+		CGREvent:          cgrEv,
+	}
+}
+
 type V1InitSessionArgs struct {
 	GetAttributes     bool
 	AllocateResources bool
 	InitSession       bool
-	ProcessThresholds *bool
-	ProcessStatQueues *bool
+	ProcessThresholds bool
+	ProcessStats      bool
 	utils.CGREvent
 }
 
@@ -1650,11 +1674,7 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 			rply.MaxUsage = &maxUsage
 		}
 	}
-	checkThresholds := smg.thdS != nil
-	if args.ProcessThresholds != nil {
-		checkThresholds = *args.ProcessThresholds
-	}
-	if checkThresholds {
+	if smg.thdS != nil && args.ProcessThresholds {
 		if smg.thdS == nil {
 			return utils.NewErrNotConnected(utils.ThresholdS)
 		}
@@ -1669,11 +1689,7 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		}
 		rply.ThresholdIDs = &tIDs
 	}
-	checkStatQueues := smg.statS != nil
-	if args.ProcessStatQueues != nil {
-		checkStatQueues = *args.ProcessStatQueues
-	}
-	if checkStatQueues {
+	if smg.statS != nil && args.ProcessStats {
 		if smg.statS == nil {
 			return utils.NewErrNotConnected(utils.StatService)
 		}
@@ -1722,15 +1738,21 @@ func (smg *SMGeneric) BiRPCv1InitiateSessionWithDigest(clnt rpcclient.RpcClientC
 		}
 	}
 
-	if args.ProcessThresholds != nil && *args.ProcessThresholds {
+	if args.ProcessThresholds {
 		initReply.Thresholds = utils.StringPointer(
 			strings.Join(*initSessionRply.ThresholdIDs, utils.FIELDS_SEP))
 	}
-	if args.ProcessStatQueues != nil && *args.ProcessStatQueues {
+	if args.ProcessStats {
 		initReply.StatQueues = utils.StringPointer(
 			strings.Join(*initSessionRply.StatQueueIDs, utils.FIELDS_SEP))
 	}
 	return nil
+}
+
+func NewV1UpdateSessionArgs(attrs, acnts bool,
+	cgrEv utils.CGREvent) *V1UpdateSessionArgs {
+	return &V1UpdateSessionArgs{GetAttributes: attrs,
+		UpdateSession: acnts, CGREvent: cgrEv}
 }
 
 type V1UpdateSessionArgs struct {
@@ -1804,11 +1826,21 @@ func (smg *SMGeneric) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 	return
 }
 
+func NewV1TerminateSessionArgs(acnts, resrc, thrds, stats bool,
+	cgrEv utils.CGREvent) *V1TerminateSessionArgs {
+	return &V1TerminateSessionArgs{
+		TerminateSession:  acnts,
+		ReleaseResources:  resrc,
+		ProcessThresholds: thrds,
+		ProcessStats:      stats,
+		CGREvent:          cgrEv}
+}
+
 type V1TerminateSessionArgs struct {
 	TerminateSession  bool
 	ReleaseResources  bool
-	ProcessThresholds *bool
-	ProcessStatQueues *bool
+	ProcessThresholds bool
+	ProcessStats      bool
 	utils.CGREvent
 }
 
@@ -1851,11 +1883,7 @@ func (smg *SMGeneric) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection
 			return utils.NewErrResourceS(err)
 		}
 	}
-	checkThresholds := smg.thdS != nil
-	if args.ProcessThresholds != nil {
-		checkThresholds = *args.ProcessThresholds
-	}
-	if checkThresholds {
+	if smg.thdS != nil && args.ProcessThresholds {
 		if smg.thdS == nil {
 			return utils.NewErrNotConnected(utils.ThresholdS)
 		}
@@ -1869,14 +1897,7 @@ func (smg *SMGeneric) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection
 				fmt.Sprintf("<SessionS> error: %s processing event %+v with ThresholdS.", err.Error(), thEv))
 		}
 	}
-	checkStatQueues := smg.statS != nil
-	if args.ProcessStatQueues != nil {
-		checkStatQueues = *args.ProcessStatQueues
-	}
-	if checkStatQueues {
-		if smg.statS == nil {
-			return utils.NewErrNotConnected(utils.StatService)
-		}
+	if smg.statS != nil && args.ProcessStats {
 		var statReply []string
 		if err := smg.statS.Call(utils.StatSv1ProcessEvent, &args.CGREvent, &statReply); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
@@ -1896,6 +1917,16 @@ func (smg *SMGeneric) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 	}
 	*reply = utils.OK
 	return nil
+}
+
+func NewV1ProcessEventArgs(resrc, acnts, attrs bool,
+	cgrEv utils.CGREvent) *V1ProcessEventArgs {
+	return &V1ProcessEventArgs{
+		AllocateResources: resrc,
+		Debit:             acnts,
+		GetAttributes:     attrs,
+		CGREvent:          cgrEv,
+	}
 }
 
 type V1ProcessEventArgs struct {

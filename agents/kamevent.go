@@ -211,30 +211,16 @@ func (kev KamEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 	if !has {
 		return
 	}
-	if strings.Index(subsystems, utils.MetaAccounts) == -1 {
-		args.GetMaxUsage = false
+	args.GetMaxUsage = strings.Index(subsystems, utils.MetaAccounts) != -1
+	args.AuthorizeResources = strings.Index(subsystems, utils.MetaResources) != -1
+	args.GetSuppliers = strings.Index(subsystems, utils.MetaSuppliers) != -1
+	args.SuppliersIgnoreErrors = strings.Index(subsystems, utils.MetaSuppliersIgnoreErrors) != -1
+	if strings.Index(subsystems, utils.MetaSuppliersEventCost) != -1 {
+		args.SuppliersMaxCost = utils.MetaEventCost
 	}
-	if strings.Index(subsystems, utils.MetaResources) != -1 {
-		args.AuthorizeResources = true
-	}
-	if strings.Index(subsystems, utils.MetaSuppliers) != -1 {
-		args.GetSuppliers = true
-		if strings.Index(subsystems, utils.MetaSuppliersEventCost) != -1 {
-			args.SuppliersMaxCost = utils.MetaEventCost
-		}
-		if strings.Index(subsystems, utils.MetaSuppliersIgnoreErrors) != -1 {
-			args.SuppliersIgnoreErrors = true
-		}
-	}
-	if strings.Index(subsystems, utils.MetaAttributes) != -1 {
-		args.GetAttributes = true
-	}
-	if strings.Index(subsystems, utils.MetaThresholds) != -1 {
-		args.ProcessThresholds = utils.BoolPointer(true)
-	}
-	if strings.Index(subsystems, utils.MetaStats) != -1 {
-		args.ProcessStatQueues = utils.BoolPointer(true)
-	}
+	args.GetAttributes = strings.Index(subsystems, utils.MetaAttributes) != -1
+	args.ProcessThresholds = strings.Index(subsystems, utils.MetaThresholds) != -1
+	args.ProcessStats = strings.Index(subsystems, utils.MetaStats) != -1
 	return
 }
 
@@ -270,10 +256,10 @@ func (kev KamEvent) AsKamAuthReply(authArgs *sessions.V1AuthorizeArgs,
 		kar.Suppliers = authReply.Suppliers.Digest()
 	}
 
-	if authArgs.ProcessThresholds != nil && *authArgs.ProcessThresholds {
+	if authArgs.ProcessThresholds {
 		kar.Thresholds = strings.Join(*authReply.ThresholdIDs, utils.FIELDS_SEP)
 	}
-	if authArgs.ProcessStatQueues != nil && *authArgs.ProcessStatQueues {
+	if authArgs.ProcessStats {
 		kar.StatQueues = strings.Join(*authReply.StatQueueIDs, utils.FIELDS_SEP)
 	}
 	return
@@ -293,21 +279,11 @@ func (kev KamEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 	if !has {
 		return
 	}
-	if strings.Index(subsystems, utils.MetaAccounts) == -1 {
-		args.InitSession = false
-	}
-	if strings.Index(subsystems, utils.MetaResources) != -1 {
-		args.AllocateResources = true
-	}
-	if strings.Index(subsystems, utils.MetaAttributes) != -1 {
-		args.GetAttributes = true
-	}
-	if strings.Index(subsystems, utils.MetaThresholds) != -1 {
-		args.ProcessThresholds = utils.BoolPointer(true)
-	}
-	if strings.Index(subsystems, utils.MetaStats) != -1 {
-		args.ProcessStatQueues = utils.BoolPointer(true)
-	}
+	args.InitSession = strings.Index(subsystems, utils.MetaAccounts) != -1
+	args.AllocateResources = strings.Index(subsystems, utils.MetaResources) != -1
+	args.GetAttributes = strings.Index(subsystems, utils.MetaAttributes) != -1
+	args.ProcessThresholds = strings.Index(subsystems, utils.MetaThresholds) != -1
+	args.ProcessStats = strings.Index(subsystems, utils.MetaStats) != -1
 	return
 }
 
@@ -325,18 +301,10 @@ func (kev KamEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionA
 	if !has {
 		return
 	}
-	if strings.Index(subsystems, utils.MetaAccounts) == -1 {
-		args.TerminateSession = false
-	}
-	if strings.Index(subsystems, utils.MetaResources) != -1 {
-		args.ReleaseResources = true
-	}
-	if strings.Index(subsystems, utils.MetaThresholds) != -1 {
-		args.ProcessThresholds = utils.BoolPointer(true)
-	}
-	if strings.Index(subsystems, utils.MetaStats) != -1 {
-		args.ProcessStatQueues = utils.BoolPointer(true)
-	}
+	args.TerminateSession = strings.Index(subsystems, utils.MetaAccounts) != -1
+	args.ReleaseResources = strings.Index(subsystems, utils.MetaResources) != -1
+	args.ProcessThresholds = strings.Index(subsystems, utils.MetaThresholds) != -1
+	args.ProcessStats = strings.Index(subsystems, utils.MetaStats) != -1
 	return
 }
 

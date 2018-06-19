@@ -19,12 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -117,23 +119,111 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 		Time:   utils.TimePointer(time.Now()),
 		Event:  reqEv.AsMapStringInterface(),
 	}
-	if reqProcessor.DryRun {
+	var reqType string
+	for _, typ := range []string{
+		utils.MetaDryRun, utils.MetaAuth,
+		utils.MetaInitiate, utils.MetaUpdate,
+		utils.MetaTerminate, utils.MetaEvent} {
+		if reqProcessor.Flags.HasKey(typ) { // request type is identified through flags
+			reqType = typ
+		}
+	}
+	switch reqType {
+	default:
+		return false, errors.New("unknown request type")
+	case utils.MetaDryRun:
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, HTTP request: %s",
 				utils.HTTPAgent, reqProcessor.Id, utils.ToJSON(agReq.Request)))
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, CGREvent: %s",
-				utils.HTTPAgent, reqProcessor.Id, agReq))
+				utils.HTTPAgent, reqProcessor.Id, utils.ToJSON(cgrEv)))
+	case utils.MetaAuth:
+		authArgs := sessions.NewV1AuthorizeArgs(
+			reqProcessor.Flags.HasKey(utils.MetaAttributes),
+			reqProcessor.Flags.HasKey(utils.MetaResources),
+			reqProcessor.Flags.HasKey(utils.MetaAccounts),
+			reqProcessor.Flags.HasKey(utils.MetaThresholds),
+			reqProcessor.Flags.HasKey(utils.MetaStats),
+			reqProcessor.Flags.HasKey(utils.MetaSuppliers),
+			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
+			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
+			*cgrEv)
+		var authReply sessions.V1AuthorizeReply
+		err = ha.sessionS.Call(utils.SessionSv1AuthorizeEvent,
+			authArgs, &authReply)
+		if agReq.CGRReply, err = NewCGRReply(&authReply, err); err != nil {
+			return
+		}
+	case utils.MetaInitiate:
+		initArgs := sessions.NewV1InitSessionArgs(
+			reqProcessor.Flags.HasKey(utils.MetaAttributes),
+			reqProcessor.Flags.HasKey(utils.MetaResources),
+			reqProcessor.Flags.HasKey(utils.MetaAccounts),
+			reqProcessor.Flags.HasKey(utils.MetaThresholds),
+			reqProcessor.Flags.HasKey(utils.MetaStats), *cgrEv)
+		var initReply sessions.V1InitSessionReply
+		err = ha.sessionS.Call(utils.SessionSv1InitiateSession,
+			initArgs, &initReply)
+		if agReq.CGRReply, err = NewCGRReply(&initReply, err); err != nil {
+			return
+		}
+	case utils.MetaUpdate:
+		updateArgs := sessions.NewV1UpdateSessionArgs(
+			reqProcessor.Flags.HasKey(utils.MetaAttributes),
+			reqProcessor.Flags.HasKey(utils.MetaAccounts), *cgrEv)
+		var updateReply sessions.V1UpdateSessionReply
+		err = ha.sessionS.Call(utils.SessionSv1UpdateSession,
+			updateArgs, &updateReply)
+		if agReq.CGRReply, err = NewCGRReply(&updateReply, err); err != nil {
+			return
+		}
+	case utils.MetaTerminate:
+		terminateArgs := sessions.NewV1TerminateSessionArgs(
+			reqProcessor.Flags.HasKey(utils.MetaAccounts),
+			reqProcessor.Flags.HasKey(utils.MetaResources),
+			reqProcessor.Flags.HasKey(utils.MetaThresholds),
+			reqProcessor.Flags.HasKey(utils.MetaStats), *cgrEv)
+		var tRply string
+		err = ha.sessionS.Call(utils.SessionSv1TerminateSession,
+			terminateArgs, &tRply)
+		if agReq.CGRReply, err = NewCGRReply(nil, err); err != nil {
+			return
+		}
+	case utils.MetaEvent:
+		evArgs := sessions.NewV1ProcessEventArgs(
+			reqProcessor.Flags.HasKey(utils.MetaResources),
+			reqProcessor.Flags.HasKey(utils.MetaAccounts),
+			reqProcessor.Flags.HasKey(utils.MetaAttributes), *cgrEv)
+		var eventRply sessions.V1ProcessEventReply
+		err = ha.sessionS.Call(utils.SessionSv1ProcessEvent,
+			evArgs, &eventRply)
+		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
+			cgrEv.Event[utils.Usage] = 0 // avoid further debits
+		} else if eventRply.MaxUsage != nil {
+			cgrEv.Event[utils.Usage] = *eventRply.MaxUsage // make sure the CDR reflects the debit
+		}
+		if agReq.CGRReply, err = NewCGRReply(&eventRply, err); err != nil {
+			return
+		}
 	}
-	fmt.Printf("cgrEv: %+v", cgrEv)
-	/*
-		ev, err := radReqAsCGREvent(req, procVars, reqProcessor.Flags, reqProcessor.RequestFields)
-		if err != nil {
-			return false, err
+	if reqProcessor.Flags.HasKey(utils.MetaCDRs) &&
+		utils.IsSliceMember([]string{utils.MetaTerminate, utils.MetaEvent}, reqType) {
+		var rplyCDRs string
+		if err = ha.sessionS.Call(utils.SessionSv1ProcessCDR,
+			*cgrEv, &rplyCDRs); err != nil {
+			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false)
 		}
-		if reqProcessor.DryRun {
-			utils.Logger.Info(fmt.Sprintf("<%s> DRY_RUN, CGREvent: %s", utils.RadiusAgent, utils.ToJSON(cgrEv)))
-		}
-	*/
+	}
+	if nM, err := agReq.AsNavigableMap(reqProcessor.ReplyFields); err != nil {
+		return false, err
+	} else {
+		agReq.Reply.Merge(nM)
+	}
+	if reqType == utils.MetaDryRun {
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> DRY_RUN, HTTP reply: %s",
+				utils.HTTPAgent, agReq.Reply))
+	}
 	return
 }

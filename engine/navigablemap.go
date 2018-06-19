@@ -48,19 +48,20 @@ type NavigableMap struct {
 }
 
 // Add will add items into NavigableMap populating also order
-func (nM *NavigableMap) Add(path []string, data interface{}) {
-	nM.order = append(nM.order)
+func (nM *NavigableMap) Set(path []string, data interface{}, ordered bool) {
 	mp := nM.data
 	for i, spath := range path {
-		_, has := mp[spath]
-		if !has {
-			if i == len(path)-1 { // last path
-				mp[spath] = data
-				return
-			}
+		if i == len(path)-1 { // last path
+			mp[spath] = data
+			return
+		}
+		if _, has := mp[spath]; !has {
 			mp[spath] = make(map[string]interface{})
 		}
 		mp = mp[spath].(map[string]interface{}) // so we can check further down
+	}
+	if ordered {
+		nM.order = append(nM.order)
 	}
 }
 
@@ -161,4 +162,16 @@ func (nM *NavigableMap) Items() (itms []*NMItem) {
 // AsNavigableMap implements both NavigableMapper as well as DataProvider interfaces
 func (nM *NavigableMap) AsNavigableMap(tpl []*config.CfgCdrField) (oNM *NavigableMap, err error) {
 	return nil, utils.ErrNotImplemented
+}
+
+func (nM *NavigableMap) Merge(nM2 *NavigableMap) {
+	if nM2 == nil {
+		return
+	}
+	for k, v := range nM2.data {
+		nM.data[k] = v
+	}
+	if len(nM2.order) != 0 {
+		nM.order = append(nM.order, nM2.order...)
+	}
 }
