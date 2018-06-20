@@ -553,6 +553,7 @@ const (
 	MetaTerminate                = "*terminate"
 	MetaEvent                    = "*event"
 	MetaDryRun                   = "*dryrun"
+	Event                        = "Event"
 )
 
 // Migrator Action
