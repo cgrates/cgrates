@@ -224,6 +224,11 @@ func (self *SMGSession) refund(usage time.Duration) (err error) {
 	var incrmts engine.Increments
 	for _, tmspn := range cc.Timespans {
 		for _, incr := range tmspn.Increments {
+			if incr.BalanceInfo == nil ||
+				(incr.BalanceInfo.Unit == nil &&
+					incr.BalanceInfo.Monetary == nil) {
+				continue // not enough information for refunds, most probably free units uncounted
+			}
 			incrmts = append(incrmts, incr)
 		}
 	}
