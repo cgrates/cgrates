@@ -109,15 +109,14 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
 	}
-	reqEv, err := agReq.AsNavigableMap(reqProcessor.RequestFields)
-	if err != nil {
-		return false, err
+	if agReq.CGRRequest, err = agReq.AsNavigableMap(reqProcessor.RequestFields); err != nil {
+		return
 	}
 	cgrEv := &utils.CGREvent{
 		Tenant: agReq.Tenant,
 		ID:     utils.UUIDSha1Prefix(),
 		Time:   utils.TimePointer(time.Now()),
-		Event:  reqEv.AsMapStringInterface(),
+		Event:  agReq.CGRRequest.AsMapStringInterface(),
 	}
 	var reqType string
 	for _, typ := range []string{

@@ -30,11 +30,12 @@ import (
 func newAgentRequest(req engine.DataProvider, tntTpl utils.RSRFields,
 	dfltTenant string, filterS *engine.FilterS) (ar *AgentRequest) {
 	ar = &AgentRequest{
-		Request:  req,
-		Vars:     engine.NewNavigableMap(nil),
-		CGRReply: engine.NewNavigableMap(nil),
-		Reply:    engine.NewNavigableMap(nil),
-		filterS:  filterS,
+		Request:    req,
+		Vars:       engine.NewNavigableMap(nil),
+		CGRRequest: engine.NewNavigableMap(nil),
+		CGRReply:   engine.NewNavigableMap(nil),
+		Reply:      engine.NewNavigableMap(nil),
+		filterS:    filterS,
 	}
 	// populate tenant
 	if tntIf, err := ar.ParseField(
@@ -50,12 +51,13 @@ func newAgentRequest(req engine.DataProvider, tntTpl utils.RSRFields,
 // AgentRequest represents data related to one request towards agent
 // implements engine.DataProvider so we can pass it to filters
 type AgentRequest struct {
-	Tenant   string
-	Request  engine.DataProvider  // request
-	Vars     *engine.NavigableMap // shared data
-	CGRReply *engine.NavigableMap
-	Reply    *engine.NavigableMap
-	filterS  *engine.FilterS
+	Tenant     string
+	Request    engine.DataProvider  // request
+	Vars       *engine.NavigableMap // shared data
+	CGRRequest *engine.NavigableMap
+	CGRReply   *engine.NavigableMap
+	Reply      *engine.NavigableMap
+	filterS    *engine.FilterS
 }
 
 // String implements engine.DataProvider
@@ -72,6 +74,8 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 		return ar.Request.FieldAsInterface(fldPath[1:])
 	case utils.MetaVars:
 		return ar.Vars.FieldAsInterface(fldPath[1:])
+	case utils.MetaCGRRequest:
+		return ar.CGRRequest.FieldAsInterface(fldPath[1:])
 	case utils.MetaCGRReply:
 		return ar.CGRReply.FieldAsInterface(fldPath[1:])
 	case utils.MetaReply:
@@ -88,6 +92,8 @@ func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) 
 		return ar.Request.FieldAsString(fldPath[1:])
 	case utils.MetaVars:
 		return ar.Vars.FieldAsString(fldPath[1:])
+	case utils.MetaCGRRequest:
+		return ar.CGRRequest.FieldAsString(fldPath[1:])
 	case utils.MetaCGRReply:
 		return ar.CGRReply.FieldAsString(fldPath[1:])
 	case utils.MetaReply:
