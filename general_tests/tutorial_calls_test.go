@@ -616,19 +616,31 @@ func testCallSyncSessions(t *testing.T) {
 		t.Errorf("Unsuported format")
 	}
 
+	time.Sleep(2 * time.Second)
+
 	// activeSessions shouldn't be active
 	if err := tutorialCallsRpc.Call(utils.SessionSv1GetActiveSessions,
 		&map[string]string{}, &reply); err.Error() != utils.ErrNotFound.Error() {
 		t.Error("Got error on SessionSv1.GetActiveSessions: ", err.Error())
 	}
 
+	var sourceForCDR string
+	var numberOfCDR int
+	switch optConf {
+	case utils.Freeswitch:
+		sourceForCDR = utils.MetaSessionS
+		numberOfCDR = 2
+	case utils.Kamailio:
+		sourceForCDR = utils.MetaSessionS + "_" + utils.KamailioAgent
+		numberOfCDR = 3 // in case of kamailio we get 3 CDRs (1 from first disconnect)
+	}
 	// verify cdr
 	var rplCdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{Sources: []string{utils.MetaSessionS},
+	req := utils.RPCCDRsFilter{Sources: []string{sourceForCDR}, MaxUsage: "20s",
 		RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}}
 	if err := tutorialCallsRpc.Call("ApierV2.GetCdrs", req, &rplCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if len(rplCdrs) != 2 { // cdr from sync session + cdr from before
+	} else if len(rplCdrs) != numberOfCDR { // cdr from sync session + cdr from before
 		t.Error("Unexpected number of CDRs returned: ", len(rplCdrs))
 	} else if time1, err := utils.ParseDurationWithSecs(rplCdrs[0].Usage); err != nil {
 		t.Error(err)
@@ -638,6 +650,12 @@ func testCallSyncSessions(t *testing.T) {
 		t.Error(err)
 	} else if time1 > time.Duration(15*time.Second) {
 		t.Error("Unexpected time duration : ", time1)
+	} else if numberOfCDR == 3 {
+		if time1, err := utils.ParseDurationWithSecs(rplCdrs[2].Usage); err != nil {
+			t.Error(err)
+		} else if time1 > time.Duration(15*time.Second) {
+			t.Error("Unexpected time duration : ", time1)
+		}
 	}
 
 }

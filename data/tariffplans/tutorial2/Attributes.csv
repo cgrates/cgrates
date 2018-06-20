@@ -1,6 +1,7 @@
 #Tenant,ID,Contexts,FilterIDs,ActivationInterval,FieldName,Initial,Substitute,Append,Weight
 cgrates.org,ATTR_1001_SIMPLEAUTH,simpleauth,*string:Account:1001,,Password,*any,CGRateS.org,true,20
 cgrates.org,ATTR_1002_SIMPLEAUTH,simpleauth,*string:Account:1002,,Password,*any,CGRateS.org,true,20
+cgrates.org,ATTR_1003_SIMPLEAUTH,simpleauth,*string:Account:1003,,Password,*any,CGRateS.org,true,20
 cgrates.org,ATTR_1001_SESSIONAUTH,*sessions,*string:Account:1001,,Password,*any,CGRateS.org,true,10
 cgrates.org,ATTR_1001_SESSIONAUTH,,,,RequestType,*any,*prepaid,true,
 cgrates.org,ATTR_1001_SESSIONAUTH,,,,PaypalAccount,*any,cgrates@paypal.com,true,

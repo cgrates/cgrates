@@ -44,6 +44,7 @@ const (
 	KamCGRSubsystems       = "cgr_subsystems"
 	KamCGRContext          = "cgr_context"
 	EvapiConnID            = "EvapiConnID" // used to share connID info in event for remote disconnects
+	CGR_DLG_LIST           = "CGR_DLG_LIST"
 )
 
 var (
@@ -322,6 +323,39 @@ type KamAuthReply struct {
 }
 
 func (self *KamAuthReply) String() string {
+	mrsh, _ := json.Marshal(self)
+	return string(mrsh)
+}
+
+type KamDlgReply struct {
+	Event        string
+	Jsonrpl_body *kamJsonDlgBody
+}
+
+type kamJsonDlgBody struct {
+	Id      int
+	Jsonrpc string
+	Result  []*kamDlgInfo
+}
+
+type kamDlgInfo struct {
+	CallId string `json:"call-id"`
+	Caller *kamCallerDlg
+}
+
+type kamCallerDlg struct {
+	Tag string
+}
+
+// NewKamDlgReply parses bytes received over the wire from Kamailio into KamDlgReply
+func NewKamDlgReply(kamEvData []byte) (rpl KamDlgReply, err error) {
+	if err = json.Unmarshal(kamEvData, &rpl); err != nil {
+		return
+	}
+	return
+}
+
+func (self *KamDlgReply) String() string {
 	mrsh, _ := json.Marshal(self)
 	return string(mrsh)
 }
