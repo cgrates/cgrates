@@ -61,7 +61,7 @@ func (nM *NavigableMap) Set(path []string, data interface{}, ordered bool) {
 		mp = mp[spath].(map[string]interface{}) // so we can check further down
 	}
 	if ordered {
-		nM.order = append(nM.order)
+		nM.order = append(nM.order, path)
 	}
 }
 
@@ -90,8 +90,8 @@ func (nM *NavigableMap) FieldAsInterface(fldPath []string) (fldVal interface{}, 
 			}
 			lastMp, canCast = elmnt.(map[string]interface{})
 			if !canCast {
-				err = fmt.Errorf("cannot cast field: %s to map[string]interface{}",
-					utils.ToJSON(elmnt))
+				err = fmt.Errorf("cannot cast field: %s with path: <%s> to map[string]interface{}",
+					utils.ToJSON(elmnt), spath)
 				return
 			}
 		}
