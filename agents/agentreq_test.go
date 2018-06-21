@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
-	"fmt"
+	"reflect"
 	"testing"
 	"time"
 
@@ -85,19 +85,30 @@ func TestAgReqAsNavigableMap(t *testing.T) {
 		&config.CfgCdrField{Tag: "AttrPaypalAccount",
 			FieldId: "PaypalAccount", Type: utils.META_COMPOSED,
 			Filters: []string{"*string:*cgrReply>Error:"},
-			Value:   utils.ParseRSRFieldsMustCompile("*cgrReply>Attributes>PaypalAccount", utils.INFIELD_SEP)},
+			Value: utils.ParseRSRFieldsMustCompile(
+				"*cgrReply>Attributes>PaypalAccount", utils.INFIELD_SEP)},
 		&config.CfgCdrField{Tag: "MaxUsage",
 			FieldId: "MaxUsage", Type: utils.META_COMPOSED,
 			Filters: []string{"*string:*cgrReply>Error:"},
-			Value:   utils.ParseRSRFieldsMustCompile("*cgrReply>MaxUsage", utils.INFIELD_SEP)},
+			Value: utils.ParseRSRFieldsMustCompile(
+				"*cgrReply>MaxUsage{*duration_seconds}", utils.INFIELD_SEP)},
 		&config.CfgCdrField{Tag: "Error",
 			FieldId: "Error", Type: utils.META_COMPOSED,
 			Filters: []string{"*rsr::*cgrReply>Error(!^$)"},
-			Value:   utils.ParseRSRFieldsMustCompile("*cgrReply>Error", utils.INFIELD_SEP)},
+			Value: utils.ParseRSRFieldsMustCompile(
+				"*cgrReply>Error", utils.INFIELD_SEP)},
 	}
+	eMp := engine.NewNavigableMap(nil)
+	eMp.Set([]string{utils.Tenant}, "cgrates.org", true)
+	eMp.Set([]string{utils.Account}, "1001", true)
+	eMp.Set([]string{utils.Destination}, "1002", true)
+	eMp.Set([]string{"RequestedUsage"}, "180", true)
+	eMp.Set([]string{"PaypalAccount"}, "cgrates@paypal.com", true)
+	eMp.Set([]string{"MaxUsage"}, "120", true)
 	if mpOut, err := agReq.AsNavigableMap(tplFlds); err != nil {
 		t.Error(err)
-	} else {
-		fmt.Printf("mpOut: %+v\n", mpOut.AsMapStringInterface())
+	} else if !reflect.DeepEqual(eMp, mpOut) {
+		t.Errorf("expecting: %+v, received: %+v",
+			eMp.AsMapStringInterface(), mpOut.AsMapStringInterface())
 	}
 }

@@ -112,11 +112,12 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.CfgCdrField) (
 		} else if !pass {
 			continue
 		}
-		if out, err := ar.ParseField(tplFld); err != nil {
+		out, err := ar.ParseField(tplFld)
+		if err != nil {
 			return nil, err
-		} else {
-			nM.Set(strings.Split(tplFld.FieldId, utils.HIERARCHY_SEP), out, true)
 		}
+		nM.Set(strings.Split(tplFld.FieldId,
+			utils.HIERARCHY_SEP), out, true)
 	}
 	return
 }
@@ -159,7 +160,7 @@ func (ar *AgentRequest) composedField(outTpl utils.RSRFields) (outVal string) {
 			}
 			continue
 		}
-		valStr, err := ar.FieldAsString(strings.Split(rsrTpl.Id, utils.CONCATENATED_KEY_SEP))
+		valStr, err := ar.FieldAsString(strings.Split(rsrTpl.Id, utils.HIERARCHY_SEP))
 		if err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> %s",
