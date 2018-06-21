@@ -6,4 +6,10 @@ cgrates.org,ATTR_1001_SESSIONAUTH,*sessions,*string:Account:1001,,Password,*any,
 cgrates.org,ATTR_1001_SESSIONAUTH,,,,RequestType,*any,*prepaid,true,
 cgrates.org,ATTR_1001_SESSIONAUTH,,,,PaypalAccount,*any,cgrates@paypal.com,true,
 cgrates.org,ATTR_1001_SESSIONAUTH,,,,LCRProfile,*any,premium_cli,true,
+cgrates.org,ATTR_1002_SESSIONAUTH,*sessions,*string:Account:1002,,Password,*any,CGRateS.org,true,10
+cgrates.org,ATTR_1002_SESSIONAUTH,,,,RequestType,*any,*postpaid,true,
+cgrates.org,ATTR_1002_SESSIONAUTH,,,,PaypalAccount,*any,cgrates@paypal.com,true,
+cgrates.org,ATTR_1002_SESSIONAUTH,,,,LCRProfile,*any,premium_cli,true,
+cgrates.org,ATTR_1002_SESSIONAUTH,,,,ResourceAllocation,*any,"ResGroup1",true,
+
 

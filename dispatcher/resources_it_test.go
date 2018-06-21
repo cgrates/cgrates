@@ -251,6 +251,11 @@ func testDspResTestAuthKey2(t *testing.T) {
 	eRs := &engine.Resources{
 		&engine.Resource{
 			Tenant: "cgrates.org",
+			ID:     "ResGroup1",
+			Usages: map[string]*engine.ResourceUsage{},
+		},
+		&engine.Resource{
+			Tenant: "cgrates.org",
 			ID:     "ResGroup2",
 			Usages: map[string]*engine.ResourceUsage{},
 		},
