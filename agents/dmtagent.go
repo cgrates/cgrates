@@ -174,7 +174,7 @@ func (da DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProce
 			if ccr.CCRequestType == 3 {
 				if err = da.sessionS.Call(utils.SessionSv1TerminateSession,
 					procVars.asV1TerminateSessionArgs(cgrEv), &rpl); err != nil {
-					procVars[utils.MetaCGRReply] = map[string]interface{}{utils.Error: err.Error()}
+					procVars[utils.MetaCGRReply], _ = NewCGRReply(nil, err)
 				}
 			} else if ccr.CCRequestType == 4 {
 				var evntRply sessions.V1ProcessEventReply
@@ -194,7 +194,7 @@ func (da DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProce
 					!strings.HasSuffix(err.Error(), utils.ErrNoActiveSession.Error())) { // Check if CDR requires session
 				if errCdr := da.sessionS.Call(utils.SessionSv1ProcessCDR, *cgrEv, &rpl); errCdr != nil {
 					err = errCdr
-					procVars[utils.MetaCGRReply] = map[string]interface{}{utils.Error: err.Error()}
+					procVars[utils.MetaCGRReply], _ = NewCGRReply(nil, err)
 				}
 			}
 		}

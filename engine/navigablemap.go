@@ -90,9 +90,13 @@ func (nM *NavigableMap) FieldAsInterface(fldPath []string) (fldVal interface{}, 
 			}
 			lastMp, canCast = elmnt.(map[string]interface{})
 			if !canCast {
-				err = fmt.Errorf("cannot cast field: %s with path: <%s> to map[string]interface{}",
-					utils.ToJSON(elmnt), spath)
-				return
+				lastMpNM, canCast := elmnt.(*NavigableMap) // attempt to cast into NavigableMap
+				if !canCast {
+					err = fmt.Errorf("cannot cast field: <%+v> type: %T with path: <%s> to map[string]interface{}",
+						elmnt, elmnt, spath)
+					return
+				}
+				lastMp = lastMpNM.data
 			}
 		}
 	}
