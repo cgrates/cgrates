@@ -427,8 +427,7 @@ func testCallCheckResourceAllocation(t *testing.T) {
 		t.Errorf("Resources: %+v", utils.ToJSON(rs))
 	}
 	for _, r := range *rs {
-		if r.ID == "ResGroup1" &&
-			(len(r.Usages) != 1 || len(r.TTLIdx) != 1) {
+		if r.ID == "ResGroup1" && (len(r.Usages) != 1 || len(r.TTLIdx) != 1) {
 			t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))
 		}
 	}
@@ -589,7 +588,6 @@ func testCallSyncSessions(t *testing.T) {
 	}
 	time.Sleep(1 * time.Second)
 	// get active sessions
-
 	if err := tutorialCallsRpc.Call(utils.SessionSv1GetActiveSessions,
 		&map[string]string{}, &reply); err != nil {
 		t.Error("Got error on SessionSv1.GetActiveSessions: ", err.Error())
