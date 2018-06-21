@@ -76,6 +76,7 @@
 		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 	"debit_interval": "10s",
+	"channel_sync_interval":"7s",
 },
 
 
