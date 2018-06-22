@@ -398,6 +398,28 @@ func main() {
 				}, &reply); err != nil {
 				log.Printf("WARNING: Got error on cache reload: %s\n", err.Error())
 			}
+			var cacheIDs []string
+			if len(apfIDs) != 0 {
+				cacheIDs = append(cacheIDs, utils.CacheSupplierFilterIndexes, utils.CacheAttributeFilterRevIndexes)
+			}
+			if len(spfIDs) != 0 {
+				cacheIDs = append(cacheIDs, utils.CacheAttributeFilterIndexes, utils.CacheSupplierFilterRevIndexes)
+			}
+			if len(trspfIDs) != 0 {
+				cacheIDs = append(cacheIDs, utils.CacheThresholdFilterIndexes, utils.CacheThresholdFilterRevIndexes)
+			}
+			if len(stqpIDs) != 0 {
+				cacheIDs = append(cacheIDs, utils.CacheStatFilterIndexes, utils.CacheStatFilterRevIndexes)
+			}
+			if len(rspIDs) != 0 {
+				cacheIDs = append(cacheIDs, utils.CacheResourceFilterIndexes, utils.CacheResourceFilterRevIndexes)
+			}
+			if *verbose {
+				log.Print("Clearing cached indexes")
+			}
+			if err = cacheS.Call(utils.CacheSv1Clear, cacheIDs, &reply); err != nil {
+				log.Printf("WARNING: Got error on cache clear: %s\n", err.Error())
+			}
 
 			if len(aps) != 0 {
 				if *verbose {

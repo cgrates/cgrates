@@ -59,7 +59,7 @@ func (chSv1 *CacheSv1) RemoveItem(args *engine.ArgsGetCacheItem,
 	return chSv1.cacheS.V1RemoveItem(args, reply)
 }
 
-// Clear will clear partitions in the cache (all for nil, none for empty slice)
+// Clear will clear partitions in the cache (nil fol all, empty slice for none)
 func (chSv1 *CacheSv1) Clear(cacheIDs []string,
 	reply *string) error {
 	return chSv1.cacheS.V1Clear(cacheIDs, reply)
