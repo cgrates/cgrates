@@ -2044,7 +2044,7 @@ func (smg *SMGeneric) syncSessions() {
 			if err := conn.Call(utils.SessionSv1GetActiveSessionIDs,
 				"", &queriedSessionIDs); err != nil {
 				utils.Logger.Warning(
-					fmt.Sprintf("error quering session ids : %+v", err))
+					fmt.Sprintf("<%s> error quering session ids : %+v", utils.SessionS, err))
 				continue
 			}
 			for _, sessionID := range queriedSessionIDs {

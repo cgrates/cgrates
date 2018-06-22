@@ -2162,6 +2162,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		log.Print("AttributeProfiles:")
 	}
 	for _, tpTH := range tpr.attributeProfiles {
+
 		th, err := APItoAttributeProfile(tpTH, tpr.timezone)
 		if err != nil {
 			return err
