@@ -18,41 +18,11 @@ following rules:
  - Rate id: *RT_20CNT* with connect fee of 40cents, 20cents per minute for the first 60s in 60s increments, followed by 10 cents per minute charged in 1s increments.
  - Rate id: *RT_40CNT* with connect fee of 80cents, 40cents per minute for the first 60s in 60s increments, follwed by 20cents per minute charged in 10s increments.
  - Rate id: *RT_1CNT* having no connect fee and a rate of 1 cent per minute, chargeable in 1 minute increments.
- - Will charge by default *RT_40CNT* for all 10xx destinations during peak times (Monday-Friday 08:00-19:00) and *RT_10CNT* during offpeatimes (rest).
- - Account 1001 will receive a special *deal* for 1002 and 1003 destinations during peak times with *RT_20CNT*, otherwise having default rating.
+ - Rate id: *RT_1CNT_PER_SEC* having no connect fee and a rate of 1 cent per second, chargeable in 1 second increments.
 
 - Accounting part will have following configured:
- - Create 5 accounts: 1001, 1002, 1003, 1004, 1007.
- - Create 1 account alias (1006 - alias of account 1002).
- - Create 1 rating profile alias (1006 - alias of rating profile 1001).
- - 1002, 1003, 1004 will receive 10units of *\*monetary* balance.
- - 1001 will receive 5 units of general  *\*monetary*, 5 units of shared balance in the shared group "SHARED_A" and 90 seconds of calling destination 1002 with special rates *RT_1CNT*.
- - 1007 will receive 0 units of shared balance in the shared group "SHARED_A".
- - Define the shared balance "SHARED_A" with debit policy *\*highest*.
- - For each balance created, attach 4 triggers to control the balance:
-  - log on balance<2,
-  - log on balance>20,
-  - log on 5 mins talked towards 10xx destination,
-  - disable the account and log if a balance is higher than 100 units.
-
-- *DerivedCharging* will execute one extra mediation run when the sessions will have as account and rating subject 1001 resulting in a cloned session with most of parameters identical to original except RequestType which will be set on *rated* instead of original *prepaid* one. The extra run will be identified by *derived_run1* in CDRs.
-
-- Will configure 4 extra CdrStatQueues:
- - *CDRST1* with 10 CDRs in the Queue and unlimited time window, calculating *ASR*, *ACD* and *ACC* for CDRs with Tenant matching *cgrates.org* and MediationRunId matching *default*. On this StatsQueue we will attach an ActionTrigger profile identified by *CDRST1_WARN*
- - *CDRST_1001* with 10 CDRs in the Queue and 10 minutes time window calculating *ASR*, *ACD* and *ACC* for CDRs with Tenant matching *cgrates.org*, RatingSubject matching *1001* and MediationRunId matching *default*. On this StatsQueue we will attach an ActionTrigger profile identified by *CDRST1001_WARN*
- - *CDRST_1002* with 10 CDRs in the Queue and 10 minutes time window calculating *ASR*, *ACD* and *ACC* for CDRs with Tenant matching *cgrates.org*, RatingSubject matching *1002* and MediationRunId matching *default*. On this StatsQueue we will attach an ActionTrigger profile identified by *CDRST1001_WARN*
- - *CDRST_1003* with 10 CDRs in the Queue and 10 minutes time window calculating *ASR*, and *ACD* for CDRs with Tenant matching *cgrates.org*, Destination matching *1003* and MediationRunId matching *default*. On this StatsQueue we will attach an ActionTrigger profile identified by *CDRST3_WARN*
- - The ActionTrigger *CDRST1_WARN* will monitor following StatsQueue Metric values:
-  - ASR drop under 45 and a minimum of 3 CDRs in the StatsQueue will call Action profile *LOG_WARNING* which will log the StatsQueue to syslog. The Action will be recurrent with a sleep time of 1 minute.
-  - ACD drop under 10 and a minimum of 5 CDRs in the StatsQueue will cause the same log to syslog. The Action will be recurrent with a sleep time of 1 minute.
-  - ACC increase over 10 and a minimum of 5 CDRs in the StatsQueue will cause the StatsQueue to be again logged to syslog. The Action will be recurrent with a sleep time of 1 minute.
-
- - The ActionTrigger *CDRST1001_WARN* will monitor following StatsQueue Metric values:
-  - ASR drop under 65 and a minimum of 3 CDRs in the StatsQueue will call Action profile *LOG_WARNING* which will log the StatsQueue to syslog. The Action will be recurrent with a sleep time of 1 minute.
-  - ACD drop under 10 and a minimum of 5 CDRs in the StatsQueue will cause the same log to syslog. The Action will be recurrent with a sleep time of 1 minute.
-  - ACC increase over 5 and a minimum of 5 CDRs in the StatsQueue will cause the StatsQueue to be again logged to syslog. The Action will be recurrent with a sleep time of 1 minute.
-
- - The ActionTrigger *CDRST3_WARN* will monitor ACD Metric and react at a minimum ACD of 60 with 5 CDRs in the StatsQueue by writing again to syslog. This ActionTrigger will be fired one time then cleared by the scheduler.
+ - Create 3 accounts: 1001, 1002, 1003.
+ - 1001, 1002 will receive 10units of *\*monetary* balance.
 
 ::
 
@@ -66,9 +36,6 @@ To verify that all actions successfully performed, we use following *cgr-console
 
   cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1001"]'
   cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1002"]'
-  cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1003"]'
-  cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1004"]'
-  cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1007"]'
 
 - Query call costs so we can see our calls will have expected costs (final cost will result as sum of *ConnectFee* and *Cost* fields):
 
@@ -77,16 +44,6 @@ To verify that all actions successfully performed, we use following *cgr-console
   cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1002" AnswerTime="2014-08-04T13:00:00Z" Usage="20s"'
   cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1002" AnswerTime="2014-08-04T13:00:00Z" Usage="1m25s"'
   cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1003" AnswerTime="2014-08-04T13:00:00Z" Usage="20s"'
-  cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1003" AnswerTime="2014-08-04T13:00:00Z" Usage="1m25s"'
-  cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1004" AnswerTime="2014-08-04T13:00:00Z" Usage="20s"'
-  cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1004" AnswerTime="2014-08-04T13:00:00Z" Usage="1m25s"'
-
-- Make sure *CDRStats Queues* were created:
-
- ::
-
-  cgr-console cdrstats_queueids
-  cgr-console 'cdrstats_metrics StatsQueueId="*default"'
 
 
 Test calls
@@ -119,49 +76,9 @@ To check that we had debits we use again console command, this time not during t
  cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1002"]'
 
 
-1003 -> 1001
+1001 -> 1003
 ~~~~~~~~~~~~
-
-The user 1003 is marked as *pseudoprepaid* inside the telecom switch hence his calls will be considered same as prepaid (no call setups possible on negative balance due to pre-auth mechanism) but not handled automatically by session manager. His call costs will be calculated directly out of CDRs and balance updated by the time when mediation process occurs. This is sometimes a good compromise of prepaid running without influencing performance (there are no recurrent call debits during a call).
-
-To check that there are no debits during or by the end of the call, but when the CDR reaches the CDRS component(which is close to real-time in case of *http-json* CDRs):
-
-::
-
- cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1003"]'
-
-
-1004 -> 1001
-~~~~~~~~~~~~
-
-The user 1004 is marked as *rated* inside the telecom switch hence his calls not interact in any way with accounting subsystem. The only action perfomed by **CGRateS** related to his calls wil be rating/mediation of his CDRs.
-
-
-1006 -> 1002
-~~~~~~~~~~~~
-
-Since the user 1006 is marked as *prepaid* inside the telecom switch, calling between 1006 and 1002 should generate pre-auth and prepaid debits which can be checked with *get_account* command integrated within *cgr-console* tool. One thing to note here is that 1006 is not defined as an account inside CGR Accounting Subsystem but as an alias of another account, hence *get_account* ran on 1006 will return "not found" and the debits can be monitored on the real account which is 1001.
-
-Check that 1001 balance is properly debitted, during the call, and moreover considering that general balance has priority over the shared one debits for this call should take place at first out of general balance.
-
-::
-
- cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1006"]'
- cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1001"]'
-
-
-1007 -> 1002
-~~~~~~~~~~~~
-
-Since the user 1007 is marked as *prepaid* inside the telecom switch, calling between 1007 and 1002 should generate pre-auth and prepaid debits which can be checked with *get_account* command integrated within *cgr-console* tool. Since 1007 has no units left into his accounts but he has one balance marked as shared, debits for this call should take place in accounts which are a part of the same shared balance as the one of *1007/SHARED_A*, which in our scenario corresponds to the one of the account 1001.
-
-Check that call can proceed even if 1007 has no units left into his own balances, and that the costs attached to the call towards 1002 are debited from the balance marked as shared within account 1001.
-
-::
-
- cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1007"]'
- cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1001"]'
-
+The user 1001 call user 1003 and after 12 seconds the call will be disconnected.
 
 CDR Exporting
 -------------
@@ -170,7 +87,7 @@ Once the CDRs are mediated, they are available to be exported. One can use avail
 
 ::
 
- cgr-console 'cdrs_export CdrFormat="csv" ExportDir="/tmp"'
+ cgr-console 'cdrs_export CdrFormat="csv" ExportPath="/tmp"'
 
 
 Fraud detection
