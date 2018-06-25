@@ -279,7 +279,7 @@ func TestRPCITStatusBcastCmd(t *testing.T) {
 		t.Errorf("Received unexpected stats: %+v", stats)
 	}
 	var loadInst utils.LoadInstance
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
 	if err := rpcRAL1.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
 		t.Error(err)
 	} else if loadInst.RatingLoadID == "" || loadInst.AccountingLoadID == "" {
