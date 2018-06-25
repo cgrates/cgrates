@@ -400,10 +400,10 @@ func main() {
 			}
 			var cacheIDs []string
 			if len(apfIDs) != 0 {
-				cacheIDs = append(cacheIDs, utils.CacheSupplierFilterIndexes, utils.CacheAttributeFilterRevIndexes)
+				cacheIDs = append(cacheIDs, utils.CacheAttributeFilterIndexes, utils.CacheAttributeFilterRevIndexes)
 			}
 			if len(spfIDs) != 0 {
-				cacheIDs = append(cacheIDs, utils.CacheAttributeFilterIndexes, utils.CacheSupplierFilterRevIndexes)
+				cacheIDs = append(cacheIDs, utils.CacheSupplierFilterIndexes, utils.CacheSupplierFilterRevIndexes)
 			}
 			if len(trspfIDs) != 0 {
 				cacheIDs = append(cacheIDs, utils.CacheThresholdFilterIndexes, utils.CacheThresholdFilterRevIndexes)
