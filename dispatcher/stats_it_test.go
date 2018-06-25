@@ -136,7 +136,7 @@ func testDspStsPing(t *testing.T) {
 func testDspStsLoadData(t *testing.T) {
 	var reply string
 	Stss := &utils.AttrLoadTpFromFolder{
-		FolderPath: path.Join(dspDataDir, "tariffplans", "tutorial2")}
+		FolderPath: path.Join(dspDataDir, "tariffplans", "tutorial")}
 	if err := instStsRPC.Call("ApierV1.LoadTariffPlanFromFolder", Stss, &reply); err != nil {
 		t.Error(err)
 	}

@@ -135,7 +135,7 @@ func testDspThPing(t *testing.T) {
 func testDspThLoadData(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{
-		FolderPath: path.Join(dspDataDir, "tariffplans", "tutorial2")}
+		FolderPath: path.Join(dspDataDir, "tariffplans", "tutorial")}
 	if err := instThRPC.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error(err)
 	}
