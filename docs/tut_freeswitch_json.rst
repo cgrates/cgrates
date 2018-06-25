@@ -53,7 +53,7 @@ At the end of each call FreeSWITCH_ will issue a http post with the CDR. This wi
 
 ::
 
- cgr-console 'cdrs_export CdrFormat="csv" ExportDir="/tmp"'
+ cgr-console 'cdrs_export CdrFormat="csv" ExportPath="/tmp"'
 
 
 **CGRateS** Usage
