@@ -116,7 +116,9 @@ func testTPRpcConn(t *testing.T) {
 func testTPImportTPFromFolderPath(t *testing.T) {
 	time.Sleep(time.Duration(1 * time.Second))
 	var reply string
-	if err := tpRPC.Call("ApierV1.ImportTariffPlanFromFolder", utils.AttrImportTPFromFolder{TPid: "TEST_TPID2", FolderPath: path.Join(tpDataDir, "tariffplans", "tutorial")}, &reply); err != nil {
+	if err := tpRPC.Call("ApierV1.ImportTariffPlanFromFolder",
+		utils.AttrImportTPFromFolder{TPid: "TEST_TPID2",
+			FolderPath: path.Join(tpDataDir, "tariffplans", "oldtutorial")}, &reply); err != nil {
 		t.Error("Got error on ApierV1.ImportTarrifPlanFromFolder: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling ApierV1.ImportTarrifPlanFromFolder got reply: ", reply)

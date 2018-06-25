@@ -1628,7 +1628,9 @@ func TestApierReloadScheduler2(t *testing.T) {
 
 func TestApierImportTPFromFolderPath(t *testing.T) {
 	var reply string
-	if err := rater.Call("ApierV1.ImportTariffPlanFromFolder", utils.AttrImportTPFromFolder{TPid: "TEST_TPID2", FolderPath: "/usr/share/cgrates/tariffplans/tutorial"}, &reply); err != nil {
+	if err := rater.Call("ApierV1.ImportTariffPlanFromFolder",
+		utils.AttrImportTPFromFolder{TPid: "TEST_TPID2",
+			FolderPath: "/usr/share/cgrates/tariffplans/oldtutorial"}, &reply); err != nil {
 		t.Error("Got error on ApierV1.ImportTarrifPlanFromFolder: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling ApierV1.ImportTarrifPlanFromFolder got reply: ", reply)
@@ -1637,7 +1639,8 @@ func TestApierImportTPFromFolderPath(t *testing.T) {
 
 func TestApierLoadTariffPlanFromStorDbDryRun(t *testing.T) {
 	var reply string
-	if err := rater.Call("ApierV1.LoadTariffPlanFromStorDb", AttrLoadTpFromStorDb{TPid: "TEST_TPID2", DryRun: true}, &reply); err != nil {
+	if err := rater.Call("ApierV1.LoadTariffPlanFromStorDb",
+		AttrLoadTpFromStorDb{TPid: "TEST_TPID2", DryRun: true}, &reply); err != nil {
 		t.Error("Got error on ApierV1.LoadTariffPlanFromStorDb: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling ApierV1.LoadTariffPlanFromStorDb got reply: ", reply)
@@ -1658,7 +1661,8 @@ func TestApierGetCacheStats2(t *testing.T) {
 
 func TestApierLoadTariffPlanFromStorDb(t *testing.T) {
 	var reply string
-	if err := rater.Call("ApierV1.LoadTariffPlanFromStorDb", AttrLoadTpFromStorDb{TPid: "TEST_TPID2"}, &reply); err != nil {
+	if err := rater.Call("ApierV1.LoadTariffPlanFromStorDb",
+		AttrLoadTpFromStorDb{TPid: "TEST_TPID2"}, &reply); err != nil {
 		t.Error("Got error on ApierV1.LoadTariffPlanFromStorDb: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling ApierV1.LoadTariffPlanFromStorDb got reply: ", reply)
