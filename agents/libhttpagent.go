@@ -22,7 +22,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 // newHADataProvider constructs a DataProvider
@@ -31,7 +33,15 @@ func newHADataProvider(dpType string,
 	switch dpType {
 	default:
 		return nil, fmt.Errorf("unsupported decoder type <%s>", dpType)
+	case utils.MetaUrl:
+		return newHTTPUrlDP(req)
 	}
+}
+
+// httpAgentReplyEncoder will encode  []*engine.NMElement
+// and write content to http writer
+type httpAgentReplyEncoder interface {
+	encode(*engine.NavigableMap) error
 }
 
 // newHAReplyEncoder constructs a httpAgentReqDecoder based on encoder type
@@ -43,8 +53,34 @@ func newHAReplyEncoder(encType string,
 	}
 }
 
-// httpAgentReplyEncoder will encode  []*engine.NMElement
-// and write content to http writer
-type httpAgentReplyEncoder interface {
-	encode(*engine.NavigableMap) error
+func newHTTPUrlDP(req *http.Request) (dP engine.DataProvider, err error) {
+	dP = &httpUrlDP{req: req}
+	return
+}
+
+// httpUrlDP implements engine.DataProvider, serving as url data decoder
+// decoded data is only searched once and cached
+type httpUrlDP struct {
+	req   *http.Request
+	cache engine.NavigableMap
+}
+
+// String is part of engine.DataProvider interface
+func (url *httpUrlDP) String() string {
+	return utils.ToJSON(url.cache.AsMapStringInterface())
+}
+
+// FieldAsInterface is part of engine.DataProvider interface
+func (url *httpUrlDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+	return
+}
+
+// FieldAsString is part of engine.DataProvider interface
+func (url *httpUrlDP) FieldAsString(fldPath []string) (data string, err error) {
+	return
+}
+
+// AsNavigableMap is part of engine.DataProvider interface
+func (url *httpUrlDP) AsNavigableMap([]*config.CfgCdrField) (nm *engine.NavigableMap, err error) {
+	return
 }
