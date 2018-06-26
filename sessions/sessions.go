@@ -1108,6 +1108,10 @@ func (smg *SMGeneric) BiRPCV1InitiateSession(clnt rpcclient.RpcClientConnection,
 		if err != rpcclient.ErrSessionNotFound {
 			err = utils.NewErrServerError(err)
 		}
+		return
+	}
+	if minMaxUsage == time.Duration(-1) {
+		*maxUsage = -1.0
 	} else {
 		*maxUsage = minMaxUsage.Seconds()
 	}
@@ -1122,6 +1126,7 @@ func (smg *SMGeneric) BiRPCV2InitiateSession(clnt rpcclient.RpcClientConnection,
 		if err != rpcclient.ErrSessionNotFound {
 			err = utils.NewErrServerError(err)
 		}
+		return
 	} else {
 		*maxUsage = minMaxUsage
 	}
@@ -1136,6 +1141,10 @@ func (smg *SMGeneric) BiRPCV1UpdateSession(clnt rpcclient.RpcClientConnection,
 		if err != rpcclient.ErrSessionNotFound {
 			err = utils.NewErrServerError(err)
 		}
+		return
+	}
+	if minMaxUsage == time.Duration(-1) {
+		*maxUsage = -1.0
 	} else {
 		*maxUsage = minMaxUsage.Seconds()
 	}
