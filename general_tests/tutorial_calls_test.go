@@ -594,6 +594,29 @@ func testCallSyncSessions(t *testing.T) {
 	} else if len(*reply) != 2 {
 		t.Errorf("expecting 2, received reply: %+v", utils.ToJSON(reply))
 	}
+	//check if resource was allocated for 2 calls(1001->1002;1001->1003)
+	var rs *engine.Resources
+	args := &utils.ArgRSv1ResourceUsage{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ResourceAllocation",
+			Event: map[string]interface{}{
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002"},
+		},
+		Units: 1,
+	}
+	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
+		t.Error(err)
+	} else if len(*rs) != 2 {
+		t.Errorf("Resources: %+v", utils.ToJSON(rs))
+	}
+	for _, r := range *rs {
+		if r.ID == "ResGroup1" && (len(r.Usages) != 2 || len(r.TTLIdx) != 2) {
+			t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))
+		}
+	}
 
 	time.Sleep(3 * time.Second)
 	//stop the FS
@@ -656,6 +679,19 @@ func testCallSyncSessions(t *testing.T) {
 		}
 	}
 
+	//check if resource was released
+	var rsAfter *engine.Resources
+	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rsAfter); err != nil {
+		t.Error(err)
+	} else if len(*rsAfter) != 2 {
+		t.Errorf("Resources: %+v", rsAfter)
+	}
+	for _, r := range *rsAfter {
+		if r.ID == "ResGroup1" &&
+			(len(r.Usages) != 0 || len(r.TTLIdx) != 0) {
+			t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))
+		}
+	}
 }
 
 func testCallStopPjsuaListener(t *testing.T) {
