@@ -54,7 +54,7 @@ func newHAReplyEncoder(encType string,
 }
 
 func newHTTPUrlDP(req *http.Request) (dP engine.DataProvider, err error) {
-	dP = &httpUrlDP{req: req}
+	dP = &httpUrlDP{req: req, cache: engine.NewNavigableMap(nil)}
 	return
 }
 
@@ -62,25 +62,43 @@ func newHTTPUrlDP(req *http.Request) (dP engine.DataProvider, err error) {
 // decoded data is only searched once and cached
 type httpUrlDP struct {
 	req   *http.Request
-	cache engine.NavigableMap
+	cache *engine.NavigableMap
 }
 
 // String is part of engine.DataProvider interface
-func (url *httpUrlDP) String() string {
-	return utils.ToJSON(url.cache.AsMapStringInterface())
+// when called, it will display the already parsed values out of cache
+func (hU *httpUrlDP) String() string {
+	return utils.ToJSON(hU.cache.AsMapStringInterface())
 }
 
 // FieldAsInterface is part of engine.DataProvider interface
-func (url *httpUrlDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+func (hU *httpUrlDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	if data, err = hU.cache.FieldAsInterface(fldPath); err == nil ||
+		err != utils.ErrNotFound { // item found in cache
+		return
+	}
+	err = nil // cancel previous err
+	data = hU.req.FormValue(fldPath[0])
+	hU.cache.Set(fldPath, data, false)
 	return
 }
 
 // FieldAsString is part of engine.DataProvider interface
-func (url *httpUrlDP) FieldAsString(fldPath []string) (data string, err error) {
+func (hU *httpUrlDP) FieldAsString(fldPath []string) (data string, err error) {
+	var valIface interface{}
+	valIface, err = hU.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	data, _ = utils.CastFieldIfToString(valIface)
 	return
 }
 
 // AsNavigableMap is part of engine.DataProvider interface
-func (url *httpUrlDP) AsNavigableMap([]*config.CfgCdrField) (nm *engine.NavigableMap, err error) {
-	return
+func (hU *httpUrlDP) AsNavigableMap([]*config.CfgCdrField) (
+	nm *engine.NavigableMap, err error) {
+	return nil, utils.ErrNotImplemented
 }
