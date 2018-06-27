@@ -44,6 +44,7 @@ type SMGSession struct {
 	Timezone   string
 	EventStart SMGenericEvent         // Event which started the session
 	CD         *engine.CallDescriptor // initial CD used for debits, updated on each debit
+	ResourceID string
 
 	EventCost     *engine.EventCost
 	ExtraDuration time.Duration // keeps the current duration debited on top of what heas been asked
