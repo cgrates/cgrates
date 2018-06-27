@@ -47,3 +47,13 @@ Host: api.cgrates.org
 		t.Errorf("received: <%s>", data)
 	}
 }
+
+/*
+<?xml version="1.0"?>
+<response status="success">
+<api_call>SampleAPIMethod</api_call>
+<SIM>
+<PublicNumber>497924804904</PublicNumber>
+</SIM>
+</response>
+*/

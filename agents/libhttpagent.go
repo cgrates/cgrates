@@ -38,21 +38,6 @@ func newHADataProvider(dpType string,
 	}
 }
 
-// httpAgentReplyEncoder will encode  []*engine.NMElement
-// and write content to http writer
-type httpAgentReplyEncoder interface {
-	encode(*engine.NavigableMap) error
-}
-
-// newHAReplyEncoder constructs a httpAgentReqDecoder based on encoder type
-func newHAReplyEncoder(encType string,
-	w http.ResponseWriter) (rE httpAgentReplyEncoder, err error) {
-	switch encType {
-	default:
-		return nil, fmt.Errorf("unsupported encoder type <%s>", encType)
-	}
-}
-
 func newHTTPUrlDP(req *http.Request) (dP engine.DataProvider, err error) {
 	dP = &httpUrlDP{req: req, cache: engine.NewNavigableMap(nil)}
 	return
@@ -101,4 +86,19 @@ func (hU *httpUrlDP) FieldAsString(fldPath []string) (data string, err error) {
 func (hU *httpUrlDP) AsNavigableMap([]*config.CfgCdrField) (
 	nm *engine.NavigableMap, err error) {
 	return nil, utils.ErrNotImplemented
+}
+
+// httpAgentReplyEncoder will encode  []*engine.NMElement
+// and write content to http writer
+type httpAgentReplyEncoder interface {
+	encode(*engine.NavigableMap) error
+}
+
+// newHAReplyEncoder constructs a httpAgentReqDecoder based on encoder type
+func newHAReplyEncoder(encType string,
+	w http.ResponseWriter) (rE httpAgentReplyEncoder, err error) {
+	switch encType {
+	default:
+		return nil, fmt.Errorf("unsupported encoder type <%s>", encType)
+	}
 }
