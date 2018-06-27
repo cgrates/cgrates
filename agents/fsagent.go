@@ -397,7 +397,7 @@ func (fsa *FSsessions) V1GetActiveSessionIDs(ignParam string,
 		for _, fsAChan := range aChans {
 			sIDs = append(sIDs, &sessions.SessionID{
 				OriginHost: fsa.conns[connId].cfg.Alias,
-				OriginID:   fsAChan["call_uuid"]},
+				OriginID:   fsAChan["uuid"]},
 			)
 		}
 	}
