@@ -1121,7 +1121,7 @@ func (smg *SMGeneric) BiRPCV2GetMaxUsage(clnt rpcclient.RpcClientConnection,
 func (smg *SMGeneric) BiRPCV1InitiateSession(clnt rpcclient.RpcClientConnection,
 	ev SMGenericEvent, maxUsage *float64) (err error) {
 	var minMaxUsage time.Duration
-	if minMaxUsage, err = smg.InitiateSession(ev, clnt, ev.GetOriginID(utils.META_DEFAULT)); err != nil {
+	if minMaxUsage, err = smg.InitiateSession(ev, clnt, ""); err != nil {
 		if err != rpcclient.ErrSessionNotFound {
 			err = utils.NewErrServerError(err)
 		}
@@ -1139,7 +1139,7 @@ func (smg *SMGeneric) BiRPCV1InitiateSession(clnt rpcclient.RpcClientConnection,
 func (smg *SMGeneric) BiRPCV2InitiateSession(clnt rpcclient.RpcClientConnection,
 	ev SMGenericEvent, maxUsage *time.Duration) (err error) {
 	var minMaxUsage time.Duration
-	if minMaxUsage, err = smg.InitiateSession(ev, clnt, ev.GetOriginID(utils.META_DEFAULT)); err != nil {
+	if minMaxUsage, err = smg.InitiateSession(ev, clnt, ""); err != nil {
 		if err != rpcclient.ErrSessionNotFound {
 			err = utils.NewErrServerError(err)
 		}
@@ -1154,7 +1154,7 @@ func (smg *SMGeneric) BiRPCV2InitiateSession(clnt rpcclient.RpcClientConnection,
 func (smg *SMGeneric) BiRPCV1UpdateSession(clnt rpcclient.RpcClientConnection,
 	ev SMGenericEvent, maxUsage *float64) (err error) {
 	var minMaxUsage time.Duration
-	if minMaxUsage, err = smg.UpdateSession(ev, clnt, ev.GetOriginID(utils.META_DEFAULT)); err != nil {
+	if minMaxUsage, err = smg.UpdateSession(ev, clnt, ""); err != nil {
 		if err != rpcclient.ErrSessionNotFound {
 			err = utils.NewErrServerError(err)
 		}
@@ -1172,7 +1172,7 @@ func (smg *SMGeneric) BiRPCV1UpdateSession(clnt rpcclient.RpcClientConnection,
 func (smg *SMGeneric) BiRPCV2UpdateSession(clnt rpcclient.RpcClientConnection,
 	ev SMGenericEvent, maxUsage *time.Duration) (err error) {
 	var minMaxUsage time.Duration
-	if minMaxUsage, err = smg.UpdateSession(ev, clnt, ev.GetOriginID(utils.META_DEFAULT)); err != nil {
+	if minMaxUsage, err = smg.UpdateSession(ev, clnt, ""); err != nil {
 		if err != rpcclient.ErrSessionNotFound {
 			err = utils.NewErrServerError(err)
 		}
@@ -1185,7 +1185,7 @@ func (smg *SMGeneric) BiRPCV2UpdateSession(clnt rpcclient.RpcClientConnection,
 // Called on session end, should stop debit loop
 func (smg *SMGeneric) BiRPCV1TerminateSession(clnt rpcclient.RpcClientConnection,
 	ev SMGenericEvent, reply *string) (err error) {
-	if err = smg.TerminateSession(ev, clnt, ev.GetOriginID(utils.META_DEFAULT)); err != nil {
+	if err = smg.TerminateSession(ev, clnt, ""); err != nil {
 		if err != rpcclient.ErrSessionNotFound {
 			err = utils.NewErrServerError(err)
 		}
@@ -1694,9 +1694,13 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		if smg.rals == nil {
 			return utils.NewErrNotConnected(utils.RALService)
 		}
-		originID, err := args.CGREvent.FieldAsString(utils.OriginID)
-		if err != nil {
-			return utils.NewErrMandatoryIeMissing(utils.OriginID)
+		var err error
+		originID := ""
+		if args.AllocateResources {
+			originID, err = args.CGREvent.FieldAsString(utils.OriginID)
+			if err != nil {
+				return utils.NewErrMandatoryIeMissing(utils.OriginID)
+			}
 		}
 		if maxUsage, err := smg.InitiateSession(args.CGREvent.Event, clnt, originID); err != nil {
 			return utils.NewErrRALs(err)
