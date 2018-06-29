@@ -12,7 +12,7 @@ imports:
 - name: github.com/cgrates/aringo
   version: 47cdb110c5ff42bddf2b801dc5ae8ceb15d2d602
 - name: github.com/cgrates/fsock
-  version: 5b60f0d72ff4f8885289bffab55435e5b8adfb55
+  version: bcbd5e75c07dddb12ac86f1f861f2bdddc1d4596
 - name: github.com/cgrates/kamevapi
   version: 0e0d0379606fd8f12b53c6da6aeb28544f7bfa37
 - name: github.com/cgrates/ltcache
