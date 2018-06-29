@@ -19,8 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/xml"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -191,13 +193,16 @@ func (nM *NavigableMap) Merge(nM2 *NavigableMap) {
 	}
 }
 
-/*
 // MarshalXML implements xml.Marshaler
-func (nM *NavigableMap) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+func (nM *NavigableMap) MarshalXML(e *xml.Encoder, start xml.StartElement) (err error) {
 	tokens := []xml.Token{start}
 	for _, itm := range nM.Items() {
+		strVal, canCast := utils.CastFieldIfToString(itm.Data)
+		if !canCast {
+			return fmt.Errorf("cannot cast field: %s to string", utils.ToJSON(itm.Data))
+		}
 		t := xml.StartElement{Name: xml.Name{"", strings.Join(itm.Path, ">")}}
-		tokens = append(tokens, t, xml.CharData(value), xml.EndElement{t.Name})
+		tokens = append(tokens, t, xml.CharData([]byte(strVal)), xml.EndElement{t.Name})
 	}
 
 	tokens = append(tokens, xml.EndElement{start.Name})
@@ -210,11 +215,10 @@ func (nM *NavigableMap) MarshalXML(e *xml.Encoder, start xml.StartElement) error
 	}
 
 	// flush to ensure tokens are written
-	err := e.Flush()
+	return e.Flush()
 	if err != nil {
 		return err
 	}
 
 	return nil
 }
-*/
