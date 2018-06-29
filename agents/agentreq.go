@@ -116,8 +116,9 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.CfgCdrField) (
 		if err != nil {
 			return nil, err
 		}
-		nM.Set(strings.Split(tplFld.FieldId,
-			utils.HIERARCHY_SEP), out, true)
+		nM.Set(
+			&engine.NMItem{Path: strings.Split(tplFld.FieldId,
+				utils.HIERARCHY_SEP), Data: out}, true)
 	}
 	return
 }

@@ -148,32 +148,36 @@ func TestNavMapAdd(t *testing.T) {
 	nM := NewNavigableMap(nil)
 	path := []string{"FistLever2", "SecondLevel2", "Field2"}
 	data := "Value2"
-	nM.Set(path, data, true)
+	nM.Set(&NMItem{Path: path, Data: data}, true)
 	path = []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"}
 	data = "Val1"
-	nM.Set(path, data, true)
+	nM.Set(&NMItem{Path: path, Data: data}, true)
 	path = []string{"FistLever2", "Field3"}
 	data = "Value3"
-	nM.Set(path, data, true)
+	nM.Set(&NMItem{Path: path, Data: data}, true)
 	path = []string{"Field4"}
 	data = "Val4"
-	nM.Set(path, data, true)
+	nM.Set(&NMItem{Path: path, Data: data}, true)
 	eNavMap := NavigableMap{
 		data: map[string]interface{}{
 			"FirstLevel": map[string]interface{}{
 				"SecondLevel": map[string]interface{}{
 					"ThirdLevel": map[string]interface{}{
-						"Fld1": "Val1",
+						"Fld1": &NMItem{Path: []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
+							Data: "Val1"},
 					},
 				},
 			},
 			"FistLever2": map[string]interface{}{
 				"SecondLevel2": map[string]interface{}{
-					"Field2": "Value2",
+					"Field2": &NMItem{Path: []string{"FistLever2", "SecondLevel2", "Field2"},
+						Data: "Value2"},
 				},
-				"Field3": "Value3",
+				"Field3": &NMItem{Path: []string{"FistLever2", "Field3"},
+					Data: "Value3"},
 			},
-			"Field4": "Val4",
+			"Field4": &NMItem{Path: []string{"Field4"},
+				Data: "Val4"},
 		},
 	}
 	if !reflect.DeepEqual(nM.data, eNavMap.data) {
@@ -190,38 +194,42 @@ func TestNavMapAdd2(t *testing.T) {
 	nM := NewNavigableMap(nil)
 	path := []string{"FistLever2", "SecondLevel2", "Field2"}
 	data := 123
-	nM.Set(path, data, true)
+	nM.Set(&NMItem{Path: path, Data: data}, true)
 	path = []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"}
 	data1 := 123.123
-	nM.Set(path, data1, true)
+	nM.Set(&NMItem{Path: path, Data: data1}, true)
 	path = []string{"FistLever2", "Field3"}
 	data2 := "Value3"
-	nM.Set(path, data2, true)
+	nM.Set(&NMItem{Path: path, Data: data2}, true)
 	path = []string{"Field4"}
 	data3 := &testStruct{
 		Item1: "Ten",
 		Item2: 10,
 	}
-	nM.Set(path, data3, true)
+	nM.Set(&NMItem{Path: path, Data: data3}, true)
 	eNavMap := NavigableMap{
 		data: map[string]interface{}{
 			"FirstLevel": map[string]interface{}{
 				"SecondLevel": map[string]interface{}{
 					"ThirdLevel": map[string]interface{}{
-						"Fld1": 123.123,
+						"Fld1": &NMItem{Path: []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
+							Data: 123.123},
 					},
 				},
 			},
 			"FistLever2": map[string]interface{}{
 				"SecondLevel2": map[string]interface{}{
-					"Field2": 123,
+					"Field2": &NMItem{Path: []string{"FistLever2", "SecondLevel2", "Field2"},
+						Data: 123},
 				},
-				"Field3": "Value3",
+				"Field3": &NMItem{Path: []string{"FistLever2", "Field3"},
+					Data: "Value3"},
 			},
-			"Field4": &testStruct{
-				Item1: "Ten",
-				Item2: 10,
-			},
+			"Field4": &NMItem{Path: []string{"Field4"},
+				Data: &testStruct{
+					Item1: "Ten",
+					Item2: 10,
+				}},
 		},
 	}
 	if !reflect.DeepEqual(nM.data, eNavMap.data) {

@@ -211,7 +211,8 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 		var rplyCDRs string
 		if err = ha.sessionS.Call(utils.SessionSv1ProcessCDR,
 			*cgrEv, &rplyCDRs); err != nil {
-			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false)
+			agReq.CGRReply.Set(
+				&engine.NMItem{Path: []string{utils.Error}, Data: err.Error()}, false)
 		}
 	}
 	if nM, err := agReq.AsNavigableMap(reqProcessor.ReplyFields); err != nil {

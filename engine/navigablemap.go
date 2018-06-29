@@ -39,6 +39,13 @@ func NewNavigableMap(data map[string]interface{}) *NavigableMap {
 	return &NavigableMap{data: data}
 }
 
+// NMItem is an item in the NavigableMap
+type NMItem struct {
+	Path   []string            // path in map
+	Data   interface{}         // value of the element
+	Config *config.CfgCdrField // so we can store additional configuration
+}
+
 // NavigableMap is a map who's values can be navigated via path
 // data can be retrieved as ordered
 // NavigableMap is not thread safe due to performance demands, could come back if needed
@@ -48,11 +55,11 @@ type NavigableMap struct {
 }
 
 // Add will add items into NavigableMap populating also order
-func (nM *NavigableMap) Set(path []string, data interface{}, ordered bool) {
+func (nM *NavigableMap) Set(itm *NMItem, ordered bool) {
 	mp := nM.data
-	for i, spath := range path {
-		if i == len(path)-1 { // last path
-			mp[spath] = data
+	for i, spath := range itm.Path {
+		if i == len(itm.Path)-1 { // last path
+			mp[spath] = itm
 			return
 		}
 		if _, has := mp[spath]; !has {
@@ -61,7 +68,7 @@ func (nM *NavigableMap) Set(path []string, data interface{}, ordered bool) {
 		mp = mp[spath].(map[string]interface{}) // so we can check further down
 	}
 	if ordered {
-		nM.order = append(nM.order, path)
+		nM.order = append(nM.order, itm.Path)
 	}
 }
 
@@ -76,12 +83,14 @@ func (nM *NavigableMap) FieldAsInterface(fldPath []string) (fldVal interface{}, 
 	var canCast bool
 	for i, spath := range fldPath {
 		if i == lenPath-1 { // lastElement
-			var has bool
-			fldVal, has = lastMp[spath]
+			itmIface, has := lastMp[spath]
 			if !has {
 				return nil, utils.ErrNotFound
 			}
-			return
+			if itm, cast := itmIface.(*NMItem); cast {
+				return itm.Data, nil
+			}
+			return itmIface, nil
 		} else {
 			elmnt, has := lastMp[spath]
 			if !has {
@@ -128,21 +137,22 @@ func (nM *NavigableMap) AsMapStringInterface() map[string]interface{} {
 	return nM.data
 }
 
-type NMItem struct {
-	Path []string    // path in map
-	Data interface{} // value of the element
-}
-
 // indexMapElements will recursively go through map and index the element paths into elmns
 func indexMapElements(mp map[string]interface{}, path []string, elms *[]*NMItem) {
 	for k, v := range mp {
 		vPath := append(path, k)
 		if mpIface, isMap := v.(map[string]interface{}); isMap {
 			indexMapElements(mpIface, vPath, elms)
-		} else {
-			elmsOut := append(*elms, &NMItem{vPath, v})
-			*elms = elmsOut
+			continue
 		}
+		var elmsOut []*NMItem
+		if nMItem, isNMItem := v.(*NMItem); isNMItem {
+			elmsOut = append(*elms, nMItem)
+		} else {
+			elmsOut = append(*elms, &NMItem{Path: vPath, Data: v})
+		}
+
+		*elms = elmsOut
 	}
 }
 
@@ -168,6 +178,7 @@ func (nM *NavigableMap) AsNavigableMap(tpl []*config.CfgCdrField) (oNM *Navigabl
 	return nil, utils.ErrNotImplemented
 }
 
+// Merge will update nM with values from a second one
 func (nM *NavigableMap) Merge(nM2 *NavigableMap) {
 	if nM2 == nil {
 		return
@@ -179,3 +190,31 @@ func (nM *NavigableMap) Merge(nM2 *NavigableMap) {
 		nM.order = append(nM.order, nM2.order...)
 	}
 }
+
+/*
+// MarshalXML implements xml.Marshaler
+func (nM *NavigableMap) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	tokens := []xml.Token{start}
+	for _, itm := range nM.Items() {
+		t := xml.StartElement{Name: xml.Name{"", strings.Join(itm.Path, ">")}}
+		tokens = append(tokens, t, xml.CharData(value), xml.EndElement{t.Name})
+	}
+
+	tokens = append(tokens, xml.EndElement{start.Name})
+
+	for _, t := range tokens {
+		err := e.EncodeToken(t)
+		if err != nil {
+			return err
+		}
+	}
+
+	// flush to ensure tokens are written
+	err := e.Flush()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+*/
