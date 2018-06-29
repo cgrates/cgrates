@@ -659,11 +659,11 @@ const CGRATES_CFG_JSON = `
 "dispatcher":{
 	"enabled": false,						// starts DispatcherS service: <true|false>.
 	"rals_conns": [],						// address where to reach the RALs for dispatcherS  <*internal>		
-	"resources_conns": [],					// address where to reach the ResourceS <""|*internal|127.0.0.1:2013>
-	"thresholds_conns": [],					// address where to reach the ThresholdS <""|*internal|127.0.0.1:2013>
-	"stats_conns": [],						// address where to reach the StatS <""|*internal|127.0.0.1:2013>
-	"suppliers_conns": [],					// address where to reach the SupplierS <""|*internal|127.0.0.1:2013>
-	"attributes_conns": [],					// address where to reach the AttributeS <""|*internal|127.0.0.1:2013>
+	"resources_conns": [],					// address where to reach the ResourceS <""|127.0.0.1:2013>
+	"thresholds_conns": [],					// address where to reach the ThresholdS <""|127.0.0.1:2013>
+	"stats_conns": [],						// address where to reach the StatS <""|127.0.0.1:2013>
+	"suppliers_conns": [],					// address where to reach the SupplierS <""|127.0.0.1:2013>
+	"attributes_conns": [],					// address where to reach the AttributeS <""|127.0.0.1:2013>
 	"sessions_conns": [],					// connection towards SessionService
 	"dispatching_strategy":"*first",		// strategy for dispatching <*first|*random|*next|*broadcast>
 },
