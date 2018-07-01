@@ -19,8 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package guardian
 
 import (
+	"fmt"
 	"sync"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 // global package variable
@@ -112,6 +115,7 @@ func (gl *GuardianLocker) GuardIDs(timeout time.Duration, lockIDs ...string) {
 	if timeout != 0 {
 		go func(timeout time.Duration, lockIDs ...string) {
 			time.Sleep(timeout)
+			utils.Logger.Warning(fmt.Sprintf("<Guardian> WARNING: force timing-out locks: %+v", lockIDs))
 			gl.UnguardIDs(lockIDs...)
 		}(timeout, lockIDs...)
 	}
