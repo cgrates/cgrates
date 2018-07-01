@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package utils
+package engine
 
 import (
 	"bytes"
@@ -32,6 +32,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/guardian"
+	"github.com/cgrates/cgrates/utils"
 	"github.com/streadway/amqp"
 )
 
@@ -63,69 +64,6 @@ func HttpJsonPost(url string, skipTlsVerify bool, content []byte) ([]byte, error
 	return respBody, nil
 }
 
-// NewFallbackFileNameFronString will revert the meta information in the fallback file name into original data
-func NewFallbackFileNameFronString(fileName string) (ffn *FallbackFileName, err error) {
-	ffn = new(FallbackFileName)
-	moduleIdx := strings.Index(fileName, HandlerArgSep)
-	ffn.Module = fileName[:moduleIdx]
-	var supportedModule bool
-	for _, prfx := range []string{ActionsPoster, CDRPoster} {
-		if strings.HasPrefix(ffn.Module, prfx) {
-			supportedModule = true
-			break
-		}
-	}
-	if !supportedModule {
-		return nil, fmt.Errorf("unsupported module: %s", ffn.Module)
-	}
-	fileNameWithoutModule := fileName[moduleIdx+1:]
-	for _, trspt := range []string{MetaHTTPjsonCDR, MetaHTTPjsonMap, MetaHTTPjson, META_HTTP_POST, MetaAMQPjsonCDR, MetaAMQPjsonMap} {
-		if strings.HasPrefix(fileNameWithoutModule, trspt) {
-			ffn.Transport = trspt
-			break
-		}
-	}
-	if ffn.Transport == "" {
-		return nil, fmt.Errorf("unsupported transport in fallback file path: %s", fileName)
-	}
-	fileNameWithoutTransport := fileNameWithoutModule[len(ffn.Transport)+1:]
-	reqIDidx := strings.LastIndex(fileNameWithoutTransport, HandlerArgSep)
-	if reqIDidx == -1 {
-		return nil, fmt.Errorf("cannot find request ID in fallback file path: %s", fileName)
-	}
-	if ffn.Address, err = url.QueryUnescape(fileNameWithoutTransport[:reqIDidx]); err != nil {
-		return nil, err
-	}
-	fileNameWithoutAddress := fileNameWithoutTransport[reqIDidx+1:]
-	for _, suffix := range []string{TxtSuffix, JSNSuffix, FormSuffix} {
-		if strings.HasSuffix(fileNameWithoutAddress, suffix) {
-			ffn.FileSuffix = suffix
-			break
-		}
-	}
-	if ffn.FileSuffix == "" {
-		return nil, fmt.Errorf("unsupported suffix in fallback file path: %s", fileName)
-	}
-	ffn.RequestID = fileNameWithoutAddress[:len(fileNameWithoutAddress)-len(ffn.FileSuffix)]
-	return
-}
-
-// FallbackFileName is the struct defining the name of a file where CGRateS will dump data which fails to be sent remotely
-type FallbackFileName struct {
-	Module     string // name of the module writing the file
-	Transport  string // transport used to send data remotely
-	Address    string // remote address where data should have been sent
-	RequestID  string // unique identifier of the request which should make files unique
-	FileSuffix string // informative file termination suffix
-}
-
-func (ffn *FallbackFileName) AsString() string {
-	if ffn.FileSuffix == "" { // Autopopulate FileSuffix based on the transport used
-		ffn.FileSuffix = CDREFileSuffixes[ffn.Transport]
-	}
-	return fmt.Sprintf("%s%s%s%s%s%s%s%s", ffn.Module, HandlerArgSep, ffn.Transport, HandlerArgSep, url.QueryEscape(ffn.Address), HandlerArgSep, ffn.RequestID, ffn.FileSuffix)
-}
-
 func NewHTTPPoster(skipTLSVerify bool, replyTimeout time.Duration) *HTTPPoster {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipTLSVerify},
@@ -140,49 +78,49 @@ type HTTPPoster struct {
 // Post with built-in failover
 // Returns also reference towards client so we can close it's connections when done
 func (poster *HTTPPoster) Post(addr string, contentType string, content interface{}, attempts int, fallbackFilePath string) (respBody []byte, err error) {
-	if !IsSliceMember([]string{CONTENT_JSON, CONTENT_FORM, CONTENT_TEXT}, contentType) {
+	if !utils.IsSliceMember([]string{utils.CONTENT_JSON, utils.CONTENT_FORM, utils.CONTENT_TEXT}, contentType) {
 		return nil, fmt.Errorf("unsupported ContentType: %s", contentType)
 	}
 	var body []byte        // Used to write in file and send over http
 	var urlVals url.Values // Used when posting form
-	if IsSliceMember([]string{CONTENT_JSON, CONTENT_TEXT}, contentType) {
+	if utils.IsSliceMember([]string{utils.CONTENT_JSON, utils.CONTENT_TEXT}, contentType) {
 		body = content.([]byte)
-	} else if contentType == CONTENT_FORM {
+	} else if contentType == utils.CONTENT_FORM {
 		urlVals = content.(url.Values)
 		body = []byte(urlVals.Encode())
 	}
-	fib := Fib()
+	fib := utils.Fib()
 	bodyType := "application/x-www-form-urlencoded"
-	if contentType == CONTENT_JSON {
+	if contentType == utils.CONTENT_JSON {
 		bodyType = "application/json"
 	}
 	for i := 0; i < attempts; i++ {
 		var resp *http.Response
-		if IsSliceMember([]string{CONTENT_JSON, CONTENT_TEXT}, contentType) {
+		if utils.IsSliceMember([]string{utils.CONTENT_JSON, utils.CONTENT_TEXT}, contentType) {
 			resp, err = poster.httpClient.Post(addr, bodyType, bytes.NewBuffer(body))
-		} else if contentType == CONTENT_FORM {
+		} else if contentType == utils.CONTENT_FORM {
 			resp, err = poster.httpClient.PostForm(addr, urlVals)
 		}
 		if err != nil {
-			Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, error: <%s>", addr, err.Error()))
+			utils.Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, error: <%s>", addr, err.Error()))
 			time.Sleep(time.Duration(fib()) * time.Second)
 			continue
 		}
 		defer resp.Body.Close()
 		respBody, err = ioutil.ReadAll(resp.Body)
 		if err != nil {
-			Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, error: <%s>", addr, err.Error()))
+			utils.Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, error: <%s>", addr, err.Error()))
 			time.Sleep(time.Duration(fib()) * time.Second)
 			continue
 		}
 		if resp.StatusCode > 299 {
-			Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, unexpected status code received: <%d>", addr, resp.StatusCode))
+			utils.Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, unexpected status code received: <%d>", addr, resp.StatusCode))
 			time.Sleep(time.Duration(fib()) * time.Second)
 			continue
 		}
 		return respBody, nil
 	}
-	if fallbackFilePath != META_NONE {
+	if fallbackFilePath != utils.META_NONE {
 		// If we got that far, post was not possible, write it on disk
 		_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 			fileOut, err := os.Create(fallbackFilePath)
@@ -194,7 +132,7 @@ func (poster *HTTPPoster) Post(addr string, contentType string, content interfac
 				return nil, err
 			}
 			return nil, nil
-		}, time.Duration(2*time.Second), FileLockPrefix+fallbackFilePath)
+		}, time.Duration(2*time.Second), utils.FileLockPrefix+fallbackFilePath)
 	}
 	return
 }
@@ -250,7 +188,7 @@ type AMQPPoster struct {
 // the optional chn will permits channel caching
 func (pstr *AMQPPoster) Post(chn *amqp.Channel, contentType string, content []byte, fallbackFileName string) (*amqp.Channel, error) {
 	var err error
-	fib := Fib()
+	fib := utils.Fib()
 	if chn == nil {
 		for i := 0; i < pstr.attempts; i++ {
 			if chn, err = pstr.NewPostChannel(); err == nil {
@@ -258,7 +196,7 @@ func (pstr *AMQPPoster) Post(chn *amqp.Channel, contentType string, content []by
 			}
 			time.Sleep(time.Duration(fib()) * time.Second)
 		}
-		if err != nil && fallbackFileName != META_NONE {
+		if err != nil && fallbackFileName != utils.META_NONE {
 			err = pstr.writeToFile(fallbackFileName, content)
 			return nil, err
 		}
@@ -278,7 +216,7 @@ func (pstr *AMQPPoster) Post(chn *amqp.Channel, contentType string, content []by
 		}
 		time.Sleep(time.Duration(fib()) * time.Second)
 	}
-	if err != nil && fallbackFileName != META_NONE {
+	if err != nil && fallbackFileName != utils.META_NONE {
 		err = pstr.writeToFile(fallbackFileName, content)
 		return nil, err
 	}
@@ -303,7 +241,7 @@ func (pstr *AMQPPoster) NewPostChannel() (postChan *amqp.Channel, err error) {
 			pstr.conn = conn
 			go func() { // monitor connection errors so we can restart
 				if err := <-pstr.conn.NotifyClose(make(chan *amqp.Error)); err != nil {
-					Logger.Err(fmt.Sprintf("Connection error received: %s", err.Error()))
+					utils.Logger.Err(fmt.Sprintf("Connection error received: %s", err.Error()))
 					pstr.Close()
 				}
 			}()
@@ -333,6 +271,6 @@ func (pstr *AMQPPoster) writeToFile(fileName string, content []byte) (err error)
 			return nil, err
 		}
 		return nil, nil
-	}, time.Duration(2*time.Second), FileLockPrefix+fallbackFilePath)
+	}, time.Duration(2*time.Second), utils.FileLockPrefix+fallbackFilePath)
 	return
 }

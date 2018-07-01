@@ -51,7 +51,7 @@ type ApierV1 struct {
 	Users       rpcclient.RpcClientConnection
 	CDRs        rpcclient.RpcClientConnection // FixMe: populate it from cgr-engine
 	ServManager *servmanager.ServiceManager   // Need to have them capitalize so we can export in V2
-	HTTPPoster  *utils.HTTPPoster
+	HTTPPoster  *engine.HTTPPoster
 }
 
 func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) error {
@@ -2106,12 +2106,12 @@ func (v1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string) (
 		}
 		switch ffn.Transport {
 		case utils.MetaHTTPjsonCDR, utils.MetaHTTPjsonMap, utils.MetaHTTPjson, utils.META_HTTP_POST:
-			_, err = utils.NewHTTPPoster(v1.Config.HttpSkipTlsVerify,
+			_, err = engine.NewHTTPPoster(v1.Config.HttpSkipTlsVerify,
 				v1.Config.ReplyTimeout).Post(ffn.Address, utils.PosterTransportContentTypes[ffn.Transport], fileContent,
 				v1.Config.PosterAttempts, failoverPath)
 		case utils.MetaAMQPjsonCDR, utils.MetaAMQPjsonMap:
-			var amqpPoster *utils.AMQPPoster
-			amqpPoster, err = utils.AMQPPostersCache.GetAMQPPoster(ffn.Address, v1.Config.PosterAttempts, failedReqsOutDir)
+			var amqpPoster *engine.AMQPPoster
+			amqpPoster, err = engine.AMQPPostersCache.GetAMQPPoster(ffn.Address, v1.Config.PosterAttempts, failedReqsOutDir)
 			if err == nil { // error will be checked bellow
 				var chn *amqp.Channel
 				chn, err = amqpPoster.Post(

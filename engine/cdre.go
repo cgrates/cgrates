@@ -52,7 +52,7 @@ const (
 
 func NewCDRExporter(cdrs []*CDR, exportTemplate *config.CdreConfig, exportFormat, exportPath, fallbackPath, exportID string,
 	synchronous bool, attempts int, fieldSeparator rune, usageMultiplyFactor utils.FieldMultiplyFactor,
-	costMultiplyFactor float64, roundingDecimals int, httpSkipTlsCheck bool, httpPoster *utils.HTTPPoster) (*CDRExporter, error) {
+	costMultiplyFactor float64, roundingDecimals int, httpSkipTlsCheck bool, httpPoster *HTTPPoster) (*CDRExporter, error) {
 	if len(cdrs) == 0 { // Nothing to export
 		return nil, nil
 	}
@@ -91,7 +91,7 @@ type CDRExporter struct {
 	costMultiplyFactor  float64
 	roundingDecimals    int
 	httpSkipTlsCheck    bool
-	httpPoster          *utils.HTTPPoster
+	httpPoster          *HTTPPoster
 
 	header, trailer []string   // Header and Trailer fields
 	content         [][]string // Rows of cdr fields
@@ -250,8 +250,8 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 	case utils.MetaHTTPjsonCDR, utils.MetaHTTPjsonMap, utils.MetaHTTPjson, utils.META_HTTP_POST:
 		_, err = cdre.httpPoster.Post(cdre.exportPath, utils.PosterTransportContentTypes[cdre.exportFormat], body, cdre.attempts, fallbackPath)
 	case utils.MetaAMQPjsonCDR, utils.MetaAMQPjsonMap:
-		var amqpPoster *utils.AMQPPoster
-		amqpPoster, err = utils.AMQPPostersCache.GetAMQPPoster(cdre.exportPath, cdre.attempts, cdre.fallbackPath)
+		var amqpPoster *AMQPPoster
+		amqpPoster, err = AMQPPostersCache.GetAMQPPoster(cdre.exportPath, cdre.attempts, cdre.fallbackPath)
 		if err == nil { // error will be checked bellow
 			var chn *amqp.Channel
 			chn, err = amqpPoster.Post(

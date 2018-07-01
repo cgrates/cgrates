@@ -295,36 +295,38 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	transactionID := utils.GenUUID()
 	//ThresholdProfile Indexes
 	thdsIndexers, err := self.computeThresholdIndexes(args.Tenant, args.ThresholdIDs, transactionID)
-	if err != nil {
+	if err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
 	//StatQueueProfile Indexes
 	sqpIndexers, err := self.computeStatIndexes(args.Tenant, args.StatIDs, transactionID)
-	if err != nil {
+	if err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
 	//ResourceProfile Indexes
 	rsIndexes, err := self.computeResourceIndexes(args.Tenant, args.ResourceIDs, transactionID)
-	if err != nil {
+	if err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
 	//SupplierProfile Indexes
 	sppIndexes, err := self.computeSupplierIndexes(args.Tenant, args.SupplierIDs, transactionID)
-	if err != nil {
+	if err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
 	//AttributeProfile Indexes
 	attrIndexes, err := self.computeAttributeIndexes(args.Tenant, args.AttributeIDs, transactionID)
-	if err != nil {
+	if err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
 	//Now we move from tmpKey to the right key for each type
 	//ThresholdProfile Indexes
 	if thdsIndexers != nil {
 		if err := thdsIndexers.StoreIndexes(true, transactionID); err != nil {
-			for _, id := range *args.ThresholdIDs {
-				if err := thdsIndexers.RemoveItemFromIndex(id); err != nil {
-					return err
+			if args.ThresholdIDs != nil {
+				for _, id := range *args.ThresholdIDs {
+					if err := thdsIndexers.RemoveItemFromIndex(id); err != nil {
+						return err
+					}
 				}
 			}
 			return err

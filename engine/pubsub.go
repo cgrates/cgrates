@@ -64,7 +64,7 @@ func NewPubSub(dm *DataManager, ttlVerify bool) (*PubSub, error) {
 	ps := &PubSub{
 		ttlVerify:   ttlVerify,
 		subscribers: make(map[string]*SubscriberData),
-		pubFunc:     utils.HttpJsonPost,
+		pubFunc:     HttpJsonPost,
 		mux:         &sync.Mutex{},
 		dm:          dm,
 	}

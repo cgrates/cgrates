@@ -519,7 +519,7 @@ func (cdr *CDR) formatField(cfgFld *config.CfgCdrField, httpSkipTlsCheck bool,
 		}
 		if len(httpAddr) == 0 {
 			err = fmt.Errorf("Empty http address for field %s type %s", cfgFld.Tag, cfgFld.Type)
-		} else if outValByte, err = utils.HttpJsonPost(httpAddr, httpSkipTlsCheck, jsn); err == nil {
+		} else if outValByte, err = HttpJsonPost(httpAddr, httpSkipTlsCheck, jsn); err == nil {
 			outVal = string(outValByte)
 			if len(outVal) == 0 && cfgFld.Mandatory {
 				err = fmt.Errorf("Empty result for http_post field: %s", cfgFld.Tag)

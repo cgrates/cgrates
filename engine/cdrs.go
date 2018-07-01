@@ -97,7 +97,7 @@ func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, r
 	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, dm: dm,
 		rals: rater, pubsub: pubsub, users: users, aliases: aliases,
 		cdrstats: cdrstats, stats: stats, thdS: thdS, guard: guardian.Guardian,
-		httpPoster: utils.NewHTTPPoster(cgrCfg.HttpSkipTlsVerify, cgrCfg.ReplyTimeout)}, nil
+		httpPoster: NewHTTPPoster(cgrCfg.HttpSkipTlsVerify, cgrCfg.ReplyTimeout)}, nil
 }
 
 type CdrServer struct {
@@ -114,7 +114,7 @@ type CdrServer struct {
 	stats         rpcclient.RpcClientConnection
 	guard         *guardian.GuardianLocker
 	responseCache *utils.ResponseCache
-	httpPoster    *utils.HTTPPoster // used for replication
+	httpPoster    *HTTPPoster // used for replication
 }
 
 func (self *CdrServer) Timezone() string {

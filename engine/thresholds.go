@@ -308,7 +308,6 @@ func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (thresholdsIDs 
 					fmt.Sprintf("<ThresholdService> failed removing non-recurrent threshold: %s, error: %s",
 						t.TenantID(), err.Error()))
 				withErrors = true
-
 			}
 			continue
 		}
@@ -325,8 +324,6 @@ func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (thresholdsIDs 
 	}
 	if len(tIDs) != 0 {
 		thresholdsIDs = append(thresholdsIDs, tIDs...)
-	} else {
-		thresholdsIDs = []string{}
 	}
 	if withErrors {
 		err = utils.ErrPartiallyExecuted

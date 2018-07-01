@@ -510,7 +510,7 @@ func callUrl(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) er
 	ffn := &utils.FallbackFileName{Module: fmt.Sprintf("%s>%s", utils.ActionsPoster, a.ActionType),
 		Transport: utils.MetaHTTPjson, Address: a.ExtraParameters,
 		RequestID: utils.GenUUID(), FileSuffix: utils.JSNSuffix}
-	_, err = utils.NewHTTPPoster(config.CgrConfig().HttpSkipTlsVerify,
+	_, err = NewHTTPPoster(config.CgrConfig().HttpSkipTlsVerify,
 		config.CgrConfig().ReplyTimeout).Post(a.ExtraParameters, utils.CONTENT_JSON, jsn,
 		config.CgrConfig().PosterAttempts, path.Join(cfg.FailedPostsDir, ffn.AsString()))
 	return err
@@ -533,7 +533,7 @@ func callUrlAsync(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Action
 	ffn := &utils.FallbackFileName{Module: fmt.Sprintf("%s>%s", utils.ActionsPoster, a.ActionType),
 		Transport: utils.MetaHTTPjson, Address: a.ExtraParameters,
 		RequestID: utils.GenUUID(), FileSuffix: utils.JSNSuffix}
-	go utils.NewHTTPPoster(config.CgrConfig().HttpSkipTlsVerify,
+	go NewHTTPPoster(config.CgrConfig().HttpSkipTlsVerify,
 		config.CgrConfig().ReplyTimeout).Post(a.ExtraParameters, utils.CONTENT_JSON, jsn,
 		config.CgrConfig().PosterAttempts, path.Join(cfg.FailedPostsDir, ffn.AsString()))
 	return nil
