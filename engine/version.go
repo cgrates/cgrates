@@ -100,14 +100,12 @@ func SetDBVersions(storage Storage) error {
 func (vers Versions) Compare(curent Versions, storType string) string {
 	var x map[string]string
 	switch storType {
-	case utils.MONGO:
+	case utils.MONGO, utils.MAPSTOR:
 		x = allVers
 	case utils.POSTGRES, utils.MYSQL:
 		x = storDBVers
 	case utils.REDIS:
 		x = dataDBVers
-	case utils.MAPSTOR:
-		x = allVers
 	}
 	for y, val := range x {
 		if vers[y] != curent[y] {
@@ -190,7 +188,7 @@ func CurrentDBVersions(storType string) Versions {
 	}
 
 	switch storType {
-	case utils.MONGO, utils.MAPSTOR, utils.INTERNAL:
+	case utils.MONGO, utils.MAPSTOR:
 		return allVersions
 	case utils.POSTGRES, utils.MYSQL:
 		return storDbVersions

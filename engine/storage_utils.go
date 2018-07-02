@@ -120,11 +120,11 @@ func ConfigureCdrStorage(db_type, host, port, name, user, pass string,
 		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
 	case utils.MONGO:
 		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, cdrsIndexes, nil, 1)
-	case utils.INTERNAL:
+	case utils.MetaInternal:
 		d, err = NewMapStorage()
 	default:
 		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are [%s, %s, %s, %s]",
-			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL))
+			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.MetaInternal))
 	}
 	if err != nil {
 		return nil, err
@@ -142,11 +142,11 @@ func ConfigureStorDB(db_type, host, port, name, user, pass string,
 		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
 	case utils.MONGO:
 		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, cdrsIndexes, nil, 1)
-	case utils.INTERNAL:
+	case utils.MetaInternal:
 		d, err = NewMapStorage()
 	default:
 		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are [%s, %s, %s, %s]",
-			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL))
+			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.MetaInternal))
 	}
 	if err != nil {
 		return nil, err
