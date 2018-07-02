@@ -1271,7 +1271,8 @@ func (ms *MapStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 	indexes map[string]utils.StringMap, commit bool, transactionID string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	dbKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
+	originKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
+	dbKey := originKey
 	if transactionID != "" {
 		dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
 	}
@@ -1281,7 +1282,7 @@ func (ms *MapStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 		if err != nil {
 			return err
 		}
-		ms.dict[dbKey] = result
+		ms.dict[originKey] = result
 		return nil
 	} else {
 		for key, strMp := range indexes {
@@ -1347,7 +1348,8 @@ func (ms *MapStorage) SetFilterReverseIndexesDrv(cacheID, itemIDPrefix string,
 	revIdx map[string]utils.StringMap, commit bool, transactionID string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	dbKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
+	originKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
+	dbKey := originKey
 	if transactionID != "" {
 		dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
 	}
@@ -1357,7 +1359,7 @@ func (ms *MapStorage) SetFilterReverseIndexesDrv(cacheID, itemIDPrefix string,
 		if err != nil {
 			return err
 		}
-		ms.dict[dbKey] = result
+		ms.dict[originKey] = result
 		return nil
 	} else {
 		for key, strMp := range revIdx {
