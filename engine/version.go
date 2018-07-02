@@ -190,7 +190,7 @@ func CurrentDBVersions(storType string) Versions {
 	}
 
 	switch storType {
-	case utils.MONGO, utils.MAPSTOR:
+	case utils.MONGO, utils.MAPSTOR, utils.INTERNAL:
 		return allVersions
 	case utils.POSTGRES, utils.MYSQL:
 		return storDbVersions

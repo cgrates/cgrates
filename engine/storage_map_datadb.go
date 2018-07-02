@@ -1664,8 +1664,6 @@ func (ms *MapStorage) GetVersions(itm string) (vrs Versions, err error) {
 }
 
 func (ms *MapStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
 	var result []byte
 	var x Versions
 	if !overwrite {
@@ -1673,7 +1671,7 @@ func (ms *MapStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
 		if err != nil {
 			return err
 		}
-		for key, _ := range vrs {
+		for key := range vrs {
 			if x[key] != vrs[key] {
 				x[key] = vrs[key]
 			}
@@ -1682,19 +1680,22 @@ func (ms *MapStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
 		if err != nil {
 			return err
 		}
+		ms.mu.Lock()
 		ms.dict[utils.TBLVersions] = result
-		return
-	} else {
-		result, err = ms.ms.Marshal(vrs)
-		if err != nil {
-			return err
-		}
-		if ms.RemoveVersions(vrs); err != nil {
-			return err
-		}
-		ms.dict[utils.TBLVersions] = result
+		ms.mu.Unlock()
 		return
 	}
+	result, err = ms.ms.Marshal(vrs)
+	if err != nil {
+		return err
+	}
+	if ms.RemoveVersions(vrs); err != nil {
+		return err
+	}
+	ms.mu.Lock()
+	ms.dict[utils.TBLVersions] = result
+	ms.mu.Unlock()
+	return
 }
 
 func (ms *MapStorage) RemoveVersions(vrs Versions) (err error) {
