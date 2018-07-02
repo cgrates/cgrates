@@ -181,3 +181,7 @@ func (ms *MapStorage) RemoveSMCost(smc *SMCost) (err error) {
 func (ms *MapStorage) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*CDR, count int64, err error) {
 	return
 }
+
+func (ms *MapStorage) GetSMCosts(cgrid, runid, originHost, originIDPrfx string) (smCosts []*SMCost, err error) {
+	return
+}

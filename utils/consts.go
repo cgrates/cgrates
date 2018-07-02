@@ -107,6 +107,7 @@ const (
 	DataManager                   = "DataManager"
 	REDIS                         = "redis"
 	MAPSTOR                       = "mapstor"
+	INTERNAL                      = "internal"
 	LOCALHOST                     = "127.0.0.1"
 	FSCDR_FILE_CSV                = "freeswitch_file_csv"
 	FSCDR_HTTP_JSON               = "freeswitch_http_json"
