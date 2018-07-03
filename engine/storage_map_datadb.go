@@ -1350,7 +1350,7 @@ func (ms *MapStorage) GetFilterReverseIndexesDrv(cacheID, itemIDPrefix string,
 			return nil, err
 		}
 		indexes = make(map[string]utils.StringMap)
-		for fldName, _ := range fldNameVal {
+		for fldName := range fldNameVal {
 			if _, has := indexes[fldName]; !has {
 				indexes[fldName] = make(utils.StringMap)
 			}
