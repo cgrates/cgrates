@@ -229,7 +229,6 @@ func main() {
 
 	if !*dryRun {
 		//tpid_remove
-
 		if *toStorDB { // Import files from a directory into storDb
 			if ldrCfg.LoaderCgrConfig.TpID == "" {
 				log.Fatal("TPid required.")
@@ -441,7 +440,6 @@ func main() {
 			}
 
 		}
-
 	} else {
 		if err := tpReader.RemoveFromDatabase(*verbose, *disableReverse); err != nil {
 			log.Fatal("Could not delete from database: ", err)

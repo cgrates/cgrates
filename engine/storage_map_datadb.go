@@ -1251,7 +1251,9 @@ func (ms *MapStorage) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType stri
 				indexes[utils.ConcatenatedKey(filterType, fldName, fldVal)] = make(utils.StringMap)
 			}
 			if len(rcvidx[utils.ConcatenatedKey(filterType, fldName, fldVal)]) != 0 {
-				indexes[utils.ConcatenatedKey(filterType, fldName, fldVal)] = rcvidx[utils.ConcatenatedKey(fldName, fldVal)]
+				for key := range rcvidx[utils.ConcatenatedKey(filterType, fldName, fldVal)] {
+					indexes[utils.ConcatenatedKey(filterType, fldName, fldVal)][key] = true
+				}
 			}
 		}
 		return
@@ -1277,27 +1279,51 @@ func (ms *MapStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 		dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
 	}
 	if commit && transactionID != "" {
+		values, _ := ms.dict[dbKey]
 		delete(ms.dict, dbKey)
-		result, err := ms.ms.Marshal(indexes)
-		if err != nil {
-			return err
+		ms.dict[originKey] = values
+		return
+	}
+	var toBeDeleted []string
+	toBeAdded := make(map[string]utils.StringMap)
+	for key, strMp := range indexes {
+		if len(strMp) == 0 { // remove with no more elements inside
+			toBeDeleted = append(toBeDeleted, key)
+			delete(indexes, key)
+			continue
 		}
-		ms.dict[originKey] = result
-		return nil
-	} else {
-		for key, strMp := range indexes {
-			if len(strMp) == 0 { // remove with no more elements inside
-				delete(indexes, key)
-				continue
-			}
-		}
-		result, err := ms.ms.Marshal(indexes)
+		toBeAdded[key] = make(utils.StringMap)
+		toBeAdded[key] = strMp
+	}
+	values, has := ms.dict[dbKey]
+	if !has {
+		result, err := ms.ms.Marshal(toBeAdded)
 		if err != nil {
 			return err
 		}
 		ms.dict[dbKey] = result
-		return nil
+		return err
 	}
+	mp := make(map[string]utils.StringMap)
+	err = ms.ms.Unmarshal(values, &mp)
+	if err != nil {
+		return err
+	}
+	for _, key := range toBeDeleted {
+		delete(mp, key)
+	}
+	for key, strMp := range toBeAdded {
+		if _, has := mp[key]; !has {
+			mp[key] = make(utils.StringMap)
+		}
+		mp[key] = strMp
+	}
+	result, err := ms.ms.Marshal(mp)
+	if err != nil {
+		return err
+	}
+	ms.dict[dbKey] = result
+	return nil
 }
 
 func (ms *MapStorage) RemoveFilterIndexesDrv(cacheID, itemIDPrefix string) (err error) {
@@ -1324,11 +1350,13 @@ func (ms *MapStorage) GetFilterReverseIndexesDrv(cacheID, itemIDPrefix string,
 			return nil, err
 		}
 		indexes = make(map[string]utils.StringMap)
-		for fldName, fldVal := range fldNameVal {
-			if _, has := indexes[utils.ConcatenatedKey(fldName, fldVal)]; !has {
-				indexes[utils.ConcatenatedKey(fldName, fldVal)] = make(utils.StringMap)
+		for fldName, _ := range fldNameVal {
+			if _, has := indexes[fldName]; !has {
+				indexes[fldName] = make(utils.StringMap)
 			}
-			indexes[utils.ConcatenatedKey(fldName, fldVal)] = rcvidx[utils.ConcatenatedKey(fldName, fldVal)]
+			for key := range rcvidx[fldName] {
+				indexes[fldName][key] = true
+			}
 		}
 		return
 	} else {
@@ -1354,27 +1382,51 @@ func (ms *MapStorage) SetFilterReverseIndexesDrv(cacheID, itemIDPrefix string,
 		dbKey = "tmp_" + utils.ConcatenatedKey(dbKey, transactionID)
 	}
 	if commit && transactionID != "" {
+		values, _ := ms.dict[dbKey]
 		delete(ms.dict, dbKey)
-		result, err := ms.ms.Marshal(revIdx)
-		if err != nil {
-			return err
-		}
-		ms.dict[originKey] = result
+		ms.dict[originKey] = values
 		return nil
-	} else {
-		for key, strMp := range revIdx {
-			if len(strMp) == 0 { // remove with no more elements inside
-				delete(revIdx, key)
-				continue
-			}
+	}
+	var toBeDeleted []string
+	toBeAdded := make(map[string]utils.StringMap)
+	for key, strMp := range revIdx {
+		if len(strMp) == 0 { // remove with no more elements inside
+			toBeDeleted = append(toBeDeleted, key)
+			delete(revIdx, key)
+			continue
 		}
-		result, err := ms.ms.Marshal(revIdx)
+		toBeAdded[key] = make(utils.StringMap)
+		toBeAdded[key] = strMp
+	}
+	values, has := ms.dict[dbKey]
+	if !has {
+		result, err := ms.ms.Marshal(toBeAdded)
 		if err != nil {
 			return err
 		}
 		ms.dict[dbKey] = result
-		return nil
+		return err
 	}
+	mp := make(map[string]utils.StringMap)
+	err = ms.ms.Unmarshal(values, &mp)
+	if err != nil {
+		return err
+	}
+	for _, key := range toBeDeleted {
+		delete(mp, key)
+	}
+	for key, strMp := range toBeAdded {
+		if _, has := mp[key]; !has {
+			mp[key] = make(utils.StringMap)
+		}
+		mp[key] = strMp
+	}
+	result, err := ms.ms.Marshal(mp)
+	if err != nil {
+		return err
+	}
+	ms.dict[dbKey] = result
+	return
 }
 
 //RemoveFilterReverseIndexesDrv removes ReverseIndexes for a specific itemID
