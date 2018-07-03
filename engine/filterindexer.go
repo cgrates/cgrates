@@ -194,15 +194,5 @@ func (rfi *FilterIndexer) RemoveItemFromIndex(itemID string) (err error) {
 		}
 	}
 	rfi.reveseIndex[itemID] = make(utils.StringMap) //Force deleting in driver
-	if err = rfi.dm.SetFilterIndexes(
-		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
-		rfi.indexes, false, utils.NonTransactional); err != nil {
-		return
-	}
-	if err = rfi.dm.SetFilterReverseIndexes(
-		utils.PrefixToRevIndexCache[rfi.itemType], rfi.dbKeySuffix,
-		rfi.reveseIndex, false, utils.NonTransactional); err != nil {
-		return
-	}
-	return
+	return rfi.StoreIndexes(false, utils.NonTransactional)
 }

@@ -26,6 +26,8 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 type TestContent struct {
@@ -38,7 +40,7 @@ func TestHttpJsonPoster(t *testing.T) {
 	content := &TestContent{Var1: "Val1", Var2: "Val2"}
 	jsn, _ := json.Marshal(content)
 	filePath := "/tmp/cgr_test_http_poster.json"
-	if _, err := NewHTTPPoster(true, time.Duration(2*time.Second)).Post("http://localhost:8080/invalid", CONTENT_JSON, jsn, 3, filePath); err != nil {
+	if _, err := NewHTTPPoster(true, time.Duration(2*time.Second)).Post("http://localhost:8080/invalid", utils.CONTENT_JSON, jsn, 3, filePath); err != nil {
 		t.Error(err)
 	}
 	if readBytes, err := ioutil.ReadFile(filePath); err != nil {
@@ -57,7 +59,7 @@ func TestHttpBytesPoster(t *testing.T) {
 		Test2
 		`)
 	filePath := "/tmp/test_http_poster.http"
-	if _, err := NewHTTPPoster(true, time.Duration(2*time.Second)).Post("http://localhost:8080/invalid", CONTENT_TEXT, content, 3, filePath); err != nil {
+	if _, err := NewHTTPPoster(true, time.Duration(2*time.Second)).Post("http://localhost:8080/invalid", utils.CONTENT_TEXT, content, 3, filePath); err != nil {
 		t.Error(err)
 	}
 	if readBytes, err := ioutil.ReadFile(filePath); err != nil {

@@ -93,6 +93,17 @@ func TestFilterIndexerITMongo(t *testing.T) {
 	}
 }
 
+func TestFilterIndexerITInternal(t *testing.T) {
+	mapDataDB, err := NewMapStorage()
+	if err != nil {
+		t.Fatal(err)
+	}
+	dataManager = NewDataManager(mapDataDB)
+	for _, stest := range sTests {
+		t.Run("TestITInternal", stest)
+	}
+}
+
 func testITFlush(t *testing.T) {
 	if err := dataManager.DataDB().Flush(""); err != nil {
 		t.Error(err)
@@ -265,7 +276,6 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		Weight:             1.4,
 		ActionIDs:          []string{},
 	}
-
 	if err := dataManager.SetThresholdProfile(th, true); err != nil {
 		t.Error(err)
 	}
