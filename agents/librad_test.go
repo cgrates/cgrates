@@ -450,7 +450,7 @@ func TestNewCGRReply(t *testing.T) {
 		},
 	}
 	eCgrRply = engine.NewNavigableMap(ev)
-	eCgrRply.Set(&engine.NMItem{Path: []string{utils.Error}, Data: ""}, false)
+	eCgrRply.Set([]string{utils.Error}, "", false)
 	if rpl, err := NewCGRReply(engine.NavigableMapper(ev), nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCgrRply, rpl) {

@@ -22,7 +22,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"strings"
+	"reflect"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -57,11 +57,11 @@ type NavigableMap struct {
 }
 
 // Add will add items into NavigableMap populating also order
-func (nM *NavigableMap) Set(itm *NMItem, ordered bool) {
+func (nM *NavigableMap) Set(path []string, data interface{}, ordered bool) {
 	mp := nM.data
-	for i, spath := range itm.Path {
-		if i == len(itm.Path)-1 { // last path
-			mp[spath] = itm
+	for i, spath := range path {
+		if i == len(path)-1 { // last path
+			mp[spath] = data
 			return
 		}
 		if _, has := mp[spath]; !has {
@@ -70,7 +70,7 @@ func (nM *NavigableMap) Set(itm *NMItem, ordered bool) {
 		mp = mp[spath].(map[string]interface{}) // so we can check further down
 	}
 	if ordered {
-		nM.order = append(nM.order, itm.Path)
+		nM.order = append(nM.order, path)
 	}
 }
 
@@ -85,30 +85,27 @@ func (nM *NavigableMap) FieldAsInterface(fldPath []string) (fldVal interface{}, 
 	var canCast bool
 	for i, spath := range fldPath {
 		if i == lenPath-1 { // lastElement
-			itmIface, has := lastMp[spath]
+			var has bool
+			fldVal, has = lastMp[spath]
 			if !has {
 				return nil, utils.ErrNotFound
 			}
-			if itm, cast := itmIface.(*NMItem); cast {
-				return itm.Data, nil
-			}
-			return itmIface, nil
-		} else {
-			elmnt, has := lastMp[spath]
-			if !has {
-				err = fmt.Errorf("no map at path: <%s>", spath)
+			return
+		}
+		elmnt, has := lastMp[spath]
+		if !has {
+			err = fmt.Errorf("no map at path: <%s>", spath)
+			return
+		}
+		lastMp, canCast = elmnt.(map[string]interface{})
+		if !canCast {
+			lastMpNM, canCast := elmnt.(*NavigableMap) // attempt to cast into NavigableMap
+			if !canCast {
+				err = fmt.Errorf("cannot cast field: <%+v> type: %T with path: <%s> to map[string]interface{}",
+					elmnt, elmnt, spath)
 				return
 			}
-			lastMp, canCast = elmnt.(map[string]interface{})
-			if !canCast {
-				lastMpNM, canCast := elmnt.(*NavigableMap) // attempt to cast into NavigableMap
-				if !canCast {
-					err = fmt.Errorf("cannot cast field: <%+v> type: %T with path: <%s> to map[string]interface{}",
-						elmnt, elmnt, spath)
-					return
-				}
-				lastMp = lastMpNM.data
-			}
+			lastMp = lastMpNM.data
 		}
 	}
 	err = errors.New("end of function")
@@ -140,43 +137,38 @@ func (nM *NavigableMap) AsMapStringInterface() map[string]interface{} {
 }
 
 // indexMapElements will recursively go through map and index the element paths into elmns
-func indexMapElements(mp map[string]interface{}, path []string, elms *[]*NMItem) {
+func indexMapElements(mp map[string]interface{}, path []string, vals *[]interface{}) {
 	for k, v := range mp {
 		vPath := append(path, k)
 		if mpIface, isMap := v.(map[string]interface{}); isMap {
-			indexMapElements(mpIface, vPath, elms)
+			indexMapElements(mpIface, vPath, vals)
 			continue
 		}
-		var elmsOut []*NMItem
-		if nMItem, isNMItem := v.(*NMItem); isNMItem {
-			elmsOut = append(*elms, nMItem)
-		} else {
-			elmsOut = append(*elms, &NMItem{Path: vPath, Data: v})
-		}
-
-		*elms = elmsOut
+		valsOut := append(*vals, v)
+		*vals = valsOut
 	}
 }
 
-// Items returns the items in map, ordered by order information
-func (nM *NavigableMap) Items() (itms []*NMItem) {
+// Values returns the values in map, ordered by order information
+func (nM *NavigableMap) Values() (vals []interface{}) {
 	if len(nM.data) == 0 {
 		return
 	}
 	if len(nM.order) == 0 {
-		indexMapElements(nM.data, []string{}, &itms)
+		indexMapElements(nM.data, []string{}, &vals)
 		return
 	}
-	itms = make([]*NMItem, len(nM.order))
+	vals = make([]interface{}, len(nM.order))
 	for i, path := range nM.order {
 		val, _ := nM.FieldAsInterface(path)
-		itms[i] = &NMItem{Data: val, Path: path}
+		vals[i] = val
 	}
 	return
 }
 
 // AsNavigableMap implements both NavigableMapper as well as DataProvider interfaces
-func (nM *NavigableMap) AsNavigableMap(tpl []*config.CfgCdrField) (oNM *NavigableMap, err error) {
+func (nM *NavigableMap) AsNavigableMap(
+	tpl []*config.CfgCdrField) (oNM *NavigableMap, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
@@ -193,32 +185,67 @@ func (nM *NavigableMap) Merge(nM2 *NavigableMap) {
 	}
 }
 
+// addNMItemToTokens will add a NMItem to tockens
+// if itm.Config.IsAttribute the item data is added as Attribute to lastElmnt
+// tokens and lastElmntIdx are overloaded on each function call
+func addNMItemToTokens(tokens *[]xml.Token, lastElmntIdx *int, itm *NMItem,
+	lastPath []string) (err error) {
+	strVal, canCast := utils.CastFieldIfToString(itm.Data)
+	if !canCast {
+		return fmt.Errorf("cannot cast field: %s to string", utils.ToJSON(itm.Data))
+	}
+	if *lastElmntIdx == -1 || len(itm.Path) <= 1 ||
+		!reflect.DeepEqual(itm.Path[:len(itm.Path)-1], lastPath) {
+		charData := []byte("")
+		if itm.Config == nil ||
+			itm.Config.AttributeID == "" { // not attribute but value
+			charData = []byte(strVal)
+		}
+		var elmLocal string
+		if len(itm.Path) != 0 {
+			elmLocal = itm.Path[len(itm.Path)-1]
+		}
+		t := xml.StartElement{Name: xml.Name{Local: elmLocal}}
+		*lastElmntIdx = len(*tokens)
+		tOut := append(*tokens, t, xml.CharData(charData), xml.EndElement{t.Name})
+		*tokens = tOut
+	}
+	if itm.Config != nil && itm.Config.AttributeID != "" {
+		tkns := *tokens
+		lstElm := tkns[*lastElmntIdx].(xml.StartElement)
+		lstElm.Attr = append(lstElm.Attr,
+			xml.Attr{xml.Name{Local: itm.Config.AttributeID}, strVal})
+	}
+	return
+}
+
 // MarshalXML implements xml.Marshaler
 func (nM *NavigableMap) MarshalXML(e *xml.Encoder, start xml.StartElement) (err error) {
 	tokens := []xml.Token{start}
-	for _, itm := range nM.Items() {
-		strVal, canCast := utils.CastFieldIfToString(itm.Data)
-		if !canCast {
-			return fmt.Errorf("cannot cast field: %s to string", utils.ToJSON(itm.Data))
+	var prevItem *NMItem
+	lastElmntIdx := utils.IntPointer(-1)
+	for _, itm := range nM.Values() {
+		nmItems, isNMItems := itm.([]*NMItem)
+		if !isNMItems {
+			return fmt.Errorf("map value: <%+v> not []*NMItem", nmItems)
 		}
-		t := xml.StartElement{Name: xml.Name{"", strings.Join(itm.Path, ">")}}
-		tokens = append(tokens, t, xml.CharData([]byte(strVal)), xml.EndElement{t.Name})
+		var lastPath []string
+		if prevItem != nil {
+			lastPath = prevItem.Path
+		}
+		for _, itm := range nmItems {
+			if err = addNMItemToTokens(&tokens, lastElmntIdx, itm, lastPath); err != nil {
+				return
+			}
+		}
 	}
-
 	tokens = append(tokens, xml.EndElement{start.Name})
-
+	//fmt.Printf("## OUT: %s\n", utils.ToJSON(tokens))
 	for _, t := range tokens {
-		err := e.EncodeToken(t)
-		if err != nil {
+		if err = e.EncodeToken(t); err != nil {
 			return err
 		}
 	}
-
 	// flush to ensure tokens are written
 	return e.Flush()
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

@@ -145,6 +145,7 @@ type CdrFieldJsonCfg struct {
 	Tag                  *string
 	Type                 *string
 	Field_id             *string
+	Attribute_id         *string
 	Handler_id           *string
 	Value                *string
 	Append               *bool

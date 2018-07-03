@@ -36,15 +36,15 @@ func TestAgReqAsNavigableMap(t *testing.T) {
 	agReq := newAgentRequest(nil, nil,
 		"cgrates.org", filterS)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set(&engine.NMItem{Path: []string{utils.CGRID},
-		Data: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String())}, false)
-	agReq.CGRRequest.Set(&engine.NMItem{Path: []string{utils.ToR}, Data: utils.VOICE}, false)
-	agReq.CGRRequest.Set(&engine.NMItem{Path: []string{utils.Account}, Data: "1001"}, false)
-	agReq.CGRRequest.Set(&engine.NMItem{Path: []string{utils.Destination}, Data: "1002"}, false)
-	agReq.CGRRequest.Set(&engine.NMItem{Path: []string{utils.AnswerTime},
-		Data: time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)}, false)
-	agReq.CGRRequest.Set(&engine.NMItem{Path: []string{utils.RequestType}, Data: utils.META_PREPAID}, false)
-	agReq.CGRRequest.Set(&engine.NMItem{Path: []string{utils.Usage}, Data: time.Duration(3 * time.Minute)}, false)
+	agReq.CGRRequest.Set([]string{utils.CGRID},
+		utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), false)
+	agReq.CGRRequest.Set([]string{utils.ToR}, utils.VOICE, false)
+	agReq.CGRRequest.Set([]string{utils.Account}, "1001", false)
+	agReq.CGRRequest.Set([]string{utils.Destination}, "1002", false)
+	agReq.CGRRequest.Set([]string{utils.AnswerTime},
+		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC), false)
+	agReq.CGRRequest.Set([]string{utils.RequestType}, utils.META_PREPAID, false)
+	agReq.CGRRequest.Set([]string{utils.Usage}, time.Duration(3*time.Minute), false)
 
 	cgrRply := map[string]interface{}{
 		utils.CapAttributes: map[string]interface{}{
@@ -99,12 +99,12 @@ func TestAgReqAsNavigableMap(t *testing.T) {
 				"*cgrReply>Error", utils.INFIELD_SEP)},
 	}
 	eMp := engine.NewNavigableMap(nil)
-	eMp.Set(&engine.NMItem{Path: []string{utils.Tenant}, Data: "cgrates.org"}, true)
-	eMp.Set(&engine.NMItem{Path: []string{utils.Account}, Data: "1001"}, true)
-	eMp.Set(&engine.NMItem{Path: []string{utils.Destination}, Data: "1002"}, true)
-	eMp.Set(&engine.NMItem{Path: []string{"RequestedUsage"}, Data: "180"}, true)
-	eMp.Set(&engine.NMItem{Path: []string{"PaypalAccount"}, Data: "cgrates@paypal.com"}, true)
-	eMp.Set(&engine.NMItem{Path: []string{"MaxUsage"}, Data: "120"}, true)
+	eMp.Set([]string{utils.Tenant}, "cgrates.org", true)
+	eMp.Set([]string{utils.Account}, "1001", true)
+	eMp.Set([]string{utils.Destination}, "1002", true)
+	eMp.Set([]string{"RequestedUsage"}, "180", true)
+	eMp.Set([]string{"PaypalAccount"}, "cgrates@paypal.com", true)
+	eMp.Set([]string{"MaxUsage"}, "120", true)
 	if mpOut, err := agReq.AsNavigableMap(tplFlds); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, mpOut) {

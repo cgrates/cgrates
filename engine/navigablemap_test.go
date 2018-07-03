@@ -18,11 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/xml"
 	"errors"
+	//"fmt"
 	"reflect"
 	"strings"
 	"testing"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -148,36 +151,32 @@ func TestNavMapAdd(t *testing.T) {
 	nM := NewNavigableMap(nil)
 	path := []string{"FistLever2", "SecondLevel2", "Field2"}
 	data := "Value2"
-	nM.Set(&NMItem{Path: path, Data: data}, true)
+	nM.Set(path, data, true)
 	path = []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"}
 	data = "Val1"
-	nM.Set(&NMItem{Path: path, Data: data}, true)
+	nM.Set(path, data, true)
 	path = []string{"FistLever2", "Field3"}
 	data = "Value3"
-	nM.Set(&NMItem{Path: path, Data: data}, true)
+	nM.Set(path, data, true)
 	path = []string{"Field4"}
 	data = "Val4"
-	nM.Set(&NMItem{Path: path, Data: data}, true)
+	nM.Set(path, data, true)
 	eNavMap := NavigableMap{
 		data: map[string]interface{}{
 			"FirstLevel": map[string]interface{}{
 				"SecondLevel": map[string]interface{}{
 					"ThirdLevel": map[string]interface{}{
-						"Fld1": &NMItem{Path: []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
-							Data: "Val1"},
+						"Fld1": "Val1",
 					},
 				},
 			},
 			"FistLever2": map[string]interface{}{
 				"SecondLevel2": map[string]interface{}{
-					"Field2": &NMItem{Path: []string{"FistLever2", "SecondLevel2", "Field2"},
-						Data: "Value2"},
+					"Field2": "Value2",
 				},
-				"Field3": &NMItem{Path: []string{"FistLever2", "Field3"},
-					Data: "Value3"},
+				"Field3": "Value3",
 			},
-			"Field4": &NMItem{Path: []string{"Field4"},
-				Data: "Val4"},
+			"Field4": "Val4",
 		},
 	}
 	if !reflect.DeepEqual(nM.data, eNavMap.data) {
@@ -194,42 +193,38 @@ func TestNavMapAdd2(t *testing.T) {
 	nM := NewNavigableMap(nil)
 	path := []string{"FistLever2", "SecondLevel2", "Field2"}
 	data := 123
-	nM.Set(&NMItem{Path: path, Data: data}, true)
+	nM.Set(path, data, true)
 	path = []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"}
 	data1 := 123.123
-	nM.Set(&NMItem{Path: path, Data: data1}, true)
+	nM.Set(path, data1, true)
 	path = []string{"FistLever2", "Field3"}
 	data2 := "Value3"
-	nM.Set(&NMItem{Path: path, Data: data2}, true)
+	nM.Set(path, data2, true)
 	path = []string{"Field4"}
 	data3 := &testStruct{
 		Item1: "Ten",
 		Item2: 10,
 	}
-	nM.Set(&NMItem{Path: path, Data: data3}, true)
+	nM.Set(path, data3, true)
 	eNavMap := NavigableMap{
 		data: map[string]interface{}{
 			"FirstLevel": map[string]interface{}{
 				"SecondLevel": map[string]interface{}{
 					"ThirdLevel": map[string]interface{}{
-						"Fld1": &NMItem{Path: []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
-							Data: 123.123},
+						"Fld1": 123.123,
 					},
 				},
 			},
 			"FistLever2": map[string]interface{}{
 				"SecondLevel2": map[string]interface{}{
-					"Field2": &NMItem{Path: []string{"FistLever2", "SecondLevel2", "Field2"},
-						Data: 123},
+					"Field2": 123,
 				},
-				"Field3": &NMItem{Path: []string{"FistLever2", "Field3"},
-					Data: "Value3"},
+				"Field3": "Value3",
 			},
-			"Field4": &NMItem{Path: []string{"Field4"},
-				Data: &testStruct{
-					Item1: "Ten",
-					Item2: 10,
-				}},
+			"Field4": &testStruct{
+				Item1: "Ten",
+				Item2: 10,
+			},
 		},
 	}
 	if !reflect.DeepEqual(nM.data, eNavMap.data) {
@@ -273,8 +268,9 @@ func TestNavMapItems(t *testing.T) {
 			Data: "Val4",
 		},
 	}
-	if !reflect.DeepEqual(len(nM.Items()), len(eItems)) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eItems), utils.ToJSON(nM.Items()))
+	if vals := nM.Values(); !reflect.DeepEqual(len(vals), len(eItems)) {
+		t.Errorf("Expecting: %+v, received: %+v",
+			utils.ToJSON(eItems), utils.ToJSON(vals))
 	}
 }
 
@@ -320,8 +316,9 @@ func TestNavMapItems2(t *testing.T) {
 			},
 		},
 	}
-	if !reflect.DeepEqual(len(nM.Items()), len(eItems)) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eItems), utils.ToJSON(nM.Items()))
+	if vals := nM.Values(); !reflect.DeepEqual(len(vals), len(eItems)) {
+		t.Errorf("Expecting: %+v, received: %+v",
+			utils.ToJSON(eItems), utils.ToJSON(vals))
 	}
 }
 
@@ -330,17 +327,29 @@ func TestNavMapOrder(t *testing.T) {
 		"FirstLevel": map[string]interface{}{
 			"SecondLevel": map[string]interface{}{
 				"ThirdLevel": map[string]interface{}{
-					"Fld1": "Val1",
+					"Fld1": &NMItem{
+						Path: []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
+						Data: "Val1",
+					},
 				},
 			},
 		},
 		"FistLever2": map[string]interface{}{
 			"SecondLevel2": map[string]interface{}{
-				"Field2": "Value2",
+				"Field2": &NMItem{
+					Path: []string{"FistLever2", "SecondLevel2", "Field2"},
+					Data: "Value2",
+				},
 			},
-			"Field3": "Value3",
+			"Field3": &NMItem{
+				Path: []string{"FistLever2", "Field3"},
+				Data: "Value3",
+			},
 		},
-		"Field4": "Val4",
+		"Field4": &NMItem{
+			Path: []string{"Field4"},
+			Data: "Val4",
+		},
 	}
 	order := [][]string{
 		[]string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
@@ -350,7 +359,7 @@ func TestNavMapOrder(t *testing.T) {
 	}
 	nM := NewNavigableMap(myData)
 	nM.order = order
-	eItems := []*NMItem{
+	eItems := []interface{}{
 		&NMItem{
 			Path: []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
 			Data: "Val1",
@@ -368,8 +377,9 @@ func TestNavMapOrder(t *testing.T) {
 			Data: "Val4",
 		},
 	}
-	if !reflect.DeepEqual(nM.Items(), eItems) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eItems), utils.ToJSON(nM.Items()))
+	if vals := nM.Values(); !reflect.DeepEqual(vals, eItems) {
+		t.Errorf("Expecting: %+v, received: %+v",
+			utils.ToJSON(eItems), utils.ToJSON(vals))
 	}
 }
 
@@ -378,17 +388,29 @@ func TestNavMapOrder2(t *testing.T) {
 		"FirstLevel": map[string]interface{}{
 			"SecondLevel": map[string]interface{}{
 				"ThirdLevel": map[string]interface{}{
-					"Fld1": "Val1",
+					"Fld1": &NMItem{
+						Path: []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
+						Data: "Val1",
+					},
 				},
 			},
 		},
 		"FistLever2": map[string]interface{}{
 			"SecondLevel2": map[string]interface{}{
-				"Field2": "Value2",
+				"Field2": &NMItem{
+					Path: []string{"FistLever2", "SecondLevel2", "Field2"},
+					Data: "Value2",
+				},
 			},
-			"Field3": "Value3",
+			"Field3": &NMItem{
+				Path: []string{"FistLever2", "Field3"},
+				Data: "Value3",
+			},
 		},
-		"Field4": "Val4",
+		"Field4": &NMItem{
+			Path: []string{"Field4"},
+			Data: "Val4",
+		},
 	}
 	order := [][]string{
 		[]string{"FistLever2", "SecondLevel2", "Field2"},
@@ -398,7 +420,7 @@ func TestNavMapOrder2(t *testing.T) {
 	}
 	nM := NewNavigableMap(myData)
 	nM.order = order
-	eItems := []*NMItem{
+	eItems := []interface{}{
 		&NMItem{
 			Path: []string{"FistLever2", "SecondLevel2", "Field2"},
 			Data: "Value2",
@@ -416,13 +438,14 @@ func TestNavMapOrder2(t *testing.T) {
 			Data: "Val1",
 		},
 	}
-	if !reflect.DeepEqual(nM.Items(), eItems) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eItems), utils.ToJSON(nM.Items()))
+	if vals := nM.Values(); !reflect.DeepEqual(eItems, vals) {
+		t.Errorf("Expecting: %+v, received: %+v",
+			utils.ToJSON(eItems), utils.ToJSON(vals))
 	}
 }
 
 func TestNavMapIndexMapElementes(t *testing.T) {
-	var elmsOut []*NMItem
+	var elmsOut []interface{}
 	ifaceMap := map[string]interface{}{
 		"FirstLevel": map[string]interface{}{
 			"SecondLevel": map[string]interface{}{
@@ -439,24 +462,7 @@ func TestNavMapIndexMapElementes(t *testing.T) {
 		},
 		"Field4": "Val4",
 	}
-	eItems := []*NMItem{
-		&NMItem{
-			Path: []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
-			Data: "Val1",
-		},
-		&NMItem{
-			Path: []string{"FistLever2", "SecondLevel2", "Field2"},
-			Data: "Value2",
-		},
-		&NMItem{
-			Path: []string{"FistLever2", "Field3"},
-			Data: "Value3",
-		},
-		&NMItem{
-			Path: []string{"Field4"},
-			Data: "Val4",
-		},
-	}
+	eItems := []interface{}{"Val1", "Value2", "Value3", "Val4"}
 	indexMapElements(ifaceMap, []string{}, &elmsOut)
 	if !reflect.DeepEqual(len(elmsOut), len(eItems)) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eItems), utils.ToJSON(elmsOut))
@@ -484,5 +490,46 @@ func TestNavMapString(t *testing.T) {
 	eStr := utils.ToJSON(myData)
 	if !reflect.DeepEqual(nM.String(), eStr) {
 		t.Errorf("Expecting: %+v, received: %+v", eStr, nM.String())
+	}
+}
+
+func TestNavMapMarshalXML(t *testing.T) {
+	nm := &NavigableMap{
+		data: map[string]interface{}{
+			"FirstLevel": map[string]interface{}{
+				"SecondLevel": map[string]interface{}{
+					"ThirdLevel": map[string]interface{}{
+						"Fld1": []*NMItem{
+							&NMItem{Path: []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
+								Data: "Val1"}},
+					},
+				},
+			},
+			"FistLever2": map[string]interface{}{
+				"SecondLevel2": map[string]interface{}{
+					"Field2": []*NMItem{
+						&NMItem{Path: []string{"FistLever2", "SecondLevel2", "Field2"},
+							Data:   "Value2",
+							Config: &config.CfgCdrField{Tag: "AttributeTest", AttributeID: "attribute1"}}},
+				},
+				"Field3": []*NMItem{
+					&NMItem{Path: []string{"FistLever2", "Field3"},
+						Data: "Value3"}},
+			},
+			"Field4": []*NMItem{
+				&NMItem{Path: []string{"Field4"},
+					Data: "Val4"}},
+		},
+		order: [][]string{
+			[]string{"FistLever2", "SecondLevel2", "Field2"},
+			[]string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
+			[]string{"FistLever2", "Field3"},
+			[]string{"Field4"},
+		},
+	}
+	if output, err := xml.MarshalIndent(nm, "", "  "); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual([]byte(""), output) {
+		//fmt.Printf("received output: <%s>\n", output)
 	}
 }

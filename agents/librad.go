@@ -411,6 +411,6 @@ func NewCGRReply(rply engine.NavigableMapper,
 	if err != nil {
 		return nil, err
 	}
-	mp.Set(&engine.NMItem{Path: []string{utils.Error}, Data: ""}, false) // enforce empty error
+	mp.Set([]string{utils.Error}, "", false) // enforce empty error
 	return mp, nil
 }

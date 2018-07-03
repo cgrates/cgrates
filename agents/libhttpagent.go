@@ -67,7 +67,7 @@ func (hU *httpUrlDP) FieldAsInterface(fldPath []string) (data interface{}, err e
 	}
 	err = nil // cancel previous err
 	data = hU.req.FormValue(fldPath[0])
-	hU.cache.Set(&engine.NMItem{Path: fldPath, Data: data}, false)
+	hU.cache.Set(fldPath, data, false)
 	return
 }
 
