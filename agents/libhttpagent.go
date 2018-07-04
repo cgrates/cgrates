@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"encoding/xml"
 	"fmt"
 	"net/http"
 
@@ -91,7 +92,7 @@ func (hU *httpUrlDP) AsNavigableMap([]*config.CfgCdrField) (
 // httpAgentReplyEncoder will encode  []*engine.NMElement
 // and write content to http writer
 type httpAgentReplyEncoder interface {
-	encode(*engine.NavigableMap) error
+	Encode(*engine.NavigableMap) error
 }
 
 // newHAReplyEncoder constructs a httpAgentReqDecoder based on encoder type
@@ -100,5 +101,32 @@ func newHAReplyEncoder(encType string,
 	switch encType {
 	default:
 		return nil, fmt.Errorf("unsupported encoder type <%s>", encType)
+	case utils.MetaXml:
+		return newHAXMLEncoder(w)
 	}
+}
+
+func newHAXMLEncoder(w http.ResponseWriter) (xE httpAgentReplyEncoder, err error) {
+	return &haXMLEncoder{w: w}, nil
+}
+
+type haXMLEncoder struct {
+	w http.ResponseWriter
+}
+
+// Encode implements httpAgentReplyEncoder
+func (xE *haXMLEncoder) Encode(nM *engine.NavigableMap) (err error) {
+	var xmlElmnts []*engine.XMLElement
+	if xmlElmnts, err = nM.AsXMLElements(); err != nil {
+		return
+	}
+	var xmlOut []byte
+	if xmlOut, err = xml.MarshalIndent(xmlElmnts, "", "  "); err != nil {
+		return
+	}
+	if _, err = xE.w.Write([]byte(xml.Header)); err != nil {
+		return
+	}
+	_, err = xE.w.Write(xmlOut)
+	return
 }

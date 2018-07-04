@@ -94,7 +94,7 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 				utils.HTTPAgent, err.Error()))
 		return
 	}
-	if err = encdr.encode(agReq.Reply); err != nil {
+	if err = encdr.Encode(agReq.Reply); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s encoding out %s",
 				utils.HTTPAgent, err.Error(), utils.ToJSON(agReq.Reply)))
