@@ -86,8 +86,8 @@ func (rfi *FilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID st
 				rfi.chngdIndxKeys[concatKey] = true
 			}
 			rfi.chngdRevIndxKeys[itemID] = true
-		default:
-			concatKey := utils.ConcatenatedKey(utils.MetaDefault, utils.ANY, utils.ANY)
+		case utils.META_NONE:
+			concatKey := utils.ConcatenatedKey(utils.META_NONE, utils.ANY, utils.ANY)
 			if _, hasIt := rfi.indexes[concatKey]; !hasIt {
 				rfi.indexes[concatKey] = make(utils.StringMap)
 			}
@@ -95,7 +95,7 @@ func (rfi *FilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID st
 				rfi.reveseIndex[itemID] = make(utils.StringMap)
 			}
 			rfi.reveseIndex[itemID][concatKey] = true
-			rfi.indexes[concatKey][itemID] = true // Fields without real field index will be located in map[*any:*any][rl.ID]
+			rfi.indexes[concatKey][itemID] = true
 		}
 	}
 	return

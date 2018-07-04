@@ -707,7 +707,8 @@ func TestDfAttributeServJsonCfg(t *testing.T) {
 
 func TestDfFilterSJsonCfg(t *testing.T) {
 	eCfg := &FilterSJsonCfg{
-		Stats_conns: &[]*HaPoolJsonCfg{},
+		Stats_conns:     &[]*HaPoolJsonCfg{},
+		Indexes_selects: utils.BoolPointer(true),
 	}
 	if cfg, err := dfCgrJsonCfg.FilterSJsonCfg(); err != nil {
 		t.Error(err)

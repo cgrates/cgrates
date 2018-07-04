@@ -470,7 +470,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 	fp := &Filter{
 		Tenant: "cgrates.org",
-		ID:     "Filter1",
+		ID:     "AttrFilter",
 		Rules: []*FilterRule{
 			&FilterRule{
 				FieldName: "EventType",
@@ -489,7 +489,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 	attrProfile := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf",
-		FilterIDs: []string{"Filter1"},
+		FilterIDs: []string{"AttrFilter"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
@@ -838,17 +838,17 @@ func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringMap{
-		"*default:*any:*any": utils.StringMap{
+		"*none:*any:*any": utils.StringMap{
 			"THD_Test":  true,
 			"THD_Test2": true,
 		},
 	}
 	reverseIdxes := map[string]utils.StringMap{
 		"THD_Test": utils.StringMap{
-			"*default:*any:*any": true,
+			"*none:*any:*any": true,
 		},
 		"THD_Test2": utils.StringMap{
-			"*default:*any:*any": true,
+			"*none:*any:*any": true,
 		},
 	}
 	rfi := NewFilterIndexer(onStor, utils.ThresholdProfilePrefix, th.Tenant)
@@ -875,7 +875,7 @@ func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 		"THD_Test2": true,
 	}
 	if rcvMp, err := dataManager.MatchFilterIndex(utils.CacheThresholdFilterIndexes, th.Tenant,
-		utils.MetaDefault, utils.META_ANY, utils.META_ANY); err != nil {
+		utils.META_NONE, utils.META_ANY, utils.META_ANY); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
@@ -937,17 +937,17 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringMap{
-		"*default:*any:*any": utils.StringMap{
+		"*none:*any:*any": utils.StringMap{
 			"SPL_Weight":  true,
 			"SPL_Weight2": true,
 		},
 	}
 	reverseIdxes := map[string]utils.StringMap{
 		"SPL_Weight": utils.StringMap{
-			"*default:*any:*any": true,
+			"*none:*any:*any": true,
 		},
 		"SPL_Weight2": utils.StringMap{
-			"*default:*any:*any": true,
+			"*none:*any:*any": true,
 		},
 	}
 	rfi := NewFilterIndexer(onStor, utils.SupplierProfilePrefix, splProfile.Tenant)
@@ -974,7 +974,7 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 		"SPL_Weight2": true,
 	}
 	if rcvMp, err := dataManager.MatchFilterIndex(utils.CacheSupplierFilterIndexes,
-		splProfile.Tenant, utils.MetaDefault, utils.META_ANY, utils.META_ANY); err != nil {
+		splProfile.Tenant, utils.META_NONE, utils.META_ANY, utils.META_ANY); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
@@ -1011,11 +1011,6 @@ func testITTestIndexingThresholds(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringMap{
-		"*default:*any:*any": utils.StringMap{
-			"TH1": true,
-			"TH2": true,
-			"TH3": true,
-		},
 		"*string:Account:1001": utils.StringMap{
 			"TH1": true,
 			"TH2": true,
@@ -1026,15 +1021,12 @@ func testITTestIndexingThresholds(t *testing.T) {
 	}
 	reverseIdxes := map[string]utils.StringMap{
 		"TH1": utils.StringMap{
-			"*default:*any:*any":   true,
 			"*string:Account:1001": true,
 		},
 		"TH2": utils.StringMap{
-			"*default:*any:*any":   true,
 			"*string:Account:1001": true,
 		},
 		"TH3": utils.StringMap{
-			"*default:*any:*any":   true,
 			"*string:Account:1002": true,
 		},
 	}
@@ -1060,10 +1052,9 @@ func testITTestIndexingThresholds(t *testing.T) {
 	eMp := utils.StringMap{
 		"TH1": true,
 		"TH2": true,
-		"TH3": true,
 	}
 	if rcvMp, err := dataManager.MatchFilterIndex(utils.CacheThresholdFilterIndexes, th.Tenant,
-		utils.MetaDefault, utils.META_ANY, utils.META_ANY); err != nil {
+		utils.MetaString, utils.Account, "1001"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)

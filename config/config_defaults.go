@@ -148,6 +148,7 @@ const CGRATES_CFG_JSON = `
 
 "filters": {								// Filters configuration (*new)
 	"stats_conns": [],						// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+	"indexes_selects":true,
 },
 
 

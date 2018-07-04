@@ -423,65 +423,7 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 		return
 	}
 	if withIndex {
-		//remove old ThresholdProfile indexes
-		indexerRemove := NewFilterIndexer(dm, utils.ThresholdProfilePrefix, th.Tenant)
-		if err = indexerRemove.RemoveItemFromIndex(th.ID); err != nil &&
-			err.Error() != utils.ErrNotFound.Error() {
-			return
-		}
-		indexer := NewFilterIndexer(dm, utils.ThresholdProfilePrefix, th.Tenant)
-		//Verify matching Filters for every FilterID from ThresholdProfile
-		fltrIDs := make([]string, len(th.FilterIDs))
-		for i, fltrID := range th.FilterIDs {
-			fltrIDs[i] = fltrID
-		}
-		if len(fltrIDs) == 0 {
-			fltrIDs = []string{utils.META_NONE}
-		}
-		for _, fltrID := range fltrIDs {
-			var fltr *Filter
-			if fltrID == utils.META_NONE {
-				fltr = &Filter{
-					Tenant: th.Tenant,
-					ID:     th.ID,
-					Rules: []*FilterRule{
-						&FilterRule{
-							Type:      utils.MetaDefault,
-							FieldName: utils.META_ANY,
-							Values:    []string{utils.META_ANY},
-						},
-					},
-				}
-			} else if fltr, err = dm.GetFilter(th.Tenant, fltrID,
-				false, utils.NonTransactional); err != nil {
-				if err == utils.ErrNotFound {
-					err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v",
-						fltrID, th)
-				}
-				return
-			}
-			for _, flt := range fltr.Rules {
-				var fldType, fldName string
-				var fldVals []string
-				if utils.IsSliceMember([]string{MetaString, MetaPrefix}, flt.Type) {
-					fldType, fldName = flt.Type, flt.FieldName
-					fldVals = flt.Values
-				} else {
-					fldType, fldName = utils.MetaDefault, utils.META_ANY
-					fldVals = []string{utils.META_ANY}
-				}
-				for _, fldVal := range fldVals {
-					if err = indexer.loadFldNameFldValIndex(fldType,
-						fldName, fldVal); err != nil && err != utils.ErrNotFound {
-						return err
-					}
-				}
-			}
-			indexer.IndexTPFilter(FilterToTPFilter(fltr), th.ID)
-		}
-		if err = indexer.StoreIndexes(true, utils.NonTransactional); err != nil {
-			return
-		}
+		return dm.createAndIndex(utils.ThresholdProfilePrefix, th.Tenant, th.ID, th.FilterIDs)
 	}
 	return
 }
@@ -533,64 +475,7 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 		return
 	}
 	if withIndex {
-		indexer := NewFilterIndexer(dm, utils.StatQueueProfilePrefix, sqp.Tenant)
-		//remove old StatQueueProfile indexes
-		if err = indexer.RemoveItemFromIndex(sqp.ID); err != nil &&
-			err.Error() != utils.ErrNotFound.Error() {
-			return
-		}
-		//Verify matching Filters for every FilterID from StatQueueProfile
-		fltrIDs := make([]string, len(sqp.FilterIDs))
-		for i, fltrID := range sqp.FilterIDs {
-			fltrIDs[i] = fltrID
-		}
-		if len(fltrIDs) == 0 {
-			fltrIDs = []string{utils.META_NONE}
-		}
-		for _, fltrID := range fltrIDs {
-			var fltr *Filter
-			if fltrID == utils.META_NONE {
-				fltr = &Filter{
-					Tenant: sqp.Tenant,
-					ID:     sqp.ID,
-					Rules: []*FilterRule{
-						&FilterRule{
-							Type:      utils.MetaDefault,
-							FieldName: utils.META_ANY,
-							Values:    []string{utils.META_ANY},
-						},
-					},
-				}
-			} else if fltr, err = dm.GetFilter(sqp.Tenant, fltrID,
-				false, utils.NonTransactional); err != nil {
-				if err == utils.ErrNotFound {
-					err = fmt.Errorf("broken reference to filter: %+v for statqueue: %+v",
-						fltrID, sqp)
-				}
-				return
-			}
-			for _, flt := range fltr.Rules {
-				var fldType, fldName string
-				var fldVals []string
-				if utils.IsSliceMember([]string{MetaString, MetaPrefix}, flt.Type) {
-					fldType, fldName = flt.Type, flt.FieldName
-					fldVals = flt.Values
-				} else {
-					fldType, fldName = utils.MetaDefault, utils.META_ANY
-					fldVals = []string{utils.META_ANY}
-				}
-				for _, fldVal := range fldVals {
-					if err = indexer.loadFldNameFldValIndex(fldType,
-						fldName, fldVal); err != nil && err != utils.ErrNotFound {
-						return err
-					}
-				}
-			}
-			indexer.IndexTPFilter(FilterToTPFilter(fltr), sqp.ID)
-		}
-		if err = indexer.StoreIndexes(true, utils.NonTransactional); err != nil {
-			return
-		}
+		return dm.createAndIndex(utils.StatQueueProfilePrefix, sqp.Tenant, sqp.ID, sqp.FilterIDs)
 	}
 	return
 }
@@ -726,62 +611,7 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 	}
 	//to be implemented in tests
 	if withIndex {
-		indexer := NewFilterIndexer(dm, utils.ResourceProfilesPrefix, rp.Tenant)
-		//remove old ResourceProfiles indexes
-		if err = indexer.RemoveItemFromIndex(rp.ID); err != nil &&
-			err.Error() != utils.ErrNotFound.Error() {
-			return
-		}
-		//Verify matching Filters for every FilterID from ResourceProfiles
-		fltrIDs := make([]string, len(rp.FilterIDs))
-		for i, fltrID := range rp.FilterIDs {
-			fltrIDs[i] = fltrID
-		}
-		if len(fltrIDs) == 0 {
-			fltrIDs = []string{utils.META_NONE}
-		}
-		for _, fltrID := range fltrIDs {
-			var fltr *Filter
-			if fltrID == utils.META_NONE {
-				fltr = &Filter{
-					Tenant: rp.Tenant,
-					ID:     rp.ID,
-					Rules: []*FilterRule{
-						&FilterRule{
-							Type:      utils.MetaDefault,
-							FieldName: utils.META_ANY,
-							Values:    []string{utils.META_ANY},
-						},
-					},
-				}
-			} else if fltr, err = dm.GetFilter(rp.Tenant, fltrID,
-				false, utils.NonTransactional); err != nil {
-				if err == utils.ErrNotFound {
-					err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v",
-						fltrID, rp)
-				}
-				return
-			}
-			for _, flt := range fltr.Rules {
-				var fldType, fldName string
-				var fldVals []string
-				if utils.IsSliceMember([]string{MetaString, MetaPrefix}, flt.Type) {
-					fldType, fldName = flt.Type, flt.FieldName
-					fldVals = flt.Values
-				} else {
-					fldType, fldName = utils.MetaDefault, utils.META_ANY
-					fldVals = []string{utils.META_ANY}
-				}
-				for _, fldVal := range fldVals {
-					if err = indexer.loadFldNameFldValIndex(fldType,
-						fldName, fldVal); err != nil && err != utils.ErrNotFound {
-						return err
-					}
-				}
-			}
-			indexer.IndexTPFilter(FilterToTPFilter(fltr), rp.ID)
-		}
-		if err = indexer.StoreIndexes(true, utils.NonTransactional); err != nil {
+		if err = dm.createAndIndex(utils.ResourceProfilesPrefix, rp.Tenant, rp.ID, rp.FilterIDs); err != nil {
 			return
 		}
 		Cache.Clear([]string{utils.CacheEventResources})
@@ -1214,66 +1044,8 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 	if err = dm.CacheDataFromDB(utils.SupplierProfilePrefix, []string{supp.TenantID()}, true); err != nil {
 		return
 	}
-	//to be implemented in tests
 	if withIndex {
-		indexer := NewFilterIndexer(dm, utils.SupplierProfilePrefix, supp.Tenant)
-		//remove old SupplierProfile indexes
-		if err = indexer.RemoveItemFromIndex(supp.ID); err != nil &&
-			err.Error() != utils.ErrNotFound.Error() {
-			return
-		}
-		//Verify matching Filters for every FilterID from SupplierProfile
-		fltrIDs := make([]string, len(supp.FilterIDs))
-		for i, fltrID := range supp.FilterIDs {
-			fltrIDs[i] = fltrID
-		}
-		if len(fltrIDs) == 0 {
-			fltrIDs = []string{utils.META_NONE}
-		}
-		for _, fltrID := range fltrIDs {
-			var fltr *Filter
-			if fltrID == utils.META_NONE {
-				fltr = &Filter{
-					Tenant: supp.Tenant,
-					ID:     supp.ID,
-					Rules: []*FilterRule{
-						&FilterRule{
-							Type:      utils.MetaDefault,
-							FieldName: utils.META_ANY,
-							Values:    []string{utils.META_ANY},
-						},
-					},
-				}
-			} else if fltr, err = dm.GetFilter(supp.Tenant, fltrID,
-				false, utils.NonTransactional); err != nil {
-				if err == utils.ErrNotFound {
-					err = fmt.Errorf("broken reference to filter: %+v for SupplierProfile: %+v",
-						fltrID, supp)
-				}
-				return
-			}
-			for _, flt := range fltr.Rules {
-				var fldType, fldName string
-				var fldVals []string
-				if utils.IsSliceMember([]string{MetaString, MetaPrefix}, flt.Type) {
-					fldType, fldName = flt.Type, flt.FieldName
-					fldVals = flt.Values
-				} else {
-					fldType, fldName = utils.MetaDefault, utils.META_ANY
-					fldVals = []string{utils.META_ANY}
-				}
-				for _, fldVal := range fldVals {
-					if err = indexer.loadFldNameFldValIndex(fldType,
-						fldName, fldVal); err != nil && err != utils.ErrNotFound {
-						return err
-					}
-				}
-			}
-			indexer.IndexTPFilter(FilterToTPFilter(fltr), supp.ID)
-		}
-		if err = indexer.StoreIndexes(true, utils.NonTransactional); err != nil {
-			return
-		}
+		return dm.createAndIndex(utils.SupplierProfilePrefix, supp.Tenant, supp.ID, supp.FilterIDs)
 	}
 	return
 }
@@ -1358,57 +1130,8 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 			}
 		}
 		for _, ctx := range ap.Contexts {
-			indexer := NewFilterIndexer(dm, utils.AttributeProfilePrefix, utils.ConcatenatedKey(ap.Tenant, ctx))
-			//Verify matching Filters for every FilterID from AttributeProfile
-			fltrIDs := make([]string, len(ap.FilterIDs))
-			for i, fltrID := range ap.FilterIDs {
-				fltrIDs[i] = fltrID
-			}
-			if len(fltrIDs) == 0 {
-				fltrIDs = []string{utils.META_NONE}
-			}
-			for _, fltrID := range fltrIDs {
-				var fltr *Filter
-				if fltrID == utils.META_NONE {
-					fltr = &Filter{
-						Tenant: ap.Tenant,
-						ID:     ap.ID,
-						Rules: []*FilterRule{
-							&FilterRule{
-								Type:      utils.MetaDefault,
-								FieldName: utils.META_ANY,
-								Values:    []string{utils.META_ANY},
-							},
-						},
-					}
-				} else if fltr, err = dm.GetFilter(ap.Tenant, fltrID,
-					false, utils.NonTransactional); err != nil {
-					if err == utils.ErrNotFound {
-						err = fmt.Errorf("broken reference to filter: %+v for AttributeProfile: %+v",
-							fltrID, ap)
-					}
-					return
-				}
-				for _, flt := range fltr.Rules {
-					var fldType, fldName string
-					var fldVals []string
-					if utils.IsSliceMember([]string{MetaString, MetaPrefix}, flt.Type) {
-						fldType, fldName = flt.Type, flt.FieldName
-						fldVals = flt.Values
-					} else {
-						fldType, fldName = utils.MetaDefault, utils.META_ANY
-						fldVals = []string{utils.META_ANY}
-					}
-					for _, fldVal := range fldVals {
-						if err = indexer.loadFldNameFldValIndex(fldType,
-							fldName, fldVal); err != nil && err != utils.ErrNotFound {
-							return err
-						}
-					}
-				}
-				indexer.IndexTPFilter(FilterToTPFilter(fltr), ap.ID)
-			}
-			if err = indexer.StoreIndexes(true, utils.NonTransactional); err != nil {
+			if err = dm.createAndIndex(utils.AttributeProfilePrefix,
+				utils.ConcatenatedKey(ap.Tenant, ctx), ap.ID, ap.FilterIDs); err != nil {
 				return
 			}
 		}
@@ -1432,4 +1155,62 @@ func (dm *DataManager) RemoveAttributeProfile(tenant, id string, contexts []stri
 		}
 	}
 	return
+}
+
+func (dm *DataManager) createAndIndex(itemPrefix, tenant, itemID string, filterIDs []string) (err error) {
+	indexer := NewFilterIndexer(dm, itemPrefix, tenant)
+	if err = indexer.RemoveItemFromIndex(itemID); err != nil &&
+		err.Error() != utils.ErrNotFound.Error() {
+		return
+	}
+	if itemPrefix == utils.AttributeProfilePrefix {
+		tenant = strings.Split(tenant, utils.InInFieldSep)[0]
+	}
+	fltrIDs := make([]string, len(filterIDs))
+	for i, fltrID := range filterIDs {
+		fltrIDs[i] = fltrID
+	}
+	if len(fltrIDs) == 0 {
+		fltrIDs = []string{utils.META_NONE}
+	}
+	for _, fltrID := range fltrIDs {
+		var fltr *Filter
+		if fltrID == utils.META_NONE {
+			fltr = &Filter{
+				Tenant: tenant,
+				ID:     itemID,
+				Rules: []*FilterRule{
+					&FilterRule{
+						Type:      utils.META_NONE,
+						FieldName: utils.META_ANY,
+						Values:    []string{utils.META_ANY},
+					},
+				},
+			}
+		} else if fltr, err = dm.GetFilter(tenant, fltrID,
+			false, utils.NonTransactional); err != nil {
+			if err == utils.ErrNotFound {
+				err = fmt.Errorf("broken reference to filter: %+v for itemType: %+v and ID: %+v",
+					fltrID, itemPrefix, itemID)
+			}
+			return
+		}
+		for _, flt := range fltr.Rules {
+			var fldType, fldName string
+			var fldVals []string
+			if utils.IsSliceMember([]string{MetaString, MetaPrefix, utils.META_NONE}, flt.Type) {
+				fldType, fldName = flt.Type, flt.FieldName
+				fldVals = flt.Values
+			}
+			for _, fldVal := range fldVals {
+				if err = indexer.loadFldNameFldValIndex(fldType,
+					fldName, fldVal); err != nil && err != utils.ErrNotFound {
+					return err
+				}
+			}
+		}
+		indexer.IndexTPFilter(FilterToTPFilter(fltr), itemID)
+	}
+	return indexer.StoreIndexes(true, utils.NonTransactional)
+
 }
