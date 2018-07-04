@@ -34,8 +34,8 @@ func (fSCfg *FilterSCfg) loadFromJsonCfg(jsnCfg *FilterSJsonCfg) (err error) {
 			fSCfg.StatSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
-	if jsnCfg.Indexes_selects != nil {
-		fSCfg.IndexedSelects = *jsnCfg.Indexes_selects
+	if jsnCfg.Indexed_selects != nil {
+		fSCfg.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	return
 }

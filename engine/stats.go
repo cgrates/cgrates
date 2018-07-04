@@ -148,7 +148,7 @@ func (sS *StatService) StoreStatQueue(sq *StatQueue) (err error) {
 func (sS *StatService) matchingStatQueuesForEvent(ev *utils.CGREvent) (sqs StatQueues, err error) {
 	matchingSQs := make(map[string]*StatQueue)
 	sqIDs, err := matchingItemIDsForEvent(ev.Event, sS.stringIndexedFields, sS.prefixIndexedFields,
-		sS.dm, utils.CacheStatFilterIndexes, ev.Tenant)
+		sS.dm, utils.CacheStatFilterIndexes, ev.Tenant, sS.filterS.cfg.FilterSCfg().IndexedSelects)
 	if err != nil {
 		return nil, err
 	}

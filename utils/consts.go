@@ -554,6 +554,7 @@ const (
 	MetaEvent                    = "*event"
 	MetaDryRun                   = "*dryrun"
 	Event                        = "Event"
+	EmptyString                  = ""
 )
 
 // Migrator Action

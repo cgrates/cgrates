@@ -117,7 +117,7 @@ func (spS *SupplierService) Shutdown() error {
 func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent) (sPrfls SupplierProfiles, err error) {
 	matchingLPs := make(map[string]*SupplierProfile)
 	sPrflIDs, err := matchingItemIDsForEvent(ev.Event, spS.stringIndexedFields, spS.prefixIndexedFields,
-		spS.dm, utils.CacheSupplierFilterIndexes, ev.Tenant)
+		spS.dm, utils.CacheSupplierFilterIndexes, ev.Tenant, spS.filterS.cfg.FilterSCfg().IndexedSelects)
 	if err != nil {
 		return nil, err
 	}

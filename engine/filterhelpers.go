@@ -28,8 +28,16 @@ import (
 // fieldIDs limits the fields which are checked against indexes
 // helper on top of dataDB.MatchFilterIndex, adding utils.ANY to list of fields queried
 func matchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldIDs *[]string,
-	dm *DataManager, cacheID, itemIDPrefix string) (itemIDs utils.StringMap, err error) {
+	dm *DataManager, cacheID, itemIDPrefix string, indexedSelects bool) (itemIDs utils.StringMap, err error) {
 	itemIDs = make(utils.StringMap)
+	if !indexedSelects {
+		sliceIDs, err := dm.DataDB().GetKeysForPrefix(itemIDPrefix)
+		if err != nil {
+			return nil, err
+		}
+		itemIDs = utils.StringMapFromSlice(sliceIDs)
+		return itemIDs, nil
+	}
 	allFieldIDs := make([]string, len(ev))
 	i := 0
 	for fldID := range ev {
@@ -37,9 +45,9 @@ func matchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 		i += 1
 	}
 	stringFieldVals := map[string]string{utils.ANY: utils.ANY} // cache here field string values, start with default one
-	filterIndexTypes := []string{MetaString, MetaPrefix, utils.MetaDefault}
+	filterIndexTypes := []string{MetaString, MetaPrefix, utils.META_NONE}
 	for i, fieldIDs := range []*[]string{stringFldIDs, prefixFldIDs, nil} { // same routine for both string and prefix filter types
-		if filterIndexTypes[i] == utils.MetaDefault {
+		if filterIndexTypes[i] == utils.META_NONE {
 			fieldIDs = &[]string{utils.ANY} // so we can query DB for unindexed filters
 		}
 		if fieldIDs == nil {
@@ -47,7 +55,7 @@ func matchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 		}
 		for _, fldName := range *fieldIDs {
 			fieldValIf, has := ev[fldName]
-			if !has && filterIndexTypes[i] != utils.MetaDefault {
+			if !has && filterIndexTypes[i] != utils.META_NONE {
 				continue
 			}
 			if _, cached := stringFieldVals[fldName]; !cached {

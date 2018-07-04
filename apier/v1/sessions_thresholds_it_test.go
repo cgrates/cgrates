@@ -114,8 +114,9 @@ func TestSessionSv1ItTPFromFolder(t *testing.T) {
 
 func TestSessionSv1ItGetThreshold(t *testing.T) {
 	tPrfl := &engine.ThresholdProfile{
-		Tenant: "cgrates.org",
-		ID:     "THD_ACNT_1001",
+		Tenant:    "cgrates.org",
+		ID:        "THD_ACNT_1001",
+		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
 		},
