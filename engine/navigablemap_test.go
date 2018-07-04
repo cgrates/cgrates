@@ -20,7 +20,7 @@ package engine
 import (
 	"encoding/xml"
 	"errors"
-	//"fmt"
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -509,27 +509,178 @@ func TestNavMapMarshalXML(t *testing.T) {
 				"SecondLevel2": map[string]interface{}{
 					"Field2": []*NMItem{
 						&NMItem{Path: []string{"FistLever2", "SecondLevel2", "Field2"},
-							Data:   "Value2",
-							Config: &config.CfgCdrField{Tag: "AttributeTest", AttributeID: "attribute1"}}},
+							Data:   "attrVal1",
+							Config: &config.CfgCdrField{Tag: "AttributeTest", AttributeID: "attribute1"}},
+						&NMItem{Path: []string{"FistLever2", "SecondLevel2", "Field2"},
+							Data: "Value2"}},
 				},
 				"Field3": []*NMItem{
 					&NMItem{Path: []string{"FistLever2", "Field3"},
 						Data: "Value3"}},
+				"Field5": []*NMItem{
+					&NMItem{Path: []string{"FistLever2", "Field5"},
+						Data: "Value5"},
+					&NMItem{Path: []string{"FistLever2", "Field5"},
+						Data:   "attrVal5",
+						Config: &config.CfgCdrField{Tag: "AttributeTest", AttributeID: "attribute5"}}},
 			},
 			"Field4": []*NMItem{
 				&NMItem{Path: []string{"Field4"},
-					Data: "Val4"}},
+					Data: "Val4"},
+				&NMItem{Path: []string{"Field4"},
+					Data:   "attrVal2",
+					Config: &config.CfgCdrField{Tag: "AttributeTest", AttributeID: "attribute2"}}},
 		},
 		order: [][]string{
 			[]string{"FistLever2", "SecondLevel2", "Field2"},
 			[]string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
 			[]string{"FistLever2", "Field3"},
+			[]string{"FistLever2", "Field5"},
 			[]string{"Field4"},
 		},
 	}
 	if output, err := xml.MarshalIndent(nm, "", "  "); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual([]byte(""), output) {
-		//fmt.Printf("received output: <%s>\n", output)
+		fmt.Printf("%s\n", output)
+	}
+}
+
+func TestNavMapAsXMLElements(t *testing.T) {
+	nM := &NavigableMap{
+		data: map[string]interface{}{
+			"FirstLevel": map[string]interface{}{
+				"SecondLevel": map[string]interface{}{
+					"ThirdLevel": map[string]interface{}{
+						"Fld1": []*NMItem{
+							&NMItem{Path: []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
+								Data: "Val1"}},
+					},
+				},
+			},
+			"FirstLevel2": map[string]interface{}{
+				"SecondLevel2": map[string]interface{}{
+					"Field2": []*NMItem{
+						&NMItem{Path: []string{"FirstLevel2", "SecondLevel2", "Field2"},
+							Data:   "attrVal1",
+							Config: &config.CfgCdrField{Tag: "AttributeTest", AttributeID: "attribute1"}},
+						&NMItem{Path: []string{"FirstLevel2", "SecondLevel2", "Field2"},
+							Data: "Value2"}},
+				},
+				"Field3": []*NMItem{
+					&NMItem{Path: []string{"FirstLevel2", "Field3"},
+						Data: "Value3"}},
+				"Field5": []*NMItem{
+					&NMItem{Path: []string{"FirstLevel2", "Field5"},
+						Data: "Value5"},
+					&NMItem{Path: []string{"FirstLevel2", "Field5"},
+						Data:   "attrVal5",
+						Config: &config.CfgCdrField{Tag: "AttributeTest", AttributeID: "attribute5"}}},
+			},
+			"Field4": []*NMItem{
+				&NMItem{Path: []string{"Field4"},
+					Data: "Val4"},
+				&NMItem{Path: []string{"Field4"},
+					Data:   "attrVal2",
+					Config: &config.CfgCdrField{Tag: "AttributeTest", AttributeID: "attribute2"}}},
+		},
+		order: [][]string{
+			[]string{"FirstLevel2", "SecondLevel2", "Field2"},
+			[]string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
+			[]string{"FirstLevel2", "Field3"},
+			[]string{"FirstLevel2", "Field5"},
+			[]string{"Field4"},
+		},
+	}
+	eXMLElmnts := []*XMLElement{
+		&XMLElement{
+			XMLName: xml.Name{Local: nM.order[0][0]},
+			Elements: []*XMLElement{
+				&XMLElement{
+					XMLName: xml.Name{Local: nM.order[0][1]},
+					Elements: []*XMLElement{
+						&XMLElement{
+							XMLName: xml.Name{Local: nM.order[0][2]},
+							Attributes: []*xml.Attr{
+								&xml.Attr{
+									Name:  xml.Name{Local: "attribute1"},
+									Value: "attrVal1",
+								},
+							},
+							Value: "Value2",
+						},
+					},
+				},
+				&XMLElement{
+					XMLName: xml.Name{Local: nM.order[2][1]},
+					Value:   "Value3",
+				},
+				&XMLElement{
+					XMLName: xml.Name{Local: nM.order[3][1]},
+					Attributes: []*xml.Attr{
+						&xml.Attr{
+							Name:  xml.Name{Local: "attribute5"},
+							Value: "attrVal5",
+						},
+					},
+					Value: "Value5",
+				},
+			},
+		},
+		&XMLElement{
+			XMLName: xml.Name{Local: nM.order[1][0]},
+			Elements: []*XMLElement{
+				&XMLElement{
+					XMLName: xml.Name{Local: nM.order[1][1]},
+					Elements: []*XMLElement{
+						&XMLElement{
+							XMLName: xml.Name{Local: nM.order[1][2]},
+							Elements: []*XMLElement{
+								&XMLElement{
+									XMLName: xml.Name{Local: nM.order[1][3]},
+									Value:   "Val1",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		&XMLElement{
+			XMLName: xml.Name{Local: nM.order[4][0]},
+			Attributes: []*xml.Attr{
+				&xml.Attr{
+					Name:  xml.Name{Local: "attribute2"},
+					Value: "attrVal2",
+				},
+			},
+			Value: "Val4",
+		},
+	}
+	xmlEnts, err := nM.AsXMLElements()
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eXMLElmnts, xmlEnts) {
+		t.Errorf("expecting: %s, received: %s", utils.ToJSON(eXMLElmnts), utils.ToJSON(xmlEnts))
+	}
+	eXML := []byte(`<FirstLevel2>
+  <SecondLevel2>
+    <Field2 attribute1="attrVal1">Value2</Field2>
+  </SecondLevel2>
+  <Field3>Value3</Field3>
+  <Field5 attribute5="attrVal5">Value5</Field5>
+</FirstLevel2>
+<FirstLevel>
+  <SecondLevel>
+    <ThirdLevel>
+      <Fld1>Val1</Fld1>
+    </ThirdLevel>
+  </SecondLevel>
+</FirstLevel>
+<Field4 attribute2="attrVal2">Val4</Field4>`)
+	if output, err := xml.MarshalIndent(xmlEnts, "", "  "); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eXML, output) {
+		fmt.Printf("expecting: \n%s, received: \n%s\n", string(eXML), string(output))
 	}
 }

@@ -22,7 +22,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"reflect"
+	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -185,67 +185,88 @@ func (nM *NavigableMap) Merge(nM2 *NavigableMap) {
 	}
 }
 
-// addNMItemToTokens will add a NMItem to tockens
-// if itm.Config.IsAttribute the item data is added as Attribute to lastElmnt
-// tokens and lastElmntIdx are overloaded on each function call
-func addNMItemToTokens(tokens *[]xml.Token, lastElmntIdx *int, itm *NMItem,
-	lastPath []string) (err error) {
-	strVal, canCast := utils.CastFieldIfToString(itm.Data)
-	if !canCast {
-		return fmt.Errorf("cannot cast field: %s to string", utils.ToJSON(itm.Data))
-	}
-	if *lastElmntIdx == -1 || len(itm.Path) <= 1 ||
-		!reflect.DeepEqual(itm.Path[:len(itm.Path)-1], lastPath) {
-		charData := []byte("")
-		if itm.Config == nil ||
-			itm.Config.AttributeID == "" { // not attribute but value
-			charData = []byte(strVal)
-		}
-		var elmLocal string
-		if len(itm.Path) != 0 {
-			elmLocal = itm.Path[len(itm.Path)-1]
-		}
-		t := xml.StartElement{Name: xml.Name{Local: elmLocal}}
-		*lastElmntIdx = len(*tokens)
-		tOut := append(*tokens, t, xml.CharData(charData), xml.EndElement{t.Name})
-		*tokens = tOut
-	}
-	if itm.Config != nil && itm.Config.AttributeID != "" {
-		tkns := *tokens
-		lstElm := tkns[*lastElmntIdx].(xml.StartElement)
-		lstElm.Attr = append(lstElm.Attr,
-			xml.Attr{xml.Name{Local: itm.Config.AttributeID}, strVal})
-	}
-	return
+// XMLElement is specially crafted to be automatically marshalled by encoding/xml
+type XMLElement struct {
+	XMLName    xml.Name
+	Value      string        `xml:",chardata"`
+	Attributes []*xml.Attr   `xml:",attr"`
+	Elements   []*XMLElement `xml:"omitempty"`
 }
 
-// MarshalXML implements xml.Marshaler
-func (nM *NavigableMap) MarshalXML(e *xml.Encoder, start xml.StartElement) (err error) {
-	tokens := []xml.Token{start}
-	var prevItem *NMItem
-	lastElmntIdx := utils.IntPointer(-1)
-	for _, itm := range nM.Values() {
-		nmItems, isNMItems := itm.([]*NMItem)
+// AsXMLElements returns the values as []*XMLElement which can be later marshaled
+// considers each value returned by .Values() in the form of []*NMItem, otherwise errors
+func (nM *NavigableMap) AsXMLElements() (ents []*XMLElement, err error) {
+	pathIdx := make(map[string]*XMLElement) // Keep the index of elements based on path
+	for _, val := range nM.Values() {
+		nmItms, isNMItems := val.([]*NMItem)
 		if !isNMItems {
-			return fmt.Errorf("map value: <%+v> not []*NMItem", nmItems)
+			return nil, fmt.Errorf("value: %+v is not []*NMItem", val)
 		}
-		var lastPath []string
-		if prevItem != nil {
-			lastPath = prevItem.Path
-		}
-		for _, itm := range nmItems {
-			if err = addNMItemToTokens(&tokens, lastElmntIdx, itm, lastPath); err != nil {
-				return
+		for _, nmItm := range nmItms {
+			val, canCast := utils.CastFieldIfToString(nmItm.Data)
+			if !canCast {
+				return nil,
+					fmt.Errorf("cannot cast value: <%s> to string", utils.ToJSON(nmItm.Data))
+			}
+			var pathCached bool
+			for i := len(nmItm.Path); i > 0; i-- {
+				var cachedElm *XMLElement
+				if cachedElm, pathCached = pathIdx[strings.Join(nmItm.Path[:i], "")]; !pathCached {
+					continue
+				}
+				if i == len(nmItm.Path) { // lastElmnt, overwrite value or add attribute
+					if nmItm.Config != nil &&
+						nmItm.Config.AttributeID != "" {
+						cachedElm.Attributes = append(cachedElm.Attributes,
+							&xml.Attr{xml.Name{Local: nmItm.Config.AttributeID}, val})
+					} else {
+						cachedElm.Value = val
+					}
+					break
+				}
+				// create elements in reverse order so we can append already created
+				var newElm *XMLElement
+				for j := len(nmItm.Path); j > i; j-- {
+					elm := &XMLElement{XMLName: xml.Name{Local: nmItm.Path[j-1]}}
+					pathIdx[strings.Join(nmItm.Path[:j], "")] = elm
+					if newElm == nil {
+						if nmItm.Config != nil &&
+							nmItm.Config.AttributeID != "" {
+							elm.Attributes = append(elm.Attributes,
+								&xml.Attr{xml.Name{Local: nmItm.Config.AttributeID}, val})
+						} else {
+							elm.Value = val
+						}
+						newElm = elm // last element
+					} else {
+						elm.Elements = append(elm.Elements, newElm)
+						newElm = elm
+					}
+				}
+				cachedElm.Elements = append(cachedElm.Elements, newElm)
+			}
+			if !pathCached { // not an update but new element to be created
+				var newElm *XMLElement
+				for i := len(nmItm.Path); i > 0; i-- {
+					elm := &XMLElement{XMLName: xml.Name{Local: nmItm.Path[i-1]}}
+					pathIdx[strings.Join(nmItm.Path[:i], "")] = elm
+					if newElm == nil { // last element, create data inside
+						if nmItm.Config != nil &&
+							nmItm.Config.AttributeID != "" {
+							elm.Attributes = append(elm.Attributes,
+								&xml.Attr{xml.Name{Local: nmItm.Config.AttributeID}, val})
+						} else {
+							elm.Value = val
+						}
+						newElm = elm // last element
+					} else {
+						elm.Elements = append(elm.Elements, newElm)
+						newElm = elm
+					}
+				}
+				ents = append(ents, newElm)
 			}
 		}
 	}
-	tokens = append(tokens, xml.EndElement{start.Name})
-	//fmt.Printf("## OUT: %s\n", utils.ToJSON(tokens))
-	for _, t := range tokens {
-		if err = e.EncodeToken(t); err != nil {
-			return err
-		}
-	}
-	// flush to ensure tokens are written
-	return e.Flush()
+	return
 }
