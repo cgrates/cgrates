@@ -780,7 +780,8 @@ func TestCgrCfgJSONDefaultsUserS(t *testing.T) {
 
 func TestCgrCfgJSONDefaultFiltersCfg(t *testing.T) {
 	eFiltersCfg := &FilterSCfg{
-		StatSConns: []*HaPoolConfig{},
+		StatSConns:     []*HaPoolConfig{},
+		IndexedSelects: true,
 	}
 	if !reflect.DeepEqual(cgrCfg.filterSCfg, eFiltersCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.filterSCfg, eFiltersCfg)
