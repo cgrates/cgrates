@@ -203,6 +203,9 @@ func (nM *NavigableMap) AsXMLElements() (ents []*XMLElement, err error) {
 			return nil, fmt.Errorf("value: %+v is not []*NMItem", val)
 		}
 		for _, nmItm := range nmItms {
+			if nmItm.Config != nil && nmItm.Config.NewBranch {
+				pathIdx = make(map[string]*XMLElement) // reset cache so we can start having other elements with same path
+			}
 			val, canCast := utils.CastFieldIfToString(nmItm.Data)
 			if !canCast {
 				return nil,

@@ -20,7 +20,6 @@ package engine
 import (
 	"encoding/xml"
 	"errors"
-	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -493,59 +492,6 @@ func TestNavMapString(t *testing.T) {
 	}
 }
 
-func TestNavMapMarshalXML(t *testing.T) {
-	nm := &NavigableMap{
-		data: map[string]interface{}{
-			"FirstLevel": map[string]interface{}{
-				"SecondLevel": map[string]interface{}{
-					"ThirdLevel": map[string]interface{}{
-						"Fld1": []*NMItem{
-							&NMItem{Path: []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
-								Data: "Val1"}},
-					},
-				},
-			},
-			"FistLever2": map[string]interface{}{
-				"SecondLevel2": map[string]interface{}{
-					"Field2": []*NMItem{
-						&NMItem{Path: []string{"FistLever2", "SecondLevel2", "Field2"},
-							Data:   "attrVal1",
-							Config: &config.CfgCdrField{Tag: "AttributeTest", AttributeID: "attribute1"}},
-						&NMItem{Path: []string{"FistLever2", "SecondLevel2", "Field2"},
-							Data: "Value2"}},
-				},
-				"Field3": []*NMItem{
-					&NMItem{Path: []string{"FistLever2", "Field3"},
-						Data: "Value3"}},
-				"Field5": []*NMItem{
-					&NMItem{Path: []string{"FistLever2", "Field5"},
-						Data: "Value5"},
-					&NMItem{Path: []string{"FistLever2", "Field5"},
-						Data:   "attrVal5",
-						Config: &config.CfgCdrField{Tag: "AttributeTest", AttributeID: "attribute5"}}},
-			},
-			"Field4": []*NMItem{
-				&NMItem{Path: []string{"Field4"},
-					Data: "Val4"},
-				&NMItem{Path: []string{"Field4"},
-					Data:   "attrVal2",
-					Config: &config.CfgCdrField{Tag: "AttributeTest", AttributeID: "attribute2"}}},
-		},
-		order: [][]string{
-			[]string{"FistLever2", "SecondLevel2", "Field2"},
-			[]string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
-			[]string{"FistLever2", "Field3"},
-			[]string{"FistLever2", "Field5"},
-			[]string{"Field4"},
-		},
-	}
-	if output, err := xml.MarshalIndent(nm, "", "  "); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual([]byte(""), output) {
-		fmt.Printf("%s\n", output)
-	}
-}
-
 func TestNavMapAsXMLElements(t *testing.T) {
 	nM := &NavigableMap{
 		data: map[string]interface{}{
@@ -576,6 +522,14 @@ func TestNavMapAsXMLElements(t *testing.T) {
 					&NMItem{Path: []string{"FirstLevel2", "Field5"},
 						Data:   "attrVal5",
 						Config: &config.CfgCdrField{Tag: "AttributeTest", AttributeID: "attribute5"}}},
+				"Field6": []*NMItem{
+					&NMItem{Path: []string{"FirstLevel2", "Field6"},
+						Data:   "Value6",
+						Config: &config.CfgCdrField{Tag: "NewBranchTest", NewBranch: true}},
+					&NMItem{Path: []string{"FirstLevel2", "Field6"},
+						Data:   "attrVal6",
+						Config: &config.CfgCdrField{Tag: "AttributeTest", AttributeID: "attribute6"}},
+				},
 			},
 			"Field4": []*NMItem{
 				&NMItem{Path: []string{"Field4"},
@@ -590,6 +544,7 @@ func TestNavMapAsXMLElements(t *testing.T) {
 			[]string{"FirstLevel2", "Field3"},
 			[]string{"FirstLevel2", "Field5"},
 			[]string{"Field4"},
+			[]string{"FirstLevel2", "Field6"},
 		},
 	}
 	eXMLElmnts := []*XMLElement{
@@ -656,6 +611,21 @@ func TestNavMapAsXMLElements(t *testing.T) {
 			},
 			Value: "Val4",
 		},
+		&XMLElement{
+			XMLName: xml.Name{Local: nM.order[5][0]},
+			Elements: []*XMLElement{
+				&XMLElement{
+					XMLName: xml.Name{Local: nM.order[5][1]},
+					Attributes: []*xml.Attr{
+						&xml.Attr{
+							Name:  xml.Name{Local: "attribute6"},
+							Value: "attrVal6",
+						},
+					},
+					Value: "Value6",
+				},
+			},
+		},
 	}
 	xmlEnts, err := nM.AsXMLElements()
 	if err != nil {
@@ -677,10 +647,13 @@ func TestNavMapAsXMLElements(t *testing.T) {
     </ThirdLevel>
   </SecondLevel>
 </FirstLevel>
-<Field4 attribute2="attrVal2">Val4</Field4>`)
+<Field4 attribute2="attrVal2">Val4</Field4>
+<FirstLevel2>
+  <Field6 attribute6="attrVal6">Value6</Field6>
+</FirstLevel2>`)
 	if output, err := xml.MarshalIndent(xmlEnts, "", "  "); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eXML, output) {
-		fmt.Printf("expecting: \n%s, received: \n%s\n", string(eXML), string(output))
+		t.Errorf("expecting: \n%s, received: \n%s\n", string(eXML), string(output))
 	}
 }
