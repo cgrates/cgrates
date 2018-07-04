@@ -423,7 +423,7 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 		return
 	}
 	if withIndex {
-		return dm.createAndIndex(utils.ThresholdProfilePrefix, th.Tenant, th.ID, th.FilterIDs)
+		return createAndIndex(utils.ThresholdProfilePrefix, th.Tenant, utils.EmptyString, th.ID, th.FilterIDs, dm)
 	}
 	return
 }
@@ -475,7 +475,7 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 		return
 	}
 	if withIndex {
-		return dm.createAndIndex(utils.StatQueueProfilePrefix, sqp.Tenant, sqp.ID, sqp.FilterIDs)
+		return createAndIndex(utils.StatQueueProfilePrefix, sqp.Tenant, utils.EmptyString, sqp.ID, sqp.FilterIDs, dm)
 	}
 	return
 }
@@ -611,7 +611,7 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 	}
 	//to be implemented in tests
 	if withIndex {
-		if err = dm.createAndIndex(utils.ResourceProfilesPrefix, rp.Tenant, rp.ID, rp.FilterIDs); err != nil {
+		if err = createAndIndex(utils.ResourceProfilesPrefix, rp.Tenant, utils.EmptyString, rp.ID, rp.FilterIDs, dm); err != nil {
 			return
 		}
 		Cache.Clear([]string{utils.CacheEventResources})
@@ -1045,7 +1045,7 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 		return
 	}
 	if withIndex {
-		return dm.createAndIndex(utils.SupplierProfilePrefix, supp.Tenant, supp.ID, supp.FilterIDs)
+		return createAndIndex(utils.SupplierProfilePrefix, supp.Tenant, utils.EmptyString, supp.ID, supp.FilterIDs, dm)
 	}
 	return
 }
@@ -1130,8 +1130,8 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 			}
 		}
 		for _, ctx := range ap.Contexts {
-			if err = dm.createAndIndex(utils.AttributeProfilePrefix,
-				utils.ConcatenatedKey(ap.Tenant, ctx), ap.ID, ap.FilterIDs); err != nil {
+			if err = createAndIndex(utils.AttributeProfilePrefix,
+				ap.Tenant, ctx, ap.ID, ap.FilterIDs, dm); err != nil {
 				return
 			}
 		}
@@ -1155,62 +1155,4 @@ func (dm *DataManager) RemoveAttributeProfile(tenant, id string, contexts []stri
 		}
 	}
 	return
-}
-
-func (dm *DataManager) createAndIndex(itemPrefix, tenant, itemID string, filterIDs []string) (err error) {
-	indexer := NewFilterIndexer(dm, itemPrefix, tenant)
-	if err = indexer.RemoveItemFromIndex(itemID); err != nil &&
-		err.Error() != utils.ErrNotFound.Error() {
-		return
-	}
-	if itemPrefix == utils.AttributeProfilePrefix {
-		tenant = strings.Split(tenant, utils.InInFieldSep)[0]
-	}
-	fltrIDs := make([]string, len(filterIDs))
-	for i, fltrID := range filterIDs {
-		fltrIDs[i] = fltrID
-	}
-	if len(fltrIDs) == 0 {
-		fltrIDs = []string{utils.META_NONE}
-	}
-	for _, fltrID := range fltrIDs {
-		var fltr *Filter
-		if fltrID == utils.META_NONE {
-			fltr = &Filter{
-				Tenant: tenant,
-				ID:     itemID,
-				Rules: []*FilterRule{
-					&FilterRule{
-						Type:      utils.META_NONE,
-						FieldName: utils.META_ANY,
-						Values:    []string{utils.META_ANY},
-					},
-				},
-			}
-		} else if fltr, err = dm.GetFilter(tenant, fltrID,
-			false, utils.NonTransactional); err != nil {
-			if err == utils.ErrNotFound {
-				err = fmt.Errorf("broken reference to filter: %+v for itemType: %+v and ID: %+v",
-					fltrID, itemPrefix, itemID)
-			}
-			return
-		}
-		for _, flt := range fltr.Rules {
-			var fldType, fldName string
-			var fldVals []string
-			if utils.IsSliceMember([]string{MetaString, MetaPrefix, utils.META_NONE}, flt.Type) {
-				fldType, fldName = flt.Type, flt.FieldName
-				fldVals = flt.Values
-			}
-			for _, fldVal := range fldVals {
-				if err = indexer.loadFldNameFldValIndex(fldType,
-					fldName, fldVal); err != nil && err != utils.ErrNotFound {
-					return err
-				}
-			}
-		}
-		indexer.IndexTPFilter(FilterToTPFilter(fltr), itemID)
-	}
-	return indexer.StoreIndexes(true, utils.NonTransactional)
-
 }

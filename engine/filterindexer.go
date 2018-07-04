@@ -196,3 +196,62 @@ func (rfi *FilterIndexer) RemoveItemFromIndex(itemID string) (err error) {
 	rfi.reveseIndex[itemID] = make(utils.StringMap) //Force deleting in driver
 	return rfi.StoreIndexes(false, utils.NonTransactional)
 }
+
+//createAndIndex create indexes for an item
+func createAndIndex(itemPrefix, tenant, context, itemID string, filterIDs []string, dm *DataManager) (err error) {
+	indexerKey := tenant
+	if context != "" {
+		indexerKey = utils.ConcatenatedKey(tenant, context)
+	}
+	indexer := NewFilterIndexer(dm, itemPrefix, indexerKey)
+	if err = indexer.RemoveItemFromIndex(itemID); err != nil &&
+		err.Error() != utils.ErrNotFound.Error() {
+		return
+	}
+	fltrIDs := make([]string, len(filterIDs))
+	for i, fltrID := range filterIDs {
+		fltrIDs[i] = fltrID
+	}
+	if len(fltrIDs) == 0 {
+		fltrIDs = []string{utils.META_NONE}
+	}
+	for _, fltrID := range fltrIDs {
+		var fltr *Filter
+		if fltrID == utils.META_NONE {
+			fltr = &Filter{
+				Tenant: tenant,
+				ID:     itemID,
+				Rules: []*FilterRule{
+					&FilterRule{
+						Type:      utils.META_NONE,
+						FieldName: utils.META_ANY,
+						Values:    []string{utils.META_ANY},
+					},
+				},
+			}
+		} else if fltr, err = dm.GetFilter(tenant, fltrID,
+			false, utils.NonTransactional); err != nil {
+			if err == utils.ErrNotFound {
+				err = fmt.Errorf("broken reference to filter: %+v for itemType: %+v and ID: %+v",
+					fltrID, itemPrefix, itemID)
+			}
+			return
+		}
+		for _, flt := range fltr.Rules {
+			var fldType, fldName string
+			var fldVals []string
+			if utils.IsSliceMember([]string{MetaString, MetaPrefix, utils.META_NONE}, flt.Type) {
+				fldType, fldName = flt.Type, flt.FieldName
+				fldVals = flt.Values
+			}
+			for _, fldVal := range fldVals {
+				if err = indexer.loadFldNameFldValIndex(fldType,
+					fldName, fldVal); err != nil && err != utils.ErrNotFound {
+					return err
+				}
+			}
+		}
+		indexer.IndexTPFilter(FilterToTPFilter(fltr), itemID)
+	}
+	return indexer.StoreIndexes(true, utils.NonTransactional)
+}

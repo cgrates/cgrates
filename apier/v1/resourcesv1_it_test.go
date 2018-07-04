@@ -143,8 +143,7 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(500) * time.Millisecond)
-	args.CGREvent.Event = map[string]interface{}{"Destination": "10"}
+	args.CGREvent.Event = map[string]interface{}{"Destination": "10", "Account": "1001"}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
 		t.Error(err)
 	}
@@ -165,6 +164,7 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(time.Duration(500) * time.Millisecond)
 	if len(*reply) != 2 {
 		t.Errorf("Expecting: %+v, received: %+v", 2, len(*reply))
 	}
@@ -173,6 +173,7 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(time.Duration(500) * time.Millisecond)
 	if len(*reply) != 1 {
 		t.Errorf("Expecting: %+v, received: %+v", 1, len(*reply))
 	}
@@ -601,7 +602,7 @@ func testV1RsSetResourceProfile(t *testing.T) {
 			&engine.FilterRule{
 				FieldName: "*string",
 				Type:      "Account",
-				Values:    []string{"1001", "1002"},
+				Values:    []string{"dan"},
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
