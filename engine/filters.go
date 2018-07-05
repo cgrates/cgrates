@@ -46,7 +46,7 @@ const (
 
 func NewFilterS(cfg *config.CGRConfig,
 	statSChan chan rpcclient.RpcClientConnection, dm *DataManager) *FilterS {
-	return &FilterS{statSChan: statSChan, dm: dm}
+	return &FilterS{statSChan: statSChan, dm: dm, cfg: cfg}
 }
 
 // FilterS is a service used to take decisions in case of filters
