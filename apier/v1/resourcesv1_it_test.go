@@ -143,6 +143,7 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
+	time.Sleep(time.Duration(500) * time.Millisecond)
 	args.CGREvent.Event = map[string]interface{}{"Destination": "10", "Account": "1001"}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
 		t.Error(err)

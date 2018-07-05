@@ -49,7 +49,8 @@ var tEvs = []*utils.CGREvent{
 			utils.EventType:     utils.AccountUpdate,
 			utils.Account:       "1002",
 			utils.AllowNegative: true,
-			utils.Disabled:      false}},
+			utils.Disabled:      false,
+			utils.Units:         12.3}},
 	&utils.CGREvent{ // hitting THD_ACNT_BALANCE_1
 		Tenant: "cgrates.org",
 		ID:     "event2",
@@ -253,10 +254,9 @@ func testV1TSGetThresholds(t *testing.T) {
 func testV1TSProcessEvent(t *testing.T) {
 	var ids []string
 	eIDs := []string{}
-	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[0], &ids); err != nil {
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[0], &ids); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
-	} else if !reflect.DeepEqual(ids, eIDs) {
-		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
 	eIDs = []string{"THD_ACNT_BALANCE_1"}
 	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[1], &ids); err != nil {
@@ -369,13 +369,13 @@ func testV1TSSetThresholdProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := tSv1Rpc.Call("ApierV1.GetThresholdProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil ||
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	tPrfl = &engine.ThresholdProfile{
 		Tenant:    "cgrates.org",
-		ID:        "TEST_PROFILE1",
+		ID:        "THD_Test",
 		FilterIDs: []string{"TestFilter"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -394,7 +394,7 @@ func testV1TSSetThresholdProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	if err := tSv1Rpc.Call("ApierV1.GetThresholdProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl, reply)
@@ -408,8 +408,8 @@ func testV1TSUpdateThresholdProfile(t *testing.T) {
 		ID:     "TestFilter2",
 		Rules: []*engine.FilterRule{
 			&engine.FilterRule{
-				FieldName: "*string",
-				Type:      "Account",
+				FieldName: "*prefix",
+				Type:      "Destination",
 				Values:    []string{"10", "20"},
 			},
 		},
@@ -433,7 +433,7 @@ func testV1TSUpdateThresholdProfile(t *testing.T) {
 	time.Sleep(time.Duration(100 * time.Millisecond)) // mongo is async
 	var reply *engine.ThresholdProfile
 	if err := tSv1Rpc.Call("ApierV1.GetThresholdProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl, reply)
@@ -443,14 +443,14 @@ func testV1TSUpdateThresholdProfile(t *testing.T) {
 func testV1TSRemoveThresholdProfile(t *testing.T) {
 	var resp string
 	if err := tSv1Rpc.Call("ApierV1.RemoveThresholdProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
 	var sqp *engine.ThresholdProfile
 	if err := tSv1Rpc.Call("ApierV1.GetThresholdProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &sqp); err == nil ||
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &sqp); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
