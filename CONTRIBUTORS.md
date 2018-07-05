@@ -66,6 +66,7 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @deanone-noc | dean one noc |
 | @cruzccl | Carlos Cruz Luengo |
 | @petekelly | Peter Kelly |
+| @vtzan | Vasilios Tzanoudakis |
 
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
