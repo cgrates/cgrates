@@ -385,7 +385,6 @@ func startHTTPAgent(internalSMGChan chan rpcclient.RpcClientConnection,
 				agntCfg.Timezone, agntCfg.RequestPayload,
 				agntCfg.ReplyPayload, agntCfg.RequestProcessors))
 	}
-	exitChan <- true
 }
 
 func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
@@ -893,7 +892,8 @@ func startDispatcherService(internalDispatcherSChan, internalRaterChan chan rpcc
 func startRpc(server *utils.Server, internalRaterChan,
 	internalCdrSChan, internalCdrStatSChan, internalPubSubSChan, internalUserSChan,
 	internalAliaseSChan, internalRsChan, internalStatSChan,
-	internalSMGChan, internalDispatcherSChan chan rpcclient.RpcClientConnection) {
+	internalSMGChan, internalDispatcherSChan chan rpcclient.RpcClientConnection,
+	exitChan chan bool) {
 	select { // Any of the rpc methods will unlock listening to rpc requests
 	case resp := <-internalRaterChan:
 		internalRaterChan <- resp
@@ -925,6 +925,7 @@ func startRpc(server *utils.Server, internalRaterChan,
 		cfg.HTTPWSURL,
 		cfg.HTTPUseBasicAuth,
 		cfg.HTTPAuthUsers,
+		exitChan,
 	)
 	if cfg.RPCGOBTLSListen != "" {
 		if cfg.TLSServerCerificate == "" || cfg.TLSServerKey == "" {
@@ -1244,7 +1245,7 @@ func main() {
 	// Serve rpc connections
 	go startRpc(server, internalRaterChan, internalCdrSChan, internalCdrStatSChan,
 		internalPubSubSChan, internalUserSChan, internalAliaseSChan, internalRsChan,
-		internalStatSChan, internalSMGChan, internalDispatcherSChan)
+		internalStatSChan, internalSMGChan, internalDispatcherSChan, exitChan)
 	<-exitChan
 
 	if *memprofile != "" {

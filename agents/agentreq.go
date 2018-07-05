@@ -116,7 +116,7 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.CfgCdrField) (
 		if err != nil {
 			return nil, err
 		}
-		nM.Set(strings.Split(tplFld.FieldId, utils.HIERARCHY_SEP), out, true)
+		nM.Set(strings.Split(tplFld.FieldId, utils.NestingSep), out, true)
 	}
 	return
 }
@@ -159,7 +159,7 @@ func (ar *AgentRequest) composedField(outTpl utils.RSRFields) (outVal string) {
 			}
 			continue
 		}
-		valStr, err := ar.FieldAsString(strings.Split(rsrTpl.Id, utils.HIERARCHY_SEP))
+		valStr, err := ar.FieldAsString(strings.Split(rsrTpl.Id, utils.NestingSep))
 		if err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> %s",
@@ -169,7 +169,7 @@ func (ar *AgentRequest) composedField(outTpl utils.RSRFields) (outVal string) {
 		if parsed, err := rsrTpl.Parse(valStr); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> %s",
-					utils.RadiusAgent, err.Error()))
+					utils.HTTPAgent, err.Error()))
 		} else {
 			outVal += parsed
 		}

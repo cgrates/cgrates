@@ -246,6 +246,7 @@ func TestHttpAgentCfg(t *testing.T) {
 {
 "http_agent": [
 	{
+		"id": "conecto1",
 		"url": "/conecto",					// relative URL for requests coming in
 		"sessions_conns": [
 			{"address": "*internal"}		// connection towards SessionService
@@ -262,6 +263,7 @@ func TestHttpAgentCfg(t *testing.T) {
 	eCgrCfg, _ := NewDefaultCGRConfig()
 	eCgrCfg.httpAgentCfg = []*HttpAgentCfg{
 		&HttpAgentCfg{
+			ID:  "conecto1",
 			Url: "/conecto",
 			Tenant: utils.ParseRSRFieldsMustCompile("^cgrates.org",
 				utils.INFIELD_SEP),

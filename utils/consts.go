@@ -654,6 +654,7 @@ const (
 	MetaAuth      = "*auth"
 	APIKey        = "APIKey"
 	APIMethods    = "APIMethods"
+	NestingSep    = "."
 )
 
 // MetaFilterIndexesAPIs

@@ -185,7 +185,7 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
-	useBasicAuth bool, userList map[string]string) {
+	useBasicAuth bool, userList map[string]string, exitChan chan bool) {
 	s.RLock()
 	enabled := s.rpcEnabled
 	s.RUnlock()
@@ -228,6 +228,7 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 	}
 	Logger.Info(fmt.Sprintf("<HTTP> start listening at <%s>", addr))
 	http.ListenAndServe(addr, nil)
+	exitChan <- true
 }
 
 func (s *Server) ServeBiJSON(addr string, onConn func(*rpc2.Client), onDis func(*rpc2.Client)) {

@@ -238,7 +238,7 @@ func (fltr *FilterRule) Pass(dP DataProvider, rpcClnt rpcclient.RpcClientConnect
 }
 
 func (fltr *FilterRule) passString(dP DataProvider) (bool, error) {
-	strVal, err := dP.FieldAsString(strings.Split(fltr.FieldName, utils.HIERARCHY_SEP))
+	strVal, err := dP.FieldAsString(strings.Split(fltr.FieldName, utils.NestingSep))
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -254,7 +254,7 @@ func (fltr *FilterRule) passString(dP DataProvider) (bool, error) {
 }
 
 func (fltr *FilterRule) passStringPrefix(dP DataProvider) (bool, error) {
-	strVal, err := dP.FieldAsString(strings.Split(fltr.FieldName, utils.HIERARCHY_SEP))
+	strVal, err := dP.FieldAsString(strings.Split(fltr.FieldName, utils.NestingSep))
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -275,7 +275,7 @@ func (fltr *FilterRule) passTimings(dP DataProvider) (bool, error) {
 }
 
 func (fltr *FilterRule) passDestinations(dP DataProvider) (bool, error) {
-	dst, err := dP.FieldAsString(strings.Split(fltr.FieldName, utils.HIERARCHY_SEP))
+	dst, err := dP.FieldAsString(strings.Split(fltr.FieldName, utils.NestingSep))
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -298,7 +298,7 @@ func (fltr *FilterRule) passDestinations(dP DataProvider) (bool, error) {
 
 func (fltr *FilterRule) passRSR(dP DataProvider) (bool, error) {
 	for _, rsrFld := range fltr.rsrFields {
-		fldIface, err := dP.FieldAsInterface(strings.Split(rsrFld.Id, utils.HIERARCHY_SEP))
+		fldIface, err := dP.FieldAsInterface(strings.Split(rsrFld.Id, utils.NestingSep))
 		if err != nil {
 			if err == utils.ErrNotFound {
 				return false, nil
@@ -338,7 +338,7 @@ func (fltr *FilterRule) passStatS(dP DataProvider,
 }
 
 func (fltr *FilterRule) passGreaterThan(dP DataProvider) (bool, error) {
-	fldIf, err := dP.FieldAsInterface(strings.Split(fltr.FieldName, utils.HIERARCHY_SEP))
+	fldIf, err := dP.FieldAsInterface(strings.Split(fltr.FieldName, utils.NestingSep))
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil

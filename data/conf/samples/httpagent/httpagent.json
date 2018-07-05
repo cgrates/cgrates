@@ -1,0 +1,75 @@
+{
+
+
+"http_agent": [
+	{
+		"id": "conecto1",
+		"url": "/conecto",
+		"sessions_conns": [
+			{"address": "*internal"}
+		],
+		"tenant": "^cgrates.org",
+		"timezone": "",
+		"request_payload":	"*url",
+		"reply_payload":	"*xml",
+		"request_processors": [
+			{
+				"id": "OutboundAUTH",
+				"filters": ["*string:*request.request_type:OutboundAUTH"],
+				"flags": ["*dryrun", "*auth", "*accounts", "*attributes"],
+				"continue_on_success": false,
+				"request_fields":[
+					{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
+						"value": "*pseudoprepaid", "mandatory": true},	
+					{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 
+						"value": "*request.CallID", "mandatory": true},
+					{"tag": "Account", "field_id": "Account", "type": "*composed", 
+						"value": "*request.Msisdn", "mandatory": true},
+					{"tag": "Destination", "field_id": "Destination", "type": "*composed", 
+						"value": "*request.Destination", "mandatory": true},
+					{"tag": "SetupTime", "field_id": "SetupTime", "type": "*constant", 
+						"value": "*now", "mandatory": true},
+				],
+				"reply_fields":[
+					{"tag": "Allow", "field_id": "response.Allow", "type": "*constant", 
+						"value": "1", "mandatory": true},
+					//{"tag": "MaxDuration", "field_id": "response.MaxDuration", "type": "*composed", 
+					//	"value": "*cgrReply.MaxUsage{*duration_seconds}", "mandatory": true},
+					{"tag": "MaxDuration", "field_id": "response.MaxDuration", "type": "*constant", 
+						"value": "1200", "mandatory": true},
+				],
+			},
+			{
+				"id": "mtcall_cdr",
+				"filters": ["*string:*request.request_type:MTCALL_CDR"],
+				"flags": ["*dryrun", "*cdrs"],
+				"continue_on_success": false,
+				"request_fields":[
+					{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
+						"value": "*pseudoprepaid", "mandatory": true},	
+					{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 
+						"value": "*request.CDR_ID", "mandatory": true},
+					{"tag": "Account", "field_id": "Account", "type": "*composed", 
+						"value": "*request.msisdn", "mandatory": true},
+					{"tag": "Destination", "field_id": "Destination", "type": "*composed", 
+						"value": "*request.destination", "mandatory": true},
+					{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", 
+						"value": "*request.timestamp", "mandatory": true},
+					{"tag": "AnswerTime", "field_id": "SetupTime", "type": "*composed", 
+						"value": "*request.timestamp", "mandatory": true},
+					{"tag": "Usage", "field_id": "Usage", "type": "*composed", 
+						"value": "*request.leg_duration;^s", "mandatory": true},
+				],
+				"reply_fields":[
+					{"tag": "CDR_ID", "field_id": "CDR_RESPONSE.CDR_ID", "type": "*composed", 
+						"value": "*request.CDR_ID", "mandatory": true},
+					{"tag": "CDR_STATUS", "field_id": "CDR_RESPONSE.CDR_STATUS", "type": "*constant", 
+						"value": "1", "mandatory": true},
+				],
+			}
+		],
+	},
+],
+
+
+}

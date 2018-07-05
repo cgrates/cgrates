@@ -37,7 +37,7 @@ func NewHTTPAgent(
 	filterS *engine.FilterS, tenantCfg utils.RSRFields,
 	dfltTenant, timezone, reqPayload, rplyPayload string,
 	reqProcessors []*config.HttpAgntProcCfg) *HTTPAgent {
-	return &HTTPAgent{sessionS: sessionS,
+	return &HTTPAgent{sessionS: sessionS, filterS: filterS,
 		dfltTenant: dfltTenant, timezone: timezone,
 		reqPayload: reqPayload, rplyPayload: rplyPayload,
 		reqProcessors: reqProcessors}
@@ -125,6 +125,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 		utils.MetaTerminate, utils.MetaEvent} {
 		if reqProcessor.Flags.HasKey(typ) { // request type is identified through flags
 			reqType = typ
+			break
 		}
 	}
 	switch reqType {
@@ -206,8 +207,8 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 			return
 		}
 	}
-	if reqProcessor.Flags.HasKey(utils.MetaCDRs) &&
-		utils.IsSliceMember([]string{utils.MetaTerminate, utils.MetaEvent}, reqType) {
+	// separate request so we can capture the Terminate/Event also here
+	if reqProcessor.Flags.HasKey(utils.MetaCDRs) {
 		var rplyCDRs string
 		if err = ha.sessionS.Call(utils.SessionSv1ProcessCDR,
 			*cgrEv, &rplyCDRs); err != nil {
@@ -224,5 +225,5 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 			fmt.Sprintf("<%s> DRY_RUN, HTTP reply: %s",
 				utils.HTTPAgent, agReq.Reply))
 	}
-	return
+	return true, nil
 }

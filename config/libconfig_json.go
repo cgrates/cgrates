@@ -379,6 +379,7 @@ type RAReqProcessorJsnCfg struct {
 
 // Conecto Agent configuration section
 type HttpAgentJsonCfg struct {
+	Id                 *string
 	Url                *string
 	Sessions_conns     *[]*HaPoolJsonCfg
 	Tenant             *string

@@ -23,6 +23,7 @@ import (
 )
 
 type HttpAgentCfg struct {
+	ID                string // identifier for the agent, so we can update it's processors
 	Url               string
 	SessionSConns     []*HaPoolConfig
 	Tenant            utils.RSRFields
@@ -35,6 +36,9 @@ type HttpAgentCfg struct {
 func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
+	}
+	if jsnCfg.Id != nil {
+		ca.ID = *jsnCfg.Id
 	}
 	if jsnCfg.Url != nil {
 		ca.Url = *jsnCfg.Url

@@ -61,42 +61,42 @@ func TestAgReqAsNavigableMap(t *testing.T) {
 			Value: utils.ParseRSRFieldsMustCompile("^cgrates.org", utils.INFIELD_SEP)},
 		&config.CfgCdrField{Tag: "Account",
 			FieldId: utils.Account, Type: utils.META_COMPOSED,
-			Value: utils.ParseRSRFieldsMustCompile("*cgrRequest>Account", utils.INFIELD_SEP)},
+			Value: utils.ParseRSRFieldsMustCompile("*cgrRequest.Account", utils.INFIELD_SEP)},
 		&config.CfgCdrField{Tag: "Destination",
 			FieldId: utils.Destination, Type: utils.META_COMPOSED,
-			Value: utils.ParseRSRFieldsMustCompile("*cgrRequest>Destination", utils.INFIELD_SEP)},
+			Value: utils.ParseRSRFieldsMustCompile("*cgrRequest.Destination", utils.INFIELD_SEP)},
 
 		&config.CfgCdrField{Tag: "RequestedUsageVoice",
 			FieldId: "RequestedUsage", Type: utils.META_COMPOSED,
-			Filters: []string{"*string:*cgrRequest>ToR:*voice"},
+			Filters: []string{"*string:*cgrRequest.ToR:*voice"},
 			Value: utils.ParseRSRFieldsMustCompile(
-				"*cgrRequest>Usage{*duration_seconds}", utils.INFIELD_SEP)},
+				"*cgrRequest.Usage{*duration_seconds}", utils.INFIELD_SEP)},
 		&config.CfgCdrField{Tag: "RequestedUsageData",
 			FieldId: "RequestedUsage", Type: utils.META_COMPOSED,
-			Filters: []string{"*string:*cgrRequest>ToR:*data"},
+			Filters: []string{"*string:*cgrRequest.ToR:*data"},
 			Value: utils.ParseRSRFieldsMustCompile(
-				"*cgrRequest>Usage{*duration_nanoseconds}", utils.INFIELD_SEP)},
+				"*cgrRequest.Usage{*duration_nanoseconds}", utils.INFIELD_SEP)},
 		&config.CfgCdrField{Tag: "RequestedUsageSMS",
 			FieldId: "RequestedUsage", Type: utils.META_COMPOSED,
-			Filters: []string{"*string:*cgrRequest>ToR:*sms"},
+			Filters: []string{"*string:*cgrRequest.ToR:*sms"},
 			Value: utils.ParseRSRFieldsMustCompile(
-				"*cgrRequest>Usage{*duration_nanoseconds}", utils.INFIELD_SEP)},
+				"*cgrRequest.Usage{*duration_nanoseconds}", utils.INFIELD_SEP)},
 
 		&config.CfgCdrField{Tag: "AttrPaypalAccount",
 			FieldId: "PaypalAccount", Type: utils.META_COMPOSED,
-			Filters: []string{"*string:*cgrReply>Error:"},
+			Filters: []string{"*string:*cgrReply.Error:"},
 			Value: utils.ParseRSRFieldsMustCompile(
-				"*cgrReply>Attributes>PaypalAccount", utils.INFIELD_SEP)},
+				"*cgrReply.Attributes.PaypalAccount", utils.INFIELD_SEP)},
 		&config.CfgCdrField{Tag: "MaxUsage",
 			FieldId: "MaxUsage", Type: utils.META_COMPOSED,
-			Filters: []string{"*string:*cgrReply>Error:"},
+			Filters: []string{"*string:*cgrReply.Error:"},
 			Value: utils.ParseRSRFieldsMustCompile(
-				"*cgrReply>MaxUsage{*duration_seconds}", utils.INFIELD_SEP)},
+				"*cgrReply.MaxUsage{*duration_seconds}", utils.INFIELD_SEP)},
 		&config.CfgCdrField{Tag: "Error",
 			FieldId: "Error", Type: utils.META_COMPOSED,
-			Filters: []string{"*rsr::*cgrReply>Error(!^$)"},
+			Filters: []string{"*rsr::*cgrReply.Error(!^$)"},
 			Value: utils.ParseRSRFieldsMustCompile(
-				"*cgrReply>Error", utils.INFIELD_SEP)},
+				"*cgrReply.Error", utils.INFIELD_SEP)},
 	}
 	eMp := engine.NewNavigableMap(nil)
 	eMp.Set([]string{utils.Tenant}, "cgrates.org", true)
