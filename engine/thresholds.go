@@ -323,9 +323,10 @@ func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (thresholdsIDs 
 			tS.stMux.Unlock()
 		}
 	}
-	if len(tIDs) != 0 {
-		thresholdsIDs = append(thresholdsIDs, tIDs...)
+	if len(tIDs) == 0 {
+		return nil, utils.ErrNotFound
 	}
+	thresholdsIDs = append(thresholdsIDs, tIDs...)
 	if withErrors {
 		err = utils.ErrPartiallyExecuted
 	}
