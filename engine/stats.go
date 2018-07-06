@@ -152,10 +152,6 @@ func (sS *StatService) matchingStatQueuesForEvent(ev *utils.CGREvent) (sqs StatQ
 	if err != nil {
 		return nil, err
 	}
-	lockIDs := utils.PrefixSliceItems(sqIDs.Slice(), utils.StatFilterIndexes)
-	lockIDs = append(lockIDs, utils.PrefixSliceItems(sqIDs.Slice(), utils.StatQueuePrefix)...) // add also lock for statQueue instances
-	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
-	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for sqID := range sqIDs {
 		sqPrfl, err := sS.dm.GetStatQueueProfile(ev.Tenant, sqID, false, utils.NonTransactional)
 		if err != nil {

@@ -153,7 +153,7 @@ var sTestsThresholdSV1 = []func(t *testing.T){
 	testV1TSLoadConfig,
 	testV1TSInitDataDb,
 	testV1TSResetStorDb,
-	testV1TSStartEngine,
+	// testV1TSStartEngine,
 	testV1TSRpcConn,
 	testV1TSFromFolder,
 	testV1TSGetThresholds,

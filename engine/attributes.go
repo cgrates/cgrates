@@ -21,8 +21,6 @@ package engine
 import (
 	"fmt"
 
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -76,9 +74,6 @@ func (alS *AttributeService) matchingAttributeProfilesForEvent(ev *utils.CGREven
 			return nil, err
 		}
 	}
-	lockIDs := utils.PrefixSliceItems(aPrflIDs.Slice(), utils.AttributeFilterIndexes)
-	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
-	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for apID := range aPrflIDs {
 		aPrfl, err := alS.dm.GetAttributeProfile(ev.Tenant, apID, false, utils.NonTransactional)
 		if err != nil {

@@ -25,8 +25,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -231,9 +229,6 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 		}
 		tIDs = tIDsMap.Slice()
 	}
-	lockIDs := utils.PrefixSliceItems(tIDs, utils.ThresholdFilterIndexes)
-	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
-	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for _, tID := range tIDs {
 		tPrfl, err := tS.dm.GetThresholdProfile(args.Tenant, tID, false, utils.NonTransactional)
 		if err != nil {
