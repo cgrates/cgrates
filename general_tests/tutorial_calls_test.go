@@ -303,7 +303,7 @@ func testCallCheckResourceBeforeAllocation(t *testing.T) {
 		}}
 	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Error(err)
-	} else if len(*rs) != 2 {
+	} else if len(*rs) != 1 {
 		t.Errorf("Resources: %+v", utils.ToJSON(rs))
 	}
 	for _, r := range *rs {
@@ -423,7 +423,7 @@ func testCallCheckResourceAllocation(t *testing.T) {
 		}}
 	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Error(err)
-	} else if len(*rs) != 2 {
+	} else if len(*rs) != 1 {
 		t.Errorf("Resources: %+v", utils.ToJSON(rs))
 	}
 	for _, r := range *rs {
@@ -532,7 +532,7 @@ func testCallCheckResourceRelease(t *testing.T) {
 		}}
 	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Error(err)
-	} else if len(*rs) != 2 {
+	} else if len(*rs) != 1 {
 		t.Errorf("Resources: %+v", rs)
 	}
 	for _, r := range *rs {
@@ -609,7 +609,7 @@ func testCallSyncSessions(t *testing.T) {
 	}
 	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Error(err)
-	} else if len(*rs) != 2 {
+	} else if len(*rs) != 1 {
 		t.Errorf("Resources: %+v", utils.ToJSON(rs))
 	}
 	for _, r := range *rs {
@@ -683,7 +683,7 @@ func testCallSyncSessions(t *testing.T) {
 	var rsAfter *engine.Resources
 	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rsAfter); err != nil {
 		t.Error(err)
-	} else if len(*rsAfter) != 2 {
+	} else if len(*rsAfter) != 1 {
 		t.Errorf("Resources: %+v", rsAfter)
 	}
 	for _, r := range *rsAfter {

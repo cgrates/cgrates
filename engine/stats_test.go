@@ -29,13 +29,13 @@ import (
 var (
 	cloneExpTimeStats time.Time
 	expTimeStats      = time.Now().Add(time.Duration(20 * time.Minute))
-	stsserv           StatService
+	statService       *StatService
 	dmSTS             *DataManager
 	sqps              = []*StatQueueProfile{
 		&StatQueueProfile{
 			Tenant:    "cgrates.org",
-			ID:        "statsprofile1",
-			FilterIDs: []string{"filter7"},
+			ID:        "StatQueueProfile1",
+			FilterIDs: []string{"FLTR_STATS_1"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
@@ -55,8 +55,8 @@ var (
 		},
 		&StatQueueProfile{
 			Tenant:    "cgrates.org",
-			ID:        "statsprofile2",
-			FilterIDs: []string{"filter8"},
+			ID:        "StatQueueProfile2",
+			FilterIDs: []string{"FLTR_STATS_2"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
@@ -76,29 +76,8 @@ var (
 		},
 		&StatQueueProfile{
 			Tenant:    "cgrates.org",
-			ID:        "statsprofile3",
-			FilterIDs: []string{"preffilter4"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			},
-			QueueLength: 10,
-			TTL:         time.Duration(10) * time.Second,
-			Metrics: []*utils.MetricWithParams{
-				&utils.MetricWithParams{
-					MetricID:   utils.MetaSum,
-					Parameters: utils.Usage,
-				},
-			},
-			ThresholdIDs: []string{},
-			Blocker:      true,
-			Stored:       true,
-			Weight:       20,
-			MinItems:     1,
-		},
-		&StatQueueProfile{
-			Tenant:    "cgrates.org",
-			ID:        "statsprofile4",
-			FilterIDs: []string{"defaultf4"},
+			ID:        "StatQueueProfilePrefix",
+			FilterIDs: []string{"FLTR_STATS_3"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
@@ -118,159 +97,151 @@ var (
 		},
 	}
 	stqs = []*StatQueue{
-		&StatQueue{Tenant: "cgrates.org", ID: "statsprofile1", sqPrfl: sqps[0]},
-		&StatQueue{Tenant: "cgrates.org", ID: "statsprofile2", sqPrfl: sqps[1]},
-		&StatQueue{Tenant: "cgrates.org", ID: "statsprofile3", sqPrfl: sqps[2]},
-		&StatQueue{Tenant: "cgrates.org", ID: "statsprofile4", sqPrfl: sqps[3]},
+		&StatQueue{Tenant: "cgrates.org", ID: "StatQueueProfile1", sqPrfl: sqps[0]},
+		&StatQueue{Tenant: "cgrates.org", ID: "StatQueueProfile2", sqPrfl: sqps[1]},
+		&StatQueue{Tenant: "cgrates.org", ID: "StatQueueProfilePrefix", sqPrfl: sqps[2]},
 	}
 	statsEvs = []*utils.CGREvent{
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]interface{}{
-				"Stats":          "StatsProfile1",
+				"Stats":          "StatQueueProfile1",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 				"UsageInterval":  "1s",
 				"PddInterval":    "1s",
-				"Weight":         "20.0",
+				"Weight":         "9.0",
 				utils.Usage:      time.Duration(135 * time.Second),
 				utils.COST:       123.0,
-			}},
+			},
+		},
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event2",
 			Event: map[string]interface{}{
-				"Stats":          "StatsProfile2",
+				"Stats":          "StatQueueProfile2",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 				"UsageInterval":  "1s",
 				"PddInterval":    "1s",
-				"Weight":         "21.0",
+				"Weight":         "15.0",
 				utils.Usage:      time.Duration(45 * time.Second),
-			}},
+			},
+		},
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event3",
 			Event: map[string]interface{}{
-				"Stats":     "StatsProfilePrefix",
+				"Stats":     "StatQueueProfilePrefix",
 				utils.Usage: time.Duration(30 * time.Second),
-			}},
-		&utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event3",
-			Event: map[string]interface{}{
-				"Weight":    "200.0",
-				utils.Usage: time.Duration(65 * time.Second),
-			}},
+			},
+		},
 	}
 )
 
-func TestStatsPopulateStatsService(t *testing.T) {
+func TestStatQueuesPopulateService(t *testing.T) {
 	data, _ := NewMapStorage()
 	dmSTS = NewDataManager(data)
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	var filters1 []*FilterRule
-	var filters2 []*FilterRule
-	var preffilter []*FilterRule
-	var defaultf []*FilterRule
-	second := 1 * time.Second
-	stsserv = StatService{
-		dm:      dmSTS,
-		filterS: &FilterS{dm: dmSTS, cfg: defaultCfg},
-	}
-	ref := NewFilterIndexer(dmSTS, utils.StatQueueProfilePrefix, "cgrates.org")
-	//filter1
-	x, err := NewFilterRule(MetaString, "Stats", []string{"StatsProfile1"})
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	filters1 = append(filters1, x)
-	x, err = NewFilterRule(MetaGreaterOrEqual, "UsageInterval", []string{second.String()})
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	filters1 = append(filters1, x)
-	x, err = NewFilterRule(MetaGreaterOrEqual, utils.Usage, []string{second.String()})
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	filters1 = append(filters1, x)
-	x, err = NewFilterRule(MetaGreaterOrEqual, "Weight", []string{"9.0"})
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	filters1 = append(filters1, x)
-	filter7 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter7", Rules: filters1}
-	dmSTS.SetFilter(filter7)
-	ref.IndexTPFilter(FilterToTPFilter(filter7), "statsprofile1")
-	//filter2
-	x, err = NewFilterRule(MetaString, "Stats", []string{"StatsProfile2"})
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	filters2 = append(filters2, x)
-	x, err = NewFilterRule(MetaGreaterOrEqual, "PddInterval", []string{second.String()})
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	filters2 = append(filters2, x)
-	x, err = NewFilterRule(MetaGreaterOrEqual, utils.Usage, []string{second.String()})
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	filters2 = append(filters2, x)
-	x, err = NewFilterRule(MetaGreaterOrEqual, "Weight", []string{"15.0"})
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	filters2 = append(filters2, x)
-	filter8 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "filter8", Rules: filters2}
-	dmSTS.SetFilter(filter8)
-	ref.IndexTPFilter(FilterToTPFilter(filter8), "statsprofile2")
-	//prefix filter
-	x, err = NewFilterRule(MetaPrefix, "Stats", []string{"StatsProfilePrefix"})
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	preffilter = append(preffilter, x)
-	x, err = NewFilterRule(MetaGreaterOrEqual, utils.Usage, []string{second.String()})
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	preffilter = append(preffilter, x)
-	preffilter4 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "preffilter4", Rules: preffilter}
-	dmSTS.SetFilter(preffilter4)
-	ref.IndexTPFilter(FilterToTPFilter(preffilter4), "statsprofile3")
-	//default filter
-	x, err = NewFilterRule(MetaGreaterOrEqual, "Weight", []string{"200.00"})
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	defaultf = append(defaultf, x)
-	x, err = NewFilterRule(MetaGreaterOrEqual, utils.Usage, []string{second.String()})
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	defaultf = append(defaultf, x)
-	defaultf4 := &Filter{Tenant: config.CgrConfig().DefaultTenant, ID: "defaultf4", Rules: defaultf}
-	dmSTS.SetFilter(defaultf4)
-	ref.IndexTPFilter(FilterToTPFilter(defaultf4), "statsprofile4")
-	for _, stq := range stqs {
-		dmSTS.SetStatQueue(stq)
-	}
-	for _, sqp := range sqps {
-		dmSTS.SetStatQueueProfile(sqp, false)
-	}
-	err = ref.StoreIndexes(true, utils.NonTransactional)
+
+	statService, err = NewStatService(dmSTS, time.Duration(1),
+		nil, &FilterS{dm: dmSTS, cfg: defaultCfg}, nil, nil)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 }
 
-func TestStatsmatchingStatQueuesForEvent(t *testing.T) {
-	msq, err := stsserv.matchingStatQueuesForEvent(statsEvs[0])
+func TestStatQueuesAddFilters(t *testing.T) {
+	fltrSts1 := &Filter{
+		Tenant: config.CgrConfig().DefaultTenant,
+		ID:     "FLTR_STATS_1",
+		Rules: []*FilterRule{
+			&FilterRule{
+				Type:      MetaString,
+				FieldName: "Stats",
+				Values:    []string{"StatQueueProfile1"},
+			},
+			&FilterRule{
+				Type:      MetaGreaterOrEqual,
+				FieldName: "UsageInterval",
+				Values:    []string{(1 * time.Second).String()},
+			},
+			&FilterRule{
+				Type:      MetaGreaterOrEqual,
+				FieldName: utils.Usage,
+				Values:    []string{(1 * time.Second).String()},
+			},
+			&FilterRule{
+				Type:      MetaGreaterOrEqual,
+				FieldName: utils.Weight,
+				Values:    []string{"9.0"},
+			},
+		},
+	}
+	dmSTS.SetFilter(fltrSts1)
+	fltrSts2 := &Filter{
+		Tenant: config.CgrConfig().DefaultTenant,
+		ID:     "FLTR_STATS_2",
+		Rules: []*FilterRule{
+			&FilterRule{
+				Type:      MetaString,
+				FieldName: "Stats",
+				Values:    []string{"StatQueueProfile2"},
+			},
+			&FilterRule{
+				Type:      MetaGreaterOrEqual,
+				FieldName: "PddInterval",
+				Values:    []string{(1 * time.Second).String()},
+			},
+			&FilterRule{
+				Type:      MetaGreaterOrEqual,
+				FieldName: utils.Usage,
+				Values:    []string{(1 * time.Second).String()},
+			},
+			&FilterRule{
+				Type:      MetaGreaterOrEqual,
+				FieldName: utils.Weight,
+				Values:    []string{"15.0"},
+			},
+		},
+	}
+	dmSTS.SetFilter(fltrSts2)
+	fltrSts3 := &Filter{
+		Tenant: config.CgrConfig().DefaultTenant,
+		ID:     "FLTR_STATS_3",
+		Rules: []*FilterRule{
+			&FilterRule{
+				Type:      MetaPrefix,
+				FieldName: "Stats",
+				Values:    []string{"StatQueueProfilePrefix"},
+			},
+		},
+	}
+	dmSTS.SetFilter(fltrSts3)
+}
+
+func TestStatQueuesPopulateStatsService(t *testing.T) {
+	for _, statQueueProfile := range sqps {
+		dmSTS.SetStatQueueProfile(statQueueProfile, true)
+	}
+	for _, statQueue := range stqs {
+		dmSTS.SetStatQueue(statQueue)
+	}
+	//Test each statQueueProfile from cache
+	for _, sqp := range sqps {
+		if tempStat, err := dmSTS.GetStatQueueProfile(sqp.Tenant,
+			sqp.ID, false, utils.NonTransactional); err != nil {
+			t.Errorf("Error: %+v", err)
+		} else if !reflect.DeepEqual(sqp, tempStat) {
+			t.Errorf("Expecting: %+v, received: %+v", sqp, tempStat)
+		}
+	}
+}
+
+func TestStatQueuesMatchingStatQueuesForEvent(t *testing.T) {
+	msq, err := statService.matchingStatQueuesForEvent(statsEvs[0])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -281,7 +252,8 @@ func TestStatsmatchingStatQueuesForEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(stqs[0].sqPrfl, msq[0].sqPrfl) {
 		t.Errorf("Expecting: %+v, received: %+v", stqs[0].sqPrfl, msq[0].sqPrfl)
 	}
-	msq, err = stsserv.matchingStatQueuesForEvent(statsEvs[1])
+
+	msq, err = statService.matchingStatQueuesForEvent(statsEvs[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -292,7 +264,8 @@ func TestStatsmatchingStatQueuesForEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(stqs[1].sqPrfl, msq[0].sqPrfl) {
 		t.Errorf("Expecting: %+v, received: %+v", stqs[1].sqPrfl, msq[0].sqPrfl)
 	}
-	msq, err = stsserv.matchingStatQueuesForEvent(statsEvs[2])
+
+	msq, err = statService.matchingStatQueuesForEvent(statsEvs[2])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -303,64 +276,44 @@ func TestStatsmatchingStatQueuesForEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(stqs[2].sqPrfl, msq[0].sqPrfl) {
 		t.Errorf("Expecting: %+v, received: %+v", stqs[2].sqPrfl, msq[0].sqPrfl)
 	}
-	// msq, err = stsserv.matchingStatQueuesForEvent(statsEvs[3])
-	// if err != nil {
-	// 	t.Errorf("Error: %+v", err)
-	// }
-	// if !reflect.DeepEqual(stqs[3].Tenant, msq[0].Tenant) {
-	// 	t.Errorf("Expecting: %+v, received: %+v", stqs[3].Tenant, msq[0].Tenant)
-	// } else if !reflect.DeepEqual(stqs[3].ID, msq[0].ID) {
-	// 	t.Errorf("Expecting: %+v, received: %+v", stqs[3].ID, msq[0].ID)
-	// } else if !reflect.DeepEqual(stqs[3].sqPrfl, msq[0].sqPrfl) {
-	// 	t.Errorf("Expecting: %+v, received: %+v", stqs[3].sqPrfl, msq[0].sqPrfl)
-	// }
 }
 
-func TestStatSprocessEvent(t *testing.T) {
+func TestStatQueuesProcessEvent(t *testing.T) {
 	stq := map[string]string{}
 	reply := []string{}
-	expected := []string{"statsprofile1"}
-	err := stsserv.V1ProcessEvent(statsEvs[0], &reply)
+	expected := []string{"StatQueueProfile1"}
+	err := statService.V1ProcessEvent(statsEvs[0], &reply)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
-	err = stsserv.V1GetQueueStringMetrics(&utils.TenantID{Tenant: stqs[0].Tenant, ID: stqs[0].ID}, &stq)
+	err = statService.V1GetQueueStringMetrics(&utils.TenantID{Tenant: stqs[0].Tenant, ID: stqs[0].ID}, &stq)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	expected = []string{"statsprofile2"}
-	err = stsserv.V1ProcessEvent(statsEvs[1], &reply)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	} else if !reflect.DeepEqual(reply, expected) {
-		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
-	}
-	err = stsserv.V1GetQueueStringMetrics(&utils.TenantID{Tenant: stqs[1].Tenant, ID: stqs[1].ID}, &stq)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	expected = []string{"statsprofile3"}
-	err = stsserv.V1ProcessEvent(statsEvs[2], &reply)
+
+	expected = []string{"StatQueueProfile2"}
+	err = statService.V1ProcessEvent(statsEvs[1], &reply)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
-	err = stsserv.V1GetQueueStringMetrics(&utils.TenantID{Tenant: stqs[2].Tenant, ID: stqs[2].ID}, &stq)
+	err = statService.V1GetQueueStringMetrics(&utils.TenantID{Tenant: stqs[1].Tenant, ID: stqs[1].ID}, &stq)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	// expected = []string{"statsprofile4"}
-	// err = stsserv.V1ProcessEvent(statsEvs[3], &reply)
-	// if err != nil {
-	// 	t.Errorf("Error: %+v", err)
-	// } else if !reflect.DeepEqual(reply, expected) {
-	// 	t.Errorf("Expecting: %+v, received: %+v", expected, reply)
-	// }
-	// err = stsserv.V1GetQueueStringMetrics(&utils.TenantID{Tenant: stqs[3].Tenant, ID: stqs[3].ID}, &stq)
-	// if err != nil {
-	// 	t.Errorf("Error: %+v", err)
-	// }
+
+	expected = []string{"StatQueueProfilePrefix"}
+	err = statService.V1ProcessEvent(statsEvs[2], &reply)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
+	}
+	err = statService.V1GetQueueStringMetrics(&utils.TenantID{Tenant: stqs[2].Tenant, ID: stqs[2].ID}, &stq)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
 }
