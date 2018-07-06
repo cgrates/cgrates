@@ -99,12 +99,24 @@ func TestAgReqAsNavigableMap(t *testing.T) {
 				"*cgrReply.Error", utils.INFIELD_SEP)},
 	}
 	eMp := engine.NewNavigableMap(nil)
-	eMp.Set([]string{utils.Tenant}, "cgrates.org", true)
-	eMp.Set([]string{utils.Account}, "1001", true)
-	eMp.Set([]string{utils.Destination}, "1002", true)
-	eMp.Set([]string{"RequestedUsage"}, "180", true)
-	eMp.Set([]string{"PaypalAccount"}, "cgrates@paypal.com", true)
-	eMp.Set([]string{"MaxUsage"}, "120", true)
+	eMp.Set([]string{utils.Tenant}, []*engine.NMItem{
+		&engine.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
+			Config: tplFlds[0]}}, true)
+	eMp.Set([]string{utils.Account}, []*engine.NMItem{
+		&engine.NMItem{Data: "1001", Path: []string{utils.Account},
+			Config: tplFlds[1]}}, true)
+	eMp.Set([]string{utils.Destination}, []*engine.NMItem{
+		&engine.NMItem{Data: "1002", Path: []string{utils.Destination},
+			Config: tplFlds[2]}}, true)
+	eMp.Set([]string{"RequestedUsage"}, []*engine.NMItem{
+		&engine.NMItem{Data: "180", Path: []string{"RequestedUsage"},
+			Config: tplFlds[3]}}, true)
+	eMp.Set([]string{"PaypalAccount"}, []*engine.NMItem{
+		&engine.NMItem{Data: "cgrates@paypal.com", Path: []string{"PaypalAccount"},
+			Config: tplFlds[6]}}, true)
+	eMp.Set([]string{"MaxUsage"}, []*engine.NMItem{
+		&engine.NMItem{Data: "120", Path: []string{"MaxUsage"},
+			Config: tplFlds[7]}}, true)
 	if mpOut, err := agReq.AsNavigableMap(tplFlds); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, mpOut) {

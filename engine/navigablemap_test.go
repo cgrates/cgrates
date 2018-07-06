@@ -19,7 +19,6 @@ package engine
 
 import (
 	"encoding/xml"
-	"errors"
 	"reflect"
 	"strings"
 	"testing"
@@ -57,7 +56,7 @@ func TestNavMapGetFieldAsString(t *testing.T) {
 	}
 	fPath := "NonExisting>AnotherFirstLevel"
 	if _, err := nM.FieldAsString(strings.Split(fPath, ">")); err.Error() !=
-		errors.New("no map at path: <NonExisting>").Error() {
+		utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
