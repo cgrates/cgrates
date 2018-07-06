@@ -254,11 +254,6 @@ func testDspResTestAuthKey2(t *testing.T) {
 			ID:     "ResGroup1",
 			Usages: map[string]*engine.ResourceUsage{},
 		},
-		&engine.Resource{
-			Tenant: "cgrates.org",
-			ID:     "ResGroup2",
-			Usages: map[string]*engine.ResourceUsage{},
-		},
 	}
 
 	if err := dspResRPC.Call(utils.ResourceSv1GetResourcesForEvent,
