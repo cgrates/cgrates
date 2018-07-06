@@ -127,6 +127,9 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.CfgCdrField) (
 		}
 		valSet = append(valSet, &engine.NMItem{Data: out, Path: fldPath, Config: tplFld})
 		nM.Set(fldPath, valSet, true)
+		if tplFld.Blocker { // useful in case of processing errors first
+			break
+		}
 	}
 	return
 }

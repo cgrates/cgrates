@@ -27,6 +27,7 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
+	"reflect"
 	"testing"
 	"time"
 
@@ -69,14 +70,12 @@ func TestHAitResetStorDb(t *testing.T) {
 	}
 }
 
-/*
 // Start CGR Engine
 func TestHAitStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(haCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
-*/
 
 // Connect rpc client to rater
 func TestHAitApierRpcConn(t *testing.T) {
@@ -97,17 +96,22 @@ func TestHAitTPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-func TestHAitAuth(t *testing.T) {
+func TestHAitAuthDryRun(t *testing.T) {
 	reqUrl := fmt.Sprintf("http://%s%s?request_type=OutboundAUTH&CallID=123456&Msisdn=497700056231&Imsi=2343000000000123&Destination=491239440004&MSRN=0102220233444488999&ProfileID=1&AgentID=176&GlobalMSISDN=497700056129&GlobalIMSI=214180000175129&ICCID=8923418450000089629&MCC=234&MNC=10&calltype=callback",
 		haCfg.HTTPListen, haCfg.HttpAgentCfg()[0].Url)
 	rply, err := httpC.Get(reqUrl)
 	if err != nil {
 		t.Error(err)
 	}
+	eXml := []byte(`<?xml version="1.0" encoding="UTF-8"?>
+<response>
+  <Allow>1</Allow>
+  <MaxDuration>1200</MaxDuration>
+</response>`)
 	if body, err := ioutil.ReadAll(rply.Body); err != nil {
 		t.Error(err)
-	} else {
-		fmt.Printf("Got reply: %s\n", string(body))
+	} else if !reflect.DeepEqual(eXml, body) {
+		t.Errorf("expecting: %s, received: %s", string(eXml), string(body))
 	}
 	rply.Body.Close()
 }

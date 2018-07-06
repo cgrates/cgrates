@@ -95,6 +95,9 @@ func NewCfgCdrFieldFromCdrFieldJsonCfg(jsnCfgFld *CdrFieldJsonCfg) (*CfgCdrField
 	if jsnCfgFld.New_branch != nil {
 		cfgFld.NewBranch = *jsnCfgFld.New_branch
 	}
+	if jsnCfgFld.Blocker != nil {
+		cfgFld.Blocker = *jsnCfgFld.Blocker
+	}
 	return cfgFld, nil
 }
 
@@ -120,6 +123,7 @@ type CfgCdrField struct {
 	MaskLen          int
 	BreakOnSuccess   bool
 	NewBranch        bool
+	Blocker          bool
 }
 
 func CfgCdrFieldsFromCdrFieldsJsonCfg(jsnCfgFldss []*CdrFieldJsonCfg) ([]*CfgCdrField, error) {

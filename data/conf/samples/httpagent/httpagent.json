@@ -14,6 +14,22 @@
 		"reply_payload":	"*xml",
 		"request_processors": [
 			{
+				"id": "OutboundAUTHDryRun",
+				"filters": ["*string:*request.request_type:OutboundAUTH","*string:*request.Msisdn:497700056231"],
+				"flags": ["*dryrun"],
+				"continue_on_success": false,
+				"request_fields":[
+				],
+				"reply_fields":[
+					{"tag": "Allow", "field_id": "response.Allow", "type": "*constant", 
+						"value": "1", "mandatory": true},
+					{"tag": "MaxDuration", "field_id": "response.MaxDuration", "type": "*constant", 
+						"value": "1200", "blocker": true},
+					{"tag": "NotUsed", "field_id": "response.NotUnused", "type": "*constant", 
+						"value": "0"},
+				],
+			},
+			{
 				"id": "OutboundAUTH",
 				"filters": ["*string:*request.request_type:OutboundAUTH"],
 				"flags": ["*dryrun", "*auth", "*accounts", "*attributes"],
@@ -33,10 +49,8 @@
 				"reply_fields":[
 					{"tag": "Allow", "field_id": "response.Allow", "type": "*constant", 
 						"value": "1", "mandatory": true},
-					//{"tag": "MaxDuration", "field_id": "response.MaxDuration", "type": "*composed", 
-					//	"value": "*cgrReply.MaxUsage{*duration_seconds}", "mandatory": true},
-					{"tag": "MaxDuration", "field_id": "response.MaxDuration", "type": "*constant", 
-						"value": "1200", "mandatory": true},
+					{"tag": "MaxDuration", "field_id": "response.MaxDuration", "type": "*composed", 
+						"value": "*cgrReply.MaxUsage{*duration_seconds}", "mandatory": true},
 				],
 			},
 			{

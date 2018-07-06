@@ -164,6 +164,7 @@ type CdrFieldJsonCfg struct {
 	Mask_length          *int
 	Break_on_success     *bool
 	New_branch           *bool
+	Blocker              *bool
 }
 
 // Cdre config section
