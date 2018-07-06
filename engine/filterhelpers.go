@@ -21,6 +21,8 @@ package engine
 import (
 	"fmt"
 
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -29,6 +31,9 @@ import (
 // helper on top of dataDB.MatchFilterIndex, adding utils.ANY to list of fields queried
 func matchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldIDs *[]string,
 	dm *DataManager, cacheID, itemIDPrefix string, indexedSelects bool) (itemIDs utils.StringMap, err error) {
+	lockID := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
+	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockID)
+	defer guardian.Guardian.UnguardIDs(lockID)
 	itemIDs = make(utils.StringMap)
 	if !indexedSelects {
 		sliceIDs, err := dm.DataDB().GetKeysForPrefix(itemIDPrefix)

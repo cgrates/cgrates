@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -124,6 +126,9 @@ func (rfi *FilterIndexer) cacheRemItemType() { // ToDo: tune here by removing pe
 
 // StoreIndexes handles storing the indexes to dataDB
 func (rfi *FilterIndexer) StoreIndexes(commit bool, transactionID string) (err error) {
+	lockID := utils.CacheInstanceToPrefix[utils.PrefixToIndexCache[rfi.itemType]] + rfi.dbKeySuffix
+	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockID)
+	defer guardian.Guardian.UnguardIDs(lockID)
 	if err = rfi.dm.SetFilterIndexes(
 		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
 		rfi.indexes, commit, transactionID); err != nil {
