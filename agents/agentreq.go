@@ -116,7 +116,17 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.CfgCdrField) (
 		if err != nil {
 			return nil, err
 		}
-		nM.Set(strings.Split(tplFld.FieldId, utils.NestingSep), out, true)
+		var valSet []*engine.NMItem
+		fldPath := strings.Split(tplFld.FieldId, utils.NestingSep)
+		if nMFields, err := nM.FieldAsInterface(fldPath); err != nil {
+			if err != utils.ErrNotFound {
+				return nil, err
+			}
+		} else {
+			valSet = nMFields.([]*engine.NMItem) // start from previous stored fields
+		}
+		valSet = append(valSet, &engine.NMItem{Data: out, Path: fldPath, Config: tplFld})
+		nM.Set(fldPath, valSet, true)
 	}
 	return
 }

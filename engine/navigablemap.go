@@ -94,8 +94,7 @@ func (nM *NavigableMap) FieldAsInterface(fldPath []string) (fldVal interface{}, 
 		}
 		elmnt, has := lastMp[spath]
 		if !has {
-			err = fmt.Errorf("no map at path: <%s>", spath)
-			return
+			return nil, utils.ErrNotFound
 		}
 		lastMp, canCast = elmnt.(map[string]interface{})
 		if !canCast {
