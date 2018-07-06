@@ -25,14 +25,14 @@
 						"value": "1", "mandatory": true},
 					{"tag": "MaxDuration", "field_id": "response.MaxDuration", "type": "*constant", 
 						"value": "1200", "blocker": true},
-					{"tag": "NotUsed", "field_id": "response.NotUnused", "type": "*constant", 
+					{"tag": "Unused", "field_id": "response.Unused", "type": "*constant", 
 						"value": "0"},
 				],
 			},
 			{
 				"id": "OutboundAUTH",
 				"filters": ["*string:*request.request_type:OutboundAUTH"],
-				"flags": ["*dryrun", "*auth", "*accounts", "*attributes"],
+				"flags": [ "*auth", "*accounts", "*attributes"],
 				"continue_on_success": false,
 				"request_fields":[
 					{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
