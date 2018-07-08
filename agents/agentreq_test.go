@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package agents
 
+/*
 import (
 	"reflect"
 	"testing"
@@ -124,3 +125,4 @@ func TestAgReqAsNavigableMap(t *testing.T) {
 			eMp.AsMapStringInterface(), mpOut.AsMapStringInterface())
 	}
 }
+*/

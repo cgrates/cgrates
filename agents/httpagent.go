@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -112,12 +111,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 	if agReq.CGRRequest, err = agReq.AsNavigableMap(reqProcessor.RequestFields); err != nil {
 		return
 	}
-	cgrEv := &utils.CGREvent{
-		Tenant: agReq.Tenant,
-		ID:     utils.UUIDSha1Prefix(),
-		Time:   utils.TimePointer(time.Now()),
-		Event:  agReq.CGRRequest.AsMapStringInterface(),
-	}
+	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuth,
@@ -132,9 +126,6 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 	default:
 		return false, errors.New("unknown request type")
 	case utils.MetaDryRun:
-		utils.Logger.Info(
-			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, HTTP request: %s",
-				utils.HTTPAgent, reqProcessor.Id, utils.ToJSON(agReq.Request)))
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, CGREvent: %s",
 				utils.HTTPAgent, reqProcessor.Id, utils.ToJSON(cgrEv)))

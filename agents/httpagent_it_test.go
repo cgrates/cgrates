@@ -111,7 +111,64 @@ func TestHAitAuthDryRun(t *testing.T) {
 	if body, err := ioutil.ReadAll(rply.Body); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eXml, body) {
-		t.Errorf("expecting: %s, received: %s", string(eXml), string(body))
+		t.Errorf("expecting: <%s>, received: <%s>", string(eXml), string(body))
 	}
 	rply.Body.Close()
+	time.Sleep(time.Millisecond)
+}
+
+func TestHAitAuth1001(t *testing.T) {
+	reqUrl := fmt.Sprintf("http://%s%s?request_type=OutboundAUTH&CallID=123456&Msisdn=1001&Imsi=2343000000000123&Destination=1002&MSRN=0102220233444488999&ProfileID=1&AgentID=176&GlobalMSISDN=497700056129&GlobalIMSI=214180000175129&ICCID=8923418450000089629&MCC=234&MNC=10&calltype=callback",
+		haCfg.HTTPListen, haCfg.HttpAgentCfg()[0].Url)
+	rply, err := httpC.Get(reqUrl)
+	if err != nil {
+		t.Error(err)
+	}
+	eXml := []byte(`<?xml version="1.0" encoding="UTF-8"?>
+<response>
+  <Allow>1</Allow>
+  <MaxDuration>10800</MaxDuration>
+</response>`)
+	if body, err := ioutil.ReadAll(rply.Body); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eXml, body) {
+		t.Errorf("expecting: <%s>, received: <%s>", string(eXml), string(body))
+	}
+	rply.Body.Close()
+	time.Sleep(time.Millisecond)
+}
+
+func TestHAitCDRmtcall(t *testing.T) {
+	reqUrl := fmt.Sprintf("http://%s%s?request_type=MTCALL_CDR&timestamp=2018-08-14%%2012:03:22&call_date=2018-0814%%2012:00:49&transactionid=10000&CDR_ID=123456&carrierid=1&mcc=0&mnc=0&imsi=434180000000000&msisdn=1001&destination=1002&leg=C&leg_duration=185&reseller_charge=11.1605&client_charge=0.0000&user_charge=22.0000&IOT=0&user_balance=10.00&cli=%%2B498702190000&polo=0.0100&ddi_map=N",
+		haCfg.HTTPListen, haCfg.HttpAgentCfg()[0].Url)
+	rply, err := httpC.Get(reqUrl)
+	if err != nil {
+		t.Error(err)
+	}
+	eXml := []byte(`<?xml version="1.0" encoding="UTF-8"?>
+<CDR_RESPONSE>
+  <CDR_ID>123456</CDR_ID>
+  <CDR_STATUS>1</CDR_STATUS>
+</CDR_RESPONSE>`)
+	if body, err := ioutil.ReadAll(rply.Body); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eXml, body) {
+		t.Errorf("expecting: <%s>, received: <%s>", string(eXml), string(body))
+	}
+	rply.Body.Close()
+	time.Sleep(time.Millisecond)
+	var cdrs []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}}
+	if err := haRPC.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Usage != "3m5s" { // should be 1 but maxUsage returns rounded version
+			t.Errorf("Unexpected CDR Usage received, cdr: %s ", utils.ToJSON(cdrs[0]))
+		}
+		if cdrs[0].Cost != 0.2188 {
+			t.Errorf("Unexpected CDR Cost received, cdr: %+v ", cdrs[0].Cost)
+		}
+	}
 }

@@ -23,6 +23,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -130,11 +131,6 @@ func (nM *NavigableMap) String() string {
 	return utils.ToJSON(nM.data)
 }
 
-// AsMapStringInterface returns the data out of map, ignoring the order part
-func (nM *NavigableMap) AsMapStringInterface() map[string]interface{} {
-	return nM.data
-}
-
 // indexMapElements will recursively go through map and index the element paths into elmns
 func indexMapElements(mp map[string]interface{}, path []string, vals *[]interface{}) {
 	for k, v := range mp {
@@ -182,6 +178,49 @@ func (nM *NavigableMap) Merge(nM2 *NavigableMap) {
 	if len(nM2.order) != 0 {
 		nM.order = append(nM.order, nM2.order...)
 	}
+}
+
+// indexMapPaths parses map returning the parsed branchPath, useful when not having order for NavigableMap
+func indexMapPaths(mp map[string]interface{}, branchPath []string, parsedPaths *[][]string) {
+	for k, v := range mp {
+		if mpIface, isMap := v.(map[string]interface{}); isMap {
+			indexMapPaths(mpIface, append(branchPath, k), parsedPaths)
+			continue
+		}
+		tmpPaths := append(*parsedPaths, append(branchPath, k))
+		*parsedPaths = tmpPaths
+	}
+}
+
+// AsCGREvent builds a CGREvent considering Time as time.Now()
+// and Event as linear map[string]interface{} with joined paths
+// treats particular case when the value of map is []*NMItem - used in agents/AgentRequest
+func (nM *NavigableMap) AsCGREvent(tnt string, pathSep string) (cgrEv *utils.CGREvent) {
+	if nM == nil || len(nM.data) == 0 {
+		return
+	}
+	cgrEv = &utils.CGREvent{
+		Tenant: tnt,
+		ID:     utils.UUIDSha1Prefix(),
+		Time:   utils.TimePointer(time.Now()),
+		Event:  make(map[string]interface{})}
+	if len(nM.order) == 0 {
+		indexMapPaths(nM.data, nil, &nM.order)
+	}
+	for _, branchPath := range nM.order {
+		val, _ := nM.FieldAsInterface(branchPath)
+		if nmItms, isNMItems := val.([]*NMItem); isNMItems { // special case when we have added multiple items inside a key, used in agents
+			for _, nmItm := range nmItms {
+				if nmItm.Config == nil ||
+					nmItm.Config.AttributeID == "" {
+					val = nmItm.Data // first item which is not an attribute will become the value
+					break
+				}
+			}
+		}
+		cgrEv.Event[strings.Join(branchPath, pathSep)] = val
+	}
+	return
 }
 
 // XMLElement is specially crafted to be automatically marshalled by encoding/xml

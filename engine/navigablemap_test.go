@@ -656,3 +656,104 @@ func TestNavMapAsXMLElements(t *testing.T) {
 		t.Errorf("expecting: \n%s, received: \n%s\n", string(eXML), string(output))
 	}
 }
+
+func TestIndexMapPaths(t *testing.T) {
+	mp := make(map[string]interface{})
+	parsedPaths := make([][]string, 0)
+	eParsedPaths := make([][]string, 0)
+	if indexMapPaths(mp, nil, &parsedPaths); !reflect.DeepEqual(eParsedPaths, parsedPaths) {
+		t.Errorf("expecting: %+v, received: %+v", eParsedPaths, parsedPaths)
+	}
+	mp = map[string]interface{}{
+		"a": "a",
+	}
+	parsedPaths = make([][]string, 0)
+	eParsedPaths = [][]string{
+		[]string{"a"},
+	}
+	if indexMapPaths(mp, nil, &parsedPaths); !reflect.DeepEqual(eParsedPaths, parsedPaths) {
+		t.Errorf("expecting: %+v, received: %+v", eParsedPaths, parsedPaths)
+	}
+	mp = map[string]interface{}{
+		"a": map[string]interface{}{
+			"a1": "a",
+		},
+		"b": "b",
+	}
+	parsedPaths = make([][]string, 0)
+	eParsedPaths = [][]string{
+		[]string{"a", "a1"},
+		[]string{"b"},
+	}
+	if indexMapPaths(mp, nil, &parsedPaths); len(eParsedPaths) != len(parsedPaths) {
+		t.Errorf("expecting: %+v, received: %+v", eParsedPaths, parsedPaths)
+	}
+}
+
+func TestNavMapAsCGREvent(t *testing.T) {
+	nM := &NavigableMap{
+		data: map[string]interface{}{
+			"FirstLevel": map[string]interface{}{
+				"SecondLevel": map[string]interface{}{
+					"ThirdLevel": map[string]interface{}{
+						"Fld1": []*NMItem{
+							&NMItem{Path: []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
+								Data: "Val1"}},
+					},
+				},
+			},
+			"FirstLevel2": map[string]interface{}{
+				"SecondLevel2": map[string]interface{}{
+					"Field2": []*NMItem{
+						&NMItem{Path: []string{"FirstLevel2", "SecondLevel2", "Field2"},
+							Data: "attrVal1",
+							Config: &config.CfgCdrField{Tag: "AttributeTest",
+								AttributeID: "attribute1"}},
+						&NMItem{Path: []string{"FirstLevel2", "SecondLevel2", "Field2"},
+							Data: "Value2"}},
+				},
+				"Field3": []*NMItem{
+					&NMItem{Path: []string{"FirstLevel2", "Field3"},
+						Data: "Value3"}},
+				"Field5": []*NMItem{
+					&NMItem{Path: []string{"FirstLevel2", "Field5"},
+						Data: "Value5"},
+					&NMItem{Path: []string{"FirstLevel2", "Field5"},
+						Data: "attrVal5",
+						Config: &config.CfgCdrField{Tag: "AttributeTest",
+							AttributeID: "attribute5"}}},
+				"Field6": []*NMItem{
+					&NMItem{Path: []string{"FirstLevel2", "Field6"},
+						Data: "Value6",
+						Config: &config.CfgCdrField{Tag: "NewBranchTest",
+							NewBranch: true}},
+					&NMItem{Path: []string{"FirstLevel2", "Field6"},
+						Data: "attrVal6",
+						Config: &config.CfgCdrField{Tag: "AttributeTest",
+							AttributeID: "attribute6"}},
+				},
+			},
+			"Field4": []*NMItem{
+				&NMItem{Path: []string{"Field4"},
+					Data: "Val4"},
+				&NMItem{Path: []string{"Field4"},
+					Data: "attrVal2",
+					Config: &config.CfgCdrField{Tag: "AttributeTest",
+						AttributeID: "attribute2"}}},
+		},
+	}
+	eEv := map[string]interface{}{
+		"FirstLevel2.SecondLevel2.Field2":        "Value2",
+		"FirstLevel.SecondLevel.ThirdLevel.Fld1": "Val1",
+		"FirstLevel2.Field3":                     "Value3",
+		"FirstLevel2.Field5":                     "Value5",
+		"FirstLevel2.Field6":                     "Value6",
+		"Field4":                                 "Val4",
+	}
+	if cgrEv := nM.AsCGREvent("cgrates.org",
+		utils.NestingSep); cgrEv.Tenant != "cgrates.org" ||
+		cgrEv.Time == nil ||
+		!reflect.DeepEqual(eEv, cgrEv.Event) {
+		t.Errorf("expecting: %+v, \nreceived: %+v", utils.ToJSON(eEv), utils.ToJSON(cgrEv.Event))
+	}
+}

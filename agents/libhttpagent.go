@@ -54,7 +54,8 @@ type httpUrlDP struct {
 // String is part of engine.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (hU *httpUrlDP) String() string {
-	return utils.ToJSON(hU.cache.AsMapStringInterface())
+	//return utils.ToJSON(hU.cache.AsMapStringInterface())
+	return "" // ToDo: fixme
 }
 
 // FieldAsInterface is part of engine.DataProvider interface
