@@ -114,7 +114,6 @@ func NewMongoStorage(host, port, db, user, pass, storageType string,
 	}
 	session, err := mgo.Dial(url)
 	if err != nil {
-		fmt.Printf("Got error from dial : %+v", err)
 		return nil, err
 	}
 	session.SetMode(mgo.Strong, true)
