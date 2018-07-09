@@ -200,6 +200,7 @@ func NewCGRConfigFromJsonStringWithDefaults(cfgJsonStr string) (*CGRConfig, erro
 func NewCGRConfigFromFolder(cfgDir string) (*CGRConfig, error) {
 	cfg, err := NewDefaultCGRConfig()
 	if err != nil {
+
 		return nil, err
 	}
 	fi, err := os.Stat(cfgDir)

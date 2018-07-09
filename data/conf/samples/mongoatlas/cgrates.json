@@ -21,7 +21,7 @@
 	"db_port": 27017,
 	"db_name": "OnlineTarrifPlans?replicaSet=CGRateS-shard-0&authSource=admin&ssl=true", 				
 	"db_user": "CGRateS",
-	"db_password": "123456y",
+	"db_password": "cgrates.org",
 },
 
 
@@ -31,7 +31,7 @@
 	"db_port": 27017,
 	"db_name": "OfflineTarrifPlans?replicaSet=CGRateS-shard-0&authSource=admin&ssl=true",
 	"db_user": "CGRateS",
-	"db_password": "123456y",
+	"db_password": "cgrates.org",
 },
 
 
@@ -76,19 +76,7 @@
 	"enabled": true,
 	"thresholds_conns": [
 		{"address": "*internal"}
-	],
-	"cdrstats_conns": [
-		{"address": "*internal"}
-	],
-	"pubsubs_conns": [
-		{"address": "*internal"}
-	],
-	"users_conns": [
-		{"address": "*internal"}
-	],
-	"aliases_conns": [
-		{"address": "*internal"}
-	],
+	],	
 },
 
 
@@ -99,9 +87,6 @@
 
 "cdrs": {
 	"enabled": true,
-	"cdrstats_conns": [
-		{"address": "*internal"}
-	],
 },
 
 
@@ -170,13 +155,13 @@
 	"out_datadb_port": "27017",
 	"out_datadb_name": "OnlineTarrifPlans?replicaSet=CGRateS-shard-0&authSource=admin&ssl=true",
 	"out_datadb_user": "CGRateS", 	
-	"out_datadb_password":"123456y", 
+	"out_datadb_password":"cgrates.org", 
 	"out_stordb_type": "mongo",
 	"out_stordb_host": "cgrates-shard-00-00-dbhlm.mongodb.net:27017,cgrates-shard-00-01-dbhlm.mongodb.net:27017,cgrates-shard-00-02-dbhlm.mongodb.net",
 	"out_stordb_port": "27017",
 	"out_stordb_name": "OfflineTarrifPlans?replicaSet=CGRateS-shard-0&authSource=admin&ssl=true", 					
 	"out_stordb_user": "CGRateS", 				
-	"out_stordb_password":  "123456y", 			
+	"out_stordb_password":  "cgrates.org", 			
 },
 
 

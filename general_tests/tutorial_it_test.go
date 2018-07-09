@@ -21,13 +21,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -39,7 +39,6 @@ var (
 	tutorialRpc     *rpc.Client
 	tutorialConfDIR string //run tests for specific configuration
 	tutorialDelay   int
-	tutorialDataDir = "/usr/share/cgrates"
 )
 
 var sTestsTutorials = []func(t *testing.T){
@@ -57,7 +56,7 @@ func TestTutorialMongo(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping non-short test")
 	}
-	tutorialConfDIR = "mongo_atlas"
+	tutorialConfDIR = "mongoatlas"
 	for _, stest := range sTestsTutorials {
 		t.Run(tutorialConfDIR, stest)
 	}
@@ -72,14 +71,12 @@ func TestTutorialMySQL(t *testing.T) {
 
 func testTutorialLoadConfig(t *testing.T) {
 	var err error
-	tutorialCfgPath = path.Join(tutorialDataDir, "conf", "samples", tutorialConfDIR)
-	fmt.Printf("Tutorial path %+v\n", tutorialCfgPath)
+	tutorialCfgPath = path.Join(*dataDir, "conf", "samples", tutorialConfDIR)
 	if tutorialCfg, err = config.NewCGRConfigFromFolder(tutorialCfgPath); err != nil {
 		t.Error(err)
 	}
-	fmt.Printf("Tutorial cfg %+v\n", tutorialCfg)
 	switch tutorialConfDIR {
-	case "mongo_atlas": // Mongo needs more time to reset db
+	case "mongoatlas": // Mongo needs more time to reset db
 		tutorialDelay = 4000
 	default:
 		tutorialDelay = 2000
@@ -119,7 +116,20 @@ func testTutorialFromFolder(t *testing.T) {
 }
 
 func testTutorialGetCost(t *testing.T) {
-
+	attrs := v1.AttrGetCost{
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Subject:     "1001",
+		Destination: "1002",
+		AnswerTime:  time.Now(),
+		Usage:       "2m10s",
+	}
+	var rply *engine.EventCost
+	if err := tutorialRpc.Call("ApierV1.GetCost", attrs, &rply); err != nil {
+		t.Error("Unexpected nil error received: ", err.Error())
+	} else if *rply.Cost != 0.316900 {
+		t.Errorf("Unexpected cost received: %f", *rply.Cost)
+	}
 }
 
 func testTutorialStopEngine(t *testing.T) {
