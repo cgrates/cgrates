@@ -854,6 +854,7 @@ const (
 	CacheFilters                   = "filters"
 	CacheSupplierProfiles          = "supplier_profiles"
 	CacheAttributeProfiles         = "attribute_profiles"
+	CacheChargerProfiles           = "charger_profiles"
 	CacheResourceFilterIndexes     = "resource_filter_indexes"
 	CacheResourceFilterRevIndexes  = "resource_filter_revindexes"
 	CacheStatFilterIndexes         = "stat_filter_indexes"

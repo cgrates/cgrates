@@ -579,6 +579,52 @@ func startAttributeService(internalAttributeSChan chan rpcclient.RpcClientConnec
 	internalAttributeSChan <- aSv1
 }
 
+// startChargerService fires up the ChargerS
+func startChargerService(internalChargerSChan chan rpcclient.RpcClientConnection,
+	cacheS *engine.CacheS, internalAttributeSChan chan rpcclient.RpcClientConnection,
+	cfg *config.CGRConfig, dm *engine.DataManager,
+	server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
+	filterS := <-filterSChan
+	filterSChan <- filterS
+	<-cacheS.GetPrecacheChannel(utils.CacheChargerProfiles)
+
+	var attrSConn *rpcclient.RpcClientPool
+	var err error
+	if len(cfg.ChargerSCfg().AttributeSConns) != 0 { // AttributeS connection init
+		attrSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
+			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.ChargerSCfg().AttributeSConns, internalAttributeSChan, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
+				utils.ChargerS, utils.AttributeS, err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+	cS, err := engine.NewChargerService(dm, filterS, attrSConn,
+		cfg.ChargerSCfg().StringIndexedFields, cfg.ChargerSCfg().PrefixIndexedFields)
+	if err != nil {
+		utils.Logger.Crit(
+			fmt.Sprintf("<%s> Could not init, error: %s",
+				utils.ChargerS, err.Error()))
+		exitChan <- true
+		return
+	}
+	go func() {
+		if err := cS.ListenAndServe(exitChan); err != nil {
+			utils.Logger.Crit(
+				fmt.Sprintf("<%s> Error: %s listening for packets",
+					utils.ChargerS, err.Error()))
+		}
+		cS.Shutdown()
+		exitChan <- true
+		return
+	}()
+	//cSv1 := v1.NewChargerSv1(cS)
+	//server.RpcRegister(cSv1)
+	//internaChargerSChan <- cSv1
+}
+
 func startResourceService(internalRsChan chan rpcclient.RpcClientConnection, cacheS *engine.CacheS,
 	internalThresholdSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
 	dm *engine.DataManager, server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {

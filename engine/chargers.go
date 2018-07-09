@@ -22,11 +22,14 @@ import (
 	"fmt"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func NewChargerService(dm *DataManager, filterS *FilterS,
+	attrS rpcclient.RpcClientConnection,
 	strgIdxFlds, prfxIdxFlds *[]string) (*ChargerService, error) {
 	return &ChargerService{dm: dm, filterS: filterS,
+		attrS:       attrS,
 		strgIdxFlds: strgIdxFlds,
 		prfxIdxFlds: prfxIdxFlds}, nil
 }
@@ -34,6 +37,7 @@ func NewChargerService(dm *DataManager, filterS *FilterS,
 type ChargerService struct {
 	dm          *DataManager
 	filterS     *FilterS
+	attrS       rpcclient.RpcClientConnection
 	strgIdxFlds *[]string
 	prfxIdxFlds *[]string
 }
