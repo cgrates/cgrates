@@ -112,6 +112,7 @@ func NewMongoStorage(host, port, db, user, pass, storageType string,
 		url += "/" + db
 		dbName = strings.Split(db, "?")[0] // remove extra info after ?
 	}
+	fmt.Printf("URL : %+v \n", url)
 	session, err := mgo.Dial(url)
 	if err != nil {
 		return nil, err
