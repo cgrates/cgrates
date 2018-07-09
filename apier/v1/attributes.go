@@ -88,15 +88,15 @@ func (alSv1 *AttributeSv1) Call(serviceMethod string,
 }
 
 // GetAttributeForEvent  returns matching AttributeProfile for Event
-func (alSv1 *AttributeSv1) GetAttributeForEvent(ev *utils.CGREvent,
+func (alSv1 *AttributeSv1) GetAttributeForEvent(args *engine.AttrArgsProcessEvent,
 	reply *engine.AttributeProfile) error {
-	return alSv1.attrS.V1GetAttributeForEvent(ev, reply)
+	return alSv1.attrS.V1GetAttributeForEvent(args, reply)
 }
 
 // ProcessEvent will replace event fields with the ones in maching AttributeProfile
-func (alSv1 *AttributeSv1) ProcessEvent(ev *utils.CGREvent,
+func (alSv1 *AttributeSv1) ProcessEvent(args *engine.AttrArgsProcessEvent,
 	reply *engine.AttrSProcessEventReply) error {
-	return alSv1.attrS.V1ProcessEvent(ev, reply)
+	return alSv1.attrS.V1ProcessEvent(args, reply)
 }
 
 func (alSv1 *AttributeSv1) Ping(ign string, reply *string) error {

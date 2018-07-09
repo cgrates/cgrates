@@ -41,32 +41,48 @@ var (
 			},
 		},
 	}
-	attrEvs = []*utils.CGREvent{
-		&utils.CGREvent{ //matching AttributeProfile1
-			Tenant:  config.CgrConfig().DefaultTenant,
-			ID:      utils.GenUUID(),
-			Context: utils.StringPointer(utils.MetaSessionS),
-			Event: map[string]interface{}{
-				"Attribute":      "AttributeProfile1",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				utils.Weight:     "20.0",
+	attrEvs = []*AttrArgsProcessEvent{
+		&AttrArgsProcessEvent{
+			CGREvent: utils.CGREvent{ //matching AttributeProfile1
+				Tenant:  config.CgrConfig().DefaultTenant,
+				ID:      utils.GenUUID(),
+				Context: utils.StringPointer(utils.MetaSessionS),
+				Event: map[string]interface{}{
+					"Attribute":      "AttributeProfile1",
+					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+					"UsageInterval":  "1s",
+					utils.Weight:     "20.0",
+				},
 			},
 		},
-		&utils.CGREvent{ //matching AttributeProfile2
-			Tenant:  config.CgrConfig().DefaultTenant,
-			ID:      utils.GenUUID(),
-			Context: utils.StringPointer(utils.MetaSessionS),
-			Event: map[string]interface{}{
-				"Attribute": "AttributeProfile2",
+		&AttrArgsProcessEvent{
+			CGREvent: utils.CGREvent{ //matching AttributeProfile2
+				Tenant:  config.CgrConfig().DefaultTenant,
+				ID:      utils.GenUUID(),
+				Context: utils.StringPointer(utils.MetaSessionS),
+				Event: map[string]interface{}{
+					"Attribute": "AttributeProfile2",
+				},
 			},
 		},
-		&utils.CGREvent{ //matching AttributeProfilePrefix
-			Tenant:  config.CgrConfig().DefaultTenant,
-			ID:      utils.GenUUID(),
-			Context: utils.StringPointer(utils.MetaSessionS),
-			Event: map[string]interface{}{
-				"Attribute": "AttributeProfilePrefix",
+		&AttrArgsProcessEvent{
+			CGREvent: utils.CGREvent{ //matching AttributeProfilePrefix
+				Tenant:  config.CgrConfig().DefaultTenant,
+				ID:      utils.GenUUID(),
+				Context: utils.StringPointer(utils.MetaSessionS),
+				Event: map[string]interface{}{
+					"Attribute": "AttributeProfilePrefix",
+				},
+			},
+		},
+		&AttrArgsProcessEvent{
+			CGREvent: utils.CGREvent{ //matching AttributeProfilePrefix
+				Tenant:  config.CgrConfig().DefaultTenant,
+				ID:      utils.GenUUID(),
+				Context: utils.StringPointer(utils.MetaSessionS),
+				Event: map[string]interface{}{
+					"DistinctMatch": 20,
+				},
 			},
 		},
 	}
@@ -117,6 +133,26 @@ var (
 			ID:        "AttributeProfilePrefix",
 			Contexts:  []string{utils.MetaSessionS},
 			FilterIDs: []string{"FLTR_ATTR_3"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     cloneExpTimeAttributes,
+			},
+			Attributes: []*Attribute{
+				&Attribute{
+					FieldName:  utils.Account,
+					Initial:    utils.META_ANY,
+					Substitute: "1010",
+					Append:     true,
+				},
+			},
+			attributes: mapSubstitutes,
+			Weight:     20,
+		},
+		&AttributeProfile{
+			Tenant:    config.CgrConfig().DefaultTenant,
+			ID:        "AttributeIDMatch",
+			Contexts:  []string{utils.MetaSessionS},
+			FilterIDs: []string{"*gte:DistinctMatch:20"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     cloneExpTimeAttributes,
@@ -281,17 +317,38 @@ func TestAttributeProfileForEvent(t *testing.T) {
 }
 
 func TestAttributeProcessEvent(t *testing.T) {
-	attrEvs[0].Event["Account"] = "1010" //Field added in event after process
+	attrEvs[0].CGREvent.Event["Account"] = "1010" //Field added in event after process
 	eRply := &AttrSProcessEventReply{
 		MatchedProfile: "AttributeProfile1",
 		AlteredFields:  []string{"Account"},
-		CGREvent:       attrEvs[0],
+		CGREvent:       &attrEvs[0].CGREvent,
 	}
 	atrp, err := attrService.processEvent(attrEvs[0])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply, atrp) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(atrp))
+	}
+}
+
+func TestAttributeProcessEventWithNotFound(t *testing.T) {
+	attrEvs[3].CGREvent.Event["Account"] = "1010" //Field added in event after process
+	if _, err := attrService.processEvent(attrEvs[3]); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Error: %+v", err)
+	}
+}
+
+func TestAttributeProcessEventWithIDs(t *testing.T) {
+	attrEvs[3].CGREvent.Event["Account"] = "1010" //Field added in event after process
+	attrEvs[3].AttributeIDs = []string{"AttributeIDMatch"}
+	eRply := &AttrSProcessEventReply{
+		MatchedProfile: "AttributeIDMatch",
+		AlteredFields:  []string{"Account"},
+		CGREvent:       &attrEvs[3].CGREvent,
+	}
+	if atrp, err := attrService.processEvent(attrEvs[3]); err != nil {
+	} else if !reflect.DeepEqual(eRply, atrp) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(atrp))
 	}
 }

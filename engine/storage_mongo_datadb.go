@@ -112,9 +112,9 @@ func NewMongoStorage(host, port, db, user, pass, storageType string,
 		url += "/" + db
 		dbName = strings.Split(db, "?")[0] // remove extra info after ?
 	}
-	fmt.Printf("URL : %+v \n", url)
 	session, err := mgo.Dial(url)
 	if err != nil {
+		fmt.Printf("Got error from dial : %+v", err)
 		return nil, err
 	}
 	session.SetMode(mgo.Strong, true)
@@ -162,6 +162,7 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 		}
 		for _, col := range []string{colAct, colApl, colAAp, colAtr, colDcs, colRpl, colLcr, colDst, colRds, colAls, colUsr, colLht} {
 			if err = db.C(col).EnsureIndex(idx); err != nil {
+
 				return
 			}
 		}
@@ -246,12 +247,13 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 			return
 		}
 		idx = mgo.Index{
-			Key:        []string{"tpid", "direction", "tenant", "category", "subject", "account", "loadid"},
+			Key:        []string{"tpid", "tenant", "category", "subject", "account", "loadid"},
 			Unique:     true,
 			DropDups:   false,
 			Background: false,
 			Sparse:     false,
 		}
+
 		if err = db.C(utils.TBLTPDerivedChargers).EnsureIndex(idx); err != nil {
 			return
 		}
