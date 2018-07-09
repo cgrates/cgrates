@@ -705,6 +705,20 @@ func TestDfAttributeServJsonCfg(t *testing.T) {
 	}
 }
 
+func TestDfChargerServJsonCfg(t *testing.T) {
+	eCfg := &ChargerSJsonCfg{
+		Enabled:               utils.BoolPointer(false),
+		Attributes_conns:      &[]*HaPoolJsonCfg{},
+		String_indexed_fields: nil,
+		Prefix_indexed_fields: &[]string{},
+	}
+	if cfg, err := dfCgrJsonCfg.ChargerServJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Error("Received: ", cfg)
+	}
+}
+
 func TestDfFilterSJsonCfg(t *testing.T) {
 	eCfg := &FilterSJsonCfg{
 		Stats_conns:     &[]*HaPoolJsonCfg{},

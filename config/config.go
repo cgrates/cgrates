@@ -341,19 +341,20 @@ type CGRConfig struct {
 	CdreProfiles             map[string]*CdreConfig
 	CdrcProfiles             map[string][]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath][]{Configs}
 	sessionSCfg              *SessionSCfg
-	fsAgentCfg               *FsAgentConfig           // FreeSWITCHAgent configuration
-	kamAgentCfg              *KamAgentCfg             // KamailioAgent Configuration
-	SmOsipsConfig            *SmOsipsConfig           // SMOpenSIPS Configuration
-	asteriskAgentCfg         *AsteriskAgentCfg        // SMAsterisk Configuration
-	diameterAgentCfg         *DiameterAgentCfg        // DiameterAgent configuration
-	radiusAgentCfg           *RadiusAgentCfg          // RadiusAgent configuration
-	httpAgentCfg             []*HttpAgentCfg          // HttpAgent configuration
-	filterSCfg               *FilterSCfg              // FilterS configuration
-	PubSubServerEnabled      bool                     // Starts PubSub as server: <true|false>.
-	AliasesServerEnabled     bool                     // Starts PubSub as server: <true|false>.
-	UserServerEnabled        bool                     // Starts User as server: <true|false>
-	UserServerIndexes        []string                 // List of user profile field indexes
-	attributeSCfg            *AttributeSCfg           // Attribute service configuration
+	fsAgentCfg               *FsAgentConfig    // FreeSWITCHAgent configuration
+	kamAgentCfg              *KamAgentCfg      // KamailioAgent Configuration
+	SmOsipsConfig            *SmOsipsConfig    // SMOpenSIPS Configuration
+	asteriskAgentCfg         *AsteriskAgentCfg // SMAsterisk Configuration
+	diameterAgentCfg         *DiameterAgentCfg // DiameterAgent configuration
+	radiusAgentCfg           *RadiusAgentCfg   // RadiusAgent configuration
+	httpAgentCfg             []*HttpAgentCfg   // HttpAgent configuration
+	filterSCfg               *FilterSCfg       // FilterS configuration
+	PubSubServerEnabled      bool              // Starts PubSub as server: <true|false>.
+	AliasesServerEnabled     bool              // Starts PubSub as server: <true|false>.
+	UserServerEnabled        bool              // Starts User as server: <true|false>
+	UserServerIndexes        []string          // List of user profile field indexes
+	attributeSCfg            *AttributeSCfg    // Attribute service configuration
+	chargerSCfg              *ChargerSCfg
 	resourceSCfg             *ResourceSConfig         // Configuration for resource limiter
 	statsCfg                 *StatSCfg                // Configuration for StatS
 	thresholdSCfg            *ThresholdSCfg           // configuration for ThresholdS
@@ -646,6 +647,14 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
+	if self.chargerSCfg != nil && self.chargerSCfg.Enabled {
+		for _, connCfg := range self.chargerSCfg.AttributeSConns {
+			if connCfg.Address == utils.MetaInternal &&
+				(self.attributeSCfg == nil || !self.attributeSCfg.Enabled) {
+				return errors.New("AttributeS not enabled but requested by ChargerS component.")
+			}
+		}
+	}
 	// ResourceLimiter checks
 	if self.resourceSCfg != nil && self.resourceSCfg.Enabled {
 		for _, connCfg := range self.resourceSCfg.ThresholdSConns {
@@ -814,6 +823,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	}
 
 	jsnAttributeSCfg, err := jsnCfg.AttributeServJsonCfg()
+	if err != nil {
+		return err
+	}
+
+	jsnChargerSCfg, err := jsnCfg.ChargerServJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -1376,6 +1390,15 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 	}
 
+	if jsnChargerSCfg != nil {
+		if self.chargerSCfg == nil {
+			self.chargerSCfg = new(ChargerSCfg)
+		}
+		if self.chargerSCfg.loadFromJsonCfg(jsnChargerSCfg); err != nil {
+			return err
+		}
+	}
+
 	if jsnRLSCfg != nil {
 		if self.resourceSCfg == nil {
 			self.resourceSCfg = new(ResourceSConfig)
@@ -1494,6 +1517,10 @@ func (self *CGRConfig) RadiusAgentCfg() *RadiusAgentCfg {
 
 func (cfg *CGRConfig) AttributeSCfg() *AttributeSCfg {
 	return cfg.attributeSCfg
+}
+
+func (cfg *CGRConfig) ChargerSCfg() *ChargerSCfg {
+	return cfg.chargerSCfg
 }
 
 // ToDo: fix locking here

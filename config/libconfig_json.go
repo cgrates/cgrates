@@ -429,6 +429,14 @@ type AttributeSJsonCfg struct {
 	Prefix_indexed_fields *[]string
 }
 
+// ChargerSJsonCfg service config section
+type ChargerSJsonCfg struct {
+	Enabled               *bool
+	Attributes_conns      *[]*HaPoolJsonCfg
+	String_indexed_fields *[]string
+	Prefix_indexed_fields *[]string
+}
+
 // ResourceLimiter service config section
 type ResourceSJsonCfg struct {
 	Enabled               *bool

@@ -57,14 +57,10 @@ func TestHAitInitCfg(t *testing.T) {
 }
 
 // Remove data in both rating and accounting db
-func TestHAitResetDataDb(t *testing.T) {
+func TestHAitResetDB(t *testing.T) {
 	if err := engine.InitDataDb(haCfg); err != nil {
 		t.Fatal(err)
 	}
-}
-
-// Wipe out the cdr database
-func TestHAitResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(haCfg); err != nil {
 		t.Fatal(err)
 	}

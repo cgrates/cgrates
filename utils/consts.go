@@ -655,6 +655,7 @@ const (
 	APIKey        = "APIKey"
 	APIMethods    = "APIMethods"
 	NestingSep    = "."
+	ChargerS      = "ChargerS"
 )
 
 // MetaFilterIndexesAPIs

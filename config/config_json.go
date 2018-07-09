@@ -67,6 +67,7 @@ const (
 	DispatcherSJson    = "dispatcher"
 	CgrLoaderCfgJson   = "loader"
 	CgrMigratorCfgJson = "migrator"
+	ChargerSCfgJson    = "chargers"
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -362,6 +363,18 @@ func (cgrJsn CgrJsonCfg) AttributeServJsonCfg() (*AttributeSJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(AttributeSJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (cgrJsn CgrJsonCfg) ChargerServJsonCfg() (*ChargerSJsonCfg, error) {
+	rawCfg, hasKey := cgrJsn[ChargerSCfgJson]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(ChargerSJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

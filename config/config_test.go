@@ -801,6 +801,18 @@ func TestCgrCfgJSONDefaultSAttributeSCfg(t *testing.T) {
 	}
 }
 
+func TestCgrCfgJSONDefaultSChargerSCfg(t *testing.T) {
+	eChargerSCfg := &ChargerSCfg{
+		Enabled:             false,
+		AttributeSConns:     []*HaPoolConfig{},
+		StringIndexedFields: nil,
+		PrefixIndexedFields: &[]string{},
+	}
+	if !reflect.DeepEqual(eChargerSCfg, cgrCfg.chargerSCfg) {
+		t.Errorf("received: %+v, expecting: %+v", eChargerSCfg, cgrCfg.chargerSCfg)
+	}
+}
+
 func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 	eResLiCfg := &ResourceSConfig{
 		Enabled:             false,

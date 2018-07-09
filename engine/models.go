@@ -558,3 +558,16 @@ type TPAttribute struct {
 	Weight             float64 `index:"9" re:"\d+\.?\d*"`
 	CreatedAt          time.Time
 }
+
+type TPCharger struct {
+	PK                 uint `gorm:"primary_key"`
+	Tpid               string
+	Tenant             string  `index:"0" re:""`
+	ID                 string  `index:"1" re:""`
+	FilterIDs          string  `index:"2" re:""`
+	ActivationInterval string  `index:"3" re:""`
+	RunID              string  `index:"4" re:""`
+	AttributeIDs       string  `index:"5" re:""`
+	Weight             float64 `index:"6" re:"\d+\.?\d*"`
+	CreatedAt          time.Time
+}

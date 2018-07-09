@@ -429,6 +429,14 @@ const CGRATES_CFG_JSON = `
 },
 
 
+"chargers": {								// Charger service
+	"enabled": false,						// starts charger service: <true|false>.
+	"attributes_conns": [],					// address where to reach the AttributeS <""|127.0.0.1:2013>
+	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+},
+
+
 "resources": {								// Resource service (*new)
 	"enabled": false,						// starts ResourceLimiter service: <true|false>.
 	"store_interval": "",					// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
