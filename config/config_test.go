@@ -675,6 +675,8 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		utils.CacheAttributeProfiles: &CacheParamConfig{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheChargerProfiles: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		utils.CacheResourceFilterIndexes: &CacheParamConfig{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		utils.CacheResourceFilterRevIndexes: &CacheParamConfig{Limit: -1,
@@ -694,6 +696,10 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 		utils.CacheAttributeFilterIndexes: &CacheParamConfig{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		utils.CacheAttributeFilterRevIndexes: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheChargerFilterIndexes: &CacheParamConfig{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheChargerFilterRevIndexes: &CacheParamConfig{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 	}
 

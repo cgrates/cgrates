@@ -133,6 +133,7 @@ const CGRATES_CFG_JSON = `
 	"filters": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control filters caching
 	"supplier_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control supplier profile caching
 	"attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control attribute profile caching
+	"charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control charger profile caching
 	"resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control resource filter indexes caching
 	"resource_filter_revindexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control resource filter reverse indexes caching
 	"stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 						// control stat filter indexes caching
@@ -143,6 +144,8 @@ const CGRATES_CFG_JSON = `
 	"supplier_filter_revindexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control supplier filter reverse indexes caching
 	"attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control attribute filter indexes caching
 	"attribute_filter_revindexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control attribute filter reverse indexes caching
+	"charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control charger filter indexes caching
+	"charger_filter_revindexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control charger filter reverse indexes caching
 },
 
 

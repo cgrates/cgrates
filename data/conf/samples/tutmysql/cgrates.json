@@ -257,6 +257,11 @@
 },
 
 
+"chargers": {								// Attribute service
+	"enabled": true,						// starts Alias service: <true|false>.
+},
+
+
 "resources": {
 	"enabled": true,
 	"store_interval": "1s",

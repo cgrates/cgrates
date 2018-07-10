@@ -58,6 +58,7 @@ var precachedPartitions = []string{
 	utils.CacheFilters,
 	utils.CacheSupplierProfiles,
 	utils.CacheAttributeProfiles,
+	utils.CacheChargerProfiles,
 }
 
 // InitCache will instantiate the cache with specific or default configuraiton

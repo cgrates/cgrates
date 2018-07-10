@@ -66,6 +66,7 @@ var (
 		CacheFilters:                   FilterPrefix,
 		CacheSupplierProfiles:          SupplierProfilePrefix,
 		CacheAttributeProfiles:         AttributeProfilePrefix,
+		CacheChargerProfiles:           ChargerProfilePrefix,
 		CacheResourceFilterIndexes:     ResourceFilterIndexes,
 		CacheResourceFilterRevIndexes:  ResourceFilterRevIndexes,
 		CacheStatFilterIndexes:         StatFilterIndexes,
@@ -84,6 +85,7 @@ var (
 		StatQueueProfilePrefix: CacheStatFilterIndexes,
 		SupplierProfilePrefix:  CacheSupplierFilterIndexes,
 		AttributeProfilePrefix: CacheAttributeFilterIndexes,
+		ChargerProfilePrefix:   CacheChargerFilterIndexes,
 	}
 	PrefixToRevIndexCache = map[string]string{
 		ThresholdProfilePrefix: CacheThresholdFilterRevIndexes,
@@ -91,6 +93,7 @@ var (
 		StatQueueProfilePrefix: CacheStatFilterRevIndexes,
 		SupplierProfilePrefix:  CacheSupplierFilterRevIndexes,
 		AttributeProfilePrefix: CacheAttributeFilterRevIndexes,
+		ChargerProfilePrefix:   CacheChargerFilterRevIndexes,
 	}
 )
 
@@ -253,6 +256,7 @@ const (
 	StatQueueProfilePrefix        = "sqp_"
 	SupplierProfilePrefix         = "spp_"
 	AttributeProfilePrefix        = "alp_"
+	ChargerProfilePrefix          = "cpp_"
 	ThresholdProfilePrefix        = "thp_"
 	StatQueuePrefix               = "stq_"
 	LOADINST_KEY                  = "load_history"
@@ -593,6 +597,7 @@ const (
 const (
 	SessionsLow    = "sessions"
 	AttributesLow  = "attributes"
+	ChargerSLow    = "chargers"
 	SuppliersLow   = "suppliers"
 	ResourcesLow   = "resources"
 	StatServiceLow = "stats"
@@ -686,6 +691,11 @@ const (
 	AttributeSv1GetAttributeForEvent = "AttributeSv1.GetAttributeForEvent"
 	AttributeSv1ProcessEvent         = "AttributeSv1.ProcessEvent"
 	AttributeSv1Ping                 = "AttributeSv1.Ping"
+)
+
+// ChargerS APIs
+const (
+	ChargerSv1Ping = "ChargerSv1.Ping"
 )
 
 // ThresholdS APIs
@@ -865,6 +875,8 @@ const (
 	CacheSupplierFilterRevIndexes  = "supplier_filter_revindexes"
 	CacheAttributeFilterIndexes    = "attribute_filter_indexes"
 	CacheAttributeFilterRevIndexes = "attribute_filter_revindexes"
+	CacheChargerFilterIndexes      = "charger_filter_indexes"
+	CacheChargerFilterRevIndexes   = "charger_filter_revindexes"
 	MetaPrecaching                 = "*precaching"
 	MetaReady                      = "*ready"
 )

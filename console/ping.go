@@ -53,6 +53,8 @@ func (self *CmdApierPing) RpcMethod() string {
 		return utils.SupplierSv1Ping
 	case utils.AttributesLow:
 		return utils.AttributeSv1Ping
+	case utils.ChargerSLow:
+		return utils.ChargerSv1Ping
 	case utils.ResourcesLow:
 		return utils.ResourceSv1Ping
 	case utils.StatServiceLow:

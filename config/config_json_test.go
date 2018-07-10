@@ -144,6 +144,9 @@ func TestCacheJsonCfg(t *testing.T) {
 		utils.CacheAttributeProfiles: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 			Precache: utils.BoolPointer(false)},
+		utils.CacheChargerProfiles: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
+			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+			Precache: utils.BoolPointer(false)},
 		utils.CacheResourceFilterIndexes: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false)},
 		utils.CacheResourceFilterRevIndexes: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
@@ -163,6 +166,10 @@ func TestCacheJsonCfg(t *testing.T) {
 		utils.CacheAttributeFilterIndexes: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false)},
 		utils.CacheAttributeFilterRevIndexes: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
+			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false)},
+		utils.CacheChargerFilterIndexes: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
+			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false)},
+		utils.CacheChargerFilterRevIndexes: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false)},
 	}
 

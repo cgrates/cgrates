@@ -587,7 +587,6 @@ func startChargerService(internalChargerSChan chan rpcclient.RpcClientConnection
 	filterS := <-filterSChan
 	filterSChan <- filterS
 	<-cacheS.GetPrecacheChannel(utils.CacheChargerProfiles)
-
 	var attrSConn *rpcclient.RpcClientPool
 	var err error
 	if len(cfg.ChargerSCfg().AttributeSConns) != 0 { // AttributeS connection init
@@ -620,9 +619,9 @@ func startChargerService(internalChargerSChan chan rpcclient.RpcClientConnection
 		exitChan <- true
 		return
 	}()
-	//cSv1 := v1.NewChargerSv1(cS)
-	//server.RpcRegister(cSv1)
-	//internaChargerSChan <- cSv1
+	cSv1 := v1.NewChargerSv1(cS)
+	server.RpcRegister(cSv1)
+	internalChargerSChan <- cSv1
 }
 
 func startResourceService(internalRsChan chan rpcclient.RpcClientConnection, cacheS *engine.CacheS,
@@ -1164,6 +1163,7 @@ func main() {
 	internalAliaseSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalSMGChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalAttributeSChan := make(chan rpcclient.RpcClientConnection, 1)
+	internalChargerSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalRsChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalStatSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalThresholdSChan := make(chan rpcclient.RpcClientConnection, 1)
@@ -1256,6 +1256,10 @@ func main() {
 
 	if cfg.AttributeSCfg().Enabled {
 		go startAttributeService(internalAttributeSChan, cacheS,
+			cfg, dm, server, exitChan, filterSChan)
+	}
+	if cfg.ChargerSCfg().Enabled {
+		go startChargerService(internalChargerSChan, cacheS, internalAttributeSChan,
 			cfg, dm, server, exitChan, filterSChan)
 	}
 
