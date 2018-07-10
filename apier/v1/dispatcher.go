@@ -135,15 +135,15 @@ func (dA *DispatcherAttributeSv1) Ping(ign string, reply *string) error {
 }
 
 // GetAttributeForEvent implements AttributeSv1GetAttributeForEvent
-func (dA *DispatcherAttributeSv1) GetAttributeForEvent(ev *dispatcher.CGREvWithApiKey,
+func (dA *DispatcherAttributeSv1) GetAttributeForEvent(args *dispatcher.ArgsAttrProcessEventWithApiKey,
 	reply *engine.AttributeProfile) error {
-	return dA.dA.AttributeSv1GetAttributeForEvent(ev, reply)
+	return dA.dA.AttributeSv1GetAttributeForEvent(args, reply)
 }
 
 // ProcessEvent implements AttributeSv1ProcessEvent
-func (dA *DispatcherAttributeSv1) ProcessEvent(ev *dispatcher.CGREvWithApiKey,
+func (dA *DispatcherAttributeSv1) ProcessEvent(args *dispatcher.ArgsAttrProcessEventWithApiKey,
 	reply *engine.AttrSProcessEventReply) error {
-	return dA.dA.AttributeSv1ProcessEvent(ev, reply)
+	return dA.dA.AttributeSv1ProcessEvent(args, reply)
 }
 
 func NewDispatcherSessionSv1(dps *dispatcher.DispatcherService) *DispatcherSessionSv1 {

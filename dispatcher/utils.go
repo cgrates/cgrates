@@ -57,6 +57,11 @@ type ArgsProcessEventWithApiKey struct {
 	engine.ArgsProcessEvent
 }
 
+type ArgsAttrProcessEventWithApiKey struct {
+	APIKey string
+	engine.AttrArgsProcessEvent
+}
+
 type ArgsGetSuppliersWithApiKey struct {
 	APIKey string
 	engine.ArgsGetSuppliers

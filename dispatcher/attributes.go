@@ -30,28 +30,28 @@ func (dS *DispatcherService) AttributeSv1Ping(ign string, reply *string) error {
 	return dS.attrS.Call(utils.AttributeSv1Ping, ign, reply)
 }
 
-func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(args *CGREvWithApiKey,
+func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(args *ArgsAttrProcessEventWithApiKey,
 	reply *engine.AttributeProfile) (err error) {
 	if dS.attrS == nil {
 		return utils.NewErrNotConnected(utils.AttributeS)
 	}
-	if err = dS.authorize(utils.AttributeSv1GetAttributeForEvent, args.CGREvent.Tenant,
-		args.APIKey, args.CGREvent.Time); err != nil {
+	if err = dS.authorize(utils.AttributeSv1GetAttributeForEvent, args.AttrArgsProcessEvent.CGREvent.Tenant,
+		args.APIKey, args.AttrArgsProcessEvent.CGREvent.Time); err != nil {
 		return
 	}
-	return dS.attrS.Call(utils.AttributeSv1GetAttributeForEvent, args.CGREvent, reply)
+	return dS.attrS.Call(utils.AttributeSv1GetAttributeForEvent, args.AttrArgsProcessEvent, reply)
 
 }
 
-func (dS *DispatcherService) AttributeSv1ProcessEvent(args *CGREvWithApiKey,
+func (dS *DispatcherService) AttributeSv1ProcessEvent(args *ArgsAttrProcessEventWithApiKey,
 	reply *engine.AttrSProcessEventReply) (err error) {
 	if dS.attrS == nil {
 		return utils.NewErrNotConnected(utils.AttributeS)
 	}
-	if err = dS.authorize(utils.AttributeSv1ProcessEvent, args.CGREvent.Tenant,
-		args.APIKey, args.CGREvent.Time); err != nil {
+	if err = dS.authorize(utils.AttributeSv1ProcessEvent, args.AttrArgsProcessEvent.CGREvent.Tenant,
+		args.APIKey, args.AttrArgsProcessEvent.CGREvent.Time); err != nil {
 		return
 	}
-	return dS.attrS.Call(utils.AttributeSv1ProcessEvent, args.CGREvent, reply)
+	return dS.attrS.Call(utils.AttributeSv1ProcessEvent, args.AttrArgsProcessEvent, reply)
 
 }
