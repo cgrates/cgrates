@@ -30,11 +30,8 @@
 	"stats_conns": [
 		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
-	"pubsubs_conns": [
-		{"address": "*internal"}
-	],
 	"attributes_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "*internal", "transport": "*json"}
 	],
 },
 
@@ -45,7 +42,7 @@
 		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 	"stats_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "*internal", "transport": "*json"}
 	],
 	"sessions_cost_retries": 5,
 },
@@ -55,34 +52,30 @@
 	"enabled": true,
 	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
 	"rals_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "*internal", "transport": "*json"}
 	],
 	"cdrs_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "*internal", "transport": "*json"}
 	],
 	"resources_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "*internal", "transport": "*json"}
 	],
 	"suppliers_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "*internal", "transport": "*json"}
 	],
 	"attributes_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "*internal", "transport": "*json"}
 	],
 	"stats_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "*internal", "transport": "*json"}
 	],
 	"thresholds_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "*internal", "transport": "*json"}
 	],
 	"debit_interval": "10s",
 	"channel_sync_interval":"7s",
 },
 
-
-"pubsubs": {
-	"enabled": true,
-},
 
 
 "attributes": {
