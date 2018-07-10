@@ -295,6 +295,17 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
+	storDataChargers, err := self.storDb.GetTPChargers(self.tpID, "")
+	if err != nil && err.Error() != utils.ErrNotFound.Error() {
+		return err
+	}
+	for _, sd := range storDataChargers {
+		sdModels := APItoModelTPCharger(sd)
+		for _, sdModel := range sdModels {
+			toExportMap[utils.ChargersCsv] = append(toExportMap[utils.ChargersCsv], sdModel)
+		}
+	}
+
 	storDataUsers, err := self.storDb.GetTPUsers(&utils.TPUsers{TPid: self.tpID})
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
 		return err

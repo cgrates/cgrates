@@ -1329,3 +1329,100 @@ func TestModelAsTPAttribute(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv[0]))
 	}
 }
+
+func TestAPItoChargerProfile(t *testing.T) {
+	tpCPP := &utils.TPChargerProfile{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "Charger1",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		RunID:     "*rated",
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "",
+		},
+		AttributeIDs: []string{"ATTR1", "ATTR2"},
+		Weight:       20,
+	}
+
+	expected := &ChargerProfile{
+		Tenant:    "cgrates.org",
+		ID:        "Charger1",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		RunID:        "*rated",
+		AttributeIDs: []string{"ATTR1", "ATTR2"},
+		Weight:       20,
+	}
+	if rcv, err := APItoChargerProfile(tpCPP, "UTC"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestAPItoModelTPCharger(t *testing.T) {
+	tpCharger := &utils.TPChargerProfile{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "Charger1",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		RunID:     "*rated",
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "",
+		},
+		AttributeIDs: []string{"ATTR1", "ATTR2"},
+		Weight:       20,
+	}
+	expected := TPChargers{
+		&TPCharger{
+			Tpid:               "TP1",
+			Tenant:             "cgrates.org",
+			ID:                 "Charger1",
+			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
+			RunID:              "*rated",
+			AttributeIDs:       "ATTR1;ATTR2",
+			ActivationInterval: "2014-07-14T14:35:00Z",
+			Weight:             20,
+		},
+	}
+	rcv := APItoModelTPCharger(tpCharger)
+	if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestModelAsTPChargers(t *testing.T) {
+	models := TPChargers{
+		&TPCharger{
+			Tpid:               "TP1",
+			Tenant:             "cgrates.org",
+			ID:                 "Charger1",
+			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
+			RunID:              "*rated",
+			AttributeIDs:       "ATTR1;ATTR2",
+			ActivationInterval: "2014-07-14T14:35:00Z",
+			Weight:             20,
+		},
+	}
+	expected := &utils.TPChargerProfile{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "Charger1",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		RunID:     "*rated",
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "",
+		},
+		AttributeIDs: []string{"ATTR1", "ATTR2"},
+		Weight:       20,
+	}
+	rcv := models.AsTPChargers()
+	if !reflect.DeepEqual(expected, rcv[0]) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv[0]))
+	}
+}

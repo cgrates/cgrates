@@ -2112,7 +2112,6 @@ func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
 				for _, val := range st.Metrics {
 					if val.Parameters != "" {
 						paramSlice = append(paramSlice, val.Parameters)
-
 					}
 				}
 				for i, val := range utils.StringMapFromSlice(paramSlice).Slice() {
@@ -2835,4 +2834,109 @@ func APItoAttributeProfile(tpTH *utils.TPAttributeProfile, timezone string) (th 
 		}
 	}
 	return th, nil
+}
+
+type TPChargers []*TPCharger
+
+func (tps TPChargers) AsTPChargers() (result []*utils.TPChargerProfile) {
+	mst := make(map[string]*utils.TPChargerProfile)
+	for _, tp := range tps {
+		tpCPP, found := mst[tp.ID]
+		if !found {
+			tpCPP = &utils.TPChargerProfile{
+				TPid:   tp.Tpid,
+				Tenant: tp.Tenant,
+				ID:     tp.ID,
+			}
+		}
+		if tp.Weight != 0 {
+			tpCPP.Weight = tp.Weight
+		}
+		if len(tp.ActivationInterval) != 0 {
+			tpCPP.ActivationInterval = new(utils.TPActivationInterval)
+			aiSplt := strings.Split(tp.ActivationInterval, utils.INFIELD_SEP)
+			if len(aiSplt) == 2 {
+				tpCPP.ActivationInterval.ActivationTime = aiSplt[0]
+				tpCPP.ActivationInterval.ExpiryTime = aiSplt[1]
+			} else if len(aiSplt) == 1 {
+				tpCPP.ActivationInterval.ActivationTime = aiSplt[0]
+			}
+		}
+		if tp.FilterIDs != "" {
+			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
+			tpCPP.FilterIDs = append(tpCPP.FilterIDs, filterSplit...)
+		}
+		if tp.RunID != "" {
+			tpCPP.RunID = tp.RunID
+		}
+		if tp.AttributeIDs != "" {
+			attributeSplit := strings.Split(tp.AttributeIDs, utils.INFIELD_SEP)
+			tpCPP.AttributeIDs = append(tpCPP.AttributeIDs, attributeSplit...)
+		}
+		mst[tp.ID] = tpCPP
+	}
+	result = make([]*utils.TPChargerProfile, len(mst))
+	i := 0
+	for _, tp := range mst {
+		result[i] = tp
+		i++
+	}
+	return
+}
+
+func APItoModelTPCharger(tpCPP *utils.TPChargerProfile) (mdls TPChargers) {
+	if tpCPP != nil {
+		mdl := &TPCharger{
+			Tenant: tpCPP.Tenant,
+			Tpid:   tpCPP.TPid,
+			ID:     tpCPP.ID,
+		}
+		mdl.Weight = tpCPP.Weight
+		mdl.RunID = tpCPP.RunID
+		for i, val := range tpCPP.AttributeIDs {
+			if i != 0 {
+				mdl.AttributeIDs += utils.INFIELD_SEP
+			}
+			mdl.AttributeIDs += val
+		}
+		for i, val := range tpCPP.FilterIDs {
+			if i != 0 {
+				mdl.FilterIDs += utils.INFIELD_SEP
+			}
+			mdl.FilterIDs += val
+		}
+		if tpCPP.ActivationInterval != nil {
+			if tpCPP.ActivationInterval.ActivationTime != "" {
+				mdl.ActivationInterval = tpCPP.ActivationInterval.ActivationTime
+			}
+			if tpCPP.ActivationInterval.ExpiryTime != "" {
+				mdl.ActivationInterval += utils.INFIELD_SEP + tpCPP.ActivationInterval.ExpiryTime
+			}
+		}
+		mdls = append(mdls, mdl)
+	}
+	return
+}
+
+func APItoChargerProfile(tpCPP *utils.TPChargerProfile, timezone string) (cpp *ChargerProfile, err error) {
+	cpp = &ChargerProfile{
+		Tenant:       tpCPP.Tenant,
+		ID:           tpCPP.ID,
+		Weight:       tpCPP.Weight,
+		RunID:        tpCPP.RunID,
+		FilterIDs:    []string{},
+		AttributeIDs: []string{},
+	}
+	for _, fli := range tpCPP.FilterIDs {
+		cpp.FilterIDs = append(cpp.FilterIDs, fli)
+	}
+	for _, attribute := range tpCPP.AttributeIDs {
+		cpp.AttributeIDs = append(cpp.AttributeIDs, attribute)
+	}
+	if tpCPP.ActivationInterval != nil {
+		if cpp.ActivationInterval, err = tpCPP.ActivationInterval.AsActivationInterval(timezone); err != nil {
+			return nil, err
+		}
+	}
+	return cpp, nil
 }

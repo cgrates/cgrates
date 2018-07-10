@@ -738,6 +738,28 @@ func (self *SQLStorage) SetTPAttributes(tpAttrs []*utils.TPAttributeProfile) err
 	return nil
 }
 
+func (self *SQLStorage) SetTPChargers(tpCPPs []*utils.TPChargerProfile) error {
+	if len(tpCPPs) == 0 {
+		return nil
+	}
+	tx := self.db.Begin()
+	for _, cpp := range tpCPPs {
+		// Remove previous
+		if err := tx.Where(&TPCharger{Tpid: cpp.TPid, ID: cpp.ID}).Delete(TPCharger{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+		for _, mst := range APItoModelTPCharger(cpp) {
+			if err := tx.Save(&mst).Error; err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+	tx.Commit()
+	return nil
+}
+
 func (self *SQLStorage) SetSMCost(smc *SMCost) error {
 	if smc.CostDetails == nil {
 		return nil
@@ -1624,7 +1646,19 @@ func (self *SQLStorage) GetTPAttributes(tpid, id string) ([]*utils.TPAttributePr
 }
 
 func (self *SQLStorage) GetTPChargers(tpid, id string) ([]*utils.TPChargerProfile, error) {
-	return nil, nil
+	var cpps TPChargers
+	q := self.db.Where("tpid = ?", tpid)
+	if len(id) != 0 {
+		q = q.Where("id = ?", id)
+	}
+	if err := q.Find(&cpps).Error; err != nil {
+		return nil, err
+	}
+	arls := cpps.AsTPChargers()
+	if len(arls) == 0 {
+		return arls, utils.ErrNotFound
+	}
+	return arls, nil
 }
 
 // GetVersions returns slice of all versions or a specific version if tag is specified

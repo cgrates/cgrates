@@ -116,3 +116,7 @@ func (cS *ChargerService) V1ProcessEvent(args *utils.CGREvent,
 	return
 
 }
+
+func (cpp *ChargerProfile) TenantID() string {
+	return utils.ConcatenatedKey(cpp.Tenant, cpp.ID)
+}
