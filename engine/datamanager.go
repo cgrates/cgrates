@@ -1156,3 +1156,17 @@ func (dm *DataManager) RemoveAttributeProfile(tenant, id string, contexts []stri
 	}
 	return
 }
+
+func (dm *DataManager) GetChargerProfile(tenant, id string, skipCache bool,
+	transactionID string) (cpp *ChargerProfile, err error) {
+	return
+}
+
+func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (err error) {
+	return
+}
+
+func (dm *DataManager) RemoveChargerProfile(tenant, id string,
+	transactionID string, withIndex bool) (err error) {
+	return
+}
