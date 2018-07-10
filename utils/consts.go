@@ -397,6 +397,7 @@ const (
 	MetaThresholds               = "*thresholds"
 	MetaSuppliers                = "*suppliers"
 	MetaAttributes               = "*attributes"
+	MetaChargers                 = "*chargers"
 	MetaResources                = "*resources"
 	MetaFilters                  = "*filters"
 	MetaCDRs                     = "*cdrs"
@@ -591,6 +592,7 @@ const (
 	ThresholdS  = "ThresholdS"
 	DispatcherS = "DispatcherS"
 	LoaderS     = "LoaderS"
+	ChargerS    = "ChargerS"
 )
 
 // Lower service names
@@ -660,7 +662,6 @@ const (
 	APIKey        = "APIKey"
 	APIMethods    = "APIMethods"
 	NestingSep    = "."
-	ChargerS      = "ChargerS"
 )
 
 // MetaFilterIndexesAPIs

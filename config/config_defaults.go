@@ -595,6 +595,19 @@ const CGRATES_CFG_JSON = `
 					{"tag": "Weight", "field_id": "Weight", "type": "*composed", "value": "15"},
 				],
 			},
+			{
+				"type": "*chargers",						// data source type
+				"file_name": "Chargers.csv",				// file name in the tp_in_dir
+				"fields": [
+					{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "0", "mandatory": true},
+					{"tag": "ID", "field_id": "ID", "type": "*composed", "value": "1", "mandatory": true},
+					{"tag": "FilterIDs", "field_id": "FilterIDs", "type": "*composed", "value": "2"},
+					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*composed", "value": "3"},
+					{"tag": "RunID", "field_id": "RunID", "type": "*composed", "value": "4"},
+					{"tag": "AttributeIDs", "field_id": "AttributeIDs", "type": "*composed", "value": "5"},
+					{"tag": "Weight", "field_id": "Weight", "type": "*composed", "value": "6"},
+				],
+			},
 		],
 	},
 ],

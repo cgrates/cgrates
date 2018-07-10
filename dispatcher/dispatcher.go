@@ -72,6 +72,7 @@ type DispatcherService struct {
 	splS     rpcclient.RpcClientConnection // SupplierS connections
 	attrS    rpcclient.RpcClientConnection // AttributeS connections
 	sessionS rpcclient.RpcClientConnection // SessionS server connections
+	chargerS rpcclient.RpcClientConnection // ChargerS server connections
 }
 
 // ListenAndServe will initialize the service
