@@ -1824,6 +1824,37 @@ func (rs *RedisStorage) RemoveAttributeProfileDrv(tenant, id string) (err error)
 	return
 }
 
+func (rs *RedisStorage) GetChargerProfileDrv(tenant, id string) (r *ChargerProfile, err error) {
+	key := utils.ChargerProfilePrefix + utils.ConcatenatedKey(tenant, id)
+	var values []byte
+	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
+		if err == redis.ErrRespNil { // did not find the destination
+			err = utils.ErrNotFound
+		}
+		return
+	}
+	if err = rs.ms.Unmarshal(values, &r); err != nil {
+		return
+	}
+	return
+}
+
+func (rs *RedisStorage) SetChargerProfileDrv(r *ChargerProfile) (err error) {
+	result, err := rs.ms.Marshal(r)
+	if err != nil {
+		return err
+	}
+	return rs.Cmd("SET", utils.ChargerProfilePrefix+utils.ConcatenatedKey(r.Tenant, r.ID), result).Err
+}
+
+func (rs *RedisStorage) RemoveChargerProfileDrv(tenant, id string) (err error) {
+	key := utils.ChargerProfilePrefix + utils.ConcatenatedKey(tenant, id)
+	if err = rs.Cmd("DEL", key).Err; err != nil {
+		return
+	}
+	return
+}
+
 func (rs *RedisStorage) GetStorageType() string {
 	return utils.REDIS
 }

@@ -144,6 +144,7 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 			path.Join(attrs.FolderPath, utils.FiltersCsv),
 			path.Join(attrs.FolderPath, utils.SuppliersCsv),
 			path.Join(attrs.FolderPath, utils.AttributesCsv),
+			path.Join(attrs.FolderPath, utils.ChargersCsv),
 		), "", self.Config.DefaultTimezone)
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)

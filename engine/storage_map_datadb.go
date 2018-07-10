@@ -1703,6 +1703,39 @@ func (ms *MapStorage) RemoveAttributeProfileDrv(tenant, id string) (err error) {
 	return
 }
 
+func (ms *MapStorage) GetChargerProfileDrv(tenant, id string) (r *ChargerProfile, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+	values, ok := ms.dict[utils.ChargerProfilePrefix+utils.ConcatenatedKey(tenant, id)]
+	if !ok {
+		return nil, utils.ErrNotFound
+	}
+	err = ms.ms.Unmarshal(values, &r)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+func (ms *MapStorage) SetChargerProfileDrv(r *ChargerProfile) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	result, err := ms.ms.Marshal(r)
+	if err != nil {
+		return err
+	}
+	ms.dict[utils.ChargerProfilePrefix+utils.ConcatenatedKey(r.Tenant, r.ID)] = result
+	return
+}
+
+func (ms *MapStorage) RemoveChargerProfileDrv(tenant, id string) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	key := utils.ChargerProfilePrefix + utils.ConcatenatedKey(tenant, id)
+	delete(ms.dict, key)
+	return
+}
+
 func (ms *MapStorage) GetVersions(itm string) (vrs Versions, err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()

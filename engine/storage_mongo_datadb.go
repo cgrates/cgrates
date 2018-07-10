@@ -68,6 +68,7 @@ const (
 	colSpp   = "supplier_profiles"
 	colAttr  = "attribute_profiles"
 	ColCDRs  = "cdrs"
+	colCpp   = "charger_profiles"
 )
 
 var (
@@ -2376,6 +2377,34 @@ func (ms *MongoStorage) SetAttributeProfileDrv(r *AttributeProfile) (err error) 
 
 func (ms *MongoStorage) RemoveAttributeProfileDrv(tenant, id string) (err error) {
 	session, col := ms.conn(colAttr)
+	defer session.Close()
+	if err = col.Remove(bson.M{"tenant": tenant, "id": id}); err != nil {
+		return
+	}
+	return nil
+}
+
+func (ms *MongoStorage) GetChargerProfileDrv(tenant, id string) (r *ChargerProfile, err error) {
+	session, col := ms.conn(colCpp)
+	defer session.Close()
+	if err = col.Find(bson.M{"tenant": tenant, "id": id}).One(&r); err != nil {
+		if err == mgo.ErrNotFound {
+			err = utils.ErrNotFound
+		}
+		return nil, err
+	}
+	return
+}
+
+func (ms *MongoStorage) SetChargerProfileDrv(r *ChargerProfile) (err error) {
+	session, col := ms.conn(colCpp)
+	defer session.Close()
+	_, err = col.Upsert(bson.M{"tenant": r.Tenant, "id": r.ID}, r)
+	return
+}
+
+func (ms *MongoStorage) RemoveChargerProfileDrv(tenant, id string) (err error) {
+	session, col := ms.conn(colCpp)
 	defer session.Close()
 	if err = col.Remove(bson.M{"tenant": tenant, "id": id}); err != nil {
 		return
