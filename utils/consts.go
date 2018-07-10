@@ -397,6 +397,7 @@ const (
 	MetaThresholds               = "*thresholds"
 	MetaSuppliers                = "*suppliers"
 	MetaAttributes               = "*attributes"
+	MetaChargers                 = "*chargers"
 	MetaResources                = "*resources"
 	MetaFilters                  = "*filters"
 	MetaCDRs                     = "*cdrs"

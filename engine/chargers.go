@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/cgrates/cgrates/config"
@@ -57,7 +58,7 @@ func (cS *ChargerService) Shutdown() (err error) {
 }
 
 // matchingChargingProfilesForEvent returns ordered list of matching chargers which are active by the time of the function call
-func (cS *ChargerService) matchingChargingProfilesForEvent(cgrEv *utils.CGREvent) (cPs ChargerProfiles, err error) {
+func (cS *ChargerService) matchingChargerProfilesForEvent(cgrEv *utils.CGREvent) (cPs ChargerProfiles, err error) {
 	cpIDs, err := matchingItemIDsForEvent(cgrEv.Event,
 		cS.cfg.ChargerSCfg().StringIndexedFields, cS.cfg.ChargerSCfg().PrefixIndexedFields,
 		cS.dm, utils.CacheChargerFilterIndexes, cgrEv.Tenant, cS.cfg.FilterSCfg().IndexedSelects)
@@ -96,7 +97,32 @@ func (cS *ChargerService) matchingChargingProfilesForEvent(cgrEv *utils.CGREvent
 }
 
 func (cS *ChargerService) processEvent(cgrEv *utils.CGREvent) (cgrEvs []*utils.CGREvent, err error) {
-
+	var cPs ChargerProfiles
+	if cPs, err = cS.matchingChargerProfilesForEvent(cgrEv); err != nil {
+		return nil, err
+	}
+	cgrEvs = make([]*utils.CGREvent, len(cPs))
+	for i, cP := range cPs {
+		cgrEvs[i] = cgrEv.Clone()
+		cgrEvs[i].Event[utils.RunID] = cP.RunID
+		if len(cP.AttributeIDs) != 0 { // Attributes should process the event
+			if cS.attrS == nil {
+				return nil, errors.New("no connection to AttributeS")
+			}
+			if cgrEvs[i].Context == nil {
+				cgrEvs[i].Context = utils.StringPointer(utils.MetaChargers)
+			}
+			var rply AttrSProcessEventReply
+			if err = cS.attrS.Call(utils.AttributeSv1ProcessEvent,
+				&AttrArgsProcessEvent{cP.AttributeIDs, *cgrEvs[i]},
+				&rply); err != nil {
+				return nil, err
+			}
+			if len(rply.AlteredFields) != 0 {
+				cgrEvs[i] = rply.CGREvent // modified event by attributeS
+			}
+		}
+	}
 	return
 }
 
@@ -121,7 +147,7 @@ func (cS *ChargerService) V1ProcessEvent(args *utils.CGREvent,
 // V1GetChargersForEvent exposes the list of ordered matching ChargingProfiles for an event
 func (cS *ChargerService) V1GetChargersForEvent(args *utils.CGREvent,
 	rply *ChargerProfiles) (err error) {
-	cPs, err := cS.matchingChargingProfilesForEvent(args)
+	cPs, err := cS.matchingChargerProfilesForEvent(args)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
