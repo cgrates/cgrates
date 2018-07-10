@@ -303,6 +303,9 @@ cgrates.org,SPP_1,,,,,supplier1,,,,ResGroup4,Stat3,10,,,
 cgrates.org,ALS1,con1,FLTR_1,2014-07-29T15:00:00Z,Field1,Initial1,Sub1,true,20
 cgrates.org,ALS1,con2;con3,,,Field2,Initial2,Sub2,false,
 `
+	chargerProfiles = `
+
+`
 )
 
 var csvr *TpReader
@@ -310,7 +313,7 @@ var csvr *TpReader
 func init() {
 	csvr = NewTpReader(dm.dataDB, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
 		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges,
-		cdrStats, users, aliases, resProfiles, stats, thresholds, filters, sppProfiles, attributeProfiles), testTPID, "")
+		cdrStats, users, aliases, resProfiles, stats, thresholds, filters, sppProfiles, attributeProfiles, chargerProfiles), testTPID, "")
 
 	if err := csvr.LoadDestinations(); err != nil {
 		log.Print("error in LoadDestinations:", err)

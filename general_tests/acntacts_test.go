@@ -58,10 +58,11 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,,false,false,10`
 	filters := ``
 	suppliers := ``
 	aliasProfiles := ``
+	chargerProfiles := ``
 	csvr := engine.NewTpReader(dbAcntActs.DataDB(), engine.NewStringCSVStorage(',', destinations, timings,
 		rates, destinationRates, ratingPlans, ratingProfiles, sharedGroups, lcrs,
 		actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats,
-		users, aliases, resLimits, stats, thresholds, filters, suppliers, aliasProfiles), "", "")
+		users, aliases, resLimits, stats, thresholds, filters, suppliers, aliasProfiles, chargerProfiles), "", "")
 	if err := csvr.LoadAll(); err != nil {
 		t.Fatal(err)
 	}
