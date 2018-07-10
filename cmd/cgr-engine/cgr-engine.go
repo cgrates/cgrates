@@ -817,7 +817,7 @@ func startDispatcherService(internalDispatcherSChan, internalRaterChan chan rpcc
 	server *utils.Server, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS Dispatcher service.")
 	var err error
-	var ralsConns, resSConns, threshSConns, statSConns, suplSConns, attrSConns, sessionsSConns *rpcclient.RpcClientPool
+	var ralsConns, resSConns, threshSConns, statSConns, suplSConns, attrSConns, sessionsSConns, chargerSConns *rpcclient.RpcClientPool
 
 	cfg.DispatcherSCfg().DispatchingStrategy = strings.TrimPrefix(cfg.DispatcherSCfg().DispatchingStrategy,
 		utils.Meta) // remote * from DispatchingStrategy
@@ -891,8 +891,18 @@ func startDispatcherService(internalDispatcherSChan, internalRaterChan chan rpcc
 			return
 		}
 	}
+	if len(cfg.DispatcherSCfg().ChargerSConns) != 0 {
+		chargerSConns, err = engine.NewRPCPool(cfg.DispatcherSCfg().DispatchingStrategy, cfg.TLSClientKey, cfg.TLSClientCerificate,
+			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.DispatcherSCfg().ChargerSConns, nil, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ChargerS: %s", utils.DispatcherS, err.Error()))
+			exitChan <- true
+			return
+		}
+	}
 	dspS, err := dispatcher.NewDispatcherService(dm, ralsConns, resSConns, threshSConns, statSConns,
-		suplSConns, attrSConns, sessionsSConns)
+		suplSConns, attrSConns, sessionsSConns, chargerSConns)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.DispatcherS, err.Error()))
 		exitChan <- true
@@ -930,7 +940,10 @@ func startDispatcherService(internalDispatcherSChan, internalRaterChan chan rpcc
 		server.RpcRegisterName(utils.SessionSv1,
 			v1.NewDispatcherSessionSv1(dspS))
 	}
-
+	if !cfg.ChargerSCfg().Enabled && len(cfg.DispatcherSCfg().ChargerSConns) != 0 {
+		server.RpcRegisterName(utils.SessionSv1,
+			v1.NewDispatcherChargerSv1(dspS))
+	}
 }
 
 func startRpc(server *utils.Server, internalRaterChan,

@@ -195,3 +195,17 @@ func (dS *DispatcherSessionSv1) UpdateSession(args *dispatcher.UpdateSessionWith
 	reply *sessions.V1UpdateSessionReply) (err error) {
 	return dS.dS.SessionSv1UpdateSession(args, reply)
 }
+
+func NewDispatcherChargerSv1(dps *dispatcher.DispatcherService) *DispatcherChargerSv1 {
+	return &DispatcherSessionSv1{dC: dps}
+}
+
+// Exports RPC from RLs
+type DispatcherChargerSv1 struct {
+	dC *dispatcher.DispatcherService
+}
+
+// Ping implements SessionSv1Ping
+func (dC *DispatcherChargerSv1) Ping(ign string, reply *string) error {
+	return dC.dC.ChargerSv1Ping(ign, reply)
+}

@@ -25,20 +25,7 @@ import (
 
 func (dS *DispatcherService) ChargerSv1Ping(ign string, reply *string) error {
 	if dS.chargerS == nil {
-		return utils.NewErrNotConnected(utils.AttributeS)
+		return utils.NewErrNotConnected(utils.ChargerS)
 	}
 	return dS.chargerS.Call(utils.ChargerSv1Ping, ign, reply)
-}
-
-func (dS *DispatcherService) ChargerSv1GetChargersForEvent(args *ArgsAttrProcessEventWithApiKey,
-	reply *engine.AttributeProfile) (err error) {
-	if dS.attrS == nil {
-		return utils.NewErrNotConnected(utils.AttributeS)
-	}
-	if err = dS.authorize(utils.AttributeSv1GetAttributeForEvent, args.AttrArgsProcessEvent.CGREvent.Tenant,
-		args.APIKey, args.AttrArgsProcessEvent.CGREvent.Time); err != nil {
-		return
-	}
-	return dS.attrS.Call(utils.AttributeSv1GetAttributeForEvent, args.AttrArgsProcessEvent, reply)
-
 }

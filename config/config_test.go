@@ -1473,6 +1473,7 @@ func TestCgrCfgJSONDefaultDispatcherSCfg(t *testing.T) {
 		SupplSConns:         []*HaPoolConfig{},
 		AttrSConns:          []*HaPoolConfig{},
 		SessionSConns:       []*HaPoolConfig{},
+		ChargerSConns:       []*HaPoolConfig{},
 		DispatchingStrategy: utils.MetaFirst,
 	}
 	if !reflect.DeepEqual(cgrCfg.dispatcherSCfg, eDspSCfg) {
