@@ -65,10 +65,11 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	filters := ``
 	suppliers := ``
 	aliasProfiles := ``
+	chargerProfiles := ``
 	csvr := engine.NewTpReader(dataDB2.DataDB(), engine.NewStringCSVStorage(',', destinations, timings,
 		rates, destinationRates, ratingPlans, ratingProfiles, sharedGroups, lcrs, actions, actionPlans,
 		actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases, resLimits,
-		stats, thresholds, filters, suppliers, aliasProfiles), "", "")
+		stats, thresholds, filters, suppliers, aliasProfiles, chargerProfiles), "", "")
 	if err := csvr.LoadDestinations(); err != nil {
 		t.Fatal(err)
 	}

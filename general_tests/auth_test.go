@@ -65,9 +65,10 @@ RP_ANY,DR_ANY_1CNT,*any,10`
 	filters := ``
 	suppliers := ``
 	aliasProfiles := ``
+	chargerProfiles := ``
 	csvr := engine.NewTpReader(dbAuth.DataDB(), engine.NewStringCSVStorage(',', destinations, timings, rates, destinationRates,
 		ratingPlans, ratingProfiles, sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions,
-		derivedCharges, cdrStats, users, aliases, resLimits, stats, thresholds, filters, suppliers, aliasProfiles), "", "")
+		derivedCharges, cdrStats, users, aliases, resLimits, stats, thresholds, filters, suppliers, aliasProfiles, chargerProfiles), "", "")
 	if err := csvr.LoadAll(); err != nil {
 		t.Fatal(err)
 	}
