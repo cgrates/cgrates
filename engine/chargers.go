@@ -96,6 +96,7 @@ func (cS *ChargerService) matchingChargingProfilesForEvent(cgrEv *utils.CGREvent
 }
 
 func (cS *ChargerService) processEvent(cgrEv *utils.CGREvent) (cgrEvs []*utils.CGREvent, err error) {
+
 	return
 }
 
@@ -115,4 +116,18 @@ func (cS *ChargerService) V1ProcessEvent(args *utils.CGREvent,
 	*reply = rply
 	return
 
+}
+
+// V1GetChargersForEvent exposes the list of ordered matching ChargingProfiles for an event
+func (cS *ChargerService) V1GetChargersForEvent(args *utils.CGREvent,
+	rply *ChargerProfiles) (err error) {
+	cPs, err := cS.matchingChargingProfilesForEvent(args)
+	if err != nil {
+		if err != utils.ErrNotFound {
+			err = utils.NewErrServerError(err)
+		}
+		return err
+	}
+	*rply = cPs
+	return
 }
