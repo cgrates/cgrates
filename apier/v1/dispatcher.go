@@ -197,7 +197,7 @@ func (dS *DispatcherSessionSv1) UpdateSession(args *dispatcher.UpdateSessionWith
 }
 
 func NewDispatcherChargerSv1(dps *dispatcher.DispatcherService) *DispatcherChargerSv1 {
-	return &DispatcherSessionSv1{dC: dps}
+	return &DispatcherChargerSv1{dC: dps}
 }
 
 // Exports RPC from RLs
