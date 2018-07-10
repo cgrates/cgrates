@@ -759,7 +759,7 @@ func (csvs *CSVStorage) GetTPAttributes(tpid, id string) ([]*utils.TPAttributePr
 			return nil, err
 		}
 		if attributeProfile, err := csvLoad(TPAttribute{}, record); err != nil {
-			log.Print("error loading tpAliasProfile: ", err)
+			log.Print("error loading tpAttributeProfile: ", err)
 			return nil, err
 		} else {
 			attributeProfile := attributeProfile.(TPAttribute)
@@ -771,31 +771,31 @@ func (csvs *CSVStorage) GetTPAttributes(tpid, id string) ([]*utils.TPAttributePr
 }
 
 func (csvs *CSVStorage) GetTPChargers(tpid, id string) ([]*utils.TPChargerProfile, error) {
-	// csvReader, fp, err := csvs.readerFunc(csvs.chargerProfilesFn, csvs.sep, getColumnCount(TPCharger{}))
-	// if err != nil {
-	// 	//log.Print("Could not load AttributeProfile file: ", err)
-	// 	// allow writing of the other values
-	// 	return nil, nil
-	// }
-	// if fp != nil {
-	// 	defer fp.Close()
-	// }
-	// var tpAls TPAttributes
-	// for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
-	// 	if err != nil {
-	// 		log.Printf("bad line in %s, %s\n", csvs.chargerProfilesFn, err.Error())
-	// 		return nil, err
-	// 	}
-	// 	if attributeProfile, err := csvLoad(TPAttribute{}, record); err != nil {
-	// 		log.Print("error loading tpAliasProfile: ", err)
-	// 		return nil, err
-	// 	} else {
-	// 		attributeProfile := attributeProfile.(TPAttribute)
-	// 		attributeProfile.Tpid = tpid
-	// 		tpAls = append(tpAls, &attributeProfile)
-	// 	}
-	// }
-	return nil, nil
+	csvReader, fp, err := csvs.readerFunc(csvs.chargerProfilesFn, csvs.sep, getColumnCount(TPCharger{}))
+	if err != nil {
+		//log.Print("Could not load AttributeProfile file: ", err)
+		// allow writing of the other values
+		return nil, nil
+	}
+	if fp != nil {
+		defer fp.Close()
+	}
+	var tpCPPs TPChargers
+	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
+		if err != nil {
+			log.Printf("bad line in %s, %s\n", csvs.chargerProfilesFn, err.Error())
+			return nil, err
+		}
+		if cpp, err := csvLoad(TPCharger{}, record); err != nil {
+			log.Print("error loading tpChargerProfile: ", err)
+			return nil, err
+		} else {
+			cpp := cpp.(TPCharger)
+			cpp.Tpid = tpid
+			tpCPPs = append(tpCPPs, &cpp)
+		}
+	}
+	return tpCPPs.AsTPChargers(), nil
 }
 
 func (csvs *CSVStorage) GetTpIds(colName string) ([]string, error) {

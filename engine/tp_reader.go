@@ -58,11 +58,13 @@ type TpReader struct {
 	filters           map[utils.TenantID]*utils.TPFilterProfile
 	sppProfiles       map[utils.TenantID]*utils.TPSupplierProfile
 	attributeProfiles map[utils.TenantID]*utils.TPAttributeProfile
+	chargerProfiles   map[utils.TenantID]*utils.TPChargerProfile
 	resources         []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
 	statQueues        []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
 	thresholds        []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
 	suppliers         []*utils.TenantID // IDs of suppliers which need creation based on sppProfiles
 	attrTntID         []*utils.TenantID // IDs of suppliers which need creation based on attributeProfiles
+	chargers          []*utils.TenantID // IDs of chargers which need creation based on chargerProfiles
 	revDests,
 	revAliases,
 	acntActionPlans map[string][]string
@@ -138,6 +140,7 @@ func (tpr *TpReader) Init() {
 	tpr.thProfiles = make(map[utils.TenantID]*utils.TPThreshold)
 	tpr.sppProfiles = make(map[utils.TenantID]*utils.TPSupplierProfile)
 	tpr.attributeProfiles = make(map[utils.TenantID]*utils.TPAttributeProfile)
+	tpr.chargerProfiles = make(map[utils.TenantID]*utils.TPChargerProfile)
 	tpr.filters = make(map[utils.TenantID]*utils.TPFilterProfile)
 	tpr.revDests = make(map[string][]string)
 	tpr.revAliases = make(map[string][]string)
@@ -1738,6 +1741,30 @@ func (tpr *TpReader) LoadAttributeProfiles() error {
 	return tpr.LoadAttributeProfilesFiltered("")
 }
 
+func (tpr *TpReader) LoadChargerProfilesFiltered(tag string) (err error) {
+	rls, err := tpr.lr.GetTPChargers(tpr.tpid, tag)
+	if err != nil {
+		return err
+	}
+	mapChargerProfile := make(map[utils.TenantID]*utils.TPChargerProfile)
+	for _, rl := range rls {
+		mapChargerProfile[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
+	}
+	tpr.chargerProfiles = mapChargerProfile
+	for tntID, _ := range mapChargerProfile {
+		if has, err := tpr.dm.HasData(utils.ChargerProfilePrefix, tntID.ID, tntID.Tenant); err != nil {
+			return err
+		} else if !has {
+			tpr.chargers = append(tpr.chargers, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
+		}
+	}
+	return nil
+}
+
+func (tpr *TpReader) LoadChargerProfiles() error {
+	return tpr.LoadChargerProfilesFiltered("")
+}
+
 func (tpr *TpReader) LoadAll() (err error) {
 	if err = tpr.LoadDestinations(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
@@ -1803,6 +1830,9 @@ func (tpr *TpReader) LoadAll() (err error) {
 		return
 	}
 	if err = tpr.LoadAttributeProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
+	}
+	if err = tpr.LoadChargerProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
 	return nil
@@ -2176,6 +2206,23 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 	}
 
 	if verbose {
+		log.Print("ChargerProfiles:")
+	}
+	for _, tpTH := range tpr.chargerProfiles {
+
+		th, err := APItoChargerProfile(tpTH, tpr.timezone)
+		if err != nil {
+			return err
+		}
+		if err = tpr.dm.SetChargerProfile(th, true); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", th.TenantID())
+		}
+	}
+
+	if verbose {
 		log.Print("Timings:")
 	}
 	for _, t := range tpr.timings {
@@ -2284,6 +2331,8 @@ func (tpr *TpReader) ShowStatistics() {
 	log.Print("SupplierProfiles: ", len(tpr.sppProfiles))
 	// Attribute profiles
 	log.Print("AttributeProfiles: ", len(tpr.attributeProfiles))
+	// Charger profiles
+	log.Print("ChargerProfiles: ", len(tpr.chargerProfiles))
 }
 
 // Returns the identities loaded for a specific category, useful for cache reloads
@@ -2453,6 +2502,14 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(tpr.attributeProfiles))
 		i := 0
 		for k, _ := range tpr.attributeProfiles {
+			keys[i] = k.TenantID()
+			i++
+		}
+		return keys, nil
+	case utils.ChargerProfilePrefix:
+		keys := make([]string, len(tpr.chargerProfiles))
+		i := 0
+		for k, _ := range tpr.chargerProfiles {
 			keys[i] = k.TenantID()
 			i++
 		}
@@ -2722,6 +2779,31 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 			log.Print("\t", tpTH.Tenant)
 		}
 	}
+
+	if verbose {
+		log.Print("AttributeProfiles:")
+	}
+	for _, tpTH := range tpr.attributeProfiles {
+		if err = tpr.dm.RemoveAttributeProfile(tpTH.Tenant, tpTH.ID, tpTH.Contexts, utils.NonTransactional, false); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", tpTH.Tenant)
+		}
+	}
+
+	if verbose {
+		log.Print("ChargerProfiles:")
+	}
+	for _, tpTH := range tpr.chargerProfiles {
+		if err = tpr.dm.RemoveChargerProfile(tpTH.Tenant, tpTH.ID, utils.NonTransactional, false); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", tpTH.Tenant)
+		}
+	}
+
 	if verbose {
 		log.Print("Timings:")
 	}
