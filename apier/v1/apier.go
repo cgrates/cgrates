@@ -1015,6 +1015,19 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 	if err = self.DataManager.CacheDataFromDB(utils.AttributeProfilePrefix, dataIDs, true); err != nil {
 		return
 	}
+	// ChargerProfiles
+	dataIDs = make([]string, 0)
+	if attrs.ChargerProfileIDs == nil {
+		dataIDs = nil // Reload all
+	} else if len(*attrs.ChargerProfileIDs) > 0 {
+		dataIDs = make([]string, len(*attrs.ChargerProfileIDs))
+		for idx, dId := range *attrs.ChargerProfileIDs {
+			dataIDs[idx] = dId
+		}
+	}
+	if err = self.DataManager.CacheDataFromDB(utils.ChargerProfilePrefix, dataIDs, true); err != nil {
+		return
+	}
 
 	*reply = utils.OK
 	return nil
@@ -1024,7 +1037,7 @@ func (self *ApierV1) LoadCache(args utils.AttrReloadCache, reply *string) (err e
 	if args.FlushAll {
 		engine.Cache.Clear(nil)
 	}
-	var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs, splpIDs, alsPrfIDs []string
+	var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs, splpIDs, alsPrfIDs, cppIDs []string
 	if args.DestinationIDs == nil {
 		dstIDs = nil
 	} else {
@@ -1135,7 +1148,15 @@ func (self *ApierV1) LoadCache(args utils.AttrReloadCache, reply *string) (err e
 	} else {
 		alsPrfIDs = *args.AttributeProfileIDs
 	}
-	if err := self.DataManager.LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs, splpIDs, alsPrfIDs); err != nil {
+	if args.ChargerProfileIDs == nil {
+		cppIDs = nil
+	} else {
+		cppIDs = *args.ChargerProfileIDs
+	}
+	if err := self.DataManager.LoadDataDBCache(dstIDs, rvDstIDs, rplIDs,
+		rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs,
+		rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs,
+		fltrIDs, splpIDs, alsPrfIDs, cppIDs); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -1316,6 +1337,14 @@ func (self *ApierV1) FlushCache(args utils.AttrReloadCache, reply *string) (err 
 				true, utils.NonTransactional)
 		}
 	}
+	if args.ChargerProfileIDs == nil {
+		engine.Cache.Clear([]string{utils.CacheChargerProfiles})
+	} else if len(*args.ChargerProfileIDs) != 0 {
+		for _, key := range *args.ChargerProfileIDs {
+			engine.Cache.Remove(utils.CacheChargerProfiles, key,
+				true, utils.NonTransactional)
+		}
+	}
 
 	*reply = utils.OK
 	return
@@ -1344,6 +1373,7 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	cs.Filters = len(engine.Cache.GetItemIDs(utils.CacheFilters, ""))
 	cs.SupplierProfiles = len(engine.Cache.GetItemIDs(utils.CacheSupplierProfiles, ""))
 	cs.AttributeProfiles = len(engine.Cache.GetItemIDs(utils.CacheAttributeProfiles, ""))
+	cs.ChargerProfiles = len(engine.Cache.GetItemIDs(utils.CacheChargerProfiles, ""))
 
 	if self.CdrStatsSrv != nil {
 		var queueIds []string
@@ -1769,6 +1799,25 @@ func (v1 *ApierV1) GetCacheKeys(args utils.ArgsCacheKeys, reply *utils.ArgsCache
 		ids = args.Paginator.PaginateStringSlice(ids)
 		if len(ids) != 0 {
 			reply.AttributeProfileIDs = &ids
+		}
+	}
+
+	if args.ChargerProfileIDs != nil {
+		var ids []string
+		if len(*args.ChargerProfileIDs) != 0 {
+			for _, id := range *args.ChargerProfileIDs {
+				if _, hasIt := engine.Cache.Get(utils.CacheChargerProfiles, id); hasIt {
+					ids = append(ids, id)
+				}
+			}
+		} else {
+			for _, id := range engine.Cache.GetItemIDs(utils.CacheChargerProfiles, "") {
+				ids = append(ids, id)
+			}
+		}
+		ids = args.Paginator.PaginateStringSlice(ids)
+		if len(ids) != 0 {
+			reply.ChargerProfileIDs = &ids
 		}
 	}
 

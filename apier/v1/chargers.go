@@ -23,6 +23,50 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// GetChargerProfile returns a Charger Profile
+func (apierV1 *ApierV1) GetChargerProfile(arg utils.TenantID, reply *engine.ChargerProfile) error {
+	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if cpp, err := apierV1.DataManager.GetChargerProfile(arg.Tenant, arg.ID, false, utils.NonTransactional); err != nil {
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
+	} else {
+		*reply = *cpp
+	}
+	return nil
+}
+
+//SetChargerProfile add/update a new Charger Profile
+func (apierV1 *ApierV1) SetChargerProfile(cpp *engine.ChargerProfile, reply *string) error {
+	if missing := utils.MissingStructFields(cpp, []string{"Tenant", "ID"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if err := apierV1.DataManager.SetChargerProfile(cpp, true); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	*reply = utils.OK
+	return nil
+}
+
+//RemoveChargerProfile remove a specific Charger Profile
+func (apierV1 *ApierV1) RemoveChargerProfile(arg utils.TenantID, reply *string) error {
+	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if err := apierV1.DataManager.RemoveChargerProfile(arg.Tenant,
+		arg.ID, utils.NonTransactional, true); err != nil {
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
+	}
+	*reply = utils.OK
+	return nil
+}
+
 func NewChargerSv1(cS *engine.ChargerService) *ChargerSv1 {
 	return &ChargerSv1{cS: cS}
 }

@@ -677,6 +677,7 @@ type ArgsCache struct {
 	FilterIDs             *[]string
 	SupplierProfileIDs    *[]string
 	AttributeProfileIDs   *[]string
+	ChargerProfileIDs     *[]string
 }
 
 // Data used to do remote cache reloads via api
@@ -720,6 +721,7 @@ type CacheStats struct {
 	Filters             int
 	SupplierProfiles    int
 	AttributeProfiles   int
+	ChargerProfiles     int
 }
 
 type AttrExpFileCdrs struct {
