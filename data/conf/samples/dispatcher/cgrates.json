@@ -54,7 +54,10 @@
 	],
 	"sessions_conns": [
 		{"address": "192.168.56.203:2012", "transport": "*json"},
-	],										
+	],		
+	"chargers_conns": [
+		{"address": "192.168.56.203:2012", "transport": "*json"},
+	],											
 	"dispatching_strategy":"*first",		
 },
 

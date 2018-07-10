@@ -30,7 +30,7 @@ import (
 
 // NewDispatcherService initializes a DispatcherService
 func NewDispatcherService(dm *engine.DataManager, rals, resS, thdS,
-	statS, splS, attrS, sessionS rpcclient.RpcClientConnection) (*DispatcherService, error) {
+	statS, splS, attrS, sessionS, chargerS rpcclient.RpcClientConnection) (*DispatcherService, error) {
 	if rals != nil && reflect.ValueOf(rals).IsNil() {
 		rals = nil
 	}
@@ -52,6 +52,9 @@ func NewDispatcherService(dm *engine.DataManager, rals, resS, thdS,
 	if sessionS != nil && reflect.ValueOf(sessionS).IsNil() {
 		sessionS = nil
 	}
+	if chargerS != nil && reflect.ValueOf(chargerS).IsNil() {
+		chargerS = nil
+	}
 	return &DispatcherService{dm: dm,
 		rals:     rals,
 		resS:     resS,
@@ -59,7 +62,8 @@ func NewDispatcherService(dm *engine.DataManager, rals, resS, thdS,
 		statS:    statS,
 		splS:     splS,
 		attrS:    attrS,
-		sessionS: sessionS}, nil
+		sessionS: sessionS,
+		chargerS: chargerS}, nil
 }
 
 // DispatcherService  is the service handling dispatcher

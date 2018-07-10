@@ -540,6 +540,7 @@ type DispatcherSJsonCfg struct {
 	Suppliers_conns      *[]*HaPoolJsonCfg
 	Attributes_conns     *[]*HaPoolJsonCfg
 	Sessions_conns       *[]*HaPoolJsonCfg
+	Chargers_conns       *[]*HaPoolJsonCfg
 	Dispatching_strategy *string
 }
 

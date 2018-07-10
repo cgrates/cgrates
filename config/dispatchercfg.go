@@ -28,6 +28,7 @@ type DispatcherSCfg struct {
 	SupplSConns         []*HaPoolConfig
 	AttrSConns          []*HaPoolConfig
 	SessionSConns       []*HaPoolConfig
+	ChargerSConns       []*HaPoolConfig
 	DispatchingStrategy string
 }
 
@@ -85,6 +86,13 @@ func (dps *DispatcherSCfg) loadFromJsonCfg(jsnCfg *DispatcherSJsonCfg) (err erro
 		for idx, jsnHaCfg := range *jsnCfg.Sessions_conns {
 			dps.SessionSConns[idx] = NewDfltHaPoolConfig()
 			dps.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
+	}
+	if jsnCfg.Chargers_conns != nil {
+		dps.ChargerSConns = make([]*HaPoolConfig, len(*jsnCfg.Chargers_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Chargers_conns {
+			dps.ChargerSConns[idx] = NewDfltHaPoolConfig()
+			dps.ChargerSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Dispatching_strategy != nil {
