@@ -56,3 +56,13 @@ func (cS *ChargerService) Shutdown() (err error) {
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown complete", utils.ChargerS))
 	return
 }
+
+type ChargerProfile struct {
+	Tenant             string
+	ID                 string
+	FilterIDs          []string
+	ActivationInterval *utils.ActivationInterval // Activation interval
+	RunID              string
+	AttributeIDs       []string
+	Weight             float64
+}

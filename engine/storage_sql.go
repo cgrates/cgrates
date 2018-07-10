@@ -1623,6 +1623,10 @@ func (self *SQLStorage) GetTPAttributes(tpid, id string) ([]*utils.TPAttributePr
 	return arls, nil
 }
 
+func (self *SQLStorage) GetTPChargers(tpid, id string) ([]*utils.TPChargerProfile, error) {
+	return nil, nil
+}
+
 // GetVersions returns slice of all versions or a specific version if tag is specified
 func (self *SQLStorage) GetVersions(itm string) (vrs Versions, err error) {
 	q := self.db.Model(&TBLVersion{})

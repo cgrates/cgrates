@@ -1422,3 +1422,14 @@ type TPAttributeProfile struct {
 	Attributes         []*TPAttribute
 	Weight             float64
 }
+
+type TPChargerProfile struct {
+	TPid               string
+	Tenant             string
+	ID                 string
+	FilterIDs          []string
+	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
+	RunID              string
+	AttributeIDs       []string
+	Weight             float64
+}

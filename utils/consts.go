@@ -805,6 +805,7 @@ const (
 	FiltersCsv            = "Filters.csv"
 	SuppliersCsv          = "Suppliers.csv"
 	AttributesCsv         = "Attributes.csv"
+	ChargersCsv           = "Chargers.csv"
 )
 
 // Table Name
@@ -833,6 +834,7 @@ const (
 	CDRsTBL               = "cdrs"
 	TBLTPSuppliers        = "tp_suppliers"
 	TBLTPAttributes       = "tp_attributes"
+	TBLTPChargers         = "tp_chargers"
 	TBLVersions           = "versions"
 	OldSMCosts            = "sm_costs"
 )
