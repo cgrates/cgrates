@@ -114,7 +114,7 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 		t.Error("No account saved")
 	}
 	engine.Cache.Clear(nil)
-	dataDB3.LoadDataDBCache(nil, nil, nil, nil,
+	dataDB3.LoadDataDBCache(nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 

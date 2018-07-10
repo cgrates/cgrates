@@ -80,7 +80,7 @@ RP_ANY,DR_ANY_1CNT,*any,10`
 	}
 
 	engine.Cache.Clear(nil)
-	dbAuth.LoadDataDBCache(nil, nil, nil, nil, nil,
+	dbAuth.LoadDataDBCache(nil, nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil)
 

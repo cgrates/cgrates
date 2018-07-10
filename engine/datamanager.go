@@ -46,7 +46,7 @@ func (dm *DataManager) DataDB() DataDB {
 
 func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs,
 	aaPlIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rpIDs, resIDs,
-	stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs, splPrflIDs, alsPrfIDs []string) (err error) {
+	stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs, splPrflIDs, alsPrfIDs, cppIDs []string) (err error) {
 	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
 		if dm.cacheCfg == nil {
 			return
@@ -58,7 +58,7 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 				utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACTION_TRIGGER_PREFIX,
 				utils.SHARED_GROUP_PREFIX, utils.ALIASES_PREFIX, utils.REVERSE_ALIASES_PREFIX, utils.StatQueuePrefix,
 				utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
-				utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AttributeProfilePrefix}, k) && cacheCfg.Precache {
+				utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AttributeProfilePrefix, utils.ChargerProfilePrefix}, k) && cacheCfg.Precache {
 				if err := dm.PreloadCacheForPrefix(k); err != nil && err != utils.ErrInvalidKey {
 					return err
 				}
@@ -89,6 +89,7 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 			utils.FilterPrefix:               fltrIDs,
 			utils.SupplierProfilePrefix:      splPrflIDs,
 			utils.AttributeProfilePrefix:     alsPrfIDs,
+			utils.ChargerProfilePrefix:       cppIDs,
 		} {
 			if err = dm.CacheDataFromDB(key, ids, false); err != nil {
 				return
@@ -148,7 +149,8 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		utils.ThresholdProfilePrefix,
 		utils.FilterPrefix,
 		utils.SupplierProfilePrefix,
-		utils.AttributeProfilePrefix}, prfx) {
+		utils.AttributeProfilePrefix,
+		utils.ChargerProfilePrefix}, prfx) {
 		return utils.NewCGRError(utils.DataManager,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -240,6 +242,9 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.AttributeProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetAttributeProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+		case utils.ChargerProfilePrefix:
+			tntID := utils.NewTenantID(dataID)
+			_, err = dm.GetChargerProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.DataManager,
@@ -1159,14 +1164,50 @@ func (dm *DataManager) RemoveAttributeProfile(tenant, id string, contexts []stri
 
 func (dm *DataManager) GetChargerProfile(tenant, id string, skipCache bool,
 	transactionID string) (cpp *ChargerProfile, err error) {
+	tntID := utils.ConcatenatedKey(tenant, id)
+	if !skipCache {
+		if x, ok := Cache.Get(utils.CacheChargerProfiles, tntID); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*ChargerProfile), nil
+		}
+	}
+	cpp, err = dm.dataDB.GetChargerProfileDrv(tenant, id)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			Cache.Set(utils.CacheChargerProfiles, tntID, nil, nil,
+				cacheCommit(transactionID), transactionID)
+		}
+		return nil, err
+	}
+	Cache.Set(utils.CacheChargerProfiles, tntID, cpp, nil,
+		cacheCommit(transactionID), transactionID)
 	return
 }
 
 func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (err error) {
+	if err = dm.DataDB().SetChargerProfileDrv(cpp); err != nil {
+		return err
+	}
+	if err = dm.CacheDataFromDB(utils.ChargerProfilePrefix, []string{cpp.TenantID()}, true); err != nil {
+		return
+	}
+	if withIndex {
+		return createAndIndex(utils.ChargerProfilePrefix, cpp.Tenant, utils.EmptyString, cpp.ID, cpp.FilterIDs, dm)
+	}
 	return
 }
 
 func (dm *DataManager) RemoveChargerProfile(tenant, id string,
 	transactionID string, withIndex bool) (err error) {
+	if err = dm.DataDB().RemoveChargerProfileDrv(tenant, id); err != nil {
+		return
+	}
+	Cache.Remove(utils.CacheChargerProfiles, utils.ConcatenatedKey(tenant, id),
+		cacheCommit(transactionID), transactionID)
+	if withIndex {
+		return NewFilterIndexer(dm, utils.ChargerProfilePrefix, tenant).RemoveItemFromIndex(id)
+	}
 	return
 }

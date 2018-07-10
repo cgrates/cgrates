@@ -60,7 +60,7 @@ RP_DATA1,DR_DATA_2,TM2,10`
 	}
 	csvr.WriteToDatabase(false, false, false)
 	engine.Cache.Clear(nil)
-	dataDB.LoadDataDBCache(nil, nil, nil, nil,
+	dataDB.LoadDataDBCache(nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 

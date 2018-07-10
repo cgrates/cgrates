@@ -664,6 +664,11 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		for iter.Next(&idResult) {
 			result = append(result, utils.AttributeProfilePrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}
+	case utils.ChargerProfilePrefix:
+		iter := db.C(colCpp).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"tenant": 1, "id": 1}).Iter()
+		for iter.Next(&idResult) {
+			result = append(result, utils.ChargerProfilePrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
+		}
 	default:
 		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
 	}
@@ -717,6 +722,9 @@ func (ms *MongoStorage) HasDataDrv(category, subject, tenant string) (has bool, 
 		has = count > 0
 	case utils.AttributeProfilePrefix:
 		count, err = db.C(colAttr).Find(bson.M{"tenant": tenant, "id": subject}).Count()
+		has = count > 0
+	case utils.ChargerProfilePrefix:
+		count, err = db.C(colCpp).Find(bson.M{"tenant": tenant, "id": subject}).Count()
 		has = count > 0
 	default:
 		err = fmt.Errorf("unsupported category in HasData: %s", category)

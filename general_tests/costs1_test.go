@@ -73,7 +73,7 @@ RP_SMS1,DR_SMS_1,ALWAYS,10`
 	}
 	csvr.WriteToDatabase(false, false, false)
 	engine.Cache.Clear(nil)
-	dataDB.LoadDataDBCache(nil, nil, nil, nil, nil, nil,
+	dataDB.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil)
 
