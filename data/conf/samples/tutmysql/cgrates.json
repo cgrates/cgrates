@@ -68,16 +68,7 @@
 	"thresholds_conns": [
 		{"address": "*internal"}
 	],
-	"cdrstats_conns": [
-		{"address": "*internal"}
-	],
-	"pubsubs_conns": [
-		{"address": "*internal"}
-	],
-	"users_conns": [
-		{"address": "*internal"}
-	],
-	"aliases_conns": [
+	"attributes_conns": [
 		{"address": "*internal"}
 	],
 },
@@ -90,9 +81,6 @@
 
 "cdrs": {
 	"enabled": true,
-	"cdrstats_conns": [
-		{"address": "*internal"}
-	],
 },
 
 
@@ -234,22 +222,6 @@
 		],
 	},
 ],
-
-
-"cdrstats": {
-	"enabled": true,
-},
-
-
-"pubsubs": {
-	"enabled": true,
-},
-
-
-"users": {
-	"enabled": true,
-	"indexes": ["Uuid"],
-},
 
 
 "attributes": {								// Attribute service

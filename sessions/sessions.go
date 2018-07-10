@@ -1446,9 +1446,12 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		if args.CGREvent.Context == nil { // populate if not already in
 			args.CGREvent.Context = utils.StringPointer(utils.MetaSessionS)
 		}
+		attrArgs := &engine.AttrArgsProcessEvent{
+			CGREvent: args.CGREvent,
+		}
 		var rplyEv engine.AttrSProcessEventReply
 		if err := smg.attrS.Call(utils.AttributeSv1ProcessEvent,
-			&args.CGREvent, &rplyEv); err == nil {
+			attrArgs, &rplyEv); err == nil {
 			args.CGREvent = *rplyEv.CGREvent
 			authReply.Attributes = &rplyEv
 		} else if err.Error() != utils.ErrNotFound.Error() {
@@ -1661,9 +1664,12 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		if args.CGREvent.Context == nil { // populate if not already in
 			args.CGREvent.Context = utils.StringPointer(utils.MetaSessionS)
 		}
+		attrArgs := &engine.AttrArgsProcessEvent{
+			CGREvent: args.CGREvent,
+		}
 		var rplyEv engine.AttrSProcessEventReply
 		if err := smg.attrS.Call(utils.AttributeSv1ProcessEvent,
-			&args.CGREvent, &rplyEv); err == nil {
+			attrArgs, &rplyEv); err == nil {
 			args.CGREvent = *rplyEv.CGREvent
 			rply.Attributes = &rplyEv
 		} else if err.Error() != utils.ErrNotFound.Error() {
@@ -1838,9 +1844,12 @@ func (smg *SMGeneric) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 		if args.CGREvent.Context == nil { // populate if not already in
 			args.CGREvent.Context = utils.StringPointer(utils.MetaSessionS)
 		}
+		attrArgs := &engine.AttrArgsProcessEvent{
+			CGREvent: args.CGREvent,
+		}
 		var rplyEv engine.AttrSProcessEventReply
 		if err := smg.attrS.Call(utils.AttributeSv1ProcessEvent,
-			&args.CGREvent, &rplyEv); err == nil {
+			attrArgs, &rplyEv); err == nil {
 			args.CGREvent = *rplyEv.CGREvent
 			rply.Attributes = &rplyEv
 		} else if err.Error() != utils.ErrNotFound.Error() {
@@ -2052,9 +2061,12 @@ func (smg *SMGeneric) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 		if args.CGREvent.Context == nil {
 			args.CGREvent.Context = utils.StringPointer(utils.MetaSessionS)
 		}
+		attrArgs := &engine.AttrArgsProcessEvent{
+			CGREvent: args.CGREvent,
+		}
 		var rplyEv engine.AttrSProcessEventReply
 		if err = smg.attrS.Call(utils.AttributeSv1ProcessEvent,
-			args.CGREvent, &rplyEv); err != nil {
+			attrArgs, &rplyEv); err != nil {
 			return utils.NewErrAttributeS(err)
 		}
 		rply.Attributes = &rplyEv
