@@ -25,6 +25,17 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
+// ChargerProfile is the config for one Charger
+type ChargerProfile struct {
+	Tenant             string
+	ID                 string
+	FilterIDs          []string
+	ActivationInterval *utils.ActivationInterval // Activation interval
+	RunID              string
+	AttributeIDs       []string // perform data aliasing based on these Attributes
+	Weight             float64
+}
+
 func NewChargerService(dm *DataManager, filterS *FilterS,
 	attrS rpcclient.RpcClientConnection,
 	strgIdxFlds, prfxIdxFlds *[]string) (*ChargerService, error) {
@@ -34,6 +45,7 @@ func NewChargerService(dm *DataManager, filterS *FilterS,
 		prfxIdxFlds: prfxIdxFlds}, nil
 }
 
+// ChargerService is performing charging
 type ChargerService struct {
 	dm          *DataManager
 	filterS     *FilterS
@@ -57,12 +69,24 @@ func (cS *ChargerService) Shutdown() (err error) {
 	return
 }
 
-type ChargerProfile struct {
-	Tenant             string
-	ID                 string
-	FilterIDs          []string
-	ActivationInterval *utils.ActivationInterval // Activation interval
-	RunID              string
-	AttributeIDs       []string
-	Weight             float64
+func (cS *ChargerService) processEvent(cgrEv *utils.CGREvent) (cgrEvs []*utils.CGREvent, err error) {
+	return
+}
+
+// V1ProcessEvent will process the event received via API and return list of events forked
+func (cS *ChargerService) V1ProcessEvent(args *utils.CGREvent,
+	reply *[]*utils.CGREvent) (err error) {
+	if args.Event == nil {
+		return utils.NewErrMandatoryIeMissing("Event")
+	}
+	rply, err := cS.processEvent(args)
+	if err != nil {
+		if err != utils.ErrNotFound {
+			err = utils.NewErrServerError(err)
+		}
+		return err
+	}
+	*reply = rply
+	return
+
 }

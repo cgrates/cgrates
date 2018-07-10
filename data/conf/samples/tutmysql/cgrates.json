@@ -224,13 +224,14 @@
 ],
 
 
-"attributes": {								// Attribute service
-	"enabled": true,						// starts Alias service: <true|false>.
+
+"attributes": {
+	"enabled": true,
 },
 
 
-"chargers": {								// Attribute service
-	"enabled": true,						// starts Alias service: <true|false>.
+"chargers": {
+	"enabled": true,
 },
 
 
@@ -258,11 +259,6 @@
 
 
 "suppliers": {
-	"enabled": true,
-},
-
-
-"aliases": {
 	"enabled": true,
 },
 
