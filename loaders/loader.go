@@ -398,6 +398,32 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				}
 			}
 		}
+	case utils.MetaChargers:
+		for _, lDataSet := range lds {
+			cppModels := make(engine.TPChargers, len(lDataSet))
+			for i, ld := range lDataSet {
+				cppModels[i] = new(engine.TPCharger)
+				if err = utils.UpdateStructWithIfaceMap(cppModels[i], ld); err != nil {
+					return
+				}
+			}
+
+			for _, tpCPP := range cppModels.AsTPChargers() {
+				cpp, err := engine.APItoChargerProfile(tpCPP, ldr.timezone)
+				if err != nil {
+					return err
+				}
+				if ldr.dryRun {
+					utils.Logger.Info(
+						fmt.Sprintf("<%s-%s> DRY_RUN: ChargerProfile: %s",
+							utils.LoaderS, ldr.ldrID, utils.ToJSON(cpp)))
+					continue
+				}
+				if err := ldr.dm.SetChargerProfile(cpp, true); err != nil {
+					return err
+				}
+			}
+		}
 	}
 	return
 }

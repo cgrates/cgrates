@@ -928,3 +928,101 @@ cgrates.org,SPL_LEASTCOST_1,,,,,supplier2,,,RP_RETAIL1,resource_spl2,,20,,,
 			utils.ToJSON(eSp3), utils.ToJSON(aps))
 	}
 }
+
+func TestLoaderProcessChargers(t *testing.T) {
+	chargerCSV := `
+#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],RunID[4],AttributeIDs[5],Weight[6]
+cgrates.org,Charge1,*string:Account:1001;*string:Account:1002,2014-07-29T15:00:00Z,*rated,Attr1;Attr2,20
+cgrates.org,Charge2,*string:Account:1003,2014-07-29T15:00:00Z,*default,Attr3,10
+`
+	data, _ := engine.NewMapStorage()
+	ldr := &Loader{
+		ldrID:         "TestLoaderProcessContent",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.CfgCdrField{
+		utils.MetaChargers: []*config.CfgCdrField{
+			&config.CfgCdrField{Tag: "TenantID",
+				FieldId:   "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     utils.ParseRSRFieldsMustCompile("0", utils.INFIELD_SEP),
+				Mandatory: true},
+			&config.CfgCdrField{Tag: "ProfileID",
+				FieldId:   "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     utils.ParseRSRFieldsMustCompile("1", utils.INFIELD_SEP),
+				Mandatory: true},
+			&config.CfgCdrField{Tag: "FilterIDs",
+				FieldId: "FilterIDs",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("2", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "ActivationInterval",
+				FieldId: "ActivationInterval",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("3", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "RunID",
+				FieldId: "RunID",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("4", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "AttributeIDs",
+				FieldId: "AttributeIDs",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("5", utils.INFIELD_SEP)},
+			&config.CfgCdrField{Tag: "Weight",
+				FieldId: "Weight",
+				Type:    utils.META_COMPOSED,
+				Value:   utils.ParseRSRFieldsMustCompile("6", utils.INFIELD_SEP)},
+		},
+	}
+	rdr := ioutil.NopCloser(strings.NewReader(chargerCSV))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaChargers: map[string]*openedCSVFile{
+			utils.ChargersCsv: &openedCSVFile{fileName: utils.ChargersCsv,
+				rdr: rdr, csvRdr: csvRdr}},
+	}
+	if err := ldr.processContent(utils.MetaChargers); err != nil {
+		t.Error(err)
+	}
+	if len(ldr.bufLoaderData) != 0 {
+		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
+	}
+	eCharger1 := &engine.ChargerProfile{
+		Tenant:    "cgrates.org",
+		ID:        "Charge1",
+		FilterIDs: []string{"*string:Account:1001", "*string:Account:1002"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 29, 15, 00, 0, 0, time.UTC),
+		},
+		RunID:        "*rated",
+		AttributeIDs: []string{"Attr1", "Attr2"},
+		Weight:       20,
+	}
+	eCharger2 := &engine.ChargerProfile{
+		Tenant:    "cgrates.org",
+		ID:        "Charge2",
+		FilterIDs: []string{"*string:Account:1003"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 29, 15, 00, 0, 0, time.UTC),
+		},
+		RunID:        "*default",
+		AttributeIDs: []string{"Attr3"},
+		Weight:       10,
+	}
+	if rcv, err := ldr.dm.GetChargerProfile("cgrates.org", "Charge1",
+		false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCharger1, rcv) {
+		t.Errorf("expecting: %s, received: %s", utils.ToJSON(eCharger1), utils.ToJSON(rcv))
+	}
+	if rcv, err := ldr.dm.GetChargerProfile("cgrates.org", "Charge2",
+		false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCharger2, rcv) {
+		t.Errorf("expecting: %s, received: %s", eCharger2, rcv)
+	}
+
+}
