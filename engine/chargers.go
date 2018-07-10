@@ -21,37 +21,24 @@ package engine
 import (
 	"fmt"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
 
-// ChargerProfile is the config for one Charger
-type ChargerProfile struct {
-	Tenant             string
-	ID                 string
-	FilterIDs          []string
-	ActivationInterval *utils.ActivationInterval // Activation interval
-	RunID              string
-	AttributeIDs       []string // perform data aliasing based on these Attributes
-	Weight             float64
-}
-
 func NewChargerService(dm *DataManager, filterS *FilterS,
 	attrS rpcclient.RpcClientConnection,
-	strgIdxFlds, prfxIdxFlds *[]string) (*ChargerService, error) {
+	cfg *config.CGRConfig) (*ChargerService, error) {
 	return &ChargerService{dm: dm, filterS: filterS,
-		attrS:       attrS,
-		strgIdxFlds: strgIdxFlds,
-		prfxIdxFlds: prfxIdxFlds}, nil
+		attrS: attrS, cfg: cfg}, nil
 }
 
 // ChargerService is performing charging
 type ChargerService struct {
-	dm          *DataManager
-	filterS     *FilterS
-	attrS       rpcclient.RpcClientConnection
-	strgIdxFlds *[]string
-	prfxIdxFlds *[]string
+	dm      *DataManager
+	filterS *FilterS
+	attrS   rpcclient.RpcClientConnection
+	cfg     *config.CGRConfig
 }
 
 // ListenAndServe will initialize the service
@@ -66,6 +53,45 @@ func (cS *ChargerService) ListenAndServe(exitChan chan bool) (err error) {
 func (cS *ChargerService) Shutdown() (err error) {
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown initialized", utils.ChargerS))
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown complete", utils.ChargerS))
+	return
+}
+
+// matchingChargingProfilesForEvent returns ordered list of matching chargers which are active by the time of the function call
+func (cS *ChargerService) matchingChargingProfilesForEvent(cgrEv *utils.CGREvent) (cPs ChargerProfiles, err error) {
+	cpIDs, err := matchingItemIDsForEvent(cgrEv.Event,
+		cS.cfg.ChargerSCfg().StringIndexedFields, cS.cfg.ChargerSCfg().PrefixIndexedFields,
+		cS.dm, utils.CacheChargerFilterIndexes, cgrEv.Tenant, cS.cfg.FilterSCfg().IndexedSelects)
+	if err != nil {
+		return nil, err
+	}
+	matchingCPs := make(map[string]*ChargerProfile)
+	for cpID := range cpIDs {
+		cP, err := cS.dm.GetChargerProfile(cgrEv.Tenant, cpID, false, utils.NonTransactional)
+		if err != nil {
+			if err == utils.ErrNotFound {
+				continue
+			}
+			return nil, err
+		}
+		if cP.ActivationInterval != nil && cgrEv.Time != nil &&
+			!cP.ActivationInterval.IsActiveAtTime(*cgrEv.Time) { // not active
+			continue
+		}
+		if pass, err := cS.filterS.Pass(cgrEv.Tenant, cP.FilterIDs,
+			NewNavigableMap(cgrEv.Event)); err != nil {
+			return nil, err
+		} else if !pass {
+			continue
+		}
+		matchingCPs[cpID] = cP
+	}
+	cPs = make(ChargerProfiles, len(matchingCPs))
+	i := 0
+	for _, cP := range matchingCPs {
+		cPs[i] = cP
+		i++
+	}
+	cPs.Sort()
 	return
 }
 

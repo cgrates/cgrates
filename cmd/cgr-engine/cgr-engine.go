@@ -600,8 +600,7 @@ func startChargerService(internalChargerSChan chan rpcclient.RpcClientConnection
 			return
 		}
 	}
-	cS, err := engine.NewChargerService(dm, filterS, attrSConn,
-		cfg.ChargerSCfg().StringIndexedFields, cfg.ChargerSCfg().PrefixIndexedFields)
+	cS, err := engine.NewChargerService(dm, filterS, attrSConn, cfg)
 	if err != nil {
 		utils.Logger.Crit(
 			fmt.Sprintf("<%s> Could not init, error: %s",
