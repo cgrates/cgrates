@@ -274,7 +274,7 @@ func (rs *RedisStorage) HasDataDrv(category, subject, tenant string) (bool, erro
 		return i == 1, err
 	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,
 		utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
-		utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AttributeProfilePrefix:
+		utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AttributeProfilePrefix, utils.ChargerProfilePrefix:
 		i, err := rs.Cmd("EXISTS", category+utils.ConcatenatedKey(tenant, subject)).Int()
 		return i == 1, err
 	}

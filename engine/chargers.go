@@ -141,7 +141,6 @@ func (cS *ChargerService) V1ProcessEvent(args *utils.CGREvent,
 	}
 	*reply = rply
 	return
-
 }
 
 // V1GetChargersForEvent exposes the list of ordered matching ChargingProfiles for an event

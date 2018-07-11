@@ -222,7 +222,7 @@ func (ms *MapStorage) HasDataDrv(category, subject, tenant string) (bool, error)
 		return exists, nil
 	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,
 		utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
-		utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AttributeProfilePrefix:
+		utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AttributeProfilePrefix, utils.ChargerProfilePrefix:
 		_, exists := ms.dict[category+utils.ConcatenatedKey(tenant, subject)]
 		return exists, nil
 	}

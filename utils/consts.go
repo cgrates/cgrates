@@ -696,7 +696,9 @@ const (
 
 // ChargerS APIs
 const (
-	ChargerSv1Ping = "ChargerSv1.Ping"
+	ChargerSv1Ping                = "ChargerSv1.Ping"
+	ChargerSv1GetChargersForEvent = "ChargerSv1.GetChargersForEvent"
+	ChargerSv1ProcessEvent        = "ChargerSv1.ProcessEvent"
 )
 
 // ThresholdS APIs
