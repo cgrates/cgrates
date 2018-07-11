@@ -304,7 +304,8 @@ cgrates.org,ALS1,con1,FLTR_1,2014-07-29T15:00:00Z,Field1,Initial1,Sub1,true,20
 cgrates.org,ALS1,con2;con3,,,Field2,Initial2,Sub2,false,
 `
 	chargerProfiles = `
-
+#Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
+cgrates.org,Charger1,*string:Account:1001,2014-07-29T15:00:00Z,*rated,ATTR_1001_SIMPLEAUTH,20
 `
 )
 
@@ -380,6 +381,9 @@ func init() {
 	}
 	if err := csvr.LoadAttributeProfiles(); err != nil {
 		log.Print("error in LoadAttributeProfiles:", err)
+	}
+	if err := csvr.LoadChargerProfiles(); err != nil {
+		log.Print("error in LoadChargerProfiles:", err)
 	}
 	csvr.WriteToDatabase(false, false, false)
 	Cache.Clear(nil)
@@ -1765,6 +1769,29 @@ func TestLoadAttributeProfiles(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].ActivationInterval, csvr.attributeProfiles[resKey].ActivationInterval)
 	} else if !reflect.DeepEqual(eAttrProfiles[resKey].Attributes, csvr.attributeProfiles[resKey].Attributes) {
 		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].Attributes, csvr.attributeProfiles[resKey].Attributes)
+	}
+}
+
+func TestLoadChargerProfiles(t *testing.T) {
+	eChargerProfiles := map[utils.TenantID]*utils.TPChargerProfile{
+		utils.TenantID{Tenant: "cgrates.org", ID: "Charger1"}: &utils.TPChargerProfile{
+			TPid:      testTPID,
+			Tenant:    "cgrates.org",
+			ID:        "Charger1",
+			FilterIDs: []string{"*string:Account:1001"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+			},
+			RunID:        "*rated",
+			AttributeIDs: []string{"ATTR_1001_SIMPLEAUTH"},
+			Weight:       20,
+		},
+	}
+	cppKey := utils.TenantID{Tenant: "cgrates.org", ID: "Charger1"}
+	if len(csvr.chargerProfiles) != len(eChargerProfiles) {
+		t.Errorf("Failed to load chargerProfiles: %s", utils.ToIJSON(csvr.chargerProfiles))
+	} else if !reflect.DeepEqual(eChargerProfiles[cppKey], csvr.chargerProfiles[cppKey]) {
+		t.Errorf("Expecting: %+v, received: %+v", eChargerProfiles[cppKey], csvr.chargerProfiles[cppKey])
 	}
 }
 

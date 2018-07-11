@@ -282,22 +282,7 @@ const (
 	NANO_MULTIPLIER               = 1000000000
 	CGR_AUTHORIZE                 = "CGR_AUTHORIZE"
 	CONFIG_DIR                    = "/etc/cgrates/"
-	CGR_ACCOUNT                   = "cgr_account"
-	CGR_SUPPLIER                  = "cgr_supplier"
-	CGR_DESTINATION               = "cgr_destination"
-	CGR_SUBJECT                   = "cgr_subject"
-	CGR_CATEGORY                  = "cgr_category"
-	CGR_REQTYPE                   = "cgr_reqtype"
-	CGR_TENANT                    = "cgr_tenant"
-	CGR_TOR                       = "cgr_tor"
-	CGR_OriginID                  = "cgr_originid"
-	CGR_HOST                      = "cgr_host"
-	CGR_PDD                       = "cgr_pdd"
 	DISCONNECT_CAUSE              = "DisconnectCause"
-	CGR_DISCONNECT_CAUSE          = "cgr_disconnectcause"
-	CGR_COMPUTELCR                = "cgr_computelcr"
-	CGR_SUPPLIERS                 = "cgr_suppliers"
-	CGRFlags                      = "cgr_flags"
 	KAM_FLATSTORE                 = "kamailio_flatstore"
 	OSIPS_FLATSTORE               = "opensips_flatstore"
 	MAX_DEBIT_CACHE_PREFIX        = "MAX_DEBIT_"
@@ -339,7 +324,6 @@ const (
 	NegativePrefix               = "!"
 	MatchStartPrefix             = "^"
 	MatchEndPrefix               = "$"
-	SMG                          = "SMG"
 	MetaGrouped                  = "*grouped"
 	MetaRaw                      = "*raw"
 	CreatedAt                    = "CreatedAt"
@@ -432,6 +416,7 @@ const (
 	Thresholds                   = "Thresholds"
 	Suppliers                    = "Suppliers"
 	Attributes                   = "Attributes"
+	Chargers                     = "Chargers"
 	StatS                        = "Stats"
 	RALService                   = "RALs"
 	CostSource                   = "CostSource"
@@ -463,30 +448,6 @@ const (
 	MetaNow                      = "*now"
 	SessionsCosts                = "SessionsCosts"
 	SessionSCosts                = "SessionSCosts"
-	TpRatingPlans                = "TpRatingPlans"
-	TpFilters                    = "TpFilters"
-	TpDestinationRates           = "TpDestinationRates"
-	TpActionTriggers             = "TpActionTriggers"
-	TpAccountActionsV            = "TpAccountActions"
-	TpActionPlans                = "TpActionPlans"
-	TpActions                    = "TpActions"
-	TpDerivedCharges             = "TpDerivedCharges"
-	TpThresholds                 = "TpThresholds"
-	TpSuppliers                  = "TpSuppliers"
-	TpStats                      = "TpStats"
-	TpSharedGroups               = "TpSharedGroups"
-	TpRatingProfiles             = "TpRatingProfiles"
-	TpResources                  = "TpResources"
-	TpRates                      = "TpRates"
-	TpTiming                     = "TpTiming"
-	TpResource                   = "TpResource"
-	TpAliases                    = "TpAliases"
-	TpUsers                      = "TpUsers"
-	TpDerivedChargersV           = "TpDerivedChargers"
-	TpCdrStats                   = "TpCdrStats"
-	TpDestinations               = "TpDestinations"
-	TpRatingPlan                 = "TpRatingPlan"
-	TpRatingProfile              = "TpRatingProfile"
 	Timing                       = "Timing"
 	RQF                          = "RQF"
 	Resource                     = "Resource"
@@ -527,7 +488,6 @@ const (
 	Error                        = "Error"
 	MetaCGRRequest               = "*cgrRequest"
 	MetaCGRReply                 = "*cgrReply"
-	CacheS                       = "CacheS"
 	CGR_ACD                      = "cgr_acd"
 	FilterIDs                    = "FilterIDs"
 	FieldName                    = "FieldName"
@@ -593,6 +553,7 @@ const (
 	DispatcherS = "DispatcherS"
 	LoaderS     = "LoaderS"
 	ChargerS    = "ChargerS"
+	CacheS      = "CacheS"
 )
 
 // Lower service names
@@ -635,6 +596,7 @@ const (
 	MetaTpDestinations      = "*tp_destinations"
 	MetaTpRatingPlan        = "*tp_rating_plan"
 	MetaTpRatingProfile     = "*tp_rating_profile"
+	MetaTpChargers          = "*tp_chargers"
 	MetaDurationSeconds     = "*duration_seconds"
 	MetaDurationNanoseconds = "*duration_nanoseconds"
 	CapAttributes           = "Attributes"
@@ -644,6 +606,34 @@ const (
 	CapThresholdHits        = "ThresholdHits"
 	CapThresholds           = "Thresholds"
 	CapStatQueues           = "StatQueues"
+)
+
+const (
+	TpRatingPlans      = "TpRatingPlans"
+	TpFilters          = "TpFilters"
+	TpDestinationRates = "TpDestinationRates"
+	TpActionTriggers   = "TpActionTriggers"
+	TpAccountActionsV  = "TpAccountActions"
+	TpActionPlans      = "TpActionPlans"
+	TpActions          = "TpActions"
+	TpDerivedCharges   = "TpDerivedCharges"
+	TpThresholds       = "TpThresholds"
+	TpSuppliers        = "TpSuppliers"
+	TpStats            = "TpStats"
+	TpSharedGroups     = "TpSharedGroups"
+	TpRatingProfiles   = "TpRatingProfiles"
+	TpResources        = "TpResources"
+	TpRates            = "TpRates"
+	TpTiming           = "TpTiming"
+	TpResource         = "TpResource"
+	TpAliases          = "TpAliases"
+	TpUsers            = "TpUsers"
+	TpDerivedChargersV = "TpDerivedChargers"
+	TpCdrStats         = "TpCdrStats"
+	TpDestinations     = "TpDestinations"
+	TpRatingPlan       = "TpRatingPlan"
+	TpRatingProfile    = "TpRatingProfile"
+	TpChargers         = "TpChargers"
 )
 
 // Dispatcher Const
@@ -664,7 +654,7 @@ const (
 	NestingSep    = "."
 )
 
-// MetaFilterIndexesAPIs
+// ApierV1 APIs
 const (
 	ApierV1ComputeFilterIndexes = "ApierV1.ComputeFilterIndexes"
 	ApierV1ReloadCache          = "ApierV1.ReloadCache"
@@ -676,12 +666,12 @@ const (
 	ApierV2LoadTariffPlanFromFolder = "ApierV2.LoadTariffPlanFromFolder"
 )
 
-// MetaUsersAPIs
+// UserS APIs
 const (
 	UsersV1ReloadUsers = "UsersV1.ReloadUsers"
 )
 
-// MetaSupplierAPIs
+// SupplierS APIs
 const (
 	SupplierSv1GetSuppliers = "SupplierSv1.GetSuppliers"
 	SupplierSv1Ping         = "SupplierSv1.Ping"
@@ -760,7 +750,7 @@ const (
 	LoaderSv1Ping = "LoaderSv1.Ping"
 )
 
-// Cache
+// CacheS APIs
 const (
 	CacheSv1GetCacheStats     = "CacheSv1.GetCacheStats"
 	CacheSv1GetItemIDs        = "CacheSv1.GetItemIDs"
@@ -782,6 +772,25 @@ const (
 // Cdrc
 const (
 	CdrcPing = "Cdrc.Ping"
+)
+
+//cgr_ variables
+const (
+	CGR_ACCOUNT          = "cgr_account"
+	CGR_SUPPLIER         = "cgr_supplier"
+	CGR_DESTINATION      = "cgr_destination"
+	CGR_SUBJECT          = "cgr_subject"
+	CGR_CATEGORY         = "cgr_category"
+	CGR_REQTYPE          = "cgr_reqtype"
+	CGR_TENANT           = "cgr_tenant"
+	CGR_TOR              = "cgr_tor"
+	CGR_OriginID         = "cgr_originid"
+	CGR_HOST             = "cgr_host"
+	CGR_PDD              = "cgr_pdd"
+	CGR_DISCONNECT_CAUSE = "cgr_disconnectcause"
+	CGR_COMPUTELCR       = "cgr_computelcr"
+	CGR_SUPPLIERS        = "cgr_suppliers"
+	CGRFlags             = "cgr_flags"
 )
 
 //CSV file name

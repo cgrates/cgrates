@@ -525,7 +525,6 @@ CREATE TABLE tp_suppliers (
 -- Table structure for table `tp_attributes`
 --
 
-
 DROP TABLE IF EXISTS tp_attributes;
 CREATE TABLE tp_attributes (
   `pk` int(11) NOT NULL AUTO_INCREMENT,
@@ -548,9 +547,29 @@ CREATE TABLE tp_attributes (
 );
 
 --
--- Table structure for table `versions`
+-- Table structure for table `tp_chargers`
 --
 
+DROP TABLE IF EXISTS tp_chargers;
+CREATE TABLE tp_chargers (
+  `pk` int(11) NOT NULL AUTO_INCREMENT,
+  `tpid` varchar(64) NOT NULL,
+  `tenant` varchar(64) NOT NULL,
+  `id` varchar(64) NOT NULL,
+  `filter_ids` varchar(64) NOT NULL,
+  `activation_interval` varchar(64) NOT NULL,
+  `run_id` varchar(64) NOT NULL,
+  `attribute_ids` varchar(64) NOT NULL,
+  `created_at` TIMESTAMP,
+  PRIMARY KEY (`pk`),
+  KEY `tpid` (`tpid`),
+  UNIQUE KEY `unique_tp_chargers` (`tpid`,`tenant`,
+    `id`,`filter_ids`,`run_id`,`attribute_ids`)
+);
+
+--
+-- Table structure for table `versions`
+--
 
 DROP TABLE IF EXISTS versions;
 CREATE TABLE versions (
