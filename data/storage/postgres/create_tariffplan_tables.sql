@@ -536,6 +536,26 @@ CREATE INDEX tp_suppliers_unique ON tp_suppliers  ("tpid",  "tenant", "id",
   CREATE INDEX tp_attributes_unique ON tp_attributes  ("tpid",  "tenant", "id",
     "filter_ids","field_name","initial","substitute");
 
+  --
+  -- Table structure for table `tp_chargers`
+  --
+
+  DROP TABLE IF EXISTS tp_chargers;
+  CREATE TABLE tp_chargers (
+    "pk" SERIAL PRIMARY KEY,
+    "tpid" varchar(64) NOT NULL,
+    "tenant"varchar(64) NOT NULL,
+    "id" varchar(64) NOT NULL,
+    "filter_ids" varchar(64) NOT NULL,
+    "activation_interval" varchar(64) NOT NULL,
+    "run_id" varchar(64) NOT NULL,
+    "attribute_ids" varchar(64) NOT NULL,
+    "weight" decimal(8,2) NOT NULL,
+    "created_at" TIMESTAMP WITH TIME ZONE
+  );
+  CREATE INDEX tp_chargers_ids ON tp_chargers (tpid);
+  CREATE INDEX tp_chargers_unique ON tp_chargers  ("tpid",  "tenant", "id",
+    "filter_ids","run_id","attribute_ids");
 
 --
 -- Table structure for table `versions`

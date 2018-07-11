@@ -1,3 +1,5 @@
+// +build integration
+
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -15,32 +17,5 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package engine
 
-import (
-	// "reflect"
-	"testing"
-	// "time"
-
-	"github.com/cgrates/cgrates/config"
-	//"github.com/cgrates/cgrates/utils"
-)
-
-var (
-	chargerSrv *ChargerService
-	dmCharger  *DataManager
-)
-
-func TestChargerPopulateChargerService(t *testing.T) {
-	data, _ := NewMapStorage()
-	dmCharger = NewDataManager(data)
-	defaultCfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	chargerSrv, err = NewChargerService(dmCharger,
-		&FilterS{dm: dmAtr, cfg: defaultCfg}, nil, defaultCfg)
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-}
+package migrator

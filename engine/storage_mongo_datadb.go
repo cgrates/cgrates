@@ -160,7 +160,8 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 			Background: false, // Build index in background and return immediately
 			Sparse:     false, // Only index documents containing the Key fields
 		}
-		for _, col := range []string{colAct, colApl, colAAp, colAtr, colDcs, colRpl, colLcr, colDst, colRds, colAls, colUsr, colLht} {
+		for _, col := range []string{colAct, colApl, colAAp, colAtr,
+			colDcs, colRpl, colLcr, colDst, colRds, colAls, colUsr, colLht} {
 			if err = db.C(col).EnsureIndex(idx); err != nil {
 
 				return
@@ -173,7 +174,8 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 			Background: false,
 			Sparse:     false,
 		}
-		for _, col := range []string{colRsP, colRes, colSqs, colSqp, colTps, colThs, colSpp, colAttr, colFlt} {
+		for _, col := range []string{colRsP, colRes, colSqs, colSqp,
+			colTps, colThs, colSpp, colAttr, colFlt, colCpp} {
 			if err = db.C(col).EnsureIndex(idx); err != nil {
 				return
 			}
@@ -199,8 +201,10 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 			Background: false,
 			Sparse:     false,
 		}
-		for _, col := range []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPDestinationRates, utils.TBLTPRatingPlans,
-			utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPActions, utils.TBLTPActionPlans, utils.TBLTPActionTriggers,
+		for _, col := range []string{utils.TBLTPTimings, utils.TBLTPDestinations,
+			utils.TBLTPDestinationRates, utils.TBLTPRatingPlans,
+			utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPActions,
+			utils.TBLTPActionPlans, utils.TBLTPActionTriggers,
 			utils.TBLTPStats, utils.TBLTPResources} {
 			if err = db.C(col).EnsureIndex(idx); err != nil {
 				return
@@ -385,7 +389,8 @@ func (ms *MongoStorage) SelectDatabase(dbName string) (err error) {
 }
 
 func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) (err error) {
-	if !utils.IsSliceMember([]string{utils.REVERSE_DESTINATION_PREFIX, utils.REVERSE_ALIASES_PREFIX, utils.AccountActionPlansPrefix}, prefix) {
+	if !utils.IsSliceMember([]string{utils.REVERSE_DESTINATION_PREFIX,
+		utils.REVERSE_ALIASES_PREFIX, utils.AccountActionPlansPrefix}, prefix) {
 		return utils.ErrInvalidKey
 	}
 	colName, ok := ms.getColNameForPrefix(prefix)
@@ -445,7 +450,8 @@ func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) (err error) {
 }
 
 func (ms *MongoStorage) RemoveReverseForPrefix(prefix string) (err error) {
-	if !utils.IsSliceMember([]string{utils.REVERSE_DESTINATION_PREFIX, utils.REVERSE_ALIASES_PREFIX, utils.AccountActionPlansPrefix}, prefix) {
+	if !utils.IsSliceMember([]string{utils.REVERSE_DESTINATION_PREFIX,
+		utils.REVERSE_ALIASES_PREFIX, utils.AccountActionPlansPrefix}, prefix) {
 		return utils.ErrInvalidKey
 	}
 	colName, ok := ms.getColNameForPrefix(prefix)
