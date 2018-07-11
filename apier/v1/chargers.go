@@ -86,3 +86,15 @@ func (cSv1 *ChargerSv1) Ping(ign string, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
+
+// GetChargerForEvent  returns matching ChargerProfile for Event
+func (cSv1 *ChargerSv1) GetChargersForEvent(cgrEv *utils.CGREvent,
+	reply *engine.ChargerProfiles) error {
+	return cSv1.cS.V1GetChargersForEvent(cgrEv, reply)
+}
+
+// ProcessEvent
+func (cSv1 *ChargerSv1) ProcessEvent(args *utils.CGREvent,
+	reply *[]*utils.CGREvent) error {
+	return cSv1.cS.V1ProcessEvent(args, reply)
+}
