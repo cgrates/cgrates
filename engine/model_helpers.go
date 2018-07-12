@@ -2886,34 +2886,82 @@ func (tps TPChargers) AsTPChargers() (result []*utils.TPChargerProfile) {
 
 func APItoModelTPCharger(tpCPP *utils.TPChargerProfile) (mdls TPChargers) {
 	if tpCPP != nil {
-		mdl := &TPCharger{
-			Tenant: tpCPP.Tenant,
-			Tpid:   tpCPP.TPid,
-			ID:     tpCPP.ID,
+		min := len(tpCPP.FilterIDs)
+		isFilter := true
+		if min > len(tpCPP.AttributeIDs) {
+			min = len(tpCPP.AttributeIDs)
+			isFilter = false
 		}
-		mdl.Weight = tpCPP.Weight
-		mdl.RunID = tpCPP.RunID
-		for i, val := range tpCPP.AttributeIDs {
-			if i != 0 {
-				mdl.AttributeIDs += utils.INFIELD_SEP
+		if min == 0 {
+			mdl := &TPCharger{
+				Tenant: tpCPP.Tenant,
+				Tpid:   tpCPP.TPid,
+				ID:     tpCPP.ID,
+				Weight: tpCPP.Weight,
+				RunID:  tpCPP.RunID,
 			}
-			mdl.AttributeIDs += val
+			if tpCPP.ActivationInterval != nil {
+				if tpCPP.ActivationInterval.ActivationTime != "" {
+					mdl.ActivationInterval = tpCPP.ActivationInterval.ActivationTime
+				}
+				if tpCPP.ActivationInterval.ExpiryTime != "" {
+					mdl.ActivationInterval += utils.INFIELD_SEP + tpCPP.ActivationInterval.ExpiryTime
+				}
+			}
+			if isFilter && len(tpCPP.AttributeIDs) > 0 {
+				mdl.AttributeIDs = tpCPP.AttributeIDs[0]
+			} else if len(tpCPP.FilterIDs) > 0 {
+				mdl.FilterIDs = tpCPP.FilterIDs[0]
+			}
+			min = 1
+			mdls = append(mdls, mdl)
+		} else {
+			for i := 0; i < min; i++ {
+				mdl := &TPCharger{
+					Tenant: tpCPP.Tenant,
+					Tpid:   tpCPP.TPid,
+					ID:     tpCPP.ID,
+				}
+				if i == 0 {
+					mdl.Weight = tpCPP.Weight
+					mdl.RunID = tpCPP.RunID
+					if tpCPP.ActivationInterval != nil {
+						if tpCPP.ActivationInterval.ActivationTime != "" {
+							mdl.ActivationInterval = tpCPP.ActivationInterval.ActivationTime
+						}
+						if tpCPP.ActivationInterval.ExpiryTime != "" {
+							mdl.ActivationInterval += utils.INFIELD_SEP + tpCPP.ActivationInterval.ExpiryTime
+						}
+					}
+				}
+				mdl.AttributeIDs = tpCPP.AttributeIDs[i]
+				mdl.FilterIDs = tpCPP.FilterIDs[i]
+				mdls = append(mdls, mdl)
+			}
 		}
-		for i, val := range tpCPP.FilterIDs {
-			if i != 0 {
-				mdl.FilterIDs += utils.INFIELD_SEP
-			}
-			mdl.FilterIDs += val
-		}
-		if tpCPP.ActivationInterval != nil {
-			if tpCPP.ActivationInterval.ActivationTime != "" {
-				mdl.ActivationInterval = tpCPP.ActivationInterval.ActivationTime
-			}
-			if tpCPP.ActivationInterval.ExpiryTime != "" {
-				mdl.ActivationInterval += utils.INFIELD_SEP + tpCPP.ActivationInterval.ExpiryTime
+		if len(tpCPP.FilterIDs)-min > 0 {
+			for i := min; i < len(tpCPP.FilterIDs); i++ {
+				mdl := &TPCharger{
+					Tenant: tpCPP.Tenant,
+					Tpid:   tpCPP.TPid,
+					ID:     tpCPP.ID,
+				}
+				mdl.FilterIDs = tpCPP.FilterIDs[i]
+				mdls = append(mdls, mdl)
 			}
 		}
-		mdls = append(mdls, mdl)
+		if len(tpCPP.AttributeIDs)-min > 0 {
+			for i := min; i < len(tpCPP.AttributeIDs); i++ {
+				mdl := &TPCharger{
+					Tenant: tpCPP.Tenant,
+					Tpid:   tpCPP.TPid,
+					ID:     tpCPP.ID,
+				}
+				mdl.AttributeIDs = tpCPP.AttributeIDs[i]
+				mdls = append(mdls, mdl)
+			}
+		}
+
 	}
 	return
 }
