@@ -1314,7 +1314,6 @@ func TestTPFilterAsTPFilter(t *testing.T) {
 	}
 }
 
-/*
 func TestTPFilterAsTPFilter2(t *testing.T) {
 	tps := []*TpFilter{
 		&TpFilter{
@@ -1362,11 +1361,10 @@ func TestTPFilterAsTPFilter2(t *testing.T) {
 	}
 
 	rcvTPs := TpFilterS(tps).AsTPFilter()
-	if !(reflect.DeepEqual(eTPs, rcvTPs)) {
-		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
+	if !reflect.DeepEqual(eTPs, rcvTPs) {
+		t.Errorf("Expecting: %+v ,Received: %+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
 	}
 }
-*/
 
 func TestAPItoTPFilter(t *testing.T) {
 	tps := &utils.TPFilterProfile{
