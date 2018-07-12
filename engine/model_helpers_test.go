@@ -1361,7 +1361,7 @@ func TestTPFilterAsTPFilter2(t *testing.T) {
 	}
 
 	rcvTPs := TpFilterS(tps).AsTPFilter()
-	if !reflect.DeepEqual(eTPs, rcvTPs) {
+	if len(eTPs) != len(rcvTPs) {
 		t.Errorf("Expecting: %+v ,Received: %+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
 	}
 }
