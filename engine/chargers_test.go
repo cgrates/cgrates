@@ -18,17 +18,83 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	// "reflect"
+	"reflect"
 	"testing"
-	// "time"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
-	//"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
 	chargerSrv *ChargerService
 	dmCharger  *DataManager
+	cPPs       = ChargerProfiles{
+		&ChargerProfile{
+			Tenant:    "cgrates.org",
+			ID:        "CPP_1",
+			FilterIDs: []string{"FLTR_CP_1", "FLTR_CP_4"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			RunID:        "*rated",
+			AttributeIDs: []string{"ATTR_1"},
+			Weight:       20,
+		},
+		&ChargerProfile{
+			Tenant:    "cgrates.org",
+			ID:        "CPP_2",
+			FilterIDs: []string{"FLTR_CP_2"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			RunID:        "*rated",
+			AttributeIDs: []string{"ATTR_1"},
+			Weight:       20,
+		},
+		&ChargerProfile{
+			Tenant:    "cgrates.org",
+			ID:        "CPP_3",
+			FilterIDs: []string{"FLTR_CP_3"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			RunID:        "*rated",
+			AttributeIDs: []string{"ATTR_1"},
+			Weight:       20,
+		},
+	}
+	chargerEvents = []*utils.CGREvent{
+		&utils.CGREvent{
+			Tenant:  config.CgrConfig().DefaultTenant,
+			ID:      utils.GenUUID(),
+			Context: utils.StringPointer(utils.MetaSessionS),
+			Event: map[string]interface{}{
+				"Charger":        "ChargerProfile1",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+				"UsageInterval":  "1s",
+				utils.Weight:     "200.0",
+			},
+		},
+		&utils.CGREvent{
+			Tenant:  config.CgrConfig().DefaultTenant,
+			ID:      utils.GenUUID(),
+			Context: utils.StringPointer(utils.MetaSessionS),
+			Event: map[string]interface{}{
+				"Charger":        "ChargerProfile2",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			},
+		},
+		&utils.CGREvent{
+			Tenant:  config.CgrConfig().DefaultTenant,
+			ID:      utils.GenUUID(),
+			Context: utils.StringPointer(utils.MetaSessionS),
+			Event: map[string]interface{}{
+				"Charger":        "DistinctMatch",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			},
+		},
+	}
 )
 
 func TestChargerPopulateChargerService(t *testing.T) {
@@ -43,4 +109,100 @@ func TestChargerPopulateChargerService(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
+}
+
+func TestChargerAddFilter(t *testing.T) {
+	fltrCP1 := &Filter{
+		Tenant: config.CgrConfig().DefaultTenant,
+		ID:     "FLTR_CP_1",
+		Rules: []*FilterRule{
+			&FilterRule{
+				Type:      MetaString,
+				FieldName: "Charger",
+				Values:    []string{"ChargerProfile1"},
+			},
+			&FilterRule{
+				Type:      MetaGreaterOrEqual,
+				FieldName: "UsageInterval",
+				Values:    []string{(1 * time.Second).String()},
+			},
+		},
+	}
+	dmCharger.SetFilter(fltrCP1)
+	fltrCP2 := &Filter{
+		Tenant: config.CgrConfig().DefaultTenant,
+		ID:     "FLTR_CP_2",
+		Rules: []*FilterRule{
+			&FilterRule{
+				Type:      MetaString,
+				FieldName: "Charger",
+				Values:    []string{"ChargerProfile2"},
+			},
+		},
+	}
+	dmCharger.SetFilter(fltrCP2)
+	fltrCPPrefix := &Filter{
+		Tenant: config.CgrConfig().DefaultTenant,
+		ID:     "FLTR_CP_3",
+		Rules: []*FilterRule{
+			&FilterRule{
+				Type:      MetaPrefix,
+				FieldName: "Charger",
+				Values:    []string{"Charger"},
+			},
+		},
+	}
+	dmCharger.SetFilter(fltrCPPrefix)
+	fltrCP4 := &Filter{
+		Tenant: config.CgrConfig().DefaultTenant,
+		ID:     "FLTR_CP_4",
+		Rules: []*FilterRule{
+			&FilterRule{
+				Type:      MetaGreaterOrEqual,
+				FieldName: utils.Weight,
+				Values:    []string{"200.00"},
+			},
+		},
+	}
+	dmCharger.SetFilter(fltrCP4)
+}
+
+func TestChargerSetChargerProfiles(t *testing.T) {
+	for _, cp := range cPPs {
+		if err = dmCharger.SetChargerProfile(cp, true); err != nil {
+			t.Errorf("Error: %+v", err)
+		}
+	}
+	//verify each charger from cache
+	for _, cp := range cPPs {
+		if tempCp, err := dmCharger.GetChargerProfile(cp.Tenant, cp.ID,
+			false, utils.NonTransactional); err != nil {
+			t.Errorf("Error: %+v", err)
+		} else if !reflect.DeepEqual(cp, tempCp) {
+			t.Errorf("Expecting: %+v, received: %+v", cp, tempCp)
+		}
+	}
+}
+
+func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
+	if _, err = chargerSrv.matchingChargerProfilesForEvent(chargerEvents[2]); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Error: %+v", err)
+	}
+
+	rcv, err := chargerSrv.matchingChargerProfilesForEvent(chargerEvents[0])
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(cPPs[0], rcv[0]) {
+		t.Errorf("Expecting: %+v, received: %+v ", cPPs[0], rcv[0])
+	}
+
+	rcv, err = chargerSrv.matchingChargerProfilesForEvent(chargerEvents[1])
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(cPPs[1], rcv[0]) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(cPPs[1]), utils.ToJSON(rcv))
+	}
+
 }
