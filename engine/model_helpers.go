@@ -2322,7 +2322,6 @@ func APItoThresholdProfile(tpTH *utils.TPThreshold, timezone string) (th *Thresh
 	}
 	for _, fli := range tpTH.FilterIDs {
 		th.FilterIDs = append(th.FilterIDs, fli)
-
 	}
 	if tpTH.ActivationInterval != nil {
 		if th.ActivationInterval, err = tpTH.ActivationInterval.AsActivationInterval(timezone); err != nil {

@@ -81,6 +81,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITFlush,
 	testOnStorITIsDBEmpty,
 	testOnStorITTestAttributeSubstituteIface,
+	testOnStorITChargerProfile,
 	//testOnStorITCacheActionTriggers,
 	//testOnStorITCacheAlias,
 	//testOnStorITCacheReverseAlias,
@@ -2665,5 +2666,80 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(attrProfile), utils.ToJSON(rcv))
+	}
+}
+
+func testOnStorITChargerProfile(t *testing.T) {
+	cpp := &ChargerProfile{
+		Tenant:    "cgrates.org",
+		ID:        "CPP_1",
+		FilterIDs: []string{"*string:Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		RunID:        "*rated",
+		AttributeIDs: []string{"ATTR_1"},
+		Weight:       20,
+	}
+	if _, rcvErr := onStor.GetChargerProfile("cgrates.org", "CPP_1",
+		false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	if err := onStor.SetChargerProfile(cpp, false); err != nil {
+		t.Error(err)
+	}
+	//get from cache
+	if rcv, err := onStor.GetChargerProfile("cgrates.org", "CPP_1",
+		false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(cpp, rcv)) {
+		t.Errorf("Expecting: %v, received: %v", cpp, rcv)
+	}
+	//get from database
+	if rcv, err := onStor.GetChargerProfile("cgrates.org", "CPP_1",
+		true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(cpp, rcv)) {
+		t.Errorf("Expecting: %v, received: %v", cpp, rcv)
+	}
+	expectedT := []string{"cpp_cgrates.org:CPP_1"}
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ChargerProfilePrefix); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedT, itm) {
+		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
+	}
+	//update
+	cpp.FilterIDs = []string{"*string:Accout:1001", "*prefix:Destination:10"}
+	if err := onStor.SetChargerProfile(cpp, false); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(sleepDelay)
+	//get from cache
+	if rcv, err := onStor.GetChargerProfile("cgrates.org", "CPP_1",
+		false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(cpp, rcv)) {
+		t.Errorf("Expecting: %v, received: %v", cpp, rcv)
+	}
+	//get from database
+	if rcv, err := onStor.GetChargerProfile("cgrates.org", "CPP_1",
+		true, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(cpp, rcv)) {
+		t.Errorf("Expecting: %v, received: %v", cpp, rcv)
+	}
+	if err := onStor.RemoveChargerProfile(cpp.Tenant, cpp.ID,
+		utils.NonTransactional, false); err != nil {
+		t.Error(err)
+	}
+	//check cache if removed
+	if _, rcvErr := onStor.GetChargerProfile("cgrates.org", "CPP_1",
+		false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	//check database if removed
+	if _, rcvErr := onStor.GetChargerProfile("cgrates.org", "CPP_1",
+		true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
 	}
 }
