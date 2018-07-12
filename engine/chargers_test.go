@@ -185,7 +185,8 @@ func TestChargerSetChargerProfiles(t *testing.T) {
 }
 
 func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
-	if _, err = chargerSrv.matchingChargerProfilesForEvent(chargerEvents[2]); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if _, err = chargerSrv.matchingChargerProfilesForEvent(chargerEvents[2]); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error: %+v", err)
 	}
 
