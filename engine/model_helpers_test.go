@@ -1020,7 +1020,7 @@ func TestAPItoTPStats(t *testing.T) {
 	}
 }
 
-func TestAsTPThresholdAsAsTPThreshold(t *testing.T) {
+func TestTPThresholdsAsTPThreshold(t *testing.T) {
 	tps := []*TpThreshold{
 		&TpThreshold{
 			Tpid:               "TEST_TPID",
@@ -1054,6 +1054,198 @@ func TestAsTPThresholdAsAsTPThreshold(t *testing.T) {
 	rcvTPs := TpThresholdS(tps).AsTPThreshold()
 	if !(reflect.DeepEqual(eTPs, rcvTPs) || reflect.DeepEqual(eTPs[0], rcvTPs[0])) {
 		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
+	}
+}
+
+func TestAPItoModelTPThreshold(t *testing.T) {
+	th := &utils.TPThreshold{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "TH_1",
+		FilterIDs: []string{"FilterID1"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "",
+		},
+		MaxHits:   12,
+		MinHits:   10,
+		MinSleep:  "1s",
+		Blocker:   false,
+		Weight:    20.0,
+		ActionIDs: []string{"WARN3"},
+	}
+	models := TpThresholdS{
+		&TpThreshold{
+			Tpid:               "TP1",
+			Tenant:             "cgrates.org",
+			ID:                 "TH_1",
+			FilterIDs:          "FilterID1",
+			ActivationInterval: "2014-07-14T14:35:00Z",
+			MaxHits:            12,
+			MinHits:            10,
+			MinSleep:           "1s",
+			Blocker:            false,
+			Weight:             20.0,
+			ActionIDs:          "WARN3",
+		},
+	}
+	rcv := APItoModelTPThreshold(th)
+	if !reflect.DeepEqual(models, rcv) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(models), utils.ToJSON(rcv))
+	}
+}
+
+func TestAPItoModelTPThreshold2(t *testing.T) {
+	th := &utils.TPThreshold{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "TH_1",
+		FilterIDs: []string{"FLTR_1", "FLTR_2"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "",
+		},
+		MaxHits:   12,
+		MinHits:   10,
+		MinSleep:  "1s",
+		Blocker:   false,
+		Weight:    20.0,
+		ActionIDs: []string{"WARN3"},
+	}
+	models := TpThresholdS{
+		&TpThreshold{
+			Tpid:               "TP1",
+			Tenant:             "cgrates.org",
+			ID:                 "TH_1",
+			FilterIDs:          "FLTR_1",
+			ActivationInterval: "2014-07-14T14:35:00Z",
+			MaxHits:            12,
+			MinHits:            10,
+			MinSleep:           "1s",
+			Blocker:            false,
+			Weight:             20.0,
+			ActionIDs:          "WARN3",
+		},
+		&TpThreshold{
+			Tpid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "TH_1",
+			FilterIDs: "FLTR_2",
+		},
+	}
+	rcv := APItoModelTPThreshold(th)
+	if !reflect.DeepEqual(models, rcv) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(models), utils.ToJSON(rcv))
+	}
+}
+
+func TestAPItoModelTPThreshold3(t *testing.T) {
+	th := &utils.TPThreshold{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "TH_1",
+		FilterIDs: []string{"FLTR_1"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "",
+		},
+		MaxHits:   12,
+		MinHits:   10,
+		MinSleep:  "1s",
+		Blocker:   false,
+		Weight:    20.0,
+		ActionIDs: []string{"WARN3", "LOG"},
+	}
+	models := TpThresholdS{
+		&TpThreshold{
+			Tpid:               "TP1",
+			Tenant:             "cgrates.org",
+			ID:                 "TH_1",
+			FilterIDs:          "FLTR_1",
+			ActivationInterval: "2014-07-14T14:35:00Z",
+			MaxHits:            12,
+			MinHits:            10,
+			MinSleep:           "1s",
+			Blocker:            false,
+			Weight:             20.0,
+			ActionIDs:          "WARN3",
+		},
+		&TpThreshold{
+			Tpid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "TH_1",
+			ActionIDs: "LOG",
+		},
+	}
+	rcv := APItoModelTPThreshold(th)
+	if !reflect.DeepEqual(models, rcv) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(models), utils.ToJSON(rcv))
+	}
+}
+
+func TestAPItoModelTPThreshold4(t *testing.T) {
+	th := &utils.TPThreshold{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "TH_1",
+		FilterIDs: []string{},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "",
+		},
+		MaxHits:   12,
+		MinHits:   10,
+		MinSleep:  "1s",
+		Blocker:   false,
+		Weight:    20.0,
+		ActionIDs: []string{"WARN3", "LOG"},
+	}
+	models := TpThresholdS{
+		&TpThreshold{
+			Tpid:               "TP1",
+			Tenant:             "cgrates.org",
+			ID:                 "TH_1",
+			ActivationInterval: "2014-07-14T14:35:00Z",
+			MaxHits:            12,
+			MinHits:            10,
+			MinSleep:           "1s",
+			Blocker:            false,
+			Weight:             20.0,
+			ActionIDs:          "WARN3",
+		},
+		&TpThreshold{
+			Tpid:      "TP1",
+			Tenant:    "cgrates.org",
+			ID:        "TH_1",
+			ActionIDs: "LOG",
+		},
+	}
+	rcv := APItoModelTPThreshold(th)
+	if !reflect.DeepEqual(models, rcv) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(models), utils.ToJSON(rcv))
+	}
+}
+
+func TestAPItoModelTPThreshold5(t *testing.T) {
+	th := &utils.TPThreshold{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "TH_1",
+		FilterIDs: []string{"FLTR_1"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "",
+		},
+		MaxHits:   12,
+		MinHits:   10,
+		MinSleep:  "1s",
+		Blocker:   false,
+		Weight:    20.0,
+		ActionIDs: []string{},
+	}
+	rcv := APItoModelTPThreshold(th)
+	if rcv != nil {
+		t.Errorf("Expecting : nil, received: %+v", utils.ToJSON(rcv))
 	}
 }
 
@@ -1122,6 +1314,7 @@ func TestTPFilterAsTPFilter(t *testing.T) {
 	}
 }
 
+/*
 func TestTPFilterAsTPFilter2(t *testing.T) {
 	tps := []*TpFilter{
 		&TpFilter{
@@ -1173,6 +1366,7 @@ func TestTPFilterAsTPFilter2(t *testing.T) {
 		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
 	}
 }
+*/
 
 func TestAPItoTPFilter(t *testing.T) {
 	tps := &utils.TPFilterProfile{
