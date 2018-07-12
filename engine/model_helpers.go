@@ -2225,115 +2225,76 @@ func (tps TpThresholdS) AsTPThreshold() (result []*utils.TPThreshold) {
 
 func APItoModelTPThreshold(th *utils.TPThreshold) (mdls TpThresholdS) {
 	if th != nil {
-		if len(th.FilterIDs) == 0 && len(th.ActionIDs) == 0 {
+		if len(th.ActionIDs) == 0 {
 			return
 		}
-		lenFilter := len(th.FilterIDs)
-		lenAction := len(th.ActionIDs)
-		var w int
-		if lenFilter > lenAction {
-			for i, action := range th.ActionIDs {
-				mdl := &TpThreshold{
-					Tpid:      th.TPid,
-					Tenant:    th.Tenant,
-					ID:        th.ID,
-					ActionIDs: action,
-					FilterIDs: th.FilterIDs[i],
-				}
-				if i == 0 {
-					mdl.Blocker = th.Blocker
-					mdl.Weight = th.Weight
-					mdl.MaxHits = th.MaxHits
-					mdl.MinHits = th.MinHits
-					mdl.MinSleep = th.MinSleep
-					mdl.Async = th.Async
-					if th.ActivationInterval != nil {
-						if th.ActivationInterval.ActivationTime != "" {
-							mdl.ActivationInterval = th.ActivationInterval.ActivationTime
-						}
-						if th.ActivationInterval.ExpiryTime != "" {
-							mdl.ActivationInterval += utils.INFIELD_SEP + th.ActivationInterval.ExpiryTime
-						}
-					}
-				}
-				mdls = append(mdls, mdl)
-				w = i + 1
-			}
-			for j := w; j < lenFilter; j++ {
-				mdl := &TpThreshold{
-					Tpid:      th.TPid,
-					Tenant:    th.Tenant,
-					ID:        th.ID,
-					FilterIDs: th.FilterIDs[j],
-				}
-				mdls = append(mdls, mdl)
-			}
+		min := len(th.FilterIDs)
+		if min > len(th.ActionIDs) {
+			min = len(th.ActionIDs)
 		}
-		if lenAction > lenFilter {
-			for i, filter := range th.FilterIDs {
-				mdl := &TpThreshold{
-					Tpid:      th.TPid,
-					Tenant:    th.Tenant,
-					ID:        th.ID,
-					ActionIDs: th.ActionIDs[i],
-					FilterIDs: filter,
-				}
-				if i == 0 {
-					mdl.Blocker = th.Blocker
-					mdl.Weight = th.Weight
-					mdl.MaxHits = th.MaxHits
-					mdl.MinHits = th.MinHits
-					mdl.MinSleep = th.MinSleep
-					mdl.Async = th.Async
-					if th.ActivationInterval != nil {
-						if th.ActivationInterval.ActivationTime != "" {
-							mdl.ActivationInterval = th.ActivationInterval.ActivationTime
-						}
-						if th.ActivationInterval.ExpiryTime != "" {
-							mdl.ActivationInterval += utils.INFIELD_SEP + th.ActivationInterval.ExpiryTime
-						}
+		for i := 0; i < min; i++ {
+			mdl := &TpThreshold{
+				Tpid:   th.TPid,
+				Tenant: th.Tenant,
+				ID:     th.ID,
+			}
+			if i == 0 {
+				mdl.Blocker = th.Blocker
+				mdl.Weight = th.Weight
+				mdl.MaxHits = th.MaxHits
+				mdl.MinHits = th.MinHits
+				mdl.MinSleep = th.MinSleep
+				mdl.Async = th.Async
+				if th.ActivationInterval != nil {
+					if th.ActivationInterval.ActivationTime != "" {
+						mdl.ActivationInterval = th.ActivationInterval.ActivationTime
+					}
+					if th.ActivationInterval.ExpiryTime != "" {
+						mdl.ActivationInterval += utils.INFIELD_SEP + th.ActivationInterval.ExpiryTime
 					}
 				}
-				mdls = append(mdls, mdl)
-				w = i + 1
 			}
-			for j := w; j < lenAction; j++ {
-				mdl := &TpThreshold{
-					Tpid:      th.TPid,
-					Tenant:    th.Tenant,
-					ID:        th.ID,
-					ActionIDs: th.ActionIDs[j],
-				}
-				mdls = append(mdls, mdl)
-			}
+			mdl.FilterIDs = th.FilterIDs[i]
+			mdl.ActionIDs = th.ActionIDs[i]
+			mdls = append(mdls, mdl)
 		}
-		if lenFilter == lenAction {
-			for i, filter := range th.FilterIDs {
-				mdl := &TpThreshold{
-					Tpid:      th.TPid,
-					Tenant:    th.Tenant,
-					ID:        th.ID,
-					ActionIDs: th.ActionIDs[i],
-					FilterIDs: filter,
-				}
-				if i == 0 {
-					mdl.Blocker = th.Blocker
-					mdl.Weight = th.Weight
-					mdl.MaxHits = th.MaxHits
-					mdl.MinHits = th.MinHits
-					mdl.MinSleep = th.MinSleep
-					mdl.Async = th.Async
-					if th.ActivationInterval != nil {
-						if th.ActivationInterval.ActivationTime != "" {
-							mdl.ActivationInterval = th.ActivationInterval.ActivationTime
-						}
-						if th.ActivationInterval.ExpiryTime != "" {
-							mdl.ActivationInterval += utils.INFIELD_SEP + th.ActivationInterval.ExpiryTime
-						}
-					}
-				}
-				mdls = append(mdls, mdl)
 
+		if len(th.FilterIDs)-min > 0 {
+			for i := min; i < len(th.FilterIDs); i++ {
+				mdl := &TpThreshold{
+					Tpid:   th.TPid,
+					Tenant: th.Tenant,
+					ID:     th.ID,
+				}
+				mdl.FilterIDs = th.FilterIDs[i]
+				mdls = append(mdls, mdl)
+			}
+		}
+		if len(th.ActionIDs)-min > 0 {
+			for i := min; i < len(th.ActionIDs); i++ {
+				mdl := &TpThreshold{
+					Tpid:   th.TPid,
+					Tenant: th.Tenant,
+					ID:     th.ID,
+				}
+				if min == 0 && i == 0 {
+					mdl.Blocker = th.Blocker
+					mdl.Weight = th.Weight
+					mdl.MaxHits = th.MaxHits
+					mdl.MinHits = th.MinHits
+					mdl.MinSleep = th.MinSleep
+					mdl.Async = th.Async
+					if th.ActivationInterval != nil {
+						if th.ActivationInterval.ActivationTime != "" {
+							mdl.ActivationInterval = th.ActivationInterval.ActivationTime
+						}
+						if th.ActivationInterval.ExpiryTime != "" {
+							mdl.ActivationInterval += utils.INFIELD_SEP + th.ActivationInterval.ExpiryTime
+						}
+					}
+				}
+				mdl.ActionIDs = th.ActionIDs[i]
+				mdls = append(mdls, mdl)
 			}
 		}
 	}
