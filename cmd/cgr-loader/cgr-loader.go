@@ -330,7 +330,7 @@ func main() {
 		if err := tpReader.WriteToDatabase(*flush, *verbose, *disableReverse); err != nil {
 			log.Fatal("Could not write to database: ", err)
 		}
-		var dstIds, revDstIDs, rplIds, rpfIds, actIds, aapIDs, shgIds, alsIds, lcrIds, dcsIds, rspIDs, resIDs, aatIDs, ralsIDs, stqIDs, stqpIDs, trsIDs, trspfIDs, flrIDs, spfIDs, apfIDs []string
+		var dstIds, revDstIDs, rplIds, rpfIds, actIds, aapIDs, shgIds, alsIds, lcrIds, dcsIds, rspIDs, resIDs, aatIDs, ralsIDs, stqIDs, stqpIDs, trsIDs, trspfIDs, flrIDs, spfIDs, apfIDs, chargerIDs []string
 		if cacheS != nil {
 			dstIds, _ = tpReader.GetLoadedIds(utils.DESTINATION_PREFIX)
 			revDstIDs, _ = tpReader.GetLoadedIds(utils.REVERSE_DESTINATION_PREFIX)
@@ -353,6 +353,7 @@ func main() {
 			flrIDs, _ = tpReader.GetLoadedIds(utils.FilterPrefix)
 			spfIDs, _ = tpReader.GetLoadedIds(utils.SupplierProfilePrefix)
 			apfIDs, _ = tpReader.GetLoadedIds(utils.AttributeProfilePrefix)
+			chargerIDs, _ = tpReader.GetLoadedIds(utils.ChargerProfilePrefix)
 		}
 		aps, _ := tpReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
 		// for users reloading
@@ -393,7 +394,8 @@ func main() {
 					ThresholdProfileIDs:   &trspfIDs,
 					FilterIDs:             &flrIDs,
 					SupplierProfileIDs:    &spfIDs,
-					AttributeProfileIDs:   &apfIDs},
+					AttributeProfileIDs:   &apfIDs,
+					ChargerProfileIDs:     &chargerIDs},
 					FlushAll: *flush,
 				}, &reply); err != nil {
 				log.Printf("WARNING: Got error on cache reload: %s\n", err.Error())
@@ -416,6 +418,9 @@ func main() {
 			}
 			if len(rspIDs) != 0 {
 				cacheIDs = append(cacheIDs, utils.CacheResourceFilterIndexes, utils.CacheResourceFilterRevIndexes)
+			}
+			if len(chargerIDs) != 0 {
+				cacheIDs = append(cacheIDs, utils.CacheChargerFilterIndexes, utils.CacheChargerFilterRevIndexes)
 			}
 			if err = cacheS.Call(utils.CacheSv1Clear, cacheIDs, &reply); err != nil {
 				log.Printf("WARNING: Got error on cache clear: %s\n", err.Error())

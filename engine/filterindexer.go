@@ -121,6 +121,8 @@ func (rfi *FilterIndexer) cacheRemItemType() { // ToDo: tune here by removing pe
 	case utils.AttributeProfilePrefix:
 		Cache.Clear([]string{utils.CacheAttributeFilterIndexes, utils.CacheAttributeFilterRevIndexes})
 
+	case utils.ChargerProfilePrefix:
+		Cache.Clear([]string{utils.CacheChargerFilterIndexes, utils.CacheChargerFilterRevIndexes})
 	}
 }
 

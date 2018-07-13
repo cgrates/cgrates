@@ -252,7 +252,6 @@ func TestStatQueuesMatchingStatQueuesForEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(stqs[0].sqPrfl, msq[0].sqPrfl) {
 		t.Errorf("Expecting: %+v, received: %+v", stqs[0].sqPrfl, msq[0].sqPrfl)
 	}
-
 	msq, err = statService.matchingStatQueuesForEvent(statsEvs[1])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -264,7 +263,6 @@ func TestStatQueuesMatchingStatQueuesForEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(stqs[1].sqPrfl, msq[0].sqPrfl) {
 		t.Errorf("Expecting: %+v, received: %+v", stqs[1].sqPrfl, msq[0].sqPrfl)
 	}
-
 	msq, err = statService.matchingStatQueuesForEvent(statsEvs[2])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -315,5 +313,42 @@ func TestStatQueuesProcessEvent(t *testing.T) {
 	err = statService.V1GetQueueStringMetrics(&utils.TenantID{Tenant: stqs[2].Tenant, ID: stqs[2].ID}, &stq)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
+	}
+}
+
+func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
+	statService.filterS.cfg.FilterSCfg().IndexedSelects = false
+	msq, err := statService.matchingStatQueuesForEvent(statsEvs[0])
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(stqs[0].Tenant, msq[0].Tenant) {
+		t.Errorf("Expecting: %+v, received: %+v", stqs[0].Tenant, msq[0].Tenant)
+	} else if !reflect.DeepEqual(stqs[0].ID, msq[0].ID) {
+		t.Errorf("Expecting: %+v, received: %+v", stqs[0].ID, msq[0].ID)
+	} else if !reflect.DeepEqual(stqs[0].sqPrfl, msq[0].sqPrfl) {
+		t.Errorf("Expecting: %+v, received: %+v", stqs[0].sqPrfl, msq[0].sqPrfl)
+	}
+	msq, err = statService.matchingStatQueuesForEvent(statsEvs[1])
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(stqs[1].Tenant, msq[0].Tenant) {
+		t.Errorf("Expecting: %+v, received: %+v", stqs[1].Tenant, msq[0].Tenant)
+	} else if !reflect.DeepEqual(stqs[1].ID, msq[0].ID) {
+		t.Errorf("Expecting: %+v, received: %+v", stqs[1].ID, msq[0].ID)
+	} else if !reflect.DeepEqual(stqs[1].sqPrfl, msq[0].sqPrfl) {
+		t.Errorf("Expecting: %+v, received: %+v", stqs[1].sqPrfl, msq[0].sqPrfl)
+	}
+	msq, err = statService.matchingStatQueuesForEvent(statsEvs[2])
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(stqs[2].Tenant, msq[0].Tenant) {
+		t.Errorf("Expecting: %+v, received: %+v", stqs[2].Tenant, msq[0].Tenant)
+	} else if !reflect.DeepEqual(stqs[2].ID, msq[0].ID) {
+		t.Errorf("Expecting: %+v, received: %+v", stqs[2].ID, msq[0].ID)
+	} else if !reflect.DeepEqual(stqs[2].sqPrfl, msq[0].sqPrfl) {
+		t.Errorf("Expecting: %+v, received: %+v", stqs[2].sqPrfl, msq[0].sqPrfl)
 	}
 }
