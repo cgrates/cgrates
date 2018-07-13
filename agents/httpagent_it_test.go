@@ -123,7 +123,7 @@ func TestHAitAuth1001(t *testing.T) {
 	eXml := []byte(`<?xml version="1.0" encoding="UTF-8"?>
 <response>
   <Allow>1</Allow>
-  <MaxDuration>10800</MaxDuration>
+  <MaxDuration>6042</MaxDuration>
 </response>`)
 	if body, err := ioutil.ReadAll(rply.Body); err != nil {
 		t.Error(err)
@@ -152,7 +152,7 @@ func TestHAitCDRmtcall(t *testing.T) {
 		t.Errorf("expecting: <%s>, received: <%s>", string(eXml), string(body))
 	}
 	rply.Body.Close()
-	time.Sleep(time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}}
 	if err := haRPC.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
@@ -166,5 +166,11 @@ func TestHAitCDRmtcall(t *testing.T) {
 		if cdrs[0].Cost != 0.2188 {
 			t.Errorf("Unexpected CDR Cost received, cdr: %+v ", cdrs[0].Cost)
 		}
+	}
+}
+
+func TestHAitStopEngine(t *testing.T) {
+	if err := engine.KillEngine(*waitRater); err != nil {
+		t.Error(err)
 	}
 }

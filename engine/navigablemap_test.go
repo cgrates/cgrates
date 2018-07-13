@@ -180,6 +180,16 @@ func TestNavMapAdd(t *testing.T) {
 	if !reflect.DeepEqual(nM.data, eNavMap.data) {
 		t.Errorf("Expecting: %+v, received: %+v", eNavMap.data, nM.data)
 	}
+	eOrder := [][]string{
+		[]string{"FistLever2", "SecondLevel2", "Field2"},
+		[]string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
+		[]string{"FistLever2", "Field3"},
+		[]string{"Field4"},
+	}
+	if !reflect.DeepEqual(eOrder, nM.order) {
+		t.Errorf("Expecting: %+v, received: %+v", eOrder, nM.order)
+	}
+
 }
 
 type testStruct struct {

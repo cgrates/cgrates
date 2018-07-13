@@ -59,6 +59,9 @@ type NavigableMap struct {
 
 // Add will add items into NavigableMap populating also order
 func (nM *NavigableMap) Set(path []string, data interface{}, ordered bool) {
+	if ordered {
+		nM.order = append(nM.order, path)
+	}
 	mp := nM.data
 	for i, spath := range path {
 		if i == len(path)-1 { // last path
@@ -69,9 +72,6 @@ func (nM *NavigableMap) Set(path []string, data interface{}, ordered bool) {
 			mp[spath] = make(map[string]interface{})
 		}
 		mp = mp[spath].(map[string]interface{}) // so we can check further down
-	}
-	if ordered {
-		nM.order = append(nM.order, path)
 	}
 }
 
