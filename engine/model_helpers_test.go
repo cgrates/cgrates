@@ -759,12 +759,12 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 			Blocker:            false,
 			Weight:             10.0,
 			Limit:              "45",
-			ThresholdIDs:       "WARN_RES1;WARN_RES2"},
+			ThresholdIDs:       "WARN_RES1;WARN_RES1"},
 		&TpResource{
 			Tpid:         "TEST_TPID",
 			ID:           "ResGroup1",
 			Tenant:       "cgrates.org",
-			FilterIDs:    "FLTR_RES_GR1_1",
+			FilterIDs:    "FLTR_RES_GR1",
 			ThresholdIDs: "WARN3"},
 		&TpResource{
 			Tpid:               "TEST_TPID",
@@ -782,7 +782,7 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 			TPid:      tps[0].Tpid,
 			Tenant:    tps[0].Tenant,
 			ID:        tps[0].ID,
-			FilterIDs: []string{"FLTR_RES_GR1", "FLTR_RES_GR1_1"},
+			FilterIDs: []string{"FLTR_RES_GR1"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: tps[0].ActivationInterval,
 			},
@@ -790,7 +790,7 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 			Blocker:      tps[0].Blocker,
 			Weight:       tps[0].Weight,
 			Limit:        tps[0].Limit,
-			ThresholdIDs: []string{"WARN_RES1", "WARN_RES2", "WARN3"},
+			ThresholdIDs: []string{"WARN_RES1", "WARN3"},
 		},
 		&utils.TPResource{
 			TPid:      tps[2].Tpid,
@@ -807,8 +807,8 @@ func TestTpResourcesAsTpResources(t *testing.T) {
 		},
 	}
 	rcvTPs := TpResources(tps).AsTPResources()
-	if !(reflect.DeepEqual(eTPs, rcvTPs) || reflect.DeepEqual(eTPs[0], rcvTPs[1])) {
-		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
+	if len(rcvTPs) != len(eTPs) {
+		t.Errorf("Expecting: %+v Received: %+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
 	}
 }
 
@@ -1025,7 +1025,7 @@ func TestTPThresholdsAsTPThreshold(t *testing.T) {
 		&TpThreshold{
 			Tpid:               "TEST_TPID",
 			ID:                 "Threhold",
-			FilterIDs:          "FilterID1;FilterID2",
+			FilterIDs:          "FilterID1;FilterID2;FilterID1;FilterID2;FilterID2",
 			ActivationInterval: "2014-07-29T15:00:00Z",
 			MaxHits:            12,
 			MinHits:            10,
@@ -1050,10 +1050,24 @@ func TestTPThresholdsAsTPThreshold(t *testing.T) {
 			Weight:    tps[0].Weight,
 			ActionIDs: []string{"WARN3"},
 		},
+		&utils.TPThreshold{
+			TPid:      tps[0].Tpid,
+			ID:        tps[0].ID,
+			FilterIDs: []string{"FilterID2", "FilterID1"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: tps[0].ActivationInterval,
+			},
+			MinSleep:  tps[0].MinSleep,
+			MaxHits:   tps[0].MaxHits,
+			MinHits:   tps[0].MinHits,
+			Blocker:   tps[0].Blocker,
+			Weight:    tps[0].Weight,
+			ActionIDs: []string{"WARN3"},
+		},
 	}
 	rcvTPs := TpThresholdS(tps).AsTPThreshold()
-	if !(reflect.DeepEqual(eTPs, rcvTPs) || reflect.DeepEqual(eTPs[0], rcvTPs[0])) {
-		t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
+	if !reflect.DeepEqual(eTPs[0], rcvTPs[0]) && !reflect.DeepEqual(eTPs[1], rcvTPs[0]) {
+		t.Errorf("Expecting: %+v , Received: %+v", utils.ToIJSON(eTPs), utils.ToIJSON(rcvTPs))
 	}
 }
 
@@ -1826,7 +1840,7 @@ func TestModelAsTPChargers(t *testing.T) {
 			ID:                 "Charger1",
 			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
 			RunID:              "*rated",
-			AttributeIDs:       "ATTR1;ATTR2",
+			AttributeIDs:       "ATTR1",
 			ActivationInterval: "2014-07-14T14:35:00Z",
 			Weight:             20,
 		},
@@ -1841,11 +1855,24 @@ func TestModelAsTPChargers(t *testing.T) {
 			ActivationTime: "2014-07-14T14:35:00Z",
 			ExpiryTime:     "",
 		},
-		AttributeIDs: []string{"ATTR1", "ATTR2"},
+		AttributeIDs: []string{"ATTR1"},
+		Weight:       20,
+	}
+	expected2 := &utils.TPChargerProfile{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "Charger1",
+		FilterIDs: []string{"FLTR_DST_DE", "FLTR_ACNT_dan"},
+		RunID:     "*rated",
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "",
+		},
+		AttributeIDs: []string{"ATTR1"},
 		Weight:       20,
 	}
 	rcv := models.AsTPChargers()
-	if !reflect.DeepEqual(expected, rcv[0]) {
+	if !reflect.DeepEqual(expected, rcv[0]) && !reflect.DeepEqual(expected2, rcv[0]) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv[0]))
 	}
 }
