@@ -1582,8 +1582,28 @@ func TestModelAsTPAttribute(t *testing.T) {
 		},
 		Weight: 20,
 	}
+	expected2 := &utils.TPAttributeProfile{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "ALS1",
+		Contexts:  []string{"con1"},
+		FilterIDs: []string{"FLTR_DST_DE", "FLTR_ACNT_dan"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "",
+		},
+		Attributes: []*utils.TPAttribute{
+			&utils.TPAttribute{
+				FieldName:  "FL1",
+				Initial:    "In1",
+				Substitute: "Al1",
+				Append:     true,
+			},
+		},
+		Weight: 20,
+	}
 	rcv := models.AsTPAttributes()
-	if !reflect.DeepEqual(expected, rcv[0]) {
+	if !reflect.DeepEqual(expected, rcv[0]) && !reflect.DeepEqual(expected2, rcv[0]) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv[0]))
 	}
 }
