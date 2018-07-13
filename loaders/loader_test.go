@@ -1001,6 +1001,17 @@ cgrates.org,Charge2,*string:Account:1003,2014-07-29T15:00:00Z,*default,Attr3,10
 		AttributeIDs: []string{"Attr1", "Attr2"},
 		Weight:       20,
 	}
+	eCharger1Rev := &engine.ChargerProfile{
+		Tenant:    "cgrates.org",
+		ID:        "Charge1",
+		FilterIDs: []string{"*string:Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 29, 15, 00, 0, 0, time.UTC),
+		},
+		RunID:        "*rated",
+		AttributeIDs: []string{"Attr2", "Attr1"},
+		Weight:       20,
+	}
 	eCharger2 := &engine.ChargerProfile{
 		Tenant:    "cgrates.org",
 		ID:        "Charge2",
@@ -1015,7 +1026,7 @@ cgrates.org,Charge2,*string:Account:1003,2014-07-29T15:00:00Z,*default,Attr3,10
 	if rcv, err := ldr.dm.GetChargerProfile("cgrates.org", "Charge1",
 		false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eCharger1, rcv) {
+	} else if !reflect.DeepEqual(eCharger1, rcv) && !reflect.DeepEqual(eCharger1Rev, rcv) {
 		t.Errorf("expecting: %s, received: %s", utils.ToJSON(eCharger1), utils.ToJSON(rcv))
 	}
 	if rcv, err := ldr.dm.GetChargerProfile("cgrates.org", "Charge2",
