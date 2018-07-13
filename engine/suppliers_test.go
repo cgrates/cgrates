@@ -164,6 +164,16 @@ var (
 				},
 			},
 		},
+		&ArgsGetSuppliers{ //matching
+			CGREvent: utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "CGR",
+				Event: map[string]interface{}{
+					"UsageInterval": "1s",
+					"PddInterval":   "1s",
+				},
+			},
+		},
 	}
 )
 
@@ -612,5 +622,32 @@ func TestSuppliersAsOptsGetSuppliersMaxCost(t *testing.T) {
 	}
 	if !reflect.DeepEqual(spl, sprf) {
 		t.Errorf("Expecting: %+v,received: %+v", spl, sprf)
+	}
+}
+
+func TestSuppliersMatchWithIndexFalse(t *testing.T) {
+	splService.filterS.cfg.FilterSCfg().IndexedSelects = false
+	sprf, err := splService.matchingSupplierProfilesForEvent(&argsGetSuppliers[0].CGREvent)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(sppTest[0], sprf[0]) {
+		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf[0])
+	}
+
+	sprf, err = splService.matchingSupplierProfilesForEvent(&argsGetSuppliers[1].CGREvent)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(sppTest[1], sprf[0]) {
+		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf[0])
+	}
+
+	sprf, err = splService.matchingSupplierProfilesForEvent(&argsGetSuppliers[2].CGREvent)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(sppTest[2], sprf[0]) {
+		t.Errorf("Expecting: %+v, received: %+v", sppTest[2], sprf[0])
 	}
 }

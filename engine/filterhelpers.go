@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
@@ -36,9 +37,13 @@ func matchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 	defer guardian.Guardian.UnguardIDs(lockID)
 	itemIDs = make(utils.StringMap)
 	if !indexedSelects {
-		sliceIDs, err := dm.DataDB().GetKeysForPrefix(itemIDPrefix)
+		keysWithID, err := dm.DataDB().GetKeysForPrefix(utils.IndexesToPrefix[cacheID])
 		if err != nil {
 			return nil, err
+		}
+		var sliceIDs []string
+		for _, id := range keysWithID {
+			sliceIDs = append(sliceIDs, strings.Split(id, ":")[1])
 		}
 		itemIDs = utils.StringMapFromSlice(sliceIDs)
 		return itemIDs, nil

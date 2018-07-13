@@ -683,3 +683,42 @@ func TestResourceUsageTTLCase4(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].ttl, mres[0].ttl)
 	}
 }
+
+func TestResourceMatchWithIndexFalse(t *testing.T) {
+	resService.filterS.cfg.FilterSCfg().IndexedSelects = false
+	mres, err := resService.matchingResourcesForEvent(resEvs[0], &timeDurationExample)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(resourceTest[0].Tenant, mres[0].Tenant) {
+		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].Tenant, mres[0].Tenant)
+	} else if !reflect.DeepEqual(resourceTest[0].ID, mres[0].ID) {
+		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].ID, mres[0].ID)
+	} else if !reflect.DeepEqual(resourceTest[0].rPrf, mres[0].rPrf) {
+		t.Errorf("Expecting: %+v, received: %+v", resourceTest[0].rPrf, mres[0].rPrf)
+	}
+
+	mres, err = resService.matchingResourcesForEvent(resEvs[1], &timeDurationExample)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(resourceTest[1].Tenant, mres[0].Tenant) {
+		t.Errorf("Expecting: %+v, received: %+v", resourceTest[1].Tenant, mres[0].Tenant)
+	} else if !reflect.DeepEqual(resourceTest[1].ID, mres[0].ID) {
+		t.Errorf("Expecting: %+v, received: %+v", resourceTest[1].ID, mres[0].ID)
+	} else if !reflect.DeepEqual(resourceTest[1].rPrf, mres[0].rPrf) {
+		t.Errorf("Expecting: %+v, received: %+v", resourceTest[1].rPrf, mres[0].rPrf)
+	}
+
+	mres, err = resService.matchingResourcesForEvent(resEvs[2], &timeDurationExample)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(resourceTest[2].Tenant, mres[0].Tenant) {
+		t.Errorf("Expecting: %+v, received: %+v", resourceTest[2].Tenant, mres[0].Tenant)
+	} else if !reflect.DeepEqual(resourceTest[2].ID, mres[0].ID) {
+		t.Errorf("Expecting: %+v, received: %+v", resourceTest[2].ID, mres[0].ID)
+	} else if !reflect.DeepEqual(resourceTest[2].rPrf, mres[0].rPrf) {
+		t.Errorf("Expecting: %+v, received: %+v", resourceTest[2].rPrf, mres[0].rPrf)
+	}
+}

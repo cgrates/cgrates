@@ -52,6 +52,8 @@ func (self *ApierV1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string)
 		arg.ItemType = utils.StatQueueProfilePrefix
 	case utils.MetaResources:
 		arg.ItemType = utils.ResourceProfilesPrefix
+	case utils.MetaChargers:
+		arg.ItemType = utils.ChargerProfilePrefix
 	case utils.MetaAttributes:
 		if missing := utils.MissingStructFields(&arg, []string{"Context"}); len(missing) != 0 { //Params missing
 			return utils.NewErrMandatoryIeMissing(missing...)
@@ -177,6 +179,8 @@ func (self *ApierV1) GetFilterReverseIndexes(arg AttrGetFilterReverseIndexes, re
 		arg.ItemType = utils.StatQueueProfilePrefix
 	case utils.MetaResources:
 		arg.ItemType = utils.ResourceProfilesPrefix
+	case utils.MetaChargers:
+		arg.ItemType = utils.ChargerProfilePrefix
 	case utils.MetaAttributes:
 		if missing := utils.MissingStructFields(&arg, []string{"Context"}); len(missing) != 0 { //Params missing
 			return utils.NewErrMandatoryIeMissing(missing...)

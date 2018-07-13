@@ -77,6 +77,8 @@ var (
 		CacheSupplierFilterRevIndexes:  SupplierFilterRevIndexes,
 		CacheAttributeFilterIndexes:    AttributeFilterIndexes,
 		CacheAttributeFilterRevIndexes: AttributeFilterRevIndexes,
+		CacheChargerFilterIndexes:      ChargerFilterIndexes,
+		CacheChargerFilterRevIndexes:   ChargerFilterRevIndexes,
 	}
 	CachePrefixToInstance map[string]string // will be built on init
 	PrefixToIndexCache    = map[string]string{
@@ -94,6 +96,20 @@ var (
 		SupplierProfilePrefix:  CacheSupplierFilterRevIndexes,
 		AttributeProfilePrefix: CacheAttributeFilterRevIndexes,
 		ChargerProfilePrefix:   CacheChargerFilterRevIndexes,
+	}
+	IndexesToPrefix = map[string]string{
+		CacheResourceFilterIndexes:     ResourceProfilesPrefix,
+		CacheResourceFilterRevIndexes:  ResourceProfilesPrefix,
+		CacheStatFilterIndexes:         StatQueueProfilePrefix,
+		CacheStatFilterRevIndexes:      StatQueueProfilePrefix,
+		CacheThresholdFilterIndexes:    ThresholdProfilePrefix,
+		CacheThresholdFilterRevIndexes: ThresholdProfilePrefix,
+		CacheSupplierFilterIndexes:     SupplierProfilePrefix,
+		CacheSupplierFilterRevIndexes:  SupplierProfilePrefix,
+		CacheAttributeFilterIndexes:    AttributeProfilePrefix,
+		CacheAttributeFilterRevIndexes: AttributeProfilePrefix,
+		CacheChargerFilterIndexes:      ChargerProfilePrefix,
+		CacheChargerFilterRevIndexes:   ChargerProfilePrefix,
 	}
 )
 
@@ -907,6 +923,8 @@ const (
 	SupplierFilterRevIndexes  = "spr_"
 	AttributeFilterIndexes    = "afi_"
 	AttributeFilterRevIndexes = "afr_"
+	ChargerFilterIndexes      = "cfi_"
+	ChargerFilterRevIndexes   = "cfr_"
 )
 
 // Agents
