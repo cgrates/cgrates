@@ -932,7 +932,7 @@ cgrates.org,SPL_LEASTCOST_1,,,,,supplier2,,,RP_RETAIL1,resource_spl2,,20,,,
 func TestLoaderProcessChargers(t *testing.T) {
 	chargerCSV := `
 #Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],RunID[4],AttributeIDs[5],Weight[6]
-cgrates.org,Charge1,*string:Account:1001;*string:Account:1002,2014-07-29T15:00:00Z,*rated,Attr1;Attr2,20
+cgrates.org,Charge1,*string:Account:1001;*string:Account:1001,2014-07-29T15:00:00Z,*rated,Attr1;Attr2,20
 cgrates.org,Charge2,*string:Account:1003,2014-07-29T15:00:00Z,*default,Attr3,10
 `
 	data, _ := engine.NewMapStorage()
@@ -993,7 +993,7 @@ cgrates.org,Charge2,*string:Account:1003,2014-07-29T15:00:00Z,*default,Attr3,10
 	eCharger1 := &engine.ChargerProfile{
 		Tenant:    "cgrates.org",
 		ID:        "Charge1",
-		FilterIDs: []string{"*string:Account:1001", "*string:Account:1002"},
+		FilterIDs: []string{"*string:Account:1001"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 00, 0, 0, time.UTC),
 		},

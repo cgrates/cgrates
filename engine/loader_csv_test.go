@@ -279,7 +279,7 @@ cgrates.org,TestStats2,,,,,*sum;*average,Cost,true,true,20,2,
 
 	thresholds = `
 #Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10]
-cgrates.org,Threshold1,FLTR_1;FLTR_ACNT_dan,2014-07-29T15:00:00Z,12,10,1s,true,10,THRESH1;THRESH2,true
+cgrates.org,Threshold1,FLTR_1;FLTR_ACNT_dan,2014-07-29T15:00:00Z,12,10,1s,true,10,THRESH1,true
 `
 
 	filters = `
@@ -1597,14 +1597,31 @@ func TestLoadThresholdProfiles(t *testing.T) {
 			MinSleep:  "1s",
 			Blocker:   true,
 			Weight:    10,
-			ActionIDs: []string{"THRESH1", "THRESH2"},
+			ActionIDs: []string{"THRESH1"},
 			Async:     true,
 		},
+	}
+	revTH := &utils.TPThreshold{
+		TPid:      testTPID,
+		Tenant:    "cgrates.org",
+		ID:        "Threshold1",
+		FilterIDs: []string{"FLTR_1", "FLTR_ACNT_dan"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-29T15:00:00Z",
+		},
+		MaxHits:   12,
+		MinHits:   10,
+		MinSleep:  "1s",
+		Blocker:   true,
+		Weight:    10,
+		ActionIDs: []string{"THRESH1"},
+		Async:     true,
 	}
 	thkey := utils.TenantID{Tenant: "cgrates.org", ID: "Threshold1"}
 	if len(csvr.thProfiles) != len(eThresholds) {
 		t.Errorf("Failed to load ThresholdProfiles: %s", utils.ToIJSON(csvr.thProfiles))
-	} else if !reflect.DeepEqual(eThresholds[thkey], csvr.thProfiles[thkey]) {
+	} else if !reflect.DeepEqual(eThresholds[thkey], csvr.thProfiles[thkey]) &&
+		!reflect.DeepEqual(revTH, csvr.thProfiles[thkey]) {
 		t.Errorf("Expecting: %+v, received: %+v", eThresholds[thkey], csvr.thProfiles[thkey])
 	}
 }
@@ -1761,7 +1778,7 @@ func TestLoadAttributeProfiles(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].Tenant, csvr.attributeProfiles[resKey].Tenant)
 	} else if !reflect.DeepEqual(eAttrProfiles[resKey].ID, csvr.attributeProfiles[resKey].ID) {
 		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].ID, csvr.attributeProfiles[resKey].ID)
-	} else if !reflect.DeepEqual(eAttrProfiles[resKey].Contexts, csvr.attributeProfiles[resKey].Contexts) {
+	} else if len(eAttrProfiles[resKey].Contexts) != len(csvr.attributeProfiles[resKey].Contexts) {
 		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].Contexts, csvr.attributeProfiles[resKey].Contexts)
 	} else if !reflect.DeepEqual(eAttrProfiles[resKey].FilterIDs, csvr.attributeProfiles[resKey].FilterIDs) {
 		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].FilterIDs, csvr.attributeProfiles[resKey].FilterIDs)

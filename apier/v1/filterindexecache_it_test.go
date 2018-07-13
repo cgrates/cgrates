@@ -287,7 +287,6 @@ func testV1FIdxCaGetThresholdFromTP(t *testing.T) {
 	//test to make sure indexes are made as expected
 	idx := map[string]utils.StringMap{
 		"THD_ACNT_BALANCE_1": {
-			"*default:*any:*any":              true,
 			"*string:Account:1001":            true,
 			"*string:Account:1002":            true,
 			"*string:EventType:BalanceUpdate": true}}
@@ -358,10 +357,9 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 	var thIDs []string
 	eIDs := []string{}
 	//Testing ProcessEvent on set thresholdprofile  after update making sure there are no hits
-	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &thIDs); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &thIDs); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
-	} else if !reflect.DeepEqual(thIDs, eIDs) {
-		t.Errorf("Expecting : %+v, received: %+v", eIDs, thIDs)
 	}
 	//matches thresholdprofile after update
 	tEv2 := &engine.ArgsProcessEvent{
@@ -428,7 +426,6 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 	}
 	time.Sleep(100 * time.Millisecond)
 	reply.FilterIDs = []string{"TestFilter3"}
-	reply.ActivationInterval = &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC)}
 
 	if err := tFIdxCaRpc.Call("ApierV1.SetThresholdProfile", reply, &result); err != nil {
 		t.Error(err)
@@ -444,12 +441,10 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 				utils.Account:   "1002",
 				utils.EventType: utils.BalanceUpdate}}}
 	var thIDs []string
-	eIDs := []string{}
 	//Testing ProcessEvent on set thresholdprofile using apier
-	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &thIDs); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &thIDs); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
-	} else if !reflect.DeepEqual(thIDs, eIDs) {
-		t.Errorf("Expecting : %s, received: %s", eIDs, thIDs)
 	}
 	tEv2 := &engine.ArgsProcessEvent{
 		CGREvent: utils.CGREvent{
@@ -458,7 +453,7 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.Account:   "1003",
 				utils.EventType: utils.BalanceUpdate}}}
-	eIDs = []string{"THD_ACNT_BALANCE_1"}
+	eIDs := []string{"THD_ACNT_BALANCE_1"}
 	//Testing ProcessEvent on set thresholdprofile using apier
 	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv2, &thIDs); err != nil {
 		t.Error(err)
@@ -537,16 +532,13 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	eIDs = []string{}
-	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &thIDs); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &thIDs); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
-	} else if !reflect.DeepEqual(thIDs, eIDs) {
-		t.Errorf("Expecting : %s, received: %s", eIDs, thIDs)
 	}
-	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv2, &thIDs); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv2, &thIDs); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
-	} else if !reflect.DeepEqual(thIDs, eIDs) {
-		t.Errorf("Expecting : %s, received: %s", eIDs, thIDs)
 	}
 	//test to make sure indexes are made as expected
 	fldNameVal2 := map[string]string{"THD_ACNT_BALANCE_1": "", "TEST_PROFILE1": ""}
@@ -744,7 +736,7 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 			&engine.FilterRule{
 				FieldName: utils.Account,
 				Type:      "*string",
-				Values:    []string{"1002"},
+				Values:    []string{"1003"},
 			},
 			&engine.FilterRule{
 				FieldName: utils.EventType,
@@ -789,13 +781,13 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply []string
-	expected := []string{"Stats1"}
+	expected := []string{"TEST_PROFILE1"}
 	tEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]interface{}{
 			utils.EventType: utils.BalanceUpdate,
-			utils.Account:   "1002",
+			utils.Account:   "1003",
 		}}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, tEv, &reply); err != nil {
 		t.Error(err)
@@ -805,7 +797,7 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 
 	fldNameVal := map[string]string{"TEST_PROFILE1": ""}
 	expectedRevIDX := map[string]utils.StringMap{
-		"TEST_PROFILE1": {"*string:Account:1002": true,
+		"TEST_PROFILE1": {"*string:Account:1003": true,
 			"*string:EventType:BalanceUpdate": true}}
 	if indexes, err = onStor.GetFilterReverseIndexes(
 		utils.PrefixToRevIndexCache[utils.StatQueueProfilePrefix], "cgrates.org",
@@ -895,7 +887,7 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 		ID:     "event1",
 		Event: map[string]interface{}{
 			utils.EventType: utils.BalanceUpdate,
-			utils.Account:   "1002",
+			utils.Account:   "1003",
 		}}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, tEv, &reply); err != nil {
 		t.Error(err)
@@ -1488,7 +1480,7 @@ func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 	idx := map[string]utils.StringMap{
-		"ResGroup1": {"*default:*any:*any": true,
+		"ResGroup1": {
 			"*prefix:Destination:10": true,
 			"*prefix:Destination:20": true,
 			"*string:Account:1001":   true,

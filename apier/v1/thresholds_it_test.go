@@ -346,28 +346,7 @@ func testV1TSGetThresholdsAfterRestart(t *testing.T) {
 
 func testV1TSSetThresholdProfile(t *testing.T) {
 	var reply *engine.ThresholdProfile
-	filter = &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "TestFilter",
-		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
-				FieldName: "*string",
-				Type:      "Account",
-				Values:    []string{"1001", "1002"},
-			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
-	}
-
 	var result string
-	if err := tSv1Rpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
 	if err := tSv1Rpc.Call("ApierV1.GetThresholdProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
@@ -376,7 +355,7 @@ func testV1TSSetThresholdProfile(t *testing.T) {
 	tPrfl = &engine.ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "THD_Test",
-		FilterIDs: []string{"TestFilter"},
+		FilterIDs: []string{"*string:Account:1001"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -385,7 +364,7 @@ func testV1TSSetThresholdProfile(t *testing.T) {
 		MinSleep:  time.Duration(5 * time.Minute),
 		Blocker:   false,
 		Weight:    20.0,
-		ActionIDs: []string{"ACT_1", "ACT_2"},
+		ActionIDs: []string{"ACT_1"},
 		Async:     true,
 	}
 	if err := tSv1Rpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
@@ -403,28 +382,7 @@ func testV1TSSetThresholdProfile(t *testing.T) {
 
 func testV1TSUpdateThresholdProfile(t *testing.T) {
 	var result string
-	filter = &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "TestFilter2",
-		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
-				FieldName: "*prefix",
-				Type:      "Destination",
-				Values:    []string{"10", "20"},
-			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
-	}
-
-	if err := tSv1Rpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-	tPrfl.FilterIDs = []string{"TestFilter", "TestFilter2"}
+	tPrfl.FilterIDs = []string{"*string:Account:1001", "*prefix:DST:10"}
 	if err := tSv1Rpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {

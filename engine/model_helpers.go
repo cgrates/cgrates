@@ -1821,6 +1821,8 @@ type TpResources []*TpResource
 
 func (tps TpResources) AsTPResources() (result []*utils.TPResource) {
 	mrl := make(map[string]*utils.TPResource)
+	filterMap := make(map[string]utils.StringMap)
+	thresholdMap := make(map[string]utils.StringMap)
 	for _, tp := range tps {
 		rl, found := mrl[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]
 		if !found {
@@ -1857,19 +1859,41 @@ func (tps TpResources) AsTPResources() (result []*utils.TPResource) {
 			}
 		}
 		if tp.ThresholdIDs != "" {
+			if _, has := thresholdMap[(&utils.TenantID{Tenant: tp.Tenant,
+				ID: tp.ID}).TenantID()]; !has {
+				thresholdMap[(&utils.TenantID{Tenant: tp.Tenant,
+					ID: tp.ID}).TenantID()] = make(utils.StringMap)
+			}
 			trshSplt := strings.Split(tp.ThresholdIDs, utils.INFIELD_SEP)
-			rl.ThresholdIDs = append(rl.ThresholdIDs, trshSplt...)
+			for _, trsh := range trshSplt {
+				thresholdMap[(&utils.TenantID{Tenant: tp.Tenant,
+					ID: tp.ID}).TenantID()][trsh] = true
+			}
 		}
 		if tp.FilterIDs != "" {
-			trshSplt := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
-			rl.FilterIDs = append(rl.FilterIDs, trshSplt...)
+			if _, has := filterMap[(&utils.TenantID{Tenant: tp.Tenant,
+				ID: tp.ID}).TenantID()]; !has {
+				filterMap[(&utils.TenantID{Tenant: tp.Tenant,
+					ID: tp.ID}).TenantID()] = make(utils.StringMap)
+			}
+			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
+			for _, filter := range filterSplit {
+				filterMap[(&utils.TenantID{Tenant: tp.Tenant,
+					ID: tp.ID}).TenantID()][filter] = true
+			}
 		}
 		mrl[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = rl
 	}
 	result = make([]*utils.TPResource, len(mrl))
 	i := 0
-	for _, rl := range mrl {
+	for tntID, rl := range mrl {
 		result[i] = rl
+		for filter := range filterMap[tntID] {
+			result[i].FilterIDs = append(result[i].FilterIDs, filter)
+		}
+		for threshold := range thresholdMap[tntID] {
+			result[i].ThresholdIDs = append(result[i].ThresholdIDs, threshold)
+		}
 		i++
 	}
 	return
@@ -1949,9 +1973,9 @@ type TpStatsS []*TpStats
 
 //to be modify
 func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
-	filtermap := make(map[string]map[string]bool)
+	filterMap := make(map[string]utils.StringMap)
 	metricmap := make(map[string]map[string]*utils.MetricWithParams)
-	thresholdmap := make(map[string]map[string]bool)
+	thresholdMap := make(map[string]utils.StringMap)
 	mst := make(map[string]*utils.TPStats)
 	for _, tp := range tps {
 		st, found := mst[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]
@@ -1999,14 +2023,14 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 			}
 		}
 		if tp.ThresholdIDs != "" {
-			if _, has := thresholdmap[(&utils.TenantID{Tenant: tp.Tenant,
+			if _, has := thresholdMap[(&utils.TenantID{Tenant: tp.Tenant,
 				ID: tp.ID}).TenantID()]; !has {
-				thresholdmap[(&utils.TenantID{Tenant: tp.Tenant,
-					ID: tp.ID}).TenantID()] = make(map[string]bool)
+				thresholdMap[(&utils.TenantID{Tenant: tp.Tenant,
+					ID: tp.ID}).TenantID()] = make(utils.StringMap)
 			}
 			trshSplt := strings.Split(tp.ThresholdIDs, utils.INFIELD_SEP)
 			for _, trsh := range trshSplt {
-				thresholdmap[(&utils.TenantID{Tenant: tp.Tenant,
+				thresholdMap[(&utils.TenantID{Tenant: tp.Tenant,
 					ID: tp.ID}).TenantID()][trsh] = true
 			}
 		}
@@ -2024,32 +2048,34 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 			}
 		}
 		if tp.FilterIDs != "" {
-			if _, has := filtermap[(&utils.TenantID{Tenant: tp.Tenant,
+			if _, has := filterMap[(&utils.TenantID{Tenant: tp.Tenant,
 				ID: tp.ID}).TenantID()]; !has {
-				filtermap[(&utils.TenantID{Tenant: tp.Tenant,
-					ID: tp.ID}).TenantID()] = make(map[string]bool)
+				filterMap[(&utils.TenantID{Tenant: tp.Tenant,
+					ID: tp.ID}).TenantID()] = make(utils.StringMap)
 			}
 			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
 			for _, filter := range filterSplit {
-				filtermap[(&utils.TenantID{Tenant: tp.Tenant,
+				filterMap[(&utils.TenantID{Tenant: tp.Tenant,
 					ID: tp.ID}).TenantID()][filter] = true
 			}
 		}
 		mst[(&utils.TenantID{Tenant: tp.Tenant,
 			ID: tp.ID}).TenantID()] = st
 	}
+	result = make([]*utils.TPStats, len(mst))
+	i := 0
 	for tntID, st := range mst {
-		for filterdata, _ := range filtermap[tntID] {
-			st.FilterIDs = append(st.FilterIDs, filterdata)
+		result[i] = st
+		for filter := range filterMap[tntID] {
+			result[i].FilterIDs = append(result[i].FilterIDs, filter)
 		}
-
-		for trsh, _ := range thresholdmap[tntID] {
-			st.ThresholdIDs = append(st.ThresholdIDs, trsh)
+		for threshold := range thresholdMap[tntID] {
+			result[i].ThresholdIDs = append(result[i].ThresholdIDs, threshold)
 		}
-		for metricdata, _ := range metricmap[tntID] {
-			st.Metrics = append(st.Metrics, metricmap[tntID][metricdata])
+		for metricdata := range metricmap[tntID] {
+			result[i].Metrics = append(result[i].Metrics, metricmap[tntID][metricdata])
 		}
-		result = append(result, st)
+		i++
 	}
 	return
 }
@@ -2145,6 +2171,8 @@ type TpThresholdS []*TpThreshold
 
 func (tps TpThresholdS) AsTPThreshold() (result []*utils.TPThreshold) {
 	mst := make(map[string]*utils.TPThreshold)
+	filterMap := make(map[string]utils.StringMap)
+	actionMap := make(map[string]utils.StringMap)
 	for _, tp := range tps {
 		th, found := mst[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]
 		if !found {
@@ -2160,8 +2188,13 @@ func (tps TpThresholdS) AsTPThreshold() (result []*utils.TPThreshold) {
 			}
 		}
 		if tp.ActionIDs != "" {
+			if _, has := actionMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]; !has {
+				actionMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(utils.StringMap)
+			}
 			actionSplit := strings.Split(tp.ActionIDs, utils.INFIELD_SEP)
-			th.ActionIDs = append(th.ActionIDs, actionSplit...)
+			for _, action := range actionSplit {
+				actionMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][action] = true
+			}
 		}
 		if tp.Weight != 0 {
 			th.Weight = tp.Weight
@@ -2177,16 +2210,27 @@ func (tps TpThresholdS) AsTPThreshold() (result []*utils.TPThreshold) {
 			}
 		}
 		if tp.FilterIDs != "" {
+			if _, has := filterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]; !has {
+				filterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(utils.StringMap)
+			}
 			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
-			th.FilterIDs = append(th.FilterIDs, filterSplit...)
+			for _, filter := range filterSplit {
+				filterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][filter] = true
+			}
 		}
 
 		mst[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = th
 	}
 	result = make([]*utils.TPThreshold, len(mst))
 	i := 0
-	for _, th := range mst {
+	for tntID, th := range mst {
 		result[i] = th
+		for filter := range filterMap[tntID] {
+			result[i].FilterIDs = append(result[i].FilterIDs, filter)
+		}
+		for action := range actionMap[tntID] {
+			result[i].ActionIDs = append(result[i].ActionIDs, action)
+		}
 		i++
 	}
 	return
@@ -2420,9 +2464,10 @@ func FilterToTPFilter(f *Filter) (tpFltr *utils.TPFilterProfile) {
 type TpSuppliers []*TpSupplier
 
 func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplierProfile) {
-	filtermap := make(map[string]map[string]bool)
+	filtermap := make(map[string]utils.StringMap)
 	mst := make(map[string]*utils.TPSupplierProfile)
 	suppliersMap := make(map[string]map[string]*utils.TPSupplier)
+	sortingParameterMap := make(map[string]utils.StringMap)
 	for _, tp := range tps {
 		th, found := mst[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]
 		if !found {
@@ -2472,8 +2517,13 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplierProfile) {
 			suppliersMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][tp.SupplierID] = sup
 		}
 		if tp.SortingParameters != "" {
-			sortingParameterSplit := strings.Split(tp.SortingParameters, utils.INFIELD_SEP)
-			th.SortingParameters = append(th.SortingParameters, sortingParameterSplit...)
+			if _, has := sortingParameterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]; !has {
+				sortingParameterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(utils.StringMap)
+			}
+			sortingParamSplit := strings.Split(tp.SortingParameters, utils.INFIELD_SEP)
+			for _, sortingParam := range sortingParamSplit {
+				sortingParameterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][sortingParam] = true
+			}
 		}
 		if tp.Weight != 0 {
 			th.Weight = tp.Weight
@@ -2490,7 +2540,7 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplierProfile) {
 		}
 		if tp.FilterIDs != "" {
 			if _, has := filtermap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]; !has {
-				filtermap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(map[string]bool)
+				filtermap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(utils.StringMap)
 			}
 			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
 			for _, filter := range filterSplit {
@@ -2506,9 +2556,11 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplierProfile) {
 		for _, supdata := range suppliersMap[tntID] {
 			result[i].Suppliers = append(result[i].Suppliers, supdata)
 		}
-
-		for filterdata, _ := range filtermap[tntID] {
+		for filterdata := range filtermap[tntID] {
 			result[i].FilterIDs = append(result[i].FilterIDs, filterdata)
+		}
+		for sortingParam := range sortingParameterMap[tntID] {
+			result[i].SortingParameters = append(result[i].SortingParameters, sortingParam)
 		}
 		i++
 	}
@@ -2626,6 +2678,8 @@ type TPAttributes []*TPAttribute
 
 func (tps TPAttributes) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 	mst := make(map[string]*utils.TPAttributeProfile)
+	filterMap := make(map[string]utils.StringMap)
+	contextMap := make(map[string]utils.StringMap)
 	for _, tp := range tps {
 		th, found := mst[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]
 		if !found {
@@ -2649,12 +2703,22 @@ func (tps TPAttributes) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 			}
 		}
 		if tp.FilterIDs != "" {
+			if _, has := filterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]; !has {
+				filterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(utils.StringMap)
+			}
 			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
-			th.FilterIDs = append(th.FilterIDs, filterSplit...)
+			for _, filter := range filterSplit {
+				filterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][filter] = true
+			}
 		}
 		if tp.Contexts != "" {
+			if _, has := contextMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]; !has {
+				contextMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(utils.StringMap)
+			}
 			contextSplit := strings.Split(tp.Contexts, utils.INFIELD_SEP)
-			th.Contexts = append(th.Contexts, contextSplit...)
+			for _, context := range contextSplit {
+				contextMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][context] = true
+			}
 		}
 		if tp.FieldName != "" {
 			th.Attributes = append(th.Attributes, &utils.TPAttribute{
@@ -2668,8 +2732,14 @@ func (tps TPAttributes) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 	}
 	result = make([]*utils.TPAttributeProfile, len(mst))
 	i := 0
-	for _, th := range mst {
+	for tntID, th := range mst {
 		result[i] = th
+		for filterID := range filterMap[tntID] {
+			result[i].FilterIDs = append(result[i].FilterIDs, filterID)
+		}
+		for context := range contextMap[tntID] {
+			result[i].Contexts = append(result[i].Contexts, context)
+		}
 		i++
 	}
 	return
@@ -2761,6 +2831,8 @@ type TPChargers []*TPCharger
 
 func (tps TPChargers) AsTPChargers() (result []*utils.TPChargerProfile) {
 	mst := make(map[string]*utils.TPChargerProfile)
+	filterMap := make(map[string]utils.StringMap)
+	attributeMap := make(map[string]utils.StringMap)
 	for _, tp := range tps {
 		tpCPP, found := mst[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]
 		if !found {
@@ -2784,22 +2856,38 @@ func (tps TPChargers) AsTPChargers() (result []*utils.TPChargerProfile) {
 			}
 		}
 		if tp.FilterIDs != "" {
+			if _, has := filterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]; !has {
+				filterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(utils.StringMap)
+			}
 			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
-			tpCPP.FilterIDs = append(tpCPP.FilterIDs, filterSplit...)
+			for _, filter := range filterSplit {
+				filterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][filter] = true
+			}
 		}
 		if tp.RunID != "" {
 			tpCPP.RunID = tp.RunID
 		}
 		if tp.AttributeIDs != "" {
+			if _, has := attributeMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]; !has {
+				attributeMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(utils.StringMap)
+			}
 			attributeSplit := strings.Split(tp.AttributeIDs, utils.INFIELD_SEP)
-			tpCPP.AttributeIDs = append(tpCPP.AttributeIDs, attributeSplit...)
+			for _, attribute := range attributeSplit {
+				attributeMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][attribute] = true
+			}
 		}
 		mst[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = tpCPP
 	}
 	result = make([]*utils.TPChargerProfile, len(mst))
 	i := 0
-	for _, tp := range mst {
+	for tntID, tp := range mst {
 		result[i] = tp
+		for filterID := range filterMap[tntID] {
+			result[i].FilterIDs = append(result[i].FilterIDs, filterID)
+		}
+		for attributeID := range attributeMap[tntID] {
+			result[i].AttributeIDs = append(result[i].AttributeIDs, attributeID)
+		}
 		i++
 	}
 	return
