@@ -506,6 +506,9 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	if !reflect.DeepEqual(cgrCfg.CDRSRaterConns, []*HaPoolConfig{&HaPoolConfig{Address: "*internal"}}) {
 		t.Error(cgrCfg.CDRSRaterConns)
 	}
+	if !reflect.DeepEqual(cgrCfg.CDRSChargerSConns, eHaPoolCfg) {
+		t.Error(cgrCfg.CDRSChargerSConns)
+	}
 	if !reflect.DeepEqual(cgrCfg.CDRSPubSubSConns, eHaPoolCfg) {
 		t.Error(cgrCfg.CDRSPubSubSConns)
 	}

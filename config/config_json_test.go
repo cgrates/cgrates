@@ -277,6 +277,7 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		Extra_fields:          &[]string{},
 		Store_cdrs:            utils.BoolPointer(true),
 		Sessions_cost_retries: utils.IntPointer(5),
+		Chargers_conns:        &[]*HaPoolJsonCfg{},
 		Rals_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer("*internal"),

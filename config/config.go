@@ -327,6 +327,7 @@ type CGRConfig struct {
 	CDRSStoreCdrs            bool              // store cdrs in storDb
 	CDRScdrAccountSummary    bool
 	CDRSSMCostRetries        int
+	CDRSChargerSConns        []*HaPoolConfig
 	CDRSRaterConns           []*HaPoolConfig // address where to reach the Rater for cost calculation: <""|internal|x.y.z.y:1234>
 	CDRSPubSubSConns         []*HaPoolConfig // address where to reach the pubsub service: <""|internal|x.y.z.y:1234>
 	CDRSAttributeSConns      []*HaPoolConfig // address where to reach the users service: <""|internal|x.y.z.y:1234>
@@ -417,6 +418,11 @@ func (self *CGRConfig) checkConfigSanity() error {
 	}
 	// CDRServer checks
 	if self.CDRSEnabled {
+		for _, conn := range self.CDRSChargerSConns {
+			if conn.Address == utils.MetaInternal && !self.chargerSCfg.Enabled {
+				return errors.New("ChargerS not enabled but requested by CDRS component.")
+			}
+		}
 		for _, cdrsRaterConn := range self.CDRSRaterConns {
 			if cdrsRaterConn.Address == utils.MetaInternal && !self.RALsEnabled {
 				return errors.New("RALs not enabled but requested by CDRS component.")
@@ -1179,6 +1185,13 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 		if jsnCdrsCfg.Sessions_cost_retries != nil {
 			self.CDRSSMCostRetries = *jsnCdrsCfg.Sessions_cost_retries
+		}
+		if jsnCdrsCfg.Chargers_conns != nil {
+			self.CDRSChargerSConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Chargers_conns))
+			for idx, jsnHaCfg := range *jsnCdrsCfg.Chargers_conns {
+				self.CDRSChargerSConns[idx] = NewDfltHaPoolConfig()
+				self.CDRSChargerSConns[idx].loadFromJsonCfg(jsnHaCfg)
+			}
 		}
 		if jsnCdrsCfg.Rals_conns != nil {
 			self.CDRSRaterConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Rals_conns))

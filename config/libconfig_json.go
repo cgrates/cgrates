@@ -115,6 +115,7 @@ type CdrsJsonCfg struct {
 	Extra_fields          *[]string
 	Store_cdrs            *bool
 	Sessions_cost_retries *int
+	Chargers_conns        *[]*HaPoolJsonCfg
 	Rals_conns            *[]*HaPoolJsonCfg
 	Pubsubs_conns         *[]*HaPoolJsonCfg
 	Attributes_conns      *[]*HaPoolJsonCfg

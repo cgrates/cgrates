@@ -69,7 +69,7 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, rater, pubsub,
-	attrs, users, aliases, cdrstats, thdS, stats rpcclient.RpcClientConnection) (*CdrServer, error) {
+	attrs, users, aliases, cdrstats, thdS, stats, chargerS rpcclient.RpcClientConnection) (*CdrServer, error) {
 	if rater != nil && reflect.ValueOf(rater).IsNil() { // Work around so we store actual nil instead of nil interface value, faster to check here than in CdrServer code
 		rater = nil
 	}
@@ -94,9 +94,13 @@ func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, r
 	if stats != nil && reflect.ValueOf(stats).IsNil() {
 		stats = nil
 	}
+	if chargerS != nil && reflect.ValueOf(chargerS).IsNil() {
+		chargerS = nil
+	}
 	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, dm: dm,
 		rals: rater, pubsub: pubsub, users: users, aliases: aliases,
-		cdrstats: cdrstats, stats: stats, thdS: thdS, guard: guardian.Guardian,
+		cdrstats: cdrstats, stats: stats, thdS: thdS,
+		chargerS: chargerS, guard: guardian.Guardian,
 		httpPoster: NewHTTPPoster(cgrCfg.HttpSkipTlsVerify, cgrCfg.ReplyTimeout)}, nil
 }
 
@@ -112,6 +116,7 @@ type CdrServer struct {
 	cdrstats      rpcclient.RpcClientConnection
 	thdS          rpcclient.RpcClientConnection
 	stats         rpcclient.RpcClientConnection
+	chargerS      rpcclient.RpcClientConnection
 	guard         *guardian.GuardianLocker
 	responseCache *utils.ResponseCache
 	httpPoster    *HTTPPoster // used for replication
