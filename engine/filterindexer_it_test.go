@@ -496,10 +496,14 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		Contexts: []string{"con1", "con2"},
 		Attributes: []*Attribute{
 			&Attribute{
-				FieldName:  "FN1",
-				Initial:    "Init1",
-				Substitute: "Val1",
-				Append:     true,
+				FieldName: "FN1",
+				Initial:   "Init1",
+				Substitute: utils.RSRFields{
+					&utils.RSRField{
+						Id: "Val1",
+					},
+				},
+				Append: true,
 			},
 		},
 		Weight: 20,

@@ -27,7 +27,7 @@ import (
 type Attribute struct {
 	FieldName  string
 	Initial    interface{}
-	Substitute interface{}
+	Substitute utils.RSRFields
 	Append     bool
 }
 
