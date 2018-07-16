@@ -97,6 +97,7 @@ func (self *FsConnConfig) loadFromJsonCfg(jsnCfg *FsConnJsonCfg) error {
 type SessionSCfg struct {
 	Enabled                 bool
 	ListenBijson            string
+	ChargerSConns           []*HaPoolConfig
 	RALsConns               []*HaPoolConfig
 	ResSConns               []*HaPoolConfig
 	ThreshSConns            []*HaPoolConfig
@@ -127,6 +128,13 @@ func (self *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) error {
 	}
 	if jsnCfg.Listen_bijson != nil {
 		self.ListenBijson = *jsnCfg.Listen_bijson
+	}
+	if jsnCfg.Chargers_conns != nil {
+		self.ChargerSConns = make([]*HaPoolConfig, len(*jsnCfg.Chargers_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Chargers_conns {
+			self.ChargerSConns[idx] = NewDfltHaPoolConfig()
+			self.ChargerSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
 	}
 	if jsnCfg.Rals_conns != nil {
 		self.RALsConns = make([]*HaPoolConfig, len(*jsnCfg.Rals_conns))

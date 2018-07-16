@@ -600,8 +600,9 @@ func TestCgrCfgJSONDefaultsCdreProfiles(t *testing.T) {
 
 func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 	eSessionSCfg := &SessionSCfg{
-		Enabled:      false,
-		ListenBijson: "127.0.0.1:2014",
+		Enabled:       false,
+		ListenBijson:  "127.0.0.1:2014",
+		ChargerSConns: []*HaPoolConfig{},
 		RALsConns: []*HaPoolConfig{
 			&HaPoolConfig{Address: "*internal"}},
 		CDRsConns: []*HaPoolConfig{

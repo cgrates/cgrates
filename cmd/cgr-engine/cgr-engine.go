@@ -135,10 +135,20 @@ func startCdrc(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConne
 
 func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, internalThresholdSChan,
 	internalStatSChan, internalSupplierSChan, internalAttrSChan,
-	internalCDRSChan chan rpcclient.RpcClientConnection, server *utils.Server, exitChan chan bool) {
+	internalCDRSChan, internalChargerSChan chan rpcclient.RpcClientConnection, server *utils.Server, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS Session service.")
 	var err error
-	var ralsConns, resSConns, threshSConns, statSConns, suplSConns, attrSConns, cdrsConn *rpcclient.RpcClientPool
+	var ralsConns, resSConns, threshSConns, statSConns, suplSConns, attrSConns, cdrsConn, chargerSConn *rpcclient.RpcClientPool
+	if len(cfg.SessionSCfg().ChargerSConns) != 0 {
+		chargerSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
+			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.SessionSCfg().ChargerSConns, internalChargerSChan, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s", utils.SessionS, utils.ChargerS, err.Error()))
+			exitChan <- true
+			return
+		}
+	}
 	if len(cfg.SessionSCfg().RALsConns) != 0 {
 		ralsConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
 			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
@@ -216,7 +226,7 @@ func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, in
 		return
 	}
 	sm := sessions.NewSMGeneric(cfg, ralsConns, resSConns, threshSConns, statSConns,
-		suplSConns, attrSConns, cdrsConn, smgReplConns, cfg.DefaultTimezone)
+		suplSConns, attrSConns, cdrsConn, chargerSConn, smgReplConns, cfg.DefaultTimezone)
 	if err = sm.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.SessionS, err))
 	}
@@ -1232,8 +1242,10 @@ func main() {
 
 	// Start SM-Generic
 	if cfg.SessionSCfg().Enabled {
-		go startSessionS(internalSMGChan, internalRaterChan, internalRsChan, internalThresholdSChan,
-			internalStatSChan, internalSupplierSChan, internalAttributeSChan, internalCdrSChan, server, exitChan)
+		go startSessionS(internalSMGChan, internalRaterChan,
+			internalRsChan, internalThresholdSChan,
+			internalStatSChan, internalSupplierSChan, internalAttributeSChan,
+			internalCdrSChan, internalChargerSChan, server, exitChan)
 	}
 	// Start FreeSWITCHAgent
 	if cfg.FsAgentCfg().Enabled {

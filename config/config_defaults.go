@@ -296,6 +296,7 @@ const CGRATES_CFG_JSON = `
 "sessions": {
 	"enabled": false,						// starts session manager service: <true|false>
 	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
+	"chargers_conns": [],					// address where to reach the charger service, empty to disable charger functionality: <""|*internal|x.y.z.y:1234>
 	"rals_conns": [
 		{"address": "*internal"}			// address where to reach the RALs <""|*internal|127.0.0.1:2013>
 	],

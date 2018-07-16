@@ -526,6 +526,11 @@ func (self *CGRConfig) checkConfigSanity() error {
 		if len(self.sessionSCfg.RALsConns) == 0 {
 			return errors.New("<SessionS> RALs definition is mandatory!")
 		}
+		for _, conn := range self.sessionSCfg.ChargerSConns {
+			if conn.Address == utils.MetaInternal && !self.chargerSCfg.Enabled {
+				return errors.New("<SessionS> ChargerS not enabled but requested")
+			}
+		}
 		for _, smgRALsConn := range self.sessionSCfg.RALsConns {
 			if smgRALsConn.Address == utils.MetaInternal && !self.RALsEnabled {
 				return errors.New("<SessionS> RALs not enabled but requested by SMGeneric component.")

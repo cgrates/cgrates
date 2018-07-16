@@ -214,6 +214,7 @@ type CdrcJsonCfg struct {
 type SessionSJsonCfg struct {
 	Enabled                   *bool
 	Listen_bijson             *string
+	Chargers_conns            *[]*HaPoolJsonCfg
 	Rals_conns                *[]*HaPoolJsonCfg
 	Resources_conns           *[]*HaPoolJsonCfg
 	Thresholds_conns          *[]*HaPoolJsonCfg
