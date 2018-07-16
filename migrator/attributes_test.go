@@ -65,7 +65,7 @@ func Testv1AttributeProfileAsAttributeProfile(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  "FL1",
 				Initial:    "In1",
-				Substitute: "Al1",
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "Al1"}},
 				Append:     true,
 			},
 		},

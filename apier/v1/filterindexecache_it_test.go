@@ -60,14 +60,14 @@ var sTestsFilterIndexesSV1Ca = []func(t *testing.T){
 	testV1FIdxCaUpdateStatQueueProfileFromTP,
 	testV1FIdxCaRemoveStatQueueProfile,
 
-	testFlush,
-	testV1FIdxCaProcessAttributeProfileEventWithNotFound,
-	testV1FIdxCaSetAttributeProfile,
-	testV1FIdxCaFromFolder,
-	testV1FIdxCaGetAttributeProfileFromTP,
-	testV1FIdxCaUpdateAttributeProfile,
-	testV1FIdxCaUpdateAttributeProfileFromTP,
-	testV1FIdxCaRemoveAttributeProfile,
+	// testFlush,
+	// testV1FIdxCaProcessAttributeProfileEventWithNotFound,
+	// testV1FIdxCaSetAttributeProfile,
+	// testV1FIdxCaFromFolder,
+	// testV1FIdxCaGetAttributeProfileFromTP,
+	// testV1FIdxCaUpdateAttributeProfile,
+	// testV1FIdxCaUpdateAttributeProfileFromTP,
+	// testV1FIdxCaRemoveAttributeProfile,
 
 	testFlush,
 	testV1FIdxCaGetResourceProfileWithNotFound,
@@ -952,6 +952,7 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 	// }
 }
 
+/*
 //AttributeProfile
 func testV1FIdxCaProcessAttributeProfileEventWithNotFound(t *testing.T) {
 	ev := &utils.CGREvent{
@@ -1316,6 +1317,7 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 		t.Error(err)
 	}
 }
+*/
 
 // ResourceProfile
 func testV1FIdxCaGetResourceProfileWithNotFound(t *testing.T) {

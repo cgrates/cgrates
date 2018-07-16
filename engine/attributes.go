@@ -166,8 +166,8 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (rply *Att
 		if !has {
 			anyInitial, hasAny := initialMp[utils.ANY]
 			if hasAny && anyInitial.Append &&
-				initialMp[utils.ANY].Substitute != interface{}(utils.META_NONE) {
-				rply.CGREvent.Event[fldName] = anyInitial.Substitute
+				initialMp[utils.ANY].Substitute.Id() != utils.META_NONE {
+				rply.CGREvent.Event[fldName] = anyInitial.Substitute.Id()
 			}
 			rply.AlteredFields = append(rply.AlteredFields, fldName)
 			continue
@@ -177,10 +177,10 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (rply *Att
 			attrVal, has = initialMp[utils.ANY]
 		}
 		if has {
-			if attrVal.Substitute == interface{}(utils.META_NONE) {
+			if attrVal.Substitute.Id() == utils.META_NONE {
 				delete(rply.CGREvent.Event, fldName)
 			} else {
-				rply.CGREvent.Event[fldName] = attrVal.Substitute
+				rply.CGREvent.Event[fldName] = attrVal.Substitute.Id()
 			}
 			rply.AlteredFields = append(rply.AlteredFields, fldName)
 		}

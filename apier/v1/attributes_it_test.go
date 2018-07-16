@@ -165,13 +165,13 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.Account,
 				Initial:    utils.ANY,
-				Substitute: "1001",
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001"}},
 				Append:     false,
 			},
 			&engine.Attribute{
 				FieldName:  utils.Subject,
 				Initial:    utils.ANY,
-				Substitute: "1001",
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001"}},
 				Append:     true,
 			},
 		},
@@ -208,7 +208,7 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.Account,
 				Initial:    utils.ANY,
-				Substitute: "1001",
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001"}},
 				Append:     false,
 			},
 		},
@@ -255,7 +255,7 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.Account,
 				Initial:    utils.ANY,
-				Substitute: "1001",
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001"}},
 				Append:     false,
 			},
 		},
@@ -355,13 +355,13 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.Account,
 				Initial:    "1008",
-				Substitute: "1001",
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001"}},
 				Append:     false,
 			},
 			&engine.Attribute{
 				FieldName:  utils.Subject,
 				Initial:    utils.ANY,
-				Substitute: "*none",
+				Substitute: utils.RSRFields{&utils.RSRField{Id: utils.META_NONE}},
 				Append:     true,
 			},
 		},
@@ -434,13 +434,13 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.Account,
 				Initial:    "1008",
-				Substitute: "1001",
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001"}},
 				Append:     false,
 			},
 			&engine.Attribute{
 				FieldName:  utils.Subject,
 				Initial:    utils.ANY,
-				Substitute: utils.META_NONE,
+				Substitute: utils.RSRFields{&utils.RSRField{Id: utils.META_NONE}},
 				Append:     false,
 			},
 		},
@@ -512,13 +512,13 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.Account,
 				Initial:    "1008",
-				Substitute: "1001",
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001"}},
 				Append:     false,
 			},
 			&engine.Attribute{
 				FieldName:  utils.Subject,
 				Initial:    "1008",
-				Substitute: utils.META_NONE,
+				Substitute: utils.RSRFields{&utils.RSRField{Id: utils.META_NONE}},
 				Append:     false,
 			},
 		},
@@ -581,7 +581,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  "FL1",
 				Initial:    "In1",
-				Substitute: "Al1",
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "Al1"}},
 				Append:     true,
 			},
 		},
@@ -607,13 +607,13 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 		&engine.Attribute{
 			FieldName:  "FL1",
 			Initial:    "In1",
-			Substitute: "Al1",
+			Substitute: utils.RSRFields{&utils.RSRField{Id: "Al1"}},
 			Append:     true,
 		},
 		&engine.Attribute{
 			FieldName:  "FL2",
 			Initial:    "In2",
-			Substitute: "Al2",
+			Substitute: utils.RSRFields{&utils.RSRField{Id: "Al2"}},
 			Append:     false,
 		},
 	}

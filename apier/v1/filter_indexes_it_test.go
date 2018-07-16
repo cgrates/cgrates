@@ -75,11 +75,11 @@ var sTestsFilterIndexesSV1 = []func(t *testing.T){
 	testV1FIdxSecondComputeSupplierProfileIndexes,
 	testV1FIdxRemoveSupplierProfile,
 
-	testV1FIdxSetAttributeProfileIndexes,
-	testV1FIdxComputeAttributeProfileIndexes,
-	testV1FIdxSetSecondAttributeProfileIndexes,
-	testV1FIdxSecondComputeAttributeProfileIndexes,
-	testV1FIdxRemoveAttributeProfile,
+	// testV1FIdxSetAttributeProfileIndexes,
+	// testV1FIdxComputeAttributeProfileIndexes,
+	// testV1FIdxSetSecondAttributeProfileIndexes,
+	// testV1FIdxSecondComputeAttributeProfileIndexes,
+	// testV1FIdxRemoveAttributeProfile,
 
 	testFlush,
 	testV1FIdxPopulateDatabase,
@@ -1371,6 +1371,7 @@ func testV1FIdxRemoveSupplierProfile(t *testing.T) {
 	}
 }
 
+/*
 //AttributeProfile
 func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 	tenant := "cgrates.org"
@@ -1663,6 +1664,7 @@ func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 		t.Error(err)
 	}
 }
+*/
 
 func testV1FIdxPopulateDatabase(t *testing.T) {
 	var result string

@@ -101,22 +101,25 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREvent) (rply []*AttrSProc
 	if cPs, err = cS.matchingChargerProfilesForEvent(cgrEv); err != nil {
 		return nil, err
 	}
-	for _, cP := range cPs {
-		cgrEv.Event[utils.RunID] = cP.RunID
+	rply = make([]*AttrSProcessEventReply, len(cPs))
+
+	for i, cP := range cPs {
+		clonedEv := cgrEv.Clone()
+		clonedEv.Event[utils.RunID] = cP.RunID
 		if len(cP.AttributeIDs) != 0 { // Attributes should process the event
 			if cS.attrS == nil {
 				return nil, errors.New("no connection to AttributeS")
 			}
-			if cgrEv.Context == nil {
-				cgrEv.Context = utils.StringPointer(utils.MetaChargers)
+			if clonedEv.Context == nil {
+				clonedEv.Context = utils.StringPointer(utils.MetaChargers)
 			}
-			var evRply AttrSProcessEventReply
+			var evReply AttrSProcessEventReply
 			if err = cS.attrS.Call(utils.AttributeSv1ProcessEvent,
-				&AttrArgsProcessEvent{cP.AttributeIDs, *cgrEv},
-				&evRply); err != nil {
+				&AttrArgsProcessEvent{cP.AttributeIDs, *clonedEv},
+				&evReply); err != nil {
 				return nil, err
 			}
-			rply = append(rply, &evRply)
+			rply[i] = &evReply
 		}
 	}
 	return

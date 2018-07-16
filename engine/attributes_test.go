@@ -34,10 +34,9 @@ var (
 	mapSubstitutes         = map[string]map[interface{}]*Attribute{
 		utils.Account: map[interface{}]*Attribute{
 			utils.META_ANY: &Attribute{
-				FieldName:  utils.Account,
-				Initial:    utils.META_ANY,
-				Substitute: "1010",
-				Append:     true,
+				FieldName: utils.Account,
+				Initial:   utils.META_ANY,
+				Append:    true,
 			},
 		},
 	}
@@ -99,10 +98,9 @@ var (
 			},
 			Attributes: []*Attribute{
 				&Attribute{
-					FieldName:  utils.Account,
-					Initial:    utils.META_ANY,
-					Substitute: "1010",
-					Append:     true,
+					FieldName: utils.Account,
+					Initial:   utils.META_ANY,
+					Append:    true,
 				},
 			},
 			Weight:     20,
@@ -119,10 +117,9 @@ var (
 			},
 			Attributes: []*Attribute{
 				&Attribute{
-					FieldName:  utils.Account,
-					Initial:    utils.META_ANY,
-					Substitute: "1010",
-					Append:     true,
+					FieldName: utils.Account,
+					Initial:   utils.META_ANY,
+					Append:    true,
 				},
 			},
 			Weight:     20,
@@ -139,10 +136,9 @@ var (
 			},
 			Attributes: []*Attribute{
 				&Attribute{
-					FieldName:  utils.Account,
-					Initial:    utils.META_ANY,
-					Substitute: "1010",
-					Append:     true,
+					FieldName: utils.Account,
+					Initial:   utils.META_ANY,
+					Append:    true,
 				},
 			},
 			attributes: mapSubstitutes,
@@ -159,10 +155,9 @@ var (
 			},
 			Attributes: []*Attribute{
 				&Attribute{
-					FieldName:  utils.Account,
-					Initial:    utils.META_ANY,
-					Substitute: "1010",
-					Append:     true,
+					FieldName: utils.Account,
+					Initial:   utils.META_ANY,
+					Append:    true,
 				},
 			},
 			attributes: mapSubstitutes,
@@ -176,6 +171,15 @@ func TestAttributePopulateAttrService(t *testing.T) {
 	if err := utils.Clone(expTimeAttributes, &cloneExpTimeAttributes); err != nil {
 		t.Error(err)
 	}
+	rsrFields, err := utils.ParseRSRFields("^1010", utils.INFIELD_SEP)
+	if err != nil {
+		t.Error(err)
+	}
+	mapSubstitutes[utils.Account][utils.META_ANY].Substitute = rsrFields
+	atrPs[0].Attributes[0].Substitute = rsrFields
+	atrPs[1].Attributes[0].Substitute = rsrFields
+	atrPs[2].Attributes[0].Substitute = rsrFields
+	atrPs[3].Attributes[0].Substitute = rsrFields
 	data, _ := NewMapStorage()
 	dmAtr = NewDataManager(data)
 	defaultCfg, err := config.NewDefaultCGRConfig()
@@ -463,14 +467,20 @@ func TestAttributeIndexer(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			&Attribute{
-				FieldName:  utils.Account,
-				Initial:    utils.META_ANY,
-				Substitute: "1001",
-				Append:     true,
+				FieldName: utils.Account,
+				Initial:   utils.META_ANY,
+				Append:    true,
 			},
 		},
 		Weight: 20,
 	}
+	//populate Substitute from attributes
+	rsrFields, err := utils.ParseRSRFields("^1010", utils.INFIELD_SEP)
+	if err != nil {
+		t.Error(err)
+	}
+	attrPrf.Attributes[0].Substitute = rsrFields
+
 	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
 		t.Error(err)
 	}
@@ -531,30 +541,5 @@ func TestAttributeIndexer(t *testing.T) {
 	if _, err := dmAtr.GetFilterReverseIndexes(
 		utils.PrefixToRevIndexCache[rfi1.itemType], rfi1.dbKeySuffix, nil); err != utils.ErrNotFound {
 		t.Error(err)
-	}
-}
-
-func TestAttributeMatchWithIndexFalse(t *testing.T) {
-	attrService.filterS.cfg.FilterSCfg().IndexedSelects = false
-	atrp, err := attrService.matchingAttributeProfilesForEvent(attrEvs[0])
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	if !reflect.DeepEqual(atrPs[0], atrp[0]) {
-		t.Errorf("Expecting: %+v, received: %+v ", atrPs[0], atrp[0])
-	}
-	atrp, err = attrService.matchingAttributeProfilesForEvent(attrEvs[1])
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	if !reflect.DeepEqual(atrPs[1], atrp[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(atrPs), utils.ToJSON(atrp))
-	}
-	atrp, err = attrService.matchingAttributeProfilesForEvent(attrEvs[2])
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	if !reflect.DeepEqual(atrPs[2], atrp[0]) {
-		t.Errorf("Expecting: %+v, received: %+v ", atrPs[2], atrp[0])
 	}
 }

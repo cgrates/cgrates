@@ -2806,17 +2806,25 @@ func APItoAttributeProfile(tpTH *utils.TPAttributeProfile, timezone string) (th 
 	th.attributes = make(map[string]map[interface{}]*Attribute)
 	for _, reqAttr := range tpTH.Attributes {
 		th.Attributes = append(th.Attributes, &Attribute{
-			Append:     reqAttr.Append,
-			FieldName:  reqAttr.FieldName,
-			Initial:    reqAttr.Initial,
-			Substitute: reqAttr.Substitute,
+			Append:    reqAttr.Append,
+			FieldName: reqAttr.FieldName,
+			Initial:   reqAttr.Initial,
+			Substitute: utils.RSRFields{
+				&utils.RSRField{
+					Id: reqAttr.Substitute,
+				},
+			},
 		})
 		th.attributes[reqAttr.FieldName] = make(map[interface{}]*Attribute)
 		th.attributes[reqAttr.FieldName][reqAttr.Initial] = &Attribute{
-			FieldName:  reqAttr.FieldName,
-			Initial:    reqAttr.Initial,
-			Substitute: reqAttr.Substitute,
-			Append:     reqAttr.Append,
+			FieldName: reqAttr.FieldName,
+			Initial:   reqAttr.Initial,
+			Substitute: utils.RSRFields{
+				&utils.RSRField{
+					Id: reqAttr.Substitute,
+				},
+			},
+			Append: reqAttr.Append,
 		}
 	}
 	if tpTH.ActivationInterval != nil {

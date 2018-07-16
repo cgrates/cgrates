@@ -81,9 +81,6 @@ func (m *Migrator) migrateV1Attributes() (err error) {
 		}
 		if v1Attr != nil {
 			attrPrf := v1Attr.AsAttributeProfile()
-			if err != nil {
-				return err
-			}
 			if m.dryRun != true {
 				if err := m.dmOut.DataManager().DataDB().SetAttributeProfileDrv(attrPrf); err != nil {
 					return err
@@ -152,11 +149,10 @@ func (v1AttrPrf v1AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 	for _, mp := range v1AttrPrf.Attributes {
 		for _, attr := range mp {
 			initIface := utils.StringToInterface(attr.Initial)
-			substituteIface := utils.StringToInterface(attr.Substitute)
 			attrPrf.Attributes = append(attrPrf.Attributes, &engine.Attribute{
 				FieldName:  attr.FieldName,
 				Initial:    initIface,
-				Substitute: substituteIface,
+				Substitute: utils.RSRFields{&utils.RSRField{Id: attr.Substitute}},
 				Append:     attr.Append,
 			})
 		}
