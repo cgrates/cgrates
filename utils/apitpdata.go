@@ -1303,6 +1303,7 @@ type ArgsComputeFilterIndexes struct {
 	StatIDs      *[]string
 	SupplierIDs  *[]string
 	ThresholdIDs *[]string
+	ChargerIDs   *[]string
 }
 
 // AsActivationTime converts TPActivationInterval into ActivationInterval

@@ -941,7 +941,7 @@ func startDispatcherService(internalDispatcherSChan, internalRaterChan chan rpcc
 			v1.NewDispatcherSessionSv1(dspS))
 	}
 	if !cfg.ChargerSCfg().Enabled && len(cfg.DispatcherSCfg().ChargerSConns) != 0 {
-		server.RpcRegisterName(utils.SessionSv1,
+		server.RpcRegisterName(utils.ChargerSv1,
 			v1.NewDispatcherChargerSv1(dspS))
 	}
 }

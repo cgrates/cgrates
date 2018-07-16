@@ -37,7 +37,7 @@ func matchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 	defer guardian.Guardian.UnguardIDs(lockID)
 	itemIDs = make(utils.StringMap)
 	if !indexedSelects {
-		keysWithID, err := dm.DataDB().GetKeysForPrefix(utils.IndexesToPrefix[cacheID])
+		keysWithID, err := dm.DataDB().GetKeysForPrefix(utils.CacheIndexesToPrefix[cacheID])
 		if err != nil {
 			return nil, err
 		}

@@ -35,7 +35,7 @@ func (dS *DispatcherService) ChargerSv1GetChargersForEvent(args *CGREvWithApiKey
 	if dS.chargerS == nil {
 		return utils.NewErrNotConnected(utils.ChargerS)
 	}
-	if err = dS.authorize(utils.AttributeSv1GetAttributeForEvent, args.CGREvent.Tenant,
+	if err = dS.authorize(utils.ChargerSv1GetChargersForEvent, args.CGREvent.Tenant,
 		args.APIKey, args.CGREvent.Time); err != nil {
 		return
 	}
@@ -47,7 +47,7 @@ func (dS *DispatcherService) ChargerSv1ProcessEvent(args *CGREvWithApiKey,
 	if dS.chargerS == nil {
 		return utils.NewErrNotConnected(utils.ChargerS)
 	}
-	if err = dS.authorize(utils.AttributeSv1GetAttributeForEvent, args.CGREvent.Tenant,
+	if err = dS.authorize(utils.ChargerSv1ProcessEvent, args.CGREvent.Tenant,
 		args.APIKey, args.CGREvent.Time); err != nil {
 		return
 	}

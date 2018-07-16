@@ -322,6 +322,11 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	if err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
+	//ChargerProfile  Indexes
+	cppIndexes, err := self.computeChargerIndexes(args.Tenant, args.ChargerIDs, transactionID)
+	if err != nil && err != utils.ErrNotFound {
+		return utils.APIErrorHandler(err)
+	}
 	//Now we move from tmpKey to the right key for each type
 	//ThresholdProfile Indexes
 	if thdsIndexers != nil {
@@ -340,7 +345,7 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	if sqpIndexers != nil {
 		if err := sqpIndexers.StoreIndexes(true, transactionID); err != nil {
 			for _, id := range *args.StatIDs {
-				if err := thdsIndexers.RemoveItemFromIndex(id); err != nil {
+				if err := sqpIndexers.RemoveItemFromIndex(id); err != nil {
 					return err
 				}
 			}
@@ -351,7 +356,7 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	if rsIndexes != nil {
 		if err := rsIndexes.StoreIndexes(true, transactionID); err != nil {
 			for _, id := range *args.ResourceIDs {
-				if err := thdsIndexers.RemoveItemFromIndex(id); err != nil {
+				if err := rsIndexes.RemoveItemFromIndex(id); err != nil {
 					return err
 				}
 			}
@@ -362,7 +367,7 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	if sppIndexes != nil {
 		if err := sppIndexes.StoreIndexes(true, transactionID); err != nil {
 			for _, id := range *args.SupplierIDs {
-				if err := thdsIndexers.RemoveItemFromIndex(id); err != nil {
+				if err := sppIndexes.RemoveItemFromIndex(id); err != nil {
 					return err
 				}
 			}
@@ -373,7 +378,18 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	if attrIndexes != nil {
 		if err := attrIndexes.StoreIndexes(true, transactionID); err != nil {
 			for _, id := range *args.AttributeIDs {
-				if err := thdsIndexers.RemoveItemFromIndex(id); err != nil {
+				if err := attrIndexes.RemoveItemFromIndex(id); err != nil {
+					return err
+				}
+			}
+			return err
+		}
+	}
+	//ChargerProfile Indexes
+	if cppIndexes != nil {
+		if err := attrIndexes.StoreIndexes(true, transactionID); err != nil {
+			for _, id := range *args.ChargerIDs {
+				if err := cppIndexes.RemoveItemFromIndex(id); err != nil {
 					return err
 				}
 			}
@@ -384,7 +400,8 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	return nil
 }
 
-func (self *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string, transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
+func (self *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string,
+	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
 	var thresholdIDs []string
 	thdsIndexers := engine.NewFilterIndexer(self.DataManager, utils.ThresholdProfilePrefix, tenant)
 	if thIDs == nil {
@@ -450,7 +467,8 @@ func (self *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string, tra
 	return thdsIndexers, nil
 }
 
-func (self *ApierV1) computeAttributeIndexes(tenant string, attrIDs *[]string, transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
+func (self *ApierV1) computeAttributeIndexes(tenant string, attrIDs *[]string,
+	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
 	var attributeIDs []string
 	attrIndexers := engine.NewFilterIndexer(self.DataManager, utils.AttributeProfilePrefix, tenant)
 	if attrIDs == nil {
@@ -516,7 +534,8 @@ func (self *ApierV1) computeAttributeIndexes(tenant string, attrIDs *[]string, t
 	return attrIndexers, nil
 }
 
-func (self *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string, transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
+func (self *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string,
+	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
 	var resourceIDs []string
 	rpIndexers := engine.NewFilterIndexer(self.DataManager, utils.ResourceProfilesPrefix, tenant)
 	if rsIDs == nil {
@@ -582,7 +601,8 @@ func (self *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string, tran
 	return rpIndexers, nil
 }
 
-func (self *ApierV1) computeStatIndexes(tenant string, stIDs *[]string, transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
+func (self *ApierV1) computeStatIndexes(tenant string, stIDs *[]string,
+	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
 	var statIDs []string
 	sqpIndexers := engine.NewFilterIndexer(self.DataManager, utils.StatQueueProfilePrefix, tenant)
 	if stIDs == nil {
@@ -648,7 +668,8 @@ func (self *ApierV1) computeStatIndexes(tenant string, stIDs *[]string, transact
 	return sqpIndexers, nil
 }
 
-func (self *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string, transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
+func (self *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string,
+	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
 	var supplierIDs []string
 	sppIndexers := engine.NewFilterIndexer(self.DataManager, utils.SupplierProfilePrefix, tenant)
 	if sppIDs == nil {
@@ -712,4 +733,71 @@ func (self *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string, tra
 		}
 	}
 	return sppIndexers, nil
+}
+
+func (self *ApierV1) computeChargerIndexes(tenant string, cppIDs *[]string,
+	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
+	var chargerIDs []string
+	cppIndexes := engine.NewFilterIndexer(self.DataManager, utils.ChargerProfilePrefix, tenant)
+	if cppIDs == nil {
+		ids, err := self.DataManager.DataDB().GetKeysForPrefix(utils.ChargerProfilePrefix)
+		if err != nil {
+			return nil, err
+		}
+		for _, id := range ids {
+			chargerIDs = append(chargerIDs, strings.Split(id, utils.CONCATENATED_KEY_SEP)[1])
+		}
+	} else {
+		chargerIDs = *cppIDs
+		transactionID = utils.NonTransactional
+	}
+	for _, id := range chargerIDs {
+		cpp, err := self.DataManager.GetChargerProfile(tenant, id, false, utils.NonTransactional)
+		if err != nil {
+			return nil, err
+		}
+		fltrIDs := make([]string, len(cpp.FilterIDs))
+		for i, fltrID := range cpp.FilterIDs {
+			fltrIDs[i] = fltrID
+		}
+		if len(fltrIDs) == 0 {
+			fltrIDs = []string{utils.META_NONE}
+		}
+		for _, fltrID := range fltrIDs {
+			var fltr *engine.Filter
+			if fltrID == utils.META_NONE {
+				fltr = &engine.Filter{
+					Tenant: cpp.Tenant,
+					ID:     cpp.ID,
+					Rules: []*engine.FilterRule{
+						&engine.FilterRule{
+							Type:      utils.META_NONE,
+							FieldName: utils.META_ANY,
+							Values:    []string{utils.META_ANY},
+						},
+					},
+				}
+			} else if fltr, err = self.DataManager.GetFilter(cpp.Tenant, fltrID,
+				false, utils.NonTransactional); err != nil {
+				if err == utils.ErrNotFound {
+					err = fmt.Errorf("broken reference to filter: %+v for charger: %+v",
+						fltrID, cpp)
+				}
+				return nil, err
+			} else {
+				cppIndexes.IndexTPFilter(engine.FilterToTPFilter(fltr), cpp.ID)
+			}
+		}
+	}
+	if transactionID == utils.NonTransactional {
+		if err := cppIndexes.StoreIndexes(true, transactionID); err != nil {
+			return nil, err
+		}
+		return nil, nil
+	} else {
+		if err := cppIndexes.StoreIndexes(false, transactionID); err != nil {
+			return nil, err
+		}
+	}
+	return cppIndexes, nil
 }
