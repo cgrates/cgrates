@@ -43,7 +43,7 @@ func (dS *DispatcherService) ChargerSv1GetChargersForEvent(args *CGREvWithApiKey
 }
 
 func (dS *DispatcherService) ChargerSv1ProcessEvent(args *CGREvWithApiKey,
-	reply *[]*utils.CGREvent) (err error) {
+	reply *[]*engine.AttrSProcessEventReply) (err error) {
 	if dS.chargerS == nil {
 		return utils.NewErrNotConnected(utils.ChargerS)
 	}

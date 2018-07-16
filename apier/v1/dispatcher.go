@@ -22,7 +22,6 @@ import (
 	"github.com/cgrates/cgrates/dispatcher"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
-	"github.com/cgrates/cgrates/utils"
 )
 
 func NewDispatcherThresholdSv1(dps *dispatcher.DispatcherService) *DispatcherThresholdSv1 {
@@ -219,6 +218,6 @@ func (dC *DispatcherChargerSv1) GetChargersForEvent(args *dispatcher.CGREvWithAp
 
 // ProcessEvent implements ChargerSv1ProcessEvent
 func (dC *DispatcherChargerSv1) ProcessEvent(args *dispatcher.CGREvWithApiKey,
-	reply *[]*utils.CGREvent) (err error) {
+	reply *[]*engine.AttrSProcessEventReply) (err error) {
 	return dC.dC.ChargerSv1ProcessEvent(args, reply)
 }

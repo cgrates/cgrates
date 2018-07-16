@@ -96,31 +96,27 @@ func (cS *ChargerService) matchingChargerProfilesForEvent(cgrEv *utils.CGREvent)
 	return
 }
 
-func (cS *ChargerService) processEvent(cgrEv *utils.CGREvent) (cgrEvs []*utils.CGREvent, err error) {
+func (cS *ChargerService) processEvent(cgrEv *utils.CGREvent) (rply []*AttrSProcessEventReply, err error) {
 	var cPs ChargerProfiles
 	if cPs, err = cS.matchingChargerProfilesForEvent(cgrEv); err != nil {
 		return nil, err
 	}
-	cgrEvs = make([]*utils.CGREvent, len(cPs))
-	for i, cP := range cPs {
-		cgrEvs[i] = cgrEv.Clone()
-		cgrEvs[i].Event[utils.RunID] = cP.RunID
+	for _, cP := range cPs {
+		cgrEv.Event[utils.RunID] = cP.RunID
 		if len(cP.AttributeIDs) != 0 { // Attributes should process the event
 			if cS.attrS == nil {
 				return nil, errors.New("no connection to AttributeS")
 			}
-			if cgrEvs[i].Context == nil {
-				cgrEvs[i].Context = utils.StringPointer(utils.MetaChargers)
+			if cgrEv.Context == nil {
+				cgrEv.Context = utils.StringPointer(utils.MetaChargers)
 			}
-			var rply AttrSProcessEventReply
+			var evRply AttrSProcessEventReply
 			if err = cS.attrS.Call(utils.AttributeSv1ProcessEvent,
-				&AttrArgsProcessEvent{cP.AttributeIDs, *cgrEvs[i]},
-				&rply); err != nil {
+				&AttrArgsProcessEvent{cP.AttributeIDs, *cgrEv},
+				&evRply); err != nil {
 				return nil, err
 			}
-			if len(rply.AlteredFields) != 0 {
-				cgrEvs[i] = rply.CGREvent // modified event by attributeS
-			}
+			rply = append(rply, &evRply)
 		}
 	}
 	return
@@ -128,7 +124,7 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREvent) (cgrEvs []*utils.C
 
 // V1ProcessEvent will process the event received via API and return list of events forked
 func (cS *ChargerService) V1ProcessEvent(args *utils.CGREvent,
-	reply *[]*utils.CGREvent) (err error) {
+	reply *[]*AttrSProcessEventReply) (err error) {
 	if args.Event == nil {
 		return utils.NewErrMandatoryIeMissing("Event")
 	}

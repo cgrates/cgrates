@@ -95,6 +95,6 @@ func (cSv1 *ChargerSv1) GetChargersForEvent(cgrEv *utils.CGREvent,
 
 // ProcessEvent
 func (cSv1 *ChargerSv1) ProcessEvent(args *utils.CGREvent,
-	reply *[]*utils.CGREvent) error {
+	reply *[]*engine.AttrSProcessEventReply) error {
 	return cSv1.cS.V1ProcessEvent(args, reply)
 }
