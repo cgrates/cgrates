@@ -97,20 +97,7 @@ var (
 		AttributeProfilePrefix: CacheAttributeFilterRevIndexes,
 		ChargerProfilePrefix:   CacheChargerFilterRevIndexes,
 	}
-	IndexesToPrefix = map[string]string{
-		CacheResourceFilterIndexes:     ResourceProfilesPrefix,
-		CacheResourceFilterRevIndexes:  ResourceProfilesPrefix,
-		CacheStatFilterIndexes:         StatQueueProfilePrefix,
-		CacheStatFilterRevIndexes:      StatQueueProfilePrefix,
-		CacheThresholdFilterIndexes:    ThresholdProfilePrefix,
-		CacheThresholdFilterRevIndexes: ThresholdProfilePrefix,
-		CacheSupplierFilterIndexes:     SupplierProfilePrefix,
-		CacheSupplierFilterRevIndexes:  SupplierProfilePrefix,
-		CacheAttributeFilterIndexes:    AttributeProfilePrefix,
-		CacheAttributeFilterRevIndexes: AttributeProfilePrefix,
-		CacheChargerFilterIndexes:      ChargerProfilePrefix,
-		CacheChargerFilterRevIndexes:   ChargerProfilePrefix,
-	}
+	CacheIndexesToPrefix map[string]string // will be built on init
 )
 
 const (
@@ -664,6 +651,7 @@ const (
 	SupplierSv1   = "SupplierSv1"
 	AttributeSv1  = "AttributeSv1"
 	SessionSv1    = "SessionSv1"
+	ChargerSv1    = "ChargerSv1"
 	MetaAuth      = "*auth"
 	APIKey        = "APIKey"
 	APIMethods    = "APIMethods"
@@ -944,6 +932,17 @@ func buildCacheInstRevPrefixes() {
 	}
 }
 
+func buildCacheIndexesToPrefix() {
+	CacheIndexesToPrefix = make(map[string]string)
+	for k, v := range PrefixToIndexCache {
+		CacheIndexesToPrefix[v] = k
+	}
+	for k, v := range PrefixToRevIndexCache {
+		CacheIndexesToPrefix[v] = k
+	}
+}
+
 func init() {
 	buildCacheInstRevPrefixes()
+	buildCacheIndexesToPrefix()
 }

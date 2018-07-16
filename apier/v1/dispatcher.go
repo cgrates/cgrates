@@ -22,6 +22,7 @@ import (
 	"github.com/cgrates/cgrates/dispatcher"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func NewDispatcherThresholdSv1(dps *dispatcher.DispatcherService) *DispatcherThresholdSv1 {
@@ -160,7 +161,7 @@ func (dS *DispatcherSessionSv1) Ping(ign string, reply *string) error {
 	return dS.dS.SessionSv1Ping(ign, reply)
 }
 
-// AuthorizeEventWithDigest implements AttributeSv1ProcessEvent
+// AuthorizeEventWithDigest implements SessionSv1AuthorizeEventWithDigest
 func (dS *DispatcherSessionSv1) AuthorizeEventWithDigest(args *dispatcher.AuthorizeArgsWithApiKey,
 	reply *sessions.V1AuthorizeReplyWithDigest) error {
 	return dS.dS.SessionSv1AuthorizeEventWithDigest(args, reply)
@@ -205,7 +206,19 @@ type DispatcherChargerSv1 struct {
 	dC *dispatcher.DispatcherService
 }
 
-// Ping implements SessionSv1Ping
+// Ping implements ChargerSv1Ping
 func (dC *DispatcherChargerSv1) Ping(ign string, reply *string) error {
 	return dC.dC.ChargerSv1Ping(ign, reply)
+}
+
+// GetChargersForEvent implements ChargerSv1GetChargersForEvent
+func (dC *DispatcherChargerSv1) GetChargersForEvent(args *dispatcher.CGREvWithApiKey,
+	reply *engine.ChargerProfiles) (err error) {
+	return dC.dC.ChargerSv1GetChargersForEvent(args, reply)
+}
+
+// ProcessEvent implements ChargerSv1ProcessEvent
+func (dC *DispatcherChargerSv1) ProcessEvent(args *dispatcher.CGREvWithApiKey,
+	reply *[]*utils.CGREvent) (err error) {
+	return dC.dC.ChargerSv1ProcessEvent(args, reply)
 }
