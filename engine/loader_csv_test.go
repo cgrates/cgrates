@@ -1601,28 +1601,31 @@ func TestLoadThresholdProfiles(t *testing.T) {
 			Async:     true,
 		},
 	}
-	revTH := &utils.TPThreshold{
-		TPid:      testTPID,
-		Tenant:    "cgrates.org",
-		ID:        "Threshold1",
-		FilterIDs: []string{"FLTR_1", "FLTR_ACNT_dan"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-29T15:00:00Z",
+	eThresholdReverse := map[utils.TenantID]*utils.TPThreshold{
+		utils.TenantID{Tenant: "cgrates.org", ID: "Threshold1"}: &utils.TPThreshold{
+			TPid:      testTPID,
+			Tenant:    "cgrates.org",
+			ID:        "Threshold1",
+			FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_1"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+			},
+			MaxHits:   12,
+			MinHits:   10,
+			MinSleep:  "1s",
+			Blocker:   true,
+			Weight:    10,
+			ActionIDs: []string{"THRESH1"},
+			Async:     true,
 		},
-		MaxHits:   12,
-		MinHits:   10,
-		MinSleep:  "1s",
-		Blocker:   true,
-		Weight:    10,
-		ActionIDs: []string{"THRESH1"},
-		Async:     true,
 	}
 	thkey := utils.TenantID{Tenant: "cgrates.org", ID: "Threshold1"}
 	if len(csvr.thProfiles) != len(eThresholds) {
 		t.Errorf("Failed to load ThresholdProfiles: %s", utils.ToIJSON(csvr.thProfiles))
 	} else if !reflect.DeepEqual(eThresholds[thkey], csvr.thProfiles[thkey]) &&
-		!reflect.DeepEqual(revTH, csvr.thProfiles[thkey]) {
-		t.Errorf("Expecting: %+v, received: %+v", eThresholds[thkey], csvr.thProfiles[thkey])
+		!reflect.DeepEqual(eThresholdReverse[thkey], csvr.thProfiles[thkey]) {
+		t.Errorf("Expecting: %+v , %+v , received: %+v", eThresholds[thkey],
+			eThresholdReverse[thkey], csvr.thProfiles[thkey])
 	}
 }
 
@@ -1839,7 +1842,6 @@ func TestLoadstatQueues(t *testing.T) {
 			ID:     "TestStats2",
 		},
 	}
-
 	if len(csvr.statQueues) != len(eStatQueues) {
 		t.Errorf("Failed to load statQueues: %s", utils.ToIJSON(csvr.statQueues))
 	}
@@ -1852,7 +1854,6 @@ func TestLoadThresholds(t *testing.T) {
 			ID:     "Threshold1",
 		},
 	}
-
 	if len(csvr.thresholds) != len(eThresholds) {
 		t.Errorf("Failed to load thresholds: %s", utils.ToIJSON(csvr.thresholds))
 	}
