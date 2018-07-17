@@ -153,10 +153,12 @@ func testDspCppAddAttributeWithPermision(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FieldName:  utils.APIMethods,
-				Initial:    utils.META_ANY,
-				Substitute: "ThresholdSv1.GetThresholdsForEvent",
-				Append:     true,
+				FieldName: utils.APIMethods,
+				Initial:   utils.META_ANY,
+				Substitute: utils.RSRFields{
+					&utils.RSRField{Id: "ThresholdSv1.GetThresholdsForEvent",
+						RSRules: []*utils.ReSearchReplace{}}},
+				Append: true,
 			},
 		},
 		Weight: 20,
@@ -205,10 +207,12 @@ func testDspCppAddAttributesWithPermision2(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FieldName:  utils.APIMethods,
-				Initial:    utils.META_ANY,
-				Substitute: "ThresholdSv1.ProcessEvent;ChargerSv1.GetChargersForEvent",
-				Append:     true,
+				FieldName: utils.APIMethods,
+				Initial:   utils.META_ANY,
+				Substitute: utils.RSRFields{
+					&utils.RSRField{Id: "ThresholdSv1.ProcessEvent;ChargerSv1.GetChargersForEvent",
+						RSRules: []*utils.ReSearchReplace{}}},
+				Append: true,
 			},
 		},
 		Weight: 20,

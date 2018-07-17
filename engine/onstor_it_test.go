@@ -2461,16 +2461,12 @@ func testOnStorITSupplierProfile(t *testing.T) {
 }
 
 func testOnStorITAttributeProfile(t *testing.T) {
-	rsrFields, err := utils.ParseRSRFields("^Val1", utils.INFIELD_SEP)
-	if err != nil {
-		t.Error(err)
-	}
 	mapSubstitutes := make(map[string]map[interface{}]*Attribute)
 	mapSubstitutes["FN1"] = make(map[interface{}]*Attribute)
 	mapSubstitutes["FN1"]["Init1"] = &Attribute{
 		FieldName:  "FN1",
 		Initial:    "Init1",
-		Substitute: rsrFields,
+		Substitute: utils.RSRFields{&utils.RSRField{Id: "Al1", RSRules: []*utils.ReSearchReplace{}}},
 		Append:     true,
 	}
 	attrProfile := &AttributeProfile{
@@ -2485,7 +2481,7 @@ func testOnStorITAttributeProfile(t *testing.T) {
 			&Attribute{
 				FieldName:  "FN1",
 				Initial:    "Init1",
-				Substitute: rsrFields,
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "Al1", RSRules: []*utils.ReSearchReplace{}}},
 				Append:     true,
 			},
 		},
@@ -2556,17 +2552,13 @@ func testOnStorITAttributeProfile(t *testing.T) {
 }
 
 func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
-	rsrFields, err := utils.ParseRSRFields("^Val1", utils.INFIELD_SEP)
-	if err != nil {
-		t.Error(err)
-	}
 	//set Substitue with type string
 	mapSubstitutes := make(map[string]map[interface{}]*Attribute)
 	mapSubstitutes["FN1"] = make(map[interface{}]*Attribute)
 	mapSubstitutes["FN1"]["Init1"] = &Attribute{
 		FieldName:  "FN1",
 		Initial:    "Init1",
-		Substitute: rsrFields,
+		Substitute: utils.RSRFields{&utils.RSRField{Id: "Val1", RSRules: []*utils.ReSearchReplace{}}},
 		Append:     true,
 	}
 	attrProfile := &AttributeProfile{
@@ -2581,7 +2573,7 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 			&Attribute{
 				FieldName:  "FN1",
 				Initial:    "Init1",
-				Substitute: rsrFields,
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "Val1", RSRules: []*utils.ReSearchReplace{}}},
 				Append:     true,
 			},
 		},
@@ -2609,22 +2601,18 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
 	}
-	rsrFields, err = utils.ParseRSRFields("^123.5", utils.INFIELD_SEP)
-	if err != nil {
-		t.Error(err)
-	}
 	//set Substitue with type float
 	mapSubstitutes["FN1"]["Init1"] = &Attribute{
 		FieldName:  "FN1",
 		Initial:    "Init1",
-		Substitute: rsrFields,
+		Substitute: utils.RSRFields{&utils.RSRField{Id: "123.123", RSRules: []*utils.ReSearchReplace{}}},
 		Append:     true,
 	}
 	attrProfile.Attributes = []*Attribute{
 		&Attribute{
 			FieldName:  "FN1",
 			Initial:    "Init1",
-			Substitute: rsrFields,
+			Substitute: utils.RSRFields{&utils.RSRField{Id: "123.123", RSRules: []*utils.ReSearchReplace{}}},
 			Append:     true,
 		},
 	}
@@ -2646,22 +2634,18 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(attrProfile), utils.ToJSON(rcv))
 	}
-	rsrFields, err = utils.ParseRSRFields("^true", utils.INFIELD_SEP)
-	if err != nil {
-		t.Error(err)
-	}
 	//set Substitue with type bool
 	mapSubstitutes["FN1"]["Init1"] = &Attribute{
 		FieldName:  "FN1",
 		Initial:    "Init1",
-		Substitute: rsrFields,
+		Substitute: utils.RSRFields{&utils.RSRField{Id: "true", RSRules: []*utils.ReSearchReplace{}}},
 		Append:     true,
 	}
 	attrProfile.Attributes = []*Attribute{
 		&Attribute{
 			FieldName:  "FN1",
 			Initial:    "Init1",
-			Substitute: rsrFields,
+			Substitute: utils.RSRFields{&utils.RSRField{Id: "true", RSRules: []*utils.ReSearchReplace{}}},
 			Append:     true,
 		},
 	}

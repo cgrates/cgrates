@@ -160,10 +160,12 @@ func testDspSessionAddAttributesWithPermision(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FieldName:  utils.APIMethods,
-				Initial:    utils.META_ANY,
-				Substitute: "ThresholdSv1.GetThSessionholdsForEvent",
-				Append:     true,
+				FieldName: utils.APIMethods,
+				Initial:   utils.META_ANY,
+				Substitute: utils.RSRFields{
+					&utils.RSRField{Id: "ThresholdSv1.GetThSessionholdsForEvent",
+						RSRules: []*utils.ReSearchReplace{}}},
+				Append: true,
 			},
 		},
 		Weight: 20,
@@ -227,10 +229,12 @@ func testDspSessionAddAttributesWithPermision2(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FieldName:  utils.APIMethods,
-				Initial:    utils.META_ANY,
-				Substitute: "SessionSv1.AuthorizeEventWithDigest;SessionSv1.InitiateSessionWithDigest;SessionSv1.UpdateSession;SessionSv1.TerminateSession;SessionSv1.ProcessCDR;SessionSv1.ProcessEvent",
-				Append:     true,
+				FieldName: utils.APIMethods,
+				Initial:   utils.META_ANY,
+				Substitute: utils.RSRFields{
+					&utils.RSRField{Id: "SessionSv1.AuthorizeEventWithDigest;SessionSv1.InitiateSessionWithDigest;SessionSv1.UpdateSession;SessionSv1.TerminateSession;SessionSv1.ProcessCDR;SessionSv1.ProcessEvent",
+						RSRules: []*utils.ReSearchReplace{}}},
+				Append: true,
 			},
 		},
 		Weight: 20,

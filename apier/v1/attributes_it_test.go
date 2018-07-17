@@ -165,13 +165,13 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.Account,
 				Initial:    utils.ANY,
-				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001"}},
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001", RSRules: []*utils.ReSearchReplace{}}},
 				Append:     false,
 			},
 			&engine.Attribute{
 				FieldName:  utils.Subject,
 				Initial:    utils.ANY,
-				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001"}},
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001", RSRules: []*utils.ReSearchReplace{}}},
 				Append:     true,
 			},
 		},
@@ -208,7 +208,7 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.Account,
 				Initial:    utils.ANY,
-				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001"}},
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001", RSRules: []*utils.ReSearchReplace{}}},
 				Append:     false,
 			},
 		},
@@ -255,7 +255,7 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.Account,
 				Initial:    utils.ANY,
-				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001"}},
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001", RSRules: []*utils.ReSearchReplace{}}},
 				Append:     false,
 			},
 		},
@@ -355,13 +355,13 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.Account,
 				Initial:    "1008",
-				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001"}},
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001", RSRules: []*utils.ReSearchReplace{}}},
 				Append:     false,
 			},
 			&engine.Attribute{
 				FieldName:  utils.Subject,
 				Initial:    utils.ANY,
-				Substitute: utils.RSRFields{&utils.RSRField{Id: utils.META_NONE}},
+				Substitute: utils.RSRFields{&utils.RSRField{Id: utils.META_NONE, RSRules: []*utils.ReSearchReplace{}}},
 				Append:     true,
 			},
 		},
@@ -434,13 +434,13 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.Account,
 				Initial:    "1008",
-				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001"}},
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001", RSRules: []*utils.ReSearchReplace{}}},
 				Append:     false,
 			},
 			&engine.Attribute{
 				FieldName:  utils.Subject,
 				Initial:    utils.ANY,
-				Substitute: utils.RSRFields{&utils.RSRField{Id: utils.META_NONE}},
+				Substitute: utils.RSRFields{&utils.RSRField{Id: utils.META_NONE, RSRules: []*utils.ReSearchReplace{}}},
 				Append:     false,
 			},
 		},
@@ -512,13 +512,13 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.Account,
 				Initial:    "1008",
-				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001"}},
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001", RSRules: []*utils.ReSearchReplace{}}},
 				Append:     false,
 			},
 			&engine.Attribute{
 				FieldName:  utils.Subject,
 				Initial:    "1008",
-				Substitute: utils.RSRFields{&utils.RSRField{Id: utils.META_NONE}},
+				Substitute: utils.RSRFields{&utils.RSRField{Id: utils.META_NONE, RSRules: []*utils.ReSearchReplace{}}},
 				Append:     false,
 			},
 		},
@@ -581,7 +581,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  "FL1",
 				Initial:    "In1",
-				Substitute: utils.RSRFields{&utils.RSRField{Id: "Al1"}},
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "Al1", RSRules: []*utils.ReSearchReplace{}}},
 				Append:     true,
 			},
 		},
@@ -607,13 +607,13 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 		&engine.Attribute{
 			FieldName:  "FL1",
 			Initial:    "In1",
-			Substitute: utils.RSRFields{&utils.RSRField{Id: "Al1"}},
+			Substitute: utils.RSRFields{&utils.RSRField{Id: "Al1", RSRules: []*utils.ReSearchReplace{}}},
 			Append:     true,
 		},
 		&engine.Attribute{
 			FieldName:  "FL2",
 			Initial:    "In2",
-			Substitute: utils.RSRFields{&utils.RSRField{Id: "Al2"}},
+			Substitute: utils.RSRFields{&utils.RSRField{Id: "Al2", RSRules: []*utils.ReSearchReplace{}}},
 			Append:     false,
 		},
 	}

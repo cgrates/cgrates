@@ -154,10 +154,12 @@ func testDspSupAddAttributesWithPermision(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FieldName:  utils.APIMethods,
-				Initial:    utils.META_ANY,
-				Substitute: "ThresholdSv1.GetThresholdsForEvent",
-				Append:     true,
+				FieldName: utils.APIMethods,
+				Initial:   utils.META_ANY,
+				Substitute: utils.RSRFields{
+					&utils.RSRField{Id: "ThresholdSv1.GetThresholdsForEvent",
+						RSRules: []*utils.ReSearchReplace{}}},
+				Append: true,
 			},
 		},
 		Weight: 20,
@@ -213,10 +215,12 @@ func testDspSupAddAttributesWithPermision2(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FieldName:  utils.APIMethods,
-				Initial:    utils.META_ANY,
-				Substitute: "ThresholdSv1.ProcessEvent;SupplierSv1.GetSuppliers",
-				Append:     true,
+				FieldName: utils.APIMethods,
+				Initial:   utils.META_ANY,
+				Substitute: utils.RSRFields{
+					&utils.RSRField{Id: "ThresholdSv1.ProcessEvent;SupplierSv1.GetSuppliers",
+						RSRules: []*utils.ReSearchReplace{}}},
+				Append: true,
 			},
 		},
 		Weight: 20,

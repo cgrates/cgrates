@@ -34,9 +34,10 @@ var (
 	mapSubstitutes         = map[string]map[interface{}]*Attribute{
 		utils.Account: map[interface{}]*Attribute{
 			utils.META_ANY: &Attribute{
-				FieldName: utils.Account,
-				Initial:   utils.META_ANY,
-				Append:    true,
+				FieldName:  utils.Account,
+				Initial:    utils.META_ANY,
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "1010", RSRules: []*utils.ReSearchReplace{}}},
+				Append:     true,
 			},
 		},
 	}
@@ -98,9 +99,10 @@ var (
 			},
 			Attributes: []*Attribute{
 				&Attribute{
-					FieldName: utils.Account,
-					Initial:   utils.META_ANY,
-					Append:    true,
+					FieldName:  utils.Account,
+					Initial:    utils.META_ANY,
+					Substitute: utils.RSRFields{&utils.RSRField{Id: "1010", RSRules: []*utils.ReSearchReplace{}}},
+					Append:     true,
 				},
 			},
 			Weight:     20,
@@ -117,9 +119,10 @@ var (
 			},
 			Attributes: []*Attribute{
 				&Attribute{
-					FieldName: utils.Account,
-					Initial:   utils.META_ANY,
-					Append:    true,
+					FieldName:  utils.Account,
+					Initial:    utils.META_ANY,
+					Substitute: utils.RSRFields{&utils.RSRField{Id: "1010", RSRules: []*utils.ReSearchReplace{}}},
+					Append:     true,
 				},
 			},
 			Weight:     20,
@@ -136,9 +139,10 @@ var (
 			},
 			Attributes: []*Attribute{
 				&Attribute{
-					FieldName: utils.Account,
-					Initial:   utils.META_ANY,
-					Append:    true,
+					FieldName:  utils.Account,
+					Initial:    utils.META_ANY,
+					Substitute: utils.RSRFields{&utils.RSRField{Id: "1010", RSRules: []*utils.ReSearchReplace{}}},
+					Append:     true,
 				},
 			},
 			attributes: mapSubstitutes,
@@ -155,9 +159,10 @@ var (
 			},
 			Attributes: []*Attribute{
 				&Attribute{
-					FieldName: utils.Account,
-					Initial:   utils.META_ANY,
-					Append:    true,
+					FieldName:  utils.Account,
+					Initial:    utils.META_ANY,
+					Substitute: utils.RSRFields{&utils.RSRField{Id: "1010", RSRules: []*utils.ReSearchReplace{}}},
+					Append:     true,
 				},
 			},
 			attributes: mapSubstitutes,
@@ -171,15 +176,6 @@ func TestAttributePopulateAttrService(t *testing.T) {
 	if err := utils.Clone(expTimeAttributes, &cloneExpTimeAttributes); err != nil {
 		t.Error(err)
 	}
-	rsrFields, err := utils.ParseRSRFields("^1010", utils.INFIELD_SEP)
-	if err != nil {
-		t.Error(err)
-	}
-	mapSubstitutes[utils.Account][utils.META_ANY].Substitute = rsrFields
-	atrPs[0].Attributes[0].Substitute = rsrFields
-	atrPs[1].Attributes[0].Substitute = rsrFields
-	atrPs[2].Attributes[0].Substitute = rsrFields
-	atrPs[3].Attributes[0].Substitute = rsrFields
 	data, _ := NewMapStorage()
 	dmAtr = NewDataManager(data)
 	defaultCfg, err := config.NewDefaultCGRConfig()
