@@ -157,10 +157,12 @@ func testDspAttrAddAttributesWithPermision(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FieldName:  utils.APIMethods,
-				Initial:    utils.META_ANY,
-				Substitute: "ThresholdSv1.GetThAttrholdsForEvent",
-				Append:     true,
+				FieldName: utils.APIMethods,
+				Initial:   utils.META_ANY,
+				Substitute: utils.RSRFields{
+					&utils.RSRField{Id: "ThresholdSv1.GetThAttrholdsForEvent",
+						RSRules: []*utils.ReSearchReplace{}}},
+				Append: true,
 			},
 		},
 		Weight: 20,
@@ -248,10 +250,12 @@ func testDspAttrAddAttributesWithPermision2(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FieldName:  utils.APIMethods,
-				Initial:    utils.META_ANY,
-				Substitute: "AttributeSv1.GetAttributeForEvent;AttributeSv1.ProcessEvent",
-				Append:     true,
+				FieldName: utils.APIMethods,
+				Initial:   utils.META_ANY,
+				Substitute: utils.RSRFields{
+					&utils.RSRField{Id: "AttributeSv1.GetAttributeForEvent;AttributeSv1.ProcessEvent",
+						RSRules: []*utils.ReSearchReplace{}}},
+				Append: true,
 			},
 		},
 		Weight: 20,
@@ -290,10 +294,12 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 		Contexts:  []string{"simpleauth"},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FieldName:  "Password",
-				Initial:    utils.ANY,
-				Substitute: "CGRateS.org",
-				Append:     true,
+				FieldName: "Password",
+				Initial:   utils.ANY,
+				Substitute: utils.RSRFields{
+					&utils.RSRField{Id: "CGRateS.org",
+						RSRules: []*utils.ReSearchReplace{}}},
+				Append: true,
 			},
 		},
 		Weight: 20.0,

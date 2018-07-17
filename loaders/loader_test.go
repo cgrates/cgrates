@@ -112,13 +112,13 @@ cgrates.org,TestLoader1,lcr,*string:Account:1008;*string:Account:1009,,Subject,*
 			&engine.Attribute{
 				FieldName:  "Account",
 				Initial:    utils.ANY,
-				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001"}},
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001", RSRules: []*utils.ReSearchReplace{}}},
 				Append:     false,
 			},
 			&engine.Attribute{
 				FieldName:  "Subject",
 				Initial:    utils.ANY,
-				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001"}},
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001", RSRules: []*utils.ReSearchReplace{}}},
 				Append:     true,
 			}},
 		Weight: 10.0,
@@ -207,7 +207,7 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  "Subject",
 				Initial:    utils.ANY,
-				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001"}},
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001", RSRules: []*utils.ReSearchReplace{}}},
 				Append:     true,
 			}},
 		Weight: 10.0,

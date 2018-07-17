@@ -1473,14 +1473,10 @@ func TestAPItoAttributeProfile(t *testing.T) {
 	mapSubstitutes := make(map[string]map[interface{}]*Attribute)
 	mapSubstitutes["FL1"] = make(map[interface{}]*Attribute)
 	mapSubstitutes["FL1"]["In1"] = &Attribute{
-		FieldName: "FL1",
-		Initial:   "In1",
-		Substitute: utils.RSRFields{
-			&utils.RSRField{
-				Id: "Al1",
-			},
-		},
-		Append: true,
+		FieldName:  "FL1",
+		Initial:    "In1",
+		Substitute: utils.RSRFields{&utils.RSRField{Id: "Al1", RSRules: []*utils.ReSearchReplace{}}},
+		Append:     true,
 	}
 	expected := &AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -1492,14 +1488,10 @@ func TestAPItoAttributeProfile(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			&Attribute{
-				FieldName: "FL1",
-				Initial:   "In1",
-				Substitute: utils.RSRFields{
-					&utils.RSRField{
-						Id: "Al1",
-					},
-				},
-				Append: true,
+				FieldName:  "FL1",
+				Initial:    "In1",
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "Al1", RSRules: []*utils.ReSearchReplace{}}},
+				Append:     true,
 			},
 		},
 		Weight:     20,

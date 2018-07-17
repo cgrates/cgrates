@@ -1089,9 +1089,6 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, skipCache bool,
 	alsPrf.attributes = make(map[string]map[interface{}]*Attribute)
 	for _, attr := range alsPrf.Attributes {
 		alsPrf.attributes[attr.FieldName] = make(map[interface{}]*Attribute)
-		if err = attr.Substitute.Compile(); err != nil {
-			return
-		}
 		alsPrf.attributes[attr.FieldName][attr.Initial] = &Attribute{
 			FieldName:  attr.FieldName,
 			Initial:    attr.Initial,

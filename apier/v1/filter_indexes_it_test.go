@@ -75,11 +75,11 @@ var sTestsFilterIndexesSV1 = []func(t *testing.T){
 	testV1FIdxSecondComputeSupplierProfileIndexes,
 	testV1FIdxRemoveSupplierProfile,
 
-	// testV1FIdxSetAttributeProfileIndexes,
-	// testV1FIdxComputeAttributeProfileIndexes,
-	// testV1FIdxSetSecondAttributeProfileIndexes,
-	// testV1FIdxSecondComputeAttributeProfileIndexes,
-	// testV1FIdxRemoveAttributeProfile,
+	testV1FIdxSetAttributeProfileIndexes,
+	testV1FIdxComputeAttributeProfileIndexes,
+	testV1FIdxSetSecondAttributeProfileIndexes,
+	testV1FIdxSecondComputeAttributeProfileIndexes,
+	testV1FIdxRemoveAttributeProfile,
 
 	testFlush,
 	testV1FIdxPopulateDatabase,
@@ -261,6 +261,7 @@ func testV1FIdxComputeThresholdsIndexes(t *testing.T) {
 			ResourceIDs:  &emptySlice,
 			StatIDs:      &emptySlice,
 			SupplierIDs:  &emptySlice,
+			ChargerIDs:   &emptySlice,
 		}, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -376,6 +377,7 @@ func testV1FIdxSecondComputeThresholdsIndexes(t *testing.T) {
 			ResourceIDs:  &emptySlice,
 			StatIDs:      &emptySlice,
 			SupplierIDs:  &emptySlice,
+			ChargerIDs:   &emptySlice,
 		}, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -417,6 +419,7 @@ func testV1FIdxThirdComputeThresholdsIndexes(t *testing.T) {
 		ResourceIDs:  &emptySlice,
 		StatIDs:      &emptySlice,
 		SupplierIDs:  &emptySlice,
+		ChargerIDs:   &emptySlice,
 	}, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -469,6 +472,7 @@ func testV1FIdxRemoveThresholdProfile(t *testing.T) {
 		ResourceIDs:  &emptySlice,
 		StatIDs:      &emptySlice,
 		SupplierIDs:  &emptySlice,
+		ChargerIDs:   &emptySlice,
 	}, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -600,6 +604,7 @@ func testV1FIdxComputeStatQueueProfileIndexes(t *testing.T) {
 		ResourceIDs:  &emptySlice,
 		StatIDs:      nil,
 		SupplierIDs:  &emptySlice,
+		ChargerIDs:   &emptySlice,
 	}, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -728,6 +733,7 @@ func testV1FIdxSecondComputeStatQueueProfileIndexes(t *testing.T) {
 			ResourceIDs:  &emptySlice,
 			StatIDs:      &stid,
 			SupplierIDs:  &emptySlice,
+			ChargerIDs:   &emptySlice,
 		}, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -772,6 +778,7 @@ func testV1FIdxRemoveStatQueueProfile(t *testing.T) {
 		ResourceIDs:  &emptySlice,
 		StatIDs:      nil,
 		SupplierIDs:  &emptySlice,
+		ChargerIDs:   &emptySlice,
 	}, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -890,6 +897,7 @@ func testV1FIdxComputeResourceProfileIndexes(t *testing.T) {
 		ResourceIDs:  nil,
 		StatIDs:      &emptySlice,
 		SupplierIDs:  &emptySlice,
+		ChargerIDs:   &emptySlice,
 	}, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -1005,6 +1013,7 @@ func testV1FIdxSecondComputeResourceProfileIndexes(t *testing.T) {
 			ResourceIDs:  &rsid,
 			StatIDs:      &emptySlice,
 			SupplierIDs:  &emptySlice,
+			ChargerIDs:   &emptySlice,
 		}, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -1045,6 +1054,7 @@ func testV1FIdxRemoveResourceProfile(t *testing.T) {
 		ResourceIDs:  nil,
 		StatIDs:      &emptySlice,
 		SupplierIDs:  &emptySlice,
+		ChargerIDs:   &emptySlice,
 	}, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -1167,6 +1177,7 @@ func testV1FIdxComputeSupplierProfileIndexes(t *testing.T) {
 		ResourceIDs:  &emptySlice,
 		StatIDs:      &emptySlice,
 		SupplierIDs:  nil,
+		ChargerIDs:   &emptySlice,
 	}, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -1289,6 +1300,7 @@ func testV1FIdxSecondComputeSupplierProfileIndexes(t *testing.T) {
 			ResourceIDs:  &emptySlice,
 			StatIDs:      &emptySlice,
 			SupplierIDs:  &spid,
+			ChargerIDs:   &emptySlice,
 		}, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -1333,6 +1345,7 @@ func testV1FIdxRemoveSupplierProfile(t *testing.T) {
 		ResourceIDs:  &emptySlice,
 		StatIDs:      &emptySlice,
 		SupplierIDs:  nil,
+		ChargerIDs:   &emptySlice,
 	}, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -1371,7 +1384,6 @@ func testV1FIdxRemoveSupplierProfile(t *testing.T) {
 	}
 }
 
-/*
 //AttributeProfile
 func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 	tenant := "cgrates.org"
@@ -1414,7 +1426,7 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  "FL1",
 				Initial:    "In1",
-				Substitute: "Al1",
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "Al1"}},
 				Append:     true,
 			},
 		},
@@ -1461,6 +1473,7 @@ func testV1FIdxComputeAttributeProfileIndexes(t *testing.T) {
 		ResourceIDs:  &emptySlice,
 		StatIDs:      &emptySlice,
 		SupplierIDs:  &emptySlice,
+		ChargerIDs:   &emptySlice,
 	}, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -1532,7 +1545,7 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  "FL1",
 				Initial:    "In1",
-				Substitute: "Al1",
+				Substitute: utils.RSRFields{&utils.RSRField{Id: "Al1"}},
 				Append:     true,
 			},
 		},
@@ -1584,6 +1597,7 @@ func testV1FIdxSecondComputeAttributeProfileIndexes(t *testing.T) {
 			ResourceIDs:  &emptySlice,
 			StatIDs:      &emptySlice,
 			SupplierIDs:  &emptySlice,
+			ChargerIDs:   &emptySlice,
 		}, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -1628,6 +1642,7 @@ func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 		ResourceIDs:  &emptySlice,
 		StatIDs:      &emptySlice,
 		SupplierIDs:  &emptySlice,
+		ChargerIDs:   &emptySlice,
 	}, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -1664,7 +1679,6 @@ func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 		t.Error(err)
 	}
 }
-*/
 
 func testV1FIdxPopulateDatabase(t *testing.T) {
 	var result string

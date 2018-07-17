@@ -2811,7 +2811,8 @@ func APItoAttributeProfile(tpTH *utils.TPAttributeProfile, timezone string) (th 
 			Initial:   reqAttr.Initial,
 			Substitute: utils.RSRFields{
 				&utils.RSRField{
-					Id: reqAttr.Substitute,
+					Id:      reqAttr.Substitute,
+					RSRules: []*utils.ReSearchReplace{}, //from mongo we get empty slice and from redis nil
 				},
 			},
 		})
@@ -2821,7 +2822,8 @@ func APItoAttributeProfile(tpTH *utils.TPAttributeProfile, timezone string) (th 
 			Initial:   reqAttr.Initial,
 			Substitute: utils.RSRFields{
 				&utils.RSRField{
-					Id: reqAttr.Substitute,
+					Id:      reqAttr.Substitute,
+					RSRules: []*utils.ReSearchReplace{}, //from mongo we get empty slice and from redis nil
 				},
 			},
 			Append: reqAttr.Append,
