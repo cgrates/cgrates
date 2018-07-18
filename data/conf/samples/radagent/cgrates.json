@@ -99,7 +99,8 @@
 	"request_processors": [
 		{
 			"id": "KamailioAuth",
-			"request_filter": "*radReqType(*radAuth)",
+			"filters": ["*string:*request.request_type:*radAuth"],
+			"flags": ["*dryrun"],
 			"request_fields":[
 				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
 					"value": "*prepaid", "mandatory": true},	
@@ -121,7 +122,8 @@
 		},
 		{
 			"id": "KamailioAccountingStart",
-			"request_filter": "*radReqType(*radAcctStart)",
+			"filters": ["*string:*request.request_type:*radAcctStart"],
+			"flags": ["*dryrun"],
 			"request_fields":[	
 				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
 					"value": "*prepaid", "mandatory": true},	
@@ -142,7 +144,8 @@
 		},
 		{
 			"id": "KamailioAccountingStop",
-			"request_filter": "*radReqType(*radAcctStop)",
+			"filters": ["*string:*request.request_type:*radAcctStop"],
+			"flags": ["*dryrun"],
 			"request_fields":[	
 				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
 					"value": "*prepaid", "mandatory": true},	
