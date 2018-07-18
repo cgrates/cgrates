@@ -54,8 +54,8 @@ Example of sample CDR generated simply using curl:
   &Account=1004 \
   &Subject=1004 \
   &Destination=%2B4986517174963 \
-  &SetupTime=2018-05-21 12:32:50+00 \
-  &AnswerTime=2018-05-21 12:32:56+00 \
+  &SetupTime=2018-05-21T12:32:50Z \
+  &AnswerTime=2018-05-21T12:32:56Z \
   &Usage=306 \
   &CostSource=*cdrs" http://127.0.0.1:2080/cdr_http
 
