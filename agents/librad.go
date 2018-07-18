@@ -32,153 +32,6 @@ import (
 	"github.com/cgrates/radigo"
 )
 
-// processorVars will hold various variables using during request processing
-// here so we can define methods on it
-type processorVars map[string]interface{}
-
-// hasSubsystems will return true on single subsystem being present in processorVars
-func (pv processorVars) hasSubsystems() (has bool) {
-	for _, k := range []string{utils.MetaAccounts, utils.MetaResources,
-		utils.MetaSuppliers, utils.MetaAttributes} {
-		if _, has = pv[k]; has {
-			return
-		}
-	}
-	return
-}
-
-func (pv processorVars) hasVar(k string) (has bool) {
-	_, has = pv[k]
-	return
-}
-
-// valAsInterface returns the string value for fldName
-func (pv processorVars) valAsInterface(fldPath string) (val interface{}, err error) {
-	fldName := fldPath
-	if strings.HasPrefix(fldPath, utils.MetaCGRReply) {
-		fldName = utils.MetaCGRReply
-	}
-	if !pv.hasVar(fldName) {
-		err = errors.New("not found")
-		return
-	}
-	return engine.NewNavigableMap(pv).FieldAsInterface(strings.Split(fldPath, utils.HIERARCHY_SEP))
-}
-
-// valAsString returns the string value for fldName
-// returns empty if fldName not found
-func (pv processorVars) valAsString(fldPath string) (val string, err error) {
-	fldName := fldPath
-	if strings.HasPrefix(fldPath, utils.MetaCGRReply) {
-		fldName = utils.MetaCGRReply
-	}
-	if !pv.hasVar(fldName) {
-		return "", utils.ErrNotFoundNoCaps
-	}
-	return engine.NewNavigableMap(pv).FieldAsString(strings.Split(fldPath, utils.HIERARCHY_SEP))
-}
-
-// asV1AuthorizeArgs returns the arguments needed by SessionSv1.AuthorizeEvent
-func (pv processorVars) asV1AuthorizeArgs(cgrEv *utils.CGREvent) (args *sessions.V1AuthorizeArgs) {
-	args = &sessions.V1AuthorizeArgs{ // defaults
-		GetMaxUsage: true,
-		CGREvent:    *cgrEv,
-	}
-	if !pv.hasSubsystems() {
-		return
-	}
-	if !pv.hasVar(utils.MetaAccounts) {
-		args.GetMaxUsage = false
-	}
-	if pv.hasVar(utils.MetaResources) {
-		args.AuthorizeResources = true
-	}
-	if pv.hasVar(utils.MetaSuppliers) {
-		args.GetSuppliers = true
-	}
-	if pv.hasVar(utils.MetaAttributes) {
-		args.GetAttributes = true
-	}
-	return
-}
-
-// asV1InitSessionArgs returns the arguments used in SessionSv1.InitSession
-func (pv processorVars) asV1InitSessionArgs(cgrEv *utils.CGREvent) (args *sessions.V1InitSessionArgs) {
-	args = &sessions.V1InitSessionArgs{ // defaults
-		InitSession: true,
-		CGREvent:    *cgrEv,
-	}
-	if !pv.hasSubsystems() {
-		return
-	}
-	if !pv.hasVar(utils.MetaAccounts) {
-		args.InitSession = false
-	}
-	if pv.hasVar(utils.MetaResources) {
-		args.AllocateResources = true
-	}
-	if pv.hasVar(utils.MetaAttributes) {
-		args.GetAttributes = true
-	}
-	return
-}
-
-// asV1UpdateSessionArgs returns the arguments used in SessionSv1.InitSession
-func (pv processorVars) asV1UpdateSessionArgs(cgrEv *utils.CGREvent) (args *sessions.V1UpdateSessionArgs) {
-	args = &sessions.V1UpdateSessionArgs{ // defaults
-		UpdateSession: true,
-		CGREvent:      *cgrEv,
-	}
-	if !pv.hasSubsystems() {
-		return
-	}
-	if !pv.hasVar(utils.MetaAccounts) {
-		args.UpdateSession = false
-	}
-	if pv.hasVar(utils.MetaAttributes) {
-		args.GetAttributes = true
-	}
-	return
-}
-
-// asV1TerminateSessionArgs returns the arguments used in SMGv1.TerminateSession
-func (pv processorVars) asV1TerminateSessionArgs(cgrEv *utils.CGREvent) (args *sessions.V1TerminateSessionArgs) {
-	args = &sessions.V1TerminateSessionArgs{ // defaults
-		TerminateSession: true,
-		CGREvent:         *cgrEv,
-	}
-	if !pv.hasSubsystems() {
-		return
-	}
-	if !pv.hasVar(utils.MetaAccounts) {
-		args.TerminateSession = false
-	}
-	if pv.hasVar(utils.MetaResources) {
-		args.ReleaseResources = true
-	}
-	return
-}
-
-func (pv processorVars) asV1ProcessEventArgs(cgrEv *utils.CGREvent) (args *sessions.V1ProcessEventArgs) {
-	args = &sessions.V1ProcessEventArgs{ // defaults
-		Debit:    true,
-		CGREvent: *cgrEv,
-	}
-	if !pv.hasSubsystems() {
-		return
-	}
-	if !pv.hasVar(utils.MetaAccounts) {
-		args.Debit = false
-	}
-	if pv.hasVar(utils.MetaResources) {
-		args.AllocateResources = true
-	}
-	if pv.hasVar(utils.MetaAttributes) {
-		args.GetAttributes = true
-	}
-	return
-}
-
 // radAttrVendorFromPath returns AttributenName and VendorName from path
 // path should be the form attributeName or vendorName/attributeName
 func attrVendorFromPath(path string) (attrName, vendorName string) {
@@ -189,34 +42,6 @@ func attrVendorFromPath(path string) (attrName, vendorName string) {
 		attrName = splt[0]
 	}
 	return
-}
-
-// radPassesFieldFilter checks whether fieldFilter matches either in processorsVars or AVPs of packet
-func radPassesFieldFilter(pkt *radigo.Packet, processorVars processorVars,
-	fieldFilter *utils.RSRField) (pass bool) {
-	if fieldFilter == nil {
-		return true
-	}
-	if valIface, hasIt := processorVars[fieldFilter.Id]; hasIt { // ProcessorVars have priority
-		if val, canCast := utils.CastFieldIfToString(valIface); !canCast {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> cannot cast field <%s> to string",
-					utils.RadiusAgent, fieldFilter.Id))
-		} else if _, err := fieldFilter.Parse(val); err == nil {
-			pass = true
-		}
-		return
-	}
-	avps := pkt.AttributesWithName(attrVendorFromPath(fieldFilter.Id))
-	if len(avps) == 0 { // no attribute found, filter not passing
-		return
-	}
-	for _, avp := range avps { // they all need to match the filter
-		if _, err := fieldFilter.Parse(avp.GetStringValue()); err != nil {
-			return
-		}
-	}
-	return true
 }
 
 // radComposedFieldValue extracts the field value out of RADIUS packet
@@ -324,47 +149,6 @@ func radFieldOutVal(pkt *radigo.Packet, processorVars processorVars,
 	return
 }
 
-// radPktAsSMGEvent converts a RADIUS packet into SMGEvent
-func radReqAsCGREvent(radPkt *radigo.Packet, procVars map[string]interface{}, procFlags utils.StringMap,
-	cfgFlds []*config.CfgCdrField) (cgrEv *utils.CGREvent, err error) {
-	outMap := make(map[string]string) // work with it so we can append values to keys
-	for _, cfgFld := range cfgFlds {
-		passedAllFilters := true
-		for _, fldFilter := range cfgFld.FieldFilter {
-			if !radPassesFieldFilter(radPkt, procVars, fldFilter) {
-				passedAllFilters = false
-				break
-			}
-		}
-		if !passedAllFilters {
-			continue
-		}
-		fmtOut, err := radFieldOutVal(radPkt, procVars, cfgFld)
-		if err != nil {
-			return nil, err
-		}
-		if _, hasKey := outMap[cfgFld.FieldId]; hasKey && cfgFld.Append {
-			outMap[cfgFld.FieldId] += fmtOut
-		} else {
-			outMap[cfgFld.FieldId] = fmtOut
-		}
-		if cfgFld.BreakOnSuccess {
-			break
-		}
-	}
-	if len(procFlags) != 0 {
-		outMap[utils.CGRFlags] = procFlags.String()
-	}
-	cgrEv = &utils.CGREvent{
-		Tenant: utils.FirstNonEmpty(outMap[utils.Tenant],
-			config.CgrConfig().DefaultTenant),
-		ID:    utils.UUIDSha1Prefix(),
-		Time:  utils.TimePointer(time.Now()),
-		Event: utils.ConvertMapValStrIf(outMap),
-	}
-	return
-}
-
 // radReplyAppendAttributes appends attributes to a RADIUS reply based on predefined template
 func radReplyAppendAttributes(reply *radigo.Packet, procVars map[string]interface{},
 	cfgFlds []*config.CfgCdrField) (err error) {
@@ -413,4 +197,54 @@ func NewCGRReply(rply engine.NavigableMapper,
 	}
 	mp.Set([]string{utils.Error}, "", false) // enforce empty error
 	return mp, nil
+}
+
+// newRADataProvider constructs a DataProvider
+func newRADataProvider(req *radigo.Packet) (dP engine.DataProvider, err error) {
+	dP = &radiusDP{req: req, cache: engine.NewNavigableMap(nil)}
+	return
+}
+
+// radiusDP implements engine.DataProvider, serving as radigo.Packet data decoder
+// decoded data is only searched once and cached
+type radiusDP struct {
+	req   *radigo.Packet
+	cache *engine.NavigableMap
+}
+
+// String is part of engine.DataProvider interface
+// when called, it will display the already parsed values out of cache
+func (pk *radiusDP) String() string {
+	return ""
+}
+
+// FieldAsInterface is part of engine.DataProvider interface
+func (pk *radiusDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	if data, err = pk.cache.FieldAsInterface(fldPath); err == nil ||
+		err != utils.ErrNotFound { // item found in cache
+		return
+	}
+	err = nil // cancel previous err
+	pk.cache.Set(fldPath, data, false)
+	return
+}
+
+// FieldAsString is part of engine.DataProvider interface
+func (pk *radiusDP) FieldAsString(fldPath []string) (data string, err error) {
+	var valIface interface{}
+	valIface, err = pk.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	data, _ = utils.CastFieldIfToString(valIface)
+	return
+}
+
+// AsNavigableMap is part of engine.DataProvider interface
+func (pk *radiusDP) AsNavigableMap([]*config.CfgCdrField) (
+	nm *engine.NavigableMap, err error) {
+	return nil, utils.ErrNotImplemented
 }
