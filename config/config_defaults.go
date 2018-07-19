@@ -400,7 +400,6 @@ const CGRATES_CFG_JSON = `
 	"sessions_conns": [
 		{"address": "*internal"}								// connection towards SessionService
 	],
-	"create_cdr": true,											// create CDR out of Accounting-Stop and send it to SessionS
 	"cdr_requires_session": false,								// only create CDR if there is an active session at terminate
 	"timezone": "",												// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
 	"request_processors": [],

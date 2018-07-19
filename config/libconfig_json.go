@@ -364,7 +364,6 @@ type RadiusAgentJsonCfg struct {
 	Client_dictionaries  *map[string]string
 	Sessions_conns       *[]*HaPoolJsonCfg
 	Tenant               *string
-	Create_cdr           *bool
 	Cdr_requires_session *bool
 	Timezone             *string
 	Request_processors   *[]*RAReqProcessorJsnCfg
