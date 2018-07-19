@@ -19,15 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
-	"errors"
 	"fmt"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/radigo"
 )
@@ -47,7 +43,7 @@ func attrVendorFromPath(path string) (attrName, vendorName string) {
 // radComposedFieldValue extracts the field value out of RADIUS packet
 // procVars have priority over packet variables
 func radComposedFieldValue(pkt *radigo.Packet,
-	procVars processorVars, outTpl utils.RSRFields) (outVal string) {
+	agReq *AgentRequest, outTpl utils.RSRFields) (outVal string) {
 	for _, rsrTpl := range outTpl {
 		if rsrTpl.IsStatic() {
 			if parsed, err := rsrTpl.Parse(""); err != nil {
@@ -59,13 +55,11 @@ func radComposedFieldValue(pkt *radigo.Packet,
 			}
 			continue
 		}
-		if val, err := procVars.valAsString(rsrTpl.Id); err != nil {
-			if err.Error() != "not found" {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> %s",
-						utils.RadiusAgent, err.Error()))
-				continue
-			}
+		if val, err := agReq.FieldAsString(strings.Split(rsrTpl.Id, utils.NestingSep)); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> %s",
+					utils.RadiusAgent, err.Error()))
+			continue
 		} else {
 			if parsed, err := rsrTpl.Parse(val); err != nil {
 				utils.Logger.Warning(
@@ -90,41 +84,8 @@ func radComposedFieldValue(pkt *radigo.Packet,
 	return outVal
 }
 
-// radMetaHandler handles *handler type in configuration fields
-func radMetaHandler(pkt *radigo.Packet, procVars processorVars,
-	cfgFld *config.CfgCdrField, roundingDecimals int) (outVal string, err error) {
-	handlerArgs := strings.Split(
-		radComposedFieldValue(pkt, procVars, cfgFld.Value), utils.HandlerArgSep)
-	switch cfgFld.HandlerId {
-	case MetaUsageDifference: // expects tEnd|tStart in the composed val
-		if len(handlerArgs) != 2 {
-			return "", errors.New("unexpected number of arguments")
-		}
-		tEnd, err := utils.ParseTimeDetectLayout(handlerArgs[0], cfgFld.Timezone)
-		if err != nil {
-			return "", err
-		}
-		tStart, err := utils.ParseTimeDetectLayout(handlerArgs[1], cfgFld.Timezone)
-		if err != nil {
-			return "", err
-		}
-		return tEnd.Sub(tStart).String(), nil
-	case utils.MetaDurationSeconds:
-		if len(handlerArgs) != 1 {
-			return "", errors.New("unexpected number of arguments")
-		}
-		val, err := utils.ParseDurationWithNanosecs(handlerArgs[0])
-		if err != nil {
-			return "", err
-		}
-		return strconv.FormatInt(int64(utils.Round(val.Seconds(),
-			roundingDecimals, utils.ROUNDING_MIDDLE)), 10), nil
-	}
-	return
-}
-
 // radFieldOutVal formats the field value retrieved from RADIUS packet
-func radFieldOutVal(pkt *radigo.Packet, processorVars processorVars,
+func radFieldOutVal(pkt *radigo.Packet, agReq *AgentRequest,
 	cfgFld *config.CfgCdrField) (outVal string, err error) {
 	// different output based on cgrFld.Type
 	switch cfgFld.Type {
@@ -134,12 +95,7 @@ func radFieldOutVal(pkt *radigo.Packet, processorVars processorVars,
 	case utils.META_CONSTANT:
 		outVal = cfgFld.Value.Id()
 	case utils.META_COMPOSED:
-		outVal = radComposedFieldValue(pkt, processorVars, cfgFld.Value)
-	case utils.META_HANDLER:
-		if outVal, err = radMetaHandler(pkt, processorVars, cfgFld,
-			config.CgrConfig().RoundingDecimals); err != nil {
-			return "", err
-		}
+		outVal = radComposedFieldValue(pkt, agReq, cfgFld.Value)
 	default:
 		return "", fmt.Errorf("unsupported configuration field type: <%s>", cfgFld.Type)
 	}
@@ -150,20 +106,10 @@ func radFieldOutVal(pkt *radigo.Packet, processorVars processorVars,
 }
 
 // radReplyAppendAttributes appends attributes to a RADIUS reply based on predefined template
-func radReplyAppendAttributes(reply *radigo.Packet, procVars map[string]interface{},
+func radReplyAppendAttributes(reply *radigo.Packet, agReq *AgentRequest,
 	cfgFlds []*config.CfgCdrField) (err error) {
 	for _, cfgFld := range cfgFlds {
-		passedAllFilters := true
-		for _, fldFilter := range cfgFld.FieldFilter {
-			if !radPassesFieldFilter(reply, procVars, fldFilter) {
-				passedAllFilters = false
-				break
-			}
-		}
-		if !passedAllFilters {
-			continue
-		}
-		fmtOut, err := radFieldOutVal(reply, procVars, cfgFld)
+		fmtOut, err := radFieldOutVal(reply, agReq, cfgFld)
 		if err != nil {
 			return err
 		}
@@ -191,12 +137,15 @@ func NewCGRReply(rply engine.NavigableMapper,
 		return engine.NewNavigableMap(map[string]interface{}{
 			utils.Error: errRply.Error()}), nil
 	}
-	mp, err = rply.AsNavigableMap(nil)
-	if err != nil {
-		return nil, err
+	mp = engine.NewNavigableMap(nil)
+	if rply != nil {
+		mp, err = rply.AsNavigableMap(nil)
+		if err != nil {
+			return nil, err
+		}
 	}
 	mp.Set([]string{utils.Error}, "", false) // enforce empty error
-	return mp, nil
+	return
 }
 
 // newRADataProvider constructs a DataProvider
@@ -215,7 +164,7 @@ type radiusDP struct {
 // String is part of engine.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (pk *radiusDP) String() string {
-	return ""
+	return utils.ToJSON(pk)
 }
 
 // FieldAsInterface is part of engine.DataProvider interface
@@ -228,6 +177,9 @@ func (pk *radiusDP) FieldAsInterface(fldPath []string) (data interface{}, err er
 		return
 	}
 	err = nil // cancel previous err
+	if len(pk.req.AttributesWithName(fldPath[0], "")) != 0 {
+		data = pk.req.AttributesWithName(fldPath[0], "")[0].GetStringValue()
+	}
 	pk.cache.Set(fldPath, data, false)
 	return
 }

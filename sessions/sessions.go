@@ -1902,6 +1902,7 @@ func (smg *SMGeneric) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection
 	if !args.TerminateSession && !args.ReleaseResources {
 		return utils.NewErrMandatoryIeMissing("subsystems")
 	}
+	//
 	if args.CGREvent.Tenant == "" {
 		args.CGREvent.Tenant = smg.cgrCfg.DefaultTenant
 	}

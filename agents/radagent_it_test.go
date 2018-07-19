@@ -191,7 +191,7 @@ func TestRAitAcctStart(t *testing.T) {
 	}
 	// Make sure the sessin is managed by SMG
 	var aSessions []*sessions.ActiveSession
-	if err := raRPC.Call("SMGenericV1.GetActiveSessions",
+	if err := raRPC.Call(utils.SessionSv1GetActiveSessions,
 		map[string]string{utils.RunID: utils.META_DEFAULT,
 			utils.OriginID: "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"},
 		&aSessions); err != nil {
@@ -279,7 +279,7 @@ func TestRAitAcctStop(t *testing.T) {
 			t.Errorf("Unexpected CDR CostSource received for CDR: %v", cdrs[0])
 		}
 		if cdrs[0].Cost != 0.01 {
-			t.Errorf("Unexpected CDR Cost received for CDR: %v", cdrs[0])
+			t.Errorf("Unexpected CDR Cost received for CDR: %v", cdrs[0].Cost)
 		}
 	}
 }

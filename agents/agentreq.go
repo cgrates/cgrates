@@ -151,6 +151,23 @@ func (aReq *AgentRequest) ParseField(
 	case utils.META_COMPOSED:
 		out = aReq.composedField(cfgFld.Value)
 		isString = true
+	case utils.META_USAGE_DIFFERENCE:
+		if len(cfgFld.Value) != 2 {
+			return nil, fmt.Errorf("invalid arguments <%s>", utils.ToJSON(cfgFld.Value))
+		} else {
+			strVal1, err := aReq.FieldAsString(strings.Split(cfgFld.Value[0].Id, utils.NestingSep))
+			strVal2, err := aReq.FieldAsString(strings.Split(cfgFld.Value[1].Id, utils.NestingSep))
+			tEnd, err := utils.ParseTimeDetectLayout(strVal1, cfgFld.Timezone)
+			if err != nil {
+				return "", err
+			}
+			tStart, err := utils.ParseTimeDetectLayout(strVal2, cfgFld.Timezone)
+			if err != nil {
+				return "", err
+			}
+			out = tEnd.Sub(tStart).String()
+		}
+		isString = true
 	}
 	if isString { // format the string additionally with fmtFieldWidth
 		out, err = utils.FmtFieldWidth(cfgFld.Tag, out.(string), cfgFld.Width,
@@ -172,17 +189,18 @@ func (ar *AgentRequest) composedField(outTpl utils.RSRFields) (outVal string) {
 			}
 			continue
 		}
+
 		valStr, err := ar.FieldAsString(strings.Split(rsrTpl.Id, utils.NestingSep))
 		if err != nil {
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> %s",
-					utils.HTTPAgent, err.Error()))
+				fmt.Sprintf("<%s> %s FieldAsString %s",
+					utils.AgentRequest, err.Error(), rsrTpl.Id))
 			continue
 		}
 		if parsed, err := rsrTpl.Parse(valStr); err != nil {
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> %s",
-					utils.HTTPAgent, err.Error()))
+				fmt.Sprintf("<%s> %s Parse ",
+					utils.AgentRequest, err.Error(), valStr))
 		} else {
 			outVal += parsed
 		}
