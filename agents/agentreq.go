@@ -189,18 +189,17 @@ func (ar *AgentRequest) composedField(outTpl utils.RSRFields) (outVal string) {
 			}
 			continue
 		}
-
 		valStr, err := ar.FieldAsString(strings.Split(rsrTpl.Id, utils.NestingSep))
 		if err != nil {
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> %s FieldAsString %s",
-					utils.AgentRequest, err.Error(), rsrTpl.Id))
+				fmt.Sprintf("<%s> %s",
+					utils.HTTPAgent, err.Error()))
 			continue
 		}
 		if parsed, err := rsrTpl.Parse(valStr); err != nil {
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> %s Parse ",
-					utils.AgentRequest, err.Error(), valStr))
+				fmt.Sprintf("<%s> %s",
+					utils.HTTPAgent, err.Error()))
 		} else {
 			outVal += parsed
 		}
