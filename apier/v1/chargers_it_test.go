@@ -168,15 +168,15 @@ func testChargerSGetChargersForEvent(t *testing.T) {
 	if err := chargerRPC.Call(utils.ChargerSv1GetChargersForEvent, chargerEvent[0], &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result, chargerProfiles) {
-		t.Errorf("Expecting : %s, received: %s", chargerProfiles, result)
+		t.Errorf("Expecting : %+v, received: %+v", chargerProfiles, result)
 	}
 }
 
 func testChargerSProcessEvent(t *testing.T) {
 	processedEv := &[]*engine.AttrSProcessEventReply{
 		&engine.AttrSProcessEventReply{
-			MatchedProfile: "ATTR_1001_SIMPLEAUTH",
-			AlteredFields:  []string{"Password"},
+			MatchedProfiles: []string{"ATTR_1001_SIMPLEAUTH"},
+			AlteredFields:   []string{"Password"},
 			CGREvent: &utils.CGREvent{ // matching Charger1
 				Tenant:  "cgrates.org",
 				ID:      "event1",

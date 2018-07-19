@@ -294,8 +294,8 @@ func testAttributeSProcessEvent(t *testing.T) {
 		},
 	}
 	eRply := &engine.AttrSProcessEventReply{
-		MatchedProfile: "ATTR_1",
-		AlteredFields:  []string{utils.Subject, utils.Account},
+		MatchedProfiles: []string{"ATTR_1"},
+		AlteredFields:   []string{utils.Subject, utils.Account},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSProcessEvent",
@@ -308,8 +308,8 @@ func testAttributeSProcessEvent(t *testing.T) {
 		},
 	}
 	eRply2 := &engine.AttrSProcessEventReply{
-		MatchedProfile: "ATTR_1",
-		AlteredFields:  []string{utils.Account, utils.Subject},
+		MatchedProfiles: []string{"ATTR_1"},
+		AlteredFields:   []string{utils.Account, utils.Subject},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSProcessEvent",
@@ -374,8 +374,8 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	eRply := &engine.AttrSProcessEventReply{
-		MatchedProfile: "AttributeWithNonSubstitute",
-		AlteredFields:  []string{utils.Account, utils.Subject},
+		MatchedProfiles: []string{"AttributeWithNonSubstitute"},
+		AlteredFields:   []string{utils.Account, utils.Subject},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSWithNoneSubstitute",
@@ -387,8 +387,8 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 		},
 	}
 	eRply2 := &engine.AttrSProcessEventReply{
-		MatchedProfile: "AttributeWithNonSubstitute",
-		AlteredFields:  []string{utils.Subject, utils.Account},
+		MatchedProfiles: []string{"AttributeWithNonSubstitute"},
+		AlteredFields:   []string{utils.Subject, utils.Account},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSWithNoneSubstitute",
@@ -453,8 +453,8 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	eRply := &engine.AttrSProcessEventReply{
-		MatchedProfile: "AttributeWithNonSubstitute",
-		AlteredFields:  []string{"Account", "Subject"},
+		MatchedProfiles: []string{"AttributeWithNonSubstitute"},
+		AlteredFields:   []string{"Account", "Subject"},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSWithNoneSubstitute",
@@ -466,8 +466,8 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 		},
 	}
 	eRply2 := &engine.AttrSProcessEventReply{
-		MatchedProfile: "AttributeWithNonSubstitute",
-		AlteredFields:  []string{utils.Subject, utils.Account},
+		MatchedProfiles: []string{"AttributeWithNonSubstitute"},
+		AlteredFields:   []string{utils.Subject, utils.Account},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSWithNoneSubstitute",
@@ -531,8 +531,8 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	eRply := &engine.AttrSProcessEventReply{
-		MatchedProfile: "AttributeWithNonSubstitute",
-		AlteredFields:  []string{"Account", "Subject"},
+		MatchedProfiles: []string{"AttributeWithNonSubstitute"},
+		AlteredFields:   []string{"Account", "Subject"},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSWithNoneSubstitute",
@@ -544,8 +544,8 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 		},
 	}
 	eRply2 := &engine.AttrSProcessEventReply{
-		MatchedProfile: "AttributeWithNonSubstitute",
-		AlteredFields:  []string{utils.Subject, utils.Account},
+		MatchedProfiles: []string{"AttributeWithNonSubstitute"},
+		AlteredFields:   []string{utils.Subject, utils.Account},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSWithNoneSubstitute",

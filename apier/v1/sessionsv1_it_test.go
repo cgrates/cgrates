@@ -183,8 +183,8 @@ func TestSSv1ItAuth(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eSplrs), utils.ToJSON(rply.Suppliers))
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
-		MatchedProfile: "ATTR_ACNT_1001",
-		AlteredFields:  []string{"OfficeGroup"},
+		MatchedProfiles: []string{"ATTR_ACNT_1001"},
+		AlteredFields:   []string{"OfficeGroup"},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "TestSSv1ItAuth",
@@ -288,8 +288,8 @@ func TestSSv1ItInitiateSession(t *testing.T) {
 		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
-		MatchedProfile: "ATTR_ACNT_1001",
-		AlteredFields:  []string{"OfficeGroup"},
+		MatchedProfiles: []string{"ATTR_ACNT_1001"},
+		AlteredFields:   []string{"OfficeGroup"},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "TestSSv1ItInitiateSession",
@@ -384,8 +384,8 @@ func TestSSv1ItUpdateSession(t *testing.T) {
 		t.Error(err)
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
-		MatchedProfile: "ATTR_ACNT_1001",
-		AlteredFields:  []string{"OfficeGroup"},
+		MatchedProfiles: []string{"ATTR_ACNT_1001"},
+		AlteredFields:   []string{"OfficeGroup"},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "TestSSv1ItUpdateSession",
@@ -507,8 +507,8 @@ func TestSSv1ItProcessEvent(t *testing.T) {
 		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
-		MatchedProfile: "ATTR_ACNT_1001",
-		AlteredFields:  []string{"OfficeGroup"},
+		MatchedProfiles: []string{"ATTR_ACNT_1001"},
+		AlteredFields:   []string{"OfficeGroup"},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "TestSSv1ItProcessEvent",
