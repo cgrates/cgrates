@@ -645,7 +645,6 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
-		Create_cdr:           utils.BoolPointer(true),
 		Cdr_requires_session: utils.BoolPointer(false),
 		Timezone:             utils.StringPointer(""),
 		Request_processors:   &[]*RAReqProcessorJsnCfg{},

@@ -1021,43 +1021,12 @@ func TestRadiusAgentCfg(t *testing.T) {
 		ClientSecrets:      map[string]string{utils.META_DEFAULT: "CGRateS.org"},
 		ClientDictionaries: map[string]string{utils.META_DEFAULT: "/usr/share/cgrates/radius/dict/"},
 		SessionSConns:      []*HaPoolConfig{&HaPoolConfig{Address: utils.MetaInternal}},
-		CreateCDR:          true,
 		CDRRequiresSession: false,
 		Timezone:           "",
 		RequestProcessors:  nil,
 	}
-	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.Enabled, testRA.Enabled) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.Enabled, testRA.Enabled)
-	}
-	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.ListenNet, testRA.ListenNet) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.ListenNet, testRA.ListenNet)
-	}
-	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.ListenAuth, testRA.ListenAuth) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.ListenAuth, testRA.ListenAuth)
-	}
-	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.ListenAcct, testRA.ListenAcct) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.ListenAcct, testRA.ListenAcct)
-	}
-	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.ClientSecrets, testRA.ClientSecrets) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.ClientSecrets, testRA.ClientSecrets)
-	}
-	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.ClientDictionaries, testRA.ClientDictionaries) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.ClientDictionaries, testRA.ClientDictionaries)
-	}
-	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.SessionSConns, testRA.SessionSConns) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg.SessionSConns, testRA.SessionSConns)
-	}
-	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.CreateCDR, testRA.CreateCDR) {
-		t.Errorf("received: %+v, expecting: %+v", cgrCfg.radiusAgentCfg.CreateCDR, testRA.CreateCDR)
-	}
-	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.CDRRequiresSession, testRA.CDRRequiresSession) {
-		t.Errorf("received: %+v, expecting: %+v", cgrCfg.radiusAgentCfg.CDRRequiresSession, testRA.CDRRequiresSession)
-	}
-	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.Timezone, testRA.Timezone) {
-		t.Errorf("received: %+v, expecting: %+v", cgrCfg.radiusAgentCfg.Timezone, testRA.Timezone)
-	}
-	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg.RequestProcessors, testRA.RequestProcessors) {
-		t.Errorf("received: %+v, expecting: %+v", cgrCfg.radiusAgentCfg.RequestProcessors, testRA.RequestProcessors)
+	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg, testRA) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.radiusAgentCfg, testRA)
 	}
 }
 

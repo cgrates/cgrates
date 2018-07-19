@@ -31,7 +31,6 @@ type RadiusAgentCfg struct {
 	ClientDictionaries map[string]string
 	SessionSConns      []*HaPoolConfig
 	Tenant             utils.RSRFields
-	CreateCDR          bool
 	CDRRequiresSession bool
 	Timezone           string
 	RequestProcessors  []*RARequestProcessor
@@ -81,9 +80,6 @@ func (self *RadiusAgentCfg) loadFromJsonCfg(jsnCfg *RadiusAgentJsonCfg) (err err
 			utils.INFIELD_SEP); err != nil {
 			return
 		}
-	}
-	if jsnCfg.Create_cdr != nil {
-		self.CreateCDR = *jsnCfg.Create_cdr
 	}
 	if jsnCfg.Cdr_requires_session != nil {
 		self.CDRRequiresSession = *jsnCfg.Cdr_requires_session

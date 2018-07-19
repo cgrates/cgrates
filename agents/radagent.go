@@ -31,16 +31,10 @@ import (
 )
 
 const (
-	MetaRadReqType       = "*radReqType"
-	MetaRadAuth          = "*radAuth"
-	MetaRadAcctStart     = "*radAcctStart"
-	MetaRadAcctUpdate    = "*radAcctUpdate"
-	MetaRadAcctStop      = "*radAcctStop"
-	MetaRadReplyCode     = "*radReplyCode"
-	MetaUsageDifference  = "*usage_difference"
-	RadAcctStart         = "Start"
-	RadAcctInterimUpdate = "Interim-Update"
-	RadAcctStop          = "Stop"
+	MetaRadReqType   = "*radReqType"
+	MetaRadAuth      = "*radAuth"
+	MetaRadAcctStart = "*radAcctStart"
+	MetaRadReplyCode = "*radReplyCode"
 )
 
 func NewRadiusAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
