@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package agents
 
-/*
 import (
 	"reflect"
 	"testing"
@@ -121,8 +120,6 @@ func TestAgReqAsNavigableMap(t *testing.T) {
 	if mpOut, err := agReq.AsNavigableMap(tplFlds); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, mpOut) {
-		t.Errorf("expecting: %+v, received: %+v",
-			eMp.AsMapStringInterface(), mpOut.AsMapStringInterface())
+		t.Errorf("expecting: %+v, received: %+v", eMp, mpOut)
 	}
 }
-*/

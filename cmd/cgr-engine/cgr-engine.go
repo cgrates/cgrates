@@ -307,9 +307,12 @@ func startDiameterAgent(internalSMGChan, internalPubSubSChan chan rpcclient.RpcC
 	exitChan <- true
 }
 
-func startRadiusAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
-	var err error
+func startRadiusAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan chan bool,
+	filterSChan chan *engine.FilterS) {
+	filterS := <-filterSChan
+	filterSChan <- filterS
 	utils.Logger.Info("Starting CGRateS RadiusAgent service")
+	var err error
 	var smgConn *rpcclient.RpcClientPool
 	if len(cfg.RadiusAgentCfg().SessionSConns) != 0 {
 		smgConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
@@ -321,7 +324,7 @@ func startRadiusAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitCh
 			return
 		}
 	}
-	ra, err := agents.NewRadiusAgent(cfg, smgConn)
+	ra, err := agents.NewRadiusAgent(cfg, filterS, smgConn)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<RadiusAgent> error: <%s>", err.Error()))
 		exitChan <- true
@@ -1268,7 +1271,7 @@ func main() {
 	}
 
 	if cfg.RadiusAgentCfg().Enabled {
-		go startRadiusAgent(internalSMGChan, exitChan)
+		go startRadiusAgent(internalSMGChan, exitChan, filterSChan)
 	}
 
 	if len(cfg.HttpAgentCfg()) != 0 {
