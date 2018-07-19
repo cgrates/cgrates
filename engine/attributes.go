@@ -131,9 +131,9 @@ type AttrSFieldNameValue struct {
 }
 
 type AttrSProcessEventReply struct {
-	MatchedProfile string
-	AlteredFields  []string
-	CGREvent       *utils.CGREvent
+	MatchedProfiles []string
+	AlteredFields   []string
+	CGREvent        *utils.CGREvent
 }
 
 // Digest returns serialized version of alteredFields in AttrSProcessEventReply
@@ -154,16 +154,20 @@ func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
 
 type AttrArgsProcessEvent struct {
 	AttributeIDs []string
+	ProcessRuns  *int // number of loops for ProcessEvent
 	utils.CGREvent
 }
 
 // processEvent will match event with attribute profile and do the necessary replacements
-func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (rply *AttrSProcessEventReply, err error) {
+func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
+	rply *AttrSProcessEventReply, err error) {
 	attrPrf, err := alS.attributeProfileForEvent(args)
 	if err != nil {
 		return nil, err
 	}
-	rply = &AttrSProcessEventReply{MatchedProfile: attrPrf.ID, CGREvent: args.Clone()}
+	rply = &AttrSProcessEventReply{
+		MatchedProfiles: []string{attrPrf.ID},
+		CGREvent:        args.Clone()}
 	for fldName, initialMp := range attrPrf.attributes {
 		initEvValIf, has := args.Event[fldName]
 		if !has {
@@ -217,13 +221,37 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 	if args.Event == nil {
 		return utils.NewErrMandatoryIeMissing("Event")
 	}
-	evReply, err := alS.processEvent(args)
-	if err != nil {
-		if err != utils.ErrNotFound {
-			err = utils.NewErrServerError(err)
-		}
-		return err
+	if args.ProcessRuns == nil || *args.ProcessRuns == 0 {
+		args.ProcessRuns = utils.IntPointer(alS.processRuns)
 	}
-	*reply = *evReply
+	var apiRply *AttrSProcessEventReply // aggregate response here
+	for i := 0; i < *args.ProcessRuns; i++ {
+		evRply, err := alS.processEvent(args)
+		if err != nil {
+			if err != utils.ErrNotFound {
+				err = utils.NewErrServerError(err)
+			} else if i != 0 { // ignore "not found" in a loop different than 0
+				err = nil
+				break
+			}
+			return err
+		}
+		if apiRply == nil { // first reply
+			apiRply = evRply
+			continue
+		}
+		if utils.IsSliceMember(apiRply.MatchedProfiles,
+			evRply.MatchedProfiles[0]) { // don't process the same AttributeProfile twice
+			break
+		}
+		apiRply.CGREvent = evRply.CGREvent
+		for _, fldName := range evRply.AlteredFields {
+			if utils.IsSliceMember(apiRply.AlteredFields, fldName) {
+				continue // only add processed fieldName once
+			}
+			apiRply.AlteredFields = append(apiRply.AlteredFields, fldName)
+		}
+	}
+	*reply = *apiRply
 	return
 }

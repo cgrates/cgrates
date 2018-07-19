@@ -319,9 +319,9 @@ func TestAttributeProfileForEvent(t *testing.T) {
 func TestAttributeProcessEvent(t *testing.T) {
 	attrEvs[0].CGREvent.Event["Account"] = "1010" //Field added in event after process
 	eRply := &AttrSProcessEventReply{
-		MatchedProfile: "AttributeProfile1",
-		AlteredFields:  []string{"Account"},
-		CGREvent:       &attrEvs[0].CGREvent,
+		MatchedProfiles: []string{"AttributeProfile1"},
+		AlteredFields:   []string{"Account"},
+		CGREvent:        &attrEvs[0].CGREvent,
 	}
 	atrp, err := attrService.processEvent(attrEvs[0])
 	if err != nil {
@@ -343,9 +343,9 @@ func TestAttributeProcessEventWithIDs(t *testing.T) {
 	attrEvs[3].CGREvent.Event["Account"] = "1010" //Field added in event after process
 	attrEvs[3].AttributeIDs = []string{"AttributeIDMatch"}
 	eRply := &AttrSProcessEventReply{
-		MatchedProfile: "AttributeIDMatch",
-		AlteredFields:  []string{"Account"},
-		CGREvent:       &attrEvs[3].CGREvent,
+		MatchedProfiles: []string{"AttributeIDMatch"},
+		AlteredFields:   []string{"Account"},
+		CGREvent:        &attrEvs[3].CGREvent,
 	}
 	if atrp, err := attrService.processEvent(attrEvs[3]); err != nil {
 	} else if !reflect.DeepEqual(eRply, atrp) {
@@ -355,8 +355,8 @@ func TestAttributeProcessEventWithIDs(t *testing.T) {
 
 func TestAttributeEventReplyDigest(t *testing.T) {
 	eRpl := &AttrSProcessEventReply{
-		MatchedProfile: "ATTR_1",
-		AlteredFields:  []string{utils.Account, utils.Subject},
+		MatchedProfiles: []string{"ATTR_1"},
+		AlteredFields:   []string{utils.Account, utils.Subject},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSProcessEvent",
@@ -377,8 +377,8 @@ func TestAttributeEventReplyDigest(t *testing.T) {
 
 func TestAttributeEventReplyDigest2(t *testing.T) {
 	eRpl := &AttrSProcessEventReply{
-		MatchedProfile: "ATTR_1",
-		AlteredFields:  []string{},
+		MatchedProfiles: []string{"ATTR_1"},
+		AlteredFields:   []string{},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSProcessEvent",
@@ -399,8 +399,8 @@ func TestAttributeEventReplyDigest2(t *testing.T) {
 
 func TestAttributeEventReplyDigest3(t *testing.T) {
 	eRpl := &AttrSProcessEventReply{
-		MatchedProfile: "ATTR_1",
-		AlteredFields:  []string{"Subject"},
+		MatchedProfiles: []string{"ATTR_1"},
+		AlteredFields:   []string{"Subject"},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSProcessEvent",
@@ -421,8 +421,8 @@ func TestAttributeEventReplyDigest3(t *testing.T) {
 
 func TestAttributeEventReplyDigest4(t *testing.T) {
 	eRpl := &AttrSProcessEventReply{
-		MatchedProfile: "ATTR_1",
-		AlteredFields:  []string{"Subject"},
+		MatchedProfiles: []string{"ATTR_1"},
+		AlteredFields:   []string{"Subject"},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSProcessEvent",

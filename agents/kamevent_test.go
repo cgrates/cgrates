@@ -270,8 +270,8 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 	}
 	authRply = &sessions.V1AuthorizeReply{
 		Attributes: &engine.AttrSProcessEventReply{
-			MatchedProfile: "ATTR_1001_ACCOUNT_PROFILE",
-			AlteredFields:  []string{"Password", utils.RequestType},
+			MatchedProfiles: []string{"ATTR_1001_ACCOUNT_PROFILE"},
+			AlteredFields:   []string{"Password", utils.RequestType},
 			CGREvent: &utils.CGREvent{
 				Tenant:  "cgrates.org",
 				ID:      "TestKamEvAsKamAuthReply",
