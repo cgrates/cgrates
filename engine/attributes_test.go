@@ -182,7 +182,7 @@ func TestAttributePopulateAttrService(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	attrService, err = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, nil, nil)
+	attrService, err = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, nil, nil, 1)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}

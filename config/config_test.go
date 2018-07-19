@@ -805,6 +805,7 @@ func TestCgrCfgJSONDefaultSAttributeSCfg(t *testing.T) {
 		Enabled:             false,
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
+		ProcessRuns:         1,
 	}
 	if !reflect.DeepEqual(eAliasSCfg, cgrCfg.attributeSCfg) {
 		t.Errorf("received: %+v, expecting: %+v", eAliasSCfg, cgrCfg.attributeSCfg)

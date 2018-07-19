@@ -25,10 +25,12 @@ import (
 )
 
 func NewAttributeService(dm *DataManager, filterS *FilterS,
-	stringIndexedFields, prefixIndexedFields *[]string) (*AttributeService, error) {
+	stringIndexedFields, prefixIndexedFields *[]string,
+	processRuns int) (*AttributeService, error) {
 	return &AttributeService{dm: dm, filterS: filterS,
 		stringIndexedFields: stringIndexedFields,
-		prefixIndexedFields: prefixIndexedFields}, nil
+		prefixIndexedFields: prefixIndexedFields,
+		processRuns:         processRuns}, nil
 }
 
 type AttributeService struct {
@@ -36,6 +38,7 @@ type AttributeService struct {
 	filterS             *FilterS
 	stringIndexedFields *[]string
 	prefixIndexedFields *[]string
+	processRuns         int
 }
 
 // ListenAndServe will initialize the service

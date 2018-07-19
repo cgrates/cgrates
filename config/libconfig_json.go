@@ -427,6 +427,7 @@ type AttributeSJsonCfg struct {
 	Enabled               *bool
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
+	Process_runs          *int
 }
 
 // ChargerSJsonCfg service config section

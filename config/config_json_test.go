@@ -705,6 +705,7 @@ func TestDfAttributeServJsonCfg(t *testing.T) {
 		Enabled:               utils.BoolPointer(false),
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
+		Process_runs:          utils.IntPointer(1),
 	}
 	if cfg, err := dfCgrJsonCfg.AttributeServJsonCfg(); err != nil {
 		t.Error(err)

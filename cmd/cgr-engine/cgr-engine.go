@@ -582,7 +582,9 @@ func startAttributeService(internalAttributeSChan chan rpcclient.RpcClientConnec
 	<-cacheS.GetPrecacheChannel(utils.CacheAttributeProfiles)
 
 	aS, err := engine.NewAttributeService(dm, filterS,
-		cfg.AttributeSCfg().StringIndexedFields, cfg.AttributeSCfg().PrefixIndexedFields)
+		cfg.AttributeSCfg().StringIndexedFields,
+		cfg.AttributeSCfg().PrefixIndexedFields,
+		cfg.AttributeSCfg().ProcessRuns)
 	if err != nil {
 		utils.Logger.Crit(
 			fmt.Sprintf("<%s> Could not init, error: %s",

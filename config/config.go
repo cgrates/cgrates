@@ -658,6 +658,11 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
+	if self.attributeSCfg != nil && self.attributeSCfg.Enabled {
+		if self.attributeSCfg.ProcessRuns < 1 {
+			return fmt.Errorf("<%s> process_runs needs to be bigger than 0", utils.AttributeS)
+		}
+	}
 	if self.chargerSCfg != nil && self.chargerSCfg.Enabled {
 		for _, connCfg := range self.chargerSCfg.AttributeSConns {
 			if connCfg.Address == utils.MetaInternal &&
