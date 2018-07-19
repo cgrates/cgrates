@@ -64,6 +64,153 @@ var (
 	ErrDiameterRatingFailed = errors.New("Diameter rating failed")
 )
 
+// processorVars will hold various variables using during request processing
+// here so we can define methods on it
+type processorVars map[string]interface{}
+
+// hasSubsystems will return true on single subsystem being present in processorVars
+func (pv processorVars) hasSubsystems() (has bool) {
+	for _, k := range []string{utils.MetaAccounts, utils.MetaResources,
+		utils.MetaSuppliers, utils.MetaAttributes} {
+		if _, has = pv[k]; has {
+			return
+		}
+	}
+	return
+}
+
+func (pv processorVars) hasVar(k string) (has bool) {
+	_, has = pv[k]
+	return
+}
+
+// valAsInterface returns the string value for fldName
+func (pv processorVars) valAsInterface(fldPath string) (val interface{}, err error) {
+	fldName := fldPath
+	if strings.HasPrefix(fldPath, utils.MetaCGRReply) {
+		fldName = utils.MetaCGRReply
+	}
+	if !pv.hasVar(fldName) {
+		err = errors.New("not found")
+		return
+	}
+	return engine.NewNavigableMap(pv).FieldAsInterface(strings.Split(fldPath, utils.HIERARCHY_SEP))
+}
+
+// valAsString returns the string value for fldName
+// returns empty if fldName not found
+func (pv processorVars) valAsString(fldPath string) (val string, err error) {
+	fldName := fldPath
+	if strings.HasPrefix(fldPath, utils.MetaCGRReply) {
+		fldName = utils.MetaCGRReply
+	}
+	if !pv.hasVar(fldName) {
+		return "", utils.ErrNotFoundNoCaps
+	}
+	return engine.NewNavigableMap(pv).FieldAsString(strings.Split(fldPath, utils.HIERARCHY_SEP))
+}
+
+// asV1AuthorizeArgs returns the arguments needed by SessionSv1.AuthorizeEvent
+func (pv processorVars) asV1AuthorizeArgs(cgrEv *utils.CGREvent) (args *sessions.V1AuthorizeArgs) {
+	args = &sessions.V1AuthorizeArgs{ // defaults
+		GetMaxUsage: true,
+		CGREvent:    *cgrEv,
+	}
+	if !pv.hasSubsystems() {
+		return
+	}
+	if !pv.hasVar(utils.MetaAccounts) {
+		args.GetMaxUsage = false
+	}
+	if pv.hasVar(utils.MetaResources) {
+		args.AuthorizeResources = true
+	}
+	if pv.hasVar(utils.MetaSuppliers) {
+		args.GetSuppliers = true
+	}
+	if pv.hasVar(utils.MetaAttributes) {
+		args.GetAttributes = true
+	}
+	return
+}
+
+// asV1InitSessionArgs returns the arguments used in SessionSv1.InitSession
+func (pv processorVars) asV1InitSessionArgs(cgrEv *utils.CGREvent) (args *sessions.V1InitSessionArgs) {
+	args = &sessions.V1InitSessionArgs{ // defaults
+		InitSession: true,
+		CGREvent:    *cgrEv,
+	}
+	if !pv.hasSubsystems() {
+		return
+	}
+	if !pv.hasVar(utils.MetaAccounts) {
+		args.InitSession = false
+	}
+	if pv.hasVar(utils.MetaResources) {
+		args.AllocateResources = true
+	}
+	if pv.hasVar(utils.MetaAttributes) {
+		args.GetAttributes = true
+	}
+	return
+}
+
+// asV1UpdateSessionArgs returns the arguments used in SessionSv1.InitSession
+func (pv processorVars) asV1UpdateSessionArgs(cgrEv *utils.CGREvent) (args *sessions.V1UpdateSessionArgs) {
+	args = &sessions.V1UpdateSessionArgs{ // defaults
+		UpdateSession: true,
+		CGREvent:      *cgrEv,
+	}
+	if !pv.hasSubsystems() {
+		return
+	}
+	if !pv.hasVar(utils.MetaAccounts) {
+		args.UpdateSession = false
+	}
+	if pv.hasVar(utils.MetaAttributes) {
+		args.GetAttributes = true
+	}
+	return
+}
+
+// asV1TerminateSessionArgs returns the arguments used in SMGv1.TerminateSession
+func (pv processorVars) asV1TerminateSessionArgs(cgrEv *utils.CGREvent) (args *sessions.V1TerminateSessionArgs) {
+	args = &sessions.V1TerminateSessionArgs{ // defaults
+		TerminateSession: true,
+		CGREvent:         *cgrEv,
+	}
+	if !pv.hasSubsystems() {
+		return
+	}
+	if !pv.hasVar(utils.MetaAccounts) {
+		args.TerminateSession = false
+	}
+	if pv.hasVar(utils.MetaResources) {
+		args.ReleaseResources = true
+	}
+	return
+}
+
+func (pv processorVars) asV1ProcessEventArgs(cgrEv *utils.CGREvent) (args *sessions.V1ProcessEventArgs) {
+	args = &sessions.V1ProcessEventArgs{ // defaults
+		Debit:    true,
+		CGREvent: *cgrEv,
+	}
+	if !pv.hasSubsystems() {
+		return
+	}
+	if !pv.hasVar(utils.MetaAccounts) {
+		args.Debit = false
+	}
+	if pv.hasVar(utils.MetaResources) {
+		args.AllocateResources = true
+	}
+	if pv.hasVar(utils.MetaAttributes) {
+		args.GetAttributes = true
+	}
+	return
+}
+
 func loadDictionaries(dictsDir, componentId string) error {
 	fi, err := os.Stat(dictsDir)
 	if err != nil {

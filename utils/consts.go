@@ -323,6 +323,7 @@ const (
 	TRIGGER_BALANCE_EXPIRED      = "*balance_expired"
 	HIERARCHY_SEP                = ">"
 	META_COMPOSED                = "*composed"
+	META_USAGE_DIFFERENCE        = "*usage_difference"
 	MetaString                   = "*string"
 	NegativePrefix               = "!"
 	MatchStartPrefix             = "^"
@@ -523,6 +524,7 @@ const (
 	MetaDryRun                   = "*dryrun"
 	Event                        = "Event"
 	EmptyString                  = ""
+	AgentRequest                 = "AgentRequest"
 )
 
 // Migrator Action

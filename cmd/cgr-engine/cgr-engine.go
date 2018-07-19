@@ -314,7 +314,7 @@ func startRadiusAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitCh
 			return
 		}
 	}
-	ra, err := agents.NewRadiusAgent(cfg, smgConn)
+	ra, err := agents.NewRadiusAgent(cfg, filterS, smgConn)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<RadiusAgent> error: <%s>", err.Error()))
 		exitChan <- true
