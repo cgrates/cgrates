@@ -24,7 +24,7 @@ import (
 )
 
 func TestNewRSRParsers(t *testing.T) {
-	ruleStr := `Value1;Heade2=Value2;~Header3(Val3&!Val4);~Header4:s/^a/${1}b/{*duration_seconds&*round:2}(b&c);Value5{*duration_seconds&*round:2}`
+	ruleStr := `Value1;Heade2=Value2;~Header3(Val3&!Val4);~Header4:s/a/${1}b/{*duration_seconds&*round:2}(b&c);Value5{*duration_seconds&*round:2}`
 	eRSRParsers := RSRParsers{
 		&RSRParser{Rules: "Value1", attrValue: "Value1"},
 		&RSRParser{Rules: "Heade2=Value2", attrName: "Heade2", attrValue: "Value2"},
@@ -32,10 +32,10 @@ func TestNewRSRParsers(t *testing.T) {
 			filters: RSRFilters{NewRSRFilterMustCompile("Val3"),
 				NewRSRFilterMustCompile("!Val4")}},
 
-		&RSRParser{Rules: "~Header4:s/^a/${1}b/{*duration_seconds&*round:2}(b&c)", attrName: "Header4",
+		&RSRParser{Rules: "~Header4:s/a/${1}b/{*duration_seconds&*round:2}(b&c)", attrName: "Header4",
 			rsrRules: []*ReSearchReplace{
 				&ReSearchReplace{
-					SearchRegexp:    regexp.MustCompile(`^a`),
+					SearchRegexp:    regexp.MustCompile(`a`),
 					ReplaceTemplate: "${1}b"}},
 			converters: DataConverters{NewDataConverterMustCompile("*duration_seconds"),
 				NewDataConverterMustCompile("*round:2")},

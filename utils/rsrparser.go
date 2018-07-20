@@ -82,9 +82,8 @@ func NewRSRParser(parserRules, inRuleSep string) (rsrParser *RSRParser, err erro
 	spltRules := spltRgxp.Split(parserRules, -1)
 	rsrParser.attrName = spltRules[0][1:] // in form ~hdr_name
 	if len(spltRules) > 1 {
-		rulesRgxp := regexp.MustCompile(`(?:(.+[^\\])\/(.*[^\\])*\/){1,}`)
+		rulesRgxp := regexp.MustCompile(`(?:(.*[^\\])\/(.*[^\\])*\/){1,}`)
 		for _, ruleStr := range spltRules[1:] { // :s/ already removed through split
-			fmt.Printf("ruleStr: %s\n", ruleStr)
 			allMatches := rulesRgxp.FindStringSubmatch(ruleStr)
 			if len(allMatches) != 3 {
 				return nil, fmt.Errorf("not enough members in Search&Replace, ruleStr: <%s>, matches: %v, ", ruleStr, allMatches)
