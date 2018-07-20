@@ -236,6 +236,9 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 			}
 			return err
 		}
+		if len(evRply.AlteredFields) != 0 {
+			args.CGREvent = evRply.CGREvent // for next loop
+		}
 		if apiRply == nil { // first reply
 			apiRply = evRply
 			continue
