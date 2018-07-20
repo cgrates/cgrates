@@ -119,6 +119,16 @@ func (prsr *RSRParser) Compile() (err error) {
 	return
 }
 
+// RegexpMatched will investigate whether we had at least one regexp match through the rules
+func (prsr *RSRParser) RegexpMatched() bool {
+	for _, rsrule := range prsr.rsrRules {
+		if rsrule.Matched {
+			return true
+		}
+	}
+	return false
+}
+
 func NewRSRParsers(parsersRules string) (prsrs RSRParsers, err error) {
 	if parsersRules == "" {
 		return
