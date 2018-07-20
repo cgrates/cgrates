@@ -188,3 +188,35 @@ func TestNewCGRReply(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eCgrRply, rpl)
 	}
 }
+
+func TestRadiusDPFieldAsInterface(t *testing.T) {
+	pkt := radigo.NewPacket(radigo.AccountingRequest, 1, dictRad, coder, "CGRateS.org")
+	if err := pkt.AddAVPWithName("User-Name", "flopsy", ""); err != nil {
+		t.Error(err)
+	}
+	if err := pkt.AddAVPWithName("Cisco-NAS-Port", "CGR1", "Cisco"); err != nil {
+		t.Error(err)
+	}
+	dp, _ := newRADataProvider(pkt)
+	if data, err := dp.FieldAsInterface([]string{"User-Name"}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(data, utils.StringToInterface("flopsy")) {
+		t.Errorf("Expecting: <%s>, received: <%s>", utils.StringToInterface("flopsy"), data)
+	}
+}
+
+func TestRadiusDPFieldAsString(t *testing.T) {
+	pkt := radigo.NewPacket(radigo.AccountingRequest, 1, dictRad, coder, "CGRateS.org")
+	if err := pkt.AddAVPWithName("User-Name", "flopsy", ""); err != nil {
+		t.Error(err)
+	}
+	if err := pkt.AddAVPWithName("Cisco-NAS-Port", "CGR1", "Cisco"); err != nil {
+		t.Error(err)
+	}
+	dp, _ := newRADataProvider(pkt)
+	if data, err := dp.FieldAsString([]string{"User-Name"}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(data, "flopsy") {
+		t.Errorf("Expecting: flopsy, received: <%s>", data)
+	}
+}
