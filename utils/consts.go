@@ -525,6 +525,9 @@ const (
 	Event                        = "Event"
 	EmptyString                  = ""
 	AgentRequest                 = "AgentRequest"
+	DynamicDataPrefix            = "~"
+	AttrValueSep                 = "="
+	ANDSep                       = "&"
 )
 
 // Migrator Action

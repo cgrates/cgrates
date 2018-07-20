@@ -80,6 +80,14 @@ func NewDataConverter(params string) (
 	}
 }
 
+func NewDataConverterMustCompile(params string) (conv DataConverter) {
+	var err error
+	if conv, err = NewDataConverter(params); err != nil {
+		panic(fmt.Sprintf("parsing: <%s>, error: %s", params, err.Error()))
+	}
+	return
+}
+
 func NewDurationSecondsConverter(params string) (
 	hdlr DataConverter, err error) {
 	return new(DurationSecondsConverter), nil

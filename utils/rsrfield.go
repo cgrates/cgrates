@@ -218,6 +218,15 @@ func NewRSRFilter(fltrVal string) (rsrFltr *RSRFilter, err error) {
 	return rsrFltr, nil
 }
 
+// NewRSRFilterMustCompile is used mostly in tests
+func NewRSRFilterMustCompile(fltrVal string) (rsrFltr *RSRFilter) {
+	var err error
+	if rsrFltr, err = NewRSRFilter(fltrVal); err != nil {
+		panic(fmt.Sprintf("parsing <%s>, err: %s", fltrVal, err.Error()))
+	}
+	return
+}
+
 // One filter rule
 type RSRFilter struct {
 	filterRule string // Value in raw format

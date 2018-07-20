@@ -71,11 +71,6 @@ func TestNewRSRField1(t *testing.T) {
 	} else if !reflect.DeepEqual(expRSRField, rsrField) {
 		t.Errorf("Expecting: %+v, received: %+v", expRSRField, rsrField)
 	}
-	// Separator escaped
-	rulesStr = `~sip_redirected_to:s\/sip:\+49(\d+)@/0$1/`
-	if rsrField, err := NewRSRField(rulesStr); err == nil {
-		t.Errorf("Parse error, field rule does not contain correct number of separators, received: %v", rsrField)
-	}
 	// One extra separator but escaped
 	rulesStr = `~sip_redirected_to:s/sip:\+49(\d+)\/@/0$1/`
 	expRSRField3 := &RSRField{Id: "sip_redirected_to", Rules: rulesStr,
