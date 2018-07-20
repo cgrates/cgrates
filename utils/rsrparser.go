@@ -24,7 +24,7 @@ import (
 	"strings"
 )
 
-func NewRSRParser(parserRules, inRuleSep string) (rsrParser *RSRParser, err error) {
+func NewRSRParser(parserRules string) (rsrParser *RSRParser, err error) {
 	if len(parserRules) == 0 {
 		return
 	}
@@ -35,7 +35,7 @@ func NewRSRParser(parserRules, inRuleSep string) (rsrParser *RSRParser, err erro
 			return nil, fmt.Errorf("invalid RSRFilter start rule in string: <%s>", parserRules)
 		}
 		fltrVal := parserRules[fltrStart+1 : len(parserRules)-1]
-		rsrParser.filters, err = ParseRSRFilters(fltrVal, inRuleSep)
+		rsrParser.filters, err = ParseRSRFilters(fltrVal, ANDSep)
 		if err != nil {
 			return nil, fmt.Errorf("Invalid FilterValue in string: %s, err: %s", fltrVal, err.Error())
 		}
@@ -48,7 +48,7 @@ func NewRSRParser(parserRules, inRuleSep string) (rsrParser *RSRParser, err erro
 					parserRules)
 		}
 		convertersStr := parserRules[idxConverters+1 : len(parserRules)-1] // strip also {}
-		convsSplt := strings.Split(convertersStr, inRuleSep)
+		convsSplt := strings.Split(convertersStr, ANDSep)
 		rsrParser.converters = make(DataConverters, len(convsSplt))
 		for i, convStr := range convsSplt {
 			if conv, err := NewDataConverter(convStr); err != nil {
@@ -109,17 +109,27 @@ type RSRParser struct {
 	filters    RSRFilters         // The value to compare when used as filter
 }
 
-func NewRSRParsers(parsersRules, rlsSep, inRlSep string) (prsrs RSRParsers, err error) {
+// Compile parses Rules string and repopulates other fields
+func (prsr *RSRParser) Compile() (err error) {
+	var newPrsr *RSRParser
+	if newPrsr, err = NewRSRParser(prsr.Rules); err != nil {
+		return
+	}
+	*prsr = *newPrsr
+	return
+}
+
+func NewRSRParsers(parsersRules string) (prsrs RSRParsers, err error) {
 	if parsersRules == "" {
 		return
 	}
-	return NewRSRParsersFromSlice(strings.Split(parsersRules, rlsSep), inRlSep)
+	return NewRSRParsersFromSlice(strings.Split(parsersRules, INFIELD_SEP))
 }
 
-func NewRSRParsersFromSlice(parsersRules []string, inRlSep string) (prsrs RSRParsers, err error) {
+func NewRSRParsersFromSlice(parsersRules []string) (prsrs RSRParsers, err error) {
 	prsrs = make(RSRParsers, len(parsersRules))
 	for i, rlStr := range parsersRules {
-		if rsrPrsr, err := NewRSRParser(rlStr, inRlSep); err != nil {
+		if rsrPrsr, err := NewRSRParser(rlStr); err != nil {
 			return nil, err
 		} else if rsrPrsr == nil {
 			return nil, fmt.Errorf("emtpy RSRParser in rule: <%s>", rlStr)

@@ -48,9 +48,32 @@ func TestNewRSRParsers(t *testing.T) {
 				NewDataConverterMustCompile("*round:2")},
 		},
 	}
-	if rsrParsers, err := NewRSRParsers(ruleStr, INFIELD_SEP, ANDSep); err != nil {
+	if rsrParsers, err := NewRSRParsers(ruleStr); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if !reflect.DeepEqual(eRSRParsers, rsrParsers) {
 		t.Errorf("expecting: %+v, received: %+v", eRSRParsers, rsrParsers)
+	}
+}
+
+func TestRSRParserCompile(t *testing.T) {
+	ePrsr := &RSRParser{
+		Rules:    "~Header4:s/a/${1}b/{*duration_seconds&*round:2}(b&c)",
+		attrName: "Header4",
+		rsrRules: []*ReSearchReplace{
+			&ReSearchReplace{
+				SearchRegexp:    regexp.MustCompile(`a`),
+				ReplaceTemplate: "${1}b"}},
+		converters: DataConverters{NewDataConverterMustCompile("*duration_seconds"),
+			NewDataConverterMustCompile("*round:2")},
+		filters: RSRFilters{NewRSRFilterMustCompile("b"),
+			NewRSRFilterMustCompile("c")},
+	}
+	prsr := &RSRParser{
+		Rules: "~Header4:s/a/${1}b/{*duration_seconds&*round:2}(b&c)",
+	}
+	if err := prsr.Compile(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ePrsr, prsr) {
+		t.Errorf("expecting: %+v, received: %+v", ePrsr, prsr)
 	}
 }
