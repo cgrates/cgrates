@@ -48,7 +48,7 @@ func TestNewRSRParsers(t *testing.T) {
 				NewDataConverterMustCompile("*round:2")},
 		},
 	}
-	if rsrParsers, err := NewRSRParsers(ruleStr); err != nil {
+	if rsrParsers, err := NewRSRParsers(ruleStr, true); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if !reflect.DeepEqual(eRSRParsers, rsrParsers) {
 		t.Errorf("expecting: %+v, received: %+v", eRSRParsers, rsrParsers)
@@ -75,5 +75,19 @@ func TestRSRParserCompile(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ePrsr, prsr) {
 		t.Errorf("expecting: %+v, received: %+v", ePrsr, prsr)
+	}
+}
+
+func TestRSRParsersParseEvent(t *testing.T) {
+	prsrs := NewRSRParsersMustCompile("~Header1;|;~Header2", true)
+	ev := map[string]interface{}{
+		"Header1": "Value1",
+		"Header2": "Value2",
+	}
+	eOut := "Value1|Value2"
+	if out, err := prsrs.ParseEvent(ev); err != nil {
+		t.Error(err)
+	} else if eOut != out {
+		t.Errorf("expecting: %s, received: %s", eOut, out)
 	}
 }

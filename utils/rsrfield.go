@@ -282,19 +282,21 @@ func ParseRSRFiltersFromSlice(fltrStrs []string) (RSRFilters, error) {
 type RSRFilters []*RSRFilter
 
 // @all: specifies whether all filters should match or at least one
-func (fltrs RSRFilters) Pass(val string, allMustMatch bool) bool {
+func (fltrs RSRFilters) Pass(val string, allMustMatch bool) (matched bool) {
 	if len(fltrs) == 0 {
 		return true
 	}
-	var matched bool
 	for _, fltr := range fltrs {
-		if fltr.Pass(val) {
-			matched = true
-		} else if allMustMatch {
-			return false
+		matched = fltr.Pass(val)
+		if allMustMatch {
+			if !matched {
+				return
+			}
+		} else if matched {
+			return
 		}
 	}
-	return matched
+	return
 }
 
 func ParseRSRFieldsFromSlice(flds []string) (RSRFields, error) {

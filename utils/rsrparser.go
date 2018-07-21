@@ -24,7 +24,63 @@ import (
 	"strings"
 )
 
-func NewRSRParser(parserRules string) (rsrParser *RSRParser, err error) {
+func NewRSRParsers(parsersRules string, allFiltersMatch bool) (prsrs RSRParsers, err error) {
+	if parsersRules == "" {
+		return
+	}
+	return NewRSRParsersFromSlice(strings.Split(parsersRules, INFIELD_SEP), allFiltersMatch)
+}
+
+func NewRSRParsersFromSlice(parsersRules []string, allFiltersMatch bool) (prsrs RSRParsers, err error) {
+	prsrs = make(RSRParsers, len(parsersRules))
+	for i, rlStr := range parsersRules {
+		if rsrPrsr, err := NewRSRParser(rlStr, allFiltersMatch); err != nil {
+			return nil, err
+		} else if rsrPrsr == nil {
+			return nil, fmt.Errorf("emtpy RSRParser in rule: <%s>", rlStr)
+		} else {
+			prsrs[i] = rsrPrsr
+		}
+	}
+	return
+}
+
+func NewRSRParsersMustCompile(parsersRules string, allFiltersMatch bool) (prsrs RSRParsers) {
+	var err error
+	if prsrs, err = NewRSRParsers(parsersRules, allFiltersMatch); err != nil {
+		panic(fmt.Sprintf("rule: <%s>, error: %s", parsersRules, err.Error()))
+	}
+	return
+}
+
+// RSRParsers is a set of RSRParser
+type RSRParsers []*RSRParser
+
+// ParseValue will parse the value out considering converters and filters
+func (prsrs RSRParsers) ParseValue(value interface{}) (out string, err error) {
+	for _, prsr := range prsrs {
+		if outPrsr, err := prsr.ParseValue(value); err != nil {
+			return "", err
+		} else {
+			out += outPrsr
+		}
+	}
+	return
+}
+
+// ParseEvent will parse the event values into one output
+func (prsrs RSRParsers) ParseEvent(ev map[string]interface{}) (out string, err error) {
+	for _, prsr := range prsrs {
+		if outPrsr, err := prsr.ParseEvent(ev); err != nil {
+			return "", err
+		} else {
+			out += outPrsr
+		}
+	}
+	return
+}
+
+func NewRSRParser(parserRules string, allFiltersMatch bool) (rsrParser *RSRParser, err error) {
 	if len(parserRules) == 0 {
 		return
 	}
@@ -98,9 +154,18 @@ func NewRSRParser(parserRules string) (rsrParser *RSRParser, err error) {
 	return
 }
 
+func NewRSRParserMustCompile(parserRules string, allFiltersMatch bool) (rsrPrsr *RSRParser) {
+	var err error
+	if rsrPrsr, err = NewRSRParser(parserRules, allFiltersMatch); err != nil {
+		panic(fmt.Sprintf("compiling rules: <%s>, error: %s", parserRules, err.Error()))
+	}
+	return
+}
+
 // RSRParser is a parser for data coming from various sources
 type RSRParser struct {
-	Rules string // Rules container holding the string rules, public so it can be stored
+	Rules           string // Rules container holding the string rules, public so it can be stored
+	AllFiltersMatch bool   // all filters must match policy
 
 	attrName   string             // instruct extracting info out of header in event
 	attrValue  string             // if populated, enforces parsing always to this value
@@ -112,7 +177,7 @@ type RSRParser struct {
 // Compile parses Rules string and repopulates other fields
 func (prsr *RSRParser) Compile() (err error) {
 	var newPrsr *RSRParser
-	if newPrsr, err = NewRSRParser(prsr.Rules); err != nil {
+	if newPrsr, err = NewRSRParser(prsr.Rules, prsr.AllFiltersMatch); err != nil {
 		return
 	}
 	*prsr = *newPrsr
@@ -129,26 +194,37 @@ func (prsr *RSRParser) RegexpMatched() bool {
 	return false
 }
 
-func NewRSRParsers(parsersRules string) (prsrs RSRParsers, err error) {
-	if parsersRules == "" {
-		return
+// parseValue the field value from a string
+func (prsr *RSRParser) parseValue(value string) string {
+	if prsr.attrValue != "" { // Enforce parsing of static values
+		return prsr.attrValue
 	}
-	return NewRSRParsersFromSlice(strings.Split(parsersRules, INFIELD_SEP))
+	for _, rsRule := range prsr.rsrRules {
+		value = rsRule.Process(value)
+	}
+	return value
 }
 
-func NewRSRParsersFromSlice(parsersRules []string) (prsrs RSRParsers, err error) {
-	prsrs = make(RSRParsers, len(parsersRules))
-	for i, rlStr := range parsersRules {
-		if rsrPrsr, err := NewRSRParser(rlStr); err != nil {
-			return nil, err
-		} else if rsrPrsr == nil {
-			return nil, fmt.Errorf("emtpy RSRParser in rule: <%s>", rlStr)
-		} else {
-			prsrs[i] = rsrPrsr
-		}
+// ParseValue will parse the value out considering converters and filters
+func (prsr *RSRParser) ParseValue(value interface{}) (out string, err error) {
+	if out, err = IfaceAsString(value); err != nil {
+		return
+	}
+	out = prsr.parseValue(out)
+	if out, err = prsr.converters.ConvertString(out); err != nil {
+		return
+	}
+	if !prsr.filters.Pass(out, prsr.AllFiltersMatch) {
+		return "", ErrFilterNotPassingNoCaps
 	}
 	return
 }
 
-// RSRParsers is a set of RSRParser
-type RSRParsers []*RSRParser
+// ParseEvent will parse the value out considering converters and filters
+func (prsr *RSRParser) ParseEvent(ev map[string]interface{}) (out string, err error) {
+	val, has := ev[prsr.attrName]
+	if !has && prsr.attrValue == "" {
+		return "", ErrNotFound
+	}
+	return prsr.ParseValue(val)
+}
