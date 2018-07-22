@@ -1475,7 +1475,7 @@ func TestAPItoAttributeProfile(t *testing.T) {
 	mapSubstitutes["FL1"]["In1"] = &Attribute{
 		FieldName:  "FL1",
 		Initial:    "In1",
-		Substitute: utils.RSRFields{&utils.RSRField{Id: "Al1", RSRules: []*utils.ReSearchReplace{}}},
+		Substitute: utils.NewRSRParsersMustCompile("Al1", true),
 		Append:     true,
 	}
 	expected := &AttributeProfile{
@@ -1490,12 +1490,11 @@ func TestAPItoAttributeProfile(t *testing.T) {
 			&Attribute{
 				FieldName:  "FL1",
 				Initial:    "In1",
-				Substitute: utils.RSRFields{&utils.RSRField{Id: "Al1", RSRules: []*utils.ReSearchReplace{}}},
+				Substitute: utils.NewRSRParsersMustCompile("Al1", true),
 				Append:     true,
 			},
 		},
-		Weight:     20,
-		attributes: mapSubstitutes,
+		Weight: 20,
 	}
 	if rcv, err := APItoAttributeProfile(tpAlsPrf, "UTC"); err != nil {
 		t.Error(err)

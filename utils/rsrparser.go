@@ -56,6 +56,15 @@ func NewRSRParsersMustCompile(parsersRules string, allFiltersMatch bool) (prsrs 
 // RSRParsers is a set of RSRParser
 type RSRParsers []*RSRParser
 
+func (prsrs RSRParsers) Compile() (err error) {
+	for _, prsr := range prsrs {
+		if err = prsr.Compile(); err != nil {
+			return
+		}
+	}
+	return
+}
+
 // ParseValue will parse the value out considering converters and filters
 func (prsrs RSRParsers) ParseValue(value interface{}) (out string, err error) {
 	for _, prsr := range prsrs {

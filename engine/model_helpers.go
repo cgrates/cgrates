@@ -2803,31 +2803,17 @@ func APItoAttributeProfile(tpTH *utils.TPAttributeProfile, timezone string) (th 
 	for _, context := range tpTH.Contexts {
 		th.Contexts = append(th.Contexts, context)
 	}
-	th.attributes = make(map[string]map[interface{}]*Attribute)
 	for _, reqAttr := range tpTH.Attributes {
-		th.Attributes = append(th.Attributes, &Attribute{
-			Append:    reqAttr.Append,
-			FieldName: reqAttr.FieldName,
-			Initial:   reqAttr.Initial,
-			Substitute: utils.RSRFields{
-				&utils.RSRField{
-					Id:      reqAttr.Substitute,
-					RSRules: []*utils.ReSearchReplace{}, //from mongo we get empty slice and from redis nil
-				},
-			},
-		})
-		th.attributes[reqAttr.FieldName] = make(map[interface{}]*Attribute)
-		th.attributes[reqAttr.FieldName][reqAttr.Initial] = &Attribute{
-			FieldName: reqAttr.FieldName,
-			Initial:   reqAttr.Initial,
-			Substitute: utils.RSRFields{
-				&utils.RSRField{
-					Id:      reqAttr.Substitute,
-					RSRules: []*utils.ReSearchReplace{}, //from mongo we get empty slice and from redis nil
-				},
-			},
-			Append: reqAttr.Append,
+		sbstPrsr, err := utils.NewRSRParsers(reqAttr.Substitute, true)
+		if err != nil {
+			return nil, err
 		}
+		th.Attributes = append(th.Attributes, &Attribute{
+			Append:     reqAttr.Append,
+			FieldName:  reqAttr.FieldName,
+			Initial:    reqAttr.Initial,
+			Substitute: sbstPrsr,
+		})
 	}
 	if tpTH.ActivationInterval != nil {
 		if th.ActivationInterval, err = tpTH.ActivationInterval.AsActivationInterval(timezone); err != nil {

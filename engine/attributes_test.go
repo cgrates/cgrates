@@ -36,7 +36,7 @@ var (
 			utils.META_ANY: &Attribute{
 				FieldName:  utils.Account,
 				Initial:    utils.META_ANY,
-				Substitute: utils.RSRFields{&utils.RSRField{Id: "1010", RSRules: []*utils.ReSearchReplace{}}},
+				Substitute: utils.NewRSRParsersMustCompile("1010", true),
 				Append:     true,
 			},
 		},
@@ -101,12 +101,12 @@ var (
 				&Attribute{
 					FieldName:  utils.Account,
 					Initial:    utils.META_ANY,
-					Substitute: utils.RSRFields{&utils.RSRField{Id: "1010", RSRules: []*utils.ReSearchReplace{}}},
+					Substitute: utils.NewRSRParsersMustCompile("1010", true),
 					Append:     true,
 				},
 			},
-			Weight:     20,
-			attributes: mapSubstitutes,
+			Weight:        20,
+			attributesIdx: mapSubstitutes,
 		},
 		&AttributeProfile{
 			Tenant:    config.CgrConfig().DefaultTenant,
@@ -121,12 +121,12 @@ var (
 				&Attribute{
 					FieldName:  utils.Account,
 					Initial:    utils.META_ANY,
-					Substitute: utils.RSRFields{&utils.RSRField{Id: "1010", RSRules: []*utils.ReSearchReplace{}}},
+					Substitute: utils.NewRSRParsersMustCompile("1010", true),
 					Append:     true,
 				},
 			},
-			Weight:     20,
-			attributes: mapSubstitutes,
+			Weight:        20,
+			attributesIdx: mapSubstitutes,
 		},
 		&AttributeProfile{
 			Tenant:    config.CgrConfig().DefaultTenant,
@@ -141,12 +141,12 @@ var (
 				&Attribute{
 					FieldName:  utils.Account,
 					Initial:    utils.META_ANY,
-					Substitute: utils.RSRFields{&utils.RSRField{Id: "1010", RSRules: []*utils.ReSearchReplace{}}},
+					Substitute: utils.NewRSRParsersMustCompile("1010", true),
 					Append:     true,
 				},
 			},
-			attributes: mapSubstitutes,
-			Weight:     20,
+			attributesIdx: mapSubstitutes,
+			Weight:        20,
 		},
 		&AttributeProfile{
 			Tenant:    config.CgrConfig().DefaultTenant,
@@ -161,12 +161,12 @@ var (
 				&Attribute{
 					FieldName:  utils.Account,
 					Initial:    utils.META_ANY,
-					Substitute: utils.RSRFields{&utils.RSRField{Id: "1010", RSRules: []*utils.ReSearchReplace{}}},
+					Substitute: utils.NewRSRParsersMustCompile("1010", true),
 					Append:     true,
 				},
 			},
-			attributes: mapSubstitutes,
-			Weight:     20,
+			attributesIdx: mapSubstitutes,
+			Weight:        20,
 		},
 	}
 )
@@ -463,20 +463,14 @@ func TestAttributeIndexer(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			&Attribute{
-				FieldName: utils.Account,
-				Initial:   utils.META_ANY,
-				Append:    true,
+				FieldName:  utils.Account,
+				Initial:    utils.META_ANY,
+				Substitute: utils.NewRSRParsersMustCompile("1010", true),
+				Append:     true,
 			},
 		},
 		Weight: 20,
 	}
-	//populate Substitute from attributes
-	rsrFields, err := utils.ParseRSRFields("^1010", utils.INFIELD_SEP)
-	if err != nil {
-		t.Error(err)
-	}
-	attrPrf.Attributes[0].Substitute = rsrFields
-
 	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
 		t.Error(err)
 	}

@@ -1068,7 +1068,7 @@ func (dm *DataManager) RemoveSupplierProfile(tenant, id, transactionID string, w
 }
 
 func (dm *DataManager) GetAttributeProfile(tenant, id string, skipCache bool,
-	transactionID string) (alsPrf *AttributeProfile, err error) {
+	transactionID string) (attrPrfl *AttributeProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if !skipCache {
 		if x, ok := Cache.Get(utils.CacheAttributeProfiles, tntID); ok {
@@ -1078,7 +1078,7 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, skipCache bool,
 			return x.(*AttributeProfile), nil
 		}
 	}
-	alsPrf, err = dm.dataDB.GetAttributeProfileDrv(tenant, id)
+	attrPrfl, err = dm.dataDB.GetAttributeProfileDrv(tenant, id)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			Cache.Set(utils.CacheAttributeProfiles, tntID, nil, nil,
@@ -1086,17 +1086,10 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, skipCache bool,
 		}
 		return nil, err
 	}
-	alsPrf.attributes = make(map[string]map[interface{}]*Attribute)
-	for _, attr := range alsPrf.Attributes {
-		alsPrf.attributes[attr.FieldName] = make(map[interface{}]*Attribute)
-		alsPrf.attributes[attr.FieldName][attr.Initial] = &Attribute{
-			FieldName:  attr.FieldName,
-			Initial:    attr.Initial,
-			Substitute: attr.Substitute,
-			Append:     attr.Append,
-		}
+	if err = attrPrfl.Compile(); err != nil {
+		return nil, err
 	}
-	Cache.Set(utils.CacheAttributeProfiles, tntID, alsPrf, nil,
+	Cache.Set(utils.CacheAttributeProfiles, tntID, attrPrfl, nil,
 		cacheCommit(transactionID), transactionID)
 	return
 }

@@ -80,7 +80,10 @@ func (m *Migrator) migrateV1Attributes() (err error) {
 			break
 		}
 		if v1Attr != nil {
-			attrPrf := v1Attr.AsAttributeProfile()
+			attrPrf, err := v1Attr.AsAttributeProfile()
+			if err != nil {
+				return err
+			}
 			if m.dryRun != true {
 				if err := m.dmOut.DataManager().DataDB().SetAttributeProfileDrv(attrPrf); err != nil {
 					return err
@@ -137,7 +140,7 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 	return
 }
 
-func (v1AttrPrf v1AttributeProfile) AsAttributeProfile() (attrPrf *engine.AttributeProfile) {
+func (v1AttrPrf v1AttributeProfile) AsAttributeProfile() (attrPrf *engine.AttributeProfile, err error) {
 	attrPrf = &engine.AttributeProfile{
 		Tenant:             v1AttrPrf.Tenant,
 		ID:                 v1AttrPrf.ID,
@@ -149,10 +152,14 @@ func (v1AttrPrf v1AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 	for _, mp := range v1AttrPrf.Attributes {
 		for _, attr := range mp {
 			initIface := utils.StringToInterface(attr.Initial)
+			sbstPrsr, err := utils.NewRSRParsers(attr.Substitute, true)
+			if err != nil {
+				return nil, err
+			}
 			attrPrf.Attributes = append(attrPrf.Attributes, &engine.Attribute{
 				FieldName:  attr.FieldName,
 				Initial:    initIface,
-				Substitute: utils.RSRFields{&utils.RSRField{Id: attr.Substitute}},
+				Substitute: sbstPrsr,
 				Append:     attr.Append,
 			})
 		}

@@ -168,15 +168,18 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 	rply = &AttrSProcessEventReply{
 		MatchedProfiles: []string{attrPrf.ID},
 		CGREvent:        args.Clone()}
-	for fldName, initialMp := range attrPrf.attributes {
+	for fldName, initialMp := range attrPrf.attributesIdx {
 		initEvValIf, has := args.Event[fldName]
 		if !has {
 			anyInitial, hasAny := initialMp[utils.ANY]
-			if hasAny && anyInitial.Append &&
-				initialMp[utils.ANY].Substitute.Id() != utils.META_NONE {
-				rply.CGREvent.Event[fldName] = anyInitial.Substitute.Id()
+			if hasAny && anyInitial.Append { // add field name
+				substitute, err := anyInitial.Substitute.ParseEvent(args.Event)
+				if err != nil {
+					return nil, err
+				}
+				rply.CGREvent.Event[fldName] = substitute
+				rply.AlteredFields = append(rply.AlteredFields, fldName)
 			}
-			rply.AlteredFields = append(rply.AlteredFields, fldName)
 			continue
 		}
 		attrVal, has := initialMp[initEvValIf]
@@ -184,10 +187,14 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 			attrVal, has = initialMp[utils.ANY]
 		}
 		if has {
-			if attrVal.Substitute.Id() == utils.META_NONE {
+			substitute, err := attrVal.Substitute.ParseEvent(args.Event)
+			if err != nil {
+				return nil, err
+			}
+			if substitute == utils.META_NONE {
 				delete(rply.CGREvent.Event, fldName)
 			} else {
-				rply.CGREvent.Event[fldName] = attrVal.Substitute.Id()
+				rply.CGREvent.Event[fldName] = substitute
 			}
 			rply.AlteredFields = append(rply.AlteredFields, fldName)
 		}

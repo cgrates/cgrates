@@ -65,13 +65,15 @@ func Testv1AttributeProfileAsAttributeProfile(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  "FL1",
 				Initial:    "In1",
-				Substitute: utils.RSRFields{&utils.RSRField{Id: "Al1"}},
+				Substitute: utils.NewRSRParsersMustCompile("Al1", true),
 				Append:     true,
 			},
 		},
 		Weight: 20,
 	}
-	if !reflect.DeepEqual(attrPrf, v1Attribute.AsAttributeProfile()) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(attrPrf), utils.ToJSON(v1Attribute.AsAttributeProfile()))
+	if ap, err := v1Attribute.AsAttributeProfile(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(attrPrf, ap) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(attrPrf), utils.ToJSON(ap))
 	}
 }
