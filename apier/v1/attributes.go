@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"fmt"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -89,8 +91,12 @@ func (alSv1 *AttributeSv1) Call(serviceMethod string,
 
 // GetAttributeForEvent  returns matching AttributeProfile for Event
 func (alSv1 *AttributeSv1) GetAttributeForEvent(args *engine.AttrArgsProcessEvent,
-	reply *engine.AttributeProfile) error {
-	return alSv1.attrS.V1GetAttributeForEvent(args, reply)
+	reply *engine.AttributeProfile) (err error) {
+	if err = alSv1.attrS.V1GetAttributeForEvent(args, reply); err != nil {
+		return
+	}
+	fmt.Printf("\n###APIER##### ATTR_PRF : %+v , SUBSISTUTE : %+v\n", reply, reply.Attributes[0].Substitute[0])
+	return
 }
 
 // ProcessEvent will replace event fields with the ones in maching AttributeProfile
