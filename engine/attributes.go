@@ -231,8 +231,10 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 	if args.ProcessRuns == nil || *args.ProcessRuns == 0 {
 		args.ProcessRuns = utils.IntPointer(alS.processRuns)
 	}
+	fmt.Printf("Process runds : %+v\n", *args.ProcessRuns)
 	var apiRply *AttrSProcessEventReply // aggregate response here
 	for i := 0; i < *args.ProcessRuns; i++ {
+		//fmt.Printf("----------------<%d>------------------\n", i)
 		evRply, err := alS.processEvent(args)
 		if err != nil {
 			if err != utils.ErrNotFound {
@@ -243,6 +245,7 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 			}
 			return err
 		}
+		//fmt.Printf("Result 1: %+v\n", utils.ToJSON(args))
 		if len(evRply.AlteredFields) != 0 {
 			args.CGREvent = *evRply.CGREvent // for next loop
 		}
@@ -250,10 +253,12 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 			apiRply = evRply
 			continue
 		}
+		//fmt.Printf("Result 2: %+v\n", utils.ToJSON(args))
 		if utils.IsSliceMember(apiRply.MatchedProfiles,
 			evRply.MatchedProfiles[0]) { // don't process the same AttributeProfile twice
 			break
 		}
+		apiRply.MatchedProfiles = append(apiRply.MatchedProfiles, evRply.MatchedProfiles[0])
 		apiRply.CGREvent = evRply.CGREvent
 		for _, fldName := range evRply.AlteredFields {
 			if utils.IsSliceMember(apiRply.AlteredFields, fldName) {
