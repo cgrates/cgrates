@@ -47,21 +47,21 @@ var sTestsAlsPrf = []func(t *testing.T){
 	testAttributeSInitCfg,
 	testAttributeSInitDataDb,
 	testAttributeSResetStorDb,
-	//testAttributeSStartEngine,
+	testAttributeSStartEngine,
 	testAttributeSRPCConn,
 	testAttributeSLoadFromFolder,
 	testAttributeSGetAttributeForEvent,
-	// testAttributeSGetAttributeForEventNotFound,
-	// testAttributeSGetAttributeForEventWithMetaAnyContext,
-	// testAttributeSProcessEvent,
-	// testAttributeSProcessEventWithNoneSubstitute,
-	// testAttributeSProcessEventWithNoneSubstitute2,
-	// testAttributeSProcessEventWithNoneSubstitute3,
-	// testAttributeSGetAlsPrfBeforeSet,
-	// testAttributeSSetAlsPrf,
-	// testAttributeSUpdateAlsPrf,
-	// testAttributeSRemAlsPrf,
-	// testAttributeSPing,
+	testAttributeSGetAttributeForEventNotFound,
+	testAttributeSGetAttributeForEventWithMetaAnyContext,
+	testAttributeSProcessEvent,
+	testAttributeSProcessEventWithNoneSubstitute,
+	testAttributeSProcessEventWithNoneSubstitute2,
+	testAttributeSProcessEventWithNoneSubstitute3,
+	testAttributeSGetAlsPrfBeforeSet,
+	testAttributeSSetAlsPrf,
+	testAttributeSUpdateAlsPrf,
+	testAttributeSRemAlsPrf,
+	testAttributeSPing,
 	testAttributeSKillEngine,
 }
 
@@ -177,13 +177,14 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		},
 		Weight: 10.0,
 	}
-	//eAttrPrf.Compile()
-
+	eAttrPrf.Compile()
 	var attrReply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eAttrPrf.Attributes[0].Substitute[0], attrReply.Attributes[0].Substitute[0]) {
+	}
+	attrReply.Compile() // Populate private variables in RSRParsers
+	if !reflect.DeepEqual(eAttrPrf.Attributes[0].Substitute[0], attrReply.Attributes[0].Substitute[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", eAttrPrf.Attributes[0].Substitute[0], attrReply.Attributes[0].Substitute[0])
 	}
 }
@@ -215,6 +216,7 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 		},
 		Weight: 10.0,
 	}
+	eAttrPrf2.Compile()
 	var result string
 	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", eAttrPrf2, &result); err != nil {
 		t.Error(err)
@@ -225,7 +227,9 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_3"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eAttrPrf2, reply) {
+	}
+	reply.Compile()
+	if !reflect.DeepEqual(eAttrPrf2, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", eAttrPrf2, reply)
 	}
 	var attrReply *engine.AttributeProfile
@@ -262,6 +266,7 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 		},
 		Weight: 10.0,
 	}
+	eAttrPrf2.Compile()
 	var result string
 	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", eAttrPrf2, &result); err != nil {
 		t.Error(err)
@@ -272,14 +277,18 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_2"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eAttrPrf2, reply) {
+	}
+	reply.Compile()
+	if !reflect.DeepEqual(eAttrPrf2, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", eAttrPrf2, reply)
 	}
 	var attrReply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eAttrPrf2, attrReply) {
+	}
+	attrReply.Compile()
+	if !reflect.DeepEqual(eAttrPrf2, attrReply) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eAttrPrf2), utils.ToJSON(attrReply))
 	}
 }
@@ -363,11 +372,12 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 				FieldName:  utils.Subject,
 				Initial:    utils.ANY,
 				Substitute: utils.NewRSRParsersMustCompile(utils.META_NONE, true),
-				Append:     true,
+				Append:     false,
 			},
 		},
 		Weight: 20,
 	}
+	alsPrf.Compile()
 	var result string
 	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
 		t.Error(err)
@@ -376,7 +386,7 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 	}
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"AttributeWithNonSubstitute"},
-		AlteredFields:   []string{utils.Account, utils.Subject},
+		AlteredFields:   []string{utils.Account},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSWithNoneSubstitute",
@@ -387,25 +397,12 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 			},
 		},
 	}
-	eRply2 := &engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"AttributeWithNonSubstitute"},
-		AlteredFields:   []string{utils.Subject, utils.Account},
-		CGREvent: &utils.CGREvent{
-			Tenant:  "cgrates.org",
-			ID:      "testAttributeSWithNoneSubstitute",
-			Context: utils.StringPointer(utils.MetaSessionS),
-			Event: map[string]interface{}{
-				utils.Account:     "1001",
-				utils.Destination: "+491511231234",
-			},
-		},
-	}
+
 	var rplyEv engine.AttrSProcessEventReply
 	if err := attrSRPC.Call(utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eRply, &rplyEv) &&
-		!reflect.DeepEqual(eRply2, &rplyEv) {
+	} else if !reflect.DeepEqual(eRply, &rplyEv) {
 		t.Errorf("Expecting: %s, received: %s",
 			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
 	}
@@ -497,6 +494,7 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 		Context: utils.StringPointer(utils.MetaSessionS),
 		Event: map[string]interface{}{
 			utils.Account:     "1008",
+			utils.Subject:     "1001",
 			utils.Destination: "+491511231234",
 		},
 	}
@@ -533,26 +531,14 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 	}
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"AttributeWithNonSubstitute"},
-		AlteredFields:   []string{"Account", "Subject"},
+		AlteredFields:   []string{"Account"},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSWithNoneSubstitute",
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
 				utils.Account:     "1001",
-				utils.Destination: "+491511231234",
-			},
-		},
-	}
-	eRply2 := &engine.AttrSProcessEventReply{
-		MatchedProfiles: []string{"AttributeWithNonSubstitute"},
-		AlteredFields:   []string{utils.Subject, utils.Account},
-		CGREvent: &utils.CGREvent{
-			Tenant:  "cgrates.org",
-			ID:      "testAttributeSWithNoneSubstitute",
-			Context: utils.StringPointer(utils.MetaSessionS),
-			Event: map[string]interface{}{
-				utils.Account:     "1001",
+				utils.Subject:     "1001",
 				utils.Destination: "+491511231234",
 			},
 		},
@@ -561,8 +547,7 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 	if err := attrSRPC.Call(utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eRply, &rplyEv) &&
-		!reflect.DeepEqual(eRply2, &rplyEv) {
+	} else if !reflect.DeepEqual(eRply, &rplyEv) {
 		t.Errorf("Expecting: %s, received: %s",
 			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
 	}
@@ -588,6 +573,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 		},
 		Weight: 20,
 	}
+	alsPrf.Compile()
 	var result string
 	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
 		t.Error(err)
@@ -598,7 +584,9 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(alsPrf, reply) {
+	}
+	reply.Compile()
+	if !reflect.DeepEqual(alsPrf, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
 	}
 }
@@ -618,6 +606,7 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 			Append:     false,
 		},
 	}
+	alsPrf.Compile()
 	var result string
 	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
 		t.Error(err)
@@ -628,7 +617,9 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(alsPrf, reply) {
+	}
+	reply.Compile()
+	if !reflect.DeepEqual(alsPrf, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
 	}
 }

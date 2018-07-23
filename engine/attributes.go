@@ -219,7 +219,6 @@ func (alS *AttributeService) V1GetAttributeForEvent(args *AttrArgsProcessEvent,
 		}
 		return err
 	}
-	fmt.Printf("ATTR_PRF : %+v , SUBSISTUTE : %+v", attrPrf, attrPrf.Attributes[0].Substitute[0])
 	*attrPrfl = *attrPrf
 	return
 }
