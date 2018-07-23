@@ -2466,7 +2466,7 @@ func testOnStorITAttributeProfile(t *testing.T) {
 	mapSubstitutes["FN1"]["Init1"] = &Attribute{
 		FieldName:  "FN1",
 		Initial:    "Init1",
-		Substitute: utils.RSRFields{&utils.RSRField{Id: "Al1", RSRules: []*utils.ReSearchReplace{}}},
+		Substitute: utils.NewRSRParsersMustCompile("Al1", true),
 		Append:     true,
 	}
 	attrProfile := &AttributeProfile{
@@ -2481,12 +2481,12 @@ func testOnStorITAttributeProfile(t *testing.T) {
 			&Attribute{
 				FieldName:  "FN1",
 				Initial:    "Init1",
-				Substitute: utils.RSRFields{&utils.RSRField{Id: "Al1", RSRules: []*utils.ReSearchReplace{}}},
+				Substitute: utils.NewRSRParsersMustCompile("Al1", true),
 				Append:     true,
 			},
 		},
-		Weight:     20,
-		attributes: mapSubstitutes,
+		Weight:        20,
+		attributesIdx: mapSubstitutes,
 	}
 	if _, rcvErr := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
 		false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
@@ -2558,7 +2558,7 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	mapSubstitutes["FN1"]["Init1"] = &Attribute{
 		FieldName:  "FN1",
 		Initial:    "Init1",
-		Substitute: utils.RSRFields{&utils.RSRField{Id: "Val1", RSRules: []*utils.ReSearchReplace{}}},
+		Substitute: utils.NewRSRParsersMustCompile("Val1", true),
 		Append:     true,
 	}
 	attrProfile := &AttributeProfile{
@@ -2573,12 +2573,12 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 			&Attribute{
 				FieldName:  "FN1",
 				Initial:    "Init1",
-				Substitute: utils.RSRFields{&utils.RSRField{Id: "Val1", RSRules: []*utils.ReSearchReplace{}}},
+				Substitute: utils.NewRSRParsersMustCompile("Val1", true),
 				Append:     true,
 			},
 		},
-		Weight:     20,
-		attributes: mapSubstitutes,
+		Weight:        20,
+		attributesIdx: mapSubstitutes,
 	}
 	if _, rcvErr := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
 		false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
@@ -2605,21 +2605,21 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	mapSubstitutes["FN1"]["Init1"] = &Attribute{
 		FieldName:  "FN1",
 		Initial:    "Init1",
-		Substitute: utils.RSRFields{&utils.RSRField{Id: "123.123", RSRules: []*utils.ReSearchReplace{}}},
+		Substitute: utils.NewRSRParsersMustCompile("123.123", true),
 		Append:     true,
 	}
 	attrProfile.Attributes = []*Attribute{
 		&Attribute{
 			FieldName:  "FN1",
 			Initial:    "Init1",
-			Substitute: utils.RSRFields{&utils.RSRField{Id: "123.123", RSRules: []*utils.ReSearchReplace{}}},
+			Substitute: utils.NewRSRParsersMustCompile("123.123", true),
 			Append:     true,
 		},
 	}
 	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
 		t.Error(err)
 	}
-	attrProfile.attributes = mapSubstitutes
+	attrProfile.attributesIdx = mapSubstitutes
 	//check cache
 	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
 		false, utils.NonTransactional); err != nil {
@@ -2638,21 +2638,21 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	mapSubstitutes["FN1"]["Init1"] = &Attribute{
 		FieldName:  "FN1",
 		Initial:    "Init1",
-		Substitute: utils.RSRFields{&utils.RSRField{Id: "true", RSRules: []*utils.ReSearchReplace{}}},
+		Substitute: utils.NewRSRParsersMustCompile("true", true),
 		Append:     true,
 	}
 	attrProfile.Attributes = []*Attribute{
 		&Attribute{
 			FieldName:  "FN1",
 			Initial:    "Init1",
-			Substitute: utils.RSRFields{&utils.RSRField{Id: "true", RSRules: []*utils.ReSearchReplace{}}},
+			Substitute: utils.NewRSRParsersMustCompile("true", true),
 			Append:     true,
 		},
 	}
 	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
 		t.Error(err)
 	}
-	attrProfile.attributes = mapSubstitutes
+	attrProfile.attributesIdx = mapSubstitutes
 	//check cache
 	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
 		false, utils.NonTransactional); err != nil {

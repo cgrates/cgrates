@@ -157,16 +157,15 @@ func testDspAttrAddAttributesWithPermision(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FieldName: utils.APIMethods,
-				Initial:   utils.META_ANY,
-				Substitute: utils.RSRFields{
-					&utils.RSRField{Id: "ThresholdSv1.GetThAttrholdsForEvent",
-						RSRules: []*utils.ReSearchReplace{}}},
-				Append: true,
+				FieldName:  utils.APIMethods,
+				Initial:    utils.META_ANY,
+				Substitute: utils.NewRSRParsersMustCompile("ThresholdSv1.GetThAttrholdsForEvent", true),
+				Append:     true,
 			},
 		},
 		Weight: 20,
 	}
+	alsPrf.Compile()
 	var Attrult string
 	if err := instAttrRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &Attrult); err != nil {
 		t.Error(err)
@@ -177,7 +176,9 @@ func testDspAttrAddAttributesWithPermision(t *testing.T) {
 	if err := instAttrRPC.Call("ApierV1.GetAttributeProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "AuthKey"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(alsPrf, reply) {
+	}
+	reply.Compile()
+	if !reflect.DeepEqual(alsPrf, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
 	}
 }
@@ -250,27 +251,28 @@ func testDspAttrAddAttributesWithPermision2(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FieldName: utils.APIMethods,
-				Initial:   utils.META_ANY,
-				Substitute: utils.RSRFields{
-					&utils.RSRField{Id: "AttributeSv1.GetAttributeForEvent;AttributeSv1.ProcessEvent",
-						RSRules: []*utils.ReSearchReplace{}}},
-				Append: true,
+				FieldName:  utils.APIMethods,
+				Initial:    utils.META_ANY,
+				Substitute: utils.NewRSRParsersMustCompile("AttributeSv1.GetAttributeForEvent;AttributeSv1.ProcessEvent", true),
+				Append:     true,
 			},
 		},
 		Weight: 20,
 	}
-	var Attrult string
-	if err := instAttrRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &Attrult); err != nil {
+	var result string
+	alsPrf.Compile()
+	if err := instAttrRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
 		t.Error(err)
-	} else if Attrult != utils.OK {
-		t.Error("Unexpected reply returned", Attrult)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.AttributeProfile
 	if err := instAttrRPC.Call("ApierV1.GetAttributeProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "AuthKey"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(alsPrf, reply) {
+	}
+	reply.Compile()
+	if !reflect.DeepEqual(alsPrf, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
 	}
 }
@@ -294,27 +296,28 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 		Contexts:  []string{"simpleauth"},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FieldName: "Password",
-				Initial:   utils.ANY,
-				Substitute: utils.RSRFields{
-					&utils.RSRField{Id: "CGRateS.org",
-						RSRules: []*utils.ReSearchReplace{}}},
-				Append: true,
+				FieldName:  "Password",
+				Initial:    utils.ANY,
+				Substitute: utils.NewRSRParsersMustCompile("CGRateS.org", true),
+				Append:     true,
 			},
 		},
 		Weight: 20.0,
 	}
+	//eAttrPrf.Compile()
 	var attrReply *engine.AttributeProfile
 	if err := dspAttrRPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		args, &attrReply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eAttrPrf, attrReply) {
+	}
+	//attrReply.Compile()
+	if !reflect.DeepEqual(eAttrPrf, attrReply) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eAttrPrf), utils.ToJSON(attrReply))
 	}
 
 	eRply := &engine.AttrSProcessEventReply{
-		MatchedProfile: "ATTR_1001_SIMPLEAUTH",
-		AlteredFields:  []string{"Password"},
+		MatchedProfiles: []string{"ATTR_1001_SIMPLEAUTH"},
+		AlteredFields:   []string{"Password"},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSGetAttributeForEvent",

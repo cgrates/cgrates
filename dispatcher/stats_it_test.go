@@ -154,12 +154,10 @@ func testDspStsAddStsibutesWithPermision(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FieldName: utils.APIMethods,
-				Initial:   utils.META_ANY,
-				Substitute: utils.RSRFields{
-					&utils.RSRField{Id: "ThresholdSv1.GetThSessionholdsForEvent",
-						RSRules: []*utils.ReSearchReplace{}}},
-				Append: true,
+				FieldName:  utils.APIMethods,
+				Initial:    utils.META_ANY,
+				Substitute: utils.NewRSRParsersMustCompile("ThresholdSv1.GetThSessionholdsForEvent", true),
+				Append:     true,
 			},
 		},
 		Weight: 20,
@@ -224,12 +222,10 @@ func testDspStsAddStsibutesWithPermision2(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FieldName: utils.APIMethods,
-				Initial:   utils.META_ANY,
-				Substitute: utils.RSRFields{
-					&utils.RSRField{Id: "StatSv1.ProcessEvent;StatSv1.GetQueueStringMetrics",
-						RSRules: []*utils.ReSearchReplace{}}},
-				Append: true,
+				FieldName:  utils.APIMethods,
+				Initial:    utils.META_ANY,
+				Substitute: utils.NewRSRParsersMustCompile("StatSv1.ProcessEvent;StatSv1.GetQueueStringMetrics", true),
+				Append:     true,
 			},
 		},
 		Weight: 20,
