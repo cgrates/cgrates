@@ -51,19 +51,18 @@ var sTestsAlsPrf = []func(t *testing.T){
 	testAttributeSRPCConn,
 	testAttributeSLoadFromFolder,
 	testAttributeSGetAttributeForEvent,
-	/*testAttributeSGetAttributeForEventNotFound,
-	testAttributeSGetAttributeForEventWithMetaAnyContext,
-	testAttributeSProcessEvent,
-	testAttributeSProcessEventWithNoneSubstitute,
-	testAttributeSProcessEventWithNoneSubstitute2,
-	testAttributeSProcessEventWithNoneSubstitute3,
-	testAttributeSGetAlsPrfBeforeSet,
-	testAttributeSSetAlsPrf,
-	testAttributeSUpdateAlsPrf,
-	testAttributeSRemAlsPrf,
-	testAttributeSPing,
+	// testAttributeSGetAttributeForEventNotFound,
+	// testAttributeSGetAttributeForEventWithMetaAnyContext,
+	// testAttributeSProcessEvent,
+	// testAttributeSProcessEventWithNoneSubstitute,
+	// testAttributeSProcessEventWithNoneSubstitute2,
+	// testAttributeSProcessEventWithNoneSubstitute3,
+	// testAttributeSGetAlsPrfBeforeSet,
+	// testAttributeSSetAlsPrf,
+	// testAttributeSUpdateAlsPrf,
+	// testAttributeSRemAlsPrf,
+	// testAttributeSPing,
 	testAttributeSKillEngine,
-	*/
 }
 
 //Test start here
@@ -178,14 +177,14 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		},
 		Weight: 10.0,
 	}
-	eAttrPrf.Compile()
+	//eAttrPrf.Compile()
 
 	var attrReply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eAttrPrf.Attributes[0].Substitute[0], attrReply.Attributes[0].Substitute[0]) {
-		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eAttrPrf.Attributes[0].Substitute), utils.ToJSON(attrReply.Attributes[0].Substitute))
+		t.Errorf("Expecting: %+v, received: %+v", eAttrPrf.Attributes[0].Substitute[0], attrReply.Attributes[0].Substitute[0])
 	}
 }
 

@@ -219,6 +219,7 @@ func (alS *AttributeService) V1GetAttributeForEvent(args *AttrArgsProcessEvent,
 		}
 		return err
 	}
+	fmt.Printf("ATTR_PRF : %+v , SUBSISTUTE : %+v", attrPrf, attrPrf.Attributes[0].Substitute[0])
 	*attrPrfl = *attrPrf
 	return
 }
@@ -231,7 +232,6 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 	if args.ProcessRuns == nil || *args.ProcessRuns == 0 {
 		args.ProcessRuns = utils.IntPointer(alS.processRuns)
 	}
-	fmt.Printf("Process runds : %+v\n", *args.ProcessRuns)
 	var apiRply *AttrSProcessEventReply // aggregate response here
 	for i := 0; i < *args.ProcessRuns; i++ {
 		evRply, err := alS.processEvent(args)

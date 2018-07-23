@@ -190,6 +190,7 @@ func (prsr *RSRParser) Compile() (err error) {
 		return
 	}
 	*prsr = *newPrsr
+	//fmt.Printf("After compile Parser : %+v\n", prsr)
 	return
 }
 
