@@ -93,7 +93,7 @@ func NewRSRParser(parserRules string, allFiltersMatch bool) (rsrParser *RSRParse
 	if len(parserRules) == 0 {
 		return
 	}
-	rsrParser = &RSRParser{Rules: parserRules}
+	rsrParser = &RSRParser{Rules: parserRules, AllFiltersMatch: allFiltersMatch}
 	if strings.HasSuffix(parserRules, FILTER_VAL_END) { // Has filter, populate the var
 		fltrStart := strings.LastIndex(parserRules, FILTER_VAL_START)
 		if fltrStart < 1 {

@@ -1013,13 +1013,13 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.Account,
 				Initial:    utils.META_ANY,
-				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001"}},
+				Substitute: utils.NewRSRParsersMustCompile("1001", true),
 				Append:     false,
 			},
 			&engine.Attribute{
 				FieldName:  utils.Subject,
 				Initial:    utils.META_ANY,
-				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001"}},
+				Substitute: utils.NewRSRParsersMustCompile("1001", true),
 				Append:     true,
 			},
 		},
@@ -1129,13 +1129,13 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.Account,
 				Initial:    utils.META_ANY,
-				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001"}},
+				Substitute: utils.NewRSRParsersMustCompile("1001", true),
 				Append:     false,
 			},
 			&engine.Attribute{
 				FieldName:  utils.Subject,
 				Initial:    "*any",
-				Substitute: utils.RSRFields{&utils.RSRField{Id: "1001"}},
+				Substitute: utils.NewRSRParsersMustCompile("1001", true),
 				Append:     true,
 			},
 		},
