@@ -494,6 +494,8 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
+		sts.Compile()
+		rcv.Compile()
 		if !reflect.DeepEqual(sts, rcv) {
 			t.Errorf("Expecting: %v, received: %v", sts, rcv)
 		}

@@ -160,12 +160,10 @@ func testDspSessionAddAttributesWithPermision(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FieldName: utils.APIMethods,
-				Initial:   utils.META_ANY,
-				Substitute: utils.RSRFields{
-					&utils.RSRField{Id: "ThresholdSv1.GetThSessionholdsForEvent",
-						RSRules: []*utils.ReSearchReplace{}}},
-				Append: true,
+				FieldName:  utils.APIMethods,
+				Initial:    utils.META_ANY,
+				Substitute: utils.NewRSRParsersMustCompile("ThresholdSv1.GetThSessionholdsForEvent", true),
+				Append:     true,
 			},
 		},
 		Weight: 20,
@@ -229,12 +227,10 @@ func testDspSessionAddAttributesWithPermision2(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FieldName: utils.APIMethods,
-				Initial:   utils.META_ANY,
-				Substitute: utils.RSRFields{
-					&utils.RSRField{Id: "SessionSv1.AuthorizeEventWithDigest;SessionSv1.InitiateSessionWithDigest;SessionSv1.UpdateSession;SessionSv1.TerminateSession;SessionSv1.ProcessCDR;SessionSv1.ProcessEvent",
-						RSRules: []*utils.ReSearchReplace{}}},
-				Append: true,
+				FieldName:  utils.APIMethods,
+				Initial:    utils.META_ANY,
+				Substitute: utils.NewRSRParsersMustCompile("SessionSv1.AuthorizeEventWithDigest;SessionSv1.InitiateSessionWithDigest;SessionSv1.UpdateSession;SessionSv1.TerminateSession;SessionSv1.ProcessCDR;SessionSv1.ProcessEvent", true),
+				Append:     true,
 			},
 		},
 		Weight: 20,
@@ -371,8 +367,8 @@ func testDspSessionUpdate(t *testing.T) {
 		t.Error(err)
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
-		MatchedProfile: "ATTR_ACNT_1001",
-		AlteredFields:  []string{"OfficeGroup"},
+		MatchedProfiles: []string{"ATTR_ACNT_1001"},
+		AlteredFields:   []string{"OfficeGroup"},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "TestSSv1ItUpdateSession",
@@ -504,8 +500,8 @@ func testDspSessionProcessEvent(t *testing.T) {
 		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
-		MatchedProfile: "ATTR_ACNT_1001",
-		AlteredFields:  []string{"OfficeGroup"},
+		MatchedProfiles: []string{"ATTR_ACNT_1001"},
+		AlteredFields:   []string{"OfficeGroup"},
 		CGREvent: &utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "TestSSv1ItProcessEvent",
