@@ -141,7 +141,7 @@ type AttrSProcessEventReply struct {
 	MatchedProfiles []string
 	AlteredFields   []string
 	CGREvent        *utils.CGREvent
-	blocker         bool
+	blocker         bool // internally used to stop further processRuns
 }
 
 // Digest returns serialized version of alteredFields in AttrSProcessEventReply
@@ -257,7 +257,7 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 		}
 		if apiRply == nil { // first reply
 			apiRply = evRply
-			if apiRply.blocker == true {
+			if apiRply.blocker {
 				break
 			}
 			continue
@@ -274,7 +274,7 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 			}
 			apiRply.AlteredFields = append(apiRply.AlteredFields, fldName)
 		}
-		if evRply.blocker == true {
+		if evRply.blocker {
 			break
 		}
 	}
