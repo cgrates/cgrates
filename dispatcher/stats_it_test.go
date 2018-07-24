@@ -227,7 +227,7 @@ func testDspStsAddStsibutesWithPermision2(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.APIMethods,
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("StatSv1.ProcessEvent;|;StatSv1.GetQueueStringMetrics", true),
+				Substitute: utils.NewRSRParsersMustCompile("StatSv1.ProcessEvent&StatSv1.GetQueueStringMetrics", true),
 				Append:     true,
 			},
 		},

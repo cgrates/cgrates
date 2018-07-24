@@ -97,5 +97,5 @@ func ParseStringMap(s string) utils.StringMap {
 	if s == utils.ZERO {
 		return make(utils.StringMap)
 	}
-	return utils.StringMapFromSlice(strings.Split(s, utils.HandlerArgSep))
+	return utils.StringMapFromSlice(strings.Split(s, utils.ANDSep))
 }

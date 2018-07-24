@@ -215,7 +215,7 @@ func testDspResAddAttributesWithPermision2(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.APIMethods,
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("ThresholdSv1.ProcessEvent;|;ResourceSv1.GetResourcesForEvent", true),
+				Substitute: utils.NewRSRParsersMustCompile("ThresholdSv1.ProcessEvent&ResourceSv1.GetResourcesForEvent", true),
 				Append:     true,
 			},
 		},
