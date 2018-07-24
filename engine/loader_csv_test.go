@@ -299,9 +299,9 @@ cgrates.org,SPP_1,,,,,supplier1,FLTR_DST_DE,Account2,RPL_3,ResGroup3,Stat2,10,,,
 cgrates.org,SPP_1,,,,,supplier1,,,,ResGroup4,Stat3,10,,,
 `
 	attributeProfiles = `
-#Tenant,ID,Contexts,FilterIDs,ActivationInterval,FieldName,Initial,Substitute,Append,Weight
-cgrates.org,ALS1,con1,FLTR_1,2014-07-29T15:00:00Z,Field1,Initial1,Sub1,true,20
-cgrates.org,ALS1,con2;con3,,,Field2,Initial2,Sub2,false,
+#Tenant,ID,Contexts,FilterIDs,ActivationInterval,FieldName,Initial,Substitute,Append,Blocker,Weight
+cgrates.org,ALS1,con1,FLTR_1,2014-07-29T15:00:00Z,Field1,Initial1,Sub1,true,true,20
+cgrates.org,ALS1,con2;con3,,,Field2,Initial2,Sub2,false,,
 `
 	chargerProfiles = `
 #Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
@@ -1771,7 +1771,8 @@ func TestLoadAttributeProfiles(t *testing.T) {
 					Append:     false,
 				},
 			},
-			Weight: 20,
+			Blocker: true,
+			Weight:  20,
 		},
 	}
 	resKey := utils.TenantID{Tenant: "cgrates.org", ID: "ALS1"}
@@ -1789,6 +1790,8 @@ func TestLoadAttributeProfiles(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].ActivationInterval, csvr.attributeProfiles[resKey].ActivationInterval)
 	} else if !reflect.DeepEqual(eAttrProfiles[resKey].Attributes, csvr.attributeProfiles[resKey].Attributes) {
 		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].Attributes, csvr.attributeProfiles[resKey].Attributes)
+	} else if !reflect.DeepEqual(eAttrProfiles[resKey].Blocker, csvr.attributeProfiles[resKey].Blocker) {
+		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].Blocker, csvr.attributeProfiles[resKey].Blocker)
 	}
 }
 

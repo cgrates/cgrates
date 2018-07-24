@@ -1,3 +1,3 @@
-#,Tenant,ID,Context,FilterIDs,ActivationInterval,FieldName,Initial,Substitute,Append,Weight
-cgrates.org,ALS1,con1,FLTR_1,2014-07-29T15:00:00Z,Field1,Initial1,Sub1,true,20
-cgrates.org,ALS1,,,,Field2,Initial2,Sub2,false,
+#,Tenant,ID,Context,FilterIDs,ActivationInterval,FieldName,Initial,Substitute,Append,Blocker,Weight
+cgrates.org,ALS1,con1,FLTR_1,2014-07-29T15:00:00Z,Field1,Initial1,Sub1,true,false,20
+cgrates.org,ALS1,,,,Field2,Initial2,Sub2,false,,
