@@ -167,11 +167,14 @@ func testDspThAddAttributesWithPermision(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
+	alsPrf.Compile()
 	var reply *engine.AttributeProfile
 	if err := instThRPC.Call("ApierV1.GetAttributeProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "AuthKey"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(alsPrf, reply) {
+	}
+	reply.Compile()
+	if !reflect.DeepEqual(alsPrf, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
 	}
 }
@@ -224,7 +227,7 @@ func testDspThAddAttributesWithPermision2(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.APIMethods,
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("ThresholdSv1.ProcessEvent;ThresholdSv1.GetThresholdsForEvent", true),
+				Substitute: utils.NewRSRParsersMustCompile("ThresholdSv1.ProcessEvent;|;ThresholdSv1.GetThresholdsForEvent", true),
 				Append:     true,
 			},
 		},
@@ -236,11 +239,14 @@ func testDspThAddAttributesWithPermision2(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
+	alsPrf.Compile()
 	var reply *engine.AttributeProfile
 	if err := instThRPC.Call("ApierV1.GetAttributeProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "AuthKey"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(alsPrf, reply) {
+	}
+	reply.Compile()
+	if !reflect.DeepEqual(alsPrf, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
 	}
 }

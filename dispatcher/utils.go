@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatcher
 
 import (
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
@@ -90,4 +91,11 @@ type TerminateSessionWithApiKey struct {
 type UpdateSessionWithApiKey struct {
 	APIKey string
 	sessions.V1UpdateSessionArgs
+}
+
+func ParseStringMap(s string) utils.StringMap {
+	if s == utils.ZERO {
+		return make(utils.StringMap)
+	}
+	return utils.StringMapFromSlice(strings.Split(s, utils.HandlerArgSep))
 }

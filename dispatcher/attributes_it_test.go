@@ -253,7 +253,7 @@ func testDspAttrAddAttributesWithPermision2(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.APIMethods,
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("AttributeSv1.GetAttributeForEvent;AttributeSv1.ProcessEvent", true),
+				Substitute: utils.NewRSRParsersMustCompile("AttributeSv1.GetAttributeForEvent;|;AttributeSv1.ProcessEvent", true),
 				Append:     true,
 			},
 		},
@@ -304,13 +304,13 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 		},
 		Weight: 20.0,
 	}
-	//eAttrPrf.Compile()
+	eAttrPrf.Compile()
 	var attrReply *engine.AttributeProfile
 	if err := dspAttrRPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		args, &attrReply); err != nil {
 		t.Error(err)
 	}
-	//attrReply.Compile()
+	attrReply.Compile()
 	if !reflect.DeepEqual(eAttrPrf, attrReply) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eAttrPrf), utils.ToJSON(attrReply))
 	}

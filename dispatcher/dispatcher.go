@@ -125,10 +125,11 @@ func (dS *DispatcherService) authorize(method, tenant, apiKey string, evTime *ti
 		return
 	}
 	var apiMethods string
+	fmt.Printf("\nRPL EV : %+v\n", utils.ToJSON(rplyEv))
 	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
 		return
 	}
-	if !utils.ParseStringMap(apiMethods).HasKey(method) {
+	if !ParseStringMap(apiMethods).HasKey(method) {
 		return utils.ErrUnauthorizedApi
 	}
 	return

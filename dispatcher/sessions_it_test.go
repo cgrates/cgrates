@@ -168,17 +168,20 @@ func testDspSessionAddAttributesWithPermision(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	var Sessionult string
-	if err := instSessionRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &Sessionult); err != nil {
+	var result string
+	if err := instSessionRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
 		t.Error(err)
-	} else if Sessionult != utils.OK {
-		t.Error("Unexpected reply returned", Sessionult)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
 	}
+	alsPrf.Compile()
 	var reply *engine.AttributeProfile
 	if err := instSessionRPC.Call("ApierV1.GetAttributeProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "AuthKey"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(alsPrf, reply) {
+	}
+	reply.Compile()
+	if !reflect.DeepEqual(alsPrf, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
 	}
 }
@@ -229,23 +232,26 @@ func testDspSessionAddAttributesWithPermision2(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.APIMethods,
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("SessionSv1.AuthorizeEventWithDigest;SessionSv1.InitiateSessionWithDigest;SessionSv1.UpdateSession;SessionSv1.TerminateSession;SessionSv1.ProcessCDR;SessionSv1.ProcessEvent", true),
+				Substitute: utils.NewRSRParsersMustCompile("SessionSv1.AuthorizeEventWithDigest;|;SessionSv1.InitiateSessionWithDigest;|;SessionSv1.UpdateSession;|;SessionSv1.TerminateSession;|;SessionSv1.ProcessCDR;|;SessionSv1.ProcessEvent", true),
 				Append:     true,
 			},
 		},
 		Weight: 20,
 	}
-	var Sessionult string
-	if err := instSessionRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &Sessionult); err != nil {
+	var result string
+	if err := instSessionRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
 		t.Error(err)
-	} else if Sessionult != utils.OK {
-		t.Error("Unexpected reply returned", Sessionult)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
 	}
+	alsPrf.Compile()
 	var reply *engine.AttributeProfile
 	if err := instSessionRPC.Call("ApierV1.GetAttributeProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "AuthKey"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(alsPrf, reply) {
+	}
+	reply.Compile()
+	if !reflect.DeepEqual(alsPrf, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
 	}
 }

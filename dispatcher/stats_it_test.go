@@ -162,17 +162,20 @@ func testDspStsAddStsibutesWithPermision(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	var Attrult string
-	if err := instStsRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &Attrult); err != nil {
+	var result string
+	if err := instStsRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
 		t.Error(err)
-	} else if Attrult != utils.OK {
-		t.Error("Unexpected reply returned", Attrult)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
 	}
+	alsPrf.Compile()
 	var reply *engine.AttributeProfile
 	if err := instStsRPC.Call("ApierV1.GetAttributeProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "AuthKey"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(alsPrf, reply) {
+	}
+	reply.Compile()
+	if !reflect.DeepEqual(alsPrf, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
 	}
 }
@@ -224,23 +227,26 @@ func testDspStsAddStsibutesWithPermision2(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.APIMethods,
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("StatSv1.ProcessEvent;StatSv1.GetQueueStringMetrics", true),
+				Substitute: utils.NewRSRParsersMustCompile("StatSv1.ProcessEvent;|;StatSv1.GetQueueStringMetrics", true),
 				Append:     true,
 			},
 		},
 		Weight: 20,
 	}
-	var Attrult string
-	if err := instStsRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &Attrult); err != nil {
+	var result string
+	if err := instStsRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
 		t.Error(err)
-	} else if Attrult != utils.OK {
-		t.Error("Unexpected reply returned", Attrult)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
 	}
+	alsPrf.Compile()
 	var reply *engine.AttributeProfile
 	if err := instStsRPC.Call("ApierV1.GetAttributeProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "AuthKey"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(alsPrf, reply) {
+	}
+	reply.Compile()
+	if !reflect.DeepEqual(alsPrf, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
 	}
 }
