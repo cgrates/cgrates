@@ -312,5 +312,4 @@ func testAccITMigrateAndMove(t *testing.T) {
 			t.Error(err)
 		}
 	}
-
 }
