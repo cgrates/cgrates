@@ -1423,6 +1423,7 @@ type TPAttributeProfile struct {
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
 	Contexts           []string              // bind this TPAttribute to multiple context
 	Attributes         []*TPAttribute
+	Blocker            bool
 	Weight             float64
 }
 

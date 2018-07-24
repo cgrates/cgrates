@@ -2684,9 +2684,10 @@ func (tps TPAttributes) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 		th, found := mst[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]
 		if !found {
 			th = &utils.TPAttributeProfile{
-				TPid:   tp.Tpid,
-				Tenant: tp.Tenant,
-				ID:     tp.ID,
+				TPid:    tp.Tpid,
+				Tenant:  tp.Tenant,
+				ID:      tp.ID,
+				Blocker: tp.Blocker,
 			}
 		}
 		if tp.Weight != 0 {
@@ -2756,6 +2757,7 @@ func APItoModelTPAttribute(th *utils.TPAttributeProfile) (mdls TPAttributes) {
 			ID:     th.ID,
 		}
 		if i == 0 {
+			mdl.Blocker = th.Blocker
 			if th.ActivationInterval != nil {
 				if th.ActivationInterval.ActivationTime != "" {
 					mdl.ActivationInterval = th.ActivationInterval.ActivationTime
@@ -2794,6 +2796,7 @@ func APItoAttributeProfile(tpTH *utils.TPAttributeProfile, timezone string) (th 
 		Tenant:    tpTH.Tenant,
 		ID:        tpTH.ID,
 		Weight:    tpTH.Weight,
+		Blocker:   tpTH.Blocker,
 		FilterIDs: []string{},
 		Contexts:  []string{},
 	}

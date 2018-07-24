@@ -38,6 +38,7 @@ type AttributeProfile struct {
 	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval // Activation interval
 	Attributes         []*Attribute
+	Blocker            bool // blocker flag to stop processing on multiple runs
 	Weight             float64
 
 	attributesIdx map[string]map[interface{}]*Attribute // map[FieldName][InitialValue]*Attribute, used as event match index

@@ -141,6 +141,7 @@ type AttrSProcessEventReply struct {
 	MatchedProfiles []string
 	AlteredFields   []string
 	CGREvent        *utils.CGREvent
+	blocker         bool
 }
 
 // Digest returns serialized version of alteredFields in AttrSProcessEventReply
@@ -174,7 +175,8 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 	}
 	rply = &AttrSProcessEventReply{
 		MatchedProfiles: []string{attrPrf.ID},
-		CGREvent:        args.Clone()}
+		CGREvent:        args.Clone(),
+		blocker:         attrPrf.Blocker}
 	for fldName, initialMp := range attrPrf.attributesIdx {
 		initEvValIf, has := args.Event[fldName]
 		if !has {
@@ -255,6 +257,9 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 		}
 		if apiRply == nil { // first reply
 			apiRply = evRply
+			if apiRply.blocker == true {
+				break
+			}
 			continue
 		}
 		if utils.IsSliceMember(apiRply.MatchedProfiles,
@@ -268,6 +273,9 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 				continue // only add processed fieldName once
 			}
 			apiRply.AlteredFields = append(apiRply.AlteredFields, fldName)
+		}
+		if evRply.blocker == true {
+			break
 		}
 	}
 	*reply = *apiRply
