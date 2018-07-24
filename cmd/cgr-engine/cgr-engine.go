@@ -576,7 +576,20 @@ func startUsersServer(internalUserSChan chan rpcclient.RpcClientConnection, dm *
 // startAttributeService fires up the AttributeS
 func startAttributeService(internalAttributeSChan chan rpcclient.RpcClientConnection,
 	cacheS *engine.CacheS, cfg *config.CGRConfig, dm *engine.DataManager,
-	server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
+	server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS,
+	internalSupplierSChan chan rpcclient.RpcClientConnection) {
+	var err error
+	var sppSConn *rpcclient.RpcClientPool
+	if len(cfg.AttributeSCfg().SupplierSConns) != 0 { // Stats connection init
+		sppSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
+			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cfg.AttributeSCfg().SupplierSConns, internalSupplierSChan, cfg.InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<AttributeS> Could not connect to SupplierS: %s", err.Error()))
+			exitChan <- true
+			return
+		}
+	}
 	filterS := <-filterSChan
 	filterSChan <- filterS
 	<-cacheS.GetPrecacheChannel(utils.CacheAttributeProfiles)
@@ -584,7 +597,7 @@ func startAttributeService(internalAttributeSChan chan rpcclient.RpcClientConnec
 	aS, err := engine.NewAttributeService(dm, filterS,
 		cfg.AttributeSCfg().StringIndexedFields,
 		cfg.AttributeSCfg().PrefixIndexedFields,
-		cfg.AttributeSCfg().ProcessRuns)
+		cfg.AttributeSCfg().ProcessRuns, sppSConn)
 	if err != nil {
 		utils.Logger.Crit(
 			fmt.Sprintf("<%s> Could not init, error: %s",
@@ -1299,7 +1312,7 @@ func main() {
 
 	if cfg.AttributeSCfg().Enabled {
 		go startAttributeService(internalAttributeSChan, cacheS,
-			cfg, dm, server, exitChan, filterSChan)
+			cfg, dm, server, exitChan, filterSChan, internalSupplierSChan)
 	}
 	if cfg.ChargerSCfg().Enabled {
 		go startChargerService(internalChargerSChan, cacheS, internalAttributeSChan,

@@ -428,6 +428,7 @@ type AttributeSJsonCfg struct {
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
 	Process_runs          *int
+	Suppliers_conns       *[]*HaPoolJsonCfg
 }
 
 // ChargerSJsonCfg service config section
