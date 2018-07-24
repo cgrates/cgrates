@@ -232,7 +232,7 @@ func testDspSessionAddAttributesWithPermision2(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.APIMethods,
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("SessionSv1.AuthorizeEventWithDigest;|;SessionSv1.InitiateSessionWithDigest;|;SessionSv1.UpdateSession;|;SessionSv1.TerminateSession;|;SessionSv1.ProcessCDR;|;SessionSv1.ProcessEvent", true),
+				Substitute: utils.NewRSRParsersMustCompile("SessionSv1.AuthorizeEventWithDigest&SessionSv1.InitiateSessionWithDigest&SessionSv1.UpdateSession&SessionSv1.TerminateSession&SessionSv1.ProcessCDR&SessionSv1.ProcessEvent", true),
 				Append:     true,
 			},
 		},

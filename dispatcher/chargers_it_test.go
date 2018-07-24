@@ -210,7 +210,7 @@ func testDspCppAddAttributesWithPermision2(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.APIMethods,
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("ThresholdSv1.ProcessEvent;|;ChargerSv1.GetChargersForEvent", true),
+				Substitute: utils.NewRSRParsersMustCompile("ThresholdSv1.ProcessEvent&ChargerSv1.GetChargersForEvent", true),
 				Append:     true,
 			},
 		},
