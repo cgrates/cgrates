@@ -359,6 +359,21 @@ func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *Sorted
 	} else if args.CGREvent.Event == nil {
 		return utils.NewErrMandatoryIeMissing("Event")
 	}
+	if spS.attributeS != nil {
+		if args.CGREvent.Context == nil { // populate if not already in
+			args.CGREvent.Context = utils.StringPointer(utils.MetaSuppliers)
+		}
+		attrArgs := &AttrArgsProcessEvent{
+			CGREvent: args.CGREvent,
+		}
+		var rplyEv AttrSProcessEventReply
+		if err := spS.attributeS.Call(utils.AttributeSv1ProcessEvent,
+			attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
+			args.CGREvent = *rplyEv.CGREvent
+		} else if err.Error() != utils.ErrNotFound.Error() {
+			return utils.NewErrAttributeS(err)
+		}
+	}
 	sSps, err := spS.sortedSuppliersForEvent(args)
 	if err != nil {
 		if err != utils.ErrNotFound {

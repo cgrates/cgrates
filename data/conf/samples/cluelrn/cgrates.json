@@ -45,13 +45,14 @@
 
 "attributes": {
 	"enabled": true,
+	"process_runs": 5,						// number of run loops when processing event
 },
 
 
 "suppliers": {
 	"enabled": true,
 	"attributes_conns": [
-		{"address": "*internal"}
+		{"address": "127.0.0.1:2012", "transport":"*json"}
 	],
 },
 

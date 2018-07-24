@@ -789,7 +789,7 @@ func startSupplierService(internalSupplierSChan chan rpcclient.RpcClientConnecti
 	filterSChan <- filterS
 	var attrSConn, resourceSConn, statSConn *rpcclient.RpcClientPool
 	if len(cfg.SupplierSCfg().AttributeSConns) != 0 {
-		resourceSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
+		attrSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
 			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.SupplierSCfg().AttributeSConns, internalAttrSChan, cfg.InternalTtl)
 		if err != nil {
