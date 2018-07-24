@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-//
 // SupplierSCfg is the configuration of supplier service
 type SupplierSCfg struct {
 	Enabled             bool
