@@ -96,7 +96,6 @@ type RalsJsonCfg struct {
 	Cdrstats_conns              *[]*HaPoolJsonCfg
 	Stats_conns                 *[]*HaPoolJsonCfg
 	Pubsubs_conns               *[]*HaPoolJsonCfg
-	Attributes_conns            *[]*HaPoolJsonCfg
 	Aliases_conns               *[]*HaPoolJsonCfg
 	Users_conns                 *[]*HaPoolJsonCfg
 	Rp_subject_prefix_matching  *bool

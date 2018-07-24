@@ -46,7 +46,6 @@ type AttrGetLcr struct {
 type Responder struct {
 	ExitChan         chan bool
 	CdrStats         rpcclient.RpcClientConnection
-	AttributeS       rpcclient.RpcClientConnection
 	Timeout          time.Duration
 	Timezone         string
 	MaxComputedUsage map[string]time.Duration

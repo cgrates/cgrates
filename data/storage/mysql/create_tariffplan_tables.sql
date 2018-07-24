@@ -538,6 +538,7 @@ CREATE TABLE tp_attributes (
   `initial` varchar(64) NOT NULL,
   `substitute` varchar(64) NOT NULL,
   `append` BOOLEAN NOT NULL,
+  `blocker` BOOLEAN NOT NULL,
   `weight` decimal(8,2) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),

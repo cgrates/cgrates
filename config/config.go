@@ -315,7 +315,6 @@ type CGRConfig struct {
 	RALsCDRStatSConns        []*HaPoolConfig // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
 	RALsStatSConns           []*HaPoolConfig
 	RALsPubSubSConns         []*HaPoolConfig
-	RALsAttributeSConns      []*HaPoolConfig
 	RALsUserSConns           []*HaPoolConfig
 	RALsAliasSConns          []*HaPoolConfig
 	RpSubjectPrefixMatching  bool // enables prefix matching for the rating profile subject
@@ -397,12 +396,6 @@ func (self *CGRConfig) checkConfigSanity() error {
 		for _, connCfg := range self.RALsAliasSConns {
 			if connCfg.Address == utils.MetaInternal && !self.AliasesServerEnabled {
 				return errors.New("Alias server not enabled but requested by RALs component.")
-			}
-		}
-
-		for _, connCfg := range self.RALsAttributeSConns {
-			if connCfg.Address == utils.MetaInternal && !self.attributeSCfg.Enabled {
-				return errors.New("Attribute service not enabled but requested by RALs component.")
 			}
 		}
 		for _, connCfg := range self.RALsUserSConns {
@@ -1140,14 +1133,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			for idx, jsnHaCfg := range *jsnRALsCfg.Pubsubs_conns {
 				self.RALsPubSubSConns[idx] = NewDfltHaPoolConfig()
 				self.RALsPubSubSConns[idx].loadFromJsonCfg(jsnHaCfg)
-			}
-		}
-
-		if jsnRALsCfg.Attributes_conns != nil {
-			self.RALsAttributeSConns = make([]*HaPoolConfig, len(*jsnRALsCfg.Attributes_conns))
-			for idx, jsnHaCfg := range *jsnRALsCfg.Attributes_conns {
-				self.RALsAttributeSConns[idx] = NewDfltHaPoolConfig()
-				self.RALsAttributeSConns[idx].loadFromJsonCfg(jsnHaCfg)
 			}
 		}
 		if jsnRALsCfg.Aliases_conns != nil {

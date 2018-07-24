@@ -453,9 +453,6 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 	if !reflect.DeepEqual(cgrCfg.RALsPubSubSConns, eHaPoolcfg) {
 		t.Error(cgrCfg.RALsPubSubSConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.RALsAttributeSConns, eHaPoolcfg) {
-		t.Error(cgrCfg.RALsAttributeSConns)
-	}
 	if !reflect.DeepEqual(cgrCfg.RALsUserSConns, eHaPoolcfg) {
 		t.Error(cgrCfg.RALsUserSConns)
 	}

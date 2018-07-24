@@ -1062,7 +1062,6 @@ func startRpc(server *utils.Server, internalRaterChan,
 			)
 		}
 	}
-
 }
 
 func writePid() {
@@ -1231,8 +1230,7 @@ func main() {
 	if cfg.RALsEnabled {
 		go startRater(internalRaterChan, cacheS, internalThresholdSChan,
 			internalCdrStatSChan, internalStatSChan,
-			internalPubSubSChan, internalAttributeSChan,
-			internalUserSChan, internalAliaseSChan,
+			internalPubSubSChan, internalUserSChan, internalAliaseSChan,
 			srvManager, server, dm, loadDb, cdrDb, &stopHandled, exitChan)
 	}
 

@@ -32,7 +32,7 @@ import (
 // Starts rater and reports on chan
 func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *engine.CacheS,
 	internalThdSChan, internalCdrStatSChan, internalStatSChan, internalPubSubSChan,
-	internalAttributeSChan, internalUserSChan, internalAliaseSChan chan rpcclient.RpcClientConnection,
+	internalUserSChan, internalAliaseSChan chan rpcclient.RpcClientConnection,
 	serviceManager *servmanager.ServiceManager, server *utils.Server,
 	dm *engine.DataManager, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, stopHandled *bool, exitChan chan bool) {
 	var waitTasks []chan struct{}
@@ -126,25 +126,6 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		}()
 	}
 
-	var attrS *rpcclient.RpcClientPool
-	if len(cfg.RALsAttributeSConns) != 0 { // Connections to AttributeS
-		attrsTaskChan := make(chan struct{})
-		waitTasks = append(waitTasks, attrsTaskChan)
-		go func() {
-			defer close(attrsTaskChan)
-			var err error
-			attrS, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate, cfg.ConnectAttempts,
-				cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-				cfg.RALsAttributeSConns, internalAttributeSChan, cfg.InternalTtl)
-			if err != nil {
-				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to %s, error: %s",
-					utils.AttributeS, err.Error()))
-				exitChan <- true
-				return
-			}
-		}()
-	}
-
 	if len(cfg.RALsAliasSConns) != 0 { // Connection to AliasService
 		aliasesTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, aliasesTaskChan)
@@ -191,9 +172,6 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		HTTPPoster: engine.NewHTTPPoster(cfg.HttpSkipTlsVerify, cfg.ReplyTimeout)}
 	if thdS != nil {
 		engine.SetThresholdS(thdS) // temporary architectural fix until we will have separate AccountS
-	}
-	if attrS != nil {
-		responder.AttributeS = attrS
 	}
 	if cdrStats != nil { // ToDo: Fix here properly the init of stats
 		responder.CdrStats = cdrStats
