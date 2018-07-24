@@ -789,6 +789,7 @@ func TestDfSupplierSJsonCfg(t *testing.T) {
 		Enabled:               utils.BoolPointer(false),
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
+		Attributes_conns:      &[]*HaPoolJsonCfg{},
 		Rals_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer("*internal"),

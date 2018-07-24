@@ -866,7 +866,7 @@ func TestCgrCfgJSONDefaultSupplierSCfg(t *testing.T) {
 		Enabled:             false,
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
-
+		AttributeSConns:     []*HaPoolConfig{},
 		RALsConns: []*HaPoolConfig{
 			&HaPoolConfig{Address: "*internal"},
 		},

@@ -469,6 +469,7 @@ type SupplierSJsonCfg struct {
 	Enabled               *bool
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
+	Attributes_conns      *[]*HaPoolJsonCfg
 	Rals_conns            *[]*HaPoolJsonCfg
 	Resources_conns       *[]*HaPoolJsonCfg
 	Stats_conns           *[]*HaPoolJsonCfg

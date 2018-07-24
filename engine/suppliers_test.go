@@ -301,7 +301,7 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 	}
 
 	splService, err = NewSupplierService(dmSPP, config.CgrConfig().DefaultTimezone,
-		&FilterS{dm: dmSPP, cfg: defaultCfg}, nil, nil, nil, nil)
+		&FilterS{dm: dmSPP, cfg: defaultCfg}, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}

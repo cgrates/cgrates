@@ -472,6 +472,7 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,						// starts SupplierS service: <true|false>.
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"attributes_conns": [],					// address where to reach the AttributeS <""|127.0.0.1:2013>
 	"rals_conns": [
 		{"address": "*internal"},			// address where to reach the RALs for cost/accounting  <*internal>
 	],

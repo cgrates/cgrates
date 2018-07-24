@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"reflect"
 	"sort"
 	"strconv"
 	"time"
@@ -70,11 +71,21 @@ func (lps SupplierProfiles) Sort() {
 // NewLCRService initializes a LCRService
 func NewSupplierService(dm *DataManager, timezone string,
 	filterS *FilterS, stringIndexedFields, prefixIndexedFields *[]string, resourceS,
-	statS rpcclient.RpcClientConnection) (spS *SupplierService, err error) {
+	statS, attributeS rpcclient.RpcClientConnection) (spS *SupplierService, err error) {
+	if attributeS != nil && reflect.ValueOf(attributeS).IsNil() { // fix nil value in interface
+		attributeS = nil
+	}
+	if resourceS != nil && reflect.ValueOf(resourceS).IsNil() { // fix nil value in interface
+		resourceS = nil
+	}
+	if statS != nil && reflect.ValueOf(statS).IsNil() { // fix nil value in interface
+		statS = nil
+	}
 	spS = &SupplierService{
 		dm:                  dm,
 		timezone:            timezone,
 		filterS:             filterS,
+		attributeS:          attributeS,
 		resourceS:           resourceS,
 		statS:               statS,
 		stringIndexedFields: stringIndexedFields,
@@ -92,6 +103,7 @@ type SupplierService struct {
 	filterS             *FilterS
 	stringIndexedFields *[]string
 	prefixIndexedFields *[]string
+	attributeS,
 	resourceS,
 	statS rpcclient.RpcClientConnection
 	sorter SupplierSortDispatcher

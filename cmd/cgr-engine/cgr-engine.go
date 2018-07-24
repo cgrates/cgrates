@@ -782,18 +782,19 @@ func startThresholdService(internalThresholdSChan chan rpcclient.RpcClientConnec
 func startSupplierService(internalSupplierSChan chan rpcclient.RpcClientConnection, cacheS *engine.CacheS,
 	internalRsChan, internalStatSChan chan rpcclient.RpcClientConnection,
 	cfg *config.CGRConfig, dm *engine.DataManager, server *utils.Server,
-	exitChan chan bool, filterSChan chan *engine.FilterS) {
+	exitChan chan bool, filterSChan chan *engine.FilterS,
+	internalAttrSChan chan rpcclient.RpcClientConnection) {
 	var err error
 	filterS := <-filterSChan
 	filterSChan <- filterS
-	var resourceSConn, statSConn *rpcclient.RpcClientPool
-	if len(cfg.SupplierSCfg().ResourceSConns) != 0 {
+	var attrSConn, resourceSConn, statSConn *rpcclient.RpcClientPool
+	if len(cfg.SupplierSCfg().AttributeSConns) != 0 {
 		resourceSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
 			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.SupplierSCfg().ResourceSConns, internalRsChan, cfg.InternalTtl)
+			cfg.SupplierSCfg().AttributeSConns, internalAttrSChan, cfg.InternalTtl)
 		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ResourceS: %s",
-				utils.SupplierS, err.Error()))
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to &s: %s",
+				utils.SupplierS, utils.AttributeS, err.Error()))
 			exitChan <- true
 			return
 		}
@@ -812,7 +813,7 @@ func startSupplierService(internalSupplierSChan chan rpcclient.RpcClientConnecti
 	<-cacheS.GetPrecacheChannel(utils.CacheSupplierProfiles)
 
 	splS, err := engine.NewSupplierService(dm, cfg.DefaultTimezone, filterS, cfg.SupplierSCfg().StringIndexedFields,
-		cfg.SupplierSCfg().PrefixIndexedFields, resourceSConn, statSConn)
+		cfg.SupplierSCfg().PrefixIndexedFields, resourceSConn, statSConn, attrSConn)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s",
 			utils.SupplierS, err.Error()))
@@ -1336,7 +1337,7 @@ func main() {
 	if cfg.SupplierSCfg().Enabled {
 		go startSupplierService(internalSupplierSChan, cacheS,
 			internalRsChan, internalStatSChan,
-			cfg, dm, server, exitChan, filterSChan)
+			cfg, dm, server, exitChan, filterSChan, internalAttributeSChan)
 	}
 
 	if cfg.DispatcherSCfg().Enabled {
