@@ -96,38 +96,55 @@ func (rp *RatingPlan) Equal(o *RatingPlan) bool {
 	return rp.Id == o.Id
 }
 
-// IsValid determines if the rating plan covers a continous period of time
+// IsValid determines if the rating plan covers a continous period of time for all destinations
 func (rp *RatingPlan) isContinous() bool {
+	if len(rp.DestinationRates) == 0 {
+		return false
+	}
+
 	weekdays := make([]int, 7)
-	for _, tm := range rp.Timings {
-		// if it is a blank timing than it will match all
-		if tm.IsBlank() {
-			return true
+	for _, dr := range rp.DestinationRates {
+		var tmgs []*RITiming
+		for _, tmg := range dr {
+			tmgs = append(tmgs, rp.Timings[tmg.Timing])
 		}
-		// skip the special timings (for specific dates)
-		if len(tm.Years) != 0 || len(tm.Months) != 0 || len(tm.MonthDays) != 0 {
-			continue
-		}
-		// if the startime is not midnight than is an extra time
-		if tm.StartTime != "00:00:00" {
-			continue
-		}
-		//check if all weekdays are covered
-		for _, wd := range tm.WeekDays {
-			weekdays[wd] = 1
-		}
-		allWeekdaysCovered := true
-		for _, wd := range weekdays {
-			if wd != 1 {
-				allWeekdaysCovered = false
+
+		continuous := false
+		for _, tm := range tmgs {
+			// if it is a blank timing than it will match all
+			if tm.IsBlank() {
+				continuous = true
+				break
+			}
+			// skip the special timings (for specific dates)
+			if len(tm.Years) != 0 || len(tm.Months) != 0 || len(tm.MonthDays) != 0 {
+				continue
+			}
+			// if the startime is not midnight than is an extra time
+			if tm.StartTime != "00:00:00" {
+				continue
+			}
+			//check if all weekdays are covered
+			for _, wd := range tm.WeekDays {
+				weekdays[wd] = 1
+			}
+			allWeekdaysCovered := true
+			for _, wd := range weekdays {
+				if wd != 1 {
+					allWeekdaysCovered = false
+					break
+				}
+			}
+			if allWeekdaysCovered {
+				continuous = true
 				break
 			}
 		}
-		if allWeekdaysCovered {
-			return true
+		if !continuous {
+			return false
 		}
 	}
-	return false
+	return true
 }
 
 func (rp *RatingPlan) getFirstUnsaneRating() string {

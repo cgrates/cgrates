@@ -230,6 +230,11 @@ func TestRatingPlanIsContinousBlank(t *testing.T) {
 			"blank": &RITiming{StartTime: "00:00:00"},
 			"other": &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "00:00:00"},
 		},
+		DestinationRates: map[string]RPRateList{
+			"DST": RPRateList{
+				&RPRate{Timing: "blank", Rating: "rt1", Weight: 10},
+				&RPRate{Timing: "other", Rating: "rt2", Weight: 10}},
+		},
 	}
 	if !rpl.isContinous() {
 		t.Errorf("Error determining rating plan's valididty: %+v", rpl)
@@ -243,6 +248,12 @@ func TestRatingPlanIsContinousGood(t *testing.T) {
 			"second": &RITiming{WeekDays: utils.WeekDays{4, 5, 6}, StartTime: "00:00:00"},
 			"third":  &RITiming{WeekDays: utils.WeekDays{0}, StartTime: "00:00:00"},
 		},
+		DestinationRates: map[string]RPRateList{
+			"DST": RPRateList{
+				&RPRate{Timing: "first", Rating: "rt1", Weight: 10},
+				&RPRate{Timing: "second", Rating: "rt2", Weight: 10},
+				&RPRate{Timing: "third", Rating: "rt3", Weight: 10}},
+		},
 	}
 	if !rpl.isContinous() {
 		t.Errorf("Error determining rating plan's valididty: %+v", rpl)
@@ -254,6 +265,11 @@ func TestRatingPlanisContinousBad(t *testing.T) {
 		Timings: map[string]*RITiming{
 			"first":  &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "00:00:00"},
 			"second": &RITiming{WeekDays: utils.WeekDays{4, 5, 0}, StartTime: "00:00:00"},
+		},
+		DestinationRates: map[string]RPRateList{
+			"DST": RPRateList{
+				&RPRate{Timing: "first", Rating: "rt1", Weight: 10},
+				&RPRate{Timing: "second", Rating: "rt2", Weight: 10}},
 		},
 	}
 	if rpl.isContinous() {
@@ -268,6 +284,13 @@ func TestRatingPlanIsContinousSpecial(t *testing.T) {
 			"first":   &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "00:00:00"},
 			"second":  &RITiming{WeekDays: utils.WeekDays{4, 5, 6}, StartTime: "00:00:00"},
 			"third":   &RITiming{WeekDays: utils.WeekDays{0}, StartTime: "00:00:00"},
+		},
+		DestinationRates: map[string]RPRateList{
+			"DST": RPRateList{
+				&RPRate{Timing: "special", Rating: "rt1", Weight: 10},
+				&RPRate{Timing: "first", Rating: "rt2", Weight: 10},
+				&RPRate{Timing: "second", Rating: "rt3", Weight: 10},
+				&RPRate{Timing: "third", Rating: "rt4", Weight: 10}},
 		},
 	}
 	if !rpl.isContinous() {
@@ -284,6 +307,14 @@ func TestRatingPlanIsContinousMultiple(t *testing.T) {
 			"second":   &RITiming{WeekDays: utils.WeekDays{4, 5, 6}, StartTime: "00:00:00"},
 			"third":    &RITiming{WeekDays: utils.WeekDays{0}, StartTime: "00:00:00"},
 		},
+		DestinationRates: map[string]RPRateList{
+			"DST": RPRateList{
+				&RPRate{Timing: "special", Rating: "rt1", Weight: 10},
+				&RPRate{Timing: "first", Rating: "rt2", Weight: 10},
+				&RPRate{Timing: "first_08", Rating: "rt3", Weight: 10},
+				&RPRate{Timing: "second", Rating: "rt4", Weight: 10},
+				&RPRate{Timing: "third", Rating: "rt5", Weight: 10}},
+		},
 	}
 	if !rpl.isContinous() {
 		t.Errorf("Error determining rating plan's valididty: %+v", rpl)
@@ -297,6 +328,13 @@ func TestRatingPlanIsContinousMissing(t *testing.T) {
 			"first_08": &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "08:00:00"},
 			"second":   &RITiming{WeekDays: utils.WeekDays{4, 5, 6}, StartTime: "00:00:00"},
 			"third":    &RITiming{WeekDays: utils.WeekDays{0}, StartTime: "00:00:00"},
+		},
+		DestinationRates: map[string]RPRateList{
+			"DST": RPRateList{
+				&RPRate{Timing: "special", Rating: "rt1", Weight: 10},
+				&RPRate{Timing: "first_08", Rating: "rt2", Weight: 10},
+				&RPRate{Timing: "second", Rating: "rt3", Weight: 10},
+				&RPRate{Timing: "third", Rating: "rt4", Weight: 10}},
 		},
 	}
 	if rpl.isContinous() {
