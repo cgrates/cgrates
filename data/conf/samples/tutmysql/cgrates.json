@@ -68,9 +68,6 @@
 	"thresholds_conns": [
 		{"address": "*internal"}
 	],
-	"attributes_conns": [
-		{"address": "*internal"}
-	],
 },
 
 
