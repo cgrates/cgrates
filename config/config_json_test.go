@@ -705,7 +705,6 @@ func TestDfAttributeServJsonCfg(t *testing.T) {
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
 		Process_runs:          utils.IntPointer(1),
-		Suppliers_conns:       &[]*HaPoolJsonCfg{},
 	}
 	if cfg, err := dfCgrJsonCfg.AttributeServJsonCfg(); err != nil {
 		t.Error(err)

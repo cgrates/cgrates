@@ -24,7 +24,6 @@ type AttributeSCfg struct {
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
 	ProcessRuns         int
-	SupplierSConns      []*HaPoolConfig
 }
 
 func (alS *AttributeSCfg) loadFromJsonCfg(jsnCfg *AttributeSJsonCfg) (err error) {
@@ -50,13 +49,6 @@ func (alS *AttributeSCfg) loadFromJsonCfg(jsnCfg *AttributeSJsonCfg) (err error)
 	}
 	if jsnCfg.Process_runs != nil {
 		alS.ProcessRuns = *jsnCfg.Process_runs
-	}
-	if jsnCfg.Suppliers_conns != nil {
-		alS.SupplierSConns = make([]*HaPoolConfig, len(*jsnCfg.Suppliers_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Suppliers_conns {
-			alS.SupplierSConns[idx] = NewDfltHaPoolConfig()
-			alS.SupplierSConns[idx].loadFromJsonCfg(jsnHaCfg)
-		}
 	}
 	return
 }

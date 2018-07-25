@@ -20,23 +20,17 @@ package engine
 
 import (
 	"fmt"
-	"reflect"
 
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func NewAttributeService(dm *DataManager, filterS *FilterS,
 	stringIndexedFields, prefixIndexedFields *[]string,
-	processRuns int, sppS rpcclient.RpcClientConnection) (*AttributeService, error) {
-	if sppS != nil && reflect.ValueOf(sppS).IsNil() { // fix nil value in interface
-		sppS = nil
-	}
+	processRuns int) (*AttributeService, error) {
 	return &AttributeService{dm: dm, filterS: filterS,
 		stringIndexedFields: stringIndexedFields,
 		prefixIndexedFields: prefixIndexedFields,
-		processRuns:         processRuns,
-		sppS:                sppS}, nil
+		processRuns:         processRuns}, nil
 }
 
 type AttributeService struct {
@@ -45,7 +39,6 @@ type AttributeService struct {
 	stringIndexedFields *[]string
 	prefixIndexedFields *[]string
 	processRuns         int
-	sppS                rpcclient.RpcClientConnection // rpc connection towards SupplierS
 }
 
 // ListenAndServe will initialize the service
