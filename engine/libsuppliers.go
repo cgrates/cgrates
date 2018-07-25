@@ -79,6 +79,17 @@ func (sSpls *SortedSuppliers) SortCost() {
 	})
 }
 
+// SortCost is part of sort interface,
+// sort based on Cost with fallback on Weight
+func (sSpls *SortedSuppliers) SortHighestCost() {
+	sort.Slice(sSpls.SortedSuppliers, func(i, j int) bool {
+		if sSpls.SortedSuppliers[i].SortingData[utils.Cost].(float64) == sSpls.SortedSuppliers[j].SortingData[utils.Cost].(float64) {
+			return sSpls.SortedSuppliers[i].SortingData[utils.Weight].(float64) > sSpls.SortedSuppliers[j].SortingData[utils.Weight].(float64)
+		}
+		return sSpls.SortedSuppliers[i].SortingData[utils.Cost].(float64) > sSpls.SortedSuppliers[j].SortingData[utils.Cost].(float64)
+	})
+}
+
 // Digest returns list of supplierIDs + parameters for easier outside access
 // format suppl1:suppl1params,suppl2:suppl2params
 func (sSpls *SortedSuppliers) Digest() string {
@@ -100,6 +111,7 @@ func NewSupplierSortDispatcher(lcrS *SupplierService) (ssd SupplierSortDispatche
 	ssd = make(map[string]SuppliersSorter)
 	ssd[utils.MetaWeight] = NewWeightSorter()
 	ssd[utils.MetaLeastCost] = NewLeastCostSorter(lcrS)
+	ssd[utils.MetaHighestCost] = NewHighestCostSorter(lcrS)
 	return
 }
 

@@ -53,6 +53,7 @@ var sTestsSupplierSV1 = []func(t *testing.T){
 	testV1SplSGetLeastCostSuppliersWithMaxCost,
 	testV1SplSGetLeastCostSuppliersWithMaxCost2,
 	testV1SplSGetLeastCostSuppliersWithMaxCostNotFound,
+	testV1SplSGetHighestCostSuppliers,
 	testV1SplSGetSupplierWithoutFilter,
 	testV1SplSSetSupplierProfiles,
 	testV1SplSUpdateSupplierProfiles,
@@ -321,6 +322,61 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost2(t *testing.T) {
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.1054,
+					utils.RatingPlanID: "RP_SPECIAL_1002",
+					utils.Weight:       10.0,
+				},
+			},
+		},
+	}
+	var suplsReply engine.SortedSuppliers
+	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
+		ev, &suplsReply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSpls, suplsReply) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
+	}
+}
+
+func testV1SplSGetHighestCostSuppliers(t *testing.T) {
+	ev := &engine.ArgsGetSuppliers{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1SplSGetHighestCostSuppliers",
+			Event: map[string]interface{}{
+				utils.Account:     "1003",
+				utils.Subject:     "1003",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+				utils.Usage:       "1m20s",
+				"DistincMatch":    "*highest_cost",
+			},
+		},
+	}
+	eSpls := engine.SortedSuppliers{
+		ProfileID: "SPL_HIGHESTCOST_1",
+		Sorting:   utils.MetaHighestCost,
+		SortedSuppliers: []*engine.SortedSupplier{
+			&engine.SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					utils.Cost:         0.46666,
+					utils.RatingPlanID: "RP_RETAIL1",
+					utils.Weight:       20.0,
+				},
+			},
+			&engine.SortedSupplier{
+				SupplierID: "supplier3",
+				SortingData: map[string]interface{}{
+					utils.Cost:         0.0136,
+					utils.RatingPlanID: "RP_SPECIAL_1002",
+					utils.Weight:       15.0,
+				},
+			},
+			&engine.SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					utils.Cost:         0.0136,
 					utils.RatingPlanID: "RP_SPECIAL_1002",
 					utils.Weight:       10.0,
 				},
