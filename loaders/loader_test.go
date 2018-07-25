@@ -311,6 +311,7 @@ cgrates.org,ResGroup2,*string:Account:1002,2014-07-29T15:00:00Z,3600s,2,premium_
 		Limit:             2,
 		Blocker:           true,
 		Stored:            true,
+		ThresholdIDs:      []string{},
 	}
 	eResPrf2 := &engine.ResourceProfile{
 		Tenant:    "cgrates.org",
@@ -325,6 +326,7 @@ cgrates.org,ResGroup2,*string:Account:1002,2014-07-29T15:00:00Z,3600s,2,premium_
 		Limit:             2,
 		Blocker:           true,
 		Stored:            true,
+		ThresholdIDs:      []string{},
 	}
 	if len(ldr.bufLoaderData) != 0 {
 		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
@@ -848,12 +850,14 @@ cgrates.org,SPL_LEASTCOST_1,,,,,supplier2,,,RP_RETAIL1,resource_spl2,,20,,,
 		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
 	}
 	eSp1 := &engine.SupplierProfile{
-		Tenant: "cgrates.org",
-		ID:     "SPL_WEIGHT_2",
+		Tenant:    "cgrates.org",
+		ID:        "SPL_WEIGHT_2",
+		FilterIDs: []string{},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2017, 11, 27, 0, 0, 0, 0, time.UTC),
 		},
-		Sorting: "*weight",
+		Sorting:           "*weight",
+		SortingParameters: []string{},
 		Suppliers: []*engine.Supplier{
 			&engine.Supplier{
 				ID:     "supplier1",
@@ -869,7 +873,8 @@ cgrates.org,SPL_LEASTCOST_1,,,,,supplier2,,,RP_RETAIL1,resource_spl2,,20,,,
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2017, 11, 27, 0, 0, 0, 0, time.UTC),
 		},
-		Sorting: "*least_cost",
+		Sorting:           "*least_cost",
+		SortingParameters: []string{},
 		Suppliers: []*engine.Supplier{
 			&engine.Supplier{
 				ID:            "supplier1",
@@ -894,7 +899,8 @@ cgrates.org,SPL_LEASTCOST_1,,,,,supplier2,,,RP_RETAIL1,resource_spl2,,20,,,
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2017, 11, 27, 0, 0, 0, 0, time.UTC),
 		},
-		Sorting: "*least_cost",
+		Sorting:           "*least_cost",
+		SortingParameters: []string{},
 		Suppliers: []*engine.Supplier{
 			&engine.Supplier{
 				ID:            "supplier2",

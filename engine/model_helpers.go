@@ -1944,17 +1944,19 @@ func APItoResource(tpRL *utils.TPResource, timezone string) (rp *ResourceProfile
 		Blocker:           tpRL.Blocker,
 		Stored:            tpRL.Stored,
 		AllocationMessage: tpRL.AllocationMessage,
+		ThresholdIDs:      make([]string, len(tpRL.ThresholdIDs)),
+		FilterIDs:         make([]string, len(tpRL.FilterIDs)),
 	}
 	if tpRL.UsageTTL != "" {
 		if rp.UsageTTL, err = utils.ParseDurationWithNanosecs(tpRL.UsageTTL); err != nil {
 			return nil, err
 		}
 	}
-	for _, fltr := range tpRL.FilterIDs {
-		rp.FilterIDs = append(rp.FilterIDs, fltr)
+	for i, fltr := range tpRL.FilterIDs {
+		rp.FilterIDs[i] = fltr
 	}
-	for _, th := range tpRL.ThresholdIDs {
-		rp.ThresholdIDs = append(rp.ThresholdIDs, th)
+	for i, th := range tpRL.ThresholdIDs {
+		rp.ThresholdIDs[i] = th
 	}
 	if tpRL.ActivationInterval != nil {
 		if rp.ActivationInterval, err = tpRL.ActivationInterval.AsActivationInterval(timezone); err != nil {
@@ -2139,25 +2141,27 @@ func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
 
 func APItoStats(tpST *utils.TPStats, timezone string) (st *StatQueueProfile, err error) {
 	st = &StatQueueProfile{
-		Tenant:      tpST.Tenant,
-		ID:          tpST.ID,
-		QueueLength: tpST.QueueLength,
-		Metrics:     tpST.Metrics,
-		Weight:      tpST.Weight,
-		Blocker:     tpST.Blocker,
-		Stored:      tpST.Stored,
-		MinItems:    tpST.MinItems,
+		Tenant:       tpST.Tenant,
+		ID:           tpST.ID,
+		QueueLength:  tpST.QueueLength,
+		Metrics:      tpST.Metrics,
+		Weight:       tpST.Weight,
+		Blocker:      tpST.Blocker,
+		Stored:       tpST.Stored,
+		MinItems:     tpST.MinItems,
+		ThresholdIDs: make([]string, len(tpST.ThresholdIDs)),
+		FilterIDs:    make([]string, len(tpST.FilterIDs)),
 	}
 	if tpST.TTL != "" {
 		if st.TTL, err = utils.ParseDurationWithNanosecs(tpST.TTL); err != nil {
 			return nil, err
 		}
 	}
-	for _, trh := range tpST.ThresholdIDs {
-		st.ThresholdIDs = append(st.ThresholdIDs, trh)
+	for i, trh := range tpST.ThresholdIDs {
+		st.ThresholdIDs[i] = trh
 	}
-	for _, fltr := range tpST.FilterIDs {
-		st.FilterIDs = append(st.FilterIDs, fltr)
+	for i, fltr := range tpST.FilterIDs {
+		st.FilterIDs[i] = fltr
 	}
 	if tpST.ActivationInterval != nil {
 		if st.ActivationInterval, err = tpST.ActivationInterval.AsActivationInterval(timezone); err != nil {
@@ -2316,25 +2320,27 @@ func APItoModelTPThreshold(th *utils.TPThreshold) (mdls TpThresholdS) {
 
 func APItoThresholdProfile(tpTH *utils.TPThreshold, timezone string) (th *ThresholdProfile, err error) {
 	th = &ThresholdProfile{
-		Tenant:  tpTH.Tenant,
-		ID:      tpTH.ID,
-		MaxHits: tpTH.MaxHits,
-		MinHits: tpTH.MinHits,
-		Weight:  tpTH.Weight,
-		Blocker: tpTH.Blocker,
-		Async:   tpTH.Async,
+		Tenant:    tpTH.Tenant,
+		ID:        tpTH.ID,
+		MaxHits:   tpTH.MaxHits,
+		MinHits:   tpTH.MinHits,
+		Weight:    tpTH.Weight,
+		Blocker:   tpTH.Blocker,
+		Async:     tpTH.Async,
+		ActionIDs: make([]string, len(tpTH.ActionIDs)),
+		FilterIDs: make([]string, len(tpTH.FilterIDs)),
 	}
 	if tpTH.MinSleep != "" {
 		if th.MinSleep, err = utils.ParseDurationWithNanosecs(tpTH.MinSleep); err != nil {
 			return nil, err
 		}
 	}
-	for _, ati := range tpTH.ActionIDs {
-		th.ActionIDs = append(th.ActionIDs, ati)
+	for i, ati := range tpTH.ActionIDs {
+		th.ActionIDs[i] = ati
 
 	}
-	for _, fli := range tpTH.FilterIDs {
-		th.FilterIDs = append(th.FilterIDs, fli)
+	for i, fli := range tpTH.FilterIDs {
+		th.FilterIDs[i] = fli
 	}
 	if tpTH.ActivationInterval != nil {
 		if th.ActivationInterval, err = tpTH.ActivationInterval.AsActivationInterval(timezone); err != nil {
@@ -2639,27 +2645,29 @@ func APItoModelTPSuppliers(st *utils.TPSupplierProfile) (mdls TpSuppliers) {
 	return
 }
 
-func APItoSupplierProfile(tpTH *utils.TPSupplierProfile, timezone string) (th *SupplierProfile, err error) {
-	th = &SupplierProfile{
-		Tenant:    tpTH.Tenant,
-		ID:        tpTH.ID,
-		Sorting:   tpTH.Sorting,
-		Weight:    tpTH.Weight,
-		Suppliers: make([]*Supplier, len(tpTH.Suppliers)),
+func APItoSupplierProfile(tpSPP *utils.TPSupplierProfile, timezone string) (spp *SupplierProfile, err error) {
+	spp = &SupplierProfile{
+		Tenant:            tpSPP.Tenant,
+		ID:                tpSPP.ID,
+		Sorting:           tpSPP.Sorting,
+		Weight:            tpSPP.Weight,
+		Suppliers:         make([]*Supplier, len(tpSPP.Suppliers)),
+		SortingParameters: make([]string, len(tpSPP.SortingParameters)),
+		FilterIDs:         make([]string, len(tpSPP.FilterIDs)),
 	}
-	for _, stp := range tpTH.SortingParameters {
-		th.SortingParameters = append(th.SortingParameters, stp)
+	for i, stp := range tpSPP.SortingParameters {
+		spp.SortingParameters[i] = stp
 	}
-	for _, fli := range tpTH.FilterIDs {
-		th.FilterIDs = append(th.FilterIDs, fli)
+	for i, fli := range tpSPP.FilterIDs {
+		spp.FilterIDs[i] = fli
 	}
-	if tpTH.ActivationInterval != nil {
-		if th.ActivationInterval, err = tpTH.ActivationInterval.AsActivationInterval(timezone); err != nil {
+	if tpSPP.ActivationInterval != nil {
+		if spp.ActivationInterval, err = tpSPP.ActivationInterval.AsActivationInterval(timezone); err != nil {
 			return nil, err
 		}
 	}
-	for i, suplier := range tpTH.Suppliers {
-		supl := &Supplier{
+	for i, suplier := range tpSPP.Suppliers {
+		spp.Suppliers[i] = &Supplier{
 			ID:                 suplier.ID,
 			Weight:             suplier.Weight,
 			Blocker:            suplier.Blocker,
@@ -2669,9 +2677,8 @@ func APItoSupplierProfile(tpTH *utils.TPSupplierProfile, timezone string) (th *S
 			StatIDs:            suplier.StatIDs,
 			SupplierParameters: suplier.SupplierParameters,
 		}
-		th.Suppliers[i] = supl
 	}
-	return th, nil
+	return spp, nil
 }
 
 type TPAttributes []*TPAttribute
@@ -2791,39 +2798,40 @@ func APItoModelTPAttribute(th *utils.TPAttributeProfile) (mdls TPAttributes) {
 	return
 }
 
-func APItoAttributeProfile(tpTH *utils.TPAttributeProfile, timezone string) (th *AttributeProfile, err error) {
-	th = &AttributeProfile{
-		Tenant:    tpTH.Tenant,
-		ID:        tpTH.ID,
-		Weight:    tpTH.Weight,
-		Blocker:   tpTH.Blocker,
-		FilterIDs: []string{},
-		Contexts:  []string{},
+func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (attrPrf *AttributeProfile, err error) {
+	attrPrf = &AttributeProfile{
+		Tenant:     tpAttr.Tenant,
+		ID:         tpAttr.ID,
+		Weight:     tpAttr.Weight,
+		Blocker:    tpAttr.Blocker,
+		FilterIDs:  make([]string, len(tpAttr.FilterIDs)),
+		Contexts:   make([]string, len(tpAttr.Contexts)),
+		Attributes: make([]*Attribute, len(tpAttr.Attributes)),
 	}
-	for _, fli := range tpTH.FilterIDs {
-		th.FilterIDs = append(th.FilterIDs, fli)
+	for i, fli := range tpAttr.FilterIDs {
+		attrPrf.FilterIDs[i] = fli
 	}
-	for _, context := range tpTH.Contexts {
-		th.Contexts = append(th.Contexts, context)
+	for i, context := range tpAttr.Contexts {
+		attrPrf.Contexts[i] = context
 	}
-	for _, reqAttr := range tpTH.Attributes {
+	for i, reqAttr := range tpAttr.Attributes {
 		sbstPrsr, err := utils.NewRSRParsers(reqAttr.Substitute, true)
 		if err != nil {
 			return nil, err
 		}
-		th.Attributes = append(th.Attributes, &Attribute{
+		attrPrf.Attributes[i] = &Attribute{
 			Append:     reqAttr.Append,
 			FieldName:  reqAttr.FieldName,
 			Initial:    reqAttr.Initial,
 			Substitute: sbstPrsr,
-		})
+		}
 	}
-	if tpTH.ActivationInterval != nil {
-		if th.ActivationInterval, err = tpTH.ActivationInterval.AsActivationInterval(timezone); err != nil {
+	if tpAttr.ActivationInterval != nil {
+		if attrPrf.ActivationInterval, err = tpAttr.ActivationInterval.AsActivationInterval(timezone); err != nil {
 			return nil, err
 		}
 	}
-	return th, nil
+	return attrPrf, nil
 }
 
 type TPChargers []*TPCharger
@@ -2980,14 +2988,14 @@ func APItoChargerProfile(tpCPP *utils.TPChargerProfile, timezone string) (cpp *C
 		ID:           tpCPP.ID,
 		Weight:       tpCPP.Weight,
 		RunID:        tpCPP.RunID,
-		FilterIDs:    []string{},
-		AttributeIDs: []string{},
+		FilterIDs:    make([]string, len(tpCPP.FilterIDs)),
+		AttributeIDs: make([]string, len(tpCPP.AttributeIDs)),
 	}
-	for _, fli := range tpCPP.FilterIDs {
-		cpp.FilterIDs = append(cpp.FilterIDs, fli)
+	for i, fli := range tpCPP.FilterIDs {
+		cpp.FilterIDs[i] = fli
 	}
-	for _, attribute := range tpCPP.AttributeIDs {
-		cpp.AttributeIDs = append(cpp.AttributeIDs, attribute)
+	for i, attribute := range tpCPP.AttributeIDs {
+		cpp.AttributeIDs[i] = attribute
 	}
 	if tpCPP.ActivationInterval != nil {
 		if cpp.ActivationInterval, err = tpCPP.ActivationInterval.AsActivationInterval(timezone); err != nil {

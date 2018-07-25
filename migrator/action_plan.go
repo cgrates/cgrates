@@ -64,6 +64,9 @@ func (m *Migrator) migrateCurrentActionPlans() (err error) {
 				if err := m.dmOut.DataManager().DataDB().SetActionPlan(idg, acts, true, utils.NonTransactional); err != nil {
 					return err
 				}
+				if err := m.dmIN.DataManager().DataDB().RemoveActionPlan(idg, utils.NonTransactional); err != nil {
+					return err
+				}
 				m.stats[utils.ActionPlans] += 1
 			}
 		}

@@ -246,5 +246,9 @@ func testActPlnITMigrateAndMove(t *testing.T) {
 		} else if !reflect.DeepEqual(actPln.ActionTimings[0].Timing, result.ActionTimings[0].Timing) {
 			t.Errorf("Expecting: %+v, received: %+v", actPln.ActionTimings[0].Timing, result.ActionTimings[0].Timing)
 		}
+		result, err = actPlnMigrator.dmIN.DataManager().DataDB().GetActionPlan((*v1actPln)[0].Id, true, utils.NonTransactional)
+		if err != utils.ErrNotFound {
+			t.Error(err)
+		}
 	}
 }
