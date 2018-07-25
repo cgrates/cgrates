@@ -430,7 +430,6 @@ const CGRATES_CFG_JSON = `
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"process_runs": 1,						// number of run loops when processing event
-	"suppliers_conns": [],					// address where to reach the SupplierS <""|*internal|127.0.0.1:2013>
 },
 
 

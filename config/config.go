@@ -700,6 +700,11 @@ func (self *CGRConfig) checkConfigSanity() error {
 				return errors.New("StatS not enabled but requested by SupplierS component.")
 			}
 		}
+		for _, connCfg := range self.supplierSCfg.AttributeSConns {
+			if connCfg.Address == utils.MetaInternal && !self.attributeSCfg.Enabled {
+				return errors.New("AttributeS not enabled but requested by SupplierS component.")
+			}
+		}
 	}
 	// DispaterS checks
 	if self.dispatcherSCfg != nil && self.dispatcherSCfg.Enabled {
