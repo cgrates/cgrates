@@ -1,0 +1,80 @@
+/*
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
+
+package engine
+
+import (
+	"fmt"
+
+	"github.com/cgrates/cgrates/utils"
+)
+
+func NewHighestCostSorter(spS *SupplierService) *HightCostSorter {
+	return &HightCostSorter{spS: spS,
+		sorting: utils.MetaHighestCost}
+}
+
+// HightCostSorter sorts suppliers based on their cost
+type HightCostSorter struct {
+	sorting string
+	spS     *SupplierService
+}
+
+func (lcs *HightCostSorter) SortSuppliers(prflID string, suppls []*Supplier,
+	ev *utils.CGREvent, extraOpts *optsGetSuppliers) (sortedSuppls *SortedSuppliers, err error) {
+	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
+		Sorting:         lcs.sorting,
+		SortedSuppliers: make([]*SortedSupplier, 0)}
+	for _, s := range suppls {
+		costData, err := lcs.spS.costForEvent(ev, s.AccountIDs, s.RatingPlanIDs)
+		if err != nil {
+			if extraOpts.ignoreErrors {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> profile: %s ignoring supplier with ID: %s, err: %s",
+						utils.SupplierS, prflID, s.ID, err.Error()))
+				continue
+			}
+			return nil, err
+		} else if len(costData) == 0 {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> profile: %s ignoring supplier with ID: %s, missing cost information",
+					utils.SupplierS, prflID, s.ID))
+			continue
+		}
+		if extraOpts.maxCost != 0 &&
+			costData[utils.Cost].(float64) > extraOpts.maxCost {
+			continue
+		}
+		srtData := map[string]interface{}{
+			utils.Weight: s.Weight,
+		}
+		for k, v := range costData {
+			srtData[k] = v
+		}
+		sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers,
+			&SortedSupplier{
+				SupplierID:         s.ID,
+				SortingData:        srtData,
+				SupplierParameters: s.SupplierParameters})
+	}
+	if len(sortedSuppls.SortedSuppliers) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	sortedSuppls.SortHighestCost()
+	return
+}

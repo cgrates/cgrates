@@ -484,6 +484,7 @@ const (
 	MetaDataDB                   = "*datadb"
 	MetaWeight                   = "*weight"
 	MetaLeastCost                = "*least_cost"
+	MetaHighestCost              = "*highest_cost"
 	Weight                       = "Weight"
 	Cost                         = "Cost"
 	RatingPlanID                 = "RatingPlanID"

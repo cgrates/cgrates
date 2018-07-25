@@ -218,3 +218,67 @@ func TestSortedSuppliersDigest3(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
 	}
 }
+
+func TestLibSuppliersSortHighestCost(t *testing.T) {
+	sSpls := &SortedSuppliers{
+		SortedSuppliers: []*SortedSupplier{
+			&SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					utils.Cost:   0.1,
+					utils.Weight: 15.0,
+				},
+				SupplierParameters: "param1",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					utils.Cost:   0.2,
+					utils.Weight: 20.0,
+				},
+				SupplierParameters: "param2",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier3",
+				SortingData: map[string]interface{}{
+					utils.Cost:   0.05,
+					utils.Weight: 10.0,
+				},
+				SupplierParameters: "param3",
+			},
+		},
+	}
+	sSpls.SortHighestCost()
+	eOrderedSpls := &SortedSuppliers{
+		SortedSuppliers: []*SortedSupplier{
+			&SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					utils.Cost:   0.2,
+					utils.Weight: 20.0,
+				},
+				SupplierParameters: "param2",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					utils.Cost:   0.1,
+					utils.Weight: 15.0,
+				},
+				SupplierParameters: "param1",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier3",
+				SortingData: map[string]interface{}{
+					utils.Cost:   0.05,
+					utils.Weight: 10.0,
+				},
+				SupplierParameters: "param3",
+			},
+		},
+	}
+	if !reflect.DeepEqual(eOrderedSpls, sSpls) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eOrderedSpls), utils.ToJSON(sSpls))
+	}
+}
