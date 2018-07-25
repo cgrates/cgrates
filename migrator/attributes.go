@@ -20,7 +20,6 @@ package migrator
 
 import (
 	"fmt"
-	//"log"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
@@ -63,6 +62,11 @@ func (m *Migrator) migrateCurrentAttributeProfile() (err error) {
 				if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
 					return err
 				}
+				if err := m.dmIN.DataManager().RemoveAttributeProfile(tenant,
+					idg, attrPrf.Contexts, utils.NonTransactional, false); err != nil {
+					return err
+				}
+				m.stats[utils.Attributes] += 1
 			}
 		}
 	}
@@ -97,7 +101,7 @@ func (m *Migrator) migrateV1Attributes() (err error) {
 	}
 	if m.dryRun != true {
 		// All done, update version wtih current one
-		vrs := engine.Versions{utils.Attributes: engine.CurrentStorDBVersions()[utils.Attributes]}
+		vrs := engine.Versions{utils.Attributes: engine.CurrentDataDBVersions()[utils.Attributes]}
 		if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
