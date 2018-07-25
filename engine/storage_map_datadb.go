@@ -1573,7 +1573,7 @@ func (ms *MapStorage) GetThresholdDrv(tenant, id string) (r *Threshold, err erro
 	if !ok {
 		return nil, utils.ErrNotFound
 	}
-	err = ms.ms.Unmarshal(values, r)
+	err = ms.ms.Unmarshal(values, &r)
 	if err != nil {
 		return nil, err
 	}
