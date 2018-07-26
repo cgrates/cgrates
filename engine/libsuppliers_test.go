@@ -26,6 +26,7 @@ import (
 
 func TestLibSuppliersSortCost(t *testing.T) {
 	sSpls := &SortedSuppliers{
+		Sorting: utils.MetaLeastCost,
 		SortedSuppliers: []*SortedSupplier{
 			&SortedSupplier{
 				SupplierID: "supplier1",
@@ -53,8 +54,9 @@ func TestLibSuppliersSortCost(t *testing.T) {
 			},
 		},
 	}
-	sSpls.SortCost()
+	sSpls.SortLeastCost()
 	eOrderedSpls := &SortedSuppliers{
+		Sorting: utils.MetaLeastCost,
 		SortedSuppliers: []*SortedSupplier{
 			&SortedSupplier{
 				SupplierID: "supplier3",
@@ -221,6 +223,7 @@ func TestSortedSuppliersDigest3(t *testing.T) {
 
 func TestLibSuppliersSortHighestCost(t *testing.T) {
 	sSpls := &SortedSuppliers{
+		Sorting: utils.MetaHighestCost,
 		SortedSuppliers: []*SortedSupplier{
 			&SortedSupplier{
 				SupplierID: "supplier1",
@@ -250,6 +253,7 @@ func TestLibSuppliersSortHighestCost(t *testing.T) {
 	}
 	sSpls.SortHighestCost()
 	eOrderedSpls := &SortedSuppliers{
+		Sorting: utils.MetaHighestCost,
 		SortedSuppliers: []*SortedSupplier{
 			&SortedSupplier{
 				SupplierID: "supplier2",

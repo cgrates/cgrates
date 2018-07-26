@@ -485,6 +485,7 @@ const (
 	MetaWeight                   = "*weight"
 	MetaLeastCost                = "*least_cost"
 	MetaHighestCost              = "*highest_cost"
+	MetaQOS                      = "*qos"
 	Weight                       = "Weight"
 	Cost                         = "Cost"
 	RatingPlanID                 = "RatingPlanID"
