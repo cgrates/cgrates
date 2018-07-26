@@ -26,7 +26,6 @@ import (
 
 func TestLibSuppliersSortCost(t *testing.T) {
 	sSpls := &SortedSuppliers{
-		Sorting: utils.MetaLeastCost,
 		SortedSuppliers: []*SortedSupplier{
 			&SortedSupplier{
 				SupplierID: "supplier1",
@@ -56,7 +55,6 @@ func TestLibSuppliersSortCost(t *testing.T) {
 	}
 	sSpls.SortLeastCost()
 	eOrderedSpls := &SortedSuppliers{
-		Sorting: utils.MetaLeastCost,
 		SortedSuppliers: []*SortedSupplier{
 			&SortedSupplier{
 				SupplierID: "supplier3",
@@ -223,7 +221,6 @@ func TestSortedSuppliersDigest3(t *testing.T) {
 
 func TestLibSuppliersSortHighestCost(t *testing.T) {
 	sSpls := &SortedSuppliers{
-		Sorting: utils.MetaHighestCost,
 		SortedSuppliers: []*SortedSupplier{
 			&SortedSupplier{
 				SupplierID: "supplier1",
@@ -253,7 +250,6 @@ func TestLibSuppliersSortHighestCost(t *testing.T) {
 	}
 	sSpls.SortHighestCost()
 	eOrderedSpls := &SortedSuppliers{
-		Sorting: utils.MetaHighestCost,
 		SortedSuppliers: []*SortedSupplier{
 			&SortedSupplier{
 				SupplierID: "supplier2",
@@ -278,6 +274,71 @@ func TestLibSuppliersSortHighestCost(t *testing.T) {
 					utils.Weight: 10.0,
 				},
 				SupplierParameters: "param3",
+			},
+		},
+	}
+	if !reflect.DeepEqual(eOrderedSpls, sSpls) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eOrderedSpls), utils.ToJSON(sSpls))
+	}
+}
+
+func TestLibSuppliersSortQOS(t *testing.T) {
+	sSpls := &SortedSuppliers{
+		SortedSuppliers: []*SortedSupplier{
+			&SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.1,
+					utils.MetaTCD: 15.0,
+				},
+				SupplierParameters: "param1",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.2,
+					utils.MetaTCD: 20.0,
+				},
+				SupplierParameters: "param2",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier3",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.05,
+					utils.MetaTCD: 10.0,
+				},
+				SupplierParameters: "param3",
+			},
+		},
+	}
+	sSpls.SortQOS()
+	eOrderedSpls := &SortedSuppliers{
+		SortedSuppliers: []*SortedSupplier{
+			&SortedSupplier{
+				SupplierID: "supplier3",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.05,
+					utils.MetaTCD: 10.0,
+				},
+				SupplierParameters: "param3",
+			},
+
+			&SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.2,
+					utils.MetaTCD: 20.0,
+				},
+				SupplierParameters: "param2",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.1,
+					utils.MetaTCD: 15.0,
+				},
+				SupplierParameters: "param1",
 			},
 		},
 	}
