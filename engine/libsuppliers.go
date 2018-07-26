@@ -68,9 +68,9 @@ func (sSpls *SortedSuppliers) SortWeight() {
 	})
 }
 
-// SortCost is part of sort interface,
-// sort based on Cost with fallback on Weight
-func (sSpls *SortedSuppliers) SortCost() {
+// SortLeastCost is part of sort interface,
+// sort ascendent based on Cost with fallback on Weight
+func (sSpls *SortedSuppliers) SortLeastCost() {
 	sort.Slice(sSpls.SortedSuppliers, func(i, j int) bool {
 		if sSpls.SortedSuppliers[i].SortingData[utils.Cost].(float64) == sSpls.SortedSuppliers[j].SortingData[utils.Cost].(float64) {
 			return sSpls.SortedSuppliers[i].SortingData[utils.Weight].(float64) > sSpls.SortedSuppliers[j].SortingData[utils.Weight].(float64)
@@ -79,14 +79,23 @@ func (sSpls *SortedSuppliers) SortCost() {
 	})
 }
 
-// SortCost is part of sort interface,
-// sort based on Cost with fallback on Weight
+// SortHighestCost is part of sort interface,
+// sort descendent based on Cost with fallback on Weight
 func (sSpls *SortedSuppliers) SortHighestCost() {
 	sort.Slice(sSpls.SortedSuppliers, func(i, j int) bool {
 		if sSpls.SortedSuppliers[i].SortingData[utils.Cost].(float64) == sSpls.SortedSuppliers[j].SortingData[utils.Cost].(float64) {
 			return sSpls.SortedSuppliers[i].SortingData[utils.Weight].(float64) > sSpls.SortedSuppliers[j].SortingData[utils.Weight].(float64)
 		}
 		return sSpls.SortedSuppliers[i].SortingData[utils.Cost].(float64) > sSpls.SortedSuppliers[j].SortingData[utils.Cost].(float64)
+	})
+}
+
+// SortQOS is part of sort interface,
+// sort based on Stats
+func (sSpls *SortedSuppliers) SortQOS() {
+	sort.Slice(sSpls.SortedSuppliers, func(i, j int) bool {
+		//to be added
+		return true
 	})
 }
 
@@ -112,6 +121,7 @@ func NewSupplierSortDispatcher(lcrS *SupplierService) (ssd SupplierSortDispatche
 	ssd[utils.MetaWeight] = NewWeightSorter()
 	ssd[utils.MetaLeastCost] = NewLeastCostSorter(lcrS)
 	ssd[utils.MetaHighestCost] = NewHighestCostSorter(lcrS)
+	ssd[utils.MetaQOS] = NewQOSSupplierSorter(lcrS)
 	return
 }
 

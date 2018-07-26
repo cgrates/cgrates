@@ -24,24 +24,24 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewHighestCostSorter(spS *SupplierService) *HightCostSorter {
-	return &HightCostSorter{spS: spS,
-		sorting: utils.MetaHighestCost}
+func NewQOSSupplierSorter(spS *SupplierService) *QOSSupplierSorter {
+	return &QOSSupplierSorter{spS: spS,
+		sorting: utils.MetaQOS}
 }
 
-// HightCostSorter sorts suppliers based on their cost
-type HightCostSorter struct {
+// QOSSorter sorts suppliers based on stats
+type QOSSupplierSorter struct {
 	sorting string
 	spS     *SupplierService
 }
 
-func (lcs *HightCostSorter) SortSuppliers(prflID string, suppls []*Supplier,
+func (lcs *QOSSupplierSorter) SortSuppliers(prflID string, suppls []*Supplier,
 	ev *utils.CGREvent, extraOpts *optsGetSuppliers) (sortedSuppls *SortedSuppliers, err error) {
 	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
 		Sorting:         lcs.sorting,
 		SortedSuppliers: make([]*SortedSupplier, 0)}
 	for _, s := range suppls {
-		costData, err := lcs.spS.costForEvent(ev, s.AccountIDs, s.RatingPlanIDs)
+		metricSupp, err := lcs.spS.statMetrics([]string{}, []string{}) //create metric map for suppier s
 		if err != nil {
 			if extraOpts.ignoreErrors {
 				utils.Logger.Warning(
@@ -50,22 +50,16 @@ func (lcs *HightCostSorter) SortSuppliers(prflID string, suppls []*Supplier,
 				continue
 			}
 			return nil, err
-		} else if len(costData) == 0 {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> profile: %s ignoring supplier with ID: %s, missing cost information",
-					utils.SupplierS, prflID, s.ID))
-			continue
 		}
-		if extraOpts.maxCost != 0 &&
-			costData[utils.Cost].(float64) > extraOpts.maxCost {
-			continue
-		}
+
 		srtData := map[string]interface{}{
 			utils.Weight: s.Weight,
 		}
-		for k, v := range costData {
+
+		for k, v := range metricSupp { //transfer data from metric into srtData
 			srtData[k] = v
 		}
+
 		sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers, &SortedSupplier{
 			SupplierID:         s.ID,
 			SortingData:        srtData,
@@ -74,6 +68,6 @@ func (lcs *HightCostSorter) SortSuppliers(prflID string, suppls []*Supplier,
 	if len(sortedSuppls.SortedSuppliers) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	sortedSuppls.SortHighestCost()
+	sortedSuppls.SortQOS()
 	return
 }
