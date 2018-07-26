@@ -67,6 +67,7 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @cruzccl | Carlos Cruz Luengo |
 | @petekelly | Peter Kelly |
 | @vtzan | Vasilios Tzanoudakis |
+| @ccppprogrammer | Sergei Lavrov |
 
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
