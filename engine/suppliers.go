@@ -259,7 +259,22 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 
 // statMetrics will query a list of statIDs and return composed metric values
 // first metric found is always returned
-func (spS *SupplierService) statMetrics(statIDs []string, metricIDs []string) (sms map[string]StatMetric, err error) {
+func (spS *SupplierService) statMetrics(statIDs []string, tenant string) (stsMetric map[string]float64, err error) {
+	stsMetric = make(map[string]float64)
+	if spS.statS != nil {
+		for _, statID := range statIDs {
+			var metrics map[string]float64
+			if err := spS.statS.Call(utils.StatSv1GetQueueFloatMetrics,
+				&utils.TenantID{Tenant: tenant, ID: statID}, &metrics); err != nil &&
+				err.Error() != utils.ErrNotFound.Error() {
+				utils.Logger.Warning(
+					fmt.Sprintf("<SupplierS> error: %s getting statMetrics for stat : %s", err.Error(), statID))
+			}
+			for key, val := range metrics {
+				stsMetric[key] = val
+			}
+		}
+	}
 	return
 }
 
@@ -297,6 +312,7 @@ func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sor
 	if err != nil {
 		return nil, err
 	}
+	extraOpts.sortingParameters = splPrfl.SortingParameters // populate sortingParameters in extraOpts
 	sortedSuppliers, err := spS.sorter.SortSuppliers(splPrfl.ID, splPrfl.Sorting,
 		spls, &args.CGREvent, extraOpts)
 	if err != nil {
@@ -348,8 +364,9 @@ func (args *ArgsGetSuppliers) asOptsGetSuppliers() (opts *optsGetSuppliers, err 
 }
 
 type optsGetSuppliers struct {
-	ignoreErrors bool
-	maxCost      float64
+	ignoreErrors      bool
+	maxCost           float64
+	sortingParameters []string //used for QOS strategy
 }
 
 // V1GetSuppliersForEvent returns the list of valid supplier IDs

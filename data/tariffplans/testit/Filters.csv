@@ -10,3 +10,7 @@ cgrates.org,FLTR_SPP_2,*string,Account,1003;1002,2014-07-29T15:00:00Z
 cgrates.org,FLTR_SPP_2,*prefix,Destination,10;20,
 cgrates.org,FLTR_SPP_2,*rsr,,Subject(~^1.*1$);Destination(1002),
 cgrates.org,FLTR_SPP_2,*string,DistincMatch,*highest_cost,
+cgrates.org,FLTR_SPP_3,*string,DistincMatch,*qos,2014-07-29T15:00:00Z
+cgrates.org,FLTR_STAT_1,*string,Account,1001,2014-07-29T15:00:00Z
+cgrates.org,FLTR_STAT_2,*string,Account,1002,2014-07-29T15:00:00Z
+cgrates.org,FLTR_STAT_3,*string,Account,1003,2014-07-29T15:00:00Z

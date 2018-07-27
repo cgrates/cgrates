@@ -312,18 +312,9 @@ func TestLibSuppliersSortQOS(t *testing.T) {
 			},
 		},
 	}
-	sSpls.SortQOS()
+	sSpls.SortQOS([]string{utils.MetaACD, utils.MetaTCD})
 	eOrderedSpls := &SortedSuppliers{
 		SortedSuppliers: []*SortedSupplier{
-			&SortedSupplier{
-				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
-					utils.MetaACD: 0.05,
-					utils.MetaTCD: 10.0,
-				},
-				SupplierParameters: "param3",
-			},
-
 			&SortedSupplier{
 				SupplierID: "supplier2",
 				SortingData: map[string]interface{}{
@@ -339,6 +330,353 @@ func TestLibSuppliersSortQOS(t *testing.T) {
 					utils.MetaTCD: 15.0,
 				},
 				SupplierParameters: "param1",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier3",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.05,
+					utils.MetaTCD: 10.0,
+				},
+				SupplierParameters: "param3",
+			},
+		},
+	}
+	if !reflect.DeepEqual(eOrderedSpls, sSpls) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eOrderedSpls), utils.ToJSON(sSpls))
+	}
+}
+
+func TestLibSuppliersSortQOS2(t *testing.T) {
+	sSpls := &SortedSuppliers{
+		SortedSuppliers: []*SortedSupplier{
+			&SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.2,
+					utils.MetaTCD: 15.0,
+				},
+				SupplierParameters: "param1",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.2,
+					utils.MetaTCD: 20.0,
+				},
+				SupplierParameters: "param2",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier3",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.1,
+					utils.MetaTCD: 10.0,
+				},
+				SupplierParameters: "param3",
+			},
+		},
+	}
+	sSpls.SortQOS([]string{utils.MetaACD, utils.MetaTCD})
+	eOrderedSpls := &SortedSuppliers{
+		SortedSuppliers: []*SortedSupplier{
+			&SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.2,
+					utils.MetaTCD: 20.0,
+				},
+				SupplierParameters: "param2",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.2,
+					utils.MetaTCD: 15.0,
+				},
+				SupplierParameters: "param1",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier3",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.1,
+					utils.MetaTCD: 10.0,
+				},
+				SupplierParameters: "param3",
+			},
+		},
+	}
+	if !reflect.DeepEqual(eOrderedSpls, sSpls) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eOrderedSpls), utils.ToJSON(sSpls))
+	}
+}
+
+func TestLibSuppliersSortQOS3(t *testing.T) {
+	sSpls := &SortedSuppliers{
+		SortedSuppliers: []*SortedSupplier{
+			&SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.2,
+					utils.MetaTCD: 15.0,
+					utils.MetaASR: 1.2,
+				},
+				SupplierParameters: "param1",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.2,
+					utils.MetaTCD: 20.0,
+					utils.MetaASR: -1.0,
+				},
+				SupplierParameters: "param2",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier3",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.1,
+					utils.MetaTCD: 10.0,
+					utils.MetaASR: 1.2,
+				},
+				SupplierParameters: "param3",
+			},
+		},
+	}
+	sSpls.SortQOS([]string{utils.MetaASR, utils.MetaACD, utils.MetaTCD})
+	eOrderedSpls := &SortedSuppliers{
+		SortedSuppliers: []*SortedSupplier{
+			&SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.2,
+					utils.MetaTCD: 15.0,
+					utils.MetaASR: 1.2,
+				},
+				SupplierParameters: "param1",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier3",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.1,
+					utils.MetaTCD: 10.0,
+					utils.MetaASR: 1.2,
+				},
+				SupplierParameters: "param3",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.2,
+					utils.MetaTCD: 20.0,
+					utils.MetaASR: -1.0,
+				},
+				SupplierParameters: "param2",
+			},
+		},
+	}
+	if !reflect.DeepEqual(eOrderedSpls, sSpls) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eOrderedSpls), utils.ToJSON(sSpls))
+	}
+}
+
+func TestLibSuppliersSortQOS4(t *testing.T) {
+	sSpls := &SortedSuppliers{
+		SortedSuppliers: []*SortedSupplier{
+			&SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.2,
+					utils.MetaTCD: 15.0,
+					utils.MetaASR: -1.0,
+					utils.MetaTCC: 10.1,
+				},
+				SupplierParameters: "param1",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.2,
+					utils.MetaTCD: 20.0,
+					utils.MetaASR: 1.2,
+					utils.MetaTCC: 10.1,
+				},
+				SupplierParameters: "param2",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier3",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.1,
+					utils.MetaTCD: 10.0,
+					utils.MetaASR: 1.2,
+					utils.MetaTCC: 10.1,
+				},
+				SupplierParameters: "param3",
+			},
+		},
+	}
+	sSpls.SortQOS([]string{utils.MetaTCC, utils.MetaASR, utils.MetaACD, utils.MetaTCD})
+	eOrderedSpls := &SortedSuppliers{
+		SortedSuppliers: []*SortedSupplier{
+			&SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.2,
+					utils.MetaTCD: 20.0,
+					utils.MetaASR: 1.2,
+					utils.MetaTCC: 10.1,
+				},
+				SupplierParameters: "param2",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier3",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.1,
+					utils.MetaTCD: 10.0,
+					utils.MetaASR: 1.2,
+					utils.MetaTCC: 10.1,
+				},
+				SupplierParameters: "param3",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.2,
+					utils.MetaTCD: 15.0,
+					utils.MetaASR: -1.0,
+					utils.MetaTCC: 10.1,
+				},
+				SupplierParameters: "param1",
+			},
+		},
+	}
+	if !reflect.DeepEqual(eOrderedSpls, sSpls) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eOrderedSpls), utils.ToJSON(sSpls))
+	}
+}
+
+func TestLibSuppliersSortQOS5(t *testing.T) {
+	sSpls := &SortedSuppliers{
+		SortedSuppliers: []*SortedSupplier{
+			&SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.2,
+					utils.MetaPDD: 0.5,
+				},
+				SupplierParameters: "param1",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.2,
+					utils.MetaPDD: 0.6,
+				},
+				SupplierParameters: "param2",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier3",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.1,
+					utils.MetaPDD: 0.2,
+				},
+				SupplierParameters: "param3",
+			},
+		},
+	}
+	sSpls.SortQOS([]string{utils.MetaPDD})
+	eOrderedSpls := &SortedSuppliers{
+		SortedSuppliers: []*SortedSupplier{
+			&SortedSupplier{
+				SupplierID: "supplier3",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.1,
+					utils.MetaPDD: 0.2,
+				},
+				SupplierParameters: "param3",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.2,
+					utils.MetaPDD: 0.5,
+				},
+				SupplierParameters: "param1",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.2,
+					utils.MetaPDD: 0.6,
+				},
+				SupplierParameters: "param2",
+			},
+		},
+	}
+	if !reflect.DeepEqual(eOrderedSpls, sSpls) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eOrderedSpls), utils.ToJSON(sSpls))
+	}
+}
+
+func TestLibSuppliersSortQOS6(t *testing.T) {
+	sSpls := &SortedSuppliers{
+		SortedSuppliers: []*SortedSupplier{
+			&SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.2,
+					utils.Weight:  15.0,
+				},
+				SupplierParameters: "param1",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.2,
+					utils.Weight:  25.0,
+				},
+				SupplierParameters: "param2",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier3",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.1,
+					utils.Weight:  20.0,
+				},
+				SupplierParameters: "param3",
+			},
+		},
+	}
+	sSpls.SortQOS([]string{utils.MetaACD})
+	eOrderedSpls := &SortedSuppliers{
+		SortedSuppliers: []*SortedSupplier{
+			&SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.2,
+					utils.Weight:  25.0,
+				},
+				SupplierParameters: "param2",
+			},
+			&SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.2,
+					utils.Weight:  15.0,
+				},
+				SupplierParameters: "param1",
+			},
+
+			&SortedSupplier{
+				SupplierID: "supplier3",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 0.1,
+					utils.Weight:  20.0,
+				},
+				SupplierParameters: "param3",
 			},
 		},
 	}
