@@ -11,4 +11,7 @@ cgrates.org,SPL_LEASTCOST_1,,,,,supplier3,,,RP_SPECIAL_1002,,,15,,,
 cgrates.org,SPL_HIGHESTCOST_1,FLTR_SPP_2,2017-11-27T00:00:00Z,*highest_cost,,supplier1,,,RP_SPECIAL_1002,,,10,false,,10
 cgrates.org,SPL_HIGHESTCOST_1,,,,,supplier2,,,RP_RETAIL1,,,20,,,
 cgrates.org,SPL_HIGHESTCOST_1,,,,,supplier3,,,RP_SPECIAL_1002,,,15,,,
+cgrates.org,SPL_QOS_1,FLTR_SPP_3,2017-11-27T00:00:00Z,*qos,*acd;*tcd;*asr,supplier1,,,,,Stat_1,10,false,,10
+cgrates.org,SPL_QOS_1,,,,,supplier2,,,,,Stat_2,20,,,
+cgrates.org,SPL_QOS_1,,,,,supplier3,,,,,Stat_3,35,,,
 

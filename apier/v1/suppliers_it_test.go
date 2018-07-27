@@ -54,6 +54,8 @@ var sTestsSupplierSV1 = []func(t *testing.T){
 	testV1SplSGetLeastCostSuppliersWithMaxCost2,
 	testV1SplSGetLeastCostSuppliersWithMaxCostNotFound,
 	testV1SplSGetHighestCostSuppliers,
+	testV1SplSPolulateStatsForQOS,
+	testV1SplSGetQOSSuppliers,
 	testV1SplSGetSupplierWithoutFilter,
 	testV1SplSSetSupplierProfiles,
 	testV1SplSUpdateSupplierProfiles,
@@ -393,6 +395,147 @@ func testV1SplSGetHighestCostSuppliers(t *testing.T) {
 	}
 }
 
+func testV1SplSPolulateStatsForQOS(t *testing.T) {
+	var reply []string
+	expected := []string{"Stat_1"}
+	ev1 := utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.Account:    "1001",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:      time.Duration(11 * time.Second),
+			utils.COST:       10.0,
+		},
+	}
+	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
+	}
+
+	expected = []string{"Stat_1"}
+	ev1 = utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event2",
+		Event: map[string]interface{}{
+			utils.Account:    "1001",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:      time.Duration(11 * time.Second),
+			utils.COST:       10.5,
+		},
+	}
+	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
+	}
+
+	expected = []string{"Stat_2"}
+	ev1 = utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event2",
+		Event: map[string]interface{}{
+			utils.Account:    "1002",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:      time.Duration(5 * time.Second),
+			utils.COST:       12.5,
+		},
+	}
+	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
+	}
+
+	expected = []string{"Stat_2"}
+	ev1 = utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event2",
+		Event: map[string]interface{}{
+			utils.Account:    "1002",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:      time.Duration(6 * time.Second),
+			utils.COST:       17.5,
+		},
+	}
+	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
+	}
+
+	expected = []string{"Stat_3"}
+	ev1 = utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event3",
+		Event: map[string]interface{}{
+			utils.Account:    "1003",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:      time.Duration(11 * time.Second),
+			utils.COST:       12.5,
+		},
+	}
+	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
+	}
+}
+
+func testV1SplSGetQOSSuppliers(t *testing.T) {
+	ev := &engine.ArgsGetSuppliers{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1SplSGetQOSSuppliers",
+			Event: map[string]interface{}{
+				"DistincMatch": "*qos",
+			},
+		},
+	}
+	eSpls := engine.SortedSuppliers{
+		ProfileID: "SPL_QOS_1",
+		Sorting:   utils.MetaQOS,
+		SortedSuppliers: []*engine.SortedSupplier{
+			&engine.SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 11.0,
+					utils.MetaASR: 100.0,
+					utils.MetaTCD: 22.0,
+					utils.Weight:  10.0,
+				},
+			},
+			&engine.SortedSupplier{
+				SupplierID: "supplier3",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 11.0,
+					utils.MetaASR: 100.0,
+					utils.MetaTCD: 11.0,
+					utils.Weight:  35.0,
+				},
+			},
+			&engine.SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: 5.5,
+					utils.MetaASR: 100.0,
+					utils.MetaTCD: 11.0,
+					utils.Weight:  20.0,
+				},
+			},
+		},
+	}
+	var suplsReply engine.SortedSuppliers
+	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
+		ev, &suplsReply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSpls, suplsReply) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
+	}
+}
+
 func testV1SplSGetSupplierWithoutFilter(t *testing.T) {
 	ev := &engine.ArgsGetSuppliers{
 		CGREvent: utils.CGREvent{
@@ -540,7 +683,9 @@ func testV1SplSRemSupplierProfiles(t *testing.T) {
 		t.Error("Unexpected reply returned", resp)
 	}
 	var reply *engine.SupplierProfile
-	if err := splSv1Rpc.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := splSv1Rpc.Call("ApierV1.GetSupplierProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

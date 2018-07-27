@@ -41,7 +41,7 @@ func (lcs *QOSSupplierSorter) SortSuppliers(prflID string, suppls []*Supplier,
 		Sorting:         lcs.sorting,
 		SortedSuppliers: make([]*SortedSupplier, 0)}
 	for _, s := range suppls {
-		metricSupp, err := lcs.spS.statMetrics([]string{}, []string{}) //create metric map for suppier s
+		metricSupp, err := lcs.spS.statMetrics(s.StatIDs, ev.Tenant) //create metric map for suppier s
 		if err != nil {
 			if extraOpts.ignoreErrors {
 				utils.Logger.Warning(
@@ -69,6 +69,6 @@ func (lcs *QOSSupplierSorter) SortSuppliers(prflID string, suppls []*Supplier,
 	if len(sortedSuppls.SortedSuppliers) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	sortedSuppls.SortQOS()
+	sortedSuppls.SortQOS(extraOpts.sortingParameters)
 	return
 }
