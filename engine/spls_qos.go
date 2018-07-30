@@ -68,9 +68,11 @@ func (lcs *QOSSupplierSorter) SortSuppliers(prflID string, suppls []*Supplier,
 					}
 				}
 			}
-			if hasMetric == false { //if not have populate with default value
-				srtData[metric] = -1
-				if metric == utils.MetaPDD {
+			if !hasMetric { //if not have populate with default value
+				switch metric {
+				default:
+					srtData[metric] = -1
+				case utils.MetaPDD:
 					srtData[metric] = 1000000
 				}
 			}
