@@ -31,6 +31,7 @@ type SortedSupplier struct {
 	SupplierID         string
 	SupplierParameters string
 	SortingData        map[string]interface{} // store here extra info like cost or stats
+	worstStats         map[string]float64
 }
 
 // SuppliersReply is returned as part of GetSuppliers call
@@ -96,20 +97,20 @@ func (sSpls *SortedSuppliers) SortQOS(params []string) {
 	sort.Slice(sSpls.SortedSuppliers, func(i, j int) bool {
 		for _, param := range params {
 			// skip to next param
-			if sSpls.SortedSuppliers[i].SortingData[param].(float64) == sSpls.SortedSuppliers[j].SortingData[param].(float64) {
+			if sSpls.SortedSuppliers[i].worstStats[param] == sSpls.SortedSuppliers[j].worstStats[param] {
 				continue
 			}
-			if sSpls.SortedSuppliers[i].SortingData[param].(float64) == -1 {
+			if sSpls.SortedSuppliers[i].worstStats[param] == -1 {
 				return false
 			}
 			switch param {
 			default:
-				return sSpls.SortedSuppliers[i].SortingData[param].(float64) > sSpls.SortedSuppliers[j].SortingData[param].(float64)
+				return sSpls.SortedSuppliers[i].worstStats[param] > sSpls.SortedSuppliers[j].worstStats[param]
 			case utils.MetaPDD:
-				return sSpls.SortedSuppliers[i].SortingData[param].(float64) < sSpls.SortedSuppliers[j].SortingData[param].(float64)
+				return sSpls.SortedSuppliers[i].worstStats[param] < sSpls.SortedSuppliers[j].worstStats[param]
 			}
 		}
-		return sSpls.SortedSuppliers[i].SortingData[utils.Weight].(float64) > sSpls.SortedSuppliers[j].SortingData[utils.Weight].(float64)
+		return sSpls.SortedSuppliers[i].worstStats[utils.Weight] > sSpls.SortedSuppliers[j].worstStats[utils.Weight]
 	})
 }
 

@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -52,24 +53,44 @@ func (lcs *QOSSupplierSorter) SortSuppliers(prflID string, suppls []*Supplier,
 			return nil, err
 		}
 
-		srtData := map[string]interface{}{
+		srtData := map[string]float64{
 			utils.Weight: s.Weight,
 		}
-
-		for k, v := range metricSupp { //transfer data from metric into srtData
-			srtData[k] = v
-		}
-		for _, metricParam := range extraOpts.sortingParameters {
-			if _, has := srtData[metricParam]; !has {
-				srtData[metricParam] = -1.0
+		for _, metric := range extraOpts.sortingParameters {
+			hasMetric := false                         //check if metricSupp have sortingParameter
+			for keyWithID, value := range metricSupp { //transfer data from metric into srtData
+				if metric == strings.Split(keyWithID, utils.InInFieldSep)[0] {
+					if val, hasKey := srtData[metric]; !hasKey ||
+						(metric == utils.MetaPDD && val < value) || //worst values
+						(metric != utils.MetaPDD && val > value) {
+						srtData[metric] = value
+						hasMetric = true
+					}
+				}
+			}
+			if hasMetric == false { //if not have populate with default value
+				if metric == utils.MetaPDD {
+					srtData[metric] = 1000000
+				} else {
+					srtData[metric] = -1
+				}
 			}
 		}
 
+		sortingData := map[string]interface{}{
+			utils.Weight: s.Weight,
+		}
+		for k, v := range metricSupp {
+			sortingData[k] = v
+		}
 		sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers,
 			&SortedSupplier{
 				SupplierID:         s.ID,
-				SortingData:        srtData,
-				SupplierParameters: s.SupplierParameters})
+				SortingData:        sortingData,
+				SupplierParameters: s.SupplierParameters,
+				worstStats:         srtData,
+			},
+		)
 	}
 	if len(sortedSuppls.SortedSuppliers) == 0 {
 		return nil, utils.ErrNotFound

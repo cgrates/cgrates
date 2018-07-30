@@ -288,7 +288,7 @@ func TestLibSuppliersSortQOS(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			&SortedSupplier{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.1,
 					utils.MetaTCD: 15.0,
 				},
@@ -296,7 +296,7 @@ func TestLibSuppliersSortQOS(t *testing.T) {
 			},
 			&SortedSupplier{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 20.0,
 				},
@@ -304,7 +304,7 @@ func TestLibSuppliersSortQOS(t *testing.T) {
 			},
 			&SortedSupplier{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.05,
 					utils.MetaTCD: 10.0,
 				},
@@ -317,7 +317,7 @@ func TestLibSuppliersSortQOS(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			&SortedSupplier{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 20.0,
 				},
@@ -325,7 +325,7 @@ func TestLibSuppliersSortQOS(t *testing.T) {
 			},
 			&SortedSupplier{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.1,
 					utils.MetaTCD: 15.0,
 				},
@@ -333,7 +333,7 @@ func TestLibSuppliersSortQOS(t *testing.T) {
 			},
 			&SortedSupplier{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.05,
 					utils.MetaTCD: 10.0,
 				},
@@ -352,7 +352,7 @@ func TestLibSuppliersSortQOS2(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			&SortedSupplier{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 15.0,
 				},
@@ -360,7 +360,7 @@ func TestLibSuppliersSortQOS2(t *testing.T) {
 			},
 			&SortedSupplier{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 20.0,
 				},
@@ -368,7 +368,7 @@ func TestLibSuppliersSortQOS2(t *testing.T) {
 			},
 			&SortedSupplier{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.1,
 					utils.MetaTCD: 10.0,
 				},
@@ -381,7 +381,7 @@ func TestLibSuppliersSortQOS2(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			&SortedSupplier{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 20.0,
 				},
@@ -389,7 +389,7 @@ func TestLibSuppliersSortQOS2(t *testing.T) {
 			},
 			&SortedSupplier{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 15.0,
 				},
@@ -397,7 +397,7 @@ func TestLibSuppliersSortQOS2(t *testing.T) {
 			},
 			&SortedSupplier{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.1,
 					utils.MetaTCD: 10.0,
 				},
@@ -416,7 +416,7 @@ func TestLibSuppliersSortQOS3(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			&SortedSupplier{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 15.0,
 					utils.MetaASR: 1.2,
@@ -425,7 +425,7 @@ func TestLibSuppliersSortQOS3(t *testing.T) {
 			},
 			&SortedSupplier{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 20.0,
 					utils.MetaASR: -1.0,
@@ -434,7 +434,7 @@ func TestLibSuppliersSortQOS3(t *testing.T) {
 			},
 			&SortedSupplier{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.1,
 					utils.MetaTCD: 10.0,
 					utils.MetaASR: 1.2,
@@ -448,7 +448,7 @@ func TestLibSuppliersSortQOS3(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			&SortedSupplier{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 15.0,
 					utils.MetaASR: 1.2,
@@ -457,7 +457,7 @@ func TestLibSuppliersSortQOS3(t *testing.T) {
 			},
 			&SortedSupplier{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.1,
 					utils.MetaTCD: 10.0,
 					utils.MetaASR: 1.2,
@@ -466,7 +466,7 @@ func TestLibSuppliersSortQOS3(t *testing.T) {
 			},
 			&SortedSupplier{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 20.0,
 					utils.MetaASR: -1.0,
@@ -486,7 +486,7 @@ func TestLibSuppliersSortQOS4(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			&SortedSupplier{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 15.0,
 					utils.MetaASR: -1.0,
@@ -496,7 +496,7 @@ func TestLibSuppliersSortQOS4(t *testing.T) {
 			},
 			&SortedSupplier{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 20.0,
 					utils.MetaASR: 1.2,
@@ -506,7 +506,7 @@ func TestLibSuppliersSortQOS4(t *testing.T) {
 			},
 			&SortedSupplier{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.1,
 					utils.MetaTCD: 10.0,
 					utils.MetaASR: 1.2,
@@ -521,7 +521,7 @@ func TestLibSuppliersSortQOS4(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			&SortedSupplier{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 20.0,
 					utils.MetaASR: 1.2,
@@ -531,7 +531,7 @@ func TestLibSuppliersSortQOS4(t *testing.T) {
 			},
 			&SortedSupplier{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.1,
 					utils.MetaTCD: 10.0,
 					utils.MetaASR: 1.2,
@@ -541,7 +541,7 @@ func TestLibSuppliersSortQOS4(t *testing.T) {
 			},
 			&SortedSupplier{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.2,
 					utils.MetaTCD: 15.0,
 					utils.MetaASR: -1.0,
@@ -562,7 +562,7 @@ func TestLibSuppliersSortQOS5(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			&SortedSupplier{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.2,
 					utils.MetaPDD: 0.5,
 				},
@@ -570,7 +570,7 @@ func TestLibSuppliersSortQOS5(t *testing.T) {
 			},
 			&SortedSupplier{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.2,
 					utils.MetaPDD: 0.6,
 				},
@@ -578,7 +578,7 @@ func TestLibSuppliersSortQOS5(t *testing.T) {
 			},
 			&SortedSupplier{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.1,
 					utils.MetaPDD: 0.2,
 				},
@@ -591,7 +591,7 @@ func TestLibSuppliersSortQOS5(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			&SortedSupplier{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.1,
 					utils.MetaPDD: 0.2,
 				},
@@ -599,7 +599,7 @@ func TestLibSuppliersSortQOS5(t *testing.T) {
 			},
 			&SortedSupplier{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.2,
 					utils.MetaPDD: 0.5,
 				},
@@ -607,7 +607,7 @@ func TestLibSuppliersSortQOS5(t *testing.T) {
 			},
 			&SortedSupplier{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.2,
 					utils.MetaPDD: 0.6,
 				},
@@ -626,7 +626,7 @@ func TestLibSuppliersSortQOS6(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			&SortedSupplier{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.2,
 					utils.Weight:  15.0,
 				},
@@ -634,7 +634,7 @@ func TestLibSuppliersSortQOS6(t *testing.T) {
 			},
 			&SortedSupplier{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.2,
 					utils.Weight:  25.0,
 				},
@@ -642,7 +642,7 @@ func TestLibSuppliersSortQOS6(t *testing.T) {
 			},
 			&SortedSupplier{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.1,
 					utils.Weight:  20.0,
 				},
@@ -655,7 +655,7 @@ func TestLibSuppliersSortQOS6(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			&SortedSupplier{
 				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.2,
 					utils.Weight:  25.0,
 				},
@@ -663,7 +663,7 @@ func TestLibSuppliersSortQOS6(t *testing.T) {
 			},
 			&SortedSupplier{
 				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.2,
 					utils.Weight:  15.0,
 				},
@@ -672,7 +672,7 @@ func TestLibSuppliersSortQOS6(t *testing.T) {
 
 			&SortedSupplier{
 				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
+				worstStats: map[string]float64{
 					utils.MetaACD: 0.1,
 					utils.Weight:  20.0,
 				},
