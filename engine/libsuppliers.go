@@ -100,7 +100,8 @@ func (sSpls *SortedSuppliers) SortQOS(params []string) {
 			if sSpls.SortedSuppliers[i].worstStats[param] == sSpls.SortedSuppliers[j].worstStats[param] {
 				continue
 			}
-			if sSpls.SortedSuppliers[i].worstStats[param] == -1 {
+			if (param != utils.MetaPDD && sSpls.SortedSuppliers[i].worstStats[param] == -1) ||
+				(param == utils.MetaPDD && sSpls.SortedSuppliers[i].worstStats[param] == 1000000) {
 				return false
 			}
 			switch param {
