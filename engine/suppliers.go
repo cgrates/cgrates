@@ -271,8 +271,9 @@ func (spS *SupplierService) statMetrics(statIDs []string, tenant string) (stsMet
 					fmt.Sprintf("<SupplierS> error: %s getting statMetrics for stat : %s", err.Error(), statID))
 			}
 			for key, val := range metrics {
-				stsMetric[key] = val
+				stsMetric[utils.ConcatenatedKey(key, statID)] = val
 			}
+
 		}
 	}
 	return
