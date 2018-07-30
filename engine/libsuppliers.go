@@ -95,13 +95,6 @@ func (sSpls *SortedSuppliers) SortHighestCost() {
 func (sSpls *SortedSuppliers) SortQOS(params []string) {
 	sort.Slice(sSpls.SortedSuppliers, func(i, j int) bool {
 		for _, param := range params {
-			// if one of the supplier is missing the qos parram skip to next one
-			if _, exists := sSpls.SortedSuppliers[i].SortingData[param]; !exists {
-				continue
-			}
-			if _, exists := sSpls.SortedSuppliers[j].SortingData[param]; !exists {
-				continue
-			}
 			// skip to next param
 			if sSpls.SortedSuppliers[i].SortingData[param].(float64) == sSpls.SortedSuppliers[j].SortingData[param].(float64) {
 				continue

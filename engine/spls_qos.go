@@ -59,6 +59,11 @@ func (lcs *QOSSupplierSorter) SortSuppliers(prflID string, suppls []*Supplier,
 		for k, v := range metricSupp { //transfer data from metric into srtData
 			srtData[k] = v
 		}
+		for _, metricParam := range extraOpts.sortingParameters {
+			if _, has := srtData[metricParam]; !has {
+				srtData[metricParam] = -1.0
+			}
+		}
 
 		sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers,
 			&SortedSupplier{
