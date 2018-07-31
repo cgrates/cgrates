@@ -58,6 +58,7 @@ var sTestsSupplierSV1 = []func(t *testing.T){
 	testV1SplSGetQOSSuppliers,
 	testV1SplSGetQOSSuppliers2,
 	testV1SplSGetQOSSuppliers3,
+	testV1SplSGetQOSSuppliersFiltred,
 	testV1SplSGetSupplierWithoutFilter,
 	testV1SplSSetSupplierProfiles,
 	testV1SplSUpdateSupplierProfiles,
@@ -659,6 +660,53 @@ func testV1SplSGetQOSSuppliers3(t *testing.T) {
 					"*asr:Stat_2": 100.0,
 					"*tcd:Stat_2": 11.0,
 					utils.Weight:  20.0,
+				},
+			},
+		},
+	}
+	var suplsReply engine.SortedSuppliers
+	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
+		ev, &suplsReply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSpls, suplsReply) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
+	}
+}
+
+func testV1SplSGetQOSSuppliersFiltred(t *testing.T) {
+	ev := &engine.ArgsGetSuppliers{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1SplSGetQOSSuppliers",
+			Event: map[string]interface{}{
+				"DistincMatch": "*qos_filtred",
+			},
+		},
+	}
+	eSpls := engine.SortedSuppliers{
+		ProfileID: "SPL_QOS_FILTRED",
+		Sorting:   utils.MetaQOS,
+		SortedSuppliers: []*engine.SortedSupplier{
+			&engine.SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					"*acd:Stat_1":   11.0,
+					"*acd:Stat_1_1": 11.0,
+					"*asr:Stat_1":   100.0,
+					"*pdd:Stat_1_1": 12.0,
+					"*tcd:Stat_1":   22.0,
+					"*tcd:Stat_1_1": 11.0,
+					utils.Weight:    10.0,
+				},
+			},
+			&engine.SortedSupplier{
+				SupplierID: "supplier3",
+				SortingData: map[string]interface{}{
+					"*acd:Stat_3": 11.0,
+					"*asr:Stat_3": 100.0,
+					"*tcd:Stat_3": 11.0,
+					utils.Weight:  35.0,
 				},
 			},
 		},

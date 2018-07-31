@@ -4,7 +4,7 @@ cgrates.org,SPL_ACNT_1001,,,,,supplier2,,,,,,10,,,
 cgrates.org,SPL_WEIGHT_2,,2017-11-27T00:00:00Z,*weight,,supplier1,,,,,,10,,,5
 cgrates.org,SPL_WEIGHT_1,FLTR_DST_DE;FLTR_ACNT_1007,2017-11-27T00:00:00Z,*weight,,supplier1,,,,,,10,,,10
 cgrates.org,SPL_WEIGHT_1,FLTR_DST_DE,,,,supplier2,,,,,,20,,,
-cgrates.org,SPL_WEIGHT_1,FLTR_ACNT_1007,,,,supplier3,FLTR_ACNT_dan,,,,,15,,,
+cgrates.org,SPL_WEIGHT_1,FLTR_ACNT_1007,,,,supplier3,FLTR_SPP_ACNT_dan,,,,,15,,,
 cgrates.org,SPL_LEASTCOST_1,FLTR_1,2017-11-27T00:00:00Z,*least_cost,,supplier1,,,RP_SPECIAL_1002,,,10,false,,10
 cgrates.org,SPL_LEASTCOST_1,,,,,supplier2,,,RP_RETAIL1,,,20,,,
 cgrates.org,SPL_LEASTCOST_1,,,,,supplier3,,,RP_SPECIAL_1002,,,15,,,
@@ -20,3 +20,6 @@ cgrates.org,SPL_QOS_2,,,,,supplier3,,,,,Stat_3,35,,,
 cgrates.org,SPL_QOS_3,FLTR_SPP_5,2017-11-27T00:00:00Z,*qos,*pdd,supplier1,,,,,Stat_1;Stat_1_1,10,false,,10
 cgrates.org,SPL_QOS_3,,,,,supplier2,,,,,Stat_2,20,,,
 cgrates.org,SPL_QOS_3,,,,,supplier3,,,,,Stat_3,35,,,
+cgrates.org,SPL_QOS_FILTRED,FLTR_SPP_6,2017-11-27T00:00:00Z,*qos,*pdd,supplier1,FLTR_QOS_SP1,,,,Stat_1;Stat_1_1,10,false,,10
+cgrates.org,SPL_QOS_FILTRED,,,,,supplier2,FLTR_QOS_SP2,,,,Stat_2,20,,,
+cgrates.org,SPL_QOS_FILTRED,,,,,supplier3,,,,,Stat_3,35,,,

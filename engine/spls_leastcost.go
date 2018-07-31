@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -41,36 +39,11 @@ func (lcs *LeastCostSorter) SortSuppliers(prflID string, suppls []*Supplier,
 		Sorting:         lcs.sorting,
 		SortedSuppliers: make([]*SortedSupplier, 0)}
 	for _, s := range suppls {
-		costData, err := lcs.spS.costForEvent(ev, s.AccountIDs, s.RatingPlanIDs)
-		if err != nil {
-			if extraOpts.ignoreErrors {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> profile: %s ignoring supplier with ID: %s, err: %s",
-						utils.SupplierS, prflID, s.ID, err.Error()))
-				continue
-			}
+		if srtSpl, pass, err := lcs.spS.populateSortingData(ev, s, extraOpts); err != nil {
 			return nil, err
-		} else if len(costData) == 0 {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> profile: %s ignoring supplier with ID: %s, missing cost information",
-					utils.SupplierS, prflID, s.ID))
-			continue
+		} else if pass && srtSpl != nil {
+			sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers, srtSpl)
 		}
-		if extraOpts.maxCost != 0 &&
-			costData[utils.Cost].(float64) > extraOpts.maxCost {
-			continue
-		}
-		srtData := map[string]interface{}{
-			utils.Weight: s.Weight,
-		}
-		for k, v := range costData {
-			srtData[k] = v
-		}
-		sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers,
-			&SortedSupplier{
-				SupplierID:         s.ID,
-				SortingData:        srtData,
-				SupplierParameters: s.SupplierParameters})
 	}
 	if len(sortedSuppls.SortedSuppliers) == 0 {
 		return nil, utils.ErrNotFound

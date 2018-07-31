@@ -31,7 +31,7 @@ type SortedSupplier struct {
 	SupplierID         string
 	SupplierParameters string
 	SortingData        map[string]interface{} // store here extra info like cost or stats
-	worstStats         map[string]float64
+	globalStats        map[string]float64
 }
 
 // SuppliersReply is returned as part of GetSuppliers call
@@ -97,21 +97,21 @@ func (sSpls *SortedSuppliers) SortQOS(params []string) {
 	sort.Slice(sSpls.SortedSuppliers, func(i, j int) bool {
 		for _, param := range params {
 			// skip to next param
-			if sSpls.SortedSuppliers[i].worstStats[param] == sSpls.SortedSuppliers[j].worstStats[param] {
+			if sSpls.SortedSuppliers[i].globalStats[param] == sSpls.SortedSuppliers[j].globalStats[param] {
 				continue
 			}
-			if (param != utils.MetaPDD && sSpls.SortedSuppliers[i].worstStats[param] == -1) ||
-				(param == utils.MetaPDD && sSpls.SortedSuppliers[i].worstStats[param] == 1000000) {
+			if (param != utils.MetaPDD && sSpls.SortedSuppliers[i].globalStats[param] == -1) ||
+				(param == utils.MetaPDD && sSpls.SortedSuppliers[i].globalStats[param] == 1000000) {
 				return false
 			}
 			switch param {
 			default:
-				return sSpls.SortedSuppliers[i].worstStats[param] > sSpls.SortedSuppliers[j].worstStats[param]
+				return sSpls.SortedSuppliers[i].globalStats[param] > sSpls.SortedSuppliers[j].globalStats[param]
 			case utils.MetaPDD:
-				return sSpls.SortedSuppliers[i].worstStats[param] < sSpls.SortedSuppliers[j].worstStats[param]
+				return sSpls.SortedSuppliers[i].globalStats[param] < sSpls.SortedSuppliers[j].globalStats[param]
 			}
 		}
-		return sSpls.SortedSuppliers[i].worstStats[utils.Weight] > sSpls.SortedSuppliers[j].worstStats[utils.Weight]
+		return sSpls.SortedSuppliers[i].globalStats[utils.Weight] > sSpls.SortedSuppliers[j].globalStats[utils.Weight]
 	})
 }
 
@@ -134,7 +134,7 @@ type SuppliersSorter interface {
 // NewSupplierSortDispatcher constructs SupplierSortDispatcher
 func NewSupplierSortDispatcher(lcrS *SupplierService) (ssd SupplierSortDispatcher, err error) {
 	ssd = make(map[string]SuppliersSorter)
-	ssd[utils.MetaWeight] = NewWeightSorter()
+	ssd[utils.MetaWeight] = NewWeightSorter(lcrS)
 	ssd[utils.MetaLeastCost] = NewLeastCostSorter(lcrS)
 	ssd[utils.MetaHighestCost] = NewHighestCostSorter(lcrS)
 	ssd[utils.MetaQOS] = NewQOSSupplierSorter(lcrS)
@@ -152,28 +152,4 @@ func (ssd SupplierSortDispatcher) SortSuppliers(prflID, strategy string,
 		return nil, fmt.Errorf("unsupported sorting strategy: %s", strategy)
 	}
 	return sd.SortSuppliers(prflID, suppls, suplEv, extraOpts)
-}
-
-func NewWeightSorter() *WeightSorter {
-	return &WeightSorter{sorting: utils.MetaWeight}
-}
-
-// WeightSorter orders suppliers based on their weight, no cost involved
-type WeightSorter struct {
-	sorting string
-}
-
-func (ws *WeightSorter) SortSuppliers(prflID string,
-	suppls []*Supplier, suplEv *utils.CGREvent, extraOpts *optsGetSuppliers) (sortedSuppls *SortedSuppliers, err error) {
-	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
-		Sorting:         ws.sorting,
-		SortedSuppliers: make([]*SortedSupplier, len(suppls))}
-	for i, s := range suppls {
-		sortedSuppls.SortedSuppliers[i] = &SortedSupplier{
-			SupplierID:         s.ID,
-			SortingData:        map[string]interface{}{utils.Weight: s.Weight},
-			SupplierParameters: s.SupplierParameters}
-	}
-	sortedSuppls.SortWeight()
-	return
 }

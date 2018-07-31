@@ -22,32 +22,29 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewHighestCostSorter(spS *SupplierService) *HightCostSorter {
-	return &HightCostSorter{spS: spS,
-		sorting: utils.MetaHighestCost}
+func NewWeightSorter(spS *SupplierService) *WeightSorter {
+	return &WeightSorter{spS: spS,
+		sorting: utils.MetaWeight}
 }
 
-// HightCostSorter sorts suppliers based on their cost
-type HightCostSorter struct {
+// WeightSorter orders suppliers based on their weight, no cost involved
+type WeightSorter struct {
 	sorting string
 	spS     *SupplierService
 }
 
-func (hcs *HightCostSorter) SortSuppliers(prflID string, suppls []*Supplier,
-	ev *utils.CGREvent, extraOpts *optsGetSuppliers) (sortedSuppls *SortedSuppliers, err error) {
+func (ws *WeightSorter) SortSuppliers(prflID string,
+	suppls []*Supplier, suplEv *utils.CGREvent, extraOpts *optsGetSuppliers) (sortedSuppls *SortedSuppliers, err error) {
 	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
-		Sorting:         hcs.sorting,
+		Sorting:         ws.sorting,
 		SortedSuppliers: make([]*SortedSupplier, 0)}
 	for _, s := range suppls {
-		if srtSpl, pass, err := hcs.spS.populateSortingData(ev, s, extraOpts); err != nil {
+		if srtSpl, pass, err := ws.spS.populateSortingData(suplEv, s, extraOpts); err != nil {
 			return nil, err
 		} else if pass && srtSpl != nil {
 			sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers, srtSpl)
 		}
 	}
-	if len(sortedSuppls.SortedSuppliers) == 0 {
-		return nil, utils.ErrNotFound
-	}
-	sortedSuppls.SortHighestCost()
+	sortedSuppls.SortWeight()
 	return
 }
