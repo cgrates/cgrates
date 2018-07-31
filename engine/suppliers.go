@@ -402,25 +402,17 @@ func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sor
 	if err != nil {
 		return nil, err
 	}
-	srtTmp := &SortedSuppliers{
-		ProfileID: sortedSuppliers.ProfileID,
-		Sorting:   sortedSuppliers.Sorting,
-	}
-	for _, s := range sortedSuppliers.SortedSuppliers {
-
-		srtTmp.SortedSuppliers = append(srtTmp.SortedSuppliers, s)
-	}
 	if args.Paginator.Offset != nil {
-		if *args.Paginator.Offset <= len(srtTmp.SortedSuppliers) {
-			srtTmp.SortedSuppliers = srtTmp.SortedSuppliers[*args.Paginator.Offset:]
+		if *args.Paginator.Offset <= len(sortedSuppliers.SortedSuppliers) {
+			sortedSuppliers.SortedSuppliers = sortedSuppliers.SortedSuppliers[*args.Paginator.Offset:]
 		}
 	}
 	if args.Paginator.Limit != nil {
-		if *args.Paginator.Limit <= len(srtTmp.SortedSuppliers) {
-			srtTmp.SortedSuppliers = srtTmp.SortedSuppliers[:*args.Paginator.Limit]
+		if *args.Paginator.Limit <= len(sortedSuppliers.SortedSuppliers) {
+			sortedSuppliers.SortedSuppliers = sortedSuppliers.SortedSuppliers[:*args.Paginator.Limit]
 		}
 	}
-	return srtTmp, nil
+	return sortedSuppliers, nil
 }
 
 type ArgsGetSuppliers struct {
