@@ -59,6 +59,7 @@ var sTestsSupplierSV1 = []func(t *testing.T){
 	testV1SplSGetQOSSuppliers2,
 	testV1SplSGetQOSSuppliers3,
 	testV1SplSGetQOSSuppliersFiltred,
+	testV1SplSGetQOSSuppliersFiltred2,
 	testV1SplSGetSupplierWithoutFilter,
 	testV1SplSSetSupplierProfiles,
 	testV1SplSUpdateSupplierProfiles,
@@ -350,7 +351,6 @@ func testV1SplSGetHighestCostSuppliers(t *testing.T) {
 			ID:     "testV1SplSGetHighestCostSuppliers",
 			Event: map[string]interface{}{
 				utils.Account:     "1003",
-				utils.Subject:     "1003",
 				utils.Destination: "1002",
 				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
 				utils.Usage:       "1m20s",
@@ -707,6 +707,56 @@ func testV1SplSGetQOSSuppliersFiltred(t *testing.T) {
 					"*asr:Stat_3": 100.0,
 					"*tcd:Stat_3": 11.0,
 					utils.Weight:  35.0,
+				},
+			},
+		},
+	}
+	var suplsReply engine.SortedSuppliers
+	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
+		ev, &suplsReply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSpls, suplsReply) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
+	}
+}
+
+func testV1SplSGetQOSSuppliersFiltred2(t *testing.T) {
+	ev := &engine.ArgsGetSuppliers{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1SplSGetQOSSuppliers",
+			Event: map[string]interface{}{
+				"DistincMatch":    "*qos_filtred2",
+				utils.Account:     "1003",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+				utils.Usage:       "1m20s",
+			},
+		},
+	}
+	eSpls := engine.SortedSuppliers{
+		ProfileID: "SPL_QOS_FILTRED2",
+		Sorting:   utils.MetaQOS,
+		SortedSuppliers: []*engine.SortedSupplier{
+			&engine.SortedSupplier{
+				SupplierID: "supplier3",
+				SortingData: map[string]interface{}{
+					"*acd:Stat_3": 11.0,
+					"*asr:Stat_3": 100.0,
+					"*tcd:Stat_3": 11.0,
+					utils.Weight:  35.0,
+				},
+			},
+			&engine.SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					"*acd:Stat_2":      5.5,
+					"*asr:Stat_2":      100.0,
+					"*tcd:Stat_2":      11.0,
+					utils.Cost:         0.46666,
+					utils.RatingPlanID: "RP_RETAIL1",
+					utils.Weight:       20.0,
 				},
 			},
 		},
