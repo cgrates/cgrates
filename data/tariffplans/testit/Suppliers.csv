@@ -23,3 +23,6 @@ cgrates.org,SPL_QOS_3,,,,,supplier3,,,,,Stat_3,35,,,
 cgrates.org,SPL_QOS_FILTRED,FLTR_SPP_6,2017-11-27T00:00:00Z,*qos,*pdd,supplier1,FLTR_QOS_SP1,,,,Stat_1;Stat_1_1,10,false,,10
 cgrates.org,SPL_QOS_FILTRED,,,,,supplier2,FLTR_QOS_SP2,,,,Stat_2,20,,,
 cgrates.org,SPL_QOS_FILTRED,,,,,supplier3,,,,,Stat_3,35,,,
+cgrates.org,SPL_QOS_FILTRED2,FLTR_SPP_QOS_2,2017-11-27T00:00:00Z,*qos,*acd;*tcd;*asr,supplier1,FLTR_QOS_SP1_2,,RP_SPECIAL_1002,,Stat_1;Stat_1_1,10,false,,10
+cgrates.org,SPL_QOS_FILTRED2,,,,,supplier2,FLTR_QOS_SP2_2,,RP_RETAIL1,,Stat_2,20,,,
+cgrates.org,SPL_QOS_FILTRED2,,,,,supplier3,,,,,Stat_3,35,,,
