@@ -6,6 +6,7 @@ cgrates.org,FLTR_1,*prefix,Destination,10;20,
 cgrates.org,FLTR_1,*rsr,,Subject(~^1.*1$);Destination(1002),
 cgrates.org,FLTR_ACNT_1007,*string,Account,1007,2014-07-29T15:00:00Z
 cgrates.org,FLTR_ACNT_dan,*string,Account,dan,2014-07-29T15:00:00Z
+cgrates.org,FLTR_SPP_ACNT_dan,*string,*req.Account,dan,2014-07-29T15:00:00Z
 cgrates.org,FLTR_SPP_2,*string,Account,1003;1002,2014-07-29T15:00:00Z
 cgrates.org,FLTR_SPP_2,*prefix,Destination,10;20,
 cgrates.org,FLTR_SPP_2,*rsr,,Subject(~^1.*1$);Destination(1002),
@@ -17,3 +18,7 @@ cgrates.org,FLTR_STAT_3,*string,Account,1003,2014-07-29T15:00:00Z
 cgrates.org,FLTR_SPP_4,*string,DistincMatch,*qos2,2014-07-29T15:00:00Z
 cgrates.org,FLTR_SPP_5,*string,DistincMatch,*qos3,2014-07-29T15:00:00Z
 cgrates.org,FLTR_STAT_1_1,*string,Stat,Stat1_1,2014-07-29T15:00:00Z
+cgrates.org,FLTR_SPP_6,*string,DistincMatch,*qos_filtred,2014-07-29T15:00:00Z
+cgrates.org,FLTR_QOS_SP1,*gte,*gs.*acd,10.0,2014-07-29T15:00:00Z
+cgrates.org,FLTR_QOS_SP2,*gte,*gs.*acd,10.0,2014-07-29T15:00:00Z
+cgrates.org,FLTR_QOS_SP2,*gte,*gs.*tcd,11.0,

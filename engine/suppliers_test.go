@@ -45,7 +45,7 @@ var (
 			Suppliers: []*Supplier{
 				&Supplier{
 					ID:                 "supplier1",
-					FilterIDs:          []string{"FLTR_SUPP_1"},
+					FilterIDs:          []string{},
 					AccountIDs:         []string{},
 					RatingPlanIDs:      []string{},
 					ResourceIDs:        []string{},
@@ -70,7 +70,7 @@ var (
 			Suppliers: []*Supplier{
 				&Supplier{
 					ID:                 "supplier2",
-					FilterIDs:          []string{"FLTR_SUPP_2"},
+					FilterIDs:          []string{},
 					AccountIDs:         []string{},
 					RatingPlanIDs:      []string{},
 					ResourceIDs:        []string{},
@@ -80,7 +80,7 @@ var (
 				},
 				&Supplier{
 					ID:                 "supplier3",
-					FilterIDs:          []string{"FLTR_SUPP_2"},
+					FilterIDs:          []string{},
 					AccountIDs:         []string{},
 					RatingPlanIDs:      []string{},
 					ResourceIDs:        []string{},
@@ -90,7 +90,7 @@ var (
 				},
 				&Supplier{
 					ID:                 "supplier1",
-					FilterIDs:          []string{"FLTR_SUPP_2"},
+					FilterIDs:          []string{},
 					AccountIDs:         []string{},
 					RatingPlanIDs:      []string{},
 					ResourceIDs:        []string{},
@@ -115,7 +115,7 @@ var (
 			Suppliers: []*Supplier{
 				&Supplier{
 					ID:                 "supplier1",
-					FilterIDs:          []string{"FLTR_SUPP_3"},
+					FilterIDs:          []string{},
 					AccountIDs:         []string{},
 					RatingPlanIDs:      []string{},
 					ResourceIDs:        []string{},
@@ -430,6 +430,7 @@ func TestSuppliersSortedForEvent(t *testing.T) {
 	if !reflect.DeepEqual(eFirstSupplierProfile, sprf) {
 		t.Errorf("Expecting: %+v, received: %+v", eFirstSupplierProfile, sprf)
 	}
+
 	eFirstSupplierProfile = &SortedSuppliers{
 		ProfileID: "SupplierProfile2",
 		Sorting:   utils.MetaWeight,

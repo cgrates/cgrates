@@ -19,9 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -36,62 +33,17 @@ type QOSSupplierSorter struct {
 	spS     *SupplierService
 }
 
-func (lcs *QOSSupplierSorter) SortSuppliers(prflID string, suppls []*Supplier,
+func (qos *QOSSupplierSorter) SortSuppliers(prflID string, suppls []*Supplier,
 	ev *utils.CGREvent, extraOpts *optsGetSuppliers) (sortedSuppls *SortedSuppliers, err error) {
 	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
-		Sorting:         lcs.sorting,
+		Sorting:         qos.sorting,
 		SortedSuppliers: make([]*SortedSupplier, 0)}
 	for _, s := range suppls {
-		metricSupp, err := lcs.spS.statMetrics(s.StatIDs, ev.Tenant) //create metric map for suppier s
-		if err != nil {
-			if extraOpts.ignoreErrors {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> profile: %s ignoring supplier with ID: %s, err: %s",
-						utils.SupplierS, prflID, s.ID, err.Error()))
-				continue
-			}
+		if srtSpl, pass, err := qos.spS.populateSortingData(ev, s, extraOpts); err != nil {
 			return nil, err
+		} else if pass && srtSpl != nil {
+			sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers, srtSpl)
 		}
-
-		srtData := map[string]float64{
-			utils.Weight: s.Weight,
-		}
-		for _, metric := range extraOpts.sortingParameters {
-			hasMetric := false                         //check if metricSupp have sortingParameter
-			for keyWithID, value := range metricSupp { //transfer data from metric into srtData
-				if metric == strings.Split(keyWithID, utils.InInFieldSep)[0] {
-					if val, hasKey := srtData[metric]; !hasKey ||
-						(metric == utils.MetaPDD && val < value) || //worst values
-						(metric != utils.MetaPDD && val > value) {
-						srtData[metric] = value
-						hasMetric = true
-					}
-				}
-			}
-			if !hasMetric { //if not have populate with default value
-				switch metric {
-				default:
-					srtData[metric] = -1
-				case utils.MetaPDD:
-					srtData[metric] = 1000000
-				}
-			}
-		}
-
-		sortingData := map[string]interface{}{
-			utils.Weight: s.Weight,
-		}
-		for k, v := range metricSupp {
-			sortingData[k] = v
-		}
-		sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers,
-			&SortedSupplier{
-				SupplierID:         s.ID,
-				SortingData:        sortingData,
-				SupplierParameters: s.SupplierParameters,
-				worstStats:         srtData,
-			},
-		)
 	}
 	if len(sortedSuppls.SortedSuppliers) == 0 {
 		return nil, utils.ErrNotFound

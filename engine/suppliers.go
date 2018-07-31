@@ -23,6 +23,7 @@ import (
 	"reflect"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -284,6 +285,100 @@ func (spS *SupplierService) resourceUsage(resIDs []string) (tUsage float64, err 
 	return
 }
 
+func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplier, extraOpts *optsGetSuppliers) (srtSpl *SortedSupplier, pass bool, err error) {
+	globalStats := map[string]float64{ //used for QOS strategy
+		utils.Weight: spl.Weight,
+	}
+	sortedSpl := &SortedSupplier{
+		SupplierID: spl.ID,
+		SortingData: map[string]interface{}{
+			utils.Weight: spl.Weight,
+		},
+		SupplierParameters: spl.SupplierParameters,
+	}
+	//calculate costData if we have fields
+	if len(spl.AccountIDs) != 0 || len(spl.RatingPlanIDs) != 0 {
+		costData, err := spS.costForEvent(ev, spl.AccountIDs, spl.RatingPlanIDs)
+		if err != nil {
+			if extraOpts.ignoreErrors {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> ignoring supplier with ID: %s, err: %s",
+						utils.SupplierS, spl.ID, err.Error()))
+			} else {
+				return nil, false, err
+			}
+		} else if len(costData) == 0 {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> profile: %s ignoring supplier with ID: %s, missing cost information",
+					utils.SupplierS, spl.ID))
+		} else {
+			if extraOpts.maxCost != 0 &&
+				costData[utils.Cost].(float64) > extraOpts.maxCost {
+				return nil, false, nil
+			}
+			for k, v := range costData {
+				sortedSpl.SortingData[k] = v
+			}
+		}
+	}
+	metricForFilter := map[string]interface{}{
+		utils.Weight: spl.Weight,
+	}
+	//calculate metrics
+	if len(spl.StatIDs) != 0 {
+		metricSupp, err := spS.statMetrics(spl.StatIDs, ev.Tenant) //create metric map for suppier
+		if err != nil {
+			if extraOpts.ignoreErrors {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> ignoring supplier with ID: %s, err: %s",
+						utils.SupplierS, spl.ID, err.Error()))
+			} else {
+				return nil, false, err
+			}
+		}
+		for _, metric := range extraOpts.sortingParameters {
+			hasMetric := false                         //check if metricSupp have sortingParameter
+			for keyWithID, value := range metricSupp { //transfer data from metric into globalStats
+				if metric == strings.Split(keyWithID, utils.InInFieldSep)[0] {
+					if val, hasKey := globalStats[metric]; !hasKey ||
+						(metric == utils.MetaPDD && val < value) || //worst values
+						(metric != utils.MetaPDD && val > value) {
+						globalStats[metric] = value
+						hasMetric = true
+					}
+				}
+			}
+			if !hasMetric { //if not have populate with default value
+				switch metric {
+				default:
+					globalStats[metric] = -1
+				case utils.MetaPDD:
+					globalStats[metric] = 1000000
+				}
+			}
+		}
+		for k, v := range metricSupp {
+			sortedSpl.SortingData[k] = v
+			metricForFilter[strings.Split(k, utils.InInFieldSep)[0]] = v
+		}
+		sortedSpl.globalStats = globalStats
+	}
+	//filter the supplier
+	if len(spl.FilterIDs) != 0 {
+		nM := NewNavigableMap(nil)
+		nM.Set([]string{"*req"}, ev.Event, false)
+		nM.Set([]string{"*sd"}, sortedSpl.SortingData, false)
+		nM.Set([]string{"*gs"}, metricForFilter, false)
+		if pass, err = spS.filterS.Pass(ev.Tenant, spl.FilterIDs,
+			nM); err != nil {
+			return nil, false, err
+		} else if !pass {
+			return nil, false, nil
+		}
+	}
+	return sortedSpl, true, nil
+}
+
 // supliersForEvent will return the list of valid supplier IDs
 // for event based on filters and sorting algorithms
 func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sortedSuppls *SortedSuppliers, err error) {
@@ -296,40 +391,36 @@ func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sor
 	} else if len(suppPrfls) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	splPrfl := suppPrfls[0] // pick up the first lcr profile as winner
-	var spls []*Supplier
-	for _, s := range splPrfl.Suppliers {
-		if len(s.FilterIDs) != 0 { // filters should be applied, check them here
-			if pass, err := spS.filterS.Pass(args.Tenant, s.FilterIDs,
-				NewNavigableMap(args.Event)); err != nil {
-				return nil, err
-			} else if !pass {
-				continue
-			}
-		}
-		spls = append(spls, s)
-	}
+	splPrfl := suppPrfls[0]                     // pick up the first lcr profile as winner
 	extraOpts, err := args.asOptsGetSuppliers() // convert suppliers arguments into internal options used to limit data
 	if err != nil {
 		return nil, err
 	}
 	extraOpts.sortingParameters = splPrfl.SortingParameters // populate sortingParameters in extraOpts
 	sortedSuppliers, err := spS.sorter.SortSuppliers(splPrfl.ID, splPrfl.Sorting,
-		spls, &args.CGREvent, extraOpts)
+		splPrfl.Suppliers, &args.CGREvent, extraOpts)
 	if err != nil {
 		return nil, err
 	}
+	srtTmp := &SortedSuppliers{
+		ProfileID: sortedSuppliers.ProfileID,
+		Sorting:   sortedSuppliers.Sorting,
+	}
+	for _, s := range sortedSuppliers.SortedSuppliers {
+
+		srtTmp.SortedSuppliers = append(srtTmp.SortedSuppliers, s)
+	}
 	if args.Paginator.Offset != nil {
-		if *args.Paginator.Offset <= len(sortedSuppliers.SortedSuppliers) {
-			sortedSuppliers.SortedSuppliers = sortedSuppliers.SortedSuppliers[*args.Paginator.Offset:]
+		if *args.Paginator.Offset <= len(srtTmp.SortedSuppliers) {
+			srtTmp.SortedSuppliers = srtTmp.SortedSuppliers[*args.Paginator.Offset:]
 		}
 	}
 	if args.Paginator.Limit != nil {
-		if *args.Paginator.Limit <= len(sortedSuppliers.SortedSuppliers) {
-			sortedSuppliers.SortedSuppliers = sortedSuppliers.SortedSuppliers[:*args.Paginator.Limit]
+		if *args.Paginator.Limit <= len(srtTmp.SortedSuppliers) {
+			srtTmp.SortedSuppliers = srtTmp.SortedSuppliers[:*args.Paginator.Limit]
 		}
 	}
-	return sortedSuppliers, nil
+	return srtTmp, nil
 }
 
 type ArgsGetSuppliers struct {

@@ -1386,6 +1386,7 @@ type TPFilter struct {
 
 type TPSupplier struct {
 	ID                 string // SupplierID
+	SortingFilter      []string
 	FilterIDs          []string
 	AccountIDs         []string
 	RatingPlanIDs      []string // used when computing price
