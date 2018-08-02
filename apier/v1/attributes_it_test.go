@@ -57,6 +57,7 @@ var sTestsAlsPrf = []func(t *testing.T){
 	testAttributeSProcessEventWithNoneSubstitute,
 	testAttributeSProcessEventWithNoneSubstitute2,
 	testAttributeSProcessEventWithNoneSubstitute3,
+	testAttributeSProcessEventWithHeader,
 	testAttributeSGetAlsPrfBeforeSet,
 	testAttributeSSetAlsPrf,
 	testAttributeSUpdateAlsPrf,
@@ -546,6 +547,66 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 	var rplyEv engine.AttrSProcessEventReply
 	if err := attrSRPC.Call(utils.AttributeSv1ProcessEvent,
 		ev, &rplyEv); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eRply, &rplyEv) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
+	}
+}
+
+func testAttributeSProcessEventWithHeader(t *testing.T) {
+	attrPrf1 := &engine.AttributeProfile{
+		Tenant:    config.CgrConfig().DefaultTenant,
+		ID:        "ATTR_Header",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:Field1:Value1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: []*engine.Attribute{
+			&engine.Attribute{
+				FieldName:  "Field2",
+				Initial:    utils.META_ANY,
+				Substitute: utils.NewRSRParsersMustCompile("~Field1", true),
+				Append:     true,
+			},
+		},
+		Blocker: true,
+		Weight:  10,
+	}
+	var result string
+	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", attrPrf1, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	attrArgs := &engine.AttrArgsProcessEvent{
+		ProcessRuns: utils.IntPointer(1),
+		CGREvent: utils.CGREvent{
+			Tenant:  config.CgrConfig().DefaultTenant,
+			ID:      "HeaderEventForAttribute",
+			Context: utils.StringPointer(utils.MetaSessionS),
+			Event: map[string]interface{}{
+				"Field1": "Value1",
+			},
+		},
+	}
+	eRply := &engine.AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_Header"},
+		AlteredFields:   []string{"Field2"},
+		CGREvent: &utils.CGREvent{
+			Tenant:  config.CgrConfig().DefaultTenant,
+			ID:      "HeaderEventForAttribute",
+			Context: utils.StringPointer(utils.MetaSessionS),
+			Event: map[string]interface{}{
+				"Field1": "Value1",
+				"Field2": "Value1",
+			},
+		},
+	}
+	var rplyEv engine.AttrSProcessEventReply
+	if err := attrSRPC.Call(utils.AttributeSv1ProcessEvent,
+		attrArgs, &rplyEv); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRply, &rplyEv) {
 		t.Errorf("Expecting: %s, received: %s",
