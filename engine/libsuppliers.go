@@ -111,7 +111,7 @@ func (sSpls *SortedSuppliers) SortQOS(params []string) {
 				return sSpls.SortedSuppliers[i].globalStats[param] < sSpls.SortedSuppliers[j].globalStats[param]
 			}
 		}
-		return sSpls.SortedSuppliers[i].globalStats[utils.Weight] > sSpls.SortedSuppliers[j].globalStats[utils.Weight]
+		return sSpls.SortedSuppliers[i].SortingData[utils.Weight].(float64) > sSpls.SortedSuppliers[j].SortingData[utils.Weight].(float64)
 	})
 }
 
