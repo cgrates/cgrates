@@ -20,7 +20,6 @@ package engine
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
