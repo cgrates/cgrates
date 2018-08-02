@@ -50,6 +50,7 @@ var sTestsFilter = []func(t *testing.T){
 	testFilterGetFilterBeforeSet,
 	testFilterSetFilter,
 	testFilterGetFilterAfterSet,
+	testFilterGetFilterIDs,
 	testFilterUpdateFilter,
 	testFilterGetFilterAfterUpdate,
 	testFilterRemoveFilter,
@@ -148,6 +149,16 @@ func testFilterSetFilter(t *testing.T) {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
+	}
+}
+
+func testFilterGetFilterIDs(t *testing.T) {
+	expected := []string{"Filter1"}
+	var result []string
+	if err := filterRPC.Call("ApierV1.GetFilterIDs", "cgrates.org", &result); err != nil {
+		t.Error(err)
+	} else if len(expected) != len(result) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, result)
 	}
 }
 

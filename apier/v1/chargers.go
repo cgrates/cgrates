@@ -39,6 +39,21 @@ func (apierV1 *ApierV1) GetChargerProfile(arg utils.TenantID, reply *engine.Char
 	return nil
 }
 
+// GetChargerProfileIDs returns list of chargerProfile IDs registered for a tenant
+func (apierV1 *ApierV1) GetChargerProfileIDs(tenant string, chPrfIDs *[]string) error {
+	prfx := utils.ChargerProfilePrefix + tenant + ":"
+	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(prfx)
+	if err != nil {
+		return err
+	}
+	retIDs := make([]string, len(keys))
+	for i, key := range keys {
+		retIDs[i] = key[len(prfx):]
+	}
+	*chPrfIDs = retIDs
+	return nil
+}
+
 //SetChargerProfile add/update a new Charger Profile
 func (apierV1 *ApierV1) SetChargerProfile(cpp *engine.ChargerProfile, reply *string) error {
 	if missing := utils.MissingStructFields(cpp, []string{"Tenant", "ID"}); len(missing) != 0 {

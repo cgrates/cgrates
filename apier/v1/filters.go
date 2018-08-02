@@ -51,6 +51,21 @@ func (self *ApierV1) GetFilter(arg utils.TenantID, reply *engine.Filter) error {
 	return nil
 }
 
+// GetFilterIDs returns list of Filter IDs registered for a tenant
+func (apierV1 *ApierV1) GetFilterIDs(tenant string, fltrIDs *[]string) error {
+	prfx := utils.FilterPrefix + tenant + ":"
+	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(prfx)
+	if err != nil {
+		return err
+	}
+	retIDs := make([]string, len(keys))
+	for i, key := range keys {
+		retIDs[i] = key[len(prfx):]
+	}
+	*fltrIDs = retIDs
+	return nil
+}
+
 //RemoveFilter  remove a specific filter
 func (self *ApierV1) RemoveFilter(arg utils.TenantID, reply *string) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing

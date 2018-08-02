@@ -602,12 +602,26 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result = append(result, utils.REVERSE_ALIASES_PREFIX+keyResult.Key)
 		}
 	case utils.ResourceProfilesPrefix:
-		iter := db.C(colRsP).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"tenant": 1, "id": 1}).Iter()
+		qry := bson.M{}
+		if tntID.Tenant != "" {
+			qry["tenant"] = tntID.Tenant
+		}
+		if tntID.ID != "" {
+			qry["id"] = bson.M{"$regex": bson.RegEx{Pattern: subject}}
+		}
+		iter := db.C(colRsP).Find(qry).Select(bson.M{"tenant": 1, "id": 1}).Iter()
 		for iter.Next(&idResult) {
 			result = append(result, utils.ResourceProfilesPrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}
 	case utils.ResourcesPrefix:
-		iter := db.C(colRes).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"tenant": 1, "id": 1}).Iter()
+		qry := bson.M{}
+		if tntID.Tenant != "" {
+			qry["tenant"] = tntID.Tenant
+		}
+		if tntID.ID != "" {
+			qry["id"] = bson.M{"$regex": bson.RegEx{Pattern: subject}}
+		}
+		iter := db.C(colRes).Find(qry).Select(bson.M{"tenant": 1, "id": 1}).Iter()
 		for iter.Next(&idResult) {
 			result = append(result, utils.ResourcesPrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}
@@ -624,7 +638,14 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result = append(result, utils.StatQueuePrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}
 	case utils.StatQueueProfilePrefix:
-		iter := db.C(colSqp).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"tenant": 1, "id": 1}).Iter()
+		qry := bson.M{}
+		if tntID.Tenant != "" {
+			qry["tenant"] = tntID.Tenant
+		}
+		if tntID.ID != "" {
+			qry["id"] = bson.M{"$regex": bson.RegEx{Pattern: subject}}
+		}
+		iter := db.C(colSqp).Find(qry).Select(bson.M{"tenant": 1, "id": 1}).Iter()
 		for iter.Next(&idResult) {
 			result = append(result, utils.StatQueueProfilePrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}
@@ -639,7 +660,14 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result = append(result, utils.TimingsPrefix+idResult.Id)
 		}
 	case utils.FilterPrefix:
-		iter := db.C(colFlt).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"tenant": 1, "id": 1}).Iter()
+		qry := bson.M{}
+		if tntID.Tenant != "" {
+			qry["tenant"] = tntID.Tenant
+		}
+		if tntID.ID != "" {
+			qry["id"] = bson.M{"$regex": bson.RegEx{Pattern: subject}}
+		}
+		iter := db.C(colFlt).Find(qry).Select(bson.M{"tenant": 1, "id": 1}).Iter()
 		for iter.Next(&idResult) {
 			result = append(result, utils.FilterPrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}
@@ -656,22 +684,50 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result = append(result, utils.ThresholdPrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}
 	case utils.ThresholdProfilePrefix:
-		iter := db.C(colTps).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"tenant": 1, "id": 1}).Iter()
+		qry := bson.M{}
+		if tntID.Tenant != "" {
+			qry["tenant"] = tntID.Tenant
+		}
+		if tntID.ID != "" {
+			qry["id"] = bson.M{"$regex": bson.RegEx{Pattern: subject}}
+		}
+		iter := db.C(colTps).Find(qry).Select(bson.M{"tenant": 1, "id": 1}).Iter()
 		for iter.Next(&idResult) {
 			result = append(result, utils.ThresholdProfilePrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}
 	case utils.SupplierProfilePrefix:
-		iter := db.C(colSpp).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"tenant": 1, "id": 1}).Iter()
+		qry := bson.M{}
+		if tntID.Tenant != "" {
+			qry["tenant"] = tntID.Tenant
+		}
+		if tntID.ID != "" {
+			qry["id"] = bson.M{"$regex": bson.RegEx{Pattern: subject}}
+		}
+		iter := db.C(colSpp).Find(qry).Select(bson.M{"tenant": 1, "id": 1}).Iter()
 		for iter.Next(&idResult) {
 			result = append(result, utils.SupplierProfilePrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}
 	case utils.AttributeProfilePrefix:
-		iter := db.C(colAttr).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"tenant": 1, "id": 1}).Iter()
+		qry := bson.M{}
+		if tntID.Tenant != "" {
+			qry["tenant"] = tntID.Tenant
+		}
+		if tntID.ID != "" {
+			qry["id"] = bson.M{"$regex": bson.RegEx{Pattern: subject}}
+		}
+		iter := db.C(colAttr).Find(qry).Select(bson.M{"tenant": 1, "id": 1}).Iter()
 		for iter.Next(&idResult) {
 			result = append(result, utils.AttributeProfilePrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}
 	case utils.ChargerProfilePrefix:
-		iter := db.C(colCpp).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"tenant": 1, "id": 1}).Iter()
+		qry := bson.M{}
+		if tntID.Tenant != "" {
+			qry["tenant"] = tntID.Tenant
+		}
+		if tntID.ID != "" {
+			qry["id"] = bson.M{"$regex": bson.RegEx{Pattern: subject}}
+		}
+		iter := db.C(colCpp).Find(qry).Select(bson.M{"tenant": 1, "id": 1}).Iter()
 		for iter.Next(&idResult) {
 			result = append(result, utils.ChargerProfilePrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}

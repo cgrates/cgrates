@@ -56,6 +56,7 @@ var sTestsRLSV1 = []func(t *testing.T){
 	testV1RsDBStore,
 	testV1RsGetResourceProfileBeforeSet,
 	testV1RsSetResourceProfile,
+	testV1RsGetResourceProfileIDs,
 	testV1RsGetResourceProfileAfterSet,
 	testV1RsUpdateResourceProfile,
 	testV1RsGetResourceProfileAfterUpdate,
@@ -602,6 +603,16 @@ func testV1RsSetResourceProfile(t *testing.T) {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
+	}
+}
+
+func testV1RsGetResourceProfileIDs(t *testing.T) {
+	expected := []string{"ResGroup2", "ResGroup1", "ResGroup3", "RES_GR_TEST"}
+	var result []string
+	if err := rlsV1Rpc.Call("ApierV1.GetResourceProfileIDs", "cgrates.org", &result); err != nil {
+		t.Error(err)
+	} else if len(expected) != len(result) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, result)
 	}
 }
 

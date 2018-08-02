@@ -160,6 +160,7 @@ var sTestsThresholdSV1 = []func(t *testing.T){
 	testV1TSProcessEvent,
 	testV1TSGetThresholdsAfterProcess,
 	testV1TSGetThresholdsAfterRestart,
+	testv1TSGetThresholdProfileIDs,
 	testV1TSSetThresholdProfile,
 	testV1TSUpdateThresholdProfile,
 	testV1TSRemoveThresholdProfile,
@@ -341,6 +342,16 @@ func testV1TSGetThresholdsAfterRestart(t *testing.T) {
 		t.Error(err)
 	} else if td.Snooze.IsZero() { // make sure Snooze time was reset during execution
 		t.Errorf("received: %+v", td)
+	}
+}
+
+func testv1TSGetThresholdProfileIDs(t *testing.T) {
+	expected := []string{"THD_STATS_1", "THD_STATS_2", "THD_STATS_3", "THD_RES_1", "THD_CDRS_1", "THD_ACNT_BALANCE_1", "THD_ACNT_EXPIRED"}
+	var result []string
+	if err := tSv1Rpc.Call("ApierV1.GetThresholdProfileIDs", "cgrates.org", &result); err != nil {
+		t.Error(err)
+	} else if len(expected) != len(result) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, result)
 	}
 }
 
