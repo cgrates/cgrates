@@ -62,6 +62,7 @@ var sTestsSupplierSV1 = []func(t *testing.T){
 	testV1SplSGetQOSSuppliersFiltred2,
 	testV1SplSGetSupplierWithoutFilter,
 	testV1SplSSetSupplierProfiles,
+	testV1SplSGetSupplierProfileIDs,
 	testV1SplSUpdateSupplierProfiles,
 	testV1SplSRemSupplierProfiles,
 	testV1SplSupplierPing,
@@ -861,6 +862,17 @@ func testV1SplSSetSupplierProfiles(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(splPrf, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", splPrf, reply)
+	}
+}
+
+func testV1SplSGetSupplierProfileIDs(t *testing.T) {
+	expected := []string{"SPL_HIGHESTCOST_1", "SPL_QOS_1", "SPL_QOS_2", "SPL_QOS_FILTRED", "SPL_QOS_FILTRED2",
+		"SPL_ACNT_1001", "SPL_LEASTCOST_1", "SPL_WEIGHT_2", "SPL_WEIGHT_1", "SPL_QOS_3", "TEST_PROFILE1"}
+	var result []string
+	if err := splSv1Rpc.Call("ApierV1.GetSupplierProfileIDs", "cgrates.org", &result); err != nil {
+		t.Error(err)
+	} else if len(expected) != len(result) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, result)
 	}
 }
 
