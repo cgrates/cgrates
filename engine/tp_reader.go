@@ -1842,7 +1842,7 @@ func (tpr *TpReader) IsValid() bool {
 	valid := true
 	for rplTag, rpl := range tpr.ratingPlans {
 		if !rpl.isContinous() {
-			log.Printf("The rating plan %s is not covering all weekdays", rplTag)
+			log.Printf("The rating plan %s is not covering all weekdays for all destinations", rplTag)
 			valid = false
 		}
 		if crazyRate := rpl.getFirstUnsaneRating(); crazyRate != "" {
