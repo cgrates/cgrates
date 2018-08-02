@@ -58,6 +58,7 @@ var sTestsAlsPrf = []func(t *testing.T){
 	testAttributeSProcessEventWithNoneSubstitute2,
 	testAttributeSProcessEventWithNoneSubstitute3,
 	testAttributeSProcessEventWithHeader,
+	testAttributeSGetAttPrfIDs,
 	testAttributeSGetAlsPrfBeforeSet,
 	testAttributeSSetAlsPrf,
 	testAttributeSUpdateAlsPrf,
@@ -611,6 +612,16 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 	} else if !reflect.DeepEqual(eRply, &rplyEv) {
 		t.Errorf("Expecting: %s, received: %s",
 			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
+	}
+}
+
+func testAttributeSGetAttPrfIDs(t *testing.T) {
+	expected := []string{"ATTR_2", "ATTR_1", "ATTR_3", "ATTR_Header", "AttributeWithNonSubstitute"}
+	var result []string
+	if err := attrSRPC.Call("ApierV1.GetAttributeProfileIDs", "cgrates.org", &result); err != nil {
+		t.Error(err)
+	} else if len(expected) != len(result) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, result)
 	}
 }
 
