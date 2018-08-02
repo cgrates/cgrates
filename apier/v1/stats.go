@@ -37,6 +37,21 @@ func (apierV1 *ApierV1) GetStatQueueProfile(arg *utils.TenantID, reply *engine.S
 	return
 }
 
+// GetStatQueueProfileIDs returns list of statQueueProfile IDs registered for a tenant
+func (apierV1 *ApierV1) GetStatQueueProfileIDs(tenant string, stsPrfIDs *[]string) error {
+	prfx := utils.StatQueueProfilePrefix + tenant + ":"
+	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(prfx)
+	if err != nil {
+		return err
+	}
+	retIDs := make([]string, len(keys))
+	for i, key := range keys {
+		retIDs[i] = key[len(prfx):]
+	}
+	*stsPrfIDs = retIDs
+	return nil
+}
+
 // SetStatQueueProfile alters/creates a StatQueueProfile
 func (apierV1 *ApierV1) SetStatQueueProfile(sqp *engine.StatQueueProfile, reply *string) error {
 	if missing := utils.MissingStructFields(sqp, []string{"Tenant", "ID"}); len(missing) != 0 {

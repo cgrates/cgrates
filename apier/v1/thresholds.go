@@ -71,6 +71,21 @@ func (apierV1 *ApierV1) GetThresholdProfile(arg *utils.TenantID, reply *engine.T
 	return
 }
 
+// GetThresholdProfileIDs returns list of thresholdProfile IDs registered for a tenant
+func (apierV1 *ApierV1) GetThresholdProfileIDs(tenant string, thPrfIDs *[]string) error {
+	prfx := utils.ThresholdProfilePrefix + tenant + ":"
+	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(prfx)
+	if err != nil {
+		return err
+	}
+	retIDs := make([]string, len(keys))
+	for i, key := range keys {
+		retIDs[i] = key[len(prfx):]
+	}
+	*thPrfIDs = retIDs
+	return nil
+}
+
 // SetThresholdProfile alters/creates a ThresholdProfile
 func (apierV1 *ApierV1) SetThresholdProfile(thp *engine.ThresholdProfile, reply *string) error {
 	if missing := utils.MissingStructFields(thp, []string{"Tenant", "ID"}); len(missing) != 0 {

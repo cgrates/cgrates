@@ -73,6 +73,21 @@ func (apierV1 *ApierV1) GetResourceProfile(arg utils.TenantID, reply *engine.Res
 	return nil
 }
 
+// GetResourceProfileIDs returns list of resourceProfile IDs registered for a tenant
+func (apierV1 *ApierV1) GetResourceProfileIDs(tenant string, rsPrfIDs *[]string) error {
+	prfx := utils.ResourceProfilesPrefix + tenant + ":"
+	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(prfx)
+	if err != nil {
+		return err
+	}
+	retIDs := make([]string, len(keys))
+	for i, key := range keys {
+		retIDs[i] = key[len(prfx):]
+	}
+	*rsPrfIDs = retIDs
+	return nil
+}
+
 //SetResourceProfile add a new resource configuration
 func (apierV1 *ApierV1) SetResourceProfile(res *engine.ResourceProfile, reply *string) error {
 	if missing := utils.MissingStructFields(res, []string{"Tenant", "ID"}); len(missing) != 0 {

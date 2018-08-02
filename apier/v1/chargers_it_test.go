@@ -70,6 +70,7 @@ var sTestsCharger = []func(t *testing.T){
 	testChargerSGetChargersForEvent,
 	testChargerSProcessEvent,
 	testChargerSSetChargerProfile,
+	testChargerSGetChargerProfileIDs,
 	testChargerSUpdateChargerProfile,
 	testChargerSRemChargerProfile,
 	testChargerSPing,
@@ -226,6 +227,16 @@ func testChargerSSetChargerProfile(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(chargerProfile, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", chargerProfile, reply)
+	}
+}
+
+func testChargerSGetChargerProfileIDs(t *testing.T) {
+	expected := []string{"Charger1", "ApierTest"}
+	var result []string
+	if err := chargerRPC.Call("ApierV1.GetChargerProfileIDs", "cgrates.org", &result); err != nil {
+		t.Error(err)
+	} else if len(expected) != len(result) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, result)
 	}
 }
 

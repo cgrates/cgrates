@@ -81,6 +81,7 @@ var sTestsStatSV1 = []func(t *testing.T){
 	testV1STSProcessEvent,
 	testV1STSGetStatsAfterRestart,
 	testV1STSSetStatQueueProfile,
+	testV1STSGetStatQueueProfileIDs,
 	testV1STSUpdateStatQueueProfile,
 	testV1STSRemoveStatQueueProfile,
 	testV1STSStatsPing,
@@ -355,6 +356,16 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statConfig, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(statConfig), utils.ToJSON(reply))
+	}
+}
+
+func testV1STSGetStatQueueProfileIDs(t *testing.T) {
+	expected := []string{"Stats1", "TEST_PROFILE1"}
+	var result []string
+	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfileIDs", "cgrates.org", &result); err != nil {
+		t.Error(err)
+	} else if len(expected) != len(result) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, result)
 	}
 }
 
