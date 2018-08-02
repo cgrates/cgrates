@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"strings"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -36,6 +38,23 @@ func (apierV1 *ApierV1) GetAttributeProfile(arg utils.TenantID, reply *engine.At
 	} else {
 		*reply = *alsPrf
 	}
+	return nil
+}
+
+// GetAttributeProfileIDs returns list of threshold IDs registered for a tenant
+func (apierV1 *ApierV1) GetAttributeProfileIDs(tenant string, attrPrfIDs *[]string) error {
+	prfx := utils.AttributeProfilePrefix
+	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(prfx)
+	if err != nil {
+		return err
+	}
+	retIDs := make([]string, 0)
+	for _, key := range keys {
+		if strings.Contains(key, tenant) {
+			retIDs = append(retIDs, key[len(prfx):])
+		}
+	}
+	*attrPrfIDs = retIDs
 	return nil
 }
 
