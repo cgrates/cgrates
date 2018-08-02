@@ -150,10 +150,13 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 	self.LastDebit = initialExtraDuration + ccDuration
 	self.TotalUsage += self.LastUsage
 	ec := engine.NewEventCostFromCallCost(cc, self.CGRID, self.RunID)
+	fmt.Printf("###New event cost (Chargers) %+v\n\n", utils.ToJSON(ec.Charges))
 	if self.EventCost == nil {
 		self.EventCost = ec
 	} else {
+		fmt.Printf("###self.EventCost.Chargers before merge %+v\n\n", utils.ToJSON(self.EventCost.Charges))
 		self.EventCost.Merge(ec)
+		fmt.Printf("###self.EventCost.Chargers after merge %+v\n\n", utils.ToJSON(self.EventCost.Charges))
 	}
 	if ccDuration < dur {
 		return initialExtraDuration + ccDuration, nil
