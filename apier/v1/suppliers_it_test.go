@@ -503,6 +503,24 @@ func testV1SplSPolulateStatsForQOS(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 
+	expected = []string{"Stat_1_1"}
+	ev1 = utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event3",
+		Event: map[string]interface{}{
+			"Stat":           "Stat1_1",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:      time.Duration(15 * time.Second),
+			utils.COST:       15.5,
+			utils.PDD:        time.Duration(15 * time.Second),
+		},
+	}
+	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
+	}
+
 }
 
 func testV1SplSGetQOSSuppliers(t *testing.T) {
@@ -520,24 +538,24 @@ func testV1SplSGetQOSSuppliers(t *testing.T) {
 		Sorting:   utils.MetaQOS,
 		SortedSuppliers: []*engine.SortedSupplier{
 			&engine.SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					"*acd:Stat_1":   11.0,
+					"*acd:Stat_1_1": 13.0,
+					"*asr:Stat_1":   100.0,
+					"*pdd:Stat_1_1": 13.5,
+					"*tcd:Stat_1":   22.0,
+					"*tcd:Stat_1_1": 26.0,
+					utils.Weight:    10.0,
+				},
+			},
+			&engine.SortedSupplier{
 				SupplierID: "supplier3",
 				SortingData: map[string]interface{}{
 					"*acd:Stat_3": 11.0,
 					"*asr:Stat_3": 100.0,
 					"*tcd:Stat_3": 11.0,
 					utils.Weight:  35.0,
-				},
-			},
-			&engine.SortedSupplier{
-				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
-					"*acd:Stat_1":   11.0,
-					"*acd:Stat_1_1": 11.0,
-					"*asr:Stat_1":   100.0,
-					"*pdd:Stat_1_1": 12.0,
-					"*tcd:Stat_1":   22.0,
-					"*tcd:Stat_1_1": 11.0,
-					utils.Weight:    10.0,
 				},
 			},
 
@@ -598,11 +616,11 @@ func testV1SplSGetQOSSuppliers2(t *testing.T) {
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
 					"*acd:Stat_1":   11.0,
-					"*acd:Stat_1_1": 11.0,
+					"*acd:Stat_1_1": 13.0,
 					"*asr:Stat_1":   100.0,
-					"*pdd:Stat_1_1": 12.0,
+					"*pdd:Stat_1_1": 13.5,
 					"*tcd:Stat_1":   22.0,
-					"*tcd:Stat_1_1": 11.0,
+					"*tcd:Stat_1_1": 26.0,
 					utils.Weight:    10.0,
 				},
 			},
@@ -636,11 +654,11 @@ func testV1SplSGetQOSSuppliers3(t *testing.T) {
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
 					"*acd:Stat_1":   11.0,
-					"*acd:Stat_1_1": 11.0,
+					"*acd:Stat_1_1": 13.0,
 					"*asr:Stat_1":   100.0,
-					"*pdd:Stat_1_1": 12.0,
+					"*pdd:Stat_1_1": 13.5,
 					"*tcd:Stat_1":   22.0,
-					"*tcd:Stat_1_1": 11.0,
+					"*tcd:Stat_1_1": 26.0,
 					utils.Weight:    10.0,
 				},
 			},
@@ -692,11 +710,11 @@ func testV1SplSGetQOSSuppliersFiltred(t *testing.T) {
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
 					"*acd:Stat_1":   11.0,
-					"*acd:Stat_1_1": 11.0,
+					"*acd:Stat_1_1": 13.0,
 					"*asr:Stat_1":   100.0,
-					"*pdd:Stat_1_1": 12.0,
+					"*pdd:Stat_1_1": 13.5,
 					"*tcd:Stat_1":   22.0,
-					"*tcd:Stat_1_1": 11.0,
+					"*tcd:Stat_1_1": 26.0,
 					utils.Weight:    10.0,
 				},
 			},

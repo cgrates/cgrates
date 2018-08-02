@@ -20,6 +20,7 @@ package engine
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -354,16 +355,33 @@ func (ec *EventCost) appendCIlFromEC(oEC *EventCost, cIlIdx int) {
 // AppendChargingInterval appends or compresses a &ChargingInterval to existing ec.Chargers
 func (ec *EventCost) AppendChargingIntervalFromEventCost(oEC *EventCost, cIlIdx int) {
 	lenChargers := len(ec.Charges)
-	if lenChargers != 0 && ec.Charges[lenChargers-1].PartiallyEquals(oEC.Charges[cIlIdx]) {
-		ec.Charges[lenChargers-1].CompressFactor += 1
-	} else {
+	fmt.Printf("\n#####Enter on AppendChargingIntervalFromEventCost#####\n")
+
+	fmt.Printf("\nlenChargers : %+v\n", lenChargers)
+	fmt.Printf("\n len(oEC.Charges) : %+v\n", len(oEC.Charges))
+
+	fmt.Printf("\n oEC.Charges[cIlIdx] : %+v\n", utils.ToJSON(oEC.Charges))
+
+	wasAdded := false
+	if lenChargers != 0 {
+		for i, charger := range ec.Charges {
+			fmt.Printf("\ni : %+v and charger : %+v\n", i, utils.ToJSON(charger))
+			if ec.Charges[i].PartiallyEquals(oEC.Charges[cIlIdx]) {
+				ec.Charges[i].CompressFactor += 1
+				wasAdded = true
+			}
+		}
+	}
+	if !wasAdded {
 		ec.appendCIlFromEC(oEC, cIlIdx)
 	}
 }
 
 // Merge will merge a list of EventCosts into this one
 func (ec *EventCost) Merge(ecs ...*EventCost) {
+	fmt.Printf("\n#####Enter on merge#####\n")
 	for _, newEC := range ecs {
+		fmt.Printf("len(ecs.Chargers) : %+v\n", len(newEC.Charges))
 		ec.AccountSummary = newEC.AccountSummary // updated AccountSummary information
 		for cIlIdx := range newEC.Charges {
 			ec.AppendChargingIntervalFromEventCost(newEC, cIlIdx)

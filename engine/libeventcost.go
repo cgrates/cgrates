@@ -33,7 +33,6 @@ type ChargingInterval struct {
 	usage          *time.Duration // cache usage computation for this interval
 	ecUsageIdx     *time.Duration // computed value of totalUsage at the starting of the interval
 	cost           *float64       // cache cost calculation on this interval
-
 }
 
 // PartiallyEquals does not compare CompressFactor, usefull for Merge
