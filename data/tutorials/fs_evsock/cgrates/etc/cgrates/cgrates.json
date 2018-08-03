@@ -113,7 +113,6 @@
 		{"address": "*internal"}
 	],
 	"string_indexed_fields": ["Account"],
-	"prefix_indexed_fields": ["Destination"],
 },
 
 
@@ -122,7 +121,7 @@
 	"thresholds_conns": [
 		{"address": "*internal"}
 	],
-	"string_indexed_fields": ["Account"],
+	"string_indexed_fields": ["Account","RunID","Destination"],
 },
 
 
@@ -144,7 +143,6 @@
 		{"address": "*internal"}	
 	],
 	"string_indexed_fields": ["Account"],
-	"prefix_indexed_fields": ["Destination"],
 },
 
 
