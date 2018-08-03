@@ -17,7 +17,7 @@ Scenario:
 
 - Create 3 accounts (equivalent of FreeSWITCH default test users - 1001, 1002, 1003).
  
- - 1001, 1002 will receive 10units of *monetary balance.
+ - 1001, 1002,1003 will receive 10units of *monetary balance.
 
 
 - Add 1 StatQueueProfile with 2 metrics :

@@ -245,7 +245,7 @@ func testDspSupAddAttributesWithPermision2(t *testing.T) {
 func testDspSupTestAuthKey2(t *testing.T) {
 	var rpl *engine.SortedSuppliers
 	eRpl := &engine.SortedSuppliers{
-		ProfileID: "SPL_LEASTCOST_1",
+		ProfileID: "SPL_ACNT_1002",
 		Sorting:   utils.MetaLeastCost,
 		SortedSuppliers: []*engine.SortedSupplier{
 			&engine.SortedSupplier{

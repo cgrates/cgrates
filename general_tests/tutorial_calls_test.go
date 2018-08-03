@@ -66,6 +66,8 @@ var sTestsCalls = []func(t *testing.T){
 	testCallGetActiveSessions,
 	testCallCall1002To1001,
 	testCallCall1001To1003,
+	testCallCall1003To1001,
+	testCallCall1003To1001SecondTime,
 	testCallCheckResourceAllocation,
 	testCallAccount1001,
 	testCall1001Cdrs,
@@ -274,6 +276,13 @@ func testCallAccountsBefore(t *testing.T) {
 	} else if reply2.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 {
 		t.Errorf("Calling ApierV1.GetBalance received: %f", reply2.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
+	var reply3 *engine.Account
+	attrs3 := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1003"}
+	if err := tutorialCallsRpc.Call("ApierV2.GetAccount", attrs3, &reply3); err != nil {
+		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
+	} else if reply3.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 {
+		t.Errorf("Calling ApierV1.GetBalance received: %f", reply3.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
 }
 
 func testCallStatMetricsBefore(t *testing.T) {
@@ -284,6 +293,12 @@ func testCallStatMetricsBefore(t *testing.T) {
 	}
 	if err := tutorialCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2"}, &metrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
+	}
+	if err := tutorialCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2_1"}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
@@ -409,6 +424,25 @@ func testCallCall1001To1003(t *testing.T) {
 	}
 }
 
+// Call from 1003 (prepaid) to 1001 for 20 seconds
+func testCallCall1003To1001(t *testing.T) {
+	if err := engine.PjsuaCallUri(
+		&engine.PjsuaAccount{Id: "sip:1003@127.0.0.1", Username: "1003", Password: "CGRateS.org", Realm: "*"},
+		"sip:1001@127.0.0.1", "sip:127.0.0.1:5080", time.Duration(20)*time.Second, 5074); err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(22 * time.Second)
+}
+
+// Call from 1003 (prepaid) to 1001 for 15 seconds
+func testCallCall1003To1001SecondTime(t *testing.T) {
+	if err := engine.PjsuaCallUri(
+		&engine.PjsuaAccount{Id: "sip:1003@127.0.0.1", Username: "1003", Password: "CGRateS.org", Realm: "*"},
+		"sip:1001@127.0.0.1", "sip:127.0.0.1:5080", time.Duration(15)*time.Second, 5075); err != nil {
+		t.Fatal(err)
+	}
+}
+
 // Check if the resource was Allocated
 func testCallCheckResourceAllocation(t *testing.T) {
 	var rs *engine.Resources
@@ -427,7 +461,7 @@ func testCallCheckResourceAllocation(t *testing.T) {
 		t.Errorf("Resources: %+v", utils.ToJSON(rs))
 	}
 	for _, r := range *rs {
-		if r.ID == "ResGroup1" && (len(r.Usages) != 1 || len(r.TTLIdx) != 1) {
+		if r.ID == "ResGroup1" && (len(r.Usages) != 2 || len(r.TTLIdx) != 2) {
 			t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))
 		}
 	}
@@ -435,7 +469,7 @@ func testCallCheckResourceAllocation(t *testing.T) {
 
 // Make sure account was debited properly
 func testCallAccount1001(t *testing.T) {
-	time.Sleep(time.Duration(80) * time.Second) // Allow calls to finish before start querying the results
+	time.Sleep(time.Duration(60) * time.Second) // Allow calls to finish before start querying the results
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := tutorialCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
@@ -502,20 +536,31 @@ func testCall1002Cdrs(t *testing.T) {
 
 func testCallStatMetrics(t *testing.T) {
 	var metrics map[string]string
-	expectedMetrics1 := map[string]string{
+	firstStatMetrics1 := map[string]string{
 		utils.MetaTCC: "1.35009",
 		utils.MetaTCD: "2m25s",
 	}
-	expectedMetrics2 := map[string]string{
+	firstStatMetrics2 := map[string]string{
 		utils.MetaTCC: "1.34009",
 		utils.MetaTCD: "2m24s",
 	}
+	secondStatMetrics := map[string]string{
+		utils.MetaTCC: "0.6",
+		utils.MetaTCD: "35s",
+	}
+
 	if err := tutorialCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2"}, &metrics); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expectedMetrics1, metrics) &&
-		!reflect.DeepEqual(expectedMetrics2, metrics) {
-		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics1, metrics)
+	} else if !reflect.DeepEqual(firstStatMetrics1, metrics) &&
+		!reflect.DeepEqual(firstStatMetrics2, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", firstStatMetrics1, metrics)
+	}
+	if err := tutorialCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2_1"}, &metrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(secondStatMetrics, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", secondStatMetrics, metrics)
 	}
 }
 
