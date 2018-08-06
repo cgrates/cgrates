@@ -365,6 +365,7 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 			Cdr_filter:            utils.StringPointer(""),
 			Synchronous:           utils.BoolPointer(false),
 			Attempts:              utils.IntPointer(1),
+			Tenant:                utils.StringPointer("cgrates.org"),
 			Field_separator:       utils.StringPointer(","),
 			Usage_multiply_factor: &map[string]float64{utils.ANY: 1.0},
 			Cost_multiply_factor:  utils.Float64Pointer(1.0),

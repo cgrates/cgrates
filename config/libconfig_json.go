@@ -173,6 +173,7 @@ type CdreJsonCfg struct {
 	Export_path           *string
 	Cdr_filter            *string
 	Filters               *[]string
+	Tenant                *string
 	Synchronous           *bool
 	Attempts              *int
 	Field_separator       *string

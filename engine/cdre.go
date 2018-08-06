@@ -355,7 +355,7 @@ func (cdre *CDRExporter) processCDRs() (err error) {
 				continue
 			}
 		} else {
-			if pass, err := cdre.filterS.Pass("cgrates.org",
+			if pass, err := cdre.filterS.Pass(cdre.exportTemplate.Tenant,
 				cdre.exportTemplate.Filters, NewNavigableMap(cdr.AsMapStringIface())); err != nil || !pass {
 				continue // Not passes filters, ignore this CDR
 			}

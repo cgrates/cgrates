@@ -29,6 +29,7 @@ type CdreConfig struct {
 	FallbackPath        string
 	CDRFilter           utils.RSRFields
 	Filters             []string
+	Tenant              string
 	Synchronous         bool
 	Attempts            int
 	FieldSeparator      rune
@@ -60,6 +61,9 @@ func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) error {
 		for i, fltr := range *jsnCfg.Filters {
 			self.Filters[i] = fltr
 		}
+	}
+	if jsnCfg.Tenant != nil {
+		self.Tenant = *jsnCfg.Tenant
 	}
 	if jsnCfg.Synchronous != nil {
 		self.Synchronous = *jsnCfg.Synchronous
@@ -108,6 +112,7 @@ func (self *CdreConfig) Clone() *CdreConfig {
 	clnCdre.Synchronous = self.Synchronous
 	clnCdre.Attempts = self.Attempts
 	clnCdre.FieldSeparator = self.FieldSeparator
+	clnCdre.Tenant = self.Tenant
 	clnCdre.UsageMultiplyFactor = make(map[string]float64, len(self.UsageMultiplyFactor))
 	for k, v := range self.UsageMultiplyFactor {
 		clnCdre.UsageMultiplyFactor[k] = v
