@@ -63,6 +63,7 @@ var sTestsAlsPrf = []func(t *testing.T){
 	testAttributeSSetAlsPrf,
 	testAttributeSUpdateAlsPrf,
 	testAttributeSRemAlsPrf,
+	testAttributeSSetAlsPrf2,
 	testAttributeSPing,
 	testAttributeSKillEngine,
 }
@@ -711,6 +712,51 @@ func testAttributeSRemAlsPrf(t *testing.T) {
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
+}
+
+func testAttributeSSetAlsPrf2(t *testing.T) {
+	alsPrf = &engine.AttributeProfile{
+		Tenant:    "golant",
+		ID:        "ATTR_972587832508_SESSIONAUTH",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:Account:972587832508"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		Attributes: []*engine.Attribute{
+			&engine.Attribute{
+				FieldName: utils.Subject,
+				Initial:   utils.ANY,
+				Substitute: utils.RSRParsers{
+					&utils.RSRParser{
+						Rules:           "roam",
+						AllFiltersMatch: true,
+					},
+				},
+				Append: false,
+			},
+		},
+		Blocker: false,
+		Weight:  10,
+	}
+	alsPrf.Compile()
+	var result string
+	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var reply *engine.AttributeProfile
+	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
+		&utils.TenantID{Tenant: "golant", ID: "ATTR_972587832508_SESSIONAUTH"}, &reply); err != nil {
+		t.Error(err)
+	}
+	reply.Compile()
+	if !reflect.DeepEqual(alsPrf, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
+	}
+
 }
 
 func testAttributeSPing(t *testing.T) {
