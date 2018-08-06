@@ -200,6 +200,7 @@ const CGRATES_CFG_JSON = `
 		"export_path": "/var/spool/cgrates/cdre",		// path where the exported CDRs will be placed
 		"cdr_filter": "",								// filter CDRs exported by this template
 		"filters" :[],									// new filters for cdre
+		"tenant": "cgrates.org",						// tenant used in filterS.Pass
 		"synchronous": false,							// block processing until export has a result
 		"attempts": 1,									// Number of attempts if not success
 		"field_separator": ",",							// used field separator in some export formats, eg: *file_csv
