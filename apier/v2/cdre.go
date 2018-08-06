@@ -140,7 +140,7 @@ func (self *ApierV2) ExportCdrsToFile(attr AttrExportCdrsToFile, reply *Exported
 	}
 	cdrexp, err := engine.NewCDRExporter(cdrs, exportTemplate, exportFormat, filePath, utils.META_NONE, exportID,
 		exportTemplate.Synchronous, exportTemplate.Attempts, fieldSep, usageMultiplyFactor,
-		costMultiplyFactor, roundingDecimals, self.Config.HttpSkipTlsVerify, self.HTTPPoster)
+		costMultiplyFactor, roundingDecimals, self.Config.HttpSkipTlsVerify, self.HTTPPoster, self.FilterS)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

@@ -371,6 +371,7 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 			Header_fields:         &eFields,
 			Content_fields:        &eContentFlds,
 			Trailer_fields:        &eFields,
+			Filters:               &[]string{},
 		},
 	}
 	if cfg, err := dfCgrJsonCfg.CdreJsonCfgs(); err != nil {

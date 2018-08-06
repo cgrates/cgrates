@@ -263,7 +263,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.2334,
 					utils.RatingPlanID: "RP_1002",
-					utils.Weight:       10.0,
+					utils.Weight:       20.0,
 				},
 			},
 		},

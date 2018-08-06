@@ -66,6 +66,7 @@ func TestCdreCfgClone(t *testing.T) {
 		ExportPath:     "/var/spool/cgrates/cdre",
 		Synchronous:    true,
 		Attempts:       2,
+		Filters:        []string{},
 		FieldSeparator: rune(','),
 		UsageMultiplyFactor: map[string]float64{
 			utils.ANY:  1.0,

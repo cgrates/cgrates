@@ -28,6 +28,7 @@ type CdreConfig struct {
 	ExportPath          string
 	FallbackPath        string
 	CDRFilter           utils.RSRFields
+	Filters             []string
 	Synchronous         bool
 	Attempts            int
 	FieldSeparator      rune
@@ -52,6 +53,12 @@ func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) error {
 	if jsnCfg.Cdr_filter != nil {
 		if self.CDRFilter, err = utils.ParseRSRFields(*jsnCfg.Cdr_filter, utils.INFIELD_SEP); err != nil {
 			return err
+		}
+	}
+	if jsnCfg.Filters != nil {
+		self.Filters = make([]string, len(*jsnCfg.Filters))
+		for i, fltr := range *jsnCfg.Filters {
+			self.Filters[i] = fltr
 		}
 	}
 	if jsnCfg.Synchronous != nil {
@@ -104,6 +111,10 @@ func (self *CdreConfig) Clone() *CdreConfig {
 	clnCdre.UsageMultiplyFactor = make(map[string]float64, len(self.UsageMultiplyFactor))
 	for k, v := range self.UsageMultiplyFactor {
 		clnCdre.UsageMultiplyFactor[k] = v
+	}
+	clnCdre.Filters = make([]string, len(self.Filters))
+	for i, fltr := range self.Filters {
+		clnCdre.Filters[i] = fltr
 	}
 	clnCdre.CostMultiplyFactor = self.CostMultiplyFactor
 	clnCdre.HeaderFields = make([]*CfgCdrField, len(self.HeaderFields))
