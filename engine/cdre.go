@@ -52,7 +52,7 @@ const (
 
 func NewCDRExporter(cdrs []*CDR, exportTemplate *config.CdreConfig, exportFormat, exportPath, fallbackPath, exportID string,
 	synchronous bool, attempts int, fieldSeparator rune, usageMultiplyFactor utils.FieldMultiplyFactor,
-	costMultiplyFactor float64, roundingDecimals int, httpSkipTlsCheck bool, httpPoster *HTTPPoster) (*CDRExporter, error) {
+	costMultiplyFactor float64, roundingDecimals int, httpSkipTlsCheck bool, httpPoster *HTTPPoster, filterS *FilterS) (*CDRExporter, error) {
 	if len(cdrs) == 0 { // Nothing to export
 		return nil, nil
 	}
@@ -72,6 +72,7 @@ func NewCDRExporter(cdrs []*CDR, exportTemplate *config.CdreConfig, exportFormat
 		httpSkipTlsCheck:    httpSkipTlsCheck,
 		httpPoster:          httpPoster,
 		negativeExports:     make(map[string]string),
+		filterS:             filterS,
 	}
 	return cdre, nil
 }
@@ -104,6 +105,8 @@ type CDRExporter struct {
 	firstExpOrderId, lastExpOrderId int64
 	positiveExports                 []string          // CGRIDs of successfully exported CDRs
 	negativeExports                 map[string]string // CGRIDs of failed exports
+
+	filterS *FilterS
 }
 
 // Handle various meta functions used in header/trailer
@@ -340,15 +343,22 @@ func (cdre *CDRExporter) processCDRs() (err error) {
 		if cdr == nil || len(cdr.CGRID) == 0 { // CDR needs to exist and it's CGRID needs to be populated
 			continue
 		}
-		passesFilters := true
-		for _, cdrFltr := range cdre.exportTemplate.CDRFilter {
-			if _, err := cdr.FieldAsString(cdrFltr); err != nil {
-				passesFilters = false
-				break
+		if len(cdre.exportTemplate.Filters) == 0 {
+			passesFilters := true
+			for _, cdrFltr := range cdre.exportTemplate.CDRFilter {
+				if _, err := cdr.FieldAsString(cdrFltr); err != nil {
+					passesFilters = false
+					break
+				}
 			}
-		}
-		if !passesFilters { // Not passes filters, ignore this CDR
-			continue
+			if !passesFilters { // Not passes filters, ignore this CDR
+				continue
+			}
+		} else {
+			if pass, err := cdre.filterS.Pass("cgrates.org",
+				cdre.exportTemplate.Filters, NewNavigableMap(cdr.AsMapStringIface())); err != nil || !pass {
+				continue // Not passes filters, ignore this CDR
+			}
 		}
 		if cdre.synchronous ||
 			utils.IsSliceMember([]string{utils.MetaFileCSV, utils.MetaFileFWV}, cdre.exportFormat) {

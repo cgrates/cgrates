@@ -34,7 +34,10 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 	internalThdSChan, internalCdrStatSChan, internalStatSChan, internalPubSubSChan,
 	internalUserSChan, internalAliaseSChan chan rpcclient.RpcClientConnection,
 	serviceManager *servmanager.ServiceManager, server *utils.Server,
-	dm *engine.DataManager, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, stopHandled *bool, exitChan chan bool) {
+	dm *engine.DataManager, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, stopHandled *bool,
+	exitChan chan bool, filterSChan chan *engine.FilterS) {
+	filterS := <-filterSChan
+	filterSChan <- filterS
 	var waitTasks []chan struct{}
 	cacheTaskChan := make(chan struct{})
 	waitTasks = append(waitTasks, cacheTaskChan)
@@ -169,7 +172,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 	responder.SetTimeToLive(cfg.ResponseCacheTTL, nil)
 	apierRpcV1 := &v1.ApierV1{StorDb: loadDb, DataManager: dm, CdrDb: cdrDb,
 		Config: cfg, Responder: responder, ServManager: serviceManager,
-		HTTPPoster: engine.NewHTTPPoster(cfg.HttpSkipTlsVerify, cfg.ReplyTimeout)}
+		HTTPPoster: engine.NewHTTPPoster(cfg.HttpSkipTlsVerify, cfg.ReplyTimeout), FilterS: filterS}
 	if thdS != nil {
 		engine.SetThresholdS(thdS) // temporary architectural fix until we will have separate AccountS
 	}

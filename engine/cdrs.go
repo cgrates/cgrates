@@ -69,7 +69,7 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, rater, pubsub,
-	attrs, users, aliases, cdrstats, thdS, stats, chargerS rpcclient.RpcClientConnection) (*CdrServer, error) {
+	attrs, users, aliases, cdrstats, thdS, stats, chargerS rpcclient.RpcClientConnection, filterS *FilterS) (*CdrServer, error) {
 	if rater != nil && reflect.ValueOf(rater).IsNil() { // Work around so we store actual nil instead of nil interface value, faster to check here than in CdrServer code
 		rater = nil
 	}
@@ -101,7 +101,7 @@ func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, r
 		rals: rater, pubsub: pubsub, users: users, aliases: aliases,
 		cdrstats: cdrstats, stats: stats, thdS: thdS,
 		chargerS: chargerS, guard: guardian.Guardian,
-		httpPoster: NewHTTPPoster(cgrCfg.HttpSkipTlsVerify, cgrCfg.ReplyTimeout)}, nil
+		httpPoster: NewHTTPPoster(cgrCfg.HttpSkipTlsVerify, cgrCfg.ReplyTimeout), filterS: filterS}, nil
 }
 
 type CdrServer struct {
@@ -120,6 +120,7 @@ type CdrServer struct {
 	guard         *guardian.GuardianLocker
 	responseCache *utils.ResponseCache
 	httpPoster    *HTTPPoster // used for replication
+	filterS       *FilterS
 }
 
 func (self *CdrServer) Timezone() string {
@@ -493,7 +494,7 @@ func (self *CdrServer) replicateCDRs(cdrs []*CDR) (err error) {
 		var cdre *CDRExporter
 		if cdre, err = NewCDRExporter(cdrs, expTpl, expTpl.ExportFormat, expTpl.ExportPath, self.cgrCfg.FailedPostsDir, "CDRSReplication",
 			expTpl.Synchronous, expTpl.Attempts, expTpl.FieldSeparator, expTpl.UsageMultiplyFactor,
-			expTpl.CostMultiplyFactor, self.cgrCfg.RoundingDecimals, self.cgrCfg.HttpSkipTlsVerify, self.httpPoster); err != nil {
+			expTpl.CostMultiplyFactor, self.cgrCfg.RoundingDecimals, self.cgrCfg.HttpSkipTlsVerify, self.httpPoster, self.filterS); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<CDRS> Building CDRExporter for online exports got error: <%s>", err.Error()))
 			continue
 		}

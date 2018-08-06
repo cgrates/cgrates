@@ -580,6 +580,7 @@ func TestCgrCfgJSONDefaultsCdreProfiles(t *testing.T) {
 		"*default": {
 			ExportFormat:        utils.MetaFileCSV,
 			ExportPath:          "/var/spool/cgrates/cdre",
+			Filters:             []string{},
 			Synchronous:         false,
 			Attempts:            1,
 			FieldSeparator:      ',',
