@@ -242,7 +242,8 @@ func TestXMLRPProcess(t *testing.T) {
 			},
 		},
 	}
-	xmlRP, err := NewXMLRecordsProcessor(bytes.NewBufferString(cdrXmlBroadsoft), utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}), "UTC", true, cdrcCfgs)
+	xmlRP, err := NewXMLRecordsProcessor(bytes.NewBufferString(cdrXmlBroadsoft),
+		utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}), "UTC", true, cdrcCfgs, nil)
 	if err != nil {
 		t.Error(err)
 	}

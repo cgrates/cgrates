@@ -92,7 +92,7 @@ func handlerSubstractUsage(xmlElmnt tree.Res, argsTpl utils.RSRFields, cdrPath u
 }
 
 func NewXMLRecordsProcessor(recordsReader io.Reader, cdrPath utils.HierarchyPath, timezone string,
-	httpSkipTlsCheck bool, cdrcCfgs []*config.CdrcConfig) (*XMLRecordsProcessor, error) {
+	httpSkipTlsCheck bool, cdrcCfgs []*config.CdrcConfig, filterS *engine.FilterS) (*XMLRecordsProcessor, error) {
 	xp, err := goxpath.Parse(cdrPath.AsString("/", true))
 	if err != nil {
 		return nil, err
@@ -105,7 +105,7 @@ func NewXMLRecordsProcessor(recordsReader io.Reader, cdrPath utils.HierarchyPath
 		return nil, err
 	}
 	xmlProc := &XMLRecordsProcessor{cdrPath: cdrPath, timezone: timezone,
-		httpSkipTlsCheck: httpSkipTlsCheck, cdrcCfgs: cdrcCfgs}
+		httpSkipTlsCheck: httpSkipTlsCheck, cdrcCfgs: cdrcCfgs, filterS: filterS}
 	xmlProc.cdrXmlElmts = goxpath.MustExec(xp, xmlNode, nil)
 	return xmlProc, nil
 }
@@ -117,6 +117,7 @@ type XMLRecordsProcessor struct {
 	timezone         string
 	httpSkipTlsCheck bool
 	cdrcCfgs         []*config.CdrcConfig // individual configs for the folder CDRC is monitoring
+	filterS          *engine.FilterS
 }
 
 func (xmlProc *XMLRecordsProcessor) ProcessedRecordsNr() int64 {

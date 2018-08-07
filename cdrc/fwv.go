@@ -49,8 +49,9 @@ func fwvValue(cdrLine string, indexStart, width int, padding string) string {
 	return rawVal
 }
 
-func NewFwvRecordsProcessor(file *os.File, dfltCfg *config.CdrcConfig, cdrcCfgs []*config.CdrcConfig, httpClient *http.Client, httpSkipTlsCheck bool, timezone string) *FwvRecordsProcessor {
-	return &FwvRecordsProcessor{file: file, cdrcCfgs: cdrcCfgs, dfltCfg: dfltCfg, httpSkipTlsCheck: httpSkipTlsCheck, timezone: timezone}
+func NewFwvRecordsProcessor(file *os.File, dfltCfg *config.CdrcConfig, cdrcCfgs []*config.CdrcConfig, httpClient *http.Client,
+	httpSkipTlsCheck bool, timezone string, filterS *engine.FilterS) *FwvRecordsProcessor {
+	return &FwvRecordsProcessor{file: file, cdrcCfgs: cdrcCfgs, dfltCfg: dfltCfg, httpSkipTlsCheck: httpSkipTlsCheck, timezone: timezone, filterS: filterS}
 }
 
 type FwvRecordsProcessor struct {
@@ -65,6 +66,7 @@ type FwvRecordsProcessor struct {
 	processedRecordsNr int64       // Number of content records in file
 	trailerOffset      int64       // Index where trailer starts, to be used as boundary when reading cdrs
 	headerCdr          *engine.CDR // Cache here the general purpose stored CDR
+	filterS            *engine.FilterS
 }
 
 // Sets the line length based on first line, sets offset back to initial after reading

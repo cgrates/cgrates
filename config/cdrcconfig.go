@@ -41,8 +41,9 @@ type CdrcConfig struct {
 	CDRPath                  utils.HierarchyPath // used for XML CDRs to specify the path towards CDR elements
 	CdrSourceId              string              // Source identifier for the processed CDRs
 	CdrFilter                utils.RSRFields     // Filter CDR records to import
-	ContinueOnSuccess        bool                // Continue after execution
-	PartialRecordCache       time.Duration       // Duration to cache partial records when not pairing
+	Filters                  []string
+	ContinueOnSuccess        bool          // Continue after execution
+	PartialRecordCache       time.Duration // Duration to cache partial records when not pairing
 	PartialCacheExpiryAction string
 	HeaderFields             []*CfgCdrField
 	ContentFields            []*CfgCdrField
@@ -110,6 +111,12 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 			return err
 		}
 	}
+	if jsnCfg.Filters != nil {
+		self.Filters = make([]string, len(*jsnCfg.Filters))
+		for i, fltr := range *jsnCfg.Filters {
+			self.Filters[i] = fltr
+		}
+	}
 	if jsnCfg.Continue_on_success != nil {
 		self.ContinueOnSuccess = *jsnCfg.Continue_on_success
 	}
@@ -165,6 +172,10 @@ func (self *CdrcConfig) Clone() *CdrcConfig {
 	clnCdrc.CDRPath = make(utils.HierarchyPath, len(self.CDRPath))
 	for i, path := range self.CDRPath {
 		clnCdrc.CDRPath[i] = path
+	}
+	clnCdrc.Filters = make([]string, len(self.Filters))
+	for i, fltr := range self.Filters {
+		clnCdrc.Filters[i] = fltr
 	}
 	clnCdrc.CdrSourceId = self.CdrSourceId
 	clnCdrc.PartialRecordCache = self.PartialRecordCache
