@@ -33,10 +33,11 @@ import (
 
 func NewCsvRecordsProcessor(csvReader *csv.Reader, timezone, fileName string,
 	dfltCdrcCfg *config.CdrcConfig, cdrcCfgs []*config.CdrcConfig,
-	httpSkipTlsCheck bool, unpairedRecordsCache *UnpairedRecordsCache, partialRecordsCache *PartialRecordsCache, cacheDumpFields []*config.CfgCdrField) *CsvRecordsProcessor {
+	httpSkipTlsCheck bool, unpairedRecordsCache *UnpairedRecordsCache, partialRecordsCache *PartialRecordsCache,
+	cacheDumpFields []*config.CfgCdrField, filterS *engine.FilterS) *CsvRecordsProcessor {
 	return &CsvRecordsProcessor{csvReader: csvReader, timezone: timezone, fileName: fileName,
 		dfltCdrcCfg: dfltCdrcCfg, cdrcCfgs: cdrcCfgs, httpSkipTlsCheck: httpSkipTlsCheck, unpairedRecordsCache: unpairedRecordsCache,
-		partialRecordsCache: partialRecordsCache, partialCacheDumpFields: cacheDumpFields}
+		partialRecordsCache: partialRecordsCache, partialCacheDumpFields: cacheDumpFields, filterS: filterS}
 
 }
 
@@ -51,6 +52,7 @@ type CsvRecordsProcessor struct {
 	unpairedRecordsCache   *UnpairedRecordsCache // Shared by cdrc so we can cache for all files in a folder
 	partialRecordsCache    *PartialRecordsCache  // Cache records which are of type "Partial"
 	partialCacheDumpFields []*config.CfgCdrField
+	filterS                *engine.FilterS
 }
 
 func (self *CsvRecordsProcessor) ProcessedRecordsNr() int64 {
@@ -100,23 +102,32 @@ func (self *CsvRecordsProcessor) processFlatstoreRecord(record []string) ([]stri
 
 // Takes the record from a slice and turns it into StoredCdrs, posting them to the cdrServer
 func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.CDR, error) {
+	utils.Logger.Debug(fmt.Sprintf("Record from CSV : %+v \n", record))
 	recordCdrs := make([]*engine.CDR, 0)    // More CDRs based on the number of filters and field templates
 	for _, cdrcCfg := range self.cdrcCfgs { // cdrFields coming from more templates will produce individual storCdr records
 		// Make sure filters are matching
 		passes := true
-		for _, rsrFilter := range cdrcCfg.CdrFilter {
-			if rsrFilter == nil { // Nil filter does not need to match anything
+		if len(cdrcCfg.Filters) == 0 {
+			for _, rsrFilter := range cdrcCfg.CdrFilter {
+				if rsrFilter == nil { // Nil filter does not need to match anything
+					continue
+				}
+				if cfgFieldIdx, _ := strconv.Atoi(rsrFilter.Id); len(record) <= cfgFieldIdx {
+					return nil, fmt.Errorf("Ignoring record: %v - cannot compile filter %+v", record, rsrFilter)
+				} else if _, err := rsrFilter.Parse(record[cfgFieldIdx]); err != nil {
+					passes = false
+					break
+				}
+			}
+			if !passes { // Stop importing cdrc fields profile due to non matching filter
 				continue
 			}
-			if cfgFieldIdx, _ := strconv.Atoi(rsrFilter.Id); len(record) <= cfgFieldIdx {
-				return nil, fmt.Errorf("Ignoring record: %v - cannot compile filter %+v", record, rsrFilter)
-			} else if _, err := rsrFilter.Parse(record[cfgFieldIdx]); err != nil {
-				passes = false
-				break
+		} else {
+			csvprovider, _ := newCsvProvider(record)
+			if pass, err := self.filterS.Pass("cgrates.org",
+				cdrcCfg.Filters, csvprovider); err != nil || !pass {
+				continue // Not passes filters, ignore this CDR
 			}
-		}
-		if !passes { // Stop importing cdrc fields profile due to non matching filter
-			continue
 		}
 		storedCdr, err := self.recordToStoredCdr(record, cdrcCfg)
 		if err != nil {
@@ -236,4 +247,58 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 		}
 	}
 	return storedCdr, nil
+}
+
+// newRADataProvider constructs a DataProvider
+func newCsvProvider(record []string) (dP engine.DataProvider, err error) {
+	dP = &csvProvider{req: record, cache: engine.NewNavigableMap(nil)}
+	return
+}
+
+// csvProvider implements engine.DataProvider so we can pass it to filters
+type csvProvider struct {
+	req   []string
+	cache *engine.NavigableMap
+}
+
+// String is part of engine.DataProvider interface
+// when called, it will display the already parsed values out of cache
+func (cP *csvProvider) String() string {
+	return utils.ToJSON(cP)
+}
+
+// FieldAsInterface is part of engine.DataProvider interface
+func (cP *csvProvider) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	if data, err = cP.cache.FieldAsInterface(fldPath); err == nil ||
+		err != utils.ErrNotFound { // item found in cache
+		return
+	}
+	err = nil // cancel previous err
+	if cfgFieldIdx, _ := strconv.Atoi(fldPath[0]); len(cP.req) <= cfgFieldIdx {
+		return nil, fmt.Errorf("Ignoring record: %v", cP.req)
+	} else {
+		data = cP.req[cfgFieldIdx]
+	}
+	cP.cache.Set(fldPath, data, false)
+	return
+}
+
+// FieldAsString is part of engine.DataProvider interface
+func (cP *csvProvider) FieldAsString(fldPath []string) (data string, err error) {
+	var valIface interface{}
+	valIface, err = cP.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	data, _ = utils.CastFieldIfToString(valIface)
+	return
+}
+
+// AsNavigableMap is part of engine.DataProvider interface
+func (cP *csvProvider) AsNavigableMap([]*config.CfgCdrField) (
+	nm *engine.NavigableMap, err error) {
+	return nil, utils.ErrNotImplemented
 }

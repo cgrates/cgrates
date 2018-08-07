@@ -187,6 +187,7 @@ func TestCgrCfgCDRC(t *testing.T) {
 			FailedCallsPrefix:        "missed_calls",
 			CDRPath:                  utils.HierarchyPath([]string{""}),
 			CdrSourceId:              "freeswitch_csv",
+			Filters:                  []string{},
 			ContinueOnSuccess:        false,
 			PartialRecordCache:       time.Duration(10 * time.Second),
 			PartialCacheExpiryAction: "*dump_to_file",

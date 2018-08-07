@@ -201,6 +201,7 @@ type CdrcJsonCfg struct {
 	Cdr_path                    *string
 	Cdr_source_id               *string
 	Cdr_filter                  *string
+	Filters                     *[]string
 	Continue_on_success         *bool
 	Max_open_files              *int
 	Partial_record_cache        *string

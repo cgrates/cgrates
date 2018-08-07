@@ -249,7 +249,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 		Sorting:   utils.MetaLeastCost,
 		SortedSuppliers: []*engine.SortedSupplier{
 			&engine.SortedSupplier{
-				SupplierID:         "supplier2",
+				SupplierID:         "supplier1",
 				SupplierParameters: "",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.1166,
@@ -258,7 +258,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 				},
 			},
 			&engine.SortedSupplier{
-				SupplierID:         "supplier1",
+				SupplierID:         "supplier2",
 				SupplierParameters: "",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.2334,

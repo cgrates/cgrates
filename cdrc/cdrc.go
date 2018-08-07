@@ -55,7 +55,8 @@ Common parameters within configs processed:
 Parameters specific per config instance:
  * duMultiplyFactor, cdrSourceId, cdrFilter, cdrFields
 */
-func NewCdrc(cdrcCfgs []*config.CdrcConfig, httpSkipTlsCheck bool, cdrs rpcclient.RpcClientConnection, closeChan chan struct{}, dfltTimezone string, roundDecimals int) (*Cdrc, error) {
+func NewCdrc(cdrcCfgs []*config.CdrcConfig, httpSkipTlsCheck bool, cdrs rpcclient.RpcClientConnection,
+	closeChan chan struct{}, dfltTimezone string, roundDecimals int, filterS *engine.FilterS) (*Cdrc, error) {
 	var cdrcCfg *config.CdrcConfig
 	for _, cdrcCfg = range cdrcCfgs { // Take the first config out, does not matter which one
 		break
@@ -80,6 +81,7 @@ func NewCdrc(cdrcCfgs []*config.CdrcConfig, httpSkipTlsCheck bool, cdrs rpcclien
 			return nil, fmt.Errorf("Nonexistent folder: %s", dir)
 		}
 	}
+	cdrc.filterS = filterS
 	cdrc.httpClient = new(http.Client)
 	return cdrc, nil
 }
@@ -95,6 +97,7 @@ type Cdrc struct {
 	maxOpenFiles         chan struct{}         // Maximum number of simultaneous files processed
 	unpairedRecordsCache *UnpairedRecordsCache // Shared between all files in the folder we process
 	partialRecordsCache  *PartialRecordsCache
+	filterS              *engine.FilterS
 }
 
 // When called fires up folder monitoring, either automated via inotify or manual by sleeping between processing
@@ -181,12 +184,15 @@ func (self *Cdrc) processFile(filePath string) error {
 	case CSV, FS_CSV, utils.KAM_FLATSTORE, utils.OSIPS_FLATSTORE, utils.PartialCSV:
 		csvReader := csv.NewReader(bufio.NewReader(file))
 		csvReader.Comma = self.dfltCdrcCfg.FieldSeparator
-		recordsProcessor = NewCsvRecordsProcessor(csvReader, self.timezone, fn, self.dfltCdrcCfg, self.cdrcCfgs,
-			self.httpSkipTlsCheck, self.unpairedRecordsCache, self.partialRecordsCache, self.dfltCdrcCfg.CacheDumpFields)
+		recordsProcessor = NewCsvRecordsProcessor(csvReader, self.timezone, fn, self.dfltCdrcCfg,
+			self.cdrcCfgs, self.httpSkipTlsCheck, self.unpairedRecordsCache, self.partialRecordsCache,
+			self.dfltCdrcCfg.CacheDumpFields, self.filterS)
 	case utils.FWV:
-		recordsProcessor = NewFwvRecordsProcessor(file, self.dfltCdrcCfg, self.cdrcCfgs, self.httpClient, self.httpSkipTlsCheck, self.timezone)
+		recordsProcessor = NewFwvRecordsProcessor(file, self.dfltCdrcCfg, self.cdrcCfgs,
+			self.httpClient, self.httpSkipTlsCheck, self.timezone, self.filterS)
 	case utils.XML:
-		if recordsProcessor, err = NewXMLRecordsProcessor(file, self.dfltCdrcCfg.CDRPath, self.timezone, self.httpSkipTlsCheck, self.cdrcCfgs); err != nil {
+		if recordsProcessor, err = NewXMLRecordsProcessor(file, self.dfltCdrcCfg.CDRPath,
+			self.timezone, self.httpSkipTlsCheck, self.cdrcCfgs, self.filterS); err != nil {
 			return err
 		}
 	default:

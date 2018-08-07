@@ -476,6 +476,7 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 			Cdr_path:                    utils.StringPointer(""),
 			Cdr_source_id:               utils.StringPointer("freeswitch_csv"),
 			Cdr_filter:                  utils.StringPointer(""),
+			Filters:                     &[]string{},
 			Continue_on_success:         utils.BoolPointer(false),
 			Partial_record_cache:        utils.StringPointer("10s"),
 			Partial_cache_expiry_action: utils.StringPointer(utils.MetaDumpToFile),

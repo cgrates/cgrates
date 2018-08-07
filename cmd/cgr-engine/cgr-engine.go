@@ -72,7 +72,11 @@ var (
 	cfg *config.CGRConfig
 )
 
-func startCdrcs(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
+func startCdrcs(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConnection,
+	exitChan chan bool, filterSChan chan *engine.FilterS) {
+	// Not sure here if FilterS is passed correct at line 103 in fo start cdrc
+	filterS := <-filterSChan
+	filterSChan <- filterS
 	cdrcInitialized := false           // Control whether the cdrc was already initialized (so we don't reload in that case)
 	var cdrcChildrenChan chan struct{} // Will use it to communicate with the children of one fork
 	for {
@@ -94,9 +98,9 @@ func startCdrcs(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConn
 					enabledCfgs = append(enabledCfgs, cdrcCfg)
 				}
 			}
-
 			if len(enabledCfgs) != 0 {
-				go startCdrc(internalCdrSChan, internalRaterChan, enabledCfgs, cfg.HttpSkipTlsVerify, cdrcChildrenChan, exitChan)
+				go startCdrc(internalCdrSChan, internalRaterChan, enabledCfgs, cfg.HttpSkipTlsVerify,
+					cdrcChildrenChan, exitChan, filterSChan)
 			} else {
 				utils.Logger.Info("<CDRC> No enabled CDRC clients")
 			}
@@ -107,7 +111,9 @@ func startCdrcs(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConn
 
 // Fires up a cdrc instance
 func startCdrc(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConnection, cdrcCfgs []*config.CdrcConfig, httpSkipTlsCheck bool,
-	closeChan chan struct{}, exitChan chan bool) {
+	closeChan chan struct{}, exitChan chan bool, filterSChan chan *engine.FilterS) {
+	filterS := <-filterSChan
+	filterSChan <- filterS
 	var cdrcCfg *config.CdrcConfig
 	for _, cdrcCfg = range cdrcCfgs { // Take the first config out, does not matter which one
 		break
@@ -120,7 +126,8 @@ func startCdrc(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConne
 		exitChan <- true
 		return
 	}
-	cdrc, err := cdrc.NewCdrc(cdrcCfgs, httpSkipTlsCheck, cdrsConn, closeChan, cfg.DefaultTimezone, cfg.RoundingDecimals)
+	cdrc, err := cdrc.NewCdrc(cdrcCfgs, httpSkipTlsCheck, cdrsConn,
+		closeChan, cfg.DefaultTimezone, cfg.RoundingDecimals, filterS)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("Cdrc config parsing error: %s", err.Error()))
 		exitChan <- true
@@ -1244,7 +1251,7 @@ func main() {
 	}
 
 	// Start CDRC components if necessary
-	go startCdrcs(internalCdrSChan, internalRaterChan, exitChan)
+	go startCdrcs(internalCdrSChan, internalRaterChan, exitChan, filterSChan)
 
 	// Start SM-Generic
 	if cfg.SessionSCfg().Enabled {
