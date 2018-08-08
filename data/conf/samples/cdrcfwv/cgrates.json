@@ -37,7 +37,7 @@
 		"cdr_format": "fwv",						// CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore>
 		"cdr_in_dir": "/tmp/cgr_fwv/cdrc/in",		// absolute path towards the directory where the CDRs are stored
 		"cdr_out_dir": "/tmp/cgr_fwv/cdrc/out",		// absolute path towards the directory where processed CDRs will be moved
-		"cdr_source_id": "fwv_localtest",			// free form field, tag identifying the source of the CDRs within CDRS database
+		"cdr_source_id": "cdrc",			// free form field, tag identifying the source of the CDRs within CDRS database
 		"cdr_filter": "",							// filter CDR records to import
 		"header_fields": [
 			{"tag": "FileName", "cdr_field_id": "CdrFileName", "type": "cdrfield", "value": "95", "width": 40, "padding":"right"},

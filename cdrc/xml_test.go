@@ -271,3 +271,77 @@ func TestXMLRPProcess(t *testing.T) {
 		t.Errorf("Expecting: %+v\n, received: %+v\n", expectedCDRs, cdrs)
 	}
 }
+
+func TestXMLRPProcessWithNewFilters(t *testing.T) {
+	cdrcCfgs := []*config.CdrcConfig{
+		&config.CdrcConfig{
+			ID:                      "XMLWithFilters",
+			Enabled:                 true,
+			CdrFormat:               "xml",
+			DataUsageMultiplyFactor: 1024,
+			CDRPath:                 utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}),
+			CdrSourceId:             "XMLWithFilters",
+			Filters:                 []string{"*string:broadWorksCDR>cdrData>headerModule>type:Normal"},
+			ContentFields: []*config.CfgCdrField{
+				&config.CfgCdrField{Tag: "TOR", Type: utils.META_COMPOSED, FieldId: utils.ToR,
+					Value: utils.ParseRSRFieldsMustCompile("^*voice", utils.INFIELD_SEP), Mandatory: true},
+				&config.CfgCdrField{Tag: "OriginID", Type: utils.META_COMPOSED, FieldId: utils.OriginID,
+					Value: utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>localCallId", utils.INFIELD_SEP), Mandatory: true},
+				&config.CfgCdrField{Tag: "RequestType", Type: utils.META_COMPOSED, FieldId: utils.RequestType,
+					Value: utils.ParseRSRFieldsMustCompile("^*rated", utils.INFIELD_SEP), Mandatory: true},
+				&config.CfgCdrField{Tag: "Tenant", Type: utils.META_COMPOSED, FieldId: utils.Tenant,
+					Value: utils.ParseRSRFieldsMustCompile("~broadWorksCDR>cdrData>basicModule>userId:s/.*@(.*)/${1}/", utils.INFIELD_SEP), Mandatory: true},
+				&config.CfgCdrField{Tag: "Category", Type: utils.META_COMPOSED, FieldId: utils.Category,
+					Value: utils.ParseRSRFieldsMustCompile("^call", utils.INFIELD_SEP), Mandatory: true},
+				&config.CfgCdrField{Tag: "Account", Type: utils.META_COMPOSED, FieldId: utils.Account,
+					Value: utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>userNumber", utils.INFIELD_SEP), Mandatory: true},
+				&config.CfgCdrField{Tag: "Destination", Type: utils.META_COMPOSED, FieldId: utils.Destination,
+					Value: utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>calledNumber", utils.INFIELD_SEP), Mandatory: true},
+				&config.CfgCdrField{Tag: "SetupTime", Type: utils.META_COMPOSED, FieldId: utils.SetupTime,
+					Value: utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>startTime", utils.INFIELD_SEP), Mandatory: true},
+				&config.CfgCdrField{Tag: "AnswerTime", Type: utils.META_COMPOSED, FieldId: utils.AnswerTime,
+					Value: utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>answerTime", utils.INFIELD_SEP), Mandatory: true},
+				&config.CfgCdrField{Tag: "Usage", Type: utils.META_HANDLER,
+					FieldId: utils.Usage, HandlerId: utils.HandlerSubstractUsage,
+					Value: utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>releaseTime;^|;broadWorksCDR>cdrData>basicModule>answerTime",
+						utils.INFIELD_SEP), Mandatory: true},
+				&config.CfgCdrField{Tag: "UsageSeconds", Type: utils.META_COMPOSED, FieldId: utils.Usage,
+					Value: utils.ParseRSRFieldsMustCompile("^s", utils.INFIELD_SEP), Mandatory: true},
+			},
+		},
+	}
+	data, _ := engine.NewMapStorage()
+	defaultCfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	xmlRP, err := NewXMLRecordsProcessor(bytes.NewBufferString(cdrXmlBroadsoft),
+		utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}), "UTC", true,
+		cdrcCfgs, engine.NewFilterS(defaultCfg, nil, engine.NewDataManager(data)))
+	if err != nil {
+		t.Error(err)
+	}
+	var cdrs []*engine.CDR
+	for i := 0; i < 4; i++ {
+		cdrs, err = xmlRP.ProcessNextRecord()
+		if i == 1 { // Take second CDR since the first one cannot be processed
+			break
+		}
+	}
+	if err != nil {
+		t.Error(err)
+	}
+	expectedCDRs := []*engine.CDR{
+		&engine.CDR{CGRID: "1f045359a0784d15e051d7e41ae30132b139d714",
+			OriginHost: "0.0.0.0", Source: "XMLWithFilters", OriginID: "25160047719:0",
+			ToR: "*voice", RequestType: "*rated", Tenant: "cgrates.org",
+			Category: "call", Account: "1001", Destination: "+4986517174963",
+			SetupTime:   time.Date(2016, 4, 19, 21, 0, 5, 247000000, time.UTC),
+			AnswerTime:  time.Date(2016, 4, 19, 21, 0, 6, 813000000, time.UTC),
+			Usage:       time.Duration(13483000000),
+			ExtraFields: map[string]string{}, Cost: -1},
+	}
+	if !reflect.DeepEqual(expectedCDRs, cdrs) {
+		t.Errorf("Expecting: %+v\n, received: %+v\n", expectedCDRs, cdrs)
+	}
+}
