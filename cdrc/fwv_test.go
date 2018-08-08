@@ -39,7 +39,6 @@ func TestFwvValue(t *testing.T) {
 	if val := fwvValue(cdrLine, 135, 6, "zeroleft"); val != "309" {
 		t.Errorf("Received: <%s>", val)
 	}
-
 }
 
 func TestFwvRecordPassesCfgFilter(t *testing.T) {

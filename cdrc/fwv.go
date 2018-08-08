@@ -128,8 +128,20 @@ func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.CDR, error) {
 	self.processedRecordsNr += 1
 	record := string(buf)
 	for _, cdrcCfg := range self.cdrcCfgs {
-		if passes := self.recordPassesCfgFilter(record, cdrcCfg); !passes {
-			continue
+		if len(cdrcCfg.Filters) == 0 {
+			if passes := self.recordPassesCfgFilter(record, cdrcCfg); !passes {
+				continue
+			}
+		} else {
+			fwvProvider, _ := newfwvProvider(record)
+			tenant, err := cdrcCfg.Tenant.ParseValue("")
+			if err != nil {
+				return nil, err
+			}
+			if pass, err := self.filterS.Pass(tenant,
+				cdrcCfg.Filters, fwvProvider); err != nil || !pass {
+				continue // Not passes filters, ignore this CDR
+			}
 		}
 		if storedCdr, err := self.recordToStoredCdr(record, cdrcCfg, cdrcCfg.ID); err != nil {
 			return nil, fmt.Errorf("Failed converting to StoredCdr, error: %s", err.Error())
@@ -275,4 +287,57 @@ func (self *FwvRecordsProcessor) processTrailer() error {
 		return fmt.Errorf("In trailer, line len: %d, have read: %d", self.lineLen, nRead)
 	}
 	return nil
+}
+
+// newfwvProvider constructs a DataProvider
+func newfwvProvider(record string) (dP engine.DataProvider, err error) {
+	dP = &fwvProvider{req: record, cache: engine.NewNavigableMap(nil)}
+	return
+}
+
+// fwvProvider implements engine.DataProvider so we can pass it to filters
+type fwvProvider struct {
+	req   string
+	cache *engine.NavigableMap
+}
+
+// String is part of engine.DataProvider interface
+// when called, it will display the already parsed values out of cache
+func (fP *fwvProvider) String() string {
+	return utils.ToJSON(fP)
+}
+
+// FieldAsInterface is part of engine.DataProvider interface
+func (fP *fwvProvider) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	if data, err = fP.cache.FieldAsInterface(fldPath); err == nil ||
+		err != utils.ErrNotFound { // item found in cache
+		return
+	}
+	err = nil // cancel previous err
+	indexes := strings.Split(fldPath[0], "-")
+	startIndex, _ := strconv.Atoi(indexes[0])
+	finalIndex, _ := strconv.Atoi(indexes[1])
+	data = fP.req[startIndex:finalIndex]
+	fP.cache.Set(fldPath, data, false)
+	return
+}
+
+// FieldAsString is part of engine.DataProvider interface
+func (fP *fwvProvider) FieldAsString(fldPath []string) (data string, err error) {
+	var valIface interface{}
+	valIface, err = fP.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	data, _ = utils.CastFieldIfToString(valIface)
+	return
+}
+
+// AsNavigableMap is part of engine.DataProvider interface
+func (fP *fwvProvider) AsNavigableMap([]*config.CfgCdrField) (
+	nm *engine.NavigableMap, err error) {
+	return nil, utils.ErrNotImplemented
 }

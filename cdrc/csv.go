@@ -124,7 +124,11 @@ func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.CDR, 
 			}
 		} else {
 			csvProvider, _ := newCsvProvider(record)
-			if pass, err := self.filterS.Pass("cgrates.org",
+			tenant, err := cdrcCfg.Tenant.ParseValue("")
+			if err != nil {
+				return nil, err
+			}
+			if pass, err := self.filterS.Pass(tenant,
 				cdrcCfg.Filters, csvProvider); err != nil || !pass {
 				continue // Not passes filters, ignore this CDR
 			}

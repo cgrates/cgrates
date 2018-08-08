@@ -42,6 +42,7 @@ type CdrcConfig struct {
 	CdrSourceId              string              // Source identifier for the processed CDRs
 	CdrFilter                utils.RSRFields     // Filter CDR records to import
 	Filters                  []string
+	Tenant                   utils.RSRParsers
 	ContinueOnSuccess        bool          // Continue after execution
 	PartialRecordCache       time.Duration // Duration to cache partial records when not pairing
 	PartialCacheExpiryAction string
@@ -117,6 +118,9 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 			self.Filters[i] = fltr
 		}
 	}
+	if jsnCfg.Tenant != nil {
+		self.Tenant = utils.NewRSRParsersMustCompile(*jsnCfg.Tenant, true)
+	}
 	if jsnCfg.Continue_on_success != nil {
 		self.ContinueOnSuccess = *jsnCfg.Continue_on_success
 	}
@@ -177,6 +181,7 @@ func (self *CdrcConfig) Clone() *CdrcConfig {
 	for i, fltr := range self.Filters {
 		clnCdrc.Filters[i] = fltr
 	}
+	clnCdrc.Tenant = self.Tenant
 	clnCdrc.CdrSourceId = self.CdrSourceId
 	clnCdrc.PartialRecordCache = self.PartialRecordCache
 	clnCdrc.PartialCacheExpiryAction = self.PartialCacheExpiryAction

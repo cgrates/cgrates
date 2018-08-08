@@ -257,6 +257,7 @@ const CGRATES_CFG_JSON = `
 		"cdr_source_id": "freeswitch_csv",				// free form field, tag identifying the source of the CDRs within CDRS database
 		"cdr_filter": "",								// filter CDR records to import
 		"filters" :[],									// new filters used in FilterS subsystem
+		"tenant": "cgrates.org",						// default tenant
 		"continue_on_success": false,					// continue to the next template if executed
 		"partial_record_cache": "10s",					// duration to cache partial records when not pairing
 		"partial_cache_expiry_action": "*dump_to_file",	// action taken when cache when records in cache are timed-out <*dump_to_file|*post_cdr>

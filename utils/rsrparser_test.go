@@ -93,3 +93,16 @@ func TestRSRParsersParseEvent(t *testing.T) {
 		t.Errorf("expecting: %s, received: %s", eOut, out)
 	}
 }
+
+func TestRSRParserConstant(t *testing.T) {
+	rule := "cgrates.org"
+	rsrParsers, err := NewRSRParsers(rule, true)
+	if err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	}
+	if out, err := rsrParsers.ParseValue(""); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if out != "cgrates.org" {
+		t.Errorf("expecting: cgrates.org , received: %+v", out)
+	}
+}

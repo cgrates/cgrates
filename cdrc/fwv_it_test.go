@@ -122,6 +122,13 @@ func TestFwvitRpcConn(t *testing.T) {
 	}
 }
 
+// InitDb so we can rely on count
+func TestFwvitInitCdrDb(t *testing.T) {
+	if err := engine.InitStorDb(fwvCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestFwvitProcessFiles(t *testing.T) {
 	fileName := "test1.fwv"
 	if err := ioutil.WriteFile(path.Join("/tmp", fileName), []byte(FW_CDR_FILE1), 0644); err != nil {

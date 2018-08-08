@@ -151,7 +151,11 @@ func (xmlProc *XMLRecordsProcessor) ProcessNextRecord() (cdrs []*engine.CDR, err
 			}
 		} else {
 			xmlProvider, _ := newXmlProvider(cdrXML, xmlProc.cdrPath)
-			if pass, err := xmlProc.filterS.Pass("cgrates.org",
+			tenant, err := cdrcCfg.Tenant.ParseValue("")
+			if err != nil {
+				return nil, err
+			}
+			if pass, err := xmlProc.filterS.Pass(tenant,
 				cdrcCfg.Filters, xmlProvider); err != nil || !pass {
 				continue // Not passes filters, ignore this CDR
 			}
