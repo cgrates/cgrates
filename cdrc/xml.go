@@ -132,21 +132,29 @@ func (xmlProc *XMLRecordsProcessor) ProcessNextRecord() (cdrs []*engine.CDR, err
 	cdrXML := xmlProc.cdrXmlElmts[xmlProc.procItems]
 	xmlProc.procItems += 1
 	for _, cdrcCfg := range xmlProc.cdrcCfgs {
-		filtersPassing := true
-		for _, rsrFltr := range cdrcCfg.CdrFilter {
-			if rsrFltr == nil {
-				continue // Pass
+		if len(cdrcCfg.Filters) == 0 {
+			filtersPassing := true
+			for _, rsrFltr := range cdrcCfg.CdrFilter {
+				if rsrFltr == nil {
+					continue // Pass
+				}
+				absolutePath := utils.ParseHierarchyPath(rsrFltr.Id, "")
+				relPath := utils.HierarchyPath(absolutePath[len(xmlProc.cdrPath)-1:]) // Need relative path to the xmlElmnt
+				fieldVal, _ := elementText(cdrXML, relPath.AsString("/", true))
+				if _, err := rsrFltr.Parse(fieldVal); err != nil {
+					filtersPassing = false
+					break
+				}
 			}
-			absolutePath := utils.ParseHierarchyPath(rsrFltr.Id, "")
-			relPath := utils.HierarchyPath(absolutePath[len(xmlProc.cdrPath)-1:]) // Need relative path to the xmlElmnt
-			fieldVal, _ := elementText(cdrXML, relPath.AsString("/", true))
-			if _, err := rsrFltr.Parse(fieldVal); err != nil {
-				filtersPassing = false
-				break
+			if !filtersPassing {
+				continue
 			}
-		}
-		if !filtersPassing {
-			continue
+		} else {
+			xmlProvider, _ := newXmlProvider(cdrXML, xmlProc.cdrPath)
+			if pass, err := xmlProc.filterS.Pass("cgrates.org",
+				cdrcCfg.Filters, xmlProvider); err != nil || !pass {
+				continue // Not passes filters, ignore this CDR
+			}
 		}
 		if cdr, err := xmlProc.recordToCDR(cdrXML, cdrcCfg); err != nil {
 			return nil, fmt.Errorf("<CDRC> Failed converting to CDR, error: %s", err.Error())
@@ -235,4 +243,57 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity tree.Res, cdrcCfg *con
 		}
 	}
 	return cdr, nil
+}
+
+// newXmlProvider constructs a DataProvider
+func newXmlProvider(req tree.Res, cdrPath utils.HierarchyPath) (dP engine.DataProvider, err error) {
+	dP = &xmlProvider{req: req, cdrPath: cdrPath, cache: engine.NewNavigableMap(nil)}
+	return
+}
+
+// xmlProvider implements engine.DataProvider so we can pass it to filters
+type xmlProvider struct {
+	req     tree.Res
+	cdrPath utils.HierarchyPath //used to compute relative path
+	cache   *engine.NavigableMap
+}
+
+// String is part of engine.DataProvider interface
+// when called, it will display the already parsed values out of cache
+func (xP *xmlProvider) String() string {
+	return utils.ToJSON(xP)
+}
+
+// FieldAsInterface is part of engine.DataProvider interface
+func (xP *xmlProvider) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	if data, err = xP.cache.FieldAsInterface(fldPath); err == nil ||
+		err != utils.ErrNotFound { // item found in cache
+		return
+	}
+	err = nil // cancel previous err
+	absolutePath := utils.ParseHierarchyPath(fldPath[0], "")
+	relPath := utils.HierarchyPath(absolutePath[len(xP.cdrPath)-1:]) // Need relative path to the xmlElmnt
+	data, err = elementText(xP.req, relPath.AsString("/", true))
+	xP.cache.Set(fldPath, data, false)
+	return
+}
+
+// FieldAsString is part of engine.DataProvider interface
+func (xP *xmlProvider) FieldAsString(fldPath []string) (data string, err error) {
+	var valIface interface{}
+	valIface, err = xP.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	data, _ = utils.CastFieldIfToString(valIface)
+	return
+}
+
+// AsNavigableMap is part of engine.DataProvider interface
+func (xP *xmlProvider) AsNavigableMap([]*config.CfgCdrField) (
+	nm *engine.NavigableMap, err error) {
+	return nil, utils.ErrNotImplemented
 }

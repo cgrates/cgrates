@@ -123,9 +123,9 @@ func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.CDR, 
 				continue
 			}
 		} else {
-			csvprovider, _ := newCsvProvider(record)
+			csvProvider, _ := newCsvProvider(record)
 			if pass, err := self.filterS.Pass("cgrates.org",
-				cdrcCfg.Filters, csvprovider); err != nil || !pass {
+				cdrcCfg.Filters, csvProvider); err != nil || !pass {
 				continue // Not passes filters, ignore this CDR
 			}
 		}
@@ -249,7 +249,7 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 	return storedCdr, nil
 }
 
-// newRADataProvider constructs a DataProvider
+// newCsvProvider constructs a DataProvider
 func newCsvProvider(record []string) (dP engine.DataProvider, err error) {
 	dP = &csvProvider{req: record, cache: engine.NewNavigableMap(nil)}
 	return
