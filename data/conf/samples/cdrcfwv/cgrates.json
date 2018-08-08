@@ -30,7 +30,7 @@
 	{
 		"id": "FWV1",
 		"enabled": true,							// enable CDR client functionality
-		"dry_run": true,
+		"dry_run": false,
 		"cdrs_conns": [
 			{"address": "*internal"}				// address where to reach CDR server. <*internal|x.y.z.y:1234>
 		],

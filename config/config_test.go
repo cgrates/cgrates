@@ -188,6 +188,7 @@ func TestCgrCfgCDRC(t *testing.T) {
 			CDRPath:                  utils.HierarchyPath([]string{""}),
 			CdrSourceId:              "freeswitch_csv",
 			Filters:                  []string{},
+			Tenant:                   utils.NewRSRParsersMustCompile("cgrates.org", true),
 			ContinueOnSuccess:        false,
 			PartialRecordCache:       time.Duration(10 * time.Second),
 			PartialCacheExpiryAction: "*dump_to_file",
