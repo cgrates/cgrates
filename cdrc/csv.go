@@ -106,9 +106,9 @@ func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.CDR, 
 	recordCdrs := make([]*engine.CDR, 0)    // More CDRs based on the number of filters and field templates
 	for _, cdrcCfg := range self.cdrcCfgs { // cdrFields coming from more templates will produce individual storCdr records
 		// Make sure filters are matching
-		passes := true
-		if len(cdrcCfg.Filters) == 0 {
-			for _, rsrFilter := range cdrcCfg.CdrFilter {
+		if len(cdrcCfg.Filters) == 0 { //backward compatibility
+			passes := true
+			for _, rsrFilter := range cdrcCfg.CdrFilter { // here process old filter for entire CDR
 				if rsrFilter == nil { // Nil filter does not need to match anything
 					continue
 				}
@@ -157,20 +157,32 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 	var err error
 	var lazyHttpFields []*config.CfgCdrField
 	for _, cdrFldCfg := range cdrcCfg.ContentFields {
-		passes := true
-		for _, rsrFilter := range cdrFldCfg.FieldFilter {
-			if rsrFilter == nil { // Nil filter does not need to match anything
+		if len(cdrFldCfg.Filters) == 0 { //backward compatibility
+			passes := true
+			for _, rsrFilter := range cdrFldCfg.FieldFilter { // here process old filter for a field from template
+				if rsrFilter == nil { // Nil filter does not need to match anything
+					continue
+				}
+				if cfgFieldIdx, _ := strconv.Atoi(rsrFilter.Id); len(record) <= cfgFieldIdx {
+					return nil, fmt.Errorf("Ignoring record: %v - cannot compile field filter %+v", record, rsrFilter)
+				} else if _, err := rsrFilter.Parse(record[cfgFieldIdx]); err != nil {
+					passes = false
+					break
+				}
+			}
+			if !passes { // Stop processing this field template since it's filters are not matching
 				continue
 			}
-			if cfgFieldIdx, _ := strconv.Atoi(rsrFilter.Id); len(record) <= cfgFieldIdx {
-				return nil, fmt.Errorf("Ignoring record: %v - cannot compile field filter %+v", record, rsrFilter)
-			} else if _, err := rsrFilter.Parse(record[cfgFieldIdx]); err != nil {
-				passes = false
-				break
+		} else {
+			csvProvider, _ := newCsvProvider(record)
+			tenant, err := cdrcCfg.Tenant.ParseValue("")
+			if err != nil {
+				return nil, err
 			}
-		}
-		if !passes { // Stop processing this field template since it's filters are not matching
-			continue
+			if pass, err := self.filterS.Pass(tenant,
+				cdrcCfg.Filters, csvProvider); err != nil || !pass {
+				continue // Not passes filters, ignore this CDR
+			}
 		}
 		if utils.IsSliceMember([]string{utils.KAM_FLATSTORE, utils.OSIPS_FLATSTORE}, self.dfltCdrcCfg.CdrFormat) { // Hardcode some values in case of flatstore
 			switch cdrFldCfg.FieldId {
@@ -179,7 +191,6 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 			case utils.Usage:
 				cdrFldCfg.Value = utils.ParseRSRFieldsMustCompile(strconv.Itoa(len(record)-1), utils.INFIELD_SEP) // in case of flatstore, last element will be the duration computed by us
 			}
-
 		}
 		var fieldVal string
 		switch cdrFldCfg.Type {

@@ -42,7 +42,6 @@ func TestFwvValue(t *testing.T) {
 }
 
 func TestFwvRecordPassesCfgFilter(t *testing.T) {
-	//record, configKey string) bool {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
 	cdrcConfig := cgrConfig.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0] // We don't really care that is for .csv since all we want to test are the filters
 	cdrcConfig.CdrFilter = utils.ParseRSRFieldsMustCompile(`~52:s/^0(\d{9})/+49${1}/(^+49123123120)`, utils.INFIELD_SEP)
