@@ -192,6 +192,22 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *confi
 		duMultiplyFactor = cdrcCfg.DataUsageMultiplyFactor
 	}
 	for _, cdrFldCfg := range cfgFields {
+		// this part need to be added for fwv to filter a field from template
+		// if len(cdrcCfg.Filters) == 0 {
+		// 	if passes := self.recordPassesCfgFilter(record, cdrFldCfg); !passes {
+		// 		continue
+		// 	}
+		// } else {
+		// 	fwvProvider, _ := newfwvProvider(record)
+		// 	tenant, err := cdrcCfg.Tenant.ParseValue("")
+		// 	if err != nil {
+		// 		return nil, err
+		// 	}
+		// 	if pass, err := self.filterS.Pass(tenant,
+		// 		cdrcCfg.Filters, fwvProvider); err != nil || !pass {
+		// 		continue // Not passes filters, ignore this CDR
+		// 	}
+		// }
 		var fieldVal string
 		switch cdrFldCfg.Type {
 		case utils.META_COMPOSED:
