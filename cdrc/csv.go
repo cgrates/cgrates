@@ -106,13 +106,23 @@ func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.CDR, 
 	recordCdrs := make([]*engine.CDR, 0)    // More CDRs based on the number of filters and field templates
 	for _, cdrcCfg := range self.cdrcCfgs { // cdrFields coming from more templates will produce individual storCdr records
 		// Make sure filters are matching
-		if len(cdrcCfg.Filters) == 0 { //backward compatibility
+		if len(cdrcCfg.Filters) != 0 {
+			csvProvider := newCsvProvider(record)
+			tenant, err := cdrcCfg.Tenant.ParseValue("")
+			if err != nil {
+				return nil, err
+			}
+			if pass, err := self.filterS.Pass(tenant,
+				cdrcCfg.Filters, csvProvider); err != nil || !pass {
+				continue // Not passes filters, ignore this CDR
+			}
+		} else { //backward compatibility
 			passes := true
 			for _, rsrFilter := range cdrcCfg.CdrFilter { // here process old filter for entire CDR
 				if rsrFilter == nil { // Nil filter does not need to match anything
 					continue
 				}
-				if cfgFieldIdx, _ := strconv.Atoi(rsrFilter.Id); len(record) <= cfgFieldIdx {
+				if cfgFieldIdx, err := strconv.Atoi(rsrFilter.Id); err != nil || len(record) <= cfgFieldIdx {
 					return nil, fmt.Errorf("Ignoring record: %v - cannot compile filter %+v", record, rsrFilter)
 				} else if _, err := rsrFilter.Parse(record[cfgFieldIdx]); err != nil {
 					passes = false
@@ -121,16 +131,6 @@ func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.CDR, 
 			}
 			if !passes { // Stop importing cdrc fields profile due to non matching filter
 				continue
-			}
-		} else {
-			csvProvider, _ := newCsvProvider(record)
-			tenant, err := cdrcCfg.Tenant.ParseValue("")
-			if err != nil {
-				return nil, err
-			}
-			if pass, err := self.filterS.Pass(tenant,
-				cdrcCfg.Filters, csvProvider); err != nil || !pass {
-				continue // Not passes filters, ignore this CDR
 			}
 		}
 		storedCdr, err := self.recordToStoredCdr(record, cdrcCfg)
@@ -157,13 +157,23 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 	var err error
 	var lazyHttpFields []*config.CfgCdrField
 	for _, cdrFldCfg := range cdrcCfg.ContentFields {
-		if len(cdrFldCfg.Filters) == 0 { //backward compatibility
+		if len(cdrFldCfg.Filters) != 0 {
+			csvProvider := newCsvProvider(record)
+			tenant, err := cdrcCfg.Tenant.ParseValue("")
+			if err != nil {
+				return nil, err
+			}
+			if pass, err := self.filterS.Pass(tenant,
+				cdrcCfg.Filters, csvProvider); err != nil || !pass {
+				continue // Not passes filters, ignore this CDR
+			}
+		} else { //backward compatibility
 			passes := true
 			for _, rsrFilter := range cdrFldCfg.FieldFilter { // here process old filter for a field from template
 				if rsrFilter == nil { // Nil filter does not need to match anything
 					continue
 				}
-				if cfgFieldIdx, _ := strconv.Atoi(rsrFilter.Id); len(record) <= cfgFieldIdx {
+				if cfgFieldIdx, err := strconv.Atoi(rsrFilter.Id); err != nil || len(record) <= cfgFieldIdx {
 					return nil, fmt.Errorf("Ignoring record: %v - cannot compile field filter %+v", record, rsrFilter)
 				} else if _, err := rsrFilter.Parse(record[cfgFieldIdx]); err != nil {
 					passes = false
@@ -172,16 +182,6 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 			}
 			if !passes { // Stop processing this field template since it's filters are not matching
 				continue
-			}
-		} else {
-			csvProvider, _ := newCsvProvider(record)
-			tenant, err := cdrcCfg.Tenant.ParseValue("")
-			if err != nil {
-				return nil, err
-			}
-			if pass, err := self.filterS.Pass(tenant,
-				cdrcCfg.Filters, csvProvider); err != nil || !pass {
-				continue // Not passes filters, ignore this CDR
 			}
 		}
 		if utils.IsSliceMember([]string{utils.KAM_FLATSTORE, utils.OSIPS_FLATSTORE}, self.dfltCdrcCfg.CdrFormat) { // Hardcode some values in case of flatstore
@@ -265,7 +265,7 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 }
 
 // newCsvProvider constructs a DataProvider
-func newCsvProvider(record []string) (dP engine.DataProvider, err error) {
+func newCsvProvider(record []string) (dP engine.DataProvider) {
 	dP = &csvProvider{req: record, cache: engine.NewNavigableMap(nil)}
 	return
 }
@@ -292,8 +292,8 @@ func (cP *csvProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 		return
 	}
 	err = nil // cancel previous err
-	if cfgFieldIdx, _ := strconv.Atoi(fldPath[0]); len(cP.req) <= cfgFieldIdx {
-		return nil, fmt.Errorf("Ignoring record: %v", cP.req)
+	if cfgFieldIdx, err := strconv.Atoi(fldPath[0]); err != nil || len(cP.req) <= cfgFieldIdx {
+		return nil, fmt.Errorf("Ignoring record: %v with error : %+v", cP.req, err)
 	} else {
 		data = cP.req[cfgFieldIdx]
 	}
