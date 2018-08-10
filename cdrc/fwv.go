@@ -128,12 +128,8 @@ func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.CDR, error) {
 	self.processedRecordsNr += 1
 	record := string(buf)
 	for _, cdrcCfg := range self.cdrcCfgs {
-		if len(cdrcCfg.Filters) == 0 {
-			if passes := self.recordPassesCfgFilter(record, cdrcCfg); !passes {
-				continue
-			}
-		} else {
-			fwvProvider, _ := newfwvProvider(record)
+		if len(cdrcCfg.Filters) != 0 {
+			fwvProvider := newfwvProvider(record)
 			tenant, err := cdrcCfg.Tenant.ParseValue("")
 			if err != nil {
 				return nil, err
@@ -141,6 +137,10 @@ func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.CDR, error) {
 			if pass, err := self.filterS.Pass(tenant,
 				cdrcCfg.Filters, fwvProvider); err != nil || !pass {
 				continue // Not passes filters, ignore this CDR
+			}
+		} else { //backward compatibility
+			if passes := self.recordPassesCfgFilter(record, cdrcCfg); !passes {
+				continue
 			}
 		}
 		if storedCdr, err := self.recordToStoredCdr(record, cdrcCfg, cdrcCfg.ID); err != nil {
@@ -160,7 +160,7 @@ func (self *FwvRecordsProcessor) recordPassesCfgFilter(record string, cdrcCfg *c
 		if rsrFilter == nil { // Nil filter does not need to match anything
 			continue
 		}
-		if cfgFieldIdx, _ := strconv.Atoi(rsrFilter.Id); len(record) <= cfgFieldIdx {
+		if cfgFieldIdx, err := strconv.Atoi(rsrFilter.Id); err != nil || len(record) <= cfgFieldIdx {
 			fmt.Errorf("Ignoring record: %v - cannot compile filter %+v", record, rsrFilter)
 			return false
 		} else if _, err := rsrFilter.Parse(record[cfgFieldIdx:]); err != nil {
@@ -192,22 +192,33 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *confi
 		duMultiplyFactor = cdrcCfg.DataUsageMultiplyFactor
 	}
 	for _, cdrFldCfg := range cfgFields {
-		// this part need to be added for fwv to filter a field from template
-		// if len(cdrcCfg.Filters) == 0 {
-		// 	if passes := self.recordPassesCfgFilter(record, cdrFldCfg); !passes {
-		// 		continue
-		// 	}
-		// } else {
-		// 	fwvProvider, _ := newfwvProvider(record)
-		// 	tenant, err := cdrcCfg.Tenant.ParseValue("")
-		// 	if err != nil {
-		// 		return nil, err
-		// 	}
-		// 	if pass, err := self.filterS.Pass(tenant,
-		// 		cdrcCfg.Filters, fwvProvider); err != nil || !pass {
-		// 		continue // Not passes filters, ignore this CDR
-		// 	}
-		// }
+		if len(cdrcCfg.Filters) != 0 {
+			fwvProvider := newfwvProvider(record)
+			tenant, err := cdrcCfg.Tenant.ParseValue("")
+			if err != nil {
+				return nil, err
+			}
+			if pass, err := self.filterS.Pass(tenant,
+				cdrcCfg.Filters, fwvProvider); err != nil || !pass {
+				continue // Not passes filters, ignore this CDR
+			}
+		} else { //backward compatibility
+			filterPass := true
+			for _, rsrFilter := range cdrFldCfg.FieldFilter {
+				if rsrFilter == nil { // Nil filter does not need to match anything
+					continue
+				}
+				if cfgFieldIdx, err := strconv.Atoi(rsrFilter.Id); err != nil || len(record) <= cfgFieldIdx {
+					return nil, fmt.Errorf("Ignoring record: %v - cannot compile filter %+v", record, rsrFilter)
+				} else if _, err := rsrFilter.Parse(record[cfgFieldIdx:]); err != nil {
+					filterPass = false
+					break
+				}
+			}
+			if !filterPass {
+				continue
+			}
+		}
 		var fieldVal string
 		switch cdrFldCfg.Type {
 		case utils.META_COMPOSED:
@@ -306,7 +317,7 @@ func (self *FwvRecordsProcessor) processTrailer() error {
 }
 
 // newfwvProvider constructs a DataProvider
-func newfwvProvider(record string) (dP engine.DataProvider, err error) {
+func newfwvProvider(record string) (dP engine.DataProvider) {
 	dP = &fwvProvider{req: record, cache: engine.NewNavigableMap(nil)}
 	return
 }
@@ -334,8 +345,14 @@ func (fP *fwvProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 	}
 	err = nil // cancel previous err
 	indexes := strings.Split(fldPath[0], "-")
-	startIndex, _ := strconv.Atoi(indexes[0])
-	finalIndex, _ := strconv.Atoi(indexes[1])
+	startIndex, err := strconv.Atoi(indexes[0])
+	if err != nil {
+		return nil, err
+	}
+	finalIndex, err := strconv.Atoi(indexes[1])
+	if err != nil {
+		return nil, err
+	}
 	data = fP.req[startIndex:finalIndex]
 	fP.cache.Set(fldPath, data, false)
 	return

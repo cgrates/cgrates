@@ -132,25 +132,8 @@ func (xmlProc *XMLRecordsProcessor) ProcessNextRecord() (cdrs []*engine.CDR, err
 	cdrXML := xmlProc.cdrXmlElmts[xmlProc.procItems]
 	xmlProc.procItems += 1
 	for _, cdrcCfg := range xmlProc.cdrcCfgs {
-		if len(cdrcCfg.Filters) == 0 { //backward compatibility
-			filtersPassing := true
-			for _, rsrFltr := range cdrcCfg.CdrFilter { // here process old filter for entire CDR
-				if rsrFltr == nil {
-					continue // Pass
-				}
-				absolutePath := utils.ParseHierarchyPath(rsrFltr.Id, "")
-				relPath := utils.HierarchyPath(absolutePath[len(xmlProc.cdrPath)-1:]) // Need relative path to the xmlElmnt
-				fieldVal, _ := elementText(cdrXML, relPath.AsString("/", true))
-				if _, err := rsrFltr.Parse(fieldVal); err != nil {
-					filtersPassing = false
-					break
-				}
-			}
-			if !filtersPassing {
-				continue
-			}
-		} else {
-			xmlProvider, _ := newXmlProvider(cdrXML, xmlProc.cdrPath)
+		if len(cdrcCfg.Filters) != 0 {
+			xmlProvider := newXmlProvider(cdrXML, xmlProc.cdrPath)
 			tenant, err := cdrcCfg.Tenant.ParseValue("")
 			if err != nil {
 				return nil, err
@@ -158,6 +141,26 @@ func (xmlProc *XMLRecordsProcessor) ProcessNextRecord() (cdrs []*engine.CDR, err
 			if pass, err := xmlProc.filterS.Pass(tenant,
 				cdrcCfg.Filters, xmlProvider); err != nil || !pass {
 				continue // Not passes filters, ignore this CDR
+			}
+		} else { //backward compatibility
+			filtersPassing := true
+			for _, rsrFltr := range cdrcCfg.CdrFilter { // here process old filter for entire CDR
+				if rsrFltr == nil {
+					continue // Pass
+				}
+				absolutePath := utils.ParseHierarchyPath(rsrFltr.Id, "")
+				relPath := utils.HierarchyPath(absolutePath[len(xmlProc.cdrPath)-1:]) // Need relative path to the xmlElmnt
+				fieldVal, err := elementText(cdrXML, relPath.AsString("/", true))
+				if err != nil {
+					return nil, err
+				}
+				if _, err := rsrFltr.Parse(fieldVal); err != nil {
+					filtersPassing = false
+					break
+				}
+			}
+			if !filtersPassing {
+				continue
 			}
 		}
 		if cdr, err := xmlProc.recordToCDR(cdrXML, cdrcCfg); err != nil {
@@ -178,25 +181,8 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity tree.Res, cdrcCfg *con
 	var err error
 	fldVals := make(map[string]string)
 	for _, cdrFldCfg := range cdrcCfg.ContentFields {
-		if len(cdrFldCfg.Filters) == 0 { //backward compatibility
-			filtersPassing := true
-			for _, rsrFltr := range cdrFldCfg.FieldFilter { // here process old filter for a field from template
-				if rsrFltr == nil {
-					continue // Pass
-				}
-				absolutePath := utils.ParseHierarchyPath(rsrFltr.Id, "")
-				relPath := utils.HierarchyPath(absolutePath[len(xmlProc.cdrPath)-1:]) // Need relative path to the xmlElmnt
-				fieldVal, _ := elementText(xmlEntity, relPath.AsString("/", true))
-				if _, err := rsrFltr.Parse(fieldVal); err != nil {
-					filtersPassing = false
-					break
-				}
-			}
-			if !filtersPassing {
-				continue
-			}
-		} else {
-			xmlProvider, _ := newXmlProvider(xmlEntity, xmlProc.cdrPath)
+		if len(cdrFldCfg.Filters) != 0 { //backward compatibility
+			xmlProvider := newXmlProvider(xmlEntity, xmlProc.cdrPath)
 			tenant, err := cdrcCfg.Tenant.ParseValue("")
 			if err != nil {
 				return nil, err
@@ -204,6 +190,26 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity tree.Res, cdrcCfg *con
 			if pass, err := xmlProc.filterS.Pass(tenant,
 				cdrcCfg.Filters, xmlProvider); err != nil || !pass {
 				continue // Not passes filters, ignore this CDR
+			}
+		} else { //backward compatibility
+			filtersPassing := true
+			for _, rsrFltr := range cdrFldCfg.FieldFilter { // here process old filter for a field from template
+				if rsrFltr == nil {
+					continue // Pass
+				}
+				absolutePath := utils.ParseHierarchyPath(rsrFltr.Id, "")
+				relPath := utils.HierarchyPath(absolutePath[len(xmlProc.cdrPath)-1:]) // Need relative path to the xmlElmnt
+				fieldVal, err := elementText(xmlEntity, relPath.AsString("/", true))
+				if err != nil {
+					return nil, err
+				}
+				if _, err := rsrFltr.Parse(fieldVal); err != nil {
+					filtersPassing = false
+					break
+				}
+			}
+			if !filtersPassing {
+				continue
 			}
 		}
 		if cdrFldCfg.Type == utils.META_COMPOSED {
@@ -278,7 +284,7 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity tree.Res, cdrcCfg *con
 }
 
 // newXmlProvider constructs a DataProvider
-func newXmlProvider(req tree.Res, cdrPath utils.HierarchyPath) (dP engine.DataProvider, err error) {
+func newXmlProvider(req tree.Res, cdrPath utils.HierarchyPath) (dP engine.DataProvider) {
 	dP = &xmlProvider{req: req, cdrPath: cdrPath, cache: engine.NewNavigableMap(nil)}
 	return
 }
