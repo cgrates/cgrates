@@ -793,7 +793,7 @@ func (self *CCR) AsDiameterMessage() (*diam.Message, error) {
 }
 
 // Extracts data out of CCR into a SMGenericEvent based on the configured template
-func (self *CCR) AsSMGenericEvent(cfgFlds []*config.CfgCdrField) (sessions.SMGenericEvent, error) {
+func (self *CCR) AsMapIface(cfgFlds []*config.CfgCdrField) (map[string]interface{}, error) {
 	outMap := make(map[string]string) // work with it so we can append values to keys
 	outMap[utils.EVENT_NAME] = DIAMETER_CCR
 	for _, cfgFld := range cfgFlds {
@@ -814,7 +814,7 @@ func (self *CCR) AsSMGenericEvent(cfgFlds []*config.CfgCdrField) (sessions.SMGen
 			break
 		}
 	}
-	return sessions.SMGenericEvent(utils.ConvertMapValStrIf(outMap)), nil
+	return utils.ConvertMapValStrIf(outMap), nil
 }
 
 func NewBareCCAFromCCR(ccr *CCR, originHost, originRealm string) *CCA {

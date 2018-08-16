@@ -388,7 +388,7 @@ func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]interface{}
 	mp[utils.Usage], _ = fsev.GetDuration(utils.META_DEFAULT)
 	mp[utils.PDD], _ = fsev.GetPdd(utils.META_DEFAULT)
 	mp[utils.ACD], _ = fsev.GetADC(utils.META_DEFAULT)
-	mp[utils.COST] = -1
+	mp[utils.COST] = -1.0
 	mp[utils.SUPPLIER] = fsev.GetSupplier(utils.META_DEFAULT)
 	mp[utils.DISCONNECT_CAUSE] = fsev.GetDisconnectCause(utils.META_DEFAULT)
 	return mp

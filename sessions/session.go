@@ -42,7 +42,7 @@ type SMGSession struct {
 	CGRID      string // Unique identifier for this session
 	RunID      string // Keep a reference for the derived run
 	Timezone   string
-	EventStart SMGenericEvent         // Event which started the session
+	EventStart *engine.SafEvent       // Event which started the session
 	CD         *engine.CallDescriptor // initial CD used for debits, updated on each debit
 	ResourceID string
 
@@ -163,17 +163,18 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 
 // Send disconnect order to remote connection
 func (self *SMGSession) disconnectSession(reason string) error {
-	self.EventStart[utils.Usage] = self.TotalUsage.Nanoseconds() // Set the usage to total one debitted
 	if self.clntConn == nil || reflect.ValueOf(self.clntConn).IsNil() {
 		return errors.New("Calling SMGClientV1.DisconnectSession requires bidirectional JSON connection")
 	}
+	self.EventStart.Set(utils.Usage, self.TotalUsage) // Set the usage to total one debitted
 	var reply string
 	servMethod := "SessionSv1.DisconnectSession"
 	if self.clientProto == 0 { // competibility with OpenSIPS
 		servMethod = "SMGClientV1.DisconnectSession"
 	}
 	if err := self.clntConn.Call(servMethod,
-		utils.AttrDisconnectSession{EventStart: self.EventStart, Reason: reason},
+		utils.AttrDisconnectSession{EventStart: self.EventStart.AsMapInterface(),
+			Reason: reason},
 		&reply); err != nil {
 		return err
 	} else if reply != utils.OK {
@@ -264,8 +265,8 @@ func (self *SMGSession) storeSMCost() error {
 		CGRID:       self.CGRID,
 		CostSource:  utils.MetaSessionS,
 		RunID:       self.RunID,
-		OriginHost:  self.EventStart.GetOriginatorIP(utils.META_DEFAULT),
-		OriginID:    self.EventStart.GetOriginID(utils.META_DEFAULT),
+		OriginHost:  self.EventStart.GetStringIgnoreErrors(utils.OriginHost),
+		OriginID:    self.EventStart.GetStringIgnoreErrors(utils.OriginID),
 		Usage:       self.TotalUsage,
 		CostDetails: self.EventCost,
 	}
@@ -285,25 +286,23 @@ func (self *SMGSession) storeSMCost() error {
 func (self *SMGSession) AsActiveSession(timezone string) *ActiveSession {
 	self.mux.RLock()
 	defer self.mux.RUnlock()
-	sTime, _ := self.EventStart.GetSetupTime(utils.META_DEFAULT, timezone)
-	aTime, _ := self.EventStart.GetAnswerTime(utils.META_DEFAULT, timezone)
 	aSession := &ActiveSession{
 		CGRID:       self.CGRID,
-		TOR:         self.EventStart.GetTOR(utils.META_DEFAULT),
+		TOR:         self.EventStart.GetStringIgnoreErrors(utils.ToR),
 		RunID:       self.RunID,
-		OriginID:    self.EventStart.GetOriginID(utils.META_DEFAULT),
-		CdrHost:     self.EventStart.GetOriginatorIP(utils.META_DEFAULT),
-		CdrSource:   self.EventStart.GetCdrSource(),
-		ReqType:     self.EventStart.GetReqType(utils.META_DEFAULT),
-		Tenant:      self.EventStart.GetTenant(utils.META_DEFAULT),
-		Category:    self.EventStart.GetCategory(utils.META_DEFAULT),
-		Account:     self.EventStart.GetAccount(utils.META_DEFAULT),
-		Subject:     self.EventStart.GetSubject(utils.META_DEFAULT),
-		Destination: self.EventStart.GetDestination(utils.META_DEFAULT),
-		SetupTime:   sTime,
-		AnswerTime:  aTime,
+		OriginID:    self.EventStart.GetStringIgnoreErrors(utils.OriginID),
+		CdrHost:     self.EventStart.GetStringIgnoreErrors(utils.OriginHost),
+		CdrSource:   utils.SessionS + "_" + self.EventStart.GetStringIgnoreErrors(utils.EVENT_NAME),
+		ReqType:     self.EventStart.GetStringIgnoreErrors(utils.RequestType),
+		Tenant:      self.EventStart.GetStringIgnoreErrors(utils.Tenant),
+		Category:    self.EventStart.GetStringIgnoreErrors(utils.Category),
+		Account:     self.EventStart.GetStringIgnoreErrors(utils.Account),
+		Subject:     self.EventStart.GetStringIgnoreErrors(utils.Subject),
+		Destination: self.EventStart.GetStringIgnoreErrors(utils.Destination),
+		SetupTime:   self.EventStart.GetTimeIgnoreErrors(utils.SetupTime, self.Timezone),
+		AnswerTime:  self.EventStart.GetTimeIgnoreErrors(utils.AnswerTime, self.Timezone),
 		Usage:       self.TotalUsage,
-		ExtraFields: self.EventStart.GetExtraFields(),
+		ExtraFields: self.EventStart.AsMapStringIgnoreErrors(utils.NewStringMap(utils.PrimaryCdrFields...)),
 		SMId:        "CGR-DA",
 	}
 	if self.CD != nil {

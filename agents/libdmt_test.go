@@ -27,7 +27,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/fiorix/go-diameter/diam"
 	"github.com/fiorix/go-diameter/diam/avp"
@@ -488,8 +487,8 @@ func TestCCRAsSMGenericEvent(t *testing.T) {
 	})
 	ccr.diamMessage.NewAVP("FramedIPAddress", avp.Mbit, 0, datatype.OctetString("0AE40041"))
 	cfgFlds := make([]*config.CfgCdrField, 0)
-	eSMGEv := sessions.SMGenericEvent{"EventName": "DIAMETER_CCR"}
-	if rSMGEv, err := ccr.AsSMGenericEvent(cfgFlds); err != nil {
+	eSMGEv := map[string]interface{}{"EventName": "DIAMETER_CCR"}
+	if rSMGEv, err := ccr.AsMapIface(cfgFlds); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSMGEv, rSMGEv) {
 		t.Errorf("Expecting: %+v, received: %+v", eSMGEv, rSMGEv)
@@ -505,8 +504,8 @@ func TestCCRAsSMGenericEvent(t *testing.T) {
 			Mandatory:   true,
 		},
 	}
-	eSMGEv = sessions.SMGenericEvent{"EventName": "DIAMETER_CCR", "LastUsed": "54239"}
-	if rSMGEv, err := ccr.AsSMGenericEvent(cfgFlds); err != nil {
+	eSMGEv = map[string]interface{}{"EventName": "DIAMETER_CCR", "LastUsed": "54239"}
+	if rSMGEv, err := ccr.AsMapIface(cfgFlds); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSMGEv, rSMGEv) {
 		t.Errorf("Expecting: %+v, received: %+v", eSMGEv, rSMGEv)
@@ -522,8 +521,8 @@ func TestCCRAsSMGenericEvent(t *testing.T) {
 			Mandatory:   true,
 		},
 	}
-	eSMGEv = sessions.SMGenericEvent{"EventName": "DIAMETER_CCR", "LastUsed": "4420"}
-	if rSMGEv, err := ccr.AsSMGenericEvent(cfgFlds); err != nil {
+	eSMGEv = map[string]interface{}{"EventName": "DIAMETER_CCR", "LastUsed": "4420"}
+	if rSMGEv, err := ccr.AsMapIface(cfgFlds); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSMGEv, rSMGEv) {
 		t.Errorf("Expecting: %+v, received: %+v", eSMGEv, rSMGEv)

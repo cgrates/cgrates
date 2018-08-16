@@ -145,6 +145,10 @@ func NewErrStringCast(valIface interface{}) error {
 	return fmt.Errorf("cannot cast value: %v to string", valIface)
 }
 
+func NewErrFldStringCast(fldName string, valIface interface{}) error {
+	return fmt.Errorf("cannot cast field: %s with value: %v to string", fldName, valIface)
+}
+
 func ErrHasPrefix(err error, prfx string) (has bool) {
 	if err == nil {
 		return

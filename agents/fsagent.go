@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
@@ -366,9 +367,10 @@ func (sm *FSsessions) Call(serviceMethod string, args interface{}, reply interfa
 
 // Internal method to disconnect session in asterisk
 func (fsa *FSsessions) V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) (err error) {
-	fsEv := sessions.SMGenericEvent(args.EventStart)
-	channelID := fsEv.GetOriginID(utils.META_DEFAULT)
-	if err = fsa.disconnectSession(fsEv[FsConnID].(string), channelID, fsEv.GetCallDestNr(utils.META_DEFAULT),
+	ev := engine.NewMapEvent(args.EventStart)
+	channelID := ev.GetStringIgnoreErrors(utils.OriginID)
+	if err = fsa.disconnectSession(ev.GetStringIgnoreErrors(FsConnID), channelID,
+		utils.FirstNonEmpty(ev.GetStringIgnoreErrors(CALL_DEST_NR), ev.GetStringIgnoreErrors(SIP_REQ_USER)),
 		utils.ErrInsufficientCredit.Error()); err != nil {
 		return
 	}

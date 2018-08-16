@@ -604,13 +604,13 @@ func TestFsEvAsMapStringInterface(t *testing.T) {
 	expectedMap[utils.Tenant] = "cgrates.org"
 	expectedMap[utils.Account] = "1001"
 	expectedMap[utils.Subject] = "1001"
-	expectedMap[utils.Cost] = -1
+	expectedMap[utils.Cost] = -1.0
 	expectedMap[utils.PDD] = time.Duration(28) * time.Millisecond
 	expectedMap[utils.ACD] = time.Duration(30) * time.Second
 	expectedMap[utils.DISCONNECT_CAUSE] = "NORMAL_CLEARING"
 	expectedMap[utils.SUPPLIER] = "supplier1"
 	if storedMap := ev.AsMapStringInterface(""); !reflect.DeepEqual(expectedMap, storedMap) {
-		t.Errorf("Expecting: %+v, received: %+v", expectedMap, storedMap)
+		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(expectedMap), utils.ToJSON(storedMap))
 	}
 }
 
@@ -966,8 +966,12 @@ variable_rtp_audio_rtcp_octet_count: 0`
 	timezone := config.CgrConfig().DefaultTimezone
 	fsCdrCfg, _ = config.NewDefaultCGRConfig()
 	fsCdr, _ := engine.NewFSCdr(body, fsCdrCfg)
-	smGev := sessions.SMGenericEvent(NewFSEvent(hangUp).AsMapStringInterface(timezone))
-	smCDR := smGev.AsCDR(fsCdrCfg, timezone)
+	smGev := engine.NewSafEvent(NewFSEvent(hangUp).AsMapStringInterface(timezone))
+	sessions.GetSetCGRID(smGev)
+	smCDR, err := smGev.AsCDR(fsCdrCfg, timezone)
+	if err != nil {
+		t.Error(err)
+	}
 	fsCDR := fsCdr.AsCDR(timezone)
 	if fsCDR.CGRID != smCDR.CGRID {
 		t.Errorf("Expecting: %s, received: %s", fsCDR.CGRID, smCDR.CGRID)

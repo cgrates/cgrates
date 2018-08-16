@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/apier/v1"
-	"github.com/cgrates/cgrates/sessions"
 )
 
 type SMGenericV2 struct {
@@ -30,21 +29,25 @@ type SMGenericV2 struct {
 }
 
 // GetMaxUsage returns maxUsage as time.Duration/int64
-func (smgv2 *SMGenericV2) GetMaxUsage(ev sessions.SMGenericEvent, maxUsage *time.Duration) error {
+func (smgv2 *SMGenericV2) GetMaxUsage(ev map[string]interface{},
+	maxUsage *time.Duration) error {
 	return smgv2.SMG.BiRPCV2GetMaxUsage(nil, ev, maxUsage)
 }
 
 // Called on session start, returns the maximum number of seconds the session can last
-func (smgv2 *SMGenericV2) InitiateSession(ev sessions.SMGenericEvent, maxUsage *time.Duration) error {
+func (smgv2 *SMGenericV2) InitiateSession(ev map[string]interface{},
+	maxUsage *time.Duration) error {
 	return smgv2.SMG.BiRPCV2InitiateSession(nil, ev, maxUsage)
 }
 
 // Interim updates, returns remaining duration from the rater
-func (smgv2 *SMGenericV2) UpdateSession(ev sessions.SMGenericEvent, maxUsage *time.Duration) error {
+func (smgv2 *SMGenericV2) UpdateSession(ev map[string]interface{},
+	maxUsage *time.Duration) error {
 	return smgv2.SMG.BiRPCV2UpdateSession(nil, ev, maxUsage)
 }
 
 // Called on individual Events (eg SMS)
-func (smgv2 *SMGenericV2) ChargeEvent(ev sessions.SMGenericEvent, maxUsage *time.Duration) error {
+func (smgv2 *SMGenericV2) ChargeEvent(ev map[string]interface{},
+	maxUsage *time.Duration) error {
 	return smgv2.SMG.BiRPCV2ChargeEvent(nil, ev, maxUsage)
 }

@@ -98,7 +98,7 @@ func (da DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProce
 		*cca = *NewBareCCAFromCCR(ccr, da.cgrCfg.DiameterAgentCfg().OriginHost, da.cgrCfg.DiameterAgentCfg().OriginRealm)
 		procVars = make(processorVars)
 	}
-	smgEv, err := ccr.AsSMGenericEvent(reqProcessor.CCRFields)
+	smgEv, err := ccr.AsMapIface(reqProcessor.CCRFields)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v AsSMGenericEvent, error: %s", ccr.diamMessage, err))
 		*cca = *NewBareCCAFromCCR(ccr, da.cgrCfg.DiameterAgentCfg().OriginHost, da.cgrCfg.DiameterAgentCfg().OriginRealm)
@@ -116,7 +116,7 @@ func (da DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProce
 		}
 	}
 	if reqProcessor.PublishEvent && da.pubsubs != nil {
-		evt, err := smgEv.AsMapStringString()
+		evt, err := engine.NewMapEvent(smgEv).AsMapString(nil)
 		if err != nil {
 			*cca = *NewBareCCAFromCCR(ccr, da.cgrCfg.DiameterAgentCfg().OriginHost, da.cgrCfg.DiameterAgentCfg().OriginRealm)
 			if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, strconv.Itoa(DiameterRatingFailed),

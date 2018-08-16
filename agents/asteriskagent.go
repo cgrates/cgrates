@@ -28,6 +28,7 @@ import (
 
 	"github.com/cgrates/aringo"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -289,7 +290,7 @@ func (sma *AsteriskAgent) ServiceShutdown() error {
 
 // Internal method to disconnect session in asterisk
 func (sma *AsteriskAgent) V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) error {
-	channelID := sessions.SMGenericEvent(args.EventStart).GetOriginID(utils.META_DEFAULT)
+	channelID := engine.NewMapEvent(args.EventStart).GetStringIgnoreErrors(utils.OriginID)
 	if err := sma.hangupChannel(channelID); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> Error: %s when attempting to disconnect channelID: %s",
