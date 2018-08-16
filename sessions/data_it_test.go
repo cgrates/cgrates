@@ -110,7 +110,7 @@ func TestSMGDataLastUsedData(t *testing.T) {
 	} else if cc.Cost != 1024 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
-	smgEv := SMGenericEvent{
+	smgEv := map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         utils.DATA,
 		utils.OriginID:    "123491",
@@ -139,7 +139,7 @@ func TestSMGDataLastUsedData(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f",
 			eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
-	smgEv = SMGenericEvent{
+	smgEv = map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         utils.DATA,
 		utils.OriginID:    "123491",
@@ -167,7 +167,7 @@ func TestSMGDataLastUsedData(t *testing.T) {
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
-	smgEv = SMGenericEvent{
+	smgEv = map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         utils.DATA,
 		utils.OriginID:    "123491",
@@ -183,7 +183,7 @@ func TestSMGDataLastUsedData(t *testing.T) {
 		utils.LastUsed:    "0",
 	}
 	var rpl string
-	if err = smgRPC.Call("SMGenericV1.TerminateSession",
+	if err := smgRPC.Call("SMGenericV1.TerminateSession",
 		smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
@@ -217,7 +217,7 @@ func TestSMGDataLastUsedMultipleUpdates(t *testing.T) {
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, totalVal)
 	}
-	smgEv := SMGenericEvent{
+	smgEv := map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         utils.DATA,
 		utils.OriginID:    "123492",
@@ -252,7 +252,7 @@ func TestSMGDataLastUsedMultipleUpdates(t *testing.T) {
 		aSessions[0].Usage != time.Duration(6144) {
 		t.Errorf("wrong active sessions: %f", aSessions[0].Usage.Seconds())
 	}
-	smgEv = SMGenericEvent{
+	smgEv = map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         utils.DATA,
 		utils.OriginID:    "123492",
@@ -286,7 +286,7 @@ func TestSMGDataLastUsedMultipleUpdates(t *testing.T) {
 		aSessions[0].Usage != time.Duration(15360) {
 		t.Errorf("wrong active sessions: %v", aSessions[0].Usage)
 	}
-	smgEv = SMGenericEvent{
+	smgEv = map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         utils.DATA,
 		utils.OriginID:    "123492",
@@ -320,7 +320,7 @@ func TestSMGDataLastUsedMultipleUpdates(t *testing.T) {
 		aSessions[0].Usage != time.Duration(13312) { // 14MB in used, 2MB extra reserved
 		t.Errorf("wrong active sessions: %+v", aSessions[0].Usage)
 	}
-	smgEv = SMGenericEvent{
+	smgEv = map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         utils.DATA,
 		utils.OriginID:    "123492",
@@ -353,7 +353,7 @@ func TestSMGDataLastUsedMultipleUpdates(t *testing.T) {
 		aSessions[0].Usage != time.Duration(14336) { // 14MB in use
 		t.Errorf("wrong active sessions: %v", aSessions[0].Usage)
 	}
-	smgEv = SMGenericEvent{
+	smgEv = map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         utils.DATA,
 		utils.OriginID:    "123492",
@@ -369,7 +369,7 @@ func TestSMGDataLastUsedMultipleUpdates(t *testing.T) {
 		utils.LastUsed:    "0", // refund 1024 (extra used) + 1024 (extra reserved)
 	}
 	var rpl string
-	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
+	if err := smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
 	eAcntVal = 89088.000000
@@ -423,7 +423,7 @@ func TestSMGDataTTLExpired(t *testing.T) {
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, totalVal)
 	}
-	smgEv := SMGenericEvent{
+	smgEv := map[string]interface{}{
 		utils.EVENT_NAME:      "TEST_EVENT",
 		utils.ToR:             utils.DATA,
 		utils.OriginID:        "TestSMGDataTTLExpired",
@@ -482,7 +482,7 @@ func TestSMGDataTTLExpMultiUpdates(t *testing.T) {
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, totalVal)
 	}
-	smgEv := SMGenericEvent{
+	smgEv := map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         utils.DATA,
 		utils.OriginID:    "123495",
@@ -517,7 +517,7 @@ func TestSMGDataTTLExpMultiUpdates(t *testing.T) {
 		int64(aSessions[0].Usage) != 4096 {
 		t.Errorf("wrong active sessions: %d", int64(aSessions[0].Usage))
 	}
-	smgEv = SMGenericEvent{
+	smgEv = map[string]interface{}{
 		utils.EVENT_NAME:         "TEST_EVENT",
 		utils.ToR:                utils.DATA,
 		utils.OriginID:           "123495",
@@ -580,7 +580,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, totalVal)
 	}
-	smgEv := SMGenericEvent{
+	smgEv := map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         utils.DATA,
 		utils.OriginID:    "123495",
@@ -615,7 +615,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 		int64(aSessions[0].Usage) != 2048 {
 		t.Errorf("wrong active sessions usage: %d", int64(aSessions[0].Usage))
 	}
-	smgEv = SMGenericEvent{
+	smgEv = map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         utils.DATA,
 		utils.OriginID:    "123495",
@@ -652,7 +652,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 		t.Errorf("wrong active sessions usage: %d", int64(aSessions[0].Usage))
 	}
 
-	smgEv = SMGenericEvent{
+	smgEv = map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         utils.DATA,
 		utils.OriginID:    "123495",
@@ -688,7 +688,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 		int64(aSessions[0].Usage) != 1024 {
 		t.Errorf("wrong active sessions usage: %d", int64(aSessions[0].Usage))
 	}
-	smgEv = SMGenericEvent{
+	smgEv = map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         utils.DATA,
 		utils.OriginID:    "123495",
@@ -704,17 +704,20 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 		utils.LastUsed:    "0",
 	}
 	var rpl string
-	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
+	if err := smgRPC.Call("SMGenericV1.TerminateSession",
+		smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
 	eAcntVal = 101376.000000 // refunded last 1MB reserved and unused
 	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
+		t.Errorf("Expected: %f, received: %f",
+			eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
 	if err := smgRPC.Call("SMGenericV1.GetActiveSessions",
-		nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		nil, &aSessions); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
 }
@@ -742,7 +745,7 @@ func TestSMGDataTTLUsageProtection(t *testing.T) {
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, totalVal)
 	}
-	smgEv := SMGenericEvent{
+	smgEv := map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         utils.DATA,
 		utils.OriginID:    "123495",

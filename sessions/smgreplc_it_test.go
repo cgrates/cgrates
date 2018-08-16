@@ -95,7 +95,7 @@ func TestSMGRplcInitiate(t *testing.T) {
 		nil, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	smgEv := SMGenericEvent{
+	smgEv := map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "123451",
@@ -146,7 +146,7 @@ func TestSMGRplcInitiate(t *testing.T) {
 
 // Update on slave
 func TestSMGRplcUpdate(t *testing.T) {
-	smgEv := SMGenericEvent{
+	smgEv := map[string]interface{}{
 		utils.EVENT_NAME: "TEST_EVENT",
 		utils.OriginID:   "123451",
 		utils.Usage:      "1m",
@@ -180,7 +180,7 @@ func TestSMGRplcUpdate(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	cgrID := smgEv.GetCGRID(utils.META_DEFAULT)
+	cgrID := GetSetCGRID(engine.NewSafEvent(smgEv))
 	// Make sure session was replicated
 	if err := smgRplcMstrRPC.Call("SMGenericV1.GetPassiveSessions",
 		nil, &pSessions); err != nil {
@@ -196,7 +196,7 @@ func TestSMGRplcUpdate(t *testing.T) {
 }
 
 func TestSMGRplcTerminate(t *testing.T) {
-	smgEv := SMGenericEvent{
+	smgEv := map[string]interface{}{
 		utils.EVENT_NAME: "TEST_EVENT",
 		utils.OriginID:   "123451",
 		utils.Usage:      "3m",
@@ -230,7 +230,7 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 	if smgRplcMstrRPC, err = jsonrpc.Dial("tcp", smgRplcMasterCfg.RPCJSONListen); err != nil {
 		t.Fatal(err)
 	}
-	smgEv1 := SMGenericEvent{
+	smgEv1 := map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "123451",
@@ -245,7 +245,7 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 		utils.AnswerTime:  "2016-01-05 18:31:05",
 		utils.Usage:       "1m30s",
 	}
-	smgEv2 := SMGenericEvent{
+	smgEv2 := map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "123481",
@@ -260,7 +260,7 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 		utils.AnswerTime:  "2016-01-05 18:31:05",
 		utils.Usage:       "1m30s",
 	}
-	for _, smgEv := range []SMGenericEvent{smgEv1, smgEv2} {
+	for _, smgEv := range []map[string]interface{}{smgEv1, smgEv2} {
 		var maxUsage time.Duration
 		if err := smgRplcMstrRPC.Call(utils.SMGenericV2InitiateSession, smgEv, &maxUsage); err != nil {
 			t.Error(err)

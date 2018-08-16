@@ -31,7 +31,6 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/fiorix/go-diameter/diam"
 	"github.com/fiorix/go-diameter/diam/avp"
@@ -112,7 +111,7 @@ func TestDmtAgentCCRAsSMGenericEvent(t *testing.T) {
 	if ccr.diamMessage, err = ccr.AsDiameterMessage(); err != nil {
 		t.Error(err)
 	}
-	eSMGE := sessions.SMGenericEvent{"EventName": DIAMETER_CCR,
+	eSMGE := map[string]interface{}{"EventName": DIAMETER_CCR,
 		"OriginID": "routinga;1442095190;1476802709",
 		"Account":  "*users", "Category": "call",
 		"AnswerTime":  "2015-11-23 12:22:24 +0000 UTC",
@@ -147,7 +146,7 @@ func TestDmtAgentCCRAsSMGenericEvent(t *testing.T) {
 		&config.CfgCdrField{Tag: "Usage", FieldId: "Usage", Type: "*handler", HandlerId: "*ccr_usage", Mandatory: true},
 		&config.CfgCdrField{Tag: "SubscriberID", FieldId: "SubscriberId", Type: "*composed",
 			Value: utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Data", utils.INFIELD_SEP), Mandatory: true}}
-	if smge, err := ccr.AsSMGenericEvent(ccrFields); err != nil {
+	if smge, err := ccr.AsMapIface(ccrFields); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSMGE, smge) {
 		t.Errorf("Expecting: %+v, received: %+v", eSMGE, smge)

@@ -37,6 +37,7 @@ var (
 	smgBiRPCCfg      *config.CGRConfig
 	smgBiRPC         *rpc2.Client
 	disconnectEvChan = make(chan *utils.AttrDisconnectSession)
+	err              error
 )
 
 func handleDisconnectSession(clnt *rpc2.Client,
@@ -131,7 +132,7 @@ func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		t.Errorf("Expecting: %f, received: %f", eAcntVal,
 			acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
-	smgEv := SMGenericEvent{
+	smgEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "123451",
@@ -144,7 +145,7 @@ func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		utils.RequestType: utils.META_PREPAID,
 		utils.SetupTime:   "2016-01-05 18:30:49",
 		utils.AnswerTime:  "2016-01-05 18:31:05",
-	}
+	})
 	var maxUsage float64
 	if err := smgBiRPC.Call(utils.SMGenericV1InitiateSession,
 		smgEv, &maxUsage); err != nil {
@@ -158,7 +159,7 @@ func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	case <-time.After(time.Duration(50 * time.Millisecond)):
 		t.Error("Did not receive disconnect event")
 	case disconnectEv := <-disconnectEvChan:
-		if SMGenericEvent(disconnectEv.EventStart).GetOriginID(utils.META_DEFAULT) != smgEv[utils.OriginID] {
+		if engine.NewMapEvent(disconnectEv.EventStart).GetStringIgnoreErrors(utils.OriginID) != smgEv[utils.OriginID] {
 			t.Errorf("Unexpected event received: %+v", disconnectEv)
 		}
 		smgEv[utils.Usage] = disconnectEv.EventStart[utils.Usage]
@@ -181,7 +182,7 @@ func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	time.Sleep(time.Duration(20) * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT},
-		DestinationPrefixes: []string{smgEv.GetDestination(utils.META_DEFAULT)}}
+		DestinationPrefixes: []string{smgEv.GetStringIgnoreErrors(utils.Destination)}}
 	if err := smgRPC.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -212,7 +213,7 @@ func TestSMGBiRPCSessionOriginatorTerminate(t *testing.T) {
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
-	smgEv := SMGenericEvent{
+	smgEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "123452",
@@ -225,7 +226,7 @@ func TestSMGBiRPCSessionOriginatorTerminate(t *testing.T) {
 		utils.RequestType: utils.META_PREPAID,
 		utils.SetupTime:   "2016-01-05 18:30:49",
 		utils.AnswerTime:  "2016-01-05 18:31:05",
-	}
+	})
 	var maxUsage float64
 	if err := smgBiRPC.Call(utils.SMGenericV1InitiateSession,
 		smgEv, &maxUsage); err != nil {
@@ -254,7 +255,8 @@ func TestSMGBiRPCSessionOriginatorTerminate(t *testing.T) {
 	}
 	time.Sleep(time.Duration(10) * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, DestinationPrefixes: []string{smgEv.GetDestination(utils.META_DEFAULT)}}
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT},
+		DestinationPrefixes: []string{smgEv.GetStringIgnoreErrors(utils.Destination)}}
 	if err := smgRPC.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {

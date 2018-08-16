@@ -30,7 +30,6 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -126,7 +125,7 @@ func TestSMGV1AccountsBefore(t *testing.T) {
 
 // Make sure account was debited properly
 func TestSMGV1GetMaxUsage(t *testing.T) {
-	setupReq := &sessions.SMGenericEvent{utils.RequestType: utils.META_PREPAID, utils.Tenant: "cgrates.org",
+	setupReq := map[string]interface{}{utils.RequestType: utils.META_PREPAID, utils.Tenant: "cgrates.org",
 		utils.Account: "1003", utils.Destination: "1002", utils.SetupTime: "2015-11-10T15:20:00Z"}
 	var maxTime float64
 	if err := smgV1Rpc.Call("SMGenericV1.GetMaxUsage", setupReq, &maxTime); err != nil {
