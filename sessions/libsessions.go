@@ -30,7 +30,7 @@ import (
 func getSessionTTL(ev *engine.SafEvent, cfgSessionTTL time.Duration,
 	cfgSessionTTLMaxDelay *time.Duration) (ttl time.Duration, err error) {
 	if ttl, err = ev.GetDuration(utils.SessionTTL); err != nil {
-		if err != utils.ErrNotFoundNoCaps {
+		if err != utils.ErrNotFound {
 			return
 		}
 		ttl = cfgSessionTTL
@@ -42,7 +42,7 @@ func getSessionTTL(ev *engine.SafEvent, cfgSessionTTL time.Duration,
 	var sessionTTLMaxDelay int64
 	maxDelay, err := ev.GetDuration(utils.SessionTTLMaxDelay)
 	if err != nil {
-		if err != utils.ErrNotFoundNoCaps {
+		if err != utils.ErrNotFound {
 			return
 		}
 		err = nil // clear the error for return
