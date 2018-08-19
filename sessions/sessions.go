@@ -573,6 +573,7 @@ func (smg *SMGeneric) sessionRelocate(initialID, cgrID, newOriginID string) erro
 		for i, s := range ss[initialID] {
 			s.mux.Lock()
 			s.CGRID = cgrID                               // Overwrite initial CGRID with new one
+			s.EventStart.Set(utils.CGRID, cgrID)          // Overwrite CGRID for final CDR
 			s.EventStart.Set(utils.OriginID, newOriginID) // Overwrite OriginID for session indexing
 			s.mux.Unlock()
 			smg.recordASession(s)
@@ -841,7 +842,6 @@ func (smg *SMGeneric) UpdateSession(gev *engine.SafEvent,
 	if gev.HasField(utils.InitialOriginID) {
 		initialCGRID := utils.Sha1(gev.GetStringIgnoreErrors(utils.InitialOriginID),
 			gev.GetStringIgnoreErrors(utils.OriginHost))
-		fmt.Printf("InitialOriginID: %s, initialCGRId: %s, cgrID: %s\n", gev.GetStringIgnoreErrors(utils.InitialOriginID), initialCGRID, cgrID)
 		err = smg.sessionRelocate(initialCGRID,
 			cgrID, gev.GetStringIgnoreErrors(utils.OriginID))
 		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
