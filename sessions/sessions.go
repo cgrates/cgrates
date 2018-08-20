@@ -1098,6 +1098,9 @@ func (smg *SMGeneric) ProcessCDR(gev *engine.SafEvent) (err error) {
 	}
 	defer smg.responseCache.Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
 	cdr, err := gev.AsCDR(smg.cgrCfg, smg.Timezone)
+	if err != nil {
+		return err
+	}
 	var reply string
 	if err = smg.cdrsrv.Call("CdrsV1.ProcessCDR", cdr, &reply); err != nil {
 		return

@@ -173,6 +173,8 @@ func IfaceAsDuration(itm interface{}) (d time.Duration, err error) {
 		return time.Duration(int64(itm.(float64))), nil
 	case int64:
 		return time.Duration(itm.(int64)), nil
+	case int:
+		return time.Duration(itm.(int)), nil
 	case string:
 		return ParseDurationWithNanosecs(itm.(string))
 
