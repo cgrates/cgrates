@@ -117,10 +117,13 @@ func TestSMGRplcInitiate(t *testing.T) {
 		t.Error(err)
 	}
 	var reply string
-	if err := smgRplcMstrRPC.Call("SMGenericV1.TerminateSession", smgEv, &reply); err == nil && err.Error() != rpcclient.ErrSessionNotFound.Error() { // Update should return rpcclient.ErrSessionNotFound
+	if err := smgRplcMstrRPC.Call("SMGenericV1.TerminateSession",
+		smgEv, &reply); err == nil &&
+		err.Error() != rpcclient.ErrSessionNotFound.Error() { // Update should return rpcclient.ErrSessionNotFound
 		t.Error(err)
 	}
-	if err := smgRplcMstrRPC.Call(utils.SMGenericV2InitiateSession, smgEv, &maxUsage); err != nil {
+	if err := smgRplcMstrRPC.Call(utils.SMGenericV2InitiateSession,
+		smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != time.Duration(90*time.Second) {
@@ -128,14 +131,16 @@ func TestSMGRplcInitiate(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
 	var aSessions []*ActiveSession
-	if err := smgRplcMstrRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.OriginID: "123451"}, &aSessions); err != nil {
+	if err := smgRplcMstrRPC.Call("SMGenericV1.GetActiveSessions",
+		map[string]string{utils.OriginID: "123451"}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
 	} else if aSessions[0].Usage != time.Duration(90)*time.Second {
 		t.Errorf("Received usage: %v", aSessions[0].Usage)
 	}
-	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", map[string]string{utils.OriginID: "123451"}, &pSessions); err != nil {
+	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions",
+		map[string]string{utils.OriginID: "123451"}, &pSessions); err != nil {
 		t.Error(err)
 	} else if len(pSessions) != 1 {
 		t.Errorf("PassiveSessions: %+v", pSessions)

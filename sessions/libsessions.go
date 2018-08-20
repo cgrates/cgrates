@@ -33,6 +33,7 @@ func getSessionTTL(ev *engine.SafEvent, cfgSessionTTL time.Duration,
 		if err != utils.ErrNotFound {
 			return
 		}
+		err = nil
 		ttl = cfgSessionTTL
 	}
 	if ttl == 0 {

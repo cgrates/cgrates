@@ -27,37 +27,44 @@ import (
 )
 
 func NewSafEvent(mp map[string]interface{}) *SafEvent {
-	return &SafEvent{me: NewMapEvent(mp)}
+	return &SafEvent{Me: NewMapEvent(mp)}
 }
 
 // SafEvent is a generic event which is safe to read/write from multiple goroutines
 type SafEvent struct {
 	sync.RWMutex
-	me MapEvent
+	Me MapEvent // need it exportable so we can pass it on network
+}
+
+func (se *SafEvent) Clone() (cln *SafEvent) {
+	se.RLock()
+	cln = &SafEvent{Me: se.Me.Clone()}
+	se.RUnlock()
+	return
 }
 
 // MapEvent offers access to MapEvent methods, avoiding locks
 func (se *SafEvent) MapEvent() (mp MapEvent) {
-	return se.me
+	return se.Me
 }
 
 func (se *SafEvent) String() (out string) {
 	se.RLock()
-	out = se.me.String()
+	out = se.Me.String()
 	se.RUnlock()
 	return
 }
 
 func (se *SafEvent) HasField(fldName string) (has bool) {
 	se.RLock()
-	has = se.me.HasField(fldName)
+	has = se.Me.HasField(fldName)
 	se.RUnlock()
 	return
 }
 
 func (se *SafEvent) Get(fldName string) (out interface{}, has bool) {
 	se.RLock()
-	out, has = se.me[fldName]
+	out, has = se.Me[fldName]
 	se.RUnlock()
 	return
 }
@@ -70,7 +77,7 @@ func (se *SafEvent) GetIgnoreErrors(fldName string) (out interface{}) {
 // Set will set a field's value
 func (se *SafEvent) Set(fldName string, val interface{}) {
 	se.Lock()
-	se.me[fldName] = val
+	se.Me[fldName] = val
 	se.Unlock()
 	return
 }
@@ -78,14 +85,14 @@ func (se *SafEvent) Set(fldName string, val interface{}) {
 // Remove will remove a field from map
 func (se *SafEvent) Remove(fldName string) {
 	se.Lock()
-	delete(se.me, fldName)
+	delete(se.Me, fldName)
 	se.Unlock()
 	return
 }
 
 func (se *SafEvent) GetString(fldName string) (out string, err error) {
 	se.RLock()
-	out, err = se.me.GetString(fldName)
+	out, err = se.Me.GetString(fldName)
 	se.RUnlock()
 	return
 }
@@ -98,7 +105,7 @@ func (se *SafEvent) GetStringIgnoreErrors(fldName string) (out string) {
 // GetDuration returns a field as Duration
 func (se *SafEvent) GetDuration(fldName string) (d time.Duration, err error) {
 	se.RLock()
-	d, err = se.me.GetDuration(fldName)
+	d, err = se.Me.GetDuration(fldName)
 	se.RUnlock()
 	return
 }
@@ -138,7 +145,7 @@ func (se *SafEvent) GetDurationPtrOrDefault(fldName string, dflt *time.Duration)
 // GetTime returns a field as Time
 func (se *SafEvent) GetTime(fldName string, tmz string) (t time.Time, err error) {
 	se.RLock()
-	t, err = se.me.GetTime(fldName, tmz)
+	t, err = se.Me.GetTime(fldName, tmz)
 	se.RUnlock()
 	return
 }
@@ -154,9 +161,9 @@ func (se *SafEvent) GetTimeIgnoreErrors(fldName string, tmz string) (t time.Time
 func (se *SafEvent) GetSetString(fldName string, setVal string) (out string, err error) {
 	se.Lock()
 	defer se.Unlock()
-	outIface, has := se.me[fldName]
+	outIface, has := se.Me[fldName]
 	if !has {
-		se.me[fldName] = setVal
+		se.Me[fldName] = setVal
 		out = setVal
 		return
 	}
@@ -167,7 +174,7 @@ func (se *SafEvent) GetSetString(fldName string, setVal string) (out string, err
 // GetMapInterface returns the map stored internally without cloning it
 func (se *SafEvent) GetMapInterface() (mp map[string]interface{}) {
 	se.RLock()
-	mp = se.me
+	mp = se.Me
 	se.RUnlock()
 	return
 }
@@ -175,7 +182,7 @@ func (se *SafEvent) GetMapInterface() (mp map[string]interface{}) {
 // AsMapInterface returns the cloned map stored internally
 func (se *SafEvent) AsMapInterface() (mp map[string]interface{}) {
 	se.RLock()
-	mp = se.me.Clone()
+	mp = se.Me.Clone()
 	se.RUnlock()
 	return
 }
@@ -184,7 +191,7 @@ func (se *SafEvent) AsMapInterface() (mp map[string]interface{}) {
 // most used when needing to export extraFields
 func (se *SafEvent) AsMapString(ignoredFlds utils.StringMap) (mp map[string]string, err error) {
 	se.RLock()
-	mp, err = se.me.AsMapString(ignoredFlds)
+	mp, err = se.Me.AsMapString(ignoredFlds)
 	se.RUnlock()
 	return
 }
@@ -193,7 +200,7 @@ func (se *SafEvent) AsMapString(ignoredFlds utils.StringMap) (mp map[string]stri
 // most used when needing to export extraFields
 func (se *SafEvent) AsMapStringIgnoreErrors(ignoredFlds utils.StringMap) (mp map[string]string) {
 	se.RLock()
-	mp = se.me.AsMapStringIgnoreErrors(ignoredFlds)
+	mp = se.Me.AsMapStringIgnoreErrors(ignoredFlds)
 	se.RUnlock()
 	return
 }
@@ -201,7 +208,7 @@ func (se *SafEvent) AsMapStringIgnoreErrors(ignoredFlds utils.StringMap) (mp map
 // AsCDR exports the SafEvent as CDR
 func (se *SafEvent) AsCDR(cfg *config.CGRConfig, tmz string) (cdr *CDR, err error) {
 	se.RLock()
-	cdr, err = se.me.AsCDR(cfg, tmz)
+	cdr, err = se.Me.AsCDR(cfg, tmz)
 	se.RUnlock()
 	return
 }

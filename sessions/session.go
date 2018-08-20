@@ -42,16 +42,29 @@ type SMGSession struct {
 	CGRID      string // Unique identifier for this session
 	RunID      string // Keep a reference for the derived run
 	Timezone   string
-	EventStart *engine.SafEvent       // Event which started the session
-	CD         *engine.CallDescriptor // initial CD used for debits, updated on each debit
 	ResourceID string
 
-	EventCost     *engine.EventCost
+	EventStart *engine.SafEvent       // Event which started the session
+	CD         *engine.CallDescriptor // initial CD used for debits, updated on each debit
+	EventCost  *engine.EventCost
+
 	ExtraDuration time.Duration // keeps the current duration debited on top of what heas been asked
 	LastUsage     time.Duration // last requested Duration
 	LastDebit     time.Duration // last real debited duration
 	TotalUsage    time.Duration // sum of lastUsage
 
+}
+
+// Clone returns the cloned version of SMGSession
+func (s *SMGSession) Clone() *SMGSession {
+	return &SMGSession{CGRID: s.CGRID, RunID: s.RunID,
+		Timezone: s.Timezone, ResourceID: s.ResourceID,
+		EventStart:    s.EventStart.Clone(),
+		CD:            s.CD.Clone(),
+		EventCost:     s.EventCost.Clone(),
+		ExtraDuration: s.ExtraDuration, LastUsage: s.LastUsage,
+		LastDebit: s.LastDebit, TotalUsage: s.TotalUsage,
+	}
 }
 
 type SessionID struct {

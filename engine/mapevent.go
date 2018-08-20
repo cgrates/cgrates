@@ -90,8 +90,8 @@ func (me MapEvent) GetTimeIgnoreErrors(fldName string, tmz string) (t time.Time)
 }
 
 // Clone returns the cloned map
-func (me MapEvent) Clone() (mp map[string]interface{}) {
-	mp = make(map[string]interface{}, len(me))
+func (me MapEvent) Clone() (mp MapEvent) {
+	mp = make(MapEvent, len(me))
 	for k, v := range me {
 		mp[k] = v
 	}

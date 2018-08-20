@@ -604,13 +604,12 @@ func (smg *SMGeneric) replicateSessionsWithID(cgrID string, passiveSessions bool
 		ss[0].mux.RLock() // lock session so we can clone it after releasing the map lock
 	}
 	ssMux.RUnlock()
-	var ssCln []*SMGSession
-	err = utils.Clone(ss, &ssCln)
+	ssCln := make([]*SMGSession, len(ss))
+	for i, s := range ss {
+		ssCln[i] = s.Clone()
+	}
 	if len(ss) != 0 {
 		ss[0].mux.RUnlock()
-	}
-	if err != nil {
-		return
 	}
 	var wg sync.WaitGroup
 	for _, rplConn := range smgReplConns {
@@ -892,7 +891,6 @@ func (smg *SMGeneric) UpdateSession(gev *engine.SafEvent,
 			return
 		}
 	}
-
 	defer smg.replicateSessionsWithID(cgrID, false, smg.smgReplConns)
 	for _, s := range aSessions[cgrID] {
 		if s.RunID == utils.META_NONE {
