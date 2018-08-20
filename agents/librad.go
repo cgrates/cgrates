@@ -28,6 +28,7 @@ import (
 	"github.com/cgrates/radigo"
 )
 
+//adding Lance to the repo
 // radAttrVendorFromPath returns AttributenName and VendorName from path
 // path should be the form attributeName or vendorName/attributeName
 func attrVendorFromPath(path string) (attrName, vendorName string) {
