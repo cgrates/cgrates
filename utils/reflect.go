@@ -169,8 +169,8 @@ func IfaceAsDuration(itm interface{}) (d time.Duration, err error) {
 	switch itm.(type) {
 	case time.Duration:
 		return itm.(time.Duration), nil
-	case float64:
-		return time.Duration(int64(itm.(float64) * float64(time.Second))), nil
+	case float64: // automatically hitting here also ints
+		return time.Duration(int64(itm.(float64))), nil
 	case int64:
 		return time.Duration(itm.(int64)), nil
 	case string:

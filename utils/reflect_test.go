@@ -277,7 +277,7 @@ func TestIfaceAsDuration(t *testing.T) {
 	} else if eItm != itmConvert {
 		t.Errorf("received: %+v", itmConvert)
 	}
-	if itmConvert, err := IfaceAsDuration(interface{}(float64(1.0))); err != nil {
+	if itmConvert, err := IfaceAsDuration(interface{}(float64(1000000000.0))); err != nil {
 		t.Error(err)
 	} else if eItm != itmConvert {
 		t.Errorf("received: %+v", itmConvert)
