@@ -59,6 +59,16 @@ func (apierV1 *ApierV1) SetAttributeProfile(alsPrf *engine.AttributeProfile, rep
 	if missing := utils.MissingStructFields(alsPrf, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
+	if len(alsPrf.Attributes) != 0 {
+		for _, attr := range alsPrf.Attributes {
+			for _, sub := range attr.Substitute {
+				if missing := utils.MissingStructFields(sub, []string{"Rules", "AllFiltersMatch"}); len(missing) != 0 {
+					return utils.NewErrMandatoryIeMissing(missing...)
+				}
+			}
+
+		}
+	}
 	if err := apierV1.DataManager.SetAttributeProfile(alsPrf, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
