@@ -65,6 +65,7 @@ var sTestsAlsPrf = []func(t *testing.T){
 	testAttributeSRemAlsPrf,
 	testAttributeSSetAlsPrf2,
 	testAttributeSSetAlsPrf3,
+	testAttributeSSetAlsPrf4,
 	testAttributeSPing,
 	testAttributeSKillEngine,
 }
@@ -760,6 +761,37 @@ func testAttributeSSetAlsPrf2(t *testing.T) {
 }
 
 func testAttributeSSetAlsPrf3(t *testing.T) {
+	alsPrf = &engine.AttributeProfile{
+		Tenant:    "golant",
+		ID:        "ATTR_972587832508_SESSIONAUTH",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:Account:972587832508"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		Attributes: []*engine.Attribute{
+			&engine.Attribute{
+				FieldName: utils.Subject,
+				Initial:   utils.ANY,
+				Substitute: utils.RSRParsers{
+					&utils.RSRParser{
+						Rules: "",
+					},
+				},
+				Append: false,
+			},
+		},
+		Blocker: false,
+		Weight:  10,
+	}
+	var result string
+	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err == nil {
+		t.Error(err)
+	}
+}
+
+func testAttributeSSetAlsPrf4(t *testing.T) {
 	alsPrf = &engine.AttributeProfile{
 		Tenant:    "golant",
 		ID:        "ATTR_972587832508_SESSIONAUTH",

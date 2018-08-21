@@ -189,7 +189,9 @@ func (prsr *RSRParser) Compile() (err error) {
 	if newPrsr, err = NewRSRParser(prsr.Rules, prsr.AllFiltersMatch); err != nil {
 		return
 	}
-	*prsr = *newPrsr
+	if newPrsr != nil {
+		*prsr = *newPrsr
+	}
 	return
 }
 
