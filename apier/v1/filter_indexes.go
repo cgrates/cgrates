@@ -151,150 +151,7 @@ func (self *ApierV1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string)
 	return nil
 }
 
-type AttrGetFilterReverseIndexes struct {
-	Tenant      string
-	Context     string
-	ItemType    string
-	ItemIDs     []string
-	FilterType  string
-	FilterField string
-	FilterValue string
-	utils.Paginator
-}
-
-func (self *ApierV1) GetFilterReverseIndexes(arg AttrGetFilterReverseIndexes, reply *[]string) (err error) {
-	var indexes map[string]utils.StringMap
-	var indexedSlice []string
-	indexesFilter := make(map[string]utils.StringMap)
-	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ItemType"}); len(missing) != 0 { //Params missing
-		return utils.NewErrMandatoryIeMissing(missing...)
-	}
-	key := arg.Tenant
-	switch arg.ItemType {
-	case utils.MetaThresholds:
-		arg.ItemType = utils.ThresholdProfilePrefix
-	case utils.MetaSuppliers:
-		arg.ItemType = utils.SupplierProfilePrefix
-	case utils.MetaStats:
-		arg.ItemType = utils.StatQueueProfilePrefix
-	case utils.MetaResources:
-		arg.ItemType = utils.ResourceProfilesPrefix
-	case utils.MetaChargers:
-		arg.ItemType = utils.ChargerProfilePrefix
-	case utils.MetaAttributes:
-		if missing := utils.MissingStructFields(&arg, []string{"Context"}); len(missing) != 0 { //Params missing
-			return utils.NewErrMandatoryIeMissing(missing...)
-		}
-		arg.ItemType = utils.AttributeProfilePrefix
-		key = utils.ConcatenatedKey(arg.Tenant, arg.Context)
-	}
-	if arg.ItemIDs != nil {
-		indexes = make(map[string]utils.StringMap)
-		for _, itemID := range arg.ItemIDs {
-			if tmpIndexes, err := self.DataManager.GetFilterReverseIndexes(
-				utils.PrefixToRevIndexCache[arg.ItemType], key, map[string]string{itemID: ""}); err != nil {
-				return err
-			} else {
-				for key, val := range tmpIndexes {
-					indexes[key] = make(utils.StringMap)
-					indexes[key] = val
-				}
-
-			}
-		}
-	} else {
-		indexes, err = self.DataManager.GetFilterReverseIndexes(
-			utils.PrefixToRevIndexCache[arg.ItemType], key, nil)
-		if err != nil {
-			return err
-		}
-	}
-	if arg.FilterType != "" {
-		for val, strmap := range indexes {
-			indexesFilter[val] = make(utils.StringMap)
-			for _, value := range strmap.Slice() {
-				if strings.HasPrefix(value, arg.FilterType) {
-					indexesFilter[val][value] = true
-					indexedSlice = append(indexedSlice, utils.ConcatenatedKey(val, value))
-				}
-			}
-		}
-		if len(indexedSlice) == 0 {
-			return utils.ErrNotFound
-		}
-	}
-	if arg.FilterField != "" {
-		if len(indexedSlice) == 0 {
-			indexesFilter = make(map[string]utils.StringMap)
-			for val, strmap := range indexes {
-				indexesFilter[val] = make(utils.StringMap)
-				for _, value := range strmap.Slice() {
-					if strings.Index(value, arg.FilterField) != -1 {
-						indexesFilter[val][value] = true
-						indexedSlice = append(indexedSlice, utils.ConcatenatedKey(val, value))
-					}
-				}
-			}
-			if len(indexedSlice) == 0 {
-				return utils.ErrNotFound
-			}
-		} else {
-			var cloneIndexSlice []string
-			for val, strmap := range indexesFilter {
-				for _, value := range strmap.Slice() {
-					if strings.Index(value, arg.FilterField) != -1 {
-						cloneIndexSlice = append(cloneIndexSlice, utils.ConcatenatedKey(val, value))
-					}
-				}
-			}
-			if len(cloneIndexSlice) == 0 {
-				return utils.ErrNotFound
-			}
-			indexedSlice = cloneIndexSlice
-		}
-	}
-	if arg.FilterValue != "" {
-		if len(indexedSlice) == 0 {
-			for val, strmap := range indexes {
-				for _, value := range strmap.Slice() {
-					if strings.Index(value, arg.FilterValue) != -1 {
-						indexedSlice = append(indexedSlice, utils.ConcatenatedKey(val, value))
-					}
-				}
-			}
-			if len(indexedSlice) == 0 {
-				return utils.ErrNotFound
-			}
-		} else {
-			var cloneIndexSlice []string
-			for val, strmap := range indexesFilter {
-				for _, value := range strmap.Slice() {
-					if strings.Index(value, arg.FilterValue) != -1 {
-						cloneIndexSlice = append(cloneIndexSlice, utils.ConcatenatedKey(val, value))
-					}
-				}
-			}
-			if len(cloneIndexSlice) == 0 {
-				return utils.ErrNotFound
-			}
-			indexedSlice = cloneIndexSlice
-		}
-	}
-	if len(indexedSlice) == 0 {
-		for val, strmap := range indexes {
-			for _, value := range strmap.Slice() {
-				indexedSlice = append(indexedSlice, utils.ConcatenatedKey(val, value))
-			}
-		}
-	}
-	if arg.Paginator.Limit != nil || arg.Paginator.Offset != nil || arg.Paginator.SearchTerm != "" {
-		*reply = arg.Paginator.PaginateStringSlice(indexedSlice)
-	} else {
-		*reply = indexedSlice
-	}
-	return nil
-}
-
+//NEED REVIEW
 func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, reply *string) error {
 	transactionID := utils.GenUUID()
 	//ThresholdProfile Indexes
@@ -333,7 +190,11 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 		if err := thdsIndexers.StoreIndexes(true, transactionID); err != nil {
 			if args.ThresholdIDs != nil {
 				for _, id := range *args.ThresholdIDs {
-					if err := thdsIndexers.RemoveItemFromIndex(id); err != nil {
+					th, err := self.DataManager.GetThresholdProfile(args.Tenant, id, false, utils.NonTransactional)
+					if err != nil {
+						return err
+					}
+					if err := thdsIndexers.RemoveItemFromIndex(args.Tenant, id, th.FilterIDs); err != nil {
 						return err
 					}
 				}
@@ -345,7 +206,11 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	if sqpIndexers != nil {
 		if err := sqpIndexers.StoreIndexes(true, transactionID); err != nil {
 			for _, id := range *args.StatIDs {
-				if err := sqpIndexers.RemoveItemFromIndex(id); err != nil {
+				sqp, err := self.DataManager.GetStatQueueProfile(args.Tenant, id, false, utils.NonTransactional)
+				if err != nil {
+					return err
+				}
+				if err := sqpIndexers.RemoveItemFromIndex(args.Tenant, id, sqp.FilterIDs); err != nil {
 					return err
 				}
 			}
@@ -356,7 +221,11 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	if rsIndexes != nil {
 		if err := rsIndexes.StoreIndexes(true, transactionID); err != nil {
 			for _, id := range *args.ResourceIDs {
-				if err := rsIndexes.RemoveItemFromIndex(id); err != nil {
+				rp, err := self.DataManager.GetResourceProfile(args.Tenant, id, false, utils.NonTransactional)
+				if err != nil {
+					return err
+				}
+				if err := rsIndexes.RemoveItemFromIndex(args.Tenant, id, rp.FilterIDs); err != nil {
 					return err
 				}
 			}
@@ -367,7 +236,11 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	if sppIndexes != nil {
 		if err := sppIndexes.StoreIndexes(true, transactionID); err != nil {
 			for _, id := range *args.SupplierIDs {
-				if err := sppIndexes.RemoveItemFromIndex(id); err != nil {
+				spp, err := self.DataManager.GetSupplierProfile(args.Tenant, id, false, utils.NonTransactional)
+				if err != nil {
+					return err
+				}
+				if err := sppIndexes.RemoveItemFromIndex(args.Tenant, id, spp.FilterIDs); err != nil {
 					return err
 				}
 			}
@@ -378,7 +251,11 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	if attrIndexes != nil {
 		if err := attrIndexes.StoreIndexes(true, transactionID); err != nil {
 			for _, id := range *args.AttributeIDs {
-				if err := attrIndexes.RemoveItemFromIndex(id); err != nil {
+				ap, err := self.DataManager.GetAttributeProfile(args.Tenant, id, false, utils.NonTransactional)
+				if err != nil {
+					return err
+				}
+				if err := attrIndexes.RemoveItemFromIndex(args.Tenant, id, ap.FilterIDs); err != nil {
 					return err
 				}
 			}
@@ -389,7 +266,11 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	if cppIndexes != nil {
 		if err := attrIndexes.StoreIndexes(true, transactionID); err != nil {
 			for _, id := range *args.ChargerIDs {
-				if err := cppIndexes.RemoveItemFromIndex(id); err != nil {
+				cpp, err := self.DataManager.GetChargerProfile(args.Tenant, id, false, utils.NonTransactional)
+				if err != nil {
+					return err
+				}
+				if err := cppIndexes.RemoveItemFromIndex(args.Tenant, id, cpp.FilterIDs); err != nil {
 					return err
 				}
 			}

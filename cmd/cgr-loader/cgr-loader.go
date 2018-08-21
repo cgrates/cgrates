@@ -405,22 +405,22 @@ func main() {
 			}
 			var cacheIDs []string
 			if len(apfIDs) != 0 {
-				cacheIDs = append(cacheIDs, utils.CacheAttributeFilterIndexes, utils.CacheAttributeFilterRevIndexes)
+				cacheIDs = append(cacheIDs, utils.CacheAttributeFilterIndexes)
 			}
 			if len(spfIDs) != 0 {
-				cacheIDs = append(cacheIDs, utils.CacheSupplierFilterIndexes, utils.CacheSupplierFilterRevIndexes)
+				cacheIDs = append(cacheIDs, utils.CacheSupplierFilterIndexes)
 			}
 			if len(trspfIDs) != 0 {
-				cacheIDs = append(cacheIDs, utils.CacheThresholdFilterIndexes, utils.CacheThresholdFilterRevIndexes)
+				cacheIDs = append(cacheIDs, utils.CacheThresholdFilterIndexes)
 			}
 			if len(stqpIDs) != 0 {
-				cacheIDs = append(cacheIDs, utils.CacheStatFilterIndexes, utils.CacheStatFilterRevIndexes)
+				cacheIDs = append(cacheIDs, utils.CacheStatFilterIndexes)
 			}
 			if len(rspIDs) != 0 {
-				cacheIDs = append(cacheIDs, utils.CacheResourceFilterIndexes, utils.CacheResourceFilterRevIndexes)
+				cacheIDs = append(cacheIDs, utils.CacheResourceFilterIndexes)
 			}
 			if len(chargerIDs) != 0 {
-				cacheIDs = append(cacheIDs, utils.CacheChargerFilterIndexes, utils.CacheChargerFilterRevIndexes)
+				cacheIDs = append(cacheIDs, utils.CacheChargerFilterIndexes)
 			}
 			if err = cacheS.Call(utils.CacheSv1Clear, cacheIDs, &reply); err != nil {
 				log.Printf("WARNING: Got error on cache clear: %s\n", err.Error())

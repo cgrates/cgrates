@@ -41,44 +41,38 @@ var (
 		MetaFileFWV:     FWVSuffix,
 	}
 	CacheInstanceToPrefix = map[string]string{
-		CacheDestinations:              DESTINATION_PREFIX,
-		CacheReverseDestinations:       REVERSE_DESTINATION_PREFIX,
-		CacheRatingPlans:               RATING_PLAN_PREFIX,
-		CacheRatingProfiles:            RATING_PROFILE_PREFIX,
-		CacheLCRRules:                  LCR_PREFIX,
-		CacheCDRStatS:                  CDR_STATS_PREFIX,
-		CacheActions:                   ACTION_PREFIX,
-		CacheActionPlans:               ACTION_PLAN_PREFIX,
-		CacheAccountActionPlans:        AccountActionPlansPrefix,
-		CacheActionTriggers:            ACTION_TRIGGER_PREFIX,
-		CacheSharedGroups:              SHARED_GROUP_PREFIX,
-		CacheAliases:                   ALIASES_PREFIX,
-		CacheReverseAliases:            REVERSE_ALIASES_PREFIX,
-		CacheDerivedChargers:           DERIVEDCHARGERS_PREFIX,
-		CacheResourceProfiles:          ResourceProfilesPrefix,
-		CacheResources:                 ResourcesPrefix,
-		CacheEventResources:            EventResourcesPrefix,
-		CacheTimings:                   TimingsPrefix,
-		CacheStatQueueProfiles:         StatQueueProfilePrefix,
-		CacheStatQueues:                StatQueuePrefix,
-		CacheThresholdProfiles:         ThresholdProfilePrefix,
-		CacheThresholds:                ThresholdPrefix,
-		CacheFilters:                   FilterPrefix,
-		CacheSupplierProfiles:          SupplierProfilePrefix,
-		CacheAttributeProfiles:         AttributeProfilePrefix,
-		CacheChargerProfiles:           ChargerProfilePrefix,
-		CacheResourceFilterIndexes:     ResourceFilterIndexes,
-		CacheResourceFilterRevIndexes:  ResourceFilterRevIndexes,
-		CacheStatFilterIndexes:         StatFilterIndexes,
-		CacheStatFilterRevIndexes:      StatFilterRevIndexes,
-		CacheThresholdFilterIndexes:    ThresholdFilterIndexes,
-		CacheThresholdFilterRevIndexes: ThresholdFilterRevIndexes,
-		CacheSupplierFilterIndexes:     SupplierFilterIndexes,
-		CacheSupplierFilterRevIndexes:  SupplierFilterRevIndexes,
-		CacheAttributeFilterIndexes:    AttributeFilterIndexes,
-		CacheAttributeFilterRevIndexes: AttributeFilterRevIndexes,
-		CacheChargerFilterIndexes:      ChargerFilterIndexes,
-		CacheChargerFilterRevIndexes:   ChargerFilterRevIndexes,
+		CacheDestinations:           DESTINATION_PREFIX,
+		CacheReverseDestinations:    REVERSE_DESTINATION_PREFIX,
+		CacheRatingPlans:            RATING_PLAN_PREFIX,
+		CacheRatingProfiles:         RATING_PROFILE_PREFIX,
+		CacheLCRRules:               LCR_PREFIX,
+		CacheCDRStatS:               CDR_STATS_PREFIX,
+		CacheActions:                ACTION_PREFIX,
+		CacheActionPlans:            ACTION_PLAN_PREFIX,
+		CacheAccountActionPlans:     AccountActionPlansPrefix,
+		CacheActionTriggers:         ACTION_TRIGGER_PREFIX,
+		CacheSharedGroups:           SHARED_GROUP_PREFIX,
+		CacheAliases:                ALIASES_PREFIX,
+		CacheReverseAliases:         REVERSE_ALIASES_PREFIX,
+		CacheDerivedChargers:        DERIVEDCHARGERS_PREFIX,
+		CacheResourceProfiles:       ResourceProfilesPrefix,
+		CacheResources:              ResourcesPrefix,
+		CacheEventResources:         EventResourcesPrefix,
+		CacheTimings:                TimingsPrefix,
+		CacheStatQueueProfiles:      StatQueueProfilePrefix,
+		CacheStatQueues:             StatQueuePrefix,
+		CacheThresholdProfiles:      ThresholdProfilePrefix,
+		CacheThresholds:             ThresholdPrefix,
+		CacheFilters:                FilterPrefix,
+		CacheSupplierProfiles:       SupplierProfilePrefix,
+		CacheAttributeProfiles:      AttributeProfilePrefix,
+		CacheChargerProfiles:        ChargerProfilePrefix,
+		CacheResourceFilterIndexes:  ResourceFilterIndexes,
+		CacheStatFilterIndexes:      StatFilterIndexes,
+		CacheThresholdFilterIndexes: ThresholdFilterIndexes,
+		CacheSupplierFilterIndexes:  SupplierFilterIndexes,
+		CacheAttributeFilterIndexes: AttributeFilterIndexes,
+		CacheChargerFilterIndexes:   ChargerFilterIndexes,
 	}
 	CachePrefixToInstance map[string]string // will be built on init
 	PrefixToIndexCache    = map[string]string{
@@ -88,14 +82,6 @@ var (
 		SupplierProfilePrefix:  CacheSupplierFilterIndexes,
 		AttributeProfilePrefix: CacheAttributeFilterIndexes,
 		ChargerProfilePrefix:   CacheChargerFilterIndexes,
-	}
-	PrefixToRevIndexCache = map[string]string{
-		ThresholdProfilePrefix: CacheThresholdFilterRevIndexes,
-		ResourceProfilesPrefix: CacheResourceFilterRevIndexes,
-		StatQueueProfilePrefix: CacheStatFilterRevIndexes,
-		SupplierProfilePrefix:  CacheSupplierFilterRevIndexes,
-		AttributeProfilePrefix: CacheAttributeFilterRevIndexes,
-		ChargerProfilePrefix:   CacheChargerFilterRevIndexes,
 	}
 	CacheIndexesToPrefix map[string]string // will be built on init
 )
@@ -865,62 +851,50 @@ const (
 
 // Cache Name
 const (
-	CacheDestinations              = "destinations"
-	CacheReverseDestinations       = "reverse_destinations"
-	CacheRatingPlans               = "rating_plans"
-	CacheRatingProfiles            = "rating_profiles"
-	CacheLCRRules                  = "lcr_rules"
-	CacheCDRStatS                  = "cdr_stats"
-	CacheActions                   = "actions"
-	CacheActionPlans               = "action_plans"
-	CacheAccountActionPlans        = "account_action_plans"
-	CacheActionTriggers            = "action_triggers"
-	CacheSharedGroups              = "shared_groups"
-	CacheAliases                   = "aliases"
-	CacheReverseAliases            = "reverse_aliases"
-	CacheDerivedChargers           = "derived_chargers"
-	CacheResources                 = "resources"
-	CacheResourceProfiles          = "resource_profiles"
-	CacheTimings                   = "timings"
-	CacheEventResources            = "event_resources"
-	CacheStatQueueProfiles         = "statqueue_profiles"
-	CacheStatQueues                = "statqueues"
-	CacheThresholdProfiles         = "threshold_profiles"
-	CacheThresholds                = "thresholds"
-	CacheFilters                   = "filters"
-	CacheSupplierProfiles          = "supplier_profiles"
-	CacheAttributeProfiles         = "attribute_profiles"
-	CacheChargerProfiles           = "charger_profiles"
-	CacheResourceFilterIndexes     = "resource_filter_indexes"
-	CacheResourceFilterRevIndexes  = "resource_filter_revindexes"
-	CacheStatFilterIndexes         = "stat_filter_indexes"
-	CacheStatFilterRevIndexes      = "stat_filter_revindexes"
-	CacheThresholdFilterIndexes    = "threshold_filter_indexes"
-	CacheThresholdFilterRevIndexes = "threshold_filter_revindexes"
-	CacheSupplierFilterIndexes     = "supplier_filter_indexes"
-	CacheSupplierFilterRevIndexes  = "supplier_filter_revindexes"
-	CacheAttributeFilterIndexes    = "attribute_filter_indexes"
-	CacheAttributeFilterRevIndexes = "attribute_filter_revindexes"
-	CacheChargerFilterIndexes      = "charger_filter_indexes"
-	CacheChargerFilterRevIndexes   = "charger_filter_revindexes"
-	MetaPrecaching                 = "*precaching"
-	MetaReady                      = "*ready"
+	CacheDestinations           = "destinations"
+	CacheReverseDestinations    = "reverse_destinations"
+	CacheRatingPlans            = "rating_plans"
+	CacheRatingProfiles         = "rating_profiles"
+	CacheLCRRules               = "lcr_rules"
+	CacheCDRStatS               = "cdr_stats"
+	CacheActions                = "actions"
+	CacheActionPlans            = "action_plans"
+	CacheAccountActionPlans     = "account_action_plans"
+	CacheActionTriggers         = "action_triggers"
+	CacheSharedGroups           = "shared_groups"
+	CacheAliases                = "aliases"
+	CacheReverseAliases         = "reverse_aliases"
+	CacheDerivedChargers        = "derived_chargers"
+	CacheResources              = "resources"
+	CacheResourceProfiles       = "resource_profiles"
+	CacheTimings                = "timings"
+	CacheEventResources         = "event_resources"
+	CacheStatQueueProfiles      = "statqueue_profiles"
+	CacheStatQueues             = "statqueues"
+	CacheThresholdProfiles      = "threshold_profiles"
+	CacheThresholds             = "thresholds"
+	CacheFilters                = "filters"
+	CacheSupplierProfiles       = "supplier_profiles"
+	CacheAttributeProfiles      = "attribute_profiles"
+	CacheChargerProfiles        = "charger_profiles"
+	CacheResourceFilterIndexes  = "resource_filter_indexes"
+	CacheStatFilterIndexes      = "stat_filter_indexes"
+	CacheThresholdFilterIndexes = "threshold_filter_indexes"
+	CacheSupplierFilterIndexes  = "supplier_filter_indexes"
+	CacheAttributeFilterIndexes = "attribute_filter_indexes"
+	CacheChargerFilterIndexes   = "charger_filter_indexes"
+	MetaPrecaching              = "*precaching"
+	MetaReady                   = "*ready"
 )
 
 // Prefix for indexing
 const (
-	ResourceFilterIndexes     = "rfi_"
-	ResourceFilterRevIndexes  = "rfr_"
-	StatFilterIndexes         = "sfi_"
-	StatFilterRevIndexes      = "sfr_"
-	ThresholdFilterIndexes    = "tfi_"
-	ThresholdFilterRevIndexes = "tfr_"
-	SupplierFilterIndexes     = "spi_"
-	SupplierFilterRevIndexes  = "spr_"
-	AttributeFilterIndexes    = "afi_"
-	AttributeFilterRevIndexes = "afr_"
-	ChargerFilterIndexes      = "cfi_"
-	ChargerFilterRevIndexes   = "cfr_"
+	ResourceFilterIndexes  = "rfi_"
+	StatFilterIndexes      = "sfi_"
+	ThresholdFilterIndexes = "tfi_"
+	SupplierFilterIndexes  = "spi_"
+	AttributeFilterIndexes = "afi_"
+	ChargerFilterIndexes   = "cfi_"
 )
 
 // Agents
@@ -943,9 +917,6 @@ func buildCacheInstRevPrefixes() {
 func buildCacheIndexesToPrefix() {
 	CacheIndexesToPrefix = make(map[string]string)
 	for k, v := range PrefixToIndexCache {
-		CacheIndexesToPrefix[v] = k
-	}
-	for k, v := range PrefixToRevIndexCache {
 		CacheIndexesToPrefix[v] = k
 	}
 }

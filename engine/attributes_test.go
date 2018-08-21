@@ -476,11 +476,6 @@ func TestAttributeIndexer(t *testing.T) {
 			"AttrPrf": true,
 		},
 	}
-	reverseIdxes := map[string]utils.StringMap{
-		"AttrPrf": utils.StringMap{
-			"*string:Account:1007": true,
-		},
-	}
 	rfi1 := NewFilterIndexer(dmAtr, utils.AttributeProfilePrefix,
 		utils.ConcatenatedKey(attrPrf.Tenant, utils.META_ANY))
 	if rcvIdx, err := dmAtr.GetFilterIndexes(utils.PrefixToIndexCache[rfi1.itemType],
@@ -489,14 +484,6 @@ func TestAttributeIndexer(t *testing.T) {
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
 			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
-		}
-	}
-	if reverseRcvIdx, err := dmAtr.GetFilterReverseIndexes(
-		utils.PrefixToRevIndexCache[rfi1.itemType], rfi1.dbKeySuffix, nil); err != nil {
-		t.Error(err)
-	} else {
-		if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
-			t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
 		}
 	}
 	//Set AttributeProfile with new context (*sessions)
@@ -514,19 +501,9 @@ func TestAttributeIndexer(t *testing.T) {
 			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
 		}
 	}
-	if reverseRcvIdx, err := dmAtr.GetFilterReverseIndexes(
-		utils.PrefixToRevIndexCache[rfi2.itemType], rfi2.dbKeySuffix, nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(reverseIdxes, reverseRcvIdx) {
-		t.Errorf("Expecting %+v, received: %+v", reverseIdxes, reverseRcvIdx)
-	}
 	//verify if old index was deleted ( context *any)
 	if _, err := dmAtr.GetFilterIndexes(utils.PrefixToIndexCache[rfi1.itemType],
 		rfi1.dbKeySuffix, MetaString, nil); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-	if _, err := dmAtr.GetFilterReverseIndexes(
-		utils.PrefixToRevIndexCache[rfi1.itemType], rfi1.dbKeySuffix, nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }

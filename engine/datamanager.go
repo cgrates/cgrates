@@ -420,6 +420,10 @@ func (dm *DataManager) GetThresholdProfile(tenant, id string, skipCache bool,
 }
 
 func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool) (err error) {
+	oldTh, err := dm.GetThresholdProfile(th.Tenant, th.ID, false, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
 	if err = dm.DataDB().SetThresholdProfileDrv(th); err != nil {
 		return err
 	}
@@ -428,6 +432,20 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 		return
 	}
 	if withIndex {
+		if oldTh != nil {
+			var needsRemove bool
+			for _, fltrID := range oldTh.FilterIDs {
+				if !utils.IsSliceMember(th.FilterIDs, fltrID) {
+					needsRemove = true
+				}
+			}
+			if needsRemove {
+				if err = NewFilterIndexer(dm, utils.ThresholdProfilePrefix,
+					th.Tenant).RemoveItemFromIndex(th.Tenant, th.ID, oldTh.FilterIDs); err != nil {
+					return
+				}
+			}
+		}
 		return createAndIndex(utils.ThresholdProfilePrefix, th.Tenant, utils.EmptyString, th.ID, th.FilterIDs, dm)
 	}
 	return
@@ -435,6 +453,10 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 
 func (dm *DataManager) RemoveThresholdProfile(tenant, id,
 	transactionID string, withIndex bool) (err error) {
+	oldTh, err := dm.GetThresholdProfile(tenant, id, false, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
 	if err = dm.DataDB().RemThresholdProfileDrv(tenant, id); err != nil {
 		return
 	}
@@ -442,7 +464,7 @@ func (dm *DataManager) RemoveThresholdProfile(tenant, id,
 		cacheCommit(transactionID), transactionID)
 	if withIndex {
 		return NewFilterIndexer(dm,
-			utils.ThresholdProfilePrefix, tenant).RemoveItemFromIndex(id)
+			utils.ThresholdProfilePrefix, tenant).RemoveItemFromIndex(tenant, id, oldTh.FilterIDs)
 	}
 	return
 }
@@ -472,6 +494,10 @@ func (dm *DataManager) GetStatQueueProfile(tenant, id string, skipCache bool,
 }
 
 func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool) (err error) {
+	oldSts, err := dm.GetStatQueueProfile(sqp.Tenant, sqp.ID, false, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
 	if err = dm.DataDB().SetStatQueueProfileDrv(sqp); err != nil {
 		return err
 	}
@@ -480,6 +506,20 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 		return
 	}
 	if withIndex {
+		if oldSts != nil {
+			var needsRemove bool
+			for _, fltrID := range oldSts.FilterIDs {
+				if !utils.IsSliceMember(sqp.FilterIDs, fltrID) {
+					needsRemove = true
+				}
+			}
+			if needsRemove {
+				if err = NewFilterIndexer(dm, utils.StatQueueProfilePrefix,
+					sqp.Tenant).RemoveItemFromIndex(sqp.Tenant, sqp.ID, oldSts.FilterIDs); err != nil {
+					return
+				}
+			}
+		}
 		return createAndIndex(utils.StatQueueProfilePrefix, sqp.Tenant, utils.EmptyString, sqp.ID, sqp.FilterIDs, dm)
 	}
 	return
@@ -487,13 +527,17 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 
 func (dm *DataManager) RemoveStatQueueProfile(tenant, id,
 	transactionID string, withIndex bool) (err error) {
+	oldSts, err := dm.GetResourceProfile(tenant, id, true, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
 	if err = dm.DataDB().RemStatQueueProfileDrv(tenant, id); err != nil {
 		return
 	}
 	Cache.Remove(utils.CacheStatQueueProfiles, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
 	if withIndex {
-		return NewFilterIndexer(dm, utils.StatQueueProfilePrefix, tenant).RemoveItemFromIndex(id)
+		return NewFilterIndexer(dm, utils.StatQueueProfilePrefix, tenant).RemoveItemFromIndex(tenant, id, oldSts.FilterIDs)
 	}
 	return
 }
@@ -607,6 +651,10 @@ func (dm *DataManager) GetResourceProfile(tenant, id string,
 }
 
 func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (err error) {
+	oldRes, err := dm.GetResourceProfile(rp.Tenant, rp.ID, false, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
 	if err = dm.DataDB().SetResourceProfileDrv(rp); err != nil {
 		return err
 	}
@@ -616,6 +664,20 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 	}
 	//to be implemented in tests
 	if withIndex {
+		if oldRes != nil {
+			var needsRemove bool
+			for _, fltrID := range oldRes.FilterIDs {
+				if !utils.IsSliceMember(rp.FilterIDs, fltrID) {
+					needsRemove = true
+				}
+			}
+			if needsRemove {
+				if err = NewFilterIndexer(dm, utils.ResourceProfilesPrefix,
+					rp.Tenant).RemoveItemFromIndex(rp.Tenant, rp.ID, oldRes.FilterIDs); err != nil {
+					return
+				}
+			}
+		}
 		if err = createAndIndex(utils.ResourceProfilesPrefix, rp.Tenant, utils.EmptyString, rp.ID, rp.FilterIDs, dm); err != nil {
 			return
 		}
@@ -625,13 +687,17 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 }
 
 func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string, withIndex bool) (err error) {
+	oldRes, err := dm.GetResourceProfile(tenant, id, false, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
 	if err = dm.DataDB().RemoveResourceProfileDrv(tenant, id); err != nil {
 		return
 	}
 	Cache.Remove(utils.CacheResourceProfiles, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
 	if withIndex {
-		return NewFilterIndexer(dm, utils.ResourceProfilesPrefix, tenant).RemoveItemFromIndex(id)
+		return NewFilterIndexer(dm, utils.ResourceProfilesPrefix, tenant).RemoveItemFromIndex(tenant, id, oldRes.FilterIDs)
 	}
 	return
 }
@@ -955,22 +1021,6 @@ func (dm *DataManager) RemoveFilterIndexes(cacheID, itemIDPrefix string) (err er
 	return dm.DataDB().RemoveFilterIndexesDrv(cacheID, itemIDPrefix)
 }
 
-func (dm *DataManager) GetFilterReverseIndexes(cacheID, itemIDPrefix string,
-	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
-	return dm.DataDB().GetFilterReverseIndexesDrv(cacheID, itemIDPrefix, fldNameVal)
-}
-
-func (dm *DataManager) SetFilterReverseIndexes(cacheID, itemIDPrefix string,
-	indexes map[string]utils.StringMap,
-	commit bool, transactionID string) (err error) {
-	return dm.DataDB().SetFilterReverseIndexesDrv(cacheID,
-		itemIDPrefix, indexes, commit, transactionID)
-}
-
-func (dm *DataManager) RemoveFilterReverseIndexes(cacheID, itemIDPrefix string) (err error) {
-	return dm.DataDB().RemoveFilterReverseIndexesDrv(cacheID, itemIDPrefix)
-}
-
 func (dm *DataManager) MatchFilterIndex(cacheID, itemIDPrefix,
 	filterType, fieldName, fieldVal string) (itemIDs utils.StringMap, err error) {
 	fieldValKey := utils.ConcatenatedKey(itemIDPrefix, filterType, fieldName, fieldVal)
@@ -1043,6 +1093,10 @@ func (dm *DataManager) GetSupplierProfile(tenant, id string, skipCache bool,
 }
 
 func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool) (err error) {
+	oldSup, err := dm.GetSupplierProfile(supp.Tenant, supp.ID, false, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
 	if err = dm.DataDB().SetSupplierProfileDrv(supp); err != nil {
 		return err
 	}
@@ -1050,19 +1104,37 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 		return
 	}
 	if withIndex {
+		if oldSup != nil {
+			var needsRemove bool
+			for _, fltrID := range oldSup.FilterIDs {
+				if !utils.IsSliceMember(supp.FilterIDs, fltrID) {
+					needsRemove = true
+				}
+			}
+			if needsRemove {
+				if err = NewFilterIndexer(dm, utils.SupplierProfilePrefix,
+					supp.Tenant).RemoveItemFromIndex(supp.Tenant, supp.ID, oldSup.FilterIDs); err != nil {
+					return
+				}
+			}
+		}
 		return createAndIndex(utils.SupplierProfilePrefix, supp.Tenant, utils.EmptyString, supp.ID, supp.FilterIDs, dm)
 	}
 	return
 }
 
 func (dm *DataManager) RemoveSupplierProfile(tenant, id, transactionID string, withIndex bool) (err error) {
+	oldSupp, err := dm.GetSupplierProfile(tenant, id, false, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
 	if err = dm.DataDB().RemoveSupplierProfileDrv(tenant, id); err != nil {
 		return
 	}
 	Cache.Remove(utils.CacheSupplierProfiles, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
 	if withIndex {
-		return NewFilterIndexer(dm, utils.SupplierProfilePrefix, tenant).RemoveItemFromIndex(id)
+		return NewFilterIndexer(dm, utils.SupplierProfilePrefix, tenant).RemoveItemFromIndex(tenant, id, oldSupp.FilterIDs)
 	}
 	return
 }
@@ -1095,7 +1167,7 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, skipCache bool,
 }
 
 func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool) (err error) {
-	oldAP, err := dm.GetAttributeProfile(ap.Tenant, ap.ID, true, utils.NonTransactional)
+	oldAP, err := dm.GetAttributeProfile(ap.Tenant, ap.ID, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -1120,7 +1192,7 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 				}
 				if needsRemove {
 					if err = NewFilterIndexer(dm, utils.AttributeProfilePrefix,
-						utils.ConcatenatedKey(ap.Tenant, ctx)).RemoveItemFromIndex(ap.ID); err != nil {
+						utils.ConcatenatedKey(ap.Tenant, ctx)).RemoveItemFromIndex(ap.Tenant, ap.ID, oldAP.FilterIDs); err != nil {
 						return
 					}
 				}
@@ -1138,6 +1210,10 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 
 func (dm *DataManager) RemoveAttributeProfile(tenant, id string, contexts []string,
 	transactionID string, withIndex bool) (err error) {
+	oldAttr, err := dm.GetAttributeProfile(tenant, id, true, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
 	if err = dm.DataDB().RemoveAttributeProfileDrv(tenant, id); err != nil {
 		return
 	}
@@ -1146,7 +1222,7 @@ func (dm *DataManager) RemoveAttributeProfile(tenant, id string, contexts []stri
 	if withIndex {
 		for _, context := range contexts {
 			if err = NewFilterIndexer(dm, utils.AttributeProfilePrefix,
-				utils.ConcatenatedKey(tenant, context)).RemoveItemFromIndex(id); err != nil {
+				utils.ConcatenatedKey(tenant, context)).RemoveItemFromIndex(tenant, id, oldAttr.FilterIDs); err != nil {
 				return
 			}
 		}
@@ -1179,6 +1255,10 @@ func (dm *DataManager) GetChargerProfile(tenant, id string, skipCache bool,
 }
 
 func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (err error) {
+	oldCpp, err := dm.GetChargerProfile(cpp.Tenant, cpp.ID, true, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
 	if err = dm.DataDB().SetChargerProfileDrv(cpp); err != nil {
 		return err
 	}
@@ -1186,6 +1266,20 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 		return
 	}
 	if withIndex {
+		if oldCpp != nil {
+			var needsRemove bool
+			for _, fltrID := range oldCpp.FilterIDs {
+				if !utils.IsSliceMember(cpp.FilterIDs, fltrID) {
+					needsRemove = true
+				}
+			}
+			if needsRemove {
+				if err = NewFilterIndexer(dm, utils.SupplierProfilePrefix,
+					cpp.Tenant).RemoveItemFromIndex(cpp.Tenant, cpp.ID, oldCpp.FilterIDs); err != nil {
+					return
+				}
+			}
+		}
 		return createAndIndex(utils.ChargerProfilePrefix, cpp.Tenant, utils.EmptyString, cpp.ID, cpp.FilterIDs, dm)
 	}
 	return
@@ -1193,13 +1287,17 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 
 func (dm *DataManager) RemoveChargerProfile(tenant, id string,
 	transactionID string, withIndex bool) (err error) {
+	oldCpp, err := dm.GetChargerProfile(tenant, id, true, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
 	if err = dm.DataDB().RemoveChargerProfileDrv(tenant, id); err != nil {
 		return
 	}
 	Cache.Remove(utils.CacheChargerProfiles, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
 	if withIndex {
-		return NewFilterIndexer(dm, utils.ChargerProfilePrefix, tenant).RemoveItemFromIndex(id)
+		return NewFilterIndexer(dm, utils.ChargerProfilePrefix, tenant).RemoveItemFromIndex(tenant, id, oldCpp.FilterIDs)
 	}
 	return
 }

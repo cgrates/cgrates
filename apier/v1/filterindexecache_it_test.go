@@ -51,14 +51,14 @@ var sTestsFilterIndexesSV1Ca = []func(t *testing.T){
 	testV1FIdxCaUpdateThresholdProfileFromTP,
 	testV1FIdxCaRemoveThresholdProfile,
 
-	testFlush,
-	testV1FIdxCaGetStatQueuesWithNotFound,
-	testV1FIdxCaSetStatQueueProfile,
-	testV1FIdxCaFromFolder,
-	testV1FIdxCaGetStatQueuesFromTP,
-	testV1FIdxCaUpdateStatQueueProfile,
-	testV1FIdxCaUpdateStatQueueProfileFromTP,
-	testV1FIdxCaRemoveStatQueueProfile,
+	// testFlush,
+	// testV1FIdxCaGetStatQueuesWithNotFound,
+	// testV1FIdxCaSetStatQueueProfile,
+	// testV1FIdxCaFromFolder,
+	// testV1FIdxCaGetStatQueuesFromTP,
+	// testV1FIdxCaUpdateStatQueueProfile,
+	// testV1FIdxCaUpdateStatQueueProfileFromTP,
+	// testV1FIdxCaRemoveStatQueueProfile,
 
 	testFlush,
 	testV1FIdxCaProcessAttributeProfileEventWithNotFound,
@@ -178,10 +178,6 @@ func testV1FIdxCaProcessEventWithNotFound(t *testing.T) {
 	if err := tFIdxCaRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &thIDs); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if indexes, err = onStor.GetFilterReverseIndexes(utils.PrefixToIndexCache[utils.ThresholdProfilePrefix],
-		"cgrates.org", nil); err == nil || err != utils.ErrNotFound {
-		t.Error(err)
-	}
 }
 
 func testV1FIdxCaSetThresholdProfile(t *testing.T) {
@@ -248,19 +244,6 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 	} else if !reflect.DeepEqual(thIDs, eIDs) {
 		t.Errorf("Expecting hits: %s, received: %s", eIDs, thIDs)
 	}
-	//test to make sure indexes are made as expected
-	fldNameVal := map[string]string{"TEST_PROFILE1": ""}
-	expectedRevIDX := map[string]utils.StringMap{
-		"TEST_PROFILE1": {"*string:Account:1001": true,
-			"*string:EventType:BalanceUpdate": true}}
-	if indexes, err = onStor.GetFilterReverseIndexes(
-		utils.PrefixToRevIndexCache[utils.ThresholdProfilePrefix],
-		"cgrates.org", fldNameVal); err != nil {
-		t.Error(err)
-	}
-	if !reflect.DeepEqual(expectedRevIDX, indexes) {
-		t.Errorf("Expecting: %+v, received: %+v", expectedRevIDX, indexes)
-	}
 }
 
 func testV1FIdxCaGetThresholdFromTP(t *testing.T) {
@@ -283,22 +266,6 @@ func testV1FIdxCaGetThresholdFromTP(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(thIDs, eIDs) {
 		t.Errorf("Expecting hits: %s, received: %s", eIDs, thIDs)
-	}
-	//test to make sure indexes are made as expected
-	idx := map[string]utils.StringMap{
-		"THD_ACNT_BALANCE_1": {
-			"*string:Account:1001":            true,
-			"*string:Account:1002":            true,
-			"*string:EventType:BalanceUpdate": true}}
-	fldNameVal := map[string]string{"THD_ACNT_BALANCE_1": ""}
-	if indexes, err = onStor.GetFilterReverseIndexes(
-		utils.PrefixToRevIndexCache[utils.ThresholdProfilePrefix],
-		"cgrates.org", fldNameVal); err != nil {
-		t.Error(err)
-	}
-	if !reflect.DeepEqual(idx, indexes) {
-		t.Errorf("Expecting: %+v, received: %+v",
-			idx, utils.ToJSON(indexes))
 	}
 }
 
@@ -376,20 +343,6 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 	} else if !reflect.DeepEqual(thIDs, eIDs) {
 		t.Errorf("Expecting : %s, received: %s", eIDs, thIDs)
 	}
-	//test to make sure indexes are made as expecte
-	fldNameVal := map[string]string{"TEST_PROFILE1": ""}
-	expectedRevIDX := map[string]utils.StringMap{
-		"TEST_PROFILE1": {"*string:Account:1002": true,
-			"*string:EventType:AccountUpdate": true}}
-	if indexes, err = onStor.GetFilterReverseIndexes(
-		utils.PrefixToRevIndexCache[utils.ThresholdProfilePrefix],
-		"cgrates.org", fldNameVal); err != nil {
-		t.Error(err)
-	}
-	if !reflect.DeepEqual(expectedRevIDX, indexes) {
-		t.Errorf("Expecting: %+v, received: %+v",
-			expectedRevIDX, utils.ToJSON(indexes))
-	}
 }
 
 func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
@@ -460,19 +413,6 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 	} else if !reflect.DeepEqual(thIDs, eIDs) {
 		t.Errorf("Expecting : %s, received: %s", eIDs, thIDs)
 	}
-	//test to make sure indexes are made as expecte
-	fldNameVal := map[string]string{"TEST_PROFILE1": ""}
-	expectedRevIDX := map[string]utils.StringMap{
-		"TEST_PROFILE1": {"*string:Account:1002": true,
-			"*string:EventType:AccountUpdate": true}}
-	if indexes, err = onStor.GetFilterReverseIndexes(
-		utils.PrefixToRevIndexCache[utils.ThresholdProfilePrefix],
-		"cgrates.org", fldNameVal); err != nil {
-		t.Error(err)
-	}
-	if !reflect.DeepEqual(expectedRevIDX, indexes) {
-		t.Errorf("Expecting: %+v, received: %+v", expectedRevIDX, utils.ToJSON(indexes))
-	}
 }
 
 func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
@@ -540,13 +480,6 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	//test to make sure indexes are made as expected
-	fldNameVal2 := map[string]string{"THD_ACNT_BALANCE_1": "", "TEST_PROFILE1": ""}
-	if _, err = onStor.GetFilterReverseIndexes(
-		utils.PrefixToIndexCache[utils.ThresholdProfilePrefix], "cgrates.org",
-		fldNameVal2); err == nil || err != utils.ErrNotFound {
-		t.Error(err)
-	}
 }
 
 //StatQueue
@@ -562,11 +495,6 @@ func testV1FIdxCaGetStatQueuesWithNotFound(t *testing.T) {
 	}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, tEv, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-	if indexes, err = onStor.GetFilterReverseIndexes(
-		utils.PrefixToIndexCache[utils.StatQueueProfilePrefix], "cgrates.org",
-		nil); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -642,19 +570,6 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
-
-	fldNameVal := map[string]string{"TEST_PROFILE1": ""}
-	expectedRevIDX := map[string]utils.StringMap{
-		"TEST_PROFILE1": {"*string:Account:1001": true,
-			"*string:EventType:AccountUpdate": true}}
-	if indexes, err = onStor.GetFilterReverseIndexes(
-		utils.PrefixToRevIndexCache[utils.StatQueueProfilePrefix], "cgrates.org",
-		fldNameVal); err != nil {
-		t.Error(err)
-	}
-	if !reflect.DeepEqual(expectedRevIDX, indexes) {
-		t.Errorf("Expecting: %+v, received: %+v", expectedRevIDX, indexes)
-	}
 }
 
 func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
@@ -710,21 +625,6 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
-	}
-
-	idx := map[string]utils.StringMap{
-		"TEST_PROFILE1": {"*string:Account:1001": true,
-			"*string:EventType:AccountUpdate": true}}
-	fldNameVal := map[string]string{"TEST_PROFILE1": ""}
-
-	if indexes, err = onStor.GetFilterReverseIndexes(
-		utils.PrefixToRevIndexCache[utils.StatQueueProfilePrefix], "cgrates.org",
-		fldNameVal); err != nil {
-		t.Error(err)
-	}
-
-	if !reflect.DeepEqual(idx, indexes) {
-		t.Errorf("Expecting: %+v, received: %+v", idx, utils.ToJSON(indexes))
 	}
 }
 
@@ -794,19 +694,6 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
-
-	fldNameVal := map[string]string{"TEST_PROFILE1": ""}
-	expectedRevIDX := map[string]utils.StringMap{
-		"TEST_PROFILE1": {"*string:Account:1003": true,
-			"*string:EventType:BalanceUpdate": true}}
-	if indexes, err = onStor.GetFilterReverseIndexes(
-		utils.PrefixToRevIndexCache[utils.StatQueueProfilePrefix], "cgrates.org",
-		fldNameVal); err != nil {
-		t.Error(err)
-	}
-	if !reflect.DeepEqual(expectedRevIDX, indexes) {
-		t.Errorf("Expecting: %+v, received: %+v", expectedRevIDX, utils.ToJSON(indexes))
-	}
 }
 
 func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
@@ -863,19 +750,6 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, ids)
-	}
-	fldNameVal := map[string]string{"Stats1": ""}
-	expectedRevIDX := map[string]utils.StringMap{
-		"Stats1": {
-			"*string:Account:1003":            true,
-			"*string:EventType:AccountUpdate": true}}
-	if indexes, err = onStor.GetFilterReverseIndexes(
-		utils.PrefixToRevIndexCache[utils.StatQueueProfilePrefix], "cgrates.org",
-		fldNameVal); err != nil {
-		t.Error(err)
-	}
-	if !reflect.DeepEqual(expectedRevIDX, indexes) {
-		t.Errorf("Expecting: %+v, received: %+v", expectedRevIDX, indexes)
 	}
 }
 
@@ -944,12 +818,6 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	// fldNameVals := map[string]string{"THD_ACNT_BALANCE_1": "", "TEST_PROFILE1": ""}
-	// if _, err = onStor.GetFilterReverseIndexes(
-	// 	utils.PrefixToIndexCache[utils.ThresholdProfilePrefix], "cgrates.org",
-	// 	fldNameVals); err == nil || err != utils.ErrNotFound {
-	// 	t.Error(err)
-	// }
 }
 
 //AttributeProfile
@@ -966,11 +834,6 @@ func testV1FIdxCaProcessAttributeProfileEventWithNotFound(t *testing.T) {
 	var rplyEv engine.AttrSProcessEventReply
 	if err := tFIdxCaRpc.Call(utils.AttributeSv1ProcessEvent, ev, &rplyEv); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-	if indexes, err = onStor.GetFilterReverseIndexes(
-		utils.PrefixToIndexCache[utils.ThresholdProfilePrefix], "cgrates.org",
-		nil); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -1045,20 +908,6 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 		ev, &rplyEv); err != nil {
 		t.Error(err)
 	}
-	//test to make sure indexes are made as expected
-	fldNameVal := map[string]string{"TEST_PROFILE1": ""}
-	expectedRevIDX := map[string]utils.StringMap{
-		"TEST_PROFILE1": {"*string:Account:1009": true,
-			"*string:Destination:+491511231234": true}}
-	if indexes, err = onStor.GetFilterReverseIndexes(
-		utils.PrefixToRevIndexCache[utils.AttributeProfilePrefix],
-		"cgrates.org:*sessions",
-		fldNameVal); err != nil {
-		t.Error(err)
-	}
-	if !reflect.DeepEqual(expectedRevIDX, indexes) {
-		t.Errorf("Expecting: %+v, received: %+v", expectedRevIDX, indexes)
-	}
 }
 
 func testV1FIdxCaGetAttributeProfileFromTP(t *testing.T) {
@@ -1075,19 +924,6 @@ func testV1FIdxCaGetAttributeProfileFromTP(t *testing.T) {
 	var rplyEv engine.AttrSProcessEventReply
 	if err := tFIdxCaRpc.Call(utils.AttributeSv1ProcessEvent, ev, &rplyEv); err != nil {
 		t.Error(err)
-	}
-	//test to make sure indexes are made as expected
-	idx := map[string]utils.StringMap{"ATTR_1": {
-		"*string:Account:1007": true}}
-	fldNameVal := map[string]string{"ATTR_1": ""}
-	if indexes, err = onStor.GetFilterReverseIndexes(
-		utils.PrefixToRevIndexCache[utils.AttributeProfilePrefix],
-		"cgrates.org:*sessions",
-		fldNameVal); err != nil {
-		t.Error(err)
-	}
-	if !reflect.DeepEqual(idx, indexes) {
-		t.Errorf("Expecting: %+v, received: %+v", idx, utils.ToJSON(indexes))
 	}
 }
 
@@ -1160,21 +996,6 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 	if err := tFIdxCaRpc.Call(utils.AttributeSv1ProcessEvent, ev, &rplyEv); err != nil {
 		t.Error(err)
 	}
-	//test to make sure indexes are made as expected
-	idx := map[string]utils.StringMap{
-		"TEST_PROFILE1": {
-			"*string:Account:2009":              true,
-			"*string:Destination:+492511231234": true}}
-	fldNameVal := map[string]string{"TEST_PROFILE1": ""}
-	if indexes, err = onStor.GetFilterReverseIndexes(
-		utils.PrefixToRevIndexCache[utils.AttributeProfilePrefix],
-		"cgrates.org:*sessions",
-		fldNameVal); err != nil {
-		t.Error(err)
-	}
-	if !reflect.DeepEqual(idx, indexes) {
-		t.Errorf("Expecting: %+v, received: %+v", idx, utils.ToJSON(indexes))
-	}
 }
 
 func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
@@ -1227,21 +1048,6 @@ func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
 	var rplyEv engine.AttrSProcessEventReply
 	if err := tFIdxCaRpc.Call(utils.AttributeSv1ProcessEvent, ev, &rplyEv); err != nil {
 		t.Error(err)
-	}
-	//test to make sure indexes are made as expected
-	idx := map[string]utils.StringMap{
-		"ATTR_1": {
-			"*string:Account:3009":              true,
-			"*string:Destination:+492511231234": true}}
-	fldNameVal := map[string]string{"ATTR_1": ""}
-	if indexes, err = onStor.GetFilterReverseIndexes(
-		utils.PrefixToRevIndexCache[utils.AttributeProfilePrefix],
-		"cgrates.org:*sessions",
-		fldNameVal); err != nil {
-		t.Error(err)
-	}
-	if !reflect.DeepEqual(idx, indexes) {
-		t.Errorf("Expecting: %+v, received: %+v", idx, utils.ToJSON(indexes))
 	}
 }
 
@@ -1308,13 +1114,6 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	//test to make sure indexes are made as expected
-	fldNameVal2 := map[string]string{"ATTR_1": "", "TEST_PROFILE1": ""}
-	if _, err = onStor.GetFilterReverseIndexes(
-		utils.PrefixToIndexCache[utils.AttributeProfilePrefix], "cgrates.org:*rating",
-		fldNameVal2); err == nil || err != utils.ErrNotFound {
-		t.Error(err)
-	}
 }
 
 // ResourceProfile
@@ -1337,11 +1136,6 @@ func testV1FIdxCaGetResourceProfileWithNotFound(t *testing.T) {
 	}
 	if err := tFIdxCaRpc.Call(utils.ResourceSv1AuthorizeResources,
 		argsRU, &reply); err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-	if indexes, err = onStor.GetFilterReverseIndexes(
-		utils.PrefixToIndexCache[utils.StatQueueProfilePrefix], "cgrates.org",
-		nil); err != nil && err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -1420,20 +1214,6 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 	} else if result != "Approved" {
 		t.Error("Unexpected reply returned", result)
 	}
-	fldNameVal := map[string]string{"RCFG1": ""}
-	expectedRevIDX := map[string]utils.StringMap{
-		"RCFG1": {
-			"*string:Account:1001":     true,
-			"*string:Subject:1002":     true,
-			"*string:Destination:1001": true}}
-	if indexes, err = onStor.GetFilterReverseIndexes(
-		utils.PrefixToRevIndexCache[utils.ResourceProfilesPrefix], "cgrates.org",
-		fldNameVal); err != nil && err != utils.ErrNotFound {
-		t.Error(err)
-	}
-	if !reflect.DeepEqual(expectedRevIDX, indexes) {
-		t.Errorf("Expecting: %+v, received: %+v", expectedRevIDX, indexes)
-	}
 }
 
 func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
@@ -1478,21 +1258,6 @@ func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 		t.Error(err)
 	} else if reply != "ResGroup1" {
 		t.Error("Unexpected reply returned", reply)
-	}
-	idx := map[string]utils.StringMap{
-		"ResGroup1": {
-			"*prefix:Destination:10": true,
-			"*prefix:Destination:20": true,
-			"*string:Account:1001":   true,
-			"*string:Account:1002":   true}}
-	fldNameVal := map[string]string{"ResGroup1": ""}
-	if indexes, err = onStor.GetFilterReverseIndexes(
-		utils.PrefixToRevIndexCache[utils.ResourceProfilesPrefix], "cgrates.org",
-		fldNameVal); err != nil {
-		t.Error(err)
-	}
-	if !reflect.DeepEqual(idx, indexes) {
-		t.Errorf("Expecting: %+v, received: %+v", idx, utils.ToJSON(indexes))
 	}
 }
 
@@ -1565,21 +1330,6 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 	} else if result != "MessageAllocation" {
 		t.Error("Unexpected reply returned", result)
 	}
-
-	// fldNameVal2 := map[string]string{"RCFG1": ""}
-	// expectedRevIDX := map[string]utils.StringMap{
-	// 	"RCFG1": {
-	// 		"*string:Account:2002":     true,
-	// 		"*string:Destination:2002": true,
-	// 		"*string:Subject:2001":     true}}
-	// if indexes, err = onStor.GetFilterReverseIndexes(
-	// 	utils.PrefixToIndexCache[utils.ResourceProfilesPrefix], "cgrates.org",
-	// 	fldNameVal2); err != nil {
-	// 	t.Error(err)
-	// }
-	// if !reflect.DeepEqual(expectedRevIDX, indexes) {
-	// 	t.Errorf("Expecting: %+v, received: %+v", expectedRevIDX, utils.ToJSON(indexes))
-	// }
 }
 
 func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
@@ -1642,20 +1392,6 @@ func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
 		t.Error(err)
 	} else if result != "ResGroup1" {
 		t.Error("Unexpected reply returned", result)
-	}
-	fldNameVal2 := map[string]string{"ResGroup1": ""}
-	expectedRevIDX := map[string]utils.StringMap{
-		"ResGroup1": {
-			"*string:Account:1002":     true,
-			"*string:Destination:1002": true,
-			"*string:Subject:1001":     true}}
-	if indexes, err = onStor.GetFilterReverseIndexes(
-		utils.PrefixToRevIndexCache[utils.ResourceProfilesPrefix],
-		"cgrates.org", fldNameVal2); err != nil {
-		t.Error(err)
-	}
-	if !reflect.DeepEqual(expectedRevIDX, indexes) {
-		t.Errorf("Expecting: %+v, received: %+v", expectedRevIDX, utils.ToJSON(indexes))
 	}
 }
 
@@ -1720,13 +1456,6 @@ func testV1FIdxCaRemoveResourceProfile(t *testing.T) {
 	if err := tFIdxCaRpc.Call("ApierV1.GetResourceProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}, &sqp); err == nil &&
 		err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-
-	fldNameVals2 := map[string]string{"ResGroup1": "", "TEST_PROFILE1": ""}
-	if _, err = onStor.GetFilterReverseIndexes(
-		utils.PrefixToIndexCache[utils.ThresholdProfilePrefix], "cgrates.org",
-		fldNameVals2); err != nil && err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
