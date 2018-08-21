@@ -527,7 +527,7 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 
 func (dm *DataManager) RemoveStatQueueProfile(tenant, id,
 	transactionID string, withIndex bool) (err error) {
-	oldSts, err := dm.GetResourceProfile(tenant, id, true, utils.NonTransactional)
+	oldSts, err := dm.GetStatQueueProfile(tenant, id, true, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}

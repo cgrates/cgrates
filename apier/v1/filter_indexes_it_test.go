@@ -57,11 +57,11 @@ var sTestsFilterIndexesSV1 = []func(t *testing.T){
 	testV1FIdxThirdComputeThresholdsIndexes,
 	testV1FIdxRemoveThresholdProfile,
 
-	// testV1FIdxSetStatQueueProfileIndexes,
-	// testV1FIdxComputeStatQueueProfileIndexes,
-	// testV1FIdxSetSecondStatQueueProfileIndexes,
-	// testV1FIdxSecondComputeStatQueueProfileIndexes,
-	// testV1FIdxRemoveStatQueueProfile,
+	testV1FIdxSetStatQueueProfileIndexes,
+	testV1FIdxComputeStatQueueProfileIndexes,
+	testV1FIdxSetSecondStatQueueProfileIndexes,
+	testV1FIdxSecondComputeStatQueueProfileIndexes,
+	testV1FIdxRemoveStatQueueProfile,
 
 	testV1FIdxSetResourceProfileIndexes,
 	testV1FIdxComputeResourceProfileIndexes,
