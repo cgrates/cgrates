@@ -61,15 +61,11 @@
 	"supplier_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
 	"attribute_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
 	"resource_filter_indexes" :{"limit": 10000, "ttl":"0s"},
-	"resource_filter_revindexes" : {"limit": 10000, "ttl":"0s"},
 	"stat_filter_indexes" : {"limit": 10000, "ttl":"0s"},
-	"stat_filter_revindexes" : {"limit": 10000, "ttl":"0s"},
 	"threshold_filter_indexes" : {"limit": 10000, "ttl":"0s"},
-	"threshold_filter_revindexes" : {"limit": 10000, "ttl":"0s"},
 	"supplier_filter_indexes" : {"limit": 10000, "ttl":"0s"},
-	"supplier_filter_revindexes" :{"limit": 10000, "ttl":"0s"},
 	"attribute_filter_indexes" : {"limit": 10000, "ttl":"0s"},
-	"attribute_filter_revindexes" : {"limit": 10000, "ttl":"0s"},
+	"charger_filter_indexes" : {"limit": 10000, "ttl":"0s"},
 },
 
 
