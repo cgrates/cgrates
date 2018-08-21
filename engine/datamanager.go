@@ -1105,7 +1105,6 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 	if err = dm.CacheDataFromDB(utils.AttributeProfilePrefix, []string{ap.TenantID()}, true); err != nil {
 		return
 	}
-	//to be implemented in tests
 	if withIndex {
 		if oldAP != nil {
 			for _, ctx := range oldAP.Contexts {
