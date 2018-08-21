@@ -20,7 +20,6 @@ package engine
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
@@ -29,31 +28,19 @@ import (
 
 func NewFilterIndexer(dm *DataManager, itemType, dbKeySuffix string) *FilterIndexer {
 	return &FilterIndexer{dm: dm, itemType: itemType, dbKeySuffix: dbKeySuffix,
-		indexes:          make(map[string]utils.StringMap),
-		reveseIndex:      make(map[string]utils.StringMap),
-		chngdIndxKeys:    make(utils.StringMap),
-		chngdRevIndxKeys: make(utils.StringMap)}
+		indexes:       make(map[string]utils.StringMap),
+		chngdIndxKeys: make(utils.StringMap)}
 }
 
 // FilterIndexer is a centralized indexer for all data sources using RequestFilter
 // retrieves and stores it's data from/to dataDB
 // not thread safe, meant to be used as logic within other code blocks
 type FilterIndexer struct {
-	indexes          map[string]utils.StringMap // map[fieldName:fieldValue]utils.StringMap[itemID]
-	reveseIndex      map[string]utils.StringMap // map[itemID]utils.StringMap[fieldName:fieldValue]
-	dm               *DataManager
-	itemType         string
-	dbKeySuffix      string          // get/store the result from/into this key
-	chngdIndxKeys    utils.StringMap // keep record of the changed fieldName:fieldValue pair so we can re-cache wisely
-	chngdRevIndxKeys utils.StringMap // keep record of the changed itemID so we can re-cache wisely
-}
-
-// ChangedKeys returns the changed keys from original indexes so we can reload wisely
-func (rfi *FilterIndexer) ChangedKeys(reverse bool) utils.StringMap {
-	if reverse {
-		return rfi.chngdRevIndxKeys
-	}
-	return rfi.chngdIndxKeys
+	indexes       map[string]utils.StringMap // map[fieldName:fieldValue]utils.StringMap[itemID]
+	dm            *DataManager
+	itemType      string
+	dbKeySuffix   string          // get/store the result from/into this key
+	chngdIndxKeys utils.StringMap // keep record of the changed fieldName:fieldValue pair so we can re-cache wisely
 }
 
 // IndexTPFilter parses reqFltrs, adding itemID in the indexes and marks the changed keys in chngdIndxKeys
@@ -67,13 +54,8 @@ func (rfi *FilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID st
 					rfi.indexes[concatKey] = make(utils.StringMap)
 				}
 				rfi.indexes[concatKey][itemID] = true
-				if _, hasIt := rfi.reveseIndex[itemID]; !hasIt {
-					rfi.reveseIndex[itemID] = make(utils.StringMap)
-				}
-				rfi.reveseIndex[itemID][concatKey] = true
 				rfi.chngdIndxKeys[concatKey] = true
 			}
-			rfi.chngdRevIndxKeys[itemID] = true
 		case MetaPrefix:
 			for _, fldVal := range fltr.Values {
 				concatKey := utils.ConcatenatedKey(fltr.Type, fltr.FieldName, fldVal)
@@ -81,23 +63,15 @@ func (rfi *FilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID st
 					rfi.indexes[concatKey] = make(utils.StringMap)
 				}
 				rfi.indexes[concatKey][itemID] = true
-				if _, hasIt := rfi.reveseIndex[itemID]; !hasIt {
-					rfi.reveseIndex[itemID] = make(utils.StringMap)
-				}
-				rfi.reveseIndex[itemID][concatKey] = true
 				rfi.chngdIndxKeys[concatKey] = true
 			}
-			rfi.chngdRevIndxKeys[itemID] = true
 		case utils.META_NONE:
 			concatKey := utils.ConcatenatedKey(utils.META_NONE, utils.ANY, utils.ANY)
 			if _, hasIt := rfi.indexes[concatKey]; !hasIt {
 				rfi.indexes[concatKey] = make(utils.StringMap)
 			}
-			if _, hasIt := rfi.reveseIndex[itemID]; !hasIt {
-				rfi.reveseIndex[itemID] = make(utils.StringMap)
-			}
-			rfi.reveseIndex[itemID][concatKey] = true
 			rfi.indexes[concatKey][itemID] = true
+			rfi.chngdIndxKeys[concatKey] = true
 		}
 	}
 	return
@@ -107,22 +81,22 @@ func (rfi *FilterIndexer) cacheRemItemType() { // ToDo: tune here by removing pe
 	switch rfi.itemType {
 
 	case utils.ThresholdProfilePrefix:
-		Cache.Clear([]string{utils.CacheThresholdFilterIndexes, utils.CacheThresholdFilterRevIndexes})
+		Cache.Clear([]string{utils.CacheThresholdFilterIndexes})
 
 	case utils.ResourceProfilesPrefix:
-		Cache.Clear([]string{utils.CacheResourceFilterIndexes, utils.CacheResourceFilterRevIndexes})
+		Cache.Clear([]string{utils.CacheResourceFilterIndexes})
 
 	case utils.StatQueueProfilePrefix:
-		Cache.Clear([]string{utils.CacheStatFilterIndexes, utils.CacheStatFilterRevIndexes})
+		Cache.Clear([]string{utils.CacheStatFilterIndexes})
 
 	case utils.SupplierProfilePrefix:
-		Cache.Clear([]string{utils.CacheSupplierFilterIndexes, utils.CacheSupplierFilterRevIndexes})
+		Cache.Clear([]string{utils.CacheSupplierFilterIndexes})
 
 	case utils.AttributeProfilePrefix:
-		Cache.Clear([]string{utils.CacheAttributeFilterIndexes, utils.CacheAttributeFilterRevIndexes})
+		Cache.Clear([]string{utils.CacheAttributeFilterIndexes})
 
 	case utils.ChargerProfilePrefix:
-		Cache.Clear([]string{utils.CacheChargerFilterIndexes, utils.CacheChargerFilterRevIndexes})
+		Cache.Clear([]string{utils.CacheChargerFilterIndexes})
 	}
 }
 
@@ -136,30 +110,8 @@ func (rfi *FilterIndexer) StoreIndexes(commit bool, transactionID string) (err e
 		rfi.indexes, commit, transactionID); err != nil {
 		return
 	}
-	if err = rfi.dm.SetFilterReverseIndexes(
-		utils.PrefixToRevIndexCache[rfi.itemType], rfi.dbKeySuffix,
-		rfi.reveseIndex, commit, transactionID); err != nil {
-		return
-	}
 	rfi.cacheRemItemType()
 	return
-}
-
-//Populate the FilterIndexer.reveseIndex for specifil itemID
-func (rfi *FilterIndexer) loadItemReverseIndex(filterType, itemID string) (err error) {
-	rcvReveseIdx, err := rfi.dm.GetFilterReverseIndexes(
-		utils.PrefixToRevIndexCache[rfi.itemType], rfi.dbKeySuffix,
-		map[string]string{itemID: ""})
-	if err != nil {
-		return err
-	}
-	for _, val2 := range rcvReveseIdx {
-		if _, has := rfi.reveseIndex[itemID]; !has {
-			rfi.reveseIndex[itemID] = make(utils.StringMap)
-		}
-		rfi.reveseIndex[itemID] = val2
-	}
-	return err
 }
 
 //Populate FilterIndexer.indexes with specific fieldName:fieldValue , item
@@ -180,17 +132,118 @@ func (rfi *FilterIndexer) loadFldNameFldValIndex(filterType, fldName, fldVal str
 }
 
 //RemoveItemFromIndex remove Indexes for a specific itemID
-func (rfi *FilterIndexer) RemoveItemFromIndex(itemID string) (err error) {
-	if err = rfi.loadItemReverseIndex(MetaString, itemID); err != nil {
-		return err
-	}
-	for key, _ := range rfi.reveseIndex[itemID] {
-		kSplt := strings.Split(key, utils.CONCATENATED_KEY_SEP)
-		if len(kSplt) != 3 {
-			return fmt.Errorf("Malformed key in db: %s", key)
-		}
-		if err = rfi.loadFldNameFldValIndex(kSplt[0], kSplt[1], kSplt[2]); err != nil {
+func (rfi *FilterIndexer) RemoveItemFromIndex(tenant, itemID string, oldFilters []string) (err error) {
+	var filterIDs []string
+	switch rfi.itemType {
+	case utils.ThresholdProfilePrefix:
+		th, err := rfi.dm.GetThresholdProfile(tenant, itemID, false, utils.NonTransactional)
+		if err != nil && err != utils.ErrNotFound {
 			return err
+		}
+		if th != nil {
+			filterIDs = make([]string, len(th.FilterIDs))
+			for i, fltrID := range th.FilterIDs {
+				filterIDs[i] = fltrID
+			}
+		}
+	case utils.AttributeProfilePrefix:
+		attrPrf, err := rfi.dm.GetAttributeProfile(tenant, itemID, false, utils.NonTransactional)
+		if err != nil && err != utils.ErrNotFound {
+			return err
+		}
+		if attrPrf != nil {
+			filterIDs = make([]string, len(attrPrf.FilterIDs))
+			for i, fltrID := range attrPrf.FilterIDs {
+				filterIDs[i] = fltrID
+			}
+		}
+	case utils.ResourceProfilesPrefix:
+		res, err := rfi.dm.GetResourceProfile(tenant, itemID, false, utils.NonTransactional)
+		if err != nil && err != utils.ErrNotFound {
+			return err
+		}
+		if res != nil {
+			filterIDs = make([]string, len(res.FilterIDs))
+			for i, fltrID := range res.FilterIDs {
+				filterIDs[i] = fltrID
+			}
+		}
+	case utils.StatQueueProfilePrefix:
+		stq, err := rfi.dm.GetStatQueueProfile(tenant, itemID, false, utils.NonTransactional)
+		if err != nil && err != utils.ErrNotFound {
+			return err
+		}
+		if stq != nil {
+			filterIDs = make([]string, len(stq.FilterIDs))
+			for i, fltrID := range stq.FilterIDs {
+				filterIDs[i] = fltrID
+			}
+		}
+	case utils.SupplierProfilePrefix:
+		spp, err := rfi.dm.GetSupplierProfile(tenant, itemID, false, utils.NonTransactional)
+		if err != nil && err != utils.ErrNotFound {
+			return err
+		}
+		if spp != nil {
+			filterIDs = make([]string, len(spp.FilterIDs))
+			for i, fltrID := range spp.FilterIDs {
+				filterIDs[i] = fltrID
+			}
+		}
+	case utils.ChargerProfilePrefix:
+		cpp, err := rfi.dm.GetChargerProfile(tenant, itemID, false, utils.NonTransactional)
+		if err != nil && err != utils.ErrNotFound {
+			return err
+		}
+		if cpp != nil {
+			filterIDs = make([]string, len(cpp.FilterIDs))
+			for i, fltrID := range cpp.FilterIDs {
+				filterIDs[i] = fltrID
+			}
+		}
+	default:
+	}
+	if len(filterIDs) == 0 {
+		filterIDs = []string{utils.META_NONE}
+	}
+	for _, oldFltr := range oldFilters {
+		filterIDs = append(filterIDs, oldFltr)
+	}
+	for _, fltrID := range filterIDs {
+		var fltr *Filter
+		if fltrID == utils.META_NONE {
+			fltr = &Filter{
+				Tenant: tenant,
+				ID:     itemID,
+				Rules: []*FilterRule{
+					&FilterRule{
+						Type:      utils.META_NONE,
+						FieldName: utils.META_ANY,
+						Values:    []string{utils.META_ANY},
+					},
+				},
+			}
+		} else if fltr, err = rfi.dm.GetFilter(tenant, fltrID,
+			false, utils.NonTransactional); err != nil {
+			if err == utils.ErrNotFound {
+				err = fmt.Errorf("broken reference to filter: %+v for itemType: %+v and ID: %+v",
+					fltrID, rfi.itemType, itemID)
+			}
+			return err
+		}
+		for _, flt := range fltr.Rules {
+			var fldType, fldName string
+			var fldVals []string
+			if utils.IsSliceMember([]string{MetaString, MetaPrefix, utils.META_NONE}, flt.Type) {
+				fldType, fldName = flt.Type, flt.FieldName
+				fldVals = flt.Values
+			}
+			for _, fldVal := range fldVals {
+				if err = rfi.loadFldNameFldValIndex(fldType,
+					fldName, fldVal); err != nil && err != utils.ErrNotFound {
+					return err
+				}
+			}
 		}
 	}
 	for _, itmMp := range rfi.indexes {
@@ -200,7 +253,6 @@ func (rfi *FilterIndexer) RemoveItemFromIndex(itemID string) (err error) {
 			}
 		}
 	}
-	rfi.reveseIndex[itemID] = make(utils.StringMap) //Force deleting in driver
 	return rfi.StoreIndexes(false, utils.NonTransactional)
 }
 
@@ -211,10 +263,6 @@ func createAndIndex(itemPrefix, tenant, context, itemID string, filterIDs []stri
 		indexerKey = utils.ConcatenatedKey(tenant, context)
 	}
 	indexer := NewFilterIndexer(dm, itemPrefix, indexerKey)
-	if err = indexer.RemoveItemFromIndex(itemID); err != nil &&
-		err.Error() != utils.ErrNotFound.Error() {
-		return
-	}
 	fltrIDs := make([]string, len(filterIDs))
 	for i, fltrID := range filterIDs {
 		fltrIDs[i] = fltrID

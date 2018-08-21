@@ -123,11 +123,6 @@ type DataDB interface {
 	SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 		indexes map[string]utils.StringMap, commit bool, transactionID string) (err error)
 	RemoveFilterIndexesDrv(cacheID, itemIDPrefix string) (err error)
-	GetFilterReverseIndexesDrv(cacheID, itemIDPrefix string,
-		fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error)
-	SetFilterReverseIndexesDrv(cacheID, itemIDPrefix string, indexes map[string]utils.StringMap,
-		commit bool, transactionID string) (err error)
-	RemoveFilterReverseIndexesDrv(cacheID, itemIDPrefix string) (err error)
 	MatchFilterIndexDrv(cacheID, itemIDPrefix,
 		filterType, fieldName, fieldVal string) (itemIDs utils.StringMap, err error)
 	GetStatQueueProfileDrv(tenant string, ID string) (sq *StatQueueProfile, err error)
