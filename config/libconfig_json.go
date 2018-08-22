@@ -572,3 +572,11 @@ type MigratorCfgJson struct {
 	Out_storDB_user     *string
 	Out_storDB_password *string
 }
+
+type FcTemplateJsonCfg struct {
+	Id       *string
+	Type     *string
+	Field_id *string
+	Filters  *[]string
+	Value    *string
+}
