@@ -74,9 +74,9 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 		return ar.Request.FieldAsInterface(fldPath[1:])
 	case utils.MetaVars:
 		return ar.Vars.FieldAsInterface(fldPath[1:])
-	case utils.MetaCGRRequest:
+	case utils.MetaCgreq:
 		return ar.CGRRequest.FieldAsInterface(fldPath[1:])
-	case utils.MetaCGRReply:
+	case utils.MetaCgrep:
 		return ar.CGRReply.FieldAsInterface(fldPath[1:])
 	case utils.MetaRep:
 		return ar.Reply.FieldAsInterface(fldPath[1:])
@@ -92,9 +92,9 @@ func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) 
 		return ar.Request.FieldAsString(fldPath[1:])
 	case utils.MetaVars:
 		return ar.Vars.FieldAsString(fldPath[1:])
-	case utils.MetaCGRRequest:
+	case utils.MetaCgreq:
 		return ar.CGRRequest.FieldAsString(fldPath[1:])
-	case utils.MetaCGRReply:
+	case utils.MetaCgrep:
 		return ar.CGRReply.FieldAsString(fldPath[1:])
 	case utils.MetaRep:
 		return ar.Reply.FieldAsString(fldPath[1:])
