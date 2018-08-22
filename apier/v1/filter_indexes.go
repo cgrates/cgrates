@@ -151,7 +151,6 @@ func (self *ApierV1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string)
 	return nil
 }
 
-//NEED REVIEW
 func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, reply *string) error {
 	transactionID := utils.GenUUID()
 	//ThresholdProfile Indexes
