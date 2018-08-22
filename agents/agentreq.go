@@ -70,7 +70,7 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 	switch fldPath[0] {
 	default:
 		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
-	case utils.MetaRequest:
+	case utils.MetaReq:
 		return ar.Request.FieldAsInterface(fldPath[1:])
 	case utils.MetaVars:
 		return ar.Vars.FieldAsInterface(fldPath[1:])
@@ -78,7 +78,7 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 		return ar.CGRRequest.FieldAsInterface(fldPath[1:])
 	case utils.MetaCGRReply:
 		return ar.CGRReply.FieldAsInterface(fldPath[1:])
-	case utils.MetaReply:
+	case utils.MetaRep:
 		return ar.Reply.FieldAsInterface(fldPath[1:])
 	}
 }
@@ -88,7 +88,7 @@ func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) 
 	switch fldPath[0] {
 	default:
 		return "", fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
-	case utils.MetaRequest:
+	case utils.MetaReq:
 		return ar.Request.FieldAsString(fldPath[1:])
 	case utils.MetaVars:
 		return ar.Vars.FieldAsString(fldPath[1:])
@@ -96,7 +96,7 @@ func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) 
 		return ar.CGRRequest.FieldAsString(fldPath[1:])
 	case utils.MetaCGRReply:
 		return ar.CGRReply.FieldAsString(fldPath[1:])
-	case utils.MetaReply:
+	case utils.MetaRep:
 		return ar.Reply.FieldAsString(fldPath[1:])
 	}
 }
