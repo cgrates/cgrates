@@ -625,9 +625,6 @@ func (self *ApierV1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) e
 	if attr.TimingIds != nil {
 		a.Balance.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.TimingIds))
 	}
-	publishAction := &engine.Action{
-		ActionType: engine.MetaPublishAccount, // here we add *publish_account because balance was deleted
-	}
 	at.SetActions(engine.Actions{a, publishAction})
 	if err := at.Execute(nil, nil); err != nil {
 		*reply = err.Error()
