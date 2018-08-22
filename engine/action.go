@@ -82,6 +82,7 @@ const (
 	TopUpZeroNegative         = "*topup_zero_negative"
 	SetExpiry                 = "*set_expiry"
 	MetaPublishAccount        = "*publish_account"
+	MetaPublishBalance        = "*publish_balance"
 )
 
 func (a *Action) Clone() *Action {
@@ -121,6 +122,7 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		TopUpZeroNegative:         topupZeroNegativeAction,
 		SetExpiry:                 setExpiryAction,
 		MetaPublishAccount:        publishAccount,
+		MetaPublishBalance:        publishBalance,
 	}
 	f, exists := actionFuncMap[typ]
 	return f, exists
@@ -867,6 +869,23 @@ func publishAccount(acnt *Account, sq *CDRStatsQueueTriggered,
 		return errors.New("nil account")
 	}
 	acnt.Publish()
+	for bType := range acnt.BalanceMap {
+		for _, b := range acnt.BalanceMap[bType] {
+			if b.account == nil {
+				b.account = acnt
+			}
+			b.Publish()
+		}
+	}
+	return nil
+}
+
+// publishAccount will publish the account as well as each balance received to ThresholdS
+func publishBalance(acnt *Account, sq *CDRStatsQueueTriggered,
+	a *Action, acs Actions) error {
+	if acnt == nil {
+		return errors.New("nil account")
+	}
 	for bType := range acnt.BalanceMap {
 		for _, b := range acnt.BalanceMap[bType] {
 			if b.account == nil {
