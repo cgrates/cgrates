@@ -478,6 +478,8 @@ const (
 	MetaSessionS                 = "*sessions"
 	MetaDefault                  = "*default"
 	Error                        = "Error"
+	MetaCgreq                    = "*cgreq"
+	MetaCgrep                    = "*cgrep"
 	MetaCGRRequest               = "*cgrRequest"
 	MetaCGRReply                 = "*cgrReply"
 	CGR_ACD                      = "cgr_acd"

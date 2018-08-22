@@ -136,9 +136,9 @@ func TestRadReplyAppendAttributes(t *testing.T) {
 	rply := radigo.NewPacket(radigo.AccessRequest, 2, dictRad, coder, "CGRateS.org").Reply()
 	rplyFlds := []*config.CfgCdrField{
 		&config.CfgCdrField{Tag: "ReplyCode", FieldId: MetaRadReplyCode, Type: utils.META_COMPOSED,
-			Value: utils.ParseRSRFieldsMustCompile("*cgrReply.Attributes.RadReply", utils.INFIELD_SEP)},
+			Value: utils.ParseRSRFieldsMustCompile("*cgrep.Attributes.RadReply", utils.INFIELD_SEP)},
 		&config.CfgCdrField{Tag: "Acct-Session-Time", FieldId: "Acct-Session-Time", Type: utils.META_COMPOSED,
-			Value: utils.ParseRSRFieldsMustCompile("*cgrReply.MaxUsage{*duration_seconds}", utils.INFIELD_SEP)},
+			Value: utils.ParseRSRFieldsMustCompile("*cgrep.MaxUsage{*duration_seconds}", utils.INFIELD_SEP)},
 	}
 	agReq := newAgentRequest(nil, nil, "cgrates.org", nil)
 	agReq.CGRReply.Set([]string{utils.CapMaxUsage}, time.Duration(time.Hour), false)

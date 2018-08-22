@@ -50,7 +50,7 @@
 					{"tag": "Allow", "field_id": "response.Allow", "type": "*constant", 
 						"value": "1", "mandatory": true},
 					{"tag": "MaxDuration", "field_id": "response.MaxDuration", "type": "*composed", 
-						"value": "*cgrReply.MaxUsage{*duration_seconds}", "mandatory": true},
+						"value": "*cgrep.MaxUsage{*duration_seconds}", "mandatory": true},
 				],
 			},
 			{

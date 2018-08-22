@@ -98,7 +98,7 @@
 			],
 			"reply_fields":[
 				{"tag": "MaxUsage", "field_id": "SIP-AVP", "type": "*composed", 
-					"value": "^session_max_time#;*cgrReply.MaxUsage{*duration_seconds}", "mandatory": true},
+					"value": "^session_max_time#;*cgrep.MaxUsage{*duration_seconds}", "mandatory": true},
 			],
 		},
 		{
