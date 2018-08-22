@@ -625,7 +625,7 @@ func (self *ApierV1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) e
 	if attr.TimingIds != nil {
 		a.Balance.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.TimingIds))
 	}
-	at.SetActions(engine.Actions{a, publishAction})
+	at.SetActions(engine.Actions{a})
 	if err := at.Execute(nil, nil); err != nil {
 		*reply = err.Error()
 		return err
