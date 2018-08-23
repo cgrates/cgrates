@@ -79,7 +79,7 @@ func (fS *FilterS) connStatS() (err error) {
 // there should be at least one filter passing, ie: if filters are not active event will fail to pass
 // receives the event as DataProvider so we can accept undecoded data (ie: HttpRequest)
 func (fS *FilterS) Pass(tenant string, filterIDs []string,
-	ev DataProvider) (pass bool, err error) {
+	ev config.DataProvider) (pass bool, err error) {
 	if len(filterIDs) == 0 {
 		return true, nil
 	}
@@ -216,7 +216,7 @@ func (rf *FilterRule) CompileValues() (err error) {
 }
 
 // Pass is the method which should be used from outside.
-func (fltr *FilterRule) Pass(dP DataProvider, rpcClnt rpcclient.RpcClientConnection) (bool, error) {
+func (fltr *FilterRule) Pass(dP config.DataProvider, rpcClnt rpcclient.RpcClientConnection) (bool, error) {
 	switch fltr.Type {
 	case MetaString:
 		return fltr.passString(dP)
@@ -237,7 +237,7 @@ func (fltr *FilterRule) Pass(dP DataProvider, rpcClnt rpcclient.RpcClientConnect
 	}
 }
 
-func (fltr *FilterRule) passString(dP DataProvider) (bool, error) {
+func (fltr *FilterRule) passString(dP config.DataProvider) (bool, error) {
 	strVal, err := dP.FieldAsString(strings.Split(fltr.FieldName, utils.NestingSep))
 	if err != nil {
 		if err == utils.ErrNotFound {
@@ -253,7 +253,7 @@ func (fltr *FilterRule) passString(dP DataProvider) (bool, error) {
 	return false, nil
 }
 
-func (fltr *FilterRule) passStringPrefix(dP DataProvider) (bool, error) {
+func (fltr *FilterRule) passStringPrefix(dP config.DataProvider) (bool, error) {
 	strVal, err := dP.FieldAsString(strings.Split(fltr.FieldName, utils.NestingSep))
 	if err != nil {
 		if err == utils.ErrNotFound {
@@ -270,11 +270,11 @@ func (fltr *FilterRule) passStringPrefix(dP DataProvider) (bool, error) {
 }
 
 // ToDo when Timings will be available in DataDb
-func (fltr *FilterRule) passTimings(dP DataProvider) (bool, error) {
+func (fltr *FilterRule) passTimings(dP config.DataProvider) (bool, error) {
 	return false, utils.ErrNotImplemented
 }
 
-func (fltr *FilterRule) passDestinations(dP DataProvider) (bool, error) {
+func (fltr *FilterRule) passDestinations(dP config.DataProvider) (bool, error) {
 	dst, err := dP.FieldAsString(strings.Split(fltr.FieldName, utils.NestingSep))
 	if err != nil {
 		if err == utils.ErrNotFound {
@@ -296,7 +296,7 @@ func (fltr *FilterRule) passDestinations(dP DataProvider) (bool, error) {
 	return false, nil
 }
 
-func (fltr *FilterRule) passRSR(dP DataProvider) (bool, error) {
+func (fltr *FilterRule) passRSR(dP config.DataProvider) (bool, error) {
 	for _, rsrFld := range fltr.rsrFields {
 		fldIface, err := dP.FieldAsInterface(strings.Split(rsrFld.Id, utils.NestingSep))
 		if err != nil {
@@ -312,7 +312,7 @@ func (fltr *FilterRule) passRSR(dP DataProvider) (bool, error) {
 	return false, nil
 }
 
-func (fltr *FilterRule) passStatS(dP DataProvider,
+func (fltr *FilterRule) passStatS(dP config.DataProvider,
 	stats rpcclient.RpcClientConnection) (bool, error) {
 	if stats == nil || reflect.ValueOf(stats).IsNil() {
 		return false, errors.New("Missing StatS information")
@@ -337,7 +337,7 @@ func (fltr *FilterRule) passStatS(dP DataProvider,
 	return false, nil
 }
 
-func (fltr *FilterRule) passGreaterThan(dP DataProvider) (bool, error) {
+func (fltr *FilterRule) passGreaterThan(dP config.DataProvider) (bool, error) {
 	fldIf, err := dP.FieldAsInterface(strings.Split(fltr.FieldName, utils.NestingSep))
 	if err != nil {
 		if err == utils.ErrNotFound {

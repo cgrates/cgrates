@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -1475,7 +1476,7 @@ func TestAPItoAttributeProfile(t *testing.T) {
 	mapSubstitutes["FL1"]["In1"] = &Attribute{
 		FieldName:  "FL1",
 		Initial:    "In1",
-		Substitute: utils.NewRSRParsersMustCompile("Al1", true),
+		Substitute: config.NewRSRParsersMustCompile("Al1", true),
 		Append:     true,
 	}
 	expected := &AttributeProfile{
@@ -1490,7 +1491,7 @@ func TestAPItoAttributeProfile(t *testing.T) {
 			&Attribute{
 				FieldName:  "FL1",
 				Initial:    "In1",
-				Substitute: utils.NewRSRParsersMustCompile("Al1", true),
+				Substitute: config.NewRSRParsersMustCompile("Al1", true),
 				Append:     true,
 			},
 		},

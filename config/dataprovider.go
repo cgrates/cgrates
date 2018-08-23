@@ -16,16 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package engine
-
-import (
-	"github.com/cgrates/cgrates/config"
-)
+package config
 
 // DataProvider is a data source from multiple formats
 type DataProvider interface {
 	String() string // printable version of data
 	FieldAsInterface(fldPath []string) (interface{}, error)
 	FieldAsString(fldPath []string) (string, error)
-	AsNavigableMap([]*config.CfgCdrField) (*NavigableMap, error)
+	AsNavigableMap([]*FCTemplate) (*NavigableMap, error)
 }

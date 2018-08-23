@@ -24,13 +24,12 @@ import (
 	"net/http"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // newHADataProvider constructs a DataProvider
 func newHADataProvider(dpType string,
-	req *http.Request) (dP engine.DataProvider, err error) {
+	req *http.Request) (dP config.DataProvider, err error) {
 	switch dpType {
 	default:
 		return nil, fmt.Errorf("unsupported decoder type <%s>", dpType)
@@ -39,8 +38,8 @@ func newHADataProvider(dpType string,
 	}
 }
 
-func newHTTPUrlDP(req *http.Request) (dP engine.DataProvider, err error) {
-	dP = &httpUrlDP{req: req, cache: engine.NewNavigableMap(nil)}
+func newHTTPUrlDP(req *http.Request) (dP config.DataProvider, err error) {
+	dP = &httpUrlDP{req: req, cache: config.NewNavigableMap(nil)}
 	return
 }
 
@@ -48,7 +47,7 @@ func newHTTPUrlDP(req *http.Request) (dP engine.DataProvider, err error) {
 // decoded data is only searched once and cached
 type httpUrlDP struct {
 	req   *http.Request
-	cache *engine.NavigableMap
+	cache *config.NavigableMap
 }
 
 // String is part of engine.DataProvider interface
@@ -85,15 +84,15 @@ func (hU *httpUrlDP) FieldAsString(fldPath []string) (data string, err error) {
 }
 
 // AsNavigableMap is part of engine.DataProvider interface
-func (hU *httpUrlDP) AsNavigableMap([]*config.CfgCdrField) (
-	nm *engine.NavigableMap, err error) {
+func (hU *httpUrlDP) AsNavigableMap([]*config.FCTemplate) (
+	nm *config.NavigableMap, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
 // httpAgentReplyEncoder will encode  []*engine.NMElement
 // and write content to http writer
 type httpAgentReplyEncoder interface {
-	Encode(*engine.NavigableMap) error
+	Encode(*config.NavigableMap) error
 }
 
 // newHAReplyEncoder constructs a httpAgentReqDecoder based on encoder type
@@ -116,8 +115,8 @@ type haXMLEncoder struct {
 }
 
 // Encode implements httpAgentReplyEncoder
-func (xE *haXMLEncoder) Encode(nM *engine.NavigableMap) (err error) {
-	var xmlElmnts []*engine.XMLElement
+func (xE *haXMLEncoder) Encode(nM *config.NavigableMap) (err error) {
+	var xmlElmnts []*config.XMLElement
 	if xmlElmnts, err = nM.AsXMLElements(); err != nil {
 		return
 	}

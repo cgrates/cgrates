@@ -21,6 +21,7 @@ package engine
 import (
 	"fmt"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -96,7 +97,7 @@ func (alS *AttributeService) matchingAttributeProfilesForEvent(args *AttrArgsPro
 			continue
 		}
 		if pass, err := alS.filterS.Pass(args.Tenant, aPrfl.FilterIDs,
-			NewNavigableMap(args.Event)); err != nil {
+			config.NewNavigableMap(args.Event)); err != nil {
 			return nil, err
 		} else if !pass {
 			continue

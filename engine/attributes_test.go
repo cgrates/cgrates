@@ -36,7 +36,7 @@ var (
 			utils.META_ANY: &Attribute{
 				FieldName:  utils.Account,
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("1010", true),
+				Substitute: config.NewRSRParsersMustCompile("1010", true),
 				Append:     true,
 			},
 		},
@@ -100,7 +100,7 @@ var (
 				&Attribute{
 					FieldName:  utils.Account,
 					Initial:    utils.META_ANY,
-					Substitute: utils.NewRSRParsersMustCompile("1010", true),
+					Substitute: config.NewRSRParsersMustCompile("1010", true),
 					Append:     true,
 				},
 			},
@@ -120,7 +120,7 @@ var (
 				&Attribute{
 					FieldName:  utils.Account,
 					Initial:    utils.META_ANY,
-					Substitute: utils.NewRSRParsersMustCompile("1010", true),
+					Substitute: config.NewRSRParsersMustCompile("1010", true),
 					Append:     true,
 				},
 			},
@@ -140,7 +140,7 @@ var (
 				&Attribute{
 					FieldName:  utils.Account,
 					Initial:    utils.META_ANY,
-					Substitute: utils.NewRSRParsersMustCompile("1010", true),
+					Substitute: config.NewRSRParsersMustCompile("1010", true),
 					Append:     true,
 				},
 			},
@@ -160,7 +160,7 @@ var (
 				&Attribute{
 					FieldName:  utils.Account,
 					Initial:    utils.META_ANY,
-					Substitute: utils.NewRSRParsersMustCompile("1010", true),
+					Substitute: config.NewRSRParsersMustCompile("1010", true),
 					Append:     true,
 				},
 			},
@@ -463,7 +463,7 @@ func TestAttributeIndexer(t *testing.T) {
 				FieldName:  utils.Account,
 				Initial:    utils.META_ANY,
 				Append:     true,
-				Substitute: utils.NewRSRParsersMustCompile("1010", true),
+				Substitute: config.NewRSRParsersMustCompile("1010", true),
 			},
 		},
 		Weight: 20,
@@ -530,7 +530,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 			&Attribute{
 				FieldName:  "Field1",
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("Value1", true),
+				Substitute: config.NewRSRParsersMustCompile("Value1", true),
 				Append:     true,
 			},
 		},
@@ -548,7 +548,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 			&Attribute{
 				FieldName:  "Field2",
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("Value2", true),
+				Substitute: config.NewRSRParsersMustCompile("Value2", true),
 				Append:     true,
 			},
 		},
@@ -566,7 +566,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 			&Attribute{
 				FieldName:  "Field3",
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("Value3", true),
+				Substitute: config.NewRSRParsersMustCompile("Value3", true),
 				Append:     true,
 			},
 		},
@@ -645,7 +645,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 			&Attribute{
 				FieldName:  "Field1",
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("Value1", true),
+				Substitute: config.NewRSRParsersMustCompile("Value1", true),
 				Append:     true,
 			},
 		},
@@ -663,7 +663,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 			&Attribute{
 				FieldName:  "Field2",
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("Value2", true),
+				Substitute: config.NewRSRParsersMustCompile("Value2", true),
 				Append:     true,
 			},
 		},
@@ -681,7 +681,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 			&Attribute{
 				FieldName:  "Field3",
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("Value3", true),
+				Substitute: config.NewRSRParsersMustCompile("Value3", true),
 				Append:     true,
 			},
 		},
@@ -759,7 +759,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 			&Attribute{
 				FieldName:  "Field1",
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("Value1", true),
+				Substitute: config.NewRSRParsersMustCompile("Value1", true),
 				Append:     true,
 			},
 		},
@@ -777,7 +777,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 			&Attribute{
 				FieldName:  "Field2",
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("Value2", true),
+				Substitute: config.NewRSRParsersMustCompile("Value2", true),
 				Append:     true,
 			},
 		},
@@ -795,7 +795,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 			&Attribute{
 				FieldName:  "Field3",
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("Value3", true),
+				Substitute: config.NewRSRParsersMustCompile("Value3", true),
 				Append:     true,
 			},
 		},
@@ -873,7 +873,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 			&Attribute{
 				FieldName:  "Field1",
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("Value1", true),
+				Substitute: config.NewRSRParsersMustCompile("Value1", true),
 				Append:     true,
 			},
 		},
@@ -891,7 +891,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 			&Attribute{
 				FieldName:  "Field2",
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("Value2", true),
+				Substitute: config.NewRSRParsersMustCompile("Value2", true),
 				Append:     true,
 			},
 		},
@@ -966,7 +966,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 			&Attribute{
 				FieldName:  "Field1",
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("Value1", true),
+				Substitute: config.NewRSRParsersMustCompile("Value1", true),
 				Append:     true,
 			},
 		},
@@ -984,7 +984,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 			&Attribute{
 				FieldName:  "Field2",
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("Value2", true),
+				Substitute: config.NewRSRParsersMustCompile("Value2", true),
 				Append:     true,
 			},
 		},
@@ -1003,7 +1003,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 			&Attribute{
 				FieldName:  "Field3",
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("Value3", true),
+				Substitute: config.NewRSRParsersMustCompile("Value3", true),
 				Append:     true,
 			},
 		},
@@ -1081,7 +1081,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 			&Attribute{
 				FieldName:  "Field1",
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("Value1", true),
+				Substitute: config.NewRSRParsersMustCompile("Value1", true),
 				Append:     true,
 			},
 		},
@@ -1100,7 +1100,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 			&Attribute{
 				FieldName:  "Field2",
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("Value2", true),
+				Substitute: config.NewRSRParsersMustCompile("Value2", true),
 				Append:     true,
 			},
 		},
@@ -1118,7 +1118,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 			&Attribute{
 				FieldName:  "Field3",
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("Value3", true),
+				Substitute: config.NewRSRParsersMustCompile("Value3", true),
 				Append:     true,
 			},
 		},
@@ -1195,7 +1195,7 @@ func TestAttributeProcessSubstitute(t *testing.T) {
 			&Attribute{
 				FieldName:  "Field2",
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("~Field1", true),
+				Substitute: config.NewRSRParsersMustCompile("~Field1", true),
 				Append:     true,
 			},
 		},

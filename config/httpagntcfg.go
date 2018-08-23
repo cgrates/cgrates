@@ -26,7 +26,7 @@ type HttpAgentCfg struct {
 	ID                string // identifier for the agent, so we can update it's processors
 	Url               string
 	SessionSConns     []*HaPoolConfig
-	Tenant            utils.RSRFields
+	Tenant            RSRParsers
 	Timezone          string
 	RequestPayload    string
 	ReplyPayload      string
@@ -51,10 +51,7 @@ func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg) (err error) {
 		}
 	}
 	if jsnCfg.Tenant != nil {
-		if ca.Tenant, err = utils.ParseRSRFields(*jsnCfg.Tenant,
-			utils.INFIELD_SEP); err != nil {
-			return
-		}
+		ca.Tenant = NewRSRParsersMustCompile(*jsnCfg.Tenant, true)
 	}
 	if jsnCfg.Timezone != nil {
 		ca.Timezone = *jsnCfg.Timezone
@@ -92,8 +89,8 @@ type HttpAgntProcCfg struct {
 	Filters           []string
 	Flags             utils.StringMap
 	ContinueOnSuccess bool
-	RequestFields     []*CfgCdrField
-	ReplyFields       []*CfgCdrField
+	RequestFields     []*FCTemplate
+	ReplyFields       []*FCTemplate
 }
 
 func (ha *HttpAgntProcCfg) loadFromJsonCfg(jsnCfg *HttpAgentProcessorJsnCfg) (err error) {
@@ -116,14 +113,10 @@ func (ha *HttpAgntProcCfg) loadFromJsonCfg(jsnCfg *HttpAgentProcessorJsnCfg) (er
 		ha.ContinueOnSuccess = *jsnCfg.Continue_on_success
 	}
 	if jsnCfg.Request_fields != nil {
-		if ha.RequestFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Request_fields); err != nil {
-			return
-		}
+		ha.RequestFields = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Request_fields)
 	}
 	if jsnCfg.Reply_fields != nil {
-		if ha.ReplyFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Reply_fields); err != nil {
-			return
-		}
+		ha.ReplyFields = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Reply_fields)
 	}
 	return nil
 }

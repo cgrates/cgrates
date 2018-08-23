@@ -170,13 +170,13 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.Account,
 				Initial:    utils.ANY,
-				Substitute: utils.NewRSRParsersMustCompile("1001", true),
+				Substitute: config.NewRSRParsersMustCompile("1001", true),
 				Append:     false,
 			},
 			&engine.Attribute{
 				FieldName:  utils.Subject,
 				Initial:    utils.ANY,
-				Substitute: utils.NewRSRParsersMustCompile("1001", true),
+				Substitute: config.NewRSRParsersMustCompile("1001", true),
 				Append:     true,
 			},
 		},
@@ -215,7 +215,7 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.Account,
 				Initial:    utils.ANY,
-				Substitute: utils.NewRSRParsersMustCompile("1001", true),
+				Substitute: config.NewRSRParsersMustCompile("1001", true),
 				Append:     false,
 			},
 		},
@@ -265,7 +265,7 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.Account,
 				Initial:    utils.ANY,
-				Substitute: utils.NewRSRParsersMustCompile("1001", true),
+				Substitute: config.NewRSRParsersMustCompile("1001", true),
 				Append:     false,
 			},
 		},
@@ -370,13 +370,13 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.Account,
 				Initial:    "1008",
-				Substitute: utils.NewRSRParsersMustCompile("1001", true),
+				Substitute: config.NewRSRParsersMustCompile("1001", true),
 				Append:     false,
 			},
 			&engine.Attribute{
 				FieldName:  utils.Subject,
 				Initial:    utils.ANY,
-				Substitute: utils.NewRSRParsersMustCompile(utils.META_NONE, true),
+				Substitute: config.NewRSRParsersMustCompile(utils.META_NONE, true),
 				Append:     false,
 			},
 		},
@@ -437,13 +437,13 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.Account,
 				Initial:    "1008",
-				Substitute: utils.NewRSRParsersMustCompile("1001", true),
+				Substitute: config.NewRSRParsersMustCompile("1001", true),
 				Append:     false,
 			},
 			&engine.Attribute{
 				FieldName:  utils.Subject,
 				Initial:    utils.ANY,
-				Substitute: utils.NewRSRParsersMustCompile(utils.META_NONE, true),
+				Substitute: config.NewRSRParsersMustCompile(utils.META_NONE, true),
 				Append:     false,
 			},
 		},
@@ -516,13 +516,13 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.Account,
 				Initial:    "1008",
-				Substitute: utils.NewRSRParsersMustCompile("1001", true),
+				Substitute: config.NewRSRParsersMustCompile("1001", true),
 				Append:     false,
 			},
 			&engine.Attribute{
 				FieldName:  utils.Subject,
 				Initial:    "1008",
-				Substitute: utils.NewRSRParsersMustCompile(utils.META_NONE, true),
+				Substitute: config.NewRSRParsersMustCompile(utils.META_NONE, true),
 				Append:     false,
 			},
 		},
@@ -571,7 +571,7 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  "Field2",
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("~Field1", true),
+				Substitute: config.NewRSRParsersMustCompile("~Field1", true),
 				Append:     true,
 			},
 		},
@@ -642,7 +642,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  "FL1",
 				Initial:    "In1",
-				Substitute: utils.NewRSRParsersMustCompile("Al1", true),
+				Substitute: config.NewRSRParsersMustCompile("Al1", true),
 				Append:     true,
 			},
 		},
@@ -671,13 +671,13 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 		&engine.Attribute{
 			FieldName:  "FL1",
 			Initial:    "In1",
-			Substitute: utils.NewRSRParsersMustCompile("Al1", true),
+			Substitute: config.NewRSRParsersMustCompile("Al1", true),
 			Append:     true,
 		},
 		&engine.Attribute{
 			FieldName:  "FL2",
 			Initial:    "In2",
-			Substitute: utils.NewRSRParsersMustCompile("Al2", true),
+			Substitute: config.NewRSRParsersMustCompile("Al2", true),
 			Append:     false,
 		},
 	}

@@ -284,8 +284,8 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity tree.Res, cdrcCfg *con
 }
 
 // newXmlProvider constructs a DataProvider
-func newXmlProvider(req tree.Res, cdrPath utils.HierarchyPath) (dP engine.DataProvider) {
-	dP = &xmlProvider{req: req, cdrPath: cdrPath, cache: engine.NewNavigableMap(nil)}
+func newXmlProvider(req tree.Res, cdrPath utils.HierarchyPath) (dP config.DataProvider) {
+	dP = &xmlProvider{req: req, cdrPath: cdrPath, cache: config.NewNavigableMap(nil)}
 	return
 }
 
@@ -293,7 +293,7 @@ func newXmlProvider(req tree.Res, cdrPath utils.HierarchyPath) (dP engine.DataPr
 type xmlProvider struct {
 	req     tree.Res
 	cdrPath utils.HierarchyPath //used to compute relative path
-	cache   *engine.NavigableMap
+	cache   *config.NavigableMap
 }
 
 // String is part of engine.DataProvider interface
@@ -331,7 +331,7 @@ func (xP *xmlProvider) FieldAsString(fldPath []string) (data string, err error) 
 }
 
 // AsNavigableMap is part of engine.DataProvider interface
-func (xP *xmlProvider) AsNavigableMap([]*config.CfgCdrField) (
-	nm *engine.NavigableMap, err error) {
+func (xP *xmlProvider) AsNavigableMap([]*config.FCTemplate) (
+	nm *config.NavigableMap, err error) {
 	return nil, utils.ErrNotImplemented
 }

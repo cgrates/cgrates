@@ -27,7 +27,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/radigo"
 )
@@ -104,7 +103,7 @@ func TestRadComposedFieldValue(t *testing.T) {
 	agReq.Vars.Set([]string{"User-Name"}, "flopsy", false)
 	eOut := "*radAcctStart|flopsy|CGR1"
 	if out := radComposedFieldValue(pkt, agReq,
-		utils.ParseRSRFieldsMustCompile("*vars.*radReqType;^|;*vars.User-Name;^|;*vars.Cisco", utils.INFIELD_SEP)); out != eOut {
+		config.NewRSRParsersMustCompile("~*vars.*radReqType;|;~*vars.User-Name;|;~*vars.Cisco", true)); out != eOut {
 		t.Errorf("Expecting: <%s>, received: <%s>", eOut, out)
 	}
 }
@@ -123,8 +122,8 @@ func TestRadFieldOutVal(t *testing.T) {
 	agReq.Vars.Set([]string{"Cisco"}, "CGR1", false)
 	agReq.Vars.Set([]string{"User-Name"}, "flopsy", false)
 	//processorVars{MetaRadReqType: MetaRadAcctStart}
-	cfgFld := &config.CfgCdrField{Tag: "ComposedTest", Type: utils.META_COMPOSED, FieldId: utils.Destination,
-		Value: utils.ParseRSRFieldsMustCompile("*vars.*radReqType;^|;*vars.User-Name;^|;*vars.Cisco", utils.INFIELD_SEP), Mandatory: true}
+	cfgFld := &config.FCTemplate{ID: "ComposedTest", Type: utils.META_COMPOSED, FieldId: utils.Destination,
+		Value: config.NewRSRParsersMustCompile("~*vars.*radReqType;|;~*vars.User-Name;|;~*vars.Cisco", true), Mandatory: true}
 	if outVal, err := radFieldOutVal(pkt, agReq, cfgFld); err != nil {
 		t.Error(err)
 	} else if outVal != eOut {
@@ -134,11 +133,11 @@ func TestRadFieldOutVal(t *testing.T) {
 
 func TestRadReplyAppendAttributes(t *testing.T) {
 	rply := radigo.NewPacket(radigo.AccessRequest, 2, dictRad, coder, "CGRateS.org").Reply()
-	rplyFlds := []*config.CfgCdrField{
-		&config.CfgCdrField{Tag: "ReplyCode", FieldId: MetaRadReplyCode, Type: utils.META_COMPOSED,
-			Value: utils.ParseRSRFieldsMustCompile("*cgrep.Attributes.RadReply", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "Acct-Session-Time", FieldId: "Acct-Session-Time", Type: utils.META_COMPOSED,
-			Value: utils.ParseRSRFieldsMustCompile("*cgrep.MaxUsage{*duration_seconds}", utils.INFIELD_SEP)},
+	rplyFlds := []*config.FCTemplate{
+		&config.FCTemplate{ID: "ReplyCode", FieldId: MetaRadReplyCode, Type: utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile("~*cgrep.Attributes.RadReply", true)},
+		&config.FCTemplate{ID: "Acct-Session-Time", FieldId: "Acct-Session-Time", Type: utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", true)},
 	}
 	agReq := newAgentRequest(nil, nil, "cgrates.org", nil)
 	agReq.CGRReply.Set([]string{utils.CapMaxUsage}, time.Duration(time.Hour), false)
@@ -159,12 +158,12 @@ func TestRadReplyAppendAttributes(t *testing.T) {
 
 type myEv map[string]interface{}
 
-func (ev myEv) AsNavigableMap(tpl []*config.CfgCdrField) (*engine.NavigableMap, error) {
-	return engine.NewNavigableMap(ev), nil
+func (ev myEv) AsNavigableMap(tpl []*config.CfgCdrField) (*config.NavigableMap, error) {
+	return config.NewNavigableMap(ev), nil
 }
 
 func TestNewCGRReply(t *testing.T) {
-	eCgrRply := engine.NewNavigableMap(map[string]interface{}{
+	eCgrRply := config.NewNavigableMap(map[string]interface{}{
 		utils.Error: "some",
 	})
 	if rpl, err := NewCGRReply(nil, errors.New("some")); err != nil {
@@ -180,9 +179,9 @@ func TestNewCGRReply(t *testing.T) {
 			},
 		},
 	}
-	eCgrRply = engine.NewNavigableMap(ev)
+	eCgrRply = config.NewNavigableMap(ev)
 	eCgrRply.Set([]string{utils.Error}, "", false)
-	if rpl, err := NewCGRReply(engine.NavigableMapper(ev), nil); err != nil {
+	if rpl, err := NewCGRReply(config.NavigableMapper(ev), nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCgrRply, rpl) {
 		t.Errorf("Expecting: %+v, received: %+v", eCgrRply, rpl)

@@ -53,69 +53,69 @@ func TestAgReqAsNavigableMap(t *testing.T) {
 		utils.CapMaxUsage: time.Duration(120 * time.Second),
 		utils.Error:       "",
 	}
-	agReq.CGRReply = engine.NewNavigableMap(cgrRply)
+	agReq.CGRReply = config.NewNavigableMap(cgrRply)
 
-	tplFlds := []*config.CfgCdrField{
-		&config.CfgCdrField{Tag: "Tenant",
+	tplFlds := []*config.FCTemplate{
+		&config.FCTemplate{ID: "Tenant",
 			FieldId: utils.Tenant, Type: utils.META_COMPOSED,
-			Value: utils.ParseRSRFieldsMustCompile("^cgrates.org", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "Account",
+			Value: config.NewRSRParsersMustCompile("cgrates.org", true)},
+		&config.FCTemplate{ID: "Account",
 			FieldId: utils.Account, Type: utils.META_COMPOSED,
-			Value: utils.ParseRSRFieldsMustCompile("*cgreq.Account", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "Destination",
+			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true)},
+		&config.FCTemplate{ID: "Destination",
 			FieldId: utils.Destination, Type: utils.META_COMPOSED,
-			Value: utils.ParseRSRFieldsMustCompile("*cgreq.Destination", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true)},
 
-		&config.CfgCdrField{Tag: "RequestedUsageVoice",
+		&config.FCTemplate{ID: "RequestedUsageVoice",
 			FieldId: "RequestedUsage", Type: utils.META_COMPOSED,
 			Filters: []string{"*string:*cgreq.ToR:*voice"},
-			Value: utils.ParseRSRFieldsMustCompile(
-				"*cgreq.Usage{*duration_seconds}", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "RequestedUsageData",
+			Value: config.NewRSRParsersMustCompile(
+				"~*cgreq.Usage{*duration_seconds}", true)},
+		&config.FCTemplate{ID: "RequestedUsageData",
 			FieldId: "RequestedUsage", Type: utils.META_COMPOSED,
 			Filters: []string{"*string:*cgreq.ToR:*data"},
-			Value: utils.ParseRSRFieldsMustCompile(
-				"*cgreq.Usage{*duration_nanoseconds}", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "RequestedUsageSMS",
+			Value: config.NewRSRParsersMustCompile(
+				"~*cgreq.Usage{*duration_nanoseconds}", true)},
+		&config.FCTemplate{ID: "RequestedUsageSMS",
 			FieldId: "RequestedUsage", Type: utils.META_COMPOSED,
 			Filters: []string{"*string:*cgreq.ToR:*sms"},
-			Value: utils.ParseRSRFieldsMustCompile(
-				"*cgreq.Usage{*duration_nanoseconds}", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile(
+				"~*cgreq.Usage{*duration_nanoseconds}", true)},
 
-		&config.CfgCdrField{Tag: "AttrPaypalAccount",
+		&config.FCTemplate{ID: "AttrPaypalAccount",
 			FieldId: "PaypalAccount", Type: utils.META_COMPOSED,
 			Filters: []string{"*string:*cgrep.Error:"},
-			Value: utils.ParseRSRFieldsMustCompile(
-				"*cgrep.Attributes.PaypalAccount", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "MaxUsage",
+			Value: config.NewRSRParsersMustCompile(
+				"~*cgrep.Attributes.PaypalAccount", true)},
+		&config.FCTemplate{ID: "MaxUsage",
 			FieldId: "MaxUsage", Type: utils.META_COMPOSED,
 			Filters: []string{"*string:*cgrep.Error:"},
-			Value: utils.ParseRSRFieldsMustCompile(
-				"*cgrep.MaxUsage{*duration_seconds}", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "Error",
+			Value: config.NewRSRParsersMustCompile(
+				"~*cgrep.MaxUsage{*duration_seconds}", true)},
+		&config.FCTemplate{ID: "Error",
 			FieldId: "Error", Type: utils.META_COMPOSED,
 			Filters: []string{"*rsr::*cgrep.Error(!^$)"},
-			Value: utils.ParseRSRFieldsMustCompile(
-				"*cgrep.Error", utils.INFIELD_SEP)},
+			Value: config.NewRSRParsersMustCompile(
+				"~*cgrep.Error", true)},
 	}
-	eMp := engine.NewNavigableMap(nil)
-	eMp.Set([]string{utils.Tenant}, []*engine.NMItem{
-		&engine.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
+	eMp := config.NewNavigableMap(nil)
+	eMp.Set([]string{utils.Tenant}, []*config.NMItem{
+		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
 			Config: tplFlds[0]}}, true)
-	eMp.Set([]string{utils.Account}, []*engine.NMItem{
-		&engine.NMItem{Data: "1001", Path: []string{utils.Account},
+	eMp.Set([]string{utils.Account}, []*config.NMItem{
+		&config.NMItem{Data: "1001", Path: []string{utils.Account},
 			Config: tplFlds[1]}}, true)
-	eMp.Set([]string{utils.Destination}, []*engine.NMItem{
-		&engine.NMItem{Data: "1002", Path: []string{utils.Destination},
+	eMp.Set([]string{utils.Destination}, []*config.NMItem{
+		&config.NMItem{Data: "1002", Path: []string{utils.Destination},
 			Config: tplFlds[2]}}, true)
-	eMp.Set([]string{"RequestedUsage"}, []*engine.NMItem{
-		&engine.NMItem{Data: "180", Path: []string{"RequestedUsage"},
+	eMp.Set([]string{"RequestedUsage"}, []*config.NMItem{
+		&config.NMItem{Data: "180", Path: []string{"RequestedUsage"},
 			Config: tplFlds[3]}}, true)
-	eMp.Set([]string{"PaypalAccount"}, []*engine.NMItem{
-		&engine.NMItem{Data: "cgrates@paypal.com", Path: []string{"PaypalAccount"},
+	eMp.Set([]string{"PaypalAccount"}, []*config.NMItem{
+		&config.NMItem{Data: "cgrates@paypal.com", Path: []string{"PaypalAccount"},
 			Config: tplFlds[6]}}, true)
-	eMp.Set([]string{"MaxUsage"}, []*engine.NMItem{
-		&engine.NMItem{Data: "120", Path: []string{"MaxUsage"},
+	eMp.Set([]string{"MaxUsage"}, []*config.NMItem{
+		&config.NMItem{Data: "120", Path: []string{"MaxUsage"},
 			Config: tplFlds[7]}}, true)
 	if mpOut, err := agReq.AsNavigableMap(tplFlds); err != nil {
 		t.Error(err)

@@ -188,7 +188,7 @@ func TestCgrCfgCDRC(t *testing.T) {
 			CDRPath:                  utils.HierarchyPath([]string{""}),
 			CdrSourceId:              "freeswitch_csv",
 			Filters:                  []string{},
-			Tenant:                   utils.NewRSRParsersMustCompile("cgrates.org", true),
+			Tenant:                   NewRSRParsersMustCompile("cgrates.org", true),
 			ContinueOnSuccess:        false,
 			PartialRecordCache:       time.Duration(10 * time.Second),
 			PartialCacheExpiryAction: "*dump_to_file",
@@ -253,7 +253,7 @@ func TestHttpAgentCfg(t *testing.T) {
 		"sessions_conns": [
 			{"address": "*internal"}		// connection towards SessionService
 		],
-		"tenant": "^cgrates.org",
+		"tenant": "cgrates.org",
 		"timezone": "",						// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
 		"request_payload":	"*url",			// source of input data <*url>
 		"reply_payload":	"*xml",			// type of output data <*xml>
@@ -265,10 +265,9 @@ func TestHttpAgentCfg(t *testing.T) {
 	eCgrCfg, _ := NewDefaultCGRConfig()
 	eCgrCfg.httpAgentCfg = []*HttpAgentCfg{
 		&HttpAgentCfg{
-			ID:  "conecto1",
-			Url: "/conecto",
-			Tenant: utils.ParseRSRFieldsMustCompile("^cgrates.org",
-				utils.INFIELD_SEP),
+			ID:             "conecto1",
+			Url:            "/conecto",
+			Tenant:         NewRSRParsersMustCompile("cgrates.org", true),
 			Timezone:       "",
 			RequestPayload: utils.MetaUrl,
 			ReplyPayload:   utils.MetaXml,

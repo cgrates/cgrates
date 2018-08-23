@@ -15,12 +15,14 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package utils
+package config
 
 import (
 	"reflect"
 	"regexp"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestNewRSRParsers(t *testing.T) {
@@ -29,25 +31,25 @@ func TestNewRSRParsers(t *testing.T) {
 		&RSRParser{Rules: "Value1", AllFiltersMatch: true, attrValue: "Value1"},
 		&RSRParser{Rules: "Heade2=Value2", AllFiltersMatch: true, attrName: "Heade2", attrValue: "Value2"},
 		&RSRParser{Rules: "~Header3(Val3&!Val4)", AllFiltersMatch: true, attrName: "Header3",
-			filters: RSRFilters{NewRSRFilterMustCompile("Val3"),
-				NewRSRFilterMustCompile("!Val4")}},
+			filters: utils.RSRFilters{utils.NewRSRFilterMustCompile("Val3"),
+				utils.NewRSRFilterMustCompile("!Val4")}},
 
 		&RSRParser{Rules: "~Header4:s/a/${1}b/{*duration_seconds&*round:2}(b&c)", AllFiltersMatch: true,
 			attrName: "Header4",
-			rsrRules: []*ReSearchReplace{
-				&ReSearchReplace{
+			rsrRules: []*utils.ReSearchReplace{
+				&utils.ReSearchReplace{
 					SearchRegexp:    regexp.MustCompile(`a`),
 					ReplaceTemplate: "${1}b"}},
-			converters: DataConverters{NewDataConverterMustCompile("*duration_seconds"),
-				NewDataConverterMustCompile("*round:2")},
-			filters: RSRFilters{NewRSRFilterMustCompile("b"),
-				NewRSRFilterMustCompile("c")},
+			converters: utils.DataConverters{utils.NewDataConverterMustCompile("*duration_seconds"),
+				utils.NewDataConverterMustCompile("*round:2")},
+			filters: utils.RSRFilters{utils.NewRSRFilterMustCompile("b"),
+				utils.NewRSRFilterMustCompile("c")},
 		},
 
 		&RSRParser{Rules: "Value5{*duration_seconds&*round:2}", AllFiltersMatch: true,
 			attrValue: "Value5",
-			converters: DataConverters{NewDataConverterMustCompile("*duration_seconds"),
-				NewDataConverterMustCompile("*round:2")},
+			converters: utils.DataConverters{utils.NewDataConverterMustCompile("*duration_seconds"),
+				utils.NewDataConverterMustCompile("*round:2")},
 		},
 	}
 	if rsrParsers, err := NewRSRParsers(ruleStr, true); err != nil {
@@ -61,14 +63,14 @@ func TestRSRParserCompile(t *testing.T) {
 	ePrsr := &RSRParser{
 		Rules:    "~Header4:s/a/${1}b/{*duration_seconds&*round:2}(b&c)",
 		attrName: "Header4",
-		rsrRules: []*ReSearchReplace{
-			&ReSearchReplace{
+		rsrRules: []*utils.ReSearchReplace{
+			&utils.ReSearchReplace{
 				SearchRegexp:    regexp.MustCompile(`a`),
 				ReplaceTemplate: "${1}b"}},
-		converters: DataConverters{NewDataConverterMustCompile("*duration_seconds"),
-			NewDataConverterMustCompile("*round:2")},
-		filters: RSRFilters{NewRSRFilterMustCompile("b"),
-			NewRSRFilterMustCompile("c")},
+		converters: utils.DataConverters{utils.NewDataConverterMustCompile("*duration_seconds"),
+			utils.NewDataConverterMustCompile("*round:2")},
+		filters: utils.RSRFilters{utils.NewRSRFilterMustCompile("b"),
+			utils.NewRSRFilterMustCompile("c")},
 	}
 	prsr := &RSRParser{
 		Rules: "~Header4:s/a/${1}b/{*duration_seconds&*round:2}(b&c)",
@@ -104,5 +106,18 @@ func TestRSRParserConstant(t *testing.T) {
 		t.Error("Unexpected error: ", err.Error())
 	} else if out != "cgrates.org" {
 		t.Errorf("expecting: cgrates.org , received: %+v", out)
+	}
+}
+
+func TestRSRParserNotConstant(t *testing.T) {
+	rule := "~Header1;~Header2"
+	rsrParsers, err := NewRSRParsers(rule, true)
+	if err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	}
+	if out, err := rsrParsers.ParseValue(""); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if out != "" {
+		t.Errorf("expecting: EmptyString , received: %+v", out)
 	}
 }

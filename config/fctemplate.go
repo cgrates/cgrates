@@ -18,10 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import (
-	"github.com/cgrates/cgrates/utils"
-)
-
 func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg) *FCTemplate {
 	fcTmp := new(FCTemplate)
 	if jsnCfg.Id != nil {
@@ -40,17 +36,53 @@ func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg) *FCTemplate {
 		}
 	}
 	if jsnCfg.Value != nil {
-		fcTmp.Value = utils.NewRSRParsersMustCompile(*jsnCfg.Value, true)
+		fcTmp.Value = NewRSRParsersMustCompile(*jsnCfg.Value, true)
+	}
+	if jsnCfg.Width != nil {
+		fcTmp.Width = *jsnCfg.Width
+	}
+	if jsnCfg.Strip != nil {
+		fcTmp.Strip = *jsnCfg.Strip
+	}
+	if jsnCfg.Padding != nil {
+		fcTmp.Padding = *jsnCfg.Padding
+	}
+	if jsnCfg.Mandatory != nil {
+		fcTmp.Mandatory = *jsnCfg.Mandatory
+	}
+	if jsnCfg.Attribute_id != nil {
+		fcTmp.AttributeID = *jsnCfg.Attribute_id
+	}
+	if jsnCfg.New_branch != nil {
+		fcTmp.NewBranch = *jsnCfg.New_branch
+	}
+	if jsnCfg.Timezone != nil {
+		fcTmp.Timezone = *jsnCfg.Timezone
+	}
+	if jsnCfg.Blocker != nil {
+		fcTmp.Blocker = *jsnCfg.Blocker
+	}
+	if jsnCfg.Break_on_success != nil {
+		fcTmp.BreakOnSuccess = *jsnCfg.Break_on_success
 	}
 	return fcTmp
 }
 
 type FCTemplate struct {
-	ID      string
-	Type    string   // Type of field
-	FieldId string   // Field identifier
-	Filters []string // list of filter profiles
-	Value   utils.RSRParsers
+	ID             string
+	Type           string   // Type of field
+	FieldId        string   // Field identifier
+	Filters        []string // list of filter profiles
+	Value          RSRParsers
+	Width          int
+	Strip          string
+	Padding        string
+	Mandatory      bool
+	AttributeID    string // Used by NavigableMap when creating CGREvent/XMLElements
+	NewBranch      bool   // Used by NavigableMap when creating XMLElements
+	Timezone       string
+	Blocker        bool
+	BreakOnSuccess bool
 }
 
 func FCTemplatesFromFCTemapltesJsonCfg(jsnCfgFlds []*FcTemplateJsonCfg) []*FCTemplate {

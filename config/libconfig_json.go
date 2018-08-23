@@ -377,8 +377,8 @@ type RAReqProcessorJsnCfg struct {
 	Filters             *[]string
 	Flags               *[]string
 	Continue_on_success *bool
-	Request_fields      *[]*CdrFieldJsonCfg
-	Reply_fields        *[]*CdrFieldJsonCfg
+	Request_fields      *[]*FcTemplateJsonCfg
+	Reply_fields        *[]*FcTemplateJsonCfg
 }
 
 // Conecto Agent configuration section
@@ -398,8 +398,8 @@ type HttpAgentProcessorJsnCfg struct {
 	Filters             *[]string
 	Flags               *[]string
 	Continue_on_success *bool
-	Request_fields      *[]*CdrFieldJsonCfg
-	Reply_fields        *[]*CdrFieldJsonCfg
+	Request_fields      *[]*FcTemplateJsonCfg
+	Reply_fields        *[]*FcTemplateJsonCfg
 }
 
 // History server config section
@@ -574,9 +574,18 @@ type MigratorCfgJson struct {
 }
 
 type FcTemplateJsonCfg struct {
-	Id       *string
-	Type     *string
-	Field_id *string
-	Filters  *[]string
-	Value    *string
+	Id               *string
+	Type             *string
+	Field_id         *string
+	Attribute_id     *string
+	Filters          *[]string
+	Value            *string
+	Width            *int
+	Strip            *string
+	Padding          *string
+	Mandatory        *bool
+	New_branch       *bool
+	Timezone         *string
+	Blocker          *bool
+	Break_on_success *bool
 }

@@ -37,7 +37,7 @@ func TestNewFCTemplateFromFCTemplateJsonCfg(t *testing.T) {
 		Type:    "*composed",
 		FieldId: "Tenant",
 		Filters: []string{"Filter1", "Filter2"},
-		Value:   utils.NewRSRParsersMustCompile("cgrates.org", true),
+		Value:   NewRSRParsersMustCompile("cgrates.org", true),
 	}
 	rcv := NewFCTemplateFromFCTemplateJsonCfg(jsonCfg)
 	if !reflect.DeepEqual(expected, rcv) {
@@ -68,14 +68,14 @@ func TestFCTemplatesFromFCTemapltesJsonCfg(t *testing.T) {
 			Type:    "*composed",
 			FieldId: "Tenant",
 			Filters: []string{"Filter1", "Filter2"},
-			Value:   utils.NewRSRParsersMustCompile("cgrates.org", true),
+			Value:   NewRSRParsersMustCompile("cgrates.org", true),
 		},
 		&FCTemplate{
 			ID:      "RunID",
 			Type:    "*composed",
 			FieldId: "RunID",
 			Filters: []string{"Filter1_1", "Filter2_2"},
-			Value:   utils.NewRSRParsersMustCompile("SampleValue", true),
+			Value:   NewRSRParsersMustCompile("SampleValue", true),
 		},
 	}
 	rcv := FCTemplatesFromFCTemapltesJsonCfg(jsnCfgs)

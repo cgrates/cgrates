@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package engine
+package config
 
 import (
 	"encoding/xml"
@@ -25,13 +25,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // CGRReplier is the interface supported by replies convertible to CGRReply
 type NavigableMapper interface {
-	AsNavigableMap([]*config.CfgCdrField) (*NavigableMap, error)
+	AsNavigableMap([]*CfgCdrField) (*NavigableMap, error)
 }
 
 // NewNavigableMap constructs a NavigableMap
@@ -44,9 +43,9 @@ func NewNavigableMap(data map[string]interface{}) *NavigableMap {
 
 // NMItem is an item in the NavigableMap
 type NMItem struct {
-	Path   []string            // path in map
-	Data   interface{}         // value of the element
-	Config *config.CfgCdrField // so we can store additional configuration
+	Path   []string    // path in map
+	Data   interface{} // value of the element
+	Config *FCTemplate // so we can store additional configuration
 }
 
 // NavigableMap is a map who's values can be navigated via path
@@ -163,7 +162,7 @@ func (nM *NavigableMap) Values() (vals []interface{}) {
 
 // AsNavigableMap implements both NavigableMapper as well as DataProvider interfaces
 func (nM *NavigableMap) AsNavigableMap(
-	tpl []*config.CfgCdrField) (oNM *NavigableMap, err error) {
+	tpl []*FCTemplate) (oNM *NavigableMap, err error) {
 	return nil, utils.ErrNotImplemented
 }
 

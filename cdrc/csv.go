@@ -264,15 +264,15 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 }
 
 // newCsvProvider constructs a DataProvider
-func newCsvProvider(record []string) (dP engine.DataProvider) {
-	dP = &csvProvider{req: record, cache: engine.NewNavigableMap(nil)}
+func newCsvProvider(record []string) (dP config.DataProvider) {
+	dP = &csvProvider{req: record, cache: config.NewNavigableMap(nil)}
 	return
 }
 
 // csvProvider implements engine.DataProvider so we can pass it to filters
 type csvProvider struct {
 	req   []string
-	cache *engine.NavigableMap
+	cache *config.NavigableMap
 }
 
 // String is part of engine.DataProvider interface
@@ -312,7 +312,7 @@ func (cP *csvProvider) FieldAsString(fldPath []string) (data string, err error) 
 }
 
 // AsNavigableMap is part of engine.DataProvider interface
-func (cP *csvProvider) AsNavigableMap([]*config.CfgCdrField) (
-	nm *engine.NavigableMap, err error) {
+func (cP *csvProvider) AsNavigableMap([]*config.FCTemplate) (
+	nm *config.NavigableMap, err error) {
 	return nil, utils.ErrNotImplemented
 }

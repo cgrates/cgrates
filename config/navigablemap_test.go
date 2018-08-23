@@ -15,7 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package engine
+package config
 
 import (
 	"encoding/xml"
@@ -23,7 +23,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -518,7 +517,7 @@ func TestNavMapAsXMLElements(t *testing.T) {
 					"Field2": []*NMItem{
 						&NMItem{Path: []string{"FirstLevel2", "SecondLevel2", "Field2"},
 							Data:   "attrVal1",
-							Config: &config.CfgCdrField{Tag: "AttributeTest", AttributeID: "attribute1"}},
+							Config: &FCTemplate{ID: "AttributeTest", AttributeID: "attribute1"}},
 						&NMItem{Path: []string{"FirstLevel2", "SecondLevel2", "Field2"},
 							Data: "Value2"}},
 				},
@@ -530,14 +529,14 @@ func TestNavMapAsXMLElements(t *testing.T) {
 						Data: "Value5"},
 					&NMItem{Path: []string{"FirstLevel2", "Field5"},
 						Data:   "attrVal5",
-						Config: &config.CfgCdrField{Tag: "AttributeTest", AttributeID: "attribute5"}}},
+						Config: &FCTemplate{ID: "AttributeTest", AttributeID: "attribute5"}}},
 				"Field6": []*NMItem{
 					&NMItem{Path: []string{"FirstLevel2", "Field6"},
 						Data:   "Value6",
-						Config: &config.CfgCdrField{Tag: "NewBranchTest", NewBranch: true}},
+						Config: &FCTemplate{ID: "NewBranchTest", NewBranch: true}},
 					&NMItem{Path: []string{"FirstLevel2", "Field6"},
 						Data:   "attrVal6",
-						Config: &config.CfgCdrField{Tag: "AttributeTest", AttributeID: "attribute6"}},
+						Config: &FCTemplate{ID: "AttributeTest", AttributeID: "attribute6"}},
 				},
 			},
 			"Field4": []*NMItem{
@@ -545,7 +544,7 @@ func TestNavMapAsXMLElements(t *testing.T) {
 					Data: "Val4"},
 				&NMItem{Path: []string{"Field4"},
 					Data:   "attrVal2",
-					Config: &config.CfgCdrField{Tag: "AttributeTest", AttributeID: "attribute2"}}},
+					Config: &FCTemplate{ID: "AttributeTest", AttributeID: "attribute2"}}},
 		},
 		order: [][]string{
 			[]string{"FirstLevel2", "SecondLevel2", "Field2"},
@@ -717,7 +716,7 @@ func TestNavMapAsCGREvent(t *testing.T) {
 					"Field2": []*NMItem{
 						&NMItem{Path: []string{"FirstLevel2", "SecondLevel2", "Field2"},
 							Data: "attrVal1",
-							Config: &config.CfgCdrField{Tag: "AttributeTest",
+							Config: &FCTemplate{ID: "AttributeTest",
 								AttributeID: "attribute1"}},
 						&NMItem{Path: []string{"FirstLevel2", "SecondLevel2", "Field2"},
 							Data: "Value2"}},
@@ -730,16 +729,16 @@ func TestNavMapAsCGREvent(t *testing.T) {
 						Data: "Value5"},
 					&NMItem{Path: []string{"FirstLevel2", "Field5"},
 						Data: "attrVal5",
-						Config: &config.CfgCdrField{Tag: "AttributeTest",
+						Config: &FCTemplate{ID: "AttributeTest",
 							AttributeID: "attribute5"}}},
 				"Field6": []*NMItem{
 					&NMItem{Path: []string{"FirstLevel2", "Field6"},
 						Data: "Value6",
-						Config: &config.CfgCdrField{Tag: "NewBranchTest",
+						Config: &FCTemplate{ID: "NewBranchTest",
 							NewBranch: true}},
 					&NMItem{Path: []string{"FirstLevel2", "Field6"},
 						Data: "attrVal6",
-						Config: &config.CfgCdrField{Tag: "AttributeTest",
+						Config: &FCTemplate{ID: "AttributeTest",
 							AttributeID: "attribute6"}},
 				},
 			},
@@ -748,7 +747,7 @@ func TestNavMapAsCGREvent(t *testing.T) {
 					Data: "Val4"},
 				&NMItem{Path: []string{"Field4"},
 					Data: "attrVal2",
-					Config: &config.CfgCdrField{Tag: "AttributeTest",
+					Config: &FCTemplate{ID: "AttributeTest",
 						AttributeID: "attribute2"}}},
 		},
 	}

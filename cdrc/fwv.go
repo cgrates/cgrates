@@ -317,15 +317,15 @@ func (self *FwvRecordsProcessor) processTrailer() error {
 }
 
 // newfwvProvider constructs a DataProvider
-func newfwvProvider(record string) (dP engine.DataProvider) {
-	dP = &fwvProvider{req: record, cache: engine.NewNavigableMap(nil)}
+func newfwvProvider(record string) (dP config.DataProvider) {
+	dP = &fwvProvider{req: record, cache: config.NewNavigableMap(nil)}
 	return
 }
 
 // fwvProvider implements engine.DataProvider so we can pass it to filters
 type fwvProvider struct {
 	req   string
-	cache *engine.NavigableMap
+	cache *config.NavigableMap
 }
 
 // String is part of engine.DataProvider interface
@@ -370,7 +370,7 @@ func (fP *fwvProvider) FieldAsString(fldPath []string) (data string, err error) 
 }
 
 // AsNavigableMap is part of engine.DataProvider interface
-func (fP *fwvProvider) AsNavigableMap([]*config.CfgCdrField) (
-	nm *engine.NavigableMap, err error) {
+func (fP *fwvProvider) AsNavigableMap([]*config.FCTemplate) (
+	nm *config.NavigableMap, err error) {
 	return nil, utils.ErrNotImplemented
 }
