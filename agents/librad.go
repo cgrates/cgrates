@@ -53,7 +53,6 @@ func radComposedFieldValue(pkt *radigo.Packet,
 			outVal += out
 			continue
 		}
-
 		for _, avp := range pkt.AttributesWithName(
 			attrVendorFromPath(rsrTpl.Rules)) {
 			if parsed, err := rsrTpl.ParseValue(avp.GetStringValue()); err != nil {
