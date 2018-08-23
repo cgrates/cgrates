@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-// SupplierSCfg is the configuration of supplier service
+// AttributeSCfg is the configuration of attribute service
 type AttributeSCfg struct {
 	Enabled             bool
 	StringIndexedFields *[]string

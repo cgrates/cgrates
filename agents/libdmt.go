@@ -94,7 +94,7 @@ func (pv processorVars) valAsInterface(fldPath string) (val interface{}, err err
 		err = errors.New("not found")
 		return
 	}
-	return engine.NewNavigableMap(pv).FieldAsInterface(strings.Split(fldPath, utils.HIERARCHY_SEP))
+	return config.NewNavigableMap(pv).FieldAsInterface(strings.Split(fldPath, utils.HIERARCHY_SEP))
 }
 
 // valAsString returns the string value for fldName
@@ -107,7 +107,7 @@ func (pv processorVars) valAsString(fldPath string) (val string, err error) {
 	if !pv.hasVar(fldName) {
 		return "", utils.ErrNotFoundNoCaps
 	}
-	return engine.NewNavigableMap(pv).FieldAsString(strings.Split(fldPath, utils.HIERARCHY_SEP))
+	return config.NewNavigableMap(pv).FieldAsString(strings.Split(fldPath, utils.HIERARCHY_SEP))
 }
 
 // asV1AuthorizeArgs returns the arguments needed by SessionSv1.AuthorizeEvent

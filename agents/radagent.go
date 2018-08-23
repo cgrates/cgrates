@@ -65,7 +65,7 @@ func NewRadiusAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 type RadiusAgent struct {
 	cgrCfg    *config.CGRConfig             // reference for future config reloads
 	sessionS  rpcclient.RpcClientConnection // Connection towards CGR-SessionS component
-	tenantCfg utils.RSRFields
+	tenantCfg config.RSRParsers
 	filterS   *engine.FilterS
 	rsAuth    *radigo.Server
 	rsAcct    *radigo.Server

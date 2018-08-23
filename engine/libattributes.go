@@ -21,13 +21,14 @@ package engine
 import (
 	"sort"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
 type Attribute struct {
 	FieldName  string
 	Initial    interface{}
-	Substitute utils.RSRParsers
+	Substitute config.RSRParsers
 	Append     bool
 }
 

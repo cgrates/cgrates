@@ -27,19 +27,19 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func newAgentRequest(req engine.DataProvider, tntTpl utils.RSRFields,
+func newAgentRequest(req config.DataProvider, tntTpl config.RSRParsers,
 	dfltTenant string, filterS *engine.FilterS) (ar *AgentRequest) {
 	ar = &AgentRequest{
 		Request:    req,
-		Vars:       engine.NewNavigableMap(nil),
-		CGRRequest: engine.NewNavigableMap(nil),
-		CGRReply:   engine.NewNavigableMap(nil),
-		Reply:      engine.NewNavigableMap(nil),
+		Vars:       config.NewNavigableMap(nil),
+		CGRRequest: config.NewNavigableMap(nil),
+		CGRReply:   config.NewNavigableMap(nil),
+		Reply:      config.NewNavigableMap(nil),
 		filterS:    filterS,
 	}
 	// populate tenant
 	if tntIf, err := ar.ParseField(
-		&config.CfgCdrField{Type: utils.META_COMPOSED,
+		&config.FCTemplate{Type: utils.META_COMPOSED,
 			Value: tntTpl}); err == nil && tntIf.(string) != "" {
 		ar.Tenant = tntIf.(string)
 	} else {
@@ -52,11 +52,11 @@ func newAgentRequest(req engine.DataProvider, tntTpl utils.RSRFields,
 // implements engine.DataProvider so we can pass it to filters
 type AgentRequest struct {
 	Tenant     string
-	Request    engine.DataProvider  // request
-	Vars       *engine.NavigableMap // shared data
-	CGRRequest *engine.NavigableMap
-	CGRReply   *engine.NavigableMap
-	Reply      *engine.NavigableMap
+	Request    config.DataProvider  // request
+	Vars       *config.NavigableMap // shared data
+	CGRRequest *config.NavigableMap
+	CGRReply   *config.NavigableMap
+	Reply      *config.NavigableMap
 	filterS    *engine.FilterS
 }
 
@@ -102,9 +102,9 @@ func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) 
 }
 
 // AsNavigableMap implements engine.DataProvider
-func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.CfgCdrField) (
-	nM *engine.NavigableMap, err error) {
-	nM = engine.NewNavigableMap(nil)
+func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
+	nM *config.NavigableMap, err error) {
+	nM = config.NewNavigableMap(nil)
 	for _, tplFld := range tplFlds {
 		if pass, err := ar.filterS.Pass(ar.Tenant,
 			tplFld.Filters, ar); err != nil {
@@ -116,16 +116,16 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.CfgCdrField) (
 		if err != nil {
 			return nil, err
 		}
-		var valSet []*engine.NMItem
+		var valSet []*config.NMItem
 		fldPath := strings.Split(tplFld.FieldId, utils.NestingSep)
 		if nMFields, err := nM.FieldAsInterface(fldPath); err != nil {
 			if err != utils.ErrNotFound {
 				return nil, err
 			}
 		} else {
-			valSet = nMFields.([]*engine.NMItem) // start from previous stored fields
+			valSet = nMFields.([]*config.NMItem) // start from previous stored fields
 		}
-		valSet = append(valSet, &engine.NMItem{Data: out, Path: fldPath, Config: tplFld})
+		valSet = append(valSet, &config.NMItem{Data: out, Path: fldPath, Config: tplFld})
 		nM.Set(fldPath, valSet, true)
 		if tplFld.Blocker { // useful in case of processing errors first
 			break
@@ -136,27 +136,27 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.CfgCdrField) (
 
 // parseField outputs the value based on the template item
 func (aReq *AgentRequest) ParseField(
-	cfgFld *config.CfgCdrField) (out interface{}, err error) {
+	cfgFld *config.FCTemplate) (out interface{}, err error) {
 	var isString bool
 	switch cfgFld.Type {
 	default:
 		return "", fmt.Errorf("unsupported type: <%s>", cfgFld.Type)
 	case utils.META_FILLER:
-		out = cfgFld.Value.Id()
+		out, err = cfgFld.Value.ParseValue(utils.EmptyString)
 		cfgFld.Padding = "right"
 		isString = true
 	case utils.META_CONSTANT:
-		out = cfgFld.Value.Id()
+		out, err = cfgFld.Value.ParseValue(utils.EmptyString)
 		isString = true
 	case utils.META_COMPOSED:
-		out = aReq.composedField(cfgFld.Value)
+		out, err = cfgFld.Value.ParseDataProvider(aReq)
 		isString = true
 	case utils.META_USAGE_DIFFERENCE:
 		if len(cfgFld.Value) != 2 {
 			return nil, fmt.Errorf("invalid arguments <%s>", utils.ToJSON(cfgFld.Value))
 		} else {
-			strVal1, err := aReq.FieldAsString(strings.Split(cfgFld.Value[0].Id, utils.NestingSep))
-			strVal2, err := aReq.FieldAsString(strings.Split(cfgFld.Value[1].Id, utils.NestingSep))
+			strVal1, err := aReq.FieldAsString(strings.Split(cfgFld.Value[0].Rules, utils.NestingSep))
+			strVal2, err := aReq.FieldAsString(strings.Split(cfgFld.Value[1].Rules, utils.NestingSep))
 			tEnd, err := utils.ParseTimeDetectLayout(strVal1, cfgFld.Timezone)
 			if err != nil {
 				return "", err
@@ -169,40 +169,12 @@ func (aReq *AgentRequest) ParseField(
 		}
 		isString = true
 	}
+	if err != nil {
+		return
+	}
 	if isString { // format the string additionally with fmtFieldWidth
-		out, err = utils.FmtFieldWidth(cfgFld.Tag, out.(string), cfgFld.Width,
+		out, err = utils.FmtFieldWidth(cfgFld.ID, out.(string), cfgFld.Width,
 			cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory)
 	}
 	return
-}
-
-// composedField is a subset of ParseField
-func (ar *AgentRequest) composedField(outTpl utils.RSRFields) (outVal string) {
-	for _, rsrTpl := range outTpl {
-		if rsrTpl.IsStatic() {
-			if parsed, err := rsrTpl.Parse(""); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> %s",
-						utils.HTTPAgent, err.Error()))
-			} else {
-				outVal += parsed
-			}
-			continue
-		}
-		valStr, err := ar.FieldAsString(strings.Split(rsrTpl.Id, utils.NestingSep))
-		if err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> %s",
-					utils.HTTPAgent, err.Error()))
-			continue
-		}
-		if parsed, err := rsrTpl.Parse(valStr); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> %s",
-					utils.HTTPAgent, err.Error()))
-		} else {
-			outVal += parsed
-		}
-	}
-	return outVal
 }

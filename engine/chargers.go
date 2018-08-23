@@ -79,7 +79,7 @@ func (cS *ChargerService) matchingChargerProfilesForEvent(cgrEv *utils.CGREvent)
 			continue
 		}
 		if pass, err := cS.filterS.Pass(cgrEv.Tenant, cP.FilterIDs,
-			NewNavigableMap(cgrEv.Event)); err != nil {
+			config.NewNavigableMap(cgrEv.Event)); err != nil {
 			return nil, err
 		} else if !pass {
 			continue

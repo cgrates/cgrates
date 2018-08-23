@@ -25,6 +25,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -242,7 +243,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 			continue
 		}
 		if pass, err := tS.filterS.Pass(args.Tenant, tPrfl.FilterIDs,
-			NewNavigableMap(args.Event)); err != nil {
+			config.NewNavigableMap(args.Event)); err != nil {
 			return nil, err
 		} else if !pass {
 			continue

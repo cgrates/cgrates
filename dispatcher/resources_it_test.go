@@ -156,7 +156,7 @@ func testDspResAddAttributesWithPermision(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.APIMethods,
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("ThresholdSv1.GetThresholdsForEvent", true),
+				Substitute: config.NewRSRParsersMustCompile("ThresholdSv1.GetThresholdsForEvent", true),
 				Append:     true,
 			},
 		},
@@ -215,7 +215,7 @@ func testDspResAddAttributesWithPermision2(t *testing.T) {
 			&engine.Attribute{
 				FieldName:  utils.APIMethods,
 				Initial:    utils.META_ANY,
-				Substitute: utils.NewRSRParsersMustCompile("ThresholdSv1.ProcessEvent&ResourceSv1.GetResourcesForEvent", true),
+				Substitute: config.NewRSRParsersMustCompile("ThresholdSv1.ProcessEvent&ResourceSv1.GetResourcesForEvent", true),
 				Append:     true,
 			},
 		},

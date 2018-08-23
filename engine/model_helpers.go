@@ -27,6 +27,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -2815,7 +2816,7 @@ func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (a
 		attrPrf.Contexts[i] = context
 	}
 	for i, reqAttr := range tpAttr.Attributes {
-		sbstPrsr, err := utils.NewRSRParsers(reqAttr.Substitute, true)
+		sbstPrsr, err := config.NewRSRParsers(reqAttr.Substitute, true)
 		if err != nil {
 			return nil, err
 		}

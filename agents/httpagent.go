@@ -33,7 +33,7 @@ import (
 // NewHttpAgent will construct a HTTPAgent
 func NewHTTPAgent(
 	sessionS rpcclient.RpcClientConnection,
-	filterS *engine.FilterS, tenantCfg utils.RSRFields,
+	filterS *engine.FilterS, tenantCfg config.RSRParsers,
 	dfltTenant, timezone, reqPayload, rplyPayload string,
 	reqProcessors []*config.HttpAgntProcCfg) *HTTPAgent {
 	return &HTTPAgent{sessionS: sessionS, filterS: filterS,
@@ -46,7 +46,7 @@ func NewHTTPAgent(
 type HTTPAgent struct {
 	sessionS  rpcclient.RpcClientConnection
 	filterS   *engine.FilterS
-	tenantCfg utils.RSRFields
+	tenantCfg config.RSRParsers
 	dfltTenant,
 	timezone,
 	reqPayload,

@@ -146,7 +146,7 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent)
 			continue
 		}
 		if pass, err := spS.filterS.Pass(ev.Tenant, splPrfl.FilterIDs,
-			NewNavigableMap(ev.Event)); err != nil {
+			config.NewNavigableMap(ev.Event)); err != nil {
 			return nil, err
 		} else if !pass {
 			continue
@@ -285,7 +285,9 @@ func (spS *SupplierService) resourceUsage(resIDs []string) (tUsage float64, err 
 	return
 }
 
-func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplier, extraOpts *optsGetSuppliers) (srtSpl *SortedSupplier, pass bool, err error) {
+//
+func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplier,
+	extraOpts *optsGetSuppliers) (srtSpl *SortedSupplier, pass bool, err error) {
 	globalStats := map[string]float64{ //used for QOS strategy
 		utils.Weight: spl.Weight,
 	}
@@ -304,6 +306,7 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> ignoring supplier with ID: %s, err: %s",
 						utils.SupplierS, spl.ID, err.Error()))
+				// return nil, false, nil
 			} else {
 				return nil, false, err
 			}
@@ -332,6 +335,7 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> ignoring supplier with ID: %s, err: %s",
 						utils.SupplierS, spl.ID, err.Error()))
+				// return nil, false, nil
 			} else {
 				return nil, false, err
 			}
@@ -365,7 +369,7 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 	}
 	//filter the supplier
 	if len(spl.FilterIDs) != 0 {
-		nM := NewNavigableMap(nil)
+		nM := config.NewNavigableMap(nil)
 		nM.Set([]string{"*req"}, ev.Event, false)
 		nM.Set([]string{"*sd"}, sortedSpl.SortingData, false)
 		nM.Set([]string{"*gs"}, metricForFilter, false)

@@ -23,7 +23,6 @@ import (
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/radigo"
 )
@@ -43,36 +42,21 @@ func attrVendorFromPath(path string) (attrName, vendorName string) {
 // radComposedFieldValue extracts the field value out of RADIUS packet
 // procVars have priority over packet variables
 func radComposedFieldValue(pkt *radigo.Packet,
-	agReq *AgentRequest, outTpl utils.RSRFields) (outVal string) {
+	agReq *AgentRequest, outTpl config.RSRParsers) (outVal string) {
 	for _, rsrTpl := range outTpl {
-		if rsrTpl.IsStatic() {
-			if parsed, err := rsrTpl.Parse(""); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> %s",
-						utils.RadiusAgent, err.Error()))
-			} else {
-				outVal += parsed
-			}
-			continue
-		}
-		if val, err := agReq.FieldAsString(strings.Split(rsrTpl.Id, utils.NestingSep)); err != nil {
+		if out, err := rsrTpl.ParseDataProvider(agReq); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> %s",
 					utils.RadiusAgent, err.Error()))
 			continue
 		} else {
-			if parsed, err := rsrTpl.Parse(val); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> %s",
-						utils.RadiusAgent, err.Error()))
-			} else {
-				outVal += parsed
-			}
+			outVal += out
 			continue
 		}
+
 		for _, avp := range pkt.AttributesWithName(
-			attrVendorFromPath(rsrTpl.Id)) {
-			if parsed, err := rsrTpl.Parse(avp.GetStringValue()); err != nil {
+			attrVendorFromPath(rsrTpl.Rules)) {
+			if parsed, err := rsrTpl.ParseValue(avp.GetStringValue()); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> %s",
 						utils.RadiusAgent, err.Error()))
@@ -86,20 +70,23 @@ func radComposedFieldValue(pkt *radigo.Packet,
 
 // radFieldOutVal formats the field value retrieved from RADIUS packet
 func radFieldOutVal(pkt *radigo.Packet, agReq *AgentRequest,
-	cfgFld *config.CfgCdrField) (outVal string, err error) {
+	cfgFld *config.FCTemplate) (outVal string, err error) {
 	// different output based on cgrFld.Type
 	switch cfgFld.Type {
 	case utils.META_FILLER:
-		outVal = cfgFld.Value.Id()
+		outVal, err = cfgFld.Value.ParseValue(utils.EmptyString)
 		cfgFld.Padding = "right"
 	case utils.META_CONSTANT:
-		outVal = cfgFld.Value.Id()
+		outVal, err = cfgFld.Value.ParseValue(utils.EmptyString)
 	case utils.META_COMPOSED:
 		outVal = radComposedFieldValue(pkt, agReq, cfgFld.Value)
 	default:
 		return "", fmt.Errorf("unsupported configuration field type: <%s>", cfgFld.Type)
 	}
-	if outVal, err = utils.FmtFieldWidth(cfgFld.Tag, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
+	if err != nil {
+		return
+	}
+	if outVal, err = utils.FmtFieldWidth(cfgFld.ID, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
 		return "", err
 	}
 	return
@@ -107,7 +94,7 @@ func radFieldOutVal(pkt *radigo.Packet, agReq *AgentRequest,
 
 // radReplyAppendAttributes appends attributes to a RADIUS reply based on predefined template
 func radReplyAppendAttributes(reply *radigo.Packet, agReq *AgentRequest,
-	cfgFlds []*config.CfgCdrField) (err error) {
+	cfgFlds []*config.FCTemplate) (err error) {
 	for _, cfgFld := range cfgFlds {
 		fmtOut, err := radFieldOutVal(reply, agReq, cfgFld)
 		if err != nil {
@@ -131,13 +118,13 @@ func radReplyAppendAttributes(reply *radigo.Packet, agReq *AgentRequest,
 }
 
 // NewCGRReply is specific to replies coming from CGRateS
-func NewCGRReply(rply engine.NavigableMapper,
-	errRply error) (mp *engine.NavigableMap, err error) {
+func NewCGRReply(rply config.NavigableMapper,
+	errRply error) (mp *config.NavigableMap, err error) {
 	if errRply != nil {
-		return engine.NewNavigableMap(map[string]interface{}{
+		return config.NewNavigableMap(map[string]interface{}{
 			utils.Error: errRply.Error()}), nil
 	}
-	mp = engine.NewNavigableMap(nil)
+	mp = config.NewNavigableMap(nil)
 	if rply != nil {
 		mp, err = rply.AsNavigableMap(nil)
 		if err != nil {
@@ -149,8 +136,8 @@ func NewCGRReply(rply engine.NavigableMapper,
 }
 
 // newRADataProvider constructs a DataProvider
-func newRADataProvider(req *radigo.Packet) (dP engine.DataProvider, err error) {
-	dP = &radiusDP{req: req, cache: engine.NewNavigableMap(nil)}
+func newRADataProvider(req *radigo.Packet) (dP config.DataProvider, err error) {
+	dP = &radiusDP{req: req, cache: config.NewNavigableMap(nil)}
 	return
 }
 
@@ -158,7 +145,7 @@ func newRADataProvider(req *radigo.Packet) (dP engine.DataProvider, err error) {
 // decoded data is only searched once and cached
 type radiusDP struct {
 	req   *radigo.Packet
-	cache *engine.NavigableMap
+	cache *config.NavigableMap
 }
 
 // String is part of engine.DataProvider interface
@@ -196,7 +183,7 @@ func (pk *radiusDP) FieldAsString(fldPath []string) (data string, err error) {
 }
 
 // AsNavigableMap is part of engine.DataProvider interface
-func (pk *radiusDP) AsNavigableMap([]*config.CfgCdrField) (
-	nm *engine.NavigableMap, err error) {
+func (pk *radiusDP) AsNavigableMap([]*config.FCTemplate) (
+	nm *config.NavigableMap, err error) {
 	return nil, utils.ErrNotImplemented
 }

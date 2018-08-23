@@ -156,7 +156,7 @@ func (v1AttrPrf v1AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 	for _, mp := range v1AttrPrf.Attributes {
 		for _, attr := range mp {
 			initIface := utils.StringToInterface(attr.Initial)
-			sbstPrsr, err := utils.NewRSRParsers(attr.Substitute, true)
+			sbstPrsr, err := config.NewRSRParsers(attr.Substitute, true)
 			if err != nil {
 				return nil, err
 			}
