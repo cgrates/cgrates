@@ -309,7 +309,7 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 			}
 		} else if len(costData) == 0 {
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> profile: %s ignoring supplier with ID: %s, missing cost information",
+				fmt.Sprintf("<%s> ignoring supplier with ID: %s, missing cost information",
 					utils.SupplierS, spl.ID))
 		} else {
 			if extraOpts.maxCost != 0 &&

@@ -130,7 +130,7 @@ func (me MapEvent) AsMapStringIgnoreErrors(ignoredFlds utils.StringMap) (mp map[
 
 // AsCDR exports the SafEvent as CDR
 func (me MapEvent) AsCDR(cfg *config.CGRConfig, tmz string) (cdr *CDR, err error) {
-	cdr = NewCDRWithDefaults(cfg)
+	cdr = &CDR{Cost: -1.0, ExtraFields: make(map[string]string)}
 	for k, v := range me {
 		if !utils.IsSliceMember(utils.PrimaryCdrFields, k) { // not primary field, populate extra ones
 			if cdr.ExtraFields[k], err = utils.IfaceAsString(v); err != nil {
@@ -219,5 +219,6 @@ func (me MapEvent) AsCDR(cfg *config.CGRConfig, tmz string) (cdr *CDR, err error
 			}
 		}
 	}
+	cdr.AddDefaults(cfg)
 	return
 }

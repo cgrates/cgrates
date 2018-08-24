@@ -198,16 +198,8 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 			return err // Error is propagated back and we don't continue processing the CDR if we cannot store it
 		}
 	}
-	if self.thdS != nil {
-		var tIDs []string
-		thEv := &ArgsProcessEvent{
-			CGREvent: *cdr.AsCGREvent()}
-		if err := self.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
-			err.Error() != utils.ErrNotFound.Error() {
-			utils.Logger.Warning(
-				fmt.Sprintf("<CDRS> error: %s processing CDR event %+v with thdS.", err.Error(), thEv))
-		}
-	}
+	// process CDR with thresholdS
+	self.thdSProcessEvent(cdr.AsCGREvent())
 	// Attach raw CDR to stats
 	if self.cdrstats != nil { // Send raw CDR to stats
 		var out int
@@ -663,4 +655,106 @@ func (cdrsrv *CdrServer) Call(serviceMethod string, args interface{}, reply inte
 		return utils.ErrServerError
 	}
 	return err
+}
+
+// thdSProcessEvent will send the event to ThresholdS if the connection is configured
+func (cdrS *CdrServer) thdSProcessEvent(cgrEv *utils.CGREvent) {
+	if cdrS.thdS == nil {
+		return
+	}
+	var tIDs []string
+	if err := cdrS.thdS.Call(utils.ThresholdSv1ProcessEvent,
+		&ArgsProcessEvent{CGREvent: *cgrEv}, &tIDs); err != nil &&
+		err.Error() != utils.ErrNotFound.Error() {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %s processing CDR event %+v with thdS.",
+				utils.CDRs, err.Error(), cgrEv))
+		return
+	}
+}
+
+// statSProcessEvent will send the event to StatS if the connection is configured
+func (cdrS *CdrServer) statSProcessEvent(cgrEv *utils.CGREvent) {
+	if cdrS.stats == nil {
+		return
+	}
+	var reply []string
+	if err := cdrS.stats.Call(utils.StatSv1ProcessEvent, cgrEv, &reply); err != nil &&
+		err.Error() != utils.ErrNotFound.Error() {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %s processing CDR event %+v with %s.",
+				utils.CDRs, err.Error(), cgrEv, utils.StatS))
+		return
+	}
+}
+
+// chrgrSProcessEvent will process the CGREvent with ChargerS subsystem
+func (cdrS *CdrServer) chrgrSProcessEvent(cgrEv *utils.CGREvent) {
+	if cdrS.chargerS == nil {
+		return
+	}
+	var chrgrs []*ChrgSProcessEventReply
+	if err := cdrS.chargerS.Call(utils.ChargerSv1ProcessEvent, cgrEv, &chrgrs); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %s processing CGR event %+v with %s.",
+				utils.CDRs, err.Error(), cgrEv, utils.ChargerS))
+		return
+	}
+	var processedCDRs []*CDR
+	for _, chrgr := range chrgrs {
+		cdr, err := NewMapEvent(chrgr.CGREvent.Event).AsCDR(cdrS.cgrCfg, cdrS.Timezone())
+		if err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s converting CDR event %+v with %s.",
+					utils.CDRs, err.Error(), cgrEv, utils.ChargerS))
+			continue
+		}
+		ratedCDRs, err := cdrS.rateCDR(cdr)
+		if err != nil {
+			if err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: %s rating CDR  %+v.",
+						utils.CDRs, err.Error(), cdr))
+				continue
+			}
+		}
+		processedCDRs = append(processedCDRs, ratedCDRs...)
+	}
+	for _, cdr := range processedCDRs {
+		if cdrS.cgrCfg.CDRSStoreCdrs { // Store CDR
+			go func() {
+				if err := cdrS.cdrDb.SetCDR(cdr, true); err != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> error: %s storing CDR  %+v.",
+							utils.CDRs, err.Error(), cdr))
+				}
+			}()
+		}
+		go cdrS.replicateCDRs([]*CDR{cdr}) // Replicate CDR
+		cgrEv := cdr.AsCGREvent()
+		go cdrS.thdSProcessEvent(cgrEv)
+		go cdrS.statSProcessEvent(cgrEv)
+	}
+}
+
+// V2ProcessCDR will process the CDR out of CGREvent
+func (cdrS *CdrServer) V2ProcessCDR(cgrEv *utils.CGREvent, reply *string) (err error) {
+	rawCDR, err := NewMapEvent(cgrEv.Event).AsCDR(cdrS.cgrCfg, cdrS.Timezone())
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
+	if cdrS.cgrCfg.CDRSStoreCdrs { // Store *raw CDR
+		if err = cdrS.cdrDb.SetCDR(rawCDR, false); err != nil {
+			return utils.NewErrServerError(err) // Cannot store CDR
+		}
+	}
+	cdrS.replicateCDRs([]*CDR{rawCDR}) // Replicate raw CDR
+
+	go cdrS.thdSProcessEvent(cgrEv)
+	go cdrS.statSProcessEvent(cgrEv)
+	go cdrS.chrgrSProcessEvent(cgrEv)
+
+	*reply = utils.OK
+	return nil
 }

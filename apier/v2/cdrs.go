@@ -71,3 +71,7 @@ type CdrsV2 struct {
 func (self *CdrsV2) StoreSMCost(args engine.ArgsV2CDRSStoreSMCost, reply *string) error {
 	return self.CdrSrv.V2StoreSMCost(args, reply)
 }
+
+func (self *CdrsV2) ProcessCDR(cgrEv *utils.CGREvent, reply *string) error {
+	return self.CdrSrv.V2ProcessCDR(cgrEv, reply)
+}

@@ -100,13 +100,32 @@ type CDR struct {
 	CostDetails *EventCost // Attach the cost details to CDR when possible
 }
 
+// AddDefaults will add missing information based on other fields
+func (cdr *CDR) AddDefaults(cfg *config.CGRConfig) {
+	if cdr.CGRID == "" {
+		cdr.ComputeCGRID()
+	}
+	if cdr.ToR == "" {
+		cdr.ToR = utils.VOICE
+	}
+	if cdr.RequestType == "" {
+		cdr.RequestType = cfg.DefaultReqType
+	}
+	if cdr.Tenant == "" {
+		cdr.Tenant = cfg.DefaultTenant
+	}
+	if cdr.Category == "" {
+		cdr.Category = cfg.DefaultCategory
+	}
+}
+
 func (cdr *CDR) CostDetailsJson() string {
 	mrshled, _ := json.Marshal(cdr.CostDetails)
 	return string(mrshled)
 }
 
 func (cdr *CDR) ComputeCGRID() {
-	cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.SetupTime.UTC().String())
+	cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.OriginHost)
 }
 
 // Used to multiply usage on export

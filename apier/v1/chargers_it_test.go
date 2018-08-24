@@ -174,10 +174,11 @@ func testChargerSGetChargersForEvent(t *testing.T) {
 }
 
 func testChargerSProcessEvent(t *testing.T) {
-	processedEv := &[]*engine.AttrSProcessEventReply{
-		&engine.AttrSProcessEventReply{
-			MatchedProfiles: []string{"ATTR_1001_SIMPLEAUTH"},
-			AlteredFields:   []string{"Password"},
+	processedEv := &[]*engine.ChrgSProcessEventReply{
+		&engine.ChrgSProcessEventReply{
+			ChargerSProfile:    "Charger1",
+			AttributeSProfiles: []string{"ATTR_1001_SIMPLEAUTH"},
+			AlteredFields:      []string{"Password"},
 			CGREvent: &utils.CGREvent{ // matching Charger1
 				Tenant:  "cgrates.org",
 				ID:      "event1",
@@ -190,7 +191,7 @@ func testChargerSProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	var result *[]*engine.AttrSProcessEventReply
+	var result *[]*engine.ChrgSProcessEventReply
 	if err := chargerRPC.Call(utils.ChargerSv1ProcessEvent, chargerEvent[1], &result); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
