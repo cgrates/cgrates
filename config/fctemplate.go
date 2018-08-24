@@ -65,6 +65,12 @@ func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg) *FCTemplate {
 	if jsnCfg.Break_on_success != nil {
 		fcTmp.BreakOnSuccess = *jsnCfg.Break_on_success
 	}
+	if jsnCfg.Handler_id != nil {
+		fcTmp.HandlerId = *jsnCfg.Handler_id
+	}
+	if jsnCfg.Layout != nil {
+		fcTmp.Layout = *jsnCfg.Layout
+	}
 	return fcTmp
 }
 
@@ -83,6 +89,8 @@ type FCTemplate struct {
 	Timezone       string
 	Blocker        bool
 	BreakOnSuccess bool
+	HandlerId      string // used by XML in CDRC
+	Layout         string // time format
 }
 
 func FCTemplatesFromFCTemapltesJsonCfg(jsnCfgFlds []*FcTemplateJsonCfg) []*FCTemplate {

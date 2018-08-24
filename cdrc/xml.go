@@ -64,14 +64,14 @@ func elementText(xmlRes tree.Res, elmntPath string) (string, error) {
 
 // handlerUsageDiff will calculate the usage as difference between timeEnd and timeStart
 // Expects the 2 arguments in template separated by |
-func handlerSubstractUsage(xmlElmnt tree.Res, argsTpl utils.RSRFields, cdrPath utils.HierarchyPath, timezone string) (time.Duration, error) {
+func handlerSubstractUsage(xmlElmnt tree.Res, argsTpl config.RSRParsers, cdrPath utils.HierarchyPath, timezone string) (time.Duration, error) {
 	var argsStr string
 	for _, rsrArg := range argsTpl {
-		if rsrArg.Id == utils.HandlerArgSep {
-			argsStr += rsrArg.Id
+		if rsrArg.Rules == utils.HandlerArgSep {
+			argsStr += rsrArg.Rules
 			continue
 		}
-		absolutePath := utils.ParseHierarchyPath(rsrArg.Id, "")
+		absolutePath := utils.ParseHierarchyPath(rsrArg.Rules, "")
 		relPath := utils.HierarchyPath(absolutePath[len(cdrPath)-1:]) // Need relative path to the xmlElmnt
 		argStr, _ := elementText(xmlElmnt, relPath.AsString("/", true))
 		argsStr += argStr
@@ -142,26 +142,6 @@ func (xmlProc *XMLRecordsProcessor) ProcessNextRecord() (cdrs []*engine.CDR, err
 				cdrcCfg.Filters, xmlProvider); err != nil || !pass {
 				continue // Not passes filters, ignore this CDR
 			}
-		} else { //backward compatibility
-			filtersPassing := true
-			for _, rsrFltr := range cdrcCfg.CdrFilter { // here process old filter for entire CDR
-				if rsrFltr == nil {
-					continue // Pass
-				}
-				absolutePath := utils.ParseHierarchyPath(rsrFltr.Id, "")
-				relPath := utils.HierarchyPath(absolutePath[len(xmlProc.cdrPath)-1:]) // Need relative path to the xmlElmnt
-				fieldVal, err := elementText(cdrXML, relPath.AsString("/", true))
-				if err != nil {
-					return nil, err
-				}
-				if _, err := rsrFltr.Parse(fieldVal); err != nil {
-					filtersPassing = false
-					break
-				}
-			}
-			if !filtersPassing {
-				continue
-			}
 		}
 		if cdr, err := xmlProc.recordToCDR(cdrXML, cdrcCfg); err != nil {
 			return nil, fmt.Errorf("<CDRC> Failed converting to CDR, error: %s", err.Error())
@@ -177,12 +157,12 @@ func (xmlProc *XMLRecordsProcessor) ProcessNextRecord() (cdrs []*engine.CDR, err
 
 func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity tree.Res, cdrcCfg *config.CdrcConfig) (*engine.CDR, error) {
 	cdr := &engine.CDR{OriginHost: "0.0.0.0", Source: cdrcCfg.CdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
-	var lazyHttpFields []*config.CfgCdrField
+	var lazyHttpFields []*config.FCTemplate
 	var err error
 	fldVals := make(map[string]string)
+	xmlProvider := newXmlProvider(xmlEntity, xmlProc.cdrPath)
 	for _, cdrFldCfg := range cdrcCfg.ContentFields {
-		if len(cdrFldCfg.Filters) != 0 { //backward compatibility
-			xmlProvider := newXmlProvider(xmlEntity, xmlProc.cdrPath)
+		if len(cdrFldCfg.Filters) != 0 {
 			tenant, err := cdrcCfg.Tenant.ParseValue("")
 			if err != nil {
 				return nil, err
@@ -191,55 +171,19 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity tree.Res, cdrcCfg *con
 				cdrcCfg.Filters, xmlProvider); err != nil || !pass {
 				continue // Not passes filters, ignore this CDR
 			}
-		} else { //backward compatibility
-			filtersPassing := true
-			for _, rsrFltr := range cdrFldCfg.FieldFilter { // here process old filter for a field from template
-				if rsrFltr == nil {
-					continue // Pass
-				}
-				absolutePath := utils.ParseHierarchyPath(rsrFltr.Id, "")
-				relPath := utils.HierarchyPath(absolutePath[len(xmlProc.cdrPath)-1:]) // Need relative path to the xmlElmnt
-				fieldVal, err := elementText(xmlEntity, relPath.AsString("/", true))
-				if err != nil {
-					return nil, err
-				}
-				if _, err := rsrFltr.Parse(fieldVal); err != nil {
-					filtersPassing = false
-					break
-				}
-			}
-			if !filtersPassing {
-				continue
-			}
 		}
 		if cdrFldCfg.Type == utils.META_COMPOSED {
-			for _, cfgFieldRSR := range cdrFldCfg.Value {
-				if cfgFieldRSR.IsStatic() {
-					if parsed, err := cfgFieldRSR.Parse(""); err != nil {
-						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s, err: %s",
-							xmlEntity, cdrFldCfg.Tag, err.Error())
-					} else {
-						fldVals[cdrFldCfg.FieldId] += parsed
-					}
-
-				} else { // Dynamic value extracted using path
-					absolutePath := utils.ParseHierarchyPath(cfgFieldRSR.Id, "")
-					relPath := utils.HierarchyPath(absolutePath[len(xmlProc.cdrPath)-1:]) // Need relative path to the xmlElmnt
-					if elmntText, err := elementText(xmlEntity, relPath.AsString("/", true)); err != nil && err != utils.ErrNotFound {
-						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s, err: %s", xmlEntity, cdrFldCfg.Tag, err.Error())
-					} else if parsed, err := cfgFieldRSR.Parse(elmntText); err != nil {
-						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s, err: %s", xmlEntity, cdrFldCfg.Tag, err.Error())
-					} else {
-						fldVals[cdrFldCfg.FieldId] += parsed
-					}
-				}
+			out, err := cdrFldCfg.Value.ParseDataProvider(xmlProvider)
+			if err != nil {
+				return nil, err
 			}
+			fldVals[cdrFldCfg.FieldId] += out
 		} else if cdrFldCfg.Type == utils.META_HTTP_POST {
 			lazyHttpFields = append(lazyHttpFields, cdrFldCfg) // Will process later so we can send an estimation of cdr to http server
 		} else if cdrFldCfg.Type == utils.META_HANDLER && cdrFldCfg.HandlerId == utils.HandlerSubstractUsage {
 			usage, err := handlerSubstractUsage(xmlEntity, cdrFldCfg.Value, xmlProc.cdrPath, xmlProc.timezone)
 			if err != nil {
-				return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s, err: %s", xmlEntity, cdrFldCfg.Tag, err.Error())
+				return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s, err: %s", xmlEntity, cdrFldCfg.ID, err.Error())
 			}
 			fldVals[cdrFldCfg.FieldId] += strconv.FormatFloat(usage.Seconds(), 'f', -1, 64)
 		} else {
@@ -257,7 +201,7 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity tree.Res, cdrcCfg *con
 		var outValByte []byte
 		var fieldVal, httpAddr string
 		for _, rsrFld := range httpFieldCfg.Value {
-			if parsed, err := rsrFld.Parse(""); err != nil {
+			if parsed, err := rsrFld.ParseValue(utils.EmptyString); err != nil {
 				return nil, fmt.Errorf("Ignoring record: %v - cannot extract http address, err: %s", xmlEntity, err.Error())
 			} else {
 				httpAddr += parsed
@@ -273,7 +217,7 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity tree.Res, cdrcCfg *con
 		} else {
 			fieldVal = string(outValByte)
 			if len(fieldVal) == 0 && httpFieldCfg.Mandatory {
-				return nil, fmt.Errorf("MandatoryIeMissing: Empty result for http_post field: %s", httpFieldCfg.Tag)
+				return nil, fmt.Errorf("MandatoryIeMissing: Empty result for http_post field: %s", httpFieldCfg.ID)
 			}
 			if err := cdr.ParseFieldValue(httpFieldCfg.FieldId, fieldVal, xmlProc.timezone); err != nil {
 				return nil, err

@@ -34,21 +34,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func fwvValue(cdrLine string, indexStart, width int, padding string) string {
-	rawVal := cdrLine[indexStart : indexStart+width]
-	switch padding {
-	case "left":
-		rawVal = strings.TrimLeft(rawVal, " ")
-	case "right":
-		rawVal = strings.TrimRight(rawVal, " ")
-	case "zeroleft":
-		rawVal = strings.TrimLeft(rawVal, "0 ")
-	case "zeroright":
-		rawVal = strings.TrimRight(rawVal, "0 ")
-	}
-	return rawVal
-}
-
 func NewFwvRecordsProcessor(file *os.File, dfltCfg *config.CdrcConfig, cdrcCfgs []*config.CdrcConfig, httpClient *http.Client,
 	httpSkipTlsCheck bool, timezone string, filterS *engine.FilterS) *FwvRecordsProcessor {
 	return &FwvRecordsProcessor{file: file, cdrcCfgs: cdrcCfgs, dfltCfg: dfltCfg, httpSkipTlsCheck: httpSkipTlsCheck, timezone: timezone, filterS: filterS}
@@ -138,10 +123,6 @@ func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.CDR, error) {
 				cdrcCfg.Filters, fwvProvider); err != nil || !pass {
 				continue // Not passes filters, ignore this CDR
 			}
-		} else { //backward compatibility
-			if passes := self.recordPassesCfgFilter(record, cdrcCfg); !passes {
-				continue
-			}
 		}
 		if storedCdr, err := self.recordToStoredCdr(record, cdrcCfg, cdrcCfg.ID); err != nil {
 			return nil, fmt.Errorf("Failed converting to StoredCdr, error: %s", err.Error())
@@ -155,29 +136,15 @@ func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.CDR, error) {
 	return recordCdrs, nil
 }
 
-func (self *FwvRecordsProcessor) recordPassesCfgFilter(record string, cdrcCfg *config.CdrcConfig) bool {
-	for _, rsrFilter := range cdrcCfg.CdrFilter {
-		if rsrFilter == nil { // Nil filter does not need to match anything
-			continue
-		}
-		if cfgFieldIdx, err := strconv.Atoi(rsrFilter.Id); err != nil || len(record) <= cfgFieldIdx {
-			fmt.Errorf("Ignoring record: %v - cannot compile filter %+v", record, rsrFilter)
-			return false
-		} else if _, err := rsrFilter.Parse(record[cfgFieldIdx:]); err != nil {
-			return false
-		}
-	}
-	return true
-}
-
 // Converts a record (header or normal) to CDR
 func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *config.CdrcConfig, cfgKey string) (*engine.CDR, error) {
 	var err error
-	var lazyHttpFields []*config.CfgCdrField
-	var cfgFields []*config.CfgCdrField
+	var lazyHttpFields []*config.FCTemplate
+	var cfgFields []*config.FCTemplate
 	var duMultiplyFactor float64
 	var storedCdr *engine.CDR
-	if self.headerCdr != nil { // Clone the header CDR so we can use it as base to future processing (inherit fields defined there)
+	fwvProvider := newfwvProvider(record) // used for filterS and for RSRParsers
+	if self.headerCdr != nil {            // Clone the header CDR so we can use it as base to future processing (inherit fields defined there)
 		storedCdr = self.headerCdr.Clone()
 	} else {
 		storedCdr = &engine.CDR{OriginHost: "0.0.0.0", ExtraFields: make(map[string]string), Cost: -1}
@@ -193,7 +160,7 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *confi
 	}
 	for _, cdrFldCfg := range cfgFields {
 		if len(cdrcCfg.Filters) != 0 {
-			fwvProvider := newfwvProvider(record)
+
 			tenant, err := cdrcCfg.Tenant.ParseValue("")
 			if err != nil {
 				return nil, err
@@ -202,58 +169,29 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *confi
 				cdrcCfg.Filters, fwvProvider); err != nil || !pass {
 				continue // Not passes filters, ignore this CDR
 			}
-		} else { //backward compatibility
-			filterPass := true
-			for _, rsrFilter := range cdrFldCfg.FieldFilter {
-				if rsrFilter == nil { // Nil filter does not need to match anything
-					continue
-				}
-				if cfgFieldIdx, err := strconv.Atoi(rsrFilter.Id); err != nil || len(record) <= cfgFieldIdx {
-					return nil, fmt.Errorf("Ignoring record: %v - cannot compile filter %+v", record, rsrFilter)
-				} else if _, err := rsrFilter.Parse(record[cfgFieldIdx:]); err != nil {
-					filterPass = false
-					break
-				}
-			}
-			if !filterPass {
-				continue
-			}
 		}
 		var fieldVal string
 		switch cdrFldCfg.Type {
 		case utils.META_COMPOSED:
-			for _, cfgFieldRSR := range cdrFldCfg.Value {
-				if cfgFieldRSR.IsStatic() {
-					if parsed, err := cfgFieldRSR.Parse(""); err != nil {
-						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s, err: %s",
-							record, cdrFldCfg.Tag, err.Error())
-					} else {
-						fieldVal += parsed
-					}
-				} else { // Dynamic value extracted using index
-					cfgFieldIdx, _ := strconv.Atoi(cfgFieldRSR.Id)
-					if len(record) <= cfgFieldIdx {
-						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s",
-							record, cdrFldCfg.Tag)
-					}
-					if parsed, err := cfgFieldRSR.Parse(fwvValue(record, cfgFieldIdx,
-						cdrFldCfg.Width, cdrFldCfg.Padding)); err != nil {
-						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s, err: %s",
-							record, cdrFldCfg.Tag, err.Error())
-					} else {
-						fieldVal += parsed
-					}
-				}
+			out, err := cdrFldCfg.Value.ParseDataProvider(fwvProvider)
+			if err != nil {
+				return nil, err
 			}
+			fieldVal = out
 		case utils.META_HTTP_POST:
 			lazyHttpFields = append(lazyHttpFields, cdrFldCfg) // Will process later so we can send an estimation of storedCdr to http server
 		default:
 			//return nil, fmt.Errorf("Unsupported field type: %s", cdrFldCfg.Type)
 			continue // Don't do anything for unsupported fields
 		}
+		if fieldVal, err = utils.FmtFieldWidth(cdrFldCfg.ID, fieldVal, cdrFldCfg.Width,
+			cdrFldCfg.Strip, cdrFldCfg.Padding, cdrFldCfg.Mandatory); err != nil {
+			return nil, err
+		}
 		if err := storedCdr.ParseFieldValue(cdrFldCfg.FieldId, fieldVal, self.timezone); err != nil {
 			return nil, err
 		}
+
 	}
 	if storedCdr.CGRID == "" && storedCdr.OriginID != "" && cfgKey != "*header" {
 		storedCdr.CGRID = utils.Sha1(storedCdr.OriginID, storedCdr.SetupTime.UTC().String())
@@ -265,7 +203,7 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *confi
 		var outValByte []byte
 		var fieldVal, httpAddr string
 		for _, rsrFld := range httpFieldCfg.Value {
-			if parsed, err := rsrFld.Parse(""); err != nil {
+			if parsed, err := rsrFld.ParseValue(utils.EmptyString); err != nil {
 				return nil, fmt.Errorf("Ignoring record: %v - cannot extract http address, err: %s",
 					record, err.Error())
 			} else {
@@ -282,7 +220,7 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *confi
 		} else {
 			fieldVal = string(outValByte)
 			if len(fieldVal) == 0 && httpFieldCfg.Mandatory {
-				return nil, fmt.Errorf("MandatoryIeMissing: Empty result for http_post field: %s", httpFieldCfg.Tag)
+				return nil, fmt.Errorf("MandatoryIeMissing: Empty result for http_post field: %s", httpFieldCfg.ID)
 			}
 			if err := storedCdr.ParseFieldValue(httpFieldCfg.FieldId, fieldVal, self.timezone); err != nil {
 				return nil, err
@@ -345,13 +283,22 @@ func (fP *fwvProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 	}
 	err = nil // cancel previous err
 	indexes := strings.Split(fldPath[0], "-")
+	if len(indexes) != 2 {
+		return "", fmt.Errorf("Invalid format for index : %+v", fldPath[0])
+	}
 	startIndex, err := strconv.Atoi(indexes[0])
 	if err != nil {
 		return nil, err
 	}
+	if startIndex < len(fP.req) {
+		return "", fmt.Errorf("Invalid start index : %+v", startIndex)
+	}
 	finalIndex, err := strconv.Atoi(indexes[1])
 	if err != nil {
 		return nil, err
+	}
+	if finalIndex > len(fP.req) {
+		return "", fmt.Errorf("Invalid final index : %+v", finalIndex)
 	}
 	data = fP.req[startIndex:finalIndex]
 	fP.cache.Set(fldPath, data, false)

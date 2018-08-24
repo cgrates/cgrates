@@ -46,10 +46,10 @@ type CdrcConfig struct {
 	ContinueOnSuccess        bool          // Continue after execution
 	PartialRecordCache       time.Duration // Duration to cache partial records when not pairing
 	PartialCacheExpiryAction string
-	HeaderFields             []*CfgCdrField
-	ContentFields            []*CfgCdrField
-	TrailerFields            []*CfgCdrField
-	CacheDumpFields          []*CfgCdrField
+	HeaderFields             []*FCTemplate
+	ContentFields            []*FCTemplate
+	TrailerFields            []*FCTemplate
+	CacheDumpFields          []*FCTemplate
 }
 
 func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
@@ -133,24 +133,16 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 		self.PartialCacheExpiryAction = *jsnCfg.Partial_cache_expiry_action
 	}
 	if jsnCfg.Header_fields != nil {
-		if self.HeaderFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Header_fields); err != nil {
-			return err
-		}
+		self.HeaderFields = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Header_fields)
 	}
 	if jsnCfg.Content_fields != nil {
-		if self.ContentFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Content_fields); err != nil {
-			return err
-		}
+		self.ContentFields = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Content_fields)
 	}
 	if jsnCfg.Trailer_fields != nil {
-		if self.TrailerFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Trailer_fields); err != nil {
-			return err
-		}
+		self.TrailerFields = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Trailer_fields)
 	}
 	if jsnCfg.Cache_dump_fields != nil {
-		if self.CacheDumpFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Cache_dump_fields); err != nil {
-			return err
-		}
+		self.CacheDumpFields = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Cache_dump_fields)
 	}
 	return nil
 }
@@ -185,10 +177,10 @@ func (self *CdrcConfig) Clone() *CdrcConfig {
 	clnCdrc.CdrSourceId = self.CdrSourceId
 	clnCdrc.PartialRecordCache = self.PartialRecordCache
 	clnCdrc.PartialCacheExpiryAction = self.PartialCacheExpiryAction
-	clnCdrc.HeaderFields = make([]*CfgCdrField, len(self.HeaderFields))
-	clnCdrc.ContentFields = make([]*CfgCdrField, len(self.ContentFields))
-	clnCdrc.TrailerFields = make([]*CfgCdrField, len(self.TrailerFields))
-	clnCdrc.CacheDumpFields = make([]*CfgCdrField, len(self.CacheDumpFields))
+	clnCdrc.HeaderFields = make([]*FCTemplate, len(self.HeaderFields))
+	clnCdrc.ContentFields = make([]*FCTemplate, len(self.ContentFields))
+	clnCdrc.TrailerFields = make([]*FCTemplate, len(self.TrailerFields))
+	clnCdrc.CacheDumpFields = make([]*FCTemplate, len(self.CacheDumpFields))
 	for idx, fld := range self.HeaderFields {
 		clonedVal := *fld
 		clnCdrc.HeaderFields[idx] = &clonedVal

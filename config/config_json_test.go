@@ -373,74 +373,74 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 }
 
 func TestDfCdrcJsonCfg(t *testing.T) {
-	eFields := []*CdrFieldJsonCfg{}
-	cdrFields := []*CdrFieldJsonCfg{
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("TOR"), Field_id: utils.StringPointer(utils.ToR), Type: utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer("2"), Mandatory: utils.BoolPointer(true)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("OriginID"), Field_id: utils.StringPointer(utils.OriginID), Type: utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer("3"), Mandatory: utils.BoolPointer(true)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("RequestType"), Field_id: utils.StringPointer(utils.RequestType), Type: utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer("4"), Mandatory: utils.BoolPointer(true)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("Tenant"), Field_id: utils.StringPointer(utils.Tenant), Type: utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer("6"), Mandatory: utils.BoolPointer(true)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("Category"), Field_id: utils.StringPointer(utils.Category), Type: utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer("7"), Mandatory: utils.BoolPointer(true)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("Account"), Field_id: utils.StringPointer(utils.Account), Type: utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer("8"), Mandatory: utils.BoolPointer(true)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("Subject"), Field_id: utils.StringPointer(utils.Subject), Type: utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer("9"), Mandatory: utils.BoolPointer(true)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("Destination"), Field_id: utils.StringPointer(utils.Destination), Type: utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer("10"), Mandatory: utils.BoolPointer(true)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("SetupTime"), Field_id: utils.StringPointer(utils.SetupTime), Type: utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer("11"), Mandatory: utils.BoolPointer(true)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("AnswerTime"), Field_id: utils.StringPointer(utils.AnswerTime), Type: utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer("12"), Mandatory: utils.BoolPointer(true)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("Usage"), Field_id: utils.StringPointer(utils.Usage), Type: utils.StringPointer(utils.META_COMPOSED),
-			Value: utils.StringPointer("13"), Mandatory: utils.BoolPointer(true)},
+	eFields := []*FcTemplateJsonCfg{}
+	cdrFields := []*FcTemplateJsonCfg{
+		&FcTemplateJsonCfg{Id: utils.StringPointer("TOR"), Field_id: utils.StringPointer(utils.ToR), Type: utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer("~2"), Mandatory: utils.BoolPointer(true)},
+		&FcTemplateJsonCfg{Id: utils.StringPointer("OriginID"), Field_id: utils.StringPointer(utils.OriginID), Type: utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer("~3"), Mandatory: utils.BoolPointer(true)},
+		&FcTemplateJsonCfg{Id: utils.StringPointer("RequestType"), Field_id: utils.StringPointer(utils.RequestType), Type: utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer("~4"), Mandatory: utils.BoolPointer(true)},
+		&FcTemplateJsonCfg{Id: utils.StringPointer("Tenant"), Field_id: utils.StringPointer(utils.Tenant), Type: utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer("~6"), Mandatory: utils.BoolPointer(true)},
+		&FcTemplateJsonCfg{Id: utils.StringPointer("Category"), Field_id: utils.StringPointer(utils.Category), Type: utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer("~7"), Mandatory: utils.BoolPointer(true)},
+		&FcTemplateJsonCfg{Id: utils.StringPointer("Account"), Field_id: utils.StringPointer(utils.Account), Type: utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer("~8"), Mandatory: utils.BoolPointer(true)},
+		&FcTemplateJsonCfg{Id: utils.StringPointer("Subject"), Field_id: utils.StringPointer(utils.Subject), Type: utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer("~9"), Mandatory: utils.BoolPointer(true)},
+		&FcTemplateJsonCfg{Id: utils.StringPointer("Destination"), Field_id: utils.StringPointer(utils.Destination), Type: utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer("~10"), Mandatory: utils.BoolPointer(true)},
+		&FcTemplateJsonCfg{Id: utils.StringPointer("SetupTime"), Field_id: utils.StringPointer(utils.SetupTime), Type: utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer("~11"), Mandatory: utils.BoolPointer(true)},
+		&FcTemplateJsonCfg{Id: utils.StringPointer("AnswerTime"), Field_id: utils.StringPointer(utils.AnswerTime), Type: utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer("~12"), Mandatory: utils.BoolPointer(true)},
+		&FcTemplateJsonCfg{Id: utils.StringPointer("Usage"), Field_id: utils.StringPointer(utils.Usage), Type: utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer("~13"), Mandatory: utils.BoolPointer(true)},
 	}
-	cacheDumpFields := []*CdrFieldJsonCfg{
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("CGRID"),
+	cacheDumpFields := []*FcTemplateJsonCfg{
+		&FcTemplateJsonCfg{Id: utils.StringPointer("CGRID"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer(utils.CGRID)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("RunID"),
+		&FcTemplateJsonCfg{Id: utils.StringPointer("RunID"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer(utils.RunID)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("TOR"),
+		&FcTemplateJsonCfg{Id: utils.StringPointer("TOR"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer(utils.ToR)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("OriginID"),
+		&FcTemplateJsonCfg{Id: utils.StringPointer("OriginID"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer(utils.OriginID)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("RequestType"),
+		&FcTemplateJsonCfg{Id: utils.StringPointer("RequestType"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer(utils.RequestType)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("Tenant"),
+		&FcTemplateJsonCfg{Id: utils.StringPointer("Tenant"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer(utils.Tenant)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("Category"),
+		&FcTemplateJsonCfg{Id: utils.StringPointer("Category"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer(utils.Category)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("Account"),
+		&FcTemplateJsonCfg{Id: utils.StringPointer("Account"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer(utils.Account)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("Subject"),
+		&FcTemplateJsonCfg{Id: utils.StringPointer("Subject"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer(utils.Subject)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("Destination"),
+		&FcTemplateJsonCfg{Id: utils.StringPointer("Destination"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer(utils.Destination)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("SetupTime"),
+		&FcTemplateJsonCfg{Id: utils.StringPointer("SetupTime"),
 			Type:   utils.StringPointer(utils.META_COMPOSED),
 			Value:  utils.StringPointer(utils.SetupTime),
 			Layout: utils.StringPointer("2006-01-02T15:04:05Z07:00")},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("AnswerTime"),
+		&FcTemplateJsonCfg{Id: utils.StringPointer("AnswerTime"),
 			Type:   utils.StringPointer(utils.META_COMPOSED),
 			Value:  utils.StringPointer(utils.AnswerTime),
 			Layout: utils.StringPointer("2006-01-02T15:04:05Z07:00")},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("Usage"),
+		&FcTemplateJsonCfg{Id: utils.StringPointer("Usage"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer(utils.Usage)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("Cost"),
+		&FcTemplateJsonCfg{Id: utils.StringPointer("Cost"),
 			Type:  utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer(utils.COST)},
 	}
@@ -478,7 +478,7 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 	if cfg, err := dfCgrJsonCfg.CdrcJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Errorf("Expecting: \n%s\n, received: \n%s\n: ", utils.ToIJSON(eCfg), utils.ToIJSON(cfg))
+		t.Errorf("Expecting: %s \n, received: %s: ", utils.ToIJSON(eCfg), utils.ToIJSON(cfg))
 	}
 }
 
@@ -1235,10 +1235,10 @@ func TestNewCgrJsonCfgFromFile(t *testing.T) {
 	} else if !reflect.DeepEqual(eCfg, gCfg) {
 		t.Errorf("Expecting: %+v, received: %+v", eCfg, gCfg)
 	}
-	cdrFields := []*CdrFieldJsonCfg{
-		&CdrFieldJsonCfg{Field_id: utils.StringPointer(utils.ToR), Value: utils.StringPointer("~7:s/^(voice|data|sms|mms|generic)$/*$1/")},
-		&CdrFieldJsonCfg{Field_id: utils.StringPointer(utils.AnswerTime), Value: utils.StringPointer("1")},
-		&CdrFieldJsonCfg{Field_id: utils.StringPointer(utils.Usage), Value: utils.StringPointer(`~9:s/^(\d+)$/${1}s/`)},
+	cdrFields := []*FcTemplateJsonCfg{
+		&FcTemplateJsonCfg{Field_id: utils.StringPointer(utils.ToR), Value: utils.StringPointer("~7:s/^(voice|data|sms|mms|generic)$/*$1/")},
+		&FcTemplateJsonCfg{Field_id: utils.StringPointer(utils.AnswerTime), Value: utils.StringPointer("~1")},
+		&FcTemplateJsonCfg{Field_id: utils.StringPointer(utils.Usage), Value: utils.StringPointer(`~9:s/^(\d+)$/${1}s/`)},
 	}
 	eCfgCdrc := []*CdrcJsonCfg{
 		&CdrcJsonCfg{
@@ -1262,7 +1262,7 @@ func TestNewCgrJsonCfgFromFile(t *testing.T) {
 	if cfg, err := cgrJsonCfg.CdrcJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfgCdrc, cfg) {
-		t.Errorf("Expecting:\n %+v\n received:\n %+v\n", utils.ToIJSON(eCfgCdrc), utils.ToIJSON(cfg))
+		t.Errorf("Expecting: %+v \n received: %+v", utils.ToIJSON(eCfgCdrc), utils.ToIJSON(cfg))
 	}
 	eCfgSmFs := &FreeswitchAgentJsonCfg{
 		Enabled: utils.BoolPointer(true),
