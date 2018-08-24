@@ -285,7 +285,6 @@ func (spS *SupplierService) resourceUsage(resIDs []string) (tUsage float64, err 
 	return
 }
 
-//
 func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplier,
 	extraOpts *optsGetSuppliers) (srtSpl *SortedSupplier, pass bool, err error) {
 	globalStats := map[string]float64{ //used for QOS strategy
@@ -307,6 +306,7 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 					fmt.Sprintf("<%s> ignoring supplier with ID: %s, err: %s",
 						utils.SupplierS, spl.ID, err.Error()))
 				// return nil, false, nil
+				// Need to add test to catch the panic and after that apply the changes
 			} else {
 				return nil, false, err
 			}
@@ -336,6 +336,7 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 					fmt.Sprintf("<%s> ignoring supplier with ID: %s, err: %s",
 						utils.SupplierS, spl.ID, err.Error()))
 				// return nil, false, nil
+				// Need to add test to catch the panic and after that apply the changes
 			} else {
 				return nil, false, err
 			}
