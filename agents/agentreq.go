@@ -155,8 +155,14 @@ func (aReq *AgentRequest) ParseField(
 		if len(cfgFld.Value) != 2 {
 			return nil, fmt.Errorf("invalid arguments <%s>", utils.ToJSON(cfgFld.Value))
 		} else {
-			strVal1, err := aReq.FieldAsString(strings.Split(cfgFld.Value[0].Rules, utils.NestingSep))
-			strVal2, err := aReq.FieldAsString(strings.Split(cfgFld.Value[1].Rules, utils.NestingSep))
+			strVal1, err := cfgFld.Value[0].ParseDataProvider(aReq)
+			if err != nil {
+				return "", err
+			}
+			strVal2, err := cfgFld.Value[1].ParseDataProvider(aReq)
+			if err != nil {
+				return "", err
+			}
 			tEnd, err := utils.ParseTimeDetectLayout(strVal1, cfgFld.Timezone)
 			if err != nil {
 				return "", err

@@ -72,7 +72,7 @@
 					{"id": "AnswerTime", "field_id": "SetupTime", "type": "*composed", 
 						"value": "~*req.timestamp", "mandatory": true},
 					{"id": "Usage", "field_id": "Usage", "type": "*composed", 
-						"value": "~*req.leg_duration;^s", "mandatory": true},
+						"value": "~*req.leg_duration;s", "mandatory": true},
 				],
 				"reply_fields":[
 					{"id": "CDR_ID", "field_id": "CDR_RESPONSE.CDR_ID", "type": "*composed", 
