@@ -152,7 +152,7 @@ func TestHAitCDRmtcall(t *testing.T) {
 		t.Errorf("expecting: <%s>, received: <%s>", string(eXml), string(body))
 	}
 	rply.Body.Close()
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(50 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}}
 	if err := haRPC.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
