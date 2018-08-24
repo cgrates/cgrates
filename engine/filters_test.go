@@ -149,24 +149,20 @@ func TestFilterPassDestinations(t *testing.T) {
 	}
 }
 
-/*
-REVIEW THIS TEST
 func TestFilterPassGreaterThan(t *testing.T) {
 	rf, err := NewFilterRule(MetaLessThan, "ASR", []string{"40"})
 	if err != nil {
 		t.Error(err)
 	}
-	ev := &config.NavigableMap{
-		data: map[string]interface{}{"ASR": 20},
-	}
+	ev := config.NewNavigableMap(nil)
+	ev.Set([]string{"ASR"}, 20, true)
 	if passes, err := rf.passGreaterThan(ev); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("not passing")
 	}
-	ev = &config.NavigableMap{
-		data: map[string]interface{}{"ASR": 40},
-	}
+	ev = config.NewNavigableMap(nil)
+	ev.Set([]string{"ASR"}, 40, true)
 	if passes, err := rf.passGreaterThan(ev); err != nil {
 		t.Error(err)
 	} else if passes {
@@ -190,9 +186,8 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	} else if !passes {
 		t.Error("not passing")
 	}
-	ev = &config.NavigableMap{
-		data: map[string]interface{}{"ASR": 20},
-	}
+	ev = config.NewNavigableMap(nil)
+	ev.Set([]string{"ASR"}, 20, true)
 	if passes, err := rf.passGreaterThan(ev); err != nil {
 		t.Error(err)
 	} else if passes {
@@ -202,16 +197,14 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	ev = &config.NavigableMap{
-		data: map[string]interface{}{"ACD": time.Duration(2 * time.Minute)},
-	}
+	ev = config.NewNavigableMap(nil)
+	ev.Set([]string{"ACD"}, time.Duration(2*time.Minute), true)
 	if passes, err := rf.passGreaterThan(ev); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("not pass")
 	}
 }
-*/
 
 func TestFilterNewRequestFilter(t *testing.T) {
 	rf, err := NewFilterRule(MetaString, "MetaString", []string{"String"})
