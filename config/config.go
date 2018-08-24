@@ -482,8 +482,10 @@ func (self *CGRConfig) checkConfigSanity() error {
 			if cdrcInst.CdrFormat == utils.CSV {
 				for _, cdrFld := range cdrcInst.ContentFields {
 					for _, rsrFld := range cdrFld.Value {
-						if _, errConv := strconv.Atoi(rsrFld.Id); errConv != nil && !rsrFld.IsStatic() {
-							return fmt.Errorf("CDR fields must be indices in case of .csv files, have instead: %s", rsrFld.Id)
+						if rsrFld.attrName != "" {
+							if _, errConv := strconv.Atoi(rsrFld.attrName); errConv != nil {
+								return fmt.Errorf("CDR fields must be indices in case of .csv files, have instead: %s", rsrFld.attrName)
+							}
 						}
 					}
 				}

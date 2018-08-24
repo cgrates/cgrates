@@ -31,16 +31,18 @@ func TestCsvRecordToCDR(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
 	cdrcConfig := cgrConfig.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0]
 	cdrcConfig.CdrSourceId = "TEST_CDRC"
-	cdrcConfig.ContentFields = append(cdrcConfig.ContentFields, &config.CfgCdrField{Tag: utils.RunID, Type: utils.META_COMPOSED,
-		FieldId: utils.RunID, Value: utils.ParseRSRFieldsMustCompile("^*default", utils.INFIELD_SEP)})
+	cdrcConfig.ContentFields = append(cdrcConfig.ContentFields, &config.FCTemplate{
+		ID: utils.RunID, Type: utils.META_COMPOSED, FieldId: utils.RunID,
+		Value: config.NewRSRParsersMustCompile("*default", true)})
 	csvProcessor := &CsvRecordsProcessor{dfltCdrcCfg: cdrcConfig, cdrcCfgs: []*config.CdrcConfig{cdrcConfig}}
 	cdrRow := []string{"firstField", "secondField"}
 	_, err := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig)
 	if err == nil {
 		t.Error("Failed to corectly detect missing fields from record")
 	}
-	cdrRow = []string{"ignored", "ignored", utils.VOICE, "acc1", utils.META_PREPAID, "*out", "cgrates.org", "call", "1001", "1001", "+4986517174963",
-		"2013-02-03 19:50:00", "2013-02-03 19:54:00", "62s", "supplier1", "172.16.1.1", "NORMAL_DISCONNECT"}
+	cdrRow = []string{"ignored", "ignored", utils.VOICE, "acc1", utils.META_PREPAID, "*out", "cgrates.org",
+		"call", "1001", "1001", "+4986517174963", "2013-02-03 19:50:00", "2013-02-03 19:54:00",
+		"62s", "supplier1", "172.16.1.1", "NORMAL_DISCONNECT"}
 	rtCdr, err := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig)
 	if err != nil {
 		t.Error("Failed to parse CDR in rated cdr", err)
@@ -73,8 +75,12 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
 	cdrcConfig := cgrConfig.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0]
 	cdrcConfig.CdrSourceId = "TEST_CDRC"
-	cdrcConfig.ContentFields = []*config.CfgCdrField{&config.CfgCdrField{Tag: "TORField", Type: utils.META_COMPOSED, FieldId: utils.ToR, Value: []*utils.RSRField{&utils.RSRField{Id: "0"}}},
-		&config.CfgCdrField{Tag: "UsageField", Type: utils.META_COMPOSED, FieldId: utils.Usage, Value: []*utils.RSRField{&utils.RSRField{Id: "1"}}}}
+	cdrcConfig.ContentFields = []*config.FCTemplate{
+		&config.FCTemplate{ID: "TORField", Type: utils.META_COMPOSED, FieldId: utils.ToR,
+			Value: config.NewRSRParsersMustCompile("~0", true)},
+		&config.FCTemplate{ID: "UsageField", Type: utils.META_COMPOSED, FieldId: utils.Usage,
+			Value: config.NewRSRParsersMustCompile("~1", true)},
+	}
 	csvProcessor := &CsvRecordsProcessor{dfltCdrcCfg: cdrcConfig, cdrcCfgs: []*config.CdrcConfig{cdrcConfig}}
 	csvProcessor.cdrcCfgs[0].DataUsageMultiplyFactor = 0
 	cdrRow := []string{"*data", "1"}

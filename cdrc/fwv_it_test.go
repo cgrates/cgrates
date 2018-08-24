@@ -94,17 +94,17 @@ func TestFwvitCreateCdrFiles(t *testing.T) {
 			fwvCdrcCfg = cdrcCfg
 		}
 	}
-	if err := os.RemoveAll(fwvCdrcCfg.CdrInDir); err != nil {
-		t.Fatal("Error removing folder: ", fwvCdrcCfg.CdrInDir, err)
-	}
-	if err := os.MkdirAll(fwvCdrcCfg.CdrInDir, 0755); err != nil {
-		t.Fatal("Error creating folder: ", fwvCdrcCfg.CdrInDir, err)
-	}
-	if err := os.RemoveAll(fwvCdrcCfg.CdrOutDir); err != nil {
-		t.Fatal("Error removing folder: ", fwvCdrcCfg.CdrOutDir, err)
-	}
-	if err := os.MkdirAll(fwvCdrcCfg.CdrOutDir, 0755); err != nil {
-		t.Fatal("Error creating folder: ", fwvCdrcCfg.CdrOutDir, err)
+	for _, cdrcProfiles := range fwvCfg.CdrcProfiles {
+		for _, cdrcInst := range cdrcProfiles {
+			for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
+				if err := os.RemoveAll(dir); err != nil {
+					t.Fatal("Error removing folder: ", dir, err)
+				}
+				if err := os.MkdirAll(dir, 0755); err != nil {
+					t.Fatal("Error creating folder: ", dir, err)
+				}
+			}
+		}
 	}
 }
 
@@ -147,6 +147,7 @@ func TestFwvitProcessFiles(t *testing.T) {
 	if len(filesOutDir) != 1 {
 		t.Errorf("In CdrcOutDir, expecting 1 files, got: %d", len(filesOutDir))
 	}
+	time.Sleep(time.Duration(1) * time.Second)
 }
 
 func TestFwvitAnalyseCDRs(t *testing.T) {

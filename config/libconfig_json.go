@@ -207,10 +207,10 @@ type CdrcJsonCfg struct {
 	Max_open_files              *int
 	Partial_record_cache        *string
 	Partial_cache_expiry_action *string
-	Header_fields               *[]*CdrFieldJsonCfg
-	Content_fields              *[]*CdrFieldJsonCfg
-	Trailer_fields              *[]*CdrFieldJsonCfg
-	Cache_dump_fields           *[]*CdrFieldJsonCfg
+	Header_fields               *[]*FcTemplateJsonCfg
+	Content_fields              *[]*FcTemplateJsonCfg
+	Trailer_fields              *[]*FcTemplateJsonCfg
+	Cache_dump_fields           *[]*FcTemplateJsonCfg
 }
 
 // SM-Generic config section
@@ -588,4 +588,6 @@ type FcTemplateJsonCfg struct {
 	Timezone         *string
 	Blocker          *bool
 	Break_on_success *bool
+	Handler_id       *string
+	Layout           *string
 }
