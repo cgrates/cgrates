@@ -105,6 +105,9 @@ func (cdr *CDR) AddDefaults(cfg *config.CGRConfig) {
 	if cdr.CGRID == "" {
 		cdr.ComputeCGRID()
 	}
+	if cdr.RunID == "" {
+		cdr.RunID = utils.MetaRaw
+	}
 	if cdr.ToR == "" {
 		cdr.ToR = utils.VOICE
 	}
@@ -116,6 +119,9 @@ func (cdr *CDR) AddDefaults(cfg *config.CGRConfig) {
 	}
 	if cdr.Category == "" {
 		cdr.Category = cfg.DefaultCategory
+	}
+	if cdr.Subject == "" {
+		cdr.Subject = cdr.Account
 	}
 }
 

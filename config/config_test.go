@@ -534,6 +534,37 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	}
 }
 
+func TestCgrCfgJSONLoadCDRS(t *testing.T) {
+	JSN_RAW_CFG := `
+{
+"cdrs": {
+	"enabled": true,
+	"chargers_conns": [
+		{"address": "*internal"}
+	],
+	"rals_conns": [
+		{"address": "*internal"}			// address where to reach the Rater for cost calculation, empty to disable functionality: <""|*internal|x.y.z.y:1234>
+	],
+},
+}
+	`
+	cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(JSN_RAW_CFG)
+	if err != nil {
+		t.Error(err)
+	}
+	if !cgrCfg.CDRSEnabled {
+		t.Error(cgrCfg.CDRSEnabled)
+	}
+	if !reflect.DeepEqual(cgrCfg.CDRSChargerSConns,
+		[]*HaPoolConfig{&HaPoolConfig{Address: utils.MetaInternal}}) {
+		t.Error(cgrCfg.CDRSChargerSConns)
+	}
+	if !reflect.DeepEqual(cgrCfg.CDRSRaterConns,
+		[]*HaPoolConfig{&HaPoolConfig{Address: utils.MetaInternal}}) {
+		t.Error(cgrCfg.CDRSRaterConns)
+	}
+}
+
 func TestCgrCfgJSONDefaultsCDRStats(t *testing.T) {
 	if cgrCfg.CDRStatsEnabled != false {
 		t.Error(cgrCfg.CDRStatsEnabled)

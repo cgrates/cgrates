@@ -41,18 +41,12 @@ var sTestsCDRsIT = []func(t *testing.T){
 	testV2CDRsInitConfig,
 	testV2CDRsInitDataDb,
 	testV2CDRsInitCdrDb,
-	testV2CDRsInjectUnratedCdr,
 	testV2CDRsStartEngine,
 	testV2CDRsRpcConn,
-	testV2CDRsProcessCdrRated,
-	testV2CDRsProcessCdrRaw,
-	testV2CDRsGetCdrs,
-	testV2CDRsCountCdrs,
-	testV2CDRsProcessPrepaidCdr,
-	testV2CDRsRateWithoutTP,
 	testV2CDRsLoadTariffPlanFromFolder,
-	testV2CDRsRateWithTP,
-	// ToDo: test engine shutdown
+	testV2CDRsProcessCDR,
+	testV2CDRsGetCdrs,
+	testV2CDRsKillEngine,
 }
 
 // Tests starting here
@@ -98,34 +92,6 @@ func testV2CDRsInitCdrDb(t *testing.T) {
 	}
 }
 
-func testV2CDRsInjectUnratedCdr(t *testing.T) {
-	var db engine.CdrStorage
-	switch cdrsConfDIR {
-	case "cdrsv2mysql":
-		db, err = engine.NewMySQLStorage(cdrsCfg.StorDBHost, cdrsCfg.StorDBPort, cdrsCfg.StorDBName, cdrsCfg.StorDBUser, cdrsCfg.StorDBPass,
-			cdrsCfg.StorDBMaxOpenConns, cdrsCfg.StorDBMaxIdleConns, cdrsCfg.StorDBConnMaxLifetime)
-	case "cdrsv2psql":
-		db, err = engine.NewPostgresStorage(cdrsCfg.StorDBHost, cdrsCfg.StorDBPort, cdrsCfg.StorDBName, cdrsCfg.StorDBUser, cdrsCfg.StorDBPass,
-			cdrsCfg.StorDBMaxOpenConns, cdrsCfg.StorDBMaxIdleConns, cdrsCfg.StorDBConnMaxLifetime)
-	case "cdrsv2mongo":
-		db, err = engine.NewMongoStorage(cdrsCfg.StorDBHost, cdrsCfg.StorDBPort, cdrsCfg.StorDBName,
-			cdrsCfg.StorDBUser, cdrsCfg.StorDBPass, utils.StorDB, cdrsCfg.StorDBCDRSIndexes, nil, 10)
-	}
-	if err != nil {
-		t.Error("Error on opening database connection: ", err)
-		return
-	}
-	strCdr1 := &engine.CDR{CGRID: utils.Sha1("bbb1", time.Date(2015, 11, 21, 10, 47, 24, 0, time.UTC).String()), RunID: utils.MetaRaw,
-		ToR: utils.VOICE, OriginID: "bbb1", OriginHost: "192.168.1.1", Source: "TestV2CdrsMongoInjectUnratedCdr", RequestType: utils.META_RATED,
-		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-		SetupTime: time.Date(2015, 11, 21, 10, 47, 24, 0, time.UTC), AnswerTime: time.Date(2015, 11, 21, 10, 47, 26, 0, time.UTC),
-		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		Cost: -1}
-	if err := db.SetCDR(strCdr1, false); err != nil {
-		t.Error(err.Error())
-	}
-}
-
 func testV2CDRsStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(cdrsCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
@@ -140,178 +106,85 @@ func testV2CDRsRpcConn(t *testing.T) {
 	}
 }
 
-func testV2CDRsProcessCdrRated(t *testing.T) {
-	cdr := &engine.CDR{
-		CGRID: utils.Sha1("dsafdsaf", time.Date(2015, 12, 13, 18, 15, 26, 0, time.UTC).String()), RunID: utils.DEFAULT_RUNID,
-		OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsaf",
-		OriginHost: "192.168.1.1", Source: "TestV2CdrsMongoProcessCdrRated", RequestType: utils.META_RATED, Tenant: "cgrates.org", Category: "call",
-		Account: "1001", Subject: "1001", Destination: "1002",
-		SetupTime: time.Date(2015, 12, 13, 18, 15, 26, 0, time.UTC), AnswerTime: time.Date(2015, 12, 13, 18, 15, 26, 0, time.UTC),
-		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		Cost: 1.01, CostSource: "TestV2CdrsMongoProcessCdrRated", PreRated: true,
-	}
-	var reply string
-	if err := cdrsRpc.Call("CdrsV2.ProcessCdr", cdr, &reply); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply received: ", reply)
-	}
-}
-
-func testV2CDRsProcessCdrRaw(t *testing.T) {
-	cdr := &engine.CDR{
-		CGRID: utils.Sha1("abcdeftg", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, RunID: utils.MetaRaw,
-		ToR: utils.VOICE, OriginID: "abcdeftg",
-		OriginHost: "192.168.1.1", Source: "TestV2CdrsMongoProcessCdrRaw", RequestType: utils.META_RATED, Tenant: "cgrates.org", Category: "call",
-		Account: "1002", Subject: "1002", Destination: "1002",
-		SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-	}
-	var reply string
-	if err := cdrsRpc.Call("CdrsV2.ProcessCdr", cdr, &reply); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply received: ", reply)
-	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-}
-
-func testV2CDRsGetCdrs(t *testing.T) {
-	var reply []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{}
-	if err := cdrsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 4 { // 1 injected, 1 rated, 1 *raw and it's pair in *default run
-		t.Error("Unexpected number of CDRs returned: ", len(reply))
-	}
-	// CDRs with rating errors
-	req = utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, MinCost: utils.Float64Pointer(-1.0), MaxCost: utils.Float64Pointer(0.0)}
-	if err := cdrsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 1 {
-		t.Error("Unexpected number of CDRs returned: ", reply)
-	}
-	// CDRs Rated
-	req = utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}}
-	if err := cdrsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 2 {
-		t.Error("Unexpected number of CDRs returned: ", reply)
-	}
-	// Raw CDRs
-	req = utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}}
-	if err := cdrsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 2 {
-		t.Error("Unexpected number of CDRs returned: ", reply)
-	}
-	// Skip Errors
-	req = utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, MinCost: utils.Float64Pointer(0.0), MaxCost: utils.Float64Pointer(-1.0)}
-	if err := cdrsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 1 {
-		t.Error("Unexpected number of CDRs returned: ", reply)
-	}
-}
-
-func testV2CDRsCountCdrs(t *testing.T) {
-	var reply int64
-	req := utils.AttrGetCdrs{}
-	if err := cdrsRpc.Call("ApierV2.CountCdrs", req, &reply); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if reply != 4 {
-		t.Error("Unexpected number of CDRs returned: ", reply)
-	}
-}
-
-// Make sure *prepaid does not block until finding previous costs
-func testV2CDRsProcessPrepaidCdr(t *testing.T) {
-	var reply string
-	cdrs := []*engine.CDR{
-		&engine.CDR{CGRID: utils.Sha1("dsafdsaf2", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsaf",
-			OriginHost: "192.168.1.1", Source: "TestV2CdrsMongoProcessPrepaidCdr1", RequestType: utils.META_PREPAID, Tenant: "cgrates.org",
-			Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
-			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, PreRated: true,
-		},
-		&engine.CDR{CGRID: utils.Sha1("abcdeftg2", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsaf",
-			OriginHost: "192.168.1.1", Source: "TestV2CdrsMongoProcessPrepaidCdr2", RequestType: utils.META_PREPAID, Tenant: "cgrates.org",
-			Category: "call", Account: "1002", Subject: "1002", Destination: "1002",
-			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
-			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
-		},
-		&engine.CDR{CGRID: utils.Sha1("aererfddf2", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsaf",
-			OriginHost: "192.168.1.1", Source: "TestV2CdrsMongoProcessPrepaidCdr3", RequestType: utils.META_PREPAID, Tenant: "cgrates.org",
-			Category: "call", Account: "1003", Subject: "1003", Destination: "1002",
-			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
-			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
-		},
-	}
-	tStart := time.Now()
-	for _, cdr := range cdrs {
-		if err := cdrsRpc.Call("CdrsV2.ProcessCdr", cdr, &reply); err != nil {
-			t.Error("Unexpected error: ", err.Error())
-		} else if reply != utils.OK {
-			t.Error("Unexpected reply received: ", reply)
-		}
-	}
-	if processDur := time.Now().Sub(tStart); processDur > 1*time.Second {
-		t.Error("Unexpected processing time", processDur)
-	}
-}
-
-func testV2CDRsRateWithoutTP(t *testing.T) {
-	rawCdrCGRID := utils.Sha1("bbb1", time.Date(2015, 11, 21, 10, 47, 24, 0, time.UTC).String())
-	// Rate the injected CDR, should not rate it since we have no TP loaded
-	attrs := utils.AttrRateCdrs{CgrIds: []string{rawCdrCGRID}}
-	var reply string
-	if err := cdrsRpc.Call("CdrsV2.RateCdrs", attrs, &reply); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply received: ", reply)
-	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{CGRIDs: []string{rawCdrCGRID}, RunIDs: []string{utils.META_DEFAULT}}
-	if err := cdrsRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if len(cdrs) != 1 { // Injected CDR did not have a charging run
-		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
-	} else {
-		if cdrs[0].Cost != -1 {
-			t.Errorf("Unexpected CDR returned: %+v", cdrs[0])
-		}
-	}
-}
-
 func testV2CDRsLoadTariffPlanFromFolder(t *testing.T) {
 	var loadInst utils.LoadInstance
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
-	if err := cdrsRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
+	if err := cdrsRpc.Call("ApierV2.LoadTariffPlanFromFolder",
+		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
+			*dataDir, "tariffplans", "testit")}, &loadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-func testV2CDRsRateWithTP(t *testing.T) {
-	rawCdrCGRID := utils.Sha1("bbb1", time.Date(2015, 11, 21, 10, 47, 24, 0, time.UTC).String())
-	attrs := utils.AttrRateCdrs{CgrIds: []string{rawCdrCGRID}}
+func testV2CDRsProcessCDR(t *testing.T) {
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.OriginID:    "testV2CDRsProcessCDR1",
+			utils.OriginHost:  "192.168.1.1",
+			utils.Source:      "testV2CDRsProcessCDR",
+			utils.RequestType: utils.META_RATED,
+			utils.Category:    "customers",
+			utils.Account:     "testV2CDRsProcessCDR",
+			utils.Destination: "+4986517174963",
+			utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+			utils.Usage:       time.Duration(1) * time.Minute,
+			"field_extr1":     "val_extr1",
+			"fieldextr2":      "valextr2",
+		},
+	}
 	var reply string
-	if err := cdrsRpc.Call("CdrsV2.RateCdrs", attrs, &reply); err != nil {
+	if err := cdrsRpc.Call(utils.CdrsV2ProcessCDR, cgrEv, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(2000) * time.Millisecond) // Give time for CDR to be rated
+}
+
+func testV2CDRsGetCdrs(t *testing.T) {
+	var cdrCnt int64
+	req := utils.AttrGetCdrs{}
+	if err := cdrsRpc.Call("ApierV2.CountCdrs", req, &cdrCnt); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if cdrCnt != 3 {
+		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
+	}
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{CGRIDs: []string{rawCdrCGRID}, RunIDs: []string{utils.META_DEFAULT}}
-	if err := cdrsRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+	args := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}}
+	if err := cdrsRpc.Call("ApierV2.GetCdrs", args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
 	} else {
-		if cdrs[0].Cost != 0.3 {
-			t.Errorf("Unexpected CDR returned: %+v", cdrs[0])
+		if cdrs[0].Cost != -1.0 {
+			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
+	}
+	args = utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"}}
+	if err := cdrsRpc.Call("ApierV2.GetCdrs", args, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Cost != 0.0198 {
+			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+		}
+	}
+	args = utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"}}
+	if err := cdrsRpc.Call("ApierV2.GetCdrs", args, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Cost != 0.0102 {
+			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+		}
+	}
+}
+
+func testV2CDRsKillEngine(t *testing.T) {
+	if err := engine.KillEngine(100); err != nil {
+		t.Error(err)
 	}
 }

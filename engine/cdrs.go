@@ -468,7 +468,8 @@ func (self *CdrServer) getCostFromRater(cdr *CDR) (*CallCost, error) {
 		DurationIndex:   cdr.Usage,
 		PerformRounding: true,
 	}
-	if utils.IsSliceMember([]string{utils.META_PSEUDOPREPAID, utils.META_POSTPAID, utils.META_PREPAID, utils.PSEUDOPREPAID, utils.POSTPAID, utils.PREPAID}, cdr.RequestType) { // Prepaid - Cost can be recalculated in case of missing records from SM
+	if utils.IsSliceMember([]string{utils.META_PSEUDOPREPAID, utils.META_POSTPAID, utils.META_PREPAID,
+		utils.PSEUDOPREPAID, utils.POSTPAID, utils.PREPAID}, cdr.RequestType) { // Prepaid - Cost can be recalculated in case of missing records from SM
 		err = self.rals.Call("Responder.Debit", cd, cc)
 	} else {
 		err = self.rals.Call("Responder.GetCost", cd, cc)
@@ -694,7 +695,7 @@ func (cdrS *CdrServer) chrgrSProcessEvent(cgrEv *utils.CGREvent) {
 		return
 	}
 	var chrgrs []*ChrgSProcessEventReply
-	if err := cdrS.chargerS.Call(utils.ChargerSv1ProcessEvent, cgrEv, &chrgrs); err == nil ||
+	if err := cdrS.chargerS.Call(utils.ChargerSv1ProcessEvent, cgrEv, &chrgrs); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s processing CGR event %+v with %s.",
@@ -723,13 +724,13 @@ func (cdrS *CdrServer) chrgrSProcessEvent(cgrEv *utils.CGREvent) {
 	}
 	for _, cdr := range processedCDRs {
 		if cdrS.cgrCfg.CDRSStoreCdrs { // Store CDR
-			go func() {
+			go func(cdr *CDR) {
 				if err := cdrS.cdrDb.SetCDR(cdr, true); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> error: %s storing CDR  %+v.",
 							utils.CDRs, err.Error(), cdr))
 				}
-			}()
+			}(cdr)
 		}
 		go cdrS.replicateCDRs([]*CDR{cdr}) // Replicate CDR
 		cgrEv := cdr.AsCGREvent()
@@ -753,6 +754,7 @@ func (cdrS *CdrServer) V2ProcessCDR(cgrEv *utils.CGREvent, reply *string) (err e
 
 	go cdrS.thdSProcessEvent(cgrEv)
 	go cdrS.statSProcessEvent(cgrEv)
+
 	go cdrS.chrgrSProcessEvent(cgrEv)
 
 	*reply = utils.OK

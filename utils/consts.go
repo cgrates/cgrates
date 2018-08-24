@@ -764,6 +764,11 @@ const (
 	CacheSv1Clear             = "CacheSv1.Clear"
 )
 
+// CdrsV2 APIs
+const (
+	CdrsV2ProcessCDR = "CdrsV2.ProcessCDR"
+)
+
 // Scheduler
 const (
 	SchedulerPing = "Scheduler.Ping"

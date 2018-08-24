@@ -102,7 +102,6 @@ func (self *CsvRecordsProcessor) processFlatstoreRecord(record []string) ([]stri
 
 // Takes the record from a slice and turns it into StoredCdrs, posting them to the cdrServer
 func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.CDR, error) {
-	utils.Logger.Debug(fmt.Sprintf("Record from CSV : %+v \n", record))
 	recordCdrs := make([]*engine.CDR, 0)    // More CDRs based on the number of filters and field templates
 	for _, cdrcCfg := range self.cdrcCfgs { // cdrFields coming from more templates will produce individual storCdr records
 		// Make sure filters are matching
