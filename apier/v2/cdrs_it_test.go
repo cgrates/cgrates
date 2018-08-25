@@ -139,7 +139,7 @@ func testV2CDRsProcessCDR(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(2000) * time.Millisecond) // Give time for CDR to be rated
+	time.Sleep(time.Duration(100) * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsGetCdrs(t *testing.T) {
