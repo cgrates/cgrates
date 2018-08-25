@@ -711,6 +711,10 @@ func (cdrS *CdrServer) chrgrSProcessEvent(cgrEv *utils.CGREvent) {
 					utils.CDRs, err.Error(), cgrEv, utils.ChargerS))
 			continue
 		}
+		if cdr.RunID == utils.MetaRaw { // do not calculate *raw, just save it back to DB, case of aliasing *raw data
+			processedCDRs = append(processedCDRs, cdr)
+			continue
+		}
 		ratedCDRs, err := cdrS.rateCDR(cdr)
 		if err != nil {
 			if err != nil {
