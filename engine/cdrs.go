@@ -749,6 +749,9 @@ func (cdrS *CdrServer) V2ProcessCDR(cgrEv *utils.CGREvent, reply *string) (err e
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
+	if cdrS.chargerS == nil { // backwards compatibility for DerivedChargers
+		return cdrS.V1ProcessCDR(rawCDR, reply)
+	}
 	if cdrS.cgrCfg.CDRSStoreCdrs { // Store *raw CDR
 		if err = cdrS.cdrDb.SetCDR(rawCDR, false); err != nil {
 			return utils.NewErrServerError(err) // Cannot store CDR
