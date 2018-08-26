@@ -403,17 +403,8 @@ func (self *ApierV1) ImportTariffPlanFromFolder(attrs utils.AttrImportTPFromFold
 	return nil
 }
 
-type AttrSetRatingProfile struct {
-	Tenant                string                      // Tenant's Id
-	Category              string                      // TypeOfRecord
-	Direction             string                      // Traffic direction, OUT is the only one supported for now
-	Subject               string                      // Rating subject, usually the same as account
-	Overwrite             bool                        // Overwrite if exists
-	RatingPlanActivations []*utils.TPRatingActivation // Activate rating plans at specific time
-}
-
 // Sets a specific rating profile working with data directly in the DataDB without involving storDb
-func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string) (err error) {
+func (self *ApierV1) SetRatingProfile(attrs utils.AttrSetRatingProfile, reply *string) (err error) {
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "TOR", "Direction", "Subject", "RatingPlanActivations"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

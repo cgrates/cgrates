@@ -718,7 +718,7 @@ func TestApierReloadScheduler(t *testing.T) {
 func TestApierSetRatingProfile(t *testing.T) {
 	reply := ""
 	rpa := &utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RETAIL1", FallbackSubjects: "dan2"}
-	rpf := &AttrSetRatingProfile{Tenant: "cgrates.org", Category: "call", Direction: "*out", Subject: "dan", RatingPlanActivations: []*utils.TPRatingActivation{rpa}}
+	rpf := &utils.AttrSetRatingProfile{Tenant: "cgrates.org", Category: "call", Direction: "*out", Subject: "dan", RatingPlanActivations: []*utils.TPRatingActivation{rpa}}
 	if err := rater.Call("ApierV1.SetRatingProfile", rpf, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetRatingProfile: ", err.Error())
 	} else if reply != "OK" {

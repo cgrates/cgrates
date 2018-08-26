@@ -660,9 +660,6 @@ func (cdrsrv *CdrServer) Call(serviceMethod string, args interface{}, reply inte
 
 // thdSProcessEvent will send the event to ThresholdS if the connection is configured
 func (cdrS *CdrServer) thdSProcessEvent(cgrEv *utils.CGREvent) {
-	if cdrS.thdS == nil {
-		return
-	}
 	var tIDs []string
 	if err := cdrS.thdS.Call(utils.ThresholdSv1ProcessEvent,
 		&ArgsProcessEvent{CGREvent: *cgrEv}, &tIDs); err != nil &&
@@ -676,9 +673,6 @@ func (cdrS *CdrServer) thdSProcessEvent(cgrEv *utils.CGREvent) {
 
 // statSProcessEvent will send the event to StatS if the connection is configured
 func (cdrS *CdrServer) statSProcessEvent(cgrEv *utils.CGREvent) {
-	if cdrS.stats == nil {
-		return
-	}
 	var reply []string
 	if err := cdrS.stats.Call(utils.StatSv1ProcessEvent, cgrEv, &reply); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
@@ -689,11 +683,41 @@ func (cdrS *CdrServer) statSProcessEvent(cgrEv *utils.CGREvent) {
 	}
 }
 
-// chrgrSProcessEvent will process the CGREvent with ChargerS subsystem
-func (cdrS *CdrServer) chrgrSProcessEvent(cgrEv *utils.CGREvent) {
-	if cdrS.chargerS == nil {
+// rarethsta will RAte/STOtore/REplicate/THresholds/STAts the CDR received
+// used by both chargerS as well as re-/rating
+func (cdrS *CdrServer) rastorethstaCDR(cdr *CDR) {
+	ratedCDRs, err := cdrS.rateCDR(cdr)
+	if err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %s rating CDR  %+v.",
+				utils.CDRs, err.Error(), cdr))
 		return
 	}
+	for _, rtCDR := range ratedCDRs {
+		if cdrS.cgrCfg.CDRSStoreCdrs { // Store CDR
+			go func(rtCDR *CDR) {
+				if err := cdrS.cdrDb.SetCDR(rtCDR, true); err != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> error: %s storing CDR  %+v.",
+							utils.CDRs, err.Error(), rtCDR))
+				}
+			}(rtCDR)
+		}
+		if len(cdrS.cgrCfg.CDRSOnlineCDRExports) != 0 {
+			go cdrS.replicateCDRs([]*CDR{rtCDR})
+		}
+		cgrEv := rtCDR.AsCGREvent()
+		if cdrS.thdS != nil {
+			go cdrS.thdSProcessEvent(cgrEv)
+		}
+		if cdrS.stats != nil {
+			go cdrS.statSProcessEvent(cgrEv)
+		}
+	}
+}
+
+// chrgrSProcessEvent will process the CGREvent with ChargerS subsystem
+func (cdrS *CdrServer) chrgrSProcessEvent(cgrEv *utils.CGREvent) {
 	var chrgrs []*ChrgSProcessEventReply
 	if err := cdrS.chargerS.Call(utils.ChargerSv1ProcessEvent, cgrEv, &chrgrs); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
@@ -702,7 +726,6 @@ func (cdrS *CdrServer) chrgrSProcessEvent(cgrEv *utils.CGREvent) {
 				utils.CDRs, err.Error(), cgrEv, utils.ChargerS))
 		return
 	}
-	var processedCDRs []*CDR
 	for _, chrgr := range chrgrs {
 		cdr, err := NewMapEvent(chrgr.CGREvent.Event).AsCDR(cdrS.cgrCfg, cdrS.Timezone())
 		if err != nil {
@@ -711,35 +734,8 @@ func (cdrS *CdrServer) chrgrSProcessEvent(cgrEv *utils.CGREvent) {
 					utils.CDRs, err.Error(), cgrEv, utils.ChargerS))
 			continue
 		}
-		if cdr.RunID == utils.MetaRaw { // do not calculate *raw, just save it back to DB, case of aliasing *raw data
-			processedCDRs = append(processedCDRs, cdr)
-			continue
-		}
-		ratedCDRs, err := cdrS.rateCDR(cdr)
-		if err != nil {
-			if err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> error: %s rating CDR  %+v.",
-						utils.CDRs, err.Error(), cdr))
-				continue
-			}
-		}
-		processedCDRs = append(processedCDRs, ratedCDRs...)
-	}
-	for _, cdr := range processedCDRs {
-		if cdrS.cgrCfg.CDRSStoreCdrs { // Store CDR
-			go func(cdr *CDR) {
-				if err := cdrS.cdrDb.SetCDR(cdr, true); err != nil {
-					utils.Logger.Warning(
-						fmt.Sprintf("<%s> error: %s storing CDR  %+v.",
-							utils.CDRs, err.Error(), cdr))
-				}
-			}(cdr)
-		}
-		go cdrS.replicateCDRs([]*CDR{cdr}) // Replicate CDR
-		cgrEv := cdr.AsCGREvent()
-		go cdrS.thdSProcessEvent(cgrEv)
-		go cdrS.statSProcessEvent(cgrEv)
+		cdrS.rastorethstaCDR(cdr)
+
 	}
 }
 
@@ -757,13 +753,39 @@ func (cdrS *CdrServer) V2ProcessCDR(cgrEv *utils.CGREvent, reply *string) (err e
 			return utils.NewErrServerError(err) // Cannot store CDR
 		}
 	}
-	cdrS.replicateCDRs([]*CDR{rawCDR}) // Replicate raw CDR
+	if len(cdrS.cgrCfg.CDRSOnlineCDRExports) != 0 {
+		cdrS.replicateCDRs([]*CDR{rawCDR}) // Replicate raw CDR
+	}
+	if cdrS.thdS != nil {
+		go cdrS.thdSProcessEvent(cgrEv)
+	}
+	if cdrS.stats != nil {
+		go cdrS.statSProcessEvent(cgrEv)
+	}
+	if cdrS.chargerS != nil {
+		go cdrS.chrgrSProcessEvent(cgrEv)
+	}
 
-	go cdrS.thdSProcessEvent(cgrEv)
-	go cdrS.statSProcessEvent(cgrEv)
+	*reply = utils.OK
+	return nil
+}
 
-	go cdrS.chrgrSProcessEvent(cgrEv)
-
+// Called by rate/re-rate API, RPC method
+func (cdrS *CdrServer) V2RateCDRs(attrs *utils.RPCCDRsFilter, reply *string) error {
+	if cdrS.chargerS == nil {
+		return utils.NewErrNotConnected(utils.ChargerS)
+	}
+	cdrFltr, err := attrs.AsCDRsFilter(cdrS.cgrCfg.DefaultTimezone)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
+	cdrs, _, err := cdrS.cdrDb.GetCDRs(cdrFltr, false)
+	if err != nil {
+		return err
+	}
+	for _, cdr := range cdrs {
+		go cdrS.rastorethstaCDR(cdr)
+	}
 	*reply = utils.OK
 	return nil
 }

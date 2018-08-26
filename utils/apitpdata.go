@@ -254,6 +254,15 @@ func (rpf *TPRatingProfile) SetRatingProfilesId(id string) error {
 	return nil
 }
 
+type AttrSetRatingProfile struct {
+	Tenant                string                // Tenant's Id
+	Category              string                // TypeOfRecord
+	Direction             string                // Traffic direction, OUT is the only one supported for now
+	Subject               string                // Rating subject, usually the same as account
+	Overwrite             bool                  // Overwrite if exists
+	RatingPlanActivations []*TPRatingActivation // Activate rating plans at specific time
+}
+
 type TPRatingActivation struct {
 	ActivationTime   string // Time when this profile will become active, defined as unix epoch time
 	RatingPlanId     string // Id of RatingPlan profile

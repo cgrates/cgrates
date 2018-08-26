@@ -767,6 +767,7 @@ const (
 // CdrsV2 APIs
 const (
 	CdrsV2ProcessCDR = "CdrsV2.ProcessCDR"
+	CdrsV2RateCDRs   = "CdrsV2.RateCDRs"
 )
 
 // Scheduler

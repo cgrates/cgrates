@@ -1,4 +1,4 @@
 #Tenant,ID,Context,FilterIDs,ActivationInterval,FieldName,Initial,Substitute,Append,Blocker,Weight
 cgrates.org,ATTR_ACNT_1001,*sessions,FLTR_ACCOUNT_1001,,OfficeGroup,*any,Marketing,true,false,10
-cgrates.org,ATTR_SUPPLIER1,*chargers,*string:Category:customers,,Subject,*any,supplier1,false,false,10
+cgrates.org,ATTR_SUPPLIER1,*chargers,*string:Category:customers,,Subject,*any,supplier1,true,false,10
 cgrates.org,ATTR_SUPPLIER1,,,,Category,*any,call,false,false,10
