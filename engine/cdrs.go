@@ -198,8 +198,10 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 			return err // Error is propagated back and we don't continue processing the CDR if we cannot store it
 		}
 	}
-	// process CDR with thresholdS
-	self.thdSProcessEvent(cdr.AsCGREvent())
+	if self.thdS != nil {
+		// process CDR with thresholdS
+		self.thdSProcessEvent(cdr.AsCGREvent())
+	}
 	// Attach raw CDR to stats
 	if self.cdrstats != nil { // Send raw CDR to stats
 		var out int
