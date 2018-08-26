@@ -117,24 +117,25 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREvent) (rply []*ChrgSProc
 			ChargerSProfile: cP.ID,
 			CGREvent:        clonedEv,
 		}
-		if len(cP.AttributeIDs) != 0 { // Attributes should process the event
-			if cS.attrS == nil {
-				return nil, errors.New("no connection to AttributeS")
-			}
-			if clonedEv.Context == nil {
-				clonedEv.Context = utils.StringPointer(utils.MetaChargers)
-			}
-			var evReply AttrSProcessEventReply
-			if err = cS.attrS.Call(utils.AttributeSv1ProcessEvent,
-				&AttrArgsProcessEvent{cP.AttributeIDs, nil, *clonedEv},
-				&evReply); err != nil {
-				return nil, err
-			}
-			rply[i].AttributeSProfiles = evReply.MatchedProfiles
-			rply[i].AlteredFields = evReply.AlteredFields
-			if len(evReply.AlteredFields) != 0 {
-				rply[i].CGREvent = evReply.CGREvent
-			}
+		if len(cP.AttributeIDs) == 1 && cP.AttributeIDs[0] == utils.META_NONE {
+			continue // AttributeS disabled
+		}
+		if cS.attrS == nil {
+			return nil, errors.New("no connection to AttributeS")
+		}
+		if clonedEv.Context == nil {
+			clonedEv.Context = utils.StringPointer(utils.MetaChargers)
+		}
+		var evReply AttrSProcessEventReply
+		if err = cS.attrS.Call(utils.AttributeSv1ProcessEvent,
+			&AttrArgsProcessEvent{cP.AttributeIDs, nil, *clonedEv},
+			&evReply); err != nil {
+			return nil, err
+		}
+		rply[i].AttributeSProfiles = evReply.MatchedProfiles
+		rply[i].AlteredFields = evReply.AlteredFields
+		if len(evReply.AlteredFields) != 0 {
+			rply[i].CGREvent = evReply.CGREvent
 		}
 	}
 	return
