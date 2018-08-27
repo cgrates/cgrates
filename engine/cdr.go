@@ -571,7 +571,8 @@ func (cdr *CDR) formatField(cfgFld *config.CfgCdrField, httpSkipTlsCheck bool,
 
 // Used in place where we need to export the CDR based on an export template
 // ExportRecord is a []string to keep it compatible with encoding/csv Writer
-func (cdr *CDR) AsExportRecord(exportFields []*config.CfgCdrField, httpSkipTlsCheck bool, groupedCDRs []*CDR, roundingDecs int) (expRecord []string, err error) {
+func (cdr *CDR) AsExportRecord(exportFields []*config.CfgCdrField,
+	httpSkipTlsCheck bool, groupedCDRs []*CDR, roundingDecs int) (expRecord []string, err error) {
 	for _, cfgFld := range exportFields {
 		if roundingDecs != 0 {
 			clnFld := new(config.CfgCdrField) // Clone so we can modify the rounding decimals without affecting the template

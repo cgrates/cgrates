@@ -161,12 +161,22 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 		}
 		var fieldVal string
 		switch cdrFldCfg.Type {
-		case utils.META_COMPOSED, utils.MetaUnixTimestamp:
+		case utils.META_COMPOSED:
 			out, err := cdrFldCfg.Value.ParseDataProvider(csvProvider)
 			if err != nil {
 				return nil, err
 			}
 			fieldVal = out
+		case utils.MetaUnixTimestamp:
+			out, err := cdrFldCfg.Value.ParseDataProvider(csvProvider)
+			if err != nil {
+				return nil, err
+			}
+			t, err := utils.ParseTimeDetectLayout(out, self.timezone)
+			if err != nil {
+				return nil, err
+			}
+			fieldVal += strconv.Itoa(int(t.Unix()))
 		case utils.META_HTTP_POST:
 			lazyHttpFields = append(lazyHttpFields, cdrFldCfg) // Will process later so we can send an estimation of storedCdr to http server
 		default:
