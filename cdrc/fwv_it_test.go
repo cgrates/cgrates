@@ -132,7 +132,7 @@ func TestFwvitInitCdrDb(t *testing.T) {
 
 func TestFwvitProcessFiles(t *testing.T) {
 	fileName := "test1.fwv"
-	if err := ioutil.WriteFile(path.Join("/tmp", fileName), []byte(FW_CDR_FILE1), 0644); err != nil {
+	if err := ioutil.WriteFile(path.Join("/tmp", fileName), []byte(FW_CDR_FILE1), 0755); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.Rename(path.Join("/tmp", fileName), path.Join(fwvCdrcCfg.CdrInDir, fileName)); err != nil {
@@ -147,7 +147,6 @@ func TestFwvitProcessFiles(t *testing.T) {
 	if len(filesOutDir) != 1 {
 		t.Errorf("In CdrcOutDir, expecting 1 files, got: %d", len(filesOutDir))
 	}
-	time.Sleep(time.Duration(1) * time.Second)
 }
 
 func TestFwvitAnalyseCDRs(t *testing.T) {

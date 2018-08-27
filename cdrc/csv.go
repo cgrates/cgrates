@@ -34,7 +34,7 @@ import (
 func NewCsvRecordsProcessor(csvReader *csv.Reader, timezone, fileName string,
 	dfltCdrcCfg *config.CdrcConfig, cdrcCfgs []*config.CdrcConfig,
 	httpSkipTlsCheck bool, unpairedRecordsCache *UnpairedRecordsCache, partialRecordsCache *PartialRecordsCache,
-	cacheDumpFields []*config.FCTemplate, filterS *engine.FilterS) *CsvRecordsProcessor {
+	cacheDumpFields []*config.CfgCdrField, filterS *engine.FilterS) *CsvRecordsProcessor {
 	return &CsvRecordsProcessor{csvReader: csvReader, timezone: timezone, fileName: fileName,
 		dfltCdrcCfg: dfltCdrcCfg, cdrcCfgs: cdrcCfgs, httpSkipTlsCheck: httpSkipTlsCheck, unpairedRecordsCache: unpairedRecordsCache,
 		partialRecordsCache: partialRecordsCache, partialCacheDumpFields: cacheDumpFields, filterS: filterS}
@@ -51,7 +51,7 @@ type CsvRecordsProcessor struct {
 	httpSkipTlsCheck       bool
 	unpairedRecordsCache   *UnpairedRecordsCache // Shared by cdrc so we can cache for all files in a folder
 	partialRecordsCache    *PartialRecordsCache  // Cache records which are of type "Partial"
-	partialCacheDumpFields []*config.FCTemplate
+	partialCacheDumpFields []*config.CfgCdrField
 	filterS                *engine.FilterS
 }
 
