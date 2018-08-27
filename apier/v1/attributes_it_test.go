@@ -730,8 +730,8 @@ func testAttributeSSetAlsPrf2(t *testing.T) {
 			&engine.Attribute{
 				FieldName: utils.Subject,
 				Initial:   utils.ANY,
-				Substitute: utils.RSRParsers{
-					&utils.RSRParser{
+				Substitute: config.RSRParsers{
+					&config.RSRParser{
 						Rules:           "roam",
 						AllFiltersMatch: true,
 					},
@@ -774,8 +774,8 @@ func testAttributeSSetAlsPrf3(t *testing.T) {
 			&engine.Attribute{
 				FieldName: utils.Subject,
 				Initial:   utils.ANY,
-				Substitute: utils.RSRParsers{
-					&utils.RSRParser{
+				Substitute: config.RSRParsers{
+					&config.RSRParser{
 						Rules: "",
 					},
 				},
@@ -805,8 +805,8 @@ func testAttributeSSetAlsPrf4(t *testing.T) {
 			&engine.Attribute{
 				FieldName: utils.Subject,
 				Initial:   utils.ANY,
-				Substitute: utils.RSRParsers{
-					&utils.RSRParser{},
+				Substitute: config.RSRParsers{
+					&config.RSRParser{},
 				},
 				Append: false,
 			},
