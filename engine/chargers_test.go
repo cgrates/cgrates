@@ -37,8 +37,8 @@ var (
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-			RunID:        "*rated",
-			AttributeIDs: []string{"ATTR_1"},
+			RunID:        "TestRunID",
+			AttributeIDs: []string{"*none"},
 			Weight:       20,
 		},
 		&ChargerProfile{
@@ -206,4 +206,21 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(cPPs[1]), utils.ToJSON(rcv))
 	}
 
+}
+
+func TestChargerProcessEvent(t *testing.T) {
+	rpl := []*ChrgSProcessEventReply{
+		&ChrgSProcessEventReply{
+			ChargerSProfile: "CPP_1",
+			CGREvent:        chargerEvents[0],
+		},
+	}
+	rpl[0].CGREvent.Event[utils.RunID] = cPPs[0].RunID
+	rcv, err := chargerSrv.processEvent(chargerEvents[0])
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(rpl[0], rcv[0]) {
+		t.Errorf("Expecting: %+v, received: %+v ", utils.ToJSON(rpl[0]), utils.ToJSON(rcv[0]))
+	}
 }
