@@ -210,7 +210,7 @@ type CdrcJsonCfg struct {
 	Header_fields               *[]*FcTemplateJsonCfg
 	Content_fields              *[]*FcTemplateJsonCfg
 	Trailer_fields              *[]*FcTemplateJsonCfg
-	Cache_dump_fields           *[]*FcTemplateJsonCfg
+	Cache_dump_fields           *[]*CdrFieldJsonCfg
 }
 
 // SM-Generic config section

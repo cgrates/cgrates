@@ -70,9 +70,7 @@ func (prc *PartialRecordsCache) dumpPartialRecords(originID string) {
 			csvWriter := csv.NewWriter(fileOut)
 			csvWriter.Comma = prc.csvSep
 			for _, cdr := range prc.partialRecords[originID].cdrs {
-				//FOR THE MOMENTN USED
-				// nil instead of prc.partialRecords[originID].cacheDumpFields
-				expRec, err := cdr.AsExportRecord(nil, prc.httpSkipTlsCheck, nil, prc.roundDecimals)
+				expRec, err := cdr.AsExportRecord(prc.partialRecords[originID].cacheDumpFields, prc.httpSkipTlsCheck, nil, prc.roundDecimals)
 				if err != nil {
 					return nil, err
 				}
@@ -180,15 +178,15 @@ func (prc *PartialRecordsCache) MergePartialCDRRecord(pCDR *PartialCDRRecord) (*
 	return pCDRIf.(*engine.CDR), err
 }
 
-func NewPartialCDRRecord(cdr *engine.CDR, cacheDumpFlds []*config.FCTemplate) *PartialCDRRecord {
+func NewPartialCDRRecord(cdr *engine.CDR, cacheDumpFlds []*config.CfgCdrField) *PartialCDRRecord {
 	return &PartialCDRRecord{cdrs: []*engine.CDR{cdr}, cacheDumpFields: cacheDumpFlds}
 }
 
 // PartialCDRRecord is a record which can be updated later
 // different from PartialFlatstoreRecordsCache which is incomplete (eg: need to calculate duration out of 2 records)
 type PartialCDRRecord struct {
-	cdrs            []*engine.CDR        // Number of CDRs
-	cacheDumpFields []*config.FCTemplate // Fields template to use when dumping from cache on disk
+	cdrs            []*engine.CDR         // Number of CDRs
+	cacheDumpFields []*config.CfgCdrField // Fields template to use when dumping from cache on disk
 }
 
 // Part of sort interface

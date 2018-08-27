@@ -34,9 +34,11 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewFwvRecordsProcessor(file *os.File, dfltCfg *config.CdrcConfig, cdrcCfgs []*config.CdrcConfig, httpClient *http.Client,
+func NewFwvRecordsProcessor(file *os.File, dfltCfg *config.CdrcConfig,
+	cdrcCfgs []*config.CdrcConfig, httpClient *http.Client,
 	httpSkipTlsCheck bool, timezone string, filterS *engine.FilterS) *FwvRecordsProcessor {
-	return &FwvRecordsProcessor{file: file, cdrcCfgs: cdrcCfgs, dfltCfg: dfltCfg, httpSkipTlsCheck: httpSkipTlsCheck, timezone: timezone, filterS: filterS}
+	return &FwvRecordsProcessor{file: file, cdrcCfgs: cdrcCfgs, dfltCfg: dfltCfg,
+		httpSkipTlsCheck: httpSkipTlsCheck, timezone: timezone, filterS: filterS}
 }
 
 type FwvRecordsProcessor struct {
@@ -290,15 +292,15 @@ func (fP *fwvProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 	if err != nil {
 		return nil, err
 	}
-	if startIndex < len(fP.req) {
-		return "", fmt.Errorf("Invalid start index : %+v", startIndex)
+	if startIndex > len(fP.req) {
+		return "", fmt.Errorf("StartIndex : %+v is greater than : %+v", startIndex, len(fP.req))
 	}
 	finalIndex, err := strconv.Atoi(indexes[1])
 	if err != nil {
 		return nil, err
 	}
 	if finalIndex > len(fP.req) {
-		return "", fmt.Errorf("Invalid final index : %+v", finalIndex)
+		return "", fmt.Errorf("FinalIndex : %+v is greater than : %+v", finalIndex, len(fP.req))
 	}
 	data = fP.req[startIndex:finalIndex]
 	fP.cache.Set(fldPath, data, false)
