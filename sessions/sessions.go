@@ -469,6 +469,43 @@ func (smg *SMGeneric) getSessionIDsForPrefix(prefix string, passiveSessions bool
 	return
 }
 
+func (smg *SMGeneric) v1ForkSessions(evStart *engine.SafEvent,
+	clntConn rpcclient.RpcClientConnection, cgrID, resourceID string) (ss []*SMGSession, err error) {
+	cdr, err := evStart.AsCDR(smg.cgrCfg, smg.Timezone)
+	if err != nil {
+		utils.Logger.Warning(fmt.Sprintf("<%s> could not convert event: %s to CDR, err: %s",
+			utils.SessionS, evStart.String(), err.Error()))
+		return nil, err
+	}
+	var sessionRuns []*engine.SessionRun
+	if err := smg.rals.Call("Responder.GetSessionRuns",
+		cdr, &sessionRuns); err != nil {
+		return nil, err
+	}
+	if len(sessionRuns) == 0 {
+		return []*SMGSession{
+			&SMGSession{CGRID: cgrID, ResourceID: resourceID, EventStart: evStart,
+				RunID: utils.META_NONE, Timezone: smg.Timezone,
+				rals: smg.rals, cdrsrv: smg.cdrsrv,
+				clntConn: clntConn}}, nil
+	}
+	stopDebitChan := make(chan struct{})
+	for _, sessionRun := range sessionRuns {
+		s := &SMGSession{CGRID: cgrID, ResourceID: resourceID, EventStart: evStart,
+			RunID: sessionRun.DerivedCharger.RunID, Timezone: smg.Timezone,
+			rals: smg.rals, cdrsrv: smg.cdrsrv,
+			CD: sessionRun.CallDescriptor, clntConn: clntConn,
+			clientProto: smg.cgrCfg.SessionSCfg().ClientProtocol}
+		//utils.Logger.Info(fmt.Sprintf("<%s> Starting session: %s, runId: %s",utils.SessionS, sessionId, s.runId))
+		if smg.cgrCfg.SessionSCfg().DebitInterval != 0 {
+			s.stopDebit = stopDebitChan
+			go s.debitLoop(smg.cgrCfg.SessionSCfg().DebitInterval)
+		}
+		ss = append(ss, s)
+	}
+	return
+}
+
 // sessionStart will handle a new session, pass the connectionId so we can communicate on disconnect request
 func (smg *SMGeneric) sessionStart(evStart *engine.SafEvent,
 	clntConn rpcclient.RpcClientConnection, resourceID string) (err error) {
@@ -477,36 +514,15 @@ func (smg *SMGeneric) sessionStart(evStart *engine.SafEvent,
 		if pSS := smg.passiveToActive(cgrID); len(pSS) != 0 {
 			return nil, nil // ToDo: handle here also debits
 		}
-		cdr, err := evStart.AsCDR(smg.cgrCfg, smg.Timezone)
+		var ss []*SMGSession
+		if smg.chargerS == nil {
+			ss, err = smg.v1ForkSessions(evStart, clntConn, cgrID, resourceID)
+		}
 		if err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<%s> could not convert event: %s to CDR, err: %s",
-				utils.SessionS, evStart.String(), err.Error()))
-		}
-		var sessionRuns []*engine.SessionRun
-		if err := smg.rals.Call("Responder.GetSessionRuns",
-			cdr, &sessionRuns); err != nil {
 			return nil, err
-		} else if len(sessionRuns) == 0 {
-			s := &SMGSession{CGRID: cgrID, ResourceID: resourceID, EventStart: evStart,
-				RunID: utils.META_NONE, Timezone: smg.Timezone,
-				rals: smg.rals, cdrsrv: smg.cdrsrv,
-				clntConn: clntConn}
-			smg.recordASession(s)
-			return nil, nil
 		}
-		stopDebitChan := make(chan struct{})
-		for _, sessionRun := range sessionRuns {
-			s := &SMGSession{CGRID: cgrID, ResourceID: resourceID, EventStart: evStart,
-				RunID: sessionRun.DerivedCharger.RunID, Timezone: smg.Timezone,
-				rals: smg.rals, cdrsrv: smg.cdrsrv,
-				CD: sessionRun.CallDescriptor, clntConn: clntConn,
-				clientProto: smg.cgrCfg.SessionSCfg().ClientProtocol}
+		for _, s := range ss {
 			smg.recordASession(s)
-			//utils.Logger.Info(fmt.Sprintf("<%s> Starting session: %s, runId: %s",utils.SessionS, sessionId, s.runId))
-			if smg.cgrCfg.SessionSCfg().DebitInterval != 0 {
-				s.stopDebit = stopDebitChan
-				go s.debitLoop(smg.cgrCfg.SessionSCfg().DebitInterval)
-			}
 		}
 		return nil, nil
 	}, smg.cgrCfg.LockingTimeout, cgrID)
