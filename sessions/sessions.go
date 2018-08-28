@@ -489,7 +489,6 @@ func (smg *SMGeneric) v1ForkSessions(evStart *engine.SafEvent,
 				rals: smg.rals, cdrsrv: smg.cdrsrv,
 				clntConn: clntConn}}, nil
 	}
-	stopDebitChan := make(chan struct{})
 	for _, sessionRun := range sessionRuns {
 		s := &SMGSession{CGRID: cgrID, ResourceID: resourceID, EventStart: evStart,
 			RunID: sessionRun.DerivedCharger.RunID, Timezone: smg.Timezone,
@@ -497,12 +496,14 @@ func (smg *SMGeneric) v1ForkSessions(evStart *engine.SafEvent,
 			CD: sessionRun.CallDescriptor, clntConn: clntConn,
 			clientProto: smg.cgrCfg.SessionSCfg().ClientProtocol}
 		//utils.Logger.Info(fmt.Sprintf("<%s> Starting session: %s, runId: %s",utils.SessionS, sessionId, s.runId))
-		if smg.cgrCfg.SessionSCfg().DebitInterval != 0 {
-			s.stopDebit = stopDebitChan
-			go s.debitLoop(smg.cgrCfg.SessionSCfg().DebitInterval)
-		}
+
 		ss = append(ss, s)
 	}
+	return
+}
+
+func (smg *SMGeneric) v2ForkSessions(evStart *engine.SafEvent,
+	clntConn rpcclient.RpcClientConnection, cgrID, resourceID string) (ss []*SMGSession, err error) {
 	return
 }
 
@@ -515,14 +516,22 @@ func (smg *SMGeneric) sessionStart(evStart *engine.SafEvent,
 			return nil, nil // ToDo: handle here also debits
 		}
 		var ss []*SMGSession
-		if smg.chargerS == nil {
+		if smg.chargerS == nil { // old way of session forking
 			ss, err = smg.v1ForkSessions(evStart, clntConn, cgrID, resourceID)
+		} else {
+			ss, err = smg.v2ForkSessions(evStart, clntConn, cgrID, resourceID)
 		}
 		if err != nil {
 			return nil, err
 		}
+		stopDebitChan := make(chan struct{})
 		for _, s := range ss {
 			smg.recordASession(s)
+			if s.RunID != utils.META_NONE &&
+				smg.cgrCfg.SessionSCfg().DebitInterval != 0 {
+				s.stopDebit = stopDebitChan
+				go s.debitLoop(smg.cgrCfg.SessionSCfg().DebitInterval)
+			}
 		}
 		return nil, nil
 	}, smg.cgrCfg.LockingTimeout, cgrID)
