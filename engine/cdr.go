@@ -467,33 +467,25 @@ func (cdr *CDR) String() string {
 
 // combimedCdrFieldVal groups together CDRs with same CGRID and combines their values matching filter field ID
 func (cdr *CDR) combimedCdrFieldVal(cfgCdrFld *config.FCTemplate, groupCDRs []*CDR, filterS *FilterS) (string, error) {
-	/*
-		var combinedVal string // Will result as combination of the field values, filters must match
-		for _, filterRule := range cfgCdrFld.Value {
-			pairingVal, err := cdr.FieldAsString(filterRule)
-			if err != nil { // Filter not passing
+	var combinedVal string // Will result as combination of the field values, filters must match
+	for _, filterRule := range cfgCdrFld.Value {
+		pairingVal, err := cdr.FieldAsString(filterRule)
+		if err != nil {
+			return "", err
+		}
+		for _, grpCDR := range groupCDRs {
+			if cdr.CGRID != grpCDR.CGRID {
+				continue // We only care about cdrs with same primary cdr behind
+			}
+			if valStr, err := grpCDR.FieldAsString(filterRule); err != nil {
+				return "", err
+			} else if valStr != pairingVal { // First CDR with field equal with ours
 				continue
 			}
-			for _, grpCDR := range groupCDRs {
-				if cdr.CGRID != grpCDR.CGRID {
-					continue // We only care about cdrs with same primary cdr behind
-				}
-				if valStr, _ := grpCDR.FieldAsString(filterRule); valStr != pairingVal { // First CDR with field equal with ours
-					continue
-				}
-				for _, rsrRule := range cfgCdrFld.Value {
-					if parsed, err := grpCDR.FieldAsString(rsrRule); err != nil {
-						return "", err
-					} else {
-						combinedVal += parsed
-					}
-
-				}
-			}
+			combinedVal += grpCDR.FieldsAsString(cfgCdrFld.Value)
 		}
-		return combinedVal, nil
-	*/
-	return "", nil
+	}
+	return combinedVal, nil
 }
 
 // Extracts the value specified by cfgHdr out of cdr, used for export values
@@ -620,6 +612,12 @@ func (cdr *CDR) AsExportMap(exportFields []*config.FCTemplate, httpSkipTlsCheck 
 	groupedCDRs []*CDR, roundingDecs int, filterS *FilterS) (expMap map[string]string, err error) {
 	expMap = make(map[string]string)
 	for _, cfgFld := range exportFields {
+		if pass, err := filterS.Pass(cdr.Tenant,
+			cfgFld.Filters, config.NewNavigableMap(cdr.AsMapStringIface())); err != nil {
+			return nil, err
+		} else if !pass {
+			continue
+		}
 		if roundingDecs != 0 {
 			clnFld := new(config.FCTemplate) // Clone so we can modify the rounding decimals without affecting the template
 			*clnFld = *cfgFld
@@ -627,9 +625,8 @@ func (cdr *CDR) AsExportMap(exportFields []*config.FCTemplate, httpSkipTlsCheck 
 			cfgFld = clnFld
 		}
 		if fmtOut, err := cdr.formatField(cfgFld, httpSkipTlsCheck, groupedCDRs, filterS); err != nil {
-			if err == utils.ErrFilterNotPassingNoCaps {
-				continue
-			}
+			utils.Logger.Warning(fmt.Sprintf("<CDR> error: %s exporting field: %s, CDR: %s\n",
+				err.Error(), utils.ToJSON(cfgFld), utils.ToJSON(cdr)))
 			return nil, err
 		} else {
 			expMap[cfgFld.FieldId] += fmtOut

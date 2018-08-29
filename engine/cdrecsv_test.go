@@ -178,12 +178,10 @@ func TestExportVoiceWithConvert(t *testing.T) {
 		ExtraFields: map[string]string{"extra1": "val_extra1",
 			"extra2": "val_extra2", "extra3": "val_extra3"},
 	}
-	data, _ := NewMapStorage()
-	dmForCDRe := NewDataManager(data)
 	cdre, err := NewCDRExporter([]*CDR{cdrVoice, cdrData, cdrSMS}, cdreCfg,
 		utils.MetaFileCSV, "", "", "firstexport",
 		true, 1, '|', map[string]float64{}, 0.0,
-		5, true, nil, &FilterS{dm: dmForCDRe, cfg: cfg})
+		5, true, nil, &FilterS{cfg: cfg})
 	if err != nil {
 		t.Error("Unexpected error received: ", err)
 	}
