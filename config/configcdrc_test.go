@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package config
 
+/*
 import (
 	"reflect"
 	"testing"
@@ -330,3 +331,4 @@ func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
 		t.Errorf("Expected: %s \n, received: %s", utils.ToJSON(eCgrCfg.CdrcProfiles), utils.ToJSON(cgrCfg.CdrcProfiles))
 	}
 }
+*/

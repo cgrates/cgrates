@@ -62,7 +62,7 @@
 "rals": {
 	"enabled": true,
 	"thresholds_conns": [
-		{"address": "*internal"}
+		{"address": "127.0.0.1:2012", "transport":"*json"},
 	],
 },
 
@@ -81,20 +81,20 @@
 
 
 "cdre": {
-"TestTutITExportCDR": {
+	"TestTutITExportCDR": {
 		"content_fields": [
-			{"tag": "CGRID", "type": "*composed", "value": "CGRID"},
-			{"tag": "RunID", "type": "*composed", "value": "RunID"},
-			{"tag":"OriginID", "type": "*composed", "value": "OriginID"},
-			{"tag":"RequestType", "type": "*composed", "value": "RequestType"},
-			{"tag":"Tenant", "type": "*composed", "value": "Tenant"},
-			{"tag":"Category", "type": "*composed", "value": "Category"},
-			{"tag":"Account", "type": "*composed", "value": "Account"},
-			{"tag":"Destination", "type": "*composed", "value": "Destination"},
-			{"tag":"AnswerTime", "type": "*composed", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
-			{"tag":"Usage", "type": "*composed", "value": "Usage"},
-			{"tag":"Cost", "type": "*composed", "value": "Cost", "rounding_decimals": 4},
-			{"tag":"MatchedDestinationID", "type": "*composed", "value": "~CostDetails:s/\"MatchedDestId\":.*_(\\w{4})/${1}/:s/\"MatchedDestId\":\"INTERNAL\"/ON010/"},
+			{"id": "CGRID", "type": "*composed", "value": "~CGRID"},
+			{"id": "RunID", "type": "*composed", "value": "~RunID"},
+			{"id":"OriginID", "type": "*composed", "value": "~OriginID"},
+			{"id":"RequestType", "type": "*composed", "value": "~RequestType"},
+			{"id":"Tenant", "type": "*composed", "value": "~Tenant"},
+			{"id":"Category", "type": "*composed", "value": "~Category"},
+			{"id":"Account", "type": "*composed", "value": "~Account"},
+			{"id":"Destination", "type": "*composed", "value": "~Destination"},
+			{"id":"AnswerTime", "type": "*composed", "value": "~AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"id":"Usage", "type": "*composed", "value": "~Usage"},
+			{"id":"Cost", "type": "*composed", "value": "~Cost", "rounding_decimals": 4},
+			{"id":"MatchedDestinationID", "type": "*composed", "value": "~CostDetails:s/\"MatchedDestId\":.*_(\\w{4})/${1}/:s/\"MatchedDestId\":\"INTERNAL\"/ON010/"},
 		],
 	},
 },

@@ -35,9 +35,9 @@ type CdreConfig struct {
 	FieldSeparator      rune
 	UsageMultiplyFactor utils.FieldMultiplyFactor
 	CostMultiplyFactor  float64
-	HeaderFields        []*CfgCdrField
-	ContentFields       []*CfgCdrField
-	TrailerFields       []*CfgCdrField
+	HeaderFields        []*FCTemplate
+	ContentFields       []*FCTemplate
+	TrailerFields       []*FCTemplate
 }
 
 func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) error {
@@ -87,19 +87,13 @@ func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) error {
 		self.CostMultiplyFactor = *jsnCfg.Cost_multiply_factor
 	}
 	if jsnCfg.Header_fields != nil {
-		if self.HeaderFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Header_fields); err != nil {
-			return err
-		}
+		self.HeaderFields = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Header_fields)
 	}
 	if jsnCfg.Content_fields != nil {
-		if self.ContentFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Content_fields); err != nil {
-			return err
-		}
+		self.ContentFields = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Content_fields)
 	}
 	if jsnCfg.Trailer_fields != nil {
-		if self.TrailerFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Trailer_fields); err != nil {
-			return err
-		}
+		self.TrailerFields = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Trailer_fields)
 	}
 	return nil
 }
@@ -122,17 +116,17 @@ func (self *CdreConfig) Clone() *CdreConfig {
 		clnCdre.Filters[i] = fltr
 	}
 	clnCdre.CostMultiplyFactor = self.CostMultiplyFactor
-	clnCdre.HeaderFields = make([]*CfgCdrField, len(self.HeaderFields))
+	clnCdre.HeaderFields = make([]*FCTemplate, len(self.HeaderFields))
 	for idx, fld := range self.HeaderFields {
 		clonedVal := *fld
 		clnCdre.HeaderFields[idx] = &clonedVal
 	}
-	clnCdre.ContentFields = make([]*CfgCdrField, len(self.ContentFields))
+	clnCdre.ContentFields = make([]*FCTemplate, len(self.ContentFields))
 	for idx, fld := range self.ContentFields {
 		clonedVal := *fld
 		clnCdre.ContentFields[idx] = &clonedVal
 	}
-	clnCdre.TrailerFields = make([]*CfgCdrField, len(self.TrailerFields))
+	clnCdre.TrailerFields = make([]*FCTemplate, len(self.TrailerFields))
 	for idx, fld := range self.TrailerFields {
 		clonedVal := *fld
 		clnCdre.TrailerFields[idx] = &clonedVal

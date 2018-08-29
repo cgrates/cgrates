@@ -71,26 +71,42 @@ func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg) *FCTemplate {
 	if jsnCfg.Layout != nil {
 		fcTmp.Layout = *jsnCfg.Layout
 	}
+	if jsnCfg.Cost_shift_digits != nil {
+		fcTmp.CostShiftDigits = *jsnCfg.Cost_shift_digits
+	}
+	if jsnCfg.Rounding_decimals != nil {
+		fcTmp.RoundingDecimals = *jsnCfg.Rounding_decimals
+	}
+	if jsnCfg.Mask_destinationd_id != nil {
+		fcTmp.MaskDestID = *jsnCfg.Mask_destinationd_id
+	}
+	if jsnCfg.Mask_length != nil {
+		fcTmp.MaskLen = *jsnCfg.Mask_length
+	}
 	return fcTmp
 }
 
 type FCTemplate struct {
-	ID             string
-	Type           string   // Type of field
-	FieldId        string   // Field identifier
-	Filters        []string // list of filter profiles
-	Value          RSRParsers
-	Width          int
-	Strip          string
-	Padding        string
-	Mandatory      bool
-	AttributeID    string // Used by NavigableMap when creating CGREvent/XMLElements
-	NewBranch      bool   // Used by NavigableMap when creating XMLElements
-	Timezone       string
-	Blocker        bool
-	BreakOnSuccess bool
-	HandlerId      string // used by XML in CDRC
-	Layout         string // time format
+	ID               string
+	Type             string   // Type of field
+	FieldId          string   // Field identifier
+	Filters          []string // list of filter profiles
+	Value            RSRParsers
+	Width            int
+	Strip            string
+	Padding          string
+	Mandatory        bool
+	AttributeID      string // Used by NavigableMap when creating CGREvent/XMLElements
+	NewBranch        bool   // Used by NavigableMap when creating XMLElements
+	Timezone         string
+	Blocker          bool
+	BreakOnSuccess   bool
+	HandlerId        string // used by XML in CDRC
+	Layout           string // time format
+	CostShiftDigits  int    // Used for CDR
+	RoundingDecimals int
+	MaskDestID       string
+	MaskLen          int
 }
 
 func FCTemplatesFromFCTemapltesJsonCfg(jsnCfgFlds []*FcTemplateJsonCfg) []*FCTemplate {

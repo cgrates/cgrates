@@ -124,19 +124,19 @@ func (cdre *CDRExporter) metaHandler(tag, arg string) (string, error) {
 		return strconv.Itoa(cdre.numberOfRecords), nil
 	case META_DURCDRS:
 		cdr := &CDR{ToR: utils.VOICE, Usage: cdre.totalDuration}
-		return cdr.FieldAsString(&utils.RSRField{Id: utils.Usage})
+		return cdr.FieldAsString(&config.RSRParser{Rules: "~" + utils.Usage, AllFiltersMatch: true})
 	case META_SMSUSAGE:
 		cdr := &CDR{ToR: utils.SMS, Usage: cdre.totalDuration}
-		return cdr.FieldAsString(&utils.RSRField{Id: utils.Usage})
+		return cdr.FieldAsString(&config.RSRParser{Rules: "~" + utils.Usage, AllFiltersMatch: true})
 	case META_MMSUSAGE:
 		cdr := &CDR{ToR: utils.MMS, Usage: cdre.totalDuration}
-		return cdr.FieldAsString(&utils.RSRField{Id: utils.Usage})
+		return cdr.FieldAsString(&config.RSRParser{Rules: "~" + utils.Usage, AllFiltersMatch: true})
 	case META_GENERICUSAGE:
 		cdr := &CDR{ToR: utils.GENERIC, Usage: cdre.totalDuration}
-		return cdr.FieldAsString(&utils.RSRField{Id: utils.Usage})
+		return cdr.FieldAsString(&config.RSRParser{Rules: "~" + utils.Usage, AllFiltersMatch: true})
 	case META_DATAUSAGE:
 		cdr := &CDR{ToR: utils.DATA, Usage: cdre.totalDuration}
-		return cdr.FieldAsString(&utils.RSRField{Id: utils.Usage})
+		return cdr.FieldAsString(&config.RSRParser{Rules: "~" + utils.Usage, AllFiltersMatch: true})
 	case META_COSTCDRS:
 		return strconv.FormatFloat(utils.Round(cdre.totalCost,
 			cdre.roundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
@@ -148,25 +148,40 @@ func (cdre *CDRExporter) metaHandler(tag, arg string) (string, error) {
 // Compose and cache the header
 func (cdre *CDRExporter) composeHeader() (err error) {
 	for _, cfgFld := range cdre.exportTemplate.HeaderFields {
+		if len(cfgFld.Filters) != 0 {
+			//check filter if pass
+		}
 		var outVal string
 		switch cfgFld.Type {
 		case utils.META_FILLER:
-			outVal = cfgFld.Value.Id()
+			out, err := cfgFld.Value.ParseValue(utils.EmptyString)
+			if err != nil {
+				return err
+			}
+			outVal = out
 			cfgFld.Padding = "right"
 		case utils.META_CONSTANT:
-			outVal = cfgFld.Value.Id()
+			out, err := cfgFld.Value.ParseValue(utils.EmptyString)
+			if err != nil {
+				return err
+			}
+			outVal = out
 		case utils.META_HANDLER:
-			outVal, err = cdre.metaHandler(cfgFld.Value.Id(), cfgFld.Layout)
+			out, err := cfgFld.Value.ParseValue(utils.EmptyString)
+			if err != nil {
+				return err
+			}
+			outVal, err = cdre.metaHandler(out, cfgFld.Layout)
 		default:
 			return fmt.Errorf("Unsupported field type: %s", cfgFld.Type)
 		}
 		if err != nil {
-			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR header, field %s, error: %s", cfgFld.Tag, err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR header, field %s, error: %s", cfgFld.ID, err.Error()))
 			return err
 		}
 		fmtOut := outVal
-		if fmtOut, err = utils.FmtFieldWidth(cfgFld.Tag, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR header, field %s, error: %s", cfgFld.Tag, err.Error()))
+		if fmtOut, err = utils.FmtFieldWidth(cfgFld.ID, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR header, field %s, error: %s", cfgFld.ID, err.Error()))
 			return err
 		}
 		cdre.Lock()
@@ -179,25 +194,40 @@ func (cdre *CDRExporter) composeHeader() (err error) {
 // Compose and cache the trailer
 func (cdre *CDRExporter) composeTrailer() (err error) {
 	for _, cfgFld := range cdre.exportTemplate.TrailerFields {
+		if len(cfgFld.Filters) != 0 {
+			//check filter if pass
+		}
 		var outVal string
 		switch cfgFld.Type {
 		case utils.META_FILLER:
-			outVal = cfgFld.Value.Id()
+			out, err := cfgFld.Value.ParseValue(utils.EmptyString)
+			if err != nil {
+				return err
+			}
+			outVal = out
 			cfgFld.Padding = "right"
 		case utils.META_CONSTANT:
-			outVal = cfgFld.Value.Id()
+			out, err := cfgFld.Value.ParseValue(utils.EmptyString)
+			if err != nil {
+				return err
+			}
+			outVal = out
 		case utils.META_HANDLER:
-			outVal, err = cdre.metaHandler(cfgFld.Value.Id(), cfgFld.Layout)
+			out, err := cfgFld.Value.ParseValue(utils.EmptyString)
+			if err != nil {
+				return err
+			}
+			outVal, err = cdre.metaHandler(out, cfgFld.Layout)
 		default:
 			return fmt.Errorf("Unsupported field type: %s", cfgFld.Type)
 		}
 		if err != nil {
-			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR trailer, field: %s, error: %s", cfgFld.Tag, err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR trailer, field: %s, error: %s", cfgFld.ID, err.Error()))
 			return err
 		}
 		fmtOut := outVal
-		if fmtOut, err = utils.FmtFieldWidth(cfgFld.Tag, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR trailer, field: %s, error: %s", cfgFld.Tag, err.Error()))
+		if fmtOut, err = utils.FmtFieldWidth(cfgFld.ID, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR trailer, field: %s, error: %s", cfgFld.ID, err.Error()))
 			return err
 		}
 		cdre.Lock()
@@ -217,7 +247,7 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 		}
 		body = jsn
 	case utils.MetaHTTPjsonMap, utils.MetaAMQPjsonMap:
-		expMp, err := cdr.AsExportMap(cdre.exportTemplate.ContentFields, cdre.httpSkipTlsCheck, nil, cdre.roundingDecimals)
+		expMp, err := cdr.AsExportMap(cdre.exportTemplate.ContentFields, cdre.httpSkipTlsCheck, nil, cdre.roundingDecimals, cdre.filterS)
 		if err != nil {
 			return err
 		}
@@ -227,7 +257,7 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 		}
 		body = jsn
 	case utils.META_HTTP_POST:
-		expMp, err := cdr.AsExportMap(cdre.exportTemplate.ContentFields, cdre.httpSkipTlsCheck, nil, cdre.roundingDecimals)
+		expMp, err := cdr.AsExportMap(cdre.exportTemplate.ContentFields, cdre.httpSkipTlsCheck, nil, cdre.roundingDecimals, cdre.filterS)
 		if err != nil {
 			return err
 		}
@@ -285,7 +315,7 @@ func (cdre *CDRExporter) processCDR(cdr *CDR) (err error) {
 	switch cdre.exportFormat {
 	case utils.MetaFileFWV, utils.MetaFileCSV:
 		var cdrRow []string
-		cdrRow, err = cdr.AsExportRecord(cdre.exportTemplate.ContentFields, cdre.httpSkipTlsCheck, cdre.cdrs, cdre.roundingDecimals)
+		cdrRow, err = cdr.AsExportRecord(cdre.exportTemplate.ContentFields, cdre.httpSkipTlsCheck, cdre.cdrs, cdre.roundingDecimals, cdre.filterS)
 		if len(cdrRow) == 0 && err == nil { // No CDR data, most likely no configuration fields defined
 			return
 		} else {
@@ -343,18 +373,7 @@ func (cdre *CDRExporter) processCDRs() (err error) {
 		if cdr == nil || len(cdr.CGRID) == 0 { // CDR needs to exist and it's CGRID needs to be populated
 			continue
 		}
-		if len(cdre.exportTemplate.Filters) == 0 {
-			passesFilters := true
-			for _, cdrFltr := range cdre.exportTemplate.CDRFilter {
-				if _, err := cdr.FieldAsString(cdrFltr); err != nil {
-					passesFilters = false
-					break
-				}
-			}
-			if !passesFilters { // Not passes filters, ignore this CDR
-				continue
-			}
-		} else {
+		if len(cdre.exportTemplate.Filters) != 0 {
 			if pass, err := cdre.filterS.Pass(cdre.exportTemplate.Tenant,
 				cdre.exportTemplate.Filters, config.NewNavigableMap(cdr.AsMapStringIface())); err != nil || !pass {
 				continue // Not passes filters, ignore this CDR
