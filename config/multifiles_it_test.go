@@ -62,8 +62,8 @@ func TestMfCdreDefaultInstance(t *testing.T) {
 	if len(mfCgrCfg.CdreProfiles[prfl].ContentFields) != 12 {
 		t.Error("Default instance has number of content fields: ", len(mfCgrCfg.CdreProfiles[prfl].ContentFields))
 	}
-	if mfCgrCfg.CdreProfiles[prfl].ContentFields[2].Tag != "Direction" {
-		t.Error("Unexpected headerField value: ", mfCgrCfg.CdreProfiles[prfl].ContentFields[2].Tag)
+	if mfCgrCfg.CdreProfiles[prfl].ContentFields[2].ID != "Direction" {
+		t.Error("Unexpected headerField value: ", mfCgrCfg.CdreProfiles[prfl].ContentFields[2].ID)
 	}
 }
 
@@ -78,13 +78,13 @@ func TestMfCdreExport1Instance(t *testing.T) {
 	if len(mfCgrCfg.CdreProfiles[prfl].HeaderFields) != 2 {
 		t.Error("Export1 instance has number of header fields: ", len(mfCgrCfg.CdreProfiles[prfl].HeaderFields))
 	}
-	if mfCgrCfg.CdreProfiles[prfl].HeaderFields[1].Tag != "RunId" {
-		t.Error("Unexpected headerField value: ", mfCgrCfg.CdreProfiles[prfl].HeaderFields[1].Tag)
+	if mfCgrCfg.CdreProfiles[prfl].HeaderFields[1].ID != "RunId" {
+		t.Error("Unexpected headerField value: ", mfCgrCfg.CdreProfiles[prfl].HeaderFields[1].ID)
 	}
 	if len(mfCgrCfg.CdreProfiles[prfl].ContentFields) != 9 {
 		t.Error("Export1 instance has number of content fields: ", len(mfCgrCfg.CdreProfiles[prfl].ContentFields))
 	}
-	if mfCgrCfg.CdreProfiles[prfl].ContentFields[2].Tag != "Account" {
-		t.Error("Unexpected headerField value: ", mfCgrCfg.CdreProfiles[prfl].ContentFields[2].Tag)
+	if mfCgrCfg.CdreProfiles[prfl].ContentFields[2].ID != "Account" {
+		t.Error("Unexpected headerField value: ", mfCgrCfg.CdreProfiles[prfl].ContentFields[2].ID)
 	}
 }

@@ -104,7 +104,7 @@ func TestPartcsvITRpcConn(t *testing.T) {
 func TestPartcsvITHandleCdr1File(t *testing.T) {
 	fileName := "file1.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
-	if err := ioutil.WriteFile(tmpFilePath, []byte(partCsvFileContent1), 0755); err != nil {
+	if err := ioutil.WriteFile(tmpFilePath, []byte(partCsvFileContent1), 0644); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join(partcsvCDRCDirIn1, fileName)); err != nil {
@@ -116,7 +116,7 @@ func TestPartcsvITHandleCdr1File(t *testing.T) {
 func TestPartcsvITHandleCdr2File(t *testing.T) {
 	fileName := "file2.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
-	if err := ioutil.WriteFile(tmpFilePath, []byte(partCsvFileContent2), 0755); err != nil {
+	if err := ioutil.WriteFile(tmpFilePath, []byte(partCsvFileContent2), 0644); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join(partcsvCDRCDirIn1, fileName)); err != nil {
@@ -128,7 +128,7 @@ func TestPartcsvITHandleCdr2File(t *testing.T) {
 func TestPartcsvITHandleCdr3File(t *testing.T) {
 	fileName := "file3.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
-	if err := ioutil.WriteFile(tmpFilePath, []byte(partCsvFileContent3), 0755); err != nil {
+	if err := ioutil.WriteFile(tmpFilePath, []byte(partCsvFileContent3), 0644); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join(partcsvCDRCDirIn2, fileName)); err != nil {
