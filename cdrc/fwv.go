@@ -161,14 +161,13 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *confi
 		duMultiplyFactor = cdrcCfg.DataUsageMultiplyFactor
 	}
 	for _, cdrFldCfg := range cfgFields {
-		if len(cdrcCfg.Filters) != 0 {
-
+		if len(cdrFldCfg.Filters) != 0 {
 			tenant, err := cdrcCfg.Tenant.ParseValue("")
 			if err != nil {
 				return nil, err
 			}
 			if pass, err := self.filterS.Pass(tenant,
-				cdrcCfg.Filters, fwvProvider); err != nil || !pass {
+				cdrFldCfg.Filters, fwvProvider); err != nil || !pass {
 				continue // Not passes filters, ignore this CDR
 			}
 		}

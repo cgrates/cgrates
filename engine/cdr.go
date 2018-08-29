@@ -498,12 +498,6 @@ func (cdr *CDR) combimedCdrFieldVal(cfgCdrFld *config.FCTemplate, groupCDRs []*C
 
 // Extracts the value specified by cfgHdr out of cdr, used for export values
 func (cdr *CDR) exportFieldValue(cfgCdrFld *config.FCTemplate, filterS *FilterS) (retVal string, err error) {
-	if pass, err := filterS.Pass(cdr.Tenant,
-		cfgCdrFld.Filters, config.NewNavigableMap(cdr.AsMapStringIface())); err != nil {
-		return "", err
-	} else if !pass {
-		return "", utils.ErrFilterNotPassingNoCaps
-	}
 	for _, rsrFld := range cfgCdrFld.Value {
 		var cdrVal string
 		switch cfgCdrFld.ID {
@@ -597,6 +591,12 @@ func (cdr *CDR) formatField(cfgFld *config.FCTemplate, httpSkipTlsCheck bool,
 func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
 	httpSkipTlsCheck bool, groupedCDRs []*CDR, roundingDecs int, filterS *FilterS) (expRecord []string, err error) {
 	for _, cfgFld := range exportFields {
+		if pass, err := filterS.Pass(cdr.Tenant,
+			cfgFld.Filters, config.NewNavigableMap(cdr.AsMapStringIface())); err != nil {
+			return []string{}, err
+		} else if !pass {
+			continue
+		}
 		if roundingDecs != 0 {
 			clnFld := new(config.FCTemplate) // Clone so we can modify the rounding decimals without affecting the template
 			*clnFld = *cfgFld
@@ -604,9 +604,6 @@ func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
 			cfgFld = clnFld
 		}
 		if fmtOut, err := cdr.formatField(cfgFld, httpSkipTlsCheck, groupedCDRs, filterS); err != nil {
-			if err == utils.ErrFilterNotPassingNoCaps {
-				continue // not exporting this field value
-			}
 			utils.Logger.Warning(fmt.Sprintf("<CDR> error: %s exporting field: %s, CDR: %s\n",
 				err.Error(), utils.ToJSON(cfgFld), utils.ToJSON(cdr)))
 			return nil, err

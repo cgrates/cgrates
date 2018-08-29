@@ -147,8 +147,10 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 				return nil, err
 			}
 			if pass, err := self.filterS.Pass(tenant,
-				cdrcCfg.Filters, csvProvider); err != nil || !pass {
-				continue // Not passes filters, ignore this CDR
+				cdrFldCfg.Filters, csvProvider); err != nil {
+				return nil, err
+			} else if !pass {
+				continue
 			}
 		}
 		if utils.IsSliceMember([]string{utils.KAM_FLATSTORE, utils.OSIPS_FLATSTORE}, self.dfltCdrcCfg.CdrFormat) { // Hardcode some values in case of flatstore
