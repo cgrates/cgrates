@@ -334,7 +334,7 @@ func TestCDRAsHttpForm(t *testing.T) {
 		t.Errorf("Expected: %s, received: %s", "valextr2", cdrForm.Get("fieldextr2"))
 	}
 }
-
+*/
 
 func TestCDRForkCdr(t *testing.T) {
 	storCdr := CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
@@ -452,7 +452,6 @@ func TestCDRForkCdrFromMetaDefaults(t *testing.T) {
 		t.Errorf("Expected: %v, received: %v", expctCdr, cdrOut)
 	}
 }
-*/
 
 func TestCDRAsExternalCDR(t *testing.T) {
 	storCdr := CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
