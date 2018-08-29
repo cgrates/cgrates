@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package engine
 
+/*
 import (
 	"bytes"
 	"math"
@@ -407,3 +408,4 @@ func TestWriteCdrs(t *testing.T) {
 		t.Error("Unexpected TotalCost: ", cdre.TotalCost())
 	}
 }
+*/

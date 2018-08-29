@@ -154,7 +154,25 @@ func (cdr *CDR) FormatCost(shiftDecimals, roundDecimals int) string {
 }
 
 // Used to retrieve fields as string, primary fields are const labeled
-func (cdr *CDR) FieldAsString(rsrFld *utils.RSRField) (parsed string, err error) {
+func (cdr *CDR) FieldAsString(rsrPrs *config.RSRParser) (parsed string, err error) {
+	parsed, err = rsrPrs.ParseCDR(config.NewNavigableMap(cdr.AsMapStringIface()))
+	if err != nil {
+		return
+	}
+	return
+}
+
+// concatenates values of multiple fields defined in template, used eg in CDR templates
+func (cdr *CDR) FieldsAsString(rsrFlds config.RSRParsers) string {
+	outVal, err := rsrFlds.ParseCDR(config.NewNavigableMap(cdr.AsMapStringIface()))
+	if err != nil {
+		return ""
+	}
+	return outVal
+}
+
+// Used to retrieve fields as string, primary fields are const labeled
+func (cdr *CDR) FieldAsStringWithRSRField(rsrFld *utils.RSRField) (parsed string, err error) {
 	if rsrFld.IsStatic() { // Static values do not care about headers
 		parsed, err = rsrFld.Parse("")
 		return
@@ -167,9 +185,9 @@ func (cdr *CDR) FieldAsString(rsrFld *utils.RSRField) (parsed string, err error)
 }
 
 // concatenates values of multiple fields defined in template, used eg in CDR templates
-func (cdr *CDR) FieldsAsString(rsrFlds utils.RSRFields) (fldVal string) {
+func (cdr *CDR) FieldsAsStringWithRSRFields(rsrFlds utils.RSRFields) (fldVal string) {
 	for _, rsrFld := range rsrFlds {
-		if fldStr, err := cdr.FieldAsString(rsrFld); err != nil {
+		if fldStr, err := cdr.FieldAsStringWithRSRField(rsrFld); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing field with template: %+v",
 					utils.CDR, err.Error(), rsrFld))
@@ -348,55 +366,55 @@ func (cdr *CDR) ForkCdr(runId string, RequestTypeFld, tenantFld,
 	frkStorCdr.OriginID = cdr.OriginID
 	frkStorCdr.OriginHost = cdr.OriginHost
 	frkStorCdr.Source = cdr.Source
-	frkStorCdr.RequestType, _ = cdr.FieldAsString(RequestTypeFld)
+	frkStorCdr.RequestType, _ = cdr.FieldAsStringWithRSRField(RequestTypeFld)
 	if primaryMandatory && len(frkStorCdr.RequestType) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing(utils.RequestType, RequestTypeFld.Id)
 	}
-	frkStorCdr.Tenant, _ = cdr.FieldAsString(tenantFld)
+	frkStorCdr.Tenant, _ = cdr.FieldAsStringWithRSRField(tenantFld)
 	if primaryMandatory && len(frkStorCdr.Tenant) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing(utils.Tenant, tenantFld.Id)
 	}
-	frkStorCdr.Category, _ = cdr.FieldAsString(categFld)
+	frkStorCdr.Category, _ = cdr.FieldAsStringWithRSRField(categFld)
 	if primaryMandatory && len(frkStorCdr.Category) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing(utils.Category, categFld.Id)
 	}
-	frkStorCdr.Account, _ = cdr.FieldAsString(accountFld)
+	frkStorCdr.Account, _ = cdr.FieldAsStringWithRSRField(accountFld)
 	if primaryMandatory && len(frkStorCdr.Account) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing(utils.Account, accountFld.Id)
 	}
-	frkStorCdr.Subject, _ = cdr.FieldAsString(subjectFld)
+	frkStorCdr.Subject, _ = cdr.FieldAsStringWithRSRField(subjectFld)
 	if primaryMandatory && len(frkStorCdr.Subject) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing(utils.Subject, subjectFld.Id)
 	}
-	frkStorCdr.Destination, _ = cdr.FieldAsString(destFld)
+	frkStorCdr.Destination, _ = cdr.FieldAsStringWithRSRField(destFld)
 	if primaryMandatory && len(frkStorCdr.Destination) == 0 && frkStorCdr.ToR == utils.VOICE {
 		return nil, utils.NewErrMandatoryIeMissing(utils.Destination, destFld.Id)
 	}
-	sTimeStr, _ := cdr.FieldAsString(setupTimeFld)
+	sTimeStr, _ := cdr.FieldAsStringWithRSRField(setupTimeFld)
 	if primaryMandatory && len(sTimeStr) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing(utils.SetupTime, setupTimeFld.Id)
 	} else if frkStorCdr.SetupTime, err = utils.ParseTimeDetectLayout(sTimeStr, timezone); err != nil {
 		return nil, err
 	}
-	aTimeStr, _ := cdr.FieldAsString(answerTimeFld)
+	aTimeStr, _ := cdr.FieldAsStringWithRSRField(answerTimeFld)
 	if primaryMandatory && len(aTimeStr) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing(utils.AnswerTime, answerTimeFld.Id)
 	} else if frkStorCdr.AnswerTime, err = utils.ParseTimeDetectLayout(aTimeStr, timezone); err != nil {
 		return nil, err
 	}
-	durStr, _ := cdr.FieldAsString(durationFld)
+	durStr, _ := cdr.FieldAsStringWithRSRField(durationFld)
 	if primaryMandatory && len(durStr) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing(utils.Usage, durationFld.Id)
 	} else if frkStorCdr.Usage, err = utils.ParseDurationWithNanosecs(durStr); err != nil {
 		return nil, err
 	}
-	ratedStr, _ := cdr.FieldAsString(ratedFld)
+	ratedStr, _ := cdr.FieldAsStringWithRSRField(ratedFld)
 	if primaryMandatory && len(ratedStr) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing(utils.PreRated, ratedFld.Id)
 	} else if frkStorCdr.PreRated, err = strconv.ParseBool(ratedStr); err != nil {
 		return nil, err
 	}
-	costStr, _ := cdr.FieldAsString(costFld)
+	costStr, _ := cdr.FieldAsStringWithRSRField(costFld)
 	if primaryMandatory && len(costStr) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing(utils.COST, costFld.Id)
 	} else if frkStorCdr.Cost, err = strconv.ParseFloat(costStr, 64); err != nil {
@@ -404,7 +422,7 @@ func (cdr *CDR) ForkCdr(runId string, RequestTypeFld, tenantFld,
 	}
 	frkStorCdr.ExtraFields = make(map[string]string, len(extraFlds))
 	for _, fld := range extraFlds {
-		frkStorCdr.ExtraFields[fld.Id], _ = cdr.FieldAsString(fld)
+		frkStorCdr.ExtraFields[fld.Id], _ = cdr.FieldAsStringWithRSRField(fld)
 	}
 	return frkStorCdr, nil
 }
@@ -448,43 +466,47 @@ func (cdr *CDR) String() string {
 }
 
 // combimedCdrFieldVal groups together CDRs with same CGRID and combines their values matching filter field ID
-func (cdr *CDR) combimedCdrFieldVal(cfgCdrFld *config.CfgCdrField, groupCDRs []*CDR) (string, error) {
-	var combinedVal string // Will result as combination of the field values, filters must match
-	for _, filterRule := range cfgCdrFld.FieldFilter {
-		pairingVal, err := cdr.FieldAsString(&utils.RSRField{Id: filterRule.Id})
-		if err != nil { // Filter not passing
-			continue
-		}
-		for _, grpCDR := range groupCDRs {
-			if cdr.CGRID != grpCDR.CGRID {
-				continue // We only care about cdrs with same primary cdr behind
-			}
-			if valStr, _ := grpCDR.FieldAsString(&utils.RSRField{Id: filterRule.Id}); valStr != pairingVal { // First CDR with field equal with ours
+func (cdr *CDR) combimedCdrFieldVal(cfgCdrFld *config.FCTemplate, groupCDRs []*CDR, filterS *FilterS) (string, error) {
+	/*
+		var combinedVal string // Will result as combination of the field values, filters must match
+		for _, filterRule := range cfgCdrFld.Value {
+			pairingVal, err := cdr.FieldAsString(filterRule)
+			if err != nil { // Filter not passing
 				continue
 			}
-			for _, rsrRule := range cfgCdrFld.Value {
-				if parsed, err := grpCDR.FieldAsString(rsrRule); err != nil {
-					return "", err
-				} else {
-					combinedVal += parsed
+			for _, grpCDR := range groupCDRs {
+				if cdr.CGRID != grpCDR.CGRID {
+					continue // We only care about cdrs with same primary cdr behind
 				}
+				if valStr, _ := grpCDR.FieldAsString(filterRule); valStr != pairingVal { // First CDR with field equal with ours
+					continue
+				}
+				for _, rsrRule := range cfgCdrFld.Value {
+					if parsed, err := grpCDR.FieldAsString(rsrRule); err != nil {
+						return "", err
+					} else {
+						combinedVal += parsed
+					}
 
+				}
 			}
 		}
-	}
-	return combinedVal, nil
+		return combinedVal, nil
+	*/
+	return "", nil
 }
 
 // Extracts the value specified by cfgHdr out of cdr, used for export values
-func (cdr *CDR) exportFieldValue(cfgCdrFld *config.CfgCdrField) (retVal string, err error) {
-	for _, cdfFltr := range cfgCdrFld.FieldFilter {
-		if _, err := cdr.FieldAsString(cdfFltr); err != nil {
-			return "", err
-		}
+func (cdr *CDR) exportFieldValue(cfgCdrFld *config.FCTemplate, filterS *FilterS) (retVal string, err error) {
+	if pass, err := filterS.Pass(cdr.Tenant,
+		cfgCdrFld.Filters, config.NewNavigableMap(cdr.AsMapStringIface())); err != nil {
+		return "", err
+	} else if !pass {
+		return "", utils.ErrFilterNotPassingNoCaps
 	}
 	for _, rsrFld := range cfgCdrFld.Value {
 		var cdrVal string
-		switch rsrFld.Id {
+		switch cfgCdrFld.ID {
 		case utils.COST:
 			cdrVal = cdr.FormatCost(cfgCdrFld.CostShiftDigits,
 				cfgCdrFld.RoundingDecimals)
@@ -512,21 +534,20 @@ func (cdr *CDR) exportFieldValue(cfgCdrFld *config.CfgCdrField) (retVal string, 
 	return
 }
 
-func (cdr *CDR) formatField(cfgFld *config.CfgCdrField, httpSkipTlsCheck bool,
-	groupedCDRs []*CDR) (fmtOut string, err error) {
+func (cdr *CDR) formatField(cfgFld *config.FCTemplate, httpSkipTlsCheck bool,
+	groupedCDRs []*CDR, filterS *FilterS) (outVal string, err error) {
 	layout := cfgFld.Layout
 	if layout == "" {
 		layout = time.RFC3339
 	}
-	var outVal string
 	switch cfgFld.Type {
 	case utils.META_FILLER:
-		outVal = cfgFld.Value.Id()
+		outVal, err = cfgFld.Value.ParseValue(utils.EmptyString)
 		cfgFld.Padding = "right"
 	case utils.META_CONSTANT:
-		outVal = cfgFld.Value.Id()
+		outVal, err = cfgFld.Value.ParseValue(utils.EmptyString)
 	case utils.MetaDateTime: // Convert the requested field value into datetime with layout
-		rawVal, err := cdr.exportFieldValue(cfgFld)
+		rawVal, err := cdr.exportFieldValue(cfgFld, filterS)
 		if err != nil {
 			return "", err
 		}
@@ -537,23 +558,26 @@ func (cdr *CDR) formatField(cfgFld *config.CfgCdrField, httpSkipTlsCheck bool,
 		}
 	case utils.META_HTTP_POST:
 		var outValByte []byte
-		httpAddr := cfgFld.Value.Id()
+		httpAddr, err := cfgFld.Value.ParseValue(utils.EmptyString)
+		if err != nil {
+			return "", err
+		}
 		jsn, err := json.Marshal(cdr)
 		if err != nil {
 			return "", err
 		}
 		if len(httpAddr) == 0 {
-			err = fmt.Errorf("Empty http address for field %s type %s", cfgFld.Tag, cfgFld.Type)
+			err = fmt.Errorf("Empty http address for field %s type %s", cfgFld.ID, cfgFld.Type)
 		} else if outValByte, err = HttpJsonPost(httpAddr, httpSkipTlsCheck, jsn); err == nil {
 			outVal = string(outValByte)
 			if len(outVal) == 0 && cfgFld.Mandatory {
-				err = fmt.Errorf("Empty result for http_post field: %s", cfgFld.Tag)
+				err = fmt.Errorf("Empty result for http_post field: %s", cfgFld.ID)
 			}
 		}
 	case utils.META_COMBIMED:
-		outVal, err = cdr.combimedCdrFieldVal(cfgFld, groupedCDRs)
+		outVal, err = cdr.combimedCdrFieldVal(cfgFld, groupedCDRs, filterS)
 	case utils.META_COMPOSED:
-		outVal, err = cdr.exportFieldValue(cfgFld)
+		outVal, err = cdr.exportFieldValue(cfgFld, filterS)
 	case utils.MetaMaskedDestination:
 		if len(cfgFld.MaskDestID) != 0 && CachedDestHasPrefix(cfgFld.MaskDestID, cdr.Destination) {
 			outVal = "1"
@@ -565,22 +589,21 @@ func (cdr *CDR) formatField(cfgFld *config.CfgCdrField, httpSkipTlsCheck bool,
 		(err != utils.ErrNotFound || cfgFld.Mandatory) {
 		return "", err
 	}
-	return utils.FmtFieldWidth(cfgFld.Tag, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory)
-
+	return utils.FmtFieldWidth(cfgFld.ID, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory)
 }
 
 // Used in place where we need to export the CDR based on an export template
 // ExportRecord is a []string to keep it compatible with encoding/csv Writer
-func (cdr *CDR) AsExportRecord(exportFields []*config.CfgCdrField,
-	httpSkipTlsCheck bool, groupedCDRs []*CDR, roundingDecs int) (expRecord []string, err error) {
+func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
+	httpSkipTlsCheck bool, groupedCDRs []*CDR, roundingDecs int, filterS *FilterS) (expRecord []string, err error) {
 	for _, cfgFld := range exportFields {
 		if roundingDecs != 0 {
-			clnFld := new(config.CfgCdrField) // Clone so we can modify the rounding decimals without affecting the template
+			clnFld := new(config.FCTemplate) // Clone so we can modify the rounding decimals without affecting the template
 			*clnFld = *cfgFld
 			clnFld.RoundingDecimals = roundingDecs
 			cfgFld = clnFld
 		}
-		if fmtOut, err := cdr.formatField(cfgFld, httpSkipTlsCheck, groupedCDRs); err != nil {
+		if fmtOut, err := cdr.formatField(cfgFld, httpSkipTlsCheck, groupedCDRs, filterS); err != nil {
 			if err == utils.ErrFilterNotPassingNoCaps {
 				continue // not exporting this field value
 			}
@@ -596,16 +619,17 @@ func (cdr *CDR) AsExportRecord(exportFields []*config.CfgCdrField,
 
 // AsExportMap converts the CDR into a map[string]string based on export template
 // Used in real-time replication as well as remote exports
-func (cdr *CDR) AsExportMap(exportFields []*config.CfgCdrField, httpSkipTlsCheck bool, groupedCDRs []*CDR, roundingDecs int) (expMap map[string]string, err error) {
+func (cdr *CDR) AsExportMap(exportFields []*config.FCTemplate, httpSkipTlsCheck bool,
+	groupedCDRs []*CDR, roundingDecs int, filterS *FilterS) (expMap map[string]string, err error) {
 	expMap = make(map[string]string)
 	for _, cfgFld := range exportFields {
 		if roundingDecs != 0 {
-			clnFld := new(config.CfgCdrField) // Clone so we can modify the rounding decimals without affecting the template
+			clnFld := new(config.FCTemplate) // Clone so we can modify the rounding decimals without affecting the template
 			*clnFld = *cfgFld
 			clnFld.RoundingDecimals = roundingDecs
 			cfgFld = clnFld
 		}
-		if fmtOut, err := cdr.formatField(cfgFld, httpSkipTlsCheck, groupedCDRs); err != nil {
+		if fmtOut, err := cdr.formatField(cfgFld, httpSkipTlsCheck, groupedCDRs, filterS); err != nil {
 			if err == utils.ErrFilterNotPassingNoCaps {
 				continue
 			}

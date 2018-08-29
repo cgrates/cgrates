@@ -179,9 +179,9 @@ type CdreJsonCfg struct {
 	Field_separator       *string
 	Usage_multiply_factor *map[string]float64
 	Cost_multiply_factor  *float64
-	Header_fields         *[]*CdrFieldJsonCfg
-	Content_fields        *[]*CdrFieldJsonCfg
-	Trailer_fields        *[]*CdrFieldJsonCfg
+	Header_fields         *[]*FcTemplateJsonCfg
+	Content_fields        *[]*FcTemplateJsonCfg
+	Trailer_fields        *[]*FcTemplateJsonCfg
 }
 
 // Cdrc config section
@@ -210,7 +210,7 @@ type CdrcJsonCfg struct {
 	Header_fields               *[]*FcTemplateJsonCfg
 	Content_fields              *[]*FcTemplateJsonCfg
 	Trailer_fields              *[]*FcTemplateJsonCfg
-	Cache_dump_fields           *[]*CdrFieldJsonCfg
+	Cache_dump_fields           *[]*FcTemplateJsonCfg
 }
 
 // SM-Generic config section
@@ -574,20 +574,24 @@ type MigratorCfgJson struct {
 }
 
 type FcTemplateJsonCfg struct {
-	Id               *string
-	Type             *string
-	Field_id         *string
-	Attribute_id     *string
-	Filters          *[]string
-	Value            *string
-	Width            *int
-	Strip            *string
-	Padding          *string
-	Mandatory        *bool
-	New_branch       *bool
-	Timezone         *string
-	Blocker          *bool
-	Break_on_success *bool
-	Handler_id       *string
-	Layout           *string
+	Id                   *string
+	Type                 *string
+	Field_id             *string
+	Attribute_id         *string
+	Filters              *[]string
+	Value                *string
+	Width                *int
+	Strip                *string
+	Padding              *string
+	Mandatory            *bool
+	New_branch           *bool
+	Timezone             *string
+	Blocker              *bool
+	Break_on_success     *bool
+	Handler_id           *string
+	Layout               *string
+	Cost_shift_digits    *int
+	Rounding_decimals    *int
+	Mask_destinationd_id *string
+	Mask_length          *int
 }

@@ -69,10 +69,13 @@ func NewCdrc(cdrcCfgs []*config.CdrcConfig, httpSkipTlsCheck bool, cdrs rpcclien
 		cdrc.maxOpenFiles <- processFile // Empty initiate so we do not need to wait later when we pop
 	}
 	var err error
-	if cdrc.unpairedRecordsCache, err = NewUnpairedRecordsCache(cdrcCfg.PartialRecordCache, cdrcCfg.CdrOutDir, cdrcCfg.FieldSeparator); err != nil {
+	if cdrc.unpairedRecordsCache, err = NewUnpairedRecordsCache(cdrcCfg.PartialRecordCache,
+		cdrcCfg.CdrOutDir, cdrcCfg.FieldSeparator); err != nil {
 		return nil, err
 	}
-	if cdrc.partialRecordsCache, err = NewPartialRecordsCache(cdrcCfg.PartialRecordCache, cdrcCfg.PartialCacheExpiryAction, cdrcCfg.CdrOutDir, cdrcCfg.FieldSeparator, roundDecimals, cdrc.timezone, cdrc.httpSkipTlsCheck, cdrc.cdrs); err != nil {
+	if cdrc.partialRecordsCache, err = NewPartialRecordsCache(cdrcCfg.PartialRecordCache,
+		cdrcCfg.PartialCacheExpiryAction, cdrcCfg.CdrOutDir, cdrcCfg.FieldSeparator, roundDecimals,
+		cdrc.timezone, cdrc.httpSkipTlsCheck, cdrc.cdrs, filterS); err != nil {
 		return nil, err
 	}
 	// Before processing, make sure in and out folders exist

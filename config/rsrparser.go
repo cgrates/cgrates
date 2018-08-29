@@ -102,6 +102,17 @@ func (prsrs RSRParsers) ParseDataProvider(dP DataProvider) (out string, err erro
 	return
 }
 
+func (prsrs RSRParsers) ParseCDR(dP DataProvider) (out string, err error) {
+	for _, prsr := range prsrs {
+		if outPrsr, err := prsr.ParseCDR(dP); err != nil {
+			return "", err
+		} else {
+			out += outPrsr
+		}
+	}
+	return
+}
+
 func NewRSRParser(parserRules string, allFiltersMatch bool) (rsrParser *RSRParser, err error) {
 	if len(parserRules) == 0 {
 		return
@@ -257,6 +268,17 @@ func (prsr *RSRParser) ParseDataProvider(dP DataProvider) (out string, err error
 	var outStr string
 	if prsr.attrValue == "" {
 		if outStr, err = dP.FieldAsString(
+			strings.Split(prsr.attrName, utils.NestingSep)); err != nil {
+			return
+		}
+	}
+	return prsr.ParseValue(outStr)
+}
+
+func (prsr *RSRParser) ParseCDR(dP DataProvider) (out string, err error) {
+	var outStr interface{}
+	if prsr.attrValue == "" {
+		if outStr, err = dP.FieldAsInterface(
 			strings.Split(prsr.attrName, utils.NestingSep)); err != nil {
 			return
 		}

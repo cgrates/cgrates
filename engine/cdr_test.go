@@ -80,134 +80,134 @@ func TestFieldAsString(t *testing.T) {
 		Usage: time.Duration(10) * time.Second, Cost: 1.01,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
-	fldName := utils.CGRID
+	prsr := config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.CGRID, true)
 	eFldVal := cdr.CGRID
-	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
 	}
-	fldName = utils.OrderID
+	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.OrderID, true)
 	eFldVal = strconv.FormatInt(cdr.OrderID, 10)
-	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
 	}
-	fldName = utils.ToR
+	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.ToR, true)
 	eFldVal = cdr.ToR
-	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
 	}
-	fldName = utils.OriginID
+	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.OriginID, true)
 	eFldVal = cdr.OriginID
-	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
 	}
-	fldName = utils.OriginHost
+	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.OriginHost, true)
 	eFldVal = cdr.OriginHost
-	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
 	}
-	fldName = utils.Source
+	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Source, true)
 	eFldVal = cdr.Source
-	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
 	}
-	fldName = utils.RequestType
+	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.RequestType, true)
 	eFldVal = cdr.RequestType
-	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
 	}
-	fldName = utils.Category
+	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Category, true)
 	eFldVal = cdr.Category
-	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
 	}
-	fldName = utils.Account
+	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Account, true)
 	eFldVal = cdr.Account
-	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
 	}
-	fldName = utils.Subject
+	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Subject, true)
 	eFldVal = cdr.Subject
-	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
 	}
-	fldName = utils.Destination
+	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Destination, true)
 	eFldVal = cdr.Destination
-	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
 	}
-	fldName = utils.SetupTime
+	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.SetupTime, true)
 	eFldVal = cdr.SetupTime.Format(time.RFC3339)
-	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+		t.Errorf("expected: <%s>, received: <%s>", eFldVal, fldVal)
 	}
-	fldName = utils.AnswerTime
+	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.AnswerTime, true)
 	eFldVal = cdr.AnswerTime.Format(time.RFC3339)
-	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+		t.Errorf("expected: <%s>, received: <%s>", eFldVal, fldVal)
 	}
-	fldName = utils.Usage
+	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Usage, true)
 	eFldVal = "10s"
-	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
 	}
-	fldName = utils.RunID
+	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.RunID, true)
 	eFldVal = cdr.RunID
-	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
 	}
-	fldName = utils.Cost
+	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Cost, true)
 	eFldVal = strconv.FormatFloat(cdr.Cost, 'f', -1, 64)
-	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
 	}
-	fldName = "field_extr1"
+	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+"field_extr1", true)
 	eFldVal = cdr.ExtraFields["field_extr1"]
-	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
 	}
-	fldName = "fieldextr2"
+	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+"fieldextr2", true)
 	eFldVal = cdr.ExtraFields["fieldextr2"]
-	if fldVal, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != nil {
+	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", fldName, eFldVal, fldVal)
+		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
 	}
-	fldName = "dummy_field"
-	if _, err := cdr.FieldAsString(&utils.RSRField{Id: fldName}); err != utils.ErrNotFound {
+	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+"dummy_field", true)
+	if _, err := cdr.FieldAsString(prsr); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -224,7 +224,7 @@ func TestFieldsAsString(t *testing.T) {
 	}
 	eVal := "call_from_1001"
 	if val := cdr.FieldsAsString(
-		utils.ParseRSRFieldsMustCompile("Category;^_from_;Account", utils.INFIELD_SEP)); val != eVal {
+		config.NewRSRParsersMustCompile("~Category;_from_;~Account", true)); val != eVal {
 		t.Errorf("Expecting : %s, received: %s", eVal, val)
 	}
 }
@@ -334,7 +334,7 @@ func TestCDRAsHttpForm(t *testing.T) {
 		t.Errorf("Expected: %s, received: %s", "valextr2", cdrForm.Get("fieldextr2"))
 	}
 }
-*/
+
 
 func TestCDRForkCdr(t *testing.T) {
 	storCdr := CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
@@ -452,6 +452,7 @@ func TestCDRForkCdrFromMetaDefaults(t *testing.T) {
 		t.Errorf("Expected: %v, received: %v", expctCdr, cdrOut)
 	}
 }
+*/
 
 func TestCDRAsExternalCDR(t *testing.T) {
 	storCdr := CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
@@ -606,59 +607,76 @@ func TestCDRAsExportRecord(t *testing.T) {
 		RunID:       utils.DEFAULT_RUNID, Cost: 1.01,
 		ExtraFields: map[string]string{"stop_time": "2014-06-11 19:19:00 +0000 UTC", "fieldextr2": "valextr2"}}
 
-	val, _ := utils.ParseRSRFields(utils.Destination, utils.INFIELD_SEP)
-	cfgCdrFld := &config.CfgCdrField{Tag: "destination", Type: utils.META_COMPOSED, FieldId: utils.Destination, Value: val, Timezone: "UTC"}
-	if expRecord, err := cdr.AsExportRecord([]*config.CfgCdrField{cfgCdrFld}, false, nil, 0); err != nil {
+	prsr := config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Destination, true)
+	cfgCdrFld := &config.FCTemplate{ID: "destination", Type: utils.META_COMPOSED,
+		FieldId: utils.Destination, Value: prsr, Timezone: "UTC"}
+	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, 0, nil); err != nil {
 		t.Error(err)
 	} else if expRecord[0] != cdr.Destination {
-		t.Errorf("Expecting:\n%s\nReceived:\n%s", cdr.Destination, expRecord[0])
+		t.Errorf("Expecting:\n%s\nReceived:\n%s", cdr.Destination, expRecord)
 	}
 	if err := dm.DataDB().SetReverseDestination(&Destination{Id: "MASKED_DESTINATIONS", Prefixes: []string{"+4986517174963"}},
 		utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	cfgCdrFld = &config.CfgCdrField{Tag: "destination", Type: utils.META_COMPOSED, FieldId: utils.Destination, Value: val, MaskDestID: "MASKED_DESTINATIONS", MaskLen: 3}
+
+	cfgCdrFld = &config.FCTemplate{ID: "Destination", Type: utils.META_COMPOSED,
+		FieldId: utils.Destination, Value: prsr, MaskDestID: "MASKED_DESTINATIONS", MaskLen: 3}
 	eDst := "+4986517174***"
-	if expRecord, err := cdr.AsExportRecord([]*config.CfgCdrField{cfgCdrFld}, false, nil, 0); err != nil {
+	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, 0, nil); err != nil {
 		t.Error(err)
 	} else if expRecord[0] != eDst {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", eDst, expRecord[0])
 	}
-	cfgCdrFld = &config.CfgCdrField{Tag: "MaskedDest", Type: utils.MetaMaskedDestination, Value: val, MaskDestID: "MASKED_DESTINATIONS"}
-	if expRecord, err := cdr.AsExportRecord([]*config.CfgCdrField{cfgCdrFld}, false, nil, 0); err != nil {
+
+	cfgCdrFld = &config.FCTemplate{ID: "MaskedDest", Type: utils.MetaMaskedDestination,
+		Value: prsr, MaskDestID: "MASKED_DESTINATIONS"}
+	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, 0, nil); err != nil {
 		t.Error(err)
 	} else if expRecord[0] != "1" {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", "1", expRecord[0])
 	}
-	fltr, _ := utils.ParseRSRFields("Tenant(itsyscom.com)", utils.INFIELD_SEP)
-	cfgCdrFld = &config.CfgCdrField{Tag: "destination", Type: utils.META_COMPOSED, FieldId: utils.Destination, Value: val, FieldFilter: fltr, Timezone: "UTC"}
-	if rcrd, err := cdr.AsExportRecord([]*config.CfgCdrField{cfgCdrFld}, false, nil, 0); err != nil {
+	data, _ := NewMapStorage()
+	dmForCDR := NewDataManager(data)
+	defaultCfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+
+	cfgCdrFld = &config.FCTemplate{ID: "destination", Type: utils.META_COMPOSED,
+		FieldId: utils.Destination, Value: prsr, Filters: []string{"*string:Tenant:itsyscom.com"}, Timezone: "UTC"}
+	if rcrd, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, 0, &FilterS{dm: dmForCDR, cfg: defaultCfg}); err != nil {
 		t.Error(err)
 	} else if len(rcrd) != 0 {
 		t.Error("failed using filter")
 	}
+
 	// Test MetaDateTime
-	val, _ = utils.ParseRSRFields("stop_time", utils.INFIELD_SEP)
+	prsr = config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"stop_time", true)
 	layout := "2006-01-02 15:04:05"
-	cfgCdrFld = &config.CfgCdrField{Tag: "stop_time", Type: utils.MetaDateTime, FieldId: "stop_time", Value: val, Layout: layout, Timezone: "UTC"}
-	if expRecord, err := cdr.AsExportRecord([]*config.CfgCdrField{cfgCdrFld}, false, nil, 0); err != nil {
+	cfgCdrFld = &config.FCTemplate{ID: "stop_time", Type: utils.MetaDateTime,
+		FieldId: "stop_time", Value: prsr, Layout: layout, Timezone: "UTC"}
+	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, 0, &FilterS{dm: dmForCDR, cfg: defaultCfg}); err != nil {
 		t.Error(err)
 	} else if expRecord[0] != "2014-06-11 19:19:00" {
 		t.Error("Expecting: 2014-06-11 19:19:00, got: ", expRecord[0])
 	}
+
 	// Test filter
-	fltr, _ = utils.ParseRSRFields("Tenant(itsyscom.com)", utils.INFIELD_SEP)
-	cfgCdrFld = &config.CfgCdrField{Tag: "stop_time", Type: utils.MetaDateTime,
-		FieldId: "stop_time", Value: val, FieldFilter: fltr, Layout: layout, Timezone: "UTC"}
-	if rcrd, err := cdr.AsExportRecord([]*config.CfgCdrField{cfgCdrFld}, false, nil, 0); err != nil {
+	cfgCdrFld = &config.FCTemplate{ID: "stop_time", Type: utils.MetaDateTime,
+		FieldId: "stop_time", Value: prsr, Filters: []string{"*string:Tenant:itsyscom.com"},
+		Layout: layout, Timezone: "UTC"}
+	if rcrd, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, 0, &FilterS{dm: dmForCDR, cfg: defaultCfg}); err != nil {
 		t.Error(err)
 	} else if len(rcrd) != 0 {
 		t.Error("failed using filter")
 	}
-	val, _ = utils.ParseRSRFields("fieldextr2", utils.INFIELD_SEP)
-	cfgCdrFld = &config.CfgCdrField{Tag: "stop_time", Type: utils.MetaDateTime, FieldId: "stop_time", Value: val, Layout: layout, Timezone: "UTC"}
+
+	prsr = config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"fieldextr2", true)
+	cfgCdrFld = &config.FCTemplate{ID: "stop_time", Type: utils.MetaDateTime,
+		FieldId: "stop_time", Value: prsr, Layout: layout, Timezone: "UTC"}
 	// Test time parse error
-	if _, err := cdr.AsExportRecord([]*config.CfgCdrField{cfgCdrFld}, false, nil, 0); err == nil {
+	if _, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, 0, nil); err == nil {
 		t.Error("Should give error here, got none.")
 	}
 }
@@ -679,12 +697,15 @@ func TestCDRAsExportMap(t *testing.T) {
 		utils.Destination: "004986517174963",
 		"FieldExtra1":     "val_extr1",
 	}
-	expFlds := []*config.CfgCdrField{
-		&config.CfgCdrField{FieldId: utils.CGRID, Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile(utils.CGRID, utils.INFIELD_SEP)},
-		&config.CfgCdrField{FieldId: utils.Destination, Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile("~Destination:s/^\\+(\\d+)$/00${1}/", utils.INFIELD_SEP)},
-		&config.CfgCdrField{FieldId: "FieldExtra1", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile("field_extr1", utils.INFIELD_SEP)},
+	expFlds := []*config.FCTemplate{
+		&config.FCTemplate{FieldId: utils.CGRID, Type: utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.CGRID, true)},
+		&config.FCTemplate{FieldId: utils.Destination, Type: utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile("~Destination:s/^\\+(\\d+)$/00${1}/", true)},
+		&config.FCTemplate{FieldId: "FieldExtra1", Type: utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"field_extr1", true)},
 	}
-	if cdrMp, err := cdr.AsExportMap(expFlds, false, nil, 0); err != nil {
+	if cdrMp, err := cdr.AsExportMap(expFlds, false, nil, 0, nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCDRMp, cdrMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eCDRMp, cdrMp)

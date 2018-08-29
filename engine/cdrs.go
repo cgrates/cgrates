@@ -307,85 +307,88 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, cdrstats, 
 }
 
 func (self *CdrServer) deriveCdrs(cdr *CDR) (drvdCDRs []*CDR, err error) {
-	dfltCDRRun := cdr.Clone()
-	cdrRuns := []*CDR{dfltCDRRun}
-	if cdr.RunID != utils.MetaRaw { // Only derive *raw CDRs
-		return cdrRuns, nil
-	}
-	dfltCDRRun.RunID = utils.META_DEFAULT // Rewrite *raw with *default since we have it as first run
-	if self.attrS != nil {
-		var rplyEv AttrSProcessEventReply
-		if err = self.attrS.Call(utils.AttributeSv1ProcessEvent,
-			cdr.AsCGREvent(), &rplyEv); err != nil {
-			return
+	/*
+		dfltCDRRun := cdr.Clone()
+		cdrRuns := []*CDR{dfltCDRRun}
+		if cdr.RunID != utils.MetaRaw { // Only derive *raw CDRs
+			return cdrRuns, nil
 		}
-		if err = cdr.UpdateFromCGREvent(rplyEv.CGREvent,
-			rplyEv.AlteredFields); err != nil {
-			return
-		}
-	}
-	if err := LoadUserProfile(cdr, utils.EXTRA_FIELDS); err != nil {
-		return nil, err
-	}
-	if err := LoadAlias(&AttrMatchingAlias{
-		Destination: cdr.Destination,
-		Direction:   utils.OUT,
-		Tenant:      cdr.Tenant,
-		Category:    cdr.Category,
-		Account:     cdr.Account,
-		Subject:     cdr.Subject,
-		Context:     utils.MetaRating,
-	}, cdr, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
-		return nil, err
-	}
-	attrsDC := &utils.AttrDerivedChargers{Tenant: cdr.Tenant, Category: cdr.Category, Direction: utils.OUT,
-		Account: cdr.Account, Subject: cdr.Subject, Destination: cdr.Destination}
-	var dcs utils.DerivedChargers
-	if err := self.rals.Call("Responder.GetDerivedChargers", attrsDC, &dcs); err != nil {
-		utils.Logger.Err(fmt.Sprintf("Could not get derived charging for cgrid %s, error: %s", cdr.CGRID, err.Error()))
-		return nil, err
-	}
-	for _, dc := range dcs.Chargers {
-		runFilters, _ := utils.ParseRSRFields(dc.RunFilters, utils.INFIELD_SEP)
-		matchingAllFilters := true
-		for _, dcRunFilter := range runFilters {
-			if _, err := cdr.FieldAsString(dcRunFilter); err != nil {
-				matchingAllFilters = false
-				break
+		dfltCDRRun.RunID = utils.META_DEFAULT // Rewrite *raw with *default since we have it as first run
+		if self.attrS != nil {
+			var rplyEv AttrSProcessEventReply
+			if err = self.attrS.Call(utils.AttributeSv1ProcessEvent,
+				cdr.AsCGREvent(), &rplyEv); err != nil {
+				return
+			}
+			if err = cdr.UpdateFromCGREvent(rplyEv.CGREvent,
+				rplyEv.AlteredFields); err != nil {
+				return
 			}
 		}
-		if !matchingAllFilters { // Do not process the derived charger further if not all filters were matched
-			continue
+		if err := LoadUserProfile(cdr, utils.EXTRA_FIELDS); err != nil {
+			return nil, err
 		}
-		dcRequestTypeFld, _ := utils.NewRSRField(dc.RequestTypeField)
-		dcTenantFld, _ := utils.NewRSRField(dc.TenantField)
-		dcCategoryFld, _ := utils.NewRSRField(dc.CategoryField)
-		dcAcntFld, _ := utils.NewRSRField(dc.AccountField)
-		dcSubjFld, _ := utils.NewRSRField(dc.SubjectField)
-		dcDstFld, _ := utils.NewRSRField(dc.DestinationField)
-		dcSTimeFld, _ := utils.NewRSRField(dc.SetupTimeField)
-		dcATimeFld, _ := utils.NewRSRField(dc.AnswerTimeField)
-		dcDurFld, _ := utils.NewRSRField(dc.UsageField)
-		dcRatedFld, _ := utils.NewRSRField(dc.PreRatedField)
-		dcCostFld, _ := utils.NewRSRField(dc.CostField)
+		if err := LoadAlias(&AttrMatchingAlias{
+			Destination: cdr.Destination,
+			Direction:   utils.OUT,
+			Tenant:      cdr.Tenant,
+			Category:    cdr.Category,
+			Account:     cdr.Account,
+			Subject:     cdr.Subject,
+			Context:     utils.MetaRating,
+		}, cdr, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
+			return nil, err
+		}
+		attrsDC := &utils.AttrDerivedChargers{Tenant: cdr.Tenant, Category: cdr.Category, Direction: utils.OUT,
+			Account: cdr.Account, Subject: cdr.Subject, Destination: cdr.Destination}
+		var dcs utils.DerivedChargers
+		if err := self.rals.Call("Responder.GetDerivedChargers", attrsDC, &dcs); err != nil {
+			utils.Logger.Err(fmt.Sprintf("Could not get derived charging for cgrid %s, error: %s", cdr.CGRID, err.Error()))
+			return nil, err
+		}
+		for _, dc := range dcs.Chargers {
+			runFilters, _ := utils.ParseRSRFields(dc.RunFilters, utils.INFIELD_SEP)
+			matchingAllFilters := true
+			for _, dcRunFilter := range runFilters {
+					if _, err := cdr.FieldAsString(dcRunFilter); err != nil {
+						matchingAllFilters = false
+						break
+					}
+			}
+			if !matchingAllFilters { // Do not process the derived charger further if not all filters were matched
+				continue
+			}
+			dcRequestTypeFld, _ := utils.NewRSRField(dc.RequestTypeField)
+			dcTenantFld, _ := utils.NewRSRField(dc.TenantField)
+			dcCategoryFld, _ := utils.NewRSRField(dc.CategoryField)
+			dcAcntFld, _ := utils.NewRSRField(dc.AccountField)
+			dcSubjFld, _ := utils.NewRSRField(dc.SubjectField)
+			dcDstFld, _ := utils.NewRSRField(dc.DestinationField)
+			dcSTimeFld, _ := utils.NewRSRField(dc.SetupTimeField)
+			dcATimeFld, _ := utils.NewRSRField(dc.AnswerTimeField)
+			dcDurFld, _ := utils.NewRSRField(dc.UsageField)
+			dcRatedFld, _ := utils.NewRSRField(dc.PreRatedField)
+			dcCostFld, _ := utils.NewRSRField(dc.CostField)
 
-		dcExtraFields := []*utils.RSRField{}
-		for key, _ := range cdr.ExtraFields {
-			dcExtraFields = append(dcExtraFields, &utils.RSRField{Id: key})
-		}
+			dcExtraFields := []*utils.RSRField{}
+			for key, _ := range cdr.ExtraFields {
+				dcExtraFields = append(dcExtraFields, &utils.RSRField{Id: key})
+			}
 
-		forkedCdr, err := cdr.ForkCdr(dc.RunID, dcRequestTypeFld, dcTenantFld, dcCategoryFld, dcAcntFld, dcSubjFld, dcDstFld,
-			dcSTimeFld, dcATimeFld, dcDurFld, dcRatedFld, dcCostFld, dcExtraFields, true, self.cgrCfg.DefaultTimezone)
-		if err != nil {
-			utils.Logger.Err(fmt.Sprintf("Could not fork CGR with cgrid %s, run: %s, error: %s", cdr.CGRID, dc.RunID, err.Error()))
-			continue // do not add it to the forked CDR list
+			forkedCdr, err := cdr.ForkCdr(dc.RunID, dcRequestTypeFld, dcTenantFld, dcCategoryFld, dcAcntFld, dcSubjFld, dcDstFld,
+				dcSTimeFld, dcATimeFld, dcDurFld, dcRatedFld, dcCostFld, dcExtraFields, true, self.cgrCfg.DefaultTimezone)
+			if err != nil {
+				utils.Logger.Err(fmt.Sprintf("Could not fork CGR with cgrid %s, run: %s, error: %s", cdr.CGRID, dc.RunID, err.Error()))
+				continue // do not add it to the forked CDR list
+			}
+			if !forkedCdr.PreRated {
+				forkedCdr.Cost = -1.0 // Make sure that un-rated CDRs start with Cost -1
+			}
+			cdrRuns = append(cdrRuns, forkedCdr)
 		}
-		if !forkedCdr.PreRated {
-			forkedCdr.Cost = -1.0 // Make sure that un-rated CDRs start with Cost -1
-		}
-		cdrRuns = append(cdrRuns, forkedCdr)
-	}
-	return cdrRuns, nil
+		return cdrRuns, nil
+	*/
+	return
 }
 
 // rateCDR will populate cost field
