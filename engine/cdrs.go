@@ -688,7 +688,7 @@ func (cdrS *CdrServer) statSProcessEvent(cgrEv *utils.CGREvent) {
 
 // rarethsta will RAte/STOtore/REplicate/THresholds/STAts the CDR received
 // used by both chargerS as well as re-/rating
-func (cdrS *CdrServer) rastorethstaCDR(cdr *CDR) {
+func (cdrS *CdrServer) raStoReThStaCDR(cdr *CDR) {
 	ratedCDRs, err := cdrS.rateCDR(cdr)
 	if err != nil {
 		utils.Logger.Warning(
@@ -737,7 +737,7 @@ func (cdrS *CdrServer) chrgrSProcessEvent(cgrEv *utils.CGREvent) {
 					utils.CDRs, err.Error(), cgrEv, utils.ChargerS))
 			continue
 		}
-		cdrS.rastorethstaCDR(cdr)
+		cdrS.raStoReThStaCDR(cdr)
 
 	}
 }
@@ -787,7 +787,7 @@ func (cdrS *CdrServer) V2RateCDRs(attrs *utils.RPCCDRsFilter, reply *string) err
 		return err
 	}
 	for _, cdr := range cdrs {
-		go cdrS.rastorethstaCDR(cdr)
+		go cdrS.raStoReThStaCDR(cdr)
 	}
 	*reply = utils.OK
 	return nil

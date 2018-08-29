@@ -405,7 +405,8 @@ func (smg *SMGeneric) unindexSession(cgrID string, passiveSessions bool) bool {
 
 // getSessionIDsMatchingIndexes will check inside indexes if it can find sessionIDs matching all filters
 // matchedIndexes returns map[matchedFieldName]possibleMatchedFieldVal so we optimize further to avoid checking them
-func (smg *SMGeneric) getSessionIDsMatchingIndexes(fltrs map[string]string, passiveSessions bool) (utils.StringMap, map[string]string) {
+func (smg *SMGeneric) getSessionIDsMatchingIndexes(fltrs map[string]string,
+	passiveSessions bool) (utils.StringMap, map[string]string) {
 	idxMux := &smg.aSIMux
 	ssIndx := smg.aSessionsIndex
 	if passiveSessions {
@@ -449,7 +450,8 @@ func (smg *SMGeneric) getSessionIDsMatchingIndexes(fltrs map[string]string, pass
 }
 
 // getSessionIDsForPrefix works with session relocation returning list of sessions with ID matching prefix for OriginID field
-func (smg *SMGeneric) getSessionIDsForPrefix(prefix string, passiveSessions bool) (cgrIDs []string) {
+func (smg *SMGeneric) getSessionIDsForPrefix(prefix string,
+	passiveSessions bool) (cgrIDs []string) {
 	idxMux := &smg.aSIMux
 	ssIndx := smg.aSessionsIndex
 	if passiveSessions {
@@ -461,7 +463,8 @@ func (smg *SMGeneric) getSessionIDsForPrefix(prefix string, passiveSessions bool
 	for originID := range ssIndx[utils.OriginID] {
 		if strings.HasPrefix(originID, prefix) {
 			if _, hasDefaultRun := ssIndx[utils.OriginID][originID][utils.META_DEFAULT]; hasDefaultRun {
-				cgrIDs = append(cgrIDs, ssIndx[utils.OriginID][originID][utils.META_DEFAULT].Slice()...)
+				cgrIDs = append(cgrIDs,
+					ssIndx[utils.OriginID][originID][utils.META_DEFAULT].Slice()...)
 			}
 		}
 	}
@@ -469,7 +472,8 @@ func (smg *SMGeneric) getSessionIDsForPrefix(prefix string, passiveSessions bool
 	return
 }
 
-func (smg *SMGeneric) v1ForkSessions(evStart *engine.SafEvent,
+// v1ForkSessions is using DerivedChargers for session forking
+func (smg *SMGeneric) v1ForkSessions(tnt string, evStart *engine.SafEvent,
 	clntConn rpcclient.RpcClientConnection, cgrID, resourceID string) (ss []*SMGSession, err error) {
 	cdr, err := evStart.AsCDR(smg.cgrCfg, smg.Timezone)
 	if err != nil {
@@ -490,25 +494,73 @@ func (smg *SMGeneric) v1ForkSessions(evStart *engine.SafEvent,
 				clntConn: clntConn}}, nil
 	}
 	for _, sessionRun := range sessionRuns {
-		s := &SMGSession{CGRID: cgrID, ResourceID: resourceID, EventStart: evStart,
-			RunID: sessionRun.DerivedCharger.RunID, Timezone: smg.Timezone,
-			rals: smg.rals, cdrsrv: smg.cdrsrv,
-			CD: sessionRun.CallDescriptor, clntConn: clntConn,
-			clientProto: smg.cgrCfg.SessionSCfg().ClientProtocol}
-		//utils.Logger.Info(fmt.Sprintf("<%s> Starting session: %s, runId: %s",utils.SessionS, sessionId, s.runId))
-
-		ss = append(ss, s)
+		ss = append(ss,
+			&SMGSession{CGRID: cgrID, Tenant: tnt,
+				ResourceID: resourceID, EventStart: evStart,
+				RunID: sessionRun.DerivedCharger.RunID, Timezone: smg.Timezone,
+				rals: smg.rals, cdrsrv: smg.cdrsrv,
+				CD: sessionRun.CallDescriptor, clntConn: clntConn,
+				clientProto: smg.cgrCfg.SessionSCfg().ClientProtocol})
 	}
 	return
 }
 
-func (smg *SMGeneric) v2ForkSessions(evStart *engine.SafEvent,
-	clntConn rpcclient.RpcClientConnection, cgrID, resourceID string) (ss []*SMGSession, err error) {
+// v2ForkSessions is using ChargerS for session forking
+func (smg *SMGeneric) v2ForkSessions(tnt string, evStart *engine.SafEvent,
+	clntConn rpcclient.RpcClientConnection,
+	cgrID, resourceID string) (ss []*SMGSession, err error) {
+	cgrEv := &utils.CGREvent{
+		Tenant: tnt,
+		ID:     utils.UUIDSha1Prefix(),
+		Event:  evStart.AsMapInterface(),
+	}
+	var chrgrs []*engine.ChrgSProcessEventReply
+	if err := smg.chargerS.Call(utils.ChargerSv1ProcessEvent, cgrEv, &chrgrs); err != nil &&
+		err.Error() != utils.ErrNotFound.Error() {
+		return nil, err
+	}
+	if len(chrgrs) == 0 {
+		return []*SMGSession{
+			&SMGSession{CGRID: cgrID, ResourceID: resourceID, EventStart: evStart,
+				RunID: utils.META_NONE, Timezone: smg.Timezone,
+				rals: smg.rals, cdrsrv: smg.cdrsrv,
+				clntConn: clntConn}}, nil
+	}
+	for _, chrgr := range chrgrs {
+		evStart := engine.NewSafEvent(chrgr.CGREvent.Event)
+		startTime := evStart.GetTimeIgnoreErrors(utils.AnswerTime, smg.Timezone)
+		if startTime.IsZero() { // AnswerTime not parsable, try SetupTime
+			startTime = evStart.GetTimeIgnoreErrors(utils.SetupTime, smg.Timezone)
+		}
+		cd := &engine.CallDescriptor{
+			CgrID:       cgrID,
+			RunID:       evStart.GetStringIgnoreErrors(utils.RunID),
+			TOR:         evStart.GetStringIgnoreErrors(utils.ToR),
+			Direction:   utils.OUT,
+			Tenant:      tnt,
+			Category:    evStart.GetStringIgnoreErrors(utils.Category),
+			Subject:     evStart.GetStringIgnoreErrors(utils.Subject),
+			Account:     evStart.GetStringIgnoreErrors(utils.Account),
+			Destination: evStart.GetStringIgnoreErrors(utils.Destination),
+			TimeStart:   startTime,
+			TimeEnd:     startTime.Add(evStart.GetDurationIgnoreErrors(utils.Usage)),
+			ExtraFields: evStart.AsMapStringIgnoreErrors(utils.NewStringMap(utils.PrimaryCdrFields...)),
+		}
+		ss = append(ss,
+			&SMGSession{CGRID: cgrID, Tenant: tnt,
+				ResourceID: resourceID,
+				EventStart: evStart,
+				RunID:      evStart.GetStringIgnoreErrors(utils.RunID),
+				Timezone:   smg.Timezone,
+				rals:       smg.rals, cdrsrv: smg.cdrsrv,
+				CD: cd, clntConn: clntConn,
+				clientProto: smg.cgrCfg.SessionSCfg().ClientProtocol})
+	}
 	return
 }
 
 // sessionStart will handle a new session, pass the connectionId so we can communicate on disconnect request
-func (smg *SMGeneric) sessionStart(evStart *engine.SafEvent,
+func (smg *SMGeneric) sessionStart(tnt string, evStart *engine.SafEvent,
 	clntConn rpcclient.RpcClientConnection, resourceID string) (err error) {
 	cgrID := evStart.GetStringIgnoreErrors(utils.CGRID)
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) { // Lock it on CGRID level
@@ -517,9 +569,9 @@ func (smg *SMGeneric) sessionStart(evStart *engine.SafEvent,
 		}
 		var ss []*SMGSession
 		if smg.chargerS == nil { // old way of session forking
-			ss, err = smg.v1ForkSessions(evStart, clntConn, cgrID, resourceID)
+			ss, err = smg.v1ForkSessions(tnt, evStart, clntConn, cgrID, resourceID)
 		} else {
-			ss, err = smg.v2ForkSessions(evStart, clntConn, cgrID, resourceID)
+			ss, err = smg.v2ForkSessions(tnt, evStart, clntConn, cgrID, resourceID)
 		}
 		if err != nil {
 			return nil, err
@@ -797,7 +849,7 @@ func (smg *SMGeneric) asActiveSessions(fltrs map[string]string, count, passiveSe
 // Methods to apply on sessions, mostly exported through RPC/Bi-RPC
 
 // MaxUsage calculates maximum usage allowed for given gevent
-func (smg *SMGeneric) GetMaxUsage(gev *engine.SafEvent) (maxUsage time.Duration, err error) {
+func (smg *SMGeneric) GetMaxUsage(tnt string, gev *engine.SafEvent) (maxUsage time.Duration, err error) {
 	cgrID := GetSetCGRID(gev)
 	cacheKey := "MaxUsage" + cgrID
 	if item, err := smg.responseCache.Get(cacheKey); err == nil && item != nil {
@@ -824,7 +876,7 @@ func (smg *SMGeneric) GetMaxUsage(gev *engine.SafEvent) (maxUsage time.Duration,
 }
 
 // Called on session start
-func (smg *SMGeneric) InitiateSession(gev *engine.SafEvent,
+func (smg *SMGeneric) InitiateSession(tnt string, gev *engine.SafEvent,
 	clnt rpcclient.RpcClientConnection, resourceID string) (maxUsage time.Duration, err error) {
 	cgrID := GetSetCGRID(gev)
 	cacheKey := "InitiateSession" + cgrID
@@ -834,7 +886,7 @@ func (smg *SMGeneric) InitiateSession(gev *engine.SafEvent,
 	defer smg.responseCache.Cache(cacheKey,
 		&utils.ResponseCacheItem{Value: maxUsage, Err: err}) // schedule response caching
 	smg.deletePassiveSessions(cgrID)
-	if err = smg.sessionStart(gev, clnt, resourceID); err != nil {
+	if err = smg.sessionStart(tnt, gev, clnt, resourceID); err != nil {
 		smg.sessionEnd(cgrID, 0)
 		return
 	}
@@ -842,7 +894,7 @@ func (smg *SMGeneric) InitiateSession(gev *engine.SafEvent,
 		maxUsage = time.Duration(-1)
 		return
 	}
-	maxUsage, err = smg.UpdateSession(gev, clnt, resourceID)
+	maxUsage, err = smg.UpdateSession(tnt, gev, clnt, resourceID)
 	if err != nil || maxUsage == 0 {
 		smg.sessionEnd(cgrID, 0)
 	}
@@ -850,7 +902,7 @@ func (smg *SMGeneric) InitiateSession(gev *engine.SafEvent,
 }
 
 // Execute debits for usage/maxUsage
-func (smg *SMGeneric) UpdateSession(gev *engine.SafEvent,
+func (smg *SMGeneric) UpdateSession(tnt string, gev *engine.SafEvent,
 	clnt rpcclient.RpcClientConnection, resourceID string) (maxUsage time.Duration, err error) {
 	cgrID := GetSetCGRID(gev)
 	cacheKey := "UpdateSession" + cgrID
@@ -869,7 +921,7 @@ func (smg *SMGeneric) UpdateSession(gev *engine.SafEvent,
 		err = smg.sessionRelocate(initialCGRID,
 			cgrID, gev.GetStringIgnoreErrors(utils.OriginID))
 		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
-			err = smg.sessionStart(gev, clnt, resourceID)
+			err = smg.sessionStart(tnt, gev, clnt, resourceID)
 		}
 		if err != nil {
 			return
@@ -933,7 +985,7 @@ func (smg *SMGeneric) UpdateSession(gev *engine.SafEvent,
 }
 
 // Called on session end, should stop debit loop
-func (smg *SMGeneric) TerminateSession(gev *engine.SafEvent,
+func (smg *SMGeneric) TerminateSession(tnt string, gev *engine.SafEvent,
 	clnt rpcclient.RpcClientConnection, resourceID string) (err error) {
 	cgrID := GetSetCGRID(gev)
 	cacheKey := "TerminateSession" + cgrID
@@ -947,7 +999,7 @@ func (smg *SMGeneric) TerminateSession(gev *engine.SafEvent,
 		err = smg.sessionRelocate(initialCGRID, cgrID,
 			gev.GetStringIgnoreErrors(utils.OriginID))
 		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
-			err = smg.sessionStart(gev, clnt, resourceID)
+			err = smg.sessionStart(tnt, gev, clnt, resourceID)
 		}
 		if err != nil && err != utils.ErrMandatoryIeMissing {
 			return
@@ -1006,7 +1058,7 @@ func (smg *SMGeneric) TerminateSession(gev *engine.SafEvent,
 }
 
 // Processes one time events (eg: SMS)
-func (smg *SMGeneric) ChargeEvent(gev *engine.SafEvent) (maxUsage time.Duration, err error) {
+func (smg *SMGeneric) ChargeEvent(tnt string, gev *engine.SafEvent) (maxUsage time.Duration, err error) {
 	cgrID := GetSetCGRID(gev)
 	cacheKey := "ChargeEvent" + cgrID
 	if item, err := smg.responseCache.Get(cacheKey); err == nil && item != nil {
@@ -1197,8 +1249,11 @@ func (smg *SMGeneric) CallBiRPC(clnt rpcclient.RpcClientConnection,
 }
 
 func (smg *SMGeneric) BiRPCV1GetMaxUsage(clnt rpcclient.RpcClientConnection,
-	ev map[string]interface{}, maxUsage *float64) error {
-	maxUsageDur, err := smg.GetMaxUsage(engine.NewSafEvent(ev))
+	ev engine.MapEvent, maxUsage *float64) error {
+	maxUsageDur, err := smg.GetMaxUsage(
+		utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.Tenant),
+			smg.cgrCfg.DefaultTenant),
+		engine.NewSafEvent(ev))
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -1212,8 +1267,11 @@ func (smg *SMGeneric) BiRPCV1GetMaxUsage(clnt rpcclient.RpcClientConnection,
 
 // BiRPCV2GetMaxUsage returns the maximum usage as duration/int64
 func (smg *SMGeneric) BiRPCV2GetMaxUsage(clnt rpcclient.RpcClientConnection,
-	ev map[string]interface{}, maxUsage *time.Duration) error {
-	maxUsageDur, err := smg.GetMaxUsage(engine.NewSafEvent(ev))
+	ev engine.MapEvent, maxUsage *time.Duration) error {
+	maxUsageDur, err := smg.GetMaxUsage(
+		utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.Tenant),
+			smg.cgrCfg.DefaultTenant),
+		engine.NewSafEvent(ev))
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -1223,9 +1281,12 @@ func (smg *SMGeneric) BiRPCV2GetMaxUsage(clnt rpcclient.RpcClientConnection,
 
 // Called on session start, returns the maximum number of seconds the session can last
 func (smg *SMGeneric) BiRPCV1InitiateSession(clnt rpcclient.RpcClientConnection,
-	ev map[string]interface{}, maxUsage *float64) (err error) {
+	ev engine.MapEvent, maxUsage *float64) (err error) {
 	var minMaxUsage time.Duration
-	if minMaxUsage, err = smg.InitiateSession(engine.NewSafEvent(ev), clnt, ""); err != nil {
+	if minMaxUsage, err = smg.InitiateSession(
+		utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.Tenant),
+			smg.cgrCfg.DefaultTenant),
+		engine.NewSafEvent(ev), clnt, ""); err != nil {
 		if err != rpcclient.ErrSessionNotFound {
 			err = utils.NewErrServerError(err)
 		}
@@ -1241,9 +1302,12 @@ func (smg *SMGeneric) BiRPCV1InitiateSession(clnt rpcclient.RpcClientConnection,
 
 // BiRPCV2InitiateSession initiates a new session, returns the maximum duration the session can last
 func (smg *SMGeneric) BiRPCV2InitiateSession(clnt rpcclient.RpcClientConnection,
-	ev map[string]interface{}, maxUsage *time.Duration) (err error) {
+	ev engine.MapEvent, maxUsage *time.Duration) (err error) {
 	var minMaxUsage time.Duration
-	if minMaxUsage, err = smg.InitiateSession(engine.NewSafEvent(ev), clnt, ""); err != nil {
+	if minMaxUsage, err = smg.InitiateSession(
+		utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.Tenant),
+			smg.cgrCfg.DefaultTenant),
+		engine.NewSafEvent(ev), clnt, ""); err != nil {
 		if err != rpcclient.ErrSessionNotFound {
 			err = utils.NewErrServerError(err)
 		}
@@ -1256,9 +1320,12 @@ func (smg *SMGeneric) BiRPCV2InitiateSession(clnt rpcclient.RpcClientConnection,
 
 // Interim updates, returns remaining duration from the RALs
 func (smg *SMGeneric) BiRPCV1UpdateSession(clnt rpcclient.RpcClientConnection,
-	ev map[string]interface{}, maxUsage *float64) (err error) {
+	ev engine.MapEvent, maxUsage *float64) (err error) {
 	var minMaxUsage time.Duration
-	if minMaxUsage, err = smg.UpdateSession(engine.NewSafEvent(ev), clnt, ""); err != nil {
+	if minMaxUsage, err = smg.UpdateSession(
+		utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.Tenant),
+			smg.cgrCfg.DefaultTenant),
+		engine.NewSafEvent(ev), clnt, ""); err != nil {
 		if err != rpcclient.ErrSessionNotFound {
 			err = utils.NewErrServerError(err)
 		}
@@ -1274,9 +1341,12 @@ func (smg *SMGeneric) BiRPCV1UpdateSession(clnt rpcclient.RpcClientConnection,
 
 // BiRPCV1UpdateSession updates an existing session, returning the duration which the session can still last
 func (smg *SMGeneric) BiRPCV2UpdateSession(clnt rpcclient.RpcClientConnection,
-	ev map[string]interface{}, maxUsage *time.Duration) (err error) {
+	ev engine.MapEvent, maxUsage *time.Duration) (err error) {
 	var minMaxUsage time.Duration
-	if minMaxUsage, err = smg.UpdateSession(engine.NewSafEvent(ev), clnt, ""); err != nil {
+	if minMaxUsage, err = smg.UpdateSession(
+		utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.Tenant),
+			smg.cgrCfg.DefaultTenant),
+		engine.NewSafEvent(ev), clnt, ""); err != nil {
 		if err != rpcclient.ErrSessionNotFound {
 			err = utils.NewErrServerError(err)
 		}
@@ -1288,8 +1358,11 @@ func (smg *SMGeneric) BiRPCV2UpdateSession(clnt rpcclient.RpcClientConnection,
 
 // Called on session end, should stop debit loop
 func (smg *SMGeneric) BiRPCV1TerminateSession(clnt rpcclient.RpcClientConnection,
-	ev map[string]interface{}, reply *string) (err error) {
-	if err = smg.TerminateSession(engine.NewSafEvent(ev), clnt, ""); err != nil {
+	ev engine.MapEvent, reply *string) (err error) {
+	if err = smg.TerminateSession(
+		utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.Tenant),
+			smg.cgrCfg.DefaultTenant),
+		engine.NewSafEvent(ev), clnt, ""); err != nil {
 		if err != rpcclient.ErrSessionNotFound {
 			err = utils.NewErrServerError(err)
 		}
@@ -1301,8 +1374,11 @@ func (smg *SMGeneric) BiRPCV1TerminateSession(clnt rpcclient.RpcClientConnection
 
 // Called on individual Events (eg SMS)
 func (smg *SMGeneric) BiRPCV1ChargeEvent(clnt rpcclient.RpcClientConnection,
-	ev map[string]interface{}, maxUsage *float64) error {
-	if minMaxUsage, err := smg.ChargeEvent(engine.NewSafEvent(ev)); err != nil {
+	ev engine.MapEvent, maxUsage *float64) error {
+	if minMaxUsage, err := smg.ChargeEvent(
+		utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.Tenant),
+			smg.cgrCfg.DefaultTenant),
+		engine.NewSafEvent(ev)); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*maxUsage = minMaxUsage.Seconds()
@@ -1312,8 +1388,11 @@ func (smg *SMGeneric) BiRPCV1ChargeEvent(clnt rpcclient.RpcClientConnection,
 
 // Called on individual Events (eg SMS)
 func (smg *SMGeneric) BiRPCV2ChargeEvent(clnt rpcclient.RpcClientConnection,
-	ev map[string]interface{}, maxUsage *time.Duration) error {
-	if minMaxUsage, err := smg.ChargeEvent(engine.NewSafEvent(ev)); err != nil {
+	ev engine.MapEvent, maxUsage *time.Duration) error {
+	if minMaxUsage, err := smg.ChargeEvent(
+		utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.Tenant),
+			smg.cgrCfg.DefaultTenant),
+		engine.NewSafEvent(ev)); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*maxUsage = minMaxUsage
@@ -1566,7 +1645,8 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		if smg.rals == nil {
 			return utils.NewErrNotConnected(utils.RALService)
 		}
-		maxUsage, err := smg.GetMaxUsage(engine.NewSafEvent(args.CGREvent.Event))
+		maxUsage, err := smg.GetMaxUsage(args.CGREvent.Tenant,
+			engine.NewSafEvent(args.CGREvent.Event))
 		if err != nil {
 			return utils.NewErrRALs(err)
 		}
@@ -1813,6 +1893,7 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 			}
 		}
 		if maxUsage, err := smg.InitiateSession(
+			args.CGREvent.Tenant,
 			engine.NewSafEvent(args.CGREvent.Event), clnt, originID); err != nil {
 			return utils.NewErrRALs(err)
 		} else {
@@ -1969,7 +2050,7 @@ func (smg *SMGeneric) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 		if err != nil {
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
-		if maxUsage, err := smg.UpdateSession(
+		if maxUsage, err := smg.UpdateSession(args.CGREvent.Tenant,
 			engine.NewSafEvent(args.CGREvent.Event), clnt, originID); err != nil {
 			return utils.NewErrRALs(err)
 		} else {
@@ -2017,7 +2098,7 @@ func (smg *SMGeneric) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection
 		if err != nil {
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
-		if err = smg.TerminateSession(
+		if err = smg.TerminateSession(args.CGREvent.Tenant,
 			engine.NewSafEvent(args.CGREvent.Event), clnt, originID); err != nil {
 			return utils.NewErrRALs(err)
 		}
@@ -2155,7 +2236,8 @@ func (smg *SMGeneric) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 		if smg.rals == nil {
 			return utils.NewErrNotConnected(utils.RALService)
 		}
-		if maxUsage, err := smg.ChargeEvent(engine.NewSafEvent(args.CGREvent.Event)); err != nil {
+		if maxUsage, err := smg.ChargeEvent(args.CGREvent.Tenant,
+			engine.NewSafEvent(args.CGREvent.Event)); err != nil {
 			return utils.NewErrRALs(err)
 		} else {
 			rply.MaxUsage = &maxUsage

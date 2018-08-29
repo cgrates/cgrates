@@ -39,6 +39,7 @@ type SMGSession struct {
 	cdrsrv      rpcclient.RpcClientConnection // Connector to CDRS service
 	clientProto float64
 
+	Tenant     string // store original Tenant so we can use it in API calls
 	CGRID      string // Unique identifier for this session
 	RunID      string // Keep a reference for the derived run
 	Timezone   string
