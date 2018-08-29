@@ -77,7 +77,8 @@ func (prc *PartialRecordsCache) dumpPartialRecords(originID string) {
 			csvWriter := csv.NewWriter(fileOut)
 			csvWriter.Comma = prc.csvSep
 			for _, cdr := range prc.partialRecords[originID].cdrs {
-				expRec, err := cdr.AsExportRecord(prc.partialRecords[originID].cacheDumpFields, prc.httpSkipTlsCheck, nil, prc.roundDecimals, prc.filterS)
+				expRec, err := cdr.AsExportRecord(prc.partialRecords[originID].cacheDumpFields,
+					prc.httpSkipTlsCheck, nil, prc.roundDecimals, prc.filterS)
 				if err != nil {
 					return nil, err
 				}
@@ -103,7 +104,7 @@ func (prc *PartialRecordsCache) postCDR(originID string) {
 			cdr := prc.partialRecords[originID].MergeCDRs()
 			cdr.Partial = false // force completion
 			var reply string
-			if err := prc.cdrs.Call("CdrsV1.ProcessCDR", cdr, &reply); err != nil {
+			if err := prc.cdrs.Call(utils.CdrsV2ProcessCDR, cdr.AsCGREvent(), &reply); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<Cdrc> Failed sending CDR  %+v from partial cache, error: %s", cdr, err.Error()))
 			} else if reply != utils.OK {
 				utils.Logger.Err(fmt.Sprintf("<Cdrc> Received unexpected reply for CDR, %+v, reply: %s", cdr, reply))

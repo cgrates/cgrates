@@ -168,7 +168,7 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity tree.Res, cdrcCfg *con
 				return nil, err
 			}
 			if pass, err := xmlProc.filterS.Pass(tenant,
-				cdrcCfg.Filters, xmlProvider); err != nil || !pass {
+				cdrFldCfg.Filters, xmlProvider); err != nil || !pass {
 				continue // Not passes filters, ignore this CDR
 			}
 		}

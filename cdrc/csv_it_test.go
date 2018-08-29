@@ -342,3 +342,89 @@ func TestCsvIT3KillEngine(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+// Begin tests for cdrc csv with new filters
+var fileContent1_4 = `accid21;*prepaid;itsyscom.com;1002;086517174963;2013-02-03 19:54:00;62;val_extra3;"";val_extra1
+accid22;*postpaid;itsyscom.com;1001;+4986517174963;2013-02-03 19:54:00;123;val_extra3;"";val_extra1
+accid23;*postpaid;cgrates.org;1002;086517174963;2013-02-03 19:54:00;76;val_extra3;"";val_extra1`
+
+func TestCsvIT4InitConfig(t *testing.T) {
+	var err error
+	csvCfgPath = path.Join(*dataDir, "conf", "samples", "csvwithfieldfilter")
+	if csvCfg, err = config.NewCGRConfigFromFolder(csvCfgPath); err != nil {
+		t.Fatal("Got config error: ", err.Error())
+	}
+}
+
+// InitDb so we can rely on count
+func TestCsvIT4InitCdrDb(t *testing.T) {
+	if err := engine.InitStorDb(csvCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestCsvIT4CreateCdrDirs(t *testing.T) {
+	for _, cdrcProfiles := range csvCfg.CdrcProfiles {
+		for _, cdrcInst := range cdrcProfiles {
+			for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
+				if err := os.RemoveAll(dir); err != nil {
+					t.Fatal("Error removing folder: ", dir, err)
+				}
+				if err := os.MkdirAll(dir, 0755); err != nil {
+					t.Fatal("Error creating folder: ", dir, err)
+				}
+			}
+		}
+	}
+}
+
+func TestCsvIT4StartEngine(t *testing.T) {
+	if _, err := engine.StopStartEngine(csvCfgPath, *waitRater); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Connect rpc client to rater
+func TestCsvIT4RpcConn(t *testing.T) {
+	var err error
+	cdrcRpc, err = jsonrpc.Dial("tcp", csvCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	if err != nil {
+		t.Fatal("Could not connect to rater: ", err.Error())
+	}
+}
+
+// Scenario out of first .xml config
+func TestCsvIT4HandleCdr2File(t *testing.T) {
+	fileName := "file1.csv"
+	tmpFilePath := path.Join("/tmp", fileName)
+	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent1_4), 0644); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := os.Rename(tmpFilePath, path.Join("/tmp/csvwithfielfilter/csvit2/in", fileName)); err != nil {
+		t.Fatal("Error moving file to processing directory: ", err)
+	}
+}
+
+func TestCsvIT4ProcessedFiles(t *testing.T) {
+	time.Sleep(time.Duration(2**waitRater) * time.Millisecond)
+	if outContent4, err := ioutil.ReadFile("/tmp/csvwithfielfilter/csvit2/out/file1.csv"); err != nil {
+		t.Error(err)
+	} else if fileContent1_4 != string(outContent4) {
+		t.Errorf("Expecting: %q, received: %q", fileContent1_4, string(outContent4))
+	}
+}
+
+func TestCsvIT4AnalyseCDRs(t *testing.T) {
+	var reply []*engine.ExternalCDR
+	if err := cdrcRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{}, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(reply) != 2 {
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	}
+}
+
+func TestCsvIT4KillEngine(t *testing.T) {
+	if err := engine.KillEngine(*waitRater); err != nil {
+		t.Error(err)
+	}
+}
