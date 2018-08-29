@@ -14,8 +14,8 @@
 	},
 	"export1": {
 		"header_fields": [
-			{"tag": "CgrId", "cdr_field_id": "cgrid", "type": "cdrfield", "value": "cgrid"},
-			{"tag":"RunId", "cdr_field_id": "mediation_runid", "type": "cdrfield", "value": "mediation_runid"},
+			{"id": "CgrId", "cdr_field_id": "cgrid", "type": "cdrfield", "value": "cgrid"},
+			{"id":"RunId", "cdr_field_id": "mediation_runid", "type": "cdrfield", "value": "mediation_runid"},
 		],							// template of the exported header fields
 	}
 },

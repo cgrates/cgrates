@@ -151,8 +151,8 @@ func testCDReExportCDRs(t *testing.T) {
 	var rply *RplExportedCDRs
 	if err := cdreRPC.Call("ApierV1.ExportCDRs", attr, &rply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if len(rply.ExportedCGRIDs) != 4 {
-		t.Error("Unexpected number of CDR exported: ", len(rply.ExportedCGRIDs))
+	} else if len(rply.ExportedCGRIDs) != 2 {
+		t.Errorf("Unexpected number of CDR exported: %s ", utils.ToJSON(rply))
 	}
 }
 
