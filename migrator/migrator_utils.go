@@ -43,7 +43,8 @@ func NewMigratorDataDB(db_type, host, port, name, user, pass, marshaler string,
 		d = newMongoMigrator(dm)
 		db = d.(MigratorDataDB)
 	case utils.INTERNAL:
-		//do nothing for the moment
+		d = newMapMigrator(dm)
+		db = d.(MigratorDataDB)
 	default:
 		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are '%s' or '%s or '%s'",
 			db_type, utils.REDIS, utils.MONGO, utils.INTERNAL))
@@ -70,7 +71,8 @@ func NewMigratorStorDB(db_type, host, port, name, user, pass string,
 		d = newMigratorSQL(storDb)
 		db = d.(MigratorStorDB)
 	case utils.INTERNAL:
-		//for the momen do nothing
+		d = newMapStorDBMigrator(storDb)
+		db = d.(MigratorStorDB)
 	default:
 		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are [%s, %s, %s, %s]",
 			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL))

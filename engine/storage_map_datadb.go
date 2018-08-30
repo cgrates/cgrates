@@ -1635,7 +1635,7 @@ func (ms *MapStorage) RemoveChargerProfileDrv(tenant, id string) (err error) {
 func (ms *MapStorage) GetVersions(itm string) (vrs Versions, err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
-	values, ok := ms.dict[itm]
+	values, ok := ms.dict[utils.TBLVersions]
 	if !ok {
 		return nil, utils.ErrNotFound
 	}
@@ -1643,36 +1643,21 @@ func (ms *MapStorage) GetVersions(itm string) (vrs Versions, err error) {
 	if err != nil {
 		return nil, err
 	}
-	return
+	if itm != "" {
+		return Versions{itm: vrs[itm]}, nil
+	}
+	return vrs, nil
 }
 
 func (ms *MapStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
 	var result []byte
-	var x Versions
-	if !overwrite {
-		x, err = ms.GetVersions("")
-		if err != nil {
+	if overwrite {
+		if ms.RemoveVersions(nil); err != nil {
 			return err
 		}
-		for key := range vrs {
-			if x[key] != vrs[key] {
-				x[key] = vrs[key]
-			}
-		}
-		result, err = ms.ms.Marshal(x)
-		if err != nil {
-			return err
-		}
-		ms.mu.Lock()
-		ms.dict[utils.TBLVersions] = result
-		ms.mu.Unlock()
-		return
 	}
 	result, err = ms.ms.Marshal(vrs)
 	if err != nil {
-		return err
-	}
-	if ms.RemoveVersions(vrs); err != nil {
 		return err
 	}
 	ms.mu.Lock()
@@ -1684,8 +1669,28 @@ func (ms *MapStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
 func (ms *MapStorage) RemoveVersions(vrs Versions) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
+	if len(vrs) != 0 {
+		var internalVersions Versions
+		values, ok := ms.dict[utils.TBLVersions]
+		if !ok {
+			return utils.ErrNotFound
+		}
+		err = ms.ms.Unmarshal(values, &internalVersions)
+		if err != nil {
+			return
+		}
+		for key, _ := range vrs {
+			delete(internalVersions, key)
+		}
+		result, err := ms.ms.Marshal(internalVersions)
+		if err != nil {
+			return err
+		}
+		ms.dict[utils.TBLVersions] = result
+		return nil
+	}
 	delete(ms.dict, utils.TBLVersions)
-	return
+	return nil
 }
 
 func (ms *MapStorage) GetStorageType() string {

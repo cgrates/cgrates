@@ -16,30 +16,17 @@
 
 
 "data_db": {
-    "db_type": "*internal",                   
+    "db_type": "internal",                   
  },
 
 
 "stor_db": {
-	"db_type": "*internal",
+	"db_type": "internal",
 },
-
 
 "rals": {
 	"enabled": true,
 	"thresholds_conns": [
-		{"address": "*internal"}
-	],
-	"cdrstats_conns": [
-		{"address": "*internal"}
-	],
-	"pubsubs_conns": [
-		{"address": "*internal"}
-	],
-	"users_conns": [
-		{"address": "*internal"}
-	],
-	"aliases_conns": [
 		{"address": "*internal"}
 	],
 },
@@ -52,45 +39,6 @@
 
 "cdrs": {
 	"enabled": true,
-	"cdrstats_conns": [
-		{"address": "*internal"}
-	],
-},
-
-
-"cdre": {
-	"TestTutITExportCDR": {
-		"content_fields": [
-			{"id": "CGRID", "type": "*composed", "value": "~CGRID"},
-			{"id": "RunID", "type": "*composed", "value": "~RunID"},
-			{"id":"OriginID", "type": "*composed", "value": "~OriginID"},
-			{"id":"RequestType", "type": "*composed", "value": "~RequestType"},
-			{"id":"Tenant", "type": "*composed", "value": "~Tenant"},
-			{"id":"Category", "type": "*composed", "value": "~Category"},
-			{"id":"Account", "type": "*composed", "value": "~Account"},
-			{"id":"Destination", "type": "*composed", "value": "~Destination"},
-			{"id":"AnswerTime", "type": "*composed", "value": "~AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
-			{"id":"Usage", "type": "*composed", "value": "~Usage"},
-			{"id":"Cost", "type": "*composed", "value": "~Cost", "rounding_decimals": 4},
-			{"id":"MatchedDestinationID", "type": "*composed", "value": "~CostDetails:s/\"MatchedDestId\":.*_(\\w{4})/${1}/:s/\"MatchedDestId\":\"INTERNAL\"/ON010/"},
-		],
-	},
-},
-
-
-"cdrstats": {
-	"enabled": true,
-},
-
-
-"pubsubs": {
-	"enabled": true,
-},
-
-
-"users": {
-	"enabled": true,
-	"indexes": ["Uuid"],
 },
 
 
@@ -128,13 +76,14 @@
 },
 
 
-"aliases": {
+"sessions": {
 	"enabled": true,
 },
 
 
-"sessions": {
-	"enabled": true,
+"migrator": {
+	"out_datadb_type": "internal",
+	"out_stordb_type": "internal",
 },
 
 }

@@ -83,7 +83,6 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 						err.Error(),
 						fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error())), nil
 				}
-
 			} else {
 				log.Print("Cannot dryRun SetVersions!")
 			}

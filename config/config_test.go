@@ -80,6 +80,20 @@ func TestCgrCfgDataDBPortWithoutDynamic(t *testing.T) {
 	} else if cgrCfg.DataDbPort != "6379" {
 		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbPort, "6379")
 	}
+	JSN_CFG = `
+{
+"data_db": {
+	"db_type": "internal",
+	}
+}`
+
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(JSN_CFG); err != nil {
+		t.Error(err)
+	} else if cgrCfg.DataDbType != utils.INTERNAL {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbType, utils.INTERNAL)
+	} else if cgrCfg.DataDbPort != "6379" {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbPort, "6379")
+	}
 }
 
 func TestCgrCfgDataDBPortWithDymanic(t *testing.T) {
@@ -97,6 +111,21 @@ func TestCgrCfgDataDBPortWithDymanic(t *testing.T) {
 		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbType, utils.MONGO)
 	} else if cgrCfg.DataDbPort != "27017" {
 		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbPort, "27017")
+	}
+	JSN_CFG = `
+{
+"data_db": {
+	"db_type": "internal",
+	"db_port": -1,
+	}
+}`
+
+	if cgrCfg, err := NewCGRConfigFromJsonString(JSN_CFG); err != nil {
+		t.Error(err)
+	} else if cgrCfg.DataDbType != utils.INTERNAL {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbType, utils.INTERNAL)
+	} else if cgrCfg.DataDbPort != "internal" {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.DataDbPort, "internal")
 	}
 }
 
@@ -1055,7 +1084,7 @@ func TestRadiusAgentCfg(t *testing.T) {
 func TestDbDefaults(t *testing.T) {
 	dbdf := NewDbDefaults()
 	flagInput := utils.MetaDynamic
-	dbs := []string{utils.MONGO, utils.REDIS, utils.MYSQL}
+	dbs := []string{utils.MONGO, utils.REDIS, utils.MYSQL, utils.INTERNAL}
 	for _, dbtype := range dbs {
 		host := dbdf.DBHost(dbtype, flagInput)
 		if host != utils.LOCALHOST {

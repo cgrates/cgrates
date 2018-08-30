@@ -86,15 +86,14 @@ func CheckVersions(storage Storage) error {
 	return nil
 }
 
-func SetDBVersions(storage Storage) error {
+func SetDBVersions(storage Storage) (err error) {
 	storType := storage.GetStorageType()
 	x := CurrentDBVersions(storType)
 	// no data, write version
-	if err := storage.SetVersions(x, false); err != nil {
+	if err = storage.SetVersions(x, false); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("Could not write current version to db: %v", err))
 	}
-	return nil
-
+	return
 }
 
 func (vers Versions) Compare(curent Versions, storType string) string {

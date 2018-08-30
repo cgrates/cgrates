@@ -54,7 +54,7 @@ const CGRATES_CFG_JSON = `
 
 
 "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	"db_type": "redis",						// data_db type: <redis|mongo>
+	"db_type": "redis",						// data_db type: <redis|mongo|internal>
 	"db_host": "127.0.0.1",					// data_db host address
 	"db_port": 6379, 						// data_db port to reach the database
 	"db_name": "10", 						// data_db database name to connect to
@@ -65,7 +65,7 @@ const CGRATES_CFG_JSON = `
 
 
 "stor_db": {								// database used to store offline tariff plans and CDRs
-	"db_type": "mysql",						// stor database type to use: <mongo|mysql|postgres>
+	"db_type": "mysql",						// stor database type to use: <mongo|mysql|postgres|internal>
 	"db_host": "127.0.0.1",					// the host to connect to
 	"db_port": 3306,						// the port to reach the stordb
 	"db_name": "cgrates",					// stor database name

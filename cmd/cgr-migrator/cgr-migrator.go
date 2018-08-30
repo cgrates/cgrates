@@ -194,6 +194,30 @@ func main() {
 		mgrCfg.MigratorCgrConfig.OutDataDBEncoding = *outDBDataEncoding
 	}
 
+	sameDataDB = mgrCfg.MigratorCgrConfig.OutDataDBType == mgrCfg.DataDbType &&
+		mgrCfg.MigratorCgrConfig.OutDataDBHost == mgrCfg.DataDbHost &&
+		mgrCfg.MigratorCgrConfig.OutDataDBPort == mgrCfg.DataDbPort &&
+		mgrCfg.MigratorCgrConfig.OutDataDBName == mgrCfg.DataDbName &&
+		mgrCfg.MigratorCgrConfig.OutDataDBEncoding == mgrCfg.DBDataEncoding
+
+	if dmIN, err = migrator.NewMigratorDataDB(mgrCfg.DataDbType,
+		mgrCfg.DataDbHost, mgrCfg.DataDbPort,
+		mgrCfg.DataDbName, mgrCfg.DataDbUser,
+		mgrCfg.DataDbPass, mgrCfg.DBDataEncoding,
+		mgrCfg.CacheCfg(), 0); err != nil {
+		log.Fatal(err)
+	}
+
+	if sameDataDB {
+		dmOUT = dmIN
+	} else if dmOUT, err = migrator.NewMigratorDataDB(mgrCfg.MigratorCgrConfig.OutDataDBType,
+		mgrCfg.MigratorCgrConfig.OutDataDBHost, mgrCfg.MigratorCgrConfig.OutDataDBPort,
+		mgrCfg.MigratorCgrConfig.OutDataDBName, mgrCfg.MigratorCgrConfig.OutDataDBUser,
+		mgrCfg.MigratorCgrConfig.OutDataDBPassword, mgrCfg.MigratorCgrConfig.OutDataDBEncoding,
+		mgrCfg.CacheCfg(), 0); err != nil {
+		log.Fatal(err)
+	}
+
 	// inStorDB
 	if *inStorDBType != dfltCfg.StorDBType {
 		mgrCfg.StorDBType = strings.TrimPrefix(*inStorDBType, "*")
@@ -230,7 +254,9 @@ func main() {
 		mgrCfg.MigratorCgrConfig.OutStorDBHost = *outStorDBHost
 	}
 	if *outStorDBPort == utils.MetaStorDB {
-		mgrCfg.MigratorCgrConfig.OutStorDBPort = mgrCfg.StorDBPort
+		if dfltCfg.MigratorCgrConfig.OutStorDBPort == mgrCfg.MigratorCgrConfig.OutStorDBPort {
+			mgrCfg.MigratorCgrConfig.OutStorDBPort = mgrCfg.StorDBPort
+		}
 	} else {
 		mgrCfg.MigratorCgrConfig.OutStorDBPort = *outStorDBPort
 	}
@@ -254,30 +280,6 @@ func main() {
 		}
 	} else {
 		mgrCfg.MigratorCgrConfig.OutStorDBPassword = *outStorDBPass
-	}
-
-	sameDataDB = mgrCfg.MigratorCgrConfig.OutDataDBType == mgrCfg.DataDbType &&
-		mgrCfg.MigratorCgrConfig.OutDataDBHost == mgrCfg.DataDbHost &&
-		mgrCfg.MigratorCgrConfig.OutDataDBPort == mgrCfg.DataDbPort &&
-		mgrCfg.MigratorCgrConfig.OutDataDBName == mgrCfg.DataDbName &&
-		mgrCfg.MigratorCgrConfig.OutDataDBEncoding == mgrCfg.DBDataEncoding
-
-	if dmIN, err = migrator.NewMigratorDataDB(mgrCfg.DataDbType,
-		mgrCfg.DataDbHost, mgrCfg.DataDbPort,
-		mgrCfg.DataDbName, mgrCfg.DataDbUser,
-		mgrCfg.DataDbPass, mgrCfg.DBDataEncoding,
-		mgrCfg.CacheCfg(), 0); err != nil {
-		log.Fatal(err)
-	}
-
-	if sameDataDB {
-		dmOUT = dmIN
-	} else if dmOUT, err = migrator.NewMigratorDataDB(mgrCfg.MigratorCgrConfig.OutDataDBType,
-		mgrCfg.MigratorCgrConfig.OutDataDBHost, mgrCfg.MigratorCgrConfig.OutDataDBPort,
-		mgrCfg.MigratorCgrConfig.OutDataDBName, mgrCfg.MigratorCgrConfig.OutDataDBUser,
-		mgrCfg.MigratorCgrConfig.OutDataDBPassword, mgrCfg.MigratorCgrConfig.OutDataDBEncoding,
-		mgrCfg.CacheCfg(), 0); err != nil {
-		log.Fatal(err)
 	}
 
 	sameStorDB = mgrCfg.MigratorCgrConfig.OutStorDBType == mgrCfg.StorDBType &&
