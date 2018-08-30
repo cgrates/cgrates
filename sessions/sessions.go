@@ -565,7 +565,8 @@ func (smg *SMGeneric) v2ForkSessions(tnt string, evStart *engine.SafEvent,
 
 // sessionStart will handle a new session, pass the connectionId so we can communicate on disconnect request
 func (smg *SMGeneric) sessionStart(tnt string, evStart *engine.SafEvent,
-	clntConn rpcclient.RpcClientConnection, resourceID string) (err error) {
+	clntConn rpcclient.RpcClientConnection, resourceID string,
+	debitInterval time.Duration) (err error) {
 	cgrID := evStart.GetStringIgnoreErrors(utils.CGRID)
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) { // Lock it on CGRID level
 		if pSS := smg.passiveToActive(cgrID); len(pSS) != 0 {
@@ -584,9 +585,9 @@ func (smg *SMGeneric) sessionStart(tnt string, evStart *engine.SafEvent,
 		for _, s := range ss {
 			smg.recordASession(s)
 			if s.RunID != utils.META_NONE &&
-				smg.cgrCfg.SessionSCfg().DebitInterval != 0 {
+				debitInterval != 0 {
 				s.stopDebit = stopDebitChan
-				go s.debitLoop(smg.cgrCfg.SessionSCfg().DebitInterval)
+				go s.debitLoop(debitInterval)
 			}
 		}
 		return nil, nil
@@ -890,7 +891,7 @@ func (smg *SMGeneric) InitiateSession(tnt string, gev *engine.SafEvent,
 	defer smg.responseCache.Cache(cacheKey,
 		&utils.ResponseCacheItem{Value: maxUsage, Err: err}) // schedule response caching
 	smg.deletePassiveSessions(cgrID)
-	if err = smg.sessionStart(tnt, gev, clnt, resourceID); err != nil {
+	if err = smg.sessionStart(tnt, gev, clnt, resourceID, smg.cgrCfg.SessionSCfg().DebitInterval); err != nil {
 		smg.sessionEnd(cgrID, 0)
 		return
 	}
@@ -925,7 +926,7 @@ func (smg *SMGeneric) UpdateSession(tnt string, gev *engine.SafEvent,
 		err = smg.sessionRelocate(initialCGRID,
 			cgrID, gev.GetStringIgnoreErrors(utils.OriginID))
 		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
-			err = smg.sessionStart(tnt, gev, clnt, resourceID)
+			err = smg.sessionStart(tnt, gev, clnt, resourceID, smg.cgrCfg.SessionSCfg().DebitInterval)
 		}
 		if err != nil {
 			return
@@ -1003,7 +1004,7 @@ func (smg *SMGeneric) TerminateSession(tnt string, gev *engine.SafEvent,
 		err = smg.sessionRelocate(initialCGRID, cgrID,
 			gev.GetStringIgnoreErrors(utils.OriginID))
 		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
-			err = smg.sessionStart(tnt, gev, clnt, resourceID)
+			err = smg.sessionStart(tnt, gev, clnt, resourceID, smg.cgrCfg.SessionSCfg().DebitInterval)
 		}
 		if err != nil && err != utils.ErrMandatoryIeMissing {
 			return
@@ -1069,104 +1070,55 @@ func (smg *SMGeneric) ChargeEvent(tnt string, gev *engine.SafEvent) (maxUsage ti
 		return item.Value.(time.Duration), item.Err
 	}
 	defer smg.responseCache.Cache(cacheKey, &utils.ResponseCacheItem{Value: maxUsage, Err: err})
-	var sessionRuns []*engine.SessionRun
-	cdr, err := gev.AsCDR(smg.cgrCfg, smg.Timezone)
+	// fork sessions
+	var ss []*SMGSession
+	if smg.chargerS == nil { // old way of session forking
+		ss, err = smg.v1ForkSessions(tnt, gev, nil, cgrID, "")
+	} else {
+		ss, err = smg.v2ForkSessions(tnt, gev, nil, cgrID, "")
+	}
 	if err != nil {
-		return maxUsage, err
-	}
-	if err = smg.rals.Call("Responder.GetSessionRuns", cdr, &sessionRuns); err != nil {
-		return
-	} else if len(sessionRuns) == 0 {
 		return
 	}
-	var maxDurInit bool // Avoid differences between default 0 and received 0
-	for _, sR := range sessionRuns {
-		cc := new(engine.CallCost)
-		if err = smg.rals.Call("Responder.MaxDebit", sR.CallDescriptor, cc); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> Could not Debit CD: %+v, RunID: %s, error: %s", utils.SessionS, sR.CallDescriptor, sR.DerivedCharger.RunID, err.Error()))
+	// debit each forked session
+	var maxDur *time.Duration // Avoid differences between default 0 and received 0
+	for _, s := range ss {
+		durDebit, err := s.debit(s.CD.GetDuration(), nil)
+		if err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> Could not Debit CD: %+v, RunID: %s, error: %s",
+				utils.SessionS, s.CD, s.RunID, err.Error()))
 			break
 		}
-		sR.CallCosts = append(sR.CallCosts, cc) // Save it so we can revert on issues
-		if ccDur := cc.GetDuration(); ccDur == 0 {
+		if durDebit == 0 {
 			err = utils.ErrInsufficientCredit
 			break
-		} else if !maxDurInit || ccDur < maxUsage {
-			maxUsage = ccDur
+		}
+		if maxDur == nil || *maxDur > durDebit {
+			maxDur = utils.DurationPointer(durDebit)
 		}
 	}
 	if err != nil { // Refund the ones already taken since we have error on one of the debits
-		for _, sR := range sessionRuns {
-			if len(sR.CallCosts) == 0 {
-				continue
-			}
-			cc := sR.CallCosts[0]
-			if len(sR.CallCosts) > 1 {
-				for _, ccSR := range sR.CallCosts {
-					cc.Merge(ccSR)
-				}
-			}
-			// collect increments
-			var refundIncrements engine.Increments
-			cc.Timespans.Decompress()
-			for _, ts := range cc.Timespans {
-				refundIncrements = append(refundIncrements, ts.Increments...)
-			}
-			// refund cc
-			if len(refundIncrements) > 0 {
-				cd := cc.CreateCallDescriptor()
-				cd.Increments = refundIncrements
-				cd.CgrID = cgrID
-				cd.RunID = sR.CallDescriptor.RunID
-				cd.Increments.Compress()
-				var acnt engine.Account
-				errRefund := smg.rals.Call("Responder.RefundIncrements", cd, &acnt)
-				if errRefund != nil {
-					return 0, errRefund
-				}
-				cc.AccountSummary = acnt.AsAccountSummary() // Update AccountSummary
+		for _, s := range ss {
+			if err := s.close(time.Duration(0)); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<%s> error: %s closing session with runID: %s",
+					utils.SessionS, err.Error(), s.RunID))
 			}
 		}
 		return
 	}
-	var withErrors bool
-	for _, sR := range sessionRuns {
-		if len(sR.CallCosts) == 0 {
-			continue
-		}
-		cc := sR.CallCosts[0]
-		if len(sR.CallCosts) > 1 {
-			for _, ccSR := range sR.CallCosts[1:] {
-				cc.Merge(ccSR)
-			}
-		}
-		cc.Round()
-		roundIncrements := cc.GetRoundIncrements()
-		if len(roundIncrements) != 0 {
-			cd := cc.CreateCallDescriptor()
-			cd.Increments = roundIncrements
-			var response float64
-			if errRefund := smg.rals.Call("Responder.RefundRounding", cd, &response); errRefund != nil {
-				utils.Logger.Err(fmt.Sprintf("<SM> ERROR failed to refund rounding: %v", errRefund))
-			}
-		}
-		var reply string
-		smCost := &engine.SMCost{
-			CGRID:       cgrID,
-			CostSource:  utils.MetaSessionS,
-			RunID:       sR.DerivedCharger.RunID,
-			OriginHost:  gev.GetStringIgnoreErrors(utils.OriginHost),
-			OriginID:    gev.GetStringIgnoreErrors(utils.OriginID),
-			CostDetails: engine.NewEventCostFromCallCost(cc, cgrID, sR.DerivedCharger.RunID),
-		}
-		if errStore := smg.cdrsrv.Call("CdrsV1.StoreSMCost", engine.AttrCDRSStoreSMCost{Cost: smCost,
-			CheckDuplicate: true}, &reply); errStore != nil && !strings.HasSuffix(errStore.Error(), utils.ErrExists.Error()) {
-			withErrors = true
-			utils.Logger.Err(fmt.Sprintf("<%s> Could not save CC: %+v, RunID: %s error: %s", utils.SessionS, cc, sR.DerivedCharger.RunID, errStore.Error()))
+	// store session log
+	for _, s := range ss {
+		if errStore := s.storeSMCost(); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> error: %s storing session with runID: %s",
+				utils.SessionS, errStore.Error(), s.RunID))
+			err = ErrPartiallyExecuted
 		}
 	}
-	if withErrors {
-		err = ErrPartiallyExecuted
+	if err != nil {
 		return
+	}
+	if maxDur != nil {
+		maxUsage = *maxDur
 	}
 	return
 }
