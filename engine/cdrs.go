@@ -792,3 +792,38 @@ func (cdrS *CdrServer) V2RateCDRs(attrs *utils.RPCCDRsFilter, reply *string) err
 	*reply = utils.OK
 	return nil
 }
+
+// V1GetCDRs returns CDRs from DB
+func (self *CdrServer) V1GetCDRs(args utils.RPCCDRsFilter, cdrs *[]*CDR) error {
+	cdrsFltr, err := args.AsCDRsFilter(self.Timezone())
+	if err != nil {
+		if err.Error() != utils.NotFoundCaps {
+			err = utils.NewErrServerError(err)
+		}
+		return err
+	}
+	if qryCDRs, _, err := self.cdrDb.GetCDRs(cdrsFltr, false); err != nil {
+		return utils.NewErrServerError(err)
+	} else {
+		*cdrs = qryCDRs
+	}
+	return nil
+}
+
+// V1CountCDRs counts CDRs from DB
+func (self *CdrServer) V1CountCDRs(args utils.RPCCDRsFilter, cnt *int64) error {
+	cdrsFltr, err := args.AsCDRsFilter(self.Timezone())
+	if err != nil {
+		if err.Error() != utils.NotFoundCaps {
+			err = utils.NewErrServerError(err)
+		}
+		return err
+	}
+	cdrsFltr.Count = true
+	if _, qryCnt, err := self.cdrDb.GetCDRs(cdrsFltr, false); err != nil {
+		return utils.NewErrServerError(err)
+	} else {
+		*cnt = qryCnt
+	}
+	return nil
+}

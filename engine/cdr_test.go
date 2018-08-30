@@ -85,77 +85,77 @@ func TestFieldAsString(t *testing.T) {
 	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
+		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
 	}
 	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.OrderID, true)
 	eFldVal = strconv.FormatInt(cdr.OrderID, 10)
 	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
+		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
 	}
 	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.ToR, true)
 	eFldVal = cdr.ToR
 	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
+		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
 	}
 	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.OriginID, true)
 	eFldVal = cdr.OriginID
 	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
+		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
 	}
 	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.OriginHost, true)
 	eFldVal = cdr.OriginHost
 	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
+		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
 	}
 	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Source, true)
 	eFldVal = cdr.Source
 	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
+		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
 	}
 	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.RequestType, true)
 	eFldVal = cdr.RequestType
 	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
+		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
 	}
 	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Category, true)
 	eFldVal = cdr.Category
 	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
+		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
 	}
 	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Account, true)
 	eFldVal = cdr.Account
 	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
+		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
 	}
 	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Subject, true)
 	eFldVal = cdr.Subject
 	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
+		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
 	}
 	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Destination, true)
 	eFldVal = cdr.Destination
 	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
+		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
 	}
 	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.SetupTime, true)
 	eFldVal = cdr.SetupTime.Format(time.RFC3339)
@@ -176,35 +176,35 @@ func TestFieldAsString(t *testing.T) {
 	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
+		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
 	}
 	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.RunID, true)
 	eFldVal = cdr.RunID
 	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
+		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
 	}
 	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+utils.Cost, true)
 	eFldVal = strconv.FormatFloat(cdr.Cost, 'f', -1, 64)
 	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
+		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
 	}
 	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+"field_extr1", true)
 	eFldVal = cdr.ExtraFields["field_extr1"]
 	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
+		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
 	}
 	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+"fieldextr2", true)
 	eFldVal = cdr.ExtraFields["fieldextr2"]
 	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {
-		t.Errorf("field: <%s>, expected: <%s>, received: <%s>", prsr, eFldVal, fldVal)
+		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
 	}
 	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+"dummy_field", true)
 	if _, err := cdr.FieldAsString(prsr); err != utils.ErrNotFound {

@@ -144,7 +144,7 @@ func TestSSv1ItAuth(t *testing.T) {
 				utils.OriginID:    "TestSSv1It1",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1001",
-				utils.Subject:     "1001",
+				utils.Subject:     "ANY2CNT",
 				utils.Destination: "1002",
 				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 				utils.Usage:       authUsage,
@@ -194,8 +194,8 @@ func TestSSv1ItAuth(t *testing.T) {
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
-				utils.Subject:     "1001",
 				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
 				utils.Destination: "1002",
 				"OfficeGroup":     "Marketing",
 				utils.OriginID:    "TestSSv1It1",
@@ -228,6 +228,7 @@ func TestSSv1ItAuthWithDigest(t *testing.T) {
 				utils.OriginID:    "TestSSv1It1",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
 				utils.Destination: "1002",
 				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 				utils.Usage:       authUsage,
@@ -270,6 +271,7 @@ func TestSSv1ItInitiateSession(t *testing.T) {
 				utils.OriginID:    "TestSSv1It1",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
 				utils.Destination: "1002",
 				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
@@ -301,6 +303,7 @@ func TestSSv1ItInitiateSession(t *testing.T) {
 				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
 				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
 				utils.Destination: "1002",
 				"OfficeGroup":     "Marketing",
 				utils.OriginID:    "TestSSv1It1",
@@ -314,6 +317,12 @@ func TestSSv1ItInitiateSession(t *testing.T) {
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
 		t.Errorf("expecting: %+v, received: %+v",
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
+	}
+	aSessions := make([]*sessions.ActiveSession, 0)
+	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 2 {
+		t.Errorf("wrong active sessions: %s", utils.ToJSON(aSessions))
 	}
 }
 
@@ -333,6 +342,7 @@ func TestSSv1ItInitiateSessionWithDigest(t *testing.T) {
 				utils.OriginID:    "TestSSv1It1",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
 				utils.Destination: "1002",
 				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
@@ -356,6 +366,12 @@ func TestSSv1ItInitiateSessionWithDigest(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v",
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.AttributesDigest))
 	}
+	aSessions := make([]*sessions.ActiveSession, 0)
+	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 4 { // the digest has increased the number of sessions
+		t.Errorf("wrong active sessions: %s", utils.ToJSON(aSessions))
+	}
 }
 
 func TestSSv1ItUpdateSession(t *testing.T) {
@@ -373,6 +389,7 @@ func TestSSv1ItUpdateSession(t *testing.T) {
 				utils.OriginID:    "TestSSv1It1",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
 				utils.Destination: "1002",
 				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
@@ -398,6 +415,7 @@ func TestSSv1ItUpdateSession(t *testing.T) {
 				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
 				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
 				utils.Destination: "1002",
 				"OfficeGroup":     "Marketing",
 				utils.OriginID:    "TestSSv1It1",
@@ -415,6 +433,12 @@ func TestSSv1ItUpdateSession(t *testing.T) {
 	if *rply.MaxUsage != reqUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
+	aSessions := make([]*sessions.ActiveSession, 0)
+	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 4 { // the digest has increased the number of sessions
+		t.Errorf("wrong active sessions: %s", utils.ToJSON(aSessions))
+	}
 }
 
 func TestSSv1ItTerminateSession(t *testing.T) {
@@ -431,6 +455,7 @@ func TestSSv1ItTerminateSession(t *testing.T) {
 				utils.OriginID:    "TestSSv1It1",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
 				utils.Destination: "1002",
 				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
@@ -446,6 +471,11 @@ func TestSSv1ItTerminateSession(t *testing.T) {
 	if rply != utils.OK {
 		t.Errorf("Unexpected reply: %s", rply)
 	}
+	aSessions := make([]*sessions.ActiveSession, 0)
+	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
 }
 
 func TestSSv1ItProcessCDR(t *testing.T) {
@@ -459,6 +489,7 @@ func TestSSv1ItProcessCDR(t *testing.T) {
 			utils.OriginID:    "TestSSv1It1",
 			utils.RequestType: utils.META_PREPAID,
 			utils.Account:     "1001",
+			utils.Subject:     "ANY2CNT",
 			utils.Destination: "1002",
 			utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 			utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
@@ -473,8 +504,10 @@ func TestSSv1ItProcessCDR(t *testing.T) {
 	if rply != utils.OK {
 		t.Errorf("Unexpected reply: %s", rply)
 	}
+	time.Sleep(100 * time.Millisecond)
 }
 
+// TestSSv1ItProcessEvent processes individual event and also checks it's CDRs
 func TestSSv1ItProcessEvent(t *testing.T) {
 	initUsage := 5 * time.Minute
 	args := &sessions.V1ProcessEventArgs{
@@ -491,6 +524,7 @@ func TestSSv1ItProcessEvent(t *testing.T) {
 				utils.OriginID:    "TestSSv1It2",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
 				utils.Destination: "1002",
 				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
@@ -522,6 +556,7 @@ func TestSSv1ItProcessEvent(t *testing.T) {
 				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
 				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
 				utils.Destination: "1002",
 				"OfficeGroup":     "Marketing",
 				utils.OriginID:    "TestSSv1It2",
@@ -535,6 +570,86 @@ func TestSSv1ItProcessEvent(t *testing.T) {
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
 		t.Errorf("expecting: %+v, received: %+v",
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
+	}
+	aSessions := make([]*sessions.ActiveSession, 0)
+	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	var rplyCDR string
+	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessCDR,
+		args.CGREvent, &rplyCDR); err != nil {
+		t.Error(err)
+	}
+	if rplyCDR != utils.OK {
+		t.Errorf("Unexpected reply: %s", rplyCDR)
+	}
+	time.Sleep(100 * time.Millisecond)
+}
+
+func TestSSv1ItCDRsGetCdrs(t *testing.T) {
+	var cdrCnt int64
+	req := utils.AttrGetCdrs{}
+	if err := sSApierRpc.Call(utils.CdrsV1CountCDRs, req, &cdrCnt); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if cdrCnt != 6 { // 3 for each CDR
+		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
+	}
+
+	var cdrs []*engine.CDR
+	args := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}}
+	if err := sSApierRpc.Call(utils.CdrsV1GetCDRs, args, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 2 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Cost != -1.0 {
+			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+		}
+	}
+	args = utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"},
+		OriginIDs: []string{"TestSSv1It1"}}
+	if err := sSApierRpc.Call(utils.CdrsV1GetCDRs, args, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Cost != 0.198 {
+			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+		}
+	}
+	args = utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"},
+		OriginIDs: []string{"TestSSv1It1"}}
+	if err := sSApierRpc.Call(utils.CdrsV1GetCDRs, args, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Cost != 0.102 {
+			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+		}
+	}
+	args = utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"},
+		OriginIDs: []string{"TestSSv1It2"}}
+	if err := sSApierRpc.Call(utils.CdrsV1GetCDRs, args, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Cost != 0.099 {
+			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+		}
+	}
+	args = utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"},
+		OriginIDs: []string{"TestSSv1It2"}}
+	if err := sSApierRpc.Call(utils.CdrsV1GetCDRs, args, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Cost != 0.051 {
+			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+		}
 	}
 }
 

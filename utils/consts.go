@@ -765,8 +765,10 @@ const (
 	CacheSv1Clear             = "CacheSv1.Clear"
 )
 
-// CdrsV2 APIs
+// Cdrs APIs
 const (
+	CdrsV1CountCDRs  = "CdrsV1.CountCDRs"
+	CdrsV1GetCDRs    = "CdrsV1.GetCDRs"
 	CdrsV2ProcessCDR = "CdrsV2.ProcessCDR"
 	CdrsV2RateCDRs   = "CdrsV2.RateCDRs"
 )

@@ -1123,19 +1123,20 @@ func (smg *SMGeneric) ChargeEvent(tnt string, gev *engine.SafEvent) (maxUsage ti
 	return
 }
 
-func (smg *SMGeneric) ProcessCDR(gev *engine.SafEvent) (err error) {
+func (smg *SMGeneric) ProcessCDR(tnt string, gev *engine.SafEvent) (err error) {
 	cgrID := GetSetCGRID(gev)
 	cacheKey := "ProcessCDR" + cgrID
 	if item, err := smg.responseCache.Get(cacheKey); err == nil && item != nil {
 		return item.Err
 	}
 	defer smg.responseCache.Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
-	cdr, err := gev.AsCDR(smg.cgrCfg, smg.Timezone)
-	if err != nil {
-		return err
+	cgrEv := &utils.CGREvent{
+		Tenant: tnt,
+		ID:     utils.UUIDSha1Prefix(),
+		Event:  gev.AsMapInterface(),
 	}
 	var reply string
-	if err = smg.cdrsrv.Call("CdrsV1.ProcessCDR", cdr, &reply); err != nil {
+	if err = smg.cdrsrv.Call(utils.CdrsV2ProcessCDR, cgrEv, &reply); err != nil {
 		return
 	}
 	return
@@ -1358,8 +1359,11 @@ func (smg *SMGeneric) BiRPCV2ChargeEvent(clnt rpcclient.RpcClientConnection,
 
 // Called on session end, should send the CDR to CDRS
 func (smg *SMGeneric) BiRPCV1ProcessCDR(clnt rpcclient.RpcClientConnection,
-	ev map[string]interface{}, reply *string) error {
-	if err := smg.ProcessCDR(engine.NewSafEvent(ev)); err != nil {
+	ev engine.MapEvent, reply *string) error {
+	if err := smg.ProcessCDR(
+		utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.Tenant),
+			smg.cgrCfg.DefaultTenant),
+		engine.NewSafEvent(ev)); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -2107,11 +2111,7 @@ func (smg *SMGeneric) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection
 // Called on session end, should send the CDR to CDRS
 func (smg *SMGeneric) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 	cgrEv utils.CGREvent, reply *string) error {
-	if err := smg.ProcessCDR(engine.NewSafEvent(cgrEv.Event)); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	*reply = utils.OK
-	return nil
+	return smg.cdrsrv.Call(utils.CdrsV2ProcessCDR, cgrEv, reply)
 }
 
 func NewV1ProcessEventArgs(resrc, acnts, attrs bool,

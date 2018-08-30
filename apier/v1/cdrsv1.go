@@ -76,3 +76,11 @@ func (self *CdrsV1) RateCDRs(attrs utils.AttrRateCdrs, reply *string) error {
 func (self *CdrsV1) StoreSMCost(attr engine.AttrCDRSStoreSMCost, reply *string) error {
 	return self.CdrSrv.V1StoreSMCost(attr, reply)
 }
+
+func (self *CdrsV1) CountCDRs(args utils.RPCCDRsFilter, reply *int64) error {
+	return self.CdrSrv.V1CountCDRs(args, reply)
+}
+
+func (self *CdrsV1) GetCDRs(args utils.RPCCDRsFilter, reply *[]*engine.CDR) error {
+	return self.CdrSrv.V1GetCDRs(args, reply)
+}
