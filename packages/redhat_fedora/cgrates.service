@@ -10,6 +10,7 @@ EnvironmentFile=-/etc/sysconfig/cgrates
 ExecStart=/usr/bin/cgr-engine $OPTIONS
 Restart=always
 TimeoutStopSec=30s
+RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
