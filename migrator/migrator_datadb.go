@@ -25,6 +25,7 @@ import (
 type MigratorDataDB interface {
 	getv1Account() (v1Acnt *v1Account, err error)
 	setV1Account(x *v1Account) (err error)
+	remV1Account(id string) (err error)
 	getV1ActionPlans() (v1aps *v1ActionPlans, err error)
 	setV1ActionPlans(x *v1ActionPlans) (err error)
 	getV1Actions() (v1acs *v1Actions, err error)
@@ -39,6 +40,7 @@ type MigratorDataDB interface {
 	setV2ActionTrigger(x *v2ActionTrigger) (err error)
 	getv2Account() (v2Acnt *v2Account, err error)
 	setV2Account(x *v2Account) (err error)
+	remV2Account(id string) (err error)
 	getV1AttributeProfile() (v1attrPrf *v1AttributeProfile, err error)
 	setV1AttributeProfile(x *v1AttributeProfile) (err error)
 	getV2ThresholdProfile() (v2T *v2Threshold, err error)

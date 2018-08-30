@@ -1,0 +1,28 @@
+{
+
+"data_db": {	// database used to store runtime data (eg: accounts, cdr stats)
+	"db_type": "redis",						// data_db type: <redis|mongo>
+	"db_port": 9999, 						// data_db port to reach the database
+	"db_name": "9999", 						// data_db database name to connect to
+},
+
+"stor_db": {	// database used to store offline tariff plans and CDRs
+"db_host": "*internal",
+},
+
+"migrator": {
+"out_datadb_type": "mongo",
+"out_datadb_host": "127.0.0.1",
+"out_datadb_port": "27017",
+"out_datadb_name": "data_backup",
+"out_datadb_user": "",
+"out_datadb_password":"",
+"out_stordb_type": "mongo",
+"out_datadb_host": "127.0.0.1",
+"out_stordb_port": "27017",
+"out_stordb_name": "store-backup",
+"out_stordb_user": "",
+"out_stordb_password": "",
+},
+
+}

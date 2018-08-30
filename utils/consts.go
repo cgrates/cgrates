@@ -96,6 +96,7 @@ const (
 	POSTGRES                      = "postgres"
 	MYSQL                         = "mysql"
 	MONGO                         = "mongo"
+	INTERNAL                      = "internal"
 	DataManager                   = "DataManager"
 	REDIS                         = "redis"
 	MAPSTOR                       = "mapstor"

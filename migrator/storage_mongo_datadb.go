@@ -84,6 +84,11 @@ func (v1ms *mongoMigrator) setV1Account(x *v1Account) (err error) {
 	return
 }
 
+//rem
+func (v1ms *mongoMigrator) remV1Account(id string) (err error) {
+	return v1ms.mgoDB.DB().C(v1AccountDBPrefix).Remove(bson.M{"id": id})
+}
+
 //V2
 //get
 func (v1ms *mongoMigrator) getv2Account() (v2Acnt *v2Account, err error) {
@@ -106,6 +111,11 @@ func (v1ms *mongoMigrator) setV2Account(x *v2Account) (err error) {
 		return err
 	}
 	return
+}
+
+//rem
+func (v1ms *mongoMigrator) remV2Account(id string) (err error) {
+	return v1ms.mgoDB.DB().C(v2AccountsCol).Remove(bson.M{"id": id})
 }
 
 //Action methods

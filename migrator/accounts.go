@@ -77,6 +77,9 @@ func (m *Migrator) migrateV1Accounts() (err error) {
 				if err = m.dmOut.DataManager().DataDB().SetAccount(acnt); err != nil {
 					return err
 				}
+				if err = m.dmIN.remV1Account(v1Acnt.Id); err != nil {
+					return err
+				}
 				m.stats[utils.Accounts] += 1
 			}
 		}
@@ -108,6 +111,9 @@ func (m *Migrator) migrateV2Accounts() (err error) {
 			acnt := v2Acnt.V2toV3Account()
 			if m.dryRun != true {
 				if err = m.dmOut.DataManager().DataDB().SetAccount(acnt); err != nil {
+					return err
+				}
+				if err = m.dmIN.remV2Account(v2Acnt.ID); err != nil {
 					return err
 				}
 				m.stats[utils.Accounts] += 1
