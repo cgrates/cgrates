@@ -126,8 +126,9 @@ func testV2CDRsProcessCDR(t *testing.T) {
 			utils.OriginHost:  "192.168.1.1",
 			utils.Source:      "testV2CDRsProcessCDR",
 			utils.RequestType: utils.META_RATED,
-			utils.Category:    "customers",
+			utils.Category:    "call",
 			utils.Account:     "testV2CDRsProcessCDR",
+			utils.Subject:     "ANY2CNT",
 			utils.Destination: "+4986517174963",
 			utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
 			utils.Usage:       time.Duration(1) * time.Minute,
@@ -191,7 +192,7 @@ func testV2CDRsRateCDRs(t *testing.T) {
 		Tenant:    "cgrates.org",
 		Category:  "call",
 		Direction: "*out",
-		Subject:   "supplier1",
+		Subject:   "SUPPLIER1",
 		RatingPlanActivations: []*utils.TPRatingActivation{
 			&utils.TPRatingActivation{
 				ActivationTime: "2018-01-01T00:00:00Z",

@@ -519,15 +519,16 @@ func (smg *SMGeneric) v2ForkSessions(tnt string, evStart *engine.SafEvent,
 		err.Error() != utils.ErrNotFound.Error() {
 		return nil, err
 	}
-	if len(chrgrs) == 0 {
-		return []*SMGSession{
-			&SMGSession{CGRID: cgrID, ResourceID: resourceID, EventStart: evStart,
-				RunID: utils.META_NONE, Timezone: smg.Timezone,
-				rals: smg.rals, cdrsrv: smg.cdrsrv,
-				clntConn: clntConn}}, nil
-	}
+	noPrepaidSs := []*SMGSession{
+		&SMGSession{CGRID: cgrID, ResourceID: resourceID, EventStart: evStart,
+			RunID: utils.META_NONE, Timezone: smg.Timezone,
+			rals: smg.rals, cdrsrv: smg.cdrsrv,
+			clntConn: clntConn}}
 	for _, chrgr := range chrgrs {
 		evStart := engine.NewSafEvent(chrgr.CGREvent.Event)
+		if evStart.GetStringIgnoreErrors(utils.RequestType) != utils.META_PREPAID {
+			continue // not forking non-prepaid session
+		}
 		startTime := evStart.GetTimeIgnoreErrors(utils.AnswerTime, smg.Timezone)
 		if startTime.IsZero() { // AnswerTime not parsable, try SetupTime
 			startTime = evStart.GetTimeIgnoreErrors(utils.SetupTime, smg.Timezone)
@@ -555,6 +556,9 @@ func (smg *SMGeneric) v2ForkSessions(tnt string, evStart *engine.SafEvent,
 				rals:       smg.rals, cdrsrv: smg.cdrsrv,
 				CD: cd, clntConn: clntConn,
 				clientProto: smg.cgrCfg.SessionSCfg().ClientProtocol})
+	}
+	if len(ss) == 0 { //  we have no *prepaid session to work with
+		return noPrepaidSs, nil
 	}
 	return
 }

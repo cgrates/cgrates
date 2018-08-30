@@ -21,6 +21,7 @@ package engine
 import (
 	"errors"
 	"fmt"
+	"reflect"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -30,6 +31,9 @@ import (
 func NewChargerService(dm *DataManager, filterS *FilterS,
 	attrS rpcclient.RpcClientConnection,
 	cfg *config.CGRConfig) (*ChargerService, error) {
+	if attrS != nil && reflect.ValueOf(attrS).IsNil() {
+		attrS = nil
+	}
 	return &ChargerService{dm: dm, filterS: filterS,
 		attrS: attrS, cfg: cfg}, nil
 }
