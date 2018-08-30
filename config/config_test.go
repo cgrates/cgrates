@@ -1518,3 +1518,32 @@ func TestCgrMigratorCfgDefault(t *testing.T) {
 		t.Errorf("received: %+v, expecting: %+v", utils.ToJSON(cgrCfg.MigratorCgrConfig), utils.ToJSON(eMgrCfg))
 	}
 }
+
+func TestCgrMigratorCfg2(t *testing.T) {
+	JSN_CFG := `
+{
+"migrator": {
+	"out_datadb_type": "redis",
+	"out_datadb_host": "0.0.0.0",
+	"out_datadb_port": "9999",
+	"out_datadb_name": "9999",
+	"out_datadb_user": "cgrates",
+	"out_datadb_password": "",
+	"out_datadb_encoding" : "msgpack",
+	"out_stordb_type": "mysql",
+	"out_stordb_host": "0.0.0.0",
+	"out_stordb_port": "9999",
+	"out_stordb_name": "cgrates",
+	"out_stordb_user": "cgrates",
+	"out_stordb_password": "",
+},
+}`
+
+	if cgrCfg, err := NewCGRConfigFromJsonString(JSN_CFG); err != nil {
+		t.Error(err)
+	} else if cgrCfg.MigratorCgrConfig.OutDataDBHost != "0.0.0.0" {
+		t.Errorf("Expected: 0.0.0.0 , received: %+v", cgrCfg.MigratorCgrConfig.OutDataDBHost)
+	} else if cgrCfg.MigratorCgrConfig.OutDataDBPort != "9999" {
+		t.Errorf("Expected: 9999, received: %+v", cgrCfg.MigratorCgrConfig.OutDataDBPassword)
+	}
+}

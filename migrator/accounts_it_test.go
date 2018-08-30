@@ -50,7 +50,7 @@ var sTestsAccIT = []func(t *testing.T){
 	testAccITMigrateAndMove,
 }
 
-func TestAccountITRedis(t *testing.T) {
+func TestAccountMigrateITRedis(t *testing.T) {
 	var err error
 	accPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
 	accCfgIn, err = config.NewCGRConfigFromFolder(accPathIn)
@@ -67,7 +67,7 @@ func TestAccountITRedis(t *testing.T) {
 	}
 }
 
-func TestAccountITMongo(t *testing.T) {
+func TestAccountMigrateITMongo(t *testing.T) {
 	var err error
 	accPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
 	accCfgIn, err = config.NewCGRConfigFromFolder(accPathIn)
@@ -166,6 +166,10 @@ func testAccITFlush(t *testing.T) {
 	if err := engine.SetDBVersions(accMigrator.dmOut.DataManager().DataDB()); err != nil {
 		t.Error("Error  ", err.Error())
 	}
+	accMigrator.dmIN.DataManager().DataDB().Flush("")
+	if err := engine.SetDBVersions(accMigrator.dmIN.DataManager().DataDB()); err != nil {
+		t.Error("Error  ", err.Error())
+	}
 }
 
 func testAccITMigrateAndMove(t *testing.T) {
@@ -244,10 +248,12 @@ func testAccITMigrateAndMove(t *testing.T) {
 	}
 	switch accAction {
 	case utils.Migrate:
+		// set v1Account
 		err := accMigrator.dmIN.setV1Account(v1Acc)
 		if err != nil {
 			t.Error("Error when setting v1 Accounts ", err.Error())
 		}
+		//set version for account : 1
 		currentVersion := engine.Versions{
 			utils.StatS:          2,
 			utils.Thresholds:     2,
@@ -260,46 +266,52 @@ func testAccITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when setting version for Accounts ", err.Error())
 		}
-
+		//check if version was set correctly
 		if vrs, err := accMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 			t.Error(err)
 		} else if vrs[utils.Accounts] != 1 {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.Accounts])
 		}
-
+		//migrate account
 		err, _ = accMigrator.Migrate([]string{utils.MetaAccounts})
 		if err != nil {
 			t.Error("Error when migrating Accounts ", err.Error())
 		}
-
+		//check if version was updated
 		if vrs, err := accMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 			t.Error(err)
 		} else if vrs[utils.Accounts] != 3 {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.Accounts])
 		}
-
+		//check if account was migrate correctly
 		result, err := accMigrator.dmOut.DataManager().DataDB().GetAccount(testAccount.ID)
 		if err != nil {
 			t.Error("Error when getting Accounts ", err.Error())
 		}
-		if !reflect.DeepEqual(testAccount.BalanceMap["*voice"][0], result.BalanceMap["*voice"][0]) {
-			t.Errorf("Expecting: %+v, received: %+v", testAccount.BalanceMap["*voice"][0], result.BalanceMap["*voice"][0])
-		} else if !reflect.DeepEqual(testAccount, result) {
+		if !reflect.DeepEqual(testAccount, result) {
 			t.Errorf("Expecting: %+v, received: %+v", testAccount, result)
 		}
-	case utils.Move:
-		if err := accMigrator.dmIN.DataManager().DataDB().SetAccount(testAccount); err != nil {
-			log.Print("GOT ERR DMIN", err)
+		//check if old account was deleted
+		if _, err = accMigrator.dmIN.getv1Account(); err != utils.ErrNoMoreData {
+			t.Error("Error should be not found : ", err)
 		}
+	case utils.Move:
+		//set an account in dmIN
+		if err := accMigrator.dmIN.DataManager().DataDB().SetAccount(testAccount); err != nil {
+			t.Error(err)
+		}
+		//set versions for account
 		currentVersion := engine.CurrentDataDBVersions()
 		err := accMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for Accounts ", err.Error())
 		}
+		//migrate accounts
 		err, _ = accMigrator.Migrate([]string{utils.MetaAccounts})
 		if err != nil {
 			t.Error("Error when accMigratorrating Accounts ", err.Error())
 		}
+		//check if account was migrate correctly
 		result, err := accMigrator.dmOut.DataManager().DataDB().GetAccount(testAccount.ID)
 		if err != nil {
 			t.Error(err)
@@ -307,6 +319,7 @@ func testAccITMigrateAndMove(t *testing.T) {
 		if !reflect.DeepEqual(testAccount, result) {
 			t.Errorf("Expecting: %+v, received: %+v", testAccount, result)
 		}
+		//check if old account was deleted
 		result, err = accMigrator.dmIN.DataManager().DataDB().GetAccount(testAccount.ID)
 		if err != utils.ErrNotFound {
 			t.Error(err)

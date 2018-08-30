@@ -50,7 +50,7 @@ func (v1rs *redisMigrator) getv1Account() (v1Acnt *v1Account, err error) {
 		if err != nil {
 			return
 		} else if len(v1rs.dataKeys) == 0 {
-			return nil, utils.ErrNotFound
+			return nil, utils.ErrNoMoreData
 		}
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
@@ -84,6 +84,12 @@ func (v1rs *redisMigrator) setV1Account(x *v1Account) (err error) {
 	return
 }
 
+//rem
+func (v1rs *redisMigrator) remV1Account(id string) (err error) {
+	key := v1AccountDBPrefix + id
+	return v1rs.rds.Cmd("DEL", key).Err
+}
+
 //V2
 //get
 func (v1rs *redisMigrator) getv2Account() (v2Acnt *v2Account, err error) {
@@ -92,7 +98,7 @@ func (v1rs *redisMigrator) getv2Account() (v2Acnt *v2Account, err error) {
 		if err != nil {
 			return
 		} else if len(v1rs.dataKeys) == 0 {
-			return nil, utils.ErrNotFound
+			return nil, utils.ErrNoMoreData
 		}
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
@@ -124,6 +130,12 @@ func (v1rs *redisMigrator) setV2Account(x *v2Account) (err error) {
 		return err
 	}
 	return
+}
+
+//rem
+func (v1rs *redisMigrator) remV2Account(id string) (err error) {
+	key := utils.ACCOUNT_PREFIX + id
+	return v1rs.rds.Cmd("DEL", key).Err
 }
 
 //ActionPlans methods
