@@ -209,7 +209,8 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 	}
 	if self.stats != nil {
 		var reply []string
-		go self.stats.Call(utils.StatSv1ProcessEvent, cdr.AsCGREvent(), &reply)
+
+		go self.stats.Call(utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{CGREvent: *cdr.AsCGREvent()}, &reply)
 	}
 	if len(self.cgrCfg.CDRSOnlineCDRExports) != 0 { // Replicate raw CDR
 		self.replicateCDRs([]*CDR{cdr})
@@ -296,7 +297,7 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, cdrstats, 
 			}
 			if self.stats != nil {
 				var reply []string
-				go self.stats.Call(utils.StatSv1ProcessEvent, ratedCDR.AsCGREvent(), &reply)
+				go self.stats.Call(utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{CGREvent: *ratedCDR.AsCGREvent()}, &reply)
 			}
 		}
 	}
@@ -677,7 +678,7 @@ func (cdrS *CdrServer) thdSProcessEvent(cgrEv *utils.CGREvent) {
 // statSProcessEvent will send the event to StatS if the connection is configured
 func (cdrS *CdrServer) statSProcessEvent(cgrEv *utils.CGREvent) {
 	var reply []string
-	if err := cdrS.stats.Call(utils.StatSv1ProcessEvent, cgrEv, &reply); err != nil &&
+	if err := cdrS.stats.Call(utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{CGREvent: *cgrEv}, &reply); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s processing CDR event %+v with %s.",

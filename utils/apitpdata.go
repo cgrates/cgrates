@@ -1057,6 +1057,7 @@ type CDRsFilter struct {
 	Unscoped               bool              // Include soft-deleted records in results
 	Count                  bool              // If true count the items instead of returning data
 	Paginator
+	//OrderBy asc/desc
 }
 
 // RPCCDRsFilter is a filter used in Rpc calls

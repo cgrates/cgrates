@@ -111,13 +111,13 @@ func (stsv1 *StatSv1) GetQueueIDs(tenant string, qIDs *[]string) error {
 }
 
 // ProcessEvent returns processes a new Event
-func (stsv1 *StatSv1) ProcessEvent(ev *utils.CGREvent, reply *[]string) error {
-	return stsv1.sS.V1ProcessEvent(ev, reply)
+func (stsv1 *StatSv1) ProcessEvent(args *engine.StatsArgsProcessEvent, reply *[]string) error {
+	return stsv1.sS.V1ProcessEvent(args, reply)
 }
 
 // GetQueueIDs returns the list of queues IDs in the system
-func (stsv1 *StatSv1) GetStatQueuesForEvent(ev *utils.CGREvent, reply *[]string) (err error) {
-	return stsv1.sS.V1GetStatQueuesForEvent(ev, reply)
+func (stsv1 *StatSv1) GetStatQueuesForEvent(args *engine.StatsArgsProcessEvent, reply *[]string) (err error) {
+	return stsv1.sS.V1GetStatQueuesForEvent(args, reply)
 }
 
 // GetStringMetrics returns the string metrics for a Queue

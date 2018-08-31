@@ -178,16 +178,17 @@ func testV1STSGetStats(t *testing.T) {
 func testV1STSProcessEvent(t *testing.T) {
 	var reply []string
 	expected := []string{"Stats1"}
-	ev1 := utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.Account:    "1001",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(135 * time.Second),
-			utils.COST:       123.0,
-			utils.PDD:        time.Duration(12 * time.Second)}}
-	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
+	args := engine.StatsArgsProcessEvent{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.Account:    "1001",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:      time.Duration(135 * time.Second),
+				utils.COST:       123.0,
+				utils.PDD:        time.Duration(12 * time.Second)}}}
+	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -213,26 +214,28 @@ func testV1STSProcessEvent(t *testing.T) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
 	}
 
-	ev2 := utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event2",
-		Event: map[string]interface{}{
-			utils.Account:    "1002",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(45 * time.Second)}}
-	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &ev2, &reply); err != nil {
+	args2 := engine.StatsArgsProcessEvent{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event2",
+			Event: map[string]interface{}{
+				utils.Account:    "1002",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:      time.Duration(45 * time.Second)}}}
+	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &args2, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
-	ev3 := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event3",
-		Event: map[string]interface{}{
-			utils.Account:   "1002",
-			utils.SetupTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:     0}}
-	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &ev3, &reply); err != nil {
+	args3 := engine.StatsArgsProcessEvent{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event3",
+			Event: map[string]interface{}{
+				utils.Account:   "1002",
+				utils.SetupTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:     0}}}
+	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &args3, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
