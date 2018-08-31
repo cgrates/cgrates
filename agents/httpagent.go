@@ -199,7 +199,8 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 		}
 	}
 	// separate request so we can capture the Terminate/Event also here
-	if reqProcessor.Flags.HasKey(utils.MetaCDRs) {
+	if reqProcessor.Flags.HasKey(utils.MetaCDRs) &&
+		!reqProcessor.Flags.HasKey(utils.MetaDryRun) {
 		var rplyCDRs string
 		if err = ha.sessionS.Call(utils.SessionSv1ProcessCDR,
 			cgrEv, &rplyCDRs); err != nil {
