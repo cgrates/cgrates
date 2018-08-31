@@ -305,8 +305,7 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> ignoring supplier with ID: %s, err: %s",
 						utils.SupplierS, spl.ID, err.Error()))
-				// return nil, false, nil
-				// Need to add test to catch the panic and after that apply the changes
+				return nil, false, nil
 			} else {
 				return nil, false, err
 			}
@@ -335,8 +334,7 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> ignoring supplier with ID: %s, err: %s",
 						utils.SupplierS, spl.ID, err.Error()))
-				// return nil, false, nil
-				// Need to add test to catch the panic and after that apply the changes
+				return nil, false, nil
 			} else {
 				return nil, false, err
 			}
