@@ -170,6 +170,9 @@ func (ec *EventCost) rateIntervalForRatingID(ratingID string) (ri *RateInterval)
 }
 
 func (ec *EventCost) Clone() (cln *EventCost) {
+	if ec == nil {
+		return
+	}
 	cln = new(EventCost)
 	cln.CGRID = ec.CGRID
 	cln.RunID = ec.RunID
