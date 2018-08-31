@@ -123,7 +123,7 @@ func TestHAitAuth1001(t *testing.T) {
 	eXml := []byte(`<?xml version="1.0" encoding="UTF-8"?>
 <response>
   <Allow>1</Allow>
-  <MaxDuration>6042</MaxDuration>
+  <MaxDuration>10800</MaxDuration>
 </response>`)
 	if body, err := ioutil.ReadAll(rply.Body); err != nil {
 		t.Error(err)

@@ -474,7 +474,8 @@ func (smg *SMGeneric) getSessionIDsForPrefix(prefix string,
 
 // v1ForkSessions is using DerivedChargers for session forking
 func (smg *SMGeneric) v1ForkSessions(tnt string, evStart *engine.SafEvent,
-	clntConn rpcclient.RpcClientConnection, cgrID, resourceID string) (ss []*SMGSession, err error) {
+	clntConn rpcclient.RpcClientConnection, cgrID, resourceID string,
+	handlePseudo bool) (ss []*SMGSession, err error) {
 	cdr, err := evStart.AsCDR(smg.cgrCfg, smg.Timezone)
 	if err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<%s> could not convert event: %s to CDR, err: %s",
@@ -486,14 +487,19 @@ func (smg *SMGeneric) v1ForkSessions(tnt string, evStart *engine.SafEvent,
 		cdr, &sessionRuns); err != nil {
 		return nil, err
 	}
-	if len(sessionRuns) == 0 {
-		return []*SMGSession{
-			&SMGSession{CGRID: cgrID, ResourceID: resourceID, EventStart: evStart,
-				RunID: utils.META_NONE, Timezone: smg.Timezone,
-				rals: smg.rals, cdrsrv: smg.cdrsrv,
-				clntConn: clntConn}}, nil
+	noneSession := []*SMGSession{
+		&SMGSession{CGRID: cgrID, ResourceID: resourceID, EventStart: evStart,
+			RunID: utils.META_NONE, Timezone: smg.Timezone,
+			rals: smg.rals, cdrsrv: smg.cdrsrv,
+			clntConn: clntConn}}
+	handledSessions := []string{utils.META_PREPAID}
+	if handlePseudo {
+		handledSessions = append(handledSessions, utils.META_PSEUDOPREPAID)
 	}
 	for _, sessionRun := range sessionRuns {
+		if !utils.IsSliceMember(handledSessions, sessionRun.RequestType) {
+			continue // not forking non-prepaid session
+		}
 		ss = append(ss,
 			&SMGSession{CGRID: cgrID, Tenant: tnt,
 				ResourceID: resourceID, EventStart: evStart,
@@ -502,13 +508,16 @@ func (smg *SMGeneric) v1ForkSessions(tnt string, evStart *engine.SafEvent,
 				CD: sessionRun.CallDescriptor, clntConn: clntConn,
 				clientProto: smg.cgrCfg.SessionSCfg().ClientProtocol})
 	}
+	if len(ss) == 0 { //  we have no *prepaid session to work with
+		return noneSession, nil
+	}
 	return
 }
 
 // v2ForkSessions is using ChargerS for session forking
 func (smg *SMGeneric) v2ForkSessions(tnt string, evStart *engine.SafEvent,
 	clntConn rpcclient.RpcClientConnection,
-	cgrID, resourceID string) (ss []*SMGSession, err error) {
+	cgrID, resourceID string, handlePseudo bool) (ss []*SMGSession, err error) {
 	cgrEv := &utils.CGREvent{
 		Tenant: tnt,
 		ID:     utils.UUIDSha1Prefix(),
@@ -519,14 +528,18 @@ func (smg *SMGeneric) v2ForkSessions(tnt string, evStart *engine.SafEvent,
 		err.Error() != utils.ErrNotFound.Error() {
 		return nil, err
 	}
-	noPrepaidSs := []*SMGSession{
+	noneSession := []*SMGSession{
 		&SMGSession{CGRID: cgrID, ResourceID: resourceID, EventStart: evStart,
 			RunID: utils.META_NONE, Timezone: smg.Timezone,
 			rals: smg.rals, cdrsrv: smg.cdrsrv,
 			clntConn: clntConn}}
+	handledSessions := []string{utils.META_PREPAID}
+	if handlePseudo {
+		handledSessions = append(handledSessions, utils.META_PSEUDOPREPAID)
+	}
 	for _, chrgr := range chrgrs {
 		evStart := engine.NewSafEvent(chrgr.CGREvent.Event)
-		if evStart.GetStringIgnoreErrors(utils.RequestType) != utils.META_PREPAID {
+		if !utils.IsSliceMember(handledSessions, evStart.GetStringIgnoreErrors(utils.RequestType)) {
 			continue // not forking non-prepaid session
 		}
 		startTime := evStart.GetTimeIgnoreErrors(utils.AnswerTime, smg.Timezone)
@@ -558,7 +571,7 @@ func (smg *SMGeneric) v2ForkSessions(tnt string, evStart *engine.SafEvent,
 				clientProto: smg.cgrCfg.SessionSCfg().ClientProtocol})
 	}
 	if len(ss) == 0 { //  we have no *prepaid session to work with
-		return noPrepaidSs, nil
+		return noneSession, nil
 	}
 	return
 }
@@ -574,9 +587,9 @@ func (smg *SMGeneric) sessionStart(tnt string, evStart *engine.SafEvent,
 		}
 		var ss []*SMGSession
 		if smg.chargerS == nil { // old way of session forking
-			ss, err = smg.v1ForkSessions(tnt, evStart, clntConn, cgrID, resourceID)
+			ss, err = smg.v1ForkSessions(tnt, evStart, clntConn, cgrID, resourceID, false)
 		} else {
-			ss, err = smg.v2ForkSessions(tnt, evStart, clntConn, cgrID, resourceID)
+			ss, err = smg.v2ForkSessions(tnt, evStart, clntConn, cgrID, resourceID, false)
 		}
 		if err != nil {
 			return nil, err
@@ -861,18 +874,34 @@ func (smg *SMGeneric) GetMaxUsage(tnt string, gev *engine.SafEvent) (maxUsage ti
 		return (item.Value.(time.Duration)), item.Err
 	}
 	defer smg.responseCache.Cache(cacheKey, &utils.ResponseCacheItem{Value: maxUsage, Err: err})
-	storedCdr, err := gev.AsCDR(config.CgrConfig(), smg.Timezone)
-	if err != nil {
-		return maxUsage, err
-	}
 	if has := gev.HasField(utils.Usage); !has { // make sure we have a minimum duration configured
-		storedCdr.Usage = smg.cgrCfg.SessionSCfg().MaxCallDuration
+		gev.Set(utils.Usage, smg.cgrCfg.SessionSCfg().MaxCallDuration)
 	}
-	var maxDur float64
-	if err = smg.rals.Call("Responder.GetDerivedMaxSessionTime", storedCdr, &maxDur); err != nil {
+	// fork sessions
+	var ss []*SMGSession
+	if smg.chargerS == nil { // old way of session forking
+		ss, err = smg.v1ForkSessions(tnt, gev, nil, cgrID, "", true)
+	} else {
+		ss, err = smg.v2ForkSessions(tnt, gev, nil, cgrID, "", true)
+	}
+	if err != nil {
 		return
 	}
-	maxUsage = time.Duration(maxDur)
+	var minUsage *time.Duration // find out the minimum usage
+	for _, s := range ss {
+		if s.RunID == utils.META_NONE {
+			minUsage = utils.DurationPointer(-1)
+			break
+		}
+		var maxDur time.Duration
+		if err = smg.rals.Call("Responder.GetMaxSessionTime", s.CD, &maxDur); err != nil {
+			return
+		}
+		if minUsage == nil || maxDur < *minUsage {
+			minUsage = &maxDur
+		}
+	}
+	maxUsage = *minUsage
 	if maxUsage != time.Duration(-1) &&
 		maxUsage < smg.cgrCfg.SessionSCfg().MinCallDuration {
 		return 0, errors.New("UNAUTHORIZED_MIN_DURATION")
@@ -1073,9 +1102,9 @@ func (smg *SMGeneric) ChargeEvent(tnt string, gev *engine.SafEvent) (maxUsage ti
 	// fork sessions
 	var ss []*SMGSession
 	if smg.chargerS == nil { // old way of session forking
-		ss, err = smg.v1ForkSessions(tnt, gev, nil, cgrID, "")
+		ss, err = smg.v1ForkSessions(tnt, gev, nil, cgrID, "", false)
 	} else {
-		ss, err = smg.v2ForkSessions(tnt, gev, nil, cgrID, "")
+		ss, err = smg.v2ForkSessions(tnt, gev, nil, cgrID, "", false)
 	}
 	if err != nil {
 		return
@@ -1083,8 +1112,8 @@ func (smg *SMGeneric) ChargeEvent(tnt string, gev *engine.SafEvent) (maxUsage ti
 	// debit each forked session
 	var maxDur *time.Duration // Avoid differences between default 0 and received 0
 	for _, s := range ss {
-		durDebit, err := s.debit(s.CD.GetDuration(), nil)
-		if err != nil {
+		var durDebit time.Duration
+		if durDebit, err = s.debit(s.CD.GetDuration(), nil); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Could not Debit CD: %+v, RunID: %s, error: %s",
 				utils.SessionS, s.CD, s.RunID, err.Error()))
 			break
@@ -1240,9 +1269,9 @@ func (smg *SMGeneric) BiRPCV2GetMaxUsage(clnt rpcclient.RpcClientConnection,
 func (smg *SMGeneric) BiRPCV1InitiateSession(clnt rpcclient.RpcClientConnection,
 	ev engine.MapEvent, maxUsage *float64) (err error) {
 	var minMaxUsage time.Duration
-	if minMaxUsage, err = smg.InitiateSession(
-		utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.Tenant),
-			smg.cgrCfg.DefaultTenant),
+	tnt := utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.Tenant),
+		smg.cgrCfg.DefaultTenant)
+	if minMaxUsage, err = smg.InitiateSession(tnt,
 		engine.NewSafEvent(ev), clnt, ""); err != nil {
 		if err != rpcclient.ErrSessionNotFound {
 			err = utils.NewErrServerError(err)
@@ -1250,7 +1279,14 @@ func (smg *SMGeneric) BiRPCV1InitiateSession(clnt rpcclient.RpcClientConnection,
 		return
 	}
 	if minMaxUsage == time.Duration(-1) {
-		*maxUsage = -1.0
+		// handle auth for OpenSIPS 2.1
+		var authUsage time.Duration
+		if authUsage, err = smg.GetMaxUsage(tnt, engine.NewSafEvent(ev)); err != nil {
+			return
+		}
+		if authUsage != time.Duration(-1) {
+			*maxUsage = authUsage.Seconds()
+		}
 	} else {
 		*maxUsage = minMaxUsage.Seconds()
 	}

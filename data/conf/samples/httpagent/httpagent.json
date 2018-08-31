@@ -56,7 +56,7 @@
 			{
 				"id": "mtcall_cdr",
 				"filters": ["*string:*req.request_type:MTCALL_CDR"],
-				"flags": ["*dryrun", "*cdrs"],
+				"flags": ["*cdrs"],
 				"continue_on_success": false,
 				"request_fields":[
 					{"id": "RequestType", "field_id": "RequestType", "type": "*constant", 

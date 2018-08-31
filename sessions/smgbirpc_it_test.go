@@ -145,13 +145,14 @@ func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		utils.RequestType: utils.META_PREPAID,
 		utils.SetupTime:   "2016-01-05 18:30:49",
 		utils.AnswerTime:  "2016-01-05 18:31:05",
+		utils.Usage:       time.Duration(200 * time.Millisecond),
 	})
 	var maxUsage float64
 	if err := smgBiRPC.Call(utils.SMGenericV1InitiateSession,
 		smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
-	if maxUsage != -1 {
+	if maxUsage != 0.01 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
 	// Make sure we are receiving a disconnect event
@@ -194,11 +195,16 @@ func TestSMGBiRPCSessionAutomaticDisconnects(t *testing.T) {
 			t.Errorf("Unexpected CDR CostSource received, cdr: %v %+v ", cdrs[0].CostSource, cdrs[0])
 		}
 	}
+
 }
 
 func TestSMGBiRPCSessionOriginatorTerminate(t *testing.T) {
-	attrSetBalance := utils.AttrSetBalance{Tenant: "cgrates.org", Account: "TestSMGBiRPCSessionOriginatorTerminate", BalanceType: utils.VOICE, BalanceID: utils.StringPointer("TestSMGBiRPCSessionOriginatorTerminate"),
-		Value: utils.Float64Pointer(1 * float64(time.Second)), RatingSubject: utils.StringPointer("*zero1ms")}
+	attrSetBalance := utils.AttrSetBalance{Tenant: "cgrates.org",
+		Account:       "TestSMGBiRPCSessionOriginatorTerminate",
+		BalanceType:   utils.VOICE,
+		BalanceID:     utils.StringPointer("TestSMGBiRPCSessionOriginatorTerminate"),
+		Value:         utils.Float64Pointer(1 * float64(time.Second)),
+		RatingSubject: utils.StringPointer("*zero1ms")}
 	var reply string
 	if err := smgRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
 		t.Error(err)
@@ -226,13 +232,14 @@ func TestSMGBiRPCSessionOriginatorTerminate(t *testing.T) {
 		utils.RequestType: utils.META_PREPAID,
 		utils.SetupTime:   "2016-01-05 18:30:49",
 		utils.AnswerTime:  "2016-01-05 18:31:05",
+		utils.Usage:       time.Duration(200 * time.Millisecond),
 	})
 	var maxUsage float64
 	if err := smgBiRPC.Call(utils.SMGenericV1InitiateSession,
 		smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
-	if maxUsage != -1 {
+	if maxUsage != 0.2 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
 	time.Sleep(time.Duration(10 * time.Millisecond)) // Give time for  debits to occur

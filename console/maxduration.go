@@ -18,7 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/engine"
+import (
+	"time"
+
+	"github.com/cgrates/cgrates/engine"
+)
 
 func init() {
 	c := &CmdGetMaxDuration{
@@ -59,8 +63,8 @@ func (self *CmdGetMaxDuration) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetMaxDuration) RpcResult() interface{} {
-	var f float64
-	return &f
+	var d time.Duration
+	return &d
 }
 
 func (self *CmdGetMaxDuration) ClientArgs() []string {

@@ -32,6 +32,7 @@ import (
 
 // Individual session run
 type SessionRun struct {
+	RequestType    string
 	DerivedCharger *utils.DerivedCharger // Needed in reply
 	CallDescriptor *CallDescriptor
 	CallCosts      []*CallCost
@@ -290,7 +291,7 @@ func (rs *Responder) RefundRounding(arg *CallDescriptor, reply *float64) (err er
 	return
 }
 
-func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *float64) (err error) {
+func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *time.Duration) (err error) {
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
@@ -315,16 +316,16 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *float64) (err
 		return utils.ErrMaxUsageExceeded
 	}
 	r, e := arg.GetMaxSessionDuration()
-	*reply, err = float64(r), e
+	*reply, err = r, e
 	return
 }
 
 // Returns MaxSessionTime for an event received in sessions, considering DerivedCharging for it
-func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) (err error) {
+func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *time.Duration) (err error) {
 	cacheKey := utils.GET_DERIV_MAX_SESS_TIME + ev.CGRID + ev.RunID
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
 		if item.Value != nil {
-			*reply = *(item.Value.(*float64))
+			*reply = *(item.Value.(*time.Duration))
 		}
 		return item.Err
 	}
@@ -353,7 +354,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) (err erro
 	if !rs.usageAllowed(ev.ToR, ev.Usage) {
 		return utils.ErrMaxUsageExceeded
 	}
-	maxCallDuration := -1.0
+	maxCallDuration := time.Duration(-1.0)
 	attrsDC := &utils.AttrDerivedChargers{Tenant: ev.Tenant,
 		Category: ev.Category, Direction: utils.OUT,
 		Account: ev.Account, Subject: ev.Subject}
@@ -410,15 +411,15 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) (err erro
 			TimeStart:   setupTime,
 			TimeEnd:     setupTime.Add(forkedCDR.Usage),
 		}
-		var remainingDuration float64
+		var remainingDuration time.Duration
 		err = rs.GetMaxSessionTime(cd, &remainingDuration)
 		if err != nil {
-			*reply = 0
+			*reply = time.Duration(0)
 			rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
 			return err
 		}
 		// Set maxCallDuration, smallest out of all forked sessions
-		if maxCallDuration == -1.0 { // first time we set it /not initialized yet
+		if maxCallDuration == time.Duration(-1) { // first time we set it /not initialized yet
 			maxCallDuration = remainingDuration
 		} else if maxCallDuration > remainingDuration {
 			maxCallDuration = remainingDuration
@@ -487,9 +488,6 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) (err error) {
 		if err != nil {
 			return err
 		}
-		if !utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, forkedCDR.RequestType) {
-			continue // We only consider prepaid sessions
-		}
 		startTime := forkedCDR.AnswerTime
 		if startTime.IsZero() { // AnswerTime not parsable, try SetupTime
 			startTime = forkedCDR.SetupTime
@@ -513,7 +511,7 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) (err error) {
 				cd.ForceDuration = true
 			}
 		}
-		sesRuns = append(sesRuns, &SessionRun{DerivedCharger: dc, CallDescriptor: cd})
+		sesRuns = append(sesRuns, &SessionRun{RequestType: forkedCDR.RequestType, DerivedCharger: dc, CallDescriptor: cd})
 	}
 	//utils.Logger.Info(fmt.Sprintf("RUNS: %v", len(sesRuns)))
 	*sRuns = sesRuns

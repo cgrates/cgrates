@@ -57,14 +57,14 @@ func (self *ApierV1) GetMaxUsage(usageRecord engine.UsageRecord, maxUsage *float
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	var maxDur float64
+	var maxDur time.Duration
 	if err := self.Responder.GetDerivedMaxSessionTime(storedCdr, &maxDur); err != nil {
 		return err
 	}
-	if maxDur == -1.0 {
+	if maxDur == time.Duration(-1) {
 		*maxUsage = -1.0
 		return nil
 	}
-	*maxUsage = time.Duration(maxDur).Seconds()
+	*maxUsage = maxDur.Seconds()
 	return nil
 }

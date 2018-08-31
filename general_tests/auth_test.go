@@ -102,7 +102,7 @@ func TestAuthPostpaidNoAcnt(t *testing.T) {
 	cdr := &engine.CDR{ToR: utils.VOICE, RequestType: utils.META_PREPAID, Tenant: "cgrates.org",
 		Category: "call", Account: "nonexistent", Subject: "testauthpostpaid1",
 		Destination: "4986517174963", SetupTime: time.Date(2015, 8, 27, 11, 26, 0, 0, time.UTC)}
-	var maxSessionTime float64
+	var maxSessionTime time.Duration
 	if err := rsponder.GetDerivedMaxSessionTime(cdr, &maxSessionTime); err != utils.ErrAccountNotFound {
 		t.Error(err)
 	}
@@ -113,7 +113,7 @@ func TestAuthPostpaidNoDestination(t *testing.T) {
 	cdr := &engine.CDR{ToR: utils.VOICE, RequestType: utils.META_PREPAID, Tenant: "cgrates.org",
 		Category: "call", Account: "testauthpostpaid1", Subject: "testauthpostpaid1",
 		Destination: "441231234", SetupTime: time.Date(2015, 8, 27, 11, 26, 0, 0, time.UTC)}
-	var maxSessionTime float64
+	var maxSessionTime time.Duration
 	if err := rsponder.GetDerivedMaxSessionTime(cdr, &maxSessionTime); err == nil {
 		t.Error("Expecting error for destination not allowed to subject")
 	}
@@ -124,10 +124,10 @@ func TestAuthPostpaidFallbackDest(t *testing.T) {
 	cdr := &engine.CDR{ToR: utils.VOICE, RequestType: utils.META_POSTPAID, Tenant: "cgrates.org",
 		Category: "call", Account: "testauthpostpaid1", Subject: "testauthpostpaid2",
 		Destination: "441231234", SetupTime: time.Date(2015, 8, 27, 11, 26, 0, 0, time.UTC)}
-	var maxSessionTime float64
+	var maxSessionTime time.Duration
 	if err := rsponder.GetDerivedMaxSessionTime(cdr, &maxSessionTime); err != nil {
 		t.Error(err)
-	} else if maxSessionTime != -1 {
+	} else if maxSessionTime != time.Duration(-1) {
 		t.Error("Unexpected maxSessionTime received: ", maxSessionTime)
 	}
 }
@@ -137,10 +137,10 @@ func TestAuthPostpaidWithDestination(t *testing.T) {
 	cdr := &engine.CDR{ToR: utils.VOICE, RequestType: utils.META_POSTPAID, Tenant: "cgrates.org",
 		Category: "call", Account: "testauthpostpaid1", Subject: "testauthpostpaid1",
 		Destination: "4986517174963", SetupTime: time.Date(2015, 8, 27, 11, 26, 0, 0, time.UTC)}
-	var maxSessionTime float64
+	var maxSessionTime time.Duration
 	if err := rsponder.GetDerivedMaxSessionTime(cdr, &maxSessionTime); err != nil {
 		t.Error(err)
-	} else if maxSessionTime != -1 {
+	} else if maxSessionTime != time.Duration(-1) {
 		t.Error("Unexpected maxSessionTime received: ", maxSessionTime)
 	}
 }

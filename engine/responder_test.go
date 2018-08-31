@@ -63,10 +63,10 @@ func TestResponderGetDerivedMaxSessionTime(t *testing.T) {
 		RunID:      utils.DEFAULT_RUNID, Usage: time.Duration(10) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		Cost:        1.01}
-	var maxSessionTime float64
+	var maxSessionTime time.Duration
 	if err := rsponder.GetDerivedMaxSessionTime(cdr, &maxSessionTime); err != nil {
 		t.Error(err)
-	} else if maxSessionTime != -1 {
+	} else if maxSessionTime != time.Duration(-1) {
 		t.Error("Unexpected maxSessionTime received: ", maxSessionTime)
 	}
 	deTMobile := &Destination{Id: "DE_TMOBILE",
