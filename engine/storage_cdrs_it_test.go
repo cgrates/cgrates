@@ -753,6 +753,13 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	} else if len(CDRs) != 7 {
 		return fmt.Errorf("testGetCDRs #94, unexpected number of CDRs returned:  %+v", len(CDRs))
 	}
+	// Filter OrderBy
+	// if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{MinUsage: "12s", OrderBy: "orderid"}, false); err != nil {
+	// 	return fmt.Errorf("testGetCDRs #95, err: %v", err)
+	// } else {
+	// 	for _, cdr := range CDRs {
+	// 	}
+	// }
 
 	return nil
 }
