@@ -192,7 +192,7 @@ func (da DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProce
 			if da.cgrCfg.DiameterAgentCfg().CreateCDR &&
 				(!da.cgrCfg.DiameterAgentCfg().CDRRequiresSession || err == nil ||
 					!strings.HasSuffix(err.Error(), utils.ErrNoActiveSession.Error())) { // Check if CDR requires session
-				if errCdr := da.sessionS.Call(utils.SessionSv1ProcessCDR, *cgrEv, &rpl); errCdr != nil {
+				if errCdr := da.sessionS.Call(utils.SessionSv1ProcessCDR, cgrEv, &rpl); errCdr != nil {
 					err = errCdr
 					procVars[utils.MetaCGRReply], _ = NewCGRReply(nil, err)
 				}

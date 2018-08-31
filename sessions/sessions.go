@@ -2110,7 +2110,7 @@ func (smg *SMGeneric) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection
 
 // Called on session end, should send the CDR to CDRS
 func (smg *SMGeneric) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
-	cgrEv utils.CGREvent, reply *string) error {
+	cgrEv *utils.CGREvent, reply *string) error {
 	return smg.cdrsrv.Call(utils.CdrsV2ProcessCDR, cgrEv, reply)
 }
 

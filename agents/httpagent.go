@@ -202,7 +202,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 	if reqProcessor.Flags.HasKey(utils.MetaCDRs) {
 		var rplyCDRs string
 		if err = ha.sessionS.Call(utils.SessionSv1ProcessCDR,
-			*cgrEv, &rplyCDRs); err != nil {
+			cgrEv, &rplyCDRs); err != nil {
 			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false)
 		}
 	}
