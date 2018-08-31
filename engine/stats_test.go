@@ -101,38 +101,44 @@ var (
 		&StatQueue{Tenant: "cgrates.org", ID: "StatQueueProfile2", sqPrfl: sqps[1]},
 		&StatQueue{Tenant: "cgrates.org", ID: "StatQueueProfilePrefix", sqPrfl: sqps[2]},
 	}
-	statsEvs = []*utils.CGREvent{
-		&utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				"Stats":          "StatQueueProfile1",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				"Weight":         "9.0",
-				utils.Usage:      time.Duration(135 * time.Second),
-				utils.COST:       123.0,
+	statsEvs = []*StatsArgsProcessEvent{
+		&StatsArgsProcessEvent{
+			CGREvent: utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					"Stats":          "StatQueueProfile1",
+					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+					"UsageInterval":  "1s",
+					"PddInterval":    "1s",
+					"Weight":         "9.0",
+					utils.Usage:      time.Duration(135 * time.Second),
+					utils.COST:       123.0,
+				},
 			},
 		},
-		&utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event2",
-			Event: map[string]interface{}{
-				"Stats":          "StatQueueProfile2",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				"PddInterval":    "1s",
-				"Weight":         "15.0",
-				utils.Usage:      time.Duration(45 * time.Second),
+		&StatsArgsProcessEvent{
+			CGREvent: utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event2",
+				Event: map[string]interface{}{
+					"Stats":          "StatQueueProfile2",
+					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+					"UsageInterval":  "1s",
+					"PddInterval":    "1s",
+					"Weight":         "15.0",
+					utils.Usage:      time.Duration(45 * time.Second),
+				},
 			},
 		},
-		&utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event3",
-			Event: map[string]interface{}{
-				"Stats":     "StatQueueProfilePrefix",
-				utils.Usage: time.Duration(30 * time.Second),
+		&StatsArgsProcessEvent{
+			CGREvent: utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event3",
+				Event: map[string]interface{}{
+					"Stats":     "StatQueueProfilePrefix",
+					utils.Usage: time.Duration(30 * time.Second),
+				},
 			},
 		},
 	}

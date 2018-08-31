@@ -29,7 +29,7 @@ func init() {
 	c := &CmdStatsQueueForEvent{
 		name:      "stats_for_event",
 		rpcMethod: utils.StatSv1GetStatQueuesForEvent,
-		rpcParams: &dispatcher.CGREvWithApiKey{},
+		rpcParams: &dispatcher.ArgsStatProcessEventWithApiKey{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -39,7 +39,7 @@ func init() {
 type CmdStatsQueueForEvent struct {
 	name      string
 	rpcMethod string
-	rpcParams *dispatcher.CGREvWithApiKey
+	rpcParams *dispatcher.ArgsStatProcessEventWithApiKey
 	*CommandExecuter
 }
 
@@ -53,7 +53,7 @@ func (self *CmdStatsQueueForEvent) RpcMethod() string {
 
 func (self *CmdStatsQueueForEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &dispatcher.CGREvWithApiKey{}
+		self.rpcParams = &dispatcher.ArgsStatProcessEventWithApiKey{}
 	}
 	return self.rpcParams
 }

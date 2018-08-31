@@ -68,6 +68,11 @@ type ArgsGetSuppliersWithApiKey struct {
 	engine.ArgsGetSuppliers
 }
 
+type ArgsStatProcessEventWithApiKey struct {
+	APIKey string
+	engine.StatsArgsProcessEvent
+}
+
 type AuthorizeArgsWithApiKey struct {
 	APIKey string
 	sessions.V1AuthorizeArgs

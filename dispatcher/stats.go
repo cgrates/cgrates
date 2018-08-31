@@ -31,7 +31,7 @@ func (dS *DispatcherService) StatSv1Ping(ign string, reply *string) error {
 	return dS.statS.Call(utils.StatSv1Ping, ign, reply)
 }
 
-func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *CGREvWithApiKey,
+func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *ArgsStatProcessEventWithApiKey,
 	reply *[]string) (err error) {
 	if dS.statS == nil {
 		return utils.NewErrNotConnected(utils.StatS)
@@ -40,7 +40,7 @@ func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *CGREvWithApiKey,
 		args.APIKey, args.CGREvent.Time); err != nil {
 		return
 	}
-	return dS.statS.Call(utils.StatSv1GetStatQueuesForEvent, args.CGREvent, reply)
+	return dS.statS.Call(utils.StatSv1GetStatQueuesForEvent, args, reply)
 }
 
 func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *TntIDWithApiKey,
@@ -56,7 +56,7 @@ func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *TntIDWithApiKey,
 	return dS.statS.Call(utils.StatSv1GetQueueStringMetrics, args.TenantID, reply)
 }
 
-func (dS *DispatcherService) StatSv1ProcessEvent(args *CGREvWithApiKey,
+func (dS *DispatcherService) StatSv1ProcessEvent(args *ArgsStatProcessEventWithApiKey,
 	reply *[]string) (err error) {
 	if dS.statS == nil {
 		return utils.NewErrNotConnected(utils.StatS)
@@ -65,5 +65,5 @@ func (dS *DispatcherService) StatSv1ProcessEvent(args *CGREvWithApiKey,
 		args.APIKey, args.CGREvent.Time); err != nil {
 		return
 	}
-	return dS.statS.Call(utils.StatSv1ProcessEvent, args.CGREvent, reply)
+	return dS.statS.Call(utils.StatSv1ProcessEvent, args, reply)
 }

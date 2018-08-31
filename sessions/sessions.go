@@ -1675,7 +1675,7 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 			return utils.NewErrNotConnected(utils.StatService)
 		}
 		var statReply []string
-		if err := smg.statS.Call(utils.StatSv1ProcessEvent, &args.CGREvent, &statReply); err != nil &&
+		if err := smg.statS.Call(utils.StatSv1ProcessEvent, &engine.StatsArgsProcessEvent{CGREvent: args.CGREvent}, &statReply); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<SessionS> error: %s processing event %+v with StatS.", err.Error(), args.CGREvent))
@@ -1880,7 +1880,7 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 			return utils.NewErrNotConnected(utils.StatService)
 		}
 		var statReply []string
-		if err := smg.statS.Call(utils.StatSv1ProcessEvent, &args.CGREvent, &statReply); err != nil &&
+		if err := smg.statS.Call(utils.StatSv1ProcessEvent, &engine.StatsArgsProcessEvent{CGREvent: args.CGREvent}, &statReply); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<SessionS> error: %s processing event %+v with StatS.", err.Error(), args.CGREvent))
@@ -2098,7 +2098,7 @@ func (smg *SMGeneric) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection
 	}
 	if smg.statS != nil && args.ProcessStats {
 		var statReply []string
-		if err := smg.statS.Call(utils.StatSv1ProcessEvent, &args.CGREvent, &statReply); err != nil &&
+		if err := smg.statS.Call(utils.StatSv1ProcessEvent, &engine.StatsArgsProcessEvent{CGREvent: args.CGREvent}, &statReply); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<SessionS> error: %s processing event %+v with StatS.", err.Error(), args.CGREvent))

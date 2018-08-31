@@ -182,18 +182,19 @@ func testDspStsAddStsibutesWithPermision(t *testing.T) {
 
 func testDspStsTestAuthKey(t *testing.T) {
 	var reply []string
-	args := CGREvWithApiKey{
+	args := ArgsStatProcessEventWithApiKey{
 		APIKey: "12345",
-		CGREvent: utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.Account:    "1001",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:      time.Duration(135 * time.Second),
-				utils.COST:       123.0,
-				utils.PDD:        time.Duration(12 * time.Second)}},
-	}
+		StatsArgsProcessEvent: engine.StatsArgsProcessEvent{
+			CGREvent: utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					utils.Account:    "1001",
+					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					utils.Usage:      time.Duration(135 * time.Second),
+					utils.COST:       123.0,
+					utils.PDD:        time.Duration(12 * time.Second)}},
+		}}
 	if err := dspStsRPC.Call(utils.StatSv1ProcessEvent,
 		args, &reply); err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
@@ -255,17 +256,19 @@ func testDspStsTestAuthKey2(t *testing.T) {
 	var reply []string
 	var metrics map[string]string
 	expected := []string{"Stats2"}
-	args := CGREvWithApiKey{
+	args := ArgsStatProcessEventWithApiKey{
 		APIKey: "12345",
-		CGREvent: utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.Account:    "1001",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:      time.Duration(135 * time.Second),
-				utils.COST:       123.0,
-				utils.RunID:      utils.DEFAULT_RUNID,
+		StatsArgsProcessEvent: engine.StatsArgsProcessEvent{
+			CGREvent: utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					utils.Account:    "1001",
+					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					utils.Usage:      time.Duration(135 * time.Second),
+					utils.COST:       123.0,
+					utils.RunID:      utils.DEFAULT_RUNID,
+				},
 			},
 		},
 	}
@@ -294,17 +297,19 @@ func testDspStsTestAuthKey2(t *testing.T) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
 	}
 
-	args = CGREvWithApiKey{
+	args = ArgsStatProcessEventWithApiKey{
 		APIKey: "12345",
-		CGREvent: utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.Account:    "1002",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:      time.Duration(45 * time.Second),
-				utils.RunID:      utils.DEFAULT_RUNID,
-				utils.COST:       10.0,
+		StatsArgsProcessEvent: engine.StatsArgsProcessEvent{
+			CGREvent: utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					utils.Account:    "1002",
+					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					utils.Usage:      time.Duration(45 * time.Second),
+					utils.RunID:      utils.DEFAULT_RUNID,
+					utils.COST:       10.0,
+				},
 			},
 		},
 	}

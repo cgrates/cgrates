@@ -65,7 +65,7 @@ func (dSts *DispatcherStatSv1) Ping(ign string, reply *string) error {
 }
 
 // GetStatQueuesForEvent implements StatSv1GetStatQueuesForEvent
-func (dSts *DispatcherStatSv1) GetStatQueuesForEvent(args *dispatcher.CGREvWithApiKey, reply *[]string) error {
+func (dSts *DispatcherStatSv1) GetStatQueuesForEvent(args *dispatcher.ArgsStatProcessEventWithApiKey, reply *[]string) error {
 	return dSts.dS.StatSv1GetStatQueuesForEvent(args, reply)
 }
 
@@ -76,7 +76,7 @@ func (dSts *DispatcherStatSv1) GetQueueStringMetrics(args *dispatcher.TntIDWithA
 }
 
 // GetQueueStringMetrics implements StatSv1ProcessEvent
-func (dSts *DispatcherStatSv1) ProcessEvent(args *dispatcher.CGREvWithApiKey, reply *[]string) error {
+func (dSts *DispatcherStatSv1) ProcessEvent(args *dispatcher.ArgsStatProcessEventWithApiKey, reply *[]string) error {
 	return dSts.dS.StatSv1ProcessEvent(args, reply)
 }
 
