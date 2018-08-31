@@ -444,6 +444,19 @@ func (self *ApierV1) SetRatingProfile(attrs utils.AttrSetRatingProfile, reply *s
 	return nil
 }
 
+func (self *ApierV1) GetRatingProfile(attrs utils.AttrGetRatingProfile, reply *engine.RatingProfile) (err error) {
+	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Category", "Direction", "Subject"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if rpPrf, err := self.DataManager.GetRatingProfile(attrs.GetID(),
+		false, utils.NonTransactional); err != nil {
+		return utils.APIErrorHandler(err)
+	} else {
+		*reply = *rpPrf
+	}
+	return
+}
+
 // Deprecated attrs
 type V1AttrSetActions struct {
 	ActionsId string        // Actions id

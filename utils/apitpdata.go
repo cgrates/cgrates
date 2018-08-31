@@ -263,6 +263,17 @@ type AttrSetRatingProfile struct {
 	RatingPlanActivations []*TPRatingActivation // Activate rating plans at specific time
 }
 
+type AttrGetRatingProfile struct {
+	Tenant    string // Tenant's Id
+	Category  string // TypeOfRecord
+	Direction string // Traffic direction, OUT is the only one supported for now
+	Subject   string // Rating subject, usually the same as account
+}
+
+func (self *AttrGetRatingProfile) GetID() string {
+	return ConcatenatedKey(self.Direction, self.Tenant, self.Category, self.Subject)
+}
+
 type TPRatingActivation struct {
 	ActivationTime   string // Time when this profile will become active, defined as unix epoch time
 	RatingPlanId     string // Id of RatingPlan profile
