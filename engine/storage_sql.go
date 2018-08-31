@@ -1042,6 +1042,11 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	if qryFltr.UpdatedAtEnd != nil && !qryFltr.UpdatedAtEnd.IsZero() {
 		q = q.Where("updated_at < ?", qryFltr.UpdatedAtEnd)
 	}
+	// need to check if it's descencent
+	// after that make a switch to make the parameter compatible
+	if qryFltr.OrderBy != "" {
+		q = q.Order(qryFltr.OrderBy)
+	}
 	if len(qryFltr.MinUsage) != 0 {
 		minUsage, err := utils.ParseDurationWithNanosecs(qryFltr.MinUsage)
 		if err != nil {

@@ -849,6 +849,7 @@ type AttrGetCdrs struct {
 	TimeEnd             string   // If provided, it will represent the end of the CDRs interval (<)
 	SkipErrors          bool     // Do not export errored CDRs
 	SkipRated           bool     // Do not export rated CDRs
+	OrderBy             string   // Ascendent/Descendent
 	Paginator
 }
 
@@ -868,6 +869,7 @@ func (self *AttrGetCdrs) AsCDRsFilter(timezone string) (*CDRsFilter, error) {
 		OrderIDStart:        self.OrderIdStart,
 		OrderIDEnd:          self.OrderIdEnd,
 		Paginator:           self.Paginator,
+		OrderBy:             self.OrderBy,
 	}
 	if len(self.TimeStart) != 0 {
 		if answerTimeStart, err := ParseTimeDetectLayout(self.TimeStart, timezone); err != nil {
@@ -1067,8 +1069,8 @@ type CDRsFilter struct {
 	MaxCost                *float64          // End of the usage interval (<)
 	Unscoped               bool              // Include soft-deleted records in results
 	Count                  bool              // If true count the items instead of returning data
+	OrderBy                string            // Can be ordered by OrderID,AnswerTime,SetupTime,Cost,Usage
 	Paginator
-	//OrderBy asc/desc
 }
 
 // RPCCDRsFilter is a filter used in Rpc calls
@@ -1116,6 +1118,7 @@ type RPCCDRsFilter struct {
 	MaxUsage               string            // End of the usage interval (<)
 	MinCost                *float64          // Start of the cost interval (>=)
 	MaxCost                *float64          // End of the usage interval (<)
+	OrderBy                string            // Ascendent/Descendent
 	Paginator                                // Add pagination
 }
 
@@ -1156,6 +1159,7 @@ func (self *RPCCDRsFilter) AsCDRsFilter(timezone string) (*CDRsFilter, error) {
 		MinCost:        self.MinCost,
 		MaxCost:        self.MaxCost,
 		Paginator:      self.Paginator,
+		OrderBy:        self.OrderBy,
 	}
 	if len(self.SetupTimeStart) != 0 {
 		if sTimeStart, err := ParseTimeDetectLayout(self.SetupTimeStart, timezone); err != nil {
