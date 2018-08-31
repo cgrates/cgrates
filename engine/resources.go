@@ -507,6 +507,9 @@ func (rS *ResourceService) processThresholds(r *Resource) (err error) {
 	}
 	var thIDs []string
 	if len(r.rPrf.ThresholdIDs) != 0 {
+		if len(r.rPrf.ThresholdIDs) == 1 && r.rPrf.ThresholdIDs[0] == utils.META_NONE {
+			return
+		}
 		thIDs = r.rPrf.ThresholdIDs
 	}
 	thEv := &ArgsProcessEvent{ThresholdIDs: thIDs,

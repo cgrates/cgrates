@@ -256,6 +256,9 @@ func (sS *StatService) processEvent(args *StatsArgsProcessEvent) (statQueueIDs [
 		}
 		var thIDs []string
 		if len(sq.sqPrfl.ThresholdIDs) != 0 {
+			if len(sq.sqPrfl.ThresholdIDs) == 1 && sq.sqPrfl.ThresholdIDs[0] == utils.META_NONE {
+				continue
+			}
 			thIDs = sq.sqPrfl.ThresholdIDs
 		}
 		thEv := &ArgsProcessEvent{
