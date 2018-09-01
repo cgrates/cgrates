@@ -163,6 +163,10 @@ func testV2CDRsGetCdrs(t *testing.T) {
 		if cdrs[0].Cost != -1.0 {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
+		if cdrs[0].ExtraFields["PayPalAccount"] != "paypal@cgrates.org" {
+			t.Errorf("PayPalAccount should be added by AttributeS, have: %s",
+				cdrs[0].ExtraFields["PayPalAccount"])
+		}
 	}
 	args = utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"}}
 	if err := cdrsRpc.Call("ApierV2.GetCdrs", args, &cdrs); err != nil {
@@ -173,6 +177,10 @@ func testV2CDRsGetCdrs(t *testing.T) {
 		if cdrs[0].Cost != 0.0198 {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
+		if cdrs[0].ExtraFields["PayPalAccount"] != "paypal@cgrates.org" {
+			t.Errorf("PayPalAccount should be added by AttributeS, have: %s",
+				cdrs[0].ExtraFields["PayPalAccount"])
+		}
 	}
 	args = utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"}}
 	if err := cdrsRpc.Call("ApierV2.GetCdrs", args, &cdrs); err != nil {
@@ -182,6 +190,10 @@ func testV2CDRsGetCdrs(t *testing.T) {
 	} else {
 		if cdrs[0].Cost != 0.0102 {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+		}
+		if cdrs[0].ExtraFields["PayPalAccount"] != "paypal@cgrates.org" {
+			t.Errorf("PayPalAccount should be added by AttributeS, have: %s",
+				cdrs[0].ExtraFields["PayPalAccount"])
 		}
 	}
 }

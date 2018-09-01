@@ -20,6 +20,9 @@
 
 "cdrs": {
 	"enabled": true,
+	"attributes_conns":[
+		{"address": "*internal"},
+	],
 	"chargers_conns":[
 		{"address": "*internal"},
 	],

@@ -98,10 +98,12 @@ func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, r
 		chargerS = nil
 	}
 	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, dm: dm,
-		rals: rater, pubsub: pubsub, users: users, aliases: aliases,
+		rals: rater, pubsub: pubsub, attrS: attrs,
+		users: users, aliases: aliases,
 		cdrstats: cdrstats, stats: stats, thdS: thdS,
 		chargerS: chargerS, guard: guardian.Guardian,
-		httpPoster: NewHTTPPoster(cgrCfg.HttpSkipTlsVerify, cgrCfg.ReplyTimeout), filterS: filterS}, nil
+		httpPoster: NewHTTPPoster(cgrCfg.HttpSkipTlsVerify,
+			cgrCfg.ReplyTimeout), filterS: filterS}, nil
 }
 
 type CdrServer struct {
@@ -743,8 +745,28 @@ func (cdrS *CdrServer) chrgrSProcessEvent(cgrEv *utils.CGREvent) {
 	}
 }
 
+// statSProcessEvent will send the event to StatS if the connection is configured
+func (cdrS *CdrServer) attrSProcessEvent(cgrEv *utils.CGREvent) (err error) {
+	if cgrEv.Context == nil { // populate if not already in
+		cgrEv.Context = utils.StringPointer(utils.MetaCDRs)
+	}
+	var rplyEv AttrSProcessEventReply
+	if err = cdrS.attrS.Call(utils.AttributeSv1ProcessEvent,
+		&AttrArgsProcessEvent{
+			CGREvent: *cgrEv},
+		&rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
+		*cgrEv = *rplyEv.CGREvent
+	} else if err.Error() == utils.ErrNotFound.Error() {
+		err = nil // cancel ErrNotFound
+	}
+	return
+}
+
 // V2ProcessCDR will process the CDR out of CGREvent
 func (cdrS *CdrServer) V2ProcessCDR(cgrEv *utils.CGREvent, reply *string) (err error) {
+	if cdrS.attrS != nil {
+		cdrS.attrSProcessEvent(cgrEv)
+	}
 	rawCDR, err := NewMapEvent(cgrEv.Event).AsCDR(cdrS.cgrCfg, cdrS.Timezone())
 	if err != nil {
 		return utils.NewErrServerError(err)
