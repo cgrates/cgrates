@@ -179,7 +179,8 @@ func TestResponderGetSessionRuns(t *testing.T) {
 	}
 	sesRuns := make([]*SessionRun, 0)
 	eSRuns := []*SessionRun{
-		&SessionRun{DerivedCharger: extra1DC,
+		&SessionRun{RequestType: utils.META_PREPAID,
+			DerivedCharger: extra1DC,
 			CallDescriptor: &CallDescriptor{
 				CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
 				RunID: "extra1", Direction: "*out", Category: "0",
@@ -187,7 +188,8 @@ func TestResponderGetSessionRuns(t *testing.T) {
 				Destination: "0256", TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 				TimeEnd: time.Date(2013, 11, 7, 8, 42, 36, 0, time.UTC), TOR: utils.VOICE,
 				ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}},
-		&SessionRun{DerivedCharger: extra2DC,
+		&SessionRun{RequestType: utils.META_PREPAID,
+			DerivedCharger: extra2DC,
 			CallDescriptor: &CallDescriptor{
 				CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
 				RunID: "extra2", Direction: "*out", Category: "call",
@@ -195,7 +197,17 @@ func TestResponderGetSessionRuns(t *testing.T) {
 				TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 				TimeEnd:   time.Date(2013, 11, 7, 8, 42, 36, 0, time.UTC), TOR: utils.VOICE,
 				ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}},
-		&SessionRun{DerivedCharger: dfDC,
+		&SessionRun{RequestType: utils.META_PSEUDOPREPAID,
+			DerivedCharger: extra3DC,
+			CallDescriptor: &CallDescriptor{
+				CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+				RunID: "extra3", Direction: "*out", Category: "0",
+				Tenant: "vdf", Subject: "rif", Account: "minu", Destination: "0256",
+				TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+				TimeEnd:   time.Date(2013, 11, 7, 8, 42, 36, 0, time.UTC), TOR: utils.VOICE,
+				ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}},
+		&SessionRun{RequestType: utils.META_PREPAID,
+			DerivedCharger: dfDC,
 			CallDescriptor: &CallDescriptor{
 				CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
 				RunID: "*default", Direction: "*out", Category: "call",
