@@ -1119,10 +1119,27 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	if qryFltr.Paginator.Offset != nil {
 		q = q.Skip(*qryFltr.Paginator.Offset)
 	}
-	// need to check if it's descencent
-	// after that make a switch to make the parameter compatible
 	if qryFltr.OrderBy != "" {
-		q = q.Sort(qryFltr.OrderBy)
+		var orderVal string
+		separateVals := strings.Split(qryFltr.OrderBy, utils.INFIELD_SEP)
+		if len(separateVals) == 2 && separateVals[1] == "desc" {
+			orderVal += "-"
+		}
+		switch separateVals[0] {
+		case utils.OrderID:
+			orderVal += "orderid"
+		case utils.AnswerTime:
+			orderVal += "answertime"
+		case utils.SetupTime:
+			orderVal += "setuptime"
+		case utils.Usage:
+			orderVal += "usage"
+		case utils.Cost:
+			orderVal += "cost"
+		default:
+			return nil, 0, fmt.Errorf("Invalid value : %s", separateVals[0])
+		}
+		q = q.Sort(orderVal)
 	}
 	if qryFltr.Count {
 		cnt, err := q.Count()

@@ -1042,10 +1042,31 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	if qryFltr.UpdatedAtEnd != nil && !qryFltr.UpdatedAtEnd.IsZero() {
 		q = q.Where("updated_at < ?", qryFltr.UpdatedAtEnd)
 	}
-	// need to check if it's descencent
-	// after that make a switch to make the parameter compatible
 	if qryFltr.OrderBy != "" {
-		q = q.Order(qryFltr.OrderBy)
+		var orderVal string
+		separateVals := strings.Split(qryFltr.OrderBy, utils.INFIELD_SEP)
+		switch separateVals[0] {
+		case utils.OrderID:
+			orderVal = "id"
+		case utils.AnswerTime:
+			orderVal = "answer_time"
+		case utils.SetupTime:
+			orderVal = "setup_time"
+		case utils.Usage:
+			if self.db.Dialect().GetName() == utils.MYSQL {
+				orderVal = "`usage`"
+			} else {
+				orderVal = "usage"
+			}
+		case utils.Cost:
+			orderVal = "cost"
+		default:
+			return nil, 0, fmt.Errorf("Invalid value : %s", separateVals[0])
+		}
+		if len(separateVals) == 2 && separateVals[1] == "desc" {
+			orderVal += " DESC"
+		}
+		q = q.Order(orderVal)
 	}
 	if len(qryFltr.MinUsage) != 0 {
 		minUsage, err := utils.ParseDurationWithNanosecs(qryFltr.MinUsage)
