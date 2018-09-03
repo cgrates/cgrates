@@ -173,7 +173,7 @@ accid23;*rated;cgrates.org;1001;086517174963;2013-02-03 19:54:00;26;val_extra3;"
 
 func TestCsvIT2InitConfig(t *testing.T) {
 	var err error
-	csvCfgPath = path.Join(*dataDir, "conf", "samples", "cdrccsvwithfilter")
+	csvCfgPath = path.Join(*dataDir, "conf", "samples", "cdrccsv")
 	if csvCfg, err = config.NewCGRConfigFromFolder(csvCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
@@ -223,14 +223,14 @@ func TestCsvIT2HandleCdr2File(t *testing.T) {
 	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent1_2), 0644); err != nil {
 		t.Fatal(err.Error())
 	}
-	if err := os.Rename(tmpFilePath, path.Join("/tmp/cdrctestswithfilters/csvit1/in", fileName)); err != nil {
+	if err := os.Rename(tmpFilePath, path.Join("/tmp/csvwithfilter1/csvit1/in", fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
 	}
 }
 
 func TestCsvIT2ProcessedFiles(t *testing.T) {
 	time.Sleep(time.Duration(2**waitRater) * time.Millisecond)
-	if outContent2, err := ioutil.ReadFile("/tmp/cdrctestswithfilters/csvit1/out/file1.csv"); err != nil {
+	if outContent2, err := ioutil.ReadFile("/tmp/csvwithfilter1/csvit1/out/file1.csv"); err != nil {
 		t.Error(err)
 	} else if fileContent1_2 != string(outContent2) {
 		t.Errorf("Expecting: %q, received: %q", fileContent1_2, string(outContent2))
@@ -255,6 +255,7 @@ func TestCsvIT2KillEngine(t *testing.T) {
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(time.Duration(2**waitRater) * time.Millisecond)
 }
 
 // Begin tests for cdrc csv with new filters
@@ -264,7 +265,7 @@ accid23;*prepaid;cgrates.org;1002;086517174963;2013-02-03 19:54:00;76;val_extra3
 
 func TestCsvIT3InitConfig(t *testing.T) {
 	var err error
-	csvCfgPath = path.Join(*dataDir, "conf", "samples", "cdrccsvwithfilter")
+	csvCfgPath = path.Join(*dataDir, "conf", "samples", "cdrccsv")
 	if csvCfg, err = config.NewCGRConfigFromFolder(csvCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
@@ -314,14 +315,14 @@ func TestCsvIT3HandleCdr2File(t *testing.T) {
 	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent1_3), 0644); err != nil {
 		t.Fatal(err.Error())
 	}
-	if err := os.Rename(tmpFilePath, path.Join("/tmp/cdrctestswithfilters/csvit2/in", fileName)); err != nil {
+	if err := os.Rename(tmpFilePath, path.Join("/tmp/csvwithfilter2/csvit2/in", fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
 	}
 }
 
 func TestCsvIT3ProcessedFiles(t *testing.T) {
 	time.Sleep(time.Duration(2**waitRater) * time.Millisecond)
-	if outContent2, err := ioutil.ReadFile("/tmp/cdrctestswithfilters/csvit2/out/file1.csv"); err != nil {
+	if outContent2, err := ioutil.ReadFile("/tmp/csvwithfilter2/csvit2/out/file1.csv"); err != nil {
 		t.Error(err)
 	} else if fileContent1_3 != string(outContent2) {
 		t.Errorf("Expecting: %q, received: %q", fileContent1_3, string(outContent2))
@@ -341,6 +342,7 @@ func TestCsvIT3KillEngine(t *testing.T) {
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(time.Duration(2**waitRater) * time.Millisecond)
 }
 
 // Begin tests for cdrc csv with new filters
@@ -350,7 +352,7 @@ accid23;*postpaid;cgrates.org;1002;086517174963;2013-02-03 19:54:00;76;val_extra
 
 func TestCsvIT4InitConfig(t *testing.T) {
 	var err error
-	csvCfgPath = path.Join(*dataDir, "conf", "samples", "csvwithfieldfilter")
+	csvCfgPath = path.Join(*dataDir, "conf", "samples", "cdrccsv")
 	if csvCfg, err = config.NewCGRConfigFromFolder(csvCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
@@ -400,14 +402,14 @@ func TestCsvIT4HandleCdr2File(t *testing.T) {
 	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent1_4), 0644); err != nil {
 		t.Fatal(err.Error())
 	}
-	if err := os.Rename(tmpFilePath, path.Join("/tmp/csvwithfielfilter/csvit2/in", fileName)); err != nil {
+	if err := os.Rename(tmpFilePath, path.Join("/tmp/csvwithfilter3/csvit3/in", fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
 	}
 }
 
 func TestCsvIT4ProcessedFiles(t *testing.T) {
 	time.Sleep(time.Duration(2**waitRater) * time.Millisecond)
-	if outContent4, err := ioutil.ReadFile("/tmp/csvwithfielfilter/csvit2/out/file1.csv"); err != nil {
+	if outContent4, err := ioutil.ReadFile("/tmp/csvwithfilter3/csvit3/out/file1.csv"); err != nil {
 		t.Error(err)
 	} else if fileContent1_4 != string(outContent4) {
 		t.Errorf("Expecting: %q, received: %q", fileContent1_4, string(outContent4))
