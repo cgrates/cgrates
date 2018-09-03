@@ -753,13 +753,57 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	} else if len(CDRs) != 7 {
 		return fmt.Errorf("testGetCDRs #94, unexpected number of CDRs returned:  %+v", len(CDRs))
 	}
-	// Filter OrderBy
-	// if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{MinUsage: "12s", OrderBy: "orderid"}, false); err != nil {
-	// 	return fmt.Errorf("testGetCDRs #95, err: %v", err)
-	// } else {
-	// 	for _, cdr := range CDRs {
-	// 	}
-	// }
-
+	//Filter by OrderID descendent
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderBy: "OrderID;desc"}, false); err != nil {
+		return fmt.Errorf("testGetCDRs #95, err: %v", err)
+	} else {
+		for i, _ := range CDRs {
+			if i+1 > len(CDRs)-1 {
+				break
+			}
+			if CDRs[i].OrderID < CDRs[i+1].OrderID {
+				return fmt.Errorf("%+v should be greater than %+v \n", CDRs[i].OrderID, CDRs[i+1].OrderID)
+			}
+		}
+	}
+	//Filter by OrderID ascendent
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderBy: "OrderID"}, false); err != nil {
+		return fmt.Errorf("testGetCDRs #95, err: %v", err)
+	} else {
+		for i, _ := range CDRs {
+			if i+1 > len(CDRs)-1 {
+				break
+			}
+			if CDRs[i].OrderID > CDRs[i+1].OrderID {
+				return fmt.Errorf("%+v sould be smaller than %+v \n", CDRs[i].OrderID, CDRs[i+1].OrderID)
+			}
+		}
+	}
+	//Filter by Cost descendent
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderBy: "Cost;desc"}, false); err != nil {
+		return fmt.Errorf("testGetCDRs #95, err: %v", err)
+	} else {
+		for i, _ := range CDRs {
+			if i+1 > len(CDRs)-1 {
+				break
+			}
+			if CDRs[i].Cost < CDRs[i+1].Cost {
+				return fmt.Errorf("%+v should be greater than %+v \n", CDRs[i].Cost, CDRs[i+1].Cost)
+			}
+		}
+	}
+	//Filter by Cost ascendent
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderBy: "Cost"}, false); err != nil {
+		return fmt.Errorf("testGetCDRs #95, err: %v", err)
+	} else {
+		for i, _ := range CDRs {
+			if i+1 > len(CDRs)-1 {
+				break
+			}
+			if CDRs[i].Cost > CDRs[i+1].Cost {
+				return fmt.Errorf("%+v sould be smaller than %+v \n", CDRs[i].Cost, CDRs[i+1].Cost)
+			}
+		}
+	}
 	return nil
 }
