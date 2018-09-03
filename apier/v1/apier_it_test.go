@@ -1573,7 +1573,7 @@ func TestApierITGetScheduledActions(t *testing.T) {
 
 func TestApierITGetDataCost(t *testing.T) {
 	attrs := AttrGetDataCost{Category: "data", Tenant: "cgrates.org",
-		Subject: "1001", AnswerTime: time.Now(), Usage: 640113}
+		Subject: "1001", AnswerTime: "*now", Usage: 640113}
 	var rply *engine.DataCost
 	if err := rater.Call("ApierV1.GetDataCost", attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
@@ -1584,7 +1584,7 @@ func TestApierITGetDataCost(t *testing.T) {
 
 func TestApierITGetCost(t *testing.T) {
 	attrs := AttrGetCost{Category: "data", Tenant: "cgrates.org",
-		Subject: "1001", AnswerTime: time.Now(), Usage: "640113"}
+		Subject: "1001", AnswerTime: "*now", Usage: "640113"}
 	var rply *engine.EventCost
 	if err := rater.Call("ApierV1.GetCost", attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
