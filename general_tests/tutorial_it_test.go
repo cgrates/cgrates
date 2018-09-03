@@ -121,7 +121,7 @@ func testTutorialGetCost(t *testing.T) {
 		Category:    "call",
 		Subject:     "1001",
 		Destination: "1002",
-		AnswerTime:  time.Now(),
+		AnswerTime:  "*now",
 		Usage:       "2m10s",
 	}
 	var rply *engine.EventCost

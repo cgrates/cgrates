@@ -639,6 +639,7 @@ func TestCgrCfgJSONDefaultsCdreProfiles(t *testing.T) {
 			Value:            NewRSRParsersMustCompile("~Cost", true),
 			RoundingDecimals: 4},
 	}
+	//
 	eCdreCfg := map[string]*CdreConfig{
 		"*default": {
 			ExportFormat:        utils.MetaFileCSV,
@@ -1545,6 +1546,97 @@ func TestCgrMigratorCfgDefault(t *testing.T) {
 	}
 	if !reflect.DeepEqual(cgrCfg.MigratorCgrConfig, eMgrCfg) {
 		t.Errorf("received: %+v, expecting: %+v", utils.ToJSON(cgrCfg.MigratorCgrConfig), utils.ToJSON(eMgrCfg))
+	}
+}
+
+func TestCDRCWithDefault(t *testing.T) {
+	eCgrCfg, _ := NewDefaultCGRConfig()
+	eCgrCfg.CdrcProfiles["/var/spool/cgrates/cdrc/in"] = []*CdrcConfig{
+		&CdrcConfig{
+			ID:                       utils.META_DEFAULT,
+			Enabled:                  false,
+			DryRun:                   false,
+			CdrsConns:                []*HaPoolConfig{&HaPoolConfig{Address: utils.MetaInternal}},
+			CdrFormat:                "csv",
+			FieldSeparator:           rune(','),
+			DataUsageMultiplyFactor:  1024,
+			Timezone:                 "",
+			RunDelay:                 0,
+			MaxOpenFiles:             1024,
+			CdrInDir:                 "/var/spool/cgrates/cdrc/in",
+			CdrOutDir:                "/var/spool/cgrates/cdrc/out",
+			FailedCallsPrefix:        "missed_calls",
+			CDRPath:                  utils.HierarchyPath([]string{""}),
+			CdrSourceId:              "freeswitch_csv",
+			Filters:                  []string{},
+			Tenant:                   NewRSRParsersMustCompile("cgrates.org", true),
+			ContinueOnSuccess:        false,
+			PartialRecordCache:       time.Duration(10 * time.Second),
+			PartialCacheExpiryAction: "*dump_to_file",
+			HeaderFields:             make([]*FCTemplate, 0),
+			ContentFields: []*FCTemplate{
+				&FCTemplate{ID: "TOR", FieldId: "ToR", Type: utils.META_COMPOSED,
+					Value: NewRSRParsersMustCompile("~2", true), Mandatory: true},
+				&FCTemplate{ID: "OriginID", FieldId: "OriginID", Type: utils.META_COMPOSED,
+					Value: NewRSRParsersMustCompile("~3", true), Mandatory: true},
+				&FCTemplate{ID: "RequestType", FieldId: "RequestType", Type: utils.META_COMPOSED,
+					Value: NewRSRParsersMustCompile("~4", true), Mandatory: true},
+				&FCTemplate{ID: "Tenant", FieldId: "Tenant", Type: utils.META_COMPOSED,
+					Value: NewRSRParsersMustCompile("~6", true), Mandatory: true},
+				&FCTemplate{ID: "Category", FieldId: "Category", Type: utils.META_COMPOSED,
+					Value: NewRSRParsersMustCompile("~7", true), Mandatory: true},
+				&FCTemplate{ID: "Account", FieldId: "Account", Type: utils.META_COMPOSED,
+					Value: NewRSRParsersMustCompile("~8", true), Mandatory: true},
+				&FCTemplate{ID: "Subject", FieldId: "Subject", Type: utils.META_COMPOSED,
+					Value: NewRSRParsersMustCompile("~9", true), Mandatory: true},
+				&FCTemplate{ID: "Destination", FieldId: "Destination", Type: utils.META_COMPOSED,
+					Value: NewRSRParsersMustCompile("~10", true), Mandatory: true},
+				&FCTemplate{ID: "SetupTime", FieldId: "SetupTime", Type: utils.META_COMPOSED,
+					Value: NewRSRParsersMustCompile("~11", true), Mandatory: true},
+				&FCTemplate{ID: "AnswerTime", FieldId: "AnswerTime", Type: utils.META_COMPOSED,
+					Value: NewRSRParsersMustCompile("~12", true), Mandatory: true},
+				&FCTemplate{ID: "Usage", FieldId: "Usage", Type: utils.META_COMPOSED,
+					Value: NewRSRParsersMustCompile("~13", true), Mandatory: true},
+			},
+			TrailerFields: make([]*FCTemplate, 0),
+			CacheDumpFields: []*FCTemplate{
+				&FCTemplate{ID: "CGRID", Type: utils.META_COMPOSED,
+					Value: NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.CGRID, true)},
+				&FCTemplate{ID: "RunID", Type: utils.META_COMPOSED,
+					Value: NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.RunID, true)},
+				&FCTemplate{ID: "TOR", Type: utils.META_COMPOSED,
+					Value: NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.ToR, true)},
+				&FCTemplate{ID: "OriginID", Type: utils.META_COMPOSED,
+					Value: NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.OriginID, true)},
+				&FCTemplate{ID: "RequestType", Type: utils.META_COMPOSED,
+					Value: NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.RequestType, true)},
+				&FCTemplate{ID: "Tenant", Type: utils.META_COMPOSED,
+					Value: NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Tenant, true)},
+				&FCTemplate{ID: "Category", Type: utils.META_COMPOSED,
+					Value: NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Category, true)},
+				&FCTemplate{ID: "Account", Type: utils.META_COMPOSED,
+					Value: NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Account, true)},
+				&FCTemplate{ID: "Subject", Type: utils.META_COMPOSED,
+					Value: NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Subject, true)},
+				&FCTemplate{ID: "Destination", Type: utils.META_COMPOSED,
+					Value: NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Destination, true)},
+				&FCTemplate{ID: "SetupTime", Type: utils.META_COMPOSED,
+					Value:  NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.SetupTime, true),
+					Layout: "2006-01-02T15:04:05Z07:00"},
+				&FCTemplate{ID: "AnswerTime", Type: utils.META_COMPOSED,
+					Value:  NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.AnswerTime, true),
+					Layout: "2006-01-02T15:04:05Z07:00"},
+				&FCTemplate{ID: "Usage", Type: utils.META_COMPOSED,
+					Value: NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Usage, true)},
+				&FCTemplate{ID: "Cost", Type: utils.META_COMPOSED,
+					Value: NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.COST, true)},
+			},
+		},
+	}
+	if !reflect.DeepEqual(eCgrCfg.CdrcProfiles, cgrCfg.CdrcProfiles) {
+		t.Errorf("Expected: %+v,\n received: %+v",
+			utils.ToJSON(eCgrCfg.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0]),
+			utils.ToJSON(cgrCfg.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0]))
 	}
 }
 
