@@ -33,6 +33,7 @@ func NewDfltLoaderSConfig() *LoaderSConfig {
 type LoaderSConfig struct { // rename to LoaderSConfig
 	Id             string
 	Enabled        bool
+	Tenant         RSRParsers
 	DryRun         bool
 	RunDelay       time.Duration
 	LockFileName   string
@@ -54,11 +55,10 @@ func NewDfltLoaderDataTypeConfig() *LoaderDataType {
 type LoaderDataType struct { //rename to LoaderDataType
 	Type     string
 	Filename string
-	Fields   []*CfgCdrField
+	Fields   []*FCTemplate
 }
 
 func (self *LoaderDataType) loadFromJsonCfg(jsnCfg *LoaderJsonDataType) error {
-
 	if jsnCfg == nil {
 		return nil
 	}
@@ -69,11 +69,7 @@ func (self *LoaderDataType) loadFromJsonCfg(jsnCfg *LoaderJsonDataType) error {
 		self.Filename = *jsnCfg.File_name
 	}
 	if jsnCfg.Fields != nil {
-		if fields, err := CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Fields); err != nil {
-			return err
-		} else {
-			self.Fields = fields
-		}
+		self.Fields = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Fields)
 	}
 	return nil
 }
@@ -87,6 +83,9 @@ func (self *LoaderSConfig) loadFromJsonCfg(jsnCfg *LoaderJsonCfg) error {
 	}
 	if jsnCfg.Enabled != nil {
 		self.Enabled = *jsnCfg.Enabled
+	}
+	if jsnCfg.Tenant != nil {
+		self.Tenant = NewRSRParsersMustCompile(*jsnCfg.Tenant, true)
 	}
 	if jsnCfg.Dry_run != nil {
 		self.DryRun = *jsnCfg.Dry_run
@@ -131,6 +130,7 @@ func (self *LoaderSConfig) Clone() *LoaderSConfig {
 	clnLoader := new(LoaderSConfig)
 	clnLoader.Id = self.Id
 	clnLoader.Enabled = self.Enabled
+	clnLoader.Tenant = self.Tenant
 	clnLoader.DryRun = self.DryRun
 	clnLoader.RunDelay = self.RunDelay
 	clnLoader.LockFileName = self.LockFileName

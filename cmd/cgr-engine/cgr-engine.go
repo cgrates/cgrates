@@ -74,7 +74,6 @@ var (
 
 func startCdrcs(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConnection,
 	exitChan chan bool, filterSChan chan *engine.FilterS) {
-	// Not sure here if FilterS is passed correct at line 103 in fo start cdrc
 	filterS := <-filterSChan
 	filterSChan <- filterS
 	cdrcInitialized := false           // Control whether the cdrc was already initialized (so we don't reload in that case)
@@ -840,8 +839,10 @@ func startFilterService(filterSChan chan *engine.FilterS, cacheS *engine.CacheS,
 
 // loaderService will start and register APIs for LoaderService if enabled
 func loaderService(cacheS *engine.CacheS, cfg *config.CGRConfig,
-	dm *engine.DataManager, server *utils.Server, exitChan chan bool) {
-	ldrS := loaders.NewLoaderService(dm, cfg.LoaderCfg(), cfg.DefaultTimezone)
+	dm *engine.DataManager, server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
+	filterS := <-filterSChan
+	filterSChan <- filterS
+	ldrS := loaders.NewLoaderService(dm, cfg.LoaderCfg(), cfg.DefaultTimezone, filterS)
 	if !ldrS.Enabled() {
 		return
 	}
@@ -1341,7 +1342,7 @@ func main() {
 			internalRaterChan, cacheS, dm, server, exitChan)
 	}
 
-	go loaderService(cacheS, cfg, dm, server, exitChan)
+	go loaderService(cacheS, cfg, dm, server, exitChan, filterSChan)
 
 	// Serve rpc connections
 	go startRpc(server, internalRaterChan, internalCdrSChan, internalCdrStatSChan,
