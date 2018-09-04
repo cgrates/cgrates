@@ -39,20 +39,22 @@ type openedCSVFile struct {
 }
 
 func NewLoader(dm *engine.DataManager, cfg *config.LoaderSConfig,
-	timezone string) (ldr *Loader) {
+	timezone string, filterS *engine.FilterS) (ldr *Loader) {
 	ldr = &Loader{
 		enabled:       cfg.Enabled,
+		tenant:        cfg.Tenant,
 		dryRun:        cfg.DryRun,
 		ldrID:         cfg.Id,
 		tpInDir:       cfg.TpInDir,
 		tpOutDir:      cfg.TpOutDir,
 		lockFilename:  cfg.LockFileName,
 		fieldSep:      cfg.FieldSeparator,
-		dataTpls:      make(map[string][]*config.CfgCdrField),
+		dataTpls:      make(map[string][]*config.FCTemplate),
 		rdrs:          make(map[string]map[string]*openedCSVFile),
 		bufLoaderData: make(map[string][]LoaderData),
 		dm:            dm,
 		timezone:      timezone,
+		filterS:       filterS,
 	}
 	for _, ldrData := range cfg.Data {
 		ldr.dataTpls[ldrData.Type] = ldrData.Fields
@@ -62,8 +64,8 @@ func NewLoader(dm *engine.DataManager, cfg *config.LoaderSConfig,
 		}
 		for _, cfgFld := range ldrData.Fields { // add all possible files to be opened
 			for _, cfgFldVal := range cfgFld.Value {
-				if idx := strings.Index(cfgFldVal.Id, utils.InInFieldSep); idx != -1 {
-					ldr.rdrs[ldrData.Type][cfgFldVal.Id[:idx]] = nil
+				if idx := strings.Index(cfgFldVal.Rules, utils.InInFieldSep); idx != -1 {
+					ldr.rdrs[ldrData.Type][cfgFldVal.Rules[:idx]] = nil
 				}
 			}
 		}
@@ -74,6 +76,7 @@ func NewLoader(dm *engine.DataManager, cfg *config.LoaderSConfig,
 // Loader is one instance loading from a folder
 type Loader struct {
 	enabled       bool
+	tenant        config.RSRParsers
 	dryRun        bool
 	ldrID         string
 	tpInDir       string
@@ -81,12 +84,13 @@ type Loader struct {
 	lockFilename  string
 	cacheSConns   []*config.HaPoolConfig
 	fieldSep      string
-	dataTpls      map[string][]*config.CfgCdrField     // map[loaderType]*config.CfgCdrField
+	dataTpls      map[string][]*config.FCTemplate      // map[loaderType]*config.FCTemplate
 	rdrs          map[string]map[string]*openedCSVFile // map[loaderType]map[fileName]*openedCSVFile for common incremental read
 	procRows      int                                  // keep here the last processed row in the file/-s
 	bufLoaderData map[string][]LoaderData              // cache of data read, indexed on tenantID
 	dm            *engine.DataManager
 	timezone      string
+	filterS       *engine.FilterS
 }
 
 func (ldr *Loader) ListenAndServe(exitChan chan struct{}) (err error) {
@@ -201,7 +205,7 @@ func (ldr *Loader) processContent(loaderType string) (err error) {
 			}
 
 			if err := lData.UpdateFromCSV(fName, record,
-				ldr.dataTpls[loaderType]); err != nil {
+				ldr.dataTpls[loaderType], ldr.tenant, ldr.filterS); err != nil {
 				fmt.Sprintf("<%s> <%s> line: %d, error: %s",
 					utils.LoaderS, ldr.ldrID, lineNr, err.Error())
 				hasErrors = true
@@ -293,6 +297,12 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				if err := ldr.dm.SetResourceProfile(res, true); err != nil {
 					return err
 				}
+				if err := ldr.dm.SetResource(
+					&engine.Resource{Tenant: res.Tenant,
+						ID:     res.ID,
+						Usages: make(map[string]*engine.ResourceUsage)}); err != nil {
+					return err
+				}
 			}
 		}
 	case utils.MetaFilters:
@@ -344,6 +354,17 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				if err := ldr.dm.SetStatQueueProfile(stsPrf, true); err != nil {
 					return err
 				}
+				metrics := make(map[string]engine.StatMetric)
+				for _, metricwithparam := range stsPrf.Metrics {
+					if metric, err := engine.NewStatMetric(metricwithparam.MetricID, stsPrf.MinItems, metricwithparam.Parameters); err != nil {
+						return utils.APIErrorHandler(err)
+					} else {
+						metrics[metricwithparam.MetricID] = metric
+					}
+				}
+				if err := ldr.dm.SetStatQueue(&engine.StatQueue{Tenant: stsPrf.Tenant, ID: stsPrf.ID, SQMetrics: metrics}); err != nil {
+					return err
+				}
 			}
 		}
 	case utils.MetaThresholds:
@@ -368,6 +389,9 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 					continue
 				}
 				if err := ldr.dm.SetThresholdProfile(thPrf, true); err != nil {
+					return err
+				}
+				if err := ldr.dm.SetThreshold(&engine.Threshold{Tenant: thPrf.Tenant, ID: thPrf.ID}); err != nil {
 					return err
 				}
 			}

@@ -27,49 +27,49 @@ import (
 )
 
 func TestDataUpdateFromCSVOneFile(t *testing.T) {
-	attrSFlds := []*config.CfgCdrField{
-		&config.CfgCdrField{Tag: "TenantID",
+	attrSFlds := []*config.FCTemplate{
+		&config.FCTemplate{ID: "TenantID",
 			FieldId:   "Tenant",
 			Type:      utils.META_COMPOSED,
-			Value:     utils.ParseRSRFieldsMustCompile("0", utils.INFIELD_SEP),
+			Value:     config.NewRSRParsersMustCompile("~0", true),
 			Mandatory: true},
-		&config.CfgCdrField{Tag: "ProfileID",
+		&config.FCTemplate{ID: "ProfileID",
 			FieldId:   "ID",
 			Type:      utils.META_COMPOSED,
-			Value:     utils.ParseRSRFieldsMustCompile("1", utils.INFIELD_SEP),
+			Value:     config.NewRSRParsersMustCompile("~1", true),
 			Mandatory: true},
-		&config.CfgCdrField{Tag: "Contexts",
+		&config.FCTemplate{ID: "Contexts",
 			FieldId: "Contexts",
 			Type:    utils.META_COMPOSED,
-			Value:   utils.ParseRSRFieldsMustCompile("2", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "FilterIDs",
+			Value:   config.NewRSRParsersMustCompile("~2", true)},
+		&config.FCTemplate{ID: "FilterIDs",
 			FieldId: "FilterIDs",
 			Type:    utils.META_COMPOSED,
-			Value:   utils.ParseRSRFieldsMustCompile("3", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "ActivationInterval",
+			Value:   config.NewRSRParsersMustCompile("~3", true)},
+		&config.FCTemplate{ID: "ActivationInterval",
 			FieldId: "ActivationInterval",
 			Type:    utils.META_COMPOSED,
-			Value:   utils.ParseRSRFieldsMustCompile("4", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "FieldName",
+			Value:   config.NewRSRParsersMustCompile("~4", true)},
+		&config.FCTemplate{ID: "FieldName",
 			FieldId: "FieldName",
 			Type:    utils.META_COMPOSED,
-			Value:   utils.ParseRSRFieldsMustCompile("5", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "Initial",
+			Value:   config.NewRSRParsersMustCompile("~5", true)},
+		&config.FCTemplate{ID: "Initial",
 			FieldId: "Initial",
 			Type:    utils.META_COMPOSED,
-			Value:   utils.ParseRSRFieldsMustCompile("6", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "Substitute",
+			Value:   config.NewRSRParsersMustCompile("~6", true)},
+		&config.FCTemplate{ID: "Substitute",
 			FieldId: "Substitute",
 			Type:    utils.META_COMPOSED,
-			Value:   utils.ParseRSRFieldsMustCompile("7", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "Append",
+			Value:   config.NewRSRParsersMustCompile("~7", true)},
+		&config.FCTemplate{ID: "Append",
 			FieldId: "Append",
 			Type:    utils.META_COMPOSED,
-			Value:   utils.ParseRSRFieldsMustCompile("8", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "Weight",
+			Value:   config.NewRSRParsersMustCompile("~8", true)},
+		&config.FCTemplate{ID: "Weight",
 			FieldId: "Weight",
 			Type:    utils.META_COMPOSED,
-			Value:   utils.ParseRSRFieldsMustCompile("9", utils.INFIELD_SEP)},
+			Value:   config.NewRSRParsersMustCompile("~9", true)},
 	}
 
 	rows := [][]string{
@@ -77,7 +77,7 @@ func TestDataUpdateFromCSVOneFile(t *testing.T) {
 		[]string{"cgrates.org", "ATTR_1", "", "", "", "Subject", "*any", "1001", "true", ""},
 	}
 	lData := make(LoaderData)
-	if err := lData.UpdateFromCSV("Attributes.csv", rows[0], attrSFlds); err != nil {
+	if err := lData.UpdateFromCSV("Attributes.csv", rows[0], attrSFlds, config.NewRSRParsersMustCompile("cgrates.org", true), nil); err != nil {
 		t.Error(err)
 	}
 	eLData := LoaderData{"Tenant": "cgrates.org",
@@ -95,7 +95,7 @@ func TestDataUpdateFromCSVOneFile(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", eLData, lData)
 	}
 	lData = make(LoaderData)
-	if err := lData.UpdateFromCSV("Attributes.csv", rows[1], attrSFlds); err != nil {
+	if err := lData.UpdateFromCSV("Attributes.csv", rows[1], attrSFlds, config.NewRSRParsersMustCompile("cgrates.org", true), nil); err != nil {
 		t.Error(err)
 	}
 	eLData = LoaderData{"Tenant": "cgrates.org",
@@ -115,41 +115,41 @@ func TestDataUpdateFromCSVOneFile(t *testing.T) {
 }
 
 func TestDataUpdateFromCSVMultiFiles(t *testing.T) {
-	attrSFlds := []*config.CfgCdrField{
-		&config.CfgCdrField{Tag: "TenantID",
+	attrSFlds := []*config.FCTemplate{
+		&config.FCTemplate{ID: "TenantID",
 			FieldId:   "Tenant",
 			Type:      utils.MetaString,
-			Value:     utils.ParseRSRFieldsMustCompile("^cgrates.org", utils.INFIELD_SEP),
+			Value:     config.NewRSRParsersMustCompile("cgrates.org", true),
 			Mandatory: true},
-		&config.CfgCdrField{Tag: "ProfileID",
+		&config.FCTemplate{ID: "ProfileID",
 			FieldId:   "ID",
 			Type:      utils.META_COMPOSED,
-			Value:     utils.ParseRSRFieldsMustCompile("File2.csv:1", utils.INFIELD_SEP),
+			Value:     config.NewRSRParsersMustCompile("~File2.csv:1", true),
 			Mandatory: true},
-		&config.CfgCdrField{Tag: "Contexts",
+		&config.FCTemplate{ID: "Contexts",
 			FieldId: "Contexts",
 			Type:    utils.MetaString,
-			Value:   utils.ParseRSRFieldsMustCompile("^*any", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "FieldName",
+			Value:   config.NewRSRParsersMustCompile("*any", true)},
+		&config.FCTemplate{ID: "FieldName",
 			FieldId: "FieldName",
 			Type:    utils.META_COMPOSED,
-			Value:   utils.ParseRSRFieldsMustCompile("File1.csv:5", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "Initial",
+			Value:   config.NewRSRParsersMustCompile("~File1.csv:5", true)},
+		&config.FCTemplate{ID: "Initial",
 			FieldId: "Initial",
 			Type:    utils.META_COMPOSED,
-			Value:   utils.ParseRSRFieldsMustCompile("File1.csv:6", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "Substitute",
+			Value:   config.NewRSRParsersMustCompile("~File1.csv:6", true)},
+		&config.FCTemplate{ID: "Substitute",
 			FieldId: "Substitute",
 			Type:    utils.META_COMPOSED,
-			Value:   utils.ParseRSRFieldsMustCompile("File1.csv:7", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "Append",
+			Value:   config.NewRSRParsersMustCompile("~File1.csv:7", true)},
+		&config.FCTemplate{ID: "Append",
 			FieldId: "Append",
 			Type:    utils.MetaString,
-			Value:   utils.ParseRSRFieldsMustCompile("^true", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "Weight",
+			Value:   config.NewRSRParsersMustCompile("true", true)},
+		&config.FCTemplate{ID: "Weight",
 			FieldId: "Weight",
 			Type:    utils.MetaString,
-			Value:   utils.ParseRSRFieldsMustCompile("^10", utils.INFIELD_SEP)},
+			Value:   config.NewRSRParsersMustCompile("10", true)},
 	}
 
 	loadRun1 := map[string][]string{
@@ -158,7 +158,7 @@ func TestDataUpdateFromCSVMultiFiles(t *testing.T) {
 	}
 	lData := make(LoaderData)
 	for fName, record := range loadRun1 {
-		if err := lData.UpdateFromCSV(fName, record, attrSFlds); err != nil {
+		if err := lData.UpdateFromCSV(fName, record, attrSFlds, config.NewRSRParsersMustCompile("cgrates.org", true), nil); err != nil {
 			t.Error(err)
 		}
 	}

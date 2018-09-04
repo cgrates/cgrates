@@ -481,12 +481,13 @@ type SupplierSJsonCfg struct {
 type LoaderJsonDataType struct {
 	Type      *string
 	File_name *string
-	Fields    *[]*CdrFieldJsonCfg
+	Fields    *[]*FcTemplateJsonCfg
 }
 
 type LoaderJsonCfg struct {
 	ID              *string
 	Enabled         *bool
+	Tenant          *string
 	Dry_run         *bool
 	Run_delay       *int
 	Lock_filename   *string

@@ -28,13 +28,13 @@ import (
 )
 
 func NewLoaderService(dm *engine.DataManager, ldrsCfg []*config.LoaderSConfig,
-	timezone string) (ldrS *LoaderService) {
+	timezone string, filterS *engine.FilterS) (ldrS *LoaderService) {
 	ldrS = &LoaderService{ldrs: make(map[string]*Loader)}
 	for _, ldrCfg := range ldrsCfg {
 		if !ldrCfg.Enabled {
 			continue
 		}
-		ldrS.ldrs[ldrCfg.Id] = NewLoader(dm, ldrCfg, timezone)
+		ldrS.ldrs[ldrCfg.Id] = NewLoader(dm, ldrCfg, timezone, filterS)
 	}
 	return
 }

@@ -21,9 +21,9 @@ package loaders
 import (
 	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -38,52 +38,100 @@ func (ld LoaderData) TenantID() string {
 // UpdateFromCSV will update LoaderData with data received from fileName,
 // contained in record and processed with cfgTpl
 func (ld LoaderData) UpdateFromCSV(fileName string, record []string,
-	cfgTpl []*config.CfgCdrField) (err error) {
+	cfgTpl []*config.FCTemplate, tnt config.RSRParsers, filterS *engine.FilterS) (err error) {
+	csvProvider := newCsvProvider(record, fileName)
 	for _, cfgFld := range cfgTpl {
-		var valStr string
-		for _, rsrFld := range cfgFld.Value {
-			if rsrFld.IsStatic() {
-				var val string
-				if val, err = rsrFld.Parse(""); err != nil {
-					return err
-				}
-				valStr += val
-				continue
-			}
-			idxStr := rsrFld.Id // default to Id in the rsrField
-			spltSrc := strings.Split(rsrFld.Id, utils.InInFieldSep)
-			if len(spltSrc) == 2 { // having field name inside definition, compare here with our source
-				if spltSrc[0] != fileName {
-					continue
-				}
-				idxStr = spltSrc[1] // will have index at second position in the rule definition
-			}
-			var cfgFieldIdx int
-			if cfgFieldIdx, err = strconv.Atoi(idxStr); err != nil {
-				return
-			} else if len(record) <= cfgFieldIdx {
-				return fmt.Errorf("Ignoring record: %v - cannot extract field %s", record, cfgFld.Tag)
-			}
-			if parsed, err := rsrFld.Parse(record[cfgFieldIdx]); err != nil {
+		// Make sure filters are matching
+		if len(cfgFld.Filters) != 0 {
+			tenant, err := tnt.ParseValue("")
+			if err != nil {
 				return err
-			} else {
-				valStr += parsed
 			}
-
+			if pass, err := filterS.Pass(tenant,
+				cfgFld.Filters, csvProvider); err != nil || !pass {
+				continue // Not passes filters, ignore this CDR
+			}
+		}
+		out, err := cfgFld.Value.ParseLoaderSDP(csvProvider)
+		if err != nil {
+			return err
 		}
 		switch cfgFld.Type {
 		case utils.META_COMPOSED:
 			if _, has := ld[cfgFld.FieldId]; !has {
-				ld[cfgFld.FieldId] = valStr
+				ld[cfgFld.FieldId] = out
 			} else if valOrig, canCast := ld[cfgFld.FieldId].(string); canCast {
-				valOrig += valStr
+				valOrig += out
 				ld[cfgFld.FieldId] = valOrig
 			}
 		case utils.MetaString:
 			if _, has := ld[cfgFld.FieldId]; !has {
-				ld[cfgFld.FieldId] = valStr
+				ld[cfgFld.FieldId] = out
 			}
 		}
 	}
 	return
+}
+
+// newCsvProvider constructs a DataProvider
+func newCsvProvider(record []string, fileName string) (dP config.DataProvider) {
+	dP = &csvProvider{req: record, fileName: fileName, cache: config.NewNavigableMap(nil)}
+	return
+}
+
+// csvProvider implements engine.DataProvider so we can pass it to filters
+type csvProvider struct {
+	req      []string
+	fileName string
+	cache    *config.NavigableMap
+}
+
+// String is part of engine.DataProvider interface
+// when called, it will display the already parsed values out of cache
+func (cP *csvProvider) String() string {
+	return utils.ToJSON(cP)
+}
+
+// FieldAsInterface is part of engine.DataProvider interface
+func (cP *csvProvider) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+	if data, err = cP.cache.FieldAsInterface(fldPath); err == nil ||
+		err != utils.ErrNotFound { // item found in cache
+		return
+	}
+	err = nil // cancel previous err
+	idx := fldPath[0]
+	var fileName string
+	if len(fldPath) == 2 {
+		fileName = fldPath[0]
+		idx = fldPath[1]
+	}
+	if fileName != "" && cP.fileName != fileName {
+		cP.cache.Set(fldPath, nil, false)
+		return
+	}
+	if cfgFieldIdx, err := strconv.Atoi(idx); err != nil || len(cP.req) <= cfgFieldIdx {
+		return nil, fmt.Errorf("Ignoring record: %v with error : %+v", cP.req, err)
+	} else {
+		data = cP.req[cfgFieldIdx]
+	}
+
+	cP.cache.Set(fldPath, data, false)
+	return
+}
+
+// FieldAsString is part of engine.DataProvider interface
+func (cP *csvProvider) FieldAsString(fldPath []string) (data string, err error) {
+	var valIface interface{}
+	valIface, err = cP.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	data, _ = utils.CastFieldIfToString(valIface)
+	return
+}
+
+// AsNavigableMap is part of engine.DataProvider interface
+func (cP *csvProvider) AsNavigableMap([]*config.FCTemplate) (
+	nm *config.NavigableMap, err error) {
+	return nil, utils.ErrNotImplemented
 }
