@@ -1862,12 +1862,12 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		return errors.New("no database connection")
 	}
 	if flush {
-		if verbose {
-			log.Print("Flushing database")
-		}
-		if err = tpr.dm.DataDB().Flush(""); err != nil {
-			return
-		}
+		// if verbose {
+		// 	log.Print("Flushing database")
+		// }
+		// if err = tpr.dm.DataDB().Flush(""); err != nil {
+		// 	return
+		// }
 	}
 	if verbose {
 		log.Print("Destinations:")
