@@ -173,7 +173,10 @@ func optsNotStrict(s *xmltree.ParseOptions) {
 func TestXMLElementText(t *testing.T) {
 	xp := goxpath.MustParse(path.Join("/broadWorksCDR/cdrData/"))
 	xmlTree := xmltree.MustParseXML(bytes.NewBufferString(cdrXmlBroadsoft), optsNotStrict)
-	cdrs := goxpath.MustExec(xp, xmlTree, nil)
+	cdrs, err := xp.ExecNode(xmlTree)
+	if err != nil {
+		t.Error(err)
+	}
 	cdrWithoutUserNr := cdrs[0]
 	if _, err := elementText(cdrWithoutUserNr, "cdrData/basicModule/userNumber"); err != utils.ErrNotFound {
 		t.Error(err)
@@ -194,7 +197,10 @@ func TestXMLElementText(t *testing.T) {
 func TestXMLHandlerSubstractUsage(t *testing.T) {
 	xp := goxpath.MustParse(path.Join("/broadWorksCDR/cdrData/"))
 	xmlTree := xmltree.MustParseXML(bytes.NewBufferString(cdrXmlBroadsoft), optsNotStrict)
-	cdrs := goxpath.MustExec(xp, xmlTree, nil)
+	cdrs, err := xp.ExecNode(xmlTree)
+	if err != nil {
+		t.Error(err)
+	}
 	cdrWithUsage := cdrs[1]
 	if usage, err := handlerSubstractUsage(cdrWithUsage,
 		config.NewRSRParsersMustCompile("~broadWorksCDR>cdrData>basicModule>releaseTime;|;~broadWorksCDR>cdrData>basicModule>answerTime", true),

@@ -39,32 +39,36 @@ import (
 
 // getElementText will process the node to extract the elementName's text out of it (only first one found)
 // returns utils.ErrNotFound if the element is not found in the node
-func elementText(xmlRes tree.Res, elmntPath string) (string, error) {
+func elementText(xmlNode tree.Node, elmntPath string) (string, error) {
 	xp, err := goxpath.Parse(elmntPath)
 	if err != nil {
 		return "", err
 	}
 	elmntBuf := bytes.NewBufferString(xml.Header)
-	if err := goxpath.Marshal(xmlRes.(tree.Node), elmntBuf); err != nil {
+	if err := goxpath.Marshal(xmlNode, elmntBuf); err != nil {
 		return "", err
 	}
-	elmntNode, err := xmltree.ParseXML(elmntBuf)
+	xmlTree, err := xmltree.ParseXML(elmntBuf)
 	if err != nil {
 		return "", err
 	}
-	elmnts, err := goxpath.Exec(xp, elmntNode, nil)
+	elmnt, err := xp.ExecNode(xmlTree)
 	if err != nil {
 		return "", err
 	}
-	if len(elmnts) == 0 {
+	if len(elmnt) == 0 {
 		return "", utils.ErrNotFound
 	}
-	return elmnts[0].String(), nil
+	elem, ok := elmnt[0].(tree.Elem)
+	if !ok {
+		return "", fmt.Errorf("Cannot parse ")
+	}
+	return elem.ResValue(), nil
 }
 
 // handlerUsageDiff will calculate the usage as difference between timeEnd and timeStart
 // Expects the 2 arguments in template separated by |
-func handlerSubstractUsage(xmlElmnt tree.Res, argsTpl config.RSRParsers, cdrPath utils.HierarchyPath, timezone string) (time.Duration, error) {
+func handlerSubstractUsage(xmlElmnt tree.Node, argsTpl config.RSRParsers, cdrPath utils.HierarchyPath, timezone string) (time.Duration, error) {
 	var argsStr string
 	for _, rsrArg := range argsTpl {
 		if rsrArg.Rules == utils.HandlerArgSep {
@@ -106,12 +110,16 @@ func NewXMLRecordsProcessor(recordsReader io.Reader, cdrPath utils.HierarchyPath
 	}
 	xmlProc := &XMLRecordsProcessor{cdrPath: cdrPath, timezone: timezone,
 		httpSkipTlsCheck: httpSkipTlsCheck, cdrcCfgs: cdrcCfgs, filterS: filterS}
-	xmlProc.cdrXmlElmts = goxpath.MustExec(xp, xmlNode, nil)
+	prov, err := xp.ExecNode(xmlNode)
+	if err != nil {
+		return nil, err
+	}
+	xmlProc.cdrXmlElmts = prov
 	return xmlProc, nil
 }
 
 type XMLRecordsProcessor struct {
-	cdrXmlElmts      []tree.Res          // result of splitting the XML doc into CDR elements
+	cdrXmlElmts      tree.NodeSet        // result of splitting the XML doc into CDR elements
 	procItems        int                 // current number of processed records from file
 	cdrPath          utils.HierarchyPath // path towards one CDR element
 	timezone         string
@@ -155,7 +163,7 @@ func (xmlProc *XMLRecordsProcessor) ProcessNextRecord() (cdrs []*engine.CDR, err
 	return cdrs, nil
 }
 
-func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity tree.Res, cdrcCfg *config.CdrcConfig) (*engine.CDR, error) {
+func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity tree.Node, cdrcCfg *config.CdrcConfig) (*engine.CDR, error) {
 	cdr := &engine.CDR{OriginHost: "0.0.0.0", Source: cdrcCfg.CdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
 	var lazyHttpFields []*config.FCTemplate
 	var err error
@@ -228,14 +236,14 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity tree.Res, cdrcCfg *con
 }
 
 // newXmlProvider constructs a DataProvider
-func newXmlProvider(req tree.Res, cdrPath utils.HierarchyPath) (dP config.DataProvider) {
+func newXmlProvider(req tree.Node, cdrPath utils.HierarchyPath) (dP config.DataProvider) {
 	dP = &xmlProvider{req: req, cdrPath: cdrPath, cache: config.NewNavigableMap(nil)}
 	return
 }
 
 // xmlProvider implements engine.DataProvider so we can pass it to filters
 type xmlProvider struct {
-	req     tree.Res
+	req     tree.Node
 	cdrPath utils.HierarchyPath //used to compute relative path
 	cache   *config.NavigableMap
 }
