@@ -125,4 +125,6 @@ imports:
   - internal/scram
 - name: github.com/dlintw/goconf
   version: dcc070983490608a14480e3bf943bad464785df5
+- name: github.com/beevik/etree
+  version: 90dafc1e1f114dfb9576218bb43c03fb854d1b34
 testImports: []

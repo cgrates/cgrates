@@ -19,9 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cdrc
 
 import (
-	"bytes"
 	"encoding/json"
-	"encoding/xml"
 	"errors"
 	"fmt"
 	"io"
@@ -29,9 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ChrisTrenkamp/goxpath"
-	"github.com/ChrisTrenkamp/goxpath/tree"
-	"github.com/ChrisTrenkamp/goxpath/tree/xmltree"
+	"github.com/beevik/etree"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -39,36 +35,17 @@ import (
 
 // getElementText will process the node to extract the elementName's text out of it (only first one found)
 // returns utils.ErrNotFound if the element is not found in the node
-func elementText(xmlNode tree.Node, elmntPath string) (string, error) {
-	xp, err := goxpath.Parse(elmntPath)
-	if err != nil {
-		return "", err
-	}
-	elmntBuf := bytes.NewBufferString(xml.Header)
-	if err := goxpath.Marshal(xmlNode, elmntBuf); err != nil {
-		return "", err
-	}
-	xmlTree, err := xmltree.ParseXML(elmntBuf)
-	if err != nil {
-		return "", err
-	}
-	elmnt, err := xp.ExecNode(xmlTree)
-	if err != nil {
-		return "", err
-	}
-	if len(elmnt) == 0 {
+func elementText(xmlElement *etree.Element, elmntPath string) (string, error) {
+	elmnt := xmlElement.FindElement(elmntPath)
+	if elmnt == nil {
 		return "", utils.ErrNotFound
 	}
-	elem, ok := elmnt[0].(tree.Elem)
-	if !ok {
-		return "", fmt.Errorf("Cannot parse ")
-	}
-	return elem.ResValue(), nil
+	return elmnt.Text(), nil
 }
 
 // handlerUsageDiff will calculate the usage as difference between timeEnd and timeStart
 // Expects the 2 arguments in template separated by |
-func handlerSubstractUsage(xmlElmnt tree.Node, argsTpl config.RSRParsers, cdrPath utils.HierarchyPath, timezone string) (time.Duration, error) {
+func handlerSubstractUsage(xmlElement *etree.Element, argsTpl config.RSRParsers, cdrPath utils.HierarchyPath, timezone string) (time.Duration, error) {
 	var argsStr string
 	for _, rsrArg := range argsTpl {
 		if rsrArg.Rules == utils.HandlerArgSep {
@@ -76,8 +53,8 @@ func handlerSubstractUsage(xmlElmnt tree.Node, argsTpl config.RSRParsers, cdrPat
 			continue
 		}
 		absolutePath := utils.ParseHierarchyPath(rsrArg.Rules, "")
-		relPath := utils.HierarchyPath(absolutePath[len(cdrPath)-1:]) // Need relative path to the xmlElmnt
-		argStr, _ := elementText(xmlElmnt, relPath.AsString("/", true))
+		relPath := utils.HierarchyPath(absolutePath[len(cdrPath):]) // Need relative path to the xmlElmnt
+		argStr, _ := elementText(xmlElement, relPath.AsString("/", false))
 		argsStr += argStr
 	}
 	handlerArgs := strings.Split(argsStr, utils.HandlerArgSep)
@@ -97,29 +74,21 @@ func handlerSubstractUsage(xmlElmnt tree.Node, argsTpl config.RSRParsers, cdrPat
 
 func NewXMLRecordsProcessor(recordsReader io.Reader, cdrPath utils.HierarchyPath, timezone string,
 	httpSkipTlsCheck bool, cdrcCfgs []*config.CdrcConfig, filterS *engine.FilterS) (*XMLRecordsProcessor, error) {
-	xp, err := goxpath.Parse(cdrPath.AsString("/", true))
-	if err != nil {
-		return nil, err
+	xmlDocument := etree.NewDocument()                                                                // create new document
+	xmlDocument.ReadSettings.CharsetReader = func(label string, input io.Reader) (io.Reader, error) { // fix for enconding != UTF-8
+		return input, nil
 	}
-	optsNotStrict := func(s *xmltree.ParseOptions) {
-		s.Strict = false
-	}
-	xmlNode, err := xmltree.ParseXML(recordsReader, optsNotStrict)
-	if err != nil {
+	if _, err := xmlDocument.ReadFrom(recordsReader); err != nil { // read file and build xml document
 		return nil, err
 	}
 	xmlProc := &XMLRecordsProcessor{cdrPath: cdrPath, timezone: timezone,
 		httpSkipTlsCheck: httpSkipTlsCheck, cdrcCfgs: cdrcCfgs, filterS: filterS}
-	prov, err := xp.ExecNode(xmlNode)
-	if err != nil {
-		return nil, err
-	}
-	xmlProc.cdrXmlElmts = prov
+	xmlProc.cdrXmlElmts = xmlDocument.Root().FindElements(cdrPath.AsString("/", true))
 	return xmlProc, nil
 }
 
 type XMLRecordsProcessor struct {
-	cdrXmlElmts      tree.NodeSet        // result of splitting the XML doc into CDR elements
+	cdrXmlElmts      []*etree.Element    // result of splitting the XML doc into CDR elements
 	procItems        int                 // current number of processed records from file
 	cdrPath          utils.HierarchyPath // path towards one CDR element
 	timezone         string
@@ -163,7 +132,7 @@ func (xmlProc *XMLRecordsProcessor) ProcessNextRecord() (cdrs []*engine.CDR, err
 	return cdrs, nil
 }
 
-func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity tree.Node, cdrcCfg *config.CdrcConfig) (*engine.CDR, error) {
+func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity *etree.Element, cdrcCfg *config.CdrcConfig) (*engine.CDR, error) {
 	cdr := &engine.CDR{OriginHost: "0.0.0.0", Source: cdrcCfg.CdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
 	var lazyHttpFields []*config.FCTemplate
 	var err error
@@ -236,14 +205,14 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity tree.Node, cdrcCfg *co
 }
 
 // newXmlProvider constructs a DataProvider
-func newXmlProvider(req tree.Node, cdrPath utils.HierarchyPath) (dP config.DataProvider) {
+func newXmlProvider(req *etree.Element, cdrPath utils.HierarchyPath) (dP config.DataProvider) {
 	dP = &xmlProvider{req: req, cdrPath: cdrPath, cache: config.NewNavigableMap(nil)}
 	return
 }
 
 // xmlProvider implements engine.DataProvider so we can pass it to filters
 type xmlProvider struct {
-	req     tree.Node
+	req     *etree.Element
 	cdrPath utils.HierarchyPath //used to compute relative path
 	cache   *config.NavigableMap
 }
@@ -265,8 +234,8 @@ func (xP *xmlProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 	}
 	err = nil // cancel previous err
 	absolutePath := utils.ParseHierarchyPath(fldPath[0], "")
-	relPath := utils.HierarchyPath(absolutePath[len(xP.cdrPath)-1:]) // Need relative path to the xmlElmnt
-	data, err = elementText(xP.req, relPath.AsString("/", true))
+	relPath := utils.HierarchyPath(absolutePath[len(xP.cdrPath):]) // Need relative path to the xmlElmnt
+	data, err = elementText(xP.req, relPath.AsString("/", false))
 	xP.cache.Set(fldPath, data, false)
 	return
 }

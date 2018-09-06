@@ -149,7 +149,7 @@ func TestXmlIT2InitCdrDb(t *testing.T) {
 
 func TestXmlIT2CreateCdrDirs(t *testing.T) {
 	for _, cdrcProfiles := range xmlCfg.CdrcProfiles {
-		for i, cdrcInst := range cdrcProfiles {
+		for _, cdrcInst := range cdrcProfiles {
 			for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
 				if err := os.RemoveAll(dir); err != nil {
 					t.Fatal("Error removing folder: ", dir, err)
@@ -158,7 +158,7 @@ func TestXmlIT2CreateCdrDirs(t *testing.T) {
 					t.Fatal("Error creating folder: ", dir, err)
 				}
 			}
-			if i == 0 { // Initialize the folders to check later
+			if cdrcInst.ID == "XMLWithFilter" { // Initialize the folders to check later
 				xmlPathIn1 = cdrcInst.CdrInDir
 				xmlPathOut1 = cdrcInst.CdrOutDir
 			}
@@ -212,6 +212,92 @@ func TestXmlIT2AnalyseCDRs(t *testing.T) {
 }
 
 func TestXmlIT2KillEngine(t *testing.T) {
+	if err := engine.KillEngine(*waitRater); err != nil {
+		t.Error(err)
+	}
+}
+
+// Begin tests for cdrc xml with new filters
+func TestXmlIT3InitConfig(t *testing.T) {
+	var err error
+	xmlCfgPath = path.Join(*dataDir, "conf", "samples", "cdrcxmlwithfilter")
+	if xmlCfg, err = config.NewCGRConfigFromFolder(xmlCfgPath); err != nil {
+		t.Fatal("Got config error: ", err.Error())
+	}
+}
+
+// InitDb so we can rely on count
+func TestXmlIT3InitCdrDb(t *testing.T) {
+	if err := engine.InitStorDb(xmlCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestXmlIT3CreateCdrDirs(t *testing.T) {
+	for _, cdrcProfiles := range xmlCfg.CdrcProfiles {
+		for _, cdrcInst := range cdrcProfiles {
+			for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
+				if err := os.RemoveAll(dir); err != nil {
+					t.Fatal("Error removing folder: ", dir, err)
+				}
+				if err := os.MkdirAll(dir, 0755); err != nil {
+					t.Fatal("Error creating folder: ", dir, err)
+				}
+			}
+			if cdrcInst.ID == "msw_xml" { // Initialize the folders to check later
+				xmlPathIn1 = cdrcInst.CdrInDir
+				xmlPathOut1 = cdrcInst.CdrOutDir
+			}
+		}
+	}
+}
+
+func TestXmlIT3StartEngine(t *testing.T) {
+	if _, err := engine.StopStartEngine(xmlCfgPath, *waitRater); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Connect rpc client to rater
+func TestXmlIT3RpcConn(t *testing.T) {
+	var err error
+	cdrcXmlRPC, err = jsonrpc.Dial("tcp", xmlCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	if err != nil {
+		t.Fatal("Could not connect to rater: ", err.Error())
+	}
+}
+
+// The default scenario, out of cdrc defined in .cfg file
+func TestXmlIT3HandleCdr1File(t *testing.T) {
+	fileName := "file1.xml"
+	tmpFilePath := path.Join("/tmp", fileName)
+	if err := ioutil.WriteFile(tmpFilePath, []byte(xmlContent), 0644); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := os.Rename(tmpFilePath, path.Join(xmlPathIn1, fileName)); err != nil {
+		t.Fatal("Error moving file to processing directory: ", err)
+	}
+}
+
+func TestXmlIT3ProcessedFiles(t *testing.T) {
+	time.Sleep(time.Duration(2**waitRater) * time.Millisecond)
+	if outContent1, err := ioutil.ReadFile(path.Join(xmlPathOut1, "file1.xml")); err != nil {
+		t.Error(err)
+	} else if xmlContent != string(outContent1) {
+		t.Errorf("Expecting: %q, received: %q", xmlContent, string(outContent1))
+	}
+}
+
+func TestXmlIT3AnalyseCDRs(t *testing.T) {
+	var reply []*engine.ExternalCDR
+	if err := cdrcXmlRPC.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{}, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(reply) != 3 {
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	}
+}
+
+func TestXmlIT3KillEngine(t *testing.T) {
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}
