@@ -176,12 +176,12 @@ func (cdre *CDRExporter) composeHeader() (err error) {
 			return fmt.Errorf("Unsupported field type: %s", cfgFld.Type)
 		}
 		if err != nil {
-			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR header, field %s, error: %s", cfgFld.ID, err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR header, field %s, error: %s", cfgFld.Tag, err.Error()))
 			return err
 		}
 		fmtOut := outVal
-		if fmtOut, err = utils.FmtFieldWidth(cfgFld.ID, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR header, field %s, error: %s", cfgFld.ID, err.Error()))
+		if fmtOut, err = utils.FmtFieldWidth(cfgFld.Tag, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR header, field %s, error: %s", cfgFld.Tag, err.Error()))
 			return err
 		}
 		cdre.Lock()
@@ -222,12 +222,12 @@ func (cdre *CDRExporter) composeTrailer() (err error) {
 			return fmt.Errorf("Unsupported field type: %s", cfgFld.Type)
 		}
 		if err != nil {
-			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR trailer, field: %s, error: %s", cfgFld.ID, err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR trailer, field: %s, error: %s", cfgFld.Tag, err.Error()))
 			return err
 		}
 		fmtOut := outVal
-		if fmtOut, err = utils.FmtFieldWidth(cfgFld.ID, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR trailer, field: %s, error: %s", cfgFld.ID, err.Error()))
+		if fmtOut, err = utils.FmtFieldWidth(cfgFld.Tag, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR trailer, field: %s, error: %s", cfgFld.Tag, err.Error()))
 			return err
 		}
 		cdre.Lock()

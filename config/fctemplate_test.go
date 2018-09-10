@@ -26,14 +26,14 @@ import (
 
 func TestNewFCTemplateFromFCTemplateJsonCfg(t *testing.T) {
 	jsonCfg := &FcTemplateJsonCfg{
-		Id:       utils.StringPointer("Tenant"),
+		Tag:      utils.StringPointer("Tenant"),
 		Type:     utils.StringPointer("*composed"),
 		Field_id: utils.StringPointer("Tenant"),
 		Filters:  &[]string{"Filter1", "Filter2"},
 		Value:    utils.StringPointer("cgrates.org"),
 	}
 	expected := &FCTemplate{
-		ID:      "Tenant",
+		Tag:     "Tenant",
 		Type:    "*composed",
 		FieldId: "Tenant",
 		Filters: []string{"Filter1", "Filter2"},
@@ -48,14 +48,14 @@ func TestNewFCTemplateFromFCTemplateJsonCfg(t *testing.T) {
 func TestFCTemplatesFromFCTemapltesJsonCfg(t *testing.T) {
 	jsnCfgs := []*FcTemplateJsonCfg{
 		&FcTemplateJsonCfg{
-			Id:       utils.StringPointer("Tenant"),
+			Tag:      utils.StringPointer("Tenant"),
 			Type:     utils.StringPointer("*composed"),
 			Field_id: utils.StringPointer("Tenant"),
 			Filters:  &[]string{"Filter1", "Filter2"},
 			Value:    utils.StringPointer("cgrates.org"),
 		},
 		&FcTemplateJsonCfg{
-			Id:       utils.StringPointer("RunID"),
+			Tag:      utils.StringPointer("RunID"),
 			Type:     utils.StringPointer("*composed"),
 			Field_id: utils.StringPointer("RunID"),
 			Filters:  &[]string{"Filter1_1", "Filter2_2"},
@@ -64,14 +64,14 @@ func TestFCTemplatesFromFCTemapltesJsonCfg(t *testing.T) {
 	}
 	expected := []*FCTemplate{
 		&FCTemplate{
-			ID:      "Tenant",
+			Tag:     "Tenant",
 			Type:    "*composed",
 			FieldId: "Tenant",
 			Filters: []string{"Filter1", "Filter2"},
 			Value:   NewRSRParsersMustCompile("cgrates.org", true),
 		},
 		&FCTemplate{
-			ID:      "RunID",
+			Tag:     "RunID",
 			Type:    "*composed",
 			FieldId: "RunID",
 			Filters: []string{"Filter1_1", "Filter2_2"},

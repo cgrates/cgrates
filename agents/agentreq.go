@@ -179,7 +179,7 @@ func (aReq *AgentRequest) ParseField(
 		return
 	}
 	if isString { // format the string additionally with fmtFieldWidth
-		out, err = utils.FmtFieldWidth(cfgFld.ID, out.(string), cfgFld.Width,
+		out, err = utils.FmtFieldWidth(cfgFld.Tag, out.(string), cfgFld.Width,
 			cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory)
 	}
 	return

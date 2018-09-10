@@ -492,7 +492,7 @@ func (cdr *CDR) combimedCdrFieldVal(cfgCdrFld *config.FCTemplate, groupCDRs []*C
 func (cdr *CDR) exportFieldValue(cfgCdrFld *config.FCTemplate, filterS *FilterS) (retVal string, err error) {
 	for _, rsrFld := range cfgCdrFld.Value {
 		var cdrVal string
-		switch cfgCdrFld.ID {
+		switch cfgCdrFld.Tag {
 		case utils.COST:
 			cdrVal = cdr.FormatCost(cfgCdrFld.CostShiftDigits,
 				cfgCdrFld.RoundingDecimals)
@@ -553,11 +553,11 @@ func (cdr *CDR) formatField(cfgFld *config.FCTemplate, httpSkipTlsCheck bool,
 			return "", err
 		}
 		if len(httpAddr) == 0 {
-			err = fmt.Errorf("Empty http address for field %s type %s", cfgFld.ID, cfgFld.Type)
+			err = fmt.Errorf("Empty http address for field %s type %s", cfgFld.Tag, cfgFld.Type)
 		} else if outValByte, err = HttpJsonPost(httpAddr, httpSkipTlsCheck, jsn); err == nil {
 			outVal = string(outValByte)
 			if len(outVal) == 0 && cfgFld.Mandatory {
-				err = fmt.Errorf("Empty result for http_post field: %s", cfgFld.ID)
+				err = fmt.Errorf("Empty result for http_post field: %s", cfgFld.Tag)
 			}
 		}
 	case utils.META_COMBIMED:
@@ -575,7 +575,7 @@ func (cdr *CDR) formatField(cfgFld *config.FCTemplate, httpSkipTlsCheck bool,
 		(err != utils.ErrNotFound || cfgFld.Mandatory) {
 		return "", err
 	}
-	return utils.FmtFieldWidth(cfgFld.ID, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory)
+	return utils.FmtFieldWidth(cfgFld.Tag, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory)
 }
 
 // Used in place where we need to export the CDR based on an export template

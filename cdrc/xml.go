@@ -160,7 +160,7 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity *etree.Element, cdrcCf
 		} else if cdrFldCfg.Type == utils.META_HANDLER && cdrFldCfg.HandlerId == utils.HandlerSubstractUsage {
 			usage, err := handlerSubstractUsage(xmlEntity, cdrFldCfg.Value, xmlProc.cdrPath, xmlProc.timezone)
 			if err != nil {
-				return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s, err: %s", xmlEntity, cdrFldCfg.ID, err.Error())
+				return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s, err: %s", xmlEntity, cdrFldCfg.Tag, err.Error())
 			}
 			fldVals[cdrFldCfg.FieldId] += strconv.FormatFloat(usage.Seconds(), 'f', -1, 64)
 		} else {
@@ -194,7 +194,7 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity *etree.Element, cdrcCf
 		} else {
 			fieldVal = string(outValByte)
 			if len(fieldVal) == 0 && httpFieldCfg.Mandatory {
-				return nil, fmt.Errorf("MandatoryIeMissing: Empty result for http_post field: %s", httpFieldCfg.ID)
+				return nil, fmt.Errorf("MandatoryIeMissing: Empty result for http_post field: %s", httpFieldCfg.Tag)
 			}
 			if err := cdr.ParseFieldValue(httpFieldCfg.FieldId, fieldVal, xmlProc.timezone); err != nil {
 				return nil, err

@@ -29,11 +29,11 @@ func TestCdreCfgClone(t *testing.T) {
 	runIdRsrs := NewRSRParsersMustCompile("runid", true)
 	emptyFields := []*FCTemplate{}
 	initContentFlds := []*FCTemplate{
-		&FCTemplate{ID: "CgrId",
+		&FCTemplate{Tag: "CgrId",
 			Type:    "*composed",
 			FieldId: "cgrid",
 			Value:   cgrIdRsrs},
-		&FCTemplate{ID: "RunId",
+		&FCTemplate{Tag: "RunId",
 			Type:    "*composed",
 			FieldId: "runid",
 			Value:   runIdRsrs},
@@ -52,11 +52,11 @@ func TestCdreCfgClone(t *testing.T) {
 		ContentFields:      initContentFlds,
 	}
 	eClnContentFlds := []*FCTemplate{
-		&FCTemplate{ID: "CgrId",
+		&FCTemplate{Tag: "CgrId",
 			Type:    "*composed",
 			FieldId: "cgrid",
 			Value:   cgrIdRsrs},
-		&FCTemplate{ID: "RunId",
+		&FCTemplate{Tag: "RunId",
 			Type:    "*composed",
 			FieldId: "runid",
 			Value:   runIdRsrs},
@@ -85,7 +85,7 @@ func TestCdreCfgClone(t *testing.T) {
 	if !reflect.DeepEqual(eClnCdreCfg, clnCdreCfg) { // MOdifying a field after clone should not affect cloned instance
 		t.Errorf("Cloned result: %+v", clnCdreCfg)
 	}
-	initContentFlds[0].ID = "Destination"
+	initContentFlds[0].Tag = "Destination"
 	if !reflect.DeepEqual(eClnCdreCfg, clnCdreCfg) { // MOdifying a field after clone should not affect cloned instance
 		t.Errorf("Cloned result: %+v", clnCdreCfg)
 	}

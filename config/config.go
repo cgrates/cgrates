@@ -150,6 +150,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.radiusAgentCfg = new(RadiusAgentCfg)
 	cfg.filterSCfg = new(FilterSCfg)
 	cfg.dispatcherSCfg = new(DispatcherSCfg)
+	cfg.schedulerCfg = new(SchedulerCfg)
 	cfg.ConfigReloads = make(map[string]chan struct{})
 	cfg.ConfigReloads[utils.CDRC] = make(chan struct{}, 1)
 	cfg.ConfigReloads[utils.CDRC] <- struct{}{} // Unlock the channel
@@ -325,7 +326,6 @@ type CGRConfig struct {
 	RpSubjectPrefixMatching  bool // enables prefix matching for the rating profile subject
 	LcrSubjectPrefixMatching bool // enables prefix matching for the lcr subject
 	RALsMaxComputedUsage     map[string]time.Duration
-	SchedulerEnabled         bool
 	CDRSEnabled              bool              // Enable CDR Server service
 	CDRSExtraFields          []*utils.RSRField // Extra fields to store in CDRs
 	CDRSStoreCdrs            bool              // store cdrs in storDb
@@ -375,6 +375,7 @@ type CGRConfig struct {
 	ConfigReloads            map[string]chan struct{} // Signals to specific entities that a config reload should occur
 	LoaderCgrConfig          *LoaderCgrCfg
 	MigratorCgrConfig        *MigratorCgrCfg
+	schedulerCfg             *SchedulerCfg
 	// Cache defaults loaded from json and needing clones
 	dfltCdreProfile *CdreConfig // Default cdreConfig profile
 	dfltCdrcProfile *CdrcConfig // Default cdrcConfig profile
@@ -516,7 +517,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 
 			for _, field := range data.Fields {
 				if field.Type != utils.META_COMPOSED && field.Type != utils.MetaString {
-					return fmt.Errorf("<%s> invalid field type %s for %s at %s", utils.LoaderS, field.Type, data.Type, field.ID)
+					return fmt.Errorf("<%s> invalid field type %s for %s at %s", utils.LoaderS, field.Type, data.Type, field.Tag)
 				}
 			}
 		}
@@ -1175,9 +1176,13 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			}
 		}
 	}
-	if jsnSchedCfg != nil && jsnSchedCfg.Enabled != nil {
-		self.SchedulerEnabled = *jsnSchedCfg.Enabled
+
+	if jsnSchedCfg != nil {
+		if err := self.schedulerCfg.loadFromJsonCfg(jsnSchedCfg); err != nil {
+			return err
+		}
 	}
+
 	if jsnCdrsCfg != nil {
 		if jsnCdrsCfg.Enabled != nil {
 			self.CDRSEnabled = *jsnCdrsCfg.Enabled
@@ -1344,6 +1349,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			}
 		}
 	}
+
 	if jsnsessionSCfg != nil {
 		if err := self.sessionSCfg.loadFromJsonCfg(jsnsessionSCfg); err != nil {
 			return err
@@ -1514,7 +1520,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			return err
 		}
 	}
-
 	return nil
 }
 
@@ -1604,4 +1609,8 @@ func (cfg *CGRConfig) LoaderCgrCfg() *LoaderCgrCfg {
 
 func (cfg *CGRConfig) MigratorCgrCfg() *MigratorCgrCfg {
 	return cfg.MigratorCgrConfig
+}
+
+func (cfg *CGRConfig) SchedulerCfg() *SchedulerCfg {
+	return cfg.schedulerCfg
 }
