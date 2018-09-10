@@ -56,43 +56,43 @@ func TestAgReqAsNavigableMap(t *testing.T) {
 	agReq.CGRReply = config.NewNavigableMap(cgrRply)
 
 	tplFlds := []*config.FCTemplate{
-		&config.FCTemplate{ID: "Tenant",
+		&config.FCTemplate{Tag: "Tenant",
 			FieldId: utils.Tenant, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", true)},
-		&config.FCTemplate{ID: "Account",
+		&config.FCTemplate{Tag: "Account",
 			FieldId: utils.Account, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true)},
-		&config.FCTemplate{ID: "Destination",
+		&config.FCTemplate{Tag: "Destination",
 			FieldId: utils.Destination, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true)},
 
-		&config.FCTemplate{ID: "RequestedUsageVoice",
+		&config.FCTemplate{Tag: "RequestedUsageVoice",
 			FieldId: "RequestedUsage", Type: utils.META_COMPOSED,
 			Filters: []string{"*string:*cgreq.ToR:*voice"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgreq.Usage{*duration_seconds}", true)},
-		&config.FCTemplate{ID: "RequestedUsageData",
+		&config.FCTemplate{Tag: "RequestedUsageData",
 			FieldId: "RequestedUsage", Type: utils.META_COMPOSED,
 			Filters: []string{"*string:*cgreq.ToR:*data"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgreq.Usage{*duration_nanoseconds}", true)},
-		&config.FCTemplate{ID: "RequestedUsageSMS",
+		&config.FCTemplate{Tag: "RequestedUsageSMS",
 			FieldId: "RequestedUsage", Type: utils.META_COMPOSED,
 			Filters: []string{"*string:*cgreq.ToR:*sms"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgreq.Usage{*duration_nanoseconds}", true)},
 
-		&config.FCTemplate{ID: "AttrPaypalAccount",
+		&config.FCTemplate{Tag: "AttrPaypalAccount",
 			FieldId: "PaypalAccount", Type: utils.META_COMPOSED,
 			Filters: []string{"*string:*cgrep.Error:"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgrep.Attributes.PaypalAccount", true)},
-		&config.FCTemplate{ID: "MaxUsage",
+		&config.FCTemplate{Tag: "MaxUsage",
 			FieldId: "MaxUsage", Type: utils.META_COMPOSED,
 			Filters: []string{"*string:*cgrep.Error:"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgrep.MaxUsage{*duration_seconds}", true)},
-		&config.FCTemplate{ID: "Error",
+		&config.FCTemplate{Tag: "Error",
 			FieldId: "Error", Type: utils.META_COMPOSED,
 			Filters: []string{"*rsr::*cgrep.Error(!^$)"},
 			Value: config.NewRSRParsersMustCompile(

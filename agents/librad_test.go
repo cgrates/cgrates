@@ -122,7 +122,7 @@ func TestRadFieldOutVal(t *testing.T) {
 	agReq.Vars.Set([]string{"Cisco"}, "CGR1", false)
 	agReq.Vars.Set([]string{"User-Name"}, "flopsy", false)
 	//processorVars{MetaRadReqType: MetaRadAcctStart}
-	cfgFld := &config.FCTemplate{ID: "ComposedTest", Type: utils.META_COMPOSED, FieldId: utils.Destination,
+	cfgFld := &config.FCTemplate{Tag: "ComposedTest", Type: utils.META_COMPOSED, FieldId: utils.Destination,
 		Value: config.NewRSRParsersMustCompile("~*vars.*radReqType;|;~*vars.User-Name;|;~*vars.Cisco", true), Mandatory: true}
 	if outVal, err := radFieldOutVal(pkt, agReq, cfgFld); err != nil {
 		t.Error(err)
@@ -134,9 +134,9 @@ func TestRadFieldOutVal(t *testing.T) {
 func TestRadReplyAppendAttributes(t *testing.T) {
 	rply := radigo.NewPacket(radigo.AccessRequest, 2, dictRad, coder, "CGRateS.org").Reply()
 	rplyFlds := []*config.FCTemplate{
-		&config.FCTemplate{ID: "ReplyCode", FieldId: MetaRadReplyCode, Type: utils.META_COMPOSED,
+		&config.FCTemplate{Tag: "ReplyCode", FieldId: MetaRadReplyCode, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*cgrep.Attributes.RadReply", true)},
-		&config.FCTemplate{ID: "Acct-Session-Time", FieldId: "Acct-Session-Time", Type: utils.META_COMPOSED,
+		&config.FCTemplate{Tag: "Acct-Session-Time", FieldId: "Acct-Session-Time", Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", true)},
 	}
 	agReq := newAgentRequest(nil, nil, "cgrates.org", nil)

@@ -1146,7 +1146,7 @@ func main() {
 	var cdrDb engine.CdrStorage
 	var dm *engine.DataManager
 	if cfg.RALsEnabled || cfg.CDRStatsEnabled || cfg.PubSubServerEnabled ||
-		cfg.AliasesServerEnabled || cfg.UserServerEnabled || cfg.SchedulerEnabled ||
+		cfg.AliasesServerEnabled || cfg.UserServerEnabled || cfg.SchedulerCfg().Enabled ||
 		cfg.AttributeSCfg().Enabled || cfg.ResourceSCfg().Enabled || cfg.StatSCfg().Enabled ||
 		cfg.ThresholdSCfg().Enabled || cfg.SupplierSCfg().Enabled { // Some services can run without db, ie: SessionS or CDRC
 		dm, err = engine.ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort,
@@ -1233,7 +1233,7 @@ func main() {
 	}
 
 	// Start Scheduler
-	if cfg.SchedulerEnabled {
+	if cfg.SchedulerCfg().Enabled {
 		go srvManager.StartScheduler(true)
 	}
 

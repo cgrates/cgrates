@@ -105,7 +105,8 @@ type RalsJsonCfg struct {
 
 // Scheduler config section
 type SchedulerJsonCfg struct {
-	Enabled *bool
+	Enabled    *bool
+	Cdrs_conns *[]*HaPoolJsonCfg
 }
 
 // Cdrs config section
@@ -573,7 +574,7 @@ type MigratorCfgJson struct {
 }
 
 type FcTemplateJsonCfg struct {
-	Id                   *string
+	Tag                  *string
 	Type                 *string
 	Field_id             *string
 	Attribute_id         *string

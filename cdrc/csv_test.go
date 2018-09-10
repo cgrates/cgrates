@@ -32,7 +32,7 @@ func TestCsvRecordToCDR(t *testing.T) {
 	cdrcConfig := cgrConfig.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0]
 	cdrcConfig.CdrSourceId = "TEST_CDRC"
 	cdrcConfig.ContentFields = append(cdrcConfig.ContentFields, &config.FCTemplate{
-		ID: utils.RunID, Type: utils.META_COMPOSED, FieldId: utils.RunID,
+		Tag: utils.RunID, Type: utils.META_COMPOSED, FieldId: utils.RunID,
 		Value: config.NewRSRParsersMustCompile("*default", true)})
 	csvProcessor := &CsvRecordsProcessor{dfltCdrcCfg: cdrcConfig, cdrcCfgs: []*config.CdrcConfig{cdrcConfig}}
 	cdrRow := []string{"firstField", "secondField"}
@@ -76,9 +76,9 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 	cdrcConfig := cgrConfig.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0]
 	cdrcConfig.CdrSourceId = "TEST_CDRC"
 	cdrcConfig.ContentFields = []*config.FCTemplate{
-		&config.FCTemplate{ID: "TORField", Type: utils.META_COMPOSED, FieldId: utils.ToR,
+		&config.FCTemplate{Tag: "TORField", Type: utils.META_COMPOSED, FieldId: utils.ToR,
 			Value: config.NewRSRParsersMustCompile("~0", true)},
-		&config.FCTemplate{ID: "UsageField", Type: utils.META_COMPOSED, FieldId: utils.Usage,
+		&config.FCTemplate{Tag: "UsageField", Type: utils.META_COMPOSED, FieldId: utils.Usage,
 			Value: config.NewRSRParsersMustCompile("~1", true)},
 	}
 	csvProcessor := &CsvRecordsProcessor{dfltCdrcCfg: cdrcConfig, cdrcCfgs: []*config.CdrcConfig{cdrcConfig}}

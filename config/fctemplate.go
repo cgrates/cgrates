@@ -20,8 +20,8 @@ package config
 
 func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg) *FCTemplate {
 	fcTmp := new(FCTemplate)
-	if jsnCfg.Id != nil {
-		fcTmp.ID = *jsnCfg.Id
+	if jsnCfg.Tag != nil {
+		fcTmp.Tag = *jsnCfg.Tag
 	}
 	if jsnCfg.Type != nil {
 		fcTmp.Type = *jsnCfg.Type
@@ -87,7 +87,7 @@ func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg) *FCTemplate {
 }
 
 type FCTemplate struct {
-	ID               string
+	Tag              string
 	Type             string   // Type of field
 	FieldId          string   // Field identifier
 	Filters          []string // list of filter profiles

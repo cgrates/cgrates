@@ -85,7 +85,7 @@ func radFieldOutVal(pkt *radigo.Packet, agReq *AgentRequest,
 	if err != nil {
 		return
 	}
-	if outVal, err = utils.FmtFieldWidth(cfgFld.ID, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
+	if outVal, err = utils.FmtFieldWidth(cfgFld.Tag, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
 		return "", err
 	}
 	return
