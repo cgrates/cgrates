@@ -488,7 +488,8 @@ func (smg *SMGeneric) v1ForkSessions(tnt string, evStart *engine.SafEvent,
 		return nil, err
 	}
 	noneSession := []*SMGSession{
-		&SMGSession{CGRID: cgrID, ResourceID: resourceID, EventStart: evStart,
+		&SMGSession{Tenant: tnt, CGRID: cgrID,
+			ResourceID: resourceID, EventStart: evStart,
 			RunID: utils.META_NONE, Timezone: smg.Timezone,
 			rals: smg.rals, cdrsrv: smg.cdrsrv,
 			clntConn: clntConn}}
@@ -989,6 +990,7 @@ func (smg *SMGeneric) UpdateSession(tnt string, gev *engine.SafEvent,
 		if err != utils.ErrNotFound {
 			return
 		}
+		err = nil
 		maxUsage = smg.cgrCfg.SessionSCfg().MaxCallDuration
 		return
 	}
