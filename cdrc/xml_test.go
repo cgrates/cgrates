@@ -222,7 +222,6 @@ func TestXMLRPProcess(t *testing.T) {
 			DataUsageMultiplyFactor: 1024,
 			CDRPath:                 utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}),
 			CdrSourceId:             "TestXML",
-			CdrFilter:               utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>headerModule>type(Normal)", utils.INFIELD_SEP),
 			ContentFields: []*config.FCTemplate{
 				&config.FCTemplate{ID: "TOR", Type: utils.META_COMPOSED, FieldId: utils.ToR,
 					Value: config.NewRSRParsersMustCompile("*voice", true), Mandatory: true},

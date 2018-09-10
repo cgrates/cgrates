@@ -46,10 +46,10 @@
               "enabled": true,                                                               // enable CDR client functionality
               "cdr_format": "xml",                                                    // CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore|partial_csv>
               "cdr_in_dir": "/tmp/cdrcxmlwithfilters2/xmlit2/in",
- 			  "cdr_out_dir": "/tmp/cdrcxmlwithfilters2/xmlit2/out",
+ 			        "cdr_out_dir": "/tmp/cdrcxmlwithfilters2/xmlit2/out",
               "cdr_path": "File>CDRs>Call",                                                                 // path towards one CDR element in case of XML CDRs
               "cdr_source_id": "zw_cfs1",                              // free form field, tag identifying the source of the CDRs within CDRS database
-         	  "content_fields":[                                                    // import content_fields template, id will match internally CDR field, in case of .csv value will be represented by index of the field value
+         	    "content_fields":[                                                    // import content_fields template, id will match internally CDR field, in case of .csv value will be represented by index of the field value
                         {"id": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},
                         {"id": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~File>CDRs>Call>SignalingInfo>PChargingVector>icidvalue", "mandatory": true},
                         {"id": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "*rated", "mandatory": true},

@@ -30,7 +30,6 @@
 	"http_localhost": {
 		"export_format": "*http_post",
 		"export_path": "http://127.0.0.1:12080/cdr_http",
-		"cdr_filter": "RunID(*default);OriginID(httpjsonrpc1)",
 		"content_fields": [								// template of the exported content fields
 			{"id": "CGRID", "type": "*composed", "value": "~CGRID", "field_id": "CGRID"},
 			{"id":"RunID", "type": "*composed", "value": "~RunID", "field_id": "RunID"},
@@ -54,7 +53,6 @@
 		"export_format": "*amqp_json_map",
 		"export_path": "amqp://guest:guest@localhost:5672/?queue_id=cgrates_cdrs",
 		"attempts": 3,
-		"cdr_filter": "RunID(*default)",
 		"content_fields": [								// template of the exported content fields
 			{"id": "CGRID", "type": "*composed", "value": "~CGRID", "field_id": "CGRID"},
 			{"id":"RunID", "type": "*composed", "value": "~RunID", "field_id": "RunID"},
@@ -77,7 +75,6 @@
 	"http_test_file": {
 		"export_format": "*http_post",
 		"export_path": "http://127.0.0.1:12080/invalid",
-		"cdr_filter": "OriginID(httpjsonrpc1)",
 		"content_fields": [
 			{"id": "OriginID", "type": "*composed", "value": "~OriginID", "field_id": "OriginID"},
 		],

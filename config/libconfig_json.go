@@ -171,7 +171,6 @@ type CdrFieldJsonCfg struct {
 type CdreJsonCfg struct {
 	Export_format         *string
 	Export_path           *string
-	Cdr_filter            *string
 	Filters               *[]string
 	Tenant                *string
 	Synchronous           *bool
@@ -200,7 +199,6 @@ type CdrcJsonCfg struct {
 	Failed_calls_prefix         *string
 	Cdr_path                    *string
 	Cdr_source_id               *string
-	Cdr_filter                  *string
 	Filters                     *[]string
 	Tenant                      *string
 	Continue_on_success         *bool

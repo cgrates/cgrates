@@ -350,7 +350,6 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 		utils.META_DEFAULT: &CdreJsonCfg{
 			Export_format:         utils.StringPointer(utils.MetaFileCSV),
 			Export_path:           utils.StringPointer("/var/spool/cgrates/cdre"),
-			Cdr_filter:            utils.StringPointer(""),
 			Synchronous:           utils.BoolPointer(false),
 			Attempts:              utils.IntPointer(1),
 			Tenant:                utils.StringPointer("cgrates.org"),
@@ -463,7 +462,6 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 			Failed_calls_prefix:         utils.StringPointer("missed_calls"),
 			Cdr_path:                    utils.StringPointer(""),
 			Cdr_source_id:               utils.StringPointer("freeswitch_csv"),
-			Cdr_filter:                  utils.StringPointer(""),
 			Filters:                     &[]string{},
 			Tenant:                      utils.StringPointer("cgrates.org"),
 			Continue_on_success:         utils.BoolPointer(false),

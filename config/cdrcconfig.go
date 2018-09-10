@@ -40,7 +40,6 @@ type CdrcConfig struct {
 	FailedCallsPrefix        string              // Used in case of flatstore CDRs to avoid searching for BYE records
 	CDRPath                  utils.HierarchyPath // used for XML CDRs to specify the path towards CDR elements
 	CdrSourceId              string              // Source identifier for the processed CDRs
-	CdrFilter                utils.RSRFields     // Filter CDR records to import
 	Filters                  []string
 	Tenant                   RSRParsers
 	ContinueOnSuccess        bool          // Continue after execution
@@ -106,11 +105,6 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 	}
 	if jsnCfg.Cdr_source_id != nil {
 		self.CdrSourceId = *jsnCfg.Cdr_source_id
-	}
-	if jsnCfg.Cdr_filter != nil {
-		if self.CdrFilter, err = utils.ParseRSRFields(*jsnCfg.Cdr_filter, utils.INFIELD_SEP); err != nil {
-			return err
-		}
 	}
 	if jsnCfg.Filters != nil {
 		self.Filters = make([]string, len(*jsnCfg.Filters))

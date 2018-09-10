@@ -338,6 +338,9 @@ func cdrLogAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actio
 		if cdrStorage == nil { // Only save if the cdrStorage is defined
 			continue
 		}
+		// ar trebui sa faca post cdr sa il trimita la cdr server
+		// de vazut cum
+		// de adaugat extra conexiune
 		if err := cdrStorage.SetCDR(cdr, true); err != nil {
 			return err
 		}
