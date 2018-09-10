@@ -27,7 +27,6 @@ type CdreConfig struct {
 	ExportFormat        string
 	ExportPath          string
 	FallbackPath        string
-	CDRFilter           utils.RSRFields
 	Filters             []string
 	Tenant              string
 	Synchronous         bool
@@ -44,17 +43,11 @@ func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) error {
 	if jsnCfg == nil {
 		return nil
 	}
-	var err error
 	if jsnCfg.Export_format != nil {
 		self.ExportFormat = *jsnCfg.Export_format
 	}
 	if jsnCfg.Export_path != nil {
 		self.ExportPath = *jsnCfg.Export_path
-	}
-	if jsnCfg.Cdr_filter != nil {
-		if self.CDRFilter, err = utils.ParseRSRFields(*jsnCfg.Cdr_filter, utils.INFIELD_SEP); err != nil {
-			return err
-		}
 	}
 	if jsnCfg.Filters != nil {
 		self.Filters = make([]string, len(*jsnCfg.Filters))

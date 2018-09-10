@@ -26,7 +26,6 @@
  		"cdr_out_dir": "/tmp/cdrctests/xmlit1/out",
  		"cdr_path": "broadWorksCDR>cdrData",
  		"cdr_source_id": "xmlit1",
- 		"cdr_filter": "broadWorksCDR>cdrData>headerModule>type(Normal)",
 		"content_fields":[							// import content_fields template, id will match internally CDR field, in case of .csv value will be represented by index of the field value
 			{"id": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},
 			{"id": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~broadWorksCDR>cdrData>basicModule>localCallId", "mandatory": true},

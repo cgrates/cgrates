@@ -192,7 +192,6 @@ const CGRATES_CFG_JSON = `
 	"*default": {
 		"export_format": "*file_csv",					// exported CDRs format <*file_csv|*file_fwv|*http_post|*http_json_cdr|*http_json_map|*amqp_json_cdr|*amqp_json_map>
 		"export_path": "/var/spool/cgrates/cdre",		// path where the exported CDRs will be placed
-		"cdr_filter": "",								// filter CDRs exported by this template
 		"filters" :[],									// new filters for cdre
 		"tenant": "cgrates.org",						// tenant used in filterS.Pass
 		"synchronous": false,							// block processing until export has a result
@@ -249,7 +248,6 @@ const CGRATES_CFG_JSON = `
 		"failed_calls_prefix": "missed_calls",			// used in case of flatstore CDRs to avoid searching for BYE records
 		"cdr_path": "",									// path towards one CDR element in case of XML CDRs
 		"cdr_source_id": "freeswitch_csv",				// free form field, tag identifying the source of the CDRs within CDRS database
-		"cdr_filter": "",								// filter CDR records to import
 		"filters" :[],									// new filters used in FilterS subsystem
 		"tenant": "cgrates.org",						// default tenant
 		"continue_on_success": false,					// continue to the next template if executed
