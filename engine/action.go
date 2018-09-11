@@ -279,7 +279,9 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 }
 
 func cdrLogAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) (err error) {
-
+	if (schedCdrsConns == nil) || (schedCdrsConns != nil && reflect.ValueOf(schedCdrsConns).IsNil()) {
+		return fmt.Errorf("No connection with CDR Server")
+	}
 	defaultTemplate := map[string]utils.RSRFields{
 		utils.ToR:         utils.ParseRSRFieldsMustCompile("BalanceType", utils.INFIELD_SEP),
 		utils.OriginHost:  utils.ParseRSRFieldsMustCompile("^127.0.0.1", utils.INFIELD_SEP),
@@ -339,9 +341,6 @@ func cdrLogAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actio
 			}
 		}
 		cdrs = append(cdrs, cdr)
-		if (schedCdrsConns == nil) || (schedCdrsConns != nil && reflect.ValueOf(schedCdrsConns).IsNil()) {
-			continue
-		}
 		var rply string
 		// After compute the CDR send it to CDR Server to be processed
 		if err := schedCdrsConns.Call(utils.CdrsV2ProcessCDR, cdr.AsCGREvent(), &rply); err != nil {

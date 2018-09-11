@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
@@ -1468,6 +1467,7 @@ func TestTopupActionLoaded(t *testing.T) {
 	}
 }
 
+/* Disabled tests with cdrLogAction because it need a rpc connection
 func TestActionCdrlogEmpty(t *testing.T) {
 	acnt := &Account{ID: "cgrates.org:dan2904"}
 	cdrlog := &Action{
@@ -1553,6 +1553,7 @@ func TestActionCdrLogParamsWithOverload(t *testing.T) {
 		t.Errorf("Expecting extra fields: %+v, received: %+v", expectedExtraFields, cdrs[0].ExtraFields)
 	}
 }
+*/
 
 func TestActionSetDDestination(t *testing.T) {
 	acc := &Account{BalanceMap: map[string]Balances{
@@ -2390,6 +2391,7 @@ func TestActionExpNoExp(t *testing.T) {
 	}
 }
 
+/*
 func TestActionCdrlogBalanceValue(t *testing.T) {
 	err := dm.DataDB().SetAccount(&Account{
 		ID: "cgrates.org:bv",
@@ -2451,6 +2453,7 @@ func TestActionCdrlogBalanceValue(t *testing.T) {
 		t.Errorf("Wrong cdrlogs: %s", utils.ToIJSON(cdrs))
 	}
 }
+*/
 
 func TestActionTopUpZeroNegative(t *testing.T) {
 	account := &Account{
