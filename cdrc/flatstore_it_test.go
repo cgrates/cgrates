@@ -30,6 +30,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var flatstoreCfgPath string
@@ -144,5 +145,19 @@ func TestFlatstoreitProcessFiles(t *testing.T) {
 		t.Error(err)
 	} else if len(ePartContent) != len(string(partContent)) {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", ePartContent, string(partContent))
+	}
+}
+
+func TestFlatstoreitAnalyseCDRs(t *testing.T) {
+	var reply []*engine.ExternalCDR
+	if err := flatstoreRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{}, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(reply) != 13 {
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	}
+	if err := flatstoreRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{MinUsage: "1"}, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(reply) != 7 {
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
 }

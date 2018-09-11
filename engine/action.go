@@ -279,6 +279,7 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 }
 
 func cdrLogAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) (err error) {
+
 	defaultTemplate := map[string]utils.RSRFields{
 		utils.ToR:         utils.ParseRSRFieldsMustCompile("BalanceType", utils.INFIELD_SEP),
 		utils.OriginHost:  utils.ParseRSRFieldsMustCompile("^127.0.0.1", utils.INFIELD_SEP),
@@ -310,9 +311,12 @@ func cdrLogAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actio
 			action.Balance == nil {
 			continue // Only log specific actions
 		}
-		cdr := &CDR{RunID: action.ActionType, Source: CDRLOG,
-			SetupTime: time.Now(), AnswerTime: time.Now(), OriginID: utils.GenUUID(),
-			ExtraFields: make(map[string]string)}
+		cdr := &CDR{RunID: action.ActionType,
+			Source:    CDRLOG,
+			SetupTime: time.Now(), AnswerTime: time.Now(),
+			OriginID:    utils.GenUUID(),
+			ExtraFields: make(map[string]string),
+			PreRated:    true}
 		cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.SetupTime.String())
 		cdr.Usage = time.Duration(1)
 		elem := reflect.ValueOf(cdr).Elem()
@@ -335,13 +339,12 @@ func cdrLogAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actio
 			}
 		}
 		cdrs = append(cdrs, cdr)
-		if cdrStorage == nil { // Only save if the cdrStorage is defined
+		if (schedCdrsConns == nil) || (schedCdrsConns != nil && reflect.ValueOf(schedCdrsConns).IsNil()) {
 			continue
 		}
-		// ar trebui sa faca post cdr sa il trimita la cdr server
-		// de vazut cum
-		// de adaugat extra conexiune
-		if err := cdrStorage.SetCDR(cdr, true); err != nil {
+		var rply string
+		// After compute the CDR send it to CDR Server to be processed
+		if err := schedCdrsConns.Call(utils.CdrsV2ProcessCDR, cdr.AsCGREvent(), &rply); err != nil {
 			return err
 		}
 	}

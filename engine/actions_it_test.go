@@ -75,8 +75,46 @@ func TestActionsitRpcConn(t *testing.T) {
 	}
 }
 
-func TestActionsitSetCdrlogDebit(t *testing.T) {
+func TestActionsitAddChargers(t *testing.T) {
+	chargerProfile := &ChargerProfile{
+		Tenant:    "cgrates.org",
+		ID:        "Charger1",
+		FilterIDs: []string{"*string:Account:dan2904"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		RunID:        "*default",
+		AttributeIDs: []string{"*none"},
+		Weight:       20,
+	}
+	var result string
+	if err := actsLclRpc.Call("ApierV1.SetChargerProfile", chargerProfile, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	chargerProfile2 := &ChargerProfile{
+		Tenant:    "cgrates.org",
+		ID:        "Charger2",
+		FilterIDs: []string{"*string:Account:dan2905"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		RunID:        "*default",
+		AttributeIDs: []string{"*none"},
+		Weight:       20,
+	}
+	if err := actsLclRpc.Call("ApierV1.SetChargerProfile", chargerProfile2, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
 
+}
+
+func TestActionsitSetCdrlogDebit(t *testing.T) {
 	var reply string
 	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan2904"}
 	if err := actsLclRpc.Call("ApierV1.SetAccount", attrsSetAccount, &reply); err != nil {
