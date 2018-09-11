@@ -1088,7 +1088,7 @@ func initLogger(cfg *config.CGRConfig) error {
 	return nil
 }
 
-func createCDRConnection(internalCDRSChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
+func schedCDRsConns(internalCDRSChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
 	var err error
 	var cdrsConn *rpcclient.RpcClientPool
 	cdrsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
@@ -1263,7 +1263,7 @@ func main() {
 
 	// Create connection to CDR Server and share it in engine(used for *cdrlog action)
 	if len(cfg.SchedulerCfg().CDRsConns) != 0 {
-		go createCDRConnection(internalCdrSChan, exitChan)
+		go schedCDRsConns(internalCdrSChan, exitChan)
 	}
 
 	// Start CDR Stats server
