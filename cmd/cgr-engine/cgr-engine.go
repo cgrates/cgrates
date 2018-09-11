@@ -225,7 +225,8 @@ func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, in
 			return
 		}
 	}
-	smgReplConns, err := sessions.NewSessionReplicationConns(cfg.SessionSCfg().SessionReplicationConns, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout)
+	smgReplConns, err := sessions.NewSessionReplicationConns(cfg.SessionSCfg().SessionReplicationConns,
+		cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to SMGReplicationConnection error: <%s>", utils.SessionS, err.Error()))
 		exitChan <- true
@@ -1087,6 +1088,20 @@ func initLogger(cfg *config.CGRConfig) error {
 	return nil
 }
 
+func createCDRConnection(internalCDRSChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
+	var err error
+	var cdrsConn *rpcclient.RpcClientPool
+	cdrsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
+		cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+		cfg.SchedulerCfg().CDRsConns, internalCDRSChan, cfg.InternalTtl)
+	if err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to CDRServer: %s", utils.SchedulerS, err.Error()))
+		exitChan <- true
+		return
+	}
+	engine.SetSchedCdrsConns(cdrsConn)
+}
+
 func main() {
 	flag.Parse()
 	if *version {
@@ -1244,6 +1259,11 @@ func main() {
 			internalUserSChan, internalAliaseSChan, internalCdrStatSChan,
 			internalThresholdSChan, internalStatSChan, internalChargerSChan,
 			server, exitChan, filterSChan)
+	}
+
+	// Create connection to CDR Server and share it in engine(used for *cdrlog action)
+	if len(cfg.SchedulerCfg().CDRsConns) != 0 {
+		go createCDRConnection(internalCdrSChan, exitChan)
 	}
 
 	// Start CDR Stats server

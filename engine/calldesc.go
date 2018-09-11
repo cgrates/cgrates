@@ -61,6 +61,7 @@ var (
 	pubSubServer             rpcclient.RpcClientConnection
 	userService              rpcclient.RpcClientConnection
 	aliasService             rpcclient.RpcClientConnection
+	schedCdrsConns           rpcclient.RpcClientConnection
 	rpSubjectPrefixMatching  bool
 	lcrSubjectPrefixMatching bool
 )
@@ -104,6 +105,10 @@ func SetUserService(us rpcclient.RpcClientConnection) {
 
 func SetAliasService(as rpcclient.RpcClientConnection) {
 	aliasService = as
+}
+
+func SetSchedCdrsConns(sc rpcclient.RpcClientConnection) {
+	schedCdrsConns = sc
 }
 
 func Publish(event CgrEvent) {
