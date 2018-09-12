@@ -331,6 +331,8 @@ func (cdre *CDRExporter) processCDR(cdr *CDR) (err error) {
 		return
 	}
 	// Done with writing content, compute stats here
+	cdre.Lock()
+	defer cdre.Unlock()
 	if cdre.firstCdrATime.IsZero() || cdr.AnswerTime.Before(cdre.firstCdrATime) {
 		cdre.firstCdrATime = cdr.AnswerTime
 	}
