@@ -21,6 +21,7 @@ package engine
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"sort"
 	"strings"
 	"time"
@@ -109,6 +110,9 @@ func SetAliasService(as rpcclient.RpcClientConnection) {
 
 func SetSchedCdrsConns(sc rpcclient.RpcClientConnection) {
 	schedCdrsConns = sc
+	if schedCdrsConns != nil && reflect.ValueOf(schedCdrsConns).IsNil() {
+		schedCdrsConns = nil
+	}
 }
 
 func Publish(event CgrEvent) {
