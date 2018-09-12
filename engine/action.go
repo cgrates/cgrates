@@ -140,156 +140,18 @@ func logAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) 
 	return
 }
 
-// Used by cdrLogAction to dynamically parse values out of account and action
-func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) string {
-	var err error
-	var dta *utils.TenantAccount
-	if acnt != nil {
-		dta, err = utils.NewTAFromAccountKey(acnt.ID) // Account information should be valid
-	}
-	if err != nil || acnt == nil {
-		dta = new(utils.TenantAccount) // Init with empty values
-	}
-	var parsedValue string // Template values
-	b := action.Balance.CreateBalance()
-	for _, rsrFld := range rsrFlds {
-		switch rsrFld.Id {
-		case "AccountID":
-			if parsed, err := rsrFld.Parse(acnt.ID); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
-					utils.SchedulerS, err.Error(), rsrFld))
-			} else {
-				parsedValue += parsed
-			}
-		case "Directions":
-			if parsed, err := rsrFld.Parse(b.Directions.String()); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
-					utils.SchedulerS, err.Error(), rsrFld))
-			} else {
-				parsedValue += parsed
-			}
-		case utils.Tenant:
-			if parsed, err := rsrFld.Parse(dta.Tenant); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
-					utils.SchedulerS, err.Error(), rsrFld))
-			} else {
-				parsedValue += parsed
-			}
-		case utils.Account:
-			if parsed, err := rsrFld.Parse(dta.Account); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
-					utils.SchedulerS, err.Error(), rsrFld))
-			} else {
-				parsedValue += parsed
-			}
-		case "ActionID":
-			if parsed, err := rsrFld.Parse(action.Id); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
-					utils.SchedulerS, err.Error(), rsrFld))
-			} else {
-				parsedValue += parsed
-			}
-		case "ActionType":
-			if parsed, err := rsrFld.Parse(action.ActionType); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
-					utils.SchedulerS, err.Error(), rsrFld))
-			} else {
-				parsedValue += parsed
-			}
-		case "ActionValue":
-			if parsed, err := rsrFld.Parse(strconv.FormatFloat(b.GetValue(), 'f', -1, 64)); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
-					utils.SchedulerS, err.Error(), rsrFld))
-			} else {
-				parsedValue += parsed
-			}
-		case "BalanceType":
-			if parsed, err := rsrFld.Parse(action.Balance.GetType()); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
-					utils.SchedulerS, err.Error(), rsrFld))
-			} else {
-				parsedValue += parsed
-			}
-		case "BalanceUUID":
-			if parsed, err := rsrFld.Parse(b.Uuid); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
-					utils.SchedulerS, err.Error(), rsrFld))
-			} else {
-				parsedValue += parsed
-			}
-		case "BalanceID":
-			if parsed, err := rsrFld.Parse(b.ID); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
-					utils.SchedulerS, err.Error(), rsrFld))
-			} else {
-				parsedValue += parsed
-			}
-		case "BalanceValue":
-			if parsed, err := rsrFld.Parse(strconv.FormatFloat(action.balanceValue, 'f', -1, 64)); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
-					utils.SchedulerS, err.Error(), rsrFld))
-			} else {
-				parsedValue += parsed
-			}
-		case "DestinationIDs":
-			if parsed, err := rsrFld.Parse(b.DestinationIDs.String()); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
-					utils.SchedulerS, err.Error(), rsrFld))
-			} else {
-				parsedValue += parsed
-			}
-		case "ExtraParameters":
-			if parsed, err := rsrFld.Parse(action.ExtraParameters); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
-					utils.SchedulerS, err.Error(), rsrFld))
-			} else {
-				parsedValue += parsed
-			}
-		case "RatingSubject":
-			if parsed, err := rsrFld.Parse(b.RatingSubject); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
-					utils.SchedulerS, err.Error(), rsrFld))
-			} else {
-				parsedValue += parsed
-			}
-		case utils.Category:
-			if parsed, err := rsrFld.Parse(action.Balance.Categories.String()); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
-					utils.SchedulerS, err.Error(), rsrFld))
-			} else {
-				parsedValue += parsed
-			}
-		case "SharedGroups":
-			if parsed, err := rsrFld.Parse(action.Balance.SharedGroups.String()); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
-					utils.SchedulerS, err.Error(), rsrFld))
-			} else {
-				parsedValue += parsed
-			}
-		default:
-			if parsed, err := rsrFld.Parse(""); err != nil { // Mostly for static values
-				utils.Logger.Warning(fmt.Sprintf("<%s> error %s when parsing template value: %+v",
-					utils.SchedulerS, err.Error(), rsrFld))
-			} else {
-				parsedValue += parsed
-			}
-		}
-	}
-	return parsedValue
-}
-
 func cdrLogAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) (err error) {
-	if (schedCdrsConns == nil) || (schedCdrsConns != nil && reflect.ValueOf(schedCdrsConns).IsNil()) {
+	if schedCdrsConns == nil {
 		return fmt.Errorf("No connection with CDR Server")
 	}
-	defaultTemplate := map[string]utils.RSRFields{
-		utils.ToR:         utils.ParseRSRFieldsMustCompile("BalanceType", utils.INFIELD_SEP),
-		utils.OriginHost:  utils.ParseRSRFieldsMustCompile("^127.0.0.1", utils.INFIELD_SEP),
-		utils.RequestType: utils.ParseRSRFieldsMustCompile("^"+utils.META_PREPAID, utils.INFIELD_SEP),
-		utils.Tenant:      utils.ParseRSRFieldsMustCompile(utils.Tenant, utils.INFIELD_SEP),
-		utils.Account:     utils.ParseRSRFieldsMustCompile(utils.Account, utils.INFIELD_SEP),
-		utils.Subject:     utils.ParseRSRFieldsMustCompile(utils.Account, utils.INFIELD_SEP), //here need to be modify
-		utils.COST:        utils.ParseRSRFieldsMustCompile("ActionValue", utils.INFIELD_SEP),
+	defaultTemplate := map[string]config.RSRParsers{
+		utils.ToR:         config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"BalanceType", true),
+		utils.OriginHost:  config.NewRSRParsersMustCompile("127.0.0.1", true),
+		utils.RequestType: config.NewRSRParsersMustCompile(utils.META_PREPAID, true),
+		utils.Tenant:      config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Tenant, true),
+		utils.Account:     config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Account, true),
+		utils.Subject:     config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Account, true),
+		utils.COST:        config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"ActionValue", true),
 	}
 	template := make(map[string]string)
 
@@ -299,10 +161,7 @@ func cdrLogAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actio
 			return
 		}
 		for field, rsr := range template {
-			defaultTemplate[field], err = utils.ParseRSRFields(rsr, utils.INFIELD_SEP)
-			if err != nil {
-				return err
-			}
+			defaultTemplate[field] = config.NewRSRParsersMustCompile(rsr, true)
 		}
 	}
 
@@ -323,8 +182,11 @@ func cdrLogAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actio
 		cdr.Usage = time.Duration(1)
 		elem := reflect.ValueOf(cdr).Elem()
 		for key, rsrFlds := range defaultTemplate {
-			parsedValue := parseTemplateValue(rsrFlds, acc, action)
+			parsedValue, err := rsrFlds.ParseDataProvider(newCdrLogProvider(acc, action))
 			field := elem.FieldByName(key)
+			if err != nil {
+				return err
+			}
 			if field.IsValid() && field.CanSet() {
 				switch field.Kind() {
 				case reflect.Float64:
@@ -938,4 +800,98 @@ func (apl Actions) Clone() (interface{}, error) {
 		}
 	}
 	return cln, nil
+}
+
+// newCdrLogProvider constructs a DataProvider
+func newCdrLogProvider(acnt *Account, action *Action) (dP config.DataProvider) {
+	dP = &cdrLogProvider{acnt: acnt, action: action, cache: config.NewNavigableMap(nil)}
+	return
+}
+
+// cdrLogProvider implements engine.DataProvider so we can pass it to filters
+type cdrLogProvider struct {
+	acnt   *Account
+	action *Action
+	cache  *config.NavigableMap
+}
+
+// String is part of engine.DataProvider interface
+// when called, it will display the already parsed values out of cache
+func (cdrP *cdrLogProvider) String() string {
+	return utils.ToJSON(cdrP)
+}
+
+// FieldAsInterface is part of engine.DataProvider interface
+func (cdrP *cdrLogProvider) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	if data, err = cdrP.cache.FieldAsInterface(fldPath); err == nil ||
+		err != utils.ErrNotFound { // item found in cache
+		return
+	}
+	err = nil // cancel previous err
+	var dta *utils.TenantAccount
+	if cdrP.acnt != nil {
+		dta, err = utils.NewTAFromAccountKey(cdrP.acnt.ID) // Account information should be valid
+	}
+	if err != nil || cdrP.acnt == nil {
+		dta = new(utils.TenantAccount) // Init with empty values
+	}
+	b := cdrP.action.Balance.CreateBalance()
+	switch fldPath[0] {
+	case "AccountID":
+		data = cdrP.acnt.ID
+	case "Directions":
+		data = b.Directions.String()
+	case utils.Tenant:
+		data = dta.Tenant
+	case utils.Account:
+		data = dta.Account
+	case "ActionID":
+		data = cdrP.action.Id
+	case "ActionType":
+		data = cdrP.action.ActionType
+	case "ActionValue":
+		data = strconv.FormatFloat(b.GetValue(), 'f', -1, 64)
+	case "BalanceType":
+		data = cdrP.action.Balance.GetType()
+	case "BalanceUUID":
+		data = b.Uuid
+	case "BalanceID":
+		data = b.ID
+	case "BalanceValue":
+		data = strconv.FormatFloat(cdrP.action.balanceValue, 'f', -1, 64)
+	case "DestinationIDs":
+		data = b.DestinationIDs.String()
+	case "ExtraParameters":
+		data = cdrP.action.ExtraParameters
+	case "RatingSubject":
+		data = b.RatingSubject
+	case utils.Category:
+		data = cdrP.action.Balance.Categories.String()
+	case "SharedGroups":
+		data = cdrP.action.Balance.SharedGroups.String()
+	default:
+		data = fldPath[0]
+	}
+	cdrP.cache.Set(fldPath, data, false)
+	return
+}
+
+// FieldAsString is part of engine.DataProvider interface
+func (cdrP *cdrLogProvider) FieldAsString(fldPath []string) (data string, err error) {
+	var valIface interface{}
+	valIface, err = cdrP.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	data, _ = utils.CastFieldIfToString(valIface)
+	return
+}
+
+// AsNavigableMap is part of engine.DataProvider interface
+func (cdrP *cdrLogProvider) AsNavigableMap([]*config.FCTemplate) (
+	nm *config.NavigableMap, err error) {
+	return nil, utils.ErrNotImplemented
 }
