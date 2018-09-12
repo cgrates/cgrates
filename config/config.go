@@ -722,6 +722,14 @@ func (self *CGRConfig) checkConfigSanity() error {
 				utils.DispatcherS, self.dispatcherSCfg.DispatchingStrategy)
 		}
 	}
+	// Scheduler check connection with CDR Server
+	if len(self.schedulerCfg.CDRsConns) != 0 {
+		for _, connCfg := range self.schedulerCfg.CDRsConns {
+			if connCfg.Address == utils.MetaInternal && !self.CDRSEnabled {
+				return errors.New("CDR Server not enabled but requested by Scheduler")
+			}
+		}
+	}
 	return nil
 }
 
