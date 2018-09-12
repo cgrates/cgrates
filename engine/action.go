@@ -154,7 +154,6 @@ func cdrLogAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actio
 		utils.COST:        config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"ActionValue", true),
 	}
 	template := make(map[string]string)
-
 	// overwrite default template
 	if a.ExtraParameters != "" {
 		if err = json.Unmarshal([]byte(a.ExtraParameters), &template); err != nil {
@@ -164,7 +163,6 @@ func cdrLogAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actio
 			defaultTemplate[field] = config.NewRSRParsersMustCompile(rsr, true)
 		}
 	}
-
 	// set stored cdr values
 	var cdrs []*CDR
 	for _, action := range acs {
