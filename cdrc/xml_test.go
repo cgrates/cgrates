@@ -407,10 +407,10 @@ var xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 			</SignalingInfo>
 			<IcSeizeTime>1510225513055</IcSeizeTime>
 			<OgSeizeTime>1510225513304</OgSeizeTime>
-			<RingingTime>20160419210005.247</RingingTime>
-			<ConnectTime>20160419210006.813</ConnectTime>
+			<RingingTime>1510225514836</RingingTime>
+			<ConnectTime/>
 			<DisconnectTime>1510225516981</DisconnectTime>
-			<ReleaseTime>20160419210020.296</ReleaseTime>
+			<ReleaseTime>1510225516981</ReleaseTime>
 			<CompleteTime>1510225516981</CompleteTime>
 		</Call>
 		<Call seqnum="0000000002" error="no" longcall="false" testcall="false" class="0" operator="false" correlator="402123969565" connected="true">
@@ -455,10 +455,10 @@ var xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 			</SignalingInfo>
 			<IcSeizeTime>1510225531933</IcSeizeTime>
 			<OgSeizeTime>1510225532183</OgSeizeTime>
-			<RingingTime>20160419210005.247</RingingTime>
-			<ConnectTime>20160419210006.813</ConnectTime>
+			<RingingTime>1510225534973</RingingTime>
+			<ConnectTime>1510225539364</ConnectTime>
 			<DisconnectTime>1510225593101</DisconnectTime>
-			<ReleaseTime>20160419210020.296</ReleaseTime>
+			<ReleaseTime>1510225593101</ReleaseTime>
 			<CompleteTime>1510225593101</CompleteTime>
 		</Call>
 		<Call seqnum="0000000003" error="no" longcall="false" testcall="false" class="0" operator="false" correlator="406419270822" connected="true">
@@ -503,10 +503,10 @@ var xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 			</SignalingInfo>
 			<IcSeizeTime>1510225865894</IcSeizeTime>
 			<OgSeizeTime>1510225866144</OgSeizeTime>
-			<RingingTime>20160419210005.247</RingingTime>
-			<ConnectTime>20160419210006.813</ConnectTime>
+			<RingingTime>1510225866756</RingingTime>
+			<ConnectTime>1510225876243</ConnectTime>
 			<DisconnectTime>1510225916144</DisconnectTime>
-			<ReleaseTime>20160419210020.296</ReleaseTime>
+			<ReleaseTime>1510225916144</ReleaseTime>
 			<CompleteTime>1510225916144</CompleteTime>
 		</Call>
 	</CDRs>
@@ -605,13 +605,13 @@ func TestXMLRPProcessWithNewFilters2(t *testing.T) {
 		t.Error(err)
 	}
 	expectedCDRs := []*engine.CDR{
-		&engine.CDR{CGRID: "7c6170203bd3d5b34e9fce366b5ee7d621217824",
+		&engine.CDR{CGRID: "0ad7f9554ff8fc5b3a7cebbe7431bbf809bc5144",
 			OriginHost: "0.0.0.0", Source: "zw_cfs1", OriginID: "46d7974398c2671016afccc3f2c428c7",
 			ToR: "*voice", RequestType: "*rated", Tenant: "XX.liquid.tel",
 			Category: "call", Account: "+27110493421", Destination: "+270843073451",
-			SetupTime:   time.Date(2016, 4, 19, 21, 0, 5, 247000000, time.UTC),
-			AnswerTime:  time.Date(2016, 4, 19, 21, 0, 6, 813000000, time.UTC),
-			Usage:       time.Duration(13483000000),
+			SetupTime:   time.Date(2017, 11, 9, 11, 5, 34, 973000000, time.UTC),
+			AnswerTime:  time.Date(2017, 11, 9, 11, 5, 39, 364000000, time.UTC),
+			Usage:       time.Duration(53737000000),
 			ExtraFields: map[string]string{}, Cost: -1},
 	}
 	if !reflect.DeepEqual(expectedCDRs, cdrs) {
