@@ -103,10 +103,8 @@ const CGRATES_CFG_JSON = `
 
 
 "scheduler": {
-	"enabled": false,						// start Scheduler service: <true|false>
-	"cdrs_conns": [
-		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
-	],
+	"enabled": false,				// start Scheduler service: <true|false>
+	"cdrs_conns": [],				// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
 },
 
 

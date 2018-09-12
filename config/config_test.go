@@ -510,9 +510,8 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 
 func TestCgrCfgJSONDefaultsScheduler(t *testing.T) {
 	eSchedulerCfg := &SchedulerCfg{
-		Enabled: false,
-		CDRsConns: []*HaPoolConfig{
-			&HaPoolConfig{Address: "*internal"}},
+		Enabled:   false,
+		CDRsConns: []*HaPoolConfig{},
 	}
 
 	if !reflect.DeepEqual(cgrCfg.schedulerCfg, eSchedulerCfg) {
