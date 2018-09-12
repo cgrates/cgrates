@@ -170,6 +170,7 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 	fsTimestamp := regexp.MustCompile(`^\d{16}$`)
 	astTimestamp := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d*[+,-]\d+$`)
 	unixTimestampRule := regexp.MustCompile(`^\d{10}$`)
+	unixTimestampMilisecondsRule := regexp.MustCompile(`^\d{13}$`)
 	oneLineTimestampRule := regexp.MustCompile(`^\d{14}$`)
 	oneSpaceTimestampRule := regexp.MustCompile(`^\d{2}\.\d{2}.\d{4}\s{1}\d{2}:\d{2}:\d{2}$`)
 	eamonTimestampRule := regexp.MustCompile(`^\d{2}/\d{2}/\d{4}\s{1}\d{2}:\d{2}:\d{2}$`)
@@ -196,6 +197,12 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 			return nilTime, err
 		} else {
 			return time.Unix(tmstmp, 0).In(loc), nil
+		}
+	case unixTimestampMilisecondsRule.MatchString(tmStr):
+		if tmstmp, err := strconv.ParseInt(tmStr, 10, 64); err != nil {
+			return nilTime, err
+		} else {
+			return time.Unix(0, tmstmp*int64(time.Millisecond)).In(loc), nil
 		}
 	case tmStr == "0" || len(tmStr) == 0: // Time probably missing from request
 		return nilTime, nil
