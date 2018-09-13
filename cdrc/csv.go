@@ -164,13 +164,13 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 		var fieldVal string
 		switch cdrFldCfg.Type {
 		case utils.META_COMPOSED:
-			out, err := cdrFldCfg.Value.ParseDataProvider(csvProvider)
+			out, err := cdrFldCfg.Value.ParseDataProvider(csvProvider, utils.NestingSep)
 			if err != nil {
 				return nil, err
 			}
 			fieldVal = out
 		case utils.MetaUnixTimestamp:
-			out, err := cdrFldCfg.Value.ParseDataProvider(csvProvider)
+			out, err := cdrFldCfg.Value.ParseDataProvider(csvProvider, utils.NestingSep)
 			if err != nil {
 				return nil, err
 			}

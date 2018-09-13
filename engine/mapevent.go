@@ -219,6 +219,8 @@ func (me MapEvent) AsCDR(cfg *config.CGRConfig, tmz string) (cdr *CDR, err error
 			}
 		}
 	}
-	cdr.AddDefaults(cfg)
+	if cfg != nil {
+		cdr.AddDefaults(cfg)
+	}
 	return
 }

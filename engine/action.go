@@ -180,7 +180,7 @@ func cdrLogAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actio
 		cdr.Usage = time.Duration(1)
 		elem := reflect.ValueOf(cdr).Elem()
 		for key, rsrFlds := range defaultTemplate {
-			parsedValue, err := rsrFlds.ParseDataProvider(newCdrLogProvider(acc, action))
+			parsedValue, err := rsrFlds.ParseDataProvider(newCdrLogProvider(acc, action), utils.NestingSep)
 			field := elem.FieldByName(key)
 			if err != nil {
 				return err

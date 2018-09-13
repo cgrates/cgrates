@@ -121,3 +121,17 @@ func TestRSRParserNotConstant(t *testing.T) {
 		t.Errorf("expecting: EmptyString , received: %+v", out)
 	}
 }
+
+func TestRSRParsersParseEvent2(t *testing.T) {
+	prsrs := NewRSRParsersMustCompile("~Header1.Test;|;~Header2.Test", true)
+	ev := map[string]interface{}{
+		"Header1.Test": "Value1",
+		"Header2.Test": "Value2",
+	}
+	eOut := "Value1|Value2"
+	if out, err := prsrs.ParseEvent(ev); err != nil {
+		t.Error(err)
+	} else if eOut != out {
+		t.Errorf("expecting: %s, received: %s", eOut, out)
+	}
+}

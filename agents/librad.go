@@ -44,7 +44,7 @@ func attrVendorFromPath(path string) (attrName, vendorName string) {
 func radComposedFieldValue(pkt *radigo.Packet,
 	agReq *AgentRequest, outTpl config.RSRParsers) (outVal string) {
 	for _, rsrTpl := range outTpl {
-		if out, err := rsrTpl.ParseDataProvider(agReq); err != nil {
+		if out, err := rsrTpl.ParseDataProvider(agReq, utils.NestingSep); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> %s",
 					utils.RadiusAgent, err.Error()))

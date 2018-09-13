@@ -149,17 +149,17 @@ func (aReq *AgentRequest) ParseField(
 		out, err = cfgFld.Value.ParseValue(utils.EmptyString)
 		isString = true
 	case utils.META_COMPOSED:
-		out, err = cfgFld.Value.ParseDataProvider(aReq)
+		out, err = cfgFld.Value.ParseDataProvider(aReq, utils.NestingSep)
 		isString = true
 	case utils.META_USAGE_DIFFERENCE:
 		if len(cfgFld.Value) != 2 {
 			return nil, fmt.Errorf("invalid arguments <%s>", utils.ToJSON(cfgFld.Value))
 		} else {
-			strVal1, err := cfgFld.Value[0].ParseDataProvider(aReq)
+			strVal1, err := cfgFld.Value[0].ParseDataProvider(aReq, utils.NestingSep)
 			if err != nil {
 				return "", err
 			}
-			strVal2, err := cfgFld.Value[1].ParseDataProvider(aReq)
+			strVal2, err := cfgFld.Value[1].ParseDataProvider(aReq, utils.NestingSep)
 			if err != nil {
 				return "", err
 			}

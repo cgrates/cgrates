@@ -642,7 +642,7 @@ func TimeIs0h(t time.Time) bool {
 
 func ParseHierarchyPath(path string, sep string) HierarchyPath {
 	if sep == "" {
-		for _, sep = range []string{HIERARCHY_SEP, "/"} {
+		for _, sep = range []string{"/", NestingSep} {
 			if idx := strings.Index(path, sep); idx != -1 {
 				break
 			}

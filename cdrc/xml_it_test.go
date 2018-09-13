@@ -292,7 +292,7 @@ func TestXmlIT3AnalyseCDRs(t *testing.T) {
 	var reply []*engine.ExternalCDR
 	if err := cdrcXmlRPC.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 3 {
+	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
 }
