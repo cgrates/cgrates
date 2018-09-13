@@ -604,10 +604,10 @@ func TestEndOfMonth(t *testing.T) {
 
 func TestParseHierarchyPath(t *testing.T) {
 	eHP := HierarchyPath([]string{"Root", "CGRateS"})
-	if hp := ParseHierarchyPath("Root>CGRateS", ""); !reflect.DeepEqual(hp, eHP) {
+	if hp := ParseHierarchyPath("/Root/CGRateS/", ""); !reflect.DeepEqual(hp, eHP) {
 		t.Errorf("Expecting: %+v, received: %+v", eHP, hp)
 	}
-	if hp := ParseHierarchyPath("/Root/CGRateS/", ""); !reflect.DeepEqual(hp, eHP) {
+	if hp := ParseHierarchyPath("Root.CGRateS", ""); !reflect.DeepEqual(hp, eHP) {
 		t.Errorf("Expecting: %+v, received: %+v", eHP, hp)
 	}
 }

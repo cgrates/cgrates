@@ -174,7 +174,7 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *confi
 		var fieldVal string
 		switch cdrFldCfg.Type {
 		case utils.META_COMPOSED:
-			out, err := cdrFldCfg.Value.ParseDataProvider(fwvProvider)
+			out, err := cdrFldCfg.Value.ParseDataProvider(fwvProvider, utils.NestingSep)
 			if err != nil {
 				return nil, err
 			}

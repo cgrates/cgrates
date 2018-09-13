@@ -52,7 +52,7 @@ func (ld LoaderData) UpdateFromCSV(fileName string, record []string,
 				continue // Not passes filters, ignore this CDR
 			}
 		}
-		out, err := cfgFld.Value.ParseLoaderSDP(csvProvider)
+		out, err := cfgFld.Value.ParseDataProvider(csvProvider, utils.InInFieldSep)
 		if err != nil {
 			return err
 		}

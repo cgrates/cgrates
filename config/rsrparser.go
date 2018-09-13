@@ -91,9 +91,9 @@ func (prsrs RSRParsers) ParseEvent(ev map[string]interface{}) (out string, err e
 	return
 }
 
-func (prsrs RSRParsers) ParseDataProvider(dP DataProvider) (out string, err error) {
+func (prsrs RSRParsers) ParseDataProvider(dP DataProvider, separator string) (out string, err error) {
 	for _, prsr := range prsrs {
-		if outPrsr, err := prsr.ParseDataProvider(dP); err != nil {
+		if outPrsr, err := prsr.ParseDataProvider(dP, separator); err != nil {
 			return "", err
 		} else {
 			out += outPrsr
@@ -105,17 +105,6 @@ func (prsrs RSRParsers) ParseDataProvider(dP DataProvider) (out string, err erro
 func (prsrs RSRParsers) ParseCDR(dP DataProvider) (out string, err error) {
 	for _, prsr := range prsrs {
 		if outPrsr, err := prsr.ParseCDR(dP); err != nil {
-			return "", err
-		} else {
-			out += outPrsr
-		}
-	}
-	return
-}
-
-func (prsrs RSRParsers) ParseLoaderSDP(dP DataProvider) (out string, err error) {
-	for _, prsr := range prsrs {
-		if outPrsr, err := prsr.ParseLoaderSDP(dP); err != nil {
 			return "", err
 		} else {
 			out += outPrsr
@@ -275,11 +264,11 @@ func (prsr *RSRParser) ParseEvent(ev map[string]interface{}) (out string, err er
 	return prsr.ParseValue(val)
 }
 
-func (prsr *RSRParser) ParseDataProvider(dP DataProvider) (out string, err error) {
+func (prsr *RSRParser) ParseDataProvider(dP DataProvider, separator string) (out string, err error) {
 	var outStr string
 	if prsr.attrValue == "" {
 		if outStr, err = dP.FieldAsString(
-			strings.Split(prsr.attrName, utils.NestingSep)); err != nil {
+			strings.Split(prsr.attrName, separator)); err != nil {
 			return
 		}
 	}
@@ -291,19 +280,6 @@ func (prsr *RSRParser) ParseCDR(dP DataProvider) (out string, err error) {
 	if prsr.attrValue == "" {
 		if outStr, err = dP.FieldAsInterface(
 			strings.Split(prsr.attrName, utils.NestingSep)); err != nil {
-			return
-		}
-	}
-	return prsr.ParseValue(outStr)
-}
-
-// ParseLoaderSDP Parse a DataProvider from LoaderS
-// data there can be FileName:ColNumber and need to be splitted by ":"
-func (prsr *RSRParser) ParseLoaderSDP(dP DataProvider) (out string, err error) {
-	var outStr string
-	if prsr.attrValue == "" {
-		if outStr, err = dP.FieldAsString(
-			strings.Split(prsr.attrName, utils.InInFieldSep)); err != nil {
 			return
 		}
 	}

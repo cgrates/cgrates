@@ -65,9 +65,15 @@ func handlerSubstractUsage(xmlElement *etree.Element, argsTpl config.RSRParsers,
 	if err != nil {
 		return time.Duration(0), err
 	}
+	if tEnd.IsZero() {
+		return time.Duration(0), fmt.Errorf("EndTime is 0")
+	}
 	tStart, err := utils.ParseTimeDetectLayout(handlerArgs[1], timezone)
 	if err != nil {
 		return time.Duration(0), err
+	}
+	if tStart.IsZero() {
+		return time.Duration(0), fmt.Errorf("StartTime is 0")
 	}
 	return tEnd.Sub(tStart), nil
 }
@@ -150,7 +156,7 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity *etree.Element, cdrcCf
 			}
 		}
 		if cdrFldCfg.Type == utils.META_COMPOSED {
-			out, err := cdrFldCfg.Value.ParseDataProvider(xmlProvider)
+			out, err := cdrFldCfg.Value.ParseDataProvider(xmlProvider, utils.NestingSep)
 			if err != nil {
 				return nil, err
 			}
@@ -225,16 +231,15 @@ func (xP *xmlProvider) String() string {
 
 // FieldAsInterface is part of engine.DataProvider interface
 func (xP *xmlProvider) FieldAsInterface(fldPath []string) (data interface{}, err error) {
-	if len(fldPath) != 1 {
+	if len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
 	if data, err = xP.cache.FieldAsInterface(fldPath); err == nil ||
 		err != utils.ErrNotFound { // item found in cache
 		return
 	}
-	err = nil // cancel previous err
-	absolutePath := utils.ParseHierarchyPath(fldPath[0], "")
-	relPath := utils.HierarchyPath(absolutePath[len(xP.cdrPath):]) // Need relative path to the xmlElmnt
+	err = nil                                                 // cancel previous err
+	relPath := utils.HierarchyPath(fldPath[len(xP.cdrPath):]) // Need relative path to the xmlElmnt
 	data, err = elementText(xP.req, relPath.AsString("/", false))
 	xP.cache.Set(fldPath, data, false)
 	return
