@@ -1044,6 +1044,28 @@ func TestDmtAgentLoadCER(t *testing.T) {
 		t.Fatal("No message returned")
 	}
 }
+
+func TestDmtAgentConnectDiameterClientCER(t *testing.T) {
+	dmtClient, err = NewDiameterClient(daCfg.DiameterAgentCfg().Listen, "UNIT_TEST", daCfg.DiameterAgentCfg().OriginRealm,
+		daCfg.DiameterAgentCfg().VendorId, daCfg.DiameterAgentCfg().ProductName, utils.DIAMETER_FIRMWARE_REVISION, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := diam.NewRequest(diam.CapabilitiesExchange, 0, dict.Default)
+	m.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("UNIT_TEST2"))
+	m.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity(daCfg.DiameterAgentCfg().OriginRealm))
+	m.NewAVP(avp.VendorID, avp.Mbit, 0, datatype.Unsigned32(daCfg.DiameterAgentCfg().VendorId))
+	m.NewAVP(avp.ProductName, 0, 0, datatype.UTF8String(daCfg.DiameterAgentCfg().ProductName))
+	m.NewAVP(avp.VendorSpecificApplicationID, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.VendorID, avp.Mbit, 0, datatype.Unsigned32(10415)),
+			diam.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4)),
+		},
+	})
+	if err := dmtClient.SendMessage(m); err != nil {
+		t.Error(err)
+	}
+}
 */
 
 func TestDmtAgentStopEngine(t *testing.T) {
