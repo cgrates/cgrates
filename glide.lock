@@ -59,7 +59,7 @@ imports:
 - name: github.com/peterh/liner
   version: 8975875355a81d612fafb9f5a6037bdcc2d9b073
 - name: github.com/streadway/amqp
-  version: d75c3a341ff43309ad0cb69ac8bdbd1d8772775f
+  version: 70e15c650864f4fc47f5d3c82ea117285480895d
 - name: github.com/ugorji/go
   version: 5cd0f2b3b6cca8e3a0a4101821e41a73cb59bed6
   subpackages:
