@@ -23,26 +23,6 @@ imports:
   version: 69d4269e21990c0f120b8e60d5b75d533db7f3dd
 - name: github.com/cgrates/rpcclient
   version: 54aff3c8e75a2342f0618dfc1c44f0660cd69bde
-- name: github.com/ChrisTrenkamp/goxpath
-  version: c385f95c6022e7756e91beac5f5510872f7dcb7d
-  subpackages:
-  - internal/execxp
-  - internal/lexer
-  - internal/parser
-  - internal/parser/findutil
-  - internal/parser/intfns
-  - internal/parser/pathexpr
-  - literals/boollit
-  - literals/numlit
-  - literals/strlit
-  - tree
-  - tree/xmltree
-  - tree/xmltree/xmlbuilder
-  - tree/xmltree/xmlele
-  - tree/xmltree/xmlnode
-  - xconst
-  - xfn
-  - xsort
 - name: github.com/DisposaBoy/JsonConfigReader
   version: 33a99fdf1d5ee1f79b5077e9c06f955ad356d5f4
 - name: github.com/fiorix/go-diameter

@@ -34,7 +34,6 @@ import:
 - package: github.com/cgrates/mgo
   subpackages:
   - bson
-- package: github.com/ChrisTrenkamp/goxpath
 - package: github.com/mitchellh/mapstructure
 - package: github.com/cgrates/aringo
 - package: github.com/bit4bit/gami
