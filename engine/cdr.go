@@ -209,23 +209,23 @@ func (cdr *CDR) ParseFieldValue(fieldId, fieldVal, timezone string) error {
 	case utils.OriginHost: // overwrite if originHost is given from template
 		cdr.OriginHost = fieldVal
 	case utils.ToR:
-		cdr.ToR += fieldVal
+		cdr.ToR = fieldVal
 	case utils.RunID:
-		cdr.RunID += fieldVal
+		cdr.RunID = fieldVal
 	case utils.OriginID:
-		cdr.OriginID += fieldVal
+		cdr.OriginID = fieldVal
 	case utils.RequestType:
-		cdr.RequestType += fieldVal
+		cdr.RequestType = fieldVal
 	case utils.Tenant:
-		cdr.Tenant += fieldVal
+		cdr.Tenant = fieldVal
 	case utils.Category:
-		cdr.Category += fieldVal
+		cdr.Category = fieldVal
 	case utils.Account:
-		cdr.Account += fieldVal
+		cdr.Account = fieldVal
 	case utils.Subject:
-		cdr.Subject += fieldVal
+		cdr.Subject = fieldVal
 	case utils.Destination:
-		cdr.Destination += fieldVal
+		cdr.Destination = fieldVal
 	case utils.PreRated:
 		cdr.PreRated, _ = strconv.ParseBool(fieldVal)
 	case utils.SetupTime:
@@ -247,7 +247,7 @@ func (cdr *CDR) ParseFieldValue(fieldId, fieldVal, timezone string) error {
 	case utils.Partial:
 		cdr.Partial, _ = strconv.ParseBool(fieldVal)
 	default: // Extra fields will not match predefined so they all show up here
-		cdr.ExtraFields[fieldId] += fieldVal
+		cdr.ExtraFields[fieldId] = fieldVal
 	}
 	return nil
 }

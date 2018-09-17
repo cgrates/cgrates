@@ -954,3 +954,22 @@ func TestCDRUpdateFromCGREvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", cdr, eCDR)
 	}
 }
+
+func TestCDRParseFieldValue2(t *testing.T) {
+	cdr := new(CDR)
+	if err := cdr.ParseFieldValue(utils.RunID, "*default", ""); err != nil {
+		t.Error(err)
+	} else if cdr.RunID != "*default" {
+		t.Errorf("Received cdr: %+v", cdr)
+	}
+	if err := cdr.ParseFieldValue(utils.OriginID, "FirstID", ""); err != nil {
+		t.Error(err)
+	} else if cdr.OriginID != "FirstID" {
+		t.Errorf("Received cdr: %+v", cdr)
+	}
+	if err := cdr.ParseFieldValue(utils.OriginID, "SecondID", ""); err != nil {
+		t.Error(err)
+	} else if cdr.OriginID != "SecondID" {
+		t.Errorf("Received cdr: %+v", cdr)
+	}
+}
