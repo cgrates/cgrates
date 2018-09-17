@@ -114,8 +114,8 @@ func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.CDR, error) {
 	}
 	self.processedRecordsNr += 1
 	record := string(buf)
+	fwvProvider := newfwvProvider(record)
 	for _, cdrcCfg := range self.cdrcCfgs {
-		fwvProvider := newfwvProvider(record)
 		tenant, err := cdrcCfg.Tenant.ParseDataProvider(fwvProvider, utils.NestingSep) // each profile of cdrc can have different tenant
 		if err != nil {
 			return nil, err
