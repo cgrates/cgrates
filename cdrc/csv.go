@@ -157,14 +157,14 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 				cdrFldCfg.Value = config.NewRSRParsersMustCompile("~"+strconv.Itoa(len(record)-1), true) // in case of flatstore, last element will be the duration computed by us
 			}
 		}
-		var fieldVal string
+		fldVals := make(map[string]string)
 		switch cdrFldCfg.Type {
 		case utils.META_COMPOSED:
 			out, err := cdrFldCfg.Value.ParseDataProvider(csvProvider, utils.NestingSep)
 			if err != nil {
 				return nil, err
 			}
-			fieldVal = out
+			fldVals[cdrFldCfg.FieldId] += out
 		case utils.MetaUnixTimestamp:
 			out, err := cdrFldCfg.Value.ParseDataProvider(csvProvider, utils.NestingSep)
 			if err != nil {
@@ -174,13 +174,13 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 			if err != nil {
 				return nil, err
 			}
-			fieldVal += strconv.Itoa(int(t.Unix()))
+			fldVals[cdrFldCfg.FieldId] += strconv.Itoa(int(t.Unix()))
 		case utils.META_HTTP_POST:
 			lazyHttpFields = append(lazyHttpFields, cdrFldCfg) // Will process later so we can send an estimation of storedCdr to http server
 		default:
 			return nil, fmt.Errorf("Unsupported field type: %s", cdrFldCfg.Type)
 		}
-		if err := storedCdr.ParseFieldValue(cdrFldCfg.FieldId, fieldVal, self.timezone); err != nil {
+		if err := storedCdr.ParseFieldValue(cdrFldCfg.FieldId, fldVals[cdrFldCfg.FieldId], self.timezone); err != nil {
 			return nil, err
 		}
 	}

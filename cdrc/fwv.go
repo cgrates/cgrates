@@ -171,25 +171,25 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *confi
 				continue // Not passes filters, ignore this CDR
 			}
 		}
-		var fieldVal string
+		fldVals := make(map[string]string)
 		switch cdrFldCfg.Type {
 		case utils.META_COMPOSED:
 			out, err := cdrFldCfg.Value.ParseDataProvider(fwvProvider, utils.NestingSep)
 			if err != nil {
 				return nil, err
 			}
-			fieldVal = out
+			fldVals[cdrFldCfg.FieldId] += out
 		case utils.META_HTTP_POST:
 			lazyHttpFields = append(lazyHttpFields, cdrFldCfg) // Will process later so we can send an estimation of storedCdr to http server
 		default:
 			//return nil, fmt.Errorf("Unsupported field type: %s", cdrFldCfg.Type)
 			continue // Don't do anything for unsupported fields
 		}
-		if fieldVal, err = utils.FmtFieldWidth(cdrFldCfg.Tag, fieldVal, cdrFldCfg.Width,
+		if fldVals[cdrFldCfg.FieldId], err = utils.FmtFieldWidth(cdrFldCfg.Tag, fldVals[cdrFldCfg.FieldId], cdrFldCfg.Width,
 			cdrFldCfg.Strip, cdrFldCfg.Padding, cdrFldCfg.Mandatory); err != nil {
 			return nil, err
 		}
-		if err := storedCdr.ParseFieldValue(cdrFldCfg.FieldId, fieldVal, self.timezone); err != nil {
+		if err := storedCdr.ParseFieldValue(cdrFldCfg.FieldId, fldVals[cdrFldCfg.FieldId], self.timezone); err != nil {
 			return nil, err
 		}
 	}
