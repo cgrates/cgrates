@@ -115,12 +115,12 @@ func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.CDR, error) {
 	self.processedRecordsNr += 1
 	record := string(buf)
 	for _, cdrcCfg := range self.cdrcCfgs {
+		fwvProvider := newfwvProvider(record)
+		tenant, err := cdrcCfg.Tenant.ParseDataProvider(fwvProvider, utils.NestingSep) // each profile of cdrc can have different tenant
+		if err != nil {
+			return nil, err
+		}
 		if len(cdrcCfg.Filters) != 0 {
-			fwvProvider := newfwvProvider(record)
-			tenant, err := cdrcCfg.Tenant.ParseValue("")
-			if err != nil {
-				return nil, err
-			}
 			if pass, err := self.filterS.Pass(tenant,
 				cdrcCfg.Filters, fwvProvider); err != nil || !pass {
 				continue // Not passes filters, ignore this CDR
