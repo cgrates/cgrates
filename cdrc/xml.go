@@ -115,18 +115,18 @@ func (xmlProc *XMLRecordsProcessor) ProcessNextRecord() (cdrs []*engine.CDR, err
 	cdrXML := xmlProc.cdrXmlElmts[xmlProc.procItems]
 	xmlProc.procItems += 1
 	for _, cdrcCfg := range xmlProc.cdrcCfgs {
+		tenant, err := cdrcCfg.Tenant.ParseValue("")
+		if err != nil {
+			return nil, err
+		}
 		if len(cdrcCfg.Filters) != 0 {
 			xmlProvider := newXmlProvider(cdrXML, xmlProc.cdrPath)
-			tenant, err := cdrcCfg.Tenant.ParseValue("")
-			if err != nil {
-				return nil, err
-			}
 			if pass, err := xmlProc.filterS.Pass(tenant,
 				cdrcCfg.Filters, xmlProvider); err != nil || !pass {
 				continue // Not passes filters, ignore this CDR
 			}
 		}
-		if cdr, err := xmlProc.recordToCDR(cdrXML, cdrcCfg); err != nil {
+		if cdr, err := xmlProc.recordToCDR(cdrXML, cdrcCfg, tenant); err != nil {
 			return nil, fmt.Errorf("<CDRC> Failed converting to CDR, error: %s", err.Error())
 		} else {
 			cdrs = append(cdrs, cdr)
@@ -138,7 +138,7 @@ func (xmlProc *XMLRecordsProcessor) ProcessNextRecord() (cdrs []*engine.CDR, err
 	return cdrs, nil
 }
 
-func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity *etree.Element, cdrcCfg *config.CdrcConfig) (*engine.CDR, error) {
+func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity *etree.Element, cdrcCfg *config.CdrcConfig, tenant string) (*engine.CDR, error) {
 	cdr := &engine.CDR{OriginHost: "0.0.0.0", Source: cdrcCfg.CdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
 	var lazyHttpFields []*config.FCTemplate
 	var err error
@@ -146,10 +146,6 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity *etree.Element, cdrcCf
 	xmlProvider := newXmlProvider(xmlEntity, xmlProc.cdrPath)
 	for _, cdrFldCfg := range cdrcCfg.ContentFields {
 		if len(cdrFldCfg.Filters) != 0 {
-			tenant, err := cdrcCfg.Tenant.ParseValue("")
-			if err != nil {
-				return nil, err
-			}
 			if pass, err := xmlProc.filterS.Pass(tenant,
 				cdrFldCfg.Filters, xmlProvider); err != nil || !pass {
 				continue // Not passes filters, ignore this CDR

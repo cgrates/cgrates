@@ -206,6 +206,8 @@ func (cdr *CDR) ParseFieldValue(fieldId, fieldVal, timezone string) error {
 		if cdr.OrderID, err = strconv.ParseInt(fieldVal, 10, 64); err != nil {
 			return err
 		}
+	case utils.OriginHost: // overwrite if originHost is given from template
+		cdr.OriginHost = fieldVal
 	case utils.ToR:
 		cdr.ToR += fieldVal
 	case utils.RunID:

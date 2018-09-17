@@ -102,21 +102,21 @@ func (self *CsvRecordsProcessor) processFlatstoreRecord(record []string) ([]stri
 
 // Takes the record from a slice and turns it into StoredCdrs, posting them to the cdrServer
 func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.CDR, error) {
+	csvProvider := newCsvProvider(record)
 	recordCdrs := make([]*engine.CDR, 0)    // More CDRs based on the number of filters and field templates
 	for _, cdrcCfg := range self.cdrcCfgs { // cdrFields coming from more templates will produce individual storCdr records
+		tenant, err := cdrcCfg.Tenant.ParseValue("") // each profile of cdrc can have different tenant
+		if err != nil {
+			return nil, err
+		}
 		// Make sure filters are matching
 		if len(cdrcCfg.Filters) != 0 {
-			csvProvider := newCsvProvider(record)
-			tenant, err := cdrcCfg.Tenant.ParseValue("")
-			if err != nil {
-				return nil, err
-			}
 			if pass, err := self.filterS.Pass(tenant,
 				cdrcCfg.Filters, csvProvider); err != nil || !pass {
 				continue // Not passes filters, ignore this CDR
 			}
 		}
-		storedCdr, err := self.recordToStoredCdr(record, cdrcCfg)
+		storedCdr, err := self.recordToStoredCdr(record, cdrcCfg, tenant)
 		if err != nil {
 			return nil, fmt.Errorf("Failed converting to StoredCdr, error: %s", err.Error())
 		} else if self.dfltCdrcCfg.CdrFormat == utils.PartialCSV {
@@ -135,17 +135,13 @@ func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.CDR, 
 }
 
 // Takes the record out of csv and turns it into storedCdr which can be processed by CDRS
-func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *config.CdrcConfig) (*engine.CDR, error) {
+func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *config.CdrcConfig, tenant string) (*engine.CDR, error) {
 	storedCdr := &engine.CDR{OriginHost: "0.0.0.0", Source: cdrcCfg.CdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
 	var err error
 	csvProvider := newCsvProvider(record) // used for filterS and for RSRParsers
 	var lazyHttpFields []*config.FCTemplate
 	for _, cdrFldCfg := range cdrcCfg.ContentFields {
 		if len(cdrFldCfg.Filters) != 0 {
-			tenant, err := cdrcCfg.Tenant.ParseValue("")
-			if err != nil {
-				return nil, err
-			}
 			if pass, err := self.filterS.Pass(tenant,
 				cdrFldCfg.Filters, csvProvider); err != nil {
 				return nil, err

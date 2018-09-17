@@ -192,7 +192,6 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *confi
 		if err := storedCdr.ParseFieldValue(cdrFldCfg.FieldId, fieldVal, self.timezone); err != nil {
 			return nil, err
 		}
-
 	}
 	if storedCdr.CGRID == "" && storedCdr.OriginID != "" && cfgKey != "*header" {
 		storedCdr.CGRID = utils.Sha1(storedCdr.OriginID, storedCdr.SetupTime.UTC().String())

@@ -18,6 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+// import (
+// 	"github.com/cgrates/cgrates/engine"
+// 	"github.com/cgrates/cgrates/utils"
+// )
+
 func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg) *FCTemplate {
 	fcTmp := new(FCTemplate)
 	if jsnCfg.Tag != nil {
@@ -116,3 +121,20 @@ func FCTemplatesFromFCTemapltesJsonCfg(jsnCfgFlds []*FcTemplateJsonCfg) []*FCTem
 	}
 	return retFields
 }
+
+// type FCTemplates []*FCTemplate
+
+// func (tmps *FCTemplates) AsNavigableMap(tenant, timezone string, dp DataProvider, filterS *engine.FilterS) (*NavigableMap, error) {
+// 	nM := NewNavigableMap(nil)
+// 	for _, tmp := range tmps {
+// 		if len(tmp.Filters) != 0 {
+// 			if pass, err := filterS.Pass(tenant,
+// 				tmp.Filters, dp); err != nil || !pass {
+// 				continue // Not passes filters, ignore this CDR
+// 			}
+// 		}
+// 		switch tmp.Type {
+// 		case utils.META_COMPOSED:
+// 		}
+// 	}
+// }
