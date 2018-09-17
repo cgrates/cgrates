@@ -78,7 +78,6 @@
 
 "cdrs": {
 	"enabled": true,
-	 //"online_cdr_exports":["TemplateWithFilter"],
 },
 
 

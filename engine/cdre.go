@@ -489,14 +489,11 @@ func (cdre *CDRExporter) ExportCDRs() (err error) {
 		default:
 			expFormat = cdre.exportFormat
 		}
-		utils.Logger.Debug(fmt.Sprintf("CDRS : %+v", cdre.cdrs))
 		expPath := cdre.exportPath
 		if len(filepath.Ext(expPath)) == 0 { // verify extension from exportPath (if have extension is file else is directory)
 			fileName := fmt.Sprintf("cdre_%s.%s", utils.UUIDSha1Prefix(), expFormat)
 			expPath = path.Join(expPath, fileName)
 		}
-		utils.Logger.Debug(fmt.Sprintf("expPath : %+v", expPath))
-		utils.Logger.Debug(fmt.Sprintf("-------------------------------------------------------------"))
 		fileOut, err := os.Create(expPath)
 		if err != nil {
 			return err
