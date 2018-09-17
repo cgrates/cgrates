@@ -36,14 +36,14 @@ func TestCsvRecordToCDR(t *testing.T) {
 		Value: config.NewRSRParsersMustCompile("*default", true)})
 	csvProcessor := &CsvRecordsProcessor{dfltCdrcCfg: cdrcConfig, cdrcCfgs: []*config.CdrcConfig{cdrcConfig}}
 	cdrRow := []string{"firstField", "secondField"}
-	_, err := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig)
+	_, err := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig, "cgrates.org")
 	if err == nil {
 		t.Error("Failed to corectly detect missing fields from record")
 	}
 	cdrRow = []string{"ignored", "ignored", utils.VOICE, "acc1", utils.META_PREPAID, "*out", "cgrates.org",
 		"call", "1001", "1001", "+4986517174963", "2013-02-03 19:50:00", "2013-02-03 19:54:00",
 		"62s", "supplier1", "172.16.1.1", "NORMAL_DISCONNECT"}
-	rtCdr, err := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig)
+	rtCdr, err := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig, "cgrates.org")
 	if err != nil {
 		t.Error("Failed to parse CDR in rated cdr", err)
 	}
@@ -84,7 +84,7 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 	csvProcessor := &CsvRecordsProcessor{dfltCdrcCfg: cdrcConfig, cdrcCfgs: []*config.CdrcConfig{cdrcConfig}}
 	csvProcessor.cdrcCfgs[0].DataUsageMultiplyFactor = 0
 	cdrRow := []string{"*data", "1"}
-	rtCdr, err := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig)
+	rtCdr, err := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig, "cgrates.org")
 	if err != nil {
 		t.Error("Failed to parse CDR in rated cdr", err)
 	}
@@ -112,7 +112,7 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 		Cost:        -1,
 	}
 	if rtCdr, _ := csvProcessor.recordToStoredCdr(cdrRow,
-		cdrcConfig); !reflect.DeepEqual(expectedCdr, rtCdr) {
+		cdrcConfig, "cgrates.org"); !reflect.DeepEqual(expectedCdr, rtCdr) {
 		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)
 	}
 	cdrRow = []string{"*voice", "1s"}
@@ -126,7 +126,7 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 		Cost:        -1,
 	}
 	if rtCdr, _ := csvProcessor.recordToStoredCdr(cdrRow,
-		cdrcConfig); !reflect.DeepEqual(expectedCdr, rtCdr) {
+		cdrcConfig, "cgrates.org"); !reflect.DeepEqual(expectedCdr, rtCdr) {
 		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)
 	}
 }

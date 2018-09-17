@@ -78,13 +78,14 @@
 
 "cdrs": {
 	"enabled": true,
+	 //"online_cdr_exports":["TemplateWithFilter"],
 },
 
 
 "cdre": {
 	"TemplateWithFilter": {
 		"export_format": "*file_csv",
-		"export_path": "/tmp",
+		"export_path": "/tmp/",
 		"filters" :["*string:Source:test2"],
 		"content_fields": [
 			{"tag": "CGRID", "type": "*composed", "value": "~CGRID"},
