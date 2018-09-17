@@ -487,7 +487,6 @@ func (self *CdrServer) getCostFromRater(cdr *CDR) (*CallCost, error) {
 	return cc, nil
 }
 
-// replicateCDRs used by online exports
 func (self *CdrServer) replicateCDRs(cdrs []*CDR) (err error) {
 	for _, exportID := range self.cgrCfg.CDRSOnlineCDRExports {
 		expTpl := self.cgrCfg.CdreProfiles[exportID] // not checking for existence of profile since this should be done in a higher layer
