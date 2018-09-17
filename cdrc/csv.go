@@ -105,7 +105,7 @@ func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.CDR, 
 	csvProvider := newCsvProvider(record)
 	recordCdrs := make([]*engine.CDR, 0)    // More CDRs based on the number of filters and field templates
 	for _, cdrcCfg := range self.cdrcCfgs { // cdrFields coming from more templates will produce individual storCdr records
-		tenant, err := cdrcCfg.Tenant.ParseValue("") // each profile of cdrc can have different tenant
+		tenant, err := cdrcCfg.Tenant.ParseDataProvider(csvProvider, utils.NestingSep) // each profile of cdrc can have different tenant
 		if err != nil {
 			return nil, err
 		}

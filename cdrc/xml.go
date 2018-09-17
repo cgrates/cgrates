@@ -114,13 +114,13 @@ func (xmlProc *XMLRecordsProcessor) ProcessNextRecord() (cdrs []*engine.CDR, err
 	cdrs = make([]*engine.CDR, 0)
 	cdrXML := xmlProc.cdrXmlElmts[xmlProc.procItems]
 	xmlProc.procItems += 1
+	xmlProvider := newXmlProvider(cdrXML, xmlProc.cdrPath)
 	for _, cdrcCfg := range xmlProc.cdrcCfgs {
-		tenant, err := cdrcCfg.Tenant.ParseValue("")
+		tenant, err := cdrcCfg.Tenant.ParseDataProvider(xmlProvider, utils.NestingSep)
 		if err != nil {
 			return nil, err
 		}
 		if len(cdrcCfg.Filters) != 0 {
-			xmlProvider := newXmlProvider(cdrXML, xmlProc.cdrPath)
 			if pass, err := xmlProc.filterS.Pass(tenant,
 				cdrcCfg.Filters, xmlProvider); err != nil || !pass {
 				continue // Not passes filters, ignore this CDR
