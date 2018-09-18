@@ -411,4 +411,46 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
+	ev := map[string]interface{}{
+		"Test": "MultipleCharacter",
+	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*rsr::Test(~^\\w{30,})"}, config.NewNavigableMap(ev)); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+	ev = map[string]interface{}{
+		"Test": "MultipleCharacter123456789MoreThan30Character",
+	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*rsr::Test(~^\\w{30,})"}, config.NewNavigableMap(ev)); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+
+	ev = map[string]interface{}{
+		"Test": map[string]interface{}{
+			"Test2": "MultipleCharacter",
+		},
+	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*rsr::Test.Test2(~^\\w{30,})"}, config.NewNavigableMap(ev)); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+	ev = map[string]interface{}{
+		"Test": map[string]interface{}{
+			"Test2": "MultipleCharacter123456789MoreThan30Character",
+		},
+	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*rsr::Test.Test2(~^\\w{30,})"}, config.NewNavigableMap(ev)); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+
 }
