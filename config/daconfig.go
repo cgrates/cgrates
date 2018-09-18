@@ -29,7 +29,7 @@ type DiameterAgentCfg struct {
 	Listen             string // address where to listen for diameter requests <x.y.z.y:1234>
 	DictionariesDir    string
 	SessionSConns      []*HaPoolConfig // connections towards SMG component
-	PubSubConns        []*HaPoolConfig // connection towards pubsubs
+	ThresholdSConns    []*HaPoolConfig // connection towards pubsubs
 	CreateCDR          bool
 	CDRRequiresSession bool
 	DebitInterval      time.Duration
@@ -61,11 +61,11 @@ func (self *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) erro
 			self.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
-	if jsnCfg.Pubsubs_conns != nil {
-		self.PubSubConns = make([]*HaPoolConfig, len(*jsnCfg.Pubsubs_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Pubsubs_conns {
-			self.PubSubConns[idx] = NewDfltHaPoolConfig()
-			self.PubSubConns[idx].loadFromJsonCfg(jsnHaCfg)
+	if jsnCfg.Thresholds_conns != nil {
+		self.ThresholdSConns = make([]*HaPoolConfig, len(*jsnCfg.Thresholds_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Thresholds_conns {
+			self.ThresholdSConns[idx] = NewDfltHaPoolConfig()
+			self.ThresholdSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Create_cdr != nil {
@@ -121,7 +121,7 @@ func (self *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) erro
 type DARequestProcessor struct {
 	Id                string
 	DryRun            bool
-	PublishEvent      bool
+	ThresholdSEvent   bool
 	RequestFilter     utils.RSRFields
 	Flags             utils.StringMap // Various flags to influence behavior
 	ContinueOnSuccess bool
@@ -140,8 +140,8 @@ func (self *DARequestProcessor) loadFromJsonCfg(jsnCfg *DARequestProcessorJsnCfg
 	if jsnCfg.Dry_run != nil {
 		self.DryRun = *jsnCfg.Dry_run
 	}
-	if jsnCfg.Publish_event != nil {
-		self.PublishEvent = *jsnCfg.Publish_event
+	if jsnCfg.Thresholds_event != nil {
+		self.ThresholdSEvent = *jsnCfg.Thresholds_event
 	}
 	var err error
 	if jsnCfg.Request_filter != nil {

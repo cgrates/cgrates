@@ -331,7 +331,7 @@ type DiameterAgentJsonCfg struct {
 	Listen               *string           // address where to listen for diameter requests <x.y.z.y:1234>
 	Dictionaries_dir     *string           // path towards additional dictionaries
 	Sessions_conns       *[]*HaPoolJsonCfg // Connections towards generic SM
-	Pubsubs_conns        *[]*HaPoolJsonCfg // connection towards pubsubs
+	Thresholds_conns     *[]*HaPoolJsonCfg // connection towards pubsubs
 	Create_cdr           *bool
 	Cdr_requires_session *bool
 	Debit_interval       *string
@@ -347,7 +347,7 @@ type DiameterAgentJsonCfg struct {
 type DARequestProcessorJsnCfg struct {
 	Id                  *string
 	Dry_run             *bool
-	Publish_event       *bool
+	Thresholds_event    *bool
 	Request_filter      *string
 	Flags               *[]string
 	Continue_on_success *bool

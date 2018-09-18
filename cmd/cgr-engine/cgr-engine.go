@@ -278,31 +278,33 @@ func startAsteriskAgent(internalSMGChan chan rpcclient.RpcClientConnection, exit
 	exitChan <- true
 }
 
-func startDiameterAgent(internalSMGChan, internalPubSubSChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
+func startDiameterAgent(internalSMGChan, internalThdSChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
 	var err error
 	utils.Logger.Info("Starting CGRateS DiameterAgent service")
-	var smgConn, pubsubConn *rpcclient.RpcClientPool
+	var smgConn, thdSConn *rpcclient.RpcClientPool
 	if len(cfg.DiameterAgentCfg().SessionSConns) != 0 {
 		smgConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
 			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.DiameterAgentCfg().SessionSConns, internalSMGChan, cfg.InternalTtl)
 		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<DiameterAgent> Could not connect to SMG: %s", err.Error()))
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
+				utils.DiameterAgent, utils.SessionS, err.Error()))
 			exitChan <- true
 			return
 		}
 	}
-	if len(cfg.DiameterAgentCfg().PubSubConns) != 0 {
-		pubsubConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
+	if len(cfg.DiameterAgentCfg().ThresholdSConns) != 0 {
+		thdSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
 			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.DiameterAgentCfg().PubSubConns, internalPubSubSChan, cfg.InternalTtl)
+			cfg.DiameterAgentCfg().ThresholdSConns, internalThdSChan, cfg.InternalTtl)
 		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<DiameterAgent> Could not connect to PubSubS: %s", err.Error()))
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
+				utils.DiameterAgent, utils.ThresholdS, err.Error()))
 			exitChan <- true
 			return
 		}
 	}
-	da, err := agents.NewDiameterAgent(cfg, smgConn, pubsubConn)
+	da, err := agents.NewDiameterAgent(cfg, smgConn, thdSConn)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> error: %s!", err))
 		exitChan <- true
@@ -1298,7 +1300,7 @@ func main() {
 	}
 
 	if cfg.DiameterAgentCfg().Enabled {
-		go startDiameterAgent(internalSMGChan, internalPubSubSChan, exitChan)
+		go startDiameterAgent(internalSMGChan, internalThresholdSChan, exitChan)
 	}
 
 	if cfg.RadiusAgentCfg().Enabled {
