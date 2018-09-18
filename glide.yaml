@@ -14,6 +14,7 @@ import:
   - diam/datatype
   - diam/dict
   - diam/sm
+- package: github.com/ishidawataru/sctp
 - package: github.com/go-sql-driver/mysql
 - package: github.com/gorhill/cronexpr
 - package: github.com/jinzhu/gorm
