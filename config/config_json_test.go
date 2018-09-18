@@ -602,7 +602,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
-		Pubsubs_conns:        &[]*HaPoolJsonCfg{},
+		Thresholds_conns:     &[]*HaPoolJsonCfg{},
 		Create_cdr:           utils.BoolPointer(true),
 		Cdr_requires_session: utils.BoolPointer(true),
 		Debit_interval:       utils.StringPointer("5m"),

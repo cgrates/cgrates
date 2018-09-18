@@ -369,7 +369,7 @@ const CGRATES_CFG_JSON = `
 	"sessions_conns": [
 		{"address": "*internal"}								// connection towards SessionService
 	],
-	"pubsubs_conns": [],										// address where to reach the pubusb service, empty to disable pubsub functionality: <""|*internal|x.y.z.y:1234>
+	"thresholds_conns": [],										// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
 	"create_cdr": true,											// create CDR out of CCR terminate and send it to SessionS
 	"cdr_requires_session": true,								// only create CDR if there is an active session at terminate
 	"debit_interval": "5m",										// interval for CCR updates

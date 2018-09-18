@@ -942,7 +942,7 @@ func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
 		DictionariesDir: "/usr/share/cgrates/diameter/dict/",
 		SessionSConns: []*HaPoolConfig{
 			&HaPoolConfig{Address: "*internal"}},
-		PubSubConns:       []*HaPoolConfig{},
+		ThresholdSConns:   []*HaPoolConfig{},
 		CreateCDR:         true,
 		DebitInterval:     5 * time.Minute,
 		Timezone:          "",
@@ -965,8 +965,10 @@ func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
 	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.SessionSConns, testDA.SessionSConns) {
 		t.Errorf("expecting: %+v, received: %+v", cgrCfg.diameterAgentCfg.SessionSConns, testDA.SessionSConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.PubSubConns, testDA.PubSubConns) {
-		t.Errorf("expecting: %+v, received: %+v", cgrCfg.diameterAgentCfg.PubSubConns, testDA.PubSubConns)
+	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.ThresholdSConns,
+		testDA.ThresholdSConns) {
+		t.Errorf("expecting: %+v, received: %+v",
+			cgrCfg.diameterAgentCfg.ThresholdSConns, testDA.ThresholdSConns)
 	}
 	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.CreateCDR, testDA.CreateCDR) {
 		t.Errorf("expecting: %+v, received: %+v", cgrCfg.diameterAgentCfg.CreateCDR, testDA.CreateCDR)
