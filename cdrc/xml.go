@@ -23,7 +23,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"strconv"
 	"strings"
 	"time"
 
@@ -164,7 +163,7 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity *etree.Element, cdrcCf
 			if err != nil {
 				return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s, err: %s", xmlEntity, cdrFldCfg.Tag, err.Error())
 			}
-			fldVals[cdrFldCfg.FieldId] += strconv.FormatFloat(usage.Seconds(), 'f', -1, 64)
+			fldVals[cdrFldCfg.FieldId] += usage.String()
 		} else {
 			return nil, fmt.Errorf("Unsupported field type: %s", cdrFldCfg.Type)
 		}
