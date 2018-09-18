@@ -1,8 +1,6 @@
 hash: 2daed4c5ed5052824ae5df18b0690a85226f9e3c61c336f83db7fccc6f4ecd51
 updated: 2017-04-21T14:51:07.386488974+02:00
 imports:
-- name: github.com/bit4bit/gami
-  version: 3a7f98e7efce7ed7f22c2169b666910b8abb15dc
 - name: github.com/cenk/hub
   version: 11382a9960d39b0ecda16fd01c424c11ff765a34
 - name: github.com/cenk/rpc2
@@ -36,36 +34,38 @@ imports:
   - diam/sm/smparser
   - diam/sm/smpeer
 - name: github.com/go-sql-driver/mysql
-  version: bc14601d1bd56421dd60f561e6052c9ed77f9daf
+  version: 99ff426eb706cffe92ff3d058e168b278cabf7c7
 - name: github.com/gorhill/cronexpr
-  version: f0984319b44273e83de132089ae42b1810f4933b
+  version: 88b0669f7d75f171bd612b874e52b95c190218df
 - name: github.com/jinzhu/gorm
-  version: 48e41440afa6a741a3e345f2cfbabca08f6fb1ac
+  version: 5be9bd34135805e0332b993378864b159784d8a8
 - name: github.com/jinzhu/inflection
   version: 1c35d901db3da928c72a72d8458480cc9ade058f
 - name: github.com/kr/pty
-  version: ce7fa45920dc37a92de8377972e52bc55ffa8d57
+  version: db8e3cd836b82e82e0a9c8edc6896967dd31374f
 - name: github.com/lib/pq
-  version: 50761b0867bd1d9d069276790bcd4a3bccf2324a
+  version: 4ded0e9383f75c197b3a2aaa6d590ac52df6fd79
   subpackages:
   - oid
 - name: github.com/mediocregopher/radix.v2
-  version: dbcfd490034f823788edc555737247e9ba628b6c
+  version: 94360be262532d465b7e4760c7a67195d3319a87
   subpackages:
   - pool
   - redis
 - name: github.com/mitchellh/mapstructure
-  version: ca63d7c062ee3c9f34db231e352b60012b4fd0c1
+  version: fa473d140ef3c6adf42d6b391fe76707f1f243c8
 - name: github.com/peterh/liner
-  version: 8975875355a81d612fafb9f5a6037bdcc2d9b073
+  version: 5a0dfa99e2aa1d433a9642e863da51402e609376
+- name: github.com/mattn/go-runewidth
+  version: ce7b0b5c7b45a81508558cd1dba6bb1e4ddb51bb
 - name: github.com/streadway/amqp
   version: 70e15c650864f4fc47f5d3c82ea117285480895d
 - name: github.com/ugorji/go
-  version: 5cd0f2b3b6cca8e3a0a4101821e41a73cb59bed6
+  version: e253f1f20942cb6dc505e504e8bbba4b7f434cb2
   subpackages:
   - codec
 - name: golang.org/x/net
-  version: 1358eff22f0dd0c54fc521042cc607f6ff4b531a
+  version: 26e67e76b6c3f6ce91f7c52def5af501b4e0f3a2
   subpackages:
   - context
   - html
@@ -95,7 +95,7 @@ imports:
   - runes
   - transform
 - name: github.com/fsnotify/fsnotify
-  version: c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9
+  version: ccc981bf80385c528a65fbfdd49bf2d8da22aa23
 - name: github.com/cgrates/mgo
   version: 04b6cd516663d1f91d8f914e66ae743d3ab1685c
   subpackages:

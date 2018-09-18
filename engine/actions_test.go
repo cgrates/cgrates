@@ -2398,7 +2398,7 @@ func TestActionSetExpiry(t *testing.T) {
 		t.Error("Error getting account: ", acc, err)
 	}
 	//Verify ExpirationDate for first balance(Bal1)
-	if acc.BalanceMap[utils.MONETARY][0].ExpirationDate != cloneTimeNowPlus24h {
+	if !acc.BalanceMap[utils.MONETARY][0].ExpirationDate.Equal(cloneTimeNowPlus24h) {
 		t.Errorf("Expecting: %+v, received: %+v", cloneTimeNowPlus24h, acc.BalanceMap[utils.MONETARY][0].ExpirationDate)
 	}
 }
