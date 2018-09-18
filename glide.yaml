@@ -24,6 +24,7 @@ import:
   - pool
   - redis
 - package: github.com/peterh/liner
+- package: github.com/mattn/go-runewidth
 - package: github.com/ugorji/go
   subpackages:
   - codec
@@ -36,7 +37,6 @@ import:
   - bson
 - package: github.com/mitchellh/mapstructure
 - package: github.com/cgrates/aringo
-- package: github.com/bit4bit/gami
 - package: github.com/streadway/amqp
 - package: github.com/cgrates/radigo
 - package: github.com/cgrates/ltcache
