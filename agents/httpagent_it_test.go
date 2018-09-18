@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -41,6 +42,9 @@ var (
 	haCfg     *config.CGRConfig
 	haRPC     *rpc.Client
 	httpC     *http.Client // so we can cache the connection
+	err       error
+	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
+	waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
 )
 
 func TestHAitInitCfg(t *testing.T) {
