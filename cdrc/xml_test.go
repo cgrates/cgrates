@@ -245,8 +245,6 @@ func TestXMLRPProcess(t *testing.T) {
 					FieldId: utils.Usage, HandlerId: utils.HandlerSubstractUsage,
 					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.releaseTime;|;~broadWorksCDR.cdrData.basicModule.answerTime",
 						true), Mandatory: true},
-				&config.FCTemplate{Tag: "UsageSeconds", Type: utils.META_COMPOSED, FieldId: utils.Usage,
-					Value: config.NewRSRParsersMustCompile("s", true), Mandatory: true},
 			},
 		},
 	}
@@ -313,8 +311,6 @@ func TestXMLRPProcessWithNewFilters(t *testing.T) {
 					FieldId: utils.Usage, HandlerId: utils.HandlerSubstractUsage,
 					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.releaseTime;|;~broadWorksCDR.cdrData.basicModule.answerTime",
 						true), Mandatory: true},
-				&config.FCTemplate{Tag: "UsageSeconds", Type: utils.META_COMPOSED, FieldId: utils.Usage,
-					Value: config.NewRSRParsersMustCompile("s", true), Mandatory: true},
 			},
 		},
 	}
@@ -578,8 +574,6 @@ func TestXMLRPNestingSeparator(t *testing.T) {
 					FieldId: utils.Usage, HandlerId: utils.HandlerSubstractUsage,
 					Value: config.NewRSRParsersMustCompile("~File.CDRs.Call.ReleaseTime;|;~File.CDRs.Call.ConnectTime",
 						true), Mandatory: true},
-				&config.FCTemplate{Tag: "UsageSeconds", Type: utils.META_COMPOSED, FieldId: utils.Usage,
-					Value: config.NewRSRParsersMustCompile("s", true), Mandatory: true},
 			},
 		},
 	}
