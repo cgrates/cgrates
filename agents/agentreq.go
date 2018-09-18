@@ -154,25 +154,24 @@ func (aReq *AgentRequest) ParseField(
 	case utils.META_USAGE_DIFFERENCE:
 		if len(cfgFld.Value) != 2 {
 			return nil, fmt.Errorf("invalid arguments <%s>", utils.ToJSON(cfgFld.Value))
-		} else {
-			strVal1, err := cfgFld.Value[0].ParseDataProvider(aReq, utils.NestingSep)
-			if err != nil {
-				return "", err
-			}
-			strVal2, err := cfgFld.Value[1].ParseDataProvider(aReq, utils.NestingSep)
-			if err != nil {
-				return "", err
-			}
-			tEnd, err := utils.ParseTimeDetectLayout(strVal1, cfgFld.Timezone)
-			if err != nil {
-				return "", err
-			}
-			tStart, err := utils.ParseTimeDetectLayout(strVal2, cfgFld.Timezone)
-			if err != nil {
-				return "", err
-			}
-			out = tEnd.Sub(tStart).String()
 		}
+		strVal1, err := cfgFld.Value[0].ParseDataProvider(aReq, utils.NestingSep)
+		if err != nil {
+			return "", err
+		}
+		strVal2, err := cfgFld.Value[1].ParseDataProvider(aReq, utils.NestingSep)
+		if err != nil {
+			return "", err
+		}
+		tEnd, err := utils.ParseTimeDetectLayout(strVal1, cfgFld.Timezone)
+		if err != nil {
+			return "", err
+		}
+		tStart, err := utils.ParseTimeDetectLayout(strVal2, cfgFld.Timezone)
+		if err != nil {
+			return "", err
+		}
+		out = tEnd.Sub(tStart).String()
 		isString = true
 	}
 	if err != nil {

@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/cgrates/cgrates/config"
@@ -158,7 +157,8 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuth,
 		utils.MetaInitiate, utils.MetaUpdate,
-		utils.MetaTerminate, utils.MetaEvent} {
+		utils.MetaTerminate, utils.MetaEvent,
+		utils.MetaCDRs} {
 		if reqProcessor.Flags.HasKey(typ) { // request type is identified through flags
 			reqType = typ
 			break
@@ -166,7 +166,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 	}
 	switch reqType {
 	default:
-		return false, errors.New("unknown request type")
+		return false, fmt.Errorf("unknown request type: <%s>", reqType)
 	case utils.MetaDryRun:
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, CGREvent: %s",

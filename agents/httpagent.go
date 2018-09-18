@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -78,7 +77,7 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s processing request: %s",
-				utils.HTTPAgent, err.Error(), utils.ToJSON(req)))
+				utils.HTTPAgent, err.Error(), utils.ToJSON(agReq)))
 		return // FixMe with returning some error on HTTP level
 	} else if !processed {
 		utils.Logger.Warning(
@@ -116,7 +115,8 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuth,
 		utils.MetaInitiate, utils.MetaUpdate,
-		utils.MetaTerminate, utils.MetaEvent} {
+		utils.MetaTerminate, utils.MetaEvent,
+		utils.MetaCDRs} {
 		if reqProcessor.Flags.HasKey(typ) { // request type is identified through flags
 			reqType = typ
 			break
@@ -124,7 +124,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 	}
 	switch reqType {
 	default:
-		return false, errors.New("unknown request type")
+		return false, fmt.Errorf("unknown request type: <%s>", reqType)
 	case utils.MetaDryRun:
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, CGREvent: %s",
