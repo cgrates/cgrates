@@ -197,6 +197,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 		if agReq.CGRReply, err = NewCGRReply(&eventRply, err); err != nil {
 			return
 		}
+	case utils.MetaCDRs: // allow CDR processing
 	}
 	// separate request so we can capture the Terminate/Event also here
 	if reqProcessor.Flags.HasKey(utils.MetaCDRs) &&

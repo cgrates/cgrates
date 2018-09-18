@@ -239,6 +239,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 		if agReq.CGRReply, err = NewCGRReply(&eventRply, err); err != nil {
 			return
 		}
+	case utils.MetaCDRs: // allow this method
 	}
 	// separate request so we can capture the Terminate/Event also here
 	if reqProcessor.Flags.HasKey(utils.MetaCDRs) {
