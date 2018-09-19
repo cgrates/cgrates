@@ -973,3 +973,31 @@ func TestCDRParseFieldValue2(t *testing.T) {
 		t.Errorf("Received cdr: %+v", cdr)
 	}
 }
+
+func TestCDRAddDefaults(t *testing.T) {
+	cdr := &CDR{
+		OriginID:   "dsafdsaf",
+		OriginHost: "192.168.1.2",
+		Account:    "1001",
+	}
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	eCDR := &CDR{
+		CGRID:       "bf736fb56ce586357ab2f286b777187a1612c6e6",
+		ToR:         utils.VOICE,
+		RunID:       utils.MetaRaw,
+		Subject:     "1001",
+		RequestType: utils.META_RATED,
+		Tenant:      "cgrates.org",
+		Category:    utils.CALL,
+		OriginID:    "dsafdsaf",
+		OriginHost:  "192.168.1.2",
+		Account:     "1001",
+	}
+	cdr.AddDefaults(cfg)
+	if !reflect.DeepEqual(cdr, eCDR) {
+		t.Errorf("Expecting: %+v, received: %+v", eCDR, cdr)
+	}
+}
