@@ -365,15 +365,10 @@ const CGRATES_CFG_JSON = `
 "diameter_agent": {
 	"enabled": false,											// enables the diameter agent: <true|false>
 	"listen": "127.0.0.1:3868",									// address where to listen for diameter requests <x.y.z.y:1234>
-	"dictionaries_dir": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
+	"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
 	"sessions_conns": [
 		{"address": "*internal"}								// connection towards SessionService
 	],
-	"thresholds_conns": [],										// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
-	"create_cdr": true,											// create CDR out of CCR terminate and send it to SessionS
-	"cdr_requires_session": true,								// only create CDR if there is an active session at terminate
-	"debit_interval": "5m",										// interval for CCR updates
-	"timezone": "",												// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
 	"origin_host": "CGR-DA",									// diameter Origin-Host AVP used in replies
 	"origin_realm": "cgrates.org",								// diameter Origin-Realm AVP used in replies
 	"vendor_id": 0,												// diameter Vendor-Id AVP used in replies

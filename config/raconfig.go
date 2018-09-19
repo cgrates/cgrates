@@ -30,7 +30,6 @@ type RadiusAgentCfg struct {
 	ClientSecrets      map[string]string
 	ClientDictionaries map[string]string
 	SessionSConns      []*HaPoolConfig
-	CDRRequiresSession bool
 	RequestProcessors  []*RARequestProcessor
 }
 
@@ -72,9 +71,6 @@ func (self *RadiusAgentCfg) loadFromJsonCfg(jsnCfg *RadiusAgentJsonCfg) (err err
 			self.SessionSConns[idx] = NewDfltHaPoolConfig()
 			self.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
-	}
-	if jsnCfg.Cdr_requires_session != nil {
-		self.CDRRequiresSession = *jsnCfg.Cdr_requires_session
 	}
 	if jsnCfg.Request_processors != nil {
 		for _, reqProcJsn := range *jsnCfg.Request_processors {

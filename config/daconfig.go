@@ -19,87 +19,58 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"time"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
 type DiameterAgentCfg struct {
-	Enabled            bool   // enables the diameter agent: <true|false>
-	Listen             string // address where to listen for diameter requests <x.y.z.y:1234>
-	DictionariesDir    string
-	SessionSConns      []*HaPoolConfig // connections towards SMG component
-	ThresholdSConns    []*HaPoolConfig // connection towards pubsubs
-	CreateCDR          bool
-	CDRRequiresSession bool
-	DebitInterval      time.Duration
-	Timezone           string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-	OriginHost         string
-	OriginRealm        string
-	VendorId           int
-	ProductName        string
-	RequestProcessors  []*DARequestProcessor
+	Enabled           bool   // enables the diameter agent: <true|false>
+	Listen            string // address where to listen for diameter requests <x.y.z.y:1234>
+	DictionariesPath  string
+	SessionSConns     []*HaPoolConfig // connections towards SMG component
+	OriginHost        string
+	OriginRealm       string
+	VendorId          int
+	ProductName       string
+	RequestProcessors []*DARequestProcessor
 }
 
-func (self *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) error {
+func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) error {
 	if jsnCfg == nil {
 		return nil
 	}
 	if jsnCfg.Enabled != nil {
-		self.Enabled = *jsnCfg.Enabled
+		da.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Listen != nil {
-		self.Listen = *jsnCfg.Listen
+		da.Listen = *jsnCfg.Listen
 	}
-	if jsnCfg.Dictionaries_dir != nil {
-		self.DictionariesDir = *jsnCfg.Dictionaries_dir
+	if jsnCfg.Dictionaries_path != nil {
+		da.DictionariesPath = *jsnCfg.Dictionaries_path
 	}
 	if jsnCfg.Sessions_conns != nil {
-		self.SessionSConns = make([]*HaPoolConfig, len(*jsnCfg.Sessions_conns))
+		da.SessionSConns = make([]*HaPoolConfig, len(*jsnCfg.Sessions_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Sessions_conns {
-			self.SessionSConns[idx] = NewDfltHaPoolConfig()
-			self.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
+			da.SessionSConns[idx] = NewDfltHaPoolConfig()
+			da.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
-	}
-	if jsnCfg.Thresholds_conns != nil {
-		self.ThresholdSConns = make([]*HaPoolConfig, len(*jsnCfg.Thresholds_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Thresholds_conns {
-			self.ThresholdSConns[idx] = NewDfltHaPoolConfig()
-			self.ThresholdSConns[idx].loadFromJsonCfg(jsnHaCfg)
-		}
-	}
-	if jsnCfg.Create_cdr != nil {
-		self.CreateCDR = *jsnCfg.Create_cdr
-	}
-	if jsnCfg.Cdr_requires_session != nil {
-		self.CDRRequiresSession = *jsnCfg.Cdr_requires_session
-	}
-	if jsnCfg.Debit_interval != nil {
-		var err error
-		if self.DebitInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Debit_interval); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Timezone != nil {
-		self.Timezone = *jsnCfg.Timezone
 	}
 	if jsnCfg.Origin_host != nil {
-		self.OriginHost = *jsnCfg.Origin_host
+		da.OriginHost = *jsnCfg.Origin_host
 	}
 	if jsnCfg.Origin_realm != nil {
-		self.OriginRealm = *jsnCfg.Origin_realm
+		da.OriginRealm = *jsnCfg.Origin_realm
 	}
 	if jsnCfg.Vendor_id != nil {
-		self.VendorId = *jsnCfg.Vendor_id
+		da.VendorId = *jsnCfg.Vendor_id
 	}
 	if jsnCfg.Product_name != nil {
-		self.ProductName = *jsnCfg.Product_name
+		da.ProductName = *jsnCfg.Product_name
 	}
 	if jsnCfg.Request_processors != nil {
 		for _, reqProcJsn := range *jsnCfg.Request_processors {
 			rp := new(DARequestProcessor)
 			var haveID bool
-			for _, rpSet := range self.RequestProcessors {
+			for _, rpSet := range da.RequestProcessors {
 				if reqProcJsn.Id != nil && rpSet.Id == *reqProcJsn.Id {
 					rp = rpSet // Will load data into the one set
 					haveID = true
@@ -110,7 +81,7 @@ func (self *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) erro
 				return nil
 			}
 			if !haveID {
-				self.RequestProcessors = append(self.RequestProcessors, rp)
+				da.RequestProcessors = append(da.RequestProcessors, rp)
 			}
 		}
 	}
@@ -120,53 +91,45 @@ func (self *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) erro
 // One Diameter request processor configuration
 type DARequestProcessor struct {
 	Id                string
-	DryRun            bool
-	ThresholdSEvent   bool
-	RequestFilter     utils.RSRFields
-	Flags             utils.StringMap // Various flags to influence behavior
+	Tenant            RSRParsers
+	Filters           []string
+	Flags             utils.StringMap
+	Timezone          string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 	ContinueOnSuccess bool
-	AppendCCA         bool
-	CCRFields         []*CfgCdrField
-	CCAFields         []*CfgCdrField
+	RequestFields     []*FCTemplate
+	ReplyFields       []*FCTemplate
 }
 
-func (self *DARequestProcessor) loadFromJsonCfg(jsnCfg *DARequestProcessorJsnCfg) error {
+func (dap *DARequestProcessor) loadFromJsonCfg(jsnCfg *DARequestProcessorJsnCfg) error {
 	if jsnCfg == nil {
 		return nil
 	}
 	if jsnCfg.Id != nil {
-		self.Id = *jsnCfg.Id
+		dap.Id = *jsnCfg.Id
 	}
-	if jsnCfg.Dry_run != nil {
-		self.DryRun = *jsnCfg.Dry_run
+	if jsnCfg.Tenant != nil {
+		dap.Tenant = NewRSRParsersMustCompile(*jsnCfg.Tenant, true)
 	}
-	if jsnCfg.Thresholds_event != nil {
-		self.ThresholdSEvent = *jsnCfg.Thresholds_event
-	}
-	var err error
-	if jsnCfg.Request_filter != nil {
-		if self.RequestFilter, err = utils.ParseRSRFields(*jsnCfg.Request_filter, utils.INFIELD_SEP); err != nil {
-			return err
+	if jsnCfg.Filters != nil {
+		dap.Filters = make([]string, len(*jsnCfg.Filters))
+		for i, fltr := range *jsnCfg.Filters {
+			dap.Filters[i] = fltr
 		}
 	}
 	if jsnCfg.Flags != nil {
-		self.Flags = utils.StringMapFromSlice(*jsnCfg.Flags)
+		dap.Flags = utils.StringMapFromSlice(*jsnCfg.Flags)
+	}
+	if jsnCfg.Timezone != nil {
+		dap.Timezone = *jsnCfg.Timezone
 	}
 	if jsnCfg.Continue_on_success != nil {
-		self.ContinueOnSuccess = *jsnCfg.Continue_on_success
+		dap.ContinueOnSuccess = *jsnCfg.Continue_on_success
 	}
-	if jsnCfg.Append_cca != nil {
-		self.AppendCCA = *jsnCfg.Append_cca
+	if jsnCfg.Request_fields != nil {
+		dap.RequestFields = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Request_fields)
 	}
-	if jsnCfg.CCR_fields != nil {
-		if self.CCRFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.CCR_fields); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.CCA_fields != nil {
-		if self.CCAFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.CCA_fields); err != nil {
-			return err
-		}
+	if jsnCfg.Reply_fields != nil {
+		dap.ReplyFields = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Reply_fields)
 	}
 	return nil
 }

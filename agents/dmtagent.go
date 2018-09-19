@@ -32,19 +32,16 @@ import (
 )
 
 func NewDiameterAgent(cgrCfg *config.CGRConfig,
-	sessionS, thdS rpcclient.RpcClientConnection) (*DiameterAgent, error) {
+	sessionS rpcclient.RpcClientConnection) (*DiameterAgent, error) {
 	if sessionS != nil && reflect.ValueOf(sessionS).IsNil() {
 		sessionS = nil
 	}
-	if thdS != nil && reflect.ValueOf(thdS).IsNil() {
-		thdS = nil
-	}
 	da := &DiameterAgent{
 		cgrCfg: cgrCfg, sessionS: sessionS,
-		thdS: thdS, connMux: new(sync.Mutex)}
-	dictsDir := cgrCfg.DiameterAgentCfg().DictionariesDir
-	if len(dictsDir) != 0 {
-		if err := loadDictionaries(dictsDir, utils.DiameterAgent); err != nil {
+		connMux: new(sync.Mutex)}
+	dictsPath := cgrCfg.DiameterAgentCfg().DictionariesPath
+	if len(dictsPath) != 0 {
+		if err := loadDictionaries(dictsPath, utils.DiameterAgent); err != nil {
 			return nil, err
 		}
 	}
@@ -54,7 +51,6 @@ func NewDiameterAgent(cgrCfg *config.CGRConfig,
 type DiameterAgent struct {
 	cgrCfg   *config.CGRConfig
 	sessionS rpcclient.RpcClientConnection // Connection towards CGR-SessionS component
-	thdS     rpcclient.RpcClientConnection // Connection towards CGR-ThresholdS component
 	connMux  *sync.Mutex                   // Protect connection for read/write
 }
 
