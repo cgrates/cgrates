@@ -400,7 +400,8 @@ func (fsev FSEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 	if err != nil {
 		return
 	}
-	args = &sessions.V1AuthorizeArgs{ // defaults
+	cgrEv.Event[utils.Usage] = config.CgrConfig().SessionSCfg().MaxCallDuration // no billsec available in auth
+	args = &sessions.V1AuthorizeArgs{                                           // defaults
 		GetMaxUsage: true,
 		CGREvent:    *cgrEv,
 	}
