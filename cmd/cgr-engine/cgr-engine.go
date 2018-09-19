@@ -278,10 +278,10 @@ func startAsteriskAgent(internalSMGChan chan rpcclient.RpcClientConnection, exit
 	exitChan <- true
 }
 
-func startDiameterAgent(internalSMGChan, internalThdSChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
+func startDiameterAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
 	var err error
 	utils.Logger.Info("Starting CGRateS DiameterAgent service")
-	var smgConn, thdSConn *rpcclient.RpcClientPool
+	var smgConn *rpcclient.RpcClientPool
 	if len(cfg.DiameterAgentCfg().SessionSConns) != 0 {
 		smgConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
 			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
@@ -293,18 +293,7 @@ func startDiameterAgent(internalSMGChan, internalThdSChan chan rpcclient.RpcClie
 			return
 		}
 	}
-	if len(cfg.DiameterAgentCfg().ThresholdSConns) != 0 {
-		thdSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
-			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-			cfg.DiameterAgentCfg().ThresholdSConns, internalThdSChan, cfg.InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.DiameterAgent, utils.ThresholdS, err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	da, err := agents.NewDiameterAgent(cfg, smgConn, thdSConn)
+	da, err := agents.NewDiameterAgent(cfg, smgConn)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> error: %s!", err))
 		exitChan <- true
@@ -1300,7 +1289,7 @@ func main() {
 	}
 
 	if cfg.DiameterAgentCfg().Enabled {
-		go startDiameterAgent(internalSMGChan, internalThresholdSChan, exitChan)
+		go startDiameterAgent(internalSMGChan, exitChan)
 	}
 
 	if cfg.RadiusAgentCfg().Enabled {

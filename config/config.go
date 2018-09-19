@@ -634,13 +634,8 @@ func (self *CGRConfig) checkConfigSanity() error {
 	if self.diameterAgentCfg.Enabled {
 		for _, daSMGConn := range self.diameterAgentCfg.SessionSConns {
 			if daSMGConn.Address == utils.MetaInternal && !self.sessionSCfg.Enabled {
-				return errors.New("SMGeneric not enabled but referenced by DiameterAgent component")
-			}
-		}
-		for _, conn := range self.diameterAgentCfg.ThresholdSConns {
-			if conn.Address == utils.MetaInternal && !self.ThresholdSCfg().Enabled {
-				return fmt.Errorf("%s not enabled but requested by %s component.",
-					utils.ThresholdS, utils.DiameterAgent)
+				return fmt.Errorf("%s not enabled but referenced by %s component",
+					utils.SessionS, utils.DiameterAgent)
 			}
 		}
 	}
