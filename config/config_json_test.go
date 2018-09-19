@@ -632,7 +632,6 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
-		Timezone:           utils.StringPointer(""),
 		Request_processors: &[]*RAReqProcessorJsnCfg{},
 	}
 	if cfg, err := dfCgrJsonCfg.RadiusAgentJsonCfg(); err != nil {

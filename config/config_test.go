@@ -1061,7 +1061,6 @@ func TestRadiusAgentCfg(t *testing.T) {
 		ClientSecrets:      map[string]string{utils.META_DEFAULT: "CGRateS.org"},
 		ClientDictionaries: map[string]string{utils.META_DEFAULT: "/usr/share/cgrates/radius/dict/"},
 		SessionSConns:      []*HaPoolConfig{&HaPoolConfig{Address: utils.MetaInternal}},
-		Timezone:           "",
 		RequestProcessors:  nil,
 	}
 	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg, testRA) {
