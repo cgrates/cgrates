@@ -1,7 +1,7 @@
 #Tenant[0],ID[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5]
 cgrates.org,FLTR_1,*string,Account,1001;1002,2014-07-29T15:00:00Z
 cgrates.org,FLTR_1,*prefix,Destination,10;20,
-cgrates.org,FLTR_1,*rsr,,Subject(~^1.*1$);Destination(1002),
+cgrates.org,FLTR_1,*rsr,,~Subject(~^1.*1$);~Destination(1002),
 cgrates.org,FLTR_ACNT_1007,*string,Account,1007,2014-07-29T15:00:00Z
 cgrates.org,FLTR_ACNT_dan,*string,Account,dan,2014-07-29T15:00:00Z
 cgrates.org,FLTR_DST_DE,*destinations,Destination,DST_DE,2014-07-29T15:00:00Z

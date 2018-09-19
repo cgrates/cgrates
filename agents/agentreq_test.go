@@ -94,7 +94,7 @@ func TestAgReqAsNavigableMap(t *testing.T) {
 				"~*cgrep.MaxUsage{*duration_seconds}", true)},
 		&config.FCTemplate{Tag: "Error",
 			FieldId: "Error", Type: utils.META_COMPOSED,
-			Filters: []string{"*rsr::*cgrep.Error(!^$)"},
+			Filters: []string{"*rsr::~*cgrep.Error(!^$)"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgrep.Error", true)},
 	}

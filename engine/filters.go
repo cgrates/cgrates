@@ -180,14 +180,14 @@ type FilterRule struct {
 	Type            string              // Filter type (*string, *timing, *rsr_filters, *stats, *lt, *lte, *gt, *gte)
 	FieldName       string              // Name of the field providing us the Values to check (used in case of some )
 	Values          []string            // Filter definition
-	rsrFields       utils.RSRFields     // Cache here the RSRFilter Values
+	rsrFields       config.RSRParsers   // Cache here the RSRFilter Values
 	statSThresholds []*RFStatSThreshold // Cached compiled RFStatsThreshold out of Values
 }
 
 // Separate method to compile RSR fields
 func (rf *FilterRule) CompileValues() (err error) {
 	if rf.Type == MetaRSR {
-		if rf.rsrFields, err = utils.ParseRSRFieldsFromSlice(rf.Values); err != nil {
+		if rf.rsrFields, err = config.NewRSRParsersFromSlice(rf.Values, true); err != nil {
 			return
 		}
 	} else if rf.Type == MetaStatS {
@@ -297,19 +297,14 @@ func (fltr *FilterRule) passDestinations(dP config.DataProvider) (bool, error) {
 }
 
 func (fltr *FilterRule) passRSR(dP config.DataProvider) (bool, error) {
-	for _, rsrFld := range fltr.rsrFields {
-		fldIface, err := dP.FieldAsInterface(strings.Split(rsrFld.Id, utils.NestingSep))
-		if err != nil {
-			if err == utils.ErrNotFound {
-				return false, nil
-			}
-			return false, err
+	_, err := fltr.rsrFields.ParseDataProviderWithInterfaces(dP, utils.NestingSep)
+	if err != nil {
+		if err == utils.ErrNotFound || err == utils.ErrFilterNotPassingNoCaps {
+			return false, nil
 		}
-		if _, err := rsrFld.Parse(fldIface); err == nil {
-			return true, nil
-		}
+		return false, err
 	}
-	return false, nil
+	return true, nil
 }
 
 func (fltr *FilterRule) passStatS(dP config.DataProvider,

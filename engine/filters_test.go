@@ -90,7 +90,7 @@ func TestFilterPassRSRFields(t *testing.T) {
 		TimeEnd:       time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
 		DurationIndex: 132 * time.Second,
 		ExtraFields:   map[string]string{"navigation": "off"}}
-	rf, err := NewFilterRule(MetaRSR, "", []string{"Tenant(~^cgr.*\\.org$)"})
+	rf, err := NewFilterRule(MetaRSR, "", []string{"~Tenant(~^cgr.*\\.org$)"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -99,7 +99,7 @@ func TestFilterPassRSRFields(t *testing.T) {
 	} else if !passes {
 		t.Error("Not passing")
 	}
-	rf, err = NewFilterRule(MetaRSR, "", []string{"navigation(on)"})
+	rf, err = NewFilterRule(MetaRSR, "", []string{"~navigation(on)"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -108,7 +108,7 @@ func TestFilterPassRSRFields(t *testing.T) {
 	} else if passes {
 		t.Error("Passing")
 	}
-	rf, err = NewFilterRule(MetaRSR, "", []string{"navigation(off)"})
+	rf, err = NewFilterRule(MetaRSR, "", []string{"~navigation(off)"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -328,13 +328,13 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		"Tenant": "cgrates.org",
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::Tenant(~^cgr.*\\.org$)"}, config.NewNavigableMap(failEvent)); err != nil {
+		[]string{"*rsr::~Tenant(~^cgr.*\\.org$)"}, config.NewNavigableMap(failEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::Tenant(~^cgr.*\\.org$)"}, config.NewNavigableMap(passEvent)); err != nil {
+		[]string{"*rsr::~Tenant(~^cgr.*\\.org$)"}, config.NewNavigableMap(passEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
@@ -415,7 +415,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 		"Test": "MultipleCharacter",
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::Test(~^\\w{30,})"}, config.NewNavigableMap(ev)); err != nil {
+		[]string{"*rsr::~Test(~^\\w{30,})"}, config.NewNavigableMap(ev)); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
@@ -424,7 +424,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 		"Test": "MultipleCharacter123456789MoreThan30Character",
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::Test(~^\\w{30,})"}, config.NewNavigableMap(ev)); err != nil {
+		[]string{"*rsr::~Test(~^\\w{30,})"}, config.NewNavigableMap(ev)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
@@ -436,7 +436,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 		},
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::Test.Test2(~^\\w{30,})"}, config.NewNavigableMap(ev)); err != nil {
+		[]string{"*rsr::~Test.Test2(~^\\w{30,})"}, config.NewNavigableMap(ev)); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
@@ -447,7 +447,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 		},
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::Test.Test2(~^\\w{30,})"}, config.NewNavigableMap(ev)); err != nil {
+		[]string{"*rsr::~Test.Test2(~^\\w{30,})"}, config.NewNavigableMap(ev)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
