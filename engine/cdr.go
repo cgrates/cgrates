@@ -155,7 +155,7 @@ func (cdr *CDR) FormatCost(shiftDecimals, roundDecimals int) string {
 
 // Used to retrieve fields as string, primary fields are const labeled
 func (cdr *CDR) FieldAsString(rsrPrs *config.RSRParser) (parsed string, err error) {
-	parsed, err = rsrPrs.ParseCDR(config.NewNavigableMap(cdr.AsMapStringIface()))
+	parsed, err = rsrPrs.ParseDataProviderWithInterfaces(config.NewNavigableMap(cdr.AsMapStringIface()), utils.NestingSep)
 	if err != nil {
 		return
 	}
@@ -164,7 +164,7 @@ func (cdr *CDR) FieldAsString(rsrPrs *config.RSRParser) (parsed string, err erro
 
 // concatenates values of multiple fields defined in template, used eg in CDR templates
 func (cdr *CDR) FieldsAsString(rsrFlds config.RSRParsers) string {
-	outVal, err := rsrFlds.ParseCDR(config.NewNavigableMap(cdr.AsMapStringIface()))
+	outVal, err := rsrFlds.ParseDataProviderWithInterfaces(config.NewNavigableMap(cdr.AsMapStringIface()), utils.NestingSep)
 	if err != nil {
 		return ""
 	}
