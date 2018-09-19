@@ -45,3 +45,24 @@ func TestSessionsNewV1AuthorizeArgs(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
 }
+
+func TestSessionsNewV1UpdateSessionArgs(t *testing.T) {
+	cgrEv := utils.CGREvent{
+		Tenant:  "cgrates.org",
+		ID:      "Event",
+		Context: utils.StringPointer(utils.MetaSessionS),
+		Event: map[string]interface{}{
+			utils.Account:     "1001",
+			utils.Destination: "1002",
+		},
+	}
+	expected := &V1UpdateSessionArgs{
+		GetAttributes: true,
+		UpdateSession: true,
+		CGREvent:      cgrEv,
+	}
+	rply := NewV1UpdateSessionArgs(true, true, cgrEv)
+	if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v, received: %+v", expected, rply)
+	}
+}
