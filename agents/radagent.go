@@ -62,12 +62,11 @@ func NewRadiusAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 }
 
 type RadiusAgent struct {
-	cgrCfg    *config.CGRConfig             // reference for future config reloads
-	sessionS  rpcclient.RpcClientConnection // Connection towards CGR-SessionS component
-	tenantCfg config.RSRParsers
-	filterS   *engine.FilterS
-	rsAuth    *radigo.Server
-	rsAcct    *radigo.Server
+	cgrCfg   *config.CGRConfig             // reference for future config reloads
+	sessionS rpcclient.RpcClientConnection // Connection towards CGR-SessionS component
+	filterS  *engine.FilterS
+	rsAuth   *radigo.Server
+	rsAcct   *radigo.Server
 }
 
 // handleAuth handles RADIUS Authorization request
@@ -80,12 +79,12 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 				utils.RadiusAgent, err.Error()))
 		return
 	}
-	agReq := newAgentRequest(dcdr, ra.tenantCfg, ra.cgrCfg.DefaultTenant, ra.filterS)
-	agReq.Vars.Set([]string{MetaRadReqType}, utils.StringToInterface(MetaRadAuth), true)
 	rpl = req.Reply()
 	rpl.Code = radigo.AccessAccept
 	var processed bool
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
+		agReq := newAgentRequest(dcdr, reqProcessor.Tenant, ra.cgrCfg.DefaultTenant, ra.filterS)
+		agReq.Vars.Set([]string{MetaRadReqType}, utils.StringToInterface(MetaRadAuth), true)
 		var lclProcessed bool
 		if lclProcessed, err = ra.processRequest(reqProcessor, agReq, rpl); lclProcessed {
 			processed = lclProcessed
@@ -95,12 +94,12 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 		}
 	}
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s> ignoring request: %s, agentRequest: %+v",
-			utils.RadiusAgent, err.Error(), utils.ToJSON(req), utils.ToJSON(agReq)))
+		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s> ignoring request: %s",
+			utils.RadiusAgent, err.Error(), utils.ToJSON(req)))
 		return nil, nil
 	} else if !processed {
-		utils.Logger.Err(fmt.Sprintf("<%s> no request processor enabled, ignoring request %s, agentRequest: %+v",
-			utils.RadiusAgent, utils.ToJSON(req), utils.ToJSON(agReq)))
+		utils.Logger.Err(fmt.Sprintf("<%s> no request processor enabled, ignoring request %s",
+			utils.RadiusAgent, utils.ToJSON(req)))
 		return nil, nil
 	}
 	return
@@ -117,11 +116,12 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 				utils.RadiusAgent, err.Error()))
 		return
 	}
-	agReq := newAgentRequest(dcdr, ra.tenantCfg, ra.cgrCfg.DefaultTenant, ra.filterS)
+
 	rpl = req.Reply()
 	rpl.Code = radigo.AccountingResponse
 	var processed bool
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
+		agReq := newAgentRequest(dcdr, reqProcessor.Tenant, ra.cgrCfg.DefaultTenant, ra.filterS)
 		var lclProcessed bool
 		if lclProcessed, err = ra.processRequest(reqProcessor, agReq, rpl); lclProcessed {
 			processed = lclProcessed
@@ -131,12 +131,12 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 		}
 	}
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s> ignoring request: %s, agentRequest: %+v",
-			utils.RadiusAgent, err.Error(), utils.ToJSON(req), utils.ToJSON(agReq)))
+		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s> ignoring request: %s, ",
+			utils.RadiusAgent, err.Error(), utils.ToJSON(req)))
 		return nil, nil
 	} else if !processed {
-		utils.Logger.Err(fmt.Sprintf("<%s> no request processor enabled, ignoring request %s, agentRequest: %+v",
-			utils.RadiusAgent, utils.ToJSON(req), utils.ToJSON(agReq)))
+		utils.Logger.Err(fmt.Sprintf("<%s> no request processor enabled, ignoring request %s",
+			utils.RadiusAgent, utils.ToJSON(req)))
 		return nil, nil
 	}
 	return
