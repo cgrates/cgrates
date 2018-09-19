@@ -69,6 +69,7 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @vtzan | Vasilios Tzanoudakis |
 | @ccppprogrammer | Sergei Lavrov |
 | @chrisgis333 | Krzysztof Grzyb |
+| @Trial97 | Alexandru Tripon |
 
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
