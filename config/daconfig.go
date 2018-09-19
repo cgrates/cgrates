@@ -66,6 +66,7 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) error 
 	}
 	if jsnCfg.Product_name != nil {
 		da.ProductName = *jsnCfg.Product_name
+<<<<<<< HEAD
 	}
 	if jsnCfg.Message_templates != nil {
 		if da.MessageTemplates == nil {
@@ -74,6 +75,8 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) error 
 		for k, jsnTpls := range jsnCfg.Message_templates {
 			da.MessageTemplates[k] = FCTemplatesFromFCTemapltesJsonCfg(jsnTpls)
 		}
+=======
+>>>>>>> Diameter configuration updates, removed connection to ThresholdS, SessionSv1.ProcessEvent now publishing event to ThresholdS and StatS
 	}
 	if jsnCfg.Request_processors != nil {
 		for _, reqProcJsn := range *jsnCfg.Request_processors {
@@ -115,10 +118,17 @@ func (dap *DARequestProcessor) loadFromJsonCfg(jsnCfg *DARequestProcessorJsnCfg)
 	}
 	if jsnCfg.Id != nil {
 		dap.Id = *jsnCfg.Id
+<<<<<<< HEAD
 	}
 	if jsnCfg.Tenant != nil {
 		dap.Tenant = NewRSRParsersMustCompile(*jsnCfg.Tenant, true)
 	}
+=======
+	}
+	if jsnCfg.Tenant != nil {
+		dap.Tenant = NewRSRParsersMustCompile(*jsnCfg.Tenant, true)
+	}
+>>>>>>> Diameter configuration updates, removed connection to ThresholdS, SessionSv1.ProcessEvent now publishing event to ThresholdS and StatS
 	if jsnCfg.Filters != nil {
 		dap.Filters = make([]string, len(*jsnCfg.Filters))
 		for i, fltr := range *jsnCfg.Filters {
