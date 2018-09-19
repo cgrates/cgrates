@@ -998,6 +998,7 @@ func TestFsEvV1AuthorizeArgs(t *testing.T) {
 		SuppliersIgnoreErrors: true,
 		SuppliersMaxCost:      utils.MetaEventCost,
 	}
+	expected.Event[utils.Usage] = config.CgrConfig().SessionSCfg().MaxCallDuration
 	rcv := ev.V1AuthorizeArgs()
 	if !reflect.DeepEqual(expected.CGREvent.Tenant, rcv.CGREvent.Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Tenant, rcv.CGREvent.Tenant)
