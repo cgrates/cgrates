@@ -31,6 +31,7 @@ type DiameterAgentCfg struct {
 	OriginRealm       string
 	VendorId          int
 	ProductName       string
+	MessageTemplates  map[string][]*FCTemplate
 	RequestProcessors []*DARequestProcessor
 }
 
@@ -65,6 +66,14 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) error 
 	}
 	if jsnCfg.Product_name != nil {
 		da.ProductName = *jsnCfg.Product_name
+	}
+	if jsnCfg.Message_templates != nil {
+		if da.MessageTemplates == nil {
+			da.MessageTemplates = make(map[string][]*FCTemplate)
+		}
+		for k, jsnTpls := range jsnCfg.Message_templates {
+			da.MessageTemplates[k] = FCTemplatesFromFCTemapltesJsonCfg(jsnTpls)
+		}
 	}
 	if jsnCfg.Request_processors != nil {
 		for _, reqProcJsn := range *jsnCfg.Request_processors {

@@ -335,6 +335,7 @@ type DiameterAgentJsonCfg struct {
 	Origin_realm       *string
 	Vendor_id          *int
 	Product_name       *string
+	Message_templates  map[string][]*FcTemplateJsonCfg
 	Request_processors *[]*DARequestProcessorJsnCfg
 }
 
