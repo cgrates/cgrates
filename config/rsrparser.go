@@ -102,9 +102,9 @@ func (prsrs RSRParsers) ParseDataProvider(dP DataProvider, separator string) (ou
 	return
 }
 
-func (prsrs RSRParsers) ParseCDR(dP DataProvider) (out string, err error) {
+func (prsrs RSRParsers) ParseDataProviderWithInterfaces(dP DataProvider, separator string) (out string, err error) {
 	for _, prsr := range prsrs {
-		if outPrsr, err := prsr.ParseCDR(dP); err != nil {
+		if outPrsr, err := prsr.ParseDataProviderWithInterfaces(dP, separator); err != nil {
 			return "", err
 		} else {
 			out += outPrsr
@@ -275,11 +275,11 @@ func (prsr *RSRParser) ParseDataProvider(dP DataProvider, separator string) (out
 	return prsr.ParseValue(outStr)
 }
 
-func (prsr *RSRParser) ParseCDR(dP DataProvider) (out string, err error) {
+func (prsr *RSRParser) ParseDataProviderWithInterfaces(dP DataProvider, separator string) (out string, err error) {
 	var outStr interface{}
 	if prsr.attrValue == "" {
 		if outStr, err = dP.FieldAsInterface(
-			strings.Split(prsr.attrName, utils.NestingSep)); err != nil {
+			strings.Split(prsr.attrName, separator)); err != nil {
 			return
 		}
 	}
