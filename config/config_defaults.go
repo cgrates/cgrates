@@ -397,7 +397,6 @@ const CGRATES_CFG_JSON = `
 		{"address": "*internal"}								// connection towards SessionService
 	],
 	"cdr_requires_session": false,								// only create CDR if there is an active session at terminate
-	"timezone": "",												// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
 	"request_processors": [],
 },
 

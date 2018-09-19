@@ -374,6 +374,8 @@ type RadiusAgentJsonCfg struct {
 type RAReqProcessorJsnCfg struct {
 	Id                  *string
 	Filters             *[]string
+	Tenant              *string
+	Timezone            *string
 	Flags               *[]string
 	Continue_on_success *bool
 	Request_fields      *[]*FcTemplateJsonCfg
