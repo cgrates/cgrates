@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cenk/rpc2"
+	"github.com/cenkalti/rpc2"
 	"github.com/cgrates/cgrates/sessions"
 )
 

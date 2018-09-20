@@ -21,8 +21,8 @@ package utils
 import (
 	"net"
 
-	"github.com/cenk/rpc2"
-	rpc2_jsonrpc "github.com/cenk/rpc2/jsonrpc"
+	"github.com/cenkalti/rpc2"
+	rpc2_jsonrpc "github.com/cenkalti/rpc2/jsonrpc"
 	"github.com/cgrates/rpcclient"
 )
 
