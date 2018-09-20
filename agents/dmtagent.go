@@ -80,5 +80,6 @@ func (self *DiameterAgent) handlers() diam.Handler {
 
 // handleALL is the handler of all messages coming in via Diameter
 func (self *DiameterAgent) handleALL(c diam.Conn, m *diam.Message) {
-	utils.Logger.Warning(fmt.Sprintf("<%s> received unexpected message from %s:\n%s", utils.DiameterAgent, c.RemoteAddr(), m))
+	utils.Logger.Warning(fmt.Sprintf("<%s> received unexpected message from %s:\n%s",
+		utils.DiameterAgent, c.RemoteAddr(), m))
 }
