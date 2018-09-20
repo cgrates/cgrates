@@ -19,12 +19,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"errors"
 	"fmt"
+	"net"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/fiorix/go-diameter/diam"
+	"github.com/fiorix/go-diameter/diam/datatype"
 	"github.com/fiorix/go-diameter/diam/dict"
 )
 
@@ -57,4 +63,95 @@ func loadDictionaries(dictsDir, componentId string) error {
 		}
 		return nil
 	})
+}
+
+// diamAVPValue will extract the go primary value out of diameter type value
+func diamAVPAsIface(dAVP *diam.AVP) (val interface{}, err error) {
+	if dAVP == nil {
+		return nil, errors.New("nil AVP")
+	}
+	switch dAVP.Data.Type() {
+	default:
+		return nil, fmt.Errorf("unsupported AVP data type: %d", dAVP.Data.Type())
+	case datatype.AddressType:
+		return net.IP([]byte(dAVP.Data.(datatype.Address))), nil
+	case datatype.DiameterIdentityType:
+		return string(dAVP.Data.(datatype.DiameterIdentity)), nil
+	case datatype.DiameterURIType:
+		return string(dAVP.Data.(datatype.DiameterURI)), nil
+	case datatype.EnumeratedType:
+		return int32(dAVP.Data.(datatype.Enumerated)), nil
+	case datatype.Float32Type:
+		return float32(dAVP.Data.(datatype.Float32)), nil
+	case datatype.Float64Type:
+		return float64(dAVP.Data.(datatype.Float64)), nil
+	case datatype.IPFilterRuleType:
+		return string(dAVP.Data.(datatype.IPFilterRule)), nil
+	case datatype.IPv4Type:
+		return net.IP([]byte(dAVP.Data.(datatype.IPv4))), nil
+	case datatype.Integer32Type:
+		return int32(dAVP.Data.(datatype.Integer32)), nil
+	case datatype.Integer64Type:
+		return int64(dAVP.Data.(datatype.Integer64)), nil
+	case datatype.OctetStringType:
+		return string(dAVP.Data.(datatype.OctetString)), nil
+	case datatype.QoSFilterRuleType:
+		return string(dAVP.Data.(datatype.QoSFilterRule)), nil
+	case datatype.TimeType:
+		return time.Time(dAVP.Data.(datatype.Time)), nil
+	case datatype.UTF8StringType:
+		return string(dAVP.Data.(datatype.UTF8String)), nil
+	case datatype.Unsigned32Type:
+		return uint32(dAVP.Data.(datatype.Unsigned32)), nil
+	case datatype.Unsigned64Type:
+		return uint64(dAVP.Data.(datatype.Unsigned64)), nil
+	}
+}
+
+// newDADataProvider constructs a DataProvider for a diameter message
+func newDADataProvider(m *diam.Message) (dP config.DataProvider, err error) {
+	dP = &diameterDP{m: m, cache: config.NewNavigableMap(nil)}
+	return
+}
+
+// diameterDP implements engine.DataProvider, serving as diam.Message data decoder
+// decoded data is only searched once and cached
+type diameterDP struct {
+	m     *diam.Message
+	cache *config.NavigableMap
+}
+
+// String is part of engine.DataProvider interface
+// when called, it will display the already parsed values out of cache
+func (dP *diameterDP) String() string {
+	return utils.ToJSON(dP.cache)
+}
+
+// AsNavigableMap is part of engine.DataProvider interface
+func (dP *diameterDP) AsNavigableMap([]*config.FCTemplate) (
+	nm *config.NavigableMap, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// FieldAsString is part of engine.DataProvider interface
+func (dP *diameterDP) FieldAsString(fldPath []string) (data string, err error) {
+	var valIface interface{}
+	valIface, err = dP.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	data, _ = utils.CastFieldIfToString(valIface)
+	return
+}
+
+// FieldAsInterface is part of engine.DataProvider interface
+func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+	if data, err = dP.cache.FieldAsInterface(fldPath); err == nil ||
+		err != utils.ErrNotFound { // item found in cache
+		return
+	}
+	err = nil // cancel previous err
+
+	dP.cache.Set(fldPath, data, false)
+	return
 }
