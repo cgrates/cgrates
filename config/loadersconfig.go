@@ -58,7 +58,7 @@ type LoaderDataType struct { //rename to LoaderDataType
 	Fields   []*FCTemplate
 }
 
-func (self *LoaderDataType) loadFromJsonCfg(jsnCfg *LoaderJsonDataType) error {
+func (self *LoaderDataType) loadFromJsonCfg(jsnCfg *LoaderJsonDataType) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -69,7 +69,9 @@ func (self *LoaderDataType) loadFromJsonCfg(jsnCfg *LoaderJsonDataType) error {
 		self.Filename = *jsnCfg.File_name
 	}
 	if jsnCfg.Fields != nil {
-		self.Fields = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Fields)
+		if self.Fields, err = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Fields); err != nil {
+			return
+		}
 	}
 	return nil
 }

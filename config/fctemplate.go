@@ -18,8 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg) *FCTemplate {
+func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg) (*FCTemplate, error) {
 	fcTmp := new(FCTemplate)
+	var err error
 	if jsnCfg.Tag != nil {
 		fcTmp.Tag = *jsnCfg.Tag
 	}
@@ -36,7 +37,10 @@ func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg) *FCTemplate {
 		}
 	}
 	if jsnCfg.Value != nil {
-		fcTmp.Value = NewRSRParsersMustCompile(*jsnCfg.Value, true)
+		fcTmp.Value, err = NewRSRParsers(*jsnCfg.Value, true)
+		if err != nil {
+			return nil, err
+		}
 	}
 	if jsnCfg.Width != nil {
 		fcTmp.Width = *jsnCfg.Width
@@ -83,7 +87,7 @@ func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg) *FCTemplate {
 	if jsnCfg.Mask_length != nil {
 		fcTmp.MaskLen = *jsnCfg.Mask_length
 	}
-	return fcTmp
+	return fcTmp, nil
 }
 
 type FCTemplate struct {
@@ -109,10 +113,14 @@ type FCTemplate struct {
 	MaskLen          int
 }
 
-func FCTemplatesFromFCTemapltesJsonCfg(jsnCfgFlds []*FcTemplateJsonCfg) []*FCTemplate {
+func FCTemplatesFromFCTemapltesJsonCfg(jsnCfgFlds []*FcTemplateJsonCfg) ([]*FCTemplate, error) {
 	retFields := make([]*FCTemplate, len(jsnCfgFlds))
+	var err error
 	for i, jsnFld := range jsnCfgFlds {
-		retFields[i] = NewFCTemplateFromFCTemplateJsonCfg(jsnFld)
+		retFields[i], err = NewFCTemplateFromFCTemplateJsonCfg(jsnFld)
+		if err != nil {
+			return nil, err
+		}
 	}
-	return retFields
+	return retFields, err
 }

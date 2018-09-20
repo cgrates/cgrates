@@ -113,7 +113,9 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 		}
 	}
 	if jsnCfg.Tenant != nil {
-		self.Tenant = NewRSRParsersMustCompile(*jsnCfg.Tenant, true)
+		if self.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true); err != nil {
+			return err
+		}
 	}
 	if jsnCfg.Continue_on_success != nil {
 		self.ContinueOnSuccess = *jsnCfg.Continue_on_success
@@ -127,16 +129,24 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 		self.PartialCacheExpiryAction = *jsnCfg.Partial_cache_expiry_action
 	}
 	if jsnCfg.Header_fields != nil {
-		self.HeaderFields = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Header_fields)
+		if self.HeaderFields, err = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Header_fields); err != nil {
+			return err
+		}
 	}
 	if jsnCfg.Content_fields != nil {
-		self.ContentFields = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Content_fields)
+		if self.ContentFields, err = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Content_fields); err != nil {
+			return err
+		}
 	}
 	if jsnCfg.Trailer_fields != nil {
-		self.TrailerFields = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Trailer_fields)
+		if self.TrailerFields, err = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Trailer_fields); err != nil {
+			return err
+		}
 	}
 	if jsnCfg.Cache_dump_fields != nil {
-		self.CacheDumpFields = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Cache_dump_fields)
+		if self.CacheDumpFields, err = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Cache_dump_fields); err != nil {
+			return err
+		}
 	}
 	return nil
 }
