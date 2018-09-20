@@ -113,12 +113,12 @@ func (ha *HttpAgntProcCfg) loadFromJsonCfg(jsnCfg *HttpAgentProcessorJsnCfg) (er
 		ha.ContinueOnSuccess = *jsnCfg.Continue_on_success
 	}
 	if jsnCfg.Request_fields != nil {
-		if ha.RequestFields, err = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Request_fields); err != nil {
+		if ha.RequestFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Request_fields); err != nil {
 			return
 		}
 	}
 	if jsnCfg.Reply_fields != nil {
-		if ha.ReplyFields, err = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Reply_fields); err != nil {
+		if ha.ReplyFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Reply_fields); err != nil {
 			return
 		}
 	}

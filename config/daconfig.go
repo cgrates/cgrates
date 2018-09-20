@@ -35,7 +35,7 @@ type DiameterAgentCfg struct {
 	RequestProcessors []*DARequestProcessor
 }
 
-func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) error {
+func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -66,17 +66,16 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) error 
 	}
 	if jsnCfg.Product_name != nil {
 		da.ProductName = *jsnCfg.Product_name
-<<<<<<< HEAD
 	}
 	if jsnCfg.Message_templates != nil {
 		if da.MessageTemplates == nil {
 			da.MessageTemplates = make(map[string][]*FCTemplate)
 		}
 		for k, jsnTpls := range jsnCfg.Message_templates {
-			da.MessageTemplates[k] = FCTemplatesFromFCTemapltesJsonCfg(jsnTpls)
+			if da.MessageTemplates[k], err = FCTemplatesFromFCTemplatesJsonCfg(jsnTpls); err != nil {
+				return
+			}
 		}
-=======
->>>>>>> Diameter configuration updates, removed connection to ThresholdS, SessionSv1.ProcessEvent now publishing event to ThresholdS and StatS
 	}
 	if jsnCfg.Request_processors != nil {
 		for _, reqProcJsn := range *jsnCfg.Request_processors {
@@ -112,23 +111,16 @@ type DARequestProcessor struct {
 	ReplyFields       []*FCTemplate
 }
 
-func (dap *DARequestProcessor) loadFromJsonCfg(jsnCfg *DARequestProcessorJsnCfg) error {
+func (dap *DARequestProcessor) loadFromJsonCfg(jsnCfg *DARequestProcessorJsnCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
 	if jsnCfg.Id != nil {
 		dap.Id = *jsnCfg.Id
-<<<<<<< HEAD
 	}
 	if jsnCfg.Tenant != nil {
 		dap.Tenant = NewRSRParsersMustCompile(*jsnCfg.Tenant, true)
 	}
-=======
-	}
-	if jsnCfg.Tenant != nil {
-		dap.Tenant = NewRSRParsersMustCompile(*jsnCfg.Tenant, true)
-	}
->>>>>>> Diameter configuration updates, removed connection to ThresholdS, SessionSv1.ProcessEvent now publishing event to ThresholdS and StatS
 	if jsnCfg.Filters != nil {
 		dap.Filters = make([]string, len(*jsnCfg.Filters))
 		for i, fltr := range *jsnCfg.Filters {
@@ -145,10 +137,14 @@ func (dap *DARequestProcessor) loadFromJsonCfg(jsnCfg *DARequestProcessorJsnCfg)
 		dap.ContinueOnSuccess = *jsnCfg.Continue_on_success
 	}
 	if jsnCfg.Request_fields != nil {
-		dap.RequestFields = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Request_fields)
+		if dap.RequestFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Request_fields); err != nil {
+			return
+		}
 	}
 	if jsnCfg.Reply_fields != nil {
-		dap.ReplyFields = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Reply_fields)
+		if dap.ReplyFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Reply_fields); err != nil {
+			return
+		}
 	}
 	return nil
 }

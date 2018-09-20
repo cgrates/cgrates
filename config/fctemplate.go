@@ -113,7 +113,7 @@ type FCTemplate struct {
 	MaskLen          int
 }
 
-func FCTemplatesFromFCTemapltesJsonCfg(jsnCfgFlds []*FcTemplateJsonCfg) ([]*FCTemplate, error) {
+func FCTemplatesFromFCTemplatesJsonCfg(jsnCfgFlds []*FcTemplateJsonCfg) ([]*FCTemplate, error) {
 	retFields := make([]*FCTemplate, len(jsnCfgFlds))
 	var err error
 	for i, jsnFld := range jsnCfgFlds {

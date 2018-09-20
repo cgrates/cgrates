@@ -129,22 +129,22 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 		self.PartialCacheExpiryAction = *jsnCfg.Partial_cache_expiry_action
 	}
 	if jsnCfg.Header_fields != nil {
-		if self.HeaderFields, err = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Header_fields); err != nil {
+		if self.HeaderFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Header_fields); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Content_fields != nil {
-		if self.ContentFields, err = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Content_fields); err != nil {
+		if self.ContentFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Content_fields); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Trailer_fields != nil {
-		if self.TrailerFields, err = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Trailer_fields); err != nil {
+		if self.TrailerFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Trailer_fields); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Cache_dump_fields != nil {
-		if self.CacheDumpFields, err = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Cache_dump_fields); err != nil {
+		if self.CacheDumpFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Cache_dump_fields); err != nil {
 			return err
 		}
 	}
