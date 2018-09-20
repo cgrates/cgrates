@@ -1,10 +1,10 @@
 hash: 2daed4c5ed5052824ae5df18b0690a85226f9e3c61c336f83db7fccc6f4ecd51
 updated: 2017-04-21T14:51:07.386488974+02:00
 imports:
-- name: github.com/cenk/hub
+- name: github.com/cenkalti/hub
   version: 11382a9960d39b0ecda16fd01c424c11ff765a34
-- name: github.com/cenk/rpc2
-  version: 7ab76d2e88c77ca1a715756036d8264b2886acd2
+- name: github.com/cenkalti/rpc2
+  version: 9642ea02d0aad04b8efb5e1a6bbc63daf8d0903d
   subpackages:
   - jsonrpc
 - name: github.com/cgrates/aringo
@@ -22,7 +22,7 @@ imports:
 - name: github.com/cgrates/rpcclient
   version: 54aff3c8e75a2342f0618dfc1c44f0660cd69bde
 - name: github.com/DisposaBoy/JsonConfigReader
-  version: 33a99fdf1d5ee1f79b5077e9c06f955ad356d5f4
+  version: 5ea4d0ddac554439159cd6f191cb94a110d73352
 - name: github.com/fiorix/go-diameter
   version: d742356e99f1457ee1fb8ddc238c932e9f5ca87b
   subpackages:

@@ -34,8 +34,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cenk/rpc2"
-	rpc2_jsonrpc "github.com/cenk/rpc2/jsonrpc"
+	"github.com/cenkalti/rpc2"
+	rpc2_jsonrpc "github.com/cenkalti/rpc2/jsonrpc"
 	"golang.org/x/net/websocket"
 	_ "net/http/pprof"
 )
