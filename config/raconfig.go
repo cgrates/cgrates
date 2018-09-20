@@ -132,10 +132,14 @@ func (self *RARequestProcessor) loadFromJsonCfg(jsnCfg *RAReqProcessorJsnCfg) (e
 		self.Timezone = *jsnCfg.Timezone
 	}
 	if jsnCfg.Request_fields != nil {
-		self.RequestFields = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Request_fields)
+		if self.RequestFields, err = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Request_fields); err != nil {
+			return
+		}
 	}
 	if jsnCfg.Reply_fields != nil {
-		self.ReplyFields = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Reply_fields)
+		if self.ReplyFields, err = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Reply_fields); err != nil {
+			return
+		}
 	}
 	return nil
 }
