@@ -254,9 +254,15 @@ func TestWriteCdr(t *testing.T) {
 	var err error
 	wrBuf := &bytes.Buffer{}
 	cfg, _ := config.NewDefaultCGRConfig()
-	hdrCfgFlds = config.FCTemplatesFromFCTemapltesJsonCfg(hdrJsnCfgFlds)
-	contentCfgFlds = config.FCTemplatesFromFCTemapltesJsonCfg(contentJsnCfgFlds)
-	trailerCfgFlds = config.FCTemplatesFromFCTemapltesJsonCfg(trailerJsnCfgFlds)
+	if hdrCfgFlds, err = config.FCTemplatesFromFCTemapltesJsonCfg(hdrJsnCfgFlds); err != nil {
+		t.Error(err)
+	}
+	if contentCfgFlds, err = config.FCTemplatesFromFCTemapltesJsonCfg(contentJsnCfgFlds); err != nil {
+		t.Error(err)
+	}
+	if trailerCfgFlds, err = config.FCTemplatesFromFCTemapltesJsonCfg(trailerJsnCfgFlds); err != nil {
+		t.Error(err)
+	}
 	cdreCfg := &config.CdreConfig{
 		ExportFormat:  utils.MetaFileFWV,
 		HeaderFields:  hdrCfgFlds,

@@ -39,8 +39,9 @@ func TestNewFCTemplateFromFCTemplateJsonCfg(t *testing.T) {
 		Filters: []string{"Filter1", "Filter2"},
 		Value:   NewRSRParsersMustCompile("cgrates.org", true),
 	}
-	rcv := NewFCTemplateFromFCTemplateJsonCfg(jsonCfg)
-	if !reflect.DeepEqual(expected, rcv) {
+	if rcv, err := NewFCTemplateFromFCTemplateJsonCfg(jsonCfg); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("expected: %s ,received: %s", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
@@ -78,8 +79,9 @@ func TestFCTemplatesFromFCTemapltesJsonCfg(t *testing.T) {
 			Value:   NewRSRParsersMustCompile("SampleValue", true),
 		},
 	}
-	rcv := FCTemplatesFromFCTemapltesJsonCfg(jsnCfgs)
-	if !reflect.DeepEqual(expected, rcv) {
+	if rcv, err := FCTemplatesFromFCTemapltesJsonCfg(jsnCfgs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("expected: %s ,received: %s", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }

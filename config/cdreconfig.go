@@ -39,7 +39,7 @@ type CdreConfig struct {
 	TrailerFields       []*FCTemplate
 }
 
-func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) error {
+func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -80,13 +80,19 @@ func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) error {
 		self.CostMultiplyFactor = *jsnCfg.Cost_multiply_factor
 	}
 	if jsnCfg.Header_fields != nil {
-		self.HeaderFields = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Header_fields)
+		if self.HeaderFields, err = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Header_fields); err != nil {
+			return err
+		}
 	}
 	if jsnCfg.Content_fields != nil {
-		self.ContentFields = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Content_fields)
+		if self.ContentFields, err = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Content_fields); err != nil {
+			return err
+		}
 	}
 	if jsnCfg.Trailer_fields != nil {
-		self.TrailerFields = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Trailer_fields)
+		if self.TrailerFields, err = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Trailer_fields); err != nil {
+			return err
+		}
 	}
 	return nil
 }
