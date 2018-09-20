@@ -789,7 +789,7 @@ func startSupplierService(internalSupplierSChan chan rpcclient.RpcClientConnecti
 			cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 			cfg.SupplierSCfg().AttributeSConns, internalAttrSChan, cfg.InternalTtl)
 		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to &s: %s",
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 				utils.SupplierS, utils.AttributeS, err.Error()))
 			exitChan <- true
 			return

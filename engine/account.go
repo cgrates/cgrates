@@ -1075,26 +1075,28 @@ func (acc *Account) AsAccountSummary() *AccountSummary {
 }
 
 func (acnt *Account) Publish() {
-	if thresholdS == nil {
-		return
-	}
 	acntTnt := utils.NewTenantID(acnt.ID)
-	thEv := &ArgsProcessEvent{
-		CGREvent: utils.CGREvent{
-			Tenant: acntTnt.Tenant,
-			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
-				utils.EventType:     utils.AccountUpdate,
-				utils.EventSource:   utils.AccountService,
-				utils.Account:       acntTnt.ID,
-				utils.AllowNegative: acnt.AllowNegative,
-				utils.Disabled:      acnt.Disabled}}}
+	cgrEv := utils.CGREvent{
+		Tenant: acntTnt.Tenant,
+		ID:     utils.GenUUID(),
+		Event: map[string]interface{}{
+			utils.EventType:     utils.AccountUpdate,
+			utils.EventSource:   utils.AccountService,
+			utils.Account:       acntTnt.ID,
+			utils.AllowNegative: acnt.AllowNegative,
+			utils.Disabled:      acnt.Disabled}}
 	var tIDs []string
-	if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent,
-		thEv, &tIDs); err != nil &&
-		err.Error() != utils.ErrNotFound.Error() {
-		utils.Logger.Warning(
-			fmt.Sprintf("<AccountS> error: %s processing account event %+v with ThresholdS.", err.Error(), thEv))
+	if statS != nil {
+		var reply []string
+		go statS.Call(utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{CGREvent: cgrEv}, &reply)
+	}
+	if thresholdS != nil {
+		if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent,
+			&ArgsProcessEvent{CGREvent: cgrEv}, &tIDs); err != nil &&
+			err.Error() != utils.ErrNotFound.Error() {
+			utils.Logger.Warning(
+				fmt.Sprintf("<AccountS> error: %s processing account event %+v with ThresholdS.", err.Error(), cgrEv))
+		}
 	}
 }
 

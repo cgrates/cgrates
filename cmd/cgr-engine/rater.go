@@ -176,6 +176,9 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 	if thdS != nil {
 		engine.SetThresholdS(thdS) // temporary architectural fix until we will have separate AccountS
 	}
+	if stats != nil {
+		engine.SetStatS(stats)
+	}
 	if cdrStats != nil { // ToDo: Fix here properly the init of stats
 		responder.CdrStats = cdrStats
 		apierRpcV1.CdrStatsSrv = cdrStats
