@@ -44,6 +44,21 @@ func TestSessionsNewV1AuthorizeArgs(t *testing.T) {
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
+	expected = &V1AuthorizeArgs{
+		GetAttributes:         true,
+		AuthorizeResources:    false,
+		GetMaxUsage:           true,
+		ProcessThresholds:     false,
+		ProcessStats:          true,
+		GetSuppliers:          false,
+		SuppliersIgnoreErrors: true,
+		SuppliersMaxCost:      utils.MetaSuppliersEventCost,
+		CGREvent:              cgrEv,
+	}
+	rply = NewV1AuthorizeArgs(true, false, true, false, true, false, true, true, cgrEv)
+	if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v,\n received: %+v", expected, rply)
+	}
 }
 
 func TestSessionsNewV1UpdateSessionArgs(t *testing.T) {
@@ -65,6 +80,15 @@ func TestSessionsNewV1UpdateSessionArgs(t *testing.T) {
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
+	expected = &V1UpdateSessionArgs{
+		GetAttributes: false,
+		UpdateSession: true,
+		CGREvent:      cgrEv,
+	}
+	rply = NewV1UpdateSessionArgs(false, true, cgrEv)
+	if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v, received: %+v", expected, rply)
+	}
 }
 
 func TestSessionsNewV1TerminateSessionArgs(t *testing.T) {
@@ -77,13 +101,19 @@ func TestSessionsNewV1TerminateSessionArgs(t *testing.T) {
 			utils.Destination: "1002",
 		},
 	}
-
 	expected := &V1TerminateSessionArgs{
 		TerminateSession:  true,
 		ProcessThresholds: true,
 		CGREvent:          cgrEv,
 	}
 	rply := NewV1TerminateSessionArgs(true, false, true, false, cgrEv)
+	if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v, received: %+v", expected, rply)
+	}
+	expected = &V1TerminateSessionArgs{
+		CGREvent: cgrEv,
+	}
+	rply = NewV1TerminateSessionArgs(false, false, false, false, cgrEv)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -99,7 +129,6 @@ func TestSessionsNewV1ProcessEventArgs(t *testing.T) {
 			utils.Destination: "1002",
 		},
 	}
-
 	expected := &V1ProcessEventArgs{
 		AllocateResources: true,
 		Debit:             true,
@@ -110,7 +139,15 @@ func TestSessionsNewV1ProcessEventArgs(t *testing.T) {
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
-
+	expected = &V1ProcessEventArgs{
+		AllocateResources: true,
+		GetAttributes:     true,
+		CGREvent:          cgrEv,
+	}
+	rply = NewV1ProcessEventArgs(true, false, true, cgrEv)
+	if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v, received: %+v", expected, rply)
+	}
 }
 
 func TestSessionsNewV1InitSessionArgs(t *testing.T) {
@@ -123,7 +160,6 @@ func TestSessionsNewV1InitSessionArgs(t *testing.T) {
 			utils.Destination: "1002",
 		},
 	}
-
 	expected := &V1InitSessionArgs{
 		GetAttributes:     true,
 		AllocateResources: true,
@@ -136,5 +172,16 @@ func TestSessionsNewV1InitSessionArgs(t *testing.T) {
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
-
+	expected = &V1InitSessionArgs{
+		GetAttributes:     true,
+		AllocateResources: false,
+		InitSession:       true,
+		ProcessThresholds: false,
+		ProcessStats:      true,
+		CGREvent:          cgrEv,
+	}
+	rply = NewV1InitSessionArgs(true, false, true, false, true, cgrEv)
+	if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v, received: %+v", expected, rply)
+	}
 }
