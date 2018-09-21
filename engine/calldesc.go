@@ -59,6 +59,7 @@ var (
 	debitPeriod              = 10 * time.Second
 	globalRoundingDecimals   = 6
 	thresholdS               rpcclient.RpcClientConnection // used by RALs to communicate with ThresholdS
+	statS                    rpcclient.RpcClientConnection
 	pubSubServer             rpcclient.RpcClientConnection
 	userService              rpcclient.RpcClientConnection
 	aliasService             rpcclient.RpcClientConnection
@@ -74,6 +75,10 @@ func SetDataStorage(dm2 *DataManager) {
 
 func SetThresholdS(thdS rpcclient.RpcClientConnection) {
 	thresholdS = thdS
+}
+
+func SetStatS(stsS rpcclient.RpcClientConnection) {
+	statS = stsS
 }
 
 // Sets the global rounding method and decimal precision for GetCost method

@@ -33,15 +33,15 @@ In a nutshell all the dependencies are installed and used from a folder named *v
 
 First we have to setup the GO Lang to our OS. Feel free to download 
 the latest GO binary release from https://golang.org/dl/
-In this Tutorial we are going to install Go 1.10.3.
+In this Tutorial we are going to install Go 1.11
 
 ::
 
-   cd $HOME && mkdir -p src/go opt && cd src
-   wget https://dl.google.com/go/go1.10.3.linux-amd64.tar.gz
-   tar -xvf go1.10.3.linux-amd64.tar.gz -C $HOME/opt
-   export GOPATH=$HOME/src/go
-   export PATH=$PATH:$HOME/opt/go/bin:$GOPATH/bin
+   rm -rf /usr/local/go
+   cd /tmp
+   wget https://dl.google.com/go/go1.11.linux-amd64.tar.gz
+   sudo tar -xvf go1.11.0.linux-amd64.tar.gz -C /usr/local/
+   export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
 
 3.2.2 Build CGRateS from Source
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

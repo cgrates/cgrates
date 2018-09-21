@@ -51,7 +51,9 @@ func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg) (err error) {
 		}
 	}
 	if jsnCfg.Tenant != nil {
-		ca.Tenant = NewRSRParsersMustCompile(*jsnCfg.Tenant, true)
+		if ca.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true); err != nil {
+			return err
+		}
 	}
 	if jsnCfg.Timezone != nil {
 		ca.Timezone = *jsnCfg.Timezone

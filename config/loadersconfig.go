@@ -76,7 +76,7 @@ func (self *LoaderDataType) loadFromJsonCfg(jsnCfg *LoaderJsonDataType) (err err
 	return nil
 }
 
-func (self *LoaderSConfig) loadFromJsonCfg(jsnCfg *LoaderJsonCfg) error {
+func (self *LoaderSConfig) loadFromJsonCfg(jsnCfg *LoaderJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -87,7 +87,9 @@ func (self *LoaderSConfig) loadFromJsonCfg(jsnCfg *LoaderJsonCfg) error {
 		self.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Tenant != nil {
-		self.Tenant = NewRSRParsersMustCompile(*jsnCfg.Tenant, true)
+		if self.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true); err != nil {
+			return err
+		}
 	}
 	if jsnCfg.Dry_run != nil {
 		self.DryRun = *jsnCfg.Dry_run

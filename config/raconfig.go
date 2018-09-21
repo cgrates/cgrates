@@ -126,7 +126,9 @@ func (self *RARequestProcessor) loadFromJsonCfg(jsnCfg *RAReqProcessorJsnCfg) (e
 		self.ContinueOnSuccess = *jsnCfg.Continue_on_success
 	}
 	if jsnCfg.Tenant != nil {
-		self.Tenant = NewRSRParsersMustCompile(*jsnCfg.Tenant, true)
+		if self.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true); err != nil {
+			return err
+		}
 	}
 	if jsnCfg.Timezone != nil {
 		self.Timezone = *jsnCfg.Timezone

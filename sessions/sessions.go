@@ -280,7 +280,14 @@ func (smg *SMGeneric) ttlTerminate(s *SMGSession, tmtr *smgSessionTerminator) {
 	}
 	cdr.Usage = s.TotalUsage
 	var reply string
-	smg.cdrsrv.Call("CdrsV1.ProcessCDR", cdr, &reply)
+	cgrEv := &utils.CGREvent{
+		Tenant: s.Tenant,
+		ID:     utils.UUIDSha1Prefix(),
+		Event:  cdr.AsMapStringIface(),
+	}
+	if err = smg.cdrsrv.Call(utils.CdrsV2ProcessCDR, cgrEv, &reply); err != nil {
+		return
+	}
 	if smg.resS != nil && s.ResourceID != "" {
 		var reply string
 		argsRU := utils.ArgRSv1ResourceUsage{

@@ -37,8 +37,7 @@ func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg) (*FCTemplate,
 		}
 	}
 	if jsnCfg.Value != nil {
-		fcTmp.Value, err = NewRSRParsers(*jsnCfg.Value, true)
-		if err != nil {
+		if fcTmp.Value, err = NewRSRParsers(*jsnCfg.Value, true); err != nil {
 			return nil, err
 		}
 	}
@@ -117,10 +116,9 @@ func FCTemplatesFromFCTemplatesJsonCfg(jsnCfgFlds []*FcTemplateJsonCfg) ([]*FCTe
 	retFields := make([]*FCTemplate, len(jsnCfgFlds))
 	var err error
 	for i, jsnFld := range jsnCfgFlds {
-		retFields[i], err = NewFCTemplateFromFCTemplateJsonCfg(jsnFld)
-		if err != nil {
+		if retFields[i], err = NewFCTemplateFromFCTemplateJsonCfg(jsnFld); err != nil {
 			return nil, err
 		}
 	}
-	return retFields, err
+	return retFields, nil
 }
