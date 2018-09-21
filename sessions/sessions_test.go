@@ -135,7 +135,7 @@ func TestSessionsNewV1ProcessEventArgs(t *testing.T) {
 		GetAttributes:     true,
 		CGREvent:          cgrEv,
 	}
-	rply := NewV1ProcessEventArgs(true, true, true, cgrEv)
+	rply := NewV1ProcessEventArgs(true, true, true, false, false, cgrEv)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -144,7 +144,7 @@ func TestSessionsNewV1ProcessEventArgs(t *testing.T) {
 		GetAttributes:     true,
 		CGREvent:          cgrEv,
 	}
-	rply = NewV1ProcessEventArgs(true, false, true, cgrEv)
+	rply = NewV1ProcessEventArgs(true, false, true, false, false, cgrEv)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -184,97 +184,4 @@ func TestSessionsNewV1InitSessionArgs(t *testing.T) {
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
-}
-
-func TestSessionsNewV1UpdateSessionArgs(t *testing.T) {
-	cgrEv := utils.CGREvent{
-		Tenant:  "cgrates.org",
-		ID:      "Event",
-		Context: utils.StringPointer(utils.MetaSessionS),
-		Event: map[string]interface{}{
-			utils.Account:     "1001",
-			utils.Destination: "1002",
-		},
-	}
-	expected := &V1UpdateSessionArgs{
-		GetAttributes: true,
-		UpdateSession: true,
-		CGREvent:      cgrEv,
-	}
-	rply := NewV1UpdateSessionArgs(true, true, cgrEv)
-	if !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting %+v, received: %+v", expected, rply)
-	}
-}
-
-func TestSessionsNewV1TerminateSessionArgs(t *testing.T) {
-	cgrEv := utils.CGREvent{
-		Tenant:  "cgrates.org",
-		ID:      "Event",
-		Context: utils.StringPointer(utils.MetaSessionS),
-		Event: map[string]interface{}{
-			utils.Account:     "1001",
-			utils.Destination: "1002",
-		},
-	}
-
-	expected := &V1TerminateSessionArgs{
-		TerminateSession:  true,
-		ProcessThresholds: true,
-		CGREvent:          cgrEv,
-	}
-	rply := NewV1TerminateSessionArgs(true, false, true, false, cgrEv)
-	if !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting %+v, received: %+v", expected, rply)
-	}
-}
-
-func TestSessionsNewV1ProcessEventArgs(t *testing.T) {
-	cgrEv := utils.CGREvent{
-		Tenant:  "cgrates.org",
-		ID:      "Event",
-		Context: utils.StringPointer(utils.MetaSessionS),
-		Event: map[string]interface{}{
-			utils.Account:     "1001",
-			utils.Destination: "1002",
-		},
-	}
-
-	expected := &V1ProcessEventArgs{
-		AllocateResources: true,
-		Debit:             true,
-		GetAttributes:     true,
-		CGREvent:          cgrEv,
-	}
-	rply := NewV1ProcessEventArgs(true, true, true, cgrEv)
-	if !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting %+v, received: %+v", expected, rply)
-	}
-
-}
-
-func TestSessionsNewV1InitSessionArgs(t *testing.T) {
-	cgrEv := utils.CGREvent{
-		Tenant:  "cgrates.org",
-		ID:      "Event",
-		Context: utils.StringPointer(utils.MetaSessionS),
-		Event: map[string]interface{}{
-			utils.Account:     "1001",
-			utils.Destination: "1002",
-		},
-	}
-
-	expected := &V1InitSessionArgs{
-		GetAttributes:     true,
-		AllocateResources: true,
-		InitSession:       true,
-		ProcessThresholds: true,
-		ProcessStats:      true,
-		CGREvent:          cgrEv,
-	}
-	rply := NewV1InitSessionArgs(true, true, true, true, true, cgrEv)
-	if !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting %+v, received: %+v", expected, rply)
-	}
-
 }
