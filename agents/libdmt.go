@@ -109,9 +109,9 @@ func diamAVPAsIface(dAVP *diam.AVP) (val interface{}, err error) {
 }
 
 // newDADataProvider constructs a DataProvider for a diameter message
-func newDADataProvider(m *diam.Message) (dP config.DataProvider, err error) {
-	dP = &diameterDP{m: m, cache: config.NewNavigableMap(nil)}
-	return
+func newDADataProvider(m *diam.Message) config.DataProvider {
+	return &diameterDP{m: m, cache: config.NewNavigableMap(nil)}
+
 }
 
 // diameterDP implements engine.DataProvider, serving as diam.Message data decoder
@@ -148,10 +148,19 @@ func (dP *diameterDP) FieldAsString(fldPath []string) (data string, err error) {
 func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
 	if data, err = dP.cache.FieldAsInterface(fldPath); err == nil ||
 		err != utils.ErrNotFound { // item found in cache
-		return
+		return nil, err
 	}
 	err = nil // cancel previous err
-
+	var avps []*diam.AVP
+	if avps, err = dP.m.FindAVPsWithPath(
+		utils.SliceStringToIface(fldPath), dict.UndefinedVendorID); err != nil {
+		return nil, err
+	} else if len(avps) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	if data, err = diamAVPAsIface(avps[0]); err != nil {
+		return nil, err
+	}
 	dP.cache.Set(fldPath, data, false)
 	return
 }
