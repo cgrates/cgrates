@@ -236,6 +236,8 @@ func IfaceAsBool(itm interface{}) (b bool, err error) {
 
 func IfaceAsString(fld interface{}) (out string, err error) {
 	switch fld.(type) {
+	case nil:
+		return
 	case int:
 		return strconv.Itoa(fld.(int)), nil
 	case int64:

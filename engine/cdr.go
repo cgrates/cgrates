@@ -102,25 +102,25 @@ type CDR struct {
 
 // AddDefaults will add missing information based on other fields
 func (cdr *CDR) AddDefaults(cfg *config.CGRConfig) {
-	if cdr.CGRID == "" {
+	if cdr.CGRID == utils.EmptyString {
 		cdr.ComputeCGRID()
 	}
-	if cdr.RunID == "" {
+	if cdr.RunID == utils.EmptyString {
 		cdr.RunID = utils.MetaRaw
 	}
-	if cdr.ToR == "" {
+	if cdr.ToR == utils.EmptyString {
 		cdr.ToR = utils.VOICE
 	}
-	if cdr.RequestType == "" {
+	if cdr.RequestType == utils.EmptyString {
 		cdr.RequestType = cfg.DefaultReqType
 	}
-	if cdr.Tenant == "" {
+	if cdr.Tenant == utils.EmptyString {
 		cdr.Tenant = cfg.DefaultTenant
 	}
-	if cdr.Category == "" {
+	if cdr.Category == utils.EmptyString {
 		cdr.Category = cfg.DefaultCategory
 	}
-	if cdr.Subject == "" {
+	if cdr.Subject == utils.EmptyString {
 		cdr.Subject = cdr.Account
 	}
 }
