@@ -281,7 +281,7 @@ func (smg *SMGeneric) ttlTerminate(s *SMGSession, tmtr *smgSessionTerminator) {
 	cdr.Usage = s.TotalUsage
 	var reply string
 	cgrEv := &utils.CGREvent{
-		Tenant: s.EventStart.GetStringIgnoreErrors(utils.Tenant),
+		Tenant: s.Tenant,
 		ID:     utils.UUIDSha1Prefix(),
 		Event:  cdr.AsMapStringIface(),
 	}

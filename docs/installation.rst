@@ -33,7 +33,7 @@ In a nutshell all the dependencies are installed and used from a folder named *v
 
 First we have to setup the GO Lang to our OS. Feel free to download 
 the latest GO binary release from https://golang.org/dl/
-In this Tutorial we are going to install Go 1.11.0.
+In this Tutorial we are going to install Go 1.11
 
 ::
 

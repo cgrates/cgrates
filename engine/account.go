@@ -1085,12 +1085,19 @@ func (acnt *Account) Publish() {
 			utils.Account:       acntTnt.ID,
 			utils.AllowNegative: acnt.AllowNegative,
 			utils.Disabled:      acnt.Disabled}}
-	var tIDs []string
 	if statS != nil {
 		var reply []string
-		go statS.Call(utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{CGREvent: cgrEv}, &reply)
+		go func() {
+			if err := statS.Call(utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{CGREvent: cgrEv}, &reply); err != nil &&
+				err.Error() != utils.ErrNotFound.Error() {
+				utils.Logger.Warning(
+					fmt.Sprintf("<AccountS> error: %s processing balance event %+v with StatS.",
+						err.Error(), cgrEv))
+			}
+		}()
 	}
 	if thresholdS != nil {
+		var tIDs []string
 		if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent,
 			&ArgsProcessEvent{CGREvent: cgrEv}, &tIDs); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
