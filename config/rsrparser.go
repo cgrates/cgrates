@@ -207,6 +207,11 @@ type RSRParser struct {
 	filters    utils.RSRFilters         // The value to compare when used as filter
 }
 
+// AttrName exports the attribute name of the RSRParser
+func (prsr *RSRParser) AttrName() string {
+	return prsr.attrName
+}
+
 // Compile parses Rules string and repopulates other fields
 func (prsr *RSRParser) Compile() (err error) {
 	var newPrsr *RSRParser

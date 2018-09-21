@@ -151,14 +151,53 @@ func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err 
 		return nil, err
 	}
 	err = nil // cancel previous err
+	// lastPath can contain selector inside
+	lastPath := fldPath[len(fldPath)-1]
+	var slctr *config.RSRParser
+	if splt := strings.Split(lastPath, "["); len(splt) != 1 {
+		lastPath = splt[0]
+		if splt[1][len(splt[1])-1:] != "]" {
+			return nil, fmt.Errorf("filter rule <%s> needs to end in ]", splt[1])
+		}
+		fltrStr := splt[1][:len(splt[1])-1] // also strip the last ]
+		if slctr, err = config.NewRSRParser(fltrStr, true); err != nil {
+			return nil, err
+		}
+	}
+	pathIface := utils.SliceStringToIface(fldPath)
+	if slctr != nil { // last path was having selector inside before
+		pathIface[len(pathIface)-1] = lastPath
+	}
 	var avps []*diam.AVP
 	if avps, err = dP.m.FindAVPsWithPath(
-		utils.SliceStringToIface(fldPath), dict.UndefinedVendorID); err != nil {
+		pathIface, dict.UndefinedVendorID); err != nil {
 		return nil, err
 	} else if len(avps) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	if data, err = diamAVPAsIface(avps[0]); err != nil {
+	slectedIdx := 0 // by default we select AVP[0]
+	if len(avps) != 1 && slctr != nil {
+		pathIface[len(pathIface)-1] = slctr.AttrName() // search for AVPs which are having common path but different end element
+		fltrAVPs, err := dP.m.FindAVPsWithPath(pathIface, dict.UndefinedVendorID)
+		if err != nil {
+			return nil, err
+		} else if len(fltrAVPs) == 0 || len(fltrAVPs) != len(avps) {
+			return nil, utils.ErrFilterNotPassingNoCaps
+		}
+		for k, fAVP := range fltrAVPs {
+			if dataAVP, err := diamAVPAsIface(fAVP); err != nil {
+				return nil, err
+			} else if _, err := slctr.ParseValue(dataAVP); err != nil { // filter not passing
+				if err != utils.ErrFilterNotPassingNoCaps {
+					return nil, err
+				}
+				continue // filter not passing, not really error
+			} else {
+				slectedIdx = k // filter passing, found our match, select the index of AVP to return
+			}
+		}
+	}
+	if data, err = diamAVPAsIface(avps[slectedIdx]); err != nil {
 		return nil, err
 	}
 	dP.cache.Set(fldPath, data, false)
