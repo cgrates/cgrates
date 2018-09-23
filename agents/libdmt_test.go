@@ -69,7 +69,14 @@ func TestDPFieldAsInterface(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", eOut, out)
 	}
 	eOut = interface{}("208708000003") // with filter on second group item
-	if out, err := dP.FieldAsInterface([]string{"Subscription-Id", "Subscription-Id-Data[~Subscription-Id-Type(1)]"}); err != nil {
+	if out, err := dP.FieldAsInterface([]string{"Subscription-Id",
+		"Subscription-Id-Data[1]"}); err != nil { // on index
+		t.Error(err)
+	} else if eOut != out {
+		t.Errorf("Expecting: %v, received: %v", eOut, out)
+	}
+	if out, err := dP.FieldAsInterface([]string{"Subscription-Id",
+		"Subscription-Id-Data[~Subscription-Id-Type(1)]"}); err != nil { // on filter
 		t.Error(err)
 	} else if eOut != out {
 		t.Errorf("Expecting: %v, received: %v", eOut, out)
