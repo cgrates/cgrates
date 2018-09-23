@@ -486,7 +486,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for tenatid, attrPrf := range loader.attributeProfiles {
-		rcv, err := loader.dm.GetAttributeProfile(tenatid.Tenant, tenatid.ID, true, utils.NonTransactional)
+		rcv, err := loader.dm.GetAttributeProfile(tenatid.Tenant, tenatid.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Errorf("Failed GetAttributeProfile, tenant: %s, id: %s,  error: %s ", attrPrf.Tenant, attrPrf.ID, err.Error())
 		}

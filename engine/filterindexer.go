@@ -147,7 +147,7 @@ func (rfi *FilterIndexer) RemoveItemFromIndex(tenant, itemID string, oldFilters 
 			}
 		}
 	case utils.AttributeProfilePrefix:
-		attrPrf, err := rfi.dm.GetAttributeProfile(tenant, itemID, false, utils.NonTransactional)
+		attrPrf, err := rfi.dm.GetAttributeProfile(tenant, itemID, true, false, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
 			return err
 		}

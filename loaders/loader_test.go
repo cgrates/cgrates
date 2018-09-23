@@ -127,7 +127,7 @@ cgrates.org,TestLoader1,lcr,*string:Account:1008;*string:Account:1009,,Subject,*
 		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
 	}
 	if ap, err := ldr.dm.GetAttributeProfile("cgrates.org", "TestLoader1",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eAP.Attributes, ap.Attributes) {
 		t.Errorf("expecting: %s, received: %s",
@@ -216,7 +216,7 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
 	}
 	if ap, err := ldr.dm.GetAttributeProfile("cgrates.org", "TestLoader2",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eAP.Attributes, ap.Attributes) {
 		t.Errorf("expecting: %s, received: %s",

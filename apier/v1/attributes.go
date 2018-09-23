@@ -28,7 +28,7 @@ func (apierV1 *ApierV1) GetAttributeProfile(arg utils.TenantID, reply *engine.At
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if alsPrf, err := apierV1.DataManager.GetAttributeProfile(arg.Tenant, arg.ID, false, utils.NonTransactional); err != nil {
+	if alsPrf, err := apierV1.DataManager.GetAttributeProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
