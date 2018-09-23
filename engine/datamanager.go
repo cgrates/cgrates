@@ -241,7 +241,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.GetSupplierProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		case utils.AttributeProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetAttributeProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+			_, err = dm.GetAttributeProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.ChargerProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetChargerProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
@@ -1139,10 +1139,10 @@ func (dm *DataManager) RemoveSupplierProfile(tenant, id, transactionID string, w
 	return
 }
 
-func (dm *DataManager) GetAttributeProfile(tenant, id string, skipCache bool,
+func (dm *DataManager) GetAttributeProfile(tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (attrPrfl *AttributeProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
+	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheAttributeProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
@@ -1152,7 +1152,7 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, skipCache bool,
 	}
 	attrPrfl, err = dm.dataDB.GetAttributeProfileDrv(tenant, id)
 	if err != nil {
-		if err == utils.ErrNotFound {
+		if err == utils.ErrNotFound && cacheWrite {
 			Cache.Set(utils.CacheAttributeProfiles, tntID, nil, nil,
 				cacheCommit(transactionID), transactionID)
 		}
@@ -1161,13 +1161,15 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, skipCache bool,
 	if err = attrPrfl.Compile(); err != nil {
 		return nil, err
 	}
-	Cache.Set(utils.CacheAttributeProfiles, tntID, attrPrfl, nil,
-		cacheCommit(transactionID), transactionID)
+	if cacheWrite {
+		Cache.Set(utils.CacheAttributeProfiles, tntID, attrPrfl, nil,
+			cacheCommit(transactionID), transactionID)
+	}
 	return
 }
 
 func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool) (err error) {
-	oldAP, err := dm.GetAttributeProfile(ap.Tenant, ap.ID, false, utils.NonTransactional)
+	oldAP, err := dm.GetAttributeProfile(ap.Tenant, ap.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -1210,7 +1212,7 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 
 func (dm *DataManager) RemoveAttributeProfile(tenant, id string, contexts []string,
 	transactionID string, withIndex bool) (err error) {
-	oldAttr, err := dm.GetAttributeProfile(tenant, id, true, utils.NonTransactional)
+	oldAttr, err := dm.GetAttributeProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}

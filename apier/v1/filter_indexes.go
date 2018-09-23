@@ -250,7 +250,7 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	if attrIndexes != nil {
 		if err := attrIndexes.StoreIndexes(true, transactionID); err != nil {
 			for _, id := range *args.AttributeIDs {
-				ap, err := self.DataManager.GetAttributeProfile(args.Tenant, id, false, utils.NonTransactional)
+				ap, err := self.DataManager.GetAttributeProfile(args.Tenant, id, true, false, utils.NonTransactional)
 				if err != nil {
 					return err
 				}
@@ -364,7 +364,7 @@ func (self *ApierV1) computeAttributeIndexes(tenant string, attrIDs *[]string,
 		transactionID = utils.NonTransactional
 	}
 	for _, id := range attributeIDs {
-		ap, err := self.DataManager.GetAttributeProfile(tenant, id, false, utils.NonTransactional)
+		ap, err := self.DataManager.GetAttributeProfile(tenant, id, true, false, utils.NonTransactional)
 		if err != nil {
 			return nil, err
 		}

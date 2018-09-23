@@ -2489,7 +2489,7 @@ func testOnStorITAttributeProfile(t *testing.T) {
 		attributesIdx: mapSubstitutes,
 	}
 	if _, rcvErr := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
-		false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
@@ -2497,14 +2497,14 @@ func testOnStorITAttributeProfile(t *testing.T) {
 	}
 	//get from cache
 	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
 	}
 	//get from database
 	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
-		true, utils.NonTransactional); err != nil {
+		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
@@ -2523,14 +2523,14 @@ func testOnStorITAttributeProfile(t *testing.T) {
 	time.Sleep(sleepDelay)
 	//get from cache
 	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
 	}
 	//get from database
 	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
-		true, utils.NonTransactional); err != nil {
+		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
@@ -2541,12 +2541,12 @@ func testOnStorITAttributeProfile(t *testing.T) {
 	}
 	//check cache if removed
 	if _, rcvErr := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
-		false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	//check database if removed
 	if _, rcvErr := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
-		true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		false, true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }
@@ -2581,7 +2581,7 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 		attributesIdx: mapSubstitutes,
 	}
 	if _, rcvErr := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
-		false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
@@ -2589,14 +2589,14 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	}
 	//check cache
 	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
 	}
 	//check database
 	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
-		true, utils.NonTransactional); err != nil {
+		false, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
@@ -2622,14 +2622,14 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	attrProfile.attributesIdx = mapSubstitutes
 	//check cache
 	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(attrProfile), utils.ToJSON(rcv))
 	}
 	//check database
 	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
-		true, utils.NonTransactional); err != nil {
+		false, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(attrProfile), utils.ToJSON(rcv))
@@ -2655,14 +2655,14 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	attrProfile.attributesIdx = mapSubstitutes
 	//check cache
 	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(attrProfile), utils.ToJSON(rcv))
 	}
 	//check database
 	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
-		true, utils.NonTransactional); err != nil {
+		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(attrProfile), utils.ToJSON(rcv))
