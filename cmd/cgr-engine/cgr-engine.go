@@ -278,9 +278,12 @@ func startAsteriskAgent(internalSMGChan chan rpcclient.RpcClientConnection, exit
 	exitChan <- true
 }
 
-func startDiameterAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
+func startDiameterAgent(internalSMGChan chan rpcclient.RpcClientConnection,
+	exitChan chan bool, filterSChan chan *engine.FilterS) {
 	var err error
 	utils.Logger.Info("Starting CGRateS DiameterAgent service")
+	filterS := <-filterSChan
+	filterSChan <- filterS
 	var smgConn *rpcclient.RpcClientPool
 	if len(cfg.DiameterAgentCfg().SessionSConns) != 0 {
 		smgConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
@@ -293,7 +296,7 @@ func startDiameterAgent(internalSMGChan chan rpcclient.RpcClientConnection, exit
 			return
 		}
 	}
-	da, err := agents.NewDiameterAgent(cfg, smgConn)
+	da, err := agents.NewDiameterAgent(cfg, filterS, smgConn)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> error: %s!", err))
 		exitChan <- true
@@ -1289,7 +1292,7 @@ func main() {
 	}
 
 	if cfg.DiameterAgentCfg().Enabled {
-		go startDiameterAgent(internalSMGChan, exitChan)
+		go startDiameterAgent(internalSMGChan, exitChan, filterSChan)
 	}
 
 	if cfg.RadiusAgentCfg().Enabled {
