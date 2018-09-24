@@ -27,11 +27,12 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func newAgentRequest(req config.DataProvider, tntTpl config.RSRParsers,
+func newAgentRequest(req config.DataProvider, vars map[string]interface{},
+	tntTpl config.RSRParsers,
 	dfltTenant string, filterS *engine.FilterS) (ar *AgentRequest) {
 	ar = &AgentRequest{
 		Request:    req,
-		Vars:       config.NewNavigableMap(nil),
+		Vars:       config.NewNavigableMap(vars),
 		CGRRequest: config.NewNavigableMap(nil),
 		CGRReply:   config.NewNavigableMap(nil),
 		Reply:      config.NewNavigableMap(nil),

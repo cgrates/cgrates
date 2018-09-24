@@ -519,6 +519,9 @@ const (
 	DynamicDataPrefix            = "~"
 	AttrValueSep                 = "="
 	ANDSep                       = "&"
+	PipeSep                      = "|"
+	MetaApp                      = "*app"
+	MetaCmd                      = "*cmd"
 )
 
 // Migrator Action

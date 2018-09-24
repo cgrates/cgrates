@@ -82,15 +82,32 @@ func (da *DiameterAgent) handlers() diam.Handler {
 
 // handleALL is the handler of all messages coming in via Diameter
 func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
+	dApp, err := m.Dictionary().App(m.Header.ApplicationID)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> decoding app: %d, err: %s",
+			utils.DiameterAgent, m.Header.ApplicationID, err.Error()))
+		return
+	}
+	dCmd, err := m.Dictionary().FindCommand(
+		m.Header.ApplicationID,
+		m.Header.CommandCode)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> decoding app: %d, command %d, err: %s",
+			utils.DiameterAgent, m.Header.ApplicationID, m.Header.CommandCode, err.Error()))
+		return
+	}
+	reqVars := map[string]interface{}{
+		utils.MetaApp: dApp.Name,
+		utils.MetaCmd: dCmd.Short + "R",
+	}
 	var processed bool
 	var rply *diam.Message
-	var err error
 	for _, reqProcessor := range da.cgrCfg.DiameterAgentCfg().RequestProcessors {
 		var lclProcessed bool
 		lclProcessed, err = da.processRequest(
 			reqProcessor,
 			newAgentRequest(
-				newDADataProvider(m),
+				newDADataProvider(m), reqVars,
 				reqProcessor.Tenant, da.cgrCfg.DefaultTenant, da.filterS),
 			rply)
 		if lclProcessed {
