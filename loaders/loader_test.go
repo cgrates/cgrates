@@ -919,7 +919,7 @@ cgrates.org,SPL_LEASTCOST_1,,,,,supplier2,,,RP_RETAIL1,resource_spl2,,20,,,
 		Weight: 10,
 	}
 	if aps, err := ldr.dm.GetSupplierProfile("cgrates.org", "SPL_WEIGHT_2",
-		false, utils.NonTransactional); err != nil {
+		true, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSp1, aps) {
 		t.Errorf("expecting: %s, received: %s",
@@ -927,7 +927,7 @@ cgrates.org,SPL_LEASTCOST_1,,,,,supplier2,,,RP_RETAIL1,resource_spl2,,20,,,
 	}
 
 	if aps, err := ldr.dm.GetSupplierProfile("cgrates.org", "SPL_LEASTCOST_1",
-		false, utils.NonTransactional); err != nil {
+		true, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSp3, aps) && !reflect.DeepEqual(eSp3reverse, aps) {
 		t.Errorf("expecting: %s, received: %s",

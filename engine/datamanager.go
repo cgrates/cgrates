@@ -238,7 +238,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.GetFilter(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		case utils.SupplierProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetSupplierProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+			_, err = dm.GetSupplierProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.AttributeProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetAttributeProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
@@ -1068,10 +1068,10 @@ func (dm *DataManager) GetAllCdrStats() (css []*CdrStats, err error) {
 	return dm.DataDB().GetAllCdrStatsDrv()
 }
 
-func (dm *DataManager) GetSupplierProfile(tenant, id string, skipCache bool,
+func (dm *DataManager) GetSupplierProfile(tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (supp *SupplierProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
+	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheSupplierProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
@@ -1081,19 +1081,21 @@ func (dm *DataManager) GetSupplierProfile(tenant, id string, skipCache bool,
 	}
 	supp, err = dm.dataDB.GetSupplierProfileDrv(tenant, id)
 	if err != nil {
-		if err == utils.ErrNotFound {
+		if err == utils.ErrNotFound && cacheWrite {
 			Cache.Set(utils.CacheSupplierProfiles, tntID, nil, nil,
 				cacheCommit(transactionID), transactionID)
 		}
 		return nil, err
 	}
-	Cache.Set(utils.CacheSupplierProfiles, tntID, supp, nil,
-		cacheCommit(transactionID), transactionID)
+	if cacheWrite {
+		Cache.Set(utils.CacheSupplierProfiles, tntID, supp, nil,
+			cacheCommit(transactionID), transactionID)
+	}
 	return
 }
 
 func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool) (err error) {
-	oldSup, err := dm.GetSupplierProfile(supp.Tenant, supp.ID, false, utils.NonTransactional)
+	oldSup, err := dm.GetSupplierProfile(supp.Tenant, supp.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -1124,7 +1126,7 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 }
 
 func (dm *DataManager) RemoveSupplierProfile(tenant, id, transactionID string, withIndex bool) (err error) {
-	oldSupp, err := dm.GetSupplierProfile(tenant, id, false, utils.NonTransactional)
+	oldSupp, err := dm.GetSupplierProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}

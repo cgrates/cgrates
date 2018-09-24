@@ -180,7 +180,7 @@ func (rfi *FilterIndexer) RemoveItemFromIndex(tenant, itemID string, oldFilters 
 			}
 		}
 	case utils.SupplierProfilePrefix:
-		spp, err := rfi.dm.GetSupplierProfile(tenant, itemID, false, utils.NonTransactional)
+		spp, err := rfi.dm.GetSupplierProfile(tenant, itemID, true, false, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
 			return err
 		}
