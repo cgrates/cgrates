@@ -235,7 +235,7 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	if sppIndexes != nil {
 		if err := sppIndexes.StoreIndexes(true, transactionID); err != nil {
 			for _, id := range *args.SupplierIDs {
-				spp, err := self.DataManager.GetSupplierProfile(args.Tenant, id, false, utils.NonTransactional)
+				spp, err := self.DataManager.GetSupplierProfile(args.Tenant, id, true, false, utils.NonTransactional)
 				if err != nil {
 					return err
 				}
@@ -565,7 +565,7 @@ func (self *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string,
 		transactionID = utils.NonTransactional
 	}
 	for _, id := range supplierIDs {
-		spp, err := self.DataManager.GetSupplierProfile(tenant, id, false, utils.NonTransactional)
+		spp, err := self.DataManager.GetSupplierProfile(tenant, id, true, false, utils.NonTransactional)
 		if err != nil {
 			return nil, err
 		}

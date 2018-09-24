@@ -427,7 +427,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 		[]string{"*rsr::~Test(~^\\w{30,})"}, config.NewNavigableMap(ev)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
-		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 
 	ev = map[string]interface{}{
@@ -451,6 +451,20 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+
+	ev = map[string]interface{}{
+		utils.Account:     "1003",
+		utils.Subject:     "1003",
+		utils.Destination: "1002",
+		utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+		utils.Usage:       "1m20s",
+	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*string:Account:1003", "*prefix:Destination:10", "*rsr::~Destination(1002)"}, config.NewNavigableMap(ev)); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 
 }

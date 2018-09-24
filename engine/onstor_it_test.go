@@ -2377,7 +2377,7 @@ func testOnStorITSupplierProfile(t *testing.T) {
 		Weight: 20,
 	}
 	if _, rcvErr := onStor.GetSupplierProfile("cgrates.org", "SPRF_1",
-		false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.SetSupplierProfile(splProfile, false); err != nil {
@@ -2385,14 +2385,14 @@ func testOnStorITSupplierProfile(t *testing.T) {
 	}
 	//get from cache
 	if rcv, err := onStor.GetSupplierProfile("cgrates.org", "SPRF_1",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(splProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", splProfile, rcv)
 	}
 	//get from database
 	if rcv, err := onStor.GetSupplierProfile("cgrates.org", "SPRF_1",
-		true, utils.NonTransactional); err != nil {
+		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(splProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", splProfile, rcv)
@@ -2432,14 +2432,14 @@ func testOnStorITSupplierProfile(t *testing.T) {
 	time.Sleep(sleepDelay)
 	//get from cache
 	if rcv, err := onStor.GetSupplierProfile("cgrates.org", "SPRF_1",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(splProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", splProfile, rcv)
 	}
 	//get from database
 	if rcv, err := onStor.GetSupplierProfile("cgrates.org", "SPRF_1",
-		true, utils.NonTransactional); err != nil {
+		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(splProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", splProfile, rcv)
@@ -2450,12 +2450,12 @@ func testOnStorITSupplierProfile(t *testing.T) {
 	}
 	//check cache if removed
 	if _, rcvErr := onStor.GetSupplierProfile("cgrates.org", "SPRF_1",
-		false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	//check database if removed
 	if _, rcvErr := onStor.GetSupplierProfile("cgrates.org", "SPRF_1",
-		true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		false, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }
