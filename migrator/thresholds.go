@@ -77,7 +77,7 @@ func (m *Migrator) migrateCurrentThresholds() (err error) {
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.ThresholdProfilePrefix+tenant+":")
-		ths, err := m.dmIN.DataManager().GetThresholdProfile(tenant, idg, true, utils.NonTransactional)
+		ths, err := m.dmIN.DataManager().GetThresholdProfile(tenant, idg, false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}

@@ -575,14 +575,14 @@ cgrates.org,THD_ACNT_1002,*string:Account:1002,2014-07-29T15:00:00Z,-1,1,1s,true
 		Async:     true,
 	}
 	if aps, err := ldr.dm.GetThresholdProfile("cgrates.org", "THD_ACNT_1001",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTh1, aps) {
 		t.Errorf("expecting: %s, received: %s",
 			utils.ToJSON(eTh1), utils.ToJSON(aps))
 	}
 	if aps, err := ldr.dm.GetThresholdProfile("cgrates.org", "THD_ACNT_1002",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTh2, aps) {
 		t.Errorf("expecting: %s, received: %s",

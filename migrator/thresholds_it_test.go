@@ -283,7 +283,7 @@ func testTrsITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when migrating Thresholds ", err.Error())
 		}
-		result, err := trsMigrator.dmOut.DataManager().GetThresholdProfile(tresProf.Tenant, tresProf.ID, false, utils.NonTransactional)
+		result, err := trsMigrator.dmOut.DataManager().GetThresholdProfile(tresProf.Tenant, tresProf.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Error("Error when getting Thresholds ", err.Error())
 		}
@@ -318,7 +318,7 @@ func testTrsITMigrateAndMove(t *testing.T) {
 			t.Error("Error when migrating Thresholds ", err.Error())
 		}
 
-		result, err = trsMigrator.dmOut.DataManager().GetThresholdProfile(tresProf2.Tenant, tresProf2.ID, false, utils.NonTransactional)
+		result, err = trsMigrator.dmOut.DataManager().GetThresholdProfile(tresProf2.Tenant, tresProf2.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Error("Error when getting Thresholds ", err.Error())
 		}
@@ -326,7 +326,7 @@ func testTrsITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expectong: %+v, received: %+v", utils.ToJSON(tresProf2), utils.ToJSON(result))
 		}
 
-		result, err = trsMigrator.dmOut.DataManager().GetThresholdProfile(tresProf3.Tenant, tresProf3.ID, false, utils.NonTransactional)
+		result, err = trsMigrator.dmOut.DataManager().GetThresholdProfile(tresProf3.Tenant, tresProf3.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Error("Error when getting Thresholds ", err.Error())
 		}
@@ -343,11 +343,11 @@ func testTrsITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when setting version for Thresholds ", err.Error())
 		}
-		err, _ = trsMigrator.Migrate([]string{utils.MetaSharedGroups})
+		err, _ = trsMigrator.Migrate([]string{utils.MetaThresholds})
 		if err != nil {
 			t.Error("Error when migrating Thresholds ", err.Error())
 		}
-		result, err := trsMigrator.dmOut.DataManager().GetThresholdProfile(tresProf.Tenant, tresProf.ID, false, utils.NonTransactional)
+		result, err := trsMigrator.dmOut.DataManager().GetThresholdProfile(tresProf.Tenant, tresProf.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Error("Error when getting Thresholds ", err.Error())
 		}

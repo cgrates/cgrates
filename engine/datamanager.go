@@ -229,7 +229,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.GetTiming(dataID, true, utils.NonTransactional)
 		case utils.ThresholdProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetThresholdProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+			_, err = dm.GetThresholdProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.ThresholdPrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetThreshold(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
@@ -395,10 +395,10 @@ func (dm *DataManager) RemoveThreshold(tenant, id, transactionID string) (err er
 	return
 }
 
-func (dm *DataManager) GetThresholdProfile(tenant, id string, skipCache bool,
+func (dm *DataManager) GetThresholdProfile(tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (th *ThresholdProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
+	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheThresholdProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
@@ -408,19 +408,21 @@ func (dm *DataManager) GetThresholdProfile(tenant, id string, skipCache bool,
 	}
 	th, err = dm.dataDB.GetThresholdProfileDrv(tenant, id)
 	if err != nil {
-		if err == utils.ErrNotFound {
+		if err == utils.ErrNotFound && cacheWrite {
 			Cache.Set(utils.CacheThresholdProfiles, tntID, nil, nil,
 				cacheCommit(transactionID), transactionID)
 		}
 		return nil, err
 	}
-	Cache.Set(utils.CacheThresholdProfiles, tntID, th, nil,
-		cacheCommit(transactionID), transactionID)
+	if cacheWrite {
+		Cache.Set(utils.CacheThresholdProfiles, tntID, th, nil,
+			cacheCommit(transactionID), transactionID)
+	}
 	return
 }
 
 func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool) (err error) {
-	oldTh, err := dm.GetThresholdProfile(th.Tenant, th.ID, false, utils.NonTransactional)
+	oldTh, err := dm.GetThresholdProfile(th.Tenant, th.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -453,7 +455,7 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 
 func (dm *DataManager) RemoveThresholdProfile(tenant, id,
 	transactionID string, withIndex bool) (err error) {
-	oldTh, err := dm.GetThresholdProfile(tenant, id, false, utils.NonTransactional)
+	oldTh, err := dm.GetThresholdProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
