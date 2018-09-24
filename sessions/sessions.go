@@ -495,7 +495,7 @@ func (smg *SMGeneric) v1ForkSessions(tnt string, evStart *engine.SafEvent,
 		return nil, err
 	}
 	noneSession := []*SMGSession{
-		&SMGSession{Tenant: tnt, CGRID: cgrID,
+		{Tenant: tnt, CGRID: cgrID,
 			ResourceID: resourceID, EventStart: evStart,
 			RunID: utils.META_NONE, Timezone: smg.Timezone,
 			rals: smg.rals, cdrsrv: smg.cdrsrv,
@@ -537,7 +537,7 @@ func (smg *SMGeneric) v2ForkSessions(tnt string, evStart *engine.SafEvent,
 		return nil, err
 	}
 	noneSession := []*SMGSession{
-		&SMGSession{CGRID: cgrID, ResourceID: resourceID, EventStart: evStart,
+		{CGRID: cgrID, ResourceID: resourceID, EventStart: evStart,
 			RunID: utils.META_NONE, Timezone: smg.Timezone,
 			rals: smg.rals, cdrsrv: smg.cdrsrv,
 			clntConn: clntConn}}
@@ -1587,29 +1587,31 @@ type V1AuthorizeReply struct {
 func (v1AuthReply *V1AuthorizeReply) AsNavigableMap(
 	ignr []*config.CfgCdrField) (*config.NavigableMap, error) {
 	cgrReply := make(map[string]interface{})
-	if v1AuthReply.Attributes != nil {
-		attrs := make(map[string]interface{})
-		for _, fldName := range v1AuthReply.Attributes.AlteredFields {
-			if v1AuthReply.Attributes.CGREvent.HasField(fldName) {
-				attrs[fldName] = v1AuthReply.Attributes.CGREvent.Event[fldName]
+	if v1AuthReply != nil {
+		if v1AuthReply.Attributes != nil {
+			attrs := make(map[string]interface{})
+			for _, fldName := range v1AuthReply.Attributes.AlteredFields {
+				if v1AuthReply.Attributes.CGREvent.HasField(fldName) {
+					attrs[fldName] = v1AuthReply.Attributes.CGREvent.Event[fldName]
+				}
 			}
+			cgrReply[utils.CapAttributes] = attrs
 		}
-		cgrReply[utils.CapAttributes] = attrs
-	}
-	if v1AuthReply.ResourceAllocation != nil {
-		cgrReply[utils.CapResourceAllocation] = *v1AuthReply.ResourceAllocation
-	}
-	if v1AuthReply.MaxUsage != nil {
-		cgrReply[utils.CapMaxUsage] = *v1AuthReply.MaxUsage
-	}
-	if v1AuthReply.Suppliers != nil {
-		cgrReply[utils.CapSuppliers] = v1AuthReply.Suppliers.Digest()
-	}
-	if v1AuthReply.ThresholdIDs != nil {
-		cgrReply[utils.CapThresholds] = *v1AuthReply.ThresholdIDs
-	}
-	if v1AuthReply.StatQueueIDs != nil {
-		cgrReply[utils.CapStatQueues] = *v1AuthReply.StatQueueIDs
+		if v1AuthReply.ResourceAllocation != nil {
+			cgrReply[utils.CapResourceAllocation] = *v1AuthReply.ResourceAllocation
+		}
+		if v1AuthReply.MaxUsage != nil {
+			cgrReply[utils.CapMaxUsage] = *v1AuthReply.MaxUsage
+		}
+		if v1AuthReply.Suppliers != nil {
+			cgrReply[utils.CapSuppliers] = v1AuthReply.Suppliers.Digest()
+		}
+		if v1AuthReply.ThresholdIDs != nil {
+			cgrReply[utils.CapThresholds] = *v1AuthReply.ThresholdIDs
+		}
+		if v1AuthReply.StatQueueIDs != nil {
+			cgrReply[utils.CapStatQueues] = *v1AuthReply.StatQueueIDs
+		}
 	}
 	return config.NewNavigableMap(cgrReply), nil
 }
@@ -1810,26 +1812,28 @@ type V1InitSessionReply struct {
 func (v1Rply *V1InitSessionReply) AsNavigableMap(
 	ignr []*config.CfgCdrField) (*config.NavigableMap, error) {
 	cgrReply := make(map[string]interface{})
-	if v1Rply.Attributes != nil {
-		attrs := make(map[string]interface{})
-		for _, fldName := range v1Rply.Attributes.AlteredFields {
-			if v1Rply.Attributes.CGREvent.HasField(fldName) {
-				attrs[fldName] = v1Rply.Attributes.CGREvent.Event[fldName]
+	if v1Rply != nil {
+		if v1Rply.Attributes != nil {
+			attrs := make(map[string]interface{})
+			for _, fldName := range v1Rply.Attributes.AlteredFields {
+				if v1Rply.Attributes.CGREvent.HasField(fldName) {
+					attrs[fldName] = v1Rply.Attributes.CGREvent.Event[fldName]
+				}
 			}
+			cgrReply[utils.CapAttributes] = attrs
 		}
-		cgrReply[utils.CapAttributes] = attrs
-	}
-	if v1Rply.ResourceAllocation != nil {
-		cgrReply[utils.CapResourceAllocation] = *v1Rply.ResourceAllocation
-	}
-	if v1Rply.MaxUsage != nil {
-		cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
-	}
-	if v1Rply.ThresholdIDs != nil {
-		cgrReply[utils.CapThresholds] = *v1Rply.ThresholdIDs
-	}
-	if v1Rply.StatQueueIDs != nil {
-		cgrReply[utils.CapStatQueues] = *v1Rply.StatQueueIDs
+		if v1Rply.ResourceAllocation != nil {
+			cgrReply[utils.CapResourceAllocation] = *v1Rply.ResourceAllocation
+		}
+		if v1Rply.MaxUsage != nil {
+			cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
+		}
+		if v1Rply.ThresholdIDs != nil {
+			cgrReply[utils.CapThresholds] = *v1Rply.ThresholdIDs
+		}
+		if v1Rply.StatQueueIDs != nil {
+			cgrReply[utils.CapStatQueues] = *v1Rply.StatQueueIDs
+		}
 	}
 	return config.NewNavigableMap(cgrReply), nil
 }
@@ -2001,17 +2005,19 @@ type V1UpdateSessionReply struct {
 func (v1Rply *V1UpdateSessionReply) AsNavigableMap(
 	ignr []*config.CfgCdrField) (*config.NavigableMap, error) {
 	cgrReply := make(map[string]interface{})
-	if v1Rply.Attributes != nil {
-		attrs := make(map[string]interface{})
-		for _, fldName := range v1Rply.Attributes.AlteredFields {
-			if v1Rply.Attributes.CGREvent.HasField(fldName) {
-				attrs[fldName] = v1Rply.Attributes.CGREvent.Event[fldName]
+	if v1Rply != nil {
+		if v1Rply.Attributes != nil {
+			attrs := make(map[string]interface{})
+			for _, fldName := range v1Rply.Attributes.AlteredFields {
+				if v1Rply.Attributes.CGREvent.HasField(fldName) {
+					attrs[fldName] = v1Rply.Attributes.CGREvent.Event[fldName]
+				}
 			}
+			cgrReply[utils.CapAttributes] = attrs
 		}
-		cgrReply[utils.CapAttributes] = attrs
-	}
-	if v1Rply.MaxUsage != nil {
-		cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
+		if v1Rply.MaxUsage != nil {
+			cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
+		}
 	}
 	return config.NewNavigableMap(cgrReply), nil
 }
@@ -2187,20 +2193,22 @@ type V1ProcessEventReply struct {
 func (v1Rply *V1ProcessEventReply) AsNavigableMap(
 	ignr []*config.CfgCdrField) (*config.NavigableMap, error) {
 	cgrReply := make(map[string]interface{})
-	if v1Rply.MaxUsage != nil {
-		cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
-	}
-	if v1Rply.ResourceAllocation != nil {
-		cgrReply[utils.CapResourceAllocation] = *v1Rply.ResourceAllocation
-	}
-	if v1Rply.Attributes != nil {
-		attrs := make(map[string]interface{})
-		for _, fldName := range v1Rply.Attributes.AlteredFields {
-			if v1Rply.Attributes.CGREvent.HasField(fldName) {
-				attrs[fldName] = v1Rply.Attributes.CGREvent.Event[fldName]
-			}
+	if v1Rply != nil {
+		if v1Rply.MaxUsage != nil {
+			cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
 		}
-		cgrReply[utils.CapAttributes] = attrs
+		if v1Rply.ResourceAllocation != nil {
+			cgrReply[utils.CapResourceAllocation] = *v1Rply.ResourceAllocation
+		}
+		if v1Rply.Attributes != nil {
+			attrs := make(map[string]interface{})
+			for _, fldName := range v1Rply.Attributes.AlteredFields {
+				if v1Rply.Attributes.CGREvent.HasField(fldName) {
+					attrs[fldName] = v1Rply.Attributes.CGREvent.Event[fldName]
+				}
+			}
+			cgrReply[utils.CapAttributes] = attrs
+		}
 	}
 	return config.NewNavigableMap(cgrReply), nil
 }
