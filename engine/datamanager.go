@@ -244,7 +244,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.GetAttributeProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.ChargerProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetChargerProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+			_, err = dm.GetChargerProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.DataManager,
@@ -1234,10 +1234,10 @@ func (dm *DataManager) RemoveAttributeProfile(tenant, id string, contexts []stri
 	return
 }
 
-func (dm *DataManager) GetChargerProfile(tenant, id string, skipCache bool,
+func (dm *DataManager) GetChargerProfile(tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (cpp *ChargerProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
+	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheChargerProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
@@ -1247,19 +1247,21 @@ func (dm *DataManager) GetChargerProfile(tenant, id string, skipCache bool,
 	}
 	cpp, err = dm.dataDB.GetChargerProfileDrv(tenant, id)
 	if err != nil {
-		if err == utils.ErrNotFound {
+		if err == utils.ErrNotFound && cacheWrite {
 			Cache.Set(utils.CacheChargerProfiles, tntID, nil, nil,
 				cacheCommit(transactionID), transactionID)
 		}
 		return nil, err
 	}
-	Cache.Set(utils.CacheChargerProfiles, tntID, cpp, nil,
-		cacheCommit(transactionID), transactionID)
+	if cacheWrite {
+		Cache.Set(utils.CacheChargerProfiles, tntID, cpp, nil,
+			cacheCommit(transactionID), transactionID)
+	}
 	return
 }
 
 func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (err error) {
-	oldCpp, err := dm.GetChargerProfile(cpp.Tenant, cpp.ID, true, utils.NonTransactional)
+	oldCpp, err := dm.GetChargerProfile(cpp.Tenant, cpp.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -1291,7 +1293,7 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 
 func (dm *DataManager) RemoveChargerProfile(tenant, id string,
 	transactionID string, withIndex bool) (err error) {
-	oldCpp, err := dm.GetChargerProfile(tenant, id, true, utils.NonTransactional)
+	oldCpp, err := dm.GetChargerProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}

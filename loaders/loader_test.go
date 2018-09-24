@@ -1030,13 +1030,13 @@ cgrates.org,Charge2,*string:Account:1003,2014-07-29T15:00:00Z,*default,Attr3,10
 		Weight:       10,
 	}
 	if rcv, err := ldr.dm.GetChargerProfile("cgrates.org", "Charge1",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCharger1, rcv) && !reflect.DeepEqual(eCharger1Rev, rcv) {
 		t.Errorf("expecting: %s, received: %s", utils.ToJSON(eCharger1), utils.ToJSON(rcv))
 	}
 	if rcv, err := ldr.dm.GetChargerProfile("cgrates.org", "Charge2",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCharger2, rcv) {
 		t.Errorf("expecting: %+v, received: %+v", eCharger2, rcv)

@@ -2682,7 +2682,7 @@ func testOnStorITChargerProfile(t *testing.T) {
 		Weight:       20,
 	}
 	if _, rcvErr := onStor.GetChargerProfile("cgrates.org", "CPP_1",
-		false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.SetChargerProfile(cpp, false); err != nil {
@@ -2690,14 +2690,14 @@ func testOnStorITChargerProfile(t *testing.T) {
 	}
 	//get from cache
 	if rcv, err := onStor.GetChargerProfile("cgrates.org", "CPP_1",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(cpp, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", cpp, rcv)
 	}
 	//get from database
 	if rcv, err := onStor.GetChargerProfile("cgrates.org", "CPP_1",
-		true, utils.NonTransactional); err != nil {
+		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(cpp, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", cpp, rcv)
@@ -2716,14 +2716,14 @@ func testOnStorITChargerProfile(t *testing.T) {
 	time.Sleep(sleepDelay)
 	//get from cache
 	if rcv, err := onStor.GetChargerProfile("cgrates.org", "CPP_1",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(cpp, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", cpp, rcv)
 	}
 	//get from database
 	if rcv, err := onStor.GetChargerProfile("cgrates.org", "CPP_1",
-		true, utils.NonTransactional); err != nil {
+		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(cpp, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", cpp, rcv)
@@ -2734,12 +2734,12 @@ func testOnStorITChargerProfile(t *testing.T) {
 	}
 	//check cache if removed
 	if _, rcvErr := onStor.GetChargerProfile("cgrates.org", "CPP_1",
-		false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	//check database if removed
 	if _, rcvErr := onStor.GetChargerProfile("cgrates.org", "CPP_1",
-		true, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		false, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }
