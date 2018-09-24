@@ -534,7 +534,7 @@ func TestResourceAddResourceProfile(t *testing.T) {
 	//Test each resourceProfile from cache
 	for _, resPrf := range resprf {
 		if tempRes, err := dmRES.GetResourceProfile(resPrf.Tenant,
-			resPrf.ID, false, utils.NonTransactional); err != nil {
+			resPrf.ID, true, false, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(resPrf, tempRes) {
 			t.Errorf("Expecting: %+v, received: %+v", resPrf, tempRes)

@@ -167,7 +167,7 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(500) * time.Millisecond)
-	if len(*reply) != 2 {
+	if len(*reply) != 1 {
 		t.Errorf("Expecting: %+v, received: %+v", 2, len(*reply))
 	}
 

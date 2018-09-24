@@ -62,7 +62,7 @@ func (apierV1 *ApierV1) GetResourceProfile(arg utils.TenantID, reply *engine.Res
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if rcfg, err := apierV1.DataManager.GetResourceProfile(arg.Tenant, arg.ID, false, utils.NonTransactional); err != nil {
+	if rcfg, err := apierV1.DataManager.GetResourceProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}

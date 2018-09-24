@@ -158,7 +158,7 @@ func (rfi *FilterIndexer) RemoveItemFromIndex(tenant, itemID string, oldFilters 
 			}
 		}
 	case utils.ResourceProfilesPrefix:
-		res, err := rfi.dm.GetResourceProfile(tenant, itemID, false, utils.NonTransactional)
+		res, err := rfi.dm.GetResourceProfile(tenant, itemID, true, false, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
 			return err
 		}

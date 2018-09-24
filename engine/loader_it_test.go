@@ -431,7 +431,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for tenantid, rl := range loader.resProfiles {
-		rcv, err := loader.dm.GetResourceProfile(tenantid.Tenant, tenantid.ID, true, utils.NonTransactional)
+		rcv, err := loader.dm.GetResourceProfile(tenantid.Tenant, tenantid.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Error("Failed GetResourceProfile: ", err.Error())
 		}

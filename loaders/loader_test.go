@@ -332,14 +332,14 @@ cgrates.org,ResGroup2,*string:Account:1002,2014-07-29T15:00:00Z,3600s,2,premium_
 		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
 	}
 	if resPrf, err := ldr.dm.GetResourceProfile("cgrates.org", "ResGroup1",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eResPrf1, resPrf) {
 		t.Errorf("expecting: %s, received: %s",
 			utils.ToJSON(eResPrf1), utils.ToJSON(resPrf))
 	}
 	if resPrf, err := ldr.dm.GetResourceProfile("cgrates.org", "ResGroup2",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eResPrf2, resPrf) {
 		t.Errorf("expecting: %s, received: %s",

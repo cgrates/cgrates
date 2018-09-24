@@ -449,7 +449,7 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent, usageTT
 		return nil, err
 	}
 	for resName := range rIDs {
-		rPrf, err := rS.dm.GetResourceProfile(ev.Tenant, resName, false, utils.NonTransactional)
+		rPrf, err := rS.dm.GetResourceProfile(ev.Tenant, resName, true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue

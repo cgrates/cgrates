@@ -220,7 +220,7 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	if rsIndexes != nil {
 		if err := rsIndexes.StoreIndexes(true, transactionID); err != nil {
 			for _, id := range *args.ResourceIDs {
-				rp, err := self.DataManager.GetResourceProfile(args.Tenant, id, false, utils.NonTransactional)
+				rp, err := self.DataManager.GetResourceProfile(args.Tenant, id, true, false, utils.NonTransactional)
 				if err != nil {
 					return err
 				}
@@ -431,7 +431,7 @@ func (self *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string,
 		transactionID = utils.NonTransactional
 	}
 	for _, id := range resourceIDs {
-		rp, err := self.DataManager.GetResourceProfile(tenant, id, false, utils.NonTransactional)
+		rp, err := self.DataManager.GetResourceProfile(tenant, id, true, false, utils.NonTransactional)
 		if err != nil {
 			return nil, err
 		}
