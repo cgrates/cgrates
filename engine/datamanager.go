@@ -215,7 +215,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.DataDB().GetReverseAlias(dataID, true, utils.NonTransactional)
 		case utils.ResourceProfilesPrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetResourceProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+			_, err = dm.GetResourceProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.ResourcesPrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetResource(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
@@ -626,10 +626,10 @@ func (dm *DataManager) RemoveResource(tenant, id, transactionID string) (err err
 	return
 }
 
-func (dm *DataManager) GetResourceProfile(tenant, id string,
-	skipCache bool, transactionID string) (rp *ResourceProfile, err error) {
+func (dm *DataManager) GetResourceProfile(tenant, id string, cacheRead, cacheWrite bool,
+	transactionID string) (rp *ResourceProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
+	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheResourceProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
@@ -639,19 +639,21 @@ func (dm *DataManager) GetResourceProfile(tenant, id string,
 	}
 	rp, err = dm.dataDB.GetResourceProfileDrv(tenant, id)
 	if err != nil {
-		if err == utils.ErrNotFound {
+		if err == utils.ErrNotFound && cacheWrite {
 			Cache.Set(utils.CacheResourceProfiles, tntID, nil, nil,
 				cacheCommit(transactionID), transactionID)
 		}
 		return nil, err
 	}
-	Cache.Set(utils.CacheResourceProfiles, tntID, rp, nil,
-		cacheCommit(transactionID), transactionID)
+	if cacheWrite {
+		Cache.Set(utils.CacheResourceProfiles, tntID, rp, nil,
+			cacheCommit(transactionID), transactionID)
+	}
 	return
 }
 
 func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (err error) {
-	oldRes, err := dm.GetResourceProfile(rp.Tenant, rp.ID, false, utils.NonTransactional)
+	oldRes, err := dm.GetResourceProfile(rp.Tenant, rp.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -687,7 +689,7 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 }
 
 func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string, withIndex bool) (err error) {
-	oldRes, err := dm.GetResourceProfile(tenant, id, false, utils.NonTransactional)
+	oldRes, err := dm.GetResourceProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}

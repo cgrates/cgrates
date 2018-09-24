@@ -34,7 +34,7 @@
 "cdrs": {
 	"enabled": true,
 	"chargers_conns":[
-		{"address": "127.0.0.1:2012", "transport": "*json"},
+		{"address": "*internal"}
 	],
 },
 
@@ -42,7 +42,7 @@
 "chargers": {
 	"enabled": true,
 	"attributes_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "*internal"}
 	],
 },
 
@@ -67,7 +67,7 @@
 	"enabled": true,
 	"store_interval": "1s",
 	"thresholds_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "*internal"}
 	],
 },
 
@@ -81,28 +81,28 @@
 	"enabled": true,
 	"session_ttl": "50ms",
 	"chargers_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "*internal"}
 	],
 	"rals_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "*internal"}
 	],
 	"cdrs_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "*internal"}
 	],
 	"resources_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "*internal"}
 	],
 	"thresholds_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "*internal"}
 	],
 	"stats_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "*internal"}
 	],
 	"suppliers_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "*internal"}
 	],
 	"attributes_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "*internal"}
 	],
 },
 
