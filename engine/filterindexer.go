@@ -169,7 +169,7 @@ func (rfi *FilterIndexer) RemoveItemFromIndex(tenant, itemID string, oldFilters 
 			}
 		}
 	case utils.StatQueueProfilePrefix:
-		stq, err := rfi.dm.GetStatQueueProfile(tenant, itemID, false, utils.NonTransactional)
+		stq, err := rfi.dm.GetStatQueueProfile(tenant, itemID, true, false, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
 			return err
 		}

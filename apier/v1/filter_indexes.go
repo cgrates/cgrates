@@ -205,7 +205,7 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	if sqpIndexers != nil {
 		if err := sqpIndexers.StoreIndexes(true, transactionID); err != nil {
 			for _, id := range *args.StatIDs {
-				sqp, err := self.DataManager.GetStatQueueProfile(args.Tenant, id, false, utils.NonTransactional)
+				sqp, err := self.DataManager.GetStatQueueProfile(args.Tenant, id, true, false, utils.NonTransactional)
 				if err != nil {
 					return err
 				}
@@ -498,7 +498,7 @@ func (self *ApierV1) computeStatIndexes(tenant string, stIDs *[]string,
 		transactionID = utils.NonTransactional
 	}
 	for _, id := range statIDs {
-		sqp, err := self.DataManager.GetStatQueueProfile(tenant, id, false, utils.NonTransactional)
+		sqp, err := self.DataManager.GetStatQueueProfile(tenant, id, true, false, utils.NonTransactional)
 		if err != nil {
 			return nil, err
 		}

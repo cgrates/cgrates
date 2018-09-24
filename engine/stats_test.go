@@ -238,7 +238,7 @@ func TestStatQueuesPopulateStatsService(t *testing.T) {
 	//Test each statQueueProfile from cache
 	for _, sqp := range sqps {
 		if tempStat, err := dmSTS.GetStatQueueProfile(sqp.Tenant,
-			sqp.ID, false, utils.NonTransactional); err != nil {
+			sqp.ID, true, false, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(sqp, tempStat) {
 			t.Errorf("Expecting: %+v, received: %+v", sqp, tempStat)
