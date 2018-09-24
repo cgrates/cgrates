@@ -214,7 +214,7 @@ func TestThresholdsCache(t *testing.T) {
 	//Test each threshold profile from cache
 	for _, th := range tPrfls {
 		if temptTh, err := dmTH.GetThresholdProfile(th.Tenant,
-			th.ID, false, utils.NonTransactional); err != nil {
+			th.ID, true, false, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(th, temptTh) {
 			t.Errorf("Expecting: %+v, received: %+v", th, temptTh)

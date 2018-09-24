@@ -231,7 +231,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 		tIDs = tIDsMap.Slice()
 	}
 	for _, tID := range tIDs {
-		tPrfl, err := tS.dm.GetThresholdProfile(args.Tenant, tID, false, utils.NonTransactional)
+		tPrfl, err := tS.dm.GetThresholdProfile(args.Tenant, tID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue

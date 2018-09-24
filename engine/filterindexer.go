@@ -136,7 +136,7 @@ func (rfi *FilterIndexer) RemoveItemFromIndex(tenant, itemID string, oldFilters 
 	var filterIDs []string
 	switch rfi.itemType {
 	case utils.ThresholdProfilePrefix:
-		th, err := rfi.dm.GetThresholdProfile(tenant, itemID, false, utils.NonTransactional)
+		th, err := rfi.dm.GetThresholdProfile(tenant, itemID, true, false, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
 			return err
 		}

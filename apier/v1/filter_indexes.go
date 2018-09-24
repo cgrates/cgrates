@@ -189,7 +189,7 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 		if err := thdsIndexers.StoreIndexes(true, transactionID); err != nil {
 			if args.ThresholdIDs != nil {
 				for _, id := range *args.ThresholdIDs {
-					th, err := self.DataManager.GetThresholdProfile(args.Tenant, id, false, utils.NonTransactional)
+					th, err := self.DataManager.GetThresholdProfile(args.Tenant, id, true, false, utils.NonTransactional)
 					if err != nil {
 						return err
 					}
@@ -297,7 +297,7 @@ func (self *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string,
 		transactionID = utils.NonTransactional
 	}
 	for _, id := range thresholdIDs {
-		th, err := self.DataManager.GetThresholdProfile(tenant, id, false, utils.NonTransactional)
+		th, err := self.DataManager.GetThresholdProfile(tenant, id, true, false, utils.NonTransactional)
 		if err != nil {
 			return nil, err
 		}
