@@ -58,9 +58,9 @@ func TestDPFieldAsInterface(t *testing.T) {
 		}})
 	m.NewAVP("Subscription-Id", avp.Mbit, 0, &diam.GroupedAVP{
 		AVP: []*diam.AVP{
-			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(1)),              // Subscription-Id-Type
+			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(2)),              // Subscription-Id-Type
 			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("208708000004")), // Subscription-Id-Data
-			diam.NewAVP(avp.ValueDigits, avp.Mbit, 0, datatype.Integer64(30000)),
+			diam.NewAVP(avp.ValueDigits, avp.Mbit, 0, datatype.Integer64(20000)),
 		}})
 
 	dP := newDADataProvider(m)
@@ -86,12 +86,12 @@ func TestDPFieldAsInterface(t *testing.T) {
 	if out, err := dP.FieldAsInterface([]string{"Subscription-Id",
 		"Subscription-Id-Data[~Subscription-Id-Type(1)]"}); err != nil { // on filter
 		t.Error(err)
-	} else if eOut != out {
-		t.Errorf("Expecting: %v, received: %v", eOut, out)
+	} else if out != eOut { // can be any result since both entries are matching single filter
+		t.Errorf("expecting: %v, received: %v", eOut, out)
 	}
 	eOut = interface{}("208708000004")
 	if out, err := dP.FieldAsInterface([]string{"Subscription-Id",
-		"Subscription-Id-Data[~Subscription-Id-Type(1)|~Value-Digits(30000)]"}); err != nil { // on multiple filter
+		"Subscription-Id-Data[~Subscription-Id-Type(2)|~Value-Digits(20000)]"}); err != nil { // on multiple filter
 		t.Error(err)
 	} else if eOut != out {
 		t.Errorf("Expecting: %v, received: %v", eOut, out)
