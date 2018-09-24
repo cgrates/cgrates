@@ -109,6 +109,14 @@ func diamAVPAsIface(dAVP *diam.AVP) (val interface{}, err error) {
 	}
 }
 
+// writeOnConn writes the message on connection, logs failures
+func writeOnConn(c diam.Conn, m *diam.Message) {
+	if _, err := m.WriteTo(c); err != nil {
+		utils.Logger.Warning(fmt.Sprintf("<%s> failed writing message to %s, err: %s, msg: %s",
+			utils.DiameterAgent, c.RemoteAddr(), err.Error(), m))
+	}
+}
+
 // newDADataProvider constructs a DataProvider for a diameter message
 func newDADataProvider(m *diam.Message) config.DataProvider {
 	return &diameterDP{m: m, cache: config.NewNavigableMap(nil)}
@@ -176,8 +184,8 @@ func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err 
 	slectedIdx := 0 // by default we select AVP[0]
 	if slctrStr != "" {
 		if slectedIdx, err = strconv.Atoi(slctrStr); err != nil { // not int, compile it as RSRParser
-			selIndxs := make(map[int][]struct{}) // use it to find intersection of all matched filters
-			slctrStrs := strings.Split(slctrStr, "|")
+			selIndxs := make(map[int]int) // use it to find intersection of all matched filters
+			slctrStrs := strings.Split(slctrStr, utils.PipeSep)
 			for _, slctrStr := range slctrStrs {
 				slctr, err := config.NewRSRParser(slctrStr, true)
 				if err != nil {
@@ -199,15 +207,15 @@ func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err 
 						}
 						continue // filter not passing, not really error
 					} else {
-						selIndxs[k] = append(selIndxs[k], struct{}{}) // filter passing, index it
+						selIndxs[k+1] += 1 // filter passing, index it with one higher to cover 0
 					}
 				}
 			}
 			var oneMatches bool
-			for idx, matches := range selIndxs {
-				if len(matches) == len(slctrStrs) { // all filters in selection matching
+			for k, matches := range selIndxs {
+				if matches == len(slctrStrs) { // all filters in selection matching
 					oneMatches = true
-					slectedIdx = idx
+					slectedIdx = k - 1 // decrease it to reflect real index
 					break
 				}
 			}

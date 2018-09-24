@@ -86,14 +86,16 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> decoding app: %d, err: %s",
 			utils.DiameterAgent, m.Header.ApplicationID, err.Error()))
+		writeOnConn(c, m.Answer(diam.NoCommonApplication))
 		return
 	}
 	dCmd, err := m.Dictionary().FindCommand(
 		m.Header.ApplicationID,
 		m.Header.CommandCode)
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> decoding app: %d, command %d, err: %s",
+		utils.Logger.Warning(fmt.Sprintf("<%s> decoding app: %d, command %d, err: %s",
 			utils.DiameterAgent, m.Header.ApplicationID, m.Header.CommandCode, err.Error()))
+		writeOnConn(c, m.Answer(diam.CommandUnsupported))
 		return
 	}
 	reqVars := map[string]interface{}{
@@ -122,11 +124,13 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s processing message: %s",
 				utils.DiameterAgent, err.Error(), m))
-		return // FixMe with returning some error on HTTP level
+		writeOnConn(c, m.Answer(diam.UnableToDeliver))
+		return
 	} else if !processed {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> no request processor enabled, ignoring message %s from %s",
 				utils.DiameterAgent, m, c.RemoteAddr()))
+		writeOnConn(c, m.Answer(diam.UnableToDeliver))
 		return
 	}
 }
