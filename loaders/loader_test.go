@@ -719,7 +719,7 @@ cgrates.org,Stats1,*string:Account:1003,2014-07-29T15:00:00Z,100,1s,*sum;*averag
 		ThresholdIDs: []string{"THRESH1", "THRESH2"},
 	}
 	if aps, err := ldr.dm.GetStatQueueProfile("cgrates.org", "Stats1",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSt1.Tenant, aps.Tenant) {
 		t.Errorf("expecting: %s, received: %s", eSt1.Tenant, aps.Tenant)

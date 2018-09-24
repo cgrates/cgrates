@@ -159,7 +159,7 @@ func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (
 		sqIDs = mapIDs.Slice()
 	}
 	for _, sqID := range sqIDs {
-		sqPrfl, err := sS.dm.GetStatQueueProfile(args.Tenant, sqID, false, utils.NonTransactional)
+		sqPrfl, err := sS.dm.GetStatQueueProfile(args.Tenant, sqID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
