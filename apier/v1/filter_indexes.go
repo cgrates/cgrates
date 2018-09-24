@@ -265,7 +265,7 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	if cppIndexes != nil {
 		if err := attrIndexes.StoreIndexes(true, transactionID); err != nil {
 			for _, id := range *args.ChargerIDs {
-				cpp, err := self.DataManager.GetChargerProfile(args.Tenant, id, false, utils.NonTransactional)
+				cpp, err := self.DataManager.GetChargerProfile(args.Tenant, id, true, false, utils.NonTransactional)
 				if err != nil {
 					return err
 				}
@@ -632,7 +632,7 @@ func (self *ApierV1) computeChargerIndexes(tenant string, cppIDs *[]string,
 		transactionID = utils.NonTransactional
 	}
 	for _, id := range chargerIDs {
-		cpp, err := self.DataManager.GetChargerProfile(tenant, id, false, utils.NonTransactional)
+		cpp, err := self.DataManager.GetChargerProfile(tenant, id, true, false, utils.NonTransactional)
 		if err != nil {
 			return nil, err
 		}

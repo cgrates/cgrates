@@ -176,7 +176,7 @@ func TestChargerSetChargerProfiles(t *testing.T) {
 	//verify each charger from cache
 	for _, cp := range cPPs {
 		if tempCp, err := dmCharger.GetChargerProfile(cp.Tenant, cp.ID,
-			false, utils.NonTransactional); err != nil {
+			true, true, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(cp, tempCp) {
 			t.Errorf("Expecting: %+v, received: %+v", cp, tempCp)

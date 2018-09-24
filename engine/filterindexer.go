@@ -191,7 +191,7 @@ func (rfi *FilterIndexer) RemoveItemFromIndex(tenant, itemID string, oldFilters 
 			}
 		}
 	case utils.ChargerProfilePrefix:
-		cpp, err := rfi.dm.GetChargerProfile(tenant, itemID, false, utils.NonTransactional)
+		cpp, err := rfi.dm.GetChargerProfile(tenant, itemID, true, false, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
 			return err
 		}
