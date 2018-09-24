@@ -48,11 +48,19 @@ func TestDPFieldAsInterface(t *testing.T) {
 		AVP: []*diam.AVP{
 			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(0)),             // Subscription-Id-Type
 			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("33708000003")), // Subscription-Id-Data
+			diam.NewAVP(avp.ValueDigits, avp.Mbit, 0, datatype.Integer64(10000)),
 		}})
 	m.NewAVP("Subscription-Id", avp.Mbit, 0, &diam.GroupedAVP{
 		AVP: []*diam.AVP{
 			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(1)),              // Subscription-Id-Type
 			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("208708000003")), // Subscription-Id-Data
+			diam.NewAVP(avp.ValueDigits, avp.Mbit, 0, datatype.Integer64(20000)),
+		}})
+	m.NewAVP("Subscription-Id", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(1)),              // Subscription-Id-Type
+			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("208708000004")), // Subscription-Id-Data
+			diam.NewAVP(avp.ValueDigits, avp.Mbit, 0, datatype.Integer64(30000)),
 		}})
 
 	dP := newDADataProvider(m)
@@ -77,6 +85,13 @@ func TestDPFieldAsInterface(t *testing.T) {
 	}
 	if out, err := dP.FieldAsInterface([]string{"Subscription-Id",
 		"Subscription-Id-Data[~Subscription-Id-Type(1)]"}); err != nil { // on filter
+		t.Error(err)
+	} else if eOut != out {
+		t.Errorf("Expecting: %v, received: %v", eOut, out)
+	}
+	eOut = interface{}("208708000004")
+	if out, err := dP.FieldAsInterface([]string{"Subscription-Id",
+		"Subscription-Id-Data[~Subscription-Id-Type(1)|~Value-Digits(30000)]"}); err != nil { // on multiple filter
 		t.Error(err)
 	} else if eOut != out {
 		t.Errorf("Expecting: %v, received: %v", eOut, out)

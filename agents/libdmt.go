@@ -176,30 +176,43 @@ func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err 
 	slectedIdx := 0 // by default we select AVP[0]
 	if slctrStr != "" {
 		if slectedIdx, err = strconv.Atoi(slctrStr); err != nil { // not int, compile it as RSRParser
-			var slctr config.RSRParsers
-			if slctr, err = config.NewRSRParsersFromSlice(strings.Split(slctrStr, "|"), true); err != nil {
-				return nil, err
-			} else if len(slctr) == 0 {
-				return nil, fmt.Errorf("unsupported filter selector: <%s>", slctrStr)
-			}
-			pathIface[len(pathIface)-1] = slctr[0].AttrName() // search for AVPs which are having common path but different end element
-			fltrAVPs, err := dP.m.FindAVPsWithPath(pathIface, dict.UndefinedVendorID)
-			if err != nil {
-				return nil, err
-			} else if len(fltrAVPs) == 0 || len(fltrAVPs) != len(avps) {
-				return nil, utils.ErrFilterNotPassingNoCaps
-			}
-			for k, fAVP := range fltrAVPs {
-				if dataAVP, err := diamAVPAsIface(fAVP); err != nil {
+			selIndxs := make(map[int][]struct{}) // use it to find intersection of all matched filters
+			slctrStrs := strings.Split(slctrStr, "|")
+			for _, slctrStr := range slctrStrs {
+				slctr, err := config.NewRSRParser(slctrStr, true)
+				if err != nil {
 					return nil, err
-				} else if _, err := slctr.ParseValue(dataAVP); err != nil { // filter not passing
-					if err != utils.ErrFilterNotPassingNoCaps {
-						return nil, err
-					}
-					continue // filter not passing, not really error
-				} else {
-					slectedIdx = k // filter passing, found our match, select the index of AVP to return
 				}
+				pathIface[len(pathIface)-1] = slctr.AttrName() // search for AVPs which are having common path but different end element
+				fltrAVPs, err := dP.m.FindAVPsWithPath(pathIface, dict.UndefinedVendorID)
+				if err != nil {
+					return nil, err
+				} else if len(fltrAVPs) == 0 || len(fltrAVPs) != len(avps) {
+					return nil, utils.ErrFilterNotPassingNoCaps
+				}
+				for k, fAVP := range fltrAVPs {
+					if dataAVP, err := diamAVPAsIface(fAVP); err != nil {
+						return nil, err
+					} else if _, err := slctr.ParseValue(dataAVP); err != nil {
+						if err != utils.ErrFilterNotPassingNoCaps {
+							return nil, err
+						}
+						continue // filter not passing, not really error
+					} else {
+						selIndxs[k] = append(selIndxs[k], struct{}{}) // filter passing, index it
+					}
+				}
+			}
+			var oneMatches bool
+			for idx, matches := range selIndxs {
+				if len(matches) == len(slctrStrs) { // all filters in selection matching
+					oneMatches = true
+					slectedIdx = idx
+					break
+				}
+			}
+			if !oneMatches {
+				return nil, utils.ErrFilterNotPassingNoCaps
 			}
 		}
 	}
