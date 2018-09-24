@@ -176,11 +176,13 @@ func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err 
 	slectedIdx := 0 // by default we select AVP[0]
 	if slctrStr != "" {
 		if slectedIdx, err = strconv.Atoi(slctrStr); err != nil { // not int, compile it as RSRParser
-			var slctr *config.RSRParser
-			if slctr, err = config.NewRSRParser(slctrStr, true); err != nil {
+			var slctr config.RSRParsers
+			if slctr, err = config.NewRSRParsersFromSlice(strings.Split(slctrStr, "|"), true); err != nil {
 				return nil, err
+			} else if len(slctr) == 0 {
+				return nil, fmt.Errorf("unsupported filter selector: <%s>", slctrStr)
 			}
-			pathIface[len(pathIface)-1] = slctr.AttrName() // search for AVPs which are having common path but different end element
+			pathIface[len(pathIface)-1] = slctr[0].AttrName() // search for AVPs which are having common path but different end element
 			fltrAVPs, err := dP.m.FindAVPsWithPath(pathIface, dict.UndefinedVendorID)
 			if err != nil {
 				return nil, err
