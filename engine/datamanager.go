@@ -232,7 +232,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.GetThresholdProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.ThresholdPrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetThreshold(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+			_, err = dm.GetThreshold(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.FilterPrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetFilter(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
@@ -353,9 +353,9 @@ func (dm *DataManager) RemoveFilter(tenant, id, transactionID string) (err error
 }
 
 func (dm *DataManager) GetThreshold(tenant, id string,
-	skipCache bool, transactionID string) (th *Threshold, err error) {
+	cacheRead, cacheWrite bool, transactionID string) (th *Threshold, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
+	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheThresholds, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
@@ -365,14 +365,16 @@ func (dm *DataManager) GetThreshold(tenant, id string,
 	}
 	th, err = dm.dataDB.GetThresholdDrv(tenant, id)
 	if err != nil {
-		if err == utils.ErrNotFound {
+		if err == utils.ErrNotFound && cacheWrite {
 			Cache.Set(utils.CacheThresholds, tntID, nil, nil,
 				cacheCommit(transactionID), transactionID)
 		}
 		return nil, err
 	}
-	Cache.Set(utils.CacheThresholds, tntID, th, nil,
-		cacheCommit(transactionID), transactionID)
+	if cacheWrite {
+		Cache.Set(utils.CacheThresholds, tntID, th, nil,
+			cacheCommit(transactionID), transactionID)
+	}
 	return
 }
 
