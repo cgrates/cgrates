@@ -69,7 +69,7 @@ func (m *Migrator) migrateCurrentStats() (err error) {
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.StatQueuePrefix+tenant+":")
-		sgs, err := m.dmIN.DataManager().GetStatQueue(tenant, idg, true, utils.NonTransactional)
+		sgs, err := m.dmIN.DataManager().GetStatQueue(tenant, idg, false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}

@@ -2029,7 +2029,7 @@ func testOnStorITStatQueue(t *testing.T) {
 		},
 	}
 	if _, rcvErr := onStor.GetStatQueue(sq.Tenant, sq.ID,
-		false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		true, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.SetStatQueue(sq); err != nil {
@@ -2037,14 +2037,14 @@ func testOnStorITStatQueue(t *testing.T) {
 	}
 	//get from cache
 	if rcv, err := onStor.GetStatQueue(sq.Tenant,
-		sq.ID, false, utils.NonTransactional); err != nil {
+		sq.ID, true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sq, rcv) {
 		t.Errorf("Expecting: %v, received: %v", sq, rcv)
 	}
 	//get from database
 	if rcv, err := onStor.GetStatQueue(sq.Tenant,
-		sq.ID, true, utils.NonTransactional); err != nil {
+		sq.ID, false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sq, rcv) {
 		t.Errorf("Expecting: %v, received: %v", sq, rcv)
@@ -2073,14 +2073,14 @@ func testOnStorITStatQueue(t *testing.T) {
 	time.Sleep(sleepDelay)
 	//get from cache
 	if rcv, err := onStor.GetStatQueue(sq.Tenant,
-		sq.ID, false, utils.NonTransactional); err != nil {
+		sq.ID, true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sq, rcv) {
 		t.Errorf("Expecting: %v, received: %v", sq, rcv)
 	}
 	//get from database
 	if rcv, err := onStor.GetStatQueue(sq.Tenant,
-		sq.ID, true, utils.NonTransactional); err != nil {
+		sq.ID, false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sq, rcv) {
 		t.Errorf("Expecting: %v, received: %v", sq, rcv)
@@ -2091,12 +2091,12 @@ func testOnStorITStatQueue(t *testing.T) {
 	}
 	//check cache if removed
 	if _, rcvErr := onStor.GetStatQueue(sq.Tenant,
-		sq.ID, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		sq.ID, true, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	//check database if removed
 	if _, rcvErr := onStor.GetStatQueue(sq.Tenant,
-		sq.ID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		sq.ID, false, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }
