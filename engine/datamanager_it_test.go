@@ -99,7 +99,7 @@ func testDMitCRUDStatQueue(t *testing.T) {
 			},
 		},
 	}
-	if _, rcvErr := dm2.GetStatQueue(sq.Tenant, sq.ID, false, ""); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := dm2.GetStatQueue(sq.Tenant, sq.ID, true, false, ""); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if _, ok := Cache.Get(utils.CacheStatQueues, sq.TenantID()); ok != false {
@@ -111,7 +111,7 @@ func testDMitCRUDStatQueue(t *testing.T) {
 	if _, ok := Cache.Get(utils.CacheStatQueues, sq.TenantID()); ok != false {
 		t.Error("should not be in cache")
 	}
-	if rcv, err := dm2.GetStatQueue(sq.Tenant, sq.ID, false, ""); err != nil {
+	if rcv, err := dm2.GetStatQueue(sq.Tenant, sq.ID, true, false, ""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sq, rcv) {
 		t.Errorf("expecting: %v, received: %v", sq, rcv)
@@ -125,7 +125,7 @@ func testDMitCRUDStatQueue(t *testing.T) {
 	if _, ok := Cache.Get(utils.CacheStatQueues, sq.TenantID()); ok != false {
 		t.Error("should not be in cache")
 	}
-	if _, rcvErr := dm2.GetStatQueue(sq.Tenant, sq.ID, false, ""); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := dm2.GetStatQueue(sq.Tenant, sq.ID, true, false, ""); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }
