@@ -1,7 +1,7 @@
 {
 
 // Real-time Charging System for Telecom & ISP environments
-// Copyright (C) ITsysCOM GmbH
+// Copyright (C) ITsysCOM GmbH 
 
 "stor_db": {								// database used to store offline tariff plans and CDRs
 	"db_password": "CGRateS.org",			// password to use when connecting to stordb
@@ -42,12 +42,12 @@
 		],
 	},
 	{
-              "id": "msw_xml",                                                               // identifier of the CDRC runner
+                    "id": "msw_xml",                                                               // identifier of the CDRC runner
               "enabled": true,                                                               // enable CDR client functionality
               "cdr_format": "xml",                                                    // CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore|partial_csv.
               "cdr_in_dir": "/tmp/cdrcxmlwithfilters2/xmlit2/in",
  			        "cdr_out_dir": "/tmp/cdrcxmlwithfilters2/xmlit2/out",
-              "cdr_path": "File.CDRs.Call",                                                                 // path towards one CDR element in case of XML CDRs
+              "cdr_path": "File.CDRs.Call",                                                                // path towards one CDR element in case of XML CDRs
               "cdr_source_id": "zw_cfs1",                              // free form field, tag identifying the source of the CDRs within CDRS database
          	    "content_fields":[                                                    // import content_fields template, id will match internally CDR field, in case of .csv value will be represented by index of the field value
                         {"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},
@@ -89,6 +89,29 @@
                         {"tag": "Usage", "field_id": "Usage", "type": "*handler", "handler_id": "*substract_usage", "value": "~File.CDRs.Call.ReleaseTime;|;~File.CDRs.Call.ConnectTime", "mandatory": true}
                 ],
       },
+        {
+    "id": "XMLWithFilterID",
+    "enabled": true,  
+    "cdr_format": "xml",
+    "cdr_in_dir": "/tmp/cdrcxmlwithfilters/xmlit5/in",
+    "cdr_out_dir": "/tmp/cdrcxmlwithfilters/xmlit5/out",
+    "cdr_path": "broadWorksCDR.cdrData",
+    "cdr_source_id": "xmlit1",
+    "filters": ["FLTR_XML"],
+    "content_fields":[              // import content_fields template, id will match internally CDR field, in case of .csv value will be represented by index of the field value
+      {"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},
+      {"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~broadWorksCDR.cdrData.basicModule.localCallId", "mandatory": true},
+      {"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "*rated", "mandatory": true},
+      {"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "*out", "mandatory": true},
+      {"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~broadWorksCDR.cdrData.basicModule.userId:s/.*@(.*)/${1}/", "mandatory": true},
+      {"tag": "Category", "field_id": "Category", "type": "*composed", "value": "call", "mandatory": true},
+      {"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~broadWorksCDR.cdrData.basicModule.userNumber", "mandatory": true},
+      {"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~broadWorksCDR.cdrData.basicModule.calledNumber", "mandatory": true},
+      {"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~broadWorksCDR.cdrData.basicModule.startTime", "mandatory": true},
+      {"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~broadWorksCDR.cdrData.basicModule.answerTime", "mandatory": true},
+      {"tag": "Usage", "field_id": "Usage", "type": "*handler", "handler_id": "*substract_usage", "value": "~broadWorksCDR.cdrData.basicModule.releaseTime;|;~broadWorksCDR.cdrData.basicModule.answerTime", "mandatory": true},
+    ],
+  },      
 ],
 
 
