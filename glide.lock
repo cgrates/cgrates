@@ -105,6 +105,8 @@ imports:
   - internal/scram
 - name: github.com/dlintw/goconf
   version: dcc070983490608a14480e3bf943bad464785df5
-- name: github.com/beevik/etree
-  version: 90dafc1e1f114dfb9576218bb43c03fb854d1b34
+- name: github.com/antchfx/xmlquery
+  version: 07935b1c0f2e6f0efa02c98cd70e223d70218955
+- name: github.com/antchfx/xpath
+  version: 3de91f3991a1af6e495d49c9218318b5544b20e3
 testImports: []
