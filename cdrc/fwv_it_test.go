@@ -257,3 +257,112 @@ func TestFwvit2KillEngine(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+// Begin tests for cdrc fwv with new filters
+func TestFwvit3InitCfg(t *testing.T) {
+	var err error
+	fwvCfgPath = path.Join(*dataDir, "conf", "samples", "cdrcfwvwithfilter")
+	if fwvCfg, err = config.NewCGRConfigFromFolder(fwvCfgPath); err != nil {
+		t.Fatal("Got config error: ", err.Error())
+	}
+}
+
+// InitDb so we can rely on count
+func TestFwvit3InitCdrDb(t *testing.T) {
+	if err := engine.InitStorDb(fwvCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Creates cdr files and moves them into processing folder
+func TestFwvit3CreateCdrFiles(t *testing.T) {
+	if fwvCfg == nil {
+		t.Fatal("Empty default cdrc configuration")
+	}
+	for _, cdrcCfg := range fwvCfg.CdrcProfiles["/tmp/cgr_fwv/cdrc/in"] {
+		if cdrcCfg.ID == "FWVWithFilterID" {
+			fwvCdrcCfg = cdrcCfg
+		}
+	}
+	if err := os.RemoveAll(fwvCdrcCfg.CdrInDir); err != nil {
+		t.Fatal("Error removing folder: ", fwvCdrcCfg.CdrInDir, err)
+	}
+	if err := os.MkdirAll(fwvCdrcCfg.CdrInDir, 0755); err != nil {
+		t.Fatal("Error creating folder: ", fwvCdrcCfg.CdrInDir, err)
+	}
+	if err := os.RemoveAll(fwvCdrcCfg.CdrOutDir); err != nil {
+		t.Fatal("Error removing folder: ", fwvCdrcCfg.CdrOutDir, err)
+	}
+	if err := os.MkdirAll(fwvCdrcCfg.CdrOutDir, 0755); err != nil {
+		t.Fatal("Error creating folder: ", fwvCdrcCfg.CdrOutDir, err)
+	}
+}
+
+func TestFwvit3StartEngine(t *testing.T) {
+	if _, err := engine.StopStartEngine(fwvCfgPath, *waitRater); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Connect rpc client to rater
+func TestFwvit3RpcConn(t *testing.T) {
+	var err error
+	fwvRpc, err = jsonrpc.Dial("tcp", fwvCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	if err != nil {
+		t.Fatal("Could not connect to rater: ", err.Error())
+	}
+}
+
+func TestFwvit3AddFilters(t *testing.T) {
+	filter := &engine.Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_FWV",
+		Rules: []*engine.FilterRule{
+			{
+				Type:      "*string",
+				FieldName: "0-10",
+				Values:    []string{"CDR0000010"},
+			},
+		},
+	}
+	var result string
+	if err := fwvRpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+}
+
+func TestFwvit3ProcessFiles(t *testing.T) {
+	fileName := "test1.fwv"
+	if err := ioutil.WriteFile(path.Join("/tmp", fileName), []byte(FW_CDR_FILE1), 0644); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := os.Rename(path.Join("/tmp", fileName), path.Join(fwvCdrcCfg.CdrInDir, fileName)); err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(time.Duration(1) * time.Second)
+	filesInDir, _ := ioutil.ReadDir(fwvCdrcCfg.CdrInDir)
+	if len(filesInDir) != 0 {
+		t.Errorf("Files in cdrcInDir: %d", len(filesInDir))
+	}
+	filesOutDir, _ := ioutil.ReadDir(fwvCdrcCfg.CdrOutDir)
+	if len(filesOutDir) != 1 {
+		t.Errorf("In CdrcOutDir, expecting 1 files, got: %d", len(filesOutDir))
+	}
+}
+
+func TestFwvit3AnalyseCDRs(t *testing.T) {
+	var reply []*engine.ExternalCDR
+	if err := fwvRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{}, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(reply) != 2 {
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	}
+}
+
+func TestFwvit3KillEngine(t *testing.T) {
+	if err := engine.KillEngine(*waitRater); err != nil {
+		t.Error(err)
+	}
+}
