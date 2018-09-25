@@ -83,7 +83,8 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 	rpl.Code = radigo.AccessAccept
 	var processed bool
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
-		agReq := newAgentRequest(dcdr, nil, reqProcessor.Tenant, ra.cgrCfg.DefaultTenant, ra.filterS)
+		agReq := newAgentRequest(dcdr, nil, reqProcessor.Tenant,
+			ra.cgrCfg.DefaultTenant, ra.filterS, nil)
 		agReq.Vars.Set([]string{MetaRadReqType}, utils.StringToInterface(MetaRadAuth), true)
 		var lclProcessed bool
 		if lclProcessed, err = ra.processRequest(reqProcessor, agReq, rpl); lclProcessed {
@@ -121,7 +122,8 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 	rpl.Code = radigo.AccountingResponse
 	var processed bool
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
-		agReq := newAgentRequest(dcdr, nil, reqProcessor.Tenant, ra.cgrCfg.DefaultTenant, ra.filterS)
+		agReq := newAgentRequest(dcdr, nil, reqProcessor.Tenant,
+			ra.cgrCfg.DefaultTenant, ra.filterS, nil)
 		var lclProcessed bool
 		if lclProcessed, err = ra.processRequest(reqProcessor, agReq, rpl); lclProcessed {
 			processed = lclProcessed

@@ -29,7 +29,8 @@ import (
 
 func newAgentRequest(req config.DataProvider, vars map[string]interface{},
 	tntTpl config.RSRParsers,
-	dfltTenant string, filterS *engine.FilterS) (ar *AgentRequest) {
+	dfltTenant string, filterS *engine.FilterS,
+	templates map[string][]*config.FCTemplate) (ar *AgentRequest) {
 	ar = &AgentRequest{
 		Request:    req,
 		Vars:       config.NewNavigableMap(vars),
@@ -37,6 +38,7 @@ func newAgentRequest(req config.DataProvider, vars map[string]interface{},
 		CGRReply:   config.NewNavigableMap(nil),
 		Reply:      config.NewNavigableMap(nil),
 		filterS:    filterS,
+		templates:  templates,
 	}
 	// populate tenant
 	if tntIf, err := ar.ParseField(
@@ -59,6 +61,7 @@ type AgentRequest struct {
 	CGRReply   *config.NavigableMap
 	Reply      *config.NavigableMap
 	filterS    *engine.FilterS
+	templates  map[string][]*config.FCTemplate
 }
 
 // String implements engine.DataProvider
@@ -106,6 +109,29 @@ func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) 
 func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 	nM *config.NavigableMap, err error) {
 	nM = config.NewNavigableMap(nil)
+	// expand template fields
+	for i := 0; i < len(tplFlds); {
+		if tplFlds[i].Type == utils.MetaTemplate {
+			tplId, err := tplFlds[i].Value.ParseDataProvider(ar, utils.NestingSep)
+			if err != nil {
+				return nil, err
+			}
+			refTpl, has := ar.templates[tplId]
+			if !has {
+				return nil, fmt.Errorf("no template with id: <%s>", tplId)
+			} else if len(refTpl) == 0 {
+				continue
+			}
+			wrkSlice := make([]*config.FCTemplate, len(refTpl)+len(tplFlds[i:])-1) // so we can cover tplFlds[i+1:]
+			copy(wrkSlice[:len(refTpl)], refTpl)                                   // copy fields out of referenced template
+			if len(tplFlds[i:]) > 1 {                                              // copy the rest of the fields after MetaTemplate
+				copy(wrkSlice[len(refTpl):], tplFlds[i+1:])
+			}
+			tplFlds = append(tplFlds[:i], wrkSlice...) // append the work
+			continue                                   // don't increase index so we can recheck
+		}
+		i++
+	}
 	for _, tplFld := range tplFlds {
 		if pass, err := ar.filterS.Pass(ar.Tenant,
 			tplFld.Filters, ar); err != nil {

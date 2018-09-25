@@ -111,7 +111,8 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			reqProcessor,
 			newAgentRequest(
 				newDADataProvider(m), reqVars,
-				reqProcessor.Tenant, da.cgrCfg.DefaultTenant, da.filterS),
+				reqProcessor.Tenant, da.cgrCfg.DefaultTenant, da.filterS,
+				da.cgrCfg.DiameterAgentCfg().Templates),
 			rply)
 		if lclProcessed {
 			processed = lclProcessed

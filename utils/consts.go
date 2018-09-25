@@ -522,6 +522,7 @@ const (
 	PipeSep                      = "|"
 	MetaApp                      = "*app"
 	MetaCmd                      = "*cmd"
+	MetaTemplate                 = "*template"
 )
 
 // Migrator Action
