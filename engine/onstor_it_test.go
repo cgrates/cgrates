@@ -1727,7 +1727,7 @@ func testOnStorITResource(t *testing.T) {
 		TTLIdx: []string{"RU1"},
 	}
 	if _, rcvErr := onStor.GetResource(res.Tenant, res.ID,
-		false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.SetResource(res); err != nil {
@@ -1735,14 +1735,14 @@ func testOnStorITResource(t *testing.T) {
 	}
 	//get from cache
 	if rcv, err := onStor.GetResource("cgrates.org", "RL1",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(res, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", res, rcv)
 	}
 	//get from database
 	if rcv, err := onStor.GetResource("cgrates.org", "RL1",
-		true, utils.NonTransactional); err != nil {
+		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(res, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", res, rcv)
@@ -1761,14 +1761,14 @@ func testOnStorITResource(t *testing.T) {
 	time.Sleep(sleepDelay)
 	//get from cache
 	if rcv, err := onStor.GetResource("cgrates.org", "RL1",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(res, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", res, rcv)
 	}
 	//get from database
 	if rcv, err := onStor.GetResource("cgrates.org", "RL1",
-		true, utils.NonTransactional); err != nil {
+		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(res, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", res, rcv)
@@ -1778,12 +1778,12 @@ func testOnStorITResource(t *testing.T) {
 	}
 	//check cache if removed
 	if _, rcvErr := onStor.GetResource(res.Tenant, res.ID,
-		false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		true, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	//check database if removed
 	if _, rcvErr := onStor.GetResource(res.Tenant, res.ID,
-		true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+		false, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

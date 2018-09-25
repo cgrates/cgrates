@@ -218,7 +218,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.GetResourceProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.ResourcesPrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetResource(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+			_, err = dm.GetResource(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.StatQueueProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetStatQueueProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
@@ -589,10 +589,10 @@ func (dm *DataManager) RemoveTiming(id, transactionID string) (err error) {
 	return
 }
 
-func (dm *DataManager) GetResource(tenant, id string, skipCache bool,
+func (dm *DataManager) GetResource(tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (rs *Resource, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
+	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheResources, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
@@ -602,14 +602,16 @@ func (dm *DataManager) GetResource(tenant, id string, skipCache bool,
 	}
 	rs, err = dm.dataDB.GetResourceDrv(tenant, id)
 	if err != nil {
-		if err == utils.ErrNotFound {
+		if err == utils.ErrNotFound && cacheWrite {
 			Cache.Set(utils.CacheResources, tntID, nil, nil,
 				cacheCommit(transactionID), transactionID)
 		}
 		return nil, err
 	}
-	Cache.Set(utils.CacheResources, tntID, rs, nil,
-		cacheCommit(transactionID), transactionID)
+	if cacheWrite {
+		Cache.Set(utils.CacheResources, tntID, rs, nil,
+			cacheCommit(transactionID), transactionID)
+	}
 	return
 }
 
