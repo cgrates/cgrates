@@ -26,7 +26,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/beevik/etree"
+	"github.com/antchfx/xmlquery"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -34,17 +34,18 @@ import (
 
 // getElementText will process the node to extract the elementName's text out of it (only first one found)
 // returns utils.ErrNotFound if the element is not found in the node
-func elementText(xmlElement *etree.Element, elmntPath string) (string, error) {
-	elmnt := xmlElement.FindElement(elmntPath)
+func elementText(xmlElement *xmlquery.Node, elmntPath string) (string, error) {
+	elmnt := xmlquery.FindOne(xmlElement, elmntPath)
 	if elmnt == nil {
 		return "", utils.ErrNotFound
 	}
-	return elmnt.Text(), nil
+	return elmnt.InnerText(), nil
+
 }
 
 // handlerUsageDiff will calculate the usage as difference between timeEnd and timeStart
 // Expects the 2 arguments in template separated by |
-func handlerSubstractUsage(xmlElement *etree.Element, argsTpl config.RSRParsers, cdrPath utils.HierarchyPath, timezone string) (time.Duration, error) {
+func handlerSubstractUsage(xmlElement *xmlquery.Node, argsTpl config.RSRParsers, cdrPath utils.HierarchyPath, timezone string) (time.Duration, error) {
 	var argsStr string
 	for _, rsrArg := range argsTpl {
 		if rsrArg.Rules == utils.HandlerArgSep {
@@ -79,21 +80,20 @@ func handlerSubstractUsage(xmlElement *etree.Element, argsTpl config.RSRParsers,
 
 func NewXMLRecordsProcessor(recordsReader io.Reader, cdrPath utils.HierarchyPath, timezone string,
 	httpSkipTlsCheck bool, cdrcCfgs []*config.CdrcConfig, filterS *engine.FilterS) (*XMLRecordsProcessor, error) {
-	xmlDocument := etree.NewDocument()                                                                // create new document
-	xmlDocument.ReadSettings.CharsetReader = func(label string, input io.Reader) (io.Reader, error) { // fix for enconding != UTF-8
-		return input, nil
-	}
-	if _, err := xmlDocument.ReadFrom(recordsReader); err != nil { // read file and build xml document
+	//create doc
+	doc, err := xmlquery.Parse(recordsReader)
+	if err != nil {
 		return nil, err
 	}
 	xmlProc := &XMLRecordsProcessor{cdrPath: cdrPath, timezone: timezone,
 		httpSkipTlsCheck: httpSkipTlsCheck, cdrcCfgs: cdrcCfgs, filterS: filterS}
-	xmlProc.cdrXmlElmts = xmlDocument.Root().FindElements(cdrPath.AsString("/", true))
+
+	xmlProc.cdrXmlElmts = xmlquery.Find(doc, cdrPath.AsString("/", true))
 	return xmlProc, nil
 }
 
 type XMLRecordsProcessor struct {
-	cdrXmlElmts      []*etree.Element    // result of splitting the XML doc into CDR elements
+	cdrXmlElmts      []*xmlquery.Node    // result of splitting the XML doc into CDR elements
 	procItems        int                 // current number of processed records from file
 	cdrPath          utils.HierarchyPath // path towards one CDR element
 	timezone         string
@@ -137,7 +137,7 @@ func (xmlProc *XMLRecordsProcessor) ProcessNextRecord() (cdrs []*engine.CDR, err
 	return cdrs, nil
 }
 
-func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity *etree.Element, cdrcCfg *config.CdrcConfig, tenant string) (*engine.CDR, error) {
+func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity *xmlquery.Node, cdrcCfg *config.CdrcConfig, tenant string) (*engine.CDR, error) {
 	cdr := &engine.CDR{OriginHost: "0.0.0.0", Source: cdrcCfg.CdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
 	var lazyHttpFields []*config.FCTemplate
 	var err error
@@ -206,14 +206,14 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity *etree.Element, cdrcCf
 }
 
 // newXmlProvider constructs a DataProvider
-func newXmlProvider(req *etree.Element, cdrPath utils.HierarchyPath) (dP config.DataProvider) {
+func newXmlProvider(req *xmlquery.Node, cdrPath utils.HierarchyPath) (dP config.DataProvider) {
 	dP = &xmlProvider{req: req, cdrPath: cdrPath, cache: config.NewNavigableMap(nil)}
 	return
 }
 
 // xmlProvider implements engine.DataProvider so we can pass it to filters
 type xmlProvider struct {
-	req     *etree.Element
+	req     *xmlquery.Node
 	cdrPath utils.HierarchyPath //used to compute relative path
 	cache   *config.NavigableMap
 }
