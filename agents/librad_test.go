@@ -97,7 +97,7 @@ func TestRadComposedFieldValue(t *testing.T) {
 	if err := pkt.AddAVPWithName("Cisco-NAS-Port", "CGR1", "Cisco"); err != nil {
 		t.Error(err)
 	}
-	agReq := newAgentRequest(nil, nil, nil, "cgrates.org", nil, nil)
+	agReq := newAgentRequest(nil, nil, nil, "cgrates.org", nil)
 	agReq.Vars.Set([]string{MetaRadReqType}, MetaRadAcctStart, false)
 	agReq.Vars.Set([]string{"Cisco"}, "CGR1", false)
 	agReq.Vars.Set([]string{"User-Name"}, "flopsy", false)
@@ -117,7 +117,7 @@ func TestRadFieldOutVal(t *testing.T) {
 		t.Error(err)
 	}
 	eOut := fmt.Sprintf("%s|flopsy|CGR1", MetaRadAcctStart)
-	agReq := newAgentRequest(nil, nil, nil, "cgrates.org", nil, nil)
+	agReq := newAgentRequest(nil, nil, nil, "cgrates.org", nil)
 	agReq.Vars.Set([]string{MetaRadReqType}, MetaRadAcctStart, false)
 	agReq.Vars.Set([]string{"Cisco"}, "CGR1", false)
 	agReq.Vars.Set([]string{"User-Name"}, "flopsy", false)
@@ -139,7 +139,7 @@ func TestRadReplyAppendAttributes(t *testing.T) {
 		&config.FCTemplate{Tag: "Acct-Session-Time", FieldId: "Acct-Session-Time", Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", true)},
 	}
-	agReq := newAgentRequest(nil, nil, nil, "cgrates.org", nil, nil)
+	agReq := newAgentRequest(nil, nil, nil, "cgrates.org", nil)
 	agReq.CGRReply.Set([]string{utils.CapMaxUsage}, time.Duration(time.Hour), false)
 	agReq.CGRReply.Set([]string{utils.CapAttributes, "RadReply"}, "AccessAccept", false)
 	agReq.CGRReply.Set([]string{utils.CapAttributes, utils.Account}, "1001", false)

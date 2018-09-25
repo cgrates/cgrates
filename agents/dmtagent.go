@@ -47,6 +47,16 @@ func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 			return nil, err
 		}
 	}
+	msgTemplates := da.cgrCfg.DiameterAgentCfg().Templates
+	// Inflate *template field types
+	for _, procsr := range da.cgrCfg.DiameterAgentCfg().RequestProcessors {
+		if err := procsr.RequestFields.InflateTemplates(msgTemplates); err != nil {
+			return nil, err
+		}
+		if err := procsr.ReplyFields.InflateTemplates(msgTemplates); err != nil {
+			return nil, err
+		}
+	}
 	return da, nil
 }
 
@@ -111,8 +121,8 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			reqProcessor,
 			newAgentRequest(
 				newDADataProvider(m), reqVars,
-				reqProcessor.Tenant, da.cgrCfg.DefaultTenant, da.filterS,
-				da.cgrCfg.DiameterAgentCfg().Templates),
+				reqProcessor.Tenant,
+				da.cgrCfg.DefaultTenant, da.filterS),
 			rply)
 		if lclProcessed {
 			processed = lclProcessed

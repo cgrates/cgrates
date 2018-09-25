@@ -18,6 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import (
+	"fmt"
+
+	"github.com/cgrates/cgrates/utils"
+)
+
 func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg) (*FCTemplate, error) {
 	fcTmp := new(FCTemplate)
 	var err error
@@ -121,4 +127,33 @@ func FCTemplatesFromFCTemplatesJsonCfg(jsnCfgFlds []*FcTemplateJsonCfg) ([]*FCTe
 		}
 	}
 	return retFields, nil
+}
+
+type FCTemplates []*FCTemplate
+
+// PopulateFromTemplates will replace fields of type "*template" with values out of map
+func (tpls FCTemplates) InflateTemplates(msgTemplates map[string]FCTemplates) (err error) {
+	for i := 0; i < len(tpls); {
+		if tpls[i].Type == utils.MetaTemplate {
+			var tplID string
+			if tplID, err = tpls[i].Value.ParseValue(nil); err != nil {
+				return
+			}
+			refTpl, has := msgTemplates[tplID]
+			if !has {
+				return fmt.Errorf("no template with id: <%s>", tplID)
+			} else if len(refTpl) == 0 {
+				continue
+			}
+			wrkSlice := make([]*FCTemplate, len(refTpl)+len(tpls[i:])-1) // so we can cover tpls[i+1:]
+			copy(wrkSlice[:len(refTpl)], refTpl)                         // copy fields out of referenced template
+			if len(tpls[i:]) > 1 {                                       // copy the rest of the fields after MetaTemplate
+				copy(wrkSlice[len(refTpl):], tpls[i+1:])
+			}
+			tpls = append(tpls[:i], wrkSlice...) // append the work
+			continue                             // don't increase index so we can recheck
+		}
+		i++
+	}
+	return
 }

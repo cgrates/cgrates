@@ -33,8 +33,7 @@ func TestAgReqAsNavigableMap(t *testing.T) {
 	dm := engine.NewDataManager(data)
 	cfg, _ := config.NewDefaultCGRConfig()
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	agReq := newAgentRequest(nil, nil, nil,
-		"cgrates.org", filterS, nil)
+	agReq := newAgentRequest(nil, nil, nil, "cgrates.org", filterS)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set([]string{utils.CGRID},
 		utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), false)
