@@ -21,7 +21,6 @@ package agents
 import (
 	"fmt"
 	"reflect"
-	"sync"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -38,9 +37,7 @@ func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 	if sessionS != nil && reflect.ValueOf(sessionS).IsNil() {
 		sessionS = nil
 	}
-	da := &DiameterAgent{
-		cgrCfg: cgrCfg, filterS: filterS,
-		sessionS: sessionS, connMux: new(sync.Mutex)}
+	da := &DiameterAgent{cgrCfg: cgrCfg, filterS: filterS, sessionS: sessionS}
 	dictsPath := cgrCfg.DiameterAgentCfg().DictionariesPath
 	if len(dictsPath) != 0 {
 		if err := loadDictionaries(dictsPath, utils.DiameterAgent); err != nil {
@@ -64,7 +61,6 @@ type DiameterAgent struct {
 	cgrCfg   *config.CGRConfig
 	filterS  *engine.FilterS
 	sessionS rpcclient.RpcClientConnection // Connection towards CGR-SessionS component
-	connMux  *sync.Mutex                   // Protect connection for read/write
 }
 
 // ListenAndServe is called when DiameterAgent is started, usually from within cmd/cgr-engine
@@ -113,17 +109,15 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		utils.MetaApp: dApp.Name,
 		utils.MetaCmd: dCmd.Short + "R",
 	}
+	rply := config.NewNavigableMap(nil) // share it among different processors
 	var processed bool
-	var rply *diam.Message
 	for _, reqProcessor := range da.cgrCfg.DiameterAgentCfg().RequestProcessors {
 		var lclProcessed bool
-		lclProcessed, err = da.processRequest(
-			reqProcessor,
+		lclProcessed, err = da.processRequest(reqProcessor,
 			newAgentRequest(
-				newDADataProvider(m), reqVars,
+				newDADataProvider(m), reqVars, rply,
 				reqProcessor.Tenant,
-				da.cgrCfg.DefaultTenant, da.filterS),
-			rply)
+				da.cgrCfg.DefaultTenant, da.filterS))
 		if lclProcessed {
 			processed = lclProcessed
 		}
@@ -145,10 +139,31 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		writeOnConn(c, m.Answer(diam.UnableToDeliver))
 		return
 	}
+	a := m.Answer(diam.Success)
+	// write reply into message
+	for _, nmItm := range rply.Items() {
+		itmStr, err := utils.IfaceAsString(nmItm.Data)
+		if err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing reply item: %v for message: %s",
+					utils.DiameterAgent, err.Error(), nmItm, m))
+			writeOnConn(c, m.Answer(diam.UnableToDeliver))
+			return
+		}
+		if err := messageSetAVPsWithPath(a, nmItm.Path,
+			itmStr, false, da.cgrCfg.DefaultTimezone); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s setting reply item: %v for message: %s",
+					utils.DiameterAgent, err.Error(), nmItm, m))
+			writeOnConn(c, m.Answer(diam.UnableToDeliver))
+			return
+		}
+	}
+	writeOnConn(c, m.Answer(diam.UnableToDeliver))
 }
 
 func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
-	agReq *AgentRequest, rply *diam.Message) (processed bool, err error) {
+	agReq *AgentRequest) (processed bool, err error) {
 	if pass, err := da.filterS.Pass(agReq.Tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
@@ -268,5 +283,4 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
 				utils.DiameterAgent, agReq.Reply))
 	}
 	return true, nil
-	return
 }

@@ -27,15 +27,20 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func newAgentRequest(req config.DataProvider, vars map[string]interface{},
+func newAgentRequest(req config.DataProvider,
+	vars map[string]interface{},
+	rply *config.NavigableMap,
 	tntTpl config.RSRParsers,
 	dfltTenant string, filterS *engine.FilterS) (ar *AgentRequest) {
+	if rply == nil {
+		rply = config.NewNavigableMap(nil)
+	}
 	ar = &AgentRequest{
 		Request:    req,
 		Vars:       config.NewNavigableMap(vars),
 		CGRRequest: config.NewNavigableMap(nil),
 		CGRReply:   config.NewNavigableMap(nil),
-		Reply:      config.NewNavigableMap(nil),
+		Reply:      rply,
 		filterS:    filterS,
 	}
 	// populate tenant
