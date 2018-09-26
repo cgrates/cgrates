@@ -165,6 +165,7 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 	}
 	rfc3339Rule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.+$`)
 	sqlRule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$`)
+	utcFormat := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}[T]\d{2}:\d{2}:\d{2}$`)
 	gotimeRule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\.?\d*\s[+,-]\d+\s\w+$`)
 	gotimeRule2 := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\.?\d*\s[+,-]\d+\s[+,-]\d+$`)
 	fsTimestamp := regexp.MustCompile(`^\d{16}$`)
@@ -223,6 +224,8 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 		} else {
 			return time.Now().Add(tmStrTmp), nil
 		}
+	case utcFormat.MatchString(tmStr):
+		return time.ParseInLocation("2006-01-02T15:04:05", tmStr, loc)
 
 	}
 	return nilTime, errors.New("Unsupported time format")

@@ -21,20 +21,27 @@ package agents
 import (
 	"encoding/xml"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"strconv"
+	"strings"
 
+	"github.com/antchfx/xmlquery"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // newHADataProvider constructs a DataProvider
-func newHADataProvider(dpType string,
+func newHADataProvider(reqPayload string,
 	req *http.Request) (dP config.DataProvider, err error) {
-	switch dpType {
+	switch reqPayload {
 	default:
-		return nil, fmt.Errorf("unsupported decoder type <%s>", dpType)
+		return nil, fmt.Errorf("unsupported decoder type <%s>", reqPayload)
 	case utils.MetaUrl:
 		return newHTTPUrlDP(req)
+	case utils.MetaXml:
+		return newHTTPXmlDP(req)
+
 	}
 }
 
@@ -89,6 +96,92 @@ func (hU *httpUrlDP) AsNavigableMap([]*config.FCTemplate) (
 	return nil, utils.ErrNotImplemented
 }
 
+func newHTTPXmlDP(req *http.Request) (dP config.DataProvider, err error) {
+	byteData, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		return nil, err
+	}
+	//convert the byteData into a xmlquery Node
+	doc, err := xmlquery.Parse(strings.NewReader(string(byteData)))
+	if err != nil {
+		return nil, err
+	}
+	dP = &httpXmlDP{xmlDoc: doc, cache: config.NewNavigableMap(nil)}
+	return
+}
+
+// httpXmlDP implements engine.DataProvider, serving as xml data decoder
+// decoded data is only searched once and cached
+type httpXmlDP struct {
+	cache  *config.NavigableMap
+	xmlDoc *xmlquery.Node
+}
+
+// String is part of engine.DataProvider interface
+// when called, it will display the already parsed values out of cache
+func (hU *httpXmlDP) String() string {
+	//return utils.ToJSON(hU.cache.AsMapStringInterface())
+	return "" // ToDo: fixme
+}
+
+// FieldAsInterface is part of engine.DataProvider interface
+func (hU *httpXmlDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+	//if path is missing return here error because if it arrived in xmlquery library will panic
+	if len(fldPath) == 0 {
+		return nil, fmt.Errorf("Empty path")
+	}
+	if data, err = hU.cache.FieldAsInterface(fldPath); err == nil ||
+		err != utils.ErrNotFound { // item found in cache
+		return
+	}
+	err = nil // cancel previous err
+	var slctrStr string
+	for i, _ := range fldPath {
+		if sIdx := strings.Index(fldPath[i], "["); sIdx != -1 {
+			slctrStr = fldPath[i][sIdx:]
+			if slctrStr[len(slctrStr)-1:] != "]" {
+				return nil, fmt.Errorf("filter rule <%s> needs to end in ]", slctrStr)
+			}
+			fldPath[i] = fldPath[i][:sIdx]
+			if slctrStr[1:2] != "@" {
+				i, err := strconv.Atoi(slctrStr[1 : len(slctrStr)-1])
+				if err != nil {
+					return nil, err
+				}
+				slctrStr = "[" + strconv.Itoa(i+1) + "]"
+			}
+			fldPath[i] = fldPath[i] + slctrStr
+		}
+	}
+	//convert fldPath to HierarchyPath
+	path := utils.HierarchyPath(fldPath)
+	elmnt := xmlquery.FindOne(hU.xmlDoc, path.AsString("/", false))
+	if elmnt == nil {
+		return
+	}
+	//add the content in data and cache it
+	data = elmnt.InnerText()
+	hU.cache.Set(fldPath, data, false)
+	return
+}
+
+// FieldAsString is part of engine.DataProvider interface
+func (hU *httpXmlDP) FieldAsString(fldPath []string) (data string, err error) {
+	var valIface interface{}
+	valIface, err = hU.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	data, _ = utils.CastFieldIfToString(valIface)
+	return
+}
+
+// AsNavigableMap is part of engine.DataProvider interface
+func (hU *httpXmlDP) AsNavigableMap([]*config.FCTemplate) (
+	nm *config.NavigableMap, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
 // httpAgentReplyEncoder will encode  []*engine.NMElement
 // and write content to http writer
 type httpAgentReplyEncoder interface {
@@ -118,6 +211,9 @@ type haXMLEncoder struct {
 func (xE *haXMLEncoder) Encode(nM *config.NavigableMap) (err error) {
 	var xmlElmnts []*config.XMLElement
 	if xmlElmnts, err = nM.AsXMLElements(); err != nil {
+		return
+	}
+	if len(xmlElmnts) == 0 {
 		return
 	}
 	var xmlOut []byte

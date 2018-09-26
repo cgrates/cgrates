@@ -30,8 +30,7 @@ import (
 )
 
 // NewHttpAgent will construct a HTTPAgent
-func NewHTTPAgent(
-	sessionS rpcclient.RpcClientConnection,
+func NewHTTPAgent(sessionS rpcclient.RpcClientConnection,
 	filterS *engine.FilterS, tenantCfg config.RSRParsers,
 	dfltTenant, timezone, reqPayload, rplyPayload string,
 	reqProcessors []*config.HttpAgntProcCfg) *HTTPAgent {
@@ -64,6 +63,7 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 	agReq := newAgentRequest(dcdr, ha.tenantCfg, ha.dfltTenant, ha.filterS)
 	var processed bool
+
 	for _, reqProcessor := range ha.reqProcessors {
 		var lclProcessed bool
 		if lclProcessed, err = ha.processRequest(reqProcessor, agReq); lclProcessed {
