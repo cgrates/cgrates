@@ -31,6 +31,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/fiorix/go-diameter/diam"
+	"github.com/fiorix/go-diameter/diam/avp"
 	"github.com/fiorix/go-diameter/diam/datatype"
 	"github.com/fiorix/go-diameter/diam/dict"
 )
@@ -107,6 +108,144 @@ func diamAVPAsIface(dAVP *diam.AVP) (val interface{}, err error) {
 	case datatype.Unsigned64Type:
 		return uint64(dAVP.Data.(datatype.Unsigned64)), nil
 	}
+}
+
+// newDiamDataType constructs dataType from valStr
+func newDiamDataType(typ datatype.TypeID, valStr,
+	tmz string) (dt datatype.Type, err error) {
+	switch typ {
+	default:
+		return nil, fmt.Errorf("unsupported AVP data type: %d", typ)
+	case datatype.AddressType:
+		return datatype.Address(net.ParseIP(valStr)), nil
+	case datatype.DiameterIdentityType:
+		return datatype.DiameterIdentity(valStr), nil
+	case datatype.DiameterURIType:
+		return datatype.DiameterURI(valStr), nil
+	case datatype.EnumeratedType:
+		i, err := strconv.ParseInt(valStr, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		return datatype.Enumerated(int32(i)), nil
+	case datatype.Float32Type:
+		f, err := strconv.ParseFloat(valStr, 32)
+		if err == nil {
+			return nil, err
+		}
+		return datatype.Float32(float32(f)), nil
+	case datatype.Float64Type:
+		f, err := strconv.ParseFloat(valStr, 64)
+		if err == nil {
+			return nil, err
+		}
+		return datatype.Float64(f), nil
+	case datatype.IPFilterRuleType:
+		return datatype.IPFilterRule(valStr), nil
+	case datatype.IPv4Type:
+		return datatype.IPv4(net.ParseIP(valStr)), nil
+	case datatype.Integer32Type:
+		i, err := strconv.ParseInt(valStr, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		return datatype.Integer32(int32(i)), nil
+	case datatype.Integer64Type:
+		i, err := strconv.ParseInt(valStr, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		return datatype.Integer64(i), nil
+	case datatype.OctetStringType:
+		return datatype.OctetString(valStr), nil
+	case datatype.QoSFilterRuleType:
+		return datatype.QoSFilterRule(valStr), nil
+	case datatype.TimeType:
+		t, err := utils.ParseTimeDetectLayout(valStr, tmz)
+		if err != nil {
+			return nil, err
+		}
+		return datatype.Time(t), nil
+	case datatype.UTF8StringType:
+		return datatype.UTF8String(valStr), nil
+	case datatype.Unsigned32Type:
+		i, err := strconv.ParseUint(valStr, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		return datatype.Unsigned32(uint32(i)), nil
+	case datatype.Unsigned64Type:
+		i, err := strconv.ParseUint(valStr, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		return datatype.Unsigned64(i), nil
+	}
+}
+
+// messageAddAVPsWithPath will dynamically add AVPs into the message
+// 	append:	append to the message, on false overwrite if AVP is single or add to group if AVP is Grouped
+func messageSetAVPsWithPath(m *diam.Message, pathStr []string,
+	avpValStr string, appnd bool, tmz string) (err error) {
+	if len(pathStr) == 0 {
+		return errors.New("empty path as AVP filter")
+	}
+	path := utils.SliceStringToIface(pathStr)
+	dictAVPs := make([]*dict.AVP, len(path)) // for each subpath, one dictionary AVP
+	for i, subpath := range path {
+		if dictAVP, err := m.Dictionary().FindAVP(m.Header.ApplicationID, subpath); err != nil {
+			return err
+		} else if dictAVP == nil {
+			return fmt.Errorf("cannot find AVP with id: %s", path[len(path)-1])
+		} else {
+			dictAVPs[i] = dictAVP
+		}
+	}
+	if dictAVPs[len(path)-1].Data.Type == diam.GroupedAVPType {
+		return errors.New("last AVP in path cannot be GroupedAVP")
+	}
+	var msgAVP *diam.AVP // Keep a reference here towards last AVP
+	lastAVPIdx := len(path) - 1
+	for i := lastAVPIdx; i >= 0; i-- {
+		var typeVal datatype.Type
+		if i == lastAVPIdx {
+			if typeVal, err = newDiamDataType(dictAVPs[i].Data.Type, avpValStr, tmz); err != nil {
+				return err
+			}
+		} else {
+			typeVal = &diam.GroupedAVP{
+				AVP: []*diam.AVP{msgAVP}}
+		}
+		newMsgAVP := diam.NewAVP(dictAVPs[i].Code, avp.Mbit, dictAVPs[i].VendorID, typeVal) // FixMe: maybe Mbit with dictionary one
+		if i == lastAVPIdx-1 && !appnd {                                                    // last AVP needs to be appended in group
+			avps, err := m.FindAVPsWithPath(path[:lastAVPIdx], dict.UndefinedVendorID)
+			if err != nil {
+				return err
+			}
+			if len(avps) != 0 { // Group AVP already in the message
+				prevGrpData := avps[len(avps)-1].Data.(*diam.GroupedAVP) // Take the last avp found to append there
+				prevGrpData.AVP = append(prevGrpData.AVP, msgAVP)
+				m.Header.MessageLength += uint32(msgAVP.Len())
+				return nil
+			}
+		}
+		msgAVP = newMsgAVP
+	}
+	if !appnd { // Not group AVP, replace the previous set one with this one
+		avps, err := m.FindAVPsWithPath(path, dict.UndefinedVendorID)
+		if err != nil {
+			return err
+		}
+		if len(avps) != 0 { // Group AVP already in the message
+			m.Header.MessageLength -= uint32(avps[len(avps)-1].Len()) // decrease message length since we overwrite
+			*avps[len(avps)-1] = *msgAVP
+			m.Header.MessageLength += uint32(msgAVP.Len())
+			return nil
+		}
+	}
+	m.AVP = append(m.AVP, msgAVP)
+	m.Header.MessageLength += uint32(msgAVP.Len())
+	return nil
 }
 
 // writeOnConn writes the message on connection, logs failures
