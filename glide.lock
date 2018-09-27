@@ -61,7 +61,7 @@ imports:
 - name: github.com/streadway/amqp
   version: 70e15c650864f4fc47f5d3c82ea117285480895d
 - name: github.com/ugorji/go
-  version: 5a66da2e74afec77056667aacd61e97b6ea8f661
+  version: 99ea80c8b19ad777f970258ca09c5c2d5826f0fd
   subpackages:
   - codec
 - name: golang.org/x/net
