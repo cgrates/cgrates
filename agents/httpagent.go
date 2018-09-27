@@ -60,7 +60,9 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	for _, reqProcessor := range ha.reqProcessors {
-		agReq := newAgentRequest(dcdr, reqProcessor.Tenant, ha.dfltTenant, ha.filterS)
+		agReq := newAgentRequest(dcdr, reqProcessor.Tenant, ha.dfltTenant,
+			utils.FirstNonEmpty(reqProcessor.Timezone, config.CgrConfig().DefaultTimezone),
+			ha.filterS)
 		lclProcessed, err := ha.processRequest(reqProcessor, agReq)
 		if err != nil {
 			utils.Logger.Warning(
@@ -93,14 +95,14 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 // processRequest represents one processor processing the request
 func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 	agReq *AgentRequest) (processed bool, err error) {
-	if pass, err := ha.filterS.Pass(agReq.Tenant,
+	if pass, err := ha.filterS.Pass(agReq.tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
 	}
 	if agReq.CGRRequest, err = agReq.AsNavigableMap(reqProcessor.RequestFields); err != nil {
 		return
 	}
-	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)
+	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.tenant, utils.NestingSep)
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuth,

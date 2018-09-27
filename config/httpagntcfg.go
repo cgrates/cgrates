@@ -80,6 +80,7 @@ type HttpAgntProcCfg struct {
 	Id                string
 	Filters           []string
 	Tenant            RSRParsers
+	Timezone          string
 	Flags             utils.StringMap
 	ContinueOnSuccess bool
 	RequestFields     []*FCTemplate
@@ -103,6 +104,9 @@ func (ha *HttpAgntProcCfg) loadFromJsonCfg(jsnCfg *HttpAgentProcessorJsnCfg) (er
 		if ha.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true); err != nil {
 			return err
 		}
+	}
+	if jsnCfg.Timezone != nil {
+		ha.Timezone = *jsnCfg.Timezone
 	}
 	if jsnCfg.Flags != nil {
 		ha.Flags = utils.StringMapFromSlice(*jsnCfg.Flags)
