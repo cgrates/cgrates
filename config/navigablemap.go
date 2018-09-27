@@ -143,11 +143,6 @@ func indexMapElements(mp map[string]interface{}, path []string, vals *[]interfac
 	}
 }
 
-// Items returns the ordered list of items in the NavigableMap
-func (nM *NavigableMap) Items() (itms []*NMItem) {
-	return
-}
-
 // Values returns the values in map, ordered by order information
 func (nM *NavigableMap) Values() (vals []interface{}) {
 	if len(nM.data) == 0 {

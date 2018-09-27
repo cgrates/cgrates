@@ -141,20 +141,44 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 	}
 	a := m.Answer(diam.Success)
 	// write reply into message
-	for _, nmItm := range rply.Items() {
-		itmStr, err := utils.IfaceAsString(nmItm.Data)
-		if err != nil {
+	for _, val := range rply.Values() {
+		nmItms, isNMItems := val.([]*config.NMItem)
+		if !isNMItems {
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error: %s processing reply item: %v for message: %s",
-					utils.DiameterAgent, err.Error(), nmItm, m))
+				fmt.Sprintf("<%s> cannot encode reply field: %s, ignoring message %s from %s",
+					utils.DiameterAgent, utils.ToJSON(val), m, c.RemoteAddr()))
 			writeOnConn(c, m.Answer(diam.UnableToDeliver))
 			return
 		}
-		if err := messageSetAVPsWithPath(a, nmItm.Path,
-			itmStr, false, da.cgrCfg.DefaultTimezone); err != nil {
+		// find out the first itm which is not an attribute
+		var itm *config.NMItem
+		for _, cfgItm := range nmItms {
+			if cfgItm.Config == nil || cfgItm.Config.AttributeID == "" {
+				itm = cfgItm
+				break
+			}
+		}
+
+		if itm == nil {
+			continue // all attributes, not writable to diameter packet
+		}
+		itmStr, err := utils.IfaceAsString(itm.Data)
+		if err != nil {
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error: %s setting reply item: %v for message: %s",
-					utils.DiameterAgent, err.Error(), nmItm, m))
+				fmt.Sprintf("<%s> error: %s processing reply item: %s for message: %s",
+					utils.DiameterAgent, err.Error(), utils.ToJSON(itm), m))
+			writeOnConn(c, m.Answer(diam.UnableToDeliver))
+			return
+		}
+		var apnd bool
+		if itm.Config == nil || !itm.Config.NewBranch {
+			apnd = true
+		}
+		if err := messageSetAVPsWithPath(a, itm.Path,
+			itmStr, apnd, da.cgrCfg.DefaultTimezone); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s setting reply item: %s for message: %s",
+					utils.DiameterAgent, err.Error(), utils.ToJSON(itm), m))
 			writeOnConn(c, m.Answer(diam.UnableToDeliver))
 			return
 		}
