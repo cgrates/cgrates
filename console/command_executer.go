@@ -31,7 +31,7 @@ import (
 )
 
 var (
-	lineR = regexp.MustCompile(`(\w+)\s*=\s*(\[.+?\]|.+?)(?:\s+|$)`)
+	lineR = regexp.MustCompile(`(\w+)\s*=\s*(\[.+?\]|\".+?\"|.+?)(?:\s+|$)`)
 	jsonR = regexp.MustCompile(`"(\w+)":(\[.+?\]|.+?)[,|}]`)
 )
 
