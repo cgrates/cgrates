@@ -387,8 +387,6 @@ type HttpAgentJsonCfg struct {
 	Id                 *string
 	Url                *string
 	Sessions_conns     *[]*HaPoolJsonCfg
-	Tenant             *string
-	Timezone           *string
 	Request_payload    *string
 	Reply_payload      *string
 	Request_processors *[]*HttpAgentProcessorJsnCfg
@@ -397,6 +395,7 @@ type HttpAgentJsonCfg struct {
 type HttpAgentProcessorJsnCfg struct {
 	Id                  *string
 	Filters             *[]string
+	Tenant              *string
 	Flags               *[]string
 	Continue_on_success *bool
 	Request_fields      *[]*FcTemplateJsonCfg

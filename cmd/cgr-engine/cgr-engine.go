@@ -401,8 +401,7 @@ func startHTTPAgent(internalSMGChan chan rpcclient.RpcClientConnection,
 			}
 		}
 		server.RegisterHttpHandler(agntCfg.Url,
-			agents.NewHTTPAgent(sSConn, filterS, agntCfg.Tenant, dfltTenant,
-				agntCfg.Timezone, agntCfg.RequestPayload,
+			agents.NewHTTPAgent(sSConn, filterS, dfltTenant, agntCfg.RequestPayload,
 				agntCfg.ReplyPayload, agntCfg.RequestProcessors))
 	}
 }
