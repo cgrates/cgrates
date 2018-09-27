@@ -8,14 +8,13 @@
 		"sessions_conns": [
 			{"address": "127.0.0.1:2012", "transport": "*json"}
 		],
-		"tenant": "cgrates.org",
-		"timezone": "",
 		"request_payload":	"*url",
 		"reply_payload":	"*xml",
 		"request_processors": [
 			{
 				"id": "OutboundAUTHDryRun",
 				"filters": ["*string:*req.request_type:OutboundAUTH","*string:*req.Msisdn:497700056231"],
+				"tenant": "cgrates.org",
 				"flags": ["*dryrun"],
 				"request_fields":[
 				],
@@ -31,6 +30,7 @@
 			{
 				"id": "OutboundAUTH",
 				"filters": ["*string:*req.request_type:OutboundAUTH"],
+				"tenant": "cgrates.org",
 				"flags": [ "*auth", "*accounts", "*attributes"],
 				"request_fields":[
 					{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
@@ -54,6 +54,7 @@
 			{
 				"id": "mtcall_cdr",
 				"filters": ["*string:*req.request_type:MTCALL_CDR"],
+				"tenant": "cgrates.org",
 				"flags": ["*cdrs"],
 				"request_fields":[
 					{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
@@ -86,13 +87,12 @@
 		"sessions_conns": [
 			{"address": "127.0.0.1:2012", "transport": "*json"}
 		],
-		"tenant": "cgrates.org",
-		"timezone": "",
 		"request_payload":	"*xml",
 		"reply_payload":	"*xml",
 		"request_processors": [
 			{
 				"id": "cdr_from_xml",
+				"tenant": "cgrates.org",
 				"flags": ["*cdrs"],
 				"request_fields":[
 					{"tag": "TOR", "field_id": "ToR", "type": "*constant",
