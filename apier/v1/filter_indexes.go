@@ -174,7 +174,7 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 		return utils.APIErrorHandler(err)
 	}
 	//AttributeProfile Indexes
-	attrIndexes, err := self.computeAttributeIndexes(args.Tenant, args.AttributeIDs, transactionID)
+	attrIndexes, err := self.computeAttributeIndexes(args.Tenant, args.Context, args.AttributeIDs, transactionID)
 	if err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -347,10 +347,11 @@ func (self *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string,
 	return thdsIndexers, nil
 }
 
-func (self *ApierV1) computeAttributeIndexes(tenant string, attrIDs *[]string,
+func (self *ApierV1) computeAttributeIndexes(tenant, context string, attrIDs *[]string,
 	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
 	var attributeIDs []string
-	attrIndexers := engine.NewFilterIndexer(self.DataManager, utils.AttributeProfilePrefix, tenant)
+	attrIndexers := engine.NewFilterIndexer(self.DataManager, utils.AttributeProfilePrefix,
+		utils.ConcatenatedKey(tenant, context))
 	if attrIDs == nil {
 		ids, err := self.DataManager.DataDB().GetKeysForPrefix(utils.AttributeProfilePrefix)
 		if err != nil {

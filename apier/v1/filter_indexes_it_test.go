@@ -1245,7 +1245,8 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err == nil ||
+	if err := tFIdxRpc.Call("ApierV1.GetAttributeProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -1273,7 +1274,8 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
+	if err := tFIdxRpc.Call("ApierV1.GetAttributeProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(alsPrf.FilterIDs, reply.FilterIDs) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.FilterIDs, reply.FilterIDs)
@@ -1285,11 +1287,11 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.ID, reply.ID)
 	}
 	if err = onStor.RemoveFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
-		tenant); err != nil {
+		utils.ConcatenatedKey(tenant, utils.MetaSessionS)); err != nil {
 		t.Error(err)
 	}
 	if indexes, err = onStor.GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
-		tenant, engine.MetaString, nil); err != utils.ErrNotFound {
+		utils.ConcatenatedKey(tenant, utils.MetaSessionS), engine.MetaString, nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -1300,6 +1302,7 @@ func testV1FIdxComputeAttributeProfileIndexes(t *testing.T) {
 	var reply2 string
 	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexes{
 		Tenant:       "cgrates.org",
+		Context:      utils.MetaSessionS,
 		ThresholdIDs: &emptySlice,
 		AttributeIDs: nil,
 		ResourceIDs:  &emptySlice,
@@ -1316,7 +1319,7 @@ func testV1FIdxComputeAttributeProfileIndexes(t *testing.T) {
 		"*string:Account:1001": {"ApierTest": true}}
 	indexes, err := onStor.GetFilterIndexes(
 		utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
-		tenant, engine.MetaString, nil)
+		utils.ConcatenatedKey(tenant, utils.MetaSessionS), engine.MetaString, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1349,7 +1352,8 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest2"}, &reply); err == nil ||
+	if err := tFIdxRpc.Call("ApierV1.GetAttributeProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest2"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -1377,7 +1381,8 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest2"}, &reply); err != nil {
+	if err := tFIdxRpc.Call("ApierV1.GetAttributeProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest2"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(alsPrf.FilterIDs, reply.FilterIDs) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.FilterIDs, reply.FilterIDs)
@@ -1390,12 +1395,12 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 	}
 	if err = onStor.RemoveFilterIndexes(
 		utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
-		tenant); err != nil {
+		utils.ConcatenatedKey(tenant, utils.MetaSessionS)); err != nil {
 		t.Error(err)
 	}
 	if indexes, err = onStor.GetFilterIndexes(
 		utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
-		tenant, engine.MetaString, nil); err != utils.ErrNotFound {
+		utils.ConcatenatedKey(tenant, utils.MetaSessionS), utils.EmptyString, nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -1408,6 +1413,7 @@ func testV1FIdxSecondComputeAttributeProfileIndexes(t *testing.T) {
 	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes,
 		utils.ArgsComputeFilterIndexes{
 			Tenant:       "cgrates.org",
+			Context:      utils.MetaSessionS,
 			ThresholdIDs: &emptySlice,
 			AttributeIDs: &apid,
 			ResourceIDs:  &emptySlice,
@@ -1424,7 +1430,7 @@ func testV1FIdxSecondComputeAttributeProfileIndexes(t *testing.T) {
 		"*string:Account:1001": {"ApierTest2": true}}
 	indexes, err := onStor.GetFilterIndexes(
 		utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
-		tenant, engine.MetaString, nil)
+		utils.ConcatenatedKey(tenant, utils.MetaSessionS), engine.MetaString, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1441,6 +1447,7 @@ func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 	var reply2 string
 	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexes{
 		Tenant:       "cgrates.org",
+		Context:      utils.MetaSessionS,
 		ThresholdIDs: &emptySlice,
 		AttributeIDs: nil,
 		ResourceIDs:  &emptySlice,
@@ -1475,7 +1482,7 @@ func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 		t.Error(err)
 	}
 	if _, err = onStor.GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
-		tenant, engine.MetaString, nil); err != nil && err != utils.ErrNotFound {
+		utils.ConcatenatedKey(tenant, utils.MetaSessionS), engine.MetaString, nil); err != nil && err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
