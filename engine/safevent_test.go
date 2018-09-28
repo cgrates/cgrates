@@ -509,9 +509,11 @@ func TestSafEventAsMapStringIgnoreErrors(t *testing.T) {
 	t.Run("asMapStrIgn1", func(t *testing.T) {
 		t.Parallel()
 		var expected map[string]string
+		safEv.RLock()
 		if expected, err = safEv.Me.AsMapString(nil); err != nil {
 			t.Error(err)
 		}
+		safEv.RUnlock()
 		if rply := safEv.AsMapStringIgnoreErrors(nil); !reflect.DeepEqual(expected, rply) {
 			t.Errorf("Expecting %+v, received: %+v", expected, rply)
 		}
@@ -524,10 +526,9 @@ func TestSafEventAsMapStringIgnoreErrors(t *testing.T) {
 		t.Parallel()
 		safEv.Set("test12", 42)
 		var expected map[string]string
-		if expected, err = safEv.Me.AsMapString(nil); err != nil {
+		if expected, err = safEv.Me.AsMapString(utils.StringMap{"test12": true}); err != nil {
 			t.Error(err)
 		}
-		delete(expected, "test12")
 		if rply := safEv.AsMapStringIgnoreErrors(utils.StringMap{"test12": true}); !reflect.DeepEqual(expected, rply) {
 			t.Errorf("Expecting %+v, received: %+v", expected, rply)
 		}
