@@ -287,7 +287,6 @@ type CodecMsgpackMarshaler struct {
 func NewCodecMsgpackMarshaler() *CodecMsgpackMarshaler {
 	cmm := &CodecMsgpackMarshaler{new(codec.MsgpackHandle)}
 	mh := cmm.mh
-	mh.TimeNotBuiltin = true
 	mh.MapType = reflect.TypeOf(map[string]interface{}(nil))
 	mh.RawToString = true
 	return cmm
