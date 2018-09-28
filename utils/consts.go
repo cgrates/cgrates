@@ -524,6 +524,8 @@ const (
 	MetaCmd                      = "*cmd"
 	MetaTemplate                 = "*template"
 	MetaCCA                      = "*cca"
+	OriginRealm                  = "OriginRealm"
+	ProductName                  = "ProductName"
 )
 
 // Migrator Action

@@ -106,8 +106,11 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		return
 	}
 	reqVars := map[string]interface{}{
-		utils.MetaApp: dApp.Name,
-		utils.MetaCmd: dCmd.Short + "R",
+		utils.OriginHost:  da.cgrCfg.DiameterAgentCfg().OriginHost, // used in templates
+		utils.OriginRealm: da.cgrCfg.DiameterAgentCfg().OriginRealm,
+		utils.ProductName: da.cgrCfg.DiameterAgentCfg().ProductName,
+		utils.MetaApp:     dApp.Name,
+		utils.MetaCmd:     dCmd.Short + "R",
 	}
 	rply := config.NewNavigableMap(nil) // share it among different processors
 	var processed bool
