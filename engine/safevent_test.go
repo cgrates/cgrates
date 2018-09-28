@@ -207,6 +207,7 @@ func TestSafEventGetString(t *testing.T) {
 func TestSafEventGetStringIgnoreErrors(t *testing.T) {
 	t.Run("getStringIgnore1", func(t *testing.T) {
 		t.Parallel()
+		safEv.Set("test1", nil)
 		if rply := safEv.GetStringIgnoreErrors("test1"); rply != "" {
 			t.Errorf("Expecting , received: %+v", rply)
 		}
