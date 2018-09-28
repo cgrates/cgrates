@@ -120,7 +120,7 @@ func (se *SafEvent) GetDurationIgnoreErrors(fldName string) (d time.Duration) {
 func (se *SafEvent) GetDurationPtr(fldName string) (d *time.Duration, err error) {
 	fldIface, has := se.Get(fldName)
 	if !has {
-		return
+		return nil, utils.ErrNotFound
 	}
 	var dReal time.Duration
 	if dReal, err = utils.IfaceAsDuration(fldIface); err != nil {
