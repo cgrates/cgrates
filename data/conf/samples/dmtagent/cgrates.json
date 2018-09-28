@@ -55,34 +55,10 @@
 	],
 },
 
-"cdrstats": {
-	"enabled": true,
-},
-
-"pubsubs": {
-	"enabled": true,				// starts PubSub service: <true|false>.
-},
-
-"aliases": {
-	"enabled": true,				// starts Aliases service: <true|false>.
-},
-
-"users": {
-	"enabled": true,
-	"indexes": ["SubscriberId"],
-},
-
-"resources": {
-	"enabled": true,
-},
-
 "attributes": {
 	"enabled": true,
 },
 
-"suppliers": {
-	"enabled": true,
-},
 
 "sessions": {
 	"enabled": true,
@@ -90,9 +66,6 @@
 
 "diameter_agent": {
 	"enabled": true,
-	"pubsubs_conns": [
-		{"address": "*internal"}
-	],
 	"sessions_conns": [
 		{"address": "127.0.0.1:2012","transport":"*json"}
 	],

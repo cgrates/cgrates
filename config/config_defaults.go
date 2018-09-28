@@ -373,6 +373,24 @@ const CGRATES_CFG_JSON = `
 	"origin_realm": "cgrates.org",								// diameter Origin-Realm AVP used in replies
 	"vendor_id": 0,												// diameter Vendor-Id AVP used in replies
 	"product_name": "CGRateS",									// diameter Product-Name AVP used in replies
+	"templates":{
+		"*cca": [
+				{"tag": "SessionId", "field_id": "Session-Id", "type": "*composed", 
+					"value": "~*req.Session-Id", "mandatory": true},
+				{"tag": "ResultCode", "field_id": "Result-Code", "type": "*constant", 
+					"value": "2001", "mandatory": true},
+				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*composed", 
+					"value": "~*vars.OriginHost", "mandatory": true},
+				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*composed", 
+					"value": "~*vars.OriginRealm", "mandatory": true},
+				{"tag": "AuthApplicationId", "field_id": "Auth-Application-Id", 
+					"type": "*constant", "value": "CGRateS", "mandatory": true},
+				{"tag": "CCRequestType", "field_id": "CC-Request-Type", "type": "*composed", 
+					"value": "~*req.CC-Request-Type", "mandatory": true},
+				{"tag": "CCRequestNumber", "field_id": "CC-Request-Number", "type": "*composed", 
+					"value": "~*req.CC-Request-Number", "mandatory": true},
+		]
+	},
 	"request_processors": [],
 },
 

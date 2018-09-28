@@ -523,6 +523,7 @@ const (
 	MetaApp                      = "*app"
 	MetaCmd                      = "*cmd"
 	MetaTemplate                 = "*template"
+	MetaCCA                      = "*cca"
 )
 
 // Migrator Action
