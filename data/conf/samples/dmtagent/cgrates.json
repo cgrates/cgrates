@@ -30,18 +30,6 @@
 
 "rals": {
 	"enabled": true,
-	"cdrstats_conns": [
-		{"address": "*internal"}
-	],
-	"pubsubs_conns": [
-		{"address": "*internal"}
-	],
-	"users_conns": [
-		{"address": "*internal"}
-	],
-	"aliases_conns": [
-		{"address": "*internal"}
-	],
 },
 
 "scheduler": {
