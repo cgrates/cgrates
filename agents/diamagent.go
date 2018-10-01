@@ -133,13 +133,13 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s processing message: %s",
 				utils.DiameterAgent, err.Error(), m))
-		writeOnConn(c, m.Answer(diam.UnableToDeliver))
+		writeOnConn(c, m.Answer(diam.UnableToComply))
 		return
 	} else if !processed {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> no request processor enabled, ignoring message %s from %s",
 				utils.DiameterAgent, m, c.RemoteAddr()))
-		writeOnConn(c, m.Answer(diam.UnableToDeliver))
+		writeOnConn(c, m.Answer(diam.UnableToComply))
 		return
 	}
 	a := m.Answer(diam.Success)
@@ -150,7 +150,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> cannot encode reply field: %s, ignoring message %s from %s",
 					utils.DiameterAgent, utils.ToJSON(val), m, c.RemoteAddr()))
-			writeOnConn(c, m.Answer(diam.UnableToDeliver))
+			writeOnConn(c, m.Answer(diam.UnableToComply))
 			return
 		}
 		// find out the first itm which is not an attribute
@@ -170,7 +170,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing reply item: %s for message: %s",
 					utils.DiameterAgent, err.Error(), utils.ToJSON(itm), m))
-			writeOnConn(c, m.Answer(diam.UnableToDeliver))
+			writeOnConn(c, m.Answer(diam.UnableToComply))
 			return
 		}
 		var apnd bool
@@ -182,11 +182,11 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s setting reply item: %s for message: %s",
 					utils.DiameterAgent, err.Error(), utils.ToJSON(itm), m))
-			writeOnConn(c, m.Answer(diam.UnableToDeliver))
+			writeOnConn(c, m.Answer(diam.UnableToComply))
 			return
 		}
 	}
-	writeOnConn(c, m.Answer(diam.UnableToDeliver))
+	writeOnConn(c, m.Answer(diam.UnableToComply))
 }
 
 func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
@@ -216,7 +216,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
 	case utils.MetaDryRun:
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, CGREvent: %s",
-				utils.DiameterAgent, reqProcessor.Id, utils.ToJSON(cgrEv)))
+				utils.DiameterAgent, reqProcessor.ID, utils.ToJSON(cgrEv)))
 	case utils.MetaAuth:
 		authArgs := sessions.NewV1AuthorizeArgs(
 			reqProcessor.Flags.HasKey(utils.MetaAttributes),

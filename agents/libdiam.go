@@ -110,6 +110,14 @@ func diamAVPAsIface(dAVP *diam.AVP) (val interface{}, err error) {
 	}
 }
 
+func diamAVPAsString(dAVP *diam.AVP) (s string, err error) {
+	var iface interface{}
+	if iface, err = diamAVPAsIface(dAVP); err != nil {
+		return
+	}
+	return utils.IfaceAsString(iface)
+}
+
 // newDiamDataType constructs dataType from valStr
 func newDiamDataType(typ datatype.TypeID, valStr,
 	tmz string) (dt datatype.Type, err error) {

@@ -244,7 +244,7 @@ func IfaceAsString(fld interface{}) (out string, err error) {
 	case int64:
 		return strconv.FormatInt(fld.(int64), 10), nil
 	case uint32:
-		return strconv.FormatUint(uint64(fld.(int32)), 10), nil
+		return strconv.FormatUint(uint64(fld.(uint32)), 10), nil
 	case uint64:
 		return strconv.FormatUint(fld.(uint64), 10), nil
 	case bool:

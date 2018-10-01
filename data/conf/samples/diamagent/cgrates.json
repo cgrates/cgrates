@@ -38,9 +38,6 @@
 
 "cdrs": {
 	"enabled": true,
-	"cdrstats_conns": [
-		{"address": "*internal"}
-	],
 },
 
 "attributes": {

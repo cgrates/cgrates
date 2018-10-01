@@ -82,7 +82,7 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) (err e
 			rp := new(DARequestProcessor)
 			var haveID bool
 			for _, rpSet := range da.RequestProcessors {
-				if reqProcJsn.Id != nil && rpSet.Id == *reqProcJsn.Id {
+				if reqProcJsn.Id != nil && rpSet.ID == *reqProcJsn.Id {
 					rp = rpSet // Will load data into the one set
 					haveID = true
 					break
@@ -101,7 +101,7 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) (err e
 
 // One Diameter request processor configuration
 type DARequestProcessor struct {
-	Id                string
+	ID                string
 	Tenant            RSRParsers
 	Filters           []string
 	Flags             utils.StringMap
@@ -116,7 +116,7 @@ func (dap *DARequestProcessor) loadFromJsonCfg(jsnCfg *DARequestProcessorJsnCfg)
 		return nil
 	}
 	if jsnCfg.Id != nil {
-		dap.Id = *jsnCfg.Id
+		dap.ID = *jsnCfg.Id
 	}
 	if jsnCfg.Tenant != nil {
 		dap.Tenant = NewRSRParsersMustCompile(*jsnCfg.Tenant, true)
