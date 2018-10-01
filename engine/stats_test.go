@@ -398,10 +398,10 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 	}
 	reply := []string{}
 	expected := []string{"StatQueueProfile1", "StatQueueProfile3"}
-	expectedRev := []string{"StatQueueProfile1", "StatQueueProfile3"}
+	expectedRev := []string{"StatQueueProfile3", "StatQueueProfile1"}
 	if err := statService.V1ProcessEvent(ev, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
-	} else if !reflect.DeepEqual(reply, expected) || !reflect.DeepEqual(reply, expectedRev) {
+	} else if !reflect.DeepEqual(reply, expected) && !reflect.DeepEqual(reply, expectedRev) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 }
