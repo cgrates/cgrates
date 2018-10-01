@@ -121,7 +121,7 @@ func (me MapEvent) AsMapStringIgnoreErrors(ignoredFlds utils.StringMap) (mp map[
 		if ignoredFlds.HasKey(k) {
 			continue
 		}
-		if out, can := utils.CastFieldIfToString(v); can {
+		if out, err := utils.IfaceAsString(v); err == nil {
 			mp[k] = out
 		}
 	}
