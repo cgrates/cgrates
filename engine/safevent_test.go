@@ -539,6 +539,7 @@ func TestSafEventAsMapInterface(t *testing.T) {
 			safEv.Remove("test8")
 		})
 	}
+	safEv.Set("test8", time.Date(2009, 11, 10, 23, 0, 0, 0, time.UTC))
 	rply := safEv.AsMapInterface()
 	if !reflect.DeepEqual(sMap, rply) {
 		t.Errorf("Expecting %+v, received: %+v", sMap, rply)
