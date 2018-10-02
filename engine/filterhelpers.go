@@ -69,8 +69,8 @@ func matchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 				continue
 			}
 			if _, cached := stringFieldVals[fldName]; !cached {
-				strVal, canCast := utils.CastFieldIfToString(fieldValIf)
-				if !canCast {
+				strVal, err := utils.IfaceAsString(fieldValIf)
+				if err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> cannot cast field: %s into string", utils.FilterS, fldName))
 					continue

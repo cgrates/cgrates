@@ -54,8 +54,8 @@ func (ev *CGREvent) FieldAsString(fldName string) (val string, err error) {
 	if !has {
 		return "", ErrNotFound
 	}
-	val, canCast := CastFieldIfToString(iface)
-	if !canCast {
+	val, err = IfaceAsString(iface)
+	if err != nil {
 		return "", fmt.Errorf("cannot cast %s to string", fldName)
 	}
 	return val, nil

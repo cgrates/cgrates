@@ -288,7 +288,7 @@ func UpdateStructWithIfaceMap(s interface{}, mp map[string]interface{}) (err err
 					fld.SetFloat(valFlt)
 				}
 			case reflect.String:
-				if valStr, canCast := CastFieldIfToString(val); !canCast {
+				if valStr, err := IfaceAsString(val); err != nil {
 					return fmt.Errorf("cannot convert field: %+v to string", val)
 				} else {
 					fld.SetString(valStr)
