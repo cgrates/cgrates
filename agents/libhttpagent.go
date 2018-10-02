@@ -86,7 +86,7 @@ func (hU *httpUrlDP) FieldAsString(fldPath []string) (data string, err error) {
 	if err != nil {
 		return
 	}
-	data, _ = utils.CastFieldIfToString(valIface)
+	data, err = utils.IfaceAsString(valIface)
 	return
 }
 
@@ -136,7 +136,7 @@ func (hU *httpXmlDP) FieldAsInterface(fldPath []string) (data interface{}, err e
 	}
 	err = nil // cancel previous err
 	var slctrStr string
-	for i, _ := range fldPath {
+	for i := range fldPath {
 		if sIdx := strings.Index(fldPath[i], "["); sIdx != -1 {
 			slctrStr = fldPath[i][sIdx:]
 			if slctrStr[len(slctrStr)-1:] != "]" {
@@ -172,7 +172,7 @@ func (hU *httpXmlDP) FieldAsString(fldPath []string) (data string, err error) {
 	if err != nil {
 		return
 	}
-	data, _ = utils.CastFieldIfToString(valIface)
+	data, err = utils.IfaceAsString(valIface)
 	return
 }
 

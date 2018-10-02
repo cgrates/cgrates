@@ -143,7 +143,7 @@ func (da DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProce
 	} else { // Query SessionS over APIs
 		var tnt string
 		if tntIf, has := smgEv[utils.Tenant]; has {
-			if tntStr, canCast := utils.CastFieldIfToString(tntIf); canCast {
+			if tntStr, err := utils.IfaceAsString(tntIf); err == nil {
 				tnt = tntStr
 			}
 		}

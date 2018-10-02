@@ -37,9 +37,8 @@ func (dcs DataConverters) ConvertString(in string) (out string, err error) {
 			return
 		}
 	}
-	var canCast bool
-	out, canCast = CastFieldIfToString(outIface)
-	if !canCast {
+	out, err = IfaceAsString(outIface)
+	if err != nil {
 		return "", NewErrStringCast(outIface)
 	}
 	return

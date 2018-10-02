@@ -247,7 +247,7 @@ func (xP *xmlProvider) FieldAsString(fldPath []string) (data string, err error) 
 	if err != nil {
 		return
 	}
-	data, _ = utils.CastFieldIfToString(valIface)
+	data, err = utils.IfaceAsString(valIface)
 	return
 }
 
