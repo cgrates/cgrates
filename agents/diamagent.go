@@ -147,6 +147,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		writeOnConn(c, m.Answer(diam.UnableToComply))
 		return
 	}
+	fmt.Printf("After processing successfully the message, have reply: %+v\n", rply)
 	a := m.Answer(diam.Success)
 	// write reply into message
 	for _, val := range rply.Values() {
@@ -191,7 +192,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			return
 		}
 	}
-	writeOnConn(c, m.Answer(diam.UnableToComply))
+	writeOnConn(c, a)
 }
 
 func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,

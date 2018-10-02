@@ -377,8 +377,6 @@ const CGRATES_CFG_JSON = `
 		"*cca": [
 				{"tag": "SessionId", "field_id": "Session-Id", "type": "*composed", 
 					"value": "~*req.Session-Id", "mandatory": true},
-				{"tag": "ResultCode", "field_id": "Result-Code", "type": "*constant", 
-					"value": "2001", "mandatory": true},
 				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*composed", 
 					"value": "~*vars.OriginHost", "mandatory": true},
 				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*composed", 
