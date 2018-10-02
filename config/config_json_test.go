@@ -631,7 +631,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 				{Tag: utils.StringPointer("AuthApplicationId"),
 					Field_id:  utils.StringPointer("Auth-Application-Id"),
 					Type:      utils.StringPointer(utils.META_COMPOSED),
-					Value:     utils.StringPointer("~*vars.ProductName"),
+					Value:     utils.StringPointer("~*vars.*appid"),
 					Mandatory: utils.BoolPointer(true)},
 				{Tag: utils.StringPointer("CCRequestType"),
 					Field_id:  utils.StringPointer("CC-Request-Type"),

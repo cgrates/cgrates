@@ -4,25 +4,8 @@
 	"request_processors": [
 
 		{
-			"id": "dryrun1",
-			"filters": ["*string:*vars.cmd:*ccr", "*string:*req.Service-Context-Id:gprs"],
-			"flags": ["*dryrun"],
-			"request_fields":[
-				{"tag": "TOR", "field_id": "ToR", "type": "*constant", "value": "*sms"},
-				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 
-					"value": "~*req.Session-Id", "mandatory": true},
-				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", "value": "*prepaid"},
-				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~*req.Event-Timestamp", "mandatory": true},
-			],
-			"reply_fields":[
-				{"tag": "CCATemplate", "type": "*template", "value": "*cca"},
-				{"tag": "ResultCode", "field_id": "Result-Code", "type": "*constant", "value": "300"},
-			],
-		},
-
-		{
 			"id": "message",
-			"filters": ["*string:*vars.cmd:*ccr", "*prefix:*req.Service-Context-Id:message",
+			"filters": ["*string:*vars.*cmd:CCR", "*prefix:*req.Service-Context-Id:message",
 				"*string:*req.CC-Request-Type:4"],
 			"flags": ["*event", "*accounts"],
 			"request_fields":[
@@ -55,4 +38,3 @@
 },
 
 }
-

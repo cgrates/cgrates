@@ -47,11 +47,15 @@ func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 	msgTemplates := da.cgrCfg.DiameterAgentCfg().Templates
 	// Inflate *template field types
 	for _, procsr := range da.cgrCfg.DiameterAgentCfg().RequestProcessors {
-		if err := procsr.RequestFields.InflateTemplates(msgTemplates); err != nil {
+		if tpls, err := config.InflateTemplates(procsr.RequestFields, msgTemplates); err != nil {
 			return nil, err
+		} else if tpls != nil {
+			procsr.RequestFields = tpls
 		}
-		if err := procsr.ReplyFields.InflateTemplates(msgTemplates); err != nil {
+		if tpls, err := config.InflateTemplates(procsr.ReplyFields, msgTemplates); err != nil {
 			return nil, err
+		} else if tpls != nil {
+			procsr.ReplyFields = tpls
 		}
 	}
 	return da, nil
@@ -110,6 +114,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		utils.OriginRealm: da.cgrCfg.DiameterAgentCfg().OriginRealm,
 		utils.ProductName: da.cgrCfg.DiameterAgentCfg().ProductName,
 		utils.MetaApp:     dApp.Name,
+		utils.MetaAppID:   dApp.ID,
 		utils.MetaCmd:     dCmd.Short + "R",
 	}
 	rply := config.NewNavigableMap(nil) // share it among different processors

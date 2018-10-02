@@ -91,20 +91,11 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 
 // FieldAsString implements engine.DataProvider
 func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) {
-	switch fldPath[0] {
-	default:
-		return "", fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
-	case utils.MetaReq:
-		return ar.Request.FieldAsString(fldPath[1:])
-	case utils.MetaVars:
-		return ar.Vars.FieldAsString(fldPath[1:])
-	case utils.MetaCgreq:
-		return ar.CGRRequest.FieldAsString(fldPath[1:])
-	case utils.MetaCgrep:
-		return ar.CGRReply.FieldAsString(fldPath[1:])
-	case utils.MetaRep:
-		return ar.Reply.FieldAsString(fldPath[1:])
+	var iface interface{}
+	if iface, err = ar.FieldAsInterface(fldPath); err != nil {
+		return
 	}
+	return utils.IfaceAsString(iface)
 }
 
 // AsNavigableMap implements engine.DataProvider

@@ -5,7 +5,7 @@
 	"request_processors": [
 		{
 			"id": "simpa_event",
-			"filters": ["*string:*vars.cmd:*ccr", "*string:*req.CC-Request-Type:4",
+			"filters": ["*string:*vars.*cmd:CCR", "*string:*req.CC-Request-Type:4",
 				"*prefix:*req.Service-Context-Id:simpa"],
 			"flags": ["*event", "*accounts"],
 			"request_fields":[

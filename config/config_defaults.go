@@ -384,7 +384,7 @@ const CGRATES_CFG_JSON = `
 				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*composed", 
 					"value": "~*vars.OriginRealm", "mandatory": true},
 				{"tag": "AuthApplicationId", "field_id": "Auth-Application-Id", "type": "*composed",
-					 "value": "~*vars.ProductName", "mandatory": true},
+					 "value": "~*vars.*appid", "mandatory": true},
 				{"tag": "CCRequestType", "field_id": "CC-Request-Type", "type": "*composed", 
 					"value": "~*req.CC-Request-Type", "mandatory": true},
 				{"tag": "CCRequestNumber", "field_id": "CC-Request-Number", "type": "*composed", 

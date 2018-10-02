@@ -521,6 +521,7 @@ const (
 	ANDSep                       = "&"
 	PipeSep                      = "|"
 	MetaApp                      = "*app"
+	MetaAppID                    = "*appid"
 	MetaCmd                      = "*cmd"
 	MetaTemplate                 = "*template"
 	MetaCCA                      = "*cca"

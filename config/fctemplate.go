@@ -129,31 +129,34 @@ func FCTemplatesFromFCTemplatesJsonCfg(jsnCfgFlds []*FcTemplateJsonCfg) ([]*FCTe
 	return retFields, nil
 }
 
-type FCTemplates []*FCTemplate
-
-// PopulateFromTemplates will replace fields of type "*template" with values out of map
-func (tpls FCTemplates) InflateTemplates(msgTemplates map[string]FCTemplates) (err error) {
-	for i := 0; i < len(tpls); {
-		if tpls[i].Type == utils.MetaTemplate {
-			var tplID string
-			if tplID, err = tpls[i].Value.ParseValue(nil); err != nil {
-				return
+// InflateTemplates will replace the *template fields with template content out msgTpls
+func InflateTemplates(fcts []*FCTemplate, msgTpls map[string][]*FCTemplate) ([]*FCTemplate, error) {
+	var hasTpl bool
+	for i := 0; i < len(fcts); {
+		if fcts[i].Type == utils.MetaTemplate {
+			hasTpl = true
+			tplID, err := fcts[i].Value.ParseValue(nil)
+			if err != nil {
+				return nil, err
 			}
-			refTpl, has := msgTemplates[tplID]
+			refTpl, has := msgTpls[tplID]
 			if !has {
-				return fmt.Errorf("no template with id: <%s>", tplID)
+				return nil, fmt.Errorf("no template with id: <%s>", tplID)
 			} else if len(refTpl) == 0 {
 				continue
 			}
-			wrkSlice := make([]*FCTemplate, len(refTpl)+len(tpls[i:])-1) // so we can cover tpls[i+1:]
+			wrkSlice := make([]*FCTemplate, len(refTpl)+len(fcts[i:])-1) // so we can cover tpls[i+1:]
 			copy(wrkSlice[:len(refTpl)], refTpl)                         // copy fields out of referenced template
-			if len(tpls[i:]) > 1 {                                       // copy the rest of the fields after MetaTemplate
-				copy(wrkSlice[len(refTpl):], tpls[i+1:])
+			if len(fcts[i:]) > 1 {                                       // copy the rest of the fields after MetaTemplate
+				copy(wrkSlice[len(refTpl):], fcts[i+1:])
 			}
-			tpls = append(tpls[:i], wrkSlice...) // append the work
+			fcts = append(fcts[:i], wrkSlice...) // append the work
 			continue                             // don't increase index so we can recheck
 		}
 		i++
 	}
-	return
+	if !hasTpl {
+		return nil, nil
+	}
+	return fcts, nil
 }

@@ -31,7 +31,7 @@ type DiameterAgentCfg struct {
 	OriginRealm       string
 	VendorId          int
 	ProductName       string
-	Templates         map[string]FCTemplates
+	Templates         map[string][]*FCTemplate
 	RequestProcessors []*DARequestProcessor
 }
 
@@ -69,7 +69,7 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) (err e
 	}
 	if jsnCfg.Templates != nil {
 		if da.Templates == nil {
-			da.Templates = make(map[string]FCTemplates)
+			da.Templates = make(map[string][]*FCTemplate)
 		}
 		for k, jsnTpls := range jsnCfg.Templates {
 			if da.Templates[k], err = FCTemplatesFromFCTemplatesJsonCfg(jsnTpls); err != nil {
@@ -107,8 +107,8 @@ type DARequestProcessor struct {
 	Flags             utils.StringMap
 	Timezone          string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 	ContinueOnSuccess bool
-	RequestFields     FCTemplates
-	ReplyFields       FCTemplates
+	RequestFields     []*FCTemplate
+	ReplyFields       []*FCTemplate
 }
 
 func (dap *DARequestProcessor) loadFromJsonCfg(jsnCfg *DARequestProcessorJsnCfg) (err error) {
