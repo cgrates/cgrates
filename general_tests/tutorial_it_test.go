@@ -55,7 +55,7 @@ var sTestsTutorials = []func(t *testing.T){
 
 //Test start here
 func TestTutorialMongoAtlas(t *testing.T) {
-	if *itTestMongoAtalas {
+	if !*itTestMongoAtalas {
 		return
 	}
 	tutorialConfDIR = "mongoatlas"

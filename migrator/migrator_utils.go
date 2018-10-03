@@ -28,10 +28,10 @@ import (
 )
 
 func NewMigratorDataDB(db_type, host, port, name, user, pass, marshaler string,
-	cacheCfg config.CacheConfig, loadHistorySize int) (db MigratorDataDB, err error) {
+	cacheCfg config.CacheConfig, sentinelName string) (db MigratorDataDB, err error) {
 	dm, err := engine.ConfigureDataStorage(db_type,
 		host, port, name, user, pass, marshaler,
-		cacheCfg, loadHistorySize)
+		cacheCfg, sentinelName)
 	var d MigratorDataDB
 	if err != nil {
 		return nil, err

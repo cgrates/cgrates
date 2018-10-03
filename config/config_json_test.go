@@ -190,18 +190,18 @@ func TestDfListenJsonCfg(t *testing.T) {
 
 func TestDfDataDbJsonCfg(t *testing.T) {
 	eCfg := &DbJsonCfg{
-		Db_type:           utils.StringPointer("redis"),
-		Db_host:           utils.StringPointer("127.0.0.1"),
-		Db_port:           utils.IntPointer(6379),
-		Db_name:           utils.StringPointer("10"),
-		Db_user:           utils.StringPointer("cgrates"),
-		Db_password:       utils.StringPointer(""),
-		Load_history_size: utils.IntPointer(10),
+		Db_type:        utils.StringPointer("redis"),
+		Db_host:        utils.StringPointer("127.0.0.1"),
+		Db_port:        utils.IntPointer(6379),
+		Db_name:        utils.StringPointer("10"),
+		Db_user:        utils.StringPointer("cgrates"),
+		Db_password:    utils.StringPointer(""),
+		Redis_sentinel: utils.StringPointer(""),
 	}
 	if cfg, err := dfCgrJsonCfg.DbJsonCfg(DATADB_JSN); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg)
+		t.Error("Received: ", utils.ToJSON(cfg))
 	}
 }
 

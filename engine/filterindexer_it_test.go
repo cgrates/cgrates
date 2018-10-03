@@ -63,7 +63,7 @@ var sTests = []func(t *testing.T){
 func TestFilterIndexerITRedis(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	redisDB, err := NewRedisStorage(fmt.Sprintf("%s:%s", cfg.DataDbHost, cfg.DataDbPort), 4,
-		cfg.DataDbPass, cfg.DBDataEncoding, utils.REDIS_MAX_CONNS, nil, 1)
+		cfg.DataDbPass, cfg.DBDataEncoding, utils.REDIS_MAX_CONNS, nil, "")
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	}
@@ -82,7 +82,7 @@ func TestFilterIndexerITMongo(t *testing.T) {
 	}
 	mongoDB, err := NewMongoStorage(mgoITCfg.StorDBHost, mgoITCfg.StorDBPort,
 		mgoITCfg.StorDBName, mgoITCfg.StorDBUser, mgoITCfg.StorDBPass,
-		utils.StorDB, nil, mgoITCfg.CacheCfg(), mgoITCfg.LoadHistorySize)
+		utils.StorDB, nil, mgoITCfg.CacheCfg())
 	if err != nil {
 		t.Fatal(err)
 	}

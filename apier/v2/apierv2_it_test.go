@@ -38,7 +38,7 @@ import (
 
 var (
 	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	waitRater = flag.Int("wait_rater", 500, "Number of miliseconds to wait for rater to start and cache")
+	waitRater = flag.Int("wait_rater", 1500, "Number of miliseconds to wait for rater to start and cache")
 )
 
 var apierCfgPath string
@@ -69,7 +69,8 @@ func TestApierV2itResetStorDb(t *testing.T) {
 
 func TestApierV2itConnectDataDB(t *testing.T) {
 	rdsDb, _ := strconv.Atoi(apierCfg.DataDbName)
-	if rdsITdb, err := engine.NewRedisStorage(fmt.Sprintf("%s:%s", apierCfg.DataDbHost, apierCfg.DataDbPort), rdsDb, apierCfg.DataDbPass, apierCfg.DBDataEncoding, utils.REDIS_MAX_CONNS, nil, 1); err != nil {
+	if rdsITdb, err := engine.NewRedisStorage(fmt.Sprintf("%s:%s", apierCfg.DataDbHost, apierCfg.DataDbPort),
+		rdsDb, apierCfg.DataDbPass, apierCfg.DBDataEncoding, utils.REDIS_MAX_CONNS, nil, ""); err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	} else {
 		dm = engine.NewDataManager(rdsITdb)

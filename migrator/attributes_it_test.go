@@ -157,14 +157,14 @@ func testAttrITConnect(t *testing.T) {
 	dataDBIn, err := NewMigratorDataDB(attrCfgIn.DataDbType,
 		attrCfgIn.DataDbHost, attrCfgIn.DataDbPort, attrCfgIn.DataDbName,
 		attrCfgIn.DataDbUser, attrCfgIn.DataDbPass, attrCfgIn.DBDataEncoding,
-		config.CgrConfig().CacheCfg(), *loadHistorySize)
+		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}
 	dataDBOut, err := NewMigratorDataDB(attrCfgOut.DataDbType,
 		attrCfgOut.DataDbHost, attrCfgOut.DataDbPort, attrCfgOut.DataDbName,
 		attrCfgOut.DataDbUser, attrCfgOut.DataDbPass, attrCfgOut.DBDataEncoding,
-		config.CgrConfig().CacheCfg(), *loadHistorySize)
+		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}

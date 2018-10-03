@@ -44,18 +44,19 @@ func TestLoaderITConnDataDbs(t *testing.T) {
 	lCfg.StorDBPass = "CGRateS.org"
 	var err error
 	if dataDbCsv, err = ConfigureDataStorage(lCfg.DataDbType, lCfg.DataDbHost, lCfg.DataDbPort, "7",
-		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding, nil, 1); err != nil {
+		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding, nil, ""); err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
 	if dataDbStor, err = ConfigureDataStorage(lCfg.DataDbType, lCfg.DataDbHost, lCfg.DataDbPort, "8",
-		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding, nil, 1); err != nil {
+		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding, nil, ""); err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
 	if dataDbApier, err = ConfigureDataStorage(lCfg.DataDbType, lCfg.DataDbHost, lCfg.DataDbPort, "9",
-		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding, nil, 1); err != nil {
+		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding, nil, ""); err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
-	for _, db := range []Storage{dataDbCsv.DataDB(), dataDbStor.DataDB(), dataDbApier.DataDB(), dataDbCsv.DataDB(), dataDbStor.DataDB(), dataDbApier.DataDB()} {
+	for _, db := range []Storage{dataDbCsv.DataDB(), dataDbStor.DataDB(), dataDbApier.DataDB(),
+		dataDbCsv.DataDB(), dataDbStor.DataDB(), dataDbApier.DataDB()} {
 		if err = db.Flush(""); err != nil {
 			t.Fatal("Error when flushing datadb")
 		}

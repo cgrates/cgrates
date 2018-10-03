@@ -138,14 +138,14 @@ func testShrGrpITConnect(t *testing.T) {
 	dataDBIn, err := NewMigratorDataDB(shrGrpCfgIn.DataDbType,
 		shrGrpCfgIn.DataDbHost, shrGrpCfgIn.DataDbPort, shrGrpCfgIn.DataDbName,
 		shrGrpCfgIn.DataDbUser, shrGrpCfgIn.DataDbPass, shrGrpCfgIn.DBDataEncoding,
-		config.CgrConfig().CacheCfg(), *loadHistorySize)
+		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}
 	dataDBOut, err := NewMigratorDataDB(shrGrpCfgOut.DataDbType,
 		shrGrpCfgOut.DataDbHost, shrGrpCfgOut.DataDbPort, shrGrpCfgOut.DataDbName,
 		shrGrpCfgOut.DataDbUser, shrGrpCfgOut.DataDbPass, shrGrpCfgOut.DBDataEncoding,
-		config.CgrConfig().CacheCfg(), *loadHistorySize)
+		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}

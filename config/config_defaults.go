@@ -60,7 +60,7 @@ const CGRATES_CFG_JSON = `
 	"db_name": "10", 						// data_db database name to connect to
 	"db_user": "cgrates", 					// username to use when connecting to data_db
 	"db_password": "", 						// password to use when connecting to data_db
-	"load_history_size": 10,				// Number of records in the load history
+	"redis_sentinel":"",					// redis_sentinel is the name of sentinel
 },
 
 

@@ -101,7 +101,7 @@ func TestStorDBitMongo(t *testing.T) {
 		t.Fatal(err)
 	}
 	if storDB, err = NewMongoStorage(cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName,
-		cfg.StorDBUser, cfg.StorDBPass, utils.StorDB, cfg.StorDBCDRSIndexes, nil, cfg.LoadHistorySize); err != nil {
+		cfg.StorDBUser, cfg.StorDBPass, utils.StorDB, cfg.StorDBCDRSIndexes, nil); err != nil {
 		t.Fatal(err)
 	}
 	storDB2ndDBname = "todo"
