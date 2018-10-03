@@ -202,7 +202,7 @@ func main() {
 	}
 	if *outDataDBRedisSentinel == utils.MetaDataDB {
 		if dfltCfg.MigratorCgrConfig.OutDataDBRedisSentinel == mgrCfg.MigratorCgrConfig.OutDataDBRedisSentinel {
-			mgrCfg.MigratorCgrConfig.OutDataDBRedisSentinel = mgrCfg.DBDataEncoding
+			mgrCfg.MigratorCgrConfig.OutDataDBRedisSentinel = mgrCfg.DataDbSentinelName
 		}
 	} else {
 		mgrCfg.MigratorCgrConfig.OutDataDBRedisSentinel = *outDataDBRedisSentinel
