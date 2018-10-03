@@ -104,14 +104,14 @@ func testStsITConnect(t *testing.T) {
 	dataDBIn, err := NewMigratorDataDB(stsCfgIn.DataDbType,
 		stsCfgIn.DataDbHost, stsCfgIn.DataDbPort, stsCfgIn.DataDbName,
 		stsCfgIn.DataDbUser, stsCfgIn.DataDbPass, stsCfgIn.DBDataEncoding,
-		config.CgrConfig().CacheCfg(), *loadHistorySize)
+		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}
 	dataDBOut, err := NewMigratorDataDB(stsCfgOut.DataDbType,
 		stsCfgOut.DataDbHost, stsCfgOut.DataDbPort, stsCfgOut.DataDbName,
 		stsCfgOut.DataDbUser, stsCfgOut.DataDbPass, stsCfgOut.DBDataEncoding,
-		config.CgrConfig().CacheCfg(), *loadHistorySize)
+		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}

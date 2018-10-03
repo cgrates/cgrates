@@ -52,6 +52,7 @@ var (
 	datadb_user     = flag.String("datadb_user", cgrConfig.DataDbUser, "The DataDb user to sign in as.")
 	datadb_pass     = flag.String("datadb_pass", cgrConfig.DataDbPass, "The DataDb user's password.")
 	dbdata_encoding = flag.String("dbdata_encoding", cgrConfig.DBDataEncoding, "The encoding used to store object data in strings.")
+	redis_sentinel  = flag.String("redis_sentinel", cgrConfig.DataDbSentinelName, "The name of redis sentinel")
 	raterAddress    = flag.String("rater_address", "", "Rater address for remote tests. Empty for internal rater.")
 	tor             = flag.String("tor", utils.VOICE, "The type of record to use in queries.")
 	category        = flag.String("category", "call", "The Record category to test.")
@@ -59,7 +60,6 @@ var (
 	subject         = flag.String("subject", "1001", "The rating subject to use in queries.")
 	destination     = flag.String("destination", "1002", "The destination to use in queries.")
 	json            = flag.Bool("json", false, "Use JSON RPC")
-	loadHistorySize = flag.Int("load_history_size", cgrConfig.LoadHistorySize, "Limit the number of records in the load history")
 	version         = flag.Bool("version", false, "Prints the application version.")
 	nilDuration     = time.Duration(0)
 	usage           = flag.String("usage", "1m", "The duration to use in call simulation.")
@@ -71,13 +71,15 @@ var (
 
 func durInternalRater(cd *engine.CallDescriptor) (time.Duration, error) {
 	dm, err := engine.ConfigureDataStorage(tstCfg.DataDbType, tstCfg.DataDbHost, tstCfg.DataDbPort,
-		tstCfg.DataDbName, tstCfg.DataDbUser, tstCfg.DataDbPass, tstCfg.DBDataEncoding, cgrConfig.CacheCfg(), *loadHistorySize)
+		tstCfg.DataDbName, tstCfg.DataDbUser, tstCfg.DataDbPass, tstCfg.DBDataEncoding,
+		cgrConfig.CacheCfg(), tstCfg.DataDbSentinelName) // for the momentn we use here "" for sentinelName
 	if err != nil {
 		return nilDuration, fmt.Errorf("Could not connect to data database: %s", err.Error())
 	}
 	defer dm.DataDB().Close()
 	engine.SetDataStorage(dm)
-	if err := dm.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil); err != nil {
+	if err := dm.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil); err != nil {
 		return nilDuration, fmt.Errorf("Cache rating error: %s", err.Error())
 	}
 	log.Printf("Runnning %d cycles...", *runs)
@@ -183,6 +185,9 @@ func main() {
 	}
 	if *dbdata_encoding != "" {
 		tstCfg.DBDataEncoding = *dbdata_encoding
+	}
+	if *redis_sentinel != "" {
+		tstCfg.DataDbSentinelName = *redis_sentinel
 	}
 
 	if *cpuprofile != "" {

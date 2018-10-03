@@ -19,19 +19,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 type MigratorCgrCfg struct {
-	OutDataDBType     string
-	OutDataDBHost     string
-	OutDataDBPort     string
-	OutDataDBName     string
-	OutDataDBUser     string
-	OutDataDBPassword string
-	OutDataDBEncoding string
-	OutStorDBType     string
-	OutStorDBHost     string
-	OutStorDBPort     string
-	OutStorDBName     string
-	OutStorDBUser     string
-	OutStorDBPassword string
+	OutDataDBType          string
+	OutDataDBHost          string
+	OutDataDBPort          string
+	OutDataDBName          string
+	OutDataDBUser          string
+	OutDataDBPassword      string
+	OutDataDBEncoding      string
+	OutDataDBRedisSentinel string
+	OutStorDBType          string
+	OutStorDBHost          string
+	OutStorDBPort          string
+	OutStorDBName          string
+	OutStorDBUser          string
+	OutStorDBPassword      string
 }
 
 func (mg *MigratorCgrCfg) loadFromJsonCfg(jsnCfg *MigratorCfgJson) (err error) {
@@ -56,6 +57,9 @@ func (mg *MigratorCgrCfg) loadFromJsonCfg(jsnCfg *MigratorCfgJson) (err error) {
 	}
 	if jsnCfg.Out_dataDB_encoding != nil {
 		mg.OutDataDBEncoding = *jsnCfg.Out_dataDB_encoding
+	}
+	if jsnCfg.Out_dataDB_redis_sentinel != nil {
+		mg.OutDataDBRedisSentinel = *jsnCfg.Out_dataDB_redis_sentinel
 	}
 
 	if jsnCfg.Out_storDB_type != nil {

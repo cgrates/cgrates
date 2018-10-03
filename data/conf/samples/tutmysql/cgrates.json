@@ -18,7 +18,6 @@
 	"db_type": "redis",						// data_db type: <redis|mongo>
 	"db_port": 6379, 						// data_db port to reach the database
 	"db_name": "10", 						// data_db database name to connect to
-	
 },
 
 "stor_db": {

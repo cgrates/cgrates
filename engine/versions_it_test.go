@@ -20,19 +20,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"flag"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/utils"
 	"log"
 	"path"
 	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
-	storageDb       Storage
-	dm3             *DataManager
-	dbtype          string
-	loadHistorySize = flag.Int("load_history_size", config.CgrConfig().LoadHistorySize, "Limit the number of records in the load history")
+	storageDb Storage
+	dm3       *DataManager
+	dbtype    string
 )
 
 var sTestsITVersions = []func(t *testing.T){
@@ -48,7 +47,7 @@ func TestVersionsITMongo(t *testing.T) {
 	}
 	if dm3, err = ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost,
 		cfg.DataDbPort, cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass,
-		cfg.DBDataEncoding, cfg.CacheCfg(), *loadHistorySize); err != nil {
+		cfg.DBDataEncoding, cfg.CacheCfg(), ""); err != nil {
 		log.Fatal(err)
 	}
 	storageDb, err = ConfigureStorStorage(cfg.StorDBType, cfg.StorDBHost,
@@ -70,7 +69,7 @@ func TestVersionsITRedisMYSQL(t *testing.T) {
 		t.Fatal(err)
 	}
 	dm3, err = ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort,
-		cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheCfg(), *loadHistorySize)
+		cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -94,7 +93,7 @@ func TestVersionsITRedisPostgres(t *testing.T) {
 		t.Fatal(err)
 	}
 	dm3, err = ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort,
-		cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheCfg(), *loadHistorySize)
+		cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}

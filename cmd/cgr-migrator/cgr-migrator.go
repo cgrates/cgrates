@@ -58,6 +58,8 @@ var (
 		"the DataDB password")
 	inDBDataEncoding = flag.String("dbdata_encoding", dfltCfg.DBDataEncoding,
 		"the encoding used to store object Data in strings")
+	inDataDBRedisSentinel = flag.String("redis_sentinel", dfltCfg.DataDbSentinelName,
+		"the name of redis sentinel")
 
 	outDataDBType = flag.String("out_datadb_type", utils.MetaDataDB,
 		"output DataDB type <*redis|*mongo>")
@@ -73,6 +75,8 @@ var (
 		"output DataDB password")
 	outDBDataEncoding = flag.String("out_dbdata_encoding", utils.MetaDataDB,
 		"the encoding used to store object Data in strings in move mode")
+	outDataDBRedisSentinel = flag.String("out_redis_sentinel", utils.MetaDataDB,
+		"the name of redis sentinel")
 
 	inStorDBType = flag.String("stordb_type", dfltCfg.StorDBType,
 		"the type of the StorDB Database <*mysql|*postgres|*mongo>")
@@ -141,6 +145,9 @@ func main() {
 	if *inDBDataEncoding != dfltCfg.DBDataEncoding {
 		mgrCfg.DBDataEncoding = *inDBDataEncoding
 	}
+	if *inDataDBRedisSentinel != dfltCfg.DataDbSentinelName {
+		mgrCfg.DataDbSentinelName = *inDataDBRedisSentinel
+	}
 
 	// outDataDB
 	if *outDataDBType == utils.MetaDataDB {
@@ -193,6 +200,13 @@ func main() {
 	} else {
 		mgrCfg.MigratorCgrConfig.OutDataDBEncoding = *outDBDataEncoding
 	}
+	if *outDataDBRedisSentinel == utils.MetaDataDB {
+		if dfltCfg.MigratorCgrConfig.OutDataDBRedisSentinel == mgrCfg.MigratorCgrConfig.OutDataDBRedisSentinel {
+			mgrCfg.MigratorCgrConfig.OutDataDBRedisSentinel = mgrCfg.DBDataEncoding
+		}
+	} else {
+		mgrCfg.MigratorCgrConfig.OutDataDBRedisSentinel = *outDataDBRedisSentinel
+	}
 
 	sameDataDB = mgrCfg.MigratorCgrConfig.OutDataDBType == mgrCfg.DataDbType &&
 		mgrCfg.MigratorCgrConfig.OutDataDBHost == mgrCfg.DataDbHost &&
@@ -204,7 +218,7 @@ func main() {
 		mgrCfg.DataDbHost, mgrCfg.DataDbPort,
 		mgrCfg.DataDbName, mgrCfg.DataDbUser,
 		mgrCfg.DataDbPass, mgrCfg.DBDataEncoding,
-		mgrCfg.CacheCfg(), 0); err != nil {
+		mgrCfg.CacheCfg(), mgrCfg.DataDbSentinelName); err != nil {
 		log.Fatal(err)
 	}
 
@@ -214,7 +228,7 @@ func main() {
 		mgrCfg.MigratorCgrConfig.OutDataDBHost, mgrCfg.MigratorCgrConfig.OutDataDBPort,
 		mgrCfg.MigratorCgrConfig.OutDataDBName, mgrCfg.MigratorCgrConfig.OutDataDBUser,
 		mgrCfg.MigratorCgrConfig.OutDataDBPassword, mgrCfg.MigratorCgrConfig.OutDataDBEncoding,
-		mgrCfg.CacheCfg(), 0); err != nil {
+		mgrCfg.CacheCfg(), mgrCfg.MigratorCgrConfig.OutDataDBRedisSentinel); err != nil {
 		log.Fatal(err)
 	}
 

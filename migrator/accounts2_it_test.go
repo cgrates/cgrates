@@ -66,14 +66,14 @@ func testAcc2ITConnect(t *testing.T) {
 	dataDBIn, err := NewMigratorDataDB(acc2CfgIn.DataDbType,
 		acc2CfgIn.DataDbHost, acc2CfgIn.DataDbPort, acc2CfgIn.DataDbName,
 		acc2CfgIn.DataDbUser, acc2CfgIn.DataDbPass, acc2CfgIn.DBDataEncoding,
-		config.CgrConfig().CacheCfg(), *loadHistorySize)
+		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		t.Error(err)
 	}
 	dataDBOut, err := NewMigratorDataDB(acc2CfgOut.DataDbType,
 		acc2CfgOut.DataDbHost, acc2CfgOut.DataDbPort, acc2CfgOut.DataDbName,
 		acc2CfgOut.DataDbUser, acc2CfgOut.DataDbPass, acc2CfgOut.DBDataEncoding,
-		config.CgrConfig().CacheCfg(), *loadHistorySize)
+		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		t.Error(err)
 	}
