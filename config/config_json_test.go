@@ -613,11 +613,6 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 					Type:      utils.StringPointer(utils.META_COMPOSED),
 					Value:     utils.StringPointer("~*req.Session-Id"),
 					Mandatory: utils.BoolPointer(true)},
-				{Tag: utils.StringPointer("ResultCode"),
-					Field_id:  utils.StringPointer("Result-Code"),
-					Type:      utils.StringPointer(utils.META_CONSTANT),
-					Value:     utils.StringPointer("2001"),
-					Mandatory: utils.BoolPointer(true)},
 				{Tag: utils.StringPointer("OriginHost"),
 					Field_id:  utils.StringPointer("Origin-Host"),
 					Type:      utils.StringPointer(utils.META_COMPOSED),
@@ -650,8 +645,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 	if cfg, err := dfCgrJsonCfg.DiameterAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		rcv := *cfg.Request_processors
-		t.Errorf("Received: %+v", rcv)
+		t.Errorf("Received: %+v", cfg)
 	}
 }
 
