@@ -5,7 +5,7 @@
 
 		{
 			"id": "dryrun1",
-			"filters": ["*string:*vars.*cmd:CCR", "*string:*req.Service-Context-Id:TestDiamITDryRun"],
+			"filters": ["*string:*vars.*cmd:CCR", "*string:*req.Service-Context-Id:TestDiamItDryRun"],
 			"flags": ["*dryrun"],
 			"request_fields":[
 				{"tag": "TOR", "field_id": "ToR", "type": "*constant", "value": "*sms"},
@@ -16,7 +16,7 @@
 			],
 			"reply_fields":[
 				{"tag": "CCATemplate", "type": "*template", "value": "*cca"},
-				{"tag": "ResultCode", "field_id": "Result-Code", "type": "*constant", "value": "300"},
+				{"tag": "ResultCode", "field_id": "Result-Code", "type": "*constant", "value": "2002"},
 			],
 		},
 	],

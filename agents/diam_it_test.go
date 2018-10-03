@@ -46,7 +46,7 @@ var dmtClient *DiameterClient
 
 var rplyTimeout time.Duration
 
-func TestDiamITInitCfg(t *testing.T) {
+func TestDiamItInitCfg(t *testing.T) {
 	daCfgPath = path.Join(*dataDir, "conf", "samples", "diamagent")
 	// Init config first
 	var err error
@@ -60,14 +60,14 @@ func TestDiamITInitCfg(t *testing.T) {
 }
 
 // Remove data in both rating and accounting db
-func TestDiamITResetDataDb(t *testing.T) {
+func TestDiamItResetDataDb(t *testing.T) {
 	if err := engine.InitDataDb(daCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
-func TestDiamITResetStorDb(t *testing.T) {
+func TestDiamItResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(daCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -75,14 +75,14 @@ func TestDiamITResetStorDb(t *testing.T) {
 
 /*
 // Start CGR Engine
-func TestDiamITStartEngine(t *testing.T) {
+func TestDiamItStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(daCfgPath, 4000); err != nil {
 		t.Fatal(err)
 	}
 }
 */
 
-func TestDiamITConnectDiameterClient(t *testing.T) {
+func TestDiamItConnectDiameterClient(t *testing.T) {
 	dmtClient, err = NewDiameterClient(daCfg.DiameterAgentCfg().Listen, "INTEGRATION_TESTS",
 		daCfg.DiameterAgentCfg().OriginRealm,
 		daCfg.DiameterAgentCfg().VendorId, daCfg.DiameterAgentCfg().ProductName,
@@ -93,7 +93,7 @@ func TestDiamITConnectDiameterClient(t *testing.T) {
 }
 
 // Connect rpc client to rater
-func TestDiamITApierRpcConn(t *testing.T) {
+func TestDiamItApierRpcConn(t *testing.T) {
 	var err error
 	apierRpc, err = jsonrpc.Dial("tcp", daCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -102,7 +102,7 @@ func TestDiamITApierRpcConn(t *testing.T) {
 }
 
 // Load the tariff plan, creating accounts and their balances
-func TestDiamITTPFromFolder(t *testing.T) {
+func TestDiamItTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
 	var loadInst utils.LoadInstance
 	if err := apierRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
@@ -111,7 +111,7 @@ func TestDiamITTPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(1000) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-func TestDiamITDryRun(t *testing.T) {
+func TestDiamItDryRun(t *testing.T) {
 	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
 	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("cgrates;1451911932;00082"))
 	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
@@ -120,7 +120,7 @@ func TestDiamITDryRun(t *testing.T) {
 	ccr.NewAVP(avp.DestinationHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
 	ccr.NewAVP(avp.UserName, avp.Mbit, 0, datatype.UTF8String("CGR-DA"))
 	ccr.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
-	ccr.NewAVP(avp.ServiceContextID, avp.Mbit, 0, datatype.UTF8String("TestDiamITDryRun")) // Match specific DryRun profile
+	ccr.NewAVP(avp.ServiceContextID, avp.Mbit, 0, datatype.UTF8String("TestDiamItDryRun")) // Match specific DryRun profile
 	ccr.NewAVP(avp.CCRequestType, avp.Mbit, 0, datatype.Enumerated(1))
 	ccr.NewAVP(avp.CCRequestNumber, avp.Mbit, 0, datatype.Unsigned32(1))
 	ccr.NewAVP(avp.EventTimestamp, avp.Mbit, 0, datatype.Time(time.Date(2016, 1, 5, 11, 30, 10, 0, time.UTC)))
@@ -169,15 +169,73 @@ func TestDiamITDryRun(t *testing.T) {
 		if msg == nil {
 			t.Fatal("No message returned")
 		}
-		avps, err := msg.FindAVPsWithPath([]interface{}{"Result-Code"}, dict.UndefinedVendorID)
-		if err != nil {
+		// Result-Code
+		eVal := "2002"
+		if avps, err := msg.FindAVPsWithPath([]interface{}{"Result-Code"}, dict.UndefinedVendorID); err != nil {
 			t.Error(err)
+		} else if len(avps) == 0 {
+			t.Error("Missing AVP")
+		} else if val, err := diamAVPAsString(avps[0]); err != nil {
+			t.Error(err)
+		} else if val != eVal {
+			t.Errorf("expecting: %s, received: <%s>", eVal, val)
 		}
-		if len(avps) == 0 {
-			t.Error("Result-Code")
+		eVal = "cgrates;1451911932;00082"
+		if avps, err := msg.FindAVPsWithPath([]interface{}{"Session-Id"}, dict.UndefinedVendorID); err != nil {
+			t.Error(err)
+		} else if len(avps) == 0 {
+			t.Error("Missing AVP")
+		} else if val, err := diamAVPAsString(avps[0]); err != nil {
+			t.Error(err)
+		} else if val != eVal {
+			t.Errorf("expecting: %s, received: <%s>", eVal, val)
 		}
-		eVal := "300"
-		if val, err := diamAVPAsString(avps[0]); err != nil {
+		eVal = "CGR-DA"
+		if avps, err := msg.FindAVPsWithPath([]interface{}{"Origin-Host"}, dict.UndefinedVendorID); err != nil {
+			t.Error(err)
+		} else if len(avps) == 0 {
+			t.Error("Missing AVP")
+		} else if val, err := diamAVPAsString(avps[0]); err != nil {
+			t.Error(err)
+		} else if val != eVal {
+			t.Errorf("expecting: %s, received: <%s>", eVal, val)
+		}
+		eVal = "cgrates.org"
+		if avps, err := msg.FindAVPsWithPath([]interface{}{"Origin-Realm"}, dict.UndefinedVendorID); err != nil {
+			t.Error(err)
+		} else if len(avps) == 0 {
+			t.Error("Missing AVP")
+		} else if val, err := diamAVPAsString(avps[0]); err != nil {
+			t.Error(err)
+		} else if val != eVal {
+			t.Errorf("expecting: %s, received: <%s>", eVal, val)
+		}
+		eVal = "4"
+		if avps, err := msg.FindAVPsWithPath([]interface{}{"Auth-Application-Id"}, dict.UndefinedVendorID); err != nil {
+			t.Error(err)
+		} else if len(avps) == 0 {
+			t.Error("Missing AVP")
+		} else if val, err := diamAVPAsString(avps[0]); err != nil {
+			t.Error(err)
+		} else if val != eVal {
+			t.Errorf("expecting: %s, received: <%s>", eVal, val)
+		}
+		eVal = "1"
+		if avps, err := msg.FindAVPsWithPath([]interface{}{"CC-Request-Type"}, dict.UndefinedVendorID); err != nil {
+			t.Error(err)
+		} else if len(avps) == 0 {
+			t.Error("Missing AVP")
+		} else if val, err := diamAVPAsString(avps[0]); err != nil {
+			t.Error(err)
+		} else if val != eVal {
+			t.Errorf("expecting: %s, received: <%s>", eVal, val)
+		}
+		eVal = "1"
+		if avps, err := msg.FindAVPsWithPath([]interface{}{"CC-Request-Number"}, dict.UndefinedVendorID); err != nil {
+			t.Error(err)
+		} else if len(avps) == 0 {
+			t.Error("Missing AVP")
+		} else if val, err := diamAVPAsString(avps[0]); err != nil {
 			t.Error(err)
 		} else if val != eVal {
 			t.Errorf("expecting: %s, received: <%s>", eVal, val)

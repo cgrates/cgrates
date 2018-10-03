@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/fiorix/go-diameter/diam"
@@ -101,5 +102,78 @@ func TestDPFieldAsInterface(t *testing.T) {
 		t.Error(err)
 	} else if eOut != out {
 		t.Errorf("Expecting: %v, received: %v", eOut, out)
+	}
+}
+
+func TestMessageSetAVPsWithPath(t *testing.T) {
+	eMessage := diam.NewRequest(diam.CreditControl, 4, nil)
+	eMessage.NewAVP("Session-Id", avp.Mbit, 0,
+		datatype.UTF8String("simuhuawei;1449573472;00001"))
+	m := diam.NewMessage(diam.CreditControl, diam.RequestFlag, 4,
+		eMessage.Header.HopByHopID, eMessage.Header.EndToEndID, nil)
+	if err := messageSetAVPsWithPath(m,
+		[]string{"Session-Id"}, "simuhuawei;1449573472;00001",
+		false, "UTC"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eMessage, m) {
+		t.Errorf("Expecting: %+v, received: %+v", eMessage, m)
+	}
+	// create same attribute twice
+	eMessage.NewAVP("Session-Id", avp.Mbit, 0,
+		datatype.UTF8String("simuhuawei;1449573472;00002"))
+	if err := messageSetAVPsWithPath(m,
+		[]string{"Session-Id"}, "simuhuawei;1449573472;00002",
+		true, "UTC"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eMessage.AVP, m.AVP) {
+		t.Errorf("Expecting: %+v, received: %+v", eMessage, m)
+	}
+	// overwrite of previous attribute
+	eMessage = diam.NewRequest(diam.CreditControl, 4, nil)
+	eMessage.NewAVP("Session-Id", avp.Mbit, 0,
+		datatype.UTF8String("simuhuawei;1449573472;00001"))
+	eMessage.NewAVP("Session-Id", avp.Mbit, 0,
+		datatype.UTF8String("simuhuawei;1449573472;00003"))
+	if err := messageSetAVPsWithPath(m,
+		[]string{"Session-Id"}, "simuhuawei;1449573472;00003",
+		false, "UTC"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eMessage.AVP, m.AVP) {
+		t.Errorf("Expecting: %+v, received: %+v", eMessage, m)
+	}
+	// adding a groupped AVP
+	eMessage.NewAVP(avp.SubscriptionID, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.SubscriptionIDType, avp.Mbit, 0, datatype.Enumerated(0)),
+			diam.NewAVP(avp.SubscriptionIDData, avp.Mbit, 0, datatype.UTF8String("1001")),
+		}})
+	if err := messageSetAVPsWithPath(m,
+		[]string{"Subscription-Id", "Subscription-Id-Type"}, "0",
+		false, "UTC"); err != nil {
+		t.Error(err)
+	}
+	if err := messageSetAVPsWithPath(m,
+		[]string{"Subscription-Id", "Subscription-Id-Data"}, "1001",
+		false, "UTC"); err != nil {
+		t.Error(err)
+	} else if len(eMessage.AVP) != len(m.AVP) {
+		t.Errorf("Expecting: %+v, received: %+v", eMessage, m)
+	}
+	eMessage.NewAVP(avp.SubscriptionID, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.SubscriptionIDType, avp.Mbit, 0, datatype.Enumerated(1)),
+			diam.NewAVP(avp.SubscriptionIDData, avp.Mbit, 0, datatype.UTF8String("1002")),
+		}})
+	if err := messageSetAVPsWithPath(m,
+		[]string{"Subscription-Id", "Subscription-Id-Type"}, "1",
+		true, "UTC"); err != nil {
+		t.Error(err)
+	}
+	if err := messageSetAVPsWithPath(m,
+		[]string{"Subscription-Id", "Subscription-Id-Data"}, "1002",
+		false, "UTC"); err != nil {
+		t.Error(err)
+	} else if len(eMessage.AVP) != len(m.AVP) {
+		t.Errorf("Expecting: %+v, received: %+v", eMessage, m)
 	}
 }

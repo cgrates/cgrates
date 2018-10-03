@@ -158,11 +158,14 @@ func (pk *radiusDP) FieldAsInterface(fldPath []string) (data interface{}, err er
 	if len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}
-	if data, err = pk.cache.FieldAsInterface(fldPath); err == nil ||
-		err != utils.ErrNotFound { // item found in cache
-		return
+	if data, err = pk.cache.FieldAsInterface(fldPath); err != nil {
+		if err != utils.ErrNotFound { // item found in cache
+			return
+		}
+		err = nil // cancel previous err
+	} else {
+		return // data found in cache
 	}
-	err = nil // cancel previous err
 	if len(pk.req.AttributesWithName(fldPath[0], "")) != 0 {
 		data = pk.req.AttributesWithName(fldPath[0], "")[0].GetStringValue()
 	}

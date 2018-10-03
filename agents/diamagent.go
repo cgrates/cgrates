@@ -147,7 +147,6 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		writeOnConn(c, m.Answer(diam.UnableToComply))
 		return
 	}
-	fmt.Printf("After processing successfully the message, have reply: %+v\n", rply)
 	a := m.Answer(diam.Success)
 	// write reply into message
 	for _, val := range rply.Values() {
@@ -179,12 +178,12 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			writeOnConn(c, m.Answer(diam.UnableToComply))
 			return
 		}
-		var apnd bool
-		if itm.Config == nil || !itm.Config.NewBranch {
-			apnd = true
+		var newBranch bool
+		if itm.Config != nil && itm.Config.NewBranch {
+			newBranch = true
 		}
 		if err := messageSetAVPsWithPath(a, itm.Path,
-			itmStr, apnd, da.cgrCfg.DefaultTimezone); err != nil {
+			itmStr, newBranch, da.cgrCfg.DefaultTimezone); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s setting reply item: %s for message: %s",
 					utils.DiameterAgent, err.Error(), utils.ToJSON(itm), m))

@@ -194,7 +194,7 @@ func newDiamDataType(typ datatype.TypeID, valStr,
 // messageAddAVPsWithPath will dynamically add AVPs into the message
 // 	append:	append to the message, on false overwrite if AVP is single or add to group if AVP is Grouped
 func messageSetAVPsWithPath(m *diam.Message, pathStr []string,
-	avpValStr string, appnd bool, tmz string) (err error) {
+	avpValStr string, newBranch bool, tmz string) (err error) {
 	if len(pathStr) == 0 {
 		return errors.New("empty path as AVP filter")
 	}
@@ -209,11 +209,11 @@ func messageSetAVPsWithPath(m *diam.Message, pathStr []string,
 			dictAVPs[i] = dictAVP
 		}
 	}
-	if dictAVPs[len(path)-1].Data.Type == diam.GroupedAVPType {
+	lastAVPIdx := len(path) - 1
+	if dictAVPs[lastAVPIdx].Data.Type == diam.GroupedAVPType {
 		return errors.New("last AVP in path cannot be GroupedAVP")
 	}
 	var msgAVP *diam.AVP // Keep a reference here towards last AVP
-	lastAVPIdx := len(path) - 1
 	for i := lastAVPIdx; i >= 0; i-- {
 		var typeVal datatype.Type
 		if i == lastAVPIdx {
@@ -225,7 +225,7 @@ func messageSetAVPsWithPath(m *diam.Message, pathStr []string,
 				AVP: []*diam.AVP{msgAVP}}
 		}
 		newMsgAVP := diam.NewAVP(dictAVPs[i].Code, avp.Mbit, dictAVPs[i].VendorID, typeVal) // FixMe: maybe Mbit with dictionary one
-		if i == lastAVPIdx-1 && !appnd {                                                    // last AVP needs to be appended in group
+		if i == lastAVPIdx-1 && !newBranch {
 			avps, err := m.FindAVPsWithPath(path[:lastAVPIdx], dict.UndefinedVendorID)
 			if err != nil {
 				return err
@@ -239,7 +239,7 @@ func messageSetAVPsWithPath(m *diam.Message, pathStr []string,
 		}
 		msgAVP = newMsgAVP
 	}
-	if !appnd { // Not group AVP, replace the previous set one with this one
+	if !newBranch { // Not group AVP, replace the previous set one with this one
 		avps, err := m.FindAVPsWithPath(path, dict.UndefinedVendorID)
 		if err != nil {
 			return err
@@ -302,11 +302,14 @@ func (dP *diameterDP) FieldAsString(fldPath []string) (data string, err error) {
 
 // FieldAsInterface is part of engine.DataProvider interface
 func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
-	if data, err = dP.cache.FieldAsInterface(fldPath); err == nil ||
-		err != utils.ErrNotFound { // item found in cache
-		return nil, err
+	if data, err = dP.cache.FieldAsInterface(fldPath); err != nil {
+		if err != utils.ErrNotFound { // item found in cache
+			return nil, err
+		}
+		err = nil // cancel previous err
+	} else {
+		return // data was found in cache
 	}
-	err = nil // cancel previous err
 	// lastPath can contain selector inside
 	lastPath := fldPath[len(fldPath)-1]
 	var slctrStr string
