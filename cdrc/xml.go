@@ -23,6 +23,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 	"time"
 
@@ -235,6 +236,24 @@ func (xP *xmlProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 	}
 	err = nil                                                 // cancel previous err
 	relPath := utils.HierarchyPath(fldPath[len(xP.cdrPath):]) // Need relative path to the xmlElmnt
+	var slctrStr string
+	for i := range relPath {
+		if sIdx := strings.Index(relPath[i], "["); sIdx != -1 {
+			slctrStr = relPath[i][sIdx:]
+			if slctrStr[len(slctrStr)-1:] != "]" {
+				return nil, fmt.Errorf("filter rule <%s> needs to end in ]", slctrStr)
+			}
+			relPath[i] = relPath[i][:sIdx]
+			if slctrStr[1:2] != "@" {
+				i, err := strconv.Atoi(slctrStr[1 : len(slctrStr)-1])
+				if err != nil {
+					return nil, err
+				}
+				slctrStr = "[" + strconv.Itoa(i+1) + "]"
+			}
+			relPath[i] = relPath[i] + slctrStr
+		}
+	}
 	data, err = elementText(xP.req, relPath.AsString("/", false))
 	xP.cache.Set(fldPath, data, false)
 	return
