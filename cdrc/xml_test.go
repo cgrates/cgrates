@@ -601,3 +601,71 @@ func TestXMLRPNestingSeparator(t *testing.T) {
 		t.Errorf("Expecting: %+v\n, received: %+v\n", expectedCDRs, cdrs)
 	}
 }
+
+var xmlMultipleIndex = `<complete-success-notification callid="109870">
+	<createtime>2005-08-26T14:16:42</createtime>
+	<connecttime>2005-08-26T14:16:56</connecttime>
+	<endtime>2005-08-26T14:17:34</endtime>
+	<reference>My Call Reference</reference>
+	<userid>386</userid>
+	<username>sampleusername</username>
+	<customerid>1</customerid>
+	<companyname>Conecto LLC</companyname>
+	<totalcost amount="0.21" currency="USD">US$0.21</totalcost>
+	<hasrecording>yes</hasrecording>
+	<hasvoicemail>no</hasvoicemail>
+	<agenttotalcost amount="0.13" currency="USD">US$0.13</agenttotalcost>
+	<agentid>44</agentid>
+	<callleg calllegid="222146">
+		<number>+441624828505</number>
+		<description>Isle of Man</description>
+		<seconds>38</seconds>
+		<perminuterate amount="0.0200" currency="USD">US$0.0200</perminuterate>
+		<cost amount="0.0140" currency="USD">US$0.0140</cost>
+		<agentperminuterate amount="0.0130" currency="USD">US$0.0130</agentperminuterate>
+		<agentcost amount="0.0082" currency="USD">US$0.0082</agentcost>
+	</callleg>
+	<callleg calllegid="222147">
+		<number>+44 7624 494075</number>
+		<description>Isle of Man</description>
+		<seconds>37</seconds>
+		<perminuterate amount="0.2700" currency="USD">US$0.2700</perminuterate>
+		<cost amount="0.1890" currency="USD">US$0.1890</cost>
+		<agentperminuterate amount="0.1880" currency="USD">US$0.1880</agentperminuterate>
+		<agentcost amount="0.1159" currency="USD">US$0.1159</agentcost>
+	</callleg>
+</complete-success-notification>
+`
+
+func TestXMLIndexes(t *testing.T) {
+	doc, err := xmlquery.Parse(strings.NewReader(xmlMultipleIndex))
+	if err != nil {
+		t.Error(err)
+	}
+	dP := newXmlProvider(doc, utils.HierarchyPath([]string{}))
+	if data, err := dP.FieldAsString([]string{"complete-success-notification", "userid"}); err != nil {
+		t.Error(err)
+	} else if data != "386" {
+		t.Errorf("expecting: 386, received: <%s>", data)
+	}
+	if data, err := dP.FieldAsString([]string{"complete-success-notification", "username"}); err != nil {
+		t.Error(err)
+	} else if data != "sampleusername" {
+		t.Errorf("expecting: sampleusername, received: <%s>", data)
+	}
+	if data, err := dP.FieldAsString([]string{"complete-success-notification", "callleg", "seconds"}); err != nil {
+		t.Error(err)
+	} else if data != "38" {
+		t.Errorf("expecting: 38, received: <%s>", data)
+	}
+	if data, err := dP.FieldAsString([]string{"complete-success-notification", "callleg[1]", "seconds"}); err != nil {
+		t.Error(err)
+	} else if data != "37" {
+		t.Errorf("expecting: 37, received: <%s>", data)
+	}
+	if data, err := dP.FieldAsString([]string{"complete-success-notification", "callleg[@calllegid='222147']", "seconds"}); err != nil {
+		t.Error(err)
+	} else if data != "37" {
+		t.Errorf("expecting: 37, received: <%s>", data)
+	}
+}
