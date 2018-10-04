@@ -532,8 +532,10 @@ func (smg *SMGeneric) v2ForkSessions(tnt string, evStart *engine.SafEvent,
 		Event:  evStart.AsMapInterface(),
 	}
 	var chrgrs []*engine.ChrgSProcessEventReply
-	if err := smg.chargerS.Call(utils.ChargerSv1ProcessEvent, cgrEv, &chrgrs); err != nil &&
-		err.Error() != utils.ErrNotFound.Error() {
+	if err := smg.chargerS.Call(utils.ChargerSv1ProcessEvent, cgrEv, &chrgrs); err != nil {
+		if err.Error() == utils.ErrNotFound.Error() {
+			return nil, utils.ErrNoActiveSession
+		}
 		return nil, err
 	}
 	noneSession := []*SMGSession{

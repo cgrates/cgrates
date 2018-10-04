@@ -20,7 +20,9 @@ package agents
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -170,6 +172,40 @@ func (aReq *AgentRequest) ParseField(
 		}
 		out = tEnd.Sub(tStart).String()
 		isString = true
+	case utils.MetaCCUsage:
+		if len(cfgFld.Value) != 3 {
+			return nil, fmt.Errorf("invalid arguments <%s> to %s",
+				utils.ToJSON(cfgFld.Value), utils.MetaCCUsage)
+		}
+		strVal1, err := cfgFld.Value[0].ParseDataProvider(aReq, utils.NestingSep) // ReqNr
+		if err != nil {
+			return "", err
+		}
+		reqNr, err := strconv.ParseInt(strVal1, 10, 64)
+		if err != nil {
+			return "", fmt.Errorf("invalid requestNumber <%s> to %s",
+				strVal1, utils.MetaCCUsage)
+		}
+		strVal2, err := cfgFld.Value[1].ParseDataProvider(aReq, utils.NestingSep) // TotalUsage
+		if err != nil {
+			return "", err
+		}
+		usedCCTime, err := utils.ParseDurationWithNanosecs(strVal2)
+		if err != nil {
+			return "", fmt.Errorf("invalid usedCCTime <%s> to %s",
+				strVal2, utils.MetaCCUsage)
+		}
+		strVal3, err := cfgFld.Value[2].ParseDataProvider(aReq, utils.NestingSep) // DebitInterval
+		if err != nil {
+			return "", err
+		}
+		debitItvl, err := utils.ParseDurationWithNanosecs(strVal3)
+		if err != nil {
+			return "", fmt.Errorf("invalid debitInterval <%s> to %s",
+				strVal3, utils.MetaCCUsage)
+		}
+		return usedCCTime + time.Duration(debitItvl.Nanoseconds()*reqNr), nil
+
 	}
 	if err != nil {
 		return
