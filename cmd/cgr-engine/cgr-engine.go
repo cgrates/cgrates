@@ -1163,9 +1163,11 @@ func main() {
 		cfg.AliasesServerEnabled || cfg.UserServerEnabled || cfg.SchedulerCfg().Enabled ||
 		cfg.AttributeSCfg().Enabled || cfg.ResourceSCfg().Enabled || cfg.StatSCfg().Enabled ||
 		cfg.ThresholdSCfg().Enabled || cfg.SupplierSCfg().Enabled { // Some services can run without db, ie: SessionS or CDRC
-		dm, err = engine.ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost,
-			cfg.DataDbPort, cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass,
-			cfg.DBDataEncoding, cfg.CacheCfg(), cfg.DataDbSentinelName)
+		dm, err = engine.ConfigureDataStorage(cfg.DataDbCfg().DataDbType,
+			cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
+			cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
+			cfg.DataDbCfg().DataDbPass, cfg.DBDataEncoding,
+			cfg.CacheCfg(), cfg.DataDbCfg().DataDbSentinelName)
 		if err != nil { // Cannot configure getter database, show stopper
 			utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 			return

@@ -34,9 +34,11 @@ import (
 )
 
 func InitDataDb(cfg *config.CGRConfig) error {
-	dm, err := ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort,
-		cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding,
-		cfg.CacheCfg(), cfg.DataDbSentinelName)
+	dm, err := ConfigureDataStorage(cfg.DataDbCfg().DataDbType,
+		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
+		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
+		cfg.DataDbCfg().DataDbPass, cfg.DBDataEncoding,
+		cfg.CacheCfg(), cfg.DataDbCfg().DataDbSentinelName)
 	if err != nil {
 		return err
 	}

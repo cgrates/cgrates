@@ -37,21 +37,21 @@ var (
 	cfgDir  = flag.String("config_dir", "",
 		"Configuration directory path.")
 
-	dataDBType = flag.String("datadb_type", dfltCfg.DataDbType,
+	dataDBType = flag.String("datadb_type", dfltCfg.DataDbCfg().DataDbType,
 		"The type of the DataDB database <*redis|*mongo>")
-	dataDBHost = flag.String("datadb_host", dfltCfg.DataDbHost,
+	dataDBHost = flag.String("datadb_host", dfltCfg.DataDbCfg().DataDbHost,
 		"The DataDb host to connect to.")
-	dataDBPort = flag.String("datadb_port", dfltCfg.DataDbPort,
+	dataDBPort = flag.String("datadb_port", dfltCfg.DataDbCfg().DataDbPort,
 		"The DataDb port to bind to.")
-	dataDBName = flag.String("datadb_name", dfltCfg.DataDbName,
+	dataDBName = flag.String("datadb_name", dfltCfg.DataDbCfg().DataDbName,
 		"The name/number of the DataDb to connect to.")
-	dataDBUser = flag.String("datadb_user", dfltCfg.DataDbUser,
+	dataDBUser = flag.String("datadb_user", dfltCfg.DataDbCfg().DataDbUser,
 		"The DataDb user to sign in as.")
-	dataDBPasswd = flag.String("datadb_passwd", dfltCfg.DataDbPass,
+	dataDBPasswd = flag.String("datadb_passwd", dfltCfg.DataDbCfg().DataDbPass,
 		"The DataDb user's password.")
 	dbDataEncoding = flag.String("dbdata_encoding", dfltCfg.DBDataEncoding,
 		"The encoding used to store object data in strings")
-	dbRedisSentinel = flag.String("redis_sentinel", dfltCfg.DataDbSentinelName,
+	dbRedisSentinel = flag.String("redis_sentinel", dfltCfg.DataDbCfg().DataDbSentinelName,
 		"The name of redis sentinel")
 
 	storDBType = flag.String("stordb_type", dfltCfg.StorDBType,
@@ -116,32 +116,32 @@ func main() {
 		}
 	}
 
-	if *dataDBType != dfltCfg.DataDbType {
-		ldrCfg.DataDbType = *dataDBType
+	if *dataDBType != dfltCfg.DataDbCfg().DataDbType {
+		ldrCfg.DataDbCfg().DataDbType = *dataDBType
 	}
 
-	if *dataDBHost != dfltCfg.DataDbHost {
-		ldrCfg.DataDbHost = *dataDBHost
+	if *dataDBHost != dfltCfg.DataDbCfg().DataDbHost {
+		ldrCfg.DataDbCfg().DataDbHost = *dataDBHost
 	}
 
-	if *dataDBPort != dfltCfg.DataDbPort {
-		ldrCfg.DataDbPort = *dataDBPort
+	if *dataDBPort != dfltCfg.DataDbCfg().DataDbPort {
+		ldrCfg.DataDbCfg().DataDbPort = *dataDBPort
 	}
 
-	if *dataDBName != dfltCfg.DataDbName {
-		ldrCfg.DataDbName = *dataDBName
+	if *dataDBName != dfltCfg.DataDbCfg().DataDbName {
+		ldrCfg.DataDbCfg().DataDbName = *dataDBName
 	}
 
-	if *dataDBUser != dfltCfg.DataDbUser {
-		ldrCfg.DataDbUser = *dataDBUser
+	if *dataDBUser != dfltCfg.DataDbCfg().DataDbUser {
+		ldrCfg.DataDbCfg().DataDbUser = *dataDBUser
 	}
 
-	if *dataDBPasswd != dfltCfg.DataDbPass {
-		ldrCfg.DataDbPass = *dataDBPasswd
+	if *dataDBPasswd != dfltCfg.DataDbCfg().DataDbPass {
+		ldrCfg.DataDbCfg().DataDbPass = *dataDBPasswd
 	}
 
-	if *dbRedisSentinel != dfltCfg.DataDbSentinelName {
-		ldrCfg.DataDbSentinelName = *dbRedisSentinel
+	if *dbRedisSentinel != dfltCfg.DataDbCfg().DataDbSentinelName {
+		ldrCfg.DataDbCfg().DataDbSentinelName = *dbRedisSentinel
 	}
 
 	if *storDBType != dfltCfg.StorDBType {
@@ -214,10 +214,11 @@ func main() {
 	}
 
 	if !*toStorDB {
-		if dm, err = engine.ConfigureDataStorage(ldrCfg.DataDbType, ldrCfg.DataDbHost,
-			ldrCfg.DataDbPort, ldrCfg.DataDbName,
-			ldrCfg.DataDbUser, ldrCfg.DataDbPass, ldrCfg.DBDataEncoding,
-			config.CgrConfig().CacheCfg(), ldrCfg.DataDbSentinelName); err != nil {
+		if dm, err = engine.ConfigureDataStorage(ldrCfg.DataDbCfg().DataDbType,
+			ldrCfg.DataDbCfg().DataDbHost, ldrCfg.DataDbCfg().DataDbPort,
+			ldrCfg.DataDbCfg().DataDbName, ldrCfg.DataDbCfg().DataDbUser,
+			ldrCfg.DataDbCfg().DataDbPass, ldrCfg.DBDataEncoding,
+			config.CgrConfig().CacheCfg(), ldrCfg.DataDbCfg().DataDbSentinelName); err != nil {
 			log.Fatalf("Coud not open dataDB connection: %s", err.Error())
 		}
 		defer dm.DataDB().Close()

@@ -135,16 +135,18 @@ func TestSharedGroupITMoveEncoding2(t *testing.T) {
 }
 
 func testShrGrpITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(shrGrpCfgIn.DataDbType,
-		shrGrpCfgIn.DataDbHost, shrGrpCfgIn.DataDbPort, shrGrpCfgIn.DataDbName,
-		shrGrpCfgIn.DataDbUser, shrGrpCfgIn.DataDbPass, shrGrpCfgIn.DBDataEncoding,
+	dataDBIn, err := NewMigratorDataDB(shrGrpCfgIn.DataDbCfg().DataDbType,
+		shrGrpCfgIn.DataDbCfg().DataDbHost, shrGrpCfgIn.DataDbCfg().DataDbPort,
+		shrGrpCfgIn.DataDbCfg().DataDbName, shrGrpCfgIn.DataDbCfg().DataDbUser,
+		shrGrpCfgIn.DataDbCfg().DataDbPass, shrGrpCfgIn.DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(shrGrpCfgOut.DataDbType,
-		shrGrpCfgOut.DataDbHost, shrGrpCfgOut.DataDbPort, shrGrpCfgOut.DataDbName,
-		shrGrpCfgOut.DataDbUser, shrGrpCfgOut.DataDbPass, shrGrpCfgOut.DBDataEncoding,
+	dataDBOut, err := NewMigratorDataDB(shrGrpCfgOut.DataDbCfg().DataDbType,
+		shrGrpCfgOut.DataDbCfg().DataDbHost, shrGrpCfgOut.DataDbCfg().DataDbPort,
+		shrGrpCfgOut.DataDbCfg().DataDbName, shrGrpCfgOut.DataDbCfg().DataDbUser,
+		shrGrpCfgOut.DataDbCfg().DataDbPass, shrGrpCfgOut.DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
@@ -168,14 +170,14 @@ func testShrGrpITMigrateAndMove(t *testing.T) {
 	v1shrGrp := &v1SharedGroup{
 		Id: "Test",
 		AccountParameters: map[string]*engine.SharingParameters{
-			"test": &engine.SharingParameters{Strategy: "*highest"},
+			"test": {Strategy: "*highest"},
 		},
 		MemberIds: []string{"1", "2", "3"},
 	}
 	shrGrp := &engine.SharedGroup{
 		Id: "Test",
 		AccountParameters: map[string]*engine.SharingParameters{
-			"test": &engine.SharingParameters{Strategy: "*highest"},
+			"test": {Strategy: "*highest"},
 		},
 		MemberIds: utils.NewStringMap("1", "2", "3"),
 	}

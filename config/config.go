@@ -140,6 +140,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.RALsMaxComputedUsage = make(map[string]time.Duration)
 	cfg.NodeID = utils.UUIDSha1Prefix()
 	cfg.DataFolderPath = "/usr/share/cgrates/"
+	cfg.dataDbCfg = new(DataDbCfg)
 	cfg.sessionSCfg = new(SessionSCfg)
 	cfg.cacheConfig = make(CacheConfig)
 	cfg.fsAgentCfg = new(FsAgentConfig)
@@ -177,16 +178,6 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	dfltAstConnCfg = cfg.asteriskAgentCfg.AsteriskConns[0]
 	dfltLoaderConfig = cfg.loaderCfg[0].Clone()
 	if err := cfg.checkConfigSanity(); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func NewCGRConfigFromJsonString(cfgJsonStr string) (*CGRConfig, error) {
-	cfg := new(CGRConfig)
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJsonStr)); err != nil {
-		return nil, err
-	} else if err := cfg.loadFromJsonCfg(jsnCfg); err != nil {
 		return nil, err
 	}
 	return cfg, nil
@@ -260,14 +251,6 @@ func NewCGRConfigFromFolder(cfgDir string) (*CGRConfig, error) {
 // Holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
 	NodeID                   string // Identifier for this engine instance
-	DataDbType               string
-	DataDbHost               string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	DataDbPort               string // The port to bind to.
-	DataDbName               string // The name of the database to connect to.
-	DataDbUser               string // The user to sign in as.
-	DataDbPass               string // The user's password.
-	DataDbSentinelName       string
-	LoadHistorySize          int    // Maximum number of records to archive in load history
 	StorDBType               string // Should reflect the database type used to store logs
 	StorDBHost               string // The host to connect to. Values that start with / are for UNIX domain sockets.
 	StorDBPort               string // Th e port to bind to.
@@ -380,6 +363,7 @@ type CGRConfig struct {
 	// Cache defaults loaded from json and needing clones
 	dfltCdreProfile *CdreConfig // Default cdreConfig profile
 	dfltCdrcProfile *CdrcConfig // Default cdrcConfig profile
+	dataDbCfg       *DataDbCfg  // Database config
 }
 
 func (self *CGRConfig) checkConfigSanity() error {
@@ -914,33 +898,8 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	}
 
 	if jsnDataDbCfg != nil {
-		if jsnDataDbCfg.Db_type != nil {
-			self.DataDbType = *jsnDataDbCfg.Db_type
-		}
-		if jsnDataDbCfg.Db_host != nil {
-			self.DataDbHost = *jsnDataDbCfg.Db_host
-		}
-		if jsnDataDbCfg.Db_port != nil {
-			port := strconv.Itoa(*jsnDataDbCfg.Db_port)
-			if port == "-1" {
-				port = utils.MetaDynamic
-			}
-			self.DataDbPort = NewDbDefaults().DBPort(*jsnDataDbCfg.Db_type, port)
-		}
-		if jsnDataDbCfg.Db_name != nil {
-			self.DataDbName = *jsnDataDbCfg.Db_name
-		}
-		if jsnDataDbCfg.Db_user != nil {
-			self.DataDbUser = *jsnDataDbCfg.Db_user
-		}
-		if jsnDataDbCfg.Db_password != nil {
-			self.DataDbPass = *jsnDataDbCfg.Db_password
-		}
-		if jsnDataDbCfg.Load_history_size != nil {
-			self.LoadHistorySize = *jsnDataDbCfg.Load_history_size
-		}
-		if jsnDataDbCfg.Redis_sentinel != nil {
-			self.DataDbSentinelName = *jsnDataDbCfg.Redis_sentinel
+		if err := self.dataDbCfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
+			return err
 		}
 	}
 
@@ -1625,4 +1584,8 @@ func (cfg *CGRConfig) MigratorCgrCfg() *MigratorCgrCfg {
 
 func (cfg *CGRConfig) SchedulerCfg() *SchedulerCfg {
 	return cfg.schedulerCfg
+}
+
+func (cfg *CGRConfig) DataDbCfg() *DataDbCfg {
+	return cfg.dataDbCfg
 }

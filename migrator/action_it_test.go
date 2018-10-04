@@ -136,16 +136,18 @@ func TestActionITMoveEncoding2(t *testing.T) {
 }*/
 
 func testActITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(actCfgIn.DataDbType,
-		actCfgIn.DataDbHost, actCfgIn.DataDbPort, actCfgIn.DataDbName,
-		actCfgIn.DataDbUser, actCfgIn.DataDbPass, actCfgIn.DBDataEncoding,
+	dataDBIn, err := NewMigratorDataDB(actCfgIn.DataDbCfg().DataDbType,
+		actCfgIn.DataDbCfg().DataDbHost, actCfgIn.DataDbCfg().DataDbPort,
+		actCfgIn.DataDbCfg().DataDbName, actCfgIn.DataDbCfg().DataDbUser,
+		actCfgIn.DataDbCfg().DataDbPass, actCfgIn.DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(actCfgOut.DataDbType,
-		actCfgOut.DataDbHost, actCfgOut.DataDbPort, actCfgOut.DataDbName,
-		actCfgOut.DataDbUser, actCfgOut.DataDbPass, actCfgOut.DBDataEncoding,
+	dataDBOut, err := NewMigratorDataDB(actCfgOut.DataDbCfg().DataDbType,
+		actCfgOut.DataDbCfg().DataDbHost, actCfgOut.DataDbCfg().DataDbPort,
+		actCfgOut.DataDbCfg().DataDbName, actCfgOut.DataDbCfg().DataDbUser,
+		actCfgOut.DataDbCfg().DataDbPass, actCfgOut.DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
@@ -167,7 +169,7 @@ func testActITFlush(t *testing.T) {
 
 func testActITMigrateAndMove(t *testing.T) {
 	timingSlice := []*engine.RITiming{
-		&engine.RITiming{
+		{
 			Years:     utils.Years{},
 			Months:    utils.Months{},
 			MonthDays: utils.MonthDays{},

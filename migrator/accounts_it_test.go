@@ -138,16 +138,18 @@ func TestAccountITMoveEncoding2(t *testing.T) {
 }
 
 func testAccITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(accCfgIn.DataDbType,
-		accCfgIn.DataDbHost, accCfgIn.DataDbPort, accCfgIn.DataDbName,
-		accCfgIn.DataDbUser, accCfgIn.DataDbPass, accCfgIn.DBDataEncoding,
+	dataDBIn, err := NewMigratorDataDB(accCfgIn.DataDbCfg().DataDbType,
+		accCfgIn.DataDbCfg().DataDbHost, accCfgIn.DataDbCfg().DataDbPort,
+		accCfgIn.DataDbCfg().DataDbName, accCfgIn.DataDbCfg().DataDbUser,
+		accCfgIn.DataDbCfg().DataDbPass, accCfgIn.DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(accCfgOut.DataDbType,
-		accCfgOut.DataDbHost, accCfgOut.DataDbPort, accCfgOut.DataDbName,
-		accCfgOut.DataDbUser, accCfgOut.DataDbPass, accCfgOut.DBDataEncoding,
+	dataDBOut, err := NewMigratorDataDB(accCfgOut.DataDbCfg().DataDbType,
+		accCfgOut.DataDbCfg().DataDbHost, accCfgOut.DataDbCfg().DataDbPort,
+		accCfgOut.DataDbCfg().DataDbName, accCfgOut.DataDbCfg().DataDbUser,
+		accCfgOut.DataDbCfg().DataDbPass, accCfgOut.DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
@@ -173,7 +175,7 @@ func testAccITFlush(t *testing.T) {
 
 func testAccITMigrateAndMove(t *testing.T) {
 	timingSlice := []*engine.RITiming{
-		&engine.RITiming{
+		{
 			Years:     utils.Years{},
 			Months:    utils.Months{},
 			MonthDays: utils.MonthDays{},
@@ -190,9 +192,9 @@ func testAccITMigrateAndMove(t *testing.T) {
 	v1Acc := &v1Account{
 		Id: "*OUT:CUSTOMER_1:rif",
 		BalanceMap: map[string]v1BalanceChain{
-			utils.DATA:  v1BalanceChain{v1b},
-			utils.VOICE: v1BalanceChain{v1b},
-			utils.MONETARY: v1BalanceChain{
+			utils.DATA:  {v1b},
+			utils.VOICE: {v1b},
+			utils.MONETARY: {
 				&v1Balance{Value: 21,
 					ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 					Timings:        timingSlice}}}}
@@ -239,9 +241,9 @@ func testAccITMigrateAndMove(t *testing.T) {
 	testAccount := &engine.Account{
 		ID: "CUSTOMER_1:rif",
 		BalanceMap: map[string]engine.Balances{
-			utils.DATA:     engine.Balances{v2d},
-			utils.VOICE:    engine.Balances{v2b},
-			utils.MONETARY: engine.Balances{m2}},
+			utils.DATA:     {v2d},
+			utils.VOICE:    {v2b},
+			utils.MONETARY: {m2}},
 		UnitCounters:   engine.UnitCounters{},
 		ActionTriggers: engine.ActionTriggers{},
 	}

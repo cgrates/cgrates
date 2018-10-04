@@ -135,16 +135,18 @@ func TestActionPlanITMoveEncoding2(t *testing.T) {
 }
 
 func testActPlnITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(actPlnCfgIn.DataDbType,
-		actPlnCfgIn.DataDbHost, actPlnCfgIn.DataDbPort, actPlnCfgIn.DataDbName,
-		actPlnCfgIn.DataDbUser, actPlnCfgIn.DataDbPass, actPlnCfgIn.DBDataEncoding,
+	dataDBIn, err := NewMigratorDataDB(actPlnCfgIn.DataDbCfg().DataDbType,
+		actPlnCfgIn.DataDbCfg().DataDbHost, actPlnCfgIn.DataDbCfg().DataDbPort,
+		actPlnCfgIn.DataDbCfg().DataDbName, actPlnCfgIn.DataDbCfg().DataDbUser,
+		actPlnCfgIn.DataDbCfg().DataDbPass, actPlnCfgIn.DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(actPlnCfgOut.DataDbType,
-		actPlnCfgOut.DataDbHost, actPlnCfgOut.DataDbPort, actPlnCfgOut.DataDbName,
-		actPlnCfgOut.DataDbUser, actPlnCfgOut.DataDbPass, actPlnCfgOut.DBDataEncoding,
+	dataDBOut, err := NewMigratorDataDB(actPlnCfgOut.DataDbCfg().DataDbType,
+		actPlnCfgOut.DataDbCfg().DataDbHost, actPlnCfgOut.DataDbCfg().DataDbPort,
+		actPlnCfgOut.DataDbCfg().DataDbName, actPlnCfgOut.DataDbCfg().DataDbUser,
+		actPlnCfgOut.DataDbCfg().DataDbPass, actPlnCfgOut.DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
@@ -186,7 +188,7 @@ func testActPlnITMigrateAndMove(t *testing.T) {
 		Id:         "test",
 		AccountIDs: utils.StringMap{"one": true},
 		ActionTimings: []*engine.ActionTiming{
-			&engine.ActionTiming{
+			{
 				Timing: &engine.RateInterval{
 					Timing: timingSlice,
 				},
