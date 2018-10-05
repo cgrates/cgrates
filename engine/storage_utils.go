@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -41,7 +42,7 @@ func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler strin
 			utils.Logger.Crit("Redis db name must be an integer!")
 			return nil, err
 		}
-		if port != "" {
+		if port != "" && strings.Index(host, ":") == -1 {
 			host += ":" + port
 		}
 		d, err = NewRedisStorage(host, db_nb, pass, marshaler, utils.REDIS_MAX_CONNS, cacheCfg, sentinelName)

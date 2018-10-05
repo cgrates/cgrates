@@ -26,6 +26,7 @@ import (
 	"io/ioutil"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
@@ -37,12 +38,20 @@ import (
 )
 
 type RedisStorage struct {
-	dbPool         *pool.Pool
-	maxConns       int
-	ms             Marshaler
-	cacheCfg       config.CacheConfig
-	sentinelClient *sentinel.Client
-	sentinelName   string
+	dbPool        *pool.Pool
+	maxConns      int
+	ms            Marshaler
+	cacheCfg      config.CacheConfig
+	sentinelName  string
+	sentinelInsts []*sentinelInst
+	db            int    //database number used when recconect sentinel
+	pass          string //password used when recconect sentinel
+	sentinelMux   sync.RWMutex
+}
+
+type sentinelInst struct {
+	addr string
+	conn *sentinel.Client
 }
 
 func NewRedisStorage(address string, db int, pass, mrshlerStr string,
@@ -78,13 +87,19 @@ func NewRedisStorage(address string, db int, pass, mrshlerStr string,
 	}
 
 	if sentinelName != "" {
-		client, err := sentinel.NewClientCustom("tcp", address, maxConns, df, sentinelName)
-		if err != nil {
-			return nil, err
+		var err error
+		addrs := strings.Split(address, ";")
+		sentinelInsts := make([]*sentinelInst, len(addrs))
+		for i, addr := range addrs {
+			sentinelInsts[i] = &sentinelInst{addr: addr}
+			if sentinelInsts[i].conn, err = sentinel.NewClientCustom("tcp",
+				addr, maxConns, df, sentinelName); err != nil {
+				return nil, err
+			}
 		}
 		return &RedisStorage{maxConns: maxConns, ms: mrshler,
-			cacheCfg: cacheCfg, sentinelClient: client,
-			sentinelName: sentinelName}, nil
+			cacheCfg: cacheCfg, sentinelName: sentinelName,
+			sentinelInsts: sentinelInsts, db: db, pass: pass}, nil
 	} else {
 		p, err := pool.NewCustom("tcp", address, maxConns, df)
 		if err != nil {
@@ -95,17 +110,68 @@ func NewRedisStorage(address string, db int, pass, mrshlerStr string,
 	}
 }
 
+func reconnectSentinel(addr, sentinelName string, db int, pass string, maxConns int) (*sentinel.Client, error) {
+	df := func(network, addr string) (*redis.Client, error) {
+		client, err := redis.Dial(network, addr)
+		if err != nil {
+			return nil, err
+		}
+		if len(pass) != 0 {
+			if err = client.Cmd("AUTH", pass).Err; err != nil {
+				client.Close()
+				return nil, err
+			}
+		}
+		if db != 0 {
+			if err = client.Cmd("SELECT", db).Err; err != nil {
+				client.Close()
+				return nil, err
+			}
+		}
+		return client, nil
+	}
+	return sentinel.NewClientCustom("tcp", addr, maxConns, df, sentinelName)
+}
+
 // This CMD function get a connection from the pool.
 // Handles automatic failover in case of network disconnects
 func (rs *RedisStorage) Cmd(cmd string, args ...interface{}) *redis.Resp {
 	if rs.sentinelName != "" {
-		conn, err := rs.sentinelClient.GetMaster(rs.sentinelName)
-		if err != nil {
-			return redis.NewResp(err)
+		var err error
+		for i := range rs.sentinelInsts {
+			rs.sentinelMux.Lock()
+
+			if rs.sentinelInsts[i].conn == nil {
+				rs.sentinelInsts[i].conn, err = reconnectSentinel(rs.sentinelInsts[i].addr,
+					rs.sentinelName, rs.db, rs.pass, rs.maxConns)
+				if err != nil {
+					if i == len(rs.sentinelInsts)-1 {
+						rs.sentinelMux.Unlock()
+						return redis.NewResp(fmt.Errorf("No sentinels active"))
+					}
+					rs.sentinelMux.Unlock()
+					continue
+				}
+			}
+			sConn := rs.sentinelInsts[i].conn
+			rs.sentinelMux.Unlock()
+
+			conn, err := sConn.GetMaster(rs.sentinelName)
+			if err != nil {
+				if i == len(rs.sentinelInsts)-1 {
+					return redis.NewResp(fmt.Errorf("No sentinels active"))
+				}
+				rs.sentinelMux.Lock()
+				rs.sentinelInsts[i].conn = nil
+				rs.sentinelMux.Unlock()
+				utils.Logger.Warning(fmt.Sprintf("<RedisStorage> sentinel error: %s ",
+					err.Error()))
+				continue
+			}
+			result := conn.Cmd(cmd, args...)
+			sConn.PutMaster(rs.sentinelName, conn)
+			return result
 		}
-		result := conn.Cmd(cmd, args...)
-		rs.sentinelClient.PutMaster(rs.sentinelName, conn)
-		return result
 	}
 
 	c1, err := rs.dbPool.Get()
@@ -131,7 +197,9 @@ func (rs *RedisStorage) Cmd(cmd string, args ...interface{}) *redis.Resp {
 }
 
 func (rs *RedisStorage) Close() {
-	rs.dbPool.Empty()
+	if rs.dbPool != nil {
+		rs.dbPool.Empty()
+	}
 }
 
 func (rs *RedisStorage) Flush(ignore string) error {
