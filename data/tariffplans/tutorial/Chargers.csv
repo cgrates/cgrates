@@ -1,2 +1,2 @@
 #Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
-cgrates.org,Charger1,*string:Account:1001,2014-07-29T15:00:00Z,*rated,ATTR_1001_SIMPLEAUTH,20
+cgrates.org,DEFAULT,,,*default,*none,0

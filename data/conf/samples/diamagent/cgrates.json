@@ -30,18 +30,6 @@
 
 "rals": {
 	"enabled": true,
-	"cdrstats_conns": [
-		{"address": "*internal"}
-	],
-	"pubsubs_conns": [
-		{"address": "*internal"}
-	],
-	"users_conns": [
-		{"address": "*internal"}
-	],
-	"aliases_conns": [
-		{"address": "*internal"}
-	],
 },
 
 "scheduler": {
@@ -50,49 +38,35 @@
 
 "cdrs": {
 	"enabled": true,
-	"cdrstats_conns": [
-		{"address": "*internal"}
-	],
-},
-
-"cdrstats": {
-	"enabled": true,
-},
-
-"pubsubs": {
-	"enabled": true,				// starts PubSub service: <true|false>.
-},
-
-"aliases": {
-	"enabled": true,				// starts Aliases service: <true|false>.
-},
-
-"users": {
-	"enabled": true,
-	"indexes": ["SubscriberId"],
-},
-
-"resources": {
-	"enabled": true,
 },
 
 "attributes": {
 	"enabled": true,
 },
 
-"suppliers": {
+"chargers": {
 	"enabled": true,
 },
 
+
 "sessions": {
 	"enabled": true,
+	"attributes_conns": [
+		{"address": "127.0.0.1:2012","transport":"*json"}
+	],
+	"chargers_conns": [
+		{"address": "127.0.0.1:2012","transport":"*json"}
+	],
+	"rals_conns": [
+		{"address": "127.0.0.1:2012","transport":"*json"}
+	],
+	"cdrs_conns": [
+		{"address": "127.0.0.1:2012","transport":"*json"}
+	],
 },
 
 "diameter_agent": {
 	"enabled": true,
-	"pubsubs_conns": [
-		{"address": "*internal"}
-	],
 	"sessions_conns": [
 		{"address": "127.0.0.1:2012","transport":"*json"}
 	],

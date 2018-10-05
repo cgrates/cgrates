@@ -1,0 +1,28 @@
+
+{
+
+"diameter_agent": {
+	"request_processors": [
+		{
+			"id": "simpa_event",
+			"filters": ["*string:*vars.*cmd:CCR", "*string:*req.CC-Request-Type:4",
+				"*prefix:*req.Service-Context-Id:simpa"],
+			"flags": ["*event", "*accounts"],
+			"request_fields":[
+				{"tag": "TOR", "field_id": "ToR", "type": "*constant", "value": "*generic"},
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 
+					"value": "~*req.Session-Id", "mandatory": true},
+				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", "value": "*prepaid"},
+				{"tag": "Category", "field_id": "Category", "type": "*constant", "value": "generic"},
+				{"tag": "Account", "field_id": "Account", "type": "*composed", "mandatory": true, 
+					"value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]"},
+				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", 
+					"value": "~*req.Event-Timestamp", "mandatory": true},
+				{"tag": "Usage", "field_id": "Usage", "type": "*value_exponent", "mandatory": true, 
+					"value": "~*req.Requested-Service-Unit.CC-Money.Unit-Value.Value-Digits;~*req.Requested-Service-Unit.CC-Money.Unit-Value.Exponent"},
+			],
+		},
+	],
+},
+
+}

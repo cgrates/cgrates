@@ -46,7 +46,7 @@ func TestNewFCTemplateFromFCTemplateJsonCfg(t *testing.T) {
 	}
 }
 
-func TestFCTemplatesFromFCTemapltesJsonCfg(t *testing.T) {
+func TestFCTemplatesFromFCTemplatesJsonCfg(t *testing.T) {
 	jsnCfgs := []*FcTemplateJsonCfg{
 		&FcTemplateJsonCfg{
 			Tag:      utils.StringPointer("Tenant"),
@@ -79,7 +79,7 @@ func TestFCTemplatesFromFCTemapltesJsonCfg(t *testing.T) {
 			Value:   NewRSRParsersMustCompile("SampleValue", true),
 		},
 	}
-	if rcv, err := FCTemplatesFromFCTemapltesJsonCfg(jsnCfgs); err != nil {
+	if rcv, err := FCTemplatesFromFCTemplatesJsonCfg(jsnCfgs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("expected: %s ,received: %s", utils.ToJSON(expected), utils.ToJSON(rcv))

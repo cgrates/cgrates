@@ -532,8 +532,10 @@ func (smg *SMGeneric) v2ForkSessions(tnt string, evStart *engine.SafEvent,
 		Event:  evStart.AsMapInterface(),
 	}
 	var chrgrs []*engine.ChrgSProcessEventReply
-	if err := smg.chargerS.Call(utils.ChargerSv1ProcessEvent, cgrEv, &chrgrs); err != nil &&
-		err.Error() != utils.ErrNotFound.Error() {
+	if err := smg.chargerS.Call(utils.ChargerSv1ProcessEvent, cgrEv, &chrgrs); err != nil {
+		if err.Error() == utils.ErrNotFound.Error() {
+			return nil, utils.ErrNoActiveSession
+		}
 		return nil, err
 	}
 	noneSession := []*SMGSession{
@@ -1909,7 +1911,7 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 			rply.MaxUsage = &maxUsage
 		}
 	}
-	if smg.thdS != nil && args.ProcessThresholds {
+	if args.ProcessThresholds {
 		if smg.thdS == nil {
 			return utils.NewErrNotConnected(utils.ThresholdS)
 		}
@@ -1924,7 +1926,7 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		}
 		rply.ThresholdIDs = &tIDs
 	}
-	if smg.statS != nil && args.ProcessStats {
+	if args.ProcessStats {
 		if smg.statS == nil {
 			return utils.NewErrNotConnected(utils.StatService)
 		}
@@ -2133,7 +2135,7 @@ func (smg *SMGeneric) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection
 			return utils.NewErrResourceS(err)
 		}
 	}
-	if smg.thdS != nil && args.ProcessThresholds {
+	if args.ProcessThresholds {
 		if smg.thdS == nil {
 			return utils.NewErrNotConnected(utils.ThresholdS)
 		}
@@ -2147,7 +2149,10 @@ func (smg *SMGeneric) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection
 				fmt.Sprintf("<SessionS> error: %s processing event %+v with ThresholdS.", err.Error(), thEv))
 		}
 	}
-	if smg.statS != nil && args.ProcessStats {
+	if args.ProcessStats {
+		if smg.statS == nil {
+			return utils.NewErrNotConnected(utils.StatS)
+		}
 		var statReply []string
 		if err := smg.statS.Call(utils.StatSv1ProcessEvent, &engine.StatsArgsProcessEvent{CGREvent: args.CGREvent}, &statReply); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
@@ -2166,20 +2171,25 @@ func (smg *SMGeneric) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 	return smg.cdrsrv.Call(utils.CdrsV2ProcessCDR, cgrEv, reply)
 }
 
-func NewV1ProcessEventArgs(resrc, acnts, attrs bool,
+func NewV1ProcessEventArgs(resrc, acnts, attrs, thds, stats bool,
 	cgrEv utils.CGREvent) *V1ProcessEventArgs {
 	return &V1ProcessEventArgs{
 		AllocateResources: resrc,
 		Debit:             acnts,
 		GetAttributes:     attrs,
+		ProcessThresholds: thds,
+		ProcessStats:      stats,
 		CGREvent:          cgrEv,
 	}
 }
 
 type V1ProcessEventArgs struct {
+	GetAttributes     bool
 	AllocateResources bool
 	Debit             bool
-	GetAttributes     bool
+	ProcessThresholds bool
+	ProcessStats      bool
+
 	utils.CGREvent
 }
 
@@ -2222,6 +2232,25 @@ func (smg *SMGeneric) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
 	}
+	if args.GetAttributes {
+		if smg.attrS == nil {
+			return utils.NewErrNotConnected(utils.AttributeS)
+		}
+		if args.CGREvent.Context == nil { // populate if not already in
+			args.CGREvent.Context = utils.StringPointer(utils.MetaSessionS)
+		}
+		attrArgs := &engine.AttrArgsProcessEvent{
+			CGREvent: args.CGREvent,
+		}
+		var rplyEv engine.AttrSProcessEventReply
+		if err := smg.attrS.Call(utils.AttributeSv1ProcessEvent,
+			attrArgs, &rplyEv); err == nil {
+			args.CGREvent = *rplyEv.CGREvent
+			rply.Attributes = &rplyEv
+		} else if err.Error() != utils.ErrNotFound.Error() {
+			return utils.NewErrAttributeS(err)
+		}
+	}
 	if args.AllocateResources {
 		if smg.resS == nil {
 			return utils.NewErrNotConnected(utils.ResourceS)
@@ -2253,22 +2282,30 @@ func (smg *SMGeneric) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 			rply.MaxUsage = &maxUsage
 		}
 	}
-	if args.GetAttributes {
-		if smg.attrS == nil {
-			return utils.NewErrNotConnected(utils.AttributeS)
+	if args.ProcessThresholds {
+		if smg.thdS == nil {
+			return utils.NewErrNotConnected(utils.ThresholdS)
 		}
-		if args.CGREvent.Context == nil {
-			args.CGREvent.Context = utils.StringPointer(utils.MetaSessionS)
-		}
-		attrArgs := &engine.AttrArgsProcessEvent{
+		var tIDs []string
+		thEv := &engine.ArgsProcessEvent{
 			CGREvent: args.CGREvent,
 		}
-		var rplyEv engine.AttrSProcessEventReply
-		if err = smg.attrS.Call(utils.AttributeSv1ProcessEvent,
-			attrArgs, &rplyEv); err != nil {
-			return utils.NewErrAttributeS(err)
+		if err := smg.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
+			err.Error() != utils.ErrNotFound.Error() {
+			utils.Logger.Warning(
+				fmt.Sprintf("<SessionS> error: %s processing event %+v with ThresholdS.", err.Error(), thEv))
 		}
-		rply.Attributes = &rplyEv
+	}
+	if args.ProcessStats {
+		if smg.statS == nil {
+			return utils.NewErrNotConnected(utils.StatS)
+		}
+		var statReply []string
+		if err := smg.statS.Call(utils.StatSv1ProcessEvent, &engine.StatsArgsProcessEvent{CGREvent: args.CGREvent}, &statReply); err != nil &&
+			err.Error() != utils.ErrNotFound.Error() {
+			utils.Logger.Warning(
+				fmt.Sprintf("<SessionS> error: %s processing event %+v with StatS.", err.Error(), args.CGREvent))
+		}
 	}
 	return nil
 }

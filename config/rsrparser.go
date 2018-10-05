@@ -207,6 +207,11 @@ type RSRParser struct {
 	filters    utils.RSRFilters         // The value to compare when used as filter
 }
 
+// AttrName exports the attribute name of the RSRParser
+func (prsr *RSRParser) AttrName() string {
+	return prsr.attrName
+}
+
 // Compile parses Rules string and repopulates other fields
 func (prsr *RSRParser) Compile() (err error) {
 	var newPrsr *RSRParser
@@ -276,12 +281,12 @@ func (prsr *RSRParser) ParseDataProvider(dP DataProvider, separator string) (out
 }
 
 func (prsr *RSRParser) ParseDataProviderWithInterfaces(dP DataProvider, separator string) (out string, err error) {
-	var outStr interface{}
+	var outIface interface{}
 	if prsr.attrValue == "" {
-		if outStr, err = dP.FieldAsInterface(
+		if outIface, err = dP.FieldAsInterface(
 			strings.Split(prsr.attrName, separator)); err != nil {
 			return
 		}
 	}
-	return prsr.ParseValue(outStr)
+	return prsr.ParseValue(outIface)
 }

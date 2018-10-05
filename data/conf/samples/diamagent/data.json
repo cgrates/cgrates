@@ -1,0 +1,125 @@
+
+{
+
+"diameter_agent": {
+	"request_processors": [
+
+		{
+			"id": "data_init",
+			"filters": ["*string:*vars.*cmd:CCR", "*string:*req.CC-Request-Type:1", "*prefix:*req.Service-Context-Id:gprs"],
+			"flags": ["*initiate", "*accounts"],
+			"request_fields":[
+				{"tag": "TOR", "field_id": "ToR", "type": "*constant", "value": "*data"},
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 
+					"value": "~*req.Session-Id", "mandatory": true},
+				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", "value": "*prepaid"},
+				{"tag": "Category", "field_id": "Category", "type": "*constant", "value": "generic"},
+				{"tag": "Account", "field_id": "Account", "type": "*composed", 
+					"value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(1)]", "mandatory": true},
+				{"tag": "Destination", "field_id": "Destination", "type": "*constant", "value": "data"},
+				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", 
+					"value": "~*req.Event-Timestamp", "mandatory": true},
+				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", 
+					"value": "~*req.Event-Timestamp", "mandatory": true},
+				{"tag": "Usage", "field_id": "Usage", "type": "*constant", "value": "2048"},
+			],
+			"reply_fields": [
+				{"tag": "CCATemplate", "type": "*template", "value": "*cca"},
+				{"tag": "ResultCode",  "filters": ["*rsr::~*cgrep.Error(!^$)"], 
+					"field_id": "Result-Code", "type": "*constant", "value": "5030", "blocker": true},
+			],
+		},
+
+		{
+			"id": "data_update_grp1",
+			"filters": ["*string:*vars.*cmd:CCR", "*string:*req.CC-Request-Type:2", 
+				"*string:*req.Multiple-Services-Credit-Control.Rating-Group:1", "*prefix:*req.Service-Context-Id:gprs"],
+			"flags": ["*update", "*accounts"],
+			"continue_on_success": true,
+			"request_fields":[
+				{"tag": "TOR", "field_id": "ToR", "type": "*constant", "value": "*data"},
+				{"tag": "InitialOriginID", "field_id": "InitialOriginID", "type": "*composed", 
+					"value": "~*req.Session-Id", "mandatory": true},
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 
+					"value": "~*req.Session-Id", "mandatory": true},
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "_grp1"},
+				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", "value": "*prepaid"},
+				{"tag": "Category", "field_id": "Category", "type": "*contant", "value": "generic"},
+				{"tag": "Account", "field_id": "Account", "type": "*composed", 
+					"value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]"},
+				{"tag": "Destination", "field_id": "Destination", "type": "*constant", "value": "data"},
+				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", 
+					"value": "~*req.Event-Timestamp", "mandatory": true},
+				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", 
+					"value": "~*req.Event-Timestamp", "mandatory": true},
+				{"tag": "Usage", "field_id": "Usage", "type": "*constant", "value": "2048"},
+				{"tag": "LastUsed", "field_id": "LastUsed", "type": "*sum", 
+					"value": "~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Input-Octets[~Rating-Group(1)];~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Output-Octets[~Rating-Group(1)]"},
+			],
+			"reply_fields": [
+				{"tag": "CCATemplate", "type": "*template", "value": "*cca"},
+				{"tag": "ResultCode",  "filters": ["*rsr::~*cgrep.Error(!^$)"], 
+					"field_id": "Result-Code", "type": "*constant", "value": "5030", "blocker": true},
+			],
+		},
+
+		{
+			"id": "data_update_grp2",
+			"filters": ["*string:*vars.*cmd:CCR", "*string:*req.CC-Request-Type:2",
+				"*string:*req.Multiple-Services-Credit-Control.Rating-Group[1]:2", "*prefix:*req.Service-Context-Id:gprs"],
+			"flags": ["*update", "*accounts"],
+			"request_fields":[
+				{"tag": "TOR", "field_id": "ToR", "type": "*constant", "value": "*data"},
+				{"tag": "InitialOriginID", "field_id": "InitialOriginID", "type": "*composed", 
+					"value": "~*req.Session-Id", "mandatory": true},
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 
+					"value": "~*req.Session-Id", "mandatory": true},
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*constant", "value": "_grp2"},
+				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", "value": "*prepaid"},
+				{"tag": "Category", "field_id": "Category", "type": "*constant", "value": "generic"},
+				{"tag": "Account", "field_id": "Account", "type": "*composed", "mandatory": true, 
+					"value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]"},
+				{"tag": "Destination", "field_id": "Destination", "type": "*constant", "value": "data"},
+				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", 
+					"value": "~*req.Event-Timestamp", "mandatory": true},
+				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", 
+					"value": "~*req.Event-Timestamp", "mandatory": true},
+				{"tag": "Usage", "field_id": "Usage", "type": "*constant", "value": "2048"},
+				{"tag": "LastUsed", "field_id": "LastUsed", "type": "*sum", 
+					"value": "~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Input-Octets[~Rating-Group(2)];~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Output-Octets[~Rating-Group(2)]"},
+			],
+			"reply_fields": [
+				{"tag": "CCATemplate", "type": "*template", "value": "*cca"},
+				{"tag": "ResultCode",  "filters": ["*rsr::~*cgrep.Error(!^$)"], 
+					"field_id": "Result-Code", "type": "*constant", "value": "5030", "blocker": true},
+			],
+		},
+
+		{
+			"id": "data_terminate",
+			"filters": ["*string:*vars.*cmd:CCR", "*string:*req.CC-Request-Type:3",
+				"*prefix:*req.Service-Context-Id:gprs"],
+			"flags": ["*terminate", "*accounts"],
+			"request_fields":[
+				{"tag": "TOR", "field_id": "ToR", "type": "*constant", "value": "*data"},
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 
+					"value": "~*req.Session-Id", "mandatory": true},
+				{"tag": "OriginIDPrefix", "field_id": "OriginIDPrefix", "type": "*composed", 
+					"value": "~*req.Session-Id", "mandatory": true},
+				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", "value": "*prepaid"},
+				{"tag": "Category", "field_id": "Category", "type": "*constant", "value": "generic"},
+				{"tag": "Account", "field_id": "Account", "type": "*composed", "mandatory": true, 
+					"value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]"},
+				{"tag": "Destination", "field_id": "Destination", "type": "*constant", "value": "data"},
+				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", 
+					"value": "~*req.Event-Timestamp", "mandatory": true},
+				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", 
+					"value": "~*req.Event-Timestamp", "mandatory": true},
+				{"tag": "LastUsed", "field_id": "LastUsed", "type": "*handler", "handler_id": "*sum", 
+					"value": "~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Input-Octets;~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Output-Octets"},
+			],
+		},
+	]
+}
+
+}

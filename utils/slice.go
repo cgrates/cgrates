@@ -83,3 +83,12 @@ func StripSlicePrefix(slc []string, nrItems int) []string {
 	}
 	return slc[nrItems:]
 }
+
+// SliceStringToIface converts slice of strings into a slice of interfaces
+func SliceStringToIface(slc []string) (ifc []interface{}) {
+	ifc = make([]interface{}, len(slc))
+	for i, itm := range slc {
+		ifc[i] = itm
+	}
+	return
+}

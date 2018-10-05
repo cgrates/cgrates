@@ -24,7 +24,7 @@ imports:
 - name: github.com/DisposaBoy/JsonConfigReader
   version: 5ea4d0ddac554439159cd6f191cb94a110d73352
 - name: github.com/fiorix/go-diameter
-  version: d742356e99f1457ee1fb8ddc238c932e9f5ca87b
+  version: 16028e641c19a8dd67509053bc558d389258ff6d
   subpackages:
   - diam
   - diam/avp
@@ -33,6 +33,8 @@ imports:
   - diam/sm
   - diam/sm/smparser
   - diam/sm/smpeer
+- name: github.com/ishidawataru/sctp
+  version: 6e2cb1366111dcf547c13531e3a263a067715847
 - name: github.com/go-sql-driver/mysql
   version: 99ff426eb706cffe92ff3d058e168b278cabf7c7
 - name: github.com/gorhill/cronexpr

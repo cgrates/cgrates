@@ -327,48 +327,42 @@ type OsipsConnJsonCfg struct {
 
 // DiameterAgent configuration
 type DiameterAgentJsonCfg struct {
-	Enabled              *bool             // enables the diameter agent: <true|false>
-	Listen               *string           // address where to listen for diameter requests <x.y.z.y:1234>
-	Dictionaries_dir     *string           // path towards additional dictionaries
-	Sessions_conns       *[]*HaPoolJsonCfg // Connections towards generic SM
-	Pubsubs_conns        *[]*HaPoolJsonCfg // connection towards pubsubs
-	Create_cdr           *bool
-	Cdr_requires_session *bool
-	Debit_interval       *string
-	Timezone             *string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-	Origin_host          *string
-	Origin_realm         *string
-	Vendor_id            *int
-	Product_name         *string
-	Request_processors   *[]*DARequestProcessorJsnCfg
+	Enabled            *bool             // enables the diameter agent: <true|false>
+	Listen             *string           // address where to listen for diameter requests <x.y.z.y:1234>
+	Dictionaries_path  *string           // path towards additional dictionaries
+	Sessions_conns     *[]*HaPoolJsonCfg // Connections towards SessionS
+	Origin_host        *string
+	Origin_realm       *string
+	Vendor_id          *int
+	Product_name       *string
+	Templates          map[string][]*FcTemplateJsonCfg
+	Request_processors *[]*DARequestProcessorJsnCfg
 }
 
 // One Diameter request processor configuration
 type DARequestProcessorJsnCfg struct {
 	Id                  *string
-	Dry_run             *bool
-	Publish_event       *bool
-	Request_filter      *string
+	Tenant              *string
+	Filters             *[]string
 	Flags               *[]string
+	Timezone            *string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 	Continue_on_success *bool
-	Append_cca          *bool
-	CCR_fields          *[]*CdrFieldJsonCfg
-	CCA_fields          *[]*CdrFieldJsonCfg
+	Request_fields      *[]*FcTemplateJsonCfg
+	Reply_fields        *[]*FcTemplateJsonCfg
 }
 
 // Radius Agent configuration section
 type RadiusAgentJsonCfg struct {
-	Enabled              *bool
-	Listen_net           *string
-	Listen_auth          *string
-	Listen_acct          *string
-	Client_secrets       *map[string]string
-	Client_dictionaries  *map[string]string
-	Sessions_conns       *[]*HaPoolJsonCfg
-	Tenant               *string
-	Cdr_requires_session *bool
-	Timezone             *string
-	Request_processors   *[]*RAReqProcessorJsnCfg
+	Enabled             *bool
+	Listen_net          *string
+	Listen_auth         *string
+	Listen_acct         *string
+	Client_secrets      *map[string]string
+	Client_dictionaries *map[string]string
+	Sessions_conns      *[]*HaPoolJsonCfg
+	Tenant              *string
+	Timezone            *string
+	Request_processors  *[]*RAReqProcessorJsnCfg
 }
 
 type RAReqProcessorJsnCfg struct {

@@ -58,9 +58,9 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 				utils.HTTPAgent, err.Error()))
 		return
 	}
-
 	for _, reqProcessor := range ha.reqProcessors {
-		agReq := newAgentRequest(dcdr, reqProcessor.Tenant, ha.dfltTenant,
+		agReq := newAgentRequest(dcdr, nil, nil,
+			reqProcessor.Tenant, ha.dfltTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone, config.CgrConfig().DefaultTimezone),
 			ha.filterS)
 		lclProcessed, err := ha.processRequest(reqProcessor, agReq)
@@ -177,7 +177,10 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 		evArgs := sessions.NewV1ProcessEventArgs(
 			reqProcessor.Flags.HasKey(utils.MetaResources),
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
-			reqProcessor.Flags.HasKey(utils.MetaAttributes), *cgrEv)
+			reqProcessor.Flags.HasKey(utils.MetaAttributes),
+			reqProcessor.Flags.HasKey(utils.MetaThresholds),
+			reqProcessor.Flags.HasKey(utils.MetaStats),
+			*cgrEv)
 		var eventRply sessions.V1ProcessEventReply
 		err = ha.sessionS.Call(utils.SessionSv1ProcessEvent,
 			evArgs, &eventRply)

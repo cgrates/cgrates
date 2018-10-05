@@ -18,6 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import (
+	"fmt"
+
+	"github.com/cgrates/cgrates/utils"
+)
+
 func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg) (*FCTemplate, error) {
 	fcTmp := new(FCTemplate)
 	var err error
@@ -112,7 +118,7 @@ type FCTemplate struct {
 	MaskLen          int
 }
 
-func FCTemplatesFromFCTemapltesJsonCfg(jsnCfgFlds []*FcTemplateJsonCfg) ([]*FCTemplate, error) {
+func FCTemplatesFromFCTemplatesJsonCfg(jsnCfgFlds []*FcTemplateJsonCfg) ([]*FCTemplate, error) {
 	retFields := make([]*FCTemplate, len(jsnCfgFlds))
 	var err error
 	for i, jsnFld := range jsnCfgFlds {
@@ -121,4 +127,36 @@ func FCTemplatesFromFCTemapltesJsonCfg(jsnCfgFlds []*FcTemplateJsonCfg) ([]*FCTe
 		}
 	}
 	return retFields, nil
+}
+
+// InflateTemplates will replace the *template fields with template content out msgTpls
+func InflateTemplates(fcts []*FCTemplate, msgTpls map[string][]*FCTemplate) ([]*FCTemplate, error) {
+	var hasTpl bool
+	for i := 0; i < len(fcts); {
+		if fcts[i].Type == utils.MetaTemplate {
+			hasTpl = true
+			tplID, err := fcts[i].Value.ParseValue(nil)
+			if err != nil {
+				return nil, err
+			}
+			refTpl, has := msgTpls[tplID]
+			if !has {
+				return nil, fmt.Errorf("no template with id: <%s>", tplID)
+			} else if len(refTpl) == 0 {
+				continue
+			}
+			wrkSlice := make([]*FCTemplate, len(refTpl)+len(fcts[i:])-1) // so we can cover tpls[i+1:]
+			copy(wrkSlice[:len(refTpl)], refTpl)                         // copy fields out of referenced template
+			if len(fcts[i:]) > 1 {                                       // copy the rest of the fields after MetaTemplate
+				copy(wrkSlice[len(refTpl):], fcts[i+1:])
+			}
+			fcts = append(fcts[:i], wrkSlice...) // append the work
+			continue                             // don't increase index so we can recheck
+		}
+		i++
+	}
+	if !hasTpl {
+		return nil, nil
+	}
+	return fcts, nil
 }
