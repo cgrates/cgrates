@@ -25,8 +25,8 @@
 			],
 			"reply_fields": [
 				{"tag": "CCATemplate", "type": "*template", "value": "*cca"},
-				{"tag": "ResultCode", "filters": ["*string:*cgrep.MaxUsage:0"], 
-					"field_id": "Result-Code", "type": "*constant", "value": "4010", "blocker": true},
+				{"tag": "ResultCode",  "filters": ["*rsr::~*cgrep.Error(!^$)"], 
+					"field_id": "Result-Code", "type": "*constant", "value": "5030", "blocker": true},
 			],
 		},
 
@@ -58,8 +58,8 @@
 			],
 			"reply_fields": [
 				{"tag": "CCATemplate", "type": "*template", "value": "*cca"},
-				{"tag": "ResultCode", "filters": ["*string:*cgrep.MaxUsage:0"], 
-					"field_id": "Result-Code", "type": "*constant", "value": "4010", "blocker": true},
+				{"tag": "ResultCode",  "filters": ["*rsr::~*cgrep.Error(!^$)"], 
+					"field_id": "Result-Code", "type": "*constant", "value": "5030", "blocker": true},
 			],
 		},
 
@@ -90,8 +90,8 @@
 			],
 			"reply_fields": [
 				{"tag": "CCATemplate", "type": "*template", "value": "*cca"},
-				{"tag": "ResultCode", "filters": ["*string:*cgrep.MaxUsage:0"], 
-					"field_id": "Result-Code", "type": "*constant", "value": "4010", "blocker": true},
+				{"tag": "ResultCode",  "filters": ["*rsr::~*cgrep.Error(!^$)"], 
+					"field_id": "Result-Code", "type": "*constant", "value": "5030", "blocker": true},
 			],
 		},
 
