@@ -66,7 +66,7 @@ func testAcc2ITConnect(t *testing.T) {
 	dataDBIn, err := NewMigratorDataDB(acc2CfgIn.DataDbCfg().DataDbType,
 		acc2CfgIn.DataDbCfg().DataDbHost, acc2CfgIn.DataDbCfg().DataDbPort,
 		acc2CfgIn.DataDbCfg().DataDbName, acc2CfgIn.DataDbCfg().DataDbUser,
-		acc2CfgIn.DataDbCfg().DataDbPass, acc2CfgIn.DBDataEncoding,
+		acc2CfgIn.DataDbCfg().DataDbPass, acc2CfgIn.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		t.Error(err)
@@ -74,7 +74,7 @@ func testAcc2ITConnect(t *testing.T) {
 	dataDBOut, err := NewMigratorDataDB(acc2CfgOut.DataDbCfg().DataDbType,
 		acc2CfgOut.DataDbCfg().DataDbHost, acc2CfgOut.DataDbCfg().DataDbPort,
 		acc2CfgOut.DataDbCfg().DataDbName, acc2CfgOut.DataDbCfg().DataDbUser,
-		acc2CfgOut.DataDbCfg().DataDbPass, acc2CfgOut.DBDataEncoding,
+		acc2CfgOut.DataDbCfg().DataDbPass, acc2CfgOut.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		t.Error(err)

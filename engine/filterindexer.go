@@ -103,7 +103,7 @@ func (rfi *FilterIndexer) cacheRemItemType() { // ToDo: tune here by removing pe
 // StoreIndexes handles storing the indexes to dataDB
 func (rfi *FilterIndexer) StoreIndexes(commit bool, transactionID string) (err error) {
 	lockID := utils.CacheInstanceToPrefix[utils.PrefixToIndexCache[rfi.itemType]] + rfi.dbKeySuffix
-	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockID)
+	guardian.Guardian.GuardIDs(config.CgrConfig().GeneralCfg().LockingTimeout, lockID)
 	defer guardian.Guardian.UnguardIDs(lockID)
 	if err = rfi.dm.SetFilterIndexes(
 		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
@@ -216,7 +216,7 @@ func (rfi *FilterIndexer) RemoveItemFromIndex(tenant, itemID string, oldFilters 
 				Tenant: tenant,
 				ID:     itemID,
 				Rules: []*FilterRule{
-					&FilterRule{
+					{
 						Type:      utils.META_NONE,
 						FieldName: utils.META_ANY,
 						Values:    []string{utils.META_ANY},
@@ -277,7 +277,7 @@ func createAndIndex(itemPrefix, tenant, context, itemID string, filterIDs []stri
 				Tenant: tenant,
 				ID:     itemID,
 				Rules: []*FilterRule{
-					&FilterRule{
+					{
 						Type:      utils.META_NONE,
 						FieldName: utils.META_ANY,
 						Values:    []string{utils.META_ANY},

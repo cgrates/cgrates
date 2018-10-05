@@ -49,7 +49,7 @@ var (
 		"The DataDb user to sign in as.")
 	dataDBPasswd = flag.String("datadb_passwd", dfltCfg.DataDbCfg().DataDbPass,
 		"The DataDb user's password.")
-	dbDataEncoding = flag.String("dbdata_encoding", dfltCfg.DBDataEncoding,
+	dbDataEncoding = flag.String("dbdata_encoding", dfltCfg.GeneralCfg().DBDataEncoding,
 		"The encoding used to store object data in strings")
 	dbRedisSentinel = flag.String("redis_sentinel", dfltCfg.DataDbCfg().DataDbSentinelName,
 		"The name of redis sentinel")
@@ -169,7 +169,7 @@ func main() {
 	}
 
 	if *dbDataEncoding != "" {
-		ldrCfg.DBDataEncoding = *dbDataEncoding
+		ldrCfg.GeneralCfg().DBDataEncoding = *dbDataEncoding
 	}
 
 	if *tpid != "" {
@@ -205,8 +205,8 @@ func main() {
 		*importID = utils.UUIDSha1Prefix()
 	}
 
-	if *timezone != dfltCfg.DefaultTimezone {
-		ldrCfg.DefaultTimezone = *timezone
+	if *timezone != dfltCfg.GeneralCfg().DefaultTimezone {
+		ldrCfg.GeneralCfg().DefaultTimezone = *timezone
 	}
 
 	if *disableReverse != dfltCfg.LoaderCgrConfig.DisableReverse {
@@ -217,7 +217,7 @@ func main() {
 		if dm, err = engine.ConfigureDataStorage(ldrCfg.DataDbCfg().DataDbType,
 			ldrCfg.DataDbCfg().DataDbHost, ldrCfg.DataDbCfg().DataDbPort,
 			ldrCfg.DataDbCfg().DataDbName, ldrCfg.DataDbCfg().DataDbUser,
-			ldrCfg.DataDbCfg().DataDbPass, ldrCfg.DBDataEncoding,
+			ldrCfg.DataDbCfg().DataDbPass, ldrCfg.GeneralCfg().DBDataEncoding,
 			config.CgrConfig().CacheCfg(), ldrCfg.DataDbCfg().DataDbSentinelName); err != nil {
 			log.Fatalf("Coud not open dataDB connection: %s", err.Error())
 		}
@@ -228,7 +228,7 @@ func main() {
 		if storDb, err = engine.ConfigureLoadStorage(ldrCfg.StorDbCfg().StorDBType,
 			ldrCfg.StorDbCfg().StorDBHost, ldrCfg.StorDbCfg().StorDBPort,
 			ldrCfg.StorDbCfg().StorDBName, ldrCfg.StorDbCfg().StorDBUser,
-			ldrCfg.StorDbCfg().StorDBPass, ldrCfg.DBDataEncoding,
+			ldrCfg.StorDbCfg().StorDBPass, ldrCfg.GeneralCfg().DBDataEncoding,
 			config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
 			config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
 			config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
@@ -295,7 +295,7 @@ func main() {
 	}
 
 	tpReader := engine.NewTpReader(dm.DataDB(), loader,
-		ldrCfg.LoaderCgrConfig.TpID, ldrCfg.DefaultTimezone)
+		ldrCfg.LoaderCgrConfig.TpID, ldrCfg.GeneralCfg().DefaultTimezone)
 
 	if err = tpReader.LoadAll(); err != nil {
 		log.Fatal(err)

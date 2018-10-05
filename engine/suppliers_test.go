@@ -43,7 +43,7 @@ var (
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Suppliers: []*Supplier{
-				&Supplier{
+				{
 					ID:                 "supplier1",
 					FilterIDs:          []string{},
 					AccountIDs:         []string{},
@@ -68,7 +68,7 @@ var (
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Suppliers: []*Supplier{
-				&Supplier{
+				{
 					ID:                 "supplier2",
 					FilterIDs:          []string{},
 					AccountIDs:         []string{},
@@ -78,7 +78,7 @@ var (
 					Weight:             20.0,
 					SupplierParameters: "param2",
 				},
-				&Supplier{
+				{
 					ID:                 "supplier3",
 					FilterIDs:          []string{},
 					AccountIDs:         []string{},
@@ -88,7 +88,7 @@ var (
 					Weight:             10.0,
 					SupplierParameters: "param3",
 				},
-				&Supplier{
+				{
 					ID:                 "supplier1",
 					FilterIDs:          []string{},
 					AccountIDs:         []string{},
@@ -113,7 +113,7 @@ var (
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
 			Suppliers: []*Supplier{
-				&Supplier{
+				{
 					ID:                 "supplier1",
 					FilterIDs:          []string{},
 					AccountIDs:         []string{},
@@ -129,7 +129,7 @@ var (
 		},
 	}
 	argsGetSuppliers = []*ArgsGetSuppliers{
-		&ArgsGetSuppliers{ //matching SupplierProfile1
+		{ //matching SupplierProfile1
 			CGREvent: utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "utils.CGREvent1",
@@ -142,7 +142,7 @@ var (
 				},
 			},
 		},
-		&ArgsGetSuppliers{ //matching SupplierProfile2
+		{ //matching SupplierProfile2
 			CGREvent: utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "utils.CGREvent1",
@@ -155,7 +155,7 @@ var (
 				},
 			},
 		},
-		&ArgsGetSuppliers{ //matching SupplierProfilePrefix
+		{ //matching SupplierProfilePrefix
 			CGREvent: utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "utils.CGREvent1",
@@ -164,7 +164,7 @@ var (
 				},
 			},
 		},
-		&ArgsGetSuppliers{ //matching
+		{ //matching
 			CGREvent: utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "CGR",
@@ -190,7 +190,7 @@ func TestSuppliersSort(t *testing.T) {
 			Sorting:           "",
 			SortingParameters: []string{},
 			Suppliers: []*Supplier{
-				&Supplier{
+				{
 					ID:                 "supplier1",
 					FilterIDs:          []string{},
 					AccountIDs:         []string{},
@@ -215,7 +215,7 @@ func TestSuppliersSort(t *testing.T) {
 			Sorting:           "",
 			SortingParameters: []string{},
 			Suppliers: []*Supplier{
-				&Supplier{
+				{
 					ID:                 "supplier1",
 					FilterIDs:          []string{},
 					AccountIDs:         []string{},
@@ -242,7 +242,7 @@ func TestSuppliersSort(t *testing.T) {
 			Sorting:           "",
 			SortingParameters: []string{},
 			Suppliers: []*Supplier{
-				&Supplier{
+				{
 					ID:                 "supplier1",
 					FilterIDs:          []string{},
 					AccountIDs:         []string{},
@@ -267,7 +267,7 @@ func TestSuppliersSort(t *testing.T) {
 			Sorting:           "",
 			SortingParameters: []string{},
 			Suppliers: []*Supplier{
-				&Supplier{
+				{
 					ID:                 "supplier1",
 					FilterIDs:          []string{},
 					AccountIDs:         []string{},
@@ -300,8 +300,10 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 
-	splService, err = NewSupplierService(dmSPP, config.CgrConfig().DefaultTimezone,
-		&FilterS{dm: dmSPP, cfg: defaultCfg}, nil, nil, nil, nil, nil)
+	splService, err = NewSupplierService(dmSPP,
+		config.CgrConfig().GeneralCfg().DefaultTimezone, &FilterS{
+			dm:  dmSPP,
+			cfg: defaultCfg}, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -309,20 +311,20 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 
 func TestSuppliersAddFilters(t *testing.T) {
 	fltrSupp1 := &Filter{
-		Tenant: config.CgrConfig().DefaultTenant,
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_1",
 		Rules: []*FilterRule{
-			&FilterRule{
+			{
 				Type:      MetaString,
 				FieldName: "Supplier",
 				Values:    []string{"SupplierProfile1"},
 			},
-			&FilterRule{
+			{
 				Type:      MetaGreaterOrEqual,
 				FieldName: "UsageInterval",
 				Values:    []string{(1 * time.Second).String()},
 			},
-			&FilterRule{
+			{
 				Type:      MetaGreaterOrEqual,
 				FieldName: utils.Weight,
 				Values:    []string{"9.0"},
@@ -331,20 +333,20 @@ func TestSuppliersAddFilters(t *testing.T) {
 	}
 	dmSPP.SetFilter(fltrSupp1)
 	fltrSupp2 := &Filter{
-		Tenant: config.CgrConfig().DefaultTenant,
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_2",
 		Rules: []*FilterRule{
-			&FilterRule{
+			{
 				Type:      MetaString,
 				FieldName: "Supplier",
 				Values:    []string{"SupplierProfile2"},
 			},
-			&FilterRule{
+			{
 				Type:      MetaGreaterOrEqual,
 				FieldName: "PddInterval",
 				Values:    []string{(1 * time.Second).String()},
 			},
-			&FilterRule{
+			{
 				Type:      MetaGreaterOrEqual,
 				FieldName: utils.Weight,
 				Values:    []string{"15.0"},
@@ -353,10 +355,10 @@ func TestSuppliersAddFilters(t *testing.T) {
 	}
 	dmSPP.SetFilter(fltrSupp2)
 	fltrSupp3 := &Filter{
-		Tenant: config.CgrConfig().DefaultTenant,
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_3",
 		Rules: []*FilterRule{
-			&FilterRule{
+			{
 				Type:      MetaPrefix,
 				FieldName: "Supplier",
 				Values:    []string{"SupplierProfilePrefix"},
@@ -414,7 +416,7 @@ func TestSuppliersSortedForEvent(t *testing.T) {
 		ProfileID: "SupplierProfile1",
 		Sorting:   utils.MetaWeight,
 		SortedSuppliers: []*SortedSupplier{
-			&SortedSupplier{
+			{
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
 					"Weight": 10.0,
@@ -435,21 +437,21 @@ func TestSuppliersSortedForEvent(t *testing.T) {
 		ProfileID: "SupplierProfile2",
 		Sorting:   utils.MetaWeight,
 		SortedSuppliers: []*SortedSupplier{
-			&SortedSupplier{
+			{
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
 					"Weight": 30.0,
 				},
 				SupplierParameters: "param1",
 			},
-			&SortedSupplier{
+			{
 				SupplierID: "supplier2",
 				SortingData: map[string]interface{}{
 					"Weight": 20.0,
 				},
 				SupplierParameters: "param2",
 			},
-			&SortedSupplier{
+			{
 				SupplierID: "supplier3",
 				SortingData: map[string]interface{}{
 					"Weight": 10.0,
@@ -471,7 +473,7 @@ func TestSuppliersSortedForEvent(t *testing.T) {
 		ProfileID: "SupplierProfilePrefix",
 		Sorting:   utils.MetaWeight,
 		SortedSuppliers: []*SortedSupplier{
-			&SortedSupplier{
+			{
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
 					"Weight": 10.0,
@@ -495,14 +497,14 @@ func TestSuppliersSortedForEventWithLimit(t *testing.T) {
 		ProfileID: "SupplierProfile2",
 		Sorting:   utils.MetaWeight,
 		SortedSuppliers: []*SortedSupplier{
-			&SortedSupplier{
+			{
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
 					"Weight": 30.0,
 				},
 				SupplierParameters: "param1",
 			},
-			&SortedSupplier{
+			{
 				SupplierID: "supplier2",
 				SortingData: map[string]interface{}{
 					"Weight": 20.0,
@@ -528,7 +530,7 @@ func TestSuppliersSortedForEventWithOffset(t *testing.T) {
 		ProfileID: "SupplierProfile2",
 		Sorting:   utils.MetaWeight,
 		SortedSuppliers: []*SortedSupplier{
-			&SortedSupplier{
+			{
 				SupplierID: "supplier3",
 				SortingData: map[string]interface{}{
 					"Weight": 10.0,
@@ -554,7 +556,7 @@ func TestSuppliersSortedForEventWithLimitAndOffset(t *testing.T) {
 		ProfileID: "SupplierProfile2",
 		Sorting:   utils.MetaWeight,
 		SortedSuppliers: []*SortedSupplier{
-			&SortedSupplier{
+			{
 				SupplierID: "supplier2",
 				SortingData: map[string]interface{}{
 					"Weight": 20.0,

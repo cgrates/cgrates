@@ -56,7 +56,8 @@ func (self *ApierV1) AddAccountActionTriggers(attr AttrAddAccountActionTriggers,
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	actTime, err := utils.ParseTimeDetectLayout(attr.ActivationDate, self.Config.DefaultTimezone)
+	actTime, err := utils.ParseTimeDetectLayout(attr.ActivationDate,
+		self.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		*reply = err.Error()
 		return err
@@ -261,14 +262,16 @@ func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 					at.MinSleep = minSleep
 				}
 				if attr.ExpirationDate != nil {
-					expTime, err := utils.ParseTimeDetectLayout(*attr.ExpirationDate, self.Config.DefaultTimezone)
+					expTime, err := utils.ParseTimeDetectLayout(*attr.ExpirationDate,
+						self.Config.GeneralCfg().DefaultTimezone)
 					if err != nil {
 						return 0, err
 					}
 					at.ExpirationDate = expTime
 				}
 				if attr.ActivationDate != nil {
-					actTime, err := utils.ParseTimeDetectLayout(*attr.ActivationDate, self.Config.DefaultTimezone)
+					actTime, err := utils.ParseTimeDetectLayout(*attr.ActivationDate,
+						self.Config.GeneralCfg().DefaultTimezone)
 					if err != nil {
 						return 0, err
 					}
@@ -451,7 +454,8 @@ func (self *ApierV1) SetActionTrigger(attr AttrSetActionTrigger, reply *string) 
 		newAtr.MinSleep = minSleep
 	}
 	if attr.ExpirationDate != nil {
-		expTime, err := utils.ParseTimeDetectLayout(*attr.ExpirationDate, self.Config.DefaultTimezone)
+		expTime, err := utils.ParseTimeDetectLayout(*attr.ExpirationDate,
+			self.Config.GeneralCfg().DefaultTimezone)
 		if err != nil {
 			*reply = err.Error()
 			return err
@@ -459,7 +463,8 @@ func (self *ApierV1) SetActionTrigger(attr AttrSetActionTrigger, reply *string) 
 		newAtr.ExpirationDate = expTime
 	}
 	if attr.ActivationDate != nil {
-		actTime, err := utils.ParseTimeDetectLayout(*attr.ActivationDate, self.Config.DefaultTimezone)
+		actTime, err := utils.ParseTimeDetectLayout(*attr.ActivationDate,
+			self.Config.GeneralCfg().DefaultTimezone)
 		if err != nil {
 			*reply = err.Error()
 			return err
@@ -604,7 +609,8 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 	if attr.BalanceWeight != 0.0 {
 		at.Balance.Weight = utils.Float64Pointer(attr.BalanceWeight)
 	}
-	if balExpiryTime, err := utils.ParseTimeDetectLayout(attr.BalanceExpiryTime, self.Config.DefaultTimezone); err != nil {
+	if balExpiryTime, err := utils.ParseTimeDetectLayout(attr.BalanceExpiryTime,
+		self.Config.GeneralCfg().DefaultTimezone); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		at.Balance.ExpirationDate = &balExpiryTime

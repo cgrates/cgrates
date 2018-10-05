@@ -436,7 +436,8 @@ func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *st
 	}
 	var expTime *time.Time
 	if attr.ExpiryTime != nil {
-		expTimeVal, err := utils.ParseTimeDetectLayout(*attr.ExpiryTime, self.Config.DefaultTimezone)
+		expTimeVal, err := utils.ParseTimeDetectLayout(*attr.ExpiryTime,
+			self.Config.GeneralCfg().DefaultTimezone)
 		if err != nil {
 			*reply = err.Error()
 			return err
@@ -510,7 +511,8 @@ func (self *ApierV1) SetBalance(attr *utils.AttrSetBalance, reply *string) error
 	}
 	var expTime *time.Time
 	if attr.ExpiryTime != nil {
-		expTimeVal, err := utils.ParseTimeDetectLayout(*attr.ExpiryTime, self.Config.DefaultTimezone)
+		expTimeVal, err := utils.ParseTimeDetectLayout(*attr.ExpiryTime,
+			self.Config.GeneralCfg().DefaultTimezone)
 		if err != nil {
 			*reply = err.Error()
 			return err
@@ -580,7 +582,8 @@ func (self *ApierV1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) e
 	}
 	var expTime *time.Time
 	if attr.ExpiryTime != nil {
-		expTimeVal, err := utils.ParseTimeDetectLayout(*attr.ExpiryTime, self.Config.DefaultTimezone)
+		expTimeVal, err := utils.ParseTimeDetectLayout(*attr.ExpiryTime,
+			self.Config.GeneralCfg().DefaultTimezone)
 		if err != nil {
 			*reply = err.Error()
 			return err

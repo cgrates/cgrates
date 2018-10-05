@@ -124,8 +124,9 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		lclProcessed, err = da.processRequest(reqProcessor,
 			newAgentRequest(
 				newDADataProvider(m), reqVars, rply,
-				reqProcessor.Tenant, da.cgrCfg.DefaultTenant,
-				utils.FirstNonEmpty(reqProcessor.Timezone, config.CgrConfig().DefaultTimezone),
+				reqProcessor.Tenant, da.cgrCfg.GeneralCfg().DefaultTenant,
+				utils.FirstNonEmpty(reqProcessor.Timezone,
+					config.CgrConfig().GeneralCfg().DefaultTimezone),
 				da.filterS))
 		if lclProcessed {
 			processed = lclProcessed
@@ -184,7 +185,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			newBranch = true
 		}
 		if err := messageSetAVPsWithPath(a, itm.Path,
-			itmStr, newBranch, da.cgrCfg.DefaultTimezone); err != nil {
+			itmStr, newBranch, da.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s setting reply item: %s for message: %s",
 					utils.DiameterAgent, err.Error(), utils.ToJSON(itm), m))

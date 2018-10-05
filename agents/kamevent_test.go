@@ -103,7 +103,7 @@ func TestKamEvAsMapStringInterface(t *testing.T) {
 }
 
 func TestKamEvAsCDR(t *testing.T) {
-	timezone := config.CgrConfig().DefaultTimezone
+	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
 	expMp := make(map[string]string)
 	expMp["cgr_account"] = "1001"
 	expMp["cgr_duration"] = "3"
@@ -136,7 +136,7 @@ func TestKamEvAsCDR(t *testing.T) {
 }
 
 func TestKamEvAsCGREvent(t *testing.T) {
-	timezone := config.CgrConfig().DefaultTimezone
+	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
 	kamEv := KamEvent{"event": "CGR_CALL_END",
 		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
 		"from_tag": "bf71ad59", "to_tag": "7351fecf",
@@ -152,7 +152,7 @@ func TestKamEvAsCGREvent(t *testing.T) {
 	}
 	expected := &utils.CGREvent{
 		Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
-			config.CgrConfig().DefaultTenant),
+			config.CgrConfig().GeneralCfg().DefaultTenant),
 		ID:      utils.UUIDSha1Prefix(),
 		Time:    &sTime,
 		Context: utils.StringPointer("account_profile"),
@@ -170,7 +170,7 @@ func TestKamEvAsCGREvent(t *testing.T) {
 }
 
 func TestKamEvV1AuthorizeArgs(t *testing.T) {
-	timezone := config.CgrConfig().DefaultTimezone
+	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
 	kamEv := KamEvent{"event": "CGR_CALL_END",
 		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
 		"from_tag": "bf71ad59", "to_tag": "7351fecf",
@@ -188,7 +188,7 @@ func TestKamEvV1AuthorizeArgs(t *testing.T) {
 		GetMaxUsage: true,
 		CGREvent: utils.CGREvent{
 			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
-				config.CgrConfig().DefaultTenant),
+				config.CgrConfig().GeneralCfg().DefaultTenant),
 			ID:    utils.UUIDSha1Prefix(),
 			Time:  &sTime,
 			Event: kamEv.AsMapStringInterface(),
@@ -220,7 +220,7 @@ func TestKamEvV1AuthorizeArgs(t *testing.T) {
 }
 
 func TestKamEvAsKamAuthReply(t *testing.T) {
-	timezone := config.CgrConfig().DefaultTimezone
+	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
 	kamEv := KamEvent{"event": "CGR_CALL_END",
 		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
 		"from_tag": "bf71ad59", "to_tag": "7351fecf",
@@ -237,7 +237,7 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 		GetMaxUsage: true,
 		CGREvent: utils.CGREvent{
 			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
-				config.CgrConfig().DefaultTenant),
+				config.CgrConfig().GeneralCfg().DefaultTenant),
 			ID:    utils.UUIDSha1Prefix(),
 			Time:  &sTime,
 			Event: kamEv.AsMapStringInterface(),
@@ -262,7 +262,7 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 		GetAttributes: true,
 		CGREvent: utils.CGREvent{
 			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
-				config.CgrConfig().DefaultTenant),
+				config.CgrConfig().GeneralCfg().DefaultTenant),
 			ID:    utils.UUIDSha1Prefix(),
 			Time:  &sTime,
 			Event: kamEv.AsMapStringInterface(),
@@ -297,7 +297,7 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 }
 
 func TestKamEvV1InitSessionArgs(t *testing.T) {
-	timezone := config.CgrConfig().DefaultTimezone
+	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
 	kamEv := KamEvent{"event": "CGR_CALL_END",
 		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
 		"from_tag": "bf71ad59", "to_tag": "7351fecf",
@@ -314,7 +314,7 @@ func TestKamEvV1InitSessionArgs(t *testing.T) {
 		InitSession: true,
 		CGREvent: utils.CGREvent{
 			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
-				config.CgrConfig().DefaultTenant),
+				config.CgrConfig().GeneralCfg().DefaultTenant),
 			ID:    utils.UUIDSha1Prefix(),
 			Time:  &sTime,
 			Event: kamEv.AsMapStringInterface(),
@@ -335,7 +335,7 @@ func TestKamEvV1InitSessionArgs(t *testing.T) {
 }
 
 func TestKamEvV1TerminateSessionArgs(t *testing.T) {
-	timezone := config.CgrConfig().DefaultTimezone
+	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
 	kamEv := KamEvent{"event": "CGR_CALL_END",
 		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
 		"from_tag": "bf71ad59", "to_tag": "7351fecf",
@@ -352,7 +352,7 @@ func TestKamEvV1TerminateSessionArgs(t *testing.T) {
 		TerminateSession: true,
 		CGREvent: utils.CGREvent{
 			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
-				config.CgrConfig().DefaultTenant),
+				config.CgrConfig().GeneralCfg().DefaultTenant),
 			ID:    utils.UUIDSha1Prefix(),
 			Time:  &sTime,
 			Event: kamEv.AsMapStringInterface(),

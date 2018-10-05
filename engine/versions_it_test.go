@@ -48,14 +48,14 @@ func TestVersionsITMongo(t *testing.T) {
 	if dm3, err = ConfigureDataStorage(cfg.DataDbCfg().DataDbType,
 		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
 		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
-		cfg.DataDbCfg().DataDbPass, cfg.DBDataEncoding,
+		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
 		cfg.CacheCfg(), ""); err != nil {
 		log.Fatal(err)
 	}
 	storageDb, err = ConfigureStorStorage(cfg.StorDbCfg().StorDBType,
 		cfg.StorDbCfg().StorDBHost, cfg.StorDbCfg().StorDBPort,
 		cfg.StorDbCfg().StorDBName, cfg.StorDbCfg().StorDBUser,
-		cfg.StorDbCfg().StorDBPass, cfg.DBDataEncoding,
+		cfg.StorDbCfg().StorDBPass, cfg.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
 		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
 		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
@@ -77,7 +77,7 @@ func TestVersionsITRedisMYSQL(t *testing.T) {
 	dm3, err = ConfigureDataStorage(cfg.DataDbCfg().DataDbType,
 		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
 		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
-		cfg.DataDbCfg().DataDbPass, cfg.DBDataEncoding, cfg.CacheCfg(), "")
+		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding, cfg.CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -85,7 +85,7 @@ func TestVersionsITRedisMYSQL(t *testing.T) {
 	storageDb, err = ConfigureStorStorage(cfg.StorDbCfg().StorDBType,
 		cfg.StorDbCfg().StorDBHost, cfg.StorDbCfg().StorDBPort,
 		cfg.StorDbCfg().StorDBName, cfg.StorDbCfg().StorDBUser,
-		cfg.StorDbCfg().StorDBPass, cfg.DBDataEncoding,
+		cfg.StorDbCfg().StorDBPass, cfg.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
 		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
 		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
@@ -107,14 +107,14 @@ func TestVersionsITRedisPostgres(t *testing.T) {
 	dm3, err = ConfigureDataStorage(cfg.DataDbCfg().DataDbType,
 		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
 		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
-		cfg.DataDbCfg().DataDbPass, cfg.DBDataEncoding, cfg.CacheCfg(), "")
+		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding, cfg.CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}
 	storageDb, err = ConfigureStorStorage(cfg.StorDbCfg().StorDBType,
 		cfg.StorDbCfg().StorDBHost, cfg.StorDbCfg().StorDBPort,
 		cfg.StorDbCfg().StorDBName, cfg.StorDbCfg().StorDBUser,
-		cfg.StorDbCfg().StorDBPass, cfg.DBDataEncoding,
+		cfg.StorDbCfg().StorDBPass, cfg.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
 		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
 		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,

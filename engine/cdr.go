@@ -69,9 +69,14 @@ func NewCDRFromExternalCDR(extCdr *ExternalCDR, timezone string) (*CDR, error) {
 }
 
 func NewCDRWithDefaults(cfg *config.CGRConfig) *CDR {
-	return &CDR{ToR: utils.VOICE, RequestType: cfg.DefaultReqType,
-		Tenant: cfg.DefaultTenant, Category: cfg.DefaultCategory,
-		ExtraFields: make(map[string]string), Cost: -1}
+	return &CDR{
+		ToR:         utils.VOICE,
+		RequestType: cfg.GeneralCfg().DefaultReqType,
+		Tenant:      cfg.GeneralCfg().DefaultTenant,
+		Category:    cfg.GeneralCfg().DefaultCategory,
+		ExtraFields: make(map[string]string),
+		Cost:        -1,
+	}
 }
 
 type CDR struct {
@@ -112,13 +117,13 @@ func (cdr *CDR) AddDefaults(cfg *config.CGRConfig) {
 		cdr.ToR = utils.VOICE
 	}
 	if cdr.RequestType == utils.EmptyString {
-		cdr.RequestType = cfg.DefaultReqType
+		cdr.RequestType = cfg.GeneralCfg().DefaultReqType
 	}
 	if cdr.Tenant == utils.EmptyString {
-		cdr.Tenant = cfg.DefaultTenant
+		cdr.Tenant = cfg.GeneralCfg().DefaultTenant
 	}
 	if cdr.Category == utils.EmptyString {
-		cdr.Category = cfg.DefaultCategory
+		cdr.Category = cfg.GeneralCfg().DefaultCategory
 	}
 	if cdr.Subject == utils.EmptyString {
 		cdr.Subject = cdr.Account
@@ -716,11 +721,13 @@ func (cdr *CDR) UpdateFromCGREvent(cgrEv *utils.CGREvent, fields []string) (err 
 				return
 			}
 		case utils.SetupTime:
-			if cdr.SetupTime, err = cgrEv.FieldAsTime(fldName, config.CgrConfig().DefaultTimezone); err != nil {
+			if cdr.SetupTime, err = cgrEv.FieldAsTime(fldName,
+				config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
 				return
 			}
 		case utils.AnswerTime:
-			if cdr.AnswerTime, err = cgrEv.FieldAsTime(fldName, config.CgrConfig().DefaultTimezone); err != nil {
+			if cdr.AnswerTime, err = cgrEv.FieldAsTime(fldName,
+				config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
 				return
 			}
 		case utils.Usage:

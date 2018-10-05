@@ -165,7 +165,7 @@ func testRedisSentinelInsertion(t *testing.T) {
 		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
 		FilterIDs: []string{"*string:Account:1001"},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FieldName:  utils.Subject,
 				Initial:    utils.ANY,
 				Substitute: config.NewRSRParsersMustCompile("1001", true),

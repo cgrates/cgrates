@@ -585,7 +585,7 @@ func (rs *Responder) Status(arg string, reply *map[string]interface{}) (err erro
 	memstats := new(runtime.MemStats)
 	runtime.ReadMemStats(memstats)
 	response := make(map[string]interface{})
-	response[utils.NodeID] = config.CgrConfig().NodeID
+	response[utils.NodeID] = config.CgrConfig().GeneralCfg().NodeID
 	response["MemoryUsage"] = utils.SizeFmt(float64(memstats.HeapAlloc), "")
 	response[utils.ActiveGoroutines] = runtime.NumGoroutine()
 	response["Footprint"] = utils.SizeFmt(float64(memstats.Sys), "")

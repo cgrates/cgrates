@@ -255,7 +255,8 @@ func (cd *CallDescriptor) UpdateFromCGREvent(cgrEv *utils.CGREvent, fields []str
 				return
 			}
 		case utils.AnswerTime:
-			if cd.TimeStart, err = cgrEv.FieldAsTime(fldName, config.CgrConfig().DefaultTimezone); err != nil {
+			if cd.TimeStart, err = cgrEv.FieldAsTime(fldName,
+				config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
 				return
 			}
 		case utils.Usage:

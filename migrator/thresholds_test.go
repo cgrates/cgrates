@@ -58,18 +58,21 @@ func Testv2ActionTriggerAsThreshold(t *testing.T) {
 	x, _ = engine.NewFilterRule(engine.MetaPrefix, "TimingIDs", v2ATR.Balance.TimingIDs.Slice())
 	filters = append(filters, x)
 
-	filter := &engine.Filter{Tenant: config.CgrConfig().DefaultTenant, ID: *v2ATR.Balance.ID, Rules: filters}
+	filter := &engine.Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     *v2ATR.Balance.ID,
+		Rules:  filters}
 
 	thp := &engine.ThresholdProfile{
 		ID:                 v2ATR.ID,
-		Tenant:             config.CgrConfig().DefaultTenant,
+		Tenant:             config.CgrConfig().GeneralCfg().DefaultTenant,
 		Blocker:            false,
 		Weight:             v2ATR.Weight,
 		ActivationInterval: &utils.ActivationInterval{v2ATR.ExpirationDate, v2ATR.ActivationDate},
 		MinSleep:           v2ATR.MinSleep,
 	}
 	th := &engine.Threshold{
-		Tenant: config.CgrConfig().DefaultTenant,
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     v2ATR.ID,
 	}
 

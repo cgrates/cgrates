@@ -158,7 +158,7 @@ func TestThresholdsPopulateThresholdService(t *testing.T) {
 
 func TestThresholdsAddFilters(t *testing.T) {
 	fltrTh1 := &Filter{
-		Tenant: config.CgrConfig().DefaultTenant,
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_TH_1",
 		Rules: []*FilterRule{
 			{
@@ -175,7 +175,7 @@ func TestThresholdsAddFilters(t *testing.T) {
 	}
 	dmTH.SetFilter(fltrTh1)
 	fltrTh2 := &Filter{
-		Tenant: config.CgrConfig().DefaultTenant,
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_TH_2",
 		Rules: []*FilterRule{
 			{
@@ -192,7 +192,7 @@ func TestThresholdsAddFilters(t *testing.T) {
 	}
 	dmTH.SetFilter(fltrTh2)
 	fltrTh3 := &Filter{
-		Tenant: config.CgrConfig().DefaultTenant,
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_TH_3",
 		Rules: []*FilterRule{
 			{

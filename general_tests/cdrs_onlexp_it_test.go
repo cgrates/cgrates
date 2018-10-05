@@ -62,11 +62,11 @@ func TestCDRsOnExpInitCdrDb(t *testing.T) {
 	if err := engine.InitStorDb(cdrsSlaveCfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.RemoveAll(cdrsMasterCfg.FailedPostsDir); err != nil {
-		t.Fatal("Error removing folder: ", cdrsMasterCfg.FailedPostsDir, err)
+	if err := os.RemoveAll(cdrsMasterCfg.GeneralCfg().FailedPostsDir); err != nil {
+		t.Fatal("Error removing folder: ", cdrsMasterCfg.GeneralCfg().FailedPostsDir, err)
 	}
 
-	if err := os.Mkdir(cdrsMasterCfg.FailedPostsDir, 0700); err != nil {
+	if err := os.Mkdir(cdrsMasterCfg.GeneralCfg().FailedPostsDir, 0700); err != nil {
 		t.Error(err)
 	}
 
@@ -226,9 +226,9 @@ func TestCDRsOnExpAMQPReplication(t *testing.T) {
 func TestCDRsOnExpHTTPPosterFileFailover(t *testing.T) {
 	time.Sleep(time.Duration(2 * time.Second))
 	failoverContent := []byte(`OriginID=httpjsonrpc1`)
-	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.FailedPostsDir)
+	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
 	if len(filesInDir) == 0 {
-		t.Fatalf("No files in directory: %s", cdrsMasterCfg.FailedPostsDir)
+		t.Fatalf("No files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)
 	}
 	var foundFile bool
 	var fileName string
@@ -242,7 +242,7 @@ func TestCDRsOnExpHTTPPosterFileFailover(t *testing.T) {
 	if !foundFile {
 		t.Fatal("Could not find the file in folder")
 	}
-	filePath := path.Join(cdrsMasterCfg.FailedPostsDir, fileName)
+	filePath := path.Join(cdrsMasterCfg.GeneralCfg().FailedPostsDir, fileName)
 	if readBytes, err := ioutil.ReadFile(filePath); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(failoverContent, readBytes) { // Checking just the prefix should do since some content is dynamic
@@ -256,9 +256,9 @@ func TestCDRsOnExpHTTPPosterFileFailover(t *testing.T) {
 func TestCDRsOnExpAMQPPosterFileFailover(t *testing.T) {
 	time.Sleep(time.Duration(10 * time.Second))
 	failoverContent := []byte(`{"CGRID":"57548d485d61ebcba55afbe5d939c82a8e9ff670"}`)
-	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.FailedPostsDir)
+	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
 	if len(filesInDir) == 0 {
-		t.Fatalf("No files in directory: %s", cdrsMasterCfg.FailedPostsDir)
+		t.Fatalf("No files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)
 	}
 	var foundFile bool
 	var fileName string
@@ -272,7 +272,7 @@ func TestCDRsOnExpAMQPPosterFileFailover(t *testing.T) {
 	if !foundFile {
 		t.Fatal("Could not find the file in folder")
 	}
-	filePath := path.Join(cdrsMasterCfg.FailedPostsDir, fileName)
+	filePath := path.Join(cdrsMasterCfg.GeneralCfg().FailedPostsDir, fileName)
 	if readBytes, err := ioutil.ReadFile(filePath); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(failoverContent, readBytes) { // Checking just the prefix should do since some content is dynamic

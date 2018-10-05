@@ -81,7 +81,10 @@ func TestV1StatsAsStats(t *testing.T) {
 	x, _ = engine.NewFilterRule(engine.MetaGreaterOrEqual, "PddInterval", []string{v1Sts.PddInterval[0].String()})
 	filters = append(filters, x)
 
-	filter := &engine.Filter{Tenant: config.CgrConfig().DefaultTenant, ID: v1Sts.Id, Rules: filters}
+	filter := &engine.Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     v1Sts.Id,
+		Rules:  filters}
 
 	sqp := &engine.StatQueueProfile{
 		Tenant:      "cgrates.org",
@@ -90,9 +93,9 @@ func TestV1StatsAsStats(t *testing.T) {
 		QueueLength: 10,
 		TTL:         time.Duration(0) * time.Second,
 		Metrics: []*utils.MetricWithParams{
-			&utils.MetricWithParams{MetricID: "*asr", Parameters: ""},
-			&utils.MetricWithParams{MetricID: "*acd", Parameters: ""},
-			&utils.MetricWithParams{MetricID: "*acc", Parameters: ""},
+			{MetricID: "*asr", Parameters: ""},
+			{MetricID: "*acd", Parameters: ""},
+			{MetricID: "*acc", Parameters: ""},
 		},
 		Blocker:      false,
 		ThresholdIDs: []string{"TestB"},

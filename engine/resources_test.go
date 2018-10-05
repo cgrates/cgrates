@@ -36,8 +36,8 @@ var (
 	resService           *ResourceService
 	dmRES                *DataManager
 	resprf               = []*ResourceProfile{
-		&ResourceProfile{
-			Tenant:    config.CgrConfig().DefaultTenant,
+		{
+			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ResourceProfile1",
 			FilterIDs: []string{"FLTR_RES_1"},
 			ActivationInterval: &utils.ActivationInterval{
@@ -49,8 +49,8 @@ var (
 			Weight:            20.00,
 			ThresholdIDs:      []string{""},
 		},
-		&ResourceProfile{
-			Tenant:    config.CgrConfig().DefaultTenant,
+		{
+			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ResourceProfile2", // identifier of this resource
 			FilterIDs: []string{"FLTR_RES_2"},
 			ActivationInterval: &utils.ActivationInterval{
@@ -62,8 +62,8 @@ var (
 			Weight:            20.00,
 			ThresholdIDs:      []string{""},
 		},
-		&ResourceProfile{
-			Tenant:    config.CgrConfig().DefaultTenant,
+		{
+			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ResourceProfile3",
 			FilterIDs: []string{"FLTR_RES_3"},
 			ActivationInterval: &utils.ActivationInterval{
@@ -77,22 +77,22 @@ var (
 		},
 	}
 	resourceTest = []*Resource{
-		&Resource{
-			Tenant: config.CgrConfig().DefaultTenant,
+		{
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "ResourceProfile1",
 			Usages: map[string]*ResourceUsage{},
 			TTLIdx: []string{},
 			rPrf:   resprf[0],
 		},
-		&Resource{
-			Tenant: config.CgrConfig().DefaultTenant,
+		{
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "ResourceProfile2",
 			Usages: map[string]*ResourceUsage{},
 			TTLIdx: []string{},
 			rPrf:   resprf[1],
 		},
-		&Resource{
-			Tenant: config.CgrConfig().DefaultTenant,
+		{
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "ResourceProfile3",
 			Usages: map[string]*ResourceUsage{},
 			TTLIdx: []string{},
@@ -100,8 +100,8 @@ var (
 		},
 	}
 	resEvs = []*utils.CGREvent{
-		&utils.CGREvent{
-			Tenant: config.CgrConfig().DefaultTenant,
+		{
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "event1",
 			Event: map[string]interface{}{
 				"Resources":      "ResourceProfile1",
@@ -113,8 +113,8 @@ var (
 				utils.COST:       123.0,
 			},
 		},
-		&utils.CGREvent{
-			Tenant: config.CgrConfig().DefaultTenant,
+		{
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "event2",
 			Event: map[string]interface{}{
 				"Resources":      "ResourceProfile2",
@@ -125,8 +125,8 @@ var (
 				utils.Usage:      time.Duration(45 * time.Second),
 			},
 		},
-		&utils.CGREvent{
-			Tenant: config.CgrConfig().DefaultTenant,
+		{
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "event3",
 			Event: map[string]interface{}{
 				"Resources": "ResourceProfilePrefix",
@@ -342,7 +342,7 @@ func TestRSCacheSetGet(t *testing.T) {
 			UsageTTL:          time.Duration(1 * time.Millisecond),
 		},
 		Usages: map[string]*ResourceUsage{
-			"RU2": &ResourceUsage{
+			"RU2": {
 				Tenant:     "cgrates.org",
 				ID:         "RU2",
 				ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
@@ -404,25 +404,25 @@ func TestResourceV1AuthorizeResourceMissingStruct(t *testing.T) {
 
 func TestResourceAddFilters(t *testing.T) {
 	fltrRes1 := &Filter{
-		Tenant: config.CgrConfig().DefaultTenant,
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_1",
 		Rules: []*FilterRule{
-			&FilterRule{
+			{
 				Type:      MetaString,
 				FieldName: "Resources",
 				Values:    []string{"ResourceProfile1"},
 			},
-			&FilterRule{
+			{
 				Type:      MetaGreaterOrEqual,
 				FieldName: "UsageInterval",
 				Values:    []string{(1 * time.Second).String()},
 			},
-			&FilterRule{
+			{
 				Type:      MetaGreaterOrEqual,
 				FieldName: utils.Usage,
 				Values:    []string{(1 * time.Second).String()},
 			},
-			&FilterRule{
+			{
 				Type:      MetaGreaterOrEqual,
 				FieldName: utils.Weight,
 				Values:    []string{"9.0"},
@@ -431,25 +431,25 @@ func TestResourceAddFilters(t *testing.T) {
 	}
 	dmRES.SetFilter(fltrRes1)
 	fltrRes2 := &Filter{
-		Tenant: config.CgrConfig().DefaultTenant,
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_2",
 		Rules: []*FilterRule{
-			&FilterRule{
+			{
 				Type:      MetaString,
 				FieldName: "Resources",
 				Values:    []string{"ResourceProfile2"},
 			},
-			&FilterRule{
+			{
 				Type:      MetaGreaterOrEqual,
 				FieldName: "PddInterval",
 				Values:    []string{(1 * time.Second).String()},
 			},
-			&FilterRule{
+			{
 				Type:      MetaGreaterOrEqual,
 				FieldName: utils.Usage,
 				Values:    []string{(1 * time.Second).String()},
 			},
-			&FilterRule{
+			{
 				Type:      MetaGreaterOrEqual,
 				FieldName: utils.Weight,
 				Values:    []string{"15.0"},
@@ -458,10 +458,10 @@ func TestResourceAddFilters(t *testing.T) {
 	}
 	dmRES.SetFilter(fltrRes2)
 	fltrRes3 := &Filter{
-		Tenant: config.CgrConfig().DefaultTenant,
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RES_3",
 		Rules: []*FilterRule{
-			&FilterRule{
+			{
 				Type:      MetaPrefix,
 				FieldName: "Resources",
 				Values:    []string{"ResourceProfilePrefix"},
@@ -478,13 +478,13 @@ func TestResourceCachedResourcesForEvent(t *testing.T) {
 		Units:    10.0,
 	}
 	val := []*utils.TenantID{
-		&utils.TenantID{
+		{
 			Tenant: "cgrates.org",
 			ID:     "RL",
 		},
 	}
 	resources := []*Resource{
-		&Resource{
+		{
 			Tenant: "cgrates.org",
 			ID:     "RL",
 			rPrf: &ResourceProfile{
@@ -502,7 +502,7 @@ func TestResourceCachedResourcesForEvent(t *testing.T) {
 				UsageTTL:          time.Duration(1 * time.Millisecond),
 			},
 			Usages: map[string]*ResourceUsage{
-				"RU2": &ResourceUsage{
+				"RU2": {
 					Tenant:     "cgrates.org",
 					ID:         "RU2",
 					ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),

@@ -157,7 +157,7 @@ func testAttrITConnect(t *testing.T) {
 	dataDBIn, err := NewMigratorDataDB(attrCfgIn.DataDbCfg().DataDbType,
 		attrCfgIn.DataDbCfg().DataDbHost, attrCfgIn.DataDbCfg().DataDbPort,
 		attrCfgIn.DataDbCfg().DataDbName, attrCfgIn.DataDbCfg().DataDbUser,
-		attrCfgIn.DataDbCfg().DataDbPass, attrCfgIn.DBDataEncoding,
+		attrCfgIn.DataDbCfg().DataDbPass, attrCfgIn.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
@@ -165,7 +165,7 @@ func testAttrITConnect(t *testing.T) {
 	dataDBOut, err := NewMigratorDataDB(attrCfgOut.DataDbCfg().DataDbType,
 		attrCfgOut.DataDbCfg().DataDbHost, attrCfgOut.DataDbCfg().DataDbPort,
 		attrCfgOut.DataDbCfg().DataDbName, attrCfgOut.DataDbCfg().DataDbUser,
-		attrCfgOut.DataDbCfg().DataDbPass, attrCfgOut.DBDataEncoding,
+		attrCfgOut.DataDbCfg().DataDbPass, attrCfgOut.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)

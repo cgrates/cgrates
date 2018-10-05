@@ -64,8 +64,8 @@ func TestFilterIndexerITRedis(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	redisDB, err := NewRedisStorage(
 		fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
-		4, cfg.DataDbCfg().DataDbPass, cfg.DBDataEncoding, utils.REDIS_MAX_CONNS,
-		nil, "")
+		4, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+		utils.REDIS_MAX_CONNS, nil, "")
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	}

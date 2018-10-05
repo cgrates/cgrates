@@ -248,7 +248,7 @@ func (rs Resources) allocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 		return "", utils.ErrResourceUnavailable
 	}
 	lockIDs := utils.PrefixSliceItems(rs.tenatIDsStr(), utils.ResourcesPrefix)
-	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
+	guardian.Guardian.GuardIDs(config.CgrConfig().GeneralCfg().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	// Simulate resource usage
 	for _, r := range rs {
@@ -417,7 +417,7 @@ func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources)
 	for i, rTid := range rIDs {
 		lockIDs[i] = utils.ResourcesPrefix + rTid.TenantID()
 	}
-	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
+	guardian.Guardian.GuardIDs(config.CgrConfig().GeneralCfg().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for i, rTid := range rIDs {
 		if r, err := rS.dm.GetResource(rTid.Tenant, rTid.ID, true, true, ""); err != nil {

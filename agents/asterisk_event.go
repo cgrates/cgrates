@@ -187,7 +187,8 @@ func (smaEv *SMAsteriskEvent) UpdateCGREvent(cgrEv *utils.CGREvent) error {
 		if _, hasIt := resCGREv.Event[utils.AnswerTime]; !hasIt {
 			resCGREv.Event[utils.Usage] = "0s"
 		} else {
-			if aTime, err := utils.IfaceAsTime(resCGREv.Event[utils.AnswerTime], config.CgrConfig().DefaultTimezone); err != nil {
+			if aTime, err := utils.IfaceAsTime(resCGREv.Event[utils.AnswerTime],
+				config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
 				return err
 			} else if aTime.IsZero() {
 				resCGREv.Event[utils.Usage] = "0s"
@@ -251,7 +252,7 @@ func (smaEv *SMAsteriskEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent
 	}
 	cgrEv = &utils.CGREvent{
 		Tenant: utils.FirstNonEmpty(smaEv.Tenant(),
-			config.CgrConfig().DefaultTenant),
+			config.CgrConfig().GeneralCfg().DefaultTenant),
 		ID:    utils.UUIDSha1Prefix(),
 		Time:  &setupTime,
 		Event: smaEv.AsMapStringInterface(),
@@ -260,7 +261,7 @@ func (smaEv *SMAsteriskEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent
 }
 
 func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
-	cgrEv, err := smaEv.AsCGREvent(config.CgrConfig().DefaultTimezone)
+	cgrEv, err := smaEv.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return
 	}

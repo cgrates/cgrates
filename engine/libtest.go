@@ -37,7 +37,7 @@ func InitDataDb(cfg *config.CGRConfig) error {
 	dm, err := ConfigureDataStorage(cfg.DataDbCfg().DataDbType,
 		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
 		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
-		cfg.DataDbCfg().DataDbPass, cfg.DBDataEncoding,
+		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
 		cfg.CacheCfg(), cfg.DataDbCfg().DataDbSentinelName)
 	if err != nil {
 		return err
@@ -58,7 +58,7 @@ func InitStorDb(cfg *config.CGRConfig) error {
 	storDb, err := ConfigureLoadStorage(cfg.StorDbCfg().StorDBType,
 		cfg.StorDbCfg().StorDBHost, cfg.StorDbCfg().StorDBPort,
 		cfg.StorDbCfg().StorDBName, cfg.StorDbCfg().StorDBUser,
-		cfg.StorDbCfg().StorDBPass, cfg.DBDataEncoding,
+		cfg.StorDbCfg().StorDBPass, cfg.GeneralCfg().DBDataEncoding,
 		cfg.StorDbCfg().StorDBMaxOpenConns, cfg.StorDbCfg().StorDBMaxIdleConns,
 		cfg.StorDbCfg().StorDBConnMaxLifetime, cfg.StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {

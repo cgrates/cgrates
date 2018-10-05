@@ -27,7 +27,7 @@ import (
 
 // Retrieves CDRs based on the filters
 func (apier *ApierV2) GetCdrs(attrs utils.RPCCDRsFilter, reply *[]*engine.ExternalCDR) error {
-	cdrsFltr, err := attrs.AsCDRsFilter(apier.Config.DefaultTimezone)
+	cdrsFltr, err := attrs.AsCDRsFilter(apier.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -47,7 +47,7 @@ func (apier *ApierV2) GetCdrs(attrs utils.RPCCDRsFilter, reply *[]*engine.Extern
 }
 
 func (apier *ApierV2) CountCdrs(attrs utils.RPCCDRsFilter, reply *int64) error {
-	cdrsFltr, err := attrs.AsCDRsFilter(apier.Config.DefaultTimezone)
+	cdrsFltr, err := attrs.AsCDRsFilter(apier.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		if err.Error() != utils.NotFoundCaps {
 			err = utils.NewErrServerError(err)

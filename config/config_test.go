@@ -319,74 +319,74 @@ func TestCgrCfgLoadJSONDefaults(t *testing.T) {
 }
 
 func TestCgrCfgJSONDefaultsGeneral(t *testing.T) {
-	if cgrCfg.HttpSkipTlsVerify != false {
-		t.Error(cgrCfg.HttpSkipTlsVerify)
+	if cgrCfg.GeneralCfg().HttpSkipTlsVerify != false {
+		t.Errorf("Expected: false, received: %+v", cgrCfg.GeneralCfg().HttpSkipTlsVerify)
 	}
-	if cgrCfg.RoundingDecimals != 5 {
-		t.Error(cgrCfg.RoundingDecimals)
+	if cgrCfg.GeneralCfg().RoundingDecimals != 5 {
+		t.Errorf("Expected: 5, received: %+v", cgrCfg.GeneralCfg().RoundingDecimals)
 	}
-	if cgrCfg.DBDataEncoding != "msgpack" {
-		t.Error(cgrCfg.DBDataEncoding)
+	if cgrCfg.GeneralCfg().DBDataEncoding != "msgpack" {
+		t.Errorf("Expected: msgpack, received: %+v", cgrCfg.GeneralCfg().DBDataEncoding)
 	}
-	if cgrCfg.TpExportPath != "/var/spool/cgrates/tpe" {
-		t.Error(cgrCfg.TpExportPath)
+	if expected := "/var/spool/cgrates/tpe"; cgrCfg.GeneralCfg().TpExportPath != expected {
+		t.Errorf("Expected: %+v, received: %+v", expected, cgrCfg.GeneralCfg().TpExportPath)
 	}
-	if cgrCfg.PosterAttempts != 3 {
-		t.Error(cgrCfg.PosterAttempts)
+	if cgrCfg.GeneralCfg().PosterAttempts != 3 {
+		t.Errorf("Expected: 3, received: %+v", cgrCfg.GeneralCfg().PosterAttempts)
 	}
-	if cgrCfg.FailedPostsDir != "/var/spool/cgrates/failed_posts" {
-		t.Error(cgrCfg.FailedPostsDir)
+	if expected := "/var/spool/cgrates/failed_posts"; cgrCfg.GeneralCfg().FailedPostsDir != expected {
+		t.Errorf("Expected: %+v, received: %+v", expected, cgrCfg.GeneralCfg().FailedPostsDir)
 	}
-	if cgrCfg.DefaultReqType != "*rated" {
-		t.Error(cgrCfg.DefaultReqType)
+	if cgrCfg.GeneralCfg().DefaultReqType != "*rated" {
+		t.Errorf("Expected: *rated, received: %+v", cgrCfg.GeneralCfg().DefaultReqType)
 	}
-	if cgrCfg.DefaultCategory != "call" {
-		t.Error(cgrCfg.DefaultCategory)
+	if cgrCfg.GeneralCfg().DefaultCategory != "call" {
+		t.Errorf("Expected: call, received: %+v", cgrCfg.GeneralCfg().DefaultCategory)
 	}
-	if cgrCfg.DefaultTenant != "cgrates.org" {
-		t.Error(cgrCfg.DefaultTenant)
+	if cgrCfg.GeneralCfg().DefaultTenant != "cgrates.org" {
+		t.Errorf("Expected: cgrates.org, received: %+v", cgrCfg.GeneralCfg().DefaultTenant)
 	}
-	if cgrCfg.DefaultTimezone != "Local" {
-		t.Error(cgrCfg.DefaultTimezone)
+	if cgrCfg.GeneralCfg().DefaultTimezone != "Local" {
+		t.Errorf("Expected: Local, received: %+v", cgrCfg.GeneralCfg().DefaultTimezone)
 	}
-	if cgrCfg.ConnectAttempts != 3 {
-		t.Error(cgrCfg.ConnectAttempts)
+	if cgrCfg.GeneralCfg().ConnectAttempts != 3 {
+		t.Errorf("Expected: 3, received: %+v", cgrCfg.GeneralCfg().ConnectAttempts)
 	}
-	if cgrCfg.Reconnects != -1 {
-		t.Error(cgrCfg.Reconnects)
+	if cgrCfg.GeneralCfg().Reconnects != -1 {
+		t.Errorf("Expected: -1, received: %+v", cgrCfg.GeneralCfg().Reconnects)
 	}
-	if cgrCfg.ConnectTimeout != 1*time.Second {
-		t.Error(cgrCfg.ConnectTimeout)
+	if cgrCfg.GeneralCfg().ConnectTimeout != 1*time.Second {
+		t.Errorf("Expected: 1s, received: %+v", cgrCfg.GeneralCfg().ConnectTimeout)
 	}
-	if cgrCfg.ReplyTimeout != 2*time.Second {
-		t.Error(cgrCfg.ReplyTimeout)
+	if cgrCfg.GeneralCfg().ReplyTimeout != 2*time.Second {
+		t.Errorf("Expected: 2s, received: %+v", cgrCfg.GeneralCfg().ReplyTimeout)
 	}
-	if cgrCfg.ResponseCacheTTL != 0*time.Second {
-		t.Error(cgrCfg.ResponseCacheTTL)
+	if cgrCfg.GeneralCfg().ResponseCacheTTL != 0*time.Second {
+		t.Errorf("Expected: 0s, received: %+v", cgrCfg.GeneralCfg().ResponseCacheTTL)
 	}
-	if cgrCfg.InternalTtl != 2*time.Minute {
-		t.Error(cgrCfg.InternalTtl)
+	if cgrCfg.GeneralCfg().InternalTtl != 2*time.Minute {
+		t.Errorf("Expected: 2m, received: %+v", cgrCfg.GeneralCfg().InternalTtl)
 	}
-	if cgrCfg.LockingTimeout != 0 {
-		t.Error(cgrCfg.LockingTimeout)
+	if cgrCfg.GeneralCfg().LockingTimeout != 0 {
+		t.Errorf("Expected: 0, received: %+v", cgrCfg.GeneralCfg().LockingTimeout)
 	}
-	if cgrCfg.Logger != utils.MetaSysLog {
-		t.Error(cgrCfg.Logger)
+	if cgrCfg.GeneralCfg().Logger != utils.MetaSysLog {
+		t.Errorf("Expected: %+v, received: %+v", utils.MetaSysLog, cgrCfg.GeneralCfg().Logger)
 	}
-	if cgrCfg.LogLevel != 6 {
-		t.Error(cgrCfg.LogLevel)
+	if cgrCfg.GeneralCfg().LogLevel != 6 {
+		t.Errorf("Expected: 6, received: %+v", cgrCfg.GeneralCfg().LogLevel)
 	}
-	if cgrCfg.DigestSeparator != "," {
-		t.Error(cgrCfg.DigestSeparator)
+	if cgrCfg.GeneralCfg().DigestSeparator != "," {
+		t.Errorf("Expected: ',' , received: %+v", cgrCfg.GeneralCfg().DigestSeparator)
 	}
-	if cgrCfg.DigestEqual != ":" {
-		t.Error(cgrCfg.DigestEqual)
+	if cgrCfg.GeneralCfg().DigestEqual != ":" {
+		t.Errorf("Expected: ':' , received: %+v", cgrCfg.GeneralCfg().DigestEqual)
 	}
 	if cgrCfg.TLSServerCerificate != "" {
-		t.Error(cgrCfg.TLSServerCerificate)
+		t.Errorf("Expected: '', received: %+v", cgrCfg.TLSServerCerificate)
 	}
 	if cgrCfg.TLSServerKey != "" {
-		t.Error(cgrCfg.TLSServerKey)
+		t.Errorf("Expected: '', received: %+v", cgrCfg.TLSServerKey)
 	}
 }
 
@@ -933,7 +933,7 @@ func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
 		Listen:           "127.0.0.1:3868",
 		DictionariesPath: "/usr/share/cgrates/diameter/dict/",
 		SessionSConns: []*HaPoolConfig{
-			&HaPoolConfig{Address: "*internal"}},
+			{Address: "*internal"}},
 		OriginHost:        "CGR-DA",
 		OriginRealm:       "cgrates.org",
 		VendorId:          0,
@@ -1052,7 +1052,7 @@ func TestRadiusAgentCfg(t *testing.T) {
 		ListenAcct:         "127.0.0.1:1813",
 		ClientSecrets:      map[string]string{utils.META_DEFAULT: "CGRateS.org"},
 		ClientDictionaries: map[string]string{utils.META_DEFAULT: "/usr/share/cgrates/radius/dict/"},
-		SessionSConns:      []*HaPoolConfig{&HaPoolConfig{Address: utils.MetaInternal}},
+		SessionSConns:      []*HaPoolConfig{{Address: utils.MetaInternal}},
 		RequestProcessors:  nil,
 	}
 	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg, testRA) {

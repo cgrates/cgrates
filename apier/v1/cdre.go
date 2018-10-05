@@ -150,7 +150,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if attr.CostMultiplyFactor != nil && *attr.CostMultiplyFactor != 0.0 {
 		costMultiplyFactor = *attr.CostMultiplyFactor
 	}
-	cdrsFltr, err := attr.AsCDRsFilter(self.Config.DefaultTimezone)
+	cdrsFltr, err := attr.AsCDRsFilter(self.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -161,9 +161,11 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		*reply = utils.ExportedFileCdrs{ExportedFilePath: ""}
 		return nil
 	}
-	cdrexp, err := engine.NewCDRExporter(cdrs, exportTemplate, exportFormat, filePath, utils.META_NONE, exportID,
-		exportTemplate.Synchronous, exportTemplate.Attempts, fieldSep, usageMultiplyFactor,
-		costMultiplyFactor, self.Config.RoundingDecimals, self.Config.HttpSkipTlsVerify, self.HTTPPoster, self.FilterS)
+	cdrexp, err := engine.NewCDRExporter(cdrs, exportTemplate, exportFormat,
+		filePath, utils.META_NONE, exportID, exportTemplate.Synchronous,
+		exportTemplate.Attempts, fieldSep, usageMultiplyFactor, costMultiplyFactor,
+		self.Config.GeneralCfg().RoundingDecimals,
+		self.Config.GeneralCfg().HttpSkipTlsVerify, self.HTTPPoster, self.FilterS)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -299,11 +301,11 @@ func (self *ApierV1) ExportCDRs(arg ArgExportCDRs, reply *RplExportedCDRs) (err 
 	if arg.CostMultiplyFactor != nil && *arg.CostMultiplyFactor != 0.0 {
 		costMultiplyFactor = *arg.CostMultiplyFactor
 	}
-	roundingDecimals := self.Config.RoundingDecimals
+	roundingDecimals := self.Config.GeneralCfg().RoundingDecimals
 	if arg.RoundingDecimals != nil {
 		roundingDecimals = *arg.RoundingDecimals
 	}
-	cdrsFltr, err := arg.RPCCDRsFilter.AsCDRsFilter(self.Config.DefaultTimezone)
+	cdrsFltr, err := arg.RPCCDRsFilter.AsCDRsFilter(self.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -316,7 +318,9 @@ func (self *ApierV1) ExportCDRs(arg ArgExportCDRs, reply *RplExportedCDRs) (err 
 	cdrexp, err := engine.NewCDRExporter(cdrs, exportTemplate, exportFormat,
 		filePath, utils.META_NONE, exportID,
 		synchronous, attempts, fieldSep, usageMultiplyFactor,
-		costMultiplyFactor, roundingDecimals, self.Config.HttpSkipTlsVerify, self.HTTPPoster, self.FilterS)
+		costMultiplyFactor, roundingDecimals,
+		self.Config.GeneralCfg().HttpSkipTlsVerify,
+		self.HTTPPoster, self.FilterS)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

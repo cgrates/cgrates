@@ -108,7 +108,7 @@ func (sS *StatService) storeStats() {
 			break // no more keys, backup completed
 		}
 		lkID := utils.StatQueuePrefix + sID
-		guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lkID)
+		guardian.Guardian.GuardIDs(config.CgrConfig().GeneralCfg().LockingTimeout, lkID)
 		if sqIf, ok := Cache.Get(utils.CacheStatQueues, sID); !ok || sqIf == nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed retrieving from cache stat queue with ID: %s",
@@ -177,7 +177,7 @@ func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (
 			continue
 		}
 		lkID := utils.StatQueuePrefix + utils.ConcatenatedKey(sqPrfl.Tenant, sqPrfl.ID)
-		guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lkID)
+		guardian.Guardian.GuardIDs(config.CgrConfig().GeneralCfg().LockingTimeout, lkID)
 		s, err := sS.dm.GetStatQueue(sqPrfl.Tenant, sqPrfl.ID, true, true, "")
 		guardian.Guardian.UnguardIDs(lkID)
 		if err != nil {
@@ -235,7 +235,7 @@ func (sS *StatService) processEvent(args *StatsArgsProcessEvent) (statQueueIDs [
 	for _, sq := range matchSQs {
 		stsIDs = append(stsIDs, sq.ID)
 		lkID := utils.StatQueuePrefix + sq.TenantID()
-		guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lkID)
+		guardian.Guardian.GuardIDs(config.CgrConfig().GeneralCfg().LockingTimeout, lkID)
 		err = sq.ProcessEvent(&args.CGREvent)
 		guardian.Guardian.UnguardIDs(lkID)
 		if err != nil {
@@ -334,7 +334,7 @@ func (sS *StatService) V1GetQueueStringMetrics(args *utils.TenantID, reply *map[
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	lkID := utils.StatQueuePrefix + args.TenantID()
-	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lkID)
+	guardian.Guardian.GuardIDs(config.CgrConfig().GeneralCfg().LockingTimeout, lkID)
 	defer guardian.Guardian.UnguardIDs(lkID)
 	sq, err := sS.dm.GetStatQueue(args.Tenant, args.ID, true, true, "")
 	if err != nil {
@@ -357,7 +357,7 @@ func (sS *StatService) V1GetQueueFloatMetrics(args *utils.TenantID, reply *map[s
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	lkID := utils.StatQueuePrefix + args.TenantID()
-	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lkID)
+	guardian.Guardian.GuardIDs(config.CgrConfig().GeneralCfg().LockingTimeout, lkID)
 	defer guardian.Guardian.UnguardIDs(lkID)
 	sq, err := sS.dm.GetStatQueue(args.Tenant, args.ID, true, true, "")
 	if err != nil {

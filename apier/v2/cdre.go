@@ -123,7 +123,7 @@ func (self *ApierV2) ExportCdrsToFile(attr AttrExportCdrsToFile, reply *Exported
 	if attr.CostMultiplyFactor != nil && *attr.CostMultiplyFactor != 0.0 {
 		costMultiplyFactor = *attr.CostMultiplyFactor
 	}
-	cdrsFltr, err := attr.RPCCDRsFilter.AsCDRsFilter(self.Config.DefaultTimezone)
+	cdrsFltr, err := attr.RPCCDRsFilter.AsCDRsFilter(self.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -134,13 +134,15 @@ func (self *ApierV2) ExportCdrsToFile(attr AttrExportCdrsToFile, reply *Exported
 		*reply = ExportedFileCdrs{ExportedFilePath: ""}
 		return nil
 	}
-	roundingDecimals := self.Config.RoundingDecimals
+	roundingDecimals := self.Config.GeneralCfg().RoundingDecimals
 	if attr.RoundingDecimals != nil {
 		roundingDecimals = *attr.RoundingDecimals
 	}
-	cdrexp, err := engine.NewCDRExporter(cdrs, exportTemplate, exportFormat, filePath, utils.META_NONE, exportID,
-		exportTemplate.Synchronous, exportTemplate.Attempts, fieldSep, usageMultiplyFactor,
-		costMultiplyFactor, roundingDecimals, self.Config.HttpSkipTlsVerify, self.HTTPPoster, self.FilterS)
+	cdrexp, err := engine.NewCDRExporter(cdrs, exportTemplate, exportFormat,
+		filePath, utils.META_NONE, exportID, exportTemplate.Synchronous,
+		exportTemplate.Attempts, fieldSep, usageMultiplyFactor, costMultiplyFactor,
+		roundingDecimals, self.Config.GeneralCfg().HttpSkipTlsVerify,
+		self.HTTPPoster, self.FilterS)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

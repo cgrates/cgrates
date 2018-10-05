@@ -28,11 +28,11 @@ import (
 // DataDbCfg Database config
 type DataDbCfg struct {
 	DataDbType         string
-	DataDbHost         string
-	DataDbPort         string
-	DataDbName         string
-	DataDbUser         string
-	DataDbPass         string
+	DataDbHost         string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	DataDbPort         string // The port to bind to.
+	DataDbName         string // The name of the database to connect to.
+	DataDbUser         string // The user to sign in as.
+	DataDbPass         string // The user's password.
 	DataDbSentinelName string
 }
 

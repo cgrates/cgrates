@@ -45,12 +45,12 @@ type CallCostLog struct {
 
 // Handler for generic cgr cdr http
 func cgrCdrHandler(w http.ResponseWriter, r *http.Request) {
-	cgrCdr, err := NewCgrCdrFromHttpReq(r, cdrServer.cgrCfg.DefaultTimezone)
+	cgrCdr, err := NewCgrCdrFromHttpReq(r, cdrServer.cgrCfg.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<CDRS> Could not create CDR entry: %s", err.Error()))
 		return
 	}
-	if err := cdrServer.processCdr(cgrCdr.AsCDR(cdrServer.cgrCfg.DefaultTimezone)); err != nil {
+	if err := cdrServer.processCdr(cgrCdr.AsCDR(cdrServer.cgrCfg.GeneralCfg().DefaultTimezone)); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<CDRS> Errors when storing CDR entry: %s", err.Error()))
 	}
 }
@@ -102,8 +102,8 @@ func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, r
 		users: users, aliases: aliases,
 		cdrstats: cdrstats, stats: stats, thdS: thdS,
 		chargerS: chargerS, guard: guardian.Guardian,
-		httpPoster: NewHTTPPoster(cgrCfg.HttpSkipTlsVerify,
-			cgrCfg.ReplyTimeout), filterS: filterS}, nil
+		httpPoster: NewHTTPPoster(cgrCfg.GeneralCfg().HttpSkipTlsVerify,
+			cgrCfg.GeneralCfg().ReplyTimeout), filterS: filterS}, nil
 }
 
 type CdrServer struct {
@@ -126,7 +126,7 @@ type CdrServer struct {
 }
 
 func (self *CdrServer) Timezone() string {
-	return self.cgrCfg.DefaultTimezone
+	return self.cgrCfg.GeneralCfg().DefaultTimezone
 }
 func (self *CdrServer) SetTimeToLive(timeToLive time.Duration, out *int) error {
 	self.responseCache = utils.NewResponseCache(timeToLive)
@@ -148,7 +148,7 @@ func (self *CdrServer) RegisterHandlersToServer(server *utils.Server) {
 
 // Used to process external CDRs
 func (self *CdrServer) ProcessExternalCdr(eCDR *ExternalCDR) error {
-	cdr, err := NewCDRFromExternalCDR(eCDR, self.cgrCfg.DefaultTimezone)
+	cdr, err := NewCDRFromExternalCDR(eCDR, self.cgrCfg.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return err
 	}
@@ -177,13 +177,13 @@ func (self *CdrServer) storeSMCost(smCost *SMCost, checkDuplicate bool) error {
 // Returns error if not able to properly store the CDR, mediation is async since we can always recover offline
 func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 	if cdr.RequestType == "" {
-		cdr.RequestType = self.cgrCfg.DefaultReqType
+		cdr.RequestType = self.cgrCfg.GeneralCfg().DefaultReqType
 	}
 	if cdr.Tenant == "" {
-		cdr.Tenant = self.cgrCfg.DefaultTenant
+		cdr.Tenant = self.cgrCfg.GeneralCfg().DefaultTenant
 	}
 	if cdr.Category == "" {
-		cdr.Category = self.cgrCfg.DefaultCategory
+		cdr.Category = self.cgrCfg.GeneralCfg().DefaultCategory
 	}
 	if cdr.Subject == "" { // Use account information as rating subject if missing
 		cdr.Subject = cdr.Account
@@ -373,12 +373,14 @@ func (self *CdrServer) deriveCdrs(cdr *CDR) (drvdCDRs []*CDR, err error) {
 		dcCostFld, _ := utils.NewRSRField(dc.CostField)
 
 		dcExtraFields := []*utils.RSRField{}
-		for key, _ := range cdr.ExtraFields {
+		for key := range cdr.ExtraFields {
 			dcExtraFields = append(dcExtraFields, &utils.RSRField{Id: key})
 		}
 
-		forkedCdr, err := cdr.ForkCdr(dc.RunID, dcRequestTypeFld, dcTenantFld, dcCategoryFld, dcAcntFld, dcSubjFld, dcDstFld,
-			dcSTimeFld, dcATimeFld, dcDurFld, dcRatedFld, dcCostFld, dcExtraFields, true, self.cgrCfg.DefaultTimezone)
+		forkedCdr, err := cdr.ForkCdr(dc.RunID, dcRequestTypeFld, dcTenantFld,
+			dcCategoryFld, dcAcntFld, dcSubjFld, dcDstFld, dcSTimeFld, dcATimeFld,
+			dcDurFld, dcRatedFld, dcCostFld, dcExtraFields, true,
+			self.cgrCfg.GeneralCfg().DefaultTimezone)
 		if err != nil {
 			utils.Logger.Err(fmt.Sprintf("Could not fork CGR with cgrid %s, run: %s, error: %s", cdr.CGRID, dc.RunID, err.Error()))
 			continue // do not add it to the forked CDR list
@@ -491,9 +493,13 @@ func (self *CdrServer) replicateCDRs(cdrs []*CDR) (err error) {
 	for _, exportID := range self.cgrCfg.CDRSOnlineCDRExports {
 		expTpl := self.cgrCfg.CdreProfiles[exportID] // not checking for existence of profile since this should be done in a higher layer
 		var cdre *CDRExporter
-		if cdre, err = NewCDRExporter(cdrs, expTpl, expTpl.ExportFormat, expTpl.ExportPath, self.cgrCfg.FailedPostsDir, "CDRSReplication",
-			expTpl.Synchronous, expTpl.Attempts, expTpl.FieldSeparator, expTpl.UsageMultiplyFactor,
-			expTpl.CostMultiplyFactor, self.cgrCfg.RoundingDecimals, self.cgrCfg.HttpSkipTlsVerify, self.httpPoster, self.filterS); err != nil {
+		if cdre, err = NewCDRExporter(cdrs, expTpl, expTpl.ExportFormat,
+			expTpl.ExportPath, self.cgrCfg.GeneralCfg().FailedPostsDir,
+			"CDRSReplication", expTpl.Synchronous, expTpl.Attempts,
+			expTpl.FieldSeparator, expTpl.UsageMultiplyFactor,
+			expTpl.CostMultiplyFactor, self.cgrCfg.GeneralCfg().RoundingDecimals,
+			self.cgrCfg.GeneralCfg().HttpSkipTlsVerify, self.httpPoster,
+			self.filterS); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<CDRS> Building CDRExporter for online exports got error: <%s>", err.Error()))
 			continue
 		}
@@ -610,7 +616,7 @@ func (cdrs *CdrServer) V2StoreSMCost(args ArgsV2CDRSStoreSMCost, reply *string) 
 
 // Called by rate/re-rate API, RPC method
 func (self *CdrServer) V1RateCDRs(attrs utils.AttrRateCDRs, reply *string) error {
-	cdrFltr, err := attrs.RPCCDRsFilter.AsCDRsFilter(self.cgrCfg.DefaultTimezone)
+	cdrFltr, err := attrs.RPCCDRsFilter.AsCDRsFilter(self.cgrCfg.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -801,7 +807,7 @@ func (cdrS *CdrServer) V2RateCDRs(attrs *utils.RPCCDRsFilter, reply *string) err
 	if cdrS.chargerS == nil {
 		return utils.NewErrNotConnected(utils.ChargerS)
 	}
-	cdrFltr, err := attrs.AsCDRsFilter(cdrS.cgrCfg.DefaultTimezone)
+	cdrFltr, err := attrs.AsCDRsFilter(cdrS.cgrCfg.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

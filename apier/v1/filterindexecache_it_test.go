@@ -85,8 +85,8 @@ func TestFIdxCaV1ITMySQL(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	rdsITdb, err := engine.NewRedisStorage(
 		fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
-		10, cfg.DataDbCfg().DataDbPass, cfg.DBDataEncoding, utils.REDIS_MAX_CONNS,
-		nil, "")
+		10, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+		utils.REDIS_MAX_CONNS, nil, "")
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	}

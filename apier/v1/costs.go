@@ -39,7 +39,8 @@ func (apier *ApierV1) GetCost(attrs AttrGetCost, ec *engine.EventCost) error {
 	if err != nil {
 		return err
 	}
-	aTime, err := utils.ParseTimeDetectLayout(attrs.AnswerTime, apier.Config.DefaultTimezone)
+	aTime, err := utils.ParseTimeDetectLayout(attrs.AnswerTime,
+		apier.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return err
 	}
@@ -72,7 +73,8 @@ type AttrGetDataCost struct {
 }
 
 func (apier *ApierV1) GetDataCost(attrs AttrGetDataCost, reply *engine.DataCost) error {
-	aTime, err := utils.ParseTimeDetectLayout(attrs.AnswerTime, apier.Config.DefaultTimezone)
+	aTime, err := utils.ParseTimeDetectLayout(attrs.AnswerTime,
+		apier.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return err
 	}

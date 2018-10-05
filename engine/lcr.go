@@ -75,10 +75,10 @@ func (self *LcrRequest) AsCallDescriptor(timezone string) (*CallDescriptor, erro
 		self.Direction = utils.OUT
 	}
 	if len(self.Tenant) == 0 {
-		self.Tenant = config.CgrConfig().DefaultTenant
+		self.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
 	}
 	if len(self.Category) == 0 {
-		self.Category = config.CgrConfig().DefaultCategory
+		self.Category = config.CgrConfig().GeneralCfg().DefaultCategory
 	}
 	if len(self.Subject) == 0 {
 		self.Subject = self.Account

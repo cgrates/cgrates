@@ -48,7 +48,8 @@ func (self *ApierV2) LoadRatingProfile(attrs AttrLoadRatingProfile, reply *strin
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	tpRpf := &utils.TPRatingProfile{TPid: attrs.TPid}
-	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
+	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
+		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone)
 	if err := dbReader.LoadRatingProfilesFiltered(tpRpf); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -66,7 +67,8 @@ func (self *ApierV2) LoadAccountActions(attrs AttrLoadAccountActions, reply *str
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
+	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
+		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone)
 	tpAa := &utils.TPAccountActions{TPid: attrs.TPid}
 	tpAa.SetAccountActionsId(attrs.AccountActionsId)
 	if _, err := guardian.Guardian.Guard(func() (interface{}, error) {
@@ -97,11 +99,13 @@ func (self *ApierV2) LoadDerivedChargers(attrs AttrLoadDerivedChargers, reply *s
 	}
 	tpDc := &utils.TPDerivedChargers{TPid: attrs.TPid}
 	tpDc.SetDerivedChargersId(attrs.DerivedChargersId)
-	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
+	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
+		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone)
 	if err := dbReader.LoadDerivedChargersFiltered(tpDc, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err := self.DataManager.CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX, []string{attrs.DerivedChargersId}, true); err != nil {
+	if err := self.DataManager.CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX,
+		[]string{attrs.DerivedChargersId}, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = v1.OK
@@ -145,7 +149,7 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 			path.Join(attrs.FolderPath, utils.SuppliersCsv),
 			path.Join(attrs.FolderPath, utils.AttributesCsv),
 			path.Join(attrs.FolderPath, utils.ChargersCsv),
-		), "", self.Config.DefaultTimezone)
+		), "", self.Config.GeneralCfg().DefaultTimezone)
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
 	}

@@ -138,7 +138,7 @@ func testShrGrpITConnect(t *testing.T) {
 	dataDBIn, err := NewMigratorDataDB(shrGrpCfgIn.DataDbCfg().DataDbType,
 		shrGrpCfgIn.DataDbCfg().DataDbHost, shrGrpCfgIn.DataDbCfg().DataDbPort,
 		shrGrpCfgIn.DataDbCfg().DataDbName, shrGrpCfgIn.DataDbCfg().DataDbUser,
-		shrGrpCfgIn.DataDbCfg().DataDbPass, shrGrpCfgIn.DBDataEncoding,
+		shrGrpCfgIn.DataDbCfg().DataDbPass, shrGrpCfgIn.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
@@ -146,7 +146,7 @@ func testShrGrpITConnect(t *testing.T) {
 	dataDBOut, err := NewMigratorDataDB(shrGrpCfgOut.DataDbCfg().DataDbType,
 		shrGrpCfgOut.DataDbCfg().DataDbHost, shrGrpCfgOut.DataDbCfg().DataDbPort,
 		shrGrpCfgOut.DataDbCfg().DataDbName, shrGrpCfgOut.DataDbCfg().DataDbUser,
-		shrGrpCfgOut.DataDbCfg().DataDbPass, shrGrpCfgOut.DBDataEncoding,
+		shrGrpCfgOut.DataDbCfg().DataDbPass, shrGrpCfgOut.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)

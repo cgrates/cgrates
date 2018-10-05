@@ -51,7 +51,7 @@ var (
 	datadb_name     = flag.String("datadb_name", cgrConfig.DataDbCfg().DataDbName, "The name/number of the DataDb to connect to.")
 	datadb_user     = flag.String("datadb_user", cgrConfig.DataDbCfg().DataDbUser, "The DataDb user to sign in as.")
 	datadb_pass     = flag.String("datadb_pass", cgrConfig.DataDbCfg().DataDbPass, "The DataDb user's password.")
-	dbdata_encoding = flag.String("dbdata_encoding", cgrConfig.DBDataEncoding, "The encoding used to store object data in strings.")
+	dbdata_encoding = flag.String("dbdata_encoding", cgrConfig.GeneralCfg().DBDataEncoding, "The encoding used to store object data in strings.")
 	redis_sentinel  = flag.String("redis_sentinel", cgrConfig.DataDbCfg().DataDbSentinelName, "The name of redis sentinel")
 	raterAddress    = flag.String("rater_address", "", "Rater address for remote tests. Empty for internal rater.")
 	tor             = flag.String("tor", utils.VOICE, "The type of record to use in queries.")
@@ -73,7 +73,7 @@ func durInternalRater(cd *engine.CallDescriptor) (time.Duration, error) {
 	dm, err := engine.ConfigureDataStorage(tstCfg.DataDbCfg().DataDbType,
 		tstCfg.DataDbCfg().DataDbHost, tstCfg.DataDbCfg().DataDbPort,
 		tstCfg.DataDbCfg().DataDbName, tstCfg.DataDbCfg().DataDbUser,
-		tstCfg.DataDbCfg().DataDbPass, tstCfg.DBDataEncoding,
+		tstCfg.DataDbCfg().DataDbPass, tstCfg.GeneralCfg().DBDataEncoding,
 		cgrConfig.CacheCfg(), tstCfg.DataDbCfg().DataDbSentinelName) // for the momentn we use here "" for sentinelName
 	if err != nil {
 		return nilDuration, fmt.Errorf("Could not connect to data database: %s", err.Error())
@@ -186,7 +186,7 @@ func main() {
 		tstCfg.DataDbCfg().DataDbPass = *datadb_pass
 	}
 	if *dbdata_encoding != "" {
-		tstCfg.DBDataEncoding = *dbdata_encoding
+		tstCfg.GeneralCfg().DBDataEncoding = *dbdata_encoding
 	}
 	if *redis_sentinel != "" {
 		tstCfg.DataDbCfg().DataDbSentinelName = *redis_sentinel

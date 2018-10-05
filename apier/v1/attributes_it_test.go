@@ -560,7 +560,7 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 
 func testAttributeSProcessEventWithHeader(t *testing.T) {
 	attrPrf1 := &engine.AttributeProfile{
-		Tenant:    config.CgrConfig().DefaultTenant,
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_Header",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:Field1:Value1"},
@@ -587,7 +587,7 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 	attrArgs := &engine.AttrArgsProcessEvent{
 		ProcessRuns: utils.IntPointer(1),
 		CGREvent: utils.CGREvent{
-			Tenant:  config.CgrConfig().DefaultTenant,
+			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:      "HeaderEventForAttribute",
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
@@ -599,7 +599,7 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_Header"},
 		AlteredFields:   []string{"Field2"},
 		CGREvent: &utils.CGREvent{
-			Tenant:  config.CgrConfig().DefaultTenant,
+			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:      "HeaderEventForAttribute",
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{

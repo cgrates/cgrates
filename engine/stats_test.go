@@ -161,7 +161,7 @@ func TestStatQueuesPopulateService(t *testing.T) {
 
 func TestStatQueuesAddFilters(t *testing.T) {
 	fltrSts1 := &Filter{
-		Tenant: config.CgrConfig().DefaultTenant,
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_STATS_1",
 		Rules: []*FilterRule{
 			{
@@ -188,7 +188,7 @@ func TestStatQueuesAddFilters(t *testing.T) {
 	}
 	dmSTS.SetFilter(fltrSts1)
 	fltrSts2 := &Filter{
-		Tenant: config.CgrConfig().DefaultTenant,
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_STATS_2",
 		Rules: []*FilterRule{
 			{
@@ -215,7 +215,7 @@ func TestStatQueuesAddFilters(t *testing.T) {
 	}
 	dmSTS.SetFilter(fltrSts2)
 	fltrSts3 := &Filter{
-		Tenant: config.CgrConfig().DefaultTenant,
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_STATS_3",
 		Rules: []*FilterRule{
 			{

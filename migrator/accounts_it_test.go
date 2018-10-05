@@ -141,7 +141,7 @@ func testAccITConnect(t *testing.T) {
 	dataDBIn, err := NewMigratorDataDB(accCfgIn.DataDbCfg().DataDbType,
 		accCfgIn.DataDbCfg().DataDbHost, accCfgIn.DataDbCfg().DataDbPort,
 		accCfgIn.DataDbCfg().DataDbName, accCfgIn.DataDbCfg().DataDbUser,
-		accCfgIn.DataDbCfg().DataDbPass, accCfgIn.DBDataEncoding,
+		accCfgIn.DataDbCfg().DataDbPass, accCfgIn.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
@@ -149,7 +149,7 @@ func testAccITConnect(t *testing.T) {
 	dataDBOut, err := NewMigratorDataDB(accCfgOut.DataDbCfg().DataDbType,
 		accCfgOut.DataDbCfg().DataDbHost, accCfgOut.DataDbCfg().DataDbPort,
 		accCfgOut.DataDbCfg().DataDbName, accCfgOut.DataDbCfg().DataDbUser,
-		accCfgOut.DataDbCfg().DataDbPass, accCfgOut.DBDataEncoding,
+		accCfgOut.DataDbCfg().DataDbPass, accCfgOut.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)

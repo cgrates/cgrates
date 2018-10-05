@@ -63,7 +63,7 @@ func NewSureTaxRequest(cdr *CDR, stCfg *config.SureTaxCfg) (*SureTaxRequest, err
 	stReq.ResponseGroup = stCfg.ResponseGroup
 	stReq.ResponseType = stCfg.ResponseType
 	stReq.ItemList = []*STRequestItem{
-		&STRequestItem{
+		{
 			CustomerNumber:       cdr.FieldsAsStringWithRSRFields(stCfg.CustomerNumber),
 			OrigNumber:           cdr.FieldsAsStringWithRSRFields(stCfg.OrigNumber),
 			TermNumber:           cdr.FieldsAsStringWithRSRFields(stCfg.TermNumber),
@@ -183,7 +183,9 @@ func SureTaxProcessCdr(cdr *CDR) error {
 	}
 	if sureTaxClient == nil { // First time used, init the client here
 		tr := &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: config.CgrConfig().HttpSkipTlsVerify},
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: config.CgrConfig().GeneralCfg().HttpSkipTlsVerify,
+			},
 		}
 		sureTaxClient = &http.Client{Transport: tr}
 	}
@@ -225,9 +227,13 @@ func SureTaxProcessCdr(cdr *CDR) error {
 		cdr.ExtraInfo = err.Error()
 	}
 	if !stCfg.IncludeLocalCost {
-		cdr.Cost = utils.Round(totalTax, config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
+		cdr.Cost = utils.Round(totalTax,
+			config.CgrConfig().GeneralCfg().RoundingDecimals,
+			utils.ROUNDING_MIDDLE)
 	} else {
-		cdr.Cost = utils.Round(cdr.Cost+totalTax, config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
+		cdr.Cost = utils.Round(cdr.Cost+totalTax,
+			config.CgrConfig().GeneralCfg().RoundingDecimals,
+			utils.ROUNDING_MIDDLE)
 	}
 	// Add response into extra fields to be available for later review
 	cdr.ExtraFields[utils.META_SURETAX] = respFull.D

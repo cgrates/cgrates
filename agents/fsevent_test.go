@@ -560,7 +560,7 @@ func TestParseEventValue(t *testing.T) {
 }
 
 func TestFsEvAsCGREvent(t *testing.T) {
-	timezone := config.CgrConfig().DefaultTimezone
+	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
 	ev := NewFSEvent(hangupEv)
 	sTime, err := ev.GetSetupTime(utils.META_DEFAULT, timezone)
 	if err != nil {
@@ -617,9 +617,9 @@ func TestFsEvAsMapStringInterface(t *testing.T) {
 func TestFsEvGetExtraFields(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	cfg.FsAgentCfg().ExtraFields = []*utils.RSRField{
-		&utils.RSRField{Id: "Channel-Read-Codec-Name"},
-		&utils.RSRField{Id: "Channel-Write-Codec-Name"},
-		&utils.RSRField{Id: "NonExistingHeader"}}
+		{Id: "Channel-Read-Codec-Name"},
+		{Id: "Channel-Write-Codec-Name"},
+		{Id: "NonExistingHeader"}}
 	config.SetCgrConfig(cfg)
 	ev := NewFSEvent(hangupEv)
 	expectedExtraFields := map[string]string{
@@ -963,7 +963,7 @@ variable_rtp_audio_out_cng_packet_count: 0
 variable_rtp_audio_rtcp_packet_count: 0
 variable_rtp_audio_rtcp_octet_count: 0`
 	var fsCdrCfg *config.CGRConfig
-	timezone := config.CgrConfig().DefaultTimezone
+	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
 	fsCdrCfg, _ = config.NewDefaultCGRConfig()
 	fsCdr, _ := engine.NewFSCdr(body, fsCdrCfg)
 	smGev := engine.NewSafEvent(NewFSEvent(hangUp).AsMapStringInterface(timezone))
@@ -979,7 +979,7 @@ variable_rtp_audio_rtcp_octet_count: 0`
 }
 
 func TestFsEvV1AuthorizeArgs(t *testing.T) {
-	timezone := config.CgrConfig().DefaultTimezone
+	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
 	ev := NewFSEvent(hangupEv)
 	sTime, err := ev.GetSetupTime(utils.META_DEFAULT, timezone)
 	if err != nil {
@@ -1022,7 +1022,7 @@ func TestFsEvV1AuthorizeArgs(t *testing.T) {
 }
 
 func TestFsEvV1InitSessionArgs(t *testing.T) {
-	timezone := config.CgrConfig().DefaultTimezone
+	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
 	ev := NewFSEvent(hangupEv)
 	sTime, err := ev.GetSetupTime(utils.META_DEFAULT, timezone)
 	if err != nil {
@@ -1052,7 +1052,7 @@ func TestFsEvV1InitSessionArgs(t *testing.T) {
 }
 
 func TestFsEvV1TerminateSessionArgs(t *testing.T) {
-	timezone := config.CgrConfig().DefaultTimezone
+	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
 	ev := NewFSEvent(hangupEv)
 	sTime, err := ev.GetSetupTime(utils.META_DEFAULT, timezone)
 	if err != nil {

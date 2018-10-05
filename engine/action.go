@@ -374,12 +374,17 @@ func callUrl(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) er
 		return err
 	}
 	cfg := config.CgrConfig()
-	ffn := &utils.FallbackFileName{Module: fmt.Sprintf("%s>%s", utils.ActionsPoster, a.ActionType),
-		Transport: utils.MetaHTTPjson, Address: a.ExtraParameters,
-		RequestID: utils.GenUUID(), FileSuffix: utils.JSNSuffix}
-	_, err = NewHTTPPoster(config.CgrConfig().HttpSkipTlsVerify,
-		config.CgrConfig().ReplyTimeout).Post(a.ExtraParameters, utils.CONTENT_JSON, jsn,
-		config.CgrConfig().PosterAttempts, path.Join(cfg.FailedPostsDir, ffn.AsString()))
+	ffn := &utils.FallbackFileName{
+		Module:     fmt.Sprintf("%s>%s", utils.ActionsPoster, a.ActionType),
+		Transport:  utils.MetaHTTPjson,
+		Address:    a.ExtraParameters,
+		RequestID:  utils.GenUUID(),
+		FileSuffix: utils.JSNSuffix,
+	}
+	_, err = NewHTTPPoster(config.CgrConfig().GeneralCfg().HttpSkipTlsVerify,
+		config.CgrConfig().GeneralCfg().ReplyTimeout).Post(a.ExtraParameters,
+		utils.CONTENT_JSON, jsn, config.CgrConfig().GeneralCfg().PosterAttempts,
+		path.Join(cfg.GeneralCfg().FailedPostsDir, ffn.AsString()))
 	return err
 }
 
@@ -397,12 +402,17 @@ func callUrlAsync(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Action
 		return err
 	}
 	cfg := config.CgrConfig()
-	ffn := &utils.FallbackFileName{Module: fmt.Sprintf("%s>%s", utils.ActionsPoster, a.ActionType),
-		Transport: utils.MetaHTTPjson, Address: a.ExtraParameters,
-		RequestID: utils.GenUUID(), FileSuffix: utils.JSNSuffix}
-	go NewHTTPPoster(config.CgrConfig().HttpSkipTlsVerify,
-		config.CgrConfig().ReplyTimeout).Post(a.ExtraParameters, utils.CONTENT_JSON, jsn,
-		config.CgrConfig().PosterAttempts, path.Join(cfg.FailedPostsDir, ffn.AsString()))
+	ffn := &utils.FallbackFileName{
+		Module:     fmt.Sprintf("%s>%s", utils.ActionsPoster, a.ActionType),
+		Transport:  utils.MetaHTTPjson,
+		Address:    a.ExtraParameters,
+		RequestID:  utils.GenUUID(),
+		FileSuffix: utils.JSNSuffix,
+	}
+	go NewHTTPPoster(config.CgrConfig().GeneralCfg().HttpSkipTlsVerify,
+		config.CgrConfig().GeneralCfg().ReplyTimeout).Post(a.ExtraParameters,
+		utils.CONTENT_JSON, jsn, config.CgrConfig().GeneralCfg().PosterAttempts,
+		path.Join(cfg.GeneralCfg().FailedPostsDir, ffn.AsString()))
 	return nil
 }
 
@@ -672,8 +682,10 @@ func cgrRPCAction(account *Account, sq *CDRStatsQueueTriggered, a *Action, acs A
 	}
 	var client rpcclient.RpcClientConnection
 	if req.Address != utils.MetaInternal {
-		if client, err = rpcclient.NewRpcClient("tcp", req.Address, "", "", req.Attempts, 0,
-			config.CgrConfig().ConnectTimeout, config.CgrConfig().ReplyTimeout, req.Transport, nil, false); err != nil {
+		if client, err = rpcclient.NewRpcClient("tcp", req.Address, "", "",
+			req.Attempts, 0, config.CgrConfig().GeneralCfg().ConnectTimeout,
+			config.CgrConfig().GeneralCfg().ReplyTimeout, req.Transport,
+			nil, false); err != nil {
 			return err
 		}
 	} else {

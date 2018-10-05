@@ -54,7 +54,7 @@ var (
 		"the DataDB user")
 	inDataDBPass = flag.String("datadb_passwd", dfltCfg.DataDbCfg().DataDbPass,
 		"the DataDB password")
-	inDBDataEncoding = flag.String("dbdata_encoding", dfltCfg.DBDataEncoding,
+	inDBDataEncoding = flag.String("dbdata_encoding", dfltCfg.GeneralCfg().DBDataEncoding,
 		"the encoding used to store object Data in strings")
 	inDataDBRedisSentinel = flag.String("redis_sentinel", dfltCfg.DataDbCfg().DataDbSentinelName,
 		"the name of redis sentinel")
@@ -140,8 +140,8 @@ func main() {
 	if *inDataDBPass != dfltCfg.DataDbCfg().DataDbPass {
 		mgrCfg.DataDbCfg().DataDbPass = *inDataDBPass
 	}
-	if *inDBDataEncoding != dfltCfg.DBDataEncoding {
-		mgrCfg.DBDataEncoding = *inDBDataEncoding
+	if *inDBDataEncoding != dfltCfg.GeneralCfg().DBDataEncoding {
+		mgrCfg.GeneralCfg().DBDataEncoding = *inDBDataEncoding
 	}
 	if *inDataDBRedisSentinel != dfltCfg.DataDbCfg().DataDbSentinelName {
 		mgrCfg.DataDbCfg().DataDbSentinelName = *inDataDBRedisSentinel
@@ -193,7 +193,7 @@ func main() {
 	}
 	if *outDBDataEncoding == utils.MetaDataDB {
 		if dfltCfg.MigratorCgrConfig.OutDataDBEncoding == mgrCfg.MigratorCgrConfig.OutDataDBEncoding {
-			mgrCfg.MigratorCgrConfig.OutDataDBEncoding = mgrCfg.DBDataEncoding
+			mgrCfg.MigratorCgrConfig.OutDataDBEncoding = mgrCfg.GeneralCfg().DBDataEncoding
 		}
 	} else {
 		mgrCfg.MigratorCgrConfig.OutDataDBEncoding = *outDBDataEncoding
@@ -210,12 +210,12 @@ func main() {
 		mgrCfg.MigratorCgrConfig.OutDataDBHost == mgrCfg.DataDbCfg().DataDbHost &&
 		mgrCfg.MigratorCgrConfig.OutDataDBPort == mgrCfg.DataDbCfg().DataDbPort &&
 		mgrCfg.MigratorCgrConfig.OutDataDBName == mgrCfg.DataDbCfg().DataDbName &&
-		mgrCfg.MigratorCgrConfig.OutDataDBEncoding == mgrCfg.DBDataEncoding
+		mgrCfg.MigratorCgrConfig.OutDataDBEncoding == mgrCfg.GeneralCfg().DBDataEncoding
 
 	if dmIN, err = migrator.NewMigratorDataDB(mgrCfg.DataDbCfg().DataDbType,
 		mgrCfg.DataDbCfg().DataDbHost, mgrCfg.DataDbCfg().DataDbPort,
 		mgrCfg.DataDbCfg().DataDbName, mgrCfg.DataDbCfg().DataDbUser,
-		mgrCfg.DataDbCfg().DataDbPass, mgrCfg.DBDataEncoding,
+		mgrCfg.DataDbCfg().DataDbPass, mgrCfg.GeneralCfg().DBDataEncoding,
 		mgrCfg.CacheCfg(), mgrCfg.DataDbCfg().DataDbSentinelName); err != nil {
 		log.Fatal(err)
 	}

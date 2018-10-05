@@ -142,16 +142,25 @@ func (fsCdr FSCdr) AsCDR(timezone string) *CDR {
 	storCdr.CGRID = fsCdr.getCGRID()
 	storCdr.ToR = utils.VOICE
 	storCdr.OriginID = fsCdr.vars[FS_UUID]
-	storCdr.OriginHost = utils.FirstNonEmpty(fsCdr.vars[utils.CGROriginHost], fsCdr.vars[FsIPv4])
+	storCdr.OriginHost = utils.FirstNonEmpty(fsCdr.vars[utils.CGROriginHost],
+		fsCdr.vars[FsIPv4])
 	storCdr.Source = FS_CDR_SOURCE
-	storCdr.RequestType = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_REQTYPE], fsCdr.cgrCfg.DefaultReqType)
-	storCdr.Tenant = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_TENANT], fsCdr.cgrCfg.DefaultTenant)
-	storCdr.Category = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_CATEGORY], fsCdr.cgrCfg.DefaultCategory)
-	storCdr.Account = fsCdr.firstDefined([]string{utils.CGR_ACCOUNT, FS_USERNAME}, FsUsername)
-	storCdr.Subject = fsCdr.firstDefined([]string{utils.CGR_SUBJECT, utils.CGR_ACCOUNT, FS_USERNAME}, FsUsername)
-	storCdr.Destination = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_DESTINATION], fsCdr.vars[FS_CALL_DEST_NR], fsCdr.vars[FS_SIP_REQUSER])
-	storCdr.SetupTime, _ = utils.ParseTimeDetectLayout(fsCdr.vars[FS_SETUP_TIME], timezone) // Not interested to process errors, should do them if necessary in a previous step
-	storCdr.AnswerTime, _ = utils.ParseTimeDetectLayout(fsCdr.vars[FS_ANSWER_TIME], timezone)
+	storCdr.RequestType = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_REQTYPE],
+		fsCdr.cgrCfg.GeneralCfg().DefaultReqType)
+	storCdr.Tenant = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_TENANT],
+		fsCdr.cgrCfg.GeneralCfg().DefaultTenant)
+	storCdr.Category = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_CATEGORY],
+		fsCdr.cgrCfg.GeneralCfg().DefaultCategory)
+	storCdr.Account = fsCdr.firstDefined([]string{utils.CGR_ACCOUNT, FS_USERNAME},
+		FsUsername)
+	storCdr.Subject = fsCdr.firstDefined([]string{utils.CGR_SUBJECT,
+		utils.CGR_ACCOUNT, FS_USERNAME}, FsUsername)
+	storCdr.Destination = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_DESTINATION],
+		fsCdr.vars[FS_CALL_DEST_NR], fsCdr.vars[FS_SIP_REQUSER])
+	storCdr.SetupTime, _ = utils.ParseTimeDetectLayout(fsCdr.vars[FS_SETUP_TIME],
+		timezone) // Not interested to process errors, should do them if necessary in a previous step
+	storCdr.AnswerTime, _ = utils.ParseTimeDetectLayout(fsCdr.vars[FS_ANSWER_TIME],
+		timezone)
 	storCdr.Usage, _ = utils.ParseDurationWithSecs(fsCdr.vars[FS_DURATION])
 	storCdr.ExtraFields = fsCdr.getExtraFields()
 	storCdr.Cost = -1

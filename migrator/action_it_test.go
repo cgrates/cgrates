@@ -139,7 +139,7 @@ func testActITConnect(t *testing.T) {
 	dataDBIn, err := NewMigratorDataDB(actCfgIn.DataDbCfg().DataDbType,
 		actCfgIn.DataDbCfg().DataDbHost, actCfgIn.DataDbCfg().DataDbPort,
 		actCfgIn.DataDbCfg().DataDbName, actCfgIn.DataDbCfg().DataDbUser,
-		actCfgIn.DataDbCfg().DataDbPass, actCfgIn.DBDataEncoding,
+		actCfgIn.DataDbCfg().DataDbPass, actCfgIn.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
@@ -147,7 +147,7 @@ func testActITConnect(t *testing.T) {
 	dataDBOut, err := NewMigratorDataDB(actCfgOut.DataDbCfg().DataDbType,
 		actCfgOut.DataDbCfg().DataDbHost, actCfgOut.DataDbCfg().DataDbPort,
 		actCfgOut.DataDbCfg().DataDbName, actCfgOut.DataDbCfg().DataDbUser,
-		actCfgOut.DataDbCfg().DataDbPass, actCfgOut.DBDataEncoding,
+		actCfgOut.DataDbCfg().DataDbPass, actCfgOut.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
