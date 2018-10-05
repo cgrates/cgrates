@@ -323,7 +323,7 @@ func (self *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string,
 					},
 				}
 			} else if fltr, err = self.DataManager.GetFilter(th.Tenant, fltrID,
-				false, utils.NonTransactional); err != nil {
+				true, false, utils.NonTransactional); err != nil {
 				if err == utils.ErrNotFound {
 					err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v",
 						fltrID, th)
@@ -391,7 +391,7 @@ func (self *ApierV1) computeAttributeIndexes(tenant, context string, attrIDs *[]
 					},
 				}
 			} else if fltr, err = self.DataManager.GetFilter(ap.Tenant, fltrID,
-				false, utils.NonTransactional); err != nil {
+				true, false, utils.NonTransactional); err != nil {
 				if err == utils.ErrNotFound {
 					err = fmt.Errorf("broken reference to filter: %+v for attribute: %+v",
 						fltrID, ap)
@@ -458,7 +458,7 @@ func (self *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string,
 					},
 				}
 			} else if fltr, err = self.DataManager.GetFilter(rp.Tenant, fltrID,
-				false, utils.NonTransactional); err != nil {
+				true, false, utils.NonTransactional); err != nil {
 				if err == utils.ErrNotFound {
 					err = fmt.Errorf("broken reference to filter: %+v for resource: %+v",
 						fltrID, rp)
@@ -525,7 +525,7 @@ func (self *ApierV1) computeStatIndexes(tenant string, stIDs *[]string,
 					},
 				}
 			} else if fltr, err = self.DataManager.GetFilter(sqp.Tenant, fltrID,
-				false, utils.NonTransactional); err != nil {
+				true, false, utils.NonTransactional); err != nil {
 				if err == utils.ErrNotFound {
 					err = fmt.Errorf("broken reference to filter: %+v for statqueue: %+v",
 						fltrID, sqp)
@@ -592,7 +592,7 @@ func (self *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string,
 					},
 				}
 			} else if fltr, err = self.DataManager.GetFilter(spp.Tenant, fltrID,
-				false, utils.NonTransactional); err != nil {
+				true, false, utils.NonTransactional); err != nil {
 				if err == utils.ErrNotFound {
 					err = fmt.Errorf("broken reference to filter: %+v for suppliers: %+v",
 						fltrID, spp)
@@ -659,7 +659,7 @@ func (self *ApierV1) computeChargerIndexes(tenant string, cppIDs *[]string,
 					},
 				}
 			} else if fltr, err = self.DataManager.GetFilter(cpp.Tenant, fltrID,
-				false, utils.NonTransactional); err != nil {
+				true, false, utils.NonTransactional); err != nil {
 				if err == utils.ErrNotFound {
 					err = fmt.Errorf("broken reference to filter: %+v for charger: %+v",
 						fltrID, cpp)

@@ -454,14 +454,14 @@ cgrates.org,FLTR_ACNT_1002,*string,Account,1002,2014-07-29T15:00:00Z
 		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
 	}
 	if fltr, err := ldr.dm.GetFilter("cgrates.org", "FLTR_1",
-		false, utils.NonTransactional); err != nil {
+		true, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eFltr1, fltr) {
 		t.Errorf("expecting: %s, received: %s",
 			utils.ToJSON(eFltr1), utils.ToJSON(fltr))
 	}
 	if fltr, err := ldr.dm.GetFilter("cgrates.org", "FLTR_DST_DE",
-		false, utils.NonTransactional); err != nil {
+		true, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eFltr2, fltr) {
 		t.Errorf("expecting: %s, received: %s",

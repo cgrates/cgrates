@@ -235,7 +235,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.GetThreshold(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.FilterPrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetFilter(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+			_, err = dm.GetFilter(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.SupplierProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetSupplierProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
@@ -310,10 +310,10 @@ func (dm *DataManager) RemoveStatQueue(tenant, id string, transactionID string) 
 }
 
 // GetFilter returns
-func (dm *DataManager) GetFilter(tenant, id string,
-	skipCache bool, transactionID string) (fltr *Filter, err error) {
+func (dm *DataManager) GetFilter(tenant, id string, cacheRead, cacheWrite bool,
+	transactionID string) (fltr *Filter, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
+	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheFilters, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
@@ -324,17 +324,21 @@ func (dm *DataManager) GetFilter(tenant, id string,
 	if strings.HasPrefix(id, utils.Meta) {
 		fltr, err = NewFilterFromInline(tenant, id)
 	} else {
-		fltr, err = dm.dataDB.GetFilterDrv(tenant, id)
+		fltr, err = dm.DataDB().GetFilterDrv(tenant, id)
 	}
 	if err != nil {
 		if err == utils.ErrNotFound {
-			Cache.Set(utils.CacheFilters, tntID, nil, nil,
-				cacheCommit(transactionID), transactionID)
+			if cacheWrite {
+				Cache.Set(utils.CacheFilters, tntID, nil, nil,
+					cacheCommit(transactionID), transactionID)
+			}
 		}
 		return nil, err
 	}
-	Cache.Set(utils.CacheFilters, tntID, fltr, nil,
-		cacheCommit(transactionID), transactionID)
+	if cacheWrite {
+		Cache.Set(utils.CacheFilters, tntID, fltr, nil,
+			cacheCommit(transactionID), transactionID)
+	}
 	return
 }
 

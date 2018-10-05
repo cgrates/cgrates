@@ -60,6 +60,7 @@ type v1Stat struct {
 type v1Stats []*v1Stat
 
 func (m *Migrator) migrateCurrentStats() (err error) {
+	fmt.Println("Ajunge aici ???")
 	var ids []string
 	tenant := config.CgrConfig().DefaultTenant
 	//StatQueue
@@ -71,6 +72,7 @@ func (m *Migrator) migrateCurrentStats() (err error) {
 		idg := strings.TrimPrefix(id, utils.StatQueuePrefix+tenant+":")
 		sgs, err := m.dmIN.DataManager().GetStatQueue(tenant, idg, false, false, utils.NonTransactional)
 		if err != nil {
+
 			return err
 		}
 		if sgs != nil {
