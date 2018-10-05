@@ -66,7 +66,7 @@ var sTestsCharger = []func(t *testing.T){
 	testChargerSResetStorDb,
 	testChargerSStartEngine,
 	testChargerSRPCConn,
-	testChargerSLoadFromFolder,
+	testChargerSLoadAddCharger,
 	testChargerSGetChargersForEvent,
 	testChargerSProcessEvent,
 	testChargerSSetChargerProfile,
@@ -138,13 +138,49 @@ func testChargerSRPCConn(t *testing.T) {
 	}
 }
 
-func testChargerSLoadFromFolder(t *testing.T) {
-	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := chargerRPC.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
-		t.Error(err)
+func testChargerSLoadAddCharger(t *testing.T) {
+	chargerProfile := &engine.ChargerProfile{
+		Tenant:    "cgrates.org",
+		ID:        "Charger1",
+		FilterIDs: []string{"*string:Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+		},
+		RunID:        "*default",
+		AttributeIDs: []string{"ATTR_1001_SIMPLEAUTH"},
+		Weight:       20,
 	}
-	time.Sleep(500 * time.Millisecond)
+	var result string
+	if err := chargerRPC.Call("ApierV1.SetChargerProfile", chargerProfile, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	alsPrf = &engine.AttributeProfile{
+		Tenant:   "cgrates.org",
+		ID:       "ATTR_1001_SIMPLEAUTH",
+		Contexts: []string{"simpleauth"},
+		Attributes: []*engine.Attribute{
+			&engine.Attribute{
+				FieldName: "Password",
+				Initial:   utils.ANY,
+				Substitute: config.RSRParsers{
+					&config.RSRParser{
+						Rules:           "CGRateS.org",
+						AllFiltersMatch: true,
+					},
+				},
+				Append: true,
+			},
+		},
+		Blocker: false,
+		Weight:  10,
+	}
+	if err := chargerRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
 }
 
 func testChargerSGetChargersForEvent(t *testing.T) {
@@ -156,7 +192,7 @@ func testChargerSGetChargersForEvent(t *testing.T) {
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
 			},
-			RunID:        "*rated",
+			RunID:        "*default",
 			AttributeIDs: []string{"ATTR_1001_SIMPLEAUTH"},
 			Weight:       20,
 		},
@@ -169,7 +205,7 @@ func testChargerSGetChargersForEvent(t *testing.T) {
 	if err := chargerRPC.Call(utils.ChargerSv1GetChargersForEvent, chargerEvent[0], &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result, chargerProfiles) {
-		t.Errorf("Expecting : %+v, received: %+v", chargerProfiles, result)
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(chargerProfiles), utils.ToJSON(result))
 	}
 }
 
@@ -186,7 +222,7 @@ func testChargerSProcessEvent(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Account: "1001",
 					"Password":    "CGRateS.org",
-					"RunID":       "*rated",
+					"RunID":       "*default",
 				},
 			},
 		},
