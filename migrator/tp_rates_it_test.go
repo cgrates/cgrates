@@ -66,23 +66,25 @@ func testTpRatesITConnect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	storDBIn, err := NewMigratorStorDB(tpRatesCfgIn.StorDBType, tpRatesCfgIn.StorDBHost,
-		tpRatesCfgIn.StorDBPort, tpRatesCfgIn.StorDBName,
-		tpRatesCfgIn.StorDBUser, tpRatesCfgIn.StorDBPass,
-		config.CgrConfig().StorDBMaxOpenConns,
-		config.CgrConfig().StorDBMaxIdleConns,
-		config.CgrConfig().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDBCDRSIndexes)
+	storDBIn, err := NewMigratorStorDB(tpRatesCfgIn.StorDbCfg().StorDBType,
+		tpRatesCfgIn.StorDbCfg().StorDBHost, tpRatesCfgIn.StorDbCfg().StorDBPort,
+		tpRatesCfgIn.StorDbCfg().StorDBName, tpRatesCfgIn.StorDbCfg().StorDBUser,
+		tpRatesCfgIn.StorDbCfg().StorDBPass,
+		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
+		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
+		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDBOut, err := NewMigratorStorDB(tpRatesCfgOut.StorDBType,
-		tpRatesCfgOut.StorDBHost, tpRatesCfgOut.StorDBPort, tpRatesCfgOut.StorDBName,
-		tpRatesCfgOut.StorDBUser, tpRatesCfgOut.StorDBPass,
-		config.CgrConfig().StorDBMaxOpenConns,
-		config.CgrConfig().StorDBMaxIdleConns,
-		config.CgrConfig().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDBCDRSIndexes)
+	storDBOut, err := NewMigratorStorDB(tpRatesCfgOut.StorDbCfg().StorDBType,
+		tpRatesCfgOut.StorDbCfg().StorDBHost, tpRatesCfgOut.StorDbCfg().StorDBPort,
+		tpRatesCfgOut.StorDbCfg().StorDBName, tpRatesCfgOut.StorDbCfg().StorDBUser,
+		tpRatesCfgOut.StorDbCfg().StorDBPass,
+		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
+		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
+		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -94,30 +96,30 @@ func testTpRatesITConnect(t *testing.T) {
 
 func testTpRatesITFlush(t *testing.T) {
 	if err := tpRatesMigrator.storDBIn.StorDB().Flush(
-		path.Join(tpRatesCfgIn.DataFolderPath, "storage", tpRatesCfgIn.StorDBType)); err != nil {
+		path.Join(tpRatesCfgIn.DataFolderPath, "storage", tpRatesCfgIn.StorDbCfg().StorDBType)); err != nil {
 		t.Error(err)
 	}
 
 	if err := tpRatesMigrator.storDBOut.StorDB().Flush(
-		path.Join(tpRatesCfgOut.DataFolderPath, "storage", tpRatesCfgOut.StorDBType)); err != nil {
+		path.Join(tpRatesCfgOut.DataFolderPath, "storage", tpRatesCfgOut.StorDbCfg().StorDBType)); err != nil {
 		t.Error(err)
 	}
 }
 
 func testTpRatesITPopulate(t *testing.T) {
 	tpRates = []*utils.TPRate{
-		&utils.TPRate{
+		{
 			TPid: "TPidTpRate",
 			ID:   "RT_FS_USERS",
 			RateSlots: []*utils.RateSlot{
-				&utils.RateSlot{
+				{
 					ConnectFee:         12,
 					Rate:               3,
 					RateUnit:           "6s",
 					RateIncrement:      "6s",
 					GroupIntervalStart: "0s",
 				},
-				&utils.RateSlot{
+				{
 					ConnectFee:         12,
 					Rate:               3,
 					RateUnit:           "4s",

@@ -66,23 +66,25 @@ func testTpTimITConnect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	storDBIn, err := NewMigratorStorDB(tpTimCfgIn.StorDBType, tpTimCfgIn.StorDBHost,
-		tpTimCfgIn.StorDBPort, tpTimCfgIn.StorDBName,
-		tpTimCfgIn.StorDBUser, tpTimCfgIn.StorDBPass,
-		config.CgrConfig().StorDBMaxOpenConns,
-		config.CgrConfig().StorDBMaxIdleConns,
-		config.CgrConfig().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDBCDRSIndexes)
+	storDBIn, err := NewMigratorStorDB(tpTimCfgIn.StorDbCfg().StorDBType,
+		tpTimCfgIn.StorDbCfg().StorDBHost, tpTimCfgIn.StorDbCfg().StorDBPort,
+		tpTimCfgIn.StorDbCfg().StorDBName, tpTimCfgIn.StorDbCfg().StorDBUser,
+		tpTimCfgIn.StorDbCfg().StorDBPass,
+		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
+		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
+		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDBOut, err := NewMigratorStorDB(tpTimCfgOut.StorDBType,
-		tpTimCfgOut.StorDBHost, tpTimCfgOut.StorDBPort, tpTimCfgOut.StorDBName,
-		tpTimCfgOut.StorDBUser, tpTimCfgOut.StorDBPass,
-		config.CgrConfig().StorDBMaxOpenConns,
-		config.CgrConfig().StorDBMaxIdleConns,
-		config.CgrConfig().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDBCDRSIndexes)
+	storDBOut, err := NewMigratorStorDB(tpTimCfgOut.StorDbCfg().StorDBType,
+		tpTimCfgOut.StorDbCfg().StorDBHost, tpTimCfgOut.StorDbCfg().StorDBPort,
+		tpTimCfgOut.StorDbCfg().StorDBName, tpTimCfgOut.StorDbCfg().StorDBUser,
+		tpTimCfgOut.StorDbCfg().StorDBPass,
+		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
+		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
+		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -94,19 +96,19 @@ func testTpTimITConnect(t *testing.T) {
 
 func testTpTimITFlush(t *testing.T) {
 	if err := tpTimMigrator.storDBIn.StorDB().Flush(
-		path.Join(tpTimCfgIn.DataFolderPath, "storage", tpTimCfgIn.StorDBType)); err != nil {
+		path.Join(tpTimCfgIn.DataFolderPath, "storage", tpTimCfgIn.StorDbCfg().StorDBType)); err != nil {
 		t.Error(err)
 	}
 
 	if err := tpTimMigrator.storDBOut.StorDB().Flush(
-		path.Join(tpTimCfgOut.DataFolderPath, "storage", tpTimCfgOut.StorDBType)); err != nil {
+		path.Join(tpTimCfgOut.DataFolderPath, "storage", tpTimCfgOut.StorDbCfg().StorDBType)); err != nil {
 		t.Error(err)
 	}
 }
 
 func testTpTimITPopulate(t *testing.T) {
 	tpTimings = []*utils.ApierTPTiming{
-		&utils.ApierTPTiming{
+		{
 			TPid:      "TPT1",
 			ID:        "Timing",
 			Years:     "2017",

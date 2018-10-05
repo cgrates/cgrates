@@ -66,23 +66,25 @@ func testTpRatPlnITConnect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	storDBIn, err := NewMigratorStorDB(tpRatPlnCfgIn.StorDBType, tpRatPlnCfgIn.StorDBHost,
-		tpRatPlnCfgIn.StorDBPort, tpRatPlnCfgIn.StorDBName,
-		tpRatPlnCfgIn.StorDBUser, tpRatPlnCfgIn.StorDBPass,
-		config.CgrConfig().StorDBMaxOpenConns,
-		config.CgrConfig().StorDBMaxIdleConns,
-		config.CgrConfig().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDBCDRSIndexes)
+	storDBIn, err := NewMigratorStorDB(tpRatPlnCfgIn.StorDbCfg().StorDBType,
+		tpRatPlnCfgIn.StorDbCfg().StorDBHost, tpRatPlnCfgIn.StorDbCfg().StorDBPort,
+		tpRatPlnCfgIn.StorDbCfg().StorDBName, tpRatPlnCfgIn.StorDbCfg().StorDBUser,
+		tpRatPlnCfgIn.StorDbCfg().StorDBPass,
+		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
+		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
+		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDBOut, err := NewMigratorStorDB(tpRatPlnCfgOut.StorDBType,
-		tpRatPlnCfgOut.StorDBHost, tpRatPlnCfgOut.StorDBPort, tpRatPlnCfgOut.StorDBName,
-		tpRatPlnCfgOut.StorDBUser, tpRatPlnCfgOut.StorDBPass,
-		config.CgrConfig().StorDBMaxOpenConns,
-		config.CgrConfig().StorDBMaxIdleConns,
-		config.CgrConfig().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDBCDRSIndexes)
+	storDBOut, err := NewMigratorStorDB(tpRatPlnCfgOut.StorDbCfg().StorDBType,
+		tpRatPlnCfgOut.StorDbCfg().StorDBHost, tpRatPlnCfgOut.StorDbCfg().StorDBPort,
+		tpRatPlnCfgOut.StorDbCfg().StorDBName, tpRatPlnCfgOut.StorDbCfg().StorDBUser,
+		tpRatPlnCfgOut.StorDbCfg().StorDBPass,
+		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
+		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
+		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -94,28 +96,28 @@ func testTpRatPlnITConnect(t *testing.T) {
 
 func testTpRatPlnITFlush(t *testing.T) {
 	if err := tpRatPlnMigrator.storDBIn.StorDB().Flush(
-		path.Join(tpRatPlnCfgIn.DataFolderPath, "storage", tpRatPlnCfgIn.StorDBType)); err != nil {
+		path.Join(tpRatPlnCfgIn.DataFolderPath, "storage", tpRatPlnCfgIn.StorDbCfg().StorDBType)); err != nil {
 		t.Error(err)
 	}
 
 	if err := tpRatPlnMigrator.storDBOut.StorDB().Flush(
-		path.Join(tpRatPlnCfgOut.DataFolderPath, "storage", tpRatPlnCfgOut.StorDBType)); err != nil {
+		path.Join(tpRatPlnCfgOut.DataFolderPath, "storage", tpRatPlnCfgOut.StorDbCfg().StorDBType)); err != nil {
 		t.Error(err)
 	}
 }
 
 func testTpRatPlnITPopulate(t *testing.T) {
 	tpRatingPlan = []*utils.TPRatingPlan{
-		&utils.TPRatingPlan{
+		{
 			TPid: "TPRP1",
 			ID:   "IDPlan2",
 			RatingPlanBindings: []*utils.TPRatingPlanBinding{
-				&utils.TPRatingPlanBinding{
+				{
 					DestinationRatesId: "RateId",
 					TimingId:           "TimingID",
 					Weight:             12,
 				},
-				&utils.TPRatingPlanBinding{
+				{
 					DestinationRatesId: "DR_FREESWITCH_USERS",
 					TimingId:           "ALWAYS",
 					Weight:             10,
@@ -142,12 +144,12 @@ func testTpRatPlnITMove(t *testing.T) {
 
 func testTpRatPlnITCheckData(t *testing.T) {
 	reverseRatingPlanBindings := []*utils.TPRatingPlanBinding{
-		&utils.TPRatingPlanBinding{
+		{
 			DestinationRatesId: "DR_FREESWITCH_USERS",
 			TimingId:           "ALWAYS",
 			Weight:             10,
 		},
-		&utils.TPRatingPlanBinding{
+		{
 			DestinationRatesId: "RateId",
 			TimingId:           "TimingID",
 			Weight:             12,

@@ -20,6 +20,7 @@ package config
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -41,7 +42,7 @@ func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		return nil
 	}
 	if jsnDbCfg.Db_type != nil {
-		dbcfg.DataDbType = *jsnDbCfg.Db_type
+		dbcfg.DataDbType = strings.TrimPrefix(*jsnDbCfg.Db_type, "*")
 	}
 	if jsnDbCfg.Db_host != nil {
 		dbcfg.DataDbHost = *jsnDbCfg.Db_host
@@ -51,7 +52,7 @@ func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		if port == "-1" {
 			port = utils.MetaDynamic
 		}
-		dbcfg.DataDbPort = NewDbDefaults().DBPort(*jsnDbCfg.Db_type, port)
+		dbcfg.DataDbPort = NewDbDefaults().DBPort(dbcfg.DataDbType, port)
 	}
 	if jsnDbCfg.Db_name != nil {
 		dbcfg.DataDbName = *jsnDbCfg.Db_name

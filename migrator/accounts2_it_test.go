@@ -80,17 +80,24 @@ func testAcc2ITConnect(t *testing.T) {
 		t.Error(err)
 	}
 
-	storDBIn, err := NewMigratorStorDB(acc2CfgIn.StorDBType,
-		acc2CfgIn.StorDBHost, acc2CfgIn.StorDBPort, acc2CfgIn.StorDBName,
-		acc2CfgIn.StorDBUser, acc2CfgIn.StorDBPass, acc2CfgIn.StorDBMaxOpenConns,
-		acc2CfgIn.StorDBMaxIdleConns, acc2CfgIn.StorDBConnMaxLifetime, acc2CfgIn.StorDBCDRSIndexes)
+	storDBIn, err := NewMigratorStorDB(acc2CfgIn.StorDbCfg().StorDBType,
+		acc2CfgIn.StorDbCfg().StorDBHost, acc2CfgIn.StorDbCfg().StorDBPort,
+		acc2CfgIn.StorDbCfg().StorDBName, acc2CfgIn.StorDbCfg().StorDBUser,
+		acc2CfgIn.StorDbCfg().StorDBPass,
+		acc2CfgIn.StorDbCfg().StorDBMaxOpenConns,
+		acc2CfgIn.StorDbCfg().StorDBMaxIdleConns,
+		acc2CfgIn.StorDbCfg().StorDBConnMaxLifetime,
+		acc2CfgIn.StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {
 		t.Error(err)
 	}
-	storDBOut, err := NewMigratorStorDB(acc2CfgOut.StorDBType,
-		acc2CfgOut.StorDBHost, acc2CfgOut.StorDBPort, acc2CfgOut.StorDBName,
-		acc2CfgOut.StorDBUser, acc2CfgOut.StorDBPass, acc2CfgOut.StorDBMaxOpenConns,
-		acc2CfgOut.StorDBMaxIdleConns, acc2CfgOut.StorDBConnMaxLifetime, acc2CfgOut.StorDBCDRSIndexes)
+	storDBOut, err := NewMigratorStorDB(acc2CfgOut.StorDbCfg().StorDBType,
+		acc2CfgOut.StorDbCfg().StorDBHost, acc2CfgOut.StorDbCfg().StorDBPort,
+		acc2CfgOut.StorDbCfg().StorDBName, acc2CfgOut.StorDbCfg().StorDBUser,
+		acc2CfgOut.StorDbCfg().StorDBPass, acc2CfgOut.StorDbCfg().StorDBMaxOpenConns,
+		acc2CfgOut.StorDbCfg().StorDBMaxIdleConns,
+		acc2CfgOut.StorDbCfg().StorDBConnMaxLifetime,
+		acc2CfgOut.StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {
 		t.Error(err)
 	}

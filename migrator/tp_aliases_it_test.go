@@ -66,23 +66,25 @@ func testTpAliITConnect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	storDBIn, err := NewMigratorStorDB(tpAliCfgIn.StorDBType, tpAliCfgIn.StorDBHost,
-		tpAliCfgIn.StorDBPort, tpAliCfgIn.StorDBName,
-		tpAliCfgIn.StorDBUser, tpAliCfgIn.StorDBPass,
-		config.CgrConfig().StorDBMaxOpenConns,
-		config.CgrConfig().StorDBMaxIdleConns,
-		config.CgrConfig().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDBCDRSIndexes)
+	storDBIn, err := NewMigratorStorDB(tpAliCfgIn.StorDbCfg().StorDBType,
+		tpAliCfgIn.StorDbCfg().StorDBHost, tpAliCfgIn.StorDbCfg().StorDBPort,
+		tpAliCfgIn.StorDbCfg().StorDBName, tpAliCfgIn.StorDbCfg().StorDBUser,
+		tpAliCfgIn.StorDbCfg().StorDBPass,
+		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
+		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
+		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDBOut, err := NewMigratorStorDB(tpAliCfgOut.StorDBType,
-		tpAliCfgOut.StorDBHost, tpAliCfgOut.StorDBPort, tpAliCfgOut.StorDBName,
-		tpAliCfgOut.StorDBUser, tpAliCfgOut.StorDBPass,
-		config.CgrConfig().StorDBMaxOpenConns,
-		config.CgrConfig().StorDBMaxIdleConns,
-		config.CgrConfig().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDBCDRSIndexes)
+	storDBOut, err := NewMigratorStorDB(tpAliCfgOut.StorDbCfg().StorDBType,
+		tpAliCfgOut.StorDbCfg().StorDBHost, tpAliCfgOut.StorDbCfg().StorDBPort,
+		tpAliCfgOut.StorDbCfg().StorDBName, tpAliCfgOut.StorDbCfg().StorDBUser,
+		tpAliCfgOut.StorDbCfg().StorDBPass,
+		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
+		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
+		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -94,19 +96,19 @@ func testTpAliITConnect(t *testing.T) {
 
 func testTpAliITFlush(t *testing.T) {
 	if err := tpAliMigrator.storDBIn.StorDB().Flush(
-		path.Join(tpAliCfgIn.DataFolderPath, "storage", tpAliCfgIn.StorDBType)); err != nil {
+		path.Join(tpAliCfgIn.DataFolderPath, "storage", tpAliCfgIn.StorDbCfg().StorDBType)); err != nil {
 		t.Error(err)
 	}
 
 	if err := tpAliMigrator.storDBOut.StorDB().Flush(
-		path.Join(tpAliCfgOut.DataFolderPath, "storage", tpAliCfgOut.StorDBType)); err != nil {
+		path.Join(tpAliCfgOut.DataFolderPath, "storage", tpAliCfgOut.StorDbCfg().StorDBType)); err != nil {
 		t.Error(err)
 	}
 }
 
 func testTpAliITPopulate(t *testing.T) {
 	tpAliases = []*utils.TPAliases{
-		&utils.TPAliases{
+		{
 			TPid:      "testTPid1",
 			Direction: "*out",
 			Tenant:    "cgrates.org",
@@ -115,7 +117,7 @@ func testTpAliITPopulate(t *testing.T) {
 			Subject:   "1006",
 			Context:   "*rating",
 			Values: []*utils.TPAliasValue{
-				&utils.TPAliasValue{
+				{
 					DestinationId: "*any",
 					Target:        "Subject",
 					Original:      "1006",
@@ -124,7 +126,7 @@ func testTpAliITPopulate(t *testing.T) {
 				},
 			},
 		},
-		&utils.TPAliases{
+		{
 			TPid:      "testTPid2",
 			Direction: "*out",
 			Tenant:    "cgrates.org",
@@ -133,7 +135,7 @@ func testTpAliITPopulate(t *testing.T) {
 			Subject:   "1001",
 			Context:   "*rating",
 			Values: []*utils.TPAliasValue{
-				&utils.TPAliasValue{
+				{
 					DestinationId: "*any",
 					Target:        "Subject",
 					Original:      "1001",

@@ -66,23 +66,25 @@ func testTpCdrStatITConnect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	storDBIn, err := NewMigratorStorDB(tpCdrStatCfgIn.StorDBType, tpCdrStatCfgIn.StorDBHost,
-		tpCdrStatCfgIn.StorDBPort, tpCdrStatCfgIn.StorDBName,
-		tpCdrStatCfgIn.StorDBUser, tpCdrStatCfgIn.StorDBPass,
-		config.CgrConfig().StorDBMaxOpenConns,
-		config.CgrConfig().StorDBMaxIdleConns,
-		config.CgrConfig().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDBCDRSIndexes)
+	storDBIn, err := NewMigratorStorDB(tpCdrStatCfgIn.StorDbCfg().StorDBType,
+		tpCdrStatCfgIn.StorDbCfg().StorDBHost, tpCdrStatCfgIn.StorDbCfg().StorDBPort,
+		tpCdrStatCfgIn.StorDbCfg().StorDBName, tpCdrStatCfgIn.StorDbCfg().StorDBUser,
+		tpCdrStatCfgIn.StorDbCfg().StorDBPass,
+		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
+		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
+		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDBOut, err := NewMigratorStorDB(tpCdrStatCfgOut.StorDBType,
-		tpCdrStatCfgOut.StorDBHost, tpCdrStatCfgOut.StorDBPort, tpCdrStatCfgOut.StorDBName,
-		tpCdrStatCfgOut.StorDBUser, tpCdrStatCfgOut.StorDBPass,
-		config.CgrConfig().StorDBMaxOpenConns,
-		config.CgrConfig().StorDBMaxIdleConns,
-		config.CgrConfig().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDBCDRSIndexes)
+	storDBOut, err := NewMigratorStorDB(tpCdrStatCfgOut.StorDbCfg().StorDBType,
+		tpCdrStatCfgOut.StorDbCfg().StorDBHost, tpCdrStatCfgOut.StorDbCfg().StorDBPort,
+		tpCdrStatCfgOut.StorDbCfg().StorDBName, tpCdrStatCfgOut.StorDbCfg().StorDBUser,
+		tpCdrStatCfgOut.StorDbCfg().StorDBPass,
+		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
+		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
+		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -94,23 +96,23 @@ func testTpCdrStatITConnect(t *testing.T) {
 
 func testTpCdrStatITFlush(t *testing.T) {
 	if err := tpCdrStatMigrator.storDBIn.StorDB().Flush(
-		path.Join(tpCdrStatCfgIn.DataFolderPath, "storage", tpCdrStatCfgIn.StorDBType)); err != nil {
+		path.Join(tpCdrStatCfgIn.DataFolderPath, "storage", tpCdrStatCfgIn.StorDbCfg().StorDBType)); err != nil {
 		t.Error(err)
 	}
 
 	if err := tpCdrStatMigrator.storDBOut.StorDB().Flush(
-		path.Join(tpCdrStatCfgOut.DataFolderPath, "storage", tpCdrStatCfgOut.StorDBType)); err != nil {
+		path.Join(tpCdrStatCfgOut.DataFolderPath, "storage", tpCdrStatCfgOut.StorDbCfg().StorDBType)); err != nil {
 		t.Error(err)
 	}
 }
 
 func testTpCdrStatITPopulate(t *testing.T) {
 	tpCdrStat = []*utils.TPCdrStats{
-		&utils.TPCdrStats{
+		{
 			TPid: "TPCdr",
 			ID:   "ID",
 			CdrStats: []*utils.TPCdrStat{
-				&utils.TPCdrStat{
+				{
 					QueueLength:      "10",
 					TimeWindow:       "0",
 					SaveInterval:     "10s",
@@ -136,7 +138,7 @@ func testTpCdrStatITPopulate(t *testing.T) {
 					CostInterval:     "",
 					ActionTriggers:   "CDRST1_WARN",
 				},
-				&utils.TPCdrStat{
+				{
 					QueueLength:      "10",
 					TimeWindow:       "0",
 					SaveInterval:     "10s",

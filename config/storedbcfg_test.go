@@ -23,8 +23,8 @@ import (
 	"testing"
 )
 
-func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
-	var dbcfg, expected DataDbCfg
+func TestStoreDbCfgloadFromJsonCfg(t *testing.T) {
+	var dbcfg, expected StorDbCfg
 	if err := dbcfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dbcfg, expected) {
@@ -36,28 +36,34 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, dbcfg)
 	}
 	cfgJSONStr := `{
-"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	"db_type": "*redis",					// data_db type: <*redis|*mongo|*internal>
-	"db_host": "127.0.0.1",					// data_db host address
-	"db_port": -1,	 						// data_db port to reach the database
-	"db_name": "10", 						// data_db database name to connect to
-	"db_user": "cgrates", 					// username to use when connecting to data_db
-	"db_password": "password",				// password to use when connecting to data_db
-	"redis_sentinel":"sentinel",			// redis_sentinel is the name of sentinel
+"stor_db": {								// database used to store offline tariff plans and CDRs
+	"db_type": "*mysql",					// stor database type to use: <*mongo|*mysql|*postgres|*internal>
+	"db_host": "127.0.0.1",					// the host to connect to
+	"db_port": 3306,						// the port to reach the stordb
+	"db_name": "cgrates",					// stor database name
+	"db_user": "cgrates",					// username to use when connecting to stordb
+	"db_password": "password",				// password to use when connecting to stordb
+	"max_open_conns": 100,					// maximum database connections opened, not applying for mongo
+	"max_idle_conns": 10,					// maximum database connections idle, not applying for mongo
+	"conn_max_lifetime": 0, 				// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
+	"cdrs_indexes": [],						// indexes on cdrs table to speed up queries, used only in case of mongo
 	}
 }`
-	expected = DataDbCfg{
-		DataDbType:         "redis",
-		DataDbHost:         "127.0.0.1",
-		DataDbPort:         "6379",
-		DataDbName:         "10",
-		DataDbUser:         "cgrates",
-		DataDbPass:         "password",
-		DataDbSentinelName: "sentinel",
+	expected = StorDbCfg{
+		StorDBType:            "mysql",
+		StorDBHost:            "127.0.0.1",
+		StorDBPort:            "3306",
+		StorDBName:            "cgrates",
+		StorDBUser:            "cgrates",
+		StorDBPass:            "password",
+		StorDBMaxOpenConns:    100,
+		StorDBMaxIdleConns:    10,
+		StorDBConnMaxLifetime: 0,
+		StorDBCDRSIndexes:     []string{},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(DATADB_JSN); err != nil {
+	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(STORDB_JSN); err != nil {
 		t.Error(err)
 	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)
@@ -65,19 +71,19 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected: %+v , recived: %+v", expected, dbcfg)
 	}
 }
-func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
-	var dbcfg DataDbCfg
+func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
+	var dbcfg StorDbCfg
 	cfgJSONStr := `{
-"data_db": {
+"stor_db": {
 	"db_type": "mongo",
 	}
 }`
-	expected := DataDbCfg{
-		DataDbType: "mongo",
+	expected := StorDbCfg{
+		StorDBType: "mongo",
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(DATADB_JSN); err != nil {
+	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(STORDB_JSN); err != nil {
 		t.Error(err)
 	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)
@@ -85,18 +91,18 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 		t.Errorf("Expected: %+v , recived: %+v", expected, dbcfg)
 	}
 	cfgJSONStr = `{
-"data_db": {
+"stor_db": {
 	"db_type": "mongo",
 	"db_port": -1,
 	}
 }`
-	expected = DataDbCfg{
-		DataDbType: "mongo",
-		DataDbPort: "27017",
+	expected = StorDbCfg{
+		StorDBType: "mongo",
+		StorDBPort: "27017",
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(DATADB_JSN); err != nil {
+	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(STORDB_JSN); err != nil {
 		t.Error(err)
 	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)
@@ -104,18 +110,18 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 		t.Errorf("Expected: %+v , recived: %+v", expected, dbcfg)
 	}
 	cfgJSONStr = `{
-"data_db": {
+"stor_db": {
 	"db_type": "*internal",
 	"db_port": -1,
 	}
 }`
-	expected = DataDbCfg{
-		DataDbType: "internal",
-		DataDbPort: "internal",
+	expected = StorDbCfg{
+		StorDBType: "internal",
+		StorDBPort: "internal",
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(DATADB_JSN); err != nil {
+	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(STORDB_JSN); err != nil {
 		t.Error(err)
 	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
 		t.Error(err)

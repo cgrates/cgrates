@@ -141,6 +141,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.NodeID = utils.UUIDSha1Prefix()
 	cfg.DataFolderPath = "/usr/share/cgrates/"
 	cfg.dataDbCfg = new(DataDbCfg)
+	cfg.storDbCfg = new(StorDbCfg)
 	cfg.sessionSCfg = new(SessionSCfg)
 	cfg.cacheConfig = make(CacheConfig)
 	cfg.fsAgentCfg = new(FsAgentConfig)
@@ -251,16 +252,6 @@ func NewCGRConfigFromFolder(cfgDir string) (*CGRConfig, error) {
 // Holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
 	NodeID                   string // Identifier for this engine instance
-	StorDBType               string // Should reflect the database type used to store logs
-	StorDBHost               string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	StorDBPort               string // Th e port to bind to.
-	StorDBName               string // The name of the database to connect to.
-	StorDBUser               string // The user to sign in as.
-	StorDBPass               string // The user's password.
-	StorDBMaxOpenConns       int    // Maximum database connections opened
-	StorDBMaxIdleConns       int    // Maximum idle connections to keep opened
-	StorDBConnMaxLifetime    int
-	StorDBCDRSIndexes        []string
 	DBDataEncoding           string // The encoding used to store object data in strings: <msgpack|json>
 	cacheConfig              CacheConfig
 	RPCJSONListen            string            // RPC JSON listening address
@@ -363,7 +354,9 @@ type CGRConfig struct {
 	// Cache defaults loaded from json and needing clones
 	dfltCdreProfile *CdreConfig // Default cdreConfig profile
 	dfltCdrcProfile *CdrcConfig // Default cdrcConfig profile
-	dataDbCfg       *DataDbCfg  // Database config
+
+	dataDbCfg *DataDbCfg // Database config
+	storDbCfg *StorDbCfg //StroreDb config
 }
 
 func (self *CGRConfig) checkConfigSanity() error {
@@ -897,47 +890,12 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return nil
 	}
 
-	if jsnDataDbCfg != nil {
-		if err := self.dataDbCfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
-			return err
-		}
+	if err := self.dataDbCfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
+		return err
 	}
 
-	if jsnStorDbCfg != nil {
-		if jsnStorDbCfg.Db_type != nil {
-			self.StorDBType = *jsnStorDbCfg.Db_type
-		}
-		if jsnStorDbCfg.Db_host != nil {
-			self.StorDBHost = *jsnStorDbCfg.Db_host
-		}
-		if jsnStorDbCfg.Db_port != nil {
-			port := strconv.Itoa(*jsnStorDbCfg.Db_port)
-			if port == "-1" {
-				port = utils.MetaDynamic
-			}
-			self.StorDBPort = NewDbDefaults().DBPort(*jsnStorDbCfg.Db_type, port)
-		}
-		if jsnStorDbCfg.Db_name != nil {
-			self.StorDBName = *jsnStorDbCfg.Db_name
-		}
-		if jsnStorDbCfg.Db_user != nil {
-			self.StorDBUser = *jsnStorDbCfg.Db_user
-		}
-		if jsnStorDbCfg.Db_password != nil {
-			self.StorDBPass = *jsnStorDbCfg.Db_password
-		}
-		if jsnStorDbCfg.Max_open_conns != nil {
-			self.StorDBMaxOpenConns = *jsnStorDbCfg.Max_open_conns
-		}
-		if jsnStorDbCfg.Max_idle_conns != nil {
-			self.StorDBMaxIdleConns = *jsnStorDbCfg.Max_idle_conns
-		}
-		if jsnStorDbCfg.Conn_max_lifetime != nil {
-			self.StorDBConnMaxLifetime = *jsnStorDbCfg.Conn_max_lifetime
-		}
-		if jsnStorDbCfg.Cdrs_indexes != nil {
-			self.StorDBCDRSIndexes = *jsnStorDbCfg.Cdrs_indexes
-		}
+	if err := self.storDbCfg.loadFromJsonCfg(jsnStorDbCfg); err != nil {
+		return err
 	}
 
 	if jsnGeneralCfg != nil {
@@ -1588,4 +1546,8 @@ func (cfg *CGRConfig) SchedulerCfg() *SchedulerCfg {
 
 func (cfg *CGRConfig) DataDbCfg() *DataDbCfg {
 	return cfg.dataDbCfg
+}
+
+func (cfg *CGRConfig) StorDbCfg() *StorDbCfg {
+	return cfg.storDbCfg
 }

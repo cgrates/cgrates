@@ -66,23 +66,25 @@ func testTpRatPrfITConnect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	storDBIn, err := NewMigratorStorDB(tpRatPrfCfgIn.StorDBType, tpRatPrfCfgIn.StorDBHost,
-		tpRatPrfCfgIn.StorDBPort, tpRatPrfCfgIn.StorDBName,
-		tpRatPrfCfgIn.StorDBUser, tpRatPrfCfgIn.StorDBPass,
-		config.CgrConfig().StorDBMaxOpenConns,
-		config.CgrConfig().StorDBMaxIdleConns,
-		config.CgrConfig().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDBCDRSIndexes)
+	storDBIn, err := NewMigratorStorDB(tpRatPrfCfgIn.StorDbCfg().StorDBType,
+		tpRatPrfCfgIn.StorDbCfg().StorDBHost, tpRatPrfCfgIn.StorDbCfg().StorDBPort,
+		tpRatPrfCfgIn.StorDbCfg().StorDBName, tpRatPrfCfgIn.StorDbCfg().StorDBUser,
+		tpRatPrfCfgIn.StorDbCfg().StorDBPass,
+		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
+		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
+		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDBOut, err := NewMigratorStorDB(tpRatPrfCfgOut.StorDBType,
-		tpRatPrfCfgOut.StorDBHost, tpRatPrfCfgOut.StorDBPort, tpRatPrfCfgOut.StorDBName,
-		tpRatPrfCfgOut.StorDBUser, tpRatPrfCfgOut.StorDBPass,
-		config.CgrConfig().StorDBMaxOpenConns,
-		config.CgrConfig().StorDBMaxIdleConns,
-		config.CgrConfig().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDBCDRSIndexes)
+	storDBOut, err := NewMigratorStorDB(tpRatPrfCfgOut.StorDbCfg().StorDBType,
+		tpRatPrfCfgOut.StorDbCfg().StorDBHost, tpRatPrfCfgOut.StorDbCfg().StorDBPort,
+		tpRatPrfCfgOut.StorDbCfg().StorDBName, tpRatPrfCfgOut.StorDbCfg().StorDBUser,
+		tpRatPrfCfgOut.StorDbCfg().StorDBPass,
+		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
+		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
+		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -94,19 +96,19 @@ func testTpRatPrfITConnect(t *testing.T) {
 
 func testTpRatPrfITFlush(t *testing.T) {
 	if err := tpRatPrfMigrator.storDBIn.StorDB().Flush(
-		path.Join(tpRatPrfCfgIn.DataFolderPath, "storage", tpRatPrfCfgIn.StorDBType)); err != nil {
+		path.Join(tpRatPrfCfgIn.DataFolderPath, "storage", tpRatPrfCfgIn.StorDbCfg().StorDBType)); err != nil {
 		t.Error(err)
 	}
 
 	if err := tpRatPrfMigrator.storDBOut.StorDB().Flush(
-		path.Join(tpRatPrfCfgOut.DataFolderPath, "storage", tpRatPrfCfgOut.StorDBType)); err != nil {
+		path.Join(tpRatPrfCfgOut.DataFolderPath, "storage", tpRatPrfCfgOut.StorDbCfg().StorDBType)); err != nil {
 		t.Error(err)
 	}
 }
 
 func testTpRatPrfITPopulate(t *testing.T) {
 	tpRatingProfile = []*utils.TPRatingProfile{
-		&utils.TPRatingProfile{
+		{
 			TPid:      "TPRProf1",
 			LoadId:    "RPrf",
 			Direction: "*out",
@@ -114,13 +116,13 @@ func testTpRatPrfITPopulate(t *testing.T) {
 			Category:  "Category",
 			Subject:   "Subject",
 			RatingPlanActivations: []*utils.TPRatingActivation{
-				&utils.TPRatingActivation{
+				{
 					ActivationTime:   "2014-07-29T15:00:00Z",
 					RatingPlanId:     "PlanOne",
 					FallbackSubjects: "FallBack",
 					CdrStatQueueIds:  "RandomId",
 				},
-				&utils.TPRatingActivation{
+				{
 					ActivationTime:   "2015-07-29T10:00:00Z",
 					RatingPlanId:     "PlanTwo",
 					FallbackSubjects: "FallOut",

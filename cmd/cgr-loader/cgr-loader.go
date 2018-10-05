@@ -54,17 +54,17 @@ var (
 	dbRedisSentinel = flag.String("redis_sentinel", dfltCfg.DataDbCfg().DataDbSentinelName,
 		"The name of redis sentinel")
 
-	storDBType = flag.String("stordb_type", dfltCfg.StorDBType,
+	storDBType = flag.String("stordb_type", dfltCfg.StorDbCfg().StorDBType,
 		"The type of the storDb database <*mysql|*postgres|*mongo>")
-	storDBHost = flag.String("stordb_host", dfltCfg.StorDBHost,
+	storDBHost = flag.String("stordb_host", dfltCfg.StorDbCfg().StorDBHost,
 		"The storDb host to connect to.")
-	storDBPort = flag.String("stordb_port", dfltCfg.StorDBPort,
+	storDBPort = flag.String("stordb_port", dfltCfg.StorDbCfg().StorDBPort,
 		"The storDb port to bind to.")
-	storDBName = flag.String("stordb_name", dfltCfg.StorDBName,
+	storDBName = flag.String("stordb_name", dfltCfg.StorDbCfg().StorDBName,
 		"The name/number of the storDb to connect to.")
-	storDBUser = flag.String("stordb_user", dfltCfg.StorDBUser,
+	storDBUser = flag.String("stordb_user", dfltCfg.StorDbCfg().StorDBUser,
 		"The storDb user to sign in as.")
-	storDBPasswd = flag.String("stordb_passwd", dfltCfg.StorDBPass,
+	storDBPasswd = flag.String("stordb_passwd", dfltCfg.StorDbCfg().StorDBPass,
 		"The storDb user's password.")
 
 	flush = flag.Bool("flushdb", false,
@@ -144,28 +144,28 @@ func main() {
 		ldrCfg.DataDbCfg().DataDbSentinelName = *dbRedisSentinel
 	}
 
-	if *storDBType != dfltCfg.StorDBType {
-		ldrCfg.StorDBType = *storDBType
+	if *storDBType != dfltCfg.StorDbCfg().StorDBType {
+		ldrCfg.StorDbCfg().StorDBType = *storDBType
 	}
 
-	if *storDBHost != dfltCfg.StorDBHost {
-		ldrCfg.StorDBHost = *storDBHost
+	if *storDBHost != dfltCfg.StorDbCfg().StorDBHost {
+		ldrCfg.StorDbCfg().StorDBHost = *storDBHost
 	}
 
-	if *storDBPort != dfltCfg.StorDBPort {
-		ldrCfg.StorDBPort = *storDBPort
+	if *storDBPort != dfltCfg.StorDbCfg().StorDBPort {
+		ldrCfg.StorDbCfg().StorDBPort = *storDBPort
 	}
 
-	if *storDBName != dfltCfg.StorDBName {
-		ldrCfg.StorDBName = *storDBName
+	if *storDBName != dfltCfg.StorDbCfg().StorDBName {
+		ldrCfg.StorDbCfg().StorDBName = *storDBName
 	}
 
-	if *storDBUser != dfltCfg.StorDBUser {
-		ldrCfg.StorDBUser = *storDBUser
+	if *storDBUser != dfltCfg.StorDbCfg().StorDBUser {
+		ldrCfg.StorDbCfg().StorDBUser = *storDBUser
 	}
 
 	if *storDBPasswd != "" {
-		ldrCfg.StorDBPass = *storDBPasswd
+		ldrCfg.StorDbCfg().StorDBPass = *storDBPasswd
 	}
 
 	if *dbDataEncoding != "" {
@@ -225,10 +225,14 @@ func main() {
 	}
 
 	if *fromStorDB || *toStorDB {
-		if storDb, err = engine.ConfigureLoadStorage(ldrCfg.StorDBType, ldrCfg.StorDBHost, ldrCfg.StorDBPort,
-			ldrCfg.StorDBName, ldrCfg.StorDBUser, ldrCfg.StorDBPass, ldrCfg.DBDataEncoding,
-			config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns,
-			config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes); err != nil {
+		if storDb, err = engine.ConfigureLoadStorage(ldrCfg.StorDbCfg().StorDBType,
+			ldrCfg.StorDbCfg().StorDBHost, ldrCfg.StorDbCfg().StorDBPort,
+			ldrCfg.StorDbCfg().StorDBName, ldrCfg.StorDbCfg().StorDBUser,
+			ldrCfg.StorDbCfg().StorDBPass, ldrCfg.DBDataEncoding,
+			config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
+			config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
+			config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
+			config.CgrConfig().StorDbCfg().StorDBCDRSIndexes); err != nil {
 			log.Fatalf("Coud not open storDB connection: %s", err.Error())
 		}
 		defer storDb.Close()

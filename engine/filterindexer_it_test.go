@@ -82,13 +82,14 @@ func TestFilterIndexerITMongo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	mongoDB, err := NewMongoStorage(mgoITCfg.StorDBHost, mgoITCfg.StorDBPort,
-		mgoITCfg.StorDBName, mgoITCfg.StorDBUser, mgoITCfg.StorDBPass,
+	mongoDB, err := NewMongoStorage(mgoITCfg.StorDbCfg().StorDBHost,
+		mgoITCfg.StorDbCfg().StorDBPort, mgoITCfg.StorDbCfg().StorDBName,
+		mgoITCfg.StorDbCfg().StorDBUser, mgoITCfg.StorDbCfg().StorDBPass,
 		utils.StorDB, nil, mgoITCfg.CacheCfg())
 	if err != nil {
 		t.Fatal(err)
 	}
-	cfgDBName = mgoITCfg.StorDBName
+	cfgDBName = mgoITCfg.StorDbCfg().StorDBName
 	dataManager = NewDataManager(mongoDB)
 	for _, stest := range sTests {
 		t.Run("TestITMongo", stest)

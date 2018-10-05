@@ -79,23 +79,25 @@ func TestSessionCostITMySql(t *testing.T) {
 }
 
 func testSessionCostITConnect(t *testing.T) {
-	storDBIn, err := NewMigratorStorDB(sCostCfgIn.StorDBType, sCostCfgIn.StorDBHost,
-		sCostCfgIn.StorDBPort, sCostCfgIn.StorDBName,
-		sCostCfgIn.StorDBUser, sCostCfgIn.StorDBPass,
-		config.CgrConfig().StorDBMaxOpenConns,
-		config.CgrConfig().StorDBMaxIdleConns,
-		config.CgrConfig().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDBCDRSIndexes)
+	storDBIn, err := NewMigratorStorDB(sCostCfgIn.StorDbCfg().StorDBType,
+		sCostCfgIn.StorDbCfg().StorDBHost, sCostCfgIn.StorDbCfg().StorDBPort,
+		sCostCfgIn.StorDbCfg().StorDBName, sCostCfgIn.StorDbCfg().StorDBUser,
+		sCostCfgIn.StorDbCfg().StorDBPass,
+		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
+		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
+		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {
 		t.Error(err)
 	}
-	storDBOut, err := NewMigratorStorDB(sCostCfgOut.StorDBType,
-		sCostCfgOut.StorDBHost, sCostCfgOut.StorDBPort, sCostCfgOut.StorDBName,
-		sCostCfgOut.StorDBUser, sCostCfgOut.StorDBPass,
-		config.CgrConfig().StorDBMaxOpenConns,
-		config.CgrConfig().StorDBMaxIdleConns,
-		config.CgrConfig().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDBCDRSIndexes)
+	storDBOut, err := NewMigratorStorDB(sCostCfgOut.StorDbCfg().StorDBType,
+		sCostCfgOut.StorDbCfg().StorDBHost, sCostCfgOut.StorDbCfg().StorDBPort,
+		sCostCfgOut.StorDbCfg().StorDBName, sCostCfgOut.StorDbCfg().StorDBUser,
+		sCostCfgOut.StorDbCfg().StorDBPass,
+		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
+		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
+		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {
 		t.Error(err)
 	}
@@ -138,7 +140,7 @@ func testSessionCostITRename(t *testing.T) {
 
 func testSessionCostITFlush(t *testing.T) {
 	if err := sCostMigrator.storDBOut.StorDB().Flush(
-		path.Join(sCostCfgIn.DataFolderPath, "storage", sCostCfgIn.StorDBType)); err != nil {
+		path.Join(sCostCfgIn.DataFolderPath, "storage", sCostCfgIn.StorDbCfg().StorDBType)); err != nil {
 		t.Error(err)
 	}
 }
@@ -149,7 +151,7 @@ func testSessionCostITMigrate(t *testing.T) {
 		Cost:        1.23,
 		Destination: "0723045326",
 		Timespans: []*engine.TimeSpan{
-			&engine.TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				DurationIndex: 0,

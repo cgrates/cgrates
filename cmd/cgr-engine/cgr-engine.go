@@ -1180,9 +1180,12 @@ func main() {
 		}
 	}
 	if cfg.RALsEnabled || cfg.CDRSEnabled {
-		storDb, err := engine.ConfigureStorStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort,
-			cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding, cfg.StorDBMaxOpenConns,
-			cfg.StorDBMaxIdleConns, cfg.StorDBConnMaxLifetime, cfg.StorDBCDRSIndexes)
+		storDb, err := engine.ConfigureStorStorage(cfg.StorDbCfg().StorDBType,
+			cfg.StorDbCfg().StorDBHost, cfg.StorDbCfg().StorDBPort,
+			cfg.StorDbCfg().StorDBName, cfg.StorDbCfg().StorDBUser,
+			cfg.StorDbCfg().StorDBPass, cfg.DBDataEncoding,
+			cfg.StorDbCfg().StorDBMaxOpenConns, cfg.StorDbCfg().StorDBMaxIdleConns,
+			cfg.StorDbCfg().StorDBConnMaxLifetime, cfg.StorDbCfg().StorDBCDRSIndexes)
 		if err != nil { // Cannot configure logger database, show stopper
 			utils.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting!", err))
 			return
