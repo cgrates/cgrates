@@ -296,8 +296,7 @@ func (dP *diameterDP) FieldAsString(fldPath []string) (data string, err error) {
 	if err != nil {
 		return
 	}
-	data, _ = utils.CastFieldIfToString(valIface)
-	return
+	return utils.IfaceAsString(valIface)
 }
 
 // FieldAsInterface is part of engine.DataProvider interface

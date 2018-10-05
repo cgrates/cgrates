@@ -58,7 +58,6 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 				utils.HTTPAgent, err.Error()))
 		return
 	}
-	var processed bool
 	for _, reqProcessor := range ha.reqProcessors {
 		agReq := newAgentRequest(dcdr, nil, nil,
 			reqProcessor.Tenant, ha.dfltTenant,

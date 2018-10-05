@@ -124,8 +124,9 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		lclProcessed, err = da.processRequest(reqProcessor,
 			newAgentRequest(
 				newDADataProvider(m), reqVars, rply,
-				reqProcessor.Tenant,
-				da.cgrCfg.DefaultTenant, da.filterS))
+				reqProcessor.Tenant, da.cgrCfg.DefaultTenant,
+				utils.FirstNonEmpty(reqProcessor.Timezone, config.CgrConfig().DefaultTimezone),
+				da.filterS))
 		if lclProcessed {
 			processed = lclProcessed
 		}
@@ -196,14 +197,14 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 
 func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
 	agReq *AgentRequest) (processed bool, err error) {
-	if pass, err := da.filterS.Pass(agReq.Tenant,
+	if pass, err := da.filterS.Pass(agReq.tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
 	}
 	if agReq.CGRRequest, err = agReq.AsNavigableMap(reqProcessor.RequestFields); err != nil {
 		return
 	}
-	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)
+	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.tenant, utils.NestingSep)
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuth,
