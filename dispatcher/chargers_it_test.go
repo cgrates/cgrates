@@ -247,15 +247,12 @@ func testDspCppTestAuthKey2(t *testing.T) {
 	}
 	eChargers := &engine.ChargerProfiles{
 		&engine.ChargerProfile{
-			Tenant:    "cgrates.org",
-			ID:        "Charger1",
-			FilterIDs: []string{"*string:Account:1001"},
-			ActivationInterval: &utils.ActivationInterval{
-				ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
-			},
-			RunID:        "*rated",
-			AttributeIDs: []string{"ATTR_1001_SIMPLEAUTH"},
-			Weight:       20,
+			Tenant:       "cgrates.org",
+			ID:           "DEFAULT",
+			FilterIDs:    []string{},
+			RunID:        "*default",
+			AttributeIDs: []string{"*none"},
+			Weight:       0,
 		},
 	}
 	var reply *engine.ChargerProfiles
