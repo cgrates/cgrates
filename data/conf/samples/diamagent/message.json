@@ -1,0 +1,37 @@
+{
+
+"diameter_agent": {
+	"request_processors": [
+
+		{
+			"id": "message",
+			"filters": ["*string:*vars.*cmd:CCR", "*prefix:*req.Service-Context-Id:message",
+				"*string:*req.CC-Request-Type:4"],
+			"flags": ["*event", "*accounts", "*cdrs"],
+			"request_fields":[
+				{"tag": "TOR", "field_id": "ToR", "type": "*constant", "value": "*sms"},
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 
+					"value": "~*req.Session-Id", "mandatory": true},
+				{"tag": "Category", "field_id": "Category", "type": "*constant", "value": "sms"},
+				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", "value": "*prepaid"},
+				{"tag": "Account", "field_id": "Account", "type": "*composed", "mandatory": true, 
+					"value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]"},
+				{"tag": "Destination", "field_id": "Destination", "type": "*composed", "mandatory": true, 
+					"value": "~*req.Service-Information.SMS-Information.Recipient-Address.Address-Data"},
+				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", 
+					"value": "~*req.Event-Timestamp", "mandatory": true},
+				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", 
+					"value": "~*req.Event-Timestamp", "mandatory": true},
+				{"tag": "Usage", "field_id": "Usage", "type": "*composed", 
+					"value": "~*req.Requested-Service-Unit.CC-Time", "mandatory": true},
+			],
+			"reply_fields":[
+				{"tag": "ResultCode",  "filters": ["*rsr::~*cgrep.Error(!^$)"], 
+					"field_id": "Result-Code", "type": "*constant", "value": "5030", "blocker": true},
+			],
+		},
+		
+	],
+},
+
+}

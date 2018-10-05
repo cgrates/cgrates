@@ -80,17 +80,17 @@ func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) (err error) {
 		self.CostMultiplyFactor = *jsnCfg.Cost_multiply_factor
 	}
 	if jsnCfg.Header_fields != nil {
-		if self.HeaderFields, err = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Header_fields); err != nil {
+		if self.HeaderFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Header_fields); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Content_fields != nil {
-		if self.ContentFields, err = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Content_fields); err != nil {
+		if self.ContentFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Content_fields); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Trailer_fields != nil {
-		if self.TrailerFields, err = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Trailer_fields); err != nil {
+		if self.TrailerFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Trailer_fields); err != nil {
 			return err
 		}
 	}

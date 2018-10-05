@@ -162,7 +162,7 @@ func TestSessionsNewV1ProcessEventArgs(t *testing.T) {
 		GetAttributes:     true,
 		CGREvent:          cgrEv,
 	}
-	rply := NewV1ProcessEventArgs(true, true, true, cgrEv)
+	rply := NewV1ProcessEventArgs(true, true, true, false, false, cgrEv)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -171,7 +171,7 @@ func TestSessionsNewV1ProcessEventArgs(t *testing.T) {
 		GetAttributes:     true,
 		CGREvent:          cgrEv,
 	}
-	rply = NewV1ProcessEventArgs(true, false, true, cgrEv)
+	rply = NewV1ProcessEventArgs(true, false, true, false, false, cgrEv)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}

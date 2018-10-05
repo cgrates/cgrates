@@ -201,13 +201,14 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 			}
 			rply.AlteredFields = append(rply.AlteredFields, fldName)
 		}
-		for _, valIface := range rply.CGREvent.Event {
-			if valIface == interface{}(utils.MetaAttributes) {
-				return nil, utils.NewCGRError(utils.AttributeSv1ProcessEvent,
-					utils.AttributesNotFoundCaps,
-					utils.AttributesNotFound,
-					utils.AttributesNotFound)
-			}
+	}
+	for _, valIface := range rply.CGREvent.Event {
+		if valIface == interface{}(utils.MetaAttributes) {
+			return nil, utils.NewCGRError(
+				utils.AttributeSv1ProcessEvent,
+				utils.AttributesNotFound,
+				utils.AttributesNotFound,
+				utils.AttributesNotFound)
 		}
 	}
 	return

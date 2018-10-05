@@ -595,29 +595,57 @@ func TestAsteriskAgentJsonCfg(t *testing.T) {
 
 func TestDiameterAgentJsonCfg(t *testing.T) {
 	eCfg := &DiameterAgentJsonCfg{
-		Enabled:          utils.BoolPointer(false),
-		Listen:           utils.StringPointer("127.0.0.1:3868"),
-		Dictionaries_dir: utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
+		Enabled:           utils.BoolPointer(false),
+		Listen:            utils.StringPointer("127.0.0.1:3868"),
+		Dictionaries_path: utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
 		Sessions_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
-		Pubsubs_conns:        &[]*HaPoolJsonCfg{},
-		Create_cdr:           utils.BoolPointer(true),
-		Cdr_requires_session: utils.BoolPointer(true),
-		Debit_interval:       utils.StringPointer("5m"),
-		Timezone:             utils.StringPointer(""),
-		Origin_host:          utils.StringPointer("CGR-DA"),
-		Origin_realm:         utils.StringPointer("cgrates.org"),
-		Vendor_id:            utils.IntPointer(0),
-		Product_name:         utils.StringPointer("CGRateS"),
-		Request_processors:   &[]*DARequestProcessorJsnCfg{},
+		Origin_host:  utils.StringPointer("CGR-DA"),
+		Origin_realm: utils.StringPointer("cgrates.org"),
+		Vendor_id:    utils.IntPointer(0),
+		Product_name: utils.StringPointer("CGRateS"),
+		Templates: map[string][]*FcTemplateJsonCfg{
+			utils.MetaCCA: {
+				{Tag: utils.StringPointer("SessionId"),
+					Field_id:  utils.StringPointer("Session-Id"),
+					Type:      utils.StringPointer(utils.META_COMPOSED),
+					Value:     utils.StringPointer("~*req.Session-Id"),
+					Mandatory: utils.BoolPointer(true)},
+				{Tag: utils.StringPointer("OriginHost"),
+					Field_id:  utils.StringPointer("Origin-Host"),
+					Type:      utils.StringPointer(utils.META_COMPOSED),
+					Value:     utils.StringPointer("~*vars.OriginHost"),
+					Mandatory: utils.BoolPointer(true)},
+				{Tag: utils.StringPointer("OriginRealm"),
+					Field_id:  utils.StringPointer("Origin-Realm"),
+					Type:      utils.StringPointer(utils.META_COMPOSED),
+					Value:     utils.StringPointer("~*vars.OriginRealm"),
+					Mandatory: utils.BoolPointer(true)},
+				{Tag: utils.StringPointer("AuthApplicationId"),
+					Field_id:  utils.StringPointer("Auth-Application-Id"),
+					Type:      utils.StringPointer(utils.META_COMPOSED),
+					Value:     utils.StringPointer("~*vars.*appid"),
+					Mandatory: utils.BoolPointer(true)},
+				{Tag: utils.StringPointer("CCRequestType"),
+					Field_id:  utils.StringPointer("CC-Request-Type"),
+					Type:      utils.StringPointer(utils.META_COMPOSED),
+					Value:     utils.StringPointer("~*req.CC-Request-Type"),
+					Mandatory: utils.BoolPointer(true)},
+				{Tag: utils.StringPointer("CCRequestNumber"),
+					Field_id:  utils.StringPointer("CC-Request-Number"),
+					Type:      utils.StringPointer(utils.META_COMPOSED),
+					Value:     utils.StringPointer("~*req.CC-Request-Number"),
+					Mandatory: utils.BoolPointer(true)},
+			},
+		},
+		Request_processors: &[]*DARequestProcessorJsnCfg{},
 	}
 	if cfg, err := dfCgrJsonCfg.DiameterAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		rcv := *cfg.Request_processors
-		t.Errorf("Received: %+v", rcv[0].CCA_fields)
+		t.Errorf("Received: %+v", cfg)
 	}
 }
 
@@ -637,8 +665,7 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 			&HaPoolJsonCfg{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
-		Cdr_requires_session: utils.BoolPointer(false),
-		Request_processors:   &[]*RAReqProcessorJsnCfg{},
+		Request_processors: &[]*RAReqProcessorJsnCfg{},
 	}
 	if cfg, err := dfCgrJsonCfg.RadiusAgentJsonCfg(); err != nil {
 		t.Error(err)

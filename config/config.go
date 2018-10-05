@@ -635,12 +635,8 @@ func (self *CGRConfig) checkConfigSanity() error {
 	if self.diameterAgentCfg.Enabled {
 		for _, daSMGConn := range self.diameterAgentCfg.SessionSConns {
 			if daSMGConn.Address == utils.MetaInternal && !self.sessionSCfg.Enabled {
-				return errors.New("SMGeneric not enabled but referenced by DiameterAgent component")
-			}
-		}
-		for _, daPubSubSConn := range self.diameterAgentCfg.PubSubConns {
-			if daPubSubSConn.Address == utils.MetaInternal && !self.PubSubServerEnabled {
-				return errors.New("PubSubS not enabled but requested by DiameterAgent component.")
+				return fmt.Errorf("%s not enabled but referenced by %s component",
+					utils.SessionS, utils.DiameterAgent)
 			}
 		}
 	}

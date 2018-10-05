@@ -42,6 +42,7 @@ var (
 	haCfg     *config.CGRConfig
 	haRPC     *rpc.Client
 	httpC     *http.Client // so we can cache the connection
+	err       error
 )
 
 func TestHAitInitCfg(t *testing.T) {

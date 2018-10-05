@@ -83,7 +83,8 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 	rpl.Code = radigo.AccessAccept
 	var processed bool
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
-		agReq := newAgentRequest(dcdr, reqProcessor.Tenant, ra.cgrCfg.DefaultTenant,
+		agReq := newAgentRequest(dcdr, nil, nil,
+			reqProcessor.Tenant, ra.cgrCfg.DefaultTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone, config.CgrConfig().DefaultTimezone),
 			ra.filterS)
 		agReq.Vars.Set([]string{MetaRadReqType}, utils.StringToInterface(MetaRadAuth), true)
@@ -123,7 +124,8 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 	rpl.Code = radigo.AccountingResponse
 	var processed bool
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
-		agReq := newAgentRequest(dcdr, reqProcessor.Tenant, ra.cgrCfg.DefaultTenant,
+		agReq := newAgentRequest(dcdr, nil, nil,
+			reqProcessor.Tenant, ra.cgrCfg.DefaultTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone, config.CgrConfig().DefaultTimezone),
 			ra.filterS)
 		var lclProcessed bool
@@ -231,7 +233,10 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 		evArgs := sessions.NewV1ProcessEventArgs(
 			reqProcessor.Flags.HasKey(utils.MetaResources),
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
-			reqProcessor.Flags.HasKey(utils.MetaAttributes), *cgrEv)
+			reqProcessor.Flags.HasKey(utils.MetaAttributes),
+			reqProcessor.Flags.HasKey(utils.MetaThresholds),
+			reqProcessor.Flags.HasKey(utils.MetaStats),
+			*cgrEv)
 		var eventRply sessions.V1ProcessEventReply
 		err = ra.sessionS.Call(utils.SessionSv1ProcessEvent,
 			evArgs, &eventRply)

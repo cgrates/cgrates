@@ -311,6 +311,7 @@ const (
 	HIERARCHY_SEP                = ">"
 	META_COMPOSED                = "*composed"
 	META_USAGE_DIFFERENCE        = "*usage_difference"
+	MetaCCUsage                  = "*cc_usage"
 	MetaString                   = "*string"
 	NegativePrefix               = "!"
 	MatchStartPrefix             = "^"
@@ -519,6 +520,14 @@ const (
 	DynamicDataPrefix            = "~"
 	AttrValueSep                 = "="
 	ANDSep                       = "&"
+	PipeSep                      = "|"
+	MetaApp                      = "*app"
+	MetaAppID                    = "*appid"
+	MetaCmd                      = "*cmd"
+	MetaTemplate                 = "*template"
+	MetaCCA                      = "*cca"
+	OriginRealm                  = "OriginRealm"
+	ProductName                  = "ProductName"
 )
 
 // Migrator Action

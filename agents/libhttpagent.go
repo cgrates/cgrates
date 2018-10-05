@@ -69,11 +69,14 @@ func (hU *httpUrlDP) FieldAsInterface(fldPath []string) (data interface{}, err e
 	if len(fldPath) != 1 {
 		return nil, utils.ErrNotFound
 	}
-	if data, err = hU.cache.FieldAsInterface(fldPath); err == nil ||
-		err != utils.ErrNotFound { // item found in cache
-		return
+	if data, err = hU.cache.FieldAsInterface(fldPath); err != nil {
+		if err != utils.ErrNotFound { // item found in cache
+			return
+		}
+		err = nil // cancel previous err
+	} else {
+		return // data found in cache
 	}
-	err = nil // cancel previous err
 	data = hU.req.FormValue(fldPath[0])
 	hU.cache.Set(fldPath, data, false)
 	return

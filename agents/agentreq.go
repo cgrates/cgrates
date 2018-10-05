@@ -20,21 +20,30 @@ package agents
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func newAgentRequest(req config.DataProvider, tntTpl config.RSRParsers,
-	dfltTenant, timezone string, filterS *engine.FilterS) (ar *AgentRequest) {
+func newAgentRequest(req config.DataProvider,
+	vars map[string]interface{},
+	rply *config.NavigableMap,
+	tntTpl config.RSRParsers,
+	dfltTenant, timezone string,
+	filterS *engine.FilterS) (ar *AgentRequest) {
+	if rply == nil {
+		rply = config.NewNavigableMap(nil)
+	}
 	ar = &AgentRequest{
 		Request:    req,
-		Vars:       config.NewNavigableMap(nil),
+		Vars:       config.NewNavigableMap(vars),
 		CGRRequest: config.NewNavigableMap(nil),
 		CGRReply:   config.NewNavigableMap(nil),
-		Reply:      config.NewNavigableMap(nil),
+		Reply:      rply,
 		timezone:   timezone,
 		filterS:    filterS,
 	}
@@ -88,20 +97,11 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 
 // FieldAsString implements engine.DataProvider
 func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) {
-	switch fldPath[0] {
-	default:
-		return "", fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
-	case utils.MetaReq:
-		return ar.Request.FieldAsString(fldPath[1:])
-	case utils.MetaVars:
-		return ar.Vars.FieldAsString(fldPath[1:])
-	case utils.MetaCgreq:
-		return ar.CGRRequest.FieldAsString(fldPath[1:])
-	case utils.MetaCgrep:
-		return ar.CGRReply.FieldAsString(fldPath[1:])
-	case utils.MetaRep:
-		return ar.Reply.FieldAsString(fldPath[1:])
+	var iface interface{}
+	if iface, err = ar.FieldAsInterface(fldPath); err != nil {
+		return
 	}
+	return utils.IfaceAsString(iface)
 }
 
 // AsNavigableMap implements engine.DataProvider
@@ -176,6 +176,44 @@ func (aReq *AgentRequest) ParseField(
 		}
 		out = tEnd.Sub(tStart).String()
 		isString = true
+	case utils.MetaCCUsage:
+		if len(cfgFld.Value) != 3 {
+			return nil, fmt.Errorf("invalid arguments <%s> to %s",
+				utils.ToJSON(cfgFld.Value), utils.MetaCCUsage)
+		}
+		strVal1, err := cfgFld.Value[0].ParseDataProvider(aReq, utils.NestingSep) // ReqNr
+		if err != nil {
+			return "", err
+		}
+		reqNr, err := strconv.ParseInt(strVal1, 10, 64)
+		if err != nil {
+			return "", fmt.Errorf("invalid requestNumber <%s> to %s",
+				strVal1, utils.MetaCCUsage)
+		}
+		strVal2, err := cfgFld.Value[1].ParseDataProvider(aReq, utils.NestingSep) // TotalUsage
+		if err != nil {
+			return "", err
+		}
+		usedCCTime, err := utils.ParseDurationWithNanosecs(strVal2)
+		if err != nil {
+			return "", fmt.Errorf("invalid usedCCTime <%s> to %s",
+				strVal2, utils.MetaCCUsage)
+		}
+		strVal3, err := cfgFld.Value[2].ParseDataProvider(aReq, utils.NestingSep) // DebitInterval
+		if err != nil {
+			return "", err
+		}
+		debitItvl, err := utils.ParseDurationWithNanosecs(strVal3)
+		if err != nil {
+			return "", fmt.Errorf("invalid debitInterval <%s> to %s",
+				strVal3, utils.MetaCCUsage)
+		}
+		mltpl := reqNr - 2 // init and terminate will be ignored
+		if mltpl < 0 {
+			mltpl = 0
+		}
+		return usedCCTime + time.Duration(debitItvl.Nanoseconds()*mltpl), nil
+
 	}
 	if err != nil {
 		return

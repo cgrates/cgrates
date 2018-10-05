@@ -69,7 +69,7 @@ func (self *LoaderDataType) loadFromJsonCfg(jsnCfg *LoaderJsonDataType) (err err
 		self.Filename = *jsnCfg.File_name
 	}
 	if jsnCfg.Fields != nil {
-		if self.Fields, err = FCTemplatesFromFCTemapltesJsonCfg(*jsnCfg.Fields); err != nil {
+		if self.Fields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Fields); err != nil {
 			return
 		}
 	}

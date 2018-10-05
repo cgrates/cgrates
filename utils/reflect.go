@@ -21,6 +21,7 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"net"
 	"reflect"
 	"strconv"
 	"time"
@@ -202,10 +203,18 @@ func IfaceAsString(fld interface{}) (out string, err error) {
 		return
 	case int:
 		return strconv.Itoa(fld.(int)), nil
+	case int32:
+		return strconv.FormatInt(int64(fld.(int32)), 10), nil
 	case int64:
 		return strconv.FormatInt(fld.(int64), 10), nil
+	case uint32:
+		return strconv.FormatUint(uint64(fld.(uint32)), 10), nil
+	case uint64:
+		return strconv.FormatUint(fld.(uint64), 10), nil
 	case bool:
 		return strconv.FormatBool(fld.(bool)), nil
+	case float32:
+		return strconv.FormatFloat(float64(fld.(float32)), 'f', -1, 64), nil
 	case float64:
 		return strconv.FormatFloat(fld.(float64), 'f', -1, 64), nil
 	case []uint8:
@@ -218,6 +227,8 @@ func IfaceAsString(fld interface{}) (out string, err error) {
 		return fld.(time.Duration).String(), nil
 	case time.Time:
 		return fld.(time.Time).Format(time.RFC3339), nil
+	case net.IP:
+		return fld.(net.IP).String(), nil
 	case string:
 		return fld.(string), nil
 	default: // Maybe we are lucky and the value converts to string
