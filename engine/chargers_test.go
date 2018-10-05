@@ -105,7 +105,7 @@ func TestChargerPopulateChargerService(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	chargerSrv, err = NewChargerService(dmCharger,
-		&FilterS{dm: dmAtr, cfg: defaultCfg}, nil, defaultCfg)
+		&FilterS{dm: dmCharger, cfg: defaultCfg}, nil, defaultCfg)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -176,7 +176,7 @@ func TestChargerSetChargerProfiles(t *testing.T) {
 	//verify each charger from cache
 	for _, cp := range cPPs {
 		if tempCp, err := dmCharger.GetChargerProfile(cp.Tenant, cp.ID,
-			true, true, utils.NonTransactional); err != nil {
+			true, false, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(cp, tempCp) {
 			t.Errorf("Expecting: %+v, received: %+v", cp, tempCp)
@@ -190,19 +190,15 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 
-	rcv, err := chargerSrv.matchingChargerProfilesForEvent(chargerEvents[0])
-	if err != nil {
+	if rcv, err := chargerSrv.matchingChargerProfilesForEvent(chargerEvents[0]); err != nil {
 		t.Errorf("Error: %+v", err)
-	}
-	if !reflect.DeepEqual(cPPs[0], rcv[0]) {
+	} else if !reflect.DeepEqual(cPPs[0], rcv[0]) {
 		t.Errorf("Expecting: %+v, received: %+v ", cPPs[0], rcv[0])
 	}
 
-	rcv, err = chargerSrv.matchingChargerProfilesForEvent(chargerEvents[1])
-	if err != nil {
+	if rcv, err := chargerSrv.matchingChargerProfilesForEvent(chargerEvents[1]); err != nil {
 		t.Errorf("Error: %+v", err)
-	}
-	if !reflect.DeepEqual(cPPs[1], rcv[0]) {
+	} else if !reflect.DeepEqual(cPPs[1], rcv[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(cPPs[1]), utils.ToJSON(rcv))
 	}
 

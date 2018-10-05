@@ -258,7 +258,7 @@ func testStsITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", sqp, result)
 		}
 
-		result1, err := stsMigrator.dmOut.DataManager().DataDB().GetFilterDrv("cgrates.org", v1Sts.Id)
+		result1, err := stsMigrator.dmOut.DataManager().GetFilter("cgrates.org", v1Sts.Id, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Error("Error when getting Stats ", err.Error())
 		}
@@ -277,11 +277,14 @@ func testStsITMigrateAndMove(t *testing.T) {
 		}
 
 	case utils.Move:
-		if err := stsMigrator.dmIN.DataManager().DataDB().SetStatQueueProfileDrv(sqp); err != nil {
+		if err := stsMigrator.dmIN.DataManager().SetStatQueueProfile(sqp, false); err != nil {
 			t.Error("Error when setting Stats ", err.Error())
 		}
 		if err := stsMigrator.dmIN.DataManager().SetStatQueue(sq); err != nil {
 			t.Error("Error when setting Stats ", err.Error())
+		}
+		if err := stsMigrator.dmOut.DataManager().SetFilter(filter); err != nil {
+			t.Error("Error when setting Filter ", err.Error())
 		}
 		currentVersion := engine.CurrentDataDBVersions()
 		err := stsMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)

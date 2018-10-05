@@ -85,7 +85,7 @@ func (fS *FilterS) Pass(tenant string, filterIDs []string,
 	}
 	for _, fltrID := range filterIDs {
 		f, err := fS.dm.GetFilter(tenant, fltrID,
-			false, utils.NonTransactional)
+			true, true, utils.NonTransactional)
 		if err != nil {
 			return false, err
 		}
