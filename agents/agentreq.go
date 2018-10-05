@@ -204,7 +204,11 @@ func (aReq *AgentRequest) ParseField(
 			return "", fmt.Errorf("invalid debitInterval <%s> to %s",
 				strVal3, utils.MetaCCUsage)
 		}
-		return usedCCTime + time.Duration(debitItvl.Nanoseconds()*reqNr), nil
+		mltpl := reqNr - 2 // init and terminate will be ignored
+		if mltpl < 0 {
+			mltpl = 0
+		}
+		return usedCCTime + time.Duration(debitItvl.Nanoseconds()*mltpl), nil
 
 	}
 	if err != nil {
