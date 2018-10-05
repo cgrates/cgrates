@@ -271,7 +271,7 @@ func TestSessionSv1ItInitiateSession(t *testing.T) {
 			utils.MONETARY: []*engine.Balance{
 				&engine.Balance{
 					//Uuid:  "c9a2c620-5256-483a-a92d-c51e94bb7667",
-					Value: 29.949000,
+					Value: 29.898000,
 					Directions: utils.StringMap{
 						"*out": true},
 					Weight: 10,
@@ -331,7 +331,7 @@ func TestSessionSv1ItTerminateSession(t *testing.T) {
 			utils.MONETARY: []*engine.Balance{
 				&engine.Balance{
 					//Uuid:  "c9a2c620-5256-483a-a92d-c51e94bb7667",
-					Value: 39.898000,
+					Value: 39.796000,
 					Directions: utils.StringMap{
 						"*out": true},
 					Weight: 10,

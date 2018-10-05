@@ -36,7 +36,7 @@ func (m *Migrator) migrateCurrentRequestFilter() (err error) {
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.FilterPrefix+tenant+":")
-		fl, err := m.dmIN.DataManager().GetFilter(tenant, idg, true, utils.NonTransactional)
+		fl, err := m.dmIN.DataManager().GetFilter(tenant, idg, false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}

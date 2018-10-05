@@ -391,6 +391,7 @@ func testDspSessionUpdate(t *testing.T) {
 				utils.SetupTime:   "2018-01-07T17:00:00Z",
 				utils.AnswerTime:  "2018-01-07T17:00:10Z",
 				utils.Usage:       300000000000.0,
+				"CGRID":           "5668666d6b8e44eb949042f25ce0796ec3592ff9",
 			},
 		},
 	}

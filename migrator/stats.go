@@ -71,6 +71,7 @@ func (m *Migrator) migrateCurrentStats() (err error) {
 		idg := strings.TrimPrefix(id, utils.StatQueuePrefix+tenant+":")
 		sgs, err := m.dmIN.DataManager().GetStatQueue(tenant, idg, false, false, utils.NonTransactional)
 		if err != nil {
+
 			return err
 		}
 		if sgs != nil {
