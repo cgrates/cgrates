@@ -30,24 +30,20 @@ import (
 )
 
 // NewHttpAgent will construct a HTTPAgent
-func NewHTTPAgent(
-	sessionS rpcclient.RpcClientConnection,
-	filterS *engine.FilterS, tenantCfg config.RSRParsers,
-	dfltTenant, timezone, reqPayload, rplyPayload string,
+func NewHTTPAgent(sessionS rpcclient.RpcClientConnection,
+	filterS *engine.FilterS, dfltTenant, reqPayload, rplyPayload string,
 	reqProcessors []*config.HttpAgntProcCfg) *HTTPAgent {
 	return &HTTPAgent{sessionS: sessionS, filterS: filterS,
-		dfltTenant: dfltTenant, timezone: timezone,
+		dfltTenant: dfltTenant,
 		reqPayload: reqPayload, rplyPayload: rplyPayload,
 		reqProcessors: reqProcessors}
 }
 
 // HTTPAgent is a handler for HTTP requests
 type HTTPAgent struct {
-	sessionS  rpcclient.RpcClientConnection
-	filterS   *engine.FilterS
-	tenantCfg config.RSRParsers
+	sessionS rpcclient.RpcClientConnection
+	filterS  *engine.FilterS
 	dfltTenant,
-	timezone,
 	reqPayload,
 	rplyPayload string
 	reqProcessors []*config.HttpAgntProcCfg
@@ -62,55 +58,52 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 				utils.HTTPAgent, err.Error()))
 		return
 	}
-	agReq := newAgentRequest(dcdr, nil, nil, ha.tenantCfg, ha.dfltTenant, ha.filterS)
 	var processed bool
 	for _, reqProcessor := range ha.reqProcessors {
-		var lclProcessed bool
-		if lclProcessed, err = ha.processRequest(reqProcessor, agReq); lclProcessed {
-			processed = lclProcessed
+		agReq := newAgentRequest(dcdr, nil, nil,
+			reqProcessor.Tenant, ha.dfltTenant,
+			utils.FirstNonEmpty(reqProcessor.Timezone, config.CgrConfig().DefaultTimezone),
+			ha.filterS)
+		lclProcessed, err := ha.processRequest(reqProcessor, agReq)
+		if err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing request: %s",
+					utils.HTTPAgent, err.Error(), utils.ToJSON(agReq)))
+			return // FixMe with returning some error on HTTP level
 		}
-		if err != nil ||
-			(lclProcessed && !reqProcessor.ContinueOnSuccess) {
+		if !lclProcessed {
+			continue
+		}
+		encdr, err := newHAReplyEncoder(ha.rplyPayload, w)
+		if err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error creating reply encoder: %s",
+					utils.HTTPAgent, err.Error()))
+			return
+		}
+		if err = encdr.Encode(agReq.Reply); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s encoding out %s",
+					utils.HTTPAgent, err.Error(), utils.ToJSON(agReq.Reply)))
+			return
+		}
+		if lclProcessed && !reqProcessor.ContinueOnSuccess {
 			break
 		}
-	}
-	if err != nil {
-		utils.Logger.Warning(
-			fmt.Sprintf("<%s> error: %s processing request: %s",
-				utils.HTTPAgent, err.Error(), utils.ToJSON(agReq)))
-		return // FixMe with returning some error on HTTP level
-	} else if !processed {
-		utils.Logger.Warning(
-			fmt.Sprintf("<%s> no request processor enabled, ignoring request %s",
-				utils.HTTPAgent, utils.ToJSON(req)))
-		return // FixMe with returning some error on HTTP level
-	}
-	encdr, err := newHAReplyEncoder(ha.rplyPayload, w)
-	if err != nil {
-		utils.Logger.Warning(
-			fmt.Sprintf("<%s> error creating reply encoder: %s",
-				utils.HTTPAgent, err.Error()))
-		return
-	}
-	if err = encdr.Encode(agReq.Reply); err != nil {
-		utils.Logger.Warning(
-			fmt.Sprintf("<%s> error: %s encoding out %s",
-				utils.HTTPAgent, err.Error(), utils.ToJSON(agReq.Reply)))
-		return
 	}
 }
 
 // processRequest represents one processor processing the request
 func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 	agReq *AgentRequest) (processed bool, err error) {
-	if pass, err := ha.filterS.Pass(agReq.Tenant,
+	if pass, err := ha.filterS.Pass(agReq.tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
 	}
 	if agReq.CGRRequest, err = agReq.AsNavigableMap(reqProcessor.RequestFields); err != nil {
 		return
 	}
-	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)
+	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.tenant, utils.NestingSep)
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuth,

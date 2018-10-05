@@ -26,8 +26,6 @@ type HttpAgentCfg struct {
 	ID                string // identifier for the agent, so we can update it's processors
 	Url               string
 	SessionSConns     []*HaPoolConfig
-	Tenant            RSRParsers
-	Timezone          string
 	RequestPayload    string
 	ReplyPayload      string
 	RequestProcessors []*HttpAgntProcCfg
@@ -49,14 +47,6 @@ func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg) (err error) {
 			ca.SessionSConns[idx] = NewDfltHaPoolConfig()
 			ca.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
-	}
-	if jsnCfg.Tenant != nil {
-		if ca.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Timezone != nil {
-		ca.Timezone = *jsnCfg.Timezone
 	}
 	if jsnCfg.Request_payload != nil {
 		ca.RequestPayload = *jsnCfg.Request_payload
@@ -89,6 +79,8 @@ func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg) (err error) {
 type HttpAgntProcCfg struct {
 	Id                string
 	Filters           []string
+	Tenant            RSRParsers
+	Timezone          string
 	Flags             utils.StringMap
 	ContinueOnSuccess bool
 	RequestFields     []*FCTemplate
@@ -107,6 +99,14 @@ func (ha *HttpAgntProcCfg) loadFromJsonCfg(jsnCfg *HttpAgentProcessorJsnCfg) (er
 		for i, fltr := range *jsnCfg.Filters {
 			ha.Filters[i] = fltr
 		}
+	}
+	if jsnCfg.Tenant != nil {
+		if ha.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.Timezone != nil {
+		ha.Timezone = *jsnCfg.Timezone
 	}
 	if jsnCfg.Flags != nil {
 		ha.Flags = utils.StringMapFromSlice(*jsnCfg.Flags)

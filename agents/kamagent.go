@@ -54,12 +54,12 @@ type KamailioAgent struct {
 func (self *KamailioAgent) Connect() error {
 	var err error
 	eventHandlers := map[*regexp.Regexp][]func([]byte, string){
-		regexp.MustCompile(CGR_AUTH_REQUEST): []func([]byte, string){
+		regexp.MustCompile(CGR_AUTH_REQUEST): {
 			self.onCgrAuth},
-		regexp.MustCompile(CGR_CALL_START): []func([]byte, string){
+		regexp.MustCompile(CGR_CALL_START): {
 			self.onCallStart},
-		regexp.MustCompile(CGR_CALL_END): []func([]byte, string){self.onCallEnd},
-		regexp.MustCompile(CGR_DLG_LIST): []func([]byte, string){self.onDlgList},
+		regexp.MustCompile(CGR_CALL_END): {self.onCallEnd},
+		regexp.MustCompile(CGR_DLG_LIST): {self.onDlgList},
 	}
 	errChan := make(chan error)
 	for _, connCfg := range self.cfg.EvapiConns {
@@ -235,9 +235,18 @@ func (self *KamailioAgent) disconnectSession(connID string, dscEv *KamSessionDis
 
 // Internal method to disconnect session in Kamailio
 func (ka *KamailioAgent) V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) (err error) {
-	hEntry, _ := utils.CastFieldIfToString(args.EventStart[KamHashEntry])
-	hID, _ := utils.CastFieldIfToString(args.EventStart[KamHashID])
-	connID, _ := utils.CastFieldIfToString(args.EventStart[EvapiConnID])
+	hEntry, err := utils.IfaceAsString(args.EventStart[KamHashEntry])
+	if err != nil {
+		return err
+	}
+	hID, err := utils.IfaceAsString(args.EventStart[KamHashID])
+	if err != nil {
+		return err
+	}
+	connID, err := utils.IfaceAsString(args.EventStart[EvapiConnID])
+	if err != nil {
+		return err
+	}
 	if err = ka.disconnectSession(connID,
 		NewKamSessionDisconnect(hEntry, hID,
 			utils.ErrInsufficientCredit.Error())); err != nil {

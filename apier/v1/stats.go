@@ -29,7 +29,7 @@ func (apierV1 *ApierV1) GetStatQueueProfile(arg *utils.TenantID, reply *engine.S
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if sCfg, err := apierV1.DataManager.GetStatQueueProfile(arg.Tenant, arg.ID,
-		false, utils.NonTransactional); err != nil {
+		true, true, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	} else {
 		*reply = *sCfg

@@ -28,7 +28,7 @@ func (apierV1 *ApierV1) GetChargerProfile(arg utils.TenantID, reply *engine.Char
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if cpp, err := apierV1.DataManager.GetChargerProfile(arg.Tenant, arg.ID, false, utils.NonTransactional); err != nil {
+	if cpp, err := apierV1.DataManager.GetChargerProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}

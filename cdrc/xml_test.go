@@ -19,13 +19,13 @@ package cdrc
 
 import (
 	"bytes"
-	"io"
 	"path"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
-	"github.com/beevik/etree"
+	"github.com/antchfx/xmlquery"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -167,15 +167,11 @@ var cdrXmlBroadsoft = `<?xml version="1.0" encoding="ISO-8859-1"?>
 </broadWorksCDR>`
 
 func TestXMLElementText(t *testing.T) {
-	doc := etree.NewDocument()
-	doc.ReadSettings.CharsetReader = func(label string, input io.Reader) (io.Reader, error) {
-		return input, nil
-	}
-	if err := doc.ReadFromBytes([]byte(cdrXmlBroadsoft)); err != nil {
+	doc, err := xmlquery.Parse(strings.NewReader(cdrXmlBroadsoft))
+	if err != nil {
 		t.Error(err)
 	}
-
-	cdrs := doc.FindElements(path.Join("/broadWorksCDR/cdrData/"))
+	cdrs := xmlquery.Find(doc, path.Join("/broadWorksCDR/cdrData/"))
 	cdrWithoutUserNr := cdrs[0]
 	if _, err := elementText(cdrWithoutUserNr, "basicModule/userNumber"); err != utils.ErrNotFound {
 		t.Error(err)
@@ -194,15 +190,12 @@ func TestXMLElementText(t *testing.T) {
 }
 
 func TestXMLHandlerSubstractUsage(t *testing.T) {
-	doc := etree.NewDocument()
-	doc.ReadSettings.CharsetReader = func(label string, input io.Reader) (io.Reader, error) {
-		return input, nil
-	}
-	if err := doc.ReadFromBytes([]byte(cdrXmlBroadsoft)); err != nil {
+	doc, err := xmlquery.Parse(strings.NewReader(cdrXmlBroadsoft))
+	if err != nil {
 		t.Error(err)
 	}
 
-	cdrs := doc.FindElements(path.Join("/broadWorksCDR/cdrData/"))
+	cdrs := xmlquery.Find(doc, path.Join("/broadWorksCDR/cdrData/"))
 	cdrWithUsage := cdrs[1]
 	if usage, err := handlerSubstractUsage(cdrWithUsage,
 		config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.releaseTime;|;~broadWorksCDR.cdrData.basicModule.answerTime", true),
@@ -516,12 +509,12 @@ var xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 `
 
 func TestXMLElementText3(t *testing.T) {
-	doc := etree.NewDocument()
-	if err := doc.ReadFromString(xmlContent); err != nil {
+	doc, err := xmlquery.Parse(strings.NewReader(xmlContent))
+	if err != nil {
 		t.Error(err)
 	}
 	hPath2 := utils.ParseHierarchyPath("File.CDRs.Call", "")
-	cdrs := doc.Root().FindElements(hPath2.AsString("/", true))
+	cdrs := xmlquery.Find(doc, hPath2.AsString("/", true))
 	if len(cdrs) != 3 {
 		t.Errorf("Expecting: 3, received: %+v", len(cdrs))
 	}
@@ -530,11 +523,7 @@ func TestXMLElementText3(t *testing.T) {
 		t.Error(err)
 	}
 
-	absolutePath := utils.ParseHierarchyPath("File.CDRs.Call.SignalingInfo.PChargingVector.icidvalue", "")
-	hPath := utils.ParseHierarchyPath(cdrs[1].GetPath(), "")
-	relPath := utils.HierarchyPath(absolutePath[len(hPath):]) // Need relative path to the xmlElmnt
-
-	if val, err := elementText(cdrs[1], relPath.AsString("/", false)); err != nil {
+	if val, err := elementText(cdrs[1], "SignalingInfo/PChargingVector/icidvalue"); err != nil {
 		t.Error(err)
 	} else if val != "46d7974398c2671016afccc3f2c428c7" {
 		t.Errorf("Expecting: 46d7974398c2671016afccc3f2c428c7, received: %s", val)
@@ -610,5 +599,73 @@ func TestXMLRPNestingSeparator(t *testing.T) {
 	}
 	if !reflect.DeepEqual(expectedCDRs, cdrs) {
 		t.Errorf("Expecting: %+v\n, received: %+v\n", expectedCDRs, cdrs)
+	}
+}
+
+var xmlMultipleIndex = `<complete-success-notification callid="109870">
+	<createtime>2005-08-26T14:16:42</createtime>
+	<connecttime>2005-08-26T14:16:56</connecttime>
+	<endtime>2005-08-26T14:17:34</endtime>
+	<reference>My Call Reference</reference>
+	<userid>386</userid>
+	<username>sampleusername</username>
+	<customerid>1</customerid>
+	<companyname>Conecto LLC</companyname>
+	<totalcost amount="0.21" currency="USD">US$0.21</totalcost>
+	<hasrecording>yes</hasrecording>
+	<hasvoicemail>no</hasvoicemail>
+	<agenttotalcost amount="0.13" currency="USD">US$0.13</agenttotalcost>
+	<agentid>44</agentid>
+	<callleg calllegid="222146">
+		<number>+441624828505</number>
+		<description>Isle of Man</description>
+		<seconds>38</seconds>
+		<perminuterate amount="0.0200" currency="USD">US$0.0200</perminuterate>
+		<cost amount="0.0140" currency="USD">US$0.0140</cost>
+		<agentperminuterate amount="0.0130" currency="USD">US$0.0130</agentperminuterate>
+		<agentcost amount="0.0082" currency="USD">US$0.0082</agentcost>
+	</callleg>
+	<callleg calllegid="222147">
+		<number>+44 7624 494075</number>
+		<description>Isle of Man</description>
+		<seconds>37</seconds>
+		<perminuterate amount="0.2700" currency="USD">US$0.2700</perminuterate>
+		<cost amount="0.1890" currency="USD">US$0.1890</cost>
+		<agentperminuterate amount="0.1880" currency="USD">US$0.1880</agentperminuterate>
+		<agentcost amount="0.1159" currency="USD">US$0.1159</agentcost>
+	</callleg>
+</complete-success-notification>
+`
+
+func TestXMLIndexes(t *testing.T) {
+	doc, err := xmlquery.Parse(strings.NewReader(xmlMultipleIndex))
+	if err != nil {
+		t.Error(err)
+	}
+	dP := newXmlProvider(doc, utils.HierarchyPath([]string{}))
+	if data, err := dP.FieldAsString([]string{"complete-success-notification", "userid"}); err != nil {
+		t.Error(err)
+	} else if data != "386" {
+		t.Errorf("expecting: 386, received: <%s>", data)
+	}
+	if data, err := dP.FieldAsString([]string{"complete-success-notification", "username"}); err != nil {
+		t.Error(err)
+	} else if data != "sampleusername" {
+		t.Errorf("expecting: sampleusername, received: <%s>", data)
+	}
+	if data, err := dP.FieldAsString([]string{"complete-success-notification", "callleg", "seconds"}); err != nil {
+		t.Error(err)
+	} else if data != "38" {
+		t.Errorf("expecting: 38, received: <%s>", data)
+	}
+	if data, err := dP.FieldAsString([]string{"complete-success-notification", "callleg[1]", "seconds"}); err != nil {
+		t.Error(err)
+	} else if data != "37" {
+		t.Errorf("expecting: 37, received: <%s>", data)
+	}
+	if data, err := dP.FieldAsString([]string{"complete-success-notification", "callleg[@calllegid='222147']", "seconds"}); err != nil {
+		t.Error(err)
+	} else if data != "37" {
+		t.Errorf("expecting: 37, received: <%s>", data)
 	}
 }

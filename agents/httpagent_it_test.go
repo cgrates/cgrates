@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -166,6 +167,36 @@ func TestHAitCDRmtcall(t *testing.T) {
 		}
 		if cdrs[0].Cost != 0.2188 {
 			t.Errorf("Unexpected CDR Cost received, cdr: %+v ", cdrs[0].Cost)
+		}
+	}
+}
+
+func TestHAitCDRmtcall2(t *testing.T) {
+	xmlBody := `<?xml version="1.0" encoding="utf-8"?><complete-datasession-notification callid="48981764"><createtime>2005-08-26T14:17:34</createtime><reference>Data</reference><userid>528594</userid><username>447700086788</username><customerid>510163</customerid><companyname>Silliname</companyname><totalcost amount="0.1400" currency="USD">0.1400</totalcost><agenttotalcost amount="0.1400" currency="USD">0.1400</agenttotalcost><agentid>234</agentid><callleg calllegid="89357336"><number>447700086788</number><description>China, Peoples Republic of - China Unicom (CU-GSM)</description><mcc>460</mcc><mnc>001</mnc><seconds>32</seconds><bytes>4558</bytes><permegabyterate  currency="USD">1.3330</permegabyterate><cost amount="0.1400" currency="USD">0.1400</cost><agentpermegabyterate currency="USD">1.3330</agentpermegabyterate><agentcost amount="0.1400"currency="USD">0.1400</agentcost></callleg></complete-datasession-notification>`
+
+	url := fmt.Sprintf("http://%s%s", haCfg.HTTPListen, haCfg.HttpAgentCfg()[1].Url)
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(xmlBody)))
+	if err != nil {
+		t.Error(err)
+	}
+	req.Header.Add("Content-Type", "application/xml; charset=utf-8")
+	resp, err := httpC.Do(req)
+	if err != nil {
+		t.Error(err)
+	}
+	resp.Body.Close()
+
+	time.Sleep(50 * time.Millisecond)
+	var cdrs []*engine.ExternalCDR
+	fltr := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{"447700086788"}}
+	if err := haRPC.Call("ApierV2.GetCdrs", fltr, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Usage != "4558" { // should be 1 but maxUsage returns rounded version
+			t.Errorf("Unexpected CDR Usage received, cdr: %s ", utils.ToJSON(cdrs[0]))
 		}
 	}
 }

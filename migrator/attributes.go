@@ -53,7 +53,7 @@ func (m *Migrator) migrateCurrentAttributeProfile() (err error) {
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.AttributeProfilePrefix+tenant+":")
-		attrPrf, err := m.dmIN.DataManager().GetAttributeProfile(tenant, idg, true, utils.NonTransactional)
+		attrPrf, err := m.dmIN.DataManager().GetAttributeProfile(tenant, idg, false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}

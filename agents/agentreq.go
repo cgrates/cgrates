@@ -33,7 +33,8 @@ func newAgentRequest(req config.DataProvider,
 	vars map[string]interface{},
 	rply *config.NavigableMap,
 	tntTpl config.RSRParsers,
-	dfltTenant string, filterS *engine.FilterS) (ar *AgentRequest) {
+	dfltTenant, timezone string,
+	filterS *engine.FilterS) (ar *AgentRequest) {
 	if rply == nil {
 		rply = config.NewNavigableMap(nil)
 	}
@@ -43,29 +44,32 @@ func newAgentRequest(req config.DataProvider,
 		CGRRequest: config.NewNavigableMap(nil),
 		CGRReply:   config.NewNavigableMap(nil),
 		Reply:      rply,
+		timezone:   timezone,
 		filterS:    filterS,
 	}
 	// populate tenant
 	if tntIf, err := ar.ParseField(
 		&config.FCTemplate{Type: utils.META_COMPOSED,
 			Value: tntTpl}); err == nil && tntIf.(string) != "" {
-		ar.Tenant = tntIf.(string)
+		ar.tenant = tntIf.(string)
 	} else {
-		ar.Tenant = dfltTenant
+		ar.tenant = dfltTenant
 	}
+
 	return
 }
 
 // AgentRequest represents data related to one request towards agent
 // implements engine.DataProvider so we can pass it to filters
 type AgentRequest struct {
-	Tenant     string
 	Request    config.DataProvider  // request
 	Vars       *config.NavigableMap // shared data
 	CGRRequest *config.NavigableMap
 	CGRReply   *config.NavigableMap
 	Reply      *config.NavigableMap
-	filterS    *engine.FilterS
+	tenant,
+	timezone string
+	filterS *engine.FilterS
 }
 
 // String implements engine.DataProvider
@@ -105,7 +109,7 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 	nM *config.NavigableMap, err error) {
 	nM = config.NewNavigableMap(nil)
 	for _, tplFld := range tplFlds {
-		if pass, err := ar.filterS.Pass(ar.Tenant,
+		if pass, err := ar.filterS.Pass(ar.tenant,
 			tplFld.Filters, ar); err != nil {
 			return nil, err
 		} else if !pass {
@@ -162,11 +166,11 @@ func (aReq *AgentRequest) ParseField(
 		if err != nil {
 			return "", err
 		}
-		tEnd, err := utils.ParseTimeDetectLayout(strVal1, cfgFld.Timezone)
+		tEnd, err := utils.ParseTimeDetectLayout(strVal1, aReq.timezone)
 		if err != nil {
 			return "", err
 		}
-		tStart, err := utils.ParseTimeDetectLayout(strVal2, cfgFld.Timezone)
+		tStart, err := utils.ParseTimeDetectLayout(strVal2, aReq.timezone)
 		if err != nil {
 			return "", err
 		}

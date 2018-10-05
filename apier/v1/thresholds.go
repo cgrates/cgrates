@@ -63,7 +63,7 @@ func (apierV1 *ApierV1) GetThresholdProfile(arg *utils.TenantID, reply *engine.T
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if th, err := apierV1.DataManager.GetThresholdProfile(arg.Tenant, arg.ID, false, utils.NonTransactional); err != nil {
+	if th, err := apierV1.DataManager.GetThresholdProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	} else {
 		*reply = *th

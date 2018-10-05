@@ -215,36 +215,36 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.DataDB().GetReverseAlias(dataID, true, utils.NonTransactional)
 		case utils.ResourceProfilesPrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetResourceProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+			_, err = dm.GetResourceProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.ResourcesPrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetResource(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+			_, err = dm.GetResource(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.StatQueueProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetStatQueueProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+			_, err = dm.GetStatQueueProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.StatQueuePrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetStatQueue(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+			_, err = dm.GetStatQueue(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
 			_, err = dm.GetTiming(dataID, true, utils.NonTransactional)
 		case utils.ThresholdProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetThresholdProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+			_, err = dm.GetThresholdProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.ThresholdPrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetThreshold(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+			_, err = dm.GetThreshold(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.FilterPrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetFilter(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
 		case utils.SupplierProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetSupplierProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+			_, err = dm.GetSupplierProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.AttributeProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetAttributeProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+			_, err = dm.GetAttributeProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.ChargerProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetChargerProfile(tntID.Tenant, tntID.ID, true, utils.NonTransactional)
+			_, err = dm.GetChargerProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.DataManager,
@@ -259,9 +259,9 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 // GetStatQueue retrieves a StatQueue from dataDB
 // handles caching and deserialization of metrics
 func (dm *DataManager) GetStatQueue(tenant, id string,
-	skipCache bool, transactionID string) (sq *StatQueue, err error) {
+	cacheRead, cacheWrite bool, transactionID string) (sq *StatQueue, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
+	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheStatQueues, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
@@ -271,7 +271,7 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 	}
 	ssq, err := dm.dataDB.GetStoredStatQueueDrv(tenant, id)
 	if err != nil {
-		if err == utils.ErrNotFound {
+		if err == utils.ErrNotFound && cacheWrite {
 			Cache.Set(utils.CacheStatQueues, tntID, nil, nil,
 				cacheCommit(transactionID), transactionID)
 		}
@@ -280,8 +280,10 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 	if sq, err = ssq.AsStatQueue(dm.dataDB.Marshaler()); err != nil {
 		return nil, err
 	}
-	Cache.Set(utils.CacheStatQueues, tntID, sq, nil,
-		cacheCommit(transactionID), transactionID)
+	if cacheWrite {
+		Cache.Set(utils.CacheStatQueues, tntID, sq, nil,
+			cacheCommit(transactionID), transactionID)
+	}
 	return
 }
 
@@ -353,9 +355,9 @@ func (dm *DataManager) RemoveFilter(tenant, id, transactionID string) (err error
 }
 
 func (dm *DataManager) GetThreshold(tenant, id string,
-	skipCache bool, transactionID string) (th *Threshold, err error) {
+	cacheRead, cacheWrite bool, transactionID string) (th *Threshold, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
+	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheThresholds, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
@@ -365,14 +367,16 @@ func (dm *DataManager) GetThreshold(tenant, id string,
 	}
 	th, err = dm.dataDB.GetThresholdDrv(tenant, id)
 	if err != nil {
-		if err == utils.ErrNotFound {
+		if err == utils.ErrNotFound && cacheWrite {
 			Cache.Set(utils.CacheThresholds, tntID, nil, nil,
 				cacheCommit(transactionID), transactionID)
 		}
 		return nil, err
 	}
-	Cache.Set(utils.CacheThresholds, tntID, th, nil,
-		cacheCommit(transactionID), transactionID)
+	if cacheWrite {
+		Cache.Set(utils.CacheThresholds, tntID, th, nil,
+			cacheCommit(transactionID), transactionID)
+	}
 	return
 }
 
@@ -395,10 +399,10 @@ func (dm *DataManager) RemoveThreshold(tenant, id, transactionID string) (err er
 	return
 }
 
-func (dm *DataManager) GetThresholdProfile(tenant, id string, skipCache bool,
+func (dm *DataManager) GetThresholdProfile(tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (th *ThresholdProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
+	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheThresholdProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
@@ -408,19 +412,21 @@ func (dm *DataManager) GetThresholdProfile(tenant, id string, skipCache bool,
 	}
 	th, err = dm.dataDB.GetThresholdProfileDrv(tenant, id)
 	if err != nil {
-		if err == utils.ErrNotFound {
+		if err == utils.ErrNotFound && cacheWrite {
 			Cache.Set(utils.CacheThresholdProfiles, tntID, nil, nil,
 				cacheCommit(transactionID), transactionID)
 		}
 		return nil, err
 	}
-	Cache.Set(utils.CacheThresholdProfiles, tntID, th, nil,
-		cacheCommit(transactionID), transactionID)
+	if cacheWrite {
+		Cache.Set(utils.CacheThresholdProfiles, tntID, th, nil,
+			cacheCommit(transactionID), transactionID)
+	}
 	return
 }
 
 func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool) (err error) {
-	oldTh, err := dm.GetThresholdProfile(th.Tenant, th.ID, false, utils.NonTransactional)
+	oldTh, err := dm.GetThresholdProfile(th.Tenant, th.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -453,7 +459,7 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 
 func (dm *DataManager) RemoveThresholdProfile(tenant, id,
 	transactionID string, withIndex bool) (err error) {
-	oldTh, err := dm.GetThresholdProfile(tenant, id, false, utils.NonTransactional)
+	oldTh, err := dm.GetThresholdProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -469,10 +475,10 @@ func (dm *DataManager) RemoveThresholdProfile(tenant, id,
 	return
 }
 
-func (dm *DataManager) GetStatQueueProfile(tenant, id string, skipCache bool,
+func (dm *DataManager) GetStatQueueProfile(tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (sqp *StatQueueProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
+	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheStatQueueProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
@@ -482,19 +488,21 @@ func (dm *DataManager) GetStatQueueProfile(tenant, id string, skipCache bool,
 	}
 	sqp, err = dm.dataDB.GetStatQueueProfileDrv(tenant, id)
 	if err != nil {
-		if err == utils.ErrNotFound {
+		if err == utils.ErrNotFound && cacheWrite {
 			Cache.Set(utils.CacheStatQueueProfiles, tntID, nil, nil,
 				cacheCommit(transactionID), transactionID)
 		}
 		return nil, err
 	}
-	Cache.Set(utils.CacheStatQueueProfiles, tntID, sqp, nil,
-		cacheCommit(transactionID), transactionID)
+	if cacheWrite {
+		Cache.Set(utils.CacheStatQueueProfiles, tntID, sqp, nil,
+			cacheCommit(transactionID), transactionID)
+	}
 	return
 }
 
 func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool) (err error) {
-	oldSts, err := dm.GetStatQueueProfile(sqp.Tenant, sqp.ID, false, utils.NonTransactional)
+	oldSts, err := dm.GetStatQueueProfile(sqp.Tenant, sqp.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -527,7 +535,7 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 
 func (dm *DataManager) RemoveStatQueueProfile(tenant, id,
 	transactionID string, withIndex bool) (err error) {
-	oldSts, err := dm.GetStatQueueProfile(tenant, id, true, utils.NonTransactional)
+	oldSts, err := dm.GetStatQueueProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -581,10 +589,10 @@ func (dm *DataManager) RemoveTiming(id, transactionID string) (err error) {
 	return
 }
 
-func (dm *DataManager) GetResource(tenant, id string, skipCache bool,
+func (dm *DataManager) GetResource(tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (rs *Resource, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
+	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheResources, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
@@ -594,14 +602,16 @@ func (dm *DataManager) GetResource(tenant, id string, skipCache bool,
 	}
 	rs, err = dm.dataDB.GetResourceDrv(tenant, id)
 	if err != nil {
-		if err == utils.ErrNotFound {
+		if err == utils.ErrNotFound && cacheWrite {
 			Cache.Set(utils.CacheResources, tntID, nil, nil,
 				cacheCommit(transactionID), transactionID)
 		}
 		return nil, err
 	}
-	Cache.Set(utils.CacheResources, tntID, rs, nil,
-		cacheCommit(transactionID), transactionID)
+	if cacheWrite {
+		Cache.Set(utils.CacheResources, tntID, rs, nil,
+			cacheCommit(transactionID), transactionID)
+	}
 	return
 }
 
@@ -626,10 +636,10 @@ func (dm *DataManager) RemoveResource(tenant, id, transactionID string) (err err
 	return
 }
 
-func (dm *DataManager) GetResourceProfile(tenant, id string,
-	skipCache bool, transactionID string) (rp *ResourceProfile, err error) {
+func (dm *DataManager) GetResourceProfile(tenant, id string, cacheRead, cacheWrite bool,
+	transactionID string) (rp *ResourceProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
+	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheResourceProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
@@ -639,19 +649,21 @@ func (dm *DataManager) GetResourceProfile(tenant, id string,
 	}
 	rp, err = dm.dataDB.GetResourceProfileDrv(tenant, id)
 	if err != nil {
-		if err == utils.ErrNotFound {
+		if err == utils.ErrNotFound && cacheWrite {
 			Cache.Set(utils.CacheResourceProfiles, tntID, nil, nil,
 				cacheCommit(transactionID), transactionID)
 		}
 		return nil, err
 	}
-	Cache.Set(utils.CacheResourceProfiles, tntID, rp, nil,
-		cacheCommit(transactionID), transactionID)
+	if cacheWrite {
+		Cache.Set(utils.CacheResourceProfiles, tntID, rp, nil,
+			cacheCommit(transactionID), transactionID)
+	}
 	return
 }
 
 func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (err error) {
-	oldRes, err := dm.GetResourceProfile(rp.Tenant, rp.ID, false, utils.NonTransactional)
+	oldRes, err := dm.GetResourceProfile(rp.Tenant, rp.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -687,7 +699,7 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 }
 
 func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string, withIndex bool) (err error) {
-	oldRes, err := dm.GetResourceProfile(tenant, id, false, utils.NonTransactional)
+	oldRes, err := dm.GetResourceProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -1068,10 +1080,10 @@ func (dm *DataManager) GetAllCdrStats() (css []*CdrStats, err error) {
 	return dm.DataDB().GetAllCdrStatsDrv()
 }
 
-func (dm *DataManager) GetSupplierProfile(tenant, id string, skipCache bool,
+func (dm *DataManager) GetSupplierProfile(tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (supp *SupplierProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
+	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheSupplierProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
@@ -1081,19 +1093,21 @@ func (dm *DataManager) GetSupplierProfile(tenant, id string, skipCache bool,
 	}
 	supp, err = dm.dataDB.GetSupplierProfileDrv(tenant, id)
 	if err != nil {
-		if err == utils.ErrNotFound {
+		if err == utils.ErrNotFound && cacheWrite {
 			Cache.Set(utils.CacheSupplierProfiles, tntID, nil, nil,
 				cacheCommit(transactionID), transactionID)
 		}
 		return nil, err
 	}
-	Cache.Set(utils.CacheSupplierProfiles, tntID, supp, nil,
-		cacheCommit(transactionID), transactionID)
+	if cacheWrite {
+		Cache.Set(utils.CacheSupplierProfiles, tntID, supp, nil,
+			cacheCommit(transactionID), transactionID)
+	}
 	return
 }
 
 func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool) (err error) {
-	oldSup, err := dm.GetSupplierProfile(supp.Tenant, supp.ID, false, utils.NonTransactional)
+	oldSup, err := dm.GetSupplierProfile(supp.Tenant, supp.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -1124,7 +1138,7 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 }
 
 func (dm *DataManager) RemoveSupplierProfile(tenant, id, transactionID string, withIndex bool) (err error) {
-	oldSupp, err := dm.GetSupplierProfile(tenant, id, false, utils.NonTransactional)
+	oldSupp, err := dm.GetSupplierProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -1139,10 +1153,10 @@ func (dm *DataManager) RemoveSupplierProfile(tenant, id, transactionID string, w
 	return
 }
 
-func (dm *DataManager) GetAttributeProfile(tenant, id string, skipCache bool,
+func (dm *DataManager) GetAttributeProfile(tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (attrPrfl *AttributeProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
+	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheAttributeProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
@@ -1152,7 +1166,7 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, skipCache bool,
 	}
 	attrPrfl, err = dm.dataDB.GetAttributeProfileDrv(tenant, id)
 	if err != nil {
-		if err == utils.ErrNotFound {
+		if err == utils.ErrNotFound && cacheWrite {
 			Cache.Set(utils.CacheAttributeProfiles, tntID, nil, nil,
 				cacheCommit(transactionID), transactionID)
 		}
@@ -1161,13 +1175,15 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, skipCache bool,
 	if err = attrPrfl.Compile(); err != nil {
 		return nil, err
 	}
-	Cache.Set(utils.CacheAttributeProfiles, tntID, attrPrfl, nil,
-		cacheCommit(transactionID), transactionID)
+	if cacheWrite {
+		Cache.Set(utils.CacheAttributeProfiles, tntID, attrPrfl, nil,
+			cacheCommit(transactionID), transactionID)
+	}
 	return
 }
 
 func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool) (err error) {
-	oldAP, err := dm.GetAttributeProfile(ap.Tenant, ap.ID, false, utils.NonTransactional)
+	oldAP, err := dm.GetAttributeProfile(ap.Tenant, ap.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -1210,7 +1226,7 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 
 func (dm *DataManager) RemoveAttributeProfile(tenant, id string, contexts []string,
 	transactionID string, withIndex bool) (err error) {
-	oldAttr, err := dm.GetAttributeProfile(tenant, id, true, utils.NonTransactional)
+	oldAttr, err := dm.GetAttributeProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -1230,10 +1246,10 @@ func (dm *DataManager) RemoveAttributeProfile(tenant, id string, contexts []stri
 	return
 }
 
-func (dm *DataManager) GetChargerProfile(tenant, id string, skipCache bool,
+func (dm *DataManager) GetChargerProfile(tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (cpp *ChargerProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-	if !skipCache {
+	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheChargerProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
@@ -1243,19 +1259,21 @@ func (dm *DataManager) GetChargerProfile(tenant, id string, skipCache bool,
 	}
 	cpp, err = dm.dataDB.GetChargerProfileDrv(tenant, id)
 	if err != nil {
-		if err == utils.ErrNotFound {
+		if err == utils.ErrNotFound && cacheWrite {
 			Cache.Set(utils.CacheChargerProfiles, tntID, nil, nil,
 				cacheCommit(transactionID), transactionID)
 		}
 		return nil, err
 	}
-	Cache.Set(utils.CacheChargerProfiles, tntID, cpp, nil,
-		cacheCommit(transactionID), transactionID)
+	if cacheWrite {
+		Cache.Set(utils.CacheChargerProfiles, tntID, cpp, nil,
+			cacheCommit(transactionID), transactionID)
+	}
 	return
 }
 
 func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (err error) {
-	oldCpp, err := dm.GetChargerProfile(cpp.Tenant, cpp.ID, true, utils.NonTransactional)
+	oldCpp, err := dm.GetChargerProfile(cpp.Tenant, cpp.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
@@ -1287,7 +1305,7 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 
 func (dm *DataManager) RemoveChargerProfile(tenant, id string,
 	transactionID string, withIndex bool) (err error) {
-	oldCpp, err := dm.GetChargerProfile(tenant, id, true, utils.NonTransactional)
+	oldCpp, err := dm.GetChargerProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}

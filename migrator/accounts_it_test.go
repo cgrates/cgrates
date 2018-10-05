@@ -34,14 +34,13 @@ import (
 )
 
 var (
-	accPathIn       string
-	accPathOut      string
-	accCfgIn        *config.CGRConfig
-	accCfgOut       *config.CGRConfig
-	accMigrator     *Migrator
-	accAction       string
-	dataDir         = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	loadHistorySize = flag.Int("load_history_size", config.CgrConfig().LoadHistorySize, "Limit the number of records in the load history")
+	accPathIn   string
+	accPathOut  string
+	accCfgIn    *config.CGRConfig
+	accCfgOut   *config.CGRConfig
+	accMigrator *Migrator
+	accAction   string
+	dataDir     = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 )
 
 var sTestsAccIT = []func(t *testing.T){
@@ -142,14 +141,14 @@ func testAccITConnect(t *testing.T) {
 	dataDBIn, err := NewMigratorDataDB(accCfgIn.DataDbType,
 		accCfgIn.DataDbHost, accCfgIn.DataDbPort, accCfgIn.DataDbName,
 		accCfgIn.DataDbUser, accCfgIn.DataDbPass, accCfgIn.DBDataEncoding,
-		config.CgrConfig().CacheCfg(), *loadHistorySize)
+		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}
 	dataDBOut, err := NewMigratorDataDB(accCfgOut.DataDbType,
 		accCfgOut.DataDbHost, accCfgOut.DataDbPort, accCfgOut.DataDbName,
 		accCfgOut.DataDbUser, accCfgOut.DataDbPass, accCfgOut.DBDataEncoding,
-		config.CgrConfig().CacheCfg(), *loadHistorySize)
+		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}

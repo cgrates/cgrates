@@ -27,43 +27,6 @@ import (
 	"time"
 )
 
-func CastFieldIfToString(fld interface{}) (string, bool) {
-	if fld == nil {
-		return "", true
-	}
-	var strVal string
-	var converted bool
-	switch fld.(type) {
-	case int:
-		strVal = strconv.Itoa(fld.(int))
-		converted = true
-	case int64:
-		strVal = strconv.FormatInt(fld.(int64), 10)
-		converted = true
-	case bool:
-		strVal = strconv.FormatBool(fld.(bool))
-		converted = true
-	case float64:
-		strVal = strconv.FormatFloat(fld.(float64), 'f', -1, 64)
-		converted = true
-	case []uint8:
-		var byteVal []byte
-		if byteVal, converted = fld.([]byte); converted {
-			strVal = string(byteVal)
-		}
-	case time.Duration:
-		strVal = fld.(time.Duration).String()
-		converted = true
-	case string:
-		strVal = fld.(string)
-		converted = true
-	default: // Maybe we are lucky and the value converts to string
-		strVal = ToJSON(fld)
-		converted = true
-	}
-	return strVal, converted
-}
-
 // StringToInterface will parse string into supported types
 // if no other conversion possible, original string will be returned
 func StringToInterface(s string) interface{} {
@@ -143,12 +106,11 @@ func ReflectFieldAsString(intf interface{}, fldName, extraFieldsLabel string) (s
 	case reflect.Float64:
 		return strconv.FormatFloat(vOf.Float(), 'f', -1, 64), nil
 	case reflect.Interface:
-		strVal, converted := CastFieldIfToString(field)
-		if !converted {
+		strVal, err := IfaceAsString(field)
+		if err != nil {
 			return "", fmt.Errorf("Cannot convert to string field type: %s", vOf.Kind().String())
-		} else {
-			return strVal, nil
 		}
+		return strVal, nil
 	default:
 		return "", fmt.Errorf("Cannot convert to string field type: %s", vOf.Kind().String())
 	}
@@ -237,6 +199,8 @@ func IfaceAsBool(itm interface{}) (b bool, err error) {
 
 func IfaceAsString(fld interface{}) (out string, err error) {
 	switch fld.(type) {
+	case nil:
+		return
 	case int:
 		return strconv.Itoa(fld.(int)), nil
 	case int32:

@@ -83,8 +83,10 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 	rpl.Code = radigo.AccessAccept
 	var processed bool
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
-		agReq := newAgentRequest(dcdr, nil, nil, reqProcessor.Tenant,
-			ra.cgrCfg.DefaultTenant, ra.filterS)
+		agReq := newAgentRequest(dcdr, nil, nil,
+			reqProcessor.Tenant, ra.cgrCfg.DefaultTenant,
+			utils.FirstNonEmpty(reqProcessor.Timezone, config.CgrConfig().DefaultTimezone),
+			ra.filterS)
 		agReq.Vars.Set([]string{MetaRadReqType}, utils.StringToInterface(MetaRadAuth), true)
 		var lclProcessed bool
 		if lclProcessed, err = ra.processRequest(reqProcessor, agReq, rpl); lclProcessed {
@@ -122,8 +124,10 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 	rpl.Code = radigo.AccountingResponse
 	var processed bool
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
-		agReq := newAgentRequest(dcdr, nil, nil, reqProcessor.Tenant,
-			ra.cgrCfg.DefaultTenant, ra.filterS)
+		agReq := newAgentRequest(dcdr, nil, nil,
+			reqProcessor.Tenant, ra.cgrCfg.DefaultTenant,
+			utils.FirstNonEmpty(reqProcessor.Timezone, config.CgrConfig().DefaultTimezone),
+			ra.filterS)
 		var lclProcessed bool
 		if lclProcessed, err = ra.processRequest(reqProcessor, agReq, rpl); lclProcessed {
 			processed = lclProcessed
@@ -147,14 +151,14 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 // processRequest represents one processor processing the request
 func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 	agReq *AgentRequest, rply *radigo.Packet) (processed bool, err error) {
-	if pass, err := ra.filterS.Pass(agReq.Tenant,
+	if pass, err := ra.filterS.Pass(agReq.tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
 	}
 	if agReq.CGRRequest, err = agReq.AsNavigableMap(reqProcessor.RequestFields); err != nil {
 		return
 	}
-	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)
+	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.tenant, utils.NestingSep)
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuth,

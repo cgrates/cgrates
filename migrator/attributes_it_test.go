@@ -157,14 +157,14 @@ func testAttrITConnect(t *testing.T) {
 	dataDBIn, err := NewMigratorDataDB(attrCfgIn.DataDbType,
 		attrCfgIn.DataDbHost, attrCfgIn.DataDbPort, attrCfgIn.DataDbName,
 		attrCfgIn.DataDbUser, attrCfgIn.DataDbPass, attrCfgIn.DBDataEncoding,
-		config.CgrConfig().CacheCfg(), *loadHistorySize)
+		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}
 	dataDBOut, err := NewMigratorDataDB(attrCfgOut.DataDbType,
 		attrCfgOut.DataDbHost, attrCfgOut.DataDbPort, attrCfgOut.DataDbName,
 		attrCfgOut.DataDbUser, attrCfgOut.DataDbPass, attrCfgOut.DBDataEncoding,
-		config.CgrConfig().CacheCfg(), *loadHistorySize)
+		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -265,7 +265,7 @@ func testAttrITMigrateAndMove(t *testing.T) {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 		}
 		result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
-			"ATTR_1", true, utils.NonTransactional)
+			"ATTR_1", false, false, utils.NonTransactional)
 		if err != nil {
 			t.Error("Error when getting Attribute ", err.Error())
 		}
@@ -285,7 +285,7 @@ func testAttrITMigrateAndMove(t *testing.T) {
 		}
 
 		_, err = attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
-			"ATTR_1", true, utils.NonTransactional)
+			"ATTR_1", false, false, utils.NonTransactional)
 		if err != utils.ErrNotFound {
 			t.Error(err)
 		}
@@ -295,7 +295,7 @@ func testAttrITMigrateAndMove(t *testing.T) {
 			t.Error("Error when migrating Attributes ", err.Error())
 		}
 		result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
-			"ATTR_1", true, utils.NonTransactional)
+			"ATTR_1", false, false, utils.NonTransactional)
 		if err != nil {
 			t.Error(err)
 		}
@@ -305,7 +305,7 @@ func testAttrITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", attrPrf, result)
 		}
 		result, err = attrMigrator.dmIN.DataManager().GetAttributeProfile("cgrates.org",
-			"ATTR_1", true, utils.NonTransactional)
+			"ATTR_1", false, false, utils.NonTransactional)
 		if err != utils.ErrNotFound {
 			t.Error(err)
 		}

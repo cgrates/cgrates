@@ -81,6 +81,7 @@ type DbJsonCfg struct {
 	Conn_max_lifetime *int // Used only in case of storDb
 	Load_history_size *int // Used in case of dataDb to limit the length of the loads history
 	Cdrs_indexes      *[]string
+	Redis_sentinel    *string
 }
 
 // Filters config
@@ -381,8 +382,6 @@ type HttpAgentJsonCfg struct {
 	Id                 *string
 	Url                *string
 	Sessions_conns     *[]*HaPoolJsonCfg
-	Tenant             *string
-	Timezone           *string
 	Request_payload    *string
 	Reply_payload      *string
 	Request_processors *[]*HttpAgentProcessorJsnCfg
@@ -391,6 +390,8 @@ type HttpAgentJsonCfg struct {
 type HttpAgentProcessorJsnCfg struct {
 	Id                  *string
 	Filters             *[]string
+	Tenant              *string
+	Timezone            *string
 	Flags               *[]string
 	Continue_on_success *bool
 	Request_fields      *[]*FcTemplateJsonCfg
@@ -554,19 +555,20 @@ type LoaderCfgJson struct {
 }
 
 type MigratorCfgJson struct {
-	Out_dataDB_type     *string
-	Out_dataDB_host     *string
-	Out_dataDB_port     *string
-	Out_dataDB_name     *string
-	Out_dataDB_user     *string
-	Out_dataDB_password *string
-	Out_dataDB_encoding *string
-	Out_storDB_type     *string
-	Out_storDB_host     *string
-	Out_storDB_port     *string
-	Out_storDB_name     *string
-	Out_storDB_user     *string
-	Out_storDB_password *string
+	Out_dataDB_type           *string
+	Out_dataDB_host           *string
+	Out_dataDB_port           *string
+	Out_dataDB_name           *string
+	Out_dataDB_user           *string
+	Out_dataDB_password       *string
+	Out_dataDB_encoding       *string
+	Out_dataDB_redis_sentinel *string
+	Out_storDB_type           *string
+	Out_storDB_host           *string
+	Out_storDB_port           *string
+	Out_storDB_name           *string
+	Out_storDB_user           *string
+	Out_storDB_password       *string
 }
 
 type FcTemplateJsonCfg struct {

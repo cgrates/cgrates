@@ -26,6 +26,7 @@ import (
 	"io/ioutil"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
@@ -33,18 +34,29 @@ import (
 	"github.com/cgrates/ltcache"
 	"github.com/mediocregopher/radix.v2/pool"
 	"github.com/mediocregopher/radix.v2/redis"
+	"github.com/mediocregopher/radix.v2/sentinel"
 )
 
 type RedisStorage struct {
-	dbPool          *pool.Pool
-	maxConns        int
-	ms              Marshaler
-	cacheCfg        config.CacheConfig
-	loadHistorySize int
+	dbPool        *pool.Pool
+	maxConns      int
+	ms            Marshaler
+	cacheCfg      config.CacheConfig
+	sentinelName  string
+	sentinelInsts []*sentinelInst
+	db            int    //database number used when recconect sentinel
+	pass          string //password used when recconect sentinel
+	sentinelMux   sync.RWMutex
+}
+
+type sentinelInst struct {
+	addr string
+	conn *sentinel.Client
 }
 
 func NewRedisStorage(address string, db int, pass, mrshlerStr string,
-	maxConns int, cacheCfg config.CacheConfig, loadHistorySize int) (*RedisStorage, error) {
+	maxConns int, cacheCfg config.CacheConfig, sentinelName string) (*RedisStorage, error) {
+
 	df := func(network, addr string) (*redis.Client, error) {
 		client, err := redis.Dial(network, addr)
 		if err != nil {
@@ -64,10 +76,7 @@ func NewRedisStorage(address string, db int, pass, mrshlerStr string,
 		}
 		return client, nil
 	}
-	p, err := pool.NewCustom("tcp", address, maxConns, df)
-	if err != nil {
-		return nil, err
-	}
+
 	var mrshler Marshaler
 	if mrshlerStr == utils.MSGPACK {
 		mrshler = NewCodecMsgpackMarshaler()
@@ -76,13 +85,95 @@ func NewRedisStorage(address string, db int, pass, mrshlerStr string,
 	} else {
 		return nil, fmt.Errorf("Unsupported marshaler: %v", mrshlerStr)
 	}
-	return &RedisStorage{dbPool: p, maxConns: maxConns, ms: mrshler,
-		cacheCfg: cacheCfg, loadHistorySize: loadHistorySize}, nil
+
+	if sentinelName != "" {
+		var err error
+		addrs := strings.Split(address, ";")
+		sentinelInsts := make([]*sentinelInst, len(addrs))
+		for i, addr := range addrs {
+			sentinelInsts[i] = &sentinelInst{addr: addr}
+			if sentinelInsts[i].conn, err = sentinel.NewClientCustom("tcp",
+				addr, maxConns, df, sentinelName); err != nil {
+				return nil, err
+			}
+		}
+		return &RedisStorage{maxConns: maxConns, ms: mrshler,
+			cacheCfg: cacheCfg, sentinelName: sentinelName,
+			sentinelInsts: sentinelInsts, db: db, pass: pass}, nil
+	} else {
+		p, err := pool.NewCustom("tcp", address, maxConns, df)
+		if err != nil {
+			return nil, err
+		}
+		return &RedisStorage{dbPool: p, maxConns: maxConns,
+			ms: mrshler, cacheCfg: cacheCfg}, nil
+	}
+}
+
+func reconnectSentinel(addr, sentinelName string, db int, pass string, maxConns int) (*sentinel.Client, error) {
+	df := func(network, addr string) (*redis.Client, error) {
+		client, err := redis.Dial(network, addr)
+		if err != nil {
+			return nil, err
+		}
+		if len(pass) != 0 {
+			if err = client.Cmd("AUTH", pass).Err; err != nil {
+				client.Close()
+				return nil, err
+			}
+		}
+		if db != 0 {
+			if err = client.Cmd("SELECT", db).Err; err != nil {
+				client.Close()
+				return nil, err
+			}
+		}
+		return client, nil
+	}
+	return sentinel.NewClientCustom("tcp", addr, maxConns, df, sentinelName)
 }
 
 // This CMD function get a connection from the pool.
 // Handles automatic failover in case of network disconnects
 func (rs *RedisStorage) Cmd(cmd string, args ...interface{}) *redis.Resp {
+	if rs.sentinelName != "" {
+		var err error
+		for i := range rs.sentinelInsts {
+			rs.sentinelMux.Lock()
+
+			if rs.sentinelInsts[i].conn == nil {
+				rs.sentinelInsts[i].conn, err = reconnectSentinel(rs.sentinelInsts[i].addr,
+					rs.sentinelName, rs.db, rs.pass, rs.maxConns)
+				if err != nil {
+					if i == len(rs.sentinelInsts)-1 {
+						rs.sentinelMux.Unlock()
+						return redis.NewResp(fmt.Errorf("No sentinels active"))
+					}
+					rs.sentinelMux.Unlock()
+					continue
+				}
+			}
+			sConn := rs.sentinelInsts[i].conn
+			rs.sentinelMux.Unlock()
+
+			conn, err := sConn.GetMaster(rs.sentinelName)
+			if err != nil {
+				if i == len(rs.sentinelInsts)-1 {
+					return redis.NewResp(fmt.Errorf("No sentinels active"))
+				}
+				rs.sentinelMux.Lock()
+				rs.sentinelInsts[i].conn = nil
+				rs.sentinelMux.Unlock()
+				utils.Logger.Warning(fmt.Sprintf("<RedisStorage> sentinel at address: %s became nil error: %s ",
+					rs.sentinelInsts[i].addr, err.Error()))
+				continue
+			}
+			result := conn.Cmd(cmd, args...)
+			sConn.PutMaster(rs.sentinelName, conn)
+			return result
+		}
+	}
+
 	c1, err := rs.dbPool.Get()
 	if err != nil {
 		return redis.NewResp(err)
@@ -106,7 +197,9 @@ func (rs *RedisStorage) Cmd(cmd string, args ...interface{}) *redis.Resp {
 }
 
 func (rs *RedisStorage) Close() {
-	rs.dbPool.Empty()
+	if rs.dbPool != nil {
+		rs.dbPool.Empty()
+	}
 }
 
 func (rs *RedisStorage) Flush(ignore string) error {
@@ -1370,6 +1463,7 @@ func (rs *RedisStorage) RemoveTimingDrv(id string) (err error) {
 }
 
 //GetFilterIndexesDrv retrieves Indexes from dataDB
+//filterType is used togheter with fieldName:Val
 func (rs *RedisStorage) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType string,
 	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	mp := make(map[string]string)

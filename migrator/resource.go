@@ -36,7 +36,7 @@ func (m *Migrator) migrateCurrentResource() (err error) {
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.ResourceProfilesPrefix+tenant+":")
-		res, err := m.dmIN.DataManager().GetResourceProfile(tenant, idg, true, utils.NonTransactional)
+		res, err := m.dmIN.DataManager().GetResourceProfile(tenant, idg, false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}

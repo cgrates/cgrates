@@ -353,7 +353,7 @@ func disableAccountAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, a
 }*/
 
 func genericReset(ub *Account) error {
-	for k, _ := range ub.BalanceMap {
+	for k := range ub.BalanceMap {
 		ub.BalanceMap[k] = Balances{&Balance{Value: 0}}
 	}
 	ub.InitCounters()
@@ -884,7 +884,7 @@ func (cdrP *cdrLogProvider) FieldAsString(fldPath []string) (data string, err er
 	if err != nil {
 		return
 	}
-	data, _ = utils.CastFieldIfToString(valIface)
+	data, err = utils.IfaceAsString(valIface)
 	return
 }
 

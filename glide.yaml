@@ -42,4 +42,5 @@ import:
 - package: github.com/cgrates/radigo
 - package: github.com/cgrates/ltcache
 - package: github.com/dlintw/goconf
-- package: github.com/beevik/etree
+- package: github.com/antchfx/xmlquery
+- package: github.com/antchfx/xpath

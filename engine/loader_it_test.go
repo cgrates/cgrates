@@ -44,18 +44,19 @@ func TestLoaderITConnDataDbs(t *testing.T) {
 	lCfg.StorDBPass = "CGRateS.org"
 	var err error
 	if dataDbCsv, err = ConfigureDataStorage(lCfg.DataDbType, lCfg.DataDbHost, lCfg.DataDbPort, "7",
-		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding, nil, 1); err != nil {
+		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding, nil, ""); err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
 	if dataDbStor, err = ConfigureDataStorage(lCfg.DataDbType, lCfg.DataDbHost, lCfg.DataDbPort, "8",
-		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding, nil, 1); err != nil {
+		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding, nil, ""); err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
 	if dataDbApier, err = ConfigureDataStorage(lCfg.DataDbType, lCfg.DataDbHost, lCfg.DataDbPort, "9",
-		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding, nil, 1); err != nil {
+		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding, nil, ""); err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
-	for _, db := range []Storage{dataDbCsv.DataDB(), dataDbStor.DataDB(), dataDbApier.DataDB(), dataDbCsv.DataDB(), dataDbStor.DataDB(), dataDbApier.DataDB()} {
+	for _, db := range []Storage{dataDbCsv.DataDB(), dataDbStor.DataDB(), dataDbApier.DataDB(),
+		dataDbCsv.DataDB(), dataDbStor.DataDB(), dataDbApier.DataDB()} {
 		if err = db.Flush(""); err != nil {
 			t.Fatal("Error when flushing datadb")
 		}
@@ -431,7 +432,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for tenantid, rl := range loader.resProfiles {
-		rcv, err := loader.dm.GetResourceProfile(tenantid.Tenant, tenantid.ID, true, utils.NonTransactional)
+		rcv, err := loader.dm.GetResourceProfile(tenantid.Tenant, tenantid.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Error("Failed GetResourceProfile: ", err.Error())
 		}
@@ -444,7 +445,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 		}
 	}
 	for tenantid, st := range loader.sqProfiles {
-		rcv, err := loader.dm.GetStatQueueProfile(tenantid.Tenant, tenantid.ID, true, utils.NonTransactional)
+		rcv, err := loader.dm.GetStatQueueProfile(tenantid.Tenant, tenantid.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Errorf("Failed GetStatsQueue, tenant: %s, id: %s,  error: %s ", tenantid.Tenant, tenantid.ID, err.Error())
 		}
@@ -458,7 +459,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for tenatid, th := range loader.thProfiles {
-		rcv, err := loader.dm.GetThresholdProfile(tenatid.Tenant, tenatid.ID, true, utils.NonTransactional)
+		rcv, err := loader.dm.GetThresholdProfile(tenatid.Tenant, tenatid.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Errorf("Failed GetThresholdProfile, tenant: %s, id: %s,  error: %s ", th.Tenant, th.ID, err.Error())
 		}
@@ -472,7 +473,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for tenatid, th := range loader.sppProfiles {
-		rcv, err := loader.dm.GetSupplierProfile(tenatid.Tenant, tenatid.ID, true, utils.NonTransactional)
+		rcv, err := loader.dm.GetSupplierProfile(tenatid.Tenant, tenatid.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Errorf("Failed GetSupplierProfile, tenant: %s, id: %s,  error: %s ", th.Tenant, th.ID, err.Error())
 		}
@@ -486,7 +487,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for tenatid, attrPrf := range loader.attributeProfiles {
-		rcv, err := loader.dm.GetAttributeProfile(tenatid.Tenant, tenatid.ID, true, utils.NonTransactional)
+		rcv, err := loader.dm.GetAttributeProfile(tenatid.Tenant, tenatid.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Errorf("Failed GetAttributeProfile, tenant: %s, id: %s,  error: %s ", attrPrf.Tenant, attrPrf.ID, err.Error())
 		}
@@ -502,7 +503,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for tenatid, cpp := range loader.chargerProfiles {
-		rcv, err := loader.dm.GetChargerProfile(tenatid.Tenant, tenatid.ID, true, utils.NonTransactional)
+		rcv, err := loader.dm.GetChargerProfile(tenatid.Tenant, tenatid.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Errorf("Failed GetChargerProfile, tenant: %s, id: %s,  error: %s ", cpp.Tenant, cpp.ID, err.Error())
 		}

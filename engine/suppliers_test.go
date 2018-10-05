@@ -375,7 +375,7 @@ func TestSuppliersCache(t *testing.T) {
 	//Test each supplier profile from cache
 	for _, spp := range sppTest {
 		if tempSpp, err := dmSPP.GetSupplierProfile(spp.Tenant,
-			spp.ID, false, utils.NonTransactional); err != nil {
+			spp.ID, true, true, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(spp, tempSpp) {
 			t.Errorf("Expecting: %+v, received: %+v", spp, tempSpp)

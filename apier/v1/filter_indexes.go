@@ -174,7 +174,7 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 		return utils.APIErrorHandler(err)
 	}
 	//AttributeProfile Indexes
-	attrIndexes, err := self.computeAttributeIndexes(args.Tenant, args.AttributeIDs, transactionID)
+	attrIndexes, err := self.computeAttributeIndexes(args.Tenant, args.Context, args.AttributeIDs, transactionID)
 	if err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -189,7 +189,7 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 		if err := thdsIndexers.StoreIndexes(true, transactionID); err != nil {
 			if args.ThresholdIDs != nil {
 				for _, id := range *args.ThresholdIDs {
-					th, err := self.DataManager.GetThresholdProfile(args.Tenant, id, false, utils.NonTransactional)
+					th, err := self.DataManager.GetThresholdProfile(args.Tenant, id, true, false, utils.NonTransactional)
 					if err != nil {
 						return err
 					}
@@ -205,7 +205,7 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	if sqpIndexers != nil {
 		if err := sqpIndexers.StoreIndexes(true, transactionID); err != nil {
 			for _, id := range *args.StatIDs {
-				sqp, err := self.DataManager.GetStatQueueProfile(args.Tenant, id, false, utils.NonTransactional)
+				sqp, err := self.DataManager.GetStatQueueProfile(args.Tenant, id, true, false, utils.NonTransactional)
 				if err != nil {
 					return err
 				}
@@ -220,7 +220,7 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	if rsIndexes != nil {
 		if err := rsIndexes.StoreIndexes(true, transactionID); err != nil {
 			for _, id := range *args.ResourceIDs {
-				rp, err := self.DataManager.GetResourceProfile(args.Tenant, id, false, utils.NonTransactional)
+				rp, err := self.DataManager.GetResourceProfile(args.Tenant, id, true, false, utils.NonTransactional)
 				if err != nil {
 					return err
 				}
@@ -235,7 +235,7 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	if sppIndexes != nil {
 		if err := sppIndexes.StoreIndexes(true, transactionID); err != nil {
 			for _, id := range *args.SupplierIDs {
-				spp, err := self.DataManager.GetSupplierProfile(args.Tenant, id, false, utils.NonTransactional)
+				spp, err := self.DataManager.GetSupplierProfile(args.Tenant, id, true, false, utils.NonTransactional)
 				if err != nil {
 					return err
 				}
@@ -250,7 +250,7 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	if attrIndexes != nil {
 		if err := attrIndexes.StoreIndexes(true, transactionID); err != nil {
 			for _, id := range *args.AttributeIDs {
-				ap, err := self.DataManager.GetAttributeProfile(args.Tenant, id, false, utils.NonTransactional)
+				ap, err := self.DataManager.GetAttributeProfile(args.Tenant, id, true, false, utils.NonTransactional)
 				if err != nil {
 					return err
 				}
@@ -265,7 +265,7 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	if cppIndexes != nil {
 		if err := attrIndexes.StoreIndexes(true, transactionID); err != nil {
 			for _, id := range *args.ChargerIDs {
-				cpp, err := self.DataManager.GetChargerProfile(args.Tenant, id, false, utils.NonTransactional)
+				cpp, err := self.DataManager.GetChargerProfile(args.Tenant, id, true, false, utils.NonTransactional)
 				if err != nil {
 					return err
 				}
@@ -297,7 +297,7 @@ func (self *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string,
 		transactionID = utils.NonTransactional
 	}
 	for _, id := range thresholdIDs {
-		th, err := self.DataManager.GetThresholdProfile(tenant, id, false, utils.NonTransactional)
+		th, err := self.DataManager.GetThresholdProfile(tenant, id, true, false, utils.NonTransactional)
 		if err != nil {
 			return nil, err
 		}
@@ -347,10 +347,11 @@ func (self *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string,
 	return thdsIndexers, nil
 }
 
-func (self *ApierV1) computeAttributeIndexes(tenant string, attrIDs *[]string,
+func (self *ApierV1) computeAttributeIndexes(tenant, context string, attrIDs *[]string,
 	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
 	var attributeIDs []string
-	attrIndexers := engine.NewFilterIndexer(self.DataManager, utils.AttributeProfilePrefix, tenant)
+	attrIndexers := engine.NewFilterIndexer(self.DataManager, utils.AttributeProfilePrefix,
+		utils.ConcatenatedKey(tenant, context))
 	if attrIDs == nil {
 		ids, err := self.DataManager.DataDB().GetKeysForPrefix(utils.AttributeProfilePrefix)
 		if err != nil {
@@ -364,7 +365,7 @@ func (self *ApierV1) computeAttributeIndexes(tenant string, attrIDs *[]string,
 		transactionID = utils.NonTransactional
 	}
 	for _, id := range attributeIDs {
-		ap, err := self.DataManager.GetAttributeProfile(tenant, id, false, utils.NonTransactional)
+		ap, err := self.DataManager.GetAttributeProfile(tenant, id, true, false, utils.NonTransactional)
 		if err != nil {
 			return nil, err
 		}
@@ -431,7 +432,7 @@ func (self *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string,
 		transactionID = utils.NonTransactional
 	}
 	for _, id := range resourceIDs {
-		rp, err := self.DataManager.GetResourceProfile(tenant, id, false, utils.NonTransactional)
+		rp, err := self.DataManager.GetResourceProfile(tenant, id, true, false, utils.NonTransactional)
 		if err != nil {
 			return nil, err
 		}
@@ -498,7 +499,7 @@ func (self *ApierV1) computeStatIndexes(tenant string, stIDs *[]string,
 		transactionID = utils.NonTransactional
 	}
 	for _, id := range statIDs {
-		sqp, err := self.DataManager.GetStatQueueProfile(tenant, id, false, utils.NonTransactional)
+		sqp, err := self.DataManager.GetStatQueueProfile(tenant, id, true, false, utils.NonTransactional)
 		if err != nil {
 			return nil, err
 		}
@@ -565,7 +566,7 @@ func (self *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string,
 		transactionID = utils.NonTransactional
 	}
 	for _, id := range supplierIDs {
-		spp, err := self.DataManager.GetSupplierProfile(tenant, id, false, utils.NonTransactional)
+		spp, err := self.DataManager.GetSupplierProfile(tenant, id, true, false, utils.NonTransactional)
 		if err != nil {
 			return nil, err
 		}
@@ -632,7 +633,7 @@ func (self *ApierV1) computeChargerIndexes(tenant string, cppIDs *[]string,
 		transactionID = utils.NonTransactional
 	}
 	for _, id := range chargerIDs {
-		cpp, err := self.DataManager.GetChargerProfile(tenant, id, false, utils.NonTransactional)
+		cpp, err := self.DataManager.GetChargerProfile(tenant, id, true, false, utils.NonTransactional)
 		if err != nil {
 			return nil, err
 		}

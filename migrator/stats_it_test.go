@@ -104,14 +104,14 @@ func testStsITConnect(t *testing.T) {
 	dataDBIn, err := NewMigratorDataDB(stsCfgIn.DataDbType,
 		stsCfgIn.DataDbHost, stsCfgIn.DataDbPort, stsCfgIn.DataDbName,
 		stsCfgIn.DataDbUser, stsCfgIn.DataDbPass, stsCfgIn.DBDataEncoding,
-		config.CgrConfig().CacheCfg(), *loadHistorySize)
+		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}
 	dataDBOut, err := NewMigratorDataDB(stsCfgOut.DataDbType,
 		stsCfgOut.DataDbHost, stsCfgOut.DataDbPort, stsCfgOut.DataDbName,
 		stsCfgOut.DataDbUser, stsCfgOut.DataDbPass, stsCfgOut.DBDataEncoding,
-		config.CgrConfig().CacheCfg(), *loadHistorySize)
+		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -268,7 +268,7 @@ func testStsITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", len(filter.Rules), len(result1.Rules))
 		}
 
-		result2, err := stsMigrator.dmOut.DataManager().GetStatQueue("cgrates.org", sq.ID, true, utils.NonTransactional)
+		result2, err := stsMigrator.dmOut.DataManager().GetStatQueue("cgrates.org", sq.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Error("Error when getting Stats ", err.Error())
 		}
@@ -296,7 +296,7 @@ func testStsITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when getting Stats ", err.Error())
 		}
-		result1, err := stsMigrator.dmOut.DataManager().GetStatQueue(sq.Tenant, sq.ID, true, utils.NonTransactional)
+		result1, err := stsMigrator.dmOut.DataManager().GetStatQueue(sq.Tenant, sq.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Error("Error when getting Stats ", err.Error())
 		}

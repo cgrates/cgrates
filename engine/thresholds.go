@@ -231,7 +231,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 		tIDs = tIDsMap.Slice()
 	}
 	for _, tID := range tIDs {
-		tPrfl, err := tS.dm.GetThresholdProfile(args.Tenant, tID, false, utils.NonTransactional)
+		tPrfl, err := tS.dm.GetThresholdProfile(args.Tenant, tID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
@@ -248,7 +248,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 		} else if !pass {
 			continue
 		}
-		t, err := tS.dm.GetThreshold(tPrfl.Tenant, tPrfl.ID, false, "")
+		t, err := tS.dm.GetThreshold(tPrfl.Tenant, tPrfl.ID, true, true, "")
 		if err != nil {
 			return nil, err
 		}
@@ -375,7 +375,7 @@ func (tS *ThresholdService) V1GetThresholdIDs(tenant string, tIDs *[]string) (er
 
 // V1GetThreshold retrieves a Threshold
 func (tS *ThresholdService) V1GetThreshold(tntID *utils.TenantID, t *Threshold) (err error) {
-	if thd, err := tS.dm.GetThreshold(tntID.Tenant, tntID.ID, false, ""); err != nil {
+	if thd, err := tS.dm.GetThreshold(tntID.Tenant, tntID.ID, true, true, ""); err != nil {
 		return err
 	} else {
 		*t = *thd

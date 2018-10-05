@@ -223,30 +223,40 @@ func TestStringToInterface(t *testing.T) {
 	}
 }
 
-func TestCastFieldIfToString(t *testing.T) {
+func TestIfaceAsString(t *testing.T) {
 	val := interface{}("string1")
-	if resVal, converted := CastFieldIfToString(val); !converted || resVal != "string1" {
-		t.Error(resVal, converted)
+	if rply, err := IfaceAsString(val); err != nil {
+		t.Error(err)
+	} else if rply != "string1" {
+		t.Errorf("Expeced string1 ,recived %+v", rply)
 	}
 	val = interface{}(123)
-	if resVal, converted := CastFieldIfToString(val); !converted || resVal != "123" {
-		t.Error(resVal, converted)
+	if rply, err := IfaceAsString(val); err != nil {
+		t.Error(err)
+	} else if rply != "123" {
+		t.Errorf("Expeced 123 ,recived %+v", rply)
 	}
 	val = interface{}([]byte("byte_val"))
-	if resVal, converted := CastFieldIfToString(val); !converted || resVal != "byte_val" {
-		t.Error(resVal, converted)
+	if rply, err := IfaceAsString(val); err != nil {
+		t.Error(err)
+	} else if rply != "byte_val" {
+		t.Errorf("Expeced byte_val ,recived %+v", rply)
 	}
 	val = interface{}(true)
-	if resVal, converted := CastFieldIfToString(val); !converted || resVal != "true" {
-		t.Error(resVal, converted)
+	if rply, err := IfaceAsString(val); err != nil {
+		t.Error(err)
+	} else if rply != "true" {
+		t.Errorf("Expeced true ,recived %+v", rply)
 	}
-	if strVal, cast := CastFieldIfToString(time.Duration(1 * time.Second)); !cast {
-		t.Error("cannot cast time.Duration")
-	} else if strVal != "1s" {
-		t.Errorf("received: %s", strVal)
+	if rply, err := IfaceAsString(time.Duration(1 * time.Second)); err != nil {
+		t.Error(err)
+	} else if rply != "1s" {
+		t.Errorf("Expeced 1s ,recived %+v", rply)
 	}
-	if resVal, converted := CastIfToString(nil); converted || resVal != "" {
-		t.Errorf("received: %s", resVal)
+	if rply, err := IfaceAsString(nil); err != nil {
+		t.Error(err)
+	} else if rply != "" {
+		t.Errorf("Expeced  ,recived %+v", rply)
 	}
 }
 

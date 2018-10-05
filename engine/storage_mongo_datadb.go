@@ -100,7 +100,7 @@ var (
 )
 
 func NewMongoStorage(host, port, db, user, pass, storageType string,
-	cdrsIndexes []string, cacheCfg config.CacheConfig, loadHistorySize int) (ms *MongoStorage, err error) {
+	cdrsIndexes []string, cacheCfg config.CacheConfig) (ms *MongoStorage, err error) {
 	url := host
 	if port != "" {
 		url += ":" + port
@@ -119,7 +119,7 @@ func NewMongoStorage(host, port, db, user, pass, storageType string,
 	}
 	session.SetMode(mgo.Strong, true)
 	ms = &MongoStorage{db: dbName, session: session, storageType: storageType, ms: NewCodecMsgpackMarshaler(),
-		cacheCfg: cacheCfg, loadHistorySize: loadHistorySize, cdrsIndexes: cdrsIndexes}
+		cacheCfg: cacheCfg, cdrsIndexes: cdrsIndexes}
 	if cNames, err := session.DB(ms.db).CollectionNames(); err != nil {
 		return nil, err
 	} else if len(cNames) == 0 { // create indexes only if database is empty
@@ -132,14 +132,13 @@ func NewMongoStorage(host, port, db, user, pass, storageType string,
 }
 
 type MongoStorage struct {
-	session         *mgo.Session
-	db              string
-	storageType     string // datadb, stordb
-	ms              Marshaler
-	cacheCfg        config.CacheConfig
-	loadHistorySize int
-	cdrsIndexes     []string
-	cnter           *utils.Counter
+	session     *mgo.Session
+	db          string
+	storageType string // datadb, stordb
+	ms          Marshaler
+	cacheCfg    config.CacheConfig
+	cdrsIndexes []string
+	cnter       *utils.Counter
 }
 
 func (ms *MongoStorage) conn(col string) (*mgo.Session, *mgo.Collection) {
@@ -2011,44 +2010,57 @@ func (ms *MongoStorage) RemoveTimingDrv(id string) (err error) {
 }
 
 // GetFilterIndexesDrv retrieves Indexes from dataDB
+//filterType is used togheter with fieldName:Val
 func (ms *MongoStorage) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType string,
 	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
-	var result struct {
+	type result struct {
 		Key   string
-		Value map[string][]string
+		Value []string
 	}
+	var results []result
 	dbKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
-	findParam := bson.M{"key": dbKey}
 	if len(fldNameVal) != 0 {
 		for fldName, fldValue := range fldNameVal {
-			qryFltr := fmt.Sprintf("value.%s",
-				utils.ConcatenatedKey(filterType, fldName, fldValue))
-			if err = col.Find(bson.M{"key": dbKey, qryFltr: bson.M{"$exists": true}}).Select(
-				bson.M{qryFltr: true}).One(&result); err != nil {
+			if err = col.Find(bson.M{"key": utils.ConcatenatedKey(dbKey, filterType, fldName, fldValue)}).All(&results); err != nil {
 				if err == mgo.ErrNotFound {
 					return nil, utils.ErrNotFound
 				}
 			}
 		}
 	} else {
-		if err = col.Find(findParam).One(&result); err != nil {
+		for _, character := range []string{".", "*"} {
+			dbKey = strings.Replace(dbKey, character, `\`+character, strings.Count(dbKey, character))
+		}
+		//inside bson.RegEx add carrot to match the prefix (optimization)
+		findWithoutIndexes := bson.M{"key": bson.M{"$regex": bson.RegEx{"^" + dbKey, ""}}}
+		if err = col.Find(findWithoutIndexes).All(&results); err != nil {
 			if err == mgo.ErrNotFound {
 				return nil, utils.ErrNotFound
 			}
 		}
 	}
 	indexes = make(map[string]utils.StringMap)
-	for key, itmSls := range result.Value {
-		if _, hasIt := indexes[key]; !hasIt {
-			indexes[key] = make(utils.StringMap)
+	for _, res := range results {
+		if len(res.Value) == 0 {
+			continue
 		}
-		indexes[key] = utils.StringMapFromSlice(itmSls)
+		keys := strings.Split(res.Key, ":")
+		indexKey := utils.ConcatenatedKey(keys[1], keys[2], keys[3])
+		//check here if itemIDPrefix has context
+		if len(strings.Split(itemIDPrefix, ":")) == 2 {
+			indexKey = utils.ConcatenatedKey(keys[2], keys[3], keys[4])
+		}
+		if _, hasIt := indexes[indexKey]; !hasIt {
+			indexes[indexKey] = make(utils.StringMap)
+		}
+		indexes[indexKey] = utils.StringMapFromSlice(res.Value)
 	}
 	if len(indexes) == 0 {
 		return nil, utils.ErrNotFound
 	}
+
 	return indexes, nil
 }
 
@@ -2063,16 +2075,20 @@ func (ms *MongoStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 		dbKey = "tmp_" + utils.ConcatenatedKey(originKey, transactionID)
 	}
 	if commit && transactionID != "" {
-		oldKey := "tmp_" + utils.ConcatenatedKey(originKey, transactionID)
-		err = col.Remove(bson.M{"key": originKey})
+		regexKey := originKey
+		for _, character := range []string{".", "*"} {
+			regexKey = strings.Replace(regexKey, character, `\`+character, strings.Count(regexKey, character))
+		}
+		//inside bson.RegEx add carrot to match the prefix (optimization)
+		_, err = col.RemoveAll(bson.M{"key": bson.M{"$regex": bson.RegEx{"^" + regexKey, ""}}})
 		if err != nil && err != mgo.ErrNotFound {
 			return
 		}
+
 		pairs := []interface{}{}
 		for key, itmMp := range indexes {
-			param := fmt.Sprintf("value.%s", key)
-			pairs = append(pairs, bson.M{"key": originKey})
-			pairs = append(pairs, bson.M{"$set": bson.M{"key": originKey, param: itmMp.Slice()}})
+			pairs = append(pairs, bson.M{"key": utils.ConcatenatedKey(originKey, key)})
+			pairs = append(pairs, bson.M{"$set": bson.M{"key": utils.ConcatenatedKey(originKey, key), "value": itmMp.Slice()}})
 		}
 		if len(pairs) != 0 {
 			bulk := col.Bulk()
@@ -2080,16 +2096,21 @@ func (ms *MongoStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 			bulk.Upsert(pairs...)
 			_, err = bulk.Run()
 		}
-		return col.Remove(bson.M{"key": oldKey})
+		oldKey := "tmp_" + utils.ConcatenatedKey(originKey, transactionID)
+		for _, character := range []string{".", "*"} {
+			oldKey = strings.Replace(oldKey, character, `\`+character, strings.Count(oldKey, character))
+		}
+		//inside bson.RegEx add carrot to match the prefix (optimization)
+		_, err = col.RemoveAll(bson.M{"key": bson.M{"$regex": bson.RegEx{"^" + oldKey, ""}}})
+		return err
 	} else {
 		pairs := []interface{}{}
 		for key, itmMp := range indexes {
-			param := fmt.Sprintf("value.%s", key)
-			pairs = append(pairs, bson.M{"key": dbKey})
+			pairs = append(pairs, bson.M{"key": utils.ConcatenatedKey(dbKey, key)})
 			if len(itmMp) == 0 {
-				pairs = append(pairs, bson.M{"$unset": bson.M{param: 1}})
+				pairs = append(pairs, bson.M{"$unset": bson.M{"value": 1}})
 			} else {
-				pairs = append(pairs, bson.M{"$set": bson.M{"key": dbKey, param: itmMp.Slice()}})
+				pairs = append(pairs, bson.M{"$set": bson.M{"key": utils.ConcatenatedKey(dbKey, key), "value": itmMp.Slice()}})
 			}
 		}
 		if len(pairs) != 0 {
@@ -2105,7 +2126,12 @@ func (ms *MongoStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 func (ms *MongoStorage) RemoveFilterIndexesDrv(cacheID, itemIDPrefix string) (err error) {
 	session, col := ms.conn(colRFI)
 	defer session.Close()
-	err = col.Remove(bson.M{"key": utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix})
+	regexKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
+	for _, character := range []string{".", "*"} {
+		regexKey = strings.Replace(regexKey, character, `\`+character, strings.Count(regexKey, character))
+	}
+	//inside bson.RegEx add carrot to match the prefix (optimization)
+	_, err = col.RemoveAll(bson.M{"key": bson.M{"$regex": bson.RegEx{"^" + regexKey, ""}}})
 	// redis compatibility
 	if err == mgo.ErrNotFound {
 		err = nil
@@ -2119,20 +2145,17 @@ func (ms *MongoStorage) MatchFilterIndexDrv(cacheID, itemIDPrefix,
 	defer session.Close()
 	var result struct {
 		Key   string
-		Value map[string][]string
+		Value []string
 	}
-	fldKey := fmt.Sprintf("value.%s",
-		utils.ConcatenatedKey(filterType, fldName, fldVal))
+	dbKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
 	if err = col.Find(
-		bson.M{"key": utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix,
-			fldKey: bson.M{"$exists": true}}).Select(bson.M{fldKey: true}).One(&result); err != nil {
+		bson.M{"key": utils.ConcatenatedKey(dbKey, filterType, fldName, fldVal)}).One(&result); err != nil {
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
 		}
 		return nil, err
 	}
-	itemIDs = utils.StringMapFromSlice(
-		result.Value[utils.ConcatenatedKey(filterType, fldName, fldVal)])
+	itemIDs = utils.StringMapFromSlice(result.Value)
 	return
 }
 

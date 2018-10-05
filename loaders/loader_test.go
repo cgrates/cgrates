@@ -127,7 +127,7 @@ cgrates.org,TestLoader1,lcr,*string:Account:1008;*string:Account:1009,,Subject,*
 		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
 	}
 	if ap, err := ldr.dm.GetAttributeProfile("cgrates.org", "TestLoader1",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eAP.Attributes, ap.Attributes) {
 		t.Errorf("expecting: %s, received: %s",
@@ -216,7 +216,7 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
 	}
 	if ap, err := ldr.dm.GetAttributeProfile("cgrates.org", "TestLoader2",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eAP.Attributes, ap.Attributes) {
 		t.Errorf("expecting: %s, received: %s",
@@ -332,14 +332,14 @@ cgrates.org,ResGroup2,*string:Account:1002,2014-07-29T15:00:00Z,3600s,2,premium_
 		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
 	}
 	if resPrf, err := ldr.dm.GetResourceProfile("cgrates.org", "ResGroup1",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eResPrf1, resPrf) {
 		t.Errorf("expecting: %s, received: %s",
 			utils.ToJSON(eResPrf1), utils.ToJSON(resPrf))
 	}
 	if resPrf, err := ldr.dm.GetResourceProfile("cgrates.org", "ResGroup2",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eResPrf2, resPrf) {
 		t.Errorf("expecting: %s, received: %s",
@@ -575,14 +575,14 @@ cgrates.org,THD_ACNT_1002,*string:Account:1002,2014-07-29T15:00:00Z,-1,1,1s,true
 		Async:     true,
 	}
 	if aps, err := ldr.dm.GetThresholdProfile("cgrates.org", "THD_ACNT_1001",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTh1, aps) {
 		t.Errorf("expecting: %s, received: %s",
 			utils.ToJSON(eTh1), utils.ToJSON(aps))
 	}
 	if aps, err := ldr.dm.GetThresholdProfile("cgrates.org", "THD_ACNT_1002",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTh2, aps) {
 		t.Errorf("expecting: %s, received: %s",
@@ -719,7 +719,7 @@ cgrates.org,Stats1,*string:Account:1003,2014-07-29T15:00:00Z,100,1s,*sum;*averag
 		ThresholdIDs: []string{"THRESH1", "THRESH2"},
 	}
 	if aps, err := ldr.dm.GetStatQueueProfile("cgrates.org", "Stats1",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSt1.Tenant, aps.Tenant) {
 		t.Errorf("expecting: %s, received: %s", eSt1.Tenant, aps.Tenant)
@@ -919,7 +919,7 @@ cgrates.org,SPL_LEASTCOST_1,,,,,supplier2,,,RP_RETAIL1,resource_spl2,,20,,,
 		Weight: 10,
 	}
 	if aps, err := ldr.dm.GetSupplierProfile("cgrates.org", "SPL_WEIGHT_2",
-		false, utils.NonTransactional); err != nil {
+		true, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSp1, aps) {
 		t.Errorf("expecting: %s, received: %s",
@@ -927,7 +927,7 @@ cgrates.org,SPL_LEASTCOST_1,,,,,supplier2,,,RP_RETAIL1,resource_spl2,,20,,,
 	}
 
 	if aps, err := ldr.dm.GetSupplierProfile("cgrates.org", "SPL_LEASTCOST_1",
-		false, utils.NonTransactional); err != nil {
+		true, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSp3, aps) && !reflect.DeepEqual(eSp3reverse, aps) {
 		t.Errorf("expecting: %s, received: %s",
@@ -1030,13 +1030,13 @@ cgrates.org,Charge2,*string:Account:1003,2014-07-29T15:00:00Z,*default,Attr3,10
 		Weight:       10,
 	}
 	if rcv, err := ldr.dm.GetChargerProfile("cgrates.org", "Charge1",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCharger1, rcv) && !reflect.DeepEqual(eCharger1Rev, rcv) {
 		t.Errorf("expecting: %s, received: %s", utils.ToJSON(eCharger1), utils.ToJSON(rcv))
 	}
 	if rcv, err := ldr.dm.GetChargerProfile("cgrates.org", "Charge2",
-		false, utils.NonTransactional); err != nil {
+		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCharger2, rcv) {
 		t.Errorf("expecting: %+v, received: %+v", eCharger2, rcv)

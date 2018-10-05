@@ -138,14 +138,14 @@ func testActPlnITConnect(t *testing.T) {
 	dataDBIn, err := NewMigratorDataDB(actPlnCfgIn.DataDbType,
 		actPlnCfgIn.DataDbHost, actPlnCfgIn.DataDbPort, actPlnCfgIn.DataDbName,
 		actPlnCfgIn.DataDbUser, actPlnCfgIn.DataDbPass, actPlnCfgIn.DBDataEncoding,
-		config.CgrConfig().CacheCfg(), *loadHistorySize)
+		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}
 	dataDBOut, err := NewMigratorDataDB(actPlnCfgOut.DataDbType,
 		actPlnCfgOut.DataDbHost, actPlnCfgOut.DataDbPort, actPlnCfgOut.DataDbName,
 		actPlnCfgOut.DataDbUser, actPlnCfgOut.DataDbPass, actPlnCfgOut.DBDataEncoding,
-		config.CgrConfig().CacheCfg(), *loadHistorySize)
+		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -51,6 +51,8 @@ var (
 		"The DataDb user's password.")
 	dbDataEncoding = flag.String("dbdata_encoding", dfltCfg.DBDataEncoding,
 		"The encoding used to store object data in strings")
+	dbRedisSentinel = flag.String("redis_sentinel", dfltCfg.DataDbSentinelName,
+		"The name of redis sentinel")
 
 	storDBType = flag.String("stordb_type", dfltCfg.StorDBType,
 		"The type of the storDb database <*mysql|*postgres|*mongo>")
@@ -138,6 +140,10 @@ func main() {
 		ldrCfg.DataDbPass = *dataDBPasswd
 	}
 
+	if *dbRedisSentinel != dfltCfg.DataDbSentinelName {
+		ldrCfg.DataDbSentinelName = *dbRedisSentinel
+	}
+
 	if *storDBType != dfltCfg.StorDBType {
 		ldrCfg.StorDBType = *storDBType
 	}
@@ -211,7 +217,7 @@ func main() {
 		if dm, err = engine.ConfigureDataStorage(ldrCfg.DataDbType, ldrCfg.DataDbHost,
 			ldrCfg.DataDbPort, ldrCfg.DataDbName,
 			ldrCfg.DataDbUser, ldrCfg.DataDbPass, ldrCfg.DBDataEncoding,
-			config.CgrConfig().CacheCfg(), ldrCfg.LoadHistorySize); err != nil {
+			config.CgrConfig().CacheCfg(), ldrCfg.DataDbSentinelName); err != nil {
 			log.Fatalf("Coud not open dataDB connection: %s", err.Error())
 		}
 		defer dm.DataDB().Close()

@@ -34,7 +34,7 @@
 "cdrs": {
 	"enabled": true,
 	"chargers_conns":[
-		{"address": "*internal"},
+		{"address": "*internal"}
 	],
 },
 

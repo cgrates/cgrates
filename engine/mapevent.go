@@ -110,7 +110,7 @@ func (me MapEvent) AsMapString(ignoredFlds utils.StringMap) (mp map[string]strin
 		if out, err = utils.IfaceAsString(v); err != nil {
 			return nil, err
 		}
-		me[k] = out
+		mp[k] = out
 	}
 	return
 }
@@ -121,8 +121,8 @@ func (me MapEvent) AsMapStringIgnoreErrors(ignoredFlds utils.StringMap) (mp map[
 		if ignoredFlds.HasKey(k) {
 			continue
 		}
-		if out, can := utils.CastFieldIfToString(v); can {
-			me[k] = out
+		if out, err := utils.IfaceAsString(v); err == nil {
+			mp[k] = out
 		}
 	}
 	return
@@ -132,7 +132,9 @@ func (me MapEvent) AsMapStringIgnoreErrors(ignoredFlds utils.StringMap) (mp map[
 func (me MapEvent) AsCDR(cfg *config.CGRConfig, tmz string) (cdr *CDR, err error) {
 	cdr = &CDR{Cost: -1.0, ExtraFields: make(map[string]string)}
 	for k, v := range me {
-		if !utils.IsSliceMember(utils.PrimaryCdrFields, k) { // not primary field, populate extra ones
+		if !utils.IsSliceMember(
+			append(utils.PrimaryCdrFields, utils.PreRated, utils.CostSource),
+			k) { // not primary field, populate extra ones
 			if cdr.ExtraFields[k], err = utils.IfaceAsString(v); err != nil {
 				return nil, err
 			}

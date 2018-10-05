@@ -36,7 +36,7 @@ func (m *Migrator) migrateCurrentSupplierProfile() (err error) {
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.SupplierProfilePrefix)
-		splp, err := m.dmIN.DataManager().GetSupplierProfile(tenant, idg, true, utils.NonTransactional)
+		splp, err := m.dmIN.DataManager().GetSupplierProfile(tenant, idg, false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}

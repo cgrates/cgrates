@@ -63,7 +63,7 @@ var sTests = []func(t *testing.T){
 func TestFilterIndexerITRedis(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	redisDB, err := NewRedisStorage(fmt.Sprintf("%s:%s", cfg.DataDbHost, cfg.DataDbPort), 4,
-		cfg.DataDbPass, cfg.DBDataEncoding, utils.REDIS_MAX_CONNS, nil, 1)
+		cfg.DataDbPass, cfg.DBDataEncoding, utils.REDIS_MAX_CONNS, nil, "")
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	}
@@ -82,7 +82,7 @@ func TestFilterIndexerITMongo(t *testing.T) {
 	}
 	mongoDB, err := NewMongoStorage(mgoITCfg.StorDBHost, mgoITCfg.StorDBPort,
 		mgoITCfg.StorDBName, mgoITCfg.StorDBUser, mgoITCfg.StorDBPass,
-		utils.StorDB, nil, mgoITCfg.CacheCfg(), mgoITCfg.LoadHistorySize)
+		utils.StorDB, nil, mgoITCfg.CacheCfg())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -136,7 +136,7 @@ func testITSetFilterIndexes(t *testing.T) {
 			"RL2": true,
 			"RL3": true,
 		},
-		utils.ConcatenatedKey(utils.MetaDefault, utils.ANY, utils.ANY): utils.StringMap{
+		utils.ConcatenatedKey(utils.META_NONE, utils.ANY, utils.ANY): utils.StringMap{
 			"RL4": true,
 			"RL5": true,
 		},
@@ -164,7 +164,7 @@ func testITGetFilterIndexes(t *testing.T) {
 			"RL2": true,
 			"RL3": true,
 		},
-		utils.ConcatenatedKey(utils.MetaDefault, utils.ANY, utils.ANY): utils.StringMap{
+		utils.ConcatenatedKey(utils.META_NONE, utils.ANY, utils.ANY): utils.StringMap{
 			"RL4": true,
 			"RL5": true,
 		},
@@ -178,6 +178,7 @@ func testITGetFilterIndexes(t *testing.T) {
 			"RL3": true,
 		},
 	}
+
 	if exsbjDan, err := dataManager.GetFilterIndexes(
 		utils.PrefixToIndexCache[utils.ResourceProfilesPrefix],
 		"cgrates.org", MetaString, sbjDan); err != nil {
@@ -187,13 +188,13 @@ func testITGetFilterIndexes(t *testing.T) {
 	}
 	if rcv, err := dataManager.GetFilterIndexes(
 		utils.PrefixToIndexCache[utils.ResourceProfilesPrefix],
-		"cgrates.org", MetaString, nil); err != nil {
+		"cgrates.org", utils.EmptyString, nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eIdxes, rcv)
 	}
 	if _, err := dataManager.GetFilterIndexes("unknown_key", "unkonwn_tenant",
-		MetaString, nil); err == nil || err != utils.ErrNotFound {
+		utils.EmptyString, nil); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -279,7 +280,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 	rfi := NewFilterIndexer(onStor, utils.ThresholdProfilePrefix, th.Tenant)
 	if rcvIdx, err := dataManager.GetFilterIndexes(
 		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
-		MetaString, nil); err != nil {
+		utils.EmptyString, nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
@@ -305,6 +306,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	th.FilterIDs = []string{"Filter2"}
+	time.Sleep(50 * time.Millisecond)
 	if err := dataManager.SetThresholdProfile(th, true); err != nil {
 		t.Error(err)
 	}
@@ -324,7 +326,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 	}
 	if rcvIdx, err := dataManager.GetFilterIndexes(
 		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
-		MetaString, nil); err != nil {
+		utils.EmptyString, nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
@@ -349,6 +351,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	th.FilterIDs = []string{"Filter1", "Filter3"}
+	time.Sleep(50 * time.Millisecond)
 	if err := dataManager.SetThresholdProfile(th, true); err != nil {
 		t.Error(err)
 	}
@@ -370,7 +373,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 	}
 	if rcvIdx, err := dataManager.GetFilterIndexes(
 		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
-		MetaString, nil); err != nil {
+		utils.EmptyString, nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
@@ -386,7 +389,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 	}
 	if _, err := dataManager.GetFilterIndexes(
 		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
-		MetaString, nil); err != utils.ErrNotFound {
+		utils.EmptyString, nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -445,7 +448,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 			utils.ConcatenatedKey(attrProfile.Tenant, ctx))
 		if rcvIdx, err := dataManager.GetFilterIndexes(
 			utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
-			MetaString, nil); err != nil {
+			utils.EmptyString, nil); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
@@ -453,6 +456,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 	}
 	//Set AttributeProfile with 1 new context (con3)
 	attrProfile.Contexts = []string{"con3"}
+	time.Sleep(50 * time.Millisecond)
 	if err := dataManager.SetAttributeProfile(attrProfile, true); err != nil {
 		t.Error(err)
 	}
@@ -461,7 +465,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		utils.ConcatenatedKey(attrProfile.Tenant, "con3"))
 	if rcvIdx, err := dataManager.GetFilterIndexes(
 		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
-		MetaString, nil); err != nil {
+		utils.EmptyString, nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
@@ -472,7 +476,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 			utils.ConcatenatedKey(attrProfile.Tenant, ctx))
 		if _, err := dataManager.GetFilterIndexes(
 			utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
-			MetaString, nil); err != nil && err != utils.ErrNotFound {
+			utils.EmptyString, nil); err != nil && err != utils.ErrNotFound {
 			t.Error(err)
 		}
 	}
@@ -489,6 +493,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		MetaString, nil); err != nil && err != utils.ErrNotFound {
 		t.Error(err)
 	}
+
 }
 
 func testITTestThresholdInlineFilterIndexing(t *testing.T) {
@@ -536,13 +541,14 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 	rfi := NewFilterIndexer(onStor, utils.ThresholdProfilePrefix, th.Tenant)
 	if rcvIdx, err := dataManager.GetFilterIndexes(
 		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
-		MetaString, nil); err != nil {
+		utils.EmptyString, nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
 	}
 	//Add an InlineFilter
 	th.FilterIDs = []string{"Filter1", "*string:Account:1001"}
+	time.Sleep(50 * time.Millisecond)
 	if err := dataManager.SetThresholdProfile(th, true); err != nil {
 		t.Error(err)
 	}
@@ -559,7 +565,7 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 	}
 	if rcvIdx, err := dataManager.GetFilterIndexes(
 		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
-		MetaString, nil); err != nil {
+		utils.EmptyString, nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
@@ -571,7 +577,7 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 	}
 	if _, err := dataManager.GetFilterIndexes(
 		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
-		MetaString, nil); err != utils.ErrNotFound {
+		utils.EmptyString, nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -592,7 +598,7 @@ func testITTestStoreFilterIndexesWithTransID(t *testing.T) {
 			"RL2": true,
 			"RL3": true,
 		},
-		utils.ConcatenatedKey(utils.MetaDefault,
+		utils.ConcatenatedKey(utils.META_NONE,
 			utils.ANY, utils.ANY): utils.StringMap{
 			"RL4": true,
 			"RL5": true,
@@ -603,19 +609,42 @@ func testITTestStoreFilterIndexesWithTransID(t *testing.T) {
 		idxes, false, "transaction1"); err != nil {
 		t.Error(err)
 	}
+
 	//commit transaction
 	if err := dataManager.SetFilterIndexes(
 		utils.PrefixToIndexCache[utils.ResourceProfilesPrefix],
 		"cgrates.org", idxes, true, "transaction1"); err != nil {
 		t.Error(err)
 	}
+	eIdx := map[string]utils.StringMap{
+		"*string:Account:1001": utils.StringMap{
+			"RL1": true,
+		},
+		"*string:Account:1002": utils.StringMap{
+			"RL1": true,
+			"RL2": true,
+		},
+		"*string:Account:dan": utils.StringMap{
+			"RL2": true,
+		},
+		"*string:Subject:dan": utils.StringMap{
+			"RL2": true,
+			"RL3": true,
+		},
+		utils.ConcatenatedKey(utils.META_NONE,
+			utils.ANY, utils.ANY): utils.StringMap{
+			"RL4": true,
+			"RL5": true,
+		},
+	}
+
 	//verify new key and check if data was moved
 	if rcv, err := dataManager.GetFilterIndexes(
 		utils.PrefixToIndexCache[utils.ResourceProfilesPrefix], "cgrates.org",
-		MetaString, nil); err != nil {
+		utils.EmptyString, nil); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(idxes, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", idxes, rcv)
+	} else if !reflect.DeepEqual(eIdx, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eIdx, rcv)
 	}
 }
 
@@ -635,16 +664,6 @@ func testITTestStoreFilterIndexesWithTransID2(t *testing.T) {
 		idxes, false, transID); err != nil {
 		t.Error(err)
 	}
-	/* #FixMe: add transactionID to GetFilterIndexes so we can check the content of temporary key
-	if rcv, err := dataManager.GetFilterIndexes(
-		utils.TEMP_DESTINATION_PREFIX+utils.PrefixToIndexCache[utils.ResourceProfilesPrefix],
-		utils.ConcatenatedKey("cgrates.org", transID),
-		MetaString, nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(idxes, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", idxes, rcv)
-	}
-	*/
 	//commit transaction
 	if err := dataManager.SetFilterIndexes(
 		utils.PrefixToIndexCache[utils.ResourceProfilesPrefix], "cgrates.org",
@@ -655,13 +674,13 @@ func testITTestStoreFilterIndexesWithTransID2(t *testing.T) {
 	if _, err := dataManager.GetFilterIndexes(
 		"tmp_"+utils.PrefixToIndexCache[utils.ResourceProfilesPrefix],
 		utils.ConcatenatedKey("cgrates.org", transID),
-		MetaString, nil); err != utils.ErrNotFound {
+		utils.EmptyString, nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	//verify new key and check if data was moved
 	if rcv, err := dataManager.GetFilterIndexes(
 		utils.PrefixToIndexCache[utils.ResourceProfilesPrefix],
-		"cgrates.org", MetaString, nil); err != nil {
+		"cgrates.org", utils.EmptyString, nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(idxes, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", idxes, rcv)
@@ -707,7 +726,7 @@ func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 	rfi := NewFilterIndexer(onStor, utils.ThresholdProfilePrefix, th.Tenant)
 	if rcvIdx, err := dataManager.GetFilterIndexes(
 		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
-		MetaString, nil); err != nil {
+		utils.META_NONE, nil); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
@@ -789,7 +808,7 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 	rfi := NewFilterIndexer(onStor, utils.SupplierProfilePrefix, splProfile.Tenant)
 	if rcvIdx, err := dataManager.GetFilterIndexes(
 		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
-		MetaString, nil); err != nil {
+		utils.EmptyString, nil); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
@@ -848,7 +867,7 @@ func testITTestIndexingThresholds(t *testing.T) {
 	}
 	if rcvIdx, err := dataManager.GetFilterIndexes(
 		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
-		MetaString, nil); err != nil {
+		utils.EmptyString, nil); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {

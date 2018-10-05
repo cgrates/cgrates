@@ -85,7 +85,7 @@ func (alS *AttributeService) matchingAttributeProfilesForEvent(args *AttrArgsPro
 		attrIDs = aPrflIDs.Slice()
 	}
 	for _, apID := range attrIDs {
-		aPrfl, err := alS.dm.GetAttributeProfile(args.Tenant, apID, false, utils.NonTransactional)
+		aPrfl, err := alS.dm.GetAttributeProfile(args.Tenant, apID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue

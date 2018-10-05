@@ -395,8 +395,7 @@ func startHTTPAgent(internalSMGChan chan rpcclient.RpcClientConnection,
 			}
 		}
 		server.RegisterHttpHandler(agntCfg.Url,
-			agents.NewHTTPAgent(sSConn, filterS, agntCfg.Tenant, dfltTenant,
-				agntCfg.Timezone, agntCfg.RequestPayload,
+			agents.NewHTTPAgent(sSConn, filterS, dfltTenant, agntCfg.RequestPayload,
 				agntCfg.ReplyPayload, agntCfg.RequestProcessors))
 	}
 }
@@ -1158,8 +1157,9 @@ func main() {
 		cfg.AliasesServerEnabled || cfg.UserServerEnabled || cfg.SchedulerCfg().Enabled ||
 		cfg.AttributeSCfg().Enabled || cfg.ResourceSCfg().Enabled || cfg.StatSCfg().Enabled ||
 		cfg.ThresholdSCfg().Enabled || cfg.SupplierSCfg().Enabled { // Some services can run without db, ie: SessionS or CDRC
-		dm, err = engine.ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort,
-			cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheCfg(), cfg.LoadHistorySize)
+		dm, err = engine.ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost,
+			cfg.DataDbPort, cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass,
+			cfg.DBDataEncoding, cfg.CacheCfg(), cfg.DataDbSentinelName)
 		if err != nil { // Cannot configure getter database, show stopper
 			utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 			return

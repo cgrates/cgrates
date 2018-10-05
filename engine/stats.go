@@ -159,7 +159,7 @@ func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (
 		sqIDs = mapIDs.Slice()
 	}
 	for _, sqID := range sqIDs {
-		sqPrfl, err := sS.dm.GetStatQueueProfile(args.Tenant, sqID, false, utils.NonTransactional)
+		sqPrfl, err := sS.dm.GetStatQueueProfile(args.Tenant, sqID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
@@ -178,7 +178,7 @@ func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (
 		}
 		lkID := utils.StatQueuePrefix + utils.ConcatenatedKey(sqPrfl.Tenant, sqPrfl.ID)
 		guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lkID)
-		s, err := sS.dm.GetStatQueue(sqPrfl.Tenant, sqPrfl.ID, false, "")
+		s, err := sS.dm.GetStatQueue(sqPrfl.Tenant, sqPrfl.ID, true, true, "")
 		guardian.Guardian.UnguardIDs(lkID)
 		if err != nil {
 			return nil, err
@@ -336,7 +336,7 @@ func (sS *StatService) V1GetQueueStringMetrics(args *utils.TenantID, reply *map[
 	lkID := utils.StatQueuePrefix + args.TenantID()
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lkID)
 	defer guardian.Guardian.UnguardIDs(lkID)
-	sq, err := sS.dm.GetStatQueue(args.Tenant, args.ID, false, "")
+	sq, err := sS.dm.GetStatQueue(args.Tenant, args.ID, true, true, "")
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
@@ -359,7 +359,7 @@ func (sS *StatService) V1GetQueueFloatMetrics(args *utils.TenantID, reply *map[s
 	lkID := utils.StatQueuePrefix + args.TenantID()
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lkID)
 	defer guardian.Guardian.UnguardIDs(lkID)
-	sq, err := sS.dm.GetStatQueue(args.Tenant, args.ID, false, "")
+	sq, err := sS.dm.GetStatQueue(args.Tenant, args.ID, true, true, "")
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)

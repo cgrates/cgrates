@@ -32,7 +32,7 @@ var (
 	statService       *StatService
 	dmSTS             *DataManager
 	sqps              = []*StatQueueProfile{
-		&StatQueueProfile{
+		{
 			Tenant:    "cgrates.org",
 			ID:        "StatQueueProfile1",
 			FilterIDs: []string{"FLTR_STATS_1"},
@@ -42,18 +42,18 @@ var (
 			QueueLength: 10,
 			TTL:         time.Duration(10) * time.Second,
 			Metrics: []*utils.MetricWithParams{
-				&utils.MetricWithParams{
+				{
 					MetricID:   utils.MetaSum,
 					Parameters: utils.Usage,
 				},
 			},
 			ThresholdIDs: []string{},
-			Blocker:      true,
+			Blocker:      false,
 			Stored:       true,
 			Weight:       20,
 			MinItems:     1,
 		},
-		&StatQueueProfile{
+		{
 			Tenant:    "cgrates.org",
 			ID:        "StatQueueProfile2",
 			FilterIDs: []string{"FLTR_STATS_2"},
@@ -63,18 +63,18 @@ var (
 			QueueLength: 10,
 			TTL:         time.Duration(10) * time.Second,
 			Metrics: []*utils.MetricWithParams{
-				&utils.MetricWithParams{
+				{
 					MetricID:   utils.MetaSum,
 					Parameters: utils.Usage,
 				},
 			},
 			ThresholdIDs: []string{},
-			Blocker:      true,
+			Blocker:      false,
 			Stored:       true,
 			Weight:       20,
 			MinItems:     1,
 		},
-		&StatQueueProfile{
+		{
 			Tenant:    "cgrates.org",
 			ID:        "StatQueueProfilePrefix",
 			FilterIDs: []string{"FLTR_STATS_3"},
@@ -84,25 +84,25 @@ var (
 			QueueLength: 10,
 			TTL:         time.Duration(10) * time.Second,
 			Metrics: []*utils.MetricWithParams{
-				&utils.MetricWithParams{
+				{
 					MetricID:   utils.MetaSum,
 					Parameters: utils.Usage,
 				},
 			},
 			ThresholdIDs: []string{},
-			Blocker:      true,
+			Blocker:      false,
 			Stored:       true,
 			Weight:       20,
 			MinItems:     1,
 		},
 	}
 	stqs = []*StatQueue{
-		&StatQueue{Tenant: "cgrates.org", ID: "StatQueueProfile1", sqPrfl: sqps[0]},
-		&StatQueue{Tenant: "cgrates.org", ID: "StatQueueProfile2", sqPrfl: sqps[1]},
-		&StatQueue{Tenant: "cgrates.org", ID: "StatQueueProfilePrefix", sqPrfl: sqps[2]},
+		{Tenant: "cgrates.org", ID: "StatQueueProfile1", sqPrfl: sqps[0]},
+		{Tenant: "cgrates.org", ID: "StatQueueProfile2", sqPrfl: sqps[1]},
+		{Tenant: "cgrates.org", ID: "StatQueueProfilePrefix", sqPrfl: sqps[2]},
 	}
 	statsEvs = []*StatsArgsProcessEvent{
-		&StatsArgsProcessEvent{
+		{
 			CGREvent: utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "event1",
@@ -117,7 +117,7 @@ var (
 				},
 			},
 		},
-		&StatsArgsProcessEvent{
+		{
 			CGREvent: utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "event2",
@@ -131,7 +131,7 @@ var (
 				},
 			},
 		},
-		&StatsArgsProcessEvent{
+		{
 			CGREvent: utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "event3",
@@ -164,22 +164,22 @@ func TestStatQueuesAddFilters(t *testing.T) {
 		Tenant: config.CgrConfig().DefaultTenant,
 		ID:     "FLTR_STATS_1",
 		Rules: []*FilterRule{
-			&FilterRule{
+			{
 				Type:      MetaString,
 				FieldName: "Stats",
 				Values:    []string{"StatQueueProfile1"},
 			},
-			&FilterRule{
+			{
 				Type:      MetaGreaterOrEqual,
 				FieldName: "UsageInterval",
 				Values:    []string{(1 * time.Second).String()},
 			},
-			&FilterRule{
+			{
 				Type:      MetaGreaterOrEqual,
 				FieldName: utils.Usage,
 				Values:    []string{(1 * time.Second).String()},
 			},
-			&FilterRule{
+			{
 				Type:      MetaGreaterOrEqual,
 				FieldName: utils.Weight,
 				Values:    []string{"9.0"},
@@ -191,22 +191,22 @@ func TestStatQueuesAddFilters(t *testing.T) {
 		Tenant: config.CgrConfig().DefaultTenant,
 		ID:     "FLTR_STATS_2",
 		Rules: []*FilterRule{
-			&FilterRule{
+			{
 				Type:      MetaString,
 				FieldName: "Stats",
 				Values:    []string{"StatQueueProfile2"},
 			},
-			&FilterRule{
+			{
 				Type:      MetaGreaterOrEqual,
 				FieldName: "PddInterval",
 				Values:    []string{(1 * time.Second).String()},
 			},
-			&FilterRule{
+			{
 				Type:      MetaGreaterOrEqual,
 				FieldName: utils.Usage,
 				Values:    []string{(1 * time.Second).String()},
 			},
-			&FilterRule{
+			{
 				Type:      MetaGreaterOrEqual,
 				FieldName: utils.Weight,
 				Values:    []string{"15.0"},
@@ -218,7 +218,7 @@ func TestStatQueuesAddFilters(t *testing.T) {
 		Tenant: config.CgrConfig().DefaultTenant,
 		ID:     "FLTR_STATS_3",
 		Rules: []*FilterRule{
-			&FilterRule{
+			{
 				Type:      MetaPrefix,
 				FieldName: "Stats",
 				Values:    []string{"StatQueueProfilePrefix"},
@@ -238,7 +238,7 @@ func TestStatQueuesPopulateStatsService(t *testing.T) {
 	//Test each statQueueProfile from cache
 	for _, sqp := range sqps {
 		if tempStat, err := dmSTS.GetStatQueueProfile(sqp.Tenant,
-			sqp.ID, false, utils.NonTransactional); err != nil {
+			sqp.ID, true, false, utils.NonTransactional); err != nil {
 			t.Errorf("Error: %+v", err)
 		} else if !reflect.DeepEqual(sqp, tempStat) {
 			t.Errorf("Expecting: %+v, received: %+v", sqp, tempStat)
@@ -356,5 +356,52 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", stqs[2].ID, msq[0].ID)
 	} else if !reflect.DeepEqual(stqs[2].sqPrfl, msq[0].sqPrfl) {
 		t.Errorf("Expecting: %+v, received: %+v", stqs[2].sqPrfl, msq[0].sqPrfl)
+	}
+}
+func TestStatQueuesV1ProcessEvent(t *testing.T) {
+	sqPrf := &StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "StatQueueProfile3",
+		FilterIDs: []string{"FLTR_STATS_1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		QueueLength: 10,
+		TTL:         time.Duration(10) * time.Second,
+		Metrics: []*utils.MetricWithParams{
+			{
+				MetricID:   utils.MetaSum,
+				Parameters: utils.Usage,
+			},
+		},
+		ThresholdIDs: []string{},
+		Stored:       true,
+		Weight:       20,
+		MinItems:     1,
+	}
+	sq := &StatQueue{Tenant: "cgrates.org", ID: "StatQueueProfile3", sqPrfl: sqPrf}
+	if err := dmSTS.SetStatQueueProfile(sqPrf, true); err != nil {
+		t.Error(err)
+	}
+	if err := dmSTS.SetStatQueue(sq); err != nil {
+		t.Error(err)
+	}
+	if tempStat, err := dmSTS.GetStatQueueProfile(sqPrf.Tenant,
+		sqPrf.ID, true, false, utils.NonTransactional); err != nil {
+		t.Errorf("Error: %+v", err)
+	} else if !reflect.DeepEqual(sqPrf, tempStat) {
+		t.Errorf("Expecting: %+v, received: %+v", sqPrf, tempStat)
+	}
+	ev := &StatsArgsProcessEvent{
+		StatIDs:  []string{"StatQueueProfile1", "StatQueueProfile2", "StatQueueProfile3"},
+		CGREvent: statsEvs[0].CGREvent,
+	}
+	reply := []string{}
+	expected := []string{"StatQueueProfile1", "StatQueueProfile3"}
+	expectedRev := []string{"StatQueueProfile3", "StatQueueProfile1"}
+	if err := statService.V1ProcessEvent(ev, &reply); err != nil {
+		t.Errorf("Error: %+v", err)
+	} else if !reflect.DeepEqual(reply, expected) && !reflect.DeepEqual(reply, expectedRev) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 }

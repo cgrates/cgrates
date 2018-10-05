@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"flag"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -34,11 +35,12 @@ import (
 )
 
 var (
-	tutorialCfgPath string
-	tutorialCfg     *config.CGRConfig
-	tutorialRpc     *rpc.Client
-	tutorialConfDIR string //run tests for specific configuration
-	tutorialDelay   int
+	itTestMongoAtalas = flag.Bool("mongo_atlas", false, "Run the test with mongo atalas connection")
+	tutorialCfgPath   string
+	tutorialCfg       *config.CGRConfig
+	tutorialRpc       *rpc.Client
+	tutorialConfDIR   string //run tests for specific configuration
+	tutorialDelay     int
 )
 
 var sTestsTutorials = []func(t *testing.T){
@@ -52,11 +54,18 @@ var sTestsTutorials = []func(t *testing.T){
 }
 
 //Test start here
-func TestTutorialMongo(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping non-short test")
+func TestTutorialMongoAtlas(t *testing.T) {
+	if !*itTestMongoAtalas {
+		return
 	}
 	tutorialConfDIR = "mongoatlas"
+	for _, stest := range sTestsTutorials {
+		t.Run(tutorialConfDIR, stest)
+	}
+}
+
+func TestTutorialMongo(t *testing.T) {
+	tutorialConfDIR = "tutmongo"
 	for _, stest := range sTestsTutorials {
 		t.Run(tutorialConfDIR, stest)
 	}

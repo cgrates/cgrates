@@ -36,7 +36,7 @@ func (m *Migrator) migrateCurrentCharger() (err error) {
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.ChargerProfilePrefix+tenant+":")
-		cpp, err := m.dmIN.DataManager().GetChargerProfile(tenant, idg, true, utils.NonTransactional)
+		cpp, err := m.dmIN.DataManager().GetChargerProfile(tenant, idg, false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}

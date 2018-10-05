@@ -266,6 +266,7 @@ type CGRConfig struct {
 	DataDbName               string // The name of the database to connect to.
 	DataDbUser               string // The user to sign in as.
 	DataDbPass               string // The user's password.
+	DataDbSentinelName       string
 	LoadHistorySize          int    // Maximum number of records to archive in load history
 	StorDBType               string // Should reflect the database type used to store logs
 	StorDBHost               string // The host to connect to. Values that start with / are for UNIX domain sockets.
@@ -933,6 +934,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 		if jsnDataDbCfg.Load_history_size != nil {
 			self.LoadHistorySize = *jsnDataDbCfg.Load_history_size
+		}
+		if jsnDataDbCfg.Redis_sentinel != nil {
+			self.DataDbSentinelName = *jsnDataDbCfg.Redis_sentinel
 		}
 	}
 
