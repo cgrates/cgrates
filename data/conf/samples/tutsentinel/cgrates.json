@@ -17,7 +17,7 @@
 
 "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
 	"db_type": "redis",						// data_db type: <redis|mongo>
-	"db_host":"127.0.0.1:16381;127.0.0.1:16382;127.0.0.1:16383",
+	"db_host":"127.0.0.1:16381;127.0.0.1:16382",
 	"db_name": "10", 						// data_db database name to connect to
 	"redis_sentinel":"redis-cluster",	
 },

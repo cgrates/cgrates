@@ -35,17 +35,15 @@ import (
 )
 
 var (
-	node1ConfigPath     = path.Join(*dataDir, "sentinel", "node1.conf")
-	node2ConfigPath     = path.Join(*dataDir, "sentinel", "node2.conf")
-	sentinel1ConfigPath = path.Join(*dataDir, "sentinel", "sentinel1.conf")
-	sentinel2ConfigPath = path.Join(*dataDir, "sentinel", "sentinel2.conf")
-	sentinel3ConfigPath = path.Join(*dataDir, "sentinel", "sentinel3.conf")
+	node1ConfigPath     = path.Join(*dataDir, "redis_sentinel", "node1.conf")
+	node2ConfigPath     = path.Join(*dataDir, "redis_sentinel", "node2.conf")
+	sentinel1ConfigPath = path.Join(*dataDir, "redis_sentinel", "sentinel1.conf")
+	sentinel2ConfigPath = path.Join(*dataDir, "redis_sentinel", "sentinel2.conf")
 	engineConfigPath    = path.Join(*dataDir, "conf", "samples", "tutsentinel")
 	sentinelConfig      *config.CGRConfig
 	sentinelRPC         *rpc.Client
-	node1exec, node2exec,
-	sentinelexec1, sentinelexec2,
-	sentinelexec3 *exec.Cmd
+	node1Exec, node2Exec,
+	stlExec1, stlExec2 *exec.Cmd
 	redisSentinel = flag.Bool("redis_sentinel", false, "Run tests with redis sentinel")
 )
 
@@ -57,8 +55,6 @@ var sTestsRds = []func(t *testing.T){
 	testRedisSentinelRPCCon,
 	testRedisSentinelSetGetAttribute,
 	testRedisSentinelInsertion,
-	testRedisSentinelShutDownSentinel1,
-	testRedisSentinelInsertion2,
 	testRedisSentinelGetAttrAfterFailover,
 	testRedisSentinelKillEngine,
 }
@@ -68,7 +64,6 @@ var sTestsRds = []func(t *testing.T){
 // Node2 will be slave of node1 and start at port 16380
 // Sentinel1 will be started at port 16381 and will watch Node1
 // Sentinel2 will be started at port 16382 and will watch Node1
-// Sentinel3 will be started at port 16383 and will watch Node1
 func TestRedisSentinel(t *testing.T) {
 	if !*redisSentinel {
 		return
@@ -79,24 +74,20 @@ func TestRedisSentinel(t *testing.T) {
 }
 
 func testRedisSentinelStartNodes(t *testing.T) {
-	node1exec = exec.Command("redis-server", node1ConfigPath)
-	if err := node1exec.Start(); err != nil {
+	node1Exec = exec.Command("redis-server", node1ConfigPath)
+	if err := node1Exec.Start(); err != nil {
 		t.Error(err)
 	}
-	node2exec = exec.Command("redis-server", node2ConfigPath)
-	if err := node2exec.Start(); err != nil {
+	node2Exec = exec.Command("redis-server", node2ConfigPath)
+	if err := node2Exec.Start(); err != nil {
 		t.Error(err)
 	}
-	sentinelexec1 = exec.Command("redis-sentinel", sentinel1ConfigPath)
-	if err := sentinelexec1.Start(); err != nil {
+	stlExec1 = exec.Command("redis-sentinel", sentinel1ConfigPath)
+	if err := stlExec1.Start(); err != nil {
 		t.Error(err)
 	}
-	sentinelexec2 = exec.Command("redis-sentinel", sentinel2ConfigPath)
-	if err := sentinelexec2.Start(); err != nil {
-		t.Error(err)
-	}
-	sentinelexec3 = exec.Command("redis-sentinel", sentinel3ConfigPath)
-	if err := sentinelexec3.Start(); err != nil {
+	stlExec2 = exec.Command("redis-sentinel", sentinel2ConfigPath)
+	if err := stlExec2.Start(); err != nil {
 		t.Error(err)
 	}
 }
@@ -166,6 +157,8 @@ func testRedisSentinelSetGetAttribute(t *testing.T) {
 }
 
 func testRedisSentinelInsertion(t *testing.T) {
+	nrFails1 := 0
+	nrFails2 := 0
 	alsPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ApierTest",
@@ -185,74 +178,68 @@ func testRedisSentinelInsertion(t *testing.T) {
 	id := alsPrf.ID + "_0"
 	index := 0
 	var result string
-	for i := 0; i < 25; i++ {
-		t.Run("add", func(t *testing.T) {
-			t.Parallel()
-			alsPrf.ID = id
-			if err := sentinelRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
+	addFunc := func(t *testing.T, nrFail *int) {
+		alsPrf.ID = id
+		if err := sentinelRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
+			if err.Error() == "SERVER_ERROR: No sentinels active" {
+				*nrFail = *nrFail + 1
+			} else {
 				t.Error(err)
 			}
-			index = index + 1
-			id = orgiginID + string(index)
-		})
-		t.Run("add2", func(t *testing.T) {
-			t.Parallel()
-			alsPrf.ID = id
-			if err := sentinelRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
-				t.Error(err)
-			}
-			index = index + 1
-			id = orgiginID + string(index)
-		})
+		}
+		index = index + 1
+		id = orgiginID + string(index)
 	}
-}
-
-// ShutDown first sentinel and the second one shoud take his place
-func testRedisSentinelShutDownSentinel1(t *testing.T) {
-	if err := sentinelexec1.Process.Kill(); err != nil { // Kill the master
+	forFunc1 := func(t *testing.T) {
+		for i := 0; i < 25; i++ {
+			t.Run("add", func(t *testing.T) {
+				t.Parallel()
+				addFunc(t, &nrFails1)
+			})
+			if i == 5 {
+				t.Run("stop1", func(t *testing.T) {
+					t.Parallel()
+					if err := stlExec1.Process.Kill(); err != nil {
+						t.Error(err)
+					}
+				})
+			}
+			if i == 10 {
+				t.Run("stop2", func(t *testing.T) {
+					t.Parallel()
+					if err := stlExec2.Process.Kill(); err != nil {
+						t.Error(err)
+					}
+				})
+			}
+			t.Run("add2", func(t *testing.T) {
+				t.Parallel()
+				addFunc(t, &nrFails1)
+			})
+		}
+	}
+	forFunc2 := func(t *testing.T) {
+		for i := 0; i < 10; i++ {
+			t.Run("add", func(t *testing.T) {
+				t.Parallel()
+				addFunc(t, &nrFails2)
+			})
+			t.Run("add2", func(t *testing.T) {
+				t.Parallel()
+				addFunc(t, &nrFails2)
+			})
+		}
+	}
+	t.Run("for1", forFunc1)
+	if nrFails1 == 0 {
+		t.Error("Fail tests in case of failover")
+	}
+	if err := exec.Command("redis-sentinel", sentinel1ConfigPath).Start(); err != nil { // Kill the master
 		t.Error(err)
 	}
-}
-
-func testRedisSentinelInsertion2(t *testing.T) {
-	alsPrf := &engine.AttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ApierTest",
-		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
-		FilterIDs: []string{"*string:Account:1001"},
-		Attributes: []*engine.Attribute{
-			&engine.Attribute{
-				FieldName:  utils.Subject,
-				Initial:    utils.ANY,
-				Substitute: config.NewRSRParsersMustCompile("1001", true),
-				Append:     true,
-			},
-		},
-		Weight: 20,
-	}
-	orgiginID := alsPrf.ID + "_"
-	id := alsPrf.ID + "_0"
-	index := 0
-	var result string
-	for i := 0; i < 25; i++ {
-		t.Run("add", func(t *testing.T) {
-			t.Parallel()
-			alsPrf.ID = id
-			if err := sentinelRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
-				t.Error(err)
-			}
-			index = index + 1
-			id = orgiginID + string(index)
-		})
-		t.Run("add2", func(t *testing.T) {
-			t.Parallel()
-			alsPrf.ID = id
-			if err := sentinelRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
-				t.Error(err)
-			}
-			index = index + 1
-			id = orgiginID + string(index)
-		})
+	t.Run("for2", forFunc2)
+	if nrFails2 > 19 {
+		t.Errorf("Fail tests in case of failback ")
 	}
 }
 
@@ -286,6 +273,19 @@ func testRedisSentinelGetAttrAfterFailover(t *testing.T) {
 }
 
 func testRedisSentinelKillEngine(t *testing.T) {
+	if err := exec.Command("pkill", "redis-server").Run(); err != nil {
+		t.Error(err)
+	}
+	if err := exec.Command("pkill", "redis-sentinel").Run(); err != nil {
+		t.Error(err)
+	}
+	if err := exec.Command("pkill", "redis-ser").Run(); err != nil {
+		t.Error(err)
+	}
+	if err := exec.Command("pkill", "redis-sen").Run(); err != nil {
+		t.Error(err)
+	}
+
 	if err := engine.KillEngine(2000); err != nil {
 		t.Error(err)
 	}

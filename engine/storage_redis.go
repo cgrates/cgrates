@@ -164,8 +164,8 @@ func (rs *RedisStorage) Cmd(cmd string, args ...interface{}) *redis.Resp {
 				rs.sentinelMux.Lock()
 				rs.sentinelInsts[i].conn = nil
 				rs.sentinelMux.Unlock()
-				utils.Logger.Warning(fmt.Sprintf("<RedisStorage> sentinel error: %s ",
-					err.Error()))
+				utils.Logger.Warning(fmt.Sprintf("<RedisStorage> sentinel at address: %s became nil error: %s ",
+					rs.sentinelInsts[i].addr, err.Error()))
 				continue
 			}
 			result := conn.Cmd(cmd, args...)
