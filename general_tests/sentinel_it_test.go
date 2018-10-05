@@ -22,7 +22,6 @@ package general_tests
 
 import (
 	"flag"
-	//"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"os/exec"
