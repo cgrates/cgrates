@@ -45,7 +45,7 @@ CREATE TABLE `tp_rates` (
   `tpid` varchar(64) NOT NULL,
   `tag` varchar(64) NOT NULL,
   `connect_fee` decimal(7,4) NOT NULL,
-  `rate` decimal(7,4) NOT NULL,
+  `rate` decimal(10,4) NOT NULL,
   `rate_unit` varchar(16) NOT NULL,
   `rate_increment` varchar(16) NOT NULL,
   `group_interval_start` varchar(16) NOT NULL,
@@ -455,7 +455,7 @@ CREATE TABLE tp_thresholds (
   `id` varchar(64) NOT NULL,
   `filter_ids` varchar(64) NOT NULL,
   `activation_interval` varchar(64) NOT NULL,
-  `recurrent` BOOLEAN NOT NULL,
+  `max_hits` int(11) NOT NULL,
   `min_hits` int(11) NOT NULL,
   `min_sleep` varchar(16) NOT NULL,
   `blocker` BOOLEAN NOT NULL,
@@ -502,7 +502,7 @@ CREATE TABLE tp_suppliers (
   `filter_ids` varchar(64) NOT NULL,
   `activation_interval` varchar(64) NOT NULL,
   `sorting` varchar(32) NOT NULL,
-  `sorting_params` varchar(64) NOT NULL,
+  `sorting_parameters` varchar(64) NOT NULL,
   `supplier_id` varchar(32) NOT NULL,
   `supplier_filter_ids` varchar(64) NOT NULL,
   `supplier_account_ids` varchar(64) NOT NULL,
@@ -525,7 +525,6 @@ CREATE TABLE tp_suppliers (
 -- Table structure for table `tp_attributes`
 --
 
-
 DROP TABLE IF EXISTS tp_attributes;
 CREATE TABLE tp_attributes (
   `pk` int(11) NOT NULL AUTO_INCREMENT,
@@ -539,6 +538,7 @@ CREATE TABLE tp_attributes (
   `initial` varchar(64) NOT NULL,
   `substitute` varchar(64) NOT NULL,
   `append` BOOLEAN NOT NULL,
+  `blocker` BOOLEAN NOT NULL,
   `weight` decimal(8,2) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
@@ -548,9 +548,29 @@ CREATE TABLE tp_attributes (
 );
 
 --
--- Table structure for table `versions`
+-- Table structure for table `tp_chargers`
 --
 
+DROP TABLE IF EXISTS tp_chargers;
+CREATE TABLE tp_chargers (
+  `pk` int(11) NOT NULL AUTO_INCREMENT,
+  `tpid` varchar(64) NOT NULL,
+  `tenant` varchar(64) NOT NULL,
+  `id` varchar(64) NOT NULL,
+  `filter_ids` varchar(64) NOT NULL,
+  `activation_interval` varchar(64) NOT NULL,
+  `run_id` varchar(64) NOT NULL,
+  `attribute_ids` varchar(64) NOT NULL,
+  `created_at` TIMESTAMP,
+  PRIMARY KEY (`pk`),
+  KEY `tpid` (`tpid`),
+  UNIQUE KEY `unique_tp_chargers` (`tpid`,`tenant`,
+    `id`,`filter_ids`,`run_id`,`attribute_ids`)
+);
+
+--
+-- Table structure for table `versions`
+--
 
 DROP TABLE IF EXISTS versions;
 CREATE TABLE versions (

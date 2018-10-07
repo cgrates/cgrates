@@ -30,6 +30,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var flatstoreCfgPath string
@@ -113,16 +114,16 @@ func TestFlatstoreitRpcConn(t *testing.T) {
 
 func TestFlatstoreitProcessFiles(t *testing.T) {
 	if err := ioutil.WriteFile(path.Join("/tmp", "acc_1.log"), []byte(fullSuccessfull), 0644); err != nil {
-		t.Fatal(err.Error)
+		t.Fatal(err.Error())
 	}
 	if err := ioutil.WriteFile(path.Join("/tmp", "missed_calls_1.log"), []byte(fullMissed), 0644); err != nil {
-		t.Fatal(err.Error)
+		t.Fatal(err.Error())
 	}
 	if err := ioutil.WriteFile(path.Join("/tmp", "acc_2.log"), []byte(part1), 0644); err != nil {
-		t.Fatal(err.Error)
+		t.Fatal(err.Error())
 	}
 	if err := ioutil.WriteFile(path.Join("/tmp", "acc_3.log"), []byte(part2), 0644); err != nil {
-		t.Fatal(err.Error)
+		t.Fatal(err.Error())
 	}
 	//Rename(oldpath, newpath string)
 	for _, fileName := range []string{"acc_1.log", "missed_calls_1.log", "acc_2.log", "acc_3.log"} {
@@ -144,5 +145,19 @@ func TestFlatstoreitProcessFiles(t *testing.T) {
 		t.Error(err)
 	} else if len(ePartContent) != len(string(partContent)) {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", ePartContent, string(partContent))
+	}
+}
+
+func TestFlatstoreitAnalyseCDRs(t *testing.T) {
+	var reply []*engine.ExternalCDR
+	if err := flatstoreRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{}, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(reply) != 13 {
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	}
+	if err := flatstoreRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{MinUsage: "1"}, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(reply) != 7 {
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
 }

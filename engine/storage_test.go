@@ -21,7 +21,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -97,6 +96,7 @@ func TestStorageDestinationContainsPrefixNotExisting(t *testing.T) {
 	}
 }
 
+/*
 func TestStorageCacheRefresh(t *testing.T) {
 	dm.DataDB().SetDestination(&Destination{"T11", []string{"0"}}, utils.NonTransactional)
 	dm.DataDB().GetDestination("T11", false, utils.NonTransactional)
@@ -112,6 +112,7 @@ func TestStorageCacheRefresh(t *testing.T) {
 		t.Error("Error refreshing cache:", d)
 	}
 }
+*/
 
 func TestStorageGetAliases(t *testing.T) {
 	ala := &Alias{
@@ -184,7 +185,7 @@ func TestStorageCacheGetReverseAliases(t *testing.T) {
 		Context:   "*other",
 	}
 	dm.DataDB().GetReverseAlias("aaa"+"Subject"+utils.MetaRating, false, utils.NonTransactional)
-	if x, ok := cache.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + "Subject" + utils.MetaRating); ok {
+	if x, ok := Cache.Get(utils.CacheReverseAliases, "aaa"+"Subject"+utils.MetaRating); ok {
 		aliasKeys := x.([]string)
 		if len(aliasKeys) != 1 {
 			t.Error("Error getting reverse alias: ", aliasKeys, ala.GetId()+utils.ANY)
@@ -193,7 +194,7 @@ func TestStorageCacheGetReverseAliases(t *testing.T) {
 		t.Error("Error getting reverse alias: ", err)
 	}
 	dm.DataDB().GetReverseAlias("aaa"+"Account"+"*other", false, utils.NonTransactional)
-	if x, ok := cache.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + "Account" + "*other"); ok {
+	if x, ok := Cache.Get(utils.CacheReverseAliases, "aaa"+"Account"+"*other"); ok {
 		aliasKeys := x.([]string)
 		if len(aliasKeys) != 1 {
 			t.Error("Error getting reverse alias: ", aliasKeys, alb.GetId()+utils.ANY)
@@ -223,17 +224,17 @@ func TestStorageCacheRemoveCachedAliases(t *testing.T) {
 	dm.DataDB().RemoveAlias(ala.GetId(), utils.NonTransactional)
 	dm.DataDB().RemoveAlias(alb.GetId(), utils.NonTransactional)
 
-	if _, ok := cache.Get(utils.ALIASES_PREFIX + ala.GetId()); ok {
+	if _, ok := Cache.Get(utils.CacheAliases, ala.GetId()); ok {
 		t.Error("Error removing cached alias: ", ok)
 	}
-	if _, ok := cache.Get(utils.ALIASES_PREFIX + alb.GetId()); ok {
+	if _, ok := Cache.Get(utils.CacheAliases, alb.GetId()); ok {
 		t.Error("Error removing cached alias: ", ok)
 	}
 
-	if _, ok := cache.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.MetaRating); ok {
+	if _, ok := Cache.Get(utils.CacheReverseAliases, "aaa"+utils.MetaRating); ok {
 		t.Error("Error removing cached reverse alias: ", ok)
 	}
-	if _, ok := cache.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.MetaRating); ok {
+	if _, ok := Cache.Get(utils.CacheReverseAliases, "aaa"+utils.MetaRating); ok {
 		t.Error("Error removing cached reverse alias: ", ok)
 	}
 }

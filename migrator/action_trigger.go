@@ -54,19 +54,19 @@ type v1ActionTriggers []*v1ActionTrigger
 
 func (m *Migrator) migrateCurrentActionTrigger() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.ACTION_TRIGGER_PREFIX)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ACTION_TRIGGER_PREFIX)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.ACTION_TRIGGER_PREFIX)
-		acts, err := m.dmIN.GetActionTriggers(idg, true, utils.NonTransactional)
+		acts, err := m.dmIN.DataManager().GetActionTriggers(idg, true, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if acts != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.SetActionTriggers(idg, acts, utils.NonTransactional); err != nil {
+				if err := m.dmOut.DataManager().SetActionTriggers(idg, acts, utils.NonTransactional); err != nil {
 					return err
 				}
 			}
@@ -79,7 +79,7 @@ func (m *Migrator) migrateV1ActionTrigger() (err error) {
 	var v1ACTs *v1ActionTriggers
 	var acts engine.ActionTriggers
 	for {
-		v1ACTs, err = m.oldDataDB.getV1ActionTriggers()
+		v1ACTs, err = m.dmIN.getV1ActionTriggers()
 		if err != nil && err != utils.ErrNoMoreData {
 			return err
 		}
@@ -93,7 +93,7 @@ func (m *Migrator) migrateV1ActionTrigger() (err error) {
 
 			}
 			if !m.dryRun {
-				if err := m.dmOut.SetActionTriggers(acts[0].ID, acts, utils.NonTransactional); err != nil {
+				if err := m.dmOut.DataManager().SetActionTriggers(acts[0].ID, acts, utils.NonTransactional); err != nil {
 					return err
 				}
 				m.stats[utils.ActionTriggers] += 1
@@ -103,7 +103,7 @@ func (m *Migrator) migrateV1ActionTrigger() (err error) {
 	if !m.dryRun {
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.ActionTriggers: engine.CurrentDataDBVersions()[utils.ActionTriggers]}
-		if err = m.dmOut.DataDB().SetVersions(vrs, false); err != nil {
+		if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),
@@ -116,7 +116,7 @@ func (m *Migrator) migrateV1ActionTrigger() (err error) {
 func (m *Migrator) migrateActionTriggers() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.dmOut.DataManager().DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

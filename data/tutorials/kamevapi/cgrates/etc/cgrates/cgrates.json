@@ -1,14 +1,12 @@
 {
 
-// Real-time Charging System for Telecom & ISP environments
+// Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 // Copyright (C) ITsysCOM GmbH
-//
-// This file contains the default configuration hardcoded into CGRateS.
-// This is what you get when you load CGRateS with an empty configuration file.
 
 "general": {
     "log_level": 7,
 },
+
 
 "listen": {
 	"rpc_json": ":2012",
@@ -30,22 +28,26 @@
 "rals": {
 	"enabled": true,
 	"thresholds_conns": [
-		{"address": "*internal"}
+		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 	"stats_conns": [
-		{"address": "*internal"}
-	],
-	"pubsubs_conns": [
-		{"address": "*internal"}
+		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 	"attributes_conns": [
-		{"address": "*internal"}
+		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 },
 
 
 "cdrs": {
 	"enabled": true,
+	"sessions_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"stats_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"sessions_cost_retries": 5,
 },
 
 
@@ -66,7 +68,14 @@
 	"attributes_conns": [
 		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
-	"debit_interval": "10s",
+	"stats_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"thresholds_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"debit_interval": "5s",
+	"channel_sync_interval":"7s",
 },
 
 
@@ -75,6 +84,10 @@
 	"evapi_conns":[							// instantiate connections to multiple Kamailio servers
 		{"address": "127.0.0.1:8448", "reconnects": 5}
 	],
+	"sessions_conns": [
+		{"address": "*internal"}			// connection towards session service: <*internal>
+	],
+	"create_cdr": true,					// create CDR out of events and sends them to CDRS component
 },
 
 
@@ -85,6 +98,7 @@
 
 "attributes": {
 	"enabled": true,
+	"string_indexed_fields": ["Account"],			
 },
 
 
@@ -93,6 +107,8 @@
 	"thresholds_conns": [
 		{"address": "*internal"}
 	],
+	"string_indexed_fields": ["Account"],
+	"prefix_indexed_fields": ["Destination"],
 },
 
 
@@ -101,11 +117,13 @@
 	"thresholds_conns": [
 		{"address": "*internal"}
 	],
+	"string_indexed_fields": ["Account"],
 },
 
 
 "thresholds": {
 	"enabled": true,
+	"string_indexed_fields": ["Account"],
 },
 
 
@@ -120,6 +138,8 @@
 	"stats_conns": [
 		{"address": "*internal"}	
 	],
+	"string_indexed_fields": ["Account"],
+	"prefix_indexed_fields": ["Destination"],
 },
 
 

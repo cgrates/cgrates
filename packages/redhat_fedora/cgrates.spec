@@ -1,5 +1,5 @@
-%global version 0.9.1rc7
-%global git_commit cc3bebd90c24b187379027e6a618e206da89d7a9
+%global version 0.9.1
+%global git_commit c284710623aef128f97369833d3fa4cb29943613
 
 %global git_short_commit %(c=%{git_commit}; echo ${c:0:7})
 %define debug_package  %{nil}
@@ -8,8 +8,8 @@
 %global _libdir	       /var/lib/%name
 
 Name:           cgrates
-Version:        %{version}.%{git_short_commit}
-Release:        1%{dist}
+Version:        %{version}
+Release:        0.1.rc8.20180816git%{git_short_commit}%{dist}
 Summary:        Carrier Grade Real-time Charging System
 License:        GPLv3
 URL:            https://github.com/cgrates/cgrates
@@ -84,6 +84,7 @@ install -D -m 0755 -p bin/cgr-console $RPM_BUILD_ROOT%{_bindir}/cgr-console
 install -D -m 0755 -p bin/cgr-engine $RPM_BUILD_ROOT%{_bindir}/cgr-engine
 install -D -m 0755 -p bin/cgr-loader $RPM_BUILD_ROOT%{_bindir}/cgr-loader
 install -D -m 0755 -p bin/cgr-tester $RPM_BUILD_ROOT%{_bindir}/cgr-tester
+install -D -m 0755 -p bin/cgr-migrator $RPM_BUILD_ROOT%{_bindir}/cgr-migrator
 mkdir -p $RPM_BUILD_ROOT%{_logdir}/cdrc/in
 mkdir -p $RPM_BUILD_ROOT%{_logdir}/cdrc/out
 mkdir -p $RPM_BUILD_ROOT%{_logdir}/cdre/csv
@@ -93,7 +94,7 @@ mkdir -p $RPM_BUILD_ROOT%{_spooldir}/cdrc/out
 mkdir -p $RPM_BUILD_ROOT%{_spooldir}/cdre/csv
 mkdir -p $RPM_BUILD_ROOT%{_spooldir}/cdre/fwv
 mkdir -p $RPM_BUILD_ROOT%{_spooldir}/tpe
-mkdir -p $RPM_BUILD_ROOT%{_spooldir}/failed_posts_
+mkdir -p $RPM_BUILD_ROOT%{_spooldir}/failed_posts
 mkdir -p $RPM_BUILD_ROOT%{_libdir}/history
 mkdir -p $RPM_BUILD_ROOT%{_libdir}/cache_dump
 install -D -m 0644 -p src/github.com/cgrates/cgrates/packages/redhat_fedora/%{name}.options $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/%{name}
@@ -123,5 +124,9 @@ rm -rf $RPM_BUILD_DIR/%{name}-%{version}
 rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Sun Aug 19 2018 Sergei Lavrov <ccppprogrammer@gmail.com> 0.9.1-0.1.rc8.20180816gitc284710
+- Update version according to Guidelines for Versioning Fedora Packages
+- Add cgr-migrator
+
 * Mon Sep 28 2015 Nick Altmann <nick.altmann@gmail.com> 0.9.1rc7-1
 - Initial rhel/fedora specification

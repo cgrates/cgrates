@@ -441,7 +441,7 @@ type TpThreshold struct {
 	ID                 string  `index:"1" re:""`
 	FilterIDs          string  `index:"2" re:""`
 	ActivationInterval string  `index:"3" re:""`
-	Recurrent          bool    `index:"4" re:""`
+	MaxHits            int     `index:"4" re:""`
 	MinHits            int     `index:"5" re:""`
 	MinSleep           string  `index:"6" re:""`
 	Blocker            bool    `index:"7" re:""`
@@ -529,7 +529,7 @@ type TpSupplier struct {
 	FilterIDs             string  `index:"2" re:""`
 	ActivationInterval    string  `index:"3" re:""`
 	Sorting               string  `index:"4" re:""`
-	SortingParams         string  `index:"5" re:""`
+	SortingParameters     string  `index:"5" re:""`
 	SupplierID            string  `index:"6" re:""`
 	SupplierFilterIDs     string  `index:"7" re:""`
 	SupplierAccountIDs    string  `index:"8" re:""`
@@ -555,6 +555,20 @@ type TPAttribute struct {
 	Initial            string  `index:"6" re:""`
 	Substitute         string  `index:"7" re:""`
 	Append             bool    `index:"8" re:""`
-	Weight             float64 `index:"9" re:"\d+\.?\d*"`
+	Blocker            bool    `index:"9" re:""`
+	Weight             float64 `index:"10" re:"\d+\.?\d*"`
+	CreatedAt          time.Time
+}
+
+type TPCharger struct {
+	PK                 uint `gorm:"primary_key"`
+	Tpid               string
+	Tenant             string  `index:"0" re:""`
+	ID                 string  `index:"1" re:""`
+	FilterIDs          string  `index:"2" re:""`
+	ActivationInterval string  `index:"3" re:""`
+	RunID              string  `index:"4" re:""`
+	AttributeIDs       string  `index:"5" re:""`
+	Weight             float64 `index:"6" re:"\d+\.?\d*"`
 	CreatedAt          time.Time
 }

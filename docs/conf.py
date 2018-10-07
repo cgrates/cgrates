@@ -178,8 +178,8 @@ htmlhelp_basename = 'CGRatesdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'CGRates.tex', u'CGRates Documentation',
-   u'Radu Ioan Fericean/Dan Christian Bogos', 'manual'),
+  ('index', 'CGRates.tex', u'CGRateS Documentation',
+   u'Dan Christian Bogos', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -211,8 +211,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'cgrates', u'CGRates Documentation',
-     [u'Radu Ioan Fericean'], 1)
+    ('index', 'cgrates', u'CGRateS Documentation',
+     [u'Dan Christian Bogos'], 1)
 ]
 
 # extensions = ['autoapi.extension']

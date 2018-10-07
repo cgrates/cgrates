@@ -26,25 +26,31 @@ import (
 )
 
 func (m *Migrator) migrateCurrentTPfilters() (err error) {
-	tpids, err := m.InStorDB().GetTpIds(utils.TBLTPFilters)
+	tpids, err := m.storDBIn.StorDB().GetTpIds(utils.TBLTPFilters)
 	if err != nil {
 		return err
 	}
-
 	for _, tpid := range tpids {
-		ids, err := m.InStorDB().GetTpTableIds(tpid, utils.TBLTPFilters, utils.TPDistinctIds{"id"}, map[string]string{}, nil)
+		ids, err := m.storDBIn.StorDB().GetTpTableIds(tpid, utils.TBLTPFilters,
+			utils.TPDistinctIds{"id"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
 		for _, id := range ids {
-			dest, err := m.InStorDB().GetTPFilters(tpid, id)
+			fltrs, err := m.storDBIn.StorDB().GetTPFilters(tpid, id)
 			if err != nil {
 				return err
 			}
-			if dest != nil {
+			if fltrs != nil {
 				if m.dryRun != true {
-					if err := m.OutStorDB().SetTPFilters(dest); err != nil {
+					if err := m.storDBOut.StorDB().SetTPFilters(fltrs); err != nil {
 						return err
+					}
+					for _, fltr := range fltrs {
+						if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPFilters,
+							fltr.TPid, map[string]string{"tenant": fltr.Tenant, "id": fltr.ID}); err != nil {
+							return err
+						}
 					}
 					m.stats[utils.TpFilters] += 1
 				}
@@ -57,7 +63,7 @@ func (m *Migrator) migrateCurrentTPfilters() (err error) {
 func (m *Migrator) migrateTPfilters() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.OutStorDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.storDBOut.StorDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

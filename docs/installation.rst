@@ -8,7 +8,7 @@ We recommend using source installs for advanced users familiar with Go programmi
 -------------------
 
 3.1.1. Debian 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 This is for the moment the only packaged and the most recommended to use method to install CGRateS.
 
@@ -16,8 +16,8 @@ On the server you want to install CGRateS, simply execute the following commands
 
 ::
 
- wget http://www.cgrates.org/tmp_pkg/cgrates_0.9.1~rc8_amd64.deb
- dpkg -i cgrates_0.9.1~rc8_amd64.deb
+   wget http://www.cgrates.org/tmp_pkg/cgrates_0.9.1~rc8_amd64.deb
+   dpkg -i cgrates_0.9.1~rc8_amd64.deb
 
 Once the installation is completed, one should perform the :ref:`post-install` section in order to have the CGRateS properly set and ready to run.
 After *post-install* actions are performed, CGRateS will be configured in **/etc/cgrates/cgrates.json** and enabled in **/etc/default/cgrates**.
@@ -27,6 +27,24 @@ After *post-install* actions are performed, CGRateS will be configured in **/etc
 
 For developing CGRateS and switching between its versions, we are using the **new vendor directory feature** introduced in go 1.6.
 In a nutshell all the dependencies are installed and used from a folder named *vendor* placed in the root of the project.
+
+3.2.1 Install GO Lang
+~~~~~~~~~~~~~~~~~~~~~
+
+First we have to setup the GO Lang to our OS. Feel free to download 
+the latest GO binary release from https://golang.org/dl/
+In this Tutorial we are going to install Go 1.11
+
+::
+
+   rm -rf /usr/local/go
+   cd /tmp
+   wget https://dl.google.com/go/go1.11.linux-amd64.tar.gz
+   sudo tar -xvf go1.11.0.linux-amd64.tar.gz -C /usr/local/
+   export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+
+3.2.2 Build CGRateS from Source
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To manage this *vendor* folder we use a tool named `glide`_ which will download specific versions of the external packages used by CGRateS.
 To configure the project with `glide`_ use the following commands:
@@ -51,6 +69,35 @@ For more information and command options use `glide`_ readme page.
 .. _glide: https://github.com/Masterminds/glide
 
 .. _post-install:
+
+3.2.3 Create Debian / Ubuntu Packages from Source
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+After compiling the source code you are ready to create the .deb packages
+for your Debian like OS. But First lets install some dependencies. 
+
+::
+
+   sudo apt-get install build-essential fakeroot dh-systemd
+
+Finally we are ready to create the system package. Before creation we make
+sure that we delete the old one first.
+
+::
+
+   cd $GOPATH/src/github.com/cgrates/cgrates/packages
+   rm -rf $GOPATH/src/github.com/cgrates/*.deb
+   make deb
+
+After some time and maybe some console warnings, your CGRateS package will be ready.
+
+3.2.4 Install Custom Debian / Ubuntu Package
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+   cd $GOPATH/src/github.com/cgrates
+   sudo dpkg -i cgrates_*.deb
 
 3.3. Post-install
 -----------------

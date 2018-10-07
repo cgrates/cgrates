@@ -599,10 +599,10 @@ func TestUsersAddUpdateRemoveIndexes(t *testing.T) {
 func TestUsersUsageRecordGetLoadUserProfile(t *testing.T) {
 	userService = &UserMap{
 		table: map[string]map[string]string{
-			"test:user":   map[string]string{utils.TOR: "01", "RequestType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
-			":user":       map[string]string{utils.TOR: "02", "RequestType": "2", "Direction": "*out", "Category": "c2", "Account": "ivo", "Subject": "0724", "Destination": "+402", "SetupTime": "s2", "AnswerTime": "t2", "Usage": "11"},
-			"test:":       map[string]string{utils.TOR: "03", "RequestType": "3", "Direction": "*out", "Category": "c3", "Account": "elloy", "Subject": "0725", "Destination": "+403", "SetupTime": "s3", "AnswerTime": "t3", "Usage": "12"},
-			"test1:user1": map[string]string{utils.TOR: "04", "RequestType": "4", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726", "Destination": "+404", "SetupTime": "s4", "AnswerTime": "t4", "Usage": "13"},
+			"test:user":   map[string]string{utils.ToR: "01", "RequestType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
+			":user":       map[string]string{utils.ToR: "02", "RequestType": "2", "Direction": "*out", "Category": "c2", "Account": "ivo", "Subject": "0724", "Destination": "+402", "SetupTime": "s2", "AnswerTime": "t2", "Usage": "11"},
+			"test:":       map[string]string{utils.ToR: "03", "RequestType": "3", "Direction": "*out", "Category": "c3", "Account": "elloy", "Subject": "0725", "Destination": "+403", "SetupTime": "s3", "AnswerTime": "t3", "Usage": "12"},
+			"test1:user1": map[string]string{utils.ToR: "04", "RequestType": "4", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726", "Destination": "+404", "SetupTime": "s4", "AnswerTime": "t4", "Usage": "13"},
 		},
 		index: make(map[string]map[string]bool),
 	}
@@ -644,10 +644,10 @@ func TestUsersUsageRecordGetLoadUserProfile(t *testing.T) {
 func TestUsersExternalCDRGetLoadUserProfileExtraFields(t *testing.T) {
 	userService = &UserMap{
 		table: map[string]map[string]string{
-			"test:user":   map[string]string{utils.TOR: "01", "RequestType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
-			":user":       map[string]string{utils.TOR: "02", "RequestType": "2", "Direction": "*out", "Category": "c2", "Account": "ivo", "Subject": "0724", "Destination": "+402", "SetupTime": "s2", "AnswerTime": "t2", "Usage": "11"},
-			"test:":       map[string]string{utils.TOR: "03", "RequestType": "3", "Direction": "*out", "Category": "c3", "Account": "elloy", "Subject": "0725", "Destination": "+403", "SetupTime": "s3", "AnswerTime": "t3", "Usage": "12"},
-			"test1:user1": map[string]string{utils.TOR: "04", "RequestType": "4", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726", "Destination": "+404", "SetupTime": "s4", "AnswerTime": "t4", "Usage": "13", "Test": "1"},
+			"test:user":   map[string]string{utils.ToR: "01", "RequestType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
+			":user":       map[string]string{utils.ToR: "02", "RequestType": "2", "Direction": "*out", "Category": "c2", "Account": "ivo", "Subject": "0724", "Destination": "+402", "SetupTime": "s2", "AnswerTime": "t2", "Usage": "11"},
+			"test:":       map[string]string{utils.ToR: "03", "RequestType": "3", "Direction": "*out", "Category": "c3", "Account": "elloy", "Subject": "0725", "Destination": "+403", "SetupTime": "s3", "AnswerTime": "t3", "Usage": "12"},
+			"test1:user1": map[string]string{utils.ToR: "04", "RequestType": "4", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726", "Destination": "+404", "SetupTime": "s4", "AnswerTime": "t4", "Usage": "13", "Test": "1"},
 		},
 		index: make(map[string]map[string]bool),
 	}
@@ -695,10 +695,10 @@ func TestUsersExternalCDRGetLoadUserProfileExtraFields(t *testing.T) {
 func TestUsersExternalCDRGetLoadUserProfileExtraFieldsNotFound(t *testing.T) {
 	userService = &UserMap{
 		table: map[string]map[string]string{
-			"test:user":   map[string]string{utils.TOR: "01", "RequestType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
-			":user":       map[string]string{utils.TOR: "02", "RequestType": "2", "Direction": "*out", "Category": "c2", "Account": "ivo", "Subject": "0724", "Destination": "+402", "SetupTime": "s2", "AnswerTime": "t2", "Usage": "11"},
-			"test:":       map[string]string{utils.TOR: "03", "RequestType": "3", "Direction": "*out", "Category": "c3", "Account": "elloy", "Subject": "0725", "Destination": "+403", "SetupTime": "s3", "AnswerTime": "t3", "Usage": "12"},
-			"test1:user1": map[string]string{utils.TOR: "04", "RequestType": "4", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726", "Destination": "+404", "SetupTime": "s4", "AnswerTime": "t4", "Usage": "13", "Test": "2"},
+			"test:user":   map[string]string{utils.ToR: "01", "RequestType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
+			":user":       map[string]string{utils.ToR: "02", "RequestType": "2", "Direction": "*out", "Category": "c2", "Account": "ivo", "Subject": "0724", "Destination": "+402", "SetupTime": "s2", "AnswerTime": "t2", "Usage": "11"},
+			"test:":       map[string]string{utils.ToR: "03", "RequestType": "3", "Direction": "*out", "Category": "c3", "Account": "elloy", "Subject": "0725", "Destination": "+403", "SetupTime": "s3", "AnswerTime": "t3", "Usage": "12"},
+			"test1:user1": map[string]string{utils.ToR: "04", "RequestType": "4", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726", "Destination": "+404", "SetupTime": "s4", "AnswerTime": "t4", "Usage": "13", "Test": "2"},
 		},
 		index: make(map[string]map[string]bool),
 	}
@@ -728,10 +728,10 @@ func TestUsersExternalCDRGetLoadUserProfileExtraFieldsNotFound(t *testing.T) {
 func TestUsersExternalCDRGetLoadUserProfileExtraFieldsSet(t *testing.T) {
 	userService = &UserMap{
 		table: map[string]map[string]string{
-			"test:user":   map[string]string{utils.TOR: "01", "RequestType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
-			":user":       map[string]string{utils.TOR: "02", "RequestType": "2", "Direction": "*out", "Category": "c2", "Account": "ivo", "Subject": "0724", "Destination": "+402", "SetupTime": "s2", "AnswerTime": "t2", "Usage": "11"},
-			"test:":       map[string]string{utils.TOR: "03", "RequestType": "3", "Direction": "*out", "Category": "c3", "Account": "elloy", "Subject": "0725", "Destination": "+403", "SetupTime": "s3", "AnswerTime": "t3", "Usage": "12"},
-			"test1:user1": map[string]string{utils.TOR: "04", "RequestType": "4", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726", "Destination": "+404", "SetupTime": "s4", "AnswerTime": "t4", "Usage": "13", "Test": "1", "Best": "BestValue"},
+			"test:user":   map[string]string{utils.ToR: "01", "RequestType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
+			":user":       map[string]string{utils.ToR: "02", "RequestType": "2", "Direction": "*out", "Category": "c2", "Account": "ivo", "Subject": "0724", "Destination": "+402", "SetupTime": "s2", "AnswerTime": "t2", "Usage": "11"},
+			"test:":       map[string]string{utils.ToR: "03", "RequestType": "3", "Direction": "*out", "Category": "c3", "Account": "elloy", "Subject": "0725", "Destination": "+403", "SetupTime": "s3", "AnswerTime": "t3", "Usage": "12"},
+			"test1:user1": map[string]string{utils.ToR: "04", "RequestType": "4", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726", "Destination": "+404", "SetupTime": "s4", "AnswerTime": "t4", "Usage": "13", "Test": "1", "Best": "BestValue"},
 		},
 		index: make(map[string]map[string]bool),
 	}
@@ -782,7 +782,7 @@ func TestUsersCallDescLoadUserProfile(t *testing.T) {
 	userService = &UserMap{
 		table: map[string]map[string]string{
 			"cgrates.org:dan":      map[string]string{"RequestType": "*prepaid", "Category": "call1", "Account": "dan", "Subject": "dan", "Cli": "+4986517174963"},
-			"cgrates.org:danvoice": map[string]string{utils.TOR: "*voice", "RequestType": "*prepaid", "Category": "call1", "Account": "dan", "Subject": "0723"},
+			"cgrates.org:danvoice": map[string]string{utils.ToR: "*voice", "RequestType": "*prepaid", "Category": "call1", "Account": "dan", "Subject": "0723"},
 			"cgrates:rif":          map[string]string{"RequestType": "*postpaid", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726"},
 		},
 		index: make(map[string]map[string]bool),
@@ -823,7 +823,7 @@ func TestUsersCDRLoadUserProfile(t *testing.T) {
 	userService = &UserMap{
 		table: map[string]map[string]string{
 			"cgrates.org:dan":      map[string]string{"RequestType": "*prepaid", "Category": "call1", "Account": "dan", "Subject": "dan", "Cli": "+4986517174963"},
-			"cgrates.org:danvoice": map[string]string{utils.TOR: "*voice", "RequestType": "*prepaid", "Category": "call1", "Account": "dan", "Subject": "0723"},
+			"cgrates.org:danvoice": map[string]string{utils.ToR: "*voice", "RequestType": "*prepaid", "Category": "call1", "Account": "dan", "Subject": "0723"},
 			"cgrates:rif":          map[string]string{"RequestType": "*postpaid", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726"},
 		},
 		index: make(map[string]map[string]bool),

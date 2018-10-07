@@ -61,12 +61,12 @@ func TestNewDerivedCharger(t *testing.T) {
 		UsageField:           "duration1",
 		SupplierField:        "supplier1",
 		DisconnectCauseField: "NORMAL_CLEARING",
-		RatedField:           "rated1",
+		PreRatedField:        "rated1",
 		CostField:            "cost1",
 	}
 	if dc1, err := NewDerivedCharger("test1", "", "reqtype1", "direction1", "tenant1", "tor1", "account1", "subject1", "destination1",
 		"setuptime1", "pdd1", "answertime1", "duration1", "supplier1", "NORMAL_CLEARING", "rated1", "cost1"); err != nil {
-		t.Error("Unexpected error", err.Error)
+		t.Error("Unexpected error", err.Error())
 	} else if !reflect.DeepEqual(edc1, dc1) {
 		t.Errorf("Expecting: %v, received: %v", edc1, dc1)
 	}
@@ -87,7 +87,7 @@ func TestNewDerivedCharger(t *testing.T) {
 		SupplierField:        "~supplier2:s/(.+)/$1/",
 		DisconnectCauseField: "~cgr_disconnect:s/(.+)/$1/",
 		CostField:            "~cgr_cost:s/(.+)/$1/",
-		RatedField:           "~cgr_rated:s/(.+)/$1/",
+		PreRatedField:        "~cgr_rated:s/(.+)/$1/",
 	}
 	edc2.rsrRunFilters, _ = ParseRSRFields("^cdr_source/tdm_cdrs/", INFIELD_SEP)
 	edc2.rsrRequestTypeField, _ = NewRSRField("~reqtype2:s/sip:(.+)/$1/")
@@ -104,7 +104,7 @@ func TestNewDerivedCharger(t *testing.T) {
 	edc2.rsrSupplierField, _ = NewRSRField("~supplier2:s/(.+)/$1/")
 	edc2.rsrDisconnectCauseField, _ = NewRSRField("~cgr_disconnect:s/(.+)/$1/")
 	edc2.rsrCostField, _ = NewRSRField("~cgr_cost:s/(.+)/$1/")
-	edc2.rsrRatedField, _ = NewRSRField("~cgr_rated:s/(.+)/$1/")
+	edc2.rsrPreRatedField, _ = NewRSRField("~cgr_rated:s/(.+)/$1/")
 	if dc2, err := NewDerivedCharger("test2",
 		"^cdr_source/tdm_cdrs/",
 		"~reqtype2:s/sip:(.+)/$1/",
@@ -139,7 +139,7 @@ func TestAppendDefaultRun(t *testing.T) {
 	dcDf := &DerivedCharger{RunID: DEFAULT_RUNID, RunFilters: "", RequestTypeField: META_DEFAULT, DirectionField: META_DEFAULT,
 		TenantField: META_DEFAULT, CategoryField: META_DEFAULT, AccountField: META_DEFAULT, SubjectField: META_DEFAULT,
 		DestinationField: META_DEFAULT, SetupTimeField: META_DEFAULT, PDDField: META_DEFAULT, AnswerTimeField: META_DEFAULT, UsageField: META_DEFAULT, SupplierField: META_DEFAULT,
-		DisconnectCauseField: META_DEFAULT, CostField: META_DEFAULT, RatedField: META_DEFAULT}
+		DisconnectCauseField: META_DEFAULT, CostField: META_DEFAULT, PreRatedField: META_DEFAULT}
 	eDc1 := &DerivedChargers{Chargers: []*DerivedCharger{dcDf}}
 	if dc1, _ = dc1.AppendDefaultRun(); !reflect.DeepEqual(dc1, eDc1) {
 		t.Errorf("Expecting: %+v, received: %+v", eDc1.Chargers[0], dc1.Chargers[0])

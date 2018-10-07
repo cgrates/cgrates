@@ -28,19 +28,19 @@ import (
 
 func (m *Migrator) migrateCurrentRatingPlans() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.RATING_PLAN_PREFIX)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.RATING_PLAN_PREFIX)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.RATING_PLAN_PREFIX)
-		rp, err := m.dmIN.GetRatingPlan(idg, true, utils.NonTransactional)
+		rp, err := m.dmIN.DataManager().GetRatingPlan(idg, true, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if rp != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.SetRatingPlan(rp, utils.NonTransactional); err != nil {
+				if err := m.dmOut.DataManager().SetRatingPlan(rp, utils.NonTransactional); err != nil {
 					return err
 				}
 				m.stats[utils.RatingPlan] += 1
@@ -53,7 +53,7 @@ func (m *Migrator) migrateCurrentRatingPlans() (err error) {
 func (m *Migrator) migrateRatingPlans() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.dmOut.DataManager().DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

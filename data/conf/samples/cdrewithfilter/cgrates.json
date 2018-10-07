@@ -1,0 +1,171 @@
+{
+// CGRateS Configuration file
+//
+
+
+"general": {
+	"log_level": 7,
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_type": "redis",						// data_db type: <redis|mongo>
+	"db_port": 6379, 						// data_db port to reach the database
+	"db_name": "10", 						// data_db database name to connect to
+	
+},
+
+"stor_db": {
+	"db_password": "CGRateS.org",
+},
+
+
+"cache":{
+	"destinations": {"limit": 10000, "ttl":"0s", "precache": true},
+	"reverse_destinations": {"limit": 10000, "ttl":"0s", "precache": true},
+	"rating_plans": {"limit": 10000, "ttl":"0s","precache": true},
+	"rating_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+	"lcr_rules": {"limit": 10000, "ttl":"0s", "precache": true},
+	"cdr_stats": {"limit": 10000, "ttl":"0s", "precache": true},
+	"actions": {"limit": 10000, "ttl":"0s", "precache": true},
+	"action_plans": {"limit": 10000, "ttl":"0s", "precache": true},
+	"account_action_plans": {"limit": 10000, "ttl":"0s", "precache": true},
+	"action_triggers": {"limit": 10000, "ttl":"0s", "precache": true},
+	"shared_groups": {"limit": 10000, "ttl":"0s", "precache": true},
+	"aliases": {"limit": 10000, "ttl":"0s", "precache": true},
+	"reverse_aliases": {"limit": 10000, "ttl":"0s", "precache": true},
+	"derived_chargers": {"limit": 10000, "ttl":"0s", "precache": true},
+	"resource_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+	"resources": {"limit": 10000, "ttl":"0s", "precache": true},
+	"statqueues": {"limit": 10000, "ttl":"0s", "precache": true},
+	"statqueue_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+	"thresholds": {"limit": 10000, "ttl":"0s", "precache": true},
+	"threshold_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+	"filters": {"limit": 10000, "ttl":"0s", "precache": true},
+	"supplier_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+	"attribute_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+	"resource_filter_indexes" :{"limit": 10000, "ttl":"0s"},
+	"resource_filter_revindexes" : {"limit": 10000, "ttl":"0s"},
+	"stat_filter_indexes" : {"limit": 10000, "ttl":"0s"},
+	"stat_filter_revindexes" : {"limit": 10000, "ttl":"0s"},
+	"threshold_filter_indexes" : {"limit": 10000, "ttl":"0s"},
+	"threshold_filter_revindexes" : {"limit": 10000, "ttl":"0s"},
+	"supplier_filter_indexes" : {"limit": 10000, "ttl":"0s"},
+	"supplier_filter_revindexes" :{"limit": 10000, "ttl":"0s"},
+	"attribute_filter_indexes" : {"limit": 10000, "ttl":"0s"},
+	"attribute_filter_revindexes" : {"limit": 10000, "ttl":"0s"},
+},
+
+
+"rals": {
+	"enabled": true,
+	"thresholds_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"scheduler": {
+	"enabled": true,
+},
+
+
+"cdrs": {
+	"enabled": true,
+},
+
+
+"cdre": {
+	"TemplateWithFilter": {
+		"export_format": "*file_csv",
+		"export_path": "/tmp/",
+		"filters" :["*string:Source:test2"],
+		"content_fields": [
+			{"tag": "CGRID", "type": "*composed", "value": "~CGRID"},
+			{"tag": "RunID", "type": "*composed", "value": "~RunID"},
+			{"tag":"Source", "type": "*composed", "value": "~Source"},
+			{"tag":"OriginID", "type": "*composed", "value": "~OriginID"},
+			{"tag":"Tenant", "type": "*composed", "value": "~Tenant"},
+			{"tag":"Category", "type": "*composed", "value": "~Category"},
+			{"tag":"Account", "type": "*composed", "value": "~Account"},
+			{"tag":"Destination", "type": "*composed", "value": "~Destination"},
+			{"tag":"Usage", "type": "*composed", "value": "~Usage"},
+			{"tag":"Cost", "type": "*composed", "value": "~Cost", "rounding_decimals": 4},
+		],
+	},
+},
+
+
+"attributes": {
+	"enabled": true,
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"resources": {
+	"enabled": true,
+	"store_interval": "1s",
+	"thresholds_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"stats": {
+	"enabled": true,
+	"store_interval": "1s",
+	"thresholds_conns": [
+		{"address": "*internal"}
+	],
+},
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "1s",
+},
+
+
+"suppliers": {
+	"enabled": true,
+	"stats_conns": [
+		{"address": "*internal"},
+	],
+},
+
+
+"sessions": {
+	"enabled": true,
+	"suppliers_conns": [
+		{"address": "*internal"}
+	],
+	"resources_conns": [
+		{"address": "*internal"}
+	],
+	"attributes_conns": [
+		{"address": "*internal"}
+	],
+	"rals_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"migrator":{
+	"out_stordb_password": "CGRateS.org",
+},
+
+
+}

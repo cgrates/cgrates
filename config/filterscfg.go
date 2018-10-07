@@ -19,7 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 type FilterSCfg struct {
-	StatSConns []*HaPoolConfig
+	StatSConns     []*HaPoolConfig
+	IndexedSelects bool
 }
 
 func (fSCfg *FilterSCfg) loadFromJsonCfg(jsnCfg *FilterSJsonCfg) (err error) {
@@ -32,6 +33,9 @@ func (fSCfg *FilterSCfg) loadFromJsonCfg(jsnCfg *FilterSJsonCfg) (err error) {
 			fSCfg.StatSConns[idx] = NewDfltHaPoolConfig()
 			fSCfg.StatSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
+	}
+	if jsnCfg.Indexed_selects != nil {
+		fSCfg.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	return
 }

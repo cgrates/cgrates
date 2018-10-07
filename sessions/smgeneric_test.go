@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -34,10 +35,10 @@ func init() {
 }
 
 func TestSMGSessionIndexing(t *testing.T) {
-	smg := NewSMGeneric(smgCfg, nil, nil, nil, nil, nil, nil, "UTC")
-	smGev := SMGenericEvent{
+	smg := NewSMGeneric(smgCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
+	smGev := engine.NewSafEvent(map[string]interface{}{
 		utils.EVENT_NAME:       "TEST_EVENT",
-		utils.TOR:              "*voice",
+		utils.ToR:              "*voice",
 		utils.OriginID:         "12345",
 		utils.Direction:        "*out",
 		utils.Account:          "account1",
@@ -57,10 +58,11 @@ func TestSMGSessionIndexing(t *testing.T) {
 		"Extra1":               "Value1",
 		"Extra2":               5,
 		"Extra3":               "",
-	}
+	})
 	// Index first session
-	smgSession := &SMGSession{CGRID: smGev.GetCGRID(utils.META_DEFAULT), RunID: utils.META_DEFAULT, EventStart: smGev}
-	cgrID := smGev.GetCGRID(utils.META_DEFAULT)
+	smgSession := &SMGSession{CGRID: GetSetCGRID(smGev),
+		RunID: utils.META_DEFAULT, EventStart: smGev}
+	cgrID := GetSetCGRID(smGev)
 	smg.indexSession(smgSession, false)
 	eIndexes := map[string]map[string]map[string]utils.StringMap{
 		"OriginID": map[string]map[string]utils.StringMap{
@@ -100,7 +102,8 @@ func TestSMGSessionIndexing(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(eIndexes, smg.aSessionsIndex) {
-		t.Errorf("Expecting: %+v, received: %+v", eIndexes, smg.aSessionsIndex)
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eIndexes), utils.ToJSON(smg.aSessionsIndex))
 	}
 	eRIdxes := map[string][]*riFieldNameVal{
 		cgrID: []*riFieldNameVal{
@@ -116,7 +119,7 @@ func TestSMGSessionIndexing(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, smg.aSessionsRIndex)
 	}
 	// Index second session
-	smGev2 := SMGenericEvent{
+	smGev2 := engine.NewSafEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT2",
 		utils.OriginID:    "12346",
 		utils.Direction:   "*out",
@@ -125,19 +128,21 @@ func TestSMGSessionIndexing(t *testing.T) {
 		utils.Tenant:      "itsyscom.com",
 		"Extra3":          "",
 		"Extra4":          "info2",
-	}
-	cgrID2 := smGev2.GetCGRID(utils.META_DEFAULT)
-	smgSession2 := &SMGSession{CGRID: smGev2.GetCGRID(utils.META_DEFAULT), RunID: utils.META_DEFAULT, EventStart: smGev2}
+	})
+	cgrID2 := GetSetCGRID(smGev2)
+	smgSession2 := &SMGSession{CGRID: cgrID2,
+		RunID: utils.META_DEFAULT, EventStart: smGev2}
 	smg.indexSession(smgSession2, false)
-	smGev3 := SMGenericEvent{
+	smGev3 := engine.NewSafEvent(map[string]interface{}{
 		utils.EVENT_NAME: "TEST_EVENT3",
 		utils.Tenant:     "cgrates.org",
 		utils.OriginID:   "12347",
 		utils.Account:    "account2",
 		"Extra5":         "info5",
-	}
-	cgrID3 := smGev3.GetCGRID(utils.META_DEFAULT)
-	smgSession3 := &SMGSession{CGRID: smGev3.GetCGRID(utils.META_DEFAULT), RunID: "secondRun", EventStart: smGev3}
+	})
+	cgrID3 := GetSetCGRID(smGev3)
+	smgSession3 := &SMGSession{CGRID: cgrID3,
+		RunID: "secondRun", EventStart: smGev3}
 	smg.indexSession(smgSession3, false)
 	eIndexes = map[string]map[string]map[string]utils.StringMap{
 		"OriginID": map[string]map[string]utils.StringMap{
@@ -389,10 +394,10 @@ func TestSMGSessionIndexing(t *testing.T) {
 }
 
 func TestSMGActiveSessions(t *testing.T) {
-	smg := NewSMGeneric(smgCfg, nil, nil, nil, nil, nil, nil, "UTC")
-	smGev1 := SMGenericEvent{
+	smg := NewSMGeneric(smgCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
+	smGev1 := engine.NewSafEvent(map[string]interface{}{
 		utils.EVENT_NAME:       "TEST_EVENT",
-		utils.TOR:              "*voice",
+		utils.ToR:              "*voice",
 		utils.OriginID:         "111",
 		utils.Direction:        "*out",
 		utils.Account:          "account1",
@@ -412,11 +417,12 @@ func TestSMGActiveSessions(t *testing.T) {
 		"Extra1":               "Value1",
 		"Extra2":               5,
 		"Extra3":               "",
-	}
-	smg.recordASession(&SMGSession{CGRID: smGev1.GetCGRID(utils.META_DEFAULT), RunID: utils.META_DEFAULT, EventStart: smGev1})
-	smGev2 := SMGenericEvent{
+	})
+	smg.recordASession(&SMGSession{CGRID: GetSetCGRID(smGev1),
+		RunID: utils.META_DEFAULT, EventStart: smGev1})
+	smGev2 := engine.NewSafEvent(map[string]interface{}{
 		utils.EVENT_NAME:       "TEST_EVENT",
-		utils.TOR:              "*voice",
+		utils.ToR:              "*voice",
 		utils.OriginID:         "222",
 		utils.Direction:        "*out",
 		utils.Account:          "account2",
@@ -433,8 +439,9 @@ func TestSMGActiveSessions(t *testing.T) {
 		utils.OriginHost:       "127.0.0.1",
 		"Extra1":               "Value1",
 		"Extra3":               "extra3",
-	}
-	smg.recordASession(&SMGSession{CGRID: smGev2.GetCGRID(utils.META_DEFAULT), RunID: utils.META_DEFAULT, EventStart: smGev2})
+	})
+	smg.recordASession(&SMGSession{CGRID: GetSetCGRID(smGev2),
+		RunID: utils.META_DEFAULT, EventStart: smGev2})
 	if aSessions, _, err := smg.asActiveSessions(nil, false, false); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
@@ -445,7 +452,7 @@ func TestSMGActiveSessions(t *testing.T) {
 	} else if len(aSessions) != 1 {
 		t.Errorf("Received sessions: %+v", aSessions)
 	}
-	if aSessions, _, err := smg.asActiveSessions(map[string]string{utils.TOR: "*voice"}, false, false); err != nil {
+	if aSessions, _, err := smg.asActiveSessions(map[string]string{utils.ToR: "*voice"}, false, false); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
 		t.Errorf("Received sessions: %+v", aSessions)
@@ -463,13 +470,13 @@ func TestSMGActiveSessions(t *testing.T) {
 }
 
 func TestGetPassiveSessions(t *testing.T) {
-	smg := NewSMGeneric(smgCfg, nil, nil, nil, nil, nil, nil, "UTC")
+	smg := NewSMGeneric(smgCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
 	if pSS := smg.getSessions("", true); len(pSS) != 0 {
 		t.Errorf("PassiveSessions: %+v", pSS)
 	}
-	smGev1 := SMGenericEvent{
+	smGev1 := engine.NewSafEvent(map[string]interface{}{
 		utils.EVENT_NAME:       "TEST_EVENT",
-		utils.TOR:              "*voice",
+		utils.ToR:              "*voice",
 		utils.OriginID:         "12345",
 		utils.Direction:        "*out",
 		utils.Account:          "account1",
@@ -489,14 +496,16 @@ func TestGetPassiveSessions(t *testing.T) {
 		"Extra1":               "Value1",
 		"Extra2":               5,
 		"Extra3":               "",
-	}
+	})
 	// Index first session
-	smgSession11 := &SMGSession{CGRID: smGev1.GetCGRID(utils.META_DEFAULT), EventStart: smGev1, RunID: utils.META_DEFAULT}
-	smgSession12 := &SMGSession{CGRID: smGev1.GetCGRID(utils.META_DEFAULT), EventStart: smGev1, RunID: "second_run"}
+	smgSession11 := &SMGSession{CGRID: GetSetCGRID(smGev1),
+		EventStart: smGev1, RunID: utils.META_DEFAULT}
+	smgSession12 := &SMGSession{CGRID: GetSetCGRID(smGev1),
+		EventStart: smGev1, RunID: "second_run"}
 	smg.passiveSessions[smgSession11.CGRID] = []*SMGSession{smgSession11, smgSession12}
-	smGev2 := SMGenericEvent{
+	smGev2 := engine.NewSafEvent(map[string]interface{}{
 		utils.EVENT_NAME:       "TEST_EVENT",
-		utils.TOR:              "*voice",
+		utils.ToR:              "*voice",
 		utils.OriginID:         "23456",
 		utils.Direction:        "*out",
 		utils.Account:          "account1",
@@ -516,11 +525,12 @@ func TestGetPassiveSessions(t *testing.T) {
 		"Extra1":               "Value1",
 		"Extra2":               5,
 		"Extra3":               "",
-	}
+	})
 	if pSS := smg.getSessions("", true); len(pSS) != 1 {
 		t.Errorf("PassiveSessions: %+v", pSS)
 	}
-	smgSession21 := &SMGSession{CGRID: smGev2.GetCGRID(utils.META_DEFAULT), EventStart: smGev2, RunID: utils.META_DEFAULT}
+	smgSession21 := &SMGSession{CGRID: GetSetCGRID(smGev2),
+		EventStart: smGev2, RunID: utils.META_DEFAULT}
 	smg.passiveSessions[smgSession21.CGRID] = []*SMGSession{smgSession21}
 	if pSS := smg.getSessions("", true); len(pSS) != 2 {
 		t.Errorf("PassiveSessions: %+v", pSS)

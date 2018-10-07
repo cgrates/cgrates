@@ -9,19 +9,36 @@
 },
 
 
-"stor_db": {								// database used to store offline tariff plans and CDRs
-	"db_password": "CGRateS.org",						// password to use when connecting to stordb
+"stor_db": {
+	"db_password": "CGRateS.org",
 },
 
 
 "rals": {
-	"enabled": true,						// enable Rater service: <true|false>
+	"enabled": true,
 },
 
 "cdrs": {
-	"enabled": true,						// start the CDR Server service:  <true|false>
+	"enabled": true,
+	"attributes_conns":[
+		{"address": "*internal"},
+	],
+	"chargers_conns":[
+		{"address": "*internal"},
+	],
 	"rals_conns": [
-		{"address": "*internal"}			// address where to reach the Rater for cost calculation, empty to disable functionality: <""|*internal|x.y.z.y:1234>
+		{"address": "*internal"}
+	],
+},
+
+"attributes": {
+	"enabled": true,
+},
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": [
+		{"address": "*internal"},
 	],
 },
 

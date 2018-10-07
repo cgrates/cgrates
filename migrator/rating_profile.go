@@ -28,19 +28,19 @@ import (
 
 func (m *Migrator) migrateCurrentRatingProfiles() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.RATING_PROFILE_PREFIX)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.RATING_PROFILE_PREFIX)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.RATING_PROFILE_PREFIX)
-		rp, err := m.dmIN.GetRatingProfile(idg, true, utils.NonTransactional)
+		rp, err := m.dmIN.DataManager().GetRatingProfile(idg, true, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if rp != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.SetRatingProfile(rp, utils.NonTransactional); err != nil {
+				if err := m.dmOut.DataManager().SetRatingProfile(rp, utils.NonTransactional); err != nil {
 					return err
 				}
 				m.stats[utils.RatingProfile] += 1
@@ -53,7 +53,7 @@ func (m *Migrator) migrateCurrentRatingProfiles() (err error) {
 func (m *Migrator) migrateRatingProfiles() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.dmOut.DataManager().DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

@@ -26,7 +26,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -148,7 +147,7 @@ func (r *Resource) recordUsage(ru *ResourceUsage) (err error) {
 	if _, hasID := r.Usages[ru.ID]; hasID {
 		return fmt.Errorf("duplicate resource usage with id: %s", ru.TenantID())
 	}
-	if r.ttl != nil {
+	if r.ttl != nil && *r.ttl != -1 {
 		if *r.ttl == 0 {
 			return // no recording for ttl of 0
 		}
@@ -206,7 +205,7 @@ func (rs Resources) recordUsage(ru *ResourceUsage) (err error) {
 	}
 	if err != nil {
 		for _, r := range rs[:nonReservedIdx] {
-			r.clearUsage(ru.TenantID()) // best effort
+			r.clearUsage(ru.ID) // best effort
 		}
 	}
 	return
@@ -254,6 +253,12 @@ func (rs Resources) allocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 	// Simulate resource usage
 	for _, r := range rs {
 		r.removeExpiredUnits()
+		if _, hasID := r.Usages[ru.ID]; hasID { // update
+			r.clearUsage(ru.ID)
+		}
+		if r.rPrf == nil {
+			return "", fmt.Errorf("empty configuration for resourceID: %s", r.TenantID())
+		}
 		if r.rPrf.Limit >= r.totalUsage()+ru.Units {
 			if alcMessage == "" {
 				if r.rPrf.AllocationMessage != "" {
@@ -355,7 +360,7 @@ func (rS *ResourceService) storeResources() {
 		if rID == "" {
 			break // no more keys, backup completed
 		}
-		if rIf, ok := cache.Get(utils.ResourcesPrefix + rID); !ok || rIf == nil {
+		if rIf, ok := Cache.Get(utils.CacheResources, rID); !ok || rIf == nil {
 			utils.Logger.Warning(fmt.Sprintf("<ResourceS> failed retrieving from cache resource with ID: %s", rID))
 		} else if err := rS.StoreResource(rIf.(*Resource)); err != nil {
 			failedRIDs = append(failedRIDs, rID) // record failure so we can schedule it for next backup
@@ -397,7 +402,7 @@ func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources)
 	rIDs, has := rS.lcEventResources[evUUID]
 	rS.lcERMux.RUnlock()
 	if !has {
-		if rIDsIf, has := cache.Get(utils.EventResourcesPrefix + evUUID); !has {
+		if rIDsIf, has := Cache.Get(utils.CacheEventResources, evUUID); !has {
 			return nil
 		} else if rIDsIf != nil {
 			rIDs = rIDsIf.([]*utils.TenantID)
@@ -415,13 +420,13 @@ func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources)
 	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
 	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for i, rTid := range rIDs {
-		if r, err := rS.dm.GetResource(rTid.Tenant, rTid.ID, false, ""); err != nil {
+		if r, err := rS.dm.GetResource(rTid.Tenant, rTid.ID, true, true, ""); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<ResourceS> force-uncaching resources for evUUID: <%s>, error: <%s>",
 					evUUID, err.Error()))
 			// on errors, cleanup cache so we recache
 			if shortCached {
-				cache.RemKey(utils.EventResourcesPrefix+evUUID, true, "")
+				Cache.Remove(utils.CacheEventResources, evUUID, true, "")
 			} else {
 				rS.lcERMux.Lock()
 				delete(rS.lcEventResources, evUUID)
@@ -436,18 +441,15 @@ func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources)
 }
 
 // matchingResourcesForEvent returns ordered list of matching resources which are active by the time of the call
-func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent) (rs Resources, err error) {
+func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent, usageTTL *time.Duration) (rs Resources, err error) {
 	matchingResources := make(map[string]*Resource)
 	rIDs, err := matchingItemIDsForEvent(ev.Event, rS.stringIndexedFields, rS.prefixIndexedFields,
-		rS.dm, utils.ResourceFilterIndexes+ev.Tenant)
+		rS.dm, utils.CacheResourceFilterIndexes, ev.Tenant, rS.filterS.cfg.FilterSCfg().IndexedSelects)
 	if err != nil {
 		return nil, err
 	}
-	lockIDs := utils.PrefixSliceItems(rIDs.Slice(), utils.ResourceFilterIndexes)
-	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
-	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for resName := range rIDs {
-		rPrf, err := rS.dm.GetResourceProfile(ev.Tenant, resName, false, utils.NonTransactional)
+		rPrf, err := rS.dm.GetResourceProfile(ev.Tenant, resName, true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
@@ -458,19 +460,24 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent) (rs Res
 			!rPrf.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
 			continue
 		}
-		if pass, err := rS.filterS.PassFiltersForEvent(ev.Tenant, ev.Event, rPrf.FilterIDs); err != nil {
+		if pass, err := rS.filterS.Pass(ev.Tenant, rPrf.FilterIDs,
+			config.NewNavigableMap(ev.Event)); err != nil {
 			return nil, err
 		} else if !pass {
 			continue
 		}
-		r, err := rS.dm.GetResource(rPrf.Tenant, rPrf.ID, false, "")
+		r, err := rS.dm.GetResource(rPrf.Tenant, rPrf.ID, true, true, "")
 		if err != nil {
 			return nil, err
 		}
 		if rPrf.Stored && r.dirty == nil {
 			r.dirty = utils.BoolPointer(false)
 		}
-		if rPrf.UsageTTL >= 0 {
+		if usageTTL != nil {
+			if *usageTTL != 0 {
+				r.ttl = usageTTL
+			}
+		} else if rPrf.UsageTTL >= 0 {
 			r.ttl = utils.DurationPointer(rPrf.UsageTTL)
 		}
 		r.rPrf = rPrf
@@ -500,6 +507,9 @@ func (rS *ResourceService) processThresholds(r *Resource) (err error) {
 	}
 	var thIDs []string
 	if len(r.rPrf.ThresholdIDs) != 0 {
+		if len(r.rPrf.ThresholdIDs) == 1 && r.rPrf.ThresholdIDs[0] == utils.META_NONE {
+			return
+		}
 		thIDs = r.rPrf.ThresholdIDs
 	}
 	thEv := &ArgsProcessEvent{ThresholdIDs: thIDs,
@@ -510,8 +520,8 @@ func (rS *ResourceService) processThresholds(r *Resource) (err error) {
 				utils.EventType:  utils.ResourceUpdate,
 				utils.ResourceID: r.ID,
 				utils.Usage:      r.totalUsage()}}}
-	var hits int
-	if err = thresholdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &hits); err != nil &&
+	var tIDs []string
+	if err = rS.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
 		utils.Logger.Warning(
 			fmt.Sprintf("<ResourceS> error: %s processing event %+v with ThresholdS.", err.Error(), thEv))
@@ -521,18 +531,20 @@ func (rS *ResourceService) processThresholds(r *Resource) (err error) {
 
 // V1ResourcesForEvent returns active resource configs matching the event
 func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, reply *Resources) (err error) {
-	if args.CGREvent.Tenant == "" {
-		return utils.NewErrMandatoryIeMissing("Tenant")
+	if missing := utils.MissingStructFields(&args.CGREvent, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	} else if args.Event == nil {
+		return utils.NewErrMandatoryIeMissing("Event")
 	}
 	var mtcRLs Resources
 	if args.UsageID != "" { // only cached if UsageID is present
 		mtcRLs = rS.cachedResourcesForEvent(args.TenantID())
 	}
 	if mtcRLs == nil {
-		if mtcRLs, err = rS.matchingResourcesForEvent(&args.CGREvent); err != nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(&args.CGREvent, args.UsageTTL); err != nil {
 			return err
 		}
-		cache.Set(utils.EventResourcesPrefix+args.TenantID(), mtcRLs.tenantIDs(), true, "")
+		Cache.Set(utils.CacheEventResources, args.TenantID(), mtcRLs.tenantIDs(), nil, true, "")
 	}
 	if len(mtcRLs) == 0 {
 		return utils.ErrNotFound
@@ -550,12 +562,15 @@ func (rS *ResourceService) V1AuthorizeResources(args utils.ArgRSv1ResourceUsage,
 	if missing := utils.MissingStructFields(&args, []string{"UsageID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
+	if args.CGREvent.Event == nil {
+		return utils.NewErrMandatoryIeMissing("Event")
+	}
 	mtcRLs := rS.cachedResourcesForEvent(args.TenantID())
 	if mtcRLs == nil {
-		if mtcRLs, err = rS.matchingResourcesForEvent(&args.CGREvent); err != nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(&args.CGREvent, args.UsageTTL); err != nil {
 			return err
 		}
-		cache.Set(utils.EventResourcesPrefix+args.TenantID(), mtcRLs.tenantIDs(), true, "")
+		Cache.Set(utils.CacheEventResources, args.TenantID(), mtcRLs.tenantIDs(), nil, true, "")
 	}
 	if alcMessage, err = mtcRLs.allocateResource(
 		&ResourceUsage{
@@ -564,7 +579,7 @@ func (rS *ResourceService) V1AuthorizeResources(args utils.ArgRSv1ResourceUsage,
 			Units:  args.Units}, true); err != nil {
 		if err == utils.ErrResourceUnavailable {
 			err = utils.ErrResourceUnauthorized
-			cache.Set(utils.EventResourcesPrefix+args.UsageID, nil, true, "")
+			Cache.Set(utils.CacheEventResources, args.UsageID, nil, nil, true, "")
 			return
 		}
 	}
@@ -580,10 +595,13 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 	if missing := utils.MissingStructFields(&args, []string{"UsageID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
+	if args.CGREvent.Event == nil {
+		return utils.NewErrMandatoryIeMissing("Event")
+	}
 	var wasCached bool
 	mtcRLs := rS.cachedResourcesForEvent(args.UsageID)
 	if mtcRLs == nil {
-		if mtcRLs, err = rS.matchingResourcesForEvent(&args.CGREvent); err != nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(&args.CGREvent, args.UsageTTL); err != nil {
 			return
 		}
 	} else {
@@ -598,10 +616,10 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 	// index it for matching out of cache
 	var wasShortCached bool
 	if wasCached {
-		if _, has := cache.Get(utils.EventResourcesPrefix + args.UsageID); has {
+		if _, has := Cache.Get(utils.CacheEventResources, args.UsageID); has {
 			// remove from short cache to populate event cache
 			wasShortCached = true
-			cache.RemKey(utils.EventResourcesPrefix+args.UsageID, true, "")
+			Cache.Remove(utils.CacheEventResources, args.UsageID, true, "")
 		}
 	}
 	if wasShortCached || !wasCached {
@@ -636,9 +654,12 @@ func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, re
 	if missing := utils.MissingStructFields(&args, []string{"UsageID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
+	if args.CGREvent.Event == nil {
+		return utils.NewErrMandatoryIeMissing("Event")
+	}
 	mtcRLs := rS.cachedResourcesForEvent(args.UsageID)
 	if mtcRLs == nil {
-		if mtcRLs, err = rS.matchingResourcesForEvent(&args.CGREvent); err != nil {
+		if mtcRLs, err = rS.matchingResourcesForEvent(&args.CGREvent, args.UsageTTL); err != nil {
 			return
 		}
 	}

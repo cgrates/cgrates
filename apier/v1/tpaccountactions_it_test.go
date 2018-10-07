@@ -131,14 +131,14 @@ func testTPAccActionsGetTPAccActionBeforeSet(t *testing.T) {
 
 func testTPAccActionsSetTPAccAction(t *testing.T) {
 	tpAccActions = &utils.TPAccountActions{
-		TPid:             "TPAcc",
-		LoadId:           "ID",
-		Tenant:           "cgrates.org",
-		Account:          "1001",
-		ActionPlanId:     "PREPAID_10",
-		ActionTriggersId: "STANDARD_TRIGGERS",
-		AllowNegative:    true,
-		Disabled:         false,
+		TPid:         "TPAcc",
+		LoadId:       "ID",
+		Tenant:       "cgrates.org",
+		Account:      "1001",
+		ActionPlanId: "PREPAID_10",
+		//ActionTriggersId: "STANDARD_TRIGGERS", // ActionTriggersId is optional
+		AllowNegative: true,
+		Disabled:      false,
 	}
 	var result string
 	if err := tpAccActionsRPC.Call("ApierV1.SetTPAccountActions", tpAccActions, &result); err != nil {

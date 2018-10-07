@@ -27,7 +27,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -42,7 +41,8 @@ var sTestsDMit = []func(t *testing.T){
 
 func TestDMitRedis(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
-	dataDB, err := NewRedisStorage(fmt.Sprintf("%s:%s", cfg.DataDbHost, cfg.DataDbPort), 4, cfg.DataDbPass, cfg.DBDataEncoding, utils.REDIS_MAX_CONNS, nil, 1)
+	dataDB, err := NewRedisStorage(fmt.Sprintf("%s:%s", cfg.DataDbHost, cfg.DataDbPort), 4,
+		cfg.DataDbPass, cfg.DBDataEncoding, utils.REDIS_MAX_CONNS, nil, "")
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	}
@@ -60,7 +60,7 @@ func TestDMitMongo(t *testing.T) {
 	}
 	dataDB, err := NewMongoStorage(mgoITCfg.StorDBHost, mgoITCfg.StorDBPort,
 		mgoITCfg.StorDBName, mgoITCfg.StorDBUser, mgoITCfg.StorDBPass,
-		utils.StorDB, nil, mgoITCfg.CacheCfg(), mgoITCfg.LoadHistorySize)
+		utils.StorDB, nil, mgoITCfg.CacheCfg())
 	if err != nil {
 		t.Fatal("Could not connect to Mongo", err.Error())
 	}
@@ -74,7 +74,7 @@ func testDMitDataFlush(t *testing.T) {
 	if err := dm2.dataDB.Flush(""); err != nil {
 		t.Error(err)
 	}
-	cache.Flush()
+	Cache.Clear(nil)
 }
 
 func testDMitCRUDStatQueue(t *testing.T) {
@@ -100,34 +100,33 @@ func testDMitCRUDStatQueue(t *testing.T) {
 			},
 		},
 	}
-	cacheKey := utils.StatQueuePrefix + sq.TenantID()
-	if _, rcvErr := dm2.GetStatQueue(sq.Tenant, sq.ID, false, ""); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := dm2.GetStatQueue(sq.Tenant, sq.ID, true, false, ""); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if _, ok := cache.Get(cacheKey); ok != false {
+	if _, ok := Cache.Get(utils.CacheStatQueues, sq.TenantID()); ok != false {
 		t.Error("should not be in cache")
 	}
 	if err := dm2.SetStatQueue(sq); err != nil {
 		t.Error(err)
 	}
-	if _, ok := cache.Get(cacheKey); ok != false {
+	if _, ok := Cache.Get(utils.CacheStatQueues, sq.TenantID()); ok != false {
 		t.Error("should not be in cache")
 	}
-	if rcv, err := dm2.GetStatQueue(sq.Tenant, sq.ID, false, ""); err != nil {
+	if rcv, err := dm2.GetStatQueue(sq.Tenant, sq.ID, true, false, ""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sq, rcv) {
 		t.Errorf("expecting: %v, received: %v", sq, rcv)
 	}
-	if _, ok := cache.Get(cacheKey); ok != true {
+	if _, ok := Cache.Get(utils.CacheStatQueues, sq.TenantID()); ok != true {
 		t.Error("should be in cache")
 	}
-	if err := dm2.RemStatQueue(sq.Tenant, sq.ID, ""); err != nil {
+	if err := dm2.RemoveStatQueue(sq.Tenant, sq.ID, ""); err != nil {
 		t.Error(err)
 	}
-	if _, ok := cache.Get(cacheKey); ok != false {
+	if _, ok := Cache.Get(utils.CacheStatQueues, sq.TenantID()); ok != false {
 		t.Error("should not be in cache")
 	}
-	if _, rcvErr := dm2.GetStatQueue(sq.Tenant, sq.ID, false, ""); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := dm2.GetStatQueue(sq.Tenant, sq.ID, true, false, ""); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

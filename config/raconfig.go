@@ -30,13 +30,10 @@ type RadiusAgentCfg struct {
 	ClientSecrets      map[string]string
 	ClientDictionaries map[string]string
 	SessionSConns      []*HaPoolConfig
-	CreateCDR          bool
-	CDRRequiresSession bool
-	Timezone           string
 	RequestProcessors  []*RARequestProcessor
 }
 
-func (self *RadiusAgentCfg) loadFromJsonCfg(jsnCfg *RadiusAgentJsonCfg) error {
+func (self *RadiusAgentCfg) loadFromJsonCfg(jsnCfg *RadiusAgentJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -75,15 +72,6 @@ func (self *RadiusAgentCfg) loadFromJsonCfg(jsnCfg *RadiusAgentJsonCfg) error {
 			self.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
-	if jsnCfg.Create_cdr != nil {
-		self.CreateCDR = *jsnCfg.Create_cdr
-	}
-	if jsnCfg.Cdr_requires_session != nil {
-		self.CDRRequiresSession = *jsnCfg.Cdr_requires_session
-	}
-	if jsnCfg.Timezone != nil {
-		self.Timezone = *jsnCfg.Timezone
-	}
 	if jsnCfg.Request_processors != nil {
 		for _, reqProcJsn := range *jsnCfg.Request_processors {
 			rp := new(RARequestProcessor)
@@ -109,29 +97,26 @@ func (self *RadiusAgentCfg) loadFromJsonCfg(jsnCfg *RadiusAgentJsonCfg) error {
 // One Diameter request processor configuration
 type RARequestProcessor struct {
 	Id                string
-	DryRun            bool
-	RequestFilter     utils.RSRFields
-	Flags             utils.StringMap // Various flags to influence behavior
+	Tenant            RSRParsers
+	Filters           []string
+	Timezone          string
+	Flags             utils.StringMap
 	ContinueOnSuccess bool
-	AppendReply       bool
-	RequestFields     []*CfgCdrField
-	ReplyFields       []*CfgCdrField
+	RequestFields     []*FCTemplate
+	ReplyFields       []*FCTemplate
 }
 
-func (self *RARequestProcessor) loadFromJsonCfg(jsnCfg *RAReqProcessorJsnCfg) error {
+func (self *RARequestProcessor) loadFromJsonCfg(jsnCfg *RAReqProcessorJsnCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
 	if jsnCfg.Id != nil {
 		self.Id = *jsnCfg.Id
 	}
-	if jsnCfg.Dry_run != nil {
-		self.DryRun = *jsnCfg.Dry_run
-	}
-	var err error
-	if jsnCfg.Request_filter != nil {
-		if self.RequestFilter, err = utils.ParseRSRFields(*jsnCfg.Request_filter, utils.INFIELD_SEP); err != nil {
-			return err
+	if jsnCfg.Filters != nil {
+		self.Filters = make([]string, len(*jsnCfg.Filters))
+		for i, fltr := range *jsnCfg.Filters {
+			self.Filters[i] = fltr
 		}
 	}
 	if jsnCfg.Flags != nil {
@@ -140,17 +125,22 @@ func (self *RARequestProcessor) loadFromJsonCfg(jsnCfg *RAReqProcessorJsnCfg) er
 	if jsnCfg.Continue_on_success != nil {
 		self.ContinueOnSuccess = *jsnCfg.Continue_on_success
 	}
-	if jsnCfg.Append_reply != nil {
-		self.AppendReply = *jsnCfg.Append_reply
-	}
-	if jsnCfg.Request_fields != nil {
-		if self.RequestFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Request_fields); err != nil {
+	if jsnCfg.Tenant != nil {
+		if self.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true); err != nil {
 			return err
 		}
 	}
+	if jsnCfg.Timezone != nil {
+		self.Timezone = *jsnCfg.Timezone
+	}
+	if jsnCfg.Request_fields != nil {
+		if self.RequestFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Request_fields); err != nil {
+			return
+		}
+	}
 	if jsnCfg.Reply_fields != nil {
-		if self.ReplyFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Reply_fields); err != nil {
-			return err
+		if self.ReplyFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Reply_fields); err != nil {
+			return
 		}
 	}
 	return nil

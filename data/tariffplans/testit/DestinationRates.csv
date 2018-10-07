@@ -1,2 +1,6 @@
 #Id,DestinationId,RatesTag,RoundingMethod,RoundingDecimals,MaxCost,MaxCostStrategy
 DR_ANY_1CNT,*any,RT_1CNT,*up,5,0,
+DR_ANY_2CNT,*any,RT_2CNT,*up,5,0,
+DR_SPECIAL_1002,DST_1002,RT_1CNT,*up,4,0,
+DR_FS_40CNT,DST_FS,RT_40CNT,*up,4,0,
+DR_TEST_1,DST_1001,RT_TEST_1,*up,4,0,

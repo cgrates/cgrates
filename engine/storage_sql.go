@@ -51,6 +51,10 @@ func (self *SQLStorage) Close() {
 	self.db.Close()
 }
 
+func (self *SQLStorage) ExportGormDB() *gorm.DB {
+	return self.db
+}
+
 func (self *SQLStorage) Flush(scriptsPath string) (err error) {
 	for _, scriptName := range []string{utils.CREATE_CDRS_TABLES_SQL, utils.CREATE_TARIFFPLAN_TABLES_SQL} {
 		if err := self.CreateTablesFromScript(path.Join(scriptsPath, scriptName)); err != nil {
@@ -75,10 +79,6 @@ func (self *SQLStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 }
 
 func (self *SQLStorage) RebuildReverseForPrefix(prefix string) error {
-	return utils.ErrNotImplemented
-}
-
-func (self *SQLStorage) PreloadCacheForPrefix(prefix string) error {
 	return utils.ErrNotImplemented
 }
 
@@ -108,7 +108,7 @@ func (self *SQLStorage) IsDBEmpty() (resp bool, err error) {
 		utils.TBLTPActionTriggers, utils.TBLTPAccountActions, utils.TBLTPDerivedChargers, utils.TBLTPUsers,
 		utils.TBLTPAliases, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
 		utils.TBLTPFilters, utils.SessionsCostsTBL, utils.CDRsTBL, utils.TBLTPActionPlans,
-		utils.TBLVersions, utils.TBLTPSuppliers, utils.TBLTPAttributes,
+		utils.TBLVersions, utils.TBLTPSuppliers, utils.TBLTPAttributes, utils.TBLTPChargers,
 	}
 	for _, tbl := range tbls {
 		if self.db.HasTable(tbl) {
@@ -127,7 +127,7 @@ func (self *SQLStorage) GetTpIds(colName string) ([]string, error) {
 	qryStr := fmt.Sprintf(" (SELECT tpid FROM %s)", colName)
 	if colName == "" {
 		qryStr = fmt.Sprintf(
-			"(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)",
+			"(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)",
 			utils.TBLTPTimings,
 			utils.TBLTPDestinations,
 			utils.TBLTPRates,
@@ -149,7 +149,8 @@ func (self *SQLStorage) GetTpIds(colName string) ([]string, error) {
 			utils.TBLTPFilters,
 			utils.TBLTPActionPlans,
 			utils.TBLTPSuppliers,
-			utils.TBLTPAttributes)
+			utils.TBLTPAttributes,
+			utils.TBLTPChargers)
 	}
 	rows, err = self.Db.Query(qryStr)
 	if err != nil {
@@ -174,8 +175,8 @@ func (self *SQLStorage) GetTpIds(colName string) ([]string, error) {
 }
 
 // ToDo: TEST
-func (self *SQLStorage) GetTpTableIds(tpid, table string, distinct utils.TPDistinctIds, filters map[string]string, pagination *utils.Paginator) ([]string, error) {
-
+func (self *SQLStorage) GetTpTableIds(tpid, table string, distinct utils.TPDistinctIds,
+	filters map[string]string, pagination *utils.Paginator) ([]string, error) {
 	qry := fmt.Sprintf("SELECT DISTINCT %s FROM %s where tpid='%s'", distinct, table, tpid)
 	for key, value := range filters {
 		if key != "" && value != "" {
@@ -236,10 +237,11 @@ func (self *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 
 	if len(table) == 0 { // Remove tpid out of all tables
 		for _, tblName := range []string{utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates,
-			utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles, utils.TBLTPSharedGroups,
-			utils.TBLTPCdrStats, utils.TBLTPLcrs, utils.TBLTPActions, utils.TBLTPActionPlans, utils.TBLTPActionTriggers,
-			utils.TBLTPAccountActions, utils.TBLTPDerivedChargers, utils.TBLTPAliases, utils.TBLTPUsers,
-			utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPFilters, utils.TBLTPSuppliers, utils.TBLTPAttributes} {
+			utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles,
+			utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPLcrs, utils.TBLTPActions,
+			utils.TBLTPActionPlans, utils.TBLTPActionTriggers, utils.TBLTPAccountActions,
+			utils.TBLTPDerivedChargers, utils.TBLTPAliases, utils.TBLTPUsers, utils.TBLTPResources,
+			utils.TBLTPStats, utils.TBLTPFilters, utils.TBLTPSuppliers, utils.TBLTPAttributes, utils.TBLTPChargers} {
 			if err := tx.Table(tblName).Where("tpid = ?", tpid).Delete(nil).Error; err != nil {
 				tx.Rollback()
 				return err
@@ -738,6 +740,28 @@ func (self *SQLStorage) SetTPAttributes(tpAttrs []*utils.TPAttributeProfile) err
 	return nil
 }
 
+func (self *SQLStorage) SetTPChargers(tpCPPs []*utils.TPChargerProfile) error {
+	if len(tpCPPs) == 0 {
+		return nil
+	}
+	tx := self.db.Begin()
+	for _, cpp := range tpCPPs {
+		// Remove previous
+		if err := tx.Where(&TPCharger{Tpid: cpp.TPid, ID: cpp.ID}).Delete(TPCharger{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+		for _, mst := range APItoModelTPCharger(cpp) {
+			if err := tx.Save(&mst).Error; err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+	tx.Commit()
+	return nil
+}
+
 func (self *SQLStorage) SetSMCost(smc *SMCost) error {
 	if smc.CostDetails == nil {
 		return nil
@@ -749,7 +773,7 @@ func (self *SQLStorage) SetSMCost(smc *SMCost) error {
 		OriginHost:  smc.OriginHost,
 		OriginID:    smc.OriginID,
 		CostSource:  smc.CostSource,
-		CostDetails: smc.CostDetails.AsJSON(),
+		CostDetails: utils.ToJSON(smc.CostDetails),
 		Usage:       smc.Usage.Nanoseconds(),
 		CreatedAt:   time.Now(),
 	}
@@ -763,9 +787,12 @@ func (self *SQLStorage) SetSMCost(smc *SMCost) error {
 
 func (self *SQLStorage) RemoveSMCost(smc *SMCost) error {
 	tx := self.db.Begin()
-
-	if err := tx.Where(&SessionsCostsSQL{Cgrid: smc.CGRID,
-		RunID: smc.RunID}).Delete(SessionsCostsSQL{}).Error; err != nil {
+	var rmParam *SessionsCostsSQL
+	if smc != nil {
+		rmParam = &SessionsCostsSQL{Cgrid: smc.CGRID,
+			RunID: smc.RunID}
+	}
+	if err := tx.Where(rmParam).Delete(SessionsCostsSQL{}).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -805,7 +832,7 @@ func (self *SQLStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix stri
 			OriginID:    result.OriginID,
 			CostSource:  result.CostSource,
 			Usage:       time.Duration(result.Usage),
-			CostDetails: &CallCost{},
+			CostDetails: new(EventCost),
 		}
 		if err := json.Unmarshal([]byte(result.CostDetails), smc.CostDetails); err != nil {
 			return nil, err
@@ -1014,6 +1041,32 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	}
 	if qryFltr.UpdatedAtEnd != nil && !qryFltr.UpdatedAtEnd.IsZero() {
 		q = q.Where("updated_at < ?", qryFltr.UpdatedAtEnd)
+	}
+	if qryFltr.OrderBy != "" {
+		var orderVal string
+		separateVals := strings.Split(qryFltr.OrderBy, utils.INFIELD_SEP)
+		switch separateVals[0] {
+		case utils.OrderID:
+			orderVal = "id"
+		case utils.AnswerTime:
+			orderVal = "answer_time"
+		case utils.SetupTime:
+			orderVal = "setup_time"
+		case utils.Usage:
+			if self.db.Dialect().GetName() == utils.MYSQL {
+				orderVal = "`usage`"
+			} else {
+				orderVal = "usage"
+			}
+		case utils.Cost:
+			orderVal = "cost"
+		default:
+			return nil, 0, fmt.Errorf("Invalid value : %s", separateVals[0])
+		}
+		if len(separateVals) == 2 && separateVals[1] == "desc" {
+			orderVal += " DESC"
+		}
+		q = q.Order(orderVal)
 	}
 	if len(qryFltr.MinUsage) != 0 {
 		minUsage, err := utils.ParseDurationWithNanosecs(qryFltr.MinUsage)
@@ -1614,6 +1667,22 @@ func (self *SQLStorage) GetTPAttributes(tpid, id string) ([]*utils.TPAttributePr
 		return nil, err
 	}
 	arls := sps.AsTPAttributes()
+	if len(arls) == 0 {
+		return arls, utils.ErrNotFound
+	}
+	return arls, nil
+}
+
+func (self *SQLStorage) GetTPChargers(tpid, id string) ([]*utils.TPChargerProfile, error) {
+	var cpps TPChargers
+	q := self.db.Where("tpid = ?", tpid)
+	if len(id) != 0 {
+		q = q.Where("id = ?", id)
+	}
+	if err := q.Find(&cpps).Error; err != nil {
+		return nil, err
+	}
+	arls := cpps.AsTPChargers()
 	if len(arls) == 0 {
 		return arls, utils.ErrNotFound
 	}

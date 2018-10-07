@@ -25,6 +25,33 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+var (
+	dataDBVers = map[string]string{
+		utils.Accounts:       "cgr-migrator -migrate=*accounts",
+		utils.Attributes:     "cgr-migrator -migrate=*attributes",
+		utils.Actions:        "cgr-migrator -migrate=*actions",
+		utils.ActionTriggers: "cgr-migrator -migrate=*action_triggers",
+		utils.ActionPlans:    "cgr-migrator -migrate=*action_plans",
+		utils.SharedGroups:   "cgr-migrator -migrate=*shared_groups",
+		utils.Thresholds:     "cgr-migrator -migrate=*thresholds",
+	}
+	storDBVers = map[string]string{
+		utils.CostDetails:   "cgr-migrator -migrate=*cost_details",
+		utils.SessionSCosts: "cgr-migrator -migrate=*sessions_costs",
+	}
+	allVers map[string]string // init will fill this with a merge of data+stor
+)
+
+func init() {
+	allVers = make(map[string]string)
+	for k, v := range dataDBVers {
+		allVers[k] = v
+	}
+	for k, v := range storDBVers {
+		allVers[k] = v
+	}
+}
+
 // Versions will keep trac of various item versions
 type Versions map[string]int64 // map[item]versionNr
 
@@ -32,7 +59,7 @@ func CheckVersions(storage Storage) error {
 	// get current db version
 	storType := storage.GetStorageType()
 	x := CurrentDBVersions(storType)
-	dbVersion, err := storage.GetVersions(utils.TBLVersions)
+	dbVersion, err := storage.GetVersions("")
 	if err == utils.ErrNotFound {
 		empty, err := storage.IsDBEmpty()
 		if err != nil {
@@ -59,49 +86,25 @@ func CheckVersions(storage Storage) error {
 	return nil
 }
 
-func SetDBVersions(storage Storage) error {
+func SetDBVersions(storage Storage) (err error) {
 	storType := storage.GetStorageType()
 	x := CurrentDBVersions(storType)
 	// no data, write version
-	if err := storage.SetVersions(x, false); err != nil {
+	if err = storage.SetVersions(x, false); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("Could not write current version to db: %v", err))
 	}
-	return nil
-
+	return
 }
 
 func (vers Versions) Compare(curent Versions, storType string) string {
 	var x map[string]string
-	m := map[string]string{
-		utils.Accounts:       "cgr-migrator -migrate=*accounts",
-		utils.Attributes:     "cgr-migrator -migrate=*attributes",
-		utils.Actions:        "cgr-migrator -migrate=*actions",
-		utils.ActionTriggers: "cgr-migrator -migrate=*action_triggers",
-		utils.ActionPlans:    "cgr-migrator -migrate=*action_plans",
-		utils.SharedGroups:   "cgr-migrator -migrate=*shared_groups",
-		utils.COST_DETAILS:   "cgr-migrator -migrate=*cost_details",
-	}
-	data := map[string]string{
-		utils.Accounts:       "cgr-migrator -migrate=*accounts",
-		utils.Attributes:     "cgr-migrator -migrate=*attributes",
-		utils.Actions:        "cgr-migrator -migrate=*actions",
-		utils.ActionTriggers: "cgr-migrator -migrate=*action_triggers",
-		utils.ActionPlans:    "cgr-migrator -migrate=*action_plans",
-		utils.SharedGroups:   "cgr-migrator -migrate=*shared_groups",
-	}
-	stor := map[string]string{
-		utils.COST_DETAILS:  "cgr-migrator -migrate=*cost_details",
-		utils.SessionsCosts: "cgr-migrator -migrate=*sessions_costs",
-	}
 	switch storType {
-	case utils.MONGO:
-		x = m
+	case utils.MONGO, utils.MAPSTOR:
+		x = allVers
 	case utils.POSTGRES, utils.MYSQL:
-		x = stor
+		x = storDBVers
 	case utils.REDIS:
-		x = data
-	case utils.MAPSTOR:
-		x = m
+		x = dataDBVers
 	}
 	for y, val := range x {
 		if vers[y] != curent[y] {
@@ -119,7 +122,7 @@ func CurrentDataDBVersions() Versions {
 		utils.ActionTriggers:      2,
 		utils.ActionPlans:         2,
 		utils.SharedGroups:        2,
-		utils.Thresholds:          2,
+		utils.Thresholds:          3,
 		utils.Suppliers:           1,
 		utils.Attributes:          2,
 		utils.Timing:              1,
@@ -136,13 +139,15 @@ func CurrentDataDBVersions() Versions {
 		utils.LCR:                 1,
 		utils.RatingPlan:          1,
 		utils.RatingProfile:       1,
+		utils.Chargers:            1,
 	}
 }
 
 func CurrentStorDBVersions() Versions {
 	return Versions{
-		utils.COST_DETAILS:       2,
-		utils.SessionsCosts:      2,
+		utils.CostDetails:        2,
+		utils.SessionSCosts:      3,
+		utils.CDRs:               2,
 		utils.TpRatingPlans:      1,
 		utils.TpFilters:          1,
 		utils.TpDestinationRates: 1,
@@ -167,6 +172,7 @@ func CurrentStorDBVersions() Versions {
 		utils.TpDestinations:     1,
 		utils.TpRatingPlan:       1,
 		utils.TpRatingProfile:    1,
+		utils.TpChargers:         1,
 	}
 }
 

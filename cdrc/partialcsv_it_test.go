@@ -105,7 +105,7 @@ func TestPartcsvITHandleCdr1File(t *testing.T) {
 	fileName := "file1.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
 	if err := ioutil.WriteFile(tmpFilePath, []byte(partCsvFileContent1), 0644); err != nil {
-		t.Fatal(err.Error)
+		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join(partcsvCDRCDirIn1, fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
@@ -117,7 +117,7 @@ func TestPartcsvITHandleCdr2File(t *testing.T) {
 	fileName := "file2.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
 	if err := ioutil.WriteFile(tmpFilePath, []byte(partCsvFileContent2), 0644); err != nil {
-		t.Fatal(err.Error)
+		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join(partcsvCDRCDirIn1, fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
@@ -129,7 +129,7 @@ func TestPartcsvITHandleCdr3File(t *testing.T) {
 	fileName := "file3.csv"
 	tmpFilePath := path.Join("/tmp", fileName)
 	if err := ioutil.WriteFile(tmpFilePath, []byte(partCsvFileContent3), 0644); err != nil {
-		t.Fatal(err.Error)
+		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join(partcsvCDRCDirIn2, fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)

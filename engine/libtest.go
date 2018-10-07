@@ -34,15 +34,16 @@ import (
 )
 
 func InitDataDb(cfg *config.CGRConfig) error {
-	dm, err := ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort, cfg.DataDbName,
-		cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding, cfg.CacheCfg(), cfg.LoadHistorySize)
+	dm, err := ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort,
+		cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding,
+		cfg.CacheCfg(), cfg.DataDbSentinelName)
 	if err != nil {
 		return err
 	}
 	if err := dm.DataDB().Flush(""); err != nil {
 		return err
 	}
-	dm.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	//dm.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	//	Write version before starting
 	if err := SetDBVersions(dm.dataDB); err != nil {
 		return err
@@ -52,8 +53,11 @@ func InitDataDb(cfg *config.CGRConfig) error {
 
 func InitStorDb(cfg *config.CGRConfig) error {
 	x := []string{utils.MYSQL, utils.POSTGRES}
-	storDb, err := ConfigureLoadStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding,
-		cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns, cfg.StorDBConnMaxLifetime, cfg.StorDBCDRSIndexes)
+	storDb, err := ConfigureLoadStorage(cfg.StorDBType,
+		cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName,
+		cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding,
+		cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns,
+		cfg.StorDBConnMaxLifetime, cfg.StorDBCDRSIndexes)
 	if err != nil {
 		return err
 	}
@@ -95,7 +99,7 @@ func StartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 		}
 	}
 	if !connected {
-		return nil, fmt.Errorf("engine did not open port <%d>", cfg.RPCJSONListen)
+		return nil, fmt.Errorf("engine did not open port <%s>", cfg.RPCJSONListen)
 	}
 	return engine, nil
 }
@@ -138,6 +142,7 @@ func LoadTariffPlanFromFolder(tpPath, timezone string, dm *DataManager, disable_
 		path.Join(tpPath, utils.FiltersCsv),
 		path.Join(tpPath, utils.SuppliersCsv),
 		path.Join(tpPath, utils.AttributesCsv),
+		path.Join(tpPath, utils.ChargersCsv),
 	), "", timezone)
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
@@ -200,6 +205,14 @@ func PjsuaCallUri(acnt *PjsuaAccount, dstUri, outboundUri string, callDur time.D
 
 func KillProcName(procName string, waitMs int) error {
 	if err := exec.Command("pkill", procName).Run(); err != nil {
+		return err
+	}
+	time.Sleep(time.Duration(waitMs) * time.Millisecond)
+	return nil
+}
+
+func ForceKillProcName(procName string, waitMs int) error {
+	if err := exec.Command("pkill", "-9", procName).Run(); err != nil {
 		return err
 	}
 	time.Sleep(time.Duration(waitMs) * time.Millisecond)

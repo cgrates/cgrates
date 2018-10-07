@@ -25,15 +25,15 @@ import (
 )
 
 func TestCdreCfgClone(t *testing.T) {
-	cgrIdRsrs := utils.ParseRSRFieldsMustCompile("cgrid", utils.INFIELD_SEP)
-	runIdRsrs := utils.ParseRSRFieldsMustCompile("runid", utils.INFIELD_SEP)
-	emptyFields := []*CfgCdrField{}
-	initContentFlds := []*CfgCdrField{
-		&CfgCdrField{Tag: "CgrId",
+	cgrIdRsrs := NewRSRParsersMustCompile("cgrid", true)
+	runIdRsrs := NewRSRParsersMustCompile("runid", true)
+	emptyFields := []*FCTemplate{}
+	initContentFlds := []*FCTemplate{
+		&FCTemplate{Tag: "CgrId",
 			Type:    "*composed",
 			FieldId: "cgrid",
 			Value:   cgrIdRsrs},
-		&CfgCdrField{Tag: "RunId",
+		&FCTemplate{Tag: "RunId",
 			Type:    "*composed",
 			FieldId: "runid",
 			Value:   runIdRsrs},
@@ -51,12 +51,12 @@ func TestCdreCfgClone(t *testing.T) {
 		CostMultiplyFactor: 1.0,
 		ContentFields:      initContentFlds,
 	}
-	eClnContentFlds := []*CfgCdrField{
-		&CfgCdrField{Tag: "CgrId",
+	eClnContentFlds := []*FCTemplate{
+		&FCTemplate{Tag: "CgrId",
 			Type:    "*composed",
 			FieldId: "cgrid",
 			Value:   cgrIdRsrs},
-		&CfgCdrField{Tag: "RunId",
+		&FCTemplate{Tag: "RunId",
 			Type:    "*composed",
 			FieldId: "runid",
 			Value:   runIdRsrs},
@@ -66,6 +66,7 @@ func TestCdreCfgClone(t *testing.T) {
 		ExportPath:     "/var/spool/cgrates/cdre",
 		Synchronous:    true,
 		Attempts:       2,
+		Filters:        []string{},
 		FieldSeparator: rune(','),
 		UsageMultiplyFactor: map[string]float64{
 			utils.ANY:  1.0,

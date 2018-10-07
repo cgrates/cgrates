@@ -19,75 +19,66 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package guardian
 
 import (
+	"fmt"
 	"sync"
-	"sync/atomic"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 // global package variable
-var Guardian = &GuardianLock{locksMap: make(map[string]*itemLock)}
+var Guardian = &GuardianLocker{locksMap: make(map[string]*itemLock)}
 
-func newItemLock(keyID string) *itemLock {
-	return &itemLock{keyID: keyID}
-}
-
-// itemLock represents one lock with key autodestroy
 type itemLock struct {
-	keyID string // store it so we know what to destroy
-	cnt   int64
-	sync.Mutex
+	lk  chan struct{}
+	cnt int64
 }
 
-// unlock() executes combined lock with autoremoving lock from Guardian
-func (il *itemLock) unlock() {
-	atomic.AddInt64(&il.cnt, -1)
-	if atomic.LoadInt64(&il.cnt) == 0 { // last lock in the queue
-		Guardian.Lock()
-		if il.cnt == 0 { // assurance that our counter was not modified in between read and lock
-			delete(Guardian.locksMap, il.keyID)
-		}
-		Guardian.Unlock()
+// GuardianLocker is an optimized locking system per locking key
+type GuardianLocker struct {
+	locksMap   map[string]*itemLock
+	sync.Mutex // protects the map
+}
+
+func (gl *GuardianLocker) lockItem(itmID string) {
+	gl.Lock()
+	itmLock, exists := gl.locksMap[itmID]
+	if !exists {
+		itmLock = &itemLock{lk: make(chan struct{}, 1)}
+		gl.locksMap[itmID] = itmLock
+		itmLock.lk <- struct{}{}
 	}
-	il.Unlock() // will unlock a single count so the next one waiting for lock can proceed
+	itmLock.cnt++
+	select {
+	case <-itmLock.lk:
+		gl.Unlock()
+		return
+	default: // move further so we can unlock
+	}
+	gl.Unlock()
+	<-itmLock.lk
 }
 
-// GuardianLock is an optimized locking system per locking key
-type GuardianLock struct {
-	locksMap     map[string]*itemLock
-	sync.RWMutex // protects the maps
+func (gl *GuardianLocker) unlockItem(itmID string) {
+	gl.Lock()
+	itmLock, exists := gl.locksMap[itmID]
+	if !exists {
+		gl.Unlock()
+		return
+	}
+	itmLock.cnt--
+	if itmLock.cnt == 0 {
+		delete(gl.locksMap, itmID)
+	}
+	gl.Unlock()
+	itmLock.lk <- struct{}{}
 }
 
-// lockItems locks a set of lockIDs
-// returning the lock structs so they can be later unlocked
-func (guard *GuardianLock) lockItems(lockIDs []string) (itmLocks []*itemLock) {
-	guard.Lock()
+// Guard executes the handler between locks
+func (gl *GuardianLocker) Guard(handler func() (interface{}, error), timeout time.Duration, lockIDs ...string) (reply interface{}, err error) {
 	for _, lockID := range lockIDs {
-		var itmLock *itemLock
-		itmLock, exists := guard.locksMap[lockID]
-		if !exists {
-			itmLock = newItemLock(lockID)
-			guard.locksMap[lockID] = itmLock
-		}
-		atomic.AddInt64(&itmLock.cnt, 1)
-		itmLocks = append(itmLocks, itmLock)
+		gl.lockItem(lockID)
 	}
-	guard.Unlock()
-	for _, itmLock := range itmLocks {
-		itmLock.Lock()
-	}
-	return
-}
-
-// unlockItems will unlock the items provided
-func (guard *GuardianLock) unlockItems(itmLocks []*itemLock) {
-	for _, itmLock := range itmLocks {
-		itmLock.unlock()
-	}
-}
-
-func (guard *GuardianLock) Guard(handler func() (interface{}, error), timeout time.Duration, lockIDs ...string) (reply interface{}, err error) {
-	itmLocks := guard.lockItems(lockIDs)
-
 	rplyChan := make(chan interface{})
 	errChan := make(chan error)
 	go func(rplyChan chan interface{}, errChan chan error) {
@@ -98,7 +89,6 @@ func (guard *GuardianLock) Guard(handler func() (interface{}, error), timeout ti
 			rplyChan <- rply
 		}
 	}(rplyChan, errChan)
-
 	if timeout > 0 { // wait with timeout
 		select {
 		case err = <-errChan:
@@ -111,34 +101,31 @@ func (guard *GuardianLock) Guard(handler func() (interface{}, error), timeout ti
 		case reply = <-rplyChan:
 		}
 	}
-	guard.unlockItems(itmLocks)
+	for _, lockID := range lockIDs {
+		gl.unlockItem(lockID)
+	}
 	return
 }
 
 // GuardTimed aquires a lock for duration
-func (guard *GuardianLock) GuardIDs(timeout time.Duration, lockIDs ...string) {
-	guard.lockItems(lockIDs)
+func (gl *GuardianLocker) GuardIDs(timeout time.Duration, lockIDs ...string) {
+	for _, lockID := range lockIDs {
+		gl.lockItem(lockID)
+	}
 	if timeout != 0 {
 		go func(timeout time.Duration, lockIDs ...string) {
 			time.Sleep(timeout)
-			guard.UnguardIDs(lockIDs...)
+			utils.Logger.Warning(fmt.Sprintf("<Guardian> WARNING: force timing-out locks: %+v", lockIDs))
+			gl.UnguardIDs(lockIDs...)
 		}(timeout, lockIDs...)
 	}
 	return
 }
 
 // UnguardTimed attempts to unlock a set of locks based on their locksUUID
-func (guard *GuardianLock) UnguardIDs(lockIDs ...string) {
-	var itmLocks []*itemLock
-	guard.RLock()
+func (gl *GuardianLocker) UnguardIDs(lockIDs ...string) {
 	for _, lockID := range lockIDs {
-		var itmLock *itemLock
-		itmLock, exists := Guardian.locksMap[lockID]
-		if exists {
-			itmLocks = append(itmLocks, itmLock)
-		}
+		gl.unlockItem(lockID)
 	}
-	guard.RUnlock()
-	guard.unlockItems(itmLocks)
 	return
 }

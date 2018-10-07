@@ -24,7 +24,6 @@ import (
 	"os"
 
 	"github.com/DisposaBoy/JsonConfigReader"
-	"github.com/cgrates/cgrates/utils"
 )
 
 const (
@@ -51,6 +50,7 @@ const (
 	OSIPS_JSN          = "opensips"
 	DA_JSN             = "diameter_agent"
 	RA_JSN             = "radius_agent"
+	HttpAgentJson      = "http_agent"
 	HISTSERV_JSN       = "historys"
 	PUBSUBSERV_JSN     = "pubsubs"
 	ALIASESSERV_JSN    = "aliases"
@@ -61,8 +61,13 @@ const (
 	THRESHOLDS_JSON    = "thresholds"
 	SupplierSJson      = "suppliers"
 	FILTERS_JSON       = "filters"
+	LoaderJson         = "loaders"
 	MAILER_JSN         = "mailer"
 	SURETAX_JSON       = "suretax"
+	DispatcherSJson    = "dispatcher"
+	CgrLoaderCfgJson   = "loader"
+	CgrMigratorCfgJson = "migrator"
+	ChargerSCfgJson    = "chargers"
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -304,6 +309,18 @@ func (self CgrJsonCfg) RadiusAgentJsonCfg() (*RadiusAgentJsonCfg, error) {
 	return cfg, nil
 }
 
+func (self CgrJsonCfg) HttpAgentJsonCfg() (*[]*HttpAgentJsonCfg, error) {
+	rawCfg, hasKey := self[HttpAgentJson]
+	if !hasKey {
+		return nil, nil
+	}
+	httpAgnt := make([]*HttpAgentJsonCfg, 0)
+	if err := json.Unmarshal(*rawCfg, &httpAgnt); err != nil {
+		return nil, err
+	}
+	return &httpAgnt, nil
+}
+
 func (self CgrJsonCfg) PubSubServJsonCfg() (*PubSubServJsonCfg, error) {
 	rawCfg, hasKey := self[PUBSUBSERV_JSN]
 	if !hasKey {
@@ -352,6 +369,18 @@ func (cgrJsn CgrJsonCfg) AttributeServJsonCfg() (*AttributeSJsonCfg, error) {
 	return cfg, nil
 }
 
+func (cgrJsn CgrJsonCfg) ChargerServJsonCfg() (*ChargerSJsonCfg, error) {
+	rawCfg, hasKey := cgrJsn[ChargerSCfgJson]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(ChargerSJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
 func (self CgrJsonCfg) ResourceSJsonCfg() (*ResourceSJsonCfg, error) {
 	rawCfg, hasKey := self[RESOURCES_JSON]
 	if !hasKey {
@@ -365,7 +394,7 @@ func (self CgrJsonCfg) ResourceSJsonCfg() (*ResourceSJsonCfg, error) {
 }
 
 func (self CgrJsonCfg) StatSJsonCfg() (*StatServJsonCfg, error) {
-	rawCfg, hasKey := self[utils.StatS]
+	rawCfg, hasKey := self[STATS_JSON]
 	if !hasKey {
 		return nil, nil
 	}
@@ -400,6 +429,18 @@ func (self CgrJsonCfg) SupplierSJsonCfg() (*SupplierSJsonCfg, error) {
 	return cfg, nil
 }
 
+func (self CgrJsonCfg) LoaderJsonCfg() ([]*LoaderJsonCfg, error) {
+	rawCfg, hasKey := self[LoaderJson]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := make([]*LoaderJsonCfg, 0)
+	if err := json.Unmarshal(*rawCfg, &cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
 func (self CgrJsonCfg) MailerJsonCfg() (*MailerJsonCfg, error) {
 	rawCfg, hasKey := self[MAILER_JSN]
 	if !hasKey {
@@ -418,6 +459,42 @@ func (self CgrJsonCfg) SureTaxJsonCfg() (*SureTaxJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(SureTaxJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (self CgrJsonCfg) DispatcherSJsonCfg() (*DispatcherSJsonCfg, error) {
+	rawCfg, hasKey := self[DispatcherSJson]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(DispatcherSJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (self CgrJsonCfg) LoaderCfgJson() (*LoaderCfgJson, error) {
+	rawCfg, hasKey := self[CgrLoaderCfgJson]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(LoaderCfgJson)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (self CgrJsonCfg) MigratorCfgJson() (*MigratorCfgJson, error) {
+	rawCfg, hasKey := self[CgrMigratorCfgJson]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(MigratorCfgJson)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

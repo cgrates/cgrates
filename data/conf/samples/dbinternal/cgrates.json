@@ -1,0 +1,89 @@
+{
+// CGRateS Configuration file
+
+
+"general": {
+	"log_level": 7,
+	"reply_timeout": "30s",
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+
+"data_db": {
+    "db_type": "internal",                   
+ },
+
+
+"stor_db": {
+	"db_type": "internal",
+},
+
+"rals": {
+	"enabled": true,
+	"thresholds_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"scheduler": {
+	"enabled": true,
+},
+
+
+"cdrs": {
+	"enabled": true,
+},
+
+
+"resources": {
+	"enabled": true,
+	"store_interval": "1s",
+	"thresholds_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"stats": {
+	"enabled": true,
+	"store_interval": "1s",
+	"thresholds_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "1s",
+},
+
+
+"suppliers": {
+	"enabled": true,
+},
+
+
+"attributes": {							// Attribute service
+	"enabled": true,				// starts Alias service: <true|false>.
+},
+
+
+"sessions": {
+	"enabled": true,
+},
+
+
+"migrator": {
+	"out_datadb_type": "internal",
+	"out_stordb_type": "internal",
+},
+
+}

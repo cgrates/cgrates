@@ -1,8 +1,8 @@
 package: ""
 import:
 - package: github.com/DisposaBoy/JsonConfigReader
-- package: github.com/cenk/hub
-- package: github.com/cenk/rpc2
+- package: github.com/cenkalti/hub
+- package: github.com/cenkalti/rpc2
 - package: github.com/cgrates/fsock
 - package: github.com/cgrates/kamevapi
 - package: github.com/cgrates/osipsdagram
@@ -14,6 +14,7 @@ import:
   - diam/datatype
   - diam/dict
   - diam/sm
+- package: github.com/ishidawataru/sctp
 - package: github.com/go-sql-driver/mysql
 - package: github.com/gorhill/cronexpr
 - package: github.com/jinzhu/gorm
@@ -24,20 +25,22 @@ import:
   - pool
   - redis
 - package: github.com/peterh/liner
+- package: github.com/mattn/go-runewidth
 - package: github.com/ugorji/go
   subpackages:
   - codec
 - package: golang.org/x/net
   subpackages:
   - websocket
-- package: gopkg.in/fsnotify.v1
+- package: github.com/fsnotify/fsnotify
 - package: github.com/cgrates/mgo
   subpackages:
   - bson
-- package: github.com/ChrisTrenkamp/goxpath
 - package: github.com/mitchellh/mapstructure
 - package: github.com/cgrates/aringo
-- package: github.com/bit4bit/gami
 - package: github.com/streadway/amqp
 - package: github.com/cgrates/radigo
 - package: github.com/cgrates/ltcache
+- package: github.com/dlintw/goconf
+- package: github.com/antchfx/xmlquery
+- package: github.com/antchfx/xpath

@@ -26,26 +26,33 @@ import (
 )
 
 func (m *Migrator) migrateCurrentTPthresholds() (err error) {
-	tpids, err := m.InStorDB().GetTpIds(utils.TBLTPThresholds)
+	tpids, err := m.storDBIn.StorDB().GetTpIds(utils.TBLTPThresholds)
 	if err != nil {
 		return err
 	}
 
 	for _, tpid := range tpids {
-		ids, err := m.InStorDB().GetTpTableIds(tpid, utils.TBLTPThresholds, utils.TPDistinctIds{"id"}, map[string]string{}, nil)
+		ids, err := m.storDBIn.StorDB().GetTpTableIds(tpid, utils.TBLTPThresholds,
+			utils.TPDistinctIds{"id"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
 		for _, id := range ids {
 
-			dest, err := m.InStorDB().GetTPThresholds(tpid, id)
+			thresholds, err := m.storDBIn.StorDB().GetTPThresholds(tpid, id)
 			if err != nil {
 				return err
 			}
-			if dest != nil {
+			if thresholds != nil {
 				if m.dryRun != true {
-					if err := m.OutStorDB().SetTPThresholds(dest); err != nil {
+					if err := m.storDBOut.StorDB().SetTPThresholds(thresholds); err != nil {
 						return err
+					}
+					for _, threshold := range thresholds {
+						if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPThresholds, threshold.TPid,
+							map[string]string{"tenant": threshold.Tenant, "id": threshold.ID}); err != nil {
+							return err
+						}
 					}
 					m.stats[utils.TpThresholds] += 1
 				}
@@ -58,7 +65,7 @@ func (m *Migrator) migrateCurrentTPthresholds() (err error) {
 func (m *Migrator) migrateTPthresholds() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.OutStorDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.storDBOut.StorDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

@@ -18,12 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"github.com/cgrates/cgrates/cache"
-	"github.com/cgrates/cgrates/utils"
 	"log"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -271,14 +271,15 @@ cgrates.org,ResGroup22,FLTR_ACNT_dan,2014-07-29T15:00:00Z,3600s,2,premium_call,t
 `
 	stats = `
 #Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],Metrics[6],Blocker[7],Stored[8],Weight[9],MinItems[10],Thresholds[11]
-cgrates.org,Stats1,FLTR_1,2014-07-29T15:00:00Z,100,1s,*asr;*acc;*tcc;*acd;*tcd;*pdd,value,true,true,20,2,THRESH1;THRESH2
-cgrates.org,Stats2,FLTR_1,2014-07-29T15:00:00Z,100,1s,*asr;*acc;*tcc;*acd;*tcd;*pdd,value,true,true,20,2,THRESH1;THRESH2
-cgrates.org,Stats3,FLTR_1,2014-07-29T15:00:00Z,100,1s,*asr;*acc;*tcc;*acd;*tcd;*pdd,,true,true,20,2,THRESH1;THRESH2
+cgrates.org,TestStats,FLTR_1,2014-07-29T15:00:00Z,100,1s,*sum;*average,Value,true,true,20,2,Th1;Th2
+cgrates.org,TestStats,,,,,*sum,Usage,true,true,20,2,
+cgrates.org,TestStats2,FLTR_1,2014-07-29T15:00:00Z,100,1s,*sum;*average,Value;Usage,true,true,20,2,Th
+cgrates.org,TestStats2,,,,,*sum;*average,Cost,true,true,20,2,
 `
 
 	thresholds = `
-#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],Recurrent[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10]
-cgrates.org,Threshold1,FLTR_1;FLTR_ACNT_dan,2014-07-29T15:00:00Z,true,10,1s,true,10,THRESH1;THRESH2,true
+#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10]
+cgrates.org,Threshold1,FLTR_1;FLTR_ACNT_dan,2014-07-29T15:00:00Z,12,10,1s,true,10,THRESH1,true
 `
 
 	filters = `
@@ -291,16 +292,20 @@ cgrates.org,FLTR_DST_DE,*destinations,Destination,DST_DE,2014-07-29T15:00:00Z
 cgrates.org,FLTR_DST_NL,*destinations,Destination,DST_NL,2014-07-29T15:00:00Z
 `
 	sppProfiles = `
-#Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParams,SupplierID,SupplierFilterIDs,SupplierAccountIDs,SupplierRatingPlanIDs,SupplierResourceIDs,SupplierStatIDs,SupplierWeight,SupplierBlocker,SupplierParameters,Weight
+#Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParameters,SupplierID,SupplierFilterIDs,SupplierAccountIDs,SupplierRatingPlanIDs,SupplierResourceIDs,SupplierStatIDs,SupplierWeight,SupplierBlocker,SupplierParameters,Weight
 cgrates.org,SPP_1,FLTR_ACNT_dan,2014-07-29T15:00:00Z,*lowest_cost,,supplier1,FLTR_ACNT_dan,Account1;Account1_1,RPL_1,ResGroup1,Stat1,10,true,param1,20
 cgrates.org,SPP_1,,,,,supplier1,,,RPL_2,ResGroup2,,10,,,
 cgrates.org,SPP_1,,,,,supplier1,FLTR_DST_DE,Account2,RPL_3,ResGroup3,Stat2,10,,,
 cgrates.org,SPP_1,,,,,supplier1,,,,ResGroup4,Stat3,10,,,
 `
 	attributeProfiles = `
-#Tenant,ID,Contexts,FilterIDs,ActivationInterval,FieldName,Initial,Substitute,Append,Weight
-cgrates.org,ALS1,con1,FLTR_1,2014-07-29T15:00:00Z,Field1,Initial1,Sub1,true,20
-cgrates.org,ALS1,con2;con3,,,Field2,Initial2,Sub2,false,
+#Tenant,ID,Contexts,FilterIDs,ActivationInterval,FieldName,Initial,Substitute,Append,Blocker,Weight
+cgrates.org,ALS1,con1,FLTR_1,2014-07-29T15:00:00Z,Field1,Initial1,Sub1,true,true,20
+cgrates.org,ALS1,con2;con3,,,Field2,Initial2,Sub2,false,,
+`
+	chargerProfiles = `
+#Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
+cgrates.org,Charger1,*string:Account:1001,2014-07-29T15:00:00Z,*rated,ATTR_1001_SIMPLEAUTH,20
 `
 )
 
@@ -309,7 +314,7 @@ var csvr *TpReader
 func init() {
 	csvr = NewTpReader(dm.dataDB, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
 		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges,
-		cdrStats, users, aliases, resProfiles, stats, thresholds, filters, sppProfiles, attributeProfiles), testTPID, "")
+		cdrStats, users, aliases, resProfiles, stats, thresholds, filters, sppProfiles, attributeProfiles, chargerProfiles), testTPID, "")
 
 	if err := csvr.LoadDestinations(); err != nil {
 		log.Print("error in LoadDestinations:", err)
@@ -377,9 +382,12 @@ func init() {
 	if err := csvr.LoadAttributeProfiles(); err != nil {
 		log.Print("error in LoadAttributeProfiles:", err)
 	}
+	if err := csvr.LoadChargerProfiles(); err != nil {
+		log.Print("error in LoadChargerProfiles:", err)
+	}
 	csvr.WriteToDatabase(false, false, false)
-	cache.Flush()
-	dm.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	Cache.Clear(nil)
+	//dm.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 }
 
 func TestLoadDestinations(t *testing.T) {
@@ -1281,19 +1289,28 @@ func TestLoadDerivedChargers(t *testing.T) {
 	expCharger1 := &utils.DerivedChargers{
 		DestinationIDs: nil,
 		Chargers: []*utils.DerivedCharger{
-			&utils.DerivedCharger{RunID: "extra1", RunFilters: "^filteredHeader1/filterValue1/", RequestTypeField: "^prepaid", DirectionField: utils.META_DEFAULT,
-				TenantField: utils.META_DEFAULT, CategoryField: utils.META_DEFAULT, AccountField: "rif", SubjectField: "rif", DestinationField: utils.META_DEFAULT,
-				SetupTimeField: utils.META_DEFAULT, PDDField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT,
-				SupplierField: utils.META_DEFAULT, DisconnectCauseField: utils.META_DEFAULT, CostField: utils.META_DEFAULT, RatedField: utils.META_DEFAULT},
-			&utils.DerivedCharger{RunID: "extra2", RequestTypeField: utils.META_DEFAULT, DirectionField: utils.META_DEFAULT, TenantField: utils.META_DEFAULT,
-				CategoryField: utils.META_DEFAULT, AccountField: "ivo", SubjectField: "ivo", DestinationField: utils.META_DEFAULT,
-				SetupTimeField: utils.META_DEFAULT, PDDField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT,
-				SupplierField: utils.META_DEFAULT, DisconnectCauseField: utils.META_DEFAULT, CostField: utils.META_DEFAULT, RatedField: utils.META_DEFAULT},
+			&utils.DerivedCharger{RunID: "extra1", RunFilters: "^filteredHeader1/filterValue1/",
+				RequestTypeField: "^prepaid", DirectionField: utils.META_DEFAULT,
+				TenantField: utils.META_DEFAULT, CategoryField: utils.META_DEFAULT,
+				AccountField: "rif", SubjectField: "rif", DestinationField: utils.META_DEFAULT,
+				SetupTimeField: utils.META_DEFAULT, PDDField: utils.META_DEFAULT,
+				AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT,
+				SupplierField: utils.META_DEFAULT, DisconnectCauseField: utils.META_DEFAULT,
+				CostField: utils.META_DEFAULT, PreRatedField: utils.META_DEFAULT},
+			&utils.DerivedCharger{RunID: "extra2", RequestTypeField: utils.META_DEFAULT,
+				DirectionField: utils.META_DEFAULT, TenantField: utils.META_DEFAULT,
+				CategoryField: utils.META_DEFAULT, AccountField: "ivo",
+				SubjectField: "ivo", DestinationField: utils.META_DEFAULT,
+				SetupTimeField: utils.META_DEFAULT, PDDField: utils.META_DEFAULT,
+				AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT,
+				SupplierField: utils.META_DEFAULT, DisconnectCauseField: utils.META_DEFAULT,
+				CostField: utils.META_DEFAULT, PreRatedField: utils.META_DEFAULT},
 		}}
 	keyCharger1 := utils.DerivedChargersKey("*out", "cgrates.org", "call", "dan", "dan")
 
 	if !csvr.derivedChargers[keyCharger1].Equal(expCharger1) {
-		t.Errorf("Expecting: %+v, received: %+v", expCharger1.Chargers[0], csvr.derivedChargers[keyCharger1].Chargers[0])
+		t.Errorf("Expecting: %+v, received: %+v",
+			expCharger1.Chargers[0], csvr.derivedChargers[keyCharger1].Chargers[0])
 	}
 }
 func TestLoadCdrStats(t *testing.T) {
@@ -1460,69 +1477,111 @@ func TestLoadResourceProfiles(t *testing.T) {
 	}
 }
 
-/*
-func TestLoadStatProfiles(t *testing.T) {
+func TestLoadStatQueueProfiles(t *testing.T) {
 	eStats := map[utils.TenantID]*utils.TPStats{
-		utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}: &utils.TPStats{
+		utils.TenantID{Tenant: "cgrates.org", ID: "TestStats"}: &utils.TPStats{
 			Tenant:    "cgrates.org",
 			TPid:      testTPID,
-			ID:        "Stats1",
+			ID:        "TestStats",
 			FilterIDs: []string{"FLTR_1"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
 			QueueLength: 100,
 			TTL:         "1s",
-			Metrics:     []string{"*asr", "*acc", "*tcc", "*acd", "*tcd", "*pdd"},
-			Thresholds:  []string{"THRESH1", "THRESH2"},
-			Blocker:     true,
-			Stored:      true,
-			Weight:      20,
-			MinItems:    2,
+			Metrics: []*utils.MetricWithParams{
+				&utils.MetricWithParams{
+					MetricID:   "*sum:Value",
+					Parameters: "Value",
+				},
+				&utils.MetricWithParams{
+					MetricID:   "*average:Value",
+					Parameters: "Value",
+				},
+				&utils.MetricWithParams{
+					MetricID:   "*sum:Usage",
+					Parameters: "Usage",
+				},
+			},
+			ThresholdIDs: []string{"Th1", "Th2"},
+			Blocker:      true,
+			Stored:       true,
+			Weight:       20,
+			MinItems:     2,
 		},
-		utils.TenantID{Tenant: "cgrates.org", ID: "Stats2"}: &utils.TPStats{
+		utils.TenantID{Tenant: "cgrates.org", ID: "TestStats2"}: &utils.TPStats{
 			Tenant:    "cgrates.org",
 			TPid:      testTPID,
-			ID:        "Stats2",
+			ID:        "TestStats2",
 			FilterIDs: []string{"FLTR_1"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
 			QueueLength: 100,
 			TTL:         "1s",
-			Metrics:     []string{"*asr", "*acc", "*tcc", "*acd", "*tcd", "*pdd"},
-			Thresholds:  []string{"THRESH1", "THRESH2"},
-			Blocker:     true,
-			Stored:      true,
-			Weight:      20,
-			MinItems:    2,
-		},
-		utils.TenantID{Tenant: "cgrates.org", ID: "Stats3"}: &utils.TPStats{
-			Tenant:    "cgrates.org",
-			TPid:      testTPID,
-			ID:        "Stats3",
-			FilterIDs: []string{"FLTR_1"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
+			Metrics: []*utils.MetricWithParams{
+				&utils.MetricWithParams{
+					MetricID:   "*sum:Value",
+					Parameters: "Value",
+				},
+				&utils.MetricWithParams{
+					MetricID:   "*average:Value",
+					Parameters: "Value",
+				},
+				&utils.MetricWithParams{
+					MetricID:   "*sum:Usage",
+					Parameters: "Usage",
+				},
+				&utils.MetricWithParams{
+					MetricID:   "*average:Usage",
+					Parameters: "Usage",
+				},
+				&utils.MetricWithParams{
+					MetricID:   "*sum:Cost",
+					Parameters: "Cost",
+				},
+				&utils.MetricWithParams{
+					MetricID:   "*average:Cost",
+					Parameters: "Cost",
+				},
 			},
-			QueueLength: 100,
-			TTL:         "1s",
-			Metrics:     []string{"*asr", "*acc", "*tcc", "*acd", "*tcd", "*pdd"},
-			Thresholds:  []string{"THRESH1", "THRESH2"},
-			Blocker:     true,
-			Stored:      true,
-			Weight:      20,
-			MinItems:    2,
+			ThresholdIDs: []string{"Th"},
+			Blocker:      true,
+			Stored:       true,
+			Weight:       20,
+			MinItems:     2,
 		},
 	}
-	stKey := utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}
-	if len(csvr.sqProfiles) != len(eStats) {
-		t.Errorf("Failed to load StatQueueProfiles: %s", len(csvr.sqProfiles))
-	} else if !reflect.DeepEqual(eStats[stKey], csvr.sqProfiles[stKey]) {
-		t.Errorf("Expecting: %+v, received: %+v", eStats[stKey], csvr.sqProfiles[stKey])
+	stKeys := []utils.TenantID{
+		utils.TenantID{Tenant: "cgrates.org", ID: "TestStats"},
+		utils.TenantID{Tenant: "cgrates.org", ID: "TestStats2"},
+	}
+	for _, stKey := range stKeys {
+		if len(csvr.sqProfiles) != len(eStats) {
+			t.Errorf("Failed to load StatQueueProfiles: %s",
+				utils.ToJSON(csvr.sqProfiles))
+		} else if !reflect.DeepEqual(eStats[stKey].Tenant,
+			csvr.sqProfiles[stKey].Tenant) {
+			t.Errorf("Expecting: %s, received: %s",
+				eStats[stKey].Tenant, csvr.sqProfiles[stKey].Tenant)
+		} else if !reflect.DeepEqual(eStats[stKey].ID,
+			csvr.sqProfiles[stKey].ID) {
+			t.Errorf("Expecting: %s, received: %s",
+				eStats[stKey].ID, csvr.sqProfiles[stKey].ID)
+		} else if !reflect.DeepEqual(len(eStats[stKey].ThresholdIDs),
+			len(csvr.sqProfiles[stKey].ThresholdIDs)) {
+			t.Errorf("Expecting: %s, received: %s",
+				utils.ToJSON(eStats[stKey].ThresholdIDs),
+				utils.ToJSON(csvr.sqProfiles[stKey].ThresholdIDs))
+		} else if !reflect.DeepEqual(len(eStats[stKey].Metrics),
+			len(csvr.sqProfiles[stKey].Metrics)) {
+			t.Errorf("Expecting: %s, received: %s",
+				utils.ToJSON(eStats[stKey].Metrics),
+				utils.ToJSON(csvr.sqProfiles[stKey].Metrics))
+		}
 	}
 }
-*/
+
 func TestLoadThresholdProfiles(t *testing.T) {
 	eThresholds := map[utils.TenantID]*utils.TPThreshold{
 		utils.TenantID{Tenant: "cgrates.org", ID: "Threshold1"}: &utils.TPThreshold{
@@ -1533,20 +1592,40 @@ func TestLoadThresholdProfiles(t *testing.T) {
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
-			Recurrent: true,
+			MaxHits:   12,
 			MinHits:   10,
 			MinSleep:  "1s",
 			Blocker:   true,
 			Weight:    10,
-			ActionIDs: []string{"THRESH1", "THRESH2"},
+			ActionIDs: []string{"THRESH1"},
+			Async:     true,
+		},
+	}
+	eThresholdReverse := map[utils.TenantID]*utils.TPThreshold{
+		utils.TenantID{Tenant: "cgrates.org", ID: "Threshold1"}: &utils.TPThreshold{
+			TPid:      testTPID,
+			Tenant:    "cgrates.org",
+			ID:        "Threshold1",
+			FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_1"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+			},
+			MaxHits:   12,
+			MinHits:   10,
+			MinSleep:  "1s",
+			Blocker:   true,
+			Weight:    10,
+			ActionIDs: []string{"THRESH1"},
 			Async:     true,
 		},
 	}
 	thkey := utils.TenantID{Tenant: "cgrates.org", ID: "Threshold1"}
 	if len(csvr.thProfiles) != len(eThresholds) {
 		t.Errorf("Failed to load ThresholdProfiles: %s", utils.ToIJSON(csvr.thProfiles))
-	} else if !reflect.DeepEqual(eThresholds[thkey], csvr.thProfiles[thkey]) {
-		t.Errorf("Expecting: %+v, received: %+v", eThresholds[thkey], csvr.thProfiles[thkey])
+	} else if !reflect.DeepEqual(eThresholds[thkey], csvr.thProfiles[thkey]) &&
+		!reflect.DeepEqual(eThresholdReverse[thkey], csvr.thProfiles[thkey]) {
+		t.Errorf("Expecting: %+v , %+v , received: %+v", eThresholds[thkey],
+			eThresholdReverse[thkey], csvr.thProfiles[thkey])
 	}
 }
 
@@ -1641,8 +1720,8 @@ func TestLoadSupplierProfiles(t *testing.T) {
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
-			Sorting:       "*lowest_cost",
-			SortingParams: []string{},
+			Sorting:           "*lowest_cost",
+			SortingParameters: []string{},
 			Suppliers: []*utils.TPSupplier{
 				&utils.TPSupplier{
 					ID:                 "supplier1",
@@ -1692,7 +1771,8 @@ func TestLoadAttributeProfiles(t *testing.T) {
 					Append:     false,
 				},
 			},
-			Weight: 20,
+			Blocker: true,
+			Weight:  20,
 		},
 	}
 	resKey := utils.TenantID{Tenant: "cgrates.org", ID: "ALS1"}
@@ -1702,7 +1782,7 @@ func TestLoadAttributeProfiles(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].Tenant, csvr.attributeProfiles[resKey].Tenant)
 	} else if !reflect.DeepEqual(eAttrProfiles[resKey].ID, csvr.attributeProfiles[resKey].ID) {
 		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].ID, csvr.attributeProfiles[resKey].ID)
-	} else if !reflect.DeepEqual(eAttrProfiles[resKey].Contexts, csvr.attributeProfiles[resKey].Contexts) {
+	} else if len(eAttrProfiles[resKey].Contexts) != len(csvr.attributeProfiles[resKey].Contexts) {
 		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].Contexts, csvr.attributeProfiles[resKey].Contexts)
 	} else if !reflect.DeepEqual(eAttrProfiles[resKey].FilterIDs, csvr.attributeProfiles[resKey].FilterIDs) {
 		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].FilterIDs, csvr.attributeProfiles[resKey].FilterIDs)
@@ -1710,6 +1790,31 @@ func TestLoadAttributeProfiles(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].ActivationInterval, csvr.attributeProfiles[resKey].ActivationInterval)
 	} else if !reflect.DeepEqual(eAttrProfiles[resKey].Attributes, csvr.attributeProfiles[resKey].Attributes) {
 		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].Attributes, csvr.attributeProfiles[resKey].Attributes)
+	} else if !reflect.DeepEqual(eAttrProfiles[resKey].Blocker, csvr.attributeProfiles[resKey].Blocker) {
+		t.Errorf("Expecting: %+v, received: %+v", eAttrProfiles[resKey].Blocker, csvr.attributeProfiles[resKey].Blocker)
+	}
+}
+
+func TestLoadChargerProfiles(t *testing.T) {
+	eChargerProfiles := map[utils.TenantID]*utils.TPChargerProfile{
+		utils.TenantID{Tenant: "cgrates.org", ID: "Charger1"}: &utils.TPChargerProfile{
+			TPid:      testTPID,
+			Tenant:    "cgrates.org",
+			ID:        "Charger1",
+			FilterIDs: []string{"*string:Account:1001"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+			},
+			RunID:        "*rated",
+			AttributeIDs: []string{"ATTR_1001_SIMPLEAUTH"},
+			Weight:       20,
+		},
+	}
+	cppKey := utils.TenantID{Tenant: "cgrates.org", ID: "Charger1"}
+	if len(csvr.chargerProfiles) != len(eChargerProfiles) {
+		t.Errorf("Failed to load chargerProfiles: %s", utils.ToIJSON(csvr.chargerProfiles))
+	} else if !reflect.DeepEqual(eChargerProfiles[cppKey], csvr.chargerProfiles[cppKey]) {
+		t.Errorf("Expecting: %+v, received: %+v", eChargerProfiles[cppKey], csvr.chargerProfiles[cppKey])
 	}
 }
 
@@ -1733,18 +1838,13 @@ func TestLoadstatQueues(t *testing.T) {
 	eStatQueues := []*utils.TenantID{
 		&utils.TenantID{
 			Tenant: "cgrates.org",
-			ID:     "Stats1",
+			ID:     "TestStats",
 		},
 		&utils.TenantID{
 			Tenant: "cgrates.org",
-			ID:     "Stats2",
-		},
-		&utils.TenantID{
-			Tenant: "cgrates.org",
-			ID:     "Stats3",
+			ID:     "TestStats2",
 		},
 	}
-
 	if len(csvr.statQueues) != len(eStatQueues) {
 		t.Errorf("Failed to load statQueues: %s", utils.ToIJSON(csvr.statQueues))
 	}
@@ -1757,7 +1857,6 @@ func TestLoadThresholds(t *testing.T) {
 			ID:     "Threshold1",
 		},
 	}
-
 	if len(csvr.thresholds) != len(eThresholds) {
 		t.Errorf("Failed to load thresholds: %s", utils.ToIJSON(csvr.thresholds))
 	}

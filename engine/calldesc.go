@@ -21,13 +21,11 @@ package engine
 import (
 	"errors"
 	"fmt"
-	"log"
-
+	"reflect"
 	"sort"
 	"strings"
 	"time"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -43,7 +41,6 @@ const (
 )
 
 func init() {
-	var err error
 	var data DataDB
 	switch DB {
 	case "map":
@@ -52,16 +49,6 @@ func init() {
 			config.SetCgrConfig(cgrCfg)
 		}
 		data, _ = NewMapStorage()
-	case utils.MONGO:
-		data, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_data_test", "", "", utils.DataDB, nil, config.CacheConfig{utils.CacheRatingPlans: &config.CacheParamConfig{Precache: true}}, 10)
-		if err != nil {
-			log.Fatal(err)
-		}
-	case utils.REDIS:
-		data, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK, utils.REDIS_MAX_CONNS, config.CacheConfig{utils.CacheRatingPlans: &config.CacheParamConfig{Precache: true}}, 10)
-		if err != nil {
-			log.Fatal(err)
-		}
 	}
 	dm = NewDataManager(data)
 }
@@ -72,9 +59,11 @@ var (
 	debitPeriod              = 10 * time.Second
 	globalRoundingDecimals   = 6
 	thresholdS               rpcclient.RpcClientConnection // used by RALs to communicate with ThresholdS
+	statS                    rpcclient.RpcClientConnection
 	pubSubServer             rpcclient.RpcClientConnection
 	userService              rpcclient.RpcClientConnection
 	aliasService             rpcclient.RpcClientConnection
+	schedCdrsConns           rpcclient.RpcClientConnection
 	rpSubjectPrefixMatching  bool
 	lcrSubjectPrefixMatching bool
 )
@@ -86,6 +75,10 @@ func SetDataStorage(dm2 *DataManager) {
 
 func SetThresholdS(thdS rpcclient.RpcClientConnection) {
 	thresholdS = thdS
+}
+
+func SetStatS(stsS rpcclient.RpcClientConnection) {
+	statS = stsS
 }
 
 // Sets the global rounding method and decimal precision for GetCost method
@@ -120,11 +113,64 @@ func SetAliasService(as rpcclient.RpcClientConnection) {
 	aliasService = as
 }
 
+func SetSchedCdrsConns(sc rpcclient.RpcClientConnection) {
+	schedCdrsConns = sc
+	if schedCdrsConns != nil && reflect.ValueOf(schedCdrsConns).IsNil() {
+		schedCdrsConns = nil
+	}
+}
+
 func Publish(event CgrEvent) {
 	if pubSubServer != nil {
 		var s string
 		pubSubServer.Call("PubSubV1.Publish", event, &s)
 	}
+}
+
+// NewCallDescriptorFromCGREvent converts a CGREvent into CallDescriptor
+func NewCallDescriptorFromCGREvent(cgrEv *utils.CGREvent,
+	timezone string) (cd *CallDescriptor, err error) {
+	cd = &CallDescriptor{Direction: utils.OUT, Tenant: cgrEv.Tenant}
+	if _, has := cgrEv.Event[utils.Category]; has {
+		if cd.Category, err = cgrEv.FieldAsString(utils.Category); err != nil {
+			return nil, err
+		}
+	}
+	if cd.Account, err = cgrEv.FieldAsString(utils.Account); err != nil {
+		return
+	}
+	if cd.Subject, err = cgrEv.FieldAsString(utils.Subject); err != nil {
+		if err != utils.ErrNotFound {
+			return
+		}
+		cd.Subject = cd.Account
+	}
+	if cd.Destination, err = cgrEv.FieldAsString(utils.Destination); err != nil {
+		return nil, err
+	}
+	if cd.TimeStart, err = cgrEv.FieldAsTime(utils.SetupTime,
+		timezone); err != nil {
+		return nil, err
+	}
+	if _, has := cgrEv.Event[utils.AnswerTime]; has { // AnswerTime takes precendence for TimeStart
+		if aTime, err := cgrEv.FieldAsTime(utils.AnswerTime,
+			timezone); err != nil {
+			return nil, err
+		} else if !aTime.IsZero() {
+			cd.TimeStart = aTime
+		}
+	}
+	if usage, err := cgrEv.FieldAsDuration(utils.Usage); err != nil {
+		return nil, err
+	} else {
+		cd.TimeEnd = cd.TimeStart.Add(usage)
+	}
+	if _, has := cgrEv.Event[utils.ToR]; has {
+		if cd.TOR, err = cgrEv.FieldAsString(utils.ToR); err != nil {
+			return nil, err
+		}
+	}
+	return
 }
 
 /*
@@ -167,7 +213,7 @@ func (cd *CallDescriptor) AsCGREvent() *utils.CGREvent {
 	for k, v := range cd.ExtraFields {
 		cgrEv.Event[k] = v
 	}
-	cgrEv.Event[utils.TOR] = cd.TOR
+	cgrEv.Event[utils.ToR] = cd.TOR
 	cgrEv.Event[utils.Tenant] = cd.Tenant
 	cgrEv.Event[utils.Category] = cd.Category
 	cgrEv.Event[utils.Account] = cd.Account
@@ -184,7 +230,7 @@ func (cd *CallDescriptor) AsCGREvent() *utils.CGREvent {
 func (cd *CallDescriptor) UpdateFromCGREvent(cgrEv *utils.CGREvent, fields []string) (err error) {
 	for _, fldName := range fields {
 		switch fldName {
-		case utils.TOR:
+		case utils.ToR:
 			if cd.TOR, err = cgrEv.FieldAsString(fldName); err != nil {
 				return
 			}
@@ -867,7 +913,8 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 }
 
 // refundIncrements has no locks
-func (cd *CallDescriptor) refundIncrements() (err error) {
+// returns the updated account referenced by the CallDescriptor
+func (cd *CallDescriptor) refundIncrements() (acnt *Account, err error) {
 	accountsCache := make(map[string]*Account)
 	for _, increment := range cd.Increments {
 		account, found := accountsCache[increment.BalanceInfo.AccountID]
@@ -903,11 +950,12 @@ func (cd *CallDescriptor) refundIncrements() (err error) {
 			account.countUnits(-increment.Cost, utils.MONETARY, cc, balance)
 		}
 	}
+	acnt = accountsCache[utils.ConcatenatedKey(cd.Tenant, cd.Account)]
 	return
 
 }
 
-func (cd *CallDescriptor) RefundIncrements() (err error) {
+func (cd *CallDescriptor) RefundIncrements() (acnt *Account, err error) {
 	// get account list for locking
 	// all must be locked in order to use cache
 	cd.Increments.Decompress()
@@ -921,7 +969,7 @@ func (cd *CallDescriptor) RefundIncrements() (err error) {
 		}
 	}
 	_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) {
-		err = cd.refundIncrements()
+		acnt, err = cd.refundIncrements()
 		return
 	}, 0, accMap.Slice()...)
 	return
@@ -1106,21 +1154,20 @@ func (cd *CallDescriptor) GetLCR(stats rpcclient.RpcClientConnection, lcrFltr *L
 			category = lcr.Category
 		}
 		ratingProfileSearchKey := utils.ConcatenatedKey(lcr.Direction, lcr.Tenant, lcrCost.Entry.RPCategory)
-		searchKey := utils.RATING_PROFILE_PREFIX + ratingProfileSearchKey
-		suppliers := cache.GetEntryKeys(searchKey)
+		suppliers := Cache.GetItemIDs(utils.CacheRatingProfiles, ratingProfileSearchKey)
 		if len(suppliers) == 0 { // Most probably the data was not cached, do it here, #ToDo: move logic in RAL service
-			suppliers, err = dm.DataDB().GetKeysForPrefix(searchKey)
+			suppliers, err = dm.DataDB().GetKeysForPrefix(utils.RATING_PROFILE_PREFIX + ratingProfileSearchKey)
 			if err != nil {
 				return nil, err
 			}
 			transID := utils.GenUUID()
 			for _, dbKey := range suppliers {
 				if _, err := dm.GetRatingProfile(dbKey[len(utils.RATING_PROFILE_PREFIX):], true, transID); err != nil { // cache the keys here
-					cache.RollbackTransaction(transID)
+					Cache.RollbackTransaction(transID)
 					return nil, err
 				}
 			}
-			cache.CommitTransaction(transID)
+			Cache.CommitTransaction(transID)
 		}
 		for _, supplier := range suppliers {
 			split := strings.Split(supplier, ":")
@@ -1399,4 +1446,30 @@ func (cd *CallDescriptor) AccountSummary() *AccountSummary {
 		return nil
 	}
 	return cd.account.AsAccountSummary()
+}
+
+// FieldAsInterface is part of utils.DataProvider
+func (cd *CallDescriptor) FieldAsInterface(fldPath []string) (fldVal interface{}, err error) {
+	if len(fldPath) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return utils.ReflectFieldInterface(cd, fldPath[0], utils.EXTRA_FIELDS)
+}
+
+// FieldAsString is part of utils.DataProvider
+func (cd *CallDescriptor) FieldAsString(fldPath []string) (fldVal string, err error) {
+	if len(fldPath) == 0 {
+		return "", utils.ErrNotFound
+	}
+	return utils.ReflectFieldAsString(cd, fldPath[0], utils.EXTRA_FIELDS)
+}
+
+// String is part of utils.DataProvider
+func (cd *CallDescriptor) String() string {
+	return utils.ToJSON(cd)
+}
+
+// AsNavigableMap is part of utils.DataProvider
+func (cd *CallDescriptor) AsNavigableMap(tpl []*config.FCTemplate) (nM *config.NavigableMap, err error) {
+	return nil, utils.ErrNotImplemented
 }

@@ -6,6 +6,10 @@
 // This file contains the default configuration hardcoded into CGRateS.
 // This is what you get when you load CGRateS with an empty configuration file.
 
+"general": {
+	"log_level": 7,
+},
+
 
 "rals": {
 	"enabled": true,						// enable Rater service: <true|false>
@@ -41,24 +45,23 @@
 		"cdr_in_dir": "/tmp/cgr_flatstore/cdrc/in",		// absolute path towards the directory where the CDRs are stored
 		"cdr_out_dir": "/tmp/cgr_flatstore/cdrc/out",	// absolute path towards the directory where processed CDRs will be moved
 		"failed_calls_prefix": "missed_calls",			// used in case of flatstore CDRs to avoid searching for BYE records
-		"cdr_source_id": "flatstore",					// free form field, tag identifying the source of the CDRs within CDRS database
-		"cdr_filter": "",								// filter CDR records to import
+		"cdr_source_id": "flatstore",					// free form field, id identifying the source of the CDRs within CDRS database
 		"partial_record_cache": "1s",					// duration to cache partial records when not pairing
-		"content_fields":[								// import template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-			{"tag": "Tor", "cdr_field_id": "tor", "type": "cdrfield", "value": "^*voice", "mandatory": true},
-			{"tag": "AccId", "cdr_field_id": "accid", "type": "cdrfield", "mandatory": true},
-			{"tag": "ReqType", "cdr_field_id": "reqtype", "type": "cdrfield", "value": "7", "mandatory": true},
-			{"tag": "Direction", "cdr_field_id": "direction", "type": "cdrfield", "value": "^out", "mandatory": true},
-			{"tag": "Tenant", "cdr_field_id": "tenant", "type": "cdrfield", "value": "^cgrates.org", "mandatory": true},
-			{"tag": "Category", "cdr_field_id": "category", "type": "cdrfield", "value": "^call", "mandatory": true},
-			{"tag": "Account", "cdr_field_id": "account", "type": "cdrfield", "value": "8", "mandatory": true},
-			{"tag": "Subject", "cdr_field_id": "subject", "type": "cdrfield", "value": "8", "mandatory": true},
-			{"tag": "Destination", "cdr_field_id": "destination", "type": "cdrfield", "value": "9", "mandatory": true},
-			{"tag": "SetupTime", "cdr_field_id": "setup_time", "type": "cdrfield", "value": "6", "mandatory": true},
-			{"tag": "AnswerTime", "cdr_field_id": "answer_time", "type": "cdrfield", "value": "6", "mandatory": true},
-			{"tag": "Usage", "cdr_field_id": "usage", "type": "cdrfield", "mandatory": true},
-			{"tag": "DisconnectCause", "cdr_field_id": "disconnect_cause", "type": "cdrfield", "value": "4;^ ;5", "mandatory": true},
-			{"tag": "DialogId", "cdr_field_id": "DialogId", "type": "cdrfield", "value": "11"},
+		"content_fields":[								// import template, id will match internally CDR field, in case of .csv value will be represented by index of the field value
+			{"tag": "Tor", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},
+			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "mandatory": true},
+			{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "~7", "mandatory": true},
+			{"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "out", "mandatory": true},
+			{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "cgrates.org", "mandatory": true},
+			{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "call", "mandatory": true},
+			{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~8", "mandatory": true},
+			{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "~8", "mandatory": true},
+			{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~9", "mandatory": true},
+			{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~6", "mandatory": true},
+			{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~6", "mandatory": true},
+			{"tag": "Usage", "field_id": "Usage", "type": "*composed", "mandatory": true},
+			{"tag": "DisconnectCause", "field_id": "DisconnectCause", "type": "*composed", "value": "~4; ;~5", "mandatory": true},
+			{"tag": "DialogId", "field_id": "DialogId", "type": "*composed", "value": "~11"},
 		],
 	},
 ],

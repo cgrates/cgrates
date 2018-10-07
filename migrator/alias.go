@@ -29,19 +29,19 @@ import (
 
 func (m *Migrator) migrateCurrentAlias() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.ALIASES_PREFIX)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ALIASES_PREFIX)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.ALIASES_PREFIX)
-		usr, err := m.dmIN.DataDB().GetAlias(idg, true, utils.NonTransactional)
+		usr, err := m.dmIN.DataManager().DataDB().GetAlias(idg, true, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if usr != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.DataDB().SetAlias(usr, utils.NonTransactional); err != nil {
+				if err := m.dmOut.DataManager().DataDB().SetAlias(usr, utils.NonTransactional); err != nil {
 					return err
 				}
 				m.stats[utils.Alias] += 1
@@ -92,7 +92,7 @@ func (m *Migrator) migrateCurrentAlias() (err error) {
 func (m *Migrator) migrateAlias() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.dmOut.DataManager().DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -120,7 +120,7 @@ func (m *Migrator) migrateAlias() (err error) {
 func (m *Migrator) migrateReverseAlias() (err error) {
 	// var vrs engine.Versions
 	// current := engine.CurrentDataDBVersions()
-	// vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	// vrs, err = m.dmOut.DataDB().GetVersions("")
 	// if err != nil {
 	// 	return utils.NewCGRError(utils.Migrator,
 	// 		utils.ServerErrorCaps,

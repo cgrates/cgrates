@@ -38,9 +38,15 @@ const (
 	PartialRecordsSuffix = "partial"
 )
 
-func NewPartialRecordsCache(ttl time.Duration, expiryAction string, cdrOutDir string, csvSep rune, roundDecimals int, timezone string, httpSkipTlsCheck bool, cdrs rpcclient.RpcClientConnection) (*PartialRecordsCache, error) {
-	return &PartialRecordsCache{ttl: ttl, expiryAction: expiryAction, cdrOutDir: cdrOutDir, csvSep: csvSep, roundDecimals: roundDecimals, timezone: timezone, httpSkipTlsCheck: httpSkipTlsCheck, cdrs: cdrs,
-		partialRecords: make(map[string]*PartialCDRRecord), dumpTimers: make(map[string]*time.Timer), guard: guardian.Guardian}, nil
+func NewPartialRecordsCache(ttl time.Duration, expiryAction string, cdrOutDir string, csvSep rune,
+	roundDecimals int, timezone string, httpSkipTlsCheck bool,
+	cdrs rpcclient.RpcClientConnection, filterS *engine.FilterS) (*PartialRecordsCache, error) {
+	return &PartialRecordsCache{ttl: ttl, expiryAction: expiryAction, cdrOutDir: cdrOutDir,
+		csvSep: csvSep, roundDecimals: roundDecimals, timezone: timezone,
+		httpSkipTlsCheck: httpSkipTlsCheck, cdrs: cdrs,
+		partialRecords: make(map[string]*PartialCDRRecord),
+		dumpTimers:     make(map[string]*time.Timer),
+		guard:          guardian.Guardian, filterS: filterS}, nil
 }
 
 type PartialRecordsCache struct {
@@ -54,7 +60,8 @@ type PartialRecordsCache struct {
 	cdrs             rpcclient.RpcClientConnection
 	partialRecords   map[string]*PartialCDRRecord // [OriginID]*PartialRecord
 	dumpTimers       map[string]*time.Timer       // [OriginID]*time.Timer which can be canceled or reset
-	guard            *guardian.GuardianLock
+	guard            *guardian.GuardianLocker
+	filterS          *engine.FilterS
 }
 
 // Dumps the cache into a .unpaired file in the outdir and cleans cache after
@@ -70,7 +77,8 @@ func (prc *PartialRecordsCache) dumpPartialRecords(originID string) {
 			csvWriter := csv.NewWriter(fileOut)
 			csvWriter.Comma = prc.csvSep
 			for _, cdr := range prc.partialRecords[originID].cdrs {
-				expRec, err := cdr.AsExportRecord(prc.partialRecords[originID].cacheDumpFields, prc.httpSkipTlsCheck, nil, prc.roundDecimals)
+				expRec, err := cdr.AsExportRecord(prc.partialRecords[originID].cacheDumpFields,
+					prc.httpSkipTlsCheck, nil, prc.roundDecimals, prc.filterS)
 				if err != nil {
 					return nil, err
 				}
@@ -96,7 +104,7 @@ func (prc *PartialRecordsCache) postCDR(originID string) {
 			cdr := prc.partialRecords[originID].MergeCDRs()
 			cdr.Partial = false // force completion
 			var reply string
-			if err := prc.cdrs.Call("CdrsV1.ProcessCDR", cdr, &reply); err != nil {
+			if err := prc.cdrs.Call(utils.CdrsV2ProcessCDR, cdr.AsCGREvent(), &reply); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<Cdrc> Failed sending CDR  %+v from partial cache, error: %s", cdr, err.Error()))
 			} else if reply != utils.OK {
 				utils.Logger.Err(fmt.Sprintf("<Cdrc> Received unexpected reply for CDR, %+v, reply: %s", cdr, reply))
@@ -178,15 +186,15 @@ func (prc *PartialRecordsCache) MergePartialCDRRecord(pCDR *PartialCDRRecord) (*
 	return pCDRIf.(*engine.CDR), err
 }
 
-func NewPartialCDRRecord(cdr *engine.CDR, cacheDumpFlds []*config.CfgCdrField) *PartialCDRRecord {
+func NewPartialCDRRecord(cdr *engine.CDR, cacheDumpFlds []*config.FCTemplate) *PartialCDRRecord {
 	return &PartialCDRRecord{cdrs: []*engine.CDR{cdr}, cacheDumpFields: cacheDumpFlds}
 }
 
 // PartialCDRRecord is a record which can be updated later
 // different from PartialFlatstoreRecordsCache which is incomplete (eg: need to calculate duration out of 2 records)
 type PartialCDRRecord struct {
-	cdrs            []*engine.CDR         // Number of CDRs
-	cacheDumpFields []*config.CfgCdrField // Fields template to use when dumping from cache on disk
+	cdrs            []*engine.CDR        // Number of CDRs
+	cacheDumpFields []*config.FCTemplate // Fields template to use when dumping from cache on disk
 }
 
 // Part of sort interface
@@ -234,7 +242,7 @@ func (partCDR *PartialCDRRecord) MergeCDRs() *engine.CDR {
 					updated = true
 				}
 			case bool:
-				if v || cdrRVal.Type().Field(i).Name == utils.PartialField { // Partial field is always updated, even if false
+				if v || cdrRVal.Type().Field(i).Name == utils.Partial { // Partial field is always updated, even if false
 					updated = true
 				}
 			case time.Time:

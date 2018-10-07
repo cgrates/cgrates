@@ -34,19 +34,19 @@ type v1SharedGroup struct {
 
 func (m *Migrator) migrateCurrentSharedGroups() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.SHARED_GROUP_PREFIX)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.SHARED_GROUP_PREFIX)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.SHARED_GROUP_PREFIX)
-		sgs, err := m.dmIN.GetSharedGroup(idg, true, utils.NonTransactional)
+		sgs, err := m.dmIN.DataManager().GetSharedGroup(idg, true, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if sgs != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.SetSharedGroup(sgs, utils.NonTransactional); err != nil {
+				if err := m.dmOut.DataManager().SetSharedGroup(sgs, utils.NonTransactional); err != nil {
 					return err
 				}
 			}
@@ -58,7 +58,7 @@ func (m *Migrator) migrateCurrentSharedGroups() (err error) {
 func (m *Migrator) migrateV1SharedGroups() (err error) {
 	var v1SG *v1SharedGroup
 	for {
-		v1SG, err = m.oldDataDB.getV1SharedGroup()
+		v1SG, err = m.dmIN.getV1SharedGroup()
 		if err != nil && err != utils.ErrNoMoreData {
 			return err
 		}
@@ -68,7 +68,7 @@ func (m *Migrator) migrateV1SharedGroups() (err error) {
 		if v1SG != nil {
 			acnt := v1SG.AsSharedGroup()
 			if m.dryRun != true {
-				if err = m.dmOut.SetSharedGroup(acnt, utils.NonTransactional); err != nil {
+				if err = m.dmOut.DataManager().SetSharedGroup(acnt, utils.NonTransactional); err != nil {
 					return err
 				}
 				m.stats[utils.SharedGroups] += 1
@@ -77,7 +77,7 @@ func (m *Migrator) migrateV1SharedGroups() (err error) {
 	}
 	// All done, update version wtih current one
 	vrs := engine.Versions{utils.SharedGroups: engine.CurrentStorDBVersions()[utils.SharedGroups]}
-	if err = m.dmOut.DataDB().SetVersions(vrs, false); err != nil {
+	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
 			err.Error(),
@@ -89,7 +89,7 @@ func (m *Migrator) migrateV1SharedGroups() (err error) {
 func (m *Migrator) migrateSharedGroups() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.dmOut.DataManager().DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

@@ -75,3 +75,20 @@ func PrefixSliceItems(slc []string, prfx string) (out []string) {
 	}
 	return
 }
+
+// StripSlicePrefix will strip a number of items from the beginning of the slice
+func StripSlicePrefix(slc []string, nrItems int) []string {
+	if len(slc) < nrItems {
+		return []string{}
+	}
+	return slc[nrItems:]
+}
+
+// SliceStringToIface converts slice of strings into a slice of interfaces
+func SliceStringToIface(slc []string) (ifc []interface{}) {
+	ifc = make([]interface{}, len(slc))
+	for i, itm := range slc {
+		ifc[i] = itm
+	}
+	return
+}

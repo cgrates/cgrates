@@ -61,7 +61,7 @@ func (cgrCdr CgrCdr) getExtraFields() map[string]string {
 func (cgrCdr CgrCdr) AsCDR(timezone string) *CDR {
 	storCdr := new(CDR)
 	storCdr.CGRID = cgrCdr.getCGRID(timezone)
-	storCdr.ToR = cgrCdr[utils.TOR]
+	storCdr.ToR = cgrCdr[utils.ToR]
 	storCdr.OriginID = cgrCdr[utils.OriginID]
 	storCdr.OriginHost = cgrCdr[utils.OriginHost]
 	storCdr.Source = cgrCdr[utils.Source]
@@ -80,7 +80,7 @@ func (cgrCdr CgrCdr) AsCDR(timezone string) *CDR {
 		storCdr.Cost, _ = strconv.ParseFloat(costStr, 64)
 	}
 	if ratedStr, hasIt := cgrCdr[utils.RATED]; hasIt {
-		storCdr.Rated, _ = strconv.ParseBool(ratedStr)
+		storCdr.PreRated, _ = strconv.ParseBool(ratedStr)
 	}
 	return storCdr
 }

@@ -84,7 +84,7 @@ func TestRAitApierRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func TestRAitTPFromFolder(t *testing.T) {
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
 	var loadInst utils.LoadInstance
 	if err := raRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
 		t.Error(err)
@@ -118,7 +118,6 @@ func TestRAitAuth(t *testing.T) {
 	if err := authReq.AddAVPWithName("Event-Timestamp", "1497106115", ""); err != nil {
 		t.Error(err)
 	}
-
 	reply, err := raAuthClnt.SendRequest(authReq)
 	if err != nil {
 		t.Error(err)
@@ -128,7 +127,7 @@ func TestRAitAuth(t *testing.T) {
 	}
 	if len(reply.AVPs) != 1 { // make sure max duration is received
 		t.Errorf("Received AVPs: %+v", reply.AVPs)
-	} else if !reflect.DeepEqual([]byte("session_max_time#3h0m0s"), reply.AVPs[0].RawValue) {
+	} else if !reflect.DeepEqual([]byte("session_max_time#10800"), reply.AVPs[0].RawValue) {
 		t.Errorf("Received: %s", string(reply.AVPs[0].RawValue))
 	}
 }
@@ -192,8 +191,9 @@ func TestRAitAcctStart(t *testing.T) {
 	}
 	// Make sure the sessin is managed by SMG
 	var aSessions []*sessions.ActiveSession
-	if err := raRPC.Call("SMGenericV1.GetActiveSessions",
-		map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT, utils.OriginID: "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"},
+	if err := raRPC.Call(utils.SessionSv1GetActiveSessions,
+		map[string]string{utils.RunID: utils.META_DEFAULT,
+			utils.OriginID: "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"},
 		&aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
@@ -260,7 +260,7 @@ func TestRAitAcctStop(t *testing.T) {
 	// Make sure the sessin was disconnected from SMG
 	var aSessions []*sessions.ActiveSession
 	if err := raRPC.Call("SMGenericV1.GetActiveSessions",
-		map[string]string{utils.MEDI_RUNID: utils.META_DEFAULT, utils.OriginID: "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"},
+		map[string]string{utils.RunID: utils.META_DEFAULT, utils.OriginID: "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"},
 		&aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -273,13 +273,13 @@ func TestRAitAcctStop(t *testing.T) {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
 	} else {
 		if cdrs[0].Usage != "4s" {
-			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
+			t.Errorf("Unexpected CDR Usage received, cdr: %v ", cdrs[0].Usage)
 		}
-		if cdrs[0].CostSource != utils.SESSION_MANAGER_SOURCE {
-			t.Errorf("Unexpected CDR CostSource received for CDR: %v", cdrs[0])
+		if cdrs[0].CostSource != utils.MetaSessionS {
+			t.Errorf("Unexpected CDR CostSource received for CDR: %v", cdrs[0].CostSource)
 		}
 		if cdrs[0].Cost != 0.01 {
-			t.Errorf("Unexpected CDR Cost received for CDR: %v", cdrs[0])
+			t.Errorf("Unexpected CDR Cost received for CDR: %v", cdrs[0].Cost)
 		}
 	}
 }

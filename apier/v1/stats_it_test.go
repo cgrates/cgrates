@@ -81,8 +81,10 @@ var sTestsStatSV1 = []func(t *testing.T){
 	testV1STSProcessEvent,
 	testV1STSGetStatsAfterRestart,
 	testV1STSSetStatQueueProfile,
+	testV1STSGetStatQueueProfileIDs,
 	testV1STSUpdateStatQueueProfile,
 	testV1STSRemoveStatQueueProfile,
+	testV1STSStatsPing,
 	testV1STSStopEngine,
 }
 
@@ -111,7 +113,7 @@ func testV1STSLoadConfig(t *testing.T) {
 	case "tutmongo": // Mongo needs more time to reset db, need to investigate
 		statsDelay = 4000
 	default:
-		statsDelay = 1000
+		statsDelay = 2000
 	}
 }
 
@@ -137,11 +139,11 @@ func testV1STSRpcConn(t *testing.T) {
 
 func testV1STSFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
 	if err := stsV1Rpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(1000) * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 }
 
 func testV1STSGetStats(t *testing.T) {
@@ -154,14 +156,16 @@ func testV1STSGetStats(t *testing.T) {
 	}
 	var metrics map[string]string
 	expectedMetrics := map[string]string{
-		utils.MetaASR:     utils.NOT_AVAILABLE,
-		utils.MetaACD:     utils.NOT_AVAILABLE,
-		utils.MetaTCC:     utils.NOT_AVAILABLE,
-		utils.MetaTCD:     utils.NOT_AVAILABLE,
-		utils.MetaACC:     utils.NOT_AVAILABLE,
-		utils.MetaPDD:     utils.NOT_AVAILABLE,
-		utils.MetaSum:     utils.NOT_AVAILABLE,
-		utils.MetaAverage: utils.NOT_AVAILABLE,
+		utils.MetaASR:                                         utils.NOT_AVAILABLE,
+		utils.MetaACD:                                         utils.NOT_AVAILABLE,
+		utils.MetaTCC:                                         utils.NOT_AVAILABLE,
+		utils.MetaTCD:                                         utils.NOT_AVAILABLE,
+		utils.MetaACC:                                         utils.NOT_AVAILABLE,
+		utils.MetaPDD:                                         utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaSum, utils.Value):     utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaAverage, utils.Value): utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaSum, utils.Usage):     utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaAverage, utils.Usage): utils.NOT_AVAILABLE,
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}, &metrics); err != nil {
@@ -172,72 +176,81 @@ func testV1STSGetStats(t *testing.T) {
 }
 
 func testV1STSProcessEvent(t *testing.T) {
-	var reply string
-	ev1 := utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.Account:    "1001",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(135 * time.Second),
-			utils.COST:       123.0,
-			utils.PDD:        time.Duration(12 * time.Second)}}
-	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
+	var reply []string
+	expected := []string{"Stats1"}
+	args := engine.StatsArgsProcessEvent{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.Account:    "1001",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:      time.Duration(135 * time.Second),
+				utils.COST:       123.0,
+				utils.PDD:        time.Duration(12 * time.Second)}}}
+	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &args, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("received reply: %s", reply)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 	//process with one event (should be N/A becaus MinItems is 2)
 	expectedMetrics := map[string]string{
-		utils.MetaASR:     utils.NOT_AVAILABLE,
-		utils.MetaACD:     utils.NOT_AVAILABLE,
-		utils.MetaTCC:     utils.NOT_AVAILABLE,
-		utils.MetaTCD:     utils.NOT_AVAILABLE,
-		utils.MetaACC:     utils.NOT_AVAILABLE,
-		utils.MetaPDD:     utils.NOT_AVAILABLE,
-		utils.MetaSum:     utils.NOT_AVAILABLE,
-		utils.MetaAverage: utils.NOT_AVAILABLE,
+		utils.MetaASR:                                         utils.NOT_AVAILABLE,
+		utils.MetaACD:                                         utils.NOT_AVAILABLE,
+		utils.MetaTCC:                                         utils.NOT_AVAILABLE,
+		utils.MetaTCD:                                         utils.NOT_AVAILABLE,
+		utils.MetaACC:                                         utils.NOT_AVAILABLE,
+		utils.MetaPDD:                                         utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaSum, utils.Value):     utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaAverage, utils.Value): utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaSum, utils.Usage):     utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaAverage, utils.Usage): utils.NOT_AVAILABLE,
 	}
 	var metrics map[string]string
-	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics, &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics); err != nil {
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
 	}
 
-	ev2 := utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event2",
-		Event: map[string]interface{}{
-			utils.Account:    "1002",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(45 * time.Second)}}
-	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &ev2, &reply); err != nil {
+	args2 := engine.StatsArgsProcessEvent{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event2",
+			Event: map[string]interface{}{
+				utils.Account:    "1002",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:      time.Duration(45 * time.Second)}}}
+	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &args2, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("received reply: %s", reply)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
-	ev3 := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event3",
-		Event: map[string]interface{}{
-			utils.Account:   "1002",
-			utils.SetupTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:     0}}
-	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &ev3, &reply); err != nil {
+	args3 := engine.StatsArgsProcessEvent{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event3",
+			Event: map[string]interface{}{
+				utils.Account:   "1002",
+				utils.SetupTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:     0}}}
+	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &args3, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("received reply: %s", reply)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 	expectedMetrics2 := map[string]string{
-		utils.MetaASR:     "66.66667%",
-		utils.MetaACD:     "1m30s",
-		utils.MetaACC:     "61.5",
-		utils.MetaTCD:     "3m0s",
-		utils.MetaTCC:     "123",
-		utils.MetaPDD:     "4s",
-		utils.MetaSum:     "0",
-		utils.MetaAverage: utils.NOT_AVAILABLE,
+		utils.MetaASR:                                         "66.66667%",
+		utils.MetaACD:                                         "1m30s",
+		utils.MetaACC:                                         "61.5",
+		utils.MetaTCD:                                         "3m0s",
+		utils.MetaTCC:                                         "123",
+		utils.MetaPDD:                                         "4s",
+		utils.ConcatenatedKey(utils.MetaSum, utils.Value):     "0",
+		utils.ConcatenatedKey(utils.MetaAverage, utils.Value): utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaSum, utils.Usage):     "180000000000",
+		utils.ConcatenatedKey(utils.MetaAverage, utils.Usage): "90000000000",
 	}
 	var metrics2 map[string]string
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics, &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics2); err != nil {
@@ -258,18 +271,20 @@ func testV1STSGetStatsAfterRestart(t *testing.T) {
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
-	time.Sleep(2 * time.Second)
+	time.Sleep(1 * time.Second)
 
 	//get stats metrics after restart
 	expectedMetrics2 := map[string]string{
-		utils.MetaASR:     "66.66667%",
-		utils.MetaACD:     "1m30s",
-		utils.MetaACC:     "61.5",
-		utils.MetaTCD:     "3m0s",
-		utils.MetaTCC:     "123",
-		utils.MetaPDD:     "4s",
-		utils.MetaSum:     "0",
-		utils.MetaAverage: utils.NOT_AVAILABLE,
+		utils.MetaASR:                                         "66.66667%",
+		utils.MetaACD:                                         "1m30s",
+		utils.MetaACC:                                         "61.5",
+		utils.MetaTCD:                                         "3m0s",
+		utils.MetaTCC:                                         "123",
+		utils.MetaPDD:                                         "4s",
+		utils.ConcatenatedKey(utils.MetaSum, utils.Value):     "0",
+		utils.ConcatenatedKey(utils.MetaAverage, utils.Value): utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaSum, utils.Usage):     "180000000000",
+		utils.ConcatenatedKey(utils.MetaAverage, utils.Usage): "90000000000",
 	}
 	var metrics2 map[string]string
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics, &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics2); err != nil {
@@ -277,7 +292,7 @@ func testV1STSGetStatsAfterRestart(t *testing.T) {
 	} else if !reflect.DeepEqual(expectedMetrics2, metrics2) {
 		t.Errorf("After restat expecting: %+v, received reply: %s", expectedMetrics2, metrics2)
 	}
-	time.Sleep(time.Duration(1 * time.Second))
+	time.Sleep(1 * time.Second)
 }
 
 func testV1STSSetStatQueueProfile(t *testing.T) {
@@ -347,6 +362,16 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 	}
 }
 
+func testV1STSGetStatQueueProfileIDs(t *testing.T) {
+	expected := []string{"Stats1", "TEST_PROFILE1"}
+	var result []string
+	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfileIDs", "cgrates.org", &result); err != nil {
+		t.Error(err)
+	} else if len(expected) != len(result) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, result)
+	}
+}
+
 func testV1STSUpdateStatQueueProfile(t *testing.T) {
 	var result string
 	filter = &engine.Filter{
@@ -397,6 +422,15 @@ func testV1STSRemoveStatQueueProfile(t *testing.T) {
 	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &sqp); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
+	}
+}
+
+func testV1STSStatsPing(t *testing.T) {
+	var resp string
+	if err := stsV1Rpc.Call(utils.StatSv1Ping, "", &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.Pong {
+		t.Error("Unexpected reply returned", resp)
 	}
 }
 

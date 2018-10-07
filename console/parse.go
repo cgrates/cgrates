@@ -71,9 +71,11 @@ func (self *CmdParse) LocalExecute() string {
 	if self.rpcParams.Value == "" {
 		return "Empty value error"
 	}
-	if rsrField, err := utils.NewRSRField(self.rpcParams.Expression); err == nil {
-		return rsrField.ParseValue(self.rpcParams.Value)
-	} else {
+	if rsrField, err := utils.NewRSRField(self.rpcParams.Expression); err != nil {
 		return err.Error()
+	} else if parsed, err := rsrField.Parse(self.rpcParams.Value); err != nil {
+		return err.Error()
+	} else {
+		return parsed
 	}
 }

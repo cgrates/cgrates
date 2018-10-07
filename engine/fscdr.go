@@ -41,7 +41,6 @@ const (
 	FS_HANGUP_TIME        = "end_epoch"
 	FS_DURATION           = "billsec"
 	FS_USERNAME           = "user_name"
-	FS_IP                 = "sip_local_network_addr"
 	FS_CDR_SOURCE         = "freeswitch_json"
 	FS_SIP_REQUSER        = "sip_req_user" // Apps like FusionPBX do not set dialed_extension, alternative being destination_number but that comes in customer profile, not in vars
 	FS_PROGRESS_MEDIAMSEC = "progress_mediamsec"
@@ -73,7 +72,8 @@ type FSCdr struct {
 }
 
 func (fsCdr FSCdr) getCGRID() string {
-	return utils.Sha1(fsCdr.vars[FS_UUID], fsCdr.vars[FsIPv4])
+	return utils.Sha1(fsCdr.vars[FS_UUID],
+		utils.FirstNonEmpty(fsCdr.vars[utils.CGROriginHost], fsCdr.vars[FsIPv4]))
 }
 
 func (fsCdr FSCdr) getExtraFields() map[string]string {
@@ -86,7 +86,10 @@ func (fsCdr FSCdr) getExtraFields() map[string]string {
 		if !foundInVars {
 			origFieldVal = fsCdr.searchExtraField(field.Id, fsCdr.body)
 		}
-		extraFields[field.Id] = field.ParseValue(origFieldVal)
+		if parsed, err := field.Parse(origFieldVal); err == nil {
+			extraFields[field.Id] = parsed
+		}
+
 	}
 	return extraFields
 }
@@ -139,7 +142,7 @@ func (fsCdr FSCdr) AsCDR(timezone string) *CDR {
 	storCdr.CGRID = fsCdr.getCGRID()
 	storCdr.ToR = utils.VOICE
 	storCdr.OriginID = fsCdr.vars[FS_UUID]
-	storCdr.OriginHost = fsCdr.vars[FS_IP]
+	storCdr.OriginHost = utils.FirstNonEmpty(fsCdr.vars[utils.CGROriginHost], fsCdr.vars[FsIPv4])
 	storCdr.Source = FS_CDR_SOURCE
 	storCdr.RequestType = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_REQTYPE], fsCdr.cgrCfg.DefaultReqType)
 	storCdr.Tenant = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_TENANT], fsCdr.cgrCfg.DefaultTenant)

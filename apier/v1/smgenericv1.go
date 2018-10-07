@@ -37,65 +37,79 @@ type SMGenericV1 struct {
 }
 
 // Returns MaxUsage (for calls in seconds), -1 for no limit
-func (self *SMGenericV1) GetMaxUsage(ev sessions.SMGenericEvent, maxUsage *float64) error {
+func (self *SMGenericV1) GetMaxUsage(ev map[string]interface{},
+	maxUsage *float64) error {
 	return self.SMG.BiRPCV1GetMaxUsage(nil, ev, maxUsage)
 }
 
 // Called on session start, returns the maximum number of seconds the session can last
-func (self *SMGenericV1) InitiateSession(ev sessions.SMGenericEvent, maxUsage *float64) error {
+func (self *SMGenericV1) InitiateSession(ev map[string]interface{},
+	maxUsage *float64) error {
 	return self.SMG.BiRPCV1InitiateSession(nil, ev, maxUsage)
 }
 
 // Interim updates, returns remaining duration from the rater
-func (self *SMGenericV1) UpdateSession(ev sessions.SMGenericEvent, maxUsage *float64) error {
+func (self *SMGenericV1) UpdateSession(ev map[string]interface{},
+	maxUsage *float64) error {
 	return self.SMG.BiRPCV1UpdateSession(nil, ev, maxUsage)
 }
 
 // Called on session end, should stop debit loop
-func (self *SMGenericV1) TerminateSession(ev sessions.SMGenericEvent, reply *string) error {
+func (self *SMGenericV1) TerminateSession(ev map[string]interface{},
+	reply *string) error {
 	return self.SMG.BiRPCV1TerminateSession(nil, ev, reply)
 }
 
 // Called on individual Events (eg SMS)
-func (self *SMGenericV1) ChargeEvent(ev sessions.SMGenericEvent, maxUsage *float64) error {
+func (self *SMGenericV1) ChargeEvent(ev map[string]interface{},
+	maxUsage *float64) error {
 	return self.SMG.BiRPCV1ChargeEvent(nil, ev, maxUsage)
 }
 
 // Called on session end, should send the CDR to CDRS
-func (self *SMGenericV1) ProcessCDR(ev sessions.SMGenericEvent, reply *string) error {
+func (self *SMGenericV1) ProcessCDR(ev map[string]interface{},
+	reply *string) error {
 	return self.SMG.BiRPCV1ProcessCDR(nil, ev, reply)
 }
 
-func (self *SMGenericV1) GetActiveSessions(attrs map[string]string, reply *[]*sessions.ActiveSession) error {
+func (self *SMGenericV1) GetActiveSessions(attrs map[string]string,
+	reply *[]*sessions.ActiveSession) error {
 	return self.SMG.BiRPCV1GetActiveSessions(nil, attrs, reply)
 }
 
-func (self *SMGenericV1) GetActiveSessionsCount(attrs map[string]string, reply *int) error {
+func (self *SMGenericV1) GetActiveSessionsCount(attrs map[string]string,
+	reply *int) error {
 	return self.SMG.BiRPCV1GetActiveSessionsCount(nil, attrs, reply)
 }
 
-func (self *SMGenericV1) GetPassiveSessions(attrs map[string]string, reply *[]*sessions.ActiveSession) error {
+func (self *SMGenericV1) GetPassiveSessions(attrs map[string]string,
+	reply *[]*sessions.ActiveSession) error {
 	return self.SMG.BiRPCV1GetPassiveSessions(nil, attrs, reply)
 }
 
-func (self *SMGenericV1) GetPassiveSessionsCount(attrs map[string]string, reply *int) error {
+func (self *SMGenericV1) GetPassiveSessionsCount(attrs map[string]string,
+	reply *int) error {
 	return self.SMG.BiRPCV1GetPassiveSessionsCount(nil, attrs, reply)
 }
 
-func (self *SMGenericV1) SetPassiveSessions(args sessions.ArgsSetPassiveSessions, reply *string) error {
+func (self *SMGenericV1) SetPassiveSessions(args sessions.ArgsSetPassiveSessions,
+	reply *string) error {
 	return self.SMG.BiRPCV1SetPassiveSessions(nil, args, reply)
 }
 
-func (self *SMGenericV1) ReplicateActiveSessions(args sessions.ArgsReplicateSessions, reply *string) error {
+func (self *SMGenericV1) ReplicateActiveSessions(args sessions.ArgsReplicateSessions,
+	reply *string) error {
 	return self.SMG.BiRPCV1ReplicateActiveSessions(nil, args, reply)
 }
 
-func (self *SMGenericV1) ReplicatePassiveSessions(args sessions.ArgsReplicateSessions, reply *string) error {
+func (self *SMGenericV1) ReplicatePassiveSessions(args sessions.ArgsReplicateSessions,
+	reply *string) error {
 	return self.SMG.BiRPCV1ReplicatePassiveSessions(nil, args, reply)
 }
 
 // rpcclient.RpcClientConnection interface
-func (self *SMGenericV1) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (self *SMGenericV1) Call(serviceMethod string,
+	args interface{}, reply interface{}) error {
 	methodSplit := strings.Split(serviceMethod, ".")
 	if len(methodSplit) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod

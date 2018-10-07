@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/dispatcher"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -27,7 +27,8 @@ import (
 func init() {
 	c := &CmdGetAttributeForEvent{
 		name:      "attributes_for_event",
-		rpcMethod: "AttributeSv1.GetAttributeForEvent",
+		rpcMethod: utils.AttributeSv1GetAttributeForEvent,
+		rpcParams: &dispatcher.ArgsAttrProcessEventWithApiKey{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +37,7 @@ func init() {
 type CmdGetAttributeForEvent struct {
 	name      string
 	rpcMethod string
-	rpcParams interface{}
+	rpcParams *dispatcher.ArgsAttrProcessEventWithApiKey
 	*CommandExecuter
 }
 
@@ -50,28 +51,12 @@ func (self *CmdGetAttributeForEvent) RpcMethod() string {
 
 func (self *CmdGetAttributeForEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		mp := make(map[string]interface{})
-		self.rpcParams = &mp
+		self.rpcParams = &dispatcher.ArgsAttrProcessEventWithApiKey{}
 	}
 	return self.rpcParams
 }
 
 func (self *CmdGetAttributeForEvent) PostprocessRpcParams() error {
-	var tenant string
-	param := self.rpcParams.(*map[string]interface{})
-	if (*param)[utils.Tenant] != nil && (*param)[utils.Tenant].(string) != "" {
-		tenant = (*param)[utils.Tenant].(string)
-		delete((*param), utils.Tenant)
-	} else {
-		tenant = config.CgrConfig().DefaultTenant
-	}
-	cgrev := utils.CGREvent{
-		Tenant: tenant,
-		ID:     utils.UUIDSha1Prefix(),
-		Event:  *param,
-	}
-
-	self.rpcParams = cgrev
 	return nil
 }
 

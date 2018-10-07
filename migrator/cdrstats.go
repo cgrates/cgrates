@@ -26,14 +26,14 @@ import (
 )
 
 func (m *Migrator) migrateCurrentCdrStats() (err error) {
-	cdrsts, err := m.dmIN.GetAllCdrStats()
+	cdrsts, err := m.dmIN.DataManager().GetAllCdrStats()
 	if err != nil {
 		return err
 	}
 	for _, cdrst := range cdrsts {
 		if cdrst != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.SetCdrStats(cdrst); err != nil {
+				if err := m.dmOut.DataManager().SetCdrStats(cdrst); err != nil {
 					return err
 				}
 				m.stats[utils.CdrStats] += 1
@@ -46,7 +46,7 @@ func (m *Migrator) migrateCurrentCdrStats() (err error) {
 func (m *Migrator) migrateCdrStats() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.dmOut.DataManager().DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

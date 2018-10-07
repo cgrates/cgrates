@@ -27,32 +27,36 @@ type CdreConfig struct {
 	ExportFormat        string
 	ExportPath          string
 	FallbackPath        string
-	CDRFilter           utils.RSRFields
+	Filters             []string
+	Tenant              string
 	Synchronous         bool
 	Attempts            int
 	FieldSeparator      rune
 	UsageMultiplyFactor utils.FieldMultiplyFactor
 	CostMultiplyFactor  float64
-	HeaderFields        []*CfgCdrField
-	ContentFields       []*CfgCdrField
-	TrailerFields       []*CfgCdrField
+	HeaderFields        []*FCTemplate
+	ContentFields       []*FCTemplate
+	TrailerFields       []*FCTemplate
 }
 
-func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) error {
+func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
-	var err error
 	if jsnCfg.Export_format != nil {
 		self.ExportFormat = *jsnCfg.Export_format
 	}
 	if jsnCfg.Export_path != nil {
 		self.ExportPath = *jsnCfg.Export_path
 	}
-	if jsnCfg.Cdr_filter != nil {
-		if self.CDRFilter, err = utils.ParseRSRFields(*jsnCfg.Cdr_filter, utils.INFIELD_SEP); err != nil {
-			return err
+	if jsnCfg.Filters != nil {
+		self.Filters = make([]string, len(*jsnCfg.Filters))
+		for i, fltr := range *jsnCfg.Filters {
+			self.Filters[i] = fltr
 		}
+	}
+	if jsnCfg.Tenant != nil {
+		self.Tenant = *jsnCfg.Tenant
 	}
 	if jsnCfg.Synchronous != nil {
 		self.Synchronous = *jsnCfg.Synchronous
@@ -76,17 +80,17 @@ func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) error {
 		self.CostMultiplyFactor = *jsnCfg.Cost_multiply_factor
 	}
 	if jsnCfg.Header_fields != nil {
-		if self.HeaderFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Header_fields); err != nil {
+		if self.HeaderFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Header_fields); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Content_fields != nil {
-		if self.ContentFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Content_fields); err != nil {
+		if self.ContentFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Content_fields); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Trailer_fields != nil {
-		if self.TrailerFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Trailer_fields); err != nil {
+		if self.TrailerFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Trailer_fields); err != nil {
 			return err
 		}
 	}
@@ -101,22 +105,27 @@ func (self *CdreConfig) Clone() *CdreConfig {
 	clnCdre.Synchronous = self.Synchronous
 	clnCdre.Attempts = self.Attempts
 	clnCdre.FieldSeparator = self.FieldSeparator
+	clnCdre.Tenant = self.Tenant
 	clnCdre.UsageMultiplyFactor = make(map[string]float64, len(self.UsageMultiplyFactor))
 	for k, v := range self.UsageMultiplyFactor {
 		clnCdre.UsageMultiplyFactor[k] = v
 	}
+	clnCdre.Filters = make([]string, len(self.Filters))
+	for i, fltr := range self.Filters {
+		clnCdre.Filters[i] = fltr
+	}
 	clnCdre.CostMultiplyFactor = self.CostMultiplyFactor
-	clnCdre.HeaderFields = make([]*CfgCdrField, len(self.HeaderFields))
+	clnCdre.HeaderFields = make([]*FCTemplate, len(self.HeaderFields))
 	for idx, fld := range self.HeaderFields {
 		clonedVal := *fld
 		clnCdre.HeaderFields[idx] = &clonedVal
 	}
-	clnCdre.ContentFields = make([]*CfgCdrField, len(self.ContentFields))
+	clnCdre.ContentFields = make([]*FCTemplate, len(self.ContentFields))
 	for idx, fld := range self.ContentFields {
 		clonedVal := *fld
 		clnCdre.ContentFields[idx] = &clonedVal
 	}
-	clnCdre.TrailerFields = make([]*CfgCdrField, len(self.TrailerFields))
+	clnCdre.TrailerFields = make([]*FCTemplate, len(self.TrailerFields))
 	for idx, fld := range self.TrailerFields {
 		clonedVal := *fld
 		clnCdre.TrailerFields[idx] = &clonedVal

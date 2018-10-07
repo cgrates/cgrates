@@ -32,6 +32,8 @@ binary-arch: clean
 	cp -r $(CURDIR)/data/conf/cgrates $(PKGDIR)/etc/
 	mkdir -p $(PKGDIR)/usr/share/cgrates
 	cp -r $(CURDIR)/data/* $(PKGDIR)/usr/share/cgrates/
+	tar -xzvf $(PKGDIR)/usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/freeswitch_conf.tar.gz -C $(PKGDIR)/usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/
+	rm $(PKGDIR)/usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/freeswitch_conf.tar.gz
 	mkdir -p $(PKGDIR)/var/spool/cgrates/cdrc/in
 	mkdir -p $(PKGDIR)/var/spool/cgrates/cdrc/out
 	mkdir -p $(PKGDIR)/var/spool/cgrates/cdre/csv

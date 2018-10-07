@@ -43,6 +43,26 @@ func NewRSRField(fldStr string) (fld *RSRField, err error) {
 		fldStr = fldStr[:fltrStart] // Take the filter part out before compiling further
 
 	}
+	if idxConverters := strings.Index(fldStr, "{*"); idxConverters != -1 { // converters in the string
+		if !strings.HasSuffix(fldStr, "}") {
+			return nil,
+				fmt.Errorf("Invalid converter value in string: %s, err: invalid converter terminator",
+					fldStr)
+		}
+		convertersStr := fldStr[idxConverters+1 : len(fldStr)-1] // strip also {}
+		convsSplt := strings.Split(convertersStr, INFIELD_SEP)
+		rsrField.converters = make([]DataConverter, len(convsSplt))
+		for i, convStr := range convsSplt {
+			if conv, err := NewDataConverter(convStr); err != nil {
+				return nil,
+					fmt.Errorf("Invalid converter value in string: %s, err: %s",
+						convStr, err.Error())
+			} else {
+				rsrField.converters[i] = conv
+			}
+		}
+		fldStr = fldStr[:idxConverters]
+	}
 	if strings.HasPrefix(fldStr, STATIC_VALUE_PREFIX) { // Special case when RSR is defined as static header/value
 		var staticHdr, staticVal string
 		if splt := strings.Split(fldStr, STATIC_HDRVAL_SEP); len(splt) == 2 { // Using / as separator since ':' is often use in date/time fields
@@ -101,15 +121,19 @@ type RSRField struct {
 	staticValue string             // If defined, enforces parsing always to this value
 	RSRules     []*ReSearchReplace // Rules to use when processing field value
 	filters     []*RSRFilter       // The value to compare when used as filter
+	converters  DataConverters     // set of converters to apply on output
 }
 
-// IsParsed finds out whether this RSRField was already parsed or RAW state
-func (rsrf *RSRField) IsParsed() bool {
-	return rsrf.staticValue != "" || rsrf.RSRules != nil || rsrf.filters != nil
+// IsCompiled finds out whether this RSRField was already parsed or RAW state
+func (rsrf *RSRField) IsCompiled() bool {
+	return rsrf.staticValue != "" ||
+		rsrf.RSRules != nil ||
+		rsrf.filters != nil ||
+		rsrf.converters != nil
 }
 
 // Compile parses Rules string and repopulates other fields
-func (rsrf *RSRField) ParseRules() error {
+func (rsrf *RSRField) Compile() error {
 	if newRSRFld, err := NewRSRField(rsrf.Rules); err != nil {
 		return err
 	} else if newRSRFld != nil {
@@ -120,8 +144,23 @@ func (rsrf *RSRField) ParseRules() error {
 	return nil
 }
 
-// Parse the field value from a string
-func (rsrf *RSRField) ParseValue(value string) string {
+// IsStatic detects if a RSRField is a static value
+func (rsrf *RSRField) IsStatic() bool {
+	return len(rsrf.staticValue) != 0
+}
+
+// RegexpMatched will investigate whether we had a regexp match through the rules
+func (rsrf *RSRField) RegexpMatched() bool {
+	for _, rsrule := range rsrf.RSRules {
+		if rsrule.Matched {
+			return true
+		}
+	}
+	return false
+}
+
+// parseValue the field value from a string
+func (rsrf *RSRField) parseValue(value string) string {
 	if len(rsrf.staticValue) != 0 { // Enforce parsing of static values
 		return rsrf.staticValue
 	}
@@ -133,31 +172,28 @@ func (rsrf *RSRField) ParseValue(value string) string {
 	return value
 }
 
-func (rsrf *RSRField) IsStatic() bool {
-	return len(rsrf.staticValue) != 0
-}
-
-func (rsrf *RSRField) RegexpMatched() bool { // Investigate whether we had a regexp match through the rules
-	for _, rsrule := range rsrf.RSRules {
-		if rsrule.Matched {
-			return true
-		}
-	}
-	return false
-}
-
-func (rsrf *RSRField) FilterPasses(value string) bool {
-	if len(rsrf.filters) == 0 { // No filters
-		return true
-	}
-	parsedVal := rsrf.ParseValue(value)
-	filterPasses := false
+func (rsrf *RSRField) filtersPassing(value string) bool {
 	for _, fltr := range rsrf.filters {
-		if fltr.Pass(parsedVal) {
-			filterPasses = true
+		if !fltr.Pass(value) {
+			return false
 		}
 	}
-	return filterPasses
+	return true
+}
+
+// Parse will parse the value out considering converters and filters
+func (rsrf *RSRField) Parse(value interface{}) (out string, err error) {
+	if out, err = IfaceAsString(value); err != nil {
+		return
+	}
+	out = rsrf.parseValue(out)
+	if out, err = rsrf.converters.ConvertString(out); err != nil {
+		return
+	}
+	if !rsrf.filtersPassing(out) {
+		return "", ErrFilterNotPassingNoCaps
+	}
+	return
 }
 
 // NewRSRFilter instantiates a new RSRFilter, setting it's properties
@@ -182,6 +218,15 @@ func NewRSRFilter(fltrVal string) (rsrFltr *RSRFilter, err error) {
 	return rsrFltr, nil
 }
 
+// NewRSRFilterMustCompile is used mostly in tests
+func NewRSRFilterMustCompile(fltrVal string) (rsrFltr *RSRFilter) {
+	var err error
+	if rsrFltr, err = NewRSRFilter(fltrVal); err != nil {
+		panic(fmt.Sprintf("parsing <%s>, err: %s", fltrVal, err.Error()))
+	}
+	return
+}
+
 // One filter rule
 type RSRFilter struct {
 	filterRule string // Value in raw format
@@ -200,13 +245,16 @@ func (rsrFltr *RSRFilter) Pass(val string) bool {
 		return len(val) == 0 != rsrFltr.negative
 	}
 	if rsrFltr.filterRule[:1] == MatchStartPrefix {
+		if rsrFltr.filterRule[len(rsrFltr.filterRule)-1:] == MatchEndPrefix { // starts with ^ and ends with $, exact match
+			return val == rsrFltr.filterRule[1:len(rsrFltr.filterRule)-1] != rsrFltr.negative
+		}
 		return strings.HasPrefix(val, rsrFltr.filterRule[1:]) != rsrFltr.negative
 	}
 	lastIdx := len(rsrFltr.filterRule) - 1
 	if rsrFltr.filterRule[lastIdx:] == MatchEndPrefix {
 		return strings.HasSuffix(val, rsrFltr.filterRule[:lastIdx]) != rsrFltr.negative
 	}
-	return val == rsrFltr.filterRule != rsrFltr.negative
+	return (strings.Index(val, rsrFltr.filterRule) != -1) != rsrFltr.negative // default is string index
 }
 
 func ParseRSRFilters(fldsStr, sep string) (RSRFilters, error) {
@@ -234,19 +282,21 @@ func ParseRSRFiltersFromSlice(fltrStrs []string) (RSRFilters, error) {
 type RSRFilters []*RSRFilter
 
 // @all: specifies whether all filters should match or at least one
-func (fltrs RSRFilters) Pass(val string, allMustMatch bool) bool {
+func (fltrs RSRFilters) Pass(val string, allMustMatch bool) (matched bool) {
 	if len(fltrs) == 0 {
 		return true
 	}
-	var matched bool
 	for _, fltr := range fltrs {
-		if fltr.Pass(val) {
-			matched = true
-		} else if allMustMatch {
-			return false
+		matched = fltr.Pass(val)
+		if allMustMatch {
+			if !matched {
+				return
+			}
+		} else if matched {
+			return
 		}
 	}
-	return matched
+	return
 }
 
 func ParseRSRFieldsFromSlice(flds []string) (RSRFields, error) {
@@ -296,9 +346,9 @@ func (flds RSRFields) Id() string {
 	return flds[0].Id
 }
 
-func (flds RSRFields) ParseRules() (err error) {
+func (flds RSRFields) Compile() (err error) {
 	for _, rsrFld := range flds {
-		if err = rsrFld.ParseRules(); err != nil {
+		if err = rsrFld.Compile(); err != nil {
 			break
 		}
 	}

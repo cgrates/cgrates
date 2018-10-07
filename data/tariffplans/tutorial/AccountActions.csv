@@ -1,6 +1,4 @@
 #Tenant,Account,ActionPlanId,ActionTriggersId,AllowNegative,Disabled
-cgrates.org,1001,PACKAGE_1001,STANDARD_TRIGGERS,,
-cgrates.org,1002,PACKAGE_10,STANDARD_TRIGGERS,,
-cgrates.org,1003,PACKAGE_10,STANDARD_TRIGGERS,,
-cgrates.org,1004,PACKAGE_10,STANDARD_TRIGGERS,,
-cgrates.org,1007,USE_SHARED_A,STANDARD_TRIGGERS,,
+cgrates.org,1001,AP_PACKAGE_10,,,
+cgrates.org,1002,AP_PACKAGE_10,,,
+cgrates.org,1003,AP_PACKAGE_10,,,

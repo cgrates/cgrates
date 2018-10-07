@@ -62,6 +62,14 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @linuxmaniac | Victor Seva |
 | @basitengr | Abdul Basit |
 | @ghenry | Gavin Henry |
+| @Anevo | Cezar Vulcu |
+| @deanone-noc | dean one noc |
+| @cruzccl | Carlos Cruz Luengo |
+| @petekelly | Peter Kelly |
+| @vtzan | Vasilios Tzanoudakis |
+| @ccppprogrammer | Sergei Lavrov |
+| @chrisgis333 | Krzysztof Grzyb |
+| @Trial97 | Alexandru Tripon |
 
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |

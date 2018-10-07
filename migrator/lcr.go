@@ -28,19 +28,19 @@ import (
 
 func (m *Migrator) migrateCurrentLCR() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.LCR_PREFIX)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.LCR_PREFIX)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.LCR_PREFIX)
-		lcr, err := m.dmIN.GetLCR(idg, true, utils.NonTransactional)
+		lcr, err := m.dmIN.DataManager().GetLCR(idg, true, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if lcr != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.SetLCR(lcr, utils.NonTransactional); err != nil {
+				if err := m.dmOut.DataManager().SetLCR(lcr, utils.NonTransactional); err != nil {
 					return err
 				}
 				m.stats[utils.LCR] += 1
@@ -53,7 +53,7 @@ func (m *Migrator) migrateCurrentLCR() (err error) {
 func (m *Migrator) migrateLCR() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.dmOut.DataManager().DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

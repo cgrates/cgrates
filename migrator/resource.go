@@ -30,19 +30,19 @@ import (
 func (m *Migrator) migrateCurrentResource() (err error) {
 	var ids []string
 	tenant := config.CgrConfig().DefaultTenant
-	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.ResourceProfilesPrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ResourceProfilesPrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.ResourceProfilesPrefix+tenant+":")
-		res, err := m.dmIN.GetResourceProfile(tenant, idg, true, utils.NonTransactional)
+		res, err := m.dmIN.DataManager().GetResourceProfile(tenant, idg, false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if res != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.SetResourceProfile(res, true); err != nil {
+				if err := m.dmOut.DataManager().SetResourceProfile(res, true); err != nil {
 					return err
 				}
 				m.stats[utils.Resource] += 1
@@ -55,7 +55,7 @@ func (m *Migrator) migrateCurrentResource() (err error) {
 func (m *Migrator) migrateResources() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.dmOut.DataManager().DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

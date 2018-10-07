@@ -25,9 +25,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -36,7 +34,7 @@ type ThresholdProfile struct {
 	ID                 string
 	FilterIDs          []string
 	ActivationInterval *utils.ActivationInterval // Time when this limit becomes active and expires
-	Recurrent          bool
+	MaxHits            int
 	MinHits            int
 	MinSleep           time.Duration
 	Blocker            bool    // blocker flag to stop processing on filters matched
@@ -71,6 +69,9 @@ func (t *Threshold) ProcessEvent(args *ArgsProcessEvent, dm *DataManager) (err e
 		return
 	}
 	if t.Hits < t.tPrfl.MinHits { // number of hits was not met, will not execute actions
+		return
+	}
+	if t.tPrfl.MaxHits != -1 && t.Hits > t.tPrfl.MaxHits {
 		return
 	}
 	acnt, _ := args.FieldAsString(utils.Account)
@@ -181,7 +182,7 @@ func (tS *ThresholdService) storeThresholds() {
 		if tID == "" {
 			break // no more keys, backup completed
 		}
-		if tIf, ok := cache.Get(utils.ThresholdPrefix + tID); !ok || tIf == nil {
+		if tIf, ok := Cache.Get(utils.CacheThresholds, tID); !ok || tIf == nil {
 			utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed retrieving from cache resource with ID: %s", tID))
 		} else if err := tS.StoreThreshold(tIf.(*Threshold)); err != nil {
 			failedTdIDs = append(failedTdIDs, tID) // record failure so we can schedule it for next backup
@@ -222,17 +223,15 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 		tIDs = args.ThresholdIDs
 	} else {
 		tIDsMap, err := matchingItemIDsForEvent(args.Event, tS.stringIndexedFields,
-			tS.prefixIndexedFields, tS.dm, utils.ThresholdFilterIndexes+args.Tenant)
+			tS.prefixIndexedFields, tS.dm, utils.CacheThresholdFilterIndexes,
+			args.Tenant, tS.filterS.cfg.FilterSCfg().IndexedSelects)
 		if err != nil {
 			return nil, err
 		}
 		tIDs = tIDsMap.Slice()
 	}
-	lockIDs := utils.PrefixSliceItems(tIDs, utils.ThresholdFilterIndexes)
-	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
-	defer guardian.Guardian.UnguardIDs(lockIDs...)
 	for _, tID := range tIDs {
-		tPrfl, err := tS.dm.GetThresholdProfile(args.Tenant, tID, false, utils.NonTransactional)
+		tPrfl, err := tS.dm.GetThresholdProfile(args.Tenant, tID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
@@ -243,16 +242,17 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 			!tPrfl.ActivationInterval.IsActiveAtTime(*args.Time) { // not active
 			continue
 		}
-		if pass, err := tS.filterS.PassFiltersForEvent(args.Tenant, args.Event, tPrfl.FilterIDs); err != nil {
+		if pass, err := tS.filterS.Pass(args.Tenant, tPrfl.FilterIDs,
+			config.NewNavigableMap(args.Event)); err != nil {
 			return nil, err
 		} else if !pass {
 			continue
 		}
-		t, err := tS.dm.GetThreshold(tPrfl.Tenant, tPrfl.ID, false, "")
+		t, err := tS.dm.GetThreshold(tPrfl.Tenant, tPrfl.ID, true, true, "")
 		if err != nil {
 			return nil, err
 		}
-		if tPrfl.Recurrent && t.dirty == nil {
+		if t.dirty == nil || tPrfl.MaxHits == -1 || t.Hits < tPrfl.MaxHits {
 			t.dirty = utils.BoolPointer(false)
 		}
 		t.tPrfl = tPrfl
@@ -281,30 +281,30 @@ type ArgsProcessEvent struct {
 }
 
 // processEvent processes a new event, dispatching to matching thresholds
-func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (hits int, err error) {
+func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (thresholdsIDs []string, err error) {
 	matchTs, err := tS.matchingThresholdsForEvent(args)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
-	hits = len(matchTs)
 	var withErrors bool
+	var tIDs []string
 	for _, t := range matchTs {
+		tIDs = append(tIDs, t.ID)
 		t.Hits += 1
 		err = t.ProcessEvent(args, tS.dm)
 		if err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<ThresholdService> threshold: %s, ignoring event: %s, error: %s",
-					t.TenantID(), args.TenantID(), err.Error()))
+					t.TenantID(), args.CGREvent.TenantID(), err.Error()))
 			withErrors = true
 			continue
 		}
-		if t.dirty == nil { // one time threshold
+		if t.dirty == nil || t.Hits == t.tPrfl.MaxHits { // one time threshold
 			if err = tS.dm.RemoveThreshold(t.Tenant, t.ID, utils.NonTransactional); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<ThresholdService> failed removing non-recurrent threshold: %s, error: %s",
 						t.TenantID(), err.Error()))
 				withErrors = true
-
 			}
 			continue
 		}
@@ -319,6 +319,10 @@ func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (hits int, err 
 			tS.stMux.Unlock()
 		}
 	}
+	if len(tIDs) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	thresholdsIDs = append(thresholdsIDs, tIDs...)
 	if withErrors {
 		err = utils.ErrPartiallyExecuted
 	}
@@ -326,14 +330,16 @@ func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (hits int, err 
 }
 
 // V1ProcessEvent implements ThresholdService method for processing an Event
-func (tS *ThresholdService) V1ProcessEvent(args *ArgsProcessEvent, reply *int) (err error) {
+func (tS *ThresholdService) V1ProcessEvent(args *ArgsProcessEvent, reply *[]string) (err error) {
 	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
+	} else if args.CGREvent.Event == nil {
+		return utils.NewErrMandatoryIeMissing("Event")
 	}
-	if hits, err := tS.processEvent(args); err != nil {
+	if ids, err := tS.processEvent(args); err != nil {
 		return err
 	} else {
-		*reply = hits
+		*reply = ids
 	}
 	return
 }
@@ -342,6 +348,8 @@ func (tS *ThresholdService) V1ProcessEvent(args *ArgsProcessEvent, reply *int) (
 func (tS *ThresholdService) V1GetThresholdsForEvent(args *ArgsProcessEvent, reply *Thresholds) (err error) {
 	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
+	} else if args.CGREvent.Event == nil {
+		return utils.NewErrMandatoryIeMissing("Event")
 	}
 	var ts Thresholds
 	if ts, err = tS.matchingThresholdsForEvent(args); err == nil {
@@ -367,7 +375,7 @@ func (tS *ThresholdService) V1GetThresholdIDs(tenant string, tIDs *[]string) (er
 
 // V1GetThreshold retrieves a Threshold
 func (tS *ThresholdService) V1GetThreshold(tntID *utils.TenantID, t *Threshold) (err error) {
-	if thd, err := tS.dm.GetThreshold(tntID.Tenant, tntID.ID, false, ""); err != nil {
+	if thd, err := tS.dm.GetThreshold(tntID.Tenant, tntID.ID, true, true, ""); err != nil {
 		return err
 	} else {
 		*t = *thd

@@ -1,0 +1,3 @@
+#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],Metrics[6],MetricParams[7],Blocker[8],Stored[9],Weight[10],MinItems[11],ThresholdIDs[12]
+cgrates.org,Stats1,FLTR_STS1,2014-07-29T15:00:00Z,100,1s,*asr;*acc;*tcc;*acd;*tcd;*pdd,,true,true,20,2,THRESH1;THRESH2
+cgrates.org,Stats1,FLTR_STS1,2014-07-29T15:00:00Z,100,1s,*sum;*average,Usage;Value,true,true,20,2,THRESH1;THRESH2

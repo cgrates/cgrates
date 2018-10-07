@@ -29,12 +29,27 @@ func (apierV1 *ApierV1) GetStatQueueProfile(arg *utils.TenantID, reply *engine.S
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if sCfg, err := apierV1.DataManager.GetStatQueueProfile(arg.Tenant, arg.ID,
-		false, utils.NonTransactional); err != nil {
+		true, true, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	} else {
 		*reply = *sCfg
 	}
 	return
+}
+
+// GetStatQueueProfileIDs returns list of statQueueProfile IDs registered for a tenant
+func (apierV1 *ApierV1) GetStatQueueProfileIDs(tenant string, stsPrfIDs *[]string) error {
+	prfx := utils.StatQueueProfilePrefix + tenant + ":"
+	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(prfx)
+	if err != nil {
+		return err
+	}
+	retIDs := make([]string, len(keys))
+	for i, key := range keys {
+		retIDs[i] = key[len(prfx):]
+	}
+	*stsPrfIDs = retIDs
+	return nil
 }
 
 // SetStatQueueProfile alters/creates a StatQueueProfile
@@ -68,6 +83,9 @@ func (apierV1 *ApierV1) RemStatQueueProfile(args *utils.TenantID, reply *string)
 	if err := apierV1.DataManager.RemoveStatQueueProfile(args.Tenant, args.ID, utils.NonTransactional, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	if err := apierV1.DataManager.RemoveStatQueue(args.Tenant, args.ID, utils.NonTransactional); err != nil {
+		return utils.APIErrorHandler(err)
+	}
 	*reply = utils.OK
 	return nil
 }
@@ -93,13 +111,13 @@ func (stsv1 *StatSv1) GetQueueIDs(tenant string, qIDs *[]string) error {
 }
 
 // ProcessEvent returns processes a new Event
-func (stsv1 *StatSv1) ProcessEvent(ev *utils.CGREvent, reply *string) error {
-	return stsv1.sS.V1ProcessEvent(ev, reply)
+func (stsv1 *StatSv1) ProcessEvent(args *engine.StatsArgsProcessEvent, reply *[]string) error {
+	return stsv1.sS.V1ProcessEvent(args, reply)
 }
 
 // GetQueueIDs returns the list of queues IDs in the system
-func (stsv1 *StatSv1) GetStatQueuesForEvent(ev *utils.CGREvent, reply *engine.StatQueues) (err error) {
-	return stsv1.sS.V1GetStatQueuesForEvent(ev, reply)
+func (stsv1 *StatSv1) GetStatQueuesForEvent(args *engine.StatsArgsProcessEvent, reply *[]string) (err error) {
+	return stsv1.sS.V1GetStatQueuesForEvent(args, reply)
 }
 
 // GetStringMetrics returns the string metrics for a Queue
@@ -110,4 +128,9 @@ func (stsv1 *StatSv1) GetQueueStringMetrics(args *utils.TenantID, reply *map[str
 // GetQueueFloatMetrics returns the float metrics for a Queue
 func (stsv1 *StatSv1) GetQueueFloatMetrics(args *utils.TenantID, reply *map[string]float64) (err error) {
 	return stsv1.sS.V1GetQueueFloatMetrics(args, reply)
+}
+
+func (stSv1 *StatSv1) Ping(ign string, reply *string) error {
+	*reply = utils.Pong
+	return nil
 }

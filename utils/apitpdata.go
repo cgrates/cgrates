@@ -254,6 +254,26 @@ func (rpf *TPRatingProfile) SetRatingProfilesId(id string) error {
 	return nil
 }
 
+type AttrSetRatingProfile struct {
+	Tenant                string                // Tenant's Id
+	Category              string                // TypeOfRecord
+	Direction             string                // Traffic direction, OUT is the only one supported for now
+	Subject               string                // Rating subject, usually the same as account
+	Overwrite             bool                  // Overwrite if exists
+	RatingPlanActivations []*TPRatingActivation // Activate rating plans at specific time
+}
+
+type AttrGetRatingProfile struct {
+	Tenant    string // Tenant's Id
+	Category  string // TypeOfRecord
+	Direction string // Traffic direction, OUT is the only one supported for now
+	Subject   string // Rating subject, usually the same as account
+}
+
+func (self *AttrGetRatingProfile) GetID() string {
+	return ConcatenatedKey(self.Direction, self.Tenant, self.Category, self.Subject)
+}
+
 type TPRatingActivation struct {
 	ActivationTime   string // Time when this profile will become active, defined as unix epoch time
 	RatingPlanId     string // Id of RatingPlan profile
@@ -677,6 +697,7 @@ type ArgsCache struct {
 	FilterIDs             *[]string
 	SupplierProfileIDs    *[]string
 	AttributeProfileIDs   *[]string
+	ChargerProfileIDs     *[]string
 }
 
 // Data used to do remote cache reloads via api
@@ -720,6 +741,7 @@ type CacheStats struct {
 	Filters             int
 	SupplierProfiles    int
 	AttributeProfiles   int
+	ChargerProfiles     int
 }
 
 type AttrExpFileCdrs struct {
@@ -827,6 +849,7 @@ type AttrGetCdrs struct {
 	TimeEnd             string   // If provided, it will represent the end of the CDRs interval (<)
 	SkipErrors          bool     // Do not export errored CDRs
 	SkipRated           bool     // Do not export rated CDRs
+	OrderBy             string   // Ascendent/Descendent
 	Paginator
 }
 
@@ -846,6 +869,7 @@ func (self *AttrGetCdrs) AsCDRsFilter(timezone string) (*CDRsFilter, error) {
 		OrderIDStart:        self.OrderIdStart,
 		OrderIDEnd:          self.OrderIdEnd,
 		Paginator:           self.Paginator,
+		OrderBy:             self.OrderBy,
 	}
 	if len(self.TimeStart) != 0 {
 		if answerTimeStart, err := ParseTimeDetectLayout(self.TimeStart, timezone); err != nil {
@@ -1045,6 +1069,7 @@ type CDRsFilter struct {
 	MaxCost                *float64          // End of the usage interval (<)
 	Unscoped               bool              // Include soft-deleted records in results
 	Count                  bool              // If true count the items instead of returning data
+	OrderBy                string            // Can be ordered by OrderID,AnswerTime,SetupTime,Cost,Usage
 	Paginator
 }
 
@@ -1093,6 +1118,7 @@ type RPCCDRsFilter struct {
 	MaxUsage               string            // End of the usage interval (<)
 	MinCost                *float64          // Start of the cost interval (>=)
 	MaxCost                *float64          // End of the usage interval (<)
+	OrderBy                string            // Ascendent/Descendent
 	Paginator                                // Add pagination
 }
 
@@ -1133,6 +1159,7 @@ func (self *RPCCDRsFilter) AsCDRsFilter(timezone string) (*CDRsFilter, error) {
 		MinCost:        self.MinCost,
 		MaxCost:        self.MaxCost,
 		Paginator:      self.Paginator,
+		OrderBy:        self.OrderBy,
 	}
 	if len(self.SetupTimeStart) != 0 {
 		if sTimeStart, err := ParseTimeDetectLayout(self.SetupTimeStart, timezone); err != nil {
@@ -1284,8 +1311,9 @@ type AttrRLsCache struct {
 
 type ArgRSv1ResourceUsage struct {
 	CGREvent
-	UsageID string // ResourceUsage Identifier
-	Units   float64
+	UsageID  string // ResourceUsage Identifier
+	UsageTTL *time.Duration
+	Units    float64
 }
 
 func (args *ArgRSv1ResourceUsage) TenantID() string {
@@ -1294,11 +1322,13 @@ func (args *ArgRSv1ResourceUsage) TenantID() string {
 
 type ArgsComputeFilterIndexes struct {
 	Tenant       string
+	Context      string
 	AttributeIDs *[]string
 	ResourceIDs  *[]string
 	StatIDs      *[]string
 	SupplierIDs  *[]string
 	ThresholdIDs *[]string
+	ChargerIDs   *[]string
 }
 
 // AsActivationTime converts TPActivationInterval into ActivationInterval
@@ -1356,7 +1386,7 @@ type TPThreshold struct {
 	ID                 string
 	FilterIDs          []string
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
-	Recurrent          bool
+	MaxHits            int
 	MinHits            int
 	MinSleep           string
 	Blocker            bool    // blocker flag to stop processing on filters matched
@@ -1398,7 +1428,7 @@ type TPSupplierProfile struct {
 	FilterIDs          []string
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
 	Sorting            string
-	SortingParams      []string
+	SortingParameters  []string
 	Suppliers          []*TPSupplier
 	Weight             float64
 }
@@ -1418,5 +1448,17 @@ type TPAttributeProfile struct {
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
 	Contexts           []string              // bind this TPAttribute to multiple context
 	Attributes         []*TPAttribute
+	Blocker            bool
+	Weight             float64
+}
+
+type TPChargerProfile struct {
+	TPid               string
+	Tenant             string
+	ID                 string
+	FilterIDs          []string
+	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
+	RunID              string
+	AttributeIDs       []string
 	Weight             float64
 }

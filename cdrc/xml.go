@@ -19,9 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cdrc
 
 import (
-	"bytes"
 	"encoding/json"
-	"encoding/xml"
 	"errors"
 	"fmt"
 	"io"
@@ -29,9 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ChrisTrenkamp/goxpath"
-	"github.com/ChrisTrenkamp/goxpath/tree"
-	"github.com/ChrisTrenkamp/goxpath/tree/xmltree"
+	"github.com/antchfx/xmlquery"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -39,41 +35,27 @@ import (
 
 // getElementText will process the node to extract the elementName's text out of it (only first one found)
 // returns utils.ErrNotFound if the element is not found in the node
-func elementText(xmlRes tree.Res, elmntPath string) (string, error) {
-	xp, err := goxpath.Parse(elmntPath)
-	if err != nil {
-		return "", err
-	}
-	elmntBuf := bytes.NewBufferString(xml.Header)
-	if err := goxpath.Marshal(xmlRes.(tree.Node), elmntBuf); err != nil {
-		return "", err
-	}
-	elmntNode, err := xmltree.ParseXML(elmntBuf)
-	if err != nil {
-		return "", err
-	}
-	elmnts, err := goxpath.Exec(xp, elmntNode, nil)
-	if err != nil {
-		return "", err
-	}
-	if len(elmnts) == 0 {
+func elementText(xmlElement *xmlquery.Node, elmntPath string) (string, error) {
+	elmnt := xmlquery.FindOne(xmlElement, elmntPath)
+	if elmnt == nil {
 		return "", utils.ErrNotFound
 	}
-	return elmnts[0].String(), nil
+	return elmnt.InnerText(), nil
+
 }
 
 // handlerUsageDiff will calculate the usage as difference between timeEnd and timeStart
 // Expects the 2 arguments in template separated by |
-func handlerSubstractUsage(xmlElmnt tree.Res, argsTpl utils.RSRFields, cdrPath utils.HierarchyPath, timezone string) (time.Duration, error) {
+func handlerSubstractUsage(xmlElement *xmlquery.Node, argsTpl config.RSRParsers, cdrPath utils.HierarchyPath, timezone string) (time.Duration, error) {
 	var argsStr string
 	for _, rsrArg := range argsTpl {
-		if rsrArg.Id == utils.HandlerArgSep {
-			argsStr += rsrArg.Id
+		if rsrArg.Rules == utils.HandlerArgSep {
+			argsStr += rsrArg.Rules
 			continue
 		}
-		absolutePath := utils.ParseHierarchyPath(rsrArg.Id, "")
-		relPath := utils.HierarchyPath(absolutePath[len(cdrPath)-1:]) // Need relative path to the xmlElmnt
-		argStr, _ := elementText(xmlElmnt, relPath.AsString("/", true))
+		absolutePath := utils.ParseHierarchyPath(rsrArg.Rules, "")
+		relPath := utils.HierarchyPath(absolutePath[len(cdrPath):]) // Need relative path to the xmlElmnt
+		argStr, _ := elementText(xmlElement, relPath.AsString("/", false))
 		argsStr += argStr
 	}
 	handlerArgs := strings.Split(argsStr, utils.HandlerArgSep)
@@ -84,39 +66,41 @@ func handlerSubstractUsage(xmlElmnt tree.Res, argsTpl utils.RSRFields, cdrPath u
 	if err != nil {
 		return time.Duration(0), err
 	}
+	if tEnd.IsZero() {
+		return time.Duration(0), fmt.Errorf("EndTime is 0")
+	}
 	tStart, err := utils.ParseTimeDetectLayout(handlerArgs[1], timezone)
 	if err != nil {
 		return time.Duration(0), err
+	}
+	if tStart.IsZero() {
+		return time.Duration(0), fmt.Errorf("StartTime is 0")
 	}
 	return tEnd.Sub(tStart), nil
 }
 
 func NewXMLRecordsProcessor(recordsReader io.Reader, cdrPath utils.HierarchyPath, timezone string,
-	httpSkipTlsCheck bool, cdrcCfgs []*config.CdrcConfig) (*XMLRecordsProcessor, error) {
-	xp, err := goxpath.Parse(cdrPath.AsString("/", true))
-	if err != nil {
-		return nil, err
-	}
-	optsNotStrict := func(s *xmltree.ParseOptions) {
-		s.Strict = false
-	}
-	xmlNode, err := xmltree.ParseXML(recordsReader, optsNotStrict)
+	httpSkipTlsCheck bool, cdrcCfgs []*config.CdrcConfig, filterS *engine.FilterS) (*XMLRecordsProcessor, error) {
+	//create doc
+	doc, err := xmlquery.Parse(recordsReader)
 	if err != nil {
 		return nil, err
 	}
 	xmlProc := &XMLRecordsProcessor{cdrPath: cdrPath, timezone: timezone,
-		httpSkipTlsCheck: httpSkipTlsCheck, cdrcCfgs: cdrcCfgs}
-	xmlProc.cdrXmlElmts = goxpath.MustExec(xp, xmlNode, nil)
+		httpSkipTlsCheck: httpSkipTlsCheck, cdrcCfgs: cdrcCfgs, filterS: filterS}
+
+	xmlProc.cdrXmlElmts = xmlquery.Find(doc, cdrPath.AsString("/", true))
 	return xmlProc, nil
 }
 
 type XMLRecordsProcessor struct {
-	cdrXmlElmts      []tree.Res          // result of splitting the XML doc into CDR elements
+	cdrXmlElmts      []*xmlquery.Node    // result of splitting the XML doc into CDR elements
 	procItems        int                 // current number of processed records from file
 	cdrPath          utils.HierarchyPath // path towards one CDR element
 	timezone         string
 	httpSkipTlsCheck bool
 	cdrcCfgs         []*config.CdrcConfig // individual configs for the folder CDRC is monitoring
+	filterS          *engine.FilterS
 }
 
 func (xmlProc *XMLRecordsProcessor) ProcessedRecordsNr() int64 {
@@ -130,24 +114,19 @@ func (xmlProc *XMLRecordsProcessor) ProcessNextRecord() (cdrs []*engine.CDR, err
 	cdrs = make([]*engine.CDR, 0)
 	cdrXML := xmlProc.cdrXmlElmts[xmlProc.procItems]
 	xmlProc.procItems += 1
+	xmlProvider := newXmlProvider(cdrXML, xmlProc.cdrPath)
 	for _, cdrcCfg := range xmlProc.cdrcCfgs {
-		filtersPassing := true
-		for _, rsrFltr := range cdrcCfg.CdrFilter {
-			if rsrFltr == nil {
-				continue // Pass
-			}
-			absolutePath := utils.ParseHierarchyPath(rsrFltr.Id, "")
-			relPath := utils.HierarchyPath(absolutePath[len(xmlProc.cdrPath)-1:]) // Need relative path to the xmlElmnt
-			fieldVal, _ := elementText(cdrXML, relPath.AsString("/", true))
-			if !rsrFltr.FilterPasses(fieldVal) {
-				filtersPassing = false
-				break
+		tenant, err := cdrcCfg.Tenant.ParseDataProvider(xmlProvider, utils.NestingSep)
+		if err != nil {
+			return nil, err
+		}
+		if len(cdrcCfg.Filters) != 0 {
+			if pass, err := xmlProc.filterS.Pass(tenant,
+				cdrcCfg.Filters, xmlProvider); err != nil || !pass {
+				continue // Not passes filters, ignore this CDR
 			}
 		}
-		if !filtersPassing {
-			continue
-		}
-		if cdr, err := xmlProc.recordToCDR(cdrXML, cdrcCfg); err != nil {
+		if cdr, err := xmlProc.recordToCDR(cdrXML, cdrcCfg, tenant); err != nil {
 			return nil, fmt.Errorf("<CDRC> Failed converting to CDR, error: %s", err.Error())
 		} else {
 			cdrs = append(cdrs, cdr)
@@ -159,26 +138,25 @@ func (xmlProc *XMLRecordsProcessor) ProcessNextRecord() (cdrs []*engine.CDR, err
 	return cdrs, nil
 }
 
-func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity tree.Res, cdrcCfg *config.CdrcConfig) (*engine.CDR, error) {
+func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity *xmlquery.Node, cdrcCfg *config.CdrcConfig, tenant string) (*engine.CDR, error) {
 	cdr := &engine.CDR{OriginHost: "0.0.0.0", Source: cdrcCfg.CdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
-	var lazyHttpFields []*config.CfgCdrField
+	var lazyHttpFields []*config.FCTemplate
 	var err error
 	fldVals := make(map[string]string)
+	xmlProvider := newXmlProvider(xmlEntity, xmlProc.cdrPath)
 	for _, cdrFldCfg := range cdrcCfg.ContentFields {
-		if cdrFldCfg.Type == utils.META_COMPOSED {
-			for _, cfgFieldRSR := range cdrFldCfg.Value {
-				if cfgFieldRSR.IsStatic() {
-					fldVals[cdrFldCfg.FieldId] += cfgFieldRSR.ParseValue("")
-				} else { // Dynamic value extracted using path
-					absolutePath := utils.ParseHierarchyPath(cfgFieldRSR.Id, "")
-					relPath := utils.HierarchyPath(absolutePath[len(xmlProc.cdrPath)-1:]) // Need relative path to the xmlElmnt
-					if elmntText, err := elementText(xmlEntity, relPath.AsString("/", true)); err != nil && err != utils.ErrNotFound {
-						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s, err: %s", xmlEntity, cdrFldCfg.Tag, err.Error())
-					} else {
-						fldVals[cdrFldCfg.FieldId] += cfgFieldRSR.ParseValue(elmntText)
-					}
-				}
+		if len(cdrFldCfg.Filters) != 0 {
+			if pass, err := xmlProc.filterS.Pass(tenant,
+				cdrFldCfg.Filters, xmlProvider); err != nil || !pass {
+				continue // Not passes filters, ignore this CDR
 			}
+		}
+		if cdrFldCfg.Type == utils.META_COMPOSED {
+			out, err := cdrFldCfg.Value.ParseDataProvider(xmlProvider, utils.NestingSep)
+			if err != nil {
+				return nil, err
+			}
+			fldVals[cdrFldCfg.FieldId] += out
 		} else if cdrFldCfg.Type == utils.META_HTTP_POST {
 			lazyHttpFields = append(lazyHttpFields, cdrFldCfg) // Will process later so we can send an estimation of cdr to http server
 		} else if cdrFldCfg.Type == utils.META_HANDLER && cdrFldCfg.HandlerId == utils.HandlerSubstractUsage {
@@ -186,7 +164,7 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity tree.Res, cdrcCfg *con
 			if err != nil {
 				return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s, err: %s", xmlEntity, cdrFldCfg.Tag, err.Error())
 			}
-			fldVals[cdrFldCfg.FieldId] += strconv.FormatFloat(usage.Seconds(), 'f', -1, 64)
+			fldVals[cdrFldCfg.FieldId] += usage.String()
 		} else {
 			return nil, fmt.Errorf("Unsupported field type: %s", cdrFldCfg.Type)
 		}
@@ -202,14 +180,18 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity tree.Res, cdrcCfg *con
 		var outValByte []byte
 		var fieldVal, httpAddr string
 		for _, rsrFld := range httpFieldCfg.Value {
-			httpAddr += rsrFld.ParseValue("")
+			if parsed, err := rsrFld.ParseValue(utils.EmptyString); err != nil {
+				return nil, fmt.Errorf("Ignoring record: %v - cannot extract http address, err: %s", xmlEntity, err.Error())
+			} else {
+				httpAddr += parsed
+			}
 		}
 		var jsn []byte
 		jsn, err = json.Marshal(cdr)
 		if err != nil {
 			return nil, err
 		}
-		if outValByte, err = utils.HttpJsonPost(httpAddr, xmlProc.httpSkipTlsCheck, jsn); err != nil && httpFieldCfg.Mandatory {
+		if outValByte, err = engine.HttpJsonPost(httpAddr, xmlProc.httpSkipTlsCheck, jsn); err != nil && httpFieldCfg.Mandatory {
 			return nil, err
 		} else {
 			fieldVal = string(outValByte)
@@ -222,4 +204,74 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity tree.Res, cdrcCfg *con
 		}
 	}
 	return cdr, nil
+}
+
+// newXmlProvider constructs a DataProvider
+func newXmlProvider(req *xmlquery.Node, cdrPath utils.HierarchyPath) (dP config.DataProvider) {
+	dP = &xmlProvider{req: req, cdrPath: cdrPath, cache: config.NewNavigableMap(nil)}
+	return
+}
+
+// xmlProvider implements engine.DataProvider so we can pass it to filters
+type xmlProvider struct {
+	req     *xmlquery.Node
+	cdrPath utils.HierarchyPath //used to compute relative path
+	cache   *config.NavigableMap
+}
+
+// String is part of engine.DataProvider interface
+// when called, it will display the already parsed values out of cache
+func (xP *xmlProvider) String() string {
+	return utils.ToJSON(xP)
+}
+
+// FieldAsInterface is part of engine.DataProvider interface
+func (xP *xmlProvider) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+	if len(fldPath) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	if data, err = xP.cache.FieldAsInterface(fldPath); err == nil ||
+		err != utils.ErrNotFound { // item found in cache
+		return
+	}
+	err = nil                                                 // cancel previous err
+	relPath := utils.HierarchyPath(fldPath[len(xP.cdrPath):]) // Need relative path to the xmlElmnt
+	var slctrStr string
+	for i := range relPath {
+		if sIdx := strings.Index(relPath[i], "["); sIdx != -1 {
+			slctrStr = relPath[i][sIdx:]
+			if slctrStr[len(slctrStr)-1:] != "]" {
+				return nil, fmt.Errorf("filter rule <%s> needs to end in ]", slctrStr)
+			}
+			relPath[i] = relPath[i][:sIdx]
+			if slctrStr[1:2] != "@" {
+				i, err := strconv.Atoi(slctrStr[1 : len(slctrStr)-1])
+				if err != nil {
+					return nil, err
+				}
+				slctrStr = "[" + strconv.Itoa(i+1) + "]"
+			}
+			relPath[i] = relPath[i] + slctrStr
+		}
+	}
+	data, err = elementText(xP.req, relPath.AsString("/", false))
+	xP.cache.Set(fldPath, data, false)
+	return
+}
+
+// FieldAsString is part of engine.DataProvider interface
+func (xP *xmlProvider) FieldAsString(fldPath []string) (data string, err error) {
+	var valIface interface{}
+	valIface, err = xP.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	data, err = utils.IfaceAsString(valIface)
+	return
+}
+
+// AsNavigableMap is part of engine.DataProvider interface
+func (xP *xmlProvider) AsNavigableMap([]*config.FCTemplate) (
+	nm *config.NavigableMap, err error) {
+	return nil, utils.ErrNotImplemented
 }

@@ -86,7 +86,7 @@ func NonemptyStructFields(s interface{}) map[string]interface{} {
 }*/
 
 // Converts a struct to map[string]interface{}
-func ToMapMapStringInterface(in interface{}) map[string]interface{} {
+func ToMapMapStringInterface(in interface{}) map[string]interface{} { // Got error and it is not used anywhere
 	out := make(map[string]interface{})
 
 	v := reflect.ValueOf(in)
@@ -224,7 +224,7 @@ func FromMapStringInterfaceValue(m map[string]interface{}, v reflect.Value) (int
 }
 
 // Update struct with map fields, returns not matching map keys, s is a struct to be updated
-func UpdateStructWithStrMap(s interface{}, m map[string]string) []string {
+func UpdateStructWithStrMap(s interface{}, m map[string]string) []string { // Not tested and declared and used only here
 	notMatched := []string{}
 	for key, val := range m {
 		fld := reflect.ValueOf(s).Elem().FieldByName(key)
@@ -250,4 +250,53 @@ func UpdateStructWithStrMap(s interface{}, m map[string]string) []string {
 		}
 	}
 	return notMatched
+}
+
+// UpdateStructWithIfaceMap will update struct fields with values coming from map
+// if map values are not matching the ones in struct convertion is being attempted
+// ToDo: add here more fields
+func UpdateStructWithIfaceMap(s interface{}, mp map[string]interface{}) (err error) {
+	for key, val := range mp {
+		fld := reflect.ValueOf(s).Elem().FieldByName(key)
+		if fld.IsValid() {
+			switch fld.Kind() {
+			case reflect.Bool:
+				if val == "" { // auto-populate defaults so we can parse empty strings
+					val = false
+				}
+				if valBool, err := IfaceAsBool(val); err != nil {
+					return err
+				} else {
+					fld.SetBool(valBool)
+				}
+			case reflect.Int, reflect.Int64:
+				if val == "" {
+					val = 0
+				}
+				if valInt, err := IfaceAsInt64(val); err != nil {
+					return err
+				} else {
+					fld.SetInt(valInt)
+				}
+			case reflect.Float64:
+				if val == "" {
+					val = 0.0
+				}
+				if valFlt, err := IfaceAsFloat64(val); err != nil {
+					return err
+				} else {
+					fld.SetFloat(valFlt)
+				}
+			case reflect.String:
+				if valStr, err := IfaceAsString(val); err != nil {
+					return fmt.Errorf("cannot convert field: %+v to string", val)
+				} else {
+					fld.SetString(valStr)
+				}
+			default: // improper use of function
+				return fmt.Errorf("cannot update unsupported struct field: %+v", fld)
+			}
+		}
+	}
+	return
 }

@@ -5,21 +5,24 @@
 //
 // This file contains the default configuration hardcoded into CGRateS.
 // This is what you get when you load CGRateS with an empty configuration file.
-
+"general": {
+	"log_level": 7,
+},
 
 "stor_db": {								// database used to store offline tariff plans and CDRs
 	"db_password": "CGRateS.org",			// password to use when connecting to stordb
 },
 
+
  "rals": {
  	"enabled": true						// so we can query CDRs
  },
+
 
  "cdrs": {
  	"enabled": true,
 	"rals_conns": [], 					// no rating support, just *raw CDR testing
 },
-
 
 
  "cdrc": [
@@ -38,21 +41,129 @@
  		"cdr_out_dir": "/tmp/cdrctests/csvit2/out",	// absolute path towards the directory where processed CDRs will be moved
  		"cdr_source_id": "csvit2",			// free form field, tag identifying the source of the CDRs within CDRS database
 		"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "^*voice", "mandatory": true},
-			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "0", "mandatory": true},
-			{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "1", "mandatory": true},
-			{"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "^*out", "mandatory": true},
-			{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "2", "mandatory": true},
-			{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "^call", "mandatory": true},
-			{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "3", "mandatory": true},
-			{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "3", "mandatory": true},
+			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},
+			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~0", "mandatory": true},
+			{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "~1", "mandatory": true},
+			{"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "*out", "mandatory": true},
+			{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~2", "mandatory": true},
+			{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "call", "mandatory": true},
+			{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~3", "mandatory": true},
+			{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "~3", "mandatory": true},
 			{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~4:s/0([1-9]\\d+)/+49${1}/", "mandatory": true},
-			{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "5", "mandatory": true},
-			{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "5", "mandatory": true},
-			{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "6", "mandatory": true},
-			{"tag": "HDRExtra3", "field_id": "HDRExtra3", "type": "*composed", "value": "6", "mandatory": true},
-			{"tag": "HDRExtra2", "field_id": "HDRExtra2", "type": "*composed", "value": "6", "mandatory": true},
-			{"tag": "HDRExtra1", "field_id": "HDRExtra1", "type": "*composed", "value": "6", "mandatory": true},
+			{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~5", "mandatory": true},
+			{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~5", "mandatory": true},
+			{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "~6", "mandatory": true},
+			{"tag": "HDRExtra3", "field_id": "HDRExtra3", "type": "*composed", "value": "~6", "mandatory": true},
+			{"tag": "HDRExtra2", "field_id": "HDRExtra2", "type": "*composed", "value": "~6", "mandatory": true},
+			{"tag": "HDRExtra1", "field_id": "HDRExtra1", "type": "*composed", "value": "~6", "mandatory": true},
+		],
+	},
+	{
+ 		"id": "*CSVWithFilter1",								// identifier of the CDRC runner
+ 		"enabled": true,							// enable CDR client functionality		
+ 		"field_separator": ";",					
+ 		"cdr_in_dir": "/tmp/csvwithfilter1/csvit1/in",	// absolute path towards the directory where the CDRs are stored
+ 		"cdr_out_dir": "/tmp/csvwithfilter1/csvit1/out",	// absolute path towards the directory where processed CDRs will be moved
+ 		"cdr_source_id": "csvit1",			// free form field, tag identifying the source of the CDRs within CDRS database
+ 		"filters":["*string:3:1002"],		//filter Account to be 1002
+		"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},
+			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~0", "mandatory": true},
+			{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "~1", "mandatory": true},
+			{"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "*out", "mandatory": true},
+			{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~2", "mandatory": true},
+			{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "call", "mandatory": true},
+			{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~3", "mandatory": true},
+			{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "~3", "mandatory": true},
+			{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~4:s/0([1-9]\\d+)/+49${1}/", "mandatory": true},
+			{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~5", "mandatory": true},
+			{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~5", "mandatory": true},
+			{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "~6", "mandatory": true},
+			{"tag": "HDRExtra3", "field_id": "HDRExtra3", "type": "*composed", "value": "~6", "mandatory": true},
+			{"tag": "HDRExtra2", "field_id": "HDRExtra2", "type": "*composed", "value": "~6", "mandatory": true},
+			{"tag": "HDRExtra1", "field_id": "HDRExtra1", "type": "*composed", "value": "~6", "mandatory": true},
+		],
+	},
+	{
+ 		"id": "*CSVWithFilter2",								// identifier of the CDRC runner
+ 		"enabled": true,							// enable CDR client functionality		
+ 		"field_separator": ";",					
+ 		"cdr_in_dir": "/tmp/csvwithfilter2/csvit2/in",	// absolute path towards the directory where the CDRs are stored
+ 		"cdr_out_dir": "/tmp/csvwithfilter2/csvit2/out",	// absolute path towards the directory where processed CDRs will be moved
+ 		"cdr_source_id": "csvit2",			// free form field, tag identifying the source of the CDRs within CDRS database
+ 		"filters":["*string:3:1002","*string:1:*prepaid","*gte:6:70"],		//filter Account to be 1002 and RequestType *prepaid
+		"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},
+			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~0", "mandatory": true},
+			{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "~1", "mandatory": true},
+			{"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "*out", "mandatory": true},
+			{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~2", "mandatory": true},
+			{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "call", "mandatory": true},
+			{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~3", "mandatory": true},
+			{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "~3", "mandatory": true},
+			{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~4:s/0([1-9]\\d+)/+49${1}/", "mandatory": true},
+			{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~5", "mandatory": true},
+			{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~5", "mandatory": true},
+			{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "~6", "mandatory": true},
+			{"tag": "HDRExtra3", "field_id": "HDRExtra3", "type": "*composed", "value": "~6", "mandatory": true},
+			{"tag": "HDRExtra2", "field_id": "HDRExtra2", "type": "*composed", "value": "~6", "mandatory": true},
+			{"tag": "HDRExtra1", "field_id": "HDRExtra1", "type": "*composed", "value": "~6", "mandatory": true},
+		],
+	},
+	{
+ 		"id": "*CSVit4",								// identifier of the CDRC runner
+ 		"enabled": true,							// enable CDR client functionality		
+ 		"field_separator": ";",					
+ 		"cdr_in_dir": "/tmp/csvwithfilter3/csvit3/in",	// absolute path towards the directory where the CDRs are stored
+ 		"cdr_out_dir": "/tmp/csvwithfilter3/csvit3/out",	// absolute path towards the directory where processed CDRs will be moved
+ 		"cdr_source_id": "csvit4",			// free form field, tag identifying the source of the CDRs within CDRS database
+ 		"filters":["*string:1:*postpaid"],		//filter Account to be 1002
+		"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},
+			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~0", "mandatory": true},
+			{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "~1", "mandatory": true},
+			{"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "*out", "mandatory": true},
+			{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~2", "mandatory": true},
+			{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "call", "mandatory": true},
+			{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~3", "mandatory": true},
+			{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "~3", "mandatory": true},
+			{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~4:s/0([1-9]\\d+)/+49${1}/", "mandatory": true},
+			{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~5", "mandatory": true},
+			{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~5", "mandatory": true},
+			{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "~6", "mandatory": true},
+			{"tag": "HDRExtra3", "field_id": "HDRExtra3", "type": "*composed", "value": "~6", "mandatory": true},
+			{"tag": "HDRExtra2", "field_id": "HDRExtra2", "type": "*composed", "value": "~6", "mandatory": true},
+			{"tag": "HDRExtra1", "field_id": "HDRExtra1", "type": "*composed", "value": "~6", "mandatory": true},
+			{"tag": "RandomVal", "field_id": "RandomVal", "type": "*composed", "value": "*randomValue","filters":["*string:3:1001"]},
+		],
+	},
+	{
+ 		"id": "DifferentTenant",								// identifier of the CDRC runner
+ 		"enabled": true,							// enable CDR client functionality		
+ 		"field_separator": ";",					
+ 		"cdr_in_dir": "/tmp/csvwithfilter4/csvit4/in",	// absolute path towards the directory where the CDRs are stored
+ 		"cdr_out_dir": "/tmp/csvwithfilter4/csvit4/out",	// absolute path towards the directory where processed CDRs will be moved
+ 		"tenant": "~2",						// tenant used in filterS.Pass
+ 		"filters":["FLTR_CDRC_ACC"],		// if tenant is itsyscom.com will check if Account is 1001 and if tenant is cgrates.org will check if Account is 1002
+ 		"cdr_source_id": "diffTenant",			// free form field, tag identifying the source of the CDRs within CDRS database
+		"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},
+			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~0", "mandatory": true},
+			{"tag": "OriginHost", "field_id": "OriginHost", "type": "*composed", "value": "~10", "mandatory": true},
+			{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "~1", "mandatory": true},
+			{"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "*out", "mandatory": true},
+			{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~2", "mandatory": true},
+			{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "call", "mandatory": true},
+			{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~3", "mandatory": true},
+			{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "~3", "mandatory": true},
+			{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~4:s/0([1-9]\\d+)/+49${1}/", "mandatory": true},
+			{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~5", "mandatory": true},
+			{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~5", "mandatory": true},
+			{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "~6", "mandatory": true},
+			{"tag": "HDRExtra3", "field_id": "HDRExtra3", "type": "*composed", "value": "~6", "mandatory": true},
+			{"tag": "HDRExtra2", "field_id": "HDRExtra2", "type": "*composed", "value": "~6", "mandatory": true},
+			{"tag": "HDRExtra1", "field_id": "HDRExtra1", "type": "*composed", "value": "~6", "mandatory": true},
+			{"tag": "RandomVal", "field_id": "RandomVal", "type": "*composed", "value": "*randomValue","filters":["*string:3:1001"]},
 		],
 	},
 ],

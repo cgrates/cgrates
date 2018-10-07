@@ -40,21 +40,32 @@ type GeneralJsonCfg struct {
 	Response_cache_ttl   *string
 	Internal_ttl         *string
 	Locking_timeout      *string
+	Digest_separator     *string
+	Digest_equal         *string
 }
 
 // Listen config section
 type ListenJsonCfg struct {
-	Rpc_json *string
-	Rpc_gob  *string
-	Http     *string
+	Rpc_json               *string
+	Rpc_gob                *string
+	Http                   *string
+	Rpc_json_tls           *string
+	Rpc_gob_tls            *string
+	Http_tls               *string
+	Tls_server_certificate *string
+	Tls_server_key         *string
+	Tls_client_certificate *string
+	Tls_client_key         *string
 }
 
 // HTTP config section
 type HTTPJsonCfg struct {
-	Json_rpc_url   *string
-	Ws_url         *string
-	Use_basic_auth *bool
-	Auth_users     *map[string]string
+	Json_rpc_url        *string
+	Ws_url              *string
+	Freeswitch_cdrs_url *string
+	Http_Cdrs           *string
+	Use_basic_auth      *bool
+	Auth_users          *map[string]string
 }
 
 // Database config
@@ -70,11 +81,13 @@ type DbJsonCfg struct {
 	Conn_max_lifetime *int // Used only in case of storDb
 	Load_history_size *int // Used in case of dataDb to limit the length of the loads history
 	Cdrs_indexes      *[]string
+	Redis_sentinel    *string
 }
 
 // Filters config
 type FilterSJsonCfg struct {
-	Stats_conns *[]*HaPoolJsonCfg
+	Stats_conns     *[]*HaPoolJsonCfg
+	Indexed_selects *bool
 }
 
 // Rater config section
@@ -84,7 +97,6 @@ type RalsJsonCfg struct {
 	Cdrstats_conns              *[]*HaPoolJsonCfg
 	Stats_conns                 *[]*HaPoolJsonCfg
 	Pubsubs_conns               *[]*HaPoolJsonCfg
-	Attributes_conns            *[]*HaPoolJsonCfg
 	Aliases_conns               *[]*HaPoolJsonCfg
 	Users_conns                 *[]*HaPoolJsonCfg
 	Rp_subject_prefix_matching  *bool
@@ -94,7 +106,8 @@ type RalsJsonCfg struct {
 
 // Scheduler config section
 type SchedulerJsonCfg struct {
-	Enabled *bool
+	Enabled    *bool
+	Cdrs_conns *[]*HaPoolJsonCfg
 }
 
 // Cdrs config section
@@ -103,6 +116,7 @@ type CdrsJsonCfg struct {
 	Extra_fields          *[]string
 	Store_cdrs            *bool
 	Sessions_cost_retries *int
+	Chargers_conns        *[]*HaPoolJsonCfg
 	Rals_conns            *[]*HaPoolJsonCfg
 	Pubsubs_conns         *[]*HaPoolJsonCfg
 	Attributes_conns      *[]*HaPoolJsonCfg
@@ -134,6 +148,7 @@ type CdrFieldJsonCfg struct {
 	Tag                  *string
 	Type                 *string
 	Field_id             *string
+	Attribute_id         *string
 	Handler_id           *string
 	Value                *string
 	Append               *bool
@@ -142,6 +157,7 @@ type CdrFieldJsonCfg struct {
 	Padding              *string
 	Layout               *string
 	Field_filter         *string
+	Filters              *[]string
 	Mandatory            *bool
 	Cost_shift_digits    *int
 	Rounding_decimals    *int
@@ -149,21 +165,24 @@ type CdrFieldJsonCfg struct {
 	Mask_destinationd_id *string
 	Mask_length          *int
 	Break_on_success     *bool
+	New_branch           *bool
+	Blocker              *bool
 }
 
 // Cdre config section
 type CdreJsonCfg struct {
 	Export_format         *string
 	Export_path           *string
-	Cdr_filter            *string
+	Filters               *[]string
+	Tenant                *string
 	Synchronous           *bool
 	Attempts              *int
 	Field_separator       *string
 	Usage_multiply_factor *map[string]float64
 	Cost_multiply_factor  *float64
-	Header_fields         *[]*CdrFieldJsonCfg
-	Content_fields        *[]*CdrFieldJsonCfg
-	Trailer_fields        *[]*CdrFieldJsonCfg
+	Header_fields         *[]*FcTemplateJsonCfg
+	Content_fields        *[]*FcTemplateJsonCfg
+	Trailer_fields        *[]*FcTemplateJsonCfg
 }
 
 // Cdrc config section
@@ -182,23 +201,27 @@ type CdrcJsonCfg struct {
 	Failed_calls_prefix         *string
 	Cdr_path                    *string
 	Cdr_source_id               *string
-	Cdr_filter                  *string
+	Filters                     *[]string
+	Tenant                      *string
 	Continue_on_success         *bool
 	Max_open_files              *int
 	Partial_record_cache        *string
 	Partial_cache_expiry_action *string
-	Header_fields               *[]*CdrFieldJsonCfg
-	Content_fields              *[]*CdrFieldJsonCfg
-	Trailer_fields              *[]*CdrFieldJsonCfg
-	Cache_dump_fields           *[]*CdrFieldJsonCfg
+	Header_fields               *[]*FcTemplateJsonCfg
+	Content_fields              *[]*FcTemplateJsonCfg
+	Trailer_fields              *[]*FcTemplateJsonCfg
+	Cache_dump_fields           *[]*FcTemplateJsonCfg
 }
 
 // SM-Generic config section
 type SessionSJsonCfg struct {
 	Enabled                   *bool
 	Listen_bijson             *string
+	Chargers_conns            *[]*HaPoolJsonCfg
 	Rals_conns                *[]*HaPoolJsonCfg
 	Resources_conns           *[]*HaPoolJsonCfg
+	Thresholds_conns          *[]*HaPoolJsonCfg
+	Stats_conns               *[]*HaPoolJsonCfg
 	Suppliers_conns           *[]*HaPoolJsonCfg
 	Cdrs_conns                *[]*HaPoolJsonCfg
 	Session_replication_conns *[]*HaPoolJsonCfg
@@ -212,6 +235,7 @@ type SessionSJsonCfg struct {
 	Session_ttl_usage         *string
 	Session_indexes           *[]string
 	Client_protocol           *float64
+	Channel_sync_interval     *string
 }
 
 // FreeSWITCHAgent config section
@@ -225,7 +249,6 @@ type FreeswitchAgentJsonCfg struct {
 	//Low_balance_ann_file   *string
 	Empty_balance_context  *string
 	Empty_balance_ann_file *string
-	Channel_sync_interval  *string
 	Max_wait_connection    *string
 	Event_socket_conns     *[]*FsConnJsonCfg
 }
@@ -235,6 +258,7 @@ type FsConnJsonCfg struct {
 	Address    *string
 	Password   *string
 	Reconnects *int
+	Alias      *string
 }
 
 // Represents one connection instance towards a rater/cdrs server
@@ -304,59 +328,74 @@ type OsipsConnJsonCfg struct {
 
 // DiameterAgent configuration
 type DiameterAgentJsonCfg struct {
-	Enabled              *bool             // enables the diameter agent: <true|false>
-	Listen               *string           // address where to listen for diameter requests <x.y.z.y:1234>
-	Dictionaries_dir     *string           // path towards additional dictionaries
-	Sessions_conns       *[]*HaPoolJsonCfg // Connections towards generic SM
-	Pubsubs_conns        *[]*HaPoolJsonCfg // connection towards pubsubs
-	Create_cdr           *bool
-	Cdr_requires_session *bool
-	Debit_interval       *string
-	Timezone             *string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-	Origin_host          *string
-	Origin_realm         *string
-	Vendor_id            *int
-	Product_name         *string
-	Request_processors   *[]*DARequestProcessorJsnCfg
+	Enabled            *bool             // enables the diameter agent: <true|false>
+	Listen             *string           // address where to listen for diameter requests <x.y.z.y:1234>
+	Dictionaries_path  *string           // path towards additional dictionaries
+	Sessions_conns     *[]*HaPoolJsonCfg // Connections towards SessionS
+	Origin_host        *string
+	Origin_realm       *string
+	Vendor_id          *int
+	Product_name       *string
+	Templates          map[string][]*FcTemplateJsonCfg
+	Request_processors *[]*DARequestProcessorJsnCfg
 }
 
 // One Diameter request processor configuration
 type DARequestProcessorJsnCfg struct {
 	Id                  *string
-	Dry_run             *bool
-	Publish_event       *bool
-	Request_filter      *string
+	Tenant              *string
+	Filters             *[]string
 	Flags               *[]string
+	Timezone            *string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 	Continue_on_success *bool
-	Append_cca          *bool
-	CCR_fields          *[]*CdrFieldJsonCfg
-	CCA_fields          *[]*CdrFieldJsonCfg
+	Request_fields      *[]*FcTemplateJsonCfg
+	Reply_fields        *[]*FcTemplateJsonCfg
 }
 
 // Radius Agent configuration section
 type RadiusAgentJsonCfg struct {
-	Enabled              *bool
-	Listen_net           *string
-	Listen_auth          *string
-	Listen_acct          *string
-	Client_secrets       *map[string]string
-	Client_dictionaries  *map[string]string
-	Sessions_conns       *[]*HaPoolJsonCfg
-	Create_cdr           *bool
-	Cdr_requires_session *bool
-	Timezone             *string
-	Request_processors   *[]*RAReqProcessorJsnCfg
+	Enabled             *bool
+	Listen_net          *string
+	Listen_auth         *string
+	Listen_acct         *string
+	Client_secrets      *map[string]string
+	Client_dictionaries *map[string]string
+	Sessions_conns      *[]*HaPoolJsonCfg
+	Tenant              *string
+	Timezone            *string
+	Request_processors  *[]*RAReqProcessorJsnCfg
 }
 
 type RAReqProcessorJsnCfg struct {
 	Id                  *string
-	Dry_run             *bool
-	Request_filter      *string
+	Filters             *[]string
+	Tenant              *string
+	Timezone            *string
 	Flags               *[]string
 	Continue_on_success *bool
-	Append_reply        *bool
-	Request_fields      *[]*CdrFieldJsonCfg
-	Reply_fields        *[]*CdrFieldJsonCfg
+	Request_fields      *[]*FcTemplateJsonCfg
+	Reply_fields        *[]*FcTemplateJsonCfg
+}
+
+// Conecto Agent configuration section
+type HttpAgentJsonCfg struct {
+	Id                 *string
+	Url                *string
+	Sessions_conns     *[]*HaPoolJsonCfg
+	Request_payload    *string
+	Reply_payload      *string
+	Request_processors *[]*HttpAgentProcessorJsnCfg
+}
+
+type HttpAgentProcessorJsnCfg struct {
+	Id                  *string
+	Filters             *[]string
+	Tenant              *string
+	Timezone            *string
+	Flags               *[]string
+	Continue_on_success *bool
+	Request_fields      *[]*FcTemplateJsonCfg
+	Reply_fields        *[]*FcTemplateJsonCfg
 }
 
 // History server config section
@@ -385,6 +424,15 @@ type UserServJsonCfg struct {
 // Attribute service config section
 type AttributeSJsonCfg struct {
 	Enabled               *bool
+	String_indexed_fields *[]string
+	Prefix_indexed_fields *[]string
+	Process_runs          *int
+}
+
+// ChargerSJsonCfg service config section
+type ChargerSJsonCfg struct {
+	Enabled               *bool
+	Attributes_conns      *[]*HaPoolJsonCfg
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
 }
@@ -420,9 +468,30 @@ type SupplierSJsonCfg struct {
 	Enabled               *bool
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
+	Attributes_conns      *[]*HaPoolJsonCfg
 	Rals_conns            *[]*HaPoolJsonCfg
 	Resources_conns       *[]*HaPoolJsonCfg
 	Stats_conns           *[]*HaPoolJsonCfg
+}
+
+type LoaderJsonDataType struct {
+	Type      *string
+	File_name *string
+	Fields    *[]*FcTemplateJsonCfg
+}
+
+type LoaderJsonCfg struct {
+	ID              *string
+	Enabled         *bool
+	Tenant          *string
+	Dry_run         *bool
+	Run_delay       *int
+	Lock_filename   *string
+	Caches_conns    *[]*HaPoolJsonCfg
+	Field_separator *string
+	Tp_in_dir       *string
+	Tp_out_dir      *string
+	Data            *[]*LoaderJsonDataType
 }
 
 // Mailer config section
@@ -461,4 +530,66 @@ type SureTaxJsonCfg struct {
 	Trans_type_code         *string
 	Sales_type_code         *string
 	Tax_exemption_code_list *string
+}
+
+// Dispatcher service config section
+type DispatcherSJsonCfg struct {
+	Enabled              *bool
+	Rals_conns           *[]*HaPoolJsonCfg
+	Resources_conns      *[]*HaPoolJsonCfg
+	Thresholds_conns     *[]*HaPoolJsonCfg
+	Stats_conns          *[]*HaPoolJsonCfg
+	Suppliers_conns      *[]*HaPoolJsonCfg
+	Attributes_conns     *[]*HaPoolJsonCfg
+	Sessions_conns       *[]*HaPoolJsonCfg
+	Chargers_conns       *[]*HaPoolJsonCfg
+	Dispatching_strategy *string
+}
+
+type LoaderCfgJson struct {
+	Tpid            *string
+	Data_path       *string
+	Disable_reverse *bool
+	Caches_conns    *[]*HaPoolJsonCfg
+	Scheduler_conns *[]*HaPoolJsonCfg
+}
+
+type MigratorCfgJson struct {
+	Out_dataDB_type           *string
+	Out_dataDB_host           *string
+	Out_dataDB_port           *string
+	Out_dataDB_name           *string
+	Out_dataDB_user           *string
+	Out_dataDB_password       *string
+	Out_dataDB_encoding       *string
+	Out_dataDB_redis_sentinel *string
+	Out_storDB_type           *string
+	Out_storDB_host           *string
+	Out_storDB_port           *string
+	Out_storDB_name           *string
+	Out_storDB_user           *string
+	Out_storDB_password       *string
+}
+
+type FcTemplateJsonCfg struct {
+	Tag                  *string
+	Type                 *string
+	Field_id             *string
+	Attribute_id         *string
+	Filters              *[]string
+	Value                *string
+	Width                *int
+	Strip                *string
+	Padding              *string
+	Mandatory            *bool
+	New_branch           *bool
+	Timezone             *string
+	Blocker              *bool
+	Break_on_success     *bool
+	Handler_id           *string
+	Layout               *string
+	Cost_shift_digits    *int
+	Rounding_decimals    *int
+	Mask_destinationd_id *string
+	Mask_length          *int
 }

@@ -26,52 +26,35 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewMigrator(dmIN *engine.DataManager, dmOut *engine.DataManager, dataDBType, dataDBEncoding string,
-	storDB engine.Storage, storDBType string, oldDataDB MigratorDataDB, oldDataDBType, oldDataDBEncoding string,
-	oldStorDB engine.Storage, oldStorDBType string, dryRun bool, sameDataDB bool, sameStorDB bool, datadb_versions bool, stordb_versions bool) (m *Migrator, err error) {
-	var mrshlr engine.Marshaler
-	var oldmrshlr engine.Marshaler
-	if dataDBEncoding == utils.MSGPACK {
-		mrshlr = engine.NewCodecMsgpackMarshaler()
-	} else if dataDBEncoding == utils.JSON {
-		mrshlr = new(engine.JSONMarshaler)
-	} else if oldDataDBEncoding == utils.MSGPACK {
-		oldmrshlr = engine.NewCodecMsgpackMarshaler()
-	} else if oldDataDBEncoding == utils.JSON {
-		oldmrshlr = new(engine.JSONMarshaler)
-	}
+func NewMigrator(
+	dmIN MigratorDataDB,
+	dmOut MigratorDataDB,
+	storDBIn MigratorStorDB,
+	storDBOut MigratorStorDB,
+	dryRun bool,
+	sameDataDB bool,
+	sameStorDB bool) (m *Migrator, err error) {
 	stats := make(map[string]int)
-
 	m = &Migrator{
-		dmOut: dmOut, dataDBType: dataDBType,
-		storDB: storDB, storDBType: storDBType,
-		mrshlr: mrshlr, dmIN: dmIN,
-		oldDataDB: oldDataDB, oldDataDBType: oldDataDBType,
-		oldStorDB: oldStorDB, oldStorDBType: oldStorDBType,
-		oldmrshlr: oldmrshlr, dryRun: dryRun, sameDataDB: sameDataDB, sameStorDB: sameStorDB,
-		datadb_versions: datadb_versions, stordb_versions: stordb_versions, stats: stats,
+		dmOut:     dmOut,
+		dmIN:      dmIN,
+		storDBIn:  storDBIn,
+		storDBOut: storDBOut,
+		dryRun:    dryRun, sameDataDB: sameDataDB, sameStorDB: sameStorDB,
+		stats: stats,
 	}
 	return m, err
 }
 
 type Migrator struct {
-	dmIN            *engine.DataManager //oldatadb
-	dmOut           *engine.DataManager
-	dataDBType      string
-	storDB          engine.Storage
-	storDBType      string
-	mrshlr          engine.Marshaler
-	oldDataDB       MigratorDataDB
-	oldDataDBType   string
-	oldStorDB       engine.Storage
-	oldStorDBType   string
-	oldmrshlr       engine.Marshaler
-	dryRun          bool
-	sameDataDB      bool
-	sameStorDB      bool
-	datadb_versions bool
-	stordb_versions bool
-	stats           map[string]int
+	dmIN       MigratorDataDB
+	dmOut      MigratorDataDB
+	storDBIn   MigratorStorDB
+	storDBOut  MigratorStorDB
+	dryRun     bool
+	sameDataDB bool
+	sameStorDB bool
+	stats      map[string]int
 }
 
 // Migrate implements the tasks to migrate, used as a dispatcher to the individual methods
@@ -86,39 +69,29 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 				fmt.Sprintf("task <%s> is not a supported migration task", taskID))
 		case utils.MetaSetVersions:
 			if m.dryRun != true {
-				if err := m.storDB.SetVersions(engine.CurrentDBVersions(m.storDBType), true); err != nil {
+				if err := m.dmOut.DataManager().DataDB().SetVersions(
+					engine.CurrentDBVersions(m.dmOut.DataManager().DataDB().GetStorageType()), true); err != nil {
 					return utils.NewCGRError(utils.Migrator,
 						utils.ServerErrorCaps,
 						err.Error(),
 						fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error())), nil
 				}
-				if err := m.dmOut.DataDB().SetVersions(engine.CurrentDBVersions(m.dataDBType), true); err != nil {
+				if err := m.storDBOut.StorDB().SetVersions(
+					engine.CurrentDBVersions(m.storDBOut.StorDB().GetStorageType()), true); err != nil {
 					return utils.NewCGRError(utils.Migrator,
 						utils.ServerErrorCaps,
 						err.Error(),
 						fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error())), nil
-				}
-				if m.datadb_versions {
-					vrs, err := m.dmOut.DataDB().GetVersions(utils.TBLVersions)
-					if err != nil {
-						return err, nil
-					}
-					log.Print("After migrate, DataDB versions :", vrs)
-				}
-				if m.stordb_versions {
-					vrs, err := m.storDB.GetVersions(utils.TBLVersions)
-					if err != nil {
-						return err, nil
-					}
-					log.Print("After migrate, StorDB versions :", vrs)
 				}
 			} else {
 				log.Print("Cannot dryRun SetVersions!")
 			}
+		case utils.MetaCDRs:
+			err = m.migrateCDRs()
 		case utils.MetaSessionsCosts:
-			err = m.migrateSessionsCosts()
-		case utils.MetaCostDetails:
-			err = m.migrateCostDetails()
+			err = m.migrateSessionSCosts()
+		// case utils.MetaCostDetails:
+		// 	err = m.migrateCostDetails()
 		case utils.MetaAccounts:
 			err = m.migrateAccounts()
 		case utils.MetaActionPlans:
@@ -166,7 +139,9 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			err = m.migrateDerivedChargers()
 		case utils.MetaSuppliers:
 			err = m.migrateSupplierProfiles()
-			//TPS
+		case utils.MetaChargers:
+			err = m.migrateChargers()
+			//TPs
 		case utils.MetaTpRatingPlans:
 			err = m.migrateTPratingplans()
 		case utils.MetaTpFilters:
@@ -207,6 +182,8 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			err = m.migrateTPcdrstats()
 		case utils.MetaTpDestinations:
 			err = m.migrateTPDestinations()
+		case utils.MetaTpChargers:
+			err = m.migrateTPChargers()
 			//DATADB ALL
 		case utils.MetaDataDB:
 			if err := m.migrateAccounts(); err != nil {

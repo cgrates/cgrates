@@ -21,11 +21,11 @@ import (
 	"bytes"
 	"path"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
-	"github.com/ChrisTrenkamp/goxpath"
-	"github.com/ChrisTrenkamp/goxpath/tree/xmltree"
+	"github.com/antchfx/xmlquery"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -166,25 +166,23 @@ var cdrXmlBroadsoft = `<?xml version="1.0" encoding="ISO-8859-1"?>
   </cdrData>
 </broadWorksCDR>`
 
-func optsNotStrict(s *xmltree.ParseOptions) {
-	s.Strict = false
-}
-
 func TestXMLElementText(t *testing.T) {
-	xp := goxpath.MustParse(path.Join("/broadWorksCDR/cdrData/"))
-	xmlTree := xmltree.MustParseXML(bytes.NewBufferString(cdrXmlBroadsoft), optsNotStrict)
-	cdrs := goxpath.MustExec(xp, xmlTree, nil)
+	doc, err := xmlquery.Parse(strings.NewReader(cdrXmlBroadsoft))
+	if err != nil {
+		t.Error(err)
+	}
+	cdrs := xmlquery.Find(doc, path.Join("/broadWorksCDR/cdrData/"))
 	cdrWithoutUserNr := cdrs[0]
-	if _, err := elementText(cdrWithoutUserNr, "cdrData/basicModule/userNumber"); err != utils.ErrNotFound {
+	if _, err := elementText(cdrWithoutUserNr, "basicModule/userNumber"); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	cdrWithUser := cdrs[1]
-	if val, err := elementText(cdrWithUser, "cdrData/basicModule/userNumber"); err != nil {
+	if val, err := elementText(cdrWithUser, "basicModule/userNumber"); err != nil {
 		t.Error(err)
 	} else if val != "1001" {
 		t.Errorf("Expecting: 1001, received: %s", val)
 	}
-	if val, err := elementText(cdrWithUser, "/cdrData/centrexModule/locationList/locationInformation/locationType"); err != nil {
+	if val, err := elementText(cdrWithUser, "centrexModule/locationList/locationInformation/locationType"); err != nil {
 		t.Error(err)
 	} else if val != "Primary Device" {
 		t.Errorf("Expecting: <Primary Device>, received: <%s>", val)
@@ -192,11 +190,15 @@ func TestXMLElementText(t *testing.T) {
 }
 
 func TestXMLHandlerSubstractUsage(t *testing.T) {
-	xp := goxpath.MustParse(path.Join("/broadWorksCDR/cdrData/"))
-	xmlTree := xmltree.MustParseXML(bytes.NewBufferString(cdrXmlBroadsoft), optsNotStrict)
-	cdrs := goxpath.MustExec(xp, xmlTree, nil)
+	doc, err := xmlquery.Parse(strings.NewReader(cdrXmlBroadsoft))
+	if err != nil {
+		t.Error(err)
+	}
+
+	cdrs := xmlquery.Find(doc, path.Join("/broadWorksCDR/cdrData/"))
 	cdrWithUsage := cdrs[1]
-	if usage, err := handlerSubstractUsage(cdrWithUsage, utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>releaseTime;^|;broadWorksCDR>cdrData>basicModule>answerTime", utils.INFIELD_SEP),
+	if usage, err := handlerSubstractUsage(cdrWithUsage,
+		config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.releaseTime;|;~broadWorksCDR.cdrData.basicModule.answerTime", true),
 		utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}), "UTC"); err != nil {
 		t.Error(err)
 	} else if usage != time.Duration(13483000000) {
@@ -213,36 +215,34 @@ func TestXMLRPProcess(t *testing.T) {
 			DataUsageMultiplyFactor: 1024,
 			CDRPath:                 utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}),
 			CdrSourceId:             "TestXML",
-			CdrFilter:               utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>headerModule>type(Normal)", utils.INFIELD_SEP),
-			ContentFields: []*config.CfgCdrField{
-				&config.CfgCdrField{Tag: "TOR", Type: utils.META_COMPOSED, FieldId: utils.TOR,
-					Value: utils.ParseRSRFieldsMustCompile("^*voice", utils.INFIELD_SEP), Mandatory: true},
-				&config.CfgCdrField{Tag: "OriginID", Type: utils.META_COMPOSED, FieldId: utils.OriginID,
-					Value: utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>localCallId", utils.INFIELD_SEP), Mandatory: true},
-				&config.CfgCdrField{Tag: "RequestType", Type: utils.META_COMPOSED, FieldId: utils.RequestType,
-					Value: utils.ParseRSRFieldsMustCompile("^*rated", utils.INFIELD_SEP), Mandatory: true},
-				&config.CfgCdrField{Tag: "Tenant", Type: utils.META_COMPOSED, FieldId: utils.Tenant,
-					Value: utils.ParseRSRFieldsMustCompile("~broadWorksCDR>cdrData>basicModule>userId:s/.*@(.*)/${1}/", utils.INFIELD_SEP), Mandatory: true},
-				&config.CfgCdrField{Tag: "Category", Type: utils.META_COMPOSED, FieldId: utils.Category,
-					Value: utils.ParseRSRFieldsMustCompile("^call", utils.INFIELD_SEP), Mandatory: true},
-				&config.CfgCdrField{Tag: "Account", Type: utils.META_COMPOSED, FieldId: utils.Account,
-					Value: utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>userNumber", utils.INFIELD_SEP), Mandatory: true},
-				&config.CfgCdrField{Tag: "Destination", Type: utils.META_COMPOSED, FieldId: utils.Destination,
-					Value: utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>calledNumber", utils.INFIELD_SEP), Mandatory: true},
-				&config.CfgCdrField{Tag: "SetupTime", Type: utils.META_COMPOSED, FieldId: utils.SetupTime,
-					Value: utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>startTime", utils.INFIELD_SEP), Mandatory: true},
-				&config.CfgCdrField{Tag: "AnswerTime", Type: utils.META_COMPOSED, FieldId: utils.AnswerTime,
-					Value: utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>answerTime", utils.INFIELD_SEP), Mandatory: true},
-				&config.CfgCdrField{Tag: "Usage", Type: utils.META_HANDLER,
+			ContentFields: []*config.FCTemplate{
+				&config.FCTemplate{Tag: "TOR", Type: utils.META_COMPOSED, FieldId: utils.ToR,
+					Value: config.NewRSRParsersMustCompile("*voice", true), Mandatory: true},
+				&config.FCTemplate{Tag: "OriginID", Type: utils.META_COMPOSED, FieldId: utils.OriginID,
+					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.localCallId", true), Mandatory: true},
+				&config.FCTemplate{Tag: "RequestType", Type: utils.META_COMPOSED, FieldId: utils.RequestType,
+					Value: config.NewRSRParsersMustCompile("*rated", true), Mandatory: true},
+				&config.FCTemplate{Tag: "Tenant", Type: utils.META_COMPOSED, FieldId: utils.Tenant,
+					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.userId:s/.*@(.*)/${1}/", true), Mandatory: true},
+				&config.FCTemplate{Tag: "Category", Type: utils.META_COMPOSED, FieldId: utils.Category,
+					Value: config.NewRSRParsersMustCompile("call", true), Mandatory: true},
+				&config.FCTemplate{Tag: "Account", Type: utils.META_COMPOSED, FieldId: utils.Account,
+					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.userNumber", true), Mandatory: true},
+				&config.FCTemplate{Tag: "Destination", Type: utils.META_COMPOSED, FieldId: utils.Destination,
+					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.calledNumber", true), Mandatory: true},
+				&config.FCTemplate{Tag: "SetupTime", Type: utils.META_COMPOSED, FieldId: utils.SetupTime,
+					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.startTime", true), Mandatory: true},
+				&config.FCTemplate{Tag: "AnswerTime", Type: utils.META_COMPOSED, FieldId: utils.AnswerTime,
+					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.answerTime", true), Mandatory: true},
+				&config.FCTemplate{Tag: "Usage", Type: utils.META_HANDLER,
 					FieldId: utils.Usage, HandlerId: utils.HandlerSubstractUsage,
-					Value: utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>releaseTime;^|;broadWorksCDR>cdrData>basicModule>answerTime",
-						utils.INFIELD_SEP), Mandatory: true},
-				&config.CfgCdrField{Tag: "UsageSeconds", Type: utils.META_COMPOSED, FieldId: utils.Usage,
-					Value: utils.ParseRSRFieldsMustCompile("^s", utils.INFIELD_SEP), Mandatory: true},
+					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.releaseTime;|;~broadWorksCDR.cdrData.basicModule.answerTime",
+						true), Mandatory: true},
 			},
 		},
 	}
-	xmlRP, err := NewXMLRecordsProcessor(bytes.NewBufferString(cdrXmlBroadsoft), utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}), "UTC", true, cdrcCfgs)
+	xmlRP, err := NewXMLRecordsProcessor(bytes.NewBufferString(cdrXmlBroadsoft),
+		utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}), "UTC", true, cdrcCfgs, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -268,5 +268,404 @@ func TestXMLRPProcess(t *testing.T) {
 	}
 	if !reflect.DeepEqual(expectedCDRs, cdrs) {
 		t.Errorf("Expecting: %+v\n, received: %+v\n", expectedCDRs, cdrs)
+	}
+}
+
+func TestXMLRPProcessWithNewFilters(t *testing.T) {
+	cdrcCfgs := []*config.CdrcConfig{
+		&config.CdrcConfig{
+			ID:                      "XMLWithFilters",
+			Enabled:                 true,
+			CdrFormat:               "xml",
+			DataUsageMultiplyFactor: 1024,
+			CDRPath:                 utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}),
+			CdrSourceId:             "XMLWithFilters",
+			Filters:                 []string{"*string:broadWorksCDR.cdrData.headerModule.type:Normal"},
+			ContentFields: []*config.FCTemplate{
+				&config.FCTemplate{Tag: "TOR", Type: utils.META_COMPOSED, FieldId: utils.ToR,
+					Value: config.NewRSRParsersMustCompile("*voice", true), Mandatory: true},
+				&config.FCTemplate{Tag: "OriginID", Type: utils.META_COMPOSED, FieldId: utils.OriginID,
+					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.localCallId", true), Mandatory: true},
+				&config.FCTemplate{Tag: "RequestType", Type: utils.META_COMPOSED, FieldId: utils.RequestType,
+					Value: config.NewRSRParsersMustCompile("*rated", true), Mandatory: true},
+				&config.FCTemplate{Tag: "Tenant", Type: utils.META_COMPOSED, FieldId: utils.Tenant,
+					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.userId:s/.*@(.*)/${1}/", true), Mandatory: true},
+				&config.FCTemplate{Tag: "Category", Type: utils.META_COMPOSED, FieldId: utils.Category,
+					Value: config.NewRSRParsersMustCompile("call", true), Mandatory: true},
+				&config.FCTemplate{Tag: "Account", Type: utils.META_COMPOSED, FieldId: utils.Account,
+					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.userNumber", true), Mandatory: true},
+				&config.FCTemplate{Tag: "Destination", Type: utils.META_COMPOSED, FieldId: utils.Destination,
+					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.calledNumber", true), Mandatory: true},
+				&config.FCTemplate{Tag: "SetupTime", Type: utils.META_COMPOSED, FieldId: utils.SetupTime,
+					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.startTime", true), Mandatory: true},
+				&config.FCTemplate{Tag: "AnswerTime", Type: utils.META_COMPOSED, FieldId: utils.AnswerTime,
+					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.answerTime", true), Mandatory: true},
+				&config.FCTemplate{Tag: "Usage", Type: utils.META_HANDLER,
+					FieldId: utils.Usage, HandlerId: utils.HandlerSubstractUsage,
+					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.releaseTime;|;~broadWorksCDR.cdrData.basicModule.answerTime",
+						true), Mandatory: true},
+			},
+		},
+	}
+	data, _ := engine.NewMapStorage()
+	defaultCfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	xmlRP, err := NewXMLRecordsProcessor(bytes.NewBufferString(cdrXmlBroadsoft),
+		utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}), "UTC", true,
+		cdrcCfgs, engine.NewFilterS(defaultCfg, nil, engine.NewDataManager(data)))
+	if err != nil {
+		t.Error(err)
+	}
+	var cdrs []*engine.CDR
+	for i := 0; i < 4; i++ {
+		cdrs, err = xmlRP.ProcessNextRecord()
+		if i == 1 { // Take second CDR since the first one cannot be processed
+			break
+		}
+	}
+	if err != nil {
+		t.Error(err)
+	}
+	expectedCDRs := []*engine.CDR{
+		&engine.CDR{CGRID: "1f045359a0784d15e051d7e41ae30132b139d714",
+			OriginHost: "0.0.0.0", Source: "XMLWithFilters", OriginID: "25160047719:0",
+			ToR: "*voice", RequestType: "*rated", Tenant: "cgrates.org",
+			Category: "call", Account: "1001", Destination: "+4986517174963",
+			SetupTime:   time.Date(2016, 4, 19, 21, 0, 5, 247000000, time.UTC),
+			AnswerTime:  time.Date(2016, 4, 19, 21, 0, 6, 813000000, time.UTC),
+			Usage:       time.Duration(13483000000),
+			ExtraFields: map[string]string{}, Cost: -1},
+	}
+	if !reflect.DeepEqual(expectedCDRs, cdrs) {
+		t.Errorf("Expecting: %+v\n, received: %+v\n", expectedCDRs, cdrs)
+	}
+}
+
+var xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
+<File xmlns="http://www.metaswitch.com/cfs/billing/V1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" compatibility="9">
+	<FileHeader seqnum="169">
+		<EquipmentType>Metaswitch CFS</EquipmentType>
+		<EquipmentId></EquipmentId>
+		<CreateTime>1510225200002</CreateTime>
+	</FileHeader>
+	<CDRs>
+		<Call seqnum="0000000001" error="no" longcall="false" testcall="false" class="0" operator="false" correlator="397828983391" connected="false">
+			<CallType>National</CallType>
+			<Features/>
+			<ReleasingParty>Orig</ReleasingParty>
+			<ReleaseReason type="q850" loc="u">19</ReleaseReason>
+			<ReleaseReason type="sip">480</ReleaseReason>
+			<ReleaseReason type="internal">No answer</ReleaseReason>
+			<InternalIndex>223007622</InternalIndex>
+			<OrigParty xsi:type="BusinessLinePartyType" subscribergroup="Subscribers in Guernsey, NJ" billingtype="flat rate" privacy="false" cpc="normal" ani-ii="00">
+				<SubscriberAddr type="e164">+27110493421</SubscriberAddr>
+				<CallingPartyAddr type="e164">+27110493421</CallingPartyAddr>
+				<ChargeAddr type="e164">+27110493421</ChargeAddr>
+				<BusinessGroupName>Ro_test</BusinessGroupName>
+				<SIPCallId>0gQAAC8WAAACBAAALxYAAD57SAEV7ekv/OSKkO7qmD82OmbfHO+Z7wIZJkXdCv8z@10.170.248.200</SIPCallId>
+			</OrigParty>
+			<TermParty xsi:type="NetworkTrunkPartyType">
+				<TrunkGroup type="sip" trunkname="IMS Core">
+					<TrunkGroupId>1</TrunkGroupId>
+					<TrunkMemberId>0</TrunkMemberId>
+				</TrunkGroup>
+				<SIPCallId>8824071D@10.170.248.140</SIPCallId>
+				<Reason type="q850">19</Reason>
+				<Reason type="sip">480</Reason>
+			</TermParty>
+			<RoutingInfo>
+				<RequestedAddr type="unknown">0763371551</RequestedAddr>
+				<DestAddr type="e164">+270763371551</DestAddr>
+				<RoutedAddr type="national">0763371551</RoutedAddr>
+				<CallingPartyRoutedAddr type="national">110493421</CallingPartyRoutedAddr>
+				<CallingPartyOrigAddr type="national">110493421</CallingPartyOrigAddr>
+			</RoutingInfo>
+			<CarrierSelectInfo>
+				<CarrierOperatorInvolved>False</CarrierOperatorInvolved>
+				<SelectionMethod>NetworkDefault</SelectionMethod>
+				<NetworkId>0</NetworkId>
+			</CarrierSelectInfo>
+			<SignalingInfo>
+				<MediaCapabilityRequested>Speech</MediaCapabilityRequested>
+				<PChargingVector>
+					<icidvalue>13442698e525ad2c21251f76479ab2b4</icidvalue>
+					<origioi>voice.lab.liquidtelecom.net</origioi>
+				</PChargingVector>
+			</SignalingInfo>
+			<IcSeizeTime>1510225513055</IcSeizeTime>
+			<OgSeizeTime>1510225513304</OgSeizeTime>
+			<RingingTime>1510225514836</RingingTime>
+			<ConnectTime/>
+			<DisconnectTime>1510225516981</DisconnectTime>
+			<ReleaseTime>1510225516981</ReleaseTime>
+			<CompleteTime>1510225516981</CompleteTime>
+		</Call>
+		<Call seqnum="0000000002" error="no" longcall="false" testcall="false" class="0" operator="false" correlator="402123969565" connected="true">
+			<CallType>Premium</CallType>
+			<Features/>
+			<ReleasingParty>Orig</ReleasingParty>
+			<ReleaseReason type="q850" loc="u">16</ReleaseReason>
+			<ReleaseReason type="internal">No error</ReleaseReason>
+			<InternalIndex>223007623</InternalIndex>
+			<OrigParty xsi:type="BusinessLinePartyType" subscribergroup="Subscribers in Guernsey, NJ" billingtype="flat rate" privacy="false" cpc="normal" ani-ii="00">
+				<SubscriberAddr type="e164">+27110493421</SubscriberAddr>
+				<CallingPartyAddr type="e164">+27110493421</CallingPartyAddr>
+				<ChargeAddr type="e164">+27110493421</ChargeAddr>
+				<BusinessGroupName>Ro_test</BusinessGroupName>
+				<SIPCallId>0gQAAC8WAAACBAAALxYAAPkyWDO29Do1SyxNi5UV71mJYEIEkfNa9wCFCCjY2asU@10.170.248.200</SIPCallId>
+			</OrigParty>
+			<TermParty xsi:type="NetworkTrunkPartyType">
+				<TrunkGroup type="sip" trunkname="IMS Core">
+					<TrunkGroupId>1</TrunkGroupId>
+					<TrunkMemberId>0</TrunkMemberId>
+				</TrunkGroup>
+				<SIPCallId>8E450FA1@10.170.248.140</SIPCallId>
+			</TermParty>
+			<RoutingInfo>
+				<RequestedAddr type="unknown">0843073451</RequestedAddr>
+				<DestAddr type="e164">+270843073451</DestAddr>
+				<RoutedAddr type="national">0843073451</RoutedAddr>
+				<CallingPartyRoutedAddr type="national">110493421</CallingPartyRoutedAddr>
+				<CallingPartyOrigAddr type="national">110493421</CallingPartyOrigAddr>
+			</RoutingInfo>
+			<CarrierSelectInfo>
+				<CarrierOperatorInvolved>False</CarrierOperatorInvolved>
+				<SelectionMethod>NetworkDefault</SelectionMethod>
+				<NetworkId>0</NetworkId>
+			</CarrierSelectInfo>
+			<SignalingInfo>
+				<MediaCapabilityRequested>Speech</MediaCapabilityRequested>
+				<PChargingVector>
+					<icidvalue>46d7974398c2671016afccc3f2c428c7</icidvalue>
+					<origioi>voice.lab.liquidtelecom.net</origioi>
+				</PChargingVector>
+			</SignalingInfo>
+			<IcSeizeTime>1510225531933</IcSeizeTime>
+			<OgSeizeTime>1510225532183</OgSeizeTime>
+			<RingingTime>1510225534973</RingingTime>
+			<ConnectTime>1510225539364</ConnectTime>
+			<DisconnectTime>1510225593101</DisconnectTime>
+			<ReleaseTime>1510225593101</ReleaseTime>
+			<CompleteTime>1510225593101</CompleteTime>
+		</Call>
+		<Call seqnum="0000000003" error="no" longcall="false" testcall="false" class="0" operator="false" correlator="406419270822" connected="true">
+			<CallType>International</CallType>
+			<Features/>
+			<ReleasingParty>Orig</ReleasingParty>
+			<ReleaseReason type="q850" loc="u">16</ReleaseReason>
+			<ReleaseReason type="internal">No error</ReleaseReason>
+			<InternalIndex>223007624</InternalIndex>
+			<OrigParty xsi:type="BusinessLinePartyType" subscribergroup="Subscribers in Guernsey, NJ" billingtype="flat rate" privacy="false" cpc="normal" ani-ii="00">
+				<SubscriberAddr type="e164">+27110493421</SubscriberAddr>
+				<CallingPartyAddr type="e164">+27110493421</CallingPartyAddr>
+				<ChargeAddr type="e164">+27110493421</ChargeAddr>
+				<BusinessGroupName>Ro_test</BusinessGroupName>
+				<SIPCallId>0gQAAC8WAAACBAAALxYAAJrUscTicyU5GtjPyQnpAeuNmz9p/bdOoR/Mk9RXciOI@10.170.248.200</SIPCallId>
+			</OrigParty>
+			<TermParty xsi:type="NetworkTrunkPartyType">
+				<TrunkGroup type="sip" trunkname="IMS Core">
+					<TrunkGroupId>1</TrunkGroupId>
+					<TrunkMemberId>0</TrunkMemberId>
+				</TrunkGroup>
+				<SIPCallId>BC8B2801@10.170.248.140</SIPCallId>
+			</TermParty>
+			<RoutingInfo>
+				<RequestedAddr type="unknown">263772822306</RequestedAddr>
+				<DestAddr type="e164">+263772822306</DestAddr>
+				<RoutedAddr type="e164">263772822306</RoutedAddr>
+				<CallingPartyRoutedAddr type="national">110493421</CallingPartyRoutedAddr>
+				<CallingPartyOrigAddr type="national">110493421</CallingPartyOrigAddr>
+			</RoutingInfo>
+			<CarrierSelectInfo>
+				<CarrierOperatorInvolved>False</CarrierOperatorInvolved>
+				<SelectionMethod>NetworkDefault</SelectionMethod>
+				<NetworkId>0</NetworkId>
+			</CarrierSelectInfo>
+			<SignalingInfo>
+				<MediaCapabilityRequested>Speech</MediaCapabilityRequested>
+				<PChargingVector>
+					<icidvalue>750b8b73e41ba7b59b21240758522268</icidvalue>
+					<origioi>voice.lab.liquidtelecom.net</origioi>
+				</PChargingVector>
+			</SignalingInfo>
+			<IcSeizeTime>1510225865894</IcSeizeTime>
+			<OgSeizeTime>1510225866144</OgSeizeTime>
+			<RingingTime>1510225866756</RingingTime>
+			<ConnectTime>1510225876243</ConnectTime>
+			<DisconnectTime>1510225916144</DisconnectTime>
+			<ReleaseTime>1510225916144</ReleaseTime>
+			<CompleteTime>1510225916144</CompleteTime>
+		</Call>
+	</CDRs>
+	<FileFooter>
+		<LastModTime>1510227591467</LastModTime>
+		<NumCDRs>3</NumCDRs>
+		<DataErroredCDRs>0</DataErroredCDRs>
+		<WriteErroredCDRs>0</WriteErroredCDRs>
+	</FileFooter>
+</File>
+`
+
+func TestXMLElementText3(t *testing.T) {
+	doc, err := xmlquery.Parse(strings.NewReader(xmlContent))
+	if err != nil {
+		t.Error(err)
+	}
+	hPath2 := utils.ParseHierarchyPath("File.CDRs.Call", "")
+	cdrs := xmlquery.Find(doc, hPath2.AsString("/", true))
+	if len(cdrs) != 3 {
+		t.Errorf("Expecting: 3, received: %+v", len(cdrs))
+	}
+
+	if _, err := elementText(cdrs[0], "SignalingInfo/PChargingVector/test"); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	if val, err := elementText(cdrs[1], "SignalingInfo/PChargingVector/icidvalue"); err != nil {
+		t.Error(err)
+	} else if val != "46d7974398c2671016afccc3f2c428c7" {
+		t.Errorf("Expecting: 46d7974398c2671016afccc3f2c428c7, received: %s", val)
+	}
+}
+
+func TestXMLRPNestingSeparator(t *testing.T) {
+	cdrcCfgs := []*config.CdrcConfig{
+		&config.CdrcConfig{
+			ID:                      "msw_xml",
+			Enabled:                 true,
+			CdrFormat:               "xml",
+			DataUsageMultiplyFactor: 1024,
+			CDRPath:                 utils.HierarchyPath([]string{"File", "CDRs", "Call"}),
+			CdrSourceId:             "zw_cfs1",
+			Filters:                 []string{},
+			ContentFields: []*config.FCTemplate{
+				&config.FCTemplate{Tag: "TOR", Type: utils.META_COMPOSED, FieldId: utils.ToR,
+					Value: config.NewRSRParsersMustCompile("*voice", true), Mandatory: true},
+				&config.FCTemplate{Tag: "OriginID", Type: utils.META_COMPOSED, FieldId: utils.OriginID,
+					Value: config.NewRSRParsersMustCompile("~File.CDRs.Call.SignalingInfo.PChargingVector.icidvalue", true), Mandatory: true},
+				&config.FCTemplate{Tag: "RequestType", Type: utils.META_COMPOSED, FieldId: utils.RequestType,
+					Value: config.NewRSRParsersMustCompile("*rated", true), Mandatory: true},
+				&config.FCTemplate{Tag: "Tenant", Type: utils.META_COMPOSED, FieldId: utils.Tenant,
+					Value: config.NewRSRParsersMustCompile("XX.liquid.tel", true), Mandatory: true},
+				&config.FCTemplate{Tag: "Category", Type: utils.META_COMPOSED, FieldId: utils.Category,
+					Value: config.NewRSRParsersMustCompile("call", true), Mandatory: true},
+				&config.FCTemplate{Tag: "Account", Type: utils.META_COMPOSED, FieldId: utils.Account,
+					Value: config.NewRSRParsersMustCompile("~File.CDRs.Call.OrigParty.SubscriberAddr", true), Mandatory: true},
+				&config.FCTemplate{Tag: "Destination", Type: utils.META_COMPOSED, FieldId: utils.Destination,
+					Value: config.NewRSRParsersMustCompile("~File.CDRs.Call.RoutingInfo.DestAddr", true), Mandatory: true},
+				&config.FCTemplate{Tag: "SetupTime", Type: utils.META_COMPOSED, FieldId: utils.SetupTime,
+					Value: config.NewRSRParsersMustCompile("~File.CDRs.Call.RingingTime", true), Mandatory: true},
+				&config.FCTemplate{Tag: "AnswerTime", Type: utils.META_COMPOSED, FieldId: utils.AnswerTime,
+					Value: config.NewRSRParsersMustCompile("~File.CDRs.Call.ConnectTime", true), Mandatory: true},
+				&config.FCTemplate{Tag: "Usage", Type: utils.META_HANDLER,
+					FieldId: utils.Usage, HandlerId: utils.HandlerSubstractUsage,
+					Value: config.NewRSRParsersMustCompile("~File.CDRs.Call.ReleaseTime;|;~File.CDRs.Call.ConnectTime",
+						true), Mandatory: true},
+			},
+		},
+	}
+	data, _ := engine.NewMapStorage()
+	defaultCfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	xmlRP, err := NewXMLRecordsProcessor(bytes.NewBufferString(xmlContent),
+		utils.HierarchyPath([]string{"File", "CDRs", "Call"}), "UTC", true,
+		cdrcCfgs, engine.NewFilterS(defaultCfg, nil, engine.NewDataManager(data)))
+	if err != nil {
+		t.Error(err)
+	}
+	var cdrs []*engine.CDR
+	for i := 0; i < 4; i++ {
+		cdrs, err = xmlRP.ProcessNextRecord()
+		if i == 1 { // Take second CDR since the first one cannot be processed
+			break
+		}
+	}
+	if err != nil {
+		t.Error(err)
+	}
+	expectedCDRs := []*engine.CDR{
+		&engine.CDR{CGRID: "0ad7f9554ff8fc5b3a7cebbe7431bbf809bc5144",
+			OriginHost: "0.0.0.0", Source: "zw_cfs1", OriginID: "46d7974398c2671016afccc3f2c428c7",
+			ToR: "*voice", RequestType: "*rated", Tenant: "XX.liquid.tel",
+			Category: "call", Account: "+27110493421", Destination: "+270843073451",
+			SetupTime:   time.Date(2017, 11, 9, 11, 5, 34, 973000000, time.UTC),
+			AnswerTime:  time.Date(2017, 11, 9, 11, 5, 39, 364000000, time.UTC),
+			Usage:       time.Duration(53737000000),
+			ExtraFields: map[string]string{}, Cost: -1},
+	}
+	if !reflect.DeepEqual(expectedCDRs, cdrs) {
+		t.Errorf("Expecting: %+v\n, received: %+v\n", expectedCDRs, cdrs)
+	}
+}
+
+var xmlMultipleIndex = `<complete-success-notification callid="109870">
+	<createtime>2005-08-26T14:16:42</createtime>
+	<connecttime>2005-08-26T14:16:56</connecttime>
+	<endtime>2005-08-26T14:17:34</endtime>
+	<reference>My Call Reference</reference>
+	<userid>386</userid>
+	<username>sampleusername</username>
+	<customerid>1</customerid>
+	<companyname>Conecto LLC</companyname>
+	<totalcost amount="0.21" currency="USD">US$0.21</totalcost>
+	<hasrecording>yes</hasrecording>
+	<hasvoicemail>no</hasvoicemail>
+	<agenttotalcost amount="0.13" currency="USD">US$0.13</agenttotalcost>
+	<agentid>44</agentid>
+	<callleg calllegid="222146">
+		<number>+441624828505</number>
+		<description>Isle of Man</description>
+		<seconds>38</seconds>
+		<perminuterate amount="0.0200" currency="USD">US$0.0200</perminuterate>
+		<cost amount="0.0140" currency="USD">US$0.0140</cost>
+		<agentperminuterate amount="0.0130" currency="USD">US$0.0130</agentperminuterate>
+		<agentcost amount="0.0082" currency="USD">US$0.0082</agentcost>
+	</callleg>
+	<callleg calllegid="222147">
+		<number>+44 7624 494075</number>
+		<description>Isle of Man</description>
+		<seconds>37</seconds>
+		<perminuterate amount="0.2700" currency="USD">US$0.2700</perminuterate>
+		<cost amount="0.1890" currency="USD">US$0.1890</cost>
+		<agentperminuterate amount="0.1880" currency="USD">US$0.1880</agentperminuterate>
+		<agentcost amount="0.1159" currency="USD">US$0.1159</agentcost>
+	</callleg>
+</complete-success-notification>
+`
+
+func TestXMLIndexes(t *testing.T) {
+	doc, err := xmlquery.Parse(strings.NewReader(xmlMultipleIndex))
+	if err != nil {
+		t.Error(err)
+	}
+	dP := newXmlProvider(doc, utils.HierarchyPath([]string{}))
+	if data, err := dP.FieldAsString([]string{"complete-success-notification", "userid"}); err != nil {
+		t.Error(err)
+	} else if data != "386" {
+		t.Errorf("expecting: 386, received: <%s>", data)
+	}
+	if data, err := dP.FieldAsString([]string{"complete-success-notification", "username"}); err != nil {
+		t.Error(err)
+	} else if data != "sampleusername" {
+		t.Errorf("expecting: sampleusername, received: <%s>", data)
+	}
+	if data, err := dP.FieldAsString([]string{"complete-success-notification", "callleg", "seconds"}); err != nil {
+		t.Error(err)
+	} else if data != "38" {
+		t.Errorf("expecting: 38, received: <%s>", data)
+	}
+	if data, err := dP.FieldAsString([]string{"complete-success-notification", "callleg[1]", "seconds"}); err != nil {
+		t.Error(err)
+	} else if data != "37" {
+		t.Errorf("expecting: 37, received: <%s>", data)
+	}
+	if data, err := dP.FieldAsString([]string{"complete-success-notification", "callleg[@calllegid='222147']", "seconds"}); err != nil {
+		t.Error(err)
+	} else if data != "37" {
+		t.Errorf("expecting: 37, received: <%s>", data)
 	}
 }

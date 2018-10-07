@@ -28,19 +28,19 @@ import (
 
 func (m *Migrator) migrateCurrentTiming() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.TimingsPrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.TimingsPrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.TimingsPrefix)
-		tm, err := m.dmIN.GetTiming(idg, true, utils.NonTransactional)
+		tm, err := m.dmIN.DataManager().GetTiming(idg, true, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if tm != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.SetTiming(tm); err != nil {
+				if err := m.dmOut.DataManager().SetTiming(tm); err != nil {
 					return err
 				}
 				m.stats[utils.Timing] += 1
@@ -53,7 +53,7 @@ func (m *Migrator) migrateCurrentTiming() (err error) {
 func (m *Migrator) migrateTimings() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.dmOut.DataManager().DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

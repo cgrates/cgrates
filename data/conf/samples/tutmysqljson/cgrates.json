@@ -1,0 +1,63 @@
+{
+// CGRateS Configuration file
+//
+
+
+"general": {
+	"log_level": 7,
+	"dbdata_encoding": "json",							// encoding used to store object data in strings: <msgpack|json>
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_type": "redis",						// data_db type: <redis|mongo>
+	"db_port": 6379, 						// data_db port to reach the database
+	"db_name": "11", 						// data_db database name to connect to
+	
+},
+
+"stor_db": {
+	"db_password": "CGRateS.org",
+},
+
+
+"cache":{
+	"destinations": {"limit": 10000, "ttl":"0s", "precache": true},
+	"reverse_destinations": {"limit": 10000, "ttl":"0s", "precache": true},
+	"rating_plans": {"limit": 10000, "ttl":"0s","precache": true},
+	"rating_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+	"lcr_rules": {"limit": 10000, "ttl":"0s", "precache": true},
+	"cdr_stats": {"limit": 10000, "ttl":"0s", "precache": true},
+	"actions": {"limit": 10000, "ttl":"0s", "precache": true},
+	"action_plans": {"limit": 10000, "ttl":"0s", "precache": true},
+	"account_action_plans": {"limit": 10000, "ttl":"0s", "precache": true},
+	"action_triggers": {"limit": 10000, "ttl":"0s", "precache": true},
+	"shared_groups": {"limit": 10000, "ttl":"0s", "precache": true},
+	"aliases": {"limit": 10000, "ttl":"0s", "precache": true},
+	"reverse_aliases": {"limit": 10000, "ttl":"0s", "precache": true},
+	"derived_chargers": {"limit": 10000, "ttl":"0s", "precache": true},
+	"resource_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+	"resources": {"limit": 10000, "ttl":"0s", "precache": true},
+	"statqueues": {"limit": 10000, "ttl":"0s", "precache": true},
+	"statqueue_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+	"thresholds": {"limit": 10000, "ttl":"0s", "precache": true},
+	"threshold_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+	"filters": {"limit": 10000, "ttl":"0s", "precache": true},
+	"supplier_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+	"attribute_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+	"resource_filter_indexes" :{"limit": 10000, "ttl":"0s"},
+	"stat_filter_indexes" : {"limit": 10000, "ttl":"0s"},
+	"threshold_filter_indexes" : {"limit": 10000, "ttl":"0s"},
+	"supplier_filter_indexes" : {"limit": 10000, "ttl":"0s"},
+	"attribute_filter_indexes" : {"limit": 10000, "ttl":"0s"},
+	"charger_filter_indexes" : {"limit": 10000, "ttl":"0s"},
+},
+
+
+}

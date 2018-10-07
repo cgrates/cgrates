@@ -18,14 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -1469,92 +1467,6 @@ func TestTopupActionLoaded(t *testing.T) {
 	}
 }
 
-func TestActionCdrlogEmpty(t *testing.T) {
-	acnt := &Account{ID: "cgrates.org:dan2904"}
-	cdrlog := &Action{
-		ActionType: CDRLOG,
-	}
-	err := cdrLogAction(acnt, nil, cdrlog, Actions{
-		&Action{
-			ActionType: DEBIT,
-			Balance: &BalanceFilter{Value: &utils.ValueFormula{Static: 25},
-				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET")), Weight: utils.Float64Pointer(20)},
-		},
-	})
-	if err != nil {
-		t.Error("Error performing cdrlog action: ", err)
-	}
-	cdrs := make([]*CDR, 0)
-	json.Unmarshal([]byte(cdrlog.ExpirationString), &cdrs)
-	if len(cdrs) != 1 || cdrs[0].Source != CDRLOG {
-		t.Errorf("Wrong cdrlogs: %+v", cdrs[0])
-	}
-}
-
-func TestActionCdrlogWithParams(t *testing.T) {
-	acnt := &Account{ID: "cgrates.org:dan2904"}
-	cdrlog := &Action{
-		ActionType:      CDRLOG,
-		ExtraParameters: `{"ReqType":"^*pseudoprepaid","Subject":"^rif", "TOR":"~action_type:s/^\\*(.*)$/did_$1/"}`,
-	}
-	err := cdrLogAction(acnt, nil, cdrlog, Actions{
-		&Action{
-			ActionType: DEBIT,
-			Balance: &BalanceFilter{Value: &utils.ValueFormula{Static: 25},
-				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET")), Weight: utils.Float64Pointer(20)},
-		},
-		&Action{
-			ActionType: DEBIT_RESET,
-			Balance: &BalanceFilter{Value: &utils.ValueFormula{Static: 25},
-				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET")), Weight: utils.Float64Pointer(20)},
-		},
-	})
-	if err != nil {
-		t.Error("Error performing cdrlog action: ", err)
-	}
-	cdrs := make([]*CDR, 0)
-	json.Unmarshal([]byte(cdrlog.ExpirationString), &cdrs)
-	if len(cdrs) != 2 ||
-		cdrs[0].Subject != "rif" {
-		t.Errorf("Wrong cdrlogs: %+v", cdrs[0])
-	}
-}
-
-func TestActionCdrLogParamsWithOverload(t *testing.T) {
-	acnt := &Account{ID: "cgrates.org:dan2904"}
-	cdrlog := &Action{
-		ActionType:      CDRLOG,
-		ExtraParameters: `{"Subject":"^rif","Destination":"^1234","ToR":"~ActionTag:s/^at(.)$/0$1/","AccountID":"~AccountID:s/^\\*(.*)$/$1/"}`,
-	}
-	err := cdrLogAction(acnt, nil, cdrlog, Actions{
-		&Action{
-			ActionType: DEBIT,
-			Balance: &BalanceFilter{Value: &utils.ValueFormula{Static: 25},
-				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET")), Weight: utils.Float64Pointer(20)},
-		},
-		&Action{
-			ActionType: DEBIT_RESET,
-			Balance: &BalanceFilter{Value: &utils.ValueFormula{Static: 25},
-				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET")), Weight: utils.Float64Pointer(20)},
-		},
-	})
-	if err != nil {
-		t.Error("Error performing cdrlog action: ", err)
-	}
-	cdrs := make([]*CDR, 0)
-	json.Unmarshal([]byte(cdrlog.ExpirationString), &cdrs)
-	expectedExtraFields := map[string]string{
-		"AccountID": "cgrates.org:dan2904",
-	}
-	if len(cdrs) != 2 ||
-		cdrs[0].Subject != "rif" {
-		t.Errorf("Wrong cdrlogs: %+v", cdrs[0])
-	}
-	if !reflect.DeepEqual(cdrs[0].ExtraFields, expectedExtraFields) {
-		t.Errorf("Expecting extra fields: %+v, received: %+v", expectedExtraFields, cdrs[0].ExtraFields)
-	}
-}
-
 func TestActionSetDDestination(t *testing.T) {
 	acc := &Account{BalanceMap: map[string]Balances{
 		utils.MONETARY: Balances{&Balance{DestinationIDs: utils.NewStringMap("*ddc_test")}}}}
@@ -1566,12 +1478,12 @@ func TestActionSetDDestination(t *testing.T) {
 		t.Error("Error storing destination: ", d, err)
 	}
 	dm.DataDB().GetReverseDestination("111", false, utils.NonTransactional)
-	x1, found := cache.Get(utils.REVERSE_DESTINATION_PREFIX + "111")
+	x1, found := Cache.Get(utils.CacheReverseDestinations, "111")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
 	dm.DataDB().GetReverseDestination("222", false, utils.NonTransactional)
-	x1, found = cache.Get(utils.REVERSE_DESTINATION_PREFIX + "222")
+	x1, found = Cache.Get(utils.CacheReverseDestinations, "222")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
@@ -1586,21 +1498,21 @@ func TestActionSetDDestination(t *testing.T) {
 	}
 
 	var ok bool
-	x1, ok = cache.Get(utils.REVERSE_DESTINATION_PREFIX + "111")
+	x1, ok = Cache.Get(utils.CacheReverseDestinations, "111")
 	if ok {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	x1, ok = cache.Get(utils.REVERSE_DESTINATION_PREFIX + "222")
+	x1, ok = Cache.Get(utils.CacheReverseDestinations, "222")
 	if ok {
 		t.Error("Error cacheing destination: ", x1)
 	}
 	dm.DataDB().GetReverseDestination("333", false, utils.NonTransactional)
-	x1, found = cache.Get(utils.REVERSE_DESTINATION_PREFIX + "333")
+	x1, found = Cache.Get(utils.CacheReverseDestinations, "333")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
 	dm.DataDB().GetReverseDestination("666", false, utils.NonTransactional)
-	x1, found = cache.Get(utils.REVERSE_DESTINATION_PREFIX + "666")
+	x1, found = Cache.Get(utils.CacheReverseDestinations, "666")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
@@ -2391,65 +2303,103 @@ func TestActionExpNoExp(t *testing.T) {
 	}
 }
 
-func TestActionCdrlogBalanceValue(t *testing.T) {
-	err := dm.DataDB().SetAccount(&Account{
-		ID: "cgrates.org:bv",
+func TestActionTopUpZeroNegative(t *testing.T) {
+	account := &Account{
+		ID: "cgrates.org:zeroNegative",
 		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{&Balance{
-				ID:    "*default",
-				Uuid:  "25a02c82-f09f-4c6e-bacf-8ed4b076475a",
-				Value: 10,
-			}},
+			utils.MONETARY: Balances{
+				&Balance{
+					ID:    "Bal1",
+					Value: -10,
+				},
+				&Balance{
+					ID:    "Bal2",
+					Value: 5,
+				},
+			},
 		},
-	})
+	}
+	err := dm.DataDB().SetAccount(account)
 	if err != nil {
 		t.Error("Error setting account: ", err)
 	}
 	at := &ActionTiming{
-		accountIDs: utils.StringMap{"cgrates.org:bv": true},
+		accountIDs: utils.StringMap{"cgrates.org:zeroNegative": true},
 		Timing:     &RateInterval{},
 		actions: []*Action{
 			&Action{
-				Id:         "RECUR_FOR_V3HSILLMILLD1G",
-				ActionType: TOPUP,
+				Id:         "ZeroMonetary",
+				ActionType: TopUpZeroNegative,
 				Balance: &BalanceFilter{
-					ID:    utils.StringPointer("*default"),
-					Uuid:  utils.StringPointer("25a02c82-f09f-4c6e-bacf-8ed4b076475a"),
-					Value: &utils.ValueFormula{Static: 1.1},
-					Type:  utils.StringPointer(utils.MONETARY),
+					Type: utils.StringPointer(utils.MONETARY),
 				},
-			},
-			&Action{
-				Id:         "RECUR_FOR_V3HSILLMILLD5G",
-				ActionType: DEBIT,
-				Balance: &BalanceFilter{
-					ID:    utils.StringPointer("*default"),
-					Uuid:  utils.StringPointer("25a02c82-f09f-4c6e-bacf-8ed4b076475a"),
-					Value: &utils.ValueFormula{Static: 2.1},
-					Type:  utils.StringPointer(utils.MONETARY),
-				},
-			},
-			&Action{
-				Id:              "c",
-				ActionType:      CDRLOG,
-				ExtraParameters: `{"BalanceID":"BalanceID","BalanceUUID":"BalanceUUID","ActionID":"ActionID","BalanceValue":"BalanceValue"}`,
 			},
 		},
 	}
 	err = at.Execute(nil, nil)
-	acc, err := dm.DataDB().GetAccount("cgrates.org:bv")
+	acc, err := dm.DataDB().GetAccount("cgrates.org:zeroNegative")
 	if err != nil || acc == nil {
 		t.Error("Error getting account: ", acc, err)
 	}
-	if acc.BalanceMap[utils.MONETARY][0].Value != 9 {
-		t.Errorf("Transaction didn't work: %v", acc.BalanceMap[utils.MONETARY][0].Value)
+	//Verify value for first balance(Bal1) should be 0 after execute action TopUpZeroNegative
+	if acc.BalanceMap[utils.MONETARY][0].Value != 0 {
+		t.Errorf("Expecting 0, received: %+v", acc.BalanceMap[utils.MONETARY][0].Value)
 	}
-	cdrs := make([]*CDR, 0)
-	json.Unmarshal([]byte(at.actions[2].ExpirationString), &cdrs)
-	if len(cdrs) != 2 ||
-		cdrs[0].ExtraFields["BalanceValue"] != "11.1" ||
-		cdrs[1].ExtraFields["BalanceValue"] != "9" {
-		t.Errorf("Wrong cdrlogs: %", utils.ToIJSON(cdrs))
+	//Verify value for secound balance(Bal2) should be the same
+	if acc.BalanceMap[utils.MONETARY][1].Value != 5 {
+		t.Errorf("Expecting 5, received: %+v", acc.BalanceMap[utils.MONETARY][1].Value)
+	}
+}
+
+func TestActionSetExpiry(t *testing.T) {
+	var cloneTimeNowPlus24h time.Time
+	timeNowPlus24h := time.Now().Add(time.Duration(24 * time.Hour))
+	//Need clone because time.Now adds extra information that DeepEqual doesn't like
+	if err := utils.Clone(timeNowPlus24h, &cloneTimeNowPlus24h); err != nil {
+		t.Error(err)
+	}
+	account := &Account{
+		ID: "cgrates.org:zeroNegative",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
+				&Balance{
+					ID:    "Bal1",
+					Value: -10,
+				},
+				&Balance{
+					ID:    "Bal2",
+					Value: 5,
+				},
+			},
+		},
+	}
+	err := dm.DataDB().SetAccount(account)
+	if err != nil {
+		t.Error("Error setting account: ", err)
+	}
+	at := &ActionTiming{
+		accountIDs: utils.StringMap{"cgrates.org:zeroNegative": true},
+		Timing:     &RateInterval{},
+		actions: []*Action{
+			&Action{
+				Id:         "SetExpiry",
+				ActionType: SetExpiry,
+				Balance: &BalanceFilter{
+					ID:             utils.StringPointer("Bal1"),
+					Type:           utils.StringPointer(utils.MONETARY),
+					ExpirationDate: utils.TimePointer(cloneTimeNowPlus24h),
+				},
+			},
+		},
+	}
+	err = at.Execute(nil, nil)
+	acc, err := dm.DataDB().GetAccount("cgrates.org:zeroNegative")
+	if err != nil || acc == nil {
+		t.Error("Error getting account: ", acc, err)
+	}
+	//Verify ExpirationDate for first balance(Bal1)
+	if !acc.BalanceMap[utils.MONETARY][0].ExpirationDate.Equal(cloneTimeNowPlus24h) {
+		t.Errorf("Expecting: %+v, received: %+v", cloneTimeNowPlus24h, acc.BalanceMap[utils.MONETARY][0].ExpirationDate)
 	}
 }
 
@@ -2620,8 +2570,8 @@ func TestCacheGetClonedActions(t *testing.T) {
 			Weight: float64(10),
 		},
 	}
-	cache.Set("MYTEST", actions, true, "")
-	clned, err := cache.GetCloned("MYTEST")
+	Cache.Set(utils.CacheActions, "MYTEST", actions, nil, true, "")
+	clned, err := Cache.GetCloned(utils.CacheActions, "MYTEST")
 	if err != nil {
 		t.Error(err)
 	}

@@ -204,21 +204,22 @@ func testSMCosts(cfg *config.CGRConfig) error {
 		},
 		TOR: utils.VOICE,
 	}
-	if err := cdrStorage.SetSMCost(&SMCost{CGRID: "164b0422fdc6a5117031b427439482c6a4f90e41", RunID: utils.META_DEFAULT, OriginHost: "localhost", OriginID: "12345",
-		CostSource: utils.UNIT_TEST, CostDetails: cc}); err != nil {
+	if err := cdrStorage.SetSMCost(&SMCost{CGRID: "164b0422fdc6a5117031b427439482c6a4f90e41",
+		RunID: utils.META_DEFAULT, OriginHost: "localhost", OriginID: "12345", CostSource: utils.UNIT_TEST,
+		CostDetails: NewEventCostFromCallCost(cc, "164b0422fdc6a5117031b427439482c6a4f90e41", utils.META_DEFAULT)}); err != nil {
 		return fmt.Errorf("testSMCosts #3 err: %v", err)
 	}
 	if rcvSMC, err := cdrStorage.GetSMCosts("164b0422fdc6a5117031b427439482c6a4f90e41", utils.META_DEFAULT, "", ""); err != nil {
 		return fmt.Errorf("testSMCosts #4 err: %v", err)
 	} else if len(rcvSMC) == 0 {
 		return errors.New("testSMCosts #5, no SMCosts received")
-	} else if len(cc.Timespans) != len(rcvSMC[0].CostDetails.Timespans) { // cc.Timespans[0].RateInterval.Rating.Rates[0], rcvCC.Timespans[0].RateInterval.Rating.Rates[0])
-		return fmt.Errorf("testSMCosts #6, expecting: %+v, received: %+s", cc, utils.ToIJSON(rcvSMC[0]))
 	}
 	// Test query per prefix
 	for i := 0; i < 3; i++ {
-		if err := cdrStorage.SetSMCost(&SMCost{CGRID: "164b0422fdc6a5117031b427439482c6a4f90e5" + strconv.Itoa(i), RunID: utils.META_DEFAULT, OriginHost: "localhost", OriginID: "abc" + strconv.Itoa(i),
-			CostSource: utils.UNIT_TEST, CostDetails: cc}); err != nil {
+		if err := cdrStorage.SetSMCost(&SMCost{CGRID: "164b0422fdc6a5117031b427439482c6a4f90e5" + strconv.Itoa(i),
+			RunID: utils.META_DEFAULT, OriginHost: "localhost", OriginID: "abc" + strconv.Itoa(i),
+			CostSource:  utils.UNIT_TEST,
+			CostDetails: NewEventCostFromCallCost(cc, "164b0422fdc6a5117031b427439482c6a4f90e5"+strconv.Itoa(i), utils.META_DEFAULT)}); err != nil {
 			return fmt.Errorf("testSMCosts #7 err: %v", err)
 		}
 	}
@@ -677,7 +678,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{MaxCost: utils.Float64Pointer(0.0)}, false); err != nil {
 		return fmt.Errorf("testGetCDRs #68, err: %v", err)
 	} else if len(CDRs) != 5 {
-		return fmt.Errorf("testGetCDRs #69, unexpected number of CDRs returned: ", CDRs)
+		return fmt.Errorf("testGetCDRs #69, unexpected number of CDRs returned: %+v", CDRs)
 	} else {
 		for i, cdr := range CDRs {
 			if i == 0 {
@@ -752,6 +753,57 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	} else if len(CDRs) != 7 {
 		return fmt.Errorf("testGetCDRs #94, unexpected number of CDRs returned:  %+v", len(CDRs))
 	}
-
+	//Filter by OrderID descendent
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderBy: "OrderID;desc"}, false); err != nil {
+		return fmt.Errorf("testGetCDRs #95, err: %v", err)
+	} else {
+		for i, _ := range CDRs {
+			if i+1 > len(CDRs)-1 {
+				break
+			}
+			if CDRs[i].OrderID < CDRs[i+1].OrderID {
+				return fmt.Errorf("%+v should be greater than %+v \n", CDRs[i].OrderID, CDRs[i+1].OrderID)
+			}
+		}
+	}
+	//Filter by OrderID ascendent
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderBy: "OrderID"}, false); err != nil {
+		return fmt.Errorf("testGetCDRs #95, err: %v", err)
+	} else {
+		for i, _ := range CDRs {
+			if i+1 > len(CDRs)-1 {
+				break
+			}
+			if CDRs[i].OrderID > CDRs[i+1].OrderID {
+				return fmt.Errorf("%+v sould be smaller than %+v \n", CDRs[i].OrderID, CDRs[i+1].OrderID)
+			}
+		}
+	}
+	//Filter by Cost descendent
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderBy: "Cost;desc"}, false); err != nil {
+		return fmt.Errorf("testGetCDRs #95, err: %v", err)
+	} else {
+		for i, _ := range CDRs {
+			if i+1 > len(CDRs)-1 {
+				break
+			}
+			if CDRs[i].Cost < CDRs[i+1].Cost {
+				return fmt.Errorf("%+v should be greater than %+v \n", CDRs[i].Cost, CDRs[i+1].Cost)
+			}
+		}
+	}
+	//Filter by Cost ascendent
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderBy: "Cost"}, false); err != nil {
+		return fmt.Errorf("testGetCDRs #95, err: %v", err)
+	} else {
+		for i, _ := range CDRs {
+			if i+1 > len(CDRs)-1 {
+				break
+			}
+			if CDRs[i].Cost > CDRs[i+1].Cost {
+				return fmt.Errorf("%+v sould be smaller than %+v \n", CDRs[i].Cost, CDRs[i+1].Cost)
+			}
+		}
+	}
 	return nil
 }

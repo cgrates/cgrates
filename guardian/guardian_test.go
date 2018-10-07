@@ -19,7 +19,6 @@ package guardian
 
 import (
 	"sync"
-	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -49,13 +48,13 @@ func TestGuardianMultipleKeys(t *testing.T) {
 	if execTime := time.Now().Sub(tStart); execTime < mustExecDur || execTime > mustExecDur+time.Duration(20*time.Millisecond) {
 		t.Errorf("Execution took: %v", execTime)
 	}
-	Guardian.RLock()
+	Guardian.Lock()
 	for _, key := range keys {
 		if _, hasKey := Guardian.locksMap[key]; hasKey {
-			t.Error("Possible memleak")
+			t.Errorf("Possible memleak for key: %s", key)
 		}
 	}
-	Guardian.RUnlock()
+	Guardian.Unlock()
 }
 
 func TestGuardianTimeout(t *testing.T) {
@@ -77,85 +76,111 @@ func TestGuardianTimeout(t *testing.T) {
 	if execTime := time.Now().Sub(tStart); execTime < mustExecDur || execTime > mustExecDur+time.Duration(20*time.Millisecond) {
 		t.Errorf("Execution took: %v", execTime)
 	}
-	Guardian.RLock()
+	Guardian.Lock()
 	for _, key := range keys {
 		if _, hasKey := Guardian.locksMap[key]; hasKey {
 			t.Error("Possible memleak")
 		}
 	}
-	Guardian.RUnlock()
+	Guardian.Unlock()
 }
 
 func TestGuardianGuardIDs(t *testing.T) {
+
+	//lock with 3 keys
 	lockIDs := []string{"test1", "test2", "test3"}
-	Guardian.RLock()
+	// make sure the keys are not in guardian before lock
+	Guardian.Lock()
 	for _, lockID := range lockIDs {
 		if _, hasKey := Guardian.locksMap[lockID]; hasKey {
 			t.Errorf("Unexpected lockID found: %s", lockID)
 		}
 	}
-	Guardian.RUnlock()
+	Guardian.Unlock()
+
+	// lock 3 items
 	tStart := time.Now()
 	lockDur := 2 * time.Millisecond
 	Guardian.GuardIDs(lockDur, lockIDs...)
-	Guardian.RLock()
+	Guardian.Lock()
 	for _, lockID := range lockIDs {
 		if itmLock, hasKey := Guardian.locksMap[lockID]; !hasKey {
 			t.Errorf("Cannot find lock for lockID: %s", lockID)
-		} else if atomic.LoadInt64(&itmLock.cnt) != 1 {
+		} else if itmLock.cnt != 1 {
 			t.Errorf("Unexpected itmLock found: %+v", itmLock)
 		}
 	}
-	Guardian.RUnlock()
-	go Guardian.GuardIDs(time.Duration(1*time.Millisecond), lockIDs[1:]...) // to test counter
-	time.Sleep(20 * time.Microsecond)                                       // give time for goroutine to lock
-	Guardian.RLock()
+	Guardian.Unlock()
+	secLockDur := time.Duration(1 * time.Millisecond)
+
+	// second lock to test counter
+	go Guardian.GuardIDs(secLockDur, lockIDs[1:]...)
+	time.Sleep(20 * time.Microsecond) // give time for goroutine to lock
+
+	// check if counters were properly increased
+	Guardian.Lock()
 	lkID := lockIDs[0]
 	eCnt := int64(1)
 	if itmLock, hasKey := Guardian.locksMap[lkID]; !hasKey {
 		t.Errorf("Cannot find lock for lockID: %s", lkID)
-	} else if cnt := atomic.LoadInt64(&itmLock.cnt); cnt != eCnt {
-		t.Errorf("Unexpected counter: %d for itmLock with id %s", cnt, lkID)
+	} else if itmLock.cnt != eCnt {
+		t.Errorf("Unexpected counter: %d for itmLock with id %s", itmLock.cnt, lkID)
 	}
 	lkID = lockIDs[1]
 	eCnt = int64(2)
 	if itmLock, hasKey := Guardian.locksMap[lkID]; !hasKey {
 		t.Errorf("Cannot find lock for lockID: %s", lkID)
-	} else if cnt := atomic.LoadInt64(&itmLock.cnt); cnt != eCnt {
-		t.Errorf("Unexpected counter: %d for itmLock with id %s", cnt, lkID)
+	} else if itmLock.cnt != eCnt {
+		t.Errorf("Unexpected counter: %d for itmLock with id %s", itmLock.cnt, lkID)
 	}
 	lkID = lockIDs[2]
-	eCnt = int64(2)
+	eCnt = int64(1) // we did not manage to increase it yet since it did not pass first lock
 	if itmLock, hasKey := Guardian.locksMap[lkID]; !hasKey {
 		t.Errorf("Cannot find lock for lockID: %s", lkID)
-	} else if cnt := atomic.LoadInt64(&itmLock.cnt); cnt != eCnt {
-		t.Errorf("Unexpected counter: %d for itmLock with id %s", cnt, lkID)
+	} else if itmLock.cnt != eCnt {
+		t.Errorf("Unexpected counter: %d for itmLock with id %s", itmLock.cnt, lkID)
 	}
-	Guardian.RUnlock()
+	Guardian.Unlock()
+
+	time.Sleep(lockDur + secLockDur + 10*time.Millisecond) // give time to unlock before proceeding
+
+	// make sure all counters were removed
+	for _, lockID := range lockIDs {
+		if _, hasKey := Guardian.locksMap[lockID]; hasKey {
+			t.Errorf("Unexpected lockID found: %s", lockID)
+		}
+	}
+
+	// test lock  without timer
 	Guardian.GuardIDs(0, lockIDs...)
 	if totalLockDur := time.Now().Sub(tStart); totalLockDur < lockDur {
 		t.Errorf("Lock duration too small")
 	}
 	time.Sleep(time.Duration(30) * time.Millisecond)
-	Guardian.RLock()
+
+	// making sure the items stay locked
+	Guardian.Lock()
 	if len(Guardian.locksMap) != 3 {
 		t.Errorf("locksMap should be have 3 elements, have: %+v", Guardian.locksMap)
 	}
 	for _, lkID := range lockIDs {
 		if itmLock, hasKey := Guardian.locksMap[lkID]; !hasKey {
 			t.Errorf("Cannot find lock for lockID: %s", lkID)
-		} else if cnt := atomic.LoadInt64(&itmLock.cnt); cnt != 1 {
-			t.Errorf("Unexpected counter: %d for itmLock with id %s", cnt, lkID)
+		} else if itmLock.cnt != 1 {
+			t.Errorf("Unexpected counter: %d for itmLock with id %s", itmLock.cnt, lkID)
 		}
 	}
-	Guardian.RUnlock()
+	Guardian.Unlock()
+
 	Guardian.UnguardIDs(lockIDs...)
 	time.Sleep(time.Duration(50) * time.Millisecond)
-	Guardian.RLock()
+
+	// make sure items were unlocked
+	Guardian.Lock()
 	if len(Guardian.locksMap) != 0 {
 		t.Errorf("locksMap should have 0 elements, has: %+v", Guardian.locksMap)
 	}
-	Guardian.RUnlock()
+	Guardian.Unlock()
 }
 
 func BenchmarkGuard(b *testing.B) {

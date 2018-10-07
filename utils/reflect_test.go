@@ -34,42 +34,42 @@ func TestReflectFieldAsStringOnStruct(t *testing.T) {
 	if strVal, err := ReflectFieldAsString(mystruct, "Title", "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if strVal != "Title1" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(mystruct, "Count", "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if strVal != "5" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(mystruct, "Count64", "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if strVal != "6" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(mystruct, "Val", "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if strVal != "7.3" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(mystruct, "a", "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if strVal != "Title2" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(mystruct, "b", "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if strVal != "15" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(mystruct, "c", "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if strVal != "16" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(mystruct, "d", "ExtraFields"); err != nil {
 		t.Error(err)
 	} else if strVal != "17.3" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 }
 
@@ -79,42 +79,42 @@ func TestReflectFieldAsStringOnMap(t *testing.T) {
 	if strVal, err := ReflectFieldAsString(myMap, "Title", ""); err != nil {
 		t.Error(err)
 	} else if strVal != "Title1" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(myMap, "Count", ""); err != nil {
 		t.Error(err)
 	} else if strVal != "5" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(myMap, "Count64", ""); err != nil {
 		t.Error(err)
 	} else if strVal != "6" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(myMap, "Val", ""); err != nil {
 		t.Error(err)
 	} else if strVal != "7.3" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(myMap, "a", ""); err != nil {
 		t.Error(err)
 	} else if strVal != "Title2" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(myMap, "b", ""); err != nil {
 		t.Error(err)
 	} else if strVal != "15" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(myMap, "c", ""); err != nil {
 		t.Error(err)
 	} else if strVal != "16" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 	if strVal, err := ReflectFieldAsString(myMap, "d", ""); err != nil {
 		t.Error(err)
 	} else if strVal != "17.3" {
-		t.Error("Received: %s", strVal)
+		t.Errorf("Received: %s", strVal)
 	}
 }
 
@@ -223,47 +223,92 @@ func TestStringToInterface(t *testing.T) {
 	}
 }
 
-func TestCastFieldIfToString(t *testing.T) {
+func TestIfaceAsString(t *testing.T) {
 	val := interface{}("string1")
-	if resVal, converted := CastFieldIfToString(val); !converted || resVal != "string1" {
-		t.Error(resVal, converted)
+	if rply, err := IfaceAsString(val); err != nil {
+		t.Error(err)
+	} else if rply != "string1" {
+		t.Errorf("Expeced string1 ,recived %+v", rply)
 	}
 	val = interface{}(123)
-	if resVal, converted := CastFieldIfToString(val); !converted || resVal != "123" {
-		t.Error(resVal, converted)
+	if rply, err := IfaceAsString(val); err != nil {
+		t.Error(err)
+	} else if rply != "123" {
+		t.Errorf("Expeced 123 ,recived %+v", rply)
 	}
 	val = interface{}([]byte("byte_val"))
-	if resVal, converted := CastFieldIfToString(val); !converted || resVal != "byte_val" {
-		t.Error(resVal, converted)
+	if rply, err := IfaceAsString(val); err != nil {
+		t.Error(err)
+	} else if rply != "byte_val" {
+		t.Errorf("Expeced byte_val ,recived %+v", rply)
 	}
 	val = interface{}(true)
-	if resVal, converted := CastFieldIfToString(val); !converted || resVal != "true" {
-		t.Error(resVal, converted)
+	if rply, err := IfaceAsString(val); err != nil {
+		t.Error(err)
+	} else if rply != "true" {
+		t.Errorf("Expeced true ,recived %+v", rply)
 	}
-	if strVal, cast := CastFieldIfToString(time.Duration(1 * time.Second)); !cast {
-		t.Error("cannot cast time.Duration")
-	} else if strVal != "1s" {
-		t.Errorf("received: %s", strVal)
+	if rply, err := IfaceAsString(time.Duration(1 * time.Second)); err != nil {
+		t.Error(err)
+	} else if rply != "1s" {
+		t.Errorf("Expeced 1s ,recived %+v", rply)
+	}
+	if rply, err := IfaceAsString(nil); err != nil {
+		t.Error(err)
+	} else if rply != "" {
+		t.Errorf("Expeced  ,recived %+v", rply)
 	}
 }
 
 func TestIfaceAsTime(t *testing.T) {
 	timeDate := time.Date(2009, 11, 10, 23, 0, 0, 0, time.UTC)
 	val := interface{}("2009-11-10T23:00:00Z")
-	if itmConvert, converted := IfaceAsTime(val, "UTC"); converted != nil {
-		t.Error("cannot cast time.Time")
+	if itmConvert, err := IfaceAsTime(val, "UTC"); err != nil {
+		t.Error(err)
 	} else if itmConvert != timeDate {
 		t.Errorf("received: %+v", itmConvert)
 	}
 	val = interface{}(timeDate)
-	if itmConvert, converted := IfaceAsTime(val, "UTC"); converted != nil {
-		t.Error("cannot cast time.Time")
+	if itmConvert, err := IfaceAsTime(val, "UTC"); err != nil {
+		t.Error(err)
 	} else if itmConvert != timeDate {
 		t.Errorf("received: %+v", itmConvert)
 	}
 	val = interface{}("This is not a time")
-	if _, converted := IfaceAsTime(val, "UTC"); converted == nil {
+	if _, err := IfaceAsTime(val, "UTC"); err == nil {
 		t.Error("There should be error")
+	}
+}
+
+func TestIfaceAsDuration(t *testing.T) {
+	eItm := time.Duration(time.Second)
+	if itmConvert, err := IfaceAsDuration(interface{}(time.Duration(time.Second))); err != nil {
+		t.Error(err)
+	} else if eItm != itmConvert {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	if itmConvert, err := IfaceAsDuration(interface{}(float64(1000000000.0))); err != nil {
+		t.Error(err)
+	} else if eItm != itmConvert {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	if itmConvert, err := IfaceAsDuration(interface{}(int64(1000000000))); err != nil {
+		t.Error(err)
+	} else if eItm != itmConvert {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	if itmConvert, err := IfaceAsDuration(interface{}(int(1000000000))); err != nil {
+		t.Error(err)
+	} else if eItm != itmConvert {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	if itmConvert, err := IfaceAsDuration(interface{}(string("1s"))); err != nil {
+		t.Error(err)
+	} else if eItm != itmConvert {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	if _, err := IfaceAsDuration(interface{}(string("s1s"))); err == nil {
+		t.Error("empty error")
 	}
 }
 
@@ -295,6 +340,81 @@ func TestIfaceAsFloat64(t *testing.T) {
 	}
 	val = interface{}("This is not a float")
 	if _, err := IfaceAsFloat64(val); err == nil {
+		t.Error("expecting error")
+	}
+}
+
+func TestIfaceAsInt64(t *testing.T) {
+	eInt := int64(3)
+	val := interface{}(3)
+	if itmConvert, err := IfaceAsInt64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eInt {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(time.Duration(3))
+	if itmConvert, err := IfaceAsInt64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eInt {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}("3")
+	if itmConvert, err := IfaceAsInt64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eInt {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(int64(3))
+	if itmConvert, err := IfaceAsInt64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eInt {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}("This is not an integer")
+	if _, err := IfaceAsInt64(val); err == nil {
+		t.Error("expecting error")
+	}
+}
+
+func TestIfaceAsBool(t *testing.T) {
+	val := interface{}(true)
+	if itmConvert, err := IfaceAsBool(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != true {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}("true")
+	if itmConvert, err := IfaceAsBool(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != true {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(0)
+	if itmConvert, err := IfaceAsBool(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != false {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(1)
+	if itmConvert, err := IfaceAsBool(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != true {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(0.0)
+	if itmConvert, err := IfaceAsBool(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != false {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(1.0)
+	if itmConvert, err := IfaceAsBool(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != true {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}("This is not a bool")
+	if _, err := IfaceAsBool(val); err == nil {
 		t.Error("expecting error")
 	}
 }

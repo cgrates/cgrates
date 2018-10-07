@@ -24,13 +24,29 @@ import (
 )
 
 func TestVersionCompare(t *testing.T) {
-	x := Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
-	y := Versions{utils.Accounts: 1, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
-	z := Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 1, utils.SharedGroups: 2, utils.COST_DETAILS: 2}
-	q := Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 1, utils.COST_DETAILS: 2}
-	c := Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 1}
-	a := Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2, utils.SessionsCosts: 1}
-	b := Versions{utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2, utils.COST_DETAILS: 2, utils.SessionsCosts: 2}
+	x := Versions{utils.Accounts: 2, utils.Actions: 2,
+		utils.ActionTriggers: 2, utils.ActionPlans: 2,
+		utils.SharedGroups: 2, utils.CostDetails: 2}
+	y := Versions{utils.Accounts: 1, utils.Actions: 2,
+		utils.ActionTriggers: 2, utils.ActionPlans: 2,
+		utils.SharedGroups: 2, utils.CostDetails: 2}
+	z := Versions{utils.Accounts: 2, utils.Actions: 2,
+		utils.ActionTriggers: 2, utils.ActionPlans: 1,
+		utils.SharedGroups: 2, utils.CostDetails: 2}
+	q := Versions{utils.Accounts: 2, utils.Actions: 2,
+		utils.ActionTriggers: 2, utils.ActionPlans: 2,
+		utils.SharedGroups: 1, utils.CostDetails: 2}
+	c := Versions{utils.Accounts: 2, utils.Actions: 2,
+		utils.ActionTriggers: 2, utils.ActionPlans: 2,
+		utils.SharedGroups: 2, utils.CostDetails: 1}
+	a := Versions{utils.Accounts: 2, utils.Actions: 2,
+		utils.ActionTriggers: 2, utils.ActionPlans: 2,
+		utils.SharedGroups: 2, utils.CostDetails: 2,
+		utils.SessionSCosts: 1}
+	b := Versions{utils.Accounts: 2, utils.Actions: 2,
+		utils.ActionTriggers: 2, utils.ActionPlans: 2,
+		utils.SharedGroups: 2, utils.CostDetails: 2,
+		utils.SessionSCosts: 2}
 	message1 := y.Compare(x, utils.MONGO)
 	if message1 != "cgr-migrator -migrate=*accounts" {
 		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -migrate=*accounts", message1)

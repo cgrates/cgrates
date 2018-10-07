@@ -1,8 +1,8 @@
-#Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParams,SupplierID,SupplierFilterIDs,SupplierAccountIDs,SupplierRatingPlanIDs,SupplierResourceIDs,SupplierStatIDs,SupplierWeight,SupplierBlocker,SupplierParameters,Weight
-cgrates.org,SPL_WEIGHT_2,,2017-11-27T00:00:00Z,*weight,,supplier1,,,,,,10,,,5
-cgrates.org,SPL_WEIGHT_1,FLTR_DST_DE;FLTR_ACNT_1007,2017-11-27T00:00:00Z,*weight,,supplier1,,,,,,10,,,10
-cgrates.org,SPL_WEIGHT_1,FLTR_DST_DE,,,,supplier2,,,,,,20,,,
-cgrates.org,SPL_WEIGHT_1,FLTR_ACNT_1007,,,,supplier3,FLTR_ACNT_dan,,,,,15,,,
-cgrates.org,SPL_LEASTCOST_1,FLTR_1,2017-11-27T00:00:00Z,*least_cost,,supplier1,,,RP_SPECIAL_1002,,,10,false,,10
-cgrates.org,SPL_LEASTCOST_1,,,,,supplier2,,,RP_RETAIL1,,,20,,,
-cgrates.org,SPL_LEASTCOST_1,,,,,supplier3,,,RP_SPECIAL_1002,,,15,,,
+#Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParamameters,SupplierID,SupplierFilterIDs,SupplierAccountIDs,SupplierRatingPlanIDs,SupplierResourceIDs,SupplierStatIDs,SupplierWeight,SupplierBlocker,SupplierParameters,Weight
+cgrates.org,SPL_ACNT_1001,FLTR_ACNT_1001,2017-11-27T00:00:00Z,*weight,,supplier1,,,,,,10,,,10
+cgrates.org,SPL_ACNT_1001,,,,,supplier2,,,,,,20,,,20
+cgrates.org,SPL_ACNT_1002,FLTR_ACNT_1002,2017-11-27T00:00:00Z,*least_cost,,supplier1,,,RP_1002_LOW,,,10,false,,10
+cgrates.org,SPL_ACNT_1002,,,,,supplier2,,,RP_1002,,,20,,,
+cgrates.org,SPL_ACNT_1003,FLTR_ACNT_1003,2017-11-27T00:00:00Z,*qos,*tcc;*tcd,supplier1,,,,,Stats2,10,false,,10
+cgrates.org,SPL_ACNT_1003,,,,,supplier2,,,,,Stats2_1,20,,,
+

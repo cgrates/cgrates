@@ -163,7 +163,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	}
 	cdrexp, err := engine.NewCDRExporter(cdrs, exportTemplate, exportFormat, filePath, utils.META_NONE, exportID,
 		exportTemplate.Synchronous, exportTemplate.Attempts, fieldSep, usageMultiplyFactor,
-		costMultiplyFactor, self.Config.RoundingDecimals, self.Config.HttpSkipTlsVerify, self.HTTPPoster)
+		costMultiplyFactor, self.Config.RoundingDecimals, self.Config.HttpSkipTlsVerify, self.HTTPPoster, self.FilterS)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -316,7 +316,7 @@ func (self *ApierV1) ExportCDRs(arg ArgExportCDRs, reply *RplExportedCDRs) (err 
 	cdrexp, err := engine.NewCDRExporter(cdrs, exportTemplate, exportFormat,
 		filePath, utils.META_NONE, exportID,
 		synchronous, attempts, fieldSep, usageMultiplyFactor,
-		costMultiplyFactor, roundingDecimals, self.Config.HttpSkipTlsVerify, self.HTTPPoster)
+		costMultiplyFactor, roundingDecimals, self.Config.HttpSkipTlsVerify, self.HTTPPoster, self.FilterS)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

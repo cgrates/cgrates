@@ -27,20 +27,26 @@ import (
 
 func (m *Migrator) migrateCurrentTPratingprofiles() (err error) {
 
-	tpids, err := m.InStorDB().GetTpIds(utils.TBLTPRateProfiles)
+	tpids, err := m.storDBIn.StorDB().GetTpIds(utils.TBLTPRateProfiles)
 	if err != nil {
 		return err
 	}
 
 	for _, tpid := range tpids {
-		dest, err := m.InStorDB().GetTPRatingProfiles(&utils.TPRatingProfile{TPid: tpid})
+		ratingProfile, err := m.storDBIn.StorDB().GetTPRatingProfiles(&utils.TPRatingProfile{TPid: tpid})
 		if err != nil {
 			return err
 		}
-		if dest != nil {
+		if ratingProfile != nil {
 			if m.dryRun != true {
-				if err := m.OutStorDB().SetTPRatingProfiles(dest); err != nil {
+				if err := m.storDBOut.StorDB().SetTPRatingProfiles(ratingProfile); err != nil {
 					return err
+				}
+				for _, ratPrf := range ratingProfile {
+					if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPRateProfiles, ratPrf.TPid, map[string]string{"loadid": ratPrf.LoadId,
+						"direction": ratPrf.Direction, "tenant": ratPrf.Tenant, "category": ratPrf.Category, "subject": ratPrf.Subject}); err != nil {
+						return err
+					}
 				}
 				m.stats[utils.TpRatingProfiles] += 1
 			}
@@ -52,7 +58,7 @@ func (m *Migrator) migrateCurrentTPratingprofiles() (err error) {
 func (m *Migrator) migrateTPratingprofiles() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.OutStorDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.storDBOut.StorDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

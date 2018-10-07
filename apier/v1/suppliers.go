@@ -28,7 +28,7 @@ func (apierV1 *ApierV1) GetSupplierProfile(arg utils.TenantID, reply *engine.Sup
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if spp, err := apierV1.DataManager.GetSupplierProfile(arg.Tenant, arg.ID, false, utils.NonTransactional); err != nil {
+	if spp, err := apierV1.DataManager.GetSupplierProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -36,6 +36,21 @@ func (apierV1 *ApierV1) GetSupplierProfile(arg utils.TenantID, reply *engine.Sup
 	} else {
 		*reply = *spp
 	}
+	return nil
+}
+
+// GetSupplierProfileIDs returns list of supplierProfile IDs registered for a tenant
+func (apierV1 *ApierV1) GetSupplierProfileIDs(tenant string, sppPrfIDs *[]string) error {
+	prfx := utils.SupplierProfilePrefix + tenant + ":"
+	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(prfx)
+	if err != nil {
+		return err
+	}
+	retIDs := make([]string, len(keys))
+	for i, key := range keys {
+		retIDs[i] = key[len(prfx):]
+	}
+	*sppPrfIDs = retIDs
 	return nil
 }
 
@@ -51,8 +66,8 @@ func (apierV1 *ApierV1) SetSupplierProfile(spp *engine.SupplierProfile, reply *s
 	return nil
 }
 
-//RemSupplierProfile remove a specific Supplier configuration
-func (apierV1 *ApierV1) RemSupplierProfile(arg utils.TenantID, reply *string) error {
+//RemoveSupplierProfile remove a specific Supplier configuration
+func (apierV1 *ApierV1) RemoveSupplierProfile(arg utils.TenantID, reply *string) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -70,7 +85,7 @@ func NewSupplierSv1(splS *engine.SupplierService) *SupplierSv1 {
 	return &SupplierSv1{splS: splS}
 }
 
-// Exports RPC from RLs
+// Exports RPC from SupplierS
 type SupplierSv1 struct {
 	splS *engine.SupplierService
 }
@@ -85,4 +100,9 @@ func (splv1 *SupplierSv1) Call(serviceMethod string,
 func (splv1 *SupplierSv1) GetSuppliers(args *engine.ArgsGetSuppliers,
 	reply *engine.SortedSuppliers) error {
 	return splv1.splS.V1GetSuppliers(args, reply)
+}
+
+func (splv1 *SupplierSv1) Ping(ign string, reply *string) error {
+	*reply = utils.Pong
+	return nil
 }

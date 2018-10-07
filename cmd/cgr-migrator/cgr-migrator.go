@@ -25,58 +25,88 @@ import (
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/migrator"
 	"github.com/cgrates/cgrates/utils"
 )
 
+const ()
+
 var (
-	sameDataDB      = true
-	sameStorDB      = true
-	outDataDB       migrator.MigratorDataDB
-	storDB          engine.Storage
-	oDBDataEncoding string
-	migrate         = flag.String("migrate", "", "Fire up automatic migration "+
-		"\n <*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups|*stordb|*datadb> ")
-	version = flag.Bool("version", false, "Prints the application version.")
+	sameDataDB, sameStorDB bool
+	dmIN, dmOUT            migrator.MigratorDataDB
+	storDBIn, storDBOut    migrator.MigratorStorDB
+	err                    error
+	dfltCfg, _             = config.NewDefaultCGRConfig()
+	cfgDir                 = flag.String("config_dir", "",
+		"Configuration directory path.")
 
-	inDataDBType = flag.String("datadb_type", config.CgrConfig().DataDbType, "The type of the DataDb Database <*redis>")
-	inDataDBHost = flag.String("datadb_host", utils.MetaDynamic, "The DataDb host to connect to.")
-	inDataDBPort = flag.String("datadb_port", utils.MetaDynamic, "The DataDb port to bind to.")
-	inDataDBName = flag.String("datadb_name", utils.MetaDynamic, "The name/number of the DataDb to connect to.")
-	inDataDBUser = flag.String("datadb_user", utils.MetaDynamic, "The DataDb user to sign in as.")
-	inDataDBPass = flag.String("datadb_passwd", utils.MetaDynamic, "The DataDb user's password.")
+	migrate = flag.String("migrate", "", "fire up automatic migration "+
+		"\n <*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups|*stordb|*datadb>")
+	version = flag.Bool("version", false, "prints the application version")
 
-	inStorDBType = flag.String("stordb_type", config.CgrConfig().StorDBType, "The type of the StorDB Database <*mysql|*postgres>")
-	inStorDBHost = flag.String("stordb_host", utils.MetaDynamic, "The StorDB host to connect to.")
-	inStorDBPort = flag.String("stordb_port", utils.MetaDynamic, "The StorDB port to bind to.")
-	inStorDBName = flag.String("stordb_name", utils.MetaDynamic, "The name/number of the StorDB to connect to.")
-	inStorDBUser = flag.String("stordb_user", utils.MetaDynamic, "The StorDB user to sign in as.")
-	inStorDBPass = flag.String("stordb_passwd", utils.MetaDynamic, "The StorDB user's password.")
+	inDataDBType = flag.String("datadb_type", dfltCfg.DataDbType,
+		"the type of the DataDB Database <*redis|*mongo>")
+	inDataDBHost = flag.String("datadb_host", dfltCfg.DataDbHost,
+		"the DataDB host")
+	inDataDBPort = flag.String("datadb_port", dfltCfg.DataDbPort,
+		"the DataDB port")
+	inDataDBName = flag.String("datadb_name", dfltCfg.DataDbName,
+		"the name/number of the DataDB")
+	inDataDBUser = flag.String("datadb_user", dfltCfg.DataDbUser,
+		"the DataDB user")
+	inDataDBPass = flag.String("datadb_passwd", dfltCfg.DataDbPass,
+		"the DataDB password")
+	inDBDataEncoding = flag.String("dbdata_encoding", dfltCfg.DBDataEncoding,
+		"the encoding used to store object Data in strings")
+	inDataDBRedisSentinel = flag.String("redis_sentinel", dfltCfg.DataDbSentinelName,
+		"the name of redis sentinel")
 
-	outDataDBType = flag.String("out_datadb_type", utils.MetaDynamic, "The type of the DataDb Database <*redis|*mongo>")
-	outDataDBHost = flag.String("out_datadb_host", utils.MetaDynamic, "The DataDb host to connect to.")
-	outDataDBPort = flag.String("out_datadb_port", utils.MetaDynamic, "The DataDb port to bind to.")
-	outDataDBName = flag.String("out_datadb_name", utils.MetaDynamic, "The name/number of the DataDb to connect to.")
-	outDataDBUser = flag.String("out_datadb_user", utils.MetaDynamic, "The DataDb user to sign in as.")
-	outDataDBPass = flag.String("out_datadb_passwd", utils.MetaDynamic, "The DataDb user's password.")
+	outDataDBType = flag.String("out_datadb_type", utils.MetaDataDB,
+		"output DataDB type <*redis|*mongo>")
+	outDataDBHost = flag.String("out_datadb_host", utils.MetaDataDB,
+		"output DataDB host to connect to")
+	outDataDBPort = flag.String("out_datadb_port", utils.MetaDataDB,
+		"output DataDB port")
+	outDataDBName = flag.String("out_datadb_name", utils.MetaDataDB,
+		"output DataDB name/number")
+	outDataDBUser = flag.String("out_datadb_user", utils.MetaDataDB,
+		"output DataDB user")
+	outDataDBPass = flag.String("out_datadb_passwd", utils.MetaDataDB,
+		"output DataDB password")
+	outDBDataEncoding = flag.String("out_dbdata_encoding", utils.MetaDataDB,
+		"the encoding used to store object Data in strings in move mode")
+	outDataDBRedisSentinel = flag.String("out_redis_sentinel", utils.MetaDataDB,
+		"the name of redis sentinel")
 
-	outStorDBType = flag.String("out_stordb_type", utils.MetaDynamic, "The type of the StorDB Database <*mysql|*postgres|*mongo>")
-	outStorDBHost = flag.String("out_stordb_host", utils.MetaDynamic, "The StorDB host to connect to.")
-	outStorDBPort = flag.String("out_stordb_port", utils.MetaDynamic, "The StorDB port to bind to.")
-	outStorDBName = flag.String("out_stordb_name", utils.MetaDynamic, "The name/number of the StorDB to connect to.")
-	outStorDBUser = flag.String("out_stordb_user", utils.MetaDynamic, "The StorDB user to sign in as.")
-	outStorDBPass = flag.String("out_stordb_passwd", utils.MetaDynamic, "The StorDB user's password.")
+	inStorDBType = flag.String("stordb_type", dfltCfg.StorDBType,
+		"the type of the StorDB Database <*mysql|*postgres|*mongo>")
+	inStorDBHost = flag.String("stordb_host", dfltCfg.StorDBHost,
+		"the StorDB host")
+	inStorDBPort = flag.String("stordb_port", dfltCfg.StorDBPort,
+		"the StorDB port")
+	inStorDBName = flag.String("stordb_name", dfltCfg.StorDBName,
+		"the name/number of the StorDB")
+	inStorDBUser = flag.String("stordb_user", dfltCfg.StorDBUser,
+		"the StorDB user")
+	inStorDBPass = flag.String("stordb_passwd", dfltCfg.StorDBPass,
+		"the StorDB password")
 
-	loadHistorySize = flag.Int("load_history_size", config.CgrConfig().LoadHistorySize, "Limit the number of records in the load history")
+	outStorDBType = flag.String("out_stordb_type", utils.MetaStorDB,
+		"output StorDB type for move mode <*mysql|*postgres|*mongo>")
+	outStorDBHost = flag.String("out_stordb_host", utils.MetaStorDB,
+		"output StorDB host")
+	outStorDBPort = flag.String("out_stordb_port", utils.MetaStorDB,
+		"output StorDB port")
+	outStorDBName = flag.String("out_stordb_name", utils.MetaStorDB,
+		"output StorDB name/number")
+	outStorDBUser = flag.String("out_stordb_user", utils.MetaStorDB,
+		"output StorDB user")
+	outStorDBPass = flag.String("out_stordb_passwd", utils.MetaStorDB,
+		"output StorDB password")
 
-	datadb_versions = flag.Bool("datadb_versions", false, "Print DataDB versions")
-	stordb_versions = flag.Bool("stordb_versions", false, "Print StorDB versions")
-
-	dbDataEncoding   = flag.String("dbData_encoding", config.CgrConfig().DBDataEncoding, "The encoding used to store object Data in strings")
-	inDBDataEncoding = flag.String("in_dbData_encoding", "", "The encoding used to store object Data in strings")
-	dryRun           = flag.Bool("dry_run", false, "When true will not save loaded Data to DataDb but just parse it for consistency and errors.")
-	verbose          = flag.Bool("verbose", false, "Enable detailed verbose logging output")
+	dryRun = flag.Bool("dry_run", false,
+		"parse loaded data for consistency and errors, without storing it")
+	verbose = flag.Bool("verbose", false, "enable detailed verbose logging output")
 )
 
 func main() {
@@ -85,96 +115,220 @@ func main() {
 		fmt.Println(utils.GetCGRVersion())
 		return
 	}
-	*inDataDBType = strings.TrimPrefix(*inDataDBType, "*")
-	*inDataDBHost = config.DBDefaults.DBHost(*inDataDBType, *inDataDBHost)
-	*inDataDBPort = config.DBDefaults.DBPort(*inDataDBType, *inDataDBPort)
-	*inDataDBName = config.DBDefaults.DBName(*inDataDBType, *inDataDBName)
-	*inDataDBUser = config.DBDefaults.DBUser(*inDataDBType, *inDataDBUser)
-	*inDataDBPass = config.DBDefaults.DBPass(*inDataDBType, *inDataDBPass)
 
-	*inStorDBType = strings.TrimPrefix(*inStorDBType, "*")
-	*inStorDBHost = config.DBDefaults.DBHost(*inStorDBType, *inStorDBHost)
-	*inStorDBPort = config.DBDefaults.DBPort(*inStorDBType, *inStorDBPort)
-	*inStorDBName = config.DBDefaults.DBName(*inStorDBType, *inStorDBName)
-	*inStorDBUser = config.DBDefaults.DBUser(*inStorDBType, *inStorDBUser)
-	*inStorDBPass = config.DBDefaults.DBPass(*inStorDBType, *inStorDBPass)
+	mgrCfg := dfltCfg
+	if *cfgDir != "" {
+		if mgrCfg, err = config.NewCGRConfigFromFolder(*cfgDir); err != nil {
+			log.Fatalf("error loading config file %s", err.Error())
+		}
+	}
 
-	if *outDataDBType == utils.MetaDynamic {
-		*outDataDBType = *inDataDBType
-		*outDataDBHost = *inDataDBHost
-		*outDataDBPort = *inDataDBPort
-		*outDataDBName = *inDataDBName
-		*outDataDBUser = *inDataDBUser
-		*outDataDBPass = *inDataDBPass
+	// inDataDB
+	if *inDataDBType != dfltCfg.DataDbType {
+		mgrCfg.DataDbType = strings.TrimPrefix(*inDataDBType, "*")
+	}
+	if *inDataDBHost != dfltCfg.DataDbHost {
+		mgrCfg.DataDbHost = *inDataDBHost
+	}
+	if *inDataDBPort != dfltCfg.DataDbPort {
+		mgrCfg.DataDbPort = *inDataDBPort
+	}
+	if *inDataDBName != dfltCfg.DataDbName {
+		mgrCfg.DataDbName = *inDataDBName
+	}
+	if *inDataDBUser != dfltCfg.DataDbUser {
+		mgrCfg.DataDbUser = *inDataDBUser
+	}
+	if *inDataDBPass != dfltCfg.DataDbPass {
+		mgrCfg.DataDbPass = *inDataDBPass
+	}
+	if *inDBDataEncoding != dfltCfg.DBDataEncoding {
+		mgrCfg.DBDataEncoding = *inDBDataEncoding
+	}
+	if *inDataDBRedisSentinel != dfltCfg.DataDbSentinelName {
+		mgrCfg.DataDbSentinelName = *inDataDBRedisSentinel
+	}
+
+	// outDataDB
+	if *outDataDBType == utils.MetaDataDB {
+		if dfltCfg.MigratorCgrConfig.OutDataDBType == mgrCfg.MigratorCgrConfig.OutDataDBType {
+			mgrCfg.MigratorCgrConfig.OutDataDBType = mgrCfg.DataDbType
+		}
 	} else {
-		*outDataDBType = strings.TrimPrefix(*outDataDBType, "*")
-		*outDataDBHost = config.DBDefaults.DBHost(*outDataDBType, *outDataDBHost)
-		*outDataDBPort = config.DBDefaults.DBPort(*outDataDBType, *outDataDBPort)
-		*outDataDBName = config.DBDefaults.DBName(*outDataDBType, *outDataDBName)
-		*outDataDBUser = config.DBDefaults.DBUser(*outDataDBType, *outDataDBUser)
-		*outDataDBPass = config.DBDefaults.DBPass(*outDataDBType, *outDataDBPass)
+		mgrCfg.MigratorCgrConfig.OutDataDBType = strings.TrimPrefix(*outDataDBType, "*")
 	}
 
-	if *outStorDBType != utils.MetaDynamic {
-		*outStorDBType = strings.TrimPrefix(*outStorDBType, "*")
-		*outStorDBHost = config.DBDefaults.DBHost(*outStorDBType, *outStorDBHost)
-		*outStorDBPort = config.DBDefaults.DBPort(*outStorDBType, *outStorDBPort)
-		*outStorDBName = config.DBDefaults.DBName(*outStorDBType, *outStorDBName)
-		*outStorDBUser = config.DBDefaults.DBUser(*outStorDBType, *outStorDBUser)
-		*outStorDBPass = config.DBDefaults.DBPass(*outStorDBType, *outStorDBPass)
-	}
-
-	var dmIN *engine.DataManager
-	dmIN, _ = engine.ConfigureDataStorage(*inDataDBType, *inDataDBHost, *inDataDBPort,
-		*inDataDBName, *inDataDBUser, *inDataDBPass, *dbDataEncoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
-	instorDB, err := engine.ConfigureStorStorage(*inStorDBType, *inStorDBHost, *inStorDBPort, *inStorDBName, *inStorDBUser, *inStorDBPass, *inDBDataEncoding,
-		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
-	if err != nil {
-		log.Fatal(err)
-	}
-	var dmOUT *engine.DataManager
-	dmOUT, _ = engine.ConfigureDataStorage(*outDataDBType, *outDataDBHost, *outDataDBPort,
-		*outDataDBName, *outDataDBUser, *outDataDBPass, *dbDataEncoding, config.CgrConfig().CacheCfg(), *loadHistorySize)
-	outDataDB, err := migrator.ConfigureV1DataStorage(*outDataDBType, *outDataDBHost, *outDataDBPort, *outDataDBName, *outDataDBUser, *outDataDBPass, *dbDataEncoding)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if *outStorDBType == utils.MetaDynamic {
-		storDB = instorDB
+	if *outDataDBHost == utils.MetaDataDB {
+		if dfltCfg.MigratorCgrConfig.OutDataDBHost == mgrCfg.MigratorCgrConfig.OutDataDBHost {
+			mgrCfg.MigratorCgrConfig.OutDataDBHost = mgrCfg.DataDbHost
+		}
 	} else {
-		storDB, err = engine.ConfigureStorStorage(*outStorDBType, *outStorDBHost, *outStorDBPort, *outStorDBName, *outStorDBUser, *outStorDBPass, *dbDataEncoding,
-			config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
-		if err != nil {
-			log.Fatal(err)
+		mgrCfg.MigratorCgrConfig.OutDataDBHost = *outDataDBHost
+	}
+	if *outDataDBPort == utils.MetaDataDB {
+		if dfltCfg.MigratorCgrConfig.OutDataDBPort == mgrCfg.MigratorCgrConfig.OutDataDBPort {
+			mgrCfg.MigratorCgrConfig.OutDataDBPort = mgrCfg.DataDbPort
 		}
+	} else {
+		mgrCfg.MigratorCgrConfig.OutDataDBPort = *outDataDBPort
 	}
-	if *inDataDBName != *outDataDBName || *inDataDBType != *outDataDBType || *inDataDBHost != *outDataDBHost {
-		sameDataDB = false
+	if *outDataDBName == utils.MetaDataDB {
+		if dfltCfg.MigratorCgrConfig.OutDataDBName == mgrCfg.MigratorCgrConfig.OutDataDBName {
+			mgrCfg.MigratorCgrConfig.OutDataDBName = mgrCfg.DataDbName
+		}
+	} else {
+		mgrCfg.MigratorCgrConfig.OutDataDBName = *outDataDBName
 	}
-	if *inStorDBName != *outStorDBName || *inStorDBType != *outStorDBName || *inStorDBHost != *outStorDBHost {
-		sameStorDB = false
+	if *outDataDBUser == utils.MetaDataDB {
+		if dfltCfg.MigratorCgrConfig.OutDataDBUser == mgrCfg.MigratorCgrConfig.OutDataDBUser {
+			mgrCfg.MigratorCgrConfig.OutDataDBUser = mgrCfg.DataDbUser
+		}
+	} else {
+		mgrCfg.MigratorCgrConfig.OutDataDBUser = *outDataDBUser
 	}
-	m, err := migrator.NewMigrator(dmIN, dmOUT, *inDataDBType, *dbDataEncoding, storDB, *inStorDBType, outDataDB,
-		*outDataDBType, *inDBDataEncoding, instorDB, *outStorDBType, *dryRun, sameDataDB, sameStorDB, *datadb_versions, *stordb_versions)
-	if err != nil {
+	if *outDataDBPass == utils.MetaDataDB {
+		if dfltCfg.MigratorCgrConfig.OutDataDBPassword == mgrCfg.MigratorCgrConfig.OutDataDBPassword {
+			mgrCfg.MigratorCgrConfig.OutDataDBPassword = mgrCfg.DataDbPass
+		}
+	} else {
+		mgrCfg.MigratorCgrConfig.OutDataDBPassword = *outDataDBPass
+	}
+	if *outDBDataEncoding == utils.MetaDataDB {
+		if dfltCfg.MigratorCgrConfig.OutDataDBEncoding == mgrCfg.MigratorCgrConfig.OutDataDBEncoding {
+			mgrCfg.MigratorCgrConfig.OutDataDBEncoding = mgrCfg.DBDataEncoding
+		}
+	} else {
+		mgrCfg.MigratorCgrConfig.OutDataDBEncoding = *outDBDataEncoding
+	}
+	if *outDataDBRedisSentinel == utils.MetaDataDB {
+		if dfltCfg.MigratorCgrConfig.OutDataDBRedisSentinel == mgrCfg.MigratorCgrConfig.OutDataDBRedisSentinel {
+			mgrCfg.MigratorCgrConfig.OutDataDBRedisSentinel = mgrCfg.DataDbSentinelName
+		}
+	} else {
+		mgrCfg.MigratorCgrConfig.OutDataDBRedisSentinel = *outDataDBRedisSentinel
+	}
+
+	sameDataDB = mgrCfg.MigratorCgrConfig.OutDataDBType == mgrCfg.DataDbType &&
+		mgrCfg.MigratorCgrConfig.OutDataDBHost == mgrCfg.DataDbHost &&
+		mgrCfg.MigratorCgrConfig.OutDataDBPort == mgrCfg.DataDbPort &&
+		mgrCfg.MigratorCgrConfig.OutDataDBName == mgrCfg.DataDbName &&
+		mgrCfg.MigratorCgrConfig.OutDataDBEncoding == mgrCfg.DBDataEncoding
+
+	if dmIN, err = migrator.NewMigratorDataDB(mgrCfg.DataDbType,
+		mgrCfg.DataDbHost, mgrCfg.DataDbPort,
+		mgrCfg.DataDbName, mgrCfg.DataDbUser,
+		mgrCfg.DataDbPass, mgrCfg.DBDataEncoding,
+		mgrCfg.CacheCfg(), mgrCfg.DataDbSentinelName); err != nil {
 		log.Fatal(err)
 	}
-	if *datadb_versions {
-		vrs, _ := dmOUT.DataDB().GetVersions(utils.TBLVersions)
-		if len(vrs) != 0 {
-			log.Printf("DataDB versions : %+v\n", vrs)
-		} else {
-			log.Printf("DataDB versions not_found")
-		}
+
+	if sameDataDB {
+		dmOUT = dmIN
+	} else if dmOUT, err = migrator.NewMigratorDataDB(mgrCfg.MigratorCgrConfig.OutDataDBType,
+		mgrCfg.MigratorCgrConfig.OutDataDBHost, mgrCfg.MigratorCgrConfig.OutDataDBPort,
+		mgrCfg.MigratorCgrConfig.OutDataDBName, mgrCfg.MigratorCgrConfig.OutDataDBUser,
+		mgrCfg.MigratorCgrConfig.OutDataDBPassword, mgrCfg.MigratorCgrConfig.OutDataDBEncoding,
+		mgrCfg.CacheCfg(), mgrCfg.MigratorCgrConfig.OutDataDBRedisSentinel); err != nil {
+		log.Fatal(err)
 	}
-	if *stordb_versions {
-		vrs, _ := storDB.GetVersions(utils.TBLVersions)
-		if len(vrs) != 0 {
-			log.Printf("StorDB versions : %+v\n", vrs)
-		} else {
-			log.Printf("StorDB versions not_found")
+
+	// inStorDB
+	if *inStorDBType != dfltCfg.StorDBType {
+		mgrCfg.StorDBType = strings.TrimPrefix(*inStorDBType, "*")
+	}
+	if *inStorDBHost != dfltCfg.StorDBHost {
+		mgrCfg.StorDBHost = *inStorDBHost
+	}
+	if *inStorDBPort != dfltCfg.StorDBPort {
+		mgrCfg.StorDBPort = *inStorDBPort
+	}
+	if *inStorDBName != dfltCfg.StorDBName {
+		mgrCfg.StorDBName = *inStorDBName
+	}
+	if *inStorDBUser != dfltCfg.StorDBUser {
+		mgrCfg.StorDBUser = *inStorDBUser
+	}
+	if *inStorDBPass != dfltCfg.StorDBPass {
+		mgrCfg.StorDBPass = *inStorDBPass
+	}
+
+	// outStorDB
+	if *outStorDBType == utils.MetaStorDB {
+		if dfltCfg.MigratorCgrConfig.OutStorDBType == mgrCfg.MigratorCgrConfig.OutStorDBType {
+			mgrCfg.MigratorCgrConfig.OutStorDBType = mgrCfg.StorDBType
 		}
+	} else {
+		mgrCfg.MigratorCgrConfig.OutStorDBType = strings.TrimPrefix(*outStorDBType, "*")
+	}
+	if *outStorDBHost == utils.MetaStorDB {
+		if dfltCfg.MigratorCgrConfig.OutStorDBHost == mgrCfg.MigratorCgrConfig.OutStorDBHost {
+			mgrCfg.MigratorCgrConfig.OutStorDBHost = mgrCfg.StorDBHost
+		}
+	} else {
+		mgrCfg.MigratorCgrConfig.OutStorDBHost = *outStorDBHost
+	}
+	if *outStorDBPort == utils.MetaStorDB {
+		if dfltCfg.MigratorCgrConfig.OutStorDBPort == mgrCfg.MigratorCgrConfig.OutStorDBPort {
+			mgrCfg.MigratorCgrConfig.OutStorDBPort = mgrCfg.StorDBPort
+		}
+	} else {
+		mgrCfg.MigratorCgrConfig.OutStorDBPort = *outStorDBPort
+	}
+	if *outStorDBName == utils.MetaStorDB {
+		if dfltCfg.MigratorCgrConfig.OutStorDBName == mgrCfg.MigratorCgrConfig.OutStorDBName {
+			mgrCfg.MigratorCgrConfig.OutStorDBName = mgrCfg.StorDBName
+		}
+	} else {
+		mgrCfg.MigratorCgrConfig.OutStorDBName = *outStorDBName
+	}
+	if *outStorDBUser == utils.MetaStorDB {
+		if dfltCfg.MigratorCgrConfig.OutStorDBUser == mgrCfg.MigratorCgrConfig.OutStorDBUser {
+			mgrCfg.MigratorCgrConfig.OutStorDBUser = mgrCfg.StorDBUser
+		}
+	} else {
+		mgrCfg.MigratorCgrConfig.OutStorDBUser = *outStorDBUser
+	}
+	if *outStorDBPass == utils.MetaStorDB {
+		if dfltCfg.MigratorCgrConfig.OutStorDBPassword == mgrCfg.MigratorCgrConfig.OutStorDBPassword {
+			mgrCfg.MigratorCgrConfig.OutStorDBPassword = mgrCfg.StorDBPass
+		}
+	} else {
+		mgrCfg.MigratorCgrConfig.OutStorDBPassword = *outStorDBPass
+	}
+
+	sameStorDB = mgrCfg.MigratorCgrConfig.OutStorDBType == mgrCfg.StorDBType &&
+		mgrCfg.MigratorCgrConfig.OutStorDBHost == mgrCfg.StorDBHost &&
+		mgrCfg.MigratorCgrConfig.OutStorDBPort == mgrCfg.StorDBPort &&
+		mgrCfg.MigratorCgrConfig.OutStorDBName == mgrCfg.StorDBName
+
+	if storDBIn, err = migrator.NewMigratorStorDB(mgrCfg.StorDBType,
+		mgrCfg.StorDBHost, mgrCfg.StorDBPort,
+		mgrCfg.StorDBName, mgrCfg.StorDBUser, mgrCfg.StorDBPass,
+		config.CgrConfig().StorDBMaxOpenConns,
+		config.CgrConfig().StorDBMaxIdleConns,
+		config.CgrConfig().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDBCDRSIndexes); err != nil {
+		log.Fatal(err)
+	}
+
+	if sameStorDB {
+		storDBOut = storDBIn
+	} else if storDBOut, err = migrator.NewMigratorStorDB(mgrCfg.MigratorCgrConfig.OutStorDBType,
+		mgrCfg.MigratorCgrConfig.OutStorDBHost, mgrCfg.MigratorCgrConfig.OutStorDBPort,
+		mgrCfg.MigratorCgrConfig.OutStorDBName, mgrCfg.MigratorCgrConfig.OutStorDBUser,
+		mgrCfg.MigratorCgrConfig.OutStorDBPassword,
+		mgrCfg.StorDBMaxOpenConns,
+		mgrCfg.StorDBMaxIdleConns,
+		mgrCfg.StorDBConnMaxLifetime,
+		mgrCfg.StorDBCDRSIndexes); err != nil {
+		log.Fatal(err)
+	}
+
+	m, err := migrator.NewMigrator(dmIN, dmOUT,
+		storDBIn, storDBOut,
+		*dryRun, sameDataDB, sameStorDB)
+	if err != nil {
+		log.Fatal(err)
 	}
 	if migrate != nil && *migrate != "" { // Run migrator
 		migrstats := make(map[string]int)

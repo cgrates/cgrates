@@ -18,7 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"github.com/cgrates/cgrates/utils"
+)
 
 func init() {
 	c := &CmdSetRatingProfile{
@@ -33,7 +35,7 @@ func init() {
 type CmdSetRatingProfile struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TPRatingProfile
+	rpcParams *utils.AttrSetRatingProfile
 	rpcResult string
 	*CommandExecuter
 }
@@ -48,7 +50,7 @@ func (self *CmdSetRatingProfile) RpcMethod() string {
 
 func (self *CmdSetRatingProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TPRatingProfile{}
+		self.rpcParams = new(utils.AttrSetRatingProfile)
 	}
 	return self.rpcParams
 }

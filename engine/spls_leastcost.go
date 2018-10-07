@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -35,32 +33,21 @@ type LeastCostSorter struct {
 	spS     *SupplierService
 }
 
-func (lcs *LeastCostSorter) SortSuppliers(prflID string,
-	suppls []*Supplier, ev *utils.CGREvent) (sortedSuppls *SortedSuppliers, err error) {
+func (lcs *LeastCostSorter) SortSuppliers(prflID string, suppls []*Supplier,
+	ev *utils.CGREvent, extraOpts *optsGetSuppliers) (sortedSuppls *SortedSuppliers, err error) {
 	sortedSuppls = &SortedSuppliers{ProfileID: prflID,
 		Sorting:         lcs.sorting,
 		SortedSuppliers: make([]*SortedSupplier, 0)}
 	for _, s := range suppls {
-		costData, err := lcs.spS.costForEvent(ev, s.AccountIDs, s.RatingPlanIDs)
-		if err != nil {
+		if srtSpl, pass, err := lcs.spS.populateSortingData(ev, s, extraOpts); err != nil {
 			return nil, err
-		} else if len(costData) == 0 {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> profile: %s ignoring supplier with ID: %s, missing cost information",
-					utils.SupplierS, prflID, s.ID))
-			continue
+		} else if pass && srtSpl != nil {
+			sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers, srtSpl)
 		}
-		srtData := map[string]interface{}{
-			utils.Weight: s.Weight,
-		}
-		for k, v := range costData {
-			srtData[k] = v
-		}
-		sortedSuppls.SortedSuppliers = append(sortedSuppls.SortedSuppliers, &SortedSupplier{
-			SupplierID:         s.ID,
-			SortingData:        srtData,
-			SupplierParameters: s.SupplierParameters})
 	}
-	sortedSuppls.SortCost()
+	if len(sortedSuppls.SortedSuppliers) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	sortedSuppls.SortLeastCost()
 	return
 }

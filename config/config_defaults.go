@@ -47,23 +47,25 @@ const CGRATES_CFG_JSON = `
 	"reply_timeout": "2s",									// consider connection down for replies taking longer than this value
 	"response_cache_ttl": "0s",								// the life span of a cached response
 	"internal_ttl": "2m",									// maximum duration to wait for internal connections before giving up
-	"locking_timeout": "5s",								// timeout internal locks to avoid deadlocks
+	"locking_timeout": "0",									// timeout internal locks to avoid deadlocks
+	"digest_separator": ",",
+	"digest_equal": ":",
 },
 
 
 "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	"db_type": "redis",						// data_db type: <redis|mongo>
+	"db_type": "redis",						// data_db type: <redis|mongo|internal>
 	"db_host": "127.0.0.1",					// data_db host address
 	"db_port": 6379, 						// data_db port to reach the database
 	"db_name": "10", 						// data_db database name to connect to
 	"db_user": "cgrates", 					// username to use when connecting to data_db
 	"db_password": "", 						// password to use when connecting to data_db
-	"load_history_size": 10,				// Number of records in the load history
+	"redis_sentinel":"",					// redis_sentinel is the name of sentinel
 },
 
 
 "stor_db": {								// database used to store offline tariff plans and CDRs
-	"db_type": "mysql",						// stor database type to use: <mongo|mysql|postgres>
+	"db_type": "mysql",						// stor database type to use: <mongo|mysql|postgres|internal>
 	"db_host": "127.0.0.1",					// the host to connect to
 	"db_port": 3306,						// the port to reach the stordb
 	"db_name": "cgrates",					// stor database name
@@ -80,19 +82,29 @@ const CGRATES_CFG_JSON = `
 	"rpc_json": "127.0.0.1:2012",			// RPC JSON listening address
 	"rpc_gob": "127.0.0.1:2013",			// RPC GOB listening address
 	"http": "127.0.0.1:2080",				// HTTP listening address
+	"rpc_json_tls" : "127.0.0.1:2022",		// RPC JSON TLS listening address
+	"rpc_gob_tls": "127.0.0.1:2023",		// RPC GOB TLS listening address
+	"http_tls": "127.0.0.1:2280",			// HTTP TLS listening address
+	"tls_server_certificate" : "",			// path to server certificate(must conatin server.crt + ca.crt)
+	"tls_server_key":"",					// path to server key
+	"tls_client_certificate" : "",			// path to client certificate(must conatin client.crt + ca.crt)
+	"tls_client_key":"",					// path to client key
 },
 
 
-"http": {									// HTTP server configuration
-	"json_rpc_url": "/jsonrpc",				// JSON RPC relative URL ("" to disable)
-	"ws_url": "/ws",						// WebSockets relative URL ("" to disable)
-	"use_basic_auth": false,				// use basic authentication
-	"auth_users": {}						// basic authentication usernames and base64-encoded passwords (eg: { "username1": "cGFzc3dvcmQ=", "username2": "cGFzc3dvcmQy "})
+"http": {										// HTTP server configuration
+	"json_rpc_url": "/jsonrpc",					// JSON RPC relative URL ("" to disable)
+	"ws_url": "/ws",							// WebSockets relative URL ("" to disable)
+	"freeswitch_cdrs_url": "/freeswitch_json",	// Freeswitch CDRS relative URL ("" to disable)
+	"http_cdrs": "/cdr_http",					// CDRS relative URL ("" to disable)
+	"use_basic_auth": false,					// use basic authentication
+	"auth_users": {},							// basic authentication usernames and base64-encoded passwords (eg: { "username1": "cGFzc3dvcmQ=", "username2": "cGFzc3dvcmQy "})
 },
 
 
 "scheduler": {
-	"enabled": false,						// start Scheduler service: <true|false>
+	"enabled": false,				// start Scheduler service: <true|false>
+	"cdrs_conns": [],				// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
 },
 
 
@@ -122,21 +134,19 @@ const CGRATES_CFG_JSON = `
 	"filters": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control filters caching
 	"supplier_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control supplier profile caching
 	"attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control attribute profile caching
-	"resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "precache": false}, // control resource filter indexes caching
-	"resource_filter_revindexes" : {"limit": -1, "ttl": "", "static_ttl": false, "precache": false}, // control resource filter reverse indexes caching
-	"stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "precache": false}, // control stat filter indexes caching
-	"stat_filter_revindexes" : {"limit": -1, "ttl": "", "static_ttl": false, "precache": false}, // control stat filter reverse indexes caching
-	"threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "precache": false}, // control threshold filter indexes caching
-	"threshold_filter_revindexes" : {"limit": -1, "ttl": "", "static_ttl": false, "precache": false}, // control threshold filter reverse indexes caching
-	"supplier_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "precache": false}, // control supplier filter indexes caching
-	"supplier_filter_revindexes" : {"limit": -1, "ttl": "", "static_ttl": false, "precache": false}, // control supplier filter reverse indexes caching
-	"attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "precache": false}, // control attribute filter indexes caching
-	"attribute_filter_revindexes" : {"limit": -1, "ttl": "", "static_ttl": false, "precache": false}, // control attribute filter reverse indexes caching
+	"charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control charger profile caching
+	"resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control resource filter indexes caching
+	"stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 						// control stat filter indexes caching
+	"threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control threshold filter indexes caching
+	"supplier_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control supplier filter indexes caching
+	"attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control attribute filter indexes caching
+	"charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control charger filter indexes caching
 },
 
 
 "filters": {								// Filters configuration (*new)
 	"stats_conns": [],						// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+	"indexed_selects":true,					// enable profile matching exclusively on indexes
 },
 
 
@@ -146,7 +156,6 @@ const CGRATES_CFG_JSON = `
 	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"stats_conns": [],						// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"pubsubs_conns": [],					// address where to reach the pubusb service, empty to disable pubsub functionality: <""|*internal|x.y.z.y:1234>
-	"attributes_conns": [],					// address where to reach the attribute service, empty to disable attributes functionality: <""|*internal|x.y.z.y:1234>
 	"users_conns": [],						// address where to reach the user service, empty to disable user profile functionality: <""|*internal|x.y.z.y:1234>
 	"aliases_conns": [],					// address where to reach the aliases service, empty to disable aliases functionality: <""|*internal|x.y.z.y:1234>
 	"rp_subject_prefix_matching": false,	// enables prefix matching for the rating profile subject
@@ -164,7 +173,8 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,						// start the CDR Server service:  <true|false>
 	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs
 	"store_cdrs": true,						// store cdrs in storDb
-	"sessions_cost_retries": 5,					// number of queries to sessions_costs before recalculating CDR
+	"sessions_cost_retries": 5,				// number of queries to sessions_costs before recalculating CDR
+	"chargers_conns": [],					// address where to reach the charger service, empty to disable charger functionality: <""|*internal|x.y.z.y:1234>
 	"rals_conns": [
 		{"address": "*internal"}			// address where to reach the Rater for cost calculation, empty to disable functionality: <""|*internal|x.y.z.y:1234>
 	],
@@ -183,7 +193,8 @@ const CGRATES_CFG_JSON = `
 	"*default": {
 		"export_format": "*file_csv",					// exported CDRs format <*file_csv|*file_fwv|*http_post|*http_json_cdr|*http_json_map|*amqp_json_cdr|*amqp_json_map>
 		"export_path": "/var/spool/cgrates/cdre",		// path where the exported CDRs will be placed
-		"cdr_filter": "",								// filter CDRs exported by this template
+		"filters" :[],									// new filters for cdre
+		"tenant": "cgrates.org",						// tenant used in filterS.Pass
 		"synchronous": false,							// block processing until export has a result
 		"attempts": 1,									// Number of attempts if not success
 		"field_separator": ",",							// used field separator in some export formats, eg: *file_csv
@@ -193,20 +204,20 @@ const CGRATES_CFG_JSON = `
 		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
 		"header_fields": [],							// template of the exported header fields
 		"content_fields": [								// template of the exported content fields
-			{"tag": "CGRID", "type": "*composed", "value": "CGRID"},
-			{"tag":"RunID", "type": "*composed", "value": "RunID"},
-			{"tag":"TOR", "type": "*composed", "value": "ToR"},
-			{"tag":"OriginID", "type": "*composed", "value": "OriginID"},
-			{"tag":"RequestType", "type": "*composed", "value": "RequestType"},
-			{"tag":"Tenant", "type": "*composed", "value": "Tenant"},
-			{"tag":"Category", "type": "*composed", "value": "Category"},
-			{"tag":"Account", "type": "*composed", "value": "Account"},
-			{"tag":"Subject", "type": "*composed", "value": "Subject"},
-			{"tag":"Destination", "type": "*composed", "value": "Destination"},
-			{"tag":"SetupTime", "type": "*composed", "value": "SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
-			{"tag":"AnswerTime", "type": "*composed", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
-			{"tag":"Usage", "type": "*composed", "value": "Usage"},
-			{"tag":"Cost", "type": "*composed", "value": "Cost", "rounding_decimals": 4},
+			{"tag": "CGRID", "type": "*composed", "value": "~CGRID"},
+			{"tag":"RunID", "type": "*composed", "value": "~RunID"},
+			{"tag":"TOR", "type": "*composed", "value": "~ToR"},
+			{"tag":"OriginID", "type": "*composed", "value": "~OriginID"},
+			{"tag":"RequestType", "type": "*composed", "value": "~RequestType"},
+			{"tag":"Tenant", "type": "*composed", "value": "~Tenant"},
+			{"tag":"Category", "type": "*composed", "value": "~Category"},
+			{"tag":"Account", "type": "*composed", "value": "~Account"},
+			{"tag":"Subject", "type": "*composed", "value": "~Subject"},
+			{"tag":"Destination", "type": "*composed", "value": "~Destination"},
+			{"tag":"SetupTime", "type": "*composed", "value": "~SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"tag":"AnswerTime", "type": "*composed", "value": "~AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"tag":"Usage", "type": "*composed", "value": "~Usage"},
+			{"tag":"Cost", "type": "*composed", "value": "~Cost", "rounding_decimals": 4},
 		],
 		"trailer_fields": [],							// template of the exported trailer fields
 	},
@@ -238,40 +249,41 @@ const CGRATES_CFG_JSON = `
 		"failed_calls_prefix": "missed_calls",			// used in case of flatstore CDRs to avoid searching for BYE records
 		"cdr_path": "",									// path towards one CDR element in case of XML CDRs
 		"cdr_source_id": "freeswitch_csv",				// free form field, tag identifying the source of the CDRs within CDRS database
-		"cdr_filter": "",								// filter CDR records to import
+		"filters" :[],									// new filters used in FilterS subsystem
+		"tenant": "cgrates.org",						// default tenant
 		"continue_on_success": false,					// continue to the next template if executed
 		"partial_record_cache": "10s",					// duration to cache partial records when not pairing
 		"partial_cache_expiry_action": "*dump_to_file",	// action taken when cache when records in cache are timed-out <*dump_to_file|*post_cdr>
 		"header_fields": [],							// template of the import header fields
 		"content_fields":[								// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "2", "mandatory": true},
-			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "3", "mandatory": true},
-			{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "4", "mandatory": true},
-			{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "6", "mandatory": true},
-			{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "7", "mandatory": true},
-			{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "8", "mandatory": true},
-			{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "9", "mandatory": true},
-			{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "10", "mandatory": true},
-			{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "11", "mandatory": true},
-			{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "12", "mandatory": true},
-			{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "13", "mandatory": true},
+			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "~2", "mandatory": true},
+			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~3", "mandatory": true},
+			{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "~4", "mandatory": true},
+			{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~6", "mandatory": true},
+			{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "~7", "mandatory": true},
+			{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~8", "mandatory": true},
+			{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "~9", "mandatory": true},
+			{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~10", "mandatory": true},
+			{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~11", "mandatory": true},
+			{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~12", "mandatory": true},
+			{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "~13", "mandatory": true},
 		],
 		"trailer_fields": [],							// template of the import trailer fields
 		"cache_dump_fields": [							// template used when dumping cached CDR, eg: partial CDRs
-			{"tag": "CGRID", "type": "*composed", "value": "CGRID"},
-			{"tag": "RunID", "type": "*composed", "value": "RunID"},
-			{"tag": "TOR", "type": "*composed", "value": "ToR"},
-			{"tag": "OriginID", "type": "*composed", "value": "OriginID"},
-			{"tag": "RequestType", "type": "*composed", "value": "RequestType"},
-			{"tag": "Tenant", "type": "*composed", "value": "Tenant"},
-			{"tag": "Category", "type": "*composed", "value": "Category"},
-			{"tag": "Account", "type": "*composed", "value": "Account"},
-			{"tag": "Subject", "type": "*composed", "value": "Subject"},
-			{"tag": "Destination", "type": "*composed", "value": "Destination"},
-			{"tag": "SetupTime", "type": "*composed", "value": "SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
-			{"tag": "AnswerTime", "type": "*composed", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
-			{"tag": "Usage", "type": "*composed", "value": "Usage"},
-			{"tag": "Cost", "type": "*composed", "value": "Cost"},
+			{"tag": "CGRID", "type": "*composed", "value": "~CGRID"},
+			{"tag": "RunID", "type": "*composed", "value": "~RunID"},
+			{"tag": "TOR", "type": "*composed", "value": "~ToR"},
+			{"tag": "OriginID", "type": "*composed", "value": "~OriginID"},
+			{"tag": "RequestType", "type": "*composed", "value": "~RequestType"},
+			{"tag": "Tenant", "type": "*composed", "value": "~Tenant"},
+			{"tag": "Category", "type": "*composed", "value": "~Category"},
+			{"tag": "Account", "type": "*composed", "value": "~Account"},
+			{"tag": "Subject", "type": "*composed", "value": "~Subject"},
+			{"tag": "Destination", "type": "*composed", "value": "~Destination"},
+			{"tag": "SetupTime", "type": "*composed", "value": "~SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"tag": "AnswerTime", "type": "*composed", "value": "~AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"tag": "Usage", "type": "*composed", "value": "~Usage"},
+			{"tag": "Cost", "type": "*composed", "value": "~Cost"},
 		],
 	},
 ],
@@ -280,6 +292,7 @@ const CGRATES_CFG_JSON = `
 "sessions": {
 	"enabled": false,						// starts session manager service: <true|false>
 	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
+	"chargers_conns": [],					// address where to reach the charger service, empty to disable charger functionality: <""|*internal|x.y.z.y:1234>
 	"rals_conns": [
 		{"address": "*internal"}			// address where to reach the RALs <""|*internal|127.0.0.1:2013>
 	],
@@ -287,6 +300,8 @@ const CGRATES_CFG_JSON = `
 		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
 	],
 	"resources_conns": [],					// address where to reach the ResourceS <""|*internal|127.0.0.1:2013>
+	"thresholds_conns": [],					// address where to reach the ThresholdS <""|*internal|127.0.0.1:2013>
+	"stats_conns": [],						// address where to reach the StatS <""|*internal|127.0.0.1:2013>
 	"suppliers_conns": [],					// address where to reach the SupplierS <""|*internal|127.0.0.1:2013>
 	"attributes_conns": [],					// address where to reach the AttributeS <""|*internal|127.0.0.1:2013>
 	"session_replication_conns": [],		// replicate sessions towards these session services
@@ -299,6 +314,7 @@ const CGRATES_CFG_JSON = `
 	//"session_ttl_usage": "",				// tweak Usage for sessions timing-out, not defined by default
 	"session_indexes": [],					// index sessions based on these fields for GetActiveSessions API
 	"client_protocol": 1.0,					// version of protocol to use when acting as JSON-PRC client <"0","1.0">
+	"channel_sync_interval": "0",			// sync channels regularly (0 to disable sync session)
 },
 
 
@@ -326,10 +342,9 @@ const CGRATES_CFG_JSON = `
 	//"low_balance_ann_file": "",			// file to be played when low balance is reached for prepaid calls
 	"empty_balance_context": "",			// if defined, prepaid calls will be transferred to this context on empty balance
 	"empty_balance_ann_file": "",			// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
-	"channel_sync_interval": "5m",			// sync channels with freeswitch regularly
 	"max_wait_connection": "2s",			// maximum duration to wait for a connection to be retrieved from the pool
 	"event_socket_conns":[					// instantiate connections to multiple FreeSWITCH servers
-		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5}
+		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5,"alias":""}
 	],
 },
 
@@ -346,22 +361,34 @@ const CGRATES_CFG_JSON = `
 	],
 },
 
+
 "diameter_agent": {
 	"enabled": false,											// enables the diameter agent: <true|false>
 	"listen": "127.0.0.1:3868",									// address where to listen for diameter requests <x.y.z.y:1234>
-	"dictionaries_dir": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
+	"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
 	"sessions_conns": [
 		{"address": "*internal"}								// connection towards SessionService
 	],
-	"pubsubs_conns": [],										// address where to reach the pubusb service, empty to disable pubsub functionality: <""|*internal|x.y.z.y:1234>
-	"create_cdr": true,											// create CDR out of CCR terminate and send it to SessionS
-	"cdr_requires_session": true,								// only create CDR if there is an active session at terminate
-	"debit_interval": "5m",										// interval for CCR updates
-	"timezone": "",												// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
 	"origin_host": "CGR-DA",									// diameter Origin-Host AVP used in replies
 	"origin_realm": "cgrates.org",								// diameter Origin-Realm AVP used in replies
 	"vendor_id": 0,												// diameter Vendor-Id AVP used in replies
 	"product_name": "CGRateS",									// diameter Product-Name AVP used in replies
+	"templates":{
+		"*cca": [
+				{"tag": "SessionId", "field_id": "Session-Id", "type": "*composed", 
+					"value": "~*req.Session-Id", "mandatory": true},
+				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*composed", 
+					"value": "~*vars.OriginHost", "mandatory": true},
+				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*composed", 
+					"value": "~*vars.OriginRealm", "mandatory": true},
+				{"tag": "AuthApplicationId", "field_id": "Auth-Application-Id", "type": "*composed",
+					 "value": "~*vars.*appid", "mandatory": true},
+				{"tag": "CCRequestType", "field_id": "CC-Request-Type", "type": "*composed", 
+					"value": "~*req.CC-Request-Type", "mandatory": true},
+				{"tag": "CCRequestNumber", "field_id": "CC-Request-Number", "type": "*composed", 
+					"value": "~*req.CC-Request-Number", "mandatory": true},
+		]
+	},
 	"request_processors": [],
 },
 
@@ -380,11 +407,13 @@ const CGRATES_CFG_JSON = `
 	"sessions_conns": [
 		{"address": "*internal"}								// connection towards SessionService
 	],
-	"create_cdr": true,											// create CDR out of Accounting-Stop and send it to SessionS
 	"cdr_requires_session": false,								// only create CDR if there is an active session at terminate
-	"timezone": "",												// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
 	"request_processors": [],
 },
+
+
+"http_agent": [						// HTTP Agents, ie towards cnc.to MVNE platform
+],
 
 
 "pubsubs": {
@@ -405,6 +434,15 @@ const CGRATES_CFG_JSON = `
 
 "attributes": {								// Attribute service
 	"enabled": false,						// starts attribute service: <true|false>.
+	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"process_runs": 1,						// number of run loops when processing event
+},
+
+
+"chargers": {								// Charger service
+	"enabled": false,						// starts charger service: <true|false>.
+	"attributes_conns": [],					// address where to reach the AttributeS <""|127.0.0.1:2013>
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 },
@@ -440,12 +478,149 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,						// starts SupplierS service: <true|false>.
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"attributes_conns": [],					// address where to reach the AttributeS <""|127.0.0.1:2013>
 	"rals_conns": [
 		{"address": "*internal"},			// address where to reach the RALs for cost/accounting  <*internal>
 	],
 	"resources_conns": [],					// address where to reach the Resource service, empty to disable functionality: <""|*internal|x.y.z.y:1234>
 	"stats_conns": [],						// address where to reach the Stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 },
+
+
+"loaders": [
+	{
+		"id": "*default",									// identifier of the Loader
+		"enabled": false,									// starts as service: <true|false>.
+		"tenant": "cgrates.org",							// tenant used in filterS.Pass
+		"dry_run": false,									// do not send the CDRs to CDRS, just parse them
+		"run_delay": 0,										// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
+		"lock_filename": ".cgr.lck",						// Filename containing concurrency lock in case of delayed processing
+		"caches_conns": [
+			{"address": "*internal"},						// address where to reach the CacheS for data reload, empty for no reloads  <""|*internal|x.y.z.y:1234>
+		],
+		"field_separator": ",",								// separator used in case of csv files
+		"tp_in_dir": "/var/spool/cgrates/loader/in",		// absolute path towards the directory where the CDRs are stored
+		"tp_out_dir": "/var/spool/cgrates/loader/out",		// absolute path towards the directory where processed CDRs will be moved
+		"data":[											// data profiles to load
+			{
+				"type": "*attributes",						// data source type
+				"file_name": "Attributes.csv",				// file name in the tp_in_dir
+				"fields": [
+					{"tag": "TenantID", "field_id": "Tenant", "type": "*composed", "value": "~0", "mandatory": true},
+					{"tag": "ProfileID", "field_id": "ID", "type": "*composed", "value": "~1", "mandatory": true},
+					{"tag": "Contexts", "field_id": "Contexts", "type": "*composed", "value": "~2"},
+					{"tag": "FilterIDs", "field_id": "FilterIDs", "type": "*composed", "value": "~3"},
+					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*composed", "value": "~4"},
+					{"tag": "FieldName", "field_id": "FieldName", "type": "*composed", "value": "~5"},
+					{"tag": "Initial", "field_id": "Initial", "type": "*composed", "value": "~6"},
+					{"tag": "Substitute", "field_id": "Substitute", "type": "*composed", "value": "~7"},
+					{"tag": "Append", "field_id": "Append", "type": "*composed", "value": "~8"},
+					{"tag": "Weight", "field_id": "Weight", "type": "*composed", "value": "~9"},
+				],
+			},
+			{
+				"type": "*filters",						// data source type
+				"file_name": "Filters.csv",				// file name in the tp_in_dir
+				"fields": [
+					{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~0", "mandatory": true},
+					{"tag": "ID", "field_id": "ID", "type": "*composed", "value": "~1", "mandatory": true},
+					{"tag": "FilterType", "field_id": "FilterType", "type": "*composed", "value": "~2"},
+					{"tag": "FilterFieldName", "field_id": "FilterFieldName", "type": "*composed", "value": "~3"},
+					{"tag": "FilterFieldValues", "field_id": "FilterFieldValues", "type": "*composed", "value": "~4"},
+					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*composed", "value": "~5"},
+				],
+			},	
+			{
+				"type": "*resources",						// data source type
+				"file_name": "Resources.csv",				// file name in the tp_in_dir
+				"fields": [
+					{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~0", "mandatory": true},
+					{"tag": "ID", "field_id": "ID", "type": "*composed", "value": "~1", "mandatory": true},
+					{"tag": "FilterIDs", "field_id": "FilterIDs", "type": "*composed", "value": "~2"},
+					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*composed", "value": "~3"},
+					{"tag": "TTL", "field_id": "UsageTTL", "type": "*composed", "value": "~4"},
+					{"tag": "Limit", "field_id": "Limit", "type": "*composed", "value": "~5"},
+					{"tag": "AllocationMessage", "field_id": "AllocationMessage", "type": "*composed", "value": "~6"},
+					{"tag": "Blocker", "field_id": "Blocker", "type": "*composed", "value": "~7"},
+					{"tag": "Stored", "field_id": "Stored", "type": "*composed", "value": "~8"},
+					{"tag": "Weight", "field_id": "Weight", "type": "*composed", "value": "~9"},
+					{"tag": "ThresholdIDs", "field_id": "ThresholdIDs", "type": "*composed", "value": "~10"},
+				],
+			},
+			{
+				"type": "*stats",						// data source type
+				"file_name": "Stats.csv",				// file name in the tp_in_dir
+				"fields": [
+					{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~0", "mandatory": true},
+					{"tag": "ID", "field_id": "ID", "type": "*composed", "value": "~1", "mandatory": true},
+					{"tag": "FilterIDs", "field_id": "FilterIDs", "type": "*composed", "value": "~2"},
+					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*composed", "value": "~3"},
+					{"tag": "QueueLength", "field_id": "QueueLength", "type": "*composed", "value": "~4"},
+					{"tag": "TTL", "field_id": "TTL", "type": "*composed", "value": "~5"},
+					{"tag": "Metrics", "field_id": "Metrics", "type": "*composed", "value": "~6"},
+					{"tag": "MetricParams", "field_id": "Parameters", "type": "*composed", "value": "~7"},
+					{"tag": "Blocker", "field_id": "Blocker", "type": "*composed", "value": "~8"},
+					{"tag": "Stored", "field_id": "Stored", "type": "*composed", "value": "~9"},
+					{"tag": "Weight", "field_id": "Weight", "type": "*composed", "value": "~10"},
+					{"tag": "MinItems", "field_id": "MinItems", "type": "*composed", "value": "~11"},
+					{"tag": "ThresholdIDs", "field_id": "ThresholdIDs", "type": "*composed", "value": "~12"},
+				],
+			},
+			{
+				"type": "*thresholds",						// data source type
+				"file_name": "Thresholds.csv",				// file name in the tp_in_dir
+				"fields": [
+					{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~0", "mandatory": true},
+					{"tag": "ID", "field_id": "ID", "type": "*composed", "value": "~1", "mandatory": true},
+					{"tag": "FilterIDs", "field_id": "FilterIDs", "type": "*composed", "value": "~2"},
+					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*composed", "value": "~3"},
+					{"tag": "MaxHits", "field_id": "MaxHits", "type": "*composed", "value": "~4"},
+					{"tag": "MinHits", "field_id": "MinHits", "type": "*composed", "value": "~5"},
+					{"tag": "MinSleep", "field_id": "MinSleep", "type": "*composed", "value": "~6"},
+					{"tag": "Blocker", "field_id": "Blocker", "type": "*composed", "value": "~7"},
+					{"tag": "Weight", "field_id": "Weight", "type": "*composed", "value": "~8"},
+					{"tag": "ActionIDs", "field_id": "ActionIDs", "type": "*composed", "value": "~9"},
+					{"tag": "Async", "field_id": "Async", "type": "*composed", "value": "~10"},
+				],
+			},
+			{
+				"type": "*suppliers",						// data source type
+				"file_name": "Suppliers.csv",				// file name in the tp_in_dir
+				"fields": [
+					{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~0", "mandatory": true},
+					{"tag": "ID", "field_id": "ID", "type": "*composed", "value": "~1", "mandatory": true},
+					{"tag": "FilterIDs", "field_id": "FilterIDs", "type": "*composed", "value": "~2"},
+					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*composed", "value": "~3"},
+					{"tag": "Sorting", "field_id": "Sorting", "type": "*composed", "value": "~4"},
+					{"tag": "SortingParamameters", "field_id": "SortingParamameters", "type": "*composed", "value": "~5"},
+					{"tag": "SupplierID", "field_id": "SupplierID", "type": "*composed", "value": "~6"},
+					{"tag": "SupplierFilterIDs", "field_id": "SupplierFilterIDs", "type": "*composed", "value": "~7"},
+					{"tag": "SupplierAccountIDs", "field_id": "SupplierAccountIDs", "type": "*composed", "value": "~8"},
+					{"tag": "SupplierRatingPlanIDs", "field_id": "SupplierRatingPlanIDs", "type": "*composed", "value": "~9"},
+					{"tag": "SupplierResourceIDs", "field_id": "SupplierResourceIDs", "type": "*composed", "value": "~10"},
+					{"tag": "SupplierStatIDs", "field_id": "SupplierStatIDs", "type": "*composed", "value": "~11"},
+					{"tag": "SupplierWeight", "field_id": "SupplierWeight", "type": "*composed", "value": "~12"},
+					{"tag": "SupplierBlocker", "field_id": "SupplierBlocker", "type": "*composed", "value": "~13"},
+					{"tag": "SupplierParameters", "field_id": "SupplierParameters", "type": "*composed", "value": "~14"},
+					{"tag": "Weight", "field_id": "Weight", "type": "*composed", "value": "~15"},
+				],
+			},
+			{
+				"type": "*chargers",						// data source type
+				"file_name": "Chargers.csv",				// file name in the tp_in_dir
+				"fields": [
+					{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~0", "mandatory": true},
+					{"tag": "ID", "field_id": "ID", "type": "*composed", "value": "~1", "mandatory": true},
+					{"tag": "FilterIDs", "field_id": "FilterIDs", "type": "*composed", "value": "~2"},
+					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*composed", "value": "~3"},
+					{"tag": "RunID", "field_id": "RunID", "type": "*composed", "value": "~4"},
+					{"tag": "AttributeIDs", "field_id": "AttributeIDs", "type": "*composed", "value": "~5"},
+					{"tag": "Weight", "field_id": "Weight", "type": "*composed", "value": "~6"},
+				],
+			},
+		],
+	},
+],
 
 
 "mailer": {
@@ -483,6 +658,50 @@ const CGRATES_CFG_JSON = `
 	"trans_type_code": "^010101",			// template extracting transaction type indicator out of StoredCdr; <$RSRFields>
 	"sales_type_code": "^R",				// template extracting sales type code out of StoredCdr; <$RSRFields>
 	"tax_exemption_code_list": "",			// template extracting tax exemption code list out of StoredCdr; <$RSRFields>
+},
+
+
+"loader": {									// loader for tariff plans out of .csv files
+	"tpid": "",								// tariff plan identificator
+	"data_path": "",						// path towards tariff plan files
+	"disable_reverse": false,				// disable reverse computing
+	"caches_conns":[						// addresses towards cacheS components for reloads
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"scheduler_conns": [
+		{"address": "127.0.0.1:2012"}
+	],
+},
+
+
+"migrator": {
+	"out_datadb_type": "redis",
+	"out_datadb_host": "127.0.0.1",
+	"out_datadb_port": "6379",
+	"out_datadb_name": "10",
+	"out_datadb_user": "cgrates",
+	"out_datadb_password": "",
+	"out_datadb_encoding" : "msgpack",
+	"out_stordb_type": "mysql",
+	"out_stordb_host": "127.0.0.1",
+	"out_stordb_port": "3306",
+	"out_stordb_name": "cgrates",
+	"out_stordb_user": "cgrates",
+	"out_stordb_password": "",
+},
+
+
+"dispatcher":{
+	"enabled": false,						// starts DispatcherS service: <true|false>.
+	"rals_conns": [],						// address where to reach the RALs for dispatcherS  <*internal>		
+	"resources_conns": [],					// address where to reach the ResourceS <""|127.0.0.1:2013>
+	"thresholds_conns": [],					// address where to reach the ThresholdS <""|127.0.0.1:2013>
+	"stats_conns": [],						// address where to reach the StatS <""|127.0.0.1:2013>
+	"suppliers_conns": [],					// address where to reach the SupplierS <""|127.0.0.1:2013>
+	"attributes_conns": [],					// address where to reach the AttributeS <""|127.0.0.1:2013>
+	"sessions_conns": [],					// connection towards SessionService
+	"chargers_conns": [],					// address where to reach the ChargerS <""|127.0.0.1:2013>
+	"dispatching_strategy":"*first",		// strategy for dispatching <*first|*random|*next|*broadcast>
 },
 
 

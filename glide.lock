@@ -1,52 +1,30 @@
 hash: 2daed4c5ed5052824ae5df18b0690a85226f9e3c61c336f83db7fccc6f4ecd51
 updated: 2017-04-21T14:51:07.386488974+02:00
 imports:
-- name: github.com/bit4bit/gami
-  version: 3a7f98e7efce7ed7f22c2169b666910b8abb15dc
-- name: github.com/cenk/hub
+- name: github.com/cenkalti/hub
   version: 11382a9960d39b0ecda16fd01c424c11ff765a34
-- name: github.com/cenk/rpc2
-  version: 7ab76d2e88c77ca1a715756036d8264b2886acd2
+- name: github.com/cenkalti/rpc2
+  version: 9642ea02d0aad04b8efb5e1a6bbc63daf8d0903d
   subpackages:
   - jsonrpc
 - name: github.com/cgrates/aringo
   version: 47cdb110c5ff42bddf2b801dc5ae8ceb15d2d602
 - name: github.com/cgrates/fsock
-  version: 5b60f0d72ff4f8885289bffab55435e5b8adfb55
+  version: bcbd5e75c07dddb12ac86f1f861f2bdddc1d4596
 - name: github.com/cgrates/kamevapi
-  version: e4dfe7d6cb5bb0872111fe7d61af0e1a19eda485
+  version: 0e0d0379606fd8f12b53c6da6aeb28544f7bfa37
 - name: github.com/cgrates/ltcache
-  version: 74beef0471a1e04ec8c95b5459086a9308dfff84
+  version: 72c7e248f205d81666842bf108384eec8d18f425
 - name: github.com/cgrates/osipsdagram
   version: 3d6beed663452471dec3ca194137a30d379d9e8f
 - name: github.com/cgrates/radigo
   version: 69d4269e21990c0f120b8e60d5b75d533db7f3dd
 - name: github.com/cgrates/rpcclient
-  version: dddae42e9344e877627cd4b7aba075d63b452c0b
-- name: github.com/ChrisTrenkamp/goxpath
-  version: 4aad8d0161aae7d17df4755d2c1e86cd1fcaaab6
-  subpackages:
-  - internal/execxp
-  - internal/lexer
-  - internal/parser
-  - internal/parser/findutil
-  - internal/parser/intfns
-  - internal/parser/pathexpr
-  - literals/boollit
-  - literals/numlit
-  - literals/strlit
-  - tree
-  - tree/xmltree
-  - tree/xmltree/xmlbuilder
-  - tree/xmltree/xmlele
-  - tree/xmltree/xmlnode
-  - xconst
-  - xfn
-  - xsort
+  version: 54aff3c8e75a2342f0618dfc1c44f0660cd69bde
 - name: github.com/DisposaBoy/JsonConfigReader
-  version: 33a99fdf1d5ee1f79b5077e9c06f955ad356d5f4
+  version: 5ea4d0ddac554439159cd6f191cb94a110d73352
 - name: github.com/fiorix/go-diameter
-  version: d742356e99f1457ee1fb8ddc238c932e9f5ca87b
+  version: 16028e641c19a8dd67509053bc558d389258ff6d
   subpackages:
   - diam
   - diam/avp
@@ -55,37 +33,41 @@ imports:
   - diam/sm
   - diam/sm/smparser
   - diam/sm/smpeer
+- name: github.com/ishidawataru/sctp
+  version: 6e2cb1366111dcf547c13531e3a263a067715847
 - name: github.com/go-sql-driver/mysql
-  version: 0b58b37b664c21f3010e836f1b931e1d0b0b0685
+  version: 99ff426eb706cffe92ff3d058e168b278cabf7c7
 - name: github.com/gorhill/cronexpr
-  version: f0984319b44273e83de132089ae42b1810f4933b
+  version: 88b0669f7d75f171bd612b874e52b95c190218df
 - name: github.com/jinzhu/gorm
-  version: 0f2ceb5a775714a46bc344976324e3e439f8cdcc
+  version: 5be9bd34135805e0332b993378864b159784d8a8
 - name: github.com/jinzhu/inflection
-  version: 74387dc39a75e970e7a3ae6a3386b5bd2e5c5cff
+  version: 1c35d901db3da928c72a72d8458480cc9ade058f
 - name: github.com/kr/pty
-  version: ce7fa45920dc37a92de8377972e52bc55ffa8d57
+  version: db8e3cd836b82e82e0a9c8edc6896967dd31374f
 - name: github.com/lib/pq
-  version: 50761b0867bd1d9d069276790bcd4a3bccf2324a
+  version: 4ded0e9383f75c197b3a2aaa6d590ac52df6fd79
   subpackages:
   - oid
 - name: github.com/mediocregopher/radix.v2
-  version: dbcfd490034f823788edc555737247e9ba628b6c
+  version: 94360be262532d465b7e4760c7a67195d3319a87
   subpackages:
   - pool
   - redis
 - name: github.com/mitchellh/mapstructure
-  version: ca63d7c062ee3c9f34db231e352b60012b4fd0c1
+  version: fa473d140ef3c6adf42d6b391fe76707f1f243c8
 - name: github.com/peterh/liner
-  version: 8975875355a81d612fafb9f5a6037bdcc2d9b073
+  version: 5a0dfa99e2aa1d433a9642e863da51402e609376
+- name: github.com/mattn/go-runewidth
+  version: ce7b0b5c7b45a81508558cd1dba6bb1e4ddb51bb
 - name: github.com/streadway/amqp
-  version: d75c3a341ff43309ad0cb69ac8bdbd1d8772775f
+  version: 70e15c650864f4fc47f5d3c82ea117285480895d
 - name: github.com/ugorji/go
-  version: 5cd0f2b3b6cca8e3a0a4101821e41a73cb59bed6
+  version: 5a66da2e74afec77056667aacd61e97b6ea8f661
   subpackages:
   - codec
 - name: golang.org/x/net
-  version: 1358eff22f0dd0c54fc521042cc607f6ff4b531a
+  version: 26e67e76b6c3f6ce91f7c52def5af501b4e0f3a2
   subpackages:
   - context
   - html
@@ -114,13 +96,19 @@ imports:
   - language
   - runes
   - transform
-- name: gopkg.in/fsnotify.v1
-  version: a8a77c9133d2d6fd8334f3260d06f60e8d80a5fb
+- name: github.com/fsnotify/fsnotify
+  version: ccc981bf80385c528a65fbfdd49bf2d8da22aa23
 - name: github.com/cgrates/mgo
-  version: 8c7a1328d9b01236687f383e686a9c610441ddc7
+  version: 04b6cd516663d1f91d8f914e66ae743d3ab1685c
   subpackages:
   - bson
   - internal/json
   - internal/sasl
   - internal/scram
+- name: github.com/dlintw/goconf
+  version: dcc070983490608a14480e3bf943bad464785df5
+- name: github.com/antchfx/xmlquery
+  version: 07935b1c0f2e6f0efa02c98cd70e223d70218955
+- name: github.com/antchfx/xpath
+  version: 3de91f3991a1af6e495d49c9218318b5544b20e3
 testImports: []

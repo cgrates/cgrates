@@ -1,0 +1,65 @@
+{
+// CGRateS Configuration file
+//
+
+
+"general": {
+	"log_level": 7,
+	"node_id":"Dispatcher",
+},
+
+
+"listen": {
+	"rpc_json": ":2112",
+	"rpc_gob": ":2113",
+	"http": ":2180",
+},
+
+"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_type": "redis",						// data_db type: <redis|mongo>
+	"db_port": 6379, 						// data_db port to reach the database
+	"db_name": "10", 						// data_db database name to connect to
+	
+},
+
+"stor_db": {
+	"db_password": "CGRateS.org",
+},
+
+
+"rals": {
+	"enabled": true,
+},
+
+
+"dispatcher":{
+	"enabled": true,						// starts DispatcherS service: <true|false>.
+	"rals_conns": [
+		{"address": "*internal"},
+	],	
+	"resources_conns": [
+		{"address": "192.168.56.203:2012", "transport": "*json"},
+	],					
+	"thresholds_conns": [
+		{"address": "192.168.56.203:2012", "transport": "*json"},
+	],					
+	"stats_conns": [
+		{"address": "192.168.56.203:2012", "transport": "*json"},
+	],						
+	"suppliers_conns": [
+		{"address": "192.168.56.203:2012", "transport": "*json"},
+	],					
+	"attributes_conns": [
+		{"address": "192.168.56.203:2012", "transport": "*json"},
+	],
+	"sessions_conns": [
+		{"address": "192.168.56.203:2012", "transport": "*json"},
+	],		
+	"chargers_conns": [
+		{"address": "192.168.56.203:2012", "transport": "*json"},
+	],											
+	"dispatching_strategy":"*first",		
+},
+
+
+}

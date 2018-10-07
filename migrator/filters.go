@@ -30,19 +30,19 @@ import (
 func (m *Migrator) migrateCurrentRequestFilter() (err error) {
 	var ids []string
 	tenant := config.CgrConfig().DefaultTenant
-	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.FilterPrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.FilterPrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.FilterPrefix+tenant+":")
-		fl, err := m.dmIN.GetFilter(tenant, idg, true, utils.NonTransactional)
+		fl, err := m.dmIN.DataManager().GetFilter(tenant, idg, false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if fl != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.SetFilter(fl); err != nil {
+				if err := m.dmOut.DataManager().SetFilter(fl); err != nil {
 					return err
 				}
 				m.stats[utils.RQF] += 1
@@ -55,7 +55,7 @@ func (m *Migrator) migrateCurrentRequestFilter() (err error) {
 func (m *Migrator) migrateRequestFilter() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.dmOut.DataManager().DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

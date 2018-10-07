@@ -50,9 +50,10 @@ var sTestsFilter = []func(t *testing.T){
 	testFilterGetFilterBeforeSet,
 	testFilterSetFilter,
 	testFilterGetFilterAfterSet,
+	testFilterGetFilterIDs,
 	testFilterUpdateFilter,
 	testFilterGetFilterAfterUpdate,
-	testFilterRemFilter,
+	testFilterRemoveFilter,
 	testFilterGetFilterAfterRemove,
 	testFilterKillEngine,
 }
@@ -67,13 +68,6 @@ func TestFilterITMySql(t *testing.T) {
 
 func TestFilterITMongo(t *testing.T) {
 	filterConfigDIR = "tutmongo"
-	for _, stest := range sTestsFilter {
-		t.Run(filterConfigDIR, stest)
-	}
-}
-
-func TestFilterITPG(t *testing.T) {
-	filterConfigDIR = "tutpostgres"
 	for _, stest := range sTestsFilter {
 		t.Run(filterConfigDIR, stest)
 	}
@@ -151,6 +145,16 @@ func testFilterSetFilter(t *testing.T) {
 	}
 }
 
+func testFilterGetFilterIDs(t *testing.T) {
+	expected := []string{"Filter1"}
+	var result []string
+	if err := filterRPC.Call("ApierV1.GetFilterIDs", "cgrates.org", &result); err != nil {
+		t.Error(err)
+	} else if len(expected) != len(result) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, result)
+	}
+}
+
 func testFilterGetFilterAfterSet(t *testing.T) {
 	var reply *engine.Filter
 	if err := filterRPC.Call("ApierV1.GetFilter", &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &reply); err != nil {
@@ -190,9 +194,9 @@ func testFilterGetFilterAfterUpdate(t *testing.T) {
 	}
 }
 
-func testFilterRemFilter(t *testing.T) {
+func testFilterRemoveFilter(t *testing.T) {
 	var resp string
-	if err := filterRPC.Call("ApierV1.RemFilter", &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &resp); err != nil {
+	if err := filterRPC.Call("ApierV1.RemoveFilter", &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)

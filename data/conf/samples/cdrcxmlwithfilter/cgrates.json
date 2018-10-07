@@ -1,0 +1,140 @@
+{
+
+// Real-time Charging System for Telecom & ISP environments
+// Copyright (C) ITsysCOM GmbH 
+
+"stor_db": {								// database used to store offline tariff plans and CDRs
+	"db_password": "CGRateS.org",			// password to use when connecting to stordb
+},
+
+ "rals": {
+ 	"enabled": true
+ },
+
+ "cdrs": {
+ 	"enabled": true,
+	"rals_conns": [],
+},
+
+
+ "cdrc": [
+ 	{
+ 		"id": "XMLWithFilter",
+ 		"enabled": true,	
+ 		"cdr_format": "xml",
+ 		"cdr_in_dir": "/tmp/cdrcxmlwithfilters/xmlit1/in",
+ 		"cdr_out_dir": "/tmp/cdrcxmlwithfilters/xmlit1/out",
+ 		"cdr_path": "broadWorksCDR.cdrData",
+ 		"cdr_source_id": "xmlit1",
+ 		"filters": ["*string:broadWorksCDR.cdrData.basicModule.userNumber:1002","*string:broadWorksCDR.cdrData.headerModule.type:Normal"],
+		"content_fields":[							// import content_fields template, id will match internally CDR field, in case of .csv value will be represented by index of the field value
+			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},
+			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~broadWorksCDR.cdrData.basicModule.localCallId", "mandatory": true},
+			{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "*rated", "mandatory": true},
+			{"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "*out", "mandatory": true},
+			{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~broadWorksCDR.cdrData.basicModule.userId:s/.*@(.*)/${1}/", "mandatory": true},
+			{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "call", "mandatory": true},
+			{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~broadWorksCDR.cdrData.basicModule.userNumber", "mandatory": true},
+			{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~broadWorksCDR.cdrData.basicModule.calledNumber", "mandatory": true},
+			{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~broadWorksCDR.cdrData.basicModule.startTime", "mandatory": true},
+			{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~broadWorksCDR.cdrData.basicModule.answerTime", "mandatory": true},
+			{"tag": "Usage", "field_id": "Usage", "type": "*handler", "handler_id": "*substract_usage", "value": "~broadWorksCDR.cdrData.basicModule.releaseTime;|;~broadWorksCDR.cdrData.basicModule.answerTime", "mandatory": true},
+		],
+	},
+	{
+                    "id": "msw_xml",                                                               // identifier of the CDRC runner
+              "enabled": true,                                                               // enable CDR client functionality
+              "cdr_format": "xml",                                                    // CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore|partial_csv.
+              "cdr_in_dir": "/tmp/cdrcxmlwithfilters2/xmlit2/in",
+ 			        "cdr_out_dir": "/tmp/cdrcxmlwithfilters2/xmlit2/out",
+              "cdr_path": "File.CDRs.Call",                                                                // path towards one CDR element in case of XML CDRs
+              "cdr_source_id": "zw_cfs1",                              // free form field, tag identifying the source of the CDRs within CDRS database
+         	    "content_fields":[                                                    // import content_fields template, id will match internally CDR field, in case of .csv value will be represented by index of the field value
+                        {"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},
+                        {"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~File.CDRs.Call.SignalingInfo.PChargingVector.icidvalue", "mandatory": true},
+                        {"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "*rated", "mandatory": true},
+                        {"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "*out", "mandatory": true},
+                        {"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "XX.liquid.tel", "mandatory": true},
+                        {"tag": "Category", "field_id": "Category", "type": "*composed", "value": "call", "mandatory": true},
+                        {"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~File.CDRs.Call.OrigParty.SubscriberAddr", "mandatory": true},
+                        {"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "~File.CDRs.Call.OrigParty.SubscriberAddr", "mandatory": true},
+                        {"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~File.CDRs.Call.RoutingInfo.DestAddr", "mandatory": true},
+                        {"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~File.CDRs.Call.RingingTime", "mandatory": true},
+                        {"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~File.CDRs.Call.ConnectTime", "mandatory": true},
+                        {"tag": "Usage", "field_id": "Usage", "type": "*handler", "handler_id": "*substract_usage", "value": "~File.CDRs.Call.ReleaseTime;|;~File.CDRs.Call.ConnectTime", "mandatory": true}
+                ],
+      },
+      {
+              "id": "msw_xml2",                                                               // identifier of the CDRC runner
+              "enabled": true,                                                               // enable CDR client functionality
+              "cdr_format": "xml",                                                    // CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore|partial_csv.
+              "cdr_in_dir": "/tmp/cdrcxmlwithfilters3/xmlit3/in",
+              "cdr_out_dir": "/tmp/cdrcxmlwithfilters3/xmlit3/out",
+              "cdr_path": "File.CDRs.Call",                                                                 // path towards one CDR element in case of XML CDRs
+              "cdr_source_id": "zw_cfs1",                              // free form field, tag identifying the source of the CDRs within CDRS database
+              "content_fields":[                                                    // import content_fields template, id will match internally CDR field, in case of .csv value will be represented by index of the field value
+                        {"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},
+                        {"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~File.CDRs.Call.SignalingInfo.PChargingVector.icidvalue", "mandatory": true},
+                        {"tag": "OriginID2", "field_id": "OriginID", "type": "*composed", "value": "~File.CDRs.Call.OrigParty.SIPCallId:s/^(.*)@.*/$1/", "mandatory": true},
+                        {"tag": "OriginHost", "field_id": "OriginHost", "type": "*composed", "value": "~File.CDRs.Call.OrigParty.SIPCallId:s/^.*@(.*)/$1/", "mandatory": true},
+                        {"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "*rated", "mandatory": true},
+                        {"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "*out", "mandatory": true},
+                        {"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "XX.liquid.tel", "mandatory": true},
+                        {"tag": "Category", "field_id": "Category", "type": "*composed", "value": "call", "mandatory": true},
+                        {"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~File.CDRs.Call.OrigParty.SubscriberAddr", "mandatory": true},
+                        {"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "~File.CDRs.Call.OrigParty.SubscriberAddr", "mandatory": true},
+                        {"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~File.CDRs.Call.RoutingInfo.DestAddr", "mandatory": true},
+                        {"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~File.CDRs.Call.RingingTime", "mandatory": true},
+                        {"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~File.CDRs.Call.ConnectTime", "mandatory": true},
+                        {"tag": "Usage", "field_id": "Usage", "type": "*handler", "handler_id": "*substract_usage", "value": "~File.CDRs.Call.ReleaseTime;|;~File.CDRs.Call.ConnectTime", "mandatory": true}
+                ],
+      },
+        {
+    "id": "XMLWithFilterID",
+    "enabled": true,  
+    "cdr_format": "xml",
+    "cdr_in_dir": "/tmp/cdrcxmlwithfilters/xmlit5/in",
+    "cdr_out_dir": "/tmp/cdrcxmlwithfilters/xmlit5/out",
+    "cdr_path": "broadWorksCDR.cdrData",
+    "cdr_source_id": "xmlit1",
+    "filters": ["FLTR_XML"],
+    "content_fields":[              // import content_fields template, id will match internally CDR field, in case of .csv value will be represented by index of the field value
+      {"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},
+      {"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~broadWorksCDR.cdrData.basicModule.localCallId", "mandatory": true},
+      {"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "*rated", "mandatory": true},
+      {"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "*out", "mandatory": true},
+      {"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~broadWorksCDR.cdrData.basicModule.userId:s/.*@(.*)/${1}/", "mandatory": true},
+      {"tag": "Category", "field_id": "Category", "type": "*composed", "value": "call", "mandatory": true},
+      {"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~broadWorksCDR.cdrData.basicModule.userNumber", "mandatory": true},
+      {"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~broadWorksCDR.cdrData.basicModule.calledNumber", "mandatory": true},
+      {"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~broadWorksCDR.cdrData.basicModule.startTime", "mandatory": true},
+      {"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~broadWorksCDR.cdrData.basicModule.answerTime", "mandatory": true},
+      {"tag": "Usage", "field_id": "Usage", "type": "*handler", "handler_id": "*substract_usage", "value": "~broadWorksCDR.cdrData.basicModule.releaseTime;|;~broadWorksCDR.cdrData.basicModule.answerTime", "mandatory": true},
+    ],
+  }, 
+    {
+    "id": "XMLWithIndex",
+    "enabled": true,  
+    "cdr_format": "xml",
+    "cdr_in_dir": "/tmp/cdrcxmlwithindex/xmlit1/in",
+    "cdr_out_dir": "/tmp/cdrcxmlwithindex/xmlit1/out",
+    "cdr_path": "complete-success-notification",
+    "cdr_source_id": "xmlit1",
+    "content_fields":[              // import content_fields template, id will match internally CDR field, in case of .csv value will be represented by index of the field value
+      {"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},
+      {"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~complete-success-notification.userid", "mandatory": true},
+      {"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "*rated", "mandatory": true},
+      {"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "*out", "mandatory": true},
+      {"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "cgrates.org", "mandatory": true},
+      {"tag": "Category", "field_id": "Category", "type": "*composed", "value": "call", "mandatory": true},
+      {"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~complete-success-notification.callleg.number", "mandatory": true},
+      {"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~complete-success-notification.callleg[1].number", "mandatory": true},
+      {"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~complete-success-notification.createtime", "mandatory": true},
+      {"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~complete-success-notification.connecttime", "mandatory": true},
+      {"tag": "Usage", "field_id": "Usage", "type": "*handler", "handler_id": "*substract_usage", "value": "~complete-success-notification.endtime;|;~complete-success-notification.connecttime", "mandatory": true},
+    ],
+  },     
+],
+
+
+}

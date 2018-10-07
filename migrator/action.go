@@ -41,19 +41,19 @@ type v1Actions []*v1Action
 
 func (m *Migrator) migrateCurrentActions() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.ACTION_PREFIX)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ACTION_PREFIX)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.ACTION_PREFIX)
-		acts, err := m.dmIN.GetActions(idg, true, utils.NonTransactional)
+		acts, err := m.dmIN.DataManager().GetActions(idg, true, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if acts != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.SetActions(idg, acts, utils.NonTransactional); err != nil {
+				if err := m.dmOut.DataManager().SetActions(idg, acts, utils.NonTransactional); err != nil {
 					return err
 				}
 				m.stats[utils.Actions] += 1
@@ -67,7 +67,7 @@ func (m *Migrator) migrateV1Actions() (err error) {
 	var v1ACs *v1Actions
 	var acts engine.Actions
 	for {
-		v1ACs, err = m.oldDataDB.getV1Actions()
+		v1ACs, err = m.dmIN.getV1Actions()
 		if err != nil && err != utils.ErrNoMoreData {
 			return err
 		}
@@ -81,7 +81,7 @@ func (m *Migrator) migrateV1Actions() (err error) {
 
 			}
 			if !m.dryRun {
-				if err := m.dmOut.SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
+				if err := m.dmOut.DataManager().SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
 					return err
 				}
 				m.stats[utils.Actions] += 1
@@ -91,7 +91,7 @@ func (m *Migrator) migrateV1Actions() (err error) {
 	if !m.dryRun {
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.Actions: engine.CurrentStorDBVersions()[utils.Actions]}
-		if err = m.dmOut.DataDB().SetVersions(vrs, false); err != nil {
+		if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),
@@ -104,7 +104,7 @@ func (m *Migrator) migrateV1Actions() (err error) {
 func (m *Migrator) migrateActions() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.dmOut.DataManager().DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

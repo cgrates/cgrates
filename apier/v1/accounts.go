@@ -489,7 +489,10 @@ func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *st
 	if attr.TimingIds != nil {
 		a.Balance.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.TimingIds))
 	}
-	at.SetActions(engine.Actions{a})
+	publishAction := &engine.Action{
+		ActionType: engine.MetaPublishBalance,
+	}
+	at.SetActions(engine.Actions{a, publishAction})
 	if err := at.Execute(nil, nil); err != nil {
 		return err
 	}
@@ -559,7 +562,10 @@ func (self *ApierV1) SetBalance(attr *utils.AttrSetBalance, reply *string) error
 	if attr.TimingIds != nil {
 		a.Balance.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.TimingIds))
 	}
-	at.SetActions(engine.Actions{a})
+	publishAction := &engine.Action{
+		ActionType: engine.MetaPublishBalance,
+	}
+	at.SetActions(engine.Actions{a, publishAction})
 	if err := at.Execute(nil, nil); err != nil {
 		*reply = err.Error()
 		return err

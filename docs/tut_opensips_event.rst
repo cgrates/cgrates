@@ -22,7 +22,7 @@ Starting OpenSIPS_ with custom configuration
 
 ::
 
- /usr/share/cgrates/tutorials/osips_async/opensips/etc/init.d/opensips start
+ /usr/share/cgrates/tutorials/osips_native/opensips/etc/init.d/opensips start
 
 To verify that OpenSIPS_ is running we run the console command:
 
@@ -36,7 +36,7 @@ Starting **CGRateS** with custom configuration
 
 ::
 
- /usr/share/cgrates/tutorials/osips_async/cgrates/etc/init.d/cgrates start
+ /usr/share/cgrates/tutorials/osips_native/cgrates/etc/init.d/cgrates start
 
 Make sure that cgrates is running
 

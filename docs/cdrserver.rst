@@ -18,27 +18,47 @@ The fields received are split into two different categories based on CGRateS int
 
 Primary fields: the fields which CGRateS needs for it's own operations and are stored into cdrs_primary table of storDb.
 
-- tor: type of record, meta-field, should map to one of the TORs hardcoded inside the server <*voice|*data|*sms>
-- accid: represents the unique accounting id given by the telecom switch generating the CDR
-- cdrhost: represents the IP address of the host generating the CDR (automatically populated by the server)
-- cdrsource: formally identifies the source of the CDR (free form field)
-- reqtype: matching the supported request types by the **CGRateS**, accepted values are hardcoded in the server <prepaid|postpaid|pseudoprepaid|rated>.
-- direction: matching the supported direction identifiers of the CGRateS <*out>
-- tenant: tenant whom this record belongs
-- category: free-form filter for this record, matching the category defined in rating profiles.
-- account: account id (accounting subsystem) the record should be attached to
-- subject: rating subject (rating subsystem) this record should be attached to
-- destination: destination to be charged
-- setup_time: set-up time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
-- answer_time: answer time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
-- usage: event usage information (eg: in case of tor=*voice this will represent the total duration of a call)
+
+- ToR: type of record, meta-field, should map to one of the TORs hardcoded inside the server <*voice|*data|*sms>
+- OriginID: represents the unique accounting id given by the telecom switch generating the CDR
+- OrderID: Stor order id used as export order id
+- OriginHost: represents the IP address of the host generating the CDR (automatically populated by the server)
+- Source: formally identifies the source of the CDR (free form field)
+- RequestType: matching the supported request types by the **CGRateS**, accepted values are hardcoded in the server <prepaid|postpaid|pseudoprepaid|rated>.
+- Category: free-form filter for this record, matching the category defined in rating profiles.
+- Tenant: tenant whom this record belongs
+- Account: account id (accounting subsystem) the record should be attached to
+- Subject: rating subject (rating subsystem) this record should be attached to
+- Destination: destination to be charged
+- SetupTime: set-up time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
+- AnswerTime: answer time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
+- Usage: event usage information (eg: in case of tor=*voice this will represent the total duration of a call)
+- CostSource: The source of this cost
+- Rated: Mark the CDR as rated so we do not process it during rating
 
 Extra fields: any field coming in via the http request and not a member of primary fields list. These fields are stored as json encoded into *cdrs_extra* table of storDb.
 
 Example of sample CDR generated simply using curl:
 ::
 
- curl --data "curl --data "tor=*voice&accid=iiaasbfdsaf&cdrhost=192.168.1.1&cdrsource=curl_cdr&reqtype=rated&direction=*out&tenant=192.168.56.66&category=call&account=dan&subject=dan&destination=%2B4986517174963&answer_time=1383813746&usage=1&sip_user=Jitsi&subject2=1003" http://127.0.0.1:2080/cdr_http
+ curl --data "ToR=*voice \
+  &Source=curl_cdr \
+  &OrderID=abcde \
+  &OriginHost=192.168.1.2 \
+  &Source=sbc1 \
+  &OriginID=qwerty3234567 \
+  &ToR=*voice \
+  &RequestType=*raw \
+  &Tenant=192.168.56.66 \
+  &Category=call \
+  &Account=1004 \
+  &Subject=1004 \
+  &Destination=%2B4986517174963 \
+  &SetupTime=2018-05-21T12:32:50Z \
+  &AnswerTime=2018-05-21T12:32:56Z \
+  &Usage=306 \
+  &CostSource=*cdrs" http://127.0.0.1:2080/cdr_http
+
 
 
 CDR-FS_JSON 
@@ -101,5 +121,5 @@ The simplified StoredCdr object is represented by following:
    AnswerTime     time.Time         // answer time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
    Usage          time.Duration     // event usage information (eg: in case of tor=*voice this will represent the total duration of a call)
    ExtraFields    map[string]string // Extra fields to be stored in CDR
-}
+ }
 

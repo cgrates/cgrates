@@ -1,0 +1,5 @@
+#Tenant[0],ID[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5]
+cgrates.org,FLTR_INTRALATA_NEWYORK,*string,CallerLATA,224;222;220;132,
+cgrates.org,FLTR_INTRALATA_NEWYORK,*string,DestinationLATA,224;222;220;132,
+cgrates.org,FLTR_INTRALATA_ILLINOIS,*string,CallerLATA,358;359,
+cgrates.org,FLTR_INTRALATA_ILLINOIS,*string,DestinationLATA,358;359,

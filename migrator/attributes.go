@@ -20,7 +20,6 @@ package migrator
 
 import (
 	"fmt"
-	//"log"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
@@ -48,21 +47,26 @@ type v1AttributeProfile struct {
 func (m *Migrator) migrateCurrentAttributeProfile() (err error) {
 	var ids []string
 	tenant := config.CgrConfig().DefaultTenant
-	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.AttributeProfilePrefix)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.AttributeProfilePrefix)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.AttributeProfilePrefix+tenant+":")
-		attrPrf, err := m.dmIN.GetAttributeProfile(tenant, idg, true, utils.NonTransactional)
+		attrPrf, err := m.dmIN.DataManager().GetAttributeProfile(tenant, idg, false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if attrPrf != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.SetAttributeProfile(attrPrf, true); err != nil {
+				if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
 					return err
 				}
+				if err := m.dmIN.DataManager().RemoveAttributeProfile(tenant,
+					idg, attrPrf.Contexts, utils.NonTransactional, false); err != nil {
+					return err
+				}
+				m.stats[utils.Attributes] += 1
 			}
 		}
 	}
@@ -72,7 +76,7 @@ func (m *Migrator) migrateCurrentAttributeProfile() (err error) {
 func (m *Migrator) migrateV1Attributes() (err error) {
 	var v1Attr *v1AttributeProfile
 	for {
-		v1Attr, err = m.oldDataDB.getV1AttributeProfile()
+		v1Attr, err = m.dmIN.getV1AttributeProfile()
 		if err != nil && err != utils.ErrNoMoreData {
 			return err
 		}
@@ -80,15 +84,15 @@ func (m *Migrator) migrateV1Attributes() (err error) {
 			break
 		}
 		if v1Attr != nil {
-			attrPrf := v1Attr.AsAttributeProfile()
+			attrPrf, err := v1Attr.AsAttributeProfile()
 			if err != nil {
 				return err
 			}
 			if m.dryRun != true {
-				if err := m.dmOut.DataDB().SetAttributeProfileDrv(attrPrf); err != nil {
+				if err := m.dmOut.DataManager().DataDB().SetAttributeProfileDrv(attrPrf); err != nil {
 					return err
 				}
-				if err := m.dmOut.SetAttributeProfile(attrPrf, true); err != nil {
+				if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
 					return err
 				}
 				m.stats[utils.Attributes] += 1
@@ -97,8 +101,8 @@ func (m *Migrator) migrateV1Attributes() (err error) {
 	}
 	if m.dryRun != true {
 		// All done, update version wtih current one
-		vrs := engine.Versions{utils.Attributes: engine.CurrentStorDBVersions()[utils.Attributes]}
-		if err = m.dmOut.DataDB().SetVersions(vrs, false); err != nil {
+		vrs := engine.Versions{utils.Attributes: engine.CurrentDataDBVersions()[utils.Attributes]}
+		if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),
@@ -111,7 +115,7 @@ func (m *Migrator) migrateV1Attributes() (err error) {
 func (m *Migrator) migrateAttributeProfile() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.dmOut.DataManager().DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -140,7 +144,7 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 	return
 }
 
-func (v1AttrPrf v1AttributeProfile) AsAttributeProfile() (attrPrf *engine.AttributeProfile) {
+func (v1AttrPrf v1AttributeProfile) AsAttributeProfile() (attrPrf *engine.AttributeProfile, err error) {
 	attrPrf = &engine.AttributeProfile{
 		Tenant:             v1AttrPrf.Tenant,
 		ID:                 v1AttrPrf.ID,
@@ -152,11 +156,14 @@ func (v1AttrPrf v1AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 	for _, mp := range v1AttrPrf.Attributes {
 		for _, attr := range mp {
 			initIface := utils.StringToInterface(attr.Initial)
-			substituteIface := utils.StringToInterface(attr.Substitute)
+			sbstPrsr, err := config.NewRSRParsers(attr.Substitute, true)
+			if err != nil {
+				return nil, err
+			}
 			attrPrf.Attributes = append(attrPrf.Attributes, &engine.Attribute{
 				FieldName:  attr.FieldName,
 				Initial:    initIface,
-				Substitute: substituteIface,
+				Substitute: sbstPrsr,
 				Append:     attr.Append,
 			})
 		}

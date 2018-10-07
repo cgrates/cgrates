@@ -29,18 +29,6 @@
 
 "rals": {
 	"enabled": true,
-	"cdrstats_conns": [
-		{"address": "*internal"}
-	],
-	"pubsubs_conns": [
-		{"address": "*internal"}
-	],
-	"users_conns": [
-		{"address": "*internal"}
-	],
-	"aliases_conns": [
-		{"address": "*internal"}
-	],
 },
 
 "scheduler": {
@@ -52,26 +40,6 @@
 	"rals_conns": [
 		{"address": "*internal"}
 	],
-	"cdrstats_conns": [
-		{"address": "*internal"}
-	],
-},
-
-"cdrstats": {
-	"enabled": true,
-},
-
-"pubsubs": {
-	"enabled": true,				// starts PubSub service: <true|false>.
-},
-
-"aliases": {
-	"enabled": true,				// starts Aliases service: <true|false>.
-},
-
-"users": {
-	"enabled": true,
-	"indexes": ["SubscriberId"],
 },
 
 "resources": {
@@ -88,6 +56,18 @@
 
 "sessions": {
 	"enabled": true,
+	"attributes_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"cdrs_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"rals_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"resources_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
 	"debit_interval": "10s",
 },
 
@@ -99,67 +79,73 @@
 	"request_processors": [
 		{
 			"id": "KamailioAuth",
-			"request_filter": "*radReqType(*radAuth)",
+			"filters": ["*string:*vars.*radReqType:*radAuth"],
+			"flags": ["*auth", "*accounts",],
+			"continue_on_success": false,
 			"request_fields":[
 				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
 					"value": "*prepaid", "mandatory": true},	
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 
-					"value": "Acct-Session-Id;^-;Sip-From-Tag", "mandatory": true},
+					"value": "~*req.Acct-Session-Id;-;~*req.Sip-From-Tag", "mandatory": true},
 				{"tag": "Account", "field_id": "Account", "type": "*composed", 
-					"value": "User-Name", "mandatory": true},
+					"value": "~*req.User-Name", "mandatory": true},
 				{"tag": "Destination", "field_id": "Destination", "type": "*composed", 
-					"value": "Called-Station-Id", "mandatory": true},
+					"value": "~*req.Called-Station-Id", "mandatory": true},
 				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", 
-					"value": "Event-Timestamp", "mandatory": true},
+					"value": "~*req.Event-Timestamp", "mandatory": true},
 				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", 
-					"value": "Event-Timestamp", "mandatory": true},
+					"value": "~*req.Event-Timestamp", "mandatory": true},
 			],
 			"reply_fields":[
 				{"tag": "MaxUsage", "field_id": "SIP-AVP", "type": "*composed", 
-					"value": "^session_max_time#;~*cgrReply>MaxUsage:s/(\\d*)\\d{9}$/$1/", "mandatory": true},
+					"value": "session_max_time#;~*cgrep.MaxUsage{*duration_seconds}", "mandatory": true},
 			],
 		},
 		{
 			"id": "KamailioAccountingStart",
-			"request_filter": "*radReqType(*radAcctStart)",
+			"filters": ["*string:*req.Acct-Status-Type:Start"],
+			"flags": ["*initiate","*attributes","*resources","*accounts"],
+			"continue_on_success": false,
 			"request_fields":[	
 				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
 					"value": "*prepaid", "mandatory": true},	
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 
-					"value": "Acct-Session-Id;^-;Sip-From-Tag;^-;Sip-To-Tag", "mandatory": true},
+					"value": "~*req.Acct-Session-Id;-;~*req.Sip-From-Tag;-;~*req.Sip-To-Tag", "mandatory": true},
 				{"tag": "OriginHost", "field_id": "OriginHost", "type": "*composed", 
-					"value": "NAS-IP-Address", "mandatory": true},
+					"value": "~*req.NAS-IP-Address", "mandatory": true},
 				{"tag": "Account", "field_id": "Account", "type": "*composed", 
-					"value": "User-Name", "mandatory": true},
+					"value": "~*req.User-Name", "mandatory": true},
 				{"tag": "Destination", "field_id": "Destination", "type": "*composed", 
-					"value": "Called-Station-Id", "mandatory": true},
+					"value": "~*req.Called-Station-Id", "mandatory": true},
 				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", 
-					"value": "Ascend-User-Acct-Time", "mandatory": true},
+					"value": "~*req.Ascend-User-Acct-Time", "mandatory": true},
 				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", 
-					"value": "Ascend-User-Acct-Time", "mandatory": true},
+					"value": "~*req.Ascend-User-Acct-Time", "mandatory": true},
 			],
 			"reply_fields":[],
 		},
 		{
 			"id": "KamailioAccountingStop",
-			"request_filter": "*radReqType(*radAcctStop)",
+			"filters": ["*string:*req.Acct-Status-Type:Stop"],
+			"flags": ["*terminate","*resources","*accounts","*cdrs"],
+			"continue_on_success": false,
 			"request_fields":[	
 				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
 					"value": "*prepaid", "mandatory": true},	
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 
-					"value": "Acct-Session-Id;^-;Sip-From-Tag;^-;Sip-To-Tag", "mandatory": true},
+					"value": "~*req.Acct-Session-Id;-;~*req.Sip-From-Tag;-;~*req.Sip-To-Tag", "mandatory": true},
 				{"tag": "OriginHost", "field_id": "OriginHost", "type": "*composed", 
-					"value": "NAS-IP-Address", "mandatory": true},
+					"value": "~*req.NAS-IP-Address", "mandatory": true},
 				{"tag": "Account", "field_id": "Account", "type": "*composed", 
-					"value": "User-Name", "mandatory": true},
+					"value": "~*req.User-Name", "mandatory": true},
 				{"tag": "Destination", "field_id": "Destination", "type": "*composed", 
-					"value": "Called-Station-Id", "mandatory": true},
+					"value": "~*req.Called-Station-Id", "mandatory": true},
 				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", 
-					"value": "Ascend-User-Acct-Time", "mandatory": true},
+					"value": "~*req.Ascend-User-Acct-Time", "mandatory": true},
 				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", 
-					"value": "Ascend-User-Acct-Time", "mandatory": true},
-				{"tag": "Usage", "field_id": "Usage", "type": "*handler", "handler_id": "*usage_difference", 
-					"value": "Event-Timestamp;^|;Ascend-User-Acct-Time", "mandatory": true},
+					"value": "~*req.Ascend-User-Acct-Time", "mandatory": true},
+				{"tag": "Usage", "field_id": "Usage", "type": "*usage_difference", 
+					"value": "~*req.Event-Timestamp;~*req.Ascend-User-Acct-Time", "mandatory": true},
 			],
 			"reply_fields":[],
 		},

@@ -620,7 +620,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 		if cc.Timespans[i].RateInterval.Rating != nil &&
 			!reflect.DeepEqual(cc.Timespans[i].RateInterval.Rating.Rates,
 				ec.Rates[ec.Rating[ec.Charges[i].RatingID].RatesID]) {
-			t.Errorf("Index: %d, expecting: %s, received: %s",
+			t.Errorf("Index: %d, expecting: %+v, received: %+v",
 				i, utils.ToJSON(cc.Timespans[i].RateInterval.Rating.Rates),
 				ec.Rates[ec.Rating[ec.Charges[i].RatingID].RatesID])
 		}

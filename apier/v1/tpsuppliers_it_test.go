@@ -131,8 +131,8 @@ func testTPSplPrfSetTPSplPrf(t *testing.T) {
 			ActivationTime: "2014-07-29T15:00:00Z",
 			ExpiryTime:     "",
 		},
-		Sorting:       "*lowest_cost",
-		SortingParams: []string{},
+		Sorting:           "*lowest_cost",
+		SortingParameters: []string{},
 		Suppliers: []*utils.TPSupplier{
 			&utils.TPSupplier{
 				ID:                 "supplier1",

@@ -49,19 +49,22 @@ func (at *v1ActionPlan) IsASAP() bool {
 
 func (m *Migrator) migrateCurrentActionPlans() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.ACTION_PLAN_PREFIX)
-		acts, err := m.dmIN.DataDB().GetActionPlan(idg, true, utils.NonTransactional)
+		acts, err := m.dmIN.DataManager().DataDB().GetActionPlan(idg, true, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if acts != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.DataDB().SetActionPlan(idg, acts, true, utils.NonTransactional); err != nil {
+				if err := m.dmOut.DataManager().DataDB().SetActionPlan(idg, acts, true, utils.NonTransactional); err != nil {
+					return err
+				}
+				if err := m.dmIN.DataManager().DataDB().RemoveActionPlan(idg, utils.NonTransactional); err != nil {
 					return err
 				}
 				m.stats[utils.ActionPlans] += 1
@@ -74,7 +77,7 @@ func (m *Migrator) migrateCurrentActionPlans() (err error) {
 func (m *Migrator) migrateV1ActionPlans() (err error) {
 	var v1APs *v1ActionPlans
 	for {
-		v1APs, err = m.oldDataDB.getV1ActionPlans()
+		v1APs, err = m.dmIN.getV1ActionPlans()
 		if err != nil && err != utils.ErrNoMoreData {
 			return err
 		}
@@ -85,7 +88,7 @@ func (m *Migrator) migrateV1ActionPlans() (err error) {
 			for _, v1ap := range *v1APs {
 				ap := v1ap.AsActionPlan()
 				if m.dryRun != true {
-					if err = m.dmOut.DataDB().SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
+					if err = m.dmOut.DataManager().DataDB().SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
 						return err
 					}
 					m.stats[utils.ActionPlans] += 1
@@ -96,7 +99,7 @@ func (m *Migrator) migrateV1ActionPlans() (err error) {
 	if m.dryRun != true {
 		// All done, update version wtih current one
 		vrs := engine.Versions{utils.ActionPlans: engine.CurrentDataDBVersions()[utils.ActionPlans]}
-		if err = m.dmOut.DataDB().SetVersions(vrs, false); err != nil {
+		if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 			return utils.NewCGRError(utils.Migrator,
 				utils.ServerErrorCaps,
 				err.Error(),
@@ -109,7 +112,7 @@ func (m *Migrator) migrateV1ActionPlans() (err error) {
 func (m *Migrator) migrateActionPlans() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.dmOut.DataManager().DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

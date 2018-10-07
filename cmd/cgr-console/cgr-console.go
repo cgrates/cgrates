@@ -25,6 +25,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -35,12 +36,14 @@ import (
 )
 
 var (
-	history_fn   = os.Getenv("HOME") + "/.cgr_history"
-	version      = flag.Bool("version", false, "Prints the application version.")
-	verbose      = flag.Bool("verbose", false, "Show extra info about command execution.")
-	server       = flag.String("server", "127.0.0.1:2012", "server address host:port")
-	rpc_encoding = flag.String("rpc_encoding", "json", "RPC encoding used <gob|json>")
-	client       *rpcclient.RpcClient
+	historyFN       = os.Getenv("HOME") + "/.cgr_history"
+	version         = flag.Bool("version", false, "Prints the application version.")
+	verbose         = flag.Bool("verbose", false, "Show extra info about command execution.")
+	server          = flag.String("server", "127.0.0.1:2012", "server address host:port")
+	rpcEncoding     = flag.String("rpc_encoding", "json", "RPC encoding used <gob|json>")
+	certificatePath = flag.String("crt_path", "", "path to certificate for tls connection")
+	keyPath         = flag.String("key_path", "", "path to key for tls connection")
+	client          *rpcclient.RpcClient
 )
 
 func executeCommand(command string) {
@@ -49,9 +52,19 @@ func executeCommand(command string) {
 	}
 	if strings.TrimSpace(command) == "help" {
 		commands := console.GetCommands()
+		orderedKeys := make([]string, len(commands))
 		fmt.Println("Commands:")
-		for name, cmd := range commands {
-			fmt.Print(name, cmd.Usage())
+		for name, _ := range commands {
+			if name != "" {
+				orderedKeys = append(orderedKeys, name)
+			}
+		}
+		sort.Strings(orderedKeys)
+		for _, name := range orderedKeys {
+			if commands[name] == nil {
+				continue
+			}
+			fmt.Println(name, commands[name].Usage())
 		}
 		return
 	}
@@ -79,7 +92,6 @@ func executeCommand(command string) {
 	if cmd.RpcMethod() != "" {
 		res := cmd.RpcResult()
 		param := cmd.RpcParams(false)
-		//log.Print(reflect.TypeOf(param))
 		switch param.(type) {
 		case *console.EmptyWrapper:
 			param = ""
@@ -90,7 +102,6 @@ func executeCommand(command string) {
 		case *console.StringMapWrapper:
 			param = param.(*console.StringMapWrapper).Items
 		}
-		//log.Printf("Param: %+v", param)
 
 		if rpcErr := client.Call(cmd.RpcMethod(), param, res); rpcErr != nil {
 			fmt.Println("Error executing command: " + rpcErr.Error())
@@ -110,8 +121,8 @@ func main() {
 		return
 	}
 	var err error
-	client, err = rpcclient.NewRpcClient("tcp", *server, 3, 3,
-		time.Duration(1*time.Second), time.Duration(5*time.Minute), *rpc_encoding, nil, false)
+	client, err = rpcclient.NewRpcClient("tcp", *server, *keyPath, *certificatePath, 3, 3,
+		time.Duration(1*time.Second), time.Duration(5*time.Minute), *rpcEncoding, nil, false)
 	if err != nil {
 		flag.PrintDefaults()
 		log.Fatal("Could not connect to server " + *server)
@@ -149,7 +160,7 @@ func main() {
 		return
 	})
 
-	if f, err := os.Open(history_fn); err == nil {
+	if f, err := os.Open(historyFN); err == nil {
 		line.ReadHistory(f)
 		f.Close()
 	}
@@ -175,7 +186,7 @@ func main() {
 		}
 	}
 
-	if f, err := os.Create(history_fn); err != nil {
+	if f, err := os.Create(historyFN); err != nil {
 		log.Print("Error writing history file: ", err)
 	} else {
 		line.WriteHistory(f)

@@ -1,0 +1,4 @@
+#Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParamameters,SupplierID,SupplierFilterIDs,SupplierAccountIDs,SupplierRatingPlanIDs,SupplierResourceIDs,SupplierStatIDs,SupplierWeight,SupplierBlocker,SupplierParameters,Weight
+cgrates.org,SPL_CLUELRN_INTER,*string:Account:9174269000;*string:LRNJurisdiction:INTER,2017-11-27T00:00:00Z,*least_cost,,LEVEL3,,,RP_LEVEL3_INTER,,,,false,,10
+cgrates.org,SPL_CLUELRN_INTER,,,,,TMOBILE,,,RP_TMOBILE_INTER,,,,false,,
+cgrates.org,SPL_CLUELRN_INTER,,,,,COMCAST,,,RP_COMCAST_INTER,,,,false,,

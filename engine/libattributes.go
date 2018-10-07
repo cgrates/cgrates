@@ -21,13 +21,14 @@ package engine
 import (
 	"sort"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
 type Attribute struct {
 	FieldName  string
 	Initial    interface{}
-	Substitute interface{}
+	Substitute config.RSRParsers
 	Append     bool
 }
 
@@ -36,10 +37,38 @@ type AttributeProfile struct {
 	ID                 string
 	Contexts           []string // bind this AttributeProfile to multiple contexts
 	FilterIDs          []string
-	ActivationInterval *utils.ActivationInterval             // Activation interval
-	attributes         map[string]map[interface{}]*Attribute // map[FieldName][InitialValue]*Attribute
+	ActivationInterval *utils.ActivationInterval // Activation interval
 	Attributes         []*Attribute
+	Blocker            bool // blocker flag to stop processing on multiple runs
 	Weight             float64
+
+	attributesIdx map[string]map[interface{}]*Attribute // map[FieldName][InitialValue]*Attribute, used as event match index
+}
+
+// computeAttributesIndex populates .attributes
+func (ap *AttributeProfile) computeAttributesIndex() {
+	ap.attributesIdx = make(map[string]map[interface{}]*Attribute)
+	for _, attr := range ap.Attributes {
+		if _, has := ap.attributesIdx[attr.FieldName]; !has {
+			ap.attributesIdx[attr.FieldName] = make(map[interface{}]*Attribute)
+		}
+		ap.attributesIdx[attr.FieldName][attr.Initial] = attr
+	}
+}
+
+func (ap *AttributeProfile) compileSubstitutes() (err error) {
+	for _, attr := range ap.Attributes {
+		if err = attr.Substitute.Compile(); err != nil {
+			return
+		}
+	}
+	return
+}
+
+// Compile is a wrapper for convenience setting up the AttributeProfile
+func (ap *AttributeProfile) Compile() error {
+	ap.computeAttributesIndex()
+	return ap.compileSubstitutes()
 }
 
 func (als *AttributeProfile) TenantID() string {

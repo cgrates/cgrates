@@ -20,8 +20,8 @@ package utils
 
 var (
 	CDRExportFormats = []string{DRYRUN, MetaFileCSV, MetaFileFWV, MetaHTTPjsonCDR, MetaHTTPjsonMap, MetaHTTPjson, META_HTTP_POST, MetaAMQPjsonCDR, MetaAMQPjsonMap}
-	PrimaryCdrFields = []string{CGRID, Source, OriginHost, OriginID, TOR, RequestType, Tenant, Category, Account, Subject, Destination, SetupTime, AnswerTime, Usage,
-		COST, RATED, PartialField, MEDI_RUNID}
+	PrimaryCdrFields = []string{CGRID, Source, OriginHost, OriginID, ToR, RequestType, Tenant, Category, Account, Subject, Destination, SetupTime, AnswerTime, Usage,
+		COST, RATED, Partial, RunID}
 	GitLastLog                  string // If set, it will be processed as part of versioning
 	PosterTransportContentTypes = map[string]string{
 		MetaHTTPjsonCDR: CONTENT_JSON,
@@ -41,43 +41,49 @@ var (
 		MetaFileFWV:     FWVSuffix,
 	}
 	CacheInstanceToPrefix = map[string]string{
-		CacheDestinations:              DESTINATION_PREFIX,
-		CacheReverseDestinations:       REVERSE_DESTINATION_PREFIX,
-		CacheRatingPlans:               RATING_PLAN_PREFIX,
-		CacheRatingProfiles:            RATING_PROFILE_PREFIX,
-		CacheLCRRules:                  LCR_PREFIX,
-		CacheCDRStatS:                  CDR_STATS_PREFIX,
-		CacheActions:                   ACTION_PREFIX,
-		CacheActionPlans:               ACTION_PLAN_PREFIX,
-		CacheAccountActionPlans:        AccountActionPlansPrefix,
-		CacheActionTriggers:            ACTION_TRIGGER_PREFIX,
-		CacheSharedGroups:              SHARED_GROUP_PREFIX,
-		CacheAliases:                   ALIASES_PREFIX,
-		CacheReverseAliases:            REVERSE_ALIASES_PREFIX,
-		CacheDerivedChargers:           DERIVEDCHARGERS_PREFIX,
-		CacheResourceProfiles:          ResourceProfilesPrefix,
-		CacheResources:                 ResourcesPrefix,
-		CacheEventResources:            EventResourcesPrefix,
-		CacheTimings:                   TimingsPrefix,
-		CacheStatQueueProfiles:         StatQueueProfilePrefix,
-		CacheStatQueues:                StatQueuePrefix,
-		CacheThresholdProfiles:         ThresholdProfilePrefix,
-		CacheThresholds:                ThresholdPrefix,
-		CacheFilters:                   FilterPrefix,
-		CacheSupplierProfiles:          SupplierProfilePrefix,
-		CacheAttributeProfiles:         AttributeProfilePrefix,
-		CacheResourceFilterIndexes:     ResourceFilterIndexes,
-		CacheResourceFilterRevIndexes:  ResourceFilterRevIndexes,
-		CacheStatFilterIndexes:         StatFilterIndexes,
-		CacheStatFilterRevIndexes:      StatFilterRevIndexes,
-		CacheThresholdFilterIndexes:    ThresholdFilterIndexes,
-		CacheThresholdFilterRevIndexes: ThresholdFilterRevIndexes,
-		CacheSupplierFilterIndexes:     SupplierFilterIndexes,
-		CacheSupplierFilterRevIndexes:  SupplierFilterRevIndexes,
-		CacheAttributeFilterIndexes:    AttributeFilterIndexes,
-		CacheAttributeFilterRevIndexes: AttributeFilterRevIndexes,
+		CacheDestinations:           DESTINATION_PREFIX,
+		CacheReverseDestinations:    REVERSE_DESTINATION_PREFIX,
+		CacheRatingPlans:            RATING_PLAN_PREFIX,
+		CacheRatingProfiles:         RATING_PROFILE_PREFIX,
+		CacheLCRRules:               LCR_PREFIX,
+		CacheCDRStatS:               CDR_STATS_PREFIX,
+		CacheActions:                ACTION_PREFIX,
+		CacheActionPlans:            ACTION_PLAN_PREFIX,
+		CacheAccountActionPlans:     AccountActionPlansPrefix,
+		CacheActionTriggers:         ACTION_TRIGGER_PREFIX,
+		CacheSharedGroups:           SHARED_GROUP_PREFIX,
+		CacheAliases:                ALIASES_PREFIX,
+		CacheReverseAliases:         REVERSE_ALIASES_PREFIX,
+		CacheDerivedChargers:        DERIVEDCHARGERS_PREFIX,
+		CacheResourceProfiles:       ResourceProfilesPrefix,
+		CacheResources:              ResourcesPrefix,
+		CacheEventResources:         EventResourcesPrefix,
+		CacheTimings:                TimingsPrefix,
+		CacheStatQueueProfiles:      StatQueueProfilePrefix,
+		CacheStatQueues:             StatQueuePrefix,
+		CacheThresholdProfiles:      ThresholdProfilePrefix,
+		CacheThresholds:             ThresholdPrefix,
+		CacheFilters:                FilterPrefix,
+		CacheSupplierProfiles:       SupplierProfilePrefix,
+		CacheAttributeProfiles:      AttributeProfilePrefix,
+		CacheChargerProfiles:        ChargerProfilePrefix,
+		CacheResourceFilterIndexes:  ResourceFilterIndexes,
+		CacheStatFilterIndexes:      StatFilterIndexes,
+		CacheThresholdFilterIndexes: ThresholdFilterIndexes,
+		CacheSupplierFilterIndexes:  SupplierFilterIndexes,
+		CacheAttributeFilterIndexes: AttributeFilterIndexes,
+		CacheChargerFilterIndexes:   ChargerFilterIndexes,
 	}
 	CachePrefixToInstance map[string]string // will be built on init
+	PrefixToIndexCache    = map[string]string{
+		ThresholdProfilePrefix: CacheThresholdFilterIndexes,
+		ResourceProfilesPrefix: CacheResourceFilterIndexes,
+		StatQueueProfilePrefix: CacheStatFilterIndexes,
+		SupplierProfilePrefix:  CacheSupplierFilterIndexes,
+		AttributeProfilePrefix: CacheAttributeFilterIndexes,
+		ChargerProfilePrefix:   CacheChargerFilterIndexes,
+	}
+	CacheIndexesToPrefix map[string]string // will be built on init
 )
 
 const (
@@ -90,6 +96,7 @@ const (
 	POSTGRES                      = "postgres"
 	MYSQL                         = "mysql"
 	MONGO                         = "mongo"
+	INTERNAL                      = "internal"
 	DataManager                   = "DataManager"
 	REDIS                         = "redis"
 	MAPSTOR                       = "mapstor"
@@ -130,8 +137,8 @@ const (
 	MSGPACK                       = "msgpack"
 	CSV_LOAD                      = "CSVLOAD"
 	CGRID                         = "CGRID"
-	TOR                           = "ToR"
-	ORDERID                       = "OrderID"
+	ToR                           = "ToR"
+	OrderID                       = "OrderID"
 	OriginID                      = "OriginID"
 	InitialOriginID               = "InitialOriginID"
 	OriginIDPrefix                = "OriginIDPrefix"
@@ -142,21 +149,23 @@ const (
 	Tenant                        = "Tenant"
 	Category                      = "Category"
 	Context                       = "Context"
+	Contexts                      = "Contexts"
 	Account                       = "Account"
 	Subject                       = "Subject"
 	Destination                   = "Destination"
 	SetupTime                     = "SetupTime"
 	AnswerTime                    = "AnswerTime"
 	Usage                         = "Usage"
+	Value                         = "Value"
 	LastUsed                      = "LastUsed"
 	PDD                           = "PDD"
 	SUPPLIER                      = "Supplier"
-	MEDI_RUNID                    = "RunID"
+	RunID                         = "RunID"
 	COST                          = "Cost"
-	COST_DETAILS                  = "CostDetails"
+	CostDetails                   = "CostDetails"
 	RATED                         = "rated"
-	RATED_FLD                     = "Rated"
-	PartialField                  = "Partial"
+	Partial                       = "Partial"
+	PreRated                      = "PreRated"
 	DEFAULT_RUNID                 = "*default"
 	META_DEFAULT                  = "*default"
 	STATIC_VALUE_PREFIX           = "^"
@@ -237,6 +246,7 @@ const (
 	StatQueueProfilePrefix        = "sqp_"
 	SupplierProfilePrefix         = "spp_"
 	AttributeProfilePrefix        = "alp_"
+	ChargerProfilePrefix          = "cpp_"
 	ThresholdProfilePrefix        = "thp_"
 	StatQueuePrefix               = "stq_"
 	LOADINST_KEY                  = "load_history"
@@ -262,22 +272,7 @@ const (
 	NANO_MULTIPLIER               = 1000000000
 	CGR_AUTHORIZE                 = "CGR_AUTHORIZE"
 	CONFIG_DIR                    = "/etc/cgrates/"
-	CGR_ACCOUNT                   = "cgr_account"
-	CGR_SUPPLIER                  = "cgr_supplier"
-	CGR_DESTINATION               = "cgr_destination"
-	CGR_SUBJECT                   = "cgr_subject"
-	CGR_CATEGORY                  = "cgr_category"
-	CGR_REQTYPE                   = "cgr_reqtype"
-	CGR_TENANT                    = "cgr_tenant"
-	CGR_TOR                       = "cgr_tor"
-	CGR_OriginID                  = "cgr_originid"
-	CGR_HOST                      = "cgr_host"
-	CGR_PDD                       = "cgr_pdd"
 	DISCONNECT_CAUSE              = "DisconnectCause"
-	CGR_DISCONNECT_CAUSE          = "cgr_disconnectcause"
-	CGR_COMPUTELCR                = "cgr_computelcr"
-	CGR_SUPPLIERS                 = "cgr_suppliers"
-	CGRFlags                      = "cgr_flags"
 	KAM_FLATSTORE                 = "kamailio_flatstore"
 	OSIPS_FLATSTORE               = "opensips_flatstore"
 	MAX_DEBIT_CACHE_PREFIX        = "MAX_DEBIT_"
@@ -315,10 +310,12 @@ const (
 	TRIGGER_BALANCE_EXPIRED      = "*balance_expired"
 	HIERARCHY_SEP                = ">"
 	META_COMPOSED                = "*composed"
+	META_USAGE_DIFFERENCE        = "*usage_difference"
+	MetaCCUsage                  = "*cc_usage"
+	MetaString                   = "*string"
 	NegativePrefix               = "!"
 	MatchStartPrefix             = "^"
 	MatchEndPrefix               = "$"
-	SMG                          = "SMG"
 	MetaGrouped                  = "*grouped"
 	MetaRaw                      = "*raw"
 	CreatedAt                    = "CreatedAt"
@@ -349,8 +346,6 @@ const (
 	StorDB                       = "stor_db"
 	Cache                        = "cache"
 	NotFoundCaps                 = "NOT_FOUND"
-	ItemNotFound                 = "item not found"
-	ItemNotCloneable             = "item not cloneable"
 	NotCloneableCaps             = "NOT_CLONEABLE"
 	ServerErrorCaps              = "SERVER_ERROR"
 	MandatoryIEMissingCaps       = "MANDATORY_IE_MISSING"
@@ -378,7 +373,9 @@ const (
 	MetaThresholds               = "*thresholds"
 	MetaSuppliers                = "*suppliers"
 	MetaAttributes               = "*attributes"
+	MetaChargers                 = "*chargers"
 	MetaResources                = "*resources"
+	MetaFilters                  = "*filters"
 	MetaCDRs                     = "*cdrs"
 	Migrator                     = "migrator"
 	UnsupportedMigrationTask     = "unsupported migration task"
@@ -411,7 +408,8 @@ const (
 	Thresholds                   = "Thresholds"
 	Suppliers                    = "Suppliers"
 	Attributes                   = "Attributes"
-	StatS                        = "stats"
+	Chargers                     = "Chargers"
+	StatS                        = "Stats"
 	RALService                   = "RALs"
 	CostSource                   = "CostSource"
 	ExtraInfo                    = "ExtraInfo"
@@ -441,30 +439,7 @@ const (
 	Action                       = "Action"
 	MetaNow                      = "*now"
 	SessionsCosts                = "SessionsCosts"
-	TpRatingPlans                = "TpRatingPlans"
-	TpFilters                    = "TpFilters"
-	TpDestinationRates           = "TpDestinationRates"
-	TpActionTriggers             = "TpActionTriggers"
-	TpAccountActionsV            = "TpAccountActions"
-	TpActionPlans                = "TpActionPlans"
-	TpActions                    = "TpActions"
-	TpDerivedCharges             = "TpDerivedCharges"
-	TpThresholds                 = "TpThresholds"
-	TpSuppliers                  = "TpSuppliers"
-	TpStats                      = "TpStats"
-	TpSharedGroups               = "TpSharedGroups"
-	TpRatingProfiles             = "TpRatingProfiles"
-	TpResources                  = "TpResources"
-	TpRates                      = "TpRates"
-	TpTiming                     = "TpTiming"
-	TpResource                   = "TpResource"
-	TpAliases                    = "TpAliases"
-	TpUsers                      = "TpUsers"
-	TpDerivedChargersV           = "TpDerivedChargers"
-	TpCdrStats                   = "TpCdrStats"
-	TpDestinations               = "TpDestinations"
-	TpRatingPlan                 = "TpRatingPlan"
-	TpRatingProfile              = "TpRatingProfile"
+	SessionSCosts                = "SessionSCosts"
 	Timing                       = "Timing"
 	RQF                          = "RQF"
 	Resource                     = "Resource"
@@ -497,20 +472,71 @@ const (
 	MetaDataDB                   = "*datadb"
 	MetaWeight                   = "*weight"
 	MetaLeastCost                = "*least_cost"
+	MetaHighestCost              = "*highest_cost"
+	MetaQOS                      = "*qos"
 	Weight                       = "Weight"
 	Cost                         = "Cost"
 	RatingPlanID                 = "RatingPlanID"
 	MetaSessionS                 = "*sessions"
-	FreeSWITCHAgent              = "FreeSWITCHAgent"
 	MetaDefault                  = "*default"
-	KamailioAgent                = "KamailioAgent"
-	RadiusAgent                  = "RadiusAgent"
-	DiameterAgent                = "DiameterAgent"
 	Error                        = "Error"
+	MetaCgreq                    = "*cgreq"
+	MetaCgrep                    = "*cgrep"
+	MetaCGRRequest               = "*cgrRequest"
 	MetaCGRReply                 = "*cgrReply"
+	CGR_ACD                      = "cgr_acd"
+	FilterIDs                    = "FilterIDs"
+	FieldName                    = "FieldName"
+	Initial                      = "Initial"
+	Substitute                   = "Substitute"
+	Append                       = "Append"
+	MetaRound                    = "*round"
+	Pong                         = "Pong"
+	MetaEventCost                = "*event_cost"
+	MetaSuppliersEventCost       = "*suppliers_event_cost"
+	MetaSuppliersIgnoreErrors    = "*suppliers_ignore_errors"
+	Freeswitch                   = "freeswitch"
+	Kamailio                     = "kamailio"
+	Opensips                     = "opensips"
+	Asterisk                     = "asterisk"
+	SchedulerS                   = "SchedulerS"
+	MetaMultiply                 = "*multiply"
+	MetaDivide                   = "*divide"
+	MetaUrl                      = "*url"
+	MetaXml                      = "*xml"
+	ApiKey                       = "apikey"
+	MetaReq                      = "*req"
+	MetaVars                     = "*vars"
+	MetaRep                      = "*rep"
+	CGROriginHost                = "cgr_originhost"
+	MetaInitiate                 = "*initiate"
+	MetaUpdate                   = "*update"
+	MetaTerminate                = "*terminate"
+	MetaEvent                    = "*event"
+	MetaDryRun                   = "*dryrun"
+	Event                        = "Event"
+	EmptyString                  = ""
+	AgentRequest                 = "AgentRequest"
+	DynamicDataPrefix            = "~"
+	AttrValueSep                 = "="
+	ANDSep                       = "&"
+	PipeSep                      = "|"
+	MetaApp                      = "*app"
+	MetaAppID                    = "*appid"
+	MetaCmd                      = "*cmd"
+	MetaTemplate                 = "*template"
+	MetaCCA                      = "*cca"
+	OriginRealm                  = "OriginRealm"
+	ProductName                  = "ProductName"
 )
 
-//MetaMetrics
+// Migrator Action
+const (
+	Move    = "move"
+	Migrate = "migrate"
+)
+
+// MetaMetrics
 const (
 	MetaASR     = "*asr"
 	MetaACD     = "*acd"
@@ -523,7 +549,7 @@ const (
 	MetaAverage = "*average"
 )
 
-//Services
+// Services
 const (
 	SessionS    = "SessionS"
 	AttributeS  = "AttributeS"
@@ -531,95 +557,258 @@ const (
 	ResourceS   = "ResourceS"
 	StatService = "StatS"
 	FilterS     = "FilterS"
+	ThresholdS  = "ThresholdS"
+	DispatcherS = "DispatcherS"
+	LoaderS     = "LoaderS"
+	ChargerS    = "ChargerS"
+	CacheS      = "CacheS"
 )
 
-//Migrator Metas
+// Lower service names
 const (
-	MetaSetVersions        = "*set_versions"
-	MetaTpRatingPlans      = "*tp_rating_plans"
-	MetaTpFilters          = "*tp_filters"
-	MetaTpDestinationRates = "*tp_destination_rates"
-	MetaTpActionTriggers   = "*tp_action_triggers"
-	MetaTpAccountActions   = "*tp_account_actions"
-	MetaTpActionPlans      = "*tp_action_plans"
-	MetaTpActions          = "*tp_actions"
-	MetaTpDerivedChargers  = "*tp_derived_charges"
-	MetaTpThresholds       = "*tp_thresholds"
-	MetaTpSuppliers        = "*tp_suppliers"
-	MetaTpStats            = "*tp_stats"
-	MetaTpSharedGroups     = "*tp_shared_groups"
-	MetaTpRatingProfiles   = "*tp_rating_profiles"
-	MetaTpResources        = "*tp_resources"
-	MetaTpRates            = "*tp_rates"
-	MetaTpTiming           = "*tp_timing"
-	MetaTpResource         = "*tp_resource"
-	MetaTpAliases          = "*tp_aliases"
-	MetaTpUsers            = "*tp_users"
-	MetaTpDerivedChargersV = "*tp_derived_chargers"
-	MetaTpCdrStats         = "*tp_cdrstats"
-	MetaTpDestinations     = "*tp_destinations"
-	MetaTpRatingPlan       = "*tp_rating_plan"
-	MetaTpRatingProfile    = "*tp_rating_profile"
-	MetaUsageSeconds       = "*usage_seconds"
+	SessionsLow    = "sessions"
+	AttributesLow  = "attributes"
+	ChargerSLow    = "chargers"
+	SuppliersLow   = "suppliers"
+	ResourcesLow   = "resources"
+	StatServiceLow = "stats"
+	ThresholdsLow  = "thresholds"
+	DispatchersLow = "dispatchers"
+	LoaderLow      = "loader"
 )
 
-// MetaFilterIndexesAPIs
+// Migrator Metas
+const (
+	MetaSetVersions         = "*set_versions"
+	MetaTpRatingPlans       = "*tp_rating_plans"
+	MetaTpFilters           = "*tp_filters"
+	MetaTpDestinationRates  = "*tp_destination_rates"
+	MetaTpActionTriggers    = "*tp_action_triggers"
+	MetaTpAccountActions    = "*tp_account_actions"
+	MetaTpActionPlans       = "*tp_action_plans"
+	MetaTpActions           = "*tp_actions"
+	MetaTpDerivedChargers   = "*tp_derived_charges"
+	MetaTpThresholds        = "*tp_thresholds"
+	MetaTpSuppliers         = "*tp_suppliers"
+	MetaTpStats             = "*tp_stats"
+	MetaTpSharedGroups      = "*tp_shared_groups"
+	MetaTpRatingProfiles    = "*tp_rating_profiles"
+	MetaTpResources         = "*tp_resources"
+	MetaTpRates             = "*tp_rates"
+	MetaTpTiming            = "*tp_timing"
+	MetaTpResource          = "*tp_resource"
+	MetaTpAliases           = "*tp_aliases"
+	MetaTpUsers             = "*tp_users"
+	MetaTpDerivedChargersV  = "*tp_derived_chargers"
+	MetaTpCdrStats          = "*tp_cdrstats"
+	MetaTpDestinations      = "*tp_destinations"
+	MetaTpRatingPlan        = "*tp_rating_plan"
+	MetaTpRatingProfile     = "*tp_rating_profile"
+	MetaTpChargers          = "*tp_chargers"
+	MetaDurationSeconds     = "*duration_seconds"
+	MetaDurationNanoseconds = "*duration_nanoseconds"
+	CapAttributes           = "Attributes"
+	CapResourceAllocation   = "ResourceAllocation"
+	CapMaxUsage             = "MaxUsage"
+	CapSuppliers            = "Suppliers"
+	CapThresholdHits        = "ThresholdHits"
+	CapThresholds           = "Thresholds"
+	CapStatQueues           = "StatQueues"
+)
+
+const (
+	TpRatingPlans      = "TpRatingPlans"
+	TpFilters          = "TpFilters"
+	TpDestinationRates = "TpDestinationRates"
+	TpActionTriggers   = "TpActionTriggers"
+	TpAccountActionsV  = "TpAccountActions"
+	TpActionPlans      = "TpActionPlans"
+	TpActions          = "TpActions"
+	TpDerivedCharges   = "TpDerivedCharges"
+	TpThresholds       = "TpThresholds"
+	TpSuppliers        = "TpSuppliers"
+	TpStats            = "TpStats"
+	TpSharedGroups     = "TpSharedGroups"
+	TpRatingProfiles   = "TpRatingProfiles"
+	TpResources        = "TpResources"
+	TpRates            = "TpRates"
+	TpTiming           = "TpTiming"
+	TpResource         = "TpResource"
+	TpAliases          = "TpAliases"
+	TpUsers            = "TpUsers"
+	TpDerivedChargersV = "TpDerivedChargers"
+	TpCdrStats         = "TpCdrStats"
+	TpDestinations     = "TpDestinations"
+	TpRatingPlan       = "TpRatingPlan"
+	TpRatingProfile    = "TpRatingProfile"
+	TpChargers         = "TpChargers"
+)
+
+// Dispatcher Const
+const (
+	MetaFirst     = "*first"
+	MetaRandom    = "*random"
+	MetaBroadcast = "*broadcast"
+	MetaNext      = "*next"
+	ThresholdSv1  = "ThresholdSv1"
+	StatSv1       = "StatSv1"
+	ResourceSv1   = "ResourceSv1"
+	SupplierSv1   = "SupplierSv1"
+	AttributeSv1  = "AttributeSv1"
+	SessionSv1    = "SessionSv1"
+	ChargerSv1    = "ChargerSv1"
+	MetaAuth      = "*auth"
+	APIKey        = "APIKey"
+	APIMethods    = "APIMethods"
+	NestingSep    = "."
+)
+
+// ApierV1 APIs
 const (
 	ApierV1ComputeFilterIndexes = "ApierV1.ComputeFilterIndexes"
+	ApierV1ReloadCache          = "ApierV1.ReloadCache"
+	ApierV1ReloadScheduler      = "ApierV1.ReloadScheduler"
+	ApierV1Ping                 = "ApierV1.Ping"
 )
 
 const (
 	ApierV2LoadTariffPlanFromFolder = "ApierV2.LoadTariffPlanFromFolder"
 )
 
-// MetaSupplierAPIs
+// UserS APIs
+const (
+	UsersV1ReloadUsers = "UsersV1.ReloadUsers"
+)
+
+// SupplierS APIs
 const (
 	SupplierSv1GetSuppliers = "SupplierSv1.GetSuppliers"
+	SupplierSv1Ping         = "SupplierSv1.Ping"
 )
 
 // AttributeS APIs
 const (
 	AttributeSv1GetAttributeForEvent = "AttributeSv1.GetAttributeForEvent"
 	AttributeSv1ProcessEvent         = "AttributeSv1.ProcessEvent"
+	AttributeSv1Ping                 = "AttributeSv1.Ping"
 )
 
-//ThresholdS APIs
+// ChargerS APIs
 const (
-	ThresholdSv1ProcessEvent    = "ThresholdSv1.ProcessEvent"
-	ThresholdSv1GetThreshold    = "ThresholdSv1.GetThreshold"
-	ThresholdSv1GetThresholdIDs = "ThresholdSv1.GetThresholdIDs"
+	ChargerSv1Ping                = "ChargerSv1.Ping"
+	ChargerSv1GetChargersForEvent = "ChargerSv1.GetChargersForEvent"
+	ChargerSv1ProcessEvent        = "ChargerSv1.ProcessEvent"
 )
 
-//StatS APIs
+// ThresholdS APIs
+const (
+	ThresholdSv1ProcessEvent          = "ThresholdSv1.ProcessEvent"
+	ThresholdSv1GetThreshold          = "ThresholdSv1.GetThreshold"
+	ThresholdSv1GetThresholdIDs       = "ThresholdSv1.GetThresholdIDs"
+	ThresholdSv1Ping                  = "ThresholdSv1.Ping"
+	ThresholdSv1GetThresholdsForEvent = "ThresholdSv1.GetThresholdsForEvent"
+)
+
+// StatS APIs
 const (
 	StatSv1ProcessEvent          = "StatSv1.ProcessEvent"
 	StatSv1GetQueueIDs           = "StatSv1.GetQueueIDs"
 	StatSv1GetQueueStringMetrics = "StatSv1.GetQueueStringMetrics"
+	StatSv1GetQueueFloatMetrics  = "StatSv1.GetQueueFloatMetrics"
+	StatSv1Ping                  = "StatSv1.Ping"
+	StatSv1GetStatQueuesForEvent = "StatSv1.GetStatQueuesForEvent"
 )
 
-//ResourceS APIs
+// ResourceS APIs
 const (
 	ResourceSv1AuthorizeResources   = "ResourceSv1.AuthorizeResources"
 	ResourceSv1GetResourcesForEvent = "ResourceSv1.GetResourcesForEvent"
 	ResourceSv1AllocateResources    = "ResourceSv1.AllocateResources"
 	ResourceSv1ReleaseResources     = "ResourceSv1.ReleaseResources"
+	ResourceSv1Ping                 = "ResourceSv1.Ping"
 )
 
-//SessionS APIs
+// SessionS APIs
 const (
-	SessionSv1AuthorizeEvent           = "SessionSv1.AuthorizeEvent"
-	SessionSv1AuthorizeEventWithDigest = "SessionSv1.AuthorizeEventWithDigest"
-	SessionSv1InitiateSession          = "SessionSv1.InitiateSession"
-	SessionSv1UpdateSession            = "SessionSv1.UpdateSession"
-	SessionSv1TerminateSession         = "SessionSv1.TerminateSession"
-	SessionSv1ProcessCDR               = "SessionSv1.ProcessCDR"
-	SessionSv1ProcessEvent             = "SessionSv1.ProcessEvent"
-	SessionSv1DisconnectSession        = "SessionSv1.DisconnectSession"
-	SessionSv1GetActiveSessions        = "SessionSv1.GetActiveSessions"
-	SessionSv1GetPassiveSessions       = "SessionSv1.GetPassiveSessions"
-	SMGenericV1InitiateSession         = "SMGenericV1.InitiateSession"
-	SMGenericV2InitiateSession         = "SMGenericV2.InitiateSession"
-	SMGenericV2UpdateSession           = "SMGenericV2.UpdateSession"
+	SessionSv1AuthorizeEvent             = "SessionSv1.AuthorizeEvent"
+	SessionSv1AuthorizeEventWithDigest   = "SessionSv1.AuthorizeEventWithDigest"
+	SessionSv1InitiateSession            = "SessionSv1.InitiateSession"
+	SessionSv1InitiateSessionWithDigest  = "SessionSv1.InitiateSessionWithDigest"
+	SessionSv1UpdateSession              = "SessionSv1.UpdateSession"
+	SessionSv1TerminateSession           = "SessionSv1.TerminateSession"
+	SessionSv1ProcessCDR                 = "SessionSv1.ProcessCDR"
+	SessionSv1ProcessEvent               = "SessionSv1.ProcessEvent"
+	SessionSv1DisconnectSession          = "SessionSv1.DisconnectSession"
+	SessionSv1GetActiveSessions          = "SessionSv1.GetActiveSessions"
+	SessionSv1GetPassiveSessions         = "SessionSv1.GetPassiveSessions"
+	SMGenericV1InitiateSession           = "SMGenericV1.InitiateSession"
+	SMGenericV2InitiateSession           = "SMGenericV2.InitiateSession"
+	SMGenericV2UpdateSession             = "SMGenericV2.UpdateSession"
+	SessionSv1Ping                       = "SessionSv1.Ping"
+	SessionSv1GetActiveSessionIDs        = "SessionSv1.GetActiveSessionIDs"
+	SessionSv1RegisterInternalBiJSONConn = "SessionSv1.RegisterInternalBiJSONConn"
+)
+
+// DispatcherS APIs
+const (
+	DispatcherSv1Ping = "DispatcherSv1.Ping"
+)
+
+// LoaderS APIs
+const (
+	LoaderSv1Load = "LoaderSv1.Load"
+	LoaderSv1Ping = "LoaderSv1.Ping"
+)
+
+// CacheS APIs
+const (
+	CacheSv1GetCacheStats     = "CacheSv1.GetCacheStats"
+	CacheSv1GetItemIDs        = "CacheSv1.GetItemIDs"
+	CacheSv1HasItem           = "CacheSv1.HasItem"
+	CacheSv1GetItemExpiryTime = "CacheSv1.GetItemExpiryTime"
+	CacheSv1RemoveItem        = "CacheSv1.RemoveItem"
+	CacheSv1PrecacheStatus    = "CacheSv1.PrecacheStatus"
+	CacheSv1HasGroup          = "CacheSv1.HasGroup"
+	CacheSv1GetGroupItemIDs   = "CacheSv1.GetGroupItemIDs"
+	CacheSv1RemoveGroup       = "CacheSv1.RemoveGroup"
+	CacheSv1Clear             = "CacheSv1.Clear"
+)
+
+// Cdrs APIs
+const (
+	CdrsV1CountCDRs  = "CdrsV1.CountCDRs"
+	CdrsV1GetCDRs    = "CdrsV1.GetCDRs"
+	CdrsV2ProcessCDR = "CdrsV2.ProcessCDR"
+	CdrsV2RateCDRs   = "CdrsV2.RateCDRs"
+)
+
+// Scheduler
+const (
+	SchedulerPing = "Scheduler.Ping"
+)
+
+// Cdrc
+const (
+	CdrcPing = "Cdrc.Ping"
+)
+
+//cgr_ variables
+const (
+	CGR_ACCOUNT          = "cgr_account"
+	CGR_SUPPLIER         = "cgr_supplier"
+	CGR_DESTINATION      = "cgr_destination"
+	CGR_SUBJECT          = "cgr_subject"
+	CGR_CATEGORY         = "cgr_category"
+	CGR_REQTYPE          = "cgr_reqtype"
+	CGR_TENANT           = "cgr_tenant"
+	CGR_TOR              = "cgr_tor"
+	CGR_OriginID         = "cgr_originid"
+	CGR_HOST             = "cgr_host"
+	CGR_PDD              = "cgr_pdd"
+	CGR_DISCONNECT_CAUSE = "cgr_disconnectcause"
+	CGR_COMPUTELCR       = "cgr_computelcr"
+	CGR_SUPPLIERS        = "cgr_suppliers"
+	CGRFlags             = "cgr_flags"
 )
 
 //CSV file name
@@ -646,9 +835,10 @@ const (
 	FiltersCsv            = "Filters.csv"
 	SuppliersCsv          = "Suppliers.csv"
 	AttributesCsv         = "Attributes.csv"
+	ChargersCsv           = "Chargers.csv"
 )
 
-//Table Name
+// Table Name
 const (
 	TBLTPTimings          = "tp_timings"
 	TBLTPDestinations     = "tp_destinations"
@@ -674,60 +864,67 @@ const (
 	CDRsTBL               = "cdrs"
 	TBLTPSuppliers        = "tp_suppliers"
 	TBLTPAttributes       = "tp_attributes"
+	TBLTPChargers         = "tp_chargers"
 	TBLVersions           = "versions"
+	OldSMCosts            = "sm_costs"
 )
 
-//Cache Name
+// Cache Name
 const (
-	CacheDestinations              = "destinations"
-	CacheReverseDestinations       = "reverse_destinations"
-	CacheRatingPlans               = "rating_plans"
-	CacheRatingProfiles            = "rating_profiles"
-	CacheLCRRules                  = "lcr_rules"
-	CacheCDRStatS                  = "cdr_stats"
-	CacheActions                   = "actions"
-	CacheActionPlans               = "action_plans"
-	CacheAccountActionPlans        = "account_action_plans"
-	CacheActionTriggers            = "action_triggers"
-	CacheSharedGroups              = "shared_groups"
-	CacheAliases                   = "aliases"
-	CacheReverseAliases            = "reverse_aliases"
-	CacheDerivedChargers           = "derived_chargers"
-	CacheResources                 = "resources"
-	CacheResourceProfiles          = "resource_profiles"
-	CacheTimings                   = "timings"
-	CacheEventResources            = "event_resources"
-	CacheStatQueueProfiles         = "statqueue_profiles"
-	CacheStatQueues                = "statqueues"
-	CacheThresholdProfiles         = "threshold_profiles"
-	CacheThresholds                = "thresholds"
-	CacheFilters                   = "filters"
-	CacheSupplierProfiles          = "supplier_profiles"
-	CacheAttributeProfiles         = "attribute_profiles"
-	CacheResourceFilterIndexes     = "resource_filter_indexes"
-	CacheResourceFilterRevIndexes  = "resource_filter_revindexes"
-	CacheStatFilterIndexes         = "stat_filter_indexes"
-	CacheStatFilterRevIndexes      = "stat_filter_revindexes"
-	CacheThresholdFilterIndexes    = "threshold_filter_indexes"
-	CacheThresholdFilterRevIndexes = "threshold_filter_revindexes"
-	CacheSupplierFilterIndexes     = "supplier_filter_indexes"
-	CacheSupplierFilterRevIndexes  = "supplier_filter_revindexes"
-	CacheAttributeFilterIndexes    = "attribute_filter_indexes"
-	CacheAttributeFilterRevIndexes = "attribute_filter_revindexes"
+	CacheDestinations           = "destinations"
+	CacheReverseDestinations    = "reverse_destinations"
+	CacheRatingPlans            = "rating_plans"
+	CacheRatingProfiles         = "rating_profiles"
+	CacheLCRRules               = "lcr_rules"
+	CacheCDRStatS               = "cdr_stats"
+	CacheActions                = "actions"
+	CacheActionPlans            = "action_plans"
+	CacheAccountActionPlans     = "account_action_plans"
+	CacheActionTriggers         = "action_triggers"
+	CacheSharedGroups           = "shared_groups"
+	CacheAliases                = "aliases"
+	CacheReverseAliases         = "reverse_aliases"
+	CacheDerivedChargers        = "derived_chargers"
+	CacheResources              = "resources"
+	CacheResourceProfiles       = "resource_profiles"
+	CacheTimings                = "timings"
+	CacheEventResources         = "event_resources"
+	CacheStatQueueProfiles      = "statqueue_profiles"
+	CacheStatQueues             = "statqueues"
+	CacheThresholdProfiles      = "threshold_profiles"
+	CacheThresholds             = "thresholds"
+	CacheFilters                = "filters"
+	CacheSupplierProfiles       = "supplier_profiles"
+	CacheAttributeProfiles      = "attribute_profiles"
+	CacheChargerProfiles        = "charger_profiles"
+	CacheResourceFilterIndexes  = "resource_filter_indexes"
+	CacheStatFilterIndexes      = "stat_filter_indexes"
+	CacheThresholdFilterIndexes = "threshold_filter_indexes"
+	CacheSupplierFilterIndexes  = "supplier_filter_indexes"
+	CacheAttributeFilterIndexes = "attribute_filter_indexes"
+	CacheChargerFilterIndexes   = "charger_filter_indexes"
+	MetaPrecaching              = "*precaching"
+	MetaReady                   = "*ready"
 )
 
-//Prefix for indexing
+// Prefix for indexing
 const (
-	ResourceFilterIndexes     = "rfi_"
-	ResourceFilterRevIndexes  = "rfr_"
-	StatFilterIndexes         = "sfi_"
-	StatFilterRevIndexes      = "sfr_"
-	ThresholdFilterIndexes    = "tfi_"
-	ThresholdFilterRevIndexes = "tfr_"
-	SupplierFilterIndexes     = "spi_"
-	SupplierFilterRevIndexes  = "spr_"
-	AttributeFilterIndexes    = "afi_"
-	AttributeFilterRevIndexes = "afr_"
+	ResourceFilterIndexes  = "rfi_"
+	StatFilterIndexes      = "sfi_"
+	ThresholdFilterIndexes = "tfi_"
+	SupplierFilterIndexes  = "spi_"
+	AttributeFilterIndexes = "afi_"
+	ChargerFilterIndexes   = "cfi_"
+)
+
+// Agents
+const (
+	KamailioAgent   = "KamailioAgent"
+	RadiusAgent     = "RadiusAgent"
+	DiameterAgent   = "DiameterAgent"
+	FreeSWITCHAgent = "FreeSWITCHAgent"
+	AsteriskAgent   = "AsteriskAgent"
+	HTTPAgent       = "HTTPAgent"
 )
 
 func buildCacheInstRevPrefixes() {
@@ -737,6 +934,14 @@ func buildCacheInstRevPrefixes() {
 	}
 }
 
+func buildCacheIndexesToPrefix() {
+	CacheIndexesToPrefix = make(map[string]string)
+	for k, v := range PrefixToIndexCache {
+		CacheIndexesToPrefix[v] = k
+	}
+}
+
 func init() {
 	buildCacheInstRevPrefixes()
+	buildCacheIndexesToPrefix()
 }

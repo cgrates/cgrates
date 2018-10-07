@@ -26,22 +26,28 @@ import (
 )
 
 func (m *Migrator) migrateCurrentTPaliases() (err error) {
-	tpids, err := m.InStorDB().GetTpIds(utils.TBLTPAliases)
+	tpids, err := m.storDBIn.StorDB().GetTpIds(utils.TBLTPAliases)
 	if err != nil {
 		return err
 	}
 	for _, tpid := range tpids {
-		dests, err := m.InStorDB().GetTPAliases(&utils.TPAliases{TPid: tpid})
+		alias, err := m.storDBIn.StorDB().GetTPAliases(&utils.TPAliases{TPid: tpid})
 		if err != nil {
 			return err
 		}
-		for _, dest := range dests {
+		for _, dest := range alias {
 			dest.TPid = tpid
 		}
-		if dests != nil {
+		if alias != nil {
 			if m.dryRun != true {
-				if err := m.OutStorDB().SetTPAliases(dests); err != nil {
+				if err := m.storDBOut.StorDB().SetTPAliases(alias); err != nil {
 					return err
+				}
+				for _, ali := range alias {
+					if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPAliases, ali.TPid, map[string]string{"direction": ali.Direction,
+						"tenant": ali.Tenant, "category": ali.Category, "account": ali.Account, "subject": ali.Subject, "context": ali.Context}); err != nil {
+						return err
+					}
 				}
 				m.stats[utils.TpAliases] += 1
 			}
@@ -54,7 +60,7 @@ func (m *Migrator) migrateCurrentTPaliases() (err error) {
 func (m *Migrator) migrateTPaliases() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.OutStorDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.storDBOut.StorDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

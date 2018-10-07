@@ -18,11 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-// SupplierSCfg is the configuration of supplier service
+// AttributeSCfg is the configuration of attribute service
 type AttributeSCfg struct {
 	Enabled             bool
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
+	ProcessRuns         int
 }
 
 func (alS *AttributeSCfg) loadFromJsonCfg(jsnCfg *AttributeSJsonCfg) (err error) {
@@ -45,6 +46,9 @@ func (alS *AttributeSCfg) loadFromJsonCfg(jsnCfg *AttributeSJsonCfg) (err error)
 			pif[i] = fID
 		}
 		alS.PrefixIndexedFields = &pif
+	}
+	if jsnCfg.Process_runs != nil {
+		alS.ProcessRuns = *jsnCfg.Process_runs
 	}
 	return
 }

@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -30,7 +31,8 @@ import (
 
 // Various helpers to deal with database
 
-func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler string, cacheCfg config.CacheConfig, loadHistorySize int) (dm *DataManager, err error) {
+func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler string,
+	cacheCfg config.CacheConfig, sentinelName string) (dm *DataManager, err error) {
 	var d DataDB
 	switch db_type {
 	case utils.REDIS:
@@ -40,17 +42,24 @@ func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler strin
 			utils.Logger.Crit("Redis db name must be an integer!")
 			return nil, err
 		}
-		if port != "" {
+		if port != "" && strings.Index(host, ":") == -1 {
 			host += ":" + port
 		}
-		d, err = NewRedisStorage(host, db_nb, pass, marshaler, utils.REDIS_MAX_CONNS, cacheCfg, loadHistorySize)
+		d, err = NewRedisStorage(host, db_nb, pass, marshaler, utils.REDIS_MAX_CONNS, cacheCfg, sentinelName)
 		dm = NewDataManager(d.(DataDB))
 	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass, utils.DataDB, nil, cacheCfg, loadHistorySize)
+		d, err = NewMongoStorage(host, port, name, user, pass, utils.DataDB, nil, cacheCfg)
+		dm = NewDataManager(d.(DataDB))
+	case utils.INTERNAL:
+		if marshaler == utils.JSON {
+			d, err = NewMapStorageJson()
+		} else {
+			d, err = NewMapStorage()
+		}
 		dm = NewDataManager(d.(DataDB))
 	default:
-		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are '%s' or '%s'",
-			db_type, utils.REDIS, utils.MONGO))
+		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are '%s' or '%s or '%s'",
+			db_type, utils.REDIS, utils.MONGO, utils.INTERNAL))
 	}
 	if err != nil {
 		return nil, err
@@ -58,18 +67,21 @@ func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler strin
 	return dm, nil
 }
 
-func ConfigureStorStorage(db_type, host, port, name, user, pass, marshaler string, maxConn, maxIdleConn, connMaxLifetime int, cdrsIndexes []string) (db Storage, err error) {
+func ConfigureStorStorage(db_type, host, port, name, user, pass, marshaler string,
+	maxConn, maxIdleConn, connMaxLifetime int, cdrsIndexes []string) (db Storage, err error) {
 	var d Storage
 	switch db_type {
 	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, cdrsIndexes, nil, 1)
+		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, cdrsIndexes, nil)
 	case utils.POSTGRES:
 		d, err = NewPostgresStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
 	case utils.MYSQL:
 		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
+	case utils.INTERNAL:
+		d, err = NewMapStorage()
 	default:
-		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are [%s, %s, %s]",
-			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES))
+		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are [%s, %s, %s, %s]",
+			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL))
 	}
 	if err != nil {
 		return nil, err
@@ -77,7 +89,8 @@ func ConfigureStorStorage(db_type, host, port, name, user, pass, marshaler strin
 	return d, nil
 }
 
-func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler string, maxConn, maxIdleConn, connMaxLifetime int, cdrsIndexes []string) (db LoadStorage, err error) {
+func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler string,
+	maxConn, maxIdleConn, connMaxLifetime int, cdrsIndexes []string) (db LoadStorage, err error) {
 	var d LoadStorage
 	switch db_type {
 	case utils.POSTGRES:
@@ -85,10 +98,12 @@ func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler strin
 	case utils.MYSQL:
 		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
 	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, cdrsIndexes, nil, 1)
+		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, cdrsIndexes, nil)
+	case utils.INTERNAL:
+		d, err = NewMapStorage()
 	default:
-		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are [%s, %s, %s]",
-			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES))
+		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are [%s, %s, %s, %s]",
+			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL))
 	}
 	if err != nil {
 		return nil, err
@@ -96,7 +111,8 @@ func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler strin
 	return d, nil
 }
 
-func ConfigureCdrStorage(db_type, host, port, name, user, pass string, maxConn, maxIdleConn, connMaxLifetime int, cdrsIndexes []string) (db CdrStorage, err error) {
+func ConfigureCdrStorage(db_type, host, port, name, user, pass string,
+	maxConn, maxIdleConn, connMaxLifetime int, cdrsIndexes []string) (db CdrStorage, err error) {
 	var d CdrStorage
 	switch db_type {
 	case utils.POSTGRES:
@@ -104,10 +120,34 @@ func ConfigureCdrStorage(db_type, host, port, name, user, pass string, maxConn, 
 	case utils.MYSQL:
 		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
 	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, cdrsIndexes, nil, 1)
+		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, cdrsIndexes, nil)
+	case utils.INTERNAL:
+		d, err = NewMapStorage()
 	default:
-		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are [%s, %s, %s]",
-			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES))
+		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are [%s, %s, %s, %s]",
+			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL))
+	}
+	if err != nil {
+		return nil, err
+	}
+	return d, nil
+}
+
+func ConfigureStorDB(db_type, host, port, name, user, pass string,
+	maxConn, maxIdleConn, connMaxLifetime int, cdrsIndexes []string) (db StorDB, err error) {
+	var d StorDB
+	switch db_type {
+	case utils.POSTGRES:
+		d, err = NewPostgresStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
+	case utils.MYSQL:
+		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
+	case utils.MONGO:
+		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, cdrsIndexes, nil)
+	case utils.INTERNAL:
+		d, err = NewMapStorage()
+	default:
+		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are [%s, %s, %s, %s]",
+			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL))
 	}
 	if err != nil {
 		return nil, err
@@ -123,7 +163,7 @@ type SMCost struct {
 	OriginID    string
 	CostSource  string
 	Usage       time.Duration
-	CostDetails *CallCost
+	CostDetails *EventCost
 }
 
 type AttrCDRSStoreSMCost struct {

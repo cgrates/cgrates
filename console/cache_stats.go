@@ -18,12 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
+)
 
 func init() {
 	c := &CmdGetCacheStats{
 		name:      "cache_stats",
-		rpcMethod: "ApierV1.GetCacheStats",
+		rpcMethod: utils.CacheSv1GetCacheStats,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -33,7 +36,7 @@ func init() {
 type CmdGetCacheStats struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.AttrCacheStats
+	rpcParams *StringSliceWrapper
 	*CommandExecuter
 }
 
@@ -47,7 +50,7 @@ func (self *CmdGetCacheStats) RpcMethod() string {
 
 func (self *CmdGetCacheStats) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.AttrCacheStats{}
+		self.rpcParams = new(StringSliceWrapper)
 	}
 	return self.rpcParams
 }
@@ -57,5 +60,6 @@ func (self *CmdGetCacheStats) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetCacheStats) RpcResult() interface{} {
-	return &utils.CacheStats{}
+	reply := make(map[string]*ltcache.CacheStats)
+	return &reply
 }

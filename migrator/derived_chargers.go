@@ -28,19 +28,19 @@ import (
 
 func (m *Migrator) migrateCurrentDerivedChargers() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.DERIVEDCHARGERS_PREFIX)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.DERIVEDCHARGERS_PREFIX)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.DERIVEDCHARGERS_PREFIX)
-		drc, err := m.dmIN.GetDerivedChargers(idg, true, utils.NonTransactional)
+		drc, err := m.dmIN.DataManager().GetDerivedChargers(idg, true, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if drc != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.DataDB().SetDerivedChargers(idg, drc, utils.NonTransactional); err != nil {
+				if err := m.dmOut.DataManager().DataDB().SetDerivedChargers(idg, drc, utils.NonTransactional); err != nil {
 					return err
 				}
 				m.stats[utils.DerivedChargersV] += 1
@@ -53,7 +53,7 @@ func (m *Migrator) migrateCurrentDerivedChargers() (err error) {
 func (m *Migrator) migrateDerivedChargers() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.dmOut.DataManager().DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

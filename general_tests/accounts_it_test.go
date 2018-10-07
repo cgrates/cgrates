@@ -57,6 +57,7 @@ var sTestsAcc = []func(t *testing.T){
 	testV1AccGetAccountAfterSet,
 	testV1AccRemAccountSet,
 	testV1AccGetAccountSetAfterDelete,
+	//testV1AccRemAccountAfterDelete,
 	testV1AccStopEngine,
 }
 
@@ -124,7 +125,7 @@ func testV1AccGetAccountBeforeSet(t *testing.T) {
 
 func testV1AccLoadTarrifPlans(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
 	if err := accRpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -199,6 +200,18 @@ func testV1AccGetAccountSetAfterDelete(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+/*
+Need to investigate for redis why didn't return not found
+func testV1AccRemAccountAfterDelete(t *testing.T) {
+	var reply string
+	if err := accRpc.Call("ApierV1.RemoveAccount",
+		&utils.AttrRemoveAccount{Tenant: "cgrates.org", Account: "testacc"},
+		&reply); err == nil || err.Error() != utils.NewErrServerError(utils.ErrNotFound).Error() {
+		t.Error(err)
+	}
+}
+*/
 
 func testV1AccStopEngine(t *testing.T) {
 	if err := engine.KillEngine(accDelay); err != nil {

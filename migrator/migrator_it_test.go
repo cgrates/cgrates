@@ -16,8 +16,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package migrator
 
+/*
 import (
 	"flag"
+	"fmt"
 	"log"
 	"path"
 	"reflect"
@@ -30,6 +32,7 @@ import (
 )
 
 var (
+	isPostgres      bool
 	path_in         string
 	path_out        string
 	cfg_in          *config.CGRConfig
@@ -37,20 +40,19 @@ var (
 	Move            = "move"
 	action          string
 	mig             *Migrator
-	dataDir         = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	loadHistorySize = flag.Int("load_history_size", config.CgrConfig().LoadHistorySize, "Limit the number of records in the load history")
+
 )
 
 // subtests to be executed for each migrator
 var sTestsITMigrator = []func(t *testing.T){
 	testFlush,
-	testMigratorAccounts,
+	testMigratorAccounts, // Done
 	testMigratorActionPlans,
 	testMigratorActionTriggers,
 	testMigratorActions,
 	testMigratorSharedGroups,
 	testMigratorStats,
-	testMigratorSessionsCosts,
+	testMigratorSessionsCosts, // Done
 	testFlush,
 	testMigratorAlias,
 	//FIXME testMigratorReverseAlias,
@@ -67,28 +69,6 @@ var sTestsITMigrator = []func(t *testing.T){
 	testMigratorTimings,
 	testMigratorThreshold,
 	testMigratorAttributeProfile,
-	//TPS
-	testMigratorTPRatingProfile,
-	testMigratorTPSuppliers,
-	testMigratorTPActions,
-	testMigratorTPAccountActions,
-	testMigratorTpActionTriggers,
-	testMigratorTpActionPlans,
-	testMigratorTpUsers,
-	testMigratorTpTimings,
-	testMigratorTpThreshold,
-	testMigratorTpStats,
-	testMigratorTpSharedGroups,
-	testMigratorTpResources,
-	testMigratorTpRatingProfiles,
-	testMigratorTpRatingPlans,
-	testMigratorTpRates,
-	testMigratorTpFilter,
-	testMigratorTpDestination,
-	testMigratorTpDestinationRate,
-	testMigratorTpDerivedChargers,
-	testMigratorTpCdrStats,
-	testMigratorTpAliases,
 	testFlush,
 }
 
@@ -113,14 +93,14 @@ func TestMigratorITPostgresConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDB, err := engine.ConfigureStorStorage(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
-		cfg_in.StorDBUser, cfg_in.StorDBPass, cfg_in.DBDataEncoding,
+	storDB, err := engine.ConfigureStorDB(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
+		cfg_in.StorDBUser, cfg_in.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
-	oldstorDB, err := engine.ConfigureStorStorage(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
-		cfg_in.StorDBUser, cfg_in.StorDBPass, cfg_in.DBDataEncoding,
+	oldstorDB, err := engine.ConfigureStorDB(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
+		cfg_in.StorDBUser, cfg_in.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
@@ -134,6 +114,7 @@ func TestMigratorITPostgresConnect(t *testing.T) {
 
 func TestMigratorITPostgres(t *testing.T) {
 	action = utils.REDIS
+	isPostgres = true
 	for _, stest := range sTestsITMigrator {
 		t.Run("TestITMigratorOnPostgres", stest)
 	}
@@ -160,14 +141,14 @@ func TestMigratorITRedisConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDB, err := engine.ConfigureStorStorage(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
-		cfg_in.StorDBUser, cfg_in.StorDBPass, cfg_in.DBDataEncoding,
+	storDB, err := engine.ConfigureStorDB(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
+		cfg_in.StorDBUser, cfg_in.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
-	oldstorDB, err := engine.ConfigureStorStorage(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
-		cfg_in.StorDBUser, cfg_in.StorDBPass, cfg_in.DBDataEncoding,
+	oldstorDB, err := engine.ConfigureStorDB(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
+		cfg_in.StorDBUser, cfg_in.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
@@ -181,6 +162,7 @@ func TestMigratorITRedisConnect(t *testing.T) {
 
 func TestMigratorITRedis(t *testing.T) {
 	action = utils.REDIS
+	isPostgres = false
 	for _, stest := range sTestsITMigrator {
 		t.Run("TestITMigratorOnRedis", stest)
 	}
@@ -207,14 +189,14 @@ func TestMigratorITMongoConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDB, err := engine.ConfigureStorStorage(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
-		cfg_in.StorDBUser, cfg_in.StorDBPass, cfg_in.DBDataEncoding,
+	storDB, err := engine.ConfigureStorDB(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
+		cfg_in.StorDBUser, cfg_in.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
-	oldstorDB, err := engine.ConfigureStorStorage(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
-		cfg_in.StorDBUser, cfg_in.StorDBPass, cfg_in.DBDataEncoding,
+	oldstorDB, err := engine.ConfigureStorDB(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
+		cfg_in.StorDBUser, cfg_in.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
@@ -259,19 +241,24 @@ func TestMigratorITMoveConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDB, err := engine.ConfigureStorStorage(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
-		cfg_in.StorDBUser, cfg_in.StorDBPass, cfg_in.DBDataEncoding,
+	storDBIn, err := engine.ConfigureStorDB(cfg_in.StorDBType, cfg_in.StorDBHost, cfg_in.StorDBPort, cfg_in.StorDBName,
+		cfg_in.StorDBUser, cfg_in.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
-	oldstorDB, err := engine.ConfigureStorStorage(cfg_out.StorDBType, cfg_out.StorDBHost, cfg_out.StorDBPort, cfg_out.StorDBName,
-		cfg_out.StorDBUser, cfg_out.StorDBPass, cfg_out.DBDataEncoding,
+	storDBOut, err := engine.ConfigureStorDB(cfg_out.StorDBType, cfg_out.StorDBHost, cfg_out.StorDBPort, cfg_out.StorDBName,
+		cfg_out.StorDBUser, cfg_out.StorDBPass,
 		config.CgrConfig().StorDBMaxOpenConns, config.CgrConfig().StorDBMaxIdleConns, config.CgrConfig().StorDBConnMaxLifetime, config.CgrConfig().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
-	mig, err = NewMigrator(dataDB2, dataDB, cfg_in.DataDbType, cfg_in.DBDataEncoding, storDB, cfg_in.StorDBType, oldDataDB,
+	oldstorDB, err := ConfigureV1StorDB(cfg_out.StorDBType, cfg_out.StorDBHost, cfg_out.StorDBPort, cfg_out.StorDBName,
+		cfg_out.StorDBUser, cfg_out.StorDBPass)
+	if err != nil {
+		log.Fatal(err)
+	}
+	mig, err = NewMigrator(dataDB2, dataDB, cfg_in.DataDbType, cfg_in.DBDataEncoding, storDBOut, storDBIn, cfg_in.StorDBType, oldDataDB,
 		cfg_in.DataDbType, cfg_in.DBDataEncoding, oldstorDB, cfg_in.StorDBType, false, false, false, false, false)
 	if err != nil {
 		log.Fatal(err)
@@ -291,93 +278,13 @@ func testFlush(t *testing.T) {
 		t.Error("Error  ", err.Error())
 	}
 	if path_out != "" {
-		if err := mig.InStorDB().Flush(path.Join(cfg_in.DataFolderPath, "storage", cfg_in.StorDBType)); err != nil {
+		if err := mig.storDBIn.Flush(path.Join(cfg_in.DataFolderPath, "storage", cfg_in.StorDBType)); err != nil {
 			t.Error(err)
 		}
 	}
 	if path_out != "" {
-		if err := mig.OutStorDB().Flush(path.Join(cfg_out.DataFolderPath, "storage", cfg_out.StorDBType)); err != nil {
+		if err := mig.storDBOut.Flush(path.Join(cfg_out.DataFolderPath, "storage", cfg_out.StorDBType)); err != nil {
 			t.Error(err)
-		}
-	}
-}
-
-func testMigratorAccounts(t *testing.T) {
-	v1d := &v1Balance{Value: 100000, Weight: 10, DestinationIds: "NAT", ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}
-	v1b := &v1Balance{Value: 100000, Weight: 10, DestinationIds: "NAT", ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}
-	v1Acc := &v1Account{Id: "*OUT:CUSTOMER_1:rif", BalanceMap: map[string]v1BalanceChain{utils.DATA: v1BalanceChain{v1d}, utils.VOICE: v1BalanceChain{v1b}, utils.MONETARY: v1BalanceChain{&v1Balance{Value: 21, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}}}
-
-	v2d := &engine.Balance{Uuid: "", ID: "", Value: 100000, Directions: utils.StringMap{"*OUT": true}, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), Weight: 10, DestinationIDs: utils.StringMap{"NAT": true},
-		RatingSubject: "", Categories: utils.NewStringMap(), SharedGroups: utils.NewStringMap(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}, TimingIDs: utils.NewStringMap(""), Factor: engine.ValueFactor{}}
-	v2b := &engine.Balance{Uuid: "", ID: "", Value: 0.0001, Directions: utils.StringMap{"*OUT": true}, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), Weight: 10, DestinationIDs: utils.StringMap{"NAT": true},
-		RatingSubject: "", Categories: utils.NewStringMap(), SharedGroups: utils.NewStringMap(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}, TimingIDs: utils.NewStringMap(""), Factor: engine.ValueFactor{}}
-	m2 := &engine.Balance{Uuid: "", ID: "", Value: 21, Directions: utils.StringMap{"*OUT": true}, ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC), DestinationIDs: utils.NewStringMap(""), RatingSubject: "",
-		Categories: utils.NewStringMap(), SharedGroups: utils.NewStringMap(), Timings: []*engine.RITiming{&engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}, TimingIDs: utils.NewStringMap(""), Factor: engine.ValueFactor{}}
-	testAccount := &engine.Account{ID: "CUSTOMER_1:rif", BalanceMap: map[string]engine.Balances{utils.DATA: engine.Balances{v2d}, utils.VOICE: engine.Balances{v2b}, utils.MONETARY: engine.Balances{m2}}, UnitCounters: engine.UnitCounters{}, ActionTriggers: engine.ActionTriggers{}}
-	switch {
-	case action == utils.REDIS:
-		err := mig.oldDataDB.setV1Account(v1Acc)
-		if err != nil {
-			t.Error("Error when setting v1 Accounts ", err.Error())
-		}
-		currentVersion := engine.Versions{utils.StatS: 2, utils.Thresholds: 2, utils.Accounts: 1, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
-		err = mig.dmOut.DataDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for Accounts ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaAccounts})
-		if err != nil {
-			t.Error("Error when migrating Accounts ", err.Error())
-		}
-		result, err := mig.dmOut.DataDB().GetAccount(testAccount.ID)
-		if err != nil {
-			t.Error("Error when getting Accounts ", err.Error())
-		}
-		if !reflect.DeepEqual(testAccount.BalanceMap["*voice"][0], result.BalanceMap["*voice"][0]) {
-			t.Errorf("Expecting: %+v, received: %+v", testAccount.BalanceMap["*voice"][0], result.BalanceMap["*voice"][0])
-		} else if !reflect.DeepEqual(testAccount, result) {
-			t.Errorf("Expecting: %+v, received: %+v", testAccount, result)
-		}
-	case action == utils.MONGO:
-		err := mig.oldDataDB.setV1Account(v1Acc)
-		if err != nil {
-			t.Error("Error when marshaling ", err.Error())
-		}
-		currentVersion := engine.Versions{utils.StatS: 2, utils.Thresholds: 2, utils.Accounts: 1, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
-		err = mig.dmOut.DataDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for Accounts ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaAccounts})
-		if err != nil {
-			t.Error("Error when migrating Accounts ", err.Error())
-		}
-		result, err := mig.dmOut.DataDB().GetAccount(testAccount.ID)
-		if err != nil {
-			t.Error("Error when getting Accounts ", err.Error())
-		}
-		if !reflect.DeepEqual(testAccount, result) {
-			t.Errorf("Expecting: %+v, received: %+v", testAccount, result)
-		}
-	case action == Move:
-		if err := mig.dmIN.DataDB().SetAccount(testAccount); err != nil {
-			log.Print("GOT ERR DMIN", err)
-		}
-		currentVersion := engine.CurrentDataDBVersions()
-		err := mig.dmOut.DataDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for Accounts ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaAccounts})
-		if err != nil {
-			t.Error("Error when migrating Accounts ", err.Error())
-		}
-		result, err := mig.dmOut.DataDB().GetAccount(testAccount.ID)
-		if err != nil {
-			log.Print("GOT ERR DMOUT", err)
-		}
-		if !reflect.DeepEqual(testAccount, result) {
-			t.Errorf("Expecting: %+v, received: %+v", testAccount, result)
 		}
 	}
 }
@@ -385,8 +292,8 @@ func testMigratorAccounts(t *testing.T) {
 func testMigratorActionPlans(t *testing.T) {
 	v1ap := &v1ActionPlans{&v1ActionPlan{Id: "test", AccountIds: []string{"one"}, Timing: &engine.RateInterval{Timing: &engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}
 	ap := &engine.ActionPlan{Id: "test", AccountIDs: utils.StringMap{"one": true}, ActionTimings: []*engine.ActionTiming{&engine.ActionTiming{Timing: &engine.RateInterval{Timing: &engine.RITiming{Years: utils.Years{}, Months: utils.Months{}, MonthDays: utils.MonthDays{}, WeekDays: utils.WeekDays{}}}}}}
-	switch {
-	case action == utils.REDIS:
+	switch action {
+	case utils.REDIS, utils.Mongo:
 		err := mig.oldDataDB.setV1ActionPlans(v1ap)
 		if err != nil {
 			t.Error("Error when setting v1 ActionPlan ", err.Error())
@@ -411,32 +318,7 @@ func testMigratorActionPlans(t *testing.T) {
 		} else if ap.ActionTimings[0].Weight != result.ActionTimings[0].Weight || ap.ActionTimings[0].ActionsID != result.ActionTimings[0].ActionsID {
 			t.Errorf("Expecting: %+v, received: %+v", ap.ActionTimings[0].Weight, result.ActionTimings[0].Weight)
 		}
-	case action == utils.MONGO:
-		err := mig.oldDataDB.setV1ActionPlans(v1ap)
-		if err != nil {
-			t.Error("Error when setting v1 ActionPlans ", err.Error())
-		}
-		currentVersion := engine.Versions{utils.StatS: 2, utils.Thresholds: 2, utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 1, utils.SharedGroups: 2}
-		err = mig.dmOut.DataDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for ActionPlan ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaActionPlans})
-		if err != nil {
-			t.Error("Error when migrating ActionPlans ", err.Error())
-		}
-		result, err := mig.dmOut.DataDB().GetActionPlan(ap.Id, true, utils.NonTransactional)
-		if err != nil {
-			t.Error("Error when getting ActionPlan ", err.Error())
-		}
-		if ap.Id != result.Id || !reflect.DeepEqual(ap.AccountIDs, result.AccountIDs) {
-			t.Errorf("Expecting: %+v, received: %+v", *ap, result)
-		} else if !reflect.DeepEqual(ap.ActionTimings[0].Timing, result.ActionTimings[0].Timing) {
-			t.Errorf("Expecting: %+v, received: %+v", ap.ActionTimings[0].Timing, result.ActionTimings[0].Timing)
-		} else if ap.ActionTimings[0].Weight != result.ActionTimings[0].Weight || ap.ActionTimings[0].ActionsID != result.ActionTimings[0].ActionsID {
-			t.Errorf("Expecting: %+v, received: %+v", ap.ActionTimings[0].Weight, result.ActionTimings[0].Weight)
-		}
-	case action == Move:
+	case Move:
 		if err := mig.dmIN.DataDB().SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
 			t.Error("Error when setting ActionPlan ", err.Error())
 		}
@@ -495,8 +377,8 @@ func testMigratorActionTriggers(t *testing.T) {
 			Executed:          true,
 		},
 	}
-	switch {
-	case action == utils.REDIS:
+	switch action {
+	case utils.REDIS, utils.MONGO:
 		err := mig.oldDataDB.setV1ActionTriggers(v1atrs)
 		if err != nil {
 			t.Error("Error when setting v1 ActionTriggers ", err.Error())
@@ -577,13 +459,7 @@ func testMigratorActionTriggers(t *testing.T) {
 		} else if !reflect.DeepEqual(atrs[0].Balance.Blocker, result[0].Balance.Blocker) {
 			t.Errorf("Expecting: %+v, received: %+v", atrs[0].Balance.Blocker, result[0].Balance.Blocker)
 		}
-	case action == utils.MONGO:
-		err, _ := mig.Migrate([]string{utils.MetaActionTriggers})
-		if err != nil && err != utils.ErrNotImplemented {
-			t.Error("Error when migrating ActionTriggers ", err.Error())
-		}
-
-	case action == Move:
+	case Move:
 		if err := mig.dmIN.SetActionTriggers(atrs[0].ID, atrs, utils.NonTransactional); err != nil {
 			t.Error("Error when setting ActionPlan ", err.Error())
 		}
@@ -706,8 +582,8 @@ func testMigratorActions(t *testing.T) {
 			},
 		},
 	}
-	switch {
-	case action == utils.REDIS:
+	switch action {
+	case utils.REDIS, utils.MONGO:
 		err := mig.oldDataDB.setV1Actions(v1act)
 		if err != nil {
 			t.Error("Error when setting v1 Actions ", err.Error())
@@ -728,29 +604,7 @@ func testMigratorActions(t *testing.T) {
 		if !reflect.DeepEqual(*act, result) {
 			t.Errorf("Expecting: %+v, received: %+v", *act, result)
 		}
-
-	case action == utils.MONGO:
-		err := mig.oldDataDB.setV1Actions(v1act)
-		if err != nil {
-			t.Error("Error when setting v1 Actions ", err.Error())
-		}
-		currentVersion := engine.Versions{utils.StatS: 2, utils.Thresholds: 2, utils.Accounts: 2, utils.Actions: 1, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
-		err = mig.dmOut.DataDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for Actions ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaActions})
-		if err != nil {
-			t.Error("Error when migrating Actions ", err.Error())
-		}
-		result, err := mig.dmOut.GetActions((*v1act)[0].Id, true, utils.NonTransactional)
-		if err != nil {
-			t.Error("Error when getting Actions ", err.Error())
-		}
-		if !reflect.DeepEqual(*act, result) {
-			t.Errorf("Expecting: %+v, received: %+v", *act, result)
-		}
-	case action == Move:
+	case Move:
 		if err := mig.dmIN.SetActions((*v1act)[0].Id, *act, utils.NonTransactional); err != nil {
 			t.Error("Error when setting ActionPlan ", err.Error())
 		}
@@ -788,8 +642,8 @@ func testMigratorSharedGroups(t *testing.T) {
 		},
 		MemberIds: utils.NewStringMap("1", "2", "3"),
 	}
-	switch {
-	case action == utils.REDIS:
+	switch action {
+	case utils.REDIS, utils.MONGO:
 		err := mig.oldDataDB.setV1SharedGroup(v1sqp)
 		if err != nil {
 			t.Error("Error when setting v1 SharedGroup ", err.Error())
@@ -810,28 +664,7 @@ func testMigratorSharedGroups(t *testing.T) {
 		if !reflect.DeepEqual(sqp, result) {
 			t.Errorf("Expecting: %+v, received: %+v", sqp, result)
 		}
-	case action == utils.MONGO:
-		err := mig.oldDataDB.setV1SharedGroup(v1sqp)
-		if err != nil {
-			t.Error("Error when setting v1 SharedGroup ", err.Error())
-		}
-		currentVersion := engine.Versions{utils.StatS: 2, utils.Thresholds: 2, utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 1}
-		err = mig.dmOut.DataDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for SharedGroup ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaSharedGroups})
-		if err != nil {
-			t.Error("Error when migrating SharedGroup ", err.Error())
-		}
-		result, err := mig.dmOut.GetSharedGroup(v1sqp.Id, true, utils.NonTransactional)
-		if err != nil {
-			t.Error("Error when getting SharedGroup ", err.Error())
-		}
-		if !reflect.DeepEqual(sqp, result) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp, result)
-		}
-	case action == Move:
+	case Move:
 		if err := mig.dmIN.SetSharedGroup(sqp, utils.NonTransactional); err != nil {
 			t.Error("Error when setting SharedGroup ", err.Error())
 		}
@@ -942,8 +775,8 @@ func testMigratorStats(t *testing.T) {
 			}
 		}
 	}
-	switch {
-	case action == utils.REDIS:
+	switch action {
+	case utils.REDIS, utils.MONGO:
 		err := mig.oldDataDB.setV1Stats(v1Sts)
 		if err != nil {
 			t.Error("Error when setting v1Stat ", err.Error())
@@ -1012,75 +845,7 @@ func testMigratorStats(t *testing.T) {
 		if !reflect.DeepEqual(sq.ID, result2.ID) {
 			t.Errorf("Expecting: %+v, received: %+v", sq.ID, result2.ID)
 		}
-	case action == utils.MONGO:
-		err := mig.oldDataDB.setV1Stats(v1Sts)
-		if err != nil {
-			t.Error("Error when setting v1Stat ", err.Error())
-		}
-		currentVersion := engine.Versions{utils.StatS: 1, utils.Thresholds: 2, utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
-		err = mig.dmOut.DataDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for stats ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaStats})
-		if err != nil {
-			t.Error("Error when migrating Stats ", err.Error())
-		}
-		result, err := mig.dmOut.GetStatQueueProfile("cgrates.org", v1Sts.Id, true, utils.NonTransactional)
-		if err != nil {
-			t.Error("Error when getting Stats ", err.Error())
-		}
-		if !reflect.DeepEqual(sqp.Tenant, result.Tenant) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp.Tenant, result.Tenant)
-		}
-		if !reflect.DeepEqual(sqp.ID, result.ID) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp.ID, result.ID)
-		}
-		if !reflect.DeepEqual(sqp.FilterIDs, result.FilterIDs) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp.FilterIDs, result.FilterIDs)
-		}
-		if !reflect.DeepEqual(sqp.QueueLength, result.QueueLength) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp.QueueLength, result.QueueLength)
-		}
-		if !reflect.DeepEqual(sqp.TTL, result.TTL) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp.TTL, result.TTL)
-		}
-		if !reflect.DeepEqual(sqp.Metrics, result.Metrics) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp.Metrics, result.Metrics)
-		}
-		if !reflect.DeepEqual(sqp.ThresholdIDs, result.ThresholdIDs) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp.ThresholdIDs, result.ThresholdIDs)
-		}
-		if !reflect.DeepEqual(sqp.Blocker, result.Blocker) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp.Blocker, result.Blocker)
-		}
-		if !reflect.DeepEqual(sqp.Stored, result.Stored) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp.Stored, result.Stored)
-		}
-		if !reflect.DeepEqual(sqp.Weight, result.Weight) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp.Weight, result.Weight)
-		}
-		if !reflect.DeepEqual(sqp, result) {
-			t.Errorf("Expecting: %+v, received: %+v", sqp, result)
-		}
-		result1, err := mig.dmOut.GetFilter("cgrates.org", v1Sts.Id, true, utils.NonTransactional)
-		if err != nil {
-			t.Error("Error when getting Stats ", err.Error())
-		}
-		if !reflect.DeepEqual(filter.ActivationInterval, result1.ActivationInterval) {
-			t.Errorf("Expecting: %+v, received: %+v", filter.ActivationInterval, result1.ActivationInterval)
-		}
-		if !reflect.DeepEqual(filter.Tenant, result1.Tenant) {
-			t.Errorf("Expecting: %+v, received: %+v", filter.Tenant, result1.Tenant)
-		}
-		result2, err := mig.dmOut.GetStatQueue("cgrates.org", sq.ID, true, utils.NonTransactional)
-		if err != nil {
-			t.Error("Error when getting Stats ", err.Error())
-		}
-		if !reflect.DeepEqual(sq.ID, result2.ID) {
-			t.Errorf("Expecting: %+v, received: %+v", sq.ID, result2.ID)
-		}
-	case action == Move:
+	case Move:
 		if err := mig.dmIN.SetStatQueueProfile(sqp, true); err != nil {
 			t.Error("Error when setting Stats ", err.Error())
 		}
@@ -1115,31 +880,52 @@ func testMigratorStats(t *testing.T) {
 
 func testMigratorSessionsCosts(t *testing.T) {
 	switch action {
-	case Move:
+	case utils.REDIS:
 		currentVersion := engine.CurrentStorDBVersions()
-		currentVersion[utils.SessionsCosts] = 1
+		currentVersion[utils.SessionSCosts] = 1
 		err := mig.OutStorDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for SessionsCosts ", err.Error())
 		}
+		if vrs, err := mig.OutStorDB().GetVersions(utils.SessionSCosts); err != nil {
+			t.Error(err)
+		} else if vrs[utils.SessionSCosts] != 1 {
+			t.Errorf("Expecting: 1, received: %+v", vrs[utils.SessionSCosts])
+		}
+		var qry string
+		if isPostgres {
+			qry = `
+	CREATE TABLE sm_costs (
+	  id SERIAL PRIMARY KEY,
+	  cgrid VARCHAR(40) NOT NULL,
+	  run_id  VARCHAR(64) NOT NULL,
+	  origin_host VARCHAR(64) NOT NULL,
+	  origin_id VARCHAR(128) NOT NULL,
+	  cost_source VARCHAR(64) NOT NULL,
+	  usage BIGINT NOT NULL,
+	  cost_details jsonb,
+	  created_at TIMESTAMP WITH TIME ZONE,
+	  deleted_at TIMESTAMP WITH TIME ZONE NULL,
+	  UNIQUE (cgrid, run_id)
+	);
+		`
+		} else {
+			qry = fmt.Sprint("CREATE TABLE sm_costs (  id int(11) NOT NULL AUTO_INCREMENT,  cgrid varchar(40) NOT NULL,  run_id  varchar(64) NOT NULL,  origin_host varchar(64) NOT NULL,  origin_id varchar(128) NOT NULL,  cost_source varchar(64) NOT NULL,  `usage` BIGINT NOT NULL,  cost_details MEDIUMTEXT,  created_at TIMESTAMP NULL,deleted_at TIMESTAMP NULL,  PRIMARY KEY (`id`),UNIQUE KEY costid (cgrid, run_id),KEY origin_idx (origin_host, origin_id),KEY run_origin_idx (run_id, origin_id),KEY deleted_at_idx (deleted_at));")
+		}
+		if _, err := mig.OutStorDB().(*engine.SQLStorage).Db.Exec("DROP TABLE IF EXISTS sessions_costs;"); err != nil {
+			t.Error(err)
+		}
+		if _, err := mig.OutStorDB().(*engine.SQLStorage).Db.Exec("DROP TABLE IF EXISTS sm_costs;"); err != nil {
+			t.Error(err)
+		}
+		if _, err := mig.OutStorDB().(*engine.SQLStorage).Db.Exec(qry); err != nil {
+			t.Error(err)
+		}
 		err, _ = mig.Migrate([]string{utils.MetaSessionsCosts})
-		if err.Error() != "Wrong version. Please use <cgr-migrator -migrate=*set_versions>" {
-			t.Error("Expecting error , received: %+v ", err)
-		}
-		if vrs, err := mig.OutStorDB().GetVersions(utils.SessionsCosts); err != nil {
+		if vrs, err := mig.OutStorDB().GetVersions(utils.SessionSCosts); err != nil {
 			t.Error(err)
-		} else if vrs[utils.SessionsCosts] != 1 {
-			t.Errorf("Expecting: 1, received: %+v", vrs[utils.SessionsCosts])
-		}
-		currentVersion = engine.CurrentStorDBVersions()
-		err = mig.OutStorDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for SessionsCosts ", err.Error())
-		}
-		if vrs, err := mig.OutStorDB().GetVersions(utils.SessionsCosts); err != nil {
-			t.Error(err)
-		} else if vrs[utils.SessionsCosts] != 2 {
-			t.Errorf("Expecting: 2, received: %+v", vrs[utils.SessionsCosts])
+		} else if vrs[utils.SessionSCosts] != 3 {
+			t.Errorf("Expecting: 3, received: %+v", vrs[utils.SessionSCosts])
 		}
 	}
 }
@@ -1662,6 +1448,7 @@ func testMigratorRatingProfile(t *testing.T) {
 		}
 	}
 }
+
 func testMigratorRQF(t *testing.T) {
 	fp := &engine.Filter{
 		Tenant: "cgrates.org",
@@ -1826,7 +1613,7 @@ func testMigratorAttributeProfile(t *testing.T) {
 	v1Attribute := &v1AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
-		Contexts:  []string{utils.MetaRating},
+		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"filter1"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -1838,7 +1625,7 @@ func testMigratorAttributeProfile(t *testing.T) {
 	attrPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
-		Contexts:  []string{utils.MetaRating},
+		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"filter1"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -1971,1113 +1758,4 @@ func testMigratorAttributeProfile(t *testing.T) {
 		}
 	}
 }
-
-//TP TESTS
-func testMigratorTPRatingProfile(t *testing.T) {
-	tpRatingProfile := []*utils.TPRatingProfile{
-		&utils.TPRatingProfile{
-			TPid:      "TPRProf1",
-			LoadId:    "RPrf",
-			Direction: "*out",
-			Tenant:    "Tenant1",
-			Category:  "Category",
-			Subject:   "Subject",
-			RatingPlanActivations: []*utils.TPRatingActivation{
-				&utils.TPRatingActivation{
-					ActivationTime:   "2014-07-29T15:00:00Z",
-					RatingPlanId:     "PlanOne",
-					FallbackSubjects: "FallBack",
-					CdrStatQueueIds:  "RandomId",
-				},
-				&utils.TPRatingActivation{
-					ActivationTime:   "2015-07-29T10:00:00Z",
-					RatingPlanId:     "PlanTwo",
-					FallbackSubjects: "FallOut",
-					CdrStatQueueIds:  "RandomIdTwo",
-				},
-			},
-		},
-	}
-	switch action {
-	case Move:
-		if err := mig.InStorDB().SetTPRatingProfiles(tpRatingProfile); err != nil {
-			t.Error("Error when setting Stats ", err.Error())
-		}
-		currentVersion := engine.CurrentStorDBVersions()
-		err := mig.OutStorDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for stats ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaTpRatingProfiles})
-		if err != nil {
-			t.Error("Error when migrating Stats ", err.Error())
-		}
-		result, err := mig.OutStorDB().GetTPRatingProfiles(tpRatingProfile[0])
-		if err != nil {
-			t.Error("Error when getting Stats ", err.Error())
-		}
-		if !reflect.DeepEqual(tpRatingProfile[0], result[0]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpRatingProfile[0], result[0])
-		}
-	}
-}
-
-func testMigratorTPSuppliers(t *testing.T) {
-	tpSplPr := []*utils.TPSupplierProfile{
-		&utils.TPSupplierProfile{
-			TPid:      "SupplierTPID12",
-			Tenant:    "cgrates.org",
-			ID:        "SUPL_1",
-			FilterIDs: []string{"FLTR_ACNT_dan"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-				ExpiryTime:     "",
-			},
-			Sorting:       "*lowest_cost",
-			SortingParams: []string{},
-			Suppliers: []*utils.TPSupplier{
-				&utils.TPSupplier{
-					ID:            "supplier1",
-					AccountIDs:    []string{"Account1"},
-					FilterIDs:     []string{"FLTR_1"},
-					RatingPlanIDs: []string{"RPL_1"},
-					ResourceIDs:   []string{"ResGroup1"},
-					StatIDs:       []string{"Stat1"},
-					Weight:        10,
-					Blocker:       false,
-				},
-			},
-			Weight: 20,
-		},
-	}
-	switch action {
-	case Move:
-		if err := mig.InStorDB().SetTPSuppliers(tpSplPr); err != nil {
-			t.Error("Error when setting TpSupplier ", err.Error())
-		}
-		currentVersion := engine.CurrentStorDBVersions()
-		err := mig.OutStorDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for TpSupplier ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaTpSuppliers})
-		if err != nil {
-			t.Error("Error when migrating TpSupplier ", err.Error())
-		}
-		result, err := mig.OutStorDB().GetTPSuppliers(tpSplPr[0].TPid, tpSplPr[0].ID)
-		if err != nil {
-			t.Error("Error when getting TPSupplier ", err.Error())
-		}
-		if !reflect.DeepEqual(tpSplPr, result) {
-			t.Errorf("Expecting: %+v, received: %+v", tpSplPr, result)
-		}
-	}
-}
-
-func testMigratorTPActions(t *testing.T) {
-	tpActions := []*utils.TPActions{
-		&utils.TPActions{
-			TPid: "TPAcc",
-			ID:   "ID",
-			Actions: []*utils.TPAction{
-				&utils.TPAction{
-					Identifier:      "*topup_reset",
-					BalanceId:       "BalID",
-					BalanceType:     "*data",
-					Directions:      "*out",
-					Units:           "10",
-					ExpiryTime:      "*unlimited",
-					Filter:          "",
-					TimingTags:      "2014-01-14T00:00:00Z",
-					DestinationIds:  "DST_1002",
-					RatingSubject:   "SPECIAL_1002",
-					Categories:      "",
-					SharedGroups:    "SHARED_A",
-					BalanceWeight:   "10",
-					ExtraParameters: "",
-					BalanceBlocker:  "false",
-					BalanceDisabled: "false",
-					Weight:          10,
-				},
-				&utils.TPAction{
-					Identifier:      "*log",
-					BalanceId:       "BalID",
-					BalanceType:     "*monetary",
-					Directions:      "*out",
-					Units:           "120",
-					ExpiryTime:      "*unlimited",
-					Filter:          "",
-					TimingTags:      "2014-01-14T00:00:00Z",
-					DestinationIds:  "*any",
-					RatingSubject:   "SPECIAL_1002",
-					Categories:      "",
-					SharedGroups:    "SHARED_A",
-					BalanceWeight:   "11",
-					ExtraParameters: "",
-					BalanceBlocker:  "false",
-					BalanceDisabled: "false",
-					Weight:          11,
-				},
-			},
-		},
-	}
-	switch action {
-	case Move:
-		if err := mig.InStorDB().SetTPActions(tpActions); err != nil {
-			t.Error("Error when setting TpActions ", err.Error())
-		}
-		currentVersion := engine.CurrentStorDBVersions()
-		err := mig.OutStorDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for TpActions ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaTpActions})
-		if err != nil {
-			t.Error("Error when migrating TpActions ", err.Error())
-		}
-		result, err := mig.OutStorDB().GetTPActions(tpActions[0].TPid, tpActions[0].ID)
-		if err != nil {
-			t.Error("Error when getting TpActions ", err.Error())
-		}
-		if !reflect.DeepEqual(tpActions[0].TPid, result[0].TPid) {
-			t.Errorf("Expecting: %+v, received: %+v", tpActions[0].TPid, result[0].TPid)
-		} else if !reflect.DeepEqual(tpActions[0].ID, result[0].ID) {
-			t.Errorf("Expecting: %+v, received: %+v", tpActions[0].ID, result[0].ID)
-		} else if !reflect.DeepEqual(tpActions[0].Actions[0], result[0].Actions[0]) &&
-			!reflect.DeepEqual(tpActions[0].Actions[0], result[0].Actions[1]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpActions[0].Actions[0], result[0].Actions[0])
-		} else if !reflect.DeepEqual(tpActions[0].Actions[1], result[0].Actions[1]) &&
-			!reflect.DeepEqual(tpActions[0].Actions[1], result[0].Actions[0]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpActions[0].Actions[1], result[0].Actions[1])
-		}
-	}
-}
-
-func testMigratorTPAccountActions(t *testing.T) {
-	tpAccActions := []*utils.TPAccountActions{
-		&utils.TPAccountActions{
-			TPid:             "TPAcc",
-			LoadId:           "ID",
-			Tenant:           "cgrates.org",
-			Account:          "1001",
-			ActionPlanId:     "PREPAID_10",
-			ActionTriggersId: "STANDARD_TRIGGERS",
-			AllowNegative:    true,
-			Disabled:         false,
-		},
-	}
-	switch action {
-	case Move:
-		if err := mig.InStorDB().SetTPAccountActions(tpAccActions); err != nil {
-			t.Error("Error when setting TpAccountActions ", err.Error())
-		}
-		currentVersion := engine.CurrentStorDBVersions()
-		err := mig.OutStorDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for TpAccountActions ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaTpAccountActions})
-		if err != nil {
-			t.Error("Error when migrating TpAccountActions ", err.Error())
-		}
-		result, err := mig.OutStorDB().GetTPAccountActions(&utils.TPAccountActions{TPid: "TPAcc"})
-		if err != nil {
-			t.Error("Error when getting TpAccountActions ", err.Error())
-		}
-		if !reflect.DeepEqual(tpAccActions[0], result[0]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpAccActions[0], result[0])
-		}
-	}
-}
-
-func testMigratorTpActionTriggers(t *testing.T) {
-	tpActionTriggers := []*utils.TPActionTriggers{
-		&utils.TPActionTriggers{
-			TPid: "TPAct",
-			ID:   "STANDARD_TRIGGERS",
-			ActionTriggers: []*utils.TPActionTrigger{
-				&utils.TPActionTrigger{
-					Id:                    "STANDARD_TRIGGERS",
-					UniqueID:              "",
-					ThresholdType:         "*min_balance",
-					ThresholdValue:        2,
-					Recurrent:             false,
-					MinSleep:              "0",
-					ExpirationDate:        "",
-					ActivationDate:        "",
-					BalanceId:             "",
-					BalanceType:           "*monetary",
-					BalanceDirections:     "*out",
-					BalanceDestinationIds: "FS_USERS",
-					BalanceWeight:         "",
-					BalanceExpirationDate: "",
-					BalanceTimingTags:     "",
-					BalanceRatingSubject:  "",
-					BalanceCategories:     "",
-					BalanceSharedGroups:   "",
-					BalanceBlocker:        "",
-					BalanceDisabled:       "",
-					MinQueuedItems:        3,
-					ActionsId:             "LOG_WARNING",
-					Weight:                10,
-				},
-				&utils.TPActionTrigger{
-					Id:                    "STANDARD_TRIGGERS",
-					UniqueID:              "",
-					ThresholdType:         "*max_event_counter",
-					ThresholdValue:        5,
-					Recurrent:             false,
-					MinSleep:              "0",
-					ExpirationDate:        "",
-					ActivationDate:        "",
-					BalanceId:             "",
-					BalanceType:           "*monetary",
-					BalanceDirections:     "*out",
-					BalanceDestinationIds: "FS_USERS",
-					BalanceWeight:         "",
-					BalanceExpirationDate: "",
-					BalanceTimingTags:     "",
-					BalanceRatingSubject:  "",
-					BalanceCategories:     "",
-					BalanceSharedGroups:   "",
-					BalanceBlocker:        "",
-					BalanceDisabled:       "",
-					MinQueuedItems:        3,
-					ActionsId:             "LOG_WARNING",
-					Weight:                10,
-				},
-			},
-		},
-	}
-	switch action {
-	case Move:
-		if err := mig.InStorDB().SetTPActionTriggers(tpActionTriggers); err != nil {
-			t.Error("Error when setting TpActionTriggers ", err.Error())
-		}
-		currentVersion := engine.CurrentStorDBVersions()
-		err := mig.OutStorDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for TpActionTriggers ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaTpActionTriggers})
-		if err != nil {
-			t.Error("Error when migrating TpActionTriggers ", err.Error())
-		}
-		result, err := mig.OutStorDB().GetTPActionTriggers(tpActionTriggers[0].TPid, tpActionTriggers[0].ID)
-		if err != nil {
-			t.Error("Error when getting TpAccountActions ", err.Error())
-		}
-		if !reflect.DeepEqual(tpActionTriggers[0].TPid, result[0].TPid) {
-			t.Errorf("Expecting: %+v, received: %+v", tpActionTriggers[0].TPid, result[0].TPid)
-		} else if !reflect.DeepEqual(tpActionTriggers[0].ID, result[0].ID) {
-			t.Errorf("Expecting: %+v, received: %+v", tpActionTriggers[0].ID, result[0].ID)
-		} else if !reflect.DeepEqual(tpActionTriggers[0].ActionTriggers[0], result[0].ActionTriggers[0]) &&
-			!reflect.DeepEqual(tpActionTriggers[0].ActionTriggers[0], result[0].ActionTriggers[1]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpActionTriggers[0].ActionTriggers[0], result[0].ActionTriggers[0])
-		} else if !reflect.DeepEqual(tpActionTriggers[0].ActionTriggers[1], result[0].ActionTriggers[1]) &&
-			!reflect.DeepEqual(tpActionTriggers[0].ActionTriggers[1], result[0].ActionTriggers[0]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpActionTriggers[0].ActionTriggers[1], result[0].ActionTriggers[1])
-		}
-	}
-}
-
-func testMigratorTpActionPlans(t *testing.T) {
-	tpAccPlan := []*utils.TPActionPlan{
-		&utils.TPActionPlan{
-			TPid: "TPAcc",
-			ID:   "ID",
-			ActionPlan: []*utils.TPActionTiming{
-				&utils.TPActionTiming{
-					ActionsId: "AccId",
-					TimingId:  "TimingID",
-					Weight:    10,
-				},
-				&utils.TPActionTiming{
-					ActionsId: "AccId2",
-					TimingId:  "TimingID2",
-					Weight:    11,
-				},
-			},
-		},
-	}
-	switch action {
-	case Move:
-		if err := mig.InStorDB().SetTPActionPlans(tpAccPlan); err != nil {
-			t.Error("Error when setting TpActionPlans ", err.Error())
-		}
-		currentVersion := engine.CurrentStorDBVersions()
-		err := mig.OutStorDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for TpActionPlans ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaTpActionPlans})
-		if err != nil {
-			t.Error("Error when migrating TpActionPlans ", err.Error())
-		}
-		result, err := mig.OutStorDB().GetTPActionPlans(tpAccPlan[0].TPid, tpAccPlan[0].ID)
-		if err != nil {
-			t.Error("Error when getting TpActionPlans ", err.Error())
-		}
-		if !reflect.DeepEqual(tpAccPlan[0], result[0]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpAccPlan[0], result[0])
-		}
-	}
-}
-
-func testMigratorTpUsers(t *testing.T) {
-	tpUser := []*utils.TPUsers{
-		&utils.TPUsers{
-			TPid:     "TPU1",
-			UserName: "User1",
-			Tenant:   "Tenant1",
-			Masked:   true,
-			Weight:   20,
-			Profile: []*utils.TPUserProfile{
-				&utils.TPUserProfile{
-					AttrName:  "UserProfile1",
-					AttrValue: "ValUP1",
-				},
-				&utils.TPUserProfile{
-					AttrName:  "UserProfile2",
-					AttrValue: "ValUP2",
-				},
-			},
-		},
-	}
-	switch action {
-	case Move:
-		if err := mig.InStorDB().SetTPUsers(tpUser); err != nil {
-			t.Error("Error when setting TpUsers ", err.Error())
-		}
-		currentVersion := engine.CurrentStorDBVersions()
-		err := mig.OutStorDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for TpUsers ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaTpUsers})
-		if err != nil {
-			t.Error("Error when migrating TpUsers ", err.Error())
-		}
-		result, err := mig.OutStorDB().GetTPUsers(&utils.TPUsers{TPid: tpUser[0].TPid})
-		if err != nil {
-			t.Error("Error when getting TpUsers ", err.Error())
-		}
-		if !reflect.DeepEqual(tpUser[0], result[0]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpUser[0], result[0])
-		}
-	}
-}
-
-func testMigratorTpTimings(t *testing.T) {
-	tpTiming := []*utils.ApierTPTiming{&utils.ApierTPTiming{
-		TPid:      "TPT1",
-		ID:        "Timing",
-		Years:     "2017",
-		Months:    "05",
-		MonthDays: "01",
-		WeekDays:  "1",
-		Time:      "15:00:00Z",
-	},
-	}
-	switch action {
-	case Move:
-		if err := mig.InStorDB().SetTPTimings(tpTiming); err != nil {
-			t.Error("Error when setting TpTiming ", err.Error())
-		}
-		currentVersion := engine.CurrentStorDBVersions()
-		err := mig.OutStorDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for TpTiming ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaTpTiming})
-		if err != nil {
-			t.Error("Error when migrating TpTiming ", err.Error())
-		}
-		result, err := mig.OutStorDB().GetTPTimings(tpTiming[0].TPid, tpTiming[0].ID)
-		if err != nil {
-			t.Error("Error when getting TpTiming ", err.Error())
-		}
-		if !reflect.DeepEqual(tpTiming[0], result[0]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpTiming[0], result[0])
-		}
-	}
-}
-
-func testMigratorTpThreshold(t *testing.T) {
-	tpThreshold := []*utils.TPThreshold{
-		&utils.TPThreshold{
-			TPid:      "TH1",
-			Tenant:    "cgrates.org",
-			ID:        "Threhold",
-			FilterIDs: []string{"FLTR_1", "FLTR_2"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-				ExpiryTime:     "",
-			},
-			Recurrent: true,
-			MinSleep:  "1s",
-			Blocker:   true,
-			Weight:    10,
-			ActionIDs: []string{"Thresh1", "Thresh2"},
-			Async:     true,
-		},
-	}
-	switch action {
-	case Move:
-		if err := mig.InStorDB().SetTPThresholds(tpThreshold); err != nil {
-			t.Error("Error when setting TpThreshold ", err.Error())
-		}
-		currentVersion := engine.CurrentStorDBVersions()
-		err := mig.OutStorDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for TpThreshold ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaTpThresholds})
-		if err != nil {
-			t.Error("Error when migrating TpThreshold ", err.Error())
-		}
-		result, err := mig.OutStorDB().GetTPThresholds(tpThreshold[0].TPid, tpThreshold[0].ID)
-		if err != nil {
-			t.Error("Error when getting TpThreshold ", err.Error())
-		}
-		if !reflect.DeepEqual(tpThreshold[0], result[0]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpThreshold[0], result[0])
-		}
-	}
-}
-
-func testMigratorTpStats(t *testing.T) {
-	tpStat := []*utils.TPStats{
-		&utils.TPStats{
-			Tenant:    "cgrates.org",
-			TPid:      "TPS1",
-			ID:        "Stat1",
-			FilterIDs: []string{"FLTR_1"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-				ExpiryTime:     "",
-			},
-			TTL: "1",
-			Metrics: []*utils.MetricWithParams{
-				&utils.MetricWithParams{MetricID: "MetricValue", Parameters: ""},
-				&utils.MetricWithParams{MetricID: "MetricValueTwo", Parameters: ""},
-			},
-			Blocker:      false,
-			Stored:       false,
-			Weight:       20,
-			MinItems:     1,
-			ThresholdIDs: []string{"ThreshValue", "ThreshValueTwo"},
-		},
-	}
-	switch action {
-	case Move:
-		if err := mig.InStorDB().SetTPStats(tpStat); err != nil {
-			t.Error("Error when setting TpStats ", err.Error())
-		}
-		currentVersion := engine.CurrentStorDBVersions()
-		err := mig.OutStorDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for TpStats ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaTpStats})
-		if err != nil {
-			t.Error("Error when migrating TpStats ", err.Error())
-		}
-		result, err := mig.OutStorDB().GetTPStats(tpStat[0].TPid, tpStat[0].ID)
-		if err != nil {
-			t.Error("Error when getting TpStats ", err.Error())
-		}
-		if !reflect.DeepEqual(tpStat[0], result[0]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpStat[0], result[0])
-		}
-	}
-}
-
-func testMigratorTpSharedGroups(t *testing.T) {
-	tpSharedGroups := []*utils.TPSharedGroups{
-		&utils.TPSharedGroups{
-			TPid: "Tpi",
-			ID:   "TpSg",
-			SharedGroups: []*utils.TPSharedGroup{
-				&utils.TPSharedGroup{
-					Account:       "AccOne",
-					Strategy:      "StrategyOne",
-					RatingSubject: "SubOne",
-				},
-				&utils.TPSharedGroup{
-					Account:       "AccTow",
-					Strategy:      "StrategyTwo",
-					RatingSubject: "SubTwo",
-				},
-				&utils.TPSharedGroup{
-					Account:       "AccPlus",
-					Strategy:      "StrategyPlus",
-					RatingSubject: "SubPlus",
-				},
-			},
-		},
-	}
-	switch action {
-	case Move:
-		if err := mig.InStorDB().SetTPSharedGroups(tpSharedGroups); err != nil {
-			t.Error("Error when setting TpSharedGroups ", err.Error())
-		}
-		currentVersion := engine.CurrentStorDBVersions()
-		err := mig.OutStorDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for TpSharedGroups ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaTpSharedGroups})
-		if err != nil {
-			t.Error("Error when migrating TpSharedGroups ", err.Error())
-		}
-		result, err := mig.OutStorDB().GetTPSharedGroups(tpSharedGroups[0].TPid, tpSharedGroups[0].ID)
-		if err != nil {
-			t.Error("Error when getting TpSharedGroups ", err.Error())
-		}
-		if !reflect.DeepEqual(tpSharedGroups[0], result[0]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpSharedGroups[0], result[0])
-		}
-	}
-}
-
-func testMigratorTpResources(t *testing.T) {
-	tpRes := []*utils.TPResource{
-		&utils.TPResource{
-			Tenant:    "cgrates.org",
-			TPid:      "TPR1",
-			ID:        "ResGroup1",
-			FilterIDs: []string{"FLTR_1"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-				ExpiryTime:     "",
-			},
-			UsageTTL:          "1s",
-			Limit:             "7",
-			AllocationMessage: "",
-			Blocker:           true,
-			Stored:            true,
-			Weight:            20,
-			ThresholdIDs:      []string{"ValOne", "ValTwo"},
-		},
-	}
-	switch action {
-	case Move:
-		if err := mig.InStorDB().SetTPResources(tpRes); err != nil {
-			t.Error("Error when setting TpResources ", err.Error())
-		}
-		currentVersion := engine.CurrentStorDBVersions()
-		err := mig.OutStorDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for TpResources ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaTpResources})
-		if err != nil {
-			t.Error("Error when migrating TpResources ", err.Error())
-		}
-		result, err := mig.OutStorDB().GetTPResources(tpRes[0].TPid, tpRes[0].ID)
-		if err != nil {
-			t.Error("Error when getting TpResources ", err.Error())
-		}
-		if !reflect.DeepEqual(tpRes[0], result[0]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpRes[0], result[0])
-		}
-	}
-}
-
-func testMigratorTpRatingProfiles(t *testing.T) {
-	tpRatingProfile := []*utils.TPRatingProfile{
-		&utils.TPRatingProfile{
-			TPid:      "TPRProf1",
-			LoadId:    "RPrf",
-			Direction: "*out",
-			Tenant:    "Tenant1",
-			Category:  "Category",
-			Subject:   "Subject",
-			RatingPlanActivations: []*utils.TPRatingActivation{
-				&utils.TPRatingActivation{
-					ActivationTime:   "2014-07-29T15:00:00Z",
-					RatingPlanId:     "PlanOne",
-					FallbackSubjects: "FallBack",
-					CdrStatQueueIds:  "RandomId",
-				},
-				&utils.TPRatingActivation{
-					ActivationTime:   "2015-07-29T10:00:00Z",
-					RatingPlanId:     "PlanTwo",
-					FallbackSubjects: "FallOut",
-					CdrStatQueueIds:  "RandomIdTwo",
-				},
-			},
-		},
-	}
-	switch action {
-	case Move:
-		if err := mig.InStorDB().SetTPRatingProfiles(tpRatingProfile); err != nil {
-			t.Error("Error when setting TpRatingProfiles ", err.Error())
-		}
-		currentVersion := engine.CurrentStorDBVersions()
-		err := mig.OutStorDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for TpRatingProfiles ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaTpRatingProfiles})
-		if err != nil {
-			t.Error("Error when migrating TpRatingProfiles ", err.Error())
-		}
-		result, err := mig.OutStorDB().GetTPRatingProfiles(&utils.TPRatingProfile{TPid: tpRatingProfile[0].TPid})
-		if err != nil {
-			t.Error("Error when getting TpRatingProfiles ", err.Error())
-		}
-		if !reflect.DeepEqual(tpRatingProfile[0], result[0]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpRatingProfile[0], result[0])
-		}
-	}
-}
-
-func testMigratorTpRatingPlans(t *testing.T) {
-	tpRatingPlan := []*utils.TPRatingPlan{
-		&utils.TPRatingPlan{
-			TPid: "TPRP1",
-			ID:   "Plan1",
-			RatingPlanBindings: []*utils.TPRatingPlanBinding{
-				&utils.TPRatingPlanBinding{
-					DestinationRatesId: "RateId",
-					TimingId:           "TimingID",
-					Weight:             12,
-				},
-				&utils.TPRatingPlanBinding{
-					DestinationRatesId: "DR_FREESWITCH_USERS",
-					TimingId:           "ALWAYS",
-					Weight:             10,
-				},
-			},
-		},
-	}
-	switch action {
-	case Move:
-		if err := mig.InStorDB().SetTPRatingPlans(tpRatingPlan); err != nil {
-			t.Error("Error when setting TpRatingPlans ", err.Error())
-		}
-		currentVersion := engine.CurrentStorDBVersions()
-		err := mig.OutStorDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for TpRatingPlans ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaTpRatingPlans})
-		if err != nil {
-			t.Error("Error when migrating TpRatingPlans ", err.Error())
-		}
-		result, err := mig.OutStorDB().GetTPRatingPlans("TPRP1", "Plan1", nil)
-		if err != nil {
-			t.Error("Error when getting TpRatingPlans ", err.Error())
-		}
-		if !reflect.DeepEqual(tpRatingPlan[0].TPid, result[0].TPid) {
-			t.Errorf("Expecting: %+v, received: %+v", tpRatingPlan[0].TPid, result[0].TPid)
-		} else if !reflect.DeepEqual(tpRatingPlan[0].ID, result[0].ID) {
-			t.Errorf("Expecting: %+v, received: %+v", tpRatingPlan[0].ID, result[0].ID)
-		} else if !reflect.DeepEqual(tpRatingPlan[0].RatingPlanBindings[0], result[0].RatingPlanBindings[0]) &&
-			!reflect.DeepEqual(tpRatingPlan[0].RatingPlanBindings[1], result[0].RatingPlanBindings[1]) &&
-			!reflect.DeepEqual(tpRatingPlan[0].RatingPlanBindings[1], result[0].RatingPlanBindings[0]) &&
-			!reflect.DeepEqual(tpRatingPlan[0].RatingPlanBindings[0], result[0].RatingPlanBindings[1]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpRatingPlan[0].RatingPlanBindings[0], result[0].RatingPlanBindings[0])
-		} else if !reflect.DeepEqual(tpRatingPlan[0].RatingPlanBindings[0], result[0].RatingPlanBindings[0]) &&
-			!reflect.DeepEqual(tpRatingPlan[0].RatingPlanBindings[1], result[0].RatingPlanBindings[1]) &&
-			!reflect.DeepEqual(tpRatingPlan[0].RatingPlanBindings[1], result[0].RatingPlanBindings[0]) &&
-			!reflect.DeepEqual(tpRatingPlan[0].RatingPlanBindings[0], result[0].RatingPlanBindings[1]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpRatingPlan[0].RatingPlanBindings[1], result[0].RatingPlanBindings[1])
-		}
-
-	}
-}
-
-func testMigratorTpRates(t *testing.T) {
-	tpRate := []*utils.TPRate{
-		&utils.TPRate{
-			TPid: "TPidTpRate",
-			ID:   "RT_FS_USERS",
-			RateSlots: []*utils.RateSlot{
-				&utils.RateSlot{
-					ConnectFee:         12,
-					Rate:               3,
-					RateUnit:           "6s",
-					RateIncrement:      "6s",
-					GroupIntervalStart: "0s",
-				},
-				&utils.RateSlot{
-					ConnectFee:         12,
-					Rate:               3,
-					RateUnit:           "4s",
-					RateIncrement:      "6s",
-					GroupIntervalStart: "1s",
-				},
-			},
-		},
-	}
-	switch action {
-	case Move:
-		if err := mig.InStorDB().SetTPRates(tpRate); err != nil {
-			t.Error("Error when setting TpRates ", err.Error())
-		}
-		currentVersion := engine.CurrentStorDBVersions()
-		err := mig.OutStorDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for TpRates ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaTpRates})
-		if err != nil {
-			t.Error("Error when migrating TpRates ", err.Error())
-		}
-		result, err := mig.OutStorDB().GetTPRates(tpRate[0].TPid, tpRate[0].ID)
-		if err != nil {
-			t.Error("Error when getting TpRates ", err.Error())
-		}
-		if !reflect.DeepEqual(tpRate[0].TPid, result[0].TPid) {
-			t.Errorf("Expecting: %+v, received: %+v", tpRate[0].TPid, result[0].TPid)
-		} else if !reflect.DeepEqual(tpRate[0].ID, result[0].ID) {
-			t.Errorf("Expecting: %+v, received: %+v", tpRate[0].ID, result[0].ID)
-		}
-		if !reflect.DeepEqual(tpRate[0].RateSlots[0].ConnectFee, result[0].RateSlots[0].ConnectFee) {
-			t.Errorf("Expecting: %+v, received: %+v", tpRate[0].RateSlots[0].ConnectFee, result[0].RateSlots[0].ConnectFee)
-		} else if !reflect.DeepEqual(tpRate[0].RateSlots[0].Rate, result[0].RateSlots[0].Rate) {
-			t.Errorf("Expecting: %+v, received: %+v", tpRate[0].RateSlots[0].Rate, result[0].RateSlots[0].Rate)
-		} else if !reflect.DeepEqual(tpRate[0].RateSlots[0].RateUnit, result[0].RateSlots[0].RateUnit) {
-			t.Errorf("Expecting: %+v, received: %+v", tpRate[0].RateSlots[0].RateUnit, result[0].RateSlots[0].RateUnit)
-		} else if !reflect.DeepEqual(tpRate[0].RateSlots[0].RateIncrement, result[0].RateSlots[0].RateIncrement) {
-			t.Errorf("Expecting: %+v, received: %+v", tpRate[0].RateSlots[0].RateIncrement, result[0].RateSlots[0].RateIncrement)
-		} else if !reflect.DeepEqual(tpRate[0].RateSlots[0].GroupIntervalStart, result[0].RateSlots[0].GroupIntervalStart) {
-			t.Errorf("Expecting: %+v, received: %+v", tpRate[0].RateSlots[0].GroupIntervalStart, result[0].RateSlots[0].GroupIntervalStart)
-		}
-		if !reflect.DeepEqual(tpRate[0].RateSlots[1].ConnectFee, result[0].RateSlots[1].ConnectFee) {
-			t.Errorf("Expecting: %+v, received: %+v", tpRate[0].RateSlots[1].ConnectFee, result[0].RateSlots[1].ConnectFee)
-		} else if !reflect.DeepEqual(tpRate[0].RateSlots[1].Rate, result[0].RateSlots[1].Rate) {
-			t.Errorf("Expecting: %+v, received: %+v", tpRate[0].RateSlots[1].Rate, result[0].RateSlots[1].Rate)
-		} else if !reflect.DeepEqual(tpRate[0].RateSlots[1].RateUnit, result[0].RateSlots[1].RateUnit) {
-			t.Errorf("Expecting: %+v, received: %+v", tpRate[0].RateSlots[1].RateUnit, result[0].RateSlots[1].RateUnit)
-		} else if !reflect.DeepEqual(tpRate[0].RateSlots[1].RateIncrement, result[0].RateSlots[1].RateIncrement) {
-			t.Errorf("Expecting: %+v, received: %+v", tpRate[0].RateSlots[1].RateIncrement, result[0].RateSlots[1].RateIncrement)
-		} else if !reflect.DeepEqual(tpRate[0].RateSlots[1].GroupIntervalStart, result[0].RateSlots[1].GroupIntervalStart) {
-			t.Errorf("Expecting: %+v, received: %+v", tpRate[0].RateSlots[1].GroupIntervalStart, result[0].RateSlots[1].GroupIntervalStart)
-		}
-	}
-}
-
-func testMigratorTpFilter(t *testing.T) {
-	tpFilter := []*utils.TPFilterProfile{
-		&utils.TPFilterProfile{
-			TPid:   "TP1",
-			Tenant: "cgrates.org",
-			ID:     "Filter",
-			Filters: []*utils.TPFilter{
-				&utils.TPFilter{
-					Type:      "*string",
-					FieldName: "Account",
-					Values:    []string{"1001", "1002"},
-				},
-			},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-				ExpiryTime:     "",
-			},
-		},
-	}
-	switch action {
-	case Move:
-		if err := mig.InStorDB().SetTPFilters(tpFilter); err != nil {
-			t.Error("Error when setting TpFilter ", err.Error())
-		}
-		currentVersion := engine.CurrentStorDBVersions()
-		err := mig.OutStorDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for TpFilter ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaTpFilters})
-		if err != nil {
-			t.Error("Error when migrating TpFilter ", err.Error())
-		}
-		result, err := mig.OutStorDB().GetTPFilters(tpFilter[0].TPid, tpFilter[0].ID)
-		if err != nil {
-			t.Error("Error when getting TpFilter ", err.Error())
-		}
-		if !reflect.DeepEqual(tpFilter[0].TPid, result[0].TPid) {
-			t.Errorf("Expecting: %+v, received: %+v", tpFilter[0].TPid, result[0].TPid)
-		} else if !reflect.DeepEqual(tpFilter[0].ID, result[0].ID) {
-			t.Errorf("Expecting: %+v, received: %+v", tpFilter[0].ID, result[0].ID)
-		} else if !reflect.DeepEqual(tpFilter[0].Filters, result[0].Filters) {
-			t.Errorf("Expecting: %+v, received: %+v", tpFilter[0].Filters, result[0].Filters)
-		} else if !reflect.DeepEqual(tpFilter[0].ActivationInterval, result[0].ActivationInterval) {
-			t.Errorf("Expecting: %+v, received: %+v", tpFilter[0].ActivationInterval, result[0].ActivationInterval)
-		}
-	}
-}
-
-func testMigratorTpDestination(t *testing.T) {
-	tpDestination := []*utils.TPDestination{
-		&utils.TPDestination{
-			TPid:     "TPD",
-			ID:       "GERMANY",
-			Prefixes: []string{"+49", "+4915"},
-		},
-	}
-	switch action {
-	case Move:
-		if err := mig.InStorDB().SetTPDestinations(tpDestination); err != nil {
-			t.Error("Error when setting TpDestination ", err.Error())
-		}
-		currentVersion := engine.CurrentStorDBVersions()
-		err := mig.OutStorDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for TpDestination ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaTpDestinations})
-		if err != nil {
-			t.Error("Error when migrating TpDestination ", err.Error())
-		}
-		result, err := mig.OutStorDB().GetTPDestinations(tpDestination[0].TPid, tpDestination[0].ID)
-		if err != nil {
-			t.Error("Error when getting TpDestination ", err.Error())
-		}
-		if !reflect.DeepEqual(tpDestination[0], result[0]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpDestination[0], result[0])
-		}
-	}
-}
-
-func testMigratorTpDestinationRate(t *testing.T) {
-	tpDestRate := []*utils.TPDestinationRate{
-		&utils.TPDestinationRate{
-			TPid: "testTPid",
-			ID:   "1",
-			DestinationRates: []*utils.DestinationRate{
-				&utils.DestinationRate{
-					DestinationId:    "GERMANY",
-					RateId:           "RT_1CENT",
-					RoundingMethod:   "*up",
-					RoundingDecimals: 0,
-					MaxCost:          0.0,
-					MaxCostStrategy:  "",
-				},
-			},
-		},
-	}
-
-	switch action {
-	case Move:
-		if err := mig.InStorDB().SetTPDestinationRates(tpDestRate); err != nil {
-			t.Error("Error when setting TpDestinationRate ", err.Error())
-		}
-		currentVersion := engine.CurrentStorDBVersions()
-		err := mig.OutStorDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for TpDestinationRate ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaTpDestinationRates})
-		if err != nil {
-			t.Error("Error when migrating TpDestinationRate ", err.Error())
-		} //OutStorDB
-		result, err := mig.InStorDB().GetTPDestinationRates("testTPid", "", nil)
-		if err != nil {
-			t.Error("Error when getting TpDestinationRate ", err.Error())
-		}
-		if !reflect.DeepEqual(tpDestRate[0].TPid, result[0].TPid) {
-			t.Errorf("Expecting: %+v, received: %+v", tpDestRate[0].TPid, result[0].TPid)
-		} else if !reflect.DeepEqual(tpDestRate[0].ID, result[0].ID) {
-			t.Errorf("Expecting: %+v, received: %+v", tpDestRate[0].ID, result[0].ID)
-		}
-		if !reflect.DeepEqual(tpDestRate[0].DestinationRates[0].DestinationId, result[0].DestinationRates[0].DestinationId) {
-			t.Errorf("Expecting: %+v, received: %+v", tpDestRate[0].DestinationRates[0].DestinationId, result[0].DestinationRates[0].DestinationId)
-		} else if !reflect.DeepEqual(tpDestRate[0].DestinationRates[0].RateId, result[0].DestinationRates[0].RateId) {
-			t.Errorf("Expecting: %+v, received: %+v", tpDestRate[0].DestinationRates[0].RateId, result[0].DestinationRates[0].RateId)
-		} else if !reflect.DeepEqual(tpDestRate[0].DestinationRates[0], result[0].DestinationRates[0]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpDestRate[0].DestinationRates[0], result[0].DestinationRates[0])
-		}
-	}
-}
-
-func testMigratorTpDerivedChargers(t *testing.T) {
-	tpDerivedChargers := []*utils.TPDerivedChargers{
-		&utils.TPDerivedChargers{
-			TPid:           "TPD",
-			LoadId:         "LoadID",
-			Direction:      "*out",
-			Tenant:         "cgrates.org",
-			Category:       "call",
-			Account:        "1001",
-			Subject:        "1001",
-			DestinationIds: "",
-			DerivedChargers: []*utils.TPDerivedCharger{
-				&utils.TPDerivedCharger{
-					RunId:                "derived_run1",
-					RunFilters:           "",
-					ReqTypeField:         "^*rated",
-					DirectionField:       "*default",
-					TenantField:          "*default",
-					CategoryField:        "*default",
-					AccountField:         "*default",
-					SubjectField:         "^1002",
-					DestinationField:     "*default",
-					SetupTimeField:       "*default",
-					PddField:             "*default",
-					AnswerTimeField:      "*default",
-					UsageField:           "*default",
-					SupplierField:        "*default",
-					DisconnectCauseField: "*default",
-					CostField:            "*default",
-					RatedField:           "*default",
-				},
-			},
-		},
-	}
-	switch action {
-	case Move:
-		if err := mig.InStorDB().SetTPDerivedChargers(tpDerivedChargers); err != nil {
-			t.Error("Error when setting TpDerivedChargers ", err.Error())
-		}
-		currentVersion := engine.CurrentStorDBVersions()
-		err := mig.OutStorDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for TpDerivedChargers ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaTpDerivedChargers})
-		if err != nil {
-			t.Error("Error when migrating TpDerivedChargers ", err.Error())
-		}
-		result, err := mig.OutStorDB().GetTPDerivedChargers(&utils.TPDerivedChargers{TPid: tpDerivedChargers[0].TPid})
-		if err != nil {
-			t.Error("Error when getting TpDerivedChargers ", err.Error())
-		}
-		if !reflect.DeepEqual(tpDerivedChargers[0], result[0]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpDerivedChargers[0], result[0])
-		}
-	}
-}
-
-func testMigratorTpCdrStats(t *testing.T) {
-	tpCdrStats := []*utils.TPCdrStats{
-		&utils.TPCdrStats{
-			TPid: "TPCdr",
-			ID:   "ID",
-			CdrStats: []*utils.TPCdrStat{
-				&utils.TPCdrStat{
-					QueueLength:      "10",
-					TimeWindow:       "0",
-					SaveInterval:     "10s",
-					Metrics:          "ASR",
-					SetupInterval:    "",
-					TORs:             "",
-					CdrHosts:         "",
-					CdrSources:       "",
-					ReqTypes:         "",
-					Directions:       "",
-					Tenants:          "cgrates.org",
-					Categories:       "",
-					Accounts:         "",
-					Subjects:         "1001",
-					DestinationIds:   "1003",
-					PddInterval:      "",
-					UsageInterval:    "",
-					Suppliers:        "suppl1",
-					DisconnectCauses: "",
-					MediationRunIds:  "*default",
-					RatedAccounts:    "",
-					RatedSubjects:    "",
-					CostInterval:     "",
-					ActionTriggers:   "CDRST1_WARN",
-				},
-				&utils.TPCdrStat{
-					QueueLength:      "10",
-					TimeWindow:       "0",
-					SaveInterval:     "10s",
-					Metrics:          "ACC",
-					SetupInterval:    "",
-					TORs:             "",
-					CdrHosts:         "",
-					CdrSources:       "",
-					ReqTypes:         "",
-					Directions:       "",
-					Tenants:          "cgrates.org",
-					Categories:       "",
-					Accounts:         "",
-					Subjects:         "1002",
-					DestinationIds:   "1003",
-					PddInterval:      "",
-					UsageInterval:    "",
-					Suppliers:        "suppl1",
-					DisconnectCauses: "",
-					MediationRunIds:  "*default",
-					RatedAccounts:    "",
-					RatedSubjects:    "",
-					CostInterval:     "",
-					ActionTriggers:   "CDRST1_WARN",
-				},
-			},
-		},
-	}
-	switch action {
-	case Move:
-		if err := mig.InStorDB().SetTPCdrStats(tpCdrStats); err != nil {
-			t.Error("Error when setting TpCdrStats ", err.Error())
-		}
-		currentVersion := engine.CurrentStorDBVersions()
-		err := mig.OutStorDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for TpCdrStats ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaTpCdrStats})
-		if err != nil {
-			t.Error("Error when migrating TpCdrStats ", err.Error())
-		}
-		result, err := mig.OutStorDB().GetTPCdrStats(tpCdrStats[0].TPid, tpCdrStats[0].ID)
-		if err != nil {
-			t.Error("Error when getting TpCdrStats ", err.Error())
-		}
-		if !reflect.DeepEqual(tpCdrStats[0], result[0]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpCdrStats[0], result[0])
-		}
-	}
-}
-
-func testMigratorTpAliases(t *testing.T) {
-	tpAliases := []*utils.TPAliases{
-		&utils.TPAliases{
-			TPid:      "tpID",
-			Direction: "*out",
-			Tenant:    "cgrates.org",
-			Category:  "call",
-			Account:   "1001",
-			Subject:   "1002",
-			Context:   "",
-			Values: []*utils.TPAliasValue{
-				&utils.TPAliasValue{
-					DestinationId: "1002",
-					Target:        "1002",
-					Original:      "1002",
-					Alias:         "1002",
-					Weight:        20.0,
-				},
-			},
-		},
-	}
-
-	switch action {
-	case Move:
-		if err := mig.InStorDB().SetTPAliases(tpAliases); err != nil {
-			t.Error("Error when setting TpAliases ", err.Error())
-		}
-		currentVersion := engine.CurrentStorDBVersions()
-		err := mig.OutStorDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for TpAliases ", err.Error())
-		}
-		err, _ = mig.Migrate([]string{utils.MetaTpAliases})
-		if err != nil {
-			t.Error("Error when migrating TpAliases ", err.Error())
-		}
-		result, err := mig.OutStorDB().GetTPAliases(&utils.TPAliases{TPid: tpAliases[0].TPid})
-		if err != nil {
-			t.Error("Error when getting TpAliases ", err.Error())
-		}
-		if !reflect.DeepEqual(tpAliases[0], result[0]) {
-			t.Errorf("Expecting: %+v, received: %+v", tpAliases[0], result[0])
-		}
-	}
-}
+*/

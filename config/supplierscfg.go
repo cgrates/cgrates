@@ -23,6 +23,7 @@ type SupplierSCfg struct {
 	Enabled             bool
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
+	AttributeSConns     []*HaPoolConfig
 	RALsConns           []*HaPoolConfig
 	ResourceSConns      []*HaPoolConfig
 	StatSConns          []*HaPoolConfig
@@ -48,6 +49,13 @@ func (spl *SupplierSCfg) loadFromJsonCfg(jsnCfg *SupplierSJsonCfg) (err error) {
 			pif[i] = fID
 		}
 		spl.PrefixIndexedFields = &pif
+	}
+	if jsnCfg.Attributes_conns != nil {
+		spl.AttributeSConns = make([]*HaPoolConfig, len(*jsnCfg.Attributes_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Attributes_conns {
+			spl.AttributeSConns[idx] = NewDfltHaPoolConfig()
+			spl.AttributeSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
 	}
 	if jsnCfg.Rals_conns != nil {
 		spl.RALsConns = make([]*HaPoolConfig, len(*jsnCfg.Rals_conns))

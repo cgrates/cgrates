@@ -21,34 +21,42 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"strings"
 )
 
 var (
-	ErrNoMoreData              = errors.New("NO_MORE_DATA")
-	ErrNotImplemented          = errors.New("NOT_IMPLEMENTED")
-	ErrNotFound                = errors.New("NOT_FOUND")
-	ErrTimedOut                = errors.New("TIMED_OUT")
-	ErrServerError             = errors.New("SERVER_ERROR")
-	ErrMaxRecursionDepth       = errors.New("MAX_RECURSION_DEPTH")
-	ErrMandatoryIeMissing      = errors.New("MANDATORY_IE_MISSING")
-	ErrExists                  = errors.New("EXISTS")
-	ErrBrokenReference         = errors.New("BROKEN_REFERENCE")
-	ErrParserError             = errors.New("PARSER_ERROR")
-	ErrInvalidPath             = errors.New("INVALID_PATH")
-	ErrInvalidKey              = errors.New("INVALID_KEY")
-	ErrUnauthorizedDestination = errors.New("UNAUTHORIZED_DESTINATION")
-	ErrRatingPlanNotFound      = errors.New("RATING_PLAN_NOT_FOUND")
-	ErrAccountNotFound         = errors.New("ACCOUNT_NOT_FOUND")
-	ErrAccountDisabled         = errors.New("ACCOUNT_DISABLED")
-	ErrUserNotFound            = errors.New("USER_NOT_FOUND")
-	ErrInsufficientCredit      = errors.New("INSUFFICIENT_CREDIT")
-	ErrNotConvertible          = errors.New("NOT_CONVERTIBLE")
-	ErrResourceUnavailable     = errors.New("RESOURCE_UNAVAILABLE")
-	ErrResourceUnauthorized    = errors.New("RESOURCE_UNAUTHORIZED")
-	ErrNoActiveSession         = errors.New("NO_ACTIVE_SESSION")
-	ErrPartiallyExecuted       = errors.New("PARTIALLY_EXECUTED")
-	ErrMaxUsageExceeded        = errors.New("MAX_USAGE_EXCEEDED")
-	ErrUnallocatedResource     = errors.New("UNALLOCATED_RESOURCE")
+	ErrNoMoreData               = errors.New("NO_MORE_DATA")
+	ErrNotImplemented           = errors.New("NOT_IMPLEMENTED")
+	ErrNotFound                 = errors.New("NOT_FOUND")
+	ErrTimedOut                 = errors.New("TIMED_OUT")
+	ErrServerError              = errors.New("SERVER_ERROR")
+	ErrMaxRecursionDepth        = errors.New("MAX_RECURSION_DEPTH")
+	ErrMandatoryIeMissing       = errors.New("MANDATORY_IE_MISSING")
+	ErrExists                   = errors.New("EXISTS")
+	ErrBrokenReference          = errors.New("BROKEN_REFERENCE")
+	ErrParserError              = errors.New("PARSER_ERROR")
+	ErrInvalidPath              = errors.New("INVALID_PATH")
+	ErrInvalidKey               = errors.New("INVALID_KEY")
+	ErrUnauthorizedDestination  = errors.New("UNAUTHORIZED_DESTINATION")
+	ErrRatingPlanNotFound       = errors.New("RATING_PLAN_NOT_FOUND")
+	ErrAccountNotFound          = errors.New("ACCOUNT_NOT_FOUND")
+	ErrAccountDisabled          = errors.New("ACCOUNT_DISABLED")
+	ErrUserNotFound             = errors.New("USER_NOT_FOUND")
+	ErrInsufficientCredit       = errors.New("INSUFFICIENT_CREDIT")
+	ErrNotConvertible           = errors.New("NOT_CONVERTIBLE")
+	ErrResourceUnavailable      = errors.New("RESOURCE_UNAVAILABLE")
+	ErrResourceUnauthorized     = errors.New("RESOURCE_UNAUTHORIZED")
+	ErrNoActiveSession          = errors.New("NO_ACTIVE_SESSION")
+	ErrPartiallyExecuted        = errors.New("PARTIALLY_EXECUTED")
+	ErrMaxUsageExceeded         = errors.New("MAX_USAGE_EXCEEDED")
+	ErrUnallocatedResource      = errors.New("UNALLOCATED_RESOURCE")
+	ErrNotFoundNoCaps           = errors.New("not found")
+	ErrFilterNotPassingNoCaps   = errors.New("filter not passing")
+	ErrNotConvertibleNoCaps     = errors.New("not convertible")
+	ErrMandatoryIeMissingNoCaps = errors.New("mandatory information missing")
+	ErrUnauthorizedApi          = errors.New("UNAUTHORIZED_API")
+	ErrUnknownApiKey            = errors.New("UNKNOWN_API_KEY")
+	RalsErrorPrfx               = "RALS_ERROR"
 )
 
 // NewCGRError initialises a new CGRError
@@ -104,19 +112,19 @@ func NewErrNotConnected(serv string) error {
 }
 
 func NewErrRALs(err error) error {
-	return fmt.Errorf("RALS_ERROR: %s", err)
+	return fmt.Errorf("%s:%s", RalsErrorPrfx, err)
 }
 
 func NewErrResourceS(err error) error {
-	return fmt.Errorf("RESOURCES_ERROR: %s", err)
+	return fmt.Errorf("RESOURCES_ERROR:%s", err)
 }
 
 func NewErrSupplierS(err error) error {
-	return fmt.Errorf("SUPPLIERS_ERROR: %s", err)
+	return fmt.Errorf("SUPPLIERS_ERROR:%s", err)
 }
 
 func NewErrAttributeS(err error) error {
-	return fmt.Errorf("ATTRIBUTES_ERROR: %s", err)
+	return fmt.Errorf("ATTRIBUTES_ERROR:%s", err)
 }
 
 // Centralized returns for APIs
@@ -131,4 +139,19 @@ func APIErrorHandler(errIn error) (err error) {
 	}
 	cgrErr.ActivateAPIError()
 	return cgrErr
+}
+
+func NewErrStringCast(valIface interface{}) error {
+	return fmt.Errorf("cannot cast value: %v to string", valIface)
+}
+
+func NewErrFldStringCast(fldName string, valIface interface{}) error {
+	return fmt.Errorf("cannot cast field: %s with value: %v to string", fldName, valIface)
+}
+
+func ErrHasPrefix(err error, prfx string) (has bool) {
+	if err == nil {
+		return
+	}
+	return strings.HasPrefix(err.Error(), prfx)
 }

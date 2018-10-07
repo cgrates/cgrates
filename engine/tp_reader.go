@@ -25,7 +25,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/structmatcher"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -59,19 +58,16 @@ type TpReader struct {
 	filters           map[utils.TenantID]*utils.TPFilterProfile
 	sppProfiles       map[utils.TenantID]*utils.TPSupplierProfile
 	attributeProfiles map[utils.TenantID]*utils.TPAttributeProfile
+	chargerProfiles   map[utils.TenantID]*utils.TPChargerProfile
 	resources         []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
 	statQueues        []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
 	thresholds        []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
 	suppliers         []*utils.TenantID // IDs of suppliers which need creation based on sppProfiles
 	attrTntID         []*utils.TenantID // IDs of suppliers which need creation based on attributeProfiles
+	chargers          []*utils.TenantID // IDs of chargers which need creation based on chargerProfiles
 	revDests,
 	revAliases,
 	acntActionPlans map[string][]string
-	thdsIndexers map[string]*FilterIndexer // tenant, indexer
-	sqpIndexers  map[string]*FilterIndexer // tenant, indexer
-	resIndexers  map[string]*FilterIndexer // tenant, indexer
-	sppIndexers  map[string]*FilterIndexer // tenant, indexer
-	attrIndexers map[string]*FilterIndexer // tenant:context , indexer
 }
 
 func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string) *TpReader {
@@ -144,15 +140,11 @@ func (tpr *TpReader) Init() {
 	tpr.thProfiles = make(map[utils.TenantID]*utils.TPThreshold)
 	tpr.sppProfiles = make(map[utils.TenantID]*utils.TPSupplierProfile)
 	tpr.attributeProfiles = make(map[utils.TenantID]*utils.TPAttributeProfile)
+	tpr.chargerProfiles = make(map[utils.TenantID]*utils.TPChargerProfile)
 	tpr.filters = make(map[utils.TenantID]*utils.TPFilterProfile)
 	tpr.revDests = make(map[string][]string)
 	tpr.revAliases = make(map[string][]string)
 	tpr.acntActionPlans = make(map[string][]string)
-	tpr.thdsIndexers = make(map[string]*FilterIndexer)
-	tpr.sqpIndexers = make(map[string]*FilterIndexer)
-	tpr.resIndexers = make(map[string]*FilterIndexer)
-	tpr.sppIndexers = make(map[string]*FilterIndexer)
-	tpr.attrIndexers = make(map[string]*FilterIndexer)
 }
 
 func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
@@ -167,13 +159,13 @@ func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
 		dst := NewDestinationFromTPDestination(tpDst)
 		// ToDo: Fix transactions at onlineDB level
 		if err = tpr.dm.DataDB().SetDestination(dst, transID); err != nil {
-			cache.RollbackTransaction(transID)
+			Cache.RollbackTransaction(transID)
 		}
 		if err = tpr.dm.DataDB().SetReverseDestination(dst, transID); err != nil {
-			cache.RollbackTransaction(transID)
+			Cache.RollbackTransaction(transID)
 		}
 	}
-	cache.CommitTransaction(transID)
+	Cache.CommitTransaction(transID)
 	return true, nil
 }
 
@@ -1622,66 +1614,11 @@ func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) (err error) {
 		mapRsPfls[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
 	tpr.resProfiles = mapRsPfls
-	for tntID, res := range mapRsPfls {
+	for tntID, _ := range mapRsPfls {
 		if has, err := tpr.dm.HasData(utils.ResourcesPrefix, tntID.ID, tntID.Tenant); err != nil {
 			return err
 		} else if !has {
 			tpr.resources = append(tpr.resources, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
-		}
-		// index resource for filters
-		if _, has := tpr.resIndexers[tntID.Tenant]; !has {
-			if tpr.resIndexers[tntID.Tenant] = NewFilterIndexer(tpr.dm, utils.ResourceProfilesPrefix, tntID.Tenant); err != nil {
-				return
-			}
-		}
-		fltrIDs := make([]string, len(res.FilterIDs))
-		for i, fltrID := range res.FilterIDs {
-			fltrIDs[i] = fltrID
-		}
-		if len(fltrIDs) == 0 {
-			fltrIDs = []string{utils.META_NONE}
-		}
-		for _, fltrID := range fltrIDs {
-			if fltrID == utils.META_NONE {
-				tpFltr := &utils.TPFilterProfile{
-					Tenant: res.Tenant,
-					ID:     res.ID,
-					Filters: []*utils.TPFilter{
-						&utils.TPFilter{
-							Type:      utils.MetaDefault,
-							FieldName: utils.META_ANY,
-							Values:    []string{utils.META_ANY},
-						},
-					},
-				}
-				tpr.resIndexers[tntID.Tenant].IndexTPFilter(tpFltr, res.ID)
-			} else if strings.HasPrefix(fltrID, utils.Meta) {
-				inFltr, err := NewInlineFilter(fltrID)
-				if err != nil {
-					return err
-				}
-				fltr, err := inFltr.AsFilter(tntID.Tenant)
-				if err != nil {
-					return err
-				}
-				tpFltr := FilterToTPFilter(fltr)
-				tpr.resIndexers[tntID.Tenant].IndexTPFilter(tpFltr, res.ID)
-			} else {
-				tpFltr, has := tpr.filters[utils.TenantID{Tenant: tntID.Tenant, ID: fltrID}]
-				if !has {
-					var fltr *Filter
-					if fltr, err = tpr.dm.GetFilter(tntID.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-						if err == utils.ErrNotFound {
-							err = fmt.Errorf("broken reference to filter: %+v for resoruce: %+v", fltrID, res)
-						}
-						return
-					} else {
-						tpFltr = FilterToTPFilter(fltr)
-					}
-				} else {
-					tpr.resIndexers[tntID.Tenant].IndexTPFilter(tpFltr, res.ID)
-				}
-			}
 		}
 	}
 	return nil
@@ -1701,66 +1638,11 @@ func (tpr *TpReader) LoadStatsFiltered(tag string) (err error) {
 		mapSTs[utils.TenantID{Tenant: st.Tenant, ID: st.ID}] = st
 	}
 	tpr.sqProfiles = mapSTs
-	for tntID, sq := range mapSTs {
+	for tntID, _ := range mapSTs {
 		if has, err := tpr.dm.HasData(utils.StatQueuePrefix, tntID.ID, tntID.Tenant); err != nil {
 			return err
 		} else if !has {
 			tpr.statQueues = append(tpr.statQueues, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
-		}
-		// index statQueues for filters
-		if _, has := tpr.sqpIndexers[tntID.Tenant]; !has {
-			if tpr.sqpIndexers[tntID.Tenant] = NewFilterIndexer(tpr.dm, utils.StatQueueProfilePrefix, tntID.Tenant); err != nil {
-				return
-			}
-		}
-		fltrIDs := make([]string, len(sq.FilterIDs))
-		for i, fltrID := range sq.FilterIDs {
-			fltrIDs[i] = fltrID
-		}
-		if len(fltrIDs) == 0 {
-			fltrIDs = []string{utils.META_NONE}
-		}
-		for _, fltrID := range fltrIDs {
-			if fltrID == utils.META_NONE {
-				tpFltr := &utils.TPFilterProfile{
-					Tenant: sq.Tenant,
-					ID:     sq.ID,
-					Filters: []*utils.TPFilter{
-						&utils.TPFilter{
-							Type:      utils.MetaDefault,
-							FieldName: utils.META_ANY,
-							Values:    []string{utils.META_ANY},
-						},
-					},
-				}
-				tpr.sqpIndexers[tntID.Tenant].IndexTPFilter(tpFltr, sq.ID)
-			} else if strings.HasPrefix(fltrID, utils.Meta) {
-				inFltr, err := NewInlineFilter(fltrID)
-				if err != nil {
-					return err
-				}
-				fltr, err := inFltr.AsFilter(tntID.Tenant)
-				if err != nil {
-					return err
-				}
-				tpFltr := FilterToTPFilter(fltr)
-				tpr.sqpIndexers[tntID.Tenant].IndexTPFilter(tpFltr, sq.ID)
-			} else {
-				tpFltr, has := tpr.filters[utils.TenantID{Tenant: tntID.Tenant, ID: fltrID}]
-				if !has {
-					var fltr *Filter
-					if fltr, err = tpr.dm.GetFilter(tntID.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-						if err == utils.ErrNotFound {
-							err = fmt.Errorf("broken reference to filter: %+v for statQueue: %+v", fltrID, sq)
-						}
-						return
-					} else {
-						tpFltr = FilterToTPFilter(fltr)
-					}
-				} else {
-					tpr.sqpIndexers[tntID.Tenant].IndexTPFilter(tpFltr, sq.ID)
-				}
-			}
 		}
 	}
 	return nil
@@ -1780,66 +1662,11 @@ func (tpr *TpReader) LoadThresholdsFiltered(tag string) (err error) {
 		mapTHs[utils.TenantID{Tenant: th.Tenant, ID: th.ID}] = th
 	}
 	tpr.thProfiles = mapTHs
-	for tntID, th := range mapTHs {
+	for tntID, _ := range mapTHs {
 		if has, err := tpr.dm.HasData(utils.ThresholdPrefix, tntID.ID, tntID.Tenant); err != nil {
 			return err
 		} else if !has {
 			tpr.thresholds = append(tpr.thresholds, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
-		}
-		// index thresholds for filters
-		if _, has := tpr.thdsIndexers[tntID.Tenant]; !has {
-			if tpr.thdsIndexers[tntID.Tenant] = NewFilterIndexer(tpr.dm, utils.ThresholdProfilePrefix, tntID.Tenant); err != nil {
-				return
-			}
-		}
-		fltrIDs := make([]string, len(th.FilterIDs))
-		for i, fltrID := range th.FilterIDs {
-			fltrIDs[i] = fltrID
-		}
-		if len(fltrIDs) == 0 {
-			fltrIDs = []string{utils.META_NONE}
-		}
-		for _, fltrID := range fltrIDs {
-			if fltrID == utils.META_NONE {
-				tpFltr := &utils.TPFilterProfile{
-					Tenant: th.Tenant,
-					ID:     th.ID,
-					Filters: []*utils.TPFilter{
-						&utils.TPFilter{
-							Type:      utils.MetaDefault,
-							FieldName: utils.META_ANY,
-							Values:    []string{utils.META_ANY},
-						},
-					},
-				}
-				tpr.thdsIndexers[tntID.Tenant].IndexTPFilter(tpFltr, th.ID)
-			} else if strings.HasPrefix(fltrID, utils.Meta) {
-				inFltr, err := NewInlineFilter(fltrID)
-				if err != nil {
-					return err
-				}
-				fltr, err := inFltr.AsFilter(tntID.Tenant)
-				if err != nil {
-					return err
-				}
-				tpFltr := FilterToTPFilter(fltr)
-				tpr.thdsIndexers[tntID.Tenant].IndexTPFilter(tpFltr, th.ID)
-			} else {
-				tpFltr, has := tpr.filters[utils.TenantID{Tenant: tntID.Tenant, ID: fltrID}]
-				if !has {
-					var fltr *Filter
-					if fltr, err = tpr.dm.GetFilter(tntID.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-						if err == utils.ErrNotFound {
-							err = fmt.Errorf("broken reference to filter: %+v for threshold: %+v", fltrID, th)
-						}
-						return
-					} else {
-						tpFltr = FilterToTPFilter(fltr)
-					}
-				} else {
-					tpr.thdsIndexers[tntID.Tenant].IndexTPFilter(tpFltr, th.ID)
-				}
-			}
 		}
 	}
 	return nil
@@ -1876,66 +1703,11 @@ func (tpr *TpReader) LoadSupplierProfilesFiltered(tag string) (err error) {
 		mapRsPfls[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
 	tpr.sppProfiles = mapRsPfls
-	for tntID, sup := range mapRsPfls {
+	for tntID, _ := range mapRsPfls {
 		if has, err := tpr.dm.HasData(utils.SupplierProfilePrefix, tntID.ID, tntID.Tenant); err != nil {
 			return err
 		} else if !has {
 			tpr.suppliers = append(tpr.suppliers, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
-		}
-		// index supplier profile for filters
-		if _, has := tpr.sppIndexers[tntID.Tenant]; !has {
-			if tpr.sppIndexers[tntID.Tenant] = NewFilterIndexer(tpr.dm, utils.SupplierProfilePrefix, tntID.Tenant); err != nil {
-				return
-			}
-		}
-		fltrIDs := make([]string, len(sup.FilterIDs))
-		for i, fltrID := range sup.FilterIDs {
-			fltrIDs[i] = fltrID
-		}
-		if len(fltrIDs) == 0 {
-			fltrIDs = []string{utils.META_NONE}
-		}
-		for _, fltrID := range fltrIDs {
-			if fltrID == utils.META_NONE {
-				tpFltr := &utils.TPFilterProfile{
-					Tenant: sup.Tenant,
-					ID:     sup.ID,
-					Filters: []*utils.TPFilter{
-						&utils.TPFilter{
-							Type:      utils.MetaDefault,
-							FieldName: utils.META_ANY,
-							Values:    []string{utils.META_ANY},
-						},
-					},
-				}
-				tpr.sppIndexers[tntID.Tenant].IndexTPFilter(tpFltr, sup.ID)
-			} else if strings.HasPrefix(fltrID, utils.Meta) {
-				inFltr, err := NewInlineFilter(fltrID)
-				if err != nil {
-					return err
-				}
-				fltr, err := inFltr.AsFilter(tntID.Tenant)
-				if err != nil {
-					return err
-				}
-				tpFltr := FilterToTPFilter(fltr)
-				tpr.sppIndexers[tntID.Tenant].IndexTPFilter(tpFltr, sup.ID)
-			} else {
-				tpFltr, has := tpr.filters[utils.TenantID{Tenant: tntID.Tenant, ID: fltrID}]
-				if !has {
-					var fltr *Filter
-					if fltr, err = tpr.dm.GetFilter(tntID.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-						if err == utils.ErrNotFound {
-							err = fmt.Errorf("broken reference to filter: %+v for SupplierProfile: %+v", fltrID, sup)
-						}
-						return
-					} else {
-						tpFltr = FilterToTPFilter(fltr)
-					}
-				} else {
-					tpr.sppIndexers[tntID.Tenant].IndexTPFilter(tpFltr, sup.ID)
-				}
-			}
 		}
 	}
 	return nil
@@ -1955,69 +1727,11 @@ func (tpr *TpReader) LoadAttributeProfilesFiltered(tag string) (err error) {
 		mapRsPfls[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
 	tpr.attributeProfiles = mapRsPfls
-	for tntID, attrP := range mapRsPfls {
+	for tntID, _ := range mapRsPfls {
 		if has, err := tpr.dm.HasData(utils.AttributeProfilePrefix, tntID.ID, tntID.Tenant); err != nil {
 			return err
 		} else if !has {
 			tpr.attrTntID = append(tpr.attrTntID, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
-		}
-		// index attribute profile for filters
-		for _, context := range attrP.Contexts {
-			attrKey := utils.ConcatenatedKey(tntID.Tenant, context)
-			if _, has := tpr.attrIndexers[attrKey]; !has {
-				if tpr.attrIndexers[attrKey] = NewFilterIndexer(tpr.dm, utils.AttributeProfilePrefix, attrKey); err != nil {
-					return
-				}
-			}
-			fltrIDs := make([]string, len(attrP.FilterIDs))
-			for i, fltrID := range attrP.FilterIDs {
-				fltrIDs[i] = fltrID
-			}
-			if len(fltrIDs) == 0 {
-				fltrIDs = []string{utils.META_NONE}
-			}
-			for _, fltrID := range fltrIDs {
-				if fltrID == utils.META_NONE {
-					tpFltr := &utils.TPFilterProfile{
-						Tenant: attrP.Tenant,
-						ID:     attrP.ID,
-						Filters: []*utils.TPFilter{
-							&utils.TPFilter{
-								Type:      utils.MetaDefault,
-								FieldName: utils.META_ANY,
-								Values:    []string{utils.META_ANY},
-							},
-						},
-					}
-					tpr.attrIndexers[tntID.Tenant].IndexTPFilter(tpFltr, attrP.ID)
-				} else if strings.HasPrefix(fltrID, utils.Meta) {
-					inFltr, err := NewInlineFilter(fltrID)
-					if err != nil {
-						return err
-					}
-					fltr, err := inFltr.AsFilter(tntID.Tenant)
-					if err != nil {
-						return err
-					}
-					tpFltr := FilterToTPFilter(fltr)
-					tpr.attrIndexers[attrKey].IndexTPFilter(tpFltr, attrP.ID)
-				} else {
-					tpFltr, has := tpr.filters[utils.TenantID{Tenant: tntID.Tenant, ID: fltrID}]
-					if !has {
-						var fltr *Filter
-						if fltr, err = tpr.dm.GetFilter(tntID.Tenant, fltrID, false, utils.NonTransactional); err != nil {
-							if err == utils.ErrNotFound {
-								err = fmt.Errorf("broken reference to filter: %+v for AttributeProfile: %+v", fltrID, attrP)
-							}
-							return
-						} else {
-							tpFltr = FilterToTPFilter(fltr)
-						}
-					} else {
-						tpr.attrIndexers[attrKey].IndexTPFilter(tpFltr, attrP.ID)
-					}
-				}
-			}
 		}
 	}
 	return nil
@@ -2025,6 +1739,30 @@ func (tpr *TpReader) LoadAttributeProfilesFiltered(tag string) (err error) {
 
 func (tpr *TpReader) LoadAttributeProfiles() error {
 	return tpr.LoadAttributeProfilesFiltered("")
+}
+
+func (tpr *TpReader) LoadChargerProfilesFiltered(tag string) (err error) {
+	rls, err := tpr.lr.GetTPChargers(tpr.tpid, tag)
+	if err != nil {
+		return err
+	}
+	mapChargerProfile := make(map[utils.TenantID]*utils.TPChargerProfile)
+	for _, rl := range rls {
+		mapChargerProfile[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
+	}
+	tpr.chargerProfiles = mapChargerProfile
+	for tntID, _ := range mapChargerProfile {
+		if has, err := tpr.dm.HasData(utils.ChargerProfilePrefix, tntID.ID, tntID.Tenant); err != nil {
+			return err
+		} else if !has {
+			tpr.chargers = append(tpr.chargers, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
+		}
+	}
+	return nil
+}
+
+func (tpr *TpReader) LoadChargerProfiles() error {
+	return tpr.LoadChargerProfilesFiltered("")
 }
 
 func (tpr *TpReader) LoadAll() (err error) {
@@ -2094,6 +1832,9 @@ func (tpr *TpReader) LoadAll() (err error) {
 	if err = tpr.LoadAttributeProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
+	if err = tpr.LoadChargerProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
+	}
 	return nil
 }
 
@@ -2120,8 +1861,13 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 	if tpr.dm.dataDB == nil {
 		return errors.New("no database connection")
 	}
-	if flush { // ToDo
-		//tpr.dm.DataDB().Flush("")
+	if flush {
+		// if verbose {
+		// 	log.Print("Flushing database")
+		// }
+		// if err = tpr.dm.DataDB().Flush(""); err != nil {
+		// 	return
+		// }
 	}
 	if verbose {
 		log.Print("Destinations:")
@@ -2349,7 +2095,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		if err != nil {
 			return err
 		}
-		if err = tpr.dm.SetResourceProfile(rsp, false); err != nil {
+		if err = tpr.dm.SetResourceProfile(rsp, true); err != nil {
 			return err
 		}
 		if verbose {
@@ -2375,7 +2121,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		if err != nil {
 			return err
 		}
-		if err = tpr.dm.SetStatQueueProfile(st, false); err != nil {
+		if err = tpr.dm.SetStatQueueProfile(st, true); err != nil {
 			return err
 		}
 		if verbose {
@@ -2412,7 +2158,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		if err != nil {
 			return err
 		}
-		if err = tpr.dm.SetThresholdProfile(th, false); err != nil {
+		if err = tpr.dm.SetThresholdProfile(th, true); err != nil {
 			return err
 		}
 		if verbose {
@@ -2439,7 +2185,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		if err != nil {
 			return err
 		}
-		if err = tpr.dm.SetSupplierProfile(th, false); err != nil {
+		if err = tpr.dm.SetSupplierProfile(th, true); err != nil {
 			return err
 		}
 		if verbose {
@@ -2455,7 +2201,24 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		if err != nil {
 			return err
 		}
-		if err = tpr.dm.SetAttributeProfile(th, false); err != nil {
+		if err = tpr.dm.SetAttributeProfile(th, true); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", th.TenantID())
+		}
+	}
+
+	if verbose {
+		log.Print("ChargerProfiles:")
+	}
+	for _, tpTH := range tpr.chargerProfiles {
+
+		th, err := APItoChargerProfile(tpTH, tpr.timezone)
+		if err != nil {
+			return err
+		}
+		if err = tpr.dm.SetChargerProfile(th, true); err != nil {
 			return err
 		}
 		if verbose {
@@ -2498,80 +2261,6 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			if err = tpr.dm.DataDB().RebuildReverseForPrefix(utils.REVERSE_ALIASES_PREFIX); err != nil {
 				return err
 			}
-		}
-	}
-	if verbose {
-		log.Print("Indexing resource profiles")
-	}
-	for tenant, fltrIdxer := range tpr.resIndexers {
-		if err := fltrIdxer.StoreIndexes(); err != nil {
-			return err
-		}
-		if verbose {
-			log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(false).Slice())
-		}
-		if verbose {
-			log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(true).Slice())
-		}
-	}
-
-	if verbose {
-		log.Print("StatQueue filter indexes:")
-	}
-	for tenant, fltrIdxer := range tpr.sqpIndexers {
-		if err := fltrIdxer.StoreIndexes(); err != nil {
-			return err
-		}
-		if verbose {
-			log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(false).Slice())
-		}
-		if verbose {
-			log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(true).Slice())
-		}
-	}
-
-	if verbose {
-		log.Print("Threshold filter indexes:")
-	}
-	for tenant, fltrIdxer := range tpr.thdsIndexers {
-		if err := fltrIdxer.StoreIndexes(); err != nil {
-			return err
-		}
-		if verbose {
-			log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(false).Slice())
-		}
-		if verbose {
-			log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(true).Slice())
-		}
-	}
-
-	if verbose {
-		log.Print("Indexing Supplier Profiles")
-	}
-	for tenant, fltrIdxer := range tpr.sppIndexers {
-		if err := fltrIdxer.StoreIndexes(); err != nil {
-			return err
-		}
-		if verbose {
-			log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(false).Slice())
-		}
-		if verbose {
-			log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(true).Slice())
-		}
-	}
-
-	if verbose {
-		log.Print("Indexing Attribute Profiles")
-	}
-	for tntCntx, fltrIdxer := range tpr.attrIndexers {
-		if err := fltrIdxer.StoreIndexes(); err != nil {
-			return err
-		}
-		if verbose {
-			log.Printf("Tenant:Context  %s, keys %+v", tntCntx, fltrIdxer.ChangedKeys(false).Slice())
-		}
-		if verbose {
-			log.Printf("Tenant:Context  %s, keys %+v", tntCntx, fltrIdxer.ChangedKeys(true).Slice())
 		}
 	}
 	return
@@ -2646,6 +2335,8 @@ func (tpr *TpReader) ShowStatistics() {
 	log.Print("SupplierProfiles: ", len(tpr.sppProfiles))
 	// Attribute profiles
 	log.Print("AttributeProfiles: ", len(tpr.attributeProfiles))
+	// Charger profiles
+	log.Print("ChargerProfiles: ", len(tpr.chargerProfiles))
 }
 
 // Returns the identities loaded for a specific category, useful for cache reloads
@@ -2815,6 +2506,14 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(tpr.attributeProfiles))
 		i := 0
 		for k, _ := range tpr.attributeProfiles {
+			keys[i] = k.TenantID()
+			i++
+		}
+		return keys, nil
+	case utils.ChargerProfilePrefix:
+		keys := make([]string, len(tpr.chargerProfiles))
+		i := 0
+		for k, _ := range tpr.chargerProfiles {
 			keys[i] = k.TenantID()
 			i++
 		}
@@ -3043,7 +2742,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 		log.Print("StatQueues:")
 	}
 	for _, sqTntID := range tpr.statQueues {
-		if err = tpr.dm.RemStatQueue(sqTntID.Tenant, sqTntID.ID, utils.NonTransactional); err != nil {
+		if err = tpr.dm.RemoveStatQueue(sqTntID.Tenant, sqTntID.ID, utils.NonTransactional); err != nil {
 			return
 		}
 		if verbose {
@@ -3084,6 +2783,31 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 			log.Print("\t", tpTH.Tenant)
 		}
 	}
+
+	if verbose {
+		log.Print("AttributeProfiles:")
+	}
+	for _, tpTH := range tpr.attributeProfiles {
+		if err = tpr.dm.RemoveAttributeProfile(tpTH.Tenant, tpTH.ID, tpTH.Contexts, utils.NonTransactional, false); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", tpTH.Tenant)
+		}
+	}
+
+	if verbose {
+		log.Print("ChargerProfiles:")
+	}
+	for _, tpTH := range tpr.chargerProfiles {
+		if err = tpr.dm.RemoveChargerProfile(tpTH.Tenant, tpTH.ID, utils.NonTransactional, false); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", tpTH.Tenant)
+		}
+	}
+
 	if verbose {
 		log.Print("Timings:")
 	}
@@ -3118,53 +2842,6 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 			}
 			if err = tpr.dm.DataDB().RemoveReverseForPrefix(utils.REVERSE_ALIASES_PREFIX); err != nil {
 				return err
-			}
-		}
-		if verbose {
-			log.Print("Indexing resource profiles")
-		}
-		for tenant, fltrIdxer := range tpr.resIndexers {
-			if err := tpr.dm.RemoveFilterIndexes(GetDBIndexKey(fltrIdxer.itemType, fltrIdxer.dbKeySuffix, false)); err != nil {
-				return err
-			}
-			if verbose {
-				log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(false).Slice())
-			}
-		}
-
-		if verbose {
-			log.Print("StatQueue filter indexes:")
-		}
-		for tenant, fltrIdxer := range tpr.sqpIndexers {
-			if err := tpr.dm.RemoveFilterIndexes(GetDBIndexKey(fltrIdxer.itemType, fltrIdxer.dbKeySuffix, false)); err != nil {
-				return err
-			}
-			if verbose {
-				log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(true).Slice())
-			}
-		}
-
-		if verbose {
-			log.Print("Threshold filter indexes:")
-		}
-		for tenant, fltrIdxer := range tpr.thdsIndexers {
-			if err := tpr.dm.RemoveFilterIndexes(GetDBIndexKey(fltrIdxer.itemType, fltrIdxer.dbKeySuffix, false)); err != nil {
-				return err
-			}
-			if verbose {
-				log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(false).Slice())
-			}
-		}
-
-		if verbose {
-			log.Print("Indexing Supplier Profiles")
-		}
-		for tenant, fltrIdxer := range tpr.sppIndexers {
-			if err := tpr.dm.RemoveFilterIndexes(GetDBIndexKey(fltrIdxer.itemType, fltrIdxer.dbKeySuffix, false)); err != nil {
-				return err
-			}
-			if verbose {
-				log.Printf("Tenant: %s, keys %+v", tenant, fltrIdxer.ChangedKeys(true).Slice())
 			}
 		}
 	}

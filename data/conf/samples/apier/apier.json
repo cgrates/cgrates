@@ -65,6 +65,29 @@
 	],
 },
 
+"attributes": {								// Attribute service
+	"enabled": true,						// starts Alias service: <true|false>.
+},
+
+
+"resources": {
+	"enabled": true,
+},
+
+
+"stats": {
+	"enabled": true,
+},
+
+"thresholds": {
+	"enabled": true,
+},
+
+
+"suppliers": {
+	"enabled": true,
+},
+
 "aliases": {
 	"enabled": true,						// start the CDR Server service:  <true|false>
 },

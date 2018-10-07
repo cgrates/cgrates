@@ -34,23 +34,11 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func fwvValue(cdrLine string, indexStart, width int, padding string) string {
-	rawVal := cdrLine[indexStart : indexStart+width]
-	switch padding {
-	case "left":
-		rawVal = strings.TrimLeft(rawVal, " ")
-	case "right":
-		rawVal = strings.TrimRight(rawVal, " ")
-	case "zeroleft":
-		rawVal = strings.TrimLeft(rawVal, "0 ")
-	case "zeroright":
-		rawVal = strings.TrimRight(rawVal, "0 ")
-	}
-	return rawVal
-}
-
-func NewFwvRecordsProcessor(file *os.File, dfltCfg *config.CdrcConfig, cdrcCfgs []*config.CdrcConfig, httpClient *http.Client, httpSkipTlsCheck bool, timezone string) *FwvRecordsProcessor {
-	return &FwvRecordsProcessor{file: file, cdrcCfgs: cdrcCfgs, dfltCfg: dfltCfg, httpSkipTlsCheck: httpSkipTlsCheck, timezone: timezone}
+func NewFwvRecordsProcessor(file *os.File, dfltCfg *config.CdrcConfig,
+	cdrcCfgs []*config.CdrcConfig, httpClient *http.Client,
+	httpSkipTlsCheck bool, timezone string, filterS *engine.FilterS) *FwvRecordsProcessor {
+	return &FwvRecordsProcessor{file: file, cdrcCfgs: cdrcCfgs, dfltCfg: dfltCfg,
+		httpSkipTlsCheck: httpSkipTlsCheck, timezone: timezone, filterS: filterS}
 }
 
 type FwvRecordsProcessor struct {
@@ -65,6 +53,7 @@ type FwvRecordsProcessor struct {
 	processedRecordsNr int64       // Number of content records in file
 	trailerOffset      int64       // Index where trailer starts, to be used as boundary when reading cdrs
 	headerCdr          *engine.CDR // Cache here the general purpose stored CDR
+	filterS            *engine.FilterS
 }
 
 // Sets the line length based on first line, sets offset back to initial after reading
@@ -125,9 +114,17 @@ func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.CDR, error) {
 	}
 	self.processedRecordsNr += 1
 	record := string(buf)
+	fwvProvider := newfwvProvider(record)
 	for _, cdrcCfg := range self.cdrcCfgs {
-		if passes := self.recordPassesCfgFilter(record, cdrcCfg); !passes {
-			continue
+		tenant, err := cdrcCfg.Tenant.ParseDataProvider(fwvProvider, utils.NestingSep) // each profile of cdrc can have different tenant
+		if err != nil {
+			return nil, err
+		}
+		if len(cdrcCfg.Filters) != 0 {
+			if pass, err := self.filterS.Pass(tenant,
+				cdrcCfg.Filters, fwvProvider); err != nil || !pass {
+				continue // Not passes filters, ignore this CDR
+			}
 		}
 		if storedCdr, err := self.recordToStoredCdr(record, cdrcCfg, cdrcCfg.ID); err != nil {
 			return nil, fmt.Errorf("Failed converting to StoredCdr, error: %s", err.Error())
@@ -141,31 +138,15 @@ func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.CDR, error) {
 	return recordCdrs, nil
 }
 
-func (self *FwvRecordsProcessor) recordPassesCfgFilter(record string, cdrcCfg *config.CdrcConfig) bool {
-	filterPasses := true
-	for _, rsrFilter := range cdrcCfg.CdrFilter {
-		if rsrFilter == nil { // Nil filter does not need to match anything
-			continue
-		}
-		if cfgFieldIdx, _ := strconv.Atoi(rsrFilter.Id); len(record) <= cfgFieldIdx {
-			fmt.Errorf("Ignoring record: %v - cannot compile filter %+v", record, rsrFilter)
-			return false
-		} else if !rsrFilter.FilterPasses(record[cfgFieldIdx:]) {
-			filterPasses = false
-			break
-		}
-	}
-	return filterPasses
-}
-
 // Converts a record (header or normal) to CDR
 func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *config.CdrcConfig, cfgKey string) (*engine.CDR, error) {
 	var err error
-	var lazyHttpFields []*config.CfgCdrField
-	var cfgFields []*config.CfgCdrField
+	var lazyHttpFields []*config.FCTemplate
+	var cfgFields []*config.FCTemplate
 	var duMultiplyFactor float64
 	var storedCdr *engine.CDR
-	if self.headerCdr != nil { // Clone the header CDR so we can use it as base to future processing (inherit fields defined there)
+	fwvProvider := newfwvProvider(record) // used for filterS and for RSRParsers
+	if self.headerCdr != nil {            // Clone the header CDR so we can use it as base to future processing (inherit fields defined there)
 		storedCdr = self.headerCdr.Clone()
 	} else {
 		storedCdr = &engine.CDR{OriginHost: "0.0.0.0", ExtraFields: make(map[string]string), Cost: -1}
@@ -180,27 +161,35 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *confi
 		duMultiplyFactor = cdrcCfg.DataUsageMultiplyFactor
 	}
 	for _, cdrFldCfg := range cfgFields {
-		var fieldVal string
+		if len(cdrFldCfg.Filters) != 0 {
+			tenant, err := cdrcCfg.Tenant.ParseValue("")
+			if err != nil {
+				return nil, err
+			}
+			if pass, err := self.filterS.Pass(tenant,
+				cdrFldCfg.Filters, fwvProvider); err != nil || !pass {
+				continue // Not passes filters, ignore this CDR
+			}
+		}
+		fldVals := make(map[string]string)
 		switch cdrFldCfg.Type {
 		case utils.META_COMPOSED:
-			for _, cfgFieldRSR := range cdrFldCfg.Value {
-				if cfgFieldRSR.IsStatic() {
-					fieldVal += cfgFieldRSR.ParseValue("")
-				} else { // Dynamic value extracted using index
-					if cfgFieldIdx, _ := strconv.Atoi(cfgFieldRSR.Id); len(record) <= cfgFieldIdx {
-						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s", record, cdrFldCfg.Tag)
-					} else {
-						fieldVal += cfgFieldRSR.ParseValue(fwvValue(record, cfgFieldIdx, cdrFldCfg.Width, cdrFldCfg.Padding))
-					}
-				}
+			out, err := cdrFldCfg.Value.ParseDataProvider(fwvProvider, utils.NestingSep)
+			if err != nil {
+				return nil, err
 			}
+			fldVals[cdrFldCfg.FieldId] += out
 		case utils.META_HTTP_POST:
 			lazyHttpFields = append(lazyHttpFields, cdrFldCfg) // Will process later so we can send an estimation of storedCdr to http server
 		default:
 			//return nil, fmt.Errorf("Unsupported field type: %s", cdrFldCfg.Type)
 			continue // Don't do anything for unsupported fields
 		}
-		if err := storedCdr.ParseFieldValue(cdrFldCfg.FieldId, fieldVal, self.timezone); err != nil {
+		if fldVals[cdrFldCfg.FieldId], err = utils.FmtFieldWidth(cdrFldCfg.Tag, fldVals[cdrFldCfg.FieldId], cdrFldCfg.Width,
+			cdrFldCfg.Strip, cdrFldCfg.Padding, cdrFldCfg.Mandatory); err != nil {
+			return nil, err
+		}
+		if err := storedCdr.ParseFieldValue(cdrFldCfg.FieldId, fldVals[cdrFldCfg.FieldId], self.timezone); err != nil {
 			return nil, err
 		}
 	}
@@ -214,14 +203,19 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *confi
 		var outValByte []byte
 		var fieldVal, httpAddr string
 		for _, rsrFld := range httpFieldCfg.Value {
-			httpAddr += rsrFld.ParseValue("")
+			if parsed, err := rsrFld.ParseValue(utils.EmptyString); err != nil {
+				return nil, fmt.Errorf("Ignoring record: %v - cannot extract http address, err: %s",
+					record, err.Error())
+			} else {
+				httpAddr += parsed
+			}
 		}
 		var jsn []byte
 		jsn, err = json.Marshal(storedCdr)
 		if err != nil {
 			return nil, err
 		}
-		if outValByte, err = utils.HttpJsonPost(httpAddr, self.httpSkipTlsCheck, jsn); err != nil && httpFieldCfg.Mandatory {
+		if outValByte, err = engine.HttpJsonPost(httpAddr, self.httpSkipTlsCheck, jsn); err != nil && httpFieldCfg.Mandatory {
 			return nil, err
 		} else {
 			fieldVal = string(outValByte)
@@ -258,4 +252,72 @@ func (self *FwvRecordsProcessor) processTrailer() error {
 		return fmt.Errorf("In trailer, line len: %d, have read: %d", self.lineLen, nRead)
 	}
 	return nil
+}
+
+// newfwvProvider constructs a DataProvider
+func newfwvProvider(record string) (dP config.DataProvider) {
+	dP = &fwvProvider{req: record, cache: config.NewNavigableMap(nil)}
+	return
+}
+
+// fwvProvider implements engine.DataProvider so we can pass it to filters
+type fwvProvider struct {
+	req   string
+	cache *config.NavigableMap
+}
+
+// String is part of engine.DataProvider interface
+// when called, it will display the already parsed values out of cache
+func (fP *fwvProvider) String() string {
+	return utils.ToJSON(fP)
+}
+
+// FieldAsInterface is part of engine.DataProvider interface
+func (fP *fwvProvider) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	if data, err = fP.cache.FieldAsInterface(fldPath); err == nil ||
+		err != utils.ErrNotFound { // item found in cache
+		return
+	}
+	err = nil // cancel previous err
+	indexes := strings.Split(fldPath[0], "-")
+	if len(indexes) != 2 {
+		return "", fmt.Errorf("Invalid format for index : %+v", fldPath[0])
+	}
+	startIndex, err := strconv.Atoi(indexes[0])
+	if err != nil {
+		return nil, err
+	}
+	if startIndex > len(fP.req) {
+		return "", fmt.Errorf("StartIndex : %+v is greater than : %+v", startIndex, len(fP.req))
+	}
+	finalIndex, err := strconv.Atoi(indexes[1])
+	if err != nil {
+		return nil, err
+	}
+	if finalIndex > len(fP.req) {
+		return "", fmt.Errorf("FinalIndex : %+v is greater than : %+v", finalIndex, len(fP.req))
+	}
+	data = fP.req[startIndex:finalIndex]
+	fP.cache.Set(fldPath, data, false)
+	return
+}
+
+// FieldAsString is part of engine.DataProvider interface
+func (fP *fwvProvider) FieldAsString(fldPath []string) (data string, err error) {
+	var valIface interface{}
+	valIface, err = fP.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	data, err = utils.IfaceAsString(valIface)
+	return
+}
+
+// AsNavigableMap is part of engine.DataProvider interface
+func (fP *fwvProvider) AsNavigableMap([]*config.FCTemplate) (
+	nm *config.NavigableMap, err error) {
+	return nil, utils.ErrNotImplemented
 }

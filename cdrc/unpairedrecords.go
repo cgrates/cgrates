@@ -41,7 +41,7 @@ type UnpairedRecordsCache struct {
 	cdrOutDir      string
 	csvSep         rune
 	partialRecords map[string]map[string]*UnpairedRecord // [FileName"][OriginID]*PartialRecord
-	guard          *guardian.GuardianLock
+	guard          *guardian.GuardianLocker
 }
 
 // Dumps the cache into a .unpaired file in the outdir and cleans cache after

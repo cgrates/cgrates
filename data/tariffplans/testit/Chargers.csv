@@ -1,0 +1,3 @@
+#Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
+cgrates.org,CustomerCharges,,,CustomerCharges,*none,20
+cgrates.org,SupplierCharges,,,SupplierCharges,ATTR_SUPPLIER1,10

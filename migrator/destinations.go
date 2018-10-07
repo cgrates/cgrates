@@ -28,19 +28,19 @@ import (
 
 func (m *Migrator) migrateCurrentDestinations() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.DESTINATION_PREFIX)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.DESTINATION_PREFIX)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.DESTINATION_PREFIX)
-		dst, err := m.dmIN.DataDB().GetDestination(idg, true, utils.NonTransactional)
+		dst, err := m.dmIN.DataManager().DataDB().GetDestination(idg, true, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if dst != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.DataDB().SetDestination(dst, utils.NonTransactional); err != nil {
+				if err := m.dmOut.DataManager().DataDB().SetDestination(dst, utils.NonTransactional); err != nil {
 					return err
 				}
 				m.stats[utils.Destinations] += 1
@@ -53,7 +53,7 @@ func (m *Migrator) migrateCurrentDestinations() (err error) {
 func (m *Migrator) migrateDestinations() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.dmOut.DataManager().DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -80,28 +80,28 @@ func (m *Migrator) migrateDestinations() (err error) {
 
 func (m *Migrator) migrateCurrentReverseDestinations() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.REVERSE_DESTINATION_PREFIX)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.REVERSE_DESTINATION_PREFIX)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
 		id := strings.TrimPrefix(id, utils.REVERSE_DESTINATION_PREFIX)
-		rdst, err := m.dmIN.DataDB().GetReverseDestination(id, true, utils.NonTransactional)
+		rdst, err := m.dmIN.DataManager().DataDB().GetReverseDestination(id, true, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if rdst != nil {
 			for _, rdid := range rdst {
-				rdstn, err := m.dmIN.DataDB().GetDestination(rdid, true, utils.NonTransactional)
+				rdstn, err := m.dmIN.DataManager().DataDB().GetDestination(rdid, true, utils.NonTransactional)
 				if err != nil {
 					return err
 				}
 				if rdstn != nil {
 					if m.dryRun != true {
-						if err := m.dmOut.DataDB().SetDestination(rdstn, utils.NonTransactional); err != nil {
+						if err := m.dmOut.DataManager().DataDB().SetDestination(rdstn, utils.NonTransactional); err != nil {
 							return err
 						}
-						if err := m.dmOut.DataDB().SetReverseDestination(rdstn, utils.NonTransactional); err != nil {
+						if err := m.dmOut.DataManager().DataDB().SetReverseDestination(rdstn, utils.NonTransactional); err != nil {
 							return err
 						}
 						m.stats[utils.ReverseDestinations] += 1
@@ -116,7 +116,7 @@ func (m *Migrator) migrateCurrentReverseDestinations() (err error) {
 func (m *Migrator) migrateReverseDestinations() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.dmOut.DataManager().DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

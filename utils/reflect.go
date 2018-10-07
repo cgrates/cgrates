@@ -21,40 +21,11 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"net"
 	"reflect"
 	"strconv"
 	"time"
 )
-
-func CastFieldIfToString(fld interface{}) (string, bool) {
-	var strVal string
-	var converted bool
-	switch fld.(type) {
-	case int:
-		strVal = strconv.Itoa(fld.(int))
-		converted = true
-	case int64:
-		strVal = strconv.FormatInt(fld.(int64), 10)
-		converted = true
-	case bool:
-		strVal = strconv.FormatBool(fld.(bool))
-		converted = true
-	case float64:
-		strVal = strconv.FormatFloat(fld.(float64), 'f', -1, 64)
-		converted = true
-	case []uint8:
-		var byteVal []byte
-		if byteVal, converted = fld.([]byte); converted {
-			strVal = string(byteVal)
-		}
-	case time.Duration:
-		strVal = fld.(time.Duration).String()
-		converted = true
-	default: // Maybe we are lucky and the value converts to string
-		strVal, converted = fld.(string)
-	}
-	return strVal, converted
-}
 
 // StringToInterface will parse string into supported types
 // if no other conversion possible, original string will be returned
@@ -135,12 +106,11 @@ func ReflectFieldAsString(intf interface{}, fldName, extraFieldsLabel string) (s
 	case reflect.Float64:
 		return strconv.FormatFloat(vOf.Float(), 'f', -1, 64), nil
 	case reflect.Interface:
-		strVal, converted := CastFieldIfToString(field)
-		if !converted {
+		strVal, err := IfaceAsString(field)
+		if err != nil {
 			return "", fmt.Errorf("Cannot convert to string field type: %s", vOf.Kind().String())
-		} else {
-			return strVal, nil
 		}
+		return strVal, nil
 	default:
 		return "", fmt.Errorf("Cannot convert to string field type: %s", vOf.Kind().String())
 	}
@@ -158,6 +128,41 @@ func IfaceAsTime(itm interface{}, timezone string) (t time.Time, err error) {
 	return
 }
 
+func IfaceAsDuration(itm interface{}) (d time.Duration, err error) {
+	switch itm.(type) {
+	case time.Duration:
+		return itm.(time.Duration), nil
+	case float64: // automatically hitting here also ints
+		return time.Duration(int64(itm.(float64))), nil
+	case int64:
+		return time.Duration(itm.(int64)), nil
+	case int:
+		return time.Duration(itm.(int)), nil
+	case string:
+		return ParseDurationWithNanosecs(itm.(string))
+
+	default:
+		err = fmt.Errorf("cannot convert field: %+v to time.Duration", itm)
+	}
+	return
+}
+
+func IfaceAsInt64(itm interface{}) (i int64, err error) {
+	switch itm.(type) {
+	case int:
+		return int64(itm.(int)), nil
+	case time.Duration:
+		return itm.(time.Duration).Nanoseconds(), nil
+	case int64:
+		return itm.(int64), nil
+	case string:
+		return strconv.ParseInt(itm.(string), 10, 64)
+	default:
+		err = fmt.Errorf("cannot convert field: %+v to int", itm)
+	}
+	return
+}
+
 func IfaceAsFloat64(itm interface{}) (f float64, err error) {
 	switch itm.(type) {
 	case float64:
@@ -169,9 +174,66 @@ func IfaceAsFloat64(itm interface{}) (f float64, err error) {
 	case string:
 		return strconv.ParseFloat(itm.(string), 64)
 	default:
-		err = fmt.Errorf("cannot convert field: %+v to time.Time", itm)
+		err = fmt.Errorf("cannot convert field: %+v to float64", itm)
 	}
 	return
+}
+
+func IfaceAsBool(itm interface{}) (b bool, err error) {
+	switch itm.(type) {
+	case bool:
+		return itm.(bool), nil
+	case string:
+		return strconv.ParseBool(itm.(string))
+	case int:
+		return itm.(int) > 0, nil
+	case int64:
+		return itm.(int64) > 0, nil
+	case float64:
+		return itm.(float64) > 0, nil
+	default:
+		err = fmt.Errorf("cannot convert field: %+v to bool", itm)
+	}
+	return
+}
+
+func IfaceAsString(fld interface{}) (out string, err error) {
+	switch fld.(type) {
+	case nil:
+		return
+	case int:
+		return strconv.Itoa(fld.(int)), nil
+	case int32:
+		return strconv.FormatInt(int64(fld.(int32)), 10), nil
+	case int64:
+		return strconv.FormatInt(fld.(int64), 10), nil
+	case uint32:
+		return strconv.FormatUint(uint64(fld.(uint32)), 10), nil
+	case uint64:
+		return strconv.FormatUint(fld.(uint64), 10), nil
+	case bool:
+		return strconv.FormatBool(fld.(bool)), nil
+	case float32:
+		return strconv.FormatFloat(float64(fld.(float32)), 'f', -1, 64), nil
+	case float64:
+		return strconv.FormatFloat(fld.(float64), 'f', -1, 64), nil
+	case []uint8:
+		if byteVal, canCast := fld.([]byte); !canCast {
+			return "", ErrNotConvertibleNoCaps
+		} else {
+			return string(byteVal), nil
+		}
+	case time.Duration:
+		return fld.(time.Duration).String(), nil
+	case time.Time:
+		return fld.(time.Time).Format(time.RFC3339), nil
+	case net.IP:
+		return fld.(net.IP).String(), nil
+	case string:
+		return fld.(string), nil
+	default: // Maybe we are lucky and the value converts to string
+		return ToJSON(fld), nil
+	}
 }
 
 // AsMapStringIface converts an item (mostly struct) as map[string]interface{}

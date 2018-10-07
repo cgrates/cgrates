@@ -19,7 +19,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/cache"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -29,13 +28,13 @@ func TestFilterPassString(t *testing.T) {
 		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
 		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
 	rf := &FilterRule{Type: MetaString, FieldName: "Category", Values: []string{"call"}}
-	if passes, err := rf.passString(cd, ""); err != nil {
+	if passes, err := rf.passString(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
 	rf = &FilterRule{Type: MetaString, FieldName: "Category", Values: []string{"cal"}}
-	if passes, err := rf.passString(cd, ""); err != nil {
+	if passes, err := rf.passString(cd); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Filter passes")
@@ -47,37 +46,37 @@ func TestFilterPassStringPrefix(t *testing.T) {
 		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
 		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
 	rf := &FilterRule{Type: MetaPrefix, FieldName: "Category", Values: []string{"call"}}
-	if passes, err := rf.passStringPrefix(cd, ""); err != nil {
+	if passes, err := rf.passStringPrefix(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
 	rf = &FilterRule{Type: MetaPrefix, FieldName: "Category", Values: []string{"premium"}}
-	if passes, err := rf.passStringPrefix(cd, ""); err != nil {
+	if passes, err := rf.passStringPrefix(cd); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passes filter")
 	}
 	rf = &FilterRule{Type: MetaPrefix, FieldName: "Destination", Values: []string{"+49"}}
-	if passes, err := rf.passStringPrefix(cd, ""); err != nil {
+	if passes, err := rf.passStringPrefix(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
 	rf = &FilterRule{Type: MetaPrefix, FieldName: "Destination", Values: []string{"+499"}}
-	if passes, err := rf.passStringPrefix(cd, ""); err != nil {
+	if passes, err := rf.passStringPrefix(cd); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passes filter")
 	}
 	rf = &FilterRule{Type: MetaPrefix, FieldName: "navigation", Values: []string{"off"}}
-	if passes, err := rf.passStringPrefix(cd, "ExtraFields"); err != nil {
+	if passes, err := rf.passStringPrefix(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
 	rf = &FilterRule{Type: MetaPrefix, FieldName: "nonexisting", Values: []string{"off"}}
-	if passing, err := rf.passStringPrefix(cd, "ExtraFields"); err != nil {
+	if passing, err := rf.passStringPrefix(cd); err != nil {
 		t.Error(err)
 	} else if passing {
 		t.Error("Passes filter")
@@ -85,32 +84,35 @@ func TestFilterPassStringPrefix(t *testing.T) {
 }
 
 func TestFilterPassRSRFields(t *testing.T) {
-	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
-		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
-		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
-	rf, err := NewFilterRule(MetaRSR, "", []string{"Tenant(~^cgr.*\\.org$)"})
+	cd := &CallDescriptor{Direction: "*out", Category: "call",
+		Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
+		TimeStart:     time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
+		DurationIndex: 132 * time.Second,
+		ExtraFields:   map[string]string{"navigation": "off"}}
+	rf, err := NewFilterRule(MetaRSR, "", []string{"~Tenant(~^cgr.*\\.org$)"})
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passRSR(cd, "ExtraFields"); err != nil {
+	if passes, err := rf.passRSR(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passing")
 	}
-	rf, err = NewFilterRule(MetaRSR, "", []string{"navigation(on)"})
+	rf, err = NewFilterRule(MetaRSR, "", []string{"~navigation(on)"})
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passRSR(cd, "ExtraFields"); err != nil {
+	if passes, err := rf.passRSR(cd); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passing")
 	}
-	rf, err = NewFilterRule(MetaRSR, "", []string{"navigation(off)"})
+	rf, err = NewFilterRule(MetaRSR, "", []string{"~navigation(off)"})
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passRSR(cd, "ExtraFields"); err != nil {
+	if passes, err := rf.passRSR(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passing")
@@ -118,15 +120,20 @@ func TestFilterPassRSRFields(t *testing.T) {
 }
 
 func TestFilterPassDestinations(t *testing.T) {
-	cache.Set(utils.REVERSE_DESTINATION_PREFIX+"+49", []string{"DE", "EU_LANDLINE"}, true, "")
-	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
-		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
-		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
+	Cache.Set(utils.CacheReverseDestinations, "+49",
+		[]string{"DE", "EU_LANDLINE"}, nil, true, "")
+	cd := &CallDescriptor{Direction: "*out",
+		Category: "call", Tenant: "cgrates.org",
+		Subject: "dan", Destination: "+4986517174963",
+		TimeStart:     time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
+		DurationIndex: 132 * time.Second,
+		ExtraFields:   map[string]string{"navigation": "off"}}
 	rf, err := NewFilterRule(MetaDestinations, "Destination", []string{"DE"})
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passDestinations(cd, "ExtraFields"); err != nil {
+	if passes, err := rf.passDestinations(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passing")
@@ -135,7 +142,7 @@ func TestFilterPassDestinations(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passDestinations(cd, "ExtraFields"); err != nil {
+	if passes, err := rf.passDestinations(cd); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passing")
@@ -147,18 +154,16 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	ev := map[string]interface{}{
-		"ASR": 20,
-	}
-	if passes, err := rf.passGreaterThan(ev, ""); err != nil {
+	ev := config.NewNavigableMap(nil)
+	ev.Set([]string{"ASR"}, 20, true)
+	if passes, err := rf.passGreaterThan(ev); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("not passing")
 	}
-	ev = map[string]interface{}{
-		"ASR": 40,
-	}
-	if passes, err := rf.passGreaterThan(ev, ""); err != nil {
+	ev = config.NewNavigableMap(nil)
+	ev.Set([]string{"ASR"}, 40, true)
+	if passes, err := rf.passGreaterThan(ev); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("equal should not be passing")
@@ -167,7 +172,7 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passGreaterThan(ev, ""); err != nil {
+	if passes, err := rf.passGreaterThan(ev); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("not passing")
@@ -176,15 +181,14 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.passGreaterThan(ev, ""); err != nil {
+	if passes, err := rf.passGreaterThan(ev); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("not passing")
 	}
-	ev = map[string]interface{}{
-		"ASR": 20,
-	}
-	if passes, err := rf.passGreaterThan(ev, ""); err != nil {
+	ev = config.NewNavigableMap(nil)
+	ev.Set([]string{"ASR"}, 20, true)
+	if passes, err := rf.passGreaterThan(ev); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("should not pass")
@@ -193,10 +197,9 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	ev = map[string]interface{}{
-		"ACD": time.Duration(2 * time.Minute),
-	}
-	if passes, err := rf.passGreaterThan(ev, ""); err != nil {
+	ev = config.NewNavigableMap(nil)
+	ev.Set([]string{"ACD"}, time.Duration(2*time.Minute), true)
+	if passes, err := rf.passGreaterThan(ev); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("not pass")
@@ -284,18 +287,18 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	passEvent := map[string]interface{}{
 		"Account": "1007",
 	}
-	if _, err := filterS.PassFiltersForEvent("cgrates.org",
-		nil, []string{"*string:Account:1007:error"}); err == nil {
+	if _, err := filterS.Pass("cgrates.org",
+		[]string{"*string:Account:1007:error"}, nil); err == nil {
 		t.Errorf(err.Error())
 	}
-	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		failEvent, []string{"*string:Account:1007"}); err != nil {
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*string:Account:1007"}, config.NewNavigableMap(failEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		passEvent, []string{"*string:Account:1007"}); err != nil {
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*string:Account:1007"}, config.NewNavigableMap(passEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
@@ -306,14 +309,14 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	passEvent = map[string]interface{}{
 		"Account": "1007",
 	}
-	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		failEvent, []string{"*prefix:Account:10"}); err != nil {
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*prefix:Account:10"}, config.NewNavigableMap(failEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		passEvent, []string{"*prefix:Account:10"}); err != nil {
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*prefix:Account:10"}, config.NewNavigableMap(passEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
@@ -324,33 +327,34 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	passEvent = map[string]interface{}{
 		"Tenant": "cgrates.org",
 	}
-	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		failEvent, []string{"*rsr::Tenant(~^cgr.*\\.org$)"}); err != nil {
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*rsr::~Tenant(~^cgr.*\\.org$)"}, config.NewNavigableMap(failEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		passEvent, []string{"*rsr::Tenant(~^cgr.*\\.org$)"}); err != nil {
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*rsr::~Tenant(~^cgr.*\\.org$)"}, config.NewNavigableMap(passEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
-	cache.Set(utils.REVERSE_DESTINATION_PREFIX+"+49", []string{"DE", "EU_LANDLINE"}, true, "")
+	Cache.Set(utils.CacheReverseDestinations, "+49",
+		[]string{"DE", "EU_LANDLINE"}, nil, true, "")
 	failEvent = map[string]interface{}{
 		utils.Destination: "+5086517174963",
 	}
 	passEvent = map[string]interface{}{
 		utils.Destination: "+4986517174963",
 	}
-	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		failEvent, []string{"*destinations:Destination:EU"}); err != nil {
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*destinations:Destination:EU"}, config.NewNavigableMap(failEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		passEvent, []string{"*destinations:Destination:EU_LANDLINE"}); err != nil {
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*destinations:Destination:EU_LANDLINE"}, config.NewNavigableMap(passEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
@@ -361,14 +365,14 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	passEvent = map[string]interface{}{
 		utils.Weight: 20,
 	}
-	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		failEvent, []string{"*gte:Weight:20"}); err != nil {
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*gte:Weight:20"}, config.NewNavigableMap(failEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		passEvent, []string{"*gte:Weight:10"}); err != nil {
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*gte:Weight:10"}, config.NewNavigableMap(passEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
@@ -395,14 +399,69 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 		utils.Destination: "+4986517174963",
 		utils.Weight:      20,
 	}
-	if pass, err := filterS.PassFiltersForEvent("cgrates.org",
-		passEvent1, []string{}); err != nil {
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{}, config.NewNavigableMap(passEvent1)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
-	if pass, err := filterS.PassFiltersForEvent("itsyscom.com",
-		passEvent2, []string{}); err != nil {
+	if pass, err := filterS.Pass("itsyscom.com",
+		[]string{}, config.NewNavigableMap(passEvent2)); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
+	ev := map[string]interface{}{
+		"Test": "MultipleCharacter",
+	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*rsr::~Test(~^\\w{30,})"}, config.NewNavigableMap(ev)); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+	ev = map[string]interface{}{
+		"Test": "MultipleCharacter123456789MoreThan30Character",
+	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*rsr::~Test(~^\\w{30,})"}, config.NewNavigableMap(ev)); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
+
+	ev = map[string]interface{}{
+		"Test": map[string]interface{}{
+			"Test2": "MultipleCharacter",
+		},
+	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*rsr::~Test.Test2(~^\\w{30,})"}, config.NewNavigableMap(ev)); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+	ev = map[string]interface{}{
+		"Test": map[string]interface{}{
+			"Test2": "MultipleCharacter123456789MoreThan30Character",
+		},
+	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*rsr::~Test.Test2(~^\\w{30,})"}, config.NewNavigableMap(ev)); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+
+	ev = map[string]interface{}{
+		utils.Account:     "1003",
+		utils.Subject:     "1003",
+		utils.Destination: "1002",
+		utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+		utils.Usage:       "1m20s",
+	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*string:Account:1003", "*prefix:Destination:10", "*rsr::~Destination(1002)"}, config.NewNavigableMap(ev)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)

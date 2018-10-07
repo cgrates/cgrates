@@ -140,7 +140,6 @@ func (acc *Account) setBalanceAction(a *Action) error {
 			acc.BalanceMap[*a.Balance.Type] = append(acc.BalanceMap[*a.Balance.Type], balance)
 		}
 	}
-
 	if a.Balance.ID != nil && *a.Balance.ID == utils.META_DEFAULT { // treat it separately since modifyBalance sets expiry and others parameters, not specific for *default
 		if a.Balance.Value != nil {
 			balance.ID = *a.Balance.ID
@@ -185,7 +184,7 @@ func (acc *Account) setBalanceAction(a *Action) error {
 
 // Debits some amount of user's specified balance adding the balance if it does not exists.
 // Returns the remaining credit in user's balance.
-func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
+func (ub *Account) debitBalanceAction(a *Action, reset, resetIfNegative bool) error {
 	if a == nil {
 		return errors.New("nil action")
 	}
@@ -204,8 +203,8 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 			continue // just to be safe (cleaned expired balances above)
 		}
 		b.account = ub
-		if b.MatchFilter(a.Balance, false) {
-			if reset {
+		if b.MatchFilter(a.Balance, false, false) {
+			if reset || (resetIfNegative && b.Value < 0) {
 				b.SetValue(0)
 			}
 			b.SubstractValue(bClone.GetValue())
@@ -1073,6 +1072,39 @@ func (acc *Account) AsAccountSummary() *AccountSummary {
 		}
 	}
 	return ad
+}
+
+func (acnt *Account) Publish() {
+	acntTnt := utils.NewTenantID(acnt.ID)
+	cgrEv := utils.CGREvent{
+		Tenant: acntTnt.Tenant,
+		ID:     utils.GenUUID(),
+		Event: map[string]interface{}{
+			utils.EventType:     utils.AccountUpdate,
+			utils.EventSource:   utils.AccountService,
+			utils.Account:       acntTnt.ID,
+			utils.AllowNegative: acnt.AllowNegative,
+			utils.Disabled:      acnt.Disabled}}
+	if statS != nil {
+		var reply []string
+		go func() {
+			if err := statS.Call(utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{CGREvent: cgrEv}, &reply); err != nil &&
+				err.Error() != utils.ErrNotFound.Error() {
+				utils.Logger.Warning(
+					fmt.Sprintf("<AccountS> error: %s processing balance event %+v with StatS.",
+						err.Error(), cgrEv))
+			}
+		}()
+	}
+	if thresholdS != nil {
+		var tIDs []string
+		if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent,
+			&ArgsProcessEvent{CGREvent: cgrEv}, &tIDs); err != nil &&
+			err.Error() != utils.ErrNotFound.Error() {
+			utils.Logger.Warning(
+				fmt.Sprintf("<AccountS> error: %s processing account event %+v with ThresholdS.", err.Error(), cgrEv))
+		}
+	}
 }
 
 func NewAccountSummaryFromJSON(jsn string) (acntSummary *AccountSummary, err error) {

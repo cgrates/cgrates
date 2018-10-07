@@ -31,17 +31,19 @@ func TestCsvRecordToCDR(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
 	cdrcConfig := cgrConfig.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0]
 	cdrcConfig.CdrSourceId = "TEST_CDRC"
-	cdrcConfig.ContentFields = append(cdrcConfig.ContentFields, &config.CfgCdrField{Tag: "RunID", Type: utils.META_COMPOSED,
-		FieldId: utils.MEDI_RUNID, Value: utils.ParseRSRFieldsMustCompile("^*default", utils.INFIELD_SEP)})
+	cdrcConfig.ContentFields = append(cdrcConfig.ContentFields, &config.FCTemplate{
+		Tag: utils.RunID, Type: utils.META_COMPOSED, FieldId: utils.RunID,
+		Value: config.NewRSRParsersMustCompile("*default", true)})
 	csvProcessor := &CsvRecordsProcessor{dfltCdrcCfg: cdrcConfig, cdrcCfgs: []*config.CdrcConfig{cdrcConfig}}
 	cdrRow := []string{"firstField", "secondField"}
-	_, err := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig)
+	_, err := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig, "cgrates.org")
 	if err == nil {
 		t.Error("Failed to corectly detect missing fields from record")
 	}
-	cdrRow = []string{"ignored", "ignored", utils.VOICE, "acc1", utils.META_PREPAID, "*out", "cgrates.org", "call", "1001", "1001", "+4986517174963",
-		"2013-02-03 19:50:00", "2013-02-03 19:54:00", "62s", "supplier1", "172.16.1.1", "NORMAL_DISCONNECT"}
-	rtCdr, err := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig)
+	cdrRow = []string{"ignored", "ignored", utils.VOICE, "acc1", utils.META_PREPAID, "*out", "cgrates.org",
+		"call", "1001", "1001", "+4986517174963", "2013-02-03 19:50:00", "2013-02-03 19:54:00",
+		"62s", "supplier1", "172.16.1.1", "NORMAL_DISCONNECT"}
+	rtCdr, err := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig, "cgrates.org")
 	if err != nil {
 		t.Error("Failed to parse CDR in rated cdr", err)
 	}
@@ -73,12 +75,16 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
 	cdrcConfig := cgrConfig.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0]
 	cdrcConfig.CdrSourceId = "TEST_CDRC"
-	cdrcConfig.ContentFields = []*config.CfgCdrField{&config.CfgCdrField{Tag: "TORField", Type: utils.META_COMPOSED, FieldId: utils.TOR, Value: []*utils.RSRField{&utils.RSRField{Id: "0"}}},
-		&config.CfgCdrField{Tag: "UsageField", Type: utils.META_COMPOSED, FieldId: utils.Usage, Value: []*utils.RSRField{&utils.RSRField{Id: "1"}}}}
+	cdrcConfig.ContentFields = []*config.FCTemplate{
+		&config.FCTemplate{Tag: "TORField", Type: utils.META_COMPOSED, FieldId: utils.ToR,
+			Value: config.NewRSRParsersMustCompile("~0", true)},
+		&config.FCTemplate{Tag: "UsageField", Type: utils.META_COMPOSED, FieldId: utils.Usage,
+			Value: config.NewRSRParsersMustCompile("~1", true)},
+	}
 	csvProcessor := &CsvRecordsProcessor{dfltCdrcCfg: cdrcConfig, cdrcCfgs: []*config.CdrcConfig{cdrcConfig}}
 	csvProcessor.cdrcCfgs[0].DataUsageMultiplyFactor = 0
 	cdrRow := []string{"*data", "1"}
-	rtCdr, err := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig)
+	rtCdr, err := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig, "cgrates.org")
 	if err != nil {
 		t.Error("Failed to parse CDR in rated cdr", err)
 	}
@@ -106,7 +112,7 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 		Cost:        -1,
 	}
 	if rtCdr, _ := csvProcessor.recordToStoredCdr(cdrRow,
-		cdrcConfig); !reflect.DeepEqual(expectedCdr, rtCdr) {
+		cdrcConfig, "cgrates.org"); !reflect.DeepEqual(expectedCdr, rtCdr) {
 		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)
 	}
 	cdrRow = []string{"*voice", "1s"}
@@ -120,7 +126,7 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 		Cost:        -1,
 	}
 	if rtCdr, _ := csvProcessor.recordToStoredCdr(cdrRow,
-		cdrcConfig); !reflect.DeepEqual(expectedCdr, rtCdr) {
+		cdrcConfig, "cgrates.org"); !reflect.DeepEqual(expectedCdr, rtCdr) {
 		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)
 	}
 }

@@ -40,7 +40,7 @@ type CgrEvent map[string]string
 
 func (ce CgrEvent) PassFilters(rsrFields utils.RSRFields) bool {
 	for _, rsrFld := range rsrFields {
-		if !rsrFld.FilterPasses(ce[rsrFld.Id]) {
+		if _, err := rsrFld.Parse(ce[rsrFld.Id]); err != nil {
 			return false
 		}
 	}
@@ -64,7 +64,7 @@ func NewPubSub(dm *DataManager, ttlVerify bool) (*PubSub, error) {
 	ps := &PubSub{
 		ttlVerify:   ttlVerify,
 		subscribers: make(map[string]*SubscriberData),
-		pubFunc:     utils.HttpJsonPost,
+		pubFunc:     HttpJsonPost,
 		mux:         &sync.Mutex{},
 		dm:          dm,
 	}
@@ -75,7 +75,7 @@ func NewPubSub(dm *DataManager, ttlVerify bool) (*PubSub, error) {
 		ps.subscribers = subs
 	}
 	for _, sData := range ps.subscribers {
-		if err := sData.Filters.ParseRules(); err != nil { // Parse rules into regexp objects
+		if err := sData.Filters.Compile(); err != nil { // Parse rules into regexp objects
 			utils.Logger.Err(fmt.Sprintf("<PubSub> Error <%s> when parsing rules out of subscriber data: %+v", err.Error(), sData))
 		}
 	}
@@ -239,7 +239,7 @@ type ProxyPubSub struct {
 }
 
 func NewProxyPubSub(addr string, attempts, reconnects int, connectTimeout, replyTimeout time.Duration) (*ProxyPubSub, error) {
-	client, err := rpcclient.NewRpcClient("tcp", addr, attempts, reconnects, connectTimeout, replyTimeout, utils.GOB, nil, false)
+	client, err := rpcclient.NewRpcClient("tcp", addr, "", "", attempts, reconnects, connectTimeout, replyTimeout, utils.GOB, nil, false)
 	if err != nil {
 		return nil, err
 	}

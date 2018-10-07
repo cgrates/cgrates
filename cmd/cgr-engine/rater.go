@@ -30,95 +30,32 @@ import (
 )
 
 // Starts rater and reports on chan
-func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneChan chan struct{},
+func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *engine.CacheS,
 	internalThdSChan, internalCdrStatSChan, internalStatSChan, internalPubSubSChan,
-	internalAttributeSChan, internalUserSChan, internalAliaseSChan chan rpcclient.RpcClientConnection,
+	internalUserSChan, internalAliaseSChan chan rpcclient.RpcClientConnection,
 	serviceManager *servmanager.ServiceManager, server *utils.Server,
-	dm *engine.DataManager, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, stopHandled *bool, exitChan chan bool) {
+	dm *engine.DataManager, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, stopHandled *bool,
+	exitChan chan bool, filterSChan chan *engine.FilterS) {
+	filterS := <-filterSChan
+	filterSChan <- filterS
 	var waitTasks []chan struct{}
-	cacheCfg := cfg.CacheCfg()
-	//Cache load
 	cacheTaskChan := make(chan struct{})
 	waitTasks = append(waitTasks, cacheTaskChan)
-	go func() {
+	go func() { //Wait for cache load
 		defer close(cacheTaskChan)
-		var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs, sppIDs, alsPrfIDs []string
-		if cCfg, has := cacheCfg[utils.CacheDestinations]; !has || !cCfg.Precache {
-			dstIDs = make([]string, 0) // Don't cache any
-		}
-		if cCfg, has := cacheCfg[utils.CacheReverseDestinations]; !has || !cCfg.Precache {
-			rvDstIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheRatingPlans]; !has || !cCfg.Precache {
-			rplIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheRatingProfiles]; !has || !cCfg.Precache {
-			rpfIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheActions]; !has || !cCfg.Precache {
-			actIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheActionPlans]; !has || !cCfg.Precache {
-			aplIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheAccountActionPlans]; !has || !cCfg.Precache {
-			aapIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheActionTriggers]; !has || !cCfg.Precache {
-			atrgIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheSharedGroups]; !has || !cCfg.Precache {
-			sgIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheLCRRules]; !has || !cCfg.Precache {
-			lcrIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheDerivedChargers]; !has || !cCfg.Precache {
-			dcIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheAliases]; !has || !cCfg.Precache {
-			alsIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheReverseAliases]; !has || !cCfg.Precache {
-			rvAlsIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheResourceProfiles]; !has || !cCfg.Precache {
-			rspIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheResources]; !has || !cCfg.Precache {
-			resIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheStatQueues]; !has || !cCfg.Precache {
-			stqIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheStatQueueProfiles]; !has || !cCfg.Precache {
-			stqpIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheThresholds]; !has || !cCfg.Precache {
-			thIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheThresholdProfiles]; !has || !cCfg.Precache {
-			thpIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheFilters]; !has || !cCfg.Precache {
-			fltrIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheSupplierProfiles]; !has || !cCfg.Precache {
-			sppIDs = make([]string, 0)
-		}
-		if cCfg, has := cacheCfg[utils.CacheAttributeProfiles]; !has || !cCfg.Precache {
-			alsPrfIDs = make([]string, 0)
-		}
-
-		// ToDo: Add here timings
-		if err := dm.LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs,
-			atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs,
-			stqpIDs, thIDs, thpIDs, fltrIDs, sppIDs, alsPrfIDs); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<RALs> Cache rating error: %s", err.Error()))
-			exitChan <- true
-			return
-		}
-		cacheDoneChan <- struct{}{}
+		<-cacheS.GetPrecacheChannel(utils.CacheDestinations)
+		<-cacheS.GetPrecacheChannel(utils.CacheReverseDestinations)
+		<-cacheS.GetPrecacheChannel(utils.CacheRatingPlans)
+		<-cacheS.GetPrecacheChannel(utils.CacheRatingProfiles)
+		<-cacheS.GetPrecacheChannel(utils.CacheActions)
+		<-cacheS.GetPrecacheChannel(utils.CacheActionPlans)
+		<-cacheS.GetPrecacheChannel(utils.CacheAccountActionPlans)
+		<-cacheS.GetPrecacheChannel(utils.CacheActionTriggers)
+		<-cacheS.GetPrecacheChannel(utils.CacheSharedGroups)
+		<-cacheS.GetPrecacheChannel(utils.CacheLCRRules)
+		<-cacheS.GetPrecacheChannel(utils.CacheDerivedChargers)
+		<-cacheS.GetPrecacheChannel(utils.CacheAliases)
+		<-cacheS.GetPrecacheChannel(utils.CacheReverseAliases)
 	}()
 
 	var thdS *rpcclient.RpcClientPool
@@ -128,7 +65,8 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		go func() {
 			defer close(thdsTaskChan)
 			var err error
-			thdS, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			thdS, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
+				cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 				cfg.RALsThresholdSConns, internalThdSChan, cfg.InternalTtl)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to ThresholdS, error: %s", err.Error()))
@@ -145,7 +83,8 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		go func() {
 			defer close(cdrstatTaskChan)
 			var err error
-			cdrStats, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			cdrStats, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
+				cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 				cfg.RALsCDRStatSConns, internalCdrStatSChan, cfg.InternalTtl)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to CDRStatS, error: %s", err.Error()))
@@ -162,7 +101,8 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		go func() {
 			defer close(statsTaskChan)
 			var err error
-			stats, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
+			stats, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
+				cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 				cfg.RALsStatSConns, internalStatSChan, cfg.InternalTtl)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to StatS, error: %s", err.Error()))
@@ -177,7 +117,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		waitTasks = append(waitTasks, pubsubTaskChan)
 		go func() {
 			defer close(pubsubTaskChan)
-			if pubSubSConns, err := engine.NewRPCPool(rpcclient.POOL_FIRST,
+			if pubSubSConns, err := engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
 				cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 				cfg.RALsPubSubSConns, internalPubSubSChan, cfg.InternalTtl); err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to PubSubS: %s", err.Error()))
@@ -189,31 +129,12 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		}()
 	}
 
-	var attrS *rpcclient.RpcClientPool
-	if len(cfg.RALsAttributeSConns) != 0 { // Connections to AttributeS
-		attrsTaskChan := make(chan struct{})
-		waitTasks = append(waitTasks, attrsTaskChan)
-		go func() {
-			defer close(attrsTaskChan)
-			var err error
-			attrS, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts,
-				cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-				cfg.RALsAttributeSConns, internalAttributeSChan, cfg.InternalTtl)
-			if err != nil {
-				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to %s, error: %s",
-					utils.AttributeS, err.Error()))
-				exitChan <- true
-				return
-			}
-		}()
-	}
-
 	if len(cfg.RALsAliasSConns) != 0 { // Connection to AliasService
 		aliasesTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, aliasesTaskChan)
 		go func() {
 			defer close(aliasesTaskChan)
-			if aliaseSCons, err := engine.NewRPCPool(rpcclient.POOL_FIRST,
+			if aliaseSCons, err := engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
 				cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 				cfg.RALsAliasSConns, internalAliaseSChan, cfg.InternalTtl); err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to AliaseS, error: %s", err.Error()))
@@ -232,7 +153,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		go func() {
 			defer close(usersTaskChan)
 			var err error
-			if usersConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
+			if usersConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
 				cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
 				cfg.RALsUserSConns, internalUserSChan, cfg.InternalTtl); err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect UserS, error: %s", err.Error()))
@@ -251,12 +172,12 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 	responder.SetTimeToLive(cfg.ResponseCacheTTL, nil)
 	apierRpcV1 := &v1.ApierV1{StorDb: loadDb, DataManager: dm, CdrDb: cdrDb,
 		Config: cfg, Responder: responder, ServManager: serviceManager,
-		HTTPPoster: utils.NewHTTPPoster(cfg.HttpSkipTlsVerify, cfg.ReplyTimeout)}
+		HTTPPoster: engine.NewHTTPPoster(cfg.HttpSkipTlsVerify, cfg.ReplyTimeout), FilterS: filterS}
 	if thdS != nil {
 		engine.SetThresholdS(thdS) // temporary architectural fix until we will have separate AccountS
 	}
-	if attrS != nil {
-		responder.AttributeS = attrS
+	if stats != nil {
+		engine.SetStatS(stats)
 	}
 	if cdrStats != nil { // ToDo: Fix here properly the init of stats
 		responder.CdrStats = cdrStats

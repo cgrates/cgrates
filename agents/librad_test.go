@@ -19,9 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"errors"
 	"fmt"
+	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -80,50 +83,9 @@ func TestAttrVendorFromPath(t *testing.T) {
 		vendorName != "" {
 		t.Error("failed")
 	}
-	if attrName, vendorName := attrVendorFromPath("Cisco/Cisco-NAS-Port"); attrName != "Cisco-NAS-Port" ||
+	if attrName, vendorName := attrVendorFromPath("Cisco>Cisco-NAS-Port"); attrName != "Cisco-NAS-Port" ||
 		vendorName != "Cisco" {
 		t.Error("failed")
-	}
-}
-
-func TestRadPassesFieldFilter(t *testing.T) {
-	pkt := radigo.NewPacket(radigo.AccountingRequest, 1, dictRad, coder, "CGRateS.org")
-	if err := pkt.AddAVPWithName("User-Name", "flopsy", ""); err != nil {
-		t.Error(err)
-	}
-	if err := pkt.AddAVPWithName("Cisco-NAS-Port", "CGR1", "Cisco"); err != nil {
-		t.Error(err)
-	}
-	if !radPassesFieldFilter(pkt, nil, nil) {
-		t.Error("not passing empty filter")
-	}
-	if !radPassesFieldFilter(pkt, nil,
-		utils.NewRSRFieldMustCompile("User-Name(flopsy)")) {
-		t.Error("not passing valid filter")
-	}
-	if radPassesFieldFilter(pkt, nil,
-		utils.NewRSRFieldMustCompile("User-Name(notmatching)")) {
-		t.Error("passing invalid filter value")
-	}
-	if !radPassesFieldFilter(pkt, nil,
-		utils.NewRSRFieldMustCompile("Cisco/Cisco-NAS-Port(CGR1)")) {
-		t.Error("not passing valid filter")
-	}
-	if radPassesFieldFilter(pkt, nil,
-		utils.NewRSRFieldMustCompile("Cisco/Cisco-NAS-Port(notmatching)")) {
-		t.Error("passing invalid filter value")
-	}
-	if !radPassesFieldFilter(pkt, processorVars{MetaRadReqType: MetaRadAuth},
-		utils.NewRSRFieldMustCompile(fmt.Sprintf("%s(%s)", MetaRadReqType, MetaRadAuth))) {
-		t.Error("not passing valid filter")
-	}
-	if radPassesFieldFilter(pkt, processorVars{MetaRadReqType: MetaRadAcctStart},
-		utils.NewRSRFieldMustCompile(fmt.Sprintf("%s(%s)", MetaRadReqType, MetaRadAuth))) {
-		t.Error("passing invalid filter")
-	}
-	if radPassesFieldFilter(pkt, nil,
-		utils.NewRSRFieldMustCompile("UnknownField(notmatching)")) {
-		t.Error("passing invalid filter value")
 	}
 }
 
@@ -135,10 +97,13 @@ func TestRadComposedFieldValue(t *testing.T) {
 	if err := pkt.AddAVPWithName("Cisco-NAS-Port", "CGR1", "Cisco"); err != nil {
 		t.Error(err)
 	}
-	eOut := fmt.Sprintf("%s|flopsy|CGR1", MetaRadAcctStart)
-	if out := radComposedFieldValue(pkt, processorVars{MetaRadReqType: MetaRadAcctStart},
-		utils.ParseRSRFieldsMustCompile(fmt.Sprintf("%s;^|;User-Name;^|;Cisco/Cisco-NAS-Port",
-			MetaRadReqType), utils.INFIELD_SEP)); out != eOut {
+	agReq := newAgentRequest(nil, nil, nil, nil, "cgrates.org", "", nil)
+	agReq.Vars.Set([]string{MetaRadReqType}, MetaRadAcctStart, false)
+	agReq.Vars.Set([]string{"Cisco"}, "CGR1", false)
+	agReq.Vars.Set([]string{"User-Name"}, "flopsy", false)
+	eOut := "*radAcctStart|flopsy|CGR1"
+	if out := radComposedFieldValue(pkt, agReq,
+		config.NewRSRParsersMustCompile("~*vars.*radReqType;|;~*vars.User-Name;|;~*vars.Cisco", true)); out != eOut {
 		t.Errorf("Expecting: <%s>, received: <%s>", eOut, out)
 	}
 }
@@ -152,122 +117,33 @@ func TestRadFieldOutVal(t *testing.T) {
 		t.Error(err)
 	}
 	eOut := fmt.Sprintf("%s|flopsy|CGR1", MetaRadAcctStart)
-	cfgFld := &config.CfgCdrField{Tag: "ComposedTest", Type: utils.META_COMPOSED, FieldId: utils.Destination,
-		Value: utils.ParseRSRFieldsMustCompile(fmt.Sprintf("%s;^|;User-Name;^|;Cisco/Cisco-NAS-Port", MetaRadReqType), utils.INFIELD_SEP), Mandatory: true}
-	if outVal, err := radFieldOutVal(pkt, processorVars{MetaRadReqType: MetaRadAcctStart}, cfgFld); err != nil {
+	agReq := newAgentRequest(nil, nil, nil, nil, "cgrates.org", "", nil)
+	agReq.Vars.Set([]string{MetaRadReqType}, MetaRadAcctStart, false)
+	agReq.Vars.Set([]string{"Cisco"}, "CGR1", false)
+	agReq.Vars.Set([]string{"User-Name"}, "flopsy", false)
+	//processorVars{MetaRadReqType: MetaRadAcctStart}
+	cfgFld := &config.FCTemplate{Tag: "ComposedTest", Type: utils.META_COMPOSED, FieldId: utils.Destination,
+		Value: config.NewRSRParsersMustCompile("~*vars.*radReqType;|;~*vars.User-Name;|;~*vars.Cisco", true), Mandatory: true}
+	if outVal, err := radFieldOutVal(pkt, agReq, cfgFld); err != nil {
 		t.Error(err)
 	} else if outVal != eOut {
 		t.Errorf("Expecting: <%s>, received: <%s>", eOut, outVal)
 	}
 }
 
-/*
-func TestRadReqAsSMGEvent(t *testing.T) {
-	pkt := radigo.NewPacket(radigo.AccountingRequest, 1, dictRad, coder, "CGRateS.org")
-	// Sample minimal packet sent by Kamailio
-	if err := pkt.AddAVPWithName("Acct-Status-Type", "2", ""); err != nil {
-		t.Error(err)
-	}
-	if err := pkt.AddAVPWithName("Service-Type", "15", ""); err != nil {
-		t.Error(err)
-	}
-	if err := pkt.AddAVPWithName("Sip-Response-Code", "200", ""); err != nil {
-		t.Error(err)
-	}
-	if err := pkt.AddAVPWithName("Sip-Method", "8", ""); err != nil {
-		t.Error(err)
-	}
-	if err := pkt.AddAVPWithName("Event-Timestamp", "1497106119", ""); err != nil {
-		t.Error(err)
-	}
-	if err := pkt.AddAVPWithName("Sip-From-Tag", "75c2f57b", ""); err != nil {
-		t.Error(err)
-	}
-	if err := pkt.AddAVPWithName("Sip-To-Tag", "51585361", ""); err != nil {
-		t.Error(err)
-	}
-	if err := pkt.AddAVPWithName("Acct-Session-Id", "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0", ""); err != nil {
-		t.Error(err)
-	}
-	if err := pkt.AddAVPWithName("User-Name", "1001", ""); err != nil {
-		t.Error(err)
-	}
-	if err := pkt.AddAVPWithName("Called-Station-Id", "1002", ""); err != nil {
-		t.Error(err)
-	}
-	if err := pkt.AddAVPWithName("Ascend-User-Acct-Time", "1497106115", ""); err != nil {
-		t.Error(err)
-	}
-	if err := pkt.AddAVPWithName("NAS-Port-Id", "5060", ""); err != nil {
-		t.Error(err)
-	}
-	if err := pkt.AddAVPWithName("Acct-Delay-Time", "0", ""); err != nil {
-		t.Error(err)
-	}
-	if err := pkt.AddAVPWithName("NAS-IP-Address", "127.0.0.1", ""); err != nil {
-		t.Error(err)
-	}
-
-	cfgFlds := []*config.CfgCdrField{
-		&config.CfgCdrField{Tag: "TOR", FieldId: utils.TOR, Type: utils.META_CONSTANT,
-			Value: utils.ParseRSRFieldsMustCompile(utils.VOICE, utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "OriginID", FieldId: utils.OriginID, Type: utils.META_COMPOSED,
-			Value: utils.ParseRSRFieldsMustCompile("Acct-Session-Id;^-;Sip-From-Tag;^-;Sip-To-Tag", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "OriginHost", FieldId: utils.OriginHost, Type: utils.META_COMPOSED,
-			Value: utils.ParseRSRFieldsMustCompile("NAS-IP-Address", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "RequestType", FieldId: utils.RequestType, Type: utils.META_CONSTANT,
-			Value: utils.ParseRSRFieldsMustCompile(utils.META_PREPAID, utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "Direction", FieldId: utils.Direction, Type: utils.META_CONSTANT,
-			Value: utils.ParseRSRFieldsMustCompile(utils.OUT, utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "Tenant", FieldId: utils.Tenant, Type: utils.META_CONSTANT,
-			Value: utils.ParseRSRFieldsMustCompile("cgrates.org", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "Category", FieldId: utils.Category, Type: utils.META_CONSTANT,
-			Value: utils.ParseRSRFieldsMustCompile("call", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "Account", FieldId: utils.Account, Type: utils.META_COMPOSED,
-			Value: utils.ParseRSRFieldsMustCompile("User-Name", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "Destination", FieldId: utils.Destination, Type: utils.META_COMPOSED,
-			Value: utils.ParseRSRFieldsMustCompile("Called-Station-Id", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "SetupTime", FieldId: utils.SetupTime, Type: utils.META_COMPOSED,
-			Value: utils.ParseRSRFieldsMustCompile("Ascend-User-Acct-Time", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "AnswerTime", FieldId: utils.AnswerTime, Type: utils.META_COMPOSED,
-			Value: utils.ParseRSRFieldsMustCompile("Ascend-User-Acct-Time", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "Usage", FieldId: utils.Usage, Type: utils.META_HANDLER, HandlerId: MetaUsageDifference,
-			Value: utils.ParseRSRFieldsMustCompile("Event-Timestamp;^|;Ascend-User-Acct-Time", utils.INFIELD_SEP)},
-	}
-
-	eSMGEv := sessions.SMGenericEvent{
-		utils.TOR:         utils.VOICE,
-		utils.OriginID:    "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-75c2f57b-51585361",
-		utils.RequestType: utils.META_PREPAID,
-		utils.Direction:   utils.OUT,
-		utils.Tenant:      "cgrates.org",
-		utils.Category:    "call",
-		utils.Account:     "1001",
-		utils.Destination: "1002",
-		utils.SetupTime:   "1497106115",
-		utils.AnswerTime:  "1497106115",
-		utils.Usage:       "4s",
-		utils.OriginHost:  "127.0.0.1",
-	}
-
-	if smgEv, err := radReqAsSMGEvent(pkt,
-		processorVars{MetaRadReqType: MetaRadAcctStop}, nil, cfgFlds); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eSMGEv, smgEv) {
-		t.Errorf("Expecting: %+v\n, received: %+v", eSMGEv, smgEv)
-	}
-}
-
-
 func TestRadReplyAppendAttributes(t *testing.T) {
 	rply := radigo.NewPacket(radigo.AccessRequest, 2, dictRad, coder, "CGRateS.org").Reply()
-	rplyFlds := []*config.CfgCdrField{
-		&config.CfgCdrField{Tag: "ReplyCode", FieldId: MetaRadReplyCode, Type: utils.META_CONSTANT,
-			Value: utils.ParseRSRFieldsMustCompile("AccessAccept", utils.INFIELD_SEP)},
-		&config.CfgCdrField{Tag: "Acct-Session-Time", FieldId: "Acct-Session-Time", Type: utils.META_COMPOSED,
-			Value: utils.ParseRSRFieldsMustCompile("~*cgrMaxUsage:s/(\\d*)\\d{9}$/$1/", utils.INFIELD_SEP)},
+	rplyFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "ReplyCode", FieldId: MetaRadReplyCode, Type: utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile("~*cgrep.Attributes.RadReply", true)},
+		&config.FCTemplate{Tag: "Acct-Session-Time", FieldId: "Acct-Session-Time", Type: utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", true)},
 	}
-	if err := radReplyAppendAttributes(rply, processorVars{MetaCGRMaxUsage: "30000000000"}, rplyFlds); err != nil {
+	agReq := newAgentRequest(nil, nil, nil, nil, "cgrates.org", "", nil)
+	agReq.CGRReply.Set([]string{utils.CapMaxUsage}, time.Duration(time.Hour), false)
+	agReq.CGRReply.Set([]string{utils.CapAttributes, "RadReply"}, "AccessAccept", false)
+	agReq.CGRReply.Set([]string{utils.CapAttributes, utils.Account}, "1001", false)
+	if err := radReplyAppendAttributes(rply, agReq, rplyFlds); err != nil {
 		t.Error(err)
 	}
 	if rply.Code != radigo.AccessAccept {
@@ -275,8 +151,71 @@ func TestRadReplyAppendAttributes(t *testing.T) {
 	}
 	if avps := rply.AttributesWithName("Acct-Session-Time", ""); len(avps) == 0 {
 		t.Error("Cannot find Acct-Session-Time in reply")
-	} else if avps[0].GetStringValue() != "30" {
-		t.Errorf("Expecting: 30, received: %s", avps[0].GetStringValue())
+	} else if avps[0].GetStringValue() != "3600" {
+		t.Errorf("Expecting: 3600, received: %s", avps[0].GetStringValue())
 	}
 }
-*/
+
+type myEv map[string]interface{}
+
+func (ev myEv) AsNavigableMap(tpl []*config.CfgCdrField) (*config.NavigableMap, error) {
+	return config.NewNavigableMap(ev), nil
+}
+
+func TestNewCGRReply(t *testing.T) {
+	eCgrRply := config.NewNavigableMap(map[string]interface{}{
+		utils.Error: "some",
+	})
+	if rpl, err := NewCGRReply(nil, errors.New("some")); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCgrRply, rpl) {
+		t.Errorf("Expecting: %+v, received: %+v",
+			utils.ToJSON(eCgrRply), utils.ToJSON(rpl))
+	}
+	ev := myEv{
+		"FirstLevel": map[string]interface{}{
+			"SecondLevel": map[string]interface{}{
+				"Fld1": "Val1",
+			},
+		},
+	}
+	eCgrRply = config.NewNavigableMap(ev)
+	eCgrRply.Set([]string{utils.Error}, "", false)
+	if rpl, err := NewCGRReply(config.NavigableMapper(ev), nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCgrRply, rpl) {
+		t.Errorf("Expecting: %+v, received: %+v", eCgrRply, rpl)
+	}
+}
+
+func TestRadiusDPFieldAsInterface(t *testing.T) {
+	pkt := radigo.NewPacket(radigo.AccountingRequest, 1, dictRad, coder, "CGRateS.org")
+	if err := pkt.AddAVPWithName("User-Name", "flopsy", ""); err != nil {
+		t.Error(err)
+	}
+	if err := pkt.AddAVPWithName("Cisco-NAS-Port", "CGR1", "Cisco"); err != nil {
+		t.Error(err)
+	}
+	dp, _ := newRADataProvider(pkt)
+	if data, err := dp.FieldAsInterface([]string{"User-Name"}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(data, utils.StringToInterface("flopsy")) {
+		t.Errorf("Expecting: <%s>, received: <%s>", utils.StringToInterface("flopsy"), data)
+	}
+}
+
+func TestRadiusDPFieldAsString(t *testing.T) {
+	pkt := radigo.NewPacket(radigo.AccountingRequest, 1, dictRad, coder, "CGRateS.org")
+	if err := pkt.AddAVPWithName("User-Name", "flopsy", ""); err != nil {
+		t.Error(err)
+	}
+	if err := pkt.AddAVPWithName("Cisco-NAS-Port", "CGR1", "Cisco"); err != nil {
+		t.Error(err)
+	}
+	dp, _ := newRADataProvider(pkt)
+	if data, err := dp.FieldAsString([]string{"User-Name"}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(data, "flopsy") {
+		t.Errorf("Expecting: flopsy, received: <%s>", data)
+	}
+}

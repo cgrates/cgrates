@@ -31,8 +31,10 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func NewServiceManager(cfg *config.CGRConfig, dm *engine.DataManager, engineShutdown chan bool, cacheDoneChan chan struct{}) *ServiceManager {
-	return &ServiceManager{cfg: cfg, dm: dm, engineShutdown: engineShutdown, cacheDoneChan: cacheDoneChan}
+func NewServiceManager(cfg *config.CGRConfig, dm *engine.DataManager,
+	engineShutdown chan bool, cacheS *engine.CacheS) *ServiceManager {
+	return &ServiceManager{cfg: cfg, dm: dm,
+		engineShutdown: engineShutdown, cacheS: cacheS}
 }
 
 // ServiceManager handles service management ran by the engine
@@ -41,7 +43,7 @@ type ServiceManager struct {
 	cfg            *config.CGRConfig
 	dm             *engine.DataManager
 	engineShutdown chan bool
-	cacheDoneChan  chan struct{} // Wait for cache to load
+	cacheS         *engine.CacheS
 	sched          *scheduler.Scheduler
 	rpcChans       map[string]chan rpcclient.RpcClientConnection // services expected to start
 	rpcServices    map[string]rpcclient.RpcClientConnection      // services started
@@ -58,8 +60,7 @@ func (srvMngr *ServiceManager) StartScheduler(waitCache bool) error {
 			"the scheduler is already running")
 	}
 	if waitCache { // Wait for cache to load data before starting
-		cacheDone := <-srvMngr.cacheDoneChan
-		srvMngr.cacheDoneChan <- cacheDone
+		<-srvMngr.cacheS.GetPrecacheChannel(utils.CacheActionPlans) // wait for ActionPlans to be cached
 	}
 	utils.Logger.Info("<ServiceManager> Starting CGRateS Scheduler.")
 	sched := scheduler.NewScheduler(srvMngr.dm)
@@ -71,7 +72,7 @@ func (srvMngr *ServiceManager) StartScheduler(waitCache bool) error {
 		srvMngr.Lock()
 		srvMngr.sched = nil // if we are after loop, the service is down
 		srvMngr.Unlock()
-		if srvMngr.cfg.SchedulerEnabled {
+		if srvMngr.cfg.SchedulerCfg().Enabled {
 			srvMngr.engineShutdown <- true // shutdown engine since this service should be running
 		}
 	}()
@@ -92,7 +93,8 @@ func (srvMngr *ServiceManager) StopScheduler() error {
 			utils.ServiceNotRunning,
 			"the scheduler is not running")
 	}
-	srvMngr.cfg.SchedulerEnabled = false
+	utils.Logger.Info("<ServiceManager> Stoping CGRateS Scheduler.")
+	srvMngr.cfg.SchedulerCfg().Enabled = false
 	sched.Shutdown()
 	return nil
 }

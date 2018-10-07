@@ -1,12 +1,3 @@
 #ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Directions[6],Categories[7],DestinationIds[8],RatingSubject[9],SharedGroup[10],ExpiryTime[11],TimingIds[12],Units[13],BalanceWeight[14],BalanceBlocker[15],BalanceDisabled[16],Weight[17]
-TOPUP_RST_10,*topup_reset,,,,*monetary,*out,,*any,,,*unlimited,,10,10,false,false,10
-TOPUP_RST_5,*topup_reset,,,,*monetary,*out,,*any,,,*unlimited,,5,20,false,false,10
-TOPUP_RST_5,*topup_reset,,,,*voice,*out,,DST_1002,SPECIAL_1002,,*unlimited,,90s,20,false,false,10
-TOPUP_120_DST1003,*topup_reset,,,,*voice,*out,,DST_1003,,,*unlimited,,120s,20,false,false,10
-TOPUP_RST_SHARED_5,*topup,,,,*monetary,*out,,*any,,SHARED_A,*unlimited,,5,10,false,false,10
-SHARED_A_0,*topup_reset,,,,*monetary,*out,,*any,,SHARED_A,*unlimited,,0,10,false,false,10
-TOPUP_RST_DATA_100,*topup_reset,,,,*data,*out,,*any,,,*unlimited,,102400,10,false,false,10
-LOG_WARNING,*log,,,,,,,,,,,,,,false,false,10
-DISABLE_AND_LOG,*log,,,,,,,,,,,,,,false,false,10
-DISABLE_AND_LOG,*disable_account,,,,,,,,,,,,,,false,false,10
-TOPUP_100SMS_DE_MOBILE,*topup,,,,*sms,*out,,DST_DE_MOBILE,,,,,100,10,false,false,10
+ACT_TOPUP_RST_10,*topup_reset,,,,*monetary,*out,,*any,,,*unlimited,,10,10,false,false,10
+ACT_LOG_WARNING,*log,,,,,,,,,,,,,,false,false,10

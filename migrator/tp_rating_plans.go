@@ -26,25 +26,30 @@ import (
 )
 
 func (m *Migrator) migrateCurrentTPratingplans() (err error) {
-	tpids, err := m.InStorDB().GetTpIds(utils.TBLTPRatingPlans)
+	tpids, err := m.storDBIn.StorDB().GetTpIds(utils.TBLTPRatingPlans)
 	if err != nil {
 		return err
 	}
 	for _, tpid := range tpids {
-		ids, err := m.InStorDB().GetTpTableIds(tpid, utils.TBLTPRatingPlans, utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
+		ids, err := m.storDBIn.StorDB().GetTpTableIds(tpid, utils.TBLTPRatingPlans, utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
 		if len(ids) != 0 {
 			for _, id := range ids {
-				rps, err := m.InStorDB().GetTPRatingPlans(tpid, id, nil)
+				ratingPlan, err := m.storDBIn.StorDB().GetTPRatingPlans(tpid, id, nil)
 				if err != nil {
 					return err
 				}
-				if rps != nil {
+				if ratingPlan != nil {
 					if m.dryRun != true {
-						if err := m.OutStorDB().SetTPRatingPlans(rps); err != nil {
+						if err := m.storDBOut.StorDB().SetTPRatingPlans(ratingPlan); err != nil {
 							return err
+						}
+						for _, ratPln := range ratingPlan {
+							if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPRatingPlans, ratPln.TPid, map[string]string{"tag": ratPln.ID}); err != nil {
+								return err
+							}
 						}
 						m.stats[utils.TpRatingPlans] += 1
 					}
@@ -58,7 +63,7 @@ func (m *Migrator) migrateCurrentTPratingplans() (err error) {
 func (m *Migrator) migrateTPratingplans() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.OutStorDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.storDBOut.StorDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

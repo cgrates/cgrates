@@ -19,10 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/sessions"
@@ -33,27 +36,30 @@ import (
 func NewKamailioAgent(kaCfg *config.KamAgentCfg,
 	sessionS *utils.BiRPCInternalClient, timezone string) (ka *KamailioAgent) {
 	ka = &KamailioAgent{cfg: kaCfg, sessionS: sessionS,
-		timezone: timezone,
-		conns:    make(map[string]*kamevapi.KamEvapi)}
+		timezone:         timezone,
+		conns:            make(map[string]*kamevapi.KamEvapi),
+		activeSessionIDs: make(chan []*sessions.SessionID)}
 	ka.sessionS.SetClientConn(ka) // pass the connection to KA back into smg so we can receive the disconnects
 	return
 }
 
 type KamailioAgent struct {
-	cfg      *config.KamAgentCfg
-	sessionS *utils.BiRPCInternalClient
-	timezone string
-	conns    map[string]*kamevapi.KamEvapi
+	cfg              *config.KamAgentCfg
+	sessionS         *utils.BiRPCInternalClient
+	timezone         string
+	conns            map[string]*kamevapi.KamEvapi
+	activeSessionIDs chan []*sessions.SessionID
 }
 
 func (self *KamailioAgent) Connect() error {
 	var err error
 	eventHandlers := map[*regexp.Regexp][]func([]byte, string){
-		regexp.MustCompile(CGR_AUTH_REQUEST): []func([]byte, string){
+		regexp.MustCompile(CGR_AUTH_REQUEST): {
 			self.onCgrAuth},
-		regexp.MustCompile(CGR_CALL_START): []func([]byte, string){
+		regexp.MustCompile(CGR_CALL_START): {
 			self.onCallStart},
-		regexp.MustCompile(CGR_CALL_END): []func([]byte, string){self.onCallEnd},
+		regexp.MustCompile(CGR_CALL_END): {self.onCallEnd},
+		regexp.MustCompile(CGR_DLG_LIST): {self.onDlgList},
 	}
 	errChan := make(chan error)
 	for _, connCfg := range self.cfg.EvapiConns {
@@ -103,6 +109,12 @@ func (ka *KamailioAgent) onCgrAuth(evData []byte, connID string) {
 		return
 	}
 	authArgs := kev.V1AuthorizeArgs()
+	if authArgs == nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate auth session arguments",
+			utils.KamailioAgent, kev[utils.OriginID]))
+		return
+	}
+	authArgs.CGREvent.Event[utils.OriginHost] = ka.conns[connID].RemoteAddr().String()
 	var authReply sessions.V1AuthorizeReply
 	err = ka.sessionS.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authReply)
 	if kar, err := kev.AsKamAuthReply(authArgs, &authReply, err); err != nil {
@@ -131,7 +143,14 @@ func (ka *KamailioAgent) onCallStart(evData []byte, connID string) {
 		return
 	}
 	initSessionArgs := kev.V1InitSessionArgs()
+	if initSessionArgs == nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate init session arguments",
+			utils.KamailioAgent, kev[utils.OriginID]))
+		return
+	}
 	initSessionArgs.CGREvent.Event[EvapiConnID] = connID // Attach the connection ID so we can properly disconnect later
+	initSessionArgs.CGREvent.Event[utils.OriginHost] = ka.conns[connID].RemoteAddr().String()
+
 	var initReply sessions.V1InitSessionReply
 	if err := ka.sessionS.Call(utils.SessionSv1InitiateSession,
 		initSessionArgs, &initReply); err != nil {
@@ -160,9 +179,16 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connID string) {
 			utils.KamailioAgent, kev[utils.OriginID]))
 		return
 	}
+	tsArgs := kev.V1TerminateSessionArgs()
+	if tsArgs == nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate terminate session arguments",
+			utils.KamailioAgent, kev[utils.OriginID]))
+		return
+	}
 	var reply string
+	tsArgs.CGREvent.Event[utils.OriginHost] = ka.conns[connID].RemoteAddr().String()
 	if err := ka.sessionS.Call(utils.SessionSv1TerminateSession,
-		kev.V1TerminateSessionArgs(), &reply); err != nil {
+		tsArgs, &reply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> could not terminate session with event %s, error: %s",
 				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
@@ -173,11 +199,29 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connID string) {
 		if err != nil {
 			return
 		}
-		if err := ka.sessionS.Call(utils.SessionSv1ProcessCDR, *cgrEv, &reply); err != nil {
+		cgrEv.Event[utils.OriginHost] = ka.conns[connID].RemoteAddr().String()
+		if err := ka.sessionS.Call(utils.SessionSv1ProcessCDR, cgrEv, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("%s> failed processing CGREvent: %s, error: %s",
 				utils.KamailioAgent, utils.ToJSON(cgrEv), err.Error()))
 		}
 	}
+}
+
+func (ka *KamailioAgent) onDlgList(evData []byte, connID string) {
+	kamDlgRpl, err := NewKamDlgReply(evData)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> unmarshalling event data: %s, error: %s",
+			utils.KamailioAgent, evData, err.Error()))
+		return
+	}
+	var sIDs []*sessions.SessionID
+	for _, dlgInfo := range kamDlgRpl.Jsonrpl_body.Result {
+		sIDs = append(sIDs, &sessions.SessionID{
+			OriginHost: ka.conns[connID].RemoteAddr().String(),
+			OriginID:   dlgInfo.CallId + ";" + dlgInfo.Caller.Tag,
+		})
+	}
+	ka.activeSessionIDs <- sIDs
 }
 
 func (self *KamailioAgent) disconnectSession(connID string, dscEv *KamSessionDisconnect) error {
@@ -191,14 +235,50 @@ func (self *KamailioAgent) disconnectSession(connID string, dscEv *KamSessionDis
 
 // Internal method to disconnect session in Kamailio
 func (ka *KamailioAgent) V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) (err error) {
-	hEntry, _ := utils.CastFieldIfToString(args.EventStart[KamHashEntry])
-	hID, _ := utils.CastFieldIfToString(args.EventStart[KamHashID])
-	connID, _ := utils.CastFieldIfToString(args.EventStart[EvapiConnID])
+	hEntry, err := utils.IfaceAsString(args.EventStart[KamHashEntry])
+	if err != nil {
+		return err
+	}
+	hID, err := utils.IfaceAsString(args.EventStart[KamHashID])
+	if err != nil {
+		return err
+	}
+	connID, err := utils.IfaceAsString(args.EventStart[EvapiConnID])
+	if err != nil {
+		return err
+	}
 	if err = ka.disconnectSession(connID,
 		NewKamSessionDisconnect(hEntry, hID,
 			utils.ErrInsufficientCredit.Error())); err != nil {
 		return
 	}
 	*reply = utils.OK
+	return
+}
+
+func (ka *KamailioAgent) V1GetActiveSessionIDs(ignParam string, sessionIDs *[]*sessions.SessionID) (err error) {
+	for _, evapi := range ka.conns {
+		errChan := make(chan error)
+		go func() {
+			kamEv, _ := json.Marshal(map[string]string{utils.Event: CGR_DLG_LIST})
+			errChan <- evapi.Send(string(kamEv))
+		}()
+		select {
+		case err = <-errChan:
+			if err != nil {
+				utils.Logger.Err(fmt.Sprintf("<%s> failed sending event, error %s",
+					utils.KamailioAgent, err.Error()))
+				return
+			}
+		case <-time.After(5 * time.Second):
+			return errors.New("timeout sending dialog list")
+		}
+
+	}
+	select {
+	case *sessionIDs = <-ka.activeSessionIDs:
+	case <-time.After(5 * time.Second):
+		return errors.New("timeout executing dialog list")
+	}
 	return
 }

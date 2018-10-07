@@ -1,0 +1,75 @@
+{
+// CGRateS Configuration file
+//
+// Used for cgradmin
+// Starts rater, scheduler
+
+"general": {
+	"log_level": 7,
+},
+
+"listen": {
+	"rpc_json": ":2012",				// RPC JSON listening address
+	"rpc_gob": ":2013",					// RPC GOB listening address
+	"http": ":2080",					// HTTP listening address
+},
+
+"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
+	"db_port": 27017, 						// the port to reach the stordb
+	"db_name": "datadb",
+	"db_password": "",
+},
+
+"stor_db": {
+	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
+	"db_port": 27017, 						// the port to reach the stordb
+	"db_name": "stordb",
+	"db_password": "",
+},
+
+"rals": {
+	"enabled": true,
+},
+
+"scheduler": {
+	"enabled": true,
+},
+
+"cdrs": {
+	"enabled": true,
+},
+
+"attributes": {
+	"enabled": true,
+},
+
+"chargers": {
+	"enabled": true,
+},
+
+
+"sessions": {
+	"enabled": true,
+	"attributes_conns": [
+		{"address": "127.0.0.1:2012","transport":"*json"}
+	],
+	"chargers_conns": [
+		{"address": "127.0.0.1:2012","transport":"*json"}
+	],
+	"rals_conns": [
+		{"address": "127.0.0.1:2012","transport":"*json"}
+	],
+	"cdrs_conns": [
+		{"address": "127.0.0.1:2012","transport":"*json"}
+	],
+},
+
+"diameter_agent": {
+	"enabled": true,
+	"sessions_conns": [
+		{"address": "127.0.0.1:2012","transport":"*json"}
+	],
+},
+
+}

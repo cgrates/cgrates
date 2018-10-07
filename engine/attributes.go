@@ -22,15 +22,16 @@ import (
 	"fmt"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func NewAttributeService(dm *DataManager, filterS *FilterS,
-	stringIndexedFields, prefixIndexedFields *[]string) (*AttributeService, error) {
+	stringIndexedFields, prefixIndexedFields *[]string,
+	processRuns int) (*AttributeService, error) {
 	return &AttributeService{dm: dm, filterS: filterS,
 		stringIndexedFields: stringIndexedFields,
-		prefixIndexedFields: prefixIndexedFields}, nil
+		prefixIndexedFields: prefixIndexedFields,
+		processRuns:         processRuns}, nil
 }
 
 type AttributeService struct {
@@ -38,6 +39,7 @@ type AttributeService struct {
 	filterS             *FilterS
 	stringIndexedFields *[]string
 	prefixIndexedFields *[]string
+	processRuns         int
 }
 
 // ListenAndServe will initialize the service
@@ -56,36 +58,46 @@ func (alS *AttributeService) Shutdown() (err error) {
 }
 
 // matchingAttributeProfilesForEvent returns ordered list of matching resources which are active by the time of the call
-func (alS *AttributeService) matchingAttributeProfilesForEvent(ev *utils.CGREvent) (aPrfls AttributeProfiles, err error) {
+func (alS *AttributeService) matchingAttributeProfilesForEvent(args *AttrArgsProcessEvent) (aPrfls AttributeProfiles, err error) {
 	var attrIdxKey string
+	var attrIDs []string
 	contextVal := utils.META_DEFAULT
-	if ev.Context != nil && *ev.Context != "" {
-		contextVal = *ev.Context
+	if args.Context != nil && *args.Context != "" {
+		contextVal = *args.Context
 	}
-	attrIdxKey = utils.ConcatenatedKey(ev.Tenant, contextVal)
+	attrIdxKey = utils.ConcatenatedKey(args.Tenant, contextVal)
 	matchingAPs := make(map[string]*AttributeProfile)
-	aPrflIDs, err := matchingItemIDsForEvent(ev.Event, alS.stringIndexedFields, alS.prefixIndexedFields,
-		alS.dm, utils.AttributeFilterIndexes+attrIdxKey)
-	if err != nil {
-		return nil, err
+	if len(args.AttributeIDs) != 0 {
+		attrIDs = args.AttributeIDs
+	} else {
+		aPrflIDs, err := matchingItemIDsForEvent(args.Event, alS.stringIndexedFields, alS.prefixIndexedFields,
+			alS.dm, utils.CacheAttributeFilterIndexes, attrIdxKey, alS.filterS.cfg.FilterSCfg().IndexedSelects)
+		if err != nil {
+			if err != utils.ErrNotFound {
+				return nil, err
+			}
+			if aPrflIDs, err = matchingItemIDsForEvent(args.Event, alS.stringIndexedFields, alS.prefixIndexedFields,
+				alS.dm, utils.CacheAttributeFilterIndexes, utils.ConcatenatedKey(args.Tenant, utils.META_ANY),
+				alS.filterS.cfg.FilterSCfg().IndexedSelects); err != nil {
+				return nil, err
+			}
+		}
+		attrIDs = aPrflIDs.Slice()
 	}
-	lockIDs := utils.PrefixSliceItems(aPrflIDs.Slice(), utils.AttributeFilterIndexes)
-	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockIDs...)
-	defer guardian.Guardian.UnguardIDs(lockIDs...)
-	for apID := range aPrflIDs {
-		aPrfl, err := alS.dm.GetAttributeProfile(ev.Tenant, apID, false, utils.NonTransactional)
+	for _, apID := range attrIDs {
+		aPrfl, err := alS.dm.GetAttributeProfile(args.Tenant, apID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
 			}
 			return nil, err
 		}
-		if aPrfl.ActivationInterval != nil && ev.Time != nil &&
-			!aPrfl.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
+		if aPrfl.ActivationInterval != nil && args.Time != nil &&
+			!aPrfl.ActivationInterval.IsActiveAtTime(*args.Time) { // not active
 			continue
 		}
-		if pass, err := alS.filterS.PassFiltersForEvent(ev.Tenant,
-			ev.Event, aPrfl.FilterIDs); err != nil {
+		if pass, err := alS.filterS.Pass(args.Tenant, aPrfl.FilterIDs,
+			config.NewNavigableMap(args.Event)); err != nil {
 			return nil, err
 		} else if !pass {
 			continue
@@ -103,9 +115,9 @@ func (alS *AttributeService) matchingAttributeProfilesForEvent(ev *utils.CGREven
 	return
 }
 
-func (alS *AttributeService) attributeProfileForEvent(ev *utils.CGREvent) (attrPrfl *AttributeProfile, err error) {
+func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent) (attrPrfl *AttributeProfile, err error) {
 	var attrPrfls AttributeProfiles
-	if attrPrfls, err = alS.matchingAttributeProfilesForEvent(ev); err != nil {
+	if attrPrfls, err = alS.matchingAttributeProfilesForEvent(args); err != nil {
 		return
 	} else if len(attrPrfls) == 0 {
 		return nil, utils.ErrNotFound
@@ -120,15 +132,19 @@ type AttrSFieldNameValue struct {
 }
 
 type AttrSProcessEventReply struct {
-	MatchedProfile string
-	AlteredFields  []string
-	CGREvent       *utils.CGREvent
+	MatchedProfiles []string
+	AlteredFields   []string
+	CGREvent        *utils.CGREvent
+	blocker         bool // internally used to stop further processRuns
 }
 
 // Digest returns serialized version of alteredFields in AttrSProcessEventReply
 // format fldName1:fldVal1,fldName2:fldVal2
 func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
 	for i, fld := range attrReply.AlteredFields {
+		if _, has := attrReply.CGREvent.Event[fld]; !has {
+			continue //maybe removed
+		}
 		if i != 0 {
 			rplyDigest += utils.FIELDS_SEP
 		}
@@ -138,45 +154,69 @@ func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
 	return
 }
 
+type AttrArgsProcessEvent struct {
+	AttributeIDs []string
+	ProcessRuns  *int // number of loops for ProcessEvent
+	utils.CGREvent
+}
+
 // processEvent will match event with attribute profile and do the necessary replacements
-func (alS *AttributeService) processEvent(ev *utils.CGREvent) (rply *AttrSProcessEventReply, err error) {
-	attrPrf, err := alS.attributeProfileForEvent(ev)
+func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
+	rply *AttrSProcessEventReply, err error) {
+	attrPrf, err := alS.attributeProfileForEvent(args)
 	if err != nil {
 		return nil, err
 	}
-	rply = &AttrSProcessEventReply{MatchedProfile: attrPrf.ID, CGREvent: ev.Clone()}
-	for fldName, intialMp := range attrPrf.attributes {
-		initEvValIf, has := ev.Event[fldName]
-		if !has { // we don't have initial in event, try append
-			if anyInitial, has := intialMp[utils.ANY]; has && anyInitial.Append {
-				rply.CGREvent.Event[fldName] = anyInitial.Substitute
+	rply = &AttrSProcessEventReply{
+		MatchedProfiles: []string{attrPrf.ID},
+		CGREvent:        args.Clone(),
+		blocker:         attrPrf.Blocker}
+	for fldName, initialMp := range attrPrf.attributesIdx {
+		initEvValIf, has := args.Event[fldName]
+		if !has {
+			anyInitial, hasAny := initialMp[utils.ANY]
+			if hasAny && anyInitial.Append { // add field name
+				substitute, err := anyInitial.Substitute.ParseEvent(args.Event)
+				if err != nil {
+					return nil, err
+				}
+				rply.CGREvent.Event[fldName] = substitute
 				rply.AlteredFields = append(rply.AlteredFields, fldName)
 			}
 			continue
 		}
-		attrVal, has := intialMp[initEvValIf]
+		attrVal, has := initialMp[initEvValIf]
 		if !has {
-			attrVal, has = intialMp[utils.ANY]
+			attrVal, has = initialMp[utils.ANY]
 		}
 		if has {
-			rply.CGREvent.Event[fldName] = attrVal.Substitute
+			substitute, err := attrVal.Substitute.ParseEvent(args.Event)
+			if err != nil {
+				return nil, err
+			}
+			if substitute == utils.META_NONE {
+				delete(rply.CGREvent.Event, fldName)
+			} else {
+				rply.CGREvent.Event[fldName] = substitute
+			}
 			rply.AlteredFields = append(rply.AlteredFields, fldName)
 		}
-		for _, valIface := range rply.CGREvent.Event {
-			if valIface == interface{}(utils.MetaAttributes) {
-				return nil, utils.NewCGRError(utils.AttributeSv1ProcessEvent,
-					utils.AttributesNotFoundCaps,
-					utils.AttributesNotFound,
-					utils.AttributesNotFound)
-			}
+	}
+	for _, valIface := range rply.CGREvent.Event {
+		if valIface == interface{}(utils.MetaAttributes) {
+			return nil, utils.NewCGRError(
+				utils.AttributeSv1ProcessEvent,
+				utils.AttributesNotFound,
+				utils.AttributesNotFound,
+				utils.AttributesNotFound)
 		}
 	}
 	return
 }
 
-func (alS *AttributeService) V1GetAttributeForEvent(ev *utils.CGREvent,
+func (alS *AttributeService) V1GetAttributeForEvent(args *AttrArgsProcessEvent,
 	attrPrfl *AttributeProfile) (err error) {
-	attrPrf, err := alS.attributeProfileForEvent(ev)
+	attrPrf, err := alS.attributeProfileForEvent(args)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
@@ -187,15 +227,52 @@ func (alS *AttributeService) V1GetAttributeForEvent(ev *utils.CGREvent,
 	return
 }
 
-func (alS *AttributeService) V1ProcessEvent(ev *utils.CGREvent,
+func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 	reply *AttrSProcessEventReply) (err error) {
-	evReply, err := alS.processEvent(ev)
-	if err != nil {
-		if err != utils.ErrNotFound {
-			err = utils.NewErrServerError(err)
-		}
-		return err
+	if args.Event == nil {
+		return utils.NewErrMandatoryIeMissing("Event")
 	}
-	*reply = *evReply
+	if args.ProcessRuns == nil || *args.ProcessRuns == 0 {
+		args.ProcessRuns = utils.IntPointer(alS.processRuns)
+	}
+	var apiRply *AttrSProcessEventReply // aggregate response here
+	for i := 0; i < *args.ProcessRuns; i++ {
+		evRply, err := alS.processEvent(args)
+		if err != nil {
+			if err != utils.ErrNotFound {
+				err = utils.NewErrServerError(err)
+			} else if i != 0 { // ignore "not found" in a loop different than 0
+				err = nil
+				break
+			}
+			return err
+		}
+		if len(evRply.AlteredFields) != 0 {
+			args.CGREvent = *evRply.CGREvent // for next loop
+		}
+		if apiRply == nil { // first reply
+			apiRply = evRply
+			if apiRply.blocker {
+				break
+			}
+			continue
+		}
+		if utils.IsSliceMember(apiRply.MatchedProfiles,
+			evRply.MatchedProfiles[0]) { // don't process the same AttributeProfile twice
+			break
+		}
+		apiRply.MatchedProfiles = append(apiRply.MatchedProfiles, evRply.MatchedProfiles[0])
+		apiRply.CGREvent = evRply.CGREvent
+		for _, fldName := range evRply.AlteredFields {
+			if utils.IsSliceMember(apiRply.AlteredFields, fldName) {
+				continue // only add processed fieldName once
+			}
+			apiRply.AlteredFields = append(apiRply.AlteredFields, fldName)
+		}
+		if evRply.blocker {
+			break
+		}
+	}
+	*reply = *apiRply
 	return
 }

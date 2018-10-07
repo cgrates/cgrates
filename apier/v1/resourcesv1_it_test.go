@@ -56,11 +56,13 @@ var sTestsRLSV1 = []func(t *testing.T){
 	testV1RsDBStore,
 	testV1RsGetResourceProfileBeforeSet,
 	testV1RsSetResourceProfile,
+	testV1RsGetResourceProfileIDs,
 	testV1RsGetResourceProfileAfterSet,
 	testV1RsUpdateResourceProfile,
 	testV1RsGetResourceProfileAfterUpdate,
 	testV1RsRemResourceProfile,
 	testV1RsGetResourceProfileAfterDelete,
+	testV1RsResourcePing,
 	testV1RsStopEngine,
 }
 
@@ -89,7 +91,7 @@ func testV1RsLoadConfig(t *testing.T) {
 	case "tutmongo": // Mongo needs more time to reset db, need to investigate
 		resDelay = 4000
 	default:
-		resDelay = 1000
+		resDelay = 2000
 	}
 }
 
@@ -122,7 +124,7 @@ func testV1RsRpcConn(t *testing.T) {
 
 func testV1RsFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
 	if err := rlsV1Rpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error(err)
 	}
@@ -135,6 +137,7 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 	args := &utils.ArgRSv1ResourceUsage{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     "Event1",
 			Event:  map[string]interface{}{"Unknown": "unknown"},
 		},
 	}
@@ -142,7 +145,7 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(500) * time.Millisecond)
-	args.CGREvent.Event = map[string]interface{}{"Destination": "10"}
+	args.CGREvent.Event = map[string]interface{}{"Destination": "10", "Account": "1001"}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
 		t.Error(err)
 	}
@@ -163,7 +166,8 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
 		t.Error(err)
 	}
-	if len(*reply) != 2 {
+	time.Sleep(time.Duration(500) * time.Millisecond)
+	if len(*reply) != 1 {
 		t.Errorf("Expecting: %+v, received: %+v", 2, len(*reply))
 	}
 
@@ -171,6 +175,7 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(time.Duration(500) * time.Millisecond)
 	if len(*reply) != 1 {
 		t.Errorf("Expecting: %+v, received: %+v", 1, len(*reply))
 	}
@@ -196,7 +201,7 @@ func testV1RsTTL0(t *testing.T) {
 		argsRU, &reply); err != nil {
 		t.Error(err)
 	}
-	// second allocation should be also allowed
+	// overwrite the first allocation
 	argsRU = utils.ArgRSv1ResourceUsage{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -205,7 +210,7 @@ func testV1RsTTL0(t *testing.T) {
 				"Destination": "3002"},
 		},
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
-		Units:   1,
+		Units:   2,
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources, argsRU, &reply); err != nil {
 		t.Error(err)
@@ -219,20 +224,37 @@ func testV1RsTTL0(t *testing.T) {
 				"Destination": "3002"},
 		},
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e22",
-		Units:   2,
+		Units:   4,
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1AllocateResources, argsRU, &reply); err == nil ||
 		err.Error() != utils.ErrResourceUnavailable.Error() {
 		t.Error(err)
 	}
-	// make sure no usage was recorded
+	// check the record
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     "Event2",
 			Event: map[string]interface{}{
 				"Account":     "3001",
 				"Destination": "3002"},
+		},
+	}
+	expiryTime, err := utils.ParseTimeDetectLayout("0001-01-01T00:00:00Z", "")
+	if err != nil {
+		t.Error(err)
+	}
+	expectedResources := &engine.Resource{
+		Tenant: "cgrates.org",
+		ID:     "ResGroup3",
+		Usages: map[string]*engine.ResourceUsage{
+			"651a8db2-4f67-4cf8-b622-169e8a482e21": &engine.ResourceUsage{
+				Tenant:     "cgrates.org",
+				ID:         "651a8db2-4f67-4cf8-b622-169e8a482e21",
+				ExpiryTime: expiryTime,
+				Units:      2,
+			},
 		},
 	}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent,
@@ -242,8 +264,12 @@ func testV1RsTTL0(t *testing.T) {
 		t.Errorf("Resources: %+v", rs)
 	} else {
 		res := *rs
-		if len(res[0].Usages) != 0 || len(res[0].TTLIdx) != 0 {
-			t.Errorf("Resource should have no usage records in: %+v", res[0])
+		if !reflect.DeepEqual(expectedResources.Tenant, res[0].Tenant) {
+			t.Errorf("Expecting: %+v, received: %+v", expectedResources.Tenant, res[0].Tenant)
+		} else if !reflect.DeepEqual(expectedResources.ID, res[0].ID) {
+			t.Errorf("Expecting: %+v, received: %+v", expectedResources.ID, res[0].ID)
+		} else if !reflect.DeepEqual(expectedResources.Usages, res[0].Usages) {
+			t.Errorf("Expecting: %+v, received: %+v", expectedResources.Usages, res[0].Usages)
 		}
 	}
 	// release should not give out errors
@@ -438,6 +464,7 @@ func testV1RsReleaseResource(t *testing.T) {
 	args := &utils.ArgRSv1ResourceUsage{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     "Event5",
 			Event: map[string]interface{}{
 				"Account":     "1002",
 				"Subject":     "1001",
@@ -480,6 +507,7 @@ func testV1RsDBStore(t *testing.T) {
 	args := &utils.ArgRSv1ResourceUsage{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     "Event3",
 			Event: map[string]interface{}{
 				"Account":     "1002",
 				"Subject":     "1001",
@@ -511,10 +539,12 @@ func testV1RsDBStore(t *testing.T) {
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
+	time.Sleep(100 * time.Millisecond)
 	rs = new(engine.Resources)
 	args = &utils.ArgRSv1ResourceUsage{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     "Event4",
 			Event: map[string]interface{}{
 				"Account":     "1002",
 				"Subject":     "1001",
@@ -553,8 +583,8 @@ func testV1RsGetResourceProfileBeforeSet(t *testing.T) {
 func testV1RsSetResourceProfile(t *testing.T) {
 	rlsConfig = &engine.ResourceProfile{
 		Tenant:    "cgrates.org",
-		ID:        "RCFG1",
-		FilterIDs: []string{"FLTR_RES_RCFG1"},
+		ID:        "RES_GR_TEST",
+		FilterIDs: []string{"*string:Account:1001"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -565,33 +595,24 @@ func testV1RsSetResourceProfile(t *testing.T) {
 		Blocker:           true,
 		Stored:            true,
 		Weight:            20,
-		ThresholdIDs:      []string{"Val1", "Val2"},
-	}
-	filter = &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "FLTR_RES_RCFG1",
-		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
-				FieldName: "*string",
-				Type:      "Account",
-				Values:    []string{"1001", "1002"},
-			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
+		ThresholdIDs:      []string{"Val1"},
 	}
 	var result string
-	if err := rlsV1Rpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
+
 	if err := rlsV1Rpc.Call("ApierV1.SetResourceProfile", rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
+	}
+}
+
+func testV1RsGetResourceProfileIDs(t *testing.T) {
+	expected := []string{"ResGroup2", "ResGroup1", "ResGroup3", "RES_GR_TEST"}
+	var result []string
+	if err := rlsV1Rpc.Call("ApierV1.GetResourceProfileIDs", "cgrates.org", &result); err != nil {
+		t.Error(err)
+	} else if len(expected) != len(result) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, result)
 	}
 }
 
@@ -607,27 +628,7 @@ func testV1RsGetResourceProfileAfterSet(t *testing.T) {
 
 func testV1RsUpdateResourceProfile(t *testing.T) {
 	var result string
-	rlsConfig.FilterIDs = []string{"FLTR_RES_RCFG1", "FLTR_RES_RCFG2"}
-	filter = &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "FLTR_RES_RCFG2",
-		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
-				FieldName: "*string",
-				Type:      "Account",
-				Values:    []string{"1001", "1002"},
-			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
-	}
-	if err := rlsV1Rpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
+	rlsConfig.FilterIDs = []string{"*string:Account:1001", "*prefix:DST:10"}
 	if err := rlsV1Rpc.Call("ApierV1.SetResourceProfile", rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -647,7 +648,7 @@ func testV1RsGetResourceProfileAfterUpdate(t *testing.T) {
 
 func testV1RsRemResourceProfile(t *testing.T) {
 	var resp string
-	if err := rlsV1Rpc.Call("ApierV1.RemResourceProfile",
+	if err := rlsV1Rpc.Call("ApierV1.RemoveResourceProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: rlsConfig.ID}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -661,6 +662,15 @@ func testV1RsGetResourceProfileAfterDelete(t *testing.T) {
 		&utils.TenantID{Tenant: "cgrates.org", ID: "RCFG1"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
+	}
+}
+
+func testV1RsResourcePing(t *testing.T) {
+	var resp string
+	if err := rlsV1Rpc.Call(utils.ResourceSv1Ping, "", &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.Pong {
+		t.Error("Unexpected reply returned", resp)
 	}
 }
 

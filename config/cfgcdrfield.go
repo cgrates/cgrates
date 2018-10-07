@@ -34,6 +34,9 @@ func NewCfgCdrFieldFromCdrFieldJsonCfg(jsnCfgFld *CdrFieldJsonCfg) (*CfgCdrField
 	if jsnCfgFld.Field_id != nil {
 		cfgFld.FieldId = *jsnCfgFld.Field_id
 	}
+	if jsnCfgFld.Attribute_id != nil {
+		cfgFld.AttributeID = *jsnCfgFld.Attribute_id
+	}
 	if jsnCfgFld.Handler_id != nil {
 		cfgFld.HandlerId = *jsnCfgFld.Handler_id
 	}
@@ -48,6 +51,12 @@ func NewCfgCdrFieldFromCdrFieldJsonCfg(jsnCfgFld *CdrFieldJsonCfg) (*CfgCdrField
 	if jsnCfgFld.Field_filter != nil {
 		if cfgFld.FieldFilter, err = utils.ParseRSRFields(*jsnCfgFld.Field_filter, utils.INFIELD_SEP); err != nil {
 			return nil, err
+		}
+	}
+	if jsnCfgFld.Filters != nil {
+		cfgFld.Filters = make([]string, len(*jsnCfgFld.Filters))
+		for i, fltr := range *jsnCfgFld.Filters {
+			cfgFld.Filters[i] = fltr
 		}
 	}
 	if jsnCfgFld.Width != nil {
@@ -83,6 +92,12 @@ func NewCfgCdrFieldFromCdrFieldJsonCfg(jsnCfgFld *CdrFieldJsonCfg) (*CfgCdrField
 	if jsnCfgFld.Break_on_success != nil {
 		cfgFld.BreakOnSuccess = *jsnCfgFld.Break_on_success
 	}
+	if jsnCfgFld.New_branch != nil {
+		cfgFld.NewBranch = *jsnCfgFld.New_branch
+	}
+	if jsnCfgFld.Blocker != nil {
+		cfgFld.Blocker = *jsnCfgFld.Blocker
+	}
 	return cfgFld, nil
 }
 
@@ -90,6 +105,8 @@ type CfgCdrField struct {
 	Tag              string // Identifier for the administrator
 	Type             string // Type of field
 	FieldId          string // Field identifier
+	AttributeID      string
+	Filters          []string // list of filter profiles
 	HandlerId        string
 	Value            utils.RSRFields
 	Append           bool
@@ -105,6 +122,8 @@ type CfgCdrField struct {
 	MaskDestID       string
 	MaskLen          int
 	BreakOnSuccess   bool
+	NewBranch        bool
+	Blocker          bool
 }
 
 func CfgCdrFieldsFromCdrFieldsJsonCfg(jsnCfgFldss []*CdrFieldJsonCfg) ([]*CfgCdrField, error) {

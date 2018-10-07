@@ -28,19 +28,19 @@ import (
 
 func (m *Migrator) migrateCurrentUser() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.USERS_PREFIX)
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.USERS_PREFIX)
 	if err != nil {
 		return err
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.USERS_PREFIX)
-		usr, err := m.dmIN.GetUser(idg)
+		usr, err := m.dmIN.DataManager().GetUser(idg)
 		if err != nil {
 			return err
 		}
 		if usr != nil {
 			if m.dryRun != true {
-				if err := m.dmOut.SetUser(usr); err != nil {
+				if err := m.dmOut.DataManager().SetUser(usr); err != nil {
 					return err
 				}
 				m.stats[utils.User] += 1
@@ -53,7 +53,7 @@ func (m *Migrator) migrateCurrentUser() (err error) {
 func (m *Migrator) migrateUser() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.dmOut.DataManager().DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

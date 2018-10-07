@@ -26,26 +26,32 @@ import (
 )
 
 func (m *Migrator) migrateCurrentTPTiming() (err error) {
-	tpids, err := m.InStorDB().GetTpIds(utils.TBLTPTimings)
+	tpids, err := m.storDBIn.StorDB().GetTpIds(utils.TBLTPTimings)
 	if err != nil {
 		return err
 	}
 
 	for _, tpid := range tpids {
-		ids, err := m.InStorDB().GetTpTableIds(tpid, utils.TBLTPTimings, utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
+		ids, err := m.storDBIn.StorDB().GetTpTableIds(tpid, utils.TBLTPTimings,
+			utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}
 		for _, id := range ids {
-
-			tm, err := m.InStorDB().GetTPTimings(tpid, id)
+			tm, err := m.storDBIn.StorDB().GetTPTimings(tpid, id)
 			if err != nil {
 				return err
 			}
 			if tm != nil {
 				if m.dryRun != true {
-					if err := m.OutStorDB().SetTPTimings(tm); err != nil {
+					if err := m.storDBOut.StorDB().SetTPTimings(tm); err != nil {
 						return err
+					}
+					for _, timing := range tm {
+						if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPTimings,
+							timing.TPid, map[string]string{"tag": timing.ID}); err != nil {
+							return err
+						}
 					}
 					m.stats[utils.TpTiming] += 1
 				}
@@ -58,7 +64,7 @@ func (m *Migrator) migrateCurrentTPTiming() (err error) {
 func (m *Migrator) migrateTpTimings() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentStorDBVersions()
-	vrs, err = m.OutStorDB().GetVersions(utils.TBLVersions)
+	vrs, err = m.storDBOut.StorDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

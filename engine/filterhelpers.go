@@ -20,7 +20,10 @@ package engine
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -28,8 +31,23 @@ import (
 // fieldIDs limits the fields which are checked against indexes
 // helper on top of dataDB.MatchFilterIndex, adding utils.ANY to list of fields queried
 func matchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldIDs *[]string,
-	dm *DataManager, dbIdxKey string) (itemIDs utils.StringMap, err error) {
+	dm *DataManager, cacheID, itemIDPrefix string, indexedSelects bool) (itemIDs utils.StringMap, err error) {
+	lockID := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
+	guardian.Guardian.GuardIDs(config.CgrConfig().LockingTimeout, lockID)
+	defer guardian.Guardian.UnguardIDs(lockID)
 	itemIDs = make(utils.StringMap)
+	if !indexedSelects {
+		keysWithID, err := dm.DataDB().GetKeysForPrefix(utils.CacheIndexesToPrefix[cacheID])
+		if err != nil {
+			return nil, err
+		}
+		var sliceIDs []string
+		for _, id := range keysWithID {
+			sliceIDs = append(sliceIDs, strings.Split(id, ":")[1])
+		}
+		itemIDs = utils.StringMapFromSlice(sliceIDs)
+		return itemIDs, nil
+	}
 	allFieldIDs := make([]string, len(ev))
 	i := 0
 	for fldID := range ev {
@@ -37,9 +55,9 @@ func matchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 		i += 1
 	}
 	stringFieldVals := map[string]string{utils.ANY: utils.ANY} // cache here field string values, start with default one
-	filterIndexTypes := []string{MetaString, MetaPrefix, utils.MetaDefault}
+	filterIndexTypes := []string{MetaString, MetaPrefix, utils.META_NONE}
 	for i, fieldIDs := range []*[]string{stringFldIDs, prefixFldIDs, nil} { // same routine for both string and prefix filter types
-		if filterIndexTypes[i] == utils.MetaDefault {
+		if filterIndexTypes[i] == utils.META_NONE {
 			fieldIDs = &[]string{utils.ANY} // so we can query DB for unindexed filters
 		}
 		if fieldIDs == nil {
@@ -47,12 +65,12 @@ func matchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 		}
 		for _, fldName := range *fieldIDs {
 			fieldValIf, has := ev[fldName]
-			if !has && filterIndexTypes[i] != utils.MetaDefault {
+			if !has && filterIndexTypes[i] != utils.META_NONE {
 				continue
 			}
 			if _, cached := stringFieldVals[fldName]; !cached {
-				strVal, canCast := utils.CastFieldIfToString(fieldValIf)
-				if !canCast {
+				strVal, err := utils.IfaceAsString(fieldValIf)
+				if err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> cannot cast field: %s into string", utils.FilterS, fldName))
 					continue
@@ -67,7 +85,7 @@ func matchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 			}
 			var dbItemIDs utils.StringMap // list of items matched in DB
 			for _, val := range fldVals {
-				dbItemIDs, err = dm.MatchFilterIndex(dbIdxKey, filterIndexTypes[i], fldName, val)
+				dbItemIDs, err = dm.MatchFilterIndex(cacheID, itemIDPrefix, filterIndexTypes[i], fldName, val)
 				if err != nil {
 					if err == utils.ErrNotFound {
 						err = nil

@@ -70,6 +70,7 @@ type FsConnConfig struct {
 	Address    string
 	Password   string
 	Reconnects int
+	Alias      string
 }
 
 func (self *FsConnConfig) loadFromJsonCfg(jsnCfg *FsConnJsonCfg) error {
@@ -85,14 +86,22 @@ func (self *FsConnConfig) loadFromJsonCfg(jsnCfg *FsConnJsonCfg) error {
 	if jsnCfg.Reconnects != nil {
 		self.Reconnects = *jsnCfg.Reconnects
 	}
+	self.Alias = self.Address
+	if jsnCfg.Alias != nil && *jsnCfg.Alias != "" {
+		self.Alias = *jsnCfg.Alias
+	}
+
 	return nil
 }
 
 type SessionSCfg struct {
 	Enabled                 bool
 	ListenBijson            string
+	ChargerSConns           []*HaPoolConfig
 	RALsConns               []*HaPoolConfig
 	ResSConns               []*HaPoolConfig
+	ThreshSConns            []*HaPoolConfig
+	StatSConns              []*HaPoolConfig
 	SupplSConns             []*HaPoolConfig
 	AttrSConns              []*HaPoolConfig
 	CDRsConns               []*HaPoolConfig
@@ -106,6 +115,7 @@ type SessionSCfg struct {
 	SessionTTLUsage         *time.Duration
 	SessionIndexes          utils.StringMap
 	ClientProtocol          float64
+	ChannelSyncInterval     time.Duration
 }
 
 func (self *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) error {
@@ -119,6 +129,13 @@ func (self *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) error {
 	if jsnCfg.Listen_bijson != nil {
 		self.ListenBijson = *jsnCfg.Listen_bijson
 	}
+	if jsnCfg.Chargers_conns != nil {
+		self.ChargerSConns = make([]*HaPoolConfig, len(*jsnCfg.Chargers_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Chargers_conns {
+			self.ChargerSConns[idx] = NewDfltHaPoolConfig()
+			self.ChargerSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
+	}
 	if jsnCfg.Rals_conns != nil {
 		self.RALsConns = make([]*HaPoolConfig, len(*jsnCfg.Rals_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Rals_conns {
@@ -131,6 +148,20 @@ func (self *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) error {
 		for idx, jsnHaCfg := range *jsnCfg.Resources_conns {
 			self.ResSConns[idx] = NewDfltHaPoolConfig()
 			self.ResSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
+	}
+	if jsnCfg.Thresholds_conns != nil {
+		self.ThreshSConns = make([]*HaPoolConfig, len(*jsnCfg.Thresholds_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Thresholds_conns {
+			self.ThreshSConns[idx] = NewDfltHaPoolConfig()
+			self.ThreshSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
+	}
+	if jsnCfg.Stats_conns != nil {
+		self.StatSConns = make([]*HaPoolConfig, len(*jsnCfg.Stats_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Stats_conns {
+			self.StatSConns[idx] = NewDfltHaPoolConfig()
+			self.StatSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Suppliers_conns != nil {
@@ -201,6 +232,11 @@ func (self *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) error {
 	if jsnCfg.Client_protocol != nil {
 		self.ClientProtocol = *jsnCfg.Client_protocol
 	}
+	if jsnCfg.Channel_sync_interval != nil {
+		if self.ChannelSyncInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Channel_sync_interval); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -214,7 +250,6 @@ type FsAgentConfig struct {
 	//LowBalanceAnnFile   string
 	EmptyBalanceContext string
 	EmptyBalanceAnnFile string
-	ChannelSyncInterval time.Duration
 	MaxWaitConnection   time.Duration
 	EventSocketConns    []*FsConnConfig
 }
@@ -251,11 +286,6 @@ func (self *FsAgentConfig) loadFromJsonCfg(jsnCfg *FreeswitchAgentJsonCfg) error
 
 	if jsnCfg.Empty_balance_ann_file != nil {
 		self.EmptyBalanceAnnFile = *jsnCfg.Empty_balance_ann_file
-	}
-	if jsnCfg.Channel_sync_interval != nil {
-		if self.ChannelSyncInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Channel_sync_interval); err != nil {
-			return err
-		}
 	}
 	if jsnCfg.Max_wait_connection != nil {
 		if self.MaxWaitConnection, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_wait_connection); err != nil {

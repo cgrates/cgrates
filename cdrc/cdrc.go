@@ -33,7 +33,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
-	"gopkg.in/fsnotify.v1"
+	"github.com/fsnotify/fsnotify"
 )
 
 const (
@@ -55,7 +55,8 @@ Common parameters within configs processed:
 Parameters specific per config instance:
  * duMultiplyFactor, cdrSourceId, cdrFilter, cdrFields
 */
-func NewCdrc(cdrcCfgs []*config.CdrcConfig, httpSkipTlsCheck bool, cdrs rpcclient.RpcClientConnection, closeChan chan struct{}, dfltTimezone string, roundDecimals int) (*Cdrc, error) {
+func NewCdrc(cdrcCfgs []*config.CdrcConfig, httpSkipTlsCheck bool, cdrs rpcclient.RpcClientConnection,
+	closeChan chan struct{}, dfltTimezone string, roundDecimals int, filterS *engine.FilterS) (*Cdrc, error) {
 	var cdrcCfg *config.CdrcConfig
 	for _, cdrcCfg = range cdrcCfgs { // Take the first config out, does not matter which one
 		break
@@ -68,10 +69,13 @@ func NewCdrc(cdrcCfgs []*config.CdrcConfig, httpSkipTlsCheck bool, cdrs rpcclien
 		cdrc.maxOpenFiles <- processFile // Empty initiate so we do not need to wait later when we pop
 	}
 	var err error
-	if cdrc.unpairedRecordsCache, err = NewUnpairedRecordsCache(cdrcCfg.PartialRecordCache, cdrcCfg.CdrOutDir, cdrcCfg.FieldSeparator); err != nil {
+	if cdrc.unpairedRecordsCache, err = NewUnpairedRecordsCache(cdrcCfg.PartialRecordCache,
+		cdrcCfg.CdrOutDir, cdrcCfg.FieldSeparator); err != nil {
 		return nil, err
 	}
-	if cdrc.partialRecordsCache, err = NewPartialRecordsCache(cdrcCfg.PartialRecordCache, cdrcCfg.PartialCacheExpiryAction, cdrcCfg.CdrOutDir, cdrcCfg.FieldSeparator, roundDecimals, cdrc.timezone, cdrc.httpSkipTlsCheck, cdrc.cdrs); err != nil {
+	if cdrc.partialRecordsCache, err = NewPartialRecordsCache(cdrcCfg.PartialRecordCache,
+		cdrcCfg.PartialCacheExpiryAction, cdrcCfg.CdrOutDir, cdrcCfg.FieldSeparator, roundDecimals,
+		cdrc.timezone, cdrc.httpSkipTlsCheck, cdrc.cdrs, filterS); err != nil {
 		return nil, err
 	}
 	// Before processing, make sure in and out folders exist
@@ -80,6 +84,7 @@ func NewCdrc(cdrcCfgs []*config.CdrcConfig, httpSkipTlsCheck bool, cdrs rpcclien
 			return nil, fmt.Errorf("Nonexistent folder: %s", dir)
 		}
 	}
+	cdrc.filterS = filterS
 	cdrc.httpClient = new(http.Client)
 	return cdrc, nil
 }
@@ -95,6 +100,7 @@ type Cdrc struct {
 	maxOpenFiles         chan struct{}         // Maximum number of simultaneous files processed
 	unpairedRecordsCache *UnpairedRecordsCache // Shared between all files in the folder we process
 	partialRecordsCache  *PartialRecordsCache
+	filterS              *engine.FilterS
 }
 
 // When called fires up folder monitoring, either automated via inotify or manual by sleeping between processing
@@ -181,12 +187,15 @@ func (self *Cdrc) processFile(filePath string) error {
 	case CSV, FS_CSV, utils.KAM_FLATSTORE, utils.OSIPS_FLATSTORE, utils.PartialCSV:
 		csvReader := csv.NewReader(bufio.NewReader(file))
 		csvReader.Comma = self.dfltCdrcCfg.FieldSeparator
-		recordsProcessor = NewCsvRecordsProcessor(csvReader, self.timezone, fn, self.dfltCdrcCfg, self.cdrcCfgs,
-			self.httpSkipTlsCheck, self.unpairedRecordsCache, self.partialRecordsCache, self.dfltCdrcCfg.CacheDumpFields)
+		recordsProcessor = NewCsvRecordsProcessor(csvReader, self.timezone, fn, self.dfltCdrcCfg,
+			self.cdrcCfgs, self.httpSkipTlsCheck, self.unpairedRecordsCache, self.partialRecordsCache,
+			self.dfltCdrcCfg.CacheDumpFields, self.filterS)
 	case utils.FWV:
-		recordsProcessor = NewFwvRecordsProcessor(file, self.dfltCdrcCfg, self.cdrcCfgs, self.httpClient, self.httpSkipTlsCheck, self.timezone)
+		recordsProcessor = NewFwvRecordsProcessor(file, self.dfltCdrcCfg, self.cdrcCfgs,
+			self.httpClient, self.httpSkipTlsCheck, self.timezone, self.filterS)
 	case utils.XML:
-		if recordsProcessor, err = NewXMLRecordsProcessor(file, self.dfltCdrcCfg.CDRPath, self.timezone, self.httpSkipTlsCheck, self.cdrcCfgs); err != nil {
+		if recordsProcessor, err = NewXMLRecordsProcessor(file, self.dfltCdrcCfg.CDRPath,
+			self.timezone, self.httpSkipTlsCheck, self.cdrcCfgs, self.filterS); err != nil {
 			return err
 		}
 	default:
@@ -210,7 +219,7 @@ func (self *Cdrc) processFile(filePath string) error {
 				utils.Logger.Info(fmt.Sprintf("<Cdrc> DryRun CDR: %+v", storedCdr))
 				continue
 			}
-			if err := self.cdrs.Call("CdrsV1.ProcessCDR", storedCdr, &reply); err != nil {
+			if err := self.cdrs.Call(utils.CdrsV2ProcessCDR, storedCdr.AsCGREvent(), &reply); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<Cdrc> Failed sending CDR, %+v, error: %s", storedCdr, err.Error()))
 			} else if reply != "OK" {
 				utils.Logger.Err(fmt.Sprintf("<Cdrc> Received unexpected reply for CDR, %+v, reply: %s", storedCdr, reply))

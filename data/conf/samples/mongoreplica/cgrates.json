@@ -1,0 +1,185 @@
+{
+// CGRateS Configuration file
+
+
+"general": {
+	"log_level": 7,
+	"reply_timeout": "30s",
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+
+"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_type": "mongo",						// data_db type: <redis|mongo>
+	"db_host": "192.168.56.202:27017,192.168.56.203:27017,192.168.56.204",					// data_db host address
+	"db_port": 27017, 						// data_db port to reach the database
+	"db_name": "teoOnline?replicaSet=rs0&authSource=admin", 
+	"db_user": "cgrates", 					// username to use when connecting to data_db
+	"db_password": "CGRateS.org", 						// password to use when connecting to data_db
+	"load_history_size": 10,				// Number of records in the load history
+},
+
+
+"stor_db": {
+	"db_type": "mongo",						// data_db type: <redis|mongo>
+	"db_host": "192.168.56.202:27017,192.168.56.203:27017,192.168.56.204",					// data_db host address
+	"db_port": 27017, 						// data_db port to reach the database
+	"db_name": "teoOffline?replicaSet=rs0&authSource=admin",
+	"db_user": "cgrates", 					// username to use when connecting to data_db
+	"db_password": "CGRateS.org", 						// password to use when connecting to data_db
+},
+
+
+"cache":{
+	"destinations": {"limit": 10000, "ttl":"0s", "precache": true},
+	"reverse_destinations": {"limit": 10000, "ttl":"0s", "precache": true},
+	"rating_plans": {"limit": 10000, "ttl":"0s","precache": true},
+	"rating_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+	"lcr_rules": {"limit": 10000, "ttl":"0s", "precache": true},
+	"cdr_stats": {"limit": 10000, "ttl":"0s", "precache": true},
+	"actions": {"limit": 10000, "ttl":"0s", "precache": true},
+	"action_plans": {"limit": 10000, "ttl":"0s", "precache": true},
+	"account_action_plans": {"limit": 10000, "ttl":"0s", "precache": true},
+	"action_triggers": {"limit": 10000, "ttl":"0s", "precache": true},
+	"shared_groups": {"limit": 10000, "ttl":"0s", "precache": true},
+	"aliases": {"limit": 10000, "ttl":"0s", "precache": true},
+	"reverse_aliases": {"limit": 10000, "ttl":"0s", "precache": true},
+	"derived_chargers": {"limit": 10000, "ttl":"0s", "precache": true},
+	"resource_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+	"resources": {"limit": 10000, "ttl":"0s", "precache": true},
+	"statqueues": {"limit": 10000, "ttl":"0s", "precache": true},
+	"statqueue_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+	"thresholds": {"limit": 10000, "ttl":"0s", "precache": true},
+	"threshold_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+	"filters": {"limit": 10000, "ttl":"0s", "precache": true},
+	"supplier_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+	"attribute_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
+	"resource_filter_indexes" :{"limit": 10000, "ttl":"0s"},
+	"stat_filter_indexes" : {"limit": 10000, "ttl":"0s"},
+	"threshold_filter_indexes" : {"limit": 10000, "ttl":"0s"},
+	"supplier_filter_indexes" : {"limit": 10000, "ttl":"0s"},
+	"attribute_filter_indexes" : {"limit": 10000, "ttl":"0s"},
+	"charger_filter_indexes" : {"limit": 10000, "ttl":"0s"},
+},
+
+
+"rals": {
+	"enabled": true,
+	"thresholds_conns": [
+		{"address": "*internal"}
+	],
+	"cdrstats_conns": [
+		{"address": "*internal"}
+	],
+	"pubsubs_conns": [
+		{"address": "*internal"}
+	],
+	"users_conns": [
+		{"address": "*internal"}
+	],
+	"aliases_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"scheduler": {
+	"enabled": true,
+},
+
+
+"cdrs": {
+	"enabled": true,
+	"cdrstats_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"cdre": {
+	"TestTutITExportCDR": {
+		"content_fields": [
+			{"tag": "CGRID", "type": "*composed", "value": "~CGRID"},
+			{"tag": "RunID", "type": "*composed", "value": "~RunID"},
+			{"tag":"OriginID", "type": "*composed", "value": "~OriginID"},
+			{"tag":"RequestType", "type": "*composed", "value": "~RequestType"},
+			{"tag":"Tenant", "type": "*composed", "value": "~Tenant"},
+			{"tag":"Category", "type": "*composed", "value": "~Category"},
+			{"tag":"Account", "type": "*composed", "value": "~Account"},
+			{"tag":"Destination", "type": "*composed", "value": "~Destination"},
+			{"tag":"AnswerTime", "type": "*composed", "value": "~AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"tag":"Usage", "type": "*composed", "value": "~Usage"},
+			{"tag":"Cost", "type": "*composed", "value": "~Cost", "rounding_decimals": 4},
+			{"tag":"MatchedDestinationID", "type": "*composed", "value": "~CostDetails:s/\"MatchedDestId\":.*_(\\w{4})/${1}/:s/\"MatchedDestId\":\"INTERNAL\"/ON010/"},
+		],
+	},
+},
+
+
+"cdrstats": {
+	"enabled": true,
+},
+
+
+"pubsubs": {
+	"enabled": true,
+},
+
+
+"users": {
+	"enabled": true,
+	"indexes": ["Uuid"],
+},
+
+
+"resources": {
+	"enabled": true,
+	"store_interval": "1s",
+	"thresholds_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"stats": {
+	"enabled": true,
+	"store_interval": "1s",
+	"thresholds_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "1s",
+},
+
+
+"suppliers": {
+	"enabled": true,
+},
+
+
+"attributes": {							// Attribute service
+	"enabled": true,				// starts Alias service: <true|false>.
+},
+
+
+"aliases": {
+	"enabled": true,
+},
+
+
+"sessions": {
+	"enabled": true,
+},
+
+
+}

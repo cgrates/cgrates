@@ -39,18 +39,42 @@ type SMGSession struct {
 	cdrsrv      rpcclient.RpcClientConnection // Connector to CDRS service
 	clientProto float64
 
+	Tenant     string // store original Tenant so we can use it in API calls
 	CGRID      string // Unique identifier for this session
 	RunID      string // Keep a reference for the derived run
 	Timezone   string
-	EventStart SMGenericEvent         // Event which started the session
-	CD         *engine.CallDescriptor // initial CD used for debits, updated on each debit
+	ResourceID string
 
-	EventCost     *engine.EventCost
+	EventStart *engine.SafEvent       // Event which started the session
+	CD         *engine.CallDescriptor // initial CD used for debits, updated on each debit
+	EventCost  *engine.EventCost
+
 	ExtraDuration time.Duration // keeps the current duration debited on top of what heas been asked
 	LastUsage     time.Duration // last requested Duration
 	LastDebit     time.Duration // last real debited duration
 	TotalUsage    time.Duration // sum of lastUsage
 
+}
+
+// Clone returns the cloned version of SMGSession
+func (s *SMGSession) Clone() *SMGSession {
+	return &SMGSession{CGRID: s.CGRID, RunID: s.RunID,
+		Timezone: s.Timezone, ResourceID: s.ResourceID,
+		EventStart:    s.EventStart.Clone(),
+		CD:            s.CD.Clone(),
+		EventCost:     s.EventCost.Clone(),
+		ExtraDuration: s.ExtraDuration, LastUsage: s.LastUsage,
+		LastDebit: s.LastDebit, TotalUsage: s.TotalUsage,
+	}
+}
+
+type SessionID struct {
+	OriginHost string
+	OriginID   string
+}
+
+func (s *SessionID) CGRID() string {
+	return utils.Sha1(s.OriginID, s.OriginHost)
 }
 
 // Called in case of automatic debits
@@ -153,17 +177,18 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 
 // Send disconnect order to remote connection
 func (self *SMGSession) disconnectSession(reason string) error {
-	self.EventStart[utils.Usage] = self.TotalUsage.Nanoseconds() // Set the usage to total one debitted
 	if self.clntConn == nil || reflect.ValueOf(self.clntConn).IsNil() {
 		return errors.New("Calling SMGClientV1.DisconnectSession requires bidirectional JSON connection")
 	}
+	self.EventStart.Set(utils.Usage, self.TotalUsage) // Set the usage to total one debitted
 	var reply string
 	servMethod := "SessionSv1.DisconnectSession"
 	if self.clientProto == 0 { // competibility with OpenSIPS
 		servMethod = "SMGClientV1.DisconnectSession"
 	}
 	if err := self.clntConn.Call(servMethod,
-		utils.AttrDisconnectSession{EventStart: self.EventStart, Reason: reason},
+		utils.AttrDisconnectSession{EventStart: self.EventStart.AsMapInterface(),
+			Reason: reason},
 		&reply); err != nil {
 		return err
 	} else if reply != utils.OK {
@@ -215,6 +240,11 @@ func (self *SMGSession) refund(usage time.Duration) (err error) {
 	var incrmts engine.Increments
 	for _, tmspn := range cc.Timespans {
 		for _, incr := range tmspn.Increments {
+			if incr.BalanceInfo == nil ||
+				(incr.BalanceInfo.Unit == nil &&
+					incr.BalanceInfo.Monetary == nil) {
+				continue // not enough information for refunds, most probably free units uncounted
+			}
 			incrmts = append(incrmts, incr)
 		}
 	}
@@ -230,8 +260,12 @@ func (self *SMGSession) refund(usage time.Duration) (err error) {
 		TOR:         self.CD.TOR,
 		Increments:  incrmts,
 	}
-	var reply float64
-	return self.rals.Call("Responder.RefundIncrements", cd, &reply)
+	var acnt engine.Account
+	err = self.rals.Call("Responder.RefundIncrements", cd, &acnt)
+	if acnt.ID != "" { // Account info updated, update also cached AccountSummary
+		self.EventCost.AccountSummary = acnt.AsAccountSummary()
+	}
+	return
 }
 
 // storeSMCost will send the SMCost to CDRs for storing
@@ -243,16 +277,17 @@ func (self *SMGSession) storeSMCost() error {
 	self.mux.Unlock()
 	smCost := &engine.V2SMCost{
 		CGRID:       self.CGRID,
-		CostSource:  utils.SESSION_MANAGER_SOURCE,
+		CostSource:  utils.MetaSessionS,
 		RunID:       self.RunID,
-		OriginHost:  self.EventStart.GetOriginatorIP(utils.META_DEFAULT),
-		OriginID:    self.EventStart.GetOriginID(utils.META_DEFAULT),
+		OriginHost:  self.EventStart.GetStringIgnoreErrors(utils.OriginHost),
+		OriginID:    self.EventStart.GetStringIgnoreErrors(utils.OriginID),
 		Usage:       self.TotalUsage,
 		CostDetails: self.EventCost,
 	}
 	var reply string
-	if err := self.cdrsrv.Call("CdrsV2.StoreSMCost", engine.ArgsV2CDRSStoreSMCost{Cost: smCost,
-		CheckDuplicate: true}, &reply); err != nil {
+	if err := self.cdrsrv.Call("CdrsV2.StoreSMCost",
+		engine.ArgsV2CDRSStoreSMCost{Cost: smCost,
+			CheckDuplicate: true}, &reply); err != nil {
 		if err == utils.ErrExists {
 			self.refund(self.CD.GetDuration()) // Refund entire duration
 		} else {
@@ -265,25 +300,23 @@ func (self *SMGSession) storeSMCost() error {
 func (self *SMGSession) AsActiveSession(timezone string) *ActiveSession {
 	self.mux.RLock()
 	defer self.mux.RUnlock()
-	sTime, _ := self.EventStart.GetSetupTime(utils.META_DEFAULT, timezone)
-	aTime, _ := self.EventStart.GetAnswerTime(utils.META_DEFAULT, timezone)
 	aSession := &ActiveSession{
 		CGRID:       self.CGRID,
-		TOR:         self.EventStart.GetTOR(utils.META_DEFAULT),
+		TOR:         self.EventStart.GetStringIgnoreErrors(utils.ToR),
 		RunID:       self.RunID,
-		OriginID:    self.EventStart.GetOriginID(utils.META_DEFAULT),
-		CdrHost:     self.EventStart.GetOriginatorIP(utils.META_DEFAULT),
-		CdrSource:   self.EventStart.GetCdrSource(),
-		ReqType:     self.EventStart.GetReqType(utils.META_DEFAULT),
-		Tenant:      self.EventStart.GetTenant(utils.META_DEFAULT),
-		Category:    self.EventStart.GetCategory(utils.META_DEFAULT),
-		Account:     self.EventStart.GetAccount(utils.META_DEFAULT),
-		Subject:     self.EventStart.GetSubject(utils.META_DEFAULT),
-		Destination: self.EventStart.GetDestination(utils.META_DEFAULT),
-		SetupTime:   sTime,
-		AnswerTime:  aTime,
+		OriginID:    self.EventStart.GetStringIgnoreErrors(utils.OriginID),
+		CdrHost:     self.EventStart.GetStringIgnoreErrors(utils.OriginHost),
+		CdrSource:   utils.SessionS + "_" + self.EventStart.GetStringIgnoreErrors(utils.EVENT_NAME),
+		ReqType:     self.EventStart.GetStringIgnoreErrors(utils.RequestType),
+		Tenant:      self.EventStart.GetStringIgnoreErrors(utils.Tenant),
+		Category:    self.EventStart.GetStringIgnoreErrors(utils.Category),
+		Account:     self.EventStart.GetStringIgnoreErrors(utils.Account),
+		Subject:     self.EventStart.GetStringIgnoreErrors(utils.Subject),
+		Destination: self.EventStart.GetStringIgnoreErrors(utils.Destination),
+		SetupTime:   self.EventStart.GetTimeIgnoreErrors(utils.SetupTime, self.Timezone),
+		AnswerTime:  self.EventStart.GetTimeIgnoreErrors(utils.AnswerTime, self.Timezone),
 		Usage:       self.TotalUsage,
-		ExtraFields: self.EventStart.GetExtraFields(),
+		ExtraFields: self.EventStart.AsMapStringIgnoreErrors(utils.NewStringMap(utils.PrimaryCdrFields...)),
 		SMId:        "CGR-DA",
 	}
 	if self.CD != nil {
