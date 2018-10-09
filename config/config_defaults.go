@@ -89,6 +89,7 @@ const CGRATES_CFG_JSON = `
 	"tls_server_key":"",					// path to server key
 	"tls_client_certificate" : "",			// path to client certificate(must conatin client.crt + ca.crt)
 	"tls_client_key":"",					// path to client key
+	"tls_skip_verify":false,				// skip tls verification
 },
 
 

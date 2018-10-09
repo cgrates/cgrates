@@ -20,3 +20,5 @@ openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAserial ca.srl -out 
 
 # Combine client.crt + ca.crt
 cat client.crt ca.crt > clientCA.crt
+
+rm ca.key ca.crt ca.srl server.crt server.csr client.crt client.csr
