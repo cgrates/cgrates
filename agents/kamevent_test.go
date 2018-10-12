@@ -95,43 +95,10 @@ func TestKamEvAsMapStringInterface(t *testing.T) {
 	expMp["from_tag"] = "bf71ad59"
 	expMp["to_tag"] = "7351fecf"
 	expMp["cgr_reqtype"] = utils.META_POSTPAID
-	expMp[utils.EVENT_NAME] = utils.KamailioAgent
+	expMp[utils.Source] = utils.KamailioAgent
 	rcv := kamEv.AsMapStringInterface()
 	if !reflect.DeepEqual(expMp, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", expMp, rcv)
-	}
-}
-
-func TestKamEvAsCDR(t *testing.T) {
-	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
-	expMp := make(map[string]string)
-	expMp["cgr_account"] = "1001"
-	expMp["cgr_duration"] = "3"
-	expMp["cgr_pdd"] = "4"
-	expMp["cgr_destination"] = "1002"
-	expMp[utils.CGR_SUPPLIER] = "supplier2"
-	expMp["cgr_answertime"] = "1419839310"
-	expMp[utils.CGR_DISCONNECT_CAUSE] = "200"
-	expMp["callid"] = "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0"
-	expMp["from_tag"] = "bf71ad59"
-	expMp["to_tag"] = "7351fecf"
-	expMp["cgr_reqtype"] = utils.META_POSTPAID
-	kamEv := KamEvent{"event": "CGR_CALL_END",
-		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
-		"from_tag": "bf71ad59", "to_tag": "7351fecf",
-		"cgr_reqtype": utils.META_POSTPAID, "cgr_account": "1001",
-		"cgr_destination": "1002", "cgr_answertime": "1419839310",
-		"cgr_duration": "3", "cgr_pdd": "4",
-		utils.CGR_SUPPLIER:         "supplier2",
-		utils.CGR_DISCONNECT_CAUSE: "200"}
-	eStoredCdr := &engine.CDR{
-		Tenant: "cgrates.org", Category: "call", Source: "KamailioEvent",
-		ToR: "*voice", Usage: 0, RequestType: "*rated",
-		ExtraFields: expMp, Cost: -1,
-	}
-	rcv := kamEv.AsCDR(timezone)
-	if !reflect.DeepEqual(eStoredCdr, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", eStoredCdr, rcv)
 	}
 }
 

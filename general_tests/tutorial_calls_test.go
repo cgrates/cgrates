@@ -355,11 +355,11 @@ func testCallCheckThreshold1002Before(t *testing.T) {
 func testCallStartPjsuaListener(t *testing.T) {
 	var err error
 	acnts := []*engine.PjsuaAccount{
-		&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1",
+		{Id: "sip:1001@127.0.0.1",
 			Username: "1001", Password: "CGRateS.org", Realm: "*", Registrar: "sip:127.0.0.1:5080"},
-		&engine.PjsuaAccount{Id: "sip:1002@127.0.0.1",
+		{Id: "sip:1002@127.0.0.1",
 			Username: "1002", Password: "CGRateS.org", Realm: "*", Registrar: "sip:127.0.0.1:5080"},
-		&engine.PjsuaAccount{Id: "sip:1003@127.0.0.1",
+		{Id: "sip:1003@127.0.0.1",
 			Username: "1003", Password: "CGRateS.org", Realm: "*", Registrar: "sip:127.0.0.1:5080"},
 	}
 	if tutorialCallsPjSuaListener, err = engine.StartPjsuaListener(
@@ -382,7 +382,7 @@ func testCallCall1001To1002(t *testing.T) {
 func testCallGetActiveSessions(t *testing.T) {
 	var reply *[]*sessions.ActiveSession
 	expected := &[]*sessions.ActiveSession{
-		&sessions.ActiveSession{
+		{
 			ReqType:     "*prepaid",
 			Tenant:      "cgrates.org",
 			Category:    "call",
@@ -697,8 +697,8 @@ func testCallSyncSessions(t *testing.T) {
 		sourceForCDR = "FS_CHANNEL_ANSWER"
 		numberOfCDR = 2
 	case utils.Kamailio:
-		sourceForCDR = utils.MetaSessionS + "_" + utils.KamailioAgent
-		numberOfCDR = 3 // in case of kamailio we get 3 CDRs (1 from first disconnect)
+		sourceForCDR = utils.KamailioAgent
+		numberOfCDR = 2
 	}
 	// verify cdr
 	var rplCdrs []*engine.ExternalCDR

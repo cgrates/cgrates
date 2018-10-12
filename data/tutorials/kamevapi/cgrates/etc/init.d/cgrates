@@ -56,7 +56,7 @@ fi
 # Install the cdre folder
 if [ ! -d $CDREDIR ]; then
   mkdir -p $CDREDIR
-  chown $USER:$GROUP $CDREDIR
+  chown -R $USER:$GROUP $CDREDIR
 fi
 
 #
