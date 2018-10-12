@@ -24,7 +24,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -124,38 +123,10 @@ func (kev KamEvent) AsMapStringInterface() (mp map[string]interface{}) {
 			mp[k] = v
 		}
 	}
-	mp[utils.EVENT_NAME] = utils.KamailioAgent
-	return
-}
-
-// AsCDR converts KamEvent into CDR
-func (kev KamEvent) AsCDR(timezone string) (cdr *engine.CDR) {
-	cdr = new(engine.CDR)
-	cdr.ExtraFields = make(map[string]string)
-	for fld, val := range kev { // first ExtraFields so we can overwrite
-		if !utils.IsSliceMember(utils.PrimaryCdrFields, fld) &&
-			!utils.IsSliceMember(kamReservedCDRFields, fld) {
-			cdr.ExtraFields[fld] = val
-		}
+	if _, has := mp[utils.Source]; !has {
+		mp[utils.Source] = utils.KamailioAgent
 	}
-	cdr.ToR = utils.VOICE
-	cdr.OriginID = kev[utils.OriginID]
-	cdr.OriginHost = kev[utils.OriginHost]
-	cdr.Source = "KamailioEvent"
-	cdr.RequestType = utils.FirstNonEmpty(kev[utils.RequestType],
-		config.CgrConfig().GeneralCfg().DefaultReqType)
-	cdr.Tenant = utils.FirstNonEmpty(kev[utils.Tenant],
-		config.CgrConfig().GeneralCfg().DefaultTenant)
-	cdr.Category = utils.FirstNonEmpty(kev[utils.Category],
-		config.CgrConfig().GeneralCfg().DefaultCategory)
-	cdr.Account = kev[utils.Account]
-	cdr.Subject = kev[utils.Subject]
-	cdr.Destination = kev[utils.Destination]
-	cdr.SetupTime, _ = utils.ParseTimeDetectLayout(kev[utils.SetupTime], timezone)
-	cdr.AnswerTime, _ = utils.ParseTimeDetectLayout(kev[utils.AnswerTime], timezone)
-	cdr.Usage, _ = utils.ParseDurationWithSecs(kev[utils.Usage])
-	cdr.Cost = -1
-	return cdr
+	return
 }
 
 // AsCDR converts KamEvent into CGREvent
