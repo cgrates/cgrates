@@ -36,7 +36,7 @@
 "scheduler": {
 	"enabled": true,						// start Scheduler service: <true|false>
 	"cdrs_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
+		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
 	],
 },
 
