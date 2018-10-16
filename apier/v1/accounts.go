@@ -110,7 +110,6 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) (
 		} else if ap == nil {
 			return 0, utils.ErrNotFound
 		}
-
 		if accID != "" {
 			delete(ap.AccountIDs, accID)
 			remAcntAPids = append(remAcntAPids, accID)
@@ -128,7 +127,6 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) (
 			err = self.DataManager.DataDB().SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
 			goto UPDATE
 		}
-
 		if attrs.ActionPlanId != "" { // delete the entire action plan
 			ap.ActionTimings = nil              // will delete the action plan
 			for acntID := range ap.AccountIDs { // Make sure we clear indexes for all accounts

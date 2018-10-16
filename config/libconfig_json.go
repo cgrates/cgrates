@@ -56,6 +56,7 @@ type ListenJsonCfg struct {
 	Tls_server_key         *string
 	Tls_client_certificate *string
 	Tls_client_key         *string
+	Tls_skip_verify        *bool
 }
 
 // HTTP config section
