@@ -108,10 +108,17 @@ func (sma *AsteriskAgent) ListenAndServe() (err error) {
 }
 
 // hangupChannel will disconnect from CGRateS side with congestion reason
-func (sma *AsteriskAgent) hangupChannel(channelID string) (err error) {
-	_, err = sma.astConn.Call(aringo.HTTP_DELETE, fmt.Sprintf("http://%s/ari/channels/%s",
+func (sma *AsteriskAgent) hangupChannel(channelID, warnMsg string) {
+	if warnMsg != "" {
+		utils.Logger.Warning(warnMsg)
+	}
+	if _, err := sma.astConn.Call(aringo.HTTP_DELETE, fmt.Sprintf("http://%s/ari/channels/%s",
 		sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address, channelID),
-		url.Values{"reason": {"congestion"}})
+		url.Values{"reason": {"congestion"}}); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> failed disconnecting channel <%s>, err: %s",
+				utils.AsteriskAgent, channelID, err.Error()))
+	}
 	return
 }
 
@@ -121,14 +128,12 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 		fmt.Sprintf("http://%s/ari/applications/%s/subscription?eventSource=channel:%s",
 			sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address,
 			CGRAuthAPP, ev.ChannelID()), nil); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when subscribingto events for channelID: %s",
-			utils.AsteriskAgent, err.Error(), ev.ChannelID()))
 		// Since we got error, disconnect channel
-		if err := sma.hangupChannel(ev.ChannelID()); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to disconnect channelID: %s",
+		sma.hangupChannel(ev.ChannelID(),
+			fmt.Sprintf("<%s> error: %s subscribing for channelID: %s",
 				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
-		}
 		return
+
 	}
 	//authorize Session
 	authArgs := ev.V1AuthorizeArgs()
@@ -139,19 +144,13 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 	}
 	var authReply sessions.V1AuthorizeReply
 	if err := sma.smg.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to authorize session for channelID: %s",
-			utils.AsteriskAgent, err.Error(), ev.ChannelID()))
-		if err := sma.hangupChannel(ev.ChannelID()); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to disconnect channelID: %s",
+		sma.hangupChannel(ev.ChannelID(),
+			fmt.Sprintf("<%s> Error: %s when attempting to authorize session for channelID: %s",
 				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
-		}
 		return
 	}
 	if authReply.MaxUsage != nil && *authReply.MaxUsage == time.Duration(0) {
-		if err := sma.hangupChannel(ev.ChannelID()); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to disconnect channelID: %s",
-				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
-		}
+		sma.hangupChannel(ev.ChannelID(), "")
 		return
 	} else if *authReply.MaxUsage != time.Duration(-1) {
 		//  Set absolute timeout for non-postpaid calls
@@ -164,10 +163,7 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 			utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when setting %s for channelID: %s",
 				utils.AsteriskAgent, err.Error(), CGRMaxSessionTime, ev.ChannelID()))
 			// Since we got error, disconnect channel
-			if err := sma.hangupChannel(ev.ChannelID()); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to disconnect channelID: %s",
-					utils.AsteriskAgent, err.Error(), ev.ChannelID()))
-			}
+			sma.hangupChannel(ev.ChannelID(), "")
 			return
 		}
 	}
@@ -198,14 +194,9 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 	err := ev.UpdateCGREvent(cgrEv) // Updates the event directly in the cache
 	sma.evCacheMux.Unlock()
 	if err != nil {
-		utils.Logger.Err(
-			fmt.Sprintf("<%s> Error: %s when attempting to initiate session for channelID: %s",
+		sma.hangupChannel(ev.ChannelID(),
+			fmt.Sprintf("<%s> error: %s when attempting to initiate session for channelID: %s",
 				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
-		if err := sma.hangupChannel(ev.ChannelID()); err != nil {
-			utils.Logger.Err(
-				fmt.Sprintf("<%s> Error: %s when attempting to disconnect channelID: %s",
-					utils.AsteriskAgent, err.Error(), ev.ChannelID()))
-		}
 		return
 	}
 	// populate init session args
@@ -220,21 +211,12 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 	var initReply sessions.V1InitSessionReply
 	if err := sma.smg.Call(utils.SessionSv1InitiateSession,
 		initSessionArgs, &initReply); err != nil {
-		utils.Logger.Err(
-			fmt.Sprintf("<%s> Error: %s when attempting to initiate session for channelID: %s",
+		sma.hangupChannel(ev.ChannelID(),
+			fmt.Sprintf("<%s> error: %s when attempting to initiate session for channelID: %s",
 				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
-		if err := sma.hangupChannel(ev.ChannelID()); err != nil {
-			utils.Logger.Err(
-				fmt.Sprintf("<%s> Error: %s when attempting to disconnect channelID: %s",
-					utils.AsteriskAgent, err.Error(), ev.ChannelID()))
-		}
 		return
 	} else if initReply.MaxUsage != nil && *initReply.MaxUsage == time.Duration(0) {
-		if err := sma.hangupChannel(ev.ChannelID()); err != nil {
-			utils.Logger.Err(
-				fmt.Sprintf("<%s> Error: %s when attempting to disconnect channelID: %s",
-					utils.AsteriskAgent, err.Error(), ev.ChannelID()))
-		}
+		sma.hangupChannel(ev.ChannelID(), "")
 		return
 	}
 
@@ -252,12 +234,9 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 	err := ev.UpdateCGREvent(cgrEv) // Updates the event directly in the cache
 	sma.evCacheMux.Unlock()
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to initiate session for channelID: %s",
-			utils.AsteriskAgent, err.Error(), ev.ChannelID()))
-		if err := sma.hangupChannel(ev.ChannelID()); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to disconnect channelID: %s",
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %s when attempting to destroy session for channelID: %s",
 				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
-		}
 		return
 	}
 	// populate terminate session args
@@ -291,11 +270,7 @@ func (sma *AsteriskAgent) ServiceShutdown() error {
 // Internal method to disconnect session in asterisk
 func (sma *AsteriskAgent) V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) error {
 	channelID := engine.NewMapEvent(args.EventStart).GetStringIgnoreErrors(utils.OriginID)
-	if err := sma.hangupChannel(channelID); err != nil {
-		utils.Logger.Err(
-			fmt.Sprintf("<%s> Error: %s when attempting to disconnect channelID: %s",
-				utils.AsteriskAgent, err.Error(), channelID))
-	}
+	sma.hangupChannel(channelID, "")
 	*reply = utils.OK
 	return nil
 }

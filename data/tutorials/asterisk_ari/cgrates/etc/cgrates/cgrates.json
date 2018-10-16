@@ -33,9 +33,6 @@
 	"stats_conns": [
 		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
-	"pubsubs_conns": [
-		{"address": "*internal"}
-	],
 	"attributes_conns": [
 		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
@@ -44,9 +41,6 @@
 
 "cdrs": {
 	"enabled": true,
-	"sessions_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
-	],
 	"stats_conns": [
 		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
@@ -81,69 +75,6 @@
 },
 
 
-"cdre": {
-	"*default": {
-		"cdr_format": "csv",							// exported CDRs format <csv>
-		"field_separator": ",",
-		"data_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from KBytes to Bytes)
-		"sms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from SMS unit to call duration in some billing systems)
-        "generic_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from GENERIC unit to call duration in some billing systems)
-		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
-		"cost_rounding_decimals": -1,					// rounding decimals for Cost values. -1 to disable rounding
-		"cost_shift_digits": 0,							// shift digits in the cost on export (eg: convert from EUR to cents)
-		"mask_destination_id": "MASKED_DESTINATIONS",	// destination id containing called addresses to be masked on export
-		"mask_length": 0,								// length of the destination suffix to be masked
-		"export_dir": "/tmp/cgr_osipsasync/cgrates/cdre",			// path where the exported CDRs will be placed
-		"header_fields": [],							// template of the exported header fields
-		"content_fields": [								// template of the exported content fields
-			{"tag": "CgrId", "type": "*composed", "value": "CGRID"},
-			{"tag":"RunId", "type": "*composed", "value": "RunID"},
-			{"tag":"Tor", "type": "*composed", "value": "ToR"},
-			{"tag":"AccId", "type": "*composed", "value": "OriginID"},
-			{"tag":"ReqType", "type": "*composed", "value": "RequestType"},
-			{"tag":"Direction", "type": "*composed", "value": "Direction"},
-			{"tag":"Tenant", "type": "*composed", "value": "Tenant"},
-			{"tag":"Category", "type": "*composed", "value": "Category"},
-			{"tag":"Account", "type": "*composed", "value": "Account"},
-			{"tag":"Subject", "type": "*composed", "value": "Subject"},
-			{"tag":"Destination", "type": "*composed", "value": "Destination"},
-			{"tag":"SetupTime", "type": "*datetime", "value": "SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
-			{"tag":"AnswerTime", "type": "*datetime", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
-			{"tag":"Usage", "type": "*composed", "value": "Usage"},
-			{"tag":"Cost", "type": "*composed", "value": "Cost"},
-		],
-		"trailer_fields": [],							// template of the exported trailer fields
-	},
-	"customer_tpl": {
-		"cdr_format": "csv",							// exported CDRs format <csv>
-		"field_separator": ";",
-		"data_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from KBytes to Bytes)
-		"sms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from SMS unit to call duration in some billing systems)
-        "generic_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from GENERIC unit to call duration in some billing systems)
-		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
-		"cost_rounding_decimals": -1,					// rounding decimals for Cost values. -1 to disable rounding
-		"cost_shift_digits": 0,							// shift digits in the cost on export (eg: convert from EUR to cents)
-		"mask_destination_id": "MASKED_DESTINATIONS",	// destination id containing called addresses to be masked on export
-		"mask_length": 0,								// length of the destination suffix to be masked
-		"export_directory": "/tmp/cgr_osipsasync/cgrates/cdre",			// path where the exported CDRs will be placed
-		"header_fields": [],							// template of the exported header fields
-		"content_fields": [								// template of the exported content fields
-			{"tag": "CgrId", "type": "*composed", "value": "CGRID"},
-			{"tag":"AccId", "type": "*composed", "value": "OriginID"},
-			{"tag":"ReqType", "type": "*composed", "value": "RequestType"},
-			{"tag":"Tenant", "type": "*composed", "value": "Tenant"},
-			{"tag":"Category", "type": "*composed", "value": "Category"},
-			{"tag":"Subject", "type": "*composed", "value": "Account"},
-			{"tag":"Destination", "type": "*datetime", "value": "~Destination:s/^1(\\d+)/+$1/:s/^\\+(\\d+)/00$1/"},
-			{"tag":"AnswerTime", "type": "*datetime", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
-			{"tag":"Usage", "type": "*composed", "value": "Usage"},
-			{"tag":"Cost", "type": "*composed", "value": "Cost"},
-		],
-		"trailer_fields": [],
-	},
-},
-
-
 "asterisk_agent": {
 	"enabled": true,	
 	"sessions_conns": [
@@ -151,19 +82,14 @@
 	],	
 	"create_cdr": true,
 	"asterisk_conns":[											
-		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 10}
+		{"address": "192.168.56.103:8088", "user": "cgrates", 
+			"password": "CGRateS.org", "connect_attempts": 3,"reconnects": 10}
 	],
 },
 
 
-"pubsubs": {
-	"enabled": true,
-},
-
-
 "attributes": {
-	"enabled": true,
-	"string_indexed_fields": ["Account"],			
+	"enabled": true,		
 },
 
 
@@ -172,8 +98,6 @@
 	"thresholds_conns": [
 		{"address": "*internal"}
 	],
-	"string_indexed_fields": ["Account"],
-	"prefix_indexed_fields": ["Destination"],
 },
 
 
@@ -182,13 +106,11 @@
 	"thresholds_conns": [
 		{"address": "*internal"}
 	],
-	"string_indexed_fields": ["Account"],
 },
 
 
 "thresholds": {
 	"enabled": true,
-	"string_indexed_fields": ["Account"],
 },
 
 
@@ -203,8 +125,6 @@
 	"stats_conns": [
 		{"address": "*internal"}	
 	],
-	"string_indexed_fields": ["Account"],
-	"prefix_indexed_fields": ["Destination"],
 },
 
 

@@ -243,7 +243,7 @@ func (smaEv *SMAsteriskEvent) AsMapStringInterface() (mp map[string]interface{})
 	return
 }
 
-// AsCDR converts KamEvent into CGREvent
+// AsCDR converts AsteriskEvent into CGREvent
 func (smaEv *SMAsteriskEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err error) {
 	setupTime, err := utils.ParseTimeDetectLayout(
 		smaEv.Timestamp(), timezone)
