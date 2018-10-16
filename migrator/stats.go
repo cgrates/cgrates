@@ -61,7 +61,7 @@ type v1Stats []*v1Stat
 
 func (m *Migrator) migrateCurrentStats() (err error) {
 	var ids []string
-	tenant := config.CgrConfig().DefaultTenant
+	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	//StatQueue
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.StatQueuePrefix)
 	if err != nil {
@@ -329,12 +329,15 @@ func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *engine.StatQueue, stq
 		}
 		filters = append(filters, x)
 	}
-	filter = &engine.Filter{Tenant: config.CgrConfig().DefaultTenant, ID: v1Sts.Id, Rules: filters}
+	filter = &engine.Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     v1Sts.Id,
+		Rules:  filters}
 	stq = &engine.StatQueueProfile{
 		ID:           v1Sts.Id,
 		QueueLength:  v1Sts.QueueLength,
 		Metrics:      []*utils.MetricWithParams{},
-		Tenant:       config.CgrConfig().DefaultTenant,
+		Tenant:       config.CgrConfig().GeneralCfg().DefaultTenant,
 		Blocker:      false,
 		Stored:       false,
 		ThresholdIDs: []string{},
@@ -344,16 +347,17 @@ func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *engine.StatQueue, stq
 		stq.Stored = true
 	}
 	if len(v1Sts.Triggers) != 0 {
-		for i, _ := range v1Sts.Triggers {
+		for i := range v1Sts.Triggers {
 			stq.ThresholdIDs = append(stq.ThresholdIDs, v1Sts.Triggers[i].ID)
 		}
 	}
-	sq = &engine.StatQueue{Tenant: config.CgrConfig().DefaultTenant,
+	sq = &engine.StatQueue{
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        v1Sts.Id,
 		SQMetrics: make(map[string]engine.StatMetric),
 	}
 	if len(v1Sts.Metrics) != 0 {
-		for i, _ := range v1Sts.Metrics {
+		for i := range v1Sts.Metrics {
 			if !strings.HasPrefix(v1Sts.Metrics[i], "*") {
 				v1Sts.Metrics[i] = "*" + v1Sts.Metrics[i]
 			}

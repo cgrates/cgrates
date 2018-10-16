@@ -119,7 +119,7 @@ func (self *ApierV1) ExportTPToFolder(attrs utils.AttrDirExportTP, exported *uti
 	if attrs.TPid == nil || *attrs.TPid == "" {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dir := self.Config.TpExportPath
+	dir := self.Config.GeneralCfg().TpExportPath
 	if attrs.ExportPath != nil {
 		dir = *attrs.ExportPath
 	}

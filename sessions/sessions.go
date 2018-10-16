@@ -115,7 +115,7 @@ func NewSMGeneric(cgrCfg *config.CGRConfig, rals, resS, thdS,
 		pSessionsIndex:     make(map[string]map[string]map[string]utils.StringMap),
 		pSessionsRIndex:    make(map[string][]*riFieldNameVal),
 		sessionTerminators: make(map[string]*smgSessionTerminator),
-		responseCache:      utils.NewResponseCache(cgrCfg.ResponseCacheTTL)}
+		responseCache:      utils.NewResponseCache(cgrCfg.GeneralCfg().ResponseCacheTTL)}
 }
 
 type SMGeneric struct {
@@ -614,7 +614,7 @@ func (smg *SMGeneric) sessionStart(tnt string, evStart *engine.SafEvent,
 			}
 		}
 		return nil, nil
-	}, smg.cgrCfg.LockingTimeout, cgrID)
+	}, smg.cgrCfg.GeneralCfg().LockingTimeout, cgrID)
 	return
 }
 
@@ -652,7 +652,7 @@ func (smg *SMGeneric) sessionEnd(cgrID string, usage time.Duration) error {
 			}
 		}
 		return nil, nil
-	}, smg.cgrCfg.LockingTimeout, cgrID)
+	}, smg.cgrCfg.GeneralCfg().LockingTimeout, cgrID)
 	return err
 }
 
@@ -687,7 +687,7 @@ func (smg *SMGeneric) sessionRelocate(initialID, cgrID, newOriginID string) erro
 			}
 		}
 		return nil, nil
-	}, smg.cgrCfg.LockingTimeout, initialID)
+	}, smg.cgrCfg.GeneralCfg().LockingTimeout, initialID)
 	return err
 }
 
@@ -1249,7 +1249,7 @@ func (smg *SMGeneric) BiRPCV1GetMaxUsage(clnt rpcclient.RpcClientConnection,
 	ev engine.MapEvent, maxUsage *float64) error {
 	maxUsageDur, err := smg.GetMaxUsage(
 		utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.Tenant),
-			smg.cgrCfg.DefaultTenant),
+			smg.cgrCfg.GeneralCfg().DefaultTenant),
 		engine.NewSafEvent(ev))
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -1267,7 +1267,7 @@ func (smg *SMGeneric) BiRPCV2GetMaxUsage(clnt rpcclient.RpcClientConnection,
 	ev engine.MapEvent, maxUsage *time.Duration) error {
 	maxUsageDur, err := smg.GetMaxUsage(
 		utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.Tenant),
-			smg.cgrCfg.DefaultTenant),
+			smg.cgrCfg.GeneralCfg().DefaultTenant),
 		engine.NewSafEvent(ev))
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -1281,7 +1281,7 @@ func (smg *SMGeneric) BiRPCV1InitiateSession(clnt rpcclient.RpcClientConnection,
 	ev engine.MapEvent, maxUsage *float64) (err error) {
 	var minMaxUsage time.Duration
 	tnt := utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.Tenant),
-		smg.cgrCfg.DefaultTenant)
+		smg.cgrCfg.GeneralCfg().DefaultTenant)
 	if minMaxUsage, err = smg.InitiateSession(tnt,
 		engine.NewSafEvent(ev), clnt, ""); err != nil {
 		if err != rpcclient.ErrSessionNotFound {
@@ -1310,7 +1310,7 @@ func (smg *SMGeneric) BiRPCV2InitiateSession(clnt rpcclient.RpcClientConnection,
 	var minMaxUsage time.Duration
 	if minMaxUsage, err = smg.InitiateSession(
 		utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.Tenant),
-			smg.cgrCfg.DefaultTenant),
+			smg.cgrCfg.GeneralCfg().DefaultTenant),
 		engine.NewSafEvent(ev), clnt, ""); err != nil {
 		if err != rpcclient.ErrSessionNotFound {
 			err = utils.NewErrServerError(err)
@@ -1328,7 +1328,7 @@ func (smg *SMGeneric) BiRPCV1UpdateSession(clnt rpcclient.RpcClientConnection,
 	var minMaxUsage time.Duration
 	if minMaxUsage, err = smg.UpdateSession(
 		utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.Tenant),
-			smg.cgrCfg.DefaultTenant),
+			smg.cgrCfg.GeneralCfg().DefaultTenant),
 		engine.NewSafEvent(ev), clnt, ""); err != nil {
 		if err != rpcclient.ErrSessionNotFound {
 			err = utils.NewErrServerError(err)
@@ -1349,7 +1349,7 @@ func (smg *SMGeneric) BiRPCV2UpdateSession(clnt rpcclient.RpcClientConnection,
 	var minMaxUsage time.Duration
 	if minMaxUsage, err = smg.UpdateSession(
 		utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.Tenant),
-			smg.cgrCfg.DefaultTenant),
+			smg.cgrCfg.GeneralCfg().DefaultTenant),
 		engine.NewSafEvent(ev), clnt, ""); err != nil {
 		if err != rpcclient.ErrSessionNotFound {
 			err = utils.NewErrServerError(err)
@@ -1365,7 +1365,7 @@ func (smg *SMGeneric) BiRPCV1TerminateSession(clnt rpcclient.RpcClientConnection
 	ev engine.MapEvent, reply *string) (err error) {
 	if err = smg.TerminateSession(
 		utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.Tenant),
-			smg.cgrCfg.DefaultTenant),
+			smg.cgrCfg.GeneralCfg().DefaultTenant),
 		engine.NewSafEvent(ev), clnt, ""); err != nil {
 		if err != rpcclient.ErrSessionNotFound {
 			err = utils.NewErrServerError(err)
@@ -1381,7 +1381,7 @@ func (smg *SMGeneric) BiRPCV1ChargeEvent(clnt rpcclient.RpcClientConnection,
 	ev engine.MapEvent, maxUsage *float64) error {
 	if minMaxUsage, err := smg.ChargeEvent(
 		utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.Tenant),
-			smg.cgrCfg.DefaultTenant),
+			smg.cgrCfg.GeneralCfg().DefaultTenant),
 		engine.NewSafEvent(ev)); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
@@ -1395,7 +1395,7 @@ func (smg *SMGeneric) BiRPCV2ChargeEvent(clnt rpcclient.RpcClientConnection,
 	ev engine.MapEvent, maxUsage *time.Duration) error {
 	if minMaxUsage, err := smg.ChargeEvent(
 		utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.Tenant),
-			smg.cgrCfg.DefaultTenant),
+			smg.cgrCfg.GeneralCfg().DefaultTenant),
 		engine.NewSafEvent(ev)); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
@@ -1409,7 +1409,7 @@ func (smg *SMGeneric) BiRPCV1ProcessCDR(clnt rpcclient.RpcClientConnection,
 	ev engine.MapEvent, reply *string) error {
 	if err := smg.ProcessCDR(
 		utils.FirstNonEmpty(ev.GetStringIgnoreErrors(utils.Tenant),
-			smg.cgrCfg.DefaultTenant),
+			smg.cgrCfg.GeneralCfg().DefaultTenant),
 		engine.NewSafEvent(ev)); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -1511,8 +1511,9 @@ func (smg *SMGeneric) BiRPCV1ReplicateActiveSessions(clnt rpcclient.RpcClientCon
 	args ArgsReplicateSessions, reply *string) (err error) {
 	smgConns := smg.smgReplConns
 	if len(args.Connections) != 0 {
-		if smgConns, err = NewSessionReplicationConns(args.Connections, smg.cgrCfg.Reconnects,
-			smg.cgrCfg.ConnectTimeout, smg.cgrCfg.ReplyTimeout); err != nil {
+		if smgConns, err = NewSessionReplicationConns(args.Connections,
+			smg.cgrCfg.GeneralCfg().Reconnects, smg.cgrCfg.GeneralCfg().ConnectTimeout,
+			smg.cgrCfg.GeneralCfg().ReplyTimeout); err != nil {
 			return
 		}
 	}
@@ -1530,8 +1531,9 @@ func (smg *SMGeneric) BiRPCV1ReplicatePassiveSessions(clnt rpcclient.RpcClientCo
 	args ArgsReplicateSessions, reply *string) (err error) {
 	smgConns := smg.smgReplConns
 	if len(args.Connections) != 0 {
-		if smgConns, err = NewSessionReplicationConns(args.Connections, smg.cgrCfg.Reconnects,
-			smg.cgrCfg.ConnectTimeout, smg.cgrCfg.ReplyTimeout); err != nil {
+		if smgConns, err = NewSessionReplicationConns(args.Connections,
+			smg.cgrCfg.GeneralCfg().Reconnects, smg.cgrCfg.GeneralCfg().ConnectTimeout,
+			smg.cgrCfg.GeneralCfg().ReplyTimeout); err != nil {
 			return
 		}
 	}
@@ -1626,7 +1628,7 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		return utils.NewErrMandatoryIeMissing("subsystems")
 	}
 	if args.CGREvent.Tenant == "" {
-		args.CGREvent.Tenant = smg.cgrCfg.DefaultTenant
+		args.CGREvent.Tenant = smg.cgrCfg.GeneralCfg().DefaultTenant
 	}
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
@@ -1847,7 +1849,7 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		return utils.NewErrMandatoryIeMissing("subsystems")
 	}
 	if args.CGREvent.Tenant == "" {
-		args.CGREvent.Tenant = smg.cgrCfg.DefaultTenant
+		args.CGREvent.Tenant = smg.cgrCfg.GeneralCfg().DefaultTenant
 	}
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
@@ -2031,7 +2033,7 @@ func (smg *SMGeneric) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 		return utils.NewErrMandatoryIeMissing("subsystems")
 	}
 	if args.CGREvent.Tenant == "" {
-		args.CGREvent.Tenant = smg.cgrCfg.DefaultTenant
+		args.CGREvent.Tenant = smg.cgrCfg.GeneralCfg().DefaultTenant
 	}
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
@@ -2098,7 +2100,7 @@ func (smg *SMGeneric) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection
 		return utils.NewErrMandatoryIeMissing("subsystems")
 	}
 	if args.CGREvent.Tenant == "" {
-		args.CGREvent.Tenant = smg.cgrCfg.DefaultTenant
+		args.CGREvent.Tenant = smg.cgrCfg.GeneralCfg().DefaultTenant
 	}
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
@@ -2227,7 +2229,7 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap(
 func (smg *SMGeneric) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 	args *V1ProcessEventArgs, rply *V1ProcessEventReply) (err error) {
 	if args.CGREvent.Tenant == "" {
-		args.CGREvent.Tenant = smg.cgrCfg.DefaultTenant
+		args.CGREvent.Tenant = smg.cgrCfg.GeneralCfg().DefaultTenant
 	}
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()

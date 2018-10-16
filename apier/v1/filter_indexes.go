@@ -263,7 +263,7 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	}
 	//ChargerProfile Indexes
 	if cppIndexes != nil {
-		if err := attrIndexes.StoreIndexes(true, transactionID); err != nil {
+		if err := cppIndexes.StoreIndexes(true, transactionID); err != nil {
 			for _, id := range *args.ChargerIDs {
 				cpp, err := self.DataManager.GetChargerProfile(args.Tenant, id, true, false, utils.NonTransactional)
 				if err != nil {
@@ -315,7 +315,7 @@ func (self *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string,
 					Tenant: th.Tenant,
 					ID:     th.ID,
 					Rules: []*engine.FilterRule{
-						&engine.FilterRule{
+						{
 							Type:      utils.MetaDefault,
 							FieldName: utils.META_ANY,
 							Values:    []string{utils.META_ANY},
@@ -383,7 +383,7 @@ func (self *ApierV1) computeAttributeIndexes(tenant, context string, attrIDs *[]
 					Tenant: ap.Tenant,
 					ID:     ap.ID,
 					Rules: []*engine.FilterRule{
-						&engine.FilterRule{
+						{
 							Type:      utils.MetaDefault,
 							FieldName: utils.META_ANY,
 							Values:    []string{utils.META_ANY},
@@ -450,7 +450,7 @@ func (self *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string,
 					Tenant: rp.Tenant,
 					ID:     rp.ID,
 					Rules: []*engine.FilterRule{
-						&engine.FilterRule{
+						{
 							Type:      utils.MetaDefault,
 							FieldName: utils.META_ANY,
 							Values:    []string{utils.META_ANY},
@@ -517,7 +517,7 @@ func (self *ApierV1) computeStatIndexes(tenant string, stIDs *[]string,
 					Tenant: sqp.Tenant,
 					ID:     sqp.ID,
 					Rules: []*engine.FilterRule{
-						&engine.FilterRule{
+						{
 							Type:      utils.MetaDefault,
 							FieldName: utils.META_ANY,
 							Values:    []string{utils.META_ANY},
@@ -584,7 +584,7 @@ func (self *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string,
 					Tenant: spp.Tenant,
 					ID:     spp.ID,
 					Rules: []*engine.FilterRule{
-						&engine.FilterRule{
+						{
 							Type:      utils.MetaDefault,
 							FieldName: utils.META_ANY,
 							Values:    []string{utils.META_ANY},
@@ -651,7 +651,7 @@ func (self *ApierV1) computeChargerIndexes(tenant string, cppIDs *[]string,
 					Tenant: cpp.Tenant,
 					ID:     cpp.ID,
 					Rules: []*engine.FilterRule{
-						&engine.FilterRule{
+						{
 							Type:      utils.META_NONE,
 							FieldName: utils.META_ANY,
 							Values:    []string{utils.META_ANY},

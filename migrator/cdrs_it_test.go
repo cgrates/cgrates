@@ -70,23 +70,25 @@ func TestCdrITMySql(t *testing.T) {
 }
 
 func testCdrITConnect(t *testing.T) {
-	storDBIn, err := NewMigratorStorDB(cdrCfgIn.StorDBType, cdrCfgIn.StorDBHost,
-		cdrCfgIn.StorDBPort, cdrCfgIn.StorDBName,
-		cdrCfgIn.StorDBUser, cdrCfgIn.StorDBPass,
-		config.CgrConfig().StorDBMaxOpenConns,
-		config.CgrConfig().StorDBMaxIdleConns,
-		config.CgrConfig().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDBCDRSIndexes)
+	storDBIn, err := NewMigratorStorDB(cdrCfgIn.StorDbCfg().StorDBType,
+		cdrCfgIn.StorDbCfg().StorDBHost, cdrCfgIn.StorDbCfg().StorDBPort,
+		cdrCfgIn.StorDbCfg().StorDBName, cdrCfgIn.StorDbCfg().StorDBUser,
+		cdrCfgIn.StorDbCfg().StorDBPass,
+		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
+		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
+		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {
 		t.Error(err)
 	}
-	storDBOut, err := NewMigratorStorDB(cdrCfgIn.StorDBType,
-		cdrCfgIn.StorDBHost, cdrCfgIn.StorDBPort, cdrCfgIn.StorDBName,
-		cdrCfgIn.StorDBUser, cdrCfgIn.StorDBPass,
-		config.CgrConfig().StorDBMaxOpenConns,
-		config.CgrConfig().StorDBMaxIdleConns,
-		config.CgrConfig().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDBCDRSIndexes)
+	storDBOut, err := NewMigratorStorDB(cdrCfgIn.StorDbCfg().StorDBType,
+		cdrCfgIn.StorDbCfg().StorDBHost, cdrCfgIn.StorDbCfg().StorDBPort,
+		cdrCfgIn.StorDbCfg().StorDBName, cdrCfgIn.StorDbCfg().StorDBUser,
+		cdrCfgIn.StorDbCfg().StorDBPass,
+		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
+		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
+		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {
 		t.Error(err)
 	}
@@ -101,7 +103,7 @@ func testCdrITConnect(t *testing.T) {
 
 func testCdrITFlush(t *testing.T) {
 	if err := cdrMigrator.storDBOut.StorDB().Flush(
-		path.Join(cdrCfgIn.DataFolderPath, "storage", cdrCfgIn.StorDBType)); err != nil {
+		path.Join(cdrCfgIn.DataFolderPath, "storage", cdrCfgIn.StorDbCfg().StorDBType)); err != nil {
 		t.Error(err)
 	}
 }
@@ -111,7 +113,7 @@ func testCdrITMigrateAndMove(t *testing.T) {
 		Direction:   utils.OUT,
 		Destination: "0723045326",
 		Timespans: []*engine.TimeSpan{
-			&engine.TimeSpan{
+			{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				DurationIndex: 0,

@@ -68,9 +68,11 @@ func TestApierV2itResetStorDb(t *testing.T) {
 }
 
 func TestApierV2itConnectDataDB(t *testing.T) {
-	rdsDb, _ := strconv.Atoi(apierCfg.DataDbName)
-	if rdsITdb, err := engine.NewRedisStorage(fmt.Sprintf("%s:%s", apierCfg.DataDbHost, apierCfg.DataDbPort),
-		rdsDb, apierCfg.DataDbPass, apierCfg.DBDataEncoding, utils.REDIS_MAX_CONNS, nil, ""); err != nil {
+	rdsDb, _ := strconv.Atoi(apierCfg.DataDbCfg().DataDbName)
+	if rdsITdb, err := engine.NewRedisStorage(
+		fmt.Sprintf("%s:%s", apierCfg.DataDbCfg().DataDbHost, apierCfg.DataDbCfg().DataDbPort),
+		rdsDb, apierCfg.DataDbCfg().DataDbPass, apierCfg.GeneralCfg().DBDataEncoding,
+		utils.REDIS_MAX_CONNS, nil, ""); err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	} else {
 		dm = engine.NewDataManager(rdsITdb)
@@ -115,7 +117,7 @@ func TestApierV2itAddBalance(t *testing.T) {
 
 func TestApierV2itSetAction(t *testing.T) {
 	attrs := utils.AttrSetActions{ActionsId: "DISABLE_ACCOUNT", Actions: []*utils.TPAction{
-		&utils.TPAction{Identifier: engine.DISABLE_ACCOUNT, Weight: 10.0},
+		{Identifier: engine.DISABLE_ACCOUNT, Weight: 10.0},
 	}}
 	var reply string
 	if err := apierRPC.Call("ApierV2.SetActions", attrs, &reply); err != nil {
@@ -201,7 +203,7 @@ func TestApierV2itFraudMitigation(t *testing.T) {
 func TestApierV2itSetAccountWithAP(t *testing.T) {
 	argActs1 := utils.AttrSetActions{ActionsId: "TestApierV2itSetAccountWithAP_ACT_1",
 		Actions: []*utils.TPAction{
-			&utils.TPAction{Identifier: engine.TOPUP_RESET, BalanceType: utils.MONETARY, Directions: utils.OUT, Units: "5.0", Weight: 20.0},
+			{Identifier: engine.TOPUP_RESET, BalanceType: utils.MONETARY, Directions: utils.OUT, Units: "5.0", Weight: 20.0},
 		}}
 	var reply string
 	if err := apierRPC.Call("ApierV2.SetActions", argActs1, &reply); err != nil {
@@ -209,7 +211,7 @@ func TestApierV2itSetAccountWithAP(t *testing.T) {
 	}
 	argAP1 := &v1.AttrSetActionPlan{Id: "TestApierV2itSetAccountWithAP_AP_1",
 		ActionPlan: []*v1.AttrActionPlan{
-			&v1.AttrActionPlan{ActionsId: argActs1.ActionsId,
+			{ActionsId: argActs1.ActionsId,
 				Time:   time.Now().Add(time.Duration(time.Minute)).String(),
 				Weight: 20.0}}}
 	if _, err := dm.DataDB().GetActionPlan(argAP1.Id, true, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
@@ -246,7 +248,7 @@ func TestApierV2itSetAccountWithAP(t *testing.T) {
 	// Set second AP so we can see the proper indexing done
 	argAP2 := &v1.AttrSetActionPlan{Id: "TestApierV2itSetAccountWithAP_AP_2",
 		ActionPlan: []*v1.AttrActionPlan{
-			&v1.AttrActionPlan{ActionsId: argActs1.ActionsId, MonthDays: "1", Time: "00:00:00", Weight: 20.0}}}
+			{ActionsId: argActs1.ActionsId, MonthDays: "1", Time: "00:00:00", Weight: 20.0}}}
 	if _, err := dm.DataDB().GetActionPlan(argAP2.Id, true, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}

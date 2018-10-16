@@ -130,7 +130,7 @@ func TestHAitAuth1001(t *testing.T) {
 	if body, err := ioutil.ReadAll(rply.Body); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eXml, body) {
-		t.Errorf("expecting: <%s>, received: <%s>", string(eXml), string(body))
+		t.Errorf("expecting: %s, received: %s", string(eXml), string(body))
 	}
 	rply.Body.Close()
 	time.Sleep(time.Millisecond)

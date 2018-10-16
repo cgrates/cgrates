@@ -47,7 +47,7 @@ func (apier *ApierV1) GetCallCostLog(attrs utils.AttrGetCallCost, reply *engine.
 
 // Retrieves CDRs based on the filters
 func (apier *ApierV1) GetCdrs(attrs utils.AttrGetCdrs, reply *[]*engine.ExternalCDR) error {
-	cdrsFltr, err := attrs.AsCDRsFilter(apier.Config.DefaultTimezone)
+	cdrsFltr, err := attrs.AsCDRsFilter(apier.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -77,7 +77,7 @@ func (apier *ApierV1) RemCdrs(attrs utils.AttrRemCdrs, reply *string) error {
 
 // New way of removing CDRs
 func (apier *ApierV1) RemoveCDRs(attrs utils.RPCCDRsFilter, reply *string) error {
-	cdrsFilter, err := attrs.AsCDRsFilter(apier.Config.DefaultTimezone)
+	cdrsFilter, err := attrs.AsCDRsFilter(apier.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

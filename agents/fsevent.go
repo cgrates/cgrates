@@ -124,7 +124,8 @@ func (fsev FSEvent) GetDestination(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	return utils.FirstNonEmpty(fsev[fieldName], fsev[DESTINATION], fsev[CALL_DEST_NR], fsev[SIP_REQ_USER])
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[DESTINATION],
+		fsev[CALL_DEST_NR], fsev[SIP_REQ_USER])
 }
 
 // Original dialed destination number, useful in case of unpark
@@ -138,7 +139,8 @@ func (fsev FSEvent) GetCategory(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	return utils.FirstNonEmpty(fsev[fieldName], fsev[CATEGORY], config.CgrConfig().DefaultCategory)
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[CATEGORY],
+		config.CgrConfig().GeneralCfg().DefaultCategory)
 }
 
 func (fsev FSEvent) GetUUID() string {
@@ -153,7 +155,8 @@ func (fsev FSEvent) GetTenant(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	return utils.FirstNonEmpty(fsev[fieldName], fsev[CSTMID], config.CgrConfig().DefaultTenant)
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[CSTMID],
+		config.CgrConfig().GeneralCfg().DefaultTenant)
 }
 
 func (fsev FSEvent) GetReqType(fieldName string) string {
@@ -166,7 +169,8 @@ func (fsev FSEvent) GetReqType(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	return utils.FirstNonEmpty(fsev[fieldName], fsev[REQTYPE], reqTypeDetected, config.CgrConfig().DefaultReqType)
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[REQTYPE],
+		reqTypeDetected, config.CgrConfig().GeneralCfg().DefaultReqType)
 }
 
 func (fsev FSEvent) MissingParameter(timezone string) string {
@@ -289,7 +293,8 @@ func (fsev FSEvent) GetOriginatorIP(fieldName string) string {
 func (fsev FSEvent) GetExtraFields() map[string]string {
 	extraFields := make(map[string]string)
 	for _, fldRule := range config.CgrConfig().FsAgentCfg().ExtraFields {
-		if parsed, err := fsev.ParseEventValue(fldRule, config.CgrConfig().DefaultTimezone); err != nil {
+		if parsed, err := fsev.ParseEventValue(fldRule,
+			config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> error: %s parsing event rule: %+v", utils.FreeSWITCHAgent, err.Error(), fldRule))
 		} else {
 			extraFields[fldRule.Id] = parsed
@@ -396,7 +401,7 @@ func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]interface{}
 
 // V1AuthorizeArgs returns the arguments used in SMGv1.Authorize
 func (fsev FSEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
-	cgrEv, err := fsev.AsCGREvent(config.CgrConfig().DefaultTimezone)
+	cgrEv, err := fsev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return
 	}
@@ -424,7 +429,7 @@ func (fsev FSEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 
 // V1InitSessionArgs returns the arguments used in SessionSv1.InitSession
 func (fsev FSEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
-	cgrEv, err := fsev.AsCGREvent(config.CgrConfig().DefaultTimezone)
+	cgrEv, err := fsev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return
 	}
@@ -446,7 +451,7 @@ func (fsev FSEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 
 // V1TerminateSessionArgs returns the arguments used in SMGv1.TerminateSession
 func (fsev FSEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionArgs) {
-	cgrEv, err := fsev.AsCGREvent(config.CgrConfig().DefaultTimezone)
+	cgrEv, err := fsev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return
 	}

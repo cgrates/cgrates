@@ -94,8 +94,10 @@ var sTestsFilterIndexesSV1 = []func(t *testing.T){
 // Test start here
 func TestFIdxV1ITMySQL(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
-	rdsITdb, err = engine.NewRedisStorage(fmt.Sprintf("%s:%s", cfg.DataDbHost, cfg.DataDbPort), 10,
-		cfg.DataDbPass, cfg.DBDataEncoding, utils.REDIS_MAX_CONNS, nil, "")
+	rdsITdb, err = engine.NewRedisStorage(
+		fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
+		10, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+		utils.REDIS_MAX_CONNS, nil, "")
 
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
@@ -113,8 +115,9 @@ func TestFIdxV1ITMongo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if mgoITdb, err = engine.NewMongoStorage(mgoITCfg.DataDbHost, mgoITCfg.DataDbPort,
-		mgoITCfg.DataDbName, mgoITCfg.DataDbUser, mgoITCfg.DataDbPass,
+	if mgoITdb, err = engine.NewMongoStorage(mgoITCfg.DataDbCfg().DataDbHost,
+		mgoITCfg.DataDbCfg().DataDbPort, mgoITCfg.DataDbCfg().DataDbName,
+		mgoITCfg.DataDbCfg().DataDbUser, mgoITCfg.DataDbCfg().DataDbPass,
 		utils.DataDB, nil, mgoITCfg.CacheCfg()); err != nil {
 		t.Fatal(err)
 	}
@@ -182,7 +185,7 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 		Tenant: tenant,
 		ID:     "TestFilter",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},
@@ -280,7 +283,7 @@ func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 		Tenant: tenant,
 		ID:     "TestFilter2",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1002"},
@@ -466,7 +469,7 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 		Tenant: tenant,
 		ID:     "FLTR_1",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},
@@ -499,11 +502,11 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 		QueueLength: 10,
 		TTL:         time.Duration(10) * time.Second,
 		Metrics: []*utils.MetricWithParams{
-			&utils.MetricWithParams{
+			{
 				MetricID:   "*sum",
 				Parameters: "",
 			},
-			&utils.MetricWithParams{
+			{
 				MetricID:   "*acd",
 				Parameters: "",
 			},
@@ -574,7 +577,7 @@ func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 		Tenant: tenant,
 		ID:     "FLTR_2",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},
@@ -607,11 +610,11 @@ func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 		QueueLength: 10,
 		TTL:         time.Duration(10) * time.Second,
 		Metrics: []*utils.MetricWithParams{
-			&utils.MetricWithParams{
+			{
 				MetricID:   "*sum",
 				Parameters: "",
 			},
-			&utils.MetricWithParams{
+			{
 				MetricID:   "*acd",
 				Parameters: "",
 			},
@@ -734,7 +737,7 @@ func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 		Tenant: tenant,
 		ID:     "FLTR_RES_RCFG1",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},
@@ -830,7 +833,7 @@ func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 		Tenant: tenant,
 		ID:     "FLTR_2",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},
@@ -972,7 +975,7 @@ func testV1FIdxSetSupplierProfileIndexes(t *testing.T) {
 		Tenant: tenant,
 		ID:     "FLTR_1",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},
@@ -1001,7 +1004,7 @@ func testV1FIdxSetSupplierProfileIndexes(t *testing.T) {
 		Sorting:           "Sort1",
 		SortingParameters: []string{"Param1", "Param2"},
 		Suppliers: []*engine.Supplier{
-			&engine.Supplier{
+			{
 				ID:            "SPL1",
 				RatingPlanIDs: []string{"RP1"},
 				FilterIDs:     []string{"FLTR_1"},
@@ -1074,7 +1077,7 @@ func testV1FIdxSetSecondSupplierProfileIndexes(t *testing.T) {
 		Tenant: tenant,
 		ID:     "FLTR_2",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},
@@ -1103,7 +1106,7 @@ func testV1FIdxSetSecondSupplierProfileIndexes(t *testing.T) {
 		Sorting:           "Sort1",
 		SortingParameters: []string{"Param1", "Param2"},
 		Suppliers: []*engine.Supplier{
-			&engine.Supplier{
+			{
 				ID:            "SPL1",
 				RatingPlanIDs: []string{"RP1"},
 				FilterIDs:     []string{"FLTR_2"},
@@ -1228,7 +1231,7 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 		Tenant: tenant,
 		ID:     "FLTR_1",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},
@@ -1260,7 +1263,7 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FieldName:  "FL1",
 				Initial:    "In1",
 				Substitute: config.NewRSRParsersMustCompile("Al1", true),
@@ -1335,7 +1338,7 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 		Tenant: tenant,
 		ID:     "FLTR_2",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},
@@ -1367,7 +1370,7 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FieldName:  "FL1",
 				Initial:    "In1",
 				Substitute: config.NewRSRParsersMustCompile("Al1", true),

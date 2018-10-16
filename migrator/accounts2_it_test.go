@@ -63,32 +63,41 @@ func TestAccMigrateWithInternal(t *testing.T) {
 }
 
 func testAcc2ITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(acc2CfgIn.DataDbType,
-		acc2CfgIn.DataDbHost, acc2CfgIn.DataDbPort, acc2CfgIn.DataDbName,
-		acc2CfgIn.DataDbUser, acc2CfgIn.DataDbPass, acc2CfgIn.DBDataEncoding,
+	dataDBIn, err := NewMigratorDataDB(acc2CfgIn.DataDbCfg().DataDbType,
+		acc2CfgIn.DataDbCfg().DataDbHost, acc2CfgIn.DataDbCfg().DataDbPort,
+		acc2CfgIn.DataDbCfg().DataDbName, acc2CfgIn.DataDbCfg().DataDbUser,
+		acc2CfgIn.DataDbCfg().DataDbPass, acc2CfgIn.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		t.Error(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(acc2CfgOut.DataDbType,
-		acc2CfgOut.DataDbHost, acc2CfgOut.DataDbPort, acc2CfgOut.DataDbName,
-		acc2CfgOut.DataDbUser, acc2CfgOut.DataDbPass, acc2CfgOut.DBDataEncoding,
+	dataDBOut, err := NewMigratorDataDB(acc2CfgOut.DataDbCfg().DataDbType,
+		acc2CfgOut.DataDbCfg().DataDbHost, acc2CfgOut.DataDbCfg().DataDbPort,
+		acc2CfgOut.DataDbCfg().DataDbName, acc2CfgOut.DataDbCfg().DataDbUser,
+		acc2CfgOut.DataDbCfg().DataDbPass, acc2CfgOut.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		t.Error(err)
 	}
 
-	storDBIn, err := NewMigratorStorDB(acc2CfgIn.StorDBType,
-		acc2CfgIn.StorDBHost, acc2CfgIn.StorDBPort, acc2CfgIn.StorDBName,
-		acc2CfgIn.StorDBUser, acc2CfgIn.StorDBPass, acc2CfgIn.StorDBMaxOpenConns,
-		acc2CfgIn.StorDBMaxIdleConns, acc2CfgIn.StorDBConnMaxLifetime, acc2CfgIn.StorDBCDRSIndexes)
+	storDBIn, err := NewMigratorStorDB(acc2CfgIn.StorDbCfg().StorDBType,
+		acc2CfgIn.StorDbCfg().StorDBHost, acc2CfgIn.StorDbCfg().StorDBPort,
+		acc2CfgIn.StorDbCfg().StorDBName, acc2CfgIn.StorDbCfg().StorDBUser,
+		acc2CfgIn.StorDbCfg().StorDBPass,
+		acc2CfgIn.StorDbCfg().StorDBMaxOpenConns,
+		acc2CfgIn.StorDbCfg().StorDBMaxIdleConns,
+		acc2CfgIn.StorDbCfg().StorDBConnMaxLifetime,
+		acc2CfgIn.StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {
 		t.Error(err)
 	}
-	storDBOut, err := NewMigratorStorDB(acc2CfgOut.StorDBType,
-		acc2CfgOut.StorDBHost, acc2CfgOut.StorDBPort, acc2CfgOut.StorDBName,
-		acc2CfgOut.StorDBUser, acc2CfgOut.StorDBPass, acc2CfgOut.StorDBMaxOpenConns,
-		acc2CfgOut.StorDBMaxIdleConns, acc2CfgOut.StorDBConnMaxLifetime, acc2CfgOut.StorDBCDRSIndexes)
+	storDBOut, err := NewMigratorStorDB(acc2CfgOut.StorDbCfg().StorDBType,
+		acc2CfgOut.StorDbCfg().StorDBHost, acc2CfgOut.StorDbCfg().StorDBPort,
+		acc2CfgOut.StorDbCfg().StorDBName, acc2CfgOut.StorDbCfg().StorDBUser,
+		acc2CfgOut.StorDbCfg().StorDBPass, acc2CfgOut.StorDbCfg().StorDBMaxOpenConns,
+		acc2CfgOut.StorDbCfg().StorDBMaxIdleConns,
+		acc2CfgOut.StorDbCfg().StorDBConnMaxLifetime,
+		acc2CfgOut.StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {
 		t.Error(err)
 	}
@@ -122,7 +131,7 @@ func testAcc2ITFlush(t *testing.T) {
 
 func testAcc2ITMigrate(t *testing.T) {
 	timingSlice := []*engine.RITiming{
-		&engine.RITiming{
+		{
 			Years:     utils.Years{},
 			Months:    utils.Months{},
 			MonthDays: utils.MonthDays{},
@@ -139,9 +148,9 @@ func testAcc2ITMigrate(t *testing.T) {
 	v1Acc := &v1Account{
 		Id: "*OUT:CUSTOMER_1:rif",
 		BalanceMap: map[string]v1BalanceChain{
-			utils.DATA:  v1BalanceChain{v1b},
-			utils.VOICE: v1BalanceChain{v1b},
-			utils.MONETARY: v1BalanceChain{
+			utils.DATA:  {v1b},
+			utils.VOICE: {v1b},
+			utils.MONETARY: {
 				&v1Balance{Value: 21,
 					ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 					Timings:        timingSlice}}}}
@@ -188,9 +197,9 @@ func testAcc2ITMigrate(t *testing.T) {
 	testAccount := &engine.Account{
 		ID: "CUSTOMER_1:rif",
 		BalanceMap: map[string]engine.Balances{
-			utils.DATA:     engine.Balances{v2d},
-			utils.VOICE:    engine.Balances{v2b},
-			utils.MONETARY: engine.Balances{m2}},
+			utils.DATA:     {v2d},
+			utils.VOICE:    {v2b},
+			utils.MONETARY: {m2}},
 		UnitCounters:   engine.UnitCounters{},
 		ActionTriggers: engine.ActionTriggers{},
 	}

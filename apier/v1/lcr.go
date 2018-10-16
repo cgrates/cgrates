@@ -27,12 +27,15 @@ import (
 
 // Computes the LCR for a specific request emulating a call
 func (self *ApierV1) GetLcr(lcrReq engine.LcrRequest, lcrReply *engine.LcrReply) error {
-	cd, err := lcrReq.AsCallDescriptor(self.Config.DefaultTimezone)
+	cd, err := lcrReq.AsCallDescriptor(self.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return err
 	}
 	var lcrQried engine.LCRCost
-	if err := self.Responder.GetLCR(&engine.AttrGetLcr{CallDescriptor: cd, LCRFilter: lcrReq.LCRFilter, Paginator: lcrReq.Paginator}, &lcrQried); err != nil {
+	if err := self.Responder.GetLCR(&engine.AttrGetLcr{
+		CallDescriptor: cd,
+		LCRFilter:      lcrReq.LCRFilter,
+		Paginator:      lcrReq.Paginator}, &lcrQried); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if lcrQried.Entry == nil {
@@ -60,7 +63,7 @@ func (self *ApierV1) GetLcr(lcrReq engine.LcrRequest, lcrReply *engine.LcrReply)
 
 // Computes the LCR for a specific request emulating a call, returns a comma separated list of suppliers
 func (self *ApierV1) GetLcrSuppliers(lcrReq engine.LcrRequest, suppliers *string) (err error) {
-	cd, err := lcrReq.AsCallDescriptor(self.Config.DefaultTimezone)
+	cd, err := lcrReq.AsCallDescriptor(self.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return err
 	}

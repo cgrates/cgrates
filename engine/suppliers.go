@@ -432,7 +432,8 @@ func (args *ArgsGetSuppliers) asOptsGetSuppliers() (opts *optsGetSuppliers, err 
 			utils.Destination, utils.SetupTime, utils.Usage}); err != nil {
 			return
 		}
-		cd, err := NewCallDescriptorFromCGREvent(&args.CGREvent, config.CgrConfig().DefaultTimezone)
+		cd, err := NewCallDescriptorFromCGREvent(&args.CGREvent,
+			config.CgrConfig().GeneralCfg().DefaultTimezone)
 		if err != nil {
 			return nil, err
 		}

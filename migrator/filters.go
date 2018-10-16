@@ -29,7 +29,7 @@ import (
 
 func (m *Migrator) migrateCurrentRequestFilter() (err error) {
 	var ids []string
-	tenant := config.CgrConfig().DefaultTenant
+	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.FilterPrefix)
 	if err != nil {
 		return err

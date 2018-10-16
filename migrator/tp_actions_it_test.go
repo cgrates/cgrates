@@ -66,23 +66,25 @@ func testTpActITConnect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	storDBIn, err := NewMigratorStorDB(tpActCfgIn.StorDBType, tpActCfgIn.StorDBHost,
-		tpActCfgIn.StorDBPort, tpActCfgIn.StorDBName,
-		tpActCfgIn.StorDBUser, tpActCfgIn.StorDBPass,
-		config.CgrConfig().StorDBMaxOpenConns,
-		config.CgrConfig().StorDBMaxIdleConns,
-		config.CgrConfig().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDBCDRSIndexes)
+	storDBIn, err := NewMigratorStorDB(tpActCfgIn.StorDbCfg().StorDBType,
+		tpActCfgIn.StorDbCfg().StorDBHost, tpActCfgIn.StorDbCfg().StorDBPort,
+		tpActCfgIn.StorDbCfg().StorDBName, tpActCfgIn.StorDbCfg().StorDBUser,
+		tpActCfgIn.StorDbCfg().StorDBPass,
+		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
+		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
+		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDBOut, err := NewMigratorStorDB(tpActCfgOut.StorDBType,
-		tpActCfgOut.StorDBHost, tpActCfgOut.StorDBPort, tpActCfgOut.StorDBName,
-		tpActCfgOut.StorDBUser, tpActCfgOut.StorDBPass,
-		config.CgrConfig().StorDBMaxOpenConns,
-		config.CgrConfig().StorDBMaxIdleConns,
-		config.CgrConfig().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDBCDRSIndexes)
+	storDBOut, err := NewMigratorStorDB(tpActCfgOut.StorDbCfg().StorDBType,
+		tpActCfgOut.StorDbCfg().StorDBHost, tpActCfgOut.StorDbCfg().StorDBPort,
+		tpActCfgOut.StorDbCfg().StorDBName, tpActCfgOut.StorDbCfg().StorDBUser,
+		tpActCfgOut.StorDbCfg().StorDBPass,
+		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
+		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
+		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -94,23 +96,23 @@ func testTpActITConnect(t *testing.T) {
 
 func testTpActITFlush(t *testing.T) {
 	if err := tpActMigrator.storDBIn.StorDB().Flush(
-		path.Join(tpActCfgIn.DataFolderPath, "storage", tpActCfgIn.StorDBType)); err != nil {
+		path.Join(tpActCfgIn.DataFolderPath, "storage", tpActCfgIn.StorDbCfg().StorDBType)); err != nil {
 		t.Error(err)
 	}
 
 	if err := tpActMigrator.storDBOut.StorDB().Flush(
-		path.Join(tpActCfgOut.DataFolderPath, "storage", tpActCfgOut.StorDBType)); err != nil {
+		path.Join(tpActCfgOut.DataFolderPath, "storage", tpActCfgOut.StorDbCfg().StorDBType)); err != nil {
 		t.Error(err)
 	}
 }
 
 func testTpActITPopulate(t *testing.T) {
 	tpActions = []*utils.TPActions{
-		&utils.TPActions{
+		{
 			TPid: "TPAcc",
 			ID:   "ID",
 			Actions: []*utils.TPAction{
-				&utils.TPAction{
+				{
 					Identifier:      "*log",
 					BalanceId:       "BalID1",
 					BalanceUuid:     "",
@@ -130,7 +132,7 @@ func testTpActITPopulate(t *testing.T) {
 					BalanceDisabled: "false",
 					Weight:          11,
 				},
-				&utils.TPAction{
+				{
 					Identifier:      "*topup_reset",
 					BalanceId:       "BalID2",
 					BalanceUuid:     "",

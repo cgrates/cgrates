@@ -101,22 +101,23 @@ func TestStatsQueueITMove(t *testing.T) {
 }
 
 func testStsITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(stsCfgIn.DataDbType,
-		stsCfgIn.DataDbHost, stsCfgIn.DataDbPort, stsCfgIn.DataDbName,
-		stsCfgIn.DataDbUser, stsCfgIn.DataDbPass, stsCfgIn.DBDataEncoding,
+	dataDBIn, err := NewMigratorDataDB(stsCfgIn.DataDbCfg().DataDbType,
+		stsCfgIn.DataDbCfg().DataDbHost, stsCfgIn.DataDbCfg().DataDbPort,
+		stsCfgIn.DataDbCfg().DataDbName, stsCfgIn.DataDbCfg().DataDbUser,
+		stsCfgIn.DataDbCfg().DataDbPass, stsCfgIn.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(stsCfgOut.DataDbType,
-		stsCfgOut.DataDbHost, stsCfgOut.DataDbPort, stsCfgOut.DataDbName,
-		stsCfgOut.DataDbUser, stsCfgOut.DataDbPass, stsCfgOut.DBDataEncoding,
+	dataDBOut, err := NewMigratorDataDB(stsCfgOut.DataDbCfg().DataDbType,
+		stsCfgOut.DataDbCfg().DataDbHost, stsCfgOut.DataDbCfg().DataDbPort,
+		stsCfgOut.DataDbCfg().DataDbName, stsCfgOut.DataDbCfg().DataDbUser,
+		stsCfgOut.DataDbCfg().DataDbPass, stsCfgOut.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}
-	stsMigrator, err = NewMigrator(dataDBIn, dataDBOut,
-		nil, nil,
+	stsMigrator, err = NewMigrator(dataDBIn, dataDBOut, nil, nil,
 		false, false, false)
 	if err != nil {
 		log.Fatal(err)
@@ -194,7 +195,10 @@ func testStsITMigrateAndMove(t *testing.T) {
 		"PddInterval", []string{v1Sts.PddInterval[0].String()})
 	filters = append(filters, x)
 
-	filter := &engine.Filter{Tenant: config.CgrConfig().DefaultTenant, ID: v1Sts.Id, Rules: filters}
+	filter := &engine.Filter{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     v1Sts.Id,
+		Rules:  filters}
 
 	sqp := &engine.StatQueueProfile{
 		Tenant:      "cgrates.org",
@@ -203,9 +207,9 @@ func testStsITMigrateAndMove(t *testing.T) {
 		QueueLength: 10,
 		TTL:         time.Duration(0) * time.Second,
 		Metrics: []*utils.MetricWithParams{
-			&utils.MetricWithParams{MetricID: "*asr", Parameters: ""},
-			&utils.MetricWithParams{MetricID: "*acd", Parameters: ""},
-			&utils.MetricWithParams{MetricID: "*acc", Parameters: ""},
+			{MetricID: "*asr", Parameters: ""},
+			{MetricID: "*acd", Parameters: ""},
+			{MetricID: "*acc", Parameters: ""},
 		},
 		ThresholdIDs: []string{"Test"},
 		Blocker:      false,
@@ -213,7 +217,8 @@ func testStsITMigrateAndMove(t *testing.T) {
 		Weight:       float64(0),
 		MinItems:     0,
 	}
-	sq := &engine.StatQueue{Tenant: config.CgrConfig().DefaultTenant,
+	sq := &engine.StatQueue{
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        v1Sts.Id,
 		SQMetrics: make(map[string]engine.StatMetric),
 	}

@@ -46,7 +46,7 @@ type v1AttributeProfile struct {
 
 func (m *Migrator) migrateCurrentAttributeProfile() (err error) {
 	var ids []string
-	tenant := config.CgrConfig().DefaultTenant
+	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.AttributeProfilePrefix)
 	if err != nil {
 		return err

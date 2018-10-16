@@ -65,9 +65,12 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		go func() {
 			defer close(thdsTaskChan)
 			var err error
-			thdS, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
-				cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-				cfg.RALsThresholdSConns, internalThdSChan, cfg.InternalTtl)
+			thdS, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
+				cfg.TLSClientKey, cfg.TLSClientCerificate,
+				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
+				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
+				cfg.RALsThresholdSConns, internalThdSChan,
+				cfg.GeneralCfg().InternalTtl)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to ThresholdS, error: %s", err.Error()))
 				exitChan <- true
@@ -83,9 +86,12 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		go func() {
 			defer close(cdrstatTaskChan)
 			var err error
-			cdrStats, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
-				cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-				cfg.RALsCDRStatSConns, internalCdrStatSChan, cfg.InternalTtl)
+			cdrStats, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
+				cfg.TLSClientKey, cfg.TLSClientCerificate,
+				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
+				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
+				cfg.RALsCDRStatSConns, internalCdrStatSChan,
+				cfg.GeneralCfg().InternalTtl)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to CDRStatS, error: %s", err.Error()))
 				exitChan <- true
@@ -101,9 +107,12 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		go func() {
 			defer close(statsTaskChan)
 			var err error
-			stats, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
-				cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-				cfg.RALsStatSConns, internalStatSChan, cfg.InternalTtl)
+			stats, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
+				cfg.TLSClientKey, cfg.TLSClientCerificate,
+				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
+				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
+				cfg.RALsStatSConns, internalStatSChan,
+				cfg.GeneralCfg().InternalTtl)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to StatS, error: %s", err.Error()))
 				exitChan <- true
@@ -117,9 +126,12 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		waitTasks = append(waitTasks, pubsubTaskChan)
 		go func() {
 			defer close(pubsubTaskChan)
-			if pubSubSConns, err := engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
-				cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-				cfg.RALsPubSubSConns, internalPubSubSChan, cfg.InternalTtl); err != nil {
+			if pubSubSConns, err := engine.NewRPCPool(rpcclient.POOL_FIRST,
+				cfg.TLSClientKey, cfg.TLSClientCerificate,
+				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
+				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
+				cfg.RALsPubSubSConns, internalPubSubSChan,
+				cfg.GeneralCfg().InternalTtl); err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to PubSubS: %s", err.Error()))
 				exitChan <- true
 				return
@@ -134,9 +146,12 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		waitTasks = append(waitTasks, aliasesTaskChan)
 		go func() {
 			defer close(aliasesTaskChan)
-			if aliaseSCons, err := engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
-				cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-				cfg.RALsAliasSConns, internalAliaseSChan, cfg.InternalTtl); err != nil {
+			if aliaseSCons, err := engine.NewRPCPool(rpcclient.POOL_FIRST,
+				cfg.TLSClientKey, cfg.TLSClientCerificate,
+				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
+				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
+				cfg.RALsAliasSConns, internalAliaseSChan,
+				cfg.GeneralCfg().InternalTtl); err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to AliaseS, error: %s", err.Error()))
 				exitChan <- true
 				return
@@ -153,9 +168,12 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		go func() {
 			defer close(usersTaskChan)
 			var err error
-			if usersConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TLSClientKey, cfg.TLSClientCerificate,
-				cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout,
-				cfg.RALsUserSConns, internalUserSChan, cfg.InternalTtl); err != nil {
+			if usersConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
+				cfg.TLSClientKey, cfg.TLSClientCerificate,
+				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
+				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
+				cfg.RALsUserSConns, internalUserSChan,
+				cfg.GeneralCfg().InternalTtl); err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect UserS, error: %s", err.Error()))
 				exitChan <- true
 				return
@@ -168,11 +186,20 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 	for _, chn := range waitTasks {
 		<-chn
 	}
-	responder := &engine.Responder{ExitChan: exitChan, MaxComputedUsage: cfg.RALsMaxComputedUsage}
-	responder.SetTimeToLive(cfg.ResponseCacheTTL, nil)
-	apierRpcV1 := &v1.ApierV1{StorDb: loadDb, DataManager: dm, CdrDb: cdrDb,
-		Config: cfg, Responder: responder, ServManager: serviceManager,
-		HTTPPoster: engine.NewHTTPPoster(cfg.HttpSkipTlsVerify, cfg.ReplyTimeout), FilterS: filterS}
+	responder := &engine.Responder{
+		ExitChan:         exitChan,
+		MaxComputedUsage: cfg.RALsMaxComputedUsage}
+	responder.SetTimeToLive(cfg.GeneralCfg().ResponseCacheTTL, nil)
+	apierRpcV1 := &v1.ApierV1{
+		StorDb:      loadDb,
+		DataManager: dm,
+		CdrDb:       cdrDb,
+		Config:      cfg,
+		Responder:   responder,
+		ServManager: serviceManager,
+		HTTPPoster: engine.NewHTTPPoster(cfg.GeneralCfg().HttpSkipTlsVerify,
+			cfg.GeneralCfg().ReplyTimeout),
+		FilterS: filterS}
 	if thdS != nil {
 		engine.SetThresholdS(thdS) // temporary architectural fix until we will have separate AccountS
 	}

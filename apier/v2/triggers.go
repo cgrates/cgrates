@@ -169,7 +169,8 @@ func (self *ApierV2) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 		}
 		var foundOne bool
 		for _, at := range account.ActionTriggers {
-			if updated, err := attr.UpdateActionTrigger(at, self.Config.DefaultTimezone); err != nil {
+			if updated, err := attr.UpdateActionTrigger(at,
+				self.Config.GeneralCfg().DefaultTimezone); err != nil {
 				return 0, err
 			} else if updated && !foundOne {
 				foundOne = true
@@ -177,7 +178,8 @@ func (self *ApierV2) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 		}
 		if !foundOne { // Did not find one to update, create a new AT
 			at := new(engine.ActionTrigger)
-			if updated, err := attr.UpdateActionTrigger(at, self.Config.DefaultTimezone); err != nil {
+			if updated, err := attr.UpdateActionTrigger(at,
+				self.Config.GeneralCfg().DefaultTimezone); err != nil {
 				return 0, err
 			} else if updated { // Adding a new AT
 				account.ActionTriggers = append(account.ActionTriggers, at)

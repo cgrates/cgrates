@@ -41,8 +41,10 @@ var sTestsDMit = []func(t *testing.T){
 
 func TestDMitRedis(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
-	dataDB, err := NewRedisStorage(fmt.Sprintf("%s:%s", cfg.DataDbHost, cfg.DataDbPort), 4,
-		cfg.DataDbPass, cfg.DBDataEncoding, utils.REDIS_MAX_CONNS, nil, "")
+	dataDB, err := NewRedisStorage(
+		fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
+		4, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+		utils.REDIS_MAX_CONNS, nil, "")
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	}
@@ -58,8 +60,9 @@ func TestDMitMongo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dataDB, err := NewMongoStorage(mgoITCfg.StorDBHost, mgoITCfg.StorDBPort,
-		mgoITCfg.StorDBName, mgoITCfg.StorDBUser, mgoITCfg.StorDBPass,
+	dataDB, err := NewMongoStorage(mgoITCfg.StorDbCfg().StorDBHost,
+		mgoITCfg.StorDbCfg().StorDBPort, mgoITCfg.StorDbCfg().StorDBName,
+		mgoITCfg.StorDbCfg().StorDBUser, mgoITCfg.StorDbCfg().StorDBPass,
 		utils.StorDB, nil, mgoITCfg.CacheCfg())
 	if err != nil {
 		t.Fatal("Could not connect to Mongo", err.Error())

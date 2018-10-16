@@ -83,8 +83,10 @@ var sTestsFilterIndexesSV1Ca = []func(t *testing.T){
 // Test start here
 func TestFIdxCaV1ITMySQL(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
-	rdsITdb, err := engine.NewRedisStorage(fmt.Sprintf("%s:%s", cfg.DataDbHost, cfg.DataDbPort), 10,
-		cfg.DataDbPass, cfg.DBDataEncoding, utils.REDIS_MAX_CONNS, nil, "")
+	rdsITdb, err := engine.NewRedisStorage(
+		fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
+		10, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+		utils.REDIS_MAX_CONNS, nil, "")
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	}
@@ -101,8 +103,9 @@ func TestFIdxCaV1ITMongo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	mgoITdb, err := engine.NewMongoStorage(mgoITCfg.DataDbHost, mgoITCfg.DataDbPort,
-		mgoITCfg.DataDbName, mgoITCfg.DataDbUser, mgoITCfg.DataDbPass,
+	mgoITdb, err := engine.NewMongoStorage(mgoITCfg.DataDbCfg().DataDbHost,
+		mgoITCfg.DataDbCfg().DataDbPort, mgoITCfg.DataDbCfg().DataDbName,
+		mgoITCfg.DataDbCfg().DataDbUser, mgoITCfg.DataDbCfg().DataDbPass,
 		utils.DataDB, nil, mgoITCfg.CacheCfg())
 	if err != nil {
 		t.Fatal(err)
@@ -185,12 +188,12 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "TestFilter",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				FieldName: utils.Account,
 				Type:      "*string",
 				Values:    []string{"1001"},
 			},
-			&engine.FilterRule{
+			{
 				FieldName: utils.EventType,
 				Type:      "*string",
 				Values:    []string{utils.BalanceUpdate},
@@ -275,12 +278,12 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "TestFilter2",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				FieldName: utils.Account,
 				Type:      "*string",
 				Values:    []string{"1002"},
 			},
-			&engine.FilterRule{
+			{
 				FieldName: utils.EventType,
 				Type:      "*string",
 				Values:    []string{utils.AccountUpdate},
@@ -351,12 +354,12 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "TestFilter3",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				FieldName: utils.Account,
 				Type:      "*string",
 				Values:    []string{"1003"},
 			},
-			&engine.FilterRule{
+			{
 				FieldName: utils.EventType,
 				Type:      "*string",
 				Values:    []string{utils.BalanceUpdate},
@@ -505,12 +508,12 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 		Tenant: tenant,
 		ID:     "FLTR_1",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				FieldName: utils.Account,
 				Type:      "*string",
 				Values:    []string{"1001"},
 			},
-			&engine.FilterRule{
+			{
 				FieldName: utils.EventType,
 				Type:      "*string",
 				Values:    []string{utils.AccountUpdate},
@@ -537,7 +540,7 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 		QueueLength: 10,
 		TTL:         time.Duration(10) * time.Second,
 		Metrics: []*utils.MetricWithParams{
-			&utils.MetricWithParams{
+			{
 				MetricID:   "*sum",
 				Parameters: "Val",
 			},
@@ -633,12 +636,12 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "FLTR_2",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				FieldName: utils.Account,
 				Type:      "*string",
 				Values:    []string{"1003"},
 			},
-			&engine.FilterRule{
+			{
 				FieldName: utils.EventType,
 				Type:      "*string",
 				Values:    []string{utils.BalanceUpdate},
@@ -664,7 +667,7 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 		QueueLength: 10,
 		TTL:         time.Duration(10) * time.Second,
 		Metrics: []*utils.MetricWithParams{
-			&utils.MetricWithParams{
+			{
 				MetricID:   "*sum",
 				Parameters: "",
 			},
@@ -701,12 +704,12 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "FLTR_3",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				FieldName: utils.Account,
 				Type:      "*string",
 				Values:    []string{"1003"},
 			},
-			&engine.FilterRule{
+			{
 				FieldName: utils.EventType,
 				Type:      "*string",
 				Values:    []string{utils.AccountUpdate},
@@ -843,12 +846,12 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "TestFilter",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				FieldName: utils.Account,
 				Type:      "*string",
 				Values:    []string{"1009"},
 			},
-			&engine.FilterRule{
+			{
 				FieldName: utils.Destination,
 				Type:      "*string",
 				Values:    []string{"+491511231234"},
@@ -873,13 +876,13 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FieldName:  utils.Account,
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("1001", true),
 				Append:     false,
 			},
-			&engine.Attribute{
+			{
 				FieldName:  utils.Subject,
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("1001", true),
@@ -932,12 +935,12 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "TestFilter2",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				FieldName: utils.Account,
 				Type:      "*string",
 				Values:    []string{"2009"},
 			},
-			&engine.FilterRule{
+			{
 				FieldName: utils.Destination,
 				Type:      "*string",
 				Values:    []string{"+492511231234"},
@@ -962,13 +965,13 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FieldName:  utils.Account,
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("1001", true),
 				Append:     false,
 			},
-			&engine.Attribute{
+			{
 				FieldName:  utils.Subject,
 				Initial:    "*any",
 				Substitute: config.NewRSRParsersMustCompile("1001", true),
@@ -1003,12 +1006,12 @@ func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "TestFilter3",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				FieldName: utils.Account,
 				Type:      "*string",
 				Values:    []string{"3009"},
 			},
-			&engine.FilterRule{
+			{
 				FieldName: utils.Destination,
 				Type:      "*string",
 				Values:    []string{"+492511231234"},
@@ -1144,17 +1147,17 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "FLTR_RES_RCFG1",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				FieldName: utils.Account,
 				Type:      "*string",
 				Values:    []string{"1001"},
 			},
-			&engine.FilterRule{
+			{
 				FieldName: utils.Subject,
 				Type:      "*string",
 				Values:    []string{"1002"},
 			},
-			&engine.FilterRule{
+			{
 				FieldName: utils.Destination,
 				Type:      "*string",
 				Values:    []string{"1001"},
@@ -1266,17 +1269,17 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "FLTR_RES_RCFG2",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				FieldName: utils.Account,
 				Type:      "*string",
 				Values:    []string{"2002"},
 			},
-			&engine.FilterRule{
+			{
 				FieldName: utils.Subject,
 				Type:      "*string",
 				Values:    []string{"2001"},
 			},
-			&engine.FilterRule{
+			{
 				FieldName: utils.Destination,
 				Type:      "*string",
 				Values:    []string{"2002"},
@@ -1337,17 +1340,17 @@ func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "FLTR_RES_RCFG3",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				FieldName: utils.Account,
 				Type:      "*string",
 				Values:    []string{"1002"},
 			},
-			&engine.FilterRule{
+			{
 				FieldName: utils.Subject,
 				Type:      "*string",
 				Values:    []string{"1001"},
 			},
-			&engine.FilterRule{
+			{
 				FieldName: utils.Destination,
 				Type:      "*string",
 				Values:    []string{"1002"},

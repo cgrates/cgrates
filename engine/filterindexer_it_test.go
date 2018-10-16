@@ -62,12 +62,14 @@ var sTests = []func(t *testing.T){
 
 func TestFilterIndexerITRedis(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
-	redisDB, err := NewRedisStorage(fmt.Sprintf("%s:%s", cfg.DataDbHost, cfg.DataDbPort), 4,
-		cfg.DataDbPass, cfg.DBDataEncoding, utils.REDIS_MAX_CONNS, nil, "")
+	redisDB, err := NewRedisStorage(
+		fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
+		4, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+		utils.REDIS_MAX_CONNS, nil, "")
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	}
-	cfgDBName = cfg.DataDbName
+	cfgDBName = cfg.DataDbCfg().DataDbName
 	dataManager = NewDataManager(redisDB)
 	for _, stest := range sTests {
 		t.Run("TestITRedis", stest)
@@ -80,13 +82,14 @@ func TestFilterIndexerITMongo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	mongoDB, err := NewMongoStorage(mgoITCfg.StorDBHost, mgoITCfg.StorDBPort,
-		mgoITCfg.StorDBName, mgoITCfg.StorDBUser, mgoITCfg.StorDBPass,
+	mongoDB, err := NewMongoStorage(mgoITCfg.StorDbCfg().StorDBHost,
+		mgoITCfg.StorDbCfg().StorDBPort, mgoITCfg.StorDbCfg().StorDBName,
+		mgoITCfg.StorDbCfg().StorDBUser, mgoITCfg.StorDbCfg().StorDBPass,
 		utils.StorDB, nil, mgoITCfg.CacheCfg())
 	if err != nil {
 		t.Fatal(err)
 	}
-	cfgDBName = mgoITCfg.StorDBName
+	cfgDBName = mgoITCfg.StorDbCfg().StorDBName
 	dataManager = NewDataManager(mongoDB)
 	for _, stest := range sTests {
 		t.Run("TestITMongo", stest)
@@ -122,21 +125,21 @@ func testITIsDBEmpty(t *testing.T) {
 
 func testITSetFilterIndexes(t *testing.T) {
 	idxes := map[string]utils.StringMap{
-		"*string:Account:1001": utils.StringMap{
+		"*string:Account:1001": {
 			"RL1": true,
 		},
-		"*string:Account:1002": utils.StringMap{
+		"*string:Account:1002": {
 			"RL1": true,
 			"RL2": true,
 		},
-		"*string:Account:dan": utils.StringMap{
+		"*string:Account:dan": {
 			"RL2": true,
 		},
-		"*string:Subject:dan": utils.StringMap{
+		"*string:Subject:dan": {
 			"RL2": true,
 			"RL3": true,
 		},
-		utils.ConcatenatedKey(utils.META_NONE, utils.ANY, utils.ANY): utils.StringMap{
+		utils.ConcatenatedKey(utils.META_NONE, utils.ANY, utils.ANY): {
 			"RL4": true,
 			"RL5": true,
 		},
@@ -150,21 +153,21 @@ func testITSetFilterIndexes(t *testing.T) {
 
 func testITGetFilterIndexes(t *testing.T) {
 	eIdxes := map[string]utils.StringMap{
-		"*string:Account:1001": utils.StringMap{
+		"*string:Account:1001": {
 			"RL1": true,
 		},
-		"*string:Account:1002": utils.StringMap{
+		"*string:Account:1002": {
 			"RL1": true,
 			"RL2": true,
 		},
-		"*string:Account:dan": utils.StringMap{
+		"*string:Account:dan": {
 			"RL2": true,
 		},
-		"*string:Subject:dan": utils.StringMap{
+		"*string:Subject:dan": {
 			"RL2": true,
 			"RL3": true,
 		},
-		utils.ConcatenatedKey(utils.META_NONE, utils.ANY, utils.ANY): utils.StringMap{
+		utils.ConcatenatedKey(utils.META_NONE, utils.ANY, utils.ANY): {
 			"RL4": true,
 			"RL5": true,
 		},
@@ -173,7 +176,7 @@ func testITGetFilterIndexes(t *testing.T) {
 		"Subject": "dan",
 	}
 	expectedsbjDan := map[string]utils.StringMap{
-		"*string:Subject:dan": utils.StringMap{
+		"*string:Subject:dan": {
 			"RL2": true,
 			"RL3": true,
 		},
@@ -224,7 +227,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "Filter1",
 		Rules: []*FilterRule{
-			&FilterRule{
+			{
 				FieldName: "EventType",
 				Type:      "*string",
 				Values:    []string{"Event1", "Event2"},
@@ -268,11 +271,11 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringMap{
-		"*string:EventType:Event1": utils.StringMap{
+		"*string:EventType:Event1": {
 			"THD_Test":  true,
 			"THD_Test2": true,
 		},
-		"*string:EventType:Event2": utils.StringMap{
+		"*string:EventType:Event2": {
 			"THD_Test":  true,
 			"THD_Test2": true,
 		},
@@ -291,7 +294,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "Filter2",
 		Rules: []*FilterRule{
-			&FilterRule{
+			{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001", "1002"},
@@ -311,16 +314,16 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes = map[string]utils.StringMap{
-		"*string:Account:1001": utils.StringMap{
+		"*string:Account:1001": {
 			"THD_Test": true,
 		},
-		"*string:Account:1002": utils.StringMap{
+		"*string:Account:1002": {
 			"THD_Test": true,
 		},
-		"*string:EventType:Event1": utils.StringMap{
+		"*string:EventType:Event1": {
 			"THD_Test2": true,
 		},
-		"*string:EventType:Event2": utils.StringMap{
+		"*string:EventType:Event2": {
 			"THD_Test2": true,
 		},
 	}
@@ -336,7 +339,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "Filter3",
 		Rules: []*FilterRule{
-			&FilterRule{
+			{
 				FieldName: "Destination",
 				Type:      "*string",
 				Values:    []string{"10", "20"},
@@ -356,17 +359,17 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes = map[string]utils.StringMap{
-		"*string:Destination:10": utils.StringMap{
+		"*string:Destination:10": {
 			"THD_Test": true,
 		},
-		"*string:Destination:20": utils.StringMap{
+		"*string:Destination:20": {
 			"THD_Test": true,
 		},
-		"*string:EventType:Event1": utils.StringMap{
+		"*string:EventType:Event1": {
 			"THD_Test":  true,
 			"THD_Test2": true,
 		},
-		"*string:EventType:Event2": utils.StringMap{
+		"*string:EventType:Event2": {
 			"THD_Test":  true,
 			"THD_Test2": true,
 		},
@@ -399,7 +402,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "AttrFilter",
 		Rules: []*FilterRule{
-			&FilterRule{
+			{
 				FieldName: "EventType",
 				Type:      "*string",
 				Values:    []string{"Event1", "Event2"},
@@ -422,7 +425,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		},
 		Contexts: []string{"con1", "con2"},
 		Attributes: []*Attribute{
-			&Attribute{
+			{
 				FieldName:  "FN1",
 				Initial:    "Init1",
 				Substitute: config.NewRSRParsersMustCompile("Val1", true),
@@ -436,10 +439,10 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringMap{
-		"*string:EventType:Event1": utils.StringMap{
+		"*string:EventType:Event1": {
 			"AttrPrf": true,
 		},
-		"*string:EventType:Event2": utils.StringMap{
+		"*string:EventType:Event2": {
 			"AttrPrf": true,
 		},
 	}
@@ -501,7 +504,7 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "Filter1",
 		Rules: []*FilterRule{
-			&FilterRule{
+			{
 				FieldName: "EventType",
 				Type:      "*string",
 				Values:    []string{"Event1", "Event2"},
@@ -531,10 +534,10 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringMap{
-		"*string:EventType:Event1": utils.StringMap{
+		"*string:EventType:Event1": {
 			"THD_Test": true,
 		},
-		"*string:EventType:Event2": utils.StringMap{
+		"*string:EventType:Event2": {
 			"THD_Test": true,
 		},
 	}
@@ -553,13 +556,13 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes = map[string]utils.StringMap{
-		"*string:Account:1001": utils.StringMap{
+		"*string:Account:1001": {
 			"THD_Test": true,
 		},
-		"*string:EventType:Event1": utils.StringMap{
+		"*string:EventType:Event1": {
 			"THD_Test": true,
 		},
-		"*string:EventType:Event2": utils.StringMap{
+		"*string:EventType:Event2": {
 			"THD_Test": true,
 		},
 	}
@@ -584,22 +587,22 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 
 func testITTestStoreFilterIndexesWithTransID(t *testing.T) {
 	idxes := map[string]utils.StringMap{
-		"*string:Account:1001": utils.StringMap{
+		"*string:Account:1001": {
 			"RL1": true,
 		},
-		"*string:Account:1002": utils.StringMap{
+		"*string:Account:1002": {
 			"RL1": true,
 			"RL2": true,
 		},
-		"*string:Account:dan": utils.StringMap{
+		"*string:Account:dan": {
 			"RL2": true,
 		},
-		"*string:Subject:dan": utils.StringMap{
+		"*string:Subject:dan": {
 			"RL2": true,
 			"RL3": true,
 		},
 		utils.ConcatenatedKey(utils.META_NONE,
-			utils.ANY, utils.ANY): utils.StringMap{
+			utils.ANY, utils.ANY): {
 			"RL4": true,
 			"RL5": true,
 		},
@@ -617,22 +620,22 @@ func testITTestStoreFilterIndexesWithTransID(t *testing.T) {
 		t.Error(err)
 	}
 	eIdx := map[string]utils.StringMap{
-		"*string:Account:1001": utils.StringMap{
+		"*string:Account:1001": {
 			"RL1": true,
 		},
-		"*string:Account:1002": utils.StringMap{
+		"*string:Account:1002": {
 			"RL1": true,
 			"RL2": true,
 		},
-		"*string:Account:dan": utils.StringMap{
+		"*string:Account:dan": {
 			"RL2": true,
 		},
-		"*string:Subject:dan": utils.StringMap{
+		"*string:Subject:dan": {
 			"RL2": true,
 			"RL3": true,
 		},
 		utils.ConcatenatedKey(utils.META_NONE,
-			utils.ANY, utils.ANY): utils.StringMap{
+			utils.ANY, utils.ANY): {
 			"RL4": true,
 			"RL5": true,
 		},
@@ -650,10 +653,10 @@ func testITTestStoreFilterIndexesWithTransID(t *testing.T) {
 
 func testITTestStoreFilterIndexesWithTransID2(t *testing.T) {
 	idxes := map[string]utils.StringMap{
-		"*string:Event:Event1": utils.StringMap{
+		"*string:Event:Event1": {
 			"RL1": true,
 		},
-		"*string:Event:Event2": utils.StringMap{
+		"*string:Event:Event2": {
 			"RL1": true,
 			"RL2": true,
 		},
@@ -718,7 +721,7 @@ func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringMap{
-		"*none:*any:*any": utils.StringMap{
+		"*none:*any:*any": {
 			"THD_Test":  true,
 			"THD_Test2": true,
 		},
@@ -756,7 +759,7 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 		Sorting:           "*weight",
 		SortingParameters: []string{},
 		Suppliers: []*Supplier{
-			&Supplier{
+			{
 				ID:                 "supplier1",
 				FilterIDs:          []string{""},
 				AccountIDs:         []string{""},
@@ -779,7 +782,7 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 		Sorting:           "*weight",
 		SortingParameters: []string{},
 		Suppliers: []*Supplier{
-			&Supplier{
+			{
 				ID:                 "supplier1",
 				FilterIDs:          []string{""},
 				AccountIDs:         []string{""},
@@ -800,7 +803,7 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringMap{
-		"*none:*any:*any": utils.StringMap{
+		"*none:*any:*any": {
 			"SPL_Weight":  true,
 			"SPL_Weight2": true,
 		},
@@ -857,11 +860,11 @@ func testITTestIndexingThresholds(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringMap{
-		"*string:Account:1001": utils.StringMap{
+		"*string:Account:1001": {
 			"TH1": true,
 			"TH2": true,
 		},
-		"*string:Account:1002": utils.StringMap{
+		"*string:Account:1002": {
 			"TH3": true,
 		},
 	}

@@ -66,23 +66,25 @@ func testTpDstRtITConnect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	storDBIn, err := NewMigratorStorDB(tpDstRtCfgIn.StorDBType, tpDstRtCfgIn.StorDBHost,
-		tpDstRtCfgIn.StorDBPort, tpDstRtCfgIn.StorDBName,
-		tpDstRtCfgIn.StorDBUser, tpDstRtCfgIn.StorDBPass,
-		config.CgrConfig().StorDBMaxOpenConns,
-		config.CgrConfig().StorDBMaxIdleConns,
-		config.CgrConfig().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDBCDRSIndexes)
+	storDBIn, err := NewMigratorStorDB(tpDstRtCfgIn.StorDbCfg().StorDBType,
+		tpDstRtCfgIn.StorDbCfg().StorDBHost, tpDstRtCfgIn.StorDbCfg().StorDBPort,
+		tpDstRtCfgIn.StorDbCfg().StorDBName, tpDstRtCfgIn.StorDbCfg().StorDBUser,
+		tpDstRtCfgIn.StorDbCfg().StorDBPass,
+		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
+		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
+		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDBOut, err := NewMigratorStorDB(tpDstRtCfgOut.StorDBType,
-		tpDstRtCfgOut.StorDBHost, tpDstRtCfgOut.StorDBPort, tpDstRtCfgOut.StorDBName,
-		tpDstRtCfgOut.StorDBUser, tpDstRtCfgOut.StorDBPass,
-		config.CgrConfig().StorDBMaxOpenConns,
-		config.CgrConfig().StorDBMaxIdleConns,
-		config.CgrConfig().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDBCDRSIndexes)
+	storDBOut, err := NewMigratorStorDB(tpDstRtCfgOut.StorDbCfg().StorDBType,
+		tpDstRtCfgOut.StorDbCfg().StorDBHost, tpDstRtCfgOut.StorDbCfg().StorDBPort,
+		tpDstRtCfgOut.StorDbCfg().StorDBName, tpDstRtCfgOut.StorDbCfg().StorDBUser,
+		tpDstRtCfgOut.StorDbCfg().StorDBPass,
+		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
+		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
+		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -94,23 +96,23 @@ func testTpDstRtITConnect(t *testing.T) {
 
 func testTpDstRtITFlush(t *testing.T) {
 	if err := tpDstRtMigrator.storDBIn.StorDB().Flush(
-		path.Join(tpDstRtCfgIn.DataFolderPath, "storage", tpDstRtCfgIn.StorDBType)); err != nil {
+		path.Join(tpDstRtCfgIn.DataFolderPath, "storage", tpDstRtCfgIn.StorDbCfg().StorDBType)); err != nil {
 		t.Error(err)
 	}
 
 	if err := tpDstRtMigrator.storDBOut.StorDB().Flush(
-		path.Join(tpDstRtCfgOut.DataFolderPath, "storage", tpDstRtCfgOut.StorDBType)); err != nil {
+		path.Join(tpDstRtCfgOut.DataFolderPath, "storage", tpDstRtCfgOut.StorDbCfg().StorDBType)); err != nil {
 		t.Error(err)
 	}
 }
 
 func testTpDstRtITPopulate(t *testing.T) {
 	tpDestinationRate = []*utils.TPDestinationRate{
-		&utils.TPDestinationRate{
+		{
 			TPid: utils.TEST_SQL,
 			ID:   "DR_FREESWITCH_USERS",
 			DestinationRates: []*utils.DestinationRate{
-				&utils.DestinationRate{
+				{
 					DestinationId:    "FS_USERS",
 					RateId:           "RT_FS_USERS",
 					RoundingMethod:   "*up",

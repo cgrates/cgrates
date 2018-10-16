@@ -167,13 +167,13 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FieldName:  utils.Account,
 				Initial:    utils.ANY,
 				Substitute: config.NewRSRParsersMustCompile("1001", true),
 				Append:     false,
 			},
-			&engine.Attribute{
+			{
 				FieldName:  utils.Subject,
 				Initial:    utils.ANY,
 				Substitute: config.NewRSRParsersMustCompile("1001", true),
@@ -212,7 +212,7 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FieldName:  utils.Account,
 				Initial:    utils.ANY,
 				Substitute: config.NewRSRParsersMustCompile("1001", true),
@@ -262,7 +262,7 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FieldName:  utils.Account,
 				Initial:    utils.ANY,
 				Substitute: config.NewRSRParsersMustCompile("1001", true),
@@ -367,13 +367,13 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FieldName:  utils.Account,
 				Initial:    "1008",
 				Substitute: config.NewRSRParsersMustCompile("1001", true),
 				Append:     false,
 			},
-			&engine.Attribute{
+			{
 				FieldName:  utils.Subject,
 				Initial:    utils.ANY,
 				Substitute: config.NewRSRParsersMustCompile(utils.META_NONE, true),
@@ -434,13 +434,13 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FieldName:  utils.Account,
 				Initial:    "1008",
 				Substitute: config.NewRSRParsersMustCompile("1001", true),
 				Append:     false,
 			},
-			&engine.Attribute{
+			{
 				FieldName:  utils.Subject,
 				Initial:    utils.ANY,
 				Substitute: config.NewRSRParsersMustCompile(utils.META_NONE, true),
@@ -513,13 +513,13 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FieldName:  utils.Account,
 				Initial:    "1008",
 				Substitute: config.NewRSRParsersMustCompile("1001", true),
 				Append:     false,
 			},
-			&engine.Attribute{
+			{
 				FieldName:  utils.Subject,
 				Initial:    "1008",
 				Substitute: config.NewRSRParsersMustCompile(utils.META_NONE, true),
@@ -560,7 +560,7 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 
 func testAttributeSProcessEventWithHeader(t *testing.T) {
 	attrPrf1 := &engine.AttributeProfile{
-		Tenant:    config.CgrConfig().DefaultTenant,
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_Header",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:Field1:Value1"},
@@ -568,7 +568,7 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FieldName:  "Field2",
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("~Field1", true),
@@ -587,7 +587,7 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 	attrArgs := &engine.AttrArgsProcessEvent{
 		ProcessRuns: utils.IntPointer(1),
 		CGREvent: utils.CGREvent{
-			Tenant:  config.CgrConfig().DefaultTenant,
+			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:      "HeaderEventForAttribute",
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
@@ -599,7 +599,7 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_Header"},
 		AlteredFields:   []string{"Field2"},
 		CGREvent: &utils.CGREvent{
-			Tenant:  config.CgrConfig().DefaultTenant,
+			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:      "HeaderEventForAttribute",
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
@@ -639,7 +639,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FieldName:  "FL1",
 				Initial:    "In1",
 				Substitute: config.NewRSRParsersMustCompile("Al1", true),
@@ -668,13 +668,13 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 
 func testAttributeSUpdateAlsPrf(t *testing.T) {
 	alsPrf.Attributes = []*engine.Attribute{
-		&engine.Attribute{
+		{
 			FieldName:  "FL1",
 			Initial:    "In1",
 			Substitute: config.NewRSRParsersMustCompile("Al1", true),
 			Append:     true,
 		},
-		&engine.Attribute{
+		{
 			FieldName:  "FL2",
 			Initial:    "In2",
 			Substitute: config.NewRSRParsersMustCompile("Al2", true),
@@ -727,7 +727,7 @@ func testAttributeSSetAlsPrf2(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FieldName: utils.Subject,
 				Initial:   utils.ANY,
 				Substitute: config.RSRParsers{
@@ -771,7 +771,7 @@ func testAttributeSSetAlsPrf3(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FieldName: utils.Subject,
 				Initial:   utils.ANY,
 				Substitute: config.RSRParsers{
@@ -802,7 +802,7 @@ func testAttributeSSetAlsPrf4(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FieldName: utils.Subject,
 				Initial:   utils.ANY,
 				Substitute: config.RSRParsers{

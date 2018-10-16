@@ -65,8 +65,8 @@ var (
 		},
 	}
 	chargerEvents = []*utils.CGREvent{
-		&utils.CGREvent{
-			Tenant:  config.CgrConfig().DefaultTenant,
+		{
+			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:      utils.GenUUID(),
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
@@ -76,8 +76,8 @@ var (
 				utils.Weight:     "200.0",
 			},
 		},
-		&utils.CGREvent{
-			Tenant:  config.CgrConfig().DefaultTenant,
+		{
+			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:      utils.GenUUID(),
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
@@ -85,8 +85,8 @@ var (
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			},
 		},
-		&utils.CGREvent{
-			Tenant:  config.CgrConfig().DefaultTenant,
+		{
+			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:      utils.GenUUID(),
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
@@ -113,15 +113,15 @@ func TestChargerPopulateChargerService(t *testing.T) {
 
 func TestChargerAddFilter(t *testing.T) {
 	fltrCP1 := &Filter{
-		Tenant: config.CgrConfig().DefaultTenant,
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_1",
 		Rules: []*FilterRule{
-			&FilterRule{
+			{
 				Type:      MetaString,
 				FieldName: "Charger",
 				Values:    []string{"ChargerProfile1"},
 			},
-			&FilterRule{
+			{
 				Type:      MetaGreaterOrEqual,
 				FieldName: "UsageInterval",
 				Values:    []string{(1 * time.Second).String()},
@@ -130,10 +130,10 @@ func TestChargerAddFilter(t *testing.T) {
 	}
 	dmCharger.SetFilter(fltrCP1)
 	fltrCP2 := &Filter{
-		Tenant: config.CgrConfig().DefaultTenant,
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_2",
 		Rules: []*FilterRule{
-			&FilterRule{
+			{
 				Type:      MetaString,
 				FieldName: "Charger",
 				Values:    []string{"ChargerProfile2"},
@@ -142,10 +142,10 @@ func TestChargerAddFilter(t *testing.T) {
 	}
 	dmCharger.SetFilter(fltrCP2)
 	fltrCPPrefix := &Filter{
-		Tenant: config.CgrConfig().DefaultTenant,
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_3",
 		Rules: []*FilterRule{
-			&FilterRule{
+			{
 				Type:      MetaPrefix,
 				FieldName: "Charger",
 				Values:    []string{"Charger"},
@@ -154,10 +154,10 @@ func TestChargerAddFilter(t *testing.T) {
 	}
 	dmCharger.SetFilter(fltrCPPrefix)
 	fltrCP4 := &Filter{
-		Tenant: config.CgrConfig().DefaultTenant,
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_CP_4",
 		Rules: []*FilterRule{
-			&FilterRule{
+			{
 				Type:      MetaGreaterOrEqual,
 				FieldName: utils.Weight,
 				Values:    []string{"200.00"},
@@ -206,7 +206,7 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 
 func TestChargerProcessEvent(t *testing.T) {
 	rpl := []*ChrgSProcessEventReply{
-		&ChrgSProcessEventReply{
+		{
 			ChargerSProfile: "CPP_1",
 			CGREvent:        chargerEvents[0],
 		},

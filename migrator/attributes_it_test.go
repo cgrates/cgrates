@@ -154,16 +154,18 @@ func TestAttributeITMoveEncoding2(t *testing.T) {
 }
 
 func testAttrITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(attrCfgIn.DataDbType,
-		attrCfgIn.DataDbHost, attrCfgIn.DataDbPort, attrCfgIn.DataDbName,
-		attrCfgIn.DataDbUser, attrCfgIn.DataDbPass, attrCfgIn.DBDataEncoding,
+	dataDBIn, err := NewMigratorDataDB(attrCfgIn.DataDbCfg().DataDbType,
+		attrCfgIn.DataDbCfg().DataDbHost, attrCfgIn.DataDbCfg().DataDbPort,
+		attrCfgIn.DataDbCfg().DataDbName, attrCfgIn.DataDbCfg().DataDbUser,
+		attrCfgIn.DataDbCfg().DataDbPass, attrCfgIn.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(attrCfgOut.DataDbType,
-		attrCfgOut.DataDbHost, attrCfgOut.DataDbPort, attrCfgOut.DataDbName,
-		attrCfgOut.DataDbUser, attrCfgOut.DataDbPass, attrCfgOut.DBDataEncoding,
+	dataDBOut, err := NewMigratorDataDB(attrCfgOut.DataDbCfg().DataDbType,
+		attrCfgOut.DataDbCfg().DataDbHost, attrCfgOut.DataDbCfg().DataDbPort,
+		attrCfgOut.DataDbCfg().DataDbName, attrCfgOut.DataDbCfg().DataDbUser,
+		attrCfgOut.DataDbCfg().DataDbPass, attrCfgOut.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
@@ -226,7 +228,7 @@ func testAttrITMigrateAndMove(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FieldName:  "FL1",
 				Initial:    "In1",
 				Substitute: config.NewRSRParsersMustCompile("Al1", true),

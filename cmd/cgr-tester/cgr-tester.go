@@ -45,14 +45,14 @@ var (
 		"Configuration directory path.")
 
 	parallel        = flag.Int("parallel", 0, "run n requests in parallel")
-	datadb_type     = flag.String("datadb_type", cgrConfig.DataDbType, "The type of the DataDb database <redis>")
-	datadb_host     = flag.String("datadb_host", cgrConfig.DataDbHost, "The DataDb host to connect to.")
-	datadb_port     = flag.String("datadb_port", cgrConfig.DataDbPort, "The DataDb port to bind to.")
-	datadb_name     = flag.String("datadb_name", cgrConfig.DataDbName, "The name/number of the DataDb to connect to.")
-	datadb_user     = flag.String("datadb_user", cgrConfig.DataDbUser, "The DataDb user to sign in as.")
-	datadb_pass     = flag.String("datadb_pass", cgrConfig.DataDbPass, "The DataDb user's password.")
-	dbdata_encoding = flag.String("dbdata_encoding", cgrConfig.DBDataEncoding, "The encoding used to store object data in strings.")
-	redis_sentinel  = flag.String("redis_sentinel", cgrConfig.DataDbSentinelName, "The name of redis sentinel")
+	datadb_type     = flag.String("datadb_type", cgrConfig.DataDbCfg().DataDbType, "The type of the DataDb database <redis>")
+	datadb_host     = flag.String("datadb_host", cgrConfig.DataDbCfg().DataDbHost, "The DataDb host to connect to.")
+	datadb_port     = flag.String("datadb_port", cgrConfig.DataDbCfg().DataDbPort, "The DataDb port to bind to.")
+	datadb_name     = flag.String("datadb_name", cgrConfig.DataDbCfg().DataDbName, "The name/number of the DataDb to connect to.")
+	datadb_user     = flag.String("datadb_user", cgrConfig.DataDbCfg().DataDbUser, "The DataDb user to sign in as.")
+	datadb_pass     = flag.String("datadb_pass", cgrConfig.DataDbCfg().DataDbPass, "The DataDb user's password.")
+	dbdata_encoding = flag.String("dbdata_encoding", cgrConfig.GeneralCfg().DBDataEncoding, "The encoding used to store object data in strings.")
+	redis_sentinel  = flag.String("redis_sentinel", cgrConfig.DataDbCfg().DataDbSentinelName, "The name of redis sentinel")
 	raterAddress    = flag.String("rater_address", "", "Rater address for remote tests. Empty for internal rater.")
 	tor             = flag.String("tor", utils.VOICE, "The type of record to use in queries.")
 	category        = flag.String("category", "call", "The Record category to test.")
@@ -70,9 +70,11 @@ var (
 )
 
 func durInternalRater(cd *engine.CallDescriptor) (time.Duration, error) {
-	dm, err := engine.ConfigureDataStorage(tstCfg.DataDbType, tstCfg.DataDbHost, tstCfg.DataDbPort,
-		tstCfg.DataDbName, tstCfg.DataDbUser, tstCfg.DataDbPass, tstCfg.DBDataEncoding,
-		cgrConfig.CacheCfg(), tstCfg.DataDbSentinelName) // for the momentn we use here "" for sentinelName
+	dm, err := engine.ConfigureDataStorage(tstCfg.DataDbCfg().DataDbType,
+		tstCfg.DataDbCfg().DataDbHost, tstCfg.DataDbCfg().DataDbPort,
+		tstCfg.DataDbCfg().DataDbName, tstCfg.DataDbCfg().DataDbUser,
+		tstCfg.DataDbCfg().DataDbPass, tstCfg.GeneralCfg().DBDataEncoding,
+		cgrConfig.CacheCfg(), tstCfg.DataDbCfg().DataDbSentinelName) // for the momentn we use here "" for sentinelName
 	if err != nil {
 		return nilDuration, fmt.Errorf("Could not connect to data database: %s", err.Error())
 	}
@@ -165,29 +167,29 @@ func main() {
 		}
 	}
 
-	if *datadb_type != cgrConfig.DataDbType {
-		tstCfg.DataDbType = *datadb_type
+	if *datadb_type != cgrConfig.DataDbCfg().DataDbType {
+		tstCfg.DataDbCfg().DataDbType = *datadb_type
 	}
-	if *datadb_host != cgrConfig.DataDbHost {
-		tstCfg.DataDbHost = *datadb_host
+	if *datadb_host != cgrConfig.DataDbCfg().DataDbHost {
+		tstCfg.DataDbCfg().DataDbHost = *datadb_host
 	}
-	if *datadb_port != cgrConfig.DataDbPort {
-		tstCfg.DataDbPort = *datadb_port
+	if *datadb_port != cgrConfig.DataDbCfg().DataDbPort {
+		tstCfg.DataDbCfg().DataDbPort = *datadb_port
 	}
-	if *datadb_name != cgrConfig.DataDbName {
-		tstCfg.DataDbName = *datadb_name
+	if *datadb_name != cgrConfig.DataDbCfg().DataDbName {
+		tstCfg.DataDbCfg().DataDbName = *datadb_name
 	}
-	if *datadb_user != cgrConfig.DataDbUser {
-		tstCfg.DataDbUser = *datadb_user
+	if *datadb_user != cgrConfig.DataDbCfg().DataDbUser {
+		tstCfg.DataDbCfg().DataDbUser = *datadb_user
 	}
-	if *datadb_pass != cgrConfig.DataDbPass {
-		tstCfg.DataDbPass = *datadb_pass
+	if *datadb_pass != cgrConfig.DataDbCfg().DataDbPass {
+		tstCfg.DataDbCfg().DataDbPass = *datadb_pass
 	}
 	if *dbdata_encoding != "" {
-		tstCfg.DBDataEncoding = *dbdata_encoding
+		tstCfg.GeneralCfg().DBDataEncoding = *dbdata_encoding
 	}
 	if *redis_sentinel != "" {
-		tstCfg.DataDbSentinelName = *redis_sentinel
+		tstCfg.DataDbCfg().DataDbSentinelName = *redis_sentinel
 	}
 
 	if *cpuprofile != "" {

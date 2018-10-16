@@ -36,13 +36,13 @@ func (self *ApierV1) GetMaxUsage(usageRecord engine.UsageRecord, maxUsage *float
 		usageRecord.ToR = utils.VOICE
 	}
 	if usageRecord.RequestType == "" {
-		usageRecord.RequestType = self.Config.DefaultReqType
+		usageRecord.RequestType = self.Config.GeneralCfg().DefaultReqType
 	}
 	if usageRecord.Tenant == "" {
-		usageRecord.Tenant = self.Config.DefaultTenant
+		usageRecord.Tenant = self.Config.GeneralCfg().DefaultTenant
 	}
 	if usageRecord.Category == "" {
-		usageRecord.Category = self.Config.DefaultCategory
+		usageRecord.Category = self.Config.GeneralCfg().DefaultCategory
 	}
 	if usageRecord.Subject == "" {
 		usageRecord.Subject = usageRecord.Account
@@ -51,9 +51,10 @@ func (self *ApierV1) GetMaxUsage(usageRecord engine.UsageRecord, maxUsage *float
 		usageRecord.SetupTime = utils.META_NOW
 	}
 	if usageRecord.Usage == "" {
-		usageRecord.Usage = strconv.FormatFloat(self.Config.MaxCallDuration.Seconds(), 'f', -1, 64)
+		usageRecord.Usage = strconv.FormatFloat(
+			self.Config.MaxCallDuration.Seconds(), 'f', -1, 64)
 	}
-	storedCdr, err := usageRecord.AsCDR(self.Config.DefaultTimezone)
+	storedCdr, err := usageRecord.AsCDR(self.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

@@ -29,8 +29,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-const ()
-
 var (
 	sameDataDB, sameStorDB bool
 	dmIN, dmOUT            migrator.MigratorDataDB
@@ -44,21 +42,21 @@ var (
 		"\n <*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups|*stordb|*datadb>")
 	version = flag.Bool("version", false, "prints the application version")
 
-	inDataDBType = flag.String("datadb_type", dfltCfg.DataDbType,
+	inDataDBType = flag.String("datadb_type", dfltCfg.DataDbCfg().DataDbType,
 		"the type of the DataDB Database <*redis|*mongo>")
-	inDataDBHost = flag.String("datadb_host", dfltCfg.DataDbHost,
+	inDataDBHost = flag.String("datadb_host", dfltCfg.DataDbCfg().DataDbHost,
 		"the DataDB host")
-	inDataDBPort = flag.String("datadb_port", dfltCfg.DataDbPort,
+	inDataDBPort = flag.String("datadb_port", dfltCfg.DataDbCfg().DataDbPort,
 		"the DataDB port")
-	inDataDBName = flag.String("datadb_name", dfltCfg.DataDbName,
+	inDataDBName = flag.String("datadb_name", dfltCfg.DataDbCfg().DataDbName,
 		"the name/number of the DataDB")
-	inDataDBUser = flag.String("datadb_user", dfltCfg.DataDbUser,
+	inDataDBUser = flag.String("datadb_user", dfltCfg.DataDbCfg().DataDbUser,
 		"the DataDB user")
-	inDataDBPass = flag.String("datadb_passwd", dfltCfg.DataDbPass,
+	inDataDBPass = flag.String("datadb_passwd", dfltCfg.DataDbCfg().DataDbPass,
 		"the DataDB password")
-	inDBDataEncoding = flag.String("dbdata_encoding", dfltCfg.DBDataEncoding,
+	inDBDataEncoding = flag.String("dbdata_encoding", dfltCfg.GeneralCfg().DBDataEncoding,
 		"the encoding used to store object Data in strings")
-	inDataDBRedisSentinel = flag.String("redis_sentinel", dfltCfg.DataDbSentinelName,
+	inDataDBRedisSentinel = flag.String("redis_sentinel", dfltCfg.DataDbCfg().DataDbSentinelName,
 		"the name of redis sentinel")
 
 	outDataDBType = flag.String("out_datadb_type", utils.MetaDataDB,
@@ -78,17 +76,17 @@ var (
 	outDataDBRedisSentinel = flag.String("out_redis_sentinel", utils.MetaDataDB,
 		"the name of redis sentinel")
 
-	inStorDBType = flag.String("stordb_type", dfltCfg.StorDBType,
+	inStorDBType = flag.String("stordb_type", dfltCfg.StorDbCfg().StorDBType,
 		"the type of the StorDB Database <*mysql|*postgres|*mongo>")
-	inStorDBHost = flag.String("stordb_host", dfltCfg.StorDBHost,
+	inStorDBHost = flag.String("stordb_host", dfltCfg.StorDbCfg().StorDBHost,
 		"the StorDB host")
-	inStorDBPort = flag.String("stordb_port", dfltCfg.StorDBPort,
+	inStorDBPort = flag.String("stordb_port", dfltCfg.StorDbCfg().StorDBPort,
 		"the StorDB port")
-	inStorDBName = flag.String("stordb_name", dfltCfg.StorDBName,
+	inStorDBName = flag.String("stordb_name", dfltCfg.StorDbCfg().StorDBName,
 		"the name/number of the StorDB")
-	inStorDBUser = flag.String("stordb_user", dfltCfg.StorDBUser,
+	inStorDBUser = flag.String("stordb_user", dfltCfg.StorDbCfg().StorDBUser,
 		"the StorDB user")
-	inStorDBPass = flag.String("stordb_passwd", dfltCfg.StorDBPass,
+	inStorDBPass = flag.String("stordb_passwd", dfltCfg.StorDbCfg().StorDBPass,
 		"the StorDB password")
 
 	outStorDBType = flag.String("out_stordb_type", utils.MetaStorDB,
@@ -124,35 +122,35 @@ func main() {
 	}
 
 	// inDataDB
-	if *inDataDBType != dfltCfg.DataDbType {
-		mgrCfg.DataDbType = strings.TrimPrefix(*inDataDBType, "*")
+	if *inDataDBType != dfltCfg.DataDbCfg().DataDbType {
+		mgrCfg.DataDbCfg().DataDbType = strings.TrimPrefix(*inDataDBType, "*")
 	}
-	if *inDataDBHost != dfltCfg.DataDbHost {
-		mgrCfg.DataDbHost = *inDataDBHost
+	if *inDataDBHost != dfltCfg.DataDbCfg().DataDbHost {
+		mgrCfg.DataDbCfg().DataDbHost = *inDataDBHost
 	}
-	if *inDataDBPort != dfltCfg.DataDbPort {
-		mgrCfg.DataDbPort = *inDataDBPort
+	if *inDataDBPort != dfltCfg.DataDbCfg().DataDbPort {
+		mgrCfg.DataDbCfg().DataDbPort = *inDataDBPort
 	}
-	if *inDataDBName != dfltCfg.DataDbName {
-		mgrCfg.DataDbName = *inDataDBName
+	if *inDataDBName != dfltCfg.DataDbCfg().DataDbName {
+		mgrCfg.DataDbCfg().DataDbName = *inDataDBName
 	}
-	if *inDataDBUser != dfltCfg.DataDbUser {
-		mgrCfg.DataDbUser = *inDataDBUser
+	if *inDataDBUser != dfltCfg.DataDbCfg().DataDbUser {
+		mgrCfg.DataDbCfg().DataDbUser = *inDataDBUser
 	}
-	if *inDataDBPass != dfltCfg.DataDbPass {
-		mgrCfg.DataDbPass = *inDataDBPass
+	if *inDataDBPass != dfltCfg.DataDbCfg().DataDbPass {
+		mgrCfg.DataDbCfg().DataDbPass = *inDataDBPass
 	}
-	if *inDBDataEncoding != dfltCfg.DBDataEncoding {
-		mgrCfg.DBDataEncoding = *inDBDataEncoding
+	if *inDBDataEncoding != dfltCfg.GeneralCfg().DBDataEncoding {
+		mgrCfg.GeneralCfg().DBDataEncoding = *inDBDataEncoding
 	}
-	if *inDataDBRedisSentinel != dfltCfg.DataDbSentinelName {
-		mgrCfg.DataDbSentinelName = *inDataDBRedisSentinel
+	if *inDataDBRedisSentinel != dfltCfg.DataDbCfg().DataDbSentinelName {
+		mgrCfg.DataDbCfg().DataDbSentinelName = *inDataDBRedisSentinel
 	}
 
 	// outDataDB
 	if *outDataDBType == utils.MetaDataDB {
 		if dfltCfg.MigratorCgrConfig.OutDataDBType == mgrCfg.MigratorCgrConfig.OutDataDBType {
-			mgrCfg.MigratorCgrConfig.OutDataDBType = mgrCfg.DataDbType
+			mgrCfg.MigratorCgrConfig.OutDataDBType = mgrCfg.DataDbCfg().DataDbType
 		}
 	} else {
 		mgrCfg.MigratorCgrConfig.OutDataDBType = strings.TrimPrefix(*outDataDBType, "*")
@@ -160,65 +158,65 @@ func main() {
 
 	if *outDataDBHost == utils.MetaDataDB {
 		if dfltCfg.MigratorCgrConfig.OutDataDBHost == mgrCfg.MigratorCgrConfig.OutDataDBHost {
-			mgrCfg.MigratorCgrConfig.OutDataDBHost = mgrCfg.DataDbHost
+			mgrCfg.MigratorCgrConfig.OutDataDBHost = mgrCfg.DataDbCfg().DataDbHost
 		}
 	} else {
 		mgrCfg.MigratorCgrConfig.OutDataDBHost = *outDataDBHost
 	}
 	if *outDataDBPort == utils.MetaDataDB {
 		if dfltCfg.MigratorCgrConfig.OutDataDBPort == mgrCfg.MigratorCgrConfig.OutDataDBPort {
-			mgrCfg.MigratorCgrConfig.OutDataDBPort = mgrCfg.DataDbPort
+			mgrCfg.MigratorCgrConfig.OutDataDBPort = mgrCfg.DataDbCfg().DataDbPort
 		}
 	} else {
 		mgrCfg.MigratorCgrConfig.OutDataDBPort = *outDataDBPort
 	}
 	if *outDataDBName == utils.MetaDataDB {
 		if dfltCfg.MigratorCgrConfig.OutDataDBName == mgrCfg.MigratorCgrConfig.OutDataDBName {
-			mgrCfg.MigratorCgrConfig.OutDataDBName = mgrCfg.DataDbName
+			mgrCfg.MigratorCgrConfig.OutDataDBName = mgrCfg.DataDbCfg().DataDbName
 		}
 	} else {
 		mgrCfg.MigratorCgrConfig.OutDataDBName = *outDataDBName
 	}
 	if *outDataDBUser == utils.MetaDataDB {
 		if dfltCfg.MigratorCgrConfig.OutDataDBUser == mgrCfg.MigratorCgrConfig.OutDataDBUser {
-			mgrCfg.MigratorCgrConfig.OutDataDBUser = mgrCfg.DataDbUser
+			mgrCfg.MigratorCgrConfig.OutDataDBUser = mgrCfg.DataDbCfg().DataDbUser
 		}
 	} else {
 		mgrCfg.MigratorCgrConfig.OutDataDBUser = *outDataDBUser
 	}
 	if *outDataDBPass == utils.MetaDataDB {
 		if dfltCfg.MigratorCgrConfig.OutDataDBPassword == mgrCfg.MigratorCgrConfig.OutDataDBPassword {
-			mgrCfg.MigratorCgrConfig.OutDataDBPassword = mgrCfg.DataDbPass
+			mgrCfg.MigratorCgrConfig.OutDataDBPassword = mgrCfg.DataDbCfg().DataDbPass
 		}
 	} else {
 		mgrCfg.MigratorCgrConfig.OutDataDBPassword = *outDataDBPass
 	}
 	if *outDBDataEncoding == utils.MetaDataDB {
 		if dfltCfg.MigratorCgrConfig.OutDataDBEncoding == mgrCfg.MigratorCgrConfig.OutDataDBEncoding {
-			mgrCfg.MigratorCgrConfig.OutDataDBEncoding = mgrCfg.DBDataEncoding
+			mgrCfg.MigratorCgrConfig.OutDataDBEncoding = mgrCfg.GeneralCfg().DBDataEncoding
 		}
 	} else {
 		mgrCfg.MigratorCgrConfig.OutDataDBEncoding = *outDBDataEncoding
 	}
 	if *outDataDBRedisSentinel == utils.MetaDataDB {
 		if dfltCfg.MigratorCgrConfig.OutDataDBRedisSentinel == mgrCfg.MigratorCgrConfig.OutDataDBRedisSentinel {
-			mgrCfg.MigratorCgrConfig.OutDataDBRedisSentinel = mgrCfg.DataDbSentinelName
+			mgrCfg.MigratorCgrConfig.OutDataDBRedisSentinel = mgrCfg.DataDbCfg().DataDbSentinelName
 		}
 	} else {
 		mgrCfg.MigratorCgrConfig.OutDataDBRedisSentinel = *outDataDBRedisSentinel
 	}
 
-	sameDataDB = mgrCfg.MigratorCgrConfig.OutDataDBType == mgrCfg.DataDbType &&
-		mgrCfg.MigratorCgrConfig.OutDataDBHost == mgrCfg.DataDbHost &&
-		mgrCfg.MigratorCgrConfig.OutDataDBPort == mgrCfg.DataDbPort &&
-		mgrCfg.MigratorCgrConfig.OutDataDBName == mgrCfg.DataDbName &&
-		mgrCfg.MigratorCgrConfig.OutDataDBEncoding == mgrCfg.DBDataEncoding
+	sameDataDB = mgrCfg.MigratorCgrConfig.OutDataDBType == mgrCfg.DataDbCfg().DataDbType &&
+		mgrCfg.MigratorCgrConfig.OutDataDBHost == mgrCfg.DataDbCfg().DataDbHost &&
+		mgrCfg.MigratorCgrConfig.OutDataDBPort == mgrCfg.DataDbCfg().DataDbPort &&
+		mgrCfg.MigratorCgrConfig.OutDataDBName == mgrCfg.DataDbCfg().DataDbName &&
+		mgrCfg.MigratorCgrConfig.OutDataDBEncoding == mgrCfg.GeneralCfg().DBDataEncoding
 
-	if dmIN, err = migrator.NewMigratorDataDB(mgrCfg.DataDbType,
-		mgrCfg.DataDbHost, mgrCfg.DataDbPort,
-		mgrCfg.DataDbName, mgrCfg.DataDbUser,
-		mgrCfg.DataDbPass, mgrCfg.DBDataEncoding,
-		mgrCfg.CacheCfg(), mgrCfg.DataDbSentinelName); err != nil {
+	if dmIN, err = migrator.NewMigratorDataDB(mgrCfg.DataDbCfg().DataDbType,
+		mgrCfg.DataDbCfg().DataDbHost, mgrCfg.DataDbCfg().DataDbPort,
+		mgrCfg.DataDbCfg().DataDbName, mgrCfg.DataDbCfg().DataDbUser,
+		mgrCfg.DataDbCfg().DataDbPass, mgrCfg.GeneralCfg().DBDataEncoding,
+		mgrCfg.CacheCfg(), mgrCfg.DataDbCfg().DataDbSentinelName); err != nil {
 		log.Fatal(err)
 	}
 
@@ -233,81 +231,82 @@ func main() {
 	}
 
 	// inStorDB
-	if *inStorDBType != dfltCfg.StorDBType {
-		mgrCfg.StorDBType = strings.TrimPrefix(*inStorDBType, "*")
+	if *inStorDBType != dfltCfg.StorDbCfg().StorDBType {
+		mgrCfg.StorDbCfg().StorDBType = strings.TrimPrefix(*inStorDBType, "*")
 	}
-	if *inStorDBHost != dfltCfg.StorDBHost {
-		mgrCfg.StorDBHost = *inStorDBHost
+	if *inStorDBHost != dfltCfg.StorDbCfg().StorDBHost {
+		mgrCfg.StorDbCfg().StorDBHost = *inStorDBHost
 	}
-	if *inStorDBPort != dfltCfg.StorDBPort {
-		mgrCfg.StorDBPort = *inStorDBPort
+	if *inStorDBPort != dfltCfg.StorDbCfg().StorDBPort {
+		mgrCfg.StorDbCfg().StorDBPort = *inStorDBPort
 	}
-	if *inStorDBName != dfltCfg.StorDBName {
-		mgrCfg.StorDBName = *inStorDBName
+	if *inStorDBName != dfltCfg.StorDbCfg().StorDBName {
+		mgrCfg.StorDbCfg().StorDBName = *inStorDBName
 	}
-	if *inStorDBUser != dfltCfg.StorDBUser {
-		mgrCfg.StorDBUser = *inStorDBUser
+	if *inStorDBUser != dfltCfg.StorDbCfg().StorDBUser {
+		mgrCfg.StorDbCfg().StorDBUser = *inStorDBUser
 	}
-	if *inStorDBPass != dfltCfg.StorDBPass {
-		mgrCfg.StorDBPass = *inStorDBPass
+	if *inStorDBPass != dfltCfg.StorDbCfg().StorDBPass {
+		mgrCfg.StorDbCfg().StorDBPass = *inStorDBPass
 	}
 
 	// outStorDB
 	if *outStorDBType == utils.MetaStorDB {
 		if dfltCfg.MigratorCgrConfig.OutStorDBType == mgrCfg.MigratorCgrConfig.OutStorDBType {
-			mgrCfg.MigratorCgrConfig.OutStorDBType = mgrCfg.StorDBType
+			mgrCfg.MigratorCgrConfig.OutStorDBType = mgrCfg.StorDbCfg().StorDBType
 		}
 	} else {
 		mgrCfg.MigratorCgrConfig.OutStorDBType = strings.TrimPrefix(*outStorDBType, "*")
 	}
 	if *outStorDBHost == utils.MetaStorDB {
 		if dfltCfg.MigratorCgrConfig.OutStorDBHost == mgrCfg.MigratorCgrConfig.OutStorDBHost {
-			mgrCfg.MigratorCgrConfig.OutStorDBHost = mgrCfg.StorDBHost
+			mgrCfg.MigratorCgrConfig.OutStorDBHost = mgrCfg.StorDbCfg().StorDBHost
 		}
 	} else {
 		mgrCfg.MigratorCgrConfig.OutStorDBHost = *outStorDBHost
 	}
 	if *outStorDBPort == utils.MetaStorDB {
 		if dfltCfg.MigratorCgrConfig.OutStorDBPort == mgrCfg.MigratorCgrConfig.OutStorDBPort {
-			mgrCfg.MigratorCgrConfig.OutStorDBPort = mgrCfg.StorDBPort
+			mgrCfg.MigratorCgrConfig.OutStorDBPort = mgrCfg.StorDbCfg().StorDBPort
 		}
 	} else {
 		mgrCfg.MigratorCgrConfig.OutStorDBPort = *outStorDBPort
 	}
 	if *outStorDBName == utils.MetaStorDB {
 		if dfltCfg.MigratorCgrConfig.OutStorDBName == mgrCfg.MigratorCgrConfig.OutStorDBName {
-			mgrCfg.MigratorCgrConfig.OutStorDBName = mgrCfg.StorDBName
+			mgrCfg.MigratorCgrConfig.OutStorDBName = mgrCfg.StorDbCfg().StorDBName
 		}
 	} else {
 		mgrCfg.MigratorCgrConfig.OutStorDBName = *outStorDBName
 	}
 	if *outStorDBUser == utils.MetaStorDB {
 		if dfltCfg.MigratorCgrConfig.OutStorDBUser == mgrCfg.MigratorCgrConfig.OutStorDBUser {
-			mgrCfg.MigratorCgrConfig.OutStorDBUser = mgrCfg.StorDBUser
+			mgrCfg.MigratorCgrConfig.OutStorDBUser = mgrCfg.StorDbCfg().StorDBUser
 		}
 	} else {
 		mgrCfg.MigratorCgrConfig.OutStorDBUser = *outStorDBUser
 	}
 	if *outStorDBPass == utils.MetaStorDB {
 		if dfltCfg.MigratorCgrConfig.OutStorDBPassword == mgrCfg.MigratorCgrConfig.OutStorDBPassword {
-			mgrCfg.MigratorCgrConfig.OutStorDBPassword = mgrCfg.StorDBPass
+			mgrCfg.MigratorCgrConfig.OutStorDBPassword = mgrCfg.StorDbCfg().StorDBPass
 		}
 	} else {
 		mgrCfg.MigratorCgrConfig.OutStorDBPassword = *outStorDBPass
 	}
 
-	sameStorDB = mgrCfg.MigratorCgrConfig.OutStorDBType == mgrCfg.StorDBType &&
-		mgrCfg.MigratorCgrConfig.OutStorDBHost == mgrCfg.StorDBHost &&
-		mgrCfg.MigratorCgrConfig.OutStorDBPort == mgrCfg.StorDBPort &&
-		mgrCfg.MigratorCgrConfig.OutStorDBName == mgrCfg.StorDBName
+	sameStorDB = mgrCfg.MigratorCgrConfig.OutStorDBType == mgrCfg.StorDbCfg().StorDBType &&
+		mgrCfg.MigratorCgrConfig.OutStorDBHost == mgrCfg.StorDbCfg().StorDBHost &&
+		mgrCfg.MigratorCgrConfig.OutStorDBPort == mgrCfg.StorDbCfg().StorDBPort &&
+		mgrCfg.MigratorCgrConfig.OutStorDBName == mgrCfg.StorDbCfg().StorDBName
 
-	if storDBIn, err = migrator.NewMigratorStorDB(mgrCfg.StorDBType,
-		mgrCfg.StorDBHost, mgrCfg.StorDBPort,
-		mgrCfg.StorDBName, mgrCfg.StorDBUser, mgrCfg.StorDBPass,
-		config.CgrConfig().StorDBMaxOpenConns,
-		config.CgrConfig().StorDBMaxIdleConns,
-		config.CgrConfig().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDBCDRSIndexes); err != nil {
+	if storDBIn, err = migrator.NewMigratorStorDB(mgrCfg.StorDbCfg().StorDBType,
+		mgrCfg.StorDbCfg().StorDBHost, mgrCfg.StorDbCfg().StorDBPort,
+		mgrCfg.StorDbCfg().StorDBName, mgrCfg.StorDbCfg().StorDBUser,
+		mgrCfg.StorDbCfg().StorDBPass,
+		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
+		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
+		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StorDBCDRSIndexes); err != nil {
 		log.Fatal(err)
 	}
 
@@ -316,11 +315,9 @@ func main() {
 	} else if storDBOut, err = migrator.NewMigratorStorDB(mgrCfg.MigratorCgrConfig.OutStorDBType,
 		mgrCfg.MigratorCgrConfig.OutStorDBHost, mgrCfg.MigratorCgrConfig.OutStorDBPort,
 		mgrCfg.MigratorCgrConfig.OutStorDBName, mgrCfg.MigratorCgrConfig.OutStorDBUser,
-		mgrCfg.MigratorCgrConfig.OutStorDBPassword,
-		mgrCfg.StorDBMaxOpenConns,
-		mgrCfg.StorDBMaxIdleConns,
-		mgrCfg.StorDBConnMaxLifetime,
-		mgrCfg.StorDBCDRSIndexes); err != nil {
+		mgrCfg.MigratorCgrConfig.OutStorDBPassword, mgrCfg.StorDbCfg().StorDBMaxOpenConns,
+		mgrCfg.StorDbCfg().StorDBMaxIdleConns, mgrCfg.StorDbCfg().StorDBConnMaxLifetime,
+		mgrCfg.StorDbCfg().StorDBCDRSIndexes); err != nil {
 		log.Fatal(err)
 	}
 

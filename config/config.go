@@ -138,8 +138,13 @@ func SetCgrConfig(cfg *CGRConfig) {
 func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg := new(CGRConfig)
 	cfg.RALsMaxComputedUsage = make(map[string]time.Duration)
-	cfg.NodeID = utils.UUIDSha1Prefix()
 	cfg.DataFolderPath = "/usr/share/cgrates/"
+	cfg.generalCfg = new(GeneralCfg)
+	cfg.dataDbCfg = new(DataDbCfg)
+	cfg.storDbCfg = new(StorDbCfg)
+
+	cfg.generalCfg.NodeID = utils.UUIDSha1Prefix()
+
 	cfg.sessionSCfg = new(SessionSCfg)
 	cfg.cacheConfig = make(CacheConfig)
 	cfg.fsAgentCfg = new(FsAgentConfig)
@@ -177,16 +182,6 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	dfltAstConnCfg = cfg.asteriskAgentCfg.AsteriskConns[0]
 	dfltLoaderConfig = cfg.loaderCfg[0].Clone()
 	if err := cfg.checkConfigSanity(); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func NewCGRConfigFromJsonString(cfgJsonStr string) (*CGRConfig, error) {
-	cfg := new(CGRConfig)
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJsonStr)); err != nil {
-		return nil, err
-	} else if err := cfg.loadFromJsonCfg(jsnCfg); err != nil {
 		return nil, err
 	}
 	return cfg, nil
@@ -259,26 +254,6 @@ func NewCGRConfigFromFolder(cfgDir string) (*CGRConfig, error) {
 
 // Holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
-	NodeID                   string // Identifier for this engine instance
-	DataDbType               string
-	DataDbHost               string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	DataDbPort               string // The port to bind to.
-	DataDbName               string // The name of the database to connect to.
-	DataDbUser               string // The user to sign in as.
-	DataDbPass               string // The user's password.
-	DataDbSentinelName       string
-	LoadHistorySize          int    // Maximum number of records to archive in load history
-	StorDBType               string // Should reflect the database type used to store logs
-	StorDBHost               string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	StorDBPort               string // Th e port to bind to.
-	StorDBName               string // The name of the database to connect to.
-	StorDBUser               string // The user to sign in as.
-	StorDBPass               string // The user's password.
-	StorDBMaxOpenConns       int    // Maximum database connections opened
-	StorDBMaxIdleConns       int    // Maximum idle connections to keep opened
-	StorDBConnMaxLifetime    int
-	StorDBCDRSIndexes        []string
-	DBDataEncoding           string // The encoding used to store object data in strings: <msgpack|json>
 	cacheConfig              CacheConfig
 	RPCJSONListen            string            // RPC JSON listening address
 	RPCGOBListen             string            // RPC GOB listening address
@@ -296,30 +271,10 @@ type CGRConfig struct {
 	HTTPWSURL                string            // WebSocket relative URL ("" to disable)
 	HTTPUseBasicAuth         bool              // Use basic auth for HTTP API
 	HTTPAuthUsers            map[string]string // Basic auth user:password map (base64 passwords)
-	DefaultReqType           string            // Use this request type if not defined on top
-	DefaultCategory          string            // set default type of record
-	DefaultTenant            string            // set default tenant
-	DefaultTimezone          string            // default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-	Reconnects               int               // number of recconect attempts in case of connection lost <-1 for infinite | nb>
-	ConnectTimeout           time.Duration     // timeout for RPC connection attempts
-	ReplyTimeout             time.Duration     // timeout replies if not reaching back
-	ConnectAttempts          int               // number of initial connection attempts before giving up
-	ResponseCacheTTL         time.Duration     // the life span of a cached response
-	InternalTtl              time.Duration     // maximum duration to wait for internal connections before giving up
-	RoundingDecimals         int               // Number of decimals to round end prices at
-	HttpSkipTlsVerify        bool              // If enabled Http Client will accept any TLS certificate
-	TpExportPath             string            // Path towards export folder for offline Tariff Plans
-	PosterAttempts           int
-	FailedPostsDir           string        // Directory path where we store failed http requests
-	MaxCallDuration          time.Duration // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
-	LockingTimeout           time.Duration // locking mechanism timeout to avoid deadlocks
-	DigestSeparator          string
-	DigestEqual              string
-	Logger                   string          // dictates the way logs are displayed/stored
-	LogLevel                 int             // system wide log level, nothing higher than this will be logged
-	RALsEnabled              bool            // start standalone server (no balancer)
-	RALsThresholdSConns      []*HaPoolConfig // address where to reach ThresholdS config
-	RALsCDRStatSConns        []*HaPoolConfig // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
+	MaxCallDuration          time.Duration     // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
+	RALsEnabled              bool              // start standalone server (no balancer)
+	RALsThresholdSConns      []*HaPoolConfig   // address where to reach ThresholdS config
+	RALsCDRStatSConns        []*HaPoolConfig   // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
 	RALsStatSConns           []*HaPoolConfig
 	RALsPubSubSConns         []*HaPoolConfig
 	RALsUserSConns           []*HaPoolConfig
@@ -380,6 +335,10 @@ type CGRConfig struct {
 	// Cache defaults loaded from json and needing clones
 	dfltCdreProfile *CdreConfig // Default cdreConfig profile
 	dfltCdrcProfile *CdrcConfig // Default cdrcConfig profile
+
+	generalCfg *GeneralCfg // General config
+	dataDbCfg  *DataDbCfg  // Database config
+	storDbCfg  *StorDbCfg  //StroreDb config
 }
 
 func (self *CGRConfig) checkConfigSanity() error {
@@ -909,152 +868,16 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return nil
 	}
 
-	if jsnDataDbCfg != nil {
-		if jsnDataDbCfg.Db_type != nil {
-			self.DataDbType = *jsnDataDbCfg.Db_type
-		}
-		if jsnDataDbCfg.Db_host != nil {
-			self.DataDbHost = *jsnDataDbCfg.Db_host
-		}
-		if jsnDataDbCfg.Db_port != nil {
-			port := strconv.Itoa(*jsnDataDbCfg.Db_port)
-			if port == "-1" {
-				port = utils.MetaDynamic
-			}
-			self.DataDbPort = NewDbDefaults().DBPort(*jsnDataDbCfg.Db_type, port)
-		}
-		if jsnDataDbCfg.Db_name != nil {
-			self.DataDbName = *jsnDataDbCfg.Db_name
-		}
-		if jsnDataDbCfg.Db_user != nil {
-			self.DataDbUser = *jsnDataDbCfg.Db_user
-		}
-		if jsnDataDbCfg.Db_password != nil {
-			self.DataDbPass = *jsnDataDbCfg.Db_password
-		}
-		if jsnDataDbCfg.Load_history_size != nil {
-			self.LoadHistorySize = *jsnDataDbCfg.Load_history_size
-		}
-		if jsnDataDbCfg.Redis_sentinel != nil {
-			self.DataDbSentinelName = *jsnDataDbCfg.Redis_sentinel
-		}
+	if err := self.dataDbCfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
+		return err
 	}
 
-	if jsnStorDbCfg != nil {
-		if jsnStorDbCfg.Db_type != nil {
-			self.StorDBType = *jsnStorDbCfg.Db_type
-		}
-		if jsnStorDbCfg.Db_host != nil {
-			self.StorDBHost = *jsnStorDbCfg.Db_host
-		}
-		if jsnStorDbCfg.Db_port != nil {
-			port := strconv.Itoa(*jsnStorDbCfg.Db_port)
-			if port == "-1" {
-				port = utils.MetaDynamic
-			}
-			self.StorDBPort = NewDbDefaults().DBPort(*jsnStorDbCfg.Db_type, port)
-		}
-		if jsnStorDbCfg.Db_name != nil {
-			self.StorDBName = *jsnStorDbCfg.Db_name
-		}
-		if jsnStorDbCfg.Db_user != nil {
-			self.StorDBUser = *jsnStorDbCfg.Db_user
-		}
-		if jsnStorDbCfg.Db_password != nil {
-			self.StorDBPass = *jsnStorDbCfg.Db_password
-		}
-		if jsnStorDbCfg.Max_open_conns != nil {
-			self.StorDBMaxOpenConns = *jsnStorDbCfg.Max_open_conns
-		}
-		if jsnStorDbCfg.Max_idle_conns != nil {
-			self.StorDBMaxIdleConns = *jsnStorDbCfg.Max_idle_conns
-		}
-		if jsnStorDbCfg.Conn_max_lifetime != nil {
-			self.StorDBConnMaxLifetime = *jsnStorDbCfg.Conn_max_lifetime
-		}
-		if jsnStorDbCfg.Cdrs_indexes != nil {
-			self.StorDBCDRSIndexes = *jsnStorDbCfg.Cdrs_indexes
-		}
+	if err := self.storDbCfg.loadFromJsonCfg(jsnStorDbCfg); err != nil {
+		return err
 	}
 
-	if jsnGeneralCfg != nil {
-		if jsnGeneralCfg.Node_id != nil && *jsnGeneralCfg.Node_id != "" {
-			self.NodeID = *jsnGeneralCfg.Node_id
-		}
-		if jsnGeneralCfg.Logger != nil {
-			self.Logger = *jsnGeneralCfg.Logger
-		}
-		if jsnGeneralCfg.Log_level != nil {
-			self.LogLevel = *jsnGeneralCfg.Log_level
-		}
-
-		if jsnGeneralCfg.Dbdata_encoding != nil {
-			self.DBDataEncoding = *jsnGeneralCfg.Dbdata_encoding
-		}
-		if jsnGeneralCfg.Default_request_type != nil {
-			self.DefaultReqType = *jsnGeneralCfg.Default_request_type
-		}
-		if jsnGeneralCfg.Default_category != nil {
-			self.DefaultCategory = *jsnGeneralCfg.Default_category
-		}
-		if jsnGeneralCfg.Default_tenant != nil {
-			self.DefaultTenant = *jsnGeneralCfg.Default_tenant
-		}
-		if jsnGeneralCfg.Connect_attempts != nil {
-			self.ConnectAttempts = *jsnGeneralCfg.Connect_attempts
-		}
-		if jsnGeneralCfg.Response_cache_ttl != nil {
-			if self.ResponseCacheTTL, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.Response_cache_ttl); err != nil {
-				return err
-			}
-		}
-		if jsnGeneralCfg.Reconnects != nil {
-			self.Reconnects = *jsnGeneralCfg.Reconnects
-		}
-		if jsnGeneralCfg.Connect_timeout != nil {
-			if self.ConnectTimeout, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.Connect_timeout); err != nil {
-				return err
-			}
-		}
-		if jsnGeneralCfg.Reply_timeout != nil {
-			if self.ReplyTimeout, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.Reply_timeout); err != nil {
-				return err
-			}
-		}
-		if jsnGeneralCfg.Rounding_decimals != nil {
-			self.RoundingDecimals = *jsnGeneralCfg.Rounding_decimals
-		}
-		if jsnGeneralCfg.Http_skip_tls_verify != nil {
-			self.HttpSkipTlsVerify = *jsnGeneralCfg.Http_skip_tls_verify
-		}
-		if jsnGeneralCfg.Tpexport_dir != nil {
-			self.TpExportPath = *jsnGeneralCfg.Tpexport_dir
-		}
-		if jsnGeneralCfg.Poster_attempts != nil {
-			self.PosterAttempts = *jsnGeneralCfg.Poster_attempts
-		}
-		if jsnGeneralCfg.Failed_posts_dir != nil {
-			self.FailedPostsDir = *jsnGeneralCfg.Failed_posts_dir
-		}
-		if jsnGeneralCfg.Default_timezone != nil {
-			self.DefaultTimezone = *jsnGeneralCfg.Default_timezone
-		}
-		if jsnGeneralCfg.Internal_ttl != nil {
-			if self.InternalTtl, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.Internal_ttl); err != nil {
-				return err
-			}
-		}
-		if jsnGeneralCfg.Locking_timeout != nil {
-			if self.LockingTimeout, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.Locking_timeout); err != nil {
-				return err
-			}
-		}
-		if jsnGeneralCfg.Digest_separator != nil {
-			self.DigestSeparator = *jsnGeneralCfg.Digest_separator
-		}
-		if jsnGeneralCfg.Digest_equal != nil {
-			self.DigestEqual = *jsnGeneralCfg.Digest_equal
-		}
+	if err := self.generalCfg.loadFromJsonCfg(jsnGeneralCfg); err != nil {
+		return err
 	}
 
 	if jsnCacheCfg != nil {
@@ -1621,4 +1444,16 @@ func (cfg *CGRConfig) MigratorCgrCfg() *MigratorCgrCfg {
 
 func (cfg *CGRConfig) SchedulerCfg() *SchedulerCfg {
 	return cfg.schedulerCfg
+}
+
+func (cfg *CGRConfig) DataDbCfg() *DataDbCfg {
+	return cfg.dataDbCfg
+}
+
+func (cfg *CGRConfig) StorDbCfg() *StorDbCfg {
+	return cfg.storDbCfg
+}
+
+func (cfg *CGRConfig) GeneralCfg() *GeneralCfg {
+	return cfg.generalCfg
 }

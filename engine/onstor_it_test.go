@@ -93,12 +93,14 @@ var sTestsOnStorIT = []func(t *testing.T){
 
 func TestOnStorITRedis(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
-	rdsITdb, err = NewRedisStorage(fmt.Sprintf("%s:%s", cfg.DataDbHost, cfg.DataDbPort), 4,
-		cfg.DataDbPass, cfg.DBDataEncoding, utils.REDIS_MAX_CONNS, nil, "")
+	rdsITdb, err = NewRedisStorage(
+		fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
+		4, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+		utils.REDIS_MAX_CONNS, nil, "")
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	}
-	onStorCfg = cfg.DataDbName
+	onStorCfg = cfg.DataDbCfg().DataDbName
 	onStor = NewDataManager(rdsITdb)
 	for _, stest := range sTestsOnStorIT {
 		t.Run("TestOnStorITRedis", stest)
@@ -112,12 +114,13 @@ func TestOnStorITMongo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if mgoITdb, err = NewMongoStorage(mgoITCfg.StorDBHost, mgoITCfg.StorDBPort,
-		mgoITCfg.StorDBName, mgoITCfg.StorDBUser, mgoITCfg.StorDBPass,
+	if mgoITdb, err = NewMongoStorage(mgoITCfg.StorDbCfg().StorDBHost,
+		mgoITCfg.StorDbCfg().StorDBPort, mgoITCfg.StorDbCfg().StorDBName,
+		mgoITCfg.StorDbCfg().StorDBUser, mgoITCfg.StorDbCfg().StorDBPass,
 		utils.StorDB, nil, mgoITCfg.CacheCfg()); err != nil {
 		t.Fatal(err)
 	}
-	onStorCfg = mgoITCfg.StorDBName
+	onStorCfg = mgoITCfg.StorDbCfg().StorDBName
 	onStor = NewDataManager(mgoITdb)
 	for _, stest := range sTestsOnStorIT {
 		t.Run("TestOnStorITMongo", stest)
@@ -147,9 +150,9 @@ func testOnStorITSetGetDerivedCharges(t *testing.T) {
 	}
 	charger1 := &utils.DerivedChargers{DestinationIDs: make(utils.StringMap),
 		Chargers: []*utils.DerivedCharger{
-			&utils.DerivedCharger{RunID: "extra1", RequestTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+			{RunID: "extra1", RequestTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 				AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
-			&utils.DerivedCharger{RunID: "extra2", RequestTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+			{RunID: "extra2", RequestTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 				AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
 		}}
 	if err := onStor.DataDB().SetDerivedChargers(keyCharger1, charger1, utils.NonTransactional); err != nil {
@@ -235,7 +238,7 @@ func testOnStorITCacheActionPlan(t *testing.T) {
 		Id:         "MORE_MINUTES",
 		AccountIDs: utils.StringMap{"vdf:minitsboy": true},
 		ActionTimings: []*ActionTiming{
-			&ActionTiming{
+			{
 				Uuid: utils.GenUUID(),
 				Timing: &RateInterval{
 					Timing: &RITiming{
@@ -249,7 +252,7 @@ func testOnStorITCacheActionPlan(t *testing.T) {
 				Weight:    10,
 				ActionsID: "MINI",
 			},
-			&ActionTiming{
+			{
 				Uuid: utils.GenUUID(),
 				Timing: &RateInterval{
 					Timing: &RITiming{
@@ -351,11 +354,11 @@ func testOnStorITCacheDerivedChargers(t *testing.T) {
 	dcs := &utils.DerivedChargers{
 		DestinationIDs: make(utils.StringMap),
 		Chargers: []*utils.DerivedCharger{
-			&utils.DerivedCharger{RunID: "extra1", RunFilters: "^filteredHeader1/filterValue1/", RequestTypeField: "^prepaid", DirectionField: utils.META_DEFAULT,
+			{RunID: "extra1", RunFilters: "^filteredHeader1/filterValue1/", RequestTypeField: "^prepaid", DirectionField: utils.META_DEFAULT,
 				TenantField: utils.META_DEFAULT, CategoryField: utils.META_DEFAULT, AccountField: "rif", SubjectField: "rif", DestinationField: utils.META_DEFAULT,
 				SetupTimeField: utils.META_DEFAULT, PDDField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT,
 				SupplierField: utils.META_DEFAULT, DisconnectCauseField: utils.META_DEFAULT, CostField: utils.META_DEFAULT, PreRatedField: utils.META_DEFAULT},
-			&utils.DerivedCharger{RunID: "extra2", RequestTypeField: utils.META_DEFAULT, DirectionField: utils.META_DEFAULT, TenantField: utils.META_DEFAULT,
+			{RunID: "extra2", RequestTypeField: utils.META_DEFAULT, DirectionField: utils.META_DEFAULT, TenantField: utils.META_DEFAULT,
 				CategoryField: utils.META_DEFAULT, AccountField: "ivo", SubjectField: "ivo", DestinationField: utils.META_DEFAULT,
 				SetupTimeField: utils.META_DEFAULT, PDDField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT,
 				SupplierField: utils.META_DEFAULT, DisconnectCauseField: utils.META_DEFAULT, CostField: utils.META_DEFAULT, PreRatedField: utils.META_DEFAULT},
@@ -481,7 +484,7 @@ func testOnStorITHasData(t *testing.T) {
 	rp := &RatingPlan{
 		Id: "HasData",
 		Timings: map[string]*RITiming{
-			"59a981b9": &RITiming{
+			"59a981b9": {
 				Years:     utils.Years{},
 				Months:    utils.Months{},
 				MonthDays: utils.MonthDays{},
@@ -490,10 +493,10 @@ func testOnStorITHasData(t *testing.T) {
 			},
 		},
 		Ratings: map[string]*RIRate{
-			"ebefae11": &RIRate{
+			"ebefae11": {
 				ConnectFee: 0,
 				Rates: []*Rate{
-					&Rate{
+					{
 						GroupIntervalStart: 0,
 						Value:              0.2,
 						RateIncrement:      time.Second,
@@ -506,7 +509,7 @@ func testOnStorITHasData(t *testing.T) {
 		},
 		DestinationRates: map[string]RPRateList{
 			"GERMANY": []*RPRate{
-				&RPRate{
+				{
 					Timing: "59a981b9",
 					Rating: "ebefae11",
 					Weight: 10,
@@ -564,7 +567,7 @@ func testOnStorITRatingPlan(t *testing.T) {
 	rp := &RatingPlan{
 		Id: "CRUDRatingPlan",
 		Timings: map[string]*RITiming{
-			"59a981b9": &RITiming{
+			"59a981b9": {
 				Years:     utils.Years{},
 				Months:    utils.Months{},
 				MonthDays: utils.MonthDays{},
@@ -573,10 +576,10 @@ func testOnStorITRatingPlan(t *testing.T) {
 			},
 		},
 		Ratings: map[string]*RIRate{
-			"ebefae11": &RIRate{
+			"ebefae11": {
 				ConnectFee: 0,
 				Rates: []*Rate{
-					&Rate{
+					{
 						GroupIntervalStart: 0,
 						Value:              0.2,
 						RateIncrement:      time.Second,
@@ -589,7 +592,7 @@ func testOnStorITRatingPlan(t *testing.T) {
 		},
 		DestinationRates: map[string]RPRateList{
 			"GERMANY": []*RPRate{
-				&RPRate{
+				{
 					Timing: "59a981b9",
 					Rating: "ebefae11",
 					Weight: 10,
@@ -624,14 +627,14 @@ func testOnStorITRatingPlan(t *testing.T) {
 	}
 	//update
 	rp.Timings = map[string]*RITiming{
-		"59a981b9": &RITiming{
+		"59a981b9": {
 			Years:     utils.Years{},
 			Months:    utils.Months{},
 			MonthDays: utils.MonthDays{},
 			WeekDays:  utils.WeekDays{1, 2, 3, 4, 5},
 			StartTime: "00:00:00",
 		},
-		"59a981a1": &RITiming{
+		"59a981a1": {
 			Years:     utils.Years{},
 			Months:    utils.Months{},
 			MonthDays: utils.MonthDays{},
@@ -797,7 +800,7 @@ func testOnStorITCRUDReverseDestinations(t *testing.T) {
 	if err := onStor.DataDB().SetReverseDestination(dst, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	for i, _ := range dst.Prefixes {
+	for i := range dst.Prefixes {
 		if rcv, err := onStor.DataDB().GetReverseDestination(dst.Prefixes[i], true, utils.NonTransactional); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual([]string{dst.Id}, rcv) {
@@ -807,7 +810,7 @@ func testOnStorITCRUDReverseDestinations(t *testing.T) {
 	if err := onStor.DataDB().UpdateReverseDestination(dst, dst2, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	for i, _ := range dst.Prefixes {
+	for i := range dst.Prefixes {
 		if rcv, err := onStor.DataDB().GetReverseDestination(dst2.Prefixes[i], true, utils.NonTransactional); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual([]string{dst2.Id}, rcv) {
@@ -822,7 +825,7 @@ func testOnStorITCRUDReverseDestinations(t *testing.T) {
 	// 	t.Error(rcvErr)
 	// }
 	//
-	for i, _ := range dst.Prefixes {
+	for i := range dst.Prefixes {
 		if rcv, err := onStor.DataDB().GetReverseDestination(dst2.Prefixes[i], false, utils.NonTransactional); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual([]string{dst2.Id}, rcv) {
@@ -842,17 +845,17 @@ func testOnStorITLCR(t *testing.T) {
 		Account:   "*any",
 		Subject:   "*any",
 		Activations: []*LCRActivation{
-			&LCRActivation{
+			{
 				ActivationTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 				Entries: []*LCREntry{
-					&LCREntry{
+					{
 						DestinationId:  "EU_LANDLINE",
 						RPCategory:     "LCR_STANDARD",
 						Strategy:       "*static",
 						StrategyParams: "ivo;dan;rif",
 						Weight:         10,
 					},
-					&LCREntry{
+					{
 						DestinationId:  "*any",
 						RPCategory:     "LCR_STANDARD",
 						Strategy:       "*lowest_cost",
@@ -893,17 +896,17 @@ func testOnStorITLCR(t *testing.T) {
 	}
 	//update
 	lcr.Activations = []*LCRActivation{
-		&LCRActivation{
+		{
 			ActivationTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 			Entries: []*LCREntry{
-				&LCREntry{
+				{
 					DestinationId:  "EU_LANDLINE",
 					RPCategory:     "LCR_STANDARD",
 					Strategy:       "*static",
 					StrategyParams: "ivo;dan;teo",
 					Weight:         10,
 				},
-				&LCREntry{
+				{
 					DestinationId:  "*any",
 					RPCategory:     "LCR_STANDARD",
 					Strategy:       "*lowest_cost",
@@ -961,7 +964,7 @@ func testOnStorITActions(t *testing.T) {
 				Weight:   utils.Float64Pointer(10),
 				Disabled: utils.BoolPointer(false),
 				Timings: []*RITiming{
-					&RITiming{
+					{
 						Years:     utils.Years{2016, 2017},
 						Months:    utils.Months{time.January, time.February, time.March},
 						MonthDays: utils.MonthDays{1, 2, 3, 4},
@@ -988,7 +991,7 @@ func testOnStorITActions(t *testing.T) {
 				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),
 				Disabled:       utils.BoolPointer(false),
 				Timings: []*RITiming{
-					&RITiming{
+					{
 						Years:     utils.Years{2016, 2017},
 						Months:    utils.Months{time.January, time.February, time.March},
 						MonthDays: utils.MonthDays{1, 2, 3, 4},
@@ -1044,7 +1047,7 @@ func testOnStorITActions(t *testing.T) {
 				Weight:   utils.Float64Pointer(10),
 				Disabled: utils.BoolPointer(false),
 				Timings: []*RITiming{
-					&RITiming{
+					{
 						Years:     utils.Years{2016, 2017},
 						Months:    utils.Months{time.January, time.February, time.March},
 						MonthDays: utils.MonthDays{1, 2, 3, 4},
@@ -1071,7 +1074,7 @@ func testOnStorITActions(t *testing.T) {
 				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),
 				Disabled:       utils.BoolPointer(false),
 				Timings: []*RITiming{
-					&RITiming{
+					{
 						Years:     utils.Years{2016, 2017},
 						Months:    utils.Months{time.January, time.February, time.March},
 						MonthDays: utils.MonthDays{1, 2, 3, 4},
@@ -1098,7 +1101,7 @@ func testOnStorITActions(t *testing.T) {
 				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),
 				Disabled:       utils.BoolPointer(false),
 				Timings: []*RITiming{
-					&RITiming{
+					{
 						Years:     utils.Years{2016, 2017},
 						Months:    utils.Months{time.January, time.February, time.March},
 						MonthDays: utils.MonthDays{1, 2, 3, 4},
@@ -1148,7 +1151,7 @@ func testOnStorITSharedGroup(t *testing.T) {
 	sg := &SharedGroup{
 		Id: "SG2",
 		AccountParameters: map[string]*SharingParameters{
-			"*any": &SharingParameters{
+			"*any": {
 				Strategy:      "*lowest",
 				RatingSubject: "",
 			},
@@ -1178,11 +1181,11 @@ func testOnStorITSharedGroup(t *testing.T) {
 	}
 	//update
 	sg.AccountParameters = map[string]*SharingParameters{
-		"*any": &SharingParameters{
+		"*any": {
 			Strategy:      "*lowest",
 			RatingSubject: "",
 		},
-		"*any2": &SharingParameters{
+		"*any2": {
 			Strategy:      "*lowest2",
 			RatingSubject: "",
 		},
@@ -1273,7 +1276,7 @@ func testOnStorITCRUDActionPlan(t *testing.T) {
 		Id:         "MORE_MINUTES2",
 		AccountIDs: utils.StringMap{"vdf:minitsboy": true},
 		ActionTimings: []*ActionTiming{
-			&ActionTiming{
+			{
 				Uuid: utils.GenUUID(),
 				Timing: &RateInterval{
 					Timing: &RITiming{
@@ -1287,7 +1290,7 @@ func testOnStorITCRUDActionPlan(t *testing.T) {
 				Weight:    10,
 				ActionsID: "MINI",
 			},
-			&ActionTiming{
+			{
 				Uuid: utils.GenUUID(),
 				Timing: &RateInterval{
 					Timing: &RITiming{
@@ -1396,7 +1399,7 @@ func testOnStorITCRUDAccountActionPlans(t *testing.T) {
 func testOnStorITCRUDAccount(t *testing.T) {
 	acc := &Account{
 		ID:         utils.ConcatenatedKey("cgrates.org", "account2"),
-		BalanceMap: map[string]Balances{utils.MONETARY: Balances{&Balance{Value: 10, Weight: 10}}},
+		BalanceMap: map[string]Balances{utils.MONETARY: {&Balance{Value: 10, Weight: 10}}},
 	}
 	if _, rcvErr := onStor.DataDB().GetAccount(acc.ID); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
@@ -1425,7 +1428,7 @@ func testOnStorITCRUDCdrStatsQueue(t *testing.T) {
 	sq := &CDRStatsQueue{
 		conf: &CdrStats{Id: "TTT"},
 		Cdrs: []*QCdr{
-			&QCdr{Cost: 9.0,
+			{Cost: 9.0,
 				SetupTime:  time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 				AnswerTime: time.Date(2012, 1, 1, 0, 0, 10, 0, time.UTC),
 				EventTime:  time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
@@ -1718,7 +1721,7 @@ func testOnStorITResource(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "RL1",
 		Usages: map[string]*ResourceUsage{
-			"RU1": &ResourceUsage{
+			"RU1": {
 				ID:         "RU1",
 				ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC),
 				Units:      2,
@@ -1937,7 +1940,7 @@ func testOnStorITStatQueueProfile(t *testing.T) {
 		QueueLength:        2,
 		TTL:                time.Duration(0 * time.Second),
 		Metrics: []*utils.MetricWithParams{
-			&utils.MetricWithParams{},
+			{},
 		},
 		Stored:       true,
 		ThresholdIDs: []string{"Thresh1"},
@@ -2106,7 +2109,7 @@ func testOnStorITThresholdProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "TestFilter2",
 		Rules: []*FilterRule{
-			&FilterRule{
+			{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001", "1002"},
@@ -2268,7 +2271,7 @@ func testOnStorITFilter(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "Filter1",
 		Rules: []*FilterRule{
-			&FilterRule{
+			{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001", "1002"},
@@ -2308,12 +2311,12 @@ func testOnStorITFilter(t *testing.T) {
 	}
 	//update
 	fp.Rules = []*FilterRule{
-		&FilterRule{
+		{
 			FieldName: "Account",
 			Type:      "*string",
 			Values:    []string{"1001", "1002"},
 		},
-		&FilterRule{
+		{
 			FieldName: "Destination",
 			Type:      "*string",
 			Values:    []string{"10", "20"},
@@ -2363,7 +2366,7 @@ func testOnStorITSupplierProfile(t *testing.T) {
 		Sorting:           "*lowest_cost",
 		SortingParameters: []string{},
 		Suppliers: []*Supplier{
-			&Supplier{
+			{
 				ID:                 "supplier1",
 				FilterIDs:          []string{"FLTR_DST_DE"},
 				AccountIDs:         []string{"Account1"},
@@ -2405,7 +2408,7 @@ func testOnStorITSupplierProfile(t *testing.T) {
 	}
 	//update
 	splProfile.Suppliers = []*Supplier{
-		&Supplier{
+		{
 			ID:                 "supplier1",
 			FilterIDs:          []string{"FLTR_DST_DE"},
 			AccountIDs:         []string{"Account1"},
@@ -2415,7 +2418,7 @@ func testOnStorITSupplierProfile(t *testing.T) {
 			Weight:             10,
 			SupplierParameters: "param1",
 		},
-		&Supplier{
+		{
 			ID:                 "supplier2",
 			FilterIDs:          []string{"FLTR_DST_DE"},
 			AccountIDs:         []string{"Account2"},
@@ -2478,7 +2481,7 @@ func testOnStorITAttributeProfile(t *testing.T) {
 		},
 		Contexts: []string{"con1"},
 		Attributes: []*Attribute{
-			&Attribute{
+			{
 				FieldName:  "FN1",
 				Initial:    "Init1",
 				Substitute: config.NewRSRParsersMustCompile("Al1", true),
@@ -2570,7 +2573,7 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 		},
 		Contexts: []string{"con1"},
 		Attributes: []*Attribute{
-			&Attribute{
+			{
 				FieldName:  "FN1",
 				Initial:    "Init1",
 				Substitute: config.NewRSRParsersMustCompile("Val1", true),
@@ -2609,7 +2612,7 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 		Append:     true,
 	}
 	attrProfile.Attributes = []*Attribute{
-		&Attribute{
+		{
 			FieldName:  "FN1",
 			Initial:    "Init1",
 			Substitute: config.NewRSRParsersMustCompile("123.123", true),
@@ -2642,7 +2645,7 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 		Append:     true,
 	}
 	attrProfile.Attributes = []*Attribute{
-		&Attribute{
+		{
 			FieldName:  "FN1",
 			Initial:    "Init1",
 			Substitute: config.NewRSRParsersMustCompile("true", true),

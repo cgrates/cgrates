@@ -35,11 +35,11 @@ func TestMfInitConfig(t *testing.T) {
 }
 
 func TestMfGeneralItems(t *testing.T) {
-	if mfCgrCfg.DefaultReqType != utils.META_PSEUDOPREPAID { // Twice reconfigured
-		t.Error("DefaultReqType: ", mfCgrCfg.DefaultReqType)
+	if mfCgrCfg.GeneralCfg().DefaultReqType != utils.META_PSEUDOPREPAID { // Twice reconfigured
+		t.Error("DefaultReqType: ", mfCgrCfg.GeneralCfg().DefaultReqType)
 	}
-	if mfCgrCfg.DefaultCategory != "call" { // Not configred, should be inherited from default
-		t.Error("DefaultCategory: ", mfCgrCfg.DefaultCategory)
+	if mfCgrCfg.GeneralCfg().DefaultCategory != "call" { // Not configred, should be inherited from default
+		t.Error("DefaultCategory: ", mfCgrCfg.GeneralCfg().DefaultCategory)
 	}
 }
 

@@ -61,7 +61,8 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	for _, reqProcessor := range ha.reqProcessors {
 		agReq := newAgentRequest(dcdr, nil, nil,
 			reqProcessor.Tenant, ha.dfltTenant,
-			utils.FirstNonEmpty(reqProcessor.Timezone, config.CgrConfig().DefaultTimezone),
+			utils.FirstNonEmpty(reqProcessor.Timezone,
+				config.CgrConfig().GeneralCfg().DefaultTimezone),
 			ha.filterS)
 		lclProcessed, err := ha.processRequest(reqProcessor, agReq)
 		if err != nil {

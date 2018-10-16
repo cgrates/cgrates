@@ -32,8 +32,8 @@ var (
 	attrService            *AttributeService
 	dmAtr                  *DataManager
 	mapSubstitutes         = map[string]map[interface{}]*Attribute{
-		utils.Account: map[interface{}]*Attribute{
-			utils.META_ANY: &Attribute{
+		utils.Account: {
+			utils.META_ANY: {
 				FieldName:  utils.Account,
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("1010", true),
@@ -42,9 +42,9 @@ var (
 		},
 	}
 	attrEvs = []*AttrArgsProcessEvent{
-		&AttrArgsProcessEvent{
+		{
 			CGREvent: utils.CGREvent{ //matching AttributeProfile1
-				Tenant:  config.CgrConfig().DefaultTenant,
+				Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 				ID:      utils.GenUUID(),
 				Context: utils.StringPointer(utils.MetaSessionS),
 				Event: map[string]interface{}{
@@ -55,9 +55,9 @@ var (
 				},
 			},
 		},
-		&AttrArgsProcessEvent{
+		{
 			CGREvent: utils.CGREvent{ //matching AttributeProfile2
-				Tenant:  config.CgrConfig().DefaultTenant,
+				Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 				ID:      utils.GenUUID(),
 				Context: utils.StringPointer(utils.MetaSessionS),
 				Event: map[string]interface{}{
@@ -65,9 +65,9 @@ var (
 				},
 			},
 		},
-		&AttrArgsProcessEvent{
+		{
 			CGREvent: utils.CGREvent{ //matching AttributeProfilePrefix
-				Tenant:  config.CgrConfig().DefaultTenant,
+				Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 				ID:      utils.GenUUID(),
 				Context: utils.StringPointer(utils.MetaSessionS),
 				Event: map[string]interface{}{
@@ -75,9 +75,9 @@ var (
 				},
 			},
 		},
-		&AttrArgsProcessEvent{
+		{
 			CGREvent: utils.CGREvent{ //matching AttributeProfilePrefix
-				Tenant:  config.CgrConfig().DefaultTenant,
+				Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 				ID:      utils.GenUUID(),
 				Context: utils.StringPointer(utils.MetaSessionS),
 				Event: map[string]interface{}{
@@ -88,7 +88,7 @@ var (
 	}
 	atrPs = AttributeProfiles{
 		&AttributeProfile{
-			Tenant:    config.CgrConfig().DefaultTenant,
+			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "AttributeProfile1",
 			Contexts:  []string{utils.MetaSessionS},
 			FilterIDs: []string{"FLTR_ATTR_1"},
@@ -97,7 +97,7 @@ var (
 				ExpiryTime:     cloneExpTimeAttributes,
 			},
 			Attributes: []*Attribute{
-				&Attribute{
+				{
 					FieldName:  utils.Account,
 					Initial:    utils.META_ANY,
 					Substitute: config.NewRSRParsersMustCompile("1010", true),
@@ -108,7 +108,7 @@ var (
 			attributesIdx: mapSubstitutes,
 		},
 		&AttributeProfile{
-			Tenant:    config.CgrConfig().DefaultTenant,
+			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "AttributeProfile2",
 			Contexts:  []string{utils.MetaSessionS},
 			FilterIDs: []string{"FLTR_ATTR_2"},
@@ -117,7 +117,7 @@ var (
 				ExpiryTime:     cloneExpTimeAttributes,
 			},
 			Attributes: []*Attribute{
-				&Attribute{
+				{
 					FieldName:  utils.Account,
 					Initial:    utils.META_ANY,
 					Substitute: config.NewRSRParsersMustCompile("1010", true),
@@ -128,7 +128,7 @@ var (
 			attributesIdx: mapSubstitutes,
 		},
 		&AttributeProfile{
-			Tenant:    config.CgrConfig().DefaultTenant,
+			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "AttributeProfilePrefix",
 			Contexts:  []string{utils.MetaSessionS},
 			FilterIDs: []string{"FLTR_ATTR_3"},
@@ -137,7 +137,7 @@ var (
 				ExpiryTime:     cloneExpTimeAttributes,
 			},
 			Attributes: []*Attribute{
-				&Attribute{
+				{
 					FieldName:  utils.Account,
 					Initial:    utils.META_ANY,
 					Substitute: config.NewRSRParsersMustCompile("1010", true),
@@ -148,7 +148,7 @@ var (
 			Weight:        20,
 		},
 		&AttributeProfile{
-			Tenant:    config.CgrConfig().DefaultTenant,
+			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "AttributeIDMatch",
 			Contexts:  []string{utils.MetaSessionS},
 			FilterIDs: []string{"*gte:DistinctMatch:20"},
@@ -157,7 +157,7 @@ var (
 				ExpiryTime:     cloneExpTimeAttributes,
 			},
 			Attributes: []*Attribute{
-				&Attribute{
+				{
 					FieldName:  utils.Account,
 					Initial:    utils.META_ANY,
 					Substitute: config.NewRSRParsersMustCompile("1010", true),
@@ -189,20 +189,20 @@ func TestAttributePopulateAttrService(t *testing.T) {
 
 func TestAttributeAddFilters(t *testing.T) {
 	fltrAttr1 := &Filter{
-		Tenant: config.CgrConfig().DefaultTenant,
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_ATTR_1",
 		Rules: []*FilterRule{
-			&FilterRule{
+			{
 				Type:      MetaString,
 				FieldName: "Attribute",
 				Values:    []string{"AttributeProfile1"},
 			},
-			&FilterRule{
+			{
 				Type:      MetaGreaterOrEqual,
 				FieldName: "UsageInterval",
 				Values:    []string{(1 * time.Second).String()},
 			},
-			&FilterRule{
+			{
 				Type:      MetaGreaterOrEqual,
 				FieldName: utils.Weight,
 				Values:    []string{"9.0"},
@@ -211,10 +211,10 @@ func TestAttributeAddFilters(t *testing.T) {
 	}
 	dmAtr.SetFilter(fltrAttr1)
 	fltrAttr2 := &Filter{
-		Tenant: config.CgrConfig().DefaultTenant,
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_ATTR_2",
 		Rules: []*FilterRule{
-			&FilterRule{
+			{
 				Type:      MetaString,
 				FieldName: "Attribute",
 				Values:    []string{"AttributeProfile2"},
@@ -223,10 +223,10 @@ func TestAttributeAddFilters(t *testing.T) {
 	}
 	dmAtr.SetFilter(fltrAttr2)
 	fltrAttrPrefix := &Filter{
-		Tenant: config.CgrConfig().DefaultTenant,
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_ATTR_3",
 		Rules: []*FilterRule{
-			&FilterRule{
+			{
 				Type:      MetaPrefix,
 				FieldName: "Attribute",
 				Values:    []string{"AttributeProfilePrefix"},
@@ -235,10 +235,10 @@ func TestAttributeAddFilters(t *testing.T) {
 	}
 	dmAtr.SetFilter(fltrAttrPrefix)
 	fltrAttr4 := &Filter{
-		Tenant: config.CgrConfig().DefaultTenant,
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_ATTR_4",
 		Rules: []*FilterRule{
-			&FilterRule{
+			{
 				Type:      MetaGreaterOrEqual,
 				FieldName: utils.Weight,
 				Values:    []string{"200.00"},
@@ -459,7 +459,7 @@ func TestAttributeIndexer(t *testing.T) {
 			ExpiryTime:     cloneExpTimeAttributes,
 		},
 		Attributes: []*Attribute{
-			&Attribute{
+			{
 				FieldName:  utils.Account,
 				Initial:    utils.META_ANY,
 				Append:     true,
@@ -472,7 +472,7 @@ func TestAttributeIndexer(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringMap{
-		"*string:Account:1007": utils.StringMap{
+		"*string:Account:1007": {
 			"AttrPrf": true,
 		},
 	}
@@ -519,7 +519,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		t.Errorf("\nExpecting: true got :%+v", test)
 	}
 	attrPrf1 := &AttributeProfile{
-		Tenant:    config.CgrConfig().DefaultTenant,
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:InitialField:InitialValue"},
@@ -527,7 +527,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*Attribute{
-			&Attribute{
+			{
 				FieldName:  "Field1",
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("Value1", true),
@@ -537,7 +537,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		Weight: 10,
 	}
 	attrPrf2 := &AttributeProfile{
-		Tenant:    config.CgrConfig().DefaultTenant,
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_2",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:Field1:Value1"},
@@ -545,7 +545,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*Attribute{
-			&Attribute{
+			{
 				FieldName:  "Field2",
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("Value2", true),
@@ -555,7 +555,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		Weight: 20,
 	}
 	attrPrf3 := &AttributeProfile{
-		Tenant:    config.CgrConfig().DefaultTenant,
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_3",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:Field2:Value2"},
@@ -563,7 +563,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*Attribute{
-			&Attribute{
+			{
 				FieldName:  "Field3",
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("Value3", true),
@@ -585,7 +585,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 	attrArgs := &AttrArgsProcessEvent{
 		ProcessRuns: utils.IntPointer(4),
 		CGREvent: utils.CGREvent{
-			Tenant:  config.CgrConfig().DefaultTenant,
+			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:      utils.GenUUID(),
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
@@ -597,7 +597,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_1", "ATTR_2", "ATTR_3"},
 		AlteredFields:   []string{"Field1", "Field2", "Field3"},
 		CGREvent: &utils.CGREvent{
-			Tenant:  config.CgrConfig().DefaultTenant,
+			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:      utils.GenUUID(),
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
@@ -634,7 +634,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		t.Errorf("\nExpecting: true got :%+v", test)
 	}
 	attrPrf1 := &AttributeProfile{
-		Tenant:    config.CgrConfig().DefaultTenant,
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:InitialField:InitialValue"},
@@ -642,7 +642,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*Attribute{
-			&Attribute{
+			{
 				FieldName:  "Field1",
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("Value1", true),
@@ -652,7 +652,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		Weight: 10,
 	}
 	attrPrf2 := &AttributeProfile{
-		Tenant:    config.CgrConfig().DefaultTenant,
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_2",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:Field1:Value1"},
@@ -660,7 +660,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*Attribute{
-			&Attribute{
+			{
 				FieldName:  "Field2",
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("Value2", true),
@@ -670,7 +670,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		Weight: 20,
 	}
 	attrPrf3 := &AttributeProfile{
-		Tenant:    config.CgrConfig().DefaultTenant,
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_3",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:NotFound:NotFound"},
@@ -678,7 +678,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*Attribute{
-			&Attribute{
+			{
 				FieldName:  "Field3",
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("Value3", true),
@@ -700,7 +700,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 	attrArgs := &AttrArgsProcessEvent{
 		ProcessRuns: utils.IntPointer(4),
 		CGREvent: utils.CGREvent{
-			Tenant:  config.CgrConfig().DefaultTenant,
+			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:      utils.GenUUID(),
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
@@ -712,7 +712,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_1", "ATTR_2"},
 		AlteredFields:   []string{"Field1", "Field2"},
 		CGREvent: &utils.CGREvent{
-			Tenant:  config.CgrConfig().DefaultTenant,
+			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:      utils.GenUUID(),
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
@@ -748,7 +748,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		t.Errorf("\nExpecting: true got :%+v", test)
 	}
 	attrPrf1 := &AttributeProfile{
-		Tenant:    config.CgrConfig().DefaultTenant,
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:InitialField:InitialValue"},
@@ -756,7 +756,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*Attribute{
-			&Attribute{
+			{
 				FieldName:  "Field1",
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("Value1", true),
@@ -766,7 +766,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		Weight: 10,
 	}
 	attrPrf2 := &AttributeProfile{
-		Tenant:    config.CgrConfig().DefaultTenant,
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_2",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:Field1:Value1"},
@@ -774,7 +774,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*Attribute{
-			&Attribute{
+			{
 				FieldName:  "Field2",
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("Value2", true),
@@ -784,7 +784,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		Weight: 20,
 	}
 	attrPrf3 := &AttributeProfile{
-		Tenant:    config.CgrConfig().DefaultTenant,
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_3",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:Field2:Value2"},
@@ -792,7 +792,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*Attribute{
-			&Attribute{
+			{
 				FieldName:  "Field3",
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("Value3", true),
@@ -814,7 +814,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 	attrArgs := &AttrArgsProcessEvent{
 		ProcessRuns: utils.IntPointer(2),
 		CGREvent: utils.CGREvent{
-			Tenant:  config.CgrConfig().DefaultTenant,
+			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:      utils.GenUUID(),
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
@@ -826,7 +826,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_1", "ATTR_2"},
 		AlteredFields:   []string{"Field1", "Field2"},
 		CGREvent: &utils.CGREvent{
-			Tenant:  config.CgrConfig().DefaultTenant,
+			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:      utils.GenUUID(),
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
@@ -862,7 +862,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 		t.Errorf("\nExpecting: true got :%+v", test)
 	}
 	attrPrf1 := &AttributeProfile{
-		Tenant:    config.CgrConfig().DefaultTenant,
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:InitialField:InitialValue"},
@@ -870,7 +870,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*Attribute{
-			&Attribute{
+			{
 				FieldName:  "Field1",
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("Value1", true),
@@ -880,7 +880,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 		Weight: 10,
 	}
 	attrPrf2 := &AttributeProfile{
-		Tenant:    config.CgrConfig().DefaultTenant,
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_2",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:Field1:Value1"},
@@ -888,7 +888,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*Attribute{
-			&Attribute{
+			{
 				FieldName:  "Field2",
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("Value2", true),
@@ -907,7 +907,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 	attrArgs := &AttrArgsProcessEvent{
 		ProcessRuns: utils.IntPointer(4),
 		CGREvent: utils.CGREvent{
-			Tenant:  config.CgrConfig().DefaultTenant,
+			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:      utils.GenUUID(),
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
@@ -919,7 +919,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_1", "ATTR_2"},
 		AlteredFields:   []string{"Field1", "Field2"},
 		CGREvent: &utils.CGREvent{
-			Tenant:  config.CgrConfig().DefaultTenant,
+			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:      utils.GenUUID(),
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
@@ -955,7 +955,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		t.Errorf("\nExpecting: true got :%+v", test)
 	}
 	attrPrf1 := &AttributeProfile{
-		Tenant:    config.CgrConfig().DefaultTenant,
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:InitialField:InitialValue"},
@@ -963,7 +963,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*Attribute{
-			&Attribute{
+			{
 				FieldName:  "Field1",
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("Value1", true),
@@ -973,7 +973,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		Weight: 10,
 	}
 	attrPrf2 := &AttributeProfile{
-		Tenant:    config.CgrConfig().DefaultTenant,
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_2",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:Field1:Value1"},
@@ -981,7 +981,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*Attribute{
-			&Attribute{
+			{
 				FieldName:  "Field2",
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("Value2", true),
@@ -992,7 +992,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		Weight:  20,
 	}
 	attrPrf3 := &AttributeProfile{
-		Tenant:    config.CgrConfig().DefaultTenant,
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_3",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:Field2:Value2"},
@@ -1000,7 +1000,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*Attribute{
-			&Attribute{
+			{
 				FieldName:  "Field3",
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("Value3", true),
@@ -1022,7 +1022,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 	attrArgs := &AttrArgsProcessEvent{
 		ProcessRuns: utils.IntPointer(4),
 		CGREvent: utils.CGREvent{
-			Tenant:  config.CgrConfig().DefaultTenant,
+			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:      utils.GenUUID(),
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
@@ -1034,7 +1034,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_1", "ATTR_2"},
 		AlteredFields:   []string{"Field1", "Field2"},
 		CGREvent: &utils.CGREvent{
-			Tenant:  config.CgrConfig().DefaultTenant,
+			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:      utils.GenUUID(),
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
@@ -1070,7 +1070,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		t.Errorf("\nExpecting: true got :%+v", test)
 	}
 	attrPrf1 := &AttributeProfile{
-		Tenant:    config.CgrConfig().DefaultTenant,
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:InitialField:InitialValue"},
@@ -1078,7 +1078,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*Attribute{
-			&Attribute{
+			{
 				FieldName:  "Field1",
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("Value1", true),
@@ -1089,7 +1089,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		Weight:  10,
 	}
 	attrPrf2 := &AttributeProfile{
-		Tenant:    config.CgrConfig().DefaultTenant,
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_2",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:Field1:Value1"},
@@ -1097,7 +1097,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*Attribute{
-			&Attribute{
+			{
 				FieldName:  "Field2",
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("Value2", true),
@@ -1107,7 +1107,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		Weight: 20,
 	}
 	attrPrf3 := &AttributeProfile{
-		Tenant:    config.CgrConfig().DefaultTenant,
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_3",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:Field2:Value2"},
@@ -1115,7 +1115,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*Attribute{
-			&Attribute{
+			{
 				FieldName:  "Field3",
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("Value3", true),
@@ -1137,7 +1137,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 	attrArgs := &AttrArgsProcessEvent{
 		ProcessRuns: utils.IntPointer(4),
 		CGREvent: utils.CGREvent{
-			Tenant:  config.CgrConfig().DefaultTenant,
+			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:      utils.GenUUID(),
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
@@ -1149,7 +1149,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_1"},
 		AlteredFields:   []string{"Field1"},
 		CGREvent: &utils.CGREvent{
-			Tenant:  config.CgrConfig().DefaultTenant,
+			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:      utils.GenUUID(),
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
@@ -1184,7 +1184,7 @@ func TestAttributeProcessSubstitute(t *testing.T) {
 		t.Errorf("\nExpecting: true got :%+v", test)
 	}
 	attrPrf1 := &AttributeProfile{
-		Tenant:    config.CgrConfig().DefaultTenant,
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
 		FilterIDs: []string{"*string:Field1:Value1"},
@@ -1192,7 +1192,7 @@ func TestAttributeProcessSubstitute(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Attributes: []*Attribute{
-			&Attribute{
+			{
 				FieldName:  "Field2",
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("~Field1", true),
@@ -1209,7 +1209,7 @@ func TestAttributeProcessSubstitute(t *testing.T) {
 	attrArgs := &AttrArgsProcessEvent{
 		ProcessRuns: utils.IntPointer(1),
 		CGREvent: utils.CGREvent{
-			Tenant:  config.CgrConfig().DefaultTenant,
+			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:      utils.GenUUID(),
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
@@ -1221,7 +1221,7 @@ func TestAttributeProcessSubstitute(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_1"},
 		AlteredFields:   []string{"Field2"},
 		CGREvent: &utils.CGREvent{
-			Tenant:  config.CgrConfig().DefaultTenant,
+			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:      utils.GenUUID(),
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{

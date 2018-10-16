@@ -628,9 +628,9 @@ func TestSafEventAsCDR(t *testing.T) {
 		Cost:        -1.0,
 		RunID:       utils.MetaRaw,
 		ToR:         utils.VOICE,
-		RequestType: cfg.DefaultReqType,
-		Tenant:      cfg.DefaultTenant,
-		Category:    cfg.DefaultCategory,
+		RequestType: cfg.GeneralCfg().DefaultReqType,
+		Tenant:      cfg.GeneralCfg().DefaultTenant,
+		Category:    cfg.GeneralCfg().DefaultCategory,
 		ExtraFields: make(map[string]string),
 	}
 	if rply, err := se.AsCDR(cfg, utils.EmptyString); err != nil {
@@ -691,9 +691,9 @@ func TestSafEventAsCDR(t *testing.T) {
 		},
 		RunID:       utils.MetaRaw,
 		ToR:         utils.VOICE,
-		RequestType: cfg.DefaultReqType,
-		Tenant:      cfg.DefaultTenant,
-		Category:    cfg.DefaultCategory,
+		RequestType: cfg.GeneralCfg().DefaultReqType,
+		Tenant:      cfg.GeneralCfg().DefaultTenant,
+		Category:    cfg.GeneralCfg().DefaultCategory,
 	}
 	if rply, err := se.AsCDR(cfg, utils.EmptyString); err != nil {
 		t.Error(err)
@@ -724,9 +724,9 @@ func TestSafEventAsCDR(t *testing.T) {
 		},
 		RunID:       utils.MetaRaw,
 		ToR:         utils.VOICE,
-		RequestType: cfg.DefaultReqType,
-		Tenant:      cfg.DefaultTenant,
-		Category:    cfg.DefaultCategory,
+		RequestType: cfg.GeneralCfg().DefaultReqType,
+		Tenant:      cfg.GeneralCfg().DefaultTenant,
+		Category:    cfg.GeneralCfg().DefaultCategory,
 	}
 	if rply, err := se.AsCDR(cfg, utils.EmptyString); err != nil {
 		t.Error(err)

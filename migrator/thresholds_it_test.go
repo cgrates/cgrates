@@ -136,16 +136,18 @@ func TestThresholdsITMoveEncoding2(t *testing.T) {
 }
 
 func testTrsITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(trsCfgIn.DataDbType,
-		trsCfgIn.DataDbHost, trsCfgIn.DataDbPort, trsCfgIn.DataDbName,
-		trsCfgIn.DataDbUser, trsCfgIn.DataDbPass, trsCfgIn.DBDataEncoding,
+	dataDBIn, err := NewMigratorDataDB(trsCfgIn.DataDbCfg().DataDbType,
+		trsCfgIn.DataDbCfg().DataDbHost, trsCfgIn.DataDbCfg().DataDbPort,
+		trsCfgIn.DataDbCfg().DataDbName, trsCfgIn.DataDbCfg().DataDbUser,
+		trsCfgIn.DataDbCfg().DataDbPass, trsCfgIn.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(trsCfgOut.DataDbType,
-		trsCfgOut.DataDbHost, trsCfgOut.DataDbPort, trsCfgOut.DataDbName,
-		trsCfgOut.DataDbUser, trsCfgOut.DataDbPass, trsCfgOut.DBDataEncoding,
+	dataDBOut, err := NewMigratorDataDB(trsCfgOut.DataDbCfg().DataDbType,
+		trsCfgOut.DataDbCfg().DataDbHost, trsCfgOut.DataDbCfg().DataDbPort,
+		trsCfgOut.DataDbCfg().DataDbName, trsCfgOut.DataDbCfg().DataDbUser,
+		trsCfgOut.DataDbCfg().DataDbPass, trsCfgOut.GeneralCfg().DBDataEncoding,
 		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
@@ -198,7 +200,7 @@ func testTrsITMigrateAndMove(t *testing.T) {
 
 	tresProf := &engine.ThresholdProfile{
 		ID:                 v1trs.ID,
-		Tenant:             config.CgrConfig().DefaultTenant,
+		Tenant:             config.CgrConfig().GeneralCfg().DefaultTenant,
 		Weight:             v1trs.Weight,
 		ActivationInterval: &utils.ActivationInterval{v1trs.ExpirationDate, v1trs.ActivationDate},
 		MinSleep:           v1trs.MinSleep,

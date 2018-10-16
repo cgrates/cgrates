@@ -34,9 +34,11 @@ import (
 )
 
 func InitDataDb(cfg *config.CGRConfig) error {
-	dm, err := ConfigureDataStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort,
-		cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding,
-		cfg.CacheCfg(), cfg.DataDbSentinelName)
+	dm, err := ConfigureDataStorage(cfg.DataDbCfg().DataDbType,
+		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
+		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
+		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+		cfg.CacheCfg(), cfg.DataDbCfg().DataDbSentinelName)
 	if err != nil {
 		return err
 	}
@@ -53,18 +55,20 @@ func InitDataDb(cfg *config.CGRConfig) error {
 
 func InitStorDb(cfg *config.CGRConfig) error {
 	x := []string{utils.MYSQL, utils.POSTGRES}
-	storDb, err := ConfigureLoadStorage(cfg.StorDBType,
-		cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName,
-		cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding,
-		cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns,
-		cfg.StorDBConnMaxLifetime, cfg.StorDBCDRSIndexes)
+	storDb, err := ConfigureLoadStorage(cfg.StorDbCfg().StorDBType,
+		cfg.StorDbCfg().StorDBHost, cfg.StorDbCfg().StorDBPort,
+		cfg.StorDbCfg().StorDBName, cfg.StorDbCfg().StorDBUser,
+		cfg.StorDbCfg().StorDBPass, cfg.GeneralCfg().DBDataEncoding,
+		cfg.StorDbCfg().StorDBMaxOpenConns, cfg.StorDbCfg().StorDBMaxIdleConns,
+		cfg.StorDbCfg().StorDBConnMaxLifetime, cfg.StorDbCfg().StorDBCDRSIndexes)
 	if err != nil {
 		return err
 	}
-	if err := storDb.Flush(path.Join(cfg.DataFolderPath, "storage", cfg.StorDBType)); err != nil {
+	if err := storDb.Flush(path.Join(cfg.DataFolderPath, "storage",
+		cfg.StorDbCfg().StorDBType)); err != nil {
 		return err
 	}
-	if utils.IsSliceMember(x, cfg.StorDBType) {
+	if utils.IsSliceMember(x, cfg.StorDbCfg().StorDBType) {
 		if err := SetDBVersions(storDb); err != nil {
 			return err
 		}

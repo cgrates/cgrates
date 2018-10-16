@@ -41,18 +41,24 @@ var tpCsvScenario = flag.String("tp_scenario", "testtp", "Use this scenario fold
 // Will use 3 different datadbs in order to be able to see differences in data loaded
 func TestLoaderITConnDataDbs(t *testing.T) {
 	lCfg, _ = config.NewDefaultCGRConfig()
-	lCfg.StorDBPass = "CGRateS.org"
+	lCfg.StorDbCfg().StorDBPass = "CGRateS.org"
 	var err error
-	if dataDbCsv, err = ConfigureDataStorage(lCfg.DataDbType, lCfg.DataDbHost, lCfg.DataDbPort, "7",
-		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding, nil, ""); err != nil {
+	if dataDbCsv, err = ConfigureDataStorage(lCfg.DataDbCfg().DataDbType,
+		lCfg.DataDbCfg().DataDbHost, lCfg.DataDbCfg().DataDbPort, "7",
+		lCfg.DataDbCfg().DataDbUser, lCfg.DataDbCfg().DataDbPass,
+		lCfg.GeneralCfg().DBDataEncoding, nil, ""); err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
-	if dataDbStor, err = ConfigureDataStorage(lCfg.DataDbType, lCfg.DataDbHost, lCfg.DataDbPort, "8",
-		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding, nil, ""); err != nil {
+	if dataDbStor, err = ConfigureDataStorage(lCfg.DataDbCfg().DataDbType,
+		lCfg.DataDbCfg().DataDbHost, lCfg.DataDbCfg().DataDbPort, "8",
+		lCfg.DataDbCfg().DataDbUser, lCfg.DataDbCfg().DataDbPass,
+		lCfg.GeneralCfg().DBDataEncoding, nil, ""); err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
-	if dataDbApier, err = ConfigureDataStorage(lCfg.DataDbType, lCfg.DataDbHost, lCfg.DataDbPort, "9",
-		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding, nil, ""); err != nil {
+	if dataDbApier, err = ConfigureDataStorage(lCfg.DataDbCfg().DataDbType,
+		lCfg.DataDbCfg().DataDbHost, lCfg.DataDbCfg().DataDbPort, "9",
+		lCfg.DataDbCfg().DataDbUser, lCfg.DataDbCfg().DataDbPass,
+		lCfg.GeneralCfg().DBDataEncoding, nil, ""); err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
 	for _, db := range []Storage{dataDbCsv.DataDB(), dataDbStor.DataDB(), dataDbApier.DataDB(),
@@ -65,14 +71,15 @@ func TestLoaderITConnDataDbs(t *testing.T) {
 
 // Create/reset storage tariff plan tables, used as database connectin establishment also
 func TestLoaderITCreateStorTpTables(t *testing.T) {
-	db, err := NewMySQLStorage(lCfg.StorDBHost, lCfg.StorDBPort, lCfg.StorDBName,
-		lCfg.StorDBUser, lCfg.StorDBPass, lCfg.StorDBMaxOpenConns, lCfg.StorDBMaxIdleConns, lCfg.StorDBConnMaxLifetime)
+	db, err := NewMySQLStorage(lCfg.StorDbCfg().StorDBHost,
+		lCfg.StorDbCfg().StorDBPort, lCfg.StorDbCfg().StorDBName,
+		lCfg.StorDbCfg().StorDBUser, lCfg.StorDbCfg().StorDBPass,
+		lCfg.StorDbCfg().StorDBMaxOpenConns, lCfg.StorDbCfg().StorDBMaxIdleConns,
+		lCfg.StorDbCfg().StorDBConnMaxLifetime)
 	if err != nil {
 		t.Error("Error on opening database connection: ", err)
-		return
-	} else {
-		storDb = db
 	}
+	storDb = db
 	// Creating the table serves also as reset since there is a drop prior to create
 	if err := db.CreateTablesFromScript(path.Join(*dataDir, "storage", "mysql", utils.CREATE_TARIFFPLAN_TABLES_SQL)); err != nil {
 		t.Error("Error on db creation: ", err.Error())

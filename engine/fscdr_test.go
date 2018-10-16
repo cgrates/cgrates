@@ -411,7 +411,7 @@ func TestFsCdrFirstNonEmpty(t *testing.T) {
 }
 
 func TestFsCdrCDRFields(t *testing.T) {
-	fsCdrCfg.CDRSExtraFields = []*utils.RSRField{&utils.RSRField{Id: "sip_user_agent"}}
+	fsCdrCfg.CDRSExtraFields = []*utils.RSRField{{Id: "sip_user_agent"}}
 	fsCdr, err := NewFSCdr(body, fsCdrCfg)
 	if err != nil {
 		t.Errorf("Error loading cdr: %v", err)
@@ -445,7 +445,7 @@ func TestFsCdrSearchExtraField(t *testing.T) {
 	fsCdr, _ := NewFSCdr(body, fsCdrCfg)
 	rsrSt1, _ := utils.NewRSRField("^injected_value")
 	rsrSt2, _ := utils.NewRSRField("^injected_hdr::injected_value/")
-	fsCdrCfg.CDRSExtraFields = []*utils.RSRField{&utils.RSRField{Id: "caller_id_name"}, rsrSt1, rsrSt2}
+	fsCdrCfg.CDRSExtraFields = []*utils.RSRField{{Id: "caller_id_name"}, rsrSt1, rsrSt2}
 	extraFields := fsCdr.getExtraFields()
 	if len(extraFields) != 3 || extraFields["caller_id_name"] != "1001" ||
 		extraFields["injected_value"] != "injected_value" ||
@@ -510,7 +510,7 @@ func TestFsCdrDDazRSRExtraFields(t *testing.T) {
     }
 }`)
 	var err error
-	fsCdrCfg, err = config.NewCGRConfigFromJsonString(eFieldsCfg)
+	fsCdrCfg, err = config.NewCGRConfigFromJsonStringWithDefaults(eFieldsCfg)
 	expCdrExtra := utils.ParseRSRFieldsMustCompile(`~effective_caller_id_number:s/(\d+)/+$1/`, utils.INFIELD_SEP)
 	if err != nil {
 		t.Error("Could not parse the config", err.Error())

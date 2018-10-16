@@ -142,9 +142,12 @@ func (kev KamEvent) AsCDR(timezone string) (cdr *engine.CDR) {
 	cdr.OriginID = kev[utils.OriginID]
 	cdr.OriginHost = kev[utils.OriginHost]
 	cdr.Source = "KamailioEvent"
-	cdr.RequestType = utils.FirstNonEmpty(kev[utils.RequestType], config.CgrConfig().DefaultReqType)
-	cdr.Tenant = utils.FirstNonEmpty(kev[utils.Tenant], config.CgrConfig().DefaultTenant)
-	cdr.Category = utils.FirstNonEmpty(kev[utils.Category], config.CgrConfig().DefaultCategory)
+	cdr.RequestType = utils.FirstNonEmpty(kev[utils.RequestType],
+		config.CgrConfig().GeneralCfg().DefaultReqType)
+	cdr.Tenant = utils.FirstNonEmpty(kev[utils.Tenant],
+		config.CgrConfig().GeneralCfg().DefaultTenant)
+	cdr.Category = utils.FirstNonEmpty(kev[utils.Category],
+		config.CgrConfig().GeneralCfg().DefaultCategory)
 	cdr.Account = kev[utils.Account]
 	cdr.Subject = kev[utils.Subject]
 	cdr.Destination = kev[utils.Destination]
@@ -182,7 +185,7 @@ func (kev KamEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err erro
 	}
 	cgrEv = &utils.CGREvent{
 		Tenant: utils.FirstNonEmpty(kev[utils.Tenant],
-			config.CgrConfig().DefaultTenant),
+			config.CgrConfig().GeneralCfg().DefaultTenant),
 		ID:    utils.UUIDSha1Prefix(),
 		Time:  &sTime,
 		Event: kev.AsMapStringInterface(),
@@ -200,7 +203,7 @@ func (kev KamEvent) String() string {
 }
 
 func (kev KamEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
-	cgrEv, err := kev.AsCGREvent(config.CgrConfig().DefaultTimezone)
+	cgrEv, err := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return
 	}
@@ -268,7 +271,7 @@ func (kev KamEvent) AsKamAuthReply(authArgs *sessions.V1AuthorizeArgs,
 
 // V1InitSessionArgs returns the arguments used in SessionSv1.InitSession
 func (kev KamEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
-	cgrEv, err := kev.AsCGREvent(config.CgrConfig().DefaultTimezone)
+	cgrEv, err := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return
 	}
@@ -290,7 +293,7 @@ func (kev KamEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 
 // V1TerminateSessionArgs returns the arguments used in SMGv1.TerminateSession
 func (kev KamEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionArgs) {
-	cgrEv, err := kev.AsCGREvent(config.CgrConfig().DefaultTimezone)
+	cgrEv, err := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return
 	}

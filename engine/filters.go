@@ -68,10 +68,10 @@ func (fS *FilterS) connStatS() (err error) {
 	}
 	fS.statSConns, err = NewRPCPool(rpcclient.POOL_FIRST,
 		fS.cfg.TLSClientKey, fS.cfg.TLSClientCerificate,
-		fS.cfg.ConnectAttempts, fS.cfg.Reconnects,
-		fS.cfg.ConnectTimeout, fS.cfg.ReplyTimeout,
+		fS.cfg.GeneralCfg().ConnectAttempts, fS.cfg.GeneralCfg().Reconnects,
+		fS.cfg.GeneralCfg().ConnectTimeout, fS.cfg.GeneralCfg().ReplyTimeout,
 		fS.cfg.FilterSCfg().StatSConns,
-		fS.statSChan, fS.cfg.InternalTtl)
+		fS.statSChan, fS.cfg.GeneralCfg().InternalTtl)
 	return
 }
 
@@ -113,7 +113,7 @@ func NewFilterFromInline(tenant, inlnRule string) (f *Filter, err error) {
 		Tenant: tenant,
 		ID:     inlnRule,
 		Rules: []*FilterRule{
-			&FilterRule{
+			{
 				Type:      ruleSplt[0],
 				FieldName: ruleSplt[1],
 				Values:    strings.Split(ruleSplt[2], utils.INFIELD_SEP)}},

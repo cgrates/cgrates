@@ -80,7 +80,7 @@ func (asr *StatASR) getValue() float64 {
 			asr.val = utils.Float64Pointer(STATS_NA)
 		} else {
 			asr.val = utils.Float64Pointer(utils.Round((asr.Answered / asr.Count * 100),
-				config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE))
+				config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE))
 		}
 	}
 	return *asr.val
@@ -108,7 +108,8 @@ func (asr *StatASR) GetFloat64Value() (val float64) {
 // AddEvent is part of StatMetric interface
 func (asr *StatASR) AddEvent(ev *utils.CGREvent) (err error) {
 	var answered bool
-	if at, err := ev.FieldAsTime(utils.AnswerTime, config.CgrConfig().DefaultTimezone); err != nil &&
+	if at, err := ev.FieldAsTime(utils.AnswerTime,
+		config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil &&
 		err != utils.ErrNotFound {
 		return err
 	} else if !at.IsZero() {
@@ -196,7 +197,8 @@ func (acd *StatACD) GetFloat64Value() (v float64) {
 
 func (acd *StatACD) AddEvent(ev *utils.CGREvent) (err error) {
 	var value time.Duration
-	if at, err := ev.FieldAsTime(utils.AnswerTime, config.CgrConfig().DefaultTimezone); err != nil {
+	if at, err := ev.FieldAsTime(utils.AnswerTime,
+		config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
 		if duration, err := ev.FieldAsDuration(utils.Usage); err != nil &&
@@ -283,7 +285,8 @@ func (tcd *StatTCD) GetFloat64Value() (v float64) {
 
 func (tcd *StatTCD) AddEvent(ev *utils.CGREvent) (err error) {
 	var value time.Duration
-	if at, err := ev.FieldAsTime(utils.AnswerTime, config.CgrConfig().DefaultTimezone); err != nil {
+	if at, err := ev.FieldAsTime(utils.AnswerTime,
+		config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
 		if duration, err := ev.FieldAsDuration(utils.Usage); err != nil &&
@@ -343,7 +346,7 @@ func (acc *StatACC) getValue() float64 {
 			acc.val = utils.Float64Pointer(STATS_NA)
 		} else {
 			acc.val = utils.Float64Pointer(utils.Round((acc.Sum / acc.Count),
-				config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE))
+				config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE))
 		}
 	}
 	return *acc.val
@@ -369,7 +372,8 @@ func (acc *StatACC) GetFloat64Value() (v float64) {
 
 func (acc *StatACC) AddEvent(ev *utils.CGREvent) (err error) {
 	var value float64
-	if at, err := ev.FieldAsTime(utils.AnswerTime, config.CgrConfig().DefaultTimezone); err != nil {
+	if at, err := ev.FieldAsTime(utils.AnswerTime,
+		config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
 		if cost, err := ev.FieldAsFloat64(utils.COST); err != nil &&
@@ -428,7 +432,8 @@ func (tcc *StatTCC) getValue() float64 {
 			tcc.val = utils.Float64Pointer(STATS_NA)
 		} else {
 			tcc.val = utils.Float64Pointer(utils.Round(tcc.Sum,
-				config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE))
+				config.CgrConfig().GeneralCfg().RoundingDecimals,
+				utils.ROUNDING_MIDDLE))
 		}
 	}
 	return *tcc.val
@@ -453,7 +458,8 @@ func (tcc *StatTCC) GetFloat64Value() (v float64) {
 
 func (tcc *StatTCC) AddEvent(ev *utils.CGREvent) (err error) {
 	var value float64
-	if at, err := ev.FieldAsTime(utils.AnswerTime, config.CgrConfig().DefaultTimezone); err != nil {
+	if at, err := ev.FieldAsTime(utils.AnswerTime,
+		config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
 		return err
 	} else if !at.IsZero() {
 		if cost, err := ev.FieldAsFloat64(utils.COST); err != nil &&
@@ -541,7 +547,8 @@ func (pdd *StatPDD) GetFloat64Value() (v float64) {
 
 func (pdd *StatPDD) AddEvent(ev *utils.CGREvent) (err error) {
 	var value time.Duration
-	if at, err := ev.FieldAsTime(utils.AnswerTime, config.CgrConfig().DefaultTimezone); err != nil &&
+	if at, err := ev.FieldAsTime(utils.AnswerTime,
+		config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil &&
 		err != utils.ErrNotFound {
 		return err
 	} else if !at.IsZero() {
@@ -665,7 +672,8 @@ func (sum *StatSum) getValue() float64 {
 			sum.val = utils.Float64Pointer(STATS_NA)
 		} else {
 			sum.val = utils.Float64Pointer(utils.Round(sum.Sum,
-				config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE))
+				config.CgrConfig().GeneralCfg().RoundingDecimals,
+				utils.ROUNDING_MIDDLE))
 		}
 	}
 	return *sum.val
@@ -744,7 +752,7 @@ func (avg *StatAverage) getValue() float64 {
 			avg.val = utils.Float64Pointer(STATS_NA)
 		} else {
 			avg.val = utils.Float64Pointer(utils.Round((avg.Sum / avg.Count),
-				config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE))
+				config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE))
 		}
 	}
 	return *avg.val

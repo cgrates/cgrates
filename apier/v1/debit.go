@@ -57,13 +57,13 @@ func (apier *ApierV1) DebitUsageWithOptions(args AttrDebitUsageWithOptions, repl
 		usageRecord.ToR = utils.VOICE
 	}
 	if usageRecord.RequestType == "" {
-		usageRecord.RequestType = apier.Config.DefaultReqType
+		usageRecord.RequestType = apier.Config.GeneralCfg().DefaultReqType
 	}
 	if usageRecord.Tenant == "" {
-		usageRecord.Tenant = apier.Config.DefaultTenant
+		usageRecord.Tenant = apier.Config.GeneralCfg().DefaultTenant
 	}
 	if usageRecord.Category == "" {
-		usageRecord.Category = apier.Config.DefaultCategory
+		usageRecord.Category = apier.Config.GeneralCfg().DefaultCategory
 	}
 	if usageRecord.Subject == "" {
 		usageRecord.Subject = usageRecord.Account
@@ -73,7 +73,8 @@ func (apier *ApierV1) DebitUsageWithOptions(args AttrDebitUsageWithOptions, repl
 	}
 
 	// Get the call descriptor from the usage record
-	cd, err := usageRecord.AsCallDescriptor(apier.Config.DefaultTimezone, !args.AllowNegativeAccount)
+	cd, err := usageRecord.AsCallDescriptor(apier.Config.GeneralCfg().DefaultTimezone,
+		!args.AllowNegativeAccount)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
