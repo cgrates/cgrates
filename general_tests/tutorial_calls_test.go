@@ -698,7 +698,7 @@ func testCallSyncSessions(t *testing.T) {
 		numberOfCDR = 2
 	case utils.Kamailio:
 		sourceForCDR = utils.KamailioAgent
-		numberOfCDR = 2
+		numberOfCDR = 3
 	}
 	// verify cdr
 	var rplCdrs []*engine.ExternalCDR
