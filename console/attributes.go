@@ -18,45 +18,49 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+)
 
 func init() {
-	c := &CmdRemoveAtributes{
-		name:      "atributes_remove",
-		rpcMethod: "ApierV1.RemoveAttributeProfile",
+	c := &CmdGetAttributes{
+		name:      "attributes",
+		rpcMethod: "ApierV1.GetAttributeProfile",
 		rpcParams: &utils.TenantID{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-type CmdRemoveAtributes struct {
+// Commander implementation
+type CmdGetAttributes struct {
 	name      string
 	rpcMethod string
 	rpcParams *utils.TenantID
 	*CommandExecuter
 }
 
-func (self *CmdRemoveAtributes) Name() string {
+func (self *CmdGetAttributes) Name() string {
 	return self.name
 }
 
-func (self *CmdRemoveAtributes) RpcMethod() string {
+func (self *CmdGetAttributes) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemoveAtributes) RpcParams(reset bool) interface{} {
+func (self *CmdGetAttributes) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantID{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdRemoveAtributes) PostprocessRpcParams() error {
+func (self *CmdGetAttributes) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemoveAtributes) RpcResult() interface{} {
-	var s string
-	return &s
+func (self *CmdGetAttributes) RpcResult() interface{} {
+	atr := engine.AttributeProfile{}
+	return &atr
 }
