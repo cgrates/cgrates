@@ -19,7 +19,6 @@
 	"tls_server_key":"/usr/share/cgrates/tls/server.key",					// path to server key
 	"tls_client_certificate" : "/usr/share/cgrates/tls/clientCA.crt",			// path to client certificate(must conatin client.crt + ca.crt)
 	"tls_client_key":"/usr/share/cgrates/tls/client.key",					// path to client key
-	"tls_skip_verify":true,
 },
 
 
