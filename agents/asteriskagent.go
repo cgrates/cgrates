@@ -113,15 +113,16 @@ func (sma *AsteriskAgent) ListenAndServe() (err error) {
 }
 
 // hangupChannel will disconnect from CGRateS side with congestion reason
-func (sma *AsteriskAgent) setChannelVar(chanID string, vars url.Values) (success bool) {
+func (sma *AsteriskAgent) setChannelVar(chanID string, vrblName, vrblVal string) (success bool) {
 	if _, err := sma.astConn.Call(aringo.HTTP_POST,
-		fmt.Sprintf("http://%s/ari/channels/%s/variable", // Asterisk having issue with variable terminating empty so harcoding param in url
-			sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address, chanID),
-		vars); err != nil {
+		fmt.Sprintf("http://%s/ari/channels/%s/variable?variable=%s&value=%s", // Asterisk having issue with variable terminating empty so harcoding param in url
+			sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address,
+			chanID, vrblName, vrblVal),
+		nil); err != nil {
 		// Since we got error, disconnect channel
 		sma.hangupChannel(chanID,
-			fmt.Sprintf("<%s> error: %s setting %+v for channelID: %s",
-				utils.AsteriskAgent, err.Error(), vars, chanID))
+			fmt.Sprintf("<%s> error: <%s> setting <%s> for channelID: <%s>",
+				utils.AsteriskAgent, err.Error(), vrblName, chanID))
 		return
 	}
 	return true
@@ -182,9 +183,7 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 						"<%s> error <%s> extracting attribute field: <%s>",
 						utils.AsteriskAgent, err.Error(), fldName))
 			}
-			if !sma.setChannelVar(ev.ChannelID(), url.Values{
-				ariVariable: {fldName},
-				ariValue:    {fldVal}}) {
+			if !sma.setChannelVar(ev.ChannelID(), fldName, fldVal) {
 				return
 			}
 		}
@@ -195,25 +194,22 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 			return
 		} else if *authReply.MaxUsage != time.Duration(-1) {
 			//  Set absolute timeout for non-postpaid calls
-			if !sma.setChannelVar(ev.ChannelID(), url.Values{
-				ariVariable: {CGRMaxSessionTime},
-				ariValue:    {strconv.Itoa(int(*authReply.MaxUsage * time.Millisecond))}}) {
+			if !sma.setChannelVar(ev.ChannelID(), CGRMaxSessionTime,
+				strconv.Itoa(int(authReply.MaxUsage.Seconds()*1000))) {
 				return
 			}
 		}
 	}
 	if authReply.ResourceAllocation != nil {
-		if !sma.setChannelVar(ev.ChannelID(), url.Values{
-			ariVariable: {ARICGRResourceAllocation},
-			ariValue:    {*authReply.ResourceAllocation}}) {
+		if !sma.setChannelVar(ev.ChannelID(),
+			ARICGRResourceAllocation, *authReply.ResourceAllocation) {
 			return
 		}
 	}
 	if authReply.Suppliers != nil {
 		for i, spl := range authReply.Suppliers.SortedSuppliers {
-			if !sma.setChannelVar(ev.ChannelID(), url.Values{
-				ariVariable: {CGRSupplier + strconv.Itoa(i+1)},
-				ariValue:    {spl.SupplierID}}) {
+			if !sma.setChannelVar(ev.ChannelID(),
+				CGRSupplier+strconv.Itoa(i+1), spl.SupplierID) {
 				return
 			}
 		}
