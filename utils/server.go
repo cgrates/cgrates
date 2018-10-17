@@ -291,7 +291,7 @@ func (r *rpcRequest) Call() io.Reader {
 	return r.rw
 }
 
-func loadTLSConfig(serverCrt, serverKey string, skipVerify bool) (config tls.Config, err error) {
+func loadTLSConfig(serverCrt, serverKey string) (config tls.Config, err error) {
 	cert, err := tls.LoadX509KeyPair(serverCrt, serverKey)
 	if err != nil {
 		log.Fatalf("Error: %s when load server keys", err)
@@ -306,23 +306,22 @@ func loadTLSConfig(serverCrt, serverKey string, skipVerify bool) (config tls.Con
 	certPool := x509.NewCertPool()
 	certPool.AddCert(ca)
 	config = tls.Config{
-		Certificates:       []tls.Certificate{cert},
-		ClientAuth:         tls.RequireAndVerifyClientCert,
-		ClientCAs:          certPool,
-		InsecureSkipVerify: skipVerify,
+		Certificates: []tls.Certificate{cert},
+		ClientAuth:   tls.RequireAndVerifyClientCert,
+		ClientCAs:    certPool,
 	}
 	config.Rand = rand.Reader
 	return
 }
 
-func (s *Server) ServeGOBTLS(addr, serverCrt, serverKey string, skipVerify bool) {
+func (s *Server) ServeGOBTLS(addr, serverCrt, serverKey string) {
 	s.RLock()
 	enabled := s.rpcEnabled
 	s.RUnlock()
 	if !enabled {
 		return
 	}
-	config, err := loadTLSConfig(serverCrt, serverKey, skipVerify)
+	config, err := loadTLSConfig(serverCrt, serverKey)
 	if err != nil {
 		return
 	}
@@ -355,14 +354,14 @@ func (s *Server) ServeGOBTLS(addr, serverCrt, serverKey string, skipVerify bool)
 	}
 }
 
-func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey string, skipVerify bool) {
+func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey string) {
 	s.RLock()
 	enabled := s.rpcEnabled
 	s.RUnlock()
 	if !enabled {
 		return
 	}
-	config, err := loadTLSConfig(serverCrt, serverKey, skipVerify)
+	config, err := loadTLSConfig(serverCrt, serverKey)
 	if err != nil {
 		return
 	}
@@ -393,7 +392,7 @@ func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey string, skipVerify bool
 	}
 }
 
-func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey string, skipVerify bool, jsonRPCURL string, wsRPCURL string,
+func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey string, jsonRPCURL string, wsRPCURL string,
 	useBasicAuth bool, userList map[string]string) {
 	s.RLock()
 	enabled := s.rpcEnabled
@@ -435,7 +434,7 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey string, skipVerify bool
 	if useBasicAuth {
 		Logger.Info("<HTTPTLS> enabling basic auth")
 	}
-	config, err := loadTLSConfig(serverCrt, serverKey, skipVerify)
+	config, err := loadTLSConfig(serverCrt, serverKey)
 	if err != nil {
 		return
 	}
