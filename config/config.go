@@ -648,7 +648,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 	if self.supplierSCfg != nil && self.supplierSCfg.Enabled {
 		for _, connCfg := range self.supplierSCfg.RALsConns {
 			if connCfg.Address != utils.MetaInternal {
-				return errors.New("Only <*internal> connectivity allowed in SupplierS for now")
+				return errors.New("Only <*internal> RALs connectivity allowed in SupplierS for now")
 			}
 			if connCfg.Address == utils.MetaInternal && !self.RALsEnabled {
 				return errors.New("RALs not enabled but requested by SupplierS component.")
