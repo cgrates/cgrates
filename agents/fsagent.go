@@ -154,7 +154,24 @@ func (sm *FSsessions) onChannelPark(fsev FSEvent, connId string) {
 			fsev.GetCallDestNr(utils.META_DEFAULT), err.Error())
 		return
 	}
-	if authArgs.GetMaxUsage {
+	if authReply.Attributes != nil {
+		for _, fldName := range authReply.Attributes.AlteredFields {
+			if _, has := authReply.Attributes.CGREvent.Event[fldName]; !has {
+				continue //maybe removed
+			}
+			if _, err := sm.conns[connId].fsSock.SendApiCmd(
+				fmt.Sprintf("uuid_setvar %s %s %s\n\n", fsev.GetUUID(), fldName,
+					authReply.Attributes.CGREvent.Event[fldName])); err != nil {
+				utils.Logger.Info(
+					fmt.Sprintf("<%s> error %s setting channel variabile: %s",
+						utils.FreeSWITCHAgent, err.Error(), fldName))
+				sm.unparkCall(fsev.GetUUID(), connId,
+					fsev.GetCallDestNr(utils.META_DEFAULT), err.Error())
+				return
+			}
+		}
+	}
+	if authReply.MaxUsage != nil {
 		if *authReply.MaxUsage != -1 { // For calls different than unlimited, set limits
 			if *authReply.MaxUsage == 0 {
 				sm.unparkCall(fsev.GetUUID(), connId,
@@ -165,7 +182,7 @@ func (sm *FSsessions) onChannelPark(fsev FSEvent, connId string) {
 				*authReply.MaxUsage, fsev.GetCallDestNr(utils.META_DEFAULT))
 		}
 	}
-	if authArgs.AuthorizeResources {
+	if authReply.ResourceAllocation != nil {
 		if _, err := sm.conns[connId].fsSock.SendApiCmd(fmt.Sprintf("uuid_setvar %s %s %s\n\n",
 			fsev.GetUUID(), CGRResourceAllocation, *authReply.ResourceAllocation)); err != nil {
 			utils.Logger.Info(
@@ -176,7 +193,7 @@ func (sm *FSsessions) onChannelPark(fsev FSEvent, connId string) {
 			return
 		}
 	}
-	if authArgs.GetSuppliers {
+	if authReply.Suppliers != nil {
 		fsArray := SliceAsFsArray(authReply.Suppliers.SuppliersWithParams())
 		if _, err := sm.conns[connId].fsSock.SendApiCmd(fmt.Sprintf("uuid_setvar %s %s %s\n\n",
 			fsev.GetUUID(), utils.CGR_SUPPLIERS, fsArray)); err != nil {
@@ -186,25 +203,7 @@ func (sm *FSsessions) onChannelPark(fsev FSEvent, connId string) {
 			return
 		}
 	}
-	if authArgs.GetAttributes {
-		if authReply.Attributes != nil {
-			for _, fldName := range authReply.Attributes.AlteredFields {
-				if _, has := authReply.Attributes.CGREvent.Event[fldName]; !has {
-					continue //maybe removed
-				}
-				if _, err := sm.conns[connId].fsSock.SendApiCmd(
-					fmt.Sprintf("uuid_setvar %s %s %s\n\n", fsev.GetUUID(), fldName,
-						authReply.Attributes.CGREvent.Event[fldName])); err != nil {
-					utils.Logger.Info(
-						fmt.Sprintf("<%s> error %s setting channel variabile: %s",
-							utils.FreeSWITCHAgent, err.Error(), fldName))
-					sm.unparkCall(fsev.GetUUID(), connId,
-						fsev.GetCallDestNr(utils.META_DEFAULT), err.Error())
-					return
-				}
-			}
-		}
-	}
+
 	sm.unparkCall(fsev.GetUUID(), connId,
 		fsev.GetCallDestNr(utils.META_DEFAULT), AUTH_OK)
 }

@@ -34,19 +34,24 @@ import (
 )
 
 const (
-	CGRAuthAPP            = "cgrates_auth"
-	CGRMaxSessionTime     = "CGRMaxSessionTime"
-	ARIStasisStart        = "StasisStart"
-	ARIChannelStateChange = "ChannelStateChange"
-	ARIChannelDestroyed   = "ChannelDestroyed"
-	eventType             = "eventType"
-	channelID             = "channelID"
-	channelState          = "channelState"
-	channelUp             = "Up"
-	timestamp             = "timestamp"
-	SMAAuthorization      = "SMA_AUTHORIZATION"
-	SMASessionStart       = "SMA_SESSION_START"
-	SMASessionTerminate   = "SMA_SESSION_TERMINATE"
+	CGRAuthAPP               = "cgrates_auth"
+	CGRMaxSessionTime        = "CGRMaxSessionTime"
+	CGRSupplier              = "CGRSupplier"
+	CGRSParams               = "CGRSParams"
+	ARIStasisStart           = "StasisStart"
+	ARIChannelStateChange    = "ChannelStateChange"
+	ARIChannelDestroyed      = "ChannelDestroyed"
+	eventType                = "eventType"
+	channelID                = "channelID"
+	channelState             = "channelState"
+	channelUp                = "Up"
+	timestamp                = "timestamp"
+	SMAAuthorization         = "SMA_AUTHORIZATION"
+	SMASessionStart          = "SMA_SESSION_START"
+	SMASessionTerminate      = "SMA_SESSION_TERMINATE"
+	ariVariable              = "variable"
+	ariValue                 = "value"
+	ARICGRResourceAllocation = "CGRResourceAllocation"
 )
 
 func NewAsteriskAgent(cgrCfg *config.CGRConfig, astConnIdx int,
@@ -117,7 +122,7 @@ func (sma *AsteriskAgent) setChannelVar(chanID string, vars url.Values) (success
 		sma.hangupChannel(chanID,
 			fmt.Sprintf("<%s> error: %s setting %+v for channelID: %s",
 				utils.AsteriskAgent, err.Error(), vars, chanID))
-		return false
+		return
 	}
 	return true
 }
@@ -153,31 +158,72 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 	//authorize Session
 	authArgs := ev.V1AuthorizeArgs()
 	if authArgs == nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate auth session arguments",
-			utils.AsteriskAgent, ev.ChannelID()))
+		sma.hangupChannel(ev.ChannelID(),
+			fmt.Sprintf("<%s> event: %s cannot generate auth session arguments",
+				utils.AsteriskAgent, ev.ChannelID()))
 		return
 	}
 	var authReply sessions.V1AuthorizeReply
 	if err := sma.smg.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
 		sma.hangupChannel(ev.ChannelID(),
-			fmt.Sprintf("<%s> Error: %s when attempting to authorize session for channelID: %s",
+			fmt.Sprintf("<%s> error: %s authorizing session for channelID: %s",
 				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
 		return
 	}
-	if authReply.MaxUsage != nil && *authReply.MaxUsage == time.Duration(0) {
-		sma.hangupChannel(ev.ChannelID(), "")
-		return
-	} else if *authReply.MaxUsage != time.Duration(-1) {
-		//  Set absolute timeout for non-postpaid calls
-		if !sma.setChannelVar(ev.ChannelID(), url.Values{"value": {strconv.FormatFloat(
-			authReply.MaxUsage.Seconds()*1000, 'f', -1, 64)}}) {
+	if authReply.Attributes != nil {
+		for _, fldName := range authReply.Attributes.AlteredFields {
+			if _, has := authReply.Attributes.CGREvent.Event[fldName]; !has {
+				continue //maybe removed
+			}
+			fldVal, err := authReply.Attributes.CGREvent.FieldAsString(fldName)
+			if err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf(
+						"<%s> error <%s> extracting attribute field: <%s>",
+						utils.AsteriskAgent, err.Error(), fldName))
+			}
+			if !sma.setChannelVar(ev.ChannelID(), url.Values{
+				ariVariable: {fldName},
+				ariValue:    {fldVal}}) {
+				return
+			}
+		}
+	}
+	if authReply.MaxUsage != nil {
+		if *authReply.MaxUsage == time.Duration(0) {
+			sma.hangupChannel(ev.ChannelID(), "")
+			return
+		} else if *authReply.MaxUsage != time.Duration(-1) {
+			//  Set absolute timeout for non-postpaid calls
+			if !sma.setChannelVar(ev.ChannelID(), url.Values{
+				ariVariable: {CGRMaxSessionTime},
+				ariValue:    {strconv.Itoa(int(*authReply.MaxUsage * time.Millisecond))}}) {
+				return
+			}
+		}
+	}
+	if authReply.ResourceAllocation != nil {
+		if !sma.setChannelVar(ev.ChannelID(), url.Values{
+			ariVariable: {ARICGRResourceAllocation},
+			ariValue:    {*authReply.ResourceAllocation}}) {
 			return
 		}
 	}
+	if authReply.Suppliers != nil {
+		for i, spl := range authReply.Suppliers.SortedSuppliers {
+			if !sma.setChannelVar(ev.ChannelID(), url.Values{
+				ariVariable: {CGRSupplier + strconv.Itoa(i+1)},
+				ariValue:    {spl.SupplierID}}) {
+				return
+			}
+		}
+	}
 	// Exit channel from stasis
-	if _, err := sma.astConn.Call(aringo.HTTP_POST, fmt.Sprintf("http://%s/ari/channels/%s/continue",
-		sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address,
-		ev.ChannelID()), nil); err != nil {
+	if _, err := sma.astConn.Call(
+		aringo.HTTP_POST,
+		fmt.Sprintf("http://%s/ari/channels/%s/continue",
+			sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address,
+			ev.ChannelID()), nil); err != nil {
 	}
 	// Done with processing event, cache it for later use
 	sma.evCacheMux.Lock()
