@@ -206,9 +206,9 @@ func (se *SafEvent) AsMapStringIgnoreErrors(ignoredFlds utils.StringMap) (mp map
 }
 
 // AsCDR exports the SafEvent as CDR
-func (se *SafEvent) AsCDR(cfg *config.CGRConfig, tmz string) (cdr *CDR, err error) {
+func (se *SafEvent) AsCDR(cfg *config.CGRConfig, tnt, tmz string) (cdr *CDR, err error) {
 	se.RLock()
-	cdr, err = se.Me.AsCDR(cfg, tmz)
+	cdr, err = se.Me.AsCDR(cfg, tnt, tmz)
 	se.RUnlock()
 	return
 }

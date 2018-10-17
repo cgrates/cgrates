@@ -258,7 +258,7 @@ func TestMapEventAsMapStringIgnoreErrors(t *testing.T) {
 func TestMapEventAsCDR(t *testing.T) {
 	me := NewMapEvent(nil)
 	expected := &CDR{Cost: -1.0, ExtraFields: make(map[string]string)}
-	if rply, err := me.AsCDR(nil, utils.EmptyString); err != nil {
+	if rply, err := me.AsCDR(nil, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
@@ -277,33 +277,33 @@ func TestMapEventAsCDR(t *testing.T) {
 		Category:    cfg.GeneralCfg().DefaultCategory,
 		ExtraFields: make(map[string]string),
 	}
-	if rply, err := me.AsCDR(cfg, utils.EmptyString); err != nil {
+	if rply, err := me.AsCDR(cfg, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
 	me = MapEvent{"SetupTime": "clearly not time string"}
-	if _, err := me.AsCDR(nil, utils.EmptyString); err == nil {
+	if _, err := me.AsCDR(nil, utils.EmptyString, utils.EmptyString); err == nil {
 		t.Errorf("Expecting not null error, received: null error")
 	}
 	me = MapEvent{"AnswerTime": "clearly not time string"}
-	if _, err := me.AsCDR(nil, utils.EmptyString); err == nil {
+	if _, err := me.AsCDR(nil, utils.EmptyString, utils.EmptyString); err == nil {
 		t.Errorf("Expecting not null error, received: null error")
 	}
 	me = MapEvent{"Usage": "clearly not duration string"}
-	if _, err := me.AsCDR(nil, utils.EmptyString); err == nil {
+	if _, err := me.AsCDR(nil, utils.EmptyString, utils.EmptyString); err == nil {
 		t.Errorf("Expecting not null error, received: null error")
 	}
 	me = MapEvent{"Partial": "clearly not bool string"}
-	if _, err := me.AsCDR(nil, utils.EmptyString); err == nil {
+	if _, err := me.AsCDR(nil, utils.EmptyString, utils.EmptyString); err == nil {
 		t.Errorf("Expecting not null error, received: null error")
 	}
 	me = MapEvent{"PreRated": "clearly not bool string"}
-	if _, err := me.AsCDR(nil, utils.EmptyString); err == nil {
+	if _, err := me.AsCDR(nil, utils.EmptyString, utils.EmptyString); err == nil {
 		t.Errorf("Expecting not null error, received: null error")
 	}
 	me = MapEvent{"Cost": "clearly not float64 string"}
-	if _, err := me.AsCDR(nil, utils.EmptyString); err == nil {
+	if _, err := me.AsCDR(nil, utils.EmptyString, utils.EmptyString); err == nil {
 		t.Errorf("Expecting not null error, received: null error")
 	}
 	me = MapEvent{"ExtraField1": 5, "ExtraField2": "extra"}
@@ -313,7 +313,7 @@ func TestMapEventAsCDR(t *testing.T) {
 			"ExtraField1": "5",
 			"ExtraField2": "extra",
 		}}
-	if rply, err := me.AsCDR(nil, utils.EmptyString); err != nil {
+	if rply, err := me.AsCDR(nil, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
@@ -339,7 +339,7 @@ func TestMapEventAsCDR(t *testing.T) {
 		Tenant:      cfg.GeneralCfg().DefaultTenant,
 		Category:    cfg.GeneralCfg().DefaultCategory,
 	}
-	if rply, err := me.AsCDR(cfg, utils.EmptyString); err != nil {
+	if rply, err := me.AsCDR(cfg, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
@@ -356,6 +356,7 @@ func TestMapEventAsCDR(t *testing.T) {
 	}
 	expected = &CDR{
 		CGRID:      "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+		Tenant:     "itsyscom.com",
 		Cost:       42.3,
 		Source:     "1001",
 		CostSource: "1002",
@@ -369,10 +370,9 @@ func TestMapEventAsCDR(t *testing.T) {
 		RunID:       utils.MetaRaw,
 		ToR:         utils.VOICE,
 		RequestType: cfg.GeneralCfg().DefaultReqType,
-		Tenant:      cfg.GeneralCfg().DefaultTenant,
 		Category:    cfg.GeneralCfg().DefaultCategory,
 	}
-	if rply, err := me.AsCDR(cfg, utils.EmptyString); err != nil {
+	if rply, err := me.AsCDR(cfg, "itsyscom.com", utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)

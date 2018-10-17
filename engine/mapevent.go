@@ -129,8 +129,8 @@ func (me MapEvent) AsMapStringIgnoreErrors(ignoredFlds utils.StringMap) (mp map[
 }
 
 // AsCDR exports the SafEvent as CDR
-func (me MapEvent) AsCDR(cfg *config.CGRConfig, tmz string) (cdr *CDR, err error) {
-	cdr = &CDR{Cost: -1.0, ExtraFields: make(map[string]string)}
+func (me MapEvent) AsCDR(cfg *config.CGRConfig, tnt, tmz string) (cdr *CDR, err error) {
+	cdr = &CDR{Tenant: tnt, Cost: -1.0, ExtraFields: make(map[string]string)}
 	for k, v := range me {
 		if !utils.IsSliceMember(
 			append(utils.PrimaryCdrFields, utils.PreRated, utils.CostSource),

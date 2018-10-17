@@ -276,7 +276,7 @@
 		{"address": "*internal"}
 	],
 	"rals_conns": [
-		{"address": "*internal"}
+		{"address": "127.0.0.1:2012","transport":"*json"}
 	],
 },
 

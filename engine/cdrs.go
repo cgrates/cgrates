@@ -739,7 +739,8 @@ func (cdrS *CdrServer) chrgrSProcessEvent(cgrEv *utils.CGREvent) {
 		return
 	}
 	for _, chrgr := range chrgrs {
-		cdr, err := NewMapEvent(chrgr.CGREvent.Event).AsCDR(cdrS.cgrCfg, cdrS.Timezone())
+		cdr, err := NewMapEvent(chrgr.CGREvent.Event).AsCDR(cdrS.cgrCfg,
+			cgrEv.Tenant, cdrS.Timezone())
 		if err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s converting CDR event %+v with %s.",
@@ -773,7 +774,7 @@ func (cdrS *CdrServer) V2ProcessCDR(cgrEv *utils.CGREvent, reply *string) (err e
 	if cdrS.attrS != nil {
 		cdrS.attrSProcessEvent(cgrEv)
 	}
-	rawCDR, err := NewMapEvent(cgrEv.Event).AsCDR(cdrS.cgrCfg, cdrS.Timezone())
+	rawCDR, err := NewMapEvent(cgrEv.Event).AsCDR(cdrS.cgrCfg, cgrEv.Tenant, cdrS.Timezone())
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

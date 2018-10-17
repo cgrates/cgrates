@@ -272,7 +272,7 @@ func (smg *SMGeneric) ttlTerminate(s *SMGSession, tmtr *smgSessionTerminator) {
 		s.debit(debitUsage, tmtr.ttlLastUsed)
 	}
 	smg.sessionEnd(s.CGRID, s.TotalUsage)
-	cdr, err := s.EventStart.AsCDR(smg.cgrCfg, smg.Timezone)
+	cdr, err := s.EventStart.AsCDR(smg.cgrCfg, s.Tenant, smg.Timezone)
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> could not create CDR out of event %s, err: %s",
@@ -483,7 +483,7 @@ func (smg *SMGeneric) getSessionIDsForPrefix(prefix string,
 func (smg *SMGeneric) v1ForkSessions(tnt string, evStart *engine.SafEvent,
 	clntConn rpcclient.RpcClientConnection, cgrID, resourceID string,
 	handlePseudo bool) (ss []*SMGSession, err error) {
-	cdr, err := evStart.AsCDR(smg.cgrCfg, smg.Timezone)
+	cdr, err := evStart.AsCDR(smg.cgrCfg, tnt, smg.Timezone)
 	if err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<%s> could not convert event: %s to CDR, err: %s",
 			utils.SessionS, evStart.String(), err.Error()))
