@@ -1142,7 +1142,6 @@ func startRpc(server *utils.Server, internalRaterChan,
 				cfg.RPCGOBTLSListen,
 				cfg.TLSServerCerificate,
 				cfg.TLSServerKey,
-				cfg.TLSSkipVerify,
 			)
 		}
 	}
@@ -1154,7 +1153,6 @@ func startRpc(server *utils.Server, internalRaterChan,
 				cfg.RPCJSONTLSListen,
 				cfg.TLSServerCerificate,
 				cfg.TLSServerKey,
-				cfg.TLSSkipVerify,
 			)
 		}
 	}
@@ -1166,7 +1164,6 @@ func startRpc(server *utils.Server, internalRaterChan,
 				cfg.HTTPTLSListen,
 				cfg.TLSServerCerificate,
 				cfg.TLSServerKey,
-				cfg.TLSSkipVerify,
 				cfg.HTTPJsonRPCURL,
 				cfg.HTTPWSURL,
 				cfg.HTTPUseBasicAuth,
