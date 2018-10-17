@@ -108,6 +108,21 @@ func (sma *AsteriskAgent) ListenAndServe() (err error) {
 }
 
 // hangupChannel will disconnect from CGRateS side with congestion reason
+func (sma *AsteriskAgent) setChannelVar(chanID string, vars url.Values) (success bool) {
+	if _, err := sma.astConn.Call(aringo.HTTP_POST,
+		fmt.Sprintf("http://%s/ari/channels/%s/variable", // Asterisk having issue with variable terminating empty so harcoding param in url
+			sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address, chanID),
+		vars); err != nil {
+		// Since we got error, disconnect channel
+		sma.hangupChannel(chanID,
+			fmt.Sprintf("<%s> error: %s setting %+v for channelID: %s",
+				utils.AsteriskAgent, err.Error(), vars, chanID))
+		return false
+	}
+	return true
+}
+
+// hangupChannel will disconnect from CGRateS side with congestion reason
 func (sma *AsteriskAgent) hangupChannel(channelID, warnMsg string) {
 	if warnMsg != "" {
 		utils.Logger.Warning(warnMsg)
@@ -154,20 +169,11 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 		return
 	} else if *authReply.MaxUsage != time.Duration(-1) {
 		//  Set absolute timeout for non-postpaid calls
-		if _, err := sma.astConn.Call(aringo.HTTP_POST,
-			fmt.Sprintf("http://%s/ari/channels/%s/variable?variable=%s&value=%d", // Asterisk having issue with variable terminating empty so harcoding param in url
-				sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address,
-				ev.ChannelID(), CGRMaxSessionTime, int64(authReply.MaxUsage.Seconds()*1000)),
-			url.Values{"value": {strconv.FormatFloat(
-				authReply.MaxUsage.Seconds()*1000, 'f', -1, 64)}}); err != nil { // Asterisk expects value in ms
-			utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when setting %s for channelID: %s",
-				utils.AsteriskAgent, err.Error(), CGRMaxSessionTime, ev.ChannelID()))
-			// Since we got error, disconnect channel
-			sma.hangupChannel(ev.ChannelID(), "")
+		if !sma.setChannelVar(ev.ChannelID(), url.Values{"value": {strconv.FormatFloat(
+			authReply.MaxUsage.Seconds()*1000, 'f', -1, 64)}}) {
 			return
 		}
 	}
-
 	// Exit channel from stasis
 	if _, err := sma.astConn.Call(aringo.HTTP_POST, fmt.Sprintf("http://%s/ari/channels/%s/continue",
 		sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address,
