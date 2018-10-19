@@ -1,0 +1,98 @@
+# Gopkg.toml example
+#
+# Refer to https://golang.github.io/dep/docs/Gopkg.toml.html
+# for detailed Gopkg.toml documentation.
+#
+# required = ["github.com/user/thing/cmd/thing"]
+# ignored = ["github.com/user/project/pkgX", "bitbucket.org/user/project/pkgA/pkgY"]
+#
+# [[constraint]]
+#   name = "github.com/user/project"
+#   version = "1.0.0"
+#
+# [[constraint]]
+#   name = "github.com/user/project2"
+#   branch = "dev"
+#   source = "github.com/myfork/project2"
+#
+# [[override]]
+#   name = "github.com/x/y"
+#   version = "2.4.0"
+#
+# [prune]
+#   non-go = false
+#   go-tests = true
+#   unused-packages = true
+
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/DisposaBoy/JsonConfigReader"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/antchfx/xmlquery"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/cenkalti/rpc2"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/cgrates/cgrates"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/cgrates/fsock"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/cgrates/kamevapi"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/cgrates/ltcache"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/cgrates/mgo"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/cgrates/rpcclient"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/fsnotify/fsnotify"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/gorhill/cronexpr"
+
+[[constraint]]
+  name = "github.com/kr/pty"
+  version = "1.1.3"
+
+[[constraint]]
+  name = "github.com/lib/pq"
+  version = "1.0.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/mediocregopher/radix.v2"
+
+[[constraint]]
+  name = "github.com/mitchellh/mapstructure"
+  version = "1.0.0"
+
+[[constraint]]
+  name = "github.com/peterh/liner"
+  version = "1.1.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/streadway/amqp"
+
+[prune]
+  go-tests = true
+  unused-packages = true
