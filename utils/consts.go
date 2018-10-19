@@ -524,6 +524,7 @@ const (
 	MetaApp                      = "*app"
 	MetaAppID                    = "*appid"
 	MetaCmd                      = "*cmd"
+	MetaEnv                      = "*env:" // use in config for describing enviormant variables
 	MetaTemplate                 = "*template"
 	MetaCCA                      = "*cca"
 	OriginRealm                  = "OriginRealm"

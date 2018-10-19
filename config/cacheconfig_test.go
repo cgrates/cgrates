@@ -19,6 +19,7 @@ package config
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -36,7 +37,7 @@ func TestAsTransCacheConfig(t *testing.T) {
 		},
 	}
 	expected := map[string]*ltcache.CacheConfig{
-		"test": &ltcache.CacheConfig{
+		"test": {
 			MaxItems:  50,
 			TTL:       time.Duration(60 * time.Second),
 			StaticTTL: true,
@@ -45,5 +46,41 @@ func TestAsTransCacheConfig(t *testing.T) {
 	reply := a.AsTransCacheConfig()
 	if !reflect.DeepEqual(expected, reply) {
 		t.Errorf("Expected: %+v, received: %+v", expected, utils.ToJSON(reply))
+	}
+}
+
+func TestCacheConfigloadFromJsonCfg(t *testing.T) {
+	var cachecfg, expected CacheConfig
+	if err := cachecfg.loadFromJsonCfg(nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(cachecfg, expected) {
+		t.Errorf("Expected: %+v ,recived: %+v", expected, cachecfg)
+	}
+	if err := cachecfg.loadFromJsonCfg(new(CacheJsonCfg)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(cachecfg, expected) {
+		t.Errorf("Expected: %+v ,recived: %+v", expected, cachecfg)
+	}
+	cfgJSONStr := `{
+"cache":{
+	"destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			
+	"reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	
+	"rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},
+	}		
+}`
+	expected = CacheConfig{
+		"destinations":         &CacheParamConfig{Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		"reverse_destinations": &CacheParamConfig{Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		"rating_plans":         &CacheParamConfig{Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
+	}
+	cachecfg = CacheConfig{}
+	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnCacheCfg, err := jsnCfg.CacheJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = cachecfg.loadFromJsonCfg(jsnCacheCfg); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, cachecfg) {
+		t.Errorf("Expected: %+v , recived: %+v", expected, cachecfg)
 	}
 }

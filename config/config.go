@@ -30,17 +30,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-const (
-	DISABLED = "disabled"
-	JSON     = "json"
-	GOB      = "gob"
-	POSTGRES = "postgres"
-	MONGO    = "mongo"
-	REDIS    = "redis"
-	SAME     = "same"
-	FS       = "freeswitch"
-)
-
 var (
 	DBDefaults               DbDefaults
 	cgrCfg                   *CGRConfig     // will be shared
