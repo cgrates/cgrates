@@ -20,73 +20,127 @@ package config
 
 import (
 	"bufio"
-	"bytes"
-	"errors"
-	// "fmt"
 	"io"
 	"os"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Reads the enviorment variable
-func ReadEnv(key string) (string, error) {
-	if env := os.Getenv(key); env != "" {
-		return env, nil
-	}
-	return "", errEnvNotFound
-}
+/*
+ *ToDo:
+ *	-add errors to util 	x
+ *	-make 'new' functions	?
+ *	-restructurate the code !!
+ *	-optimize it a lot 		!!!
+ *	-add test for them 		+
+ */
 
 func NewRawJSONReader(r io.Reader) io.Reader {
 	return &EnvReader{
-		rd: &comentByteReader{
-			rd: bufio.NewReader(r),
+		rd: &rawJson{
+			rdr: bufio.NewReader(r),
 		},
 	}
 }
 
-type comentByteReader struct {
-	rd           *bufio.Reader
-	isPosComment bool // for comment removal
-	isInString   bool // ignore coment delimiters in string declarations
-}
-
-func isNL(c byte) bool {
+func isNewLine(c byte) bool {
 	return c == '\n' || c == '\r'
 }
 
-func isWS(c byte) bool {
-	return c == ' ' || c == '\t' || isNL(c)
+func isWhiteSpace(c byte) bool {
+	return c == ' ' || c == '\t' || isNewLine(c) || c == 0
 }
 
-func (b *comentByteReader) consumeNL() error {
+// Reads the enviorment variable
+func ReadEnv(key string) (string, error) { //it shod print a warning not a error
+	if env := os.Getenv(key); env != "" {
+		return env, nil
+	}
+	return "", utils.ErrEnvNotFound(key)
+}
+
+func isAlfanum(bit byte) bool {
+	return (bit >= 'a' && bit <= 'z') ||
+		(bit >= 'A' && bit <= 'Z') ||
+		(bit >= '0' && bit <= '9')
+}
+
+type rawJson struct {
+	isInString bool
+	rdr        *bufio.Reader
+}
+
+func (b *rawJson) ReadByte() (bit byte, err error) {
+	if b.isInString { //ignore commas in strings
+		return b.ReadByteWC()
+	}
+	bit, err = b.ReadByteWC()
+	if err != nil {
+		return bit, err
+	}
+	if bit == ',' {
+		bit2, err := b.PeekByteWC()
+		if err != nil {
+			return bit, err
+		}
+		if bit2 == ']' || bit2 == '}' {
+			return b.ReadByteWC()
+		}
+	}
+	return bit, err
+}
+
+func (b *rawJson) consumeComent(pkbit byte) (bool, error) {
+	switch pkbit {
+	case '/':
+		for {
+			bit, err := b.rdr.ReadByte()
+			if err != nil || isNewLine(bit) { //read until newline or EOF
+				return true, err
+			}
+		}
+	case '*':
+		for bit, err := b.rdr.ReadByte(); bit != '*'; bit, err = b.rdr.ReadByte() { //max 2 reads
+			if err == io.EOF {
+				return true, utils.ErrJsonIncompleteComment
+			}
+			if err != nil {
+				return true, err
+			}
+		}
+		simbolMeet := false
+		for {
+			bit, err := b.rdr.ReadByte()
+			if err == io.EOF {
+				return true, utils.ErrJsonIncompleteComment
+			}
+			if err != nil {
+				return true, err
+			}
+			if simbolMeet && bit == '/' {
+				return true, nil
+			}
+			simbolMeet = bit == '*'
+		}
+	}
+	return false, nil
+}
+
+func (b *rawJson) readFirstNonWhiteSpace() (byte, error) {
 	for {
-		bit, err := b.rd.ReadByte()
-		if err != nil || isNL(bit) {
-			return err
+		bit, err := b.rdr.ReadByte()
+		if err != nil || !isWhiteSpace(bit) {
+			return bit, err
 		}
 	}
 }
-func (b *comentByteReader) consumeMLC() error {
-	stop := false
-	for {
-		bit, err := b.rd.ReadByte()
-		if err != nil && err != io.EOF {
-			return err
-		}
-		if err == io.EOF {
-			return errors.New("Incomplete Comment")
-		}
 
-		if stop && bit == '/' {
-			return nil
-		}
-		stop = bit == '*'
+func (b *rawJson) ReadByteWC() (bit byte, err error) {
+	if b.isInString {
+		bit, err = b.rdr.ReadByte()
+	} else {
+		bit, err = b.readFirstNonWhiteSpace()
 	}
-}
-
-func (b *comentByteReader) ReadByte() (byte, error) {
-	bit, err := b.rd.ReadByte()
 	if err != nil {
 		return bit, err
 	}
@@ -94,28 +148,50 @@ func (b *comentByteReader) ReadByte() (byte, error) {
 		b.isInString = !b.isInString
 		return bit, err
 	}
-	if !b.isInString {
-		if bit == '/' {
-			bit2, err := b.rd.Peek(1)
-			if err != nil {
-				return bit, err
-			}
-			switch bit2[0] {
-			case '/':
-				err = b.consumeNL()
-				if err == io.EOF {
-					return 0, err
-				}
-				return '\n', err
-			case '*':
-				if err = b.consumeMLC(); err != nil {
-					return 0, err
-				}
-				return b.rd.ReadByte()
-			}
+	if !b.isInString && bit == '/' {
+		bit2, err := b.rdr.Peek(1)
+		if err != nil {
+			return bit, err
+		}
+		isComment, err := b.consumeComent(bit2[0])
+		if err != nil && err != io.EOF {
+			return bit, err
+		}
+		if isComment {
+			return b.ReadByteWC()
 		}
 	}
 	return bit, err
+}
+
+func (b *rawJson) PeekByteWC() (byte, error) {
+	for {
+		bit, err := b.rdr.Peek(1)
+		if err != nil {
+			return bit[0], err
+		}
+		if !b.isInString && bit[0] == '/' { //try consume comment
+			bit, err = b.rdr.Peek(2)
+			if err != nil {
+				return bit[0], err
+			}
+			isComment, err := b.consumeComent(bit[1])
+			if err != nil {
+				return bit[0], err
+			}
+			if isComment {
+				return b.PeekByteWC()
+			}
+			return bit[0], err
+		}
+		if !isWhiteSpace(bit[0]) {
+			return bit[0], err
+		}
+		bit2, err := b.rdr.ReadByte()
+		if err != nil {
+			return bit2, err
+		}
+	}
 }
 
 type EnvReader struct {
@@ -125,17 +201,13 @@ type EnvReader struct {
 	m   int           // meta Ofset
 }
 
-var errNegativeRead = errors.New("reader returned negative count from Read")
-var errEnvNotFound = errors.New("reader cant find enviormental variable")
-
 func (b *EnvReader) readEnvName() (name []byte, bit byte, err error) { //0 if not set
-	esc := []byte{' ', '\t', '\n', '\r', ',', '}', ']', '\'', '"', '/'}
 	for { //read byte by byte
 		bit, err := b.rd.ReadByte()
 		if err != nil {
 			return name, 0, err
 		}
-		if bytes.IndexByte(esc, bit) != -1 {
+		if !isAlfanum(bit) && bit != '_' { //[a-zA-Z_]+[a-zA-Z0-9_]*
 			return name, bit, nil
 		}
 		name = append(name, bit)
@@ -152,7 +224,7 @@ func (b *EnvReader) replaceEnv(buf []byte, startEnv, midEnv int) (n int, err err
 		return 0, err
 	}
 
-	if endEnv := midEnv + len(key); endEnv > len(b.buf) { // garbage
+	if endEnv := midEnv + len(key); endEnv > len(b.buf) { // for garbage colector
 		b.buf = nil
 	}
 
@@ -164,12 +236,12 @@ func (b *EnvReader) replaceEnv(buf []byte, startEnv, midEnv int) (n int, err err
 	if startEnv+i < len(buf) { //add the bit
 		buf[startEnv+i] = bit
 		for j := startEnv + i + 1; j <= midEnv && j < len(buf); j++ { //replace *env: if value < len("*env:")
-			buf[j] = 0
+			buf[j] = ' '
 		}
 		return startEnv + i, nil
 	}
 
-	if i <= len(value) { //pune restul in buferul extra
+	if i <= len(value) { // add the remaining in the extra buffer
 		b.buf = make([]byte, len(value)-i+1)
 		for j := 0; j+i < len(value); j++ {
 			b.buf[j] = value[j+i]
@@ -188,7 +260,7 @@ func (b *EnvReader) checkMeta(bit byte) bool {
 		b.m++
 		return false
 	}
-	b.m = 0
+	b.m = 0 //reset counting
 	return false
 }
 
@@ -203,9 +275,7 @@ func (b *EnvReader) Read(p []byte) (n int, err error) {
 		for ; b.r < len(b.buf) && b.r-pOf < len(p); b.r++ {
 			p[b.r-pOf] = b.buf[b.r]
 			if isEnv := b.checkMeta(p[b.r-pOf]); isEnv {
-				startEnv := b.r - len(utils.MetaEnv) + 1
-				midEnv := b.r
-				b.r, err = b.replaceEnv(p, startEnv, midEnv)
+				b.r, err = b.replaceEnv(p, b.r-len(utils.MetaEnv)+1, b.r)
 				if err != nil {
 					return b.r, err
 				}
@@ -226,51 +296,32 @@ func (b *EnvReader) Read(p []byte) (n int, err error) {
 			return pOf, err
 		}
 		if isEnv := b.checkMeta(p[pOf]); isEnv {
-			startEnv := pOf - len(utils.MetaEnv) + 1
-			midEnv := pOf
-			pOf, err = b.replaceEnv(p, startEnv, midEnv)
+			pOf, err = b.replaceEnv(p, pOf-len(utils.MetaEnv)+1, pOf)
 			if err != nil {
 				return pOf, err
 			}
 		}
-
 	}
 	if b.m != 0 { //continue to read if posible meta
 		initMeta := b.m
 		buf := make([]byte, len(utils.MetaEnv)-initMeta)
-		for i := 0; b.m != 0; i++ {
+		i := 0
+		for ; b.m != 0; i++ {
 			buf[i], err = b.rd.ReadByte()
 			if err != nil {
 				return i - 1, err
 			}
 			if isEnv := b.checkMeta(buf[i]); isEnv {
-				startEnv := len(p) - initMeta
-				midEnv := i
-				i, err = b.replaceEnv(p, startEnv, midEnv)
+				i, err = b.replaceEnv(p, len(p)-initMeta, i)
 				if err != nil {
 					return i, err
 				}
 				buf = nil
 			}
-
 		}
 		if len(buf) > 0 {
-			b.buf = buf
+			b.buf = buf[:i]
 		}
 	}
 	return len(p), nil
-
 }
-
-// func (b *EnvReader) commentGuard(bit byte) byte {
-// 	// fmt.Println(b.isPosComment, string(bit))
-// 	if b.isPosComment && bit == '/' {
-// 		b.isPosComment = false
-// 		return 1
-// 	} else if b.isPosComment && bit == '*' {
-// 		b.isPosComment = false
-// 		return 2
-// 	}
-// 	b.isPosComment = bit == '/'
-// 	return 0
-// }
