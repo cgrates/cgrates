@@ -1099,6 +1099,7 @@ func startDispatcherService(internalDispatcherSChan, internalRaterChan chan rpcc
 func startRpc(server *utils.Server, internalRaterChan,
 	internalCdrSChan, internalCdrStatSChan, internalPubSubSChan, internalUserSChan,
 	internalAliaseSChan, internalRsChan, internalStatSChan,
+	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
 	internalSMGChan, internalDispatcherSChan chan rpcclient.RpcClientConnection,
 	exitChan chan bool) {
 	select { // Any of the rpc methods will unlock listening to rpc requests
@@ -1120,6 +1121,14 @@ func startRpc(server *utils.Server, internalRaterChan,
 		internalRsChan <- rls
 	case statS := <-internalStatSChan:
 		internalStatSChan <- statS
+	case attrS := <-internalAttrSChan:
+		internalAttrSChan <- attrS
+	case chrgS := <-internalChargerSChan:
+		internalChargerSChan <- chrgS
+	case thS := <-internalThdSChan:
+		internalThdSChan <- thS
+	case splS := <-internalSuplSChan:
+		internalSuplSChan <- splS
 	case dispatcherS := <-internalDispatcherSChan:
 		internalDispatcherSChan <- dispatcherS
 	}
@@ -1487,7 +1496,10 @@ func main() {
 	// Serve rpc connections
 	go startRpc(server, internalRaterChan, internalCdrSChan, internalCdrStatSChan,
 		internalPubSubSChan, internalUserSChan, internalAliaseSChan, internalRsChan,
-		internalStatSChan, internalSMGChan, internalDispatcherSChan, exitChan)
+		internalStatSChan,
+		internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
+		internalSupplierSChan,
+		internalSMGChan, internalDispatcherSChan, exitChan)
 	<-exitChan
 
 	if *memprofile != "" {
