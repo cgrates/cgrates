@@ -21,8 +21,6 @@ imports:
   version: 69d4269e21990c0f120b8e60d5b75d533db7f3dd
 - name: github.com/cgrates/rpcclient
   version: 7316bff37a2b8692fbadd57f9c9cda070cc33081
-- name: github.com/DisposaBoy/JsonConfigReader
-  version: 5ea4d0ddac554439159cd6f191cb94a110d73352
 - name: github.com/fiorix/go-diameter
   version: 16028e641c19a8dd67509053bc558d389258ff6d
   subpackages:

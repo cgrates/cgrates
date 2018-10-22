@@ -57,6 +57,8 @@ var (
 	ErrUnauthorizedApi          = errors.New("UNAUTHORIZED_API")
 	ErrUnknownApiKey            = errors.New("UNKNOWN_API_KEY")
 	RalsErrorPrfx               = "RALS_ERROR"
+
+	ErrJsonIncompleteComment = errors.New("JSON_INCOMPLETE_COMMENT")
 )
 
 // NewCGRError initialises a new CGRError
@@ -154,4 +156,8 @@ func ErrHasPrefix(err error, prfx string) (has bool) {
 		return
 	}
 	return strings.HasPrefix(err.Error(), prfx)
+}
+
+func ErrEnvNotFound(key string) error {
+	return errors.New("ENV_VAR_NOT_FOUND:" + key)
 }

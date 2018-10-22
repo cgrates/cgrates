@@ -22,8 +22,6 @@ import (
 	"encoding/json"
 	"io"
 	"os"
-
-	"github.com/DisposaBoy/JsonConfigReader"
 )
 
 const (
@@ -75,7 +73,7 @@ const (
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
 func NewCgrJsonCfgFromReader(r io.Reader) (*CgrJsonCfg, error) {
 	var cgrJsonCfg CgrJsonCfg
-	jr := JsonConfigReader.New(r)
+	jr := NewRawJSONReader(r)
 	if err := json.NewDecoder(jr).Decode(&cgrJsonCfg); err != nil {
 		return nil, err
 	}
