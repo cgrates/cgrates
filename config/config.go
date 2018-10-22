@@ -142,7 +142,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.generalCfg = new(GeneralCfg)
 	cfg.dataDbCfg = new(DataDbCfg)
 	cfg.storDbCfg = new(StorDbCfg)
-
+	cfg.tlsCfg = new(TlsCfg)
 	cfg.generalCfg.NodeID = utils.UUIDSha1Prefix()
 
 	cfg.sessionSCfg = new(SessionSCfg)
@@ -261,10 +261,6 @@ type CGRConfig struct {
 	RPCJSONTLSListen         string            // RPC JSON TLS listening address
 	RPCGOBTLSListen          string            // RPC GOB TLS listening address
 	HTTPTLSListen            string            // HTTP TLS listening address
-	TLSServerCerificate      string            // path to server certificate
-	TLSServerKey             string            // path to server key
-	TLSClientCerificate      string            // path to client certificate
-	TLSClientKey             string            // path to client key
 	HTTPJsonRPCURL           string            // JSON RPC relative URL ("" to disable)
 	HTTPFreeswitchCDRsURL    string            // Freeswitch CDRS relative URL ("" to disable)
 	HTTPCDRsURL              string            // CDRS relative URL ("" to disable)
@@ -339,6 +335,7 @@ type CGRConfig struct {
 	generalCfg *GeneralCfg // General config
 	dataDbCfg  *DataDbCfg  // Database config
 	storDbCfg  *StorDbCfg  //StroreDb config
+	tlsCfg     *TlsCfg
 }
 
 func (self *CGRConfig) checkConfigSanity() error {
