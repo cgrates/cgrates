@@ -206,6 +206,9 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
 		return
 	}
 	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.tenant, utils.NestingSep)
+	if cgrEv == nil {
+		return false, fmt.Errorf("empty RequestFields in %s processor", reqProcessor.ID)
+	}
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuth,
