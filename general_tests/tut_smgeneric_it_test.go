@@ -74,7 +74,7 @@ func TestTutSMGStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestTutSMGRpcConn(t *testing.T) {
 	var err error
-	tutSMGRpc, err = jsonrpc.Dial("tcp", tutSMGCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tutSMGRpc, err = jsonrpc.Dial("tcp", tutSMGCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

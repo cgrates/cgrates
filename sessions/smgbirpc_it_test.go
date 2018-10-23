@@ -92,7 +92,7 @@ func TestSMGBiRPCApierRpcConn(t *testing.T) {
 		clntHandlers); err != nil {
 		t.Fatal(err)
 	}
-	if smgRPC, err = jsonrpc.Dial("tcp", smgBiRPCCfg.RPCJSONListen); err != nil { // Connect also simple RPC so we can check accounts and such
+	if smgRPC, err = jsonrpc.Dial("tcp", smgBiRPCCfg.ListenCfg().RPCJSONListen); err != nil { // Connect also simple RPC so we can check accounts and such
 		t.Fatal(err)
 	}
 	dummyClnt.Close() // close so we don't get EOF error when disconnecting server

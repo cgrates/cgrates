@@ -32,7 +32,7 @@ import (
 // Various helpers to deal with database
 
 func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler string,
-	cacheCfg config.CacheConfig, sentinelName string) (dm *DataManager, err error) {
+	cacheCfg config.CacheCfg, sentinelName string) (dm *DataManager, err error) {
 	var d DataDB
 	switch db_type {
 	case utils.REDIS:

@@ -43,7 +43,7 @@ var (
 )
 
 var evs = []*utils.CGREvent{
-	&utils.CGREvent{
+	{
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]interface{}{
@@ -51,14 +51,14 @@ var evs = []*utils.CGREvent{
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:      time.Duration(135 * time.Second),
 			utils.COST:       123.0}},
-	&utils.CGREvent{
+	{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]interface{}{
 			utils.Account:    "1002",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			utils.Usage:      time.Duration(45 * time.Second)}},
-	&utils.CGREvent{
+	{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]interface{}{
@@ -131,7 +131,7 @@ func testV1STSStartEngine(t *testing.T) {
 
 func testV1STSRpcConn(t *testing.T) {
 	var err error
-	stsV1Rpc, err = jsonrpc.Dial("tcp", stsV1Cfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	stsV1Rpc, err = jsonrpc.Dial("tcp", stsV1Cfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -156,12 +156,12 @@ func testV1STSGetStats(t *testing.T) {
 	}
 	var metrics map[string]string
 	expectedMetrics := map[string]string{
-		utils.MetaASR:                                         utils.NOT_AVAILABLE,
-		utils.MetaACD:                                         utils.NOT_AVAILABLE,
-		utils.MetaTCC:                                         utils.NOT_AVAILABLE,
-		utils.MetaTCD:                                         utils.NOT_AVAILABLE,
-		utils.MetaACC:                                         utils.NOT_AVAILABLE,
-		utils.MetaPDD:                                         utils.NOT_AVAILABLE,
+		utils.MetaASR: utils.NOT_AVAILABLE,
+		utils.MetaACD: utils.NOT_AVAILABLE,
+		utils.MetaTCC: utils.NOT_AVAILABLE,
+		utils.MetaTCD: utils.NOT_AVAILABLE,
+		utils.MetaACC: utils.NOT_AVAILABLE,
+		utils.MetaPDD: utils.NOT_AVAILABLE,
 		utils.ConcatenatedKey(utils.MetaSum, utils.Value):     utils.NOT_AVAILABLE,
 		utils.ConcatenatedKey(utils.MetaAverage, utils.Value): utils.NOT_AVAILABLE,
 		utils.ConcatenatedKey(utils.MetaSum, utils.Usage):     utils.NOT_AVAILABLE,
@@ -195,12 +195,12 @@ func testV1STSProcessEvent(t *testing.T) {
 	}
 	//process with one event (should be N/A becaus MinItems is 2)
 	expectedMetrics := map[string]string{
-		utils.MetaASR:                                         utils.NOT_AVAILABLE,
-		utils.MetaACD:                                         utils.NOT_AVAILABLE,
-		utils.MetaTCC:                                         utils.NOT_AVAILABLE,
-		utils.MetaTCD:                                         utils.NOT_AVAILABLE,
-		utils.MetaACC:                                         utils.NOT_AVAILABLE,
-		utils.MetaPDD:                                         utils.NOT_AVAILABLE,
+		utils.MetaASR: utils.NOT_AVAILABLE,
+		utils.MetaACD: utils.NOT_AVAILABLE,
+		utils.MetaTCC: utils.NOT_AVAILABLE,
+		utils.MetaTCD: utils.NOT_AVAILABLE,
+		utils.MetaACC: utils.NOT_AVAILABLE,
+		utils.MetaPDD: utils.NOT_AVAILABLE,
 		utils.ConcatenatedKey(utils.MetaSum, utils.Value):     utils.NOT_AVAILABLE,
 		utils.ConcatenatedKey(utils.MetaAverage, utils.Value): utils.NOT_AVAILABLE,
 		utils.ConcatenatedKey(utils.MetaSum, utils.Usage):     utils.NOT_AVAILABLE,
@@ -241,12 +241,12 @@ func testV1STSProcessEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 	expectedMetrics2 := map[string]string{
-		utils.MetaASR:                                         "66.66667%",
-		utils.MetaACD:                                         "1m30s",
-		utils.MetaACC:                                         "61.5",
-		utils.MetaTCD:                                         "3m0s",
-		utils.MetaTCC:                                         "123",
-		utils.MetaPDD:                                         "4s",
+		utils.MetaASR: "66.66667%",
+		utils.MetaACD: "1m30s",
+		utils.MetaACC: "61.5",
+		utils.MetaTCD: "3m0s",
+		utils.MetaTCC: "123",
+		utils.MetaPDD: "4s",
 		utils.ConcatenatedKey(utils.MetaSum, utils.Value):     "0",
 		utils.ConcatenatedKey(utils.MetaAverage, utils.Value): utils.NOT_AVAILABLE,
 		utils.ConcatenatedKey(utils.MetaSum, utils.Usage):     "180000000000",
@@ -267,7 +267,7 @@ func testV1STSGetStatsAfterRestart(t *testing.T) {
 		t.Fatal(err)
 	}
 	var err error
-	stsV1Rpc, err = jsonrpc.Dial("tcp", stsV1Cfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	stsV1Rpc, err = jsonrpc.Dial("tcp", stsV1Cfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -275,12 +275,12 @@ func testV1STSGetStatsAfterRestart(t *testing.T) {
 
 	//get stats metrics after restart
 	expectedMetrics2 := map[string]string{
-		utils.MetaASR:                                         "66.66667%",
-		utils.MetaACD:                                         "1m30s",
-		utils.MetaACC:                                         "61.5",
-		utils.MetaTCD:                                         "3m0s",
-		utils.MetaTCC:                                         "123",
-		utils.MetaPDD:                                         "4s",
+		utils.MetaASR: "66.66667%",
+		utils.MetaACD: "1m30s",
+		utils.MetaACC: "61.5",
+		utils.MetaTCD: "3m0s",
+		utils.MetaTCC: "123",
+		utils.MetaPDD: "4s",
 		utils.ConcatenatedKey(utils.MetaSum, utils.Value):     "0",
 		utils.ConcatenatedKey(utils.MetaAverage, utils.Value): utils.NOT_AVAILABLE,
 		utils.ConcatenatedKey(utils.MetaSum, utils.Usage):     "180000000000",
@@ -301,7 +301,7 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "FLTR_1",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},
@@ -334,11 +334,11 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 		QueueLength: 10,
 		TTL:         time.Duration(10) * time.Second,
 		Metrics: []*utils.MetricWithParams{
-			&utils.MetricWithParams{
+			{
 				MetricID:   utils.MetaSum,
 				Parameters: "",
 			},
-			&utils.MetricWithParams{
+			{
 				MetricID:   utils.MetaAverage,
 				Parameters: "",
 			},
@@ -378,7 +378,7 @@ func testV1STSUpdateStatQueueProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "FLTR_2",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				FieldName: "Account",
 				Type:      "*string",
 				Values:    []string{"1001"},
@@ -448,7 +448,7 @@ func BenchmarkSTSV1SetEvent(b *testing.B) {
 	}
 	b.StopTimer()
 	var err error
-	stsV1Rpc, err = jsonrpc.Dial("tcp", stsV1Cfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	stsV1Rpc, err = jsonrpc.Dial("tcp", stsV1Cfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		b.Fatal("Could not connect to rater: ", err.Error())
 	}

@@ -75,7 +75,7 @@ func TestTpStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestTpRpcConn(t *testing.T) {
 	var err error
-	tpRPC, err = jsonrpc.Dial("tcp", tpCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tpRPC, err = jsonrpc.Dial("tcp", tpCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -264,7 +264,7 @@ func TestTpCreateExecuteActionMatch(t *testing.T) {
 	if err := tpRPC.Call("ApierV2.SetActions", utils.AttrSetActions{
 		ActionsId: "PAYMENT_2056bd2fe137082970f97102b64e42fd",
 		Actions: []*utils.TPAction{
-			&utils.TPAction{
+			{
 				BalanceType:   "*monetary",
 				Directions:    "*out",
 				Identifier:    "*topup",
@@ -313,7 +313,7 @@ func TestTpSetRemoveActions(t *testing.T) {
 	if err := tpRPC.Call("ApierV2.SetActions", utils.AttrSetActions{
 		ActionsId: "TO_BE_DELETED",
 		Actions: []*utils.TPAction{
-			&utils.TPAction{
+			{
 				BalanceType:   "*monetary",
 				Directions:    "*out",
 				Identifier:    "*topup",

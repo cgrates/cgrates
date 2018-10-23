@@ -37,7 +37,7 @@ var (
 func init() {
 	apierDebitStorage, _ = engine.NewMapStorage()
 	cfg, _ := config.NewDefaultCGRConfig()
-	responder := &engine.Responder{MaxComputedUsage: cfg.RALsMaxComputedUsage}
+	responder := &engine.Responder{MaxComputedUsage: cfg.RalsCfg().RALsMaxComputedUsage}
 	dm = engine.NewDataManager(apierDebitStorage)
 	engine.SetDataStorage(dm)
 	apierDebit = &ApierV1{
@@ -53,7 +53,7 @@ func TestDebitUsageWithOptions(t *testing.T) {
 	cgrAcnt1 := &engine.Account{
 		ID: utils.ConcatenatedKey(cgrTenant, "account1"),
 		BalanceMap: map[string]engine.Balances{
-			utils.MONETARY: engine.Balances{b10},
+			utils.MONETARY: {b10},
 		},
 	}
 	if err := apierDebitStorage.SetAccount(cgrAcnt1); err != nil {
@@ -70,7 +70,7 @@ func TestDebitUsageWithOptions(t *testing.T) {
 	rp1 := &engine.RatingPlan{
 		Id: "RP1",
 		Timings: map[string]*engine.RITiming{
-			"30eab300": &engine.RITiming{
+			"30eab300": {
 				Years:     utils.Years{},
 				Months:    utils.Months{},
 				MonthDays: utils.MonthDays{},
@@ -79,10 +79,10 @@ func TestDebitUsageWithOptions(t *testing.T) {
 			},
 		},
 		Ratings: map[string]*engine.RIRate{
-			"b457f86d": &engine.RIRate{
+			"b457f86d": {
 				ConnectFee: 0,
 				Rates: []*engine.Rate{
-					&engine.Rate{
+					{
 						GroupIntervalStart: 0,
 						Value:              0.03,
 						RateIncrement:      time.Second,
@@ -95,7 +95,7 @@ func TestDebitUsageWithOptions(t *testing.T) {
 		},
 		DestinationRates: map[string]engine.RPRateList{
 			dstDe.Id: []*engine.RPRate{
-				&engine.RPRate{
+				{
 					Timing: "30eab300",
 					Rating: "b457f86d",
 					Weight: 10,

@@ -107,7 +107,7 @@ func testFilterStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testFilterRpcConn(t *testing.T) {
 	var err error
-	filterRPC, err = jsonrpc.Dial("tcp", filterCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	filterRPC, err = jsonrpc.Dial("tcp", filterCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -125,7 +125,7 @@ func testFilterSetFilter(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "Filter1",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				FieldName: "*string",
 				Type:      "Account",
 				Values:    []string{"1001", "1002"},
@@ -166,12 +166,12 @@ func testFilterGetFilterAfterSet(t *testing.T) {
 
 func testFilterUpdateFilter(t *testing.T) {
 	filter.Rules = []*engine.FilterRule{
-		&engine.FilterRule{
+		{
 			FieldName: "*string",
 			Type:      "Account",
 			Values:    []string{"1001", "1002"},
 		},
-		&engine.FilterRule{
+		{
 			FieldName: engine.MetaPrefix,
 			Type:      "Destination",
 			Values:    []string{"10", "20"},

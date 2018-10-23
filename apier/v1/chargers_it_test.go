@@ -43,14 +43,14 @@ var (
 )
 
 var chargerEvent = []*utils.CGREvent{
-	&utils.CGREvent{ // matching Charger1
+	{ // matching Charger1
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]interface{}{
 			utils.Account: "1001",
 		},
 	},
-	&utils.CGREvent{ // no matching
+	{ // no matching
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]interface{}{
@@ -132,7 +132,7 @@ func testChargerSStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testChargerSRPCConn(t *testing.T) {
 	var err error
-	chargerRPC, err = jsonrpc.Dial("tcp", chargerCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	chargerRPC, err = jsonrpc.Dial("tcp", chargerCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -161,7 +161,7 @@ func testChargerSLoadAddCharger(t *testing.T) {
 		ID:       "ATTR_1001_SIMPLEAUTH",
 		Contexts: []string{"simpleauth"},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FieldName: "Password",
 				Initial:   utils.ANY,
 				Substitute: config.RSRParsers{
@@ -211,7 +211,7 @@ func testChargerSGetChargersForEvent(t *testing.T) {
 
 func testChargerSProcessEvent(t *testing.T) {
 	processedEv := &[]*engine.ChrgSProcessEventReply{
-		&engine.ChrgSProcessEventReply{
+		{
 			ChargerSProfile:    "Charger1",
 			AttributeSProfiles: []string{"ATTR_1001_SIMPLEAUTH"},
 			AlteredFields:      []string{"Password"},

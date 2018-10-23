@@ -153,7 +153,7 @@ func testV1FIdxCaStartEngine(t *testing.T) {
 
 func testV1FIdxCaRpcConn(t *testing.T) {
 	var err error
-	tFIdxCaRpc, err = jsonrpc.Dial("tcp", tSv1Cfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tFIdxCaRpc, err = jsonrpc.Dial("tcp", tSv1Cfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

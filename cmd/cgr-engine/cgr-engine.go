@@ -1191,22 +1191,22 @@ func startRpc(server *utils.Server, internalRaterChan,
 		internalAnalyzerSChan <- analyzerS
 	}
 
-	go server.ServeJSON(cfg.RPCJSONListen)
-	go server.ServeGOB(cfg.RPCGOBListen)
+	go server.ServeJSON(cfg.ListenCfg().RPCJSONListen)
+	go server.ServeGOB(cfg.ListenCfg().RPCGOBListen)
 	go server.ServeHTTP(
-		cfg.HTTPListen,
-		cfg.HTTPJsonRPCURL,
-		cfg.HTTPWSURL,
-		cfg.HTTPUseBasicAuth,
-		cfg.HTTPAuthUsers,
+		cfg.ListenCfg().HTTPListen,
+		cfg.HTTPCfg().HTTPJsonRPCURL,
+		cfg.HTTPCfg().HTTPWSURL,
+		cfg.HTTPCfg().HTTPUseBasicAuth,
+		cfg.HTTPCfg().HTTPAuthUsers,
 		exitChan,
 	)
-	if cfg.RPCGOBTLSListen != "" {
+	if cfg.ListenCfg().RPCGOBTLSListen != "" {
 		if cfg.TlsCfg().ServerCerificate == "" || cfg.TlsCfg().ServerKey == "" {
 			utils.Logger.Warning("WARNING: missing TLS certificate/key file!")
 		} else {
 			go server.ServeGOBTLS(
-				cfg.RPCGOBTLSListen,
+				cfg.ListenCfg().RPCGOBTLSListen,
 				cfg.TlsCfg().ServerCerificate,
 				cfg.TlsCfg().ServerKey,
 				cfg.TlsCfg().CaCertificate,
@@ -1215,12 +1215,12 @@ func startRpc(server *utils.Server, internalRaterChan,
 			)
 		}
 	}
-	if cfg.RPCJSONTLSListen != "" {
+	if cfg.ListenCfg().RPCJSONTLSListen != "" {
 		if cfg.TlsCfg().ServerCerificate == "" || cfg.TlsCfg().ServerKey == "" {
 			utils.Logger.Warning("WARNING: missing TLS certificate/key file!")
 		} else {
 			go server.ServeJSONTLS(
-				cfg.RPCJSONTLSListen,
+				cfg.ListenCfg().RPCJSONTLSListen,
 				cfg.TlsCfg().ServerCerificate,
 				cfg.TlsCfg().ServerKey,
 				cfg.TlsCfg().CaCertificate,
@@ -1229,21 +1229,21 @@ func startRpc(server *utils.Server, internalRaterChan,
 			)
 		}
 	}
-	if cfg.HTTPTLSListen != "" {
+	if cfg.ListenCfg().HTTPTLSListen != "" {
 		if cfg.TlsCfg().ServerCerificate == "" || cfg.TlsCfg().ServerKey == "" {
 			utils.Logger.Warning("WARNING: missing TLS certificate/key file!")
 		} else {
 			go server.ServeHTTPTLS(
-				cfg.HTTPTLSListen,
+				cfg.ListenCfg().HTTPTLSListen,
 				cfg.TlsCfg().ServerCerificate,
 				cfg.TlsCfg().ServerKey,
 				cfg.TlsCfg().CaCertificate,
 				cfg.TlsCfg().ServerPolicy,
 				cfg.TlsCfg().ServerName,
-				cfg.HTTPJsonRPCURL,
-				cfg.HTTPWSURL,
-				cfg.HTTPUseBasicAuth,
-				cfg.HTTPAuthUsers,
+				cfg.HTTPCfg().HTTPJsonRPCURL,
+				cfg.HTTPCfg().HTTPWSURL,
+				cfg.HTTPCfg().HTTPUseBasicAuth,
+				cfg.HTTPCfg().HTTPAuthUsers,
 			)
 		}
 	}
@@ -1350,7 +1350,7 @@ func main() {
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
 	var dm *engine.DataManager
-	if cfg.RALsEnabled || cfg.CDRStatsEnabled || cfg.PubSubServerEnabled ||
+	if cfg.RalsCfg().RALsEnabled || cfg.CDRStatsEnabled || cfg.PubSubServerEnabled ||
 		cfg.AliasesServerEnabled || cfg.UserServerEnabled || cfg.SchedulerCfg().Enabled ||
 		cfg.AttributeSCfg().Enabled || cfg.ResourceSCfg().Enabled || cfg.StatSCfg().Enabled ||
 		cfg.ThresholdSCfg().Enabled || cfg.SupplierSCfg().Enabled { // Some services can run without db, ie: SessionS or CDRC
@@ -1370,7 +1370,7 @@ func main() {
 			return
 		}
 	}
-	if cfg.RALsEnabled || cfg.CDRSEnabled {
+	if cfg.RalsCfg().RALsEnabled || cfg.CDRSEnabled {
 		storDb, err := engine.ConfigureStorStorage(cfg.StorDbCfg().StorDBType,
 			cfg.StorDbCfg().StorDBHost, cfg.StorDbCfg().StorDBPort,
 			cfg.StorDbCfg().StorDBName, cfg.StorDbCfg().StorDBUser,
@@ -1393,8 +1393,8 @@ func main() {
 	}
 	// Done initing DBs
 	engine.SetRoundingDecimals(cfg.GeneralCfg().RoundingDecimals)
-	engine.SetRpSubjectPrefixMatching(cfg.RpSubjectPrefixMatching)
-	engine.SetLcrSubjectPrefixMatching(cfg.LcrSubjectPrefixMatching)
+	engine.SetRpSubjectPrefixMatching(cfg.RalsCfg().RpSubjectPrefixMatching)
+	engine.SetLcrSubjectPrefixMatching(cfg.RalsCfg().LcrSubjectPrefixMatching)
 	stopHandled := false
 
 	// Rpc/http server
@@ -1437,7 +1437,7 @@ func main() {
 	srvManager := servmanager.NewServiceManager(cfg, dm, exitChan, cacheS)
 
 	// Start rater service
-	if cfg.RALsEnabled {
+	if cfg.RalsCfg().RALsEnabled {
 		go startRater(internalRaterChan, cacheS, internalThresholdSChan,
 			internalCdrStatSChan, internalStatSChan,
 			internalPubSubSChan, internalUserSChan, internalAliaseSChan,

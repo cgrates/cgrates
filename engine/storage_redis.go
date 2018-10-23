@@ -41,7 +41,7 @@ type RedisStorage struct {
 	dbPool        *pool.Pool
 	maxConns      int
 	ms            Marshaler
-	cacheCfg      config.CacheConfig
+	cacheCfg      config.CacheCfg
 	sentinelName  string
 	sentinelInsts []*sentinelInst
 	db            int    //database number used when recconect sentinel
@@ -55,7 +55,7 @@ type sentinelInst struct {
 }
 
 func NewRedisStorage(address string, db int, pass, mrshlerStr string,
-	maxConns int, cacheCfg config.CacheConfig, sentinelName string) (*RedisStorage, error) {
+	maxConns int, cacheCfg config.CacheCfg, sentinelName string) (*RedisStorage, error) {
 
 	df := func(network, addr string) (*redis.Client, error) {
 		client, err := redis.Dial(network, addr)
@@ -1598,7 +1598,7 @@ func (rs *RedisStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
 
 func (rs *RedisStorage) RemoveVersions(vrs Versions) (err error) {
 	if len(vrs) != 0 {
-		for key, _ := range vrs {
+		for key := range vrs {
 			err = rs.Cmd("HDEL", utils.TBLVersions, key).Err
 			if err != nil {
 				return err

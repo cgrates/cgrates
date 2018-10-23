@@ -42,7 +42,7 @@ var (
 )
 
 var tEvs = []*utils.CGREvent{
-	&utils.CGREvent{ // hitting THD_ACNT_BALANCE_1
+	{ // hitting THD_ACNT_BALANCE_1
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]interface{}{
@@ -51,7 +51,7 @@ var tEvs = []*utils.CGREvent{
 			utils.AllowNegative: true,
 			utils.Disabled:      false,
 			utils.Units:         12.3}},
-	&utils.CGREvent{ // hitting THD_ACNT_BALANCE_1
+	{ // hitting THD_ACNT_BALANCE_1
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]interface{}{
@@ -61,7 +61,7 @@ var tEvs = []*utils.CGREvent{
 			utils.Units:      12.3,
 			utils.ExpiryTime: time.Date(2009, 11, 10, 23, 00, 0, 0, time.UTC),
 		}},
-	&utils.CGREvent{ // hitting THD_STATS_1
+	{ // hitting THD_STATS_1
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]interface{}{
@@ -75,7 +75,7 @@ var tEvs = []*utils.CGREvent{
 			"ACC":           0.75,
 			"PDD":           "2s",
 		}},
-	&utils.CGREvent{ // hitting THD_STATS_1 and THD_STATS_2
+	{ // hitting THD_STATS_1 and THD_STATS_2
 		Tenant: "cgrates.org",
 		ID:     "event4",
 		Event: map[string]interface{}{
@@ -86,7 +86,7 @@ var tEvs = []*utils.CGREvent{
 			"ACD":           "2m45s",
 			"TCD":           "1h",
 		}},
-	&utils.CGREvent{ // hitting THD_STATS_3
+	{ // hitting THD_STATS_3
 		Tenant: "cgrates.org",
 		ID:     "event5",
 		Event: map[string]interface{}{
@@ -96,7 +96,7 @@ var tEvs = []*utils.CGREvent{
 			"ACD":           "2m45s",
 			"TCD":           "3h1s",
 		}},
-	&utils.CGREvent{ // hitting THD_RES_1
+	{ // hitting THD_RES_1
 		Tenant: "cgrates.org",
 		ID:     "event6",
 		Event: map[string]interface{}{
@@ -104,7 +104,7 @@ var tEvs = []*utils.CGREvent{
 			utils.Account:    "1002",
 			utils.ResourceID: "RES_GRP_1",
 			utils.Usage:      10.0}},
-	&utils.CGREvent{ // hitting THD_RES_1
+	{ // hitting THD_RES_1
 		Tenant: "cgrates.org",
 		ID:     "event6",
 		Event: map[string]interface{}{
@@ -112,7 +112,7 @@ var tEvs = []*utils.CGREvent{
 			utils.Account:    "1002",
 			utils.ResourceID: "RES_GRP_1",
 			utils.Usage:      10.0}},
-	&utils.CGREvent{ // hitting THD_RES_1
+	{ // hitting THD_RES_1
 		Tenant: "cgrates.org",
 		ID:     "event6",
 		Event: map[string]interface{}{
@@ -120,7 +120,7 @@ var tEvs = []*utils.CGREvent{
 			utils.Account:    "1002",
 			utils.ResourceID: "RES_GRP_1",
 			utils.Usage:      10.0}},
-	&utils.CGREvent{ // hitting THD_CDRS_1
+	{ // hitting THD_CDRS_1
 		Tenant: "cgrates.org",
 		ID:     "cdrev1",
 		Event: map[string]interface{}{
@@ -219,7 +219,7 @@ func testV1TSStartEngine(t *testing.T) {
 
 func testV1TSRpcConn(t *testing.T) {
 	var err error
-	tSv1Rpc, err = jsonrpc.Dial("tcp", tSv1Cfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tSv1Rpc, err = jsonrpc.Dial("tcp", tSv1Cfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -331,7 +331,7 @@ func testV1TSGetThresholdsAfterRestart(t *testing.T) {
 		t.Fatal(err)
 	}
 	var err error
-	tSv1Rpc, err = jsonrpc.Dial("tcp", tSv1Cfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tSv1Rpc, err = jsonrpc.Dial("tcp", tSv1Cfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

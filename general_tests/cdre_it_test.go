@@ -107,7 +107,7 @@ func testCDREStartEngine(t *testing.T) {
 
 func testCDRERpcConn(t *testing.T) {
 	var err error
-	cdreRPC, err = jsonrpc.Dial("tcp", cdreCfg.RPCJSONListen)
+	cdreRPC, err = jsonrpc.Dial("tcp", cdreCfg.ListenCfg().RPCJSONListen)
 	if err != nil {
 		t.Fatal(err)
 	}

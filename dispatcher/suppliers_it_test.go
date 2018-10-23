@@ -108,11 +108,11 @@ func testDspSupStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testDspSupRPCConn(t *testing.T) {
 	var err error
-	instSupRPC, err = jsonrpc.Dial("tcp", instSupCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	instSupRPC, err = jsonrpc.Dial("tcp", instSupCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
-	dspSupRPC, err = jsonrpc.Dial("tcp", dspSupCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	dspSupRPC, err = jsonrpc.Dial("tcp", dspSupCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -153,7 +153,7 @@ func testDspSupAddAttributesWithPermision(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FieldName:  utils.APIMethods,
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("ThresholdSv1.GetThresholdsForEvent", true),
@@ -215,7 +215,7 @@ func testDspSupAddAttributesWithPermision2(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FieldName:  utils.APIMethods,
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("ThresholdSv1.ProcessEvent&SupplierSv1.GetSuppliers", true),
@@ -248,7 +248,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 		ProfileID: "SPL_ACNT_1002",
 		Sorting:   utils.MetaLeastCost,
 		SortedSuppliers: []*engine.SortedSupplier{
-			&engine.SortedSupplier{
+			{
 				SupplierID:         "supplier1",
 				SupplierParameters: "",
 				SortingData: map[string]interface{}{
@@ -257,7 +257,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 					utils.Weight:       10.0,
 				},
 			},
-			&engine.SortedSupplier{
+			{
 				SupplierID:         "supplier2",
 				SupplierParameters: "",
 				SortingData: map[string]interface{}{

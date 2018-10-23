@@ -76,7 +76,7 @@ func TestRAitStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestRAitApierRpcConn(t *testing.T) {
 	var err error
-	raRPC, err = jsonrpc.Dial("tcp", raCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	raRPC, err = jsonrpc.Dial("tcp", raCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

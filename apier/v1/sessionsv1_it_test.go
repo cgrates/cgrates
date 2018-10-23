@@ -100,7 +100,7 @@ func TestSSv1ItRpcConn(t *testing.T) {
 		clntHandlers); err != nil {
 		t.Fatal(err)
 	}
-	if sSApierRpc, err = jsonrpc.Dial("tcp", sSv1Cfg.RPCJSONListen); err != nil {
+	if sSApierRpc, err = jsonrpc.Dial("tcp", sSv1Cfg.ListenCfg().RPCJSONListen); err != nil {
 		t.Fatal(err)
 	}
 	dummyClnt.Close() // close so we don't get EOF error when disconnecting server
@@ -165,13 +165,13 @@ func TestSSv1ItAuth(t *testing.T) {
 		ProfileID: "SPL_ACNT_1001",
 		Sorting:   utils.MetaWeight,
 		SortedSuppliers: []*engine.SortedSupplier{
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
 					"Weight": 20.0,
 				},
 			},
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier2",
 				SortingData: map[string]interface{}{
 					"Weight": 10.0,

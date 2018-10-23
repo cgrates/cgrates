@@ -109,7 +109,7 @@ func testTutorialStartEngine(t *testing.T) {
 
 func testTutorialRpcConn(t *testing.T) {
 	var err error
-	tutorialRpc, err = jsonrpc.Dial("tcp", tutorialCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tutorialRpc, err = jsonrpc.Dial("tcp", tutorialCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

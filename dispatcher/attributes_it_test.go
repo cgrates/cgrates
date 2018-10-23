@@ -110,11 +110,11 @@ func testDspAttrStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testDspAttrRPCConn(t *testing.T) {
 	var err error
-	instAttrRPC, err = jsonrpc.Dial("tcp", instAttrCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	instAttrRPC, err = jsonrpc.Dial("tcp", instAttrCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
-	dspAttrRPC, err = jsonrpc.Dial("tcp", dspAttrCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	dspAttrRPC, err = jsonrpc.Dial("tcp", dspAttrCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -156,7 +156,7 @@ func testDspAttrAddAttributesWithPermision(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FieldName:  utils.APIMethods,
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("ThresholdSv1.GetThAttrholdsForEvent", true),
@@ -250,7 +250,7 @@ func testDspAttrAddAttributesWithPermision2(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FieldName:  utils.APIMethods,
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("AttributeSv1.GetAttributeForEvent&AttributeSv1.ProcessEvent", true),
@@ -295,7 +295,7 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 		FilterIDs: []string{"*string:Account:1001"},
 		Contexts:  []string{"simpleauth"},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FieldName:  "Password",
 				Initial:    utils.ANY,
 				Substitute: config.NewRSRParsersMustCompile("CGRateS.org", true),

@@ -71,10 +71,10 @@ func TestSMGRplcStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func TestSMGRplcApierRpcConn(t *testing.T) {
-	if smgRplcMstrRPC, err = jsonrpc.Dial("tcp", smgRplcMasterCfg.RPCJSONListen); err != nil {
+	if smgRplcMstrRPC, err = jsonrpc.Dial("tcp", smgRplcMasterCfg.ListenCfg().RPCJSONListen); err != nil {
 		t.Fatal(err)
 	}
-	if smgRplcSlvRPC, err = jsonrpc.Dial("tcp", smgRplcSlaveCfg.RPCJSONListen); err != nil {
+	if smgRplcSlvRPC, err = jsonrpc.Dial("tcp", smgRplcSlaveCfg.ListenCfg().RPCJSONListen); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -232,7 +232,7 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 	if err != nil { // Kill both and start Master
 		t.Fatal(err)
 	}
-	if smgRplcMstrRPC, err = jsonrpc.Dial("tcp", smgRplcMasterCfg.RPCJSONListen); err != nil {
+	if smgRplcMstrRPC, err = jsonrpc.Dial("tcp", smgRplcMasterCfg.ListenCfg().RPCJSONListen); err != nil {
 		t.Fatal(err)
 	}
 	smgEv1 := map[string]interface{}{
@@ -288,15 +288,15 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 	if _, err := engine.StartEngine(smgRplcSlaveCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
-	if smgRplcSlvRPC, err = jsonrpc.Dial("tcp", smgRplcSlaveCfg.RPCJSONListen); err != nil {
+	if smgRplcSlvRPC, err = jsonrpc.Dial("tcp", smgRplcSlaveCfg.ListenCfg().RPCJSONListen); err != nil {
 		t.Fatal(err)
 	}
 	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
 	argsRepl := ArgsReplicateSessions{Connections: []*config.HaPoolConfig{
-		&config.HaPoolConfig{
-			Address:     smgRplcSlaveCfg.RPCJSONListen,
+		{
+			Address:     smgRplcSlaveCfg.ListenCfg().RPCJSONListen,
 			Transport:   utils.MetaJSONrpc,
 			Synchronous: true},
 	}}
@@ -327,7 +327,7 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 	if _, err := engine.StartEngine(smgRplcMasterCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
-	if smgRplcMstrRPC, err = jsonrpc.Dial("tcp", smgRplcMasterCfg.RPCJSONListen); err != nil {
+	if smgRplcMstrRPC, err = jsonrpc.Dial("tcp", smgRplcMasterCfg.ListenCfg().RPCJSONListen); err != nil {
 		t.Fatal(err)
 	}
 	// Master should have no session active/passive
@@ -339,8 +339,8 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 	}
 	// recover passive sessions from slave
 	argsRepl = ArgsReplicateSessions{Connections: []*config.HaPoolConfig{
-		&config.HaPoolConfig{
-			Address:     smgRplcMasterCfg.RPCJSONListen,
+		{
+			Address:     smgRplcMasterCfg.ListenCfg().RPCJSONListen,
 			Transport:   utils.MetaJSONrpc,
 			Synchronous: true},
 	}}

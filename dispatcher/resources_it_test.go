@@ -108,11 +108,11 @@ func testDspResStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testDspResRPCConn(t *testing.T) {
 	var err error
-	instResRPC, err = jsonrpc.Dial("tcp", instResCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	instResRPC, err = jsonrpc.Dial("tcp", instResCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
-	dspResRPC, err = jsonrpc.Dial("tcp", dspResCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	dspResRPC, err = jsonrpc.Dial("tcp", dspResCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -153,7 +153,7 @@ func testDspResAddAttributesWithPermision(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FieldName:  utils.APIMethods,
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("ThresholdSv1.GetThresholdsForEvent", true),
@@ -212,7 +212,7 @@ func testDspResAddAttributesWithPermision2(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		Attributes: []*engine.Attribute{
-			&engine.Attribute{
+			{
 				FieldName:  utils.APIMethods,
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("ThresholdSv1.ProcessEvent&ResourceSv1.GetResourcesForEvent", true),

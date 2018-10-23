@@ -62,7 +62,7 @@ var precachedPartitions = []string{
 }
 
 // InitCache will instantiate the cache with specific or default configuraiton
-func InitCache(cfg config.CacheConfig) {
+func InitCache(cfg config.CacheCfg) {
 	if cfg == nil {
 		cfg = config.CgrConfig().CacheCfg()
 	}

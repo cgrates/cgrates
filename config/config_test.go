@@ -176,10 +176,10 @@ func TestCgrCfgListener(t *testing.T) {
 
 	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(JSN_CFG); err != nil {
 		t.Error(err)
-	} else if cgrCfg.RPCGOBTLSListen != "127.0.0.1:2023" {
-		t.Errorf("Expected: 127.0.0.1:2023 , received: %+v", cgrCfg.RPCGOBTLSListen)
-	} else if cgrCfg.RPCJSONTLSListen != "127.0.0.1:2022" {
-		t.Errorf("Expected: 127.0.0.1:2022 , received: %+v", cgrCfg.RPCJSONTLSListen)
+	} else if cgrCfg.ListenCfg().RPCGOBTLSListen != "127.0.0.1:2023" {
+		t.Errorf("Expected: 127.0.0.1:2023 , received: %+v", cgrCfg.ListenCfg().RPCGOBTLSListen)
+	} else if cgrCfg.ListenCfg().RPCJSONTLSListen != "127.0.0.1:2022" {
+		t.Errorf("Expected: 127.0.0.1:2022 , received: %+v", cgrCfg.ListenCfg().RPCJSONTLSListen)
 	}
 }
 
@@ -385,23 +385,23 @@ func TestCgrCfgJSONDefaultsGeneral(t *testing.T) {
 }
 
 func TestCgrCfgJSONDefaultsListen(t *testing.T) {
-	if cgrCfg.RPCJSONListen != "127.0.0.1:2012" {
-		t.Error(cgrCfg.RPCJSONListen)
+	if cgrCfg.ListenCfg().RPCJSONListen != "127.0.0.1:2012" {
+		t.Errorf("Expected: 127.0.0.1:2012 , received: %+v", cgrCfg.ListenCfg().RPCJSONListen)
 	}
-	if cgrCfg.RPCGOBListen != "127.0.0.1:2013" {
-		t.Error(cgrCfg.RPCGOBListen)
+	if cgrCfg.ListenCfg().RPCGOBListen != "127.0.0.1:2013" {
+		t.Errorf("Expected: 127.0.0.1:2013 , received: %+v", cgrCfg.ListenCfg().RPCGOBListen)
 	}
-	if cgrCfg.HTTPListen != "127.0.0.1:2080" {
-		t.Error(cgrCfg.HTTPListen)
+	if cgrCfg.ListenCfg().HTTPListen != "127.0.0.1:2080" {
+		t.Errorf("Expected: 127.0.0.1:2080 , received: %+v", cgrCfg.ListenCfg().HTTPListen)
 	}
-	if cgrCfg.RPCJSONTLSListen != "127.0.0.1:2022" {
-		t.Error(cgrCfg.RPCJSONListen)
+	if cgrCfg.ListenCfg().RPCJSONTLSListen != "127.0.0.1:2022" {
+		t.Errorf("Expected: 127.0.0.1:2022 , received: %+v", cgrCfg.ListenCfg().RPCJSONListen)
 	}
-	if cgrCfg.RPCGOBTLSListen != "127.0.0.1:2023" {
-		t.Error(cgrCfg.RPCGOBListen)
+	if cgrCfg.ListenCfg().RPCGOBTLSListen != "127.0.0.1:2023" {
+		t.Errorf("Expected: 127.0.0.1:2023 , received: %+v", cgrCfg.ListenCfg().RPCGOBListen)
 	}
-	if cgrCfg.HTTPTLSListen != "127.0.0.1:2280" {
-		t.Error(cgrCfg.HTTPListen)
+	if cgrCfg.ListenCfg().HTTPTLSListen != "127.0.0.1:2280" {
+		t.Errorf("Expected: 127.0.0.1:2280 , received: %+v", cgrCfg.ListenCfg().HTTPListen)
 	}
 }
 
@@ -459,29 +459,29 @@ func TestCgrCfgJSONDefaultsStorDB(t *testing.T) {
 func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 	eHaPoolcfg := []*HaPoolConfig{}
 
-	if cgrCfg.RALsEnabled != false {
-		t.Error(cgrCfg.RALsEnabled)
+	if cgrCfg.RalsCfg().RALsEnabled != false {
+		t.Errorf("Expecting: false , received: %+v", cgrCfg.RalsCfg().RALsEnabled)
 	}
-	if !reflect.DeepEqual(cgrCfg.RALsThresholdSConns, eHaPoolcfg) {
-		t.Error(cgrCfg.RALsThresholdSConns)
+	if !reflect.DeepEqual(cgrCfg.RalsCfg().RALsThresholdSConns, eHaPoolcfg) {
+		t.Errorf("Expecting: %+v , received: %+v", eHaPoolcfg, cgrCfg.RalsCfg().RALsThresholdSConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.RALsCDRStatSConns, eHaPoolcfg) {
-		t.Error(cgrCfg.RALsCDRStatSConns)
+	if !reflect.DeepEqual(cgrCfg.RalsCfg().RALsCDRStatSConns, eHaPoolcfg) {
+		t.Errorf("Expecting: %+v , received: %+v", eHaPoolcfg, cgrCfg.RalsCfg().RALsCDRStatSConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.RALsPubSubSConns, eHaPoolcfg) {
-		t.Error(cgrCfg.RALsPubSubSConns)
+	if !reflect.DeepEqual(cgrCfg.RalsCfg().RALsPubSubSConns, eHaPoolcfg) {
+		t.Errorf("Expecting: %+v , received: %+v", eHaPoolcfg, cgrCfg.RalsCfg().RALsPubSubSConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.RALsUserSConns, eHaPoolcfg) {
-		t.Error(cgrCfg.RALsUserSConns)
+	if !reflect.DeepEqual(cgrCfg.RalsCfg().RALsUserSConns, eHaPoolcfg) {
+		t.Errorf("Expecting: %+v , received: %+v", eHaPoolcfg, cgrCfg.RalsCfg().RALsUserSConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.RALsAliasSConns, eHaPoolcfg) {
-		t.Error(cgrCfg.RALsAliasSConns)
+	if !reflect.DeepEqual(cgrCfg.RalsCfg().RALsAliasSConns, eHaPoolcfg) {
+		t.Errorf("Expecting: %+v , received: %+v", eHaPoolcfg, cgrCfg.RalsCfg().RALsAliasSConns)
 	}
-	if cgrCfg.RpSubjectPrefixMatching != false {
-		t.Error(cgrCfg.RpSubjectPrefixMatching)
+	if cgrCfg.RalsCfg().RpSubjectPrefixMatching != false {
+		t.Errorf("Expecting: false , received: %+v", cgrCfg.RalsCfg().RpSubjectPrefixMatching)
 	}
-	if cgrCfg.LcrSubjectPrefixMatching != false {
-		t.Error(cgrCfg.LcrSubjectPrefixMatching)
+	if cgrCfg.RalsCfg().LcrSubjectPrefixMatching != false {
+		t.Errorf("Expecting: false , received: %+v", cgrCfg.RalsCfg().LcrSubjectPrefixMatching)
 	}
 	eMaxCU := map[string]time.Duration{
 		utils.ANY:   time.Duration(189 * time.Hour),
@@ -489,8 +489,8 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 		utils.DATA:  time.Duration(107374182400),
 		utils.SMS:   time.Duration(10000),
 	}
-	if !reflect.DeepEqual(eMaxCU, cgrCfg.RALsMaxComputedUsage) {
-		t.Errorf("Expecting: %+v, received: %+v", eMaxCU, cgrCfg.RALsMaxComputedUsage)
+	if !reflect.DeepEqual(eMaxCU, cgrCfg.RalsCfg().RALsMaxComputedUsage) {
+		t.Errorf("Expecting: %+v , received: %+v", eMaxCU, cgrCfg.RalsCfg().RALsMaxComputedUsage)
 	}
 }
 
@@ -681,70 +681,70 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 
 }
 func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
-	eCacheCfg := CacheConfig{
-		utils.CacheDestinations: &CacheParamConfig{Limit: -1,
+	eCacheCfg := CacheCfg{
+		utils.CacheDestinations: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheReverseDestinations: &CacheParamConfig{Limit: -1,
+		utils.CacheReverseDestinations: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheRatingPlans: &CacheParamConfig{Limit: -1,
+		utils.CacheRatingPlans: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheRatingProfiles: &CacheParamConfig{Limit: -1,
+		utils.CacheRatingProfiles: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheLCRRules: &CacheParamConfig{Limit: -1,
+		utils.CacheLCRRules: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheCDRStatS: &CacheParamConfig{Limit: -1,
+		utils.CacheCDRStatS: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheActions: &CacheParamConfig{Limit: -1,
+		utils.CacheActions: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheActionPlans: &CacheParamConfig{Limit: -1,
+		utils.CacheActionPlans: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheAccountActionPlans: &CacheParamConfig{Limit: -1,
+		utils.CacheAccountActionPlans: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheActionTriggers: &CacheParamConfig{Limit: -1,
+		utils.CacheActionTriggers: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheSharedGroups: &CacheParamConfig{Limit: -1,
+		utils.CacheSharedGroups: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheAliases: &CacheParamConfig{Limit: -1,
+		utils.CacheAliases: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheReverseAliases: &CacheParamConfig{Limit: -1,
+		utils.CacheReverseAliases: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheDerivedChargers: &CacheParamConfig{Limit: -1,
+		utils.CacheDerivedChargers: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheTimings: &CacheParamConfig{Limit: -1,
+		utils.CacheTimings: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheResourceProfiles: &CacheParamConfig{Limit: -1,
+		utils.CacheResourceProfiles: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheResources: &CacheParamConfig{Limit: -1,
+		utils.CacheResources: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheEventResources: &CacheParamConfig{Limit: -1,
+		utils.CacheEventResources: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(1 * time.Minute), StaticTTL: false},
-		utils.CacheStatQueueProfiles: &CacheParamConfig{Limit: -1,
+		utils.CacheStatQueueProfiles: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(1 * time.Minute), StaticTTL: false, Precache: false},
-		utils.CacheStatQueues: &CacheParamConfig{Limit: -1,
+		utils.CacheStatQueues: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(1 * time.Minute), StaticTTL: false, Precache: false},
-		utils.CacheThresholdProfiles: &CacheParamConfig{Limit: -1,
+		utils.CacheThresholdProfiles: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheThresholds: &CacheParamConfig{Limit: -1,
+		utils.CacheThresholds: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheFilters: &CacheParamConfig{Limit: -1,
+		utils.CacheFilters: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheSupplierProfiles: &CacheParamConfig{Limit: -1,
+		utils.CacheSupplierProfiles: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheAttributeProfiles: &CacheParamConfig{Limit: -1,
+		utils.CacheAttributeProfiles: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheChargerProfiles: &CacheParamConfig{Limit: -1,
+		utils.CacheChargerProfiles: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheResourceFilterIndexes: &CacheParamConfig{Limit: -1,
+		utils.CacheResourceFilterIndexes: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheStatFilterIndexes: &CacheParamConfig{Limit: -1,
+		utils.CacheStatFilterIndexes: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheThresholdFilterIndexes: &CacheParamConfig{Limit: -1,
+		utils.CacheThresholdFilterIndexes: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheSupplierFilterIndexes: &CacheParamConfig{Limit: -1,
+		utils.CacheSupplierFilterIndexes: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheAttributeFilterIndexes: &CacheParamConfig{Limit: -1,
+		utils.CacheAttributeFilterIndexes: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheChargerFilterIndexes: &CacheParamConfig{Limit: -1,
+		utils.CacheChargerFilterIndexes: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 	}
 
@@ -1018,23 +1018,23 @@ func TestCgrCfgJSONDefaultsSureTax(t *testing.T) {
 }
 
 func TestCgrCfgJSONDefaultsHTTP(t *testing.T) {
-	if cgrCfg.HTTPJsonRPCURL != "/jsonrpc" {
-		t.Error(cgrCfg.HTTPJsonRPCURL)
+	if cgrCfg.HTTPCfg().HTTPJsonRPCURL != "/jsonrpc" {
+		t.Errorf("expecting: /jsonrpc , received: %+v", cgrCfg.HTTPCfg().HTTPJsonRPCURL)
 	}
-	if cgrCfg.HTTPWSURL != "/ws" {
-		t.Error(cgrCfg.HTTPWSURL)
+	if cgrCfg.HTTPCfg().HTTPWSURL != "/ws" {
+		t.Errorf("expecting: /ws , received: %+v", cgrCfg.HTTPCfg().HTTPWSURL)
 	}
-	if cgrCfg.HTTPFreeswitchCDRsURL != "/freeswitch_json" {
-		t.Error(cgrCfg.HTTPFreeswitchCDRsURL)
+	if cgrCfg.HTTPCfg().HTTPFreeswitchCDRsURL != "/freeswitch_json" {
+		t.Errorf("expecting: /freeswitch_json , received: %+v", cgrCfg.HTTPCfg().HTTPFreeswitchCDRsURL)
 	}
-	if cgrCfg.HTTPCDRsURL != "/cdr_http" {
-		t.Error(cgrCfg.HTTPCDRsURL)
+	if cgrCfg.HTTPCfg().HTTPCDRsURL != "/cdr_http" {
+		t.Errorf("expecting: /cdr_http , received: %+v", cgrCfg.HTTPCfg().HTTPCDRsURL)
 	}
-	if cgrCfg.HTTPUseBasicAuth != false {
-		t.Error(cgrCfg.HTTPUseBasicAuth)
+	if cgrCfg.HTTPCfg().HTTPUseBasicAuth != false {
+		t.Errorf("expecting: false , received: %+v", cgrCfg.HTTPCfg().HTTPUseBasicAuth)
 	}
-	if !reflect.DeepEqual(cgrCfg.HTTPAuthUsers, map[string]string{}) {
-		t.Error(cgrCfg.HTTPAuthUsers)
+	if !reflect.DeepEqual(cgrCfg.HTTPCfg().HTTPAuthUsers, map[string]string{}) {
+		t.Errorf("expecting: %+v , received: %+v", map[string]string{}, cgrCfg.HTTPCfg().HTTPAuthUsers)
 	}
 }
 

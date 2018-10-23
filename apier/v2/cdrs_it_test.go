@@ -102,7 +102,7 @@ func testV2CDRsStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testV2CDRsRpcConn(t *testing.T) {
-	cdrsRpc, err = jsonrpc.Dial("tcp", cdrsCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrsRpc, err = jsonrpc.Dial("tcp", cdrsCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -206,7 +206,7 @@ func testV2CDRsRateCDRs(t *testing.T) {
 		Direction: "*out",
 		Subject:   "SUPPLIER1",
 		RatingPlanActivations: []*utils.TPRatingActivation{
-			&utils.TPRatingActivation{
+			{
 				ActivationTime: "2018-01-01T00:00:00Z",
 				RatingPlanId:   "RP_ANY2CNT"}},
 		Overwrite: true}

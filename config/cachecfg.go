@@ -25,14 +25,14 @@ import (
 	"github.com/cgrates/ltcache"
 )
 
-type CacheParamConfig struct {
+type CacheParamCfg struct {
 	Limit     int
 	TTL       time.Duration
 	StaticTTL bool
 	Precache  bool
 }
 
-func (self *CacheParamConfig) loadFromJsonCfg(jsnCfg *CacheParamJsonCfg) error {
+func (self *CacheParamCfg) loadFromJsonCfg(jsnCfg *CacheParamJsonCfg) error {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -54,14 +54,14 @@ func (self *CacheParamConfig) loadFromJsonCfg(jsnCfg *CacheParamJsonCfg) error {
 	return nil
 }
 
-type CacheConfig map[string]*CacheParamConfig
+type CacheCfg map[string]*CacheParamCfg
 
-func (self CacheConfig) loadFromJsonCfg(jsnCfg *CacheJsonCfg) (err error) {
+func (self CacheCfg) loadFromJsonCfg(jsnCfg *CacheJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
 	for kJsn, vJsn := range *jsnCfg {
-		val := new(CacheParamConfig)
+		val := new(CacheParamCfg)
 		if err := val.loadFromJsonCfg(vJsn); err != nil {
 			return err
 		}
@@ -70,7 +70,7 @@ func (self CacheConfig) loadFromJsonCfg(jsnCfg *CacheJsonCfg) (err error) {
 	return nil
 }
 
-func (cCfg CacheConfig) AsTransCacheConfig() (tcCfg map[string]*ltcache.CacheConfig) {
+func (cCfg CacheCfg) AsTransCacheConfig() (tcCfg map[string]*ltcache.CacheConfig) {
 	tcCfg = make(map[string]*ltcache.CacheConfig, len(cCfg))
 	for k, cPcfg := range cCfg {
 		tcCfg[k] = &ltcache.CacheConfig{

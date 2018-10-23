@@ -69,7 +69,7 @@ func TestActionsitStartEngine(t *testing.T) {
 func TestActionsitRpcConn(t *testing.T) {
 	var err error
 	time.Sleep(500 * time.Millisecond)
-	actsLclRpc, err = jsonrpc.Dial("tcp", actsLclCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	actsLclRpc, err = jsonrpc.Dial("tcp", actsLclCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -84,8 +84,8 @@ func TestActionsitSetCdrlogDebit(t *testing.T) {
 		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
 	}
 	attrsAA := &utils.AttrSetActions{ActionsId: "ACTS_1", Actions: []*utils.TPAction{
-		&utils.TPAction{Identifier: DEBIT, BalanceType: utils.MONETARY, Units: "5", ExpiryTime: UNLIMITED, Weight: 20.0},
-		&utils.TPAction{Identifier: CDRLOG},
+		{Identifier: DEBIT, BalanceType: utils.MONETARY, Units: "5", ExpiryTime: UNLIMITED, Weight: 20.0},
+		{Identifier: CDRLOG},
 	}}
 	if err := actsLclRpc.Call("ApierV2.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
@@ -127,8 +127,8 @@ func TestActionsitSetCdrlogTopup(t *testing.T) {
 		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
 	}
 	attrsAA := &utils.AttrSetActions{ActionsId: "ACTS_2", Actions: []*utils.TPAction{
-		&utils.TPAction{Identifier: TOPUP, BalanceType: utils.MONETARY, Units: "5", ExpiryTime: UNLIMITED, Weight: 20.0},
-		&utils.TPAction{Identifier: CDRLOG},
+		{Identifier: TOPUP, BalanceType: utils.MONETARY, Units: "5", ExpiryTime: UNLIMITED, Weight: 20.0},
+		{Identifier: CDRLOG},
 	}}
 	if err := actsLclRpc.Call("ApierV2.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
@@ -165,9 +165,9 @@ func TestActionsitCdrlogEmpty(t *testing.T) {
 	var reply string
 	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan2904"}
 	attrsAA := &utils.AttrSetActions{ActionsId: "ACTS_3", Actions: []*utils.TPAction{
-		&utils.TPAction{Identifier: DEBIT, BalanceType: utils.MONETARY, DestinationIds: "RET",
+		{Identifier: DEBIT, BalanceType: utils.MONETARY, DestinationIds: "RET",
 			Units: "5", ExpiryTime: UNLIMITED, Weight: 20.0},
-		&utils.TPAction{Identifier: CDRLOG},
+		{Identifier: CDRLOG},
 	}}
 	if err := actsLclRpc.Call("ApierV2.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
@@ -200,11 +200,11 @@ func TestActionsitCdrlogWithParams(t *testing.T) {
 	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan2904"}
 	attrsAA := &utils.AttrSetActions{ActionsId: "ACTS_4",
 		Actions: []*utils.TPAction{
-			&utils.TPAction{Identifier: DEBIT, BalanceType: utils.MONETARY,
+			{Identifier: DEBIT, BalanceType: utils.MONETARY,
 				DestinationIds: "RET", Units: "25", ExpiryTime: UNLIMITED, Weight: 20.0},
-			&utils.TPAction{Identifier: CDRLOG,
+			{Identifier: CDRLOG,
 				ExtraParameters: `{"RequestType":"*pseudoprepaid","Subject":"DifferentThanAccount", "ToR":"~ActionType:s/^\\*(.*)$/did_$1/"}`},
-			&utils.TPAction{Identifier: DEBIT_RESET, BalanceType: utils.MONETARY,
+			{Identifier: DEBIT_RESET, BalanceType: utils.MONETARY,
 				DestinationIds: "RET", Units: "25", ExpiryTime: UNLIMITED, Weight: 20.0},
 		},
 	}
