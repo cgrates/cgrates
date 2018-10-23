@@ -80,22 +80,22 @@ func testTLSStartEngine(t *testing.T) {
 
 func testTLSRpcConn(t *testing.T) {
 	var err error
-	tlsRpcClientJson, err = rpcclient.NewRpcClient("tcp", "localhost:2022", tlsCfg.TLSClientKey,
-		tlsCfg.TLSClientCerificate, 3, 3,
+	tlsRpcClientJson, err = rpcclient.NewRpcClient("tcp", "localhost:2022", tlsCfg.TlsCfg().ClientKey,
+		tlsCfg.TlsCfg().ClientCerificate, tlsCfg.TlsCfg().CaCertificate, 3, 3,
 		time.Duration(1*time.Second), time.Duration(5*time.Minute), utils.JSON, nil, false)
 	if err != nil {
 		t.Errorf("Error: %s when dialing", err)
 	}
 
-	tlsRpcClientGob, err = rpcclient.NewRpcClient("tcp", "localhost:2023", tlsCfg.TLSClientKey,
-		tlsCfg.TLSClientCerificate, 3, 3,
+	tlsRpcClientGob, err = rpcclient.NewRpcClient("tcp", "localhost:2023", tlsCfg.TlsCfg().ClientKey,
+		tlsCfg.TlsCfg().ClientCerificate, tlsCfg.TlsCfg().CaCertificate, 3, 3,
 		time.Duration(1*time.Second), time.Duration(5*time.Minute), utils.GOB, nil, false)
 	if err != nil {
 		t.Errorf("Error: %s when dialing", err)
 	}
 
-	tlsHTTPJson, err = rpcclient.NewRpcClient("tcp", "https://localhost:2280/jsonrpc", tlsCfg.TLSClientKey,
-		tlsCfg.TLSClientCerificate, 3, 3,
+	tlsHTTPJson, err = rpcclient.NewRpcClient("tcp", "https://localhost:2280/jsonrpc", tlsCfg.TlsCfg().ClientKey,
+		tlsCfg.TlsCfg().ClientCerificate, tlsCfg.TlsCfg().CaCertificate, 3, 3,
 		time.Duration(1*time.Second), time.Duration(5*time.Minute), rpcclient.JSON_HTTP, nil, false)
 	if err != nil {
 		t.Errorf("Error: %s when dialing", err)

@@ -67,10 +67,10 @@ func (fS *FilterS) connStatS() (err error) {
 		return
 	}
 	fS.statSConns, err = NewRPCPool(rpcclient.POOL_FIRST,
-		fS.cfg.TLSClientKey, fS.cfg.TLSClientCerificate,
-		fS.cfg.GeneralCfg().ConnectAttempts, fS.cfg.GeneralCfg().Reconnects,
-		fS.cfg.GeneralCfg().ConnectTimeout, fS.cfg.GeneralCfg().ReplyTimeout,
-		fS.cfg.FilterSCfg().StatSConns,
+		fS.cfg.TlsCfg().ClientKey, fS.cfg.TlsCfg().ClientCerificate,
+		fS.cfg.TlsCfg().CaCertificate, fS.cfg.GeneralCfg().ConnectAttempts,
+		fS.cfg.GeneralCfg().Reconnects, fS.cfg.GeneralCfg().ConnectTimeout,
+		fS.cfg.GeneralCfg().ReplyTimeout, fS.cfg.FilterSCfg().StatSConns,
 		fS.statSChan, fS.cfg.GeneralCfg().InternalTtl)
 	return
 }

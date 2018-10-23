@@ -66,7 +66,8 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 			defer close(thdsTaskChan)
 			var err error
 			thdS, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
-				cfg.TLSClientKey, cfg.TLSClientCerificate,
+				cfg.TlsCfg().ClientKey,
+				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 				cfg.RALsThresholdSConns, internalThdSChan,
@@ -87,7 +88,8 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 			defer close(cdrstatTaskChan)
 			var err error
 			cdrStats, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
-				cfg.TLSClientKey, cfg.TLSClientCerificate,
+				cfg.TlsCfg().ClientKey,
+				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 				cfg.RALsCDRStatSConns, internalCdrStatSChan,
@@ -108,7 +110,8 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 			defer close(statsTaskChan)
 			var err error
 			stats, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
-				cfg.TLSClientKey, cfg.TLSClientCerificate,
+				cfg.TlsCfg().ClientKey,
+				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 				cfg.RALsStatSConns, internalStatSChan,
@@ -127,7 +130,8 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		go func() {
 			defer close(pubsubTaskChan)
 			if pubSubSConns, err := engine.NewRPCPool(rpcclient.POOL_FIRST,
-				cfg.TLSClientKey, cfg.TLSClientCerificate,
+				cfg.TlsCfg().ClientKey,
+				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 				cfg.RALsPubSubSConns, internalPubSubSChan,
@@ -147,7 +151,8 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		go func() {
 			defer close(aliasesTaskChan)
 			if aliaseSCons, err := engine.NewRPCPool(rpcclient.POOL_FIRST,
-				cfg.TLSClientKey, cfg.TLSClientCerificate,
+				cfg.TlsCfg().ClientKey,
+				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 				cfg.RALsAliasSConns, internalAliaseSChan,
@@ -169,7 +174,8 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 			defer close(usersTaskChan)
 			var err error
 			if usersConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
-				cfg.TLSClientKey, cfg.TLSClientCerificate,
+				cfg.TlsCfg().ClientKey,
+				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 				cfg.RALsUserSConns, internalUserSChan,

@@ -20,11 +20,11 @@ package utils
 
 import (
 	"bytes"
-	"crypto/rand"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -291,37 +291,54 @@ func (r *rpcRequest) Call() io.Reader {
 	return r.rw
 }
 
-func loadTLSConfig(serverCrt, serverKey string) (config tls.Config, err error) {
+func loadTLSConfig(serverCrt, serverKey, caCert string, serverPolicy int,
+	serverName string) (config tls.Config, err error) {
 	cert, err := tls.LoadX509KeyPair(serverCrt, serverKey)
 	if err != nil {
 		log.Fatalf("Error: %s when load server keys", err)
 	}
-	if len(cert.Certificate) != 2 {
-		log.Fatalf("%s should have 2 concatenated certificates: server + CA", serverCrt)
-	}
-	ca, err := x509.ParseCertificate(cert.Certificate[1])
+	rootCAs, err := x509.SystemCertPool()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error: %s when load SystemCertPool", err)
+		return
 	}
-	certPool := x509.NewCertPool()
-	certPool.AddCert(ca)
+	if rootCAs == nil {
+		rootCAs = x509.NewCertPool()
+	}
+
+	if caCert != "" {
+		ca, err := ioutil.ReadFile(caCert)
+		if err != nil {
+			log.Fatalf("Error: %s when read CA", err)
+			return config, err
+		}
+
+		if ok := rootCAs.AppendCertsFromPEM(ca); !ok {
+			log.Fatalf("Cannot append certificate authority")
+			return config, err
+		}
+	}
+
 	config = tls.Config{
 		Certificates: []tls.Certificate{cert},
-		ClientAuth:   tls.RequireAndVerifyClientCert,
-		ClientCAs:    certPool,
+		ClientAuth:   tls.ClientAuthType(serverPolicy),
+		ClientCAs:    rootCAs,
 	}
-	config.Rand = rand.Reader
+	if serverName != "" {
+		config.ServerName = serverName
+	}
 	return
 }
 
-func (s *Server) ServeGOBTLS(addr, serverCrt, serverKey string) {
+func (s *Server) ServeGOBTLS(addr, serverCrt, serverKey, caCert string,
+	serverPolicy int, serverName string) {
 	s.RLock()
 	enabled := s.rpcEnabled
 	s.RUnlock()
 	if !enabled {
 		return
 	}
-	config, err := loadTLSConfig(serverCrt, serverKey)
+	config, err := loadTLSConfig(serverCrt, serverKey, caCert, serverPolicy, serverName)
 	if err != nil {
 		return
 	}
@@ -354,14 +371,15 @@ func (s *Server) ServeGOBTLS(addr, serverCrt, serverKey string) {
 	}
 }
 
-func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey string) {
+func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey, caCert string,
+	serverPolicy int, serverName string) {
 	s.RLock()
 	enabled := s.rpcEnabled
 	s.RUnlock()
 	if !enabled {
 		return
 	}
-	config, err := loadTLSConfig(serverCrt, serverKey)
+	config, err := loadTLSConfig(serverCrt, serverKey, caCert, serverPolicy, serverName)
 	if err != nil {
 		return
 	}
@@ -392,7 +410,8 @@ func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey string) {
 	}
 }
 
-func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey string, jsonRPCURL string, wsRPCURL string,
+func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverPolicy int,
+	serverName string, jsonRPCURL string, wsRPCURL string,
 	useBasicAuth bool, userList map[string]string) {
 	s.RLock()
 	enabled := s.rpcEnabled
@@ -434,7 +453,7 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey string, jsonRPCURL stri
 	if useBasicAuth {
 		Logger.Info("<HTTPTLS> enabling basic auth")
 	}
-	config, err := loadTLSConfig(serverCrt, serverKey)
+	config, err := loadTLSConfig(serverCrt, serverKey, caCert, serverPolicy, serverName)
 	if err != nil {
 		return
 	}

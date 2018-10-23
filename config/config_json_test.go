@@ -170,16 +170,12 @@ func TestCacheJsonCfg(t *testing.T) {
 
 func TestDfListenJsonCfg(t *testing.T) {
 	eCfg := &ListenJsonCfg{
-		Rpc_json:               utils.StringPointer("127.0.0.1:2012"),
-		Rpc_gob:                utils.StringPointer("127.0.0.1:2013"),
-		Http:                   utils.StringPointer("127.0.0.1:2080"),
-		Rpc_json_tls:           utils.StringPointer("127.0.0.1:2022"),
-		Rpc_gob_tls:            utils.StringPointer("127.0.0.1:2023"),
-		Http_tls:               utils.StringPointer("127.0.0.1:2280"),
-		Tls_server_certificate: utils.StringPointer(""),
-		Tls_server_key:         utils.StringPointer(""),
-		Tls_client_certificate: utils.StringPointer(""),
-		Tls_client_key:         utils.StringPointer(""),
+		Rpc_json:     utils.StringPointer("127.0.0.1:2012"),
+		Rpc_gob:      utils.StringPointer("127.0.0.1:2013"),
+		Http:         utils.StringPointer("127.0.0.1:2080"),
+		Rpc_json_tls: utils.StringPointer("127.0.0.1:2022"),
+		Rpc_gob_tls:  utils.StringPointer("127.0.0.1:2023"),
+		Http_tls:     utils.StringPointer("127.0.0.1:2280"),
 	}
 	if cfg, err := dfCgrJsonCfg.ListenJsonCfg(); err != nil {
 		t.Error(err)
@@ -1391,6 +1387,23 @@ func TestDfMigratorCfg(t *testing.T) {
 		Out_storDB_password: utils.StringPointer(""),
 	}
 	if cfg, err := dfCgrJsonCfg.MigratorCfgJson(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
+	}
+}
+
+func TestDfTlsCfg(t *testing.T) {
+	eCfg := &TlsJsonCfg{
+		Server_certificate: utils.StringPointer(""),
+		Server_key:         utils.StringPointer(""),
+		Ca_certificate:     utils.StringPointer(""),
+		Client_certificate: utils.StringPointer(""),
+		Client_key:         utils.StringPointer(""),
+		Server_name:        utils.StringPointer(""),
+		Server_policy:      utils.IntPointer(4),
+	}
+	if cfg, err := dfCgrJsonCfg.TlsCfgJson(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
