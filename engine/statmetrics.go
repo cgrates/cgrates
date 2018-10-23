@@ -115,7 +115,7 @@ func (asr *StatASR) AddEvent(ev *utils.CGREvent) (err error) {
 	} else if !at.IsZero() {
 		answered = true
 	}
-	asr.Events[ev.TenantID()] = answered
+	asr.Events[ev.ID] = answered
 	asr.Count += 1
 	if answered {
 		asr.Answered += 1
@@ -124,8 +124,8 @@ func (asr *StatASR) AddEvent(ev *utils.CGREvent) (err error) {
 	return
 }
 
-func (asr *StatASR) RemEvent(evTenantID string) (err error) {
-	answered, has := asr.Events[evTenantID]
+func (asr *StatASR) RemEvent(evID string) (err error) {
+	answered, has := asr.Events[evID]
 	if !has {
 		return utils.ErrNotFound
 	}
@@ -133,7 +133,7 @@ func (asr *StatASR) RemEvent(evTenantID string) (err error) {
 		asr.Answered -= 1
 	}
 	asr.Count -= 1
-	delete(asr.Events, evTenantID)
+	delete(asr.Events, evID)
 	asr.val = nil
 	return
 }
@@ -209,14 +209,14 @@ func (acd *StatACD) AddEvent(ev *utils.CGREvent) (err error) {
 			acd.Sum += duration
 		}
 	}
-	acd.Events[ev.TenantID()] = value
+	acd.Events[ev.ID] = value
 	acd.Count += 1
 	acd.val = nil
 	return
 }
 
-func (acd *StatACD) RemEvent(evTenantID string) (err error) {
-	duration, has := acd.Events[evTenantID]
+func (acd *StatACD) RemEvent(evID string) (err error) {
+	duration, has := acd.Events[evID]
 	if !has {
 		return utils.ErrNotFound
 	}
@@ -224,7 +224,7 @@ func (acd *StatACD) RemEvent(evTenantID string) (err error) {
 		acd.Sum -= duration
 	}
 	acd.Count -= 1
-	delete(acd.Events, evTenantID)
+	delete(acd.Events, evID)
 	acd.val = nil
 	return
 }
@@ -298,14 +298,14 @@ func (tcd *StatTCD) AddEvent(ev *utils.CGREvent) (err error) {
 		}
 
 	}
-	tcd.Events[ev.TenantID()] = value
+	tcd.Events[ev.ID] = value
 	tcd.Count += 1
 	tcd.val = nil
 	return
 }
 
-func (tcd *StatTCD) RemEvent(evTenantID string) (err error) {
-	duration, has := tcd.Events[evTenantID]
+func (tcd *StatTCD) RemEvent(evID string) (err error) {
+	duration, has := tcd.Events[evID]
 	if !has {
 		return utils.ErrNotFound
 	}
@@ -313,7 +313,7 @@ func (tcd *StatTCD) RemEvent(evTenantID string) (err error) {
 		tcd.Sum -= duration
 	}
 	tcd.Count -= 1
-	delete(tcd.Events, evTenantID)
+	delete(tcd.Events, evID)
 	tcd.val = nil
 	return
 }
@@ -384,14 +384,14 @@ func (acc *StatACC) AddEvent(ev *utils.CGREvent) (err error) {
 			acc.Sum += cost
 		}
 	}
-	acc.Events[ev.TenantID()] = value
+	acc.Events[ev.ID] = value
 	acc.Count += 1
 	acc.val = nil
 	return
 }
 
-func (acc *StatACC) RemEvent(evTenantID string) (err error) {
-	cost, has := acc.Events[evTenantID]
+func (acc *StatACC) RemEvent(evID string) (err error) {
+	cost, has := acc.Events[evID]
 	if !has {
 		return utils.ErrNotFound
 	}
@@ -399,7 +399,7 @@ func (acc *StatACC) RemEvent(evTenantID string) (err error) {
 		acc.Sum -= cost
 	}
 	acc.Count -= 1
-	delete(acc.Events, evTenantID)
+	delete(acc.Events, evID)
 	acc.val = nil
 	return
 }
@@ -470,14 +470,14 @@ func (tcc *StatTCC) AddEvent(ev *utils.CGREvent) (err error) {
 			tcc.Sum += cost
 		}
 	}
-	tcc.Events[ev.TenantID()] = value
+	tcc.Events[ev.ID] = value
 	tcc.Count += 1
 	tcc.val = nil
 	return
 }
 
-func (tcc *StatTCC) RemEvent(evTenantID string) (err error) {
-	cost, has := tcc.Events[evTenantID]
+func (tcc *StatTCC) RemEvent(evID string) (err error) {
+	cost, has := tcc.Events[evID]
 	if !has {
 		return utils.ErrNotFound
 	}
@@ -485,7 +485,7 @@ func (tcc *StatTCC) RemEvent(evTenantID string) (err error) {
 		tcc.Sum -= cost
 	}
 	tcc.Count -= 1
-	delete(tcc.Events, evTenantID)
+	delete(tcc.Events, evID)
 	tcc.val = nil
 	return
 }
@@ -560,14 +560,14 @@ func (pdd *StatPDD) AddEvent(ev *utils.CGREvent) (err error) {
 			pdd.Sum += duration
 		}
 	}
-	pdd.Events[ev.TenantID()] = value
+	pdd.Events[ev.ID] = value
 	pdd.Count += 1
 	pdd.val = nil
 	return
 }
 
-func (pdd *StatPDD) RemEvent(evTenantID string) (err error) {
-	duration, has := pdd.Events[evTenantID]
+func (pdd *StatPDD) RemEvent(evID string) (err error) {
+	duration, has := pdd.Events[evID]
 	if !has {
 		return utils.ErrNotFound
 	}
@@ -575,7 +575,7 @@ func (pdd *StatPDD) RemEvent(evTenantID string) (err error) {
 		pdd.Sum -= duration
 	}
 	pdd.Count -= 1
-	delete(pdd.Events, evTenantID)
+	delete(pdd.Events, evID)
 	pdd.val = nil
 	return
 }
@@ -628,22 +628,22 @@ func (ddc *StatDDC) AddEvent(ev *utils.CGREvent) (err error) {
 	if _, has := ddc.Destinations[dest]; !has {
 		ddc.Destinations[dest] = make(map[string]bool)
 	}
-	ddc.Destinations[dest][ev.TenantID()] = true
-	ddc.Events[ev.TenantID()] = dest
+	ddc.Destinations[dest][ev.ID] = true
+	ddc.Events[ev.ID] = dest
 	return
 }
 
-func (ddc *StatDDC) RemEvent(evTenantID string) (err error) {
-	destination, has := ddc.Events[evTenantID]
+func (ddc *StatDDC) RemEvent(evID string) (err error) {
+	destination, has := ddc.Events[evID]
 	if !has {
 		return utils.ErrNotFound
 	}
-	delete(ddc.Events, evTenantID)
+	delete(ddc.Events, evID)
 	if len(ddc.Destinations[destination]) == 1 {
 		delete(ddc.Destinations, destination)
 		return
 	}
-	delete(ddc.Destinations[destination], evTenantID)
+	delete(ddc.Destinations[destination], evID)
 	return
 }
 
@@ -705,20 +705,20 @@ func (sum *StatSum) AddEvent(ev *utils.CGREvent) (err error) {
 		value = val
 		sum.Sum += val
 	}
-	sum.Events[ev.TenantID()] = value
+	sum.Events[ev.ID] = value
 	sum.val = nil
 	return
 }
 
-func (sum *StatSum) RemEvent(evTenantID string) (err error) {
-	val, has := sum.Events[evTenantID]
+func (sum *StatSum) RemEvent(evID string) (err error) {
+	val, has := sum.Events[evID]
 	if !has {
 		return utils.ErrNotFound
 	}
 	if val != 0 {
 		sum.Sum -= val
 	}
-	delete(sum.Events, evTenantID)
+	delete(sum.Events, evID)
 	sum.val = nil
 	return
 }
@@ -784,15 +784,15 @@ func (avg *StatAverage) AddEvent(ev *utils.CGREvent) (err error) {
 	} else if val > 0 {
 		value = val
 		avg.Sum += val
-		avg.Events[ev.TenantID()] = value
+		avg.Events[ev.ID] = value
 		avg.Count += 1
 		avg.val = nil
 	}
 	return
 }
 
-func (avg *StatAverage) RemEvent(evTenantID string) (err error) {
-	val, has := avg.Events[evTenantID]
+func (avg *StatAverage) RemEvent(evID string) (err error) {
+	val, has := avg.Events[evID]
 	if !has {
 		return utils.ErrNotFound
 	}
@@ -800,7 +800,7 @@ func (avg *StatAverage) RemEvent(evTenantID string) (err error) {
 		avg.Sum -= val
 	}
 	avg.Count -= 1
-	delete(avg.Events, evTenantID)
+	delete(avg.Events, evID)
 	avg.val = nil
 	return
 }
