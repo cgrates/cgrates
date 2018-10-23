@@ -121,7 +121,7 @@ func testV1SplSStartEngine(t *testing.T) {
 
 func testV1SplSRpcConn(t *testing.T) {
 	var err error
-	splSv1Rpc, err = jsonrpc.Dial("tcp", splSv1Cfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	splSv1Rpc, err = jsonrpc.Dial("tcp", splSv1Cfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -151,13 +151,13 @@ func testV1SplSGetWeightSuppliers(t *testing.T) {
 		ProfileID: "SPL_WEIGHT_1",
 		Sorting:   utils.MetaWeight,
 		SortedSuppliers: []*engine.SortedSupplier{
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier2",
 				SortingData: map[string]interface{}{
 					utils.Weight: 20.0,
 				},
 			},
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
 					utils.Weight: 10.0,
@@ -193,7 +193,7 @@ func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 		ProfileID: "SPL_LEASTCOST_1",
 		Sorting:   utils.MetaLeastCost,
 		SortedSuppliers: []*engine.SortedSupplier{
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier3",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.0136,
@@ -201,7 +201,7 @@ func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 					utils.Weight:       15.0,
 				},
 			},
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.0136,
@@ -209,7 +209,7 @@ func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 					utils.Weight:       10.0,
 				},
 			},
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier2",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.46666,
@@ -248,7 +248,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost(t *testing.T) {
 		ProfileID: "SPL_LEASTCOST_1",
 		Sorting:   utils.MetaLeastCost,
 		SortedSuppliers: []*engine.SortedSupplier{
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier3",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.0136,
@@ -256,7 +256,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost(t *testing.T) {
 					utils.Weight:       15.0,
 				},
 			},
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.0136,
@@ -318,7 +318,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost2(t *testing.T) {
 		ProfileID: "SPL_LEASTCOST_1",
 		Sorting:   utils.MetaLeastCost,
 		SortedSuppliers: []*engine.SortedSupplier{
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier3",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.1054,
@@ -326,7 +326,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost2(t *testing.T) {
 					utils.Weight:       15.0,
 				},
 			},
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.1054,
@@ -364,7 +364,7 @@ func testV1SplSGetHighestCostSuppliers(t *testing.T) {
 		ProfileID: "SPL_HIGHESTCOST_1",
 		Sorting:   utils.MetaHighestCost,
 		SortedSuppliers: []*engine.SortedSupplier{
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier2",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.46666,
@@ -372,7 +372,7 @@ func testV1SplSGetHighestCostSuppliers(t *testing.T) {
 					utils.Weight:       20.0,
 				},
 			},
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier3",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.0136,
@@ -380,7 +380,7 @@ func testV1SplSGetHighestCostSuppliers(t *testing.T) {
 					utils.Weight:       15.0,
 				},
 			},
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
 					utils.Cost:         0.0136,
@@ -560,7 +560,7 @@ func testV1SplSGetQOSSuppliers(t *testing.T) {
 		ProfileID: "SPL_QOS_1",
 		Sorting:   utils.MetaQOS,
 		SortedSuppliers: []*engine.SortedSupplier{
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
 					"*acd:Stat_1":   11.0,
@@ -572,7 +572,7 @@ func testV1SplSGetQOSSuppliers(t *testing.T) {
 					utils.Weight:    10.0,
 				},
 			},
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier3",
 				SortingData: map[string]interface{}{
 					"*acd:Stat_3": 11.0,
@@ -582,7 +582,7 @@ func testV1SplSGetQOSSuppliers(t *testing.T) {
 				},
 			},
 
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier2",
 				SortingData: map[string]interface{}{
 					"*acd:Stat_2": 5.5,
@@ -617,7 +617,7 @@ func testV1SplSGetQOSSuppliers2(t *testing.T) {
 		ProfileID: "SPL_QOS_2",
 		Sorting:   utils.MetaQOS,
 		SortedSuppliers: []*engine.SortedSupplier{
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier3",
 				SortingData: map[string]interface{}{
 					"*acd:Stat_3": 11.0,
@@ -626,7 +626,7 @@ func testV1SplSGetQOSSuppliers2(t *testing.T) {
 					utils.Weight:  35.0,
 				},
 			},
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier2",
 				SortingData: map[string]interface{}{
 					"*acd:Stat_2": 5.5,
@@ -635,7 +635,7 @@ func testV1SplSGetQOSSuppliers2(t *testing.T) {
 					utils.Weight:  20.0,
 				},
 			},
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
 					"*acd:Stat_1":   11.0,
@@ -673,7 +673,7 @@ func testV1SplSGetQOSSuppliers3(t *testing.T) {
 		ProfileID: "SPL_QOS_3",
 		Sorting:   utils.MetaQOS,
 		SortedSuppliers: []*engine.SortedSupplier{
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
 					"*acd:Stat_1":   11.0,
@@ -685,7 +685,7 @@ func testV1SplSGetQOSSuppliers3(t *testing.T) {
 					utils.Weight:    10.0,
 				},
 			},
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier3",
 				SortingData: map[string]interface{}{
 					"*acd:Stat_3": 11.0,
@@ -694,7 +694,7 @@ func testV1SplSGetQOSSuppliers3(t *testing.T) {
 					utils.Weight:  35.0,
 				},
 			},
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier2",
 				SortingData: map[string]interface{}{
 					"*acd:Stat_2": 5.5,
@@ -729,7 +729,7 @@ func testV1SplSGetQOSSuppliersFiltred(t *testing.T) {
 		ProfileID: "SPL_QOS_FILTRED",
 		Sorting:   utils.MetaQOS,
 		SortedSuppliers: []*engine.SortedSupplier{
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
 					"*acd:Stat_1":   11.0,
@@ -741,7 +741,7 @@ func testV1SplSGetQOSSuppliersFiltred(t *testing.T) {
 					utils.Weight:    10.0,
 				},
 			},
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier3",
 				SortingData: map[string]interface{}{
 					"*acd:Stat_3": 11.0,
@@ -780,7 +780,7 @@ func testV1SplSGetQOSSuppliersFiltred2(t *testing.T) {
 		ProfileID: "SPL_QOS_FILTRED2",
 		Sorting:   utils.MetaQOS,
 		SortedSuppliers: []*engine.SortedSupplier{
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier3",
 				SortingData: map[string]interface{}{
 					"*acd:Stat_3": 11.0,
@@ -789,7 +789,7 @@ func testV1SplSGetQOSSuppliersFiltred2(t *testing.T) {
 					utils.Weight:  35.0,
 				},
 			},
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier2",
 				SortingData: map[string]interface{}{
 					"*acd:Stat_2":      5.5,
@@ -827,7 +827,7 @@ func testV1SplSGetSupplierWithoutFilter(t *testing.T) {
 		ProfileID: "SPL_WEIGHT_2",
 		Sorting:   utils.MetaWeight,
 		SortedSuppliers: []*engine.SortedSupplier{
-			&engine.SortedSupplier{
+			{
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
 					utils.Weight: 10.0,
@@ -859,7 +859,7 @@ func testV1SplSSetSupplierProfiles(t *testing.T) {
 		Sorting:           "Sort1",
 		SortingParameters: []string{"Param1", "Param2"},
 		Suppliers: []*engine.Supplier{
-			&engine.Supplier{
+			{
 				ID:                 "SPL1",
 				RatingPlanIDs:      []string{"RP1"},
 				FilterIDs:          []string{"FLTR_1"},
@@ -900,7 +900,7 @@ func testV1SplSGetSupplierProfileIDs(t *testing.T) {
 
 func testV1SplSUpdateSupplierProfiles(t *testing.T) {
 	splPrf.Suppliers = []*engine.Supplier{
-		&engine.Supplier{
+		{
 			ID:                 "SPL1",
 			RatingPlanIDs:      []string{"RP1"},
 			FilterIDs:          []string{"FLTR_1"},
@@ -911,7 +911,7 @@ func testV1SplSUpdateSupplierProfiles(t *testing.T) {
 			Blocker:            false,
 			SupplierParameters: "SortingParameter1",
 		},
-		&engine.Supplier{
+		{
 			ID:                 "SPL2",
 			RatingPlanIDs:      []string{"RP2"},
 			FilterIDs:          []string{"FLTR_2"},
@@ -924,7 +924,7 @@ func testV1SplSUpdateSupplierProfiles(t *testing.T) {
 		},
 	}
 	reverseSuppliers := []*engine.Supplier{
-		&engine.Supplier{
+		{
 			ID:                 "SPL2",
 			RatingPlanIDs:      []string{"RP2"},
 			FilterIDs:          []string{"FLTR_2"},
@@ -935,7 +935,7 @@ func testV1SplSUpdateSupplierProfiles(t *testing.T) {
 			Blocker:            true,
 			SupplierParameters: "SortingParameter2",
 		},
-		&engine.Supplier{
+		{
 			ID:                 "SPL1",
 			RatingPlanIDs:      []string{"RP1"},
 			FilterIDs:          []string{"FLTR_1"},

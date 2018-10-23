@@ -33,12 +33,12 @@ var rsponder *Responder
 func init() {
 	cfg, _ := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
-	rsponder = &Responder{MaxComputedUsage: cfg.RALsMaxComputedUsage}
+	rsponder = &Responder{MaxComputedUsage: cfg.RalsCfg().RALsMaxComputedUsage}
 }
 
 // Test internal abilites of GetDerivedChargers
 func TestResponderGetDerivedChargers(t *testing.T) {
-	cfgedDC := &utils.DerivedChargers{DestinationIDs: utils.StringMap{}, Chargers: []*utils.DerivedCharger{&utils.DerivedCharger{RunID: "responder1",
+	cfgedDC := &utils.DerivedChargers{DestinationIDs: utils.StringMap{}, Chargers: []*utils.DerivedCharger{{RunID: "responder1",
 		RequestTypeField: utils.META_DEFAULT, DirectionField: "test", TenantField: "test",
 		CategoryField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", UsageField: "test"}}}
 	attrs := &utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "responder_test", Subject: "responder_test"}
@@ -83,9 +83,9 @@ func TestResponderGetDerivedMaxSessionTime(t *testing.T) {
 		Weight: 10, DestinationIDs: utils.NewStringMap("DE_TMOBILE")}
 	rifsAccount := &Account{ID: utils.ConcatenatedKey(testTenant, "rif"),
 		BalanceMap: map[string]Balances{
-			utils.VOICE: Balances{b10}}}
+			utils.VOICE: {b10}}}
 	dansAccount := &Account{ID: utils.ConcatenatedKey(testTenant, "dan"),
-		BalanceMap: map[string]Balances{utils.VOICE: Balances{b20}}}
+		BalanceMap: map[string]Balances{utils.VOICE: {b20}}}
 	if err := dm.DataDB().SetAccount(rifsAccount); err != nil {
 		t.Error(err)
 	}
@@ -94,11 +94,11 @@ func TestResponderGetDerivedMaxSessionTime(t *testing.T) {
 	}
 	keyCharger1 := utils.ConcatenatedKey("*out", testTenant, "call", "dan", "dan")
 	charger1 := &utils.DerivedChargers{Chargers: []*utils.DerivedCharger{
-		&utils.DerivedCharger{RunID: "extra1", RequestTypeField: "^" + utils.META_PREPAID, DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+		{RunID: "extra1", RequestTypeField: "^" + utils.META_PREPAID, DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "^dan", SubjectField: "^dan", DestinationField: "^+49151708707", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
-		&utils.DerivedCharger{RunID: "extra2", RequestTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+		{RunID: "extra2", RequestTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "^ivo", SubjectField: "^ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
-		&utils.DerivedCharger{RunID: "extra3", RequestTypeField: "^" + utils.META_PSEUDOPREPAID, DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+		{RunID: "extra3", RequestTypeField: "^" + utils.META_PSEUDOPREPAID, DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "^rif", SubjectField: "^rif", DestinationField: "^+49151708707", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
 	}}
 	if err := dm.DataDB().SetDerivedChargers(keyCharger1, charger1, utils.NonTransactional); err != nil {
@@ -179,7 +179,7 @@ func TestResponderGetSessionRuns(t *testing.T) {
 	}
 	sesRuns := make([]*SessionRun, 0)
 	eSRuns := []*SessionRun{
-		&SessionRun{RequestType: utils.META_PREPAID,
+		{RequestType: utils.META_PREPAID,
 			DerivedCharger: extra1DC,
 			CallDescriptor: &CallDescriptor{
 				CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
@@ -188,7 +188,7 @@ func TestResponderGetSessionRuns(t *testing.T) {
 				Destination: "0256", TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 				TimeEnd: time.Date(2013, 11, 7, 8, 42, 36, 0, time.UTC), TOR: utils.VOICE,
 				ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}},
-		&SessionRun{RequestType: utils.META_PREPAID,
+		{RequestType: utils.META_PREPAID,
 			DerivedCharger: extra2DC,
 			CallDescriptor: &CallDescriptor{
 				CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
@@ -197,7 +197,7 @@ func TestResponderGetSessionRuns(t *testing.T) {
 				TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 				TimeEnd:   time.Date(2013, 11, 7, 8, 42, 36, 0, time.UTC), TOR: utils.VOICE,
 				ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}},
-		&SessionRun{RequestType: utils.META_PSEUDOPREPAID,
+		{RequestType: utils.META_PSEUDOPREPAID,
 			DerivedCharger: extra3DC,
 			CallDescriptor: &CallDescriptor{
 				CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
@@ -206,7 +206,7 @@ func TestResponderGetSessionRuns(t *testing.T) {
 				TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 				TimeEnd:   time.Date(2013, 11, 7, 8, 42, 36, 0, time.UTC), TOR: utils.VOICE,
 				ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}},
-		&SessionRun{RequestType: utils.META_PREPAID,
+		{RequestType: utils.META_PREPAID,
 			DerivedCharger: dfDC,
 			CallDescriptor: &CallDescriptor{
 				CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
@@ -234,7 +234,7 @@ func TestResponderGetLCR(t *testing.T) {
 	rp1 := &RatingPlan{
 		Id: "RP1",
 		Timings: map[string]*RITiming{
-			"30eab300": &RITiming{
+			"30eab300": {
 				Years:     utils.Years{},
 				Months:    utils.Months{},
 				MonthDays: utils.MonthDays{},
@@ -243,10 +243,10 @@ func TestResponderGetLCR(t *testing.T) {
 			},
 		},
 		Ratings: map[string]*RIRate{
-			"b457f86d": &RIRate{
+			"b457f86d": {
 				ConnectFee: 0,
 				Rates: []*Rate{
-					&Rate{
+					{
 						GroupIntervalStart: 0,
 						Value:              0.01,
 						RateIncrement:      time.Second,
@@ -259,7 +259,7 @@ func TestResponderGetLCR(t *testing.T) {
 		},
 		DestinationRates: map[string]RPRateList{
 			dstDe.Id: []*RPRate{
-				&RPRate{
+				{
 					Timing: "30eab300",
 					Rating: "b457f86d",
 					Weight: 10,
@@ -270,7 +270,7 @@ func TestResponderGetLCR(t *testing.T) {
 	rp2 := &RatingPlan{
 		Id: "RP2",
 		Timings: map[string]*RITiming{
-			"30eab300": &RITiming{
+			"30eab300": {
 				Years:     utils.Years{},
 				Months:    utils.Months{},
 				MonthDays: utils.MonthDays{},
@@ -279,10 +279,10 @@ func TestResponderGetLCR(t *testing.T) {
 			},
 		},
 		Ratings: map[string]*RIRate{
-			"b457f86d": &RIRate{
+			"b457f86d": {
 				ConnectFee: 0,
 				Rates: []*Rate{
-					&Rate{
+					{
 						GroupIntervalStart: 0,
 						Value:              0.02,
 						RateIncrement:      time.Second,
@@ -295,7 +295,7 @@ func TestResponderGetLCR(t *testing.T) {
 		},
 		DestinationRates: map[string]RPRateList{
 			"GERMANY": []*RPRate{
-				&RPRate{
+				{
 					Timing: "30eab300",
 					Rating: "b457f86d",
 					Weight: 10,
@@ -306,7 +306,7 @@ func TestResponderGetLCR(t *testing.T) {
 	rp3 := &RatingPlan{
 		Id: "RP3",
 		Timings: map[string]*RITiming{
-			"30eab300": &RITiming{
+			"30eab300": {
 				Years:     utils.Years{},
 				Months:    utils.Months{},
 				MonthDays: utils.MonthDays{},
@@ -315,10 +315,10 @@ func TestResponderGetLCR(t *testing.T) {
 			},
 		},
 		Ratings: map[string]*RIRate{
-			"b457f86d": &RIRate{
+			"b457f86d": {
 				ConnectFee: 0,
 				Rates: []*Rate{
-					&Rate{
+					{
 						GroupIntervalStart: 0,
 						Value:              0.03,
 						RateIncrement:      time.Second,
@@ -331,7 +331,7 @@ func TestResponderGetLCR(t *testing.T) {
 		},
 		DestinationRates: map[string]RPRateList{
 			"GERMANY": []*RPRate{
-				&RPRate{
+				{
 					Timing: "30eab300",
 					Rating: "b457f86d",
 					Weight: 10,
@@ -382,46 +382,46 @@ func TestResponderGetLCR(t *testing.T) {
 	}
 	lcrStatic := &LCR{Direction: utils.OUT, Tenant: "tenant12", Category: "call_static", Account: utils.ANY, Subject: utils.ANY,
 		Activations: []*LCRActivation{
-			&LCRActivation{
+			{
 				ActivationTime: time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
 				Entries: []*LCREntry{
-					&LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_STATIC, StrategyParams: "ivo12;dan12;rif12", Weight: 10.0}},
+					{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_STATIC, StrategyParams: "ivo12;dan12;rif12", Weight: 10.0}},
 			},
 		},
 	}
 	lcrLowestCost := &LCR{Direction: utils.OUT, Tenant: "tenant12", Category: "call_least_cost", Account: utils.ANY, Subject: utils.ANY,
 		Activations: []*LCRActivation{
-			&LCRActivation{
+			{
 				ActivationTime: time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
 				Entries: []*LCREntry{
-					&LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_LOWEST, Weight: 10.0}},
+					{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_LOWEST, Weight: 10.0}},
 			},
 		},
 	}
 	lcrQosThreshold := &LCR{Direction: utils.OUT, Tenant: "tenant12", Category: "call_qos_threshold", Account: utils.ANY, Subject: utils.ANY,
 		Activations: []*LCRActivation{
-			&LCRActivation{
+			{
 				ActivationTime: time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
 				Entries: []*LCREntry{
-					&LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_QOS_THRESHOLD, StrategyParams: "35;;;;4m;;;;;;;;;", Weight: 10.0}},
+					{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_QOS_THRESHOLD, StrategyParams: "35;;;;4m;;;;;;;;;", Weight: 10.0}},
 			},
 		},
 	}
 	lcrQos := &LCR{Direction: utils.OUT, Tenant: "tenant12", Category: "call_qos", Account: utils.ANY, Subject: utils.ANY,
 		Activations: []*LCRActivation{
-			&LCRActivation{
+			{
 				ActivationTime: time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
 				Entries: []*LCREntry{
-					&LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_QOS, Weight: 10.0}},
+					{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_QOS, Weight: 10.0}},
 			},
 		},
 	}
 	lcrLoad := &LCR{Direction: utils.OUT, Tenant: "tenant12", Category: "call_load", Account: utils.ANY, Subject: utils.ANY,
 		Activations: []*LCRActivation{
-			&LCRActivation{
+			{
 				ActivationTime: time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
 				Entries: []*LCREntry{
-					&LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_LOAD, StrategyParams: "ivo12:10;dan12:3", Weight: 10.0}},
+					{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_LOAD, StrategyParams: "ivo12:10;dan12:3", Weight: 10.0}},
 			},
 		},
 	}
@@ -443,9 +443,9 @@ func TestResponderGetLCR(t *testing.T) {
 	eStLcr := &LCRCost{
 		Entry: &LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_STATIC, StrategyParams: "ivo12;dan12;rif12", Weight: 10.0},
 		SupplierCosts: []*LCRSupplierCost{
-			&LCRSupplierCost{Supplier: "*out:tenant12:call:ivo12", Cost: 1.8, Duration: 60 * time.Second},
-			&LCRSupplierCost{Supplier: "*out:tenant12:call:dan12", Cost: 0.6, Duration: 60 * time.Second},
-			&LCRSupplierCost{Supplier: "*out:tenant12:call:rif12", Cost: 1.2, Duration: 60 * time.Second},
+			{Supplier: "*out:tenant12:call:ivo12", Cost: 1.8, Duration: 60 * time.Second},
+			{Supplier: "*out:tenant12:call:dan12", Cost: 0.6, Duration: 60 * time.Second},
+			{Supplier: "*out:tenant12:call:rif12", Cost: 1.2, Duration: 60 * time.Second},
 		},
 	}
 	var lcr LCRCost
@@ -470,9 +470,9 @@ func TestResponderGetLCR(t *testing.T) {
 	eLcLcr := &LCRCost{
 		Entry: &LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_LOWEST, Weight: 10.0},
 		SupplierCosts: []*LCRSupplierCost{
-			&LCRSupplierCost{Supplier: "*out:tenant12:call:dan12", Cost: 0.6, Duration: 60 * time.Second},
-			&LCRSupplierCost{Supplier: "*out:tenant12:call:rif12", Cost: 1.2, Duration: 60 * time.Second},
-			&LCRSupplierCost{Supplier: "*out:tenant12:call:ivo12", Cost: 1.8, Duration: 60 * time.Second},
+			{Supplier: "*out:tenant12:call:dan12", Cost: 0.6, Duration: 60 * time.Second},
+			{Supplier: "*out:tenant12:call:rif12", Cost: 1.2, Duration: 60 * time.Second},
+			{Supplier: "*out:tenant12:call:ivo12", Cost: 1.8, Duration: 60 * time.Second},
 		},
 	}
 	var lcrLc LCRCost
@@ -491,11 +491,11 @@ func TestResponderGetLCR(t *testing.T) {
 	rif12sAccount := &Account{
 		ID: utils.ConcatenatedKey("tenant12", "rif12"),
 		BalanceMap: map[string]Balances{
-			utils.VOICE: Balances{bRif12}}, AllowNegative: true}
+			utils.VOICE: {bRif12}}, AllowNegative: true}
 	ivo12sAccount := &Account{
 		ID: utils.ConcatenatedKey("tenant12", "ivo12"),
 		BalanceMap: map[string]Balances{
-			utils.VOICE: Balances{bIvo12}}, AllowNegative: true}
+			utils.VOICE: {bIvo12}}, AllowNegative: true}
 	for _, acnt := range []*Account{rif12sAccount, ivo12sAccount} {
 		if err := dm.DataDB().SetAccount(acnt); err != nil {
 			t.Error(err)
@@ -504,9 +504,9 @@ func TestResponderGetLCR(t *testing.T) {
 	eLcLcr = &LCRCost{
 		Entry: &LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_LOWEST, Weight: 10.0},
 		SupplierCosts: []*LCRSupplierCost{
-			&LCRSupplierCost{Supplier: "*out:tenant12:call:ivo12", Cost: 0, Duration: 60 * time.Second},
-			&LCRSupplierCost{Supplier: "*out:tenant12:call:rif12", Cost: 0.4, Duration: 60 * time.Second},
-			&LCRSupplierCost{Supplier: "*out:tenant12:call:dan12", Cost: 0.6, Duration: 60 * time.Second},
+			{Supplier: "*out:tenant12:call:ivo12", Cost: 0, Duration: 60 * time.Second},
+			{Supplier: "*out:tenant12:call:rif12", Cost: 0.4, Duration: 60 * time.Second},
+			{Supplier: "*out:tenant12:call:dan12", Cost: 0.6, Duration: 60 * time.Second},
 		},
 	}
 	if err := rsponder.GetLCR(&AttrGetLcr{CallDescriptor: cdLowestCost}, &lcrLc); err != nil {

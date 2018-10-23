@@ -88,7 +88,7 @@ func TestApierV2itStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func TestApierV2itRpcConn(t *testing.T) {
-	apierRPC, err = jsonrpc.Dial("tcp", apierCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	apierRPC, err = jsonrpc.Dial("tcp", apierCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

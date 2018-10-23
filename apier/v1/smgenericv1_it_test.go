@@ -74,7 +74,7 @@ func TestSMGV1StartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestSMGV1RpcConn(t *testing.T) {
 	var err error
-	smgV1Rpc, err = jsonrpc.Dial("tcp", smgV1Cfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	smgV1Rpc, err = jsonrpc.Dial("tcp", smgV1Cfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

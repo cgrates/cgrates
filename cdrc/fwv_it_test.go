@@ -117,7 +117,7 @@ func TestFwvitStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestFwvitRpcConn(t *testing.T) {
 	var err error
-	fwvRpc, err = jsonrpc.Dial("tcp", fwvCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	fwvRpc, err = jsonrpc.Dial("tcp", fwvCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -211,7 +211,7 @@ func TestFwvit2StartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestFwvit2RpcConn(t *testing.T) {
 	var err error
-	fwvRpc, err = jsonrpc.Dial("tcp", fwvCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	fwvRpc, err = jsonrpc.Dial("tcp", fwvCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -307,7 +307,7 @@ func TestFwvit3StartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestFwvit3RpcConn(t *testing.T) {
 	var err error
-	fwvRpc, err = jsonrpc.Dial("tcp", fwvCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	fwvRpc, err = jsonrpc.Dial("tcp", fwvCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

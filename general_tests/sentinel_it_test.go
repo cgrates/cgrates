@@ -116,7 +116,7 @@ func testRedisSentinelStartEngine(t *testing.T) {
 
 func testRedisSentinelRPCCon(t *testing.T) {
 	var err error
-	sentinelRPC, err = jsonrpc.Dial("tcp", sentinelConfig.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	sentinelRPC, err = jsonrpc.Dial("tcp", sentinelConfig.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

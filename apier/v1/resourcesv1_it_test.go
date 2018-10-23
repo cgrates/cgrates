@@ -116,7 +116,7 @@ func testV1RsStartEngine(t *testing.T) {
 
 func testV1RsRpcConn(t *testing.T) {
 	var err error
-	rlsV1Rpc, err = jsonrpc.Dial("tcp", rlsV1Cfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	rlsV1Rpc, err = jsonrpc.Dial("tcp", rlsV1Cfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -249,7 +249,7 @@ func testV1RsTTL0(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "ResGroup3",
 		Usages: map[string]*engine.ResourceUsage{
-			"651a8db2-4f67-4cf8-b622-169e8a482e21": &engine.ResourceUsage{
+			"651a8db2-4f67-4cf8-b622-169e8a482e21": {
 				Tenant:     "cgrates.org",
 				ID:         "651a8db2-4f67-4cf8-b622-169e8a482e21",
 				ExpiryTime: expiryTime,
@@ -535,7 +535,7 @@ func testV1RsDBStore(t *testing.T) {
 		t.Fatal(err)
 	}
 	var err error
-	rlsV1Rpc, err = jsonrpc.Dial("tcp", rlsV1Cfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	rlsV1Rpc, err = jsonrpc.Dial("tcp", rlsV1Cfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

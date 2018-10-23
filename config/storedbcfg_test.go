@@ -63,9 +63,9 @@ func TestStoreDbCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(STORDB_JSN); err != nil {
+	} else if jsnStoreDbCfg, err := jsnCfg.DbJsonCfg(STORDB_JSN); err != nil {
 		t.Error(err)
-	} else if err = dbcfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
+	} else if err = dbcfg.loadFromJsonCfg(jsnStoreDbCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
 		t.Errorf("Expected: %+v , recived: %+v", expected, dbcfg)

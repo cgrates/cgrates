@@ -142,8 +142,8 @@ func (self *CdrServer) getCache() *utils.ResponseCache {
 
 func (self *CdrServer) RegisterHandlersToServer(server *utils.Server) {
 	cdrServer = self // Share the server object for handlers
-	server.RegisterHttpFunc(self.cgrCfg.HTTPCDRsURL, cgrCdrHandler)
-	server.RegisterHttpFunc(self.cgrCfg.HTTPFreeswitchCDRsURL, fsCdrHandler)
+	server.RegisterHttpFunc(self.cgrCfg.HTTPCfg().HTTPCDRsURL, cgrCdrHandler)
+	server.RegisterHttpFunc(self.cgrCfg.HTTPCfg().HTTPFreeswitchCDRsURL, fsCdrHandler)
 }
 
 // Used to process external CDRs

@@ -83,7 +83,7 @@ func TestXmlITStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestXmlITRpcConn(t *testing.T) {
 	var err error
-	cdrcXmlRPC, err = jsonrpc.Dial("tcp", xmlCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrcXmlRPC, err = jsonrpc.Dial("tcp", xmlCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -175,7 +175,7 @@ func TestXmlIT2StartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestXmlIT2RpcConn(t *testing.T) {
 	var err error
-	cdrcXmlRPC, err = jsonrpc.Dial("tcp", xmlCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrcXmlRPC, err = jsonrpc.Dial("tcp", xmlCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -261,7 +261,7 @@ func TestXmlIT3StartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestXmlIT3RpcConn(t *testing.T) {
 	var err error
-	cdrcXmlRPC, err = jsonrpc.Dial("tcp", xmlCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrcXmlRPC, err = jsonrpc.Dial("tcp", xmlCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -347,7 +347,7 @@ func TestXmlIT4StartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestXmlIT4RpcConn(t *testing.T) {
 	var err error
-	cdrcXmlRPC, err = jsonrpc.Dial("tcp", xmlCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrcXmlRPC, err = jsonrpc.Dial("tcp", xmlCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -433,7 +433,7 @@ func TestXmlIT5StartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestXmlIT5RpcConn(t *testing.T) {
 	var err error
-	cdrcXmlRPC, err = jsonrpc.Dial("tcp", xmlCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrcXmlRPC, err = jsonrpc.Dial("tcp", xmlCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -544,7 +544,7 @@ func TestXmlIT6StartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestXmlIT6RpcConn(t *testing.T) {
 	var err error
-	cdrcXmlRPC, err = jsonrpc.Dial("tcp", xmlCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrcXmlRPC, err = jsonrpc.Dial("tcp", xmlCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

@@ -88,9 +88,9 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if jsnDataDbCfg, err := jsnCfg.GeneralJsonCfg(); err != nil {
+	} else if jsnGenCfg, err := jsnCfg.GeneralJsonCfg(); err != nil {
 		t.Error(err)
-	} else if err = gencfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
+	} else if err = gencfg.loadFromJsonCfg(jsnGenCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, gencfg) {
 		t.Errorf("Expected: %+v , recived: %+v", expected, gencfg)

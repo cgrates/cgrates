@@ -94,7 +94,7 @@ func TestSessionSv1ItRpcConn(t *testing.T) {
 		clntHandlers); err != nil {
 		t.Fatal(err)
 	}
-	if sSApierRpc2, err = jsonrpc.Dial("tcp", sSv1Cfg2.RPCJSONListen); err != nil {
+	if sSApierRpc2, err = jsonrpc.Dial("tcp", sSv1Cfg2.ListenCfg().RPCJSONListen); err != nil {
 		t.Fatal(err)
 	}
 	dummyClnt.Close() // close so we don't get EOF error when disconnecting server
@@ -141,7 +141,7 @@ func TestSessionSv1ItGetThreshold(t *testing.T) {
 		ID: "cgrates.org:1001",
 		BalanceMap: map[string]engine.Balances{
 			utils.MONETARY: []*engine.Balance{
-				&engine.Balance{
+				{
 					//Uuid:  "c9a2c620-5256-483a-a92d-c51e94bb7667",
 					Value: 10,
 					Directions: utils.StringMap{
@@ -203,7 +203,7 @@ func TestSessionSv1ItAuth(t *testing.T) {
 		ID: "cgrates.org:1001",
 		BalanceMap: map[string]engine.Balances{
 			utils.MONETARY: []*engine.Balance{
-				&engine.Balance{
+				{
 					//Uuid:  "c9a2c620-5256-483a-a92d-c51e94bb7667",
 					Value: 20,
 					Directions: utils.StringMap{
@@ -269,7 +269,7 @@ func TestSessionSv1ItInitiateSession(t *testing.T) {
 		ID: "cgrates.org:1001",
 		BalanceMap: map[string]engine.Balances{
 			utils.MONETARY: []*engine.Balance{
-				&engine.Balance{
+				{
 					//Uuid:  "c9a2c620-5256-483a-a92d-c51e94bb7667",
 					Value: 29.898000,
 					Directions: utils.StringMap{
@@ -329,7 +329,7 @@ func TestSessionSv1ItTerminateSession(t *testing.T) {
 		ID: "cgrates.org:1001",
 		BalanceMap: map[string]engine.Balances{
 			utils.MONETARY: []*engine.Balance{
-				&engine.Balance{
+				{
 					//Uuid:  "c9a2c620-5256-483a-a92d-c51e94bb7667",
 					Value: 39.796000,
 					Directions: utils.StringMap{

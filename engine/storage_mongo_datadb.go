@@ -100,7 +100,7 @@ var (
 )
 
 func NewMongoStorage(host, port, db, user, pass, storageType string,
-	cdrsIndexes []string, cacheCfg config.CacheConfig) (ms *MongoStorage, err error) {
+	cdrsIndexes []string, cacheCfg config.CacheCfg) (ms *MongoStorage, err error) {
 	url := host
 	if port != "" {
 		url += ":" + port
@@ -136,7 +136,7 @@ type MongoStorage struct {
 	db          string
 	storageType string // datadb, stordb
 	ms          Marshaler
-	cacheCfg    config.CacheConfig
+	cacheCfg    config.CacheCfg
 	cdrsIndexes []string
 	cnter       *utils.Counter
 }

@@ -104,7 +104,7 @@ func TestCsvITStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestCsvITRpcConn(t *testing.T) {
 	var err error
-	cdrcRpc, err = jsonrpc.Dial("tcp", csvCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrcRpc, err = jsonrpc.Dial("tcp", csvCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -210,7 +210,7 @@ func TestCsvIT2StartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestCsvIT2RpcConn(t *testing.T) {
 	var err error
-	cdrcRpc, err = jsonrpc.Dial("tcp", csvCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrcRpc, err = jsonrpc.Dial("tcp", csvCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -302,7 +302,7 @@ func TestCsvIT3StartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestCsvIT3RpcConn(t *testing.T) {
 	var err error
-	cdrcRpc, err = jsonrpc.Dial("tcp", csvCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrcRpc, err = jsonrpc.Dial("tcp", csvCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -389,7 +389,7 @@ func TestCsvIT4StartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestCsvIT4RpcConn(t *testing.T) {
 	var err error
-	cdrcRpc, err = jsonrpc.Dial("tcp", csvCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrcRpc, err = jsonrpc.Dial("tcp", csvCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -476,7 +476,7 @@ func TestCsvIT5StartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestCsvIT5RpcConn(t *testing.T) {
 	var err error
-	cdrcRpc, err = jsonrpc.Dial("tcp", csvCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrcRpc, err = jsonrpc.Dial("tcp", csvCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -487,7 +487,7 @@ func TestCsvIT5AddFilters(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "FLTR_CDRC_ACC",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				Type:      "*string",
 				FieldName: "3",
 				Values:    []string{"1002"},
@@ -504,7 +504,7 @@ func TestCsvIT5AddFilters(t *testing.T) {
 		Tenant: "itsyscom.com",
 		ID:     "FLTR_CDRC_ACC",
 		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
+			{
 				Type:      "*string",
 				FieldName: "3",
 				Values:    []string{"1001"},

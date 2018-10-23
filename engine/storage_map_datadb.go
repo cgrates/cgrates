@@ -35,7 +35,7 @@ type MapStorage struct {
 	tasks    [][]byte
 	ms       Marshaler
 	mu       sync.RWMutex
-	cacheCfg config.CacheConfig
+	cacheCfg config.CacheCfg
 }
 
 type storage map[string][]byte
@@ -1679,7 +1679,7 @@ func (ms *MapStorage) RemoveVersions(vrs Versions) (err error) {
 		if err != nil {
 			return
 		}
-		for key, _ := range vrs {
+		for key := range vrs {
 			delete(internalVersions, key)
 		}
 		result, err := ms.ms.Marshal(internalVersions)

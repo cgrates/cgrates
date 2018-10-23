@@ -59,7 +59,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 	}()
 
 	var thdS *rpcclient.RpcClientPool
-	if len(cfg.RALsThresholdSConns) != 0 { // Connections to ThresholdS
+	if len(cfg.RalsCfg().RALsThresholdSConns) != 0 { // Connections to ThresholdS
 		thdsTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, thdsTaskChan)
 		go func() {
@@ -70,7 +70,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-				cfg.RALsThresholdSConns, internalThdSChan,
+				cfg.RalsCfg().RALsThresholdSConns, internalThdSChan,
 				cfg.GeneralCfg().InternalTtl)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to ThresholdS, error: %s", err.Error()))
@@ -81,7 +81,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 	}
 
 	var cdrStats *rpcclient.RpcClientPool
-	if len(cfg.RALsCDRStatSConns) != 0 { // Connections to CDRStats
+	if len(cfg.RalsCfg().RALsCDRStatSConns) != 0 { // Connections to CDRStats
 		cdrstatTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, cdrstatTaskChan)
 		go func() {
@@ -92,7 +92,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-				cfg.RALsCDRStatSConns, internalCdrStatSChan,
+				cfg.RalsCfg().RALsCDRStatSConns, internalCdrStatSChan,
 				cfg.GeneralCfg().InternalTtl)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to CDRStatS, error: %s", err.Error()))
@@ -103,7 +103,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 	}
 
 	var stats *rpcclient.RpcClientPool
-	if len(cfg.RALsStatSConns) != 0 { // Connections to CDRStats
+	if len(cfg.RalsCfg().RALsStatSConns) != 0 { // Connections to CDRStats
 		statsTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, statsTaskChan)
 		go func() {
@@ -114,7 +114,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-				cfg.RALsStatSConns, internalStatSChan,
+				cfg.RalsCfg().RALsStatSConns, internalStatSChan,
 				cfg.GeneralCfg().InternalTtl)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to StatS, error: %s", err.Error()))
@@ -124,7 +124,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		}()
 	}
 
-	if len(cfg.RALsPubSubSConns) != 0 { // Connection to pubsubs
+	if len(cfg.RalsCfg().RALsPubSubSConns) != 0 { // Connection to pubsubs
 		pubsubTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, pubsubTaskChan)
 		go func() {
@@ -134,7 +134,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-				cfg.RALsPubSubSConns, internalPubSubSChan,
+				cfg.RalsCfg().RALsPubSubSConns, internalPubSubSChan,
 				cfg.GeneralCfg().InternalTtl); err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to PubSubS: %s", err.Error()))
 				exitChan <- true
@@ -145,7 +145,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		}()
 	}
 
-	if len(cfg.RALsAliasSConns) != 0 { // Connection to AliasService
+	if len(cfg.RalsCfg().RALsAliasSConns) != 0 { // Connection to AliasService
 		aliasesTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, aliasesTaskChan)
 		go func() {
@@ -155,7 +155,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-				cfg.RALsAliasSConns, internalAliaseSChan,
+				cfg.RalsCfg().RALsAliasSConns, internalAliaseSChan,
 				cfg.GeneralCfg().InternalTtl); err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to AliaseS, error: %s", err.Error()))
 				exitChan <- true
@@ -167,7 +167,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 	}
 
 	var usersConns rpcclient.RpcClientConnection
-	if len(cfg.RALsUserSConns) != 0 { // Connection to UserService
+	if len(cfg.RalsCfg().RALsUserSConns) != 0 { // Connection to UserService
 		usersTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, usersTaskChan)
 		go func() {
@@ -178,7 +178,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-				cfg.RALsUserSConns, internalUserSChan,
+				cfg.RalsCfg().RALsUserSConns, internalUserSChan,
 				cfg.GeneralCfg().InternalTtl); err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect UserS, error: %s", err.Error()))
 				exitChan <- true
@@ -194,7 +194,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 	}
 	responder := &engine.Responder{
 		ExitChan:         exitChan,
-		MaxComputedUsage: cfg.RALsMaxComputedUsage}
+		MaxComputedUsage: cfg.RalsCfg().RALsMaxComputedUsage}
 	responder.SetTimeToLive(cfg.GeneralCfg().ResponseCacheTTL, nil)
 	apierRpcV1 := &v1.ApierV1{
 		StorDb:      loadDb,

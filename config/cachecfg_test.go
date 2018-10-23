@@ -28,8 +28,8 @@ import (
 )
 
 func TestAsTransCacheConfig(t *testing.T) {
-	a := &CacheConfig{
-		"test": &CacheParamConfig{
+	a := &CacheCfg{
+		"test": &CacheParamCfg{
 			Limit:     50,
 			TTL:       time.Duration(60 * time.Second),
 			StaticTTL: true,
@@ -50,7 +50,7 @@ func TestAsTransCacheConfig(t *testing.T) {
 }
 
 func TestCacheConfigloadFromJsonCfg(t *testing.T) {
-	var cachecfg, expected CacheConfig
+	var cachecfg, expected CacheCfg
 	if err := cachecfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(cachecfg, expected) {
@@ -68,12 +68,12 @@ func TestCacheConfigloadFromJsonCfg(t *testing.T) {
 	"rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},
 	}		
 }`
-	expected = CacheConfig{
-		"destinations":         &CacheParamConfig{Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		"reverse_destinations": &CacheParamConfig{Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		"rating_plans":         &CacheParamConfig{Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
+	expected = CacheCfg{
+		"destinations":         &CacheParamCfg{Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		"reverse_destinations": &CacheParamCfg{Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		"rating_plans":         &CacheParamCfg{Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
 	}
-	cachecfg = CacheConfig{}
+	cachecfg = CacheCfg{}
 	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnCacheCfg, err := jsnCfg.CacheJsonCfg(); err != nil {

@@ -33,7 +33,7 @@ func NewDataManager(dataDB DataDB) *DataManager {
 // transparently manages data retrieval, further serialization and caching
 type DataManager struct {
 	dataDB   DataDB
-	cacheCfg config.CacheConfig
+	cacheCfg config.CacheCfg
 }
 
 // DataDB exports access to dataDB
