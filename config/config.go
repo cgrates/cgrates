@@ -865,6 +865,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return nil
 	}
 
+	jsnTlsCgrCfg, err := jsnCfg.TlsCfgJson()
+	if err != nil {
+		return nil
+	}
+
 	if err := self.dataDbCfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
 		return err
 	}
@@ -874,6 +879,10 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	}
 
 	if err := self.generalCfg.loadFromJsonCfg(jsnGeneralCfg); err != nil {
+		return err
+	}
+
+	if err := self.tlsCfg.loadFromJsonCfg(jsnTlsCgrCfg); err != nil {
 		return err
 	}
 
@@ -902,18 +911,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 		if jsnListenCfg.Http_tls != nil && *jsnListenCfg.Http_tls != "" {
 			self.HTTPTLSListen = *jsnListenCfg.Http_tls
-		}
-		if jsnListenCfg.Tls_server_certificate != nil && *jsnListenCfg.Tls_server_certificate != "" {
-			self.TLSServerCerificate = *jsnListenCfg.Tls_server_certificate
-		}
-		if jsnListenCfg.Tls_server_key != nil && *jsnListenCfg.Tls_server_key != "" {
-			self.TLSServerKey = *jsnListenCfg.Tls_server_key
-		}
-		if jsnListenCfg.Tls_client_certificate != nil && *jsnListenCfg.Tls_client_certificate != "" {
-			self.TLSClientCerificate = *jsnListenCfg.Tls_client_certificate
-		}
-		if jsnListenCfg.Tls_client_key != nil && *jsnListenCfg.Tls_client_key != "" {
-			self.TLSClientKey = *jsnListenCfg.Tls_client_key
 		}
 	}
 
@@ -1453,4 +1450,8 @@ func (cfg *CGRConfig) StorDbCfg() *StorDbCfg {
 
 func (cfg *CGRConfig) GeneralCfg() *GeneralCfg {
 	return cfg.generalCfg
+}
+
+func (cfg *CGRConfig) TlsCfg() *TlsCfg {
+	return cfg.tlsCfg
 }

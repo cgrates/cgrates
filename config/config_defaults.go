@@ -88,13 +88,13 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"tls":{
+"tls": {
 	"server_certificate" : "",			// path to server certificate
 	"server_key":"",					// path to server key
 	"client_certificate" : "",			// path to client certificate
 	"client_key":"",					// path to client key
-	"ca_certificate":"",				// path to CA certificate (populate if used self-sign certificate)
-	"server_policy":4					// server_policy determine the TLS Client Authentication (0-NoClientCert, 1-RequestClientCert, 2-RequireAnyClientCert, 3-VerifyClientCertIfGiven, 4-RequireAndVerifyClientCert)
+	"ca_certificate":"",				// path to CA certificate (populate if used self-sign certificate otherwise let it empty)
+	"server_policy":4,					// server_policy determine the TLS Client Authentication (0-NoClientCert, 1-RequestClientCert, 2-RequireAnyClientCert, 3-VerifyClientCertIfGiven, 4-RequireAndVerifyClientCert)
 	"server_name":"",					
 },
 

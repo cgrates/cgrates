@@ -20,7 +20,7 @@ imports:
 - name: github.com/cgrates/radigo
   version: 69d4269e21990c0f120b8e60d5b75d533db7f3dd
 - name: github.com/cgrates/rpcclient
-  version: 54aff3c8e75a2342f0618dfc1c44f0660cd69bde
+  version: 7e7a74eff4a9cc56dbfd43502b8a4c2757ffbd67
 - name: github.com/DisposaBoy/JsonConfigReader
   version: 5ea4d0ddac554439159cd6f191cb94a110d73352
 - name: github.com/fiorix/go-diameter

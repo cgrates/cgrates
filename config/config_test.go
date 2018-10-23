@@ -382,12 +382,6 @@ func TestCgrCfgJSONDefaultsGeneral(t *testing.T) {
 	if cgrCfg.GeneralCfg().DigestEqual != ":" {
 		t.Errorf("Expected: ':' , received: %+v", cgrCfg.GeneralCfg().DigestEqual)
 	}
-	if cgrCfg.TLSServerCerificate != "" {
-		t.Errorf("Expected: '', received: %+v", cgrCfg.TLSServerCerificate)
-	}
-	if cgrCfg.TLSServerKey != "" {
-		t.Errorf("Expected: '', received: %+v", cgrCfg.TLSServerKey)
-	}
 }
 
 func TestCgrCfgJSONDefaultsListen(t *testing.T) {
@@ -1645,5 +1639,36 @@ func TestCgrMigratorCfg2(t *testing.T) {
 		t.Errorf("Expected: 0.0.0.0 , received: %+v", cgrCfg.MigratorCgrConfig.OutDataDBHost)
 	} else if cgrCfg.MigratorCgrConfig.OutDataDBPort != "9999" {
 		t.Errorf("Expected: 9999, received: %+v", cgrCfg.MigratorCgrConfig.OutDataDBPassword)
+	}
+}
+
+func TestCfgTlsCfg(t *testing.T) {
+	JSN_CFG := `
+	{
+	"tls":{
+		"server_certificate" : "path/To/Server/Cert",			
+		"server_key":"path/To/Server/Key",					
+		"client_certificate" : "path/To/Client/Cert",			
+		"client_key":"path/To/Client/Key",					
+		"ca_certificate":"path/To/CA/Cert",							
+		"server_name":"TestServerName",
+		"server_policy":3,					
+		},
+	}`
+	eCgrCfg, _ := NewDefaultCGRConfig()
+	eCgrCfg.tlsCfg = &TlsCfg{
+		ServerCerificate: "path/To/Server/Cert",
+		ServerKey:        "path/To/Server/Key",
+		CaCertificate:    "path/To/CA/Cert",
+		ClientCerificate: "path/To/Client/Cert",
+		ClientKey:        "path/To/Client/Key",
+		ServerName:       "TestServerName",
+		ServerPolicy:     3,
+	}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(JSN_CFG); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCgrCfg.TlsCfg(), cgrCfg.TlsCfg()) {
+		t.Errorf("Expected: %s, received: %s",
+			utils.ToJSON(eCgrCfg.tlsCfg), utils.ToJSON(cgrCfg.tlsCfg))
 	}
 }

@@ -46,16 +46,12 @@ type GeneralJsonCfg struct {
 
 // Listen config section
 type ListenJsonCfg struct {
-	Rpc_json               *string
-	Rpc_gob                *string
-	Http                   *string
-	Rpc_json_tls           *string
-	Rpc_gob_tls            *string
-	Http_tls               *string
-	Tls_server_certificate *string
-	Tls_server_key         *string
-	Tls_client_certificate *string
-	Tls_client_key         *string
+	Rpc_json     *string
+	Rpc_gob      *string
+	Http         *string
+	Rpc_json_tls *string
+	Rpc_gob_tls  *string
+	Http_tls     *string
 }
 
 // HTTP config section
@@ -66,6 +62,16 @@ type HTTPJsonCfg struct {
 	Http_Cdrs           *string
 	Use_basic_auth      *bool
 	Auth_users          *map[string]string
+}
+
+type TlsJsonCfg struct {
+	Server_certificate *string
+	Server_key         *string
+	Server_policy      *int
+	Server_name        *string
+	Client_certificate *string
+	Client_key         *string
+	Ca_certificate     *string
 }
 
 // Database config
