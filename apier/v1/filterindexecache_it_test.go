@@ -381,6 +381,13 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
+	if reply == nil {
+		t.Errorf("Expecting reply to not be nil")
+		// reply shoud not be nil so exit function
+		// to avoid nil segmentation fault;
+		// if this happens try to run this test manualy
+		return
+	}
 	reply.FilterIDs = []string{"TestFilter3"}
 
 	if err := tFIdxCaRpc.Call("ApierV1.SetThresholdProfile", reply, &result); err != nil {

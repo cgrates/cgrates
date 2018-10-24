@@ -122,6 +122,13 @@ func TestTutITCacheStats(t *testing.T) {
 	if err := tutLocalRpc.Call("ApierV1.GetCacheKeys", argsAPI, &rcvKeys); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else {
+		if rcvKeys.DestinationIDs == nil {
+			t.Errorf("Expecting rcvKeys.DestinationIDs to not be nil")
+			// rcvKeys.DestinationIDs shoud not be nil so exit function
+			// to avoid nil segmentation fault;
+			// if this happens try to run this test manualy
+			return
+		}
 		if len(*expKeys.DestinationIDs) != len(*rcvKeys.DestinationIDs) {
 			t.Errorf("Expected: %+v, received: %+v", expKeys.DestinationIDs, rcvKeys.DestinationIDs)
 		}

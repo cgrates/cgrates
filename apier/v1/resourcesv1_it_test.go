@@ -150,6 +150,13 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(500) * time.Millisecond)
+	if reply == nil {
+		t.Errorf("Expecting reply to not be nil")
+		// reply shoud not be nil so exit function
+		// to avoid nil segmentation fault;
+		// if this happens try to run this test manualy
+		return
+	}
 	if len(*reply) != 1 {
 		t.Errorf("Expecting: %+v, received: %+v", 1, len(*reply))
 	}
@@ -475,6 +482,13 @@ func testV1RsReleaseResource(t *testing.T) {
 	} else if len(*rs) != 2 {
 		t.Errorf("Resources: %+v", rs)
 	}
+	if rs == nil {
+		t.Errorf("Expecting rs to not be nil")
+		// rs shoud not be nil so exit function
+		// to avoid nil segmentation fault;
+		// if this happens try to run this test manualy
+		return
+	}
 	// make sure Resource1 have no more active resources
 	for _, r := range *rs {
 		if r.ID == "ResGroup1" &&
@@ -517,6 +531,13 @@ func testV1RsDBStore(t *testing.T) {
 		t.Error(err)
 	} else if len(*rs) != 2 {
 		t.Errorf("Resources: %+v", rs)
+	}
+	if rs == nil {
+		t.Errorf("Expecting rs to not be nil")
+		// rs shoud not be nil so exit function
+		// to avoid nil segmentation fault;
+		// if this happens try to run this test manualy
+		return
 	}
 	// count resources before restart
 	for _, r := range *rs {
