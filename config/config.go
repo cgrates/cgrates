@@ -139,6 +139,9 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.filterSCfg = new(FilterSCfg)
 	cfg.ralsCfg = new(RalsCfg)
 	cfg.ralsCfg.RALsMaxComputedUsage = make(map[string]time.Duration)
+	cfg.schedulerCfg = new(SchedulerCfg)
+	cfg.cdrsCfg = new(CdrsCfg)
+	cfg.cdrStatsCfg = new(CdrStatsCfg)
 	cfg.analyzerSCfg = new(AnalyzerSCfg)
 
 	cfg.sessionSCfg = new(SessionSCfg)
@@ -149,7 +152,6 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.diameterAgentCfg = new(DiameterAgentCfg)
 	cfg.radiusAgentCfg = new(RadiusAgentCfg)
 	cfg.dispatcherSCfg = new(DispatcherSCfg)
-	cfg.schedulerCfg = new(SchedulerCfg)
 	cfg.ConfigReloads = make(map[string]chan struct{})
 	cfg.ConfigReloads[utils.CDRC] = make(chan struct{}, 1)
 	cfg.ConfigReloads[utils.CDRC] <- struct{}{} // Unlock the channel
@@ -248,156 +250,173 @@ func NewCGRConfigFromFolder(cfgDir string) (*CGRConfig, error) {
 
 // Holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
-	MaxCallDuration       time.Duration     // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
-	CDRSEnabled           bool              // Enable CDR Server service
-	CDRSExtraFields       []*utils.RSRField // Extra fields to store in CDRs
-	CDRSStoreCdrs         bool              // store cdrs in storDb
-	CDRScdrAccountSummary bool
-	CDRSSMCostRetries     int
-	CDRSChargerSConns     []*HaPoolConfig
-	CDRSRaterConns        []*HaPoolConfig // address where to reach the Rater for cost calculation: <""|internal|x.y.z.y:1234>
-	CDRSPubSubSConns      []*HaPoolConfig // address where to reach the pubsub service: <""|internal|x.y.z.y:1234>
-	CDRSAttributeSConns   []*HaPoolConfig // address where to reach the users service: <""|internal|x.y.z.y:1234>
-	CDRSUserSConns        []*HaPoolConfig // address where to reach the users service: <""|internal|x.y.z.y:1234>
-	CDRSAliaseSConns      []*HaPoolConfig // address where to reach the aliases service: <""|internal|x.y.z.y:1234>
-	CDRSCDRStatSConns     []*HaPoolConfig // address where to reach the cdrstats service. Empty to disable cdrstats gathering  <""|internal|x.y.z.y:1234>
-	CDRSThresholdSConns   []*HaPoolConfig // address where to reach the thresholds service
-	CDRSStatSConns        []*HaPoolConfig
-	CDRSOnlineCDRExports  []string      // list of CDRE templates to use for real-time CDR exports
-	CDRStatsEnabled       bool          // Enable CDR Stats service
-	CDRStatsSaveInterval  time.Duration // Save interval duration
-	CdreProfiles          map[string]*CdreConfig
-	CdrcProfiles          map[string][]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath][]{Configs}
-	sessionSCfg           *SessionSCfg
-	fsAgentCfg            *FsAgentConfig    // FreeSWITCHAgent configuration
-	kamAgentCfg           *KamAgentCfg      // KamailioAgent Configuration
-	SmOsipsConfig         *SmOsipsConfig    // SMOpenSIPS Configuration
-	asteriskAgentCfg      *AsteriskAgentCfg // SMAsterisk Configuration
-	diameterAgentCfg      *DiameterAgentCfg // DiameterAgent configuration
-	radiusAgentCfg        *RadiusAgentCfg   // RadiusAgent configuration
-	httpAgentCfg          []*HttpAgentCfg   // HttpAgent configuration
-	PubSubServerEnabled   bool              // Starts PubSub as server: <true|false>.
-	AliasesServerEnabled  bool              // Starts PubSub as server: <true|false>.
-	UserServerEnabled     bool              // Starts User as server: <true|false>
-	UserServerIndexes     []string          // List of user profile field indexes
-	attributeSCfg         *AttributeSCfg    // Attribute service configuration
-	chargerSCfg           *ChargerSCfg
-	resourceSCfg          *ResourceSConfig         // Configuration for resource limiter
-	statsCfg              *StatSCfg                // Configuration for StatS
-	thresholdSCfg         *ThresholdSCfg           // configuration for ThresholdS
-	supplierSCfg          *SupplierSCfg            // configuration for SupplierS
-	loaderCfg             []*LoaderSConfig         // configuration for Loader
-	dispatcherSCfg        *DispatcherSCfg          // configuration for Dispatcher
-	MailerServer          string                   // The server to use when sending emails out
-	MailerAuthUser        string                   // Authenticate to email server using this user
-	MailerAuthPass        string                   // Authenticate to email server with this password
-	MailerFromAddr        string                   // From address used when sending emails out
-	DataFolderPath        string                   // Path towards data folder, for tests internal usage, not loading out of .json options
-	sureTaxCfg            *SureTaxCfg              // Load here SureTax configuration, as pointer so we can have runtime reloads in the future
-	ConfigReloads         map[string]chan struct{} // Signals to specific entities that a config reload should occur
-	LoaderCgrConfig       *LoaderCgrCfg
-	MigratorCgrConfig     *MigratorCgrCfg
-	schedulerCfg          *SchedulerCfg
+	MaxCallDuration time.Duration // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
+
+	CdreProfiles         map[string]*CdreConfig
+	CdrcProfiles         map[string][]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath][]{Configs}
+	sessionSCfg          *SessionSCfg
+	fsAgentCfg           *FsAgentConfig    // FreeSWITCHAgent configuration
+	kamAgentCfg          *KamAgentCfg      // KamailioAgent Configuration
+	SmOsipsConfig        *SmOsipsConfig    // SMOpenSIPS Configuration
+	asteriskAgentCfg     *AsteriskAgentCfg // SMAsterisk Configuration
+	diameterAgentCfg     *DiameterAgentCfg // DiameterAgent configuration
+	radiusAgentCfg       *RadiusAgentCfg   // RadiusAgent configuration
+	httpAgentCfg         []*HttpAgentCfg   // HttpAgent configuration
+	PubSubServerEnabled  bool              // Starts PubSub as server: <true|false>.
+	AliasesServerEnabled bool              // Starts PubSub as server: <true|false>.
+	UserServerEnabled    bool              // Starts User as server: <true|false>
+	UserServerIndexes    []string          // List of user profile field indexes
+	attributeSCfg        *AttributeSCfg    // Attribute service configuration
+	chargerSCfg          *ChargerSCfg
+	resourceSCfg         *ResourceSConfig         // Configuration for resource limiter
+	statsCfg             *StatSCfg                // Configuration for StatS
+	thresholdSCfg        *ThresholdSCfg           // configuration for ThresholdS
+	supplierSCfg         *SupplierSCfg            // configuration for SupplierS
+	loaderCfg            []*LoaderSConfig         // configuration for Loader
+	dispatcherSCfg       *DispatcherSCfg          // configuration for Dispatcher
+	MailerServer         string                   // The server to use when sending emails out
+	MailerAuthUser       string                   // Authenticate to email server using this user
+	MailerAuthPass       string                   // Authenticate to email server with this password
+	MailerFromAddr       string                   // From address used when sending emails out
+	DataFolderPath       string                   // Path towards data folder, for tests internal usage, not loading out of .json options
+	sureTaxCfg           *SureTaxCfg              // Load here SureTax configuration, as pointer so we can have runtime reloads in the future
+	ConfigReloads        map[string]chan struct{} // Signals to specific entities that a config reload should occur
+	LoaderCgrConfig      *LoaderCgrCfg
+	MigratorCgrConfig    *MigratorCgrCfg
+
 	// Cache defaults loaded from json and needing clones
 	dfltCdreProfile *CdreConfig // Default cdreConfig profile
 	dfltCdrcProfile *CdrcConfig // Default cdrcConfig profile
 
-	generalCfg *GeneralCfg // General config
-	dataDbCfg  *DataDbCfg  // Database config
-	storDbCfg  *StorDbCfg  // StroreDb config
-	tlsCfg     *TlsCfg     // TLS config
-	cacheCfg   CacheCfg    // Cache config
-	listenCfg  *ListenCfg  // Listen config
-	httpCfg    *HTTPCfg    // HTTP config
-	filterSCfg *FilterSCfg // FilterS config
-	ralsCfg    *RalsCfg    // Rals config
+	generalCfg   *GeneralCfg   // General config
+	dataDbCfg    *DataDbCfg    // Database config
+	storDbCfg    *StorDbCfg    // StroreDb config
+	tlsCfg       *TlsCfg       // TLS config
+	cacheCfg     CacheCfg      // Cache config
+	listenCfg    *ListenCfg    // Listen config
+	httpCfg      *HTTPCfg      // HTTP config
+	filterSCfg   *FilterSCfg   // FilterS config
+	ralsCfg      *RalsCfg      // Rals config
+	schedulerCfg *SchedulerCfg // Scheduler config
+	cdrsCfg      *CdrsCfg      // Cdrs config
+	cdrStatsCfg  *CdrStatsCfg  // CdrStats config - deprecated
 	analyzerSCfg *AnalyzerSCfg
 }
 
 func (self *CGRConfig) checkConfigSanity() error {
 	// Rater checks
 	if self.ralsCfg.RALsEnabled {
-		for _, connCfg := range self.ralsCfg.RALsCDRStatSConns {
-			if connCfg.Address == utils.MetaInternal && !self.CDRStatsEnabled {
-				return errors.New("CDRStats not enabled but requested by RALs component.")
+		if !self.cdrStatsCfg.CDRStatsEnabled {
+			for _, connCfg := range self.ralsCfg.RALsCDRStatSConns {
+				if connCfg.Address == utils.MetaInternal {
+					return errors.New("CDRStats not enabled but requested by RALs component.")
+				}
 			}
 		}
-		for _, connCfg := range self.ralsCfg.RALsStatSConns {
-			if connCfg.Address == utils.MetaInternal && !self.statsCfg.Enabled {
-				return errors.New("StatS not enabled but requested by RALs component.")
+		if !self.statsCfg.Enabled {
+			for _, connCfg := range self.ralsCfg.RALsStatSConns {
+				if connCfg.Address == utils.MetaInternal {
+					return errors.New("StatS not enabled but requested by RALs component.")
+				}
 			}
 		}
-		for _, connCfg := range self.ralsCfg.RALsPubSubSConns {
-			if connCfg.Address == utils.MetaInternal && !self.PubSubServerEnabled {
-				return errors.New("PubSub server not enabled but requested by RALs component.")
+		if !self.PubSubServerEnabled {
+			for _, connCfg := range self.ralsCfg.RALsPubSubSConns {
+				if connCfg.Address == utils.MetaInternal {
+					return errors.New("PubSub server not enabled but requested by RALs component.")
+				}
 			}
 		}
-		for _, connCfg := range self.ralsCfg.RALsAliasSConns {
-			if connCfg.Address == utils.MetaInternal && !self.AliasesServerEnabled {
-				return errors.New("Alias server not enabled but requested by RALs component.")
+		if !self.AliasesServerEnabled {
+			for _, connCfg := range self.ralsCfg.RALsAliasSConns {
+				if connCfg.Address == utils.MetaInternal {
+					return errors.New("Alias server not enabled but requested by RALs component.")
+				}
 			}
 		}
-		for _, connCfg := range self.ralsCfg.RALsUserSConns {
-			if connCfg.Address == utils.MetaInternal && !self.UserServerEnabled {
-				return errors.New("User service not enabled but requested by RALs component.")
+		if !self.UserServerEnabled {
+			for _, connCfg := range self.ralsCfg.RALsUserSConns {
+				if connCfg.Address == utils.MetaInternal {
+					return errors.New("User service not enabled but requested by RALs component.")
+				}
 			}
 		}
-		for _, connCfg := range self.ralsCfg.RALsThresholdSConns {
-			if connCfg.Address == utils.MetaInternal && !self.thresholdSCfg.Enabled {
-				return errors.New("ThresholdS not enabled but requested by RALs component.")
+		if !self.thresholdSCfg.Enabled {
+			for _, connCfg := range self.ralsCfg.RALsThresholdSConns {
+				if connCfg.Address == utils.MetaInternal {
+					return errors.New("ThresholdS not enabled but requested by RALs component.")
+				}
 			}
 		}
 	}
 	// CDRServer checks
-	if self.CDRSEnabled {
-		for _, conn := range self.CDRSChargerSConns {
-			if conn.Address == utils.MetaInternal && !self.chargerSCfg.Enabled {
-				return errors.New("ChargerS not enabled but requested by CDRS component.")
+	if self.cdrsCfg.CDRSEnabled {
+		if !self.chargerSCfg.Enabled {
+			for _, conn := range self.cdrsCfg.CDRSChargerSConns {
+				if conn.Address == utils.MetaInternal {
+					return errors.New("ChargerS not enabled but requested by CDRS component.")
+				}
 			}
 		}
-		for _, cdrsRaterConn := range self.CDRSRaterConns {
-			if cdrsRaterConn.Address == utils.MetaInternal && !self.ralsCfg.RALsEnabled {
-				return errors.New("RALs not enabled but requested by CDRS component.")
+		if !self.ralsCfg.RALsEnabled {
+			for _, cdrsRaterConn := range self.cdrsCfg.CDRSRaterConns {
+				if cdrsRaterConn.Address == utils.MetaInternal {
+					return errors.New("RALs not enabled but requested by CDRS component.")
+				}
 			}
 		}
-		for _, connCfg := range self.CDRSPubSubSConns {
-			if connCfg.Address == utils.MetaInternal && !self.PubSubServerEnabled {
-				return errors.New("PubSubS not enabled but requested by CDRS component.")
+		if !self.PubSubServerEnabled {
+			for _, connCfg := range self.cdrsCfg.CDRSPubSubSConns {
+				if connCfg.Address == utils.MetaInternal {
+					return errors.New("PubSubS not enabled but requested by CDRS component.")
+				}
 			}
 		}
-		for _, connCfg := range self.CDRSAttributeSConns {
-			if connCfg.Address == utils.MetaInternal && !self.attributeSCfg.Enabled {
-				return errors.New("AttributeS not enabled but requested by CDRS component.")
+		if !self.attributeSCfg.Enabled {
+			for _, connCfg := range self.cdrsCfg.CDRSAttributeSConns {
+				if connCfg.Address == utils.MetaInternal {
+					return errors.New("AttributeS not enabled but requested by CDRS component.")
+				}
 			}
 		}
-		for _, connCfg := range self.CDRSUserSConns {
-			if connCfg.Address == utils.MetaInternal && !self.UserServerEnabled {
-				return errors.New("UserS not enabled but requested by CDRS component.")
+		if !self.UserServerEnabled {
+			for _, connCfg := range self.cdrsCfg.CDRSUserSConns {
+				if connCfg.Address == utils.MetaInternal {
+					return errors.New("UserS not enabled but requested by CDRS component.")
+				}
 			}
 		}
-		for _, connCfg := range self.CDRSAliaseSConns {
-			if connCfg.Address == utils.MetaInternal && !self.AliasesServerEnabled {
-				return errors.New("AliaseS not enabled but requested by CDRS component.")
+		if !self.AliasesServerEnabled {
+			for _, connCfg := range self.cdrsCfg.CDRSAliaseSConns {
+				if connCfg.Address == utils.MetaInternal {
+					return errors.New("AliaseS not enabled but requested by CDRS component.")
+				}
 			}
 		}
-		for _, connCfg := range self.CDRSCDRStatSConns {
-			if connCfg.Address == utils.MetaInternal && !self.CDRStatsEnabled {
-				return errors.New("CDRStatS not enabled but requested by CDRS component.")
+		if !self.cdrStatsCfg.CDRStatsEnabled {
+			for _, connCfg := range self.cdrsCfg.CDRSCDRStatSConns {
+				if connCfg.Address == utils.MetaInternal {
+					return errors.New("CDRStatS not enabled but requested by CDRS component.")
+				}
 			}
 		}
-		for _, connCfg := range self.CDRSStatSConns {
-			if connCfg.Address == utils.MetaInternal && !self.statsCfg.Enabled {
-				return errors.New("StatS not enabled but requested by CDRS component.")
+		if !self.statsCfg.Enabled {
+			for _, connCfg := range self.cdrsCfg.CDRSStatSConns {
+				if connCfg.Address == utils.MetaInternal {
+					return errors.New("StatS not enabled but requested by CDRS component.")
+				}
 			}
 		}
-		for _, cdrePrfl := range self.CDRSOnlineCDRExports {
+		for _, cdrePrfl := range self.cdrsCfg.CDRSOnlineCDRExports {
 			if _, hasIt := self.CdreProfiles[cdrePrfl]; !hasIt {
 				return fmt.Errorf("<CDRS> Cannot find CDR export template with ID: <%s>", cdrePrfl)
 			}
 		}
-		for _, connCfg := range self.CDRSThresholdSConns {
-			if connCfg.Address == utils.MetaInternal && !self.thresholdSCfg.Enabled {
-				return errors.New("ThresholdS not enabled but requested by CDRS component.")
+		if !self.thresholdSCfg.Enabled {
+			for _, connCfg := range self.cdrsCfg.CDRSThresholdSConns {
+				if connCfg.Address == utils.MetaInternal {
+					return errors.New("ThresholdS not enabled but requested by CDRS component.")
+				}
 			}
 		}
 	}
@@ -410,9 +429,11 @@ func (self *CGRConfig) checkConfigSanity() error {
 			if len(cdrcInst.CdrsConns) == 0 {
 				return fmt.Errorf("<CDRC> Instance: %s, CdrC enabled but no CDRS defined!", cdrcInst.ID)
 			}
-			for _, conn := range cdrcInst.CdrsConns {
-				if conn.Address == utils.MetaInternal && !self.CDRSEnabled {
-					return errors.New("CDRS not enabled but referenced from CDRC")
+			if !self.cdrsCfg.CDRSEnabled {
+				for _, conn := range cdrcInst.CdrsConns {
+					if conn.Address == utils.MetaInternal {
+						return errors.New("CDRS not enabled but referenced from CDRC")
+					}
 				}
 			}
 			if len(cdrcInst.ContentFields) == 0 {
@@ -460,47 +481,63 @@ func (self *CGRConfig) checkConfigSanity() error {
 		if len(self.sessionSCfg.RALsConns) == 0 {
 			return errors.New("<SessionS> RALs definition is mandatory!")
 		}
-		for _, conn := range self.sessionSCfg.ChargerSConns {
-			if conn.Address == utils.MetaInternal && !self.chargerSCfg.Enabled {
-				return errors.New("<SessionS> ChargerS not enabled but requested")
+		if !self.chargerSCfg.Enabled {
+			for _, conn := range self.sessionSCfg.ChargerSConns {
+				if conn.Address == utils.MetaInternal {
+					return errors.New("<SessionS> ChargerS not enabled but requested")
+				}
 			}
 		}
-		for _, smgRALsConn := range self.sessionSCfg.RALsConns {
-			if smgRALsConn.Address == utils.MetaInternal && !self.ralsCfg.RALsEnabled {
-				return errors.New("<SessionS> RALs not enabled but requested by SMGeneric component.")
+		if !self.ralsCfg.RALsEnabled {
+			for _, smgRALsConn := range self.sessionSCfg.RALsConns {
+				if smgRALsConn.Address == utils.MetaInternal {
+					return errors.New("<SessionS> RALs not enabled but requested by SMGeneric component.")
+				}
 			}
 		}
-		for _, conn := range self.sessionSCfg.ResSConns {
-			if conn.Address == utils.MetaInternal && !self.resourceSCfg.Enabled {
-				return errors.New("<SessionS> ResourceS not enabled but requested by SMGeneric component.")
+		if !self.resourceSCfg.Enabled {
+			for _, conn := range self.sessionSCfg.ResSConns {
+				if conn.Address == utils.MetaInternal {
+					return errors.New("<SessionS> ResourceS not enabled but requested by SMGeneric component.")
+				}
 			}
 		}
-		for _, conn := range self.sessionSCfg.ThreshSConns {
-			if conn.Address == utils.MetaInternal && !self.thresholdSCfg.Enabled {
-				return errors.New("<SessionS> ThresholdS not enabled but requested by SMGeneric component.")
+		if !self.thresholdSCfg.Enabled {
+			for _, conn := range self.sessionSCfg.ThreshSConns {
+				if conn.Address == utils.MetaInternal {
+					return errors.New("<SessionS> ThresholdS not enabled but requested by SMGeneric component.")
+				}
 			}
 		}
-		for _, conn := range self.sessionSCfg.StatSConns {
-			if conn.Address == utils.MetaInternal && !self.statsCfg.Enabled {
-				return errors.New("<SessionS> StatS not enabled but requested by SMGeneric component.")
+		if !self.statsCfg.Enabled {
+			for _, conn := range self.sessionSCfg.StatSConns {
+				if conn.Address == utils.MetaInternal {
+					return errors.New("<SessionS> StatS not enabled but requested by SMGeneric component.")
+				}
 			}
 		}
-		for _, conn := range self.sessionSCfg.SupplSConns {
-			if conn.Address == utils.MetaInternal && !self.supplierSCfg.Enabled {
-				return errors.New("<SessionS> SupplierS not enabled but requested by SMGeneric component.")
+		if !self.supplierSCfg.Enabled {
+			for _, conn := range self.sessionSCfg.SupplSConns {
+				if conn.Address == utils.MetaInternal {
+					return errors.New("<SessionS> SupplierS not enabled but requested by SMGeneric component.")
+				}
 			}
 		}
-		for _, conn := range self.sessionSCfg.AttrSConns {
-			if conn.Address == utils.MetaInternal && !self.attributeSCfg.Enabled {
-				return errors.New("<SessionS> AttributeS not enabled but requested by SMGeneric component.")
+		if !self.attributeSCfg.Enabled {
+			for _, conn := range self.sessionSCfg.AttrSConns {
+				if conn.Address == utils.MetaInternal {
+					return errors.New("<SessionS> AttributeS not enabled but requested by SMGeneric component.")
+				}
 			}
 		}
 		if len(self.sessionSCfg.CDRsConns) == 0 {
 			return errors.New("<SessionS> CDRs definition is mandatory!")
 		}
-		for _, smgCDRSConn := range self.sessionSCfg.CDRsConns {
-			if smgCDRSConn.Address == utils.MetaInternal && !self.CDRSEnabled {
-				return errors.New("<SessionS> CDRS not enabled but referenced by SMGeneric component")
+		if !self.cdrsCfg.CDRSEnabled {
+			for _, smgCDRSConn := range self.sessionSCfg.CDRsConns {
+				if smgCDRSConn.Address == utils.MetaInternal {
+					return errors.New("<SessionS> CDRS not enabled but referenced by SMGeneric component")
+				}
 			}
 		}
 	}
@@ -533,18 +570,21 @@ func (self *CGRConfig) checkConfigSanity() error {
 		if len(self.SmOsipsConfig.RALsConns) == 0 {
 			return errors.New("<SMOpenSIPS> Rater definition is mandatory!")
 		}
-		for _, smOsipsRaterConn := range self.SmOsipsConfig.RALsConns {
-			if smOsipsRaterConn.Address == utils.MetaInternal && !self.ralsCfg.RALsEnabled {
-				return errors.New("<SMOpenSIPS> RALs not enabled.")
+		if !self.ralsCfg.RALsEnabled {
+			for _, smOsipsRaterConn := range self.SmOsipsConfig.RALsConns {
+				if smOsipsRaterConn.Address == utils.MetaInternal {
+					return errors.New("<SMOpenSIPS> RALs not enabled.")
+				}
 			}
 		}
 		if len(self.SmOsipsConfig.CDRsConns) == 0 {
 			return errors.New("<SMOpenSIPS> CDRs definition is mandatory!")
 		}
-
-		for _, smOsipsCDRSConn := range self.SmOsipsConfig.CDRsConns {
-			if smOsipsCDRSConn.Address == utils.MetaInternal && !self.CDRSEnabled {
-				return errors.New("<SMOpenSIPS> CDRS not enabled.")
+		if !self.cdrsCfg.CDRSEnabled {
+			for _, smOsipsCDRSConn := range self.SmOsipsConfig.CDRsConns {
+				if smOsipsCDRSConn.Address == utils.MetaInternal {
+					return errors.New("<SMOpenSIPS> CDRS not enabled.")
+				}
 			}
 		}
 	}
@@ -564,36 +604,37 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// DAgent checks
-	if self.diameterAgentCfg.Enabled {
+	if self.diameterAgentCfg.Enabled && !self.sessionSCfg.Enabled {
 		for _, daSMGConn := range self.diameterAgentCfg.SessionSConns {
-			if daSMGConn.Address == utils.MetaInternal && !self.sessionSCfg.Enabled {
+			if daSMGConn.Address == utils.MetaInternal {
 				return fmt.Errorf("%s not enabled but referenced by %s component",
 					utils.SessionS, utils.DiameterAgent)
 			}
 		}
 	}
-	if self.radiusAgentCfg.Enabled {
+	if self.radiusAgentCfg.Enabled && !self.sessionSCfg.Enabled {
 		for _, raSMGConn := range self.radiusAgentCfg.SessionSConns {
-			if raSMGConn.Address == utils.MetaInternal && !self.sessionSCfg.Enabled {
+			if raSMGConn.Address == utils.MetaInternal {
 				return errors.New("SMGeneric not enabled but referenced by RadiusAgent component")
 			}
 		}
 	}
-	for _, httpAgentCfg := range self.httpAgentCfg {
-		// httpAgent checks
-		for _, sSConn := range httpAgentCfg.SessionSConns {
-			if sSConn.Address == utils.MetaInternal &&
-				!self.sessionSCfg.Enabled {
-				return errors.New("SessionS not enabled but referenced by HttpAgent component")
+	if self.sessionSCfg.Enabled {
+		for _, httpAgentCfg := range self.httpAgentCfg {
+			// httpAgent checks
+			for _, sSConn := range httpAgentCfg.SessionSConns {
+				if sSConn.Address == utils.MetaInternal {
+					return errors.New("SessionS not enabled but referenced by HttpAgent component")
+				}
 			}
 		}
 	}
-	if self.attributeSCfg != nil && self.attributeSCfg.Enabled {
+	if self.attributeSCfg.Enabled {
 		if self.attributeSCfg.ProcessRuns < 1 {
 			return fmt.Errorf("<%s> process_runs needs to be bigger than 0", utils.AttributeS)
 		}
 	}
-	if self.chargerSCfg != nil && self.chargerSCfg.Enabled {
+	if self.chargerSCfg.Enabled {
 		for _, connCfg := range self.chargerSCfg.AttributeSConns {
 			if connCfg.Address == utils.MetaInternal &&
 				(self.attributeSCfg == nil || !self.attributeSCfg.Enabled) {
@@ -602,23 +643,23 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// ResourceLimiter checks
-	if self.resourceSCfg != nil && self.resourceSCfg.Enabled {
+	if self.resourceSCfg.Enabled && !self.thresholdSCfg.Enabled {
 		for _, connCfg := range self.resourceSCfg.ThresholdSConns {
-			if connCfg.Address == utils.MetaInternal && !self.thresholdSCfg.Enabled {
+			if connCfg.Address == utils.MetaInternal {
 				return errors.New("ThresholdS not enabled but requested by ResourceS component.")
 			}
 		}
 	}
 	// StatS checks
-	if self.statsCfg != nil && self.statsCfg.Enabled {
+	if self.statsCfg.Enabled && !self.thresholdSCfg.Enabled {
 		for _, connCfg := range self.statsCfg.ThresholdSConns {
-			if connCfg.Address == utils.MetaInternal && !self.thresholdSCfg.Enabled {
+			if connCfg.Address == utils.MetaInternal {
 				return errors.New("ThresholdS not enabled but requested by StatS component.")
 			}
 		}
 	}
 	// SupplierS checks
-	if self.supplierSCfg != nil && self.supplierSCfg.Enabled {
+	if self.supplierSCfg.Enabled {
 		for _, connCfg := range self.supplierSCfg.RALsConns {
 			if connCfg.Address != utils.MetaInternal {
 				return errors.New("Only <*internal> RALs connectivity allowed in SupplierS for now")
@@ -627,24 +668,30 @@ func (self *CGRConfig) checkConfigSanity() error {
 				return errors.New("RALs not enabled but requested by SupplierS component.")
 			}
 		}
-		for _, connCfg := range self.supplierSCfg.ResourceSConns {
-			if connCfg.Address == utils.MetaInternal && !self.resourceSCfg.Enabled {
-				return errors.New("ResourceS not enabled but requested by SupplierS component.")
+		if !self.resourceSCfg.Enabled {
+			for _, connCfg := range self.supplierSCfg.ResourceSConns {
+				if connCfg.Address == utils.MetaInternal {
+					return errors.New("ResourceS not enabled but requested by SupplierS component.")
+				}
 			}
 		}
-		for _, connCfg := range self.supplierSCfg.StatSConns {
-			if connCfg.Address == utils.MetaInternal && !self.resourceSCfg.Enabled {
-				return errors.New("StatS not enabled but requested by SupplierS component.")
+		if !self.resourceSCfg.Enabled {
+			for _, connCfg := range self.supplierSCfg.StatSConns {
+				if connCfg.Address == utils.MetaInternal {
+					return errors.New("StatS not enabled but requested by SupplierS component.")
+				}
 			}
 		}
-		for _, connCfg := range self.supplierSCfg.AttributeSConns {
-			if connCfg.Address == utils.MetaInternal && !self.attributeSCfg.Enabled {
-				return errors.New("AttributeS not enabled but requested by SupplierS component.")
+		if !self.attributeSCfg.Enabled {
+			for _, connCfg := range self.supplierSCfg.AttributeSConns {
+				if connCfg.Address == utils.MetaInternal {
+					return errors.New("AttributeS not enabled but requested by SupplierS component.")
+				}
 			}
 		}
 	}
 	// DispaterS checks
-	if self.dispatcherSCfg != nil && self.dispatcherSCfg.Enabled {
+	if self.dispatcherSCfg.Enabled {
 		if !utils.IsSliceMember([]string{utils.MetaFirst, utils.MetaRandom, utils.MetaNext,
 			utils.MetaBroadcast}, self.dispatcherSCfg.DispatchingStrategy) {
 			return fmt.Errorf("<%s> unsupported dispatching strategy %s",
@@ -652,9 +699,9 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// Scheduler check connection with CDR Server
-	if len(self.schedulerCfg.CDRsConns) != 0 {
+	if !self.cdrsCfg.CDRSEnabled {
 		for _, connCfg := range self.schedulerCfg.CDRsConns {
-			if connCfg.Address == utils.MetaInternal && !self.CDRSEnabled {
+			if connCfg.Address == utils.MetaInternal {
 				return errors.New("CDR Server not enabled but requested by Scheduler")
 			}
 		}
@@ -669,10 +716,15 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err != nil {
 		return err
 	}
+	if err := self.generalCfg.loadFromJsonCfg(jsnGeneralCfg); err != nil {
+		return err
+	}
 
-	// Load sections out of JSON config, stop on error
 	jsnCacheCfg, err := jsnCfg.CacheJsonCfg()
 	if err != nil {
+		return err
+	}
+	if err := self.cacheCfg.loadFromJsonCfg(jsnCacheCfg); err != nil {
 		return err
 	}
 
@@ -680,9 +732,15 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err != nil {
 		return err
 	}
+	if err := self.listenCfg.loadFromJsonCfg(jsnListenCfg); err != nil {
+		return err
+	}
 
 	jsnHttpCfg, err := jsnCfg.HttpJsonCfg()
 	if err != nil {
+		return err
+	}
+	if err := self.httpCfg.loadFromJsonCfg(jsnHttpCfg); err != nil {
 		return err
 	}
 
@@ -690,9 +748,15 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err != nil {
 		return err
 	}
+	if err := self.dataDbCfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
+		return err
+	}
 
 	jsnStorDbCfg, err := jsnCfg.DbJsonCfg(STORDB_JSN)
 	if err != nil {
+		return err
+	}
+	if err := self.storDbCfg.loadFromJsonCfg(jsnStorDbCfg); err != nil {
 		return err
 	}
 
@@ -700,14 +764,23 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err != nil {
 		return err
 	}
+	if err = self.filterSCfg.loadFromJsonCfg(jsnFilterSCfg); err != nil {
+		return
+	}
 
 	jsnRALsCfg, err := jsnCfg.RalsJsonCfg()
 	if err != nil {
 		return err
 	}
+	if err = self.ralsCfg.loadFromJsonCfg(jsnRALsCfg); err != nil {
+		return
+	}
 
 	jsnSchedCfg, err := jsnCfg.SchedulerJsonCfg()
 	if err != nil {
+		return err
+	}
+	if err := self.schedulerCfg.loadFromJsonCfg(jsnSchedCfg); err != nil {
 		return err
 	}
 
@@ -715,9 +788,15 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err != nil {
 		return err
 	}
+	if err := self.cdrsCfg.loadFromJsonCfg(jsnCdrsCfg); err != nil {
+		return err
+	}
 
 	jsnCdrstatsCfg, err := jsnCfg.CdrStatsJsonCfg()
 	if err != nil {
+		return err
+	}
+	if err := self.cdrStatsCfg.loadFromJsonCfg(jsnCdrstatsCfg); err != nil {
 		return err
 	}
 
@@ -845,154 +924,17 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err != nil {
 		return nil
 	}
-
 	jsnAnalyzerCgrCfg, err := jsnCfg.AnalyzerCfgJson()
 	if err != nil {
 		return nil
 	}
-
-	if err := self.dataDbCfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
-		return err
-	}
-
-	if err := self.storDbCfg.loadFromJsonCfg(jsnStorDbCfg); err != nil {
-		return err
-	}
-
-	if err := self.generalCfg.loadFromJsonCfg(jsnGeneralCfg); err != nil {
-		return err
-	}
-
 	if err := self.tlsCfg.loadFromJsonCfg(jsnTlsCgrCfg); err != nil {
-		return err
-	}
-
-	if err := self.cacheCfg.loadFromJsonCfg(jsnCacheCfg); err != nil {
 		return err
 	}
 
 	if err := self.analyzerSCfg.loadFromJsonCfg(jsnAnalyzerCgrCfg); err != nil {
 		return err
 	}
-
-	if err := self.listenCfg.loadFromJsonCfg(jsnListenCfg); err != nil {
-		return err
-	}
-
-	if err := self.httpCfg.loadFromJsonCfg(jsnHttpCfg); err != nil {
-		return err
-	}
-
-	if err = self.filterSCfg.loadFromJsonCfg(jsnFilterSCfg); err != nil {
-		return
-	}
-
-	if err = self.ralsCfg.loadFromJsonCfg(jsnRALsCfg); err != nil {
-		return
-	}
-
-	if jsnSchedCfg != nil {
-		if err := self.schedulerCfg.loadFromJsonCfg(jsnSchedCfg); err != nil {
-			return err
-		}
-	}
-
-	if jsnCdrsCfg != nil {
-		if jsnCdrsCfg.Enabled != nil {
-			self.CDRSEnabled = *jsnCdrsCfg.Enabled
-		}
-		if jsnCdrsCfg.Extra_fields != nil {
-			if self.CDRSExtraFields, err = utils.ParseRSRFieldsFromSlice(*jsnCdrsCfg.Extra_fields); err != nil {
-				return err
-			}
-		}
-		if jsnCdrsCfg.Store_cdrs != nil {
-			self.CDRSStoreCdrs = *jsnCdrsCfg.Store_cdrs
-		}
-		if jsnCdrsCfg.Sessions_cost_retries != nil {
-			self.CDRSSMCostRetries = *jsnCdrsCfg.Sessions_cost_retries
-		}
-		if jsnCdrsCfg.Chargers_conns != nil {
-			self.CDRSChargerSConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Chargers_conns))
-			for idx, jsnHaCfg := range *jsnCdrsCfg.Chargers_conns {
-				self.CDRSChargerSConns[idx] = NewDfltHaPoolConfig()
-				self.CDRSChargerSConns[idx].loadFromJsonCfg(jsnHaCfg)
-			}
-		}
-		if jsnCdrsCfg.Rals_conns != nil {
-			self.CDRSRaterConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Rals_conns))
-			for idx, jsnHaCfg := range *jsnCdrsCfg.Rals_conns {
-				self.CDRSRaterConns[idx] = NewDfltHaPoolConfig()
-				self.CDRSRaterConns[idx].loadFromJsonCfg(jsnHaCfg)
-			}
-		}
-		if jsnCdrsCfg.Pubsubs_conns != nil {
-			self.CDRSPubSubSConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Pubsubs_conns))
-			for idx, jsnHaCfg := range *jsnCdrsCfg.Pubsubs_conns {
-				self.CDRSPubSubSConns[idx] = NewDfltHaPoolConfig()
-				self.CDRSPubSubSConns[idx].loadFromJsonCfg(jsnHaCfg)
-			}
-		}
-		if jsnCdrsCfg.Attributes_conns != nil {
-			self.CDRSAttributeSConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Attributes_conns))
-			for idx, jsnHaCfg := range *jsnCdrsCfg.Attributes_conns {
-				self.CDRSAttributeSConns[idx] = NewDfltHaPoolConfig()
-				self.CDRSAttributeSConns[idx].loadFromJsonCfg(jsnHaCfg)
-			}
-		}
-		if jsnCdrsCfg.Users_conns != nil {
-			self.CDRSUserSConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Users_conns))
-			for idx, jsnHaCfg := range *jsnCdrsCfg.Users_conns {
-				self.CDRSUserSConns[idx] = NewDfltHaPoolConfig()
-				self.CDRSUserSConns[idx].loadFromJsonCfg(jsnHaCfg)
-			}
-		}
-		if jsnCdrsCfg.Aliases_conns != nil {
-			self.CDRSAliaseSConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Aliases_conns))
-			for idx, jsnHaCfg := range *jsnCdrsCfg.Aliases_conns {
-				self.CDRSAliaseSConns[idx] = NewDfltHaPoolConfig()
-				self.CDRSAliaseSConns[idx].loadFromJsonCfg(jsnHaCfg)
-			}
-		}
-		if jsnCdrsCfg.Cdrstats_conns != nil {
-			self.CDRSCDRStatSConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Cdrstats_conns))
-			for idx, jsnHaCfg := range *jsnCdrsCfg.Cdrstats_conns {
-				self.CDRSCDRStatSConns[idx] = NewDfltHaPoolConfig()
-				self.CDRSCDRStatSConns[idx].loadFromJsonCfg(jsnHaCfg)
-			}
-		}
-		if jsnCdrsCfg.Thresholds_conns != nil {
-			self.CDRSThresholdSConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Thresholds_conns))
-			for idx, jsnHaCfg := range *jsnCdrsCfg.Thresholds_conns {
-				self.CDRSThresholdSConns[idx] = NewDfltHaPoolConfig()
-				self.CDRSThresholdSConns[idx].loadFromJsonCfg(jsnHaCfg)
-			}
-		}
-		if jsnCdrsCfg.Stats_conns != nil {
-			self.CDRSStatSConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Stats_conns))
-			for idx, jsnHaCfg := range *jsnCdrsCfg.Stats_conns {
-				self.CDRSStatSConns[idx] = NewDfltHaPoolConfig()
-				self.CDRSStatSConns[idx].loadFromJsonCfg(jsnHaCfg)
-			}
-		}
-		if jsnCdrsCfg.Online_cdr_exports != nil {
-			for _, expProfile := range *jsnCdrsCfg.Online_cdr_exports {
-				self.CDRSOnlineCDRExports = append(self.CDRSOnlineCDRExports, expProfile)
-			}
-		}
-	}
-
-	if jsnCdrstatsCfg != nil {
-		if jsnCdrstatsCfg.Enabled != nil {
-			self.CDRStatsEnabled = *jsnCdrstatsCfg.Enabled
-			if jsnCdrstatsCfg.Save_Interval != nil {
-				if self.CDRStatsSaveInterval, err = utils.ParseDurationWithNanosecs(*jsnCdrstatsCfg.Save_Interval); err != nil {
-					return err
-				}
-			}
-		}
-	}
-
 	if jsnCdreCfg != nil {
 		if self.CdreProfiles == nil {
 			self.CdreProfiles = make(map[string]*CdreConfig)
@@ -1355,6 +1297,14 @@ func (cfg *CGRConfig) HTTPCfg() *HTTPCfg {
 
 func (cfg *CGRConfig) RalsCfg() *RalsCfg {
 	return cfg.ralsCfg
+}
+
+func (cfg *CGRConfig) CdrsCfg() *CdrsCfg {
+	return cfg.cdrsCfg
+}
+
+func (cfg *CGRConfig) CdrStatsCfg() *CdrStatsCfg {
+	return cfg.cdrStatsCfg
 }
 
 func (cfg *CGRConfig) AnalyzerSCfg() *AnalyzerSCfg {

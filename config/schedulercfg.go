@@ -23,19 +23,19 @@ type SchedulerCfg struct {
 	CDRsConns []*HaPoolConfig
 }
 
-func (self *SchedulerCfg) loadFromJsonCfg(jsnCfg *SchedulerJsonCfg) error {
+func (schdcfg *SchedulerCfg) loadFromJsonCfg(jsnCfg *SchedulerJsonCfg) error {
 	if jsnCfg == nil {
 		return nil
 	}
 	if jsnCfg.Enabled != nil {
-		self.Enabled = *jsnCfg.Enabled
+		schdcfg.Enabled = *jsnCfg.Enabled
 	}
 
 	if jsnCfg.Cdrs_conns != nil {
-		self.CDRsConns = make([]*HaPoolConfig, len(*jsnCfg.Cdrs_conns))
+		schdcfg.CDRsConns = make([]*HaPoolConfig, len(*jsnCfg.Cdrs_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Cdrs_conns {
-			self.CDRsConns[idx] = NewDfltHaPoolConfig()
-			self.CDRsConns[idx].loadFromJsonCfg(jsnHaCfg)
+			schdcfg.CDRsConns[idx] = NewDfltHaPoolConfig()
+			schdcfg.CDRsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	return nil

@@ -470,13 +470,13 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 	utils.Logger.Info("Starting CGRateS CDRS service.")
 	var ralConn, pubSubConn, usersConn, attrSConn, aliasesConn, cdrstatsConn,
 		thresholdSConn, statsConn, chargerSConn *rpcclient.RpcClientPool
-	if len(cfg.CDRSChargerSConns) != 0 { // Conn pool towards RAL
+	if len(cfg.CdrsCfg().CDRSChargerSConns) != 0 { // Conn pool towards RAL
 		chargerSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
 			cfg.TlsCfg().ClientKey,
 			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.CDRSChargerSConns, internalChargerSChan,
+			cfg.CdrsCfg().CDRSChargerSConns, internalChargerSChan,
 			cfg.GeneralCfg().InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
@@ -485,13 +485,13 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 			return
 		}
 	}
-	if len(cfg.CDRSRaterConns) != 0 { // Conn pool towards RAL
+	if len(cfg.CdrsCfg().CDRSRaterConns) != 0 { // Conn pool towards RAL
 		ralConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
 			cfg.TlsCfg().ClientKey,
 			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.CDRSRaterConns, internalRaterChan,
+			cfg.CdrsCfg().CDRSRaterConns, internalRaterChan,
 			cfg.GeneralCfg().InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to RAL: %s", err.Error()))
@@ -499,13 +499,13 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 			return
 		}
 	}
-	if len(cfg.CDRSPubSubSConns) != 0 { // Pubsub connection init
+	if len(cfg.CdrsCfg().CDRSPubSubSConns) != 0 { // Pubsub connection init
 		pubSubConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
 			cfg.TlsCfg().ClientKey,
 			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.CDRSPubSubSConns, internalPubSubSChan,
+			cfg.CdrsCfg().CDRSPubSubSConns, internalPubSubSChan,
 			cfg.GeneralCfg().InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to PubSubSystem: %s", err.Error()))
@@ -513,13 +513,13 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 			return
 		}
 	}
-	if len(cfg.CDRSAttributeSConns) != 0 { // Users connection init
+	if len(cfg.CdrsCfg().CDRSAttributeSConns) != 0 { // Users connection init
 		attrSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
 			cfg.TlsCfg().ClientKey,
 			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.CDRSAttributeSConns, internalAttributeSChan,
+			cfg.CdrsCfg().CDRSAttributeSConns, internalAttributeSChan,
 			cfg.GeneralCfg().InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
@@ -528,13 +528,13 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 			return
 		}
 	}
-	if len(cfg.CDRSUserSConns) != 0 { // Users connection init
+	if len(cfg.CdrsCfg().CDRSUserSConns) != 0 { // Users connection init
 		usersConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
 			cfg.TlsCfg().ClientKey,
 			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.CDRSUserSConns, internalUserSChan,
+			cfg.CdrsCfg().CDRSUserSConns, internalUserSChan,
 			cfg.GeneralCfg().InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to UserS: %s", err.Error()))
@@ -542,13 +542,13 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 			return
 		}
 	}
-	if len(cfg.CDRSAliaseSConns) != 0 { // Aliases connection init
+	if len(cfg.CdrsCfg().CDRSAliaseSConns) != 0 { // Aliases connection init
 		aliasesConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
 			cfg.TlsCfg().ClientKey,
 			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.CDRSAliaseSConns, internalAliaseSChan,
+			cfg.CdrsCfg().CDRSAliaseSConns, internalAliaseSChan,
 			cfg.GeneralCfg().InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to AliaseS: %s", err.Error()))
@@ -556,13 +556,13 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 			return
 		}
 	}
-	if len(cfg.CDRSCDRStatSConns) != 0 { // Stats connection init
+	if len(cfg.CdrsCfg().CDRSCDRStatSConns) != 0 { // Stats connection init
 		cdrstatsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
 			cfg.TlsCfg().ClientKey,
 			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.CDRSCDRStatSConns, internalCdrStatSChan,
+			cfg.CdrsCfg().CDRSCDRStatSConns, internalCdrStatSChan,
 			cfg.GeneralCfg().InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to CDRStatS: %s", err.Error()))
@@ -570,13 +570,13 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 			return
 		}
 	}
-	if len(cfg.CDRSThresholdSConns) != 0 { // Stats connection init
+	if len(cfg.CdrsCfg().CDRSThresholdSConns) != 0 { // Stats connection init
 		thresholdSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
 			cfg.TlsCfg().ClientKey,
 			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.CDRSThresholdSConns, internalThresholdSChan,
+			cfg.CdrsCfg().CDRSThresholdSConns, internalThresholdSChan,
 			cfg.GeneralCfg().InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to ThresholdS: %s", err.Error()))
@@ -584,13 +584,13 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 			return
 		}
 	}
-	if len(cfg.CDRSStatSConns) != 0 { // Stats connection init
+	if len(cfg.CdrsCfg().CDRSStatSConns) != 0 { // Stats connection init
 		statsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
 			cfg.TlsCfg().ClientKey,
 			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.CDRSStatSConns, internalStatSChan,
+			cfg.CdrsCfg().CDRSStatSConns, internalStatSChan,
 			cfg.GeneralCfg().InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to StatS: %s", err.Error()))
@@ -626,7 +626,7 @@ func startScheduler(internalSchedulerChan chan *scheduler.Scheduler, cacheDoneCh
 }
 
 func startCdrStats(internalCdrStatSChan chan rpcclient.RpcClientConnection, dm *engine.DataManager, server *utils.Server) {
-	cdrStats := engine.NewStats(dm, cfg.CDRStatsSaveInterval)
+	cdrStats := engine.NewStats(dm, cfg.CdrStatsCfg().CDRStatsSaveInterval)
 	server.RpcRegister(cdrStats)
 	server.RpcRegister(&v1.CDRStatsV1{CdrStats: cdrStats}) // Public APIs
 	internalCdrStatSChan <- cdrStats
@@ -1350,7 +1350,7 @@ func main() {
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
 	var dm *engine.DataManager
-	if cfg.RalsCfg().RALsEnabled || cfg.CDRStatsEnabled || cfg.PubSubServerEnabled ||
+	if cfg.RalsCfg().RALsEnabled || cfg.CdrStatsCfg().CDRStatsEnabled || cfg.PubSubServerEnabled ||
 		cfg.AliasesServerEnabled || cfg.UserServerEnabled || cfg.SchedulerCfg().Enabled ||
 		cfg.AttributeSCfg().Enabled || cfg.ResourceSCfg().Enabled || cfg.StatSCfg().Enabled ||
 		cfg.ThresholdSCfg().Enabled || cfg.SupplierSCfg().Enabled { // Some services can run without db, ie: SessionS or CDRC
@@ -1370,7 +1370,7 @@ func main() {
 			return
 		}
 	}
-	if cfg.RalsCfg().RALsEnabled || cfg.CDRSEnabled {
+	if cfg.RalsCfg().RALsEnabled || cfg.CdrsCfg().CDRSEnabled {
 		storDb, err := engine.ConfigureStorStorage(cfg.StorDbCfg().StorDBType,
 			cfg.StorDbCfg().StorDBHost, cfg.StorDbCfg().StorDBPort,
 			cfg.StorDbCfg().StorDBName, cfg.StorDbCfg().StorDBUser,
@@ -1450,7 +1450,7 @@ func main() {
 	}
 
 	// Start CDR Server
-	if cfg.CDRSEnabled {
+	if cfg.CdrsCfg().CDRSEnabled {
 		go startCDRS(internalCdrSChan, cdrDb, dm,
 			internalRaterChan, internalPubSubSChan, internalAttributeSChan,
 			internalUserSChan, internalAliaseSChan, internalCdrStatSChan,
@@ -1464,7 +1464,7 @@ func main() {
 	}
 
 	// Start CDR Stats server
-	if cfg.CDRStatsEnabled {
+	if cfg.CdrStatsCfg().CDRStatsEnabled {
 		go startCdrStats(internalCdrStatSChan, dm, server)
 	}
 

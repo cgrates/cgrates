@@ -508,50 +508,47 @@ func TestCgrCfgJSONDefaultsScheduler(t *testing.T) {
 func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	eHaPoolCfg := []*HaPoolConfig{}
 	var eCdrExtr []*utils.RSRField
-	if cgrCfg.CDRSEnabled != false {
-		t.Error(cgrCfg.CDRSEnabled)
+	if cgrCfg.CdrsCfg().CDRSEnabled != false {
+		t.Errorf("Expecting: false , received: %+v", cgrCfg.CdrsCfg().CDRSEnabled)
 	}
-	if !reflect.DeepEqual(eCdrExtr, cgrCfg.CDRSExtraFields) {
-		t.Errorf(" expecting: %+v, received: %+v", eCdrExtr, cgrCfg.CDRSExtraFields)
+	if !reflect.DeepEqual(eCdrExtr, cgrCfg.CdrsCfg().CDRSExtraFields) {
+		t.Errorf("Expecting: %+v , received: %+v", eCdrExtr, cgrCfg.CdrsCfg().CDRSExtraFields)
 	}
-	if cgrCfg.CDRSStoreCdrs != true {
-		t.Error(cgrCfg.CDRSStoreCdrs)
+	if cgrCfg.CdrsCfg().CDRSStoreCdrs != true {
+		t.Errorf("Expecting: true , received: %+v", cgrCfg.CdrsCfg().CDRSStoreCdrs)
 	}
-	if cgrCfg.CDRScdrAccountSummary != false {
-		t.Error(cgrCfg.CDRScdrAccountSummary)
+	if cgrCfg.CdrsCfg().CDRSSMCostRetries != 5 {
+		t.Errorf("Expecting: 5 , received: %+v", cgrCfg.CdrsCfg().CDRSSMCostRetries)
 	}
-	if cgrCfg.CDRSSMCostRetries != 5 {
-		t.Error(cgrCfg.CDRSSMCostRetries)
+	if expected := []*HaPoolConfig{{Address: utils.MetaInternal}}; !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSRaterConns, expected) {
+		t.Errorf("Expecting: %+v , received: %+v", expected, cgrCfg.CdrsCfg().CDRSRaterConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.CDRSRaterConns, []*HaPoolConfig{{Address: "*internal"}}) {
-		t.Error(cgrCfg.CDRSRaterConns)
+	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSChargerSConns, eHaPoolCfg) {
+		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().CDRSChargerSConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.CDRSChargerSConns, eHaPoolCfg) {
-		t.Error(cgrCfg.CDRSChargerSConns)
+	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSPubSubSConns, eHaPoolCfg) {
+		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().CDRSPubSubSConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.CDRSPubSubSConns, eHaPoolCfg) {
-		t.Error(cgrCfg.CDRSPubSubSConns)
+	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSAttributeSConns, eHaPoolCfg) {
+		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().CDRSAttributeSConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.CDRSAttributeSConns, eHaPoolCfg) {
-		t.Error(cgrCfg.CDRSAttributeSConns)
+	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSUserSConns, eHaPoolCfg) {
+		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().CDRSUserSConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.CDRSUserSConns, eHaPoolCfg) {
-		t.Error(cgrCfg.CDRSUserSConns)
+	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSAliaseSConns, eHaPoolCfg) {
+		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().CDRSAliaseSConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.CDRSAliaseSConns, eHaPoolCfg) {
-		t.Error(cgrCfg.CDRSAliaseSConns)
+	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSCDRStatSConns, eHaPoolCfg) {
+		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().CDRSCDRStatSConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.CDRSCDRStatSConns, eHaPoolCfg) {
-		t.Error(cgrCfg.CDRSCDRStatSConns)
+	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSThresholdSConns, eHaPoolCfg) {
+		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().CDRSThresholdSConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.CDRSThresholdSConns, eHaPoolCfg) {
-		t.Error(cgrCfg.CDRSThresholdSConns)
+	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSStatSConns, eHaPoolCfg) {
+		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().CDRSStatSConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.CDRSStatSConns, eHaPoolCfg) {
-		t.Error(cgrCfg.CDRSStatSConns)
-	}
-	if cgrCfg.CDRSOnlineCDRExports != nil {
-		t.Error(cgrCfg.CDRSOnlineCDRExports)
+	if cgrCfg.CdrsCfg().CDRSOnlineCDRExports != nil {
+		t.Errorf("Expecting: nil , received: %+v", cgrCfg.CdrsCfg().CDRSOnlineCDRExports)
 	}
 }
 
@@ -573,25 +570,24 @@ func TestCgrCfgJSONLoadCDRS(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if !cgrCfg.CDRSEnabled {
-		t.Error(cgrCfg.CDRSEnabled)
+	if !cgrCfg.CdrsCfg().CDRSEnabled {
+		t.Errorf("Expecting: true , received: %+v", cgrCfg.CdrsCfg().CDRSEnabled)
 	}
-	if !reflect.DeepEqual(cgrCfg.CDRSChargerSConns,
-		[]*HaPoolConfig{{Address: utils.MetaInternal}}) {
-		t.Error(cgrCfg.CDRSChargerSConns)
+	expected := []*HaPoolConfig{{Address: utils.MetaInternal}}
+	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSChargerSConns, expected) {
+		t.Errorf("Expecting: %+v , received: %+v", expected, cgrCfg.CdrsCfg().CDRSChargerSConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.CDRSRaterConns,
-		[]*HaPoolConfig{{Address: utils.MetaInternal}}) {
-		t.Error(cgrCfg.CDRSRaterConns)
+	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSRaterConns, expected) {
+		t.Errorf("Expecting: %+v , received: %+v", expected, cgrCfg.CdrsCfg().CDRSRaterConns)
 	}
 }
 
 func TestCgrCfgJSONDefaultsCDRStats(t *testing.T) {
-	if cgrCfg.CDRStatsEnabled != false {
-		t.Error(cgrCfg.CDRStatsEnabled)
+	if cgrCfg.CdrStatsCfg().CDRStatsEnabled != false {
+		t.Error(cgrCfg.CdrStatsCfg().CDRStatsEnabled)
 	}
-	if cgrCfg.CDRStatsSaveInterval != 1*time.Minute {
-		t.Error(cgrCfg.CDRStatsSaveInterval)
+	if cgrCfg.CdrStatsCfg().CDRStatsSaveInterval != 1*time.Minute {
+		t.Error(cgrCfg.CdrStatsCfg().CDRStatsSaveInterval)
 	}
 }
 
