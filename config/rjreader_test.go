@@ -51,7 +51,7 @@ var (
 )
 
 func TestEnvRawJsonReadByte(t *testing.T) {
-	raw := &rawJson{rdr: bufio.NewReader(strings.NewReader(envStr))}
+	raw := &rawJSON{rdr: bufio.NewReader(strings.NewReader(envStr))}
 	expected := []byte(`{"data_db":{"db_type":"redis","db_host":"127.0.0.1","db_port":6379,"db_name":"10","db_user":"*env:TESTVAR","db_password":",/**/","redis_sentinel":""}}`)
 	rply := []byte{}
 	bit, err := raw.ReadByte()
