@@ -35,23 +35,26 @@ import (
  *	-add test for them 		+
  */
 
+// NewRawJSONReader returns a raw JSON reader
 func NewRawJSONReader(r io.Reader) io.Reader {
 	return &EnvReader{
-		rd: &rawJson{
+		rd: &rawJSON{
 			rdr: bufio.NewReader(r),
 		},
 	}
 }
 
+// isNewLine check if byte is new line
 func isNewLine(c byte) bool {
 	return c == '\n' || c == '\r'
 }
 
+// isWhiteSpace check if byte is white space
 func isWhiteSpace(c byte) bool {
 	return c == ' ' || c == '\t' || isNewLine(c) || c == 0
 }
 
-// Reads the enviorment variable
+//ReadEnv reads the enviorment variable
 func ReadEnv(key string) (string, error) { //it shod print a warning not a error
 	if env := os.Getenv(key); env != "" {
 		return env, nil
@@ -59,18 +62,21 @@ func ReadEnv(key string) (string, error) { //it shod print a warning not a error
 	return "", utils.ErrEnvNotFound(key)
 }
 
+// isAlfanum check if byte is number or letter
 func isAlfanum(bit byte) bool {
 	return (bit >= 'a' && bit <= 'z') ||
 		(bit >= 'A' && bit <= 'Z') ||
 		(bit >= '0' && bit <= '9')
 }
 
-type rawJson struct {
-	isInString bool
+// rawJSON is io.ByteReader interface to read JSON without comments, whitespaces and commas before ']' and '}'
+type rawJSON struct {
+	isInString bool // ignore character in strings
 	rdr        *bufio.Reader
 }
 
-func (b *rawJson) ReadByte() (bit byte, err error) {
+// ReadByte implementation
+func (b *rawJSON) ReadByte() (bit byte, err error) {
 	if b.isInString { //ignore commas in strings
 		return b.ReadByteWC()
 	}
@@ -90,7 +96,8 @@ func (b *rawJson) ReadByte() (bit byte, err error) {
 	return bit, err
 }
 
-func (b *rawJson) consumeComent(pkbit byte) (bool, error) {
+// consumeComent consumes the comment based on the peeked byte
+func (b *rawJSON) consumeComent(pkbit byte) (bool, error) {
 	switch pkbit {
 	case '/':
 		for {
@@ -126,7 +133,8 @@ func (b *rawJson) consumeComent(pkbit byte) (bool, error) {
 	return false, nil
 }
 
-func (b *rawJson) readFirstNonWhiteSpace() (byte, error) {
+//readFirstNonWhiteSpace reads first non white space byte
+func (b *rawJSON) readFirstNonWhiteSpace() (byte, error) {
 	for {
 		bit, err := b.rdr.ReadByte()
 		if err != nil || !isWhiteSpace(bit) {
@@ -135,7 +143,8 @@ func (b *rawJson) readFirstNonWhiteSpace() (byte, error) {
 	}
 }
 
-func (b *rawJson) ReadByteWC() (bit byte, err error) {
+// ReadByteWC reads next byte skiping the comments
+func (b *rawJSON) ReadByteWC() (bit byte, err error) {
 	if b.isInString {
 		bit, err = b.rdr.ReadByte()
 	} else {
@@ -164,7 +173,8 @@ func (b *rawJson) ReadByteWC() (bit byte, err error) {
 	return bit, err
 }
 
-func (b *rawJson) PeekByteWC() (byte, error) {
+// PeekByteWC peeks next byte skiping the comments
+func (b *rawJSON) PeekByteWC() (byte, error) {
 	for {
 		bit, err := b.rdr.Peek(1)
 		if err != nil {
@@ -194,13 +204,15 @@ func (b *rawJson) PeekByteWC() (byte, error) {
 	}
 }
 
+// EnvReader io.Reader interface to read JSON replacing the EnvMeta
 type EnvReader struct {
 	buf []byte
 	rd  io.ByteReader // reader provided by the client
 	r   int           // buf read positions
-	m   int           // meta Ofset
+	m   int           // meta Ofset used to determine fi MetaEnv was meet
 }
 
+//readEnvName reads the enviorment key
 func (b *EnvReader) readEnvName() (name []byte, bit byte, err error) { //0 if not set
 	for { //read byte by byte
 		bit, err := b.rd.ReadByte()
@@ -214,6 +226,7 @@ func (b *EnvReader) readEnvName() (name []byte, bit byte, err error) { //0 if no
 	}
 }
 
+//replaceEnv replaces the EnvMeta and enviorment key with  enviorment variable value in specific buffer
 func (b *EnvReader) replaceEnv(buf []byte, startEnv, midEnv int) (n int, err error) {
 	key, bit, err := b.readEnvName()
 	if err != nil && err != io.EOF {
@@ -251,6 +264,7 @@ func (b *EnvReader) replaceEnv(buf []byte, startEnv, midEnv int) (n int, err err
 	return len(buf), nil
 }
 
+//checkMeta check if char mach with next char from MetaEnv if not reset the counting
 func (b *EnvReader) checkMeta(bit byte) bool {
 	if bit == utils.MetaEnv[b.m] {
 		if bit == ':' {
@@ -264,6 +278,7 @@ func (b *EnvReader) checkMeta(bit byte) bool {
 	return false
 }
 
+// Read implementation
 func (b *EnvReader) Read(p []byte) (n int, err error) {
 	if len(p) == 0 {
 		return 0, nil
