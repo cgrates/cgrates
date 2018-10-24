@@ -188,6 +188,13 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		ev, &attrReply); err != nil {
 		t.Error(err)
 	}
+	if attrReply == nil {
+		t.Errorf("Expecting attrReply to not be nil")
+		// attrReply shoud not be nil so exit function
+		// to avoid nil segmentation fault;
+		// if this happens try to run this test manualy
+		return
+	}
 	attrReply.Compile() // Populate private variables in RSRParsers
 	if !reflect.DeepEqual(eAttrPrf.Attributes[0].Substitute[0], attrReply.Attributes[0].Substitute[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", eAttrPrf.Attributes[0].Substitute[0], attrReply.Attributes[0].Substitute[0])
