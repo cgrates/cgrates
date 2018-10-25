@@ -45,6 +45,7 @@ type Server struct {
 	httpEnabled bool
 	birpcSrv    *rpc2.Server
 	sync.RWMutex
+	httpsMux *http.ServeMux
 }
 
 func (s *Server) RpcRegister(rcvr interface{}) {
@@ -63,6 +64,9 @@ func (s *Server) RpcRegisterName(name string, rcvr interface{}) {
 
 func (s *Server) RegisterHttpFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
 	http.HandleFunc(pattern, handler)
+	if s.httpsMux != nil {
+		s.httpsMux.HandleFunc(pattern, handler)
+	}
 	s.Lock()
 	s.httpEnabled = true
 	s.Unlock()
@@ -70,6 +74,9 @@ func (s *Server) RegisterHttpFunc(pattern string, handler func(http.ResponseWrit
 
 func (s *Server) RegisterHttpHandler(pattern string, handler http.Handler) {
 	http.Handle(pattern, handler)
+	if s.httpsMux != nil {
+		s.httpsMux.Handle(pattern, handler)
+	}
 	s.Lock()
 	s.httpEnabled = true
 	s.Unlock()
@@ -419,16 +426,16 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 	if !enabled {
 		return
 	}
-	mux := http.NewServeMux()
+	s.httpsMux = http.NewServeMux()
 	if enabled && jsonRPCURL != "" {
 		s.Lock()
 		s.httpEnabled = true
 		s.Unlock()
 		Logger.Info("<HTTPTLS> enabling handler for JSON-RPC")
 		if useBasicAuth {
-			mux.HandleFunc(jsonRPCURL, use(handleRequest, basicAuth(userList)))
+			s.httpsMux.HandleFunc(jsonRPCURL, use(handleRequest, basicAuth(userList)))
 		} else {
-			mux.HandleFunc(jsonRPCURL, handleRequest)
+			s.httpsMux.HandleFunc(jsonRPCURL, handleRequest)
 		}
 	}
 	if enabled && wsRPCURL != "" {
@@ -440,11 +447,11 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 			jsonrpc.ServeConn(ws)
 		})
 		if useBasicAuth {
-			mux.HandleFunc(wsRPCURL, use(func(w http.ResponseWriter, r *http.Request) {
+			s.httpsMux.HandleFunc(wsRPCURL, use(func(w http.ResponseWriter, r *http.Request) {
 				wsHandler.ServeHTTP(w, r)
 			}, basicAuth(userList)))
 		} else {
-			mux.Handle(wsRPCURL, wsHandler)
+			s.httpsMux.Handle(wsRPCURL, wsHandler)
 		}
 	}
 	if !s.httpEnabled {
@@ -459,7 +466,7 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 	}
 	httpSrv := http.Server{
 		Addr:      addr,
-		Handler:   mux,
+		Handler:   s.httpsMux,
 		TLSConfig: &config,
 	}
 	Logger.Info(fmt.Sprintf("<HTTPTLS> start listening at <%s>", addr))

@@ -44,6 +44,7 @@ var (
 	certificatePath = flag.String("crt_path", "", "path to certificate for tls connection")
 	keyPath         = flag.String("key_path", "", "path to key for tls connection")
 	caPath          = flag.String("ca_path", "", "path to CA for tls connection(only for self sign certificate)")
+	tls             = flag.Bool("tls", false, "Tls connection")
 	client          *rpcclient.RpcClient
 )
 
@@ -122,7 +123,7 @@ func main() {
 		return
 	}
 	var err error
-	client, err = rpcclient.NewRpcClient("tcp", *server, *keyPath, *certificatePath, *caPath, 3, 3,
+	client, err = rpcclient.NewRpcClient("tcp", *server, *tls, *keyPath, *certificatePath, *caPath, 3, 3,
 		time.Duration(1*time.Second), time.Duration(5*time.Minute), *rpcEncoding, nil, false)
 	if err != nil {
 		flag.PrintDefaults()

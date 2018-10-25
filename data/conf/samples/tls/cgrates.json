@@ -40,49 +40,11 @@
 	"db_type": "redis",						// data_db type: <redis|mongo>
 	"db_port": 6379, 						// data_db port to reach the database
 	"db_name": "10", 						// data_db database name to connect to
-	
 },
 
 
 "stor_db": {
 	"db_password": "CGRateS.org",
-},
-
-
-"cache":{
-	"destinations": {"limit": 10000, "ttl":"0s", "precache": true},
-	"reverse_destinations": {"limit": 10000, "ttl":"0s", "precache": true},
-	"rating_plans": {"limit": 10000, "ttl":"0s","precache": true},
-	"rating_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
-	"lcr_rules": {"limit": 10000, "ttl":"0s", "precache": true},
-	"cdr_stats": {"limit": 10000, "ttl":"0s", "precache": true},
-	"actions": {"limit": 10000, "ttl":"0s", "precache": true},
-	"action_plans": {"limit": 10000, "ttl":"0s", "precache": true},
-	"account_action_plans": {"limit": 10000, "ttl":"0s", "precache": true},
-	"action_triggers": {"limit": 10000, "ttl":"0s", "precache": true},
-	"shared_groups": {"limit": 10000, "ttl":"0s", "precache": true},
-	"aliases": {"limit": 10000, "ttl":"0s", "precache": true},
-	"reverse_aliases": {"limit": 10000, "ttl":"0s", "precache": true},
-	"derived_chargers": {"limit": 10000, "ttl":"0s", "precache": true},
-	"resource_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
-	"resources": {"limit": 10000, "ttl":"0s", "precache": true},
-	"statqueues": {"limit": 10000, "ttl":"0s", "precache": true},
-	"statqueue_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
-	"thresholds": {"limit": 10000, "ttl":"0s", "precache": true},
-	"threshold_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
-	"filters": {"limit": 10000, "ttl":"0s", "precache": true},
-	"supplier_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
-	"attribute_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
-	"resource_filter_indexes" :{"limit": 10000, "ttl":"0s"},
-	"resource_filter_revindexes" : {"limit": 10000, "ttl":"0s"},
-	"stat_filter_indexes" : {"limit": 10000, "ttl":"0s"},
-	"stat_filter_revindexes" : {"limit": 10000, "ttl":"0s"},
-	"threshold_filter_indexes" : {"limit": 10000, "ttl":"0s"},
-	"threshold_filter_revindexes" : {"limit": 10000, "ttl":"0s"},
-	"supplier_filter_indexes" : {"limit": 10000, "ttl":"0s"},
-	"supplier_filter_revindexes" :{"limit": 10000, "ttl":"0s"},
-	"attribute_filter_indexes" : {"limit": 10000, "ttl":"0s"},
-	"attribute_filter_revindexes" : {"limit": 10000, "ttl":"0s"},
 },
 
 
@@ -95,7 +57,7 @@
 	"enabled": true,
 	"store_interval": "1s",
 	"thresholds_conns": [
-		{"address": "*internal"}
+		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 },
 
@@ -104,7 +66,7 @@
 	"enabled": true,
 	"store_interval": "1s",
 	"thresholds_conns": [
-		{"address": "*internal"}
+		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 },
 
@@ -113,5 +75,35 @@
 	"store_interval": "1s",
 },
 
+"sessions": {
+	"enabled": true,
+	"rals_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"resources_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"attributes_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+},
+
+"attributes": {
+	"enabled": true,
+},
+
+"cdrs": {
+	"enabled": true,
+	"chargers_conns":[
+		{"address": "*internal"}
+	],
+},
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": [
+		{"address": "*internal"}
+	],
+},
 
 }

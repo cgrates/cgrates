@@ -307,8 +307,8 @@ func main() {
 	if len(ldrCfg.LoaderCgrConfig.CachesConns) != 0 { // Init connection to CacheS so we can reload it's data
 		if cacheS, err = rpcclient.NewRpcClient("tcp",
 			ldrCfg.LoaderCgrConfig.CachesConns[0].Address,
-			ldrCfg.TlsCfg().ClientKey, ldrCfg.TlsCfg().ClientCerificate,
-			ldrCfg.TlsCfg().CaCertificate, 3, 3,
+			ldrCfg.LoaderCgrConfig.CachesConns[0].Tls, ldrCfg.TlsCfg().ClientKey,
+			ldrCfg.TlsCfg().ClientCerificate, ldrCfg.TlsCfg().CaCertificate, 3, 3,
 			time.Duration(1*time.Second), time.Duration(5*time.Minute),
 			strings.TrimPrefix(ldrCfg.LoaderCgrConfig.CachesConns[0].Transport, utils.Meta),
 			nil, false); err != nil {
@@ -326,6 +326,7 @@ func main() {
 			userS = cacheS
 		} else {
 			if userS, err = rpcclient.NewRpcClient("tcp", *usersAddress,
+				ldrCfg.LoaderCgrConfig.CachesConns[0].Tls,
 				ldrCfg.TlsCfg().ClientKey, ldrCfg.TlsCfg().ClientCerificate,
 				ldrCfg.TlsCfg().CaCertificate, 3, 3,
 				time.Duration(1*time.Second), time.Duration(5*time.Minute),
