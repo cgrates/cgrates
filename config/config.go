@@ -142,6 +142,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.schedulerCfg = new(SchedulerCfg)
 	cfg.cdrsCfg = new(CdrsCfg)
 	cfg.cdrStatsCfg = new(CdrStatsCfg)
+	cfg.CdreProfiles = make(map[string]*CdreCfg)
 	cfg.analyzerSCfg = new(AnalyzerSCfg)
 
 	cfg.sessionSCfg = new(SessionSCfg)
@@ -167,7 +168,9 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	cfg.MaxCallDuration = time.Duration(3) * time.Hour // Hardcoded for now
+
 	if err := cfg.loadFromJsonCfg(cgrJsonCfg); err != nil {
 		return nil, err
 	}
@@ -252,7 +255,8 @@ func NewCGRConfigFromFolder(cfgDir string) (*CGRConfig, error) {
 type CGRConfig struct {
 	MaxCallDuration time.Duration // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
 
-	CdreProfiles         map[string]*CdreConfig
+	CdreProfiles map[string]*CdreCfg
+
 	CdrcProfiles         map[string][]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath][]{Configs}
 	sessionSCfg          *SessionSCfg
 	fsAgentCfg           *FsAgentConfig    // FreeSWITCHAgent configuration
@@ -285,7 +289,7 @@ type CGRConfig struct {
 	MigratorCgrConfig    *MigratorCgrCfg
 
 	// Cache defaults loaded from json and needing clones
-	dfltCdreProfile *CdreConfig // Default cdreConfig profile
+	dfltCdreProfile *CdreCfg    // Default cdreConfig profile
 	dfltCdrcProfile *CdrcConfig // Default cdrcConfig profile
 
 	generalCfg   *GeneralCfg   // General config
@@ -936,12 +940,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return err
 	}
 	if jsnCdreCfg != nil {
-		if self.CdreProfiles == nil {
-			self.CdreProfiles = make(map[string]*CdreConfig)
-		}
 		for profileName, jsnCdre1Cfg := range jsnCdreCfg {
 			if _, hasProfile := self.CdreProfiles[profileName]; !hasProfile { // New profile, create before loading from json
-				self.CdreProfiles[profileName] = new(CdreConfig)
+				self.CdreProfiles[profileName] = new(CdreCfg)
 				if profileName != utils.META_DEFAULT {
 					self.CdreProfiles[profileName] = self.dfltCdreProfile.Clone() // Clone default so we do not inherit pointers
 				}

@@ -263,7 +263,7 @@ func TestWriteCdr(t *testing.T) {
 	if trailerCfgFlds, err = config.FCTemplatesFromFCTemplatesJsonCfg(trailerJsnCfgFlds); err != nil {
 		t.Error(err)
 	}
-	cdreCfg := &config.CdreConfig{
+	cdreCfg := &config.CdreCfg{
 		ExportFormat:  utils.MetaFileFWV,
 		HeaderFields:  hdrCfgFlds,
 		ContentFields: contentCfgFlds,
@@ -331,7 +331,7 @@ func TestWriteCdr(t *testing.T) {
 
 func TestWriteCdrs(t *testing.T) {
 	wrBuf := &bytes.Buffer{}
-	cdreCfg := &config.CdreConfig{
+	cdreCfg := &config.CdreCfg{
 		ExportFormat:  utils.MetaFileFWV,
 		HeaderFields:  hdrCfgFlds,
 		ContentFields: contentCfgFlds,

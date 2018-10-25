@@ -23,10 +23,9 @@ import (
 )
 
 // One instance of CdrExporter
-type CdreConfig struct {
+type CdreCfg struct {
 	ExportFormat        string
 	ExportPath          string
-	FallbackPath        string
 	Filters             []string
 	Tenant              string
 	Synchronous         bool
@@ -39,7 +38,7 @@ type CdreConfig struct {
 	TrailerFields       []*FCTemplate
 }
 
-func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) (err error) {
+func (self *CdreCfg) loadFromJsonCfg(jsnCfg *CdreJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -97,9 +96,9 @@ func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) (err error) {
 	return nil
 }
 
-// Clone itself into a new CdreConfig
-func (self *CdreConfig) Clone() *CdreConfig {
-	clnCdre := new(CdreConfig)
+// Clone itself into a new CdreCfg
+func (self *CdreCfg) Clone() *CdreCfg {
+	clnCdre := new(CdreCfg)
 	clnCdre.ExportFormat = self.ExportFormat
 	clnCdre.ExportPath = self.ExportPath
 	clnCdre.Synchronous = self.Synchronous
