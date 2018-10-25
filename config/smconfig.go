@@ -122,11 +122,10 @@ type SessionSCfg struct {
 	ChannelSyncInterval     time.Duration
 }
 
-func (self *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) error {
+func (self *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
-	var err error
 	if jsnCfg.Enabled != nil {
 		self.Enabled = *jsnCfg.Enabled
 	}

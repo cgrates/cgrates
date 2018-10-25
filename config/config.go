@@ -145,8 +145,8 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.CdreProfiles = make(map[string]*CdreCfg)
 	cfg.CdrcProfiles = make(map[string][]*CdrcCfg)
 	cfg.analyzerSCfg = new(AnalyzerSCfg)
-
 	cfg.sessionSCfg = new(SessionSCfg)
+
 	cfg.fsAgentCfg = new(FsAgentConfig)
 	cfg.kamAgentCfg = new(KamAgentCfg)
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
@@ -260,7 +260,6 @@ type CGRConfig struct {
 	CdrcProfiles map[string][]*CdrcCfg // Number of CDRC instances running imports, format map[dirPath][]{Configs}
 	loaderCfg    []*LoaderSCfg         // LoaderS configurations
 
-	sessionSCfg          *SessionSCfg
 	fsAgentCfg           *FsAgentConfig    // FreeSWITCHAgent configuration
 	kamAgentCfg          *KamAgentCfg      // KamailioAgent Configuration
 	SmOsipsConfig        *SmOsipsConfig    // SMOpenSIPS Configuration
@@ -305,6 +304,7 @@ type CGRConfig struct {
 	schedulerCfg *SchedulerCfg // Scheduler config
 	cdrsCfg      *CdrsCfg      // Cdrs config
 	cdrStatsCfg  *CdrStatsCfg  // CdrStats config - deprecated
+	sessionSCfg  *SessionSCfg  // SessionS config
 	analyzerSCfg *AnalyzerSCfg
 }
 
@@ -819,6 +819,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err != nil {
 		return err
 	}
+	if err := self.sessionSCfg.loadFromJsonCfg(jsnsessionSCfg); err != nil {
+		return err
+	}
 
 	jsnSmFsCfg, err := jsnCfg.FreeswitchAgentJsonCfg()
 	if err != nil {
@@ -1005,11 +1008,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 	}
 
-	if jsnsessionSCfg != nil {
-		if err := self.sessionSCfg.loadFromJsonCfg(jsnsessionSCfg); err != nil {
-			return err
-		}
-	}
 	if jsnSmFsCfg != nil {
 		if err := self.fsAgentCfg.loadFromJsonCfg(jsnSmFsCfg); err != nil {
 			return err
