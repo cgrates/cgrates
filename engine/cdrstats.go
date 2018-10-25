@@ -22,7 +22,6 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 

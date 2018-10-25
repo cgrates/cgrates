@@ -626,7 +626,7 @@ func TestCgrCfgJSONDefaultsCdreProfiles(t *testing.T) {
 			Value:            NewRSRParsersMustCompile("~Cost", true),
 			RoundingDecimals: 4},
 	}
-	eCdreCfg := map[string]*CdreConfig{
+	eCdreCfg := map[string]*CdreCfg{
 		"*default": {
 			ExportFormat:        utils.MetaFileCSV,
 			ExportPath:          "/var/spool/cgrates/cdre",

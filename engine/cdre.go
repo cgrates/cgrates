@@ -51,7 +51,7 @@ const (
 	META_FORMATCOST    = "*format_cost"
 )
 
-func NewCDRExporter(cdrs []*CDR, exportTemplate *config.CdreConfig, exportFormat, exportPath, fallbackPath, exportID string,
+func NewCDRExporter(cdrs []*CDR, exportTemplate *config.CdreCfg, exportFormat, exportPath, fallbackPath, exportID string,
 	synchronous bool, attempts int, fieldSeparator rune, usageMultiplyFactor utils.FieldMultiplyFactor,
 	costMultiplyFactor float64, roundingDecimals int, httpSkipTlsCheck bool, httpPoster *HTTPPoster, filterS *FilterS) (*CDRExporter, error) {
 	if len(cdrs) == 0 { // Nothing to export
@@ -81,7 +81,7 @@ func NewCDRExporter(cdrs []*CDR, exportTemplate *config.CdreConfig, exportFormat
 type CDRExporter struct {
 	sync.RWMutex
 	cdrs                []*CDR
-	exportTemplate      *config.CdreConfig
+	exportTemplate      *config.CdreCfg
 	exportFormat        string
 	exportPath          string
 	fallbackPath        string // folder where we save failed CDRs

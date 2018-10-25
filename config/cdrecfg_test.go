@@ -19,6 +19,7 @@ package config
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -29,16 +30,16 @@ func TestCdreCfgClone(t *testing.T) {
 	runIdRsrs := NewRSRParsersMustCompile("runid", true)
 	emptyFields := []*FCTemplate{}
 	initContentFlds := []*FCTemplate{
-		&FCTemplate{Tag: "CgrId",
+		{Tag: "CgrId",
 			Type:    "*composed",
 			FieldId: "cgrid",
 			Value:   cgrIdRsrs},
-		&FCTemplate{Tag: "RunId",
+		{Tag: "RunId",
 			Type:    "*composed",
 			FieldId: "runid",
 			Value:   runIdRsrs},
 	}
-	initCdreCfg := &CdreConfig{
+	initCdreCfg := &CdreCfg{
 		ExportFormat:   utils.MetaFileCSV,
 		ExportPath:     "/var/spool/cgrates/cdre",
 		Synchronous:    true,
@@ -52,16 +53,16 @@ func TestCdreCfgClone(t *testing.T) {
 		ContentFields:      initContentFlds,
 	}
 	eClnContentFlds := []*FCTemplate{
-		&FCTemplate{Tag: "CgrId",
+		{Tag: "CgrId",
 			Type:    "*composed",
 			FieldId: "cgrid",
 			Value:   cgrIdRsrs},
-		&FCTemplate{Tag: "RunId",
+		{Tag: "RunId",
 			Type:    "*composed",
 			FieldId: "runid",
 			Value:   runIdRsrs},
 	}
-	eClnCdreCfg := &CdreConfig{
+	eClnCdreCfg := &CdreCfg{
 		ExportFormat:   utils.MetaFileCSV,
 		ExportPath:     "/var/spool/cgrates/cdre",
 		Synchronous:    true,
@@ -94,4 +95,70 @@ func TestCdreCfgClone(t *testing.T) {
 		t.Error("Unexpected change of FieldId: ", initCdreCfg.ContentFields[0].FieldId)
 	}
 
+}
+
+func TestCdreCfgloadFromJsonCfg(t *testing.T) {
+	var lstcfg, expected CdreCfg
+	if err := lstcfg.loadFromJsonCfg(nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(lstcfg, expected) {
+		t.Errorf("Expected: %+v ,recived: %+v", expected, lstcfg)
+	}
+	if err := lstcfg.loadFromJsonCfg(new(CdreJsonCfg)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(lstcfg, expected) {
+		t.Errorf("Expected: %+v ,recived: %+v", expected, lstcfg)
+	}
+	cfgJSONStr := `{
+"cdre": {
+	"*default": {
+		"export_format": "*file_csv",					// exported CDRs format <*file_csv|*file_fwv|*http_post|*http_json_cdr|*http_json_map|*amqp_json_cdr|*amqp_json_map>
+		"export_path": "/var/spool/cgrates/cdre",		// path where the exported CDRs will be placed
+		"filters" :[],									// new filters for cdre
+		"tenant": "cgrates.org",						// tenant used in filterS.Pass
+		"synchronous": false,							// block processing until export has a result
+		"attempts": 1,									// Number of attempts if not success
+		"field_separator": ",",							// used field separator in some export formats, eg: *file_csv
+		"usage_multiply_factor": {
+			"*any": 1									// multiply usage based on ToR field or *any for all
+		},
+		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
+		"header_fields": [],							// template of the exported header fields
+		"content_fields": [								// template of the exported content fields
+			{"tag": "CGRID", "type": "*composed", "value": "~CGRID"},
+		],
+		"trailer_fields": [],							// template of the exported trailer fields
+	},
+},
+}`
+	val, err := NewRSRParsers("~CGRID", true)
+	if err != nil {
+		t.Error(err)
+	}
+	expected = CdreCfg{
+		ExportFormat:        "*file_csv",
+		ExportPath:          "/var/spool/cgrates/cdre",
+		Filters:             []string{},
+		Tenant:              "cgrates.org",
+		Attempts:            1,
+		FieldSeparator:      ',',
+		UsageMultiplyFactor: map[string]float64{"*any": 1},
+		CostMultiplyFactor:  1,
+		HeaderFields:        []*FCTemplate{},
+		ContentFields: []*FCTemplate{{
+			Tag:   "CGRID",
+			Type:  "*composed",
+			Value: val,
+		}},
+		TrailerFields: []*FCTemplate{},
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnCdreCfg, err := jsnCfg.CdreJsonCfgs(); err != nil {
+		t.Error(err)
+	} else if err = lstcfg.loadFromJsonCfg(jsnCdreCfg["*default"]); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, lstcfg) {
+		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(lstcfg))
+	}
 }
