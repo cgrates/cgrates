@@ -32,9 +32,9 @@ import (
 
 var (
 	DBDefaults               DbDefaults
-	cgrCfg                   *CGRConfig     // will be shared
-	dfltFsConnConfig         *FsConnCfg     // Default FreeSWITCH Connection configuration, built out of json default configuration
-	dfltKamConnConfig        *KamConnConfig // Default Kamailio Connection configuration
+	cgrCfg                   *CGRConfig  // will be shared
+	dfltFsConnConfig         *FsConnCfg  // Default FreeSWITCH Connection configuration, built out of json default configuration
+	dfltKamConnConfig        *KamConnCfg // Default Kamailio Connection configuration
 	dfltHaPoolConfig         *HaPoolConfig
 	dfltAstConnCfg           *AsteriskConnCfg
 	dfltLoaderConfig         *LoaderSCfg
@@ -147,8 +147,8 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.analyzerSCfg = new(AnalyzerSCfg)
 	cfg.sessionSCfg = new(SessionSCfg)
 	cfg.fsAgentCfg = new(FsAgentCfg)
-
 	cfg.kamAgentCfg = new(KamAgentCfg)
+
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
 	cfg.asteriskAgentCfg = new(AsteriskAgentCfg)
 	cfg.diameterAgentCfg = new(DiameterAgentCfg)
@@ -260,7 +260,6 @@ type CGRConfig struct {
 	CdrcProfiles map[string][]*CdrcCfg // Number of CDRC instances running imports, format map[dirPath][]{Configs}
 	loaderCfg    []*LoaderSCfg         // LoaderS configurations
 
-	kamAgentCfg          *KamAgentCfg      // KamailioAgent Configuration
 	SmOsipsConfig        *SmOsipsConfig    // SMOpenSIPS Configuration
 	asteriskAgentCfg     *AsteriskAgentCfg // SMAsterisk Configuration
 	diameterAgentCfg     *DiameterAgentCfg // DiameterAgent configuration
@@ -305,6 +304,7 @@ type CGRConfig struct {
 	cdrStatsCfg  *CdrStatsCfg  // CdrStats config - deprecated
 	sessionSCfg  *SessionSCfg  // SessionS config
 	fsAgentCfg   *FsAgentCfg   // FreeSWITCHAgent config
+	kamAgentCfg  *KamAgentCfg  // KamailioAgent config
 	analyzerSCfg *AnalyzerSCfg
 }
 
@@ -835,6 +835,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err != nil {
 		return err
 	}
+	if err := self.kamAgentCfg.loadFromJsonCfg(jsnKamAgentCfg); err != nil {
+		return err
+	}
 
 	jsnSMAstCfg, err := jsnCfg.AsteriskAgentJsonCfg()
 	if err != nil {
@@ -1008,12 +1011,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			} else {
 				self.CdrcProfiles[cdrcInstCfg.CdrInDir] = append(self.CdrcProfiles[cdrcInstCfg.CdrInDir], cdrcInstCfg)
 			}
-		}
-	}
-
-	if jsnKamAgentCfg != nil {
-		if err := self.kamAgentCfg.loadFromJsonCfg(jsnKamAgentCfg); err != nil {
-			return err
 		}
 	}
 

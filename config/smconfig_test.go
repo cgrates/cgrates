@@ -180,3 +180,60 @@ func TestFsAgentCfgloadFromJsonCfg2(t *testing.T) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(fsagcfg))
 	}
 }
+
+func TestFsConnCfgloadFromJsonCfg(t *testing.T) {
+	var fscocfg, expected FsConnCfg
+	if err := fscocfg.loadFromJsonCfg(nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(fscocfg, expected) {
+		t.Errorf("Expected: %+v ,recived: %+v", expected, fscocfg)
+	}
+	if err := fscocfg.loadFromJsonCfg(new(FsConnJsonCfg)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(fscocfg, expected) {
+		t.Errorf("Expected: %+v ,recived: %+v", expected, fscocfg)
+	}
+	json := &FsConnJsonCfg{
+		Address:    utils.StringPointer("127.0.0.1:8448"),
+		Password:   utils.StringPointer("pass123"),
+		Reconnects: utils.IntPointer(5),
+	}
+	expected = FsConnCfg{
+		Address:    "127.0.0.1:8448",
+		Password:   "pass123",
+		Reconnects: 5,
+		Alias:      "127.0.0.1:8448",
+	}
+	if err = fscocfg.loadFromJsonCfg(json); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, fscocfg) {
+		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(fscocfg))
+	}
+}
+
+func TestHaPoolConfigloadFromJsonCfg(t *testing.T) {
+	var hpoolcfg, expected HaPoolConfig
+	if err := hpoolcfg.loadFromJsonCfg(nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(hpoolcfg, expected) {
+		t.Errorf("Expected: %+v ,recived: %+v", expected, hpoolcfg)
+	}
+	if err := hpoolcfg.loadFromJsonCfg(new(HaPoolJsonCfg)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(hpoolcfg, expected) {
+		t.Errorf("Expected: %+v ,recived: %+v", expected, hpoolcfg)
+	}
+	json := &HaPoolJsonCfg{
+		Address:     utils.StringPointer("127.0.0.1:8448"),
+		Synchronous: utils.BoolPointer(true),
+	}
+	expected = HaPoolConfig{
+		Address:     "127.0.0.1:8448",
+		Synchronous: true,
+	}
+	if err = hpoolcfg.loadFromJsonCfg(json); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, hpoolcfg) {
+		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(hpoolcfg))
+	}
+}
