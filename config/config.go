@@ -143,6 +143,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.cdrsCfg = new(CdrsCfg)
 	cfg.cdrStatsCfg = new(CdrStatsCfg)
 	cfg.CdreProfiles = make(map[string]*CdreCfg)
+	cfg.CdrcProfiles = make(map[string][]*CdrcCfg)
 	cfg.analyzerSCfg = new(AnalyzerSCfg)
 
 	cfg.sessionSCfg = new(SessionSCfg)
@@ -255,10 +256,10 @@ func NewCGRConfigFromFolder(cfgDir string) (*CGRConfig, error) {
 type CGRConfig struct {
 	MaxCallDuration time.Duration // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
 
-	CdreProfiles map[string]*CdreCfg
-	loaderCfg    []*LoaderSCfg // configuration for Loader
+	CdreProfiles map[string]*CdreCfg   // Cdre config profiles
+	CdrcProfiles map[string][]*CdrcCfg // Number of CDRC instances running imports, format map[dirPath][]{Configs}
+	loaderCfg    []*LoaderSCfg         // LoaderS configurations
 
-	CdrcProfiles         map[string][]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath][]{Configs}
 	sessionSCfg          *SessionSCfg
 	fsAgentCfg           *FsAgentConfig    // FreeSWITCHAgent configuration
 	kamAgentCfg          *KamAgentCfg      // KamailioAgent Configuration
@@ -289,8 +290,8 @@ type CGRConfig struct {
 	MigratorCgrConfig    *MigratorCgrCfg
 
 	// Cache defaults loaded from json and needing clones
-	dfltCdreProfile *CdreCfg    // Default cdreConfig profile
-	dfltCdrcProfile *CdrcConfig // Default cdrcConfig profile
+	dfltCdreProfile *CdreCfg // Default cdreConfig profile
+	dfltCdrcProfile *CdrcCfg // Default cdrcConfig profile
 
 	generalCfg   *GeneralCfg   // General config
 	dataDbCfg    *DataDbCfg    // Database config
@@ -962,21 +963,18 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	}
 
 	if jsnCdrcCfg != nil {
-		if self.CdrcProfiles == nil {
-			self.CdrcProfiles = make(map[string][]*CdrcConfig)
-		}
 		for _, jsnCrc1Cfg := range jsnCdrcCfg {
 			if jsnCrc1Cfg.Id == nil || *jsnCrc1Cfg.Id == "" {
-				return errors.New("CDRC profile without an id")
+				return utils.ErrCDRCNoProfileID
 			}
 			if *jsnCrc1Cfg.Id == utils.META_DEFAULT {
 				if self.dfltCdrcProfile == nil {
-					self.dfltCdrcProfile = new(CdrcConfig)
+					self.dfltCdrcProfile = new(CdrcCfg)
 				}
 			}
 			indxFound := -1 // Will be different than -1 if an instance with same id will be found
 			pathFound := "" // Will be populated with the path where slice of cfgs was found
-			var cdrcInstCfg *CdrcConfig
+			var cdrcInstCfg *CdrcCfg
 			for path := range self.CdrcProfiles {
 				for i := range self.CdrcProfiles[path] {
 					if self.CdrcProfiles[path][i].ID == *jsnCrc1Cfg.Id {
@@ -994,10 +992,10 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 				return err
 			}
 			if cdrcInstCfg.CdrInDir == "" {
-				return errors.New("CDRC profile without cdr_in_dir")
+				return utils.ErrCDRCNoInDir
 			}
 			if _, hasDir := self.CdrcProfiles[cdrcInstCfg.CdrInDir]; !hasDir {
-				self.CdrcProfiles[cdrcInstCfg.CdrInDir] = make([]*CdrcConfig, 0)
+				self.CdrcProfiles[cdrcInstCfg.CdrInDir] = make([]*CdrcCfg, 0)
 			}
 			if indxFound != -1 { // Replace previous config so we have inheritance
 				self.CdrcProfiles[pathFound][indxFound] = cdrcInstCfg

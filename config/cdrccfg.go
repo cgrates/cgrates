@@ -24,7 +24,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type CdrcConfig struct {
+type CdrcCfg struct {
 	ID                       string              // free-form text identifying this CDRC instance
 	Enabled                  bool                // Enable/Disable the profile
 	DryRun                   bool                // Do not post CDRs to the server
@@ -51,7 +51,7 @@ type CdrcConfig struct {
 	CacheDumpFields          []*FCTemplate
 }
 
-func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
+func (self *CdrcCfg) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -151,11 +151,12 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 	return nil
 }
 
-// Clone itself into a new CdrcConfig
-func (self *CdrcConfig) Clone() *CdrcConfig {
-	clnCdrc := new(CdrcConfig)
+// Clone itself into a new CdrcCfg
+func (self *CdrcCfg) Clone() *CdrcCfg {
+	clnCdrc := new(CdrcCfg)
 	clnCdrc.ID = self.ID
 	clnCdrc.Enabled = self.Enabled
+	clnCdrc.DryRun = self.DryRun
 	clnCdrc.CdrsConns = make([]*HaPoolConfig, len(self.CdrsConns))
 	for idx, cdrConn := range self.CdrsConns {
 		clonedVal := *cdrConn
@@ -173,12 +174,14 @@ func (self *CdrcConfig) Clone() *CdrcConfig {
 	for i, path := range self.CDRPath {
 		clnCdrc.CDRPath[i] = path
 	}
+	clnCdrc.FailedCallsPrefix = self.FailedCallsPrefix
 	clnCdrc.Filters = make([]string, len(self.Filters))
 	for i, fltr := range self.Filters {
 		clnCdrc.Filters[i] = fltr
 	}
 	clnCdrc.Tenant = self.Tenant
 	clnCdrc.CdrSourceId = self.CdrSourceId
+	clnCdrc.ContinueOnSuccess = self.ContinueOnSuccess
 	clnCdrc.PartialRecordCache = self.PartialRecordCache
 	clnCdrc.PartialCacheExpiryAction = self.PartialCacheExpiryAction
 	clnCdrc.HeaderFields = make([]*FCTemplate, len(self.HeaderFields))

@@ -36,7 +36,7 @@ import (
 var flatstoreCfgPath string
 var flatstoreCfg *config.CGRConfig
 var flatstoreRpc *rpc.Client
-var flatstoreCdrcCfg *config.CdrcConfig
+var flatstoreCdrcCfg *config.CdrcCfg
 
 var fullSuccessfull = `INVITE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0|200|OK|1436454408|*prepaid|1001|1002||3401:2069362475
 BYE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0|200|OK|1436454410|||||3401:2069362475

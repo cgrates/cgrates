@@ -92,7 +92,7 @@ func startCdrcs(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConn
 		}
 		// Start CDRCs
 		for _, cdrcCfgs := range cfg.CdrcProfiles {
-			var enabledCfgs []*config.CdrcConfig
+			var enabledCfgs []*config.CdrcCfg
 			for _, cdrcCfg := range cdrcCfgs { // Take a random config out since they should be the same
 				if cdrcCfg.Enabled {
 					enabledCfgs = append(enabledCfgs, cdrcCfg)
@@ -111,11 +111,11 @@ func startCdrcs(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConn
 }
 
 // Fires up a cdrc instance
-func startCdrc(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConnection, cdrcCfgs []*config.CdrcConfig, httpSkipTlsCheck bool,
+func startCdrc(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConnection, cdrcCfgs []*config.CdrcCfg, httpSkipTlsCheck bool,
 	closeChan chan struct{}, exitChan chan bool, filterSChan chan *engine.FilterS) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
-	var cdrcCfg *config.CdrcConfig
+	var cdrcCfg *config.CdrcCfg
 	for _, cdrcCfg = range cdrcCfgs { // Take the first config out, does not matter which one
 		break
 	}

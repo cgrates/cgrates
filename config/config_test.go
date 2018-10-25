@@ -199,7 +199,7 @@ func TestCgrCfgCDRC(t *testing.T) {
 ],
 }`
 	eCgrCfg, _ := NewDefaultCGRConfig()
-	eCgrCfg.CdrcProfiles["/var/spool/cgrates/cdrc/in"] = []*CdrcConfig{
+	eCgrCfg.CdrcProfiles["/var/spool/cgrates/cdrc/in"] = []*CdrcCfg{
 		{
 			ID:                       utils.META_DEFAULT,
 			Enabled:                  true,
@@ -1520,7 +1520,7 @@ func TestCgrMigratorCfgDefault(t *testing.T) {
 
 func TestCDRCWithDefault(t *testing.T) {
 	eCgrCfg, _ := NewDefaultCGRConfig()
-	eCgrCfg.CdrcProfiles["/var/spool/cgrates/cdrc/in"] = []*CdrcConfig{
+	eCgrCfg.CdrcProfiles["/var/spool/cgrates/cdrc/in"] = []*CdrcCfg{
 		{
 			ID:                       utils.META_DEFAULT,
 			Enabled:                  false,

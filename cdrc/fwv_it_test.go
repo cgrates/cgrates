@@ -37,7 +37,7 @@ import (
 var fwvCfgPath string
 var fwvCfg *config.CGRConfig
 var fwvRpc *rpc.Client
-var fwvCdrcCfg *config.CdrcConfig
+var fwvCdrcCfg *config.CdrcCfg
 
 var FW_CDR_FILE1 = `HDR0001DDB     ABC                                     Some Connect A.B.                       DDB-Some-10022-20120711-309.CDR         00030920120711100255
 CDR0000010  0 20120708181506000123451234         0040123123120                  004                                            000018009980010001ISDN  ABC   10Buiten uw regio                         EHV 00000009190000000009

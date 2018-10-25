@@ -49,8 +49,8 @@ README:
 
 var csvCfgPath string
 var csvCfg *config.CGRConfig
-var cdrcCfgs []*config.CdrcConfig
-var cdrcCfg *config.CdrcConfig
+var cdrcCfgs []*config.CdrcCfg
+var cdrcCfg *config.CdrcCfg
 var cdrcRpc *rpc.Client
 
 var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
