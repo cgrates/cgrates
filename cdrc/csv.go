@@ -32,7 +32,7 @@ import (
 )
 
 func NewCsvRecordsProcessor(csvReader *csv.Reader, timezone, fileName string,
-	dfltCdrcCfg *config.CdrcConfig, cdrcCfgs []*config.CdrcConfig,
+	dfltCdrcCfg *config.CdrcCfg, cdrcCfgs []*config.CdrcCfg,
 	httpSkipTlsCheck bool, unpairedRecordsCache *UnpairedRecordsCache, partialRecordsCache *PartialRecordsCache,
 	cacheDumpFields []*config.FCTemplate, filterS *engine.FilterS) *CsvRecordsProcessor {
 	return &CsvRecordsProcessor{csvReader: csvReader, timezone: timezone, fileName: fileName,
@@ -45,8 +45,8 @@ type CsvRecordsProcessor struct {
 	csvReader              *csv.Reader
 	timezone               string // Timezone for CDRs which are not clearly specifying it
 	fileName               string
-	dfltCdrcCfg            *config.CdrcConfig
-	cdrcCfgs               []*config.CdrcConfig
+	dfltCdrcCfg            *config.CdrcCfg
+	cdrcCfgs               []*config.CdrcCfg
 	processedRecordsNr     int64 // Number of content records in file
 	httpSkipTlsCheck       bool
 	unpairedRecordsCache   *UnpairedRecordsCache // Shared by cdrc so we can cache for all files in a folder
@@ -135,7 +135,7 @@ func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.CDR, 
 }
 
 // Takes the record out of csv and turns it into storedCdr which can be processed by CDRS
-func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *config.CdrcConfig, tenant string) (*engine.CDR, error) {
+func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *config.CdrcCfg, tenant string) (*engine.CDR, error) {
 	storedCdr := &engine.CDR{OriginHost: "0.0.0.0", Source: cdrcCfg.CdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
 	var err error
 	csvProvider := newCsvProvider(record) // used for filterS and for RSRParsers

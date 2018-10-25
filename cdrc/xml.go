@@ -80,7 +80,7 @@ func handlerSubstractUsage(xmlElement *xmlquery.Node, argsTpl config.RSRParsers,
 }
 
 func NewXMLRecordsProcessor(recordsReader io.Reader, cdrPath utils.HierarchyPath, timezone string,
-	httpSkipTlsCheck bool, cdrcCfgs []*config.CdrcConfig, filterS *engine.FilterS) (*XMLRecordsProcessor, error) {
+	httpSkipTlsCheck bool, cdrcCfgs []*config.CdrcCfg, filterS *engine.FilterS) (*XMLRecordsProcessor, error) {
 	//create doc
 	doc, err := xmlquery.Parse(recordsReader)
 	if err != nil {
@@ -99,7 +99,7 @@ type XMLRecordsProcessor struct {
 	cdrPath          utils.HierarchyPath // path towards one CDR element
 	timezone         string
 	httpSkipTlsCheck bool
-	cdrcCfgs         []*config.CdrcConfig // individual configs for the folder CDRC is monitoring
+	cdrcCfgs         []*config.CdrcCfg // individual configs for the folder CDRC is monitoring
 	filterS          *engine.FilterS
 }
 
@@ -138,7 +138,7 @@ func (xmlProc *XMLRecordsProcessor) ProcessNextRecord() (cdrs []*engine.CDR, err
 	return cdrs, nil
 }
 
-func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity *xmlquery.Node, cdrcCfg *config.CdrcConfig, tenant string) (*engine.CDR, error) {
+func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity *xmlquery.Node, cdrcCfg *config.CdrcCfg, tenant string) (*engine.CDR, error) {
 	cdr := &engine.CDR{OriginHost: "0.0.0.0", Source: cdrcCfg.CdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
 	var lazyHttpFields []*config.FCTemplate
 	var err error

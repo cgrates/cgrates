@@ -34,8 +34,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewFwvRecordsProcessor(file *os.File, dfltCfg *config.CdrcConfig,
-	cdrcCfgs []*config.CdrcConfig, httpClient *http.Client,
+func NewFwvRecordsProcessor(file *os.File, dfltCfg *config.CdrcCfg,
+	cdrcCfgs []*config.CdrcCfg, httpClient *http.Client,
 	httpSkipTlsCheck bool, timezone string, filterS *engine.FilterS) *FwvRecordsProcessor {
 	return &FwvRecordsProcessor{file: file, cdrcCfgs: cdrcCfgs, dfltCfg: dfltCfg,
 		httpSkipTlsCheck: httpSkipTlsCheck, timezone: timezone, filterS: filterS}
@@ -43,8 +43,8 @@ func NewFwvRecordsProcessor(file *os.File, dfltCfg *config.CdrcConfig,
 
 type FwvRecordsProcessor struct {
 	file               *os.File
-	dfltCfg            *config.CdrcConfig // General parameters
-	cdrcCfgs           []*config.CdrcConfig
+	dfltCfg            *config.CdrcCfg // General parameters
+	cdrcCfgs           []*config.CdrcCfg
 	httpClient         *http.Client
 	httpSkipTlsCheck   bool
 	timezone           string
@@ -139,7 +139,7 @@ func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.CDR, error) {
 }
 
 // Converts a record (header or normal) to CDR
-func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *config.CdrcConfig, cfgKey string) (*engine.CDR, error) {
+func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *config.CdrcCfg, cfgKey string) (*engine.CDR, error) {
 	var err error
 	var lazyHttpFields []*config.FCTemplate
 	var cfgFields []*config.FCTemplate

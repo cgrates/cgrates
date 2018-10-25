@@ -59,6 +59,8 @@ var (
 	RalsErrorPrfx               = "RALS_ERROR"
 
 	ErrJsonIncompleteComment = errors.New("JSON_INCOMPLETE_COMMENT")
+	ErrCDRCNoProfileID       = errors.New("CDRC_PROFILE_WITHOUT_ID")
+	ErrCDRCNoInDir           = errors.New("CDRC_PROFILE_WITHOUT_IN_DIR")
 )
 
 // NewCGRError initialises a new CGRError

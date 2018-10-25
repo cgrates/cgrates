@@ -35,8 +35,8 @@ import (
 
 var xmlCfgPath string
 var xmlCfg *config.CGRConfig
-var cdrcXmlCfgs []*config.CdrcConfig
-var cdrcXmlCfg *config.CdrcConfig
+var cdrcXmlCfgs []*config.CdrcCfg
+var cdrcXmlCfg *config.CdrcCfg
 var cdrcXmlRPC *rpc.Client
 var xmlPathIn1, xmlPathOut1 string
 

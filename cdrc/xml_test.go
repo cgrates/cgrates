@@ -207,8 +207,8 @@ func TestXMLHandlerSubstractUsage(t *testing.T) {
 }
 
 func TestXMLRPProcess(t *testing.T) {
-	cdrcCfgs := []*config.CdrcConfig{
-		&config.CdrcConfig{
+	cdrcCfgs := []*config.CdrcCfg{
+		{
 			ID:                      "TestXML",
 			Enabled:                 true,
 			CdrFormat:               "xml",
@@ -216,25 +216,25 @@ func TestXMLRPProcess(t *testing.T) {
 			CDRPath:                 utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}),
 			CdrSourceId:             "TestXML",
 			ContentFields: []*config.FCTemplate{
-				&config.FCTemplate{Tag: "TOR", Type: utils.META_COMPOSED, FieldId: utils.ToR,
+				{Tag: "TOR", Type: utils.META_COMPOSED, FieldId: utils.ToR,
 					Value: config.NewRSRParsersMustCompile("*voice", true), Mandatory: true},
-				&config.FCTemplate{Tag: "OriginID", Type: utils.META_COMPOSED, FieldId: utils.OriginID,
+				{Tag: "OriginID", Type: utils.META_COMPOSED, FieldId: utils.OriginID,
 					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.localCallId", true), Mandatory: true},
-				&config.FCTemplate{Tag: "RequestType", Type: utils.META_COMPOSED, FieldId: utils.RequestType,
+				{Tag: "RequestType", Type: utils.META_COMPOSED, FieldId: utils.RequestType,
 					Value: config.NewRSRParsersMustCompile("*rated", true), Mandatory: true},
-				&config.FCTemplate{Tag: "Tenant", Type: utils.META_COMPOSED, FieldId: utils.Tenant,
+				{Tag: "Tenant", Type: utils.META_COMPOSED, FieldId: utils.Tenant,
 					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.userId:s/.*@(.*)/${1}/", true), Mandatory: true},
-				&config.FCTemplate{Tag: "Category", Type: utils.META_COMPOSED, FieldId: utils.Category,
+				{Tag: "Category", Type: utils.META_COMPOSED, FieldId: utils.Category,
 					Value: config.NewRSRParsersMustCompile("call", true), Mandatory: true},
-				&config.FCTemplate{Tag: "Account", Type: utils.META_COMPOSED, FieldId: utils.Account,
+				{Tag: "Account", Type: utils.META_COMPOSED, FieldId: utils.Account,
 					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.userNumber", true), Mandatory: true},
-				&config.FCTemplate{Tag: "Destination", Type: utils.META_COMPOSED, FieldId: utils.Destination,
+				{Tag: "Destination", Type: utils.META_COMPOSED, FieldId: utils.Destination,
 					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.calledNumber", true), Mandatory: true},
-				&config.FCTemplate{Tag: "SetupTime", Type: utils.META_COMPOSED, FieldId: utils.SetupTime,
+				{Tag: "SetupTime", Type: utils.META_COMPOSED, FieldId: utils.SetupTime,
 					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.startTime", true), Mandatory: true},
-				&config.FCTemplate{Tag: "AnswerTime", Type: utils.META_COMPOSED, FieldId: utils.AnswerTime,
+				{Tag: "AnswerTime", Type: utils.META_COMPOSED, FieldId: utils.AnswerTime,
 					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.answerTime", true), Mandatory: true},
-				&config.FCTemplate{Tag: "Usage", Type: utils.META_HANDLER,
+				{Tag: "Usage", Type: utils.META_HANDLER,
 					FieldId: utils.Usage, HandlerId: utils.HandlerSubstractUsage,
 					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.releaseTime;|;~broadWorksCDR.cdrData.basicModule.answerTime",
 						true), Mandatory: true},
@@ -257,7 +257,7 @@ func TestXMLRPProcess(t *testing.T) {
 		t.Error(err)
 	}
 	expectedCDRs := []*engine.CDR{
-		&engine.CDR{CGRID: "1f045359a0784d15e051d7e41ae30132b139d714",
+		{CGRID: "1f045359a0784d15e051d7e41ae30132b139d714",
 			OriginHost: "0.0.0.0", Source: "TestXML", OriginID: "25160047719:0",
 			ToR: "*voice", RequestType: "*rated", Tenant: "cgrates.org",
 			Category: "call", Account: "1001", Destination: "+4986517174963",
@@ -272,8 +272,8 @@ func TestXMLRPProcess(t *testing.T) {
 }
 
 func TestXMLRPProcessWithNewFilters(t *testing.T) {
-	cdrcCfgs := []*config.CdrcConfig{
-		&config.CdrcConfig{
+	cdrcCfgs := []*config.CdrcCfg{
+		{
 			ID:                      "XMLWithFilters",
 			Enabled:                 true,
 			CdrFormat:               "xml",
@@ -282,25 +282,25 @@ func TestXMLRPProcessWithNewFilters(t *testing.T) {
 			CdrSourceId:             "XMLWithFilters",
 			Filters:                 []string{"*string:broadWorksCDR.cdrData.headerModule.type:Normal"},
 			ContentFields: []*config.FCTemplate{
-				&config.FCTemplate{Tag: "TOR", Type: utils.META_COMPOSED, FieldId: utils.ToR,
+				{Tag: "TOR", Type: utils.META_COMPOSED, FieldId: utils.ToR,
 					Value: config.NewRSRParsersMustCompile("*voice", true), Mandatory: true},
-				&config.FCTemplate{Tag: "OriginID", Type: utils.META_COMPOSED, FieldId: utils.OriginID,
+				{Tag: "OriginID", Type: utils.META_COMPOSED, FieldId: utils.OriginID,
 					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.localCallId", true), Mandatory: true},
-				&config.FCTemplate{Tag: "RequestType", Type: utils.META_COMPOSED, FieldId: utils.RequestType,
+				{Tag: "RequestType", Type: utils.META_COMPOSED, FieldId: utils.RequestType,
 					Value: config.NewRSRParsersMustCompile("*rated", true), Mandatory: true},
-				&config.FCTemplate{Tag: "Tenant", Type: utils.META_COMPOSED, FieldId: utils.Tenant,
+				{Tag: "Tenant", Type: utils.META_COMPOSED, FieldId: utils.Tenant,
 					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.userId:s/.*@(.*)/${1}/", true), Mandatory: true},
-				&config.FCTemplate{Tag: "Category", Type: utils.META_COMPOSED, FieldId: utils.Category,
+				{Tag: "Category", Type: utils.META_COMPOSED, FieldId: utils.Category,
 					Value: config.NewRSRParsersMustCompile("call", true), Mandatory: true},
-				&config.FCTemplate{Tag: "Account", Type: utils.META_COMPOSED, FieldId: utils.Account,
+				{Tag: "Account", Type: utils.META_COMPOSED, FieldId: utils.Account,
 					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.userNumber", true), Mandatory: true},
-				&config.FCTemplate{Tag: "Destination", Type: utils.META_COMPOSED, FieldId: utils.Destination,
+				{Tag: "Destination", Type: utils.META_COMPOSED, FieldId: utils.Destination,
 					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.calledNumber", true), Mandatory: true},
-				&config.FCTemplate{Tag: "SetupTime", Type: utils.META_COMPOSED, FieldId: utils.SetupTime,
+				{Tag: "SetupTime", Type: utils.META_COMPOSED, FieldId: utils.SetupTime,
 					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.startTime", true), Mandatory: true},
-				&config.FCTemplate{Tag: "AnswerTime", Type: utils.META_COMPOSED, FieldId: utils.AnswerTime,
+				{Tag: "AnswerTime", Type: utils.META_COMPOSED, FieldId: utils.AnswerTime,
 					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.answerTime", true), Mandatory: true},
-				&config.FCTemplate{Tag: "Usage", Type: utils.META_HANDLER,
+				{Tag: "Usage", Type: utils.META_HANDLER,
 					FieldId: utils.Usage, HandlerId: utils.HandlerSubstractUsage,
 					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.releaseTime;|;~broadWorksCDR.cdrData.basicModule.answerTime",
 						true), Mandatory: true},
@@ -329,7 +329,7 @@ func TestXMLRPProcessWithNewFilters(t *testing.T) {
 		t.Error(err)
 	}
 	expectedCDRs := []*engine.CDR{
-		&engine.CDR{CGRID: "1f045359a0784d15e051d7e41ae30132b139d714",
+		{CGRID: "1f045359a0784d15e051d7e41ae30132b139d714",
 			OriginHost: "0.0.0.0", Source: "XMLWithFilters", OriginID: "25160047719:0",
 			ToR: "*voice", RequestType: "*rated", Tenant: "cgrates.org",
 			Category: "call", Account: "1001", Destination: "+4986517174963",
@@ -531,8 +531,8 @@ func TestXMLElementText3(t *testing.T) {
 }
 
 func TestXMLRPNestingSeparator(t *testing.T) {
-	cdrcCfgs := []*config.CdrcConfig{
-		&config.CdrcConfig{
+	cdrcCfgs := []*config.CdrcCfg{
+		{
 			ID:                      "msw_xml",
 			Enabled:                 true,
 			CdrFormat:               "xml",
@@ -541,25 +541,25 @@ func TestXMLRPNestingSeparator(t *testing.T) {
 			CdrSourceId:             "zw_cfs1",
 			Filters:                 []string{},
 			ContentFields: []*config.FCTemplate{
-				&config.FCTemplate{Tag: "TOR", Type: utils.META_COMPOSED, FieldId: utils.ToR,
+				{Tag: "TOR", Type: utils.META_COMPOSED, FieldId: utils.ToR,
 					Value: config.NewRSRParsersMustCompile("*voice", true), Mandatory: true},
-				&config.FCTemplate{Tag: "OriginID", Type: utils.META_COMPOSED, FieldId: utils.OriginID,
+				{Tag: "OriginID", Type: utils.META_COMPOSED, FieldId: utils.OriginID,
 					Value: config.NewRSRParsersMustCompile("~File.CDRs.Call.SignalingInfo.PChargingVector.icidvalue", true), Mandatory: true},
-				&config.FCTemplate{Tag: "RequestType", Type: utils.META_COMPOSED, FieldId: utils.RequestType,
+				{Tag: "RequestType", Type: utils.META_COMPOSED, FieldId: utils.RequestType,
 					Value: config.NewRSRParsersMustCompile("*rated", true), Mandatory: true},
-				&config.FCTemplate{Tag: "Tenant", Type: utils.META_COMPOSED, FieldId: utils.Tenant,
+				{Tag: "Tenant", Type: utils.META_COMPOSED, FieldId: utils.Tenant,
 					Value: config.NewRSRParsersMustCompile("XX.liquid.tel", true), Mandatory: true},
-				&config.FCTemplate{Tag: "Category", Type: utils.META_COMPOSED, FieldId: utils.Category,
+				{Tag: "Category", Type: utils.META_COMPOSED, FieldId: utils.Category,
 					Value: config.NewRSRParsersMustCompile("call", true), Mandatory: true},
-				&config.FCTemplate{Tag: "Account", Type: utils.META_COMPOSED, FieldId: utils.Account,
+				{Tag: "Account", Type: utils.META_COMPOSED, FieldId: utils.Account,
 					Value: config.NewRSRParsersMustCompile("~File.CDRs.Call.OrigParty.SubscriberAddr", true), Mandatory: true},
-				&config.FCTemplate{Tag: "Destination", Type: utils.META_COMPOSED, FieldId: utils.Destination,
+				{Tag: "Destination", Type: utils.META_COMPOSED, FieldId: utils.Destination,
 					Value: config.NewRSRParsersMustCompile("~File.CDRs.Call.RoutingInfo.DestAddr", true), Mandatory: true},
-				&config.FCTemplate{Tag: "SetupTime", Type: utils.META_COMPOSED, FieldId: utils.SetupTime,
+				{Tag: "SetupTime", Type: utils.META_COMPOSED, FieldId: utils.SetupTime,
 					Value: config.NewRSRParsersMustCompile("~File.CDRs.Call.RingingTime", true), Mandatory: true},
-				&config.FCTemplate{Tag: "AnswerTime", Type: utils.META_COMPOSED, FieldId: utils.AnswerTime,
+				{Tag: "AnswerTime", Type: utils.META_COMPOSED, FieldId: utils.AnswerTime,
 					Value: config.NewRSRParsersMustCompile("~File.CDRs.Call.ConnectTime", true), Mandatory: true},
-				&config.FCTemplate{Tag: "Usage", Type: utils.META_HANDLER,
+				{Tag: "Usage", Type: utils.META_HANDLER,
 					FieldId: utils.Usage, HandlerId: utils.HandlerSubstractUsage,
 					Value: config.NewRSRParsersMustCompile("~File.CDRs.Call.ReleaseTime;|;~File.CDRs.Call.ConnectTime",
 						true), Mandatory: true},
@@ -588,7 +588,7 @@ func TestXMLRPNestingSeparator(t *testing.T) {
 		t.Error(err)
 	}
 	expectedCDRs := []*engine.CDR{
-		&engine.CDR{CGRID: "0ad7f9554ff8fc5b3a7cebbe7431bbf809bc5144",
+		{CGRID: "0ad7f9554ff8fc5b3a7cebbe7431bbf809bc5144",
 			OriginHost: "0.0.0.0", Source: "zw_cfs1", OriginID: "46d7974398c2671016afccc3f2c428c7",
 			ToR: "*voice", RequestType: "*rated", Tenant: "XX.liquid.tel",
 			Category: "call", Account: "+27110493421", Destination: "+270843073451",
