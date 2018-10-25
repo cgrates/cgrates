@@ -26,7 +26,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestFsAgentConfigLoadFromJsonCfg(t *testing.T) {
+func TestFsAgentCfgloadFromJsonCfg1(t *testing.T) {
 	fsAgentJsnCfg := &FreeswitchAgentJsonCfg{
 		Enabled:        utils.BoolPointer(true),
 		Create_cdr:     utils.BoolPointer(true),
@@ -44,16 +44,16 @@ func TestFsAgentConfigLoadFromJsonCfg(t *testing.T) {
 			},
 		},
 	}
-	eFsAgentConfig := &FsAgentConfig{
+	eFsAgentConfig := &FsAgentCfg{
 		Enabled:       true,
 		CreateCdr:     true,
 		SubscribePark: true,
-		EventSocketConns: []*FsConnConfig{
+		EventSocketConns: []*FsConnCfg{
 			{Address: "1.2.3.4:8021", Password: "ClueCon", Reconnects: 5, Alias: "1.2.3.4:8021"},
 			{Address: "2.3.4.5:8021", Password: "ClueCon", Reconnects: 5, Alias: "2.3.4.5:8021"},
 		},
 	}
-	fsAgentCfg := new(FsAgentConfig)
+	fsAgentCfg := new(FsAgentCfg)
 	if err := fsAgentCfg.loadFromJsonCfg(fsAgentJsnCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eFsAgentConfig, fsAgentCfg) {
@@ -119,11 +119,64 @@ func TestSessionSCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if jsnSchCfg, err := jsnCfg.SessionSJsonCfg(); err != nil {
+	} else if jsnSesCfg, err := jsnCfg.SessionSJsonCfg(); err != nil {
 		t.Error(err)
-	} else if err = sescfg.loadFromJsonCfg(jsnSchCfg); err != nil {
+	} else if err = sescfg.loadFromJsonCfg(jsnSesCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, sescfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, sescfg)
+		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(sescfg))
+	}
+}
+
+func TestFsAgentCfgloadFromJsonCfg2(t *testing.T) {
+	var fsagcfg, expected FsAgentCfg
+	if err := fsagcfg.loadFromJsonCfg(nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(fsagcfg, expected) {
+		t.Errorf("Expected: %+v ,recived: %+v", expected, fsagcfg)
+	}
+	if err := fsagcfg.loadFromJsonCfg(new(FreeswitchAgentJsonCfg)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(fsagcfg, expected) {
+		t.Errorf("Expected: %+v ,recived: %+v", expected, fsagcfg)
+	}
+	cfgJSONStr := `{
+"freeswitch_agent": {
+	"enabled": false,						// starts the FreeSWITCH agent: <true|false>
+	"sessions_conns": [
+		{"address": "*internal"}			// connection towards session service: <*internal>
+	],
+	"subscribe_park": true,					// subscribe via fsock to receive park events
+	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
+	"extra_fields": [],						// extra fields to store in auth/CDRs when creating them
+	//"min_dur_low_balance": "5s",			// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debit_interval)
+	//"low_balance_ann_file": "",			// file to be played when low balance is reached for prepaid calls
+	"empty_balance_context": "",			// if defined, prepaid calls will be transferred to this context on empty balance
+	"empty_balance_ann_file": "",			// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
+	"max_wait_connection": "2s",			// maximum duration to wait for a connection to be retrieved from the pool
+	"event_socket_conns":[					// instantiate connections to multiple FreeSWITCH servers
+		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5,"alias":""}
+	],
+},
+}`
+	expected = FsAgentCfg{
+		SessionSConns:     []*HaPoolConfig{{Address: "*internal"}},
+		SubscribePark:     true,
+		MaxWaitConnection: time.Duration(2 * time.Second),
+		EventSocketConns: []*FsConnCfg{{
+			Address:    "127.0.0.1:8021",
+			Password:   "ClueCon",
+			Reconnects: 5,
+			Alias:      "127.0.0.1:8021",
+		}},
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnFsAgCfg, err := jsnCfg.FreeswitchAgentJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = fsagcfg.loadFromJsonCfg(jsnFsAgCfg); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, fsagcfg) {
+		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(fsagcfg))
 	}
 }

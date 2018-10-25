@@ -32,10 +32,10 @@ import (
 
 type fsSockWithConfig struct {
 	fsSock *fsock.FSock
-	cfg    *config.FsConnConfig
+	cfg    *config.FsConnCfg
 }
 
-func NewFSsessions(fsAgentConfig *config.FsAgentConfig,
+func NewFSsessions(fsAgentConfig *config.FsAgentCfg,
 	smg *utils.BiRPCInternalClient, timezone string) (fsa *FSsessions) {
 	fsa = &FSsessions{
 		cfg:         fsAgentConfig,
@@ -51,7 +51,7 @@ func NewFSsessions(fsAgentConfig *config.FsAgentConfig,
 // The freeswitch session manager type holding a buffer for the network connection
 // and the active sessions
 type FSsessions struct {
-	cfg         *config.FsAgentConfig
+	cfg         *config.FsAgentCfg
 	conns       map[string]*fsSockWithConfig // Keep the list here for connection management purposes
 	senderPools map[string]*fsock.FSockPool  // Keep sender pools here
 	smg         *utils.BiRPCInternalClient
@@ -68,8 +68,8 @@ func (sm *FSsessions) createHandlers() map[string][]func(string, string) {
 			NewFSEvent(body), connId)
 	}
 	handlers := map[string][]func(string, string){
-		"CHANNEL_ANSWER":          []func(string, string){ca},
-		"CHANNEL_HANGUP_COMPLETE": []func(string, string){ch},
+		"CHANNEL_ANSWER":          {ca},
+		"CHANNEL_HANGUP_COMPLETE": {ch},
 	}
 	if sm.cfg.SubscribePark {
 		cp := func(body, connId string) {
@@ -271,7 +271,7 @@ func (sm *FSsessions) onChannelHangupComplete(fsev FSEvent, connId string) {
 // Connects to the freeswitch mod_event_socket server and starts
 // listening for events.
 func (sm *FSsessions) Connect() error {
-	eventFilters := map[string][]string{"Call-Direction": []string{"inbound"}}
+	eventFilters := map[string][]string{"Call-Direction": {"inbound"}}
 	errChan := make(chan error)
 	for _, connCfg := range sm.cfg.EventSocketConns {
 		connId := utils.GenUUID()
