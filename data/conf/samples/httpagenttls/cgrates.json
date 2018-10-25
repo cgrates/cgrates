@@ -1,0 +1,68 @@
+{
+// CGRateS Configuration file
+//
+
+
+"general": {
+	"log_level": 7,
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+	"rpc_json_tls":":2022",
+	"rpc_gob_tls":":2023",
+	"http_tls": "localhost:2280",
+},
+
+"tls": {
+	"server_certificate" : "/usr/share/cgrates/tls/server.crt",			// path to server certificate(must conatin server.crt + ca.crt)
+	"server_key":"/usr/share/cgrates/tls/server.key",					// path to server key
+	"client_certificate" : "/usr/share/cgrates/tls/client.crt",			// path to client certificate(must conatin client.crt + ca.crt)
+	"client_key":"/usr/share/cgrates/tls/client.key",					// path to client key
+	"ca_certificate":"/usr/share/cgrates/tls/ca.crt",
+},
+
+
+"stor_db": {
+	"db_password": "CGRateS.org",
+},
+
+
+"rals": {
+	"enabled": true,
+},
+
+
+"scheduler": {
+	"enabled": true,
+},
+
+
+"cdrs": {
+	"enabled": true,
+},
+
+
+"attributes": {
+	"enabled": true,
+},
+
+
+"sessions": {
+	"enabled": true,
+	"attributes_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"cdrs_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"rals_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+},
+
+
+}

@@ -28,7 +28,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func NewRPCPool(dispatchStrategy, key_path, cert_path, ca_path string, connAttempts, reconnects int,
+func NewRPCPool(dispatchStrategy string, key_path, cert_path, ca_path string, connAttempts, reconnects int,
 	connectTimeout, replyTimeout time.Duration, rpcConnCfgs []*config.HaPoolConfig,
 	internalConnChan chan rpcclient.RpcClientConnection, ttl time.Duration) (*rpcclient.RpcClientPool, error) {
 	var rpcClient *rpcclient.RpcClient
@@ -44,14 +44,14 @@ func NewRPCPool(dispatchStrategy, key_path, cert_path, ca_path string, connAttem
 			case <-time.After(ttl):
 				return nil, errors.New("TTL triggered")
 			}
-			rpcClient, err = rpcclient.NewRpcClient("", "", key_path, cert_path, ca_path, connAttempts,
+			rpcClient, err = rpcclient.NewRpcClient("", "", rpcConnCfg.Tls, key_path, cert_path, ca_path, connAttempts,
 				reconnects, connectTimeout, replyTimeout, rpcclient.INTERNAL_RPC, internalConn, false)
 		} else if utils.IsSliceMember([]string{utils.MetaJSONrpc, utils.MetaGOBrpc, ""}, rpcConnCfg.Transport) {
 			codec := utils.GOB
 			if rpcConnCfg.Transport != "" {
 				codec = rpcConnCfg.Transport[1:] // Transport contains always * before codec understood by rpcclient
 			}
-			rpcClient, err = rpcclient.NewRpcClient("tcp", rpcConnCfg.Address, key_path, cert_path, ca_path,
+			rpcClient, err = rpcclient.NewRpcClient("tcp", rpcConnCfg.Address, rpcConnCfg.Tls, key_path, cert_path, ca_path,
 				connAttempts, reconnects, connectTimeout, replyTimeout, codec, nil, false)
 		} else {
 			return nil, fmt.Errorf("Unsupported transport: <%s>", rpcConnCfg.Transport)

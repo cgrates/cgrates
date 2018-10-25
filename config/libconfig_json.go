@@ -271,6 +271,7 @@ type HaPoolJsonCfg struct {
 	Address     *string
 	Transport   *string
 	Synchronous *bool
+	Tls         *bool
 }
 
 type AstConnJsonCfg struct {

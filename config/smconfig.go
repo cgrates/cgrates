@@ -38,6 +38,7 @@ type HaPoolConfig struct {
 	Address     string
 	Transport   string
 	Synchronous bool
+	Tls         bool
 }
 
 func (self *HaPoolConfig) loadFromJsonCfg(jsnCfg *HaPoolJsonCfg) error {
@@ -52,6 +53,9 @@ func (self *HaPoolConfig) loadFromJsonCfg(jsnCfg *HaPoolJsonCfg) error {
 	}
 	if jsnCfg.Synchronous != nil {
 		self.Synchronous = *jsnCfg.Synchronous
+	}
+	if jsnCfg.Tls != nil {
+		self.Tls = *jsnCfg.Synchronous
 	}
 	return nil
 }
