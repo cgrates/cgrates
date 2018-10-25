@@ -61,23 +61,23 @@ func (self *HaPoolConfig) loadFromJsonCfg(jsnCfg *HaPoolJsonCfg) error {
 }
 
 // Returns the first cached default value for a FreeSWITCHAgent connection
-func NewDfltFsConnConfig() *FsConnConfig {
+func NewDfltFsConnConfig() *FsConnCfg {
 	if dfltFsConnConfig == nil {
-		return new(FsConnConfig) // No defaults, most probably we are building the defaults now
+		return new(FsConnCfg) // No defaults, most probably we are building the defaults now
 	}
 	dfltVal := *dfltFsConnConfig // Copy the value instead of it's pointer
 	return &dfltVal
 }
 
 // One connection to FreeSWITCH server
-type FsConnConfig struct {
+type FsConnCfg struct {
 	Address    string
 	Password   string
 	Reconnects int
 	Alias      string
 }
 
-func (self *FsConnConfig) loadFromJsonCfg(jsnCfg *FsConnJsonCfg) error {
+func (self *FsConnCfg) loadFromJsonCfg(jsnCfg *FsConnJsonCfg) error {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -243,7 +243,7 @@ func (self *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	return nil
 }
 
-type FsAgentConfig struct {
+type FsAgentCfg struct {
 	Enabled       bool
 	SessionSConns []*HaPoolConfig
 	SubscribePark bool
@@ -254,10 +254,10 @@ type FsAgentConfig struct {
 	EmptyBalanceContext string
 	EmptyBalanceAnnFile string
 	MaxWaitConnection   time.Duration
-	EventSocketConns    []*FsConnConfig
+	EventSocketConns    []*FsConnCfg
 }
 
-func (self *FsAgentConfig) loadFromJsonCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
+func (self *FsAgentCfg) loadFromJsonCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -296,7 +296,7 @@ func (self *FsAgentConfig) loadFromJsonCfg(jsnCfg *FreeswitchAgentJsonCfg) error
 		}
 	}
 	if jsnCfg.Event_socket_conns != nil {
-		self.EventSocketConns = make([]*FsConnConfig, len(*jsnCfg.Event_socket_conns))
+		self.EventSocketConns = make([]*FsConnCfg, len(*jsnCfg.Event_socket_conns))
 		for idx, jsnConnCfg := range *jsnCfg.Event_socket_conns {
 			self.EventSocketConns[idx] = NewDfltFsConnConfig()
 			self.EventSocketConns[idx].loadFromJsonCfg(jsnConnCfg)

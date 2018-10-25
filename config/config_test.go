@@ -54,7 +54,7 @@ func TestCgrCfgLoadWithDefaults(t *testing.T) {
 		t.Error(err)
 	}
 	eCgrCfg.fsAgentCfg.Enabled = true
-	eCgrCfg.fsAgentCfg.EventSocketConns = []*FsConnConfig{
+	eCgrCfg.fsAgentCfg.EventSocketConns = []*FsConnCfg{
 		{Address: "1.2.3.4:8021", Password: "ClueCon", Reconnects: 3, Alias: "123"},
 		{Address: "1.2.3.5:8021", Password: "ClueCon", Reconnects: 5, Alias: "124"},
 	}
@@ -751,7 +751,7 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 }
 
 func TestCgrCfgJSONDefaultsFsAgentConfig(t *testing.T) {
-	eFsAgentCfg := &FsAgentConfig{
+	eFsAgentCfg := &FsAgentCfg{
 		Enabled: false,
 		SessionSConns: []*HaPoolConfig{
 			{Address: "*internal"}},
@@ -761,9 +761,12 @@ func TestCgrCfgJSONDefaultsFsAgentConfig(t *testing.T) {
 		EmptyBalanceContext: "",
 		EmptyBalanceAnnFile: "",
 		MaxWaitConnection:   2 * time.Second,
-		EventSocketConns: []*FsConnConfig{
-			{Address: "127.0.0.1:8021",
-				Password: "ClueCon", Reconnects: 5, Alias: "127.0.0.1:8021"}},
+		EventSocketConns: []*FsConnCfg{{
+			Address:    "127.0.0.1:8021",
+			Password:   "ClueCon",
+			Reconnects: 5,
+			Alias:      "127.0.0.1:8021",
+		}},
 	}
 
 	if !reflect.DeepEqual(cgrCfg.fsAgentCfg, eFsAgentCfg) {
