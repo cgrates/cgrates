@@ -780,9 +780,10 @@ func TestCgrCfgJSONDefaultsKamAgentConfig(t *testing.T) {
 		SessionSConns: []*HaPoolConfig{
 			{Address: "*internal"}},
 		CreateCdr: false,
-		EvapiConns: []*KamConnConfig{
-			{
-				Address: "127.0.0.1:8448", Reconnects: 5}},
+		EvapiConns: []*KamConnCfg{{
+			Address:    "127.0.0.1:8448",
+			Reconnects: 5,
+		}},
 	}
 	if !reflect.DeepEqual(cgrCfg.kamAgentCfg, eKamAgentCfg) {
 		t.Errorf("received: %+v, expecting: %+v",

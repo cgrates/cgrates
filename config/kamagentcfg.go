@@ -19,12 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 // Represents one connection instance towards Kamailio
-type KamConnConfig struct {
+type KamConnCfg struct {
 	Address    string
 	Reconnects int
 }
 
-func (self *KamConnConfig) loadFromJsonCfg(jsnCfg *KamConnJsonCfg) error {
+func (self *KamConnCfg) loadFromJsonCfg(jsnCfg *KamConnJsonCfg) error {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -42,7 +42,7 @@ type KamAgentCfg struct {
 	Enabled       bool
 	SessionSConns []*HaPoolConfig
 	CreateCdr     bool
-	EvapiConns    []*KamConnConfig
+	EvapiConns    []*KamConnCfg
 	Timezone      string
 }
 
@@ -64,7 +64,7 @@ func (ka *KamAgentCfg) loadFromJsonCfg(jsnCfg *KamAgentJsonCfg) error {
 		ka.CreateCdr = *jsnCfg.Create_cdr
 	}
 	if jsnCfg.Evapi_conns != nil {
-		ka.EvapiConns = make([]*KamConnConfig, len(*jsnCfg.Evapi_conns))
+		ka.EvapiConns = make([]*KamConnCfg, len(*jsnCfg.Evapi_conns))
 		for idx, jsnConnCfg := range *jsnCfg.Evapi_conns {
 			ka.EvapiConns[idx] = NewDfltKamConnConfig()
 			ka.EvapiConns[idx].loadFromJsonCfg(jsnConnCfg)

@@ -306,9 +306,9 @@ func (self *FsAgentCfg) loadFromJsonCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 }
 
 // Returns the first cached default value for a FreeSWITCHAgent connection
-func NewDfltKamConnConfig() *KamConnConfig {
+func NewDfltKamConnConfig() *KamConnCfg {
 	if dfltKamConnConfig == nil {
-		return new(KamConnConfig) // No defaults, most probably we are building the defaults now
+		return new(KamConnCfg) // No defaults, most probably we are building the defaults now
 	}
 	dfltVal := *dfltKamConnConfig
 	return &dfltVal
