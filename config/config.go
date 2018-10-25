@@ -37,7 +37,7 @@ var (
 	dfltKamConnConfig        *KamConnConfig // Default Kamailio Connection configuration
 	dfltHaPoolConfig         *HaPoolConfig
 	dfltAstConnCfg           *AsteriskConnCfg
-	dfltLoaderConfig         *LoaderSConfig
+	dfltLoaderConfig         *LoaderSCfg
 	dfltLoaderDataTypeConfig *LoaderDataType
 )
 
@@ -256,6 +256,7 @@ type CGRConfig struct {
 	MaxCallDuration time.Duration // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
 
 	CdreProfiles map[string]*CdreCfg
+	loaderCfg    []*LoaderSCfg // configuration for Loader
 
 	CdrcProfiles         map[string][]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath][]{Configs}
 	sessionSCfg          *SessionSCfg
@@ -276,7 +277,6 @@ type CGRConfig struct {
 	statsCfg             *StatSCfg                // Configuration for StatS
 	thresholdSCfg        *ThresholdSCfg           // configuration for ThresholdS
 	supplierSCfg         *SupplierSCfg            // configuration for SupplierS
-	loaderCfg            []*LoaderSConfig         // configuration for Loader
 	dispatcherSCfg       *DispatcherSCfg          // configuration for Dispatcher
 	MailerServer         string                   // The server to use when sending emails out
 	MailerAuthUser       string                   // Authenticate to email server using this user
@@ -954,9 +954,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	}
 
 	if jsnLoaderCfg != nil {
-		self.loaderCfg = make([]*LoaderSConfig, len(jsnLoaderCfg))
+		self.loaderCfg = make([]*LoaderSCfg, len(jsnLoaderCfg))
 		for idx, profile := range jsnLoaderCfg {
-			self.loaderCfg[idx] = NewDfltLoaderSConfig()
+			self.loaderCfg[idx] = NewDfltLoaderSCfg()
 			self.loaderCfg[idx].loadFromJsonCfg(profile)
 		}
 	}
@@ -1252,7 +1252,7 @@ func (cfg *CGRConfig) CacheCfg() CacheCfg {
 	return cfg.cacheCfg
 }
 
-func (cfg *CGRConfig) LoaderCfg() []*LoaderSConfig {
+func (cfg *CGRConfig) LoaderCfg() []*LoaderSCfg {
 	return cfg.loaderCfg
 }
 
