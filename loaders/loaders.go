@@ -27,7 +27,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewLoaderService(dm *engine.DataManager, ldrsCfg []*config.LoaderSConfig,
+func NewLoaderService(dm *engine.DataManager, ldrsCfg []*config.LoaderSCfg,
 	timezone string, filterS *engine.FilterS) (ldrS *LoaderService) {
 	ldrS = &LoaderService{ldrs: make(map[string]*Loader)}
 	for _, ldrCfg := range ldrsCfg {
