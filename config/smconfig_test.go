@@ -237,3 +237,82 @@ func TestHaPoolConfigloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(hpoolcfg))
 	}
 }
+
+func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
+	var asagcfg, expected AsteriskAgentCfg
+	if err := asagcfg.loadFromJsonCfg(nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(asagcfg, expected) {
+		t.Errorf("Expected: %+v ,recived: %+v", expected, asagcfg)
+	}
+	if err := asagcfg.loadFromJsonCfg(new(AsteriskAgentJsonCfg)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(asagcfg, expected) {
+		t.Errorf("Expected: %+v ,recived: %+v", expected, asagcfg)
+	}
+	cfgJSONStr := `{
+"asterisk_agent": {
+	"enabled": true,						// starts the Asterisk agent: <true|false>
+	"sessions_conns": [
+		{"address": "*internal"}			// connection towards session service: <*internal>
+	],
+	"create_cdr": false,					// create CDR out of events and sends it to CDRS component
+	"asterisk_conns":[						// instantiate connections to multiple Asterisk servers
+		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 5}
+	],
+},
+}`
+	expected = AsteriskAgentCfg{
+		Enabled:       true,
+		SessionSConns: []*HaPoolConfig{{Address: "*internal"}},
+		AsteriskConns: []*AsteriskConnCfg{{
+			Address:         "127.0.0.1:8088",
+			User:            "cgrates",
+			Password:        "CGRateS.org",
+			ConnectAttempts: 3,
+			Reconnects:      5,
+		}},
+	}
+	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+		t.Error(err)
+	} else if jsnAsAgCfg, err := jsnCfg.AsteriskAgentJsonCfg(); err != nil {
+		t.Error(err)
+	} else if err = asagcfg.loadFromJsonCfg(jsnAsAgCfg); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, asagcfg) {
+		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(asagcfg))
+	}
+}
+
+func TestAsteriskConnCfgloadFromJsonCfg(t *testing.T) {
+	var asconcfg, expected AsteriskConnCfg
+	if err := asconcfg.loadFromJsonCfg(nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(asconcfg, expected) {
+		t.Errorf("Expected: %+v ,recived: %+v", expected, asconcfg)
+	}
+	if err := asconcfg.loadFromJsonCfg(new(AstConnJsonCfg)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(asconcfg, expected) {
+		t.Errorf("Expected: %+v ,recived: %+v", expected, asconcfg)
+	}
+	json := &AstConnJsonCfg{
+		Address:          utils.StringPointer("127.0.0.1:8088"),
+		User:             utils.StringPointer("cgrates"),
+		Password:         utils.StringPointer("CGRateS.org"),
+		Connect_attempts: utils.IntPointer(3),
+		Reconnects:       utils.IntPointer(5),
+	}
+	expected = AsteriskConnCfg{
+		Address:         "127.0.0.1:8088",
+		User:            "cgrates",
+		Password:        "CGRateS.org",
+		ConnectAttempts: 3,
+		Reconnects:      5,
+	}
+	if err = asconcfg.loadFromJsonCfg(json); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, asconcfg) {
+		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(asconcfg))
+	}
+}

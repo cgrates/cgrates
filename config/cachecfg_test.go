@@ -49,7 +49,7 @@ func TestAsTransCacheConfig(t *testing.T) {
 	}
 }
 
-func TestCacheConfigloadFromJsonCfg(t *testing.T) {
+func TestCacheCfgloadFromJsonCfg(t *testing.T) {
 	var cachecfg, expected CacheCfg
 	if err := cachecfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
@@ -82,5 +82,36 @@ func TestCacheConfigloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, cachecfg) {
 		t.Errorf("Expected: %+v , recived: %+v", expected, cachecfg)
+	}
+}
+
+func TestCacheParamCfgloadFromJsonCfg(t *testing.T) {
+	var fscocfg, expected CacheParamCfg
+	if err := fscocfg.loadFromJsonCfg(nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(fscocfg, expected) {
+		t.Errorf("Expected: %+v ,recived: %+v", expected, fscocfg)
+	}
+	if err := fscocfg.loadFromJsonCfg(new(CacheParamJsonCfg)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(fscocfg, expected) {
+		t.Errorf("Expected: %+v ,recived: %+v", expected, fscocfg)
+	}
+	json := &CacheParamJsonCfg{
+		Limit:      utils.IntPointer(5),
+		Ttl:        utils.StringPointer("1s"),
+		Static_ttl: utils.BoolPointer(true),
+		Precache:   utils.BoolPointer(true),
+	}
+	expected = CacheParamCfg{
+		Limit:     5,
+		TTL:       time.Duration(time.Second),
+		StaticTTL: true,
+		Precache:  true,
+	}
+	if err = fscocfg.loadFromJsonCfg(json); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, fscocfg) {
+		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(fscocfg))
 	}
 }
