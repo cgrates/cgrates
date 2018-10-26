@@ -141,7 +141,6 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.ralsCfg.RALsMaxComputedUsage = make(map[string]time.Duration)
 	cfg.schedulerCfg = new(SchedulerCfg)
 	cfg.cdrsCfg = new(CdrsCfg)
-	cfg.cdrStatsCfg = new(CdrStatsCfg)
 	cfg.CdreProfiles = make(map[string]*CdreCfg)
 	cfg.CdrcProfiles = make(map[string][]*CdrcCfg)
 	cfg.analyzerSCfg = new(AnalyzerSCfg)
@@ -151,8 +150,12 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.asteriskAgentCfg = new(AsteriskAgentCfg)
 	cfg.diameterAgentCfg = new(DiameterAgentCfg)
 	cfg.radiusAgentCfg = new(RadiusAgentCfg)
+	cfg.attributeSCfg = new(AttributeSCfg)
 
+	//Depricated
+	cfg.cdrStatsCfg = new(CdrStatsCfg)
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
+
 	cfg.dispatcherSCfg = new(DispatcherSCfg)
 	cfg.ConfigReloads = make(map[string]chan struct{})
 	cfg.ConfigReloads[utils.CDRC] = make(chan struct{}, 1)
@@ -260,28 +263,23 @@ type CGRConfig struct {
 	CdrcProfiles map[string][]*CdrcCfg // Number of CDRC instances running imports, format map[dirPath][]{Configs}
 	loaderCfg    []*LoaderSCfg         // LoaderS configurations
 
-	SmOsipsConfig        *SmOsipsConfig  // SMOpenSIPS Configuration
-	httpAgentCfg         []*HttpAgentCfg // HttpAgent configuration
-	PubSubServerEnabled  bool            // Starts PubSub as server: <true|false>.
-	AliasesServerEnabled bool            // Starts PubSub as server: <true|false>.
-	UserServerEnabled    bool            // Starts User as server: <true|false>
-	UserServerIndexes    []string        // List of user profile field indexes
-	attributeSCfg        *AttributeSCfg  // Attribute service configuration
-	chargerSCfg          *ChargerSCfg
-	resourceSCfg         *ResourceSConfig         // Configuration for resource limiter
-	statsCfg             *StatSCfg                // Configuration for StatS
-	thresholdSCfg        *ThresholdSCfg           // configuration for ThresholdS
-	supplierSCfg         *SupplierSCfg            // configuration for SupplierS
-	dispatcherSCfg       *DispatcherSCfg          // configuration for Dispatcher
-	MailerServer         string                   // The server to use when sending emails out
-	MailerAuthUser       string                   // Authenticate to email server using this user
-	MailerAuthPass       string                   // Authenticate to email server with this password
-	MailerFromAddr       string                   // From address used when sending emails out
-	DataFolderPath       string                   // Path towards data folder, for tests internal usage, not loading out of .json options
-	sureTaxCfg           *SureTaxCfg              // Load here SureTax configuration, as pointer so we can have runtime reloads in the future
-	ConfigReloads        map[string]chan struct{} // Signals to specific entities that a config reload should occur
-	LoaderCgrConfig      *LoaderCgrCfg
-	MigratorCgrConfig    *MigratorCgrCfg
+	httpAgentCfg []*HttpAgentCfg // HttpAgent configuration
+
+	chargerSCfg       *ChargerSCfg
+	resourceSCfg      *ResourceSConfig         // Configuration for resource limiter
+	statsCfg          *StatSCfg                // Configuration for StatS
+	thresholdSCfg     *ThresholdSCfg           // configuration for ThresholdS
+	supplierSCfg      *SupplierSCfg            // configuration for SupplierS
+	dispatcherSCfg    *DispatcherSCfg          // configuration for Dispatcher
+	MailerServer      string                   // The server to use when sending emails out
+	MailerAuthUser    string                   // Authenticate to email server using this user
+	MailerAuthPass    string                   // Authenticate to email server with this password
+	MailerFromAddr    string                   // From address used when sending emails out
+	DataFolderPath    string                   // Path towards data folder, for tests internal usage, not loading out of .json options
+	sureTaxCfg        *SureTaxCfg              // Load here SureTax configuration, as pointer so we can have runtime reloads in the future
+	ConfigReloads     map[string]chan struct{} // Signals to specific entities that a config reload should occur
+	LoaderCgrConfig   *LoaderCgrCfg
+	MigratorCgrConfig *MigratorCgrCfg
 
 	// Cache defaults loaded from json and needing clones
 	dfltCdreProfile *CdreCfg // Default cdreConfig profile
@@ -298,14 +296,22 @@ type CGRConfig struct {
 	ralsCfg          *RalsCfg          // Rals config
 	schedulerCfg     *SchedulerCfg     // Scheduler config
 	cdrsCfg          *CdrsCfg          // Cdrs config
-	cdrStatsCfg      *CdrStatsCfg      // CdrStats config - deprecated
 	sessionSCfg      *SessionSCfg      // SessionS config
 	fsAgentCfg       *FsAgentCfg       // FreeSWITCHAgent config
 	kamAgentCfg      *KamAgentCfg      // KamailioAgent config
 	asteriskAgentCfg *AsteriskAgentCfg // AsteriskAgent config
 	diameterAgentCfg *DiameterAgentCfg // DiameterAgent config
 	radiusAgentCfg   *RadiusAgentCfg   // RadiusAgent config
+	attributeSCfg    *AttributeSCfg    // AttributeS config
 	analyzerSCfg *AnalyzerSCfg
+
+	// Deprecated
+	cdrStatsCfg          *CdrStatsCfg   // CdrStats config
+	SmOsipsConfig        *SmOsipsConfig // SMOpenSIPS Configuration
+	PubSubServerEnabled  bool           // Starts PubSub as server: <true|false>.
+	AliasesServerEnabled bool           // Starts PubSub as server: <true|false>.
+	UserServerEnabled    bool           // Starts User as server: <true|false>
+	UserServerIndexes    []string       // List of user profile field indexes
 }
 
 func (self *CGRConfig) checkConfigSanity() error {
@@ -797,14 +803,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return err
 	}
 
-	jsnCdrstatsCfg, err := jsnCfg.CdrStatsJsonCfg()
-	if err != nil {
-		return err
-	}
-	if err := self.cdrStatsCfg.loadFromJsonCfg(jsnCdrstatsCfg); err != nil {
-		return err
-	}
-
 	jsnCdreCfg, err := jsnCfg.CdreJsonCfgs()
 	if err != nil {
 		return err
@@ -868,23 +866,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return err
 	}
 
-	jsnPubSubServCfg, err := jsnCfg.PubSubServJsonCfg()
-	if err != nil {
-		return err
-	}
-
-	jsnAliasesServCfg, err := jsnCfg.AliasesServJsonCfg()
-	if err != nil {
-		return err
-	}
-
-	jsnUserServCfg, err := jsnCfg.UserServJsonCfg()
-	if err != nil {
-		return err
-	}
-
 	jsnAttributeSCfg, err := jsnCfg.AttributeServJsonCfg()
 	if err != nil {
+		return err
+	}
+	if self.attributeSCfg.loadFromJsonCfg(jsnAttributeSCfg); err != nil {
 		return err
 	}
 
@@ -1033,26 +1019,48 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 	}
 
+	//Depricated
+	jsnCdrstatsCfg, err := jsnCfg.CdrStatsJsonCfg()
+	if err != nil {
+		return err
+	}
+	if err := self.cdrStatsCfg.loadFromJsonCfg(jsnCdrstatsCfg); err != nil {
+		return err
+	}
+
+	jsnPubSubServCfg, err := jsnCfg.PubSubServJsonCfg()
+	if err != nil {
+		return err
+	}
 	if jsnPubSubServCfg != nil {
 		if jsnPubSubServCfg.Enabled != nil {
 			self.PubSubServerEnabled = *jsnPubSubServCfg.Enabled
 		}
 	}
 
+	jsnAliasesServCfg, err := jsnCfg.AliasesServJsonCfg()
+	if err != nil {
+		return err
+	}
 	if jsnAliasesServCfg != nil {
 		if jsnAliasesServCfg.Enabled != nil {
 			self.AliasesServerEnabled = *jsnAliasesServCfg.Enabled
 		}
 	}
 
-	if jsnAttributeSCfg != nil {
-		if self.attributeSCfg == nil {
-			self.attributeSCfg = new(AttributeSCfg)
+	jsnUserServCfg, err := jsnCfg.UserServJsonCfg()
+	if err != nil {
+		return err
+	}
+	if jsnUserServCfg != nil {
+		if jsnUserServCfg.Enabled != nil {
+			self.UserServerEnabled = *jsnUserServCfg.Enabled
 		}
-		if self.attributeSCfg.loadFromJsonCfg(jsnAttributeSCfg); err != nil {
-			return err
+		if jsnUserServCfg.Indexes != nil {
+			self.UserServerIndexes = *jsnUserServCfg.Indexes
 		}
 	}
+	///depricated^^^
 
 	if jsnChargerSCfg != nil {
 		if self.chargerSCfg == nil {
@@ -1096,15 +1104,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 		if self.supplierSCfg.loadFromJsonCfg(jsnSupplierSCfg); err != nil {
 			return err
-		}
-	}
-
-	if jsnUserServCfg != nil {
-		if jsnUserServCfg.Enabled != nil {
-			self.UserServerEnabled = *jsnUserServCfg.Enabled
-		}
-		if jsnUserServCfg.Indexes != nil {
-			self.UserServerIndexes = *jsnUserServCfg.Indexes
 		}
 	}
 
