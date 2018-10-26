@@ -148,9 +148,9 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.sessionSCfg = new(SessionSCfg)
 	cfg.fsAgentCfg = new(FsAgentCfg)
 	cfg.kamAgentCfg = new(KamAgentCfg)
+	cfg.asteriskAgentCfg = new(AsteriskAgentCfg)
 
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
-	cfg.asteriskAgentCfg = new(AsteriskAgentCfg)
 	cfg.diameterAgentCfg = new(DiameterAgentCfg)
 	cfg.radiusAgentCfg = new(RadiusAgentCfg)
 	cfg.dispatcherSCfg = new(DispatcherSCfg)
@@ -261,7 +261,6 @@ type CGRConfig struct {
 	loaderCfg    []*LoaderSCfg         // LoaderS configurations
 
 	SmOsipsConfig        *SmOsipsConfig    // SMOpenSIPS Configuration
-	asteriskAgentCfg     *AsteriskAgentCfg // SMAsterisk Configuration
 	diameterAgentCfg     *DiameterAgentCfg // DiameterAgent configuration
 	radiusAgentCfg       *RadiusAgentCfg   // RadiusAgent configuration
 	httpAgentCfg         []*HttpAgentCfg   // HttpAgent configuration
@@ -290,21 +289,22 @@ type CGRConfig struct {
 	dfltCdreProfile *CdreCfg // Default cdreConfig profile
 	dfltCdrcProfile *CdrcCfg // Default cdrcConfig profile
 
-	generalCfg   *GeneralCfg   // General config
-	dataDbCfg    *DataDbCfg    // Database config
-	storDbCfg    *StorDbCfg    // StroreDb config
-	tlsCfg       *TlsCfg       // TLS config
-	cacheCfg     CacheCfg      // Cache config
-	listenCfg    *ListenCfg    // Listen config
-	httpCfg      *HTTPCfg      // HTTP config
-	filterSCfg   *FilterSCfg   // FilterS config
-	ralsCfg      *RalsCfg      // Rals config
-	schedulerCfg *SchedulerCfg // Scheduler config
-	cdrsCfg      *CdrsCfg      // Cdrs config
-	cdrStatsCfg  *CdrStatsCfg  // CdrStats config - deprecated
-	sessionSCfg  *SessionSCfg  // SessionS config
-	fsAgentCfg   *FsAgentCfg   // FreeSWITCHAgent config
-	kamAgentCfg  *KamAgentCfg  // KamailioAgent config
+	generalCfg       *GeneralCfg       // General config
+	dataDbCfg        *DataDbCfg        // Database config
+	storDbCfg        *StorDbCfg        // StroreDb config
+	tlsCfg           *TlsCfg           // TLS config
+	cacheCfg         CacheCfg          // Cache config
+	listenCfg        *ListenCfg        // Listen config
+	httpCfg          *HTTPCfg          // HTTP config
+	filterSCfg       *FilterSCfg       // FilterS config
+	ralsCfg          *RalsCfg          // Rals config
+	schedulerCfg     *SchedulerCfg     // Scheduler config
+	cdrsCfg          *CdrsCfg          // Cdrs config
+	cdrStatsCfg      *CdrStatsCfg      // CdrStats config - deprecated
+	sessionSCfg      *SessionSCfg      // SessionS config
+	fsAgentCfg       *FsAgentCfg       // FreeSWITCHAgent config
+	kamAgentCfg      *KamAgentCfg      // KamailioAgent config
+	asteriskAgentCfg *AsteriskAgentCfg // AsteriskAgent config
 	analyzerSCfg *AnalyzerSCfg
 }
 

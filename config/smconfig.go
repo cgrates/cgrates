@@ -414,6 +414,9 @@ type AsteriskConnCfg struct {
 }
 
 func (aConnCfg *AsteriskConnCfg) loadFromJsonCfg(jsnCfg *AstConnJsonCfg) error {
+	if jsnCfg == nil {
+		return nil
+	}
 	if jsnCfg.Address != nil {
 		aConnCfg.Address = *jsnCfg.Address
 	}
@@ -440,6 +443,9 @@ type AsteriskAgentCfg struct {
 }
 
 func (aCfg *AsteriskAgentCfg) loadFromJsonCfg(jsnCfg *AsteriskAgentJsonCfg) (err error) {
+	if jsnCfg == nil {
+		return nil
+	}
 	if jsnCfg.Enabled != nil {
 		aCfg.Enabled = *jsnCfg.Enabled
 	}
