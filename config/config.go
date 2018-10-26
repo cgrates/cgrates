@@ -843,6 +843,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err != nil {
 		return err
 	}
+	if err := self.asteriskAgentCfg.loadFromJsonCfg(jsnSMAstCfg); err != nil {
+		return err
+	}
 
 	jsnDACfg, err := jsnCfg.DiameterAgentJsonCfg()
 	if err != nil {
@@ -1011,12 +1014,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			} else {
 				self.CdrcProfiles[cdrcInstCfg.CdrInDir] = append(self.CdrcProfiles[cdrcInstCfg.CdrInDir], cdrcInstCfg)
 			}
-		}
-	}
-
-	if jsnSMAstCfg != nil {
-		if err := self.asteriskAgentCfg.loadFromJsonCfg(jsnSMAstCfg); err != nil {
-			return err
 		}
 	}
 
