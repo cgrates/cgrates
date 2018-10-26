@@ -23,6 +23,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -63,6 +65,95 @@ func TestEnvRawJsonReadByte(t *testing.T) {
 	}
 }
 
+func TestEnvRawJsonconsumeComent(t *testing.T) {
+	raw := &rawJSON{rdr: bufio.NewReader(strings.NewReader(`//comment
+a/*comment*/b`))}
+	expected := (byte)('a')
+	if r, err := raw.consumeComent('d'); err != nil {
+		t.Error(err)
+	} else if r {
+		t.Errorf("Expected to not replace comment")
+	}
+	if r, err := raw.consumeComent('/'); err != nil {
+		t.Error(err)
+	} else if !r {
+		t.Errorf("Expected to replace comment")
+	}
+	if rply, err := raw.ReadByte(); err != nil {
+		t.Error(err)
+	} else if rply != expected {
+		t.Errorf("Expected: %+v\n, recived: %+v", string(expected), string(rply))
+	}
+	expected = (byte)('b')
+	if r, err := raw.consumeComent('*'); err != nil {
+		t.Error(err)
+	} else if !r {
+		t.Errorf("Expected to replace comment")
+	}
+	if rply, err := raw.ReadByte(); err != nil {
+		t.Error(err)
+	} else if rply != expected {
+		t.Errorf("Expected: %+v\n, recived: %+v", string(expected), string(rply))
+	}
+}
+
+func TestEnvRawJsonReadByteWC(t *testing.T) {
+	raw := &rawJSON{rdr: bufio.NewReader(strings.NewReader(`c/*first comment*///another comment    
+
+		cgrates`))}
+	expected := (byte)('c')
+	if rply, err := raw.ReadByteWC(); err != nil {
+		t.Error(err)
+	} else if rply != expected {
+		t.Errorf("Expected: %+v\n, recived: %+v", string(expected), string(rply))
+	}
+	if rply, err := raw.ReadByteWC(); err != nil {
+		t.Error(err)
+	} else if rply != expected {
+		t.Errorf("Expected: %+v\n, recived: %+v", string(expected), string(rply))
+	}
+}
+
+func TestEnvRawJsonPeekByteWC(t *testing.T) {
+	raw := &rawJSON{rdr: bufio.NewReader(strings.NewReader(`c/*first comment*///another comment    
+
+		bgrates`))}
+	expected := (byte)('c')
+	if rply, err := raw.PeekByteWC(); err != nil {
+		t.Error(err)
+	} else if rply != expected {
+		t.Errorf("Expected: %+v\n, recived: %+v", string(expected), string(rply))
+	}
+	if rply, err := raw.ReadByteWC(); err != nil {
+		t.Error(err)
+	} else if rply != expected {
+		t.Errorf("Expected: %+v\n, recived: %+v", string(expected), string(rply))
+	}
+	expected = (byte)('b')
+	if rply, err := raw.PeekByteWC(); err != nil {
+		t.Error(err)
+	} else if rply != expected {
+		t.Errorf("Expected: %+v\n, recived: %+v", string(expected), string(rply))
+	}
+	if rply, err := raw.ReadByteWC(); err != nil {
+		t.Error(err)
+	} else if rply != expected {
+		t.Errorf("Expected: %+v\n, recived: %+v", string(expected), string(rply))
+	}
+}
+
+func TestEnvRawJsonreadFirstNonWhiteSpace(t *testing.T) {
+	raw := &rawJSON{rdr: bufio.NewReader(strings.NewReader(`    
+
+		cgrates`))}
+	expected := (byte)('c')
+	if rply, err := raw.readFirstNonWhiteSpace(); err != nil {
+		t.Error(err)
+	} else if rply != expected {
+		t.Errorf("Expected: %+v\n, recived: %+v", string(expected), string(rply))
+	}
+}
+
 func TestEnvReaderRead(t *testing.T) {
 	os.Setenv("TESTVAR", "cgRates")
 	envR := NewRawJSONReader(strings.NewReader(envStr))
@@ -77,12 +168,114 @@ func TestEnvReaderRead(t *testing.T) {
 	rply = append(rply, buf[:n]...)
 
 	if !reflect.DeepEqual(expected, rply) {
-		// for i := 0; i < len(expected); i++ {
-		// 	if expected[i] != rply[i] {
-		// 		t.Errorf("Expected: %q\n, recived: %q pe pozitia %+v", (string(expected[i-2 : i+2])), (string(rply[i-2 : i+2])), i)
-		// 		break
-		// 	}
-		// }
 		t.Errorf("Expected: %+v\n, recived: %+v", (string(expected)), (string(rply)))
+	}
+}
+
+func TestEnvReaderreadEnvName(t *testing.T) {
+	envR := EnvReader{rd: &rawJSON{rdr: bufio.NewReader(strings.NewReader(`Test_VAR1 } Var2_TEST'`))}}
+	expected := []byte("Test_VAR1")
+	if rply, bit, err := envR.readEnvName(); err != nil {
+		t.Error(err)
+	} else if bit != '}' {
+		t.Errorf("Wrong bit returned %q", bit)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expected: %+v, recived: %+v", (string(expected)), (string(rply)))
+	}
+	expected = []byte("Var2_TEST")
+	if rply, bit, err := envR.readEnvName(); err != nil {
+		t.Error(err)
+	} else if bit != '\'' {
+		t.Errorf("Wrong bit returned %q", bit)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expected: %+v, recived: %+v", (string(expected)), (string(rply)))
+	}
+}
+
+func TestEnvReaderreplaceEnv(t *testing.T) {
+	os.Setenv("Test_VAR1", "5")
+	os.Setenv("Test_VAR2", "aVeryLongEnviormentalVariable")
+	envR := EnvReader{rd: &rawJSON{rdr: bufio.NewReader(strings.NewReader(`Test_VAR1,/*comment*/ }Test_VAR2"`))}}
+	expected := []byte("5}   ")
+	expectedn := 2
+	rply := make([]byte, 5)
+	if n, err := envR.replaceEnv(rply, 0, 5); err != nil {
+		t.Error(err)
+	} else if expectedn != n {
+		t.Errorf("Expected: %+v, recived: %+v", expectedn, n)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expected: %q, recived: %q", (string(expected)), (string(rply)))
+	}
+	expected = []byte("aVery")
+	expectedn = 5
+	rply = make([]byte, 5)
+	if n, err := envR.replaceEnv(rply, 0, 5); err != nil {
+		t.Error(err)
+	} else if expectedn != n {
+		t.Errorf("Expected: %+v, recived: %+v", expectedn, n)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expected: %q, recived: %q", (string(expected)), (string(rply)))
+	} else if bufexp := []byte("LongEnviormentalVariable\""); !reflect.DeepEqual(bufexp, envR.buf) {
+		t.Errorf("Expected: %q, recived: %q", (string(expected)), (string(rply)))
+	}
+}
+
+func TestEnvReadercheckMeta(t *testing.T) {
+	envR := EnvReader{rd: &rawJSON{rdr: bufio.NewReader(strings.NewReader(""))}}
+	envR.m = 2
+	if envR.checkMeta('n') {
+		t.Errorf("Expectiv to get false recived true")
+	} else if envR.m != 3 {
+		t.Errorf("Expectiv the meta offset to incrase")
+	}
+	envR.m = 4
+	if !envR.checkMeta(':') {
+		t.Errorf("Expectiv true ")
+	} else if envR.m != 0 {
+		t.Errorf("Expectiv the meta offset to reset")
+	}
+	envR.m = 1
+	if envR.checkMeta('v') {
+		t.Errorf("Expectiv to get false recived true")
+	} else if envR.m != 0 {
+		t.Errorf("Expectiv the meta offset to reset")
+	}
+}
+
+func TestisNewLine(t *testing.T) {
+	for char, expected := range map[byte]bool{'a': false, '\n': true, ' ': false, '\t': false, '\r': true} {
+		if rply := isNewLine(char); expected != rply {
+			t.Errorf("Expected: %+v, recived: %+v", expected, rply)
+		}
+	}
+}
+
+func TestisWhiteSpace(t *testing.T) {
+	for char, expected := range map[byte]bool{'a': false, '\n': true, ' ': true, '\t': true, '\r': true, 0: true, '1': false} {
+		if rply := isWhiteSpace(char); expected != rply {
+			t.Errorf("Expected: %+v, recived: %+v", expected, rply)
+		}
+	}
+}
+
+func TestReadEnv(t *testing.T) {
+	key := "TESTVAR2"
+	if _, err := ReadEnv(key); !reflect.DeepEqual(err, utils.ErrEnvNotFound(key)) {
+		t.Errorf("Expected: %+v, recived: %+v", utils.ErrEnvNotFound(key), err)
+	}
+	expected := "cgRates"
+	os.Setenv(key, expected)
+	if rply, err := ReadEnv(key); err != nil {
+		t.Error(err)
+	} else if rply != expected {
+		t.Errorf("Expected: %+v, recived: %+v", expected, rply)
+	}
+}
+
+func TestisAlfanum(t *testing.T) {
+	for char, expected := range map[byte]bool{'a': true, '\n': false, ' ': false, '\t': false, '\r': false, 0: false, '1': true, 'Q': true, '9': true} {
+		if rply := isAlfanum(char); expected != rply {
+			t.Errorf("Expected: %+v, recived: %+v", expected, rply)
+		}
 	}
 }
