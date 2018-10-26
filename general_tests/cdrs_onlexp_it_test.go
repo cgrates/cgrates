@@ -86,7 +86,7 @@ func TestCDRsOnExpStartSlaveEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func TestCDRsOnExpHttpCdrReplication(t *testing.T) {
-	cdrsMasterRpc, err = rpcclient.NewRpcClient("tcp", cdrsMasterCfg.RPCJSONListen, false, "", "", "", 1, 1,
+	cdrsMasterRpc, err = rpcclient.NewRpcClient("tcp", cdrsMasterCfg.ListenCfg().RPCJSONListen, false, "", "", "", 1, 1,
 		time.Duration(1*time.Second), time.Duration(2*time.Second), "json", nil, false)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())

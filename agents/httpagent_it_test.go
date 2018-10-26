@@ -153,9 +153,9 @@ func testHAitTPFromFolder(t *testing.T) {
 
 func testHAitAuthDryRun(t *testing.T) {
 	httpConst := "http"
-	addr := haCfg.HTTPListen
+	addr := haCfg.ListenCfg().HTTPListen
 	if isTls {
-		addr = haCfg.HTTPTLSListen
+		addr = haCfg.ListenCfg().HTTPTLSListen
 		httpConst = "https"
 	}
 	reqUrl := fmt.Sprintf("%s://%s%s?request_type=OutboundAUTH&CallID=123456&Msisdn=497700056231&Imsi=2343000000000123&Destination=491239440004&MSRN=0102220233444488999&ProfileID=1&AgentID=176&GlobalMSISDN=497700056129&GlobalIMSI=214180000175129&ICCID=8923418450000089629&MCC=234&MNC=10&calltype=callback",
@@ -180,9 +180,9 @@ func testHAitAuthDryRun(t *testing.T) {
 
 func testHAitAuth1001(t *testing.T) {
 	httpConst := "http"
-	addr := haCfg.HTTPListen
+	addr := haCfg.ListenCfg().HTTPListen
 	if isTls {
-		addr = haCfg.HTTPTLSListen
+		addr = haCfg.ListenCfg().HTTPTLSListen
 		httpConst = "https"
 
 	}
@@ -208,9 +208,9 @@ func testHAitAuth1001(t *testing.T) {
 
 func testHAitCDRmtcall(t *testing.T) {
 	httpConst := "http"
-	addr := haCfg.HTTPListen
+	addr := haCfg.ListenCfg().HTTPListen
 	if isTls {
-		addr = haCfg.HTTPTLSListen
+		addr = haCfg.ListenCfg().HTTPTLSListen
 		httpConst = "https"
 	}
 	reqUrl := fmt.Sprintf("%s://%s%s?request_type=MTCALL_CDR&timestamp=2018-08-14%%2012:03:22&call_date=2018-0814%%2012:00:49&transactionid=10000&CDR_ID=123456&carrierid=1&mcc=0&mnc=0&imsi=434180000000000&msisdn=1001&destination=1002&leg=C&leg_duration=185&reseller_charge=11.1605&client_charge=0.0000&user_charge=22.0000&IOT=0&user_balance=10.00&cli=%%2B498702190000&polo=0.0100&ddi_map=N",
@@ -250,9 +250,9 @@ func testHAitCDRmtcall(t *testing.T) {
 func testHAitCDRmtcall2(t *testing.T) {
 	xmlBody := `<?xml version="1.0" encoding="utf-8"?><complete-datasession-notification callid="48981764"><createtime>2005-08-26T14:17:34</createtime><reference>Data</reference><userid>528594</userid><username>447700086788</username><customerid>510163</customerid><companyname>Silliname</companyname><totalcost amount="0.1400" currency="USD">0.1400</totalcost><agenttotalcost amount="0.1400" currency="USD">0.1400</agenttotalcost><agentid>234</agentid><callleg calllegid="89357336"><number>447700086788</number><description>China, Peoples Republic of - China Unicom (CU-GSM)</description><mcc>460</mcc><mnc>001</mnc><seconds>32</seconds><bytes>4558</bytes><permegabyterate  currency="USD">1.3330</permegabyterate><cost amount="0.1400" currency="USD">0.1400</cost><agentpermegabyterate currency="USD">1.3330</agentpermegabyterate><agentcost amount="0.1400"currency="USD">0.1400</agentcost></callleg></complete-datasession-notification>`
 	httpConst := "http"
-	addr := haCfg.HTTPListen
+	addr := haCfg.ListenCfg().HTTPListen
 	if isTls {
-		addr = haCfg.HTTPTLSListen
+		addr = haCfg.ListenCfg().HTTPTLSListen
 		httpConst = "https"
 	}
 	url := fmt.Sprintf("%s://%s%s", httpConst, addr, haCfg.HttpAgentCfg()[1].Url)

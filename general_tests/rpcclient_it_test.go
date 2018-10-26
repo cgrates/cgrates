@@ -78,13 +78,13 @@ func TestRPCITLclStartSecondEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestRPCITLclRpcConnPoolFirst(t *testing.T) {
 	rpcPoolFirst = rpcclient.NewRpcClientPool(rpcclient.POOL_FIRST, 0)
-	rpcRAL1, err = rpcclient.NewRpcClient("tcp", rpcITCfg1.RPCJSONListen, false, "", "", "", 3, 1,
+	rpcRAL1, err = rpcclient.NewRpcClient("tcp", rpcITCfg1.ListenCfg().RPCJSONListen, false, "", "", "", 3, 1,
 		time.Duration(1*time.Second), time.Duration(2*time.Second), rpcclient.JSON_RPC, nil, false)
 	if err == nil {
 		t.Fatal("Should receive cannot connect error here")
 	}
 	rpcPoolFirst.AddClient(rpcRAL1)
-	rpcRAL2, err = rpcclient.NewRpcClient("tcp", rpcITCfg2.RPCJSONListen, false, "", "", "", 3, 1,
+	rpcRAL2, err = rpcclient.NewRpcClient("tcp", rpcITCfg2.ListenCfg().RPCJSONListen, false, "", "", "", 3, 1,
 		time.Duration(1*time.Second), time.Duration(2*time.Second), rpcclient.JSON_RPC, nil, false)
 	if err != nil {
 		t.Fatal(err)
