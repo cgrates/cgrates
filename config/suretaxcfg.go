@@ -19,27 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"github.com/cgrates/cgrates/utils"
-	"strings"
 	"time"
-)
 
-// Creates a new SureTaxCfg with defaults pre-populated out of config_defaults.json
-func NewSureTaxCfgWithDefaults() (*SureTaxCfg, error) {
-	jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(CGRATES_CFG_JSON))
-	if err != nil {
-		return nil, err
-	}
-	jsnSureTaxCfg, err := jsnCfg.SureTaxJsonCfg()
-	if err != nil {
-		return nil, err
-	}
-	st := new(SureTaxCfg)
-	if err := st.loadFromJsonCfg(jsnSureTaxCfg); err != nil {
-		return nil, err
-	}
-	return st, nil
-}
+	"github.com/cgrates/cgrates/utils"
+)
 
 // SureTax configuration object
 type SureTaxCfg struct {
@@ -72,8 +55,10 @@ type SureTaxCfg struct {
 }
 
 // Loads/re-loads data from json config object
-func (self *SureTaxCfg) loadFromJsonCfg(jsnCfg *SureTaxJsonCfg) error {
-	var err error
+func (self *SureTaxCfg) loadFromJsonCfg(jsnCfg *SureTaxJsonCfg) (err error) {
+	if jsnCfg == nil {
+		return
+	}
 	if jsnCfg.Url != nil {
 		self.Url = *jsnCfg.Url
 	}
