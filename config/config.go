@@ -859,6 +859,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err != nil {
 		return err
 	}
+	if err := self.radiusAgentCfg.loadFromJsonCfg(jsnRACfg); err != nil {
+		return err
+	}
 
 	jsnHttpAgntCfg, err := jsnCfg.HttpAgentJsonCfg()
 	if err != nil {
@@ -1017,12 +1020,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			} else {
 				self.CdrcProfiles[cdrcInstCfg.CdrInDir] = append(self.CdrcProfiles[cdrcInstCfg.CdrInDir], cdrcInstCfg)
 			}
-		}
-	}
-
-	if jsnRACfg != nil {
-		if err := self.radiusAgentCfg.loadFromJsonCfg(jsnRACfg); err != nil {
-			return err
 		}
 	}
 
