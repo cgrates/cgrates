@@ -21,40 +21,43 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 )
 
-func TestChargerSCfgloadFromJsonCfg(t *testing.T) {
-	var chgscfg, expected ChargerSCfg
-	if err := chgscfg.loadFromJsonCfg(nil); err != nil {
+func TestResourceSConfigloadFromJsonCfg(t *testing.T) {
+	var rlcfg, expected ResourceSConfig
+	if err := rlcfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(chgscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, chgscfg)
+	} else if !reflect.DeepEqual(rlcfg, expected) {
+		t.Errorf("Expected: %+v ,recived: %+v", expected, rlcfg)
 	}
-	if err := chgscfg.loadFromJsonCfg(new(ChargerSJsonCfg)); err != nil {
+	if err := rlcfg.loadFromJsonCfg(new(ResourceSJsonCfg)); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(chgscfg, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, chgscfg)
+	} else if !reflect.DeepEqual(rlcfg, expected) {
+		t.Errorf("Expected: %+v ,recived: %+v", expected, rlcfg)
 	}
 	cfgJSONStr := `{
-"chargers": {								// Charger service
-	"enabled": true,						// starts charger service: <true|false>.
-	"attributes_conns": [],					// address where to reach the AttributeS <""|127.0.0.1:2013>
+"resources": {								// Resource service (*new)
+	"enabled": true,						// starts ResourceLimiter service: <true|false>.
+	"store_interval": "1s",					// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+	"thresholds_conns": [],					// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": ["index1", "index2"],			// query indexes based on these fields for faster processing
 },	
 }`
-	expected = ChargerSCfg{
+	expected = ResourceSConfig{
 		Enabled:             true,
-		AttributeSConns:     []*HaPoolConfig{},
+		StoreInterval:       time.Duration(time.Second),
+		ThresholdSConns:     []*HaPoolConfig{},
 		PrefixIndexedFields: &[]string{"index1", "index2"},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if jsnChgCfg, err := jsnCfg.ChargerServJsonCfg(); err != nil {
+	} else if jsnRlcCfg, err := jsnCfg.ResourceSJsonCfg(); err != nil {
 		t.Error(err)
-	} else if err = chgscfg.loadFromJsonCfg(jsnChgCfg); err != nil {
+	} else if err = rlcfg.loadFromJsonCfg(jsnRlcCfg); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expected, chgscfg) {
-		t.Errorf("Expected: %+v , recived: %+v", expected, chgscfg)
+	} else if !reflect.DeepEqual(expected, rlcfg) {
+		t.Errorf("Expected: %+v , recived: %+v", expected, rlcfg)
 	}
 }
