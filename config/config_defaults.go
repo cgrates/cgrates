@@ -414,7 +414,6 @@ const CGRATES_CFG_JSON = `
 	"sessions_conns": [
 		{"address": "*internal"}								// connection towards SessionService
 	],
-	"cdr_requires_session": false,								// only create CDR if there is an active session at terminate
 	"request_processors": [],
 },
 
