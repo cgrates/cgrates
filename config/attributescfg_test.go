@@ -50,9 +50,9 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if jsnCacheCfg, err := jsnCfg.AttributeServJsonCfg(); err != nil {
+	} else if jsnAttSCfg, err := jsnCfg.AttributeServJsonCfg(); err != nil {
 		t.Error(err)
-	} else if err = attscfg.loadFromJsonCfg(jsnCacheCfg); err != nil {
+	} else if err = attscfg.loadFromJsonCfg(jsnAttSCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, attscfg) {
 		t.Errorf("Expected: %+v , recived: %+v", expected, attscfg)

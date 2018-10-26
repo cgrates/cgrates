@@ -113,9 +113,9 @@ func TestCdrcCfgloadFromJsonCfg(t *testing.T) {
 	expected = cdrcCfg
 	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if jsnCacheCfg, err := jsnCfg.CdrcJsonCfg(); err != nil {
+	} else if jsnCdrcCfg, err := jsnCfg.CdrcJsonCfg(); err != nil {
 		t.Error(err)
-	} else if err = cdrccfg.loadFromJsonCfg(jsnCacheCfg[0]); err != nil {
+	} else if err = cdrccfg.loadFromJsonCfg(jsnCdrcCfg[0]); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, cdrccfg) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(cdrccfg))
