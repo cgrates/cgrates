@@ -149,10 +149,10 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.fsAgentCfg = new(FsAgentCfg)
 	cfg.kamAgentCfg = new(KamAgentCfg)
 	cfg.asteriskAgentCfg = new(AsteriskAgentCfg)
-
-	cfg.SmOsipsConfig = new(SmOsipsConfig)
 	cfg.diameterAgentCfg = new(DiameterAgentCfg)
 	cfg.radiusAgentCfg = new(RadiusAgentCfg)
+
+	cfg.SmOsipsConfig = new(SmOsipsConfig)
 	cfg.dispatcherSCfg = new(DispatcherSCfg)
 	cfg.ConfigReloads = make(map[string]chan struct{})
 	cfg.ConfigReloads[utils.CDRC] = make(chan struct{}, 1)
@@ -260,15 +260,13 @@ type CGRConfig struct {
 	CdrcProfiles map[string][]*CdrcCfg // Number of CDRC instances running imports, format map[dirPath][]{Configs}
 	loaderCfg    []*LoaderSCfg         // LoaderS configurations
 
-	SmOsipsConfig        *SmOsipsConfig    // SMOpenSIPS Configuration
-	diameterAgentCfg     *DiameterAgentCfg // DiameterAgent configuration
-	radiusAgentCfg       *RadiusAgentCfg   // RadiusAgent configuration
-	httpAgentCfg         []*HttpAgentCfg   // HttpAgent configuration
-	PubSubServerEnabled  bool              // Starts PubSub as server: <true|false>.
-	AliasesServerEnabled bool              // Starts PubSub as server: <true|false>.
-	UserServerEnabled    bool              // Starts User as server: <true|false>
-	UserServerIndexes    []string          // List of user profile field indexes
-	attributeSCfg        *AttributeSCfg    // Attribute service configuration
+	SmOsipsConfig        *SmOsipsConfig  // SMOpenSIPS Configuration
+	httpAgentCfg         []*HttpAgentCfg // HttpAgent configuration
+	PubSubServerEnabled  bool            // Starts PubSub as server: <true|false>.
+	AliasesServerEnabled bool            // Starts PubSub as server: <true|false>.
+	UserServerEnabled    bool            // Starts User as server: <true|false>
+	UserServerIndexes    []string        // List of user profile field indexes
+	attributeSCfg        *AttributeSCfg  // Attribute service configuration
 	chargerSCfg          *ChargerSCfg
 	resourceSCfg         *ResourceSConfig         // Configuration for resource limiter
 	statsCfg             *StatSCfg                // Configuration for StatS
@@ -305,6 +303,8 @@ type CGRConfig struct {
 	fsAgentCfg       *FsAgentCfg       // FreeSWITCHAgent config
 	kamAgentCfg      *KamAgentCfg      // KamailioAgent config
 	asteriskAgentCfg *AsteriskAgentCfg // AsteriskAgent config
+	diameterAgentCfg *DiameterAgentCfg // DiameterAgent config
+	radiusAgentCfg   *RadiusAgentCfg   // RadiusAgent config
 	analyzerSCfg *AnalyzerSCfg
 }
 
@@ -851,6 +851,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err != nil {
 		return err
 	}
+	if err := self.diameterAgentCfg.loadFromJsonCfg(jsnDACfg); err != nil {
+		return err
+	}
 
 	jsnRACfg, err := jsnCfg.RadiusAgentJsonCfg()
 	if err != nil {
@@ -1014,12 +1017,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			} else {
 				self.CdrcProfiles[cdrcInstCfg.CdrInDir] = append(self.CdrcProfiles[cdrcInstCfg.CdrInDir], cdrcInstCfg)
 			}
-		}
-	}
-
-	if jsnDACfg != nil {
-		if err := self.diameterAgentCfg.loadFromJsonCfg(jsnDACfg); err != nil {
-			return err
 		}
 	}
 
