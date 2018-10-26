@@ -552,3 +552,121 @@ func TestChargedTimingClone(t *testing.T) {
 		t.Errorf("Expecting: Time, received: %+v", ct2)
 	}
 }
+
+//Start tests for RatingUnit
+func TestRatingUnitEquals(t *testing.T) {
+	ru1 := &RatingUnit{
+		ConnectFee:       1.23,
+		RoundingMethod:   "Meth1",
+		RoundingDecimals: 4,
+		MaxCost:          3.45,
+		MaxCostStrategy:  "MaxMeth",
+		TimingID:         "TimingID1",
+		RatesID:          "RatesID1",
+		RatingFiltersID:  "RatingFltrID1",
+	}
+	ru2 := &RatingUnit{
+		ConnectFee:       1.23,
+		RoundingMethod:   "Meth1",
+		RoundingDecimals: 4,
+		MaxCost:          3.45,
+		MaxCostStrategy:  "MaxMeth",
+		TimingID:         "TimingID1",
+		RatesID:          "RatesID1",
+		RatingFiltersID:  "RatingFltrID1",
+	}
+	ru3 := &RatingUnit{
+		ConnectFee:       1.24,
+		RoundingMethod:   "Meth2",
+		RoundingDecimals: 4,
+		MaxCost:          3.45,
+		MaxCostStrategy:  "MaxMeth",
+		TimingID:         "TimingID1",
+		RatesID:          "RatesID1",
+		RatingFiltersID:  "RatingFltrID1",
+	}
+	if eq := ru1.Equals(ru2); !eq {
+		t.Errorf("Expecting: true, received: %+v", eq)
+	}
+	if eq := ru1.Equals(ru3); eq {
+		t.Errorf("Expecting: false, received: %+v", eq)
+	}
+}
+
+func TestRatingUnitClone(t *testing.T) {
+	ru1 := &RatingUnit{
+		ConnectFee:       1.23,
+		RoundingMethod:   "Meth1",
+		RoundingDecimals: 4,
+		MaxCost:          3.45,
+		MaxCostStrategy:  "MaxMeth",
+		TimingID:         "TimingID1",
+		RatesID:          "RatesID1",
+		RatingFiltersID:  "RatingFltrID1",
+	}
+	ru2 := ru1.Clone()
+	if eq := ru1.Equals(ru2); !eq {
+		t.Errorf("Expecting: true, received: %+v", eq)
+	}
+	ru1.ConnectFee = 2.34
+	if ru2.ConnectFee != 1.23 {
+		t.Errorf("Expecting: 1.23, received: %+v", ru2)
+	}
+}
+
+//Start tests for RatingFilters
+func TestRatingFiltersGetIDWithSet(t *testing.T) {
+	rf1 := RatingFilters{
+		"Key1": RatingMatchedFilters{
+			"AccountID":     "1001",
+			"Units":         2.34,
+			"ExtraChargeID": "Extra1",
+		},
+		"Key2": RatingMatchedFilters{
+			"AccountID":     "1002",
+			"Units":         1.23,
+			"ExtraChargeID": "Extra2",
+		},
+	}
+
+	id1 := rf1.GetIDWithSet(RatingMatchedFilters{
+		"AccountID":     "1001",
+		"Units":         2.34,
+		"ExtraChargeID": "Extra1",
+	})
+	if id1 != "Key1" {
+		t.Errorf("Expecting: Key1, received: %+v", id1)
+	}
+
+	id2 := rf1.GetIDWithSet(RatingMatchedFilters{
+		"AccountID":     "1004",
+		"Units":         2.34,
+		"ExtraChargeID": "Extra3",
+	})
+	if id2 == "" {
+		t.Errorf("Expecting id , received: %+v", id2)
+	}
+}
+
+func TestRatingFiltersClone(t *testing.T) {
+	rf1 := RatingFilters{
+		"Key1": RatingMatchedFilters{
+			"AccountID":     "1001",
+			"Units":         2.34,
+			"ExtraChargeID": "Extra1",
+		},
+		"Key2": RatingMatchedFilters{
+			"AccountID":     "1002",
+			"Units":         1.23,
+			"ExtraChargeID": "Extra2",
+		},
+	}
+	rf2 := rf1.Clone()
+	if !reflect.DeepEqual(rf1, rf2) {
+		t.Errorf("Expecting: %+v, received: %+v", rf1, rf2)
+	}
+	rf1["Key1"]["AccountID"] = "1003"
+	if rf2["Key1"]["AccountID"] != "1001" {
+		t.Errorf("Expecting 1001 , received: %+v", rf2)
+	}
+}
