@@ -153,6 +153,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.attributeSCfg = new(AttributeSCfg)
 	cfg.chargerSCfg = new(ChargerSCfg)
 	cfg.resourceSCfg = new(ResourceSConfig)
+	cfg.statsCfg = new(StatSCfg)
 
 	//Depricated
 	cfg.cdrStatsCfg = new(CdrStatsCfg)
@@ -267,7 +268,6 @@ type CGRConfig struct {
 
 	httpAgentCfg []*HttpAgentCfg // HttpAgent configuration
 
-	statsCfg          *StatSCfg                // Configuration for StatS
 	thresholdSCfg     *ThresholdSCfg           // configuration for ThresholdS
 	supplierSCfg      *SupplierSCfg            // configuration for SupplierS
 	dispatcherSCfg    *DispatcherSCfg          // configuration for Dispatcher
@@ -305,6 +305,7 @@ type CGRConfig struct {
 	attributeSCfg    *AttributeSCfg    // AttributeS config
 	chargerSCfg      *ChargerSCfg      // ChargerS config
 	resourceSCfg     *ResourceSConfig  // ResourceS config
+	statsCfg         *StatSCfg         // StatS config
 	analyzerSCfg *AnalyzerSCfg
 
 	// Deprecated
@@ -896,6 +897,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err != nil {
 		return err
 	}
+	if self.statsCfg.loadFromJsonCfg(jsnStatSCfg); err != nil {
+		return err
+	}
 
 	jsnThresholdSCfg, err := jsnCfg.ThresholdSJsonCfg()
 	if err != nil {
@@ -1069,15 +1073,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 	}
 	///depricated^^^
-
-	if jsnStatSCfg != nil {
-		if self.statsCfg == nil {
-			self.statsCfg = new(StatSCfg)
-		}
-		if self.statsCfg.loadFromJsonCfg(jsnStatSCfg); err != nil {
-			return err
-		}
-	}
 
 	if jsnThresholdSCfg != nil {
 		if self.thresholdSCfg == nil {
