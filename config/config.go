@@ -151,6 +151,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.diameterAgentCfg = new(DiameterAgentCfg)
 	cfg.radiusAgentCfg = new(RadiusAgentCfg)
 	cfg.attributeSCfg = new(AttributeSCfg)
+	cfg.chargerSCfg = new(ChargerSCfg)
 
 	//Depricated
 	cfg.cdrStatsCfg = new(CdrStatsCfg)
@@ -265,7 +266,6 @@ type CGRConfig struct {
 
 	httpAgentCfg []*HttpAgentCfg // HttpAgent configuration
 
-	chargerSCfg       *ChargerSCfg
 	resourceSCfg      *ResourceSConfig         // Configuration for resource limiter
 	statsCfg          *StatSCfg                // Configuration for StatS
 	thresholdSCfg     *ThresholdSCfg           // configuration for ThresholdS
@@ -303,6 +303,7 @@ type CGRConfig struct {
 	diameterAgentCfg *DiameterAgentCfg // DiameterAgent config
 	radiusAgentCfg   *RadiusAgentCfg   // RadiusAgent config
 	attributeSCfg    *AttributeSCfg    // AttributeS config
+	chargerSCfg      *ChargerSCfg      // ChargerS config
 	analyzerSCfg *AnalyzerSCfg
 
 	// Deprecated
@@ -878,6 +879,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err != nil {
 		return err
 	}
+	if self.chargerSCfg.loadFromJsonCfg(jsnChargerSCfg); err != nil {
+		return err
+	}
 
 	jsnRLSCfg, err := jsnCfg.ResourceSJsonCfg()
 	if err != nil {
@@ -1061,15 +1065,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 	}
 	///depricated^^^
-
-	if jsnChargerSCfg != nil {
-		if self.chargerSCfg == nil {
-			self.chargerSCfg = new(ChargerSCfg)
-		}
-		if self.chargerSCfg.loadFromJsonCfg(jsnChargerSCfg); err != nil {
-			return err
-		}
-	}
 
 	if jsnRLSCfg != nil {
 		if self.resourceSCfg == nil {
