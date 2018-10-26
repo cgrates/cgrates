@@ -1496,8 +1496,8 @@ func TestCgrLoaderCfgDefault(t *testing.T) {
 			},
 		},
 	}
-	if !reflect.DeepEqual(cgrCfg.LoaderCgrConfig, eLdrCfg) {
-		t.Errorf("received: %+v, expecting: %+v", utils.ToJSON(cgrCfg.LoaderCgrConfig), utils.ToJSON(eLdrCfg))
+	if !reflect.DeepEqual(cgrCfg.LoaderCgrCfg(), eLdrCfg) {
+		t.Errorf("received: %+v, expecting: %+v", utils.ToJSON(cgrCfg.LoaderCgrCfg()), utils.ToJSON(eLdrCfg))
 	}
 }
 
@@ -1517,8 +1517,8 @@ func TestCgrMigratorCfgDefault(t *testing.T) {
 		OutStorDBUser:     "cgrates",
 		OutStorDBPassword: "",
 	}
-	if !reflect.DeepEqual(cgrCfg.MigratorCgrConfig, eMgrCfg) {
-		t.Errorf("received: %+v, expecting: %+v", utils.ToJSON(cgrCfg.MigratorCgrConfig), utils.ToJSON(eMgrCfg))
+	if !reflect.DeepEqual(cgrCfg.MigratorCgrCfg(), eMgrCfg) {
+		t.Errorf("received: %+v, expecting: %+v", utils.ToJSON(cgrCfg.MigratorCgrCfg()), utils.ToJSON(eMgrCfg))
 	}
 }
 
@@ -1635,10 +1635,10 @@ func TestCgrMigratorCfg2(t *testing.T) {
 
 	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(JSN_CFG); err != nil {
 		t.Error(err)
-	} else if cgrCfg.MigratorCgrConfig.OutDataDBHost != "0.0.0.0" {
-		t.Errorf("Expected: 0.0.0.0 , received: %+v", cgrCfg.MigratorCgrConfig.OutDataDBHost)
-	} else if cgrCfg.MigratorCgrConfig.OutDataDBPort != "9999" {
-		t.Errorf("Expected: 9999, received: %+v", cgrCfg.MigratorCgrConfig.OutDataDBPassword)
+	} else if cgrCfg.MigratorCgrCfg().OutDataDBHost != "0.0.0.0" {
+		t.Errorf("Expected: 0.0.0.0 , received: %+v", cgrCfg.MigratorCgrCfg().OutDataDBHost)
+	} else if cgrCfg.MigratorCgrCfg().OutDataDBPort != "9999" {
+		t.Errorf("Expected: 9999, received: %+v", cgrCfg.MigratorCgrCfg().OutDataDBPassword)
 	}
 }
 

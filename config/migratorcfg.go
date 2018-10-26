@@ -36,7 +36,9 @@ type MigratorCgrCfg struct {
 }
 
 func (mg *MigratorCgrCfg) loadFromJsonCfg(jsnCfg *MigratorCfgJson) (err error) {
-
+	if jsnCfg == nil {
+		return
+	}
 	if jsnCfg.Out_dataDB_type != nil {
 		mg.OutDataDBType = *jsnCfg.Out_dataDB_type
 	}
@@ -61,7 +63,6 @@ func (mg *MigratorCgrCfg) loadFromJsonCfg(jsnCfg *MigratorCfgJson) (err error) {
 	if jsnCfg.Out_dataDB_redis_sentinel != nil {
 		mg.OutDataDBRedisSentinel = *jsnCfg.Out_dataDB_redis_sentinel
 	}
-
 	if jsnCfg.Out_storDB_type != nil {
 		mg.OutStorDBType = *jsnCfg.Out_storDB_type
 	}

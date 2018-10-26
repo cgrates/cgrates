@@ -127,6 +127,7 @@ func SetCgrConfig(cfg *CGRConfig) {
 func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg := new(CGRConfig)
 	cfg.DataFolderPath = "/usr/share/cgrates/"
+	cfg.MaxCallDuration = time.Duration(3) * time.Hour // Hardcoded for now
 
 	cfg.generalCfg = new(GeneralCfg)
 	cfg.generalCfg.NodeID = utils.UUIDSha1Prefix()
@@ -154,12 +155,17 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.chargerSCfg = new(ChargerSCfg)
 	cfg.resourceSCfg = new(ResourceSConfig)
 	cfg.statsCfg = new(StatSCfg)
+	cfg.thresholdSCfg = new(ThresholdSCfg)
+	cfg.supplierSCfg = new(SupplierSCfg)
+	cfg.sureTaxCfg = new(SureTaxCfg)
+	cfg.dispatcherSCfg = new(DispatcherSCfg)
+	cfg.loaderCgrCfg = new(LoaderCgrCfg)
+	cfg.migratorCgrCfg = new(MigratorCgrCfg)
 
 	//Depricated
 	cfg.cdrStatsCfg = new(CdrStatsCfg)
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
 
-	cfg.dispatcherSCfg = new(DispatcherSCfg)
 	cfg.ConfigReloads = make(map[string]chan struct{})
 	cfg.ConfigReloads[utils.CDRC] = make(chan struct{}, 1)
 	cfg.ConfigReloads[utils.CDRC] <- struct{}{} // Unlock the channel
@@ -171,16 +177,15 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.ConfigReloads[utils.DIAMETER_AGENT] <- struct{}{} // Unlock the channel
 	cfg.ConfigReloads[utils.SMAsterisk] = make(chan struct{}, 1)
 	cfg.ConfigReloads[utils.SMAsterisk] <- struct{}{} // Unlock the channel
+
 	cgrJsonCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(CGRATES_CFG_JSON))
 	if err != nil {
 		return nil, err
 	}
-
-	cfg.MaxCallDuration = time.Duration(3) * time.Hour // Hardcoded for now
-
 	if err := cfg.loadFromJsonCfg(cgrJsonCfg); err != nil {
 		return nil, err
 	}
+
 	cfg.dfltCdreProfile = cfg.CdreProfiles[utils.META_DEFAULT].Clone() // So default will stay unique, will have nil pointer in case of no defaults loaded which is an extra check
 	cfg.dfltCdrcProfile = cfg.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0].Clone()
 	dfltFsConnConfig = cfg.fsAgentCfg.EventSocketConns[0] // We leave it crashing here on purpose if no Connection defaults defined
@@ -261,6 +266,10 @@ func NewCGRConfigFromFolder(cfgDir string) (*CGRConfig, error) {
 // Holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
 	MaxCallDuration time.Duration // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
+	DataFolderPath  string        // Path towards data folder, for tests internal usage, not loading out of .json options
+	// Cache defaults loaded from json and needing clones
+	dfltCdreProfile *CdreCfg // Default cdreConfig profile
+	dfltCdrcProfile *CdrcCfg // Default cdrcConfig profile
 
 	CdreProfiles map[string]*CdreCfg   // Cdre config profiles
 	CdrcProfiles map[string][]*CdrcCfg // Number of CDRC instances running imports, format map[dirPath][]{Configs}
@@ -268,22 +277,12 @@ type CGRConfig struct {
 
 	httpAgentCfg []*HttpAgentCfg // HttpAgent configuration
 
-	thresholdSCfg     *ThresholdSCfg           // configuration for ThresholdS
-	supplierSCfg      *SupplierSCfg            // configuration for SupplierS
-	dispatcherSCfg    *DispatcherSCfg          // configuration for Dispatcher
-	MailerServer      string                   // The server to use when sending emails out
-	MailerAuthUser    string                   // Authenticate to email server using this user
-	MailerAuthPass    string                   // Authenticate to email server with this password
-	MailerFromAddr    string                   // From address used when sending emails out
-	DataFolderPath    string                   // Path towards data folder, for tests internal usage, not loading out of .json options
-	sureTaxCfg        *SureTaxCfg              // Load here SureTax configuration, as pointer so we can have runtime reloads in the future
-	ConfigReloads     map[string]chan struct{} // Signals to specific entities that a config reload should occur
-	LoaderCgrConfig   *LoaderCgrCfg
-	MigratorCgrConfig *MigratorCgrCfg
+	MailerServer   string // The server to use when sending emails out
+	MailerAuthUser string // Authenticate to email server using this user
+	MailerAuthPass string // Authenticate to email server with this password
+	MailerFromAddr string // From address used when sending emails out
 
-	// Cache defaults loaded from json and needing clones
-	dfltCdreProfile *CdreCfg // Default cdreConfig profile
-	dfltCdrcProfile *CdrcCfg // Default cdrcConfig profile
+	ConfigReloads map[string]chan struct{} // Signals to specific entities that a config reload should occur
 
 	generalCfg       *GeneralCfg       // General config
 	dataDbCfg        *DataDbCfg        // Database config
@@ -306,6 +305,12 @@ type CGRConfig struct {
 	chargerSCfg      *ChargerSCfg      // ChargerS config
 	resourceSCfg     *ResourceSConfig  // ResourceS config
 	statsCfg         *StatSCfg         // StatS config
+	thresholdSCfg    *ThresholdSCfg    // ThresholdS config
+	supplierSCfg     *SupplierSCfg     // SupplierS config
+	sureTaxCfg       *SureTaxCfg       // SureTax config
+	dispatcherSCfg   *DispatcherSCfg   // DispatcherS config
+	loaderCgrCfg     *LoaderCgrCfg     // LoaderCgr config
+	migratorCgrCfg   *MigratorCgrCfg   // MigratorCgr config
 	analyzerSCfg *AnalyzerSCfg
 
 	// Deprecated
@@ -905,9 +910,15 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err != nil {
 		return err
 	}
+	if self.thresholdSCfg.loadFromJsonCfg(jsnThresholdSCfg); err != nil {
+		return err
+	}
 
 	jsnSupplierSCfg, err := jsnCfg.SupplierSJsonCfg()
 	if err != nil {
+		return err
+	}
+	if self.supplierSCfg.loadFromJsonCfg(jsnSupplierSCfg); err != nil {
 		return err
 	}
 
@@ -925,9 +936,15 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err != nil {
 		return err
 	}
+	if err := self.sureTaxCfg.loadFromJsonCfg(jsnSureTaxCfg); err != nil {
+		return err
+	}
 
 	jsnDispatcherCfg, err := jsnCfg.DispatcherSJsonCfg()
 	if err != nil {
+		return err
+	}
+	if self.dispatcherSCfg.loadFromJsonCfg(jsnDispatcherCfg); err != nil {
 		return err
 	}
 
@@ -935,10 +952,16 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err != nil {
 		return nil
 	}
+	if self.loaderCgrCfg.loadFromJsonCfg(jsnLoaderCgrCfg); err != nil {
+		return err
+	}
 
 	jsnMigratorCgrCfg, err := jsnCfg.MigratorCfgJson()
 	if err != nil {
 		return nil
+	}
+	if self.migratorCgrCfg.loadFromJsonCfg(jsnMigratorCgrCfg); err != nil {
+		return err
 	}
 
 	jsnTlsCgrCfg, err := jsnCfg.TlsCfgJson()
@@ -1074,24 +1097,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	}
 	///depricated^^^
 
-	if jsnThresholdSCfg != nil {
-		if self.thresholdSCfg == nil {
-			self.thresholdSCfg = new(ThresholdSCfg)
-		}
-		if self.thresholdSCfg.loadFromJsonCfg(jsnThresholdSCfg); err != nil {
-			return err
-		}
-	}
-
-	if jsnSupplierSCfg != nil {
-		if self.supplierSCfg == nil {
-			self.supplierSCfg = new(SupplierSCfg)
-		}
-		if self.supplierSCfg.loadFromJsonCfg(jsnSupplierSCfg); err != nil {
-			return err
-		}
-	}
-
 	if jsnMailerCfg != nil {
 		if jsnMailerCfg.Server != nil {
 			self.MailerServer = *jsnMailerCfg.Server
@@ -1104,42 +1109,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 		if jsnMailerCfg.From_address != nil {
 			self.MailerFromAddr = *jsnMailerCfg.From_address
-		}
-	}
-
-	if jsnSureTaxCfg != nil { // New config for SureTax
-		if self.sureTaxCfg, err = NewSureTaxCfgWithDefaults(); err != nil {
-			return err
-		}
-		if err := self.sureTaxCfg.loadFromJsonCfg(jsnSureTaxCfg); err != nil {
-			return err
-		}
-	}
-
-	if jsnDispatcherCfg != nil {
-		if self.dispatcherSCfg == nil {
-			self.dispatcherSCfg = new(DispatcherSCfg)
-		}
-		if self.dispatcherSCfg.loadFromJsonCfg(jsnDispatcherCfg); err != nil {
-			return err
-		}
-	}
-
-	if jsnLoaderCgrCfg != nil {
-		if self.LoaderCgrConfig == nil {
-			self.LoaderCgrConfig = new(LoaderCgrCfg)
-		}
-		if self.LoaderCgrConfig.loadFromJsonCfg(jsnLoaderCgrCfg); err != nil {
-			return err
-		}
-	}
-
-	if jsnMigratorCgrCfg != nil {
-		if self.MigratorCgrConfig == nil {
-			self.MigratorCgrConfig = new(MigratorCgrCfg)
-		}
-		if self.MigratorCgrConfig.loadFromJsonCfg(jsnMigratorCgrCfg); err != nil {
-			return err
 		}
 	}
 	return nil
@@ -1226,11 +1195,11 @@ func (cfg *CGRConfig) DispatcherSCfg() *DispatcherSCfg {
 }
 
 func (cfg *CGRConfig) LoaderCgrCfg() *LoaderCgrCfg {
-	return cfg.LoaderCgrConfig
+	return cfg.loaderCgrCfg
 }
 
 func (cfg *CGRConfig) MigratorCgrCfg() *MigratorCgrCfg {
-	return cfg.MigratorCgrConfig
+	return cfg.migratorCgrCfg
 }
 
 func (cfg *CGRConfig) SchedulerCfg() *SchedulerCfg {

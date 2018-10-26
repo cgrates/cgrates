@@ -27,6 +27,9 @@ type LoaderCgrCfg struct {
 }
 
 func (ld *LoaderCgrCfg) loadFromJsonCfg(jsnCfg *LoaderCfgJson) (err error) {
+	if jsnCfg == nil {
+		return
+	}
 	if jsnCfg.Tpid != nil {
 		ld.TpID = *jsnCfg.Tpid
 	}

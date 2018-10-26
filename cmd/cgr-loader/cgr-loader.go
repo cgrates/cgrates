@@ -69,9 +69,9 @@ var (
 
 	flush = flag.Bool("flushdb", false,
 		"Flush the database before importing")
-	tpid = flag.String("tpid", dfltCfg.LoaderCgrConfig.TpID,
+	tpid = flag.String("tpid", dfltCfg.LoaderCgrCfg().TpID,
 		"The tariff plan ID from the database")
-	dataPath = flag.String("path", dfltCfg.LoaderCgrConfig.DataPath,
+	dataPath = flag.String("path", dfltCfg.LoaderCgrCfg().DataPath,
 		"The path to folder containing the data files")
 	version = flag.Bool("version", false,
 		"Prints the application version.")
@@ -83,9 +83,9 @@ var (
 	fromStorDB    = flag.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
 	toStorDB      = flag.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
 	rpcEncoding   = flag.String("rpc_encoding", utils.MetaJSONrpc, "RPC encoding used <gob|json>")
-	cacheSAddress = flag.String("caches_address", dfltCfg.LoaderCgrConfig.CachesConns[0].Address,
+	cacheSAddress = flag.String("caches_address", dfltCfg.LoaderCgrCfg().CachesConns[0].Address,
 		"CacheS component to contact for cache reloads, empty to disable automatic cache reloads")
-	schedulerAddress = flag.String("scheduler_address", dfltCfg.LoaderCgrConfig.SchedulerConns[0].Address, "")
+	schedulerAddress = flag.String("scheduler_address", dfltCfg.LoaderCgrCfg().SchedulerConns[0].Address, "")
 
 	importID       = flag.String("import_id", "", "Uniquely identify an import/load, postpended to some automatic fields")
 	timezone       = flag.String("timezone", "", `Timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>`)
@@ -173,32 +173,32 @@ func main() {
 	}
 
 	if *tpid != "" {
-		ldrCfg.LoaderCgrConfig.TpID = *tpid
+		ldrCfg.LoaderCgrCfg().TpID = *tpid
 	}
 
 	if *dataPath != "" {
-		ldrCfg.LoaderCgrConfig.DataPath = *dataPath
+		ldrCfg.LoaderCgrCfg().DataPath = *dataPath
 	}
 
-	if *cacheSAddress != dfltCfg.LoaderCgrConfig.CachesConns[0].Address {
-		ldrCfg.LoaderCgrConfig.CachesConns = make([]*config.HaPoolConfig, 0)
+	if *cacheSAddress != dfltCfg.LoaderCgrCfg().CachesConns[0].Address {
+		ldrCfg.LoaderCgrCfg().CachesConns = make([]*config.HaPoolConfig, 0)
 		if *cacheSAddress != "" {
-			ldrCfg.LoaderCgrConfig.CachesConns = append(ldrCfg.LoaderCgrConfig.CachesConns,
+			ldrCfg.LoaderCgrCfg().CachesConns = append(ldrCfg.LoaderCgrCfg().CachesConns,
 				&config.HaPoolConfig{Address: *cacheSAddress})
 		}
 	}
 
-	if *schedulerAddress != dfltCfg.LoaderCgrConfig.SchedulerConns[0].Address {
-		ldrCfg.LoaderCgrConfig.SchedulerConns = make([]*config.HaPoolConfig, 0)
+	if *schedulerAddress != dfltCfg.LoaderCgrCfg().SchedulerConns[0].Address {
+		ldrCfg.LoaderCgrCfg().SchedulerConns = make([]*config.HaPoolConfig, 0)
 		if *schedulerAddress != "" {
-			ldrCfg.LoaderCgrConfig.SchedulerConns = append(ldrCfg.LoaderCgrConfig.SchedulerConns,
+			ldrCfg.LoaderCgrCfg().SchedulerConns = append(ldrCfg.LoaderCgrCfg().SchedulerConns,
 				&config.HaPoolConfig{Address: *schedulerAddress})
 		}
 	}
 
-	if *rpcEncoding != dfltCfg.LoaderCgrConfig.CachesConns[0].Transport &&
-		len(ldrCfg.LoaderCgrConfig.CachesConns) != 0 {
-		ldrCfg.LoaderCgrConfig.CachesConns[0].Transport = *rpcEncoding
+	if *rpcEncoding != dfltCfg.LoaderCgrCfg().CachesConns[0].Transport &&
+		len(ldrCfg.LoaderCgrCfg().CachesConns) != 0 {
+		ldrCfg.LoaderCgrCfg().CachesConns[0].Transport = *rpcEncoding
 	}
 
 	if *importID == "" {
@@ -209,8 +209,8 @@ func main() {
 		ldrCfg.GeneralCfg().DefaultTimezone = *timezone
 	}
 
-	if *disableReverse != dfltCfg.LoaderCgrConfig.DisableReverse {
-		ldrCfg.LoaderCgrConfig.DisableReverse = *disableReverse
+	if *disableReverse != dfltCfg.LoaderCgrCfg().DisableReverse {
+		ldrCfg.LoaderCgrCfg().DisableReverse = *disableReverse
 	}
 
 	if !*toStorDB {
@@ -241,16 +241,16 @@ func main() {
 	if !*dryRun {
 		//tpid_remove
 		if *toStorDB { // Import files from a directory into storDb
-			if ldrCfg.LoaderCgrConfig.TpID == "" {
+			if ldrCfg.LoaderCgrCfg().TpID == "" {
 				log.Fatal("TPid required.")
 			}
 			if *flushStorDB {
-				if err = storDb.RemTpData("", ldrCfg.LoaderCgrConfig.TpID, map[string]string{}); err != nil {
+				if err = storDb.RemTpData("", ldrCfg.LoaderCgrCfg().TpID, map[string]string{}); err != nil {
 					log.Fatal(err)
 				}
 			}
 			csvImporter := engine.TPCSVImporter{
-				TPid:     ldrCfg.LoaderCgrConfig.TpID,
+				TPid:     ldrCfg.LoaderCgrCfg().TpID,
 				StorDb:   storDb,
 				DirPath:  *dataPath,
 				Sep:      ',',
@@ -295,7 +295,7 @@ func main() {
 	}
 
 	tpReader := engine.NewTpReader(dm.DataDB(), loader,
-		ldrCfg.LoaderCgrConfig.TpID, ldrCfg.GeneralCfg().DefaultTimezone)
+		ldrCfg.LoaderCgrCfg().TpID, ldrCfg.GeneralCfg().DefaultTimezone)
 
 	if err = tpReader.LoadAll(); err != nil {
 		log.Fatal(err)
@@ -304,13 +304,13 @@ func main() {
 	if *dryRun { // We were just asked to parse the data, not saving it
 		return
 	}
-	if len(ldrCfg.LoaderCgrConfig.CachesConns) != 0 { // Init connection to CacheS so we can reload it's data
+	if len(ldrCfg.LoaderCgrCfg().CachesConns) != 0 { // Init connection to CacheS so we can reload it's data
 		if cacheS, err = rpcclient.NewRpcClient("tcp",
-			ldrCfg.LoaderCgrConfig.CachesConns[0].Address,
-			ldrCfg.LoaderCgrConfig.CachesConns[0].Tls, ldrCfg.TlsCfg().ClientKey,
+			ldrCfg.LoaderCgrCfg().CachesConns[0].Address,
+			ldrCfg.LoaderCgrCfg().CachesConns[0].Tls, ldrCfg.TlsCfg().ClientKey,
 			ldrCfg.TlsCfg().ClientCerificate, ldrCfg.TlsCfg().CaCertificate, 3, 3,
 			time.Duration(1*time.Second), time.Duration(5*time.Minute),
-			strings.TrimPrefix(ldrCfg.LoaderCgrConfig.CachesConns[0].Transport, utils.Meta),
+			strings.TrimPrefix(ldrCfg.LoaderCgrCfg().CachesConns[0].Transport, utils.Meta),
 			nil, false); err != nil {
 			log.Fatalf("Could not connect to CacheS: %s", err.Error())
 			return
@@ -321,12 +321,12 @@ func main() {
 
 	// FixMe: remove users reloading as soon as not longer supported
 	if *usersAddress != "" { // Init connection to rater so we can reload it's data
-		if len(ldrCfg.LoaderCgrConfig.CachesConns) != 0 &&
-			*usersAddress == ldrCfg.LoaderCgrConfig.CachesConns[0].Address {
+		if len(ldrCfg.LoaderCgrCfg().CachesConns) != 0 &&
+			*usersAddress == ldrCfg.LoaderCgrCfg().CachesConns[0].Address {
 			userS = cacheS
 		} else {
 			if userS, err = rpcclient.NewRpcClient("tcp", *usersAddress,
-				ldrCfg.LoaderCgrConfig.CachesConns[0].Tls,
+				ldrCfg.LoaderCgrCfg().CachesConns[0].Tls,
 				ldrCfg.TlsCfg().ClientKey, ldrCfg.TlsCfg().ClientCerificate,
 				ldrCfg.TlsCfg().CaCertificate, 3, 3,
 				time.Duration(1*time.Second), time.Duration(5*time.Minute),
