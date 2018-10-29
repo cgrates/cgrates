@@ -172,13 +172,13 @@ func (rpf *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error
 		} else {
 			for _, p := range utils.SplitPrefix(cd.Destination, MIN_PREFIX_MATCH) {
 				if destIDs, err := dm.DataDB().GetReverseDestination(p, false, utils.NonTransactional); err == nil {
-					var bestWeight float64
+					var bestWeight *float64
 					for _, dID := range destIDs {
 						if _, ok := rpl.DestinationRates[dID]; ok {
 							ril := rpl.RateIntervalList(dID)
 							currentWeight := ril.GetWeight()
-							if currentWeight > bestWeight {
-								bestWeight = currentWeight
+							if bestWeight == nil || currentWeight > *bestWeight {
+								bestWeight = utils.Float64Pointer(currentWeight)
 								rps = ril
 								prefix = p
 								destinationId = dID

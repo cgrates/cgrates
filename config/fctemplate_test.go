@@ -85,3 +85,207 @@ func TestFCTemplatesFromFCTemplatesJsonCfg(t *testing.T) {
 		t.Errorf("expected: %s ,received: %s", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
+
+func TestFCTemplateInflate1(t *testing.T) {
+	fcTmp1 := []*FCTemplate{
+		&FCTemplate{
+			Tag:     "Tenant",
+			Type:    "*composed",
+			FieldId: "Tenant",
+			Filters: []string{"Filter1", "Filter2"},
+			Value:   NewRSRParsersMustCompile("cgrates.org", true),
+		},
+		&FCTemplate{
+			Tag:     "RunID",
+			Type:    "*composed",
+			FieldId: "RunID",
+			Filters: []string{"Filter1_1", "Filter2_2"},
+			Value:   NewRSRParsersMustCompile("SampleValue", true),
+		},
+		&FCTemplate{
+			Tag:     "TmpMap",
+			Type:    "*template",
+			Filters: []string{"Filter1_1", "Filter2_2"},
+			Value:   NewRSRParsersMustCompile("TmpMap", true),
+		},
+	}
+	fcTmpMp := map[string][]*FCTemplate{
+		"TmpMap": []*FCTemplate{
+			&FCTemplate{
+				Tag:     "Elem1",
+				Type:    "*composed",
+				FieldId: "Elem1",
+				Filters: []string{"Filter1", "Filter2"},
+				Value:   NewRSRParsersMustCompile("Elem1", true),
+			},
+			&FCTemplate{
+				Tag:     "Elem2",
+				Type:    "*composed",
+				FieldId: "Elem2",
+				Filters: []string{"Filter1_1", "Filter2_2"},
+				Value:   NewRSRParsersMustCompile("Elem2", true),
+			},
+		},
+		"TmpMap2": []*FCTemplate{
+			&FCTemplate{
+				Tag:     "Elem2.1",
+				Type:    "*composed",
+				FieldId: "Elem2.1",
+				Filters: []string{"Filter1", "Filter2"},
+				Value:   NewRSRParsersMustCompile("Elem2.1", true),
+			},
+			&FCTemplate{
+				Tag:     "Elem2.2",
+				Type:    "*composed",
+				FieldId: "Elem2.2",
+				Filters: []string{"Filter1_1", "Filter2_2"},
+				Value:   NewRSRParsersMustCompile("Elem2.2", true),
+			},
+		},
+	}
+	expFC := []*FCTemplate{
+		&FCTemplate{
+			Tag:     "Tenant",
+			Type:    "*composed",
+			FieldId: "Tenant",
+			Filters: []string{"Filter1", "Filter2"},
+			Value:   NewRSRParsersMustCompile("cgrates.org", true),
+		},
+		&FCTemplate{
+			Tag:     "RunID",
+			Type:    "*composed",
+			FieldId: "RunID",
+			Filters: []string{"Filter1_1", "Filter2_2"},
+			Value:   NewRSRParsersMustCompile("SampleValue", true),
+		},
+		&FCTemplate{
+			Tag:     "Elem1",
+			Type:    "*composed",
+			FieldId: "Elem1",
+			Filters: []string{"Filter1", "Filter2"},
+			Value:   NewRSRParsersMustCompile("Elem1", true),
+		},
+		&FCTemplate{
+			Tag:     "Elem2",
+			Type:    "*composed",
+			FieldId: "Elem2",
+			Filters: []string{"Filter1_1", "Filter2_2"},
+			Value:   NewRSRParsersMustCompile("Elem2", true),
+		},
+	}
+	if rcv, err := InflateTemplates(fcTmp1, fcTmpMp); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expFC, rcv) {
+		t.Errorf("expected: %s ,received: %s", utils.ToJSON(expFC), utils.ToJSON(rcv))
+	}
+}
+
+func TestFCTemplateInflate2(t *testing.T) {
+	fcTmp1 := []*FCTemplate{
+		&FCTemplate{
+			Tag:     "Tenant",
+			Type:    "*composed",
+			FieldId: "Tenant",
+			Filters: []string{"Filter1", "Filter2"},
+			Value:   NewRSRParsersMustCompile("cgrates.org", true),
+		},
+		&FCTemplate{
+			Tag:     "RunID",
+			Type:    "*composed",
+			FieldId: "RunID",
+			Filters: []string{"Filter1_1", "Filter2_2"},
+			Value:   NewRSRParsersMustCompile("SampleValue", true),
+		},
+		&FCTemplate{
+			Tag:     "TmpMap3",
+			Type:    "*template",
+			Filters: []string{"Filter1_1", "Filter2_2"},
+			Value:   NewRSRParsersMustCompile("TmpMap3", true),
+		},
+	}
+	fcTmpMp := map[string][]*FCTemplate{
+		"TmpMap": []*FCTemplate{
+			&FCTemplate{
+				Tag:     "Elem1",
+				Type:    "*composed",
+				FieldId: "Elem1",
+				Filters: []string{"Filter1", "Filter2"},
+				Value:   NewRSRParsersMustCompile("Elem1", true),
+			},
+			&FCTemplate{
+				Tag:     "Elem2",
+				Type:    "*composed",
+				FieldId: "Elem2",
+				Filters: []string{"Filter1_1", "Filter2_2"},
+				Value:   NewRSRParsersMustCompile("Elem2", true),
+			},
+		},
+		"TmpMap2": []*FCTemplate{
+			&FCTemplate{
+				Tag:     "Elem2.1",
+				Type:    "*composed",
+				FieldId: "Elem2.1",
+				Filters: []string{"Filter1", "Filter2"},
+				Value:   NewRSRParsersMustCompile("Elem2.1", true),
+			},
+			&FCTemplate{
+				Tag:     "Elem2.2",
+				Type:    "*composed",
+				FieldId: "Elem2.2",
+				Filters: []string{"Filter1_1", "Filter2_2"},
+				Value:   NewRSRParsersMustCompile("Elem2.2", true),
+			},
+		},
+	}
+	if _, err := InflateTemplates(fcTmp1, fcTmpMp); err.Error() != "no template with id: <TmpMap3>" {
+		t.Error(err)
+	}
+}
+
+func TestFCTemplateInflate3(t *testing.T) {
+	fcTmp1 := []*FCTemplate{
+		&FCTemplate{
+			Tag:     "Tenant",
+			Type:    "*composed",
+			FieldId: "Tenant",
+			Filters: []string{"Filter1", "Filter2"},
+			Value:   NewRSRParsersMustCompile("cgrates.org", true),
+		},
+		&FCTemplate{
+			Tag:     "RunID",
+			Type:    "*composed",
+			FieldId: "RunID",
+			Filters: []string{"Filter1_1", "Filter2_2"},
+			Value:   NewRSRParsersMustCompile("SampleValue", true),
+		},
+		&FCTemplate{
+			Tag:     "TmpMap",
+			Type:    "*template",
+			Filters: []string{"Filter1_1", "Filter2_2"},
+			Value:   NewRSRParsersMustCompile("TmpMap", true),
+		},
+	}
+	fcTmpMp := map[string][]*FCTemplate{
+		"TmpMap": []*FCTemplate{},
+		"TmpMap2": []*FCTemplate{
+			&FCTemplate{
+				Tag:     "Elem2.1",
+				Type:    "*composed",
+				FieldId: "Elem2.1",
+				Filters: []string{"Filter1", "Filter2"},
+				Value:   NewRSRParsersMustCompile("Elem2.1", true),
+			},
+			&FCTemplate{
+				Tag:     "Elem2.2",
+				Type:    "*composed",
+				FieldId: "Elem2.2",
+				Filters: []string{"Filter1_1", "Filter2_2"},
+				Value:   NewRSRParsersMustCompile("Elem2.2", true),
+			},
+		},
+	}
+	if _, err := InflateTemplates(fcTmp1, fcTmpMp); err == nil ||
+		err.Error() != "empty template with id: <TmpMap>" {
+		t.Error(err)
+	}
+}
