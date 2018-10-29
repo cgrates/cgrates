@@ -143,7 +143,7 @@ func InflateTemplates(fcts []*FCTemplate, msgTpls map[string][]*FCTemplate) ([]*
 			if !has {
 				return nil, fmt.Errorf("no template with id: <%s>", tplID)
 			} else if len(refTpl) == 0 {
-				continue
+				return nil, fmt.Errorf("empty template with id: <%s>", tplID)
 			}
 			wrkSlice := make([]*FCTemplate, len(refTpl)+len(fcts[i:])-1) // so we can cover tpls[i+1:]
 			copy(wrkSlice[:len(refTpl)], refTpl)                         // copy fields out of referenced template
