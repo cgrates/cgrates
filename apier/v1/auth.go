@@ -27,7 +27,7 @@ import (
 )
 
 // Returns MaxUsage (for calls in seconds), -1 for no limit
-func (self *ApierV1) GetMaxUsage(usageRecord engine.UsageRecord, maxUsage *float64) error {
+func (self *ApierV1) GetMaxUsage(usageRecord engine.UsageRecord, maxUsage *int64) error {
 	err := engine.LoadUserProfile(&usageRecord, "ExtraFields")
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -63,9 +63,9 @@ func (self *ApierV1) GetMaxUsage(usageRecord engine.UsageRecord, maxUsage *float
 		return err
 	}
 	if maxDur == time.Duration(-1) {
-		*maxUsage = -1.0
+		*maxUsage = -1
 		return nil
 	}
-	*maxUsage = maxDur.Seconds()
+	*maxUsage = maxDur.Nanoseconds()
 	return nil
 }
