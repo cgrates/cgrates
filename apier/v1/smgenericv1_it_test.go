@@ -127,11 +127,11 @@ func TestSMGV1AccountsBefore(t *testing.T) {
 func TestSMGV1GetMaxUsage(t *testing.T) {
 	setupReq := map[string]interface{}{utils.RequestType: utils.META_PREPAID, utils.Tenant: "cgrates.org",
 		utils.Account: "1003", utils.Destination: "1002", utils.SetupTime: "2015-11-10T15:20:00Z"}
-	var maxTime int64
+	var maxTime float64
 	if err := smgV1Rpc.Call("SMGenericV1.GetMaxUsage", setupReq, &maxTime); err != nil {
 		t.Error(err)
 	} else if maxTime != 2700 {
-		t.Errorf("Calling ApierV1.GetMaxUsage got maxTime: %v", maxTime)
+		t.Errorf("Calling ApierV1.GetMaxUsage got maxTime: %f", maxTime)
 	}
 }
 
