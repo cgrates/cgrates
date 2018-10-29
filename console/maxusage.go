@@ -61,7 +61,7 @@ func (self *CmdGetMaxUsage) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetMaxUsage) RpcResult() interface{} {
-	var f float64
+	var f int64
 	return &f
 }
 
