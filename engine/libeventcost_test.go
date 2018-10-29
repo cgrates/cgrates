@@ -794,9 +794,6 @@ func TestChargedRatesGetIDWithSet(t *testing.T) {
 			},
 		},
 	}
-
-	// in rate interval at line 292
-	// RateGroups verify only the firs Rate with the others
 	if id1 := cr1.GetIDWithSet(RateGroups{
 		&Rate{
 			GroupIntervalStart: time.Hour,
