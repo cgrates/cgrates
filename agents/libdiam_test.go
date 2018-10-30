@@ -177,3 +177,30 @@ func TestMessageSetAVPsWithPath(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eMessage, m)
 	}
 }
+
+func TestMessageSetAVPsWithPath2(t *testing.T) {
+	eMessage := diam.NewRequest(diam.CreditControl, 4, nil)
+	eMessage.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(432, avp.Mbit, 0, datatype.Unsigned32(65000)),
+		}})
+	eMessage.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(432, avp.Mbit, 0, datatype.Unsigned32(100)),
+		}})
+	m := diam.NewMessage(diam.CreditControl, diam.RequestFlag, 4,
+		eMessage.Header.HopByHopID, eMessage.Header.EndToEndID, nil)
+	if err := messageSetAVPsWithPath(m,
+		[]string{"Multiple-Services-Credit-Control", "Rating-Group"}, "65000",
+		true, "UTC"); err != nil {
+		t.Error(err)
+	}
+	if err := messageSetAVPsWithPath(m,
+		[]string{"Multiple-Services-Credit-Control", "Rating-Group"}, "100",
+		true, "UTC"); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(eMessage, m) {
+		t.Errorf("Expecting: %+v, received: %+v", eMessage, m)
+	}
+}
