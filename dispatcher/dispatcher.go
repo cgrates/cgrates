@@ -81,6 +81,7 @@ type DispatcherService struct {
 
 // ListenAndServe will initialize the service
 func (dS *DispatcherService) ListenAndServe(exitChan chan bool) error {
+	utils.Logger.Info("Starting Dispatcher service")
 	e := <-exitChan
 	exitChan <- e // put back for the others listening for shutdown request
 	return nil

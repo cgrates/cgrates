@@ -65,8 +65,10 @@ func (self *CmdApierPing) RpcMethod() string {
 		return utils.SessionSv1Ping
 	case utils.LoaderLow:
 		return utils.LoaderSv1Ping
-	case utils.DispatchersLow:
+	case utils.DispatcherLow:
 		return utils.DispatcherSv1Ping
+	case utils.AnalyzerLow:
+		return utils.AnalyzerSv1Ping
 	default:
 	}
 	return self.rpcMethod

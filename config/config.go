@@ -143,6 +143,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.dataDbCfg = new(DataDbCfg)
 	cfg.storDbCfg = new(StorDbCfg)
 	cfg.tlsCfg = new(TlsCfg)
+	cfg.analyzerSCfg = new(AnalyzerSCfg)
 	cfg.generalCfg.NodeID = utils.UUIDSha1Prefix()
 
 	cfg.sessionSCfg = new(SessionSCfg)
@@ -336,6 +337,8 @@ type CGRConfig struct {
 	dataDbCfg  *DataDbCfg  // Database config
 	storDbCfg  *StorDbCfg  //StroreDb config
 	tlsCfg     *TlsCfg
+
+	analyzerSCfg *AnalyzerSCfg
 }
 
 func (self *CGRConfig) checkConfigSanity() error {
@@ -870,6 +873,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return nil
 	}
 
+	jsnAnalyzerCgrCfg, err := jsnCfg.AnalyzerCfgJson()
+	if err != nil {
+		return nil
+	}
+
 	if err := self.dataDbCfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
 		return err
 	}
@@ -883,6 +891,10 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	}
 
 	if err := self.tlsCfg.loadFromJsonCfg(jsnTlsCgrCfg); err != nil {
+		return err
+	}
+
+	if err := self.analyzerSCfg.loadFromJsonCfg(jsnAnalyzerCgrCfg); err != nil {
 		return err
 	}
 
@@ -1454,4 +1466,8 @@ func (cfg *CGRConfig) GeneralCfg() *GeneralCfg {
 
 func (cfg *CGRConfig) TlsCfg() *TlsCfg {
 	return cfg.tlsCfg
+}
+
+func (cfg *CGRConfig) AnalyzerSCfg() *AnalyzerSCfg {
+	return cfg.analyzerSCfg
 }

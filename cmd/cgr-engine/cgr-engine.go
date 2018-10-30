@@ -30,6 +30,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/agents"
+	"github.com/cgrates/cgrates/analyzer"
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/cdrc"
@@ -1127,11 +1128,35 @@ func startDispatcherService(internalDispatcherSChan, internalRaterChan chan rpcc
 	}
 }
 
+// startDispatcherService fires up the AnalyzerS
+func startAnalyzerService(internalAnalyzerSChan chan rpcclient.RpcClientConnection,
+	server *utils.Server, exitChan chan bool) {
+	utils.Logger.Info("Starting CGRateS Analyzer service.")
+	var err error
+	aS, err := analyzer.NewAnalyzerService()
+	if err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.AnalyzerS, err.Error()))
+		exitChan <- true
+		return
+	}
+	go func() {
+		if err := aS.ListenAndServe(exitChan); err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Error: %s listening for packets", utils.AnalyzerS, err.Error()))
+		}
+		aS.Shutdown()
+		exitChan <- true
+		return
+	}()
+	aSv1 := v1.NewAnalyzerSv1(aS)
+	server.RpcRegister(aSv1)
+	internalAnalyzerSChan <- aSv1
+}
+
 func startRpc(server *utils.Server, internalRaterChan,
 	internalCdrSChan, internalCdrStatSChan, internalPubSubSChan, internalUserSChan,
 	internalAliaseSChan, internalRsChan, internalStatSChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
-	internalSMGChan, internalDispatcherSChan chan rpcclient.RpcClientConnection,
+	internalSMGChan, internalDispatcherSChan, internalAnalyzerSChan chan rpcclient.RpcClientConnection,
 	exitChan chan bool) {
 	select { // Any of the rpc methods will unlock listening to rpc requests
 	case resp := <-internalRaterChan:
@@ -1162,6 +1187,8 @@ func startRpc(server *utils.Server, internalRaterChan,
 		internalSuplSChan <- splS
 	case dispatcherS := <-internalDispatcherSChan:
 		internalDispatcherSChan <- dispatcherS
+	case analyzerS := <-internalAnalyzerSChan:
+		internalAnalyzerSChan <- analyzerS
 	}
 
 	go server.ServeJSON(cfg.RPCJSONListen)
@@ -1404,6 +1431,7 @@ func main() {
 	internalSupplierSChan := make(chan rpcclient.RpcClientConnection, 1)
 	filterSChan := make(chan *engine.FilterS, 1)
 	internalDispatcherSChan := make(chan rpcclient.RpcClientConnection, 1)
+	internalAnalyzerSChan := make(chan rpcclient.RpcClientConnection, 1)
 
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, dm, exitChan, cacheS)
@@ -1527,9 +1555,8 @@ func main() {
 			cfg, dm, server, exitChan, filterSChan, internalAttributeSChan)
 	}
 
-	if cfg.DispatcherSCfg().Enabled {
-		go startDispatcherService(internalDispatcherSChan,
-			internalRaterChan, cacheS, dm, server, exitChan)
+	if cfg.AnalyzerSCfg().Enabled {
+		go startAnalyzerService(internalAnalyzerSChan, server, exitChan)
 	}
 
 	go loaderService(cacheS, cfg, dm, server, exitChan, filterSChan)
@@ -1540,7 +1567,7 @@ func main() {
 		internalStatSChan,
 		internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
 		internalSupplierSChan,
-		internalSMGChan, internalDispatcherSChan, exitChan)
+		internalSMGChan, internalDispatcherSChan, internalAnalyzerSChan, exitChan)
 	<-exitChan
 
 	if *memprofile != "" {

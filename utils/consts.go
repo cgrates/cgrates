@@ -562,6 +562,7 @@ const (
 	LoaderS     = "LoaderS"
 	ChargerS    = "ChargerS"
 	CacheS      = "CacheS"
+	AnalyzerS   = "AnalyzerS"
 )
 
 // Lower service names
@@ -573,7 +574,8 @@ const (
 	ResourcesLow   = "resources"
 	StatServiceLow = "stats"
 	ThresholdsLow  = "thresholds"
-	DispatchersLow = "dispatchers"
+	DispatcherLow  = "dispatcher"
+	AnalyzerLow    = "analyzer"
 	LoaderLow      = "loader"
 )
 
@@ -752,6 +754,11 @@ const (
 // DispatcherS APIs
 const (
 	DispatcherSv1Ping = "DispatcherSv1.Ping"
+)
+
+// AnalyzerS APIs
+const (
+	AnalyzerSv1Ping = "AnalyzerSv1.Ping"
 )
 
 // LoaderS APIs

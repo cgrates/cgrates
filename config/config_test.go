@@ -1672,3 +1672,12 @@ func TestCfgTlsCfg(t *testing.T) {
 			utils.ToJSON(eCgrCfg.tlsCfg), utils.ToJSON(cgrCfg.tlsCfg))
 	}
 }
+
+func TestCgrCfgJSONDefaultAnalyzerSCfg(t *testing.T) {
+	aSCfg := &AnalyzerSCfg{
+		Enabled: false,
+	}
+	if !reflect.DeepEqual(cgrCfg.analyzerSCfg, aSCfg) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.analyzerSCfg, aSCfg)
+	}
+}
