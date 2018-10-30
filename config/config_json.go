@@ -69,6 +69,7 @@ const (
 	CgrMigratorCfgJson = "migrator"
 	ChargerSCfgJson    = "chargers"
 	TlsCfgJson         = "tls"
+	AnalyzerCfgJson    = "analyzer"
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -508,6 +509,18 @@ func (self CgrJsonCfg) TlsCfgJson() (*TlsJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(TlsJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (self CgrJsonCfg) AnalyzerCfgJson() (*AnalyzerSJsonCfg, error) {
+	rawCfg, hasKey := self[AnalyzerCfgJson]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(AnalyzerSJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

@@ -712,4 +712,9 @@ const CGRATES_CFG_JSON = `
 },
 
 
+"analyzer":{
+	"enabled":false							// starts AnalyzerS service: <true|false>.
+},
+
+
 }`

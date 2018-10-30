@@ -1409,3 +1409,14 @@ func TestDfTlsCfg(t *testing.T) {
 		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }
+
+func TestDfAnalyzerCfg(t *testing.T) {
+	eCfg := &AnalyzerSJsonCfg{
+		Enabled: utils.BoolPointer(false),
+	}
+	if cfg, err := dfCgrJsonCfg.AnalyzerCfgJson(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
+	}
+}

@@ -599,3 +599,8 @@ type FcTemplateJsonCfg struct {
 	Mask_destinationd_id *string
 	Mask_length          *int
 }
+
+// Analyzer service json config section
+type AnalyzerSJsonCfg struct {
+	Enabled *bool
+}
