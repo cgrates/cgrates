@@ -238,6 +238,22 @@ func TestDiamItDryRun(t *testing.T) {
 		} else if val != eVal {
 			t.Errorf("expecting: %s, received: <%s>", eVal, val)
 		}
+		if avps, err := msg.FindAVPsWithPath([]interface{}{"Multiple-Services-Credit-Control", "Rating-Group"}, dict.UndefinedVendorID); err != nil {
+			t.Error(err)
+		} else if len(avps) != 2 {
+			t.Errorf("Unexpected number of Multiple-Services-Credit-Control.Rating-Group : %d", len(avps))
+		} else {
+			if val, err := diamAVPAsString(avps[0]); err != nil {
+				t.Error(err)
+			} else if val != "65000" {
+				t.Errorf("expecting: 65000, received: <%s>", val)
+			}
+			if val, err := diamAVPAsString(avps[1]); err != nil {
+				t.Error(err)
+			} else if val != "100" {
+				t.Errorf("expecting: 100, received: <%s>", val)
+			}
+		}
 	}
 }
 
