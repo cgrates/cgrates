@@ -1128,7 +1128,7 @@ func startDispatcherService(internalDispatcherSChan, internalRaterChan chan rpcc
 	}
 }
 
-// startDispatcherService fires up the AnalyzerS
+// startAnalyzerService fires up the AnalyzerS
 func startAnalyzerService(internalAnalyzerSChan chan rpcclient.RpcClientConnection,
 	server *utils.Server, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS Analyzer service.")
@@ -1553,6 +1553,10 @@ func main() {
 		go startSupplierService(internalSupplierSChan, cacheS,
 			internalRsChan, internalStatSChan,
 			cfg, dm, server, exitChan, filterSChan, internalAttributeSChan)
+	}
+	if cfg.DispatcherSCfg().Enabled {
+		go startDispatcherService(internalDispatcherSChan,
+			internalRaterChan, cacheS, dm, server, exitChan)
 	}
 
 	if cfg.AnalyzerSCfg().Enabled {
