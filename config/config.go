@@ -162,6 +162,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.loaderCgrCfg = new(LoaderCgrCfg)
 	cfg.migratorCgrCfg = new(MigratorCgrCfg)
 	cfg.mailerCfg = new(MailerCfg)
+	cfg.loaderCfg = make([]*LoaderSCfg, 0)
 
 	//Depricated
 	cfg.cdrStatsCfg = new(CdrStatsCfg)
@@ -268,15 +269,15 @@ func NewCGRConfigFromFolder(cfgDir string) (*CGRConfig, error) {
 type CGRConfig struct {
 	MaxCallDuration time.Duration // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
 	DataFolderPath  string        // Path towards data folder, for tests internal usage, not loading out of .json options
+
 	// Cache defaults loaded from json and needing clones
 	dfltCdreProfile *CdreCfg // Default cdreConfig profile
 	dfltCdrcProfile *CdrcCfg // Default cdrcConfig profile
 
 	CdreProfiles map[string]*CdreCfg   // Cdre config profiles
 	CdrcProfiles map[string][]*CdrcCfg // Number of CDRC instances running imports, format map[dirPath][]{Configs}
-	loaderCfg    []*LoaderSCfg         // LoaderS configurations
-
-	httpAgentCfg []*HttpAgentCfg // HttpAgent configuration
+	loaderCfg    []*LoaderSCfg         // LoaderS configs
+	httpAgentCfg HttpAgentCfgs         // HttpAgent configs
 
 	ConfigReloads map[string]chan struct{} // Signals to specific entities that a config reload should occur
 
@@ -870,6 +871,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err != nil {
 		return err
 	}
+	if err := self.httpAgentCfg.loadFromJsonCfg(jsnHttpAgntCfg); err != nil {
+		return err
+	}
 
 	jsnAttributeSCfg, err := jsnCfg.AttributeServJsonCfg()
 	if err != nil {
@@ -994,10 +998,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	}
 
 	if jsnLoaderCfg != nil {
-		self.loaderCfg = make([]*LoaderSCfg, len(jsnLoaderCfg))
-		for idx, profile := range jsnLoaderCfg {
-			self.loaderCfg[idx] = NewDfltLoaderSCfg()
-			self.loaderCfg[idx].loadFromJsonCfg(profile)
+		// self.loaderCfg = make([]*LoaderSCfg, len(jsnLoaderCfg))
+		for _, profile := range jsnLoaderCfg {
+			loadSCfgp := NewDfltLoaderSCfg()
+			loadSCfgp.loadFromJsonCfg(profile)
+			self.loaderCfg = append(self.loaderCfg, loadSCfgp) // use apend so the loaderS profile to be loaded from multiple files
 		}
 	}
 
@@ -1040,16 +1045,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 				self.CdrcProfiles[pathFound][indxFound] = cdrcInstCfg
 			} else {
 				self.CdrcProfiles[cdrcInstCfg.CdrInDir] = append(self.CdrcProfiles[cdrcInstCfg.CdrInDir], cdrcInstCfg)
-			}
-		}
-	}
-
-	if jsnHttpAgntCfg != nil {
-		self.httpAgentCfg = make([]*HttpAgentCfg, len(*jsnHttpAgntCfg))
-		for i, jsnCfg := range *jsnHttpAgntCfg {
-			self.httpAgentCfg[i] = new(HttpAgentCfg)
-			if err := self.httpAgentCfg[i].loadFromJsonCfg(jsnCfg); err != nil {
-				return err
 			}
 		}
 	}
