@@ -22,6 +22,36 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type HttpAgentCfgs []*HttpAgentCfg
+
+func (hcfgs *HttpAgentCfgs) loadFromJsonCfg(jsnHttpAgntCfg *[]*HttpAgentJsonCfg) (err error) {
+	if jsnHttpAgntCfg == nil {
+		return nil
+	}
+	for _, jsnCfg := range *jsnHttpAgntCfg {
+		hac := new(HttpAgentCfg)
+		var haveID bool
+		if jsnCfg.Id != nil {
+			for _, val := range *hcfgs {
+				if val.ID == *jsnCfg.Id {
+					hac = val
+					haveID = true
+					break
+				}
+			}
+		}
+
+		if err := hac.loadFromJsonCfg(jsnCfg); err != nil {
+			return err
+		}
+		if !haveID {
+			*hcfgs = append(*hcfgs, hac)
+		}
+
+	}
+	return nil
+}
+
 type HttpAgentCfg struct {
 	ID                string // identifier for the agent, so we can update it's processors
 	Url               string
@@ -29,6 +59,32 @@ type HttpAgentCfg struct {
 	RequestPayload    string
 	ReplyPayload      string
 	RequestProcessors []*HttpAgntProcCfg
+}
+
+func (ca *HttpAgentCfg) appendHttpAgntProcCfgs(hps *[]*HttpAgentProcessorJsnCfg) (err error) {
+	if hps == nil {
+		return
+	}
+	for _, reqProcJsn := range *hps {
+		rp := new(HttpAgntProcCfg)
+		var haveID bool
+		if reqProcJsn.Id != nil {
+			for _, rpSet := range ca.RequestProcessors {
+				if rpSet.Id == *reqProcJsn.Id {
+					rp = rpSet // Will load data into the one set
+					haveID = true
+					break
+				}
+			}
+		}
+		if err := rp.loadFromJsonCfg(reqProcJsn); err != nil {
+			return err
+		}
+		if !haveID {
+			ca.RequestProcessors = append(ca.RequestProcessors, rp)
+		}
+	}
+	return nil
 }
 
 func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg) (err error) {
@@ -54,24 +110,8 @@ func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg) (err error) {
 	if jsnCfg.Reply_payload != nil {
 		ca.ReplyPayload = *jsnCfg.Reply_payload
 	}
-	if jsnCfg.Request_processors != nil {
-		for _, reqProcJsn := range *jsnCfg.Request_processors {
-			rp := new(HttpAgntProcCfg)
-			var haveID bool
-			for _, rpSet := range ca.RequestProcessors {
-				if reqProcJsn.Id != nil && rpSet.Id == *reqProcJsn.Id {
-					rp = rpSet // Will load data into the one set
-					haveID = true
-					break
-				}
-			}
-			if err := rp.loadFromJsonCfg(reqProcJsn); err != nil {
-				return nil
-			}
-			if !haveID {
-				ca.RequestProcessors = append(ca.RequestProcessors, rp)
-			}
-		}
+	if err = ca.appendHttpAgntProcCfgs(jsnCfg.Request_processors); err != nil {
+		return err
 	}
 	return nil
 }
