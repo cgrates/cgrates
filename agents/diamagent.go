@@ -164,33 +164,29 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		}
 		// find out the first itm which is not an attribute
 		var itm *config.NMItem
-		var itmStr string
-		for _, cfgItm := range nmItms {
+		for i, cfgItm := range nmItms {
 			if cfgItm.Config == nil || cfgItm.Config.AttributeID == "" {
-				itmStr, err = utils.IfaceAsString(cfgItm.Data)
-				if err != nil {
-					utils.Logger.Warning(
-						fmt.Sprintf("<%s> error: %s processing reply item: %s for message: %s",
-							utils.DiameterAgent, err.Error(), utils.ToJSON(cfgItm), m))
-					writeOnConn(c, m.Answer(diam.UnableToComply))
-					return
+				itmPath := strings.Join(cfgItm.Path, utils.NestingSep)
+				if i == 0 { // path is common, increase it only once
+					pathIdx[itmPath] += 1
 				}
-				// uniquePath is path contatenated with data (must be something unique)
-				uniquePath := utils.ConcatenatedKey(strings.Join(cfgItm.Path, "."), itmStr)
-				if _, has := pathIdx[uniquePath]; !has {
-					pathIdx[uniquePath] += 1
+				if i == pathIdx[itmPath]-1 { // revert from multiple items to only one per config path
 					itm = cfgItm
 					break
-				} else {
-					continue
 				}
 			}
 		}
-
 		if itm == nil {
 			continue // all attributes, not writable to diameter packet
 		}
-
+		itmStr, err := utils.IfaceAsString(itm.Data)
+		if err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing reply item: %s for message: %s",
+					utils.DiameterAgent, err.Error(), utils.ToJSON(itm), m))
+			writeOnConn(c, m.Answer(diam.UnableToComply))
+			return
+		}
 		var newBranch bool
 		if itm.Config != nil && itm.Config.NewBranch {
 			newBranch = true
