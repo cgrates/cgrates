@@ -965,17 +965,17 @@ func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
 }
 
 func TestCgrCfgJSONDefaultsMailer(t *testing.T) {
-	if cgrCfg.MailerServer != "localhost" {
-		t.Error(cgrCfg.MailerServer)
+	if cgrCfg.MailerCfg().MailerServer != "localhost" {
+		t.Error(cgrCfg.MailerCfg().MailerServer)
 	}
-	if cgrCfg.MailerAuthUser != "cgrates" {
-		t.Error(cgrCfg.MailerAuthUser)
+	if cgrCfg.MailerCfg().MailerAuthUser != "cgrates" {
+		t.Error(cgrCfg.MailerCfg().MailerAuthUser)
 	}
-	if cgrCfg.MailerAuthPass != "CGRateS.org" {
-		t.Error(cgrCfg.MailerAuthPass)
+	if cgrCfg.MailerCfg().MailerAuthPass != "CGRateS.org" {
+		t.Error(cgrCfg.MailerCfg().MailerAuthPass)
 	}
-	if cgrCfg.MailerFromAddr != "cgr-mailer@localhost.localdomain" {
-		t.Error(cgrCfg.MailerFromAddr)
+	if cgrCfg.MailerCfg().MailerFromAddr != "cgr-mailer@localhost.localdomain" {
+		t.Error(cgrCfg.MailerCfg().MailerFromAddr)
 	}
 }
 

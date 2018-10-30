@@ -442,10 +442,10 @@ func mailAsync(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) 
 		message = []byte(fmt.Sprintf("To: %s\r\nSubject: [CGR Notification] Threshold hit on CDRStatsQueueId: %s\r\n\r\nTime: \r\n\t%s\r\n\r\nCDRStatsQueueId:\r\n\t%s\r\n\r\nMetrics:\r\n\t%+v\r\n\r\nTrigger:\r\n\t%+v\r\n\r\nYours faithfully,\r\nCGR CDR Stats Monitor\r\n",
 			toAddrStr, sq.Id, time.Now(), sq.Id, sq.Metrics, sq.Trigger))
 	}
-	auth := smtp.PlainAuth("", cgrCfg.MailerAuthUser, cgrCfg.MailerAuthPass, strings.Split(cgrCfg.MailerServer, ":")[0]) // We only need host part, so ignore port
+	auth := smtp.PlainAuth("", cgrCfg.MailerCfg().MailerAuthUser, cgrCfg.MailerCfg().MailerAuthPass, strings.Split(cgrCfg.MailerCfg().MailerServer, ":")[0]) // We only need host part, so ignore port
 	go func() {
 		for i := 0; i < 5; i++ { // Loop so we can increase the success rate on best effort
-			if err := smtp.SendMail(cgrCfg.MailerServer, auth, cgrCfg.MailerFromAddr, toAddrs, message); err == nil {
+			if err := smtp.SendMail(cgrCfg.MailerCfg().MailerServer, auth, cgrCfg.MailerCfg().MailerFromAddr, toAddrs, message); err == nil {
 				break
 			} else if i == 4 {
 				if ub != nil {

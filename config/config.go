@@ -161,6 +161,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.dispatcherSCfg = new(DispatcherSCfg)
 	cfg.loaderCgrCfg = new(LoaderCgrCfg)
 	cfg.migratorCgrCfg = new(MigratorCgrCfg)
+	cfg.mailerCfg = new(MailerCfg)
 
 	//Depricated
 	cfg.cdrStatsCfg = new(CdrStatsCfg)
@@ -277,11 +278,6 @@ type CGRConfig struct {
 
 	httpAgentCfg []*HttpAgentCfg // HttpAgent configuration
 
-	MailerServer   string // The server to use when sending emails out
-	MailerAuthUser string // Authenticate to email server using this user
-	MailerAuthPass string // Authenticate to email server with this password
-	MailerFromAddr string // From address used when sending emails out
-
 	ConfigReloads map[string]chan struct{} // Signals to specific entities that a config reload should occur
 
 	generalCfg       *GeneralCfg       // General config
@@ -311,6 +307,7 @@ type CGRConfig struct {
 	dispatcherSCfg   *DispatcherSCfg   // DispatcherS config
 	loaderCgrCfg     *LoaderCgrCfg     // LoaderCgr config
 	migratorCgrCfg   *MigratorCgrCfg   // MigratorCgr config
+	mailerCfg        *MailerCfg        // Mailer config
 	analyzerSCfg *AnalyzerSCfg
 
 	// Deprecated
@@ -931,6 +928,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err != nil {
 		return err
 	}
+	if self.mailerCfg.loadFromJsonCfg(jsnMailerCfg); err != nil {
+		return err
+	}
 
 	jsnSureTaxCfg, err := jsnCfg.SureTaxJsonCfg()
 	if err != nil {
@@ -1096,21 +1096,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 	}
 	///depricated^^^
-
-	if jsnMailerCfg != nil {
-		if jsnMailerCfg.Server != nil {
-			self.MailerServer = *jsnMailerCfg.Server
-		}
-		if jsnMailerCfg.Auth_user != nil {
-			self.MailerAuthUser = *jsnMailerCfg.Auth_user
-		}
-		if jsnMailerCfg.Auth_password != nil {
-			self.MailerAuthPass = *jsnMailerCfg.Auth_password
-		}
-		if jsnMailerCfg.From_address != nil {
-			self.MailerFromAddr = *jsnMailerCfg.From_address
-		}
-	}
 	return nil
 }
 
@@ -1240,6 +1225,10 @@ func (cfg *CGRConfig) CdrsCfg() *CdrsCfg {
 
 func (cfg *CGRConfig) CdrStatsCfg() *CdrStatsCfg {
 	return cfg.cdrStatsCfg
+}
+
+func (cfg *CGRConfig) MailerCfg() *MailerCfg {
+	return cfg.mailerCfg
 }
 
 func (cfg *CGRConfig) AnalyzerSCfg() *AnalyzerSCfg {
