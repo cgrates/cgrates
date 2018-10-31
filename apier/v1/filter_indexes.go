@@ -20,9 +20,10 @@ package v1
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"strings"
 )
 
 type AttrGetFilterIndexes struct {
@@ -33,6 +34,42 @@ type AttrGetFilterIndexes struct {
 	FilterField string
 	FilterValue string
 	utils.Paginator
+}
+
+type AttrRemFilterIndexes struct {
+	Tenant   string
+	Context  string
+	ItemType string
+}
+
+func (self *ApierV1) RemoveFilterIndexes(arg AttrRemFilterIndexes, reply *string) (err error) {
+	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ItemType"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	key := arg.Tenant
+	switch arg.ItemType {
+	case utils.MetaThresholds:
+		arg.ItemType = utils.ThresholdProfilePrefix
+	case utils.MetaSuppliers:
+		arg.ItemType = utils.SupplierProfilePrefix
+	case utils.MetaStats:
+		arg.ItemType = utils.StatQueueProfilePrefix
+	case utils.MetaResources:
+		arg.ItemType = utils.ResourceProfilesPrefix
+	case utils.MetaChargers:
+		arg.ItemType = utils.ChargerProfilePrefix
+	case utils.MetaAttributes:
+		if missing := utils.MissingStructFields(&arg, []string{"Context"}); len(missing) != 0 { //Params missing
+			return utils.NewErrMandatoryIeMissing(missing...)
+		}
+		arg.ItemType = utils.AttributeProfilePrefix
+		key = utils.ConcatenatedKey(arg.Tenant, arg.Context)
+	}
+	if err = self.DataManager.RemoveFilterIndexes(utils.PrefixToIndexCache[arg.ItemType], key); err != nil {
+		return err
+	}
+	*reply = utils.OK
+	return nil
 }
 
 func (self *ApierV1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string) (err error) {
