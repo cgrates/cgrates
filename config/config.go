@@ -309,7 +309,7 @@ type CGRConfig struct {
 	loaderCgrCfg     *LoaderCgrCfg     // LoaderCgr config
 	migratorCgrCfg   *MigratorCgrCfg   // MigratorCgr config
 	mailerCfg        *MailerCfg        // Mailer config
-	analyzerSCfg *AnalyzerSCfg
+	analyzerSCfg     *AnalyzerSCfg     // AnalyzerS config
 
 	// Deprecated
 	cdrStatsCfg          *CdrStatsCfg   // CdrStats config
@@ -972,17 +972,18 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err != nil {
 		return nil
 	}
-	jsnAnalyzerCgrCfg, err := jsnCfg.AnalyzerCfgJson()
-	if err != nil {
-		return nil
-	}
 	if err := self.tlsCfg.loadFromJsonCfg(jsnTlsCgrCfg); err != nil {
 		return err
 	}
 
+	jsnAnalyzerCgrCfg, err := jsnCfg.AnalyzerCfgJson()
+	if err != nil {
+		return nil
+	}
 	if err := self.analyzerSCfg.loadFromJsonCfg(jsnAnalyzerCgrCfg); err != nil {
 		return err
 	}
+
 	if jsnCdreCfg != nil {
 		for profileName, jsnCdre1Cfg := range jsnCdreCfg {
 			if _, hasProfile := self.CdreProfiles[profileName]; !hasProfile { // New profile, create before loading from json
