@@ -164,8 +164,10 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		}
 		// find out the first itm which is not an attribute
 		var itm *config.NMItem
-		for i, cfgItm := range nmItms {
-			if cfgItm.Config == nil || cfgItm.Config.AttributeID == "" {
+		if len(nmItms) == 1 {
+			itm = nmItms[0]
+		} else { // only for groups
+			for i, cfgItm := range nmItms {
 				itmPath := strings.Join(cfgItm.Path, utils.NestingSep)
 				if i == 0 { // path is common, increase it only once
 					pathIdx[itmPath] += 1
