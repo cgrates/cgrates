@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -66,7 +67,7 @@ func (gencfg *GeneralCfg) loadFromJsonCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 	}
 
 	if jsnGeneralCfg.Dbdata_encoding != nil {
-		gencfg.DBDataEncoding = *jsnGeneralCfg.Dbdata_encoding
+		gencfg.DBDataEncoding = strings.TrimPrefix(*jsnGeneralCfg.Dbdata_encoding, "*")
 	}
 	if jsnGeneralCfg.Default_request_type != nil {
 		gencfg.DefaultReqType = *jsnGeneralCfg.Default_request_type

@@ -18,6 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import (
+	"strings"
+)
+
 type MigratorCgrCfg struct {
 	OutDataDBType          string
 	OutDataDBHost          string
@@ -40,7 +44,7 @@ func (mg *MigratorCgrCfg) loadFromJsonCfg(jsnCfg *MigratorCfgJson) (err error) {
 		return
 	}
 	if jsnCfg.Out_dataDB_type != nil {
-		mg.OutDataDBType = *jsnCfg.Out_dataDB_type
+		mg.OutDataDBType = strings.TrimPrefix(*jsnCfg.Out_dataDB_type, "*")
 	}
 	if jsnCfg.Out_dataDB_host != nil {
 		mg.OutDataDBHost = *jsnCfg.Out_dataDB_host
@@ -58,7 +62,7 @@ func (mg *MigratorCgrCfg) loadFromJsonCfg(jsnCfg *MigratorCfgJson) (err error) {
 		mg.OutDataDBPassword = *jsnCfg.Out_dataDB_password
 	}
 	if jsnCfg.Out_dataDB_encoding != nil {
-		mg.OutDataDBEncoding = *jsnCfg.Out_dataDB_encoding
+		mg.OutDataDBEncoding = strings.TrimPrefix(*jsnCfg.Out_dataDB_encoding, "*")
 	}
 	if jsnCfg.Out_dataDB_redis_sentinel != nil {
 		mg.OutDataDBRedisSentinel = *jsnCfg.Out_dataDB_redis_sentinel
