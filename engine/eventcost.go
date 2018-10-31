@@ -344,18 +344,46 @@ func (ec *EventCost) accountingGetIDFromEventCost(oEC *EventCost, oAccountingID 
 	return ec.Accounting.GetIDWithSet(oBC)
 }
 
-// appendCIl appends a ChargingInterval to existing chargers, no compression done
+// appendCIl appends a ChargingInterval to existing chargers
+// no compression done at ChargingInterval level, attempted on ChargingIncrement level
 func (ec *EventCost) appendCIlFromEC(oEC *EventCost, cIlIdx int) {
 	cIl := oEC.Charges[cIlIdx]
 	cIl.RatingID = ec.ratingGetIDFomEventCost(oEC, cIl.RatingID)
-	for _, cIt := range cIl.Increments {
-		cIt.AccountingID = ec.accountingGetIDFromEventCost(oEC, cIt.AccountingID)
+	lastCIl := ec.Charges[len(ec.Charges)-1]
+	lastCIt := lastCIl.Increments[len(lastCIl.Increments)-1]
+	appendChargingIncrement := lastCIl.CompressFactor == 1 &&
+		lastCIl.RatingID == cIl.RatingID // attempt compressing of the ChargingIncrements
+	var idxFirstCIt *int // keep here the reference towards last not appended charging increment so we can create separate ChargingInterval
+	var idxLastCF *int   // reference towards last compress not absorbed by ec.Charges
+	for cF := cIl.CompressFactor; cF > 0; cF-- {
+		for i, cIt := range cIl.Increments {
+			cIt.AccountingID = ec.accountingGetIDFromEventCost(oEC, cIt.AccountingID)
+			if idxFirstCIt != nil {
+				continue
+			}
+			if !appendChargingIncrement ||
+				!lastCIt.PartiallyEquals(cIt) {
+				idxFirstCIt = utils.IntPointer(i)
+				idxLastCF = utils.IntPointer(cF)
+				continue
+			}
+			lastCIt.CompressFactor += cIt.CompressFactor // compress the iterated ChargingIncrement
+		}
 	}
-	ec.Charges = append(ec.Charges, cIl)
+	if idxFirstCIt != nil { // CIt was not completely absorbed
+		cIlCln := cIl.Clone()
+		cIlCln.CompressFactor = 1
+		cIlCln.Increments = cIlCln.Increments[*idxFirstCIt:]
+		ec.Charges = append(ec.Charges, cIlCln)
+		if *idxLastCF > 1 { // add the remaining part out of original ChargingInterval
+			cIl.CompressFactor = *idxLastCF - 1
+			ec.Charges = append(ec.Charges, cIl)
+		}
+	}
 }
 
 // AppendChargingInterval appends or compresses a &ChargingInterval to existing ec.Chargers
-func (ec *EventCost) AppendChargingIntervalFromEventCost(oEC *EventCost, cIlIdx int) {
+func (ec *EventCost) appendChargingIntervalFromEventCost(oEC *EventCost, cIlIdx int) {
 	lenChargers := len(ec.Charges)
 	if lenChargers != 0 && ec.Charges[lenChargers-1].PartiallyEquals(oEC.Charges[cIlIdx]) {
 		ec.Charges[lenChargers-1].CompressFactor += 1
@@ -369,7 +397,7 @@ func (ec *EventCost) Merge(ecs ...*EventCost) {
 	for _, newEC := range ecs {
 		ec.AccountSummary = newEC.AccountSummary // updated AccountSummary information
 		for cIlIdx := range newEC.Charges {
-			ec.AppendChargingIntervalFromEventCost(newEC, cIlIdx)
+			ec.appendChargingIntervalFromEventCost(newEC, cIlIdx)
 		}
 	}
 	ec.ResetCounters()

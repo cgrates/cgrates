@@ -1225,18 +1225,6 @@ func TestECTrimMUsage(t *testing.T) {
 			}
 		})
 	}
-	/*
-
-		ec = testEC.Clone()
-		atUsage = time.Duration(61 * time.Second)
-		srplsEC, _ = ec.Trim(atUsage)
-		if ec.GetUsage() != atUsage {
-			t.Errorf("Wrongly trimmed EC: %s", utils.ToJSON(ec))
-		}
-		if srplsEC.GetUsage() != time.Duration(239*time.Second) {
-			t.Errorf("Wrong surplusEC: %s", utils.ToJSON(srplsEC))
-		}
-	*/
 }
 
 /*
@@ -1290,3 +1278,327 @@ func TestECMerge(t *testing.T) {
 	}
 }
 */
+
+func TestECMergeGT(t *testing.T) {
+	// InitialEventCost
+	ecGT := &EventCost{
+		CGRID:     "7636f3f1a06dffa038ba7900fb57f52d28830a24",
+		RunID:     utils.META_DEFAULT,
+		StartTime: time.Date(2018, 7, 27, 0, 59, 21, 0, time.UTC),
+		Charges: []*ChargingInterval{
+			&ChargingInterval{
+				RatingID: "cc68da4",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(102400),
+						AccountingID:   "0d87a64",
+						CompressFactor: 103,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		AccountSummary: &AccountSummary{
+			Tenant: "cgrates.org",
+			ID:     "dan",
+			BalanceSummaries: []*BalanceSummary{
+				&BalanceSummary{
+					UUID:  "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+					ID:    "addon_data",
+					Type:  utils.DATA,
+					Value: 10726871040},
+			},
+		},
+		Rating: Rating{
+			"cc68da4": &RatingUnit{
+				RatesID:         "06dee2e",
+				RatingFiltersID: "216b0a5",
+			},
+		},
+		Accounting: Accounting{
+			"0d87a64": &BalanceCharge{
+				AccountID:     "cgrates.org:dan",
+				BalanceUUID:   "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+				Units:         102400,
+				ExtraChargeID: utils.META_NONE,
+			},
+		},
+		RatingFilters: RatingFilters{
+			"216b0a5": RatingMatchedFilters{
+				"DestinationID":     utils.META_ANY,
+				"DestinationPrefix": "42502",
+				"RatingPlanID":      utils.META_NONE,
+				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+			},
+		},
+		Rates: ChargedRates{
+			"06dee2e": RateGroups{
+				&Rate{
+					RateIncrement: time.Duration(102400),
+					RateUnit:      time.Duration(102400)},
+			},
+		},
+	}
+	ecGTUpdt := &EventCost{
+		CGRID:     "7636f3f1a06dffa038ba7900fb57f52d28830a24",
+		RunID:     utils.META_DEFAULT,
+		StartTime: time.Date(2018, 7, 27, 0, 59, 38, 0105472, time.UTC),
+		Charges: []*ChargingInterval{
+			&ChargingInterval{
+				RatingID: "6a83227",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(102400),
+						AccountingID:   "9288f93",
+						CompressFactor: 84,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		AccountSummary: &AccountSummary{
+			Tenant: "cgrates.org",
+			ID:     "dan",
+			BalanceSummaries: []*BalanceSummary{
+				&BalanceSummary{
+					UUID:  "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+					ID:    "addon_data",
+					Type:  utils.DATA,
+					Value: 10718269440},
+			},
+		},
+		Rating: Rating{
+			"6a83227": &RatingUnit{
+				RatesID:         "52f8b0f",
+				RatingFiltersID: "17f7216",
+			},
+		},
+		Accounting: Accounting{
+			"9288f93": &BalanceCharge{
+				AccountID:     "cgrates.org:dan",
+				BalanceUUID:   "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+				Units:         102400,
+				ExtraChargeID: utils.META_NONE,
+			},
+		},
+		RatingFilters: RatingFilters{
+			"17f7216": RatingMatchedFilters{
+				"DestinationID":     utils.META_ANY,
+				"DestinationPrefix": "42502",
+				"RatingPlanID":      utils.META_NONE,
+				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+			},
+		},
+		Rates: ChargedRates{
+			"52f8b0f": RateGroups{
+				&Rate{
+					RateIncrement: time.Duration(102400),
+					RateUnit:      time.Duration(102400)},
+			},
+		},
+	}
+	ecGT.Merge(ecGTUpdt)
+	ecExpct := &EventCost{
+		CGRID:     "7636f3f1a06dffa038ba7900fb57f52d28830a24",
+		RunID:     utils.META_DEFAULT,
+		StartTime: time.Date(2018, 7, 27, 0, 59, 21, 0, time.UTC),
+		Charges: []*ChargingInterval{
+			&ChargingInterval{
+				RatingID: "cc68da4",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(102400),
+						AccountingID:   "0d87a64",
+						CompressFactor: 187,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		AccountSummary: &AccountSummary{
+			Tenant: "cgrates.org",
+			ID:     "dan",
+			BalanceSummaries: []*BalanceSummary{
+				&BalanceSummary{
+					UUID:  "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+					ID:    "addon_data",
+					Type:  utils.DATA,
+					Value: 10718269440},
+			},
+		},
+		Rating: Rating{
+			"cc68da4": &RatingUnit{
+				RatesID:         "06dee2e",
+				RatingFiltersID: "216b0a5",
+			},
+		},
+		Accounting: Accounting{
+			"0d87a64": &BalanceCharge{
+				AccountID:     "cgrates.org:dan",
+				BalanceUUID:   "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+				Units:         102400,
+				ExtraChargeID: utils.META_NONE,
+			},
+		},
+		RatingFilters: RatingFilters{
+			"216b0a5": RatingMatchedFilters{
+				"DestinationID":     utils.META_ANY,
+				"DestinationPrefix": "42502",
+				"RatingPlanID":      utils.META_NONE,
+				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+			},
+		},
+		Rates: ChargedRates{
+			"06dee2e": RateGroups{
+				&Rate{
+					RateIncrement: time.Duration(102400),
+					RateUnit:      time.Duration(102400)},
+			},
+		},
+	}
+	if len(ecGT.Charges) != len(ecExpct.Charges) ||
+		!reflect.DeepEqual(ecGT.Charges[0].TotalUsage(), ecExpct.Charges[0].TotalUsage()) ||
+		!reflect.DeepEqual(ecGT.Charges[0].TotalCost(), ecExpct.Charges[0].TotalCost()) {
+		t.Errorf("expecting: %s\n\n, received: %s",
+			utils.ToJSON(ecExpct), utils.ToJSON(ecGT))
+	}
+}
+
+func TestECAppendCIlFromEC(t *testing.T) {
+	ec := &EventCost{
+		Charges: []*ChargingInterval{
+			&ChargingInterval{
+				RatingID: "cc68da4",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(102400),
+						AccountingID:   "0d87a64",
+						CompressFactor: 103,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rating: Rating{
+			"cc68da4": &RatingUnit{
+				RatesID:         "06dee2e",
+				RatingFiltersID: "216b0a5",
+			},
+		},
+		Accounting: Accounting{
+			"0d87a64": &BalanceCharge{
+				AccountID:     "cgrates.org:dan",
+				BalanceUUID:   "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+				Units:         102400,
+				ExtraChargeID: utils.META_NONE,
+			},
+		},
+		RatingFilters: RatingFilters{
+			"216b0a5": RatingMatchedFilters{
+				"DestinationID":     utils.META_ANY,
+				"DestinationPrefix": "42502",
+				"RatingPlanID":      utils.META_NONE,
+				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+			},
+		},
+		Rates: ChargedRates{
+			"06dee2e": RateGroups{
+				&Rate{
+					RateIncrement: time.Duration(102400),
+					RateUnit:      time.Duration(102400)},
+			},
+		},
+	}
+	oEC := &EventCost{
+		Charges: []*ChargingInterval{
+			&ChargingInterval{
+				RatingID: "6a83227",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(102400),
+						AccountingID:   "9288f93",
+						CompressFactor: 84,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rating: Rating{
+			"6a83227": &RatingUnit{
+				RatesID:         "52f8b0f",
+				RatingFiltersID: "17f7216",
+			},
+		},
+		Accounting: Accounting{
+			"9288f93": &BalanceCharge{
+				AccountID:     "cgrates.org:dan",
+				BalanceUUID:   "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+				Units:         102400,
+				ExtraChargeID: utils.META_NONE,
+			},
+		},
+		RatingFilters: RatingFilters{
+			"17f7216": RatingMatchedFilters{
+				"DestinationID":     utils.META_ANY,
+				"DestinationPrefix": "42502",
+				"RatingPlanID":      utils.META_NONE,
+				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+			},
+		},
+		Rates: ChargedRates{
+			"52f8b0f": RateGroups{
+				&Rate{
+					RateIncrement: time.Duration(102400),
+					RateUnit:      time.Duration(102400)},
+			},
+		},
+	}
+	ec.appendCIlFromEC(oEC, 0)
+	eEC := &EventCost{
+		Charges: []*ChargingInterval{
+			&ChargingInterval{
+				RatingID: "cc68da4",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(102400),
+						AccountingID:   "0d87a64",
+						CompressFactor: 187,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rating: Rating{
+			"cc68da4": &RatingUnit{
+				RatesID:         "06dee2e",
+				RatingFiltersID: "216b0a5",
+			},
+		},
+		Accounting: Accounting{
+			"0d87a64": &BalanceCharge{
+				AccountID:     "cgrates.org:dan",
+				BalanceUUID:   "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+				Units:         102400,
+				ExtraChargeID: utils.META_NONE,
+			},
+		},
+		RatingFilters: RatingFilters{
+			"216b0a5": RatingMatchedFilters{
+				"DestinationID":     utils.META_ANY,
+				"DestinationPrefix": "42502",
+				"RatingPlanID":      utils.META_NONE,
+				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+			},
+		},
+		Rates: ChargedRates{
+			"06dee2e": RateGroups{
+				&Rate{
+					RateIncrement: time.Duration(102400),
+					RateUnit:      time.Duration(102400)},
+			},
+		},
+	}
+	if !reflect.DeepEqual(eEC, ec) {
+		t.Errorf("expecting: %s, received: %s", utils.ToJSON(eEC), utils.ToJSON(ec))
+	}
+}

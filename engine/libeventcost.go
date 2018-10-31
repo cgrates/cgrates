@@ -36,18 +36,17 @@ type ChargingInterval struct {
 }
 
 // PartiallyEquals does not compare CompressFactor, usefull for Merge
-func (cIl *ChargingInterval) PartiallyEquals(oCIl *ChargingInterval) (equals bool) {
-	if equals = cIl.RatingID == oCIl.RatingID &&
+func (cIl *ChargingInterval) PartiallyEquals(oCIl *ChargingInterval) bool {
+	if equals := cIl.RatingID == oCIl.RatingID &&
 		len(cIl.Increments) == len(oCIl.Increments); !equals {
-		return
+		return false
 	}
 	for i := range cIl.Increments {
 		if !cIl.Increments[i].Equals(oCIl.Increments[i]) {
-			equals = false
-			break
+			return false
 		}
 	}
-	return
+	return true
 }
 
 // Usage computes the total usage of this ChargingInterval, ignoring CompressFactor
@@ -136,6 +135,13 @@ func (cIt *ChargingIncrement) Equals(oCIt *ChargingIncrement) bool {
 		cIt.CompressFactor == oCIt.CompressFactor
 }
 
+// PartiallyEquals ignores the CompressFactor when comparing
+func (cIt *ChargingIncrement) PartiallyEquals(oCIt *ChargingIncrement) bool {
+	return cIt.Usage == oCIt.Usage &&
+		cIt.Cost == oCIt.Cost &&
+		cIt.AccountingID == oCIt.AccountingID
+}
+
 func (cIt *ChargingIncrement) Clone() (cln *ChargingIncrement) {
 	cln = new(ChargingIncrement)
 	*cln = *cIt
@@ -161,11 +167,19 @@ type BalanceCharge struct {
 }
 
 func (bc *BalanceCharge) Equals(oBC *BalanceCharge) bool {
+	bcExtraChargeID := bc.ExtraChargeID
+	if bcExtraChargeID == "" {
+		bcExtraChargeID = utils.META_NONE
+	}
+	oBCExtraChargerID := oBC.ExtraChargeID
+	if oBCExtraChargerID == "" { // so we can compare them properly
+		oBCExtraChargerID = utils.META_NONE
+	}
 	return bc.AccountID == oBC.AccountID &&
 		bc.BalanceUUID == oBC.BalanceUUID &&
 		bc.RatingID == oBC.RatingID &&
 		bc.Units == oBC.Units &&
-		bc.ExtraChargeID == oBC.ExtraChargeID
+		bcExtraChargeID == oBCExtraChargerID
 }
 
 func (bc *BalanceCharge) Clone() *BalanceCharge {
@@ -176,15 +190,13 @@ func (bc *BalanceCharge) Clone() *BalanceCharge {
 
 type RatingMatchedFilters map[string]interface{}
 
-func (rf RatingMatchedFilters) Equals(oRF RatingMatchedFilters) (equals bool) {
-	equals = true
+func (rf RatingMatchedFilters) Equals(oRF RatingMatchedFilters) bool {
 	for k := range rf {
 		if rf[k] != oRF[k] {
-			equals = false
-			break
+			return false
 		}
 	}
-	return
+	return true
 }
 
 func (rf RatingMatchedFilters) Clone() (cln map[string]interface{}) {
