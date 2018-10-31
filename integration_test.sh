@@ -31,8 +31,8 @@ smg=$?
 echo 'go test github.com/cgrates/cgrates/migrator -tags=integration'
 go test github.com/cgrates/cgrates/migrator -tags=integration
 mgr=$?
-echo 'go test github.com/cgrates/cgrates/dispatcher -tags=integration'
-go test github.com/cgrates/cgrates/dispatcher -tags=integration
+echo 'go test github.com/cgrates/cgrates/dispatchers -tags=integration'
+go test github.com/cgrates/cgrates/dispatchers -tags=integration
 dis=$?
 
 exit $gen && $ap1 && $ap2 && $en && $cdrc && $cfg && $utl && $gnr && $agts && $smg && $mgr && $dis
