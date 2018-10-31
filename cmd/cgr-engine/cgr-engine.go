@@ -30,7 +30,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/agents"
-	"github.com/cgrates/cgrates/analyzer"
+	"github.com/cgrates/cgrates/analyzers"
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/cdrc"
@@ -1133,7 +1133,7 @@ func startAnalyzerService(internalAnalyzerSChan chan rpcclient.RpcClientConnecti
 	server *utils.Server, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS Analyzer service.")
 	var err error
-	aS, err := analyzer.NewAnalyzerService()
+	aS, err := analyzers.NewAnalyzerService()
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.AnalyzerS, err.Error()))
 		exitChan <- true

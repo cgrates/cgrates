@@ -574,9 +574,9 @@ const (
 	ResourcesLow   = "resources"
 	StatServiceLow = "stats"
 	ThresholdsLow  = "thresholds"
-	DispatcherLow  = "dispatcher"
-	AnalyzerLow    = "analyzer"
-	LoaderLow      = "loader"
+	DispatcherSLow = "dispatchers"
+	AnalyzerSLow   = "analyzers"
+	LoaderSLow     = "loaders"
 )
 
 // Migrator Metas
