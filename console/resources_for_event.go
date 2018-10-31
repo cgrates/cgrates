@@ -21,7 +21,7 @@ package console
 import (
 	"time"
 
-	"github.com/cgrates/cgrates/dispatcher"
+	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -30,7 +30,7 @@ func init() {
 	c := &CmdGetResourceForEvent{
 		name:      "resources_for_event",
 		rpcMethod: utils.ResourceSv1GetResourcesForEvent,
-		rpcParams: &dispatcher.ArgsV1ResUsageWithApiKey{},
+		rpcParams: &dispatchers.ArgsV1ResUsageWithApiKey{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -40,7 +40,7 @@ func init() {
 type CmdGetResourceForEvent struct {
 	name      string
 	rpcMethod string
-	rpcParams *dispatcher.ArgsV1ResUsageWithApiKey
+	rpcParams *dispatchers.ArgsV1ResUsageWithApiKey
 	*CommandExecuter
 }
 
@@ -54,7 +54,7 @@ func (self *CmdGetResourceForEvent) RpcMethod() string {
 
 func (self *CmdGetResourceForEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &dispatcher.ArgsV1ResUsageWithApiKey{}
+		self.rpcParams = &dispatchers.ArgsV1ResUsageWithApiKey{}
 	}
 	return self.rpcParams
 }

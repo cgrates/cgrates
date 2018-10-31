@@ -16,29 +16,29 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package dispatcher
+package dispatchers
 
 import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) ResourceSv1Ping(ign string, rpl *string) (err error) {
-	if dS.resS == nil {
-		return utils.NewErrNotConnected(utils.ResourceS)
+func (dS *DispatcherService) SupplierSv1Ping(ign string, reply *string) error {
+	if dS.splS == nil {
+		return utils.NewErrNotConnected(utils.SupplierS)
 	}
-	return dS.resS.Call(utils.ResourceSv1Ping, ign, rpl)
+	return dS.splS.Call(utils.SupplierSv1Ping, ign, reply)
 }
 
-func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args *ArgsV1ResUsageWithApiKey,
-	reply *engine.Resources) (err error) {
-	if dS.resS == nil {
-		return utils.NewErrNotConnected(utils.ResourceS)
+func (dS *DispatcherService) SupplierSv1GetSuppliers(args *ArgsGetSuppliersWithApiKey,
+	reply *engine.SortedSuppliers) (err error) {
+	if dS.splS == nil {
+		return utils.NewErrNotConnected(utils.SupplierS)
 	}
-	if err = dS.authorize(utils.ResourceSv1GetResourcesForEvent, args.ArgRSv1ResourceUsage.CGREvent.Tenant,
-		args.APIKey, args.ArgRSv1ResourceUsage.CGREvent.Time); err != nil {
+	if err = dS.authorize(utils.SupplierSv1GetSuppliers, args.ArgsGetSuppliers.CGREvent.Tenant,
+		args.APIKey, args.ArgsGetSuppliers.CGREvent.Time); err != nil {
 		return
 	}
-	return dS.resS.Call(utils.ResourceSv1GetResourcesForEvent, args.ArgRSv1ResourceUsage, reply)
+	return dS.splS.Call(utils.SupplierSv1GetSuppliers, args.ArgsGetSuppliers, reply)
 
 }
