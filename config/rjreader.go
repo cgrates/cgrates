@@ -26,15 +26,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-/*
- *ToDo:
- *	-add errors to util 	x
- *	-make 'new' functions	?
- *	-restructurate the code !!
- *	-optimize it a lot 		!!!
- *	-add test for them 		+
- */
-
 // NewRawJSONReader returns a raw JSON reader
 func NewRawJSONReader(r io.Reader) io.Reader {
 	return &EnvReader{
