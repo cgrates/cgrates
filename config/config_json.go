@@ -67,7 +67,7 @@ const (
 	CgrMigratorCfgJson = "migrator"
 	ChargerSCfgJson    = "chargers"
 	TlsCfgJson         = "tls"
-	AnalyzerCfgJson    = "analyzer"
+	AnalyzerCfgJson    = "analyzers"
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
