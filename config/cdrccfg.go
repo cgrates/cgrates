@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -29,7 +30,7 @@ type CdrcCfg struct {
 	Enabled                  bool                // Enable/Disable the profile
 	DryRun                   bool                // Do not post CDRs to the server
 	CdrsConns                []*HaPoolConfig     // The address where CDRs can be reached
-	CdrFormat                string              // The type of CDR file to process <csv|opensips_flatstore>
+	CdrFormat                string              // The type of CDR file to process <*csv|*opensips_flatstore>
 	FieldSeparator           rune                // The separator to use when reading csvs
 	DataUsageMultiplyFactor  float64             // Conversion factor for data usage
 	Timezone                 string              // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
@@ -73,7 +74,7 @@ func (self *CdrcCfg) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 		}
 	}
 	if jsnCfg.Cdr_format != nil {
-		self.CdrFormat = *jsnCfg.Cdr_format
+		self.CdrFormat = strings.TrimPrefix(*jsnCfg.Cdr_format, "*")
 	}
 	if jsnCfg.Field_separator != nil && len(*jsnCfg.Field_separator) > 0 {
 		sepStr := *jsnCfg.Field_separator
