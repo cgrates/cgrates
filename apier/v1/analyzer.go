@@ -19,18 +19,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/analyzer"
+	"github.com/cgrates/cgrates/analyzers"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewAnalyzerSv1 initializes AnalyzerSv1
-func NewAnalyzerSv1(aS *analyzer.AnalyzerService) *AnalyzerSv1 {
+func NewAnalyzerSv1(aS *analyzers.AnalyzerService) *AnalyzerSv1 {
 	return &AnalyzerSv1{aS: aS}
 }
 
 // Exports RPC from RLs
 type AnalyzerSv1 struct {
-	aS *analyzer.AnalyzerService
+	aS *analyzers.AnalyzerService
 }
 
 // Call implements rpcclient.RpcClientConnection interface for internal RPC
