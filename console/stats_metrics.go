@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/dispatcher"
+	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -27,7 +27,7 @@ func init() {
 	c := &CmdGetStatQueueStringMetrics{
 		name:      "stats_metrics",
 		rpcMethod: utils.StatSv1GetQueueStringMetrics,
-		rpcParams: &dispatcher.TntIDWithApiKey{},
+		rpcParams: &dispatchers.TntIDWithApiKey{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -37,7 +37,7 @@ func init() {
 type CmdGetStatQueueStringMetrics struct {
 	name      string
 	rpcMethod string
-	rpcParams *dispatcher.TntIDWithApiKey
+	rpcParams *dispatchers.TntIDWithApiKey
 	*CommandExecuter
 }
 
@@ -51,7 +51,7 @@ func (self *CmdGetStatQueueStringMetrics) RpcMethod() string {
 
 func (self *CmdGetStatQueueStringMetrics) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &dispatcher.TntIDWithApiKey{}
+		self.rpcParams = &dispatchers.TntIDWithApiKey{}
 	}
 	return self.rpcParams
 }

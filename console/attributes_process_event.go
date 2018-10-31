@@ -21,7 +21,7 @@ package console
 import (
 	"time"
 
-	"github.com/cgrates/cgrates/dispatcher"
+	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -30,7 +30,7 @@ func init() {
 	c := &CmdAttributesProcessEvent{
 		name:      "attributes_process_event",
 		rpcMethod: utils.AttributeSv1ProcessEvent,
-		rpcParams: &dispatcher.ArgsAttrProcessEventWithApiKey{},
+		rpcParams: &dispatchers.ArgsAttrProcessEventWithApiKey{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -39,7 +39,7 @@ func init() {
 type CmdAttributesProcessEvent struct {
 	name      string
 	rpcMethod string
-	rpcParams *dispatcher.ArgsAttrProcessEventWithApiKey
+	rpcParams *dispatchers.ArgsAttrProcessEventWithApiKey
 	*CommandExecuter
 }
 
@@ -53,7 +53,7 @@ func (self *CmdAttributesProcessEvent) RpcMethod() string {
 
 func (self *CmdAttributesProcessEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &dispatcher.ArgsAttrProcessEventWithApiKey{}
+		self.rpcParams = &dispatchers.ArgsAttrProcessEventWithApiKey{}
 	}
 	return self.rpcParams
 }
