@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/dispatcher"
+	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -30,7 +30,7 @@ func init() {
 	c := &CmdThresholdsForEvent{
 		name:      "thresholds_for_event",
 		rpcMethod: utils.ThresholdSv1GetThresholdsForEvent,
-		rpcParams: &dispatcher.ArgsProcessEventWithApiKey{},
+		rpcParams: &dispatchers.ArgsProcessEventWithApiKey{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -39,7 +39,7 @@ func init() {
 type CmdThresholdsForEvent struct {
 	name      string
 	rpcMethod string
-	rpcParams *dispatcher.ArgsProcessEventWithApiKey
+	rpcParams *dispatchers.ArgsProcessEventWithApiKey
 	*CommandExecuter
 }
 
@@ -53,7 +53,7 @@ func (self *CmdThresholdsForEvent) RpcMethod() string {
 
 func (self *CmdThresholdsForEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &dispatcher.ArgsProcessEventWithApiKey{}
+		self.rpcParams = &dispatchers.ArgsProcessEventWithApiKey{}
 	}
 	return self.rpcParams
 }

@@ -21,7 +21,7 @@ package console
 import (
 	"time"
 
-	"github.com/cgrates/cgrates/dispatcher"
+	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -30,7 +30,7 @@ func init() {
 	c := &CmdSuppliersSort{
 		name:      "suppliers",
 		rpcMethod: utils.SupplierSv1GetSuppliers,
-		rpcParams: &dispatcher.ArgsGetSuppliersWithApiKey{},
+		rpcParams: &dispatchers.ArgsGetSuppliersWithApiKey{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -39,7 +39,7 @@ func init() {
 type CmdSuppliersSort struct {
 	name      string
 	rpcMethod string
-	rpcParams *dispatcher.ArgsGetSuppliersWithApiKey
+	rpcParams *dispatchers.ArgsGetSuppliersWithApiKey
 	*CommandExecuter
 }
 
@@ -53,7 +53,7 @@ func (self *CmdSuppliersSort) RpcMethod() string {
 
 func (self *CmdSuppliersSort) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &dispatcher.ArgsGetSuppliersWithApiKey{}
+		self.rpcParams = &dispatchers.ArgsGetSuppliersWithApiKey{}
 	}
 	return self.rpcParams
 }

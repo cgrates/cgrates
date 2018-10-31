@@ -35,7 +35,7 @@ import (
 	"github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/cdrc"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/dispatcher"
+	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/scheduler"
@@ -1083,7 +1083,7 @@ func startDispatcherService(internalDispatcherSChan, internalRaterChan chan rpcc
 			return
 		}
 	}
-	dspS, err := dispatcher.NewDispatcherService(dm, ralsConns, resSConns,
+	dspS, err := dispatchers.NewDispatcherService(dm, ralsConns, resSConns,
 		threshSConns, statSConns, suplSConns, attrSConns, sessionsSConns, chargerSConns)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.DispatcherS, err.Error()))
