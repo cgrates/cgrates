@@ -33,7 +33,7 @@ const CGRATES_CFG_JSON = `
 	"log_level": 6,											// control the level of messages logged (0-emerg to 7-debug)
 	"http_skip_tls_verify": false,							// if enabled Http Client will accept any TLS certificate
 	"rounding_decimals": 5,									// system level precision for floats
-	"dbdata_encoding": "msgpack",							// encoding used to store object data in strings: <msgpack|json>
+	"dbdata_encoding": "*msgpack",							// encoding used to store object data in strings: <*msgpack|*json>
 	"tpexport_dir": "/var/spool/cgrates/tpe",				// path towards export folder for offline Tariff Plans
 	"poster_attempts": 3,									// number of attempts before considering post request failed (eg: *call_url, CDR replication)
 	"failed_posts_dir": "/var/spool/cgrates/failed_posts",	// directory path where we store failed requests
@@ -245,7 +245,7 @@ const CGRATES_CFG_JSON = `
 		"cdrs_conns": [
 			{"address": "*internal"}					// address where to reach CDR server. <*internal|x.y.z.y:1234>
 		],
-		"cdr_format": "csv",							// CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore|partial_csv>
+		"cdr_format": "*csv",							// CDR file format <*csv|*freeswitch_csv|*fwv|*opensips_flatstore|*partial_csv>
 		"field_separator": ",",							// separator used in case of csv files
 		"timezone": "",									// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 		"run_delay": 0,									// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
