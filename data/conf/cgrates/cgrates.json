@@ -71,6 +71,17 @@
 //	},
 
 
+//	"tls": {
+//		"server_certificate" : "",			// path to server certificate
+//		"server_key":"",					// path to server key
+//		"client_certificate" : "",			// path to client certificate
+//		"client_key":"",					// path to client key
+//		"ca_certificate":"",				// path to CA certificate (populate if used self-sign certificate otherwise let it empty)
+//		"server_policy":4,					// server_policy determine the TLS Client Authentication (0-NoClientCert, 1-RequestClientCert, 2-RequireAnyClientCert, 3-VerifyClientCertIfGiven, 4-RequireAndVerifyClientCert)
+//		"server_name":"",					
+//	},
+
+
 //	"http": {										// HTTP server configuration
 //		"json_rpc_url": "/jsonrpc",					// JSON RPC relative URL ("" to disable)
 //		"ws_url": "/ws",							// WebSockets relative URL ("" to disable)
@@ -680,6 +691,11 @@
 //		"sessions_conns": [],					// connection towards SessionService
 //		"chargers_conns": [],					// address where to reach the ChargerS <""|127.0.0.1:2013>
 //		"dispatching_strategy": "*first",		// strategy for dispatching <*first|*random|*next|*broadcast>
+//	},
+
+
+//	"analyzers":{
+//		"enabled":false							// starts AnalyzerS service: <true|false>.
 //	},
 
 
