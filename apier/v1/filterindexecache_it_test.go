@@ -36,7 +36,7 @@ import (
 var tFIdxCaRpc *rpc.Client
 
 var sTestsFilterIndexesSV1Ca = []func(t *testing.T){
-	testFlush,
+	testV1FIdxdxInitDataDb,
 	testV1FIdxCaLoadConfig,
 	testV1FIdxCadxInitDataDb,
 	testV1FIdxCaResetStorDb,
@@ -51,7 +51,7 @@ var sTestsFilterIndexesSV1Ca = []func(t *testing.T){
 	testV1FIdxCaUpdateThresholdProfileFromTP,
 	testV1FIdxCaRemoveThresholdProfile,
 
-	testFlush,
+	testV1FIdxdxInitDataDb,
 	testV1FIdxCaGetStatQueuesWithNotFound,
 	testV1FIdxCaSetStatQueueProfile,
 	testV1FIdxCaFromFolder,
@@ -60,7 +60,7 @@ var sTestsFilterIndexesSV1Ca = []func(t *testing.T){
 	testV1FIdxCaUpdateStatQueueProfileFromTP,
 	testV1FIdxCaRemoveStatQueueProfile,
 
-	testFlush,
+	testV1FIdxdxInitDataDb,
 	testV1FIdxCaProcessAttributeProfileEventWithNotFound,
 	testV1FIdxCaSetAttributeProfile,
 	testV1FIdxCaFromFolder,
@@ -69,7 +69,7 @@ var sTestsFilterIndexesSV1Ca = []func(t *testing.T){
 	testV1FIdxCaUpdateAttributeProfileFromTP,
 	testV1FIdxCaRemoveAttributeProfile,
 
-	testFlush,
+	testV1FIdxdxInitDataDb,
 	testV1FIdxCaGetResourceProfileWithNotFound,
 	testV1FIdxCaSetResourceProfile,
 	testV1FIdxCaFromFolder,
