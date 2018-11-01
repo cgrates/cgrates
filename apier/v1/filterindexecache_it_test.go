@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -82,15 +81,6 @@ var sTestsFilterIndexesSV1Ca = []func(t *testing.T){
 
 // Test start here
 func TestFIdxCaV1ITMySQL(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
-	rdsITdb, err := engine.NewRedisStorage(
-		fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
-		10, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
-		utils.REDIS_MAX_CONNS, nil, "")
-	if err != nil {
-		t.Fatal("Could not connect to Redis", err.Error())
-	}
-	onStor = engine.NewDataManager(rdsITdb)
 	tSv1ConfDIR = "tutmysql"
 	for _, stest := range sTestsFilterIndexesSV1Ca {
 		t.Run(tSv1ConfDIR, stest)
@@ -98,19 +88,6 @@ func TestFIdxCaV1ITMySQL(t *testing.T) {
 }
 
 func TestFIdxCaV1ITMongo(t *testing.T) {
-	cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	mgoITCfg, err := config.NewCGRConfigFromFolder(cdrsMongoCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	mgoITdb, err := engine.NewMongoStorage(mgoITCfg.DataDbCfg().DataDbHost,
-		mgoITCfg.DataDbCfg().DataDbPort, mgoITCfg.DataDbCfg().DataDbName,
-		mgoITCfg.DataDbCfg().DataDbUser, mgoITCfg.DataDbCfg().DataDbPass,
-		utils.DataDB, nil, mgoITCfg.CacheCfg())
-	if err != nil {
-		t.Fatal(err)
-	}
-	onStor = engine.NewDataManager(mgoITdb)
 	tSv1ConfDIR = "tutmongo"
 	time.Sleep(time.Duration(2 * time.Second)) // give time for engine to start
 	for _, stest := range sTestsFilterIndexesSV1Ca {
