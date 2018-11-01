@@ -1227,58 +1227,6 @@ func TestECTrimMUsage(t *testing.T) {
 	}
 }
 
-/*
-func TestECMerge(t *testing.T) {
-	ec := NewBareEventCost()
-	ec.CGRID = testEC.CGRID
-	ec.RunID = testEC.RunID
-	ec.StartTime = testEC.StartTime
-	newEC := &EventCost{
-		Charges:        []*ChargingInterval{testEC.Charges[0]},
-		AccountSummary: testEC.AccountSummary,
-		Rating:         testEC.Rating,
-		Accounting:     testEC.Accounting,
-		RatingFilters:  testEC.RatingFilters,
-		Rates:          testEC.Rates,
-		Timings:        testEC.Timings,
-	}
-	ec.Merge(newEC)
-	if len(ec.Charges) != len(newEC.Charges) ||
-		!reflect.DeepEqual(ec.Charges[0].TotalUsage(), newEC.Charges[0].TotalUsage()) ||
-		!reflect.DeepEqual(ec.Charges[0].TotalCost(), newEC.Charges[0].TotalCost()) {
-		t.Errorf("Unexpected EC after merge: %s", utils.ToJSON(ec))
-	}
-	// Add second charging interval with compress factor 1
-	newEC = &EventCost{
-		Charges: []*ChargingInterval{
-			&ChargingInterval{
-				RatingID:       testEC.Charges[1].RatingID,
-				Increments:     testEC.Charges[1].Increments,
-				CompressFactor: 1}},
-		AccountSummary: testEC.AccountSummary,
-		Rating:         testEC.Rating,
-		Accounting:     testEC.Accounting,
-		RatingFilters:  testEC.RatingFilters,
-		Rates:          testEC.Rates,
-		Timings:        testEC.Timings,
-	}
-	ec.Merge(newEC)
-	if len(ec.Charges) != 2 ||
-		!reflect.DeepEqual(ec.Charges[1].TotalUsage(), newEC.Charges[0].TotalUsage()) ||
-		!reflect.DeepEqual(ec.Charges[1].TotalCost(), newEC.Charges[0].TotalCost()) {
-		t.Errorf("Unexpected EC after merge: %s", utils.ToJSON(ec))
-	}
-	newEC.Charges[0].CompressFactor = 1
-	ec.Merge(newEC)
-	if len(ec.Charges) != 2 ||
-		ec.Charges[1].CompressFactor != 2 ||
-		*ec.Charges[1].Usage() != time.Duration(1*time.Minute) || // only equal at charging interval level
-		*ec.Charges[1].TotalUsage() != time.Duration(2*time.Minute) {
-		t.Errorf("Unexpected EC after merge: %s", utils.ToJSON(ec))
-	}
-}
-*/
-
 func TestECMergeGT(t *testing.T) {
 	// InitialEventCost
 	ecGT := &EventCost{
@@ -1462,9 +1410,11 @@ func TestECMergeGT(t *testing.T) {
 		t.Errorf("expecting: %s\n\n, received: %s",
 			utils.ToJSON(ecExpct), utils.ToJSON(ecGT))
 	}
+
 }
 
 func TestECAppendCIlFromEC(t *testing.T) {
+	// Standard compressing 1-1
 	ec := &EventCost{
 		Charges: []*ChargingInterval{
 			&ChargingInterval{
@@ -1566,6 +1516,485 @@ func TestECAppendCIlFromEC(t *testing.T) {
 					},
 				},
 				CompressFactor: 1,
+			},
+		},
+		Rating: Rating{
+			"cc68da4": &RatingUnit{
+				RatesID:         "06dee2e",
+				RatingFiltersID: "216b0a5",
+			},
+		},
+		Accounting: Accounting{
+			"0d87a64": &BalanceCharge{
+				AccountID:     "cgrates.org:dan",
+				BalanceUUID:   "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+				Units:         102400,
+				ExtraChargeID: utils.META_NONE,
+			},
+		},
+		RatingFilters: RatingFilters{
+			"216b0a5": RatingMatchedFilters{
+				"DestinationID":     utils.META_ANY,
+				"DestinationPrefix": "42502",
+				"RatingPlanID":      utils.META_NONE,
+				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+			},
+		},
+		Rates: ChargedRates{
+			"06dee2e": RateGroups{
+				&Rate{
+					RateIncrement: time.Duration(102400),
+					RateUnit:      time.Duration(102400)},
+			},
+		},
+	}
+	if !reflect.DeepEqual(eEC, ec) {
+		t.Errorf("expecting: %s, received: %s", utils.ToJSON(eEC), utils.ToJSON(ec))
+	}
+
+	// Second case, do not compress if first interval's compress factor is different than 1
+	ec = &EventCost{
+		Charges: []*ChargingInterval{
+			&ChargingInterval{
+				RatingID: "cc68da4",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(102400),
+						AccountingID:   "0d87a64",
+						CompressFactor: 103,
+					},
+				},
+				CompressFactor: 2,
+			},
+		},
+		Rating: Rating{
+			"cc68da4": &RatingUnit{
+				RatesID:         "06dee2e",
+				RatingFiltersID: "216b0a5",
+			},
+		},
+		Accounting: Accounting{
+			"0d87a64": &BalanceCharge{
+				AccountID:     "cgrates.org:dan",
+				BalanceUUID:   "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+				Units:         102400,
+				ExtraChargeID: utils.META_NONE,
+			},
+		},
+		RatingFilters: RatingFilters{
+			"216b0a5": RatingMatchedFilters{
+				"DestinationID":     utils.META_ANY,
+				"DestinationPrefix": "42502",
+				"RatingPlanID":      utils.META_NONE,
+				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+			},
+		},
+		Rates: ChargedRates{
+			"06dee2e": RateGroups{
+				&Rate{
+					RateIncrement: time.Duration(102400),
+					RateUnit:      time.Duration(102400)},
+			},
+		},
+	}
+	oEC = &EventCost{
+		Charges: []*ChargingInterval{
+			&ChargingInterval{
+				RatingID: "6a83227",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(102400),
+						AccountingID:   "9288f93",
+						CompressFactor: 84,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rating: Rating{
+			"6a83227": &RatingUnit{
+				RatesID:         "52f8b0f",
+				RatingFiltersID: "17f7216",
+			},
+		},
+		Accounting: Accounting{
+			"9288f93": &BalanceCharge{
+				AccountID:     "cgrates.org:dan",
+				BalanceUUID:   "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+				Units:         102400,
+				ExtraChargeID: utils.META_NONE,
+			},
+		},
+		RatingFilters: RatingFilters{
+			"17f7216": RatingMatchedFilters{
+				"DestinationID":     utils.META_ANY,
+				"DestinationPrefix": "42502",
+				"RatingPlanID":      utils.META_NONE,
+				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+			},
+		},
+		Rates: ChargedRates{
+			"52f8b0f": RateGroups{
+				&Rate{
+					RateIncrement: time.Duration(102400),
+					RateUnit:      time.Duration(102400)},
+			},
+		},
+	}
+	ec.appendCIlFromEC(oEC, 0)
+	eEC = &EventCost{
+		Charges: []*ChargingInterval{
+			&ChargingInterval{
+				RatingID: "cc68da4",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(102400),
+						AccountingID:   "0d87a64",
+						CompressFactor: 103,
+					},
+				},
+				CompressFactor: 2,
+			},
+			&ChargingInterval{
+				RatingID: "cc68da4",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(102400),
+						AccountingID:   "0d87a64",
+						CompressFactor: 84,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rating: Rating{
+			"cc68da4": &RatingUnit{
+				RatesID:         "06dee2e",
+				RatingFiltersID: "216b0a5",
+			},
+		},
+		Accounting: Accounting{
+			"0d87a64": &BalanceCharge{
+				AccountID:     "cgrates.org:dan",
+				BalanceUUID:   "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+				Units:         102400,
+				ExtraChargeID: utils.META_NONE,
+			},
+		},
+		RatingFilters: RatingFilters{
+			"216b0a5": RatingMatchedFilters{
+				"DestinationID":     utils.META_ANY,
+				"DestinationPrefix": "42502",
+				"RatingPlanID":      utils.META_NONE,
+				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+			},
+		},
+		Rates: ChargedRates{
+			"06dee2e": RateGroups{
+				&Rate{
+					RateIncrement: time.Duration(102400),
+					RateUnit:      time.Duration(102400)},
+			},
+		},
+	}
+	if !reflect.DeepEqual(eEC, ec) {
+		t.Errorf("expecting: %s, received: %s", utils.ToJSON(eEC), utils.ToJSON(ec))
+	}
+
+	// Third case, split oEC
+	ec = &EventCost{
+		Charges: []*ChargingInterval{
+			&ChargingInterval{
+				RatingID: "cc68da4",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(100),
+						AccountingID:   "0d87a64",
+						CompressFactor: 1,
+					},
+				},
+				CompressFactor: 1,
+			},
+			&ChargingInterval{
+				RatingID: "cc68da4",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(102400),
+						AccountingID:   "0d87a64",
+						CompressFactor: 103,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rating: Rating{
+			"cc68da4": &RatingUnit{
+				RatesID:         "06dee2e",
+				RatingFiltersID: "216b0a5",
+			},
+		},
+		Accounting: Accounting{
+			"0d87a64": &BalanceCharge{
+				AccountID:     "cgrates.org:dan",
+				BalanceUUID:   "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+				Units:         102400,
+				ExtraChargeID: utils.META_NONE,
+			},
+		},
+		RatingFilters: RatingFilters{
+			"216b0a5": RatingMatchedFilters{
+				"DestinationID":     utils.META_ANY,
+				"DestinationPrefix": "42502",
+				"RatingPlanID":      utils.META_NONE,
+				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+			},
+		},
+		Rates: ChargedRates{
+			"06dee2e": RateGroups{
+				&Rate{
+					RateIncrement: time.Duration(102400),
+					RateUnit:      time.Duration(102400)},
+			},
+		},
+	}
+	oEC = &EventCost{
+		Charges: []*ChargingInterval{
+			&ChargingInterval{
+				RatingID: "6a83227",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(102400),
+						AccountingID:   "9288f93",
+						CompressFactor: 42,
+					},
+					&ChargingIncrement{
+						Usage:          time.Duration(10240),
+						AccountingID:   "9288f93",
+						CompressFactor: 20,
+					},
+				},
+				CompressFactor: 3,
+			},
+		},
+		Rating: Rating{
+			"6a83227": &RatingUnit{
+				RatesID:         "52f8b0f",
+				RatingFiltersID: "17f7216",
+			},
+		},
+		Accounting: Accounting{
+			"9288f93": &BalanceCharge{
+				AccountID:     "cgrates.org:dan",
+				BalanceUUID:   "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+				Units:         102400,
+				ExtraChargeID: utils.META_NONE,
+			},
+		},
+		RatingFilters: RatingFilters{
+			"17f7216": RatingMatchedFilters{
+				"DestinationID":     utils.META_ANY,
+				"DestinationPrefix": "42502",
+				"RatingPlanID":      utils.META_NONE,
+				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+			},
+		},
+		Rates: ChargedRates{
+			"52f8b0f": RateGroups{
+				&Rate{
+					RateIncrement: time.Duration(102400),
+					RateUnit:      time.Duration(102400)},
+			},
+		},
+	}
+	ec.appendCIlFromEC(oEC, 0)
+	eEC = &EventCost{
+		Charges: []*ChargingInterval{
+			&ChargingInterval{
+				RatingID: "cc68da4",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(100),
+						AccountingID:   "0d87a64",
+						CompressFactor: 1,
+					},
+				},
+				CompressFactor: 1,
+			},
+			&ChargingInterval{
+				RatingID: "cc68da4",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(102400),
+						AccountingID:   "0d87a64",
+						CompressFactor: 145,
+					},
+				},
+				CompressFactor: 1,
+			},
+			&ChargingInterval{
+				RatingID: "cc68da4",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(10240),
+						AccountingID:   "0d87a64",
+						CompressFactor: 20,
+					},
+				},
+				CompressFactor: 1,
+			},
+			&ChargingInterval{
+				RatingID: "cc68da4",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(102400),
+						AccountingID:   "0d87a64",
+						CompressFactor: 42,
+					},
+					&ChargingIncrement{
+						Usage:          time.Duration(10240),
+						AccountingID:   "0d87a64",
+						CompressFactor: 20,
+					},
+				},
+				CompressFactor: 2,
+			},
+		},
+		Rating: Rating{
+			"cc68da4": &RatingUnit{
+				RatesID:         "06dee2e",
+				RatingFiltersID: "216b0a5",
+			},
+		},
+		Accounting: Accounting{
+			"0d87a64": &BalanceCharge{
+				AccountID:     "cgrates.org:dan",
+				BalanceUUID:   "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+				Units:         102400,
+				ExtraChargeID: utils.META_NONE,
+			},
+		},
+		RatingFilters: RatingFilters{
+			"216b0a5": RatingMatchedFilters{
+				"DestinationID":     utils.META_ANY,
+				"DestinationPrefix": "42502",
+				"RatingPlanID":      utils.META_NONE,
+				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+			},
+		},
+		Rates: ChargedRates{
+			"06dee2e": RateGroups{
+				&Rate{
+					RateIncrement: time.Duration(102400),
+					RateUnit:      time.Duration(102400)},
+			},
+		},
+	}
+	if !reflect.DeepEqual(eEC, ec) {
+		t.Errorf("expecting: %s, received: %s", utils.ToJSON(eEC), utils.ToJSON(ec))
+	}
+
+	// Fourth case, increase ChargingInterval.CompressFactor
+	ec = &EventCost{
+		Charges: []*ChargingInterval{
+			&ChargingInterval{
+				RatingID: "cc68da4",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(102400),
+						AccountingID:   "0d87a64",
+						CompressFactor: 103,
+					},
+				},
+				CompressFactor: 2,
+			},
+		},
+		Rating: Rating{
+			"cc68da4": &RatingUnit{
+				RatesID:         "06dee2e",
+				RatingFiltersID: "216b0a5",
+			},
+		},
+		Accounting: Accounting{
+			"0d87a64": &BalanceCharge{
+				AccountID:     "cgrates.org:dan",
+				BalanceUUID:   "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+				Units:         102400,
+				ExtraChargeID: utils.META_NONE,
+			},
+		},
+		RatingFilters: RatingFilters{
+			"216b0a5": RatingMatchedFilters{
+				"DestinationID":     utils.META_ANY,
+				"DestinationPrefix": "42502",
+				"RatingPlanID":      utils.META_NONE,
+				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+			},
+		},
+		Rates: ChargedRates{
+			"06dee2e": RateGroups{
+				&Rate{
+					RateIncrement: time.Duration(102400),
+					RateUnit:      time.Duration(102400)},
+			},
+		},
+	}
+	oEC = &EventCost{
+		Charges: []*ChargingInterval{
+			&ChargingInterval{
+				RatingID: "6a83227",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(102400),
+						AccountingID:   "9288f93",
+						CompressFactor: 103,
+					},
+				},
+				CompressFactor: 3,
+			},
+		},
+		Rating: Rating{
+			"6a83227": &RatingUnit{
+				RatesID:         "52f8b0f",
+				RatingFiltersID: "17f7216",
+			},
+		},
+		Accounting: Accounting{
+			"9288f93": &BalanceCharge{
+				AccountID:     "cgrates.org:dan",
+				BalanceUUID:   "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+				Units:         102400,
+				ExtraChargeID: utils.META_NONE,
+			},
+		},
+		RatingFilters: RatingFilters{
+			"17f7216": RatingMatchedFilters{
+				"DestinationID":     utils.META_ANY,
+				"DestinationPrefix": "42502",
+				"RatingPlanID":      utils.META_NONE,
+				"Subject":           "9a767726-fe69-4940-b7bd-f43de9f0f8a5",
+			},
+		},
+		Rates: ChargedRates{
+			"52f8b0f": RateGroups{
+				&Rate{
+					RateIncrement: time.Duration(102400),
+					RateUnit:      time.Duration(102400)},
+			},
+		},
+	}
+	ec.appendCIlFromEC(oEC, 0)
+	eEC = &EventCost{
+		Charges: []*ChargingInterval{
+			&ChargingInterval{
+				RatingID: "cc68da4",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(102400),
+						AccountingID:   "0d87a64",
+						CompressFactor: 103,
+					},
+				},
+				CompressFactor: 5,
 			},
 		},
 		Rating: Rating{

@@ -348,21 +348,22 @@ func (ec *EventCost) accountingGetIDFromEventCost(oEC *EventCost, oAccountingID 
 // no compression done at ChargingInterval level, attempted on ChargingIncrement level
 func (ec *EventCost) appendCIlFromEC(oEC *EventCost, cIlIdx int) {
 	cIl := oEC.Charges[cIlIdx]
-	cIl.RatingID = ec.ratingGetIDFomEventCost(oEC, cIl.RatingID)
+	cIlCln := cIl.Clone() // add/modify data on clone instead of original
+	cIlCln.RatingID = ec.ratingGetIDFomEventCost(oEC, cIl.RatingID)
 	lastCIl := ec.Charges[len(ec.Charges)-1]
 	lastCIt := lastCIl.Increments[len(lastCIl.Increments)-1]
 	appendChargingIncrement := lastCIl.CompressFactor == 1 &&
-		lastCIl.RatingID == cIl.RatingID // attempt compressing of the ChargingIncrements
+		lastCIl.RatingID == cIlCln.RatingID // attempt compressing of the ChargingIncrements
 	var idxFirstCIt *int // keep here the reference towards last not appended charging increment so we can create separate ChargingInterval
 	var idxLastCF *int   // reference towards last compress not absorbed by ec.Charges
 	for cF := cIl.CompressFactor; cF > 0; cF-- {
 		for i, cIt := range cIl.Increments {
-			cIt.AccountingID = ec.accountingGetIDFromEventCost(oEC, cIt.AccountingID)
+			cIlCln.Increments[i].AccountingID = ec.accountingGetIDFromEventCost(oEC, cIt.AccountingID)
 			if idxFirstCIt != nil {
 				continue
 			}
 			if !appendChargingIncrement ||
-				!lastCIt.PartiallyEquals(cIt) {
+				!lastCIt.PartiallyEquals(cIlCln.Increments[i]) {
 				idxFirstCIt = utils.IntPointer(i)
 				idxLastCF = utils.IntPointer(cF)
 				continue
@@ -370,14 +371,18 @@ func (ec *EventCost) appendCIlFromEC(oEC *EventCost, cIlIdx int) {
 			lastCIt.CompressFactor += cIt.CompressFactor // compress the iterated ChargingIncrement
 		}
 	}
+	if lastCIl.PartiallyEquals(cIlCln) { // the two CIls are equal, compress the original one
+		lastCIl.CompressFactor += cIlCln.CompressFactor
+		return
+	}
 	if idxFirstCIt != nil { // CIt was not completely absorbed
-		cIlCln := cIl.Clone()
-		cIlCln.CompressFactor = 1
-		cIlCln.Increments = cIlCln.Increments[*idxFirstCIt:]
-		ec.Charges = append(ec.Charges, cIlCln)
+		cIl.RatingID = cIlCln.RatingID // reuse cIl so we don't clone again
+		cIl.CompressFactor = 1
+		cIl.Increments = cIlCln.Increments[*idxFirstCIt:]
+		ec.Charges = append(ec.Charges, cIl)
 		if *idxLastCF > 1 { // add the remaining part out of original ChargingInterval
-			cIl.CompressFactor = *idxLastCF - 1
-			ec.Charges = append(ec.Charges, cIl)
+			cIlCln.CompressFactor = *idxLastCF - 1
+			ec.Charges = append(ec.Charges, cIlCln)
 		}
 	}
 }
