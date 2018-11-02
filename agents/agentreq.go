@@ -213,7 +213,19 @@ func (aReq *AgentRequest) ParseField(
 			mltpl = 0
 		}
 		return usedCCTime + time.Duration(debitItvl.Nanoseconds()*mltpl), nil
-
+	case utils.MetaSum:
+		if len(cfgFld.Value) != 2 {
+			return nil, fmt.Errorf("invalid arguments <%s>", utils.ToJSON(cfgFld.Value))
+		}
+		strVal1, err := cfgFld.Value[0].ParseDataProvider(aReq, utils.NestingSep)
+		if err != nil {
+			return "", err
+		}
+		strVal2, err := cfgFld.Value[1].ParseDataProvider(aReq, utils.NestingSep)
+		if err != nil {
+			return "", err
+		}
+		out, err = utils.Sum(utils.StringToInterface(strVal1), utils.StringToInterface(strVal2))
 	}
 	if err != nil {
 		return
