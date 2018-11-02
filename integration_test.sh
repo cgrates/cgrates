@@ -1,4 +1,5 @@
 #! /usr/bin/env sh
+go clean --cache
 ./test.sh
 gen=$?
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration'

@@ -163,7 +163,6 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-
 	var result string
 	if err := tFIdxRpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
 		t.Error(err)
@@ -1609,7 +1608,7 @@ func testV1FIdxGetFilterIndexes4(t *testing.T) {
 }
 
 func testV1FIdxStopEngine(t *testing.T) {
-	if err := engine.KillEngine(100); err != nil {
+	if err := engine.KillEngine(thdsDelay); err != nil {
 		t.Error(err)
 	}
 }

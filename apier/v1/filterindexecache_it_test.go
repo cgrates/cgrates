@@ -35,8 +35,8 @@ import (
 var tFIdxCaRpc *rpc.Client
 
 var sTestsFilterIndexesSV1Ca = []func(t *testing.T){
-	testV1FIdxdxInitDataDb,
 	testV1FIdxCaLoadConfig,
+	testV1FIdxdxInitDataDb,
 	testV1FIdxCadxInitDataDb,
 	testV1FIdxCaResetStorDb,
 	testV1FIdxCaStartEngine,
@@ -1448,7 +1448,7 @@ func testV1FIdxCaRemoveResourceProfile(t *testing.T) {
 }
 
 func testV1FIdxCaStopEngine(t *testing.T) {
-	if err := engine.KillEngine(100); err != nil {
+	if err := engine.KillEngine(thdsDelay); err != nil {
 		t.Error(err)
 	}
 }
