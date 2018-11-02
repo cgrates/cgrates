@@ -82,6 +82,7 @@ var sTestsFilterIndexesSV1Ca = []func(t *testing.T){
 // Test start here
 func TestFIdxCaV1ITMySQL(t *testing.T) {
 	tSv1ConfDIR = "tutmysql"
+	time.Sleep(time.Duration(2 * time.Second)) // give time for engine to start
 	for _, stest := range sTestsFilterIndexesSV1Ca {
 		t.Run(tSv1ConfDIR, stest)
 	}
@@ -101,12 +102,7 @@ func testV1FIdxCaLoadConfig(t *testing.T) {
 	if tSv1Cfg, err = config.NewCGRConfigFromFolder(tSv1CfgPath); err != nil {
 		t.Error(err)
 	}
-	switch tSv1ConfDIR {
-	case "tutmongo": // Mongo needs more time to reset db, need to investigate
-		thdsDelay = 4000
-	default:
-		thdsDelay = 1000
-	}
+	thdsDelay = 4000
 }
 
 func testV1FIdxCadxInitDataDb(t *testing.T) {
@@ -134,6 +130,7 @@ func testV1FIdxCaRpcConn(t *testing.T) {
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
+	time.Sleep(5 * time.Second)
 }
 
 func testV1FIdxCaFromFolder(t *testing.T) {
