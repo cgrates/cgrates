@@ -242,7 +242,7 @@ func (b *EnvReader) replaceEnv(buf []byte, startEnv, midEnv int) (n int, err err
 		for j := startEnv + i + 1; j <= midEnv && j < len(buf); j++ { //replace *env: if value < len("*env:")
 			buf[j] = ' '
 		}
-		return startEnv + i + 1, nil
+		return startEnv + i, nil //return position of \"
 	}
 
 	if i <= len(value) { // add the remaining in the extra buffer

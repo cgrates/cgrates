@@ -166,9 +166,38 @@ func TestEnvReaderRead(t *testing.T) {
 		buf = make([]byte, 20)
 	}
 	rply = append(rply, buf[:n]...)
+	for i, bit := range rply {
+		if bit == 0 {
+			t.Errorf("Recivied a zero bit on position %+v\n", i)
+		}
+	}
 
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expected: %+v\n, recived: %+v", (string(expected)), (string(rply)))
+	}
+}
+
+func TestEnvReaderRead2(t *testing.T) {
+	os.Setenv("TESTVARNoZero", "cgr1")
+	envR := NewRawJSONReader(strings.NewReader(`{"origin_host": "*env:TESTVARNoZero",
+        "origin_realm": "*env:TESTVARNoZero",}`))
+	expected := []byte(`{"origin_host":"cgr1","origin_realm":"cgr1"}`)
+	rply := []byte{}
+	buf := make([]byte, 20)
+	n, err := envR.Read(buf)
+	for ; err == nil && n > 0; n, err = envR.Read(buf) {
+		rply = append(rply, buf[:n]...)
+		buf = make([]byte, 20)
+	}
+	rply = append(rply, buf[:n]...)
+	for i, bit := range rply {
+		if bit == 0 {
+			t.Errorf("Recivied a zero bit on position %+v\n", i)
+		}
+	}
+
+	if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expected: %+q\n, recived: %+q", (string(expected)), (string(rply)))
 	}
 }
 
@@ -197,7 +226,7 @@ func TestEnvReaderreplaceEnv(t *testing.T) {
 	os.Setenv("Test_VAR2", "aVeryLongEnviormentalVariable")
 	envR := EnvReader{rd: &rawJSON{rdr: bufio.NewReader(strings.NewReader(`Test_VAR1,/*comment*/ }Test_VAR2"`))}}
 	expected := []byte("5}   ")
-	expectedn := 2
+	expectedn := 1
 	rply := make([]byte, 5)
 	if n, err := envR.replaceEnv(rply, 0, 5); err != nil {
 		t.Error(err)
