@@ -86,7 +86,7 @@ func (da *DiameterAgent) handlers() diam.Handler {
 	dSM.HandleFunc("ALL", da.handleMessage) // route all commands to one dispatcher
 	go func() {
 		for err := range dSM.ErrorReports() {
-			utils.Logger.Err(fmt.Sprintf("<%s> sm error: %+v", utils.DiameterAgent, err))
+			utils.Logger.Err(fmt.Sprintf("<%s> sm error: %v", utils.DiameterAgent, err))
 		}
 	}()
 	return dSM
