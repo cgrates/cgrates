@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	// "fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -93,7 +94,6 @@ var sTestsFilterIndexesSV1 = []func(t *testing.T){
 // Test start here
 func TestFIdxV1ITMySQL(t *testing.T) {
 	tSv1ConfDIR = "tutmysql"
-	time.Sleep(time.Duration(2 * time.Second)) // give time for engine to start
 	for _, stest := range sTestsFilterIndexesSV1 {
 		t.Run(tSv1ConfDIR, stest)
 	}
@@ -101,7 +101,6 @@ func TestFIdxV1ITMySQL(t *testing.T) {
 
 func TestFIdxV1ITMongo(t *testing.T) {
 	tSv1ConfDIR = "tutmongo"
-	time.Sleep(time.Duration(2 * time.Second)) // give time for engine to start
 	for _, stest := range sTestsFilterIndexesSV1 {
 		t.Run(tSv1ConfDIR, stest)
 	}
@@ -113,8 +112,12 @@ func testV1FIdxLoadConfig(t *testing.T) {
 	if tSv1Cfg, err = config.NewCGRConfigFromFolder(tSv1CfgPath); err != nil {
 		t.Error(err)
 	}
-	thdsDelay = 4000
-
+	switch tSv1ConfDIR {
+	case "tutmongo": // Mongo needs more time to reset db, need to investigate
+		thdsDelay = 4000
+	default:
+		thdsDelay = 1000
+	}
 }
 
 func testV1FIdxdxInitDataDb(t *testing.T) {
@@ -142,7 +145,6 @@ func testV1FIdxRpcConn(t *testing.T) {
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
-	time.Sleep(5 * time.Second)
 }
 
 //ThresholdProfile
@@ -1606,7 +1608,7 @@ func testV1FIdxGetFilterIndexes4(t *testing.T) {
 }
 
 func testV1FIdxStopEngine(t *testing.T) {
-	if err := engine.KillEngine(thdsDelay); err != nil {
+	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
 }
