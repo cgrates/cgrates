@@ -132,7 +132,6 @@ func testV1FIdxCaRpcConn(t *testing.T) {
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
-	time.Sleep(5 * time.Second)
 }
 
 func testV1FIdxCaFromFolder(t *testing.T) {
