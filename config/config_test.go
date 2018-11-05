@@ -925,6 +925,7 @@ func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
 	testDA := &DiameterAgentCfg{
 		Enabled:          false,
 		Listen:           "127.0.0.1:3868",
+		Network:          "tcp",
 		DictionariesPath: "/usr/share/cgrates/diameter/dict/",
 		SessionSConns: []*HaPoolConfig{
 			{Address: "*internal"}},
