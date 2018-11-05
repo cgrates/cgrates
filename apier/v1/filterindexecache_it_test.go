@@ -36,8 +36,7 @@ var tFIdxCaRpc *rpc.Client
 
 var sTestsFilterIndexesSV1Ca = []func(t *testing.T){
 	testV1FIdxCaLoadConfig,
-	testV1FIdxdxInitDataDb,
-	testV1FIdxCadxInitDataDb,
+	testV1FIdxCaInitDataDb,
 	testV1FIdxCaResetStorDb,
 	testV1FIdxCaStartEngine,
 	testV1FIdxCaRpcConn,
@@ -50,7 +49,7 @@ var sTestsFilterIndexesSV1Ca = []func(t *testing.T){
 	testV1FIdxCaUpdateThresholdProfileFromTP,
 	testV1FIdxCaRemoveThresholdProfile,
 
-	testV1FIdxdxInitDataDb,
+	testV1FIdxCaInitDataDb,
 	testV1FIdxCaGetStatQueuesWithNotFound,
 	testV1FIdxCaSetStatQueueProfile,
 	testV1FIdxCaFromFolder,
@@ -59,7 +58,7 @@ var sTestsFilterIndexesSV1Ca = []func(t *testing.T){
 	testV1FIdxCaUpdateStatQueueProfileFromTP,
 	testV1FIdxCaRemoveStatQueueProfile,
 
-	testV1FIdxdxInitDataDb,
+	testV1FIdxCaInitDataDb,
 	testV1FIdxCaProcessAttributeProfileEventWithNotFound,
 	testV1FIdxCaSetAttributeProfile,
 	testV1FIdxCaFromFolder,
@@ -68,7 +67,7 @@ var sTestsFilterIndexesSV1Ca = []func(t *testing.T){
 	testV1FIdxCaUpdateAttributeProfileFromTP,
 	testV1FIdxCaRemoveAttributeProfile,
 
-	testV1FIdxdxInitDataDb,
+	testV1FIdxCaInitDataDb,
 	testV1FIdxCaGetResourceProfileWithNotFound,
 	testV1FIdxCaSetResourceProfile,
 	testV1FIdxCaFromFolder,
@@ -82,7 +81,6 @@ var sTestsFilterIndexesSV1Ca = []func(t *testing.T){
 // Test start here
 func TestFIdxCaV1ITMySQL(t *testing.T) {
 	tSv1ConfDIR = "tutmysql"
-	time.Sleep(time.Duration(2 * time.Second)) // give time for engine to start
 	for _, stest := range sTestsFilterIndexesSV1Ca {
 		t.Run(tSv1ConfDIR, stest)
 	}
@@ -90,7 +88,6 @@ func TestFIdxCaV1ITMySQL(t *testing.T) {
 
 func TestFIdxCaV1ITMongo(t *testing.T) {
 	tSv1ConfDIR = "tutmongo"
-	time.Sleep(time.Duration(2 * time.Second)) // give time for engine to start
 	for _, stest := range sTestsFilterIndexesSV1Ca {
 		t.Run(tSv1ConfDIR, stest)
 	}
@@ -102,10 +99,15 @@ func testV1FIdxCaLoadConfig(t *testing.T) {
 	if tSv1Cfg, err = config.NewCGRConfigFromFolder(tSv1CfgPath); err != nil {
 		t.Error(err)
 	}
-	thdsDelay = 4000
+	switch tSv1ConfDIR {
+	case "tutmongo": // Mongo needs more time to reset db, need to investigate
+		thdsDelay = 4000
+	default:
+		thdsDelay = 1000
+	}
 }
 
-func testV1FIdxCadxInitDataDb(t *testing.T) {
+func testV1FIdxCaInitDataDb(t *testing.T) {
 	if err := engine.InitDataDb(tSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
@@ -1445,7 +1447,7 @@ func testV1FIdxCaRemoveResourceProfile(t *testing.T) {
 }
 
 func testV1FIdxCaStopEngine(t *testing.T) {
-	if err := engine.KillEngine(thdsDelay); err != nil {
+	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
 }
