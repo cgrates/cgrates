@@ -29,13 +29,15 @@ import (
 	"github.com/fiorix/go-diameter/diam/sm"
 )
 
-func NewDiameterClient(addr, originHost, originRealm string, vendorId int, productName string, firmwareRev int, dictsDir string) (*DiameterClient, error) {
+func NewDiameterClient(addr, originHost, originRealm string, vendorId int, productName string,
+	firmwareRev int, dictsDir string, network string) (*DiameterClient, error) {
 	cfg := &sm.Settings{
 		OriginHost:       datatype.DiameterIdentity(originHost),
 		OriginRealm:      datatype.DiameterIdentity(originRealm),
 		VendorID:         datatype.Unsigned32(vendorId),
 		ProductName:      datatype.UTF8String(productName),
 		FirmwareRevision: datatype.Unsigned32(firmwareRev),
+		HostIPAddresses:  []datatype.Address{datatype.Address(addr)},
 	}
 	dSM := sm.New(cfg)
 	go func() {
@@ -59,7 +61,7 @@ func NewDiameterClient(addr, originHost, originRealm string, vendorId int, produ
 			return nil, err
 		}
 	}
-	conn, err := cli.Dial(addr)
+	conn, err := cli.DialNetwork(network, addr)
 	if err != nil {
 		return nil, err
 	}

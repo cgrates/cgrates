@@ -82,9 +82,9 @@ func TestDiamItStartEngine(t *testing.T) {
 
 func TestDiamItConnectDiameterClient(t *testing.T) {
 	diamClnt, err = NewDiameterClient(daCfg.DiameterAgentCfg().Listen, "INTEGRATION_TESTS",
-		daCfg.DiameterAgentCfg().OriginRealm,
-		daCfg.DiameterAgentCfg().VendorId, daCfg.DiameterAgentCfg().ProductName,
-		utils.DIAMETER_FIRMWARE_REVISION, daCfg.DiameterAgentCfg().DictionariesPath)
+		daCfg.DiameterAgentCfg().OriginRealm, daCfg.DiameterAgentCfg().VendorId,
+		daCfg.DiameterAgentCfg().ProductName, utils.DIAMETER_FIRMWARE_REVISION,
+		daCfg.DiameterAgentCfg().DictionariesPath, daCfg.DiameterAgentCfg().Network)
 	if err != nil {
 		t.Fatal(err)
 	}
