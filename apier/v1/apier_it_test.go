@@ -759,11 +759,19 @@ func TestApierSetRatingProfile(t *testing.T) {
 	} else if cc.Cost != 0 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
-	expectedStats = &utils.CacheStats{ReverseDestinations: 10, RatingPlans: 1, RatingProfiles: 1, Actions: 1, ActionPlans: 1, AccountActionPlans: 1}
+	expectedStats = &utils.CacheStats{
+		ReverseDestinations: 10,
+		RatingPlans:         1,
+		RatingProfiles:      1,
+		Actions:             1,
+		ActionPlans:         1,
+		AccountActionPlans:  1,
+		Aliases:             6,
+	}
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
-		t.Errorf("Calling ApierV1.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)
+		t.Errorf("Calling ApierV1.GetCacheStats expected: %+v, received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))
 	}
 }
 
@@ -819,11 +827,19 @@ func TestApierReloadCache(t *testing.T) {
 	}
 	var rcvStats *utils.CacheStats
 	var args utils.AttrCacheStats
-	expectedStats := &utils.CacheStats{ReverseDestinations: 10, RatingPlans: 1, RatingProfiles: 1, Actions: 1, ActionPlans: 1, AccountActionPlans: 1}
+	expectedStats := &utils.CacheStats{
+		ReverseDestinations: 10,
+		RatingPlans:         1,
+		RatingProfiles:      1, // when it fails here is 2 is needed to investigate more
+		Actions:             1,
+		ActionPlans:         1,
+		AccountActionPlans:  1,
+		Aliases:             6,
+	}
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
-		t.Errorf("Calling ApierV1.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)
+		t.Errorf("Calling ApierV1.GetCacheStats expected: %+v, received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))
 	}
 }
 
@@ -1292,7 +1308,7 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 	if err := rater.Call("ApierV1.GetCacheStats", utils.AttrCacheStats{}, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expStats, rcvStats) {
-		t.Errorf("Expecting: %+v, received: %+v", expStats, rcvStats)
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expStats), utils.ToJSON(rcvStats))
 	}
 	reply := ""
 	// Simple test that command is executed without errors
