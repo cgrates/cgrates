@@ -257,21 +257,22 @@ func TestTpExecuteActionCgrRpcAcc(t *testing.T) {
 	}
 }
 
-func TestTpExecuteActionCgrRpcCdrStats(t *testing.T) {
-	var reply string
-	if err := tpRPC.Call("ApierV2.ExecuteAction", utils.AttrExecuteAction{
-		ActionsId: "RPC_CDRSTATS",
-	}, &reply); err != nil {
-		t.Error("Got error on ApierV2.ExecuteAction: ", err.Error())
-	} else if reply != utils.OK {
-		t.Errorf("Calling ExecuteAction got reply: %s", reply)
-	}
-	var queue engine.CDRStatsQueue
-	time.Sleep(20 * time.Millisecond)
-	if err := tpRPC.Call("CDRStatsV1.GetQueue", "qtest", &queue); err != nil {
-		t.Error("Got error on CDRStatsV1.GetQueue: ", err.Error())
-	}
-}
+// Deprecated
+// func TestTpExecuteActionCgrRpcCdrStats(t *testing.T) {
+// 	var reply string
+// 	if err := tpRPC.Call("ApierV2.ExecuteAction", utils.AttrExecuteAction{
+// 		ActionsId: "RPC_CDRSTATS",
+// 	}, &reply); err != nil {
+// 		t.Error("Got error on ApierV2.ExecuteAction: ", err.Error())
+// 	} else if reply != utils.OK {
+// 		t.Errorf("Calling ExecuteAction got reply: %s", reply)
+// 	}
+// 	var queue engine.CDRStatsQueue
+// 	time.Sleep(20 * time.Millisecond)
+// 	if err := tpRPC.Call("CDRStatsV1.GetQueue", "qtest", &queue); err != nil {
+// 		t.Error("Got error on CDRStatsV1.GetQueue: ", err.Error())
+// 	}
+// }
 
 func TestTpCreateExecuteActionMatch(t *testing.T) {
 	var reply string

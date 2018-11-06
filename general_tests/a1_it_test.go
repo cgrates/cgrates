@@ -218,8 +218,8 @@ func TestA1itDataSession1(t *testing.T) {
 			t.Error(err)
 		}
 		cc = *ec.AsCallCost()
-		if len(cc.Timespans) != 3 {
-			t.Errorf("Unexpected number of timespans: %+v", len(cc.Timespans))
+		if len(cc.Timespans) != 1 {
+			t.Errorf("Unexpected number of timespans: %+v, for %+v\n from:%+v", len(cc.Timespans), utils.ToJSON(cc.Timespans), utils.ToJSON(ec))
 		}
 		if cc.RatedUsage != 2202800 {
 			t.Errorf("RatingUsage expected: %f received %f, callcost: %+v ", 2202800.0, cc.RatedUsage, cc)

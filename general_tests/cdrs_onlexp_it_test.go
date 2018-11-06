@@ -276,7 +276,7 @@ func TestCDRsOnExpAMQPPosterFileFailover(t *testing.T) {
 	if readBytes, err := ioutil.ReadFile(filePath); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(failoverContent, readBytes) { // Checking just the prefix should do since some content is dynamic
-		t.Errorf("Expecting: %q, received: %q", string(failoverContent), string(readBytes))
+		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(failoverContent), utils.ToJSON(readBytes))
 	}
 	if err := os.Remove(filePath); err != nil {
 		t.Error("Failed removing file: ", filePath)

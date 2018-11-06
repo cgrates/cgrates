@@ -81,9 +81,9 @@ func testCDREInitCfg(t *testing.T) {
 	config.SetCgrConfig(cdreCfg)
 	switch cdreConfigDIR {
 	case "tutmongo":
-		cdreDelay = 4000
-	default:
 		cdreDelay = 2000
+	default:
+		cdreDelay = 1000
 	}
 }
 
@@ -146,7 +146,7 @@ func testCDREProcessCdr(t *testing.T) {
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}
 	cdr.ComputeCGRID()
 	var reply string
-	if err := cdreRPC.Call("CdrsV1.ProcessCdr", cdr, &reply); err != nil {
+	if err := cdreRPC.Call(utils.CdrsV2ProcessCDR, cdr, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
