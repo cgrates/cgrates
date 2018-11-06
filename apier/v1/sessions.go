@@ -47,6 +47,7 @@ func (ssv1 *SessionSv1) Handlers() map[string]interface{} {
 		utils.SessionSv1GetActiveSessions:          ssv1.BiRPCV1GetActiveSessions,
 		utils.SessionSv1GetPassiveSessions:         ssv1.BiRPCV1GetPassiveSessions,
 		utils.SessionSv1RegisterInternalBiJSONConn: ssv1.BiRPCv1RegisterInternalBiJSONConn,
+		utils.SessionSv1Ping:                       ssv1.BiRPCPing,
 	}
 }
 
@@ -149,6 +150,10 @@ func (ssv1 *SessionSv1) BiRPCV1GetPassiveSessions(clnt *rpc2.Client, args map[st
 func (ssv1 *SessionSv1) BiRPCv1RegisterInternalBiJSONConn(clnt *rpc2.Client, args string,
 	rply *string) error {
 	return ssv1.SMG.BiRPCv1RegisterInternalBiJSONConn(clnt, args, rply)
+}
+
+func (ssv1 *SessionSv1) BiRPCPing(clnt *rpc2.Client, ign string, reply *string) error {
+	return ssv1.Ping(ign, reply)
 }
 
 func (ssv1 *SessionSv1) Ping(ign string, reply *string) error {
