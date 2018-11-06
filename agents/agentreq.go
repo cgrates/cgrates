@@ -121,14 +121,29 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 		}
 		var valSet []*config.NMItem
 		fldPath := strings.Split(tplFld.FieldId, utils.NestingSep)
+		nMItm := &config.NMItem{Data: out, Path: fldPath, Config: tplFld}
 		if nMFields, err := nM.FieldAsInterface(fldPath); err != nil {
 			if err != utils.ErrNotFound {
 				return nil, err
 			}
 		} else {
 			valSet = nMFields.([]*config.NMItem) // start from previous stored fields
+			if tplFld.Type == utils.META_COMPOSED {
+				prevNMItem := valSet[len(valSet)-1]
+				prevDataStr, err := utils.IfaceAsString(prevNMItem.Data)
+				if err != nil {
+					return nil, err
+				}
+				outStr, err := utils.IfaceAsString(out)
+				if err != nil {
+					return nil, err
+				}
+				*nMItm = *prevNMItem // inherit the particularities, ie AttributeName
+				nMItm.Data = prevDataStr + outStr
+				valSet = valSet[:len(valSet)-1] // discard the last item
+			}
 		}
-		valSet = append(valSet, &config.NMItem{Data: out, Path: fldPath, Config: tplFld})
+		valSet = append(valSet, nMItm)
 		nM.Set(fldPath, valSet, true)
 		if tplFld.Blocker { // useful in case of processing errors first
 			break

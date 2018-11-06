@@ -21,9 +21,9 @@
 				"reply_fields":[
 					{"tag": "Allow", "field_id": "response.Allow", "type": "*constant", 
 						"value": "1", "mandatory": true},
-					{"tag": "Concatenated1", "field_id": "Concatenated", "type": "*composed",
+					{"tag": "Concatenated1", "field_id": "response.Concatenated", "type": "*composed",
                     	"value": "~*req.MCC;/", "mandatory": true},
-                    {"tag": "Concatenated2", "field_id": "Concatenated", "type": "*composed",
+                    {"tag": "Concatenated2", "field_id": "response.Concatenated", "type": "*composed",
                     	"value": "Val1"},
 					{"tag": "MaxDuration", "field_id": "response.MaxDuration", "type": "*constant", 
 						"value": "1200", "blocker": true},
