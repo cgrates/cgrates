@@ -1,0 +1,29 @@
+{
+
+"diameter_agent": {
+	"request_processors": [
+
+		{
+			"id": "dryrun1",
+			"filters": ["*string:*vars.*cmd:CCR", "*string:*req.Service-Context-Id:TestDiamItDryRun"],
+			"flags": ["*dryrun"],
+			"request_fields":[
+				{"tag": "TOR", "field_id": "ToR", "type": "*constant", "value": "*sms"},
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 
+					"value": "~*req.Session-Id", "mandatory": true},
+				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", "value": "*prepaid"},
+				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~*req.Event-Timestamp", "mandatory": true},
+			],
+			"reply_fields":[
+				{"tag": "CCATemplate", "type": "*template", "value": "*cca"},
+				{"tag": "ResultCode", "field_id": "Result-Code", "type": "*constant", "value": "2002"},
+				{"tag": "RatingGroup",  "field_id": "Multiple-Services-Credit-Control.Rating-Group",
+					"type": "*constant", "value": "65000","new_branch": true},
+         		{"tag": "RatingGroup",  "field_id": "Multiple-Services-Credit-Control.Rating-Group",
+         			"type": "*constant", "value": "100","new_branch": true}, 
+			],
+		},
+	],
+},
+
+}

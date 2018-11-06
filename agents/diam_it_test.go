@@ -39,15 +39,46 @@ var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path h
 var interations = flag.Int("iterations", 1, "Number of iterations to do for dry run simulation")
 var replyTimeout = flag.String("reply_timeout", "1s", "Maximum duration to wait for a reply")
 
-var daCfgPath string
+var daCfgPath, diamConfigDIR string
 var daCfg *config.CGRConfig
 var apierRpc *rpc.Client
 var diamClnt *DiameterClient
 
 var rplyTimeout time.Duration
 
-func TestDiamItInitCfg(t *testing.T) {
-	daCfgPath = path.Join(*dataDir, "conf", "samples", "diamagent")
+var sTestsDiam = []func(t *testing.T){
+	testDiamItInitCfg,
+	testDiamItResetDataDb,
+	testDiamItResetStorDb,
+	testDiamItStartEngine,
+	testDiamItConnectDiameterClient,
+	testDiamItApierRpcConn,
+	testDiamItTPFromFolder,
+	testDiamItDryRun,
+	testDiamItCCRInit,
+	testDiamItCCRUpdate,
+	testDiamItCCRTerminate,
+	testDiamItCCRSMS,
+	testDiamItKillEngine,
+}
+
+//Test start here
+func TestDiamItTcp(t *testing.T) {
+	diamConfigDIR = "diamagent"
+	for _, stest := range sTestsDiam {
+		t.Run(diamConfigDIR, stest)
+	}
+}
+
+func TestDiamItSctp(t *testing.T) {
+	diamConfigDIR = "diamsctpagent"
+	for _, stest := range sTestsDiam {
+		t.Run(diamConfigDIR, stest)
+	}
+}
+
+func testDiamItInitCfg(t *testing.T) {
+	daCfgPath = path.Join(*dataDir, "conf", "samples", diamConfigDIR)
 	// Init config first
 	var err error
 	daCfg, err = config.NewCGRConfigFromFolder(daCfgPath)
@@ -60,38 +91,41 @@ func TestDiamItInitCfg(t *testing.T) {
 }
 
 // Remove data in both rating and accounting db
-func TestDiamItResetDataDb(t *testing.T) {
+func testDiamItResetDataDb(t *testing.T) {
 	if err := engine.InitDataDb(daCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
-func TestDiamItResetStorDb(t *testing.T) {
+func testDiamItResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(daCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Start CGR Engine
-func TestDiamItStartEngine(t *testing.T) {
+func testDiamItStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(daCfgPath, 4000); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestDiamItConnectDiameterClient(t *testing.T) {
+func testDiamItConnectDiameterClient(t *testing.T) {
+	if diamConfigDIR == "diamsctpagent" {
+		daCfg.DiameterAgentCfg().DictionariesPath = ""
+	}
 	diamClnt, err = NewDiameterClient(daCfg.DiameterAgentCfg().Listen, "INTEGRATION_TESTS",
 		daCfg.DiameterAgentCfg().OriginRealm, daCfg.DiameterAgentCfg().VendorId,
 		daCfg.DiameterAgentCfg().ProductName, utils.DIAMETER_FIRMWARE_REVISION,
-		daCfg.DiameterAgentCfg().DictionariesPath, daCfg.DiameterAgentCfg().Network)
+		daCfg.DiameterAgentCfg().DictionariesPath, daCfg.DiameterAgentCfg().ListenNet)
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func TestDiamItApierRpcConn(t *testing.T) {
+func testDiamItApierRpcConn(t *testing.T) {
 	var err error
 	apierRpc, err = jsonrpc.Dial("tcp", daCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -100,7 +134,7 @@ func TestDiamItApierRpcConn(t *testing.T) {
 }
 
 // Load the tariff plan, creating accounts and their balances
-func TestDiamItTPFromFolder(t *testing.T) {
+func testDiamItTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	var loadInst utils.LoadInstance
 	if err := apierRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
@@ -109,7 +143,7 @@ func TestDiamItTPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(1000) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-func TestDiamItDryRun(t *testing.T) {
+func testDiamItDryRun(t *testing.T) {
 	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
 	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("cgrates;1451911932;00082"))
 	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
@@ -257,7 +291,7 @@ func TestDiamItDryRun(t *testing.T) {
 	}
 }
 
-func TestDiamItCCRInit(t *testing.T) {
+func testDiamItCCRInit(t *testing.T) {
 	m := diam.NewRequest(diam.CreditControl, 4, nil)
 	m.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("bb97be2b9f37c2be9614fff71c8b1d08b1acbff8"))
 	m.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("192.168.1.1"))
@@ -332,7 +366,7 @@ func TestDiamItCCRInit(t *testing.T) {
 	}
 }
 
-func TestDiamItCCRUpdate(t *testing.T) {
+func testDiamItCCRUpdate(t *testing.T) {
 	m := diam.NewRequest(diam.CreditControl, 4, nil)
 	m.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("bb97be2b9f37c2be9614fff71c8b1d08b1acbff8"))
 	m.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("192.168.1.1"))
@@ -407,7 +441,7 @@ func TestDiamItCCRUpdate(t *testing.T) {
 	}
 }
 
-func TestDiamItCCRTerminate(t *testing.T) {
+func testDiamItCCRTerminate(t *testing.T) {
 	m := diam.NewRequest(diam.CreditControl, 4, nil)
 	m.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("bb97be2b9f37c2be9614fff71c8b1d08b1acbff8"))
 	m.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("192.168.1.1"))
@@ -482,7 +516,7 @@ func TestDiamItCCRTerminate(t *testing.T) {
 	}
 }
 
-func TestDiamItCCRSMS(t *testing.T) {
+func testDiamItCCRSMS(t *testing.T) {
 	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
 	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("TestDmtAgentSendCCRSMS"))
 	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
@@ -547,5 +581,11 @@ func TestDiamItCCRSMS(t *testing.T) {
 		if cdrs[0].Usage != 1 {
 			t.Errorf("Unexpected Usage CDR: %+v", cdrs[0])
 		}
+	}
+}
+
+func testDiamItKillEngine(t *testing.T) {
+	if err := engine.KillEngine(4000); err != nil {
+		t.Error(err)
 	}
 }

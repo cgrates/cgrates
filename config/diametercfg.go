@@ -24,7 +24,7 @@ import (
 
 type DiameterAgentCfg struct {
 	Enabled           bool   // enables the diameter agent: <true|false>
-	Network           string // network for diameter <tcp|sctp>
+	ListenNet         string // sctp or tcp
 	Listen            string // address where to listen for diameter requests <x.y.z.y:1234>
 	DictionariesPath  string
 	SessionSConns     []*HaPoolConfig // connections towards SMG component
@@ -46,8 +46,8 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) (err e
 	if jsnCfg.Listen != nil {
 		da.Listen = *jsnCfg.Listen
 	}
-	if jsnCfg.Network != nil {
-		da.Network = *jsnCfg.Network
+	if jsnCfg.Listen_net != nil {
+		da.ListenNet = *jsnCfg.Listen_net
 	}
 	if jsnCfg.Dictionaries_path != nil {
 		da.DictionariesPath = *jsnCfg.Dictionaries_path

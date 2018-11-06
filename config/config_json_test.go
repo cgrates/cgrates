@@ -593,7 +593,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 	eCfg := &DiameterAgentJsonCfg{
 		Enabled:           utils.BoolPointer(false),
 		Listen:            utils.StringPointer("127.0.0.1:3868"),
-		Network:           utils.StringPointer("tcp"),
+		Listen_net:        utils.StringPointer("tcp"),
 		Dictionaries_path: utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
 		Sessions_conns: &[]*HaPoolJsonCfg{
 			{
