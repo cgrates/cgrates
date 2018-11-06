@@ -167,6 +167,7 @@ func testHAitAuthDryRun(t *testing.T) {
 	eXml := []byte(`<?xml version="1.0" encoding="UTF-8"?>
 <response>
   <Allow>1</Allow>
+  <Concatenated>234/Val1</Concatenated>
   <MaxDuration>1200</MaxDuration>
 </response>`)
 	if body, err := ioutil.ReadAll(rply.Body); err != nil {
