@@ -372,7 +372,7 @@ const CGRATES_CFG_JSON = `
 "diameter_agent": {
 	"enabled": false,											// enables the diameter agent: <true|false>
 	"listen": "127.0.0.1:3868",									// address where to listen for diameter requests <x.y.z.y:1234>
-	"network": "tcp",											// network type for diameter <tcp|sctp>
+	"listen_net": "tcp",										// transport type for diameter <tcp|sctp>
 	"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
 	"sessions_conns": [
 		{"address": "*internal"}								// connection towards SessionService
