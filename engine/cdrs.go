@@ -202,7 +202,7 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 	}
 	if self.thdS != nil {
 		// process CDR with thresholdS
-		self.thdSProcessEvent(cdr.AsCGREvent())
+		go self.thdSProcessEvent(cdr.AsCGREvent())
 	}
 	// Attach raw CDR to stats
 	if self.cdrstats != nil { // Send raw CDR to stats
