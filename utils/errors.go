@@ -61,6 +61,7 @@ var (
 	ErrJsonIncompleteComment = errors.New("JSON_INCOMPLETE_COMMENT")
 	ErrCDRCNoProfileID       = errors.New("CDRC_PROFILE_WITHOUT_ID")
 	ErrCDRCNoInDir           = errors.New("CDRC_PROFILE_WITHOUT_IN_DIR")
+	ErrNotEnoughParameters   = errors.New("NotEnoughParameters")
 )
 
 // NewCGRError initialises a new CGRError

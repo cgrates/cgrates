@@ -420,7 +420,7 @@ func TestIfaceAsBool(t *testing.T) {
 }
 
 func TestSum(t *testing.T) {
-	if _, err := Sum(1); err == nil || err.Error() != "Not enought parameters" {
+	if _, err := Sum(1); err == nil || err != ErrNotEnoughParameters {
 		t.Error(err)
 	}
 	if _, err := Sum(1, 1.2, false); err == nil || err.Error() != "incomparable" {
