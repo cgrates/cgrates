@@ -1300,6 +1300,18 @@ func TestApierComputeReverse(t *testing.T) {
 	}
 }
 
+// Make sure balance was topped-up
+// Bug reported by DigiDaz over IRC
+func TestApierGetAccountAfterLoad(t *testing.T) {
+	var reply *engine.Account
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
+	if err := rater.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
+	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 11 {
+		t.Errorf("Calling ApierV1.GetBalance expected: 11, received: %v", reply.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+}
+
 func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 	expStats := &utils.CacheStats{
 		Destinations:       3,
@@ -1341,18 +1353,6 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 			rcvStats.Resources != 3 {
 			t.Errorf("Expecting: %+v, received: %+v", expStats, rcvStats)
 		}
-	}
-}
-
-// Make sure balance was topped-up
-// Bug reported by DigiDaz over IRC
-func TestApierGetAccountAfterLoad(t *testing.T) {
-	var reply *engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := rater.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 11 {
-		t.Errorf("Calling ApierV1.GetBalance expected: 11, received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 }
 
