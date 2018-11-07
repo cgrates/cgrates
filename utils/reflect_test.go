@@ -419,43 +419,6 @@ func TestIfaceAsBool(t *testing.T) {
 	}
 }
 
-func TestSum(t *testing.T) {
-	if _, err := Sum(1, 1.2); err == nil || err.Error() != "incomparable" {
-		t.Error(err)
-	}
-	if _, err := Sum(struct{}{},
-		map[string]interface{}{"a": "a"}); err == nil || err.Error() != "incomparable" {
-		t.Error(err)
-	}
-	if sum, err := Sum(1.2, 1.2); err != nil {
-		t.Error(err)
-	} else if sum != 2.4 {
-		t.Errorf("Expecting: 2.4, received: %+v", sum)
-	}
-	if sum, err := Sum(2, 4); err != nil {
-		t.Error(err)
-	} else if sum != int64(6) {
-		t.Errorf("Expecting: 6, received: %+v", sum)
-	}
-	if sum, err := Sum(0.5, 1.23); err != nil {
-		t.Error(err)
-	} else if sum != 1.73 {
-		t.Errorf("Expecting: 1.73, received: %+v", sum)
-	}
-	if sum, err := Sum(time.Duration(2*time.Second),
-		time.Duration(1*time.Second)); err != nil {
-		t.Error(err)
-	} else if sum != time.Duration(3*time.Second) {
-		t.Errorf("Expecting: 3s, received: %+v", sum)
-	}
-	if sum, err := Sum(time.Duration(2*time.Second),
-		time.Duration(10*time.Millisecond)); err != nil {
-		t.Error(err)
-	} else if sum != time.Duration(2*time.Second+10*time.Millisecond) {
-		t.Errorf("Expecting: 2s10ms, received: %+v", sum)
-	}
-}
-
 func TestMultipleSum(t *testing.T) {
 	if _, err := MultipleSum(1); err == nil || err.Error() != "Not enought parameters" {
 		t.Error(err)
