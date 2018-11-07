@@ -325,7 +325,7 @@ func GreaterThan(item, oItem interface{}, orEqual bool) (gte bool, err error) {
 func Sum(items ...interface{}) (sum interface{}, err error) {
 	//we need at least 2 items to sum them
 	if len(items) < 2 {
-		return nil, errors.New("Not enought parameters")
+		return nil, fmt.Errorf("Not enough parameters : %s", len(items))
 	}
 
 	// convert the type for first item

@@ -98,6 +98,7 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 // FieldAsString implements engine.DataProvider
 func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) {
 	var iface interface{}
+
 	if iface, err = ar.FieldAsInterface(fldPath); err != nil {
 		return
 	}
@@ -237,7 +238,7 @@ func (aReq *AgentRequest) ParseField(
 			}
 			iFaceVals[i] = utils.StringToInterface(strVal)
 		}
-		out, err = utils.Sum(iFaceVals)
+		out, err = utils.Sum(iFaceVals...)
 	}
 	if err != nil {
 		return
