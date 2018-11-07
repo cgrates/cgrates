@@ -112,12 +112,7 @@ func testV1FIdxLoadConfig(t *testing.T) {
 	if tSv1Cfg, err = config.NewCGRConfigFromFolder(tSv1CfgPath); err != nil {
 		t.Error(err)
 	}
-	switch tSv1ConfDIR {
-	case "tutmongo": // Mongo needs more time to reset db, need to investigate
-		thdsDelay = 4000
-	default:
-		thdsDelay = 1000
-	}
+	thdsDelay = 1000
 }
 
 func testV1FIdxdxInitDataDb(t *testing.T) {

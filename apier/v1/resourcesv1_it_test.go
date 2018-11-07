@@ -87,12 +87,8 @@ func testV1RsLoadConfig(t *testing.T) {
 	if rlsV1Cfg, err = config.NewCGRConfigFromFolder(rlsV1CfgPath); err != nil {
 		t.Error(err)
 	}
-	switch rlsV1ConfDIR {
-	case "tutmongo": // Mongo needs more time to reset db, need to investigate
-		resDelay = 4000
-	default:
-		resDelay = 2000
-	}
+	resDelay = 1000
+
 }
 
 func testV1RsInitDataDb(t *testing.T) {
@@ -128,7 +124,7 @@ func testV1RsFromFolder(t *testing.T) {
 	if err := rlsV1Rpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(1000) * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 
 }
 
@@ -144,12 +140,10 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(500) * time.Millisecond)
 	args.CGREvent.Event = map[string]interface{}{"Destination": "10", "Account": "1001"}
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(500) * time.Millisecond)
 	if reply == nil {
 		t.Errorf("Expecting reply to not be nil")
 		// reply shoud not be nil so exit function
@@ -173,7 +167,6 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(500) * time.Millisecond)
 	if len(*reply) != 1 {
 		t.Errorf("Expecting: %+v, received: %+v", 2, len(*reply))
 	}
@@ -182,7 +175,6 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 	if err := rlsV1Rpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(500) * time.Millisecond)
 	if len(*reply) != 1 {
 		t.Errorf("Expecting: %+v, received: %+v", 1, len(*reply))
 	}
@@ -374,7 +366,7 @@ func testV1RsAllocateResource(t *testing.T) {
 		t.Error(err)
 	}
 	eAllocationMsg = "ResGroup1"
-	time.Sleep(time.Duration(1000) * time.Millisecond) // Give time for allocations on first resource to expire
+	time.Sleep(time.Second) // Give time for allocations on first resource to expire
 
 	argsRU = utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e55", // same ID should be accepted by first group since the previous resource should be expired
@@ -560,7 +552,6 @@ func testV1RsDBStore(t *testing.T) {
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
-	time.Sleep(100 * time.Millisecond)
 	rs = new(engine.Resources)
 	args = &utils.ArgRSv1ResourceUsage{
 		CGREvent: utils.CGREvent{
@@ -589,7 +580,6 @@ func testV1RsDBStore(t *testing.T) {
 			}
 		}
 	}
-	time.Sleep(time.Duration(1) * time.Second)
 }
 
 func testV1RsGetResourceProfileBeforeSet(t *testing.T) {

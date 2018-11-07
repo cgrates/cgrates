@@ -132,12 +132,12 @@ func testTPAccPlansSetTPAccPlan(t *testing.T) {
 		TPid: "TPAcc",
 		ID:   "ID",
 		ActionPlan: []*utils.TPActionTiming{
-			&utils.TPActionTiming{
+			{
 				ActionsId: "AccId",
 				TimingId:  "TimingID",
 				Weight:    10,
 			},
-			&utils.TPActionTiming{
+			{
 				ActionsId: "AccId2",
 				TimingId:  "TimingID2",
 				Weight:    11,
@@ -178,17 +178,17 @@ func testTPAccPlansGetTPAccPlanIds(t *testing.T) {
 
 func testTPAccPlansUpdateTPAccPlan(t *testing.T) {
 	tpAccPlan.ActionPlan = []*utils.TPActionTiming{
-		&utils.TPActionTiming{
+		{
 			ActionsId: "AccId",
 			TimingId:  "TimingID",
 			Weight:    10,
 		},
-		&utils.TPActionTiming{
+		{
 			ActionsId: "AccId2",
 			TimingId:  "TimingID2",
 			Weight:    11,
 		},
-		&utils.TPActionTiming{
+		{
 			ActionsId: "AccId3",
 			TimingId:  "TimingID3",
 			Weight:    12,

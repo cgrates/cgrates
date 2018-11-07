@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package v1
 
-/* Need to investigate why add *default key Item1 in mongo
 import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
@@ -80,12 +79,7 @@ func testPrecacheInitCfg(t *testing.T) {
 	}
 	precacheCfg.DataFolderPath = precacheDataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(precacheCfg)
-	switch precacheConfigDIR {
-	case "tutmongo": // Mongo needs more time to reset db, need to investigate
-		precacheDelay = 2000
-	default:
-		precacheDelay = 1000
-	}
+	precacheDelay = 1000
 }
 
 func testPrecacheResetDataDB(t *testing.T) {
@@ -102,7 +96,7 @@ func testPrecacheStartEngine(t *testing.T) {
 
 func testPrecacheRpcConn(t *testing.T) {
 	var err error
-	precacheRPC, err = jsonrpc.Dial("tcp", precacheCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	precacheRPC, err = jsonrpc.Dial("tcp", precacheCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -123,147 +117,135 @@ func testPrecacheGetCacheStatsBeforeLoad(t *testing.T) {
 	var reply *map[string]*ltcache.CacheStats
 	cacheIDs := []string{}
 	expectedStats := &map[string]*ltcache.CacheStats{
-		"*default": &ltcache.CacheStats{
+		"*default": {
 			Items:  0,
 			Groups: 0,
 		},
-		"account_action_plans": &ltcache.CacheStats{
+		"account_action_plans": {
 			Items:  0,
 			Groups: 0,
 		},
-		"action_plans": &ltcache.CacheStats{
+		"action_plans": {
 			Items:  0,
 			Groups: 0,
 		},
-		"action_triggers": &ltcache.CacheStats{
+		"action_triggers": {
 			Items:  0,
 			Groups: 0,
 		},
-		"actions": &ltcache.CacheStats{
+		"actions": {
 			Items:  0,
 			Groups: 0,
 		},
-		"aliases": &ltcache.CacheStats{
+		"aliases": {
 			Items:  0,
 			Groups: 0,
 		},
-		"attribute_filter_indexes": &ltcache.CacheStats{
+		"attribute_filter_indexes": {
 			Items:  0,
 			Groups: 0,
 		},
-		"attribute_filter_revindexes": &ltcache.CacheStats{
+		"attribute_profiles": {
 			Items:  0,
 			Groups: 0,
 		},
-		"attribute_profiles": &ltcache.CacheStats{
+		"cdr_stats": {
 			Items:  0,
 			Groups: 0,
 		},
-		"cdr_stats": &ltcache.CacheStats{
+		"charger_filter_indexes": {
 			Items:  0,
 			Groups: 0,
 		},
-		"derived_chargers": &ltcache.CacheStats{
+		"charger_profiles": {
 			Items:  0,
 			Groups: 0,
 		},
-		"destinations": &ltcache.CacheStats{
+		"derived_chargers": {
 			Items:  0,
 			Groups: 0,
 		},
-		"event_resources": &ltcache.CacheStats{
+		"destinations": {
 			Items:  0,
 			Groups: 0,
 		},
-		"filters": &ltcache.CacheStats{
+		"event_resources": {
 			Items:  0,
 			Groups: 0,
 		},
-		"lcr_rules": &ltcache.CacheStats{
+		"filters": {
 			Items:  0,
 			Groups: 0,
 		},
-		"rating_plans": &ltcache.CacheStats{
+		"lcr_rules": {
 			Items:  0,
 			Groups: 0,
 		},
-		"rating_profiles": &ltcache.CacheStats{
+		"rating_plans": {
 			Items:  0,
 			Groups: 0,
 		},
-		"resource_filter_indexes": &ltcache.CacheStats{
+		"rating_profiles": {
 			Items:  0,
 			Groups: 0,
 		},
-		"resource_filter_revindexes": &ltcache.CacheStats{
+		"resource_filter_indexes": {
 			Items:  0,
 			Groups: 0,
 		},
-		"resource_profiles": &ltcache.CacheStats{
+		"resource_profiles": {
 			Items:  0,
 			Groups: 0,
 		},
-		"resources": &ltcache.CacheStats{
+		"resources": {
 			Items:  0,
 			Groups: 0,
 		},
-		"reverse_aliases": &ltcache.CacheStats{
+		"reverse_aliases": {
 			Items:  0,
 			Groups: 0,
 		},
-		"reverse_destinations": &ltcache.CacheStats{
+		"reverse_destinations": {
 			Items:  0,
 			Groups: 0,
 		},
-		"shared_groups": &ltcache.CacheStats{
+		"shared_groups": {
 			Items:  0,
 			Groups: 0,
 		},
-		"stat_filter_indexes": &ltcache.CacheStats{
+		"stat_filter_indexes": {
 			Items:  0,
 			Groups: 0,
 		},
-		"stat_filter_revindexes": &ltcache.CacheStats{
+		"statqueue_profiles": {
 			Items:  0,
 			Groups: 0,
 		},
-		"statqueue_profiles": &ltcache.CacheStats{
+		"statqueues": {
 			Items:  0,
 			Groups: 0,
 		},
-		"statqueues": &ltcache.CacheStats{
+		"supplier_filter_indexes": {
 			Items:  0,
 			Groups: 0,
 		},
-		"supplier_filter_indexes": &ltcache.CacheStats{
+		"supplier_profiles": {
 			Items:  0,
 			Groups: 0,
 		},
-		"supplier_filter_revindexes": &ltcache.CacheStats{
+		"threshold_filter_indexes": {
 			Items:  0,
 			Groups: 0,
 		},
-		"supplier_profiles": &ltcache.CacheStats{
+		"threshold_profiles": {
 			Items:  0,
 			Groups: 0,
 		},
-		"threshold_filter_indexes": &ltcache.CacheStats{
+		"thresholds": {
 			Items:  0,
 			Groups: 0,
 		},
-		"threshold_filter_revindexes": &ltcache.CacheStats{
-			Items:  0,
-			Groups: 0,
-		},
-		"threshold_profiles": &ltcache.CacheStats{
-			Items:  0,
-			Groups: 0,
-		},
-		"thresholds": &ltcache.CacheStats{
-			Items:  0,
-			Groups: 0,
-		},
-		"timings": &ltcache.CacheStats{
+		"timings": {
 			Items:  0,
 			Groups: 0,
 		},
@@ -281,16 +263,15 @@ func testPrecacheFromFolder(t *testing.T) {
 	if err := precacheRPC.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 }
 
 func testPrecacheRestartEngine(t *testing.T) {
-	time.Sleep(2 * time.Second)
 	if _, err := engine.StopStartEngine(precacheCfgPath, precacheDelay); err != nil {
 		t.Fatal(err)
 	}
 	var err error
-	precacheRPC, err = jsonrpc.Dial("tcp", precacheCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	precacheRPC, err = jsonrpc.Dial("tcp", precacheCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -300,147 +281,135 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 	var reply *map[string]*ltcache.CacheStats
 	cacheIDs := []string{}
 	expectedStats := &map[string]*ltcache.CacheStats{
-		"*default": &ltcache.CacheStats{
+		"*default": {
 			Items:  0,
 			Groups: 0,
 		},
-		"account_action_plans": &ltcache.CacheStats{
-			Items:  5,
+		"account_action_plans": {
+			Items:  5, //5
 			Groups: 0,
 		},
-		"action_plans": &ltcache.CacheStats{
+		"action_plans": {
 			Items:  4,
 			Groups: 0,
 		},
-		"action_triggers": &ltcache.CacheStats{
+		"action_triggers": {
 			Items:  4, // expected to have 4 items
 			Groups: 0,
 		},
-		"actions": &ltcache.CacheStats{
+		"actions": {
 			Items:  9, // expected to have 9 items
 			Groups: 0,
 		},
-		"aliases": &ltcache.CacheStats{
+		"aliases": {
 			Items:  1,
 			Groups: 0,
 		},
-		"attribute_filter_indexes": &ltcache.CacheStats{
+		"attribute_filter_indexes": {
 			Items:  0,
 			Groups: 0,
 		},
-		"attribute_filter_revindexes": &ltcache.CacheStats{
-			Items:  0,
-			Groups: 0,
-		},
-		"attribute_profiles": &ltcache.CacheStats{
+		"attribute_profiles": {
 			Items:  1,
 			Groups: 0,
 		},
-		"cdr_stats": &ltcache.CacheStats{
+		"cdr_stats": {
 			Items:  0,
 			Groups: 0,
 		},
-		"derived_chargers": &ltcache.CacheStats{
+		"charger_filter_indexes": {
+			Items:  0,
+			Groups: 0,
+		},
+		"charger_profiles": {
+			Items:  0,
+			Groups: 0,
+		},
+		"derived_chargers": {
 			Items:  1, // expected to have 1 item
 			Groups: 0,
 		},
-		"destinations": &ltcache.CacheStats{
-			Items:  8,
+		"destinations": {
+			Items:  5,
 			Groups: 0,
 		},
-		"event_resources": &ltcache.CacheStats{
+		"event_resources": {
 			Items:  0,
 			Groups: 0,
 		},
-		"filters": &ltcache.CacheStats{
+		"filters": {
 			Items:  16, // expected to have 16 items
 			Groups: 0,
 		},
-		"lcr_rules": &ltcache.CacheStats{
+		"lcr_rules": {
 			Items:  5, // expected to have 5 items
 			Groups: 0,
 		},
-		"rating_plans": &ltcache.CacheStats{
+		"rating_plans": {
 			Items:  4, // expected to have 4 items
 			Groups: 0,
 		},
-		"rating_profiles": &ltcache.CacheStats{
+		"rating_profiles": {
 			Items:  10, // expected to have 10 items
 			Groups: 0,
 		},
-		"resource_filter_indexes": &ltcache.CacheStats{
+		"resource_filter_indexes": {
 			Items:  0,
 			Groups: 0,
 		},
-		"resource_filter_revindexes": &ltcache.CacheStats{
-			Items:  0,
+		"resource_profiles": {
+			Items:  3,
 			Groups: 0,
 		},
-		"resource_profiles": &ltcache.CacheStats{
-			Items:  4,
-			Groups: 0,
-		},
-		"resources": &ltcache.CacheStats{
+		"resources": {
 			Items:  3, //expected to have 3 items
 			Groups: 0,
 		},
-		"reverse_aliases": &ltcache.CacheStats{
+		"reverse_aliases": {
 			Items:  2,
 			Groups: 0,
 		},
-		"reverse_destinations": &ltcache.CacheStats{
-			Items:  10,
+		"reverse_destinations": {
+			Items:  7,
 			Groups: 0,
 		},
-		"shared_groups": &ltcache.CacheStats{
+		"shared_groups": {
 			Items:  1,
 			Groups: 0,
 		},
-		"stat_filter_indexes": &ltcache.CacheStats{
+		"stat_filter_indexes": {
 			Items:  0,
 			Groups: 0,
 		},
-		"stat_filter_revindexes": &ltcache.CacheStats{
-			Items:  0,
+		"statqueue_profiles": {
+			Items:  1,
 			Groups: 0,
 		},
-		"statqueue_profiles": &ltcache.CacheStats{
-			Items:  2,
-			Groups: 0,
-		},
-		"statqueues": &ltcache.CacheStats{
+		"statqueues": {
 			Items:  1, // expected to have 1 item
 			Groups: 0,
 		},
-		"supplier_filter_indexes": &ltcache.CacheStats{
+		"supplier_filter_indexes": {
 			Items:  0,
 			Groups: 0,
 		},
-		"supplier_filter_revindexes": &ltcache.CacheStats{
-			Items:  0,
-			Groups: 0,
-		},
-		"supplier_profiles": &ltcache.CacheStats{
+		"supplier_profiles": {
 			Items:  3, // expected to have 3 items
 			Groups: 0,
 		},
-		"threshold_filter_indexes": &ltcache.CacheStats{
+		"threshold_filter_indexes": {
 			Items:  0,
 			Groups: 0,
 		},
-		"threshold_filter_revindexes": &ltcache.CacheStats{
-			Items:  0,
+		"threshold_profiles": {
+			Items:  7,
 			Groups: 0,
 		},
-		"threshold_profiles": &ltcache.CacheStats{
-			Items:  9,
-			Groups: 0,
-		},
-		"thresholds": &ltcache.CacheStats{
+		"thresholds": {
 			Items:  7, // expected to have 7 items
 			Groups: 0,
 		},
-		"timings": &ltcache.CacheStats{
+		"timings": {
 			Items:  0,
 			Groups: 0,
 		},
@@ -457,4 +426,3 @@ func testPrecacheKillEngine(t *testing.T) {
 		t.Error(err)
 	}
 }
-*/

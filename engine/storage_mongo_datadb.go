@@ -649,9 +649,9 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result = append(result, utils.StatQueueProfilePrefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
 		}
 	case utils.AccountActionPlansPrefix:
-		iter := db.C(colAAp).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
-		for iter.Next(&idResult) {
-			result = append(result, utils.AccountActionPlansPrefix+idResult.Id)
+		iter := db.C(colAAp).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
+		for iter.Next(&keyResult) {
+			result = append(result, utils.AccountActionPlansPrefix+keyResult.Key)
 		}
 	case utils.TimingsPrefix:
 		iter := db.C(colTmg).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()

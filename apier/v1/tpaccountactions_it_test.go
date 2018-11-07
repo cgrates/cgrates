@@ -90,12 +90,7 @@ func testTPAccActionsInitCfg(t *testing.T) {
 	}
 	tpAccActionsCfg.DataFolderPath = tpAccActionsDataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(tpAccActionsCfg)
-	switch tpAccActionsConfigDIR {
-	case "tutmongo": // Mongo needs more time to reset db, need to investigate
-		tpAccActionsDelay = 2000
-	default:
-		tpAccActionsDelay = 1000
-	}
+	tpAccActionsDelay = 1000
 }
 
 // Wipe out the cdr database

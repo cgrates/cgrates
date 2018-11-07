@@ -82,12 +82,7 @@ func testTPInitCfg(t *testing.T) {
 	}
 	tpCfg.DataFolderPath = tpDataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(tpCfg)
-	switch tpConfigDIR {
-	case "tutmongo": // Mongo needs more time to reset db, need to investigate
-		tpDelay = 4000
-	default:
-		tpDelay = 2000
-	}
+	tpDelay = 1000
 }
 
 // Wipe out the cdr database
@@ -114,7 +109,6 @@ func testTPRpcConn(t *testing.T) {
 }
 
 func testTPImportTPFromFolderPath(t *testing.T) {
-	time.Sleep(time.Duration(1 * time.Second))
 	var reply string
 	if err := tpRPC.Call("ApierV1.ImportTariffPlanFromFolder",
 		utils.AttrImportTPFromFolder{TPid: "TEST_TPID2",
@@ -123,7 +117,7 @@ func testTPImportTPFromFolderPath(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Calling ApierV1.ImportTarrifPlanFromFolder got reply: ", reply)
 	}
-	time.Sleep(time.Duration(2 * time.Second))
+	time.Sleep(500 * time.Millisecond)
 }
 
 func testTPExportTPToFolder(t *testing.T) {
@@ -147,7 +141,7 @@ func testTPExportTPToFolder(t *testing.T) {
 	} else if !reflect.DeepEqual(len(expectedTPStas.ExportedFiles), len(reply.ExportedFiles)) {
 		t.Errorf("Expecting : %+v, received: %+v", len(expectedTPStas.ExportedFiles), len(reply.ExportedFiles))
 	}
-	time.Sleep(time.Duration(2 * time.Second))
+	time.Sleep(500 * time.Millisecond)
 
 }
 
