@@ -363,3 +363,70 @@ func Sum(item, oItem interface{}) (sum interface{}, err error) {
 	}
 	return
 }
+
+// MultipleSum attempts to sum multiple items
+// returns the result or error if not comparable
+func MultipleSum(items ...interface{}) (sum interface{}, err error) {
+	//we need at least 2 items to sum them
+	if len(items) < 2 {
+		return nil, errors.New("Not enought parameters")
+	}
+
+	// convert the type for first item
+	valItm := reflect.ValueOf(items[0])
+	switch valItm.Kind() {
+	case reflect.Float32:
+		items[0] = valItm.Float()
+		valItm = reflect.ValueOf(items[0])
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32:
+		items[0] = valItm.Int()
+		valItm = reflect.ValueOf(items[0])
+	}
+	typItem := reflect.TypeOf(items[0])
+
+	//populate sum with first item so we can add after
+	switch items[0].(type) {
+	case float64:
+		sum = valItm.Float()
+	case int64:
+		sum = valItm.Int()
+	case time.Duration:
+		tVal := items[0].(time.Duration)
+		sum = tVal
+	}
+
+	for _, item := range items[1:] {
+		valOtItm := reflect.ValueOf(item)
+		// convert to wider type so we can be compatible with StringToInterface function
+		switch valOtItm.Kind() {
+		case reflect.Float32:
+			item = valOtItm.Float()
+			valOtItm = reflect.ValueOf(item)
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32:
+			item = valOtItm.Int()
+			valOtItm = reflect.ValueOf(item)
+		}
+		typOItem := reflect.TypeOf(item)
+		// check if the type for rest items is the same as first
+		if !typItem.Comparable() ||
+			!typOItem.Comparable() ||
+			typItem != typOItem {
+			return false, errors.New("incomparable")
+		}
+
+		switch items[0].(type) {
+		case float64:
+			sum = reflect.ValueOf(sum).Float() + valOtItm.Float()
+		case int64:
+			sum = reflect.ValueOf(sum).Int() + valOtItm.Int()
+		case time.Duration:
+			tOVal := item.(time.Duration)
+			sum = sum.(time.Duration) + tOVal
+		default: // unsupported comparison
+			err = fmt.Errorf("unsupported comparison type: %v, kind: %v", typItem, typItem.Kind())
+			break
+		}
+	}
+	return
+
+}
