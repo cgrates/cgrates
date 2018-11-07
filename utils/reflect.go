@@ -320,9 +320,9 @@ func GreaterThan(item, oItem interface{}, orEqual bool) (gte bool, err error) {
 	return
 }
 
-// MultipleSum attempts to sum multiple items
+// Sum attempts to sum multiple items
 // returns the result or error if not comparable
-func MultipleSum(items ...interface{}) (sum interface{}, err error) {
+func Sum(items ...interface{}) (sum interface{}, err error) {
 	//we need at least 2 items to sum them
 	if len(items) < 2 {
 		return nil, errors.New("Not enought parameters")

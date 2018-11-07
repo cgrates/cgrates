@@ -419,35 +419,35 @@ func TestIfaceAsBool(t *testing.T) {
 	}
 }
 
-func TestMultipleSum(t *testing.T) {
-	if _, err := MultipleSum(1); err == nil || err.Error() != "Not enought parameters" {
+func TestSum(t *testing.T) {
+	if _, err := Sum(1); err == nil || err.Error() != "Not enought parameters" {
 		t.Error(err)
 	}
-	if _, err := MultipleSum(1, 1.2, false); err == nil || err.Error() != "incomparable" {
+	if _, err := Sum(1, 1.2, false); err == nil || err.Error() != "incomparable" {
 		t.Error(err)
 	}
-	if sum, err := MultipleSum(1.2, 1.2, 1.2, 1.2); err != nil {
+	if sum, err := Sum(1.2, 1.2, 1.2, 1.2); err != nil {
 		t.Error(err)
 	} else if sum != 4.8 {
 		t.Errorf("Expecting: 4.8, received: %+v", sum)
 	}
-	if sum, err := MultipleSum(2, 4, 6, 8); err != nil {
+	if sum, err := Sum(2, 4, 6, 8); err != nil {
 		t.Error(err)
 	} else if sum != int64(20) {
 		t.Errorf("Expecting: 20, received: %+v", sum)
 	}
-	if sum, err := MultipleSum(0.5, 1.23, 1.456, 2.234, 11.2, 0.45); err != nil {
+	if sum, err := Sum(0.5, 1.23, 1.456, 2.234, 11.2, 0.45); err != nil {
 		t.Error(err)
 	} else if sum != 17.069999999999997 {
 		t.Errorf("Expecting: 17.069999999999997, received: %+v", sum)
 	}
-	if sum, err := MultipleSum(2*time.Second, 1*time.Second, 2*time.Second,
+	if sum, err := Sum(2*time.Second, 1*time.Second, 2*time.Second,
 		5*time.Second, 4*time.Millisecond); err != nil {
 		t.Error(err)
 	} else if sum != 10*time.Second+4*time.Millisecond {
 		t.Errorf("Expecting: 10.004s, received: %+v", sum)
 	}
-	if sum, err := MultipleSum(time.Duration(2*time.Second),
+	if sum, err := Sum(time.Duration(2*time.Second),
 		time.Duration(10*time.Millisecond)); err != nil {
 		t.Error(err)
 	} else if sum != time.Duration(2*time.Second+10*time.Millisecond) {
