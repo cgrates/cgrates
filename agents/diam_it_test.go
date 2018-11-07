@@ -288,6 +288,16 @@ func testDiamItDryRun(t *testing.T) {
 				t.Errorf("expecting: 100, received: <%s>", val)
 			}
 		}
+		eVal = "6" // sum of items
+		if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
+			t.Error(err)
+		} else if len(avps) == 0 {
+			t.Error("Missing AVP")
+		} else if val, err := diamAVPAsString(avps[0]); err != nil {
+			t.Error(err)
+		} else if val != eVal {
+			t.Errorf("expecting: %s, received: <%s>", eVal, val)
+		}
 	}
 }
 

@@ -98,9 +98,11 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 // FieldAsString implements engine.DataProvider
 func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) {
 	var iface interface{}
-
 	if iface, err = ar.FieldAsInterface(fldPath); err != nil {
 		return
+	}
+	if nmItems, isNMItems := iface.([]*config.NMItem); isNMItems { // special handling of NMItems, take the last value out of it
+		iface = nmItems[len(nmItems)-1].Data // could be we need nil protection here
 	}
 	return utils.IfaceAsString(iface)
 }
@@ -130,7 +132,7 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 		} else {
 			valSet = nMFields.([]*config.NMItem) // start from previous stored fields
 			if tplFld.Type == utils.META_COMPOSED {
-				prevNMItem := valSet[len(valSet)-1]
+				prevNMItem := valSet[len(valSet)-1] // could be we need nil protection here
 				prevDataStr, err := utils.IfaceAsString(prevNMItem.Data)
 				if err != nil {
 					return nil, err

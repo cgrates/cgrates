@@ -24,7 +24,7 @@
 					"type": "*constant", "value": "65000","new_branch": true},
          		{"tag": "RatingGroup",  "field_id": "Multiple-Services-Credit-Control.Rating-Group",
          			"type": "*constant", "value": "100","new_branch": true},
-         		{"tag": "LastUsed", "field_id": "LastUsed", "type": "*sum", 
+         		{"tag": "GrantedUsage", "field_id": "Granted-Service-Unit.CC-Time", "type": "*sum", 
          			"value": "~*cgreq.Val1;~*cgreq.Val2;~*cgreq.Val3"}, 
 			],
 		},
