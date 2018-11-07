@@ -320,50 +320,6 @@ func GreaterThan(item, oItem interface{}, orEqual bool) (gte bool, err error) {
 	return
 }
 
-// Sum attempts to sum two items
-// returns the result or error if not comparable
-func Sum(item, oItem interface{}) (sum interface{}, err error) {
-	valItm := reflect.ValueOf(item)
-	valOtItm := reflect.ValueOf(oItem)
-	// convert to wider type so we can be compatible with StringToInterface function
-	switch valItm.Kind() {
-	case reflect.Float32:
-		item = valItm.Float()
-		valItm = reflect.ValueOf(item)
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32:
-		item = valItm.Int()
-		valItm = reflect.ValueOf(item)
-	}
-	switch valOtItm.Kind() {
-	case reflect.Float32:
-		oItem = valOtItm.Float()
-		valOtItm = reflect.ValueOf(oItem)
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32:
-		oItem = valOtItm.Int()
-		valOtItm = reflect.ValueOf(oItem)
-	}
-	typItem := reflect.TypeOf(item)
-	typOItem := reflect.TypeOf(oItem)
-	if !typItem.Comparable() ||
-		!typOItem.Comparable() ||
-		typItem != typOItem {
-		return false, errors.New("incomparable")
-	}
-	switch item.(type) {
-	case float64:
-		sum = valItm.Float() + valOtItm.Float()
-	case int64:
-		sum = valItm.Int() + valOtItm.Int()
-	case time.Duration:
-		tVal := item.(time.Duration)
-		tOVal := oItem.(time.Duration)
-		sum = tVal + tOVal
-	default: // unsupported comparison
-		err = fmt.Errorf("unsupported comparison type: %v, kind: %v", typItem, typItem.Kind())
-	}
-	return
-}
-
 // MultipleSum attempts to sum multiple items
 // returns the result or error if not comparable
 func MultipleSum(items ...interface{}) (sum interface{}, err error) {
