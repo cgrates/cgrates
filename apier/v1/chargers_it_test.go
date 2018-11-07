@@ -101,12 +101,7 @@ func testChargerSInitCfg(t *testing.T) {
 	}
 	chargerCfg.DataFolderPath = *dataDir
 	config.SetCgrConfig(chargerCfg)
-	switch chargerConfigDIR {
-	case "tutmongo":
-		chargerDelay = 2000
-	default:
-		chargerDelay = 1000
-	}
+	chargerDelay = 1000
 }
 
 func testChargerSInitDataDb(t *testing.T) {
@@ -320,7 +315,7 @@ func testChargerSPing(t *testing.T) {
 }
 
 func testChargerSKillEngine(t *testing.T) {
-	if err := engine.KillEngine(chargerDelay); err != nil {
+	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
 }

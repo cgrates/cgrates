@@ -69,7 +69,7 @@ func testCDReInitCfg(t *testing.T) {
 	}
 	cdreCfg.DataFolderPath = alsPrfDataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(cdreCfg)
-	cdreDelay = 2000
+	cdreDelay = 1000
 }
 
 func testCDReInitDataDb(t *testing.T) {
@@ -140,7 +140,7 @@ func testCDReAddCDRs(t *testing.T) {
 			t.Error("Unexpected reply received: ", reply)
 		}
 	}
-	time.Sleep(time.Duration(cdreDelay) * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 }
 
 func testCDReExportCDRs(t *testing.T) {
@@ -157,7 +157,7 @@ func testCDReExportCDRs(t *testing.T) {
 }
 
 func testCDReKillEngine(t *testing.T) {
-	if err := engine.KillEngine(cdreDelay); err != nil {
+	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
 }

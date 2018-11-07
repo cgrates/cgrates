@@ -178,7 +178,6 @@ func TestTSV1ITMySQL(t *testing.T) {
 
 func TestTSV1ITMongo(t *testing.T) {
 	tSv1ConfDIR = "tutmongo"
-	time.Sleep(time.Duration(2 * time.Second)) // give time for engine to start
 	for _, stest := range sTestsThresholdSV1 {
 		t.Run(tSv1ConfDIR, stest)
 	}
@@ -190,12 +189,7 @@ func testV1TSLoadConfig(t *testing.T) {
 	if tSv1Cfg, err = config.NewCGRConfigFromFolder(tSv1CfgPath); err != nil {
 		t.Error(err)
 	}
-	switch tSv1ConfDIR {
-	case "tutmongo": // Mongo needs more time to reset db, need to investigate
-		thdsDelay = 4000
-	default:
-		thdsDelay = 2000
-	}
+	thdsDelay = 1000
 }
 
 func testV1TSInitDataDb(t *testing.T) {
@@ -335,7 +329,6 @@ func testV1TSGetThresholdsAfterRestart(t *testing.T) {
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
-	time.Sleep(time.Duration(1 * time.Second))
 	var td engine.Threshold
 	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThreshold,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_BALANCE_1"}, &td); err != nil {
@@ -399,7 +392,7 @@ func testV1TSUpdateThresholdProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	time.Sleep(time.Duration(100 * time.Millisecond)) // mongo is async
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // mongo is async
 	var reply *engine.ThresholdProfile
 	if err := tSv1Rpc.Call("ApierV1.GetThresholdProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &reply); err != nil {
@@ -421,7 +414,7 @@ func testV1TSRemoveThresholdProfile(t *testing.T) {
 	if err := tSv1Rpc.Call("ApierV1.GetThresholdProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &sqp); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
+		t.Errorf("Recived %s and the error:%+v", utils.ToJSON(sqp), err)
 	}
 }
 

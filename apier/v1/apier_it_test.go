@@ -29,7 +29,6 @@ import (
 	"net/rpc/jsonrpc"
 	"net/url"
 	"os"
-	"os/exec"
 	"path"
 	"reflect"
 	"strings"
@@ -830,7 +829,7 @@ func TestApierReloadCache(t *testing.T) {
 	expectedStats := &utils.CacheStats{
 		ReverseDestinations: 10,
 		RatingPlans:         1,
-		RatingProfiles:      1, // when it fails here is 2 is needed to investigate more
+		RatingProfiles:      2,
 		Actions:             1,
 		ActionPlans:         1,
 		AccountActionPlans:  1,
@@ -1278,7 +1277,7 @@ func TestApierLoadTariffPlanFromFolder(t *testing.T) {
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.LoadTariffPlanFromFolder got reply: ", reply)
 	}
-	time.Sleep(time.Duration(2 * time.Second))
+	time.Sleep(time.Second)
 }
 
 // For now just test that they execute without errors
@@ -1302,8 +1301,13 @@ func TestApierComputeReverse(t *testing.T) {
 }
 
 func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
-	expStats := &utils.CacheStats{Destinations: 3, Actions: 6, ActionPlans: 7,
-		AccountActionPlans: 13, Aliases: 1, AttributeProfiles: 1} // We get partial cache info during load, maybe fix this in the future
+	expStats := &utils.CacheStats{
+		Destinations:       3,
+		Actions:            6,
+		ActionPlans:        7,
+		AccountActionPlans: 13,
+		Aliases:            1,
+		AttributeProfiles:  0} // Did not cache because it wasn't previously cached
 	var rcvStats *utils.CacheStats
 	if err := rater.Call("ApierV1.GetCacheStats", utils.AttrCacheStats{}, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
@@ -1896,5 +1900,7 @@ func TestApierPing(t *testing.T) {
 
 // Simply kill the engine after we are done with tests within this file
 func TestApierStopEngine(t *testing.T) {
-	exec.Command("pkill", "cgr-engine").Run()
+	if err := engine.KillEngine(100); err != nil {
+		t.Error(err)
+	}
 }

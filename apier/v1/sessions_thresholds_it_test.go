@@ -78,7 +78,6 @@ func TestSessionSv1ItStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(sSv1CfgPath2, 100); err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(100 * time.Millisecond)
 }
 
 func TestSessionSv1ItRpcConn(t *testing.T) {
@@ -109,7 +108,6 @@ func TestSessionSv1ItTPFromFolder(t *testing.T) {
 		attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Millisecond) // Give time for scheduler to execute topups
 }
 
 func TestSessionSv1ItGetThreshold(t *testing.T) {

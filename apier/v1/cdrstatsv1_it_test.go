@@ -146,7 +146,6 @@ func TestCDRStatsitGetMetrics1(t *testing.T) {
 
 // Test stats persistence
 func TestCDRStatsitStatsPersistence(t *testing.T) {
-	time.Sleep(time.Duration(2) * time.Second) // Allow stats to be updated in dataDb
 	if _, err := engine.StopStartEngine(cdrstCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}

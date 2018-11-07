@@ -82,12 +82,7 @@ func testFilterInitCfg(t *testing.T) {
 	}
 	filterCfg.DataFolderPath = filterDataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(filterCfg)
-	switch filterConfigDIR {
-	case "tutmongo": // Mongo needs more time to reset db, need to investigate
-		filterDelay = 2000
-	default:
-		filterDelay = 1000
-	}
+	filterDelay = 1000
 }
 
 // Wipe out the cdr database
@@ -211,7 +206,7 @@ func testFilterGetFilterAfterRemove(t *testing.T) {
 }
 
 func testFilterKillEngine(t *testing.T) {
-	if err := engine.KillEngine(filterDelay); err != nil {
+	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
 }

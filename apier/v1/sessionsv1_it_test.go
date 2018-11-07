@@ -83,7 +83,6 @@ func TestSSv1ItStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(sSv1CfgPath, 100); err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(100 * time.Millisecond)
 }
 
 func TestSSv1ItRpcConn(t *testing.T) {
@@ -124,7 +123,6 @@ func TestSSv1ItTPFromFolder(t *testing.T) {
 		attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Millisecond) // Give time for scheduler to execute topups
 }
 
 func TestSSv1ItAuth(t *testing.T) {

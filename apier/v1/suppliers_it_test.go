@@ -80,7 +80,6 @@ func TestSuplSV1ITMySQL(t *testing.T) {
 
 func TestSuplSV1ITMongo(t *testing.T) {
 	splSv1ConfDIR = "tutmongo"
-	time.Sleep(time.Duration(2 * time.Second)) // give time for engine to start
 	for _, stest := range sTestsSupplierSV1 {
 		t.Run(splSv1ConfDIR, stest)
 	}
@@ -92,12 +91,7 @@ func testV1SplSLoadConfig(t *testing.T) {
 	if splSv1Cfg, err = config.NewCGRConfigFromFolder(splSv1CfgPath); err != nil {
 		t.Error(err)
 	}
-	switch splSv1ConfDIR {
-	case "tutmongo": // Mongo needs more time to reset db, need to investigate
-		splsDelay = 4000
-	default:
-		splsDelay = 1000
-	}
+	splsDelay = 1000
 }
 
 func testV1SplSInitDataDb(t *testing.T) {
@@ -356,7 +350,7 @@ func testV1SplSGetHighestCostSuppliers(t *testing.T) {
 				utils.Destination: "1002",
 				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
 				utils.Usage:       "1m20s",
-				"DistincMatch":    "*highest_cost",
+				"DistinctMatch":   "*highest_cost",
 			},
 		},
 	}
@@ -397,6 +391,7 @@ func testV1SplSGetHighestCostSuppliers(t *testing.T) {
 	} else if !reflect.DeepEqual(eSpls, suplsReply) {
 		t.Errorf("Expecting: %s, received: %s",
 			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
+		panic(utils.ToJSON(suplsReply))
 	}
 }
 
@@ -543,7 +538,7 @@ func testV1SplSPolulateStatsForQOS(t *testing.T) {
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
-
+	time.Sleep(100 * time.Millisecond)
 }
 
 func testV1SplSGetQOSSuppliers(t *testing.T) {
@@ -809,6 +804,7 @@ func testV1SplSGetQOSSuppliersFiltred2(t *testing.T) {
 	} else if !reflect.DeepEqual(eSpls, suplsReply) {
 		t.Errorf("Expecting: %s, received: %s",
 			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
+		panic(utils.ToJSON(suplsReply))
 	}
 }
 

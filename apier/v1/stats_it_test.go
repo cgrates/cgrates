@@ -109,12 +109,7 @@ func testV1STSLoadConfig(t *testing.T) {
 	if stsV1Cfg, err = config.NewCGRConfigFromFolder(stsV1CfgPath); err != nil {
 		t.Error(err)
 	}
-	switch stsV1ConfDIR {
-	case "tutmongo": // Mongo needs more time to reset db, need to investigate
-		statsDelay = 4000
-	default:
-		statsDelay = 2000
-	}
+	statsDelay = 1000
 }
 
 func testV1STSInitDataDb(t *testing.T) {
@@ -262,7 +257,7 @@ func testV1STSProcessEvent(t *testing.T) {
 }
 
 func testV1STSGetStatsAfterRestart(t *testing.T) {
-	time.Sleep(1 * time.Second)
+	time.Sleep(time.Second)
 	if _, err := engine.StopStartEngine(stsV1CfgPath, statsDelay); err != nil {
 		t.Fatal(err)
 	}
@@ -271,7 +266,6 @@ func testV1STSGetStatsAfterRestart(t *testing.T) {
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
-	time.Sleep(1 * time.Second)
 
 	//get stats metrics after restart
 	expectedMetrics2 := map[string]string{
@@ -292,7 +286,6 @@ func testV1STSGetStatsAfterRestart(t *testing.T) {
 	} else if !reflect.DeepEqual(expectedMetrics2, metrics2) {
 		t.Errorf("After restat expecting: %+v, received reply: %s", expectedMetrics2, metrics2)
 	}
-	time.Sleep(1 * time.Second)
 }
 
 func testV1STSSetStatQueueProfile(t *testing.T) {
@@ -400,7 +393,7 @@ func testV1STSUpdateStatQueueProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	time.Sleep(time.Duration(1 * time.Second))
+	time.Sleep(time.Second)
 	var reply *engine.StatQueueProfile
 	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {

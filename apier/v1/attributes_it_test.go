@@ -94,12 +94,7 @@ func testAttributeSInitCfg(t *testing.T) {
 	}
 	alsPrfCfg.DataFolderPath = alsPrfDataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(alsPrfCfg)
-	switch alsPrfConfigDIR {
-	case "tutmongo": // Mongo needs more time to reset db, need to investigate
-		alsPrfDelay = 2000
-	default:
-		alsPrfDelay = 1000
-	}
+	alsPrfDelay = 1000
 }
 
 func testAttributeSInitDataDb(t *testing.T) {
@@ -837,7 +832,7 @@ func testAttributeSPing(t *testing.T) {
 }
 
 func testAttributeSKillEngine(t *testing.T) {
-	if err := engine.KillEngine(alsPrfDelay); err != nil {
+	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
 }
