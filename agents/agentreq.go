@@ -237,7 +237,7 @@ func (aReq *AgentRequest) ParseField(
 			}
 			iFaceVals[i] = utils.StringToInterface(strVal)
 		}
-		out, err = utils.MultipleSum(iFaceVals)
+		out, err = utils.Sum(iFaceVals)
 	}
 	if err != nil {
 		return
