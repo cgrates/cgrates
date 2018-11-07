@@ -391,7 +391,6 @@ func testV1SplSGetHighestCostSuppliers(t *testing.T) {
 	} else if !reflect.DeepEqual(eSpls, suplsReply) {
 		t.Errorf("Expecting: %s, received: %s",
 			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
-		panic(utils.ToJSON(suplsReply))
 	}
 }
 
@@ -547,7 +546,7 @@ func testV1SplSGetQOSSuppliers(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetQOSSuppliers",
 			Event: map[string]interface{}{
-				"DistincMatch": "*qos",
+				"DistinctMatch": "*qos",
 			},
 		},
 	}
@@ -604,7 +603,7 @@ func testV1SplSGetQOSSuppliers2(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetQOSSuppliers",
 			Event: map[string]interface{}{
-				"DistincMatch": "*qos2",
+				"DistinctMatch": "*qos2",
 			},
 		},
 	}
@@ -660,7 +659,7 @@ func testV1SplSGetQOSSuppliers3(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetQOSSuppliers",
 			Event: map[string]interface{}{
-				"DistincMatch": "*qos3",
+				"DistinctMatch": "*qos3",
 			},
 		},
 	}
@@ -716,7 +715,7 @@ func testV1SplSGetQOSSuppliersFiltred(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetQOSSuppliers",
 			Event: map[string]interface{}{
-				"DistincMatch": "*qos_filtred",
+				"DistinctMatch": "*qos_filtred",
 			},
 		},
 	}
@@ -763,7 +762,7 @@ func testV1SplSGetQOSSuppliersFiltred2(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetQOSSuppliers",
 			Event: map[string]interface{}{
-				"DistincMatch":    "*qos_filtred2",
+				"DistinctMatch":   "*qos_filtred2",
 				utils.Account:     "1003",
 				utils.Destination: "1002",
 				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
@@ -804,7 +803,6 @@ func testV1SplSGetQOSSuppliersFiltred2(t *testing.T) {
 	} else if !reflect.DeepEqual(eSpls, suplsReply) {
 		t.Errorf("Expecting: %s, received: %s",
 			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
-		panic(utils.ToJSON(suplsReply))
 	}
 }
 
