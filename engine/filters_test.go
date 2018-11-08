@@ -467,3 +467,43 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 }
+
+func TestPassFilterMaxCost(t *testing.T) {
+	data, _ := NewMapStorage()
+	dmFilterPass := NewDataManager(data)
+	cfg, _ := config.NewDefaultCGRConfig()
+	filterS := FilterS{
+		cfg: cfg,
+		dm:  dmFilterPass,
+	}
+	//check with max usage -1 should fail
+	passEvent1 := map[string]interface{}{
+		"MaxUsage": time.Duration(-1),
+	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*rsr::~MaxUsage{*duration_nanoseconds}(>0)"}, config.NewNavigableMap(passEvent1)); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: false , received: %+v", pass)
+	}
+	//check with max usage 0 should fail
+	passEvent2 := map[string]interface{}{
+		"MaxUsage": time.Duration(0),
+	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*rsr::~MaxUsage{*duration_nanoseconds}(>0)"}, config.NewNavigableMap(passEvent2)); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: false, received: %+v", pass)
+	}
+	//check with max usage 123 should pass
+	passEvent3 := map[string]interface{}{
+		"MaxUsage": time.Duration(123),
+	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*rsr::~MaxUsage{*duration_nanoseconds}(>0)"}, config.NewNavigableMap(passEvent3)); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: true, received: %+v", pass)
+	}
+}

@@ -353,7 +353,7 @@ func (fltr *FilterRule) passGreaterThan(dP config.DataProvider) (bool, error) {
 			return false, err
 		} else if utils.IsSliceMember([]string{MetaGreaterThan, MetaGreaterOrEqual}, fltr.Type) && gte {
 			return true, nil
-		} else if !gte && utils.IsSliceMember([]string{MetaLessThan, MetaLessOrEqual}, fltr.Type) && !gte {
+		} else if utils.IsSliceMember([]string{MetaLessThan, MetaLessOrEqual}, fltr.Type) && !gte {
 			return true, nil
 		}
 	}
