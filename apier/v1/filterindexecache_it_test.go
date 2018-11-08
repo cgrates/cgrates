@@ -130,6 +130,7 @@ func testV1FIdxCaRpcConn(t *testing.T) {
 }
 
 func testV1FIdxCaFromFolder(t *testing.T) {
+	time.Sleep(10 * time.Millisecond)
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
 	if err := tFIdxCaRpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
@@ -286,6 +287,7 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
+	time.Sleep(100 * time.Millisecond)
 	//make sure doesn't match the thresholdprofile after update
 	tEv := &engine.ArgsProcessEvent{
 		CGREvent: utils.CGREvent{
@@ -350,7 +352,6 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_BALANCE_1"}, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(100 * time.Millisecond)
 	if reply == nil {
 		t.Errorf("Expecting reply to not be nil")
 		// reply shoud not be nil so exit function
@@ -365,7 +366,7 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-
+	time.Sleep(100 * time.Millisecond)
 	tEv := &engine.ArgsProcessEvent{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -716,6 +717,7 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
+	time.Sleep(100 * time.Millisecond)
 	tEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",

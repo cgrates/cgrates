@@ -1614,7 +1614,7 @@ func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) (err error) {
 		mapRsPfls[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
 	tpr.resProfiles = mapRsPfls
-	for tntID, _ := range mapRsPfls {
+	for tntID := range mapRsPfls {
 		if has, err := tpr.dm.HasData(utils.ResourcesPrefix, tntID.ID, tntID.Tenant); err != nil {
 			return err
 		} else if !has {
@@ -1638,7 +1638,7 @@ func (tpr *TpReader) LoadStatsFiltered(tag string) (err error) {
 		mapSTs[utils.TenantID{Tenant: st.Tenant, ID: st.ID}] = st
 	}
 	tpr.sqProfiles = mapSTs
-	for tntID, _ := range mapSTs {
+	for tntID := range mapSTs {
 		if has, err := tpr.dm.HasData(utils.StatQueuePrefix, tntID.ID, tntID.Tenant); err != nil {
 			return err
 		} else if !has {
@@ -1662,7 +1662,7 @@ func (tpr *TpReader) LoadThresholdsFiltered(tag string) (err error) {
 		mapTHs[utils.TenantID{Tenant: th.Tenant, ID: th.ID}] = th
 	}
 	tpr.thProfiles = mapTHs
-	for tntID, _ := range mapTHs {
+	for tntID := range mapTHs {
 		if has, err := tpr.dm.HasData(utils.ThresholdPrefix, tntID.ID, tntID.Tenant); err != nil {
 			return err
 		} else if !has {
@@ -1703,7 +1703,7 @@ func (tpr *TpReader) LoadSupplierProfilesFiltered(tag string) (err error) {
 		mapRsPfls[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
 	tpr.sppProfiles = mapRsPfls
-	for tntID, _ := range mapRsPfls {
+	for tntID := range mapRsPfls {
 		if has, err := tpr.dm.HasData(utils.SupplierProfilePrefix, tntID.ID, tntID.Tenant); err != nil {
 			return err
 		} else if !has {
@@ -1727,7 +1727,7 @@ func (tpr *TpReader) LoadAttributeProfilesFiltered(tag string) (err error) {
 		mapRsPfls[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
 	tpr.attributeProfiles = mapRsPfls
-	for tntID, _ := range mapRsPfls {
+	for tntID := range mapRsPfls {
 		if has, err := tpr.dm.HasData(utils.AttributeProfilePrefix, tntID.ID, tntID.Tenant); err != nil {
 			return err
 		} else if !has {
@@ -1751,7 +1751,7 @@ func (tpr *TpReader) LoadChargerProfilesFiltered(tag string) (err error) {
 		mapChargerProfile[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
 	tpr.chargerProfiles = mapChargerProfile
-	for tntID, _ := range mapChargerProfile {
+	for tntID := range mapChargerProfile {
 		if has, err := tpr.dm.HasData(utils.ChargerProfilePrefix, tntID.ID, tntID.Tenant); err != nil {
 			return err
 		} else if !has {
@@ -1886,8 +1886,6 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		for id, vals := range tpr.revDests {
 			log.Printf("\t %s : %+v", id, vals)
 		}
-	}
-	if verbose {
 		log.Print("Rating Plans:")
 	}
 	for _, rp := range tpr.ratingPlans {
@@ -2449,7 +2447,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 	case utils.ResourceProfilesPrefix:
 		keys := make([]string, len(tpr.resProfiles))
 		i := 0
-		for k, _ := range tpr.resProfiles {
+		for k := range tpr.resProfiles {
 			keys[i] = k.TenantID()
 			i++
 		}
@@ -2473,7 +2471,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 	case utils.StatQueueProfilePrefix:
 		keys := make([]string, len(tpr.sqProfiles))
 		i := 0
-		for k, _ := range tpr.sqProfiles {
+		for k := range tpr.sqProfiles {
 			keys[i] = k.TenantID()
 			i++
 		}
@@ -2481,7 +2479,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 	case utils.ThresholdProfilePrefix:
 		keys := make([]string, len(tpr.thProfiles))
 		i := 0
-		for k, _ := range tpr.thProfiles {
+		for k := range tpr.thProfiles {
 			keys[i] = k.TenantID()
 			i++
 		}
@@ -2497,7 +2495,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 	case utils.SupplierProfilePrefix:
 		keys := make([]string, len(tpr.sppProfiles))
 		i := 0
-		for k, _ := range tpr.sppProfiles {
+		for k := range tpr.sppProfiles {
 			keys[i] = k.TenantID()
 			i++
 		}
@@ -2505,7 +2503,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 	case utils.AttributeProfilePrefix:
 		keys := make([]string, len(tpr.attributeProfiles))
 		i := 0
-		for k, _ := range tpr.attributeProfiles {
+		for k := range tpr.attributeProfiles {
 			keys[i] = k.TenantID()
 			i++
 		}
@@ -2513,7 +2511,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 	case utils.ChargerProfilePrefix:
 		keys := make([]string, len(tpr.chargerProfiles))
 		i := 0
-		for k, _ := range tpr.chargerProfiles {
+		for k := range tpr.chargerProfiles {
 			keys[i] = k.TenantID()
 			i++
 		}
@@ -2565,7 +2563,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 	if verbose {
 		log.Print("Action Plans:")
 	}
-	for k, _ := range tpr.actionPlans {
+	for k := range tpr.actionPlans {
 		err = tpr.dm.DataDB().RemoveActionPlan(k, utils.NonTransactional)
 		if err != nil {
 			return err
@@ -2583,7 +2581,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 	if verbose {
 		log.Print("Action Triggers:")
 	}
-	for k, _ := range tpr.actionsTriggers {
+	for k := range tpr.actionsTriggers {
 		err = tpr.dm.RemoveActionTriggers(k, utils.NonTransactional)
 		if err != nil {
 			return err
@@ -2595,7 +2593,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 	if verbose {
 		log.Print("Shared Groups:")
 	}
-	for k, _ := range tpr.sharedGroups {
+	for k := range tpr.sharedGroups {
 		err = tpr.dm.RemoveSharedGroup(k, utils.NonTransactional)
 		if err != nil {
 			return err
@@ -2619,7 +2617,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 	if verbose {
 		log.Print("Actions:")
 	}
-	for k, _ := range tpr.actions {
+	for k := range tpr.actions {
 		err = tpr.dm.RemoveActions(k, utils.NonTransactional)
 		if err != nil {
 			return err
@@ -2643,7 +2641,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 	if verbose {
 		log.Print("Derived Chargers:")
 	}
-	for key, _ := range tpr.derivedChargers {
+	for key := range tpr.derivedChargers {
 		err = tpr.dm.RemoveDerivedChargers(key, utils.NonTransactional)
 		if err != nil {
 			return err

@@ -405,7 +405,7 @@ func (tps TpDestinationRates) AsMapDestinationRates() (map[string]*utils.TPDesti
 			TPid: tp.Tpid,
 			ID:   tp.Tag,
 			DestinationRates: []*utils.DestinationRate{
-				&utils.DestinationRate{
+				{
 					DestinationId:    tp.DestinationsTag,
 					RateId:           tp.RatesTag,
 					RoundingMethod:   tp.RoundingMethod,

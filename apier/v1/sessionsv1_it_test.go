@@ -123,6 +123,7 @@ func TestSSv1ItTPFromFolder(t *testing.T) {
 		attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(500 * time.Millisecond)
 }
 
 func TestSSv1ItAuth(t *testing.T) {
