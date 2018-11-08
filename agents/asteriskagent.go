@@ -112,7 +112,7 @@ func (sma *AsteriskAgent) ListenAndServe() (err error) {
 	panic("<AsteriskAgent> ListenAndServe out of select")
 }
 
-// hangupChannel will disconnect from CGRateS side with congestion reason
+// setChannelVar will set the value of a variable
 func (sma *AsteriskAgent) setChannelVar(chanID string, vrblName, vrblVal string) (success bool) {
 	if _, err := sma.astConn.Call(aringo.HTTP_POST,
 		fmt.Sprintf("http://%s/ari/channels/%s/variable?variable=%s&value=%s", // Asterisk having issue with variable terminating empty so harcoding param in url

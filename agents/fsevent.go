@@ -65,7 +65,7 @@ const (
 	PDD_NOMEDIA_MS           = "variable_progressmsec"
 	IGNOREPARK               = "variable_cgr_ignorepark"
 	FS_VARPREFIX             = "variable_"
-	VarCGRSubsystems         = "variable_cgr_subsystems"
+	VarCGRSubsystems         = "variable_" + utils.CGRSubsystems
 	CGRResourceAllocation    = "cgr_resource_allocation"
 	VAR_CGR_DISCONNECT_CAUSE = "variable_" + utils.CGR_DISCONNECT_CAUSE
 	VAR_CGR_CMPUTELCR        = "variable_" + utils.CGR_COMPUTELCR

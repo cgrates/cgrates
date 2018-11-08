@@ -153,6 +153,10 @@ func (smaEv *SMAsteriskEvent) Supplier() string {
 	return smaEv.cachedFields[utils.CGR_SUPPLIER]
 }
 
+func (smaEv *SMAsteriskEvent) Subsystems() string {
+	return smaEv.cachedFields[utils.CGRSubsystems]
+}
+
 func (smaEv *SMAsteriskEvent) DisconnectCause() string {
 	cachedKey := utils.CGR_DISCONNECT_CAUSE
 	cachedVal, hasIt := smaEv.cachedFields[cachedKey]

@@ -194,7 +194,7 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connID string) {
 				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
 		// no return here since we want CDR anyhow
 	}
-	if ka.cfg.CreateCdr || strings.Index(kev[KamCGRSubsystems], utils.MetaCDRs) != -1 {
+	if ka.cfg.CreateCdr || strings.Index(kev[utils.CGRSubsystems], utils.MetaCDRs) != -1 {
 		cgrEv, err := kev.AsCGREvent(ka.timezone)
 		if err != nil {
 			return

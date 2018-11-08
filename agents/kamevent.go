@@ -40,14 +40,13 @@ const (
 	KamHashEntry           = "h_entry"
 	KamHashID              = "h_id"
 	KamReplyRoute          = "reply_route"
-	KamCGRSubsystems       = "cgr_subsystems"
 	KamCGRContext          = "cgr_context"
 	EvapiConnID            = "EvapiConnID" // used to share connID info in event for remote disconnects
 	CGR_DLG_LIST           = "CGR_DLG_LIST"
 )
 
 var (
-	kamReservedEventFields = []string{EVENT, KamTRIndex, KamTRLabel, KamCGRSubsystems, KamCGRContext, KamReplyRoute}
+	kamReservedEventFields = []string{EVENT, KamTRIndex, KamTRLabel, utils.CGRSubsystems, KamCGRContext, KamReplyRoute}
 	kamReservedCDRFields   = append(kamReservedEventFields, KamHashEntry, KamHashID) // HashEntry and id are needed in events for disconnects
 )
 
@@ -182,7 +181,7 @@ func (kev KamEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 		GetMaxUsage: true,
 		CGREvent:    *cgrEv,
 	}
-	subsystems, has := kev[KamCGRSubsystems]
+	subsystems, has := kev[utils.CGRSubsystems]
 	if !has {
 		return
 	}
@@ -250,7 +249,7 @@ func (kev KamEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 		InitSession: true,
 		CGREvent:    *cgrEv,
 	}
-	subsystems, has := kev[KamCGRSubsystems]
+	subsystems, has := kev[utils.CGRSubsystems]
 	if !has {
 		return
 	}
@@ -272,7 +271,7 @@ func (kev KamEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionA
 		TerminateSession: true,
 		CGREvent:         *cgrEv,
 	}
-	subsystems, has := kev[KamCGRSubsystems]
+	subsystems, has := kev[utils.CGRSubsystems]
 	if !has {
 		return
 	}
