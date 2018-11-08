@@ -122,3 +122,36 @@ func TestAgReqAsNavigableMap(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", eMp, mpOut)
 	}
 }
+
+func TestAgReqMaxCost(t *testing.T) {
+	data, _ := engine.NewMapStorage()
+	dm := engine.NewDataManager(data)
+	cfg, _ := config.NewDefaultCGRConfig()
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	agReq := newAgentRequest(nil, nil, nil, nil, "cgrates.org", "", filterS)
+	// populate request, emulating the way will be done in HTTPAgent
+	agReq.CGRRequest.Set([]string{utils.CapMaxUsage}, "120s", false)
+
+	cgrRply := map[string]interface{}{
+		utils.CapMaxUsage: time.Duration(120 * time.Second),
+	}
+	agReq.CGRReply = config.NewNavigableMap(cgrRply)
+
+	tplFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "MaxUsage",
+			FieldId: "MaxUsage", Type: utils.META_COMPOSED,
+			Filters: []string{"*rsr::~*cgrep.MaxUsage(>0s)"},
+			Value: config.NewRSRParsersMustCompile(
+				"~*cgrep.MaxUsage{*duration_seconds}", true)},
+	}
+	eMp := config.NewNavigableMap(nil)
+
+	eMp.Set([]string{"MaxUsage"}, []*config.NMItem{
+		&config.NMItem{Data: "120", Path: []string{"MaxUsage"},
+			Config: tplFlds[0]}}, true)
+	if mpOut, err := agReq.AsNavigableMap(tplFlds); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eMp, mpOut) {
+		t.Errorf("expecting: %+v, received: %+v", eMp, mpOut)
+	}
+}

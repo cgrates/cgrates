@@ -481,6 +481,75 @@ func TestRSRFilterPass(t *testing.T) {
 	if !fltr.Pass("") {
 		t.Error("Passing!")
 	}
+
+	// compare greaterThan
+	fltr, err = NewRSRFilter(">0s")
+	if err != nil {
+		t.Error(err)
+	}
+	if fltr.Pass("0s") {
+		t.Error("passing!")
+	}
+	if fltr.Pass("13") {
+		t.Error("passing!")
+	}
+	if !fltr.Pass("12s") {
+		t.Error("not passing!")
+	}
+
+	// compare greaterThanOrEqual
+	fltr, err = NewRSRFilter(">=0s")
+	if err != nil {
+		t.Error(err)
+	}
+	if fltr.Pass("-1s") {
+		t.Error("passing!")
+	}
+	if !fltr.Pass("0s") {
+		t.Error("not passing!")
+	}
+	if fltr.Pass("13") {
+		t.Error("passing!")
+	}
+	if !fltr.Pass("12s") {
+		t.Error("not passing!")
+	}
+
+	// compare lessThan
+	fltr, err = NewRSRFilter("<0s")
+	if err != nil {
+		t.Error(err)
+	}
+	if fltr.Pass("1ns") {
+		t.Error("passing!")
+	}
+	if fltr.Pass("13") {
+		t.Error("passing!")
+	}
+	if fltr.Pass("12s") {
+		t.Error("passing!")
+	}
+	if !fltr.Pass("-12s") {
+		t.Error("not passing!")
+	}
+
+	// compare lessThanOrEqual
+	fltr, err = NewRSRFilter("<=0s")
+	if err != nil {
+		t.Error(err)
+	}
+	if !fltr.Pass("-1s") {
+		t.Error("not passing!")
+	}
+	if !fltr.Pass("0s") {
+		t.Error("not passing!")
+	}
+	if fltr.Pass("13") {
+		t.Error("passing!")
+	}
+	if fltr.Pass("12s") {
+		t.Error("passing!")
+	}
 }
 
 func TestRSRFiltersPass(t *testing.T) {

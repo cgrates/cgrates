@@ -254,6 +254,47 @@ func (rsrFltr *RSRFilter) Pass(val string) bool {
 	if rsrFltr.filterRule[lastIdx:] == MatchEndPrefix {
 		return strings.HasSuffix(val, rsrFltr.filterRule[:lastIdx]) != rsrFltr.negative
 	}
+	if len(rsrFltr.filterRule) > 2 && rsrFltr.filterRule[:2] == MatchGreaterThanOrEqual {
+		gt, err := GreaterThan(StringToInterface(val),
+			StringToInterface(rsrFltr.filterRule[2:]), true)
+		if err != nil {
+			Logger.Warning(fmt.Sprintf("<RSRFilter> rule: <%s>, err: <%s>", rsrFltr.filterRule, err.Error()))
+			return false
+		}
+		return gt && !rsrFltr.negative
+	}
+
+	if len(rsrFltr.filterRule) > 2 && rsrFltr.filterRule[:2] == MatchLessThanOrEqual {
+		gt, err := GreaterThan(StringToInterface(rsrFltr.filterRule[2:]), // compare the rule with the val
+			StringToInterface(val),
+			true)
+		if err != nil {
+			Logger.Warning(fmt.Sprintf("<RSRFilter> rule: <%s>, err: <%s>", rsrFltr.filterRule, err.Error()))
+			return false
+		}
+		return gt && !rsrFltr.negative
+	}
+
+	if rsrFltr.filterRule[:1] == MatchGreaterThan {
+		gt, err := GreaterThan(StringToInterface(val),
+			StringToInterface(rsrFltr.filterRule[1:]), false)
+		if err != nil {
+			Logger.Warning(fmt.Sprintf("<RSRFilter> rule: <%s>, err: <%s>", rsrFltr.filterRule, err.Error()))
+			return false
+		}
+		return gt && !rsrFltr.negative
+	}
+
+	if rsrFltr.filterRule[:1] == MatchLessThan {
+		gt, err := GreaterThan(StringToInterface(rsrFltr.filterRule[1:]), // compare the rule with the val
+			StringToInterface(val),
+			false)
+		if err != nil {
+			Logger.Warning(fmt.Sprintf("<RSRFilter> rule: <%s>, err: <%s>", rsrFltr.filterRule, err.Error()))
+			return false
+		}
+		return gt && !rsrFltr.negative
+	}
 	return (strings.Index(val, rsrFltr.filterRule) != -1) != rsrFltr.negative // default is string index
 }
 
