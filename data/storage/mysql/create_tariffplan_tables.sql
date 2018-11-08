@@ -430,7 +430,7 @@ CREATE TABLE tp_stats (
   `activation_interval` varchar(64) NOT NULL,
   `queue_length` int(11) NOT NULL,
   `ttl` varchar(32) NOT NULL,
-  `metrics` varchar(64) NOT NULL,
+  `metrics` varchar(128) NOT NULL,
   `parameters` varchar(64) NOT NULL,
   `blocker` BOOLEAN NOT NULL,
   `stored` BOOLEAN NOT NULL,
