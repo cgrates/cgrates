@@ -112,7 +112,6 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 	nM *config.NavigableMap, err error) {
 	nM = config.NewNavigableMap(nil)
 	for _, tplFld := range tplFlds {
-		fmt.Println(utils.ToJSON(tplFld))
 		if pass, err := ar.filterS.Pass(ar.tenant,
 			tplFld.Filters, ar); err != nil {
 			return nil, err
@@ -128,7 +127,6 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 		nMItm := &config.NMItem{Data: out, Path: fldPath, Config: tplFld}
 		if nMFields, err := nM.FieldAsInterface(fldPath); err != nil {
 			if err != utils.ErrNotFound {
-				fmt.Println("Return err for : ", utils.ToJSON(tplFld))
 				return nil, err
 			}
 		} else {
