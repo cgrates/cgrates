@@ -12,6 +12,8 @@
 				{"tag": "Val1", "field_id": "Val1", "type": "*constant", "value": "1"},
 				{"tag": "Val2", "field_id": "Val2", "type": "*constant", "value": "2"},
 				{"tag": "Val3", "field_id": "Val3", "type": "*constant", "value": "3"},
+				{"tag": "OptionalField", "field_id":"OptionalField", "type":"*composed",
+					"value":"~*req.Inexistent", "manadatory":false},
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 
 					"value": "~*req.Session-Id", "mandatory": true},
 				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", "value": "*prepaid"},
