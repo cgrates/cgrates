@@ -2786,7 +2786,8 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 		log.Print("AttributeProfiles:")
 	}
 	for _, tpTH := range tpr.attributeProfiles {
-		if err = tpr.dm.RemoveAttributeProfile(tpTH.Tenant, tpTH.ID, tpTH.Contexts, utils.NonTransactional, false); err != nil {
+		if err = tpr.dm.RemoveAttributeProfile(tpTH.Tenant, tpTH.ID,
+			utils.NonTransactional, false); err != nil && err.Error() != utils.ErrNotFound.Error() {
 			return err
 		}
 		if verbose {

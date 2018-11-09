@@ -2539,7 +2539,7 @@ func testOnStorITAttributeProfile(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
 	}
 	if err := onStor.RemoveAttributeProfile(attrProfile.Tenant,
-		attrProfile.ID, attrProfile.Contexts, utils.NonTransactional, false); err != nil {
+		attrProfile.ID, utils.NonTransactional, false); err != nil {
 		t.Error(err)
 	}
 	//check cache if removed

@@ -485,7 +485,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 	}
 
 	if err := dataManager.RemoveAttributeProfile(attrProfile.Tenant,
-		attrProfile.ID, attrProfile.Contexts, utils.NonTransactional, true); err != nil {
+		attrProfile.ID, utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
 	//check if index is removed
