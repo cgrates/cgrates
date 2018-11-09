@@ -80,17 +80,16 @@ func (apierV1 *ApierV1) SetAttributeProfile(alsPrf *engine.AttributeProfile, rep
 }
 
 type ArgRemoveAttrProfile struct {
-	Tenant   string
-	ID       string
-	Contexts []string
+	Tenant string
+	ID     string
 }
 
 //RemoveAttributeProfile remove a specific Attribute Profile
 func (apierV1 *ApierV1) RemoveAttributeProfile(arg *ArgRemoveAttrProfile, reply *string) error {
-	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID", "Contexts"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataManager.RemoveAttributeProfile(arg.Tenant, arg.ID, arg.Contexts, utils.NonTransactional, true); err != nil {
+	if err := apierV1.DataManager.RemoveAttributeProfile(arg.Tenant, arg.ID, utils.NonTransactional, true); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
