@@ -169,7 +169,7 @@ func (aReq *AgentRequest) ParseField(
 	case utils.META_CONSTANT:
 		out, err = cfgFld.Value.ParseValue(utils.EmptyString)
 		isString = true
-	case utils.META_COMPOSED:
+	case utils.MetaVariable, utils.META_COMPOSED:
 		out, err = cfgFld.Value.ParseDataProvider(aReq, utils.NestingSep)
 		isString = true
 	case utils.META_USAGE_DIFFERENCE:

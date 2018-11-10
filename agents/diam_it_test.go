@@ -190,6 +190,34 @@ func testDiamItDryRun(t *testing.T) {
 				},
 			}),
 		}})
+	ccr.NewAVP(avp.MultipleServicesCreditControl, avp.Mbit, 0, &diam.GroupedAVP{ // Multiple-Services-Credit-Control
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.UsedServiceUnit, avp.Mbit, 0, &diam.GroupedAVP{ // Used-Service-Unit
+				AVP: []*diam.AVP{
+					diam.NewAVP(avp.CCTotalOctets, avp.Mbit, 0, datatype.Unsigned64(7640)),  // CC-Total-Octets
+					diam.NewAVP(avp.CCInputOctets, avp.Mbit, 0, datatype.Unsigned64(5337)),  // CC-Input-Octets
+					diam.NewAVP(avp.CCOutputOctets, avp.Mbit, 0, datatype.Unsigned64(2303)), // CC-Output-Octets
+				},
+			}),
+			diam.NewAVP(avp.ServiceIdentifier, avp.Mbit, 0, datatype.Unsigned32(65000)), // Service-Identifier
+			diam.NewAVP(avp.RatingGroup, avp.Mbit, 0, datatype.Unsigned32(1)),           // Rating-Group
+			diam.NewAVP(avp.ReportingReason, avp.Mbit, 0, datatype.Enumerated(2)),       // Reporting-Reason
+		},
+	})
+	ccr.NewAVP(avp.MultipleServicesCreditControl, avp.Mbit, 0, &diam.GroupedAVP{ // Multiple-Services-Credit-Control
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.UsedServiceUnit, avp.Mbit, 0, &diam.GroupedAVP{ // Used-Service-Unit
+				AVP: []*diam.AVP{
+					diam.NewAVP(avp.CCTotalOctets, avp.Mbit, 0, datatype.Unsigned64(3000)),  // CC-Total-Octets
+					diam.NewAVP(avp.CCInputOctets, avp.Mbit, 0, datatype.Unsigned64(2000)),  // CC-Input-Octets
+					diam.NewAVP(avp.CCOutputOctets, avp.Mbit, 0, datatype.Unsigned64(1000)), // CC-Output-Octets
+				},
+			}),
+			diam.NewAVP(avp.ServiceIdentifier, avp.Mbit, 0, datatype.Unsigned32(65000)), // Service-Identifier
+			diam.NewAVP(avp.RatingGroup, avp.Mbit, 0, datatype.Unsigned32(2)),           // Rating-Group
+			diam.NewAVP(avp.ReportingReason, avp.Mbit, 0, datatype.Enumerated(2)),       // Reporting-Reason
+		},
+	})
 	if _, err := ccr.NewAVP("Framed-IP-Address", avp.Mbit, 0, datatype.UTF8String("10.228.16.4")); err != nil {
 		t.Error(err)
 	}
@@ -279,13 +307,29 @@ func testDiamItDryRun(t *testing.T) {
 		} else {
 			if val, err := diamAVPAsString(avps[0]); err != nil {
 				t.Error(err)
-			} else if val != "65000" {
-				t.Errorf("expecting: 65000, received: <%s>", val)
+			} else if val != "1" {
+				t.Errorf("expecting: 1, received: <%s>", val)
 			}
 			if val, err := diamAVPAsString(avps[1]); err != nil {
 				t.Error(err)
-			} else if val != "100" {
-				t.Errorf("expecting: 100, received: <%s>", val)
+			} else if val != "2" {
+				t.Errorf("expecting: 2, received: <%s>", val)
+			}
+		}
+		if avps, err := msg.FindAVPsWithPath([]interface{}{"Multiple-Services-Credit-Control", "Used-Service-Unit", "CC-Total-Octets"}, dict.UndefinedVendorID); err != nil {
+			t.Error(err)
+		} else if len(avps) != 2 {
+			t.Errorf("Unexpected number of Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets : %d", len(avps))
+		} else {
+			if val, err := diamAVPAsString(avps[0]); err != nil {
+				t.Error(err)
+			} else if val != "7640" {
+				t.Errorf("expecting: 7640, received: <%s>", val)
+			}
+			if val, err := diamAVPAsString(avps[1]); err != nil {
+				t.Error(err)
+			} else if val != "3000" {
+				t.Errorf("expecting: 3000, received: <%s>", val)
 			}
 		}
 		eVal = "6" // sum of items

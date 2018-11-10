@@ -311,6 +311,7 @@ const (
 	HIERARCHY_SEP                = ">"
 	META_COMPOSED                = "*composed"
 	META_USAGE_DIFFERENCE        = "*usage_difference"
+	MetaVariable                 = "*variable"
 	MetaCCUsage                  = "*cc_usage"
 	MetaString                   = "*string"
 	NegativePrefix               = "!"

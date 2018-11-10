@@ -340,12 +340,19 @@ func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err 
 				if err != nil {
 					return nil, err
 				}
-				pathIface[len(pathIface)-1] = slctr.AttrName() // search for AVPs which are having common path but different end element
-				fltrAVPs, err := dP.m.FindAVPsWithPath(pathIface, dict.UndefinedVendorID)
+				var fltrAVPs []*diam.AVP
+				for i := len(pathIface) - 1; i > 0; i-- {
+					pathIface[i] = slctr.AttrName() // search for AVPs which are having common path but different end element
+					pathIface = pathIface[:i+1]
+					if fltrAVPs, err = dP.m.FindAVPsWithPath(pathIface, dict.UndefinedVendorID); err != nil || len(fltrAVPs) != 0 {
+						break // found AVPs or got error, go and compare
+					}
+				}
 				if err != nil {
 					return nil, err
 				} else if len(fltrAVPs) == 0 || len(fltrAVPs) != len(avps) {
-					return nil, utils.ErrFilterNotPassingNoCaps
+					return nil, fmt.Errorf("%s for selector %s",
+						utils.ErrFilterNotPassingNoCaps.Error(), slctr.AttrName())
 				}
 				for k, fAVP := range fltrAVPs {
 					if dataAVP, err := diamAVPAsIface(fAVP); err != nil {
