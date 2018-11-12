@@ -19,13 +19,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"bufio"
+	"bytes"
+	"net/http"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/radigo"
+	"github.com/fiorix/go-diameter/diam"
+	"github.com/fiorix/go-diameter/diam/avp"
+	"github.com/fiorix/go-diameter/diam/datatype"
 )
 
 func TestAgReqAsNavigableMap(t *testing.T) {
@@ -154,4 +162,196 @@ func TestAgReqMaxCost(t *testing.T) {
 	} else if !reflect.DeepEqual(eMp, mpOut) {
 		t.Errorf("expecting: %+v, received: %+v", eMp, mpOut)
 	}
+}
+
+func TestAgReqParseFieldDiameter(t *testing.T) {
+	//creater diameter message
+	m := diam.NewRequest(diam.CreditControl, 4, nil)
+	m.NewAVP("Session-Id", avp.Mbit, 0, datatype.UTF8String("simuhuawei;1449573472;00002"))
+	m.NewAVP("Subscription-Id", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(2)),              // Subscription-Id-Type
+			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("208708000004")), // Subscription-Id-Data
+			diam.NewAVP(avp.ValueDigits, avp.Mbit, 0, datatype.Integer64(20000)),
+		}})
+	//create diameterDataProvider
+	dP := newDADataProvider(m)
+	data, _ := engine.NewMapStorage()
+	dm := engine.NewDataManager(data)
+	cfg, _ := config.NewDefaultCGRConfig()
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	//pass the data provider to agent request
+	agReq := newAgentRequest(dP, nil, nil, nil, "cgrates.org", "", filterS)
+
+	tplFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "MandatoryFalse",
+			FieldId: "MandatoryFalse", Type: utils.META_COMPOSED,
+			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryFalse", true),
+			Mandatory: false},
+		&config.FCTemplate{Tag: "MandatoryTrue",
+			FieldId: "MandatoryTrue", Type: utils.META_COMPOSED,
+			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryTrue", true),
+			Mandatory: true},
+	}
+	expected := ""
+	if out, err := agReq.ParseField(tplFlds[0]); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(out, expected) {
+		t.Errorf("expecting: <%+v>, received: <%+v>", expected, out)
+	}
+	if _, err := agReq.ParseField(tplFlds[1]); err == nil ||
+		err.Error() != "Empty source value for fieldID: <MandatoryTrue>" {
+		t.Error(err)
+	}
+}
+
+func TestAgReqParseFieldRadius(t *testing.T) {
+	//creater radius message
+	pkt := radigo.NewPacket(radigo.AccountingRequest, 1, dictRad, coder, "CGRateS.org")
+	if err := pkt.AddAVPWithName("User-Name", "flopsy", ""); err != nil {
+		t.Error(err)
+	}
+	if err := pkt.AddAVPWithName("Cisco-NAS-Port", "CGR1", "Cisco"); err != nil {
+		t.Error(err)
+	}
+	//create radiusDataProvider
+	dP, _ := newRADataProvider(pkt)
+	data, _ := engine.NewMapStorage()
+	dm := engine.NewDataManager(data)
+	cfg, _ := config.NewDefaultCGRConfig()
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	//pass the data provider to agent request
+	agReq := newAgentRequest(dP, nil, nil, nil, "cgrates.org", "", filterS)
+	tplFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "MandatoryFalse",
+			FieldId: "MandatoryFalse", Type: utils.META_COMPOSED,
+			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryFalse", true),
+			Mandatory: false},
+		&config.FCTemplate{Tag: "MandatoryTrue",
+			FieldId: "MandatoryTrue", Type: utils.META_COMPOSED,
+			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryTrue", true),
+			Mandatory: true},
+	}
+	expected := ""
+	if out, err := agReq.ParseField(tplFlds[0]); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(out, expected) {
+		t.Errorf("expecting: <%+v>, received: <%+v>", expected, out)
+	}
+	if _, err := agReq.ParseField(tplFlds[1]); err == nil ||
+		err.Error() != "Empty source value for fieldID: <MandatoryTrue>" {
+		t.Error(err)
+	}
+}
+
+func TestAgReqParseFieldHttpUrl(t *testing.T) {
+	//creater radius message
+	br := bufio.NewReader(strings.NewReader(`GET /cdr?request_type=MOSMS_CDR&timestamp=2008-08-15%2017:49:21&message_date=2008-08-15%2017:49:21&transactionid=100744&CDR_ID=123456&carrierid=1&mcc=222&mnc=10&imsi=235180000000000&msisdn=%2B4977000000000&destination=%2B497700000001&message_status=0&IOT=0&service_id=1 HTTP/1.1
+Host: api.cgrates.org
+
+`))
+	req, err := http.ReadRequest(br)
+	if err != nil {
+		t.Error(err)
+	}
+	//create radiusDataProvider
+	dP, _ := newHTTPUrlDP(req)
+	data, _ := engine.NewMapStorage()
+	dm := engine.NewDataManager(data)
+	cfg, _ := config.NewDefaultCGRConfig()
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	//pass the data provider to agent request
+	agReq := newAgentRequest(dP, nil, nil, nil, "cgrates.org", "", filterS)
+	tplFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "MandatoryFalse",
+			FieldId: "MandatoryFalse", Type: utils.META_COMPOSED,
+			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryFalse", true),
+			Mandatory: false},
+		&config.FCTemplate{Tag: "MandatoryTrue",
+			FieldId: "MandatoryTrue", Type: utils.META_COMPOSED,
+			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryTrue", true),
+			Mandatory: true},
+	}
+	expected := ""
+	if out, err := agReq.ParseField(tplFlds[0]); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(out, expected) {
+		t.Errorf("expecting: <%+v>, received: <%+v>", expected, out)
+	}
+
+	if _, err := agReq.ParseField(tplFlds[1]); err == nil ||
+		err.Error() != "Empty source value for fieldID: <MandatoryTrue>" {
+		t.Error(err)
+	}
+}
+
+func TestAgReqParseFieldHttpXml(t *testing.T) {
+	//creater radius message
+	body := `<complete-success-notification callid="109870">
+	<createtime>2005-08-26T14:16:42</createtime>
+	<connecttime>2005-08-26T14:16:56</connecttime>
+	<endtime>2005-08-26T14:17:34</endtime>
+	<reference>My Call Reference</reference>
+	<userid>386</userid>
+	<username>sampleusername</username>
+	<customerid>1</customerid>
+	<companyname>Conecto LLC</companyname>
+	<totalcost amount="0.21" currency="USD">US$0.21</totalcost>
+	<hasrecording>yes</hasrecording>
+	<hasvoicemail>no</hasvoicemail>
+	<agenttotalcost amount="0.13" currency="USD">US$0.13</agenttotalcost>
+	<agentid>44</agentid>
+	<callleg calllegid="222146">
+		<number>+441624828505</number>
+		<description>Isle of Man</description>
+		<seconds>38</seconds>
+		<perminuterate amount="0.0200" currency="USD">US$0.0200</perminuterate>
+		<cost amount="0.0140" currency="USD">US$0.0140</cost>
+		<agentperminuterate amount="0.0130" currency="USD">US$0.0130</agentperminuterate>
+		<agentcost amount="0.0082" currency="USD">US$0.0082</agentcost>
+	</callleg>
+	<callleg calllegid="222147">
+		<number>+44 7624 494075</number>
+		<description>Isle of Man</description>
+		<seconds>37</seconds>
+		<perminuterate amount="0.2700" currency="USD">US$0.2700</perminuterate>
+		<cost amount="0.1890" currency="USD">US$0.1890</cost>
+		<agentperminuterate amount="0.1880" currency="USD">US$0.1880</agentperminuterate>
+		<agentcost amount="0.1159" currency="USD">US$0.1159</agentcost>
+	</callleg>
+</complete-success-notification>
+`
+	req, err := http.NewRequest("POST", "http://localhost:8080/", bytes.NewBuffer([]byte(body)))
+	if err != nil {
+		t.Error(err)
+	}
+	//create radiusDataProvider
+	dP, _ := newHTTPXmlDP(req)
+	data, _ := engine.NewMapStorage()
+	dm := engine.NewDataManager(data)
+	cfg, _ := config.NewDefaultCGRConfig()
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	//pass the data provider to agent request
+	agReq := newAgentRequest(dP, nil, nil, nil, "cgrates.org", "", filterS)
+	tplFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "MandatoryFalse",
+			FieldId: "MandatoryFalse", Type: utils.META_COMPOSED,
+			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryFalse", true),
+			Mandatory: false},
+		&config.FCTemplate{Tag: "MandatoryTrue",
+			FieldId: "MandatoryTrue", Type: utils.META_COMPOSED,
+			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryTrue", true),
+			Mandatory: true},
+	}
+	expected := ""
+	if out, err := agReq.ParseField(tplFlds[0]); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(out, expected) {
+		t.Errorf("expecting: <%+v>, received: <%+v>", expected, out)
+	}
+	if _, err := agReq.ParseField(tplFlds[1]); err == nil ||
+		err.Error() != "Empty source value for fieldID: <MandatoryTrue>" {
+		t.Error(err)
+	}
+
 }

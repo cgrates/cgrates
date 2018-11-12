@@ -243,11 +243,9 @@ func (aReq *AgentRequest) ParseField(
 		out, err = utils.Sum(iFaceVals...)
 	}
 	if err != nil &&
-		(!strings.HasPrefix(err.Error(), "Could not find") ||
-			cfgFld.Mandatory) {
+		!strings.HasPrefix(err.Error(), "Could not find") {
 		return
 	}
-	err = nil
 	if isString { // format the string additionally with fmtFieldWidth
 		out, err = utils.FmtFieldWidth(cfgFld.Tag, out.(string), cfgFld.Width,
 			cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory)
