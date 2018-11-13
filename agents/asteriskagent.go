@@ -229,6 +229,12 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 
 // Ussually channelUP
 func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
+	// utils.Logger.Debug(fmt.Sprintf("#################handleChannelStateChange#####################"))
+	// utils.Logger.Debug(fmt.Sprintf("ev.ariEv : %+v", ev.ariEv))
+	// utils.Logger.Debug(fmt.Sprintf("ev.asteriskIP : %+v", ev.asteriskIP))
+	// utils.Logger.Debug(fmt.Sprintf("ev.cachedFields : %+v", ev.cachedFields))
+	// utils.Logger.Debug(fmt.Sprintf("ev.Subsystems() : %+v", ev.Subsystems()))
+
 	if ev.ChannelState() != channelUp {
 		return
 	}
@@ -238,6 +244,7 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 	if !hasIt { // Not handled by us
 		return
 	}
+
 	sma.evCacheMux.Lock()
 	err := ev.UpdateCGREvent(cgrEv) // Updates the event directly in the cache
 	sma.evCacheMux.Unlock()
@@ -247,8 +254,10 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
 		return
 	}
+
 	// populate init session args
 	initSessionArgs := ev.V1InitSessionArgs(*cgrEv)
+
 	if initSessionArgs == nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate init session arguments",
 			utils.AsteriskAgent, ev.ChannelID()))
@@ -294,7 +303,6 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 			utils.AsteriskAgent, ev.ChannelID()))
 		return
 	}
-
 	var reply string
 	if err := sma.smg.Call(utils.SessionSv1TerminateSession,
 		tsArgs, &reply); err != nil {
@@ -328,6 +336,27 @@ func (sma *AsteriskAgent) Call(serviceMethod string, args interface{}, reply int
 	return utils.RPCCall(sma, serviceMethod, args, reply)
 }
 
-func (fsa *AsteriskAgent) V1GetActiveSessionIDs(ignParam string, sessionIDs *[]*sessions.SessionID) (err error) {
-	return utils.ErrNotImplemented
+func (sma *AsteriskAgent) V1GetActiveSessionIDs(ignParam string,
+	sessionIDs *[]*sessions.SessionID) (err error) {
+	utils.Logger.Debug(fmt.Sprintf("ASTERISK Enter in Sync session??"))
+	var sIDs []*sessions.SessionID
+	i := 0
+	sma.evCacheMux.RLock()
+	originIds := make([]string, len(sma.eventsCache))
+	for orgId := range sma.eventsCache {
+		originIds[i] = orgId
+		i++
+	}
+	sma.evCacheMux.RUnlock()
+	fmt.Println("originIds : ", originIds)
+	fmt.Println("sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address : ", sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address)
+	for _, orgId := range originIds {
+		sIDs = append(sIDs, &sessions.SessionID{
+			OriginHost: sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address,
+			OriginID:   orgId},
+		)
+	}
+	*sessionIDs = sIDs
+	return
+	//return utils.ErrNotImplemented
 }
