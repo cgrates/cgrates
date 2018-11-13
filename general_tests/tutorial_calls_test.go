@@ -104,14 +104,12 @@ func TestOpensipsCalls(t *testing.T) {
 	}
 }
 
-/* Need to be checked
 func TestAsteriskCalls(t *testing.T) {
 	optConf = utils.Asterisk
 	for _, stest := range sTestsCalls {
 		t.Run("", stest)
 	}
 }
-*/
 
 func testCallInitCfg(t *testing.T) {
 	// Init config first
@@ -243,7 +241,7 @@ func testCallRestartFS(t *testing.T) {
 // Connect rpc client to rater
 func testCallRpcConn(t *testing.T) {
 	var err error
-	tutorialCallsRpc, err = jsonrpc.Dial("tcp", tutorialCallsCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tutorialCallsRpc, err = jsonrpc.Dial("tcp", tutorialCallsCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
