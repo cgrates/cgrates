@@ -23,10 +23,13 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
+	"path"
 	"runtime"
 	"runtime/pprof"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/cgrates/cgrates/agents"
@@ -62,12 +65,10 @@ var (
 	cfgDir            = flag.String("config_dir", utils.CONFIG_DIR, "Configuration directory path.")
 	version           = flag.Bool("version", false, "Prints the application version.")
 	pidFile           = flag.String("pid", "", "Write pid file")
-	cpupath           = flag.String("cpupath", "", "write cpu profile to files")
-	cputimeout        = flag.Duration("cputimeout", 5*time.Second, "Time betwen cpu profile saves")
-	cpuNoFiles        = flag.Int("cpuNoFiles", 5, "Number of cpu profile to write")
-	mempath           = flag.String("mempath", "", "write memory profile to file")
-	memtimeout        = flag.Duration("memtimeout", 5*time.Second, "Time betwen memory profile saves")
-	memNoFiles        = flag.Int("memNoFiles", 5, "Number of memory profile to write")
+	cpuProfDir        = flag.String("cpuprof_dir", "", "write cpu profile to files")
+	memProfDir        = flag.String("memprof_dir", "", "write memory profile to file")
+	memProfInterval   = flag.Duration("memprof_interval", 5*time.Second, "Time betwen memory profile saves")
+	memProfNrFiles    = flag.Int("memprof_nrfiles", 1, "Number of memory profile to write")
 	scheduledShutdown = flag.String("scheduled_shutdown", "", "shutdown the engine after this duration")
 	singlecpu         = flag.Bool("singlecpu", false, "Run on single CPU core")
 	syslogger         = flag.String("logger", "", "logger <*syslog|*stdout>")
@@ -1295,38 +1296,58 @@ func schedCDRsConns(internalCDRSChan chan rpcclient.RpcClientConnection, exitCha
 	}
 	engine.SetSchedCdrsConns(cdrsConn)
 }
-func memprofiling(mempath string, timeout time.Duration, noFile int) {
-	for i := 1; ; i++ {
-		time.Sleep(timeout)
-		f, err := os.Create(fmt.Sprintf("%smem%v.prof", mempath, i))
-		if err != nil {
-			log.Fatal("could not create memory profile file: ", err)
-		}
-		runtime.GC() // get up-to-date statistics
-		if err := pprof.WriteHeapProfile(f); err != nil {
-			log.Fatal("could not write memory profile: ", err)
-		}
+
+func memProfFile(memProfPath string) bool {
+	f, err := os.Create(memProfPath)
+	if err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<memProfile>could not create memory profile file: %s", err))
+		return false
+	}
+	runtime.GC() // get up-to-date statistics
+	if err := pprof.WriteHeapProfile(f); err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<memProfile>could not write memory profile: %s", err))
 		f.Close()
-		if i%noFile == 0 {
+		return false
+	}
+	f.Close()
+	return true
+}
+
+func memProfiling(memProfDir string, interval time.Duration, nrFiles int, exitChan chan bool) {
+	for i := 1; ; i++ {
+		time.Sleep(interval)
+		memPath := path.Join(memProfDir, fmt.Sprintf("mem%v.prof", i))
+		if !memProfFile(memPath) {
+			exitChan <- true
+		}
+		if i%nrFiles == 0 {
 			i = 0 // reset the counting
 		}
 	}
 }
-func cpuprofiling(cpupath string, timeout time.Duration, noFile int) {
-	for i := 1; ; i++ {
-		f, err := os.Create(fmt.Sprintf("%scpu%v.prof", cpupath, i))
-		if err != nil {
-			log.Fatal(err)
-		}
-		pprof.StartCPUProfile(f)
-		time.Sleep(timeout) //wait to profile
-		pprof.StopCPUProfile()
-		f.Close()
-		if i%noFile == 0 {
-			i = 0 // reset the counting
-		}
+
+func cpuProfiling(cpuProfDir string, exitChan chan bool, stopChan, doneChan chan struct{}) {
+	cpuPath := path.Join(cpuProfDir, "cpu.prof")
+	f, err := os.Create(cpuPath)
+	if err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<cpuProfiling>could not create cpu profile file: %s", err))
+		exitChan <- true
+		return
 	}
+	pprof.StartCPUProfile(f)
+	<-stopChan
+	pprof.StopCPUProfile()
+	f.Close()
+	doneChan <- struct{}{}
 }
+
+func shutdownSingnalHandler(exitChan chan bool) {
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGHUP, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+	<-c
+	exitChan <- true
+}
+
 func main() {
 	flag.Parse()
 	if *version {
@@ -1339,14 +1360,19 @@ func main() {
 	if *singlecpu {
 		runtime.GOMAXPROCS(1) // Having multiple cpus may slow down computing due to CPU management, to be reviewed in future Go releases
 	}
-	exitChan := make(chan bool)
 
-	if *mempath != "" {
-		go memprofiling(*mempath, *memtimeout, *memNoFiles)
+	exitChan := make(chan bool)
+	go shutdownSingnalHandler(exitChan)
+
+	if *memProfDir != "" {
+		go memProfiling(*memProfDir, *memProfInterval, *memProfNrFiles, exitChan)
 	}
-	if *cpupath != "" {
-		go cpuprofiling(*cpupath, *cputimeout, *cpuNoFiles)
+	cpuProfChanStop := make(chan struct{})
+	cpuProfChanDone := make(chan struct{})
+	if *cpuProfDir != "" {
+		go cpuProfiling(*cpuProfDir, exitChan, cpuProfChanStop, cpuProfChanDone)
 	}
+
 	if *scheduledShutdown != "" {
 		shutdownDur, err := utils.ParseDurationWithNanosecs(*scheduledShutdown)
 		if err != nil {
@@ -1380,6 +1406,7 @@ func main() {
 		lgLevel = *logLevel
 	}
 	utils.Logger.SetLogLevel(lgLevel)
+
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
 	var dm *engine.DataManager
@@ -1514,8 +1541,6 @@ func main() {
 	// Start FreeSWITCHAgent
 	if cfg.FsAgentCfg().Enabled {
 		go startFsAgent(internalSMGChan, exitChan)
-		// close all sessions on shutdown
-		go shutdownSessionmanagerSingnalHandler(exitChan)
 	}
 
 	// Start SM-Kamailio
@@ -1607,6 +1632,13 @@ func main() {
 		internalSMGChan, internalDispatcherSChan, internalAnalyzerSChan, exitChan)
 	<-exitChan
 
+	if *cpuProfDir != "" { // wait to end cpuProfiling
+		cpuProfChanStop <- struct{}{}
+		<-cpuProfChanDone
+	}
+	if *memProfDir != "" { // write last memory profiling
+		memProfFile(path.Join(*memProfDir, "mem_final.prof"))
+	}
 	if *pidFile != "" {
 		if err := os.Remove(*pidFile); err != nil {
 			utils.Logger.Warning("Could not remove pid file: " + err.Error())
