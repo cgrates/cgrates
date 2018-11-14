@@ -252,7 +252,7 @@ func (cP *csvProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 	} else {
 		data = cP.req[cfgFieldIdx]
 	}
-	cP.cache.Set(fldPath, data, false)
+	cP.cache.Set(fldPath, data, false, false)
 	return
 }
 

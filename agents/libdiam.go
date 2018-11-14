@@ -386,6 +386,6 @@ func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err 
 	if data, err = diamAVPAsIface(avps[slectedIdx]); err != nil {
 		return nil, err
 	}
-	dP.cache.Set(fldPath, data, false)
+	dP.cache.Set(fldPath, data, false, false)
 	return
 }

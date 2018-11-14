@@ -57,14 +57,30 @@ type NavigableMap struct {
 }
 
 // Add will add items into NavigableMap populating also order
-func (nM *NavigableMap) Set(path []string, data interface{}, ordered bool) {
+// apnd parameter allows appending the data if both sides are []*NMItem
+func (nM *NavigableMap) Set(path []string, data interface{}, apnd, ordered bool) {
 	if ordered {
 		nM.order = append(nM.order, path)
 	}
 	mp := nM.data
 	for i, spath := range path {
 		if i == len(path)-1 { // last path
-			mp[spath] = data
+			oData, has := mp[spath]
+			if !has || !apnd { // no need to append
+				mp[spath] = data
+				return
+			}
+			dataItms, isNMItems := data.([]*NMItem)
+			if !isNMItems { // new data is not items
+				mp[spath] = data
+				return
+			}
+			oItms, isNMItems := oData.([]*NMItem)
+			if !isNMItems { // previous data is not items, simply overwrite
+				mp[spath] = data
+				return
+			}
+			mp[spath] = append(oItms, dataItms...)
 			return
 		}
 		if _, has := mp[spath]; !has {
@@ -166,16 +182,30 @@ func (nM *NavigableMap) AsNavigableMap(
 }
 
 // Merge will update nM with values from a second one
-func (nM *NavigableMap) Merge(nM2 *NavigableMap) {
+func (nM *NavigableMap) Merge(nM2 *NavigableMap) (err error) {
 	if nM2 == nil {
 		return
 	}
 	for k, v := range nM2.data {
+		oV, has := nM.data[k]
+		if !has {
+			nM.data[k] = v
+			continue
+		}
+		if oItms, isNMItems := oV.([]*NMItem); isNMItems {
+			vItms, isItms := v.([]*NMItem)
+			if !isItms {
+				return utils.ErrIncompatible
+			}
+			oItms = append(oItms, vItms...)
+			continue
+		}
 		nM.data[k] = v
 	}
 	if len(nM2.order) != 0 {
 		nM.order = append(nM.order, nM2.order...)
 	}
+	return
 }
 
 // indexMapPaths parses map returning the parsed branchPath, useful when not having order for NavigableMap

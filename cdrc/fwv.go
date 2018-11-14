@@ -301,7 +301,7 @@ func (fP *fwvProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 		return "", fmt.Errorf("FinalIndex : %+v is greater than : %+v", finalIndex, len(fP.req))
 	}
 	data = fP.req[startIndex:finalIndex]
-	fP.cache.Set(fldPath, data, false)
+	fP.cache.Set(fldPath, data, false, false)
 	return
 }
 

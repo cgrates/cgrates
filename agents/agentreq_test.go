@@ -44,14 +44,15 @@ func TestAgReqAsNavigableMap(t *testing.T) {
 	agReq := newAgentRequest(nil, nil, nil, nil, "cgrates.org", "", filterS)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set([]string{utils.CGRID},
-		utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), false)
-	agReq.CGRRequest.Set([]string{utils.ToR}, utils.VOICE, false)
-	agReq.CGRRequest.Set([]string{utils.Account}, "1001", false)
-	agReq.CGRRequest.Set([]string{utils.Destination}, "1002", false)
+		utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+		false, false)
+	agReq.CGRRequest.Set([]string{utils.ToR}, utils.VOICE, false, false)
+	agReq.CGRRequest.Set([]string{utils.Account}, "1001", false, false)
+	agReq.CGRRequest.Set([]string{utils.Destination}, "1002", false, false)
 	agReq.CGRRequest.Set([]string{utils.AnswerTime},
-		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC), false)
-	agReq.CGRRequest.Set([]string{utils.RequestType}, utils.META_PREPAID, false)
-	agReq.CGRRequest.Set([]string{utils.Usage}, time.Duration(3*time.Minute), false)
+		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC), false, false)
+	agReq.CGRRequest.Set([]string{utils.RequestType}, utils.META_PREPAID, false, false)
+	agReq.CGRRequest.Set([]string{utils.Usage}, time.Duration(3*time.Minute), false, false)
 
 	cgrRply := map[string]interface{}{
 		utils.CapAttributes: map[string]interface{}{
@@ -108,22 +109,22 @@ func TestAgReqAsNavigableMap(t *testing.T) {
 	eMp := config.NewNavigableMap(nil)
 	eMp.Set([]string{utils.Tenant}, []*config.NMItem{
 		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
-			Config: tplFlds[0]}}, true)
+			Config: tplFlds[0]}}, false, true)
 	eMp.Set([]string{utils.Account}, []*config.NMItem{
 		&config.NMItem{Data: "1001", Path: []string{utils.Account},
-			Config: tplFlds[1]}}, true)
+			Config: tplFlds[1]}}, false, true)
 	eMp.Set([]string{utils.Destination}, []*config.NMItem{
 		&config.NMItem{Data: "1002", Path: []string{utils.Destination},
-			Config: tplFlds[2]}}, true)
+			Config: tplFlds[2]}}, false, true)
 	eMp.Set([]string{"RequestedUsage"}, []*config.NMItem{
 		&config.NMItem{Data: "180", Path: []string{"RequestedUsage"},
-			Config: tplFlds[3]}}, true)
+			Config: tplFlds[3]}}, false, true)
 	eMp.Set([]string{"PaypalAccount"}, []*config.NMItem{
 		&config.NMItem{Data: "cgrates@paypal.com", Path: []string{"PaypalAccount"},
-			Config: tplFlds[6]}}, true)
+			Config: tplFlds[6]}}, false, true)
 	eMp.Set([]string{"MaxUsage"}, []*config.NMItem{
 		&config.NMItem{Data: "120", Path: []string{"MaxUsage"},
-			Config: tplFlds[7]}}, true)
+			Config: tplFlds[7]}}, false, true)
 	if mpOut, err := agReq.AsNavigableMap(tplFlds); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, mpOut) {
@@ -138,7 +139,7 @@ func TestAgReqMaxCost(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := newAgentRequest(nil, nil, nil, nil, "cgrates.org", "", filterS)
 	// populate request, emulating the way will be done in HTTPAgent
-	agReq.CGRRequest.Set([]string{utils.CapMaxUsage}, "120s", false)
+	agReq.CGRRequest.Set([]string{utils.CapMaxUsage}, "120s", false, false)
 
 	cgrRply := map[string]interface{}{
 		utils.CapMaxUsage: time.Duration(120 * time.Second),
@@ -156,7 +157,7 @@ func TestAgReqMaxCost(t *testing.T) {
 
 	eMp.Set([]string{"MaxUsage"}, []*config.NMItem{
 		&config.NMItem{Data: "120", Path: []string{"MaxUsage"},
-			Config: tplFlds[0]}}, true)
+			Config: tplFlds[0]}}, false, true)
 	if mpOut, err := agReq.AsNavigableMap(tplFlds); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, mpOut) {

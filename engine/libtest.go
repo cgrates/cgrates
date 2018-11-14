@@ -54,7 +54,6 @@ func InitDataDb(cfg *config.CGRConfig) error {
 }
 
 func InitStorDb(cfg *config.CGRConfig) error {
-	x := []string{utils.MYSQL, utils.POSTGRES}
 	storDb, err := ConfigureLoadStorage(cfg.StorDbCfg().StorDBType,
 		cfg.StorDbCfg().StorDBHost, cfg.StorDbCfg().StorDBPort,
 		cfg.StorDbCfg().StorDBName, cfg.StorDbCfg().StorDBUser,
@@ -68,7 +67,8 @@ func InitStorDb(cfg *config.CGRConfig) error {
 		cfg.StorDbCfg().StorDBType)); err != nil {
 		return err
 	}
-	if utils.IsSliceMember(x, cfg.StorDbCfg().StorDBType) {
+	if utils.IsSliceMember([]string{utils.MYSQL, utils.POSTGRES},
+		cfg.StorDbCfg().StorDBType) {
 		if err := SetDBVersions(storDb); err != nil {
 			return err
 		}

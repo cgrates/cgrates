@@ -147,7 +147,7 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 			}
 		}
 		valSet = append(valSet, nMItm)
-		nM.Set(fldPath, valSet, true)
+		nM.Set(fldPath, valSet, false, true)
 		if tplFld.Blocker { // useful in case of processing errors first
 			break
 		}

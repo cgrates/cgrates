@@ -56,6 +56,7 @@ var (
 	ErrMandatoryIeMissingNoCaps = errors.New("mandatory information missing")
 	ErrUnauthorizedApi          = errors.New("UNAUTHORIZED_API")
 	ErrUnknownApiKey            = errors.New("UNKNOWN_API_KEY")
+	ErrIncompatible             = errors.New("INCOMPATIBLE")
 	RalsErrorPrfx               = "RALS_ERROR"
 
 	ErrJsonIncompleteComment = errors.New("JSON_INCOMPLETE_COMMENT")

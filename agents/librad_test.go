@@ -98,9 +98,9 @@ func TestRadComposedFieldValue(t *testing.T) {
 		t.Error(err)
 	}
 	agReq := newAgentRequest(nil, nil, nil, nil, "cgrates.org", "", nil)
-	agReq.Vars.Set([]string{MetaRadReqType}, MetaRadAcctStart, false)
-	agReq.Vars.Set([]string{"Cisco"}, "CGR1", false)
-	agReq.Vars.Set([]string{"User-Name"}, "flopsy", false)
+	agReq.Vars.Set([]string{MetaRadReqType}, MetaRadAcctStart, false, false)
+	agReq.Vars.Set([]string{"Cisco"}, "CGR1", false, false)
+	agReq.Vars.Set([]string{"User-Name"}, "flopsy", false, false)
 	eOut := "*radAcctStart|flopsy|CGR1"
 	if out := radComposedFieldValue(pkt, agReq,
 		config.NewRSRParsersMustCompile("~*vars.*radReqType;|;~*vars.User-Name;|;~*vars.Cisco", true)); out != eOut {
@@ -118,9 +118,9 @@ func TestRadFieldOutVal(t *testing.T) {
 	}
 	eOut := fmt.Sprintf("%s|flopsy|CGR1", MetaRadAcctStart)
 	agReq := newAgentRequest(nil, nil, nil, nil, "cgrates.org", "", nil)
-	agReq.Vars.Set([]string{MetaRadReqType}, MetaRadAcctStart, false)
-	agReq.Vars.Set([]string{"Cisco"}, "CGR1", false)
-	agReq.Vars.Set([]string{"User-Name"}, "flopsy", false)
+	agReq.Vars.Set([]string{MetaRadReqType}, MetaRadAcctStart, false, false)
+	agReq.Vars.Set([]string{"Cisco"}, "CGR1", false, false)
+	agReq.Vars.Set([]string{"User-Name"}, "flopsy", false, false)
 	//processorVars{MetaRadReqType: MetaRadAcctStart}
 	cfgFld := &config.FCTemplate{Tag: "ComposedTest", Type: utils.META_COMPOSED, FieldId: utils.Destination,
 		Value: config.NewRSRParsersMustCompile("~*vars.*radReqType;|;~*vars.User-Name;|;~*vars.Cisco", true), Mandatory: true}
@@ -140,9 +140,9 @@ func TestRadReplyAppendAttributes(t *testing.T) {
 			Value: config.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", true)},
 	}
 	agReq := newAgentRequest(nil, nil, nil, nil, "cgrates.org", "", nil)
-	agReq.CGRReply.Set([]string{utils.CapMaxUsage}, time.Duration(time.Hour), false)
-	agReq.CGRReply.Set([]string{utils.CapAttributes, "RadReply"}, "AccessAccept", false)
-	agReq.CGRReply.Set([]string{utils.CapAttributes, utils.Account}, "1001", false)
+	agReq.CGRReply.Set([]string{utils.CapMaxUsage}, time.Duration(time.Hour), false, false)
+	agReq.CGRReply.Set([]string{utils.CapAttributes, "RadReply"}, "AccessAccept", false, false)
+	agReq.CGRReply.Set([]string{utils.CapAttributes, utils.Account}, "1001", false, false)
 	if err := radReplyAppendAttributes(rply, agReq, rplyFlds); err != nil {
 		t.Error(err)
 	}
@@ -180,7 +180,7 @@ func TestNewCGRReply(t *testing.T) {
 		},
 	}
 	eCgrRply = config.NewNavigableMap(ev)
-	eCgrRply.Set([]string{utils.Error}, "", false)
+	eCgrRply.Set([]string{utils.Error}, "", false, false)
 	if rpl, err := NewCGRReply(config.NavigableMapper(ev), nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCgrRply, rpl) {

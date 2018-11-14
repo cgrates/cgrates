@@ -155,14 +155,14 @@ func TestFilterPassGreaterThan(t *testing.T) {
 		t.Error(err)
 	}
 	ev := config.NewNavigableMap(nil)
-	ev.Set([]string{"ASR"}, 20, true)
+	ev.Set([]string{"ASR"}, 20, false, true)
 	if passes, err := rf.passGreaterThan(ev); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("not passing")
 	}
 	ev = config.NewNavigableMap(nil)
-	ev.Set([]string{"ASR"}, 40, true)
+	ev.Set([]string{"ASR"}, 40, false, true)
 	if passes, err := rf.passGreaterThan(ev); err != nil {
 		t.Error(err)
 	} else if passes {
@@ -187,7 +187,7 @@ func TestFilterPassGreaterThan(t *testing.T) {
 		t.Error("not passing")
 	}
 	ev = config.NewNavigableMap(nil)
-	ev.Set([]string{"ASR"}, 20, true)
+	ev.Set([]string{"ASR"}, 20, false, true)
 	if passes, err := rf.passGreaterThan(ev); err != nil {
 		t.Error(err)
 	} else if passes {
@@ -198,7 +198,7 @@ func TestFilterPassGreaterThan(t *testing.T) {
 		t.Error(err)
 	}
 	ev = config.NewNavigableMap(nil)
-	ev.Set([]string{"ACD"}, time.Duration(2*time.Minute), true)
+	ev.Set([]string{"ACD"}, time.Duration(2*time.Minute), false, true)
 	if passes, err := rf.passGreaterThan(ev); err != nil {
 		t.Error(err)
 	} else if !passes {

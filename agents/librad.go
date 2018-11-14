@@ -130,7 +130,7 @@ func NewCGRReply(rply config.NavigableMapper,
 			return nil, err
 		}
 	}
-	mp.Set([]string{utils.Error}, "", false) // enforce empty error
+	mp.Set([]string{utils.Error}, "", false, false) // enforce empty error
 	return
 }
 
@@ -169,7 +169,7 @@ func (pk *radiusDP) FieldAsInterface(fldPath []string) (data interface{}, err er
 	if len(pk.req.AttributesWithName(fldPath[0], "")) != 0 {
 		data = pk.req.AttributesWithName(fldPath[0], "")[0].GetStringValue()
 	}
-	pk.cache.Set(fldPath, data, false)
+	pk.cache.Set(fldPath, data, false, false)
 	return
 }
 

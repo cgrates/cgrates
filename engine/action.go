@@ -885,7 +885,7 @@ func (cdrP *cdrLogProvider) FieldAsInterface(fldPath []string) (data interface{}
 	default:
 		data = fldPath[0]
 	}
-	cdrP.cache.Set(fldPath, data, false)
+	cdrP.cache.Set(fldPath, data, false, false)
 	return
 }
 

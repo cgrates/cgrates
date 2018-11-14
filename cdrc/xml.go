@@ -255,7 +255,7 @@ func (xP *xmlProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 		}
 	}
 	data, err = elementText(xP.req, relPath.AsString("/", false))
-	xP.cache.Set(fldPath, data, false)
+	xP.cache.Set(fldPath, data, false, false)
 	return
 }
 

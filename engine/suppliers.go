@@ -369,9 +369,9 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 	//filter the supplier
 	if len(spl.FilterIDs) != 0 {
 		nM := config.NewNavigableMap(nil)
-		nM.Set([]string{"*req"}, ev.Event, false)
-		nM.Set([]string{"*sd"}, sortedSpl.SortingData, false)
-		nM.Set([]string{"*gs"}, metricForFilter, false)
+		nM.Set([]string{"*req"}, ev.Event, false, false)
+		nM.Set([]string{"*sd"}, sortedSpl.SortingData, false, false)
+		nM.Set([]string{"*gs"}, metricForFilter, false, false)
 		if pass, err = spS.filterS.Pass(ev.Tenant, spl.FilterIDs,
 			nM); err != nil {
 			return nil, false, err

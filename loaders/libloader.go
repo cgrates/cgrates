@@ -106,7 +106,7 @@ func (cP *csvProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 		idx = fldPath[1]
 	}
 	if fileName != "" && cP.fileName != fileName {
-		cP.cache.Set(fldPath, nil, false)
+		cP.cache.Set(fldPath, nil, false, false)
 		return
 	}
 	if cfgFieldIdx, err := strconv.Atoi(idx); err != nil || len(cP.req) <= cfgFieldIdx {
@@ -115,7 +115,7 @@ func (cP *csvProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 		data = cP.req[cfgFieldIdx]
 	}
 
-	cP.cache.Set(fldPath, data, false)
+	cP.cache.Set(fldPath, data, false, false)
 	return
 }
 

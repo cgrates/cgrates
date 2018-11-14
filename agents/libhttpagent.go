@@ -78,7 +78,7 @@ func (hU *httpUrlDP) FieldAsInterface(fldPath []string) (data interface{}, err e
 		return // data found in cache
 	}
 	data = hU.req.FormValue(fldPath[0])
-	hU.cache.Set(fldPath, data, false)
+	hU.cache.Set(fldPath, data, false, false)
 	return
 }
 
@@ -164,7 +164,7 @@ func (hU *httpXmlDP) FieldAsInterface(fldPath []string) (data interface{}, err e
 	}
 	//add the content in data and cache it
 	data = elmnt.InnerText()
-	hU.cache.Set(fldPath, data, false)
+	hU.cache.Set(fldPath, data, false, false)
 	return
 }
 
