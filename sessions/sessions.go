@@ -2322,7 +2322,6 @@ func (smg *SMGeneric) OnBiJSONDisconnect(c *rpc2.Client) {
 }
 
 func (smg *SMGeneric) syncSessions() {
-	utils.Logger.Debug("Enter in sync sessions ????")
 	var rpcClnts []rpcclient.RpcClientConnection
 	for _, conn := range smg.intBiJSONConns {
 		rpcClnts = append(rpcClnts, conn)
