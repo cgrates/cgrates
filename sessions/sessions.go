@@ -2345,7 +2345,6 @@ func (smg *SMGeneric) syncSessions() {
 			}
 		}
 	}
-	utils.Logger.Debug(fmt.Sprintf("queried CGRIDS : %+v", queriedCGRIDs))
 	var toBeRemoved []string
 	smg.aSessionsMux.RLock()
 	for cgrid := range smg.activeSessions {

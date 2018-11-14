@@ -229,12 +229,6 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 
 // Ussually channelUP
 func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
-	// utils.Logger.Debug(fmt.Sprintf("#################handleChannelStateChange#####################"))
-	// utils.Logger.Debug(fmt.Sprintf("ev.ariEv : %+v", ev.ariEv))
-	// utils.Logger.Debug(fmt.Sprintf("ev.asteriskIP : %+v", ev.asteriskIP))
-	// utils.Logger.Debug(fmt.Sprintf("ev.cachedFields : %+v", ev.cachedFields))
-	// utils.Logger.Debug(fmt.Sprintf("ev.Subsystems() : %+v", ev.Subsystems()))
-
 	if ev.ChannelState() != channelUp {
 		return
 	}
@@ -338,7 +332,6 @@ func (sma *AsteriskAgent) Call(serviceMethod string, args interface{}, reply int
 
 func (sma *AsteriskAgent) V1GetActiveSessionIDs(ignParam string,
 	sessionIDs *[]*sessions.SessionID) (err error) {
-	utils.Logger.Debug(fmt.Sprintf("ASTERISK Enter in Sync session??"))
 	var sIDs []*sessions.SessionID
 	i := 0
 	sma.evCacheMux.RLock()
@@ -348,15 +341,13 @@ func (sma *AsteriskAgent) V1GetActiveSessionIDs(ignParam string,
 		i++
 	}
 	sma.evCacheMux.RUnlock()
-	fmt.Println("originIds : ", originIds)
-	fmt.Println("sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address : ", sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address)
 	for _, orgId := range originIds {
 		sIDs = append(sIDs, &sessions.SessionID{
-			OriginHost: sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address,
+			OriginHost: strings.Split(sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address, ":")[0],
 			OriginID:   orgId},
 		)
 	}
 	*sessionIDs = sIDs
 	return
-	//return utils.ErrNotImplemented
+
 }

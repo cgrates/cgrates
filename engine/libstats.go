@@ -136,9 +136,13 @@ func (sq *StatQueue) TenantID() string {
 
 // ProcessEvent processes a utils.CGREvent, returns true if processed
 func (sq *StatQueue) ProcessEvent(ev *utils.CGREvent) (err error) {
+	fmt.Println("sq before ", utils.ToJSON(sq))
 	sq.remExpired()
+	fmt.Println("sq after rem expired ", utils.ToJSON(sq))
 	sq.remOnQueueLength()
+	fmt.Println("sq after rem queue lengt  ", utils.ToJSON(sq))
 	sq.addStatEvent(ev)
+	fmt.Println("sq after radd event  ", utils.ToJSON(sq))
 	return
 }
 
@@ -185,9 +189,11 @@ func (sq *StatQueue) remOnQueueLength() {
 // addStatEvent computes metrics for an event
 func (sq *StatQueue) addStatEvent(ev *utils.CGREvent) {
 	var expTime *time.Time
+	fmt.Println("sq.ttl : ", sq.ttl)
 	if sq.ttl != nil {
 		expTime = utils.TimePointer(time.Now().Add(*sq.ttl))
 	}
+	fmt.Println("expTime : ", expTime)
 	sq.SQItems = append(sq.SQItems,
 		struct {
 			EventID    string
