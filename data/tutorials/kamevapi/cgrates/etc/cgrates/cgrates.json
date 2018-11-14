@@ -5,6 +5,7 @@
 
 "general": {
     "log_level": 7,
+	"node_id":"CGRKamailio",
 },
 
 
@@ -31,9 +32,6 @@
 		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 	"stats_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
-	],
-	"attributes_conns": [
 		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 },
@@ -117,7 +115,7 @@
 	"thresholds_conns": [
 		{"address": "*internal"}
 	],
-	"string_indexed_fields": ["Account"],
+	"string_indexed_fields": ["Account","RunID","Destination"],
 },
 
 
