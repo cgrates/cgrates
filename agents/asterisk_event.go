@@ -245,6 +245,7 @@ func (smaEv *SMAsteriskEvent) AsMapStringInterface() (mp map[string]interface{})
 	for extraKey, extraVal := range smaEv.ExtraParameters() { // Append extraParameters
 		mp[extraKey] = extraVal
 	}
+	mp[utils.Source] = utils.KamailioAgent
 	return
 }
 

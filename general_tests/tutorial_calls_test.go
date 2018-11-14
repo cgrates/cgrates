@@ -77,7 +77,7 @@ var sTestsCalls = []func(t *testing.T){
 	testCallCheckResourceRelease,
 	testCallCheckThreshold1001After,
 	testCallCheckThreshold1002After,
-	//testCallSyncSessions,
+	testCallSyncSessions,
 	testCallStopPjsuaListener,
 	testCallStopCgrEngine,
 	testCallStopFS,
@@ -424,11 +424,6 @@ func testCallCall1001To1003(t *testing.T) {
 	}
 }
 
-// 1001 -> 1002 67s
-// 1002 -> 1001 65s
-// 1001 -> 1003 12s
-// here we have 3 units of resource allocation
-
 // Call from 1003 (prepaid) to 1001 for 20 seconds
 func testCallCall1003To1001(t *testing.T) {
 	if err := engine.PjsuaCallUri(
@@ -438,11 +433,6 @@ func testCallCall1003To1001(t *testing.T) {
 	}
 	// after this call from 1001 to 1003 and call from 1003 to 1001 should be done
 }
-
-// 1001 -> 1002 45s
-// 1002 -> 1001 43s
-// 1003 -> 1001 20s
-// 1 unit was release and 1 units was accolated (now we have 3 units allocated )
 
 // Call from 1003 (prepaid) to 1001 for 15 seconds
 func testCallCall1003To1001SecondTime(t *testing.T) {
@@ -454,11 +444,6 @@ func testCallCall1003To1001SecondTime(t *testing.T) {
 	}
 	time.Sleep(time.Second)
 }
-
-// 1001 -> 1002 22s
-// 1002 -> 1001 20s
-// 1003 -> 1001 15s (new call)
-// 3 units allocated
 
 // Check if the resource was Allocated
 func testCallCheckResourceAllocation(t *testing.T) {
@@ -483,7 +468,7 @@ func testCallCheckResourceAllocation(t *testing.T) {
 		}
 	}
 	// Allow calls to finish before start querying the results
-	time.Sleep(time.Duration(30) * time.Second)
+	time.Sleep(time.Duration(50) * time.Second)
 }
 
 // Make sure account was debited properly
@@ -699,7 +684,7 @@ func testCallSyncSessions(t *testing.T) {
 		t.Errorf("Resources: %+v", utils.ToJSON(rs))
 	}
 	for _, r := range *rs {
-		if r.ID == "ResGroup1" && (len(r.Usages) != 2 || len(r.TTLIdx) != 2) {
+		if r.ID == "ResGroup1" && len(r.Usages) != 2 {
 			t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))
 		}
 	}
@@ -727,7 +712,7 @@ func testCallSyncSessions(t *testing.T) {
 
 	// activeSessions shouldn't be active
 	if err := tutorialCallsRpc.Call(utils.SessionSv1GetActiveSessions,
-		&map[string]string{}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&map[string]string{}, &reply); err != nil && err.Error() != utils.ErrNotFound.Error() {
 		t.Error("Got error on SessionSv1.GetActiveSessions: ", err)
 	}
 
@@ -741,7 +726,7 @@ func testCallSyncSessions(t *testing.T) {
 		sourceForCDR = utils.KamailioAgent
 		numberOfCDR = 3
 	case utils.Asterisk:
-		sourceForCDR = ""
+		sourceForCDR = utils.AsteriskAgent
 		numberOfCDR = 3
 	}
 	// verify cdr
