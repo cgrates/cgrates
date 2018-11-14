@@ -77,7 +77,7 @@ var sTestsCalls = []func(t *testing.T){
 	testCallCheckResourceRelease,
 	testCallCheckThreshold1001After,
 	testCallCheckThreshold1002After,
-	testCallSyncSessions,
+	//testCallSyncSessions,
 	testCallStopPjsuaListener,
 	testCallStopCgrEngine,
 	testCallStopFS,
@@ -424,6 +424,11 @@ func testCallCall1001To1003(t *testing.T) {
 	}
 }
 
+// 1001 -> 1002 67s
+// 1002 -> 1001 65s
+// 1001 -> 1003 12s
+// here we have 3 units of resource allocation
+
 // Call from 1003 (prepaid) to 1001 for 20 seconds
 func testCallCall1003To1001(t *testing.T) {
 	if err := engine.PjsuaCallUri(
@@ -431,12 +436,17 @@ func testCallCall1003To1001(t *testing.T) {
 		"sip:1001@127.0.0.1", "sip:127.0.0.1:5080", time.Duration(20)*time.Second, 5074); err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(22 * time.Second)
 	// after this call from 1001 to 1003 and call from 1003 to 1001 should be done
 }
 
+// 1001 -> 1002 45s
+// 1002 -> 1001 43s
+// 1003 -> 1001 20s
+// 1 unit was release and 1 units was accolated (now we have 3 units allocated )
+
 // Call from 1003 (prepaid) to 1001 for 15 seconds
 func testCallCall1003To1001SecondTime(t *testing.T) {
+	time.Sleep(22 * time.Second)
 	if err := engine.PjsuaCallUri(
 		&engine.PjsuaAccount{Id: "sip:1003@127.0.0.1", Username: "1003", Password: "CGRateS.org", Realm: "*"},
 		"sip:1001@127.0.0.1", "sip:127.0.0.1:5080", time.Duration(15)*time.Second, 5075); err != nil {
@@ -444,6 +454,11 @@ func testCallCall1003To1001SecondTime(t *testing.T) {
 	}
 	time.Sleep(time.Second)
 }
+
+// 1001 -> 1002 22s
+// 1002 -> 1001 20s
+// 1003 -> 1001 15s (new call)
+// 3 units allocated
 
 // Check if the resource was Allocated
 func testCallCheckResourceAllocation(t *testing.T) {
@@ -463,12 +478,12 @@ func testCallCheckResourceAllocation(t *testing.T) {
 		t.Errorf("Resources: %+v", utils.ToJSON(rs))
 	}
 	for _, r := range *rs {
-		if r.ID == "ResGroup1" && (len(r.Usages) != 2 || len(r.TTLIdx) != 2) {
+		if r.ID == "ResGroup1" && len(r.Usages) != 3 {
 			t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))
 		}
 	}
 	// Allow calls to finish before start querying the results
-	time.Sleep(time.Duration(45) * time.Second)
+	time.Sleep(time.Duration(30) * time.Second)
 }
 
 // Make sure account was debited properly
@@ -610,9 +625,8 @@ func testCallCheckResourceRelease(t *testing.T) {
 		t.Errorf("Resources: %+v", rs)
 	}
 	for _, r := range *rs {
-		if r.ID == "ResGroup1" &&
-			(len(r.Usages) != 0 || len(r.TTLIdx) != 0) {
-			t.Errorf("Unexpected resource: %+v", r)
+		if r.ID == "ResGroup1" && len(r.Usages) != 0 {
+			t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))
 		}
 	}
 }
