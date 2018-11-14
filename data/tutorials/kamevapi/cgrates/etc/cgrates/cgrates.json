@@ -106,7 +106,6 @@
 		{"address": "*internal"}
 	],
 	"string_indexed_fields": ["Account"],
-	"prefix_indexed_fields": ["Destination"],
 },
 
 
@@ -137,7 +136,6 @@
 		{"address": "*internal"}	
 	],
 	"string_indexed_fields": ["Account"],
-	"prefix_indexed_fields": ["Destination"],
 },
 
 
