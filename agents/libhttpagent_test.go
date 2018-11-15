@@ -130,4 +130,14 @@ func TestHttpXmlDPFieldAsInterface(t *testing.T) {
 	} else if data != "37" {
 		t.Errorf("expecting: 37, received: <%s>", data)
 	}
+	if data, err := dP.FieldAsString([]string{"complete-success-notification", "callleg", "@calllegid"}); err != nil {
+		t.Error(err)
+	} else if data != "222146" {
+		t.Errorf("expecting: 222146, received: <%s>", data)
+	}
+	if data, err := dP.FieldAsString([]string{"complete-success-notification", "callleg[1]", "@calllegid"}); err != nil {
+		t.Error(err)
+	} else if data != "222147" {
+		t.Errorf("expecting: 222147, received: <%s>", data)
+	}
 }

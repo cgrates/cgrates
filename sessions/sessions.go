@@ -292,7 +292,7 @@ func (smg *SMGeneric) ttlTerminate(s *SMGSession, tmtr *smgSessionTerminator) {
 		var reply string
 		argsRU := utils.ArgRSv1ResourceUsage{
 			CGREvent: utils.CGREvent{
-				Tenant: s.EventStart.GetStringIgnoreErrors(utils.Tenant),
+				Tenant: s.Tenant,
 				Event:  s.EventStart.AsMapInterface(),
 			},
 			UsageID: s.ResourceID,

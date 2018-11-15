@@ -27,6 +27,7 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -39,7 +40,7 @@ import (
 var tutorialCallsCfg *config.CGRConfig
 var tutorialCallsRpc *rpc.Client
 var tutorialCallsPjSuaListener *os.File
-var waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
+var waitRater = flag.Int("wait_rater", 1000, "Number of miliseconds to wait for rater to start and cache")
 var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 var fsConfig = flag.String("fsConfig", "/usr/share/cgrates/tutorials/fs_evsock", "FreeSwitch tutorial folder")
 var kamConfig = flag.String("kamConfig", "/usr/share/cgrates/tutorials/kamevapi", "Kamailio tutorial folder")
@@ -72,6 +73,7 @@ var sTestsCalls = []func(t *testing.T){
 	testCallAccount1001,
 	testCall1001Cdrs,
 	testCall1002Cdrs,
+	testCall1003Cdrs,
 	testCallStatMetrics,
 	testCallCheckResourceRelease,
 	testCallCheckThreshold1001After,
@@ -104,14 +106,12 @@ func TestOpensipsCalls(t *testing.T) {
 	}
 }
 
-/* Need to be checked
 func TestAsteriskCalls(t *testing.T) {
 	optConf = utils.Asterisk
 	for _, stest := range sTestsCalls {
 		t.Run("", stest)
 	}
 }
-*/
 
 func testCallInitCfg(t *testing.T) {
 	// Init config first
@@ -243,11 +243,10 @@ func testCallRestartFS(t *testing.T) {
 // Connect rpc client to rater
 func testCallRpcConn(t *testing.T) {
 	var err error
-	tutorialCallsRpc, err = jsonrpc.Dial("tcp", tutorialCallsCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tutorialCallsRpc, err = jsonrpc.Dial("tcp", tutorialCallsCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 // Load the tariff plan, creating accounts and their balances
@@ -366,6 +365,7 @@ func testCallStartPjsuaListener(t *testing.T) {
 		acnts, 5070, time.Duration(*waitRater)*time.Millisecond); err != nil {
 		t.Fatal(err)
 	}
+	time.Sleep(1 * time.Second)
 }
 
 // Call from 1001 (prepaid) to 1002
@@ -375,7 +375,8 @@ func testCallCall1001To1002(t *testing.T) {
 		"sip:1002@127.0.0.1", "sip:127.0.0.1:5080", time.Duration(67)*time.Second, 5071); err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(1 * time.Second)
+	// give time to session to start so we can check it
+	time.Sleep(time.Second)
 }
 
 // GetActiveSessions
@@ -431,16 +432,18 @@ func testCallCall1003To1001(t *testing.T) {
 		"sip:1001@127.0.0.1", "sip:127.0.0.1:5080", time.Duration(20)*time.Second, 5074); err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(22 * time.Second)
+	// after this call from 1001 to 1003 and call from 1003 to 1001 should be done
 }
 
 // Call from 1003 (prepaid) to 1001 for 15 seconds
 func testCallCall1003To1001SecondTime(t *testing.T) {
+	time.Sleep(22 * time.Second)
 	if err := engine.PjsuaCallUri(
 		&engine.PjsuaAccount{Id: "sip:1003@127.0.0.1", Username: "1003", Password: "CGRateS.org", Realm: "*"},
 		"sip:1001@127.0.0.1", "sip:127.0.0.1:5080", time.Duration(15)*time.Second, 5075); err != nil {
 		t.Fatal(err)
 	}
+	time.Sleep(time.Second)
 }
 
 // Check if the resource was Allocated
@@ -461,15 +464,16 @@ func testCallCheckResourceAllocation(t *testing.T) {
 		t.Errorf("Resources: %+v", utils.ToJSON(rs))
 	}
 	for _, r := range *rs {
-		if r.ID == "ResGroup1" && (len(r.Usages) != 2 || len(r.TTLIdx) != 2) {
+		if r.ID == "ResGroup1" && len(r.Usages) != 3 {
 			t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))
 		}
 	}
+	// Allow calls to finish before start querying the results
+	time.Sleep(time.Duration(50) * time.Second)
 }
 
 // Make sure account was debited properly
 func testCallAccount1001(t *testing.T) {
-	time.Sleep(time.Duration(60) * time.Second) // Allow calls to finish before start querying the results
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := tutorialCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
@@ -495,6 +499,10 @@ func testCall1001Cdrs(t *testing.T) {
 				t.Errorf("Unexpected RequestType for CDR: %+v", cdr.RequestType)
 			}
 			if cdr.Destination == "1002" {
+				// in case of Asterisk take the integer part from usage
+				if optConf == utils.Asterisk {
+					cdr.Usage = strings.Split(cdr.Usage, ".")[0] + "s"
+				}
 				if cdr.Usage != "1m7s" && cdr.Usage != "1m8s" { // Usage as seconds
 					t.Errorf("Unexpected Usage for CDR: %+v", cdr.Usage)
 				}
@@ -502,6 +510,10 @@ func testCall1001Cdrs(t *testing.T) {
 					t.Errorf("Unexpected CostSource for CDR: %+v", cdr.CostSource)
 				}
 			} else if cdr.Destination == "1003" {
+				// in case of Asterisk take the integer part from usage
+				if optConf == utils.Asterisk {
+					cdr.Usage = strings.Split(cdr.Usage, ".")[0] + "s"
+				}
 				if cdr.Usage != "12s" && cdr.Usage != "13s" { // Usage as seconds
 					t.Errorf("Unexpected Usage for CDR: %+v", cdr.Usage)
 				}
@@ -516,7 +528,8 @@ func testCall1001Cdrs(t *testing.T) {
 // Make sure account was debited properly
 func testCall1002Cdrs(t *testing.T) {
 	var reply []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{"1002"}, DestinationPrefixes: []string{"1001"}}
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT},
+		Accounts: []string{"1002"}, DestinationPrefixes: []string{"1001"}}
 	if err := tutorialCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
@@ -525,7 +538,11 @@ func testCall1002Cdrs(t *testing.T) {
 		if reply[0].RequestType != utils.META_POSTPAID {
 			t.Errorf("Unexpected RequestType for CDR: %+v", reply[0].RequestType)
 		}
-		if reply[0].Usage != "1m5s" { // Usage as seconds
+		// in case of Asterisk take the integer part from usage
+		if optConf == utils.Asterisk {
+			reply[0].Usage = strings.Split(reply[0].Usage, ".")[0] + "s"
+		}
+		if reply[0].Usage != "1m5s" && reply[0].Usage != "1m6s" { // Usage as seconds
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0].Usage)
 		}
 		if reply[0].CostSource != utils.MetaCDRs {
@@ -534,33 +551,86 @@ func testCall1002Cdrs(t *testing.T) {
 	}
 }
 
+// Make sure account was debited properly
+func testCall1003Cdrs(t *testing.T) {
+	var reply []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT},
+		Accounts: []string{"1003"}, DestinationPrefixes: []string{"1001"}}
+	if err := tutorialCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(reply) != 2 {
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	} else {
+		for _, cdr := range reply {
+			if cdr.RequestType != utils.META_PREPAID {
+				t.Errorf("Unexpected RequestType for CDR: %+v", cdr.RequestType)
+			}
+			// in case of Asterisk take the integer part from usage
+			if optConf == utils.Asterisk {
+				cdr.Usage = strings.Split(cdr.Usage, ".")[0] + "s"
+			}
+			if cdr.Usage != "15s" && cdr.Usage != "16s" &&
+				cdr.Usage != "20s" && cdr.Usage != "21s" { // Usage as seconds
+				t.Errorf("Unexpected Usage for CDR: %+v", cdr.Usage)
+			}
+			if cdr.CostSource != utils.MetaSessionS {
+				t.Errorf("Unexpected CostSource for CDR: %+v", cdr.CostSource)
+			}
+
+		}
+	}
+}
+
 func testCallStatMetrics(t *testing.T) {
 	var metrics map[string]string
 	firstStatMetrics1 := map[string]string{
+		utils.MetaTCC: "1.35346",
+		utils.MetaTCD: "2m27s",
+	}
+	firstStatMetrics2 := map[string]string{
 		utils.MetaTCC: "1.35009",
 		utils.MetaTCD: "2m25s",
 	}
-	firstStatMetrics2 := map[string]string{
+	firstStatMetrics3 := map[string]string{
 		utils.MetaTCC: "1.34009",
 		utils.MetaTCD: "2m24s",
 	}
-	secondStatMetrics := map[string]string{
+	firstStatMetrics4 := map[string]string{
+		utils.MetaTCC: "1.35346",
+		utils.MetaTCD: "2m24s",
+	}
+	secondStatMetrics1 := map[string]string{
 		utils.MetaTCC: "0.6",
 		utils.MetaTCD: "35s",
+	}
+	secondStatMetrics2 := map[string]string{
+		utils.MetaTCC: "0.6",
+		utils.MetaTCD: "37s",
 	}
 
 	if err := tutorialCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2"}, &metrics); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(firstStatMetrics1, metrics) &&
-		!reflect.DeepEqual(firstStatMetrics2, metrics) {
+	}
+	if optConf == utils.Asterisk {
+		metrics[utils.MetaTCD] = strings.Split(metrics[utils.MetaTCD], ".")[0] + "s"
+	}
+	if !reflect.DeepEqual(firstStatMetrics1, metrics) &&
+		!reflect.DeepEqual(firstStatMetrics2, metrics) &&
+		!reflect.DeepEqual(firstStatMetrics3, metrics) &&
+		!reflect.DeepEqual(firstStatMetrics4, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", firstStatMetrics1, metrics)
 	}
 	if err := tutorialCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2_1"}, &metrics); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(secondStatMetrics, metrics) {
-		t.Errorf("expecting: %+v, received reply: %s", secondStatMetrics, metrics)
+	}
+	if optConf == utils.Asterisk {
+		metrics[utils.MetaTCD] = strings.Split(metrics[utils.MetaTCD], ".")[0] + "s"
+	}
+	if !reflect.DeepEqual(secondStatMetrics1, metrics) &&
+		!reflect.DeepEqual(secondStatMetrics2, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", secondStatMetrics1, metrics)
 	}
 }
 
@@ -581,9 +651,8 @@ func testCallCheckResourceRelease(t *testing.T) {
 		t.Errorf("Resources: %+v", rs)
 	}
 	for _, r := range *rs {
-		if r.ID == "ResGroup1" &&
-			(len(r.Usages) != 0 || len(r.TTLIdx) != 0) {
-			t.Errorf("Unexpected resource: %+v", r)
+		if r.ID == "ResGroup1" && len(r.Usages) != 0 {
+			t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))
 		}
 	}
 }
@@ -616,19 +685,19 @@ func testCallSyncSessions(t *testing.T) {
 	var reply *[]*sessions.ActiveSession
 	// activeSessions shouldn't be active
 	if err := tutorialCallsRpc.Call(utils.SessionSv1GetActiveSessions,
-		&map[string]string{}, &reply); err.Error() != utils.ErrNotFound.Error() {
-		t.Error("Got error on SessionSv1.GetActiveSessions: ", err.Error())
+		&map[string]string{}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error("Got error on SessionSv1.GetActiveSessions: ", err)
 	}
 	// 1001 call 1002 stop the call after 12 seconds
 	if err := engine.PjsuaCallUri(
 		&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "CGRateS.org", Realm: "*"},
-		"sip:1002@127.0.0.1", "sip:127.0.0.1:5080", time.Duration(120)*time.Second, 5071); err != nil {
+		"sip:1002@127.0.0.1", "sip:127.0.0.1:5080", time.Duration(120)*time.Second, 5076); err != nil {
 		t.Fatal(err)
 	}
 	// 1001 call 1003 stop the call after 11 seconds
 	if err := engine.PjsuaCallUri(
 		&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "CGRateS.org", Realm: "*"},
-		"sip:1003@127.0.0.1", "sip:127.0.0.1:5080", time.Duration(120)*time.Second, 5073); err != nil {
+		"sip:1003@127.0.0.1", "sip:127.0.0.1:5080", time.Duration(120)*time.Second, 5077); err != nil {
 		t.Fatal(err)
 	}
 	time.Sleep(1 * time.Second)
@@ -637,28 +706,26 @@ func testCallSyncSessions(t *testing.T) {
 		&map[string]string{}, &reply); err != nil {
 		t.Error("Got error on SessionSv1.GetActiveSessions: ", err.Error())
 	} else if len(*reply) != 2 {
-		t.Errorf("expecting 2, received reply: %+v", utils.ToJSON(reply))
+		t.Errorf("expecting 2 active sessions, received: %+v", utils.ToJSON(reply))
 	}
 	//check if resource was allocated for 2 calls(1001->1002;1001->1003)
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
-			ID:     "ResourceAllocation",
+			ID:     "AllocateResource",
 			Event: map[string]interface{}{
 				utils.Account:     "1001",
 				utils.Subject:     "1001",
 				utils.Destination: "1002"},
-		},
-		Units: 1,
-	}
+		}}
 	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Error(err)
 	} else if len(*rs) != 1 {
 		t.Errorf("Resources: %+v", utils.ToJSON(rs))
 	}
 	for _, r := range *rs {
-		if r.ID == "ResGroup1" && (len(r.Usages) != 2 || len(r.TTLIdx) != 2) {
+		if r.ID == "ResGroup1" && len(r.Usages) != 2 {
 			t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))
 		}
 	}
@@ -686,8 +753,8 @@ func testCallSyncSessions(t *testing.T) {
 
 	// activeSessions shouldn't be active
 	if err := tutorialCallsRpc.Call(utils.SessionSv1GetActiveSessions,
-		&map[string]string{}, &reply); err.Error() != utils.ErrNotFound.Error() {
-		t.Error("Got error on SessionSv1.GetActiveSessions: ", err.Error())
+		&map[string]string{}, &reply); err != nil && err.Error() != utils.ErrNotFound.Error() {
+		t.Error("Got error on SessionSv1.GetActiveSessions: ", err)
 	}
 
 	var sourceForCDR string
@@ -698,6 +765,9 @@ func testCallSyncSessions(t *testing.T) {
 		numberOfCDR = 2
 	case utils.Kamailio:
 		sourceForCDR = utils.KamailioAgent
+		numberOfCDR = 3
+	case utils.Asterisk:
+		sourceForCDR = utils.AsteriskAgent
 		numberOfCDR = 3
 	}
 	// verify cdr
@@ -732,8 +802,7 @@ func testCallSyncSessions(t *testing.T) {
 		t.Errorf("Resources: %+v", rsAfter)
 	}
 	for _, r := range *rsAfter {
-		if r.ID == "ResGroup1" &&
-			(len(r.Usages) != 0 || len(r.TTLIdx) != 0) {
+		if r.ID == "ResGroup1" && len(r.Usages) != 0 {
 			t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))
 		}
 	}

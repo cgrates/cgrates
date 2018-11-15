@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
@@ -244,6 +245,7 @@ func (smaEv *SMAsteriskEvent) AsMapStringInterface() (mp map[string]interface{})
 	for extraKey, extraVal := range smaEv.ExtraParameters() { // Append extraParameters
 		mp[extraKey] = extraVal
 	}
+	mp[utils.Source] = utils.AsteriskAgent
 	return
 }
 
@@ -273,37 +275,19 @@ func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs)
 		GetMaxUsage: true,
 		CGREvent:    *cgrEv,
 	}
-	// For the moment hardcoded only GetMaxUsage : true
-	/*
-		subsystems, has := kev[KamCGRSubsystems]
-		if !has {
-			return
-		}
-		if strings.Index(subsystems, utils.MetaAccounts) == -1 {
-			args.GetMaxUsage = false
-		}
-		if strings.Index(subsystems, utils.MetaResources) != -1 {
-			args.AuthorizeResources = true
-		}
-		if strings.Index(subsystems, utils.MetaSuppliers) != -1 {
-			args.GetSuppliers = true
-			if strings.Index(subsystems, utils.MetaSuppliersEventCost) != -1 {
-				args.SuppliersMaxCost = utils.MetaEventCost
-			}
-			if strings.Index(subsystems, utils.MetaSuppliersIgnoreErrors) != -1 {
-				args.SuppliersIgnoreErrors = true
-			}
-		}
-		if strings.Index(subsystems, utils.MetaAttributes) != -1 {
-			args.GetAttributes = true
-		}
-		if strings.Index(subsystems, utils.MetaThresholds) != -1 {
-			args.ProcessThresholds = utils.BoolPointer(true)
-		}
-		if strings.Index(subsystems, utils.MetaStats) != -1 {
-			args.ProcessStatQueues = utils.BoolPointer(true)
-		}
-	*/
+	if smaEv.Subsystems() == utils.EmptyString {
+		return
+	}
+	args.GetMaxUsage = strings.Index(smaEv.Subsystems(), utils.MetaAccounts) != -1
+	args.AuthorizeResources = strings.Index(smaEv.Subsystems(), utils.MetaResources) != -1
+	args.GetSuppliers = strings.Index(smaEv.Subsystems(), utils.MetaSuppliers) != -1
+	args.SuppliersIgnoreErrors = strings.Index(smaEv.Subsystems(), utils.MetaSuppliersIgnoreErrors) != -1
+	if strings.Index(smaEv.Subsystems(), utils.MetaSuppliersEventCost) != -1 {
+		args.SuppliersMaxCost = utils.MetaEventCost
+	}
+	args.GetAttributes = strings.Index(smaEv.Subsystems(), utils.MetaAttributes) != -1
+	args.ProcessThresholds = strings.Index(smaEv.Subsystems(), utils.MetaThresholds) != -1
+	args.ProcessStats = strings.Index(smaEv.Subsystems(), utils.MetaStats) != -1
 	return
 }
 
@@ -312,27 +296,17 @@ func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEv utils.CGREvent) (args *ses
 		InitSession: true,
 		CGREvent:    cgrEv,
 	}
-	/*
-		subsystems, has := kev[KamCGRSubsystems]
-		if !has {
-			return
-		}
-		if strings.Index(subsystems, utils.MetaAccounts) == -1 {
-			args.InitSession = false
-		}
-		if strings.Index(subsystems, utils.MetaResources) != -1 {
-			args.AllocateResources = true
-		}
-		if strings.Index(subsystems, utils.MetaAttributes) != -1 {
-			args.GetAttributes = true
-		}
-		if strings.Index(subsystems, utils.MetaThresholds) != -1 {
-			args.ProcessThresholds = utils.BoolPointer(true)
-		}
-		if strings.Index(subsystems, utils.MetaStats) != -1 {
-			args.ProcessStatQueues = utils.BoolPointer(true)
-		}
-	*/
+	subsystems, err := cgrEv.FieldAsString(utils.CGRSubsystems)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> event: %s don't have cgr_subsystems variable",
+			utils.AsteriskAgent, utils.ToJSON(cgrEv)))
+		return nil
+	}
+	args.InitSession = strings.Index(subsystems, utils.MetaAccounts) != -1
+	args.AllocateResources = strings.Index(subsystems, utils.MetaResources) != -1
+	args.GetAttributes = strings.Index(subsystems, utils.MetaAttributes) != -1
+	args.ProcessThresholds = strings.Index(subsystems, utils.MetaThresholds) != -1
+	args.ProcessStats = strings.Index(subsystems, utils.MetaStats) != -1
 	return
 }
 
@@ -341,23 +315,15 @@ func (smaEv *SMAsteriskEvent) V1TerminateSessionArgs(cgrEv utils.CGREvent) (args
 		TerminateSession: true,
 		CGREvent:         cgrEv,
 	}
-	/*
-		subsystems, has := kev[KamCGRSubsystems]
-		if !has {
-			return
-		}
-		if strings.Index(subsystems, utils.MetaAccounts) == -1 {
-			args.TerminateSession = false
-		}
-		if strings.Index(subsystems, utils.MetaResources) != -1 {
-			args.ReleaseResources = true
-		}
-		if strings.Index(subsystems, utils.MetaThresholds) != -1 {
-			args.ProcessThresholds = utils.BoolPointer(true)
-		}
-		if strings.Index(subsystems, utils.MetaStats) != -1 {
-			args.ProcessStatQueues = utils.BoolPointer(true)
-		}
-	*/
+	subsystems, err := cgrEv.FieldAsString(utils.CGRSubsystems)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> event: %s don't have cgr_subsystems variable",
+			utils.AsteriskAgent, utils.ToJSON(cgrEv)))
+		return nil
+	}
+	args.TerminateSession = strings.Index(subsystems, utils.MetaAccounts) != -1
+	args.ReleaseResources = strings.Index(subsystems, utils.MetaResources) != -1
+	args.ProcessThresholds = strings.Index(subsystems, utils.MetaThresholds) != -1
+	args.ProcessStats = strings.Index(subsystems, utils.MetaStats) != -1
 	return
 }

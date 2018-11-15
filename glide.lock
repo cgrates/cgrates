@@ -8,7 +8,7 @@ imports:
   subpackages:
   - jsonrpc
 - name: github.com/cgrates/aringo
-  version: 47cdb110c5ff42bddf2b801dc5ae8ceb15d2d602
+  version: f996da7890eaec95ba13240253744446e17e6598
 - name: github.com/cgrates/fsock
   version: bcbd5e75c07dddb12ac86f1f861f2bdddc1d4596
 - name: github.com/cgrates/kamevapi
