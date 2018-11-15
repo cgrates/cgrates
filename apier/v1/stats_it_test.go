@@ -393,13 +393,12 @@ func testV1STSUpdateStatQueueProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	time.Sleep(time.Second)
 	var reply *engine.StatQueueProfile
 	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statConfig, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", statConfig, reply)
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(statConfig), utils.ToJSON(reply))
 	}
 }
 
@@ -410,6 +409,9 @@ func testV1STSRemoveStatQueueProfile(t *testing.T) {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
+	}
+	if tSv1ConfDIR == "tutmongo" {
+		time.Sleep(150 * time.Millisecond)
 	}
 	var sqp *engine.StatQueueProfile
 	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile",

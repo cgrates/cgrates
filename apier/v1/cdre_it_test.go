@@ -24,6 +24,7 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
+	"reflect"
 	"testing"
 	"time"
 
@@ -49,6 +50,8 @@ var sTestsCDRE = []func(t *testing.T){
 	testCDReRPCConn,
 	testCDReAddCDRs,
 	testCDReExportCDRs,
+	testCDReFromFolder,
+	testCDReProcessExternalCdr,
 	testCDReKillEngine,
 }
 
@@ -153,6 +156,93 @@ func testCDReExportCDRs(t *testing.T) {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rply.ExportedCGRIDs) != 4 {
 		t.Errorf("Unexpected number of CDR exported: %s ", utils.ToJSON(rply))
+	}
+}
+
+func testCDReFromFolder(t *testing.T) {
+	var reply string
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	if err := cdreRPC.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(500 * time.Millisecond)
+}
+
+// Test CDR from external sources
+func testCDReProcessExternalCdr(t *testing.T) {
+	cdr := &engine.ExternalCDR{ToR: utils.VOICE,
+		OriginID: "testextcdr1", OriginHost: "127.0.0.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED,
+		Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1001",
+		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
+		Usage: "1s", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+	var reply string
+	if err := cdreRPC.Call("CdrsV1.ProcessExternalCdr", cdr, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	time.Sleep(50 * time.Millisecond)
+	var cdrs []*engine.ExternalCDR
+	args := utils.RPCCDRsFilter{OriginIDs: []string{"testextcdr1"}}
+	if err := cdreRPC.Call("ApierV2.GetCdrs", args, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 2 {
+		t.Errorf("Unexpected number of CDRs returned: %v, cdrs=%s ", len(cdrs), utils.ToJSON(cdrs))
+		return
+	} else {
+		for _, c := range cdrs {
+			if c.RunID == utils.MetaRaw && c.Cost != -1 {
+				t.Errorf("Expected for *raw cdr cost to be -1, recived: %v", c.Cost)
+			}
+			if c.RunID == utils.MetaDefault && c.Cost != 0.3 {
+				t.Errorf("Expected for *default cdr cost to be 0.3, recived: %v", c.Cost)
+			}
+			if c.RunID == utils.MetaDefault {
+				acdr, err := engine.NewCDRFromExternalCDR(c, "")
+				if err != nil {
+					t.Error(err)
+					return
+				}
+				if acdr.CostDetails == nil {
+					t.Errorf("CostDetails should not be nil")
+					return
+				}
+				if acdr.CostDetails.Usage == nil {
+					t.Errorf("CostDetails for procesed cdr has usage nil")
+				}
+				if acdr.CostDetails.Cost == nil {
+					t.Errorf("CostDetails for procesed cdr has cost nil")
+				}
+			}
+			if c.Usage != "1s" {
+				t.Errorf("Expected 1s,recived %s", c.Usage)
+			}
+			if c.Source != utils.UNIT_TEST {
+				t.Errorf("Expected %s,recived %s", utils.UNIT_TEST, c.Source)
+			}
+			if c.ToR != utils.VOICE {
+				t.Errorf("Expected %s,recived %s", utils.VOICE, c.ToR)
+			}
+			if c.RequestType != utils.META_RATED {
+				t.Errorf("Expected %s,recived %s", utils.META_RATED, c.RequestType)
+			}
+			if c.Category != "call" {
+				t.Errorf("Expected call,recived %s", c.Category)
+			}
+			if c.Account != "1003" {
+				t.Errorf("Expected 1003,recived %s", c.Account)
+			}
+			if c.Subject != "1003" {
+				t.Errorf("Expected 1003,recived %s", c.Subject)
+			}
+			if c.Destination != "1001" {
+				t.Errorf("Expected 1001,recived %s", c.Destination)
+			}
+			if !reflect.DeepEqual(c.ExtraFields, cdr.ExtraFields) {
+				t.Errorf("Expected %s,recived %s", utils.ToJSON(c.ExtraFields), utils.ToJSON(cdr.ExtraFields))
+			}
+		}
 	}
 }
 

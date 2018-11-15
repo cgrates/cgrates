@@ -55,6 +55,7 @@ func NewCDRFromExternalCDR(extCdr *ExternalCDR, timezone string) (*CDR, error) {
 		}
 	}
 	if len(extCdr.CostDetails) != 0 {
+		cdr.CostDetails = &EventCost{}
 		if err = json.Unmarshal([]byte(extCdr.CostDetails), cdr.CostDetails); err != nil {
 			return nil, err
 		}
