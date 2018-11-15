@@ -245,7 +245,7 @@ func (smaEv *SMAsteriskEvent) AsMapStringInterface() (mp map[string]interface{})
 	for extraKey, extraVal := range smaEv.ExtraParameters() { // Append extraParameters
 		mp[extraKey] = extraVal
 	}
-	mp[utils.Source] = utils.KamailioAgent
+	mp[utils.Source] = utils.AsteriskAgent
 	return
 }
 
@@ -275,7 +275,9 @@ func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs)
 		GetMaxUsage: true,
 		CGREvent:    *cgrEv,
 	}
-
+	if smaEv.Subsystems() == utils.EmptyString {
+		return
+	}
 	args.GetMaxUsage = strings.Index(smaEv.Subsystems(), utils.MetaAccounts) != -1
 	args.AuthorizeResources = strings.Index(smaEv.Subsystems(), utils.MetaResources) != -1
 	args.GetSuppliers = strings.Index(smaEv.Subsystems(), utils.MetaSuppliers) != -1
