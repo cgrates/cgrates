@@ -27,6 +27,7 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -498,6 +499,10 @@ func testCall1001Cdrs(t *testing.T) {
 				t.Errorf("Unexpected RequestType for CDR: %+v", cdr.RequestType)
 			}
 			if cdr.Destination == "1002" {
+				// in case of Asterisk take the integer part from usage
+				if optConf == utils.Asterisk {
+					cdr.Usage = strings.Split(cdr.Usage, ".")[0] + "s"
+				}
 				if cdr.Usage != "1m7s" && cdr.Usage != "1m8s" { // Usage as seconds
 					t.Errorf("Unexpected Usage for CDR: %+v", cdr.Usage)
 				}
@@ -505,6 +510,10 @@ func testCall1001Cdrs(t *testing.T) {
 					t.Errorf("Unexpected CostSource for CDR: %+v", cdr.CostSource)
 				}
 			} else if cdr.Destination == "1003" {
+				// in case of Asterisk take the integer part from usage
+				if optConf == utils.Asterisk {
+					cdr.Usage = strings.Split(cdr.Usage, ".")[0] + "s"
+				}
 				if cdr.Usage != "12s" && cdr.Usage != "13s" { // Usage as seconds
 					t.Errorf("Unexpected Usage for CDR: %+v", cdr.Usage)
 				}
@@ -529,6 +538,10 @@ func testCall1002Cdrs(t *testing.T) {
 		if reply[0].RequestType != utils.META_POSTPAID {
 			t.Errorf("Unexpected RequestType for CDR: %+v", reply[0].RequestType)
 		}
+		// in case of Asterisk take the integer part from usage
+		if optConf == utils.Asterisk {
+			reply[0].Usage = strings.Split(reply[0].Usage, ".")[0] + "s"
+		}
 		if reply[0].Usage != "1m5s" && reply[0].Usage != "1m6s" { // Usage as seconds
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0].Usage)
 		}
@@ -551,6 +564,10 @@ func testCall1003Cdrs(t *testing.T) {
 		for _, cdr := range reply {
 			if cdr.RequestType != utils.META_PREPAID {
 				t.Errorf("Unexpected RequestType for CDR: %+v", cdr.RequestType)
+			}
+			// in case of Asterisk take the integer part from usage
+			if optConf == utils.Asterisk {
+				cdr.Usage = strings.Split(cdr.Usage, ".")[0] + "s"
 			}
 			if cdr.Usage != "15s" && cdr.Usage != "16s" &&
 				cdr.Usage != "20s" && cdr.Usage != "21s" { // Usage as seconds
@@ -578,6 +595,10 @@ func testCallStatMetrics(t *testing.T) {
 		utils.MetaTCC: "1.34009",
 		utils.MetaTCD: "2m24s",
 	}
+	firstStatMetrics4 := map[string]string{
+		utils.MetaTCC: "1.35346",
+		utils.MetaTCD: "2m24s",
+	}
 	secondStatMetrics1 := map[string]string{
 		utils.MetaTCC: "0.6",
 		utils.MetaTCD: "35s",
@@ -590,15 +611,24 @@ func testCallStatMetrics(t *testing.T) {
 	if err := tutorialCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2"}, &metrics); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(firstStatMetrics1, metrics) &&
+	}
+	if optConf == utils.Asterisk {
+		metrics[utils.MetaTCD] = strings.Split(metrics[utils.MetaTCD], ".")[0] + "s"
+	}
+	if !reflect.DeepEqual(firstStatMetrics1, metrics) &&
 		!reflect.DeepEqual(firstStatMetrics2, metrics) &&
-		!reflect.DeepEqual(firstStatMetrics3, metrics) {
+		!reflect.DeepEqual(firstStatMetrics3, metrics) &&
+		!reflect.DeepEqual(firstStatMetrics4, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", firstStatMetrics1, metrics)
 	}
 	if err := tutorialCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2_1"}, &metrics); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(secondStatMetrics1, metrics) &&
+	}
+	if optConf == utils.Asterisk {
+		metrics[utils.MetaTCD] = strings.Split(metrics[utils.MetaTCD], ".")[0] + "s"
+	}
+	if !reflect.DeepEqual(secondStatMetrics1, metrics) &&
 		!reflect.DeepEqual(secondStatMetrics2, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", secondStatMetrics1, metrics)
 	}
@@ -772,8 +802,7 @@ func testCallSyncSessions(t *testing.T) {
 		t.Errorf("Resources: %+v", rsAfter)
 	}
 	for _, r := range *rsAfter {
-		if r.ID == "ResGroup1" &&
-			(len(r.Usages) != 0 || len(r.TTLIdx) != 0) {
+		if r.ID == "ResGroup1" && len(r.Usages) != 0 {
 			t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))
 		}
 	}

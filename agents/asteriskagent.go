@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"strconv"
@@ -99,6 +100,7 @@ func (sma *AsteriskAgent) ListenAndServe() (err error) {
 		case astRawEv := <-sma.astEvChan:
 			smAsteriskEvent := NewSMAsteriskEvent(astRawEv,
 				strings.Split(sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address, ":")[0])
+
 			switch smAsteriskEvent.EventType() {
 			case ARIStasisStart:
 				go sma.handleStasisStart(smAsteriskEvent)
@@ -192,12 +194,13 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 		if *authReply.MaxUsage == time.Duration(0) {
 			sma.hangupChannel(ev.ChannelID(), "")
 			return
-		} else if *authReply.MaxUsage != time.Duration(-1) {
-			//  Set absolute timeout for non-postpaid calls
-			if !sma.setChannelVar(ev.ChannelID(), CGRMaxSessionTime,
-				strconv.Itoa(int(authReply.MaxUsage.Seconds()*1000))) {
-				return
-			}
+		} else if *authReply.MaxUsage == time.Duration(-1) {
+			*authReply.MaxUsage = sma.cgrCfg.SessionSCfg().MaxCallDuration
+		}
+		//  Set absolute timeout for non-postpaid calls
+		if !sma.setChannelVar(ev.ChannelID(), CGRMaxSessionTime,
+			strconv.Itoa(int(authReply.MaxUsage.Seconds()*1000))) {
+			return
 		}
 	}
 	if authReply.ResourceAllocation != nil {
@@ -232,6 +235,7 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 	if ev.ChannelState() != channelUp {
 		return
 	}
+
 	sma.evCacheMux.RLock()
 	cgrEv, hasIt := sma.eventsCache[ev.ChannelID()]
 	sma.evCacheMux.RUnlock()
@@ -331,23 +335,25 @@ func (sma *AsteriskAgent) Call(serviceMethod string, args interface{}, reply int
 }
 
 func (sma *AsteriskAgent) V1GetActiveSessionIDs(ignParam string,
-	sessionIDs *[]*sessions.SessionID) (err error) {
-	var sIDs []*sessions.SessionID
-	i := 0
-	sma.evCacheMux.RLock()
-	originIds := make([]string, len(sma.eventsCache))
-	for orgId := range sma.eventsCache {
-		originIds[i] = orgId
-		i++
+	sessionIDs *[]*sessions.SessionID) error {
+	var slMpIface []map[string]interface{} // decode the result from ari into a slice of map[string]interface{}
+	if mp, err := sma.astConn.Call(
+		aringo.HTTP_GET,
+		fmt.Sprintf("http://%s/ari/channels",
+			sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address),
+		nil); err != nil {
+		return err
+	} else if err := json.Unmarshal(mp, &slMpIface); err != nil {
+		return err
 	}
-	sma.evCacheMux.RUnlock()
-	for _, orgId := range originIds {
+	var sIDs []*sessions.SessionID
+	for _, mpIface := range slMpIface {
 		sIDs = append(sIDs, &sessions.SessionID{
 			OriginHost: strings.Split(sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address, ":")[0],
-			OriginID:   orgId},
+			OriginID:   mpIface["id"].(string)},
 		)
 	}
 	*sessionIDs = sIDs
-	return
+	return nil
 
 }
