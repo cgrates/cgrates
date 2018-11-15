@@ -235,14 +235,12 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 	if ev.ChannelState() != channelUp {
 		return
 	}
-
 	sma.evCacheMux.RLock()
 	cgrEv, hasIt := sma.eventsCache[ev.ChannelID()]
 	sma.evCacheMux.RUnlock()
 	if !hasIt { // Not handled by us
 		return
 	}
-
 	sma.evCacheMux.Lock()
 	err := ev.UpdateCGREvent(cgrEv) // Updates the event directly in the cache
 	sma.evCacheMux.Unlock()
@@ -252,10 +250,8 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
 		return
 	}
-
 	// populate init session args
 	initSessionArgs := ev.V1InitSessionArgs(*cgrEv)
-
 	if initSessionArgs == nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate init session arguments",
 			utils.AsteriskAgent, ev.ChannelID()))
@@ -274,7 +270,6 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 		sma.hangupChannel(ev.ChannelID(), "")
 		return
 	}
-
 }
 
 // Channel disconnect
@@ -301,6 +296,7 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 			utils.AsteriskAgent, ev.ChannelID()))
 		return
 	}
+
 	var reply string
 	if err := sma.smg.Call(utils.SessionSv1TerminateSession,
 		tsArgs, &reply); err != nil {
