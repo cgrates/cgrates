@@ -283,6 +283,9 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, cdrstats, 
 	// Store rated CDRs
 	if store {
 		for _, ratedCDR := range ratedCDRs {
+			if ratedCDR.CostDetails != nil {
+				ratedCDR.CostDetails.Compute()
+			}
 			if err := self.cdrDb.SetCDR(ratedCDR, true); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<CDRS> Storing rated CDR %+v, got error: %s", ratedCDR, err.Error()))
 			}

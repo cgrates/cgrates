@@ -698,7 +698,7 @@ func TestApierLoadAccountActions(t *testing.T) {
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
-		t.Errorf("Calling ApierV1.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)
+		t.Errorf("Calling ApierV1.GetCacheStats expected: %+v, received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))
 	}
 }
 
