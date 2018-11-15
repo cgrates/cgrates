@@ -529,7 +529,7 @@ func testCall1002Cdrs(t *testing.T) {
 		if reply[0].RequestType != utils.META_POSTPAID {
 			t.Errorf("Unexpected RequestType for CDR: %+v", reply[0].RequestType)
 		}
-		if reply[0].Usage != "1m5s" { // Usage as seconds
+		if reply[0].Usage != "1m5s" && reply[0].Usage != "1m6s" { // Usage as seconds
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0].Usage)
 		}
 		if reply[0].CostSource != utils.MetaCDRs {
@@ -552,7 +552,8 @@ func testCall1003Cdrs(t *testing.T) {
 			if cdr.RequestType != utils.META_PREPAID {
 				t.Errorf("Unexpected RequestType for CDR: %+v", cdr.RequestType)
 			}
-			if cdr.Usage != "15s" && cdr.Usage != "20s" { // Usage as seconds
+			if cdr.Usage != "15s" && cdr.Usage != "16s" &&
+				cdr.Usage != "20s" && cdr.Usage != "21s" { // Usage as seconds
 				t.Errorf("Unexpected Usage for CDR: %+v", cdr.Usage)
 			}
 			if cdr.CostSource != utils.MetaSessionS {
@@ -566,30 +567,40 @@ func testCall1003Cdrs(t *testing.T) {
 func testCallStatMetrics(t *testing.T) {
 	var metrics map[string]string
 	firstStatMetrics1 := map[string]string{
-		utils.MetaTCC: "1.22009",
-		utils.MetaTCD: "2m12s",
+		utils.MetaTCC: "1.35346",
+		utils.MetaTCD: "2m27s",
 	}
 	firstStatMetrics2 := map[string]string{
+		utils.MetaTCC: "1.35009",
+		utils.MetaTCD: "2m25s",
+	}
+	firstStatMetrics3 := map[string]string{
 		utils.MetaTCC: "1.34009",
 		utils.MetaTCD: "2m24s",
 	}
-	secondStatMetrics := map[string]string{
+	secondStatMetrics1 := map[string]string{
 		utils.MetaTCC: "0.6",
 		utils.MetaTCD: "35s",
+	}
+	secondStatMetrics2 := map[string]string{
+		utils.MetaTCC: "0.6",
+		utils.MetaTCD: "37s",
 	}
 
 	if err := tutorialCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2"}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(firstStatMetrics1, metrics) &&
-		!reflect.DeepEqual(firstStatMetrics2, metrics) {
+		!reflect.DeepEqual(firstStatMetrics2, metrics) &&
+		!reflect.DeepEqual(firstStatMetrics3, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", firstStatMetrics1, metrics)
 	}
 	if err := tutorialCallsRpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2_1"}, &metrics); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(secondStatMetrics, metrics) {
-		t.Errorf("expecting: %+v, received reply: %s", secondStatMetrics, metrics)
+	} else if !reflect.DeepEqual(secondStatMetrics1, metrics) &&
+		!reflect.DeepEqual(secondStatMetrics2, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", secondStatMetrics1, metrics)
 	}
 }
 

@@ -1,13 +1,11 @@
 {
 
-// Real-time Charging System for Telecom & ISP environments
+// Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 // Copyright (C) ITsysCOM GmbH
-//
-// This file contains the default configuration hardcoded into CGRateS.
-// This is what you get when you load CGRateS with an empty configuration file.
 
 "general": {
-	"log_level":7,
+    "log_level": 7,
+	"node_id":"CGRFreeswitch",
 },
 
 
@@ -31,16 +29,10 @@
 "rals": {
 	"enabled": true,
 	"thresholds_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "127.0.0.1:2012", "transport": "*json"},
 	],
 	"stats_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
-	],
-	"pubsubs_conns": [
-		{"address": "*internal"}
-	],
-	"attributes_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "127.0.0.1:2012", "transport": "*json"},
 	],
 },
 
@@ -48,10 +40,10 @@
 "cdrs": {
 	"enabled": true,
 	"sessions_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "127.0.0.1:2012", "transport": "*json"},
 	],
 	"stats_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "127.0.0.1:2012", "transport": "*json"},
 	],
 	"sessions_cost_retries": 5,
 },
@@ -60,25 +52,25 @@
 "sessions": {
 	"enabled": true,
 	"rals_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "127.0.0.1:2012", "transport": "*json"},
 	],
 	"cdrs_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "127.0.0.1:2012", "transport": "*json"},
 	],
 	"resources_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "127.0.0.1:2012", "transport": "*json"},
 	],
 	"suppliers_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "127.0.0.1:2012", "transport": "*json"},
 	],
 	"attributes_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "127.0.0.1:2012", "transport": "*json"},
 	],
 	"stats_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "127.0.0.1:2012", "transport": "*json"},
 	],
 	"thresholds_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "127.0.0.1:2012", "transport": "*json"},
 	],
 	"debit_interval": "5s",
 	"channel_sync_interval":"7s",
@@ -87,17 +79,12 @@
 
 "freeswitch_agent": {
 	"enabled": true,
-	"sessions_conns": [
-		{"address": "*internal"}
-	],
 	"event_socket_conns":[
 		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": -1,"alias":""}
 	],
-},
-
-
-"pubsubs": {
-	"enabled": true,
+	"sessions_conns": [
+		{"address": "*internal"},
+	],
 },
 
 
@@ -109,18 +96,12 @@
 
 "resources": {
 	"enabled": true,
-	"thresholds_conns": [
-		{"address": "*internal"}
-	],
 	"string_indexed_fields": ["Account"],
 },
 
 
 "stats": {
 	"enabled": true,
-	"thresholds_conns": [
-		{"address": "*internal"}
-	],
 	"string_indexed_fields": ["Account","RunID","Destination"],
 },
 
@@ -134,13 +115,13 @@
 "suppliers": {
 	"enabled": true,
 	"rals_conns": [
-		{"address": "*internal"}
+		{"address": "*internal"},
 	],
 	"resources_conns": [
-		{"address": "*internal"}
+		{"address": "*internal"},
 	],
 	"stats_conns": [
-		{"address": "*internal"}	
+		{"address": "*internal"},	
 	],
 	"string_indexed_fields": ["Account"],
 },
