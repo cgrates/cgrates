@@ -333,13 +333,13 @@ func (sma *AsteriskAgent) Call(serviceMethod string, args interface{}, reply int
 func (sma *AsteriskAgent) V1GetActiveSessionIDs(ignParam string,
 	sessionIDs *[]*sessions.SessionID) error {
 	var slMpIface []map[string]interface{} // decode the result from ari into a slice of map[string]interface{}
-	if mp, err := sma.astConn.Call(
+	if byts, err := sma.astConn.Call(
 		aringo.HTTP_GET,
 		fmt.Sprintf("http://%s/ari/channels",
 			sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address),
 		nil); err != nil {
 		return err
-	} else if err := json.Unmarshal(mp, &slMpIface); err != nil {
+	} else if err := json.Unmarshal(byts, &slMpIface); err != nil {
 		return err
 	}
 	var sIDs []*sessions.SessionID

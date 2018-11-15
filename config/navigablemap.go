@@ -22,6 +22,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -102,14 +103,29 @@ func (nM *NavigableMap) FieldAsInterface(fldPath []string) (fldVal interface{}, 
 	var canCast bool
 	for i, spath := range fldPath {
 		if i == lenPath-1 { // lastElement
+			var idx *int
 			if idxStart := strings.Index(spath, utils.IdxStart); idxStart != -1 &&
 				strings.HasSuffix(spath, utils.IdxEnd) {
+				slctr := spath[idxStart+1 : len(spath)-1]
+				if !strings.HasPrefix(slctr, utils.DynamicDataPrefix) {
+					if idxVal, err := strconv.Atoi(slctr); err != nil {
+						return nil, err
+					} else {
+						idx = utils.IntPointer(idxVal)
+					}
+				}
 				spath = spath[:idxStart] // ignore the selector for now since it is processed in other places
 			}
 			var has bool
 			fldVal, has = lastMp[spath]
 			if !has {
 				return nil, utils.ErrNotFound
+			}
+			if valItms, isItms := fldVal.([]*NMItem); isItms && idx != nil {
+				if *idx >= len(valItms) {
+					return nil, fmt.Errorf("selector index %d out of range", *idx)
+				}
+				fldVal = valItms[*idx].Data
 			}
 			return
 		}
