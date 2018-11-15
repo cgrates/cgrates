@@ -841,3 +841,35 @@ func TestNavMapAsCGREvent(t *testing.T) {
 		t.Errorf("expecting: %+v, \nreceived: %+v", utils.ToJSON(eEv), utils.ToJSON(cgrEv.Event))
 	}
 }
+
+func TestNavMapMerge(t *testing.T) {
+	nM2 := &NavigableMap{
+		data: map[string]interface{}{
+			"FirstLevel": map[string]interface{}{
+				"SecondLevel": map[string]interface{}{
+					"ThirdLevel": map[string]interface{}{
+						"Fld1": []*NMItem{
+							{
+								Path: []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
+								Data: "Val1",
+							},
+							{
+								Path: []string{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
+								Data: "Val2",
+							},
+						},
+					},
+				},
+			},
+		},
+		order: [][]string{
+			{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
+			{"FirstLevel", "SecondLevel", "ThirdLevel", "Fld1"},
+		},
+	}
+	nM := NewNavigableMap(nil)
+	nM.Merge(nM2)
+	if !reflect.DeepEqual(nM2, nM) {
+		t.Errorf("expecting: %+v, received: %+v", nM2, nM)
+	}
+}

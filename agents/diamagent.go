@@ -211,7 +211,6 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
 	}
-	fmt.Printf("processRequest, processor: %s, agreq: %s\n", utils.ToJSON(reqProcessor), utils.ToJSON(agReq))
 	if agReq.CGRRequest, err = agReq.AsNavigableMap(reqProcessor.RequestFields); err != nil {
 		return
 	}
@@ -318,8 +317,8 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
 	}
 	if nM, err := agReq.AsNavigableMap(reqProcessor.ReplyFields); err != nil {
 		return false, err
-	} else if err := agReq.Reply.Merge(nM); err != nil {
-		return false, err
+	} else {
+		agReq.Reply.Merge(nM)
 	}
 	if reqType == utils.MetaDryRun {
 		utils.Logger.Info(

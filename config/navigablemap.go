@@ -92,6 +92,7 @@ func (nM *NavigableMap) Set(path []string, data interface{}, apnd, ordered bool)
 
 // FieldAsInterface returns the field value as interface{} for the path specified
 // implements DataProvider
+// supports spath with selective elements in case of []*NMItem
 func (nM *NavigableMap) FieldAsInterface(fldPath []string) (fldVal interface{}, err error) {
 	lenPath := len(fldPath)
 	if lenPath == 0 {
@@ -101,6 +102,10 @@ func (nM *NavigableMap) FieldAsInterface(fldPath []string) (fldVal interface{}, 
 	var canCast bool
 	for i, spath := range fldPath {
 		if i == lenPath-1 { // lastElement
+			if idxStart := strings.Index(spath, utils.IdxStart); idxStart != -1 &&
+				strings.HasSuffix(spath, utils.IdxEnd) {
+				spath = spath[:idxStart] // ignore the selector for now since it is processed in other places
+			}
 			var has bool
 			fldVal, has = lastMp[spath]
 			if !has {
@@ -182,28 +187,27 @@ func (nM *NavigableMap) AsNavigableMap(
 }
 
 // Merge will update nM with values from a second one
-func (nM *NavigableMap) Merge(nM2 *NavigableMap) (err error) {
+func (nM *NavigableMap) Merge(nM2 *NavigableMap) {
 	if nM2 == nil {
 		return
 	}
-	for k, v := range nM2.data {
-		oV, has := nM.data[k]
-		if !has {
-			nM.data[k] = v
-			continue
-		}
-		if oItms, isNMItems := oV.([]*NMItem); isNMItems {
-			vItms, isItms := v.([]*NMItem)
-			if !isItms {
-				return utils.ErrIncompatible
-			}
-			oItms = append(oItms, vItms...)
-			continue
-		}
-		nM.data[k] = v
+	if len(nM2.order) == 0 {
+		indexMapPaths(nM2.data, nil, &nM.order)
 	}
-	if len(nM2.order) != 0 {
-		nM.order = append(nM.order, nM2.order...)
+	pathIdx := make(map[string]int) // will hold references for last index exported in case of []*NMItem
+	for _, path := range nM2.order {
+		val, _ := nM2.FieldAsInterface(path)
+		if valItms, isItms := val.([]*NMItem); isItms {
+			pathStr := strings.Join(path, utils.NestingSep)
+			pathIdx[pathStr] += 1
+			if pathIdx[pathStr] > len(valItms) {
+				val = valItms[len(valItms)-1:] // slice with only last element in, so we can set it unlimited
+			} else {
+				val = []*NMItem{valItms[pathIdx[pathStr]-1]} // set only one item per path
+			}
+		}
+		nM.Set(path, val, true,
+			(len(nM.order) != 0 || len(nM.data) == 0))
 	}
 	return
 }
