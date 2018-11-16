@@ -117,13 +117,6 @@ func NewMongoStorage(host, port, db, user, pass, storageType string,
 	session.SetMode(mgo.Strong, true)
 	ms = &MongoStorage{db: dbName, session: session, storageType: storageType, ms: NewCodecMsgpackMarshaler(),
 		cacheCfg: cacheCfg, cdrsIndexes: cdrsIndexes}
-	if cNames, err := session.DB(ms.db).CollectionNames(); err != nil {
-		return nil, err
-	} else if len(cNames) == 0 { // create indexes only if database is empty
-		if err = ms.EnsureIndexes(); err != nil {
-			return nil, err
-		}
-	}
 	ms.cnter = utils.NewCounter(time.Now().UnixNano(), 0)
 	return
 }
@@ -143,6 +136,7 @@ func (ms *MongoStorage) conn(col string) (*mgo.Session, *mgo.Collection) {
 	return sessionCopy, sessionCopy.DB(ms.db).C(col)
 }
 
+/*
 // EnsureIndexes creates db indexes
 func (ms *MongoStorage) EnsureIndexes() (err error) {
 	dbSession := ms.session.Copy()
@@ -301,7 +295,7 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 		}
 	}
 	return
-}
+}//*/
 
 func (ms *MongoStorage) getColNameForPrefix(prefix string) (name string, ok bool) {
 	colMap := map[string]string{
