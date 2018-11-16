@@ -516,28 +516,34 @@ func TestPassFilterMissingField(t *testing.T) {
 		cfg: cfg,
 		dm:  dmFilterPass,
 	}
+
 	passEvent1 := map[string]interface{}{
-		"Category": "call",
+		"test": "call",
 	}
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*rsr::~Category(^$)"}, config.NewNavigableMap(passEvent1)); err != nil {
 		t.Errorf(err.Error())
-	} else if pass {
-		t.Errorf("Expecting: true , received: %+v", pass)
-	}
-	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::~Category(!^$)"}, config.NewNavigableMap(passEvent1)); err != nil {
-		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: true , received: %+v", pass)
 	}
+
 	passEvent2 := map[string]interface{}{
-		"test": "call",
+		"Category": "",
 	}
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*rsr::~Category(^$)"}, config.NewNavigableMap(passEvent2)); err != nil {
 		t.Errorf(err.Error())
-	} else if pass {
+	} else if !pass {
 		t.Errorf("Expecting: true , received: %+v", pass)
+	}
+
+	passEvent3 := map[string]interface{}{
+		"Category": "call",
+	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*rsr::~Category(^$)"}, config.NewNavigableMap(passEvent3)); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: false , received: %+v", pass)
 	}
 }

@@ -207,8 +207,10 @@ func TestFieldAsString(t *testing.T) {
 		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
 	}
 	prsr = config.NewRSRParserMustCompile(utils.DynamicDataPrefix+"dummy_field", true)
-	if _, err := cdr.FieldAsString(prsr); err != utils.ErrNotFound {
+	if fldVal, err := cdr.FieldAsString(prsr); err != utils.ErrNotFound {
 		t.Error(err)
+	} else if fldVal != utils.EmptyString {
+		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, utils.EmptyString, fldVal)
 	}
 }
 

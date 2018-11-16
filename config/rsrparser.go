@@ -273,7 +273,8 @@ func (prsr *RSRParser) ParseDataProvider(dP DataProvider, separator string) (out
 	var outStr string
 	if prsr.attrValue == "" {
 		if outStr, err = dP.FieldAsString(
-			strings.Split(prsr.attrName, separator)); err != nil {
+			strings.Split(prsr.attrName, separator)); err != nil &&
+			(err != utils.ErrNotFound || prsr.filters.FilterRules() != "^$") {
 			return
 		}
 	}
@@ -284,7 +285,8 @@ func (prsr *RSRParser) ParseDataProviderWithInterfaces(dP DataProvider, separato
 	var outIface interface{}
 	if prsr.attrValue == "" {
 		if outIface, err = dP.FieldAsInterface(
-			strings.Split(prsr.attrName, separator)); err != nil {
+			strings.Split(prsr.attrName, separator)); err != nil &&
+			(err != utils.ErrNotFound || prsr.filters.FilterRules() != "^$") {
 			return
 		}
 	}
