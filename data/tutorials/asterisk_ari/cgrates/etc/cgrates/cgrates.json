@@ -80,7 +80,7 @@
 "asterisk_agent": {
 	"enabled": true,
 	"asterisk_conns":[							
-		{"address": "192.168.56.203:8088", "user": "cgrates",
+		{"address": "127.0.0.1:8088", "user": "cgrates",
 			"password": "CGRateS.org", "connect_attempts": 3,"reconnects": 10}
 	],
 	"sessions_conns": [
