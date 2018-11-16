@@ -234,6 +234,10 @@ type RSRFilter struct {
 	negative   bool // Rule should not match
 }
 
+func (rsrFltr *RSRFilter) FilterRule() string {
+	return rsrFltr.filterRule
+}
+
 func (rsrFltr *RSRFilter) Pass(val string) bool {
 	if rsrFltr.filterRule == "" {
 		return !rsrFltr.negative
@@ -321,6 +325,13 @@ func ParseRSRFiltersFromSlice(fltrStrs []string) (RSRFilters, error) {
 }
 
 type RSRFilters []*RSRFilter
+
+func (fltrs RSRFilters) FilterRules() (rls string) {
+	for _, fltr := range fltrs {
+		rls += fltr.FilterRule()
+	}
+	return
+}
 
 // @all: specifies whether all filters should match or at least one
 func (fltrs RSRFilters) Pass(val string, allMustMatch bool) (matched bool) {
