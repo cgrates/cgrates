@@ -507,3 +507,37 @@ func TestPassFilterMaxCost(t *testing.T) {
 		t.Errorf("Expecting: true, received: %+v", pass)
 	}
 }
+
+func TestPassFilterMissingField(t *testing.T) {
+	data, _ := NewMapStorage()
+	dmFilterPass := NewDataManager(data)
+	cfg, _ := config.NewDefaultCGRConfig()
+	filterS := FilterS{
+		cfg: cfg,
+		dm:  dmFilterPass,
+	}
+	passEvent1 := map[string]interface{}{
+		"Category": "call",
+	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*rsr::~Category(^$)"}, config.NewNavigableMap(passEvent1)); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: true , received: %+v", pass)
+	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*rsr::~Category(!^$)"}, config.NewNavigableMap(passEvent1)); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: true , received: %+v", pass)
+	}
+	passEvent2 := map[string]interface{}{
+		"test": "call",
+	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*rsr::~Category(^$)"}, config.NewNavigableMap(passEvent2)); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: true , received: %+v", pass)
+	}
+}
