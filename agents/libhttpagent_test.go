@@ -141,3 +141,53 @@ func TestHttpXmlDPFieldAsInterface(t *testing.T) {
 		t.Errorf("expecting: 222147, received: <%s>", data)
 	}
 }
+
+func TestHttpXmlDPFieldAsInterface2(t *testing.T) {
+	body := `<?xml version="1.0" encoding="UTF-8"?>
+   <sms-notification callid="145566709">
+   <createtime>2018-11-15T15:11:26</createtime>
+   <reference>SMS</reference>
+   <calltype calltypeid="8">smsrelay</calltype>
+   <userid>1636488</userid>
+   <username>447440935378</username>
+   <customerid>1632715</customerid>
+   <companyname>447440935378</companyname>
+   <totalcost amount="0.0000" currency="USD">0.0000</totalcost>
+   <agenttotalcost amount="0.0360" currency="USD">0.0360</agenttotalcost>
+   <agentid>2774</agentid>
+   <callleg calllegid="219816629" calllegtype="mo">
+      <number>447440935378</number>
+      <ratedforuseras><![CDATA[UK Mobile - O2 [GBRCN] [MSRN]]]></ratedforuseras>
+      <cost amount="0.0000" currency="USD">0.0000</cost>
+      <agentcost amount="0.0135" currency="USD">0.0135</agentcost>
+   </callleg>
+   <callleg calllegid="219816630" calllegtype="mt">
+      <number>447930323266</number>
+      <ratedforuseras><![CDATA[UK Mobile - T-Mobile [GBRME]]]></ratedforuseras>
+      <cost amount="0.0000" currency="USD">0.0000</cost>
+      <agentcost amount="0.0225" currency="USD">0.0225</agentcost>
+   </callleg>
+</sms-notification>
+`
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/", bytes.NewBuffer([]byte(body)))
+	if err != nil {
+		t.Error(err)
+	}
+	dP, _ := newHTTPXmlDP(req)
+	if data, err := dP.FieldAsString([]string{"sms-notification", "callleg", "agentcost", "@amount"}); err != nil {
+		t.Error(err)
+	} else if data != "0.0135" {
+		t.Errorf("expecting: 0.0135, received: <%s>", data)
+	}
+	if data, err := dP.FieldAsString([]string{"sms-notification", "callleg[0]", "agentcost"}); err != nil {
+		t.Error(err)
+	} else if data != "0.0135" {
+		t.Errorf("expecting: 0.0135, received: <%s>", data)
+	}
+	if data, err := dP.FieldAsString([]string{"sms-notification", "callleg[1]", "agentcost"}); err != nil {
+		t.Error(err)
+	} else if data != "0.0225" {
+		t.Errorf("expecting: 0.0225, received: <%s>", data)
+	}
+}

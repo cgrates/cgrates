@@ -133,11 +133,6 @@ func (hU *httpXmlDP) FieldAsInterface(fldPath []string) (data interface{}, err e
 	if len(fldPath) == 0 {
 		return nil, fmt.Errorf("Empty path")
 	}
-	if data, err = hU.cache.FieldAsInterface(fldPath); err == nil ||
-		err != utils.ErrNotFound { // item found in cache
-		return
-	}
-	err = nil // cancel previous err
 	var slctrStr string
 	for i := range fldPath {
 		if sIdx := strings.Index(fldPath[i], "["); sIdx != -1 {
@@ -156,6 +151,11 @@ func (hU *httpXmlDP) FieldAsInterface(fldPath []string) (data interface{}, err e
 			fldPath[i] = fldPath[i] + slctrStr
 		}
 	}
+	if data, err = hU.cache.FieldAsInterface(fldPath); err == nil ||
+		err != utils.ErrNotFound { // item found in cache
+		return
+	}
+	err = nil // cancel previous err
 	//convert fldPath to HierarchyPath
 	path := utils.HierarchyPath(fldPath)
 	elmnt := xmlquery.FindOne(hU.xmlDoc, path.AsString("/", false))
