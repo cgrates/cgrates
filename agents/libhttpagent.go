@@ -133,14 +133,23 @@ func (hU *httpXmlDP) FieldAsInterface(fldPath []string) (data interface{}, err e
 	if len(fldPath) == 0 {
 		return nil, fmt.Errorf("Empty path")
 	}
+	if data, err = hU.cache.FieldAsInterface(fldPath); err == nil ||
+		err != utils.ErrNotFound { // item found in cache
+		return
+	}
+	err = nil // cancel previous err
 	var slctrStr string
-	for i := range fldPath {
-		if sIdx := strings.Index(fldPath[i], "["); sIdx != -1 {
-			slctrStr = fldPath[i][sIdx:]
+	workPath := make([]string, len(fldPath))
+	for i, val := range fldPath {
+		workPath[i] = val
+	}
+	for i := range workPath {
+		if sIdx := strings.Index(workPath[i], "["); sIdx != -1 {
+			slctrStr = workPath[i][sIdx:]
 			if slctrStr[len(slctrStr)-1:] != "]" {
 				return nil, fmt.Errorf("filter rule <%s> needs to end in ]", slctrStr)
 			}
-			fldPath[i] = fldPath[i][:sIdx]
+			workPath[i] = workPath[i][:sIdx]
 			if slctrStr[1:2] != "@" {
 				i, err := strconv.Atoi(slctrStr[1 : len(slctrStr)-1])
 				if err != nil {
@@ -148,17 +157,12 @@ func (hU *httpXmlDP) FieldAsInterface(fldPath []string) (data interface{}, err e
 				}
 				slctrStr = "[" + strconv.Itoa(i+1) + "]"
 			}
-			fldPath[i] = fldPath[i] + slctrStr
+			workPath[i] = workPath[i] + slctrStr
 		}
 	}
-	if data, err = hU.cache.FieldAsInterface(fldPath); err == nil ||
-		err != utils.ErrNotFound { // item found in cache
-		return
-	}
-	err = nil // cancel previous err
-	//convert fldPath to HierarchyPath
-	path := utils.HierarchyPath(fldPath)
-	elmnt := xmlquery.FindOne(hU.xmlDoc, path.AsString("/", false))
+	//convert workPath to HierarchyPath
+	hrPath := utils.HierarchyPath(workPath)
+	elmnt := xmlquery.FindOne(hU.xmlDoc, hrPath.AsString("/", false))
 	if elmnt == nil {
 		return
 	}
