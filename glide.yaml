@@ -43,3 +43,13 @@ import:
 - package: github.com/dlintw/goconf
 - package: github.com/antchfx/xmlquery
 - package: github.com/antchfx/xpath
+- package: github.com/mongodb/mongo-go-driver
+  subpackages:
+  - bson
+  - mongo
+  - options
+- package: github.com/stretchr/testify
+  subpackages:
+  - require
+- package: github.com/Masterminds/semver
+  version: ^1.4.2
