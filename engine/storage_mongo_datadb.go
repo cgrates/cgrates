@@ -1686,6 +1686,7 @@ func (ms *MongoStorage) RemAccountActionPlans(acntID string, aPlIDs []string) (e
 		if err == mgo.ErrNotFound {
 			err = utils.ErrNotFound
 		}
+		return err
 	}
 	oldAPlIDs, err := ms.GetAccountActionPlans(acntID, true, utils.NonTransactional)
 	if err != nil {
