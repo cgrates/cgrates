@@ -172,6 +172,11 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 			break
 		}
 	}
+	if reqProcessor.Flags.HasKey(utils.MetaLog) {
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> LOG, processorID: %s, diameter message: %s",
+				utils.RadiusAgent, reqProcessor.ID, agReq.Request.String()))
+	}
 	switch reqType {
 	default:
 		return false, fmt.Errorf("unknown request type: <%s>", reqType)
@@ -267,6 +272,11 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 	}
 	if err := radReplyAppendAttributes(rply, agReq, reqProcessor.ReplyFields); err != nil {
 		return false, err
+	}
+	if reqProcessor.Flags.HasKey(utils.MetaLog) {
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> LOG, Radius reply: %s",
+				utils.RadiusAgent, utils.ToJSON(rply)))
 	}
 	if reqType == utils.MetaDryRun {
 		utils.Logger.Info(
