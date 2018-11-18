@@ -115,6 +115,11 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 			break
 		}
 	}
+	if reqProcessor.Flags.HasKey(utils.MetaLog) {
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> LOG, processorID: %s, diameter message: %s",
+				utils.HTTPAgent, reqProcessor.ID, agReq.Request.String()))
+	}
 	switch reqType {
 	default:
 		return false, fmt.Errorf("unknown request type: <%s>", reqType)
@@ -208,6 +213,11 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 		return false, err
 	} else {
 		agReq.Reply.Merge(nM)
+	}
+	if reqProcessor.Flags.HasKey(utils.MetaLog) {
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> LOG, HTTP reply: %s",
+				utils.HTTPAgent, agReq.Reply))
 	}
 	if reqType == utils.MetaDryRun {
 		utils.Logger.Info(

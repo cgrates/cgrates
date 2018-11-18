@@ -60,8 +60,7 @@ type httpUrlDP struct {
 // String is part of engine.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (hU *httpUrlDP) String() string {
-	//return utils.ToJSON(hU.cache.AsMapStringInterface())
-	return "" // ToDo: fixme
+	return hU.cache.String()
 }
 
 // FieldAsInterface is part of engine.DataProvider interface
@@ -123,8 +122,7 @@ type httpXmlDP struct {
 // String is part of engine.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (hU *httpXmlDP) String() string {
-	//return utils.ToJSON(hU.cache.AsMapStringInterface())
-	return "" // ToDo: fixme
+	return hU.cache.String()
 }
 
 // FieldAsInterface is part of engine.DataProvider interface

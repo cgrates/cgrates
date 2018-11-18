@@ -150,7 +150,7 @@ type radiusDP struct {
 // String is part of engine.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (pk *radiusDP) String() string {
-	return utils.ToJSON(pk.cache)
+	return pk.cache.String()
 }
 
 // FieldAsInterface is part of engine.DataProvider interface
