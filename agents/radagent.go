@@ -174,8 +174,8 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 	}
 	if reqProcessor.Flags.HasKey(utils.MetaLog) {
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> LOG, processorID: %s, diameter message: %s",
-				utils.RadiusAgent, reqProcessor.ID, agReq.Request.String()))
+			fmt.Sprintf("<%s> LOG, processorID: %s, radius message: %s",
+				utils.RadiusAgent, reqProcessor.Id, agReq.Request.String()))
 	}
 	switch reqType {
 	default:

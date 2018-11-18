@@ -117,8 +117,8 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 	}
 	if reqProcessor.Flags.HasKey(utils.MetaLog) {
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> LOG, processorID: %s, diameter message: %s",
-				utils.HTTPAgent, reqProcessor.ID, agReq.Request.String()))
+			fmt.Sprintf("<%s> LOG, processorID: %s, http message: %s",
+				utils.HTTPAgent, reqProcessor.Id, agReq.Request.String()))
 	}
 	switch reqType {
 	default:
