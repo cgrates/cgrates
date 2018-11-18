@@ -217,6 +217,9 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 	if len(self.cgrCfg.CdrsCfg().CDRSOnlineCDRExports) != 0 { // Replicate raw CDR
 		self.replicateCDRs([]*CDR{cdr})
 	}
+	if cdr.Usage < time.Duration(0) {
+		cdr.Usage = time.Duration(0)
+	}
 	if self.rals != nil && !cdr.PreRated { // CDRs not rated will be processed by Rating
 		go self.deriveRateStoreStatsReplicate(cdr, self.cgrCfg.CdrsCfg().CDRSStoreCdrs,
 			true, len(self.cgrCfg.CdrsCfg().CDRSOnlineCDRExports) != 0)
@@ -404,6 +407,9 @@ func (self *CdrServer) rateCDR(cdr *CDR) ([]*CDR, error) {
 	var err error
 	if cdr.RequestType == utils.META_NONE {
 		return nil, nil
+	}
+	if cdr.Usage < 0 {
+		cdr.Usage = time.Duration(0)
 	}
 	cdr.ExtraInfo = "" // Clean previous ExtraInfo, useful when re-rating
 	var cdrsRated []*CDR
