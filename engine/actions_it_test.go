@@ -24,6 +24,7 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
+	"reflect"
 	"strconv"
 	"testing"
 	"time"
@@ -234,8 +235,116 @@ func TestActionsitCdrlogWithParams(t *testing.T) {
 	}
 }
 
-func TestActionsitStopCgrEngine(t *testing.T) {
+func TestActionsitThresholdCDrLog(t *testing.T) {
+	var thReply *ThresholdProfile
+	var result string
+	var reply string
 
+	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "th_acc"}
+	if err := actsLclRpc.Call("ApierV1.SetAccount", attrsSetAccount, &reply); err != nil {
+		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
+	}
+	attrsAA := &utils.AttrSetActions{ActionsId: "ACT_TH_CDRLOG", Actions: []*utils.TPAction{
+		{Identifier: TOPUP, BalanceType: utils.MONETARY, Units: "5", ExpiryTime: UNLIMITED, Weight: 20.0},
+		{Identifier: CDRLOG},
+	}}
+	if err := actsLclRpc.Call("ApierV2.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+		t.Error("Got error on ApierV2.SetActions: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
+	}
+	//make sure that the threshold don't exit
+	if err := actsLclRpc.Call("ApierV1.GetThresholdProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &thReply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	tPrfl := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "THD_Test",
+		FilterIDs: []string{"*string:Account:th_acc"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		MaxHits:   -1,
+		MinSleep:  time.Duration(5 * time.Minute),
+		Blocker:   false,
+		Weight:    20.0,
+		ActionIDs: []string{"ACT_TH_CDRLOG"},
+		Async:     false,
+	}
+	if err := actsLclRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := actsLclRpc.Call("ApierV1.GetThresholdProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &thReply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(tPrfl, thReply) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl, thReply)
+	}
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "cdrev1",
+		Event: map[string]interface{}{
+			utils.EventType:   utils.CDR,
+			"field_extr1":     "val_extr1",
+			"fieldextr2":      "valextr2",
+			utils.CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+			utils.RunID:       utils.MetaRaw,
+			utils.OrderID:     123,
+			utils.OriginHost:  "192.168.1.1",
+			utils.Source:      utils.UNIT_TEST,
+			utils.OriginID:    "dsafdsaf",
+			utils.ToR:         utils.VOICE,
+			utils.RequestType: utils.META_RATED,
+			utils.Direction:   "*out",
+			utils.Tenant:      "cgrates.org",
+			utils.Category:    "call",
+			utils.Account:     "th_acc",
+			utils.Subject:     "th_acc",
+			utils.Destination: "+4986517174963",
+			utils.SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+			utils.PDD:         time.Duration(0) * time.Second,
+			utils.AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+			utils.Usage:       time.Duration(10) * time.Second,
+			utils.SUPPLIER:    "SUPPL1",
+			utils.COST:        -1.0,
+		},
+	}
+	var ids []string
+	eIDs := []string{"THD_Test"}
+	if err := actsLclRpc.Call(utils.ThresholdSv1ProcessEvent, ev, &ids); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ids, eIDs) {
+		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
+	}
+	var rcvedCdrs []*ExternalCDR
+	if err := actsLclRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{Sources: []string{CDRLOG},
+		Accounts: []string{attrsSetAccount.Account}}, &rcvedCdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(rcvedCdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(rcvedCdrs))
+	} else if rcvedCdrs[0].ToR != utils.MONETARY ||
+		rcvedCdrs[0].OriginHost != "127.0.0.1" ||
+		rcvedCdrs[0].Source != CDRLOG ||
+		rcvedCdrs[0].RequestType != utils.META_PREPAID ||
+		rcvedCdrs[0].Tenant != "cgrates.org" ||
+		rcvedCdrs[0].Account != "th_acc" ||
+		rcvedCdrs[0].Subject != "th_acc" ||
+		rcvedCdrs[0].Usage != "1" ||
+		rcvedCdrs[0].RunID != TOPUP ||
+		strconv.FormatFloat(rcvedCdrs[0].Cost, 'f', -1, 64) != attrsAA.Actions[0].Units {
+		t.Errorf("Received: %+v", rcvedCdrs[0])
+	}
+
+}
+
+func TestActionsitStopCgrEngine(t *testing.T) {
 	if err := KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}
