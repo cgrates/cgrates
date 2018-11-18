@@ -226,6 +226,11 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
 			break
 		}
 	}
+	if reqProcessor.Flags.HasKey(utils.MetaLog) {
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> LOG, processorID: %s, diameter message: %s",
+				utils.DiameterAgent, reqProcessor.ID, agReq.Request.String()))
+	}
 	switch reqType {
 	default:
 		return false, fmt.Errorf("unknown request type: <%s>", reqType)
@@ -319,6 +324,11 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
 		return false, err
 	} else {
 		agReq.Reply.Merge(nM)
+	}
+	if reqProcessor.Flags.HasKey(utils.MetaLog) {
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> LOG, Diameter reply: %s",
+				utils.DiameterAgent, agReq.Reply))
 	}
 	if reqType == utils.MetaDryRun {
 		utils.Logger.Info(

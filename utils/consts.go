@@ -537,6 +537,7 @@ const (
 	CGRSubsystems                = "cgr_subsystems"
 	IdxStart                     = "["
 	IdxEnd                       = "]"
+	MetaLog                      = "*log"
 )
 
 // Migrator Action
