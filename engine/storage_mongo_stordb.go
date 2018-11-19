@@ -80,7 +80,8 @@ func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 				Pattern: ".*" + regexp.QuoteMeta(pag.SearchTerm) + ".*",
 				Options: ""}})
 		}
-		findMap["$and"] = []bson.M{bson.M{"$or": searchItems}}
+		// findMap["$and"] = []bson.M{{"$or": searchItems}} //before
+		findMap["$or"] = searchItems // after
 	}
 
 	session, col := ms.conn(table)
@@ -1005,7 +1006,7 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 			filters[CostLow] = bson.M{"$gte": *qryFltr.MinCost}
 		} else if *qryFltr.MinCost == 0.0 && *qryFltr.MaxCost == -1.0 { // Special case when we want to skip errors
 			filters["$or"] = []bson.M{
-				bson.M{CostLow: bson.M{"$gte": 0.0}},
+				{CostLow: bson.M{"$gte": 0.0}},
 			}
 		} else {
 			filters[CostLow] = bson.M{"$gte": *qryFltr.MinCost, "$lt": *qryFltr.MaxCost}
