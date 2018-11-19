@@ -1953,7 +1953,9 @@ func (ms *MongoStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 			bulk := col.Bulk()
 			bulk.Unordered()
 			bulk.Upsert(pairs...)
-			_, err = bulk.Run()
+			if _, err = bulk.Run(); err != nil {
+				return err
+			}
 		}
 		oldKey := "tmp_" + utils.ConcatenatedKey(originKey, transactionID)
 		for _, character := range []string{".", "*"} {
@@ -1976,7 +1978,9 @@ func (ms *MongoStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 			bulk := col.Bulk()
 			bulk.Unordered()
 			bulk.Upsert(pairs...)
-			_, err = bulk.Run()
+			if _, err = bulk.Run(); err != nil {
+				return err
+			}
 		}
 	}
 	return
