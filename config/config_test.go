@@ -1485,6 +1485,7 @@ func TestCgrLoaderCfgDefault(t *testing.T) {
 		TpID:           "",
 		DataPath:       "",
 		DisableReverse: false,
+		FieldSeparator: rune(','),
 		CachesConns: []*HaPoolConfig{
 			{
 				Address:   "127.0.0.1:2012",

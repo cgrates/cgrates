@@ -1352,6 +1352,7 @@ func TestDfLoaderCfg(t *testing.T) {
 		Tpid:            utils.StringPointer(""),
 		Data_path:       utils.StringPointer(""),
 		Disable_reverse: utils.BoolPointer(false),
+		Field_separator: utils.StringPointer(","),
 		Caches_conns: &[]*HaPoolJsonCfg{
 			{
 				Address:   utils.StringPointer("127.0.0.1:2012"),

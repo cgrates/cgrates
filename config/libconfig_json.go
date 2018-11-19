@@ -557,6 +557,7 @@ type LoaderCfgJson struct {
 	Tpid            *string
 	Data_path       *string
 	Disable_reverse *bool
+	Field_separator *string
 	Caches_conns    *[]*HaPoolJsonCfg
 	Scheduler_conns *[]*HaPoolJsonCfg
 }

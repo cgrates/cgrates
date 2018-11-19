@@ -672,6 +672,7 @@ const CGRATES_CFG_JSON = `
 	"tpid": "",								// tariff plan identificator
 	"data_path": "",						// path towards tariff plan files
 	"disable_reverse": false,				// disable reverse computing
+	"field_separator": ",",					// separator used in case of csv files
 	"caches_conns":[						// addresses towards cacheS components for reloads
 		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
