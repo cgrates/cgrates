@@ -22,6 +22,7 @@ type LoaderCgrCfg struct {
 	TpID           string
 	DataPath       string
 	DisableReverse bool
+	FieldSeparator rune // The separator to use when reading csvs
 	CachesConns    []*HaPoolConfig
 	SchedulerConns []*HaPoolConfig
 }
@@ -38,6 +39,10 @@ func (ld *LoaderCgrCfg) loadFromJsonCfg(jsnCfg *LoaderCfgJson) (err error) {
 	}
 	if jsnCfg.Disable_reverse != nil {
 		ld.DisableReverse = *jsnCfg.Disable_reverse
+	}
+	if jsnCfg.Field_separator != nil && len(*jsnCfg.Field_separator) > 0 {
+		sepStr := *jsnCfg.Field_separator
+		ld.FieldSeparator = rune(sepStr[0])
 	}
 	if jsnCfg.Caches_conns != nil {
 		ld.CachesConns = make([]*HaPoolConfig, len(*jsnCfg.Caches_conns))

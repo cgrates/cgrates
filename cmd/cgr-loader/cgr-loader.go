@@ -79,6 +79,8 @@ var (
 		"Enable detailed verbose logging output")
 	dryRun = flag.Bool("dry_run", false,
 		"When true will not save loaded data to dataDb but just parse it for consistency and errors.")
+	fieldSep = flag.String("field_sep", ",",
+		`Separator for csv file (by default "," is used)`)
 
 	fromStorDB    = flag.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
 	toStorDB      = flag.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
@@ -180,6 +182,10 @@ func main() {
 		ldrCfg.LoaderCgrCfg().DataPath = *dataPath
 	}
 
+	if rune((*fieldSep)[0]) != dfltCfg.LoaderCgrCfg().FieldSeparator {
+		ldrCfg.LoaderCgrCfg().FieldSeparator = rune((*fieldSep)[0])
+	}
+
 	if *cacheSAddress != dfltCfg.LoaderCgrCfg().CachesConns[0].Address {
 		ldrCfg.LoaderCgrCfg().CachesConns = make([]*config.HaPoolConfig, 0)
 		if *cacheSAddress != "" {
@@ -253,7 +259,7 @@ func main() {
 				TPid:     ldrCfg.LoaderCgrCfg().TpID,
 				StorDb:   storDb,
 				DirPath:  *dataPath,
-				Sep:      ',',
+				Sep:      ldrCfg.LoaderCgrCfg().FieldSeparator,
 				Verbose:  *verbose,
 				ImportId: *importID,
 			}
@@ -267,7 +273,7 @@ func main() {
 	if *fromStorDB { // Load Tariff Plan from storDb into dataDb
 		loader = storDb
 	} else { // Default load from csv files to dataDb
-		loader = engine.NewFileCSVStorage(',',
+		loader = engine.NewFileCSVStorage(ldrCfg.LoaderCgrCfg().FieldSeparator,
 			path.Join(*dataPath, utils.DESTINATIONS_CSV),
 			path.Join(*dataPath, utils.TIMINGS_CSV),
 			path.Join(*dataPath, utils.RATES_CSV),
