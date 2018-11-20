@@ -197,10 +197,12 @@ func (pstr *AMQPPoster) Post(chn *amqp.Channel, contentType string, content []by
 			time.Sleep(time.Duration(fib()) * time.Second)
 		}
 		if err != nil && fallbackFileName != utils.META_NONE {
+			utils.Logger.Warning(fmt.Sprintf("<AMQPPoster> creating new post channel, err: %s", err.Error()))
 			err = pstr.writeToFile(fallbackFileName, content)
 			return nil, err
 		}
 	}
+
 	for i := 0; i < pstr.attempts; i++ {
 		if err = chn.Publish(
 			"",                 // exchange
