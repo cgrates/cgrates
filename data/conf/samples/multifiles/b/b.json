@@ -20,4 +20,32 @@
 	}
 },
 
+"http_agent": [
+	{
+		"id": "conecto1",
+		"url": "/newConecto",
+		"sessions_conns": [
+			{"address": "127.0.0.2:2012", "transport": "*json"}
+		],
+		"request_payload":	"*url",
+		"reply_payload":	"*xml",
+		"request_processors": [
+			{
+				"id": "mtcall_cdr",
+				"filters": ["*string:*req.request_type:MTCALL_CDR"],
+				"tenant": "cgrates.org",
+				"flags": ["*cdrs"],
+				"request_fields":[
+					{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
+						"value": "*pseudoprepaid", "mandatory": true},	
+				],
+				"reply_fields":[
+					{"tag": "CDR_ID", "field_id": "CDR_RESPONSE.CDR_ID", "type": "*composed", 
+						"value": "~*req.CDR_ID", "mandatory": true},
+				],
+			}
+		],
+	},
+],
+
 }

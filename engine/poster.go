@@ -186,8 +186,8 @@ type AMQPPoster struct {
 
 // Post is the method being called when we need to post anything in the queue
 // the optional chn will permits channel caching
-func (pstr *AMQPPoster) Post(chn *amqp.Channel, contentType string, content []byte, fallbackFileName string) (*amqp.Channel, error) {
-	var err error
+func (pstr *AMQPPoster) Post(chn *amqp.Channel, contentType string, content []byte,
+	fallbackFileName string) (rChn *amqp.Channel, err error) {
 	fib := utils.Fib()
 	if chn == nil {
 		for i := 0; i < pstr.attempts; i++ {
@@ -196,13 +196,16 @@ func (pstr *AMQPPoster) Post(chn *amqp.Channel, contentType string, content []by
 			}
 			time.Sleep(time.Duration(fib()) * time.Second)
 		}
-		if err != nil && fallbackFileName != utils.META_NONE {
+		if err != nil &&
+			fallbackFileName != utils.META_NONE {
 			utils.Logger.Warning(fmt.Sprintf("<AMQPPoster> creating new post channel, err: %s", err.Error()))
 			err = pstr.writeToFile(fallbackFileName, content)
 			return nil, err
 		}
 	}
-
+	if err != nil {
+		return
+	}
 	for i := 0; i < pstr.attempts; i++ {
 		if err = chn.Publish(
 			"",                 // exchange

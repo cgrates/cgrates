@@ -96,7 +96,8 @@ func TestMfCdreExport1Instance(t *testing.T) {
 		t.Error("Unexpected headerField value: ", mfCgrCfg.CdreProfiles[prfl].ContentFields[2].Tag)
 	}
 }
-func TestEnvReaderITRead(t *testing.T) {
+
+func TestMfEnvReaderITRead(t *testing.T) {
 	expected := GeneralCfg{
 		NodeID:            "d80fac5",
 		Logger:            "*syslog",
@@ -123,5 +124,106 @@ func TestEnvReaderITRead(t *testing.T) {
 	}
 	if !reflect.DeepEqual(expected, *mfCgrCfg.generalCfg) {
 		t.Errorf("Expected: %+v\n, recived: %+v", utils.ToJSON(expected), utils.ToJSON(*mfCgrCfg.generalCfg))
+	}
+}
+
+func TestMfHttpAgentMultipleFields(t *testing.T) {
+	if len(mfCgrCfg.HttpAgentCfg()) != 2 {
+		t.Errorf("Expected: 2, recived: %+v", len(mfCgrCfg.HttpAgentCfg()))
+	}
+	expected := []*HttpAgentCfg{
+		&HttpAgentCfg{
+			ID:             "conecto1",
+			Url:            "/newConecto",
+			SessionSConns:  []*HaPoolConfig{{Address: "127.0.0.2:2012", Transport: "*json"}},
+			RequestPayload: "*url",
+			ReplyPayload:   "*xml",
+			RequestProcessors: []*HttpAgntProcCfg{
+				{
+					Id:            "OutboundAUTHDryRun",
+					Filters:       []string{},
+					Tenant:        NewRSRParsersMustCompile("cgrates.org", true),
+					Flags:         utils.StringMap{"*dryrun": true},
+					RequestFields: []*FCTemplate{},
+					ReplyFields: []*FCTemplate{{
+						Tag:       "Allow",
+						FieldId:   "response.Allow",
+						Type:      "*constant",
+						Value:     NewRSRParsersMustCompile("1", true),
+						Mandatory: true,
+					}},
+				},
+				{
+					Id:      "OutboundAUTH",
+					Filters: []string{"*string:*req.request_type:OutboundAUTH"},
+					Tenant:  NewRSRParsersMustCompile("cgrates.org", true),
+					Flags: utils.StringMap{"*accounts": true,
+						"*attributes": true, "*auth": true},
+					RequestFields: []*FCTemplate{
+						{
+							Tag:       "RequestType",
+							FieldId:   "RequestType",
+							Type:      "*constant",
+							Value:     NewRSRParsersMustCompile("*pseudoprepaid", true),
+							Mandatory: true,
+						},
+					},
+					ReplyFields: []*FCTemplate{
+						{
+							Tag:       "Allow",
+							FieldId:   "response.Allow",
+							Type:      "*constant",
+							Value:     NewRSRParsersMustCompile("1", true),
+							Mandatory: true,
+						},
+					},
+				},
+				{
+					Id:      "mtcall_cdr",
+					Filters: []string{"*string:*req.request_type:MTCALL_CDR"},
+					Tenant:  NewRSRParsersMustCompile("cgrates.org", true),
+					Flags:   utils.StringMap{"*cdrs": true},
+					RequestFields: []*FCTemplate{{
+						Tag:       "RequestType",
+						FieldId:   "RequestType",
+						Type:      "*constant",
+						Value:     NewRSRParsersMustCompile("*pseudoprepaid", true),
+						Mandatory: true,
+					}},
+					ReplyFields: []*FCTemplate{{
+						Tag:       "CDR_ID",
+						FieldId:   "CDR_RESPONSE.CDR_ID",
+						Type:      "*composed",
+						Value:     NewRSRParsersMustCompile("~*req.CDR_ID", true),
+						Mandatory: true,
+					}},
+				},
+			},
+		},
+		&HttpAgentCfg{
+			ID:             "conecto_xml",
+			Url:            "/conecto_xml",
+			SessionSConns:  []*HaPoolConfig{{Address: "127.0.0.1:2012", Transport: "*json"}},
+			RequestPayload: "*xml",
+			ReplyPayload:   "*xml",
+			RequestProcessors: []*HttpAgntProcCfg{{
+				Id:     "cdr_from_xml",
+				Tenant: NewRSRParsersMustCompile("cgrates.org", true),
+				Flags:  utils.StringMap{"*cdrs": true},
+				RequestFields: []*FCTemplate{
+					{
+						Tag:       "TOR",
+						FieldId:   "ToR",
+						Type:      "*constant",
+						Value:     NewRSRParsersMustCompile("*data", true),
+						Mandatory: true,
+					},
+				},
+				ReplyFields: []*FCTemplate{},
+			}}},
+	}
+
+	if !reflect.DeepEqual(mfCgrCfg.HttpAgentCfg(), expected) {
+		t.Errorf("Expected: %+v\n, recived: %+v", utils.ToJSON(expected), utils.ToJSON(mfCgrCfg.HttpAgentCfg()))
 	}
 }

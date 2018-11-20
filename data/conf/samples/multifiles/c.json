@@ -20,4 +20,29 @@
 	}
 },
 
+"http_agent": [
+	{
+		"id": "conecto_xml",
+		"url": "/conecto_xml",
+		"sessions_conns": [
+			{"address": "127.0.0.1:2012", "transport": "*json"}
+		],
+		"request_payload":	"*xml",
+		"reply_payload":	"*xml",
+		"request_processors": [
+			{
+				"id": "cdr_from_xml",
+				"tenant": "cgrates.org",
+				"flags": ["*cdrs"],
+				"request_fields":[
+					{"tag": "TOR", "field_id": "ToR", "type": "*constant",
+					 "value": "*data", "mandatory": true},
+				],
+				"reply_fields":[],
+			}
+		],
+	},
+],
+
+
 }
