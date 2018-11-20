@@ -648,7 +648,7 @@ func (ddc *StatDDC) RemEvent(evID string) (err error) {
 }
 
 func (ddc *StatDDC) Marshal(ms Marshaler) (marshaled []byte, err error) {
-	return ms.Marshal(DDC)
+	return ms.Marshal(ddc)
 }
 func (ddc *StatDDC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, ddc)
