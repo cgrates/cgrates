@@ -96,7 +96,7 @@ var (
 	CostLow            = strings.ToLower(utils.COST)
 )
 
-func NewMongoStorage(host, port, db, user, pass, storageType string,
+func NewMongoStorageOld(host, port, db, user, pass, storageType string,
 	cdrsIndexes []string, cacheCfg config.CacheCfg) (ms *MongoStorage, err error) {
 	url := host
 	if port != "" {

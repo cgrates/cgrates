@@ -34,6 +34,7 @@ import (
 var (
 	rdsITdb    *RedisStorage
 	mgoITdb    *MongoStorage
+	mgoITdb2   *MongoStorageNew
 	onStor     *DataManager
 	onStorCfg  string
 	sleepDelay time.Duration
@@ -43,12 +44,12 @@ var (
 var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITFlush,
 	testOnStorITIsDBEmpty,
-	testOnStorITSetGetDerivedCharges,
-	testOnStorITCacheDestinations,
-	testOnStorITCacheReverseDestinations,
-	testOnStorITCacheActionPlan,
-	testOnStorITCacheAccountActionPlans,
-	testOnStorITCacheDerivedChargers,
+	// testOnStorITSetGetDerivedCharges,
+	// testOnStorITCacheDestinations,
+	// testOnStorITCacheReverseDestinations,
+	// testOnStorITCacheActionPlan,
+	// testOnStorITCacheAccountActionPlans,
+	// testOnStorITCacheDerivedChargers,
 
 	// ToDo: test cache flush for a prefix
 	// ToDo: testOnStorITLoadAccountingCache
@@ -72,14 +73,14 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITStatQueueProfile,
 	testOnStorITStatQueue,
 	testOnStorITThresholdProfile,
-	testOnStorITThreshold,
-	testOnStorITFilter,
-	testOnStorITSupplierProfile,
-	testOnStorITAttributeProfile,
-	testOnStorITFlush,
-	testOnStorITIsDBEmpty,
-	testOnStorITTestAttributeSubstituteIface,
-	testOnStorITChargerProfile,
+	// testOnStorITThreshold,
+	// testOnStorITFilter,
+	// testOnStorITSupplierProfile,
+	// testOnStorITAttributeProfile,
+	// testOnStorITFlush,
+	// testOnStorITIsDBEmpty,
+	// testOnStorITTestAttributeSubstituteIface,
+	// testOnStorITChargerProfile,//aici
 	//testOnStorITCacheActionTriggers,
 	//testOnStorITCacheAlias,
 	//testOnStorITCacheReverseAlias,
@@ -112,7 +113,7 @@ func TestOnStorITMongo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if mgoITdb, err = NewMongoStorage(mgoITCfg.StorDbCfg().StorDBHost,
+	if mgoITdb, err = NewMongoStorageOld(mgoITCfg.StorDbCfg().StorDBHost,
 		mgoITCfg.StorDbCfg().StorDBPort, mgoITCfg.StorDbCfg().StorDBName,
 		mgoITCfg.StorDbCfg().StorDBUser, mgoITCfg.StorDbCfg().StorDBPass,
 		utils.StorDB, nil, mgoITCfg.CacheCfg()); err != nil {
@@ -122,6 +123,26 @@ func TestOnStorITMongo(t *testing.T) {
 	onStor = NewDataManager(mgoITdb)
 	for _, stest := range sTestsOnStorIT {
 		t.Run("TestOnStorITMongo", stest)
+	}
+}
+
+func TestOnStorITMongo2(t *testing.T) {
+	sleepDelay = 500 * time.Millisecond
+	cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "cdrsv2mongo")
+	mgoITCfg, err := config.NewCGRConfigFromFolder(cdrsMongoCfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if mgoITdb2, err = NewMongoStorage(mgoITCfg.StorDbCfg().StorDBHost,
+		mgoITCfg.StorDbCfg().StorDBPort, mgoITCfg.StorDbCfg().StorDBName,
+		mgoITCfg.StorDbCfg().StorDBUser, mgoITCfg.StorDbCfg().StorDBPass,
+		utils.StorDB, nil, mgoITCfg.CacheCfg()); err != nil {
+		t.Fatal(err)
+	}
+	onStorCfg = mgoITCfg.StorDbCfg().StorDBName
+	onStor = NewDataManager(mgoITdb2)
+	for _, stest := range sTestsOnStorIT {
+		t.Run("TestOnStorITMongoNew", stest)
 	}
 }
 
@@ -2004,14 +2025,14 @@ func testOnStorITThresholdProfile(t *testing.T) {
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(th, rcv) {
-		t.Errorf("Expecting: %v, received: %v", th, rcv)
+		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
 	}
 	//get from database
 	if rcv, err := onStor.GetThresholdProfile(th.Tenant, th.ID,
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(th, rcv) {
-		t.Errorf("Expecting: %v, received: %v", th, rcv)
+		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
 	}
 	expectedR := []string{"thp_cgrates.org:test"}
 	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ThresholdProfilePrefix); err != nil {

@@ -40,9 +40,9 @@ import (
 )
 
 // NewMongoStorageNew givese new mongo driver
-func NewMongoStorageNew(host, port, db, user, pass, storageType string,
+func NewMongoStorage(host, port, db, user, pass, storageType string,
 	cdrsIndexes []string, cacheCfg config.CacheCfg) (ms *MongoStorageNew, err error) {
-	url := host
+	url := "mongodb://" + host
 	if port != "" {
 		url += ":" + port
 	}
@@ -293,17 +293,19 @@ func (ms *MongoStorageNew) RemoveReverseForPrefix(prefix string) (err error) {
 // IsDBEmpty implementation
 func (ms *MongoStorageNew) IsDBEmpty() (resp bool, err error) {
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) error {
-		col, err := ms.DB().ListCollections(sctx, bson.D{})
+		col, err := ms.DB().ListCollections(sctx, nil)
 		if err != nil {
 			return err
 		}
-		resp = !col.Next(sctx)
+		if resp = !col.Next(sctx); resp {
+			return nil
+		}
 		elem := bson.D{}
 		err = col.Decode(&elem)
 		if err != nil {
 			return err
 		}
-		resp = resp || (elem.Map()["name"] == "cdrs")
+		resp = (elem.Map()["name"] == "cdrs")
 		col.Close(sctx)
 		return nil
 	})
@@ -751,6 +753,7 @@ func (ms *MongoStorageNew) SetReverseDestination(dest *Destination,
 		if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 			_, err = ms.getCol(colRds).UpdateOne(sctx, bson.M{"key": p},
 				bson.M{"$addToSet": bson.M{"value": dest.Id}},
+				options.Update().SetUpsert(true),
 			)
 			return err
 		}); err != nil {
@@ -1059,6 +1062,28 @@ func (ms *MongoStorageNew) GetUserDrv(key string) (up *UserProfile, err error) {
 		return nil, err
 	}
 	return kv.Value, nil
+}
+
+func (ms *MongoStorageNew) GetUsersDrv() (result []*UserProfile, err error) {
+	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
+		cur, err := ms.getCol(colUsr).Find(sctx, nil)
+		if err != nil {
+			return err
+		}
+		for cur.Next(sctx) {
+			var kv struct {
+				Key   string
+				Value *UserProfile
+			}
+			err := cur.Decode(&kv)
+			if err != nil {
+				return err
+			}
+			result = append(result, kv.Value)
+		}
+		return cur.Close(sctx)
+	})
+	return
 }
 
 func (ms *MongoStorageNew) SetUserDrv(up *UserProfile) (err error) {
@@ -1977,16 +2002,8 @@ func (ms *MongoStorageNew) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 			return err
 		})
 	} else {
-		pairs := []interface{}{}
 		var lastErr error
 		for key, itmMp := range indexes {
-			pairs = append(pairs, bson.M{"key": utils.ConcatenatedKey(dbKey, key)})
-			if len(itmMp) == 0 {
-				pairs = append(pairs, bson.M{"$unset": bson.M{"value": 1}})
-			} else {
-				pairs = append(pairs, bson.M{"$set": bson.M{"key": utils.ConcatenatedKey(dbKey, key), "value": itmMp.Slice()}})
-			}
-
 			if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 				var action bson.M
 				if len(itmMp) == 0 {
@@ -2137,8 +2154,7 @@ func (ms *MongoStorageNew) GetThresholdProfileDrv(tenant, ID string) (tp *Thresh
 func (ms *MongoStorageNew) SetThresholdProfileDrv(tp *ThresholdProfile) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(colTps).UpdateOne(sctx, bson.M{"tenant": tp.Tenant, "id": tp.ID},
-			bson.M{"$set": tp},
-			options.Update().SetUpsert(true),
+			bson.M{"$set": tp}, options.Update().SetUpsert(true),
 		)
 		return err
 	})
