@@ -46,7 +46,7 @@ type ActionTrigger struct {
 	LastExecutionTime time.Time
 }
 
-func (at *ActionTrigger) Execute(ub *Account, sq *CDRStatsQueueTriggered) (err error) {
+func (at *ActionTrigger) Execute(ub *Account) (err error) {
 	// check for min sleep time
 	if at.Recurrent && !at.LastExecutionTime.IsZero() && time.Since(at.LastExecutionTime) < at.MinSleep {
 		return
@@ -94,7 +94,7 @@ func (at *ActionTrigger) Execute(ub *Account, sq *CDRStatsQueueTriggered) (err e
 			break
 		}
 		//go utils.Logger.Info(fmt.Sprintf("Executing %v, %v: %v", ub, sq, a))
-		if err := actionFunction(ub, sq, a, aac); err != nil {
+		if err := actionFunction(ub, a, aac, nil); err != nil {
 			utils.Logger.Err(fmt.Sprintf("Error executing action %s: %v!", a.ActionType, err))
 			transactionFailed = false
 			break

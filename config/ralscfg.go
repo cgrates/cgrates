@@ -28,7 +28,6 @@ import (
 type RalsCfg struct {
 	RALsEnabled              bool            // start standalone server (no balancer)
 	RALsThresholdSConns      []*HaPoolConfig // address where to reach ThresholdS config
-	RALsCDRStatSConns        []*HaPoolConfig // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
 	RALsStatSConns           []*HaPoolConfig
 	RALsPubSubSConns         []*HaPoolConfig
 	RALsUserSConns           []*HaPoolConfig
@@ -51,13 +50,6 @@ func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 		for idx, jsnHaCfg := range *jsnRALsCfg.Thresholds_conns {
 			ralsCfg.RALsThresholdSConns[idx] = NewDfltHaPoolConfig()
 			ralsCfg.RALsThresholdSConns[idx].loadFromJsonCfg(jsnHaCfg)
-		}
-	}
-	if jsnRALsCfg.Cdrstats_conns != nil {
-		ralsCfg.RALsCDRStatSConns = make([]*HaPoolConfig, len(*jsnRALsCfg.Cdrstats_conns))
-		for idx, jsnHaCfg := range *jsnRALsCfg.Cdrstats_conns {
-			ralsCfg.RALsCDRStatSConns[idx] = NewDfltHaPoolConfig()
-			ralsCfg.RALsCDRStatSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnRALsCfg.Stats_conns != nil {

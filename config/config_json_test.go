@@ -82,12 +82,6 @@ func TestCacheJsonCfg(t *testing.T) {
 		utils.CacheRatingProfiles: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 			Precache: utils.BoolPointer(false)},
-		utils.CacheLCRRules: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
-			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-			Precache: utils.BoolPointer(false)},
-		utils.CacheCDRStatS: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
-			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-			Precache: utils.BoolPointer(false)},
 		utils.CacheActions: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 			Precache: utils.BoolPointer(false)},
@@ -225,7 +219,6 @@ func TestDfRalsJsonCfg(t *testing.T) {
 	eCfg := &RalsJsonCfg{
 		Enabled:                     utils.BoolPointer(false),
 		Thresholds_conns:            &[]*HaPoolJsonCfg{},
-		Cdrstats_conns:              &[]*HaPoolJsonCfg{},
 		Stats_conns:                 &[]*HaPoolJsonCfg{},
 		Pubsubs_conns:               &[]*HaPoolJsonCfg{},
 		Users_conns:                 &[]*HaPoolJsonCfg{},
@@ -272,7 +265,6 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		Attributes_conns:   &[]*HaPoolJsonCfg{},
 		Users_conns:        &[]*HaPoolJsonCfg{},
 		Aliases_conns:      &[]*HaPoolJsonCfg{},
-		Cdrstats_conns:     &[]*HaPoolJsonCfg{},
 		Thresholds_conns:   &[]*HaPoolJsonCfg{},
 		Stats_conns:        &[]*HaPoolJsonCfg{},
 		Online_cdr_exports: &[]string{},
@@ -281,18 +273,6 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("Received: %+v", *cfg)
-	}
-}
-
-func TestDfCdrStatsJsonCfg(t *testing.T) {
-	eCfg := &CdrStatsJsonCfg{
-		Enabled:       utils.BoolPointer(false),
-		Save_Interval: utils.StringPointer("1m"),
-	}
-	if cfg, err := dfCgrJsonCfg.CdrStatsJsonCfg(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", *cfg)
 	}
 }
 

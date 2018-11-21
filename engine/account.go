@@ -638,11 +638,11 @@ func (acc *Account) ExecuteActionTriggers(a *Action) {
 							if strings.HasPrefix(at.ThresholdType, "*max") {
 								if c.Filter.Equal(at.Balance) && c.Value >= at.ThresholdValue {
 									//log.Print("HERE")
-									at.Execute(acc, nil)
+									at.Execute(acc)
 								}
 							} else { //MIN
 								if c.Filter.Equal(at.Balance) && c.Value <= at.ThresholdValue {
-									at.Execute(acc, nil)
+									at.Execute(acc)
 								}
 							}
 						}
@@ -657,15 +657,15 @@ func (acc *Account) ExecuteActionTriggers(a *Action) {
 				switch at.ThresholdType {
 				case utils.TRIGGER_MAX_BALANCE:
 					if b.MatchActionTrigger(at) && b.GetValue() >= at.ThresholdValue {
-						at.Execute(acc, nil)
+						at.Execute(acc)
 					}
 				case utils.TRIGGER_MIN_BALANCE:
 					if b.MatchActionTrigger(at) && b.GetValue() <= at.ThresholdValue {
-						at.Execute(acc, nil)
+						at.Execute(acc)
 					}
 				case utils.TRIGGER_BALANCE_EXPIRED:
 					if b.MatchActionTrigger(at) && b.IsExpired() {
-						at.Execute(acc, nil)
+						at.Execute(acc)
 					}
 				}
 			}

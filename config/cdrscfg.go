@@ -33,7 +33,6 @@ type CdrsCfg struct {
 	CDRSAttributeSConns  []*HaPoolConfig // address where to reach the users service: <""|internal|x.y.z.y:1234>
 	CDRSUserSConns       []*HaPoolConfig // address where to reach the users service: <""|internal|x.y.z.y:1234>
 	CDRSAliaseSConns     []*HaPoolConfig // address where to reach the aliases service: <""|internal|x.y.z.y:1234>
-	CDRSCDRStatSConns    []*HaPoolConfig // address where to reach the cdrstats service. Empty to disable cdrstats gathering  <""|internal|x.y.z.y:1234>
 	CDRSThresholdSConns  []*HaPoolConfig // address where to reach the thresholds service
 	CDRSStatSConns       []*HaPoolConfig
 	CDRSOnlineCDRExports []string // list of CDRE templates to use for real-time CDR exports
@@ -98,13 +97,6 @@ func (cdrscfg *CdrsCfg) loadFromJsonCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 		for idx, jsnHaCfg := range *jsnCdrsCfg.Aliases_conns {
 			cdrscfg.CDRSAliaseSConns[idx] = NewDfltHaPoolConfig()
 			cdrscfg.CDRSAliaseSConns[idx].loadFromJsonCfg(jsnHaCfg)
-		}
-	}
-	if jsnCdrsCfg.Cdrstats_conns != nil {
-		cdrscfg.CDRSCDRStatSConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Cdrstats_conns))
-		for idx, jsnHaCfg := range *jsnCdrsCfg.Cdrstats_conns {
-			cdrscfg.CDRSCDRStatSConns[idx] = NewDfltHaPoolConfig()
-			cdrscfg.CDRSCDRStatSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCdrsCfg.Thresholds_conns != nil {

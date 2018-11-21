@@ -91,7 +91,7 @@ func (a *Action) Clone() *Action {
 	return &clonedAction
 }
 
-type actionTypeFunc func(*Account, *CDRStatsQueueTriggered, *Action, Actions) error
+type actionTypeFunc func(*Account, *Action, Actions, interface{}) error
 
 func getActionFunc(typ string) (actionTypeFunc, bool) {
 	actionFuncMap := map[string]actionTypeFunc{
@@ -128,19 +128,19 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 	return f, exists
 }
 
-func logAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) (err error) {
-	if ub != nil {
+func logAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
+	switch {
+	case ub != nil:
 		body, _ := json.Marshal(ub)
 		utils.Logger.Info(fmt.Sprintf("Threshold hit, Balance: %s", body))
-	}
-	if sq != nil {
-		body, _ := json.Marshal(sq)
-		utils.Logger.Info(fmt.Sprintf("Threshold hit, CDRStatsQueue: %s", body))
+	case extraData != nil:
+		body, _ := json.Marshal(extraData)
+		utils.Logger.Info(fmt.Sprintf("<CGRLog> extraData: %s", body))
 	}
 	return
 }
 
-func cdrLogAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) (err error) {
+func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (err error) {
 	if schedCdrsConns == nil {
 		return fmt.Errorf("No connection with CDR Server")
 	}
@@ -212,7 +212,7 @@ func cdrLogAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actio
 	return
 }
 
-func resetTriggersAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) (err error) {
+func resetTriggersAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -220,7 +220,7 @@ func resetTriggersAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs
 	return
 }
 
-func setRecurrentAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) (err error) {
+func setRecurrentAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -228,7 +228,7 @@ func setRecurrentAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs 
 	return
 }
 
-func unsetRecurrentAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) (err error) {
+func unsetRecurrentAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -236,7 +236,7 @@ func unsetRecurrentAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, ac
 	return
 }
 
-func allowNegativeAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) (err error) {
+func allowNegativeAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -244,7 +244,7 @@ func allowNegativeAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs
 	return
 }
 
-func denyNegativeAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) (err error) {
+func denyNegativeAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -252,14 +252,14 @@ func denyNegativeAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs 
 	return
 }
 
-func resetAccountAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) (err error) {
+func resetAccountAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
 	return genericReset(ub)
 }
 
-func topupResetAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) (err error) {
+func topupResetAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -273,7 +273,7 @@ func topupResetAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Ac
 	return
 }
 
-func topupAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) (err error) {
+func topupAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -284,7 +284,7 @@ func topupAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions
 	return
 }
 
-func debitResetAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) (err error) {
+func debitResetAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -294,7 +294,7 @@ func debitResetAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Ac
 	return genericDebit(ub, a, true)
 }
 
-func debitAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) (err error) {
+func debitAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -302,7 +302,7 @@ func debitAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions
 	return
 }
 
-func resetCountersAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) (err error) {
+func resetCountersAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
@@ -328,7 +328,7 @@ func genericDebit(ub *Account, a *Action, reset bool) (err error) {
 	return ub.debitBalanceAction(a, reset, false)
 }
 
-func enableAccountAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) (err error) {
+func enableAccountAction(acc *Account, a *Action, acs Actions, extraData interface{}) (err error) {
 	if acc == nil {
 		return errors.New("nil account")
 	}
@@ -336,7 +336,7 @@ func enableAccountAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, ac
 	return
 }
 
-func disableAccountAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) (err error) {
+func disableAccountAction(acc *Account, a *Action, acs Actions, extraData interface{}) (err error) {
 	if acc == nil {
 		return errors.New("nil account")
 	}
@@ -361,13 +361,13 @@ func genericReset(ub *Account) error {
 	return nil
 }
 
-func callUrl(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) error {
+func callUrl(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 	var o interface{}
-	if ub != nil {
+	switch {
+	case ub != nil:
 		o = ub
-	}
-	if sq != nil {
-		o = sq
+	case extraData != nil:
+		o = extraData
 	}
 	jsn, err := json.Marshal(o)
 	if err != nil {
@@ -389,13 +389,13 @@ func callUrl(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) er
 }
 
 // Does not block for posts, no error reports
-func callUrlAsync(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) error {
+func callUrlAsync(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 	var o interface{}
-	if ub != nil {
+	switch {
+	case ub != nil:
 		o = ub
-	}
-	if sq != nil {
-		o = sq
+	case extraData != nil:
+		o = extraData
 	}
 	jsn, err := json.Marshal(o)
 	if err != nil {
@@ -417,7 +417,7 @@ func callUrlAsync(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Action
 }
 
 // Mails the balance hitting the threshold towards predefined list of addresses
-func mailAsync(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) error {
+func mailAsync(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 	cgrCfg := config.CgrConfig()
 	params := strings.Split(a.ExtraParameters, string(utils.CSV_SEP))
 	if len(params) == 0 {
@@ -438,9 +438,6 @@ func mailAsync(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) 
 			return err
 		}
 		message = []byte(fmt.Sprintf("To: %s\r\nSubject: [CGR Notification] Threshold hit on Balance: %s\r\n\r\nTime: \r\n\t%s\r\n\r\nBalance:\r\n\t%s\r\n\r\nYours faithfully,\r\nCGR Balance Monitor\r\n", toAddrStr, ub.ID, time.Now(), balJsn))
-	} else if sq != nil {
-		message = []byte(fmt.Sprintf("To: %s\r\nSubject: [CGR Notification] Threshold hit on CDRStatsQueueId: %s\r\n\r\nTime: \r\n\t%s\r\n\r\nCDRStatsQueueId:\r\n\t%s\r\n\r\nMetrics:\r\n\t%+v\r\n\r\nTrigger:\r\n\t%+v\r\n\r\nYours faithfully,\r\nCGR CDR Stats Monitor\r\n",
-			toAddrStr, sq.Id, time.Now(), sq.Id, sq.Metrics, sq.Trigger))
 	}
 	auth := smtp.PlainAuth("", cgrCfg.MailerCfg().MailerAuthUser, cgrCfg.MailerCfg().MailerAuthPass, strings.Split(cgrCfg.MailerCfg().MailerServer, ":")[0]) // We only need host part, so ignore port
 	go func() {
@@ -450,8 +447,6 @@ func mailAsync(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) 
 			} else if i == 4 {
 				if ub != nil {
 					utils.Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed emailing, params: [%s], error: [%s], BalanceId: %s", a.ExtraParameters, err.Error(), ub.ID))
-				} else if sq != nil {
-					utils.Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed emailing, params: [%s], error: [%s], CDRStatsQueueTriggeredId: %s", a.ExtraParameters, err.Error(), sq.Id))
 				}
 				break
 			}
@@ -461,7 +456,7 @@ func mailAsync(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) 
 	return nil
 }
 
-func setddestinations(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) (err error) {
+func setddestinations(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
 	var ddcDestId string
 	for _, bchain := range ub.BalanceMap {
 		for _, b := range bchain {
@@ -481,13 +476,14 @@ func setddestinations(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Ac
 	}
 	if ddcDestId != "" {
 		// make slice from prefixes
-		prefixes := make([]string, len(sq.Metrics))
-		i := 0
-		for p := range sq.Metrics {
-			prefixes[i] = p
-			i++
-		}
-		newDest := &Destination{Id: ddcDestId, Prefixes: prefixes}
+		// Review here prefixes
+		// prefixes := make([]string, len(sq.Metrics))
+		// i := 0
+		// for p := range sq.Metrics {
+		// 	prefixes[i] = p
+		// 	i++
+		// }
+		newDest := &Destination{Id: ddcDestId}
 		oldDest, err := dm.DataDB().GetDestination(ddcDestId, false, utils.NonTransactional)
 		if err != nil {
 			return err
@@ -511,7 +507,7 @@ func setddestinations(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Ac
 	return nil
 }
 
-func removeAccountAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) error {
+func removeAccountAction(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 	var accID string
 	if ub != nil {
 		accID = ub.ID
@@ -572,7 +568,7 @@ func removeAccountAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs
 	return nil
 }
 
-func removeBalanceAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) error {
+func removeBalanceAction(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 	if ub == nil {
 		return fmt.Errorf("nil account for %s action", utils.ToJSON(a))
 	}
@@ -597,23 +593,23 @@ func removeBalanceAction(ub *Account, sq *CDRStatsQueueTriggered, a *Action, acs
 	return nil
 }
 
-func setBalanceAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) error {
-	if acc == nil {
+func setBalanceAction(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+	if ub == nil {
 		return fmt.Errorf("nil account for %s action", utils.ToJSON(a))
 	}
-	return acc.setBalanceAction(a)
+	return ub.setBalanceAction(a)
 }
 
-func transferMonetaryDefaultAction(acc *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) error {
-	if acc == nil {
+func transferMonetaryDefaultAction(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+	if ub == nil {
 		utils.Logger.Err("*transfer_monetary_default called without account")
 		return utils.ErrAccountNotFound
 	}
-	if _, exists := acc.BalanceMap[utils.MONETARY]; !exists {
+	if _, exists := ub.BalanceMap[utils.MONETARY]; !exists {
 		return utils.ErrNotFound
 	}
-	defaultBalance := acc.GetDefaultMoneyBalance()
-	bChain := acc.BalanceMap[utils.MONETARY]
+	defaultBalance := ub.GetDefaultMoneyBalance()
+	bChain := ub.BalanceMap[utils.MONETARY]
 	for _, balance := range bChain {
 		if balance.Uuid != defaultBalance.Uuid &&
 			balance.ID != defaultBalance.ID && // extra caution
@@ -651,7 +647,7 @@ Sq - CDRStatsQueueTriggered object
 
 We can actually use everythiong that go templates offer. You can read more here: https://golang.org/pkg/text/template/
 */
-func cgrRPCAction(account *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) error {
+func cgrRPCAction(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 	// parse template
 	tmpl := template.New("extra_params")
 	tmpl.Delims("<<", ">>")
@@ -662,11 +658,11 @@ func cgrRPCAction(account *Account, sq *CDRStatsQueueTriggered, a *Action, acs A
 	}
 	var buf bytes.Buffer
 	if err = t.Execute(&buf, struct {
-		Account *Account
-		Sq      *CDRStatsQueueTriggered
-		Action  *Action
-		Actions Actions
-	}{account, sq, a, acs}); err != nil {
+		Account   *Account
+		Action    *Action
+		Actions   Actions
+		ExtraData interface{}
+	}{ub, a, acs, extraData}); err != nil {
 		utils.Logger.Err(fmt.Sprintf("error executing *cgr_rpc template %s:", err.Error()))
 		return err
 	}
@@ -716,22 +712,22 @@ func cgrRPCAction(account *Account, sq *CDRStatsQueueTriggered, a *Action, acs A
 	return nil
 }
 
-func topupZeroNegativeAction(account *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) error {
-	if account == nil {
+func topupZeroNegativeAction(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+	if ub == nil {
 		return errors.New("nil account")
 	}
-	if account.BalanceMap == nil {
-		account.BalanceMap = make(map[string]Balances)
+	if ub.BalanceMap == nil {
+		ub.BalanceMap = make(map[string]Balances)
 	}
-	return account.debitBalanceAction(a, false, true)
+	return ub.debitBalanceAction(a, false, true)
 }
 
-func setExpiryAction(account *Account, sq *CDRStatsQueueTriggered, a *Action, acs Actions) error {
-	if account == nil {
+func setExpiryAction(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+	if ub == nil {
 		return errors.New("nil account")
 	}
 	balanceType := a.Balance.GetType()
-	for _, b := range account.BalanceMap[balanceType] {
+	for _, b := range ub.BalanceMap[balanceType] {
 		if b.MatchFilter(a.Balance, false, true) {
 			b.ExpirationDate = a.Balance.GetExpirationDate()
 		}
@@ -740,16 +736,15 @@ func setExpiryAction(account *Account, sq *CDRStatsQueueTriggered, a *Action, ac
 }
 
 // publishAccount will publish the account as well as each balance received to ThresholdS
-func publishAccount(acnt *Account, sq *CDRStatsQueueTriggered,
-	a *Action, acs Actions) error {
-	if acnt == nil {
+func publishAccount(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+	if ub == nil {
 		return errors.New("nil account")
 	}
-	acnt.Publish()
-	for bType := range acnt.BalanceMap {
-		for _, b := range acnt.BalanceMap[bType] {
+	ub.Publish()
+	for bType := range ub.BalanceMap {
+		for _, b := range ub.BalanceMap[bType] {
 			if b.account == nil {
-				b.account = acnt
+				b.account = ub
 			}
 			b.Publish()
 		}
@@ -758,15 +753,14 @@ func publishAccount(acnt *Account, sq *CDRStatsQueueTriggered,
 }
 
 // publishAccount will publish the account as well as each balance received to ThresholdS
-func publishBalance(acnt *Account, sq *CDRStatsQueueTriggered,
-	a *Action, acs Actions) error {
-	if acnt == nil {
+func publishBalance(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+	if ub == nil {
 		return errors.New("nil account")
 	}
-	for bType := range acnt.BalanceMap {
-		for _, b := range acnt.BalanceMap[bType] {
+	for bType := range ub.BalanceMap {
+		for _, b := range ub.BalanceMap[bType] {
 			if b.account == nil {
-				b.account = acnt
+				b.account = ub
 			}
 			b.Publish()
 		}

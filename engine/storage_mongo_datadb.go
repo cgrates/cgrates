@@ -46,14 +46,11 @@ const (
 	colRpf   = "rating_profiles"
 	colAcc   = "accounts"
 	colShg   = "shared_groups"
-	colLcr   = "lcr_rules"
 	colDcs   = "derived_chargers"
 	colAls   = "aliases"
 	colRCfgs = "reverse_aliases"
-	colStq   = "stat_qeues"
 	colPbs   = "pubsub"
 	colUsr   = "users"
-	colCrs   = "cdr_stats"
 	colLht   = "load_history"
 	colVer   = "versions"
 	colRsP   = "resource_profiles"
@@ -160,7 +157,7 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 			Sparse:     false, // Only index documents containing the Key fields
 		}
 		for _, col := range []string{colAct, colApl, colAAp, colAtr,
-			colDcs, colRpl, colLcr, colDst, colRds, colAls, colUsr, colLht} {
+			colDcs, colRpl, colDst, colRds, colAls, colUsr, colLht} {
 			if err = db.C(col).EnsureIndex(idx); err != nil {
 
 				return
@@ -186,7 +183,7 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 			Background: false,
 			Sparse:     false,
 		}
-		for _, col := range []string{colRpf, colShg, colCrs, colAcc} {
+		for _, col := range []string{colRpf, colShg, colAcc} {
 			if err = db.C(col).EnsureIndex(idx); err != nil {
 				return
 			}
@@ -202,7 +199,7 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 		}
 		for _, col := range []string{utils.TBLTPTimings, utils.TBLTPDestinations,
 			utils.TBLTPDestinationRates, utils.TBLTPRatingPlans,
-			utils.TBLTPSharedGroups, utils.TBLTPCdrStats, utils.TBLTPActions,
+			utils.TBLTPSharedGroups, utils.TBLTPActions,
 			utils.TBLTPActionPlans, utils.TBLTPActionTriggers,
 			utils.TBLTPStats, utils.TBLTPResources} {
 			if err = db.C(col).EnsureIndex(idx); err != nil {
@@ -220,16 +217,6 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 			return
 		}
 		idx = mgo.Index{
-			Key:        []string{"tpid", "direction", "tenant", "category", "account", "subject"},
-			Unique:     true,
-			DropDups:   false,
-			Background: false,
-			Sparse:     false,
-		}
-		if err = db.C(utils.TBLTPLcrs).EnsureIndex(idx); err != nil {
-			return
-		}
-		idx = mgo.Index{
 			Key:        []string{"tpid", "tenant", "username"},
 			Unique:     true,
 			DropDups:   false,
@@ -237,16 +224,6 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 			Sparse:     false,
 		}
 		if err = db.C(utils.TBLTPUsers).EnsureIndex(idx); err != nil {
-			return
-		}
-		idx = mgo.Index{
-			Key:        []string{"tpid", "direction", "tenant", "category", "account", "subject", "context"},
-			Unique:     true,
-			DropDups:   false,
-			Background: false,
-			Sparse:     false,
-		}
-		if err = db.C(utils.TBLTPLcrs).EnsureIndex(idx); err != nil {
 			return
 		}
 		idx = mgo.Index{
@@ -339,16 +316,14 @@ func (ms *MongoStorage) getColNameForPrefix(prefix string) (name string, ok bool
 		utils.RATING_PROFILE_PREFIX:      colRpf,
 		utils.ACCOUNT_PREFIX:             colAcc,
 		utils.SHARED_GROUP_PREFIX:        colShg,
-		utils.LCR_PREFIX:                 colLcr,
 		utils.DERIVEDCHARGERS_PREFIX:     colDcs,
 		utils.ALIASES_PREFIX:             colAls,
 		utils.REVERSE_ALIASES_PREFIX:     colRCfgs,
 		utils.PUBSUB_SUBSCRIBERS_PREFIX:  colPbs,
 		utils.USERS_PREFIX:               colUsr,
-		utils.CDR_STATS_PREFIX:           colCrs,
 		utils.LOADINST_KEY:               colLht,
 		utils.VERSION_PREFIX:             colVer,
-		//utils.CDR_STATS_QUEUE_PREFIX:            colStq,
+
 		utils.TimingsPrefix:          colTmg,
 		utils.ResourcesPrefix:        colRes,
 		utils.ResourceProfilesPrefix: colRsP,
@@ -579,11 +554,6 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		iter := db.C(colDcs).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
 		for iter.Next(&keyResult) {
 			result = append(result, utils.DERIVEDCHARGERS_PREFIX+keyResult.Key)
-		}
-	case utils.LCR_PREFIX:
-		iter := db.C(colLcr).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
-		for iter.Next(&keyResult) {
-			result = append(result, utils.LCR_PREFIX+keyResult.Key)
 		}
 	case utils.ACCOUNT_PREFIX:
 		iter := db.C(colAcc).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
@@ -903,43 +873,6 @@ func (ms *MongoStorage) RemoveRatingProfileDrv(key string) error {
 	return iter.Close()
 }
 
-func (ms *MongoStorage) GetLCRDrv(key string) (lcr *LCR, err error) {
-
-	var result struct {
-		Key   string
-		Value *LCR
-	}
-	session, col := ms.conn(colLcr)
-	defer session.Close()
-	if err = col.Find(bson.M{"key": key}).One(&result); err != nil {
-		if err == mgo.ErrNotFound {
-			err = utils.ErrNotFound
-		}
-		return nil, err
-	}
-	lcr = result.Value
-	return
-}
-
-func (ms *MongoStorage) SetLCRDrv(lcr *LCR) (err error) {
-	session, col := ms.conn(colLcr)
-	defer session.Close()
-	if _, err = col.Upsert(bson.M{"key": lcr.GetId()}, &struct {
-		Key   string
-		Value *LCR
-	}{lcr.GetId(), lcr}); err != nil {
-		return
-	}
-	return
-}
-
-func (ms *MongoStorage) RemoveLCRDrv(id, transactionID string) (err error) {
-	session, col := ms.conn(colLcr)
-	defer session.Close()
-	err = col.Remove(bson.M{"key": id})
-	return err
-}
-
 func (ms *MongoStorage) GetDestination(key string, skipCache bool,
 	transactionID string) (result *Destination, err error) {
 	if !skipCache {
@@ -1238,42 +1171,6 @@ func (ms *MongoStorage) RemoveAccount(key string) (err error) {
 		err = utils.ErrNotFound
 	}
 	return
-}
-
-func (ms *MongoStorage) GetCdrStatsQueueDrv(key string) (sq *CDRStatsQueue, err error) {
-	var result struct {
-		Key   string
-		Value *CDRStatsQueue
-	}
-	session, col := ms.conn(colStq)
-	defer session.Close()
-	if err = col.Find(bson.M{"key": key}).One(&result); err != nil {
-		if err == mgo.ErrNotFound {
-			err = utils.ErrNotFound
-		}
-		return nil, err
-	}
-	sq = result.Value
-	return
-}
-
-func (ms *MongoStorage) SetCdrStatsQueueDrv(sq *CDRStatsQueue) (err error) {
-	session, col := ms.conn(colStq)
-	defer session.Close()
-	_, err = col.Upsert(bson.M{"key": sq.GetId()}, &struct {
-		Key   string
-		Value *CDRStatsQueue
-	}{Key: sq.GetId(), Value: sq})
-	return
-}
-
-func (ms *MongoStorage) RemoveCdrStatsQueueDrv(id string) (err error) {
-	session, col := ms.conn(colStq)
-	defer session.Close()
-	if err = col.Remove(bson.M{"key": id}); err != nil && err != mgo.ErrNotFound {
-		return
-	}
-	return nil
 }
 
 func (ms *MongoStorage) GetSubscribersDrv() (result map[string]*SubscriberData, err error) {
@@ -1889,39 +1786,6 @@ func (ms *MongoStorage) RemoveDerivedChargersDrv(id, transactionID string) (err 
 	}
 	Cache.Remove(utils.CacheDerivedChargers, id, cCommit, transactionID)
 	return nil
-}
-
-func (ms *MongoStorage) SetCdrStatsDrv(cs *CdrStats) error {
-	session, col := ms.conn(colCrs)
-	defer session.Close()
-	_, err := col.Upsert(bson.M{"id": cs.Id}, cs)
-	return err
-}
-
-func (ms *MongoStorage) GetCdrStatsDrv(key string) (cs *CdrStats, err error) {
-	cs = new(CdrStats)
-	session, col := ms.conn(colCrs)
-	defer session.Close()
-	if err = col.Find(bson.M{"id": key}).One(cs); err != nil {
-		if err == mgo.ErrNotFound {
-			err = utils.ErrNotFound
-		}
-		return nil, err
-	}
-	return
-}
-
-func (ms *MongoStorage) GetAllCdrStatsDrv() (css []*CdrStats, err error) {
-	session, col := ms.conn(colCrs)
-	defer session.Close()
-	iter := col.Find(nil).Iter()
-	var cs CdrStats
-	for iter.Next(&cs) {
-		clone := cs // avoid using the same pointer in append
-		css = append(css, &clone)
-	}
-	err = iter.Close()
-	return
 }
 
 func (ms *MongoStorage) GetResourceProfileDrv(tenant, id string) (rp *ResourceProfile, err error) {

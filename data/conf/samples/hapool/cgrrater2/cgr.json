@@ -8,9 +8,6 @@
 
 "rals": {
 	"enabled": true,
-	"cdrstats_conns": [
-		{"address": "*internal"}
-	],
 	"pubsubs_conns": [
 		{"address": "*internal"}
 	],
@@ -23,10 +20,6 @@
 },
 
 "scheduler": {
-	"enabled": true,
-},
-
-"cdrstats": {
 	"enabled": true,
 },
 

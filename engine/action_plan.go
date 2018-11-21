@@ -36,6 +36,7 @@ type ActionTiming struct {
 	Uuid         string
 	Timing       *RateInterval
 	ActionsID    string
+	ExtraData    interface{}
 	Weight       float64
 	actions      Actions
 	accountIDs   utils.StringMap // copy of action plans accounts
@@ -331,7 +332,7 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 					transactionFailed = true
 					break
 				}
-				if err := actionFunction(acc, nil, a, aac); err != nil {
+				if err := actionFunction(acc, a, aac, at.ExtraData); err != nil {
 					utils.Logger.Err(fmt.Sprintf("Error executing action %s: %v!", a.ActionType, err))
 					transactionFailed = true
 					if failedActions != nil {
@@ -370,7 +371,7 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 				}
 				break
 			}
-			if err := actionFunction(nil, nil, a, aac); err != nil {
+			if err := actionFunction(nil, a, aac, at.ExtraData); err != nil {
 				utils.Logger.Err(fmt.Sprintf("Error executing accountless action %s: %v!", a.ActionType, err))
 				if failedActions != nil {
 					go func() { failedActions <- a }()

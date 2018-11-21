@@ -51,13 +51,11 @@ RP_ANY,DR_ANY_1CNT,*any,10`
 *out,cgrates.org,call,testauthpostpaid2,2013-01-06T00:00:00Z,RP_1,*any,
 *out,cgrates.org,call,*any,2013-01-06T00:00:00Z,RP_ANY,,`
 	sharedGroups := ``
-	lcrs := ``
 	actions := `TOPUP10_AC,*topup_reset,,,,*monetary,*out,,*any,,,*unlimited,,0,10,false,false,10`
 	actionPlans := `TOPUP10_AT,TOPUP10_AC,*asap,10`
 	actionTriggers := ``
 	accountActions := `cgrates.org,testauthpostpaid1,TOPUP10_AT,,,`
 	derivedCharges := ``
-	cdrStats := ``
 	users := ``
 	aliases := ``
 	resLimits := ``
@@ -68,8 +66,8 @@ RP_ANY,DR_ANY_1CNT,*any,10`
 	aliasProfiles := ``
 	chargerProfiles := ``
 	csvr := engine.NewTpReader(dbAuth.DataDB(), engine.NewStringCSVStorage(',', destinations, timings, rates, destinationRates,
-		ratingPlans, ratingProfiles, sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions,
-		derivedCharges, cdrStats, users, aliases, resLimits, stats, thresholds, filters, suppliers, aliasProfiles, chargerProfiles), "", "")
+		ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans, actionTriggers, accountActions,
+		derivedCharges, users, aliases, resLimits, stats, thresholds, filters, suppliers, aliasProfiles, chargerProfiles), "", "")
 	if err := csvr.LoadAll(); err != nil {
 		t.Fatal(err)
 	}

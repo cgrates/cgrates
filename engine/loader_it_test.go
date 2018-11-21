@@ -103,13 +103,11 @@ func TestLoaderITRemoveLoad(t *testing.T) {
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATING_PLANS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATING_PROFILES_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.SHARED_GROUPS_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.LCRS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTIONS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTION_PLANS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTION_TRIGGERS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACCOUNT_ACTIONS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DERIVED_CHARGERS_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.CDR_STATS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.USERS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ALIASES_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ResourcesCsv),
@@ -153,9 +151,6 @@ func TestLoaderITRemoveLoad(t *testing.T) {
 	}
 	if err = loader.LoadDerivedChargers(); err != nil {
 		t.Error("Failed loading derived chargers: ", err.Error())
-	}
-	if err = loader.LoadLCRs(); err != nil {
-		t.Error("Failed loading lcr rules: ", err.Error())
 	}
 	if err = loader.LoadUsers(); err != nil {
 		t.Error("Failed loading users: ", err.Error())
@@ -208,13 +203,11 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATING_PLANS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATING_PROFILES_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.SHARED_GROUPS_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.LCRS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTIONS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTION_PLANS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTION_TRIGGERS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACCOUNT_ACTIONS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DERIVED_CHARGERS_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.CDR_STATS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.USERS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ALIASES_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ResourcesCsv),
@@ -258,9 +251,6 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 	}
 	if err = loader.LoadDerivedChargers(); err != nil {
 		t.Error("Failed loading derived chargers: ", err.Error())
-	}
-	if err = loader.LoadLCRs(); err != nil {
-		t.Error("Failed loading lcr rules: ", err.Error())
 	}
 	if err = loader.LoadUsers(); err != nil {
 		t.Error("Failed loading users: ", err.Error())
@@ -385,16 +375,6 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 		}
 	}
 
-	for k, lcr := range loader.lcrs {
-		rcv, err := loader.dm.GetLCR(k, true, utils.NonTransactional)
-		if err != nil {
-			t.Error("Failed GetLCR: ", err.Error())
-		}
-		if !reflect.DeepEqual(lcr, rcv) {
-			t.Errorf("Expecting: %v, received: %v", lcr, rcv)
-		}
-	}
-
 	for k, dcs := range loader.derivedChargers {
 		rcv, err := loader.dm.GetDerivedChargers(k, true, utils.NonTransactional)
 		if err != nil {
@@ -402,19 +382,6 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 		}
 		if !reflect.DeepEqual(dcs.DestinationIDs, rcv.DestinationIDs) {
 			t.Errorf("Expecting: %v, received: %v", dcs.DestinationIDs, rcv.DestinationIDs)
-		}
-	}
-
-	for k, sq := range loader.cdrStats {
-		rcv, err := loader.dm.GetCdrStats(k)
-		// t.Log(utils.ToIJSON(sq))
-		// t.Log(utils.ToIJSON(rcv))
-		t.Log(k)
-		if err != nil {
-			t.Error("Failed GetCdrStats: ", err.Error())
-		}
-		if !reflect.DeepEqual(sq, rcv) {
-			t.Errorf("Expecting: %v, received: %v", sq, rcv)
 		}
 	}
 
@@ -580,9 +547,6 @@ func TestLoaderITLoadFromStorDb(t *testing.T) {
 	if err := loader.LoadDerivedChargers(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading derived chargers: ", err.Error())
 	}
-	if err := loader.LoadLCRs(); err != nil && err.Error() != utils.NotFoundCaps {
-		t.Error("Failed loading lcr rules: ", err.Error())
-	}
 	if err := loader.LoadUsers(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading users: ", err.Error())
 	}
@@ -628,19 +592,6 @@ func TestLoaderITLoadIndividualProfiles(t *testing.T) {
 		for _, d := range dcs {
 			if err := loader.LoadDerivedChargersFiltered(d, true); err != nil {
 				t.Fatalf("Could not load derived charger with id: %s, error: %s", d.GetDerivedChargesId(), err.Error())
-			}
-		}
-	}
-	// Load cdr stats
-	//loadId = utils.CSV_LOAD + "_" + utils.TEST_SQL
-	if css, err := storDb.GetTPCdrStats(utils.TEST_SQL, ""); err != nil {
-		t.Fatal("Could not retrieve cdr stats, error: ", err.Error())
-	} else if len(css) == 0 {
-		t.Fatal("Could not retrieve cdr stats")
-	} else {
-		for _, c := range css {
-			if err := loader.LoadCdrStatsFiltered(c.ID, true); err != nil {
-				t.Fatalf("Could not load cdr stats with id: %s, error: %s", c.ID, err.Error())
 			}
 		}
 	}

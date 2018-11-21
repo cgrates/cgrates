@@ -307,33 +307,6 @@ func (ms *MapStorage) RemoveRatingProfileDrv(key string) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetLCRDrv(id string) (lcr *LCR, err error) {
-	ms.mu.RLock()
-	defer ms.mu.RUnlock()
-	key := utils.LCR_PREFIX + id
-	if values, ok := ms.dict[key]; ok {
-		err = ms.ms.Unmarshal(values, &lcr)
-	} else {
-		return nil, utils.ErrNotFound
-	}
-	return
-}
-
-func (ms *MapStorage) SetLCRDrv(lcr *LCR) (err error) {
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
-	result, err := ms.ms.Marshal(lcr)
-	ms.dict[utils.LCR_PREFIX+lcr.GetId()] = result
-	return
-}
-
-func (ms *MapStorage) RemoveLCRDrv(id, transactionID string) (err error) {
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
-	delete(ms.dict, utils.LCR_PREFIX+id)
-	return
-}
-
 func (ms *MapStorage) GetDestination(key string, skipCache bool, transactionID string) (dest *Destination, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
@@ -588,33 +561,6 @@ func (ms *MapStorage) RemoveAccount(key string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	delete(ms.dict, utils.ACCOUNT_PREFIX+key)
-	return
-}
-
-func (ms *MapStorage) GetCdrStatsQueueDrv(key string) (sq *CDRStatsQueue, err error) {
-	ms.mu.RLock()
-	defer ms.mu.RUnlock()
-	if values, ok := ms.dict[utils.CDR_STATS_QUEUE_PREFIX+key]; ok {
-		sq = &CDRStatsQueue{}
-		err = ms.ms.Unmarshal(values, sq)
-	} else {
-		return nil, utils.ErrNotFound
-	}
-	return
-}
-
-func (ms *MapStorage) SetCdrStatsQueueDrv(sq *CDRStatsQueue) (err error) {
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
-	result, err := ms.ms.Marshal(sq)
-	ms.dict[utils.CDR_STATS_QUEUE_PREFIX+sq.GetId()] = result
-	return
-}
-
-func (ms *MapStorage) RemoveCdrStatsQueueDrv(id string) (err error) {
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
-	delete(ms.dict, id)
 	return
 }
 
@@ -1072,39 +1018,6 @@ func (ms *MapStorage) RemoveDerivedChargersDrv(id, transactionID string) (err er
 	cCommit := cacheCommit(transactionID)
 	delete(ms.dict, id)
 	Cache.Remove(utils.CacheDerivedChargers, id, cCommit, transactionID)
-	return
-}
-
-func (ms *MapStorage) SetCdrStatsDrv(cs *CdrStats) error {
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
-	result, err := ms.ms.Marshal(cs)
-	ms.dict[utils.CDR_STATS_PREFIX+cs.Id] = result
-	return err
-}
-
-func (ms *MapStorage) GetCdrStatsDrv(key string) (cs *CdrStats, err error) {
-	ms.mu.RLock()
-	defer ms.mu.RUnlock()
-	if values, ok := ms.dict[utils.CDR_STATS_PREFIX+key]; ok {
-		err = ms.ms.Unmarshal(values, &cs)
-	} else {
-		return nil, utils.ErrNotFound
-	}
-	return
-}
-
-func (ms *MapStorage) GetAllCdrStatsDrv() (css []*CdrStats, err error) {
-	ms.mu.RLock()
-	defer ms.mu.RUnlock()
-	for key, value := range ms.dict {
-		if !strings.HasPrefix(key, utils.CDR_STATS_PREFIX) {
-			continue
-		}
-		cs := &CdrStats{}
-		err = ms.ms.Unmarshal(value, cs)
-		css = append(css, cs)
-	}
 	return
 }
 

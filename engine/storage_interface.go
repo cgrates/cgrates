@@ -61,12 +61,6 @@ type DataDB interface {
 	SetReverseDestination(*Destination, string) error
 	GetReverseDestination(string, bool, string) ([]string, error)
 	UpdateReverseDestination(*Destination, *Destination, string) error
-	GetLCRDrv(string) (*LCR, error)
-	SetLCRDrv(*LCR) error
-	RemoveLCRDrv(id, transactionID string) (err error)
-	SetCdrStatsDrv(*CdrStats) error
-	GetCdrStatsDrv(string) (*CdrStats, error)
-	GetAllCdrStatsDrv() ([]*CdrStats, error)
 	GetDerivedChargersDrv(string) (*utils.DerivedChargers, error)
 	SetDerivedChargers(string, *utils.DerivedChargers, string) error
 	RemoveDerivedChargersDrv(id, transactionID string) (err error)
@@ -92,9 +86,6 @@ type DataDB interface {
 	GetAccount(string) (*Account, error)
 	SetAccount(*Account) error
 	RemoveAccount(string) error
-	GetCdrStatsQueueDrv(string) (*CDRStatsQueue, error)
-	SetCdrStatsQueueDrv(*CDRStatsQueue) error
-	RemoveCdrStatsQueueDrv(id string) (err error)
 	GetSubscribersDrv() (map[string]*SubscriberData, error)
 	SetSubscriberDrv(string, *SubscriberData) error
 	RemoveSubscriberDrv(string) error
@@ -184,8 +175,6 @@ type LoadReader interface {
 	GetTPRatingPlans(string, string, *utils.Paginator) ([]*utils.TPRatingPlan, error)
 	GetTPRatingProfiles(*utils.TPRatingProfile) ([]*utils.TPRatingProfile, error)
 	GetTPSharedGroups(string, string) ([]*utils.TPSharedGroups, error)
-	GetTPCdrStats(string, string) ([]*utils.TPCdrStats, error)
-	GetTPLCRs(*utils.TPLcrRules) ([]*utils.TPLcrRules, error)
 	GetTPUsers(*utils.TPUsers) ([]*utils.TPUsers, error)
 	GetTPAliases(*utils.TPAliases) ([]*utils.TPAliases, error)
 	GetTPDerivedChargers(*utils.TPDerivedChargers) ([]*utils.TPDerivedChargers, error)
@@ -211,11 +200,9 @@ type LoadWriter interface {
 	SetTPRatingPlans([]*utils.TPRatingPlan) error
 	SetTPRatingProfiles([]*utils.TPRatingProfile) error
 	SetTPSharedGroups([]*utils.TPSharedGroups) error
-	SetTPCdrStats([]*utils.TPCdrStats) error
 	SetTPUsers([]*utils.TPUsers) error
 	SetTPAliases([]*utils.TPAliases) error
 	SetTPDerivedChargers([]*utils.TPDerivedChargers) error
-	SetTPLCRs([]*utils.TPLcrRules) error
 	SetTPActions([]*utils.TPActions) error
 	SetTPActionPlans([]*utils.TPActionPlan) error
 	SetTPActionTriggers([]*utils.TPActionTriggers) error

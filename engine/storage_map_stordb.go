@@ -52,12 +52,6 @@ func (ms *MapStorage) GetTPRatingProfiles(filter *utils.TPRatingProfile) (rProfi
 func (ms *MapStorage) GetTPSharedGroups(tpid, id string) (sGroups []*utils.TPSharedGroups, err error) {
 	return nil, utils.ErrNotImplemented
 }
-func (ms *MapStorage) GetTPCdrStats(tpid, id string) (stats []*utils.TPCdrStats, err error) {
-	return nil, utils.ErrNotImplemented
-}
-func (ms *MapStorage) GetTPLCRs(filter *utils.TPLcrRules) (lcrs []*utils.TPLcrRules, err error) {
-	return nil, utils.ErrNotImplemented
-}
 func (ms *MapStorage) GetTPUsers(filter *utils.TPUsers) (users []*utils.TPUsers, err error) {
 	return nil, utils.ErrNotImplemented
 }
@@ -126,9 +120,6 @@ func (ms *MapStorage) SetTPRatingProfiles(ratingProfiles []*utils.TPRatingProfil
 func (ms *MapStorage) SetTPSharedGroups(groups []*utils.TPSharedGroups) (err error) {
 	return utils.ErrNotImplemented
 }
-func (ms *MapStorage) SetTPCdrStats(cdrStats []*utils.TPCdrStats) (err error) {
-	return utils.ErrNotImplemented
-}
 func (ms *MapStorage) SetTPUsers(users []*utils.TPUsers) (err error) {
 	return utils.ErrNotImplemented
 }
@@ -136,9 +127,6 @@ func (ms *MapStorage) SetTPAliases(aliases []*utils.TPAliases) (err error) {
 	return utils.ErrNotImplemented
 }
 func (ms *MapStorage) SetTPDerivedChargers(dc []*utils.TPDerivedChargers) (err error) {
-	return utils.ErrNotImplemented
-}
-func (ms *MapStorage) SetTPLCRs(lcrs []*utils.TPLcrRules) (err error) {
 	return utils.ErrNotImplemented
 }
 func (ms *MapStorage) SetTPActions(acts []*utils.TPActions) (err error) {

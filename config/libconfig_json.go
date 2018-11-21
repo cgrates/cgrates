@@ -99,7 +99,6 @@ type FilterSJsonCfg struct {
 type RalsJsonCfg struct {
 	Enabled                     *bool
 	Thresholds_conns            *[]*HaPoolJsonCfg
-	Cdrstats_conns              *[]*HaPoolJsonCfg
 	Stats_conns                 *[]*HaPoolJsonCfg
 	Pubsubs_conns               *[]*HaPoolJsonCfg
 	Aliases_conns               *[]*HaPoolJsonCfg
@@ -127,7 +126,6 @@ type CdrsJsonCfg struct {
 	Attributes_conns      *[]*HaPoolJsonCfg
 	Users_conns           *[]*HaPoolJsonCfg
 	Aliases_conns         *[]*HaPoolJsonCfg
-	Cdrstats_conns        *[]*HaPoolJsonCfg
 	Thresholds_conns      *[]*HaPoolJsonCfg
 	Stats_conns           *[]*HaPoolJsonCfg
 	Online_cdr_exports    *[]string
@@ -140,12 +138,6 @@ type CdrReplicationJsonCfg struct {
 	Attempts       *int
 	Cdr_filter     *string
 	Content_fields *[]*CdrFieldJsonCfg
-}
-
-// Cdrstats config section
-type CdrStatsJsonCfg struct {
-	Enabled       *bool
-	Save_Interval *string
 }
 
 // One cdr field config, used in cdre and cdrc

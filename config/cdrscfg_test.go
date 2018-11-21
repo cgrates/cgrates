@@ -51,7 +51,6 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 	"attributes_conns": [],					// address where to reach the attribute service, empty to disable attributes functionality: <""|*internal|x.y.z.y:1234>
 	"users_conns": [],						// address where to reach the user service, empty to disable user profile functionality: <""|*internal|x.y.z.y:1234>
 	"aliases_conns": [],					// address where to reach the aliases service, empty to disable aliases functionality: <""|*internal|x.y.z.y:1234>
-	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable cdrstats functionality: <""|*internal|x.y.z.y:1234>
 	"thresholds_conns": [],					// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
 	"stats_conns": [],						// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"online_cdr_exports":[],				// list of CDRE profiles to use for real-time CDR exports
@@ -66,7 +65,6 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 		CDRSAttributeSConns: []*HaPoolConfig{},
 		CDRSUserSConns:      []*HaPoolConfig{},
 		CDRSAliaseSConns:    []*HaPoolConfig{},
-		CDRSCDRStatSConns:   []*HaPoolConfig{},
 		CDRSThresholdSConns: []*HaPoolConfig{},
 		CDRSStatSConns:      []*HaPoolConfig{},
 	}

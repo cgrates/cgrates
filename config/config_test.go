@@ -465,9 +465,6 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 	if !reflect.DeepEqual(cgrCfg.RalsCfg().RALsThresholdSConns, eHaPoolcfg) {
 		t.Errorf("Expecting: %+v , received: %+v", eHaPoolcfg, cgrCfg.RalsCfg().RALsThresholdSConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.RalsCfg().RALsCDRStatSConns, eHaPoolcfg) {
-		t.Errorf("Expecting: %+v , received: %+v", eHaPoolcfg, cgrCfg.RalsCfg().RALsCDRStatSConns)
-	}
 	if !reflect.DeepEqual(cgrCfg.RalsCfg().RALsPubSubSConns, eHaPoolcfg) {
 		t.Errorf("Expecting: %+v , received: %+v", eHaPoolcfg, cgrCfg.RalsCfg().RALsPubSubSConns)
 	}
@@ -538,9 +535,6 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSAliaseSConns, eHaPoolCfg) {
 		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().CDRSAliaseSConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSCDRStatSConns, eHaPoolCfg) {
-		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().CDRSCDRStatSConns)
-	}
 	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSThresholdSConns, eHaPoolCfg) {
 		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().CDRSThresholdSConns)
 	}
@@ -579,15 +573,6 @@ func TestCgrCfgJSONLoadCDRS(t *testing.T) {
 	}
 	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSRaterConns, expected) {
 		t.Errorf("Expecting: %+v , received: %+v", expected, cgrCfg.CdrsCfg().CDRSRaterConns)
-	}
-}
-
-func TestCgrCfgJSONDefaultsCDRStats(t *testing.T) {
-	if cgrCfg.CdrStatsCfg().CDRStatsEnabled != false {
-		t.Error(cgrCfg.CdrStatsCfg().CDRStatsEnabled)
-	}
-	if cgrCfg.CdrStatsCfg().CDRStatsSaveInterval != 1*time.Minute {
-		t.Error(cgrCfg.CdrStatsCfg().CDRStatsSaveInterval)
 	}
 }
 
@@ -685,10 +670,6 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 		utils.CacheRatingPlans: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		utils.CacheRatingProfiles: &CacheParamCfg{Limit: -1,
-			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheLCRRules: &CacheParamCfg{Limit: -1,
-			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheCDRStatS: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		utils.CacheActions: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},

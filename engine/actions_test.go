@@ -842,7 +842,7 @@ func TestActionResetTriggresActionFilter(t *testing.T) {
 			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true}},
 	}
-	resetTriggersAction(ub, nil, &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.SMS)}}, nil)
+	resetTriggersAction(ub, &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.SMS)}}, nil, nil)
 	if ub.ActionTriggers[0].Executed == false || ub.ActionTriggers[1].Executed == false {
 		t.Error("Reset triggers action failed!")
 	}
@@ -968,7 +968,7 @@ func TestActionTopupResetCredit(t *testing.T) {
 	}
 	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY),
 		Value: &utils.ValueFormula{Static: 10}, Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}
-	topupResetAction(ub, nil, a, nil)
+	topupResetAction(ub, a, nil, nil)
 	if ub.AllowNegative ||
 		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 10 ||
 		len(ub.UnitCounters) != 0 || // InitCounters finds no counters
@@ -991,7 +991,7 @@ func TestActionTopupValueFactor(t *testing.T) {
 		},
 		ExtraParameters: `{"*monetary":2.0}`,
 	}
-	topupResetAction(ub, nil, a, nil)
+	topupResetAction(ub, a, nil, nil)
 	if len(ub.BalanceMap) != 1 || ub.BalanceMap[utils.MONETARY][0].Factor[utils.MONETARY] != 2.0 {
 		t.Errorf("Topup reset action failed to set Factor: %+v", ub.BalanceMap[utils.MONETARY][0].Factor)
 	}
@@ -1009,7 +1009,7 @@ func TestActionTopupResetCreditId(t *testing.T) {
 	}
 	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), ID: utils.StringPointer("TEST_B"),
 		Value: &utils.ValueFormula{Static: 10}, Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}
-	topupResetAction(ub, nil, a, nil)
+	topupResetAction(ub, a, nil, nil)
 	if ub.AllowNegative ||
 		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 110 ||
 		len(ub.BalanceMap[utils.MONETARY]) != 2 {
@@ -1029,7 +1029,7 @@ func TestActionTopupResetCreditNoId(t *testing.T) {
 	}
 	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY),
 		Value: &utils.ValueFormula{Static: 10}, Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}
-	topupResetAction(ub, nil, a, nil)
+	topupResetAction(ub, a, nil, nil)
 	if ub.AllowNegative ||
 		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 20 ||
 		len(ub.BalanceMap[utils.MONETARY]) != 2 {
@@ -1058,7 +1058,7 @@ func TestActionTopupResetMinutes(t *testing.T) {
 		Value: &utils.ValueFormula{Static: 5}, Weight: utils.Float64Pointer(20),
 		DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),
 		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}
-	topupResetAction(ub, nil, a, nil)
+	topupResetAction(ub, a, nil, nil)
 	if ub.AllowNegative ||
 		ub.BalanceMap[utils.VOICE].GetTotalValue() != 5 ||
 		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 100 ||
@@ -1092,7 +1092,7 @@ func TestActionTopupCredit(t *testing.T) {
 	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY),
 		Value:      &utils.ValueFormula{Static: 10},
 		Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}
-	topupAction(ub, nil, a, nil)
+	topupAction(ub, a, nil, nil)
 	if ub.AllowNegative ||
 		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 110 ||
 		len(ub.UnitCounters) != 0 ||
@@ -1121,7 +1121,7 @@ func TestActionTopupMinutes(t *testing.T) {
 		Value: &utils.ValueFormula{Static: 5}, Weight: utils.Float64Pointer(20),
 		DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),
 		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}
-	topupAction(ub, nil, a, nil)
+	topupAction(ub, a, nil, nil)
 	if ub.AllowNegative ||
 		ub.BalanceMap[utils.VOICE].GetTotalValue() != 15 ||
 		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 100 ||
@@ -1154,7 +1154,7 @@ func TestActionDebitCredit(t *testing.T) {
 	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY),
 		Value:      &utils.ValueFormula{Static: 10},
 		Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}
-	debitAction(ub, nil, a, nil)
+	debitAction(ub, a, nil, nil)
 	if ub.AllowNegative ||
 		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 90 ||
 		len(ub.UnitCounters) != 0 ||
@@ -1185,7 +1185,7 @@ func TestActionDebitMinutes(t *testing.T) {
 		Value: &utils.ValueFormula{Static: 5}, Weight: utils.Float64Pointer(20),
 		DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),
 		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}
-	debitAction(ub, nil, a, nil)
+	debitAction(ub, a, nil, nil)
 	if ub.AllowNegative ||
 		ub.BalanceMap[utils.VOICE][0].GetValue() != 5 ||
 		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 100 ||
@@ -1251,7 +1251,7 @@ func TestActionResetCounterOnlyDefault(t *testing.T) {
 	}
 	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)}}
 	ub.InitCounters()
-	resetCountersAction(ub, nil, a, nil)
+	resetCountersAction(ub, a, nil, nil)
 	if !ub.AllowNegative ||
 		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 100 ||
 		len(ub.UnitCounters) != 1 ||
@@ -1293,7 +1293,7 @@ func TestActionResetCounterCredit(t *testing.T) {
 				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true}},
 	}
 	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)}}
-	resetCountersAction(ub, nil, a, nil)
+	resetCountersAction(ub, a, nil, nil)
 	if !ub.AllowNegative ||
 		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 100 ||
 		len(ub.UnitCounters) != 2 ||
@@ -1467,6 +1467,8 @@ func TestTopupActionLoaded(t *testing.T) {
 	}
 }
 
+/*
+Need to be reviewed with extra data instead of cdrstats
 func TestActionSetDDestination(t *testing.T) {
 	acc := &Account{BalanceMap: map[string]Balances{
 		utils.MONETARY: Balances{&Balance{DestinationIDs: utils.NewStringMap("*ddc_test")}}}}
@@ -1517,6 +1519,7 @@ func TestActionSetDDestination(t *testing.T) {
 		t.Error("Error cacheing destination: ", x1)
 	}
 }
+*/
 
 func TestActionTransactionFuncType(t *testing.T) {
 	err := dm.DataDB().SetAccount(&Account{
@@ -2457,7 +2460,7 @@ func TestCgrRpcAction(t *testing.T) {
 	"Async" :false,
 	"Params": {"Name":"n", "Surname":"s", "Age":10.2}}`,
 	}
-	if err := cgrRPCAction(nil, nil, a, nil); err != nil {
+	if err := cgrRPCAction(nil, a, nil, nil); err != nil {
 		t.Error("error executing cgr action: ", err)
 	}
 	if trpcp.status != utils.OK {

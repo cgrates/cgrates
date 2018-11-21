@@ -470,14 +470,14 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 	cdrDb engine.CdrStorage, dm *engine.DataManager,
 	internalRaterChan, internalPubSubSChan, internalAttributeSChan,
 	internalUserSChan, internalAliaseSChan,
-	internalCdrStatSChan, internalThresholdSChan, internalStatSChan,
+	internalThresholdSChan, internalStatSChan,
 	internalChargerSChan chan rpcclient.RpcClientConnection,
 	server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
 	var err error
 	utils.Logger.Info("Starting CGRateS CDRS service.")
-	var ralConn, pubSubConn, usersConn, attrSConn, aliasesConn, cdrstatsConn,
+	var ralConn, pubSubConn, usersConn, attrSConn, aliasesConn,
 		thresholdSConn, statsConn, chargerSConn *rpcclient.RpcClientPool
 	if len(cfg.CdrsCfg().CDRSChargerSConns) != 0 { // Conn pool towards RAL
 		chargerSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
@@ -565,20 +565,6 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 			return
 		}
 	}
-	if len(cfg.CdrsCfg().CDRSCDRStatSConns) != 0 { // Stats connection init
-		cdrstatsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.CdrsCfg().CDRSCDRStatSConns, internalCdrStatSChan,
-			cfg.GeneralCfg().InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to CDRStatS: %s", err.Error()))
-			exitChan <- true
-			return
-		}
-	}
 	if len(cfg.CdrsCfg().CDRSThresholdSConns) != 0 { // Stats connection init
 		thresholdSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
 			cfg.TlsCfg().ClientKey,
@@ -608,7 +594,7 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 		}
 	}
 	cdrServer, _ := engine.NewCdrServer(cfg, cdrDb, dm, ralConn, pubSubConn,
-		attrSConn, usersConn, aliasesConn, cdrstatsConn,
+		attrSConn, usersConn, aliasesConn,
 		thresholdSConn, statsConn, chargerSConn, filterS)
 	cdrServer.SetTimeToLive(cfg.GeneralCfg().ResponseCacheTTL, nil)
 	utils.Logger.Info("Registering CDRS HTTP Handlers.")
@@ -632,13 +618,6 @@ func startScheduler(internalSchedulerChan chan *scheduler.Scheduler, cacheDoneCh
 
 	sched.Loop()
 	exitChan <- true // Should not get out of loop though
-}
-
-func startCdrStats(internalCdrStatSChan chan rpcclient.RpcClientConnection, dm *engine.DataManager, server *utils.Server) {
-	cdrStats := engine.NewStats(dm, cfg.CdrStatsCfg().CDRStatsSaveInterval)
-	server.RpcRegister(cdrStats)
-	server.RpcRegister(&v1.CDRStatsV1{CdrStats: cdrStats}) // Public APIs
-	internalCdrStatSChan <- cdrStats
 }
 
 func startPubSubServer(internalPubSubSChan chan rpcclient.RpcClientConnection, dm *engine.DataManager, server *utils.Server, exitChan chan bool) {
@@ -1162,7 +1141,7 @@ func startAnalyzerService(internalAnalyzerSChan chan rpcclient.RpcClientConnecti
 }
 
 func startRpc(server *utils.Server, internalRaterChan,
-	internalCdrSChan, internalCdrStatSChan, internalPubSubSChan, internalUserSChan,
+	internalCdrSChan, internalPubSubSChan, internalUserSChan,
 	internalAliaseSChan, internalRsChan, internalStatSChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
 	internalSMGChan, internalDispatcherSChan, internalAnalyzerSChan chan rpcclient.RpcClientConnection,
@@ -1172,8 +1151,6 @@ func startRpc(server *utils.Server, internalRaterChan,
 		internalRaterChan <- resp
 	case cdrs := <-internalCdrSChan:
 		internalCdrSChan <- cdrs
-	case cdrstats := <-internalCdrStatSChan:
-		internalCdrStatSChan <- cdrstats
 	case pubsubs := <-internalPubSubSChan:
 		internalPubSubSChan <- pubsubs
 	case users := <-internalUserSChan:
@@ -1414,7 +1391,7 @@ func main() {
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
 	var dm *engine.DataManager
-	if cfg.RalsCfg().RALsEnabled || cfg.CdrStatsCfg().CDRStatsEnabled || cfg.PubSubServerEnabled ||
+	if cfg.RalsCfg().RALsEnabled || cfg.PubSubServerEnabled ||
 		cfg.AliasesServerEnabled || cfg.UserServerEnabled || cfg.SchedulerCfg().Enabled ||
 		cfg.AttributeSCfg().Enabled || cfg.ResourceSCfg().Enabled || cfg.StatSCfg().Enabled ||
 		cfg.ThresholdSCfg().Enabled || cfg.SupplierSCfg().Enabled { // Some services can run without db, ie: SessionS or CDRC
@@ -1482,7 +1459,6 @@ func main() {
 	// Define internal connections via channels
 	internalRaterChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalCdrSChan := make(chan rpcclient.RpcClientConnection, 1)
-	internalCdrStatSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalPubSubSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalUserSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalAliaseSChan := make(chan rpcclient.RpcClientConnection, 1)
@@ -1503,8 +1479,7 @@ func main() {
 	// Start rater service
 	if cfg.RalsCfg().RALsEnabled {
 		go startRater(internalRaterChan, cacheS, internalThresholdSChan,
-			internalCdrStatSChan, internalStatSChan,
-			internalPubSubSChan, internalUserSChan, internalAliaseSChan,
+			internalStatSChan, internalPubSubSChan, internalUserSChan, internalAliaseSChan,
 			srvManager, server, dm, loadDb, cdrDb, &stopHandled, exitChan, filterSChan)
 	}
 
@@ -1517,7 +1492,7 @@ func main() {
 	if cfg.CdrsCfg().CDRSEnabled {
 		go startCDRS(internalCdrSChan, cdrDb, dm,
 			internalRaterChan, internalPubSubSChan, internalAttributeSChan,
-			internalUserSChan, internalAliaseSChan, internalCdrStatSChan,
+			internalUserSChan, internalAliaseSChan,
 			internalThresholdSChan, internalStatSChan, internalChargerSChan,
 			server, exitChan, filterSChan)
 	}
@@ -1525,11 +1500,6 @@ func main() {
 	// Create connection to CDR Server and share it in engine(used for *cdrlog action)
 	if len(cfg.SchedulerCfg().CDRsConns) != 0 {
 		go schedCDRsConns(internalCdrSChan, exitChan)
-	}
-
-	// Start CDR Stats server
-	if cfg.CdrStatsCfg().CDRStatsEnabled {
-		go startCdrStats(internalCdrStatSChan, dm, server)
 	}
 
 	// Start CDRC components if necessary
@@ -1628,7 +1598,7 @@ func main() {
 	go loaderService(cacheS, cfg, dm, server, exitChan, filterSChan)
 
 	// Serve rpc connections
-	go startRpc(server, internalRaterChan, internalCdrSChan, internalCdrStatSChan,
+	go startRpc(server, internalRaterChan, internalCdrSChan,
 		internalPubSubSChan, internalUserSChan, internalAliaseSChan, internalRsChan,
 		internalStatSChan,
 		internalAttributeSChan, internalChargerSChan, internalThresholdSChan,

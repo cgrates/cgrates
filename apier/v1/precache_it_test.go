@@ -149,10 +149,6 @@ func testPrecacheGetCacheStatsBeforeLoad(t *testing.T) {
 			Items:  0,
 			Groups: 0,
 		},
-		"cdr_stats": {
-			Items:  0,
-			Groups: 0,
-		},
 		"charger_filter_indexes": {
 			Items:  0,
 			Groups: 0,
@@ -174,10 +170,6 @@ func testPrecacheGetCacheStatsBeforeLoad(t *testing.T) {
 			Groups: 0,
 		},
 		"filters": {
-			Items:  0,
-			Groups: 0,
-		},
-		"lcr_rules": {
 			Items:  0,
 			Groups: 0,
 		},
@@ -313,10 +305,6 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Items:  1,
 			Groups: 0,
 		},
-		"cdr_stats": {
-			Items:  0,
-			Groups: 0,
-		},
 		"charger_filter_indexes": {
 			Items:  0,
 			Groups: 0,
@@ -339,10 +327,6 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 		},
 		"filters": {
 			Items:  16, // expected to have 16 items
-			Groups: 0,
-		},
-		"lcr_rules": {
-			Items:  5, // expected to have 5 items
 			Groups: 0,
 		},
 		"rating_plans": {

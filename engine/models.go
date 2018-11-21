@@ -116,40 +116,6 @@ func (rpf *TpRatingProfile) GetRatingProfileId() string {
 	return utils.ConcatenatedKey(rpf.Loadid, rpf.Direction, rpf.Tenant, rpf.Category, rpf.Subject)
 }
 
-type TpLcrRule struct {
-	Id             int64
-	Tpid           string
-	Direction      string  `index:"0" re:""`
-	Tenant         string  `index:"1" re:""`
-	Category       string  `index:"2" re:""`
-	Account        string  `index:"3" re:""`
-	Subject        string  `index:"4" re:""`
-	DestinationTag string  `index:"5" re:""`
-	RpCategory     string  `index:"6" re:""`
-	Strategy       string  `index:"7" re:""`
-	StrategyParams string  `index:"8" re:""`
-	ActivationTime string  `index:"9" re:""`
-	Weight         float64 `index:"10" re:""`
-	CreatedAt      time.Time
-}
-
-func (lcr *TpLcrRule) SetLcrRuleId(id string) error {
-	ids := strings.Split(id, utils.CONCATENATED_KEY_SEP)
-	if len(ids) != 5 {
-		return fmt.Errorf("wrong LcrRule Id: %s", id)
-	}
-	lcr.Direction = ids[0]
-	lcr.Tenant = ids[1]
-	lcr.Category = ids[2]
-	lcr.Account = ids[3]
-	lcr.Subject = ids[4]
-	return nil
-}
-
-func (lcr *TpLcrRule) GetLcrRuleId() string {
-	return utils.LCRKey(lcr.Direction, lcr.Tenant, lcr.Category, lcr.Account, lcr.Subject)
-}
-
 type TpAction struct {
 	Id              int64
 	Tpid            string
@@ -297,41 +263,6 @@ func (tpdc *TpDerivedCharger) SetDerivedChargersId(id string) error {
 
 func (tpdc *TpDerivedCharger) GetDerivedChargersId() string {
 	return utils.ConcatenatedKey(tpdc.Loadid, tpdc.Direction, tpdc.Tenant, tpdc.Category, tpdc.Account, tpdc.Subject)
-}
-
-type TpCdrstat struct {
-	Id               int64
-	Tpid             string
-	Tag              string `index:"0" re:""`
-	QueueLength      int    `index:"1" re:""`
-	TimeWindow       string `index:"2" re:""`
-	SaveInterval     string `index:"3" re:""`
-	Metrics          string `index:"4" re:""`
-	SetupInterval    string `index:"5" re:""`
-	Tors             string `index:"6" re:""`
-	CdrHosts         string `index:"7" re:""`
-	CdrSources       string `index:"8" re:""`
-	ReqTypes         string `index:"9" re:""`
-	Directions       string `index:"10" re:""`
-	Tenants          string `index:"11" re:""`
-	Categories       string `index:"12" re:""`
-	Accounts         string `index:"13" re:""`
-	Subjects         string `index:"14" re:""`
-	DestinationIds   string `index:"15" re:""`
-	PddInterval      string `index:"16" re:""`
-	UsageInterval    string `index:"17" re:""`
-	Suppliers        string `index:"18" re:""`
-	DisconnectCauses string `index:"19" re:""`
-	MediationRunids  string `index:"20" re:""`
-	RatedAccounts    string `index:"21" re:""`
-	RatedSubjects    string `index:"22" re:""`
-	CostInterval     string `index:"23" re:""`
-	ActionTriggers   string `index:"24" re:""`
-	CreatedAt        time.Time
-}
-
-func (t TpCdrstat) TableName() string {
-	return utils.TBLTPCdrStats
 }
 
 type TpUser struct {

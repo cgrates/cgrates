@@ -54,7 +54,7 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 		for k, cacheCfg := range dm.cacheCfg {
 			k = utils.CacheInstanceToPrefix[k] // alias into prefixes understood by storage
 			if utils.IsSliceMember([]string{utils.DESTINATION_PREFIX, utils.REVERSE_DESTINATION_PREFIX,
-				utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.LCR_PREFIX, utils.CDR_STATS_PREFIX,
+				utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
 				utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACTION_TRIGGER_PREFIX,
 				utils.SHARED_GROUP_PREFIX, utils.ALIASES_PREFIX, utils.REVERSE_ALIASES_PREFIX, utils.StatQueuePrefix,
 				utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
@@ -76,7 +76,6 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 			utils.AccountActionPlansPrefix:   aaPlIDs,
 			utils.ACTION_TRIGGER_PREFIX:      atrgIDs,
 			utils.SHARED_GROUP_PREFIX:        sgIDs,
-			utils.LCR_PREFIX:                 lcrIDs,
 			utils.DERIVEDCHARGERS_PREFIX:     dcIDs,
 			utils.ALIASES_PREFIX:             alsIDs,
 			utils.REVERSE_ALIASES_PREFIX:     rvAlsIDs,
@@ -137,7 +136,6 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		utils.ACTION_TRIGGER_PREFIX,
 		utils.SHARED_GROUP_PREFIX,
 		utils.DERIVEDCHARGERS_PREFIX,
-		utils.LCR_PREFIX,
 		utils.ALIASES_PREFIX,
 		utils.REVERSE_ALIASES_PREFIX,
 		utils.ResourceProfilesPrefix,
@@ -207,8 +205,6 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.GetSharedGroup(dataID, true, utils.NonTransactional)
 		case utils.DERIVEDCHARGERS_PREFIX:
 			_, err = dm.GetDerivedChargers(dataID, true, utils.NonTransactional)
-		case utils.LCR_PREFIX:
-			_, err = dm.GetLCR(dataID, true, utils.NonTransactional)
 		case utils.ALIASES_PREFIX:
 			_, err = dm.DataDB().GetAlias(dataID, true, utils.NonTransactional)
 		case utils.REVERSE_ALIASES_PREFIX:
@@ -799,45 +795,6 @@ func (dm *DataManager) RemoveSharedGroup(id, transactionID string) (err error) {
 	return
 }
 
-func (dm *DataManager) GetLCR(id string, skipCache bool,
-	transactionID string) (lcr *LCR, err error) {
-	if !skipCache {
-		if x, ok := Cache.Get(utils.CacheLCRRules, id); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*LCR), nil
-		}
-	}
-	lcr, err = dm.DataDB().GetLCRDrv(id)
-	if err != nil {
-		if err == utils.ErrNotFound {
-			Cache.Set(utils.CacheLCRRules, id, nil, nil,
-				cacheCommit(transactionID), transactionID)
-		}
-		return nil, err
-	}
-	Cache.Set(utils.CacheLCRRules, id, lcr, nil,
-		cacheCommit(transactionID), transactionID)
-	return
-}
-
-func (dm *DataManager) SetLCR(lcr *LCR, transactionID string) (err error) {
-	if err = dm.DataDB().SetLCRDrv(lcr); err != nil {
-		return
-	}
-	return dm.CacheDataFromDB(utils.LCR_PREFIX, []string{lcr.GetId()}, true)
-}
-
-func (dm *DataManager) RemoveLCR(id, transactionID string) (err error) {
-	if err = dm.DataDB().RemoveLCRDrv(id, transactionID); err != nil {
-		return
-	}
-	Cache.Remove(utils.CacheLCRRules, id,
-		cacheCommit(transactionID), transactionID)
-	return
-}
-
 func (dm *DataManager) GetDerivedChargers(key string, skipCache bool,
 	transactionID string) (dcs *utils.DerivedChargers, err error) {
 	if !skipCache {
@@ -1058,30 +1015,6 @@ func (dm *DataManager) MatchFilterIndex(cacheID, itemIDPrefix,
 	Cache.Set(cacheID, fieldValKey, itemIDs, nil,
 		true, utils.NonTransactional)
 	return
-}
-
-func (dm *DataManager) GetCdrStatsQueue(key string) (sq *CDRStatsQueue, err error) {
-	return dm.DataDB().GetCdrStatsQueueDrv(key)
-}
-
-func (dm *DataManager) SetCdrStatsQueue(sq *CDRStatsQueue) (err error) {
-	return dm.DataDB().SetCdrStatsQueueDrv(sq)
-}
-
-func (dm *DataManager) RemoveCdrStatsQueue(key string) error {
-	return dm.DataDB().RemoveCdrStatsQueueDrv(key)
-}
-
-func (dm *DataManager) SetCdrStats(cs *CdrStats) error {
-	return dm.DataDB().SetCdrStatsDrv(cs)
-}
-
-func (dm *DataManager) GetCdrStats(key string) (cs *CdrStats, err error) {
-	return dm.DataDB().GetCdrStatsDrv(key)
-}
-
-func (dm *DataManager) GetAllCdrStats() (css []*CdrStats, err error) {
-	return dm.DataDB().GetAllCdrStatsDrv()
 }
 
 func (dm *DataManager) GetSupplierProfile(tenant, id string, cacheRead, cacheWrite bool,

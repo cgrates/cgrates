@@ -48,13 +48,11 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 	ratingProfiles := `*out,cgrates.org,call,*any,2013-01-06T00:00:00Z,RP_UK,,
 *out,cgrates.org,call,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,,`
 	sharedGroups := ``
-	lcrs := ``
 	actions := `TOPUP10_AC1,*topup_reset,,,,*voice,*out,,DST_UK_Mobile_BIG5,discounted_minutes,,*unlimited,,40s,10,false,false,10`
 	actionPlans := `TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	actionTriggers := ``
 	accountActions := `cgrates.org,12346,TOPUP10_AT,,,`
 	derivedCharges := ``
-	cdrStats := ``
 	users := ``
 	aliases := ``
 	resLimits := ``
@@ -65,8 +63,8 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 	aliasProfiles := ``
 	chargerProfiles := ``
 	csvr := engine.NewTpReader(dataDB3.DataDB(), engine.NewStringCSVStorage(',', destinations, timings, rates,
-		destinationRates, ratingPlans, ratingProfiles, sharedGroups, lcrs, actions, actionPlans, actionTriggers,
-		accountActions, derivedCharges, cdrStats, users, aliases, resLimits, stats,
+		destinationRates, ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans, actionTriggers,
+		accountActions, derivedCharges, users, aliases, resLimits, stats,
 		thresholds, filters, suppliers, aliasProfiles, chargerProfiles), "", "")
 	if err := csvr.LoadDestinations(); err != nil {
 		t.Fatal(err)
@@ -87,9 +85,6 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 		t.Fatal(err)
 	}
 	if err := csvr.LoadSharedGroups(); err != nil {
-		t.Fatal(err)
-	}
-	if err := csvr.LoadLCRs(); err != nil {
 		t.Fatal(err)
 	}
 	if err := csvr.LoadActions(); err != nil {

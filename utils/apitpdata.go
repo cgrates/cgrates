@@ -357,42 +357,6 @@ type TPSharedGroup struct {
 	RatingSubject string
 }
 
-type TPLcrRules struct {
-	TPid      string
-	Direction string
-	Tenant    string
-	Category  string
-	Account   string
-	Subject   string
-	Rules     []*TPLcrRule
-}
-
-type TPLcrRule struct {
-	DestinationId  string
-	RpCategory     string
-	Strategy       string
-	StrategyParams string
-	ActivationTime string
-	Weight         float64
-}
-
-func (lcr *TPLcrRules) GetLcrRuleId() string {
-	return LCRKey(lcr.Direction, lcr.Tenant, lcr.Category, lcr.Account, lcr.Subject)
-}
-
-func (lcr *TPLcrRules) SetId(id string) error {
-	ids := strings.Split(id, CONCATENATED_KEY_SEP)
-	if len(ids) != 5 {
-		return fmt.Errorf("wrong LcrRule Id: %s", id)
-	}
-	lcr.Direction = ids[0]
-	lcr.Tenant = ids[1]
-	lcr.Category = ids[2]
-	lcr.Account = ids[3]
-	lcr.Subject = ids[4]
-	return nil
-}
-
 type TpAlias struct {
 	Direction string
 	Tenant    string
@@ -472,39 +436,6 @@ func (tu *TPUsers) SetId(id string) error {
 	tu.Tenant = vals[0]
 	tu.UserName = vals[1]
 	return nil
-}
-
-type TPCdrStats struct {
-	TPid     string
-	ID       string
-	CdrStats []*TPCdrStat
-}
-
-type TPCdrStat struct {
-	QueueLength      string
-	TimeWindow       string
-	SaveInterval     string
-	Metrics          string
-	SetupInterval    string
-	TORs             string
-	CdrHosts         string
-	CdrSources       string
-	ReqTypes         string
-	Directions       string
-	Tenants          string
-	Categories       string
-	Accounts         string
-	Subjects         string
-	DestinationIds   string
-	PddInterval      string
-	UsageInterval    string
-	Suppliers        string
-	DisconnectCauses string
-	MediationRunIds  string
-	RatedAccounts    string
-	RatedSubjects    string
-	CostInterval     string
-	ActionTriggers   string
 }
 
 type TPDerivedChargers struct {
@@ -684,7 +615,6 @@ type ArgsCache struct {
 	AccountActionPlanIDs  *[]string
 	ActionTriggerIDs      *[]string
 	SharedGroupIDs        *[]string
-	LCRids                *[]string
 	DerivedChargerIDs     *[]string
 	AliasIDs              *[]string
 	ReverseAliasIDs       *[]string
@@ -727,8 +657,6 @@ type CacheStats struct {
 	AccountActionPlans  int
 	SharedGroups        int
 	DerivedChargers     int
-	LcrProfiles         int
-	CdrStats            int
 	Users               int
 	Aliases             int
 	ReverseAliases      int

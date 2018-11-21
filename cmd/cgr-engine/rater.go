@@ -31,7 +31,7 @@ import (
 
 // Starts rater and reports on chan
 func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *engine.CacheS,
-	internalThdSChan, internalCdrStatSChan, internalStatSChan, internalPubSubSChan,
+	internalThdSChan, internalStatSChan, internalPubSubSChan,
 	internalUserSChan, internalAliaseSChan chan rpcclient.RpcClientConnection,
 	serviceManager *servmanager.ServiceManager, server *utils.Server,
 	dm *engine.DataManager, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, stopHandled *bool,
@@ -52,7 +52,6 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		<-cacheS.GetPrecacheChannel(utils.CacheAccountActionPlans)
 		<-cacheS.GetPrecacheChannel(utils.CacheActionTriggers)
 		<-cacheS.GetPrecacheChannel(utils.CacheSharedGroups)
-		<-cacheS.GetPrecacheChannel(utils.CacheLCRRules)
 		<-cacheS.GetPrecacheChannel(utils.CacheDerivedChargers)
 		<-cacheS.GetPrecacheChannel(utils.CacheAliases)
 		<-cacheS.GetPrecacheChannel(utils.CacheReverseAliases)
@@ -80,30 +79,8 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		}()
 	}
 
-	var cdrStats *rpcclient.RpcClientPool
-	if len(cfg.RalsCfg().RALsCDRStatSConns) != 0 { // Connections to CDRStats
-		cdrstatTaskChan := make(chan struct{})
-		waitTasks = append(waitTasks, cdrstatTaskChan)
-		go func() {
-			defer close(cdrstatTaskChan)
-			var err error
-			cdrStats, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
-				cfg.TlsCfg().ClientKey,
-				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-				cfg.RalsCfg().RALsCDRStatSConns, internalCdrStatSChan,
-				cfg.GeneralCfg().InternalTtl)
-			if err != nil {
-				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to CDRStatS, error: %s", err.Error()))
-				exitChan <- true
-				return
-			}
-		}()
-	}
-
 	var stats *rpcclient.RpcClientPool
-	if len(cfg.RalsCfg().RALsStatSConns) != 0 { // Connections to CDRStats
+	if len(cfg.RalsCfg().RALsStatSConns) != 0 { // Connections to StatS
 		statsTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, statsTaskChan)
 		go func() {
@@ -212,10 +189,6 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 	if stats != nil {
 		engine.SetStatS(stats)
 	}
-	if cdrStats != nil { // ToDo: Fix here properly the init of stats
-		responder.CdrStats = cdrStats
-		apierRpcV1.CdrStatsSrv = cdrStats
-	}
 	if usersConns != nil {
 		apierRpcV1.Users = usersConns
 	}
@@ -226,8 +199,6 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 	server.RpcRegister(apierRpcV1)
 	server.RpcRegister(apierRpcV2)
 
-	utils.RegisterRpcParams("", &engine.Stats{})
-	utils.RegisterRpcParams("", &v1.CDRStatsV1{})
 	utils.RegisterRpcParams("PubSubV1", &engine.PubSub{})
 	utils.RegisterRpcParams("AliasesV1", &engine.AliasHandler{})
 	utils.RegisterRpcParams("UsersV1", &engine.UserMap{})
