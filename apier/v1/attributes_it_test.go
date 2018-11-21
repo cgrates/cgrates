@@ -54,6 +54,7 @@ var sTestsAlsPrf = []func(t *testing.T){
 	testAttributeSGetAttributeForEventNotFound,
 	testAttributeSGetAttributeForEventWithMetaAnyContext,
 	testAttributeSProcessEvent,
+	testAttributeSProcessEventMissing,
 	testAttributeSProcessEventWithNoneSubstitute,
 	testAttributeSProcessEventWithNoneSubstitute2,
 	testAttributeSProcessEventWithNoneSubstitute3,
@@ -346,6 +347,24 @@ func testAttributeSProcessEvent(t *testing.T) {
 		!reflect.DeepEqual(eRply2, &rplyEv) { // second for reversed order of attributes
 		t.Errorf("Expecting: %s, received: %s",
 			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
+	}
+}
+
+func testAttributeSProcessEventMissing(t *testing.T) {
+	ev := &utils.CGREvent{
+		Tenant:  "cgrates.org",
+		ID:      "testAttributeSProcessEvent",
+		Context: utils.StringPointer(utils.MetaSessionS),
+		Event: map[string]interface{}{
+			utils.Account:     "NonExist",
+			utils.Category:    "*attributes",
+			utils.Destination: "+491511231234",
+		},
+	}
+	var rplyEv engine.AttrSProcessEventReply
+	if err := attrSRPC.Call(utils.AttributeSv1ProcessEvent,
+		ev, &rplyEv); err == nil && err != utils.ErrMandatoryIeMissing {
+		t.Error(err)
 	}
 }
 
