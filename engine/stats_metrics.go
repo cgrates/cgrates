@@ -30,6 +30,8 @@ type Metric interface {
 	GetValue() float64
 }
 
+// Old metric (deprecated)
+// New mtric are in statmetrics.go
 const ASR = "ASR"
 const ACD = "ACD"
 const TCD = "TCD"
