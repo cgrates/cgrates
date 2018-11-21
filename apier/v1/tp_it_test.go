@@ -125,7 +125,7 @@ func testTPExportTPToFolder(t *testing.T) {
 	expectedTPStas := &utils.ExportedTPStats{
 		Compressed: true,
 		ExportPath: "/tmp/",
-		ExportedFiles: []string{"RatingProfiles.csv", "CdrStats.csv", "Users.csv", "RatingPlans.csv", "Actions.csv", "AccountActions.csv",
+		ExportedFiles: []string{"RatingProfiles.csv", "Users.csv", "RatingPlans.csv", "Actions.csv", "AccountActions.csv",
 			"Timings.csv", "SharedGroups.csv", "ActionPlans.csv", "ActionTriggers.cs", "DerivedChargers.csv", "Resources.csv",
 			"Stats.csv", "Thresholds.csv", "Destinations.csv", "Rates.csv", "DestinationRates.csv", "Filters.csv", "Suppliers.csv", "Attributes.csv"},
 	}

@@ -280,50 +280,6 @@ func (ms *MongoStorage) GetTPSharedGroups(tpid, id string) ([]*utils.TPSharedGro
 	return results, err
 }
 
-func (ms *MongoStorage) GetTPCdrStats(tpid, id string) ([]*utils.TPCdrStats, error) {
-	filter := bson.M{
-		"tpid": tpid,
-	}
-	if id != "" {
-		filter["id"] = id
-	}
-	var results []*utils.TPCdrStats
-	session, col := ms.conn(utils.TBLTPCdrStats)
-	defer session.Close()
-	err := col.Find(filter).All(&results)
-	if len(results) == 0 {
-		return results, utils.ErrNotFound
-	}
-	return results, err
-}
-
-func (ms *MongoStorage) GetTPLCRs(tp *utils.TPLcrRules) ([]*utils.TPLcrRules, error) {
-	filter := bson.M{"tpid": tp.TPid}
-	if tp.Direction != "" {
-		filter["direction"] = tp.Direction
-	}
-	if tp.Tenant != "" {
-		filter["tenant"] = tp.Tenant
-	}
-	if tp.Category != "" {
-		filter["category"] = tp.Category
-	}
-	if tp.Account != "" {
-		filter["account"] = tp.Account
-	}
-	if tp.Subject != "" {
-		filter["subject"] = tp.Subject
-	}
-	var results []*utils.TPLcrRules
-	session, col := ms.conn(utils.TBLTPLcrs)
-	defer session.Close()
-	err := col.Find(filter).All(&results)
-	if len(results) == 0 {
-		return results, utils.ErrNotFound
-	}
-	return results, err
-}
-
 func (ms *MongoStorage) GetTPUsers(tp *utils.TPUsers) ([]*utils.TPUsers, error) {
 	filter := bson.M{"tpid": tp.TPid}
 	if tp.Tenant != "" {
@@ -672,25 +628,6 @@ func (ms *MongoStorage) SetTPSharedGroups(tps []*utils.TPSharedGroups) error {
 	return err
 }
 
-func (ms *MongoStorage) SetTPCdrStats(tps []*utils.TPCdrStats) error {
-	if len(tps) == 0 {
-		return nil
-	}
-	m := make(map[string]bool)
-	session, col := ms.conn(utils.TBLTPCdrStats)
-	defer session.Close()
-	tx := col.Bulk()
-	for _, tp := range tps {
-		if found, _ := m[tp.ID]; !found {
-			m[tp.ID] = true
-			tx.RemoveAll(bson.M{"tpid": tp.TPid, "id": tp.ID})
-		}
-		tx.Insert(tp)
-	}
-	_, err := tx.Run()
-	return err
-}
-
 func (ms *MongoStorage) SetTPUsers(tps []*utils.TPUsers) error {
 	if len(tps) == 0 {
 		return nil
@@ -760,27 +697,6 @@ func (ms *MongoStorage) SetTPDerivedChargers(tps []*utils.TPDerivedChargers) err
 				"subject":   tp.Subject})
 		}
 		tx.Insert(tp)
-	}
-	_, err := tx.Run()
-	return err
-}
-
-func (ms *MongoStorage) SetTPLCRs(tps []*utils.TPLcrRules) error {
-	if len(tps) == 0 {
-		return nil
-	}
-	session, col := ms.conn(utils.TBLTPLcrs)
-	defer session.Close()
-	tx := col.Bulk()
-	for _, tp := range tps {
-		tx.Upsert(bson.M{
-			"tpid":      tp.TPid,
-			"direction": tp.Direction,
-			"tenant":    tp.Tenant,
-			"category":  tp.Category,
-			"account":   tp.Account,
-			"subject":   tp.Subject}, tp)
-
 	}
 	_, err := tx.Run()
 	return err

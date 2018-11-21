@@ -69,7 +69,7 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, rater, pubsub,
-	attrs, users, aliases, cdrstats, thdS, stats, chargerS rpcclient.RpcClientConnection, filterS *FilterS) (*CdrServer, error) {
+	attrs, users, aliases, thdS, stats, chargerS rpcclient.RpcClientConnection, filterS *FilterS) (*CdrServer, error) {
 	if rater != nil && reflect.ValueOf(rater).IsNil() { // Work around so we store actual nil instead of nil interface value, faster to check here than in CdrServer code
 		rater = nil
 	}
@@ -85,9 +85,7 @@ func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, r
 	if aliases != nil && reflect.ValueOf(aliases).IsNil() {
 		aliases = nil
 	}
-	if cdrstats != nil && reflect.ValueOf(cdrstats).IsNil() {
-		cdrstats = nil
-	}
+
 	if thdS != nil && reflect.ValueOf(thdS).IsNil() {
 		thdS = nil
 	}
@@ -100,7 +98,7 @@ func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, r
 	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, dm: dm,
 		rals: rater, pubsub: pubsub, attrS: attrs,
 		users: users, aliases: aliases,
-		cdrstats: cdrstats, stats: stats, thdS: thdS,
+		stats: stats, thdS: thdS,
 		chargerS: chargerS, guard: guardian.Guardian,
 		httpPoster: NewHTTPPoster(cgrCfg.GeneralCfg().HttpSkipTlsVerify,
 			cgrCfg.GeneralCfg().ReplyTimeout), filterS: filterS}, nil
@@ -115,7 +113,6 @@ type CdrServer struct {
 	attrS         rpcclient.RpcClientConnection
 	users         rpcclient.RpcClientConnection
 	aliases       rpcclient.RpcClientConnection
-	cdrstats      rpcclient.RpcClientConnection
 	thdS          rpcclient.RpcClientConnection
 	stats         rpcclient.RpcClientConnection
 	chargerS      rpcclient.RpcClientConnection
@@ -204,11 +201,6 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 		// process CDR with thresholdS
 		go self.thdSProcessEvent(cdr.AsCGREvent())
 	}
-	// Attach raw CDR to stats
-	if self.cdrstats != nil { // Send raw CDR to stats
-		var out int
-		go self.cdrstats.Call("CDRStatsV1.AppendCDR", cdr, &out)
-	}
 	if self.stats != nil {
 		var reply []string
 
@@ -294,12 +286,6 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, cdrstats, 
 	// Attach CDR to stats
 	if cdrstats { // Send CDR to stats
 		for _, ratedCDR := range ratedCDRs {
-			if self.cdrstats != nil {
-				var out int
-				if err := self.cdrstats.Call("CDRStatsV1.AppendCDR", ratedCDR, &out); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<CDRS> Could not send CDR to cdrstats: %s", err.Error()))
-				}
-			}
 			if self.stats != nil {
 				var reply []string
 				go self.stats.Call(utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{CGREvent: *ratedCDR.AsCGREvent()}, &reply)
@@ -635,7 +621,7 @@ func (self *CdrServer) V1RateCDRs(attrs utils.AttrRateCDRs, reply *string) error
 	if attrs.StoreCDRs != nil {
 		storeCDRs = *attrs.StoreCDRs
 	}
-	sendToStats := self.cdrstats != nil
+	sendToStats := self.stats != nil
 	if attrs.SendToStatS != nil {
 		sendToStats = *attrs.SendToStatS
 	}

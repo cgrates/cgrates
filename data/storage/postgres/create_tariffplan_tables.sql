@@ -242,29 +242,6 @@ CREATE TABLE tp_account_actions (
 CREATE INDEX tpaccountactions_tpid_idx ON tp_account_actions (tpid);
 CREATE INDEX tpaccountactions_idx ON tp_account_actions (tpid,loadid,tenant,account);
 
---
--- Table structure for table `tp_lcr_rules`
---
-
-DROP TABLE IF EXISTS tp_lcr_rules;
-CREATE TABLE tp_lcr_rules (
-  id SERIAL PRIMARY KEY,
-  tpid VARCHAR(64) NOT NULL,
-  direction VARCHAR(8) NOT NULL,
-  tenant VARCHAR(64) NOT NULL,
-  category VARCHAR(32) NOT NULL,
-  account VARCHAR(64) NOT NULL,
-  subject VARCHAR(64) NOT NULL,
-  destination_tag VARCHAR(64) NOT NULL,
-  rp_category VARCHAR(32) NOT NULL,
-  strategy VARCHAR(18) NOT NULL,
-  strategy_params VARCHAR(256) NOT NULL,
-  activation_time VARCHAR(24) NOT NULL,
-  weight NUMERIC(8,2) NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE
-);
-CREATE INDEX tplcr_tpid_idx ON tp_lcr_rules (tpid);
-CREATE INDEX tplcr_idx ON tp_lcr_rules (tpid,tenant,category,direction,account,subject,destination_tag);
 
 --
 -- Table structure for table `tp_derived_chargers`
@@ -302,45 +279,6 @@ CREATE TABLE tp_derived_chargers (
 );
 CREATE INDEX tpderivedchargers_tpid_idx ON tp_derived_chargers (tpid);
 CREATE INDEX tpderivedchargers_idx ON tp_derived_chargers (tpid,loadid,direction,tenant,category,account,subject);
-
-
---
--- Table structure for table `tp_cdr_stats`
---
-
-DROP TABLE IF EXISTS tp_cdr_stats;
-CREATE TABLE tp_cdr_stats (
-  id SERIAL PRIMARY KEY,
-  tpid VARCHAR(64) NOT NULL,
-  tag VARCHAR(64) NOT NULL,
-  queue_length INTEGER NOT NULL,
-  time_window VARCHAR(8) NOT NULL,
-  save_interval VARCHAR(8) NOT NULL,
-  metrics VARCHAR(64) NOT NULL,
-  setup_interval VARCHAR(64) NOT NULL,
-  tors VARCHAR(64) NOT NULL,
-  cdr_hosts VARCHAR(64) NOT NULL,
-  cdr_sources VARCHAR(64) NOT NULL,
-  req_types VARCHAR(64) NOT NULL,
-  directions VARCHAR(8) NOT NULL,
-  tenants VARCHAR(64) NOT NULL,
-  categories VARCHAR(32) NOT NULL,
-  accounts VARCHAR(255) NOT NULL,
-  subjects VARCHAR(64) NOT NULL,
-  destination_ids VARCHAR(64) NOT NULL,
-  pdd_interval VARCHAR(64) NOT NULL,
-  usage_interval VARCHAR(64) NOT NULL,
-  suppliers VARCHAR(64) NOT NULL,
-  disconnect_causes VARCHAR(64) NOT NULL,
-  mediation_runids VARCHAR(64) NOT NULL,
-  rated_accounts VARCHAR(255) NOT NULL,
-  rated_subjects VARCHAR(64) NOT NULL,
-  cost_interval VARCHAR(24) NOT NULL,
-  action_triggers VARCHAR(64) NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE
-);
-CREATE INDEX tpcdrstats_tpid_idx ON tp_cdr_stats (tpid);
-CREATE INDEX tpcdrstats_idx ON tp_cdr_stats (tpid,tag);
 
 --
 -- Table structure for table `tp_users`

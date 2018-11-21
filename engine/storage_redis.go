@@ -463,39 +463,6 @@ func (rs *RedisStorage) RemoveRatingProfileDrv(key string) error {
 	return nil
 }
 
-func (rs *RedisStorage) GetLCRDrv(id string) (lcr *LCR, err error) {
-	key := utils.LCR_PREFIX + id
-	var values []byte
-	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
-			err = utils.ErrNotFound
-		}
-		return
-	}
-	if err = rs.ms.Unmarshal(values, &lcr); err != nil {
-		return
-	}
-	return
-}
-
-func (rs *RedisStorage) SetLCRDrv(lcr *LCR) (err error) {
-	var result []byte
-	if result, err = rs.ms.Marshal(lcr); err != nil {
-		return
-	}
-	key := utils.LCR_PREFIX + lcr.GetId()
-	if err = rs.Cmd("SET", key, result).Err; err != nil {
-		return
-	}
-	return
-}
-
-func (rs *RedisStorage) RemoveLCRDrv(id, transactionID string) (err error) {
-	dbKey := utils.LCR_PREFIX + id
-	err = rs.Cmd("DEL", dbKey).Err
-	return err
-}
-
 // GetDestination retrieves a destination with id from  tp_db
 func (rs *RedisStorage) GetDestination(key string, skipCache bool,
 	transactionID string) (dest *Destination, err error) {
@@ -762,35 +729,6 @@ func (rs *RedisStorage) RemoveAccount(key string) (err error) {
 		err = utils.ErrNotFound
 	}
 	return
-}
-
-func (rs *RedisStorage) GetCdrStatsQueueDrv(key string) (sq *CDRStatsQueue, err error) {
-	var values []byte
-	if values, err = rs.Cmd("GET", utils.CDR_STATS_QUEUE_PREFIX+key).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
-			err = utils.ErrNotFound
-		}
-		return
-	}
-	sq = new(CDRStatsQueue)
-	if err = rs.ms.Unmarshal(values, &sq); err != nil {
-		return nil, err
-	}
-	return
-}
-
-func (rs *RedisStorage) SetCdrStatsQueueDrv(sq *CDRStatsQueue) (err error) {
-	var result []byte
-	if result, err = rs.ms.Marshal(sq); err != nil {
-		return
-	}
-	return rs.Cmd("SET", utils.CDR_STATS_QUEUE_PREFIX+sq.GetId(), result).Err
-}
-
-func (rs *RedisStorage) RemoveCdrStatsQueueDrv(id string) (err error) {
-	dbKey := utils.CDR_STATS_QUEUE_PREFIX + id
-	err = rs.Cmd("DEL", dbKey).Err
-	return err
 }
 
 func (rs *RedisStorage) GetSubscribersDrv() (result map[string]*SubscriberData, err error) {
@@ -1327,45 +1265,6 @@ func (rs *RedisStorage) RemoveDerivedChargersDrv(id, transactionID string) (err 
 		return err
 	}
 	Cache.Remove(utils.CacheDerivedChargers, id, cCommit, transactionID)
-	return
-}
-
-func (rs *RedisStorage) SetCdrStatsDrv(cs *CdrStats) error {
-	marshaled, err := rs.ms.Marshal(cs)
-	if err != nil {
-		return err
-	}
-	return rs.Cmd("SET", utils.CDR_STATS_PREFIX+cs.Id, marshaled).Err
-}
-
-func (rs *RedisStorage) GetCdrStatsDrv(key string) (cs *CdrStats, err error) {
-	var values []byte
-	if values, err = rs.Cmd("GET", utils.CDR_STATS_PREFIX+key).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
-			err = utils.ErrNotFound
-		}
-		return
-	}
-	if err = rs.ms.Unmarshal(values, &cs); err != nil {
-		return
-	}
-	return
-}
-
-func (rs *RedisStorage) GetAllCdrStatsDrv() (css []*CdrStats, err error) {
-	keys, err := rs.Cmd("KEYS", utils.CDR_STATS_PREFIX+"*").List()
-	if err != nil {
-		return nil, err
-	}
-	for _, key := range keys {
-		value, err := rs.Cmd("GET", key).Bytes()
-		if err != nil {
-			continue
-		}
-		cs := &CdrStats{}
-		err = rs.ms.Unmarshal(value, cs)
-		css = append(css, cs)
-	}
 	return
 }
 

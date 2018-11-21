@@ -28,6 +28,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+//to be moved in utils
+const STATS_NA = -1.0
+
 // NewStatMetric instantiates the StatMetric
 // cfg serves as general purpose container to pass config options to metric
 func NewStatMetric(metricID string, minItems int, extraParams string) (sm StatMetric, err error) {

@@ -24,9 +24,6 @@
 	"thresholds_conns": [
 		{"address": "*internal"}
 	],
-	"cdrstats_conns": [
-		{"address": "*internal"}
-	],
 	"pubsubs_conns": [
 		{"address": "*internal"}
 	],
@@ -46,14 +43,6 @@
 
 "cdrs": {
 	"enabled": true,					// start the CDR Server service:  <true|false>
-	"cdrstats_conns": [
-		{"address": "*internal"}
-	],
-},
-
-
-"cdrstats": {
-	"enabled": true,					// starts the cdrstats service: <true|false>
 },
 
 

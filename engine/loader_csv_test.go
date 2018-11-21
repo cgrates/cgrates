@@ -157,10 +157,6 @@ SG1,*any,*lowest,
 SG2,*any,*lowest,one
 SG3,*any,*lowest,
 `
-	lcrs = `
-*in,cgrates.org,call,*any,*any,EU_LANDLINE,LCR_STANDARD,*static,ivo;dan;rif,2012-01-01T00:00:00Z,10
-*in,cgrates.org,call,*any,*any,*any,LCR_STANDARD,*lowest_cost,,2012-01-01T00:00:00Z,20
-`
 	actions = `
 MINI,*topup_reset,,,,*monetary,*out,,,,,*unlimited,,10,10,false,false,10
 MINI,*topup,,,,*voice,*out,,NAT,test,,*unlimited,,100s,10,false,false,10
@@ -236,14 +232,6 @@ cgrates.org,round,TOPUP10_AT,,false,false
 *out,cgrates.org,call,dan,dan,,extra2,,,,,,ivo,ivo,,,,,,,,,
 *out,cgrates.org,call,dan,*any,,extra1,,,,,,rif2,rif2,,,,,,,,,
 `
-	cdrStats = `
-#Id[0],QueueLength[1],TimeWindow[2],SaveInterval[3],Metric[4],SetupInterval[5],TOR[6],CdrHost[7],CdrSource[8],ReqType[9],Direction[10],Tenant[11],Category[12],Account[13],Subject[14],DestinationPrefix[15],PddInterval[16],UsageInterval[17],Supplier[18],DisconnectCause[19],MediationRunIds[20],RatedAccount[21],RatedSubject[22],CostInterval[23],Triggers[24]
-CDRST1,5,60m,10s,ASR,2014-07-29T15:00:00Z;2014-07-29T16:00:00Z,*voice,87.139.12.167,FS_JSON,*rated,*out,cgrates.org,call,dan,dan,49,3m;7m,5m;10m,suppl1,NORMAL_CLEARING,default,rif,rif,0;2,STANDARD_TRIGGERS
-CDRST1,,,,ACD,,,,,,,,,,,,,,,,,,,,STANDARD_TRIGGER
-CDRST1,,,,ACC,,,,,,,,,,,,,,,,,,,,
-CDRST2,10,10m,,ASR,,,,,,,cgrates.org,call,,,,,,,,,,,,
-CDRST2,,,,ACD,,,,,,,,,,,,,,,,,,,,
-`
 	users = `
 #Tenant[0],UserName[1],AttributeName[2],AttributeValue[3],Weight[4]
 cgrates.org,rif,false,test0,val0,10
@@ -313,8 +301,8 @@ var csvr *TpReader
 
 func init() {
 	csvr = NewTpReader(dm.dataDB, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges,
-		cdrStats, users, aliases, resProfiles, stats, thresholds, filters, sppProfiles, attributeProfiles, chargerProfiles), testTPID, "")
+		sharedGroups, actions, actionPlans, actionTriggers, accountActions, derivedCharges,
+		users, aliases, resProfiles, stats, thresholds, filters, sppProfiles, attributeProfiles, chargerProfiles), testTPID, "")
 
 	if err := csvr.LoadDestinations(); err != nil {
 		log.Print("error in LoadDestinations:", err)
@@ -337,9 +325,6 @@ func init() {
 	if err := csvr.LoadSharedGroups(); err != nil {
 		log.Print("error in LoadSharedGroups:", err)
 	}
-	if err := csvr.LoadLCRs(); err != nil {
-		log.Print("error in LoadLCR:", err)
-	}
 	if err := csvr.LoadActions(); err != nil {
 		log.Print("error in LoadActions:", err)
 	}
@@ -354,9 +339,6 @@ func init() {
 	}
 	if err := csvr.LoadDerivedChargers(); err != nil {
 		log.Print("error in LoadDerivedChargers:", err)
-	}
-	if err := csvr.LoadCdrStats(); err != nil {
-		log.Print("error in LoadCdrStats:", err)
 	}
 	if err := csvr.LoadUsers(); err != nil {
 		log.Print("error in LoadUsers:", err)
@@ -1096,45 +1078,6 @@ func TestLoadSharedGroups(t *testing.T) {
 	  }*/
 }
 
-func TestLoadLCRs(t *testing.T) {
-	if len(csvr.lcrs) != 1 {
-		t.Error("Failed to load LCRs: ", csvr.lcrs)
-	}
-
-	lcr := csvr.lcrs["*in:cgrates.org:call:*any:*any"]
-	expected := &LCR{
-		Tenant:    "cgrates.org",
-		Category:  "call",
-		Direction: "*in",
-		Account:   "*any",
-		Subject:   "*any",
-		Activations: []*LCRActivation{
-			&LCRActivation{
-				ActivationTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
-				Entries: []*LCREntry{
-					&LCREntry{
-						DestinationId:  "EU_LANDLINE",
-						RPCategory:     "LCR_STANDARD",
-						Strategy:       "*static",
-						StrategyParams: "ivo;dan;rif",
-						Weight:         10,
-					},
-					&LCREntry{
-						DestinationId:  "*any",
-						RPCategory:     "LCR_STANDARD",
-						Strategy:       "*lowest_cost",
-						StrategyParams: "",
-						Weight:         20,
-					},
-				},
-			},
-		},
-	}
-	if !reflect.DeepEqual(lcr, expected) {
-		t.Errorf("Error loading lcr %+v: ", lcr.Activations[0].Entries[0])
-	}
-}
-
 func TestLoadActionTimings(t *testing.T) {
 	if len(csvr.actionPlans) != 9 {
 		t.Error("Failed to load action timings: ", len(csvr.actionPlans))
@@ -1311,53 +1254,6 @@ func TestLoadDerivedChargers(t *testing.T) {
 	if !csvr.derivedChargers[keyCharger1].Equal(expCharger1) {
 		t.Errorf("Expecting: %+v, received: %+v",
 			expCharger1.Chargers[0], csvr.derivedChargers[keyCharger1].Chargers[0])
-	}
-}
-func TestLoadCdrStats(t *testing.T) {
-	if len(csvr.cdrStats) != 2 {
-		t.Error("Failed to load cdr stats: ", csvr.cdrStats)
-	}
-	cdrStats1 := &CdrStats{
-		Id:           "CDRST1",
-		QueueLength:  5,
-		TimeWindow:   60 * time.Minute,
-		SaveInterval: 10 * time.Second,
-		Metrics:      []string{"ASR", "ACD", "ACC"},
-		SetupInterval: []time.Time{
-			time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
-			time.Date(2014, 7, 29, 16, 0, 0, 0, time.UTC),
-		},
-		TOR:             []string{utils.VOICE},
-		CdrHost:         []string{"87.139.12.167"},
-		CdrSource:       []string{"FS_JSON"},
-		ReqType:         []string{utils.META_RATED},
-		Direction:       []string{utils.OUT},
-		Tenant:          []string{"cgrates.org"},
-		Category:        []string{"call"},
-		Account:         []string{"dan"},
-		Subject:         []string{"dan"},
-		DestinationIds:  []string{"49"},
-		PddInterval:     []time.Duration{3 * time.Minute, 7 * time.Minute},
-		UsageInterval:   []time.Duration{5 * time.Minute, 10 * time.Minute},
-		Supplier:        []string{"suppl1"},
-		DisconnectCause: []string{"NORMAL_CLEARING"},
-		MediationRunIds: []string{"default"},
-		RatedAccount:    []string{"rif"},
-		RatedSubject:    []string{"rif"},
-		CostInterval:    []float64{0, 2},
-	}
-	for _, triggerKey := range []string{"STANDARD_TRIGGER", "STANDARD_TRIGGERS"} {
-		cdrStats1.Triggers = append(cdrStats1.Triggers, csvr.actionsTriggers[triggerKey]...)
-	}
-	// compare trigger lengths
-	if len(csvr.cdrStats[cdrStats1.Id].Triggers) != len(cdrStats1.Triggers) {
-		t.Error("Wrong trigger length: ", len(csvr.cdrStats[cdrStats1.Id].Triggers), len(cdrStats1.Triggers))
-	}
-	// cannot deepequal triggers
-	csvr.cdrStats[cdrStats1.Id].Triggers = nil
-	cdrStats1.Triggers = nil
-	if !reflect.DeepEqual(csvr.cdrStats[cdrStats1.Id], cdrStats1) {
-		t.Errorf("Unexpected stats %+v", csvr.cdrStats[cdrStats1.Id])
 	}
 }
 

@@ -165,7 +165,6 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.loaderCfg = make([]*LoaderSCfg, 0)
 
 	//Depricated
-	cfg.cdrStatsCfg = new(CdrStatsCfg)
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
 
 	cfg.ConfigReloads = make(map[string]chan struct{})
@@ -312,7 +311,6 @@ type CGRConfig struct {
 	analyzerSCfg     *AnalyzerSCfg     // AnalyzerS config
 
 	// Deprecated
-	cdrStatsCfg          *CdrStatsCfg   // CdrStats config
 	SmOsipsConfig        *SmOsipsConfig // SMOpenSIPS Configuration
 	PubSubServerEnabled  bool           // Starts PubSub as server: <true|false>.
 	AliasesServerEnabled bool           // Starts PubSub as server: <true|false>.
@@ -323,13 +321,6 @@ type CGRConfig struct {
 func (self *CGRConfig) checkConfigSanity() error {
 	// Rater checks
 	if self.ralsCfg.RALsEnabled {
-		if !self.cdrStatsCfg.CDRStatsEnabled {
-			for _, connCfg := range self.ralsCfg.RALsCDRStatSConns {
-				if connCfg.Address == utils.MetaInternal {
-					return errors.New("CDRStats not enabled but requested by RALs component.")
-				}
-			}
-		}
 		if !self.statsCfg.Enabled {
 			for _, connCfg := range self.ralsCfg.RALsStatSConns {
 				if connCfg.Address == utils.MetaInternal {
@@ -407,13 +398,6 @@ func (self *CGRConfig) checkConfigSanity() error {
 			for _, connCfg := range self.cdrsCfg.CDRSAliaseSConns {
 				if connCfg.Address == utils.MetaInternal {
 					return errors.New("AliaseS not enabled but requested by CDRS component.")
-				}
-			}
-		}
-		if !self.cdrStatsCfg.CDRStatsEnabled {
-			for _, connCfg := range self.cdrsCfg.CDRSCDRStatSConns {
-				if connCfg.Address == utils.MetaInternal {
-					return errors.New("CDRStatS not enabled but requested by CDRS component.")
 				}
 			}
 		}
@@ -1051,13 +1035,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	}
 
 	//Depricated
-	jsnCdrstatsCfg, err := jsnCfg.CdrStatsJsonCfg()
-	if err != nil {
-		return err
-	}
-	if err := self.cdrStatsCfg.loadFromJsonCfg(jsnCdrstatsCfg); err != nil {
-		return err
-	}
 
 	jsnPubSubServCfg, err := jsnCfg.PubSubServJsonCfg()
 	if err != nil {
@@ -1217,10 +1194,6 @@ func (cfg *CGRConfig) RalsCfg() *RalsCfg {
 
 func (cfg *CGRConfig) CdrsCfg() *CdrsCfg {
 	return cfg.cdrsCfg
-}
-
-func (cfg *CGRConfig) CdrStatsCfg() *CdrStatsCfg {
-	return cfg.cdrStatsCfg
 }
 
 func (cfg *CGRConfig) MailerCfg() *MailerCfg {

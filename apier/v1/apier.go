@@ -47,7 +47,6 @@ type ApierV1 struct {
 	CdrDb       engine.CdrStorage
 	Config      *config.CGRConfig
 	Responder   *engine.Responder
-	CdrStatsSrv rpcclient.RpcClientConnection
 	Users       rpcclient.RpcClientConnection
 	CDRs        rpcclient.RpcClientConnection // FixMe: populate it from cgr-engine
 	ServManager *servmanager.ServiceManager   // Need to have them capitalize so we can export in V2
@@ -287,25 +286,6 @@ func (self *ApierV1) LoadSharedGroup(attrs AttrLoadSharedGroup, reply *string) e
 	return nil
 }
 
-type AttrLoadCdrStats struct {
-	TPid       string
-	CdrStatsId string
-}
-
-// Load destinations from storDb into dataDb.
-func (self *ApierV1) LoadCdrStats(attrs AttrLoadCdrStats, reply *string) error {
-	if len(attrs.TPid) == 0 {
-		return utils.NewErrMandatoryIeMissing("TPid")
-	}
-	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
-		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone)
-	if err := dbReader.LoadCdrStatsFiltered(attrs.CdrStatsId, true); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	*reply = OK
-	return nil
-}
-
 type AttrLoadTpFromStorDb struct {
 	TPid     string
 	FlushDb  bool // Flush dataDB before loading
@@ -351,7 +331,6 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 		}
 	}
 	aps, _ := dbReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
-	cstKeys, _ := dbReader.GetLoadedIds(utils.CDR_STATS_PREFIX)
 	userKeys, _ := dbReader.GetLoadedIds(utils.USERS_PREFIX)
 
 	// relase tp data
@@ -364,12 +343,6 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 		}
 	}
 
-	if len(cstKeys) != 0 && self.CdrStatsSrv != nil {
-		var out int
-		if err := self.CdrStatsSrv.Call("CDRStatsV1.ReloadQueues", cstKeys, &out); err != nil {
-			return err
-		}
-	}
 	if len(userKeys) != 0 && self.Users != nil {
 		var r string
 		if err := self.Users.Call("AliasV1.ReloadUsers", "", &r); err != nil {
@@ -865,19 +838,6 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 	if err = self.DataManager.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, dataIDs, true); err != nil {
 		return
 	}
-	// LCR Profiles
-	dataIDs = make([]string, 0)
-	if attrs.LCRids == nil {
-		dataIDs = nil // Reload all
-	} else if len(*attrs.LCRids) > 0 {
-		dataIDs = make([]string, len(*attrs.LCRids))
-		for idx, dId := range *attrs.LCRids {
-			dataIDs[idx] = dId
-		}
-	}
-	if err = self.DataManager.CacheDataFromDB(utils.LCR_PREFIX, dataIDs, true); err != nil {
-		return
-	}
 	// DerivedChargers
 	dataIDs = make([]string, 0)
 	if attrs.DerivedChargerIDs == nil {
@@ -1102,11 +1062,6 @@ func (self *ApierV1) LoadCache(args utils.AttrReloadCache, reply *string) (err e
 	} else {
 		sgIDs = *args.SharedGroupIDs
 	}
-	if args.LCRids == nil {
-		lcrIDs = nil
-	} else {
-		lcrIDs = *args.LCRids
-	}
 	if args.DerivedChargerIDs == nil {
 		dcIDs = nil
 	} else {
@@ -1252,14 +1207,6 @@ func (self *ApierV1) FlushCache(args utils.AttrReloadCache, reply *string) (err 
 				true, utils.NonTransactional)
 		}
 	}
-	if args.LCRids == nil {
-		engine.Cache.Clear([]string{utils.CacheLCRRules})
-	} else if len(*args.LCRids) != 0 {
-		for _, key := range *args.LCRids {
-			engine.Cache.Remove(utils.CacheLCRRules, key,
-				true, utils.NonTransactional)
-		}
-	}
 	if args.DerivedChargerIDs == nil {
 		engine.Cache.Clear([]string{utils.CacheDerivedChargers})
 	} else if len(*args.DerivedChargerIDs) != 0 {
@@ -1380,7 +1327,6 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	cs.AccountActionPlans = len(engine.Cache.GetItemIDs(utils.CacheAccountActionPlans, ""))
 	cs.SharedGroups = len(engine.Cache.GetItemIDs(utils.CacheSharedGroups, ""))
 	cs.DerivedChargers = len(engine.Cache.GetItemIDs(utils.CacheDerivedChargers, ""))
-	cs.LcrProfiles = len(engine.Cache.GetItemIDs(utils.CacheLCRRules, ""))
 	cs.Aliases = len(engine.Cache.GetItemIDs(utils.CacheAliases, ""))
 	cs.ReverseAliases = len(engine.Cache.GetItemIDs(utils.CacheReverseAliases, ""))
 	cs.ResourceProfiles = len(engine.Cache.GetItemIDs(utils.CacheResourceProfiles, ""))
@@ -1394,13 +1340,6 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	cs.AttributeProfiles = len(engine.Cache.GetItemIDs(utils.CacheAttributeProfiles, ""))
 	cs.ChargerProfiles = len(engine.Cache.GetItemIDs(utils.CacheChargerProfiles, ""))
 
-	if self.CdrStatsSrv != nil {
-		var queueIds []string
-		if err := self.CdrStatsSrv.Call("CDRStatsV1.GetQueueIds", 0, &queueIds); err != nil {
-			return utils.NewErrServerError(err)
-		}
-		cs.CdrStats = len(queueIds)
-	}
 	if self.Users != nil {
 		var ups engine.UserProfiles
 		if err := self.Users.Call("UsersV1.GetUsers", &engine.UserProfile{}, &ups); err != nil {
@@ -1576,24 +1515,6 @@ func (v1 *ApierV1) GetCacheKeys(args utils.ArgsCacheKeys, reply *utils.ArgsCache
 		ids = args.Paginator.PaginateStringSlice(ids)
 		if len(ids) != 0 {
 			reply.SharedGroupIDs = &ids
-		}
-	}
-	if args.LCRids != nil {
-		var ids []string
-		if len(*args.LCRids) != 0 {
-			for _, id := range *args.LCRids {
-				if _, hasIt := engine.Cache.Get(utils.CacheLCRRules, id); hasIt {
-					ids = append(ids, id)
-				}
-			}
-		} else {
-			for _, id := range engine.Cache.GetItemIDs(utils.CacheLCRRules, "") {
-				ids = append(ids, id)
-			}
-		}
-		ids = args.Paginator.PaginateStringSlice(ids)
-		if len(ids) != 0 {
-			reply.LCRids = &ids
 		}
 	}
 	if args.DerivedChargerIDs != nil {
@@ -1864,13 +1785,11 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 			path.Join(attrs.FolderPath, utils.RATING_PLANS_CSV),
 			path.Join(attrs.FolderPath, utils.RATING_PROFILES_CSV),
 			path.Join(attrs.FolderPath, utils.SHARED_GROUPS_CSV),
-			path.Join(attrs.FolderPath, utils.LCRS_CSV),
 			path.Join(attrs.FolderPath, utils.ACTIONS_CSV),
 			path.Join(attrs.FolderPath, utils.ACTION_PLANS_CSV),
 			path.Join(attrs.FolderPath, utils.ACTION_TRIGGERS_CSV),
 			path.Join(attrs.FolderPath, utils.ACCOUNT_ACTIONS_CSV),
 			path.Join(attrs.FolderPath, utils.DERIVED_CHARGERS_CSV),
-			path.Join(attrs.FolderPath, utils.CDR_STATS_CSV),
 			path.Join(attrs.FolderPath, utils.USERS_CSV),
 			path.Join(attrs.FolderPath, utils.ALIASES_CSV),
 			path.Join(attrs.FolderPath, utils.ResourcesCsv),
@@ -1913,7 +1832,6 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		}
 	}
 	aps, _ := loader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
-	cstKeys, _ := loader.GetLoadedIds(utils.CDR_STATS_PREFIX)
 	userKeys, _ := loader.GetLoadedIds(utils.USERS_PREFIX)
 
 	// relase tp data
@@ -1924,12 +1842,6 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		if sched != nil {
 			utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading scheduler.")
 			sched.Reload()
-		}
-	}
-	if len(cstKeys) != 0 && self.CdrStatsSrv != nil {
-		var out int
-		if err := self.CdrStatsSrv.Call("CDRStatsV1.ReloadQueues", cstKeys, &out); err != nil {
-			return err
 		}
 	}
 	if len(userKeys) != 0 && self.Users != nil {

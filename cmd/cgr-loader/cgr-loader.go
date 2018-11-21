@@ -281,13 +281,11 @@ func main() {
 			path.Join(*dataPath, utils.RATING_PLANS_CSV),
 			path.Join(*dataPath, utils.RATING_PROFILES_CSV),
 			path.Join(*dataPath, utils.SHARED_GROUPS_CSV),
-			path.Join(*dataPath, utils.LCRS_CSV),
 			path.Join(*dataPath, utils.ACTIONS_CSV),
 			path.Join(*dataPath, utils.ACTION_PLANS_CSV),
 			path.Join(*dataPath, utils.ACTION_TRIGGERS_CSV),
 			path.Join(*dataPath, utils.ACCOUNT_ACTIONS_CSV),
 			path.Join(*dataPath, utils.DERIVED_CHARGERS_CSV),
-			path.Join(*dataPath, utils.CDR_STATS_CSV),
 			path.Join(*dataPath, utils.USERS_CSV),
 			path.Join(*dataPath, utils.ALIASES_CSV),
 			path.Join(*dataPath, utils.ResourcesCsv),
@@ -350,7 +348,7 @@ func main() {
 		if err := tpReader.WriteToDatabase(*flush, *verbose, *disableReverse); err != nil {
 			log.Fatal("Could not write to database: ", err)
 		}
-		var dstIds, revDstIDs, rplIds, rpfIds, actIds, aapIDs, shgIds, alsIds, lcrIds, dcsIds, rspIDs, resIDs, aatIDs, ralsIDs, stqIDs, stqpIDs, trsIDs, trspfIDs, flrIDs, spfIDs, apfIDs, chargerIDs []string
+		var dstIds, revDstIDs, rplIds, rpfIds, actIds, aapIDs, shgIds, alsIds, dcsIds, rspIDs, resIDs, aatIDs, ralsIDs, stqIDs, stqpIDs, trsIDs, trspfIDs, flrIDs, spfIDs, apfIDs, chargerIDs []string
 		if cacheS != nil {
 			dstIds, _ = tpReader.GetLoadedIds(utils.DESTINATION_PREFIX)
 			revDstIDs, _ = tpReader.GetLoadedIds(utils.REVERSE_DESTINATION_PREFIX)
@@ -360,7 +358,6 @@ func main() {
 			aapIDs, _ = tpReader.GetLoadedIds(utils.AccountActionPlansPrefix)
 			shgIds, _ = tpReader.GetLoadedIds(utils.SHARED_GROUP_PREFIX)
 			alsIds, _ = tpReader.GetLoadedIds(utils.ALIASES_PREFIX)
-			lcrIds, _ = tpReader.GetLoadedIds(utils.LCR_PREFIX)
 			dcsIds, _ = tpReader.GetLoadedIds(utils.DERIVEDCHARGERS_PREFIX)
 			rspIDs, _ = tpReader.GetLoadedIds(utils.ResourceProfilesPrefix)
 			resIDs, _ = tpReader.GetLoadedIds(utils.ResourcesPrefix)
@@ -402,7 +399,6 @@ func main() {
 					AccountActionPlanIDs:  &aapIDs,
 					SharedGroupIDs:        &shgIds,
 					AliasIDs:              &alsIds,
-					LCRids:                &lcrIds,
 					DerivedChargerIDs:     &dcsIds,
 					ResourceProfileIDs:    &rspIDs,
 					ResourceIDs:           &resIDs,

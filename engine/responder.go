@@ -38,12 +38,6 @@ type SessionRun struct {
 	CallCosts      []*CallCost
 }
 
-type AttrGetLcr struct {
-	*CallDescriptor
-	*LCRFilter
-	*utils.Paginator
-}
-
 type Responder struct {
 	ExitChan         chan bool
 	CdrStats         rpcclient.RpcClientConnection
@@ -525,54 +519,6 @@ func (rs *Responder) GetDerivedChargers(attrs *utils.AttrDerivedChargers, dcs *u
 	} else if dcsH != nil {
 		*dcs = *dcsH
 	}
-	return nil
-}
-
-func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) (err error) {
-	cacheKey := utils.LCRCachePrefix + attrs.CgrID + attrs.RunID
-	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
-		if item.Value != nil {
-			*reply = *(item.Value.(*LCRCost))
-		}
-		return item.Err
-	}
-	if attrs.CallDescriptor.Subject == "" {
-		attrs.CallDescriptor.Subject = attrs.CallDescriptor.Account
-	}
-	// replace user profile fields
-	if err := LoadUserProfile(attrs.CallDescriptor, utils.EXTRA_FIELDS); err != nil {
-		return err
-	}
-	// replace aliases
-	cd := attrs.CallDescriptor
-	if err := LoadAlias(
-		&AttrMatchingAlias{
-			Destination: cd.Destination,
-			Direction:   cd.Direction,
-			Tenant:      cd.Tenant,
-			Category:    cd.Category,
-			Account:     cd.Account,
-			Subject:     cd.Subject,
-			Context:     utils.MetaRating,
-		}, cd, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
-		rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
-		return err
-	}
-	if !rs.usageAllowed(cd.TOR, cd.GetDuration()) {
-		return utils.ErrMaxUsageExceeded
-	}
-	lcrCost, err := attrs.CallDescriptor.GetLCR(rs.CdrStats, attrs.LCRFilter, attrs.Paginator)
-	if err != nil {
-		rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
-		return err
-	}
-	if lcrCost.Entry != nil && lcrCost.Entry.Strategy == LCR_STRATEGY_LOAD {
-		for _, suppl := range lcrCost.SupplierCosts {
-			suppl.Cost = -1 // In case of load distribution we don't calculate costs
-		}
-	}
-	rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Value: lcrCost})
-	*reply = *lcrCost
 	return nil
 }
 

@@ -133,13 +133,11 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 			path.Join(attrs.FolderPath, utils.RATING_PLANS_CSV),
 			path.Join(attrs.FolderPath, utils.RATING_PROFILES_CSV),
 			path.Join(attrs.FolderPath, utils.SHARED_GROUPS_CSV),
-			path.Join(attrs.FolderPath, utils.LCRS_CSV),
 			path.Join(attrs.FolderPath, utils.ACTIONS_CSV),
 			path.Join(attrs.FolderPath, utils.ACTION_PLANS_CSV),
 			path.Join(attrs.FolderPath, utils.ACTION_TRIGGERS_CSV),
 			path.Join(attrs.FolderPath, utils.ACCOUNT_ACTIONS_CSV),
 			path.Join(attrs.FolderPath, utils.DERIVED_CHARGERS_CSV),
-			path.Join(attrs.FolderPath, utils.CDR_STATS_CSV),
 			path.Join(attrs.FolderPath, utils.USERS_CSV),
 			path.Join(attrs.FolderPath, utils.ALIASES_CSV),
 			path.Join(attrs.FolderPath, utils.ResourcesCsv),
@@ -183,7 +181,6 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		}
 	}
 	aps, _ := loader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
-	cstKeys, _ := loader.GetLoadedIds(utils.CDR_STATS_PREFIX)
 	userKeys, _ := loader.GetLoadedIds(utils.USERS_PREFIX)
 
 	// relase tp data
@@ -194,12 +191,6 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		if sched != nil {
 			utils.Logger.Info("ApierV2.LoadTariffPlanFromFolder, reloading scheduler.")
 			sched.Reload()
-		}
-	}
-	if len(cstKeys) != 0 && self.CdrStatsSrv != nil {
-		var out int
-		if err := self.CdrStatsSrv.Call("CDRStatsV1.ReloadQueues", cstKeys, &out); err != nil {
-			return err
 		}
 	}
 	if len(userKeys) != 0 && self.Users != nil {

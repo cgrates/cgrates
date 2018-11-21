@@ -218,17 +218,6 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	storDataCdrStats, err := self.storDb.GetTPCdrStats(self.tpID, "")
-	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		return err
-	}
-	for _, sd := range storDataCdrStats {
-		sdModels := APItoModelCdrStat(sd)
-		for _, sdModel := range sdModels {
-			toExportMap[utils.CDR_STATS_CSV] = append(toExportMap[utils.CDR_STATS_CSV], sdModel)
-		}
-	}
-
 	storDataResources, err := self.storDb.GetTPResources(self.tpID, "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
 		return err

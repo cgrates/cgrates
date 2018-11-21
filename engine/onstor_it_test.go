@@ -58,13 +58,11 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITRatingProfile,
 	testOnStorITCRUDDestinations,
 	testOnStorITCRUDReverseDestinations,
-	testOnStorITLCR,
 	testOnStorITActions,
 	testOnStorITSharedGroup,
 	testOnStorITCRUDActionPlan,
 	testOnStorITCRUDAccountActionPlans,
 	testOnStorITCRUDAccount,
-	testOnStorITCRUDCdrStatsQueue,
 	testOnStorITCRUDSubscribers,
 	testOnStorITResource,
 	testOnStorITResourceProfile,
@@ -837,117 +835,6 @@ func testOnStorITCRUDReverseDestinations(t *testing.T) {
 	// }
 }
 
-func testOnStorITLCR(t *testing.T) {
-	lcr := &LCR{
-		Tenant:    "cgrates.org",
-		Category:  "call",
-		Direction: "*out",
-		Account:   "*any",
-		Subject:   "*any",
-		Activations: []*LCRActivation{
-			{
-				ActivationTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
-				Entries: []*LCREntry{
-					{
-						DestinationId:  "EU_LANDLINE",
-						RPCategory:     "LCR_STANDARD",
-						Strategy:       "*static",
-						StrategyParams: "ivo;dan;rif",
-						Weight:         10,
-					},
-					{
-						DestinationId:  "*any",
-						RPCategory:     "LCR_STANDARD",
-						Strategy:       "*lowest_cost",
-						StrategyParams: "",
-						Weight:         20,
-					},
-				},
-			},
-		},
-	}
-
-	if _, rcvErr := onStor.GetLCR(lcr.GetId(), false,
-		utils.NonTransactional); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
-	}
-	if err := onStor.SetLCR(lcr, utils.NonTransactional); err != nil {
-		t.Error(err)
-	}
-	//get from cache
-	if rcv, err := onStor.GetLCR(lcr.GetId(), false,
-		utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(lcr, rcv) {
-		t.Errorf("Expecting: %v, received: %v", lcr, rcv)
-	}
-	//get from database
-	if rcv, err := onStor.GetLCR(lcr.GetId(), true,
-		utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(lcr, rcv) {
-		t.Errorf("Expecting: %v, received: %v", lcr, rcv)
-	}
-	expectedCLCR := []string{"lcr_*out:cgrates.org:call:*any:*any"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.LCR_PREFIX); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expectedCLCR, itm) {
-		t.Errorf("Expected : %+v, but received %+v", expectedCLCR, itm)
-	}
-	//update
-	lcr.Activations = []*LCRActivation{
-		{
-			ActivationTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
-			Entries: []*LCREntry{
-				{
-					DestinationId:  "EU_LANDLINE",
-					RPCategory:     "LCR_STANDARD",
-					Strategy:       "*static",
-					StrategyParams: "ivo;dan;teo",
-					Weight:         10,
-				},
-				{
-					DestinationId:  "*any",
-					RPCategory:     "LCR_STANDARD",
-					Strategy:       "*lowest_cost",
-					StrategyParams: "",
-					Weight:         20,
-				},
-			},
-		},
-	}
-	if err := onStor.SetLCR(lcr, utils.NonTransactional); err != nil {
-		t.Error(err)
-	}
-	//get from cache
-	if rcv, err := onStor.GetLCR(lcr.GetId(), false,
-		utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(lcr, rcv) {
-		t.Errorf("Expecting: %v, received: %v", lcr, rcv)
-	}
-	//get from database
-	if rcv, err := onStor.GetLCR(lcr.GetId(), true,
-		utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(lcr, rcv) {
-		t.Errorf("Expecting: %v, received: %v", lcr, rcv)
-	}
-	if err := onStor.RemoveLCR(lcr.GetId(), utils.NonTransactional); err != nil {
-		t.Error(err)
-	}
-	//check cache if removed
-	if _, rcvErr := onStor.GetLCR(lcr.GetId(), false,
-		utils.NonTransactional); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
-	}
-	//check database if removed
-	if _, rcvErr := onStor.GetLCR(lcr.GetId(), true,
-		utils.NonTransactional); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
-	}
-}
-
 func testOnStorITActions(t *testing.T) {
 	acts := Actions{
 		&Action{
@@ -1420,35 +1307,6 @@ func testOnStorITCRUDAccount(t *testing.T) {
 		t.Error(err)
 	}
 	if _, rcvErr := onStor.DataDB().GetAccount(acc.ID); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
-	}
-}
-
-func testOnStorITCRUDCdrStatsQueue(t *testing.T) {
-	sq := &CDRStatsQueue{
-		conf: &CdrStats{Id: "TTT"},
-		Cdrs: []*QCdr{
-			{Cost: 9.0,
-				SetupTime:  time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
-				AnswerTime: time.Date(2012, 1, 1, 0, 0, 10, 0, time.UTC),
-				EventTime:  time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
-			}},
-	}
-	if _, rcvErr := onStor.GetCdrStatsQueue(sq.GetId()); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
-	}
-	if err := onStor.SetCdrStatsQueue(sq); err != nil {
-		t.Error(err)
-	}
-	if rcv, err := onStor.GetCdrStatsQueue(sq.GetId()); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(sq.Cdrs, rcv.Cdrs) {
-		t.Errorf("Expecting: %v, received: %v", sq.Cdrs, rcv.Cdrs)
-	}
-	if err := onStor.RemoveCdrStatsQueue(sq.GetId()); err != nil {
-		t.Error(err)
-	}
-	if _, rcvErr := onStor.GetCdrStatsQueue(sq.GetId()); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

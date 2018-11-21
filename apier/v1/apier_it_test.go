@@ -1334,7 +1334,6 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 			rcvStats.ActionPlans != 7 ||
 			rcvStats.SharedGroups != 0 ||
 			rcvStats.DerivedChargers != 3 ||
-			rcvStats.LcrProfiles != 0 ||
 			rcvStats.Aliases != 1 ||
 			rcvStats.ReverseAliases != 2 ||
 			rcvStats.ResourceProfiles != 3 ||

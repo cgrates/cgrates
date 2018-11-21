@@ -45,8 +45,6 @@ var (
 		CacheReverseDestinations:    REVERSE_DESTINATION_PREFIX,
 		CacheRatingPlans:            RATING_PLAN_PREFIX,
 		CacheRatingProfiles:         RATING_PROFILE_PREFIX,
-		CacheLCRRules:               LCR_PREFIX,
-		CacheCDRStatS:               CDR_STATS_PREFIX,
 		CacheActions:                ACTION_PREFIX,
 		CacheActionPlans:            ACTION_PLAN_PREFIX,
 		CacheAccountActionPlans:     AccountActionPlansPrefix,
@@ -221,9 +219,7 @@ const (
 	ACCOUNT_PREFIX                = "acc_"
 	DESTINATION_PREFIX            = "dst_"
 	REVERSE_DESTINATION_PREFIX    = "rds_"
-	LCR_PREFIX                    = "lcr_"
 	DERIVEDCHARGERS_PREFIX        = "dcs_"
-	CDR_STATS_QUEUE_PREFIX        = "csq_"
 	PUBSUB_SUBSCRIBERS_PREFIX     = "pss_"
 	USERS_PREFIX                  = "usr_"
 	ALIASES_PREFIX                = "als_"
@@ -837,13 +833,11 @@ const (
 	RATING_PLANS_CSV      = "RatingPlans.csv"
 	RATING_PROFILES_CSV   = "RatingProfiles.csv"
 	SHARED_GROUPS_CSV     = "SharedGroups.csv"
-	LCRS_CSV              = "LcrRules.csv"
 	ACTIONS_CSV           = "Actions.csv"
 	ACTION_PLANS_CSV      = "ActionPlans.csv"
 	ACTION_TRIGGERS_CSV   = "ActionTriggers.csv"
 	ACCOUNT_ACTIONS_CSV   = "AccountActions.csv"
 	DERIVED_CHARGERS_CSV  = "DerivedChargers.csv"
-	CDR_STATS_CSV         = "CdrStats.csv"
 	USERS_CSV             = "Users.csv"
 	ALIASES_CSV           = "Aliases.csv"
 	ResourcesCsv          = "Resources.csv"
@@ -864,8 +858,6 @@ const (
 	TBLTPRatingPlans      = "tp_rating_plans"
 	TBLTPRateProfiles     = "tp_rating_profiles"
 	TBLTPSharedGroups     = "tp_shared_groups"
-	TBLTPCdrStats         = "tp_cdr_stats"
-	TBLTPLcrs             = "tp_lcr_rules"
 	TBLTPActions          = "tp_actions"
 	TBLTPActionPlans      = "tp_action_plans"
 	TBLTPActionTriggers   = "tp_action_triggers"
@@ -892,8 +884,6 @@ const (
 	CacheReverseDestinations    = "reverse_destinations"
 	CacheRatingPlans            = "rating_plans"
 	CacheRatingProfiles         = "rating_profiles"
-	CacheLCRRules               = "lcr_rules"
-	CacheCDRStatS               = "cdr_stats"
 	CacheActions                = "actions"
 	CacheActionPlans            = "action_plans"
 	CacheAccountActionPlans     = "account_action_plans"

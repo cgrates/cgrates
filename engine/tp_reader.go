@@ -47,9 +47,7 @@ type TpReader struct {
 	ratingPlans       map[string]*RatingPlan
 	ratingProfiles    map[string]*RatingProfile
 	sharedGroups      map[string]*SharedGroup
-	lcrs              map[string]*LCR
 	derivedChargers   map[string]*utils.DerivedChargers
-	cdrStats          map[string]*CdrStats
 	users             map[string]*UserProfile
 	aliases           map[string]*Alias
 	resProfiles       map[utils.TenantID]*utils.TPResource
@@ -129,9 +127,7 @@ func (tpr *TpReader) Init() {
 	tpr.ratingPlans = make(map[string]*RatingPlan)
 	tpr.ratingProfiles = make(map[string]*RatingProfile)
 	tpr.sharedGroups = make(map[string]*SharedGroup)
-	tpr.lcrs = make(map[string]*LCR)
 	tpr.accountActions = make(map[string]*Account)
-	tpr.cdrStats = make(map[string]*CdrStats)
 	tpr.users = make(map[string]*UserProfile)
 	tpr.aliases = make(map[string]*Alias)
 	tpr.derivedChargers = make(map[string]*utils.DerivedChargers)
@@ -480,86 +476,6 @@ func (tpr *TpReader) LoadSharedGroupsFiltered(tag string, save bool) (err error)
 
 func (tpr *TpReader) LoadSharedGroups() error {
 	return tpr.LoadSharedGroupsFiltered(tpr.tpid, false)
-}
-
-func (tpr *TpReader) LoadLCRs() (err error) {
-	tps, err := tpr.lr.GetTPLCRs(&utils.TPLcrRules{TPid: tpr.tpid})
-	if err != nil {
-		return err
-	}
-	for _, tpLcr := range tps {
-		if tpLcr != nil {
-			for _, rule := range tpLcr.Rules {
-				// check the rating profiles
-				ratingProfileSearchKey := utils.ConcatenatedKey(tpLcr.Direction, tpLcr.Tenant, rule.RpCategory)
-				found := false
-				for rpfKey := range tpr.ratingProfiles {
-					if strings.HasPrefix(rpfKey, ratingProfileSearchKey) {
-						found = true
-						break
-					}
-				}
-				if !found && tpr.dm.dataDB != nil {
-					if keys, err := tpr.dm.DataDB().GetKeysForPrefix(utils.RATING_PROFILE_PREFIX + ratingProfileSearchKey); err != nil {
-						return fmt.Errorf("[LCR] error querying dataDb %s", err.Error())
-					} else if len(keys) != 0 {
-						found = true
-					}
-				}
-				if !found {
-					return fmt.Errorf("[LCR] could not find ratingProfiles with prefix %s", ratingProfileSearchKey)
-				}
-
-				// check destination tags
-				if rule.DestinationId != "" && rule.DestinationId != utils.ANY {
-					_, found := tpr.destinations[rule.DestinationId]
-					if !found && tpr.dm.dataDB != nil {
-						if found, err = tpr.dm.HasData(utils.DESTINATION_PREFIX, rule.DestinationId, ""); err != nil {
-							return fmt.Errorf("[LCR] error querying dataDb %s", err.Error())
-						}
-					}
-					if !found {
-						return fmt.Errorf("[LCR] could not find destination with tag %s", rule.DestinationId)
-					}
-				}
-				tag := utils.LCRKey(tpLcr.Direction, tpLcr.Tenant, tpLcr.Category, tpLcr.Account, tpLcr.Subject)
-				activationTime, _ := utils.ParseTimeDetectLayout(rule.ActivationTime, tpr.timezone)
-
-				lcr, found := tpr.lcrs[tag]
-				if !found {
-					lcr = &LCR{
-						Direction: tpLcr.Direction,
-						Tenant:    tpLcr.Tenant,
-						Category:  tpLcr.Category,
-						Account:   tpLcr.Account,
-						Subject:   tpLcr.Subject,
-					}
-				}
-				var act *LCRActivation
-				for _, existingAct := range lcr.Activations {
-					if existingAct.ActivationTime.Equal(activationTime) {
-						act = existingAct
-						break
-					}
-				}
-				if act == nil {
-					act = &LCRActivation{
-						ActivationTime: activationTime,
-					}
-					lcr.Activations = append(lcr.Activations, act)
-				}
-				act.Entries = append(act.Entries, &LCREntry{
-					DestinationId:  rule.DestinationId,
-					RPCategory:     rule.RpCategory,
-					Strategy:       rule.Strategy,
-					StrategyParams: rule.StrategyParams,
-					Weight:         rule.Weight,
-				})
-				tpr.lcrs[tag] = lcr
-			}
-		}
-	}
-	return nil
 }
 
 func (tpr *TpReader) LoadActions() (err error) {
@@ -1241,241 +1157,6 @@ func (tpr *TpReader) LoadDerivedChargers() (err error) {
 	return tpr.LoadDerivedChargersFiltered(&utils.TPDerivedChargers{TPid: tpr.tpid}, false)
 }
 
-func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
-	tps, err := tpr.lr.GetTPCdrStats(tpr.tpid, tag)
-	if err != nil {
-		return err
-	}
-	storStats := MapTPCdrStats(tps)
-	var actionIDs []string // collect action ids
-	for tag, tpStats := range storStats {
-		for _, tpStat := range tpStats {
-			var cs *CdrStats
-			var exists bool
-			if cs, exists = tpr.cdrStats[tag]; !exists {
-				cs = &CdrStats{Id: tag}
-			}
-			// action triggers
-			triggerTag := tpStat.ActionTriggers
-			if triggerTag != "" {
-				_, exists := tpr.actionsTriggers[triggerTag]
-				if !exists {
-					tpatrs, err := tpr.lr.GetTPActionTriggers(tpr.tpid, triggerTag)
-					if err != nil {
-						return errors.New(err.Error() + " (ActionTriggers): " + triggerTag)
-					}
-					atrsM := MapTPActionTriggers(tpatrs)
-					for _, atrsLst := range atrsM {
-						atrs := make([]*ActionTrigger, len(atrsLst))
-						for idx, atr := range atrsLst {
-							minSleep, _ := utils.ParseDurationWithNanosecs(atr.MinSleep)
-							expTime, _ := utils.ParseTimeDetectLayout(atr.ExpirationDate, tpr.timezone)
-							actTime, _ := utils.ParseTimeDetectLayout(atr.ActivationDate, tpr.timezone)
-							if atr.UniqueID == "" {
-								atr.UniqueID = utils.GenUUID()
-							}
-							atrs[idx] = &ActionTrigger{
-								ID:             triggerTag,
-								UniqueID:       atr.UniqueID,
-								ThresholdType:  atr.ThresholdType,
-								ThresholdValue: atr.ThresholdValue,
-								Recurrent:      atr.Recurrent,
-								MinSleep:       minSleep,
-								ExpirationDate: expTime,
-								ActivationDate: actTime,
-								Balance:        &BalanceFilter{},
-								Weight:         atr.Weight,
-								ActionsID:      atr.ActionsId,
-							}
-							if atr.BalanceId != "" && atr.BalanceId != utils.ANY {
-								atrs[idx].Balance.ID = utils.StringPointer(atr.BalanceId)
-							}
-
-							if atr.BalanceType != "" && atr.BalanceType != utils.ANY {
-								atrs[idx].Balance.Type = utils.StringPointer(atr.BalanceType)
-							}
-
-							if atr.BalanceWeight != "" && atr.BalanceWeight != utils.ANY {
-								u, err := strconv.ParseFloat(atr.BalanceWeight, 64)
-								if err != nil {
-									return err
-								}
-								atrs[idx].Balance.Weight = utils.Float64Pointer(u)
-							}
-							if atr.BalanceExpirationDate != "" && atr.BalanceExpirationDate != utils.ANY && atr.ExpirationDate != utils.UNLIMITED {
-								u, err := utils.ParseTimeDetectLayout(atr.BalanceExpirationDate, tpr.timezone)
-								if err != nil {
-									return err
-								}
-								atrs[idx].Balance.ExpirationDate = utils.TimePointer(u)
-							}
-							if atr.BalanceRatingSubject != "" && atr.BalanceRatingSubject != utils.ANY {
-								atrs[idx].Balance.RatingSubject = utils.StringPointer(atr.BalanceRatingSubject)
-							}
-
-							if atr.BalanceCategories != "" && atr.BalanceCategories != utils.ANY {
-								atrs[idx].Balance.Categories = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceCategories))
-							}
-							if atr.BalanceDirections != "" && atr.BalanceDirections != utils.ANY {
-								atrs[idx].Balance.Directions = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceDirections))
-							}
-							if atr.BalanceDestinationIds != "" && atr.BalanceDestinationIds != utils.ANY {
-								atrs[idx].Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceDestinationIds))
-							}
-							if atr.BalanceSharedGroups != "" && atr.BalanceSharedGroups != utils.ANY {
-								atrs[idx].Balance.SharedGroups = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceSharedGroups))
-							}
-							if atr.BalanceTimingTags != "" && atr.BalanceTimingTags != utils.ANY {
-								atrs[idx].Balance.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceTimingTags))
-							}
-							if atr.BalanceBlocker != "" && atr.BalanceBlocker != utils.ANY {
-								u, err := strconv.ParseBool(atr.BalanceBlocker)
-								if err != nil {
-									return err
-								}
-								atrs[idx].Balance.Blocker = utils.BoolPointer(u)
-							}
-							if atr.BalanceDisabled != "" && atr.BalanceDisabled != utils.ANY {
-								u, err := strconv.ParseBool(atr.BalanceDisabled)
-								if err != nil {
-									return err
-								}
-								atrs[idx].Balance.Disabled = utils.BoolPointer(u)
-							}
-						}
-						tpr.actionsTriggers[triggerTag] = atrs
-					}
-				}
-				// collect action ids from triggers
-				for _, atr := range tpr.actionsTriggers[triggerTag] {
-					actionIDs = append(actionIDs, atr.ActionsID)
-				}
-			}
-			triggers, exists := tpr.actionsTriggers[triggerTag]
-			if triggerTag != "" && !exists {
-				// only return error if there was something there for the tag
-				return fmt.Errorf("could not get action triggers for cdr stats id %s: %s", cs.Id, triggerTag)
-			}
-			// write action triggers
-			err = tpr.dm.SetActionTriggers(triggerTag, triggers, utils.NonTransactional)
-			if err != nil {
-				return errors.New(err.Error() + " (SetActionTriggers): " + triggerTag)
-			}
-			UpdateCdrStats(cs, triggers, tpStat, tpr.timezone)
-			tpr.cdrStats[tag] = cs
-		}
-	}
-	// actions
-	for _, actId := range actionIDs {
-		_, exists := tpr.actions[actId]
-		if !exists {
-			tpas, err := tpr.lr.GetTPActions(tpr.tpid, actId)
-			if err != nil {
-				return err
-			}
-			as := MapTPActions(tpas)
-			for tag, tpacts := range as {
-				acts := make([]*Action, len(tpacts))
-				for idx, tpact := range tpacts {
-					// check filter field
-					if len(tpact.Filter) > 0 {
-						if _, err := structmatcher.NewStructMatcher(tpact.Filter); err != nil {
-							return fmt.Errorf("error parsing action %s filter field: %v", tag, err)
-						}
-					}
-					acts[idx] = &Action{
-						Id:         tag,
-						ActionType: tpact.Identifier,
-						//BalanceType:      tpact.BalanceType,
-						Weight:           tpact.Weight,
-						ExtraParameters:  tpact.ExtraParameters,
-						ExpirationString: tpact.ExpiryTime,
-						Filter:           tpact.Filter,
-						Balance:          &BalanceFilter{},
-					}
-					if tpact.BalanceId != "" && tpact.BalanceId != utils.ANY {
-						acts[idx].Balance.ID = utils.StringPointer(tpact.BalanceId)
-					}
-					if tpact.BalanceType != "" && tpact.BalanceType != utils.ANY {
-						acts[idx].Balance.Type = utils.StringPointer(tpact.BalanceType)
-					}
-
-					if tpact.Units != "" && tpact.Units != utils.ANY {
-						vf, err := utils.ParseBalanceFilterValue(tpact.BalanceType, tpact.Units)
-						if err != nil {
-							return err
-						}
-						acts[idx].Balance.Value = vf
-					}
-
-					if tpact.BalanceWeight != "" && tpact.BalanceWeight != utils.ANY {
-						u, err := strconv.ParseFloat(tpact.BalanceWeight, 64)
-						if err != nil {
-							return err
-						}
-						acts[idx].Balance.Weight = utils.Float64Pointer(u)
-					}
-					if tpact.RatingSubject != "" && tpact.RatingSubject != utils.ANY {
-						acts[idx].Balance.RatingSubject = utils.StringPointer(tpact.RatingSubject)
-					}
-
-					if tpact.Categories != "" && tpact.Categories != utils.ANY {
-						acts[idx].Balance.Categories = utils.StringMapPointer(utils.ParseStringMap(tpact.Categories))
-					}
-					if tpact.Directions != "" && tpact.Directions != utils.ANY {
-						acts[idx].Balance.Directions = utils.StringMapPointer(utils.ParseStringMap(tpact.Directions))
-					}
-					if tpact.DestinationIds != "" && tpact.DestinationIds != utils.ANY {
-						acts[idx].Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(tpact.DestinationIds))
-					}
-					if tpact.SharedGroups != "" && tpact.SharedGroups != utils.ANY {
-						acts[idx].Balance.SharedGroups = utils.StringMapPointer(utils.ParseStringMap(tpact.SharedGroups))
-					}
-					if tpact.TimingTags != "" && tpact.TimingTags != utils.ANY {
-						acts[idx].Balance.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(tpact.TimingTags))
-					}
-					if tpact.BalanceBlocker != "" && tpact.BalanceBlocker != utils.ANY {
-						u, err := strconv.ParseBool(tpact.BalanceBlocker)
-						if err != nil {
-							return err
-						}
-						acts[idx].Balance.Blocker = utils.BoolPointer(u)
-					}
-					if tpact.BalanceDisabled != "" && tpact.BalanceDisabled != utils.ANY {
-						u, err := strconv.ParseBool(tpact.BalanceDisabled)
-						if err != nil {
-							return err
-						}
-						acts[idx].Balance.Disabled = utils.BoolPointer(u)
-					}
-
-				}
-				tpr.actions[tag] = acts
-			}
-		}
-	}
-
-	if save {
-		// write actions
-		for k, as := range tpr.actions {
-			err = tpr.dm.SetActions(k, as, utils.NonTransactional)
-			if err != nil {
-				return err
-			}
-		}
-		for _, stat := range tpr.cdrStats {
-			if err := tpr.dm.SetCdrStats(stat); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
-func (tpr *TpReader) LoadCdrStats() error {
-	return tpr.LoadCdrStatsFiltered("", false)
-}
-
 func (tpr *TpReader) LoadUsersFiltered(filter *utils.TPUsers) (bool, error) {
 	tpUsers, err := tpr.lr.GetTPUsers(filter)
 	if err != nil {
@@ -1787,9 +1468,6 @@ func (tpr *TpReader) LoadAll() (err error) {
 	if err = tpr.LoadSharedGroups(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
-	if err = tpr.LoadLCRs(); err != nil && err.Error() != utils.NotFoundCaps {
-		return
-	}
 	if err = tpr.LoadActions(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
@@ -1803,9 +1481,6 @@ func (tpr *TpReader) LoadAll() (err error) {
 		return
 	}
 	if err = tpr.LoadDerivedChargers(); err != nil && err.Error() != utils.NotFoundCaps {
-		return
-	}
-	if err = tpr.LoadCdrStats(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
 	if err = tpr.LoadUsers(); err != nil && err.Error() != utils.NotFoundCaps {
@@ -1981,18 +1656,6 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		}
 	}
 	if verbose {
-		log.Print("LCR Rules:")
-	}
-	for k, lcr := range tpr.lcrs {
-		err = tpr.dm.SetLCR(lcr, utils.NonTransactional)
-		if err != nil {
-			return err
-		}
-		if verbose {
-			log.Println("\t", k)
-		}
-	}
-	if verbose {
 		log.Print("Actions:")
 	}
 	for k, as := range tpr.actions {
@@ -2026,18 +1689,6 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		}
 		if verbose {
 			log.Print("\t", key)
-		}
-	}
-	if verbose {
-		log.Print("CDR Stats Queues:")
-	}
-	for _, sq := range tpr.cdrStats {
-		err = tpr.dm.SetCdrStats(sq)
-		if err != nil {
-			return err
-		}
-		if verbose {
-			log.Print("\t", sq.Id)
 		}
 	}
 	if verbose {
@@ -2317,10 +1968,6 @@ func (tpr *TpReader) ShowStatistics() {
 	log.Print("Account actions: ", len(tpr.accountActions))
 	// derivedChargers
 	log.Print("Derived Chargers: ", len(tpr.derivedChargers))
-	// lcr rules
-	log.Print("LCR rules: ", len(tpr.lcrs))
-	// cdr stats
-	log.Print("CDR stats: ", len(tpr.cdrStats))
 	// resource profiles
 	log.Print("ResourceProfiles: ", len(tpr.resProfiles))
 	// stats
@@ -2404,14 +2051,6 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case utils.CDR_STATS_PREFIX: // cdr stats
-		keys := make([]string, len(tpr.cdrStats))
-		i := 0
-		for k := range tpr.cdrStats {
-			keys[i] = k
-			i++
-		}
-		return keys, nil
 	case utils.SHARED_GROUP_PREFIX:
 		keys := make([]string, len(tpr.sharedGroups))
 		i := 0
@@ -2456,14 +2095,6 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(tpr.actionsTriggers))
 		i := 0
 		for k := range tpr.actionsTriggers {
-			keys[i] = k
-			i++
-		}
-		return keys, nil
-	case utils.LCR_PREFIX:
-		keys := make([]string, len(tpr.lcrs))
-		i := 0
-		for k := range tpr.lcrs {
 			keys[i] = k
 			i++
 		}
@@ -2603,18 +2234,6 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 		}
 	}
 	if verbose {
-		log.Print("LCR Rules:")
-	}
-	for k, lcr := range tpr.lcrs {
-		err = tpr.dm.RemoveLCR(lcr.GetId(), utils.NonTransactional)
-		if err != nil {
-			return err
-		}
-		if verbose {
-			log.Println("\t", k)
-		}
-	}
-	if verbose {
 		log.Print("Actions:")
 	}
 	for k := range tpr.actions {
@@ -2648,18 +2267,6 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 		}
 		if verbose {
 			log.Print("\t", key)
-		}
-	}
-	if verbose {
-		log.Print("CDR Stats Queues:")
-	}
-	for _, sq := range tpr.cdrStats {
-		err = tpr.dm.RemoveCdrStatsQueue(sq.Id)
-		if err != nil {
-			return err
-		}
-		if verbose {
-			log.Print("\t", sq.Id)
 		}
 	}
 	if verbose {

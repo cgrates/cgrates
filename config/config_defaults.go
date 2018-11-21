@@ -120,8 +120,6 @@ const CGRATES_CFG_JSON = `
 	"reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// reverse destinations index caching
 	"rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// rating plans caching
 	"rating_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// rating profiles caching
-	"lcr_rules": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// lcr rules caching
-	"cdr_stats": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// cdr stats queues caching
 	"actions": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// actions caching
 	"action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// action plans caching
 	"account_action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// account action plans index caching
@@ -160,7 +158,6 @@ const CGRATES_CFG_JSON = `
 "rals": {
 	"enabled": false,						// enable Rater service: <true|false>
 	"thresholds_conns": [],					// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
-	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"stats_conns": [],						// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"pubsubs_conns": [],					// address where to reach the pubusb service, empty to disable pubsub functionality: <""|*internal|x.y.z.y:1234>
 	"users_conns": [],						// address where to reach the user service, empty to disable user profile functionality: <""|*internal|x.y.z.y:1234>
@@ -189,7 +186,6 @@ const CGRATES_CFG_JSON = `
 	"attributes_conns": [],					// address where to reach the attribute service, empty to disable attributes functionality: <""|*internal|x.y.z.y:1234>
 	"users_conns": [],						// address where to reach the user service, empty to disable user profile functionality: <""|*internal|x.y.z.y:1234>
 	"aliases_conns": [],					// address where to reach the aliases service, empty to disable aliases functionality: <""|*internal|x.y.z.y:1234>
-	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable cdrstats functionality: <""|*internal|x.y.z.y:1234>
 	"thresholds_conns": [],					// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
 	"stats_conns": [],						// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"online_cdr_exports":[],				// list of CDRE profiles to use for real-time CDR exports
@@ -228,12 +224,6 @@ const CGRATES_CFG_JSON = `
 		],
 		"trailer_fields": [],							// template of the exported trailer fields
 	},
-},
-
-
-"cdrstats": {
-	"enabled": false,						// starts the cdrstats service: <true|false>
-	"save_interval": "1m",					// interval to save changed stats into dataDb storage
 },
 
 

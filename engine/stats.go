@@ -254,25 +254,25 @@ func (sS *StatService) processEvent(args *StatsArgsProcessEvent) (statQueueIDs [
 				sS.ssqMux.Unlock()
 			}
 		}
-		var thIDs []string
-		if len(sq.sqPrfl.ThresholdIDs) != 0 {
-			if len(sq.sqPrfl.ThresholdIDs) == 1 && sq.sqPrfl.ThresholdIDs[0] == utils.META_NONE {
-				continue
-			}
-			thIDs = sq.sqPrfl.ThresholdIDs
-		}
-		thEv := &ArgsProcessEvent{
-			ThresholdIDs: thIDs,
-			CGREvent: utils.CGREvent{
-				Tenant: sq.Tenant,
-				ID:     utils.GenUUID(),
-				Event: map[string]interface{}{
-					utils.EventType: utils.StatUpdate,
-					utils.StatID:    sq.ID}}}
-		for metricID, metric := range sq.SQMetrics {
-			thEv.Event[metricID] = metric.GetValue()
-		}
 		if sS.thdS != nil {
+			var thIDs []string
+			if len(sq.sqPrfl.ThresholdIDs) != 0 {
+				if len(sq.sqPrfl.ThresholdIDs) == 1 && sq.sqPrfl.ThresholdIDs[0] == utils.META_NONE {
+					continue
+				}
+				thIDs = sq.sqPrfl.ThresholdIDs
+			}
+			thEv := &ArgsProcessEvent{
+				ThresholdIDs: thIDs,
+				CGREvent: utils.CGREvent{
+					Tenant: sq.Tenant,
+					ID:     utils.GenUUID(),
+					Event: map[string]interface{}{
+						utils.EventType: utils.StatUpdate,
+						utils.StatID:    sq.ID}}}
+			for metricID, metric := range sq.SQMetrics {
+				thEv.Event[metricID] = metric.GetValue()
+			}
 			var tIDs []string
 			if err := sS.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {

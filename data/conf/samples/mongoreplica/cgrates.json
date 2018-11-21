@@ -74,9 +74,6 @@
 	"thresholds_conns": [
 		{"address": "*internal"}
 	],
-	"cdrstats_conns": [
-		{"address": "*internal"}
-	],
 	"pubsubs_conns": [
 		{"address": "*internal"}
 	],
@@ -96,9 +93,6 @@
 
 "cdrs": {
 	"enabled": true,
-	"cdrstats_conns": [
-		{"address": "*internal"}
-	],
 },
 
 
@@ -119,11 +113,6 @@
 			{"tag":"MatchedDestinationID", "type": "*composed", "value": "~CostDetails:s/\"MatchedDestId\":.*_(\\w{4})/${1}/:s/\"MatchedDestId\":\"INTERNAL\"/ON010/"},
 		],
 	},
-},
-
-
-"cdrstats": {
-	"enabled": true,
 },
 
 
