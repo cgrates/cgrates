@@ -288,6 +288,9 @@ func (fltr *FilterRule) passEmpty(dP config.DataProvider) (bool, error) {
 		}
 		return false, err
 	}
+	if val == nil {
+		return true, nil
+	}
 	rval := reflect.ValueOf(val)
 	if rval.Type().Kind() == reflect.Ptr {
 		if rval.IsNil() {
