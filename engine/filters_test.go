@@ -24,9 +24,17 @@ import (
 )
 
 func TestFilterPassString(t *testing.T) {
-	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
-		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
-		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
+	cd := &CallDescriptor{
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "dan",
+		Destination:   "+4986517174963",
+		TimeStart:     time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
+		DurationIndex: 132 * time.Second,
+		ExtraFields:   map[string]string{"navigation": "off"},
+	}
 	rf := &FilterRule{Type: MetaString, FieldName: "Category", Values: []string{"call"}}
 	if passes, err := rf.passString(cd); err != nil {
 		t.Error(err)
@@ -38,6 +46,45 @@ func TestFilterPassString(t *testing.T) {
 		t.Error(err)
 	} else if passes {
 		t.Error("Filter passes")
+	}
+}
+
+func TestFilterPassEmpty(t *testing.T) {
+	cd := &CallDescriptor{
+		Direction:     "*out",
+		Category:      "",
+		Tenant:        "cgrates.org",
+		Subject:       "dan",
+		Destination:   "+4986517174963",
+		TimeStart:     time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
+		DurationIndex: 132 * time.Second,
+		ExtraFields:   map[string]string{"navigation": "off"},
+	}
+	rf := &FilterRule{Type: MetaEmpty, FieldName: "Category", Values: []string{}}
+	if passes, err := rf.passEmpty(cd); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("Not passes filter")
+	}
+	rf = &FilterRule{Type: MetaEmpty, FieldName: "Direction", Values: []string{}}
+	if passes, err := rf.passEmpty(cd); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("Filter passes")
+	}
+	rf = &FilterRule{Type: MetaEmpty, FieldName: "ExtraFields", Values: []string{}}
+	if passes, err := rf.passEmpty(cd); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("Filter passes")
+	}
+	cd.ExtraFields = map[string]string{}
+	rf = &FilterRule{Type: MetaEmpty, FieldName: "ExtraFields", Values: []string{}}
+	if passes, err := rf.passEmpty(cd); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("Not passes filter")
 	}
 }
 
@@ -142,12 +189,17 @@ func TestFilterPassStringSuffix(t *testing.T) {
 }
 
 func TestFilterPassRSRFields(t *testing.T) {
-	cd := &CallDescriptor{Direction: "*out", Category: "call",
-		Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
+	cd := &CallDescriptor{
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "dan",
+		Destination:   "+4986517174963",
 		TimeStart:     time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC),
 		TimeEnd:       time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
 		DurationIndex: 132 * time.Second,
-		ExtraFields:   map[string]string{"navigation": "off"}}
+		ExtraFields:   map[string]string{"navigation": "off"},
+	}
 	rf, err := NewFilterRule(MetaRSR, "", []string{"~Tenant(~^cgr.*\\.org$)"})
 	if err != nil {
 		t.Error(err)
@@ -180,13 +232,17 @@ func TestFilterPassRSRFields(t *testing.T) {
 func TestFilterPassDestinations(t *testing.T) {
 	Cache.Set(utils.CacheReverseDestinations, "+49",
 		[]string{"DE", "EU_LANDLINE"}, nil, true, "")
-	cd := &CallDescriptor{Direction: "*out",
-		Category: "call", Tenant: "cgrates.org",
-		Subject: "dan", Destination: "+4986517174963",
+	cd := &CallDescriptor{
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "dan",
+		Destination:   "+4986517174963",
 		TimeStart:     time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC),
 		TimeEnd:       time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
 		DurationIndex: 132 * time.Second,
-		ExtraFields:   map[string]string{"navigation": "off"}}
+		ExtraFields:   map[string]string{"navigation": "off"},
+	}
 	rf, err := NewFilterRule(MetaDestinations, "Destination", []string{"DE"})
 	if err != nil {
 		t.Error(err)
@@ -270,6 +326,14 @@ func TestFilterNewRequestFilter(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	erf := &FilterRule{Type: MetaString, FieldName: "MetaString", Values: []string{"String"}}
+	if !reflect.DeepEqual(erf, rf) {
+		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
+	}
+	rf, err = NewFilterRule(MetaEmpty, "MetaEmpty", []string{})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	erf = &FilterRule{Type: MetaEmpty, FieldName: "MetaEmpty", Values: []string{}}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
@@ -454,6 +518,39 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
+
+	failEvent = map[string]interface{}{
+		"EmptyString":   "nonEmpty",
+		"EmptySlice":    []string{""},
+		"EmptyMap":      map[string]string{"": ""},
+		"EmptyPtr":      &struct{}{},
+		"EmptyPtrSlice": &[]string{""},
+		"EmptyPtrMap":   &map[string]string{"": ""},
+	}
+	var testnil *struct{}
+	testnil = nil
+	passEvent = map[string]interface{}{
+		"EmptyString":   "",
+		"EmptySlice":    []string{},
+		"EmptyMap":      map[string]string{},
+		"EmptyPtr":      testnil,
+		"EmptyPtrSlice": &[]string{},
+		"EmptyPtrMap":   &map[string]string{},
+	}
+	for key := range failEvent {
+		if pass, err := filterS.Pass("cgrates.org", []string{"*empty:" + key + ":"},
+			config.NewNavigableMap(failEvent)); err != nil {
+			t.Errorf(err.Error())
+		} else if pass {
+			t.Errorf("For %s expecting: %+v, received: %+v", key, false, pass)
+		}
+		if pass, err := filterS.Pass("cgrates.org", []string{"*empty:" + key + ":"},
+			config.NewNavigableMap(passEvent)); err != nil {
+			t.Errorf(err.Error())
+		} else if !pass {
+			t.Errorf("For %s expecting: %+v, received: %+v", key, true, pass)
+		}
 	}
 }
 

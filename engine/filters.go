@@ -33,6 +33,7 @@ const (
 	MetaString         = "*string"
 	MetaPrefix         = "*prefix"
 	MetaSuffix         = "*suffix"
+	MetaEmpty          = "*empty"
 	MetaTimings        = "*timings"
 	MetaRSR            = "*rsr"
 	MetaStatS          = "*stats"
@@ -148,12 +149,12 @@ func (f *Filter) Compile() (err error) {
 
 func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error) {
 	if !utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaSuffix,
-		MetaTimings, MetaRSR, MetaStatS, MetaDestinations,
+		MetaTimings, MetaRSR, MetaStatS, MetaDestinations, MetaEmpty,
 		MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("Unsupported filter Type: %s", rfType)
 	}
 	if fieldName == "" && utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaSuffix,
-		MetaTimings, MetaDestinations, MetaLessThan,
+		MetaTimings, MetaDestinations, MetaLessThan, MetaEmpty,
 		MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("FieldName is mandatory for Type: %s", rfType)
 	}
@@ -221,6 +222,8 @@ func (fltr *FilterRule) Pass(dP config.DataProvider, rpcClnt rpcclient.RpcClient
 	switch fltr.Type {
 	case MetaString:
 		return fltr.passString(dP)
+	case MetaEmpty:
+		return fltr.passEmpty(dP)
 	case MetaPrefix:
 		return fltr.passStringPrefix(dP)
 	case MetaSuffix:
@@ -254,6 +257,33 @@ func (fltr *FilterRule) passString(dP config.DataProvider) (bool, error) {
 		}
 	}
 	return false, nil
+}
+
+func (fltr *FilterRule) passEmpty(dP config.DataProvider) (bool, error) {
+	val, err := dP.FieldAsInterface(strings.Split(fltr.FieldName, utils.NestingSep))
+	if err != nil {
+		if err == utils.ErrNotFound {
+			return true, nil
+		}
+		return false, err
+	}
+	rval := reflect.ValueOf(val)
+	if rval.Type().Kind() == reflect.Ptr {
+		if rval.IsNil() {
+			return true, nil
+		}
+		rval = rval.Elem()
+	}
+	switch rval.Type().Kind() {
+	case reflect.String:
+		return rval.Interface() == "", nil
+	case reflect.Slice:
+		return rval.Len() == 0, nil
+	case reflect.Map:
+		return len(rval.MapKeys()) == 0, nil
+	default:
+		return false, nil
+	}
 }
 
 func (fltr *FilterRule) passStringPrefix(dP config.DataProvider) (bool, error) {
