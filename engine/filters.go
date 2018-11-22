@@ -32,6 +32,7 @@ import (
 const (
 	MetaString         = "*string"
 	MetaPrefix         = "*prefix"
+	MetaSuffix         = "*suffix"
 	MetaTimings        = "*timings"
 	MetaRSR            = "*rsr"
 	MetaStatS          = "*stats"
@@ -146,17 +147,17 @@ func (f *Filter) Compile() (err error) {
 }
 
 func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error) {
-	if !utils.IsSliceMember([]string{MetaString, MetaPrefix,
+	if !utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaSuffix,
 		MetaTimings, MetaRSR, MetaStatS, MetaDestinations,
 		MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("Unsupported filter Type: %s", rfType)
 	}
-	if fieldName == "" && utils.IsSliceMember([]string{MetaString,
-		MetaPrefix, MetaTimings, MetaDestinations, MetaLessThan,
+	if fieldName == "" && utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaSuffix,
+		MetaTimings, MetaDestinations, MetaLessThan,
 		MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("FieldName is mandatory for Type: %s", rfType)
 	}
-	if len(vals) == 0 && utils.IsSliceMember([]string{MetaString, MetaPrefix,
+	if len(vals) == 0 && utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaSuffix,
 		MetaTimings, MetaRSR, MetaDestinations, MetaDestinations, MetaLessThan,
 		MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("Values is mandatory for Type: %s", rfType)
@@ -222,6 +223,8 @@ func (fltr *FilterRule) Pass(dP config.DataProvider, rpcClnt rpcclient.RpcClient
 		return fltr.passString(dP)
 	case MetaPrefix:
 		return fltr.passStringPrefix(dP)
+	case MetaSuffix:
+		return fltr.passStringSuffix(dP)
 	case MetaTimings:
 		return fltr.passTimings(dP)
 	case MetaDestinations:
@@ -263,6 +266,22 @@ func (fltr *FilterRule) passStringPrefix(dP config.DataProvider) (bool, error) {
 	}
 	for _, prfx := range fltr.Values {
 		if strings.HasPrefix(strVal, prfx) {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func (fltr *FilterRule) passStringSuffix(dP config.DataProvider) (bool, error) {
+	strVal, err := dP.FieldAsString(strings.Split(fltr.FieldName, utils.NestingSep))
+	if err != nil {
+		if err == utils.ErrNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+	for _, prfx := range fltr.Values {
+		if strings.HasSuffix(strVal, prfx) {
 			return true, nil
 		}
 	}

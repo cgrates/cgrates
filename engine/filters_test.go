@@ -42,9 +42,17 @@ func TestFilterPassString(t *testing.T) {
 }
 
 func TestFilterPassStringPrefix(t *testing.T) {
-	cd := &CallDescriptor{Direction: "*out", Category: "call", Tenant: "cgrates.org", Subject: "dan", Destination: "+4986517174963",
-		TimeStart: time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC), TimeEnd: time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
-		DurationIndex: 132 * time.Second, ExtraFields: map[string]string{"navigation": "off"}}
+	cd := &CallDescriptor{
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "dan",
+		Destination:   "+4986517174963",
+		TimeStart:     time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
+		DurationIndex: 132 * time.Second,
+		ExtraFields:   map[string]string{"navigation": "off"},
+	}
 	rf := &FilterRule{Type: MetaPrefix, FieldName: "Category", Values: []string{"call"}}
 	if passes, err := rf.passStringPrefix(cd); err != nil {
 		t.Error(err)
@@ -77,6 +85,56 @@ func TestFilterPassStringPrefix(t *testing.T) {
 	}
 	rf = &FilterRule{Type: MetaPrefix, FieldName: "nonexisting", Values: []string{"off"}}
 	if passing, err := rf.passStringPrefix(cd); err != nil {
+		t.Error(err)
+	} else if passing {
+		t.Error("Passes filter")
+	}
+}
+
+func TestFilterPassStringSuffix(t *testing.T) {
+	cd := &CallDescriptor{
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "dan",
+		Destination:   "+4986517174963",
+		TimeStart:     time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
+		DurationIndex: 132 * time.Second,
+		ExtraFields:   map[string]string{"navigation": "off"},
+	}
+	rf := &FilterRule{Type: MetaSuffix, FieldName: "Category", Values: []string{"call"}}
+	if passes, err := rf.passStringSuffix(cd); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("Not passes filter")
+	}
+	rf = &FilterRule{Type: MetaSuffix, FieldName: "Category", Values: []string{"premium"}}
+	if passes, err := rf.passStringSuffix(cd); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("Passes filter")
+	}
+	rf = &FilterRule{Type: MetaSuffix, FieldName: "Destination", Values: []string{"963"}}
+	if passes, err := rf.passStringSuffix(cd); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("Not passes filter")
+	}
+	rf = &FilterRule{Type: MetaSuffix, FieldName: "Destination", Values: []string{"4966"}}
+	if passes, err := rf.passStringSuffix(cd); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("Passes filter")
+	}
+	rf = &FilterRule{Type: MetaSuffix, FieldName: "navigation", Values: []string{"off"}}
+	if passes, err := rf.passStringSuffix(cd); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("Not passes filter")
+	}
+	rf = &FilterRule{Type: MetaSuffix, FieldName: "nonexisting", Values: []string{"off"}}
+	if passing, err := rf.passStringSuffix(cd); err != nil {
 		t.Error(err)
 	} else if passing {
 		t.Error("Passes filter")
@@ -223,6 +281,14 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
+	rf, err = NewFilterRule(MetaSuffix, "MetaSuffix", []string{"stringSuffix"})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	erf = &FilterRule{Type: MetaSuffix, FieldName: "MetaSuffix", Values: []string{"stringSuffix"}}
+	if !reflect.DeepEqual(erf, rf) {
+		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
+	}
 	rf, err = NewFilterRule(MetaTimings, "MetaTimings", []string{""})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -317,6 +383,18 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	}
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*prefix:Account:10"}, config.NewNavigableMap(passEvent)); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*suffix:Account:07"}, config.NewNavigableMap(failEvent)); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*suffix:Account:07"}, config.NewNavigableMap(passEvent)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
@@ -461,7 +539,8 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 		utils.Usage:       "1m20s",
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*string:Account:1003", "*prefix:Destination:10", "*rsr::~Destination(1002)"}, config.NewNavigableMap(ev)); err != nil {
+		[]string{"*string:Account:1003", "*prefix:Destination:10", "*suffix:Subject:03", "*rsr::~Destination(1002)"},
+		config.NewNavigableMap(ev)); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
