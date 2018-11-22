@@ -83,6 +83,7 @@ func (t *Threshold) ProcessEvent(args *ArgsProcessEvent, dm *DataManager) (err e
 		at := &ActionTiming{
 			Uuid:      utils.GenUUID(),
 			ActionsID: actionSetID,
+			ExtraData: args.CGREvent,
 		}
 		if acntID != "" {
 			at.accountIDs = utils.NewStringMap(acntID)
