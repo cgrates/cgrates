@@ -47,6 +47,19 @@ func TestFilterPassString(t *testing.T) {
 	} else if passes {
 		t.Error("Filter passes")
 	}
+	//not
+	rf = &FilterRule{Type: "*notstring", FieldName: "Category", Values: []string{"call"}}
+	if passes, err := rf.Pass(cd, nil); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("Filter passes")
+	}
+	rf = &FilterRule{Type: "*notstring", FieldName: "Category", Values: []string{"cal"}}
+	if passes, err := rf.Pass(cd, nil); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("Not passes filter")
+	}
 }
 
 func TestFilterPassEmpty(t *testing.T) {
@@ -85,6 +98,19 @@ func TestFilterPassEmpty(t *testing.T) {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
+	}
+	//not
+	rf = &FilterRule{Type: "*notempty", FieldName: "Direction", Values: []string{}}
+	if passes, err := rf.Pass(cd, nil); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("Not passes filter")
+	}
+	rf = &FilterRule{Type: "*notempty", FieldName: "Category", Values: []string{}}
+	if passes, err := rf.Pass(cd, nil); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("Filter passes")
 	}
 }
 
@@ -136,6 +162,13 @@ func TestFilterPassStringPrefix(t *testing.T) {
 	} else if passing {
 		t.Error("Passes filter")
 	}
+	//not
+	rf = &FilterRule{Type: "*notprefix", FieldName: "Category", Values: []string{"premium"}}
+	if passes, err := rf.Pass(cd, nil); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("Not passes filter")
+	}
 }
 
 func TestFilterPassStringSuffix(t *testing.T) {
@@ -186,6 +219,13 @@ func TestFilterPassStringSuffix(t *testing.T) {
 	} else if passing {
 		t.Error("Passes filter")
 	}
+	//not
+	rf = &FilterRule{Type: "*notsuffix", FieldName: "Destination", Values: []string{"963"}}
+	if passes, err := rf.Pass(cd, nil); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("Passes filter")
+	}
 }
 
 func TestFilterPassRSRFields(t *testing.T) {
@@ -227,6 +267,16 @@ func TestFilterPassRSRFields(t *testing.T) {
 	} else if !passes {
 		t.Error("Not passing")
 	}
+	//not
+	rf, err = NewFilterRule("*notrsr", "", []string{"~navigation(off)"})
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.Pass(cd, nil); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("Passing")
+	}
 }
 
 func TestFilterPassDestinations(t *testing.T) {
@@ -257,6 +307,16 @@ func TestFilterPassDestinations(t *testing.T) {
 		t.Error(err)
 	}
 	if passes, err := rf.passDestinations(cd); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("Passing")
+	}
+	//not
+	rf, err = NewFilterRule("*notdestinations", "Destination", []string{"DE"})
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.Pass(cd, nil); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passing")
@@ -317,6 +377,18 @@ func TestFilterPassGreaterThan(t *testing.T) {
 		t.Error(err)
 	} else if !passes {
 		t.Error("not pass")
+	}
+	//not
+	ev = config.NewNavigableMap(nil)
+	ev.Set([]string{"ASR"}, 20, false, true)
+	rf, err = NewFilterRule("*notgt", "ASR", []string{"40"})
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.passGreaterThan(ev); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("passing")
 	}
 }
 
@@ -401,6 +473,15 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
+	//not
+	rf, err = NewFilterRule("*notgt", "NotMetaGreaterOrEqual", []string{"20"})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	erf = &FilterRule{Type: "*notgt", FieldName: "NotMetaGreaterOrEqual", Values: []string{"20"}}
+	if !reflect.DeepEqual(erf, rf) {
+		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
+	}
 }
 
 func TestInlineFilterPassFiltersForEvent(t *testing.T) {
@@ -433,6 +514,13 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
+	//not
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*notstring:Account:1007"}, config.NewNavigableMap(passEvent)); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
 	failEvent = map[string]interface{}{
 		"Account": "2001",
 	}
@@ -463,6 +551,13 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
+	//not
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*notsuffix:Account:07"}, config.NewNavigableMap(passEvent)); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
+	}
 	failEvent = map[string]interface{}{
 		"Tenant": "anotherTenant.org",
 	}
@@ -480,6 +575,13 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
+	}
+	//not
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*notrsr::~Tenant(~^cgr.*\\.org$)"}, config.NewNavigableMap(passEvent)); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	Cache.Set(utils.CacheReverseDestinations, "+49",
 		[]string{"DE", "EU_LANDLINE"}, nil, true, "")

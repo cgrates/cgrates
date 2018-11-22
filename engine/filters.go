@@ -30,6 +30,7 @@ import (
 )
 
 const (
+	MetaNot            = "*not"
 	MetaString         = "*string"
 	MetaPrefix         = "*prefix"
 	MetaSuffix         = "*suffix"
@@ -148,19 +149,23 @@ func (f *Filter) Compile() (err error) {
 }
 
 func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error) {
+	ftype := rfType
+	if strings.HasPrefix(rfType, MetaNot) {
+		ftype = "*" + strings.TrimPrefix(rfType, MetaNot)
+	}
 	if !utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaSuffix,
 		MetaTimings, MetaRSR, MetaStatS, MetaDestinations, MetaEmpty,
-		MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
+		MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, ftype) {
 		return nil, fmt.Errorf("Unsupported filter Type: %s", rfType)
 	}
 	if fieldName == "" && utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaSuffix,
 		MetaTimings, MetaDestinations, MetaLessThan, MetaEmpty,
-		MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
+		MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, ftype) {
 		return nil, fmt.Errorf("FieldName is mandatory for Type: %s", rfType)
 	}
 	if len(vals) == 0 && utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaSuffix,
 		MetaTimings, MetaRSR, MetaDestinations, MetaDestinations, MetaLessThan,
-		MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
+		MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, ftype) {
 		return nil, fmt.Errorf("Values is mandatory for Type: %s", rfType)
 	}
 	rf := &FilterRule{Type: rfType, FieldName: fieldName, Values: vals}
@@ -179,20 +184,25 @@ type RFStatSThreshold struct {
 // FilterRule filters requests coming into various places
 // Pass rule: default negative, one mathing rule should pass the filter
 type FilterRule struct {
-	Type            string              // Filter type (*string, *timing, *rsr_filters, *stats, *lt, *lte, *gt, *gte)
-	FieldName       string              // Name of the field providing us the Values to check (used in case of some )
-	Values          []string            // Filter definition
-	rsrFields       config.RSRParsers   // Cache here the RSRFilter Values
+	Type            string            // Filter type (*string, *timing, *rsr_filters, *stats, *lt, *lte, *gt, *gte)
+	FieldName       string            // Name of the field providing us the Values to check (used in case of some )
+	Values          []string          // Filter definition
+	rsrFields       config.RSRParsers // Cache here the RSRFilter Values
+	negative        bool
 	statSThresholds []*RFStatSThreshold // Cached compiled RFStatsThreshold out of Values
 }
 
 // Separate method to compile RSR fields
 func (rf *FilterRule) CompileValues() (err error) {
-	if rf.Type == MetaRSR {
+	rftype := rf.Type
+	if strings.HasPrefix(rftype, MetaNot) {
+		rftype = "*" + strings.TrimPrefix(rftype, MetaNot)
+	}
+	if rftype == MetaRSR {
 		if rf.rsrFields, err = config.NewRSRParsersFromSlice(rf.Values, true); err != nil {
 			return
 		}
-	} else if rf.Type == MetaStatS {
+	} else if rftype == MetaStatS {
 		rf.statSThresholds = make([]*RFStatSThreshold, len(rf.Values))
 		for i, val := range rf.Values {
 			valSplt := strings.Split(val, utils.InInFieldSep)
@@ -218,29 +228,40 @@ func (rf *FilterRule) CompileValues() (err error) {
 }
 
 // Pass is the method which should be used from outside.
-func (fltr *FilterRule) Pass(dP config.DataProvider, rpcClnt rpcclient.RpcClientConnection) (bool, error) {
+func (fltr *FilterRule) Pass(dP config.DataProvider, rpcClnt rpcclient.RpcClientConnection) (result bool, err error) {
+	if !fltr.negative && strings.HasPrefix(fltr.Type, MetaNot) {
+		fltr.Type = "*" + strings.TrimPrefix(fltr.Type, MetaNot)
+		fltr.negative = true
+	}
 	switch fltr.Type {
 	case MetaString:
-		return fltr.passString(dP)
+		result, err = fltr.passString(dP)
 	case MetaEmpty:
-		return fltr.passEmpty(dP)
+		result, err = fltr.passEmpty(dP)
 	case MetaPrefix:
-		return fltr.passStringPrefix(dP)
+		result, err = fltr.passStringPrefix(dP)
 	case MetaSuffix:
-		return fltr.passStringSuffix(dP)
+		result, err = fltr.passStringSuffix(dP)
 	case MetaTimings:
-		return fltr.passTimings(dP)
+		result, err = fltr.passTimings(dP)
 	case MetaDestinations:
-		return fltr.passDestinations(dP)
+		result, err = fltr.passDestinations(dP)
 	case MetaRSR:
-		return fltr.passRSR(dP)
+		result, err = fltr.passRSR(dP)
 	case MetaStatS:
-		return fltr.passStatS(dP, rpcClnt)
+		result, err = fltr.passStatS(dP, rpcClnt)
 	case MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual:
-		return fltr.passGreaterThan(dP)
+		result, err = fltr.passGreaterThan(dP)
 	default:
-		return false, utils.ErrNotImplemented
+		err = utils.ErrNotImplemented
 	}
+	if fltr.negative {
+		result = !result
+	}
+	if err != nil {
+		return false, err
+	}
+	return
 }
 
 func (fltr *FilterRule) passString(dP config.DataProvider) (bool, error) {
