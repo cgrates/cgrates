@@ -818,6 +818,7 @@ func (ms *MongoStorageNew) UpdateReverseDestination(oldDest, newDest *Destinatio
 		if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 			_, err = ms.getCol(colRds).UpdateOne(sctx, bson.M{"key": addedPrefix},
 				bson.M{"$addToSet": bson.M{"value": newDest.Id}},
+				options.Update().SetUpsert(true),
 			)
 			return err
 		}); err != nil {

@@ -44,12 +44,12 @@ var (
 var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITFlush,
 	testOnStorITIsDBEmpty,
-	// testOnStorITSetGetDerivedCharges,
-	// testOnStorITCacheDestinations,
-	// testOnStorITCacheReverseDestinations,
-	// testOnStorITCacheActionPlan,
-	// testOnStorITCacheAccountActionPlans,
-	// testOnStorITCacheDerivedChargers,
+	testOnStorITSetGetDerivedCharges,
+	testOnStorITCacheDestinations,
+	testOnStorITCacheReverseDestinations,
+	testOnStorITCacheActionPlan,
+	testOnStorITCacheAccountActionPlans,
+	testOnStorITCacheDerivedChargers,
 
 	// ToDo: test cache flush for a prefix
 	// ToDo: testOnStorITLoadAccountingCache
@@ -59,11 +59,13 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITRatingProfile,
 	testOnStorITCRUDDestinations,
 	testOnStorITCRUDReverseDestinations,
+	testOnStorITLCR,
 	testOnStorITActions,
 	testOnStorITSharedGroup,
 	testOnStorITCRUDActionPlan,
 	testOnStorITCRUDAccountActionPlans,
 	testOnStorITCRUDAccount,
+	testOnStorITCRUDCdrStatsQueue,
 	testOnStorITCRUDSubscribers,
 	testOnStorITResource,
 	testOnStorITResourceProfile,
@@ -73,14 +75,15 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITStatQueueProfile,
 	testOnStorITStatQueue,
 	testOnStorITThresholdProfile,
-	// testOnStorITThreshold,
-	// testOnStorITFilter,
-	// testOnStorITSupplierProfile,
-	// testOnStorITAttributeProfile,
-	// testOnStorITFlush,
-	// testOnStorITIsDBEmpty,
-	// testOnStorITTestAttributeSubstituteIface,
-	// testOnStorITChargerProfile,//aici
+	testOnStorITThreshold,
+	testOnStorITFilter,
+	testOnStorITSupplierProfile,
+	testOnStorITAttributeProfile,
+	testOnStorITFlush,
+	testOnStorITIsDBEmpty,
+	testOnStorITTestAttributeSubstituteIface,
+	testOnStorITChargerProfile,
+
 	//testOnStorITCacheActionTriggers,
 	//testOnStorITCacheAlias,
 	//testOnStorITCacheReverseAlias,
@@ -714,15 +717,23 @@ func testOnStorITRatingProfile(t *testing.T) {
 	if rcv, err := onStor.GetRatingProfile(rpf.Id, false,
 		utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rpf, rcv) {
-		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(rpf), utils.ToJSON(rcv))
+	} else {
+		//convert to UTC for mongo that stores the Date as ISODate
+		rcv.RatingPlanActivations[0].ActivationTime = rcv.RatingPlanActivations[0].ActivationTime.UTC()
+		if !reflect.DeepEqual(rpf, rcv) {
+			t.Errorf("Expecting: %v, received: %v", utils.ToJSON(rpf), utils.ToJSON(rcv))
+		}
 	}
 	//get from database
 	if rcv, err := onStor.GetRatingProfile(rpf.Id, true,
 		utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rpf, rcv) {
-		t.Errorf("Expecting: %v, received: %v", rpf, rcv)
+	} else {
+		//convert to UTC for mongo that stores the Date as ISODate
+		rcv.RatingPlanActivations[0].ActivationTime = rcv.RatingPlanActivations[0].ActivationTime.UTC()
+		if !reflect.DeepEqual(rpf, rcv) {
+			t.Errorf("Expecting: %v, received: %v", utils.ToJSON(rpf), utils.ToJSON(rcv))
+		}
 	}
 	expectedCRPl := []string{"rpf_*out:test:1:trp"}
 	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.RATING_PROFILE_PREFIX); err != nil {
@@ -747,15 +758,23 @@ func testOnStorITRatingProfile(t *testing.T) {
 	if rcv, err := onStor.GetRatingProfile(rpf.Id, false,
 		utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rpf, rcv) {
-		t.Errorf("Expecting: %v, received: %v", rpf, rcv)
+	} else {
+		//convert to UTC for mongo that stores the Date as ISODate
+		rcv.RatingPlanActivations[0].ActivationTime = rcv.RatingPlanActivations[0].ActivationTime.UTC()
+		if !reflect.DeepEqual(rpf, rcv) {
+			t.Errorf("Expecting: %v, received: %v", utils.ToJSON(rpf), utils.ToJSON(rcv))
+		}
 	}
 	//get from database
 	if rcv, err := onStor.GetRatingProfile(rpf.Id, true,
 		utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rpf, rcv) {
-		t.Errorf("Expecting: %v, received: %v", rpf, rcv)
+	} else {
+		//convert to UTC for mongo that stores the Date as ISODate
+		rcv.RatingPlanActivations[0].ActivationTime = rcv.RatingPlanActivations[0].ActivationTime.UTC()
+		if !reflect.DeepEqual(rpf, rcv) {
+			t.Errorf("Expecting: %v, received: %v", utils.ToJSON(rpf), utils.ToJSON(rcv))
+		}
 	}
 	if err = onStor.RemoveRatingProfile(rpf.Id, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -2024,15 +2043,25 @@ func testOnStorITThresholdProfile(t *testing.T) {
 	if rcv, err := onStor.GetThresholdProfile(th.Tenant, th.ID,
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(th, rcv) {
-		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
+	} else {
+		//convert to UTC for mongo that stores the Date as ISODate
+		rcv.ActivationInterval.ActivationTime = rcv.ActivationInterval.ActivationTime.UTC()
+		rcv.ActivationInterval.ExpiryTime = rcv.ActivationInterval.ExpiryTime.UTC()
+		if !reflect.DeepEqual(th, rcv) {
+			t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
+		}
 	}
 	//get from database
 	if rcv, err := onStor.GetThresholdProfile(th.Tenant, th.ID,
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(th, rcv) {
-		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
+	} else {
+		//convert to UTC for mongo that stores the Date as ISODate
+		rcv.ActivationInterval.ActivationTime = rcv.ActivationInterval.ActivationTime.UTC()
+		rcv.ActivationInterval.ExpiryTime = rcv.ActivationInterval.ExpiryTime.UTC()
+		if !reflect.DeepEqual(th, rcv) {
+			t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
+		}
 	}
 	expectedR := []string{"thp_cgrates.org:test"}
 	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ThresholdProfilePrefix); err != nil {
@@ -2050,15 +2079,25 @@ func testOnStorITThresholdProfile(t *testing.T) {
 	if rcv, err := onStor.GetThresholdProfile(th.Tenant, th.ID,
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(th, rcv) {
-		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
+	} else {
+		//convert to UTC for mongo that stores the Date as ISODate
+		rcv.ActivationInterval.ActivationTime = rcv.ActivationInterval.ActivationTime.UTC()
+		rcv.ActivationInterval.ExpiryTime = rcv.ActivationInterval.ExpiryTime.UTC()
+		if !reflect.DeepEqual(th, rcv) {
+			t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
+		}
 	}
 	//get from database
 	if rcv, err := onStor.GetThresholdProfile(th.Tenant, th.ID,
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(th, rcv) {
-		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
+	} else {
+		//convert to UTC for mongo that stores the Date as ISODate
+		rcv.ActivationInterval.ActivationTime = rcv.ActivationInterval.ActivationTime.UTC()
+		rcv.ActivationInterval.ExpiryTime = rcv.ActivationInterval.ExpiryTime.UTC()
+		if !reflect.DeepEqual(th, rcv) {
+			t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
+		}
 	}
 	if err := onStor.RemoveThresholdProfile(th.Tenant,
 		th.ID, utils.NonTransactional, false); err != nil {
