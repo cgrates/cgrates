@@ -738,7 +738,7 @@ func TestCgrCfgJSONDefaultsFsAgentConfig(t *testing.T) {
 			{Address: "*internal"}},
 		SubscribePark:       true,
 		CreateCdr:           false,
-		ExtraFields:         nil,
+		ExtraFields:         RSRParsers{},
 		EmptyBalanceContext: "",
 		EmptyBalanceAnnFile: "",
 		MaxWaitConnection:   2 * time.Second,
@@ -751,7 +751,7 @@ func TestCgrCfgJSONDefaultsFsAgentConfig(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(cgrCfg.fsAgentCfg, eFsAgentCfg) {
-		t.Errorf("received: %+v, expecting: %+v", cgrCfg.fsAgentCfg, eFsAgentCfg)
+		t.Errorf("received: %+v, expecting: %+v", utils.ToJSON(cgrCfg.fsAgentCfg), utils.ToJSON(eFsAgentCfg))
 	}
 }
 

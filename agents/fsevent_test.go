@@ -498,63 +498,63 @@ func TestParseEventValue(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
 	ev := NewFSEvent(hangupEv)
-	if tor, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.ToR}, ""); tor != utils.VOICE {
+	if tor, _ := ev.ParseEventValue(config.NewRSRParserMustCompile("~"+utils.ToR, true), ""); tor != utils.VOICE {
 		t.Error("Unexpected tor parsed", tor)
 	}
-	if accid, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.OriginID}, ""); accid != "e3133bf7-dcde-4daf-9663-9a79ffcef5ad" {
+	if accid, _ := ev.ParseEventValue(config.NewRSRParserMustCompile("~"+utils.OriginID, true), ""); accid != "e3133bf7-dcde-4daf-9663-9a79ffcef5ad" {
 		t.Error("Unexpected result parsed", accid)
 	}
-	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.OriginHost}, ""); parsed != "10.0.3.15" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile("~"+utils.OriginHost, true), ""); parsed != "10.0.3.15" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.Source}, ""); parsed != "FS_EVENT" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile("~"+utils.Source, true), ""); parsed != "FS_EVENT" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.RequestType}, ""); parsed != utils.META_PREPAID {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile("~"+utils.RequestType, true), ""); parsed != utils.META_PREPAID {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.Direction}, ""); parsed != utils.OUT {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile("~"+utils.Direction, true), ""); parsed != utils.OUT {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.Tenant}, ""); parsed != "cgrates.org" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile("~"+utils.Tenant, true), ""); parsed != "cgrates.org" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.Category}, ""); parsed != "call" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile("~"+utils.Category, true), ""); parsed != "call" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.Account}, ""); parsed != "1001" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile("~"+utils.Account, true), ""); parsed != "1001" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.Subject}, ""); parsed != "1001" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile("~"+utils.Subject, true), ""); parsed != "1001" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.Destination}, ""); parsed != "1003" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile("~"+utils.Destination, true), ""); parsed != "1003" {
 		t.Error("Unexpected result parsed", parsed)
 	}
 	sTime, _ := utils.ParseTimeDetectLayout("1436280728471153"[:len("1436280728471153")-6], "") // We discard nanoseconds information so we can correlate csv
-	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.SetupTime}, ""); parsed != sTime.String() {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile("~"+utils.SetupTime, true), ""); parsed != sTime.String() {
 		t.Errorf("Expecting: %s, parsed: %s", sTime.String(), parsed)
 	}
 	aTime, _ := utils.ParseTimeDetectLayout("1436280728971147"[:len("1436280728971147")-6], "")
-	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.AnswerTime}, ""); parsed != aTime.String() {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile("~"+utils.AnswerTime, true), ""); parsed != aTime.String() {
 		t.Errorf("Expecting: %s, parsed: %s", aTime.String(), parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.Usage}, ""); parsed != "66000000000" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile("~"+utils.Usage, true), ""); parsed != "66000000000" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.PDD}, ""); parsed != "0.028" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile("~"+utils.PDD, true), ""); parsed != "0.028" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.SUPPLIER}, ""); parsed != "supplier1" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile("~"+utils.SUPPLIER, true), ""); parsed != "supplier1" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.RunID}, ""); parsed != utils.DEFAULT_RUNID {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile("~"+utils.RunID, true), ""); parsed != utils.DEFAULT_RUNID {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: utils.COST}, ""); parsed != "-1" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile("~"+utils.COST, true), ""); parsed != "-1" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(&utils.RSRField{Id: "Hangup-Cause"}, ""); parsed != "NORMAL_CLEARING" {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile("~"+"Hangup-Cause", true), ""); parsed != "NORMAL_CLEARING" {
 		t.Error("Unexpected result parsed", parsed)
 	}
 }
@@ -616,10 +616,16 @@ func TestFsEvAsMapStringInterface(t *testing.T) {
 
 func TestFsEvGetExtraFields(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
-	cfg.FsAgentCfg().ExtraFields = []*utils.RSRField{
-		{Id: "Channel-Read-Codec-Name"},
-		{Id: "Channel-Write-Codec-Name"},
-		{Id: "NonExistingHeader"}}
+	var err error
+	err = nil
+	cfg.FsAgentCfg().ExtraFields, err = config.NewRSRParsersFromSlice([]string{
+		"~Channel-Read-Codec-Name",
+		"~Channel-Write-Codec-Name",
+		"~NonExistingHeader",
+	}, true)
+	if err != nil {
+		t.Error(err)
+	}
 	config.SetCgrConfig(cfg)
 	ev := NewFSEvent(hangupEv)
 	expectedExtraFields := map[string]string{
