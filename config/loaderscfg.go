@@ -20,8 +20,6 @@ package config
 
 import (
 	"time"
-
-	"github.com/cgrates/cgrates/utils"
 )
 
 func NewDfltLoaderSCfg() *LoaderSCfg {
@@ -60,7 +58,7 @@ type LoaderDataType struct { //rename to LoaderDataType
 	Fields   []*FCTemplate
 }
 
-func (self *LoaderDataType) loadFromJsonCfg(jsnCfg *LoaderJsonDataType) (err error) {
+func (self *LoaderDataType) loadFromJsonCfg(jsnCfg *LoaderJsonDataType, separator string) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -71,14 +69,14 @@ func (self *LoaderDataType) loadFromJsonCfg(jsnCfg *LoaderJsonDataType) (err err
 		self.Filename = *jsnCfg.File_name
 	}
 	if jsnCfg.Fields != nil {
-		if self.Fields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Fields); err != nil {
+		if self.Fields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Fields, separator); err != nil {
 			return
 		}
 	}
 	return nil
 }
 
-func (self *LoaderSCfg) loadFromJsonCfg(jsnCfg *LoaderJsonCfg) (err error) {
+func (self *LoaderSCfg) loadFromJsonCfg(jsnCfg *LoaderJsonCfg, separator string) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -89,10 +87,6 @@ func (self *LoaderSCfg) loadFromJsonCfg(jsnCfg *LoaderJsonCfg) (err error) {
 		self.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Tenant != nil {
-		separator := utils.INFIELD_SEP
-		if cgrCfg != nil && cgrCfg.GeneralCfg() != nil {
-			separator = cgrCfg.GeneralCfg().RsrSepatarot
-		}
 		if self.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true, separator); err != nil {
 			return err
 		}
@@ -127,7 +121,7 @@ func (self *LoaderSCfg) loadFromJsonCfg(jsnCfg *LoaderJsonCfg) (err error) {
 		data := make([]*LoaderDataType, len(*jsnCfg.Data))
 		for idx, jsnLoCfg := range *jsnCfg.Data {
 			data[idx] = NewDfltLoaderDataTypeConfig()
-			data[idx].loadFromJsonCfg(jsnLoCfg)
+			data[idx].loadFromJsonCfg(jsnLoCfg, separator)
 		}
 		self.Data = data
 	}

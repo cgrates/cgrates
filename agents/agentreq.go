@@ -113,17 +113,14 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 	nM = config.NewNavigableMap(nil)
 
 	for _, tplFld := range tplFlds {
-		utils.Logger.Debug(fmt.Sprintf("===Teo=== %+v", utils.ToJSON(tplFlds)))
 		if pass, err := ar.filterS.Pass(ar.tenant,
 			tplFld.Filters, ar); err != nil {
 			return nil, err
 		} else if !pass {
 			continue
 		}
-		utils.Logger.Debug(fmt.Sprintf("===Teo=== TEST"))
 		out, err := ar.ParseField(tplFld)
 		if err != nil {
-			utils.Logger.Debug(fmt.Sprintf("===Teo=== err: %+v, out: %+v", err, out))
 			return nil, err
 		}
 		var valSet []*config.NMItem
@@ -174,7 +171,6 @@ func (aReq *AgentRequest) ParseField(
 		out, err = cfgFld.Value.ParseValue(utils.EmptyString)
 		isString = true
 	case utils.MetaVariable, utils.META_COMPOSED:
-		utils.Logger.Debug(fmt.Sprintf("===Teo=== cfgFld: %+v", utils.ToJSON(cfgFld)))
 		out, err = cfgFld.Value.ParseDataProvider(aReq, utils.NestingSep)
 		isString = true
 	case utils.META_USAGE_DIFFERENCE:

@@ -210,11 +210,8 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
 	agReq *AgentRequest) (processed bool, err error) {
 	if pass, err := da.filterS.Pass(agReq.tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
-		utils.Logger.Debug(fmt.Sprintf("===Teo=== reqProcessor : %+v", utils.ToJSON(reqProcessor)))
-		utils.Logger.Debug(fmt.Sprintf("===Teo=== err from filter : %+v", err))
 		return pass, err
 	}
-	utils.Logger.Debug(fmt.Sprintf("===Teo=== ReqProc after pass: %+v", utils.ToJSON(reqProcessor)))
 	if agReq.CGRRequest, err = agReq.AsNavigableMap(reqProcessor.RequestFields); err != nil {
 		return
 	}

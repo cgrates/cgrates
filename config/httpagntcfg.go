@@ -24,7 +24,7 @@ import (
 
 type HttpAgentCfgs []*HttpAgentCfg
 
-func (hcfgs *HttpAgentCfgs) loadFromJsonCfg(jsnHttpAgntCfg *[]*HttpAgentJsonCfg) (err error) {
+func (hcfgs *HttpAgentCfgs) loadFromJsonCfg(jsnHttpAgntCfg *[]*HttpAgentJsonCfg, separator string) (err error) {
 	if jsnHttpAgntCfg == nil {
 		return nil
 	}
@@ -41,7 +41,7 @@ func (hcfgs *HttpAgentCfgs) loadFromJsonCfg(jsnHttpAgntCfg *[]*HttpAgentJsonCfg)
 			}
 		}
 
-		if err := hac.loadFromJsonCfg(jsnCfg); err != nil {
+		if err := hac.loadFromJsonCfg(jsnCfg, separator); err != nil {
 			return err
 		}
 		if !haveID {
@@ -61,7 +61,7 @@ type HttpAgentCfg struct {
 	RequestProcessors []*HttpAgntProcCfg
 }
 
-func (ca *HttpAgentCfg) appendHttpAgntProcCfgs(hps *[]*HttpAgentProcessorJsnCfg) (err error) {
+func (ca *HttpAgentCfg) appendHttpAgntProcCfgs(hps *[]*HttpAgentProcessorJsnCfg, separator string) (err error) {
 	if hps == nil {
 		return
 	}
@@ -77,7 +77,7 @@ func (ca *HttpAgentCfg) appendHttpAgntProcCfgs(hps *[]*HttpAgentProcessorJsnCfg)
 				}
 			}
 		}
-		if err := rp.loadFromJsonCfg(reqProcJsn); err != nil {
+		if err := rp.loadFromJsonCfg(reqProcJsn, separator); err != nil {
 			return err
 		}
 		if !haveID {
@@ -87,7 +87,7 @@ func (ca *HttpAgentCfg) appendHttpAgntProcCfgs(hps *[]*HttpAgentProcessorJsnCfg)
 	return nil
 }
 
-func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg) (err error) {
+func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg, separator string) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -110,7 +110,7 @@ func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg) (err error) {
 	if jsnCfg.Reply_payload != nil {
 		ca.ReplyPayload = *jsnCfg.Reply_payload
 	}
-	if err = ca.appendHttpAgntProcCfgs(jsnCfg.Request_processors); err != nil {
+	if err = ca.appendHttpAgntProcCfgs(jsnCfg.Request_processors, separator); err != nil {
 		return err
 	}
 	return nil
@@ -127,7 +127,7 @@ type HttpAgntProcCfg struct {
 	ReplyFields       []*FCTemplate
 }
 
-func (ha *HttpAgntProcCfg) loadFromJsonCfg(jsnCfg *HttpAgentProcessorJsnCfg) (err error) {
+func (ha *HttpAgntProcCfg) loadFromJsonCfg(jsnCfg *HttpAgentProcessorJsnCfg, separator string) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -141,7 +141,7 @@ func (ha *HttpAgntProcCfg) loadFromJsonCfg(jsnCfg *HttpAgentProcessorJsnCfg) (er
 		}
 	}
 	if jsnCfg.Tenant != nil {
-		if ha.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true, CgrConfig().generalCfg.RsrSepatarot); err != nil {
+		if ha.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true, separator); err != nil {
 			return err
 		}
 	}
@@ -155,12 +155,12 @@ func (ha *HttpAgntProcCfg) loadFromJsonCfg(jsnCfg *HttpAgentProcessorJsnCfg) (er
 		ha.ContinueOnSuccess = *jsnCfg.Continue_on_success
 	}
 	if jsnCfg.Request_fields != nil {
-		if ha.RequestFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Request_fields); err != nil {
+		if ha.RequestFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Request_fields, separator); err != nil {
 			return
 		}
 	}
 	if jsnCfg.Reply_fields != nil {
-		if ha.ReplyFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Reply_fields); err != nil {
+		if ha.ReplyFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Reply_fields, separator); err != nil {
 			return
 		}
 	}

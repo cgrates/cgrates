@@ -33,7 +33,7 @@ type RadiusAgentCfg struct {
 	RequestProcessors  []*RARequestProcessor
 }
 
-func (self *RadiusAgentCfg) loadFromJsonCfg(jsnCfg *RadiusAgentJsonCfg) (err error) {
+func (self *RadiusAgentCfg) loadFromJsonCfg(jsnCfg *RadiusAgentJsonCfg, separator string) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -83,7 +83,7 @@ func (self *RadiusAgentCfg) loadFromJsonCfg(jsnCfg *RadiusAgentJsonCfg) (err err
 					break
 				}
 			}
-			if err := rp.loadFromJsonCfg(reqProcJsn); err != nil {
+			if err := rp.loadFromJsonCfg(reqProcJsn, separator); err != nil {
 				return nil
 			}
 			if !haveID {
@@ -106,7 +106,7 @@ type RARequestProcessor struct {
 	ReplyFields       []*FCTemplate
 }
 
-func (self *RARequestProcessor) loadFromJsonCfg(jsnCfg *RAReqProcessorJsnCfg) (err error) {
+func (self *RARequestProcessor) loadFromJsonCfg(jsnCfg *RAReqProcessorJsnCfg, separator string) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -126,7 +126,7 @@ func (self *RARequestProcessor) loadFromJsonCfg(jsnCfg *RAReqProcessorJsnCfg) (e
 		self.ContinueOnSuccess = *jsnCfg.Continue_on_success
 	}
 	if jsnCfg.Tenant != nil {
-		if self.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true, CgrConfig().generalCfg.RsrSepatarot); err != nil {
+		if self.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true, separator); err != nil {
 			return err
 		}
 	}
@@ -134,12 +134,12 @@ func (self *RARequestProcessor) loadFromJsonCfg(jsnCfg *RAReqProcessorJsnCfg) (e
 		self.Timezone = *jsnCfg.Timezone
 	}
 	if jsnCfg.Request_fields != nil {
-		if self.RequestFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Request_fields); err != nil {
+		if self.RequestFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Request_fields, separator); err != nil {
 			return
 		}
 	}
 	if jsnCfg.Reply_fields != nil {
-		if self.ReplyFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Reply_fields); err != nil {
+		if self.ReplyFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Reply_fields, separator); err != nil {
 			return
 		}
 	}

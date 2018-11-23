@@ -254,13 +254,13 @@ func TestWriteCdr(t *testing.T) {
 	var err error
 	wrBuf := &bytes.Buffer{}
 	cfg, _ := config.NewDefaultCGRConfig()
-	if hdrCfgFlds, err = config.FCTemplatesFromFCTemplatesJsonCfg(hdrJsnCfgFlds); err != nil {
+	if hdrCfgFlds, err = config.FCTemplatesFromFCTemplatesJsonCfg(hdrJsnCfgFlds, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	}
-	if contentCfgFlds, err = config.FCTemplatesFromFCTemplatesJsonCfg(contentJsnCfgFlds); err != nil {
+	if contentCfgFlds, err = config.FCTemplatesFromFCTemplatesJsonCfg(contentJsnCfgFlds, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	}
-	if trailerCfgFlds, err = config.FCTemplatesFromFCTemplatesJsonCfg(trailerJsnCfgFlds); err != nil {
+	if trailerCfgFlds, err = config.FCTemplatesFromFCTemplatesJsonCfg(trailerJsnCfgFlds, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	}
 	cdreCfg := &config.CdreCfg{

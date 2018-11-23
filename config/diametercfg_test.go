@@ -27,12 +27,12 @@ import (
 
 func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 	var dacfg, expected DiameterAgentCfg
-	if err := dacfg.loadFromJsonCfg(nil); err != nil {
+	if err := dacfg.loadFromJsonCfg(nil, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dacfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, dacfg)
 	}
-	if err := dacfg.loadFromJsonCfg(new(DiameterAgentJsonCfg)); err != nil {
+	if err := dacfg.loadFromJsonCfg(new(DiameterAgentJsonCfg), utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dacfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, dacfg)
@@ -67,7 +67,7 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if jsnDaCfg, err := jsnCfg.DiameterAgentJsonCfg(); err != nil {
 		t.Error(err)
-	} else if err = dacfg.loadFromJsonCfg(jsnDaCfg); err != nil {
+	} else if err = dacfg.loadFromJsonCfg(jsnDaCfg, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dacfg) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(dacfg))
@@ -76,12 +76,12 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 
 func TestDARequestProcessorloadFromJsonCfg(t *testing.T) {
 	var dareq, expected DARequestProcessor
-	if err := dareq.loadFromJsonCfg(nil); err != nil {
+	if err := dareq.loadFromJsonCfg(nil, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dareq, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, dareq)
 	}
-	if err := dareq.loadFromJsonCfg(new(DARequestProcessorJsnCfg)); err != nil {
+	if err := dareq.loadFromJsonCfg(new(DARequestProcessorJsnCfg), utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dareq, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, dareq)
@@ -102,7 +102,7 @@ func TestDARequestProcessorloadFromJsonCfg(t *testing.T) {
 		Timezone:          "Local",
 		ContinueOnSuccess: true,
 	}
-	if err = dareq.loadFromJsonCfg(json); err != nil {
+	if err = dareq.loadFromJsonCfg(json, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dareq) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(dareq))
