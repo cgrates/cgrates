@@ -63,11 +63,11 @@ func TestLoaderSCfgloadFromJsonCfg(t *testing.T) {
 		}
 	]
 }`
-	val, err := NewRSRParsers("~0", true)
+	val, err := NewRSRParsers("~0", true, utils.INFIELD_SEP)
 	if err != nil {
 		t.Error(err)
 	}
-	ten, err := NewRSRParsers("cgrates.org", true)
+	ten, err := NewRSRParsers("cgrates.org", true, utils.INFIELD_SEP)
 	if err != nil {
 		t.Error(err)
 	}

@@ -141,7 +141,7 @@ func (ha *HttpAgntProcCfg) loadFromJsonCfg(jsnCfg *HttpAgentProcessorJsnCfg) (er
 		}
 	}
 	if jsnCfg.Tenant != nil {
-		if ha.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true); err != nil {
+		if ha.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true, CgrConfig().generalCfg.RsrSepatarot); err != nil {
 			return err
 		}
 	}

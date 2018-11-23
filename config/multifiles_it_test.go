@@ -121,6 +121,7 @@ func TestMfEnvReaderITRead(t *testing.T) {
 		LockingTimeout:    time.Duration(0),
 		DigestSeparator:   ",",
 		DigestEqual:       ":",
+		RsrSepatarot:      ";",
 	}
 	if !reflect.DeepEqual(expected, *mfCgrCfg.generalCfg) {
 		t.Errorf("Expected: %+v\n, recived: %+v", utils.ToJSON(expected), utils.ToJSON(*mfCgrCfg.generalCfg))
@@ -142,21 +143,21 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 				{
 					Id:            "OutboundAUTHDryRun",
 					Filters:       []string{},
-					Tenant:        NewRSRParsersMustCompile("cgrates.org", true),
+					Tenant:        NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 					Flags:         utils.StringMap{"*dryrun": true},
 					RequestFields: []*FCTemplate{},
 					ReplyFields: []*FCTemplate{{
 						Tag:       "Allow",
 						FieldId:   "response.Allow",
 						Type:      "*constant",
-						Value:     NewRSRParsersMustCompile("1", true),
+						Value:     NewRSRParsersMustCompile("1", true, utils.INFIELD_SEP),
 						Mandatory: true,
 					}},
 				},
 				{
 					Id:      "OutboundAUTH",
 					Filters: []string{"*string:*req.request_type:OutboundAUTH"},
-					Tenant:  NewRSRParsersMustCompile("cgrates.org", true),
+					Tenant:  NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 					Flags: utils.StringMap{"*accounts": true,
 						"*attributes": true, "*auth": true},
 					RequestFields: []*FCTemplate{
@@ -164,7 +165,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 							Tag:       "RequestType",
 							FieldId:   "RequestType",
 							Type:      "*constant",
-							Value:     NewRSRParsersMustCompile("*pseudoprepaid", true),
+							Value:     NewRSRParsersMustCompile("*pseudoprepaid", true, utils.INFIELD_SEP),
 							Mandatory: true,
 						},
 					},
@@ -173,7 +174,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 							Tag:       "Allow",
 							FieldId:   "response.Allow",
 							Type:      "*constant",
-							Value:     NewRSRParsersMustCompile("1", true),
+							Value:     NewRSRParsersMustCompile("1", true, utils.INFIELD_SEP),
 							Mandatory: true,
 						},
 					},
@@ -181,20 +182,20 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 				{
 					Id:      "mtcall_cdr",
 					Filters: []string{"*string:*req.request_type:MTCALL_CDR"},
-					Tenant:  NewRSRParsersMustCompile("cgrates.org", true),
+					Tenant:  NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 					Flags:   utils.StringMap{"*cdrs": true},
 					RequestFields: []*FCTemplate{{
 						Tag:       "RequestType",
 						FieldId:   "RequestType",
 						Type:      "*constant",
-						Value:     NewRSRParsersMustCompile("*pseudoprepaid", true),
+						Value:     NewRSRParsersMustCompile("*pseudoprepaid", true, utils.INFIELD_SEP),
 						Mandatory: true,
 					}},
 					ReplyFields: []*FCTemplate{{
 						Tag:       "CDR_ID",
 						FieldId:   "CDR_RESPONSE.CDR_ID",
 						Type:      "*composed",
-						Value:     NewRSRParsersMustCompile("~*req.CDR_ID", true),
+						Value:     NewRSRParsersMustCompile("~*req.CDR_ID", true, utils.INFIELD_SEP),
 						Mandatory: true,
 					}},
 				},
@@ -208,14 +209,14 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 			ReplyPayload:   "*xml",
 			RequestProcessors: []*HttpAgntProcCfg{{
 				Id:     "cdr_from_xml",
-				Tenant: NewRSRParsersMustCompile("cgrates.org", true),
+				Tenant: NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 				Flags:  utils.StringMap{"*cdrs": true},
 				RequestFields: []*FCTemplate{
 					{
 						Tag:       "TOR",
 						FieldId:   "ToR",
 						Type:      "*constant",
-						Value:     NewRSRParsersMustCompile("*data", true),
+						Value:     NewRSRParsersMustCompile("*data", true, utils.INFIELD_SEP),
 						Mandatory: true,
 					},
 				},

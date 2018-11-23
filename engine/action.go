@@ -145,13 +145,13 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 		return fmt.Errorf("No connection with CDR Server")
 	}
 	defaultTemplate := map[string]config.RSRParsers{
-		utils.ToR:         config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"BalanceType", true),
-		utils.OriginHost:  config.NewRSRParsersMustCompile("127.0.0.1", true),
-		utils.RequestType: config.NewRSRParsersMustCompile(utils.META_PREPAID, true),
-		utils.Tenant:      config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Tenant, true),
-		utils.Account:     config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Account, true),
-		utils.Subject:     config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Account, true),
-		utils.COST:        config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"ActionValue", true),
+		utils.ToR:         config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"BalanceType", true, utils.INFIELD_SEP),
+		utils.OriginHost:  config.NewRSRParsersMustCompile("127.0.0.1", true, utils.INFIELD_SEP),
+		utils.RequestType: config.NewRSRParsersMustCompile(utils.META_PREPAID, true, utils.INFIELD_SEP),
+		utils.Tenant:      config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Tenant, true, utils.INFIELD_SEP),
+		utils.Account:     config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Account, true, utils.INFIELD_SEP),
+		utils.Subject:     config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Account, true, utils.INFIELD_SEP),
+		utils.COST:        config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"ActionValue", true, utils.INFIELD_SEP),
 	}
 	template := make(map[string]string)
 	// overwrite default template
@@ -160,7 +160,8 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 			return
 		}
 		for field, rsr := range template {
-			defaultTemplate[field] = config.NewRSRParsersMustCompile(rsr, true)
+			defaultTemplate[field] = config.NewRSRParsersMustCompile(rsr,
+				true, config.CgrConfig().GeneralCfg().RsrSepatarot)
 		}
 	}
 	// set stored cdr values

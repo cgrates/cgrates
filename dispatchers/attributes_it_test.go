@@ -159,7 +159,7 @@ func testDspAttrAddAttributesWithPermision(t *testing.T) {
 			{
 				FieldName:  utils.APIMethods,
 				Initial:    utils.META_ANY,
-				Substitute: config.NewRSRParsersMustCompile("ThresholdSv1.GetThAttrholdsForEvent", true),
+				Substitute: config.NewRSRParsersMustCompile("ThresholdSv1.GetThAttrholdsForEvent", true, utils.INFIELD_SEP),
 				Append:     true,
 			},
 		},
@@ -253,7 +253,7 @@ func testDspAttrAddAttributesWithPermision2(t *testing.T) {
 			{
 				FieldName:  utils.APIMethods,
 				Initial:    utils.META_ANY,
-				Substitute: config.NewRSRParsersMustCompile("AttributeSv1.GetAttributeForEvent&AttributeSv1.ProcessEvent", true),
+				Substitute: config.NewRSRParsersMustCompile("AttributeSv1.GetAttributeForEvent&AttributeSv1.ProcessEvent", true, utils.INFIELD_SEP),
 				Append:     true,
 			},
 		},
@@ -298,7 +298,7 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 			{
 				FieldName:  "Password",
 				Initial:    utils.ANY,
-				Substitute: config.NewRSRParsersMustCompile("CGRateS.org", true),
+				Substitute: config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
 				Append:     true,
 			},
 		},

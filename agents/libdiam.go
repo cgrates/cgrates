@@ -291,6 +291,7 @@ func (dP *diameterDP) AsNavigableMap([]*config.FCTemplate) (
 
 // FieldAsString is part of engine.DataProvider interface
 func (dP *diameterDP) FieldAsString(fldPath []string) (data string, err error) {
+	utils.Logger.Debug(fmt.Sprintf("===Teo=== FieldAsString: %+v", utils.ToJSON(fldPath)))
 	var valIface interface{}
 	valIface, err = dP.FieldAsInterface(fldPath)
 	if err != nil {

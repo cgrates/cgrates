@@ -428,7 +428,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 			{
 				FieldName:  "FN1",
 				Initial:    "Init1",
-				Substitute: config.NewRSRParsersMustCompile("Val1", true),
+				Substitute: config.NewRSRParsersMustCompile("Val1", true, utils.INFIELD_SEP),
 				Append:     true,
 			},
 		},

@@ -132,7 +132,7 @@ func testRedisSentinelSetGetAttribute(t *testing.T) {
 			{
 				FieldName:  utils.Subject,
 				Initial:    utils.ANY,
-				Substitute: config.NewRSRParsersMustCompile("1001", true),
+				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				Append:     true,
 			},
 		},
@@ -168,7 +168,7 @@ func testRedisSentinelInsertion(t *testing.T) {
 			{
 				FieldName:  utils.Subject,
 				Initial:    utils.ANY,
-				Substitute: config.NewRSRParsersMustCompile("1001", true),
+				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				Append:     true,
 			},
 		},
@@ -254,7 +254,7 @@ func testRedisSentinelGetAttrAfterFailover(t *testing.T) {
 			{
 				FieldName:  utils.Subject,
 				Initial:    utils.ANY,
-				Substitute: config.NewRSRParsersMustCompile("1001", true),
+				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				Append:     true,
 			},
 		},

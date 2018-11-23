@@ -52,7 +52,7 @@ func TestNewRSRParsers(t *testing.T) {
 				utils.NewDataConverterMustCompile("*round:2")},
 		},
 	}
-	if rsrParsers, err := NewRSRParsers(ruleStr, true); err != nil {
+	if rsrParsers, err := NewRSRParsers(ruleStr, true, utils.INFIELD_SEP); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if !reflect.DeepEqual(eRSRParsers, rsrParsers) {
 		t.Errorf("expecting: %+v, received: %+v", eRSRParsers, rsrParsers)
@@ -83,7 +83,7 @@ func TestRSRParserCompile(t *testing.T) {
 }
 
 func TestRSRParsersParseEvent(t *testing.T) {
-	prsrs := NewRSRParsersMustCompile("~Header1;|;~Header2", true)
+	prsrs := NewRSRParsersMustCompile("~Header1;|;~Header2", true, utils.INFIELD_SEP)
 	ev := map[string]interface{}{
 		"Header1": "Value1",
 		"Header2": "Value2",
@@ -98,7 +98,7 @@ func TestRSRParsersParseEvent(t *testing.T) {
 
 func TestRSRParserConstant(t *testing.T) {
 	rule := "cgrates.org"
-	rsrParsers, err := NewRSRParsers(rule, true)
+	rsrParsers, err := NewRSRParsers(rule, true, utils.INFIELD_SEP)
 	if err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	}
@@ -111,7 +111,7 @@ func TestRSRParserConstant(t *testing.T) {
 
 func TestRSRParserNotConstant(t *testing.T) {
 	rule := "~Header1;~Header2"
-	rsrParsers, err := NewRSRParsers(rule, true)
+	rsrParsers, err := NewRSRParsers(rule, true, utils.INFIELD_SEP)
 	if err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	}
@@ -123,7 +123,7 @@ func TestRSRParserNotConstant(t *testing.T) {
 }
 
 func TestRSRParsersParseEvent2(t *testing.T) {
-	prsrs := NewRSRParsersMustCompile("~Header1.Test;|;~Header2.Test", true)
+	prsrs := NewRSRParsersMustCompile("~Header1.Test;|;~Header2.Test", true, utils.INFIELD_SEP)
 	ev := map[string]interface{}{
 		"Header1.Test": "Value1",
 		"Header2.Test": "Value2",

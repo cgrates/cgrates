@@ -50,6 +50,7 @@ const CGRATES_CFG_JSON = `
 	"locking_timeout": "0",									// timeout internal locks to avoid deadlocks
 	"digest_separator": ",",
 	"digest_equal": ":",
+	"rsr_separator": ";",
 },
 
 

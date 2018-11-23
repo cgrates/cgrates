@@ -20,6 +20,8 @@ package config
 
 import (
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func NewDfltLoaderSCfg() *LoaderSCfg {
@@ -87,7 +89,11 @@ func (self *LoaderSCfg) loadFromJsonCfg(jsnCfg *LoaderJsonCfg) (err error) {
 		self.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Tenant != nil {
-		if self.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true); err != nil {
+		separator := utils.INFIELD_SEP
+		if cgrCfg != nil && cgrCfg.GeneralCfg() != nil {
+			separator = cgrCfg.GeneralCfg().RsrSepatarot
+		}
+		if self.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true, separator); err != nil {
 			return err
 		}
 	}

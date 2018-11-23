@@ -66,45 +66,45 @@ func TestAgReqAsNavigableMap(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Tenant",
 			FieldId: utils.Tenant, Type: utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("cgrates.org", true)},
+			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Account",
 			FieldId: utils.Account, Type: utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true)},
+			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Destination",
 			FieldId: utils.Destination, Type: utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true)},
+			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
 
 		&config.FCTemplate{Tag: "RequestedUsageVoice",
 			FieldId: "RequestedUsage", Type: utils.META_COMPOSED,
 			Filters: []string{"*string:*cgreq.ToR:*voice"},
 			Value: config.NewRSRParsersMustCompile(
-				"~*cgreq.Usage{*duration_seconds}", true)},
+				"~*cgreq.Usage{*duration_seconds}", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "RequestedUsageData",
 			FieldId: "RequestedUsage", Type: utils.META_COMPOSED,
 			Filters: []string{"*string:*cgreq.ToR:*data"},
 			Value: config.NewRSRParsersMustCompile(
-				"~*cgreq.Usage{*duration_nanoseconds}", true)},
+				"~*cgreq.Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "RequestedUsageSMS",
 			FieldId: "RequestedUsage", Type: utils.META_COMPOSED,
 			Filters: []string{"*string:*cgreq.ToR:*sms"},
 			Value: config.NewRSRParsersMustCompile(
-				"~*cgreq.Usage{*duration_nanoseconds}", true)},
+				"~*cgreq.Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
 
 		&config.FCTemplate{Tag: "AttrPaypalAccount",
 			FieldId: "PaypalAccount", Type: utils.META_COMPOSED,
 			Filters: []string{"*string:*cgrep.Error:"},
 			Value: config.NewRSRParsersMustCompile(
-				"~*cgrep.Attributes.PaypalAccount", true)},
+				"~*cgrep.Attributes.PaypalAccount", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "MaxUsage",
 			FieldId: "MaxUsage", Type: utils.META_COMPOSED,
 			Filters: []string{"*string:*cgrep.Error:"},
 			Value: config.NewRSRParsersMustCompile(
-				"~*cgrep.MaxUsage{*duration_seconds}", true)},
+				"~*cgrep.MaxUsage{*duration_seconds}", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Error",
 			FieldId: "Error", Type: utils.META_COMPOSED,
 			Filters: []string{"*rsr::~*cgrep.Error(!^$)"},
 			Value: config.NewRSRParsersMustCompile(
-				"~*cgrep.Error", true)},
+				"~*cgrep.Error", true, utils.INFIELD_SEP)},
 	}
 	eMp := config.NewNavigableMap(nil)
 	eMp.Set([]string{utils.Tenant}, []*config.NMItem{
@@ -151,7 +151,7 @@ func TestAgReqMaxCost(t *testing.T) {
 			FieldId: "MaxUsage", Type: utils.META_COMPOSED,
 			Filters: []string{"*rsr::~*cgrep.MaxUsage(>0s)"},
 			Value: config.NewRSRParsersMustCompile(
-				"~*cgrep.MaxUsage{*duration_seconds}", true)},
+				"~*cgrep.MaxUsage{*duration_seconds}", true, utils.INFIELD_SEP)},
 	}
 	eMp := config.NewNavigableMap(nil)
 
@@ -187,11 +187,11 @@ func TestAgReqParseFieldDiameter(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "MandatoryFalse",
 			FieldId: "MandatoryFalse", Type: utils.META_COMPOSED,
-			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryFalse", true),
+			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryFalse", true, utils.INFIELD_SEP),
 			Mandatory: false},
 		&config.FCTemplate{Tag: "MandatoryTrue",
 			FieldId: "MandatoryTrue", Type: utils.META_COMPOSED,
-			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryTrue", true),
+			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryTrue", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
 	expected := ""
@@ -226,11 +226,11 @@ func TestAgReqParseFieldRadius(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "MandatoryFalse",
 			FieldId: "MandatoryFalse", Type: utils.META_COMPOSED,
-			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryFalse", true),
+			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryFalse", true, utils.INFIELD_SEP),
 			Mandatory: false},
 		&config.FCTemplate{Tag: "MandatoryTrue",
 			FieldId: "MandatoryTrue", Type: utils.META_COMPOSED,
-			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryTrue", true),
+			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryTrue", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
 	expected := ""
@@ -266,11 +266,11 @@ Host: api.cgrates.org
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "MandatoryFalse",
 			FieldId: "MandatoryFalse", Type: utils.META_COMPOSED,
-			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryFalse", true),
+			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryFalse", true, utils.INFIELD_SEP),
 			Mandatory: false},
 		&config.FCTemplate{Tag: "MandatoryTrue",
 			FieldId: "MandatoryTrue", Type: utils.META_COMPOSED,
-			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryTrue", true),
+			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryTrue", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
 	expected := ""
@@ -337,11 +337,11 @@ func TestAgReqParseFieldHttpXml(t *testing.T) {
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "MandatoryFalse",
 			FieldId: "MandatoryFalse", Type: utils.META_COMPOSED,
-			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryFalse", true),
+			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryFalse", true, utils.INFIELD_SEP),
 			Mandatory: false},
 		&config.FCTemplate{Tag: "MandatoryTrue",
 			FieldId: "MandatoryTrue", Type: utils.META_COMPOSED,
-			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryTrue", true),
+			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryTrue", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
 	expected := ""

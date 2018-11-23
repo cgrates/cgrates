@@ -123,7 +123,13 @@ func (dap *DARequestProcessor) loadFromJsonCfg(jsnCfg *DARequestProcessorJsnCfg)
 		dap.ID = *jsnCfg.Id
 	}
 	if jsnCfg.Tenant != nil {
-		dap.Tenant = NewRSRParsersMustCompile(*jsnCfg.Tenant, true)
+		separator := utils.INFIELD_SEP
+		if cgrCfg != nil && cgrCfg.GeneralCfg() != nil {
+			separator = cgrCfg.GeneralCfg().RsrSepatarot
+		}
+		if dap.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true, separator); err != nil {
+			return
+		}
 	}
 	if jsnCfg.Filters != nil {
 		dap.Filters = make([]string, len(*jsnCfg.Filters))

@@ -96,7 +96,7 @@ func TestDARequestProcessorloadFromJsonCfg(t *testing.T) {
 	}
 	expected = DARequestProcessor{
 		ID:                "cgrates",
-		Tenant:            NewRSRParsersMustCompile("tenant", true),
+		Tenant:            NewRSRParsersMustCompile("tenant", true, utils.INFIELD_SEP),
 		Filters:           []string{"filter1", "filter2"},
 		Flags:             utils.StringMap{"flag1": true, "flag2": true},
 		Timezone:          "Local",

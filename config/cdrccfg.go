@@ -114,7 +114,11 @@ func (self *CdrcCfg) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 		}
 	}
 	if jsnCfg.Tenant != nil {
-		if self.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true); err != nil {
+		separator := utils.INFIELD_SEP
+		if cgrCfg != nil && cgrCfg.GeneralCfg() != nil {
+			separator = cgrCfg.GeneralCfg().RsrSepatarot
+		}
+		if self.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true, separator); err != nil {
 			return err
 		}
 	}

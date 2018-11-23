@@ -26,8 +26,8 @@ import (
 )
 
 func TestCdreCfgClone(t *testing.T) {
-	cgrIdRsrs := NewRSRParsersMustCompile("cgrid", true)
-	runIdRsrs := NewRSRParsersMustCompile("runid", true)
+	cgrIdRsrs := NewRSRParsersMustCompile("cgrid", true, utils.INFIELD_SEP)
+	runIdRsrs := NewRSRParsersMustCompile("runid", true, utils.INFIELD_SEP)
 	emptyFields := []*FCTemplate{}
 	initContentFlds := []*FCTemplate{
 		{Tag: "CgrId",
@@ -131,7 +131,7 @@ func TestCdreCfgloadFromJsonCfg(t *testing.T) {
 	},
 },
 }`
-	val, err := NewRSRParsers("~CGRID", true)
+	val, err := NewRSRParsers("~CGRID", true, utils.INFIELD_SEP)
 	if err != nil {
 		t.Error(err)
 	}

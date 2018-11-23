@@ -162,7 +162,7 @@ func testDspSessionAddAttributesWithPermision(t *testing.T) {
 			{
 				FieldName:  utils.APIMethods,
 				Initial:    utils.META_ANY,
-				Substitute: config.NewRSRParsersMustCompile("ThresholdSv1.GetThSessionholdsForEvent", true),
+				Substitute: config.NewRSRParsersMustCompile("ThresholdSv1.GetThSessionholdsForEvent", true, utils.INFIELD_SEP),
 				Append:     true,
 			},
 		},
@@ -232,7 +232,7 @@ func testDspSessionAddAttributesWithPermision2(t *testing.T) {
 			{
 				FieldName:  utils.APIMethods,
 				Initial:    utils.META_ANY,
-				Substitute: config.NewRSRParsersMustCompile("SessionSv1.AuthorizeEventWithDigest&SessionSv1.InitiateSessionWithDigest&SessionSv1.UpdateSession&SessionSv1.TerminateSession&SessionSv1.ProcessCDR&SessionSv1.ProcessEvent", true),
+				Substitute: config.NewRSRParsersMustCompile("SessionSv1.AuthorizeEventWithDigest&SessionSv1.InitiateSessionWithDigest&SessionSv1.UpdateSession&SessionSv1.TerminateSession&SessionSv1.ProcessCDR&SessionSv1.ProcessEvent", true, utils.INFIELD_SEP),
 				Append:     true,
 			},
 		},

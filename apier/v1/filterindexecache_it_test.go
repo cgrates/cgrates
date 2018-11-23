@@ -858,13 +858,13 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 			{
 				FieldName:  utils.Account,
 				Initial:    utils.META_ANY,
-				Substitute: config.NewRSRParsersMustCompile("1001", true),
+				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				Append:     false,
 			},
 			{
 				FieldName:  utils.Subject,
 				Initial:    utils.META_ANY,
-				Substitute: config.NewRSRParsersMustCompile("1001", true),
+				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				Append:     true,
 			},
 		},
@@ -947,13 +947,13 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 			{
 				FieldName:  utils.Account,
 				Initial:    utils.META_ANY,
-				Substitute: config.NewRSRParsersMustCompile("1001", true),
+				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				Append:     false,
 			},
 			{
 				FieldName:  utils.Subject,
 				Initial:    "*any",
-				Substitute: config.NewRSRParsersMustCompile("1001", true),
+				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				Append:     true,
 			},
 		},
