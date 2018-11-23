@@ -166,13 +166,13 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 			{
 				FieldName:  utils.Account,
 				Initial:    utils.ANY,
-				Substitute: config.NewRSRParsersMustCompile("1001", true),
+				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				Append:     false,
 			},
 			{
 				FieldName:  utils.Subject,
 				Initial:    utils.ANY,
-				Substitute: config.NewRSRParsersMustCompile("1001", true),
+				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				Append:     true,
 			},
 		},
@@ -218,7 +218,7 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 			{
 				FieldName:  utils.Account,
 				Initial:    utils.ANY,
-				Substitute: config.NewRSRParsersMustCompile("1001", true),
+				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				Append:     false,
 			},
 		},
@@ -268,7 +268,7 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 			{
 				FieldName:  utils.Account,
 				Initial:    utils.ANY,
-				Substitute: config.NewRSRParsersMustCompile("1001", true),
+				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				Append:     false,
 			},
 		},
@@ -391,13 +391,13 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 			{
 				FieldName:  utils.Account,
 				Initial:    "1008",
-				Substitute: config.NewRSRParsersMustCompile("1001", true),
+				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				Append:     false,
 			},
 			{
 				FieldName:  utils.Subject,
 				Initial:    utils.ANY,
-				Substitute: config.NewRSRParsersMustCompile(utils.META_NONE, true),
+				Substitute: config.NewRSRParsersMustCompile(utils.META_NONE, true, utils.INFIELD_SEP),
 				Append:     false,
 			},
 		},
@@ -458,13 +458,13 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 			{
 				FieldName:  utils.Account,
 				Initial:    "1008",
-				Substitute: config.NewRSRParsersMustCompile("1001", true),
+				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				Append:     false,
 			},
 			{
 				FieldName:  utils.Subject,
 				Initial:    utils.ANY,
-				Substitute: config.NewRSRParsersMustCompile(utils.META_NONE, true),
+				Substitute: config.NewRSRParsersMustCompile(utils.META_NONE, true, utils.INFIELD_SEP),
 				Append:     false,
 			},
 		},
@@ -537,13 +537,13 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 			{
 				FieldName:  utils.Account,
 				Initial:    "1008",
-				Substitute: config.NewRSRParsersMustCompile("1001", true),
+				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				Append:     false,
 			},
 			{
 				FieldName:  utils.Subject,
 				Initial:    "1008",
-				Substitute: config.NewRSRParsersMustCompile(utils.META_NONE, true),
+				Substitute: config.NewRSRParsersMustCompile(utils.META_NONE, true, utils.INFIELD_SEP),
 				Append:     false,
 			},
 		},
@@ -592,7 +592,7 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 			{
 				FieldName:  "Field2",
 				Initial:    utils.META_ANY,
-				Substitute: config.NewRSRParsersMustCompile("~Field1", true),
+				Substitute: config.NewRSRParsersMustCompile("~Field1", true, utils.INFIELD_SEP),
 				Append:     true,
 			},
 		},
@@ -663,7 +663,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 			{
 				FieldName:  "FL1",
 				Initial:    "In1",
-				Substitute: config.NewRSRParsersMustCompile("Al1", true),
+				Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 				Append:     true,
 			},
 		},
@@ -692,13 +692,13 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 		{
 			FieldName:  "FL1",
 			Initial:    "In1",
-			Substitute: config.NewRSRParsersMustCompile("Al1", true),
+			Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 			Append:     true,
 		},
 		{
 			FieldName:  "FL2",
 			Initial:    "In2",
-			Substitute: config.NewRSRParsersMustCompile("Al2", true),
+			Substitute: config.NewRSRParsersMustCompile("Al2", true, utils.INFIELD_SEP),
 			Append:     false,
 		},
 	}

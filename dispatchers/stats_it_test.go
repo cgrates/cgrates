@@ -156,7 +156,7 @@ func testDspStsAddStsibutesWithPermision(t *testing.T) {
 			{
 				FieldName:  utils.APIMethods,
 				Initial:    utils.META_ANY,
-				Substitute: config.NewRSRParsersMustCompile("ThresholdSv1.GetThSessionholdsForEvent", true),
+				Substitute: config.NewRSRParsersMustCompile("ThresholdSv1.GetThSessionholdsForEvent", true, utils.INFIELD_SEP),
 				Append:     true,
 			},
 		},
@@ -228,7 +228,7 @@ func testDspStsAddStsibutesWithPermision2(t *testing.T) {
 			{
 				FieldName:  utils.APIMethods,
 				Initial:    utils.META_ANY,
-				Substitute: config.NewRSRParsersMustCompile("StatSv1.ProcessEvent&StatSv1.GetQueueStringMetrics", true),
+				Substitute: config.NewRSRParsersMustCompile("StatSv1.ProcessEvent&StatSv1.GetQueueStringMetrics", true, utils.INFIELD_SEP),
 				Append:     true,
 			},
 		},

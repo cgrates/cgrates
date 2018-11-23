@@ -60,6 +60,7 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Locking_timeout:      utils.StringPointer("0"),
 		Digest_separator:     utils.StringPointer(","),
 		Digest_equal:         utils.StringPointer(":"),
+		Rsr_separator:        utils.StringPointer(";"),
 	}
 	if gCfg, err := dfCgrJsonCfg.GeneralJsonCfg(); err != nil {
 		t.Error(err)

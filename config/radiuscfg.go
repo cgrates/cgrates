@@ -126,7 +126,7 @@ func (self *RARequestProcessor) loadFromJsonCfg(jsnCfg *RAReqProcessorJsnCfg) (e
 		self.ContinueOnSuccess = *jsnCfg.Continue_on_success
 	}
 	if jsnCfg.Tenant != nil {
-		if self.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true); err != nil {
+		if self.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true, CgrConfig().generalCfg.RsrSepatarot); err != nil {
 			return err
 		}
 	}

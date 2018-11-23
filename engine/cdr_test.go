@@ -226,7 +226,7 @@ func TestFieldsAsString(t *testing.T) {
 	}
 	eVal := "call_from_1001"
 	if val := cdr.FieldsAsString(
-		config.NewRSRParsersMustCompile("~Category;_from_;~Account", true)); val != eVal {
+		config.NewRSRParsersMustCompile("~Category;_from_;~Account", true, utils.INFIELD_SEP)); val != eVal {
 		t.Errorf("Expecting : %s, received: %s", eVal, val)
 	}
 }
@@ -608,7 +608,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 		RunID:       utils.DEFAULT_RUNID, Cost: 1.01,
 		ExtraFields: map[string]string{"stop_time": "2014-06-11 19:19:00 +0000 UTC", "fieldextr2": "valextr2"}}
 
-	prsr := config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Destination, true)
+	prsr := config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Destination, true, utils.INFIELD_SEP)
 	cfgCdrFld := &config.FCTemplate{Tag: "destination", Type: utils.META_COMPOSED,
 		FieldId: utils.Destination, Value: prsr, Timezone: "UTC"}
 	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, 0, nil); err != nil {
@@ -653,7 +653,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 	}
 
 	// Test MetaDateTime
-	prsr = config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"stop_time", true)
+	prsr = config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"stop_time", true, utils.INFIELD_SEP)
 	layout := "2006-01-02 15:04:05"
 	cfgCdrFld = &config.FCTemplate{Tag: "stop_time", Type: utils.MetaDateTime,
 		FieldId: "stop_time", Value: prsr, Layout: layout, Timezone: "UTC"}
@@ -673,7 +673,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 		t.Error("failed using filter")
 	}
 
-	prsr = config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"fieldextr2", true)
+	prsr = config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"fieldextr2", true, utils.INFIELD_SEP)
 	cfgCdrFld = &config.FCTemplate{Tag: "stop_time", Type: utils.MetaDateTime,
 		FieldId: "stop_time", Value: prsr, Layout: layout, Timezone: "UTC"}
 	// Test time parse error
@@ -700,11 +700,11 @@ func TestCDRAsExportMap(t *testing.T) {
 	}
 	expFlds := []*config.FCTemplate{
 		&config.FCTemplate{FieldId: utils.CGRID, Type: utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.CGRID, true)},
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.CGRID, true, utils.INFIELD_SEP)},
 		&config.FCTemplate{FieldId: utils.Destination, Type: utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("~Destination:s/^\\+(\\d+)$/00${1}/", true)},
+			Value: config.NewRSRParsersMustCompile("~Destination:s/^\\+(\\d+)$/00${1}/", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{FieldId: "FieldExtra1", Type: utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"field_extr1", true)},
+			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"field_extr1", true, utils.INFIELD_SEP)},
 	}
 	if cdrMp, err := cdr.AsExportMap(expFlds, false, nil, 0, nil); err != nil {
 		t.Error(err)

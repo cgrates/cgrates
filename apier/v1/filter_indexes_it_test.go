@@ -1197,7 +1197,7 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 			{
 				FieldName:  "FL1",
 				Initial:    "In1",
-				Substitute: config.NewRSRParsersMustCompile("Al1", true),
+				Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 				Append:     true,
 			},
 		},
@@ -1306,7 +1306,7 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 		Attributes: []*engine.Attribute{{
 			FieldName:  "FL1",
 			Initial:    "In1",
-			Substitute: config.NewRSRParsersMustCompile("Al1", true),
+			Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 			Append:     true,
 		}},
 		Weight: 20,

@@ -26,11 +26,11 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewRSRParsers(parsersRules string, allFiltersMatch bool) (prsrs RSRParsers, err error) {
+func NewRSRParsers(parsersRules string, allFiltersMatch bool, rsrSeparator string) (prsrs RSRParsers, err error) {
 	if parsersRules == "" {
 		return
 	}
-	return NewRSRParsersFromSlice(strings.Split(parsersRules, utils.INFIELD_SEP), allFiltersMatch)
+	return NewRSRParsersFromSlice(strings.Split(parsersRules, rsrSeparator), allFiltersMatch)
 }
 
 func NewRSRParsersFromSlice(parsersRules []string, allFiltersMatch bool) (prsrs RSRParsers, err error) {
@@ -47,9 +47,9 @@ func NewRSRParsersFromSlice(parsersRules []string, allFiltersMatch bool) (prsrs 
 	return
 }
 
-func NewRSRParsersMustCompile(parsersRules string, allFiltersMatch bool) (prsrs RSRParsers) {
+func NewRSRParsersMustCompile(parsersRules string, allFiltersMatch bool, rsrSeparator string) (prsrs RSRParsers) {
 	var err error
-	if prsrs, err = NewRSRParsers(parsersRules, allFiltersMatch); err != nil {
+	if prsrs, err = NewRSRParsers(parsersRules, allFiltersMatch, rsrSeparator); err != nil {
 		panic(fmt.Sprintf("rule: <%s>, error: %s", parsersRules, err.Error()))
 	}
 	return
@@ -92,6 +92,7 @@ func (prsrs RSRParsers) ParseEvent(ev map[string]interface{}) (out string, err e
 }
 
 func (prsrs RSRParsers) ParseDataProvider(dP DataProvider, separator string) (out string, err error) {
+	utils.Logger.Debug(fmt.Sprintf("===Teo=== ParseDataProvider: %+v", utils.ToJSON(prsrs)))
 	for _, prsr := range prsrs {
 		if outPrsr, err := prsr.ParseDataProvider(dP, separator); err != nil {
 			return "", err

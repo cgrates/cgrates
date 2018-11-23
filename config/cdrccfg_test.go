@@ -39,7 +39,7 @@ var cdrcCfg = CdrcCfg{
 	CDRPath:                  []string{""},
 	CdrSourceId:              "freeswitch_csv",
 	Filters:                  []string{},
-	Tenant:                   NewRSRParsersMustCompile("cgrates.org", true),
+	Tenant:                   NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 	PartialRecordCache:       time.Duration(10 * time.Second),
 	PartialCacheExpiryAction: "*dump_to_file",
 	HeaderFields:             []*FCTemplate{},
@@ -48,7 +48,7 @@ var cdrcCfg = CdrcCfg{
 			Tag:       "TOR",
 			FieldId:   "ToR",
 			Type:      "*composed",
-			Value:     NewRSRParsersMustCompile("~2", true),
+			Value:     NewRSRParsersMustCompile("~2", true, utils.INFIELD_SEP),
 			Mandatory: true,
 		},
 	},
@@ -57,7 +57,7 @@ var cdrcCfg = CdrcCfg{
 		{
 			Tag:   "CGRID",
 			Type:  "*composed",
-			Value: NewRSRParsersMustCompile("~CGRID", true),
+			Value: NewRSRParsersMustCompile("~CGRID", true, utils.INFIELD_SEP),
 		},
 	},
 }

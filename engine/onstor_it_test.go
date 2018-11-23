@@ -2327,7 +2327,7 @@ func testOnStorITAttributeProfile(t *testing.T) {
 	mapSubstitutes["FN1"]["Init1"] = &Attribute{
 		FieldName:  "FN1",
 		Initial:    "Init1",
-		Substitute: config.NewRSRParsersMustCompile("Al1", true),
+		Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 		Append:     true,
 	}
 	attrProfile := &AttributeProfile{
@@ -2342,7 +2342,7 @@ func testOnStorITAttributeProfile(t *testing.T) {
 			{
 				FieldName:  "FN1",
 				Initial:    "Init1",
-				Substitute: config.NewRSRParsersMustCompile("Al1", true),
+				Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 				Append:     true,
 			},
 		},
@@ -2419,7 +2419,7 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	mapSubstitutes["FN1"]["Init1"] = &Attribute{
 		FieldName:  "FN1",
 		Initial:    "Init1",
-		Substitute: config.NewRSRParsersMustCompile("Val1", true),
+		Substitute: config.NewRSRParsersMustCompile("Val1", true, utils.INFIELD_SEP),
 		Append:     true,
 	}
 	attrProfile := &AttributeProfile{
@@ -2434,7 +2434,7 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 			{
 				FieldName:  "FN1",
 				Initial:    "Init1",
-				Substitute: config.NewRSRParsersMustCompile("Val1", true),
+				Substitute: config.NewRSRParsersMustCompile("Val1", true, utils.INFIELD_SEP),
 				Append:     true,
 			},
 		},
@@ -2466,14 +2466,14 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	mapSubstitutes["FN1"]["Init1"] = &Attribute{
 		FieldName:  "FN1",
 		Initial:    "Init1",
-		Substitute: config.NewRSRParsersMustCompile("123.123", true),
+		Substitute: config.NewRSRParsersMustCompile("123.123", true, utils.INFIELD_SEP),
 		Append:     true,
 	}
 	attrProfile.Attributes = []*Attribute{
 		{
 			FieldName:  "FN1",
 			Initial:    "Init1",
-			Substitute: config.NewRSRParsersMustCompile("123.123", true),
+			Substitute: config.NewRSRParsersMustCompile("123.123", true, utils.INFIELD_SEP),
 			Append:     true,
 		},
 	}
@@ -2499,14 +2499,14 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	mapSubstitutes["FN1"]["Init1"] = &Attribute{
 		FieldName:  "FN1",
 		Initial:    "Init1",
-		Substitute: config.NewRSRParsersMustCompile("true", true),
+		Substitute: config.NewRSRParsersMustCompile("true", true, utils.INFIELD_SEP),
 		Append:     true,
 	}
 	attrProfile.Attributes = []*Attribute{
 		{
 			FieldName:  "FN1",
 			Initial:    "Init1",
-			Substitute: config.NewRSRParsersMustCompile("true", true),
+			Substitute: config.NewRSRParsersMustCompile("true", true, utils.INFIELD_SEP),
 			Append:     true,
 		},
 	}

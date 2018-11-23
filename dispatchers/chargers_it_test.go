@@ -155,7 +155,7 @@ func testDspCppAddAttributeWithPermision(t *testing.T) {
 			{
 				FieldName:  utils.APIMethods,
 				Initial:    utils.META_ANY,
-				Substitute: config.NewRSRParsersMustCompile("ThresholdSv1.GetThresholdsForEvent", true),
+				Substitute: config.NewRSRParsersMustCompile("ThresholdSv1.GetThresholdsForEvent", true, utils.INFIELD_SEP),
 				Append:     true,
 			},
 		},
@@ -210,7 +210,7 @@ func testDspCppAddAttributesWithPermision2(t *testing.T) {
 			{
 				FieldName:  utils.APIMethods,
 				Initial:    utils.META_ANY,
-				Substitute: config.NewRSRParsersMustCompile("ThresholdSv1.ProcessEvent&ChargerSv1.GetChargersForEvent", true),
+				Substitute: config.NewRSRParsersMustCompile("ThresholdSv1.ProcessEvent&ChargerSv1.GetChargersForEvent", true, utils.INFIELD_SEP),
 				Append:     true,
 			},
 		},

@@ -37,7 +37,7 @@ func TestNewFCTemplateFromFCTemplateJsonCfg(t *testing.T) {
 		Type:    "*composed",
 		FieldId: "Tenant",
 		Filters: []string{"Filter1", "Filter2"},
-		Value:   NewRSRParsersMustCompile("cgrates.org", true),
+		Value:   NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 	}
 	if rcv, err := NewFCTemplateFromFCTemplateJsonCfg(jsonCfg); err != nil {
 		t.Error(err)
@@ -69,14 +69,14 @@ func TestFCTemplatesFromFCTemplatesJsonCfg(t *testing.T) {
 			Type:    "*composed",
 			FieldId: "Tenant",
 			Filters: []string{"Filter1", "Filter2"},
-			Value:   NewRSRParsersMustCompile("cgrates.org", true),
+			Value:   NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 		},
 		&FCTemplate{
 			Tag:     "RunID",
 			Type:    "*composed",
 			FieldId: "RunID",
 			Filters: []string{"Filter1_1", "Filter2_2"},
-			Value:   NewRSRParsersMustCompile("SampleValue", true),
+			Value:   NewRSRParsersMustCompile("SampleValue", true, utils.INFIELD_SEP),
 		},
 	}
 	if rcv, err := FCTemplatesFromFCTemplatesJsonCfg(jsnCfgs); err != nil {
@@ -93,20 +93,20 @@ func TestFCTemplateInflate1(t *testing.T) {
 			Type:    "*composed",
 			FieldId: "Tenant",
 			Filters: []string{"Filter1", "Filter2"},
-			Value:   NewRSRParsersMustCompile("cgrates.org", true),
+			Value:   NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 		},
 		&FCTemplate{
 			Tag:     "RunID",
 			Type:    "*composed",
 			FieldId: "RunID",
 			Filters: []string{"Filter1_1", "Filter2_2"},
-			Value:   NewRSRParsersMustCompile("SampleValue", true),
+			Value:   NewRSRParsersMustCompile("SampleValue", true, utils.INFIELD_SEP),
 		},
 		&FCTemplate{
 			Tag:     "TmpMap",
 			Type:    "*template",
 			Filters: []string{"Filter1_1", "Filter2_2"},
-			Value:   NewRSRParsersMustCompile("TmpMap", true),
+			Value:   NewRSRParsersMustCompile("TmpMap", true, utils.INFIELD_SEP),
 		},
 	}
 	fcTmpMp := map[string][]*FCTemplate{
@@ -116,14 +116,14 @@ func TestFCTemplateInflate1(t *testing.T) {
 				Type:    "*composed",
 				FieldId: "Elem1",
 				Filters: []string{"Filter1", "Filter2"},
-				Value:   NewRSRParsersMustCompile("Elem1", true),
+				Value:   NewRSRParsersMustCompile("Elem1", true, utils.INFIELD_SEP),
 			},
 			&FCTemplate{
 				Tag:     "Elem2",
 				Type:    "*composed",
 				FieldId: "Elem2",
 				Filters: []string{"Filter1_1", "Filter2_2"},
-				Value:   NewRSRParsersMustCompile("Elem2", true),
+				Value:   NewRSRParsersMustCompile("Elem2", true, utils.INFIELD_SEP),
 			},
 		},
 		"TmpMap2": []*FCTemplate{
@@ -132,14 +132,14 @@ func TestFCTemplateInflate1(t *testing.T) {
 				Type:    "*composed",
 				FieldId: "Elem2.1",
 				Filters: []string{"Filter1", "Filter2"},
-				Value:   NewRSRParsersMustCompile("Elem2.1", true),
+				Value:   NewRSRParsersMustCompile("Elem2.1", true, utils.INFIELD_SEP),
 			},
 			&FCTemplate{
 				Tag:     "Elem2.2",
 				Type:    "*composed",
 				FieldId: "Elem2.2",
 				Filters: []string{"Filter1_1", "Filter2_2"},
-				Value:   NewRSRParsersMustCompile("Elem2.2", true),
+				Value:   NewRSRParsersMustCompile("Elem2.2", true, utils.INFIELD_SEP),
 			},
 		},
 	}
@@ -149,28 +149,28 @@ func TestFCTemplateInflate1(t *testing.T) {
 			Type:    "*composed",
 			FieldId: "Tenant",
 			Filters: []string{"Filter1", "Filter2"},
-			Value:   NewRSRParsersMustCompile("cgrates.org", true),
+			Value:   NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 		},
 		&FCTemplate{
 			Tag:     "RunID",
 			Type:    "*composed",
 			FieldId: "RunID",
 			Filters: []string{"Filter1_1", "Filter2_2"},
-			Value:   NewRSRParsersMustCompile("SampleValue", true),
+			Value:   NewRSRParsersMustCompile("SampleValue", true, utils.INFIELD_SEP),
 		},
 		&FCTemplate{
 			Tag:     "Elem1",
 			Type:    "*composed",
 			FieldId: "Elem1",
 			Filters: []string{"Filter1", "Filter2"},
-			Value:   NewRSRParsersMustCompile("Elem1", true),
+			Value:   NewRSRParsersMustCompile("Elem1", true, utils.INFIELD_SEP),
 		},
 		&FCTemplate{
 			Tag:     "Elem2",
 			Type:    "*composed",
 			FieldId: "Elem2",
 			Filters: []string{"Filter1_1", "Filter2_2"},
-			Value:   NewRSRParsersMustCompile("Elem2", true),
+			Value:   NewRSRParsersMustCompile("Elem2", true, utils.INFIELD_SEP),
 		},
 	}
 	if rcv, err := InflateTemplates(fcTmp1, fcTmpMp); err != nil {
@@ -187,20 +187,20 @@ func TestFCTemplateInflate2(t *testing.T) {
 			Type:    "*composed",
 			FieldId: "Tenant",
 			Filters: []string{"Filter1", "Filter2"},
-			Value:   NewRSRParsersMustCompile("cgrates.org", true),
+			Value:   NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 		},
 		&FCTemplate{
 			Tag:     "RunID",
 			Type:    "*composed",
 			FieldId: "RunID",
 			Filters: []string{"Filter1_1", "Filter2_2"},
-			Value:   NewRSRParsersMustCompile("SampleValue", true),
+			Value:   NewRSRParsersMustCompile("SampleValue", true, utils.INFIELD_SEP),
 		},
 		&FCTemplate{
 			Tag:     "TmpMap3",
 			Type:    "*template",
 			Filters: []string{"Filter1_1", "Filter2_2"},
-			Value:   NewRSRParsersMustCompile("TmpMap3", true),
+			Value:   NewRSRParsersMustCompile("TmpMap3", true, utils.INFIELD_SEP),
 		},
 	}
 	fcTmpMp := map[string][]*FCTemplate{
@@ -210,14 +210,14 @@ func TestFCTemplateInflate2(t *testing.T) {
 				Type:    "*composed",
 				FieldId: "Elem1",
 				Filters: []string{"Filter1", "Filter2"},
-				Value:   NewRSRParsersMustCompile("Elem1", true),
+				Value:   NewRSRParsersMustCompile("Elem1", true, utils.INFIELD_SEP),
 			},
 			&FCTemplate{
 				Tag:     "Elem2",
 				Type:    "*composed",
 				FieldId: "Elem2",
 				Filters: []string{"Filter1_1", "Filter2_2"},
-				Value:   NewRSRParsersMustCompile("Elem2", true),
+				Value:   NewRSRParsersMustCompile("Elem2", true, utils.INFIELD_SEP),
 			},
 		},
 		"TmpMap2": []*FCTemplate{
@@ -226,14 +226,14 @@ func TestFCTemplateInflate2(t *testing.T) {
 				Type:    "*composed",
 				FieldId: "Elem2.1",
 				Filters: []string{"Filter1", "Filter2"},
-				Value:   NewRSRParsersMustCompile("Elem2.1", true),
+				Value:   NewRSRParsersMustCompile("Elem2.1", true, utils.INFIELD_SEP),
 			},
 			&FCTemplate{
 				Tag:     "Elem2.2",
 				Type:    "*composed",
 				FieldId: "Elem2.2",
 				Filters: []string{"Filter1_1", "Filter2_2"},
-				Value:   NewRSRParsersMustCompile("Elem2.2", true),
+				Value:   NewRSRParsersMustCompile("Elem2.2", true, utils.INFIELD_SEP),
 			},
 		},
 	}
@@ -249,20 +249,20 @@ func TestFCTemplateInflate3(t *testing.T) {
 			Type:    "*composed",
 			FieldId: "Tenant",
 			Filters: []string{"Filter1", "Filter2"},
-			Value:   NewRSRParsersMustCompile("cgrates.org", true),
+			Value:   NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 		},
 		&FCTemplate{
 			Tag:     "RunID",
 			Type:    "*composed",
 			FieldId: "RunID",
 			Filters: []string{"Filter1_1", "Filter2_2"},
-			Value:   NewRSRParsersMustCompile("SampleValue", true),
+			Value:   NewRSRParsersMustCompile("SampleValue", true, utils.INFIELD_SEP),
 		},
 		&FCTemplate{
 			Tag:     "TmpMap",
 			Type:    "*template",
 			Filters: []string{"Filter1_1", "Filter2_2"},
-			Value:   NewRSRParsersMustCompile("TmpMap", true),
+			Value:   NewRSRParsersMustCompile("TmpMap", true, utils.INFIELD_SEP),
 		},
 	}
 	fcTmpMp := map[string][]*FCTemplate{
@@ -273,14 +273,14 @@ func TestFCTemplateInflate3(t *testing.T) {
 				Type:    "*composed",
 				FieldId: "Elem2.1",
 				Filters: []string{"Filter1", "Filter2"},
-				Value:   NewRSRParsersMustCompile("Elem2.1", true),
+				Value:   NewRSRParsersMustCompile("Elem2.1", true, utils.INFIELD_SEP),
 			},
 			&FCTemplate{
 				Tag:     "Elem2.2",
 				Type:    "*composed",
 				FieldId: "Elem2.2",
 				Filters: []string{"Filter1_1", "Filter2_2"},
-				Value:   NewRSRParsersMustCompile("Elem2.2", true),
+				Value:   NewRSRParsersMustCompile("Elem2.2", true, utils.INFIELD_SEP),
 			},
 		},
 	}

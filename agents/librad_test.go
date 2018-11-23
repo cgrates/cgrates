@@ -103,7 +103,7 @@ func TestRadComposedFieldValue(t *testing.T) {
 	agReq.Vars.Set([]string{"User-Name"}, "flopsy", false, false)
 	eOut := "*radAcctStart|flopsy|CGR1"
 	if out := radComposedFieldValue(pkt, agReq,
-		config.NewRSRParsersMustCompile("~*vars.*radReqType;|;~*vars.User-Name;|;~*vars.Cisco", true)); out != eOut {
+		config.NewRSRParsersMustCompile("~*vars.*radReqType;|;~*vars.User-Name;|;~*vars.Cisco", true, utils.INFIELD_SEP)); out != eOut {
 		t.Errorf("Expecting: <%s>, received: <%s>", eOut, out)
 	}
 }
@@ -123,7 +123,7 @@ func TestRadFieldOutVal(t *testing.T) {
 	agReq.Vars.Set([]string{"User-Name"}, "flopsy", false, false)
 	//processorVars{MetaRadReqType: MetaRadAcctStart}
 	cfgFld := &config.FCTemplate{Tag: "ComposedTest", Type: utils.META_COMPOSED, FieldId: utils.Destination,
-		Value: config.NewRSRParsersMustCompile("~*vars.*radReqType;|;~*vars.User-Name;|;~*vars.Cisco", true), Mandatory: true}
+		Value: config.NewRSRParsersMustCompile("~*vars.*radReqType;|;~*vars.User-Name;|;~*vars.Cisco", true, utils.INFIELD_SEP), Mandatory: true}
 	if outVal, err := radFieldOutVal(pkt, agReq, cfgFld); err != nil {
 		t.Error(err)
 	} else if outVal != eOut {
@@ -135,9 +135,9 @@ func TestRadReplyAppendAttributes(t *testing.T) {
 	rply := radigo.NewPacket(radigo.AccessRequest, 2, dictRad, coder, "CGRateS.org").Reply()
 	rplyFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "ReplyCode", FieldId: MetaRadReplyCode, Type: utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("~*cgrep.Attributes.RadReply", true)},
+			Value: config.NewRSRParsersMustCompile("~*cgrep.Attributes.RadReply", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Acct-Session-Time", FieldId: "Acct-Session-Time", Type: utils.META_COMPOSED,
-			Value: config.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", true)},
+			Value: config.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", true, utils.INFIELD_SEP)},
 	}
 	agReq := newAgentRequest(nil, nil, nil, nil, "cgrates.org", "", nil)
 	agReq.CGRReply.Set([]string{utils.CapMaxUsage}, time.Duration(time.Hour), false, false)

@@ -43,7 +43,11 @@ func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg) (*FCTemplate,
 		}
 	}
 	if jsnCfg.Value != nil {
-		if fcTmp.Value, err = NewRSRParsers(*jsnCfg.Value, true); err != nil {
+		separator := utils.INFIELD_SEP
+		if cgrCfg != nil && cgrCfg.GeneralCfg() != nil {
+			separator = cgrCfg.GeneralCfg().RsrSepatarot
+		}
+		if fcTmp.Value, err = NewRSRParsers(*jsnCfg.Value, true, separator); err != nil {
 			return nil, err
 		}
 	}

@@ -42,6 +42,7 @@ type GeneralJsonCfg struct {
 	Locking_timeout      *string
 	Digest_separator     *string
 	Digest_equal         *string
+	Rsr_separator        *string
 }
 
 // Listen config section
