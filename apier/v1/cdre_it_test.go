@@ -170,11 +170,21 @@ func testCDReFromFolder(t *testing.T) {
 
 // Test CDR from external sources
 func testCDReProcessExternalCdr(t *testing.T) {
-	cdr := &engine.ExternalCDR{ToR: utils.VOICE,
-		OriginID: "testextcdr1", OriginHost: "127.0.0.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED,
-		Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1001",
-		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
-		Usage: "1s", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	cdr := &engine.ExternalCDR{
+		ToR:         utils.VOICE,
+		OriginID:    "testextcdr1",
+		OriginHost:  "127.0.0.1",
+		Source:      utils.UNIT_TEST,
+		RequestType: utils.META_RATED,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1003",
+		Subject:     "1003",
+		Destination: "1001",
+		SetupTime:   "2014-08-04T13:00:00Z",
+		AnswerTime:  "2014-08-04T13:00:07Z",
+		Usage:       "1s",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
 	var reply string
 	if err := cdreRPC.Call("CdrsV1.ProcessExternalCdr", cdr, &reply); err != nil {

@@ -163,6 +163,7 @@ func TestFsAgentCfgloadFromJsonCfg2(t *testing.T) {
 		SessionSConns:     []*HaPoolConfig{{Address: "*internal"}},
 		SubscribePark:     true,
 		MaxWaitConnection: time.Duration(2 * time.Second),
+		ExtraFields:       RSRParsers{},
 		EventSocketConns: []*FsConnCfg{{
 			Address:    "127.0.0.1:8021",
 			Password:   "ClueCon",

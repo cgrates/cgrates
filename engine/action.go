@@ -171,12 +171,14 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 			action.Balance == nil {
 			continue // Only log specific actions
 		}
-		cdr := &CDR{RunID: action.ActionType,
+		cdr := &CDR{
+			RunID:     action.ActionType,
 			Source:    CDRLOG,
 			SetupTime: time.Now(), AnswerTime: time.Now(),
 			OriginID:    utils.GenUUID(),
 			ExtraFields: make(map[string]string),
-			PreRated:    true}
+			PreRated:    true,
+		}
 		cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.SetupTime.String())
 		cdr.Usage = time.Duration(1)
 		elem := reflect.ValueOf(cdr).Elem()

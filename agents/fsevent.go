@@ -297,60 +297,60 @@ func (fsev FSEvent) GetExtraFields() map[string]string {
 			config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> error: %s parsing event rule: %+v", utils.FreeSWITCHAgent, err.Error(), fldRule))
 		} else {
-			extraFields[fldRule.Id] = parsed
+			extraFields[fldRule.AttrName()] = parsed
 		}
 	}
 	return extraFields
 }
 
 // Used in derived charging and sittuations when we need to run regexp on fields
-func (fsev FSEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) (parsed string, err error) {
-	switch rsrFld.Id {
+func (fsev FSEvent) ParseEventValue(rsrFld *config.RSRParser, timezone string) (parsed string, err error) {
+	switch rsrFld.AttrName() {
 	case utils.ToR:
-		return rsrFld.Parse(utils.VOICE)
+		return rsrFld.ParseValue(utils.VOICE)
 	case utils.OriginID:
-		return rsrFld.Parse(fsev.GetUUID())
+		return rsrFld.ParseValue(fsev.GetUUID())
 	case utils.OriginHost:
-		return rsrFld.Parse(utils.FirstNonEmpty(fsev[VarCGROriginHost], fsev[FS_IPv4]))
+		return rsrFld.ParseValue(utils.FirstNonEmpty(fsev[VarCGROriginHost], fsev[FS_IPv4]))
 	case utils.Source:
-		return rsrFld.Parse("FS_EVENT")
+		return rsrFld.ParseValue("FS_EVENT")
 	case utils.RequestType:
-		return rsrFld.Parse(fsev.GetReqType(""))
+		return rsrFld.ParseValue(fsev.GetReqType(""))
 	case utils.Direction:
-		return rsrFld.Parse(fsev.GetDirection(""))
+		return rsrFld.ParseValue(fsev.GetDirection(""))
 	case utils.Tenant:
-		return rsrFld.Parse(fsev.GetTenant(""))
+		return rsrFld.ParseValue(fsev.GetTenant(""))
 	case utils.Category:
-		return rsrFld.Parse(fsev.GetCategory(""))
+		return rsrFld.ParseValue(fsev.GetCategory(""))
 	case utils.Account:
-		return rsrFld.Parse(fsev.GetAccount(""))
+		return rsrFld.ParseValue(fsev.GetAccount(""))
 	case utils.Subject:
-		return rsrFld.Parse(fsev.GetSubject(""))
+		return rsrFld.ParseValue(fsev.GetSubject(""))
 	case utils.Destination:
-		return rsrFld.Parse(fsev.GetDestination(""))
+		return rsrFld.ParseValue(fsev.GetDestination(""))
 	case utils.SetupTime:
 		st, _ := fsev.GetSetupTime("", timezone)
-		return rsrFld.Parse(st.String())
+		return rsrFld.ParseValue(st.String())
 	case utils.AnswerTime:
 		at, _ := fsev.GetAnswerTime("", timezone)
-		return rsrFld.Parse(at.String())
+		return rsrFld.ParseValue(at.String())
 	case utils.Usage:
 		dur, _ := fsev.GetDuration("")
-		return rsrFld.Parse(strconv.FormatInt(dur.Nanoseconds(), 10))
+		return rsrFld.ParseValue(strconv.FormatInt(dur.Nanoseconds(), 10))
 	case utils.PDD:
 		PDD, _ := fsev.GetPdd(utils.META_DEFAULT)
-		return rsrFld.Parse(strconv.FormatFloat(PDD.Seconds(), 'f', -1, 64))
+		return rsrFld.ParseValue(strconv.FormatFloat(PDD.Seconds(), 'f', -1, 64))
 	case utils.SUPPLIER:
-		return rsrFld.Parse(fsev.GetSupplier(""))
+		return rsrFld.ParseValue(fsev.GetSupplier(""))
 	case utils.DISCONNECT_CAUSE:
-		return rsrFld.Parse(fsev.GetDisconnectCause(""))
+		return rsrFld.ParseValue(fsev.GetDisconnectCause(""))
 	case utils.RunID:
-		return rsrFld.Parse(utils.DEFAULT_RUNID)
+		return rsrFld.ParseValue(utils.DEFAULT_RUNID)
 	case utils.Cost:
-		return rsrFld.Parse(strconv.FormatFloat(-1, 'f', -1, 64)) // Recommended to use FormatCost
+		return rsrFld.ParseValue(strconv.FormatFloat(-1, 'f', -1, 64)) // Recommended to use FormatCost
 	default:
-		if parsed, err = rsrFld.Parse(fsev[rsrFld.Id]); err != nil {
-			parsed, err = rsrFld.Parse(fsev[FS_VARPREFIX+rsrFld.Id])
+		if parsed, err = rsrFld.ParseValue(fsev[rsrFld.AttrName()]); err != nil {
+			parsed, err = rsrFld.ParseValue(fsev[FS_VARPREFIX+rsrFld.AttrName()])
 		}
 		return
 	}
