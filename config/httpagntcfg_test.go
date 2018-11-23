@@ -27,12 +27,12 @@ import (
 
 func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 	var httpcfg, expected HttpAgentCfgs
-	if err := httpcfg.loadFromJsonCfg(nil); err != nil {
+	if err := httpcfg.loadFromJsonCfg(nil, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(httpcfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, httpcfg)
 	}
-	if err := httpcfg.loadFromJsonCfg(new([]*HttpAgentJsonCfg)); err != nil {
+	if err := httpcfg.loadFromJsonCfg(new([]*HttpAgentJsonCfg), utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(httpcfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, httpcfg)
@@ -89,7 +89,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if jsnhttpCfg, err := jsnCfg.HttpAgentJsonCfg(); err != nil {
 		t.Error(err)
-	} else if err = httpcfg.loadFromJsonCfg(jsnhttpCfg); err != nil {
+	} else if err = httpcfg.loadFromJsonCfg(jsnhttpCfg, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, httpcfg) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(httpcfg))
@@ -200,7 +200,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if jsnhttpCfg, err := jsnCfg.HttpAgentJsonCfg(); err != nil {
 		t.Error(err)
-	} else if err = httpcfg.loadFromJsonCfg(jsnhttpCfg); err != nil {
+	} else if err = httpcfg.loadFromJsonCfg(jsnhttpCfg, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, httpcfg) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(httpcfg))
@@ -209,12 +209,12 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 
 func TestHttpAgentCfgloadFromJsonCfg(t *testing.T) {
 	var httpcfg, expected HttpAgentCfg
-	if err := httpcfg.loadFromJsonCfg(nil); err != nil {
+	if err := httpcfg.loadFromJsonCfg(nil, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(httpcfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, httpcfg)
 	}
-	if err := httpcfg.loadFromJsonCfg(new(HttpAgentJsonCfg)); err != nil {
+	if err := httpcfg.loadFromJsonCfg(new(HttpAgentJsonCfg), utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(httpcfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, httpcfg)
@@ -253,7 +253,7 @@ func TestHttpAgentCfgloadFromJsonCfg(t *testing.T) {
 		}},
 	}
 
-	if err = httpcfg.loadFromJsonCfg(jsnhttpCfg); err != nil {
+	if err = httpcfg.loadFromJsonCfg(jsnhttpCfg, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, httpcfg) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(httpcfg))
@@ -345,7 +345,7 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 		}},
 	}
 
-	if err = initial.appendHttpAgntProcCfgs(proceses); err != nil {
+	if err = initial.appendHttpAgntProcCfgs(proceses, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, initial) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(initial))
@@ -354,12 +354,12 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 
 func TestHttpAgntProcCfgloadFromJsonCfg(t *testing.T) {
 	var httpcfg, expected HttpAgntProcCfg
-	if err := httpcfg.loadFromJsonCfg(nil); err != nil {
+	if err := httpcfg.loadFromJsonCfg(nil, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(httpcfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, httpcfg)
 	}
-	if err := httpcfg.loadFromJsonCfg(new(HttpAgentProcessorJsnCfg)); err != nil {
+	if err := httpcfg.loadFromJsonCfg(new(HttpAgentProcessorJsnCfg), utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(httpcfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, httpcfg)
@@ -394,7 +394,7 @@ func TestHttpAgntProcCfgloadFromJsonCfg(t *testing.T) {
 		}},
 	}
 
-	if err = httpcfg.loadFromJsonCfg(jsnhttpCfg); err != nil {
+	if err = httpcfg.loadFromJsonCfg(jsnhttpCfg, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, httpcfg) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(httpcfg))

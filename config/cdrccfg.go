@@ -52,7 +52,7 @@ type CdrcCfg struct {
 	CacheDumpFields          []*FCTemplate
 }
 
-func (self *CdrcCfg) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
+func (self *CdrcCfg) loadFromJsonCfg(jsnCfg *CdrcJsonCfg, separator string) error {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -114,10 +114,6 @@ func (self *CdrcCfg) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 		}
 	}
 	if jsnCfg.Tenant != nil {
-		separator := utils.INFIELD_SEP
-		if cgrCfg != nil && cgrCfg.GeneralCfg() != nil {
-			separator = cgrCfg.GeneralCfg().RsrSepatarot
-		}
 		if self.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true, separator); err != nil {
 			return err
 		}
@@ -134,22 +130,22 @@ func (self *CdrcCfg) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 		self.PartialCacheExpiryAction = *jsnCfg.Partial_cache_expiry_action
 	}
 	if jsnCfg.Header_fields != nil {
-		if self.HeaderFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Header_fields); err != nil {
+		if self.HeaderFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Header_fields, separator); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Content_fields != nil {
-		if self.ContentFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Content_fields); err != nil {
+		if self.ContentFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Content_fields, separator); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Trailer_fields != nil {
-		if self.TrailerFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Trailer_fields); err != nil {
+		if self.TrailerFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Trailer_fields, separator); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Cache_dump_fields != nil {
-		if self.CacheDumpFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Cache_dump_fields); err != nil {
+		if self.CacheDumpFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Cache_dump_fields, separator); err != nil {
 			return err
 		}
 	}

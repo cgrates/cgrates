@@ -92,7 +92,6 @@ func (prsrs RSRParsers) ParseEvent(ev map[string]interface{}) (out string, err e
 }
 
 func (prsrs RSRParsers) ParseDataProvider(dP DataProvider, separator string) (out string, err error) {
-	utils.Logger.Debug(fmt.Sprintf("===Teo=== ParseDataProvider: %+v", utils.ToJSON(prsrs)))
 	for _, prsr := range prsrs {
 		if outPrsr, err := prsr.ParseDataProvider(dP, separator); err != nil {
 			return "", err

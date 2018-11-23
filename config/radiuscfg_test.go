@@ -27,12 +27,12 @@ import (
 
 func TestRadiusAgentCfgloadFromJsonCfg(t *testing.T) {
 	var racfg, expected RadiusAgentCfg
-	if err := racfg.loadFromJsonCfg(nil); err != nil {
+	if err := racfg.loadFromJsonCfg(nil, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(racfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, racfg)
 	}
-	if err := racfg.loadFromJsonCfg(new(RadiusAgentJsonCfg)); err != nil {
+	if err := racfg.loadFromJsonCfg(new(RadiusAgentJsonCfg), utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(racfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, racfg)
@@ -67,7 +67,7 @@ func TestRadiusAgentCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if jsnRaCfg, err := jsnCfg.RadiusAgentJsonCfg(); err != nil {
 		t.Error(err)
-	} else if err = racfg.loadFromJsonCfg(jsnRaCfg); err != nil {
+	} else if err = racfg.loadFromJsonCfg(jsnRaCfg, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, racfg) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(racfg))
@@ -76,12 +76,12 @@ func TestRadiusAgentCfgloadFromJsonCfg(t *testing.T) {
 
 func TestRARequestProcessorloadFromJsonCfg(t *testing.T) {
 	var rareq, expected RARequestProcessor
-	if err := rareq.loadFromJsonCfg(nil); err != nil {
+	if err := rareq.loadFromJsonCfg(nil, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rareq, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, rareq)
 	}
-	if err := rareq.loadFromJsonCfg(new(RAReqProcessorJsnCfg)); err != nil {
+	if err := rareq.loadFromJsonCfg(new(RAReqProcessorJsnCfg), utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rareq, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, rareq)
@@ -102,7 +102,7 @@ func TestRARequestProcessorloadFromJsonCfg(t *testing.T) {
 		Timezone:          "Local",
 		ContinueOnSuccess: true,
 	}
-	if err = rareq.loadFromJsonCfg(json); err != nil {
+	if err = rareq.loadFromJsonCfg(json, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rareq) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(rareq))

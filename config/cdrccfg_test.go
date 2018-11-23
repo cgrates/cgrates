@@ -64,12 +64,12 @@ var cdrcCfg = CdrcCfg{
 
 func TestCdrcCfgloadFromJsonCfg(t *testing.T) {
 	var cdrccfg, expected CdrcCfg
-	if err := cdrccfg.loadFromJsonCfg(nil); err != nil {
+	if err := cdrccfg.loadFromJsonCfg(nil, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(cdrccfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, cdrccfg)
 	}
-	if err := cdrccfg.loadFromJsonCfg(new(CdrcJsonCfg)); err != nil {
+	if err := cdrccfg.loadFromJsonCfg(new(CdrcJsonCfg), utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(cdrccfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, cdrccfg)
@@ -115,7 +115,7 @@ func TestCdrcCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if jsnCdrcCfg, err := jsnCfg.CdrcJsonCfg(); err != nil {
 		t.Error(err)
-	} else if err = cdrccfg.loadFromJsonCfg(jsnCdrcCfg[0]); err != nil {
+	} else if err = cdrccfg.loadFromJsonCfg(jsnCdrcCfg[0], utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, cdrccfg) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(cdrccfg))
