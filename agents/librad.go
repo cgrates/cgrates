@@ -135,7 +135,7 @@ func NewCGRReply(rply config.NavigableMapper,
 }
 
 // newRADataProvider constructs a DataProvider
-func newRADataProvider(req *radigo.Packet) (dP config.DataProvider, err error) {
+func newRADataProvider(req *radigo.Packet) (dP config.DataProvider) {
 	dP = &radiusDP{req: req, cache: config.NewNavigableMap(nil)}
 	return
 }

@@ -71,14 +71,8 @@ type RadiusAgent struct {
 
 // handleAuth handles RADIUS Authorization request
 func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err error) {
-	req.SetAVPValues()                  // populate string values in AVPs
-	dcdr, err := newRADataProvider(req) // dcdr will provide information from request
-	if err != nil {
-		utils.Logger.Warning(
-			fmt.Sprintf("<%s> error creating decoder: %s",
-				utils.RadiusAgent, err.Error()))
-		return
-	}
+	req.SetAVPValues()             // populate string values in AVPs
+	dcdr := newRADataProvider(req) // dcdr will provide information from request
 	rpl = req.Reply()
 	rpl.Code = radigo.AccessAccept
 	var processed bool
@@ -112,15 +106,8 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 // handleAcct handles RADIUS Accounting request
 // supports: Acct-Status-Type = Start, Interim-Update, Stop
 func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err error) {
-	req.SetAVPValues()                  // populate string values in AVPs
-	dcdr, err := newRADataProvider(req) // dcdr will provide information from request
-	if err != nil {
-		utils.Logger.Warning(
-			fmt.Sprintf("<%s> error creating decoder: %s",
-				utils.RadiusAgent, err.Error()))
-		return
-	}
-
+	req.SetAVPValues()             // populate string values in AVPs
+	dcdr := newRADataProvider(req) // dcdr will provide information from request
 	rpl = req.Reply()
 	rpl.Code = radigo.AccountingResponse
 	var processed bool

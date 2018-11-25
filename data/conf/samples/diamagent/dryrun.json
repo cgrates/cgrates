@@ -15,7 +15,7 @@
 				{"tag": "OptionalField", "field_id":"OptionalField", "type":"*composed",
 					"value":"~*req.Inexistent", "mandatory":false},
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 
-					"value": "~*req.Session-Id:s/(\\d+);(\\d+)$/$1;$2/", "mandatory": true},
+					"value": "~*req.Session-Id", "mandatory": true},
 				{"tag": "RequestType", "field_id": "RequestType", 
 					"type": "*constant", "value": "*prepaid"},
 				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", 

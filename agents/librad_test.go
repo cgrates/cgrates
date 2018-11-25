@@ -196,7 +196,7 @@ func TestRadiusDPFieldAsInterface(t *testing.T) {
 	if err := pkt.AddAVPWithName("Cisco-NAS-Port", "CGR1", "Cisco"); err != nil {
 		t.Error(err)
 	}
-	dp, _ := newRADataProvider(pkt)
+	dp := newRADataProvider(pkt)
 	if data, err := dp.FieldAsInterface([]string{"User-Name"}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(data, utils.StringToInterface("flopsy")) {
@@ -212,7 +212,7 @@ func TestRadiusDPFieldAsString(t *testing.T) {
 	if err := pkt.AddAVPWithName("Cisco-NAS-Port", "CGR1", "Cisco"); err != nil {
 		t.Error(err)
 	}
-	dp, _ := newRADataProvider(pkt)
+	dp := newRADataProvider(pkt)
 	if data, err := dp.FieldAsString([]string{"User-Name"}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(data, "flopsy") {
