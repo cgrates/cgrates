@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"net"
 	"reflect"
 	"testing"
 	"time"
@@ -256,6 +257,12 @@ func TestIfaceAsString(t *testing.T) {
 	if rply, err := IfaceAsString(nil); err != nil {
 		t.Error(err)
 	} else if rply != "" {
+		t.Errorf("Expeced  ,recived %+v", rply)
+	}
+	val = interface{}(net.ParseIP("127.0.0.1"))
+	if rply, err := IfaceAsString(val); err != nil {
+		t.Error(err)
+	} else if rply != "127.0.0.1" {
 		t.Errorf("Expeced  ,recived %+v", rply)
 	}
 }
