@@ -265,6 +265,18 @@ func TestIfaceAsString(t *testing.T) {
 	} else if rply != "127.0.0.1" {
 		t.Errorf("Expeced  ,recived %+v", rply)
 	}
+	val = interface{}(10.23)
+	if rply, err := IfaceAsString(val); err != nil {
+		t.Error(err)
+	} else if rply != "10.23" {
+		t.Errorf("Expeced  ,recived %+v", rply)
+	}
+	val = interface{}(time.Date(2009, 11, 10, 23, 0, 0, 0, time.UTC))
+	if rply, err := IfaceAsString(val); err != nil {
+		t.Error(err)
+	} else if rply != "2009-11-10T23:00:00Z" {
+		t.Errorf("Expeced  ,recived %+v", rply)
+	}
 }
 
 func TestIfaceAsTime(t *testing.T) {
