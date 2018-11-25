@@ -216,7 +216,7 @@ func TestAgReqParseFieldRadius(t *testing.T) {
 		t.Error(err)
 	}
 	//create radiusDataProvider
-	dP, _ := newRADataProvider(pkt)
+	dP := newRADataProvider(pkt)
 	data, _ := engine.NewMapStorage()
 	dm := engine.NewDataManager(data)
 	cfg, _ := config.NewDefaultCGRConfig()
