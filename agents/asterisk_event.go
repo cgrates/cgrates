@@ -276,6 +276,8 @@ func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs)
 		CGREvent:    *cgrEv,
 	}
 	if smaEv.Subsystems() == utils.EmptyString {
+		utils.Logger.Err(fmt.Sprintf("<%s> cgr_subsystems variable is not set",
+			utils.AsteriskAgent))
 		return
 	}
 	args.GetMaxUsage = strings.Index(smaEv.Subsystems(), utils.MetaAccounts) != -1
@@ -300,7 +302,7 @@ func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEv utils.CGREvent) (args *ses
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> event: %s don't have cgr_subsystems variable",
 			utils.AsteriskAgent, utils.ToJSON(cgrEv)))
-		return nil
+		return
 	}
 	args.InitSession = strings.Index(subsystems, utils.MetaAccounts) != -1
 	args.AllocateResources = strings.Index(subsystems, utils.MetaResources) != -1
@@ -319,7 +321,7 @@ func (smaEv *SMAsteriskEvent) V1TerminateSessionArgs(cgrEv utils.CGREvent) (args
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> event: %s don't have cgr_subsystems variable",
 			utils.AsteriskAgent, utils.ToJSON(cgrEv)))
-		return nil
+		return
 	}
 	args.TerminateSession = strings.Index(subsystems, utils.MetaAccounts) != -1
 	args.ReleaseResources = strings.Index(subsystems, utils.MetaResources) != -1
