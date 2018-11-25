@@ -620,14 +620,21 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
-	if self.sessionSCfg.Enabled {
-		for _, httpAgentCfg := range self.httpAgentCfg {
-			// httpAgent checks
-			for _, sSConn := range httpAgentCfg.SessionSConns {
-				if sSConn.Address == utils.MetaInternal {
-					return errors.New("SessionS not enabled but referenced by HttpAgent component")
-				}
+	// HTTPAgent checks
+	for _, httpAgentCfg := range self.httpAgentCfg {
+		// httpAgent checks
+		for _, sSConn := range httpAgentCfg.SessionSConns {
+			if sSConn.Address == utils.MetaInternal && self.sessionSCfg.Enabled {
+				return errors.New("SessionS not enabled but referenced by HttpAgent component")
 			}
+		}
+		if !utils.IsSliceMember([]string{utils.MetaUrl, utils.MetaXml}, httpAgentCfg.RequestPayload) {
+			return fmt.Errorf("<%s> unsupported request payload %s",
+				utils.HTTPAgent, httpAgentCfg.RequestPayload)
+		}
+		if !utils.IsSliceMember([]string{utils.MetaXml}, httpAgentCfg.ReplyPayload) {
+			return fmt.Errorf("<%s> unsupported reply payload %s",
+				utils.HTTPAgent, httpAgentCfg.ReplyPayload)
 		}
 	}
 	if self.attributeSCfg.Enabled {
