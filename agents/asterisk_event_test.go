@@ -21,6 +21,10 @@ import (
 	"encoding/json"
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/sessions"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -323,5 +327,124 @@ func TestSMAEventExtraParameters(t *testing.T) {
 	}
 	if extraParams := smaEv.ExtraParameters(); !reflect.DeepEqual(expExtraParams, extraParams) {
 		t.Errorf("Expecting: %+v, received: %+v", expExtraParams, extraParams)
+	}
+}
+
+func TestSMAEventV1AuthorizeArgs(t *testing.T) {
+	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
+	var ev map[string]interface{}
+	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
+		t.Error(err)
+	}
+	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
+	cgrEv, err := smaEv.AsCGREvent(timezone)
+	if err != nil {
+		t.Error(err)
+	}
+	exp := &sessions.V1AuthorizeArgs{
+		GetMaxUsage: true,
+		CGREvent:    *cgrEv,
+	}
+	if rcv := smaEv.V1AuthorizeArgs(); !reflect.DeepEqual(exp.GetMaxUsage, rcv.GetMaxUsage) {
+		t.Errorf("Expecting: %+v, received: %+v", exp.GetMaxUsage, rcv.GetMaxUsage)
+	}
+
+	stasisStart2 := `{"type":"StasisStart","timestamp":"2018-11-25T05:03:26.464-0500","args":["cgr_reqtype=*prepaid","cgr_supplier=supplier1","cgr_subsystems=*accounts*attributes*resources*stats*suppliers*thresholds"],"channel":{"id":"1543140206.0","dialplan":{"context":"internal","exten":"1002","priority":4},"caller":{"name":"","number":"1001"},"name":"PJSIP/1001-00000000","state":"Ring","connected":{"name":"","number":""},"language":"en","accountcode":"","creationtime":"2018-11-25T05:03:26.463-0500"},"asterisk_id":"08:00:27:b7:b8:1f","application":"cgrates_auth"}`
+	var ev2 map[string]interface{}
+	if err := json.Unmarshal([]byte(stasisStart2), &ev2); err != nil {
+		t.Error(err)
+	}
+	smaEv2 := NewSMAsteriskEvent(ev2, "127.0.0.1")
+	smaEv2.parseStasisArgs()
+	cgrEv2, err := smaEv2.AsCGREvent(timezone)
+	if err != nil {
+		t.Error(err)
+	}
+
+	exp2 := &sessions.V1AuthorizeArgs{
+		GetAttributes:      true,
+		AuthorizeResources: true,
+		GetMaxUsage:        true,
+		ProcessThresholds:  true,
+		ProcessStats:       true,
+		GetSuppliers:       true,
+		CGREvent:           *cgrEv2,
+	}
+	if rcv := smaEv2.V1AuthorizeArgs(); !reflect.DeepEqual(exp2.GetAttributes, rcv.GetAttributes) {
+		t.Errorf("Expecting: %+v, received: %+v", exp2.GetAttributes, rcv.GetAttributes)
+	} else if !reflect.DeepEqual(exp2.AuthorizeResources, rcv.AuthorizeResources) {
+		t.Errorf("Expecting: %+v, received: %+v", exp2.AuthorizeResources, rcv.AuthorizeResources)
+	} else if !reflect.DeepEqual(exp2.GetMaxUsage, rcv.GetMaxUsage) {
+		t.Errorf("Expecting: %+v, received: %+v", exp2.GetMaxUsage, rcv.GetMaxUsage)
+	} else if !reflect.DeepEqual(exp2.ProcessThresholds, rcv.ProcessThresholds) {
+		t.Errorf("Expecting: %+v, received: %+v", exp2.ProcessThresholds, rcv.ProcessThresholds)
+	} else if !reflect.DeepEqual(exp2.ProcessStats, rcv.ProcessStats) {
+		t.Errorf("Expecting: %+v, received: %+v", exp2.ProcessStats, rcv.ProcessStats)
+	}
+}
+
+func TestSMAEventV1InitSessionArgs(t *testing.T) {
+	cgrEv := utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "AsteriskEvent",
+		Event: map[string]interface{}{
+			"MissingCGRSubsustems": "",
+		},
+	}
+	exp := &sessions.V1InitSessionArgs{
+		InitSession: true,
+		CGREvent:    cgrEv,
+	}
+	var ev map[string]interface{}
+	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
+		t.Error(err)
+	}
+	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
+	if rcv := smaEv.V1InitSessionArgs(cgrEv); !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+
+	exp2 := &sessions.V1InitSessionArgs{
+		GetAttributes:     true,
+		AllocateResources: true,
+		InitSession:       true,
+		CGREvent:          cgrEv,
+	}
+	cgrEv.Event[utils.CGRSubsystems] = "*resources*accounts*attributes"
+	if rcv := smaEv.V1InitSessionArgs(cgrEv); !reflect.DeepEqual(exp2, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp2), utils.ToJSON(rcv))
+	}
+}
+
+func TestSMAEventV1TerminateSessionArgs(t *testing.T) {
+	cgrEv := utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "AsteriskEvent",
+		Event: map[string]interface{}{
+			"MissingCGRSubsustems": "",
+		},
+	}
+	exp := &sessions.V1TerminateSessionArgs{
+		TerminateSession: true,
+		CGREvent:         cgrEv,
+	}
+	var ev map[string]interface{}
+	if err := json.Unmarshal([]byte(stasisStart), &ev); err != nil {
+		t.Error(err)
+	}
+	smaEv := NewSMAsteriskEvent(ev, "127.0.0.1")
+	if rcv := smaEv.V1TerminateSessionArgs(cgrEv); !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(rcv))
+	}
+
+	exp2 := &sessions.V1TerminateSessionArgs{
+		TerminateSession: true,
+		ReleaseResources: true,
+		ProcessStats:     true,
+		CGREvent:         cgrEv,
+	}
+	cgrEv.Event[utils.CGRSubsystems] = "*resources*accounts*stats"
+	if rcv := smaEv.V1TerminateSessionArgs(cgrEv); !reflect.DeepEqual(exp2, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp2), utils.ToJSON(rcv))
 	}
 }
