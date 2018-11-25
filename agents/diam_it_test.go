@@ -55,10 +55,10 @@ var sTestsDiam = []func(t *testing.T){
 	testDiamItApierRpcConn,
 	testDiamItTPFromFolder,
 	testDiamItDryRun,
-	// testDiamItCCRInit,
-	// testDiamItCCRUpdate,
-	// testDiamItCCRTerminate,
-	// testDiamItCCRSMS,
+	testDiamItCCRInit,
+	testDiamItCCRUpdate,
+	testDiamItCCRTerminate,
+	testDiamItCCRSMS,
 	testDiamItKillEngine,
 }
 
