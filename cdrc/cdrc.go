@@ -187,6 +187,7 @@ func (self *Cdrc) processFile(filePath string) error {
 	case CSV, FS_CSV, utils.KAM_FLATSTORE, utils.OSIPS_FLATSTORE, utils.PartialCSV:
 		csvReader := csv.NewReader(bufio.NewReader(file))
 		csvReader.Comma = self.dfltCdrcCfg.FieldSeparator
+		csvReader.Comment = '#'
 		recordsProcessor = NewCsvRecordsProcessor(csvReader, self.timezone, fn, self.dfltCdrcCfg,
 			self.cdrcCfgs, self.httpSkipTlsCheck, self.unpairedRecordsCache, self.partialRecordsCache,
 			self.dfltCdrcCfg.CacheDumpFields, self.filterS)
