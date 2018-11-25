@@ -41,8 +41,6 @@
 	"reverse_destinations": {"limit": 10000, "ttl":"0s", "precache": true},
 	"rating_plans": {"limit": 10000, "ttl":"0s","precache": true},
 	"rating_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
-	"lcr_rules": {"limit": 10000, "ttl":"0s", "precache": true},
-	"cdr_stats": {"limit": 10000, "ttl":"0s", "precache": true},
 	"actions": {"limit": 10000, "ttl":"0s", "precache": true},
 	"action_plans": {"limit": 10000, "ttl":"0s", "precache": true},
 	"account_action_plans": {"limit": 10000, "ttl":"0s", "precache": true},
