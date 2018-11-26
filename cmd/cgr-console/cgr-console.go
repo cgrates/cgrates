@@ -40,7 +40,7 @@ var (
 	version         = flag.Bool("version", false, "Prints the application version.")
 	verbose         = flag.Bool("verbose", false, "Show extra info about command execution.")
 	server          = flag.String("server", "127.0.0.1:2012", "server address host:port")
-	rpcEncoding     = flag.String("rpc_encoding", "json", "RPC encoding used <gob|json>")
+	rpcEncoding     = flag.String("rpc_encoding", "*json", "RPC encoding used <*gob|*json>")
 	certificatePath = flag.String("crt_path", "", "path to certificate for tls connection")
 	keyPath         = flag.String("key_path", "", "path to key for tls connection")
 	caPath          = flag.String("ca_path", "", "path to CA for tls connection(only for self sign certificate)")
@@ -56,7 +56,7 @@ func executeCommand(command string) {
 		commands := console.GetCommands()
 		orderedKeys := make([]string, len(commands))
 		fmt.Println("Commands:")
-		for name, _ := range commands {
+		for name := range commands {
 			if name != "" {
 				orderedKeys = append(orderedKeys, name)
 			}
@@ -78,7 +78,7 @@ func executeCommand(command string) {
 				fmt.Print(cmd.Usage())
 			} else {
 				fmt.Print("Available commands: ")
-				for name, _ := range commands {
+				for name := range commands {
 					fmt.Print(name + " ")
 				}
 				fmt.Println()
@@ -124,7 +124,7 @@ func main() {
 	}
 	var err error
 	client, err = rpcclient.NewRpcClient("tcp", *server, *tls, *keyPath, *certificatePath, *caPath, 3, 3,
-		time.Duration(1*time.Second), time.Duration(5*time.Minute), *rpcEncoding, nil, false)
+		time.Duration(1*time.Second), time.Duration(5*time.Minute), strings.TrimPrefix(*rpcEncoding, utils.Meta), nil, false)
 	if err != nil {
 		flag.PrintDefaults()
 		log.Fatal("Could not connect to server " + *server)
