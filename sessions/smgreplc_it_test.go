@@ -283,8 +283,14 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 	} else if aSessions[0].Usage != time.Duration(90)*time.Second {
 		t.Errorf("Received usage: %v", aSessions[0].Usage)
 	}
-	time.Sleep(time.Duration(200) * time.Millisecond) // Do not start slave too early since it will receive the replicated sessions
 	// Start slave, should not have any active session at beginning
+	slave, err := engine.StartEngine(smgRplcSlaveCfgPath, *waitRater)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := slave.Process.Kill(); err != nil { // restart the slave
+		t.Error(err)
+	}
 	if _, err := engine.StartEngine(smgRplcSlaveCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
