@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -1148,5 +1149,195 @@ func TestStatAverageGetStringValue(t *testing.T) {
 	statAvg.RemEvent(ev3.ID)
 	if strVal := statAvg.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong statAvg value: %s", strVal)
+	}
+}
+
+var jMarshaler JSONMarshaler
+
+func TestASRMarshal(t *testing.T) {
+	asr, _ := NewASR(2, "")
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
+	asr.AddEvent(ev)
+	var nasr StatASR
+	expected := []byte(`{"Answered":1,"Count":1,"Events":{"EVENT_1":true},"MinItems":2}`)
+	if b, err := asr.Marshal(&jMarshaler); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, b) {
+		t.Errorf("Expected: %s , recived: %s", string(expected), string(b))
+	} else if err := nasr.LoadMarshaled(&jMarshaler, b); err != nil {
+		t.Error(err)
+	} else if reflect.DeepEqual(asr, nasr) {
+		t.Errorf("Expected: %s , recived: %s", utils.ToJSON(asr), utils.ToJSON(nasr))
+	}
+}
+
+func TestACDMarshal(t *testing.T) {
+	acd, _ := NewACD(2, "")
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Usage":      time.Duration(10 * time.Second)}}
+	acd.AddEvent(ev)
+	var nacd StatACD
+	expected := []byte(`{"Sum":10000000000,"Count":1,"Events":{"EVENT_1":10000000000},"MinItems":2}`)
+	if b, err := acd.Marshal(&jMarshaler); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, b) {
+		t.Errorf("Expected: %s , recived: %s", string(expected), string(b))
+	} else if err := nacd.LoadMarshaled(&jMarshaler, b); err != nil {
+		t.Error(err)
+	} else if reflect.DeepEqual(acd, nacd) {
+		t.Errorf("Expected: %s , recived: %s", utils.ToJSON(acd), utils.ToJSON(nacd))
+	}
+}
+
+func TestTCDMarshal(t *testing.T) {
+	tcd, _ := NewTCD(2, "")
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Usage":      time.Duration(10 * time.Second)}}
+	tcd.AddEvent(ev)
+	var ntcd StatTCD
+	expected := []byte(`{"Sum":10000000000,"Count":1,"Events":{"EVENT_1":10000000000},"MinItems":2}`)
+	if b, err := tcd.Marshal(&jMarshaler); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, b) {
+		t.Errorf("Expected: %s , recived: %s", string(expected), string(b))
+	} else if err := ntcd.LoadMarshaled(&jMarshaler, b); err != nil {
+		t.Error(err)
+	} else if reflect.DeepEqual(tcd, ntcd) {
+		t.Errorf("Expected: %s , recived: %s", utils.ToJSON(tcd), utils.ToJSON(ntcd))
+	}
+}
+
+func TestACCMarshal(t *testing.T) {
+	acc, _ := NewACC(2, "")
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Cost":       "12.3"}}
+	acc.AddEvent(ev)
+	var nacc StatACC
+	expected := []byte(`{"Sum":12.3,"Count":1,"Events":{"EVENT_1":12.3},"MinItems":2}`)
+	if b, err := acc.Marshal(&jMarshaler); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, b) {
+		t.Errorf("Expected: %s , recived: %s", string(expected), string(b))
+	} else if err := nacc.LoadMarshaled(&jMarshaler, b); err != nil {
+		t.Error(err)
+	} else if reflect.DeepEqual(acc, nacc) {
+		t.Errorf("Expected: %s , recived: %s", utils.ToJSON(acc), utils.ToJSON(nacc))
+	}
+}
+
+func TestTCCMarshal(t *testing.T) {
+	tcc, _ := NewTCC(2, "")
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Cost":       "12.3"}}
+	tcc.AddEvent(ev)
+	var ntcc StatTCC
+	expected := []byte(`{"Sum":12.3,"Count":1,"Events":{"EVENT_1":12.3},"MinItems":2}`)
+	if b, err := tcc.Marshal(&jMarshaler); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, b) {
+		t.Errorf("Expected: %s , recived: %s", string(expected), string(b))
+	} else if err := ntcc.LoadMarshaled(&jMarshaler, b); err != nil {
+		t.Error(err)
+	} else if reflect.DeepEqual(tcc, ntcc) {
+		t.Errorf("Expected: %s , recived: %s", utils.ToJSON(tcc), utils.ToJSON(ntcc))
+	}
+}
+
+func TestPDDMarshal(t *testing.T) {
+	pdd, _ := NewPDD(2, "")
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Usage":      time.Duration(10 * time.Second),
+			utils.PDD:    time.Duration(5 * time.Second)}}
+	pdd.AddEvent(ev)
+	var ntdd StatPDD
+	expected := []byte(`{"Sum":5000000000,"Count":1,"Events":{"EVENT_1":5000000000},"MinItems":2}`)
+	if b, err := pdd.Marshal(&jMarshaler); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, b) {
+		t.Errorf("Expected: %s , recived: %s", string(expected), string(b))
+	} else if err := ntdd.LoadMarshaled(&jMarshaler, b); err != nil {
+		t.Error(err)
+	} else if reflect.DeepEqual(pdd, ntdd) {
+		t.Errorf("Expected: %s , recived: %s", utils.ToJSON(pdd), utils.ToJSON(ntdd))
+	}
+}
+
+func TestDCCMarshal(t *testing.T) {
+	ddc, _ := NewDCC(2, "")
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{
+			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Usage":           time.Duration(10 * time.Second),
+			utils.PDD:         time.Duration(5 * time.Second),
+			utils.Destination: "1002"}}
+	ddc.AddEvent(ev)
+	var nddc StatDDC
+	expected := []byte(`{"Destinations":{"1002":{"EVENT_1":true}},"Events":{"EVENT_1":"1002"},"MinItems":2}`)
+	if b, err := ddc.Marshal(&jMarshaler); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, b) {
+		t.Errorf("Expected: %s , recived: %s", string(expected), string(b))
+	} else if err := nddc.LoadMarshaled(&jMarshaler, b); err != nil {
+		t.Error(err)
+	} else if reflect.DeepEqual(ddc, nddc) {
+		t.Errorf("Expected: %s , recived: %s", utils.ToJSON(ddc), utils.ToJSON(nddc))
+	}
+}
+
+func TestStatSumMarshal(t *testing.T) {
+	statSum, _ := NewStatSum(2, "Cost")
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{
+			"Cost":            "20",
+			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Usage":           time.Duration(10 * time.Second),
+			utils.PDD:         time.Duration(5 * time.Second),
+			utils.Destination: "1002"}}
+	statSum.AddEvent(ev)
+	var nstatSum StatSum
+	expected := []byte(`{"Sum":20,"Events":{"EVENT_1":20},"MinItems":2,"FieldName":"Cost"}`)
+	if b, err := statSum.Marshal(&jMarshaler); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, b) {
+		t.Errorf("Expected: %s , recived: %s", string(expected), string(b))
+	} else if err := nstatSum.LoadMarshaled(&jMarshaler, b); err != nil {
+		t.Error(err)
+	} else if reflect.DeepEqual(statSum, nstatSum) {
+		t.Errorf("Expected: %s , recived: %s", utils.ToJSON(statSum), utils.ToJSON(nstatSum))
+	}
+}
+
+func TestStatAverageMarshal(t *testing.T) {
+	statAvg, _ := NewStatAverage(2, "Cost")
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{
+			"Cost":            "20",
+			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Usage":           time.Duration(10 * time.Second),
+			utils.PDD:         time.Duration(5 * time.Second),
+			utils.Destination: "1002"}}
+	statAvg.AddEvent(ev)
+	var nstatAvg StatAverage
+	expected := []byte(`{"Sum":20,"Count":1,"Events":{"EVENT_1":20},"MinItems":2,"FieldName":"Cost"}`)
+	if b, err := statAvg.Marshal(&jMarshaler); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, b) {
+		t.Errorf("Expected: %s , recived: %s", string(expected), string(b))
+	} else if err := nstatAvg.LoadMarshaled(&jMarshaler, b); err != nil {
+		t.Error(err)
+	} else if reflect.DeepEqual(statAvg, nstatAvg) {
+		t.Errorf("Expected: %s , recived: %s", utils.ToJSON(statAvg), utils.ToJSON(nstatAvg))
 	}
 }
