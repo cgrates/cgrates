@@ -119,7 +119,7 @@ func main() {
 	}
 
 	if *dataDBType != dfltCfg.DataDbCfg().DataDbType {
-		ldrCfg.DataDbCfg().DataDbType = *dataDBType
+		ldrCfg.DataDbCfg().DataDbType = strings.TrimPrefix(*dataDBType, "*")
 	}
 
 	if *dataDBHost != dfltCfg.DataDbCfg().DataDbHost {
@@ -147,7 +147,7 @@ func main() {
 	}
 
 	if *storDBType != dfltCfg.StorDbCfg().StorDBType {
-		ldrCfg.StorDbCfg().StorDBType = *storDBType
+		ldrCfg.StorDbCfg().StorDBType = strings.TrimPrefix(*storDBType, "*")
 	}
 
 	if *storDBHost != dfltCfg.StorDbCfg().StorDBHost {
