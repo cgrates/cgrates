@@ -661,7 +661,7 @@ const CGRATES_CFG_JSON = `
 
 "loader": {									// loader for tariff plans out of .csv files
 	"tpid": "",								// tariff plan identificator
-	"data_path": "",						// path towards tariff plan files
+	"data_path": "./",						// path towards tariff plan files
 	"disable_reverse": false,				// disable reverse computing
 	"field_separator": ",",					// separator used in case of csv files
 	"caches_conns":[						// addresses towards cacheS components for reloads
