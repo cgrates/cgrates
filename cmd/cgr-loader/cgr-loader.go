@@ -84,7 +84,7 @@ var (
 
 	fromStorDB    = flag.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
 	toStorDB      = flag.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
-	rpcEncoding   = flag.String("rpc_encoding", utils.MetaJSONrpc, "RPC encoding used <gob|json>")
+	rpcEncoding   = flag.String("rpc_encoding", utils.MetaJSONrpc, "RPC encoding used <*gob|*json>")
 	cacheSAddress = flag.String("caches_address", dfltCfg.LoaderCgrCfg().CachesConns[0].Address,
 		"CacheS component to contact for cache reloads, empty to disable automatic cache reloads")
 	schedulerAddress = flag.String("scheduler_address", dfltCfg.LoaderCgrCfg().SchedulerConns[0].Address, "")
@@ -190,7 +190,10 @@ func main() {
 		ldrCfg.LoaderCgrCfg().CachesConns = make([]*config.HaPoolConfig, 0)
 		if *cacheSAddress != "" {
 			ldrCfg.LoaderCgrCfg().CachesConns = append(ldrCfg.LoaderCgrCfg().CachesConns,
-				&config.HaPoolConfig{Address: *cacheSAddress})
+				&config.HaPoolConfig{
+					Address:   *cacheSAddress,
+					Transport: *rpcEncoding,
+				})
 		}
 	}
 
