@@ -118,6 +118,7 @@ func main() {
 		}
 	}
 
+	// Data for DataDB
 	if *dataDBType != dfltCfg.DataDbCfg().DataDbType {
 		ldrCfg.DataDbCfg().DataDbType = *dataDBType
 	}
@@ -146,6 +147,11 @@ func main() {
 		ldrCfg.DataDbCfg().DataDbSentinelName = *dbRedisSentinel
 	}
 
+	if *dbDataEncoding != dfltCfg.GeneralCfg().DBDataEncoding {
+		ldrCfg.GeneralCfg().DBDataEncoding = *dbDataEncoding
+	}
+
+	// Data for StorDB
 	if *storDBType != dfltCfg.StorDbCfg().StorDBType {
 		ldrCfg.StorDbCfg().StorDBType = *storDBType
 	}
@@ -166,19 +172,15 @@ func main() {
 		ldrCfg.StorDbCfg().StorDBUser = *storDBUser
 	}
 
-	if *storDBPasswd != "" {
+	if *storDBPasswd != dfltCfg.StorDbCfg().StorDBPass {
 		ldrCfg.StorDbCfg().StorDBPass = *storDBPasswd
 	}
 
-	if *dbDataEncoding != "" {
-		ldrCfg.GeneralCfg().DBDataEncoding = *dbDataEncoding
-	}
-
-	if *tpid != "" {
+	if *tpid != dfltCfg.LoaderCgrCfg().DataPath {
 		ldrCfg.LoaderCgrCfg().TpID = *tpid
 	}
 
-	if *dataPath != "" {
+	if *dataPath != dfltCfg.LoaderCgrCfg().DataPath {
 		ldrCfg.LoaderCgrCfg().DataPath = *dataPath
 	}
 

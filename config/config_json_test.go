@@ -1331,7 +1331,7 @@ func TestDfDispatcherSJsonCfg(t *testing.T) {
 func TestDfLoaderCfg(t *testing.T) {
 	eCfg := &LoaderCfgJson{
 		Tpid:            utils.StringPointer(""),
-		Data_path:       utils.StringPointer(""),
+		Data_path:       utils.StringPointer("./"),
 		Disable_reverse: utils.BoolPointer(false),
 		Field_separator: utils.StringPointer(","),
 		Caches_conns: &[]*HaPoolJsonCfg{

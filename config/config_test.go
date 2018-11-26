@@ -1464,7 +1464,7 @@ func TestCgrCfgJSONDefaultDispatcherSCfg(t *testing.T) {
 func TestCgrLoaderCfgDefault(t *testing.T) {
 	eLdrCfg := &LoaderCgrCfg{
 		TpID:           "",
-		DataPath:       "",
+		DataPath:       "./",
 		DisableReverse: false,
 		FieldSeparator: rune(','),
 		CachesConns: []*HaPoolConfig{
