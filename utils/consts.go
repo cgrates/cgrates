@@ -161,7 +161,7 @@ const (
 	RunID                         = "RunID"
 	COST                          = "Cost"
 	CostDetails                   = "CostDetails"
-	RATED                         = "rated"
+	RATED                         = "Rated"
 	Partial                       = "Partial"
 	PreRated                      = "PreRated"
 	DEFAULT_RUNID                 = "*default"
