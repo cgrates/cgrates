@@ -120,7 +120,7 @@ func main() {
 
 	// Data for DataDB
 	if *dataDBType != dfltCfg.DataDbCfg().DataDbType {
-		ldrCfg.DataDbCfg().DataDbType = *dataDBType
+		ldrCfg.DataDbCfg().DataDbType = strings.TrimPrefix(*dataDBType, "*")
 	}
 
 	if *dataDBHost != dfltCfg.DataDbCfg().DataDbHost {
@@ -153,7 +153,7 @@ func main() {
 
 	// Data for StorDB
 	if *storDBType != dfltCfg.StorDbCfg().StorDBType {
-		ldrCfg.StorDbCfg().StorDBType = *storDBType
+		ldrCfg.StorDbCfg().StorDBType = strings.TrimPrefix(*storDBType, "*")
 	}
 
 	if *storDBHost != dfltCfg.StorDbCfg().StorDBHost {
