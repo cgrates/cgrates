@@ -149,26 +149,32 @@ func (f *Filter) Compile() (err error) {
 }
 
 func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error) {
-	ftype := rfType
+	var negative bool
 	if strings.HasPrefix(rfType, MetaNot) {
-		ftype = "*" + strings.TrimPrefix(rfType, MetaNot)
+		rfType = "*" + strings.TrimPrefix(rfType, MetaNot)
+		negative = true
 	}
 	if !utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaSuffix,
 		MetaTimings, MetaRSR, MetaStatS, MetaDestinations, MetaEmpty,
-		MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, ftype) {
+		MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("Unsupported filter Type: %s", rfType)
 	}
 	if fieldName == "" && utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaSuffix,
 		MetaTimings, MetaDestinations, MetaLessThan, MetaEmpty,
-		MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, ftype) {
+		MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("FieldName is mandatory for Type: %s", rfType)
 	}
 	if len(vals) == 0 && utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaSuffix,
 		MetaTimings, MetaRSR, MetaDestinations, MetaDestinations, MetaLessThan,
-		MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, ftype) {
+		MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("Values is mandatory for Type: %s", rfType)
 	}
-	rf := &FilterRule{Type: rfType, FieldName: fieldName, Values: vals}
+	rf := &FilterRule{
+		Type:      rfType,
+		FieldName: fieldName,
+		Values:    vals,
+		negative:  negative,
+	}
 	if err := rf.CompileValues(); err != nil {
 		return nil, err
 	}
@@ -194,15 +200,15 @@ type FilterRule struct {
 
 // Separate method to compile RSR fields
 func (rf *FilterRule) CompileValues() (err error) {
-	rftype := rf.Type
-	if strings.HasPrefix(rftype, MetaNot) {
-		rftype = "*" + strings.TrimPrefix(rftype, MetaNot)
+	if !rf.negative && strings.HasPrefix(rf.Type, MetaNot) {
+		rf.Type = "*" + strings.TrimPrefix(rf.Type, MetaNot)
+		rf.negative = true
 	}
-	if rftype == MetaRSR {
+	if rf.Type == MetaRSR {
 		if rf.rsrFields, err = config.NewRSRParsersFromSlice(rf.Values, true); err != nil {
 			return
 		}
-	} else if rftype == MetaStatS {
+	} else if rf.Type == MetaStatS {
 		rf.statSThresholds = make([]*RFStatSThreshold, len(rf.Values))
 		for i, val := range rf.Values {
 			valSplt := strings.Split(val, utils.InInFieldSep)
@@ -255,13 +261,10 @@ func (fltr *FilterRule) Pass(dP config.DataProvider, rpcClnt rpcclient.RpcClient
 	default:
 		err = utils.ErrNotImplemented
 	}
-	if fltr.negative {
-		result = !result
-	}
 	if err != nil {
 		return false, err
 	}
-	return
+	return result != fltr.negative, nil
 }
 
 func (fltr *FilterRule) passString(dP config.DataProvider) (bool, error) {

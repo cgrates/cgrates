@@ -31,7 +31,7 @@ func TestNewRSRField1(t *testing.T) {
 		Id:    "sip_redirected_to",
 		Rules: rulesStr,
 		RSRules: []*ReSearchReplace{
-			&ReSearchReplace{
+			{
 				SearchRegexp:    regexp.MustCompile(`sip:\+49(\d+)@`),
 				ReplaceTemplate: "0$1"}},
 		filters:    []*RSRFilter{filter},
@@ -47,7 +47,7 @@ func TestNewRSRField1(t *testing.T) {
 	// rulesStr = `~sip_redirected_to:s/sip:\+49(\d+)@/0$1/{*duration_seconds;*round:5:*middle}(086517174963)`
 	filter, _ = NewRSRFilter("086517174963")
 	expRSRField2 := &RSRField{Id: "sip_redirected_to", Rules: rulesStr, filters: []*RSRFilter{filter},
-		RSRules: []*ReSearchReplace{&ReSearchReplace{SearchRegexp: regexp.MustCompile(`sip:\+49(\d+)@`), ReplaceTemplate: "0$1"}}}
+		RSRules: []*ReSearchReplace{{SearchRegexp: regexp.MustCompile(`sip:\+49(\d+)@`), ReplaceTemplate: "0$1"}}}
 	if rsrField, err := NewRSRField(rulesStr); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if !reflect.DeepEqual(expRSRField2, rsrField) {
@@ -60,7 +60,7 @@ func TestNewRSRField1(t *testing.T) {
 		Id:    "sip_redirected_to",
 		Rules: rulesStr,
 		RSRules: []*ReSearchReplace{
-			&ReSearchReplace{
+			{
 				SearchRegexp:    regexp.MustCompile(`sip:\+49(\d+)@`),
 				ReplaceTemplate: "0$1"}},
 		filters: []*RSRFilter{filter},
@@ -74,7 +74,7 @@ func TestNewRSRField1(t *testing.T) {
 	// One extra separator but escaped
 	rulesStr = `~sip_redirected_to:s/sip:\+49(\d+)\/@/0$1/`
 	expRSRField3 := &RSRField{Id: "sip_redirected_to", Rules: rulesStr,
-		RSRules: []*ReSearchReplace{&ReSearchReplace{SearchRegexp: regexp.MustCompile(`sip:\+49(\d+)\/@`), ReplaceTemplate: "0$1"}}}
+		RSRules: []*ReSearchReplace{{SearchRegexp: regexp.MustCompile(`sip:\+49(\d+)\/@`), ReplaceTemplate: "0$1"}}}
 	if rsrField, err := NewRSRField(rulesStr); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if !reflect.DeepEqual(expRSRField3, rsrField) {
@@ -85,7 +85,7 @@ func TestNewRSRField1(t *testing.T) {
 func TestNewRSRFieldDDz(t *testing.T) {
 	rulesStr := `~effective_caller_id_number:s/(\d+)/+$1/`
 	expectRSRField := &RSRField{Id: "effective_caller_id_number", Rules: rulesStr,
-		RSRules: []*ReSearchReplace{&ReSearchReplace{SearchRegexp: regexp.MustCompile(`(\d+)`), ReplaceTemplate: "+$1"}}}
+		RSRules: []*ReSearchReplace{{SearchRegexp: regexp.MustCompile(`(\d+)`), ReplaceTemplate: "+$1"}}}
 	if rsrField, err := NewRSRField(rulesStr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rsrField, expectRSRField) {
@@ -96,7 +96,7 @@ func TestNewRSRFieldDDz(t *testing.T) {
 func TestNewRSRFieldIvo(t *testing.T) {
 	rulesStr := `~cost_details:s/MatchedDestId":".+_(\s\s\s\s\s)"/$1/`
 	expectRSRField := &RSRField{Id: "cost_details", Rules: rulesStr,
-		RSRules: []*ReSearchReplace{&ReSearchReplace{SearchRegexp: regexp.MustCompile(`MatchedDestId":".+_(\s\s\s\s\s)"`), ReplaceTemplate: "$1"}}}
+		RSRules: []*ReSearchReplace{{SearchRegexp: regexp.MustCompile(`MatchedDestId":".+_(\s\s\s\s\s)"`), ReplaceTemplate: "$1"}}}
 	if rsrField, err := NewRSRField(rulesStr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rsrField, expectRSRField) {
@@ -111,8 +111,8 @@ func TestConvertPlusNationalAnd00(t *testing.T) {
 	rulesStr := `~effective_caller_id_number:s/\+49(\d+)/0$1/:s/\+(\d+)/00$1/`
 	expectRSRField := &RSRField{Id: "effective_caller_id_number", Rules: rulesStr,
 		RSRules: []*ReSearchReplace{
-			&ReSearchReplace{SearchRegexp: regexp.MustCompile(`\+49(\d+)`), ReplaceTemplate: "0$1"},
-			&ReSearchReplace{SearchRegexp: regexp.MustCompile(`\+(\d+)`), ReplaceTemplate: "00$1"}}}
+			{SearchRegexp: regexp.MustCompile(`\+49(\d+)`), ReplaceTemplate: "0$1"},
+			{SearchRegexp: regexp.MustCompile(`\+(\d+)`), ReplaceTemplate: "00$1"}}}
 	rsrField, err := NewRSRField(rulesStr)
 	if err != nil {
 		t.Error(err)
@@ -164,7 +164,7 @@ func TestConvertDurToSecs(t *testing.T) {
 	rulesStr := `~9:s/^(\d+)$/${1}s/`
 	expectRSRField := &RSRField{Id: "9", Rules: rulesStr,
 		RSRules: []*ReSearchReplace{
-			&ReSearchReplace{SearchRegexp: regexp.MustCompile(`^(\d+)$`), ReplaceTemplate: "${1}s"}}}
+			{SearchRegexp: regexp.MustCompile(`^(\d+)$`), ReplaceTemplate: "${1}s"}}}
 	rsrField, err := NewRSRField(rulesStr)
 	if err != nil {
 		t.Error(err)
@@ -182,7 +182,7 @@ func TestPrefix164(t *testing.T) {
 	rulesStr := `~0:s/^([1-9]\d+)$/+$1/`
 	expectRSRField := &RSRField{Id: "0", Rules: rulesStr,
 		RSRules: []*ReSearchReplace{
-			&ReSearchReplace{SearchRegexp: regexp.MustCompile(`^([1-9]\d+)$`), ReplaceTemplate: "+$1"}}}
+			{SearchRegexp: regexp.MustCompile(`^([1-9]\d+)$`), ReplaceTemplate: "+$1"}}}
 	rsrField, err := NewRSRField(rulesStr)
 	if err != nil {
 		t.Error(err)
@@ -201,7 +201,7 @@ func TestIsStatic(t *testing.T) {
 	if !rsr1.IsStatic() {
 		t.Error("Failed to detect static value.")
 	}
-	rsr2 := &RSRField{Id: "0", RSRules: []*ReSearchReplace{&ReSearchReplace{SearchRegexp: regexp.MustCompile(`^([1-9]\d+)$`), ReplaceTemplate: "+$1"}}}
+	rsr2 := &RSRField{Id: "0", RSRules: []*ReSearchReplace{{SearchRegexp: regexp.MustCompile(`^([1-9]\d+)$`), ReplaceTemplate: "+$1"}}}
 	if rsr2.IsStatic() {
 		t.Error("Non static detected as static value")
 	}
@@ -223,7 +223,7 @@ func TestParseRSRFields(t *testing.T) {
 	expectParsedFields := RSRFields{
 		&RSRField{Id: "host", Rules: "host"},
 		&RSRField{Id: "sip_redirected_to", Rules: `~sip_redirected_to:s/sip:\+49(\d+)@/0$1/`,
-			RSRules: []*ReSearchReplace{&ReSearchReplace{SearchRegexp: regexp.MustCompile(`sip:\+49(\d+)@`), ReplaceTemplate: "0$1"}}},
+			RSRules: []*ReSearchReplace{{SearchRegexp: regexp.MustCompile(`sip:\+49(\d+)@`), ReplaceTemplate: "0$1"}}},
 		&RSRField{Id: "destination", Rules: "destination"}}
 	if parsedFields, err := ParseRSRFields(fields, FIELDS_SEP); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -497,6 +497,21 @@ func TestRSRFilterPass(t *testing.T) {
 		t.Error("not passing!")
 	}
 
+	// compare not greaterThan
+	fltr, err = NewRSRFilter("!>0s") // !(n>0s)
+	if err != nil {
+		t.Error(err)
+	}
+	if !fltr.Pass("0s") {
+		t.Error("not passing!")
+	}
+	if fltr.Pass("13") {
+		t.Error("passing!")
+	}
+	if fltr.Pass("12s") {
+		t.Error("passing!")
+	}
+
 	// compare greaterThanOrEqual
 	fltr, err = NewRSRFilter(">=0s")
 	if err != nil {
@@ -513,6 +528,24 @@ func TestRSRFilterPass(t *testing.T) {
 	}
 	if !fltr.Pass("12s") {
 		t.Error("not passing!")
+	}
+
+	// compare not greaterThanOrEqual
+	fltr, err = NewRSRFilter("!>=0s")
+	if err != nil {
+		t.Error(err)
+	}
+	if !fltr.Pass("-1s") {
+		t.Error("not passing!")
+	}
+	if fltr.Pass("0s") {
+		t.Error("passing!")
+	}
+	if fltr.Pass("13") {
+		t.Error("passing!")
+	}
+	if fltr.Pass("12s") {
+		t.Error("passing!")
 	}
 
 	// compare lessThan
@@ -533,6 +566,24 @@ func TestRSRFilterPass(t *testing.T) {
 		t.Error("not passing!")
 	}
 
+	// compare not lessThan
+	fltr, err = NewRSRFilter("!<0s")
+	if err != nil {
+		t.Error(err)
+	}
+	if !fltr.Pass("1ns") {
+		t.Error("not passing!")
+	}
+	if fltr.Pass("13") {
+		t.Error("passing!")
+	}
+	if !fltr.Pass("12s") {
+		t.Error("not passing!")
+	}
+	if fltr.Pass("-12s") {
+		t.Error("passing!")
+	}
+
 	// compare lessThanOrEqual
 	fltr, err = NewRSRFilter("<=0s")
 	if err != nil {
@@ -549,6 +600,24 @@ func TestRSRFilterPass(t *testing.T) {
 	}
 	if fltr.Pass("12s") {
 		t.Error("passing!")
+	}
+
+	// compare not lessThanOrEqual
+	fltr, err = NewRSRFilter("!<=0s")
+	if err != nil {
+		t.Error(err)
+	}
+	if fltr.Pass("-1s") {
+		t.Error("passing!")
+	}
+	if fltr.Pass("0s") {
+		t.Error("passing!")
+	}
+	if fltr.Pass("13") {
+		t.Error("passing!")
+	}
+	if !fltr.Pass("12s") {
+		t.Error("not passing!")
 	}
 }
 

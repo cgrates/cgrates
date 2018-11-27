@@ -478,7 +478,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &FilterRule{Type: "*notgt", FieldName: "NotMetaGreaterOrEqual", Values: []string{"20"}}
+	erf = &FilterRule{Type: "*gt", FieldName: "NotMetaGreaterOrEqual", Values: []string{"20"}, negative: true}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
