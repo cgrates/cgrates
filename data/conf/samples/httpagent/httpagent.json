@@ -59,7 +59,7 @@
 				"id": "mtcall_cdr",
 				"filters": ["*string:*req.request_type:MTCALL_CDR"],
 				"tenant": "cgrates.org",
-				"flags": ["*cdrs","*log"],
+				"flags": ["*cdrs"],
 				"request_fields":[
 					{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
 						"value": "*pseudoprepaid", "mandatory": true},	
