@@ -130,6 +130,13 @@ func TestFwvitInitCdrDb(t *testing.T) {
 	}
 }
 
+// Remove data in both rating and accounting db
+func TestFwvitResetDataDb(t *testing.T) {
+	if err := engine.InitDataDb(fwvCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestFwvitProcessFiles(t *testing.T) {
 	fileName := "test1.fwv"
 	if err := ioutil.WriteFile(path.Join("/tmp", fileName), []byte(FW_CDR_FILE1), 0755); err != nil {

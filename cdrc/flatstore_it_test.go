@@ -56,7 +56,7 @@ var part1 = `BYE|f9d3d5c3|c863a6e3|214d8f52b566e33a9349b184e72a4ccb@0:0:0:0:0:0:
 `
 
 var part2 = `INVITE|f9d3d5c3|c863a6e3|214d8f52b566e33a9349b184e72a4ccb@0:0:0:0:0:0:0:0|200|OK|1436454647|*postpaid|1002|1003||1877:893549742
-INVITE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0|200|OK|1436454408|*prepaid|1001|1002||3401:2069362475`
+INVITE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9p@0:0:0:0:0:0:0:0|200|OK|1436454408|*prepaid|1001|1002||3401:2069362475`
 
 func TestFlatstoreitInitCfg(t *testing.T) {
 	var err error
@@ -69,6 +69,13 @@ func TestFlatstoreitInitCfg(t *testing.T) {
 // InitDb so we can rely on count
 func TestFlatstoreitInitCdrDb(t *testing.T) {
 	if err := engine.InitStorDb(flatstoreCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Remove data in both rating and accounting db
+func TestFlatstoreitResetDataDb(t *testing.T) {
+	if err := engine.InitDataDb(flatstoreCfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -140,10 +147,10 @@ func TestFlatstoreitProcessFiles(t *testing.T) {
 	if len(filesOutDir) != 5 {
 		t.Errorf("In CdrcOutDir, expecting 5 files, got: %d", len(filesOutDir))
 	}
-	ePartContent := "INVITE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0|200|OK|1436454408|*prepaid|1001|1002||3401:2069362475\n"
+	ePartContent := "INVITE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9p@0:0:0:0:0:0:0:0|200|OK|1436454408|*prepaid|1001|1002||3401:2069362475\n"
 	if partContent, err := ioutil.ReadFile(path.Join(flatstoreCdrcCfg.CdrOutDir, "acc_3.log.unpaired")); err != nil {
 		t.Error(err)
-	} else if len(ePartContent) != len(string(partContent)) {
+	} else if (ePartContent) != (string(partContent)) {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", ePartContent, string(partContent))
 	}
 }
@@ -159,5 +166,11 @@ func TestFlatstoreitAnalyseCDRs(t *testing.T) {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 7 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	}
+}
+
+func TestFlatstoreitKillEngine(t *testing.T) {
+	if err := engine.KillEngine(*waitRater); err != nil {
+		t.Error(err)
 	}
 }
