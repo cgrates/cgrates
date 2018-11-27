@@ -193,11 +193,20 @@ func testHAitAuth1001(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	eXml := []byte(`<?xml version="1.0" encoding="UTF-8"?>
+	var eXml []byte
+	if t := time.Now(); t.Weekday() != 6 && t.Weekday() != 7 { // Different rating plans for weekend
+		eXml = []byte(`<?xml version="1.0" encoding="UTF-8"?>
+<response>
+  <Allow>1</Allow>
+  <MaxDuration>6042</MaxDuration>
+</response>`)
+	} else {
+		eXml = []byte(`<?xml version="1.0" encoding="UTF-8"?>
 <response>
   <Allow>1</Allow>
   <MaxDuration>10800</MaxDuration>
 </response>`)
+	}
 	if body, err := ioutil.ReadAll(rply.Body); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eXml, body) {
