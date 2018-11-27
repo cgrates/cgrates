@@ -265,7 +265,7 @@ func (rsrFltr *RSRFilter) Pass(val string) bool {
 			Logger.Warning(fmt.Sprintf("<RSRFilter> rule: <%s>, err: <%s>", rsrFltr.filterRule, err.Error()))
 			return false
 		}
-		return gt && !rsrFltr.negative
+		return gt != rsrFltr.negative
 	}
 
 	if len(rsrFltr.filterRule) > 2 && rsrFltr.filterRule[:2] == MatchLessThanOrEqual {
@@ -276,7 +276,7 @@ func (rsrFltr *RSRFilter) Pass(val string) bool {
 			Logger.Warning(fmt.Sprintf("<RSRFilter> rule: <%s>, err: <%s>", rsrFltr.filterRule, err.Error()))
 			return false
 		}
-		return gt && !rsrFltr.negative
+		return gt != rsrFltr.negative
 	}
 
 	if rsrFltr.filterRule[:1] == MatchGreaterThan {
@@ -286,7 +286,7 @@ func (rsrFltr *RSRFilter) Pass(val string) bool {
 			Logger.Warning(fmt.Sprintf("<RSRFilter> rule: <%s>, err: <%s>", rsrFltr.filterRule, err.Error()))
 			return false
 		}
-		return gt && !rsrFltr.negative
+		return gt != rsrFltr.negative
 	}
 
 	if rsrFltr.filterRule[:1] == MatchLessThan {
@@ -297,7 +297,7 @@ func (rsrFltr *RSRFilter) Pass(val string) bool {
 			Logger.Warning(fmt.Sprintf("<RSRFilter> rule: <%s>, err: <%s>", rsrFltr.filterRule, err.Error()))
 			return false
 		}
-		return gt && !rsrFltr.negative
+		return gt != rsrFltr.negative
 	}
 	return (strings.Index(val, rsrFltr.filterRule) != -1) != rsrFltr.negative // default is string index
 }
