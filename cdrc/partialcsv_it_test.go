@@ -65,6 +65,13 @@ func TestPartcsvITInitCdrDb(t *testing.T) {
 	}
 }
 
+// Remove data in both rating and accounting db
+func TestPartcsvITResetDataDb(t *testing.T) {
+	if err := engine.InitDataDb(partcsvCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestPartcsvITCreateCdrDirs(t *testing.T) {
 	for path, cdrcProfiles := range partcsvCfg.CdrcProfiles {
 		for _, cdrcInst := range cdrcProfiles {

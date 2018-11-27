@@ -80,6 +80,13 @@ func TestCsvITInitCdrDb(t *testing.T) {
 	}
 }
 
+// Remove data in both rating and accounting db
+func TestCsvITResetDataDb(t *testing.T) {
+	if err := engine.InitDataDb(csvCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestCsvITCreateCdrDirs(t *testing.T) {
 	for _, cdrcProfiles := range csvCfg.CdrcProfiles {
 		for _, cdrcInst := range cdrcProfiles {
@@ -149,10 +156,11 @@ func TestCsvITProcessedFiles(t *testing.T) {
 }
 
 func TestCsvITAnalyseCDRs(t *testing.T) {
+	time.Sleep(500 * time.Millisecond)
 	var reply []*engine.ExternalCDR
 	if err := cdrcRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 6 { // 1 injected, 1 rated, 1 *raw and it's pair in *default run
+	} else if len(reply) != 5 { // 1 injected, 1 rated, 1 *raw and it's pair in *default run
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
 	if err := cdrcRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{DestinationPrefixes: []string{"08651"}}, &reply); err == nil || err.Error() != utils.NotFoundCaps {

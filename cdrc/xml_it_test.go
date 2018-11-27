@@ -55,6 +55,13 @@ func TestXmlITInitCdrDb(t *testing.T) {
 	}
 }
 
+// Remove data in both rating and accounting db
+func TestXmlITResetDataDb(t *testing.T) {
+	if err := engine.InitDataDb(xmlCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestXmlITCreateCdrDirs(t *testing.T) {
 	for _, cdrcProfiles := range xmlCfg.CdrcProfiles {
 		for i, cdrcInst := range cdrcProfiles {
