@@ -179,12 +179,26 @@ func TestCDRsOnExpAMQPReplication(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(5 * time.Second))
-	testCdr := &engine.CDR{CGRID: utils.Sha1("amqpreconnect", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
-		ToR: utils.VOICE, OriginID: "amqpreconnect", OriginHost: "192.168.1.1", Source: "UNKNOWN", RequestType: utils.META_PSEUDOPREPAID,
-		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		RunID: utils.DEFAULT_RUNID, Cost: 1.201, PreRated: true}
+	testCdr := &engine.CDR{
+		CGRID:       utils.Sha1("amqpreconnect", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+		ToR:         utils.VOICE,
+		OriginID:    "amqpreconnect",
+		OriginHost:  "192.168.1.1",
+		Source:      "UNKNOWN",
+		RequestType: utils.META_PSEUDOPREPAID,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "1002",
+		SetupTime:   time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
+		AnswerTime:  time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+		Usage:       time.Duration(10) * time.Second,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		RunID:       utils.DEFAULT_RUNID,
+		Cost:        1.201,
+		PreRated:    true,
+	}
 	var reply string
 	if err := cdrsMasterRpc.Call("CdrsV2.ProcessCdr", testCdr, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -217,14 +231,14 @@ func TestCDRsOnExpAMQPReplication(t *testing.T) {
 		if rcvCDR[utils.CGRID] != testCdr.CGRID {
 			t.Errorf("Unexpected CDR received: %+v", rcvCDR)
 		}
-	case <-time.After(time.Duration(100 * time.Millisecond)):
+	case <-time.After(150 * time.Millisecond):
 		t.Error("No message received from RabbitMQ")
 	}
 
 }
 
 func TestCDRsOnExpHTTPPosterFileFailover(t *testing.T) {
-	time.Sleep(time.Duration(2 * time.Second))
+	time.Sleep(time.Duration(5 * time.Second))
 	failoverContent := []byte(`OriginID=httpjsonrpc1`)
 	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
 	if len(filesInDir) == 0 {
@@ -254,7 +268,7 @@ func TestCDRsOnExpHTTPPosterFileFailover(t *testing.T) {
 }
 
 func TestCDRsOnExpAMQPPosterFileFailover(t *testing.T) {
-	time.Sleep(time.Duration(10 * time.Second))
+	time.Sleep(time.Duration(5 * time.Second))
 	failoverContent := []byte(`{"CGRID":"57548d485d61ebcba55afbe5d939c82a8e9ff670"}`)
 	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
 	if len(filesInDir) == 0 {
@@ -306,3 +320,9 @@ func TestCdrsHttpCdrReplication2(t *testing.T) {
 	}
 }
 */
+
+func TestCDRsOnExpStopEngine(t *testing.T) {
+	if err := engine.KillEngine(100); err != nil {
+		t.Error(err)
+	}
+}

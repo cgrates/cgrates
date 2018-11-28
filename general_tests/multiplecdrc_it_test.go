@@ -21,14 +21,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"errors"
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"os"
-	"os/exec"
 	"path"
 	"testing"
 	"time"
@@ -46,26 +43,6 @@ var testCalls = flag.Bool("calls", false, "Run test calls simulation, not by def
 var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 var storDbType = flag.String("stordb_type", "mysql", "The type of the storDb database <mysql>")
 var waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
-
-func startEngine() error {
-	enginePath, err := exec.LookPath("cgr-engine")
-	if err != nil {
-		return errors.New("Cannot find cgr-engine executable")
-	}
-	stopEngine()
-	engine := exec.Command(enginePath, "-config_dir", cfgPath)
-	if err := engine.Start(); err != nil {
-		return fmt.Errorf("Cannot start cgr-engine: %s", err.Error())
-	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time to rater to fire up
-	return nil
-}
-
-func stopEngine() error {
-	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	return nil
-}
 
 func TestMCDRCLoadConfig(t *testing.T) {
 	var err error
@@ -102,10 +79,14 @@ func TestMCDRCCreateCdrDirs(t *testing.T) {
 		}
 	}
 }
+func TestMCDRCStartEngine(t *testing.T) {
+	if _, err := engine.StopStartEngine(cfgPath, *waitRater); err != nil {
+		t.Fatal(err)
+	}
+}
 
 // Connect rpc client to rater
 func TestMCDRCRpcConn(t *testing.T) {
-	startEngine()
 	var err error
 	rater, err = jsonrpc.Dial("tcp", cfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -171,5 +152,7 @@ func TestMCDRCHandleCdr3File(t *testing.T) {
 }
 
 func TestMCDRCStopEngine(t *testing.T) {
-	stopEngine()
+	if err := engine.KillEngine(100); err != nil {
+		t.Error(err)
+	}
 }
