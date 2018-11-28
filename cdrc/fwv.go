@@ -160,6 +160,7 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *confi
 		storedCdr.Source = cdrcCfg.CdrSourceId
 		duMultiplyFactor = cdrcCfg.DataUsageMultiplyFactor
 	}
+	fldVals := make(map[string]string)
 	for _, cdrFldCfg := range cfgFields {
 		if len(cdrFldCfg.Filters) != 0 {
 			tenant, err := cdrcCfg.Tenant.ParseValue("")
@@ -171,7 +172,6 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *confi
 				continue // Not passes filters, ignore this CDR
 			}
 		}
-		fldVals := make(map[string]string)
 		switch cdrFldCfg.Type {
 		case utils.META_COMPOSED:
 			out, err := cdrFldCfg.Value.ParseDataProvider(fwvProvider, utils.NestingSep)

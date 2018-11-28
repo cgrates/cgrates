@@ -140,6 +140,7 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 	var err error
 	csvProvider := newCsvProvider(record) // used for filterS and for RSRParsers
 	var lazyHttpFields []*config.FCTemplate
+	fldVals := make(map[string]string)
 	for _, cdrFldCfg := range cdrcCfg.ContentFields {
 		if len(cdrFldCfg.Filters) != 0 {
 			if pass, err := self.filterS.Pass(tenant,
@@ -157,7 +158,6 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 				cdrFldCfg.Value = config.NewRSRParsersMustCompile("~"+strconv.Itoa(len(record)-1), true, utils.INFIELD_SEP) // in case of flatstore, last element will be the duration computed by us
 			}
 		}
-		fldVals := make(map[string]string)
 		switch cdrFldCfg.Type {
 		case utils.META_COMPOSED:
 			out, err := cdrFldCfg.Value.ParseDataProvider(csvProvider, utils.NestingSep)
