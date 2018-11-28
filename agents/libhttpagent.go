@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/http/httputil"
 	"strconv"
 	"strings"
 
@@ -60,7 +61,8 @@ type httpUrlDP struct {
 // String is part of engine.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (hU *httpUrlDP) String() string {
-	return hU.cache.String()
+	byts, _ := httputil.DumpRequest(hU.req, true)
+	return string(byts)
 }
 
 // FieldAsInterface is part of engine.DataProvider interface
@@ -122,7 +124,7 @@ type httpXmlDP struct {
 // String is part of engine.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (hU *httpXmlDP) String() string {
-	return hU.cache.String()
+	return hU.xmlDoc.OutputXML(true)
 }
 
 // FieldAsInterface is part of engine.DataProvider interface
