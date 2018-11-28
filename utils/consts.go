@@ -528,6 +528,7 @@ const (
 	MetaEnv                      = "*env:" // use in config for describing enviormant variables
 	MetaTemplate                 = "*template"
 	MetaCCA                      = "*cca"
+	MetaErr                      = "*err"
 	OriginRealm                  = "OriginRealm"
 	ProductName                  = "ProductName"
 	CGRSubsystems                = "cgr_subsystems"

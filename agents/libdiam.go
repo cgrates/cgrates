@@ -29,6 +29,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/fiorix/go-diameter/diam"
 	"github.com/fiorix/go-diameter/diam/avp"
@@ -387,5 +388,76 @@ func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err 
 		return nil, err
 	}
 	dP.cache.Set(fldPath, data, false, false)
+	return
+}
+
+// diamAnswer builds up the answer to be sent back to the client
+func diamAnswer(m *diam.Message, resCode uint32, errFlag bool,
+	rply *config.NavigableMap, tmz string) (a *diam.Message, err error) {
+	a = m.Answer(resCode)
+	if errFlag {
+		a.Header.CommandFlags = diam.ErrorFlag
+	}
+	// write reply into message
+	pathIdx := make(map[string]int) // group items for same path
+	for _, val := range rply.Values() {
+		nmItms, isNMItems := val.([]*config.NMItem)
+		if !isNMItems {
+			return nil, fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(val))
+		}
+		// find out the first itm which is not an attribute
+		var itm *config.NMItem
+		if len(nmItms) == 1 {
+			itm = nmItms[0]
+		} else { // only for groups
+			for i, cfgItm := range nmItms {
+				itmPath := strings.Join(cfgItm.Path, utils.NestingSep)
+				if i == 0 { // path is common, increase it only once
+					pathIdx[itmPath] += 1
+				}
+				if i == pathIdx[itmPath]-1 { // revert from multiple items to only one per config path
+					itm = cfgItm
+					break
+				}
+			}
+		}
+		if itm == nil {
+			continue // all attributes, not writable to diameter packet
+		}
+		itmStr, err := utils.IfaceAsString(itm.Data)
+		if err != nil {
+			return nil, fmt.Errorf("cannot convert data: %+v to string, err: %s", itm.Data, err)
+		}
+		var newBranch bool
+		if itm.Config != nil && itm.Config.NewBranch {
+			newBranch = true
+		}
+		if err = messageSetAVPsWithPath(a, itm.Path,
+			itmStr, newBranch, tmz); err != nil {
+			return nil, fmt.Errorf("setting item with path: %+v got err: %s", itm.Path, err.Error())
+		}
+	}
+	return
+}
+
+// negDiamAnswer is used to return the negative answer we need previous to
+func diamErr(m *diam.Message, resCode uint32,
+	reqVars map[string]interface{},
+	tpl []*config.FCTemplate, tnt, tmz string,
+	filterS *engine.FilterS) (a *diam.Message, err error) {
+	aReq := newAgentRequest(
+		newDADataProvider(m), reqVars,
+		config.NewNavigableMap(nil),
+		nil, tnt, tmz, filterS)
+	var rplyData *config.NavigableMap
+	if rplyData, err = aReq.AsNavigableMap(tpl); err != nil {
+		return
+	}
+	return diamAnswer(m, resCode, true, rplyData, tmz)
+}
+
+func diamBareErr(m *diam.Message, resCode uint32) (a *diam.Message) {
+	a = m.Answer(resCode)
+	a.Header.CommandFlags = diam.ErrorFlag
 	return
 }

@@ -372,7 +372,16 @@ const CGRATES_CFG_JSON = `
 	"origin_realm": "cgrates.org",								// diameter Origin-Realm AVP used in replies
 	"vendor_id": 0,												// diameter Vendor-Id AVP used in replies
 	"product_name": "CGRateS",									// diameter Product-Name AVP used in replies
+	"max_active_requests": -1,									// limit the number of active requests processed by the server <-1|0-n>
 	"templates":{
+		"*err": [
+				{"tag": "SessionId", "field_id": "Session-Id", "type": "*composed", 
+					"value": "~*req.Session-Id", "mandatory": true},
+				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*composed", 
+					"value": "~*vars.OriginHost", "mandatory": true},
+				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*composed", 
+					"value": "~*vars.OriginRealm", "mandatory": true},
+		],
 		"*cca": [
 				{"tag": "SessionId", "field_id": "Session-Id", "type": "*composed", 
 					"value": "~*req.Session-Id", "mandatory": true},

@@ -21,7 +21,7 @@ package agents
 import (
 	"fmt"
 	"reflect"
-	"strings"
+	"sync"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -66,6 +66,8 @@ type DiameterAgent struct {
 	cgrCfg   *config.CGRConfig
 	filterS  *engine.FilterS
 	sessionS rpcclient.RpcClientConnection // Connection towards CGR-SessionS component
+	aReqs    int
+	sync.RWMutex
 }
 
 // ListenAndServe is called when DiameterAgent is started, usually from within cmd/cgr-engine
@@ -98,7 +100,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> decoding app: %d, err: %s",
 			utils.DiameterAgent, m.Header.ApplicationID, err.Error()))
-		writeOnConn(c, m.Answer(diam.NoCommonApplication))
+		writeOnConn(c, diamBareErr(m, diam.NoCommonApplication))
 		return
 	}
 	dCmd, err := m.Dictionary().FindCommand(
@@ -107,7 +109,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 	if err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<%s> decoding app: %d, command %d, err: %s",
 			utils.DiameterAgent, m.Header.ApplicationID, m.Header.CommandCode, err.Error()))
-		writeOnConn(c, m.Answer(diam.CommandUnsupported))
+		writeOnConn(c, diamBareErr(m, diam.CommandUnsupported))
 		return
 	}
 	reqVars := map[string]interface{}{
@@ -117,6 +119,36 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		utils.MetaApp:     dApp.Name,
 		utils.MetaAppID:   dApp.ID,
 		utils.MetaCmd:     dCmd.Short + "R",
+	}
+	// build the negative error answer
+	diamErr, err := diamErr(m, diam.UnableToComply, reqVars,
+		da.cgrCfg.DiameterAgentCfg().Templates[utils.MetaErr],
+		da.cgrCfg.GeneralCfg().DefaultTenant,
+		da.cgrCfg.GeneralCfg().DefaultTimezone,
+		da.filterS)
+	if err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %s building errDiam for message: %s",
+				utils.DiameterAgent, err.Error(), m))
+		writeOnConn(c, diamBareErr(m, diam.CommandUnsupported))
+		return
+	}
+	if da.cgrCfg.DiameterAgentCfg().MaxActiveReqs != -1 {
+		da.Lock()
+		if da.aReqs == da.cgrCfg.DiameterAgentCfg().MaxActiveReqs {
+			utils.Logger.Err(
+				fmt.Sprintf("<%s> denying request due to maximum active requests reached: %d, message: %s",
+					utils.DiameterAgent, da.cgrCfg.DiameterAgentCfg().MaxActiveReqs, m))
+			writeOnConn(c, diamErr)
+			return
+		}
+		da.aReqs++
+		da.Unlock()
+		defer func() { // schedule decrement when returning out of function
+			da.Lock()
+			da.aReqs--
+			da.Unlock()
+		}()
 	}
 	rply := config.NewNavigableMap(nil) // share it among different processors
 	var processed bool
@@ -128,7 +160,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 				newDADataProvider(m), reqVars, rply,
 				reqProcessor.Tenant, da.cgrCfg.GeneralCfg().DefaultTenant,
 				utils.FirstNonEmpty(reqProcessor.Timezone,
-					config.CgrConfig().GeneralCfg().DefaultTimezone),
+					da.cgrCfg.GeneralCfg().DefaultTimezone),
 				da.filterS))
 		if lclProcessed {
 			processed = lclProcessed
@@ -142,66 +174,22 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s processing message: %s",
 				utils.DiameterAgent, err.Error(), m))
-		writeOnConn(c, m.Answer(diam.UnableToComply))
+		writeOnConn(c, diamErr)
 		return
 	} else if !processed {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> no request processor enabled, ignoring message %s from %s",
 				utils.DiameterAgent, m, c.RemoteAddr()))
-		writeOnConn(c, m.Answer(diam.UnableToComply))
+		writeOnConn(c, diamErr)
 		return
 	}
-	a := m.Answer(diam.Success)
-	// write reply into message
-	pathIdx := make(map[string]int) // group items for same path
-	for _, val := range rply.Values() {
-		nmItms, isNMItems := val.([]*config.NMItem)
-		if !isNMItems {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> cannot encode reply field: %s, ignoring message %s from %s",
-					utils.DiameterAgent, utils.ToJSON(val), m, c.RemoteAddr()))
-			writeOnConn(c, m.Answer(diam.UnableToComply))
-			return
-		}
-		// find out the first itm which is not an attribute
-		var itm *config.NMItem
-		if len(nmItms) == 1 {
-			itm = nmItms[0]
-		} else { // only for groups
-			for i, cfgItm := range nmItms {
-				itmPath := strings.Join(cfgItm.Path, utils.NestingSep)
-				if i == 0 { // path is common, increase it only once
-					pathIdx[itmPath] += 1
-				}
-				if i == pathIdx[itmPath]-1 { // revert from multiple items to only one per config path
-					itm = cfgItm
-					break
-				}
-			}
-		}
-		if itm == nil {
-			continue // all attributes, not writable to diameter packet
-		}
-		itmStr, err := utils.IfaceAsString(itm.Data)
-		if err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error: %s processing reply item: %s for message: %s",
-					utils.DiameterAgent, err.Error(), utils.ToJSON(itm), m))
-			writeOnConn(c, m.Answer(diam.UnableToComply))
-			return
-		}
-		var newBranch bool
-		if itm.Config != nil && itm.Config.NewBranch {
-			newBranch = true
-		}
-		if err := messageSetAVPsWithPath(a, itm.Path,
-			itmStr, newBranch, da.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error: %s setting reply item: %s for message: %s",
-					utils.DiameterAgent, err.Error(), utils.ToJSON(itm), m))
-			writeOnConn(c, m.Answer(diam.UnableToComply))
-			return
-		}
+	a, err := diamAnswer(m, diam.Success, false,
+		rply, da.cgrCfg.GeneralCfg().DefaultTimezone)
+	if err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> err: %s, replying to message: %+v",
+				utils.DiameterAgent, err.Error(), m))
+
 	}
 	writeOnConn(c, a)
 }

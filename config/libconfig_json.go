@@ -327,17 +327,18 @@ type OsipsConnJsonCfg struct {
 
 // DiameterAgent configuration
 type DiameterAgentJsonCfg struct {
-	Enabled            *bool   // enables the diameter agent: <true|false>
-	Listen             *string // address where to listen for diameter requests <x.y.z.y:1234>
-	Listen_net         *string
-	Dictionaries_path  *string           // path towards additional dictionaries
-	Sessions_conns     *[]*HaPoolJsonCfg // Connections towards SessionS
-	Origin_host        *string
-	Origin_realm       *string
-	Vendor_id          *int
-	Product_name       *string
-	Templates          map[string][]*FcTemplateJsonCfg
-	Request_processors *[]*DARequestProcessorJsnCfg
+	Enabled             *bool   // enables the diameter agent: <true|false>
+	Listen              *string // address where to listen for diameter requests <x.y.z.y:1234>
+	Listen_net          *string
+	Dictionaries_path   *string           // path towards additional dictionaries
+	Sessions_conns      *[]*HaPoolJsonCfg // Connections towards SessionS
+	Origin_host         *string
+	Origin_realm        *string
+	Vendor_id           *int
+	Product_name        *string
+	Max_active_requests *int
+	Templates           map[string][]*FcTemplateJsonCfg
+	Request_processors  *[]*DARequestProcessorJsnCfg
 }
 
 // One Diameter request processor configuration

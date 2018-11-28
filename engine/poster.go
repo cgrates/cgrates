@@ -145,11 +145,11 @@ type AMQPCachedPosters struct {
 
 // GetAMQPPoster creates a new poster only if not already cached
 // uses dialURL as cache key
-func (pc *AMQPCachedPosters) GetAMQPPoster(dialURL string, attempts int, fallbackFileDir string) (amqpPoster *AMQPPoster, err error) {
+func (pc *AMQPCachedPosters) GetAMQPPoster(dialURL string, attempts int,
+	fallbackFileDir string) (amqpPoster *AMQPPoster, err error) {
 	pc.Lock()
 	defer pc.Unlock()
-	var hasIt bool
-	if _, hasIt = pc.cache[dialURL]; !hasIt {
+	if _, hasIt := pc.cache[dialURL]; !hasIt {
 		if pstr, err := NewAMQPPoster(dialURL, attempts, fallbackFileDir); err != nil {
 			return nil, err
 		} else {
