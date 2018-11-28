@@ -1,2 +1,3 @@
 #Tenant,Account,ActionPlanId,ActionTriggersId,AllowNegative,Disabled
 cgrates.org,1001,PACKAGE_1001,,,
+cgrates.org,1002,PACKAGE_1002,,,
