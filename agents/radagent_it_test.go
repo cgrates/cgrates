@@ -189,6 +189,7 @@ func TestRAitAcctStart(t *testing.T) {
 	if len(reply.AVPs) != 0 { // we don't expect AVPs to be populated
 		t.Errorf("Received AVPs: %+v", reply.AVPs)
 	}
+	time.Sleep(500 * time.Millisecond) // Wait so session is made
 	// Make sure the sessin is managed by SMG
 	var aSessions []*sessions.ActiveSession
 	if err := raRPC.Call(utils.SessionSv1GetActiveSessions,
@@ -198,8 +199,8 @@ func TestRAitAcctStart(t *testing.T) {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
-	} else if aSessions[0].Usage != time.Duration(10)*time.Second {
-		t.Errorf("Expecting 10s, received usage: %v", aSessions[0].Usage)
+	} else if aSessions[0].Usage != 10*time.Second {
+		t.Errorf("Expecting 10s, received usage: %v\nAnd Session: %s ", aSessions[0].Usage, utils.ToJSON(aSessions))
 	}
 }
 
@@ -264,7 +265,7 @@ func TestRAitAcctStop(t *testing.T) {
 		&aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(10 * time.Millisecond))
+	time.Sleep(100 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	args := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, DestinationPrefixes: []string{"1002"}}
 	if err := raRPC.Call("ApierV2.GetCdrs", args, &cdrs); err != nil {
