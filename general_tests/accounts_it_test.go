@@ -23,11 +23,9 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
-	//"reflect"
 	"testing"
 	"time"
 
-	//"github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -58,6 +56,7 @@ var sTestsAcc = []func(t *testing.T){
 	testV1AccRemAccountSet,
 	testV1AccGetAccountSetAfterDelete,
 	//testV1AccRemAccountAfterDelete,
+	testV1AccMonthly,
 	testV1AccStopEngine,
 }
 
@@ -118,14 +117,16 @@ func testV1AccRpcConn(t *testing.T) {
 
 func testV1AccGetAccountBeforeSet(t *testing.T) {
 	var reply *engine.Account
-	if err := accRpc.Call("ApierV2.GetAccount", &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := accRpc.Call("ApierV2.GetAccount",
+		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
 
 func testV1AccLoadTarrifPlans(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
 	if err := accRpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -212,6 +213,26 @@ func testV1AccRemAccountAfterDelete(t *testing.T) {
 	}
 }
 */
+
+func testV1AccMonthly(t *testing.T) {
+	// add 10 seconds delay before and after
+	timeAfter := time.Now().Add(10*time.Second).AddDate(0, 1, 0)
+	timeBefore := time.Now().Add(-10*time.Second).AddDate(0, 1, 0)
+	var reply *engine.Account
+	if err := accRpc.Call("ApierV2.GetAccount",
+		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1002"},
+		&reply); err != nil {
+		t.Error(err)
+	} else if _, has := reply.BalanceMap[utils.DATA]; !has {
+		t.Error("Unexpected balance returned: ", utils.ToJSON(reply.BalanceMap[utils.DATA]))
+	} else if len(reply.BalanceMap[utils.DATA]) != 1 {
+		t.Error("Unexpected number of balances returned: ", len(reply.BalanceMap[utils.DATA]))
+	} else if reply.BalanceMap[utils.DATA][0].ExpirationDate.After(timeAfter) &&
+		reply.BalanceMap[utils.DATA][0].ExpirationDate.Before(timeBefore) {
+		t.Error("Unexpected expiration date returned: ", reply.BalanceMap[utils.DATA][0].ExpirationDate)
+	}
+
+}
 
 func testV1AccStopEngine(t *testing.T) {
 	if err := engine.KillEngine(accDelay); err != nil {
