@@ -256,6 +256,7 @@ func testTPitDestinations(t *testing.T) {
 		t.Errorf("Calling ApierV2.GetTPDestinationIDs expected: %v, received: %v", expectedDstIds, rplyDstIds)
 	}
 }
+
 func testTPitKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)

@@ -786,3 +786,9 @@ func TestSMGDataTTLUsageProtection(t *testing.T) {
 		t.Error(err, aSessions)
 	}
 }
+
+func TestSMGDataTTKillEngine(t *testing.T) {
+	if err := engine.KillEngine(100); err != nil {
+		t.Error(err)
+	}
+}
