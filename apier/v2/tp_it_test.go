@@ -53,7 +53,7 @@ var sTestsTutIT = []func(t *testing.T){
 	testTPitRpcConn,
 	testTPitTimings,
 	testTPitDestinations,
-	// ToDo: test engine shutdown
+	testTPitKillEngine,
 }
 
 // Tests starting here
@@ -254,5 +254,10 @@ func testTPitDestinations(t *testing.T) {
 		t.Error("Calling ApierV1.GetTPDestinationIDs, got error: ", err.Error())
 	} else if len(expectedDstIds) != len(rplyDstIds) {
 		t.Errorf("Calling ApierV2.GetTPDestinationIDs expected: %v, received: %v", expectedDstIds, rplyDstIds)
+	}
+}
+func testTPitKillEngine(t *testing.T) {
+	if err := engine.KillEngine(100); err != nil {
+		t.Error(err)
 	}
 }
