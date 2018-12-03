@@ -24,6 +24,7 @@ import (
 	"log"
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
@@ -150,8 +151,9 @@ func testTpResITCheckData(t *testing.T) {
 	if err != nil {
 		t.Error("Error when getting TpResources ", err.Error())
 	}
+	sort.Strings(result[0].ThresholdIDs)
 	if !reflect.DeepEqual(tpResources[0], result[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", tpResources[0], result[0])
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(tpResources[0]), utils.ToJSON(result[0]))
 	}
 	result, err = tpResMigrator.storDBIn.StorDB().GetTPResources(
 		tpResources[0].TPid, tpResources[0].ID)
