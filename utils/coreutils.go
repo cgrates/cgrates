@@ -257,7 +257,7 @@ func ParseDate(date string) (expDate time.Time, err error) {
 			}
 			expDate = expDate.Add(extraDur)
 		}
-	case strings.HasSuffix(date, "Z") || strings.Index(date, "+") != -1: // Allow both Z and +hh:mm format
+	case strings.HasSuffix(date, "Z") || strings.Index(date, "+") != -1 || strings.Index(date, "-") != -1: // Allow both Z and +-hh:mm format
 		expDate, err = time.Parse(time.RFC3339, date)
 	default:
 		unix, err := strconv.ParseInt(date, 10, 64)
