@@ -257,73 +257,60 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	} else if !tm.Equal(expectedTime) {
 		t.Errorf("Unexpected time parsed: %v, expecting: %v", tm, expectedTime)
 	}
-}
 
-func TestParseDateUnix(t *testing.T) {
-	date, err := ParseDate("1375212790")
 	expected := time.Date(2013, 7, 30, 19, 33, 10, 0, time.UTC)
+	date, err := ParseTimeDetectLayout("1375212790", "")
 	if err != nil || !date.Equal(expected) {
 		t.Error("error parsing date: ", expected.Sub(date))
 	}
-}
 
-func TestParseDateUnlimited(t *testing.T) {
-	date, err := ParseDate("*unlimited")
+	date, err = ParseTimeDetectLayout("*unlimited", "")
 	if err != nil || !date.IsZero() {
 		t.Error("error parsing unlimited date!: ")
 	}
-}
 
-func TestParseDateEmpty(t *testing.T) {
-	date, err := ParseDate("")
+	date, err = ParseTimeDetectLayout("", "")
 	if err != nil || !date.IsZero() {
 		t.Error("error parsing unlimited date!: ")
 	}
-}
 
-func TestParseDatePlus(t *testing.T) {
-	date, err := ParseDate("+20s")
-	expected := time.Now()
+	date, err = ParseTimeDetectLayout("+20s", "")
+	expected = time.Now()
 	if err != nil || date.Sub(expected).Seconds() > 20 || date.Sub(expected).Seconds() < 19 {
 		t.Error("error parsing date: ", date.Sub(expected).Seconds())
 	}
-}
 
-func TestParseDateMonthly(t *testing.T) {
-	expected := time.Now().AddDate(0, 1, 0)
-	if date, err := ParseDate("*monthly"); err != nil {
+	expected = time.Now().AddDate(0, 1, 0)
+	if date, err := ParseTimeDetectLayout("*monthly", ""); err != nil {
 		t.Error(err)
 	} else if expected.Sub(date).Seconds() > 1 {
 		t.Errorf("received: %+v", date)
 	}
-}
 
-func TestParseDateMonthEnd(t *testing.T) {
-	expected := GetEndOfMonth(time.Now())
-	if date, err := ParseDate("*month_end"); err != nil {
+	expected = GetEndOfMonth(time.Now())
+	if date, err := ParseTimeDetectLayout("*month_end", ""); err != nil {
 		t.Error(err)
 	} else if !date.Equal(expected) {
 		t.Errorf("received: %+v", date)
 	}
 	expected = GetEndOfMonth(time.Now()).Add(time.Hour).Add(2 * time.Minute)
-	if date, err := ParseDate("*month_end+1h2m"); err != nil {
+	if date, err := ParseTimeDetectLayout("*month_end+1h2m", ""); err != nil {
 		t.Error(err)
 	} else if !date.Equal(expected) {
 		t.Errorf("expecting: %+v, received: %+v", expected, date)
 	}
-}
 
-func TestParseDateRFC3339(t *testing.T) {
-	date, err := ParseDate("2013-07-30T19:33:10Z")
-	expected := time.Date(2013, 7, 30, 19, 33, 10, 0, time.UTC)
+	date, err = ParseTimeDetectLayout("2013-07-30T19:33:10Z", "")
+	expected = time.Date(2013, 7, 30, 19, 33, 10, 0, time.UTC)
 	if err != nil || !date.Equal(expected) {
 		t.Error("error parsing date: ", expected.Sub(date))
 	}
-	date, err = ParseDate("2016-04-01T02:00:00+02:00")
+	date, err = ParseTimeDetectLayout("2016-04-01T02:00:00+02:00", "")
 	expected = time.Date(2016, 4, 1, 0, 0, 0, 0, time.UTC)
 	if err != nil || !date.Equal(expected) {
 		t.Errorf("Expecting: %v, received: %v", expected, date)
 	}
+
 }
 
 func TestRoundDuration(t *testing.T) {

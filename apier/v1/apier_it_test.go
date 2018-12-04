@@ -738,8 +738,8 @@ func TestApierSetRatingProfile(t *testing.T) {
 	}
 	// Make sure rates were loaded for account dan
 	// Test here ResponderGetCost
-	tStart, _ := utils.ParseDate("2013-08-07T17:30:00Z")
-	tEnd, _ := utils.ParseDate("2013-08-07T17:31:30Z")
+	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
+	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:30Z", "")
 	cd := engine.CallDescriptor{
 		Direction:     "*out",
 		Category:      "call",
@@ -1357,8 +1357,8 @@ func TestApierGetAccountAfterLoad(t *testing.T) {
 
 // Test here ResponderGetCost
 func TestApierResponderGetCost(t *testing.T) {
-	tStart, _ := utils.ParseDate("2013-08-07T17:30:00Z")
-	tEnd, _ := utils.ParseDate("2013-08-07T17:31:30Z")
+	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
+	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:30Z", "")
 	cd := engine.CallDescriptor{
 		Direction:     "*out",
 		Category:      "call",

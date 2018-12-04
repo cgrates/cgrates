@@ -177,6 +177,24 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 	eamonTimestampRule := regexp.MustCompile(`^\d{2}/\d{2}/\d{4}\s{1}\d{2}:\d{2}:\d{2}$`)
 	broadsoftTimestampRule := regexp.MustCompile(`^\d{14}\.\d{3}`)
 	switch {
+	case tmStr == UNLIMITED || tmStr == "":
+	// leave it at zero
+	case tmStr == "*daily":
+		return time.Now().AddDate(0, 0, 1), nil // add one day
+	case tmStr == "*monthly":
+		return time.Now().AddDate(0, 1, 0), nil // add one month
+	case tmStr == "*yearly":
+		return time.Now().AddDate(1, 0, 0), nil // add one year
+	case strings.HasPrefix(tmStr, "*month_end"):
+		expDate := GetEndOfMonth(time.Now())
+		if eDurIdx := strings.Index(tmStr, "+"); eDurIdx != -1 {
+			var extraDur time.Duration
+			if extraDur, err = time.ParseDuration(tmStr[eDurIdx+1:]); err != nil {
+				return nilTime, err
+			}
+			expDate = expDate.Add(extraDur)
+		}
+		return expDate, nil
 	case astTimestamp.MatchString(tmStr):
 		return time.Parse("2006-01-02T15:04:05.999999999-0700", tmStr)
 	case rfc3339Rule.MatchString(tmStr):
@@ -229,44 +247,6 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 
 	}
 	return nilTime, errors.New("Unsupported time format")
-}
-
-func ParseDate(date string) (expDate time.Time, err error) {
-	date = strings.TrimSpace(date)
-	switch {
-	case date == UNLIMITED || date == "":
-		// leave it at zero
-	case strings.HasPrefix(date, "+"):
-		d, err := time.ParseDuration(date[1:])
-		if err != nil {
-			return expDate, err
-		}
-		expDate = time.Now().Add(d)
-	case date == "*daily":
-		expDate = time.Now().AddDate(0, 0, 1) // add one day
-	case date == "*monthly":
-		expDate = time.Now().AddDate(0, 1, 0) // add one month
-	case date == "*yearly":
-		expDate = time.Now().AddDate(1, 0, 0) // add one year
-	case strings.HasPrefix(date, "*month_end"):
-		expDate = GetEndOfMonth(time.Now())
-		if eDurIdx := strings.Index(date, "+"); eDurIdx != -1 {
-			var extraDur time.Duration
-			if extraDur, err = time.ParseDuration(date[eDurIdx+1:]); err != nil {
-				return
-			}
-			expDate = expDate.Add(extraDur)
-		}
-	case strings.HasSuffix(date, "Z") || strings.Index(date, "+") != -1: // Allow both Z and +hh:mm format
-		expDate, err = time.Parse(time.RFC3339, date)
-	default:
-		unix, err := strconv.ParseInt(date, 10, 64)
-		if err != nil {
-			return expDate, err
-		}
-		expDate = time.Unix(unix, 0)
-	}
-	return
 }
 
 // returns a number equal or larger than the amount that exactly

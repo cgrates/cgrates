@@ -121,7 +121,7 @@ func (attr *AttrSetAccountActionTriggers) UpdateActionTrigger(at *engine.ActionT
 		at.Balance.Weight = attr.BalanceWeight
 	}
 	if attr.BalanceExpirationDate != nil {
-		balanceExpTime, err := utils.ParseDate(*attr.BalanceExpirationDate)
+		balanceExpTime, err := utils.ParseTimeDetectLayout(*attr.BalanceExpirationDate, timezone)
 		if err != nil {
 			return false, err
 		}
