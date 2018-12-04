@@ -91,12 +91,26 @@ func TestCDRsOnExpHttpCdrReplication(t *testing.T) {
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
-	testCdr1 := &engine.CDR{CGRID: utils.Sha1("httpjsonrpc1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
-		ToR: utils.VOICE, OriginID: "httpjsonrpc1", OriginHost: "192.168.1.1", Source: "UNKNOWN", RequestType: utils.META_PSEUDOPREPAID,
-		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		RunID: utils.DEFAULT_RUNID, Cost: 1.201, PreRated: true}
+	testCdr1 := &engine.CDR{
+		CGRID:       utils.Sha1("httpjsonrpc1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+		ToR:         utils.VOICE,
+		OriginID:    "httpjsonrpc1",
+		OriginHost:  "192.168.1.1",
+		Source:      "UNKNOWN",
+		RequestType: utils.META_PSEUDOPREPAID,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "1002",
+		SetupTime:   time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
+		AnswerTime:  time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+		Usage:       time.Duration(10) * time.Second,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		RunID:       utils.DEFAULT_RUNID,
+		Cost:        1.201,
+		PreRated:    true,
+	}
 	var reply string
 	if err := cdrsMasterRpc.Call("CdrsV2.ProcessCdr", testCdr1, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -110,7 +124,7 @@ func TestCDRsOnExpHttpCdrReplication(t *testing.T) {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
 	// ToDo: Fix cdr_http to be compatible with rest of processCdr methods
-	time.Sleep(time.Duration(20) * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	var rcvedCdrs []*engine.ExternalCDR
 	if err := cdrsSlaveRpc.Call("ApierV2.GetCdrs",
 		utils.RPCCDRsFilter{CGRIDs: []string{testCdr1.CGRID}, RunIDs: []string{utils.META_DEFAULT}}, &rcvedCdrs); err != nil {
@@ -239,7 +253,7 @@ func TestCDRsOnExpAMQPReplication(t *testing.T) {
 
 func TestCDRsOnExpHTTPPosterFileFailover(t *testing.T) {
 	time.Sleep(time.Duration(5 * time.Second))
-	failoverContent := []byte(`OriginID=httpjsonrpc1`)
+	failoverContent := [][]byte{[]byte(`OriginID=httpjsonrpc1`), []byte(`OriginID=amqpreconnect`)}
 	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
 	if len(filesInDir) == 0 {
 		t.Fatalf("No files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)
@@ -250,26 +264,25 @@ func TestCDRsOnExpHTTPPosterFileFailover(t *testing.T) {
 		fileName = file.Name()
 		if strings.Index(fileName, utils.FormSuffix) != -1 {
 			foundFile = true
-			break
+			filePath := path.Join(cdrsMasterCfg.GeneralCfg().FailedPostsDir, fileName)
+			if readBytes, err := ioutil.ReadFile(filePath); err != nil {
+				t.Error(err)
+			} else if !reflect.DeepEqual(failoverContent[0], readBytes) && !reflect.DeepEqual(failoverContent[1], readBytes) { // Checking just the prefix should do since some content is dynamic
+				t.Errorf("Expecting: %q or %q, received: %q", string(failoverContent[0]), string(failoverContent[1]), string(readBytes))
+			}
+			if err := os.Remove(filePath); err != nil {
+				t.Error("Failed removing file: ", filePath)
+			}
 		}
 	}
 	if !foundFile {
 		t.Fatal("Could not find the file in folder")
 	}
-	filePath := path.Join(cdrsMasterCfg.GeneralCfg().FailedPostsDir, fileName)
-	if readBytes, err := ioutil.ReadFile(filePath); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(failoverContent, readBytes) { // Checking just the prefix should do since some content is dynamic
-		t.Errorf("Expecting: %q, received: %q", string(failoverContent), string(readBytes))
-	}
-	if err := os.Remove(filePath); err != nil {
-		t.Error("Failed removing file: ", filePath)
-	}
 }
 
 func TestCDRsOnExpAMQPPosterFileFailover(t *testing.T) {
 	time.Sleep(time.Duration(5 * time.Second))
-	failoverContent := []byte(`{"CGRID":"57548d485d61ebcba55afbe5d939c82a8e9ff670"}`)
+	failoverContent := [][]byte{[]byte(`{"CGRID":"57548d485d61ebcba55afbe5d939c82a8e9ff670"}`), []byte(`{"CGRID":"88ed9c38005f07576a1e1af293063833b60edcc6"}`)}
 	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
 	if len(filesInDir) == 0 {
 		t.Fatalf("No files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)
@@ -280,20 +293,19 @@ func TestCDRsOnExpAMQPPosterFileFailover(t *testing.T) {
 		fileName = file.Name()
 		if strings.HasPrefix(fileName, "cdr|*amqp_json_map") {
 			foundFile = true
-			break
+			filePath := path.Join(cdrsMasterCfg.GeneralCfg().FailedPostsDir, fileName)
+			if readBytes, err := ioutil.ReadFile(filePath); err != nil {
+				t.Error(err)
+			} else if !reflect.DeepEqual(failoverContent[0], readBytes) && !reflect.DeepEqual(failoverContent[1], readBytes) { // Checking just the prefix should do since some content is dynamic
+				t.Errorf("Expecting: %v or %v, received: %v", string(failoverContent[0]), string(failoverContent[1]), string(readBytes))
+			}
+			if err := os.Remove(filePath); err != nil {
+				t.Error("Failed removing file: ", filePath)
+			}
 		}
 	}
 	if !foundFile {
 		t.Fatal("Could not find the file in folder")
-	}
-	filePath := path.Join(cdrsMasterCfg.GeneralCfg().FailedPostsDir, fileName)
-	if readBytes, err := ioutil.ReadFile(filePath); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(failoverContent, readBytes) { // Checking just the prefix should do since some content is dynamic
-		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(failoverContent), utils.ToJSON(readBytes))
-	}
-	if err := os.Remove(filePath); err != nil {
-		t.Error("Failed removing file: ", filePath)
 	}
 }
 
