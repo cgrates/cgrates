@@ -189,7 +189,6 @@ func TestRAitAcctStart(t *testing.T) {
 	if len(reply.AVPs) != 0 { // we don't expect AVPs to be populated
 		t.Errorf("Received AVPs: %+v", reply.AVPs)
 	}
-	time.Sleep(500 * time.Millisecond) // Wait so session is made
 	// Make sure the sessin is managed by SMG
 	var aSessions []*sessions.ActiveSession
 	if err := raRPC.Call(utils.SessionSv1GetActiveSessions,

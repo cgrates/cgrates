@@ -673,6 +673,7 @@ func TestSMGVoiceSessionTTL(t *testing.T) {
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
+	time.Sleep(time.Duration(100 * time.Millisecond))
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, DestinationPrefixes: []string{"1008"}}
 	if err := smgRPC.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
@@ -966,7 +967,7 @@ func TestSMGVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Received reply: %s", reply)
 	}
-	time.Sleep(time.Duration(20) * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT},
 		DestinationPrefixes: []string{smgEv.GetStringIgnoreErrors(utils.Destination)}}
