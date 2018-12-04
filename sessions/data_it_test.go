@@ -92,7 +92,7 @@ func TestSMGDataLastUsedData(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f",
 			eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
-	tStart, _ := utils.ParseDate("2016-01-05T18:31:05Z")
+	tStart, _ := utils.ParseTimeDetectLayout("2016-01-05T18:31:05Z", "")
 	cd := engine.CallDescriptor{
 		Direction:   "*out",
 		Category:    "data",

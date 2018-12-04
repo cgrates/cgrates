@@ -24,6 +24,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -81,7 +82,8 @@ func (at *ActionTrigger) Execute(ub *Account) (err error) {
 			a.Balance = &BalanceFilter{}
 		}
 		if a.ExpirationString != "" { // if it's *unlimited then it has to be zero time'
-			if expDate, parseErr := utils.ParseDate(a.ExpirationString); parseErr == nil {
+			if expDate, parseErr := utils.ParseTimeDetectLayout(a.ExpirationString,
+				config.CgrConfig().GeneralCfg().DefaultTimezone); parseErr == nil {
 				a.Balance.ExpirationDate = &time.Time{}
 				*a.Balance.ExpirationDate = expDate
 			}
