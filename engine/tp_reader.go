@@ -376,7 +376,7 @@ func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *utils.TPRatingProfile)
 	for _, tpRpf := range rpfs {
 		resultRatingProfile = &RatingProfile{Id: tpRpf.KeyId()}
 		for _, tpRa := range tpRpf.RatingPlanActivations {
-			at, err := utils.ParseDate(tpRa.ActivationTime)
+			at, err := utils.ParseTimeDetectLayout(tpRa.ActivationTime, tpr.timezone)
 			if err != nil {
 				return fmt.Errorf("cannot parse activation time from %v", tpRa.ActivationTime)
 			}
@@ -416,7 +416,7 @@ func (tpr *TpReader) LoadRatingProfiles() (err error) {
 	for _, tpRpf := range mpTpRpfs {
 		rpf := &RatingProfile{Id: tpRpf.KeyId()}
 		for _, tpRa := range tpRpf.RatingPlanActivations {
-			at, err := utils.ParseDate(tpRa.ActivationTime)
+			at, err := utils.ParseTimeDetectLayout(tpRa.ActivationTime, tpr.timezone)
 			if err != nil {
 				return fmt.Errorf("cannot parse activation time from %v", tpRa.ActivationTime)
 			}
