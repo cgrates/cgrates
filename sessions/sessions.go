@@ -95,7 +95,8 @@ func NewSMGeneric(cgrCfg *config.CGRConfig, rals, resS, thdS,
 	if chargerS != nil && reflect.ValueOf(chargerS).IsNil() {
 		chargerS = nil
 	}
-	return &SMGeneric{cgrCfg: cgrCfg,
+	return &SMGeneric{
+		cgrCfg:             cgrCfg,
 		chargerS:           chargerS,
 		rals:               rals,
 		resS:               resS,
@@ -427,6 +428,9 @@ func (smg *SMGeneric) getSessionIDsMatchingIndexes(fltrs map[string]string,
 	runID := fltrs[utils.RunID]
 	checkNr := 0
 	for fltrName, fltrVal := range fltrs {
+		if fltrName == utils.RunID {
+			continue
+		}
 		checkNr += 1
 		if _, hasFldName := ssIndx[fltrName]; !hasFldName {
 			continue
@@ -447,11 +451,11 @@ func (smg *SMGeneric) getSessionIDsMatchingIndexes(fltrs map[string]string,
 			continue
 		}
 		// Higher run, takes out non matching indexes
-		for cgrID := range ssIndx[fltrName][fltrVal] {
-			if _, hasCGRID := matchingSessions[cgrID]; !hasCGRID {
-				delete(matchingSessions, cgrID)
-			}
-		}
+		// for cgrID := range ssIndx[fltrName][fltrVal] /*[runID]*/ {
+		// 	if _, hasCGRID := matchingSessions[cgrID]; !hasCGRID {
+		// 		delete(matchingSessions, cgrID)
+		// 	}
+		// }
 	}
 	return matchingSessions.Clone(), matchedIndexes
 }
