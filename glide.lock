@@ -145,7 +145,7 @@ imports:
 - name: github.com/Masterminds/semver
   version: c7af12943936e8c39859482e61f0574c2fd7fc75
 - name: github.com/mongodb/mongo-go-driver
-  version: 03d16bbe636981a408ff359412697fa9ff16ec83
+  version: 2bcd97a847884e8d7ecede81cf57bff44d6da7b8
   subpackages:
   - bson
   - bson/bsoncodec

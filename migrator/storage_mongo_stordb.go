@@ -28,14 +28,14 @@ import (
 func newMongoStorDBMigrator(stor engine.StorDB) (mgoMig *mongoStorDBMigrator) {
 	return &mongoStorDBMigrator{
 		storDB:  &stor,
-		mgoDB:   stor.(*engine.MongoStorage),
+		mgoDB:   stor.(*engine.MongoStorageOld),
 		qryIter: nil,
 	}
 }
 
 type mongoStorDBMigrator struct {
 	storDB  *engine.StorDB
-	mgoDB   *engine.MongoStorage
+	mgoDB   *engine.MongoStorageOld
 	qryIter *mgo.Iter
 }
 

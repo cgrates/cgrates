@@ -34,7 +34,7 @@ const (
 
 type mongoMigrator struct {
 	dm      *engine.DataManager
-	mgoDB   *engine.MongoStorage
+	mgoDB   *engine.MongoStorageOld
 	qryIter *mgo.Iter
 }
 
@@ -50,7 +50,7 @@ type AtKeyValue struct {
 func newMongoMigrator(dm *engine.DataManager) (mgoMig *mongoMigrator) {
 	return &mongoMigrator{
 		dm:      dm,
-		mgoDB:   dm.DataDB().(*engine.MongoStorage),
+		mgoDB:   dm.DataDB().(*engine.MongoStorageOld),
 		qryIter: nil,
 	}
 }
