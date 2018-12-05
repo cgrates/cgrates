@@ -33,15 +33,15 @@ import (
 	"github.com/cgrates/ltcache"
 
 	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/bson/objectid"
+	"github.com/mongodb/mongo-go-driver/bson/primitive"
 	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/mongodb/mongo-go-driver/options"
+	"github.com/mongodb/mongo-go-driver/mongo/options"
 	"github.com/mongodb/mongo-go-driver/x/bsonx"
 )
 
-// NewMongoStorageNew givese new mongo driver
+// NewMongoStorage givese new mongo driver
 func NewMongoStorage(host, port, db, user, pass, storageType string,
-	cdrsIndexes []string, cacheCfg config.CacheCfg) (ms *MongoStorageNew, err error) {
+	cdrsIndexes []string, cacheCfg config.CacheCfg) (ms *MongoStorage, err error) {
 	url := "mongodb://" + host
 	if port != "" {
 		url += ":" + port
@@ -64,7 +64,7 @@ func NewMongoStorage(host, port, db, user, pass, storageType string,
 	if err != nil {
 		return nil, err
 	}
-	ms = &MongoStorageNew{
+	ms = &MongoStorage{
 		client:      client,
 		ctx:         ctx,
 		db:          dbName,
@@ -73,12 +73,19 @@ func NewMongoStorage(host, port, db, user, pass, storageType string,
 		cacheCfg:    cacheCfg,
 		cdrsIndexes: cdrsIndexes,
 	}
+	if col, err := ms.client.Database(db).ListCollections(ms.ctx, nil); err != nil {
+		return nil, err
+	} else if !col.Next(ctx) { // create indexes only if database is empty
+		if err = ms.EnsureIndexes(); err != nil {
+			return nil, err
+		}
+	}
 	ms.cnter = utils.NewCounter(time.Now().UnixNano(), 0)
 	return
 }
 
-// MongoStorageNew struct for new mongo driver
-type MongoStorageNew struct {
+// MongoStorage struct for new mongo driver
+type MongoStorage struct {
 	client      *mongo.Client
 	ctx         context.Context
 	db          string
@@ -90,11 +97,110 @@ type MongoStorageNew struct {
 	cnter       *utils.Counter
 }
 
-func (ms *MongoStorageNew) getCol(col string) *mongo.Collection {
+func (ms *MongoStorage) EnusureIndex(colName string, uniq bool, keys ...string) error {
+	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) error {
+		col := ms.getCol(colName)
+		io := mongo.NewIndexOptionsBuilder().Unique(uniq)
+		var doc bsonx.Doc
+		// elem := make([]bson.M, len(keys))
+		for _, k := range keys {
+			// elem[i] = bson.M{k: 1}
+			doc = doc.Append(k, bsonx.Int32(1))
+		}
+		_, err := col.Indexes().CreateOne(sctx, mongo.IndexModel{
+			Keys:    doc,
+			Options: io.Build(),
+		})
+		return err
+	})
+}
+
+func (ms *MongoStorage) getCol(col string) *mongo.Collection {
 	return ms.client.Database(ms.db).Collection(col)
 }
 
-func (ms *MongoStorageNew) getColNameForPrefix(prefix string) (string, bool) {
+// EnsureIndexes creates db indexes
+func (ms *MongoStorage) EnsureIndexes() (err error) {
+	if ms.storageType == utils.DataDB {
+		for _, col := range []string{colAct, colApl, colAAp, colAtr,
+			colDcs, colRpl, colDst, colRds, colAls, colUsr, colLht} {
+			if err = ms.EnusureIndex(col, true, "key"); err != nil {
+				return
+			}
+		}
+		for _, col := range []string{colRsP, colRes, colSqs, colSqp,
+			colTps, colThs, colSpp, colAttr, colFlt, colCpp} {
+			if err = ms.EnusureIndex(col, true, "tenant", "id"); err != nil {
+				return
+			}
+		}
+		for _, col := range []string{colRpf, colShg, colAcc} {
+			if err = ms.EnusureIndex(col, true, "id"); err != nil {
+				return
+			}
+		}
+	}
+	if ms.storageType == utils.StorDB {
+		for _, col := range []string{utils.TBLTPTimings, utils.TBLTPDestinations,
+			utils.TBLTPDestinationRates, utils.TBLTPRatingPlans,
+			utils.TBLTPSharedGroups, utils.TBLTPActions,
+			utils.TBLTPActionPlans, utils.TBLTPActionTriggers,
+			utils.TBLTPStats, utils.TBLTPResources} {
+			if err = ms.EnusureIndex(col, true, "tpid", "id"); err != nil {
+				return
+			}
+		}
+
+		if err = ms.EnusureIndex(utils.TBLTPRateProfiles, true, "tpid", "direction",
+			"tenant", "category", "subject", "loadid"); err != nil {
+			return
+		}
+
+		if err = ms.EnusureIndex(utils.TBLTPUsers, true, "tpid", "tenant",
+			"username"); err != nil {
+			return
+		}
+
+		if err = ms.EnusureIndex(utils.TBLTPDerivedChargers, true, "tpid", "tenant",
+			"category", "subject", "account", "loadid"); err != nil {
+			return
+		}
+
+		if err = ms.EnusureIndex(utils.TBLTPDerivedChargers, true, "tpid", "direction",
+			"tenant", "account", "loadid"); err != nil {
+			return
+		}
+
+		if err = ms.EnusureIndex(utils.CDRsTBL, true, CGRIDLow, RunIDLow,
+			OriginIDLow); err != nil {
+			return
+		}
+
+		for _, idxKey := range ms.cdrsIndexes {
+			if err = ms.EnusureIndex(utils.CDRsTBL, false, idxKey); err != nil {
+				return
+			}
+		}
+
+		if err = ms.EnusureIndex(utils.SessionsCostsTBL, true, CGRIDLow,
+			RunIDLow); err != nil {
+			return
+		}
+
+		if err = ms.EnusureIndex(utils.SessionsCostsTBL, false, OriginHostLow,
+			OriginIDLow); err != nil {
+			return
+		}
+
+		if err = ms.EnusureIndex(utils.SessionsCostsTBL, false, RunIDLow,
+			OriginIDLow); err != nil {
+			return
+		}
+	}
+	return
+}
+
+func (ms *MongoStorage) getColNameForPrefix(prefix string) (string, bool) {
 	res, ok := map[string]string{
 		utils.DESTINATION_PREFIX:         colDst,
 		utils.REVERSE_DESTINATION_PREFIX: colRds,
@@ -107,61 +213,58 @@ func (ms *MongoStorageNew) getColNameForPrefix(prefix string) (string, bool) {
 		utils.RATING_PROFILE_PREFIX:      colRpf,
 		utils.ACCOUNT_PREFIX:             colAcc,
 		utils.SHARED_GROUP_PREFIX:        colShg,
-		utils.LCR_PREFIX:                 colLcr,
 		utils.DERIVEDCHARGERS_PREFIX:     colDcs,
 		utils.ALIASES_PREFIX:             colAls,
 		utils.REVERSE_ALIASES_PREFIX:     colRCfgs,
 		utils.PUBSUB_SUBSCRIBERS_PREFIX:  colPbs,
 		utils.USERS_PREFIX:               colUsr,
-		utils.CDR_STATS_PREFIX:           colCrs,
 		utils.LOADINST_KEY:               colLht,
 		utils.VERSION_PREFIX:             colVer,
-		//utils.CDR_STATS_QUEUE_PREFIX:            colStq,
-		utils.TimingsPrefix:          colTmg,
-		utils.ResourcesPrefix:        colRes,
-		utils.ResourceProfilesPrefix: colRsP,
-		utils.ThresholdProfilePrefix: colTps,
-		utils.StatQueueProfilePrefix: colSqp,
-		utils.ThresholdPrefix:        colThs,
-		utils.FilterPrefix:           colFlt,
-		utils.SupplierProfilePrefix:  colSpp,
-		utils.AttributeProfilePrefix: colAttr,
+		utils.TimingsPrefix:              colTmg,
+		utils.ResourcesPrefix:            colRes,
+		utils.ResourceProfilesPrefix:     colRsP,
+		utils.ThresholdProfilePrefix:     colTps,
+		utils.StatQueueProfilePrefix:     colSqp,
+		utils.ThresholdPrefix:            colThs,
+		utils.FilterPrefix:               colFlt,
+		utils.SupplierProfilePrefix:      colSpp,
+		utils.AttributeProfilePrefix:     colAttr,
 	}[prefix]
 	return res, ok
 }
 
 // Close disconects the client
-func (ms *MongoStorageNew) Close() {
+func (ms *MongoStorage) Close() {
 	if err := ms.client.Disconnect(ms.ctx); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<MongoStorage> Error on disconect:%s", err))
 	}
 }
 
 // Flush drops the datatable
-func (ms *MongoStorageNew) Flush(ignore string) (err error) {
+func (ms *MongoStorage) Flush(ignore string) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) error {
 		return ms.client.Database(ms.db).Drop(sctx)
 	})
 }
 
 // Marshaler returns the marshall
-func (ms *MongoStorageNew) Marshaler() Marshaler {
+func (ms *MongoStorage) Marshaler() Marshaler {
 	return ms.ms
 }
 
 // DB returnes a database object
-func (ms *MongoStorageNew) DB() *mongo.Database {
+func (ms *MongoStorage) DB() *mongo.Database {
 	return ms.client.Database(ms.db)
 }
 
 // SelectDatabase selects the database
-func (ms *MongoStorageNew) SelectDatabase(dbName string) (err error) {
+func (ms *MongoStorage) SelectDatabase(dbName string) (err error) {
 	ms.db = dbName
 	return
 }
 
 // RebuildReverseForPrefix implementation
-func (ms *MongoStorageNew) RebuildReverseForPrefix(prefix string) (err error) {
+func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) (err error) {
 	if !utils.IsSliceMember([]string{utils.REVERSE_DESTINATION_PREFIX,
 		utils.REVERSE_ALIASES_PREFIX, utils.AccountActionPlansPrefix}, prefix) {
 		return utils.ErrInvalidKey
@@ -224,7 +327,7 @@ func (ms *MongoStorageNew) RebuildReverseForPrefix(prefix string) (err error) {
 }
 
 // RemoveReverseForPrefix implementation
-func (ms *MongoStorageNew) RemoveReverseForPrefix(prefix string) (err error) {
+func (ms *MongoStorage) RemoveReverseForPrefix(prefix string) (err error) {
 	if !utils.IsSliceMember([]string{utils.REVERSE_DESTINATION_PREFIX,
 		utils.REVERSE_ALIASES_PREFIX, utils.AccountActionPlansPrefix}, prefix) {
 		return utils.ErrInvalidKey
@@ -291,7 +394,7 @@ func (ms *MongoStorageNew) RemoveReverseForPrefix(prefix string) (err error) {
 }
 
 // IsDBEmpty implementation
-func (ms *MongoStorageNew) IsDBEmpty() (resp bool, err error) {
+func (ms *MongoStorage) IsDBEmpty() (resp bool, err error) {
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) error {
 		col, err := ms.DB().ListCollections(sctx, nil)
 		if err != nil {
@@ -312,7 +415,7 @@ func (ms *MongoStorageNew) IsDBEmpty() (resp bool, err error) {
 	return resp, err
 }
 
-func (ms *MongoStorageNew) getField(sctx mongo.SessionContext, col, prefix, subject, field string) (result []string, err error) {
+func (ms *MongoStorage) getField(sctx mongo.SessionContext, col, prefix, subject, field string) (result []string, err error) {
 	fieldResult := bson.D{}
 	iter, err := ms.getCol(col).Find(sctx,
 		bson.M{field: bsonx.Regex(subject, "")},
@@ -332,7 +435,7 @@ func (ms *MongoStorageNew) getField(sctx mongo.SessionContext, col, prefix, subj
 	}
 	return result, iter.Close(sctx)
 }
-func (ms *MongoStorageNew) getField2(sctx mongo.SessionContext, col, prefix, subject string, tntID *utils.TenantID) (result []string, err error) {
+func (ms *MongoStorage) getField2(sctx mongo.SessionContext, col, prefix, subject string, tntID *utils.TenantID) (result []string, err error) {
 	idResult := struct{ Tenant, Id string }{}
 	elem := bson.M{}
 	if tntID.Tenant != "" {
@@ -358,7 +461,7 @@ func (ms *MongoStorageNew) getField2(sctx mongo.SessionContext, col, prefix, sub
 }
 
 // GetKeysForPrefix implementation
-func (ms *MongoStorageNew) GetKeysForPrefix(prefix string) (result []string, err error) {
+func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err error) {
 	var category, subject string
 	keyLen := len(utils.DESTINATION_PREFIX)
 	if len(prefix) < keyLen {
@@ -388,8 +491,6 @@ func (ms *MongoStorageNew) GetKeysForPrefix(prefix string) (result []string, err
 			result, err = ms.getField(sctx, colShg, utils.SHARED_GROUP_PREFIX, subject, "id")
 		case utils.DERIVEDCHARGERS_PREFIX:
 			result, err = ms.getField(sctx, colDcs, utils.DERIVEDCHARGERS_PREFIX, subject, "key")
-		case utils.LCR_PREFIX:
-			result, err = ms.getField(sctx, colLcr, utils.LCR_PREFIX, subject, "key")
 		case utils.ACCOUNT_PREFIX:
 			result, err = ms.getField(sctx, colAcc, utils.ACCOUNT_PREFIX, subject, "id")
 		case utils.ALIASES_PREFIX:
@@ -428,7 +529,7 @@ func (ms *MongoStorageNew) GetKeysForPrefix(prefix string) (result []string, err
 	return
 }
 
-func (ms *MongoStorageNew) HasDataDrv(category, subject, tenant string) (has bool, err error) {
+func (ms *MongoStorage) HasDataDrv(category, subject, tenant string) (has bool, err error) {
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		var count int64
 		switch category {
@@ -471,7 +572,7 @@ func (ms *MongoStorageNew) HasDataDrv(category, subject, tenant string) (has boo
 	return has, err
 }
 
-func (ms *MongoStorageNew) GetRatingPlanDrv(key string) (rp *RatingPlan, err error) {
+func (ms *MongoStorage) GetRatingPlanDrv(key string) (rp *RatingPlan, err error) {
 	var kv struct {
 		Key   string
 		Value []byte
@@ -505,7 +606,7 @@ func (ms *MongoStorageNew) GetRatingPlanDrv(key string) (rp *RatingPlan, err err
 	return
 }
 
-func (ms *MongoStorageNew) SetRatingPlanDrv(rp *RatingPlan) error {
+func (ms *MongoStorage) SetRatingPlanDrv(rp *RatingPlan) error {
 	result, err := ms.ms.Marshal(rp)
 	if err != nil {
 		return err
@@ -526,7 +627,7 @@ func (ms *MongoStorageNew) SetRatingPlanDrv(rp *RatingPlan) error {
 	})
 }
 
-func (ms *MongoStorageNew) RemoveRatingPlanDrv(key string) error {
+func (ms *MongoStorage) RemoveRatingPlanDrv(key string) error {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(colRpl).DeleteMany(sctx, bson.M{"key": key})
 		if dr.DeletedCount == 0 {
@@ -536,7 +637,7 @@ func (ms *MongoStorageNew) RemoveRatingPlanDrv(key string) error {
 	})
 }
 
-func (ms *MongoStorageNew) GetRatingProfileDrv(key string) (rp *RatingProfile, err error) {
+func (ms *MongoStorage) GetRatingProfileDrv(key string) (rp *RatingProfile, err error) {
 	rp = new(RatingProfile)
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colRpf).FindOne(sctx, bson.M{"id": key})
@@ -551,7 +652,7 @@ func (ms *MongoStorageNew) GetRatingProfileDrv(key string) (rp *RatingProfile, e
 	return
 }
 
-func (ms *MongoStorageNew) SetRatingProfileDrv(rp *RatingProfile) (err error) {
+func (ms *MongoStorage) SetRatingProfileDrv(rp *RatingProfile) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(colRpf).UpdateOne(sctx, bson.M{"id": rp.Id},
 			bson.M{"$set": rp},
@@ -561,7 +662,7 @@ func (ms *MongoStorageNew) SetRatingProfileDrv(rp *RatingProfile) (err error) {
 	})
 }
 
-func (ms *MongoStorageNew) RemoveRatingProfileDrv(key string) error {
+func (ms *MongoStorage) RemoveRatingProfileDrv(key string) error {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(colRpf).DeleteMany(sctx, bson.M{"id": key})
 		if dr.DeletedCount == 0 {
@@ -571,48 +672,7 @@ func (ms *MongoStorageNew) RemoveRatingProfileDrv(key string) error {
 	})
 }
 
-func (ms *MongoStorageNew) GetLCRDrv(key string) (lcr *LCR, err error) {
-	var result struct {
-		Key   string
-		Value *LCR
-	}
-	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		cur := ms.getCol(colLcr).FindOne(sctx, bson.M{"key": key})
-		if err := cur.Decode(&result); err != nil {
-			if err == mongo.ErrNoDocuments {
-				return utils.ErrNotFound
-			}
-			return err
-		}
-		return nil
-	})
-	return result.Value, err
-}
-
-func (ms *MongoStorageNew) SetLCRDrv(lcr *LCR) (err error) {
-	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(colLcr).UpdateOne(sctx, bson.M{"key": lcr.GetId()},
-			bson.M{"$set": struct {
-				Key   string
-				Value *LCR
-			}{lcr.GetId(), lcr}},
-			options.Update().SetUpsert(true),
-		)
-		return err
-	})
-}
-
-func (ms *MongoStorageNew) RemoveLCRDrv(key, transactionID string) (err error) {
-	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		dr, err := ms.getCol(colLcr).DeleteOne(sctx, bson.M{"key": key})
-		if dr.DeletedCount == 0 {
-			return utils.ErrNotFound
-		}
-		return err
-	})
-}
-
-func (ms *MongoStorageNew) GetDestination(key string, skipCache bool,
+func (ms *MongoStorage) GetDestination(key string, skipCache bool,
 	transactionID string) (result *Destination, err error) {
 	if !skipCache {
 		if x, ok := Cache.Get(utils.CacheDestinations, key); ok {
@@ -659,7 +719,7 @@ func (ms *MongoStorageNew) GetDestination(key string, skipCache bool,
 	return
 }
 
-func (ms *MongoStorageNew) SetDestination(dest *Destination, transactionID string) (err error) {
+func (ms *MongoStorage) SetDestination(dest *Destination, transactionID string) (err error) {
 	result, err := ms.ms.Marshal(dest)
 	if err != nil {
 		return err
@@ -681,7 +741,7 @@ func (ms *MongoStorageNew) SetDestination(dest *Destination, transactionID strin
 	})
 }
 
-func (ms *MongoStorageNew) RemoveDestination(destID string,
+func (ms *MongoStorage) RemoveDestination(destID string,
 	transactionID string) (err error) {
 	// get destination for prefix list
 	d, err := ms.GetDestination(destID, false, transactionID)
@@ -713,7 +773,7 @@ func (ms *MongoStorageNew) RemoveDestination(destID string,
 	return
 }
 
-func (ms *MongoStorageNew) GetReverseDestination(prefix string, skipCache bool,
+func (ms *MongoStorage) GetReverseDestination(prefix string, skipCache bool,
 	transactionID string) (ids []string, err error) {
 	if !skipCache {
 		if x, ok := Cache.Get(utils.CacheReverseDestinations, prefix); ok {
@@ -747,7 +807,7 @@ func (ms *MongoStorageNew) GetReverseDestination(prefix string, skipCache bool,
 	return
 }
 
-func (ms *MongoStorageNew) SetReverseDestination(dest *Destination,
+func (ms *MongoStorage) SetReverseDestination(dest *Destination,
 	transactionID string) (err error) {
 	for _, p := range dest.Prefixes {
 		if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
@@ -763,7 +823,7 @@ func (ms *MongoStorageNew) SetReverseDestination(dest *Destination,
 	return nil
 }
 
-func (ms *MongoStorageNew) UpdateReverseDestination(oldDest, newDest *Destination,
+func (ms *MongoStorage) UpdateReverseDestination(oldDest, newDest *Destination,
 	transactionID string) error {
 	//log.Printf("Old: %+v, New: %+v", oldDest, newDest)
 	var obsoletePrefixes []string
@@ -828,7 +888,7 @@ func (ms *MongoStorageNew) UpdateReverseDestination(oldDest, newDest *Destinatio
 	return nil
 }
 
-func (ms *MongoStorageNew) GetActionsDrv(key string) (as Actions, err error) {
+func (ms *MongoStorage) GetActionsDrv(key string) (as Actions, err error) {
 	var result struct {
 		Key   string
 		Value Actions
@@ -849,7 +909,7 @@ func (ms *MongoStorageNew) GetActionsDrv(key string) (as Actions, err error) {
 	return
 }
 
-func (ms *MongoStorageNew) SetActionsDrv(key string, as Actions) error {
+func (ms *MongoStorage) SetActionsDrv(key string, as Actions) error {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(colAct).UpdateOne(sctx, bson.M{"key": key},
 			bson.M{"$set": struct {
@@ -862,7 +922,7 @@ func (ms *MongoStorageNew) SetActionsDrv(key string, as Actions) error {
 	})
 }
 
-func (ms *MongoStorageNew) RemoveActionsDrv(key string) error {
+func (ms *MongoStorage) RemoveActionsDrv(key string) error {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(colAct).DeleteOne(sctx, bson.M{"key": key})
 		if dr.DeletedCount == 0 {
@@ -872,7 +932,7 @@ func (ms *MongoStorageNew) RemoveActionsDrv(key string) error {
 	})
 }
 
-func (ms *MongoStorageNew) GetSharedGroupDrv(key string) (sg *SharedGroup, err error) {
+func (ms *MongoStorage) GetSharedGroupDrv(key string) (sg *SharedGroup, err error) {
 	sg = new(SharedGroup)
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colShg).FindOne(sctx, bson.M{"id": key})
@@ -887,7 +947,7 @@ func (ms *MongoStorageNew) GetSharedGroupDrv(key string) (sg *SharedGroup, err e
 	return
 }
 
-func (ms *MongoStorageNew) SetSharedGroupDrv(sg *SharedGroup) (err error) {
+func (ms *MongoStorage) SetSharedGroupDrv(sg *SharedGroup) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(colShg).UpdateOne(sctx, bson.M{"id": sg.Id},
 			bson.M{"$set": sg},
@@ -897,7 +957,7 @@ func (ms *MongoStorageNew) SetSharedGroupDrv(sg *SharedGroup) (err error) {
 	})
 }
 
-func (ms *MongoStorageNew) RemoveSharedGroupDrv(id, transactionID string) (err error) {
+func (ms *MongoStorage) RemoveSharedGroupDrv(id, transactionID string) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(colShg).DeleteOne(sctx, bson.M{"id": id})
 		if dr.DeletedCount == 0 {
@@ -907,7 +967,7 @@ func (ms *MongoStorageNew) RemoveSharedGroupDrv(id, transactionID string) (err e
 	})
 }
 
-func (ms *MongoStorageNew) GetAccount(key string) (result *Account, err error) {
+func (ms *MongoStorage) GetAccount(key string) (result *Account, err error) {
 	result = new(Account)
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colAcc).FindOne(sctx, bson.M{"id": key})
@@ -922,7 +982,7 @@ func (ms *MongoStorageNew) GetAccount(key string) (result *Account, err error) {
 	return
 }
 
-func (ms *MongoStorageNew) SetAccount(acc *Account) error {
+func (ms *MongoStorage) SetAccount(acc *Account) error {
 	// never override existing account with an empty one
 	// UPDATE: if all balances expired and were cleaned it makes
 	// sense to write empty balance map
@@ -944,7 +1004,7 @@ func (ms *MongoStorageNew) SetAccount(acc *Account) error {
 	})
 }
 
-func (ms *MongoStorageNew) RemoveAccount(key string) (err error) {
+func (ms *MongoStorage) RemoveAccount(key string) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(colAcc).DeleteOne(sctx, bson.M{"id": key})
 		if dr.DeletedCount == 0 {
@@ -954,50 +1014,7 @@ func (ms *MongoStorageNew) RemoveAccount(key string) (err error) {
 	})
 }
 
-func (ms *MongoStorageNew) GetCdrStatsQueueDrv(key string) (sq *CDRStatsQueue, err error) {
-	var result struct {
-		Key   string
-		Value *CDRStatsQueue
-	}
-	if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		cur := ms.getCol(colStq).FindOne(sctx, bson.M{"key": key})
-		if err := cur.Decode(&result); err != nil {
-			if err == mongo.ErrNoDocuments {
-				return utils.ErrNotFound
-			}
-			return err
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-	return result.Value, nil
-}
-
-func (ms *MongoStorageNew) SetCdrStatsQueueDrv(sq *CDRStatsQueue) (err error) {
-	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(colStq).UpdateOne(sctx, bson.M{"key": sq.GetId()},
-			bson.M{"$set": struct {
-				Key   string
-				Value *CDRStatsQueue
-			}{Key: sq.GetId(), Value: sq}},
-			options.Update().SetUpsert(true),
-		)
-		return err
-	})
-}
-
-func (ms *MongoStorageNew) RemoveCdrStatsQueueDrv(id string) (err error) {
-	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		dr, err := ms.getCol(colStq).DeleteOne(sctx, bson.M{"key": id})
-		if dr.DeletedCount == 0 {
-			return utils.ErrNotFound
-		}
-		return err
-	})
-}
-
-func (ms *MongoStorageNew) GetSubscribersDrv() (result map[string]*SubscriberData, err error) {
+func (ms *MongoStorage) GetSubscribersDrv() (result map[string]*SubscriberData, err error) {
 	result = make(map[string]*SubscriberData)
 	var kv struct {
 		Key   string
@@ -1022,7 +1039,7 @@ func (ms *MongoStorageNew) GetSubscribersDrv() (result map[string]*SubscriberDat
 	return
 }
 
-func (ms *MongoStorageNew) SetSubscriberDrv(key string, sub *SubscriberData) (err error) {
+func (ms *MongoStorage) SetSubscriberDrv(key string, sub *SubscriberData) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(colPbs).UpdateOne(sctx, bson.M{"key": key},
 			bson.M{"$set": struct {
@@ -1035,7 +1052,7 @@ func (ms *MongoStorageNew) SetSubscriberDrv(key string, sub *SubscriberData) (er
 	})
 }
 
-func (ms *MongoStorageNew) RemoveSubscriberDrv(key string) (err error) {
+func (ms *MongoStorage) RemoveSubscriberDrv(key string) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(colPbs).DeleteOne(sctx, bson.M{"key": key})
 		if dr.DeletedCount == 0 {
@@ -1045,7 +1062,7 @@ func (ms *MongoStorageNew) RemoveSubscriberDrv(key string) (err error) {
 	})
 }
 
-func (ms *MongoStorageNew) GetUserDrv(key string) (up *UserProfile, err error) {
+func (ms *MongoStorage) GetUserDrv(key string) (up *UserProfile, err error) {
 	var kv struct {
 		Key   string
 		Value *UserProfile
@@ -1065,7 +1082,7 @@ func (ms *MongoStorageNew) GetUserDrv(key string) (up *UserProfile, err error) {
 	return kv.Value, nil
 }
 
-func (ms *MongoStorageNew) GetUsersDrv() (result []*UserProfile, err error) {
+func (ms *MongoStorage) GetUsersDrv() (result []*UserProfile, err error) {
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur, err := ms.getCol(colUsr).Find(sctx, nil)
 		if err != nil {
@@ -1087,7 +1104,7 @@ func (ms *MongoStorageNew) GetUsersDrv() (result []*UserProfile, err error) {
 	return
 }
 
-func (ms *MongoStorageNew) SetUserDrv(up *UserProfile) (err error) {
+func (ms *MongoStorage) SetUserDrv(up *UserProfile) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(colUsr).UpdateOne(sctx, bson.M{"key": up.GetId()},
 			bson.M{"$set": struct {
@@ -1100,7 +1117,7 @@ func (ms *MongoStorageNew) SetUserDrv(up *UserProfile) (err error) {
 	})
 }
 
-func (ms *MongoStorageNew) RemoveUserDrv(key string) (err error) {
+func (ms *MongoStorage) RemoveUserDrv(key string) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(colUsr).DeleteOne(sctx, bson.M{"key": key})
 		if dr.DeletedCount == 0 {
@@ -1110,7 +1127,7 @@ func (ms *MongoStorageNew) RemoveUserDrv(key string) (err error) {
 	})
 }
 
-func (ms *MongoStorageNew) GetAlias(key string, skipCache bool,
+func (ms *MongoStorage) GetAlias(key string, skipCache bool,
 	transactionID string) (al *Alias, err error) {
 	if !skipCache {
 		if x, ok := Cache.Get(utils.CacheAliases, key); ok {
@@ -1148,7 +1165,7 @@ func (ms *MongoStorageNew) GetAlias(key string, skipCache bool,
 	return
 }
 
-func (ms *MongoStorageNew) SetAlias(al *Alias, transactionID string) (err error) {
+func (ms *MongoStorage) SetAlias(al *Alias, transactionID string) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(colAls).UpdateOne(sctx, bson.M{"key": al.GetId()},
 			bson.M{"$set": struct {
@@ -1161,7 +1178,7 @@ func (ms *MongoStorageNew) SetAlias(al *Alias, transactionID string) (err error)
 	})
 }
 
-func (ms *MongoStorageNew) RemoveAlias(key, transactionID string) (err error) {
+func (ms *MongoStorage) RemoveAlias(key, transactionID string) (err error) {
 	al := new(Alias)
 	al.SetId(key)
 	origKey := key
@@ -1214,7 +1231,7 @@ func (ms *MongoStorageNew) RemoveAlias(key, transactionID string) (err error) {
 	return
 }
 
-func (ms *MongoStorageNew) GetReverseAlias(reverseID string, skipCache bool,
+func (ms *MongoStorage) GetReverseAlias(reverseID string, skipCache bool,
 	transactionID string) (ids []string, err error) {
 	if !skipCache {
 		if x, ok := Cache.Get(utils.CacheReverseAliases, reverseID); ok {
@@ -1248,7 +1265,7 @@ func (ms *MongoStorageNew) GetReverseAlias(reverseID string, skipCache bool,
 	return
 }
 
-func (ms *MongoStorageNew) SetReverseAlias(al *Alias, transactionID string) (err error) {
+func (ms *MongoStorage) SetReverseAlias(al *Alias, transactionID string) (err error) {
 	for _, value := range al.Values {
 		for target, pairs := range value.Pairs {
 			for _, alias := range pairs {
@@ -1270,7 +1287,7 @@ func (ms *MongoStorageNew) SetReverseAlias(al *Alias, transactionID string) (err
 }
 
 // Limit will only retrieve the last n items out of history, newest first
-func (ms *MongoStorageNew) GetLoadHistory(limit int, skipCache bool,
+func (ms *MongoStorage) GetLoadHistory(limit int, skipCache bool,
 	transactionID string) (loadInsts []*utils.LoadInstance, err error) {
 	if limit == 0 {
 		return nil, nil
@@ -1316,7 +1333,7 @@ func (ms *MongoStorageNew) GetLoadHistory(limit int, skipCache bool,
 }
 
 // Adds a single load instance to load history
-func (ms *MongoStorageNew) AddLoadHistory(ldInst *utils.LoadInstance,
+func (ms *MongoStorage) AddLoadHistory(ldInst *utils.LoadInstance,
 	loadHistSize int, transactionID string) error {
 	if loadHistSize == 0 { // Load history disabled
 		return nil
@@ -1331,7 +1348,7 @@ func (ms *MongoStorageNew) AddLoadHistory(ldInst *utils.LoadInstance,
 		cur := ms.getCol(colLht).FindOne(sctx, bson.M{"key": utils.LOADINST_KEY})
 		if err := cur.Decode(&kv); err != nil {
 			if err == mongo.ErrNoDocuments {
-				return utils.ErrNotFound
+				return nil // utils.ErrNotFound
 			}
 			return err
 		}
@@ -1372,7 +1389,7 @@ func (ms *MongoStorageNew) AddLoadHistory(ldInst *utils.LoadInstance,
 	return err
 }
 
-func (ms *MongoStorageNew) GetActionTriggersDrv(key string) (atrs ActionTriggers, err error) {
+func (ms *MongoStorage) GetActionTriggersDrv(key string) (atrs ActionTriggers, err error) {
 	var kv struct {
 		Key   string
 		Value ActionTriggers
@@ -1393,10 +1410,10 @@ func (ms *MongoStorageNew) GetActionTriggersDrv(key string) (atrs ActionTriggers
 	return
 }
 
-func (ms *MongoStorageNew) SetActionTriggersDrv(key string, atrs ActionTriggers) (err error) {
+func (ms *MongoStorage) SetActionTriggersDrv(key string, atrs ActionTriggers) (err error) {
 	if len(atrs) == 0 {
 		return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-			_, err = ms.getCol(colStq).DeleteOne(sctx, bson.M{"key": key})
+			_, err = ms.getCol(colAtr).DeleteOne(sctx, bson.M{"key": key})
 			return err
 		})
 	}
@@ -1412,9 +1429,9 @@ func (ms *MongoStorageNew) SetActionTriggersDrv(key string, atrs ActionTriggers)
 	})
 }
 
-func (ms *MongoStorageNew) RemoveActionTriggersDrv(key string) error {
+func (ms *MongoStorage) RemoveActionTriggersDrv(key string) error {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		dr, err := ms.getCol(colStq).DeleteOne(sctx, bson.M{"key": key})
+		dr, err := ms.getCol(colAtr).DeleteOne(sctx, bson.M{"key": key})
 		if dr.DeletedCount == 0 {
 			return utils.ErrNotFound
 		}
@@ -1422,7 +1439,7 @@ func (ms *MongoStorageNew) RemoveActionTriggersDrv(key string) error {
 	})
 }
 
-func (ms *MongoStorageNew) GetActionPlan(key string, skipCache bool,
+func (ms *MongoStorage) GetActionPlan(key string, skipCache bool,
 	transactionID string) (ats *ActionPlan, err error) {
 	if !skipCache {
 		if x, err := Cache.GetCloned(utils.CacheActionPlans, key); err != nil {
@@ -1471,7 +1488,7 @@ func (ms *MongoStorageNew) GetActionPlan(key string, skipCache bool,
 	return
 }
 
-func (ms *MongoStorageNew) SetActionPlan(key string, ats *ActionPlan,
+func (ms *MongoStorage) SetActionPlan(key string, ats *ActionPlan,
 	overwrite bool, transactionID string) (err error) {
 	// clean dots from account ids map
 	cCommit := cacheCommit(transactionID)
@@ -1516,7 +1533,7 @@ func (ms *MongoStorageNew) SetActionPlan(key string, ats *ActionPlan,
 	})
 }
 
-func (ms *MongoStorageNew) RemoveActionPlan(key string, transactionID string) error {
+func (ms *MongoStorage) RemoveActionPlan(key string, transactionID string) error {
 	cCommit := cacheCommit(transactionID)
 	Cache.Remove(utils.CacheActionPlans, key, cCommit, transactionID)
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
@@ -1525,7 +1542,7 @@ func (ms *MongoStorageNew) RemoveActionPlan(key string, transactionID string) er
 	})
 }
 
-func (ms *MongoStorageNew) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {
+func (ms *MongoStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {
 	keys, err := ms.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
 	if err != nil {
 		return nil, err
@@ -1542,7 +1559,7 @@ func (ms *MongoStorageNew) GetAllActionPlans() (ats map[string]*ActionPlan, err 
 	return
 }
 
-func (ms *MongoStorageNew) GetAccountActionPlans(acntID string, skipCache bool, transactionID string) (aPlIDs []string, err error) {
+func (ms *MongoStorage) GetAccountActionPlans(acntID string, skipCache bool, transactionID string) (aPlIDs []string, err error) {
 	if !skipCache {
 		if x, ok := Cache.Get(utils.CacheAccountActionPlans, acntID); ok {
 			if x == nil {
@@ -1575,7 +1592,7 @@ func (ms *MongoStorageNew) GetAccountActionPlans(acntID string, skipCache bool, 
 	return
 }
 
-func (ms *MongoStorageNew) SetAccountActionPlans(acntID string, aPlIDs []string, overwrite bool) (err error) {
+func (ms *MongoStorage) SetAccountActionPlans(acntID string, aPlIDs []string, overwrite bool) (err error) {
 	if !overwrite {
 		if oldaPlIDs, err := ms.GetAccountActionPlans(acntID, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return err
@@ -1601,7 +1618,7 @@ func (ms *MongoStorageNew) SetAccountActionPlans(acntID string, aPlIDs []string,
 }
 
 // ToDo: check return len(aPlIDs) == 0
-func (ms *MongoStorageNew) RemAccountActionPlans(acntID string, aPlIDs []string) (err error) {
+func (ms *MongoStorage) RemAccountActionPlans(acntID string, aPlIDs []string) (err error) {
 	if len(aPlIDs) == 0 {
 		return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 			dr, err := ms.getCol(colAAp).DeleteOne(sctx, bson.M{"key": acntID})
@@ -1644,16 +1661,16 @@ func (ms *MongoStorageNew) RemAccountActionPlans(acntID string, aPlIDs []string)
 	})
 }
 
-func (ms *MongoStorageNew) PushTask(t *Task) error {
+func (ms *MongoStorage) PushTask(t *Task) error {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) error {
-		_, err := ms.getCol(colTsk).InsertOne(sctx, bson.M{"_id": objectid.New(), "task": t})
+		_, err := ms.getCol(colTsk).InsertOne(sctx, bson.M{"_id": primitive.NewObjectID(), "task": t})
 		return err
 	})
 }
 
-func (ms *MongoStorageNew) PopTask() (t *Task, err error) {
+func (ms *MongoStorage) PopTask() (t *Task, err error) {
 	v := struct {
-		ID   objectid.ObjectID `bson:"_id"`
+		ID   primitive.ObjectID `bson:"_id"`
 		Task *Task
 	}{}
 	if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
@@ -1671,7 +1688,7 @@ func (ms *MongoStorageNew) PopTask() (t *Task, err error) {
 	return v.Task, nil
 }
 
-func (ms *MongoStorageNew) GetDerivedChargersDrv(key string) (dcs *utils.DerivedChargers, err error) {
+func (ms *MongoStorage) GetDerivedChargersDrv(key string) (dcs *utils.DerivedChargers, err error) {
 	var kv struct {
 		Key   string
 		Value *utils.DerivedChargers
@@ -1691,7 +1708,7 @@ func (ms *MongoStorageNew) GetDerivedChargersDrv(key string) (dcs *utils.Derived
 	return kv.Value, nil
 }
 
-func (ms *MongoStorageNew) SetDerivedChargers(key string,
+func (ms *MongoStorage) SetDerivedChargers(key string,
 	dcs *utils.DerivedChargers, transactionID string) (err error) {
 	cCommit := cacheCommit(transactionID)
 	if dcs == nil || len(dcs.Chargers) == 0 {
@@ -1716,7 +1733,7 @@ func (ms *MongoStorageNew) SetDerivedChargers(key string,
 	})
 }
 
-func (ms *MongoStorageNew) RemoveDerivedChargersDrv(id, transactionID string) (err error) {
+func (ms *MongoStorage) RemoveDerivedChargersDrv(id, transactionID string) (err error) {
 	cCommit := cacheCommit(transactionID)
 	if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(colDcs).DeleteOne(sctx, bson.M{"key": id})
@@ -1728,52 +1745,7 @@ func (ms *MongoStorageNew) RemoveDerivedChargersDrv(id, transactionID string) (e
 	return nil
 }
 
-func (ms *MongoStorageNew) GetCdrStatsDrv(key string) (cs *CdrStats, err error) {
-	cs = new(CdrStats)
-	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		cur := ms.getCol(colCrs).FindOne(sctx, bson.M{"id": key})
-		if err := cur.Decode(cs); err != nil {
-			if err == mongo.ErrNoDocuments {
-				return utils.ErrNotFound
-			}
-			return err
-		}
-		return nil
-	})
-	return
-}
-
-func (ms *MongoStorageNew) GetAllCdrStatsDrv() (css []*CdrStats, err error) {
-	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(colCrs).Find(sctx, nil)
-		if err != nil {
-			return err
-		}
-		for cur.Next(sctx) {
-			var cs CdrStats
-			err := cur.Decode(&cs)
-			if err != nil {
-				return err
-			}
-			clone := cs // avoid using the same pointer in append
-			css = append(css, &clone)
-		}
-		return cur.Close(sctx)
-	})
-	return
-}
-
-func (ms *MongoStorageNew) SetCdrStatsDrv(cs *CdrStats) error {
-	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(colCrs).UpdateOne(sctx, bson.M{"id": cs.Id},
-			bson.M{"$set": cs},
-			options.Update().SetUpsert(true),
-		)
-		return err
-	})
-}
-
-func (ms *MongoStorageNew) GetResourceProfileDrv(tenant, id string) (rp *ResourceProfile, err error) {
+func (ms *MongoStorage) GetResourceProfileDrv(tenant, id string) (rp *ResourceProfile, err error) {
 	rp = new(ResourceProfile)
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colRsP).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
@@ -1788,7 +1760,7 @@ func (ms *MongoStorageNew) GetResourceProfileDrv(tenant, id string) (rp *Resourc
 	return
 }
 
-func (ms *MongoStorageNew) SetResourceProfileDrv(rp *ResourceProfile) (err error) {
+func (ms *MongoStorage) SetResourceProfileDrv(rp *ResourceProfile) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(colRsP).UpdateOne(sctx, bson.M{"tenant": rp.Tenant, "id": rp.ID},
 			bson.M{"$set": rp},
@@ -1798,9 +1770,9 @@ func (ms *MongoStorageNew) SetResourceProfileDrv(rp *ResourceProfile) (err error
 	})
 }
 
-func (ms *MongoStorageNew) RemoveResourceProfileDrv(tenant, id string) (err error) {
+func (ms *MongoStorage) RemoveResourceProfileDrv(tenant, id string) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		dr, err := ms.getCol(colDcs).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
+		dr, err := ms.getCol(colRsP).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {
 			return utils.ErrNotFound
 		}
@@ -1808,7 +1780,7 @@ func (ms *MongoStorageNew) RemoveResourceProfileDrv(tenant, id string) (err erro
 	})
 }
 
-func (ms *MongoStorageNew) GetResourceDrv(tenant, id string) (r *Resource, err error) {
+func (ms *MongoStorage) GetResourceDrv(tenant, id string) (r *Resource, err error) {
 	r = new(Resource)
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colRes).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
@@ -1823,7 +1795,7 @@ func (ms *MongoStorageNew) GetResourceDrv(tenant, id string) (r *Resource, err e
 	return
 }
 
-func (ms *MongoStorageNew) SetResourceDrv(r *Resource) (err error) {
+func (ms *MongoStorage) SetResourceDrv(r *Resource) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(colRes).UpdateOne(sctx, bson.M{"tenant": r.Tenant, "id": r.ID},
 			bson.M{"$set": r},
@@ -1833,7 +1805,7 @@ func (ms *MongoStorageNew) SetResourceDrv(r *Resource) (err error) {
 	})
 }
 
-func (ms *MongoStorageNew) RemoveResourceDrv(tenant, id string) (err error) {
+func (ms *MongoStorage) RemoveResourceDrv(tenant, id string) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(colRes).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {
@@ -1843,7 +1815,7 @@ func (ms *MongoStorageNew) RemoveResourceDrv(tenant, id string) (err error) {
 	})
 }
 
-func (ms *MongoStorageNew) GetTimingDrv(id string) (t *utils.TPTiming, err error) {
+func (ms *MongoStorage) GetTimingDrv(id string) (t *utils.TPTiming, err error) {
 	t = new(utils.TPTiming)
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colTmg).FindOne(sctx, bson.M{"id": id})
@@ -1858,7 +1830,7 @@ func (ms *MongoStorageNew) GetTimingDrv(id string) (t *utils.TPTiming, err error
 	return
 }
 
-func (ms *MongoStorageNew) SetTimingDrv(t *utils.TPTiming) (err error) {
+func (ms *MongoStorage) SetTimingDrv(t *utils.TPTiming) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(colTmg).UpdateOne(sctx, bson.M{"id": t.ID},
 			bson.M{"$set": t},
@@ -1868,7 +1840,7 @@ func (ms *MongoStorageNew) SetTimingDrv(t *utils.TPTiming) (err error) {
 	})
 }
 
-func (ms *MongoStorageNew) RemoveTimingDrv(id string) (err error) {
+func (ms *MongoStorage) RemoveTimingDrv(id string) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(colTmg).DeleteOne(sctx, bson.M{"id": id})
 		if dr.DeletedCount == 0 {
@@ -1880,7 +1852,7 @@ func (ms *MongoStorageNew) RemoveTimingDrv(id string) (err error) {
 
 // GetFilterIndexesDrv retrieves Indexes from dataDB
 //filterType is used togheter with fieldName:Val
-func (ms *MongoStorageNew) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType string,
+func (ms *MongoStorage) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType string,
 	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	type result struct {
 		Key   string
@@ -1959,7 +1931,7 @@ func (ms *MongoStorageNew) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType
 }
 
 // SetFilterIndexesDrv stores Indexes into DataDB
-func (ms *MongoStorageNew) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
+func (ms *MongoStorage) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 	indexes map[string]utils.StringMap, commit bool, transactionID string) (err error) {
 	originKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
 	dbKey := originKey
@@ -2025,7 +1997,7 @@ func (ms *MongoStorageNew) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 	}
 }
 
-func (ms *MongoStorageNew) RemoveFilterIndexesDrv(cacheID, itemIDPrefix string) (err error) {
+func (ms *MongoStorage) RemoveFilterIndexesDrv(cacheID, itemIDPrefix string) (err error) {
 	regexKey := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
 	for _, character := range []string{".", "*"} {
 		regexKey = strings.Replace(regexKey, character, `\`+character, strings.Count(regexKey, character))
@@ -2037,7 +2009,7 @@ func (ms *MongoStorageNew) RemoveFilterIndexesDrv(cacheID, itemIDPrefix string) 
 	})
 }
 
-func (ms *MongoStorageNew) MatchFilterIndexDrv(cacheID, itemIDPrefix,
+func (ms *MongoStorage) MatchFilterIndexDrv(cacheID, itemIDPrefix,
 	filterType, fldName, fldVal string) (itemIDs utils.StringMap, err error) {
 	var result struct {
 		Key   string
@@ -2060,7 +2032,7 @@ func (ms *MongoStorageNew) MatchFilterIndexDrv(cacheID, itemIDPrefix,
 }
 
 // GetStatQueueProfileDrv retrieves a StatQueueProfile from dataDB
-func (ms *MongoStorageNew) GetStatQueueProfileDrv(tenant string, id string) (sq *StatQueueProfile, err error) {
+func (ms *MongoStorage) GetStatQueueProfileDrv(tenant string, id string) (sq *StatQueueProfile, err error) {
 	sq = new(StatQueueProfile)
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colSqp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
@@ -2076,7 +2048,7 @@ func (ms *MongoStorageNew) GetStatQueueProfileDrv(tenant string, id string) (sq 
 }
 
 // SetStatQueueProfileDrv stores a StatsQueue into DataDB
-func (ms *MongoStorageNew) SetStatQueueProfileDrv(sq *StatQueueProfile) (err error) {
+func (ms *MongoStorage) SetStatQueueProfileDrv(sq *StatQueueProfile) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(colSqp).UpdateOne(sctx, bson.M{"tenant": sq.Tenant, "id": sq.ID},
 			bson.M{"$set": sq},
@@ -2087,7 +2059,7 @@ func (ms *MongoStorageNew) SetStatQueueProfileDrv(sq *StatQueueProfile) (err err
 }
 
 // RemStatQueueProfileDrv removes a StatsQueue from dataDB
-func (ms *MongoStorageNew) RemStatQueueProfileDrv(tenant, id string) (err error) {
+func (ms *MongoStorage) RemStatQueueProfileDrv(tenant, id string) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(colSqp).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {
@@ -2098,7 +2070,7 @@ func (ms *MongoStorageNew) RemStatQueueProfileDrv(tenant, id string) (err error)
 }
 
 // GetStoredStatQueueDrv retrieves a StoredStatQueue
-func (ms *MongoStorageNew) GetStoredStatQueueDrv(tenant, id string) (sq *StoredStatQueue, err error) {
+func (ms *MongoStorage) GetStoredStatQueueDrv(tenant, id string) (sq *StoredStatQueue, err error) {
 	sq = new(StoredStatQueue)
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colSqs).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
@@ -2114,7 +2086,7 @@ func (ms *MongoStorageNew) GetStoredStatQueueDrv(tenant, id string) (sq *StoredS
 }
 
 // SetStoredStatQueueDrv stores the metrics for a StoredStatQueue
-func (ms *MongoStorageNew) SetStoredStatQueueDrv(sq *StoredStatQueue) (err error) {
+func (ms *MongoStorage) SetStoredStatQueueDrv(sq *StoredStatQueue) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(colSqs).UpdateOne(sctx, bson.M{"tenant": sq.Tenant, "id": sq.ID},
 			bson.M{"$set": sq},
@@ -2125,7 +2097,7 @@ func (ms *MongoStorageNew) SetStoredStatQueueDrv(sq *StoredStatQueue) (err error
 }
 
 // RemStoredStatQueueDrv removes stored metrics for a StoredStatQueue
-func (ms *MongoStorageNew) RemStoredStatQueueDrv(tenant, id string) (err error) {
+func (ms *MongoStorage) RemStoredStatQueueDrv(tenant, id string) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(colSqs).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {
@@ -2136,7 +2108,7 @@ func (ms *MongoStorageNew) RemStoredStatQueueDrv(tenant, id string) (err error) 
 }
 
 // GetThresholdProfileDrv retrieves a ThresholdProfile from dataDB
-func (ms *MongoStorageNew) GetThresholdProfileDrv(tenant, ID string) (tp *ThresholdProfile, err error) {
+func (ms *MongoStorage) GetThresholdProfileDrv(tenant, ID string) (tp *ThresholdProfile, err error) {
 	tp = new(ThresholdProfile)
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colTps).FindOne(sctx, bson.M{"tenant": tenant, "id": ID})
@@ -2152,7 +2124,7 @@ func (ms *MongoStorageNew) GetThresholdProfileDrv(tenant, ID string) (tp *Thresh
 }
 
 // SetThresholdProfileDrv stores a ThresholdProfile into DataDB
-func (ms *MongoStorageNew) SetThresholdProfileDrv(tp *ThresholdProfile) (err error) {
+func (ms *MongoStorage) SetThresholdProfileDrv(tp *ThresholdProfile) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(colTps).UpdateOne(sctx, bson.M{"tenant": tp.Tenant, "id": tp.ID},
 			bson.M{"$set": tp}, options.Update().SetUpsert(true),
@@ -2162,7 +2134,7 @@ func (ms *MongoStorageNew) SetThresholdProfileDrv(tp *ThresholdProfile) (err err
 }
 
 // RemoveThresholdProfile removes a ThresholdProfile from dataDB/cache
-func (ms *MongoStorageNew) RemThresholdProfileDrv(tenant, id string) (err error) {
+func (ms *MongoStorage) RemThresholdProfileDrv(tenant, id string) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(colTps).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {
@@ -2172,7 +2144,7 @@ func (ms *MongoStorageNew) RemThresholdProfileDrv(tenant, id string) (err error)
 	})
 }
 
-func (ms *MongoStorageNew) GetThresholdDrv(tenant, id string) (r *Threshold, err error) {
+func (ms *MongoStorage) GetThresholdDrv(tenant, id string) (r *Threshold, err error) {
 	r = new(Threshold)
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colThs).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
@@ -2187,7 +2159,7 @@ func (ms *MongoStorageNew) GetThresholdDrv(tenant, id string) (r *Threshold, err
 	return
 }
 
-func (ms *MongoStorageNew) SetThresholdDrv(r *Threshold) (err error) {
+func (ms *MongoStorage) SetThresholdDrv(r *Threshold) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(colThs).UpdateOne(sctx, bson.M{"tenant": r.Tenant, "id": r.ID},
 			bson.M{"$set": r},
@@ -2197,7 +2169,7 @@ func (ms *MongoStorageNew) SetThresholdDrv(r *Threshold) (err error) {
 	})
 }
 
-func (ms *MongoStorageNew) RemoveThresholdDrv(tenant, id string) (err error) {
+func (ms *MongoStorage) RemoveThresholdDrv(tenant, id string) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(colThs).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {
@@ -2207,7 +2179,7 @@ func (ms *MongoStorageNew) RemoveThresholdDrv(tenant, id string) (err error) {
 	})
 }
 
-func (ms *MongoStorageNew) GetFilterDrv(tenant, id string) (r *Filter, err error) {
+func (ms *MongoStorage) GetFilterDrv(tenant, id string) (r *Filter, err error) {
 	r = new(Filter)
 	if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colFlt).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
@@ -2229,7 +2201,7 @@ func (ms *MongoStorageNew) GetFilterDrv(tenant, id string) (r *Filter, err error
 	return
 }
 
-func (ms *MongoStorageNew) SetFilterDrv(r *Filter) (err error) {
+func (ms *MongoStorage) SetFilterDrv(r *Filter) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(colFlt).UpdateOne(sctx, bson.M{"tenant": r.Tenant, "id": r.ID},
 			bson.M{"$set": r},
@@ -2239,7 +2211,7 @@ func (ms *MongoStorageNew) SetFilterDrv(r *Filter) (err error) {
 	})
 }
 
-func (ms *MongoStorageNew) RemoveFilterDrv(tenant, id string) (err error) {
+func (ms *MongoStorage) RemoveFilterDrv(tenant, id string) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(colFlt).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {
@@ -2249,7 +2221,7 @@ func (ms *MongoStorageNew) RemoveFilterDrv(tenant, id string) (err error) {
 	})
 }
 
-func (ms *MongoStorageNew) GetSupplierProfileDrv(tenant, id string) (r *SupplierProfile, err error) {
+func (ms *MongoStorage) GetSupplierProfileDrv(tenant, id string) (r *SupplierProfile, err error) {
 	r = new(SupplierProfile)
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colSpp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
@@ -2264,7 +2236,7 @@ func (ms *MongoStorageNew) GetSupplierProfileDrv(tenant, id string) (r *Supplier
 	return
 }
 
-func (ms *MongoStorageNew) SetSupplierProfileDrv(r *SupplierProfile) (err error) {
+func (ms *MongoStorage) SetSupplierProfileDrv(r *SupplierProfile) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(colSpp).UpdateOne(sctx, bson.M{"tenant": r.Tenant, "id": r.ID},
 			bson.M{"$set": r},
@@ -2274,7 +2246,7 @@ func (ms *MongoStorageNew) SetSupplierProfileDrv(r *SupplierProfile) (err error)
 	})
 }
 
-func (ms *MongoStorageNew) RemoveSupplierProfileDrv(tenant, id string) (err error) {
+func (ms *MongoStorage) RemoveSupplierProfileDrv(tenant, id string) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(colSpp).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {
@@ -2284,7 +2256,7 @@ func (ms *MongoStorageNew) RemoveSupplierProfileDrv(tenant, id string) (err erro
 	})
 }
 
-func (ms *MongoStorageNew) GetAttributeProfileDrv(tenant, id string) (r *AttributeProfile, err error) {
+func (ms *MongoStorage) GetAttributeProfileDrv(tenant, id string) (r *AttributeProfile, err error) {
 	r = new(AttributeProfile)
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colAttr).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
@@ -2299,7 +2271,7 @@ func (ms *MongoStorageNew) GetAttributeProfileDrv(tenant, id string) (r *Attribu
 	return
 }
 
-func (ms *MongoStorageNew) SetAttributeProfileDrv(r *AttributeProfile) (err error) {
+func (ms *MongoStorage) SetAttributeProfileDrv(r *AttributeProfile) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(colAttr).UpdateOne(sctx, bson.M{"tenant": r.Tenant, "id": r.ID},
 			bson.M{"$set": r},
@@ -2309,7 +2281,7 @@ func (ms *MongoStorageNew) SetAttributeProfileDrv(r *AttributeProfile) (err erro
 	})
 }
 
-func (ms *MongoStorageNew) RemoveAttributeProfileDrv(tenant, id string) (err error) {
+func (ms *MongoStorage) RemoveAttributeProfileDrv(tenant, id string) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(colAttr).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {
@@ -2319,7 +2291,7 @@ func (ms *MongoStorageNew) RemoveAttributeProfileDrv(tenant, id string) (err err
 	})
 }
 
-func (ms *MongoStorageNew) GetChargerProfileDrv(tenant, id string) (r *ChargerProfile, err error) {
+func (ms *MongoStorage) GetChargerProfileDrv(tenant, id string) (r *ChargerProfile, err error) {
 	r = new(ChargerProfile)
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colCpp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
@@ -2334,7 +2306,7 @@ func (ms *MongoStorageNew) GetChargerProfileDrv(tenant, id string) (r *ChargerPr
 	return
 }
 
-func (ms *MongoStorageNew) SetChargerProfileDrv(r *ChargerProfile) (err error) {
+func (ms *MongoStorage) SetChargerProfileDrv(r *ChargerProfile) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(colCpp).UpdateOne(sctx, bson.M{"tenant": r.Tenant, "id": r.ID},
 			bson.M{"$set": r},
@@ -2344,7 +2316,7 @@ func (ms *MongoStorageNew) SetChargerProfileDrv(r *ChargerProfile) (err error) {
 	})
 }
 
-func (ms *MongoStorageNew) RemoveChargerProfileDrv(tenant, id string) (err error) {
+func (ms *MongoStorage) RemoveChargerProfileDrv(tenant, id string) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(colCpp).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {

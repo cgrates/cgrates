@@ -29,7 +29,7 @@ import (
 	"github.com/cgrates/mgo/bson"
 )
 
-func (ms *MongoStorage) GetTpIds(colName string) ([]string, error) {
+func (ms *MongoStorageOld) GetTpIds(colName string) ([]string, error) {
 	tpidMap := make(map[string]bool)
 	session := ms.session.Copy()
 	db := session.DB(ms.db)
@@ -60,7 +60,7 @@ func (ms *MongoStorage) GetTpIds(colName string) ([]string, error) {
 	return tpids, nil
 }
 
-func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDistinctIds, filter map[string]string, pag *utils.Paginator) ([]string, error) {
+func (ms *MongoStorageOld) GetTpTableIds(tpid, table string, distinct utils.TPDistinctIds, filter map[string]string, pag *utils.Paginator) ([]string, error) {
 	findMap := make(map[string]interface{})
 	if tpid != "" {
 		findMap["tpid"] = tpid
@@ -68,7 +68,7 @@ func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 	for k, v := range filter {
 		findMap[k] = v
 	}
-	for k, v := range distinct { //fix for MongoStorage on TPUsers
+	for k, v := range distinct { //fix for MongoStorageOld on TPUsers
 		if v == "user_name" {
 			distinct[k] = "username"
 		}
@@ -129,7 +129,7 @@ func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 	return distinctIds.Slice(), nil
 }
 
-func (ms *MongoStorage) GetTPTimings(tpid, id string) ([]*utils.ApierTPTiming, error) {
+func (ms *MongoStorageOld) GetTPTimings(tpid, id string) ([]*utils.ApierTPTiming, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
@@ -146,7 +146,7 @@ func (ms *MongoStorage) GetTPTimings(tpid, id string) ([]*utils.ApierTPTiming, e
 	return results, err
 }
 
-func (ms *MongoStorage) GetTPDestinations(tpid, id string) ([]*utils.TPDestination, error) {
+func (ms *MongoStorageOld) GetTPDestinations(tpid, id string) ([]*utils.TPDestination, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
@@ -163,7 +163,7 @@ func (ms *MongoStorage) GetTPDestinations(tpid, id string) ([]*utils.TPDestinati
 	return results, err
 }
 
-func (ms *MongoStorage) GetTPRates(tpid, id string) ([]*utils.TPRate, error) {
+func (ms *MongoStorageOld) GetTPRates(tpid, id string) ([]*utils.TPRate, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
@@ -185,7 +185,7 @@ func (ms *MongoStorage) GetTPRates(tpid, id string) ([]*utils.TPRate, error) {
 	return results, err
 }
 
-func (ms *MongoStorage) GetTPDestinationRates(tpid, id string, pag *utils.Paginator) ([]*utils.TPDestinationRate, error) {
+func (ms *MongoStorageOld) GetTPDestinationRates(tpid, id string, pag *utils.Paginator) ([]*utils.TPDestinationRate, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
@@ -211,7 +211,7 @@ func (ms *MongoStorage) GetTPDestinationRates(tpid, id string, pag *utils.Pagina
 	return results, err
 }
 
-func (ms *MongoStorage) GetTPRatingPlans(tpid, id string, pag *utils.Paginator) ([]*utils.TPRatingPlan, error) {
+func (ms *MongoStorageOld) GetTPRatingPlans(tpid, id string, pag *utils.Paginator) ([]*utils.TPRatingPlan, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
@@ -237,7 +237,7 @@ func (ms *MongoStorage) GetTPRatingPlans(tpid, id string, pag *utils.Paginator) 
 	return results, err
 }
 
-func (ms *MongoStorage) GetTPRatingProfiles(tp *utils.TPRatingProfile) ([]*utils.TPRatingProfile, error) {
+func (ms *MongoStorageOld) GetTPRatingProfiles(tp *utils.TPRatingProfile) ([]*utils.TPRatingProfile, error) {
 	filter := bson.M{"tpid": tp.TPid}
 	if tp.Direction != "" {
 		filter["direction"] = tp.Direction
@@ -264,7 +264,7 @@ func (ms *MongoStorage) GetTPRatingProfiles(tp *utils.TPRatingProfile) ([]*utils
 	return results, err
 }
 
-func (ms *MongoStorage) GetTPSharedGroups(tpid, id string) ([]*utils.TPSharedGroups, error) {
+func (ms *MongoStorageOld) GetTPSharedGroups(tpid, id string) ([]*utils.TPSharedGroups, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
@@ -281,7 +281,7 @@ func (ms *MongoStorage) GetTPSharedGroups(tpid, id string) ([]*utils.TPSharedGro
 	return results, err
 }
 
-func (ms *MongoStorage) GetTPUsers(tp *utils.TPUsers) ([]*utils.TPUsers, error) {
+func (ms *MongoStorageOld) GetTPUsers(tp *utils.TPUsers) ([]*utils.TPUsers, error) {
 	filter := bson.M{"tpid": tp.TPid}
 	if tp.Tenant != "" {
 		filter["tenant"] = tp.Tenant
@@ -299,7 +299,7 @@ func (ms *MongoStorage) GetTPUsers(tp *utils.TPUsers) ([]*utils.TPUsers, error) 
 	return results, err
 }
 
-func (ms *MongoStorage) GetTPAliases(tp *utils.TPAliases) ([]*utils.TPAliases, error) {
+func (ms *MongoStorageOld) GetTPAliases(tp *utils.TPAliases) ([]*utils.TPAliases, error) {
 	filter := bson.M{"tpid": tp.TPid}
 	if tp.Direction != "" {
 		filter["direction"] = tp.Direction
@@ -329,7 +329,7 @@ func (ms *MongoStorage) GetTPAliases(tp *utils.TPAliases) ([]*utils.TPAliases, e
 	return results, err
 }
 
-func (ms *MongoStorage) GetTPResources(tpid, id string) ([]*utils.TPResource, error) {
+func (ms *MongoStorageOld) GetTPResources(tpid, id string) ([]*utils.TPResource, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
@@ -346,7 +346,7 @@ func (ms *MongoStorage) GetTPResources(tpid, id string) ([]*utils.TPResource, er
 	return results, err
 }
 
-func (ms *MongoStorage) GetTPStats(tpid, id string) ([]*utils.TPStats, error) {
+func (ms *MongoStorageOld) GetTPStats(tpid, id string) ([]*utils.TPStats, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
@@ -363,7 +363,7 @@ func (ms *MongoStorage) GetTPStats(tpid, id string) ([]*utils.TPStats, error) {
 	return results, err
 }
 
-func (ms *MongoStorage) GetTPDerivedChargers(tp *utils.TPDerivedChargers) ([]*utils.TPDerivedChargers, error) {
+func (ms *MongoStorageOld) GetTPDerivedChargers(tp *utils.TPDerivedChargers) ([]*utils.TPDerivedChargers, error) {
 	filter := bson.M{"tpid": tp.TPid}
 	if tp.Direction != "" {
 		filter["direction"] = tp.Direction
@@ -393,7 +393,7 @@ func (ms *MongoStorage) GetTPDerivedChargers(tp *utils.TPDerivedChargers) ([]*ut
 	return results, err
 }
 
-func (ms *MongoStorage) GetTPActions(tpid, id string) ([]*utils.TPActions, error) {
+func (ms *MongoStorageOld) GetTPActions(tpid, id string) ([]*utils.TPActions, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
@@ -410,7 +410,7 @@ func (ms *MongoStorage) GetTPActions(tpid, id string) ([]*utils.TPActions, error
 	return results, err
 }
 
-func (ms *MongoStorage) GetTPActionPlans(tpid, id string) ([]*utils.TPActionPlan, error) {
+func (ms *MongoStorageOld) GetTPActionPlans(tpid, id string) ([]*utils.TPActionPlan, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
@@ -427,7 +427,7 @@ func (ms *MongoStorage) GetTPActionPlans(tpid, id string) ([]*utils.TPActionPlan
 	return results, err
 }
 
-func (ms *MongoStorage) GetTPActionTriggers(tpid, id string) ([]*utils.TPActionTriggers, error) {
+func (ms *MongoStorageOld) GetTPActionTriggers(tpid, id string) ([]*utils.TPActionTriggers, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
@@ -444,7 +444,7 @@ func (ms *MongoStorage) GetTPActionTriggers(tpid, id string) ([]*utils.TPActionT
 	return results, err
 }
 
-func (ms *MongoStorage) GetTPAccountActions(tp *utils.TPAccountActions) ([]*utils.TPAccountActions, error) {
+func (ms *MongoStorageOld) GetTPAccountActions(tp *utils.TPAccountActions) ([]*utils.TPAccountActions, error) {
 	filter := bson.M{"tpid": tp.TPid}
 	if tp.Tenant != "" {
 		filter["tenant"] = tp.Tenant
@@ -465,7 +465,7 @@ func (ms *MongoStorage) GetTPAccountActions(tp *utils.TPAccountActions) ([]*util
 	return results, err
 }
 
-func (ms *MongoStorage) RemTpData(table, tpid string, args map[string]string) error {
+func (ms *MongoStorageOld) RemTpData(table, tpid string, args map[string]string) error {
 	session := ms.session.Copy()
 	db := session.DB(ms.db)
 	defer session.Close()
@@ -504,7 +504,7 @@ func (ms *MongoStorage) RemTpData(table, tpid string, args map[string]string) er
 	return db.C(table).Remove(args)
 }
 
-func (ms *MongoStorage) SetTPTimings(tps []*utils.ApierTPTiming) error {
+func (ms *MongoStorageOld) SetTPTimings(tps []*utils.ApierTPTiming) error {
 	if len(tps) == 0 {
 		return nil
 	}
@@ -518,7 +518,7 @@ func (ms *MongoStorage) SetTPTimings(tps []*utils.ApierTPTiming) error {
 	return err
 }
 
-func (ms *MongoStorage) SetTPDestinations(tpDsts []*utils.TPDestination) (err error) {
+func (ms *MongoStorageOld) SetTPDestinations(tpDsts []*utils.TPDestination) (err error) {
 	if len(tpDsts) == 0 {
 		return
 	}
@@ -532,7 +532,7 @@ func (ms *MongoStorage) SetTPDestinations(tpDsts []*utils.TPDestination) (err er
 	return
 }
 
-func (ms *MongoStorage) SetTPRates(tps []*utils.TPRate) error {
+func (ms *MongoStorageOld) SetTPRates(tps []*utils.TPRate) error {
 	if len(tps) == 0 {
 		return nil
 	}
@@ -551,7 +551,7 @@ func (ms *MongoStorage) SetTPRates(tps []*utils.TPRate) error {
 	return err
 }
 
-func (ms *MongoStorage) SetTPDestinationRates(tps []*utils.TPDestinationRate) error {
+func (ms *MongoStorageOld) SetTPDestinationRates(tps []*utils.TPDestinationRate) error {
 	if len(tps) == 0 {
 		return nil
 	}
@@ -570,7 +570,7 @@ func (ms *MongoStorage) SetTPDestinationRates(tps []*utils.TPDestinationRate) er
 	return err
 }
 
-func (ms *MongoStorage) SetTPRatingPlans(tps []*utils.TPRatingPlan) error {
+func (ms *MongoStorageOld) SetTPRatingPlans(tps []*utils.TPRatingPlan) error {
 	if len(tps) == 0 {
 		return nil
 	}
@@ -589,7 +589,7 @@ func (ms *MongoStorage) SetTPRatingPlans(tps []*utils.TPRatingPlan) error {
 	return err
 }
 
-func (ms *MongoStorage) SetTPRatingProfiles(tps []*utils.TPRatingProfile) error {
+func (ms *MongoStorageOld) SetTPRatingProfiles(tps []*utils.TPRatingProfile) error {
 	if len(tps) == 0 {
 		return nil
 	}
@@ -610,7 +610,7 @@ func (ms *MongoStorage) SetTPRatingProfiles(tps []*utils.TPRatingProfile) error 
 	return err
 }
 
-func (ms *MongoStorage) SetTPSharedGroups(tps []*utils.TPSharedGroups) error {
+func (ms *MongoStorageOld) SetTPSharedGroups(tps []*utils.TPSharedGroups) error {
 	if len(tps) == 0 {
 		return nil
 	}
@@ -629,7 +629,7 @@ func (ms *MongoStorage) SetTPSharedGroups(tps []*utils.TPSharedGroups) error {
 	return err
 }
 
-func (ms *MongoStorage) SetTPUsers(tps []*utils.TPUsers) error {
+func (ms *MongoStorageOld) SetTPUsers(tps []*utils.TPUsers) error {
 	if len(tps) == 0 {
 		return nil
 	}
@@ -652,7 +652,7 @@ func (ms *MongoStorage) SetTPUsers(tps []*utils.TPUsers) error {
 	return err
 }
 
-func (ms *MongoStorage) SetTPAliases(tps []*utils.TPAliases) error {
+func (ms *MongoStorageOld) SetTPAliases(tps []*utils.TPAliases) error {
 	if len(tps) == 0 {
 		return nil
 	}
@@ -678,7 +678,7 @@ func (ms *MongoStorage) SetTPAliases(tps []*utils.TPAliases) error {
 	return err
 }
 
-func (ms *MongoStorage) SetTPDerivedChargers(tps []*utils.TPDerivedChargers) error {
+func (ms *MongoStorageOld) SetTPDerivedChargers(tps []*utils.TPDerivedChargers) error {
 	if len(tps) == 0 {
 		return nil
 	}
@@ -703,7 +703,7 @@ func (ms *MongoStorage) SetTPDerivedChargers(tps []*utils.TPDerivedChargers) err
 	return err
 }
 
-func (ms *MongoStorage) SetTPActions(tps []*utils.TPActions) error {
+func (ms *MongoStorageOld) SetTPActions(tps []*utils.TPActions) error {
 	if len(tps) == 0 {
 		return nil
 	}
@@ -722,7 +722,7 @@ func (ms *MongoStorage) SetTPActions(tps []*utils.TPActions) error {
 	return err
 }
 
-func (ms *MongoStorage) SetTPActionPlans(tps []*utils.TPActionPlan) error {
+func (ms *MongoStorageOld) SetTPActionPlans(tps []*utils.TPActionPlan) error {
 	if len(tps) == 0 {
 		return nil
 	}
@@ -741,7 +741,7 @@ func (ms *MongoStorage) SetTPActionPlans(tps []*utils.TPActionPlan) error {
 	return err
 }
 
-func (ms *MongoStorage) SetTPActionTriggers(tps []*utils.TPActionTriggers) error {
+func (ms *MongoStorageOld) SetTPActionTriggers(tps []*utils.TPActionTriggers) error {
 	if len(tps) == 0 {
 		return nil
 	}
@@ -760,7 +760,7 @@ func (ms *MongoStorage) SetTPActionTriggers(tps []*utils.TPActionTriggers) error
 	return err
 }
 
-func (ms *MongoStorage) SetTPAccountActions(tps []*utils.TPAccountActions) error {
+func (ms *MongoStorageOld) SetTPAccountActions(tps []*utils.TPAccountActions) error {
 	if len(tps) == 0 {
 		return nil
 	}
@@ -778,7 +778,7 @@ func (ms *MongoStorage) SetTPAccountActions(tps []*utils.TPAccountActions) error
 	return err
 }
 
-func (ms *MongoStorage) SetTPResources(tpRLs []*utils.TPResource) (err error) {
+func (ms *MongoStorageOld) SetTPResources(tpRLs []*utils.TPResource) (err error) {
 	if len(tpRLs) == 0 {
 		return
 	}
@@ -792,7 +792,7 @@ func (ms *MongoStorage) SetTPResources(tpRLs []*utils.TPResource) (err error) {
 	return
 }
 
-func (ms *MongoStorage) SetTPRStats(tpS []*utils.TPStats) (err error) {
+func (ms *MongoStorageOld) SetTPRStats(tpS []*utils.TPStats) (err error) {
 	if len(tpS) == 0 {
 		return
 	}
@@ -806,7 +806,7 @@ func (ms *MongoStorage) SetTPRStats(tpS []*utils.TPStats) (err error) {
 	return
 }
 
-func (ms *MongoStorage) SetSMCost(smc *SMCost) error {
+func (ms *MongoStorageOld) SetSMCost(smc *SMCost) error {
 	if smc.CostDetails == nil {
 		return nil
 	}
@@ -815,7 +815,7 @@ func (ms *MongoStorage) SetSMCost(smc *SMCost) error {
 	return col.Insert(smc)
 }
 
-func (ms *MongoStorage) RemoveSMCost(smc *SMCost) error {
+func (ms *MongoStorageOld) RemoveSMCost(smc *SMCost) error {
 	session, col := ms.conn(utils.SessionsCostsTBL)
 	defer session.Close()
 	remParams := bson.M{}
@@ -828,7 +828,7 @@ func (ms *MongoStorage) RemoveSMCost(smc *SMCost) error {
 	return err
 }
 
-func (ms *MongoStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix string) (smcs []*SMCost, err error) {
+func (ms *MongoStorageOld) GetSMCosts(cgrid, runid, originHost, originIDPrefix string) (smcs []*SMCost, err error) {
 	filter := bson.M{}
 	if cgrid != "" {
 		filter[CGRIDLow] = cgrid
@@ -860,7 +860,7 @@ func (ms *MongoStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix stri
 	return smcs, nil
 }
 
-func (ms *MongoStorage) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
+func (ms *MongoStorageOld) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
 	if cdr.OrderID == 0 {
 		cdr.OrderID = ms.cnter.Next()
 	}
@@ -874,7 +874,7 @@ func (ms *MongoStorage) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
 	return err
 }
 
-func (ms *MongoStorage) cleanEmptyFilters(filters bson.M) {
+func (ms *MongoStorageOld) cleanEmptyFilters(filters bson.M) {
 	for k, v := range filters {
 		switch value := v.(type) {
 		case *int64:
@@ -907,7 +907,7 @@ func (ms *MongoStorage) cleanEmptyFilters(filters bson.M) {
 }
 
 //  _, err := col(ColCDRs).UpdateAll(bson.M{CGRIDLow: bson.M{"$in": cgrIds}}, bson.M{"$set": bson.M{"deleted_at": time.Now()}})
-func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR, int64, error) {
+func (ms *MongoStorageOld) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR, int64, error) {
 	var minUsage, maxUsage *time.Duration
 	if len(qryFltr.MinUsage) != 0 {
 		if parsed, err := utils.ParseDurationWithNanosecs(qryFltr.MinUsage); err != nil {
@@ -1079,7 +1079,7 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	return cdrs, 0, nil
 }
 
-func (ms *MongoStorage) GetTPStat(tpid, id string) ([]*utils.TPStats, error) {
+func (ms *MongoStorageOld) GetTPStat(tpid, id string) ([]*utils.TPStats, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
@@ -1096,7 +1096,7 @@ func (ms *MongoStorage) GetTPStat(tpid, id string) ([]*utils.TPStats, error) {
 	return results, err
 }
 
-func (ms *MongoStorage) SetTPStats(tpSTs []*utils.TPStats) (err error) {
+func (ms *MongoStorageOld) SetTPStats(tpSTs []*utils.TPStats) (err error) {
 	if len(tpSTs) == 0 {
 		return
 	}
@@ -1110,7 +1110,7 @@ func (ms *MongoStorage) SetTPStats(tpSTs []*utils.TPStats) (err error) {
 	return
 }
 
-func (ms *MongoStorage) GetTPThresholds(tpid, id string) ([]*utils.TPThreshold, error) {
+func (ms *MongoStorageOld) GetTPThresholds(tpid, id string) ([]*utils.TPThreshold, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
@@ -1127,7 +1127,7 @@ func (ms *MongoStorage) GetTPThresholds(tpid, id string) ([]*utils.TPThreshold, 
 	return results, err
 }
 
-func (ms *MongoStorage) SetTPThresholds(tpTHs []*utils.TPThreshold) (err error) {
+func (ms *MongoStorageOld) SetTPThresholds(tpTHs []*utils.TPThreshold) (err error) {
 	if len(tpTHs) == 0 {
 		return
 	}
@@ -1141,7 +1141,7 @@ func (ms *MongoStorage) SetTPThresholds(tpTHs []*utils.TPThreshold) (err error) 
 	return
 }
 
-func (ms *MongoStorage) GetTPFilters(tpid, id string) ([]*utils.TPFilterProfile, error) {
+func (ms *MongoStorageOld) GetTPFilters(tpid, id string) ([]*utils.TPFilterProfile, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
@@ -1158,7 +1158,7 @@ func (ms *MongoStorage) GetTPFilters(tpid, id string) ([]*utils.TPFilterProfile,
 	return results, err
 }
 
-func (ms *MongoStorage) SetTPFilters(tpTHs []*utils.TPFilterProfile) (err error) {
+func (ms *MongoStorageOld) SetTPFilters(tpTHs []*utils.TPFilterProfile) (err error) {
 	if len(tpTHs) == 0 {
 		return
 	}
@@ -1172,7 +1172,7 @@ func (ms *MongoStorage) SetTPFilters(tpTHs []*utils.TPFilterProfile) (err error)
 	return
 }
 
-func (ms *MongoStorage) GetTPSuppliers(tpid, id string) ([]*utils.TPSupplierProfile, error) {
+func (ms *MongoStorageOld) GetTPSuppliers(tpid, id string) ([]*utils.TPSupplierProfile, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
@@ -1189,7 +1189,7 @@ func (ms *MongoStorage) GetTPSuppliers(tpid, id string) ([]*utils.TPSupplierProf
 	return results, err
 }
 
-func (ms *MongoStorage) SetTPSuppliers(tpSPs []*utils.TPSupplierProfile) (err error) {
+func (ms *MongoStorageOld) SetTPSuppliers(tpSPs []*utils.TPSupplierProfile) (err error) {
 	if len(tpSPs) == 0 {
 		return
 	}
@@ -1203,7 +1203,7 @@ func (ms *MongoStorage) SetTPSuppliers(tpSPs []*utils.TPSupplierProfile) (err er
 	return
 }
 
-func (ms *MongoStorage) GetTPAttributes(tpid, id string) ([]*utils.TPAttributeProfile, error) {
+func (ms *MongoStorageOld) GetTPAttributes(tpid, id string) ([]*utils.TPAttributeProfile, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
@@ -1220,7 +1220,7 @@ func (ms *MongoStorage) GetTPAttributes(tpid, id string) ([]*utils.TPAttributePr
 	return results, err
 }
 
-func (ms *MongoStorage) SetTPAttributes(tpSPs []*utils.TPAttributeProfile) (err error) {
+func (ms *MongoStorageOld) SetTPAttributes(tpSPs []*utils.TPAttributeProfile) (err error) {
 	if len(tpSPs) == 0 {
 		return
 	}
@@ -1234,7 +1234,7 @@ func (ms *MongoStorage) SetTPAttributes(tpSPs []*utils.TPAttributeProfile) (err 
 	return
 }
 
-func (ms *MongoStorage) GetTPChargers(tpid, id string) ([]*utils.TPChargerProfile, error) {
+func (ms *MongoStorageOld) GetTPChargers(tpid, id string) ([]*utils.TPChargerProfile, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
@@ -1251,7 +1251,7 @@ func (ms *MongoStorage) GetTPChargers(tpid, id string) ([]*utils.TPChargerProfil
 	return results, err
 }
 
-func (ms *MongoStorage) SetTPChargers(tpCPP []*utils.TPChargerProfile) (err error) {
+func (ms *MongoStorageOld) SetTPChargers(tpCPP []*utils.TPChargerProfile) (err error) {
 	if len(tpCPP) == 0 {
 		return
 	}
@@ -1265,7 +1265,7 @@ func (ms *MongoStorage) SetTPChargers(tpCPP []*utils.TPChargerProfile) (err erro
 	return
 }
 
-func (ms *MongoStorage) GetVersions(itm string) (vrs Versions, err error) {
+func (ms *MongoStorageOld) GetVersions(itm string) (vrs Versions, err error) {
 	session, col := ms.conn(colVer)
 	defer session.Close()
 	proj := bson.M{} // projection params
@@ -1284,7 +1284,7 @@ func (ms *MongoStorage) GetVersions(itm string) (vrs Versions, err error) {
 	return
 }
 
-func (ms *MongoStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
+func (ms *MongoStorageOld) SetVersions(vrs Versions, overwrite bool) (err error) {
 	session, col := ms.conn(colVer)
 	defer session.Close()
 	if overwrite {
@@ -1295,7 +1295,7 @@ func (ms *MongoStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
 	return
 }
 
-func (ms *MongoStorage) RemoveVersions(vrs Versions) (err error) {
+func (ms *MongoStorageOld) RemoveVersions(vrs Versions) (err error) {
 	session, col := ms.conn(colVer)
 	defer session.Close()
 	if len(vrs) != 0 {
@@ -1317,6 +1317,6 @@ func (ms *MongoStorage) RemoveVersions(vrs Versions) (err error) {
 	return
 }
 
-func (ms *MongoStorage) GetStorageType() string {
+func (ms *MongoStorageOld) GetStorageType() string {
 	return utils.MONGO
 }
