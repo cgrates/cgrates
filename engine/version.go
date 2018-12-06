@@ -92,6 +92,7 @@ func SetDBVersions(storage Storage) (err error) {
 	// no data, write version
 	if err = storage.SetVersions(x, false); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("Could not write current version to db: %v", err))
+		return err
 	}
 	return
 }
