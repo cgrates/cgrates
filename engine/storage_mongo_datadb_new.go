@@ -1330,7 +1330,7 @@ func (ms *MongoStorage) GetLoadHistory(limit int, skipCache bool,
 		Key   string
 		Value []*utils.LoadInstance
 	}
-	if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
+	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colLht).FindOne(sctx, bson.M{"key": utils.LOADINST_KEY})
 		if err := cur.Decode(&kv); err != nil {
 			if err == mongo.ErrNoDocuments {
@@ -1339,9 +1339,7 @@ func (ms *MongoStorage) GetLoadHistory(limit int, skipCache bool,
 			return err
 		}
 		return nil
-	}); err != nil {
-		return nil, err
-	}
+	})
 	cCommit := cacheCommit(transactionID)
 	if err == nil {
 		loadInsts = kv.Value
