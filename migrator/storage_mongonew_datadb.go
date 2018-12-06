@@ -80,6 +80,7 @@ func (v1ms *mongoMigrator) getv1Account() (v1Acnt *v1Account, err error) {
 		v1ms.cursor = nil
 		return nil, utils.ErrNoMoreData
 	}
+	v1Acnt = new(v1Account)
 	if err := (*v1ms.cursor).Decode(v1Acnt); err != nil {
 		return nil, err
 	}
@@ -114,6 +115,7 @@ func (v1ms *mongoMigrator) getv2Account() (v2Acnt *v2Account, err error) {
 		v1ms.cursor = nil
 		return nil, utils.ErrNoMoreData
 	}
+	v2Acnt = new(v2Account)
 	if err := (*v1ms.cursor).Decode(v2Acnt); err != nil {
 		return nil, err
 	}
@@ -135,7 +137,7 @@ func (v1ms *mongoMigrator) remV2Account(id string) (err error) {
 //Action methods
 //get
 func (v1ms *mongoMigrator) getV1ActionPlans() (v1aps *v1ActionPlans, err error) {
-	var strct *AtKeyValue
+	strct := new(AtKeyValue)
 	if v1ms.cursor == nil {
 		var cursor mongo.Cursor
 		cursor, err = v1ms.mgoDB.DB().Collection("actiontimings").Find(v1ms.mgoDB.GetContext(), nil)
@@ -165,7 +167,7 @@ func (v1ms *mongoMigrator) setV1ActionPlans(x *v1ActionPlans) (err error) {
 //Actions methods
 //get
 func (v1ms *mongoMigrator) getV1Actions() (v1acs *v1Actions, err error) {
-	var strct *AcKeyValue
+	strct := new(AcKeyValue)
 	if v1ms.cursor == nil {
 		var cursor mongo.Cursor
 		cursor, err = v1ms.mgoDB.DB().Collection("actions").Find(v1ms.mgoDB.GetContext(), nil)
@@ -219,6 +221,7 @@ func (v1ms *mongoMigrator) getV1SharedGroup() (v1sg *v1SharedGroup, err error) {
 		v1ms.cursor = nil
 		return nil, utils.ErrNoMoreData
 	}
+	v1sg = new(v1SharedGroup)
 	if err := (*v1ms.cursor).Decode(v1sg); err != nil {
 		return nil, err
 	}
@@ -247,6 +250,7 @@ func (v1ms *mongoMigrator) getV1Stats() (v1st *v1Stat, err error) {
 		v1ms.cursor = nil
 		return nil, utils.ErrNoMoreData
 	}
+	v1st = new(v1Stat)
 	if err := (*v1ms.cursor).Decode(v1st); err != nil {
 		return nil, err
 	}
@@ -275,6 +279,7 @@ func (v1ms *mongoMigrator) getV2ActionTrigger() (v2at *v2ActionTrigger, err erro
 		v1ms.cursor = nil
 		return nil, utils.ErrNoMoreData
 	}
+	v2at = new(v2ActionTrigger)
 	if err := (*v1ms.cursor).Decode(v2at); err != nil {
 		return nil, err
 	}
@@ -303,6 +308,7 @@ func (v1ms *mongoMigrator) getV1AttributeProfile() (v1attrPrf *v1AttributeProfil
 		v1ms.cursor = nil
 		return nil, utils.ErrNoMoreData
 	}
+	v1attrPrf = new(v1AttributeProfile)
 	if err := (*v1ms.cursor).Decode(v1attrPrf); err != nil {
 		return nil, err
 	}
@@ -331,6 +337,7 @@ func (v1ms *mongoMigrator) getV2ThresholdProfile() (v2T *v2Threshold, err error)
 		v1ms.cursor = nil
 		return nil, utils.ErrNoMoreData
 	}
+	v2T = new(v2Threshold)
 	if err := (*v1ms.cursor).Decode(v2T); err != nil {
 		return nil, err
 	}
