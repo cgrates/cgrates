@@ -664,6 +664,7 @@ func (ms *MongoStorage) GetRatingProfileDrv(key string) (rp *RatingProfile, err 
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colRpf).FindOne(sctx, bson.M{"id": key})
 		if err := cur.Decode(rp); err != nil {
+			rp = nil
 			if err == mongo.ErrNoDocuments {
 				return utils.ErrNotFound
 			}
@@ -959,6 +960,7 @@ func (ms *MongoStorage) GetSharedGroupDrv(key string) (sg *SharedGroup, err erro
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colShg).FindOne(sctx, bson.M{"id": key})
 		if err := cur.Decode(sg); err != nil {
+			sg = nil
 			if err == mongo.ErrNoDocuments {
 				return utils.ErrNotFound
 			}
@@ -994,8 +996,8 @@ func (ms *MongoStorage) GetAccount(key string) (result *Account, err error) {
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colAcc).FindOne(sctx, bson.M{"id": key})
 		if err := cur.Decode(result); err != nil {
+			result = nil
 			if err == mongo.ErrNoDocuments {
-				result = nil
 				return utils.ErrNotFound
 			}
 			return err
@@ -1771,6 +1773,7 @@ func (ms *MongoStorage) GetResourceProfileDrv(tenant, id string) (rp *ResourcePr
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colRsP).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if err := cur.Decode(rp); err != nil {
+			rp = nil
 			if err == mongo.ErrNoDocuments {
 				return utils.ErrNotFound
 			}
@@ -1806,6 +1809,7 @@ func (ms *MongoStorage) GetResourceDrv(tenant, id string) (r *Resource, err erro
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colRes).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if err := cur.Decode(r); err != nil {
+			r = nil
 			if err == mongo.ErrNoDocuments {
 				return utils.ErrNotFound
 			}
@@ -1841,6 +1845,7 @@ func (ms *MongoStorage) GetTimingDrv(id string) (t *utils.TPTiming, err error) {
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colTmg).FindOne(sctx, bson.M{"id": id})
 		if err := cur.Decode(t); err != nil {
+			t = nil
 			if err == mongo.ErrNoDocuments {
 				return utils.ErrNotFound
 			}
@@ -2058,6 +2063,7 @@ func (ms *MongoStorage) GetStatQueueProfileDrv(tenant string, id string) (sq *St
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colSqp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if err := cur.Decode(sq); err != nil {
+			sq = nil
 			if err == mongo.ErrNoDocuments {
 				return utils.ErrNotFound
 			}
@@ -2096,6 +2102,7 @@ func (ms *MongoStorage) GetStoredStatQueueDrv(tenant, id string) (sq *StoredStat
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colSqs).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if err := cur.Decode(sq); err != nil {
+			sq = nil
 			if err == mongo.ErrNoDocuments {
 				return utils.ErrNotFound
 			}
@@ -2134,6 +2141,7 @@ func (ms *MongoStorage) GetThresholdProfileDrv(tenant, ID string) (tp *Threshold
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colTps).FindOne(sctx, bson.M{"tenant": tenant, "id": ID})
 		if err := cur.Decode(tp); err != nil {
+			tp = nil
 			if err == mongo.ErrNoDocuments {
 				return utils.ErrNotFound
 			}
@@ -2170,6 +2178,7 @@ func (ms *MongoStorage) GetThresholdDrv(tenant, id string) (r *Threshold, err er
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colThs).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if err := cur.Decode(r); err != nil {
+			r = nil
 			if err == mongo.ErrNoDocuments {
 				return utils.ErrNotFound
 			}
@@ -2247,6 +2256,7 @@ func (ms *MongoStorage) GetSupplierProfileDrv(tenant, id string) (r *SupplierPro
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colSpp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if err := cur.Decode(r); err != nil {
+			r = nil
 			if err == mongo.ErrNoDocuments {
 				return utils.ErrNotFound
 			}
@@ -2282,6 +2292,7 @@ func (ms *MongoStorage) GetAttributeProfileDrv(tenant, id string) (r *AttributeP
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colAttr).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if err := cur.Decode(r); err != nil {
+			r = nil
 			if err == mongo.ErrNoDocuments {
 				return utils.ErrNotFound
 			}
@@ -2317,6 +2328,7 @@ func (ms *MongoStorage) GetChargerProfileDrv(tenant, id string) (r *ChargerProfi
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(colCpp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if err := cur.Decode(r); err != nil {
+			r = nil
 			if err == mongo.ErrNoDocuments {
 				return utils.ErrNotFound
 			}

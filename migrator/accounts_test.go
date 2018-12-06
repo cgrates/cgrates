@@ -26,13 +26,92 @@ import (
 )
 
 func TestV1AccountAsAccount(t *testing.T) {
-	d1b := &v1Balance{Value: 100000, Weight: 10, DestinationIds: "NAT", Timings: []*engine.RITiming{&engine.RITiming{StartTime: "00:00:00"}}}
-	v1b := &v1Balance{Value: 100000, Weight: 10, DestinationIds: "NAT", Timings: []*engine.RITiming{&engine.RITiming{StartTime: "00:00:00"}}}
-	v1Acc := &v1Account{Id: "*OUT:CUSTOMER_1:rif", BalanceMap: map[string]v1BalanceChain{utils.DATA: v1BalanceChain{d1b}, utils.VOICE: v1BalanceChain{v1b}, utils.MONETARY: v1BalanceChain{&v1Balance{Value: 21, Timings: []*engine.RITiming{&engine.RITiming{StartTime: "00:00:00"}}}}}}
-	d2 := &engine.Balance{Uuid: "", ID: "", Value: 100000, Directions: utils.StringMap{"*OUT": true}, Weight: 10, DestinationIDs: utils.StringMap{"NAT": true}, RatingSubject: "", Categories: utils.NewStringMap(""), SharedGroups: utils.NewStringMap(""), Timings: []*engine.RITiming{&engine.RITiming{StartTime: "00:00:00"}}, TimingIDs: utils.NewStringMap(""), Factor: engine.ValueFactor{}}
-	v2 := &engine.Balance{Uuid: "", ID: "", Value: 0.0001, Directions: utils.StringMap{"*OUT": true}, Weight: 10, DestinationIDs: utils.StringMap{"NAT": true}, RatingSubject: "", Categories: utils.NewStringMap(""), SharedGroups: utils.NewStringMap(""), Timings: []*engine.RITiming{&engine.RITiming{StartTime: "00:00:00"}}, TimingIDs: utils.NewStringMap(""), Factor: engine.ValueFactor{}}
-	m2 := &engine.Balance{Uuid: "", ID: "", Value: 21, Directions: utils.StringMap{"*OUT": true}, DestinationIDs: utils.NewStringMap(""), RatingSubject: "", Categories: utils.NewStringMap(""), SharedGroups: utils.NewStringMap(""), Timings: []*engine.RITiming{&engine.RITiming{StartTime: "00:00:00"}}, TimingIDs: utils.NewStringMap(""), Factor: engine.ValueFactor{}}
-	testAccount := &engine.Account{ID: "CUSTOMER_1:rif", BalanceMap: map[string]engine.Balances{utils.DATA: engine.Balances{d2}, utils.VOICE: engine.Balances{v2}, utils.MONETARY: engine.Balances{m2}}, UnitCounters: engine.UnitCounters{}, ActionTriggers: engine.ActionTriggers{}}
+	d1b := &v1Balance{
+		Value:          100000,
+		Weight:         10,
+		DestinationIds: "NAT",
+		Timings: []*engine.RITiming{
+			&engine.RITiming{
+				StartTime: "00:00:00",
+			},
+		},
+	}
+	v1b := &v1Balance{
+		Value:          100000,
+		Weight:         10,
+		DestinationIds: "NAT",
+		Timings: []*engine.RITiming{
+			&engine.RITiming{
+				StartTime: "00:00:00",
+			},
+		},
+	}
+	v1Acc := &v1Account{
+		Id: "*OUT:CUSTOMER_1:rif",
+		BalanceMap: map[string]v1BalanceChain{
+			utils.DATA:  v1BalanceChain{d1b},
+			utils.VOICE: v1BalanceChain{v1b},
+			utils.MONETARY: v1BalanceChain{&v1Balance{
+				Value: 21,
+				Timings: []*engine.RITiming{
+					&engine.RITiming{
+						StartTime: "00:00:00",
+					},
+				},
+			}},
+		},
+	}
+	d2 := &engine.Balance{
+		Uuid:           "",
+		ID:             "",
+		Value:          100000,
+		Directions:     utils.StringMap{"*OUT": true},
+		Weight:         10,
+		DestinationIDs: utils.StringMap{"NAT": true},
+		RatingSubject:  "",
+		Categories:     utils.NewStringMap(""),
+		SharedGroups:   utils.NewStringMap(""),
+		Timings:        []*engine.RITiming{&engine.RITiming{StartTime: "00:00:00"}},
+		TimingIDs:      utils.NewStringMap(""),
+		Factor:         engine.ValueFactor{},
+	}
+	v2 := &engine.Balance{
+		Uuid:           "",
+		ID:             "",
+		Value:          0.0001,
+		Directions:     utils.StringMap{"*OUT": true},
+		Weight:         10,
+		DestinationIDs: utils.StringMap{"NAT": true},
+		RatingSubject:  "",
+		Categories:     utils.NewStringMap(""),
+		SharedGroups:   utils.NewStringMap(""),
+		Timings:        []*engine.RITiming{&engine.RITiming{StartTime: "00:00:00"}},
+		TimingIDs:      utils.NewStringMap(""),
+		Factor:         engine.ValueFactor{},
+	}
+	m2 := &engine.Balance{
+		Uuid:           "",
+		ID:             "",
+		Value:          21,
+		Directions:     utils.StringMap{"*OUT": true},
+		DestinationIDs: utils.NewStringMap(""),
+		RatingSubject:  "",
+		Categories:     utils.NewStringMap(""),
+		SharedGroups:   utils.NewStringMap(""),
+		Timings:        []*engine.RITiming{&engine.RITiming{StartTime: "00:00:00"}},
+		TimingIDs:      utils.NewStringMap(""),
+		Factor:         engine.ValueFactor{},
+	}
+	testAccount := &engine.Account{
+		ID: "CUSTOMER_1:rif",
+		BalanceMap: map[string]engine.Balances{
+			utils.DATA:     engine.Balances{d2},
+			utils.VOICE:    engine.Balances{v2},
+			utils.MONETARY: engine.Balances{m2},
+		},
+		UnitCounters:   engine.UnitCounters{},
+		ActionTriggers: engine.ActionTriggers{},
+	}
 	if def := v1b.IsDefault(); def != false {
 		t.Errorf("Expecting: false, received: true")
 	}

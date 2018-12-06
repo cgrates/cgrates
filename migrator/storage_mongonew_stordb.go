@@ -62,6 +62,7 @@ func (v1ms *mongoStorDBMigrator) getV1CDR() (v1Cdr *v1Cdrs, err error) {
 		v1ms.cursor = nil
 		return nil, utils.ErrNoMoreData
 	}
+	v1Cdr = new(v1Cdrs)
 	if err := (*v1ms.cursor).Decode(v1Cdr); err != nil {
 		return nil, err
 	}
@@ -106,6 +107,7 @@ func (v1ms *mongoStorDBMigrator) getV2SMCost() (v2Cost *v2SessionsCost, err erro
 		v1ms.cursor = nil
 		return nil, utils.ErrNoMoreData
 	}
+	v2Cost = new(v2SessionsCost)
 	if err := (*v1ms.cursor).Decode(v2Cost); err != nil {
 		return nil, err
 	}
@@ -120,6 +122,6 @@ func (v1ms *mongoStorDBMigrator) setV2SMCost(v2Cost *v2SessionsCost) (err error)
 
 //remove
 func (v1ms *mongoStorDBMigrator) remV2SMCost(v2Cost *v2SessionsCost) (err error) {
-	_, err = v1ms.mgoDB.DB().Collection(v1AccountDBPrefix).DeleteMany(v1ms.mgoDB.GetContext(), nil)
+	_, err = v1ms.mgoDB.DB().Collection(utils.SessionsCostsTBL).DeleteMany(v1ms.mgoDB.GetContext(), nil)
 	return
 }

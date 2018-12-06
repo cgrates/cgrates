@@ -576,7 +576,7 @@ func testV1RsDBStore(t *testing.T) {
 			}
 		case "ResGroup2":
 			if len(r.Usages) != 3 || len(r.TTLIdx) != 3 {
-				t.Errorf("Unexpected resource: %+v", r)
+				t.Errorf("Unexpected resource: %s", utils.ToJSON(r))
 			}
 		}
 	}

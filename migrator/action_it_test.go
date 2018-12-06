@@ -162,7 +162,8 @@ func testActITConnect(t *testing.T) {
 
 func testActITFlush(t *testing.T) {
 	actMigrator.dmOut.DataManager().DataDB().Flush("")
-	if err := engine.SetDBVersions(actMigrator.dmOut.DataManager().DataDB()); err != nil {
+	actMigrator.dmIN.DataManager().DataDB().Flush("")
+	if err := engine.SetDBVersions(actMigrator.dmIN.DataManager().DataDB()); err != nil {
 		t.Error("Error  ", err.Error())
 	}
 }
