@@ -81,12 +81,7 @@ func testV1AccLoadConfig(t *testing.T) {
 	if accCfg, err = config.NewCGRConfigFromFolder(accCfgPath); err != nil {
 		t.Error(err)
 	}
-	switch accConfDIR {
-	case "tutmongo": // Mongo needs more time to reset db, need to investigate
-		accDelay = 2000
-	default:
-		accDelay = 1000
-	}
+	accDelay = 1000
 }
 
 func testV1AccInitDataDb(t *testing.T) {

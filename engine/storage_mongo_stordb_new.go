@@ -1322,11 +1322,13 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	}
 	if qryFltr.Count {
 		var cnt int64
-		err := ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
+		if err := ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 			cnt, err = ms.getCol(ColCDRs).Count(sctx, filters, cop)
 			return err
-		})
-		return nil, cnt, err
+		}); err != nil {
+			return nil, 0, err
+		}
+		return nil, cnt, nil
 	}
 	// Execute query
 	var cdrs []*CDR
