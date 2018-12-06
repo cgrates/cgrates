@@ -34,7 +34,6 @@ import (
 var (
 	rdsITdb    *RedisStorage
 	mgoITdb    *MongoStorage
-	mgoITdb2   *MongoStorageNew
 	onStor     *DataManager
 	onStorCfg  string
 	sleepDelay time.Duration
@@ -107,43 +106,23 @@ func TestOnStorITRedis(t *testing.T) {
 	}
 }
 
-// func TestOnStorITMongo(t *testing.T) {
-// 	sleepDelay = 500 * time.Millisecond
-// 	cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "cdrsv2mongo")
-// 	mgoITCfg, err := config.NewCGRConfigFromFolder(cdrsMongoCfgPath)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	if mgoITdb, err = NewMongoStorage(mgoITCfg.StorDbCfg().StorDBHost,
-// 		mgoITCfg.StorDbCfg().StorDBPort, mgoITCfg.StorDbCfg().StorDBName,
-// 		mgoITCfg.StorDbCfg().StorDBUser, mgoITCfg.StorDbCfg().StorDBPass,
-// 		utils.StorDB, nil, mgoITCfg.CacheCfg()); err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	onStorCfg = mgoITCfg.StorDbCfg().StorDBName
-// 	onStor = NewDataManager(mgoITdb)
-// 	for _, stest := range sTestsOnStorIT {
-// 		t.Run("TestOnStorITMongo", stest)
-// 	}
-// }
-
-func TestOnStorITMongo2(t *testing.T) {
+func TestOnStorITMongo(t *testing.T) {
 	sleepDelay = 500 * time.Millisecond
 	cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "cdrsv2mongo")
 	mgoITCfg, err := config.NewCGRConfigFromFolder(cdrsMongoCfgPath)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if mgoITdb2, err = NewMongoStorage(mgoITCfg.StorDbCfg().StorDBHost,
+	if mgoITdb, err = NewMongoStorage(mgoITCfg.StorDbCfg().StorDBHost,
 		mgoITCfg.StorDbCfg().StorDBPort, mgoITCfg.StorDbCfg().StorDBName,
 		mgoITCfg.StorDbCfg().StorDBUser, mgoITCfg.StorDbCfg().StorDBPass,
 		utils.StorDB, nil, mgoITCfg.CacheCfg()); err != nil {
 		t.Fatal(err)
 	}
 	onStorCfg = mgoITCfg.StorDbCfg().StorDBName
-	onStor = NewDataManager(mgoITdb2)
+	onStor = NewDataManager(mgoITdb)
 	for _, stest := range sTestsOnStorIT {
-		t.Run("TestOnStorITMongoNew", stest)
+		t.Run("TestOnStorITMongo", stest)
 	}
 }
 

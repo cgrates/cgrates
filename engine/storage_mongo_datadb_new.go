@@ -73,12 +73,32 @@ func NewMongoStorage(host, port, db, user, pass, storageType string,
 		cacheCfg:    cacheCfg,
 		cdrsIndexes: cdrsIndexes,
 	}
-	if col, err := ms.client.Database(db).ListCollections(ms.ctx, nil); err != nil {
-		return nil, err
-	} else if !col.Next(ctx) { // create indexes only if database is empty
-		if err = ms.EnsureIndexes(); err != nil {
-			return nil, err
+	if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) error {
+		if col, err := ms.client.Database(db).ListCollections(sctx, nil, options.ListCollections().SetNameOnly(true)); err != nil {
+			return err
+		} else {
+			empty := true
+			for col.Next(sctx) { // create indexes only if database is empty or only version table is present
+				var elem struct{ Name string }
+				err := col.Decode(&elem)
+				if err != nil {
+					return err
+				}
+				if elem.Name != colVer {
+					empty = false
+					break
+				}
+			}
+			col.Close(sctx)
+			if empty {
+				if err = ms.EnsureIndexes(); err != nil {
+					return err
+				}
+			}
+			return nil
 		}
+	}); err != nil {
+		return nil, err
 	}
 	ms.cnter = utils.NewCounter(time.Now().UnixNano(), 0)
 	return
@@ -102,9 +122,7 @@ func (ms *MongoStorage) EnusureIndex(colName string, uniq bool, keys ...string) 
 		col := ms.getCol(colName)
 		io := mongo.NewIndexOptionsBuilder().Unique(uniq)
 		var doc bsonx.Doc
-		// elem := make([]bson.M, len(keys))
 		for _, k := range keys {
-			// elem[i] = bson.M{k: 1}
 			doc = doc.Append(k, bsonx.Int32(1))
 		}
 		_, err := col.Indexes().CreateOne(sctx, mongo.IndexModel{
@@ -117,6 +135,10 @@ func (ms *MongoStorage) EnusureIndex(colName string, uniq bool, keys ...string) 
 
 func (ms *MongoStorage) getCol(col string) *mongo.Collection {
 	return ms.client.Database(ms.db).Collection(col)
+}
+
+func (ms *MongoStorage) GetContext() context.Context {
+	return ms.ctx
 }
 
 // EnsureIndexes creates db indexes
