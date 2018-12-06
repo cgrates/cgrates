@@ -995,6 +995,7 @@ func (ms *MongoStorage) GetAccount(key string) (result *Account, err error) {
 		cur := ms.getCol(colAcc).FindOne(sctx, bson.M{"id": key})
 		if err := cur.Decode(result); err != nil {
 			if err == mongo.ErrNoDocuments {
+				result = nil
 				return utils.ErrNotFound
 			}
 			return err

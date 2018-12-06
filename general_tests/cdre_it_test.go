@@ -23,6 +23,7 @@ package general_tests
 import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
+
 	//"os"
 	"path"
 	"testing"
@@ -79,12 +80,7 @@ func testCDREInitCfg(t *testing.T) {
 	}
 	cdreCfg.DataFolderPath = cdreDataDir
 	config.SetCgrConfig(cdreCfg)
-	switch cdreConfigDIR {
-	case "tutmongo":
-		cdreDelay = 2000
-	default:
-		cdreDelay = 1000
-	}
+	cdreDelay = 1000
 }
 
 func testCDREInitDataDb(t *testing.T) {
@@ -173,7 +169,7 @@ func testCDREExport(t *testing.T) {
 }
 
 func testCDREStopEngine(t *testing.T) {
-	if err := engine.KillEngine(100); err != nil {
+	if err := engine.KillEngine(cdreDelay); err != nil {
 		t.Error(err)
 	}
 }
