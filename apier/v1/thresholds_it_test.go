@@ -492,7 +492,7 @@ func testV1TSMaxHits(t *testing.T) {
 }
 
 func testV1TSStopEngine(t *testing.T) {
-	if err := engine.KillEngine(100); err != nil {
+	if err := engine.KillEngine(thdsDelay); err != nil {
 		t.Error(err)
 	}
 }

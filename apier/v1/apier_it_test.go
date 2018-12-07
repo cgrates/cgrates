@@ -1301,6 +1301,7 @@ func TestApierComputeReverse(t *testing.T) {
 }
 
 func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
+	time.Sleep(10 * time.Millisecond)
 	expStats := &utils.CacheStats{
 		Destinations:       3,
 		Actions:            6,
