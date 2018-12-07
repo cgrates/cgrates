@@ -145,40 +145,22 @@ imports:
 - name: github.com/Masterminds/semver
   version: c7af12943936e8c39859482e61f0574c2fd7fc75
 - name: github.com/mongodb/mongo-go-driver
-  version: 2bcd97a847884e8d7ecede81cf57bff44d6da7b8
+  version: e8f52c4942686e6f1d9f366fa1e84b016aae0762
   subpackages:
   - bson
   - bson/bsoncodec
   - bson/bsonrw
   - bson/bsontype
-  - bson/decimal
-  - bson/objectid
   - bson/primitive
-  - core/address
-  - core/auth
-  - core/auth/internal/gssapi
-  - core/command
-  - core/compressor
-  - core/connection
-  - core/connstring
-  - core/description
-  - core/dispatch
-  - core/event
-  - core/result
-  - core/session
-  - core/tag
-  - core/topology
-  - core/uuid
-  - core/version
-  - core/wiremessage
   - internal
   - mongo
   - mongo/readconcern
   - mongo/readpref
   - mongo/writeconcern
-  - options
+  - mongo/options
   - x/bsonx
   - x/bsonx/bsoncore
+  - x/mongo/driver/topology
 - name: github.com/peterh/liner
   version: 5a0dfa99e2aa1d433a9642e863da51402e609376
 - name: github.com/streadway/amqp
