@@ -23,8 +23,6 @@ package general_tests
 import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
-
-	//"os"
 	"path"
 	"testing"
 	"time"
