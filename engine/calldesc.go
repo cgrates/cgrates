@@ -21,6 +21,7 @@ package engine
 import (
 	"errors"
 	"fmt"
+	"net"
 	"reflect"
 	"time"
 
@@ -1090,4 +1091,9 @@ func (cd *CallDescriptor) String() string {
 // AsNavigableMap is part of utils.DataProvider
 func (cd *CallDescriptor) AsNavigableMap(tpl []*config.FCTemplate) (nM *config.NavigableMap, err error) {
 	return nil, utils.ErrNotImplemented
+}
+
+// RemoteHost is part of utils.DataProvider
+func (cd *CallDescriptor) RemoteHost() net.Addr {
+	return new(utils.LocalAddr)
 }

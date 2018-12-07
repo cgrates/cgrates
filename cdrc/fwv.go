@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"strconv"
@@ -320,4 +321,9 @@ func (fP *fwvProvider) FieldAsString(fldPath []string) (data string, err error) 
 func (fP *fwvProvider) AsNavigableMap([]*config.FCTemplate) (
 	nm *config.NavigableMap, err error) {
 	return nil, utils.ErrNotImplemented
+}
+
+// RemoteHost is part of engine.DataProvider interface
+func (fP *fwvProvider) RemoteHost() net.Addr {
+	return new(utils.LocalAddr)
 }

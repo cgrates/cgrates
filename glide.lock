@@ -18,7 +18,7 @@ imports:
 - name: github.com/cgrates/osipsdagram
   version: 3d6beed663452471dec3ca194137a30d379d9e8f
 - name: github.com/cgrates/radigo
-  version: 69d4269e21990c0f120b8e60d5b75d533db7f3dd
+  version: e5c8f3272cccf795f47b82e25a8f3408312c14e0
 - name: github.com/cgrates/rpcclient
   version: 7316bff37a2b8692fbadd57f9c9cda070cc33081
 - name: github.com/fiorix/go-diameter

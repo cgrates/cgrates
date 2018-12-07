@@ -22,6 +22,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"net"
 	"strconv"
 	"strings"
 	"time"
@@ -162,8 +163,14 @@ func (nM *NavigableMap) FieldAsString(fldPath []string) (fldVal string, err erro
 	return
 }
 
+// String is part of engine.DataProvider interface
 func (nM *NavigableMap) String() string {
 	return utils.ToJSON(nM.data)
+}
+
+// RemoteHost is part of engine.DataProvider interface
+func (nM *NavigableMap) RemoteHost() net.Addr {
+	return new(utils.LocalAddr)
 }
 
 // indexMapElements will recursively go through map and index the element paths into elmns

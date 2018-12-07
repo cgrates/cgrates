@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"net"
 	"net/smtp"
 	"path"
 	"reflect"
@@ -901,4 +902,9 @@ func (cdrP *cdrLogProvider) FieldAsString(fldPath []string) (data string, err er
 func (cdrP *cdrLogProvider) AsNavigableMap([]*config.FCTemplate) (
 	nm *config.NavigableMap, err error) {
 	return nil, utils.ErrNotImplemented
+}
+
+// RemoteHost is part of engine.DataProvider interface
+func (cdrP *cdrLogProvider) RemoteHost() net.Addr {
+	return new(utils.LocalAddr)
 }

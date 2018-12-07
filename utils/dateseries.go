@@ -339,3 +339,13 @@ func DaysInYear(year int) float64 {
 	last := first.AddDate(1, 0, 0)
 	return float64(last.Sub(first).Hours() / 24)
 }
+
+type LocalAddr struct{}
+
+func (lc *LocalAddr) Network() string {
+	return Local
+}
+
+func (lc *LocalAddr) String() string {
+	return Local
+}

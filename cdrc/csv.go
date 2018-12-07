@@ -22,6 +22,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"net"
 	"strconv"
 	"strings"
 	"time"
@@ -271,4 +272,9 @@ func (cP *csvProvider) FieldAsString(fldPath []string) (data string, err error) 
 func (cP *csvProvider) AsNavigableMap([]*config.FCTemplate) (
 	nm *config.NavigableMap, err error) {
 	return nil, utils.ErrNotImplemented
+}
+
+// RemoteHost is part of engine.DataProvider interface
+func (cP *csvProvider) RemoteHost() net.Addr {
+	return new(utils.LocalAddr)
 }

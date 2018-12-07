@@ -20,6 +20,7 @@ package agents
 
 import (
 	"fmt"
+	"net"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
@@ -188,4 +189,9 @@ func (pk *radiusDP) FieldAsString(fldPath []string) (data string, err error) {
 func (pk *radiusDP) AsNavigableMap([]*config.FCTemplate) (
 	nm *config.NavigableMap, err error) {
 	return nil, utils.ErrNotImplemented
+}
+
+// RemoteHost is part of engine.DataProvider interface
+func (pk *radiusDP) RemoteHost() net.Addr {
+	return pk.req.RemoteAddr()
 }
