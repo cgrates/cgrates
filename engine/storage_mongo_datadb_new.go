@@ -24,6 +24,7 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"reflect"
 	"strings"
 	"time"
 
@@ -33,11 +34,34 @@ import (
 	"github.com/cgrates/ltcache"
 
 	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/bson/bsoncodec"
+	"github.com/mongodb/mongo-go-driver/bson/bsonrw"
+	"github.com/mongodb/mongo-go-driver/bson/bsontype"
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 	"github.com/mongodb/mongo-go-driver/mongo"
 	"github.com/mongodb/mongo-go-driver/mongo/options"
 	"github.com/mongodb/mongo-go-driver/x/bsonx"
+	"github.com/mongodb/mongo-go-driver/x/mongo/driver/topology"
 )
+
+var tTime = reflect.TypeOf(time.Time{})
+
+func TimeDecodeValue1(dc bsoncodec.DecodeContext, vr bsonrw.ValueReader, val reflect.Value) error {
+	if vr.Type() != bsontype.DateTime {
+		return fmt.Errorf("cannot decode %v into a time.Time", vr.Type())
+	}
+
+	dt, err := vr.ReadDateTime()
+	if err != nil {
+		return err
+	}
+
+	if !val.CanSet() || val.Type() != tTime {
+		return bsoncodec.ValueDecoderError{Name: "TimeDecodeValue", Types: []reflect.Type{tTime}, Received: val}
+	}
+	val.Set(reflect.ValueOf(time.Unix(dt/1000, dt%1000*1000000).UTC()))
+	return nil
+}
 
 // NewMongoStorage givese new mongo driver
 func NewMongoStorage(host, port, db, user, pass, storageType string,
@@ -56,7 +80,21 @@ func NewMongoStorage(host, port, db, user, pass, storageType string,
 	}
 	ctx := context.Background()
 
-	client, err := mongo.NewClient(url)
+	reg := bson.NewRegistryBuilder().RegisterDecoder(tTime, bsoncodec.ValueDecoderFunc(TimeDecodeValue1)).Build()
+	opt := &options.ClientOptions{
+		Registry: reg,
+		TopologyOptions: []topology.Option{
+			topology.WithServerOptions(func(opts ...topology.ServerOption) []topology.ServerOption {
+				return []topology.ServerOption{
+					topology.WithRegistry(func(r *bsoncodec.Registry) *bsoncodec.Registry { return reg }),
+				}
+			}),
+		},
+	}
+
+	client, err := mongo.NewClientWithOptions(url, opt)
+	// client, err := mongo.NewClient(url)
+
 	if err != nil {
 		return nil, err
 	}
