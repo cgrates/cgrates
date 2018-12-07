@@ -535,6 +535,7 @@ const (
 	IdxStart                     = "["
 	IdxEnd                       = "]"
 	MetaLog                      = "*log"
+	MetaRemoteHost               = "*remote_host"
 )
 
 // Migrator Action

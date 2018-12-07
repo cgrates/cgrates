@@ -20,6 +20,7 @@ package agents
 
 import (
 	"fmt"
+	"net"
 	"strconv"
 	"strings"
 	"time"
@@ -242,6 +243,18 @@ func (aReq *AgentRequest) ParseField(
 			iFaceVals[i] = utils.StringToInterface(strVal)
 		}
 		out, err = utils.Sum(iFaceVals...)
+	case utils.MetaRemoteHost:
+		netInterfaceAddresses, err := net.InterfaceAddrs()
+		if err != nil {
+			return "", err
+		}
+		for _, netInterfaceAddress := range netInterfaceAddresses {
+			networkIp, ok := netInterfaceAddress.(*net.IPNet)
+			if ok && !networkIp.IP.IsLoopback() && networkIp.IP.To4() != nil {
+				out = networkIp.IP.String()
+				break
+			}
+		}
 	}
 	if err != nil &&
 		!strings.HasPrefix(err.Error(), "Could not find") {
