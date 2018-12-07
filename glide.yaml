@@ -49,33 +49,16 @@ import:
   - bson/bsoncodec
   - bson/bsonrw
   - bson/bsontype
-  - bson/decimal
-  - bson/objectid
   - bson/primitive
-  - core/address
-  - core/auth
-  - core/auth/internal/gssapi
-  - core/command
-  - core/compressor
-  - core/connection
-  - core/connstring
-  - core/description
-  - core/dispatch
-  - core/event
-  - core/result
-  - core/session
-  - core/tag
-  - core/topology
-  - core/uuid
-  - core/version
-  - core/wiremessage
   - internal
   - mongo
   - mongo/readconcern
   - mongo/readpref
   - mongo/writeconcern
-  - options
+  - mongo/options
   - x/bsonx
+  - x/bsonx/bsoncore
+  - x/mongo/driver/topology
 - package: github.com/stretchr/testify
   subpackages:
   - require
