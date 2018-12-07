@@ -1,10 +1,6 @@
-hash: 47448d94325e62dd3dcce88ebc5ad633efd329dea16f3f3a6f481cd4947eca89
-updated: 2018-11-19T14:47:52.199551832+02:00
+hash: 2daed4c5ed5052824ae5df18b0690a85226f9e3c61c336f83db7fccc6f4ecd51
+updated: 2017-04-21T14:51:07.386488974+02:00
 imports:
-- name: github.com/antchfx/xmlquery
-  version: 98cdbc3221ed492316cca5a4711e48ee0ca0dc9a
-- name: github.com/antchfx/xpath
-  version: a762252498f5e50d8f368dd0a8748073e4b92f93
 - name: github.com/cenkalti/hub
   version: 11382a9960d39b0ecda16fd01c424c11ff765a34
 - name: github.com/cenkalti/rpc2
@@ -19,23 +15,14 @@ imports:
   version: 0e0d0379606fd8f12b53c6da6aeb28544f7bfa37
 - name: github.com/cgrates/ltcache
   version: 92fb7fa77cca400b55d805e4a6d625443027c7f5
-- name: github.com/cgrates/mgo
-  version: 04b6cd516663d1f91d8f914e66ae743d3ab1685c
-  subpackages:
-  - bson
-  - internal/json
-  - internal/sasl
-  - internal/scram
 - name: github.com/cgrates/osipsdagram
   version: 3d6beed663452471dec3ca194137a30d379d9e8f
 - name: github.com/cgrates/radigo
   version: e5c8f3272cccf795f47b82e25a8f3408312c14e0
 - name: github.com/cgrates/rpcclient
   version: 7316bff37a2b8692fbadd57f9c9cda070cc33081
-- name: github.com/dlintw/goconf
-  version: dcc070983490608a14480e3bf943bad464785df5
 - name: github.com/fiorix/go-diameter
-  version: abaf0a5b14a05f3a4a75b8fe23066ab1f898aeac
+  version: 16028e641c19a8dd67509053bc558d389258ff6d
   subpackages:
   - diam
   - diam/avp
@@ -44,39 +31,27 @@ imports:
   - diam/sm
   - diam/sm/smparser
   - diam/sm/smpeer
-- name: github.com/fsnotify/fsnotify
-  version: ccc981bf80385c528a65fbfdd49bf2d8da22aa23
-- name: github.com/go-sql-driver/mysql
-  version: 6be42e0ff99645d7d9626d779001a46e39c5f280
-- name: github.com/go-stack/stack
-  version: 2fee6af1a9795aafbe0253a0cfbdf668e1fb8a9a
-- name: github.com/golang/snappy
-  version: 2e65f85255dbc3072edf28d6b5b8efc472979f5a
-- name: github.com/gorhill/cronexpr
-  version: 88b0669f7d75f171bd612b874e52b95c190218df
 - name: github.com/ishidawataru/sctp
   version: 6e2cb1366111dcf547c13531e3a263a067715847
+- name: github.com/go-sql-driver/mysql
+  version: 99ff426eb706cffe92ff3d058e168b278cabf7c7
+- name: github.com/gorhill/cronexpr
+  version: 88b0669f7d75f171bd612b874e52b95c190218df
 - name: github.com/jinzhu/gorm
-  version: 472c70caa40267cb89fd8facb07fe6454b578626
+  version: 5be9bd34135805e0332b993378864b159784d8a8
 - name: github.com/jinzhu/inflection
-  version: 04140366298a54a039076d798123ffa108fff46c
+  version: 1c35d901db3da928c72a72d8458480cc9ade058f
 - name: github.com/kr/pty
   version: db8e3cd836b82e82e0a9c8edc6896967dd31374f
 - name: github.com/lib/pq
-  version: 9eb73efc1fcc404148b56765b0d3f61d9a5ef8ee
+  version: 4ded0e9383f75c197b3a2aaa6d590ac52df6fd79
   subpackages:
   - oid
-- name: github.com/Masterminds/semver
-  version: c7af12943936e8c39859482e61f0574c2fd7fc75
-- name: github.com/mattn/go-runewidth
-  version: c88d7e5f2e24de48a200a2655ac8a0910be9a0f7
 - name: github.com/mediocregopher/radix.v2
-  version: b67df6e626f993b64b3ca9f4b8630900e61002e3
+  version: 94360be262532d465b7e4760c7a67195d3319a87
   subpackages:
   - pool
-  - pubsub
   - redis
-  - sentinel
 - name: github.com/mitchellh/mapstructure
   version: fa473d140ef3c6adf42d6b391fe76707f1f243c8
 - name: github.com/peterh/liner
@@ -121,29 +96,6 @@ imports:
   - transform
 - name: github.com/fsnotify/fsnotify
   version: ccc981bf80385c528a65fbfdd49bf2d8da22aa23
-- name: github.com/cgrates/mgo
-  version: b5d62cd7eda5e7675d9e6e033012a0f75c3d5b52
-  subpackages:
-  - bson
-  - internal/json
-  - internal/sasl
-  - internal/scram
-- name: github.com/dlintw/goconf
-  version: dcc070983490608a14480e3bf943bad464785df5
-- name: github.com/antchfx/xmlquery
-  version: 07935b1c0f2e6f0efa02c98cd70e223d70218955
-- name: github.com/antchfx/xpath
-  version: 3de91f3991a1af6e495d49c9218318b5544b20e3
-- name: github.com/davecgh/go-spew
-  version: d8f796af33cc11cb798c1aaeb27a4ebc5099927d
-  subpackages:
-  - spew
-- name: github.com/go-stack/stack
-  version: 2fee6af1a9795aafbe0253a0cfbdf668e1fb8a9a
-- name: github.com/golang/snappy
-  version: 2e65f85255dbc3072edf28d6b5b8efc472979f5a
-- name: github.com/Masterminds/semver
-  version: c7af12943936e8c39859482e61f0574c2fd7fc75
 - name: github.com/mongodb/mongo-go-driver
   version: e8f52c4942686e6f1d9f366fa1e84b016aae0762
   subpackages:
@@ -161,65 +113,10 @@ imports:
   - x/bsonx
   - x/bsonx/bsoncore
   - x/mongo/driver/topology
-- name: github.com/peterh/liner
-  version: 5a0dfa99e2aa1d433a9642e863da51402e609376
-- name: github.com/streadway/amqp
-  version: 27835f1a64e97101d95306211f03c0620ffa295d
-- name: github.com/stretchr/testify
-  version: 8019298d9fa5a04fc2ad10ae03349df3483096a6
-  subpackages:
-  - require
-- name: github.com/ugorji/go
-  version: ce1d12656603bc8fa8009023db97a0f0176ca4b9
-  subpackages:
-  - codec
-- name: github.com/xdg/scram
-  version: 7eeb5667e42c09cb51bf7b7c28aea8c56767da90
-- name: github.com/xdg/stringprep
-  version: 73f8eece6fdcd902c185bf651de50f3828bed5ed
-- name: golang.org/x/crypto
-  version: 3d3f9f413869b949e48070b5bc593aa22cc2b8f2
-  subpackages:
-  - pbkdf2
-- name: golang.org/x/net
-  version: adae6a3d119ae4890b46832a2e88a95adc62b8e7
-  subpackages:
-  - context
-  - html
-  - html/atom
-  - html/charset
-  - websocket
-- name: golang.org/x/sync
-  version: 42b317875d0fa942474b76e1b46a6060d720ae6e
-  subpackages:
-  - semaphore
-- name: golang.org/x/sys
-  version: 93218def8b18e66adbdab3eca8ec334700329f1f
-  subpackages:
-  - unix
-- name: golang.org/x/text
-  version: 6f44c5a2ea40ee3593d98cdcc905cc1fdaa660e2
-  subpackages:
-  - encoding
-  - encoding/charmap
-  - encoding/htmlindex
-  - encoding/internal
-  - encoding/internal/identifier
-  - encoding/japanese
-  - encoding/korean
-  - encoding/simplifiedchinese
-  - encoding/traditionalchinese
-  - encoding/unicode
-  - internal/language
-  - internal/language/compact
-  - internal/tag
-  - internal/utf8internal
-  - language
-  - runes
-  - transform
-  - unicode/norm
-- name: google.golang.org/appengine
-  version: 4a4468ece617fc8205e99368fa2200e9d1fad421
-  subpackages:
-  - cloudsql
+- name: github.com/dlintw/goconf
+  version: dcc070983490608a14480e3bf943bad464785df5
+- name: github.com/antchfx/xmlquery
+  version: 07935b1c0f2e6f0efa02c98cd70e223d70218955
+- name: github.com/antchfx/xpath
+  version: 3de91f3991a1af6e495d49c9218318b5544b20e3
 testImports: []

@@ -21,97 +21,104 @@ package migrator
 import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/mgo"
-	"github.com/cgrates/mgo/bson"
+	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
-func newmongoStorDBMigratorOldOld(stor engine.StorDB) (mgoMig *mongoStorDBMigratorOld) {
-	return &mongoStorDBMigratorOld{
-		storDB:  &stor,
-		mgoDB:   stor.(*engine.MongoStorageOld),
-		qryIter: nil,
+func newMongoStorDBMigrator(stor engine.StorDB) (mgoMig *mongoStorDBMigrator) {
+	return &mongoStorDBMigrator{
+		storDB: &stor,
+		mgoDB:  stor.(*engine.MongoStorage),
+		cursor: nil,
 	}
 }
 
-type mongoStorDBMigratorOld struct {
-	storDB  *engine.StorDB
-	mgoDB   *engine.MongoStorageOld
-	qryIter *mgo.Iter
+type mongoStorDBMigrator struct {
+	storDB *engine.StorDB
+	mgoDB  *engine.MongoStorage
+	cursor *mongo.Cursor
 }
 
-func (mgoMig *mongoStorDBMigratorOld) StorDB() engine.StorDB {
+func (mgoMig *mongoStorDBMigrator) StorDB() engine.StorDB {
 	return *mgoMig.storDB
 }
 
 //CDR methods
 //get
-func (v1ms *mongoStorDBMigratorOld) getV1CDR() (v1Cdr *v1Cdrs, err error) {
-	if v1ms.qryIter == nil {
-		v1ms.qryIter = v1ms.mgoDB.DB().C(engine.ColCDRs).Find(nil).Iter()
+func (v1ms *mongoStorDBMigrator) getV1CDR() (v1Cdr *v1Cdrs, err error) {
+	if v1ms.cursor == nil {
+		var cursor mongo.Cursor
+		cursor, err = v1ms.mgoDB.DB().Collection(engine.ColCDRs).Find(v1ms.mgoDB.GetContext(), nil)
+		if err != nil {
+			return nil, err
+		}
+		v1ms.cursor = &cursor
 	}
-	v1ms.qryIter.Next(&v1Cdr)
-
-	if v1Cdr == nil {
-		v1ms.qryIter = nil
+	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
+		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
+		v1ms.cursor = nil
 		return nil, utils.ErrNoMoreData
-
+	}
+	v1Cdr = new(v1Cdrs)
+	if err := (*v1ms.cursor).Decode(v1Cdr); err != nil {
+		return nil, err
 	}
 	return v1Cdr, nil
 }
 
 //set
-func (v1ms *mongoStorDBMigratorOld) setV1CDR(v1Cdr *v1Cdrs) (err error) {
-	if err = v1ms.mgoDB.DB().C(engine.ColCDRs).Insert(v1Cdr); err != nil {
-		return err
-	}
+func (v1ms *mongoStorDBMigrator) setV1CDR(v1Cdr *v1Cdrs) (err error) {
+	_, err = v1ms.mgoDB.DB().Collection(engine.ColCDRs).InsertOne(v1ms.mgoDB.GetContext(), v1Cdr)
 	return
 }
 
 //SMCost methods
 //rename
-func (v1ms *mongoStorDBMigratorOld) renameV1SMCosts() (err error) {
-	if err = v1ms.mgoDB.DB().C(utils.OldSMCosts).DropCollection(); err != nil {
+func (v1ms *mongoStorDBMigrator) renameV1SMCosts() (err error) {
+	if err = v1ms.mgoDB.DB().Collection(utils.OldSMCosts).Drop(v1ms.mgoDB.GetContext()); err != nil {
 		return err
 	}
-	result := make(map[string]string)
-	return v1ms.mgoDB.DB().Run(bson.D{{"create", utils.SessionsCostsTBL}}, result)
+	return v1ms.mgoDB.DB().RunCommand(v1ms.mgoDB.GetContext(),
+		bson.D{{"create", utils.SessionsCostsTBL}}).Err()
 }
 
-func (v1ms *mongoStorDBMigratorOld) createV1SMCosts() (err error) {
-	err = v1ms.mgoDB.DB().C(utils.OldSMCosts).DropCollection()
-	err = v1ms.mgoDB.DB().C(utils.SessionsCostsTBL).DropCollection()
-	result := make(map[string]string)
-	return v1ms.mgoDB.DB().Run(bson.D{{"create", utils.OldSMCosts},
-		{"size", 1024}}, result)
+func (v1ms *mongoStorDBMigrator) createV1SMCosts() (err error) {
+	v1ms.mgoDB.DB().Collection(utils.OldSMCosts).Drop(v1ms.mgoDB.GetContext())
+	v1ms.mgoDB.DB().Collection(utils.SessionsCostsTBL).Drop(v1ms.mgoDB.GetContext())
+	return v1ms.mgoDB.DB().RunCommand(v1ms.mgoDB.GetContext(),
+		bson.D{{"create", utils.OldSMCosts}, {"size", 1024}}).Err()
 }
 
 //get
-func (v1ms *mongoStorDBMigratorOld) getV2SMCost() (v2Cost *v2SessionsCost, err error) {
-	if v1ms.qryIter == nil {
-		v1ms.qryIter = v1ms.mgoDB.DB().C(utils.SessionsCostsTBL).Find(nil).Iter()
+func (v1ms *mongoStorDBMigrator) getV2SMCost() (v2Cost *v2SessionsCost, err error) {
+	if v1ms.cursor == nil {
+		var cursor mongo.Cursor
+		cursor, err = v1ms.mgoDB.DB().Collection(utils.SessionsCostsTBL).Find(v1ms.mgoDB.GetContext(), nil)
+		if err != nil {
+			return nil, err
+		}
+		v1ms.cursor = &cursor
 	}
-	v1ms.qryIter.Next(&v2Cost)
-
-	if v2Cost == nil {
-		v1ms.qryIter = nil
+	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
+		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
+		v1ms.cursor = nil
 		return nil, utils.ErrNoMoreData
-
+	}
+	v2Cost = new(v2SessionsCost)
+	if err := (*v1ms.cursor).Decode(v2Cost); err != nil {
+		return nil, err
 	}
 	return v2Cost, nil
 }
 
 //set
-func (v1ms *mongoStorDBMigratorOld) setV2SMCost(v2Cost *v2SessionsCost) (err error) {
-	if err = v1ms.mgoDB.DB().C(utils.SessionsCostsTBL).Insert(v2Cost); err != nil {
-		return err
-	}
+func (v1ms *mongoStorDBMigrator) setV2SMCost(v2Cost *v2SessionsCost) (err error) {
+	_, err = v1ms.mgoDB.DB().Collection(utils.SessionsCostsTBL).InsertOne(v1ms.mgoDB.GetContext(), v2Cost)
 	return
 }
 
 //remove
-func (v1ms *mongoStorDBMigratorOld) remV2SMCost(v2Cost *v2SessionsCost) (err error) {
-	if err = v1ms.mgoDB.DB().C(utils.SessionsCostsTBL).Remove(nil); err != nil {
-		return err
-	}
+func (v1ms *mongoStorDBMigrator) remV2SMCost(v2Cost *v2SessionsCost) (err error) {
+	_, err = v1ms.mgoDB.DB().Collection(utils.SessionsCostsTBL).DeleteMany(v1ms.mgoDB.GetContext(), nil)
 	return
 }
