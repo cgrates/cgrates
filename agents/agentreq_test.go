@@ -356,3 +356,26 @@ func TestAgReqParseFieldHttpXml(t *testing.T) {
 	}
 
 }
+
+func TestAgReqParseFieldRemoteHost(t *testing.T) {
+	data, _ := engine.NewMapStorage()
+	dm := engine.NewDataManager(data)
+	cfg, _ := config.NewDefaultCGRConfig()
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	agReq := newAgentRequest(nil, nil, nil, nil, "cgrates.org", "", filterS)
+
+	tplFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "OriginHost",
+			FieldId: utils.OriginHost, Type: utils.MetaRemoteHost},
+	}
+	eMp := config.NewNavigableMap(nil)
+	eMp.Set([]string{utils.OriginHost}, []*config.NMItem{
+		&config.NMItem{Data: "192.168.56.203", Path: []string{utils.OriginHost},
+			Config: tplFlds[0]}}, false, true)
+	if mpOut, err := agReq.AsNavigableMap(tplFlds); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eMp, mpOut) {
+		t.Errorf("expecting: %+v, received: %+v", eMp, mpOut)
+	}
+
+}
