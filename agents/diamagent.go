@@ -157,7 +157,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		var lclProcessed bool
 		lclProcessed, err = da.processRequest(reqProcessor,
 			newAgentRequest(
-				newDADataProvider(m), reqVars, rply,
+				newDADataProvider(c, m), reqVars, rply,
 				reqProcessor.Tenant, da.cgrCfg.GeneralCfg().DefaultTenant,
 				utils.FirstNonEmpty(reqProcessor.Timezone,
 					da.cgrCfg.GeneralCfg().DefaultTimezone),

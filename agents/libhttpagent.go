@@ -22,6 +22,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"strconv"
@@ -100,6 +101,11 @@ func (hU *httpUrlDP) AsNavigableMap([]*config.FCTemplate) (
 	return nil, utils.ErrNotImplemented
 }
 
+// RemoteHost is part of engine.DataProvider interface
+func (hU *httpUrlDP) RemoteHost() net.Addr {
+	return newHttpRemoteAddr(hU.req.RemoteAddr)
+}
+
 func newHTTPXmlDP(req *http.Request) (dP config.DataProvider, err error) {
 	byteData, err := ioutil.ReadAll(req.Body)
 	if err != nil {
@@ -110,7 +116,7 @@ func newHTTPXmlDP(req *http.Request) (dP config.DataProvider, err error) {
 	if err != nil {
 		return nil, err
 	}
-	dP = &httpXmlDP{xmlDoc: doc, cache: config.NewNavigableMap(nil)}
+	dP = &httpXmlDP{xmlDoc: doc, cache: config.NewNavigableMap(nil), addr: req.RemoteAddr}
 	return
 }
 
@@ -119,6 +125,7 @@ func newHTTPXmlDP(req *http.Request) (dP config.DataProvider, err error) {
 type httpXmlDP struct {
 	cache  *config.NavigableMap
 	xmlDoc *xmlquery.Node
+	addr   string
 }
 
 // String is part of engine.DataProvider interface
@@ -189,6 +196,11 @@ func (hU *httpXmlDP) AsNavigableMap([]*config.FCTemplate) (
 	return nil, utils.ErrNotImplemented
 }
 
+// RemoteHost is part of engine.DataProvider interface
+func (hU *httpXmlDP) RemoteHost() net.Addr {
+	return newHttpRemoteAddr(hU.addr)
+}
+
 // httpAgentReplyEncoder will encode  []*engine.NMElement
 // and write content to http writer
 type httpAgentReplyEncoder interface {
@@ -232,4 +244,21 @@ func (xE *haXMLEncoder) Encode(nM *config.NavigableMap) (err error) {
 	}
 	_, err = xE.w.Write(xmlOut)
 	return
+}
+
+func newHttpRemoteAddr(ip string) *httpRemoteAddr {
+	return &httpRemoteAddr{ip: ip}
+
+}
+
+type httpRemoteAddr struct {
+	ip string
+}
+
+func (http *httpRemoteAddr) Network() string {
+	return utils.TCP
+}
+
+func (http *httpRemoteAddr) String() string {
+	return http.ip
 }

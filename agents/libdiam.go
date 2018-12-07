@@ -266,14 +266,15 @@ func writeOnConn(c diam.Conn, m *diam.Message) {
 }
 
 // newDADataProvider constructs a DataProvider for a diameter message
-func newDADataProvider(m *diam.Message) config.DataProvider {
-	return &diameterDP{m: m, cache: config.NewNavigableMap(nil)}
+func newDADataProvider(c diam.Conn, m *diam.Message) config.DataProvider {
+	return &diameterDP{c: c, m: m, cache: config.NewNavigableMap(nil)}
 
 }
 
 // diameterDP implements engine.DataProvider, serving as diam.Message data decoder
 // decoded data is only searched once and cached
 type diameterDP struct {
+	c     diam.Conn
 	m     *diam.Message
 	cache *config.NavigableMap
 }
@@ -298,6 +299,11 @@ func (dP *diameterDP) FieldAsString(fldPath []string) (data string, err error) {
 		return
 	}
 	return utils.IfaceAsString(valIface)
+}
+
+// RemoteHost is part of engine.DataProvider interface
+func (dP *diameterDP) RemoteHost() net.Addr {
+	return dP.c.RemoteAddr()
 }
 
 // FieldAsInterface is part of engine.DataProvider interface
@@ -446,7 +452,7 @@ func diamErr(m *diam.Message, resCode uint32,
 	tpl []*config.FCTemplate, tnt, tmz string,
 	filterS *engine.FilterS) (a *diam.Message, err error) {
 	aReq := newAgentRequest(
-		newDADataProvider(m), reqVars,
+		newDADataProvider(nil, m), reqVars,
 		config.NewNavigableMap(nil),
 		nil, tnt, tmz, filterS)
 	var rplyData *config.NavigableMap

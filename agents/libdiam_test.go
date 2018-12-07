@@ -64,7 +64,7 @@ func TestDPFieldAsInterface(t *testing.T) {
 			diam.NewAVP(avp.ValueDigits, avp.Mbit, 0, datatype.Integer64(20000)),
 		}})
 
-	dP := newDADataProvider(m)
+	dP := newDADataProvider(nil, m)
 	eOut := interface{}("simuhuawei;1449573472;00002")
 	if out, err := dP.FieldAsInterface([]string{"Session-Id"}); err != nil {
 		t.Error(err)

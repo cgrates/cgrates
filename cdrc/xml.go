@@ -23,6 +23,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"strconv"
 	"strings"
 	"time"
@@ -274,4 +275,9 @@ func (xP *xmlProvider) FieldAsString(fldPath []string) (data string, err error) 
 func (xP *xmlProvider) AsNavigableMap([]*config.FCTemplate) (
 	nm *config.NavigableMap, err error) {
 	return nil, utils.ErrNotImplemented
+}
+
+// RemoteHost is part of engine.DataProvider interface
+func (xP *xmlProvider) RemoteHost() net.Addr {
+	return new(utils.LocalAddr)
 }

@@ -78,6 +78,11 @@ func (ar *AgentRequest) String() string {
 	return utils.ToJSON(ar)
 }
 
+// RemoteHost implements engine.DataProvider
+func (aReq *AgentRequest) RemoteHost() net.Addr {
+	return aReq.Request.RemoteHost()
+}
+
 // FieldAsInterface implements engine.DataProvider
 func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err error) {
 	switch fldPath[0] {
@@ -171,6 +176,9 @@ func (aReq *AgentRequest) ParseField(
 	case utils.META_CONSTANT:
 		out, err = cfgFld.Value.ParseValue(utils.EmptyString)
 		isString = true
+	case utils.MetaRemoteHost:
+		out = aReq.RemoteHost().String()
+		isString = true
 	case utils.MetaVariable, utils.META_COMPOSED:
 		out, err = cfgFld.Value.ParseDataProvider(aReq, utils.NestingSep)
 		isString = true
@@ -243,19 +251,8 @@ func (aReq *AgentRequest) ParseField(
 			iFaceVals[i] = utils.StringToInterface(strVal)
 		}
 		out, err = utils.Sum(iFaceVals...)
-	case utils.MetaRemoteHost:
-		netInterfaceAddresses, err := net.InterfaceAddrs()
-		if err != nil {
-			return "", err
-		}
-		for _, netInterfaceAddress := range netInterfaceAddresses {
-			networkIp, ok := netInterfaceAddress.(*net.IPNet)
-			if ok && !networkIp.IP.IsLoopback() && networkIp.IP.To4() != nil {
-				out = networkIp.IP.String()
-				break
-			}
-		}
 	}
+
 	if err != nil &&
 		!strings.HasPrefix(err.Error(), "Could not find") {
 		return
