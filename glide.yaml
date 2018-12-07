@@ -32,9 +32,6 @@ import:
   subpackages:
   - websocket
 - package: github.com/fsnotify/fsnotify
-- package: github.com/cgrates/mgo
-  subpackages:
-  - bson
 - package: github.com/mitchellh/mapstructure
 - package: github.com/cgrates/aringo
 - package: github.com/streadway/amqp
