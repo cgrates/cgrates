@@ -248,30 +248,6 @@ CREATE TABLE `tp_account_actions` (
 );
 
 --
--- Table structure for table `tp_lcr_rules`
---
-
-DROP TABLE IF EXISTS tp_lcr_rules;
-CREATE TABLE tp_lcr_rules (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `tpid` varchar(64) NOT NULL,
-  `direction` varchar(8) NOT NULL,
-  `tenant` varchar(64) NOT NULL,
-  `category` varchar(32) NOT NULL,
-  `account` varchar(64) NOT NULL,
-  `subject` varchar(64) NOT NULL,
-  `destination_tag` varchar(64) NOT NULL,
-  `rp_category` varchar(32) NOT NULL,
-  `strategy` varchar(18) NOT NULL,
-  `strategy_params`	varchar(256) NOT NULL,
-  `activation_time` varchar(24) NOT NULL,
-  `weight` DECIMAL(8,2) NOT NULL,
-  `created_at` TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `tpid` (`tpid`)
-);
-
---
 -- Table structure for table `tp_derived_chargers`
 --
 
@@ -303,45 +279,6 @@ CREATE TABLE tp_derived_chargers (
   `disconnect_cause_field`  varchar(64) NOT NULL,
   `rated_field`  varchar(64) NOT NULL,
   `cost_field`  varchar(64) NOT NULL,
-  `created_at` TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `tpid` (`tpid`)
-);
-
-
---
--- Table structure for table `tp_cdr_stats`
---
-
-DROP TABLE IF EXISTS tp_cdr_stats;
-CREATE TABLE tp_cdr_stats (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `tpid` varchar(64) NOT NULL,
-  `tag` varchar(64) NOT NULL,
-  `queue_length` int(11) NOT NULL,
-  `time_window` varchar(8) NOT NULL,
-  `save_interval` varchar(8) NOT NULL,
-  `metrics` varchar(64) NOT NULL,
-  `setup_interval` varchar(64) NOT NULL,
-  `tors` varchar(64) NOT NULL,
-  `cdr_hosts` varchar(64) NOT NULL,
-  `cdr_sources` varchar(64) NOT NULL,
-  `req_types` varchar(64) NOT NULL,
-  `directions` varchar(8) NOT NULL,
-  `tenants` varchar(64) NOT NULL,
-  `categories` varchar(32) NOT NULL,
-  `accounts` varchar(255) NOT NULL,
-  `subjects` varchar(64) NOT NULL,
-  `destination_ids` varchar(64) NOT NULL,
-  `pdd_interval` varchar(64) NOT NULL,
-  `usage_interval` varchar(64) NOT NULL,
-  `suppliers` varchar(64) NOT NULL,
-  `disconnect_causes` varchar(64) NOT NULL,
-  `mediation_runids` varchar(64) NOT NULL,
-  `rated_accounts` varchar(255) NOT NULL,
-  `rated_subjects` varchar(64) NOT NULL,
-  `cost_interval` varchar(24) NOT NULL,
-  `action_triggers` varchar(64) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`)
