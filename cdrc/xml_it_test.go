@@ -64,7 +64,7 @@ func TestXmlITResetDataDb(t *testing.T) {
 
 func TestXmlITCreateCdrDirs(t *testing.T) {
 	for _, cdrcProfiles := range xmlCfg.CdrcProfiles {
-		for i, cdrcInst := range cdrcProfiles {
+		for _, cdrcInst := range cdrcProfiles {
 			for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
 				if err := os.RemoveAll(dir); err != nil {
 					t.Fatal("Error removing folder: ", dir, err)
@@ -73,7 +73,7 @@ func TestXmlITCreateCdrDirs(t *testing.T) {
 					t.Fatal("Error creating folder: ", dir, err)
 				}
 			}
-			if i == 0 { // Initialize the folders to check later
+			if cdrcInst.ID == "XMLit1" { // Initialize the folders to check later
 				xmlPathIn1 = cdrcInst.CdrInDir
 				xmlPathOut1 = cdrcInst.CdrOutDir
 			}

@@ -54,7 +54,7 @@ var cdrcCfg *config.CdrcCfg
 var cdrcRpc *rpc.Client
 
 var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-var waitRater = flag.Int("wait_rater", 300, "Number of miliseconds to wait for rater to start and cache")
+var waitRater = flag.Int("wait_rater", 500, "Number of miliseconds to wait for rater to start and cache")
 
 var fileContent1 = `dbafe9c8614c785a65aabd116dd3959c3c56f7f6,default,*voice,dsafdsaf,*rated,*out,cgrates.org,call,1001,1001,+4986517174963,2013-11-07 08:42:25 +0000 UTC,2013-11-07 08:42:26 +0000 UTC,10s,1.0100,val_extra3,"",val_extra1
 dbafe9c8614c785a65aabd116dd3959c3c56f7f7,default,*voice,dsafdsag,*rated,*out,cgrates.org,call,1001,1001,+4986517174964,2013-11-07 09:42:25 +0000 UTC,2013-11-07 09:42:26 +0000 UTC,20s,1.0100,val_extra3,"",val_extra1
