@@ -538,6 +538,7 @@ const (
 	MetaRemoteHost               = "*remote_host"
 	Local                        = "local"
 	TCP                          = "tcp"
+	CGRDebitInterval             = "CGRDebitInterval"
 )
 
 // Migrator Action

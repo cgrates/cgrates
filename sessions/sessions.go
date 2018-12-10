@@ -1928,10 +1928,16 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 				return utils.NewErrMandatoryIeMissing(utils.OriginID)
 			}
 		}
+		ev := engine.NewSafEvent(args.CGREvent.Event)
+		dbtItvl := smg.cgrCfg.SessionSCfg().DebitInterval
+		if ev.HasField(utils.CGRDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
+			if dbtItvl, err = ev.GetDuration(utils.CGRDebitInterval); err != nil {
+				return utils.NewErrRALs(err)
+			}
+		}
 		if maxUsage, err := smg.InitiateSession(
 			args.CGREvent.Tenant,
-			engine.NewSafEvent(args.CGREvent.Event), clnt, originID,
-			smg.cgrCfg.SessionSCfg().DebitInterval); err != nil {
+			ev, clnt, originID, dbtItvl); err != nil {
 			return utils.NewErrRALs(err)
 		} else {
 			rply.MaxUsage = &maxUsage
@@ -2089,9 +2095,15 @@ func (smg *SMGeneric) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 		if err != nil {
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
+		ev := engine.NewSafEvent(args.CGREvent.Event)
+		dbtItvl := smg.cgrCfg.SessionSCfg().DebitInterval
+		if ev.HasField(utils.CGRDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
+			if dbtItvl, err = ev.GetDuration(utils.CGRDebitInterval); err != nil {
+				return utils.NewErrRALs(err)
+			}
+		}
 		if maxUsage, err := smg.UpdateSession(args.CGREvent.Tenant,
-			engine.NewSafEvent(args.CGREvent.Event), clnt, originID,
-			smg.cgrCfg.SessionSCfg().DebitInterval); err != nil {
+			ev, clnt, originID, dbtItvl); err != nil {
 			return utils.NewErrRALs(err)
 		} else {
 			rply.MaxUsage = &maxUsage
@@ -2138,9 +2150,15 @@ func (smg *SMGeneric) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection
 		if err != nil {
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
+		ev := engine.NewSafEvent(args.CGREvent.Event)
+		dbtItvl := smg.cgrCfg.SessionSCfg().DebitInterval
+		if ev.HasField(utils.CGRDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
+			if dbtItvl, err = ev.GetDuration(utils.CGRDebitInterval); err != nil {
+				return utils.NewErrRALs(err)
+			}
+		}
 		if err = smg.TerminateSession(args.CGREvent.Tenant,
-			engine.NewSafEvent(args.CGREvent.Event), clnt, originID,
-			smg.cgrCfg.SessionSCfg().DebitInterval); err != nil {
+			ev, clnt, originID, dbtItvl); err != nil {
 			return utils.NewErrRALs(err)
 		}
 	}
