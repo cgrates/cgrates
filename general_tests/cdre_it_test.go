@@ -148,6 +148,7 @@ func testCDREProcessCdr(t *testing.T) {
 }
 
 func testCDREExport(t *testing.T) {
+	// time.Sleep(100 * time.Millisecond)
 	var replyExport v1.RplExportedCDRs
 	exportArgs := v1.ArgExportCDRs{
 		ExportPath:     utils.StringPointer("/tmp"),
@@ -160,10 +161,10 @@ func testCDREExport(t *testing.T) {
 	} else if replyExport.TotalRecords != 1 {
 		t.Errorf("Unexpected total records: %+v", replyExport.TotalRecords)
 	}
-	//expFilePath := path.Join(*exportArgs.ExportPath, *exportArgs.ExportFileName)
-	//if err := os.Remove(expFilePath); err != nil {
-	//	t.Error(err)
-	//}
+	// expFilePath := path.Join(*exportArgs.ExportPath, *exportArgs.ExportFileName)
+	// if err := os.Remove(expFilePath); err != nil {
+	// 	t.Error(err)
+	// }
 }
 
 func testCDREStopEngine(t *testing.T) {
