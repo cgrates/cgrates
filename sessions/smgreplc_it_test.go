@@ -111,14 +111,9 @@ func TestSMGRplcInitiate(t *testing.T) {
 		utils.Usage:       "1m30s",
 	}
 	var maxUsage time.Duration
-	if err := smgRplcMstrRPC.Call(utils.SMGenericV2UpdateSession,
-		smgEv, &maxUsage); err == nil &&
-		err.Error() != rpcclient.ErrSessionNotFound.Error() { // Update should return rpcclient.ErrSessionNotFound
-		t.Error(err)
-	}
 	var reply string
 	if err := smgRplcMstrRPC.Call("SMGenericV1.TerminateSession",
-		smgEv, &reply); err == nil &&
+		smgEv, &reply); err == nil ||
 		err.Error() != rpcclient.ErrSessionNotFound.Error() { // Update should return rpcclient.ErrSessionNotFound
 		t.Error(err)
 	}
@@ -212,17 +207,23 @@ func TestSMGRplcTerminate(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
 	var aSessions []*ActiveSession
-	if err := smgRplcMstrRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.OriginID: "123451"}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcMstrRPC.Call("SMGenericV1.GetActiveSessions",
+		map[string]string{utils.OriginID: "123451"}, &aSessions); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
-	if err := smgRplcSlvRPC.Call("SMGenericV1.GetActiveSessions", map[string]string{utils.OriginID: "123451"}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcSlvRPC.Call("SMGenericV1.GetActiveSessions",
+		map[string]string{utils.OriginID: "123451"}, &aSessions); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
 	var pSessions map[string][]*SMGSession
-	if err := smgRplcMstrRPC.Call("SMGenericV1.GetPassiveSessions", nil, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcMstrRPC.Call("SMGenericV1.GetPassiveSessions",
+		nil, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", nil, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions",
+		nil, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

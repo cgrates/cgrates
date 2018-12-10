@@ -638,7 +638,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 	if maxUsage != 1024 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
-	eAcntVal = 100352.000000 // 1054720
+	eAcntVal = 100352.000000
 	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
@@ -675,7 +675,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 	if maxUsage != 0 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
-	eAcntVal = 100352.000000 // 1054720
+	eAcntVal = 100352.000000
 	if err := smgRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {

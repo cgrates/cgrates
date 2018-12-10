@@ -32,12 +32,12 @@ import (
 
 // One session handled by SM
 type SMGSession struct {
-	mux         sync.RWMutex                  // protects the SMGSession in places where is concurrently accessed
-	stopDebit   chan struct{}                 // Channel to communicate with debit loops when closing the session
-	clntConn    rpcclient.RpcClientConnection // Reference towards client connection on SMG side so we can disconnect.
-	rals        rpcclient.RpcClientConnection // Connector to rals service
-	cdrsrv      rpcclient.RpcClientConnection // Connector to CDRS service
-	clientProto float64
+	sync.RWMutex                               // protects the SMGSession in places where is concurrently accessed
+	stopDebit    chan struct{}                 // Channel to communicate with debit loops when closing the session
+	clntConn     rpcclient.RpcClientConnection // Reference towards client connection on SMG side so we can disconnect.
+	rals         rpcclient.RpcClientConnection // Connector to rals service
+	cdrsrv       rpcclient.RpcClientConnection // Connector to CDRS service
+	clientProto  float64
 
 	Tenant     string // store original Tenant so we can use it in API calls
 	CGRID      string // Unique identifier for this session
@@ -49,11 +49,10 @@ type SMGSession struct {
 	CD         *engine.CallDescriptor // initial CD used for debits, updated on each debit
 	EventCost  *engine.EventCost
 
-	ExtraDuration time.Duration // keeps the current duration debited on top of what heas been asked
+	ExtraDuration time.Duration // keeps the current duration debited on top of what has been asked
 	LastUsage     time.Duration // last requested Duration
 	LastDebit     time.Duration // last real debited duration
 	TotalUsage    time.Duration // sum of lastUsage
-
 }
 
 // Clone returns the cloned version of SMGSession
@@ -111,8 +110,8 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 
 // Attempts to debit a duration, returns maximum duration which can be debitted or error
 func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.Duration, error) {
-	self.mux.Lock()
-	defer self.mux.Unlock()
+	self.Lock()
+	defer self.Unlock()
 	requestedDuration := dur
 	if lastUsed != nil {
 		self.ExtraDuration = self.LastDebit - *lastUsed
@@ -128,9 +127,8 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 	} else {
 		self.LastUsage = requestedDuration
 		self.TotalUsage += self.LastUsage
-		ccDuration := self.ExtraDuration // fake ccDuration
 		self.ExtraDuration -= dur
-		return ccDuration, nil
+		return requestedDuration, nil
 	}
 	initialExtraDuration := self.ExtraDuration
 	self.ExtraDuration = 0
@@ -199,8 +197,8 @@ func (self *SMGSession) disconnectSession(reason string) error {
 
 // Session has ended, check debits and refund the extra charged duration
 func (self *SMGSession) close(usage time.Duration) (err error) {
-	self.mux.Lock()
-	defer self.mux.Unlock()
+	self.Lock()
+	defer self.Unlock()
 	if self.EventCost == nil {
 		return
 	}
@@ -273,8 +271,8 @@ func (self *SMGSession) storeSMCost() error {
 	if self.EventCost == nil {
 		return nil // There are no costs to save, ignore the operation
 	}
-	self.mux.Lock()
-	self.mux.Unlock()
+	self.Lock()
+	self.Unlock()
 	smCost := &engine.V2SMCost{
 		CGRID:       self.CGRID,
 		CostSource:  utils.MetaSessionS,
@@ -298,8 +296,8 @@ func (self *SMGSession) storeSMCost() error {
 }
 
 func (self *SMGSession) AsActiveSession(timezone string) *ActiveSession {
-	self.mux.RLock()
-	defer self.mux.RUnlock()
+	self.RLock()
+	defer self.RUnlock()
 	aSession := &ActiveSession{
 		CGRID:       self.CGRID,
 		TOR:         self.EventStart.GetStringIgnoreErrors(utils.ToR),

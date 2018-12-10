@@ -110,6 +110,15 @@ func (se *SafEvent) GetDuration(fldName string) (d time.Duration, err error) {
 	return
 }
 
+// GetDurationPointer returns pointer towards duration, useful to detect presence of duration
+func (se *SafEvent) GetDurationOrDefault(fldName string, dflt time.Duration) (d time.Duration, err error) {
+	_, has := se.Get(fldName)
+	if !has {
+		return dflt, nil
+	}
+	return se.GetDuration(fldName)
+}
+
 // GetDuration returns a field as Duration, ignoring errors
 func (se *SafEvent) GetDurationIgnoreErrors(fldName string) (d time.Duration) {
 	d, _ = se.GetDuration(fldName)

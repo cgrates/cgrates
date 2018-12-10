@@ -26,7 +26,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// getSessionTTL retrieves SessionTTL setting out of S
+// getSessionTTL retrieves SessionTTL setting out of ev
+// if SessionTTLMaxDelay is present in ev, the return is randomized
 func getSessionTTL(ev *engine.SafEvent, cfgSessionTTL time.Duration,
 	cfgSessionTTLMaxDelay *time.Duration) (ttl time.Duration, err error) {
 	if ttl, err = ev.GetDuration(utils.SessionTTL); err != nil {
