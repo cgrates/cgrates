@@ -143,7 +143,7 @@ func testV2CDRsProcessCDR(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(100) * time.Millisecond) // Give time for CDR to be rated
+	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsGetCdrs(t *testing.T) {
@@ -223,7 +223,7 @@ func testV2CDRsRateCDRs(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(100) * time.Millisecond) // Give time for CDR to be rated
+	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsGetCdrs2(t *testing.T) {
@@ -291,7 +291,7 @@ func testV2CDRsUsageNegative(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(100) * time.Millisecond) // Give time for CDR to be rated
+	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
 
 	var cdrs []*engine.ExternalCDR
 	args := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}, OriginIDs: []string{"testV2CDRsUsageNegative"}}
@@ -336,7 +336,7 @@ func testV2CDRsUsageNegative(t *testing.T) {
 }
 
 func testV2CDRsKillEngine(t *testing.T) {
-	if err := engine.KillEngine(100); err != nil {
+	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}
 }
