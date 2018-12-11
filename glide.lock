@@ -97,7 +97,7 @@ imports:
 - name: github.com/fsnotify/fsnotify
   version: ccc981bf80385c528a65fbfdd49bf2d8da22aa23
 - name: github.com/cgrates/mgo
-  version: 5d96853206543d8c9d681d96a5ad2369e68873dd
+  version: f861bea8d39aa1e39041e6bcf022d286776a3504
   subpackages:
   - bson
   - internal/json
