@@ -762,7 +762,9 @@ func (cdrS *CdrServer) attrSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 // V2ProcessCDR will process the CDR out of CGREvent
 func (cdrS *CdrServer) V2ProcessCDR(cgrEv *utils.CGREvent, reply *string) (err error) {
 	if cdrS.attrS != nil {
-		cdrS.attrSProcessEvent(cgrEv)
+		if err := cdrS.attrSProcessEvent(cgrEv); err != nil {
+			return utils.NewErrServerError(err)
+		}
 	}
 	rawCDR, err := NewMapEvent(cgrEv.Event).AsCDR(cdrS.cgrCfg, cgrEv.Tenant, cdrS.Timezone())
 	if err != nil {
