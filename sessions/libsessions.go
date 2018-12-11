@@ -26,6 +26,14 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// SessionSClient is the interface implemented by Agents which are able to
+// communicate bidirectionally with SessionS and remote Communication Switch
+type SessionSClient interface {
+	Call(serviceMethod string, args interface{}, reply interface{}) error
+	V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) (err error)
+	V1GetActiveSessionIDs(ignParam string, sessionIDs *[]*SessionID) (err error)
+}
+
 // getSessionTTL retrieves SessionTTL setting out of ev
 // if SessionTTLMaxDelay is present in ev, the return is randomized
 func getSessionTTL(ev *engine.SafEvent, cfgSessionTTL time.Duration,
