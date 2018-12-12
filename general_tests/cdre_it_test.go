@@ -63,7 +63,7 @@ func TestCDREITMySql(t *testing.T) {
 }
 
 func TestCDREITMongo(t *testing.T) {
-	cdreConfigDIR = "tutmongo"
+	cdreConfigDIR = "tutmongo2"
 	for _, stest := range sTestsCDRE {
 		t.Run(cdreConfigDIR, stest)
 	}
