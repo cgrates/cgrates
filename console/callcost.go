@@ -61,5 +61,5 @@ func (self *CmdGetCostDetails) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetCostDetails) RpcResult() interface{} {
-	return &engine.CallCost{}
+	return &engine.SMCost{}
 }
