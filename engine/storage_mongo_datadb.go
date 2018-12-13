@@ -128,7 +128,7 @@ func TimeDecodeValue1(dc bsoncodec.DecodeContext, vr bsonrw.ValueReader, val ref
 // NewMongoStorage givese new mongo driver
 func NewMongoStorage(host, port, db, user, pass, storageType string,
 	cdrsIndexes []string, cacheCfg config.CacheCfg) (ms *MongoStorage, err error) {
-	url := "mongodb://" + host
+	url := host
 	if port != "" {
 		url += ":" + port
 	}
@@ -141,7 +141,7 @@ func NewMongoStorage(host, port, db, user, pass, storageType string,
 		dbName = strings.Split(db, "?")[0] // remove extra info after ?
 	}
 	ctx := context.Background()
-
+	url = "mongodb://" + url
 	reg := bson.NewRegistryBuilder().RegisterDecoder(tTime, bsoncodec.ValueDecoderFunc(TimeDecodeValue1)).Build()
 	opt := &options.ClientOptions{
 		Registry: reg,
@@ -174,7 +174,7 @@ func NewMongoStorage(host, port, db, user, pass, storageType string,
 		cdrsIndexes: cdrsIndexes,
 	}
 	if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) error {
-		if col, err := ms.client.Database(db).ListCollections(sctx, nil, options.ListCollections().SetNameOnly(true)); err != nil {
+		if col, err := ms.client.Database(dbName).ListCollections(sctx, nil, options.ListCollections().SetNameOnly(true)); err != nil {
 			return err
 		} else {
 			empty := true
