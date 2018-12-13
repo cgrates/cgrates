@@ -1455,15 +1455,15 @@ func TestApierITProcessCdr(t *testing.T) {
 
 // Test here ResponderGetCost
 func TestApierGetCallCostLog(t *testing.T) {
-	var cc engine.SMCost
+	var cc engine.EventCost
 	var attrs utils.AttrGetCallCost
 	// Simple test that command is executed without errors
-	if err := rater.Call("ApierV1.GetCallCostLog", attrs, &cc); err == nil {
+	if err := rater.Call("ApierV1.GetEventCost", attrs, &cc); err == nil {
 		t.Error("Failed to detect missing fields in ApierV1.GetCallCostLog")
 	}
 	attrs.CgrId = "dummyid"
 	attrs.RunId = "default"
-	if err := rater.Call("ApierV1.GetCallCostLog", attrs, &cc); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := rater.Call("ApierV1.GetEventCost", attrs, &cc); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error("ApierV1.GetCallCostLog: should return NOT_FOUND, got:", err)
 	}
 	tm := time.Now().Truncate(time.Millisecond)
@@ -1494,38 +1494,30 @@ func TestApierGetCallCostLog(t *testing.T) {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	time.Sleep(100 * time.Millisecond)
-	expected := engine.SMCost{
-		CGRID:      "Cdr1",
-		RunID:      "*default",
-		OriginHost: "192.168.1.1",
-		OriginID:   "OriginCDR1",
-		CostSource: "*cdrs",
-		Usage:      0 * time.Second,
-		CostDetails: &engine.EventCost{
-			CGRID:     "Cdr1",
-			RunID:     "*default",
-			StartTime: tm,
-			Usage:     utils.DurationPointer(0),
-			Cost:      utils.Float64Pointer(0),
-			Charges: []*engine.ChargingInterval{{
-				RatingID:       "",
-				Increments:     nil,
-				CompressFactor: 0,
-			}},
-			AccountSummary: nil,
-			Rating:         engine.Rating{},
-			Accounting:     engine.Accounting{},
-			RatingFilters:  engine.RatingFilters{},
-			Rates:          engine.ChargedRates{},
-			Timings:        engine.ChargedTimings{},
-		},
+	expected := engine.EventCost{
+		CGRID:     "Cdr1",
+		RunID:     "*default",
+		StartTime: tm,
+		Usage:     utils.DurationPointer(0),
+		Cost:      utils.Float64Pointer(0),
+		Charges: []*engine.ChargingInterval{{
+			RatingID:       "",
+			Increments:     nil,
+			CompressFactor: 0,
+		}},
+		AccountSummary: nil,
+		Rating:         engine.Rating{},
+		Accounting:     engine.Accounting{},
+		RatingFilters:  engine.RatingFilters{},
+		Rates:          engine.ChargedRates{},
+		Timings:        engine.ChargedTimings{},
 	}
 	attrs.CgrId = "Cdr1"
 	attrs.RunId = ""
-	if err := rater.Call("ApierV1.GetCallCostLog", attrs, &cc); err != nil {
+	if err := rater.Call("ApierV1.GetEventCost", attrs, &cc); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, cc) {
-		t.Errorf("Expecting %s ,recived %s", utils.ToJSON(expected.CostDetails), utils.ToJSON(cc.CostDetails))
+		t.Errorf("Expecting %s ,recived %s", utils.ToJSON(expected), utils.ToJSON(cc))
 	}
 }
 
