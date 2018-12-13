@@ -102,8 +102,8 @@ type CDR struct {
 	Partial     bool              // Used for partial record processing by CDRC
 	PreRated    bool              // Mark the CDR as rated so we do not process it during rating
 	CostSource  string            // The source of this cost
-	Cost        float64
-	CostDetails *EventCost // Attach the cost details to CDR when possible
+	Cost        float64           //
+	CostDetails *EventCost        // Attach the cost details to CDR when possible
 }
 
 // AddDefaults will add missing information based on other fields
@@ -465,18 +465,6 @@ func (cdr *CDR) AsExternalCDR() *ExternalCDR {
 		CostDetails: cdr.CostDetailsJson(),
 		ExtraInfo:   cdr.ExtraInfo,
 		PreRated:    cdr.PreRated,
-	}
-}
-
-func (cdr *CDR) AsSMCost() *SMCost {
-	return &SMCost{
-		CGRID:       cdr.CGRID,
-		RunID:       cdr.RunID,
-		OriginHost:  cdr.OriginHost,
-		OriginID:    cdr.OriginID,
-		CostSource:  cdr.CostSource,
-		Usage:       cdr.Usage,
-		CostDetails: cdr.CostDetails,
 	}
 }
 

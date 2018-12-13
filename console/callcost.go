@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdGetCostDetails{
 		name:      "cost_details",
-		rpcMethod: "ApierV1.GetCallCostLog",
+		rpcMethod: "ApierV1.GetEventCost",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -61,5 +61,5 @@ func (self *CmdGetCostDetails) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetCostDetails) RpcResult() interface{} {
-	return &engine.SMCost{}
+	return &engine.EventCost{}
 }
