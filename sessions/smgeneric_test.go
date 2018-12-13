@@ -30,8 +30,12 @@ var smgCfg *config.CGRConfig
 
 func init() {
 	smgCfg, _ = config.NewDefaultCGRConfig()
-	smgCfg.SessionSCfg().SessionIndexes = utils.StringMap{"Tenant": true,
-		"Account": true, "Extra3": true, "Extra4": true}
+	smgCfg.SessionSCfg().SessionIndexes = utils.StringMap{
+		"Tenant":  true,
+		"Account": true,
+		"Extra3":  true,
+		"Extra4":  true,
+	}
 }
 
 func TestSMGSessionIndexing(t *testing.T) {
@@ -60,8 +64,11 @@ func TestSMGSessionIndexing(t *testing.T) {
 		"Extra3":               "",
 	})
 	// Index first session
-	smgSession := &SMGSession{CGRID: GetSetCGRID(smGev),
-		RunID: utils.META_DEFAULT, EventStart: smGev}
+	smgSession := &SMGSession{
+		CGRID:      GetSetCGRID(smGev),
+		RunID:      utils.META_DEFAULT,
+		EventStart: smGev,
+	}
 	cgrID := GetSetCGRID(smGev)
 	smg.indexSession(smgSession, false)
 	eIndexes := map[string]map[string]map[string]utils.StringMap{
@@ -130,8 +137,11 @@ func TestSMGSessionIndexing(t *testing.T) {
 		"Extra4":          "info2",
 	})
 	cgrID2 := GetSetCGRID(smGev2)
-	smgSession2 := &SMGSession{CGRID: cgrID2,
-		RunID: utils.META_DEFAULT, EventStart: smGev2}
+	smgSession2 := &SMGSession{
+		CGRID:      cgrID2,
+		RunID:      utils.META_DEFAULT,
+		EventStart: smGev2,
+	}
 	smg.indexSession(smgSession2, false)
 	smGev3 := engine.NewSafEvent(map[string]interface{}{
 		utils.EVENT_NAME: "TEST_EVENT3",
@@ -141,8 +151,11 @@ func TestSMGSessionIndexing(t *testing.T) {
 		"Extra5":         "info5",
 	})
 	cgrID3 := GetSetCGRID(smGev3)
-	smgSession3 := &SMGSession{CGRID: cgrID3,
-		RunID: "secondRun", EventStart: smGev3}
+	smgSession3 := &SMGSession{
+		CGRID:      cgrID3,
+		RunID:      "secondRun",
+		EventStart: smGev3,
+	}
 	smg.indexSession(smgSession3, false)
 	eIndexes = map[string]map[string]map[string]utils.StringMap{
 		"OriginID": map[string]map[string]utils.StringMap{
@@ -418,8 +431,11 @@ func TestSMGActiveSessions(t *testing.T) {
 		"Extra2":               5,
 		"Extra3":               "",
 	})
-	smg.recordASession(&SMGSession{CGRID: GetSetCGRID(smGev1),
-		RunID: utils.META_DEFAULT, EventStart: smGev1})
+	smg.recordASession(&SMGSession{
+		CGRID:      GetSetCGRID(smGev1),
+		RunID:      utils.META_DEFAULT,
+		EventStart: smGev1,
+	})
 	smGev2 := engine.NewSafEvent(map[string]interface{}{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
@@ -440,16 +456,39 @@ func TestSMGActiveSessions(t *testing.T) {
 		"Extra1":               "Value1",
 		"Extra3":               "extra3",
 	})
-	smg.recordASession(&SMGSession{CGRID: GetSetCGRID(smGev2),
-		RunID: utils.META_DEFAULT, EventStart: smGev2})
+	smg.recordASession(&SMGSession{
+		CGRID:      GetSetCGRID(smGev2),
+		RunID:      utils.META_DEFAULT,
+		EventStart: smGev2,
+	})
 	if aSessions, _, err := smg.asActiveSessions(nil, false, false); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
 		t.Errorf("Received sessions: %+v", aSessions)
 	}
-	if aSessions, _, err := smg.asActiveSessions(map[string]string{"Tenant": "itsyscom.com"}, false, false); err != nil {
+	if aSessions, _, err := smg.asActiveSessions(map[string]string{}, false, false); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 2 {
+		t.Errorf("Received sessions: %+v", aSessions)
+	}
+	if aSessions, _, err := smg.asActiveSessions(map[string]string{utils.Tenant: "noTenant"}, false, false); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 0 {
+		t.Errorf("Received sessions: %+v", aSessions)
+	}
+	if aSessions, _, err := smg.asActiveSessions(map[string]string{utils.Tenant: "itsyscom.com"}, false, false); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
+		t.Errorf("Received sessions: %+v", aSessions)
+	}
+	if aSessions, _, err := smg.asActiveSessions(map[string]string{utils.OriginID: "222", utils.Tenant: "itsyscom.com"}, false, false); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 1 {
+		t.Errorf("Received sessions: %+v", aSessions)
+	}
+	if aSessions, _, err := smg.asActiveSessions(map[string]string{utils.OriginID: "222", utils.Tenant: "NoTenant.com"}, false, false); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 0 {
 		t.Errorf("Received sessions: %+v", aSessions)
 	}
 	if aSessions, _, err := smg.asActiveSessions(map[string]string{utils.ToR: "*voice"}, false, false); err != nil {
@@ -463,6 +502,11 @@ func TestSMGActiveSessions(t *testing.T) {
 		t.Errorf("Received sessions: %+v", aSessions)
 	}
 	if aSessions, _, err := smg.asActiveSessions(map[string]string{utils.SUPPLIER: "supplier2"}, false, false); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 1 {
+		t.Errorf("Received sessions: %+v", aSessions)
+	}
+	if aSessions, _, err := smg.asActiveSessions(map[string]string{utils.OriginID: "222", utils.Tenant: "itsyscom.com", utils.SUPPLIER: "supplier2", "Extra1": "Value1"}, false, false); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Received sessions: %+v", aSessions)
@@ -498,10 +542,16 @@ func TestGetPassiveSessions(t *testing.T) {
 		"Extra3":               "",
 	})
 	// Index first session
-	smgSession11 := &SMGSession{CGRID: GetSetCGRID(smGev1),
-		EventStart: smGev1, RunID: utils.META_DEFAULT}
-	smgSession12 := &SMGSession{CGRID: GetSetCGRID(smGev1),
-		EventStart: smGev1, RunID: "second_run"}
+	smgSession11 := &SMGSession{
+		CGRID:      GetSetCGRID(smGev1),
+		EventStart: smGev1,
+		RunID:      utils.META_DEFAULT,
+	}
+	smgSession12 := &SMGSession{
+		CGRID:      GetSetCGRID(smGev1),
+		EventStart: smGev1,
+		RunID:      "second_run",
+	}
 	smg.passiveSessions[smgSession11.CGRID] = []*SMGSession{smgSession11, smgSession12}
 	smGev2 := engine.NewSafEvent(map[string]interface{}{
 		utils.EVENT_NAME:       "TEST_EVENT",
@@ -519,18 +569,21 @@ func TestGetPassiveSessions(t *testing.T) {
 		utils.Usage:            "1m23s",
 		utils.LastUsed:         "21s",
 		utils.PDD:              "300ms",
-		utils.SUPPLIER:         "supplier1",
+		utils.SUPPLIER:         "supplier2",
 		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
 		utils.OriginHost:       "127.0.0.1",
-		"Extra1":               "Value1",
-		"Extra2":               5,
-		"Extra3":               "",
+		"Extra1":               "Value2",
+		"Extra2":               6,
+		"Extra3":               "e1",
 	})
 	if pSS := smg.getSessions("", true); len(pSS) != 1 {
 		t.Errorf("PassiveSessions: %+v", pSS)
 	}
-	smgSession21 := &SMGSession{CGRID: GetSetCGRID(smGev2),
-		EventStart: smGev2, RunID: utils.META_DEFAULT}
+	smgSession21 := &SMGSession{
+		CGRID:      GetSetCGRID(smGev2),
+		EventStart: smGev2,
+		RunID:      utils.META_DEFAULT,
+	}
 	smg.passiveSessions[smgSession21.CGRID] = []*SMGSession{smgSession21}
 	if pSS := smg.getSessions("", true); len(pSS) != 2 {
 		t.Errorf("PassiveSessions: %+v", pSS)
@@ -540,5 +593,56 @@ func TestGetPassiveSessions(t *testing.T) {
 	}
 	if pSS := smg.getSessions("aabbcc", true); len(pSS) != 0 {
 		t.Errorf("PassiveSessions: %+v", pSS)
+	}
+
+	if aSessions, _, err := smg.asActiveSessions(nil, false, true); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 3 {
+		t.Errorf("Received sessions: %+v", aSessions)
+	}
+	if aSessions, _, err := smg.asActiveSessions(map[string]string{}, false, true); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 3 {
+		t.Errorf("Received sessions: %+v", aSessions)
+	}
+	if aSessions, _, err := smg.asActiveSessions(map[string]string{utils.Tenant: "noTenant"}, false, true); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 0 {
+		t.Errorf("Received sessions: %+v", aSessions)
+	}
+	if aSessions, _, err := smg.asActiveSessions(map[string]string{utils.Tenant: "cgrates.org"}, false, true); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 3 {
+		t.Errorf("Received sessions: %+v", aSessions)
+	}
+	if aSessions, _, err := smg.asActiveSessions(map[string]string{utils.OriginID: "23456", utils.Tenant: "cgrates.org"}, false, true); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 1 {
+		t.Errorf("Received sessions: %+v", aSessions)
+	}
+	if aSessions, _, err := smg.asActiveSessions(map[string]string{utils.OriginID: "404", utils.Tenant: "cgrates.org"}, false, true); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 0 {
+		t.Errorf("Received sessions: %+v", aSessions)
+	}
+	if aSessions, _, err := smg.asActiveSessions(map[string]string{utils.ToR: "*voice"}, false, true); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 3 {
+		t.Errorf("Received sessions: %+v", aSessions)
+	}
+	if aSessions, _, err := smg.asActiveSessions(map[string]string{"Extra3": ""}, false, true); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 2 {
+		t.Errorf("Received sessions: %+v", aSessions)
+	}
+	if aSessions, _, err := smg.asActiveSessions(map[string]string{utils.SUPPLIER: "supplier2"}, false, true); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 1 {
+		t.Errorf("Received sessions: %+v", aSessions)
+	}
+	if aSessions, _, err := smg.asActiveSessions(map[string]string{utils.OriginID: "23456", utils.Tenant: "cgrates.org", "Extra3": "e1", "Extra1": "Value2"}, false, true); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 1 {
+		t.Errorf("Received sessions: %+v", aSessions)
 	}
 }

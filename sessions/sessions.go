@@ -427,17 +427,39 @@ func (smg *SMGeneric) getSessionIDsMatchingIndexes(fltrs map[string]string,
 	matchingSessions := make(utils.StringMap)
 	runID := fltrs[utils.RunID]
 	checkNr := 0
+	var findFunc func(cgrID, fltrName, fltrVal string) bool
+	if runID == "" {
+		findFunc = func(cgrID, fltrName, fltrVal string) bool {
+			for runID := range ssIndx[fltrName][fltrVal] {
+				for cgrmID := range ssIndx[fltrName][fltrVal][runID] {
+					if cgrID == cgrmID {
+						return true
+					}
+				}
+			}
+			return false
+		}
+	} else { // We know the RunID
+		findFunc = func(cgrID, fltrName, fltrVal string) bool {
+			for cgrmID := range ssIndx[fltrName][fltrVal][runID] {
+				if cgrID == cgrmID {
+					return true
+				}
+			}
+			return false
+		}
+	}
 	for fltrName, fltrVal := range fltrs {
 		if fltrName == utils.RunID {
 			continue
 		}
-		checkNr += 1
 		if _, hasFldName := ssIndx[fltrName]; !hasFldName {
 			continue
 		}
+		checkNr += 1
 		if _, hasFldVal := ssIndx[fltrName][fltrVal]; !hasFldVal {
 			matchedIndexes[fltrName] = utils.META_NONE
-			continue
+			return make(utils.StringMap), matchedIndexes
 		}
 		matchedIndexes[fltrName] = fltrVal
 		if checkNr == 1 { // First run will init the MatchingSessions
@@ -451,11 +473,11 @@ func (smg *SMGeneric) getSessionIDsMatchingIndexes(fltrs map[string]string,
 			continue
 		}
 		// Higher run, takes out non matching indexes
-		// for cgrID := range ssIndx[fltrName][fltrVal] /*[runID]*/ {
-		// 	if _, hasCGRID := matchingSessions[cgrID]; !hasCGRID {
-		// 		delete(matchingSessions, cgrID)
-		// 	}
-		// }
+		for cgrID := range matchingSessions {
+			if !findFunc(cgrID, fltrName, fltrVal) {
+				delete(matchingSessions, cgrID)
+			}
+		}
 	}
 	return matchingSessions.Clone(), matchedIndexes
 }
