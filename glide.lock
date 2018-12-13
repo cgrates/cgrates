@@ -97,7 +97,7 @@ imports:
 - name: github.com/fsnotify/fsnotify
   version: ccc981bf80385c528a65fbfdd49bf2d8da22aa23
 - name: github.com/mongodb/mongo-go-driver
-  version: e8f52c4942686e6f1d9f366fa1e84b016aae0762
+  version: 30999752086b83f8191ea5e6eb526a8bd63508cc
   subpackages:
   - bson
   - bson/bsoncodec
