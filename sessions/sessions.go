@@ -594,27 +594,24 @@ func (smg *SMGeneric) v2ForkSessions(tnt string, evStart *engine.SafEvent,
 func (smg *SMGeneric) sessionStart(tnt, cgrID string, evStart *engine.SafEvent,
 	clntConn rpcclient.RpcClientConnection, resourceID string,
 	dbtItval time.Duration) (err error) {
-	guardian.Guardian.Guard(func() (interface{}, error) { // Lock it on CGRID level
-		var ss []*SMGSession
-		if smg.chargerS == nil { // old way of session forking
-			ss, err = smg.v1ForkSessions(tnt, evStart, clntConn, cgrID, resourceID, false)
-		} else {
-			ss, err = smg.v2ForkSessions(tnt, evStart, clntConn, cgrID, resourceID, false)
+	var ss []*SMGSession
+	if smg.chargerS == nil { // old way of session forking
+		ss, err = smg.v1ForkSessions(tnt, evStart, clntConn, cgrID, resourceID, false)
+	} else {
+		ss, err = smg.v2ForkSessions(tnt, evStart, clntConn, cgrID, resourceID, false)
+	}
+	if err != nil {
+		return
+	}
+	stopDebitChan := make(chan struct{})
+	for _, s := range ss {
+		smg.recordASession(s)
+		if s.RunID != utils.META_NONE &&
+			dbtItval != 0 {
+			s.stopDebit = stopDebitChan
+			go s.debitLoop(dbtItval)
 		}
-		if err != nil {
-			return nil, err
-		}
-		stopDebitChan := make(chan struct{})
-		for _, s := range ss {
-			smg.recordASession(s)
-			if s.RunID != utils.META_NONE &&
-				dbtItval != 0 {
-				s.stopDebit = stopDebitChan
-				go s.debitLoop(dbtItval)
-			}
-		}
-		return nil, nil
-	}, smg.cgrCfg.GeneralCfg().LockingTimeout, cgrID)
+	}
 	return
 }
 
@@ -622,153 +619,144 @@ func (smg *SMGeneric) sessionStart(tnt, cgrID string, evStart *engine.SafEvent,
 func (smg *SMGeneric) sessionUpdate(tnt, cgrID string, ev *engine.SafEvent,
 	clnt rpcclient.RpcClientConnection, resourceID string,
 	dbtItval time.Duration) (maxUsage time.Duration, err error) {
-	guardian.Guardian.Guard(func() (iface interface{}, errGuard error) { // Lock it on CGRID level
-		// make sure the session exists, otherwise create
-		aSessions := smg.getSessions(cgrID, false)
-		if len(aSessions) == 0 {
-			if aSessions = smg.passiveToActive(cgrID); len(aSessions) == 0 {
-				if ev.HasField(utils.InitialOriginID) {
-					initialCGRID := utils.Sha1(
-						ev.GetStringIgnoreErrors(utils.InitialOriginID),
-						ev.GetStringIgnoreErrors(utils.OriginHost))
-					err = smg.sessionRelocate(initialCGRID,
-						cgrID, ev.GetStringIgnoreErrors(utils.OriginID))
-					if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
-						err = smg.sessionStart(tnt, cgrID, ev, clnt, resourceID, dbtItval)
-					}
-					if err != nil {
-						return
-					}
-					smg.replicateSessionsWithID(initialCGRID, false, smg.smgReplConns) // report changes
-					aSessions = smg.getSessions(cgrID, false)                          // try again to populate after starting above
-					if len(aSessions) == 0 {
-						utils.Logger.Err(
-							fmt.Sprintf("<%s> no active sessions for event: <%s>",
-								utils.SessionS, cgrID))
-						err = rpcclient.ErrSessionNotFound
-						return
-					}
-				}
+	// make sure the session exists, otherwise create
+	aSessions := smg.getSessions(cgrID, false)
+	if len(aSessions) == 0 {
+		if aSessions = smg.passiveToActive(cgrID); len(aSessions) == 0 {
+			if ev.HasField(utils.InitialOriginID) {
+				initialCGRID := utils.Sha1(
+					ev.GetStringIgnoreErrors(utils.InitialOriginID),
+					ev.GetStringIgnoreErrors(utils.OriginHost))
+				err = smg.sessionRelocate(initialCGRID,
+					cgrID, ev.GetStringIgnoreErrors(utils.OriginID))
+				smg.replicateSessionsWithID(initialCGRID, false, smg.smgReplConns) // report changes
+			}
+			if !ev.HasField(utils.InitialOriginID) || err == utils.ErrNotFound { // create a new  session with this update
+				err = smg.sessionStart(tnt, cgrID, ev, clnt, resourceID, dbtItval)
+			}
+			if err != nil {
+				return
+			}
+			aSessions = smg.getSessions(cgrID, false) // try again to populate after starting above
+			if len(aSessions) == 0 {
+				utils.Logger.Err(
+					fmt.Sprintf("<%s> no active sessions for event: <%s>",
+						utils.SessionS, cgrID))
+				err = rpcclient.ErrSessionNotFound
+				return
 			}
 		}
-		defer smg.replicateSessionsWithID(cgrID, false, smg.smgReplConns)
+	}
+	defer smg.replicateSessionsWithID(cgrID, false, smg.smgReplConns)
 
-		var sesTTL, evLastUsed time.Duration
-		if sesTTL, err = getSessionTTL(ev, smg.cgrCfg.SessionSCfg().SessionTTL,
-			smg.cgrCfg.SessionSCfg().SessionTTLMaxDelay); err != nil {
-			return
-		}
-		var ttlLastUsed, ttlUsage, lastUsed *time.Duration
-		if ttlLastUsed, err = ev.GetDurationPtrOrDefault(utils.SessionTTLLastUsed,
-			smg.cgrCfg.SessionSCfg().SessionTTLLastUsed); err != nil {
-			return
-		}
-		if ttlUsage, err = ev.GetDurationPtrOrDefault(utils.SessionTTLUsage,
-			smg.cgrCfg.SessionSCfg().SessionTTLUsage); err != nil {
-			return
-		}
-		smg.resetTerminatorTimer(cgrID, sesTTL, ttlLastUsed, ttlUsage)
-		if evLastUsed, err = ev.GetDuration(utils.LastUsed); err == nil {
-			lastUsed = &evLastUsed
-		} else if err != utils.ErrNotFound {
-			return
-		}
-		if maxUsage, err = ev.GetDuration(utils.Usage); err != nil {
-			if err != utils.ErrNotFound {
-				return
-			}
-			maxUsage = smg.cgrCfg.SessionSCfg().MaxCallDuration
-			err = nil
-		}
-		for _, s := range aSessions[cgrID] {
-			var maxDur time.Duration
-			var maxUsageSet bool
-			if s.RunID == utils.META_NONE {
-				maxDur = time.Duration(-1)
-			} else if maxDur, err = s.debit(maxUsage, lastUsed); err != nil {
-				return
-			}
-			if maxDur == time.Duration(-1) && !maxUsageSet {
-				maxUsage = maxDur
-			} else if maxDur < maxUsage {
-				maxUsage = maxDur
-			}
-		}
+	var sesTTL, evLastUsed time.Duration
+	if sesTTL, err = getSessionTTL(ev, smg.cgrCfg.SessionSCfg().SessionTTL,
+		smg.cgrCfg.SessionSCfg().SessionTTLMaxDelay); err != nil {
 		return
-	}, smg.cgrCfg.GeneralCfg().LockingTimeout, cgrID)
+	}
+	var ttlLastUsed, ttlUsage, lastUsed *time.Duration
+	if ttlLastUsed, err = ev.GetDurationPtrOrDefault(utils.SessionTTLLastUsed,
+		smg.cgrCfg.SessionSCfg().SessionTTLLastUsed); err != nil {
+		return
+	}
+	if ttlUsage, err = ev.GetDurationPtrOrDefault(utils.SessionTTLUsage,
+		smg.cgrCfg.SessionSCfg().SessionTTLUsage); err != nil {
+		return
+	}
+	smg.resetTerminatorTimer(cgrID, sesTTL, ttlLastUsed, ttlUsage)
+	if evLastUsed, err = ev.GetDuration(utils.LastUsed); err == nil {
+		lastUsed = &evLastUsed
+	} else if err != utils.ErrNotFound {
+		return
+	}
+	if maxUsage, err = ev.GetDuration(utils.Usage); err != nil {
+		if err != utils.ErrNotFound {
+			return
+		}
+		maxUsage = smg.cgrCfg.SessionSCfg().MaxCallDuration
+		err = nil
+	}
+	for _, s := range aSessions[cgrID] {
+		var maxDur time.Duration
+		var maxUsageSet bool
+		if s.RunID == utils.META_NONE {
+			maxDur = time.Duration(-1)
+		} else if maxDur, err = s.debit(maxUsage, lastUsed); err != nil {
+			return
+		}
+		if maxDur == time.Duration(-1) && !maxUsageSet {
+			maxUsage = maxDur
+		} else if maxDur < maxUsage {
+			maxUsage = maxDur
+		}
+	}
 	return
 }
 
 // sessionEnd will end a session from outside
 func (smg *SMGeneric) sessionEnd(cgrID string, usage time.Duration) (err error) {
-	guardian.Guardian.Guard(func() (interface{}, error) { // Lock it on UUID level
-		ss := smg.getSessions(cgrID, false)
-		if len(ss) == 0 {
-			if ss = smg.passiveToActive(cgrID); len(ss) == 0 {
-				return nil, nil // ToDo: handle here also debits
-			}
+	ss := smg.getSessions(cgrID, false)
+	if len(ss) == 0 {
+		if ss = smg.passiveToActive(cgrID); len(ss) == 0 {
+			return // ToDo: handle here also debits
 		}
-		if !smg.unrecordASession(cgrID) { // Unreference it early so we avoid concurrency
-			return nil, nil // Did not find the session so no need to close it anymore
+	}
+	if !smg.unrecordASession(cgrID) { // Unreference it early so we avoid concurrency
+		return // Did not find the session so no need to close it anymore
+	}
+	for idx, s := range ss[cgrID] {
+		if s.RunID == utils.META_NONE {
+			continue
 		}
-		for idx, s := range ss[cgrID] {
-			if s.RunID == utils.META_NONE {
-				continue
-			}
-			s.TotalUsage = usage // save final usage as totalUsage
-			if idx == 0 && s.stopDebit != nil {
-				close(s.stopDebit) // Stop automatic debits
-			}
-			aTime, err := s.EventStart.GetTime(utils.AnswerTime, smg.Timezone)
-			if err != nil || aTime.IsZero() {
-				utils.Logger.Warning(fmt.Sprintf("<%s> could not retrieve answer time for session: %s, runId: %s, aTime: %+v, error: %v",
-					utils.SessionS, cgrID, s.RunID, aTime, err))
-				continue // Unanswered session
-			}
-			if err := s.close(usage); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<%s> Could not close session: %s, runId: %s, error: %s", utils.SessionS, cgrID, s.RunID, err.Error()))
-			}
-			if err := s.storeSMCost(); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<%s> Could not save session: %s, runId: %s, error: %s", utils.SessionS, cgrID, s.RunID, err.Error()))
-			}
+		s.TotalUsage = usage // save final usage as totalUsage
+		if idx == 0 && s.stopDebit != nil {
+			close(s.stopDebit) // Stop automatic debits
 		}
-		return nil, nil
-	}, smg.cgrCfg.GeneralCfg().LockingTimeout, cgrID)
+		aTime, err := s.EventStart.GetTime(utils.AnswerTime, smg.Timezone)
+		if err != nil || aTime.IsZero() {
+			utils.Logger.Warning(fmt.Sprintf("<%s> could not retrieve answer time for session: %s, runId: %s, aTime: %+v, error: %v",
+				utils.SessionS, cgrID, s.RunID, aTime, err))
+			continue // Unanswered session
+		}
+		if err := s.close(usage); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> Could not close session: %s, runId: %s, error: %s", utils.SessionS, cgrID, s.RunID, err.Error()))
+		}
+		if err := s.storeSMCost(); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> Could not save session: %s, runId: %s, error: %s", utils.SessionS, cgrID, s.RunID, err.Error()))
+		}
+	}
 	return
 }
 
 // sessionRelocate is used when an update will relocate an initial session (eg multiple data streams)
 func (smg *SMGeneric) sessionRelocate(initialID, cgrID, newOriginID string) (err error) {
-	guardian.Guardian.Guard(func() (interface{}, error) { // Lock it on initialID level
-		if utils.IsSliceMember([]string{initialID, cgrID, newOriginID}, "") { // Not allowed empty params here
-			return nil, utils.ErrMandatoryIeMissing
+	if utils.IsSliceMember([]string{initialID, cgrID, newOriginID}, "") { // Not allowed empty params here
+		return utils.ErrMandatoryIeMissing
+	}
+	ssNew := smg.getSessions(cgrID, false)
+	if len(ssNew) != 0 { // Already relocated
+		return
+	}
+	if pSSNew := smg.getSessions(cgrID, true); len(pSSNew) != 0 { // passive sessions recorded, will be recovered so no need of relocation
+		return
+	}
+	ss := smg.getSessions(initialID, false)
+	if len(ss) == 0 { // No need of relocation
+		if ss = smg.passiveToActive(initialID); len(ss) == 0 {
+			return utils.ErrNotFound
 		}
-		ssNew := smg.getSessions(cgrID, false)
-		if len(ssNew) != 0 { // Already relocated
-			return nil, nil
+	}
+	for i, s := range ss[initialID] {
+		s.Lock()
+		s.CGRID = cgrID                               // Overwrite initial CGRID with new one
+		s.EventStart.Set(utils.CGRID, cgrID)          // Overwrite CGRID for final CDR
+		s.EventStart.Set(utils.OriginID, newOriginID) // Overwrite OriginID for session indexing
+		s.Unlock()
+		smg.recordASession(s)
+		if i == 0 {
+			smg.unrecordASession(initialID)
 		}
-		if pSSNew := smg.getSessions(cgrID, true); len(pSSNew) != 0 { // passive sessions recorded, will be recovered so no need of relocation
-			return nil, nil
-		}
-		ss := smg.getSessions(initialID, false)
-		if len(ss) == 0 { // No need of relocation
-			if ss = smg.passiveToActive(initialID); len(ss) == 0 {
-				return nil, utils.ErrNotFound
-			}
-		}
-		for i, s := range ss[initialID] {
-			s.Lock()
-			s.CGRID = cgrID                               // Overwrite initial CGRID with new one
-			s.EventStart.Set(utils.CGRID, cgrID)          // Overwrite CGRID for final CDR
-			s.EventStart.Set(utils.OriginID, newOriginID) // Overwrite OriginID for session indexing
-			s.Unlock()
-			smg.recordASession(s)
-			if i == 0 {
-				smg.unrecordASession(initialID)
-			}
-		}
-		return nil, nil
-	}, smg.cgrCfg.GeneralCfg().LockingTimeout, initialID)
+	}
 	return
 }
 
@@ -1005,25 +993,28 @@ func (smg *SMGeneric) InitiateSession(tnt string, ev *engine.SafEvent,
 	clnt rpcclient.RpcClientConnection, resourceID string,
 	dbtItval time.Duration) (maxUsage time.Duration, err error) {
 	cgrID := GetSetCGRID(ev)
-	cacheKey := "InitiateSession" + cgrID
-	if item, err := smg.responseCache.Get(cacheKey); err == nil && item != nil {
-		return item.Value.(time.Duration), item.Err
-	}
-	defer smg.responseCache.Cache(cacheKey,
-		&utils.ResponseCacheItem{Value: maxUsage, Err: err}) // schedule response caching
-	smg.deletePassiveSessions(cgrID)
-	if err = smg.sessionStart(tnt, cgrID, ev, clnt, resourceID, dbtItval); err != nil {
-		smg.sessionEnd(cgrID, 0)
+	guardian.Guardian.Guard(func() (iface interface{}, err error) { // Lock it on CGRID level
+		cacheKey := "InitiateSession" + cgrID
+		if item, err := smg.responseCache.Get(cacheKey); err == nil && item != nil {
+			return item.Value.(time.Duration), item.Err
+		}
+		defer smg.responseCache.Cache(cacheKey,
+			&utils.ResponseCacheItem{Value: maxUsage, Err: err}) // schedule response caching
+		smg.deletePassiveSessions(cgrID)
+		if err = smg.sessionStart(tnt, cgrID, ev, clnt, resourceID, dbtItval); err != nil {
+			smg.sessionEnd(cgrID, 0)
+			return
+		}
+		if dbtItval != 0 { // Session handled by debit loop
+			maxUsage = time.Duration(-1)
+			return
+		}
+		maxUsage, err = smg.sessionUpdate(tnt, cgrID, ev, clnt, resourceID, dbtItval)
+		if err != nil || maxUsage == 0 {
+			smg.sessionEnd(cgrID, 0)
+		}
 		return
-	}
-	if dbtItval != 0 { // Session handled by debit loop
-		maxUsage = time.Duration(-1)
-		return
-	}
-	maxUsage, err = smg.sessionUpdate(tnt, cgrID, ev, clnt, resourceID, dbtItval)
-	if err != nil || maxUsage == 0 {
-		smg.sessionEnd(cgrID, 0)
-	}
+	}, smg.cgrCfg.GeneralCfg().LockingTimeout, cgrID)
 	return
 }
 
@@ -1032,16 +1023,19 @@ func (smg *SMGeneric) UpdateSession(tnt string, ev *engine.SafEvent,
 	clnt rpcclient.RpcClientConnection, resourceID string,
 	dbtItval time.Duration) (maxUsage time.Duration, err error) {
 	cgrID := GetSetCGRID(ev)
-	cacheKey := "UpdateSession" + cgrID
-	if item, err := smg.responseCache.Get(cacheKey); err == nil && item != nil {
-		return item.Value.(time.Duration), item.Err
-	}
-	defer smg.responseCache.Cache(cacheKey,
-		&utils.ResponseCacheItem{Value: maxUsage, Err: err})
-	maxUsage, err = smg.sessionUpdate(tnt, cgrID, ev, clnt, resourceID, dbtItval)
-	if err != nil {
-		smg.sessionEnd(cgrID, 0)
-	}
+	guardian.Guardian.Guard(func() (iface interface{}, err error) { // Lock it on CGRID level
+		cacheKey := "UpdateSession" + cgrID
+		if item, err := smg.responseCache.Get(cacheKey); err == nil && item != nil {
+			return item.Value.(time.Duration), item.Err
+		}
+		defer smg.responseCache.Cache(cacheKey,
+			&utils.ResponseCacheItem{Value: maxUsage, Err: err})
+		maxUsage, err = smg.sessionUpdate(tnt, cgrID, ev, clnt, resourceID, dbtItval)
+		if err != nil {
+			smg.sessionEnd(cgrID, 0)
+		}
+		return
+	}, smg.cgrCfg.GeneralCfg().LockingTimeout, cgrID)
 	return
 }
 
@@ -1050,73 +1044,76 @@ func (smg *SMGeneric) TerminateSession(tnt string, ev *engine.SafEvent,
 	clnt rpcclient.RpcClientConnection, resourceID string,
 	dbtItvl time.Duration) (err error) {
 	cgrID := GetSetCGRID(ev)
-	cacheKey := "TerminateSession" + cgrID
-	if item, err := smg.responseCache.Get(cacheKey); err == nil && item != nil {
-		return item.Err
-	}
-	defer smg.responseCache.Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
-	if ev.HasField(utils.InitialOriginID) {
-		initialCGRID := utils.Sha1(
-			ev.GetStringIgnoreErrors(utils.InitialOriginID),
-			ev.GetStringIgnoreErrors(utils.OriginHost))
-		err = smg.sessionRelocate(initialCGRID, cgrID,
-			ev.GetStringIgnoreErrors(utils.OriginID))
-		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
-			err = smg.sessionStart(tnt, cgrID, ev, clnt, resourceID, dbtItvl)
+	guardian.Guardian.Guard(func() (iface interface{}, err error) { // Lock it on CGRID level
+		cacheKey := "TerminateSession" + cgrID
+		if item, err := smg.responseCache.Get(cacheKey); err == nil && item != nil {
+			return nil, item.Err
 		}
-		if err != nil && err != utils.ErrMandatoryIeMissing {
-			return
+		defer smg.responseCache.Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
+		if ev.HasField(utils.InitialOriginID) {
+			initialCGRID := utils.Sha1(
+				ev.GetStringIgnoreErrors(utils.InitialOriginID),
+				ev.GetStringIgnoreErrors(utils.OriginHost))
+			err = smg.sessionRelocate(initialCGRID, cgrID,
+				ev.GetStringIgnoreErrors(utils.OriginID))
+			if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
+				err = smg.sessionStart(tnt, cgrID, ev, clnt, resourceID, dbtItvl)
+			}
+			if err != nil && err != utils.ErrMandatoryIeMissing {
+				return
+			}
+			smg.replicateSessionsWithID(initialCGRID, false, smg.smgReplConns)
 		}
-		smg.replicateSessionsWithID(initialCGRID, false, smg.smgReplConns)
-	}
-	sessionIDs := []string{cgrID}
-	if ev.HasField(utils.OriginIDPrefix) { // OriginIDPrefix is present, OriginID will not be anymore considered
-		sessionIDPrefix := ev.GetStringIgnoreErrors(utils.OriginIDPrefix)
-		if sessionIDs = smg.getSessionIDsForPrefix(sessionIDPrefix, false); len(sessionIDs) == 0 {
-			sessionIDs = smg.getSessionIDsForPrefix(sessionIDPrefix, true)
-			for _, sessionID := range sessionIDs { // activate sessions for prefix
-				smg.passiveToActive(sessionID)
+		sessionIDs := []string{cgrID}
+		if ev.HasField(utils.OriginIDPrefix) { // OriginIDPrefix is present, OriginID will not be anymore considered
+			sessionIDPrefix := ev.GetStringIgnoreErrors(utils.OriginIDPrefix)
+			if sessionIDs = smg.getSessionIDsForPrefix(sessionIDPrefix, false); len(sessionIDs) == 0 {
+				sessionIDs = smg.getSessionIDsForPrefix(sessionIDPrefix, true)
+				for _, sessionID := range sessionIDs { // activate sessions for prefix
+					smg.passiveToActive(sessionID)
+				}
 			}
 		}
-	}
-	usage, errUsage := ev.GetDuration(utils.Usage)
-	var lastUsed time.Duration
-	if errUsage != nil {
-		if errUsage != utils.ErrNotFound {
-			err = errUsage
-			return
-		}
-		lastUsed, err = ev.GetDuration(utils.LastUsed)
-		if err != nil {
-			if err == utils.ErrNotFound {
-				err = utils.ErrMandatoryIeMissing
-			}
-			return
-		}
-	}
-	var hasActiveSession bool
-	for _, sessionID := range sessionIDs {
-		aSessions := smg.getSessions(sessionID, false)
-		if len(aSessions) == 0 {
-			if aSessions = smg.passiveToActive(cgrID); len(aSessions) == 0 {
-				utils.Logger.Err(fmt.Sprintf("<%s> terminate with no active sessions for cgrID: <%s>", utils.SessionS, cgrID))
-				continue
-			}
-		}
-		hasActiveSession = true
-		defer smg.replicateSessionsWithID(sessionID, false, smg.smgReplConns)
-		s := aSessions[sessionID][0]
+		usage, errUsage := ev.GetDuration(utils.Usage)
+		var lastUsed time.Duration
 		if errUsage != nil {
-			usage = s.TotalUsage - s.LastUsage + lastUsed
+			if errUsage != utils.ErrNotFound {
+				err = errUsage
+				return
+			}
+			lastUsed, err = ev.GetDuration(utils.LastUsed)
+			if err != nil {
+				if err == utils.ErrNotFound {
+					err = utils.ErrMandatoryIeMissing
+				}
+				return
+			}
 		}
-		if errSEnd := smg.sessionEnd(sessionID, usage); errSEnd != nil {
-			err = errSEnd // Last error will be the one returned as API result
+		var hasActiveSession bool
+		for _, sessionID := range sessionIDs {
+			aSessions := smg.getSessions(sessionID, false)
+			if len(aSessions) == 0 {
+				if aSessions = smg.passiveToActive(cgrID); len(aSessions) == 0 {
+					utils.Logger.Err(fmt.Sprintf("<%s> terminate with no active sessions for cgrID: <%s>", utils.SessionS, cgrID))
+					continue
+				}
+			}
+			hasActiveSession = true
+			defer smg.replicateSessionsWithID(sessionID, false, smg.smgReplConns)
+			s := aSessions[sessionID][0]
+			if errUsage != nil {
+				usage = s.TotalUsage - s.LastUsage + lastUsed
+			}
+			if errSEnd := smg.sessionEnd(sessionID, usage); errSEnd != nil {
+				err = errSEnd // Last error will be the one returned as API result
+			}
 		}
-	}
-	if !hasActiveSession {
-		err = rpcclient.ErrSessionNotFound
+		if !hasActiveSession {
+			err = rpcclient.ErrSessionNotFound
+			return
+		}
 		return
-	}
+	}, smg.cgrCfg.GeneralCfg().LockingTimeout, cgrID)
 	return
 }
 
