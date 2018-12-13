@@ -1380,21 +1380,6 @@ func TestApierResponderGetCost(t *testing.T) {
 	}
 }
 
-// Test here ResponderGetCost
-func TestApierGetCallCostLog(t *testing.T) {
-	var cc engine.CallCost
-	var attrs utils.AttrGetCallCost
-	// Simple test that command is executed without errors
-	if err := rater.Call("ApierV1.GetCallCostLog", attrs, &cc); err == nil {
-		t.Error("Failed to detect missing fields in ApierV1.GetCallCostLog")
-	}
-	attrs.CgrId = "dummyid"
-	attrs.RunId = "default"
-	if err := rater.Call("ApierV1.GetCallCostLog", attrs, &cc); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Error("ApierV1.GetCallCostLog: should return NOT_FOUND, got:", err)
-	}
-}
-
 func TestApierMaxDebitInexistentAcnt(t *testing.T) {
 
 	cc := &engine.CallCost{}
@@ -1465,6 +1450,82 @@ func TestApierITProcessCdr(t *testing.T) {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 3 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	}
+}
+
+// Test here ResponderGetCost
+func TestApierGetCallCostLog(t *testing.T) {
+	var cc engine.SMCost
+	var attrs utils.AttrGetCallCost
+	// Simple test that command is executed without errors
+	if err := rater.Call("ApierV1.GetCallCostLog", attrs, &cc); err == nil {
+		t.Error("Failed to detect missing fields in ApierV1.GetCallCostLog")
+	}
+	attrs.CgrId = "dummyid"
+	attrs.RunId = "default"
+	if err := rater.Call("ApierV1.GetCallCostLog", attrs, &cc); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error("ApierV1.GetCallCostLog: should return NOT_FOUND, got:", err)
+	}
+	tm := time.Now().Truncate(time.Millisecond)
+	cdr := &engine.CDR{
+		CGRID:       "Cdr1",
+		OrderID:     123,
+		ToR:         utils.VOICE,
+		OriginID:    "OriginCDR1",
+		OriginHost:  "192.168.1.1",
+		Source:      "test",
+		RequestType: utils.META_RATED,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "+4986517174963",
+		SetupTime:   tm,
+		AnswerTime:  tm,
+		RunID:       utils.DEFAULT_RUNID,
+		Usage:       time.Duration(0),
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		Cost:        1.01,
+	}
+	var reply string
+	if err := rater.Call("CdrsV1.ProcessCDR", cdr, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	time.Sleep(100 * time.Millisecond)
+	expected := engine.SMCost{
+		CGRID:      "Cdr1",
+		RunID:      "*default",
+		OriginHost: "192.168.1.1",
+		OriginID:   "OriginCDR1",
+		CostSource: "*cdrs",
+		Usage:      0 * time.Second,
+		CostDetails: &engine.EventCost{
+			CGRID:     "Cdr1",
+			RunID:     "*default",
+			StartTime: tm,
+			Usage:     utils.DurationPointer(0),
+			Cost:      utils.Float64Pointer(0),
+			Charges: []*engine.ChargingInterval{{
+				RatingID:       "",
+				Increments:     nil,
+				CompressFactor: 0,
+			}},
+			AccountSummary: nil,
+			Rating:         engine.Rating{},
+			Accounting:     engine.Accounting{},
+			RatingFilters:  engine.RatingFilters{},
+			Rates:          engine.ChargedRates{},
+			Timings:        engine.ChargedTimings{},
+		},
+	}
+	attrs.CgrId = "Cdr1"
+	attrs.RunId = ""
+	if err := rater.Call("ApierV1.GetCallCostLog", attrs, &cc); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, cc) {
+		t.Errorf("Expecting %s ,recived %s", utils.ToJSON(expected.CostDetails), utils.ToJSON(cc.CostDetails))
 	}
 }
 

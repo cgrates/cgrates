@@ -34,13 +34,19 @@ func (apier *ApierV1) GetCallCostLog(attrs utils.AttrGetCallCost, reply *engine.
 	if attrs.RunId == "" {
 		attrs.RunId = utils.META_DEFAULT
 	}
-	if smcs, err := apier.CdrDb.GetSMCosts(attrs.CgrId, attrs.RunId, "", ""); err != nil {
+	cdrFltr := &utils.CDRsFilter{
+		CGRIDs: []string{attrs.CgrId},
+		RunIDs: []string{attrs.RunId},
+	}
+	if cdrs, _, err := apier.CdrDb.GetCDRs(cdrFltr, false); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
 		return err
+	} else if len(cdrs) == 0 {
+		return utils.ErrNotFound
 	} else {
-		*reply = *smcs[0]
+		*reply = *cdrs[0].AsSMCost()
 	}
 	return nil
 }

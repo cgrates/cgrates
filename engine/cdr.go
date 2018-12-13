@@ -468,6 +468,18 @@ func (cdr *CDR) AsExternalCDR() *ExternalCDR {
 	}
 }
 
+func (cdr *CDR) AsSMCost() *SMCost {
+	return &SMCost{
+		CGRID:       cdr.CGRID,
+		RunID:       cdr.RunID,
+		OriginHost:  cdr.OriginHost,
+		OriginID:    cdr.OriginID,
+		CostSource:  cdr.CostSource,
+		Usage:       cdr.Usage,
+		CostDetails: cdr.CostDetails,
+	}
+}
+
 func (cdr *CDR) String() string {
 	mrsh, _ := json.Marshal(cdr)
 	return string(mrsh)
