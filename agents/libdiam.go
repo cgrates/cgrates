@@ -358,8 +358,7 @@ func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err 
 				if err != nil {
 					return nil, err
 				} else if len(fltrAVPs) == 0 || len(fltrAVPs) != len(avps) {
-					return nil, fmt.Errorf("%s for selector %s",
-						utils.ErrFilterNotPassingNoCaps.Error(), slctr.AttrName())
+					return nil, utils.ErrNotFound
 				}
 				for k, fAVP := range fltrAVPs {
 					if dataAVP, err := diamAVPAsIface(fAVP); err != nil {

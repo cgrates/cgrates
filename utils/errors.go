@@ -165,3 +165,7 @@ func ErrHasPrefix(err error, prfx string) (has bool) {
 func ErrEnvNotFound(key string) error {
 	return errors.New("ENV_VAR_NOT_FOUND:" + key)
 }
+
+func ErrPrefixNotFound(reason string) error {
+	return fmt.Errorf("%s:%s", ErrNotFound.Error(), reason)
+}

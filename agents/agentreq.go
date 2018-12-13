@@ -127,6 +127,13 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 		}
 		out, err := ar.ParseField(tplFld)
 		if err != nil {
+			if err == utils.ErrNotFound {
+				if !tplFld.Mandatory {
+					err = nil
+					continue
+				}
+				err = utils.ErrPrefixNotFound(tplFld.Tag)
+			}
 			return nil, err
 		}
 		var valSet []*config.NMItem
