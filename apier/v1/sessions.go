@@ -41,6 +41,7 @@ func (ssv1 *SessionSv1) Handlers() map[string]interface{} {
 		utils.SessionSv1InitiateSession:            ssv1.BiRpcInitiateSession,
 		utils.SessionSv1InitiateSessionWithDigest:  ssv1.BiRpcInitiateSessionWithDigest,
 		utils.SessionSv1UpdateSession:              ssv1.BiRpcUpdateSession,
+		utils.SessionSv1SyncSessions:               ssv1.BiRpcSyncSessions,
 		utils.SessionSv1TerminateSession:           ssv1.BiRpcTerminateSession,
 		utils.SessionSv1ProcessCDR:                 ssv1.BiRpcProcessCDR,
 		utils.SessionSv1ProcessEvent:               ssv1.BiRpcProcessEvent,
@@ -74,6 +75,11 @@ func (ssv1 *SessionSv1) InitiateSessionWithDigest(args *sessions.V1InitSessionAr
 func (ssv1 *SessionSv1) UpdateSession(args *sessions.V1UpdateSessionArgs,
 	rply *sessions.V1UpdateSessionReply) error {
 	return ssv1.SMG.BiRPCv1UpdateSession(nil, args, rply)
+}
+
+func (ssv1 *SessionSv1) SyncSessions(args *string,
+	rply *string) error {
+	return ssv1.SMG.BiRPCv1SyncSessions(nil, "", rply)
 }
 
 func (ssv1 *SessionSv1) TerminateSession(args *sessions.V1TerminateSessionArgs,
@@ -121,6 +127,11 @@ func (ssv1 *SessionSv1) BiRpcInitiateSessionWithDigest(clnt *rpc2.Client, args *
 func (ssv1 *SessionSv1) BiRpcUpdateSession(clnt *rpc2.Client, args *sessions.V1UpdateSessionArgs,
 	rply *sessions.V1UpdateSessionReply) error {
 	return ssv1.SMG.BiRPCv1UpdateSession(clnt, args, rply)
+}
+
+func (ssv1 *SessionSv1) BiRpcSyncSessions(clnt *rpc2.Client, args *string,
+	rply *string) error {
+	return ssv1.SMG.BiRPCv1SyncSessions(clnt, "", rply)
 }
 
 func (ssv1 *SessionSv1) BiRpcTerminateSession(clnt *rpc2.Client, args *sessions.V1TerminateSessionArgs,

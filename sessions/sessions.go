@@ -2427,6 +2427,13 @@ func (smg *SMGeneric) syncSessions() {
 	}
 }
 
+func (smg *SMGeneric) BiRPCv1SyncSessions(clnt rpcclient.RpcClientConnection,
+	ignParam string, reply *string) error {
+	smg.syncSessions()
+	*reply = utils.OK
+	return nil
+}
+
 func (smg *SMGeneric) BiRPCv1RegisterInternalBiJSONConn(clnt rpcclient.RpcClientConnection,
 	ignParam string, reply *string) error {
 	smg.intBiJSONConns = append(smg.intBiJSONConns, clnt)
