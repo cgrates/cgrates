@@ -144,12 +144,20 @@ func TestFlatstoreitProcessFiles(t *testing.T) {
 		t.Errorf("Files in cdrcInDir: %+v", filesInDir)
 	}
 	filesOutDir, _ := ioutil.ReadDir(flatstoreCdrcCfg.CdrOutDir)
-	f := []string{}
-	for _, s := range filesOutDir {
-		f = append(f, s.Name())
-	}
 	if len(filesOutDir) != 5 {
+		f := []string{}
+		for _, s := range filesOutDir {
+			f = append(f, s.Name())
+			t.Errorf("File %s:", s.Name())
+			if partContent, err := ioutil.ReadFile(path.Join(flatstoreCdrcCfg.CdrOutDir, s.Name())); err != nil {
+				t.Error(err)
+			} else {
+				t.Errorf("%s", partContent)
+			}
+			t.Errorf("==============================================================================")
+		}
 		t.Errorf("In CdrcOutDir, expecting 5 files, got: %d, for %s", len(filesOutDir), utils.ToJSON(f))
+		return
 	}
 	ePartContent := "INVITE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9p@0:0:0:0:0:0:0:0|200|OK|1436454408|*prepaid|1001|1002||3401:2069362475\n"
 	if partContent, err := ioutil.ReadFile(path.Join(flatstoreCdrcCfg.CdrOutDir, "acc_3.log.unpaired")); err != nil {
