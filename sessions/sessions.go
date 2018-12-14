@@ -1015,7 +1015,7 @@ func (smg *SMGeneric) InitiateSession(tnt string, ev *engine.SafEvent,
 	clnt rpcclient.RpcClientConnection, resourceID string,
 	dbtItval time.Duration) (maxUsage time.Duration, err error) {
 	cgrID := GetSetCGRID(ev)
-	guardian.Guardian.Guard(func() (iface interface{}, err error) { // Lock it on CGRID level
+	_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) { // Lock it on CGRID level
 		cacheKey := "InitiateSession" + cgrID
 		if item, err := smg.responseCache.Get(cacheKey); err == nil && item != nil {
 			return item.Value.(time.Duration), item.Err
@@ -1045,7 +1045,7 @@ func (smg *SMGeneric) UpdateSession(tnt string, ev *engine.SafEvent,
 	clnt rpcclient.RpcClientConnection, resourceID string,
 	dbtItval time.Duration) (maxUsage time.Duration, err error) {
 	cgrID := GetSetCGRID(ev)
-	guardian.Guardian.Guard(func() (iface interface{}, err error) { // Lock it on CGRID level
+	_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) { // Lock it on CGRID level
 		cacheKey := "UpdateSession" + cgrID
 		if item, err := smg.responseCache.Get(cacheKey); err == nil && item != nil {
 			return item.Value.(time.Duration), item.Err
@@ -1066,7 +1066,7 @@ func (smg *SMGeneric) TerminateSession(tnt string, ev *engine.SafEvent,
 	clnt rpcclient.RpcClientConnection, resourceID string,
 	dbtItvl time.Duration) (err error) {
 	cgrID := GetSetCGRID(ev)
-	guardian.Guardian.Guard(func() (iface interface{}, err error) { // Lock it on CGRID level
+	_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) { // Lock it on CGRID level
 		cacheKey := "TerminateSession" + cgrID
 		if item, err := smg.responseCache.Get(cacheKey); err == nil && item != nil {
 			return nil, item.Err
