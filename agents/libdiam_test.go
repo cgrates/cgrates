@@ -204,3 +204,137 @@ func TestMessageSetAVPsWithPath2(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eMessage, m)
 	}
 }
+
+func TestMessageSetAVPsWithPath3(t *testing.T) {
+	eMessage := diam.NewRequest(diam.CreditControl, 4, nil)
+	eMessage.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(430, avp.Mbit, 0, &diam.GroupedAVP{ // 430 code for Final-Unit-Indication
+				AVP: []*diam.AVP{
+					diam.NewAVP(449, avp.Mbit, 0, datatype.Enumerated(1)), // 449 code for Final-Unit-Action
+					diam.NewAVP(434, avp.Mbit, 0, &diam.GroupedAVP{ // 434 code for Redirect-Server
+						AVP: []*diam.AVP{
+							diam.NewAVP(433, avp.Mbit, 0, datatype.Enumerated(2)),                      // 433 code for Redirect-Address-Type
+							diam.NewAVP(435, avp.Mbit, 0, datatype.UTF8String("http://172.10.88.88/")), //435 code for Redirect-Server-Address
+						},
+					},
+					),
+				},
+			},
+			),
+		},
+	},
+	)
+	m := diam.NewMessage(diam.CreditControl, diam.RequestFlag, 4,
+		eMessage.Header.HopByHopID, eMessage.Header.EndToEndID, nil)
+
+	if err := messageSetAVPsWithPath(m,
+		[]string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Final-Unit-Action"}, "1",
+		false, "UTC"); err != nil {
+		t.Error(err)
+	}
+
+	if err := messageSetAVPsWithPath(m,
+		[]string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type"}, "2",
+		false, "UTC"); err != nil {
+		t.Error(err)
+	}
+
+	if err := messageSetAVPsWithPath(m,
+		[]string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Server-Address"}, "http://172.10.88.88/",
+		false, "UTC"); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(eMessage.String(), m.String()) {
+		t.Errorf("Expecting: %+v \n, received: %+v \n", eMessage, m)
+	}
+}
+
+func TestMessageSetAVPsWithPath4(t *testing.T) {
+	eMessage := diam.NewRequest(diam.CreditControl, 4, nil)
+	eMessage.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(430, avp.Mbit, 0, &diam.GroupedAVP{ // 430 code for Final-Unit-Indication
+				AVP: []*diam.AVP{
+					diam.NewAVP(434, avp.Mbit, 0, &diam.GroupedAVP{ // 434 code for Redirect-Server
+						AVP: []*diam.AVP{
+							diam.NewAVP(433, avp.Mbit, 0, datatype.Enumerated(2)),                      // 433 code for Redirect-Address-Type
+							diam.NewAVP(435, avp.Mbit, 0, datatype.UTF8String("http://172.10.88.88/")), //435 code for Redirect-Server-Address
+						},
+					},
+					),
+					diam.NewAVP(449, avp.Mbit, 0, datatype.Enumerated(1)), // 449 code for Final-Unit-Action
+				},
+			},
+			),
+		},
+	},
+	)
+	m := diam.NewMessage(diam.CreditControl, diam.RequestFlag, 4,
+		eMessage.Header.HopByHopID, eMessage.Header.EndToEndID, nil)
+
+	if err := messageSetAVPsWithPath(m,
+		[]string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type"}, "2",
+		false, "UTC"); err != nil {
+		t.Error(err)
+	}
+	if err := messageSetAVPsWithPath(m,
+		[]string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Final-Unit-Action"}, "1",
+		false, "UTC"); err != nil {
+		t.Error(err)
+	}
+
+	if err := messageSetAVPsWithPath(m,
+		[]string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Server-Address"}, "http://172.10.88.88/",
+		false, "UTC"); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(eMessage.String(), m.String()) {
+		t.Errorf("Expecting: %+v \n, received: %+v \n", eMessage, m)
+	}
+}
+
+func TestMessageSetAVPsWithPath5(t *testing.T) {
+	eMessage := diam.NewRequest(diam.CreditControl, 4, nil)
+	eMessage.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(430, avp.Mbit, 0, &diam.GroupedAVP{ // 430 code for Final-Unit-Indication
+				AVP: []*diam.AVP{
+					diam.NewAVP(434, avp.Mbit, 0, &diam.GroupedAVP{ // 434 code for Redirect-Server
+						AVP: []*diam.AVP{
+							diam.NewAVP(433, avp.Mbit, 0, datatype.Enumerated(2)),                      // 433 code for Redirect-Address-Type
+							diam.NewAVP(435, avp.Mbit, 0, datatype.UTF8String("http://172.10.88.88/")), //435 code for Redirect-Server-Address
+						},
+					},
+					),
+					diam.NewAVP(449, avp.Mbit, 0, datatype.Enumerated(1)), // 449 code for Final-Unit-Action
+				},
+			},
+			),
+		},
+	},
+	)
+	m := diam.NewMessage(diam.CreditControl, diam.RequestFlag, 4,
+		eMessage.Header.HopByHopID, eMessage.Header.EndToEndID, nil)
+
+	if err := messageSetAVPsWithPath(m,
+		[]string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type"}, "2",
+		false, "UTC"); err != nil {
+		t.Error(err)
+	}
+
+	if err := messageSetAVPsWithPath(m,
+		[]string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Server-Address"}, "http://172.10.88.88/",
+		false, "UTC"); err != nil {
+		t.Error(err)
+	}
+	if err := messageSetAVPsWithPath(m,
+		[]string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Final-Unit-Action"}, "1",
+		false, "UTC"); err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(eMessage.String(), m.String()) {
+		t.Errorf("Expecting: %+v \n, received: %+v \n", eMessage, m)
+	}
+}

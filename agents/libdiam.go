@@ -210,6 +210,7 @@ func messageSetAVPsWithPath(m *diam.Message, pathStr []string,
 			dictAVPs[i] = dictAVP
 		}
 	}
+
 	lastAVPIdx := len(path) - 1
 	if dictAVPs[lastAVPIdx].Data.Type == diam.GroupedAVPType {
 		return errors.New("last AVP in path cannot be GroupedAVP")
@@ -227,15 +228,22 @@ func messageSetAVPsWithPath(m *diam.Message, pathStr []string,
 		}
 		newMsgAVP := diam.NewAVP(dictAVPs[i].Code, avp.Mbit, dictAVPs[i].VendorID, typeVal) // FixMe: maybe Mbit with dictionary one
 		if i == lastAVPIdx-1 && !newBranch {
-			avps, err := m.FindAVPsWithPath(path[:lastAVPIdx], dict.UndefinedVendorID)
-			if err != nil {
-				return err
-			}
-			if len(avps) != 0 { // Group AVP already in the message
-				prevGrpData := avps[len(avps)-1].Data.(*diam.GroupedAVP) // Take the last avp found to append there
-				prevGrpData.AVP = append(prevGrpData.AVP, msgAVP)
-				m.Header.MessageLength += uint32(msgAVP.Len())
-				return nil
+			for idx := i + 1; idx > 0; idx-- { //check if we can append to the last AVP
+				avps, err := m.FindAVPsWithPath(path[:idx], dict.UndefinedVendorID)
+				if err != nil {
+					return err
+				}
+				if len(avps) != 0 { // Group AVP already in the message
+					prevGrpData := avps[len(avps)-1].Data.(*diam.GroupedAVP)               // Take the last avp found to append there
+					if newMsgAVP.Data.Type() == diam.GroupedAVPType && idx != lastAVPIdx { // check if we need to add a group to last avp
+						prevGrpData.AVP = append(prevGrpData.AVP, newMsgAVP)
+						m.Header.MessageLength += uint32(newMsgAVP.Len())
+					} else {
+						prevGrpData.AVP = append(prevGrpData.AVP, msgAVP)
+						m.Header.MessageLength += uint32(msgAVP.Len())
+					}
+					return nil
+				}
 			}
 		}
 		msgAVP = newMsgAVP
@@ -406,6 +414,7 @@ func diamAnswer(m *diam.Message, resCode uint32, errFlag bool,
 	// write reply into message
 	pathIdx := make(map[string]int) // group items for same path
 	for _, val := range rply.Values() {
+
 		nmItms, isNMItems := val.([]*config.NMItem)
 		if !isNMItems {
 			return nil, fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(val))
@@ -426,6 +435,7 @@ func diamAnswer(m *diam.Message, resCode uint32, errFlag bool,
 				}
 			}
 		}
+
 		if itm == nil {
 			continue // all attributes, not writable to diameter packet
 		}
