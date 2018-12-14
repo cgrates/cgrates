@@ -373,6 +373,7 @@ const CGRATES_CFG_JSON = `
 	"vendor_id": 0,												// diameter Vendor-Id AVP used in replies
 	"product_name": "CGRateS",									// diameter Product-Name AVP used in replies
 	"max_active_requests": -1,									// limit the number of active requests processed by the server <-1|0-n>
+	"asr_template": "",											// enable AbortSession message being sent to client on DisconnectSession
 	"templates":{
 		"*err": [
 				{"tag": "SessionId", "field_id": "Session-Id", "type": "*composed", 
@@ -395,6 +396,24 @@ const CGRATES_CFG_JSON = `
 					"value": "~*req.CC-Request-Type", "mandatory": true},
 				{"tag": "CCRequestNumber", "field_id": "CC-Request-Number", "type": "*composed", 
 					"value": "~*req.CC-Request-Number", "mandatory": true},
+		],
+		"*asr": [
+				{"tag": "SessionId", "field_id": "Session-Id", "type": "*composed", 
+					"value": "~*req.OriginID", "mandatory": true},
+				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*composed", 
+					"value": "~*vars.OriginHost", "mandatory": true},
+				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*composed", 
+					"value": "~*vars.OriginRealm", "mandatory": true},
+				{"tag": "DestinationRealm", "field_id": "Destination-Realm", "type": "*composed", 
+					"value": "~*vars.DestinationRealm", "mandatory": true},
+				{"tag": "DestinationHost", "field_id": "Destination-Host", "type": "*composed", 
+					"value": "~*vars.DestinationHost", "mandatory": true},
+				{"tag": "AuthApplicationId", "field_id": "Auth-Application-Id", "type": "*composed",
+					 "value": "~*vars.*appid", "mandatory": true},
+				{"tag": "UserName", "field_id": "User-Name", "type": "*composed", 
+					"value": "~*req.Account", "mandatory": true},
+				{"tag": "OriginStateID", "field_id": "Origin-State-Id", "type": "*composed", 
+					"value": "~*vars.OriginStateID", "mandatory": true},
 		]
 	},
 	"request_processors": [],

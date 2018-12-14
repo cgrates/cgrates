@@ -539,6 +539,7 @@ const (
 	Local                        = "local"
 	TCP                          = "tcp"
 	CGRDebitInterval             = "CGRDebitInterval"
+	MetaAsr                      = "*asr"
 )
 
 // Migrator Action

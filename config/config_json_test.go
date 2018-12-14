@@ -585,6 +585,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 		Vendor_id:           utils.IntPointer(0),
 		Product_name:        utils.StringPointer("CGRateS"),
 		Max_active_requests: utils.IntPointer(-1),
+		Asr_template:        utils.StringPointer(""),
 		Templates: map[string][]*FcTemplateJsonCfg{
 			utils.MetaErr: {
 				{Tag: utils.StringPointer("SessionId"),
@@ -635,13 +636,55 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 					Value:     utils.StringPointer("~*req.CC-Request-Number"),
 					Mandatory: utils.BoolPointer(true)},
 			},
+			utils.MetaASR: {
+				{Tag: utils.StringPointer("SessionId"),
+					Field_id:  utils.StringPointer("Session-Id"),
+					Type:      utils.StringPointer(utils.META_COMPOSED),
+					Value:     utils.StringPointer("~*req.OriginID"),
+					Mandatory: utils.BoolPointer(true)},
+				{Tag: utils.StringPointer("OriginHost"),
+					Field_id:  utils.StringPointer("Origin-Host"),
+					Type:      utils.StringPointer(utils.META_COMPOSED),
+					Value:     utils.StringPointer("~*vars.OriginHost"),
+					Mandatory: utils.BoolPointer(true)},
+				{Tag: utils.StringPointer("OriginRealm"),
+					Field_id:  utils.StringPointer("Origin-Realm"),
+					Type:      utils.StringPointer(utils.META_COMPOSED),
+					Value:     utils.StringPointer("~*vars.OriginRealm"),
+					Mandatory: utils.BoolPointer(true)},
+				{Tag: utils.StringPointer("DestinationRealm"),
+					Field_id:  utils.StringPointer("Destination-Realm"),
+					Type:      utils.StringPointer(utils.META_COMPOSED),
+					Value:     utils.StringPointer("~*vars.DestinationRealm"),
+					Mandatory: utils.BoolPointer(true)},
+				{Tag: utils.StringPointer("DestinationHost"),
+					Field_id:  utils.StringPointer("Destination-Host"),
+					Type:      utils.StringPointer(utils.META_COMPOSED),
+					Value:     utils.StringPointer("~*vars.DestinationHost"),
+					Mandatory: utils.BoolPointer(true)},
+				{Tag: utils.StringPointer("AuthApplicationId"),
+					Field_id:  utils.StringPointer("Auth-Application-Id"),
+					Type:      utils.StringPointer(utils.META_COMPOSED),
+					Value:     utils.StringPointer("~*vars.*appid"),
+					Mandatory: utils.BoolPointer(true)},
+				{Tag: utils.StringPointer("UserName"),
+					Field_id:  utils.StringPointer("User-Name"),
+					Type:      utils.StringPointer(utils.META_COMPOSED),
+					Value:     utils.StringPointer("~*req.Account"),
+					Mandatory: utils.BoolPointer(true)},
+				{Tag: utils.StringPointer("OriginStateID"),
+					Field_id:  utils.StringPointer("Origin-State-Id"),
+					Type:      utils.StringPointer(utils.META_COMPOSED),
+					Value:     utils.StringPointer("~*vars.OriginStateID"),
+					Mandatory: utils.BoolPointer(true)},
+			},
 		},
 		Request_processors: &[]*DARequestProcessorJsnCfg{},
 	}
 	if cfg, err := dfCgrJsonCfg.DiameterAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Errorf("Received: %+v", cfg)
+		t.Errorf("expecting: %s, \n\nreceived: %s", utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }
 
