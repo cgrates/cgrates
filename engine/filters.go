@@ -49,7 +49,11 @@ const (
 
 func NewFilterS(cfg *config.CGRConfig,
 	statSChan chan rpcclient.RpcClientConnection, dm *DataManager) *FilterS {
-	return &FilterS{statSChan: statSChan, dm: dm, cfg: cfg}
+	return &FilterS{
+		statSChan: statSChan,
+		dm:        dm,
+		cfg:       cfg,
+	}
 }
 
 // FilterS is a service used to take decisions in case of filters
@@ -90,6 +94,9 @@ func (fS *FilterS) Pass(tenant string, filterIDs []string,
 		f, err := fS.dm.GetFilter(tenant, fltrID,
 			true, true, utils.NonTransactional)
 		if err != nil {
+			if err == utils.ErrNotFound {
+				err = utils.ErrPrefixNotFound(fltrID)
+			}
 			return false, err
 		}
 		if f.ActivationInterval != nil &&
@@ -115,11 +122,11 @@ func NewFilterFromInline(tenant, inlnRule string) (f *Filter, err error) {
 	f = &Filter{
 		Tenant: tenant,
 		ID:     inlnRule,
-		Rules: []*FilterRule{
-			{
-				Type:      ruleSplt[0],
-				FieldName: ruleSplt[1],
-				Values:    strings.Split(ruleSplt[2], utils.INFIELD_SEP)}},
+		Rules: []*FilterRule{{
+			Type:      ruleSplt[0],
+			FieldName: ruleSplt[1],
+			Values:    strings.Split(ruleSplt[2], utils.INFIELD_SEP),
+		}},
 	}
 	if err = f.Compile(); err != nil {
 		return nil, err
@@ -259,7 +266,7 @@ func (fltr *FilterRule) Pass(dP config.DataProvider, rpcClnt rpcclient.RpcClient
 	case MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual:
 		result, err = fltr.passGreaterThan(dP)
 	default:
-		err = utils.ErrNotImplemented
+		err = utils.ErrPrefixNotErrNotImplemented(fltr.Type)
 	}
 	if err != nil {
 		return false, err
