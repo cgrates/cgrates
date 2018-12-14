@@ -162,10 +162,18 @@ func ErrHasPrefix(err error, prfx string) (has bool) {
 	return strings.HasPrefix(err.Error(), prfx)
 }
 
-func ErrEnvNotFound(key string) error {
-	return errors.New("ENV_VAR_NOT_FOUND:" + key)
+func ErrPrefix(err error, reason string) error {
+	return fmt.Errorf("%s:%s", err.Error(), reason)
 }
 
 func ErrPrefixNotFound(reason string) error {
-	return fmt.Errorf("%s:%s", ErrNotFound.Error(), reason)
+	return ErrPrefix(ErrNotFound, reason)
+}
+
+func ErrPrefixNotErrNotImplemented(reason string) error {
+	return ErrPrefix(ErrNotImplemented, reason)
+}
+
+func ErrEnvNotFound(key string) error {
+	return ErrPrefix(ErrNotFound, "ENV_VAR:"+key)
 }
