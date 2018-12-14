@@ -749,6 +749,7 @@ const (
 	SessionSv1InitiateSession            = "SessionSv1.InitiateSession"
 	SessionSv1InitiateSessionWithDigest  = "SessionSv1.InitiateSessionWithDigest"
 	SessionSv1UpdateSession              = "SessionSv1.UpdateSession"
+	SessionSv1SyncSessions               = "SessionSv1.SyncSessions"
 	SessionSv1TerminateSession           = "SessionSv1.TerminateSession"
 	SessionSv1ProcessCDR                 = "SessionSv1.ProcessCDR"
 	SessionSv1ProcessEvent               = "SessionSv1.ProcessEvent"
