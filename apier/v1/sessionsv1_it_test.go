@@ -652,6 +652,134 @@ func TestSSv1ItCDRsGetCdrs(t *testing.T) {
 	}
 }
 
+func TestSSv1ItForceUpdateSession(t *testing.T) {
+	aSessions := make([]*sessions.ActiveSession, 0)
+	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Error: %v with len(asessions)=%v", err, len(aSessions))
+	}
+	var acnt *engine.Account
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
+	eAcntVal := 9.25
+	if err := sSApierRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+
+	reqUsage := 5 * time.Minute
+	args := &sessions.V1UpdateSessionArgs{
+		GetAttributes: true,
+		UpdateSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItUpdateSession",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "TestSSv1It1",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       reqUsage,
+			},
+		},
+	}
+	var rply sessions.V1UpdateSessionReply
+	if err := sSv1BiRpc.Call(utils.SessionSv1UpdateSession,
+		args, &rply); err != nil {
+		t.Error(err)
+	}
+	eAttrs := &engine.AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_ACNT_1001"},
+		AlteredFields:   []string{"OfficeGroup"},
+		CGREvent: &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "TestSSv1ItUpdateSession",
+			Context: utils.StringPointer(utils.MetaSessionS),
+			Event: map[string]interface{}{
+				utils.CGRID:       "5668666d6b8e44eb949042f25ce0796ec3592ff9",
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.ToR:         utils.VOICE,
+				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
+				utils.Destination: "1002",
+				"OfficeGroup":     "Marketing",
+				utils.OriginID:    "TestSSv1It1",
+				utils.RequestType: utils.META_PREPAID,
+				utils.SetupTime:   "2018-01-07T17:00:00Z",
+				utils.AnswerTime:  "2018-01-07T17:00:10Z",
+				utils.Usage:       300000000000.0,
+			},
+		},
+	}
+	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
+		t.Errorf("expecting: %+v, received: %+v",
+			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
+	}
+	if *rply.MaxUsage != reqUsage {
+		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
+	}
+	aSessions = make([]*sessions.ActiveSession, 0)
+	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 2 {
+		t.Errorf("wrong active ssesions: %s", utils.ToJSON(aSessions))
+	}
+
+	eAcntVal = 9.10
+	if err := sSApierRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+
+	argst := &sessions.V1TerminateSessionArgs{
+		TerminateSession: true,
+		ReleaseResources: true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItUpdateSession",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "TestSSv1It1",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       10 * time.Minute,
+			},
+		},
+	}
+	rplyt := ""
+	if err := sSv1BiRpc.Call(utils.SessionSv1TerminateSession,
+		argst, &rplyt); err != nil {
+		t.Error(err)
+	}
+	if rplyt != utils.OK {
+		t.Errorf("Unexpected reply: %s", rplyt)
+	}
+	aSessions = make([]*sessions.ActiveSession, 0)
+	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	eAcntVal = 8.95
+	if err := sSApierRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+}
+
 func TestSSv1ItStopCgrEngine(t *testing.T) {
 	if err := sSv1BiRpc.Close(); err != nil { // Close the connection so we don't get EOF warnings from client
 		t.Error(err)
