@@ -116,7 +116,7 @@ func TestOnStorITMongo(t *testing.T) {
 	if mgoITdb, err = NewMongoStorage(mgoITCfg.StorDbCfg().StorDBHost,
 		mgoITCfg.StorDbCfg().StorDBPort, mgoITCfg.StorDbCfg().StorDBName,
 		mgoITCfg.StorDbCfg().StorDBUser, mgoITCfg.StorDbCfg().StorDBPass,
-		utils.StorDB, nil, mgoITCfg.CacheCfg()); err != nil {
+		utils.StorDB, nil, mgoITCfg.CacheCfg(), false); err != nil {
 		t.Fatal(err)
 	}
 	onStorCfg = mgoITCfg.StorDbCfg().StorDBName

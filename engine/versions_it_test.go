@@ -156,12 +156,12 @@ func testVersion(t *testing.T) {
 
 	storType := dm3.DataDB().GetStorageType()
 	switch storType {
-	case utils.MONGO, utils.MAPSTOR:
+	case utils.MAPSTOR:
 		currentVersion = allVersions
 		testVersion = allVersions
 		testVersion[utils.Accounts] = 1
 		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*accounts>"
-	case utils.REDIS:
+	case utils.MONGO, utils.REDIS:
 		currentVersion = dataDbVersions
 		testVersion = dataDbVersions
 		testVersion[utils.Accounts] = 1
@@ -198,12 +198,12 @@ func testVersion(t *testing.T) {
 	}
 	storType = storageDb.GetStorageType()
 	switch storType {
-	case utils.MONGO, utils.MAPSTOR:
+	case utils.MAPSTOR:
 		currentVersion = allVersions
 		testVersion = allVersions
 		testVersion[utils.Accounts] = 1
 		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*accounts>"
-	case utils.POSTGRES, utils.MYSQL:
+	case utils.MONGO, utils.POSTGRES, utils.MYSQL:
 		currentVersion = storDbVersions
 		testVersion = allVersions
 		testVersion[utils.CostDetails] = 1
@@ -228,7 +228,7 @@ func testVersion(t *testing.T) {
 	if err := storageDb.SetVersions(testVersion, false); err != nil {
 		t.Error(err)
 	}
-	if err := CheckVersions(storageDb); err.Error() != test {
+	if err := CheckVersions(storageDb); err != nil && err.Error() != test {
 		t.Error(err)
 	}
 	if err = storageDb.RemoveVersions(testVersion); err != nil {

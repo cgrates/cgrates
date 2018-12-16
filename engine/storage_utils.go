@@ -48,7 +48,7 @@ func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler strin
 		d, err = NewRedisStorage(host, db_nb, pass, marshaler, utils.REDIS_MAX_CONNS, cacheCfg, sentinelName)
 		dm = NewDataManager(d.(DataDB))
 	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass, utils.DataDB, nil, cacheCfg)
+		d, err = NewMongoStorage(host, port, name, user, pass, utils.DataDB, nil, cacheCfg, true)
 		dm = NewDataManager(d.(DataDB))
 	case utils.INTERNAL:
 		if marshaler == utils.JSON {
@@ -72,7 +72,7 @@ func ConfigureStorStorage(db_type, host, port, name, user, pass, marshaler strin
 	var d Storage
 	switch db_type {
 	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, cdrsIndexes, nil)
+		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, cdrsIndexes, nil, false)
 	case utils.POSTGRES:
 		d, err = NewPostgresStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
 	case utils.MYSQL:
@@ -98,7 +98,7 @@ func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler strin
 	case utils.MYSQL:
 		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
 	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, cdrsIndexes, nil)
+		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, cdrsIndexes, nil, false)
 	case utils.INTERNAL:
 		d, err = NewMapStorage()
 	default:
@@ -120,7 +120,7 @@ func ConfigureCdrStorage(db_type, host, port, name, user, pass string,
 	case utils.MYSQL:
 		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
 	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, cdrsIndexes, nil)
+		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, cdrsIndexes, nil, false)
 	case utils.INTERNAL:
 		d, err = NewMapStorage()
 	default:
@@ -142,7 +142,7 @@ func ConfigureStorDB(db_type, host, port, name, user, pass string,
 	case utils.MYSQL:
 		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
 	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, cdrsIndexes, nil)
+		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, cdrsIndexes, nil, false)
 	case utils.INTERNAL:
 		d, err = NewMapStorage()
 	default:

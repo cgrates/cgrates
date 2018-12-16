@@ -36,9 +36,7 @@ func TestVersionCompare(t *testing.T) {
 	q := Versions{utils.Accounts: 2, utils.Actions: 2,
 		utils.ActionTriggers: 2, utils.ActionPlans: 2,
 		utils.SharedGroups: 1, utils.CostDetails: 2}
-	c := Versions{utils.Accounts: 2, utils.Actions: 2,
-		utils.ActionTriggers: 2, utils.ActionPlans: 2,
-		utils.SharedGroups: 2, utils.CostDetails: 1}
+	c := Versions{utils.CostDetails: 1}
 	a := Versions{utils.Accounts: 2, utils.Actions: 2,
 		utils.ActionTriggers: 2, utils.ActionPlans: 2,
 		utils.SharedGroups: 2, utils.CostDetails: 2,
@@ -47,27 +45,27 @@ func TestVersionCompare(t *testing.T) {
 		utils.ActionTriggers: 2, utils.ActionPlans: 2,
 		utils.SharedGroups: 2, utils.CostDetails: 2,
 		utils.SessionSCosts: 2}
-	message1 := y.Compare(x, utils.MONGO)
+	message1 := y.Compare(x, utils.MONGO, true)
 	if message1 != "cgr-migrator -migrate=*accounts" {
 		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -migrate=*accounts", message1)
 	}
-	message2 := z.Compare(x, utils.MONGO)
+	message2 := z.Compare(x, utils.MONGO, true)
 	if message2 != "cgr-migrator -migrate=*action_plans" {
 		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -migrate=*action_plans", message2)
 	}
-	message3 := q.Compare(x, utils.MONGO)
+	message3 := q.Compare(x, utils.MONGO, true)
 	if message3 != "cgr-migrator -migrate=*shared_groups" {
 		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -migrate=*shared_groups", message3)
 	}
-	message4 := c.Compare(x, utils.MONGO)
+	message4 := c.Compare(x, utils.MONGO, false)
 	if message4 != "cgr-migrator -migrate=*cost_details" {
 		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -migrate=*cost_details", message4)
 	}
-	message5 := a.Compare(b, utils.MYSQL)
+	message5 := a.Compare(b, utils.MYSQL, false)
 	if message5 != "cgr-migrator -migrate=*sessions_costs" {
 		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -migrate=*sessions_costs", message5)
 	}
-	message6 := a.Compare(b, utils.POSTGRES)
+	message6 := a.Compare(b, utils.POSTGRES, false)
 	if message6 != "cgr-migrator -migrate=*sessions_costs" {
 		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -migrate=*sessions_costs", message6)
 	}
