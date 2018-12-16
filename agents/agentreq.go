@@ -75,7 +75,7 @@ type AgentRequest struct {
 
 // String implements engine.DataProvider
 func (ar *AgentRequest) String() string {
-	return utils.ToJSON(ar)
+	return utils.ToIJSON(ar)
 }
 
 // RemoteHost implements engine.DataProvider
