@@ -69,15 +69,13 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 				fmt.Sprintf("task <%s> is not a supported migration task", taskID))
 		case utils.MetaSetVersions:
 			if m.dryRun != true {
-				if err := m.dmOut.DataManager().DataDB().SetVersions(
-					engine.CurrentDBVersions(m.dmOut.DataManager().DataDB().GetStorageType()), true); err != nil {
+				if err := engine.OverwriteDBVersions(m.dmOut.DataManager().DataDB()); err != nil {
 					return utils.NewCGRError(utils.Migrator,
 						utils.ServerErrorCaps,
 						err.Error(),
 						fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error())), nil
 				}
-				if err := m.storDBOut.StorDB().SetVersions(
-					engine.CurrentDBVersions(m.storDBOut.StorDB().GetStorageType()), true); err != nil {
+				if err := engine.OverwriteDBVersions(m.storDBOut.StorDB()); err != nil {
 					return utils.NewCGRError(utils.Migrator,
 						utils.ServerErrorCaps,
 						err.Error(),

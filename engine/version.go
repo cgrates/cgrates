@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/cgrates/cgrates/utils"
@@ -58,7 +57,9 @@ type Versions map[string]int64 // map[item]versionNr
 func CheckVersions(storage Storage) error {
 	// get current db version
 	storType := storage.GetStorageType()
-	x := CurrentDBVersions(storType)
+	isDataDB := isDataDB(storage)
+
+	x := CurrentDBVersions(storType, isDataDB)
 	dbVersion, err := storage.GetVersions("")
 	if err == utils.ErrNotFound {
 		empty, err := storage.IsDBEmpty()
@@ -66,50 +67,68 @@ func CheckVersions(storage Storage) error {
 			return err
 		}
 		if !empty {
-			msg := "Migration needed: please backup cgrates data and run : <cgr-migrator>"
-			return errors.New(msg)
+			return fmt.Errorf("Migration needed: please backup cgrates data and run : <cgr-migrator>")
 		}
-		// no data, write version
-		if err := SetDBVersions(storage); err != nil {
+		// no data, safe to write version
+		if err := OverwriteDBVersions(storage); err != nil {
 			return err
 		}
-
 	} else {
 		// comparing versions
-		message := dbVersion.Compare(x, storType)
-		if len(message) > 2 {
-			// write the new values
-			msg := "Migration needed: please backup cgr data and run : <" + message + ">"
-			return errors.New(msg)
+		message := dbVersion.Compare(x, storType, isDataDB)
+		if message != "" {
+			return fmt.Errorf("Migration needed: please backup cgr data and run : <%s>", message)
 		}
 	}
 	return nil
 }
 
-func SetDBVersions(storage Storage) (err error) {
-	storType := storage.GetStorageType()
-	x := CurrentDBVersions(storType)
+// relevant only for mongoDB
+func isDataDB(storage Storage) bool {
+	conv, ok := storage.(*MongoStorage)
+	if !ok {
+		return false
+	}
+	return conv.IsDataDB()
+}
+
+func setDBVersions(storage Storage, overwrite bool) (err error) {
+	x := CurrentDBVersions(storage.GetStorageType(), isDataDB(storage))
 	// no data, write version
-	if err = storage.SetVersions(x, false); err != nil {
+	if err = storage.SetVersions(x, overwrite); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("Could not write current version to db: %v", err))
 		return err
 	}
 	return
 }
 
-func (vers Versions) Compare(curent Versions, storType string) string {
-	var x map[string]string
+func SetDBVersions(storage Storage) (err error) {
+	return setDBVersions(storage, false)
+}
+
+func OverwriteDBVersions(storage Storage) (err error) {
+	return setDBVersions(storage, true)
+}
+
+func (vers Versions) Compare(curent Versions, storType string, isDataDB bool) string {
+	var message map[string]string
 	switch storType {
-	case utils.MONGO, utils.MAPSTOR:
-		x = allVers
+	case utils.MONGO:
+		if isDataDB {
+			message = dataDBVers
+		} else {
+			message = storDBVers
+		}
+	case utils.MAPSTOR:
+		message = allVers
 	case utils.POSTGRES, utils.MYSQL:
-		x = storDBVers
+		message = storDBVers
 	case utils.REDIS:
-		x = dataDBVers
+		message = dataDBVers
 	}
-	for y, val := range x {
-		if vers[y] != curent[y] {
-			return val
+	for subsis, reason := range message {
+		if vers[subsis] != curent[subsis] {
+			return reason
 		}
 	}
 	return ""
@@ -177,10 +196,9 @@ func CurrentStorDBVersions() Versions {
 	}
 }
 
-func CurrentDBVersions(storType string) Versions {
+func CurrentAllDBVersions() Versions {
 	dataDbVersions := CurrentDataDBVersions()
 	storDbVersions := CurrentStorDBVersions()
-
 	allVersions := make(Versions)
 	for k, v := range dataDbVersions {
 		allVersions[k] = v
@@ -188,14 +206,22 @@ func CurrentDBVersions(storType string) Versions {
 	for k, v := range storDbVersions {
 		allVersions[k] = v
 	}
+	return allVersions
+}
 
+func CurrentDBVersions(storType string, isDataDB bool) Versions {
 	switch storType {
-	case utils.MONGO, utils.MAPSTOR:
-		return allVersions
+	case utils.MONGO:
+		if isDataDB {
+			return CurrentDataDBVersions()
+		}
+		return CurrentStorDBVersions()
+	case utils.MAPSTOR:
+		return CurrentAllDBVersions()
 	case utils.POSTGRES, utils.MYSQL:
-		return storDbVersions
+		return CurrentStorDBVersions()
 	case utils.REDIS:
-		return dataDbVersions
+		return CurrentDataDBVersions()
 	}
 	return nil
 }
