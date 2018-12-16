@@ -38,7 +38,6 @@ var (
 	chargerCfg       *config.CGRConfig
 	chargerRPC       *rpc.Client
 	chargerProfile   *engine.ChargerProfile
-	chargerDelay     int
 	chargerConfigDIR string //run tests for specific configuration
 )
 
@@ -101,7 +100,6 @@ func testChargerSInitCfg(t *testing.T) {
 	}
 	chargerCfg.DataFolderPath = *dataDir
 	config.SetCgrConfig(chargerCfg)
-	chargerDelay = 1000
 }
 
 func testChargerSInitDataDb(t *testing.T) {
@@ -119,7 +117,7 @@ func testChargerSResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testChargerSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(chargerCfgPath, chargerDelay); err != nil {
+	if _, err := engine.StopStartEngine(chargerCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }

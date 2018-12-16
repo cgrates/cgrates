@@ -99,7 +99,6 @@ func testV1FIdxCaLoadConfig(t *testing.T) {
 	if tSv1Cfg, err = config.NewCGRConfigFromFolder(tSv1CfgPath); err != nil {
 		t.Error(err)
 	}
-	thdsDelay = 1000
 }
 
 func testV1FIdxCaInitDataDb(t *testing.T) {
@@ -116,7 +115,7 @@ func testV1FIdxCaResetStorDb(t *testing.T) {
 }
 
 func testV1FIdxCaStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(tSv1CfgPath, thdsDelay); err != nil {
+	if _, err := engine.StopStartEngine(tSv1CfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -130,7 +129,6 @@ func testV1FIdxCaRpcConn(t *testing.T) {
 }
 
 func testV1FIdxCaFromFolder(t *testing.T) {
-	time.Sleep(10 * time.Millisecond)
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
 	if err := tFIdxCaRpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
@@ -287,7 +285,6 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	time.Sleep(100 * time.Millisecond)
 	//make sure doesn't match the thresholdprofile after update
 	tEv := &engine.ArgsProcessEvent{
 		CGREvent: utils.CGREvent{
@@ -366,7 +363,6 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	time.Sleep(100 * time.Millisecond)
 	tEv := &engine.ArgsProcessEvent{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -708,7 +704,6 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(100 * time.Millisecond)
 	reply.FilterIDs = []string{"FLTR_3"}
 	reply.ActivationInterval = &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}
 	if err := tFIdxCaRpc.Call("ApierV1.SetStatQueueProfile",
@@ -717,7 +712,6 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	time.Sleep(100 * time.Millisecond)
 	tEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event1",
@@ -1010,7 +1004,6 @@ func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
 	if err := tFIdxCaRpc.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(100 * time.Millisecond)
 	reply.FilterIDs = []string{"TestFilter3"}
 	if err := tFIdxCaRpc.Call("ApierV1.SetAttributeProfile", reply, &result); err != nil {
 		t.Error(err)
@@ -1350,7 +1343,6 @@ func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(100 * time.Millisecond)
 	reply.FilterIDs = []string{"FLTR_RES_RCFG3"}
 	reply.ActivationInterval = &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}
 

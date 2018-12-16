@@ -39,7 +39,6 @@ var (
 	stsV1Rpc     *rpc.Client
 	statConfig   *engine.StatQueueProfile
 	stsV1ConfDIR string //run tests for specific configuration
-	statsDelay   int
 )
 
 var evs = []*utils.CGREvent{
@@ -109,7 +108,6 @@ func testV1STSLoadConfig(t *testing.T) {
 	if stsV1Cfg, err = config.NewCGRConfigFromFolder(stsV1CfgPath); err != nil {
 		t.Error(err)
 	}
-	statsDelay = 1000
 }
 
 func testV1STSInitDataDb(t *testing.T) {
@@ -119,7 +117,7 @@ func testV1STSInitDataDb(t *testing.T) {
 }
 
 func testV1STSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(stsV1CfgPath, statsDelay); err != nil {
+	if _, err := engine.StopStartEngine(stsV1CfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -258,7 +256,7 @@ func testV1STSProcessEvent(t *testing.T) {
 
 func testV1STSGetStatsAfterRestart(t *testing.T) {
 	time.Sleep(time.Second)
-	if _, err := engine.StopStartEngine(stsV1CfgPath, statsDelay); err != nil {
+	if _, err := engine.StopStartEngine(stsV1CfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 	var err error
@@ -410,9 +408,6 @@ func testV1STSRemoveStatQueueProfile(t *testing.T) {
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	if tSv1ConfDIR == "tutmongo" {
-		time.Sleep(150 * time.Millisecond)
-	}
 	var sqp *engine.StatQueueProfile
 	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &sqp); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -430,7 +425,7 @@ func testV1STSStatsPing(t *testing.T) {
 }
 
 func testV1STSStopEngine(t *testing.T) {
-	if err := engine.KillEngine(statsDelay); err != nil {
+	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}
 }

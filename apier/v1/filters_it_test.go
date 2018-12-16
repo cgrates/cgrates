@@ -21,15 +21,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -38,7 +39,6 @@ var (
 	filterRPC       *rpc.Client
 	filterDataDir   = "/usr/share/cgrates"
 	filter          *engine.Filter
-	filterDelay     int
 	filterConfigDIR string //run tests for specific configuration
 )
 
@@ -82,7 +82,6 @@ func testFilterInitCfg(t *testing.T) {
 	}
 	filterCfg.DataFolderPath = filterDataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(filterCfg)
-	filterDelay = 1000
 }
 
 // Wipe out the cdr database
@@ -94,7 +93,7 @@ func testFilterResetDataDB(t *testing.T) {
 
 // Start CGR Engine
 func testFilterStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(filterCfgPath, filterDelay); err != nil {
+	if _, err := engine.StopStartEngine(filterCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }

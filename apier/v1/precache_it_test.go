@@ -39,7 +39,6 @@ var (
 	precacheCfg       *config.CGRConfig
 	precacheRPC       *rpc.Client
 	precacheDataDir   = "/usr/share/cgrates"
-	precacheDelay     int
 	precacheConfigDIR string //run tests for specific configuration
 )
 
@@ -79,7 +78,6 @@ func testPrecacheInitCfg(t *testing.T) {
 	}
 	precacheCfg.DataFolderPath = precacheDataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(precacheCfg)
-	precacheDelay = 1000
 }
 
 func testPrecacheResetDataDB(t *testing.T) {
@@ -89,7 +87,7 @@ func testPrecacheResetDataDB(t *testing.T) {
 }
 
 func testPrecacheStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(precacheCfgPath, precacheDelay); err != nil {
+	if _, err := engine.StopStartEngine(precacheCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -259,7 +257,7 @@ func testPrecacheFromFolder(t *testing.T) {
 }
 
 func testPrecacheRestartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(precacheCfgPath, precacheDelay); err != nil {
+	if _, err := engine.StopStartEngine(precacheCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 	var err error
@@ -406,7 +404,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 }
 
 func testPrecacheKillEngine(t *testing.T) {
-	if err := engine.KillEngine(precacheDelay); err != nil {
+	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}
 }
