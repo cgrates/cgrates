@@ -39,7 +39,6 @@ var (
 	attrSRPC        *rpc.Client
 	alsPrfDataDir   = "/usr/share/cgrates"
 	alsPrf          *engine.AttributeProfile
-	alsPrfDelay     int
 	alsPrfConfigDIR string //run tests for specific configuration
 )
 
@@ -95,7 +94,6 @@ func testAttributeSInitCfg(t *testing.T) {
 	}
 	alsPrfCfg.DataFolderPath = alsPrfDataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(alsPrfCfg)
-	alsPrfDelay = 1000
 }
 
 func testAttributeSInitDataDb(t *testing.T) {
@@ -113,7 +111,7 @@ func testAttributeSResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testAttributeSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(alsPrfCfgPath, alsPrfDelay); err != nil {
+	if _, err := engine.StopStartEngine(alsPrfCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }

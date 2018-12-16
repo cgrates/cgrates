@@ -38,7 +38,6 @@ var (
 	tSv1Rpc     *rpc.Client
 	tPrfl       *engine.ThresholdProfile
 	tSv1ConfDIR string //run tests for specific configuration
-	thdsDelay   int
 )
 
 var tEvs = []*utils.CGREvent{
@@ -189,7 +188,6 @@ func testV1TSLoadConfig(t *testing.T) {
 	if tSv1Cfg, err = config.NewCGRConfigFromFolder(tSv1CfgPath); err != nil {
 		t.Error(err)
 	}
-	thdsDelay = 1000
 }
 
 func testV1TSInitDataDb(t *testing.T) {
@@ -206,7 +204,7 @@ func testV1TSResetStorDb(t *testing.T) {
 }
 
 func testV1TSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(tSv1CfgPath, thdsDelay); err != nil {
+	if _, err := engine.StopStartEngine(tSv1CfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -321,7 +319,7 @@ func testV1TSGetThresholdsAfterProcess(t *testing.T) {
 
 func testV1TSGetThresholdsAfterRestart(t *testing.T) {
 	time.Sleep(time.Second)
-	if _, err := engine.StopStartEngine(tSv1CfgPath, thdsDelay); err != nil {
+	if _, err := engine.StopStartEngine(tSv1CfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 	var err error
@@ -392,7 +390,6 @@ func testV1TSUpdateThresholdProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // mongo is async
 	var reply *engine.ThresholdProfile
 	if err := tSv1Rpc.Call("ApierV1.GetThresholdProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &reply); err != nil {
@@ -492,7 +489,7 @@ func testV1TSMaxHits(t *testing.T) {
 }
 
 func testV1TSStopEngine(t *testing.T) {
-	if err := engine.KillEngine(thdsDelay); err != nil {
+	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}
 }

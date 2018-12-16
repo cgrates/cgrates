@@ -38,7 +38,6 @@ var (
 	rlsV1Rpc     *rpc.Client
 	rlsV1ConfDIR string //run tests for specific configuration
 	rlsConfig    *engine.ResourceProfile
-	resDelay     int
 )
 
 var sTestsRLSV1 = []func(t *testing.T){
@@ -87,8 +86,6 @@ func testV1RsLoadConfig(t *testing.T) {
 	if rlsV1Cfg, err = config.NewCGRConfigFromFolder(rlsV1CfgPath); err != nil {
 		t.Error(err)
 	}
-	resDelay = 1000
-
 }
 
 func testV1RsInitDataDb(t *testing.T) {
@@ -105,7 +102,7 @@ func testV1RsResetStorDb(t *testing.T) {
 }
 
 func testV1RsStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(rlsV1CfgPath, resDelay); err != nil {
+	if _, err := engine.StopStartEngine(rlsV1CfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -544,7 +541,7 @@ func testV1RsDBStore(t *testing.T) {
 			}
 		}
 	}
-	if _, err := engine.StopStartEngine(rlsV1CfgPath, resDelay); err != nil {
+	if _, err := engine.StopStartEngine(rlsV1CfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 	var err error
@@ -686,7 +683,7 @@ func testV1RsResourcePing(t *testing.T) {
 }
 
 func testV1RsStopEngine(t *testing.T) {
-	if err := engine.KillEngine(resDelay); err != nil {
+	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}
 }

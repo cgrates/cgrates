@@ -38,7 +38,6 @@ var (
 	splSv1Rpc     *rpc.Client
 	splPrf        *engine.SupplierProfile
 	splSv1ConfDIR string //run tests for specific configuration
-	splsDelay     int
 )
 
 var sTestsSupplierSV1 = []func(t *testing.T){
@@ -91,7 +90,6 @@ func testV1SplSLoadConfig(t *testing.T) {
 	if splSv1Cfg, err = config.NewCGRConfigFromFolder(splSv1CfgPath); err != nil {
 		t.Error(err)
 	}
-	splsDelay = 1000
 }
 
 func testV1SplSInitDataDb(t *testing.T) {
@@ -108,7 +106,7 @@ func testV1SplSResetStorDb(t *testing.T) {
 }
 
 func testV1SplSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(splSv1CfgPath, splsDelay); err != nil {
+	if _, err := engine.StopStartEngine(splSv1CfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -537,7 +535,6 @@ func testV1SplSPolulateStatsForQOS(t *testing.T) {
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
-	time.Sleep(100 * time.Millisecond)
 }
 
 func testV1SplSGetQOSSuppliers(t *testing.T) {

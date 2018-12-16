@@ -21,15 +21,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -37,7 +38,6 @@ var (
 	tpCfg       *config.CGRConfig
 	tpRPC       *rpc.Client
 	tpDataDir   = "/usr/share/cgrates"
-	tpDelay     int
 	tpConfigDIR string //run tests for specific configuration
 )
 
@@ -82,7 +82,6 @@ func testTPInitCfg(t *testing.T) {
 	}
 	tpCfg.DataFolderPath = tpDataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(tpCfg)
-	tpDelay = 1000
 }
 
 // Wipe out the cdr database
@@ -94,7 +93,7 @@ func testTPResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testTPStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(tpCfgPath, tpDelay); err != nil {
+	if _, err := engine.StopStartEngine(tpCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -146,7 +145,7 @@ func testTPExportTPToFolder(t *testing.T) {
 }
 
 func testTPKillEngine(t *testing.T) {
-	if err := engine.KillEngine(tpDelay); err != nil {
+	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}
 }

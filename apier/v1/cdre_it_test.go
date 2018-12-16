@@ -38,7 +38,6 @@ var (
 	cdreCfg       *config.CGRConfig
 	cdreRPC       *rpc.Client
 	cdreDataDir   = "/usr/share/cgrates"
-	cdreDelay     int
 	cdreConfigDIR string //run tests for specific configuration
 )
 
@@ -72,7 +71,6 @@ func testCDReInitCfg(t *testing.T) {
 	}
 	cdreCfg.DataFolderPath = alsPrfDataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(cdreCfg)
-	cdreDelay = 1000
 }
 
 func testCDReInitDataDb(t *testing.T) {
@@ -90,7 +88,7 @@ func testCDReResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testCDReStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(cdreCfgPath, cdreDelay); err != nil {
+	if _, err := engine.StopStartEngine(cdreCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }

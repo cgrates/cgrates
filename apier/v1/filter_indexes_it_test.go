@@ -112,7 +112,6 @@ func testV1FIdxLoadConfig(t *testing.T) {
 	if tSv1Cfg, err = config.NewCGRConfigFromFolder(tSv1CfgPath); err != nil {
 		t.Error(err)
 	}
-	thdsDelay = 1000
 }
 
 func testV1FIdxdxInitDataDb(t *testing.T) {
@@ -129,7 +128,7 @@ func testV1FIdxResetStorDb(t *testing.T) {
 }
 
 func testV1FIdxStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(tSv1CfgPath, thdsDelay); err != nil {
+	if _, err := engine.StopStartEngine(tSv1CfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
