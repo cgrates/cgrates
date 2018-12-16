@@ -23,19 +23,20 @@ import (
 )
 
 type DiameterAgentCfg struct {
-	Enabled           bool   // enables the diameter agent: <true|false>
-	ListenNet         string // sctp or tcp
-	Listen            string // address where to listen for diameter requests <x.y.z.y:1234>
-	DictionariesPath  string
-	SessionSConns     []*HaPoolConfig // connections towards SMG component
-	OriginHost        string
-	OriginRealm       string
-	VendorId          int
-	ProductName       string
-	MaxActiveReqs     int // limit the maximum number of requests processed
-	ASRTempalte       string
-	Templates         map[string][]*FCTemplate
-	RequestProcessors []*DARequestProcessor
+	Enabled             bool   // enables the diameter agent: <true|false>
+	ListenNet           string // sctp or tcp
+	Listen              string // address where to listen for diameter requests <x.y.z.y:1234>
+	ClientHostAddresses string // addresses used for HostIPAddresses on server side <x.y.z.y/x1.y1.z1.y1:1234>
+	DictionariesPath    string
+	SessionSConns       []*HaPoolConfig // connections towards SMG component
+	OriginHost          string
+	OriginRealm         string
+	VendorId            int
+	ProductName         string
+	MaxActiveReqs       int // limit the maximum number of requests processed
+	ASRTempalte         string
+	Templates           map[string][]*FCTemplate
+	RequestProcessors   []*DARequestProcessor
 }
 
 func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separator string) (err error) {
@@ -47,6 +48,9 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separa
 	}
 	if jsnCfg.Listen != nil {
 		da.Listen = *jsnCfg.Listen
+	}
+	if jsnCfg.Client_host_addressed != nil {
+		da.ClientHostAddresses = *jsnCfg.Client_host_addressed
 	}
 	if jsnCfg.Listen_net != nil {
 		da.ListenNet = *jsnCfg.Listen_net
