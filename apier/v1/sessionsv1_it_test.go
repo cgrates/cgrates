@@ -738,30 +738,30 @@ func TestSSv1ItForceUpdateSession(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 
-	argst := &sessions.V1TerminateSessionArgs{
-		TerminateSession: true,
-		ReleaseResources: true,
-		CGREvent: utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSSv1ItUpdateSession",
-			Event: map[string]interface{}{
-				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "TestSSv1It1",
-				utils.RequestType: utils.META_PREPAID,
-				utils.Account:     "1001",
-				utils.Subject:     "ANY2CNT",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       10 * time.Minute,
-			},
-		},
-	}
+	// argst := &sessions.V1TerminateSessionArgs{
+	// 	TerminateSession: true,
+	// 	ReleaseResources: true,
+	// 	CGREvent: utils.CGREvent{
+	// 		Tenant: "cgrates.org",
+	// 		ID:     "TestSSv1ItUpdateSession",
+	// 		Event: map[string]interface{}{
+	// 			utils.Tenant:      "cgrates.org",
+	// 			utils.Category:    "call",
+	// 			utils.ToR:         utils.VOICE,
+	// 			utils.OriginID:    "TestSSv1It1",
+	// 			utils.RequestType: utils.META_PREPAID,
+	// 			utils.Account:     "1001",
+	// 			utils.Subject:     "ANY2CNT",
+	// 			utils.Destination: "1002",
+	// 			utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+	// 			utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+	// 			utils.Usage:       10 * time.Minute,
+	// 		},
+	// 	},
+	// }
 	rplyt := ""
-	if err := sSv1BiRpc.Call(utils.SessionSv1TerminateSession,
-		argst, &rplyt); err != nil {
+	if err := sSv1BiRpc.Call(utils.SessionSv1ForceDisconnect,
+		map[string]string{utils.OriginID: "TestSSv1It1"}, &rplyt); err != nil {
 		t.Error(err)
 	}
 	if rplyt != utils.OK {
@@ -772,10 +772,9 @@ func TestSSv1ItForceUpdateSession(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	eAcntVal = 8.95
 	if err := sSApierRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
+	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal { // no monetary change bacause the sessin was terminated
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 }
