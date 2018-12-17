@@ -99,8 +99,10 @@ func (da *DiameterAgent) handlers() diam.Handler {
 			continue
 		}
 		for _, iAddr := range addrs {
-			settings.HostIPAddresses = append(settings.HostIPAddresses, datatype.Address(
-				strings.Split(iAddr.String(), utils.HDR_VAL_SEP)[0])) // address came in form x.y.z.t/24
+			if strings.Contains(da.cgrCfg.DiameterAgentCfg().Listen, strings.Split(iAddr.String(), utils.HDR_VAL_SEP)[0]) {
+				settings.HostIPAddresses = append(settings.HostIPAddresses, datatype.Address(
+					strings.Split(iAddr.String(), utils.HDR_VAL_SEP)[0])) // address came in form x.y.z.t/24
+			}
 		}
 	}
 
