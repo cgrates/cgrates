@@ -2434,6 +2434,33 @@ func (smg *SMGeneric) BiRPCv1SyncSessions(clnt rpcclient.RpcClientConnection,
 	return nil
 }
 
+func (smg *SMGeneric) BiRPCV1ForceDisconnect(clnt rpcclient.RpcClientConnection,
+	fltr map[string]string, reply *string) error {
+	for fldName, fldVal := range fltr {
+		if fldVal == "" {
+			fltr[fldName] = utils.META_NONE
+		}
+	}
+	aSessions, _, err := smg.asActiveSessions(fltr, false, false)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	} else if len(aSessions) == 0 {
+		return utils.ErrNotFound
+	}
+	for _, aSession := range aSessions {
+		sessions := smg.getSessions(aSession.CGRID, false)
+		if len(sessions[aSession.CGRID]) == 0 {
+			continue
+		}
+		terminator := &smgSessionTerminator{
+			ttl: time.Duration(0),
+		}
+		smg.ttlTerminate(sessions[aSession.CGRID][0], terminator)
+	}
+	*reply = utils.OK
+	return nil
+}
+
 func (smg *SMGeneric) BiRPCv1RegisterInternalBiJSONConn(clnt rpcclient.RpcClientConnection,
 	ignParam string, reply *string) error {
 	smg.intBiJSONConns = append(smg.intBiJSONConns, clnt)
