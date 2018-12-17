@@ -40,13 +40,20 @@ func NewDiameterClient(addr, originHost, originRealm string, vendorId int, produ
 		ProductName:      datatype.UTF8String(productName),
 		FirmwareRevision: datatype.Unsigned32(firmwareRev),
 	}
-	interfaces, _ := net.Interfaces()
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		return nil, err
+	}
 	for _, inter := range interfaces {
-		if addrs, err := inter.Addrs(); err == nil {
-			for _, iAddr := range addrs {
-				cfg.HostIPAddresses = append(cfg.HostIPAddresses, datatype.Address(
-					strings.Split(iAddr.String(), utils.HDR_VAL_SEP)[0])) // address came in form x.y.z.t/24
-			}
+		addrs, err := inter.Addrs()
+		if err != nil {
+			utils.Logger.Err(fmt.Sprintf("<DiameterClient> error: %+v, when taking address from interface: %+v",
+				err, inter.Name))
+			continue
+		}
+		for _, iAddr := range addrs {
+			cfg.HostIPAddresses = append(cfg.HostIPAddresses, datatype.Address(
+				strings.Split(iAddr.String(), utils.HDR_VAL_SEP)[0])) // address came in form x.y.z.t/24
 		}
 	}
 	dSM := sm.New(cfg)

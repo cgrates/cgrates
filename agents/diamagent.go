@@ -86,16 +86,24 @@ func (da *DiameterAgent) handlers() diam.Handler {
 		ProductName:      datatype.UTF8String(da.cgrCfg.DiameterAgentCfg().ProductName),
 		FirmwareRevision: datatype.Unsigned32(utils.DIAMETER_FIRMWARE_REVISION),
 	}
-	interfaces, _ := net.Interfaces()
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> scan for interfaces err: %s",
+			utils.DiameterAgent, err.Error()))
+	}
 	for _, inter := range interfaces {
-		fmt.Println(inter.Name, inter.HardwareAddr)
-		if addrs, err := inter.Addrs(); err == nil {
-			for _, iAddr := range addrs {
-				settings.HostIPAddresses = append(settings.HostIPAddresses, datatype.Address(
-					strings.Split(iAddr.String(), utils.HDR_VAL_SEP)[0])) // address came in form x.y.z.t/24
-			}
+		addrs, err := inter.Addrs()
+		if err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> error: %+v, when taking address from interface: %+v",
+				utils.DiameterAgent, err, inter.Name))
+			continue
+		}
+		for _, iAddr := range addrs {
+			settings.HostIPAddresses = append(settings.HostIPAddresses, datatype.Address(
+				strings.Split(iAddr.String(), utils.HDR_VAL_SEP)[0])) // address came in form x.y.z.t/24
 		}
 	}
+
 	dSM := sm.New(settings)
 
 	dSM.HandleFunc("ALL", da.handleMessage) // route all commands to one dispatcher
