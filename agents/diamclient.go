@@ -20,7 +20,7 @@ package agents
 
 import (
 	"fmt"
-	"strconv"
+	"net"
 	"strings"
 	"time"
 
@@ -29,7 +29,6 @@ import (
 	"github.com/fiorix/go-diameter/diam/avp"
 	"github.com/fiorix/go-diameter/diam/datatype"
 	"github.com/fiorix/go-diameter/diam/sm"
-	"github.com/ishidawataru/sctp"
 )
 
 func NewDiameterClient(addr, originHost, originRealm string, vendorId int, productName string,
@@ -41,16 +40,13 @@ func NewDiameterClient(addr, originHost, originRealm string, vendorId int, produ
 		ProductName:      datatype.UTF8String(productName),
 		FirmwareRevision: datatype.Unsigned32(firmwareRev),
 	}
-	if strings.Contains(network, utils.SCTPLow) {
-		addrs, err := sctp.ResolveSCTPAddr(network, addr)
-		if err != nil {
-			utils.Logger.Err(fmt.Sprintf("<DiameterClient> resolving sctp addresses: %v", err))
-			return nil, err
-		}
-		cfg.HostIPAddresses = make([]datatype.Address, len((addrs.IPAddrs)))
-		for i, addr := range addrs.IPAddrs {
-			cfg.HostIPAddresses[i] = datatype.Address(
-				utils.ConcatenatedKey(addr.String(), strconv.Itoa(addrs.Port)))
+	interfaces, _ := net.Interfaces()
+	for _, inter := range interfaces {
+		if addrs, err := inter.Addrs(); err == nil {
+			for _, iAddr := range addrs {
+				cfg.HostIPAddresses = append(cfg.HostIPAddresses, datatype.Address(
+					strings.Split(iAddr.String(), utils.HDR_VAL_SEP)[0])) // address came in form x.y.z.t/24
+			}
 		}
 	}
 	dSM := sm.New(cfg)
