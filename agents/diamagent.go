@@ -86,12 +86,11 @@ func (da *DiameterAgent) handlers() diam.Handler {
 		ProductName:      datatype.UTF8String(da.cgrCfg.DiameterAgentCfg().ProductName),
 		FirmwareRevision: datatype.Unsigned32(utils.DIAMETER_FIRMWARE_REVISION),
 	}
-	ipPort := strings.Split(da.cgrCfg.DiameterAgentCfg().Listen, utils.InInFieldSep)
-	if ipPort[0] == "" {
+	hosts := disectDiamListen(da.cgrCfg.DiameterAgentCfg().Listen)
+	if len(hosts) == 0 {
 		interfaces, err := net.Interfaces()
 		if err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> scan for interfaces err: %s",
-				utils.DiameterAgent, err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<%s> error : %v, when quering interfaces for address", utils.DiameterAgent, err))
 		}
 		for _, inter := range interfaces {
 			addrs, err := inter.Addrs()
@@ -101,14 +100,13 @@ func (da *DiameterAgent) handlers() diam.Handler {
 				continue
 			}
 			for _, iAddr := range addrs {
-				settings.HostIPAddresses = append(settings.HostIPAddresses, datatype.Address(
-					strings.Split(iAddr.String(), utils.HDR_VAL_SEP)[0])) // address came in form x.y.z.t/24
+				hosts = append(hosts, strings.Split(iAddr.String(), utils.HDR_VAL_SEP)[0]) // address came in form x.y.z.t/24
 			}
 		}
-	} else {
-		for _, ip := range strings.Split(ipPort[0], utils.HDR_VAL_SEP) {
-			settings.HostIPAddresses = append(settings.HostIPAddresses, datatype.Address(ip))
-		}
+	}
+	settings.HostIPAddresses = make([]datatype.Address, len(hosts))
+	for i, host := range hosts {
+		settings.HostIPAddresses[i] = datatype.Address(host)
 	}
 
 	dSM := sm.New(settings)

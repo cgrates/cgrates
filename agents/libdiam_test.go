@@ -338,3 +338,22 @@ func TestMessageSetAVPsWithPath5(t *testing.T) {
 		t.Errorf("Expecting: %+v \n, received: %+v \n", eMessage, m)
 	}
 }
+
+func TestdisectDiamListen(t *testing.T) {
+	expIPs := []string{"192.168.56.203", "192.168.57.203"}
+	rvc := disectDiamListen("192.168.56.203/192.168.57.203:3869")
+	if !reflect.DeepEqual(expIPs, rvc) {
+		t.Errorf("Expecting: %+v \n, received: %+v \n ", expIPs, rvc)
+	}
+	expIPs = []string{"192.168.56.203"}
+	rvc = disectDiamListen("192.168.56.203:3869")
+	if !reflect.DeepEqual(expIPs, rvc) {
+		t.Errorf("Expecting: %+v \n, received: %+v \n ", expIPs, rvc)
+	}
+	expIPs = []string{}
+	rvc = disectDiamListen(":3869")
+	if !reflect.DeepEqual(expIPs, rvc) {
+		t.Errorf("Expecting: %+v \n, received: %+v \n ", expIPs, rvc)
+	}
+
+}

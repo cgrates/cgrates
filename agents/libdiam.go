@@ -476,3 +476,16 @@ func diamBareErr(m *diam.Message, resCode uint32) (a *diam.Message) {
 	a.Header.CommandFlags = diam.ErrorFlag
 	return
 }
+
+func disectDiamListen(addrs string) (ipAddrs []string) {
+	ipPort := strings.Split(addrs, utils.InInFieldSep)
+	if ipPort[0] == "" {
+		return
+	}
+	ips := strings.Split(ipPort[0], utils.HDR_VAL_SEP)
+	ipAddrs = make([]string, len(ips))
+	for i, ip := range ips {
+		ipAddrs[i] = ip
+	}
+	return
+}
