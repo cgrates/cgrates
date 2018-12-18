@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"net"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -39,6 +40,32 @@ type MapEvent map[string]interface{}
 
 func (me MapEvent) String() string {
 	return utils.ToJSON(me)
+}
+
+func (me MapEvent) FieldAsInterface(fldPath []string) (interface{}, error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	fldIface, has := me[fldPath[0]]
+	if !has {
+		return nil, utils.ErrNotFound
+	}
+	return fldIface, nil
+}
+
+func (me MapEvent) FieldAsString(fldPath []string) (string, error) {
+	if len(fldPath) != 1 {
+		return "", utils.ErrNotFound
+	}
+	return me.GetString(fldPath[0])
+}
+
+func (me MapEvent) AsNavigableMap([]*config.FCTemplate) (*config.NavigableMap, error) {
+	return config.NewNavigableMap(me), nil
+}
+
+func (me MapEvent) RemoteHost() net.Addr {
+	return new(utils.LocalAddr)
 }
 
 func (me MapEvent) HasField(fldName string) (has bool) {
