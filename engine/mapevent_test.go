@@ -55,6 +55,62 @@ func TestMapEventNewMapEvent(t *testing.T) {
 	}
 }
 
+func TestMapEventFieldAsInterface(t *testing.T) {
+	data := config.DataProvider(mapEv)
+	if _, err := data.FieldAsInterface([]string{"first", "second"}); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if _, err := data.FieldAsInterface([]string{"first"}); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if rply, err := data.FieldAsInterface([]string{"test1"}); err != nil {
+		t.Error(err)
+	} else if rply != nil {
+		t.Errorf("Expecting %+v, received: %+v", nil, rply)
+	}
+	if rply, err := data.FieldAsInterface([]string{"test4"}); err != nil {
+		t.Error(err)
+	} else if expected := true; rply != expected {
+		t.Errorf("Expecting %+v, received: %+v", expected, rply)
+	}
+}
+
+func TestMapEventFieldAsString(t *testing.T) {
+	data := config.DataProvider(mapEv)
+	if _, err := data.FieldAsString([]string{"first", "second"}); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if _, err := data.FieldAsString([]string{"first"}); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if rply, err := data.FieldAsString([]string{"test1"}); err != nil {
+		t.Error(err)
+	} else if rply != "" {
+		t.Errorf("Expecting %+v, received: %+v", "", rply)
+	}
+	if rply, err := data.FieldAsString([]string{"test4"}); err != nil {
+		t.Error(err)
+	} else if expected := "true"; rply != expected {
+		t.Errorf("Expecting %+v, received: %+v", expected, rply)
+	}
+}
+
+func TestMapEventAsNavigableMap(t *testing.T) {
+	data := config.DataProvider(mapEv)
+	if rply, err := data.AsNavigableMap(nil); err != nil {
+		t.Error(err)
+	} else if expected := config.NewNavigableMap(mapEv); !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v, received: %+v", expected, rply)
+	}
+}
+
+func TestMapEventRemoteHost(t *testing.T) {
+	data := config.DataProvider(mapEv)
+	if rply, expected := data.RemoteHost(), new(utils.LocalAddr); !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v, received: %+v", expected, rply)
+	}
+}
+
 func TestMapEventString(t *testing.T) {
 	me := NewMapEvent(nil)
 	if rply, expected := me.String(), utils.ToJSON(me); !reflect.DeepEqual(expected, rply) {
