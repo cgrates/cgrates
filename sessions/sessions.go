@@ -2393,13 +2393,25 @@ func (smg *SMGeneric) syncSessions() {
 		rpcClnts = append(rpcClnts, conn)
 	}
 	queriedCGRIDs := make(utils.StringMap)
+	var err error
 	for _, conn := range rpcClnts {
 		var queriedSessionIDs []*SessionID
 		if conn != nil {
-			if err := conn.Call(utils.SessionSv1GetActiveSessionIDs,
-				"", &queriedSessionIDs); err != nil {
+			errChan := make(chan error)
+			go func() {
+				errChan <- conn.Call(utils.SessionSv1GetActiveSessionIDs,
+					"", &queriedSessionIDs)
+			}()
+			select {
+			case err = <-errChan:
+				if err != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> error quering session ids : %+v", utils.SessionS, err))
+					continue
+				}
+			case <-time.After(5 * time.Second):
 				utils.Logger.Warning(
-					fmt.Sprintf("<%s> error quering session ids : %+v", utils.SessionS, err))
+					fmt.Sprintf("<%s> timeout quering session ids ", utils.SessionS))
 				continue
 			}
 			for _, sessionID := range queriedSessionIDs {
