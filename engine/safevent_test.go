@@ -52,6 +52,62 @@ func TestSafEventMapEvent(t *testing.T) {
 	}
 }
 
+func TestSafEventFieldAsInterface(t *testing.T) {
+	data := config.DataProvider(safEv)
+	if _, err := data.FieldAsInterface([]string{"first", "second"}); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if _, err := data.FieldAsInterface([]string{"first"}); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if rply, err := data.FieldAsInterface([]string{"test1"}); err != nil {
+		t.Error(err)
+	} else if rply != nil {
+		t.Errorf("Expecting %+v, received: %+v", nil, rply)
+	}
+	if rply, err := data.FieldAsInterface([]string{"test4"}); err != nil {
+		t.Error(err)
+	} else if expected := true; rply != expected {
+		t.Errorf("Expecting %+v, received: %+v", expected, rply)
+	}
+}
+
+func TestSafEventFieldAsString(t *testing.T) {
+	data := config.DataProvider(safEv)
+	if _, err := data.FieldAsString([]string{"first", "second"}); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if _, err := data.FieldAsString([]string{"first"}); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if rply, err := data.FieldAsString([]string{"test1"}); err != nil {
+		t.Error(err)
+	} else if rply != "" {
+		t.Errorf("Expecting %+v, received: %+v", "", rply)
+	}
+	if rply, err := data.FieldAsString([]string{"test4"}); err != nil {
+		t.Error(err)
+	} else if expected := "true"; rply != expected {
+		t.Errorf("Expecting %+v, received: %+v", expected, rply)
+	}
+}
+
+func TestSafEventAsNavigableMap(t *testing.T) {
+	data := config.DataProvider(safEv)
+	if rply, err := data.AsNavigableMap(nil); err != nil {
+		t.Error(err)
+	} else if expected := config.NewNavigableMap(sMap); !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v, received: %+v", expected, rply)
+	}
+}
+
+func TestSafEventRemoteHost(t *testing.T) {
+	data := config.DataProvider(safEv)
+	if rply, expected := data.RemoteHost(), new(utils.LocalAddr); !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v, received: %+v", expected, rply)
+	}
+}
+
 func TestSafEventClone(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		t.Run("clone", func(t *testing.T) {
