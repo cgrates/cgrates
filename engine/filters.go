@@ -35,6 +35,7 @@ const (
 	MetaPrefix         = "*prefix"
 	MetaSuffix         = "*suffix"
 	MetaEmpty          = "*empty"
+	MetaExists         = "*exists"
 	MetaTimings        = "*timings"
 	MetaRSR            = "*rsr"
 	MetaStatS          = "*stats"
@@ -162,12 +163,12 @@ func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error)
 		negative = true
 	}
 	if !utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaSuffix,
-		MetaTimings, MetaRSR, MetaStatS, MetaDestinations, MetaEmpty,
+		MetaTimings, MetaRSR, MetaStatS, MetaDestinations, MetaEmpty, MetaExists,
 		MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("Unsupported filter Type: %s", rfType)
 	}
 	if fieldName == "" && utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaSuffix,
-		MetaTimings, MetaDestinations, MetaLessThan, MetaEmpty,
+		MetaTimings, MetaDestinations, MetaLessThan, MetaEmpty, MetaExists,
 		MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("FieldName is mandatory for Type: %s", rfType)
 	}
@@ -251,6 +252,8 @@ func (fltr *FilterRule) Pass(dP config.DataProvider, rpcClnt rpcclient.RpcClient
 		result, err = fltr.passString(dP)
 	case MetaEmpty:
 		result, err = fltr.passEmpty(dP)
+	case MetaExists:
+		result, err = fltr.passExists(dP)
 	case MetaPrefix:
 		result, err = fltr.passStringPrefix(dP)
 	case MetaSuffix:
@@ -288,6 +291,17 @@ func (fltr *FilterRule) passString(dP config.DataProvider) (bool, error) {
 		}
 	}
 	return false, nil
+}
+
+func (fltr *FilterRule) passExists(dP config.DataProvider) (bool, error) {
+	_, err := dP.FieldAsInterface(strings.Split(fltr.FieldName, utils.NestingSep))
+	if err != nil {
+		if err == utils.ErrNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }
 
 func (fltr *FilterRule) passEmpty(dP config.DataProvider) (bool, error) {

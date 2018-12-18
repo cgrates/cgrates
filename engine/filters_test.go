@@ -114,6 +114,58 @@ func TestFilterPassEmpty(t *testing.T) {
 	}
 }
 
+func TestFilterPassExists(t *testing.T) {
+	cd := &CallDescriptor{
+		Direction:     "*out",
+		Category:      "",
+		Tenant:        "cgrates.org",
+		Subject:       "dan",
+		Destination:   "+4986517174963",
+		TimeStart:     time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC),
+		DurationIndex: 132 * time.Second,
+		ExtraFields:   map[string]string{"navigation": "off"},
+	}
+	rf := &FilterRule{Type: MetaExists, FieldName: "Category", Values: []string{}}
+	if passes, err := rf.passExists(cd); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("Not passes filter")
+	}
+	rf = &FilterRule{Type: MetaExists, FieldName: "Direction", Values: []string{}}
+	if passes, err := rf.passExists(cd); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("Not passes filter")
+	}
+	rf = &FilterRule{Type: MetaExists, FieldName: "ExtraFields1", Values: []string{}}
+	if passes, err := rf.passExists(cd); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("Filter passes")
+	}
+	cd.ExtraFields = map[string]string{}
+	rf = &FilterRule{Type: MetaExists, FieldName: "ExtraFields", Values: []string{}}
+	if passes, err := rf.passExists(cd); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("Not passes filter")
+	}
+	//not
+	rf = &FilterRule{Type: "*notexists", FieldName: "Direction", Values: []string{}}
+	if passes, err := rf.Pass(cd, nil); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("Filter passes")
+	}
+	rf = &FilterRule{Type: "*notexists", FieldName: "Category1", Values: []string{}}
+	if passes, err := rf.Pass(cd, nil); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("Not passes filter")
+	}
+}
+
 func TestFilterPassStringPrefix(t *testing.T) {
 	cd := &CallDescriptor{
 		Direction:     "*out",
@@ -409,6 +461,14 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
+	rf, err = NewFilterRule(MetaExists, "MetaExists", []string{})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	erf = &FilterRule{Type: MetaExists, FieldName: "MetaExists", Values: []string{}}
+	if !reflect.DeepEqual(erf, rf) {
+		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
+	}
 	rf, err = NewFilterRule(MetaPrefix, "MetaPrefix", []string{"stringPrefix"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -655,6 +715,18 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		} else if !pass {
 			t.Errorf("For %s expecting: %+v, received: %+v", key, true, pass)
 		}
+	}
+	if pass, err := filterS.Pass("cgrates.org", []string{"*exists:" + "NewKey" + ":"},
+		config.NewNavigableMap(failEvent)); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("For NewKey expecting: %+v, received: %+v", false, pass)
+	}
+	if pass, err := filterS.Pass("cgrates.org", []string{"*notexists:" + "NewKey" + ":"},
+		config.NewNavigableMap(failEvent)); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("For NewKey expecting: %+v, received: %+v", true, pass)
 	}
 }
 
