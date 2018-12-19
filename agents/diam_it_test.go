@@ -22,6 +22,7 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
+	"strings"
 	"testing"
 	"time"
 
@@ -644,6 +645,10 @@ func testDiamItCCRTerminate(t *testing.T) {
 	} else {
 		if cdrs[0].Usage != 550*time.Second {
 			t.Errorf("Unexpected Usage CDR: %+v", cdrs[0])
+		}
+
+		if !strings.Contains(cdrs[0].OriginHost, "127.0.0.1") {
+			t.Errorf("Unexpected OriginHost CDR: %+v", cdrs[0])
 		}
 	}
 }
