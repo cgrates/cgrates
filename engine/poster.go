@@ -249,10 +249,10 @@ func (pstr *AMQPPoster) Post(chn *amqp.Channel, contentType string, content []by
 	}
 	for i := 0; i < pstr.attempts; i++ {
 		if err = chn.Publish(
-			pstr.exchange, // exchange
-			pstr.queueID,  // routing key
-			false,         // mandatory
-			false,         // immediate
+			pstr.exchange,   // exchange
+			pstr.routingKey, // routing key
+			false,           // mandatory
+			false,           // immediate
 			amqp.Publishing{
 				DeliveryMode: amqp.Persistent,
 				ContentType:  contentType,
@@ -302,7 +302,7 @@ func (pstr *AMQPPoster) NewPostChannel() (postChan *amqp.Channel, err error) {
 	}
 
 	if pstr.exchange != "" {
-		err = postChan.ExchangeDeclare(
+		if err = postChan.ExchangeDeclare(
 			pstr.exchange,     // name
 			pstr.exchangeType, // type
 			true,              // durable
@@ -310,33 +310,30 @@ func (pstr *AMQPPoster) NewPostChannel() (postChan *amqp.Channel, err error) {
 			false,             // internal
 			false,             // no-wait
 			nil,               // args
-		)
-		if err != nil {
+		); err != nil {
 			return
 		}
 	}
 
-	_, err = postChan.QueueDeclare(
+	if _, err = postChan.QueueDeclare(
 		pstr.queueID, // name
 		true,         // durable
 		false,        // auto-delete
 		false,        // exclusive
 		false,        // no-wait
 		nil,          // args
-	)
-	if err != nil {
+	); err != nil {
 		return
 	}
 
 	if pstr.exchange != "" {
-		err = postChan.QueueBind(
-			pstr.queueID,  // queue
-			routingKey,    // key
-			pstr.exchange, // exchange
-			false,         // no-wait
-			nil,           // args
-		)
-		if err != nil {
+		if err = postChan.QueueBind(
+			pstr.queueID,    // queue
+			pstr.routingKey, // key
+			pstr.exchange,   // exchange
+			false,           // no-wait
+			nil,             // args
+		); err != nil {
 			return
 		}
 	}
