@@ -2409,7 +2409,7 @@ func (smg *SMGeneric) syncSessions() {
 						fmt.Sprintf("<%s> error quering session ids : %+v", utils.SessionS, err))
 					continue
 				}
-			case <-time.After(5 * time.Second):
+			case <-time.After(smg.cgrCfg.GeneralCfg().ReplyTimeout):
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> timeout quering session ids ", utils.SessionS))
 				continue
