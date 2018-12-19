@@ -193,6 +193,10 @@ func TestAgReqParseFieldDiameter(t *testing.T) {
 			FieldId: "MandatoryTrue", Type: utils.META_COMPOSED,
 			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryTrue", true, utils.INFIELD_SEP),
 			Mandatory: true},
+		&config.FCTemplate{Tag: "Session-Id", Filters: []string{},
+			FieldId: "Session-Id", Type: utils.META_COMPOSED,
+			Value:     config.NewRSRParsersMustCompile("~*req.Session-Id", true, utils.INFIELD_SEP),
+			Mandatory: true},
 	}
 	expected := ""
 	if out, err := agReq.ParseField(tplFlds[0]); err != nil {
@@ -203,6 +207,12 @@ func TestAgReqParseFieldDiameter(t *testing.T) {
 	if _, err := agReq.ParseField(tplFlds[1]); err == nil ||
 		err.Error() != "Empty source value for fieldID: <MandatoryTrue>" {
 		t.Error(err)
+	}
+	expected = "simuhuawei;1449573472;00002"
+	if out, err := agReq.ParseField(tplFlds[2]); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(out, expected) {
+		t.Errorf("expecting: <%+v>, received: <%+v>", expected, out)
 	}
 }
 
@@ -354,5 +364,47 @@ func TestAgReqParseFieldHttpXml(t *testing.T) {
 		err.Error() != "Empty source value for fieldID: <MandatoryTrue>" {
 		t.Error(err)
 	}
+}
 
+func TestAgReqEmptyFilter(t *testing.T) {
+	data, _ := engine.NewMapStorage()
+	dm := engine.NewDataManager(data)
+	cfg, _ := config.NewDefaultCGRConfig()
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	agReq := newAgentRequest(nil, nil, nil, nil, "cgrates.org", "", filterS)
+	// populate request, emulating the way will be done in HTTPAgent
+	agReq.CGRRequest.Set([]string{utils.CGRID},
+		utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+		false, false)
+	agReq.CGRRequest.Set([]string{utils.Account}, "1001", false, false)
+	agReq.CGRRequest.Set([]string{utils.Destination}, "1002", false, false)
+
+	tplFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "Tenant", Filters: []string{},
+			FieldId: utils.Tenant, Type: utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
+
+		&config.FCTemplate{Tag: "Account", Filters: []string{},
+			FieldId: utils.Account, Type: utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "Destination", Filters: []string{},
+			FieldId: utils.Destination, Type: utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
+	}
+	eMp := config.NewNavigableMap(nil)
+	eMp.Set([]string{utils.Tenant}, []*config.NMItem{
+		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
+			Config: tplFlds[0]}}, false, true)
+	eMp.Set([]string{utils.Account}, []*config.NMItem{
+		&config.NMItem{Data: "1001", Path: []string{utils.Account},
+			Config: tplFlds[1]}}, false, true)
+	eMp.Set([]string{utils.Destination}, []*config.NMItem{
+		&config.NMItem{Data: "1002", Path: []string{utils.Destination},
+			Config: tplFlds[2]}}, false, true)
+
+	if mpOut, err := agReq.AsNavigableMap(tplFlds); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eMp, mpOut) {
+		t.Errorf("expecting: %+v, received: %+v", eMp, mpOut)
+	}
 }
