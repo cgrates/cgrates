@@ -81,7 +81,6 @@ func TestSMGBiRPCStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func TestSMGBiRPCApierRpcConn(t *testing.T) {
-	time.Sleep(time.Duration(1 * time.Second))
 	clntHandlers := map[string]interface{}{"SessionSv1.DisconnectSession": handleDisconnectSession}
 	dummyClnt, err := utils.NewBiJSONrpcClient(smgBiRPCCfg.SessionSCfg().ListenBijson,
 		clntHandlers)
