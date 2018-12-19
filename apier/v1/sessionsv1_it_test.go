@@ -677,7 +677,7 @@ func TestSSv1ItForceUpdateSession(t *testing.T) {
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "TestSSv1It1",
+				utils.OriginID:    "TestSSv1It",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1001",
 				utils.Subject:     "ANY2CNT",
@@ -701,7 +701,7 @@ func TestSSv1ItForceUpdateSession(t *testing.T) {
 			ID:      "TestSSv1ItUpdateSession",
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
-				utils.CGRID:       "5668666d6b8e44eb949042f25ce0796ec3592ff9",
+				utils.CGRID:       "70876773b294f0e1476065f8d18bb9ec6bcb3d5f",
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
@@ -709,7 +709,7 @@ func TestSSv1ItForceUpdateSession(t *testing.T) {
 				utils.Subject:     "ANY2CNT",
 				utils.Destination: "1002",
 				"OfficeGroup":     "Marketing",
-				utils.OriginID:    "TestSSv1It1",
+				utils.OriginID:    "TestSSv1It",
 				utils.RequestType: utils.META_PREPAID,
 				utils.SetupTime:   "2018-01-07T17:00:00Z",
 				utils.AnswerTime:  "2018-01-07T17:00:10Z",
@@ -739,7 +739,7 @@ func TestSSv1ItForceUpdateSession(t *testing.T) {
 	}
 	rplyt := ""
 	if err := sSv1BiRpc.Call(utils.SessionSv1ForceDisconnect,
-		map[string]string{utils.OriginID: "TestSSv1It1"}, &rplyt); err != nil {
+		map[string]string{utils.OriginID: "TestSSv1It"}, &rplyt); err != nil {
 		t.Error(err)
 	} else if rplyt != utils.OK {
 		t.Errorf("Unexpected reply: %s", rplyt)
@@ -753,6 +753,29 @@ func TestSSv1ItForceUpdateSession(t *testing.T) {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal { // no monetary change bacause the sessin was terminated
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+	time.Sleep(100 * time.Millisecond)
+	var cdrs []*engine.CDR
+	argsCDR := utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"}, OriginIDs: []string{"TestSSv1It"}}
+	if err := sSApierRpc.Call(utils.CdrsV1GetCDRs, argsCDR, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs), "\n", utils.ToJSON(cdrs))
+	} else {
+		if cdrs[0].Cost != 0.099 {
+			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+		}
+	}
+	argsCDR = utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"},
+		OriginIDs: []string{"TestSSv1It"}}
+	if err := sSApierRpc.Call(utils.CdrsV1GetCDRs, argsCDR, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Cost != 0.051 {
+			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+		}
 	}
 }
 
