@@ -36,6 +36,17 @@ import (
 	"github.com/streadway/amqp"
 )
 
+var AMQPQuery = []string{"cacertfile", "certfile", "keyfile", "verify", "server_name_indication", "auth_mechanism", "heartbeat", "connection_timeout", "channel_max"}
+
+const (
+	defaultQueueID      = "cgrates_cdrs"
+	defaultExchangeType = "direct"
+	queueID             = "queue_id"
+	exchange            = "exchange"
+	exchangeType        = "exchange_type"
+	routingKey          = "routing_key"
+)
+
 func init() {
 	AMQPPostersCache = &AMQPCachedPosters{cache: make(map[string]*AMQPPoster)} // Initialize the cache for amqpPosters
 }
@@ -161,27 +172,57 @@ func (pc *AMQPCachedPosters) GetAMQPPoster(dialURL string, attempts int,
 
 // "amqp://guest:guest@localhost:5672/?queueID=cgrates_cdrs"
 func NewAMQPPoster(dialURL string, attempts int, fallbackFileDir string) (*AMQPPoster, error) {
-	u, err := url.Parse(dialURL)
-	if err != nil {
+	amqp := &AMQPPoster{
+		attempts:        attempts,
+		fallbackFileDir: fallbackFileDir,
+	}
+	if err := amqp.parseURL(dialURL); err != nil {
 		return nil, err
 	}
-	qry := u.Query()
-	posterQueueID := "cgrates_cdrs"
-	if vals, has := qry["queue_id"]; has && len(vals) != 0 {
-		posterQueueID = vals[0]
-	}
-	dialURL = strings.Split(dialURL, "?")[0] // Take query params out of dialURL
-	return &AMQPPoster{dialURL: dialURL, posterQueueID: posterQueueID,
-		attempts: attempts, fallbackFileDir: fallbackFileDir}, nil
+	return amqp, nil
 }
 
 type AMQPPoster struct {
 	dialURL         string
-	posterQueueID   string // identifier of the CDR queue where we publish
+	queueID         string // identifier of the CDR queue where we publish
+	exchange        string
+	exchangeType    string
+	routingKey      string
 	attempts        int
 	fallbackFileDir string
 	sync.Mutex      // protect connection
 	conn            *amqp.Connection
+}
+
+func (pstr *AMQPPoster) parseURL(dialURL string) error {
+	u, err := url.Parse(dialURL)
+	if err != nil {
+		return err
+	}
+	qry := u.Query()
+	q := url.Values{}
+	for _, key := range AMQPQuery {
+		if vals, has := qry[key]; has && len(vals) != 0 {
+			q.Add(key, vals[0])
+		}
+	}
+	pstr.dialURL = strings.Split(dialURL, "?")[0] + "?" + q.Encode()
+	pstr.queueID = defaultQueueID
+	pstr.routingKey = defaultQueueID
+	if vals, has := qry[queueID]; has && len(vals) != 0 {
+		pstr.queueID = vals[0]
+	}
+	if vals, has := qry[routingKey]; has && len(vals) != 0 {
+		pstr.routingKey = vals[0]
+	}
+	if vals, has := qry[exchange]; has && len(vals) != 0 {
+		pstr.exchange = vals[0]
+		pstr.exchangeType = defaultExchangeType
+	}
+	if vals, has := qry[exchangeType]; has && len(vals) != 0 {
+		pstr.exchangeType = vals[0]
+	}
+	return nil
 }
 
 // Post is the method being called when we need to post anything in the queue
@@ -208,10 +249,10 @@ func (pstr *AMQPPoster) Post(chn *amqp.Channel, contentType string, content []by
 	}
 	for i := 0; i < pstr.attempts; i++ {
 		if err = chn.Publish(
-			"",                 // exchange
-			pstr.posterQueueID, // routing key
-			false,              // mandatory
-			false,              // immediate
+			pstr.exchange, // exchange
+			pstr.queueID,  // routing key
+			false,         // mandatory
+			false,         // immediate
 			amqp.Publishing{
 				DeliveryMode: amqp.Persistent,
 				ContentType:  contentType,
@@ -259,7 +300,46 @@ func (pstr *AMQPPoster) NewPostChannel() (postChan *amqp.Channel, err error) {
 	if postChan, err = pstr.conn.Channel(); err != nil {
 		return
 	}
-	_, err = postChan.QueueDeclare(pstr.posterQueueID, true, false, false, false, nil)
+
+	if pstr.exchange != "" {
+		err = postChan.ExchangeDeclare(
+			pstr.exchange,     // name
+			pstr.exchangeType, // type
+			true,              // durable
+			false,             // audo-delete
+			false,             // internal
+			false,             // no-wait
+			nil,               // args
+		)
+		if err != nil {
+			return
+		}
+	}
+
+	_, err = postChan.QueueDeclare(
+		pstr.queueID, // name
+		true,         // durable
+		false,        // auto-delete
+		false,        // exclusive
+		false,        // no-wait
+		nil,          // args
+	)
+	if err != nil {
+		return
+	}
+
+	if pstr.exchange != "" {
+		err = postChan.QueueBind(
+			pstr.queueID,  // queue
+			routingKey,    // key
+			pstr.exchange, // exchange
+			false,         // no-wait
+			nil,           // args
+		)
+		if err != nil {
+			return
+		}
+	}
 	return
 }
 
