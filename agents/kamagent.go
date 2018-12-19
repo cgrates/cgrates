@@ -258,22 +258,12 @@ func (ka *KamailioAgent) V1DisconnectSession(args utils.AttrDisconnectSession, r
 
 func (ka *KamailioAgent) V1GetActiveSessionIDs(ignParam string, sessionIDs *[]*sessions.SessionID) (err error) {
 	for _, evapi := range ka.conns {
-		errChan := make(chan error)
-		go func() {
-			kamEv, _ := json.Marshal(map[string]string{utils.Event: CGR_DLG_LIST})
-			errChan <- evapi.Send(string(kamEv))
-		}()
-		select {
-		case err = <-errChan:
-			if err != nil {
-				utils.Logger.Err(fmt.Sprintf("<%s> failed sending event, error %s",
-					utils.KamailioAgent, err.Error()))
-				return
-			}
-		case <-time.After(5 * time.Second):
-			return errors.New("timeout sending dialog list")
+		kamEv, _ := json.Marshal(map[string]string{utils.Event: CGR_DLG_LIST})
+		if err = evapi.Send(string(kamEv)); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> failed sending event, error %s",
+				utils.KamailioAgent, err.Error()))
+			return
 		}
-
 	}
 	select {
 	case *sessionIDs = <-ka.activeSessionIDs:

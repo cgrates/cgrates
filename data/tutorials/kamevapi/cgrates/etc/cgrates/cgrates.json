@@ -6,6 +6,7 @@
 "general": {
     "log_level": 7,
 	"node_id":"CGRKamailio",
+	"reply_timeout": "5s",
 },
 
 
