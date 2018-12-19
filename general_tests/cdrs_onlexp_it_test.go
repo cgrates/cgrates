@@ -84,6 +84,32 @@ func TestCDRsOnExpStartSlaveEngine(t *testing.T) {
 	}
 }
 
+// Create Queues dor amq
+
+func TestCDRsOnExpAMQPQueuesCreation(t *testing.T) {
+	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ch, err := conn.Channel()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ch.Close()
+
+	if err = ch.ExchangeDeclare("exchangename", "fanout", true, false, false, false, nil); err != nil {
+		return
+	}
+	q1, err := ch.QueueDeclare("queue1", true, false, false, false, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = ch.QueueBind(q1.Name, "cgr_cdrs", "exchangename", false, nil); err != nil {
+		t.Fatal(err)
+	}
+}
+
 // Connect rpc client to rater
 func TestCDRsOnExpHttpCdrReplication(t *testing.T) {
 	cdrsMasterRpc, err = rpcclient.NewRpcClient("tcp", cdrsMasterCfg.ListenCfg().RPCJSONListen, false, "", "", "", 1, 1,
@@ -171,8 +197,28 @@ func TestCDRsOnExpAMQPReplication(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	q1, err := ch.QueueDeclare("queue1", true, false, false, false, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	msgs, err := ch.Consume(q.Name, "", true, false, false, false, nil)
 	if err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case d := <-msgs:
+		var rcvCDR map[string]string
+		if err := json.Unmarshal(d.Body, &rcvCDR); err != nil {
+			t.Error(err)
+		}
+		if rcvCDR[utils.CGRID] != utils.Sha1("httpjsonrpc1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()) {
+			t.Errorf("Unexpected CDR received: %+v", rcvCDR)
+		}
+	case <-time.After(time.Duration(100 * time.Millisecond)):
+		t.Error("No message received from RabbitMQ")
+	}
+	if msgs, err = ch.Consume(q1.Name, "consumer", true, false, false, false, nil); err != nil {
 		t.Fatal(err)
 	}
 	select {
@@ -230,9 +276,6 @@ func TestCDRsOnExpAMQPReplication(t *testing.T) {
 	}
 	defer ch.Close()
 
-	if q, err = ch.QueueDeclare("cgrates_cdrs", true, false, false, false, nil); err != nil {
-		t.Fatal(err)
-	}
 	if msgs, err = ch.Consume(q.Name, "", true, false, false, false, nil); err != nil {
 		t.Fatal(err)
 	}
@@ -244,6 +287,22 @@ func TestCDRsOnExpAMQPReplication(t *testing.T) {
 		}
 		if rcvCDR[utils.CGRID] != testCdr.CGRID {
 			t.Errorf("Unexpected CDR received: %+v", rcvCDR)
+		}
+	case <-time.After(150 * time.Millisecond):
+		t.Error("No message received from RabbitMQ")
+	}
+
+	if msgs, err = ch.Consume(q1.Name, "", true, false, false, false, nil); err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case d := <-msgs:
+		var rcvCDR map[string]string
+		if err := json.Unmarshal(d.Body, &rcvCDR); err != nil {
+			t.Error(err)
+		}
+		if rcvCDR[utils.CGRID] != testCdr.CGRID {
+			t.Errorf("Unexpected CDR received: %s expeced: %s", utils.ToJSON(rcvCDR), utils.ToJSON(testCdr))
 		}
 	case <-time.After(150 * time.Millisecond):
 		t.Error("No message received from RabbitMQ")
