@@ -103,7 +103,7 @@ func TestSafEventAsNavigableMap(t *testing.T) {
 
 func TestSafEventRemoteHost(t *testing.T) {
 	data := config.DataProvider(safEv)
-	if rply, expected := data.RemoteHost(), new(utils.LocalAddr); !reflect.DeepEqual(expected, rply) {
+	if rply, expected := data.RemoteHost(), utils.LocalAddr(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
 }
