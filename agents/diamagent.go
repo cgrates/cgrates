@@ -209,7 +209,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		writeOnConn(c, diamErr)
 		return
 	}
-	a, err := diamAnswer(m, diam.Success, false,
+	a, err := diamAnswer(m, 0, false,
 		rply, da.cgrCfg.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		utils.Logger.Warning(

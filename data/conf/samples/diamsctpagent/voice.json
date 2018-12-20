@@ -29,6 +29,7 @@
 			"reply_fields":[
 				{"tag": "ResultCode",  "filters": ["*rsr::~*cgrep.Error(!^$)"], 
 					"field_id": "Result-Code", "type": "*constant", "value": "5030", "blocker": true},
+				{"tag": "ResultCode", "field_id": "Result-Code", "type": "*constant", "value": "2001"},
 				{"tag": "GrantedUnits", "field_id": "Granted-Service-Unit.CC-Time", "type": "*composed", 
 					"value": "~*cgrep.MaxUsage{*duration_seconds}", "mandatory": true},
 			],
@@ -61,6 +62,7 @@
 			"reply_fields":[
 				{"tag": "ResultCode",  "filters": ["*rsr::~*cgrep.Error(!^$)"], 
 					"field_id": "Result-Code", "type": "*constant", "value": "5030", "blocker": true},
+				{"tag": "ResultCode", "field_id": "Result-Code", "type": "*constant", "value": "2001"},
 				{"tag": "GrantedUnits", "field_id": "Granted-Service-Unit.CC-Time", "type": "*composed", 
 					"value": "~*cgrep.MaxUsage{*duration_seconds}", "mandatory": true},
 			],
@@ -88,6 +90,11 @@
 					"value": "~*req.Used-Service-Unit.CC-Time:s/(.*)/${1}s/", "mandatory": true},
 				{"tag": "SubscriberID", "field_id": "SubscriberId", "type": "*composed", 
 					"value": "~*req.Subscription-Id.Subscription-Id-Data", "mandatory": true},
+			],
+			"reply_fields":[
+				{"tag": "ResultCode",  "filters": ["*rsr::~*cgrep.Error(!^$)"], 
+					"field_id": "Result-Code", "type": "*constant", "value": "5030", "blocker": true},
+				{"tag": "ResultCode", "field_id": "Result-Code", "type": "*constant", "value": "2001"},
 			],
 		},
 	],

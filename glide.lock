@@ -22,7 +22,7 @@ imports:
 - name: github.com/cgrates/rpcclient
   version: 7316bff37a2b8692fbadd57f9c9cda070cc33081
 - name: github.com/fiorix/go-diameter
-  version: 16028e641c19a8dd67509053bc558d389258ff6d
+  version: abaf0a5b14a05f3a4a75b8fe23066ab1f898aeac
   subpackages:
   - diam
   - diam/avp
