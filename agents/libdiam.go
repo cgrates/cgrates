@@ -311,7 +311,7 @@ func (dP *diameterDP) FieldAsString(fldPath []string) (data string, err error) {
 
 // RemoteHost is part of engine.DataProvider interface
 func (dP *diameterDP) RemoteHost() net.Addr {
-	return dP.c.RemoteAddr()
+	return utils.NewNetAddr(dP.c.RemoteAddr().Network(), dP.c.RemoteAddr().String())
 }
 
 // FieldAsInterface is part of engine.DataProvider interface

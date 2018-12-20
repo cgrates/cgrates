@@ -65,7 +65,7 @@ func (me MapEvent) AsNavigableMap([]*config.FCTemplate) (*config.NavigableMap, e
 }
 
 func (me MapEvent) RemoteHost() net.Addr {
-	return new(utils.LocalAddr)
+	return utils.LocalAddr()
 }
 
 func (me MapEvent) HasField(fldName string) (has bool) {

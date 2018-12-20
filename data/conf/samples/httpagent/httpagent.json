@@ -65,6 +65,8 @@
 						"value": "*pseudoprepaid", "mandatory": true},	
 					{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 
 						"value": "~*req.CDR_ID", "mandatory": true},
+					{"tag": "OriginHost", "field_id": "OriginHost", "type": "*remote_host", 
+						"mandatory": true},
 					{"tag": "Account", "field_id": "Account", "type": "*composed", 
 						"value": "~*req.msisdn", "mandatory": true},
 					{"tag": "Destination", "field_id": "Destination", "type": "*composed", 

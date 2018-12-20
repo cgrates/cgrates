@@ -193,5 +193,5 @@ func (pk *radiusDP) AsNavigableMap([]*config.FCTemplate) (
 
 // RemoteHost is part of engine.DataProvider interface
 func (pk *radiusDP) RemoteHost() net.Addr {
-	return pk.req.RemoteAddr()
+	return utils.NewNetAddr(pk.req.RemoteAddr().Network(), pk.req.RemoteAddr().String())
 }
