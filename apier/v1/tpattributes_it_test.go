@@ -21,14 +21,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -106,7 +107,7 @@ func testTPAlsPrfStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testTPAlsPrfRPCConn(t *testing.T) {
 	var err error
-	tpAlsPrfRPC, err = jsonrpc.Dial("tcp", tpAlsPrfCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tpAlsPrfRPC, err = jsonrpc.Dial("tcp", tpAlsPrfCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -114,7 +115,8 @@ func testTPAlsPrfRPCConn(t *testing.T) {
 
 func testTPAlsPrfGetTPAlsPrfBeforeSet(t *testing.T) {
 	var reply *utils.TPAttributeProfile
-	if err := tpAlsPrfRPC.Call("ApierV1.GetTPAttributeProfile", &AttrGetTPAttributeProfile{TPid: "TP1", ID: "ALS1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpAlsPrfRPC.Call("ApierV1.GetTPAttributeProfile",
+		&AttrGetTPAttributeProfile{TPid: "TP1", ID: "ALS1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -150,7 +152,8 @@ func testTPAlsPrfSetTPAlsPrf(t *testing.T) {
 
 func testTPAlsPrfGetTPAlsPrfAfterSet(t *testing.T) {
 	var reply *utils.TPAttributeProfile
-	if err := tpAlsPrfRPC.Call("ApierV1.GetTPAttributeProfile", &AttrGetTPAttributeProfile{TPid: "TP1", ID: "Attr1"}, &reply); err != nil {
+	if err := tpAlsPrfRPC.Call("ApierV1.GetTPAttributeProfile",
+		&AttrGetTPAttributeProfile{TPid: "TP1", ID: "Attr1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpAlsPrf, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", tpAlsPrf, reply)
@@ -160,7 +163,8 @@ func testTPAlsPrfGetTPAlsPrfAfterSet(t *testing.T) {
 func testTPAlsPrfGetTPAlsPrfIDs(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"Attr1"}
-	if err := tpAlsPrfRPC.Call("ApierV1.GetTPAttributeProfileIds", &AttrGetTPAttributeProfileIds{TPid: "TP1"}, &result); err != nil {
+	if err := tpAlsPrfRPC.Call("ApierV1.GetTPAttributeProfileIds",
+		&AttrGetTPAttributeProfileIds{TPid: "TP1"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedTPID, result)

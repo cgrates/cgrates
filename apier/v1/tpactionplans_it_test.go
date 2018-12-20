@@ -21,14 +21,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -114,7 +115,7 @@ func testTPAccPlansStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testTPAccPlansRpcConn(t *testing.T) {
 	var err error
-	tpAccPlansRPC, err = jsonrpc.Dial("tcp", tpAccPlansCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tpAccPlansRPC, err = jsonrpc.Dial("tcp", tpAccPlansCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -122,7 +123,8 @@ func testTPAccPlansRpcConn(t *testing.T) {
 
 func testTPAccPlansGetTPAccPlanBeforeSet(t *testing.T) {
 	var reply *utils.TPActionPlan
-	if err := tpAccPlansRPC.Call("ApierV1.GetTPActionPlan", &AttrGetTPActionPlan{TPid: "TPAcc", ID: "ID"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpAccPlansRPC.Call("ApierV1.GetTPActionPlan",
+		&AttrGetTPActionPlan{TPid: "TPAcc", ID: "ID"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -154,7 +156,8 @@ func testTPAccPlansSetTPAccPlan(t *testing.T) {
 
 func testTPAccPlansGetTPAccPlanAfterSet(t *testing.T) {
 	var reply *utils.TPActionPlan
-	if err := tpAccPlansRPC.Call("ApierV1.GetTPActionPlan", &AttrGetTPActionPlan{TPid: "TPAcc", ID: "ID"}, &reply); err != nil {
+	if err := tpAccPlansRPC.Call("ApierV1.GetTPActionPlan",
+		&AttrGetTPActionPlan{TPid: "TPAcc", ID: "ID"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpAccPlan.TPid, reply.TPid) {
 		t.Errorf("Expecting : %+v, received: %+v", tpAccPlan.TPid, reply.TPid)
@@ -168,7 +171,8 @@ func testTPAccPlansGetTPAccPlanAfterSet(t *testing.T) {
 func testTPAccPlansGetTPAccPlanIds(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"ID"}
-	if err := tpAccPlansRPC.Call("ApierV1.GetTPActionPlanIds", &AttrGetTPActionPlanIds{TPid: "TPAcc"}, &result); err != nil {
+	if err := tpAccPlansRPC.Call("ApierV1.GetTPActionPlanIds",
+		&AttrGetTPActionPlanIds{TPid: "TPAcc"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedTPID, result)
@@ -205,7 +209,8 @@ func testTPAccPlansUpdateTPAccPlan(t *testing.T) {
 
 func testTPAccPlansGetTPAccPlanAfterUpdate(t *testing.T) {
 	var reply *utils.TPActionPlan
-	if err := tpAccPlansRPC.Call("ApierV1.GetTPActionPlan", &AttrGetTPActionPlan{TPid: "TPAcc", ID: "ID"}, &reply); err != nil {
+	if err := tpAccPlansRPC.Call("ApierV1.GetTPActionPlan",
+		&AttrGetTPActionPlan{TPid: "TPAcc", ID: "ID"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpAccPlan.TPid, reply.TPid) {
 		t.Errorf("Expecting : %+v, received: %+v", tpAccPlan.TPid, reply.TPid)
@@ -219,7 +224,8 @@ func testTPAccPlansGetTPAccPlanAfterUpdate(t *testing.T) {
 
 func testTPAccPlansRemTPAccPlan(t *testing.T) {
 	var resp string
-	if err := tpAccPlansRPC.Call("ApierV1.RemTPActionPlan", &AttrGetTPActionPlan{TPid: "TPAcc", ID: "ID"}, &resp); err != nil {
+	if err := tpAccPlansRPC.Call("ApierV1.RemTPActionPlan",
+		&AttrGetTPActionPlan{TPid: "TPAcc", ID: "ID"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -229,7 +235,8 @@ func testTPAccPlansRemTPAccPlan(t *testing.T) {
 
 func testTPAccPlansGetTPAccPlanAfterRemove(t *testing.T) {
 	var reply *utils.TPActionPlan
-	if err := tpAccPlansRPC.Call("ApierV1.GetTPActionPlan", &AttrGetTPActionPlan{TPid: "TPAcc", ID: "ID"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpAccPlansRPC.Call("ApierV1.GetTPActionPlan",
+		&AttrGetTPActionPlan{TPid: "TPAcc", ID: "ID"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

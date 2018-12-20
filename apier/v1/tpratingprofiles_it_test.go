@@ -21,14 +21,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -51,6 +52,7 @@ var sTestsTPRatingProfiles = []func(t *testing.T){
 	testTPRatingProfilesSetTPRatingProfile,
 	testTPRatingProfilesGetTPRatingProfileAfterSet,
 	testTPRatingProfilesGetTPRatingProfileLoadIds,
+	testTPRatingProfilesGetTPRatingProfilesByLoadId,
 	testTPRatingProfilesUpdateTPRatingProfile,
 	testTPRatingProfilesGetTPRatingProfileAfterUpdate,
 	testTPRatingProfilesRemTPRatingProfile,
@@ -114,7 +116,7 @@ func testTPRatingProfilesStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testTPRatingProfilesRpcConn(t *testing.T) {
 	var err error
-	tpRatingProfileRPC, err = jsonrpc.Dial("tcp", tpRatingProfileCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tpRatingProfileRPC, err = jsonrpc.Dial("tcp", tpRatingProfileCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -122,7 +124,8 @@ func testTPRatingProfilesRpcConn(t *testing.T) {
 
 func testTPRatingProfilesGetTPRatingProfileBeforeSet(t *testing.T) {
 	var reply *utils.TPRatingProfile
-	if err := tpRatingProfileRPC.Call("ApierV1.GetTPRatingProfile", &AttrGetTPRatingProfile{TPid: "TPRProf1", RatingProfileId: tpRatingProfileID}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpRatingProfileRPC.Call("ApierV1.GetTPRatingProfile",
+		&AttrGetTPRatingProfile{TPid: "TPRProf1", RatingProfileId: tpRatingProfileID}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -160,7 +163,8 @@ func testTPRatingProfilesSetTPRatingProfile(t *testing.T) {
 
 func testTPRatingProfilesGetTPRatingProfileAfterSet(t *testing.T) {
 	var respond *utils.TPRatingProfile
-	if err := tpRatingProfileRPC.Call("ApierV1.GetTPRatingProfile", &AttrGetTPRatingProfile{TPid: "TPRProf1", RatingProfileId: tpRatingProfileID}, &respond); err != nil {
+	if err := tpRatingProfileRPC.Call("ApierV1.GetTPRatingProfile",
+		&AttrGetTPRatingProfile{TPid: "TPRProf1", RatingProfileId: tpRatingProfileID}, &respond); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpRatingProfile.TPid, respond.TPid) {
 		t.Errorf("Expecting : %+v, received: %+v", tpRatingProfile.TPid, respond.TPid)
@@ -182,10 +186,34 @@ func testTPRatingProfilesGetTPRatingProfileAfterSet(t *testing.T) {
 func testTPRatingProfilesGetTPRatingProfileLoadIds(t *testing.T) {
 	var result []string
 	expected := []string{"RPrf"}
-	if err := tpRatingProfileRPC.Call("ApierV1.GetTPRatingProfileLoadIds", &utils.AttrTPRatingProfileIds{TPid: tpRatingProfile.TPid, Tenant: tpRatingProfile.Tenant, Category: tpRatingProfile.Category, Direction: tpRatingProfile.Direction, Subject: tpRatingProfile.Subject}, &result); err != nil {
+	if err := tpRatingProfileRPC.Call("ApierV1.GetTPRatingProfileLoadIds",
+		&utils.AttrTPRatingProfileIds{TPid: tpRatingProfile.TPid, Tenant: tpRatingProfile.Tenant,
+			Category: tpRatingProfile.Category, Direction: tpRatingProfile.Direction, Subject: tpRatingProfile.Subject}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, result) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, result)
+	}
+}
+
+func testTPRatingProfilesGetTPRatingProfilesByLoadId(t *testing.T) {
+	var respond *[]*utils.TPRatingProfile
+	if err := tpRatingProfileRPC.Call("ApierV1.GetTPRatingProfilesByLoadId",
+		&utils.TPRatingProfile{TPid: "TPRProf1", LoadId: "RPrf"}, &respond); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(tpRatingProfile.TPid, (*respond)[0].TPid) {
+		t.Errorf("Expecting : %+v, received: %+v", tpRatingProfile.TPid, (*respond)[0].TPid)
+	} else if !reflect.DeepEqual(tpRatingProfile.LoadId, (*respond)[0].LoadId) {
+		t.Errorf("Expecting : %+v, received: %+v", tpRatingProfile.LoadId, (*respond)[0].LoadId)
+	} else if !reflect.DeepEqual(tpRatingProfile.Direction, (*respond)[0].Direction) {
+		t.Errorf("Expecting : %+v, received: %+v", tpRatingProfile.Direction, (*respond)[0].Direction)
+	} else if !reflect.DeepEqual(tpRatingProfile.Tenant, (*respond)[0].Tenant) {
+		t.Errorf("Expecting : %+v, received: %+v", tpRatingProfile.Tenant, (*respond)[0].Tenant)
+	} else if !reflect.DeepEqual(tpRatingProfile.Category, (*respond)[0].Category) {
+		t.Errorf("Expecting : %+v, received: %+v", tpRatingProfile.Category, (*respond)[0].Category)
+	} else if !reflect.DeepEqual(tpRatingProfile.Subject, (*respond)[0].Subject) {
+		t.Errorf("Expecting : %+v, received: %+v", tpRatingProfile.Subject, (*respond)[0].Subject)
+	} else if !reflect.DeepEqual(len(tpRatingProfile.RatingPlanActivations), len((*respond)[0].RatingPlanActivations)) {
+		t.Errorf("Expecting : %+v, received: %+v", len(tpRatingProfile.RatingPlanActivations), len((*respond)[0].RatingPlanActivations))
 	}
 }
 
@@ -220,7 +248,8 @@ func testTPRatingProfilesUpdateTPRatingProfile(t *testing.T) {
 
 func testTPRatingProfilesGetTPRatingProfileAfterUpdate(t *testing.T) {
 	var respond *utils.TPRatingProfile
-	if err := tpRatingProfileRPC.Call("ApierV1.GetTPRatingProfile", &AttrGetTPRatingProfile{TPid: "TPRProf1", RatingProfileId: tpRatingProfileID}, &respond); err != nil {
+	if err := tpRatingProfileRPC.Call("ApierV1.GetTPRatingProfile",
+		&AttrGetTPRatingProfile{TPid: "TPRProf1", RatingProfileId: tpRatingProfileID}, &respond); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpRatingProfile.TPid, respond.TPid) {
 		t.Errorf("Expecting : %+v, received: %+v", tpRatingProfile.TPid, respond.TPid)
@@ -241,7 +270,8 @@ func testTPRatingProfilesGetTPRatingProfileAfterUpdate(t *testing.T) {
 
 func testTPRatingProfilesRemTPRatingProfile(t *testing.T) {
 	var resp string
-	if err := tpRatingProfileRPC.Call("ApierV1.RemTPRatingProfile", &AttrGetTPRatingProfile{TPid: "TPRProf1", RatingProfileId: tpRatingProfile.GetRatingProfilesId()}, &resp); err != nil {
+	if err := tpRatingProfileRPC.Call("ApierV1.RemTPRatingProfile",
+		&AttrGetTPRatingProfile{TPid: "TPRProf1", RatingProfileId: tpRatingProfile.GetRatingProfilesId()}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -250,7 +280,8 @@ func testTPRatingProfilesRemTPRatingProfile(t *testing.T) {
 
 func testTPRatingProfilesGetTPRatingProfileAfterRemove(t *testing.T) {
 	var respond *utils.TPRatingProfile
-	if err := tpRatingProfileRPC.Call("ApierV1.GetTPRatingProfile", &AttrGetTPRatingProfile{TPid: "TPRProf1", RatingProfileId: tpRatingProfileID}, &respond); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpRatingProfileRPC.Call("ApierV1.GetTPRatingProfile",
+		&AttrGetTPRatingProfile{TPid: "TPRProf1", RatingProfileId: tpRatingProfileID}, &respond); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

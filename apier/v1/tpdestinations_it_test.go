@@ -21,14 +21,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -113,7 +114,7 @@ func testTPDestinationsStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testTPDestinationsRpcConn(t *testing.T) {
 	var err error
-	tpDestinationRPC, err = jsonrpc.Dial("tcp", tpDestinationCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tpDestinationRPC, err = jsonrpc.Dial("tcp", tpDestinationCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,7 +122,8 @@ func testTPDestinationsRpcConn(t *testing.T) {
 
 func testTPDestinationsGetTPDestinationBeforeSet(t *testing.T) {
 	var reply *utils.TPDestination
-	if err := tpDestinationRPC.Call("ApierV1.GetTPDestination", &AttrGetTPDestination{TPid: "TPD", ID: "GERMANY"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpDestinationRPC.Call("ApierV1.GetTPDestination",
+		&AttrGetTPDestination{TPid: "TPD", ID: "GERMANY"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
@@ -143,7 +145,8 @@ func testTPDestinationsSetTPDestination(t *testing.T) {
 
 func testTPDestinationsGetTPDestinationAfterSet(t *testing.T) {
 	var reply *utils.TPDestination
-	if err := tpDestinationRPC.Call("ApierV1.GetTPDestination", &AttrGetTPDestination{TPid: "TPD", ID: "GERMANY"}, &reply); err != nil {
+	if err := tpDestinationRPC.Call("ApierV1.GetTPDestination",
+		&AttrGetTPDestination{TPid: "TPD", ID: "GERMANY"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpDestination.TPid, reply.TPid) {
 		t.Errorf("Expecting : %+v, received: %+v", tpDestination.TPid, reply.TPid)
@@ -158,7 +161,8 @@ func testTPDestinationsGetTPDestinationAfterSet(t *testing.T) {
 func testTPDestinationsGetTPDestinationIds(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"GERMANY"}
-	if err := tpDestinationRPC.Call("ApierV1.GetTPDestinationIDs", &AttrGetTPDestinationIds{TPid: "TPD"}, &result); err != nil {
+	if err := tpDestinationRPC.Call("ApierV1.GetTPDestinationIDs",
+		&AttrGetTPDestinationIds{TPid: "TPD"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedTPID, result)
@@ -179,7 +183,8 @@ func testTPDestinationsUpdateTPDestination(t *testing.T) {
 
 func testTPDestinationsGetTPDestinationAfterUpdate(t *testing.T) {
 	var reply *utils.TPDestination
-	if err := tpDestinationRPC.Call("ApierV1.GetTPDestination", &AttrGetTPDestination{TPid: "TPD", ID: "GERMANY"}, &reply); err != nil {
+	if err := tpDestinationRPC.Call("ApierV1.GetTPDestination",
+		&AttrGetTPDestination{TPid: "TPD", ID: "GERMANY"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpDestination.TPid, reply.TPid) {
 		t.Errorf("Expecting : %+v, received: %+v", tpDestination.TPid, reply.TPid)
@@ -193,7 +198,8 @@ func testTPDestinationsGetTPDestinationAfterUpdate(t *testing.T) {
 
 func testTPDestinationsRemTPDestination(t *testing.T) {
 	var resp string
-	if err := tpDestinationRPC.Call("ApierV1.RemTPDestination", &AttrGetTPDestination{TPid: "TPD", ID: "GERMANY"}, &resp); err != nil {
+	if err := tpDestinationRPC.Call("ApierV1.RemTPDestination",
+		&AttrGetTPDestination{TPid: "TPD", ID: "GERMANY"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -203,7 +209,8 @@ func testTPDestinationsRemTPDestination(t *testing.T) {
 
 func testTPDestinationsGetTPDestinationAfterRemove(t *testing.T) {
 	var reply *utils.TPDestination
-	if err := tpDestinationRPC.Call("ApierV1.GetTPDestination", &AttrGetTPDestination{TPid: "TPD", ID: "GERMANY"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpDestinationRPC.Call("ApierV1.GetTPDestination",
+		&AttrGetTPDestination{TPid: "TPD", ID: "GERMANY"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

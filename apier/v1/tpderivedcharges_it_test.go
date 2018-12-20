@@ -21,14 +21,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -114,7 +115,7 @@ func testTPDerivedChargersStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testTPDerivedChargersRpcConn(t *testing.T) {
 	var err error
-	tpDerivedChargersRPC, err = jsonrpc.Dial("tcp", tpDerivedChargersCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tpDerivedChargersRPC, err = jsonrpc.Dial("tcp", tpDerivedChargersCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -122,7 +123,8 @@ func testTPDerivedChargersRpcConn(t *testing.T) {
 
 func testTPDerivedChargersGetTPDerivedChargersBeforeSet(t *testing.T) {
 	var reply *utils.TPDerivedChargers
-	if err := tpDerivedChargersRPC.Call("ApierV1.GetTPDerivedChargers", &AttrGetTPDerivedChargers{TPid: "TPD", DerivedChargersId: tpDerivedChargersID}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpDerivedChargersRPC.Call("ApierV1.GetTPDerivedChargers",
+		&AttrGetTPDerivedChargers{TPid: "TPD", DerivedChargersId: tpDerivedChargersID}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
@@ -170,7 +172,8 @@ func testTPDerivedChargersSetTPDerivedChargers(t *testing.T) {
 
 func testTPDerivedChargersGetTPDerivedChargersAfterSet(t *testing.T) {
 	var reply *utils.TPDerivedChargers
-	if err := tpDerivedChargersRPC.Call("ApierV1.GetTPDerivedChargers", &AttrGetTPDerivedChargers{TPid: "TPD", DerivedChargersId: tpDerivedChargersID}, &reply); err != nil {
+	if err := tpDerivedChargersRPC.Call("ApierV1.GetTPDerivedChargers",
+		&AttrGetTPDerivedChargers{TPid: "TPD", DerivedChargersId: tpDerivedChargersID}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpDerivedChargers.TPid, reply.TPid) {
 		t.Errorf("Expecting : %+v, received: %+v", tpDerivedChargers.TPid, reply.TPid)
@@ -197,7 +200,8 @@ func testTPDerivedChargersGetTPDerivedChargersAfterSet(t *testing.T) {
 func testTPDerivedChargersGetTPDerivedChargerIds(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"LoadID:*out:cgrates.org:call:1001:1001"}
-	if err := tpDerivedChargersRPC.Call("ApierV1.GetTPDerivedChargerIds", &AttrGetTPDerivedChargeIds{TPid: "TPD"}, &result); err != nil {
+	if err := tpDerivedChargersRPC.Call("ApierV1.GetTPDerivedChargerIds",
+		&AttrGetTPDerivedChargeIds{TPid: "TPD"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedTPID, result)
@@ -257,7 +261,8 @@ func testTPDerivedChargersUpdateTPDerivedChargers(t *testing.T) {
 
 func testTPDerivedChargersGetTPDerivedChargersAfterUpdate(t *testing.T) {
 	var reply *utils.TPDerivedChargers
-	if err := tpDerivedChargersRPC.Call("ApierV1.GetTPDerivedChargers", &AttrGetTPDerivedChargers{TPid: "TPD", DerivedChargersId: tpDerivedChargersID}, &reply); err != nil {
+	if err := tpDerivedChargersRPC.Call("ApierV1.GetTPDerivedChargers",
+		&AttrGetTPDerivedChargers{TPid: "TPD", DerivedChargersId: tpDerivedChargersID}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpDerivedChargers.TPid, reply.TPid) {
 		t.Errorf("Expecting : %+v, received: %+v", tpDerivedChargers.TPid, reply.TPid)
@@ -283,7 +288,8 @@ func testTPDerivedChargersGetTPDerivedChargersAfterUpdate(t *testing.T) {
 
 func testTPDerivedChargersRemTPDerivedChargers(t *testing.T) {
 	var resp string
-	if err := tpDerivedChargersRPC.Call("ApierV1.RemTPDerivedChargers", &AttrGetTPDerivedChargers{TPid: "TPD", DerivedChargersId: tpDerivedChargersID}, &resp); err != nil {
+	if err := tpDerivedChargersRPC.Call("ApierV1.RemTPDerivedChargers",
+		&AttrGetTPDerivedChargers{TPid: "TPD", DerivedChargersId: tpDerivedChargersID}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -293,7 +299,8 @@ func testTPDerivedChargersRemTPDerivedChargers(t *testing.T) {
 
 func testTPDerivedChargersGetTPDerivedChargersAfterRemove(t *testing.T) {
 	var reply *utils.TPDerivedChargers
-	if err := tpDerivedChargersRPC.Call("ApierV1.GetTPDerivedChargers", &AttrGetTPDerivedChargers{TPid: "TPD", DerivedChargersId: tpDerivedChargersID}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpDerivedChargersRPC.Call("ApierV1.GetTPDerivedChargers",
+		&AttrGetTPDerivedChargers{TPid: "TPD", DerivedChargersId: tpDerivedChargersID}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

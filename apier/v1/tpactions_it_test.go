@@ -21,14 +21,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -114,7 +115,7 @@ func testTPActionsStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testTPActionsRpcConn(t *testing.T) {
 	var err error
-	tpActionRPC, err = jsonrpc.Dial("tcp", tpActionCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tpActionRPC, err = jsonrpc.Dial("tcp", tpActionCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -122,7 +123,8 @@ func testTPActionsRpcConn(t *testing.T) {
 
 func testTPActionsGetTPActionBeforeSet(t *testing.T) {
 	var reply *utils.TPActionPlan
-	if err := tpActionRPC.Call("ApierV1.GetTPActions", &AttrGetTPActions{TPid: "TPAcc", ID: "ID"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpActionRPC.Call("ApierV1.GetTPActions",
+		&AttrGetTPActions{TPid: "TPAcc", ID: "ID"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -184,7 +186,8 @@ func testTPActionsSetTPAction(t *testing.T) {
 
 func testTPActionsGetTPActionAfterSet(t *testing.T) {
 	var reply *utils.TPActions
-	if err := tpActionRPC.Call("ApierV1.GetTPActions", &AttrGetTPActions{TPid: "TPAcc", ID: "ID"}, &reply); err != nil {
+	if err := tpActionRPC.Call("ApierV1.GetTPActions",
+		&AttrGetTPActions{TPid: "TPAcc", ID: "ID"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpActions.TPid, reply.TPid) {
 		t.Errorf("Expecting : %+v, received: %+v", tpActions.TPid, reply.TPid)
@@ -198,7 +201,8 @@ func testTPActionsGetTPActionAfterSet(t *testing.T) {
 func testTPActionsGetTPActionIds(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"ID"}
-	if err := tpActionRPC.Call("ApierV1.GetTPActionIds", &AttrGetTPActionIds{TPid: "TPAcc"}, &result); err != nil {
+	if err := tpActionRPC.Call("ApierV1.GetTPActionIds",
+		&AttrGetTPActionIds{TPid: "TPAcc"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedTPID, result)
@@ -279,7 +283,8 @@ func testTPActionsUpdateTPAction(t *testing.T) {
 
 func testTPActionsGetTPActionAfterUpdate(t *testing.T) {
 	var reply *utils.TPActions
-	if err := tpActionRPC.Call("ApierV1.GetTPActions", &AttrGetTPActions{TPid: "TPAcc", ID: "ID"}, &reply); err != nil {
+	if err := tpActionRPC.Call("ApierV1.GetTPActions",
+		&AttrGetTPActions{TPid: "TPAcc", ID: "ID"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpActions.TPid, reply.TPid) {
 		t.Errorf("Expecting : %+v, received: %+v", tpActions.TPid, reply.TPid)
@@ -293,7 +298,8 @@ func testTPActionsGetTPActionAfterUpdate(t *testing.T) {
 
 func testTPActionsRemTPAction(t *testing.T) {
 	var resp string
-	if err := tpActionRPC.Call("ApierV1.RemTPActions", &AttrGetTPActions{TPid: "TPAcc", ID: "ID"}, &resp); err != nil {
+	if err := tpActionRPC.Call("ApierV1.RemTPActions",
+		&AttrGetTPActions{TPid: "TPAcc", ID: "ID"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -303,7 +309,8 @@ func testTPActionsRemTPAction(t *testing.T) {
 
 func testTPActionsGetTPActionAfterRemove(t *testing.T) {
 	var reply *utils.TPActionPlan
-	if err := tpActionRPC.Call("ApierV1.GetTPActions", &AttrGetTPActions{TPid: "TPAcc", ID: "ID"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpActionRPC.Call("ApierV1.GetTPActions",
+		&AttrGetTPActions{TPid: "TPAcc", ID: "ID"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

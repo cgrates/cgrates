@@ -21,14 +21,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -114,7 +115,7 @@ func testTPActionTriggersStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testTPActionTriggersRpcConn(t *testing.T) {
 	var err error
-	tpActionTriggerRPC, err = jsonrpc.Dial("tcp", tpActionTriggerCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tpActionTriggerRPC, err = jsonrpc.Dial("tcp", tpActionTriggerCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -122,7 +123,8 @@ func testTPActionTriggersRpcConn(t *testing.T) {
 
 func testTPActionTriggersGetTPActionTriggersBeforeSet(t *testing.T) {
 	var reply *utils.TPActionTriggers
-	if err := tpActionTriggerRPC.Call("ApierV1.GetTPActionTriggers", &AttrGetTPActionTriggers{TPid: "TPAct", ID: "ID"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpActionTriggerRPC.Call("ApierV1.GetTPActionTriggers",
+		&AttrGetTPActionTriggers{TPid: "TPAct", ID: "ID"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -194,7 +196,8 @@ func testTPActionTriggersSetTPActionTriggers(t *testing.T) {
 
 func testTPActionTriggersGetTPActionTriggersAfterSet(t *testing.T) {
 	var reply *utils.TPActionTriggers
-	if err := tpActionTriggerRPC.Call("ApierV1.GetTPActionTriggers", &AttrGetTPActionTriggers{TPid: "TPAct", ID: "ID"}, &reply); err != nil {
+	if err := tpActionTriggerRPC.Call("ApierV1.GetTPActionTriggers",
+		&AttrGetTPActionTriggers{TPid: "TPAct", ID: "ID"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpActionTriggers.TPid, reply.TPid) {
 		t.Errorf("Expecting : %+v, received: %+v", tpActionTriggers.TPid, reply.TPid)
@@ -208,7 +211,8 @@ func testTPActionTriggersGetTPActionTriggersAfterSet(t *testing.T) {
 func testTPActionTriggersGetTPActionTriggersIds(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"ID"}
-	if err := tpActionTriggerRPC.Call("ApierV1.GetTPActionTriggerIds", &AttrGetTPActionTriggerIds{TPid: "TPAct"}, &result); err != nil {
+	if err := tpActionTriggerRPC.Call("ApierV1.GetTPActionTriggerIds",
+		&AttrGetTPActionTriggerIds{TPid: "TPAct"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedTPID, result)
@@ -305,7 +309,8 @@ func testTPActionTriggersUpdateTPActionTriggers(t *testing.T) {
 
 func testTPActionTriggersGetTPActionTriggersAfterUpdate(t *testing.T) {
 	var reply *utils.TPActionTriggers
-	if err := tpActionTriggerRPC.Call("ApierV1.GetTPActionTriggers", &AttrGetTPActionTriggers{TPid: "TPAct", ID: "ID"}, &reply); err != nil {
+	if err := tpActionTriggerRPC.Call("ApierV1.GetTPActionTriggers",
+		&AttrGetTPActionTriggers{TPid: "TPAct", ID: "ID"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpActionTriggers.TPid, reply.TPid) {
 		t.Errorf("Expecting : %+v, received: %+v", tpActionTriggers.TPid, reply.TPid)
@@ -319,7 +324,8 @@ func testTPActionTriggersGetTPActionTriggersAfterUpdate(t *testing.T) {
 
 func testTPActionTriggersRemTPActionTriggers(t *testing.T) {
 	var resp string
-	if err := tpActionTriggerRPC.Call("ApierV1.RemTPActionTriggers", &AttrGetTPActionTriggers{TPid: "TPAct", ID: "ID"}, &resp); err != nil {
+	if err := tpActionTriggerRPC.Call("ApierV1.RemTPActionTriggers",
+		&AttrGetTPActionTriggers{TPid: "TPAct", ID: "ID"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -329,7 +335,8 @@ func testTPActionTriggersRemTPActionTriggers(t *testing.T) {
 
 func testTPActionTriggersGetTPActionTriggersAfterRemove(t *testing.T) {
 	var reply *utils.TPActionTriggers
-	if err := tpActionTriggerRPC.Call("ApierV1.GetTPActionTriggers", &AttrGetTPActionTriggers{TPid: "TPAct", ID: "ID"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpActionTriggerRPC.Call("ApierV1.GetTPActionTriggers",
+		&AttrGetTPActionTriggers{TPid: "TPAct", ID: "ID"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

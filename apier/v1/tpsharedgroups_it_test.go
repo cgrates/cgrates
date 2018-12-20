@@ -21,14 +21,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -113,7 +114,7 @@ func testTPSharedGroupsStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testTPSharedGroupsRpcConn(t *testing.T) {
 	var err error
-	tpSharedGroupRPC, err = jsonrpc.Dial("tcp", tpSharedGroupCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tpSharedGroupRPC, err = jsonrpc.Dial("tcp", tpSharedGroupCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
