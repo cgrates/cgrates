@@ -57,7 +57,7 @@ func (self *ApierV1) GetTPRatingProfilesByLoadId(attrs utils.TPRatingProfile, re
 		}
 		return err
 	} else {
-		reply = &rps
+		*reply = rps
 	}
 	return nil
 }

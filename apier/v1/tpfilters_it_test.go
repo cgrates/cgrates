@@ -21,14 +21,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -113,7 +114,7 @@ func testTPFilterStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testTPFilterRpcConn(t *testing.T) {
 	var err error
-	tpFilterRPC, err = jsonrpc.Dial("tcp", tpFilterCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tpFilterRPC, err = jsonrpc.Dial("tcp", tpFilterCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,7 +122,8 @@ func testTPFilterRpcConn(t *testing.T) {
 
 func ttestTPFilterGetTPFilterBeforeSet(t *testing.T) {
 	var reply *utils.TPFilterProfile
-	if err := tpFilterRPC.Call("ApierV1.GetTPFilterProfile", &AttrGetTPFilterProfile{TPid: "TP1", ID: "Filter"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpFilterRPC.Call("ApierV1.GetTPFilterProfile",
+		&AttrGetTPFilterProfile{TPid: "TP1", ID: "Filter"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -154,7 +156,8 @@ func testTPFilterSetTPFilter(t *testing.T) {
 
 func testTPFilterGetTPFilterAfterSet(t *testing.T) {
 	var reply *utils.TPFilterProfile
-	if err := tpFilterRPC.Call("ApierV1.GetTPFilterProfile", &AttrGetTPFilterProfile{TPid: "TP1", ID: "Filter"}, &reply); err != nil {
+	if err := tpFilterRPC.Call("ApierV1.GetTPFilterProfile",
+		&AttrGetTPFilterProfile{TPid: "TP1", ID: "Filter"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpFilter, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", tpFilter, reply)
@@ -164,7 +167,8 @@ func testTPFilterGetTPFilterAfterSet(t *testing.T) {
 func testTPFilterGetFilterIds(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"Filter"}
-	if err := tpFilterRPC.Call("ApierV1.GetTPFilterProfileIds", &AttrGetTPFilterProfileIds{TPid: "TP1"}, &result); err != nil {
+	if err := tpFilterRPC.Call("ApierV1.GetTPFilterProfileIds",
+		&AttrGetTPFilterProfileIds{TPid: "TP1"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedTPID, result)
@@ -194,7 +198,8 @@ func testTPFilterUpdateTPFilter(t *testing.T) {
 
 func testTPFilterGetTPFilterAfterUpdate(t *testing.T) {
 	var reply *utils.TPFilterProfile
-	if err := tpFilterRPC.Call("ApierV1.GetTPFilterProfile", &AttrGetTPFilterProfile{TPid: "TP1", ID: "Filter"}, &reply); err != nil {
+	if err := tpFilterRPC.Call("ApierV1.GetTPFilterProfile",
+		&AttrGetTPFilterProfile{TPid: "TP1", ID: "Filter"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpFilter, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", tpFilter, reply)
@@ -203,7 +208,8 @@ func testTPFilterGetTPFilterAfterUpdate(t *testing.T) {
 
 func testTPFilterRemTPFilter(t *testing.T) {
 	var resp string
-	if err := tpFilterRPC.Call("ApierV1.RemTPFilterProfile", &AttrRemTPFilterProfile{TPid: "TP1", Tenant: "cgrates.org", ID: "Filter"}, &resp); err != nil {
+	if err := tpFilterRPC.Call("ApierV1.RemTPFilterProfile",
+		&AttrRemTPFilterProfile{TPid: "TP1", Tenant: "cgrates.org", ID: "Filter"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -212,7 +218,8 @@ func testTPFilterRemTPFilter(t *testing.T) {
 
 func testTPFilterGetTPFilterAfterRemove(t *testing.T) {
 	var reply *utils.TPFilterProfile
-	if err := tpFilterRPC.Call("ApierV1.GetTPFilterProfile", &AttrGetTPFilterProfile{TPid: "TP1", ID: "Filter"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpFilterRPC.Call("ApierV1.GetTPFilterProfile",
+		&AttrGetTPFilterProfile{TPid: "TP1", ID: "Filter"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

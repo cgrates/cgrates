@@ -21,14 +21,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -113,7 +114,7 @@ func testTPThreholdStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testTPThreholdRpcConn(t *testing.T) {
 	var err error
-	tpThresholdRPC, err = jsonrpc.Dial("tcp", tpThresholdCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tpThresholdRPC, err = jsonrpc.Dial("tcp", tpThresholdCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,7 +122,8 @@ func testTPThreholdRpcConn(t *testing.T) {
 
 func testTPThreholdGetTPThreholdBeforeSet(t *testing.T) {
 	var reply *utils.TPThreshold
-	if err := tpThresholdRPC.Call("ApierV1.GetTPThreshold", AttrGetTPThreshold{TPid: "TH1", ID: "Threshold"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpThresholdRPC.Call("ApierV1.GetTPThreshold",
+		AttrGetTPThreshold{TPid: "TH1", ID: "Threshold"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -136,7 +138,6 @@ func testTPThreholdSetTPThrehold(t *testing.T) {
 			ActivationTime: "2014-07-29T15:00:00Z",
 			ExpiryTime:     "",
 		},
-		Recurrent: true,
 		MinSleep:  "1s",
 		Blocker:   true,
 		Weight:    10,

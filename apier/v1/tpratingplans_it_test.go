@@ -21,14 +21,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -113,7 +114,7 @@ func testTPRatingPlansStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testTPRatingPlansRpcConn(t *testing.T) {
 	var err error
-	tpRatingPlanRPC, err = jsonrpc.Dial("tcp", tpRatingPlanCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tpRatingPlanRPC, err = jsonrpc.Dial("tcp", tpRatingPlanCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,7 +122,8 @@ func testTPRatingPlansRpcConn(t *testing.T) {
 
 func testTPRatingPlansGetTPRatingPlanBeforeSet(t *testing.T) {
 	var reply *utils.TPRatingPlan
-	if err := tpRatingPlanRPC.Call("ApierV1.GetTPRatingPlan", &AttrGetTPRatingPlan{TPid: "TPRP1", ID: "Plan1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpRatingPlanRPC.Call("ApierV1.GetTPRatingPlan",
+		&AttrGetTPRatingPlan{TPid: "TPRP1", ID: "Plan1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -153,7 +155,8 @@ func testTPRatingPlansSetTPRatingPlan(t *testing.T) {
 
 func testTPRatingPlansGetTPRatingPlanAfterSet(t *testing.T) {
 	var respond *utils.TPRatingPlan
-	if err := tpRatingPlanRPC.Call("ApierV1.GetTPRatingPlan", &AttrGetTPRatingPlan{TPid: "TPRP1", ID: "Plan1"}, &respond); err != nil {
+	if err := tpRatingPlanRPC.Call("ApierV1.GetTPRatingPlan",
+		&AttrGetTPRatingPlan{TPid: "TPRP1", ID: "Plan1"}, &respond); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpRatingPlan.TPid, respond.TPid) {
 		t.Errorf("Expecting : %+v, received: %+v", tpRatingPlan.TPid, respond.TPid)
@@ -167,7 +170,8 @@ func testTPRatingPlansGetTPRatingPlanAfterSet(t *testing.T) {
 func testTPRatingPlansGetTPRatingPlanIds(t *testing.T) {
 	var result []string
 	expected := []string{"Plan1"}
-	if err := tpRatingPlanRPC.Call("ApierV1.GetTPRatingPlanIds", &AttrGetTPRatingPlanIds{TPid: tpRatingPlan.TPid}, &result); err != nil {
+	if err := tpRatingPlanRPC.Call("ApierV1.GetTPRatingPlanIds",
+		&AttrGetTPRatingPlanIds{TPid: tpRatingPlan.TPid}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, result) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, result)
@@ -202,7 +206,8 @@ func testTPRatingPlansUpdateTPRatingPlan(t *testing.T) {
 
 func testTPRatingPlansGetTPRatingPlanAfterUpdate(t *testing.T) {
 	var respond *utils.TPRatingPlan
-	if err := tpRatingPlanRPC.Call("ApierV1.GetTPRatingPlan", &AttrGetTPRatingPlan{TPid: "TPRP1", ID: "Plan1"}, &respond); err != nil {
+	if err := tpRatingPlanRPC.Call("ApierV1.GetTPRatingPlan",
+		&AttrGetTPRatingPlan{TPid: "TPRP1", ID: "Plan1"}, &respond); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpRatingPlan.TPid, respond.TPid) {
 		t.Errorf("Expecting : %+v, received: %+v", tpRatingPlan.TPid, respond.TPid)
@@ -215,7 +220,8 @@ func testTPRatingPlansGetTPRatingPlanAfterUpdate(t *testing.T) {
 
 func testTPRatingPlansRemTPRatingPlan(t *testing.T) {
 	var resp string
-	if err := tpRatingPlanRPC.Call("ApierV1.RemTPRatingPlan", &AttrGetTPRatingPlan{TPid: "TPRP1", ID: "Plan1"}, &resp); err != nil {
+	if err := tpRatingPlanRPC.Call("ApierV1.RemTPRatingPlan",
+		&AttrGetTPRatingPlan{TPid: "TPRP1", ID: "Plan1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -224,7 +230,8 @@ func testTPRatingPlansRemTPRatingPlan(t *testing.T) {
 
 func testTPRatingPlansGetTPRatingPlanAfterRemove(t *testing.T) {
 	var respond *utils.TPRatingPlan
-	if err := tpRatingPlanRPC.Call("ApierV1.GetTPRatingPlan", &AttrGetTPRatingPlan{TPid: "TPRP1", ID: "Plan1"}, &respond); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpRatingPlanRPC.Call("ApierV1.GetTPRatingPlan",
+		&AttrGetTPRatingPlan{TPid: "TPRP1", ID: "Plan1"}, &respond); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

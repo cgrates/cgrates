@@ -21,14 +21,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -113,7 +114,7 @@ func testTPRatesStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testTPRatesRpcConn(t *testing.T) {
 	var err error
-	tpRateRPC, err = jsonrpc.Dial("tcp", tpRateCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tpRateRPC, err = jsonrpc.Dial("tcp", tpRateCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,7 +122,8 @@ func testTPRatesRpcConn(t *testing.T) {
 
 func testTPRatesGetTPRateforeSet(t *testing.T) {
 	var reply *utils.TPRate
-	if err := tpRateRPC.Call("ApierV1.GetTPRate", &AttrGetTPRate{TPid: "TPidTpRate", ID: "RT_FS_USERS"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpRateRPC.Call("ApierV1.GetTPRate",
+		&AttrGetTPRate{TPid: "TPidTpRate", ID: "RT_FS_USERS"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -208,7 +210,8 @@ func testTPRatesUpdateTPRate(t *testing.T) {
 
 func testTPRatesGetTPRateAfterUpdate(t *testing.T) {
 	var reply *utils.TPRate
-	if err := tpRateRPC.Call("ApierV1.GetTPRate", &AttrGetTPRate{TPid: "TPidTpRate", ID: tpRate.ID}, &reply); err != nil {
+	if err := tpRateRPC.Call("ApierV1.GetTPRate",
+		&AttrGetTPRate{TPid: "TPidTpRate", ID: tpRate.ID}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpRate, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", tpRate, reply)
@@ -218,7 +221,8 @@ func testTPRatesGetTPRateAfterUpdate(t *testing.T) {
 
 func testTPRatesRemTPRate(t *testing.T) {
 	var resp string
-	if err := tpRateRPC.Call("ApierV1.RemTPRate", &AttrGetTPRate{TPid: "TPidTpRate", ID: "RT_FS_USERS"}, &resp); err != nil {
+	if err := tpRateRPC.Call("ApierV1.RemTPRate",
+		&AttrGetTPRate{TPid: "TPidTpRate", ID: "RT_FS_USERS"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -227,7 +231,8 @@ func testTPRatesRemTPRate(t *testing.T) {
 
 func testTPRatesGetTPRateAfterRemove(t *testing.T) {
 	var reply *utils.TPRate
-	if err := tpRateRPC.Call("ApierV1.GetTPRate", &AttrGetTPRate{TPid: "TPidTpRate", ID: "RT_FS_USERS"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpRateRPC.Call("ApierV1.GetTPRate",
+		&AttrGetTPRate{TPid: "TPidTpRate", ID: "RT_FS_USERS"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
