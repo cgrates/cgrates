@@ -407,7 +407,7 @@ func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err 
 // diamAnswer builds up the answer to be sent back to the client
 func diamAnswer(m *diam.Message, resCode uint32, errFlag bool,
 	rply *config.NavigableMap, tmz string) (a *diam.Message, err error) {
-	a = m.Answer(resCode)
+	a = newDiamAnswer(m, resCode)
 	if errFlag {
 		a.Header.CommandFlags = diam.ErrorFlag
 	}
@@ -488,4 +488,20 @@ func disectDiamListen(addrs string) (ipAddrs []string) {
 		ipAddrs[i] = ip
 	}
 	return
+}
+
+// newDiamAnswer temporary until fiorix will fix the issue
+func newDiamAnswer(m *diam.Message, resCode uint32) *diam.Message {
+	nm := diam.NewMessage(
+		m.Header.CommandCode,
+		m.Header.CommandFlags&^diam.RequestFlag, // Reset the Request bit.
+		m.Header.ApplicationID,
+		m.Header.HopByHopID,
+		m.Header.EndToEndID,
+		m.Dictionary(),
+	)
+	if resCode != 0 {
+		nm.NewAVP(avp.ResultCode, avp.Mbit, 0, datatype.Unsigned32(resCode))
+	}
+	return nm
 }
