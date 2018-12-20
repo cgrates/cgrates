@@ -116,7 +116,7 @@ func testDiamItResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testDiamItStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(daCfgPath, 4000); err != nil {
+	if _, err := engine.StopStartEngine(daCfgPath, 200); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -646,7 +646,7 @@ func testDiamItCCRTerminate(t *testing.T) {
 		if cdrs[0].Usage != 550*time.Second {
 			t.Errorf("Unexpected Usage CDR: %+v", cdrs[0])
 		}
-
+		// in case of sctp we get OriginHost ip1/ip2/ip3/...
 		if !strings.Contains(cdrs[0].OriginHost, "127.0.0.1") {
 			t.Errorf("Unexpected OriginHost CDR: %+v", cdrs[0])
 		}

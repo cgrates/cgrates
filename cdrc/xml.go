@@ -279,5 +279,5 @@ func (xP *xmlProvider) AsNavigableMap([]*config.FCTemplate) (
 
 // RemoteHost is part of engine.DataProvider interface
 func (xP *xmlProvider) RemoteHost() net.Addr {
-	return new(utils.LocalAddr)
+	return utils.LocalAddr()
 }

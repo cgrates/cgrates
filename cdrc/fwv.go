@@ -325,5 +325,5 @@ func (fP *fwvProvider) AsNavigableMap([]*config.FCTemplate) (
 
 // RemoteHost is part of engine.DataProvider interface
 func (fP *fwvProvider) RemoteHost() net.Addr {
-	return new(utils.LocalAddr)
+	return utils.LocalAddr()
 }

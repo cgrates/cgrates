@@ -250,6 +250,9 @@ func testHAitCDRmtcall(t *testing.T) {
 		if cdrs[0].Cost != 0.2188 {
 			t.Errorf("Unexpected CDR Cost received, cdr: %+v ", cdrs[0].Cost)
 		}
+		if cdrs[0].OriginHost != "127.0.0.1" {
+			t.Errorf("Unexpected CDR OriginHost received, cdr: %+v ", cdrs[0].OriginHost)
+		}
 	}
 }
 

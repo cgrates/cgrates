@@ -103,7 +103,7 @@ func (hU *httpUrlDP) AsNavigableMap([]*config.FCTemplate) (
 
 // RemoteHost is part of engine.DataProvider interface
 func (hU *httpUrlDP) RemoteHost() net.Addr {
-	return newHttpRemoteAddr(hU.req.RemoteAddr)
+	return utils.NewNetAddr("TCP", hU.req.RemoteAddr)
 }
 
 func newHTTPXmlDP(req *http.Request) (dP config.DataProvider, err error) {
@@ -198,7 +198,7 @@ func (hU *httpXmlDP) AsNavigableMap([]*config.FCTemplate) (
 
 // RemoteHost is part of engine.DataProvider interface
 func (hU *httpXmlDP) RemoteHost() net.Addr {
-	return newHttpRemoteAddr(hU.addr)
+	return utils.NewNetAddr("TCP", hU.addr)
 }
 
 // httpAgentReplyEncoder will encode  []*engine.NMElement
@@ -244,21 +244,4 @@ func (xE *haXMLEncoder) Encode(nM *config.NavigableMap) (err error) {
 	}
 	_, err = xE.w.Write(xmlOut)
 	return
-}
-
-func newHttpRemoteAddr(ip string) *httpRemoteAddr {
-	return &httpRemoteAddr{ip: ip}
-
-}
-
-type httpRemoteAddr struct {
-	ip string
-}
-
-func (http *httpRemoteAddr) Network() string {
-	return utils.TCP
-}
-
-func (http *httpRemoteAddr) String() string {
-	return http.ip
 }

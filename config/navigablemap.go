@@ -170,7 +170,7 @@ func (nM *NavigableMap) String() string {
 
 // RemoteHost is part of engine.DataProvider interface
 func (nM *NavigableMap) RemoteHost() net.Addr {
-	return new(utils.LocalAddr)
+	return utils.LocalAddr()
 }
 
 // indexMapElements will recursively go through map and index the element paths into elmns

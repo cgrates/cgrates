@@ -282,6 +282,9 @@ func TestRAitAcctStop(t *testing.T) {
 		if cdrs[0].Cost != 0.01 {
 			t.Errorf("Unexpected CDR Cost received for CDR: %v", cdrs[0].Cost)
 		}
+		if cdrs[0].ExtraFields["RemoteAddr"] != "127.0.0.1" {
+			t.Errorf("Unexpected CDR RemoteAddr received for CDR: %+v", utils.ToJSON(cdrs[0]))
+		}
 	}
 }
 

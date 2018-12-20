@@ -906,5 +906,5 @@ func (cdrP *cdrLogProvider) AsNavigableMap([]*config.FCTemplate) (
 
 // RemoteHost is part of engine.DataProvider interface
 func (cdrP *cdrLogProvider) RemoteHost() net.Addr {
-	return new(utils.LocalAddr)
+	return utils.LocalAddr()
 }

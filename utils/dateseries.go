@@ -20,6 +20,7 @@ package utils
 
 import (
 	"fmt"
+	"net"
 	"reflect"
 	"sort"
 	"strconv"
@@ -340,12 +341,49 @@ func DaysInYear(year int) float64 {
 	return float64(last.Sub(first).Hours() / 24)
 }
 
-type LocalAddr struct{}
-
-func (lc *LocalAddr) Network() string {
-	return Local
+func LocalAddr() *NetAddr {
+	return &NetAddr{network: Local, ip: Local}
 }
 
-func (lc *LocalAddr) String() string {
-	return Local
+func NewNetAddr(network, host string) *NetAddr {
+	ip, port, err := net.SplitHostPort(host)
+	if err != nil {
+		Logger.Warning(fmt.Sprintf("failed parsing RemoteAddr: %s, err: %s",
+			host, err.Error()))
+	}
+	p, err := strconv.Atoi(port)
+	if err != nil {
+		Logger.Warning(fmt.Sprintf("failed converting port : %+v, err: %s",
+			port, err.Error()))
+	}
+	return &NetAddr{network: network, ip: ip, port: p}
+}
+
+type NetAddr struct {
+	network string
+	ip      string
+	port    int
+}
+
+// Network is part of net.Addr interface
+func (lc *NetAddr) Network() string {
+	return lc.network
+}
+
+// String is part of net.Addr interface
+func (lc *NetAddr) String() string {
+	return lc.ip
+}
+
+// Port
+func (lc *NetAddr) Port() int {
+	return lc.port
+}
+
+// Host
+func (lc *NetAddr) Host() string {
+	if lc.ip == Local {
+		return Local
+	}
+	return ConcatenatedKey(lc.ip, strconv.Itoa(lc.port))
 }
