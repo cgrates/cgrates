@@ -1335,6 +1335,8 @@ func (smg *SMGeneric) BiRPCV1InitiateSession(clnt rpcclient.RpcClientConnection,
 		}
 		if authUsage != time.Duration(-1) {
 			*maxUsage = authUsage.Seconds()
+		} else {
+			*maxUsage = smg.cgrCfg.SessionSCfg().MaxCallDuration.Seconds() // Force max since -1 is not supported by OpenSIPS 2.1
 		}
 	} else {
 		*maxUsage = minMaxUsage.Seconds()
