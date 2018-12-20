@@ -34,8 +34,8 @@ import (
 
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/analyzers"
-	"github.com/cgrates/cgrates/apier/v1"
-	"github.com/cgrates/cgrates/apier/v2"
+	v1 "github.com/cgrates/cgrates/apier/v1"
+	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/cdrc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/dispatchers"
@@ -1331,8 +1331,9 @@ func shutdownSingnalHandler(exitChan chan bool) {
 
 func main() {
 	flag.Parse()
+	vers := utils.GetCGRVersion()
 	if *version {
-		fmt.Println(utils.GetCGRVersion())
+		fmt.Println(vers)
 		return
 	}
 	if *pidFile != "" {
@@ -1365,6 +1366,7 @@ func main() {
 			return
 		}()
 	}
+	utils.Logger.Debug(fmt.Sprintf("Starting CGRateS with version <%s>", vers))
 	var err error
 	// Init config
 	cfg, err = config.NewCGRConfigFromFolder(*cfgDir)
