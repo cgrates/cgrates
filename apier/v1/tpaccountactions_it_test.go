@@ -51,6 +51,7 @@ var sTestsTPAccActions = []func(t *testing.T){
 	testTPAccActionsGetTPAccActionBeforeSet,
 	testTPAccActionsSetTPAccAction,
 	testTPAccActionsGetTPAccActionAfterSet,
+	testTPAccActionsGetTPAccountActionsByLoadId,
 	testTPAccActionsGetTPAccountActionLoadIds,
 	testTPAccActionsGetTPAccountActionIds,
 	testTPAccActionsUpdateTPAccAction,
@@ -152,6 +153,16 @@ func testTPAccActionsGetTPAccActionAfterSet(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpAccActions, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", tpAccActions, reply)
+	}
+}
+
+func testTPAccActionsGetTPAccountActionsByLoadId(t *testing.T) {
+	var reply *[]*utils.TPAccountActions
+	if err := tpAccActionsRPC.Call("ApierV1.GetTPAccountActionsByLoadId",
+		&utils.TPAccountActions{TPid: "TPAcc", LoadId: "ID"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(tpAccActions, (*reply)[0]) {
+		t.Errorf("Expecting : %+v, received: %+v", tpAccActions, (*reply)[0])
 	}
 }
 
