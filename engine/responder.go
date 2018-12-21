@@ -535,7 +535,7 @@ func (rs *Responder) Status(arg string, reply *map[string]interface{}) (err erro
 	response["MemoryUsage"] = utils.SizeFmt(float64(memstats.HeapAlloc), "")
 	response[utils.ActiveGoroutines] = runtime.NumGoroutine()
 	response["Footprint"] = utils.SizeFmt(float64(memstats.Sys), "")
-	response[utils.Version] = utils.GetCGRVersion
+	response[utils.Version] = utils.GetCGRVersion()
 	*reply = response
 	return
 }
