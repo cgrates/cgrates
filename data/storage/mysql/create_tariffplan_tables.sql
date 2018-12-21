@@ -498,6 +498,7 @@ CREATE TABLE tp_chargers (
   `activation_interval` varchar(64) NOT NULL,
   `run_id` varchar(64) NOT NULL,
   `attribute_ids` varchar(64) NOT NULL,
+  `weight` decimal(8,2) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),
