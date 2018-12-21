@@ -1685,7 +1685,8 @@ func (smg *SMGeneric) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 			args.CGREvent.Context = utils.StringPointer(utils.MetaSessionS)
 		}
 		attrArgs := &engine.AttrArgsProcessEvent{
-			CGREvent: args.CGREvent,
+			ProcessRuns: utils.IntPointer(smg.cgrCfg.AttributeSCfg().ProcessRuns),
+			CGREvent:    args.CGREvent,
 		}
 		var rplyEv engine.AttrSProcessEventReply
 		if err := smg.attrS.Call(utils.AttributeSv1ProcessEvent,
@@ -1906,7 +1907,8 @@ func (smg *SMGeneric) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 			args.CGREvent.Context = utils.StringPointer(utils.MetaSessionS)
 		}
 		attrArgs := &engine.AttrArgsProcessEvent{
-			CGREvent: args.CGREvent,
+			ProcessRuns: utils.IntPointer(smg.cgrCfg.AttributeSCfg().ProcessRuns),
+			CGREvent:    args.CGREvent,
 		}
 		var rplyEv engine.AttrSProcessEventReply
 		if err := smg.attrS.Call(utils.AttributeSv1ProcessEvent,
@@ -2097,7 +2099,8 @@ func (smg *SMGeneric) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 			args.CGREvent.Context = utils.StringPointer(utils.MetaSessionS)
 		}
 		attrArgs := &engine.AttrArgsProcessEvent{
-			CGREvent: args.CGREvent,
+			ProcessRuns: utils.IntPointer(smg.cgrCfg.AttributeSCfg().ProcessRuns),
+			CGREvent:    args.CGREvent,
 		}
 		var rplyEv engine.AttrSProcessEventReply
 		if err := smg.attrS.Call(utils.AttributeSv1ProcessEvent,

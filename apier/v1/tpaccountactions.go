@@ -56,7 +56,7 @@ func (self *ApierV1) GetTPAccountActionsByLoadId(attrs utils.TPAccountActions, r
 		}
 		return err
 	} else {
-		reply = &aas
+		*reply = aas
 	}
 	return nil
 }
