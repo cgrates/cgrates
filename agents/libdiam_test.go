@@ -339,6 +339,22 @@ func TestMessageSetAVPsWithPath5(t *testing.T) {
 	}
 }
 
+// In case we send -1 as CC-Time we get error from go-diameter :
+// " strconv.ParseUint: parsing "-1": invalid syntax "
+// and crashed
+/*
+func TestMessageSetAVPsWithPath6(t *testing.T) {
+	m := diam.NewMessage(diam.CreditControl, diam.RequestFlag, 4,
+		eMessage.Header.HopByHopID, eMessage.Header.EndToEndID, nil)
+
+	if err := messageSetAVPsWithPath(m,
+		[]string{"Granted-Service-Unit", "CC-Time"}, "-1",
+		false, "UTC"); err != nil {
+		t.Error(err)
+	}
+}
+*/
+
 func TestdisectDiamListen(t *testing.T) {
 	expIPs := []string{"192.168.56.203", "192.168.57.203"}
 	rvc := disectDiamListen("192.168.56.203/192.168.57.203:3869")
