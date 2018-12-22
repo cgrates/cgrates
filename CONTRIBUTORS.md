@@ -70,6 +70,7 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @ccppprogrammer | Sergei Lavrov |
 | @chrisgis333 | Krzysztof Grzyb |
 | @Trial97 | Alexandru Tripon |
+| @anthonysomerset | Anthony Somerset |
 
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
