@@ -36,11 +36,11 @@ import (
 )
 
 func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
-	sessionS rpcclient.RpcClientConnection) (*DiameterAgent, error) {
-	if sessionS != nil && reflect.ValueOf(sessionS).IsNil() {
-		sessionS = nil
+	sS rpcclient.RpcClientConnection) (*DiameterAgent, error) {
+	if sS != nil && reflect.ValueOf(sS).IsNil() {
+		sS = nil
 	}
-	da := &DiameterAgent{cgrCfg: cgrCfg, filterS: filterS, sessionS: sessionS}
+	da := &DiameterAgent{cgrCfg: cgrCfg, filterS: filterS, sS: sS}
 	dictsPath := cgrCfg.DiameterAgentCfg().DictionariesPath
 	if len(dictsPath) != 0 {
 		if err := loadDictionaries(dictsPath, utils.DiameterAgent); err != nil {
@@ -61,15 +61,16 @@ func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 			procsr.ReplyFields = tpls
 		}
 	}
+	//da.sS.SetClientConn(da) // pass the connection to sessionS back so we can receive the disconnects
 	return da, nil
 }
 
 type DiameterAgent struct {
 	cgrCfg   *config.CGRConfig
 	filterS  *engine.FilterS
-	sessionS rpcclient.RpcClientConnection // Connection towards CGR-SessionS component
+	sS       rpcclient.RpcClientConnection // Connection towards CGR-SessionS component
 	aReqs    int
-	sync.RWMutex
+	aReqsLck sync.RWMutex
 }
 
 // ListenAndServe is called when DiameterAgent is started, usually from within cmd/cgr-engine
@@ -160,7 +161,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		return
 	}
 	if da.cgrCfg.DiameterAgentCfg().MaxActiveReqs != -1 {
-		da.Lock()
+		da.aReqsLck.Lock()
 		if da.aReqs == da.cgrCfg.DiameterAgentCfg().MaxActiveReqs {
 			utils.Logger.Err(
 				fmt.Sprintf("<%s> denying request due to maximum active requests reached: %d, message: %s",
@@ -169,11 +170,11 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			return
 		}
 		da.aReqs++
-		da.Unlock()
+		da.aReqsLck.Unlock()
 		defer func() { // schedule decrement when returning out of function
-			da.Lock()
+			da.aReqsLck.Lock()
 			da.aReqs--
-			da.Unlock()
+			da.aReqsLck.Unlock()
 		}()
 	}
 	rply := config.NewNavigableMap(nil) // share it among different processors
@@ -266,7 +267,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			*cgrEv)
 		var authReply sessions.V1AuthorizeReply
-		err = da.sessionS.Call(utils.SessionSv1AuthorizeEvent,
+		err = da.sS.Call(utils.SessionSv1AuthorizeEvent,
 			authArgs, &authReply)
 		if agReq.CGRReply, err = NewCGRReply(&authReply, err); err != nil {
 			return
@@ -279,7 +280,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaThresholds),
 			reqProcessor.Flags.HasKey(utils.MetaStats), *cgrEv)
 		var initReply sessions.V1InitSessionReply
-		err = da.sessionS.Call(utils.SessionSv1InitiateSession,
+		err = da.sS.Call(utils.SessionSv1InitiateSession,
 			initArgs, &initReply)
 		if agReq.CGRReply, err = NewCGRReply(&initReply, err); err != nil {
 			return
@@ -289,7 +290,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaAttributes),
 			reqProcessor.Flags.HasKey(utils.MetaAccounts), *cgrEv)
 		var updateReply sessions.V1UpdateSessionReply
-		err = da.sessionS.Call(utils.SessionSv1UpdateSession,
+		err = da.sS.Call(utils.SessionSv1UpdateSession,
 			updateArgs, &updateReply)
 		if agReq.CGRReply, err = NewCGRReply(&updateReply, err); err != nil {
 			return
@@ -301,7 +302,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaThresholds),
 			reqProcessor.Flags.HasKey(utils.MetaStats), *cgrEv)
 		var tRply string
-		err = da.sessionS.Call(utils.SessionSv1TerminateSession,
+		err = da.sS.Call(utils.SessionSv1TerminateSession,
 			terminateArgs, &tRply)
 		if agReq.CGRReply, err = NewCGRReply(nil, err); err != nil {
 			return
@@ -315,7 +316,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaStats),
 			*cgrEv)
 		var eventRply sessions.V1ProcessEventReply
-		err = da.sessionS.Call(utils.SessionSv1ProcessEvent,
+		err = da.sS.Call(utils.SessionSv1ProcessEvent,
 			evArgs, &eventRply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
@@ -331,7 +332,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
 	if reqProcessor.Flags.HasKey(utils.MetaCDRs) &&
 		!reqProcessor.Flags.HasKey(utils.MetaDryRun) {
 		var rplyCDRs string
-		if err = da.sessionS.Call(utils.SessionSv1ProcessCDR,
+		if err = da.sS.Call(utils.SessionSv1ProcessCDR,
 			cgrEv, &rplyCDRs); err != nil {
 			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false, false)
 		}
@@ -352,4 +353,20 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
 				utils.DiameterAgent, agReq.Reply))
 	}
 	return true, nil
+}
+
+// rpcclient.RpcClientConnection interface
+func (da *DiameterAgent) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	return utils.RPCCall(da, serviceMethod, args, reply)
+}
+
+// V1DisconnectSession is part of the sessions.SessionSClient
+func (da *DiameterAgent) V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) error {
+	return utils.ErrNotImplemented
+}
+
+// V1GetActiveSessionIDs is part of the sessions.SessionSClient
+func (da *DiameterAgent) V1GetActiveSessionIDs(ignParam string,
+	sessionIDs *[]*sessions.SessionID) error {
+	return utils.ErrNotImplemented
 }

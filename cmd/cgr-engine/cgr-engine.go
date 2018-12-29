@@ -333,20 +333,33 @@ func startAsteriskAgent(internalSMGChan chan rpcclient.RpcClientConnection, exit
 	exitChan <- true
 }
 
-func startDiameterAgent(internalSMGChan chan rpcclient.RpcClientConnection,
+func startDiameterAgent(internalSsChan chan rpcclient.RpcClientConnection,
 	exitChan chan bool, filterSChan chan *engine.FilterS) {
 	var err error
 	utils.Logger.Info("Starting CGRateS DiameterAgent service")
 	filterS := <-filterSChan
 	filterSChan <- filterS
-	var smgConn *rpcclient.RpcClientPool
-	if len(cfg.DiameterAgentCfg().SessionSConns) != 0 {
-		smgConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
+	var sS rpcclient.RpcClientConnection
+	var sSInternal bool
+	if len(cfg.DiameterAgentCfg().SessionSConns) == 0 {
+		utils.Logger.Crit(
+			fmt.Sprintf("<%s> no SessionS connections defined",
+				utils.DiameterAgent))
+		exitChan <- true
+		return
+	}
+	if cfg.DiameterAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
+		sSInternal = true
+		sSIntConn := <-internalSsChan
+		internalSsChan <- sSIntConn
+		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SMGeneric))
+	} else {
+		sS, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
 			cfg.TlsCfg().ClientKey,
 			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.DiameterAgentCfg().SessionSConns, internalSMGChan,
+			cfg.DiameterAgentCfg().SessionSConns, internalSsChan,
 			cfg.GeneralCfg().InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
@@ -355,11 +368,14 @@ func startDiameterAgent(internalSMGChan chan rpcclient.RpcClientConnection,
 			return
 		}
 	}
-	da, err := agents.NewDiameterAgent(cfg, filterS, smgConn)
+	da, err := agents.NewDiameterAgent(cfg, filterS, sS)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> error: %s!", err))
 		exitChan <- true
 		return
+	}
+	if sSInternal { // bidirectional client backwards connection
+		sS.(*utils.BiRPCInternalClient).SetClientConn(da)
 	}
 	if err = da.ListenAndServe(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> error: %s!", err))

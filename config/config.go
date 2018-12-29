@@ -605,11 +605,13 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// DAgent checks
-	if self.diameterAgentCfg.Enabled && !self.sessionSCfg.Enabled {
-		for _, daSMGConn := range self.diameterAgentCfg.SessionSConns {
-			if daSMGConn.Address == utils.MetaInternal {
-				return fmt.Errorf("%s not enabled but referenced by %s component",
-					utils.SessionS, utils.DiameterAgent)
+	if self.diameterAgentCfg.Enabled {
+		if !self.sessionSCfg.Enabled {
+			for _, daSMGConn := range self.diameterAgentCfg.SessionSConns {
+				if daSMGConn.Address == utils.MetaInternal {
+					return fmt.Errorf("%s not enabled but referenced by %s component",
+						utils.SessionS, utils.DiameterAgent)
+				}
 			}
 		}
 	}
