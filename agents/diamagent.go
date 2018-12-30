@@ -139,6 +139,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		writeOnConn(c, diamBareErr(m, diam.CommandUnsupported))
 		return
 	}
+	diamDP := newDADataProvider(c, m)
 	reqVars := map[string]interface{}{
 		utils.OriginHost:  da.cgrCfg.DiameterAgentCfg().OriginHost, // used in templates
 		utils.OriginRealm: da.cgrCfg.DiameterAgentCfg().OriginRealm,
@@ -160,6 +161,20 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		writeOnConn(c, diamBareErr(m, diam.CommandUnsupported))
 		return
 	}
+	// cache message for ASR
+	if da.cgrCfg.DiameterAgentCfg().ASRTempalte != "" {
+		sessID, err := diamDP.FieldAsString([]string{"Session-Id"})
+		if err != nil {
+			utils.Logger.Err(
+				fmt.Sprintf("<%s> failed retrieving Session-Id err: %s, message: %s",
+					utils.DiameterAgent, err.Error(), m))
+			writeOnConn(c, diamErr)
+		}
+		// cache message data needed for building up the ASR
+		engine.Cache.Set(utils.CacheDiameterMessages, sessID, &diamMessageData{c, m, reqVars},
+			nil, false, utils.NonTransactional)
+	}
+	// handle MaxActiveReqs
 	if da.cgrCfg.DiameterAgentCfg().MaxActiveReqs != -1 {
 		da.aReqsLck.Lock()
 		if da.aReqs == da.cgrCfg.DiameterAgentCfg().MaxActiveReqs {
@@ -179,12 +194,11 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 	}
 	rply := config.NewNavigableMap(nil) // share it among different processors
 	var processed bool
-
 	for _, reqProcessor := range da.cgrCfg.DiameterAgentCfg().RequestProcessors {
 		var lclProcessed bool
 		lclProcessed, err = da.processRequest(reqProcessor,
 			newAgentRequest(
-				newDADataProvider(c, m), reqVars, rply,
+				diamDP, reqVars, rply,
 				reqProcessor.Tenant, da.cgrCfg.GeneralCfg().DefaultTenant,
 				utils.FirstNonEmpty(reqProcessor.Timezone,
 					da.cgrCfg.GeneralCfg().DefaultTimezone),
@@ -361,7 +375,8 @@ func (da *DiameterAgent) Call(serviceMethod string, args interface{}, reply inte
 }
 
 // V1DisconnectSession is part of the sessions.SessionSClient
-func (da *DiameterAgent) V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) error {
+func (da *DiameterAgent) V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) (err error) {
+	//m := NewMessage(cmd uint32, 0, appid, 0, 0,  m.Dictionary())
 	return utils.ErrNotImplemented
 }
 

@@ -188,7 +188,10 @@ func (self *SMGSession) disconnectSession(reason string) error {
 		utils.AttrDisconnectSession{EventStart: self.EventStart.AsMapInterface(),
 			Reason: reason},
 		&reply); err != nil {
-		return err
+		if err != utils.ErrNotImplemented {
+			return err
+		}
+		err = nil
 	} else if reply != utils.OK {
 		return errors.New(fmt.Sprintf("Unexpected disconnect reply: %s", reply))
 	}

@@ -147,6 +147,7 @@ const CGRATES_CFG_JSON = `
 	"supplier_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control supplier filter indexes caching
 	"attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control attribute filter indexes caching
 	"charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control charger filter indexes caching
+	"diameter_messages": {"limit": -1, "ttl": "1h", "static_ttl": false},						// diameter messages caching
 },
 
 
@@ -403,13 +404,13 @@ const CGRATES_CFG_JSON = `
 				{"tag": "SessionId", "field_id": "Session-Id", "type": "*composed", 
 					"value": "~*req.OriginID", "mandatory": true},
 				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*composed", 
-					"value": "~*vars.OriginHost", "mandatory": true},
-				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*composed", 
-					"value": "~*vars.OriginRealm", "mandatory": true},
-				{"tag": "DestinationRealm", "field_id": "Destination-Realm", "type": "*composed", 
-					"value": "~*vars.DestinationRealm", "mandatory": true},
-				{"tag": "DestinationHost", "field_id": "Destination-Host", "type": "*composed", 
 					"value": "~*vars.DestinationHost", "mandatory": true},
+				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*composed", 
+					"value": "~*vars.DestinationRealm", "mandatory": true},
+				{"tag": "DestinationRealm", "field_id": "Destination-Realm", "type": "*composed", 
+					"value": "~*vars.OriginRealm", "mandatory": true},
+				{"tag": "DestinationHost", "field_id": "Destination-Host", "type": "*composed", 
+					"value": "~*vars.OriginHost", "mandatory": true},
 				{"tag": "AuthApplicationId", "field_id": "Auth-Application-Id", "type": "*composed",
 					 "value": "~*vars.*appid", "mandatory": true},
 				{"tag": "UserName", "field_id": "User-Name", "type": "*composed", 

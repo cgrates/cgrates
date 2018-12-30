@@ -505,3 +505,10 @@ func newDiamAnswer(m *diam.Message, resCode uint32) *diam.Message {
 	}
 	return nm
 }
+
+// diamMessageData is cached when data is needed (ie. )
+type diamMessageData struct {
+	c    diam.Conn
+	m    *diam.Message
+	vars map[string]interface{}
+}

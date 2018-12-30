@@ -921,6 +921,7 @@ const (
 	CacheSupplierFilterIndexes  = "supplier_filter_indexes"
 	CacheAttributeFilterIndexes = "attribute_filter_indexes"
 	CacheChargerFilterIndexes   = "charger_filter_indexes"
+	CacheDiameterMessages       = "diameter_messages"
 	MetaPrecaching              = "*precaching"
 	MetaReady                   = "*ready"
 )
