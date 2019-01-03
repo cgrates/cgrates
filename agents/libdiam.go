@@ -266,11 +266,12 @@ func messageSetAVPsWithPath(m *diam.Message, pathStr []string,
 }
 
 // writeOnConn writes the message on connection, logs failures
-func writeOnConn(c diam.Conn, m *diam.Message) {
-	if _, err := m.WriteTo(c); err != nil {
+func writeOnConn(c diam.Conn, m *diam.Message) (err error) {
+	if _, err = m.WriteTo(c); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<%s> failed writing message to %s, err: %s, msg: %s",
 			utils.DiameterAgent, c.RemoteAddr(), err.Error(), m))
 	}
+	return
 }
 
 // newDADataProvider constructs a DataProvider for a diameter message
@@ -404,20 +405,14 @@ func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err 
 	return
 }
 
-// diamAnswer builds up the answer to be sent back to the client
-func diamAnswer(m *diam.Message, resCode uint32, errFlag bool,
-	rply *config.NavigableMap, tmz string) (a *diam.Message, err error) {
-	a = newDiamAnswer(m, resCode)
-	if errFlag {
-		a.Header.CommandFlags = diam.ErrorFlag
-	}
+// updateDiamMsgFromNavMap will update the diameter message with items from navigable map
+func updateDiamMsgFromNavMap(m *diam.Message, navMp *config.NavigableMap, tmz string) (err error) {
 	// write reply into message
 	pathIdx := make(map[string]int) // group items for same path
-	for _, val := range rply.Values() {
-
+	for _, val := range navMp.Values() {
 		nmItms, isNMItems := val.([]*config.NMItem)
 		if !isNMItems {
-			return nil, fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(val))
+			return fmt.Errorf("cannot encode reply value: %s, err: not NMItems", utils.ToJSON(val))
 		}
 		// find out the first itm which is not an attribute
 		var itm *config.NMItem
@@ -441,16 +436,29 @@ func diamAnswer(m *diam.Message, resCode uint32, errFlag bool,
 		}
 		itmStr, err := utils.IfaceAsString(itm.Data)
 		if err != nil {
-			return nil, fmt.Errorf("cannot convert data: %+v to string, err: %s", itm.Data, err)
+			return fmt.Errorf("cannot convert data: %+v to string, err: %s", itm.Data, err)
 		}
 		var newBranch bool
 		if itm.Config != nil && itm.Config.NewBranch {
 			newBranch = true
 		}
-		if err = messageSetAVPsWithPath(a, itm.Path,
+		if err = messageSetAVPsWithPath(m, itm.Path,
 			itmStr, newBranch, tmz); err != nil {
-			return nil, fmt.Errorf("setting item with path: %+v got err: %s", itm.Path, err.Error())
+			return fmt.Errorf("setting item with path: %+v got err: %s", itm.Path, err.Error())
 		}
+	}
+	return
+}
+
+// diamAnswer builds up the answer to be sent back to the client
+func diamAnswer(m *diam.Message, resCode uint32, errFlag bool,
+	rply *config.NavigableMap, tmz string) (a *diam.Message, err error) {
+	a = newDiamAnswer(m, resCode)
+	if errFlag {
+		a.Header.CommandFlags = diam.ErrorFlag
+	}
+	if err = updateDiamMsgFromNavMap(a, rply, tmz); err != nil {
+		return nil, err
 	}
 	return
 }
@@ -507,7 +515,7 @@ func newDiamAnswer(m *diam.Message, resCode uint32) *diam.Message {
 }
 
 // diamMessageData is cached when data is needed (ie. )
-type diamMessageData struct {
+type diamMsgData struct {
 	c    diam.Conn
 	m    *diam.Message
 	vars map[string]interface{}

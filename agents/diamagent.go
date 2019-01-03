@@ -165,13 +165,13 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 	if da.cgrCfg.DiameterAgentCfg().ASRTempalte != "" {
 		sessID, err := diamDP.FieldAsString([]string{"Session-Id"})
 		if err != nil {
-			utils.Logger.Err(
+			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed retrieving Session-Id err: %s, message: %s",
 					utils.DiameterAgent, err.Error(), m))
 			writeOnConn(c, diamErr)
 		}
 		// cache message data needed for building up the ASR
-		engine.Cache.Set(utils.CacheDiameterMessages, sessID, &diamMessageData{c, m, reqVars},
+		engine.Cache.Set(utils.CacheDiameterMessages, sessID, &diamMsgData{c, m, reqVars},
 			nil, false, utils.NonTransactional)
 	}
 	// handle MaxActiveReqs
@@ -376,8 +376,45 @@ func (da *DiameterAgent) Call(serviceMethod string, args interface{}, reply inte
 
 // V1DisconnectSession is part of the sessions.SessionSClient
 func (da *DiameterAgent) V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) (err error) {
-	//m := NewMessage(cmd uint32, 0, appid, 0, 0,  m.Dictionary())
-	return utils.ErrNotImplemented
+	ssID, has := args.EventStart[utils.OriginID]
+	if !has {
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> cannot disconnect session, missing OriginID in event: %s",
+				utils.DiameterAgent, utils.ToJSON(args.EventStart)))
+		return utils.ErrMandatoryIeMissing
+	}
+	msg, has := engine.Cache.Get(utils.CacheDiameterMessages, ssID.(string))
+	if !has {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> cannot retrieve message from cache with OriginID: <%s>",
+				utils.DiameterAgent, ssID))
+		return utils.ErrMandatoryIeMissing
+	}
+	dmd := msg.(*diamMsgData)
+	aReq := newAgentRequest(
+		newDADataProvider(dmd.c, dmd.m),
+		dmd.vars, nil, nil,
+		da.cgrCfg.GeneralCfg().DefaultTenant,
+		da.cgrCfg.GeneralCfg().DefaultTimezone, da.filterS)
+	nM, err := aReq.AsNavigableMap(da.cgrCfg.DiameterAgentCfg().Templates[da.cgrCfg.DiameterAgentCfg().ASRTempalte])
+	if err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> cannot disconnect session with OriginID: <%s>, err: %s",
+				utils.DiameterAgent, ssID, err.Error()))
+		return utils.ErrServerError
+	}
+	m := diam.NewMessage(dmd.m.Header.CommandCode, 0, dmd.m.Header.ApplicationID, 0, 0, dmd.m.Dictionary())
+	if err = updateDiamMsgFromNavMap(m, nM, da.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> cannot disconnect session with OriginID: <%s>, err: %s",
+				utils.DiameterAgent, ssID, err.Error()))
+		return utils.ErrServerError
+	}
+	if err = writeOnConn(dmd.c, m); err != nil {
+		return utils.ErrServerError
+	}
+	*reply = utils.OK
+	return
 }
 
 // V1GetActiveSessionIDs is part of the sessions.SessionSClient
