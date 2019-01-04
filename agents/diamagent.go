@@ -162,7 +162,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		return
 	}
 	// cache message for ASR
-	if da.cgrCfg.DiameterAgentCfg().ASRTempalte != "" {
+	if da.cgrCfg.DiameterAgentCfg().ASRTemplate != "" {
 		sessID, err := diamDP.FieldAsString([]string{"Session-Id"})
 		if err != nil {
 			utils.Logger.Warning(
@@ -172,7 +172,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		}
 		// cache message data needed for building up the ASR
 		engine.Cache.Set(utils.CacheDiameterMessages, sessID, &diamMsgData{c, m, reqVars},
-			nil, false, utils.NonTransactional)
+			nil, true, utils.NonTransactional)
 	}
 	// handle MaxActiveReqs
 	if da.cgrCfg.DiameterAgentCfg().MaxActiveReqs != -1 {
@@ -396,14 +396,14 @@ func (da *DiameterAgent) V1DisconnectSession(args utils.AttrDisconnectSession, r
 		dmd.vars, nil, nil,
 		da.cgrCfg.GeneralCfg().DefaultTenant,
 		da.cgrCfg.GeneralCfg().DefaultTimezone, da.filterS)
-	nM, err := aReq.AsNavigableMap(da.cgrCfg.DiameterAgentCfg().Templates[da.cgrCfg.DiameterAgentCfg().ASRTempalte])
+	nM, err := aReq.AsNavigableMap(da.cgrCfg.DiameterAgentCfg().Templates[da.cgrCfg.DiameterAgentCfg().ASRTemplate])
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> cannot disconnect session with OriginID: <%s>, err: %s",
 				utils.DiameterAgent, ssID, err.Error()))
 		return utils.ErrServerError
 	}
-	m := diam.NewMessage(dmd.m.Header.CommandCode, 0, dmd.m.Header.ApplicationID, 0, 0, dmd.m.Dictionary())
+	m := diam.NewRequest(dmd.m.Header.CommandCode, dmd.m.Header.ApplicationID, dmd.m.Dictionary())
 	if err = updateDiamMsgFromNavMap(m, nM, da.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> cannot disconnect session with OriginID: <%s>, err: %s",
