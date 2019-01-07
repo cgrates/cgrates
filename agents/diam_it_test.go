@@ -63,7 +63,7 @@ var sTestsDiam = []func(t *testing.T){
 	testDiamItKillEngine,
 }
 
-//Test start here
+// Test start here
 func TestDiamItTcp(t *testing.T) {
 	diamConfigDIR = "diamagent"
 	for _, stest := range sTestsDiam {
@@ -131,9 +131,6 @@ func testDiamItStartEngine(t *testing.T) {
 }
 
 func testDiamItConnectDiameterClient(t *testing.T) {
-	if diamConfigDIR == "diamsctpagent" || diamConfigDIR == "diamagentmaxconn" {
-		daCfg.DiameterAgentCfg().DictionariesPath = ""
-	}
 	diamClnt, err = NewDiameterClient(daCfg.DiameterAgentCfg().Listen, "INTEGRATION_TESTS",
 		daCfg.DiameterAgentCfg().OriginRealm, daCfg.DiameterAgentCfg().VendorId,
 		daCfg.DiameterAgentCfg().ProductName, utils.DIAMETER_FIRMWARE_REVISION,

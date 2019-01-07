@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -30,6 +31,8 @@ import (
 	"github.com/fiorix/go-diameter/diam/datatype"
 	"github.com/fiorix/go-diameter/diam/sm"
 )
+
+var dictOnce sync.Once
 
 func NewDiameterClient(addr, originHost, originRealm string, vendorId int, productName string,
 	firmwareRev int, dictsDir string, network string) (*DiameterClient, error) {
@@ -74,7 +77,10 @@ func NewDiameterClient(addr, originHost, originRealm string, vendorId int, produ
 		},
 	}
 	if len(dictsDir) != 0 {
-		if err := loadDictionaries(dictsDir, "DiameterClient"); err != nil {
+		var err error
+		err = nil
+		dictOnce.Do(func() { err = loadDictionaries(dictsDir, "DiameterClient") })
+		if err != nil {
 			return nil, err
 		}
 	}
