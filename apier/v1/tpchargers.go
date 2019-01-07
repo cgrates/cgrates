@@ -35,8 +35,9 @@ func (self *ApierV1) SetTPCharger(attr utils.TPChargerProfile, reply *string) er
 }
 
 type AttrGetTPCharger struct {
-	TPid string // Tariff plan id
-	ID   string
+	TPid   string // Tariff plan id
+	Tenant string
+	ID     string
 }
 
 // Queries specific ChargerProfile on Tariff plan
