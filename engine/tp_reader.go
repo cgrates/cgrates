@@ -266,13 +266,17 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 	for tag, rplBnds := range bindings {
 		ratingPlan := &RatingPlan{Id: tag}
 		for _, rp := range rplBnds {
-			tptm, err := tpr.lr.GetTPTimings(tpr.tpid, rp.TimingId)
-			if err != nil || len(tptm) == 0 {
-				return false, fmt.Errorf("no timing with id %s: %v", rp.TimingId, err)
-			}
-			tm, err := MapTPTimings(tptm)
-			if err != nil {
-				return false, err
+			tm := tpr.timings
+			_, exists := tpr.timings[rp.TimingId]
+			if !exists {
+				tptm, err := tpr.lr.GetTPTimings(tpr.tpid, rp.TimingId)
+				if err != nil || len(tptm) == 0 {
+					return false, fmt.Errorf("no timing with id %s: %v", rp.TimingId, err)
+				}
+				tm, err = MapTPTimings(tptm)
+				if err != nil {
+					return false, err
+				}
 			}
 
 			rp.SetTiming(tm[rp.TimingId])
