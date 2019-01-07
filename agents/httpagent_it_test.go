@@ -180,6 +180,24 @@ func testHAitAuthDryRun(t *testing.T) {
 }
 
 func testHAitAuth1001(t *testing.T) {
+	acnt := "20002"
+	maxDuration := 60
+
+	attrSetBalance := utils.AttrSetBalance{
+		Tenant:        "cgrates.org",
+		Account:       acnt,
+		BalanceType:   utils.VOICE,
+		BalanceID:     utils.StringPointer("TestDynamicDebitBalance"),
+		Value:         utils.Float64Pointer(float64(maxDuration) * float64(time.Second)),
+		RatingSubject: utils.StringPointer("*zero5ms"),
+	}
+	var reply string
+	if err := haRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
+	}
+
 	httpConst := "http"
 	addr := haCfg.ListenCfg().HTTPListen
 	if isTls {
@@ -187,16 +205,11 @@ func testHAitAuth1001(t *testing.T) {
 		httpConst = "https"
 
 	}
-	reqUrl := fmt.Sprintf("%s://%s%s?request_type=OutboundAUTH&CallID=123456&Msisdn=1001&Imsi=2343000000000123&Destination=1002&MSRN=0102220233444488999&ProfileID=1&AgentID=176&GlobalMSISDN=497700056129&GlobalIMSI=214180000175129&ICCID=8923418450000089629&MCC=234&MNC=10&calltype=callback",
-		httpConst, addr, haCfg.HttpAgentCfg()[0].Url)
+	reqUrl := fmt.Sprintf("%s://%s%s?request_type=OutboundAUTH&CallID=123456&Msisdn=%s&Imsi=2343000000000123&Destination=1002&MSRN=0102220233444488999&ProfileID=1&AgentID=176&GlobalMSISDN=497700056129&GlobalIMSI=214180000175129&ICCID=8923418450000089629&MCC=234&MNC=10&calltype=callback",
+		httpConst, addr, haCfg.HttpAgentCfg()[0].Url, acnt)
 	rply, err := httpC.Get(reqUrl)
 	if err != nil {
 		t.Error(err)
-	}
-	// var eXml []byte
-	maxDuration := 6042
-	if t := time.Now(); t.Weekday() == time.Saturday || t.Weekday() == time.Sunday { // Different rating plans for weekend
-		maxDuration = 10800
 	}
 	eXml := []byte(fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
 <response>
