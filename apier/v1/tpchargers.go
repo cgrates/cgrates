@@ -76,12 +76,18 @@ func (self *ApierV1) GetTPChargerIDs(attrs AttrGetTPChargerIds, reply *[]string)
 	return nil
 }
 
+type AttrRemTPCharger struct {
+	TPid   string // Tariff plan id
+	Tenant string
+	ID     string // Attribute id
+}
+
 // Removes specific Resource on Tariff plan
-func (self *ApierV1) RemTPCharger(attrs AttrGetTPCharger, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
+func (self *ApierV1) RemTPCharger(attrs AttrRemTPCharger, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBLTPChargers, attrs.TPid, map[string]string{"id": attrs.ID}); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBLTPChargers, attrs.TPid, map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = utils.OK
