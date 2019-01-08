@@ -677,7 +677,7 @@ func (csvs *CSVStorage) GetTPSuppliers(tpid, id string) ([]*utils.TPSupplierProf
 	return tpSPPs.AsTPSuppliers(), nil
 }
 
-func (csvs *CSVStorage) GetTPAttributes(tpid, id string) ([]*utils.TPAttributeProfile, error) {
+func (csvs *CSVStorage) GetTPAttributes(tpid, tenant, id string) ([]*utils.TPAttributeProfile, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.attributeProfilesFn, csvs.sep, getColumnCount(TPAttribute{}))
 	if err != nil {
 		//log.Print("Could not load AttributeProfile file: ", err)

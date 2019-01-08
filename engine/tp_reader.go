@@ -1403,16 +1403,16 @@ func (tpr *TpReader) LoadSupplierProfiles() error {
 }
 
 func (tpr *TpReader) LoadAttributeProfilesFiltered(tag string) (err error) {
-	rls, err := tpr.lr.GetTPAttributes(tpr.tpid, tag)
+	attrs, err := tpr.lr.GetTPAttributes(tpr.tpid, "", tag)
 	if err != nil {
 		return err
 	}
-	mapRsPfls := make(map[utils.TenantID]*utils.TPAttributeProfile)
-	for _, rl := range rls {
-		mapRsPfls[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
+	mapAttrPfls := make(map[utils.TenantID]*utils.TPAttributeProfile)
+	for _, attr := range attrs {
+		mapAttrPfls[utils.TenantID{Tenant: attr.Tenant, ID: attr.ID}] = attr
 	}
-	tpr.attributeProfiles = mapRsPfls
-	for tntID := range mapRsPfls {
+	tpr.attributeProfiles = mapAttrPfls
+	for tntID := range mapAttrPfls {
 		if has, err := tpr.dm.HasData(utils.AttributeProfilePrefix, tntID.ID, tntID.Tenant); err != nil {
 			return err
 		} else if !has {

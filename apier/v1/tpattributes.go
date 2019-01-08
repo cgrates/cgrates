@@ -23,28 +23,23 @@ import (
 )
 
 // Creates a new AttributeProfile within a tariff plan
-func (self *ApierV1) SetTPAttributeProfile(attrs utils.TPAttributeProfile, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
+func (self *ApierV1) SetTPAttributeProfile(attrs *utils.TPAttributeProfile, reply *string) error {
+	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.SetTPAttributes([]*utils.TPAttributeProfile{&attrs}); err != nil {
+	if err := self.StorDb.SetTPAttributes([]*utils.TPAttributeProfile{attrs}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-type AttrGetTPAttributeProfile struct {
-	TPid string // Tariff plan id
-	ID   string
-}
-
 // Queries specific AttributeProfile on Tariff plan
-func (self *ApierV1) GetTPAttributeProfile(attr AttrGetTPAttributeProfile, reply *utils.TPAttributeProfile) error {
-	if missing := utils.MissingStructFields(&attr, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
+func (self *ApierV1) GetTPAttributeProfile(attr *utils.TPTntID, reply *utils.TPAttributeProfile) error {
+	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if als, err := self.StorDb.GetTPAttributes(attr.TPid, attr.ID); err != nil {
+	if als, err := self.StorDb.GetTPAttributes(attr.TPid, attr.Tenant, attr.ID); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -75,15 +70,9 @@ func (self *ApierV1) GetTPAttributeProfileIds(attrs AttrGetTPAttributeProfileIds
 	return nil
 }
 
-type AttrRemTPAttributeProfile struct {
-	TPid   string // Tariff plan id
-	Tenant string
-	ID     string // Attribute id
-}
-
 // Removes specific AttributeProfile on Tariff plan
-func (self *ApierV1) RemTPAttributeProfile(attrs AttrRemTPAttributeProfile, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
+func (self *ApierV1) RemTPAttributeProfile(attrs *utils.TPTntID, reply *string) error {
+	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := self.StorDb.RemTpData(utils.TBLTPAttributes, attrs.TPid, map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {

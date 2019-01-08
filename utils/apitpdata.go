@@ -1076,18 +1076,18 @@ func (self *RPCCDRsFilter) AsCDRsFilter(timezone string) (*CDRsFilter, error) {
 		NotSubjects:            self.NotSubjects,
 		DestinationPrefixes:    self.DestinationPrefixes,
 		NotDestinationPrefixes: self.NotDestinationPrefixes,
-		Costs:          self.Costs,
-		NotCosts:       self.NotCosts,
-		ExtraFields:    self.ExtraFields,
-		NotExtraFields: self.NotExtraFields,
-		OrderIDStart:   self.OrderIDStart,
-		OrderIDEnd:     self.OrderIDEnd,
-		MinUsage:       self.MinUsage,
-		MaxUsage:       self.MaxUsage,
-		MinCost:        self.MinCost,
-		MaxCost:        self.MaxCost,
-		Paginator:      self.Paginator,
-		OrderBy:        self.OrderBy,
+		Costs:                  self.Costs,
+		NotCosts:               self.NotCosts,
+		ExtraFields:            self.ExtraFields,
+		NotExtraFields:         self.NotExtraFields,
+		OrderIDStart:           self.OrderIDStart,
+		OrderIDEnd:             self.OrderIDEnd,
+		MinUsage:               self.MinUsage,
+		MaxUsage:               self.MaxUsage,
+		MinCost:                self.MinCost,
+		MaxCost:                self.MaxCost,
+		Paginator:              self.Paginator,
+		OrderBy:                self.OrderBy,
 	}
 	if len(self.SetupTimeStart) != 0 {
 		if sTimeStart, err := ParseTimeDetectLayout(self.SetupTimeStart, timezone); err != nil {
@@ -1389,4 +1389,10 @@ type TPChargerProfile struct {
 	RunID              string
 	AttributeIDs       []string
 	Weight             float64
+}
+
+type TPTntID struct {
+	TPid   string
+	Tenant string
+	ID     string
 }

@@ -82,12 +82,7 @@ func testTPAlsPrfInitCfg(t *testing.T) {
 	}
 	tpAlsPrfCfg.DataFolderPath = tpAlsPrfDataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(tpAlsPrfCfg)
-	switch tpAlsPrfConfigDIR {
-	case "tutmongo": // Mongo needs more time to reset db, need to investigate
-		tpAlsPrfDelay = 2000
-	default:
-		tpAlsPrfDelay = 1000
-	}
+	tpAlsPrfDelay = 1000
 }
 
 // Wipe out the cdr database
@@ -116,7 +111,7 @@ func testTPAlsPrfRPCConn(t *testing.T) {
 func testTPAlsPrfGetTPAlsPrfBeforeSet(t *testing.T) {
 	var reply *utils.TPAttributeProfile
 	if err := tpAlsPrfRPC.Call("ApierV1.GetTPAttributeProfile",
-		&AttrGetTPAttributeProfile{TPid: "TP1", ID: "ALS1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Attr1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -153,7 +148,7 @@ func testTPAlsPrfSetTPAlsPrf(t *testing.T) {
 func testTPAlsPrfGetTPAlsPrfAfterSet(t *testing.T) {
 	var reply *utils.TPAttributeProfile
 	if err := tpAlsPrfRPC.Call("ApierV1.GetTPAttributeProfile",
-		&AttrGetTPAttributeProfile{TPid: "TP1", ID: "Attr1"}, &reply); err != nil {
+		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Attr1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpAlsPrf, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", tpAlsPrf, reply)
@@ -196,18 +191,44 @@ func testTPAlsPrfUpdateTPAlsPrf(t *testing.T) {
 
 func testTPAlsPrfGetTPAlsPrfAfterUpdate(t *testing.T) {
 	var reply *utils.TPAttributeProfile
+	revTPAlsPrf := &utils.TPAttributeProfile{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "Attr1",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-29T15:00:00Z",
+			ExpiryTime:     "",
+		},
+		Contexts: []string{"con1"},
+		Attributes: []*utils.TPAttribute{
+			&utils.TPAttribute{
+				FieldName:  "FL2",
+				Initial:    "In2",
+				Substitute: "Al2",
+				Append:     false,
+			},
+			&utils.TPAttribute{
+				FieldName:  "FL1",
+				Initial:    "In1",
+				Substitute: "Al1",
+				Append:     true,
+			},
+		},
+		Weight: 20,
+	}
 	if err := tpAlsPrfRPC.Call("ApierV1.GetTPAttributeProfile",
-		&AttrGetTPAttributeProfile{TPid: "TP1", ID: "Attr1"}, &reply); err != nil {
+		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Attr1"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(tpAlsPrf, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", tpAlsPrf, reply)
+	} else if !reflect.DeepEqual(tpAlsPrf, reply) && !reflect.DeepEqual(revTPAlsPrf, reply) {
+		t.Errorf("Expecting : %+v, \n received: %+v", utils.ToJSON(tpAlsPrf), utils.ToJSON(reply))
 	}
 }
 
 func testTPAlsPrfRemTPAlsPrf(t *testing.T) {
 	var resp string
 	if err := tpAlsPrfRPC.Call("ApierV1.RemTPAttributeProfile",
-		&AttrRemTPAttributeProfile{TPid: "TP1", Tenant: "cgrates.org", ID: "Attr1"},
+		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Attr1"},
 		&resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -218,7 +239,7 @@ func testTPAlsPrfRemTPAlsPrf(t *testing.T) {
 func testTPAlsPrfGetTPAlsPrfAfterRemove(t *testing.T) {
 	var reply *utils.TPAttributeProfile
 	if err := tpAlsPrfRPC.Call("ApierV1.GetTPAttributeProfile",
-		&AttrGetTPAttributeProfile{TPid: "TP1", ID: "ALS1"},
+		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Attr1"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
