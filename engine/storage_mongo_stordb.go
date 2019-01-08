@@ -1533,10 +1533,13 @@ func (ms *MongoStorage) SetTPSuppliers(tpSPs []*utils.TPSupplierProfile) (err er
 	})
 }
 
-func (ms *MongoStorage) GetTPAttributes(tpid, id string) ([]*utils.TPAttributeProfile, error) {
+func (ms *MongoStorage) GetTPAttributes(tpid, tenant, id string) ([]*utils.TPAttributeProfile, error) {
 	filter := bson.M{"tpid": tpid}
 	if id != "" {
 		filter["id"] = id
+	}
+	if tenant != "" {
+		filter["tenant"] = tenant
 	}
 	var results []*utils.TPAttributeProfile
 	err := ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {

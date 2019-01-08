@@ -1554,11 +1554,14 @@ func (self *SQLStorage) GetTPSuppliers(tpid, id string) ([]*utils.TPSupplierProf
 	return arls, nil
 }
 
-func (self *SQLStorage) GetTPAttributes(tpid, id string) ([]*utils.TPAttributeProfile, error) {
+func (self *SQLStorage) GetTPAttributes(tpid, tenant, id string) ([]*utils.TPAttributeProfile, error) {
 	var sps TPAttributes
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("id = ?", id)
+	}
+	if len(tenant) != 0 {
+		q = q.Where("tenant = ?", tenant)
 	}
 	if err := q.Find(&sps).Error; err != nil {
 		return nil, err

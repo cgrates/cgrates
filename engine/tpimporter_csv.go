@@ -385,7 +385,7 @@ func (self *TPCSVImporter) importAttributeProfiles(fn string) error {
 	if self.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	rls, err := self.csvr.GetTPAttributes(self.TPid, "")
+	rls, err := self.csvr.GetTPAttributes(self.TPid, "", "")
 	if err != nil {
 		return err
 	}

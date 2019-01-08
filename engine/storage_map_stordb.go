@@ -88,7 +88,7 @@ func (ms *MapStorage) GetTPFilters(tpid, id string) (fltrs []*utils.TPFilterProf
 func (ms *MapStorage) GetTPSuppliers(tpid, id string) (supps []*utils.TPSupplierProfile, err error) {
 	return nil, utils.ErrNotImplemented
 }
-func (ms *MapStorage) GetTPAttributes(tpid, id string) (attrs []*utils.TPAttributeProfile, err error) {
+func (ms *MapStorage) GetTPAttributes(tpid, tenant, id string) (attrs []*utils.TPAttributeProfile, err error) {
 	return nil, utils.ErrNotImplemented
 }
 func (ms *MapStorage) GetTPChargers(tpid, id string) (attrs []*utils.TPChargerProfile, err error) {

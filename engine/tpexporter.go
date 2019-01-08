@@ -273,7 +273,7 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	storDataAlias, err := self.storDb.GetTPAttributes(self.tpID, "")
+	storDataAlias, err := self.storDb.GetTPAttributes(self.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
 		return err
 	}
