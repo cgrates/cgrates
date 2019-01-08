@@ -36,7 +36,7 @@ import (
 func (ms *MongoStorage) GetTpIds(colName string) (tpids []string, err error) {
 	getTpIDs := func(ctx context.Context, col string, tpMap map[string]struct{}) (map[string]struct{}, error) {
 		if strings.HasPrefix(col, "tp_") {
-			result, err := ms.getCol(col).Distinct(ctx, "tpid", nil)
+			result, err := ms.getCol(col).Distinct(ctx, "tpid", bson.D{})
 			if err != nil {
 				return tpMap, err
 			}
@@ -50,7 +50,7 @@ func (ms *MongoStorage) GetTpIds(colName string) (tpids []string, err error) {
 
 	if colName == "" {
 		if err := ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) error {
-			col, err := ms.DB().ListCollections(sctx, nil, options.ListCollections().SetNameOnly(true))
+			col, err := ms.DB().ListCollections(sctx, bson.D{}, options.ListCollections().SetNameOnly(true))
 			if err != nil {
 				return err
 			}
@@ -671,7 +671,7 @@ func (ms *MongoStorage) GetTPAccountActions(tp *utils.TPAccountActions) ([]*util
 func (ms *MongoStorage) RemTpData(table, tpid string, args map[string]string) error {
 	if len(table) == 0 { // Remove tpid out of all tables
 		return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) error {
-			col, err := ms.DB().ListCollections(sctx, nil, options.ListCollections().SetNameOnly(true))
+			col, err := ms.DB().ListCollections(sctx, bson.D{}, options.ListCollections().SetNameOnly(true))
 			if err != nil {
 				return err
 			}
@@ -1616,7 +1616,7 @@ func (ms *MongoStorage) GetVersions(itm string) (vrs Versions, err error) {
 		fop.SetProjection(bson.M{"_id": 0})
 	}
 	if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		cur := ms.getCol(colVer).FindOne(sctx, nil, fop)
+		cur := ms.getCol(colVer).FindOne(sctx, bson.D{}, fop)
 		if err := cur.Decode(&vrs); err != nil {
 			if err == mongo.ErrNoDocuments {
 				return utils.ErrNotFound
@@ -1638,7 +1638,7 @@ func (ms *MongoStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
 		ms.RemoveVersions(nil)
 	}
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(colVer).UpdateOne(sctx, nil, bson.M{"$set": vrs},
+		_, err = ms.getCol(colVer).UpdateOne(sctx, bson.D{}, bson.M{"$set": vrs},
 			options.Update().SetUpsert(true),
 		)
 		return err
@@ -1654,7 +1654,7 @@ func (ms *MongoStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
 func (ms *MongoStorage) RemoveVersions(vrs Versions) (err error) {
 	if len(vrs) == 0 {
 		return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-			dr, err := ms.getCol(colVer).DeleteOne(sctx, nil)
+			dr, err := ms.getCol(colVer).DeleteOne(sctx, bson.D{})
 			if dr.DeletedCount == 0 {
 				return utils.ErrNotFound
 			}
@@ -1663,7 +1663,7 @@ func (ms *MongoStorage) RemoveVersions(vrs Versions) (err error) {
 	}
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		for k := range vrs {
-			if _, err = ms.getCol(colVer).UpdateOne(sctx, nil, bson.M{"$unset": bson.M{k: 1}},
+			if _, err = ms.getCol(colVer).UpdateOne(sctx, bson.D{}, bson.M{"$unset": bson.M{k: 1}},
 				options.Update().SetUpsert(true)); err != nil {
 				return err
 			}
