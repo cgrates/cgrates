@@ -41,7 +41,6 @@ import (
 	"github.com/mongodb/mongo-go-driver/mongo"
 	"github.com/mongodb/mongo-go-driver/mongo/options"
 	"github.com/mongodb/mongo-go-driver/x/bsonx"
-	"github.com/mongodb/mongo-go-driver/x/mongo/driver/topology"
 )
 
 const (
@@ -143,16 +142,7 @@ func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes
 	ctx := context.Background()
 	url = "mongodb://" + url
 	reg := bson.NewRegistryBuilder().RegisterDecoder(tTime, bsoncodec.ValueDecoderFunc(TimeDecodeValue1)).Build()
-	opt := &options.ClientOptions{
-		Registry: reg,
-		TopologyOptions: []topology.Option{
-			topology.WithServerOptions(func(opts ...topology.ServerOption) []topology.ServerOption {
-				return []topology.ServerOption{
-					topology.WithRegistry(func(r *bsoncodec.Registry) *bsoncodec.Registry { return reg }),
-				}
-			}),
-		},
-	}
+	opt := options.Client().SetRegistry(reg)
 
 	client, err := mongo.NewClientWithOptions(url, opt)
 	// client, err := mongo.NewClient(url)
@@ -175,7 +165,7 @@ func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes
 		isDataDB:    isDataDB,
 	}
 	if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) error {
-		if col, err := ms.client.Database(dbName).ListCollections(sctx, nil, options.ListCollections().SetNameOnly(true)); err != nil {
+		if col, err := ms.client.Database(dbName).ListCollections(sctx, bson.D{}, options.ListCollections().SetNameOnly(true)); err != nil {
 			return err
 		} else {
 			empty := true
@@ -225,14 +215,14 @@ func (ms *MongoStorage) IsDataDB() bool {
 func (ms *MongoStorage) EnusureIndex(colName string, uniq bool, keys ...string) error {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) error {
 		col := ms.getCol(colName)
-		io := mongo.NewIndexOptionsBuilder().Unique(uniq)
+		io := options.Index().SetUnique(uniq)
 		var doc bsonx.Doc
 		for _, k := range keys {
 			doc = doc.Append(k, bsonx.Int32(1))
 		}
 		_, err := col.Indexes().CreateOne(sctx, mongo.IndexModel{
 			Keys:    doc,
-			Options: io.Build(),
+			Options: io,
 		})
 		return err
 	})
@@ -523,7 +513,7 @@ func (ms *MongoStorage) RemoveReverseForPrefix(prefix string) (err error) {
 // IsDBEmpty implementation
 func (ms *MongoStorage) IsDBEmpty() (resp bool, err error) {
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) error {
-		col, err := ms.DB().ListCollections(sctx, nil)
+		col, err := ms.DB().ListCollections(sctx, bson.D{})
 		if err != nil {
 			return err
 		}
@@ -1151,7 +1141,7 @@ func (ms *MongoStorage) GetSubscribersDrv() (result map[string]*SubscriberData, 
 		Value *SubscriberData
 	}
 	if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(colPbs).Find(sctx, nil)
+		cur, err := ms.getCol(colPbs).Find(sctx, bson.D{})
 		if err != nil {
 			return err
 		}
@@ -1214,7 +1204,7 @@ func (ms *MongoStorage) GetUserDrv(key string) (up *UserProfile, err error) {
 
 func (ms *MongoStorage) GetUsersDrv() (result []*UserProfile, err error) {
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(colUsr).Find(sctx, nil)
+		cur, err := ms.getCol(colUsr).Find(sctx, bson.D{})
 		if err != nil {
 			return err
 		}
@@ -1802,7 +1792,7 @@ func (ms *MongoStorage) PopTask() (t *Task, err error) {
 		Task *Task
 	}{}
 	if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		cur := ms.getCol(colTsk).FindOneAndDelete(sctx, nil)
+		cur := ms.getCol(colTsk).FindOneAndDelete(sctx, bson.D{})
 		if err := cur.Decode(&v); err != nil {
 			if err == mongo.ErrNoDocuments {
 				return utils.ErrNotFound
