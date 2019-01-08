@@ -35,7 +35,7 @@ import (
 var dictOnce sync.Once
 
 func NewDiameterClient(addr, originHost, originRealm string, vendorId int, productName string,
-	firmwareRev int, dictsDir string, network string) (*DiameterClient, error) {
+	firmwareRev int, dictsDir string, network string) (dc *DiameterClient, err error) {
 	cfg := &sm.Settings{
 		OriginHost:       datatype.DiameterIdentity(originHost),
 		OriginRealm:      datatype.DiameterIdentity(originRealm),
@@ -77,8 +77,6 @@ func NewDiameterClient(addr, originHost, originRealm string, vendorId int, produ
 		},
 	}
 	if len(dictsDir) != 0 {
-		var err error
-		err = nil
 		dictOnce.Do(func() { err = loadDictionaries(dictsDir, "DiameterClient") })
 		if err != nil {
 			return nil, err
@@ -88,7 +86,7 @@ func NewDiameterClient(addr, originHost, originRealm string, vendorId int, produ
 	if err != nil {
 		return nil, err
 	}
-	dc := &DiameterClient{conn: conn, handlers: dSM, received: make(chan *diam.Message)}
+	dc = &DiameterClient{conn: conn, handlers: dSM, received: make(chan *diam.Message)}
 	dSM.HandleFunc("ALL", dc.handleALL)
 	return dc, nil
 }
