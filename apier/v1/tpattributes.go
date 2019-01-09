@@ -56,8 +56,8 @@ type AttrGetTPAttributeProfileIds struct {
 }
 
 // Queries attribute identities on specific tariff plan.
-func (self *ApierV1) GetTPAttributeProfileIds(attrs AttrGetTPAttributeProfileIds, reply *[]string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
+func (self *ApierV1) GetTPAttributeProfileIds(attrs *AttrGetTPAttributeProfileIds, reply *[]string) error {
+	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPAttributes, utils.TPDistinctIds{"id"}, nil, &attrs.Paginator); err != nil {

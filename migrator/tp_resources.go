@@ -39,7 +39,7 @@ func (m *Migrator) migrateCurrentTPresources() (err error) {
 		}
 		for _, id := range ids {
 
-			resources, err := m.storDBIn.StorDB().GetTPResources(tpid, id)
+			resources, err := m.storDBIn.StorDB().GetTPResources(tpid, "", id)
 			if err != nil {
 				return err
 			}

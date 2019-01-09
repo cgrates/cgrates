@@ -1290,7 +1290,7 @@ func (tpr *TpReader) LoadAliases() error {
 }
 
 func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) (err error) {
-	rls, err := tpr.lr.GetTPResources(tpr.tpid, tag)
+	rls, err := tpr.lr.GetTPResources(tpr.tpid, "", tag)
 	if err != nil {
 		return err
 	}

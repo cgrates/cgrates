@@ -1474,11 +1474,14 @@ func (self *SQLStorage) GetTPAliases(filter *utils.TPAliases) ([]*utils.TPAliase
 	}
 }
 
-func (self *SQLStorage) GetTPResources(tpid, id string) ([]*utils.TPResource, error) {
+func (self *SQLStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPResource, error) {
 	var rls TpResources
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("id = ?", id)
+	}
+	if len(tenant) != 0 {
+		q = q.Where("tenant = ?", tenant)
 	}
 	if err := q.Find(&rls).Error; err != nil {
 		return nil, err

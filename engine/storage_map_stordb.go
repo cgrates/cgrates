@@ -73,7 +73,7 @@ func (ms *MapStorage) GetTPActionTriggers(tpid, id string) (aTriggers []*utils.T
 func (ms *MapStorage) GetTPAccountActions(filter *utils.TPAccountActions) (accounts []*utils.TPAccountActions, err error) {
 	return nil, utils.ErrNotImplemented
 }
-func (ms *MapStorage) GetTPResources(tpid, id string) (resources []*utils.TPResource, err error) {
+func (ms *MapStorage) GetTPResources(tpid, tenant, id string) (resources []*utils.TPResource, err error) {
 	return nil, utils.ErrNotImplemented
 }
 func (ms *MapStorage) GetTPStats(tpid, id string) (stats []*utils.TPStats, err error) {
