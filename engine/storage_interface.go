@@ -184,7 +184,7 @@ type LoadReader interface {
 	GetTPAccountActions(*utils.TPAccountActions) ([]*utils.TPAccountActions, error)
 	GetTPResources(string, string, string) ([]*utils.TPResource, error)
 	GetTPStats(string, string, string) ([]*utils.TPStats, error)
-	GetTPThresholds(string, string) ([]*utils.TPThreshold, error)
+	GetTPThresholds(string, string, string) ([]*utils.TPThreshold, error)
 	GetTPFilters(string, string) ([]*utils.TPFilterProfile, error)
 	GetTPSuppliers(string, string) ([]*utils.TPSupplierProfile, error)
 	GetTPAttributes(string, string, string) ([]*utils.TPAttributeProfile, error)

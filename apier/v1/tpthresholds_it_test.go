@@ -59,21 +59,21 @@ var sTestsTPThreshold = []func(t *testing.T){
 }
 
 //Test start here
-func TestTPThreholdITMySql(t *testing.T) {
+func TestTPThresholdITMySql(t *testing.T) {
 	tpThresholdConfigDIR = "tutmysql"
 	for _, stest := range sTestsTPThreshold {
 		t.Run(tpThresholdConfigDIR, stest)
 	}
 }
 
-func TestTPThreholdITMongo(t *testing.T) {
+func TestTPThresholdITMongo(t *testing.T) {
 	tpThresholdConfigDIR = "tutmongo"
 	for _, stest := range sTestsTPThreshold {
 		t.Run(tpThresholdConfigDIR, stest)
 	}
 }
 
-func TestTPThreholdITPG(t *testing.T) {
+func TestTPThresholdITPG(t *testing.T) {
 	tpThresholdConfigDIR = "tutpostgres"
 	for _, stest := range sTestsTPThreshold {
 		t.Run(tpThresholdConfigDIR, stest)
@@ -89,12 +89,8 @@ func testTPThreholdInitCfg(t *testing.T) {
 	}
 	tpThresholdCfg.DataFolderPath = tpThresholdDataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(tpThresholdCfg)
-	switch tpThresholdConfigDIR {
-	case "tutmongo": // Mongo needs more time to reset db
-		tpThresholdDelay = 2000
-	default:
-		tpThresholdDelay = 1000
-	}
+	tpThresholdDelay = 1000
+
 }
 
 // Wipe out the cdr database
@@ -123,7 +119,8 @@ func testTPThreholdRpcConn(t *testing.T) {
 func testTPThreholdGetTPThreholdBeforeSet(t *testing.T) {
 	var reply *utils.TPThreshold
 	if err := tpThresholdRPC.Call("ApierV1.GetTPThreshold",
-		AttrGetTPThreshold{TPid: "TH1", ID: "Threshold"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&utils.TPTntID{TPid: "TH1", Tenant: "cgrates.org", ID: "Threshold"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -132,7 +129,7 @@ func testTPThreholdSetTPThrehold(t *testing.T) {
 	tpThreshold = &utils.TPThreshold{
 		TPid:      "TH1",
 		Tenant:    "cgrates.org",
-		ID:        "Threhold",
+		ID:        "Threshold",
 		FilterIDs: []string{"FLTR_1", "FLTR_2"},
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-29T15:00:00Z",
@@ -154,7 +151,8 @@ func testTPThreholdSetTPThrehold(t *testing.T) {
 
 func testTPThreholdGetTPThreholdAfterSet(t *testing.T) {
 	var respond *utils.TPThreshold
-	if err := tpThresholdRPC.Call("ApierV1.GetTPThreshold", &AttrGetTPThreshold{TPid: tpThreshold.TPid, ID: tpThreshold.ID}, &respond); err != nil {
+	if err := tpThresholdRPC.Call("ApierV1.GetTPThreshold",
+		&utils.TPTntID{TPid: "TH1", Tenant: "cgrates.org", ID: "Threshold"}, &respond); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpThreshold, respond) {
 		t.Errorf("Expecting: %+v, received: %+v", tpThreshold, respond)
@@ -163,8 +161,9 @@ func testTPThreholdGetTPThreholdAfterSet(t *testing.T) {
 
 func testTPThreholdGetTPThreholdIds(t *testing.T) {
 	var result []string
-	expectedTPID := []string{"Threhold"}
-	if err := tpThresholdRPC.Call("ApierV1.GetTPThresholdIDs", &AttrGetTPThresholdIds{TPid: tpThreshold.TPid}, &result); err != nil {
+	expectedTPID := []string{"Threshold"}
+	if err := tpThresholdRPC.Call("ApierV1.GetTPThresholdIDs",
+		&AttrGetTPThresholdIds{TPid: tpThreshold.TPid}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result, expectedTPID) {
 		t.Errorf("Expecting: %+v, received: %+v", result, expectedTPID)
@@ -183,7 +182,8 @@ func testTPThreholdUpdateTPThrehold(t *testing.T) {
 
 func testTPThreholdGetTPThreholdAfterUpdate(t *testing.T) {
 	var respond *utils.TPThreshold
-	if err := tpThresholdRPC.Call("ApierV1.GetTPThreshold", &AttrGetTPThreshold{TPid: tpThreshold.TPid, ID: tpThreshold.ID}, &respond); err != nil {
+	if err := tpThresholdRPC.Call("ApierV1.GetTPThreshold",
+		&utils.TPTntID{TPid: "TH1", Tenant: "cgrates.org", ID: "Threshold"}, &respond); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpThreshold, respond) {
 		t.Errorf("Expecting: %+v, received: %+v", tpThreshold, respond)
@@ -192,7 +192,8 @@ func testTPThreholdGetTPThreholdAfterUpdate(t *testing.T) {
 
 func testTPThreholdRemTPThrehold(t *testing.T) {
 	var resp string
-	if err := tpThresholdRPC.Call("ApierV1.RemTPThreshold", &AttrGetTPThreshold{TPid: "TH1", ID: "Threhold"}, &resp); err != nil {
+	if err := tpThresholdRPC.Call("ApierV1.RemTPThreshold",
+		&utils.TPTntID{TPid: "TH1", Tenant: "cgrates.org", ID: "Threshold"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -201,7 +202,9 @@ func testTPThreholdRemTPThrehold(t *testing.T) {
 
 func testTPThreholdGetTPThreholdAfterRemove(t *testing.T) {
 	var reply *utils.TPThreshold
-	if err := tpThresholdRPC.Call("ApierV1.GetTPThreshold", AttrGetTPThreshold{TPid: "TH1", ID: "Threshold"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := tpThresholdRPC.Call("ApierV1.GetTPThreshold",
+		&utils.TPTntID{TPid: "TH1", Tenant: "cgrates.org", ID: "Threshold"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

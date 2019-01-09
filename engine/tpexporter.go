@@ -240,7 +240,7 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	storDataThresholds, err := self.storDb.GetTPThresholds(self.tpID, "")
+	storDataThresholds, err := self.storDb.GetTPThresholds(self.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
 		return err
 	}

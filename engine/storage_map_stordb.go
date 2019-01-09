@@ -79,7 +79,7 @@ func (ms *MapStorage) GetTPResources(tpid, tenant, id string) (resources []*util
 func (ms *MapStorage) GetTPStats(tpid, tenant, id string) (stats []*utils.TPStats, err error) {
 	return nil, utils.ErrNotImplemented
 }
-func (ms *MapStorage) GetTPThresholds(tpid, id string) (ths []*utils.TPThreshold, err error) {
+func (ms *MapStorage) GetTPThresholds(tpid, tenant, id string) (ths []*utils.TPThreshold, err error) {
 	return nil, utils.ErrNotImplemented
 }
 func (ms *MapStorage) GetTPFilters(tpid, id string) (fltrs []*utils.TPFilterProfile, err error) {

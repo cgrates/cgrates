@@ -1359,33 +1359,6 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	return cdrs, 0, err
 }
 
-func (ms *MongoStorage) GetTPStat(tpid, id string) ([]*utils.TPStats, error) {
-	filter := bson.M{"tpid": tpid}
-	if id != "" {
-		filter["id"] = id
-	}
-	var results []*utils.TPStats
-	err := ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(utils.TBLTPStats).Find(sctx, filter)
-		if err != nil {
-			return err
-		}
-		for cur.Next(sctx) {
-			var tp utils.TPStats
-			err := cur.Decode(&tp)
-			if err != nil {
-				return err
-			}
-			results = append(results, &tp)
-		}
-		if len(results) == 0 {
-			return utils.ErrNotFound
-		}
-		return cur.Close(sctx)
-	})
-	return results, err
-}
-
 func (ms *MongoStorage) SetTPStats(tpSTs []*utils.TPStats) (err error) {
 	if len(tpSTs) == 0 {
 		return
@@ -1404,10 +1377,13 @@ func (ms *MongoStorage) SetTPStats(tpSTs []*utils.TPStats) (err error) {
 	})
 }
 
-func (ms *MongoStorage) GetTPThresholds(tpid, id string) ([]*utils.TPThreshold, error) {
+func (ms *MongoStorage) GetTPThresholds(tpid, tenant, id string) ([]*utils.TPThreshold, error) {
 	filter := bson.M{"tpid": tpid}
 	if id != "" {
 		filter["id"] = id
+	}
+	if tenant != "" {
+		filter["tenant"] = tenant
 	}
 	var results []*utils.TPThreshold
 	err := ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {

@@ -1512,11 +1512,14 @@ func (self *SQLStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStats, e
 	return asts, nil
 }
 
-func (self *SQLStorage) GetTPThresholds(tpid, id string) ([]*utils.TPThreshold, error) {
+func (self *SQLStorage) GetTPThresholds(tpid, tenant, id string) ([]*utils.TPThreshold, error) {
 	var ths TpThresholdS
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("id = ?", id)
+	}
+	if len(tenant) != 0 {
+		q = q.Where("tenant = ?", tenant)
 	}
 	if err := q.Find(&ths).Error; err != nil {
 		return nil, err

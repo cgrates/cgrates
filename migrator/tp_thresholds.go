@@ -39,7 +39,7 @@ func (m *Migrator) migrateCurrentTPthresholds() (err error) {
 		}
 		for _, id := range ids {
 
-			thresholds, err := m.storDBIn.StorDB().GetTPThresholds(tpid, id)
+			thresholds, err := m.storDBIn.StorDB().GetTPThresholds(tpid, "", id)
 			if err != nil {
 				return err
 			}
