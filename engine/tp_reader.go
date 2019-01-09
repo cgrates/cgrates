@@ -1379,7 +1379,7 @@ func (tpr *TpReader) LoadFilters() error {
 }
 
 func (tpr *TpReader) LoadSupplierProfilesFiltered(tag string) (err error) {
-	rls, err := tpr.lr.GetTPSuppliers(tpr.tpid, tag)
+	rls, err := tpr.lr.GetTPSuppliers(tpr.tpid, "", tag)
 	if err != nil {
 		return err
 	}

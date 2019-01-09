@@ -374,7 +374,7 @@ func (self *TPCSVImporter) importSuppliers(fn string) error {
 	if self.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	rls, err := self.csvr.GetTPSuppliers(self.TPid, "")
+	rls, err := self.csvr.GetTPSuppliers(self.TPid, "", "")
 	if err != nil {
 		return err
 	}

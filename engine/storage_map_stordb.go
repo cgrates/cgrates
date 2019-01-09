@@ -85,7 +85,7 @@ func (ms *MapStorage) GetTPThresholds(tpid, tenant, id string) (ths []*utils.TPT
 func (ms *MapStorage) GetTPFilters(tpid, tenant, id string) (fltrs []*utils.TPFilterProfile, err error) {
 	return nil, utils.ErrNotImplemented
 }
-func (ms *MapStorage) GetTPSuppliers(tpid, id string) (supps []*utils.TPSupplierProfile, err error) {
+func (ms *MapStorage) GetTPSuppliers(tpid, tenant, id string) (supps []*utils.TPSupplierProfile, err error) {
 	return nil, utils.ErrNotImplemented
 }
 func (ms *MapStorage) GetTPAttributes(tpid, tenant, id string) (attrs []*utils.TPAttributeProfile, err error) {

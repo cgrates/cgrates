@@ -262,7 +262,7 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	storDataSuppliers, err := self.storDb.GetTPSuppliers(self.tpID, "")
+	storDataSuppliers, err := self.storDb.GetTPSuppliers(self.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
 		return err
 	}
