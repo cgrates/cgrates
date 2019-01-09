@@ -591,3 +591,97 @@ func TestUpdateDiamMsgFromNavMap3(t *testing.T) {
 		t.Errorf("Expected %s, recived %s", utils.ToJSON(eMessage), utils.ToJSON(m2))
 	}
 }
+
+func TestUpdateDiamMsgFromNavMap4(t *testing.T) {
+	eMessage := diam.NewRequest(diam.CreditControl, 4, nil)
+	eMessage.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(430, avp.Mbit, 0, &diam.GroupedAVP{ // 430 code for Final-Unit-Indication
+				AVP: []*diam.AVP{
+					diam.NewAVP(449, avp.Mbit, 0, datatype.Enumerated(1)), // 449 code for Final-Unit-Action
+					diam.NewAVP(434, avp.Mbit, 0, &diam.GroupedAVP{ // 434 code for Redirect-Server
+						AVP: []*diam.AVP{
+							diam.NewAVP(433, avp.Mbit, 0, datatype.Enumerated(2)),                      // 433 code for Redirect-Address-Type
+							diam.NewAVP(435, avp.Mbit, 0, datatype.UTF8String("http://172.10.88.88/")), // 435 code for Redirect-Server-Address
+						},
+					},
+					),
+				},
+			},
+			),
+			diam.NewAVP(452, avp.Mbit, 0, datatype.Enumerated(2)), // 452 code for Redirect-Address-Type
+		},
+	},
+	)
+	eMessage.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(430, avp.Mbit, 0, &diam.GroupedAVP{ // 430 code for Final-Unit-Indication
+				AVP: []*diam.AVP{
+					diam.NewAVP(434, avp.Mbit, 0, &diam.GroupedAVP{ // 434 code for Redirect-Server
+						AVP: []*diam.AVP{
+							diam.NewAVP(435, avp.Mbit, 0, datatype.UTF8String("http://172.10.88.88/")), // 435 code for Redirect-Server-Address
+						},
+					},
+					),
+				},
+			},
+			),
+		},
+	},
+	)
+	eMessage.NewAVP("Granted-Service-Unit", avp.Mbit, 0, &diam.GroupedAVP{ // 431 code for Granted-Service-Unit
+		AVP: []*diam.AVP{
+			diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(10)), // 420 code for CC-Time
+		},
+	},
+	)
+
+	m2 := diam.NewMessage(diam.CreditControl, diam.RequestFlag, 4,
+		eMessage.Header.HopByHopID, eMessage.Header.EndToEndID, nil)
+
+	nM := config.NewNavigableMap(nil)
+
+	itm := &config.NMItem{
+		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Final-Unit-Action"},
+		Data: datatype.Enumerated(1),
+	}
+	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+
+	itm = &config.NMItem{
+		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Address-Type"},
+		Data: datatype.Enumerated(2),
+	}
+	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+
+	itm = &config.NMItem{
+		Path: []string{"Multiple-Services-Credit-Control", "Tariff-Change-Usage"},
+		Data: datatype.Enumerated(2),
+	}
+	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+
+	itm = &config.NMItem{
+		Path: []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Server-Address"},
+		Data: "http://172.10.88.88/",
+	}
+	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+
+	itm = &config.NMItem{
+		Path:   []string{"Multiple-Services-Credit-Control", "Final-Unit-Indication", "Redirect-Server", "Redirect-Server-Address"},
+		Data:   "http://172.10.88.88/",
+		Config: &config.FCTemplate{NewBranch: true},
+	}
+	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+
+	itm = &config.NMItem{
+		Path: []string{"Granted-Service-Unit", "CC-Time"},
+		Data: datatype.Unsigned32(10),
+	}
+	nM.Set(itm.Path, []*config.NMItem{itm}, true, true)
+
+	if err := updateDiamMsgFromNavMap(m2, nM, ""); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(eMessage.String(), m2.String()) {
+		t.Errorf("Expected %s, recived %s", utils.ToJSON(eMessage), utils.ToJSON(m2))
+	}
+}
