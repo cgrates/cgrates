@@ -1244,7 +1244,7 @@ func testStorDBitCRUDTpAliases(t *testing.T) {
 
 func testStorDBitCRUDTpResources(t *testing.T) {
 	// READ
-	if _, err := storDB.GetTPResources("testTPid", ""); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPResources("testTPid", "", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	//WRITE
@@ -1275,7 +1275,7 @@ func testStorDBitCRUDTpResources(t *testing.T) {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTPResources("testTPid", ""); err != nil {
+	if rcv, err := storDB.GetTPResources("testTPid", "", ""); err != nil {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(snd[0].TPid, rcv[0].TPid) || reflect.DeepEqual(snd[0].TPid, rcv[1].TPid)) {
@@ -1304,7 +1304,7 @@ func testStorDBitCRUDTpResources(t *testing.T) {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTPResources("testTPid", ""); err != nil {
+	if rcv, err := storDB.GetTPResources("testTPid", "", ""); err != nil {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(snd[0].TPid, rcv[0].TPid) || reflect.DeepEqual(snd[0].TPid, rcv[1].TPid)) {
@@ -1332,14 +1332,14 @@ func testStorDBitCRUDTpResources(t *testing.T) {
 		t.Error(err)
 	}
 	// READ
-	if _, err := storDB.GetTPResources("testTPid", ""); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPResources("testTPid", "", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
 
 func testStorDBitCRUDTpStats(t *testing.T) {
 	// READ
-	if _, err := storDB.GetTPStats("TEST_TPID", ""); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPStats("TEST_TPID", "", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	//WRITE
@@ -1378,7 +1378,7 @@ func testStorDBitCRUDTpStats(t *testing.T) {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTPStats("TEST_TPID", ""); err != nil {
+	if rcv, err := storDB.GetTPStats("TEST_TPID", "", ""); err != nil {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(eTPs[0].TPid, rcv[0].TPid) || reflect.DeepEqual(eTPs[0].TPid, rcv[1].TPid)) {
@@ -1401,7 +1401,7 @@ func testStorDBitCRUDTpStats(t *testing.T) {
 		t.Error(err)
 	}
 	// READ
-	if rcv, err := storDB.GetTPStats("TEST_TPID", ""); err != nil {
+	if rcv, err := storDB.GetTPStats("TEST_TPID", "", ""); err != nil {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(eTPs[0].TPid, rcv[0].TPid) || reflect.DeepEqual(eTPs[0].TPid, rcv[1].TPid)) {
@@ -1424,7 +1424,7 @@ func testStorDBitCRUDTpStats(t *testing.T) {
 		t.Error(err)
 	}
 	// READ
-	if _, err := storDB.GetTPStats("TEST_TPID", ""); err != utils.ErrNotFound {
+	if _, err := storDB.GetTPStats("TEST_TPID", "", ""); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }

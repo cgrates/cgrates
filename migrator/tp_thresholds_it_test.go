@@ -145,7 +145,7 @@ func testTpTresITMove(t *testing.T) {
 
 func testTpTresITCheckData(t *testing.T) {
 	result, err := tpTresMigrator.storDBOut.StorDB().GetTPThresholds(
-		tpThresholds[0].TPid, tpThresholds[0].ID)
+		tpThresholds[0].TPid, "", tpThresholds[0].ID)
 	if err != nil {
 		t.Error("Error when getting TpThresholds ", err.Error())
 	}
@@ -155,7 +155,7 @@ func testTpTresITCheckData(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(tpThresholds[0]), utils.ToJSON(result[0]))
 	}
 	result, err = tpTresMigrator.storDBIn.StorDB().GetTPThresholds(
-		tpThresholds[0].TPid, tpThresholds[0].ID)
+		tpThresholds[0].TPid, "", tpThresholds[0].ID)
 	if err != utils.ErrNotFound {
 		t.Error(err)
 	}
