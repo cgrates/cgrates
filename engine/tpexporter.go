@@ -251,7 +251,7 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	storDataFilters, err := self.storDb.GetTPFilters(self.tpID, "")
+	storDataFilters, err := self.storDb.GetTPFilters(self.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
 		return err
 	}

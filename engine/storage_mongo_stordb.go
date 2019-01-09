@@ -1425,10 +1425,13 @@ func (ms *MongoStorage) SetTPThresholds(tpTHs []*utils.TPThreshold) (err error) 
 	})
 }
 
-func (ms *MongoStorage) GetTPFilters(tpid, id string) ([]*utils.TPFilterProfile, error) {
+func (ms *MongoStorage) GetTPFilters(tpid, tenant, id string) ([]*utils.TPFilterProfile, error) {
 	filter := bson.M{"tpid": tpid}
 	if id != "" {
 		filter["id"] = id
+	}
+	if tenant != "" {
+		filter["tenant"] = tenant
 	}
 	results := []*utils.TPFilterProfile{}
 	err := ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {

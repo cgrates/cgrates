@@ -621,7 +621,7 @@ func (csvs *CSVStorage) GetTPThresholds(tpid, tenant, id string) ([]*utils.TPThr
 	return tpThreshold.AsTPThreshold(), nil
 }
 
-func (csvs *CSVStorage) GetTPFilters(tpid, id string) ([]*utils.TPFilterProfile, error) {
+func (csvs *CSVStorage) GetTPFilters(tpid, tenant, id string) ([]*utils.TPFilterProfile, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.filterFn, csvs.sep, getColumnCount(TpFilter{}))
 	if err != nil {
 		//log.Print("Could not load filter file: ", err)
