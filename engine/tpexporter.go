@@ -229,7 +229,7 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	storDataStats, err := self.storDb.GetTPStats(self.tpID, "")
+	storDataStats, err := self.storDb.GetTPStats(self.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
 		return err
 	}

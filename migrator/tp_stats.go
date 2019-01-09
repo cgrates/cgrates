@@ -39,7 +39,7 @@ func (m *Migrator) migrateCurrentTPstats() (err error) {
 		}
 		for _, id := range ids {
 
-			stats, err := m.storDBIn.StorDB().GetTPStats(tpid, id)
+			stats, err := m.storDBIn.StorDB().GetTPStats(tpid, "", id)
 			if err != nil {
 				return err
 			}
