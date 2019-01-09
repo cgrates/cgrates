@@ -2249,6 +2249,7 @@ func APItoModelTPSuppliers(st *utils.TPSupplierProfile) (mdls TpSuppliers) {
 		}
 		mdl.SupplierWeight = supl.Weight
 		mdl.SupplierParameters = supl.SupplierParameters
+		mdl.SupplierBlocker = supl.Blocker
 		mdls = append(mdls, mdl)
 	}
 	return

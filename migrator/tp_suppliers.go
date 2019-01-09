@@ -39,7 +39,7 @@ func (m *Migrator) migrateCurrentTPSuppliers() (err error) {
 		}
 		for _, id := range ids {
 
-			suppliers, err := m.storDBIn.StorDB().GetTPSuppliers(tpid, id)
+			suppliers, err := m.storDBIn.StorDB().GetTPSuppliers(tpid, "", id)
 			if err != nil {
 				return err
 			}

@@ -155,7 +155,7 @@ func testTpSplITMove(t *testing.T) {
 
 func testTpSplITCheckData(t *testing.T) {
 	result, err := tpSplMigrator.storDBOut.StorDB().GetTPSuppliers(
-		tpSuppliers[0].TPid, tpSuppliers[0].ID)
+		tpSuppliers[0].TPid, "", tpSuppliers[0].ID)
 	if err != nil {
 		t.Error("Error when getting TpSuppliers ", err.Error())
 	}
@@ -164,7 +164,7 @@ func testTpSplITCheckData(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(tpSuppliers[0]), utils.ToJSON(result[0]))
 	}
 	result, err = tpSplMigrator.storDBIn.StorDB().GetTPSuppliers(
-		tpSuppliers[0].TPid, tpSuppliers[0].ID)
+		tpSuppliers[0].TPid, "", tpSuppliers[0].ID)
 	if err != utils.ErrNotFound {
 		t.Error(err)
 	}
