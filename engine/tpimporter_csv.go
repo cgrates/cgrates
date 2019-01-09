@@ -363,7 +363,7 @@ func (self *TPCSVImporter) importFilters(fn string) error {
 	if self.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	sts, err := self.csvr.GetTPFilters(self.TPid, "")
+	sts, err := self.csvr.GetTPFilters(self.TPid, "", "")
 	if err != nil {
 		return err
 	}

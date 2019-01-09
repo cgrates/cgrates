@@ -144,7 +144,7 @@ func testTpFltrITMove(t *testing.T) {
 
 func testTpFltrITCheckData(t *testing.T) {
 	result, err := tpFltrMigrator.storDBOut.StorDB().GetTPFilters(
-		tpFilters[0].TPid, tpFilters[0].ID)
+		tpFilters[0].TPid, "", tpFilters[0].ID)
 	if err != nil {
 		t.Error("Error when getting TpFilter ", err.Error())
 	}
@@ -152,7 +152,7 @@ func testTpFltrITCheckData(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", tpFilters[0], result[0])
 	}
 	result, err = tpFltrMigrator.storDBIn.StorDB().GetTPFilters(
-		tpFilters[0].TPid, tpFilters[0].ID)
+		tpFilters[0].TPid, "", tpFilters[0].ID)
 	if err != utils.ErrNotFound {
 		t.Error(err)
 	}

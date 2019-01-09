@@ -37,7 +37,7 @@ func (m *Migrator) migrateCurrentTPfilters() (err error) {
 			return err
 		}
 		for _, id := range ids {
-			fltrs, err := m.storDBIn.StorDB().GetTPFilters(tpid, id)
+			fltrs, err := m.storDBIn.StorDB().GetTPFilters(tpid, "", id)
 			if err != nil {
 				return err
 			}

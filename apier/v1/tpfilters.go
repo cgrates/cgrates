@@ -23,28 +23,23 @@ import (
 )
 
 // Creates a new FilterProfile within a tariff plan
-func (self *ApierV1) SetTPFilterProfile(attrs utils.TPFilterProfile, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
+func (self *ApierV1) SetTPFilterProfile(attrs *utils.TPFilterProfile, reply *string) error {
+	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.SetTPFilters([]*utils.TPFilterProfile{&attrs}); err != nil {
+	if err := self.StorDb.SetTPFilters([]*utils.TPFilterProfile{attrs}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-type AttrGetTPFilterProfile struct {
-	TPid string // Tariff plan id
-	ID   string // Filter id
-}
-
 // Queries specific FilterProfile on tariff plan
-func (self *ApierV1) GetTPFilterProfile(attr AttrGetTPFilterProfile, reply *utils.TPFilterProfile) error {
-	if missing := utils.MissingStructFields(&attr, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
+func (self *ApierV1) GetTPFilterProfile(attr *utils.TPTntID, reply *utils.TPFilterProfile) error {
+	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if filter, err := self.StorDb.GetTPFilters(attr.TPid, attr.ID); err != nil {
+	if filter, err := self.StorDb.GetTPFilters(attr.TPid, attr.Tenant, attr.ID); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -61,11 +56,12 @@ type AttrGetTPFilterProfileIds struct {
 }
 
 // Queries FilterProfile identities on specific tariff plan.
-func (self *ApierV1) GetTPFilterProfileIds(attrs AttrGetTPFilterProfileIds, reply *[]string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
+func (self *ApierV1) GetTPFilterProfileIds(attrs *AttrGetTPFilterProfileIds, reply *[]string) error {
+	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPFilters, utils.TPDistinctIds{"id"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPFilters, utils.TPDistinctIds{"id"},
+		nil, &attrs.Paginator); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -76,18 +72,13 @@ func (self *ApierV1) GetTPFilterProfileIds(attrs AttrGetTPFilterProfileIds, repl
 	return nil
 }
 
-type AttrRemTPFilterProfile struct {
-	TPid   string // Tariff plan id
-	Tenant string
-	ID     string // Filter id
-}
-
 // Removes specific FilterProfile on Tariff plan
-func (self *ApierV1) RemTPFilterProfile(attrs AttrRemTPFilterProfile, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
+func (self *ApierV1) RemTPFilterProfile(attrs *utils.TPTntID, reply *string) error {
+	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBLTPFilters, attrs.TPid, map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBLTPFilters, attrs.TPid,
+		map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = utils.OK

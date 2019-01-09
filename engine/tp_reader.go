@@ -1362,7 +1362,7 @@ func (tpr *TpReader) LoadThresholds() error {
 }
 
 func (tpr *TpReader) LoadFiltersFiltered(tag string) error {
-	tps, err := tpr.lr.GetTPFilters(tpr.tpid, tag)
+	tps, err := tpr.lr.GetTPFilters(tpr.tpid, "", tag)
 	if err != nil {
 		return err
 	}
