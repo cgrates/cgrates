@@ -479,12 +479,15 @@ func (ms *MongoStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPReso
 	return results, err
 }
 
-func (ms *MongoStorage) GetTPStats(tpid, id string) ([]*utils.TPStats, error) {
+func (ms *MongoStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStats, error) {
 	filter := bson.M{
 		"tpid": tpid,
 	}
 	if id != "" {
 		filter["id"] = id
+	}
+	if tenant != "" {
+		filter["tenant"] = tenant
 	}
 	var results []*utils.TPStats
 	err := ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {

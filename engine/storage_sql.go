@@ -1493,11 +1493,14 @@ func (self *SQLStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPReso
 	return arls, nil
 }
 
-func (self *SQLStorage) GetTPStats(tpid, id string) ([]*utils.TPStats, error) {
+func (self *SQLStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStats, error) {
 	var sts TpStatsS
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("id = ?", id)
+	}
+	if len(tenant) != 0 {
+		q = q.Where("tenant = ?", tenant)
 	}
 	if err := q.Find(&sts).Error; err != nil {
 		return nil, err

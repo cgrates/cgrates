@@ -565,7 +565,7 @@ func (csvs *CSVStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPReso
 	return tpResLimits.AsTPResources(), nil
 }
 
-func (csvs *CSVStorage) GetTPStats(tpid, id string) ([]*utils.TPStats, error) {
+func (csvs *CSVStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStats, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.statsFn, csvs.sep, getColumnCount(TpStats{}))
 	if err != nil {
 		//log.Print("Could not load stats file: ", err)

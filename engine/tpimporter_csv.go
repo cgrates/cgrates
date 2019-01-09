@@ -341,7 +341,7 @@ func (self *TPCSVImporter) importStats(fn string) error {
 	if self.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	sts, err := self.csvr.GetTPStats(self.TPid, "")
+	sts, err := self.csvr.GetTPStats(self.TPid, "", "")
 	if err != nil {
 		return err
 	}

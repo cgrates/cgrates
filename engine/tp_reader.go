@@ -1314,7 +1314,7 @@ func (tpr *TpReader) LoadResourceProfiles() error {
 }
 
 func (tpr *TpReader) LoadStatsFiltered(tag string) (err error) {
-	tps, err := tpr.lr.GetTPStats(tpr.tpid, tag)
+	tps, err := tpr.lr.GetTPStats(tpr.tpid, "", tag)
 	if err != nil {
 		return err
 	}

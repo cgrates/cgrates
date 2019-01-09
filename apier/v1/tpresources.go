@@ -24,7 +24,7 @@ import (
 
 // Creates a new resource within a tariff plan
 func (self *ApierV1) SetTPResource(attr *utils.TPResource, reply *string) error {
-	if missing := utils.MissingStructFields(attr, []string{"TPid", "ID", "Limit"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID", "Limit"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := self.StorDb.SetTPResources([]*utils.TPResource{attr}); err != nil {
