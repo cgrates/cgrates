@@ -1569,10 +1569,13 @@ func (ms *MongoStorage) SetTPAttributes(tpSPs []*utils.TPAttributeProfile) (err 
 	})
 }
 
-func (ms *MongoStorage) GetTPChargers(tpid, id string) ([]*utils.TPChargerProfile, error) {
+func (ms *MongoStorage) GetTPChargers(tpid, tenant, id string) ([]*utils.TPChargerProfile, error) {
 	filter := bson.M{"tpid": tpid}
 	if id != "" {
 		filter["id"] = id
+	}
+	if tenant != "" {
+		filter["tenant"] = tenant
 	}
 	var results []*utils.TPChargerProfile
 	err := ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {

@@ -396,7 +396,7 @@ func (self *TPCSVImporter) importChargerProfiles(fn string) error {
 	if self.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	rls, err := self.csvr.GetTPChargers(self.TPid, "")
+	rls, err := self.csvr.GetTPChargers(self.TPid, "", "")
 	if err != nil {
 		return err
 	}

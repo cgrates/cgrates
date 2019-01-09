@@ -23,29 +23,23 @@ import (
 )
 
 // Creates a new ChargerProfile within a tariff plan
-func (self *ApierV1) SetTPCharger(attr utils.TPChargerProfile, reply *string) error {
-	if missing := utils.MissingStructFields(&attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
+func (self *ApierV1) SetTPCharger(attr *utils.TPChargerProfile, reply *string) error {
+	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.SetTPChargers([]*utils.TPChargerProfile{&attr}); err != nil {
+	if err := self.StorDb.SetTPChargers([]*utils.TPChargerProfile{attr}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-type AttrGetTPCharger struct {
-	TPid   string // Tariff plan id
-	Tenant string
-	ID     string
-}
-
 // Queries specific ChargerProfile on Tariff plan
-func (self *ApierV1) GetTPCharger(attr AttrGetTPCharger, reply *utils.TPChargerProfile) error {
-	if missing := utils.MissingStructFields(&attr, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
+func (self *ApierV1) GetTPCharger(attr *utils.TPTntID, reply *utils.TPChargerProfile) error {
+	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if rls, err := self.StorDb.GetTPChargers(attr.TPid, attr.ID); err != nil {
+	if rls, err := self.StorDb.GetTPChargers(attr.TPid, attr.Tenant, attr.ID); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -62,11 +56,12 @@ type AttrGetTPChargerIds struct {
 }
 
 // Queries Resource identities on specific tariff plan.
-func (self *ApierV1) GetTPChargerIDs(attrs AttrGetTPChargerIds, reply *[]string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
+func (self *ApierV1) GetTPChargerIDs(attrs *AttrGetTPChargerIds, reply *[]string) error {
+	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPChargers, utils.TPDistinctIds{"id"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPChargers, utils.TPDistinctIds{"id"},
+		nil, &attrs.Paginator); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -77,18 +72,13 @@ func (self *ApierV1) GetTPChargerIDs(attrs AttrGetTPChargerIds, reply *[]string)
 	return nil
 }
 
-type AttrRemTPCharger struct {
-	TPid   string // Tariff plan id
-	Tenant string
-	ID     string // Attribute id
-}
-
 // Removes specific Resource on Tariff plan
-func (self *ApierV1) RemTPCharger(attrs AttrRemTPCharger, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
+func (self *ApierV1) RemTPCharger(attrs *utils.TPTntID, reply *string) error {
+	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBLTPChargers, attrs.TPid, map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBLTPChargers, attrs.TPid,
+		map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = utils.OK

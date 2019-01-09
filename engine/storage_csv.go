@@ -705,7 +705,7 @@ func (csvs *CSVStorage) GetTPAttributes(tpid, tenant, id string) ([]*utils.TPAtt
 	return tpAls.AsTPAttributes(), nil
 }
 
-func (csvs *CSVStorage) GetTPChargers(tpid, id string) ([]*utils.TPChargerProfile, error) {
+func (csvs *CSVStorage) GetTPChargers(tpid, tenant, id string) ([]*utils.TPChargerProfile, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.chargerProfilesFn, csvs.sep, getColumnCount(TPCharger{}))
 	if err != nil {
 		//log.Print("Could not load AttributeProfile file: ", err)

@@ -284,7 +284,7 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	storDataChargers, err := self.storDb.GetTPChargers(self.tpID, "")
+	storDataChargers, err := self.storDb.GetTPChargers(self.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
 		return err
 	}

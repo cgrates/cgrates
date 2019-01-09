@@ -38,7 +38,7 @@ func (m *Migrator) migrateCurrentTPChargers() (err error) {
 			return err
 		}
 		for _, id := range ids {
-			chargers, err := m.storDBIn.StorDB().GetTPChargers(tpid, id)
+			chargers, err := m.storDBIn.StorDB().GetTPChargers(tpid, "", id)
 			if err != nil {
 				return err
 			}
