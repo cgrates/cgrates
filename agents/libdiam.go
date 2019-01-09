@@ -243,7 +243,7 @@ func messageSetAVPsWithPath(m *diam.Message, pathStr []string,
 				AVP: []*diam.AVP{msgAVP}}
 		}
 		msgAVP = diam.NewAVP(dictAVPs[i].Code, avp.Mbit, dictAVPs[i].VendorID, typeVal) // FixMe: maybe Mbit with dictionary one
-		if !newBranch {
+		if i > 0 && !newBranch {
 			avps, err := m.FindAVPsWithPath(path[:i], dict.UndefinedVendorID)
 			if err != nil {
 				return err
