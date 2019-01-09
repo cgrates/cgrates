@@ -182,7 +182,7 @@ type LoadReader interface {
 	GetTPActionPlans(string, string) ([]*utils.TPActionPlan, error)
 	GetTPActionTriggers(string, string) ([]*utils.TPActionTriggers, error)
 	GetTPAccountActions(*utils.TPAccountActions) ([]*utils.TPAccountActions, error)
-	GetTPResources(string, string) ([]*utils.TPResource, error)
+	GetTPResources(string, string, string) ([]*utils.TPResource, error)
 	GetTPStats(string, string) ([]*utils.TPStats, error)
 	GetTPThresholds(string, string) ([]*utils.TPThreshold, error)
 	GetTPFilters(string, string) ([]*utils.TPFilterProfile, error)

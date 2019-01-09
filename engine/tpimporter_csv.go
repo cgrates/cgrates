@@ -330,7 +330,7 @@ func (self *TPCSVImporter) importResources(fn string) error {
 	if self.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	rls, err := self.csvr.GetTPResources(self.TPid, "")
+	rls, err := self.csvr.GetTPResources(self.TPid, "", "")
 	if err != nil {
 		return err
 	}

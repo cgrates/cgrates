@@ -218,7 +218,7 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	storDataResources, err := self.storDb.GetTPResources(self.tpID, "")
+	storDataResources, err := self.storDb.GetTPResources(self.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
 		return err
 	}
