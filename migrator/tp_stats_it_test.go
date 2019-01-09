@@ -150,7 +150,7 @@ func testTpStatsITMove(t *testing.T) {
 
 func testTpStatsITCheckData(t *testing.T) {
 	result, err := tpStatsMigrator.storDBOut.StorDB().GetTPStats(
-		tpStats[0].TPid, tpStats[0].ID)
+		tpStats[0].TPid, "", tpStats[0].ID)
 	if err != nil {
 		t.Error("Error when getting TpStat ", err.Error())
 	}
@@ -160,7 +160,7 @@ func testTpStatsITCheckData(t *testing.T) {
 			utils.ToJSON(tpStats[0]), utils.ToJSON(result[0]))
 	}
 	result, err = tpStatsMigrator.storDBIn.StorDB().GetTPStats(
-		tpStats[0].TPid, tpStats[0].ID)
+		tpStats[0].TPid, "", tpStats[0].ID)
 	if err != utils.ErrNotFound {
 		t.Error(err)
 	}

@@ -147,7 +147,7 @@ func testTpResITMove(t *testing.T) {
 
 func testTpResITCheckData(t *testing.T) {
 	result, err := tpResMigrator.storDBOut.StorDB().GetTPResources(
-		tpResources[0].TPid, tpResources[0].ID)
+		tpResources[0].TPid, "", tpResources[0].ID)
 	if err != nil {
 		t.Error("Error when getting TpResources ", err.Error())
 	}
@@ -156,7 +156,7 @@ func testTpResITCheckData(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(tpResources[0]), utils.ToJSON(result[0]))
 	}
 	result, err = tpResMigrator.storDBIn.StorDB().GetTPResources(
-		tpResources[0].TPid, tpResources[0].ID)
+		tpResources[0].TPid, "", tpResources[0].ID)
 	if err != utils.ErrNotFound {
 		t.Error(err)
 	}
