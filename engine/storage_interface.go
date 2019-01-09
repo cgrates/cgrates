@@ -188,7 +188,7 @@ type LoadReader interface {
 	GetTPFilters(string, string, string) ([]*utils.TPFilterProfile, error)
 	GetTPSuppliers(string, string, string) ([]*utils.TPSupplierProfile, error)
 	GetTPAttributes(string, string, string) ([]*utils.TPAttributeProfile, error)
-	GetTPChargers(string, string) ([]*utils.TPChargerProfile, error)
+	GetTPChargers(string, string, string) ([]*utils.TPChargerProfile, error)
 }
 
 type LoadWriter interface {

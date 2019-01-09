@@ -112,7 +112,7 @@ func testTPChrgsRPCConn(t *testing.T) {
 func testTPChrgsGetTPChrgsBeforeSet(t *testing.T) {
 	var reply *utils.TPChargerProfile
 	if err := tpChrgsRPC.Call("ApierV1.GetTPCharger",
-		&AttrGetTPCharger{TPid: "TP1", ID: "Chrgs"}, &reply); err == nil ||
+		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Chrgs"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -143,7 +143,7 @@ func testTPChrgsSetTPChrgs(t *testing.T) {
 func testTPChrgsGetTPChrgsAfterSet(t *testing.T) {
 	var reply *utils.TPChargerProfile
 	if err := tpChrgsRPC.Call("ApierV1.GetTPCharger",
-		&AttrGetTPCharger{TPid: "TP1", ID: "Chrgs"}, &reply); err != nil {
+		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Chrgs"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpChrgs, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", tpChrgs, reply)
@@ -174,7 +174,7 @@ func testTPChrgsUpdateTPChrgs(t *testing.T) {
 func testTPChrgsGetTPChrgsAfterUpdate(t *testing.T) {
 	var reply *utils.TPChargerProfile
 	if err := tpChrgsRPC.Call("ApierV1.GetTPCharger",
-		&AttrGetTPCharger{TPid: "TP1", ID: "Chrgs"}, &reply); err != nil {
+		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Chrgs"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpChrgs, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", tpChrgs, reply)
@@ -184,7 +184,7 @@ func testTPChrgsGetTPChrgsAfterUpdate(t *testing.T) {
 func testTPChrgsRemTPChrgs(t *testing.T) {
 	var resp string
 	if err := tpChrgsRPC.Call("ApierV1.RemTPCharger",
-		&AttrGetTPCharger{TPid: "TP1", Tenant: "cgrates.org", ID: "Chrgs"},
+		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Chrgs"},
 		&resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -195,7 +195,7 @@ func testTPChrgsRemTPChrgs(t *testing.T) {
 func testTPChrgsGetTPChrgsAfterRemove(t *testing.T) {
 	var reply *utils.TPChargerProfile
 	if err := tpChrgsRPC.Call("ApierV1.GetTPCharger",
-		&AttrGetTPCharger{TPid: "TP1", ID: "Chrgs"}, &reply); err == nil ||
+		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Chrgs"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

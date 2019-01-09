@@ -1588,11 +1588,14 @@ func (self *SQLStorage) GetTPAttributes(tpid, tenant, id string) ([]*utils.TPAtt
 	return arls, nil
 }
 
-func (self *SQLStorage) GetTPChargers(tpid, id string) ([]*utils.TPChargerProfile, error) {
+func (self *SQLStorage) GetTPChargers(tpid, tenant, id string) ([]*utils.TPChargerProfile, error) {
 	var cpps TPChargers
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("id = ?", id)
+	}
+	if len(tenant) != 0 {
+		q = q.Where("tenant = ?", tenant)
 	}
 	if err := q.Find(&cpps).Error; err != nil {
 		return nil, err

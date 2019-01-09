@@ -91,7 +91,7 @@ func (ms *MapStorage) GetTPSuppliers(tpid, tenant, id string) (supps []*utils.TP
 func (ms *MapStorage) GetTPAttributes(tpid, tenant, id string) (attrs []*utils.TPAttributeProfile, err error) {
 	return nil, utils.ErrNotImplemented
 }
-func (ms *MapStorage) GetTPChargers(tpid, id string) (attrs []*utils.TPChargerProfile, err error) {
+func (ms *MapStorage) GetTPChargers(tpid, tenant, id string) (attrs []*utils.TPChargerProfile, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
