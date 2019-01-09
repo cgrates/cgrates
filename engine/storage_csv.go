@@ -593,7 +593,7 @@ func (csvs *CSVStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStats, e
 	return tpStats.AsTPStats(), nil
 }
 
-func (csvs *CSVStorage) GetTPThresholds(tpid, id string) ([]*utils.TPThreshold, error) {
+func (csvs *CSVStorage) GetTPThresholds(tpid, tenant, id string) ([]*utils.TPThreshold, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.thresholdsFn, csvs.sep, getColumnCount(TpThreshold{}))
 	if err != nil {
 		//log.Print("Could not load threshold file: ", err)
