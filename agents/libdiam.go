@@ -192,6 +192,23 @@ func newDiamDataType(typ datatype.TypeID, valStr,
 	}
 }
 
+func headerLen(a *diam.AVP) int {
+	if a.Flags&avp.Vbit == avp.Vbit {
+		return 12
+	}
+	return 8
+}
+
+func updateAVPLenght(avps []*diam.AVP) (l int) {
+	for _, avp := range avps {
+		if v, ok := (avp.Data).(*diam.GroupedAVP); ok {
+			avp.Length = headerLen(avp) + updateAVPLenght(v.AVP)
+		}
+		l += avp.Length
+	}
+	return
+}
+
 // messageAddAVPsWithPath will dynamically add AVPs into the message
 // 	append:	append to the message, on false overwrite if AVP is single or add to group if AVP is Grouped
 func messageSetAVPsWithPath(m *diam.Message, pathStr []string,
@@ -210,7 +227,6 @@ func messageSetAVPsWithPath(m *diam.Message, pathStr []string,
 			dictAVPs[i] = dictAVP
 		}
 	}
-
 	lastAVPIdx := len(path) - 1
 	if dictAVPs[lastAVPIdx].Data.Type == diam.GroupedAVPType {
 		return errors.New("last AVP in path cannot be GroupedAVP")
@@ -226,27 +242,22 @@ func messageSetAVPsWithPath(m *diam.Message, pathStr []string,
 			typeVal = &diam.GroupedAVP{
 				AVP: []*diam.AVP{msgAVP}}
 		}
-		newMsgAVP := diam.NewAVP(dictAVPs[i].Code, avp.Mbit, dictAVPs[i].VendorID, typeVal) // FixMe: maybe Mbit with dictionary one
-		if i == lastAVPIdx-1 && !newBranch {
-			for idx := i + 1; idx > 0; idx-- { //check if we can append to the last AVP
-				avps, err := m.FindAVPsWithPath(path[:idx], dict.UndefinedVendorID)
-				if err != nil {
-					return err
-				}
-				if len(avps) != 0 { // Group AVP already in the message
-					prevGrpData := avps[len(avps)-1].Data.(*diam.GroupedAVP)               // Take the last avp found to append there
-					if newMsgAVP.Data.Type() == diam.GroupedAVPType && idx != lastAVPIdx { // check if we need to add a group to last avp
-						prevGrpData.AVP = append(prevGrpData.AVP, newMsgAVP)
-						m.Header.MessageLength += uint32(newMsgAVP.Len())
-					} else {
-						prevGrpData.AVP = append(prevGrpData.AVP, msgAVP)
-						m.Header.MessageLength += uint32(msgAVP.Len())
-					}
+		msgAVP = diam.NewAVP(dictAVPs[i].Code, avp.Mbit, dictAVPs[i].VendorID, typeVal) // FixMe: maybe Mbit with dictionary one
+		if !newBranch {
+			avps, err := m.FindAVPsWithPath(path[:i], dict.UndefinedVendorID)
+			if err != nil {
+				return err
+			}
+			if len(avps) != 0 { // Group AVP already in the message
+				prevGrpData, ok := avps[len(avps)-1].Data.(*diam.GroupedAVP) // Take the last avp found to append there
+				if ok {
+					prevGrpData.AVP = append(prevGrpData.AVP, msgAVP)
+					m.Header.MessageLength += uint32(msgAVP.Len())
+					// updateAVPLenght(m.AVP)
 					return nil
 				}
 			}
 		}
-		msgAVP = newMsgAVP
 	}
 	if !newBranch { // Not group AVP, replace the previous set one with this one
 		avps, err := m.FindAVPsWithPath(path, dict.UndefinedVendorID)
@@ -257,11 +268,13 @@ func messageSetAVPsWithPath(m *diam.Message, pathStr []string,
 			m.Header.MessageLength -= uint32(avps[len(avps)-1].Len()) // decrease message length since we overwrite
 			*avps[len(avps)-1] = *msgAVP
 			m.Header.MessageLength += uint32(msgAVP.Len())
+			// updateAVPLenght(m.AVP)
 			return nil
 		}
 	}
 	m.AVP = append(m.AVP, msgAVP)
 	m.Header.MessageLength += uint32(msgAVP.Len())
+	// updateAVPLenght(m.AVP)
 	return nil
 }
 
