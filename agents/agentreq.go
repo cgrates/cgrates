@@ -243,7 +243,7 @@ func (aReq *AgentRequest) ParseField(
 			return "", fmt.Errorf("invalid debitInterval <%s> to %s",
 				strVal3, utils.MetaCCUsage)
 		}
-		mltpl := reqNr - 2 // init and terminate will be ignored
+		mltpl := reqNr - 1 // terminate will be ignored (init request should always be 0)
 		if mltpl < 0 {
 			mltpl = 0
 		}
