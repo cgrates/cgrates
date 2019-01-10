@@ -117,6 +117,7 @@ func TestLoaderITRemoveLoad(t *testing.T) {
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.SuppliersCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.AttributesCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ChargersCsv),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DispatchersCsv),
 	), "", "")
 
 	if err = loader.LoadDestinations(); err != nil {
@@ -179,6 +180,9 @@ func TestLoaderITRemoveLoad(t *testing.T) {
 	if err = loader.LoadChargerProfiles(); err != nil {
 		t.Error("Failed loading Charger profiles: ", err.Error())
 	}
+	if err = loader.LoadDispatcherProfiles(); err != nil {
+		t.Error("Failed loading Charger profiles: ", err.Error())
+	}
 	if err := loader.WriteToDatabase(true, false, false); err != nil {
 		t.Error("Could not write data into dataDb: ", err.Error())
 	}
@@ -217,6 +221,7 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.SuppliersCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.AttributesCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ChargersCsv),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DispatchersCsv),
 	), "", "")
 
 	if err = loader.LoadDestinations(); err != nil {
@@ -278,6 +283,9 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 	}
 	if err = loader.LoadChargerProfiles(); err != nil {
 		t.Error("Failed loading Alias profiles: ", err.Error())
+	}
+	if err = loader.LoadDispatcherProfiles(); err != nil {
+		t.Error("Failed loading Charger profiles: ", err.Error())
 	}
 	if err := loader.WriteToDatabase(true, false, false); err != nil {
 		t.Error("Could not write data into dataDb: ", err.Error())
@@ -487,6 +495,20 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 		}
 		if !reflect.DeepEqual(cp, rcv) {
 			t.Errorf("Expecting: %v, received: %v", cp, rcv)
+		}
+	}
+
+	for tenatid, dpp := range loader.dispatcherProfiles {
+		rcv, err := loader.dm.GetDispatcherProfile(tenatid.Tenant, tenatid.ID, false, false, utils.NonTransactional)
+		if err != nil {
+			t.Errorf("Failed GetDispatcherProfile, tenant: %s, id: %s,  error: %s ", dpp.Tenant, dpp.ID, err.Error())
+		}
+		dp, err := APItoDispatcherProfile(dpp, "UTC")
+		if err != nil {
+			t.Error(err)
+		}
+		if !reflect.DeepEqual(dp, rcv) {
+			t.Errorf("Expecting: %v, received: %v", dp, rcv)
 		}
 	}
 

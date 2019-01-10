@@ -507,6 +507,28 @@ CREATE TABLE tp_chargers (
 );
 
 --
+-- Table structure for table `tp_dispatchers`
+--
+
+DROP TABLE IF EXISTS tp_dispatchers;
+CREATE TABLE tp_dispatchers (
+  `pk` int(11) NOT NULL AUTO_INCREMENT,
+  `tpid` varchar(64) NOT NULL,
+  `tenant` varchar(64) NOT NULL,
+  `id` varchar(64) NOT NULL,
+  `filter_ids` varchar(64) NOT NULL,
+  `activation_interval` varchar(64) NOT NULL,
+  `strategy` varchar(64) NOT NULL,
+  `hosts` varchar(64) NOT NULL,
+  `weight` decimal(8,2) NOT NULL,
+  `created_at` TIMESTAMP,
+  PRIMARY KEY (`pk`),
+  KEY `tpid` (`tpid`),
+  UNIQUE KEY `unique_tp_dispatchers` (`tpid`,`tenant`,
+    `id`,`filter_ids`,`strategy`,`hosts`)
+);
+
+--
 -- Table structure for table `versions`
 --
 

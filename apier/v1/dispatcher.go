@@ -22,7 +22,67 @@ import (
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
+	"github.com/cgrates/cgrates/utils"
 )
+
+// GetDispatcherProfile returns a Dispatcher Profile
+func (apierV1 *ApierV1) GetDispatcherProfile(arg *utils.TenantID, reply *engine.DispatcherProfile) error {
+	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if dpp, err := apierV1.DataManager.GetDispatcherProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
+	} else {
+		*reply = *dpp
+	}
+	return nil
+}
+
+// GetDispatcherProfileIDs returns list of dispatcherProfile IDs registered for a tenant
+func (apierV1 *ApierV1) GetDispatcherProfileIDs(tenant string, dPrfIDs *[]string) error {
+	prfx := utils.DispatcherProfilePrefix + tenant + ":"
+	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(prfx)
+	if err != nil {
+		return err
+	}
+	retIDs := make([]string, len(keys))
+	for i, key := range keys {
+		retIDs[i] = key[len(prfx):]
+	}
+	*dPrfIDs = retIDs
+	return nil
+}
+
+//SetDispatcherProfile add/update a new Dispatcher Profile
+func (apierV1 *ApierV1) SetDispatcherProfile(dpp *engine.DispatcherProfile, reply *string) error {
+	if missing := utils.MissingStructFields(dpp, []string{"Tenant", "ID"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if err := apierV1.DataManager.SetDispatcherProfile(dpp, true); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	*reply = utils.OK
+	return nil
+}
+
+//RemoveDispatcherProfile remove a specific Dispatcher Profile
+func (apierV1 *ApierV1) RemoveDispatcherProfile(arg *utils.TenantID, reply *string) error {
+	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if err := apierV1.DataManager.RemoveDispatcherProfile(arg.Tenant,
+		arg.ID, utils.NonTransactional, true); err != nil {
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
+	}
+	*reply = utils.OK
+	return nil
+}
 
 func NewDispatcherThresholdSv1(dps *dispatchers.DispatcherService) *DispatcherThresholdSv1 {
 	return &DispatcherThresholdSv1{dS: dps}

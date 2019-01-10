@@ -158,6 +158,7 @@ func CurrentDataDBVersions() Versions {
 		utils.RatingPlan:          1,
 		utils.RatingProfile:       1,
 		utils.Chargers:            1,
+		utils.Dispatchers:         1,
 	}
 }
 
@@ -190,6 +191,7 @@ func CurrentStorDBVersions() Versions {
 		utils.TpRatingPlan:       1,
 		utils.TpRatingProfile:    1,
 		utils.TpChargers:         1,
+		utils.TpDispatchers:      1,
 	}
 }
 

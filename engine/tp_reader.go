@@ -30,39 +30,41 @@ import (
 )
 
 type TpReader struct {
-	tpid              string
-	timezone          string
-	dm                *DataManager
-	lr                LoadReader
-	actions           map[string][]*Action
-	actionPlans       map[string]*ActionPlan
-	actionsTriggers   map[string]ActionTriggers
-	accountActions    map[string]*Account
-	dirtyRpAliases    []*TenantRatingSubject // used to clean aliases that might have changed
-	dirtyAccAliases   []*TenantAccount       // used to clean aliases that might have changed
-	destinations      map[string]*Destination
-	timings           map[string]*utils.TPTiming
-	rates             map[string]*utils.TPRate
-	destinationRates  map[string]*utils.TPDestinationRate
-	ratingPlans       map[string]*RatingPlan
-	ratingProfiles    map[string]*RatingProfile
-	sharedGroups      map[string]*SharedGroup
-	derivedChargers   map[string]*utils.DerivedChargers
-	users             map[string]*UserProfile
-	aliases           map[string]*Alias
-	resProfiles       map[utils.TenantID]*utils.TPResource
-	sqProfiles        map[utils.TenantID]*utils.TPStats
-	thProfiles        map[utils.TenantID]*utils.TPThreshold
-	filters           map[utils.TenantID]*utils.TPFilterProfile
-	sppProfiles       map[utils.TenantID]*utils.TPSupplierProfile
-	attributeProfiles map[utils.TenantID]*utils.TPAttributeProfile
-	chargerProfiles   map[utils.TenantID]*utils.TPChargerProfile
-	resources         []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
-	statQueues        []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
-	thresholds        []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
-	suppliers         []*utils.TenantID // IDs of suppliers which need creation based on sppProfiles
-	attrTntID         []*utils.TenantID // IDs of suppliers which need creation based on attributeProfiles
-	chargers          []*utils.TenantID // IDs of chargers which need creation based on chargerProfiles
+	tpid               string
+	timezone           string
+	dm                 *DataManager
+	lr                 LoadReader
+	actions            map[string][]*Action
+	actionPlans        map[string]*ActionPlan
+	actionsTriggers    map[string]ActionTriggers
+	accountActions     map[string]*Account
+	dirtyRpAliases     []*TenantRatingSubject // used to clean aliases that might have changed
+	dirtyAccAliases    []*TenantAccount       // used to clean aliases that might have changed
+	destinations       map[string]*Destination
+	timings            map[string]*utils.TPTiming
+	rates              map[string]*utils.TPRate
+	destinationRates   map[string]*utils.TPDestinationRate
+	ratingPlans        map[string]*RatingPlan
+	ratingProfiles     map[string]*RatingProfile
+	sharedGroups       map[string]*SharedGroup
+	derivedChargers    map[string]*utils.DerivedChargers
+	users              map[string]*UserProfile
+	aliases            map[string]*Alias
+	resProfiles        map[utils.TenantID]*utils.TPResource
+	sqProfiles         map[utils.TenantID]*utils.TPStats
+	thProfiles         map[utils.TenantID]*utils.TPThreshold
+	filters            map[utils.TenantID]*utils.TPFilterProfile
+	sppProfiles        map[utils.TenantID]*utils.TPSupplierProfile
+	attributeProfiles  map[utils.TenantID]*utils.TPAttributeProfile
+	chargerProfiles    map[utils.TenantID]*utils.TPChargerProfile
+	dispatcherProfiles map[utils.TenantID]*utils.TPDispatcherProfile
+	resources          []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
+	statQueues         []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
+	thresholds         []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
+	suppliers          []*utils.TenantID // IDs of suppliers which need creation based on sppProfiles
+	attrTntID          []*utils.TenantID // IDs of suppliers which need creation based on attributeProfiles
+	chargers           []*utils.TenantID // IDs of chargers which need creation based on chargerProfiles
+	dpps               []*utils.TenantID // IDs of chargers which need creation based on dispatcherProfiles
 	revDests,
 	revAliases,
 	acntActionPlans map[string][]string
@@ -137,6 +139,7 @@ func (tpr *TpReader) Init() {
 	tpr.sppProfiles = make(map[utils.TenantID]*utils.TPSupplierProfile)
 	tpr.attributeProfiles = make(map[utils.TenantID]*utils.TPAttributeProfile)
 	tpr.chargerProfiles = make(map[utils.TenantID]*utils.TPChargerProfile)
+	tpr.dispatcherProfiles = make(map[utils.TenantID]*utils.TPDispatcherProfile)
 	tpr.filters = make(map[utils.TenantID]*utils.TPFilterProfile)
 	tpr.revDests = make(map[string][]string)
 	tpr.revAliases = make(map[string][]string)
@@ -1450,6 +1453,30 @@ func (tpr *TpReader) LoadChargerProfiles() error {
 	return tpr.LoadChargerProfilesFiltered("")
 }
 
+func (tpr *TpReader) LoadDispatcherProfilesFiltered(tag string) (err error) {
+	rls, err := tpr.lr.GetTPDispatchers(tpr.tpid, "", tag)
+	if err != nil {
+		return err
+	}
+	mapDispatcherProfile := make(map[utils.TenantID]*utils.TPDispatcherProfile)
+	for _, rl := range rls {
+		mapDispatcherProfile[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
+	}
+	tpr.dispatcherProfiles = mapDispatcherProfile
+	for tntID := range mapDispatcherProfile {
+		if has, err := tpr.dm.HasData(utils.DispatcherProfilePrefix, tntID.ID, tntID.Tenant); err != nil {
+			return err
+		} else if !has {
+			tpr.dpps = append(tpr.dpps, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
+		}
+	}
+	return nil
+}
+
+func (tpr *TpReader) LoadDispatcherProfiles() error {
+	return tpr.LoadDispatcherProfilesFiltered("")
+}
+
 func (tpr *TpReader) LoadAll() (err error) {
 	if err = tpr.LoadDestinations(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
@@ -1512,6 +1539,9 @@ func (tpr *TpReader) LoadAll() (err error) {
 		return
 	}
 	if err = tpr.LoadChargerProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
+	}
+	if err = tpr.LoadDispatcherProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
 	return nil
@@ -1880,6 +1910,22 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 	}
 
 	if verbose {
+		log.Print("DispatcherProfiles:")
+	}
+	for _, tpTH := range tpr.dispatcherProfiles {
+		th, err := APItoDispatcherProfile(tpTH, tpr.timezone)
+		if err != nil {
+			return err
+		}
+		if err = tpr.dm.SetDispatcherProfile(th, true); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", th.TenantID())
+		}
+	}
+
+	if verbose {
 		log.Print("Timings:")
 	}
 	for _, t := range tpr.timings {
@@ -1986,6 +2032,8 @@ func (tpr *TpReader) ShowStatistics() {
 	log.Print("AttributeProfiles: ", len(tpr.attributeProfiles))
 	// Charger profiles
 	log.Print("ChargerProfiles: ", len(tpr.chargerProfiles))
+	// Dispatcher profiles
+	log.Print("DispatcherProfiles: ", len(tpr.dispatcherProfiles))
 }
 
 // Returns the identities loaded for a specific category, useful for cache reloads
@@ -2147,6 +2195,14 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(tpr.chargerProfiles))
 		i := 0
 		for k := range tpr.chargerProfiles {
+			keys[i] = k.TenantID()
+			i++
+		}
+		return keys, nil
+	case utils.DispatcherProfilePrefix:
+		keys := make([]string, len(tpr.dispatcherProfiles))
+		i := 0
+		for k := range tpr.dispatcherProfiles {
 			keys[i] = k.TenantID()
 			i++
 		}
@@ -2411,6 +2467,18 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 	}
 	for _, tpTH := range tpr.chargerProfiles {
 		if err = tpr.dm.RemoveChargerProfile(tpTH.Tenant, tpTH.ID, utils.NonTransactional, false); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", tpTH.Tenant)
+		}
+	}
+
+	if verbose {
+		log.Print("DispatcherProfiles:")
+	}
+	for _, tpTH := range tpr.dispatcherProfiles {
+		if err = tpr.dm.RemoveDispatcherProfile(tpTH.Tenant, tpTH.ID, utils.NonTransactional, false); err != nil {
 			return err
 		}
 		if verbose {

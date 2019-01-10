@@ -155,6 +155,14 @@ func testPrecacheGetCacheStatsBeforeLoad(t *testing.T) {
 			Items:  0,
 			Groups: 0,
 		},
+		"dispatcher_filter_indexes": {
+			Items:  0,
+			Groups: 0,
+		},
+		"dispatcher_profiles": {
+			Items:  0,
+			Groups: 0,
+		},
 		"derived_chargers": {
 			Items:  0,
 			Groups: 0,
@@ -312,6 +320,14 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"charger_profiles": {
+			Items:  0,
+			Groups: 0,
+		},
+		"dispatcher_filter_indexes": {
+			Items:  0,
+			Groups: 0,
+		},
+		"dispatcher_profiles": {
 			Items:  0,
 			Groups: 0,
 		},

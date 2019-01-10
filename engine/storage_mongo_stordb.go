@@ -1617,6 +1617,54 @@ func (ms *MongoStorage) SetTPChargers(tpCPP []*utils.TPChargerProfile) (err erro
 	})
 }
 
+func (ms *MongoStorage) GetTPDispatchers(tpid, tenant, id string) ([]*utils.TPDispatcherProfile, error) {
+	filter := bson.M{"tpid": tpid}
+	if id != "" {
+		filter["id"] = id
+	}
+	if tenant != "" {
+		filter["tenant"] = tenant
+	}
+	var results []*utils.TPDispatcherProfile
+	err := ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
+		cur, err := ms.getCol(utils.TBLTPDispatchers).Find(sctx, filter)
+		if err != nil {
+			return err
+		}
+		for cur.Next(sctx) {
+			var tp utils.TPDispatcherProfile
+			err := cur.Decode(&tp)
+			if err != nil {
+				return err
+			}
+			results = append(results, &tp)
+		}
+		if len(results) == 0 {
+			return utils.ErrNotFound
+		}
+		return cur.Close(sctx)
+	})
+	return results, err
+}
+
+func (ms *MongoStorage) SetTPDispatchers(tpDPPs []*utils.TPDispatcherProfile) (err error) {
+	if len(tpDPPs) == 0 {
+		return
+	}
+	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
+		for _, tp := range tpDPPs {
+			_, err = ms.getCol(utils.TBLTPDispatchers).UpdateOne(sctx, bson.M{"tpid": tp.TPid, "id": tp.ID},
+				bson.M{"$set": tp},
+				options.Update().SetUpsert(true),
+			)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
 func (ms *MongoStorage) GetVersions(itm string) (vrs Versions, err error) {
 	fop := options.FindOne()
 	if itm != "" {

@@ -628,6 +628,7 @@ type ArgsCache struct {
 	SupplierProfileIDs    *[]string
 	AttributeProfileIDs   *[]string
 	ChargerProfileIDs     *[]string
+	DispatcherProfileIDs  *[]string
 }
 
 // Data used to do remote cache reloads via api
@@ -670,6 +671,7 @@ type CacheStats struct {
 	SupplierProfiles    int
 	AttributeProfiles   int
 	ChargerProfiles     int
+	DispatcherProfiles  int
 }
 
 type AttrExpFileCdrs struct {
@@ -1395,4 +1397,15 @@ type TPTntID struct {
 	TPid   string
 	Tenant string
 	ID     string
+}
+
+type TPDispatcherProfile struct {
+	TPid               string
+	Tenant             string
+	ID                 string
+	FilterIDs          []string
+	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
+	Strategy           string
+	Hosts              []string
+	Weight             float64
 }

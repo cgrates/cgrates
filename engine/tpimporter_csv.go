@@ -62,6 +62,7 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 	utils.SuppliersCsv:          (*TPCSVImporter).importSuppliers,
 	utils.AttributesCsv:         (*TPCSVImporter).importAttributeProfiles,
 	utils.ChargersCsv:           (*TPCSVImporter).importChargerProfiles,
+	utils.DispatchersCsv:        (*TPCSVImporter).importDispatcherProfiles,
 }
 
 func (self *TPCSVImporter) Run() error {
@@ -87,6 +88,7 @@ func (self *TPCSVImporter) Run() error {
 		path.Join(self.DirPath, utils.SuppliersCsv),
 		path.Join(self.DirPath, utils.AttributesCsv),
 		path.Join(self.DirPath, utils.ChargersCsv),
+		path.Join(self.DirPath, utils.DispatchersCsv),
 	)
 	files, _ := ioutil.ReadDir(self.DirPath)
 	for _, f := range files {
@@ -401,4 +403,15 @@ func (self *TPCSVImporter) importChargerProfiles(fn string) error {
 		return err
 	}
 	return self.StorDb.SetTPChargers(rls)
+}
+
+func (self *TPCSVImporter) importDispatcherProfiles(fn string) error {
+	if self.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
+	dpps, err := self.csvr.GetTPDispatchers(self.TPid, "", "")
+	if err != nil {
+		return err
+	}
+	return self.StorDb.SetTPDispatchers(dpps)
 }

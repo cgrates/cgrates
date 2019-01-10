@@ -2614,3 +2614,174 @@ func APItoChargerProfile(tpCPP *utils.TPChargerProfile, timezone string) (cpp *C
 	}
 	return cpp, nil
 }
+
+type TPDispatchers []*TPDispatcher
+
+func (tps TPDispatchers) AsTPDispatchers() (result []*utils.TPDispatcherProfile) {
+	mst := make(map[string]*utils.TPDispatcherProfile)
+	filterMap := make(map[string]utils.StringMap)
+	hostMap := make(map[string]utils.StringMap)
+	for _, tp := range tps {
+		tpDPP, found := mst[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]
+		if !found {
+			tpDPP = &utils.TPDispatcherProfile{
+				TPid:   tp.Tpid,
+				Tenant: tp.Tenant,
+				ID:     tp.ID,
+			}
+		}
+		if tp.Weight != 0 {
+			tpDPP.Weight = tp.Weight
+		}
+		if len(tp.ActivationInterval) != 0 {
+			tpDPP.ActivationInterval = new(utils.TPActivationInterval)
+			aiSplt := strings.Split(tp.ActivationInterval, utils.INFIELD_SEP)
+			if len(aiSplt) == 2 {
+				tpDPP.ActivationInterval.ActivationTime = aiSplt[0]
+				tpDPP.ActivationInterval.ExpiryTime = aiSplt[1]
+			} else if len(aiSplt) == 1 {
+				tpDPP.ActivationInterval.ActivationTime = aiSplt[0]
+			}
+		}
+		if tp.FilterIDs != "" {
+			if _, has := filterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]; !has {
+				filterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(utils.StringMap)
+			}
+			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
+			for _, filter := range filterSplit {
+				filterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][filter] = true
+			}
+		}
+		if tp.Strategy != "" {
+			tpDPP.Strategy = tp.Strategy
+		}
+		if tp.Hosts != "" {
+			if _, has := hostMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]; !has {
+				hostMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(utils.StringMap)
+			}
+			hostsSplit := strings.Split(tp.Hosts, utils.INFIELD_SEP)
+			for _, host := range hostsSplit {
+				hostMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][host] = true
+			}
+		}
+		mst[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = tpDPP
+	}
+	result = make([]*utils.TPDispatcherProfile, len(mst))
+	i := 0
+	for tntID, tp := range mst {
+		result[i] = tp
+		for filterID := range filterMap[tntID] {
+			result[i].FilterIDs = append(result[i].FilterIDs, filterID)
+		}
+		for host := range hostMap[tntID] {
+			result[i].Hosts = append(result[i].Hosts, host)
+		}
+		i++
+	}
+	return
+}
+
+func APItoModelTPDispatcher(tpDPP *utils.TPDispatcherProfile) (mdls TPDispatchers) {
+	if tpDPP != nil {
+		min := len(tpDPP.FilterIDs)
+		isFilter := true
+		if min > len(tpDPP.Hosts) {
+			min = len(tpDPP.Hosts)
+			isFilter = false
+		}
+		if min == 0 {
+			mdl := &TPDispatcher{
+				Tenant:   tpDPP.Tenant,
+				Tpid:     tpDPP.TPid,
+				ID:       tpDPP.ID,
+				Weight:   tpDPP.Weight,
+				Strategy: tpDPP.Strategy,
+			}
+			if tpDPP.ActivationInterval != nil {
+				if tpDPP.ActivationInterval.ActivationTime != "" {
+					mdl.ActivationInterval = tpDPP.ActivationInterval.ActivationTime
+				}
+				if tpDPP.ActivationInterval.ExpiryTime != "" {
+					mdl.ActivationInterval += utils.INFIELD_SEP + tpDPP.ActivationInterval.ExpiryTime
+				}
+			}
+			if isFilter && len(tpDPP.Hosts) > 0 {
+				mdl.Hosts = tpDPP.Hosts[0]
+			} else if len(tpDPP.FilterIDs) > 0 {
+				mdl.FilterIDs = tpDPP.FilterIDs[0]
+			}
+			min = 1
+			mdls = append(mdls, mdl)
+		} else {
+			for i := 0; i < min; i++ {
+				mdl := &TPDispatcher{
+					Tenant: tpDPP.Tenant,
+					Tpid:   tpDPP.TPid,
+					ID:     tpDPP.ID,
+				}
+				if i == 0 {
+					mdl.Weight = tpDPP.Weight
+					mdl.Strategy = tpDPP.Strategy
+					if tpDPP.ActivationInterval != nil {
+						if tpDPP.ActivationInterval.ActivationTime != "" {
+							mdl.ActivationInterval = tpDPP.ActivationInterval.ActivationTime
+						}
+						if tpDPP.ActivationInterval.ExpiryTime != "" {
+							mdl.ActivationInterval += utils.INFIELD_SEP + tpDPP.ActivationInterval.ExpiryTime
+						}
+					}
+				}
+				mdl.Hosts = tpDPP.Hosts[i]
+				mdl.FilterIDs = tpDPP.FilterIDs[i]
+				mdls = append(mdls, mdl)
+			}
+		}
+		if len(tpDPP.FilterIDs)-min > 0 {
+			for i := min; i < len(tpDPP.FilterIDs); i++ {
+				mdl := &TPDispatcher{
+					Tenant: tpDPP.Tenant,
+					Tpid:   tpDPP.TPid,
+					ID:     tpDPP.ID,
+				}
+				mdl.FilterIDs = tpDPP.FilterIDs[i]
+				mdls = append(mdls, mdl)
+			}
+		}
+		if len(tpDPP.Hosts)-min > 0 {
+			for i := min; i < len(tpDPP.Hosts); i++ {
+				mdl := &TPDispatcher{
+					Tenant: tpDPP.Tenant,
+					Tpid:   tpDPP.TPid,
+					ID:     tpDPP.ID,
+				}
+				mdl.Hosts = tpDPP.Hosts[i]
+				mdls = append(mdls, mdl)
+			}
+		}
+
+	}
+	return
+}
+
+func APItoDispatcherProfile(tpDPP *utils.TPDispatcherProfile, timezone string) (dpp *DispatcherProfile, err error) {
+	dpp = &DispatcherProfile{
+		Tenant:    tpDPP.Tenant,
+		ID:        tpDPP.ID,
+		Weight:    tpDPP.Weight,
+		Strategy:  tpDPP.Strategy,
+		FilterIDs: make([]string, len(tpDPP.FilterIDs)),
+		Hosts:     make([]string, len(tpDPP.Hosts)),
+	}
+	for i, fli := range tpDPP.FilterIDs {
+		dpp.FilterIDs[i] = fli
+	}
+	for i, host := range tpDPP.Hosts {
+		dpp.Hosts[i] = host
+	}
+	if tpDPP.ActivationInterval != nil {
+		if dpp.ActivationInterval, err = tpDPP.ActivationInterval.AsActivationInterval(timezone); err != nil {
+			return nil, err
+		}
+	}
+	return dpp, nil
+}

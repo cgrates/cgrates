@@ -222,7 +222,8 @@ func (ms *MapStorage) HasDataDrv(category, subject, tenant string) (bool, error)
 		return exists, nil
 	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,
 		utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
-		utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AttributeProfilePrefix, utils.ChargerProfilePrefix:
+		utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AttributeProfilePrefix,
+		utils.ChargerProfilePrefix, utils.DispatcherProfilePrefix:
 		_, exists := ms.dict[category+utils.ConcatenatedKey(tenant, subject)]
 		return exists, nil
 	}
@@ -1541,6 +1542,39 @@ func (ms *MapStorage) RemoveChargerProfileDrv(tenant, id string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	key := utils.ChargerProfilePrefix + utils.ConcatenatedKey(tenant, id)
+	delete(ms.dict, key)
+	return
+}
+
+func (ms *MapStorage) GetDispatcherProfileDrv(tenant, id string) (r *DispatcherProfile, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+	values, ok := ms.dict[utils.DispatcherProfilePrefix+utils.ConcatenatedKey(tenant, id)]
+	if !ok {
+		return nil, utils.ErrNotFound
+	}
+	err = ms.ms.Unmarshal(values, &r)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+func (ms *MapStorage) SetDispatcherProfileDrv(r *DispatcherProfile) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	result, err := ms.ms.Marshal(r)
+	if err != nil {
+		return err
+	}
+	ms.dict[utils.DispatcherProfilePrefix+utils.ConcatenatedKey(r.Tenant, r.ID)] = result
+	return
+}
+
+func (ms *MapStorage) RemoveDispatcherProfileDrv(tenant, id string) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	key := utils.DispatcherProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	delete(ms.dict, key)
 	return
 }

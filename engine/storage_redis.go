@@ -355,7 +355,6 @@ func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 		return keys, nil
 	}
 	return nil, nil
-
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity
@@ -367,7 +366,8 @@ func (rs *RedisStorage) HasDataDrv(category, subject, tenant string) (bool, erro
 		return i == 1, err
 	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,
 		utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
-		utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AttributeProfilePrefix, utils.ChargerProfilePrefix:
+		utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AttributeProfilePrefix,
+		utils.ChargerProfilePrefix, utils.DispatcherProfilePrefix:
 		i, err := rs.Cmd("EXISTS", category+utils.ConcatenatedKey(tenant, subject)).Int()
 		return i == 1, err
 	}
@@ -1762,6 +1762,37 @@ func (rs *RedisStorage) SetChargerProfileDrv(r *ChargerProfile) (err error) {
 
 func (rs *RedisStorage) RemoveChargerProfileDrv(tenant, id string) (err error) {
 	key := utils.ChargerProfilePrefix + utils.ConcatenatedKey(tenant, id)
+	if err = rs.Cmd("DEL", key).Err; err != nil {
+		return
+	}
+	return
+}
+
+func (rs *RedisStorage) GetDispatcherProfileDrv(tenant, id string) (r *DispatcherProfile, err error) {
+	key := utils.DispatcherProfilePrefix + utils.ConcatenatedKey(tenant, id)
+	var values []byte
+	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
+		if err == redis.ErrRespNil { // did not find the destination
+			err = utils.ErrNotFound
+		}
+		return
+	}
+	if err = rs.ms.Unmarshal(values, &r); err != nil {
+		return
+	}
+	return
+}
+
+func (rs *RedisStorage) SetDispatcherProfileDrv(r *DispatcherProfile) (err error) {
+	result, err := rs.ms.Marshal(r)
+	if err != nil {
+		return err
+	}
+	return rs.Cmd("SET", utils.DispatcherProfilePrefix+utils.ConcatenatedKey(r.Tenant, r.ID), result).Err
+}
+
+func (rs *RedisStorage) RemoveDispatcherProfileDrv(tenant, id string) (err error) {
+	key := utils.DispatcherProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	if err = rs.Cmd("DEL", key).Err; err != nil {
 		return
 	}

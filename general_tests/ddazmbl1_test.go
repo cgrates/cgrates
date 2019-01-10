@@ -69,7 +69,7 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 			destinationRates, ratingPlans, ratingProfiles,
 			sharedGroups, actions, actionPlans, actionTriggers, accountActions,
 			derivedCharges, users, aliases, resLimits, stats,
-			thresholds, filters, suppliers, aliasProfiles, chargerProfiles), "", "")
+			thresholds, filters, suppliers, aliasProfiles, chargerProfiles, ``), "", "")
 	if err := csvr.LoadDestinations(); err != nil {
 		t.Fatal(err)
 	}
@@ -116,7 +116,7 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 
 	dataDB.LoadDataDBCache(nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	if cachedDests := len(engine.Cache.GetItemIDs(utils.CacheDestinations, "")); cachedDests != 0 {
 		t.Error("Wrong number of cached destinations found", cachedDests)
