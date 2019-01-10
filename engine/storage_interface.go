@@ -140,6 +140,9 @@ type DataDB interface {
 	GetChargerProfileDrv(string, string) (*ChargerProfile, error)
 	SetChargerProfileDrv(*ChargerProfile) error
 	RemoveChargerProfileDrv(string, string) error
+	GetDispatcherProfileDrv(string, string) (*DispatcherProfile, error)
+	SetDispatcherProfileDrv(*DispatcherProfile) error
+	RemoveDispatcherProfileDrv(string, string) error
 }
 
 type StorDB interface {
@@ -189,6 +192,7 @@ type LoadReader interface {
 	GetTPSuppliers(string, string, string) ([]*utils.TPSupplierProfile, error)
 	GetTPAttributes(string, string, string) ([]*utils.TPAttributeProfile, error)
 	GetTPChargers(string, string, string) ([]*utils.TPChargerProfile, error)
+	GetTPDispatchers(string, string, string) ([]*utils.TPDispatcherProfile, error)
 }
 
 type LoadWriter interface {
@@ -214,6 +218,7 @@ type LoadWriter interface {
 	SetTPSuppliers([]*utils.TPSupplierProfile) error
 	SetTPAttributes([]*utils.TPAttributeProfile) error
 	SetTPChargers([]*utils.TPChargerProfile) error
+	SetTPDispatchers([]*utils.TPDispatcherProfile) error
 }
 
 // NewMarshaler returns the marshaler type selected by mrshlerStr

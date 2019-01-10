@@ -34,34 +34,38 @@ type CSVStorage struct {
 	// file names
 	destinationsFn, ratesFn, destinationratesFn, timingsFn, destinationratetimingsFn, ratingprofilesFn,
 	sharedgroupsFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn,
-	usersFn, aliasesFn, resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn, attributeProfilesFn, chargerProfilesFn string
+	usersFn, aliasesFn, resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn, attributeProfilesFn,
+	chargerProfilesFn, dispatcherProfilesFn string
 }
 
 func NewFileCSVStorage(sep rune,
 	destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn,
 	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn, usersFn, aliasesFn,
-	resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn, attributeProfilesFn, chargerProfilesFn string) *CSVStorage {
+	resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn, attributeProfilesFn, chargerProfilesFn, dispatcherProfilesFn string) *CSVStorage {
 	c := new(CSVStorage)
 	c.sep = sep
 	c.readerFunc = openFileCSVStorage
 	c.destinationsFn, c.timingsFn, c.ratesFn, c.destinationratesFn, c.destinationratetimingsFn, c.ratingprofilesFn,
 		c.sharedgroupsFn, c.actionsFn, c.actiontimingsFn, c.actiontriggersFn, c.accountactionsFn,
 		c.derivedChargersFn, c.usersFn, c.aliasesFn, c.resProfilesFn, c.statsFn, c.thresholdsFn,
-		c.filterFn, c.suppProfilesFn, c.attributeProfilesFn, c.chargerProfilesFn = destinationsFn, timingsFn,
+		c.filterFn, c.suppProfilesFn, c.attributeProfilesFn,
+		c.chargerProfilesFn, c.dispatcherProfilesFn = destinationsFn, timingsFn,
 		ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn,
 		actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn,
-		usersFn, aliasesFn, resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn, attributeProfilesFn, chargerProfilesFn
+		usersFn, aliasesFn, resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn,
+		attributeProfilesFn, chargerProfilesFn, dispatcherProfilesFn
 	return c
 }
 
 func NewStringCSVStorage(sep rune,
 	destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn,
 	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn, usersFn,
-	aliasesFn, resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn, attributeProfilesFn, chargerProfilesFn string) *CSVStorage {
+	aliasesFn, resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn,
+	attributeProfilesFn, chargerProfilesFn, dispatcherProfilesFn string) *CSVStorage {
 	c := NewFileCSVStorage(sep, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn,
 		ratingprofilesFn, sharedgroupsFn, actionsFn, actiontimingsFn, actiontriggersFn,
 		accountactionsFn, derivedChargersFn, usersFn, aliasesFn, resProfilesFn,
-		statsFn, thresholdsFn, filterFn, suppProfilesFn, attributeProfilesFn, chargerProfilesFn)
+		statsFn, thresholdsFn, filterFn, suppProfilesFn, attributeProfilesFn, chargerProfilesFn, dispatcherProfilesFn)
 	c.readerFunc = openStringCSVStorage
 	return c
 }
@@ -733,10 +737,38 @@ func (csvs *CSVStorage) GetTPChargers(tpid, tenant, id string) ([]*utils.TPCharg
 	return tpCPPs.AsTPChargers(), nil
 }
 
+func (csvs *CSVStorage) GetTPDispatchers(tpid, tenant, id string) ([]*utils.TPDispatcherProfile, error) {
+	csvReader, fp, err := csvs.readerFunc(csvs.dispatcherProfilesFn, csvs.sep, getColumnCount(TPDispatcher{}))
+	if err != nil {
+		// allow writing of the other values
+		return nil, nil
+	}
+	if fp != nil {
+		defer fp.Close()
+	}
+	var tpDPPs TPDispatchers
+	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
+		if err != nil {
+			log.Printf("bad line in %s, %s\n", csvs.dispatcherProfilesFn, err.Error())
+			return nil, err
+		}
+		if dpp, err := csvLoad(TPDispatcher{}, record); err != nil {
+			log.Print("error loading tpDispatcherProfile: ", err)
+			return nil, err
+		} else {
+			dpp := dpp.(TPDispatcher)
+			dpp.Tpid = tpid
+			tpDPPs = append(tpDPPs, &dpp)
+		}
+	}
+	return tpDPPs.AsTPDispatchers(), nil
+}
+
 func (csvs *CSVStorage) GetTpIds(colName string) ([]string, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (csvs *CSVStorage) GetTpTableIds(tpid, table string, distinct utils.TPDistinctIds, filters map[string]string, p *utils.Paginator) ([]string, error) {
+func (csvs *CSVStorage) GetTpTableIds(tpid, table string,
+	distinct utils.TPDistinctIds, filters map[string]string, p *utils.Paginator) ([]string, error) {
 	return nil, utils.ErrNotImplemented
 }

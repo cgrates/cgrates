@@ -141,12 +141,14 @@ const CGRATES_CFG_JSON = `
 	"supplier_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control supplier profile caching
 	"attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control attribute profile caching
 	"charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control charger profile caching
+	"dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// control dispatcher profile caching
 	"resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control resource filter indexes caching
 	"stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 						// control stat filter indexes caching
 	"threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control threshold filter indexes caching
 	"supplier_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control supplier filter indexes caching
 	"attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control attribute filter indexes caching
 	"charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control charger filter indexes caching
+	"dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control dispatcher filter indexes caching
 	"diameter_messages": {"limit": -1, "ttl": "1h", "static_ttl": false},						// diameter messages caching
 },
 

@@ -46,7 +46,7 @@ func (dm *DataManager) DataDB() DataDB {
 
 func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs,
 	aaPlIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rpIDs, resIDs,
-	stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs, splPrflIDs, alsPrfIDs, cppIDs []string) (err error) {
+	stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs, splPrflIDs, alsPrfIDs, cppIDs, dppIDs []string) (err error) {
 	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
 		if dm.cacheCfg == nil {
 			return
@@ -58,7 +58,8 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 				utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACTION_TRIGGER_PREFIX,
 				utils.SHARED_GROUP_PREFIX, utils.ALIASES_PREFIX, utils.REVERSE_ALIASES_PREFIX, utils.StatQueuePrefix,
 				utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
-				utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AttributeProfilePrefix, utils.ChargerProfilePrefix}, k) && cacheCfg.Precache {
+				utils.FilterPrefix, utils.SupplierProfilePrefix,
+				utils.AttributeProfilePrefix, utils.ChargerProfilePrefix, utils.DispatcherProfilePrefix}, k) && cacheCfg.Precache {
 				if err := dm.PreloadCacheForPrefix(k); err != nil && err != utils.ErrInvalidKey {
 					return err
 				}
@@ -89,6 +90,7 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 			utils.SupplierProfilePrefix:      splPrflIDs,
 			utils.AttributeProfilePrefix:     alsPrfIDs,
 			utils.ChargerProfilePrefix:       cppIDs,
+			utils.DispatcherProfilePrefix:    dppIDs,
 		} {
 			if err = dm.CacheDataFromDB(key, ids, false); err != nil {
 				return
@@ -148,7 +150,8 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		utils.FilterPrefix,
 		utils.SupplierProfilePrefix,
 		utils.AttributeProfilePrefix,
-		utils.ChargerProfilePrefix}, prfx) {
+		utils.ChargerProfilePrefix,
+		utils.DispatcherProfilePrefix}, prfx) {
 		return utils.NewCGRError(utils.DataManager,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -241,6 +244,9 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.ChargerProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetChargerProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+		case utils.DispatcherProfilePrefix:
+			tntID := utils.NewTenantID(dataID)
+			_, err = dm.GetDispatcherProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.DataManager,
@@ -1228,7 +1234,7 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 				}
 			}
 			if needsRemove {
-				if err = NewFilterIndexer(dm, utils.SupplierProfilePrefix,
+				if err = NewFilterIndexer(dm, utils.ChargerProfilePrefix,
 					cpp.Tenant).RemoveItemFromIndex(cpp.Tenant, cpp.ID, oldCpp.FilterIDs); err != nil {
 					return
 				}
@@ -1252,6 +1258,80 @@ func (dm *DataManager) RemoveChargerProfile(tenant, id string,
 		cacheCommit(transactionID), transactionID)
 	if withIndex {
 		return NewFilterIndexer(dm, utils.ChargerProfilePrefix, tenant).RemoveItemFromIndex(tenant, id, oldCpp.FilterIDs)
+	}
+	return
+}
+
+func (dm *DataManager) GetDispatcherProfile(tenant, id string, cacheRead, cacheWrite bool,
+	transactionID string) (dpp *DispatcherProfile, err error) {
+	tntID := utils.ConcatenatedKey(tenant, id)
+	if cacheRead {
+		if x, ok := Cache.Get(utils.CacheDispatcherProfiles, tntID); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*DispatcherProfile), nil
+		}
+	}
+	dpp, err = dm.dataDB.GetDispatcherProfileDrv(tenant, id)
+	if err != nil {
+		if err == utils.ErrNotFound && cacheWrite {
+			Cache.Set(utils.CacheDispatcherProfiles, tntID, nil, nil,
+				cacheCommit(transactionID), transactionID)
+		}
+		return nil, err
+	}
+	if cacheWrite {
+		Cache.Set(utils.CacheDispatcherProfiles, tntID, dpp, nil,
+			cacheCommit(transactionID), transactionID)
+	}
+	return
+}
+
+func (dm *DataManager) SetDispatcherProfile(dpp *DispatcherProfile, withIndex bool) (err error) {
+	oldDpp, err := dm.GetDispatcherProfile(dpp.Tenant, dpp.ID, true, false, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
+	if err = dm.DataDB().SetDispatcherProfileDrv(dpp); err != nil {
+		return err
+	}
+	if err = dm.CacheDataFromDB(utils.DispatcherProfilePrefix, []string{dpp.TenantID()}, true); err != nil {
+		return
+	}
+	if withIndex {
+		if oldDpp != nil {
+			var needsRemove bool
+			for _, fltrID := range oldDpp.FilterIDs {
+				if !utils.IsSliceMember(dpp.FilterIDs, fltrID) {
+					needsRemove = true
+				}
+			}
+			if needsRemove {
+				if err = NewFilterIndexer(dm, utils.DispatcherProfilePrefix,
+					dpp.Tenant).RemoveItemFromIndex(dpp.Tenant, dpp.ID, oldDpp.FilterIDs); err != nil {
+					return
+				}
+			}
+		}
+		return createAndIndex(utils.DispatcherProfilePrefix, dpp.Tenant, utils.EmptyString, dpp.ID, dpp.FilterIDs, dm)
+	}
+	return
+}
+
+func (dm *DataManager) RemoveDispatcherProfile(tenant, id string,
+	transactionID string, withIndex bool) (err error) {
+	oldDpp, err := dm.GetDispatcherProfile(tenant, id, true, false, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
+	if err = dm.DataDB().RemoveDispatcherProfileDrv(tenant, id); err != nil {
+		return
+	}
+	Cache.Remove(utils.CacheDispatcherProfiles, utils.ConcatenatedKey(tenant, id),
+		cacheCommit(transactionID), transactionID)
+	if withIndex {
+		return NewFilterIndexer(dm, utils.DispatcherProfilePrefix, tenant).RemoveItemFromIndex(tenant, id, oldDpp.FilterIDs)
 	}
 	return
 }

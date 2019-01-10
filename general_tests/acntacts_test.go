@@ -60,7 +60,7 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,,false,false,10`
 	csvr := engine.NewTpReader(dbAcntActs.DataDB(), engine.NewStringCSVStorage(',', destinations, timings,
 		rates, destinationRates, ratingPlans, ratingProfiles, sharedGroups,
 		actions, actionPlans, actionTriggers, accountActions, derivedCharges,
-		users, aliases, resLimits, stats, thresholds, filters, suppliers, aliasProfiles, chargerProfiles), "", "")
+		users, aliases, resLimits, stats, thresholds, filters, suppliers, aliasProfiles, chargerProfiles, ``), "", "")
 	if err := csvr.LoadAll(); err != nil {
 		t.Fatal(err)
 	}
@@ -69,7 +69,7 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,,false,false,10`
 	engine.Cache.Clear(nil)
 	dbAcntActs.LoadDataDBCache(nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil)
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	expectAcnt := &engine.Account{ID: "cgrates.org:1"}
 	if acnt, err := dbAcntActs.DataDB().GetAccount("cgrates.org:1"); err != nil {

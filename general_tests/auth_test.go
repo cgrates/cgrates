@@ -67,7 +67,7 @@ RP_ANY,DR_ANY_1CNT,*any,10`
 	chargerProfiles := ``
 	csvr := engine.NewTpReader(dbAuth.DataDB(), engine.NewStringCSVStorage(',', destinations, timings, rates, destinationRates,
 		ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans, actionTriggers, accountActions,
-		derivedCharges, users, aliases, resLimits, stats, thresholds, filters, suppliers, aliasProfiles, chargerProfiles), "", "")
+		derivedCharges, users, aliases, resLimits, stats, thresholds, filters, suppliers, aliasProfiles, chargerProfiles, ``), "", "")
 	if err := csvr.LoadAll(); err != nil {
 		t.Fatal(err)
 	}
@@ -81,7 +81,7 @@ RP_ANY,DR_ANY_1CNT,*any,10`
 	engine.Cache.Clear(nil)
 	dbAuth.LoadDataDBCache(nil, nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil)
+		nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	if cachedDests := len(engine.Cache.GetItemIDs(utils.CacheDestinations, "")); cachedDests != 0 {
 		t.Error("Wrong number of cached destinations found", cachedDests)

@@ -295,14 +295,19 @@ cgrates.org,ALS1,con2;con3,,,Field2,Initial2,Sub2,false,,
 #Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
 cgrates.org,Charger1,*string:Account:1001,2014-07-29T15:00:00Z,*rated,ATTR_1001_SIMPLEAUTH,20
 `
+	dispatcherProfiles = `
+#Tenant,ID,FilterIDs,ActivationInterval,Strategy,Hosts,Weight
+cgrates.org,D1,*string:Account:1001,2014-07-29T15:00:00Z,*first,192.168.56.203;192.168.56.204,20
+`
 )
 
 var csvr *TpReader
 
 func init() {
-	csvr = NewTpReader(dm.dataDB, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, actions, actionPlans, actionTriggers, accountActions, derivedCharges,
-		users, aliases, resProfiles, stats, thresholds, filters, sppProfiles, attributeProfiles, chargerProfiles), testTPID, "")
+	csvr = NewTpReader(dm.dataDB, NewStringCSVStorage(',', destinations, timings, rates, destinationRates,
+		ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans, actionTriggers,
+		accountActions, derivedCharges, users, aliases, resProfiles, stats, thresholds,
+		filters, sppProfiles, attributeProfiles, chargerProfiles, dispatcherProfiles), testTPID, "")
 
 	if err := csvr.LoadDestinations(); err != nil {
 		log.Print("error in LoadDestinations:", err)
@@ -365,6 +370,9 @@ func init() {
 		log.Print("error in LoadAttributeProfiles:", err)
 	}
 	if err := csvr.LoadChargerProfiles(); err != nil {
+		log.Print("error in LoadChargerProfiles:", err)
+	}
+	if err := csvr.LoadDispatcherProfiles(); err != nil {
 		log.Print("error in LoadChargerProfiles:", err)
 	}
 	csvr.WriteToDatabase(false, false, false)
@@ -1711,6 +1719,42 @@ func TestLoadChargerProfiles(t *testing.T) {
 		t.Errorf("Failed to load chargerProfiles: %s", utils.ToIJSON(csvr.chargerProfiles))
 	} else if !reflect.DeepEqual(eChargerProfiles[cppKey], csvr.chargerProfiles[cppKey]) {
 		t.Errorf("Expecting: %+v, received: %+v", eChargerProfiles[cppKey], csvr.chargerProfiles[cppKey])
+	}
+}
+
+func TestLoadDispatcherProfiles(t *testing.T) {
+	eDispatcherProfiles := map[utils.TenantID]*utils.TPDispatcherProfile{
+		utils.TenantID{Tenant: "cgrates.org", ID: "D1"}: &utils.TPDispatcherProfile{
+			TPid:      testTPID,
+			Tenant:    "cgrates.org",
+			ID:        "D1",
+			FilterIDs: []string{"*string:Account:1001"},
+			ActivationInterval: &utils.TPActivationInterval{
+				ActivationTime: "2014-07-29T15:00:00Z",
+			},
+			Strategy: "*first",
+			Hosts:    []string{"192.168.56.203", "192.168.56.204"},
+			Weight:   20,
+		},
+	}
+	revHosts := &utils.TPDispatcherProfile{
+		TPid:      testTPID,
+		Tenant:    "cgrates.org",
+		ID:        "D1",
+		FilterIDs: []string{"*string:Account:1001"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-29T15:00:00Z",
+		},
+		Strategy: "*first",
+		Hosts:    []string{"192.168.56.204", "192.168.56.203"},
+		Weight:   20,
+	}
+	dppKey := utils.TenantID{Tenant: "cgrates.org", ID: "D1"}
+	if len(csvr.dispatcherProfiles) != len(eDispatcherProfiles) {
+		t.Errorf("Failed to load chargerProfiles: %s", utils.ToIJSON(csvr.chargerProfiles))
+	} else if !reflect.DeepEqual(eDispatcherProfiles[dppKey], csvr.dispatcherProfiles[dppKey]) &&
+		!reflect.DeepEqual(revHosts, csvr.dispatcherProfiles[dppKey]) {
+		t.Errorf("Expecting: %+v, received: %+v", eDispatcherProfiles[dppKey], csvr.dispatcherProfiles[dppKey])
 	}
 }
 

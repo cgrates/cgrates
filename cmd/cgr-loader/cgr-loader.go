@@ -300,6 +300,7 @@ func main() {
 			path.Join(*dataPath, utils.SuppliersCsv),
 			path.Join(*dataPath, utils.AttributesCsv),
 			path.Join(*dataPath, utils.ChargersCsv),
+			path.Join(*dataPath, utils.DispatchersCsv),
 		)
 	}
 
@@ -353,7 +354,8 @@ func main() {
 		if err := tpReader.WriteToDatabase(*flush, *verbose, *disableReverse); err != nil {
 			log.Fatal("Could not write to database: ", err)
 		}
-		var dstIds, revDstIDs, rplIds, rpfIds, actIds, aapIDs, shgIds, alsIds, dcsIds, rspIDs, resIDs, aatIDs, ralsIDs, stqIDs, stqpIDs, trsIDs, trspfIDs, flrIDs, spfIDs, apfIDs, chargerIDs []string
+		var dstIds, revDstIDs, rplIds, rpfIds, actIds, aapIDs, shgIds, alsIds, dcsIds, rspIDs, resIDs,
+			aatIDs, ralsIDs, stqIDs, stqpIDs, trsIDs, trspfIDs, flrIDs, spfIDs, apfIDs, chargerIDs, dppIDs []string
 		if cacheS != nil {
 			dstIds, _ = tpReader.GetLoadedIds(utils.DESTINATION_PREFIX)
 			revDstIDs, _ = tpReader.GetLoadedIds(utils.REVERSE_DESTINATION_PREFIX)
@@ -376,6 +378,7 @@ func main() {
 			spfIDs, _ = tpReader.GetLoadedIds(utils.SupplierProfilePrefix)
 			apfIDs, _ = tpReader.GetLoadedIds(utils.AttributeProfilePrefix)
 			chargerIDs, _ = tpReader.GetLoadedIds(utils.ChargerProfilePrefix)
+			dppIDs, _ = tpReader.GetLoadedIds(utils.DispatcherProfilePrefix)
 		}
 		aps, _ := tpReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
 		// for users reloading
@@ -416,7 +419,8 @@ func main() {
 					FilterIDs:             &flrIDs,
 					SupplierProfileIDs:    &spfIDs,
 					AttributeProfileIDs:   &apfIDs,
-					ChargerProfileIDs:     &chargerIDs},
+					ChargerProfileIDs:     &chargerIDs,
+					DispatcherProfileIDs:  &dppIDs},
 					FlushAll: *flush,
 				}, &reply); err != nil {
 				log.Printf("WARNING: Got error on cache reload: %s\n", err.Error())
@@ -442,6 +446,9 @@ func main() {
 			}
 			if len(chargerIDs) != 0 {
 				cacheIDs = append(cacheIDs, utils.CacheChargerFilterIndexes)
+			}
+			if len(dppIDs) != 0 {
+				cacheIDs = append(cacheIDs, utils.CacheDispatcherFilterIndexes)
 			}
 			if err = cacheS.Call(utils.CacheSv1Clear, cacheIDs, &reply); err != nil {
 				log.Printf("WARNING: Got error on cache clear: %s\n", err.Error())

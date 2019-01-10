@@ -1016,7 +1016,7 @@ func (self *ApierV1) LoadCache(args utils.AttrReloadCache, reply *string) (err e
 	if args.FlushAll {
 		engine.Cache.Clear(nil)
 	}
-	var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs, splpIDs, alsPrfIDs, cppIDs []string
+	var dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs, rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs, splpIDs, alsPrfIDs, cppIDs, dppIDs []string
 	if args.DestinationIDs == nil {
 		dstIDs = nil
 	} else {
@@ -1127,10 +1127,15 @@ func (self *ApierV1) LoadCache(args utils.AttrReloadCache, reply *string) (err e
 	} else {
 		cppIDs = *args.ChargerProfileIDs
 	}
+	if args.DispatcherProfileIDs == nil {
+		dppIDs = nil
+	} else {
+		dppIDs = *args.DispatcherProfileIDs
+	}
 	if err := self.DataManager.LoadDataDBCache(dstIDs, rvDstIDs, rplIDs,
 		rpfIDs, actIDs, aplIDs, aapIDs, atrgIDs, sgIDs, lcrIDs, dcIDs, alsIDs,
 		rvAlsIDs, rspIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs,
-		fltrIDs, splpIDs, alsPrfIDs, cppIDs); err != nil {
+		fltrIDs, splpIDs, alsPrfIDs, cppIDs, dppIDs); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -1311,6 +1316,14 @@ func (self *ApierV1) FlushCache(args utils.AttrReloadCache, reply *string) (err 
 				true, utils.NonTransactional)
 		}
 	}
+	if args.DispatcherProfileIDs == nil {
+		engine.Cache.Clear([]string{utils.CacheDispatcherProfiles})
+	} else if len(*args.DispatcherProfileIDs) != 0 {
+		for _, key := range *args.DispatcherProfileIDs {
+			engine.Cache.Remove(utils.CacheDispatcherProfiles, key,
+				true, utils.NonTransactional)
+		}
+	}
 
 	*reply = utils.OK
 	return
@@ -1339,6 +1352,7 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	cs.SupplierProfiles = len(engine.Cache.GetItemIDs(utils.CacheSupplierProfiles, ""))
 	cs.AttributeProfiles = len(engine.Cache.GetItemIDs(utils.CacheAttributeProfiles, ""))
 	cs.ChargerProfiles = len(engine.Cache.GetItemIDs(utils.CacheChargerProfiles, ""))
+	cs.DispatcherProfiles = len(engine.Cache.GetItemIDs(utils.CacheDispatcherProfiles, ""))
 
 	if self.Users != nil {
 		var ups engine.UserProfiles
@@ -1761,6 +1775,25 @@ func (v1 *ApierV1) GetCacheKeys(args utils.ArgsCacheKeys, reply *utils.ArgsCache
 		}
 	}
 
+	if args.DispatcherProfileIDs != nil {
+		var ids []string
+		if len(*args.DispatcherProfileIDs) != 0 {
+			for _, id := range *args.DispatcherProfileIDs {
+				if _, hasIt := engine.Cache.Get(utils.CacheDispatcherProfiles, id); hasIt {
+					ids = append(ids, id)
+				}
+			}
+		} else {
+			for _, id := range engine.Cache.GetItemIDs(utils.CacheDispatcherProfiles, "") {
+				ids = append(ids, id)
+			}
+		}
+		ids = args.Paginator.PaginateStringSlice(ids)
+		if len(ids) != 0 {
+			reply.ChargerProfileIDs = &ids
+		}
+	}
+
 	return
 }
 
@@ -1799,6 +1832,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 			path.Join(attrs.FolderPath, utils.SuppliersCsv),
 			path.Join(attrs.FolderPath, utils.AttributesCsv),
 			path.Join(attrs.FolderPath, utils.ChargersCsv),
+			path.Join(attrs.FolderPath, utils.DispatchersCsv),
 		), "", self.Config.GeneralCfg().DefaultTimezone)
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)

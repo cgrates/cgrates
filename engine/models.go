@@ -503,3 +503,16 @@ type TPCharger struct {
 	Weight             float64 `index:"6" re:"\d+\.?\d*"`
 	CreatedAt          time.Time
 }
+
+type TPDispatcher struct {
+	PK                 uint `gorm:"primary_key"`
+	Tpid               string
+	Tenant             string  `index:"0" re:""`
+	ID                 string  `index:"1" re:""`
+	FilterIDs          string  `index:"2" re:""`
+	ActivationInterval string  `index:"3" re:""`
+	Strategy           string  `index:"4" re:""`
+	Hosts              string  `index:"5" re:""`
+	Weight             float64 `index:"6" re:"\d+\.?\d*"`
+	CreatedAt          time.Time
+}
