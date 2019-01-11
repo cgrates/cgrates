@@ -442,6 +442,42 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	} else if passes {
 		t.Error("passing")
 	}
+	// Second
+	ev = config.NewNavigableMap(nil)
+	ev.Set([]string{"ASR"}, time.Duration(20*time.Second), false, true)
+	rf, err = NewFilterRule("*gte", "ASR", []string{"10s"})
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.passGreaterThan(ev); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("passing")
+	}
+
+	ev = config.NewNavigableMap(nil)
+	ev.Set([]string{"ASR"}, 20, false, true)
+	rf, err = NewFilterRule("*gte", "ASR{*duration_seconds}", []string{"10"})
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.passGreaterThan(ev); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("passing")
+	}
+	//Here converter will be consider part of path and will get error : NOT_FOUND
+	ev = config.NewNavigableMap(nil)
+	ev.Set([]string{"ASR"}, 20, false, true)
+	rf, err = NewFilterRule("*gte", "ASR{*duration_seconds}", []string{"10s"})
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.passGreaterThan(ev); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("passing")
+	}
 }
 
 func TestFilterNewRequestFilter(t *testing.T) {
