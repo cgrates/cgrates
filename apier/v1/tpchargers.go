@@ -55,7 +55,7 @@ type AttrGetTPChargerIds struct {
 	utils.Paginator
 }
 
-// Queries Resource identities on specific tariff plan.
+// Queries Charger identities on specific tariff plan.
 func (self *ApierV1) GetTPChargerIDs(attrs *AttrGetTPChargerIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -72,7 +72,7 @@ func (self *ApierV1) GetTPChargerIDs(attrs *AttrGetTPChargerIds, reply *[]string
 	return nil
 }
 
-// Removes specific Resource on Tariff plan
+// Removes specific ChargerProfile on Tariff plan
 func (self *ApierV1) RemTPCharger(attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
