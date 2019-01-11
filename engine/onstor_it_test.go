@@ -80,6 +80,7 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITIsDBEmpty,
 	testOnStorITTestAttributeSubstituteIface,
 	testOnStorITChargerProfile,
+	testOnStorITDispatcherProfile,
 
 	//testOnStorITCacheActionTriggers,
 	//testOnStorITCacheAlias,
@@ -2613,6 +2614,81 @@ func testOnStorITChargerProfile(t *testing.T) {
 	}
 	//check database if removed
 	if _, rcvErr := onStor.GetChargerProfile("cgrates.org", "CPP_1",
+		false, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+}
+
+func testOnStorITDispatcherProfile(t *testing.T) {
+	dpp := &DispatcherProfile{
+		Tenant:    "cgrates.org",
+		ID:        "Dsp1",
+		FilterIDs: []string{"*string:Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		Strategy: utils.MetaFirst,
+		Hosts:    []string{"192.168.56.203"},
+		Weight:   20,
+	}
+	if _, rcvErr := onStor.GetDispatcherProfile("cgrates.org", "Dsp1",
+		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	if err := onStor.SetDispatcherProfile(dpp, false); err != nil {
+		t.Error(err)
+	}
+	//get from cache
+	if rcv, err := onStor.GetDispatcherProfile("cgrates.org", "Dsp1",
+		true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(dpp, rcv)) {
+		t.Errorf("Expecting: %v, received: %v", dpp, rcv)
+	}
+	//get from database
+	if rcv, err := onStor.GetDispatcherProfile("cgrates.org", "Dsp1",
+		false, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(dpp, rcv)) {
+		t.Errorf("Expecting: %v, received: %v", dpp, rcv)
+	}
+	expectedT := []string{"dpp_cgrates.org:Dsp1"}
+	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.DispatcherProfilePrefix); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedT, itm) {
+		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
+	}
+	//update
+	dpp.FilterIDs = []string{"*string:Accout:1001", "*prefix:Destination:10"}
+	if err := onStor.SetDispatcherProfile(dpp, false); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(sleepDelay)
+	//get from cache
+	if rcv, err := onStor.GetDispatcherProfile("cgrates.org", "Dsp1",
+		true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(dpp, rcv)) {
+		t.Errorf("Expecting: %v, received: %v", dpp, rcv)
+	}
+	//get from database
+	if rcv, err := onStor.GetDispatcherProfile("cgrates.org", "Dsp1",
+		false, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !(reflect.DeepEqual(dpp, rcv)) {
+		t.Errorf("Expecting: %v, received: %v", dpp, rcv)
+	}
+	if err := onStor.RemoveDispatcherProfile(dpp.Tenant, dpp.ID,
+		utils.NonTransactional, false); err != nil {
+		t.Error(err)
+	}
+	//check cache if removed
+	if _, rcvErr := onStor.GetDispatcherProfile("cgrates.org", "Dsp1",
+		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
+		t.Error(rcvErr)
+	}
+	//check database if removed
+	if _, rcvErr := onStor.GetDispatcherProfile("cgrates.org", "Dsp1",
 		false, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
