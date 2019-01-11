@@ -432,9 +432,6 @@ func (fltr *FilterRule) passStatS(dP config.DataProvider,
 func (fltr *FilterRule) passGreaterThan(dP config.DataProvider) (bool, error) {
 	fldIf, err := dP.FieldAsInterface(strings.Split(fltr.FieldName, utils.NestingSep))
 	if err != nil {
-		utils.Logger.Warning(
-			fmt.Sprintf("<%s> attempting to get <%v> having path <%s> but received error : <%s>",
-				utils.FilterS, fldIf, fltr.FieldName, err))
 		if err == utils.ErrNotFound {
 			return false, nil
 		}

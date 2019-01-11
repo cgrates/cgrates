@@ -455,6 +455,7 @@ func TestFilterPassGreaterThan(t *testing.T) {
 		t.Error("passing")
 	}
 
+	//Here converter will be consider part of path and will get error : NOT_FOUND
 	ev = config.NewNavigableMap(nil)
 	ev.Set([]string{"ASR"}, 20, false, true)
 	rf, err = NewFilterRule("*gte", "ASR{*duration_seconds}", []string{"10"})
