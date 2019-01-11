@@ -437,7 +437,6 @@ func (fltr *FilterRule) passGreaterThan(dP config.DataProvider) (bool, error) {
 		}
 		return false, err
 	}
-
 	if fldStr, castStr := fldIf.(string); castStr { // attempt converting string since deserialization fails here (ie: time.Time fields)
 		fldIf = utils.StringToInterface(fldStr)
 	}
