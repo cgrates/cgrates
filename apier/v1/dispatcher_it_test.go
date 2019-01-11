@@ -173,7 +173,6 @@ func testDispatcherSUpdateDispatcherProfile(t *testing.T) {
 	} else if !reflect.DeepEqual(dispatcherProfile, dsp) {
 		t.Errorf("Expecting : %+v, received: %+v", dispatcherProfile, dsp)
 	}
-
 }
 
 func testDispatcherSRemDispatcherProfile(t *testing.T) {
