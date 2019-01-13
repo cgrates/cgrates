@@ -45,6 +45,10 @@ func (m *Migrator) migrateCurrentDispatcher() (err error) {
 				if err := m.dmOut.DataManager().SetDispatcherProfile(dpp, true); err != nil {
 					return err
 				}
+				if err := m.dmIN.DataManager().RemoveDispatcherProfile(tenant,
+					idg, utils.NonTransactional, false); err != nil {
+					return err
+				}
 				m.stats[utils.Dispatchers] += 1
 			}
 		}
