@@ -384,6 +384,7 @@ const (
 	MetaSuppliers                = "*suppliers"
 	MetaAttributes               = "*attributes"
 	MetaChargers                 = "*chargers"
+	MetaDispatchers              = "*dispatchers"
 	MetaResources                = "*resources"
 	MetaFilters                  = "*filters"
 	MetaCDRs                     = "*cdrs"
