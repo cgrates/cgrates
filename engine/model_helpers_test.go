@@ -1767,3 +1767,76 @@ func TestModelAsTPChargers(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv[0]))
 	}
 }
+
+func TestAPItoDispatcherProfile(t *testing.T) {
+	tpDPP := &utils.TPDispatcherProfile{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "Dsp",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		Strategy:  utils.MetaFirst,
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "",
+		},
+		Hosts:  []string{"localhost", "192.168.56.203"},
+		Weight: 20,
+	}
+
+	expected := &DispatcherProfile{
+		Tenant:    "cgrates.org",
+		ID:        "Dsp",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		Strategy:  utils.MetaFirst,
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		Hosts:  []string{"localhost", "192.168.56.203"},
+		Weight: 20,
+	}
+	if rcv, err := APItoDispatcherProfile(tpDPP, "UTC"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
+
+func TestAPItoModelTPDispatcher(t *testing.T) {
+	tpDPP := &utils.TPDispatcherProfile{
+		TPid:      "TP1",
+		Tenant:    "cgrates.org",
+		ID:        "Dsp",
+		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		Strategy:  utils.MetaFirst,
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-14T14:35:00Z",
+			ExpiryTime:     "",
+		},
+		Hosts:  []string{"localhost", "192.168.56.203"},
+		Weight: 20,
+	}
+	expected := TPDispatchers{
+		&TPDispatcher{
+			Tpid:               "TP1",
+			Tenant:             "cgrates.org",
+			ID:                 "Dsp",
+			FilterIDs:          "FLTR_ACNT_dan",
+			Strategy:           utils.MetaFirst,
+			Hosts:              "localhost",
+			ActivationInterval: "2014-07-14T14:35:00Z",
+			Weight:             20,
+		},
+		&TPDispatcher{
+			Tpid:               "TP1",
+			Tenant:             "cgrates.org",
+			ID:                 "Dsp",
+			FilterIDs:          "FLTR_DST_DE",
+			Hosts:              "192.168.56.203",
+			ActivationInterval: "",
+		},
+	}
+	rcv := APItoModelTPDispatcher(tpDPP)
+	if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting : %+v, \n received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}
