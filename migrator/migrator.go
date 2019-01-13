@@ -178,6 +178,8 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			err = m.migrateTPDestinations()
 		case utils.MetaTpChargers:
 			err = m.migrateTPChargers()
+		case utils.MetaTpDispatchers:
+			err = m.migrateTPDispatchers()
 			//DATADB ALL
 		case utils.MetaDataDB:
 			if err := m.migrateAccounts(); err != nil {
