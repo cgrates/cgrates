@@ -631,6 +631,7 @@ const (
 	MetaTpRatingPlan        = "*tp_rating_plan"
 	MetaTpRatingProfile     = "*tp_rating_profile"
 	MetaTpChargers          = "*tp_chargers"
+	MetaTpDispatchers       = "*tp_dispatchers"
 	MetaDurationSeconds     = "*duration_seconds"
 	MetaDurationNanoseconds = "*duration_nanoseconds"
 	CapAttributes           = "Attributes"
