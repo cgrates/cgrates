@@ -23,9 +23,73 @@ import (
 	//"log"
 	"strings"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
+
+type Alias struct {
+	Direction string
+	Tenant    string
+	Category  string
+	Account   string
+	Subject   string
+	Context   string
+	Values    AliasValues
+}
+type AliasValues []*AliasValue
+
+type AliasValue struct {
+	DestinationId string //=Destination
+	Pairs         AliasPairs
+	Weight        float64
+}
+type AliasPairs map[string]map[string]string
+
+func alias2AtttributeProfile(alias Alias, defaultTenant string) engine.AttributeProfile {
+	out := engine.AttributeProfile{
+		Tenant:             alias.Tenant,
+		Contexts:           []string{"*any"},
+		FilterIDs:          make([]string, 0),
+		ActivationInterval: nil,
+		Attributes:         make([]*engine.Attribute, 0),
+		Blocker:            false,
+		Weight:             10,
+	}
+	if len(out.Tenant) == 0 || out.Tenant == utils.META_ANY {
+		// cfg, _ := config.NewDefaultCGRConfig()
+		out.Tenant = defaultTenant //cfg.GeneralCfg().DefaultTenant
+	}
+	if len(alias.Category) != 0 && alias.Category != utils.META_ANY {
+		out.FilterIDs = append(out.FilterIDs, "*string:Category:"+alias.Category)
+	}
+	if len(alias.Account) != 0 && alias.Account != utils.META_ANY {
+		out.FilterIDs = append(out.FilterIDs, "*string:Account:"+alias.Account)
+	}
+	if len(alias.Subject) != 0 && alias.Subject != utils.META_ANY {
+		out.FilterIDs = append(out.FilterIDs, "*string:Subject:"+alias.Subject)
+	}
+	var destination string
+	for _, av := range alias.Values {
+		if len(destination) == 0 || destination != utils.META_ANY {
+			destination = av.DestinationId
+		}
+		for fieldname, vals := range av.Pairs {
+			for initial, substitute := range vals {
+				out.Attributes = append(out.Attributes, &engine.Attribute{
+					FieldName:  fieldname,
+					Initial:    initial,
+					Substitute: config.NewRSRParsersMustCompile(substitute, true, utils.INFIELD_SEP),
+					Append:     true,
+				})
+			}
+		}
+	}
+	if len(destination) == 0 || destination != utils.META_ANY {
+		out.FilterIDs = append(out.FilterIDs, "*string:Destination:"+destination)
+	}
+	return out
+}
 
 func (m *Migrator) migrateCurrentAlias() (err error) {
 	var ids []string
