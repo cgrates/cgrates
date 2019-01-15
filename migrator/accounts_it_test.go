@@ -101,6 +101,24 @@ func TestAccountITMove(t *testing.T) {
 	}
 }
 
+func TestAccountITMigrateMongo2Redis(t *testing.T) {
+	var err error
+	accPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	accCfgIn, err = config.NewCGRConfigFromFolder(accPathIn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	accPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	accCfgOut, err = config.NewCGRConfigFromFolder(accPathOut)
+	if err != nil {
+		t.Fatal(err)
+	}
+	accAction = utils.Migrate
+	for _, stest := range sTestsAccIT {
+		t.Run("TestAccountITMigrateMongo2Redis", stest)
+	}
+}
+
 func TestAccountITMoveEncoding(t *testing.T) {
 	var err error
 	accPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
@@ -262,13 +280,14 @@ func testAccITMigrateAndMove(t *testing.T) {
 			utils.Actions:        2,
 			utils.ActionTriggers: 2,
 			utils.ActionPlans:    2,
-			utils.SharedGroups:   2}
-		err = accMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
+			utils.SharedGroups:   2,
+		}
+		err = accMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for Accounts ", err.Error())
 		}
 		//check if version was set correctly
-		if vrs, err := accMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
+		if vrs, err := accMigrator.dmIN.DataManager().DataDB().GetVersions(""); err != nil {
 			t.Error(err)
 		} else if vrs[utils.Accounts] != 1 {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.Accounts])

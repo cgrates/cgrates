@@ -202,8 +202,14 @@ func testActPlnITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when setting v1 ActionPlan ", err.Error())
 		}
-		currentVersion := engine.Versions{utils.StatS: 2, utils.Thresholds: 2, utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 1, utils.SharedGroups: 2}
-		err = actPlnMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
+		currentVersion := engine.Versions{
+			utils.StatS: 2, utils.Thresholds: 2,
+			utils.Accounts: 2, utils.Actions: 2,
+			utils.ActionTriggers: 2,
+			utils.ActionPlans:    1,
+			utils.SharedGroups:   2,
+		}
+		err = actPlnMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for ActionPlan ", err.Error())
 		}

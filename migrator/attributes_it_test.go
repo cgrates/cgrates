@@ -243,14 +243,13 @@ func testAttrITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when setting v1 AttributeProfile ", err.Error())
 		}
-		currentVersion := engine.Versions{
-			utils.Attributes: 1}
-		err = attrMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
+		currentVersion := engine.Versions{utils.Attributes: 1}
+		err = attrMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for Attributes ", err.Error())
 		}
 
-		if vrs, err := attrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
+		if vrs, err := attrMigrator.dmIN.DataManager().DataDB().GetVersions(""); err != nil {
 			t.Error(err)
 		} else if vrs[utils.Attributes] != 1 {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
