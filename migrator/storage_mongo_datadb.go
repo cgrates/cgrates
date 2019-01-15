@@ -23,6 +23,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/mongo"
+	"github.com/mongodb/mongo-go-driver/mongo/options"
 )
 
 const (
@@ -30,6 +31,7 @@ const (
 	v1ActionTriggersCol    = "action_triggers"
 	v1AttributeProfilesCol = "attribute_profiles"
 	v2ThresholdProfileCol  = "threshold_profiles"
+	v1AliasCol             = "aliases"
 )
 
 type mongoMigrator struct {
@@ -354,5 +356,79 @@ func (v1ms *mongoMigrator) setV2ThresholdProfile(x *v2Threshold) (err error) {
 //rem
 func (v1ms *mongoMigrator) remV2ThresholdProfile(tenant, id string) (err error) {
 	_, err = v1ms.mgoDB.DB().Collection(v2ThresholdProfileCol).DeleteOne(v1ms.mgoDB.GetContext(), bson.M{"tenant": tenant, "id": id})
+	return
+}
+
+//Alias methods
+//get
+func (v1ms *mongoMigrator) getV1Alias() (v1a *v1Alias, err error) {
+	if v1ms.cursor == nil {
+		var cursor mongo.Cursor
+		cursor, err = v1ms.mgoDB.DB().Collection(v1AliasCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		if err != nil {
+			return nil, err
+		}
+		v1ms.cursor = &cursor
+	}
+	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
+		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
+		v1ms.cursor = nil
+		return nil, utils.ErrNoMoreData
+	}
+	v1a = new(v1Alias)
+	if err := (*v1ms.cursor).Decode(v1a); err != nil {
+		return nil, err
+	}
+	return v1a, nil
+}
+
+//set
+func (v1ms *mongoMigrator) setV1Alias(al *v1Alias) (err error) {
+	_, err = v1ms.mgoDB.DB().Collection(v1AliasCol).UpdateOne(v1ms.mgoDB.GetContext(), bson.M{"key": al.GetId()},
+		bson.M{"$set": struct {
+			Key   string
+			Value v1AliasValues
+		}{Key: al.GetId(), Value: al.Values}},
+		options.Update().SetUpsert(true),
+	)
+	return err
+}
+
+//rem
+func (v1ms *mongoMigrator) remV1Alias(key string) (err error) {
+	al := new(v1Alias)
+	al.SetId(key)
+	var kv struct {
+		Key   string
+		Value v1AliasValues
+	}
+	cur := v1ms.mgoDB.DB().Collection(v1AliasCol).FindOne(v1ms.mgoDB.GetContext(), bson.M{"key": key})
+	if err := cur.Decode(&kv); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return utils.ErrNotFound
+		}
+		return err
+	}
+	al.Values = kv.Value
+	dr, err := v1ms.mgoDB.DB().Collection(v1AliasCol).DeleteOne(v1ms.mgoDB.GetContext(), bson.M{"key": key})
+	if dr.DeletedCount == 0 {
+		return utils.ErrNotFound
+	}
+	if err != nil {
+		return err
+	}
+	for _, value := range al.Values {
+		tmpKey := utils.ConcatenatedKey(al.GetId(), value.DestinationId)
+		for target, pairs := range value.Pairs {
+			for _, alias := range pairs {
+				rKey := alias + target + al.Context
+				_, err = v1ms.mgoDB.DB().Collection(v1AliasCol).UpdateOne(v1ms.mgoDB.GetContext(), bson.M{"key": rKey},
+					bson.M{"$pull": bson.M{"value": tmpKey}})
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
 	return
 }
