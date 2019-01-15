@@ -28,27 +28,48 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type Alias struct {
+type v1Alias struct {
 	Direction string
 	Tenant    string
 	Category  string
 	Account   string
 	Subject   string
 	Context   string
-	Values    AliasValues
+	Values    v1AliasValues
 }
-type AliasValues []*AliasValue
 
-type AliasValue struct {
+type v1AliasValues []*v1AliasValue
+
+type v1AliasValue struct {
 	DestinationId string //=Destination
-	Pairs         AliasPairs
+	Pairs         v1AliasPairs
 	Weight        float64
 }
-type AliasPairs map[string]map[string]string
 
-func alias2AtttributeProfile(alias Alias, defaultTenant string) engine.AttributeProfile {
-	out := engine.AttributeProfile{
+type v1AliasPairs map[string]map[string]string
+
+func (al *v1Alias) SetId(id string) error {
+	vals := strings.Split(id, utils.CONCATENATED_KEY_SEP)
+	if len(vals) != 6 {
+		return utils.ErrInvalidKey
+	}
+	al.Direction = vals[0]
+	al.Tenant = vals[1]
+	al.Category = vals[2]
+	al.Account = vals[3]
+	al.Subject = vals[4]
+	al.Context = vals[5]
+	return nil
+}
+
+func (al *v1Alias) GetId() string {
+	return utils.ConcatenatedKey(al.Direction, al.Tenant, al.Category, al.Account, al.Subject, al.Context)
+}
+
+func alias2AtttributeProfile(alias *v1Alias, defaultTenant string) *engine.AttributeProfile {
+	out := &engine.AttributeProfile{
 		Tenant:             alias.Tenant,
+		ID:                 alias.GetId(),
 		Contexts:           []string{"*any"},
 		FilterIDs:          make([]string, 0),
 		ActivationInterval: nil,
@@ -57,8 +78,7 @@ func alias2AtttributeProfile(alias Alias, defaultTenant string) engine.Attribute
 		Weight:             10,
 	}
 	if len(out.Tenant) == 0 || out.Tenant == utils.META_ANY {
-		// cfg, _ := config.NewDefaultCGRConfig()
-		out.Tenant = defaultTenant //cfg.GeneralCfg().DefaultTenant
+		out.Tenant = defaultTenant
 	}
 	if len(alias.Category) != 0 && alias.Category != utils.META_ANY {
 		out.FilterIDs = append(out.FilterIDs, "*string:Category:"+alias.Category)
@@ -71,7 +91,7 @@ func alias2AtttributeProfile(alias Alias, defaultTenant string) engine.Attribute
 	}
 	var destination string
 	for _, av := range alias.Values {
-		if len(destination) == 0 || destination != utils.META_ANY {
+		if len(destination) == 0 || destination == utils.META_ANY {
 			destination = av.DestinationId
 		}
 		for fieldname, vals := range av.Pairs {
@@ -85,13 +105,56 @@ func alias2AtttributeProfile(alias Alias, defaultTenant string) engine.Attribute
 			}
 		}
 	}
-	if len(destination) == 0 || destination != utils.META_ANY {
+	if len(destination) != 0 && destination != utils.META_ANY {
 		out.FilterIDs = append(out.FilterIDs, "*string:Destination:"+destination)
 	}
 	return out
 }
 
-func (m *Migrator) migrateCurrentAlias() (err error) {
+func (m *Migrator) migrateAlias2Attributes() (err error) {
+	cfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		return err
+	}
+	defaultTenant := cfg.GeneralCfg().DefaultTenant
+	for {
+		alias, err := m.dmIN.getV1Alias()
+		if err == utils.ErrNoMoreData {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		if alias == nil || m.dryRun {
+			continue
+		}
+		attr := alias2AtttributeProfile(alias, defaultTenant)
+		if len(attr.Attributes) == 0 {
+			continue
+		}
+		if err := m.dmIN.remV1Alias(alias.GetId()); err != nil {
+			return err
+		}
+		if err := m.dmOut.DataManager().DataDB().SetAttributeProfileDrv(attr); err != nil {
+			return err
+		}
+		m.stats[utils.Alias] += 1
+	}
+	if m.dryRun {
+		return
+	}
+	// All done, update version wtih current one
+	vrs := engine.Versions{utils.Alias: engine.CurrentDataDBVersions()[utils.Alias]}
+	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating Alias version into dataDB", err.Error()))
+	}
+	return
+}
+
+func (m *Migrator) migrateV1Alias() (err error) {
 	var ids []string
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ALIASES_PREFIX)
 	if err != nil {
@@ -103,14 +166,13 @@ func (m *Migrator) migrateCurrentAlias() (err error) {
 		if err != nil {
 			return err
 		}
-		if usr != nil {
-			if m.dryRun != true {
-				if err := m.dmOut.DataManager().DataDB().SetAlias(usr, utils.NonTransactional); err != nil {
-					return err
-				}
-				m.stats[utils.Alias] += 1
-			}
+		if usr == nil || m.dryRun {
+			continue
 		}
+		if err := m.dmOut.DataManager().DataDB().SetAlias(usr, utils.NonTransactional); err != nil {
+			return err
+		}
+		m.stats[utils.Alias] += 1
 	}
 	return
 }
@@ -156,7 +218,7 @@ func (m *Migrator) migrateCurrentAlias() (err error) {
 func (m *Migrator) migrateAlias() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataManager().DataDB().GetVersions("")
+	vrs, err = m.dmIN.DataManager().DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -173,10 +235,9 @@ func (m *Migrator) migrateAlias() (err error) {
 		if m.sameDataDB {
 			return
 		}
-		if err := m.migrateCurrentAlias(); err != nil {
-			return err
-		}
-		return
+		return m.migrateV1Alias()
+	case 1:
+		return m.migrateAlias2Attributes()
 	}
 	return
 }

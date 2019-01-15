@@ -19,8 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
+	"strings"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/mediocregopher/radix.v2/redis"
 )
 
 type redisMigrator struct {
@@ -471,5 +474,90 @@ func (v1rs *redisMigrator) setV2ThresholdProfile(x *v2Threshold) (err error) {
 //rem
 func (v1rs *redisMigrator) remV2ThresholdProfile(tenant, id string) (err error) {
 	key := utils.ThresholdProfilePrefix + utils.ConcatenatedKey(tenant, id)
+	return v1rs.rds.Cmd("DEL", key).Err
+}
+
+//ThresholdProfile methods
+//get
+func (v1rs *redisMigrator) getV1Alias() (v1a *v1Alias, err error) {
+	v1a = &v1Alias{Values: make(v1AliasValues, 0)}
+	if v1rs.qryIdx == nil {
+		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(utils.ALIASES_PREFIX)
+		if err != nil {
+			return
+		} else if len(v1rs.dataKeys) == 0 {
+			return nil, utils.ErrNotFound
+		}
+		v1rs.qryIdx = utils.IntPointer(0)
+	}
+	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
+		key := v1rs.dataKeys[*v1rs.qryIdx]
+		strVal, err := v1rs.rds.Cmd("GET", key).Bytes()
+		if err != nil {
+			return nil, err
+		}
+		v1a.SetId(strings.TrimPrefix(key, utils.ALIASES_PREFIX))
+		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v1a.Values); err != nil {
+			return nil, err
+		}
+		*v1rs.qryIdx = *v1rs.qryIdx + 1
+	} else {
+		v1rs.qryIdx = nil
+		return nil, utils.ErrNoMoreData
+	}
+	return v1a, nil
+}
+
+//set
+func (v1rs *redisMigrator) setV1Alias(al *v1Alias) (err error) {
+	var result []byte
+	result, err = v1rs.rds.Marshaler().Marshal(al.Values)
+	if err != nil {
+		return
+	}
+	key := utils.ALIASES_PREFIX + al.GetId()
+	if err = v1rs.rds.Cmd("SET", key, result).Err; err != nil {
+		return
+	}
+	return
+}
+
+//rem
+func (v1rs *redisMigrator) remV1Alias(key string) (err error) {
+
+	// get alias for values list
+
+	var values []byte
+	if values, err = v1rs.rds.Cmd("GET",
+		utils.ALIASES_PREFIX+key).Bytes(); err != nil {
+		if err == redis.ErrRespNil { // did not find the destination
+			err = utils.ErrNotFound
+		}
+		return
+	}
+	al := &v1Alias{Values: make(v1AliasValues, 0)}
+	al.SetId(key)
+	if err = v1rs.rds.Marshaler().Unmarshal(values, &al.Values); err != nil {
+		return err
+	}
+
+	err = v1rs.rds.Cmd("DEL", utils.ALIASES_PREFIX+key).Err
+	if err != nil {
+		return err
+	}
+	for _, value := range al.Values {
+		tmpKey := utils.ConcatenatedKey(al.GetId(), value.DestinationId)
+		for target, pairs := range value.Pairs {
+			for _, alias := range pairs {
+				revID := alias + target + al.Context
+				err = v1rs.rds.Cmd("SREM", utils.REVERSE_ALIASES_PREFIX+revID, tmpKey).Err
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return
+
 	return v1rs.rds.Cmd("DEL", key).Err
 }

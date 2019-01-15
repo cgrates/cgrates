@@ -149,7 +149,7 @@ func CurrentDataDBVersions() Versions {
 		utils.RQF:                 1,
 		utils.Resource:            1,
 		utils.ReverseAlias:        1,
-		utils.Alias:               1,
+		utils.Alias:               2,
 		utils.User:                1,
 		utils.Subscribers:         1,
 		utils.DerivedChargersV:    1,

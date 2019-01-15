@@ -46,5 +46,9 @@ type MigratorDataDB interface {
 	getV2ThresholdProfile() (v2T *v2Threshold, err error)
 	setV2ThresholdProfile(x *v2Threshold) (err error)
 	remV2ThresholdProfile(tenant, id string) (err error)
+	getV1Alias() (v1a *v1Alias, err error)
+	setV1Alias(al *v1Alias) (err error)
+	remV1Alias(key string) (err error)
+
 	DataManager() *engine.DataManager
 }
