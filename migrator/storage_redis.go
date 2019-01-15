@@ -486,7 +486,7 @@ func (v1rs *redisMigrator) getV1Alias() (v1a *v1Alias, err error) {
 		if err != nil {
 			return
 		} else if len(v1rs.dataKeys) == 0 {
-			return nil, utils.ErrNotFound
+			return nil, utils.ErrNoMoreData
 		}
 		v1rs.qryIdx = utils.IntPointer(0)
 	}

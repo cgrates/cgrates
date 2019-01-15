@@ -98,6 +98,24 @@ func TestActionPlanITMove(t *testing.T) {
 	}
 }
 
+func TestActionPlanITMigrateMongo2Redis(t *testing.T) {
+	var err error
+	actPlnPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	actPlnCfgIn, err = config.NewCGRConfigFromFolder(actPlnPathIn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	actPlnPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	actPlnCfgOut, err = config.NewCGRConfigFromFolder(actPlnPathOut)
+	if err != nil {
+		t.Fatal(err)
+	}
+	actActionPlan = utils.Migrate
+	for _, stest := range sTestsActPlnIT {
+		t.Run("TestActionPlanITMigrateMongo2Redis", stest)
+	}
+}
+
 func TestActionPlanITMoveEncoding(t *testing.T) {
 	var err error
 	actPlnPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
@@ -162,6 +180,10 @@ func testActPlnITConnect(t *testing.T) {
 func testActPlnITFlush(t *testing.T) {
 	actPlnMigrator.dmOut.DataManager().DataDB().Flush("")
 	if err := engine.SetDBVersions(actPlnMigrator.dmOut.DataManager().DataDB()); err != nil {
+		t.Error("Error  ", err.Error())
+	}
+	actPlnMigrator.dmIN.DataManager().DataDB().Flush("")
+	if err := engine.SetDBVersions(actPlnMigrator.dmIN.DataManager().DataDB()); err != nil {
 		t.Error("Error  ", err.Error())
 	}
 }

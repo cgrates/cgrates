@@ -116,7 +116,6 @@ func TestActionITMoveEncoding(t *testing.T) {
 	}
 }
 
-/*
 func TestActionITMigrateMongo2Redis(t *testing.T) {
 	var err error
 	actPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
@@ -134,7 +133,6 @@ func TestActionITMigrateMongo2Redis(t *testing.T) {
 		t.Run("TestActionITMigrateMongo2Redis", stest)
 	}
 }
-*/
 
 func TestActionITMoveEncoding2(t *testing.T) {
 	var err error

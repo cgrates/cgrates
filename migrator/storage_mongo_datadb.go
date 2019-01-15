@@ -376,9 +376,15 @@ func (v1ms *mongoMigrator) getV1Alias() (v1a *v1Alias, err error) {
 		return nil, utils.ErrNoMoreData
 	}
 	v1a = new(v1Alias)
-	if err := (*v1ms.cursor).Decode(v1a); err != nil {
+	var kv struct {
+		Key   string
+		Value v1AliasValues
+	}
+	if err := (*v1ms.cursor).Decode(&kv); err != nil {
 		return nil, err
 	}
+	v1a.Values = kv.Value
+	v1a.SetId(kv.Key)
 	return v1a, nil
 }
 
