@@ -245,8 +245,9 @@ func testStsITMigrateAndMove(t *testing.T) {
 			utils.Actions:        2,
 			utils.ActionTriggers: 2,
 			utils.ActionPlans:    2,
-			utils.SharedGroups:   2}
-		err = stsMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
+			utils.SharedGroups:   2,
+		}
+		err = stsMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for stats ", err.Error())
 		}

@@ -117,6 +117,25 @@ func TestActionITMoveEncoding(t *testing.T) {
 }
 
 /*
+func TestActionITMigrateMongo2Redis(t *testing.T) {
+	var err error
+	actPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	actCfgIn, err = config.NewCGRConfigFromFolder(actPathIn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	actPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	actCfgOut, err = config.NewCGRConfigFromFolder(actPathOut)
+	if err != nil {
+		t.Fatal(err)
+	}
+	actAction = utils.Migrate
+	for _, stest := range sTestsActIT {
+		t.Run("TestActionITMigrateMongo2Redis", stest)
+	}
+}
+*/
+
 func TestActionITMoveEncoding2(t *testing.T) {
 	var err error
 	actPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
@@ -133,7 +152,7 @@ func TestActionITMoveEncoding2(t *testing.T) {
 	for _, stest := range sTestsActIT {
 		t.Run("TestActionITMoveEncoding2", stest)
 	}
-}*/
+}
 
 func testActITConnect(t *testing.T) {
 	dataDBIn, err := NewMigratorDataDB(actCfgIn.DataDbCfg().DataDbType,
@@ -164,6 +183,9 @@ func testActITFlush(t *testing.T) {
 	actMigrator.dmOut.DataManager().DataDB().Flush("")
 	actMigrator.dmIN.DataManager().DataDB().Flush("")
 	if err := engine.SetDBVersions(actMigrator.dmIN.DataManager().DataDB()); err != nil {
+		t.Error("Error  ", err.Error())
+	}
+	if err := engine.SetDBVersions(actMigrator.dmOut.DataManager().DataDB()); err != nil {
 		t.Error("Error  ", err.Error())
 	}
 }
@@ -212,8 +234,16 @@ func testActITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when setting v1 Actions ", err.Error())
 		}
-		currentVersion := engine.Versions{utils.StatS: 2, utils.Thresholds: 2, utils.Accounts: 2, utils.Actions: 1, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
-		err = actMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
+		currentVersion := engine.Versions{
+			utils.StatS:          2,
+			utils.Thresholds:     2,
+			utils.Accounts:       2,
+			utils.Actions:        1,
+			utils.ActionTriggers: 2,
+			utils.ActionPlans:    2,
+			utils.SharedGroups:   2,
+		}
+		err = actMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for Actions ", err.Error())
 		}

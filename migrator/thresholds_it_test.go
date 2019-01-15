@@ -276,8 +276,16 @@ func testTrsITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when setting v1 Thresholds ", err.Error())
 		}
-		currentVersion := engine.Versions{utils.StatS: 2, utils.Thresholds: 1, utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
-		err = trsMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
+		currentVersion := engine.Versions{
+			utils.StatS:          2,
+			utils.Thresholds:     1,
+			utils.Accounts:       2,
+			utils.Actions:        2,
+			utils.ActionTriggers: 2,
+			utils.ActionPlans:    2,
+			utils.SharedGroups:   2,
+		}
+		err = trsMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for Thresholds ", err.Error())
 		}
@@ -310,8 +318,16 @@ func testTrsITMigrateAndMove(t *testing.T) {
 			t.Error("Error when setting v1 Thresholds ", err.Error())
 		}
 
-		currentVersion = engine.Versions{utils.StatS: 2, utils.Thresholds: 2, utils.Accounts: 2, utils.Actions: 2, utils.ActionTriggers: 2, utils.ActionPlans: 2, utils.SharedGroups: 2}
-		err = trsMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
+		currentVersion = engine.Versions{
+			utils.StatS:          2,
+			utils.Thresholds:     2,
+			utils.Accounts:       2,
+			utils.Actions:        2,
+			utils.ActionTriggers: 2,
+			utils.ActionPlans:    2,
+			utils.SharedGroups:   2,
+		}
+		err = trsMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for Thresholds ", err.Error())
 		}

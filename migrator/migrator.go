@@ -36,12 +36,14 @@ func NewMigrator(
 	sameStorDB bool) (m *Migrator, err error) {
 	stats := make(map[string]int)
 	m = &Migrator{
-		dmOut:     dmOut,
-		dmIN:      dmIN,
-		storDBIn:  storDBIn,
-		storDBOut: storDBOut,
-		dryRun:    dryRun, sameDataDB: sameDataDB, sameStorDB: sameStorDB,
-		stats: stats,
+		dmOut:      dmOut,
+		dmIN:       dmIN,
+		storDBIn:   storDBIn,
+		storDBOut:  storDBOut,
+		dryRun:     dryRun,
+		sameDataDB: sameDataDB,
+		sameStorDB: sameStorDB,
+		stats:      stats,
 	}
 	return m, err
 }
