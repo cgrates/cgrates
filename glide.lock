@@ -20,7 +20,7 @@ imports:
 - name: github.com/cgrates/radigo
   version: e5c8f3272cccf795f47b82e25a8f3408312c14e0
 - name: github.com/cgrates/rpcclient
-  version: 7316bff37a2b8692fbadd57f9c9cda070cc33081
+  version: dd1d74bc1fe774ddec5146c94464741b6849053a
 - name: github.com/fiorix/go-diameter
   version: abaf0a5b14a05f3a4a75b8fe23066ab1f898aeac
   subpackages:
