@@ -99,6 +99,24 @@ func TestAttributeITMove1(t *testing.T) {
 	}
 }
 
+func TestAttributeITMigrateMongo2Redis(t *testing.T) {
+	var err error
+	attrPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	attrCfgIn, err = config.NewCGRConfigFromFolder(attrPathIn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	attrPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	attrCfgOut, err = config.NewCGRConfigFromFolder(attrPathOut)
+	if err != nil {
+		t.Fatal(err)
+	}
+	attrAction = utils.Migrate
+	for _, stest := range sTestsAttrIT {
+		t.Run("TestAttributeITMigrateMongo2Redis", stest)
+	}
+}
+
 func TestAttributeITMove2(t *testing.T) {
 	var err error
 	attrPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
@@ -187,6 +205,9 @@ func testAttrITFlush(t *testing.T) {
 	} else if isEmpty != true {
 		t.Errorf("\nExpecting: true got :%+v", isEmpty)
 	}
+	if err := engine.SetDBVersions(attrMigrator.dmOut.DataManager().DataDB()); err != nil {
+		t.Error("Error  ", err.Error())
+	}
 	if err := attrMigrator.dmIN.DataManager().DataDB().Flush(""); err != nil {
 		t.Error(err)
 	}
@@ -194,6 +215,9 @@ func testAttrITFlush(t *testing.T) {
 		t.Error(err)
 	} else if isEmpty != true {
 		t.Errorf("\nExpecting: true got :%+v", isEmpty)
+	}
+	if err := engine.SetDBVersions(attrMigrator.dmIN.DataManager().DataDB()); err != nil {
+		t.Error("Error  ", err.Error())
 	}
 }
 
@@ -298,7 +322,7 @@ func testAttrITMigrateAndMove(t *testing.T) {
 		result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
 			"ATTR_1", false, false, utils.NonTransactional)
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 		result.Compile()
 		attrPrf.Compile()

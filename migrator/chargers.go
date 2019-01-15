@@ -55,7 +55,7 @@ func (m *Migrator) migrateCurrentCharger() (err error) {
 func (m *Migrator) migrateChargers() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmOut.DataManager().DataDB().GetVersions("")
+	vrs, err = m.dmIN.DataManager().DataDB().GetVersions("")
 	if err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
