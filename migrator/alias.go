@@ -106,7 +106,7 @@ func alias2AtttributeProfile(alias *v1Alias, defaultTenant string) *engine.Attri
 		}
 	}
 	if len(destination) != 0 && destination != utils.META_ANY {
-		out.FilterIDs = append(out.FilterIDs, "*string:Destination:"+destination)
+		out.FilterIDs = append(out.FilterIDs, "*destination:Destination:"+destination)
 	}
 	return out
 }
