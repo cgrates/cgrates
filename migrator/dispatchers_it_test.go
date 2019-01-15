@@ -153,6 +153,9 @@ func testDspITFlush(t *testing.T) {
 	} else if isEmpty != true {
 		t.Errorf("\nExpecting: true got :%+v", isEmpty)
 	}
+	if err := engine.SetDBVersions(dspMigrator.dmOut.DataManager().DataDB()); err != nil {
+		t.Error("Error  ", err.Error())
+	}
 	if err := dspMigrator.dmIN.DataManager().DataDB().Flush(""); err != nil {
 		t.Error(err)
 	}
@@ -160,6 +163,9 @@ func testDspITFlush(t *testing.T) {
 		t.Error(err)
 	} else if isEmpty != true {
 		t.Errorf("\nExpecting: true got :%+v", isEmpty)
+	}
+	if err := engine.SetDBVersions(dspMigrator.dmIN.DataManager().DataDB()); err != nil {
+		t.Error("Error  ", err.Error())
 	}
 }
 

@@ -109,7 +109,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			Context:   "*rated",
 			Values: v1AliasValues{
 				&v1AliasValue{
-					DestinationId: "1003",
+					DestinationId: "DST_1003",
 					Pairs: map[string]map[string]string{
 						"Account": map[string]string{
 							"1001": "1002",
@@ -131,7 +131,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			Context:   "*rated",
 			Values: v1AliasValues{
 				&v1AliasValue{
-					DestinationId: "1003",
+					DestinationId: "DST_1003",
 					Pairs: map[string]map[string]string{
 						"Account": map[string]string{
 							"1001": "1002",
@@ -226,7 +226,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			FilterIDs: []string{
 				"*string:Category:*voice",
 				"*string:Account:1001",
-				"*string:Destination:1003",
+				"*destination:Destination:DST_1003",
 			},
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
@@ -253,7 +253,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			FilterIDs: []string{
 				"*string:Account:1001",
 				"*string:Subject:call_1001",
-				"*string:Destination:1003",
+				"*destination:Destination:DST_1003",
 			},
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{

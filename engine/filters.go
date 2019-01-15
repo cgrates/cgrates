@@ -173,8 +173,8 @@ func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error)
 		return nil, fmt.Errorf("FieldName is mandatory for Type: %s", rfType)
 	}
 	if len(vals) == 0 && utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaSuffix,
-		MetaTimings, MetaRSR, MetaDestinations, MetaDestinations, MetaLessThan,
-		MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
+		MetaTimings, MetaRSR, MetaDestinations, MetaLessThan, MetaLessOrEqual,
+		MetaGreaterThan, MetaGreaterOrEqual}, rfType) {
 		return nil, fmt.Errorf("Values is mandatory for Type: %s", rfType)
 	}
 	rf := &FilterRule{
