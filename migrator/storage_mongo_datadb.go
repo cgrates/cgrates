@@ -32,6 +32,7 @@ const (
 	v1AttributeProfilesCol = "attribute_profiles"
 	v2ThresholdProfileCol  = "threshold_profiles"
 	v1AliasCol             = "aliases"
+	v1UserCol              = "users"
 )
 
 type mongoMigrator struct {
@@ -436,5 +437,49 @@ func (v1ms *mongoMigrator) remV1Alias(key string) (err error) {
 			}
 		}
 	}
+	return
+}
+
+// User methods
+//get
+func (v1ms *mongoMigrator) getV1User() (v1u *v1UserProfile, err error) {
+	if v1ms.cursor == nil {
+		var cursor mongo.Cursor
+		cursor, err = v1ms.mgoDB.DB().Collection(v1UserCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		if err != nil {
+			return nil, err
+		}
+		v1ms.cursor = &cursor
+	}
+	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
+		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
+		v1ms.cursor = nil
+		return nil, utils.ErrNoMoreData
+	}
+	var kv struct {
+		Key   string
+		Value *v1UserProfile
+	}
+	if err := (*v1ms.cursor).Decode(&kv); err != nil {
+		return nil, err
+	}
+	return kv.Value, nil
+}
+
+//set
+func (v1ms *mongoMigrator) setV1User(us *v1UserProfile) (err error) {
+	_, err = v1ms.mgoDB.DB().Collection(v1UserCol).UpdateOne(v1ms.mgoDB.GetContext(), bson.M{"key": us.GetId()},
+		bson.M{"$set": struct {
+			Key   string
+			Value *v1UserProfile
+		}{Key: us.GetId(), Value: us}},
+		options.Update().SetUpsert(true),
+	)
+	return err
+}
+
+//rem
+func (v1ms *mongoMigrator) remV1User(key string) (err error) {
+	_, err = v1ms.mgoDB.DB().Collection(v1UserCol).DeleteOne(v1ms.mgoDB.GetContext(), bson.M{"key": key})
 	return
 }

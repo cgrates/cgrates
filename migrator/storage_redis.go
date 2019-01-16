@@ -561,3 +561,45 @@ func (v1rs *redisMigrator) remV1Alias(key string) (err error) {
 
 	return v1rs.rds.Cmd("DEL", key).Err
 }
+
+// User methods
+//get
+func (v1rs *redisMigrator) getV1User() (v1u *v1UserProfile, err error) {
+	if v1rs.qryIdx == nil {
+		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(utils.USERS_PREFIX)
+		if err != nil {
+			return
+		} else if len(v1rs.dataKeys) == 0 {
+			return nil, utils.ErrNotFound
+		}
+		v1rs.qryIdx = utils.IntPointer(0)
+	}
+	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
+		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
+		if err != nil {
+			return nil, err
+		}
+		v1u = new(v1UserProfile)
+		if err := v1rs.rds.Marshaler().Unmarshal(strVal, v1u); err != nil {
+			return nil, err
+		}
+		*v1rs.qryIdx = *v1rs.qryIdx + 1
+		return v1u, nil
+	}
+	v1rs.qryIdx = nil
+	return nil, utils.ErrNoMoreData
+}
+
+//set
+func (v1rs *redisMigrator) setV1User(us *v1UserProfile) (err error) {
+	bit, err := v1rs.rds.Marshaler().Marshal(us)
+	if err != nil {
+		return err
+	}
+	return v1rs.rds.Cmd("SET", utils.USERS_PREFIX+us.GetId(), bit).Err
+}
+
+//rem
+func (v1rs *redisMigrator) remV1User(key string) (err error) {
+	return v1rs.rds.Cmd("DEL", utils.USERS_PREFIX+key).Err
+}
