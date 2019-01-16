@@ -182,3 +182,19 @@ func (v1ms *mapMigrator) setV1Alias(al *v1Alias) (err error) {
 func (v1ms *mapMigrator) remV1Alias(key string) (err error) {
 	return utils.ErrNotImplemented
 }
+
+// User methods
+//get
+func (v1ms *mapMigrator) getV1User() (v1u *v1UserProfile, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+//set
+func (v1ms *mapMigrator) setV1User(us *v1UserProfile) (err error) {
+	return utils.ErrNotImplemented
+}
+
+//rem
+func (v1ms *mapMigrator) remV1User(key string) (err error) {
+	return utils.ErrNotImplemented
+}

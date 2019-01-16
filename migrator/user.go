@@ -22,9 +22,93 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
+
+type v1UserProfile struct {
+	Tenant   string
+	UserName string
+	Masked   bool //disable if true
+	Profile  map[string]string
+	Weight   float64
+	ponder   int
+}
+
+func (ud *v1UserProfile) GetId() string {
+	return utils.ConcatenatedKey(ud.Tenant, ud.UserName)
+}
+
+func (ud *v1UserProfile) SetId(id string) error {
+	vals := strings.Split(id, utils.CONCATENATED_KEY_SEP)
+	if len(vals) != 2 {
+		return utils.ErrInvalidKey
+	}
+	ud.Tenant = vals[0]
+	ud.UserName = vals[1]
+	return nil
+}
+
+func userProfile2attributeProfile(user *v1UserProfile) (attr *engine.AttributeProfile) {
+	attr = &engine.AttributeProfile{
+		Tenant:             user.Tenant,
+		ID:                 user.UserName,
+		Contexts:           []string{utils.META_ANY},
+		FilterIDs:          make([]string, 0),
+		ActivationInterval: nil,
+		Attributes:         make([]*engine.Attribute, 0),
+		Blocker:            false,
+		Weight:             user.Weight,
+	}
+	for fieldname, substitute := range user.Profile {
+		attr.Attributes = append(attr.Attributes, &engine.Attribute{
+			FieldName:  fieldname,
+			Initial:    utils.META_ANY,
+			Substitute: config.NewRSRParsersMustCompile(substitute, true, utils.INFIELD_SEP),
+			Append:     true,
+		})
+	}
+	return
+}
+
+func (m *Migrator) migrateV1User2AttributeProfile() (err error) {
+	for {
+		user, err := m.dmIN.getV1User()
+		if err == utils.ErrNoMoreData {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		if user == nil || user.Masked || m.dryRun {
+			continue
+		}
+		attr := userProfile2attributeProfile(user)
+		if len(attr.Attributes) == 0 {
+			continue
+		}
+		if err := m.dmIN.remV1User(user.GetId()); err != nil {
+			return err
+		}
+		if err := m.dmOut.DataManager().DataDB().SetAttributeProfileDrv(attr); err != nil {
+			return err
+		}
+		m.stats[utils.User] += 1
+	}
+	if m.dryRun {
+		return
+	}
+	// All done, update version wtih current one
+	vrs := engine.Versions{utils.User: engine.CurrentDataDBVersions()[utils.User]}
+	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating Alias version into dataDB", err.Error()))
+	}
+	return
+}
 
 func (m *Migrator) migrateCurrentUser() (err error) {
 	var ids []string
@@ -55,25 +139,19 @@ func (m *Migrator) migrateUser() (err error) {
 	current := engine.CurrentDataDBVersions()
 	vrs, err = m.dmIN.DataManager().DataDB().GetVersions("")
 	if err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
+		return utils.NewCGRError(utils.Migrator, utils.ServerErrorCaps,
+			err.Error(), fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
 	} else if len(vrs) == 0 {
-		return utils.NewCGRError(utils.Migrator,
-			utils.MandatoryIEMissingCaps,
-			utils.UndefinedVersion,
-			"version number is not defined for ActionTriggers model")
+		return utils.NewCGRError(utils.Migrator, utils.MandatoryIEMissingCaps,
+			utils.UndefinedVersion, "version number is not defined for Users model")
 	}
 	switch vrs[utils.User] {
+	case 1:
+		return m.migrateV1User2AttributeProfile()
 	case current[utils.User]:
-		if m.sameStorDB {
-			return
+		if !m.sameStorDB {
+			return m.migrateCurrentUser()
 		}
-		if err := m.migrateCurrentUser(); err != nil {
-			return err
-		}
-		return
 	}
 	return
 }

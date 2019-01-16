@@ -49,6 +49,9 @@ type MigratorDataDB interface {
 	getV1Alias() (v1a *v1Alias, err error)
 	setV1Alias(al *v1Alias) (err error)
 	remV1Alias(key string) (err error)
+	getV1User() (v1u *v1UserProfile, err error)
+	setV1User(us *v1UserProfile) (err error)
+	remV1User(key string) (err error)
 
 	DataManager() *engine.DataManager
 }
