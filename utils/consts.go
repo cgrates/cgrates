@@ -318,6 +318,7 @@ const (
 	META_USAGE_DIFFERENCE        = "*usage_difference"
 	MetaVariable                 = "*variable"
 	MetaCCUsage                  = "*cc_usage"
+	MetaValueExponent            = "*value_exponent"
 	MetaString                   = "*string"
 	NegativePrefix               = "!"
 	MatchStartPrefix             = "^"
