@@ -22,9 +22,197 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
+
+var dcGetMapKeys = func(m utils.StringMap) (keys []string) {
+	keys = make([]string, len(m))
+	i := 0
+	for k, _ := range m {
+		keys[i] = k
+		i += 1
+	}
+	// sort.Strings(keys)
+	return keys
+}
+
+type v1DerivedCharger struct {
+	RunID      string // Unique runId in the chain
+	RunFilters string // Only run the charger if all the filters match
+
+	RequestTypeField     string // Field containing request type info, number in case of csv source, '^' as prefix in case of static values
+	DirectionField       string // Field containing direction info
+	TenantField          string // Field containing tenant info
+	CategoryField        string // Field containing tor info
+	AccountField         string // Field containing account information
+	SubjectField         string // Field containing subject information
+	DestinationField     string // Field containing destination information
+	SetupTimeField       string // Field containing setup time information
+	PDDField             string // Field containing setup time information
+	AnswerTimeField      string // Field containing answer time information
+	UsageField           string // Field containing usage information
+	SupplierField        string // Field containing supplier information
+	DisconnectCauseField string // Field containing disconnect cause information
+	CostField            string // Field containing cost information
+	PreRatedField        string // Field marking rated request in CDR
+}
+
+type v1DerivedChargers struct {
+	DestinationIDs utils.StringMap
+	Chargers       []*v1DerivedCharger
+}
+
+type v1DerivedChargersWithKey struct {
+	Key   string
+	Value *v1DerivedChargers
+}
+
+func fieldinfo2Attribute(attr []*engine.Attribute, fieldName, fieldInfo string) (a []*engine.Attribute) {
+	var rp config.RSRParsers
+	if fieldInfo == utils.META_DEFAULT || len(fieldInfo) == 0 {
+		return attr
+	}
+	if strings.HasPrefix(fieldInfo, utils.STATIC_VALUE_PREFIX) {
+		fieldInfo = fieldInfo[1:]
+	}
+	var err error
+	if rp, err = config.NewRSRParsers(fieldInfo, true, utils.INFIELD_SEP); err != nil {
+		utils.Logger.Err(fmt.Sprintf("On Migrating rule: <%s>, error: %s", fieldInfo, err.Error()))
+		return attr
+	}
+	return append(attr, &engine.Attribute{
+		FieldName:  fieldName,
+		Initial:    utils.META_ANY,
+		Substitute: rp,
+		Append:     true,
+	})
+}
+func derivedChargers2AttributeProfile(dc *v1DerivedCharger, tenant, key string, filters []string) (attr *engine.AttributeProfile) {
+	attr = &engine.AttributeProfile{
+		Tenant:             tenant,
+		ID:                 key,
+		Contexts:           []string{utils.META_ANY},
+		FilterIDs:          filters,
+		ActivationInterval: nil,
+		Attributes:         make([]*engine.Attribute, 0),
+		Blocker:            false,
+		Weight:             10,
+	}
+	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.RequestType, dc.RequestTypeField)
+	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.Direction, dc.DirectionField) //still in use?
+	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.Tenant, dc.TenantField)
+	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.Category, dc.CategoryField)
+	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.Account, dc.AccountField)
+	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.Subject, dc.SubjectField)
+	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.Destination, dc.DestinationField)
+	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.SetupTime, dc.SetupTimeField)
+	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.PDD, dc.PDDField)
+	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.AnswerTime, dc.AnswerTimeField)
+	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.Usage, dc.UsageField)
+	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.SUPPLIER, dc.SupplierField)
+	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.DISCONNECT_CAUSE, dc.DisconnectCauseField)
+	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.Cost, dc.CostField)
+	attr.Attributes = fieldinfo2Attribute(attr.Attributes, utils.PreRated, dc.PreRatedField)
+	return
+}
+
+func derivedChargers2Charger(dc *v1DerivedCharger, tenant string, key string, filters []string) (ch *engine.ChargerProfile) {
+	ch = &engine.ChargerProfile{
+		Tenant:             tenant,
+		ID:                 key,
+		FilterIDs:          filters,
+		ActivationInterval: nil,
+		RunID:              dc.RunID,
+		AttributeIDs:       make([]string, 0),
+		Weight:             10,
+	}
+
+	filter := dc.RunFilters
+	if len(filter) != 0 {
+		if strings.HasPrefix(filter, utils.STATIC_VALUE_PREFIX) {
+			filter = filter[1:]
+		}
+		ch.FilterIDs = append(ch.FilterIDs, "*rsr::"+filter)
+	}
+	return
+}
+
+func (m *Migrator) derivedChargers2Chargers(dck *v1DerivedChargersWithKey) (err error) {
+	// (direction, tenant, category, account, subject)
+	skey := utils.SplitConcatenatedKey(dck.Key)
+	destination := ""
+	if len(dck.Value.DestinationIDs) != 0 {
+		destination = "*destination:Destination:"
+		keys := dcGetMapKeys(dck.Value.DestinationIDs)
+		destination += strings.Join(keys, utils.INFIELD_SEP)
+	}
+	filter := make([]string, 0)
+
+	if len(destination) != 0 {
+		filter = append(filter, destination)
+	}
+	if len(skey[2]) != 0 && skey[2] != utils.META_ANY {
+		filter = append(filter, "*string:Category:"+skey[2])
+	}
+	if len(skey[3]) != 0 && skey[3] != utils.META_ANY {
+		filter = append(filter, "*string:Account:"+skey[3])
+	}
+	if len(skey[4]) != 0 && skey[4] != utils.META_ANY {
+		filter = append(filter, "*string:Subject:"+skey[4])
+	}
+
+	for i, dc := range dck.Value.Chargers {
+		attr := derivedChargers2AttributeProfile(dc, skey[1], fmt.Sprintf("%s%v", dck.Key, i), filter)
+		ch := derivedChargers2Charger(dc, skey[1], fmt.Sprintf("%s%v", dck.Key, i), filter)
+		if len(attr.Attributes) != 0 {
+			if err = m.dmOut.DataManager().DataDB().SetAttributeProfileDrv(attr); err != nil {
+				return err
+			}
+			ch.AttributeIDs = append(ch.AttributeIDs, attr.ID)
+		}
+		if err = m.dmOut.DataManager().DataDB().SetChargerProfileDrv(ch); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (m *Migrator) migrateV1DerivedChargers() (err error) {
+	for {
+		var dck *v1DerivedChargersWithKey
+		dck, err = m.dmIN.getV1DerivedChargers()
+		if err == utils.ErrNoMoreData {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		if dck == nil || m.dryRun {
+			continue
+		}
+		if err = m.derivedChargers2Chargers(dck); err != nil {
+			return err
+		}
+		if err = m.dmIN.remV1DerivedChargers(dck.Key); err != nil {
+			return err
+		}
+		m.stats[utils.DerivedChargersV] += 1
+	}
+	if m.dryRun {
+		return
+	}
+	// All done, update version wtih current one
+	vrs := engine.Versions{utils.DerivedChargersV: engine.CurrentDataDBVersions()[utils.DerivedChargersV]}
+	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating DerivedChargers version into dataDB", err.Error()))
+	}
+	return
+}
 
 func (m *Migrator) migrateCurrentDerivedChargers() (err error) {
 	var ids []string
@@ -63,9 +251,12 @@ func (m *Migrator) migrateDerivedChargers() (err error) {
 		return utils.NewCGRError(utils.Migrator,
 			utils.MandatoryIEMissingCaps,
 			utils.UndefinedVersion,
-			"version number is not defined for ActionTriggers model")
+			"version number is not defined for DerivedChargers model")
 	}
+
 	switch vrs[utils.DerivedChargersV] {
+	case 1:
+		return m.migrateV1DerivedChargers()
 	case current[utils.DerivedChargersV]:
 		if m.sameDataDB {
 			return

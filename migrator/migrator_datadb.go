@@ -52,6 +52,9 @@ type MigratorDataDB interface {
 	getV1User() (v1u *v1UserProfile, err error)
 	setV1User(us *v1UserProfile) (err error)
 	remV1User(key string) (err error)
+	getV1DerivedChargers() (v1d *v1DerivedChargersWithKey, err error)
+	setV1DerivedChargers(dc *v1DerivedChargersWithKey) (err error)
+	remV1DerivedChargers(key string) (err error)
 
 	DataManager() *engine.DataManager
 }

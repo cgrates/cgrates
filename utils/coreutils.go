@@ -340,6 +340,10 @@ func ConcatenatedKey(keyVals ...string) string {
 	return strings.Join(keyVals, CONCATENATED_KEY_SEP)
 }
 
+func SplitConcatenatedKey(key string) []string {
+	return strings.Split(key, CONCATENATED_KEY_SEP)
+}
+
 func LCRKey(direction, tenant, category, account, subject string) string {
 	return ConcatenatedKey(direction, tenant, category, account, subject)
 }

@@ -33,7 +33,6 @@ type v1UserProfile struct {
 	Masked   bool //disable if true
 	Profile  map[string]string
 	Weight   float64
-	ponder   int
 }
 
 func (ud *v1UserProfile) GetId() string {

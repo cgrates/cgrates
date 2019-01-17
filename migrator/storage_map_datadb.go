@@ -198,3 +198,19 @@ func (v1ms *mapMigrator) setV1User(us *v1UserProfile) (err error) {
 func (v1ms *mapMigrator) remV1User(key string) (err error) {
 	return utils.ErrNotImplemented
 }
+
+// DerivedChargers methods
+//get
+func (v1ms *mapMigrator) getV1DerivedChargers() (v1d *v1DerivedChargersWithKey, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+//set
+func (v1ms *mapMigrator) setV1DerivedChargers(dc *v1DerivedChargersWithKey) (err error) {
+	return utils.ErrNotImplemented
+}
+
+//rem
+func (v1ms *mapMigrator) remV1DerivedChargers(key string) (err error) {
+	return utils.ErrNotImplemented
+}

@@ -570,7 +570,7 @@ func (v1rs *redisMigrator) getV1User() (v1u *v1UserProfile, err error) {
 		if err != nil {
 			return
 		} else if len(v1rs.dataKeys) == 0 {
-			return nil, utils.ErrNotFound
+			return nil, utils.ErrNoMoreData
 		}
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
@@ -602,4 +602,51 @@ func (v1rs *redisMigrator) setV1User(us *v1UserProfile) (err error) {
 //rem
 func (v1rs *redisMigrator) remV1User(key string) (err error) {
 	return v1rs.rds.Cmd("DEL", utils.USERS_PREFIX+key).Err
+}
+
+// DerivedChargers methods
+//get
+func (v1rs *redisMigrator) getV1DerivedChargers() (v1d *v1DerivedChargersWithKey, err error) {
+	if v1rs.qryIdx == nil {
+		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(utils.DERIVEDCHARGERS_PREFIX)
+		if err != nil {
+			return
+		} else if len(v1rs.dataKeys) == 0 {
+			return nil, utils.ErrNoMoreData
+		}
+		v1rs.qryIdx = utils.IntPointer(0)
+	}
+	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
+		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
+		if err != nil {
+			return nil, err
+		}
+		v1d = new(v1DerivedChargersWithKey)
+		v1d.Key = strings.TrimPrefix(v1rs.dataKeys[*v1rs.qryIdx], utils.DERIVEDCHARGERS_PREFIX)
+		v1d.Value = new(v1DerivedChargers)
+		if err := v1rs.rds.Marshaler().Unmarshal(strVal, v1d.Value); err != nil {
+			return nil, err
+		}
+		*v1rs.qryIdx = *v1rs.qryIdx + 1
+		return v1d, nil
+	}
+	v1rs.qryIdx = nil
+	return nil, utils.ErrNoMoreData
+}
+
+//set
+func (v1rs *redisMigrator) setV1DerivedChargers(dc *v1DerivedChargersWithKey) (err error) {
+	if dc == nil || len(dc.Value.Chargers) == 0 {
+		return v1rs.remV1DerivedChargers(dc.Key)
+	}
+	bit, err := v1rs.rds.Marshaler().Marshal(dc.Value)
+	if err != nil {
+		return err
+	}
+	return v1rs.rds.Cmd("SET", utils.DERIVEDCHARGERS_PREFIX+dc.Key, bit).Err
+}
+
+//rem
+func (v1rs *redisMigrator) remV1DerivedChargers(key string) (err error) {
+	return v1rs.rds.Cmd("DEL", utils.DERIVEDCHARGERS_PREFIX+key).Err
 }
