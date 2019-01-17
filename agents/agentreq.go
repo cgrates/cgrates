@@ -158,8 +158,8 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 				}
 				*nMItm = *prevNMItem // inherit the particularities, ie AttributeName
 				nMItm.Data = prevDataStr + outStr
-				valSet = valSet[:len(valSet)-1] // discard the last item
 			}
+			valSet = valSet[:len(valSet)-1] // discard the last item
 		}
 		valSet = append(valSet, nMItm)
 		nM.Set(fldPath, valSet, false, true)
