@@ -408,3 +408,29 @@ func TestAgReqEmptyFilter(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", eMp, mpOut)
 	}
 }
+
+func TestAgReqMetaExponent(t *testing.T) {
+	data, _ := engine.NewMapStorage()
+	dm := engine.NewDataManager(data)
+	cfg, _ := config.NewDefaultCGRConfig()
+	filterS := engine.NewFilterS(cfg, nil, dm)
+	agReq := newAgentRequest(nil, nil, nil, nil, "cgrates.org", "", filterS)
+	agReq.CGRRequest.Set([]string{"Value"}, "2", false, false)
+	agReq.CGRRequest.Set([]string{"Exponent"}, "2", false, false)
+
+	tplFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "TestExpo", Filters: []string{},
+			FieldId: "TestExpo", Type: utils.MetaValueExponent,
+			Value: config.NewRSRParsersMustCompile("~*cgreq.Value;~*cgreq.Exponent", true, utils.INFIELD_SEP)},
+	}
+	eMp := config.NewNavigableMap(nil)
+	eMp.Set([]string{"TestExpo"}, []*config.NMItem{
+		&config.NMItem{Data: "200", Path: []string{"TestExpo"},
+			Config: tplFlds[0]}}, false, true)
+
+	if mpOut, err := agReq.AsNavigableMap(tplFlds); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eMp, mpOut) {
+		t.Errorf("expecting: %+v, \n received: %+v", eMp, mpOut)
+	}
+}

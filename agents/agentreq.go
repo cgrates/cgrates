@@ -20,6 +20,7 @@ package agents
 
 import (
 	"fmt"
+	"math"
 	"net"
 	"strconv"
 	"strings"
@@ -258,6 +259,30 @@ func (aReq *AgentRequest) ParseField(
 			iFaceVals[i] = utils.StringToInterface(strVal)
 		}
 		out, err = utils.Sum(iFaceVals...)
+	case utils.MetaValueExponent:
+		if len(cfgFld.Value) != 2 {
+			return nil, fmt.Errorf("invalid arguments <%s> to %s",
+				utils.ToJSON(cfgFld.Value), utils.MetaValueExponent)
+		}
+		strVal1, err := cfgFld.Value[0].ParseDataProvider(aReq, utils.NestingSep) // String Value
+		if err != nil {
+			return "", err
+		}
+		val, err := strconv.ParseFloat(strVal1, 64)
+		if err != nil {
+			return "", fmt.Errorf("invalid value <%s> to %s",
+				strVal1, utils.MetaValueExponent)
+		}
+		strVal2, err := cfgFld.Value[1].ParseDataProvider(aReq, utils.NestingSep) // String Exponent
+		if err != nil {
+			return "", err
+		}
+		exp, err := strconv.Atoi(strVal2)
+		if err != nil {
+			return "", err
+		}
+		out = strconv.FormatFloat(utils.Round(val*math.Pow10(exp),
+			config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64)
 	}
 
 	if err != nil &&
