@@ -99,7 +99,9 @@ func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,
 	if dS.attrS == nil {
 		return utils.NewErrNotConnected(utils.AttributeS)
 	}
-	if err = dS.attrS.Call(utils.AttributeSv1ProcessEvent, ev, reply); err != nil {
+	if err = dS.attrS.Call(utils.AttributeSv1ProcessEvent,
+		&engine.AttrArgsProcessEvent{
+			CGREvent: *ev}, reply); err != nil {
 		if err.Error() == utils.ErrNotFound.Error() {
 			err = utils.ErrUnknownApiKey
 		}
