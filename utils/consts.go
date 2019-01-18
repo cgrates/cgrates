@@ -21,12 +21,11 @@ package utils
 var (
 	CDRExportFormats = []string{DRYRUN, MetaFileCSV, MetaFileFWV, MetaHTTPjsonCDR, MetaHTTPjsonMap,
 		MetaHTTPjson, META_HTTP_POST, MetaAMQPjsonCDR, MetaAMQPjsonMap}
-	PrimaryCdrFields = []string{CGRID, Source, OriginHost, OriginID, ToR, RequestType, Tenant, Category,
-		Account, Subject, Destination, SetupTime, AnswerTime, Usage,
-		COST, RATED, Partial, RunID}
-	NotExtraCDRFields = []string{CGRID, Source, OriginHost, OriginID, ToR, RequestType, Tenant, Category,
-		Account, Subject, Destination, SetupTime, AnswerTime, Usage,
-		COST, RATED, Partial, RunID, PreRated, CostSource}
+	MainCDRFields = []string{CGRID, Source, OriginHost, OriginID, ToR, RequestType, Tenant, Category,
+		Account, Subject, Destination, SetupTime, AnswerTime, Usage, COST, RATED, Partial, RunID,
+		PreRated, CostSource}
+	MainCDRFieldsMap StringMap
+
 	GitLastLog                  string // If set, it will be processed as part of versioning
 	PosterTransportContentTypes = map[string]string{
 		MetaHTTPjsonCDR: CONTENT_JSON,
@@ -980,4 +979,5 @@ func buildCacheIndexesToPrefix() {
 func init() {
 	buildCacheInstRevPrefixes()
 	buildCacheIndexesToPrefix()
+	MainCDRFieldsMap = NewStringMap(MainCDRFields...)
 }

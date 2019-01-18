@@ -159,8 +159,8 @@ func (me MapEvent) AsMapStringIgnoreErrors(ignoredFlds utils.StringMap) (mp map[
 func (me MapEvent) AsCDR(cfg *config.CGRConfig, tnt, tmz string) (cdr *CDR, err error) {
 	cdr = &CDR{Tenant: tnt, Cost: -1.0, ExtraFields: make(map[string]string)}
 	for k, v := range me {
-		if !utils.IsSliceMember(utils.NotExtraCDRFields, k) { // not primary field, populate extra ones
-			utils.Logger.Debug(fmt.Sprintf("field <%s> as extra since is not present in %s", k, utils.ToJSON(utils.NotExtraCDRFields)))
+		if _, has := utils.MainCDRFieldsMap[k]; !has { // not primary field, populate extra ones
+			utils.Logger.Debug(fmt.Sprintf("field <%s> as extra since is not present in %s", k, utils.ToJSON(utils.MainCDRFields)))
 			if cdr.ExtraFields[k], err = utils.IfaceAsString(v); err != nil {
 				return nil, err
 			}
