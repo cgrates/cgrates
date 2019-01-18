@@ -317,7 +317,7 @@ func (self *SMGSession) AsActiveSession(timezone string) *ActiveSession {
 		SetupTime:   self.EventStart.GetTimeIgnoreErrors(utils.SetupTime, self.Timezone),
 		AnswerTime:  self.EventStart.GetTimeIgnoreErrors(utils.AnswerTime, self.Timezone),
 		Usage:       self.TotalUsage,
-		ExtraFields: self.EventStart.AsMapStringIgnoreErrors(utils.NewStringMap(utils.PrimaryCdrFields...)),
+		ExtraFields: self.EventStart.AsMapStringIgnoreErrors(utils.MainCDRFieldsMap),
 		SMId:        "CGR-DA",
 	}
 	if self.CD != nil {

@@ -57,7 +57,7 @@ type AttrGetTPResourceIds struct {
 
 // Queries Resource identities on specific tariff plan.
 func (self *ApierV1) GetTPResourceIDs(attrs *AttrGetTPResourceIds, reply *[]string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPResources, utils.TPDistinctIds{"id"}, nil, &attrs.Paginator); err != nil {

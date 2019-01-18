@@ -594,7 +594,7 @@ func (smg *SMGeneric) v2ForkSessions(tnt string, evStart *engine.SafEvent,
 			Destination: evStart.GetStringIgnoreErrors(utils.Destination),
 			TimeStart:   startTime,
 			TimeEnd:     startTime.Add(evStart.GetDurationIgnoreErrors(utils.Usage)),
-			ExtraFields: evStart.AsMapStringIgnoreErrors(utils.NewStringMap(utils.PrimaryCdrFields...)),
+			ExtraFields: evStart.AsMapStringIgnoreErrors(utils.MainCDRFieldsMap),
 		}
 		ss = append(ss,
 			&SMGSession{CGRID: cgrID, Tenant: tnt,

@@ -19,9 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"github.com/cgrates/cgrates/utils"
 	"net/http"
 	"strconv"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func NewCgrCdrFromHttpReq(req *http.Request, timezone string) (CgrCdr, error) {
@@ -51,7 +52,7 @@ func (cgrCdr CgrCdr) getCGRID(timezone string) string {
 func (cgrCdr CgrCdr) getExtraFields() map[string]string {
 	extraFields := make(map[string]string)
 	for k, v := range cgrCdr {
-		if !utils.IsSliceMember(utils.PrimaryCdrFields, k) {
+		if _, has := utils.MainCDRFieldsMap[k]; !has {
 			extraFields[k] = v
 		}
 	}
