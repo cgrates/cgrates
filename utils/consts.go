@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
+import "sort"
+
 var (
 	CDRExportFormats = []string{DRYRUN, MetaFileCSV, MetaFileFWV, MetaHTTPjsonCDR, MetaHTTPjsonMap,
 		MetaHTTPjson, META_HTTP_POST, MetaAMQPjsonCDR, MetaAMQPjsonMap}
@@ -769,12 +771,20 @@ const (
 	SessionSv1GetActiveSessions          = "SessionSv1.GetActiveSessions"
 	SessionSv1ForceDisconnect            = "SessionSv1.ForceDisconnect"
 	SessionSv1GetPassiveSessions         = "SessionSv1.GetPassiveSessions"
+	SessionSv1SetPassiveSessions         = "SessionSV1.SetPassiveSessions"
 	SMGenericV1InitiateSession           = "SMGenericV1.InitiateSession"
 	SMGenericV2InitiateSession           = "SMGenericV2.InitiateSession"
 	SMGenericV2UpdateSession             = "SMGenericV2.UpdateSession"
 	SessionSv1Ping                       = "SessionSv1.Ping"
 	SessionSv1GetActiveSessionIDs        = "SessionSv1.GetActiveSessionIDs"
 	SessionSv1RegisterInternalBiJSONConn = "SessionSv1.RegisterInternalBiJSONConn"
+)
+
+// Responder APIs
+const (
+	ResponderDebit             = "Responder.Debit"
+	ResponderRefundIncrements  = "Responder.RefundIncrements"
+	ResponderGetMaxSessionTime = "Responder.GetMaxSessionTime"
 )
 
 // DispatcherS APIs
@@ -809,10 +819,11 @@ const (
 
 // Cdrs APIs
 const (
-	CdrsV1CountCDRs  = "CdrsV1.CountCDRs"
-	CdrsV1GetCDRs    = "CdrsV1.GetCDRs"
-	CdrsV2ProcessCDR = "CdrsV2.ProcessCDR"
-	CdrsV2RateCDRs   = "CdrsV2.RateCDRs"
+	CdrsV1CountCDRs   = "CdrsV1.CountCDRs"
+	CdrsV1GetCDRs     = "CdrsV1.GetCDRs"
+	CdrsV2ProcessCDR  = "CdrsV2.ProcessCDR"
+	CdrsV2RateCDRs    = "CdrsV2.RateCDRs"
+	CdrsV2StoreSMCost = "CdrsV2.StoreSMCost"
 )
 
 // Scheduler
@@ -974,7 +985,18 @@ func buildCacheIndexesToPrefix() {
 	}
 }
 
+// sortStringSlices makes sure the slices are string sorted
+// so we can search inside using SliceHasMember
+func sortStringSlices() {
+	sort.Strings(CDRExportFormats)
+	sort.Strings(PrimaryCdrFields)
+	sort.Strings(NotExtraCDRFields)
+}
+
 func init() {
+	sortStringSlices()
 	buildCacheInstRevPrefixes()
 	buildCacheIndexesToPrefix()
+	// Some sorting
+
 }

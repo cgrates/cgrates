@@ -63,4 +63,8 @@
 	"enabled": true,
 },
 
+"chargers": {
+	"enabled": true,
+},
+
 }

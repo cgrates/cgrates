@@ -480,12 +480,15 @@ func (self *CGRConfig) checkConfigSanity() error {
 	// SessionS checks
 	if self.sessionSCfg.Enabled {
 		if len(self.sessionSCfg.RALsConns) == 0 {
-			return errors.New("<SessionS> RALs definition is mandatory!")
+			return errors.New("<SessionS> RALs definition is mandatory")
+		}
+		if len(self.sessionSCfg.ChargerSConns) == 0 {
+			return fmt.Errorf("<%s> %s connection is mandatory", utils.SessionS, utils.ChargerS)
 		}
 		if !self.chargerSCfg.Enabled {
 			for _, conn := range self.sessionSCfg.ChargerSConns {
 				if conn.Address == utils.MetaInternal {
-					return errors.New("<SessionS> ChargerS not enabled but requested")
+					return errors.New("<SessionS> ChargerS not enabled")
 				}
 			}
 		}

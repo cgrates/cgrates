@@ -32,16 +32,13 @@ func IsSliceMember(ss []string, s string) bool {
 	return false
 }
 
-// SliceHasMember is a simpler mode to match inside a slice
+// SliceHasMember searches within a *sorted* slice
 // useful to search in shared vars (no slice sort)
-func SliceHasMember(ss []string, s string) (has bool) {
-	for _, mbr := range ss {
-		if mbr == s {
-			has = true
-			break
-		}
+func SliceHasMember(ss []string, s string) bool {
+	if i := sort.SearchStrings(ss, s); i < len(ss) && ss[i] == s {
+		return true
 	}
-	return
+	return false
 }
 
 func SliceWithoutMember(ss []string, s string) []string {

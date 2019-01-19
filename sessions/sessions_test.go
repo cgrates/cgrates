@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package sessions
 
+/*
 import (
 	"reflect"
 	"testing"
@@ -359,3 +360,4 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 }
+*/
