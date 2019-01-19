@@ -101,6 +101,25 @@ func (me MapEvent) GetDurationIgnoreErrors(fldName string) (d time.Duration) {
 	return
 }
 
+// GetDurationPointer returns pointer towards duration, useful to detect presence of duration
+func (me MapEvent) GetDurationPtr(fldName string) (d *time.Duration, err error) {
+	fldIface, has := me[fldName]
+	if !has {
+		return nil, utils.ErrNotFound
+	}
+	var dReal time.Duration
+	if dReal, err = utils.IfaceAsDuration(fldIface); err != nil {
+		return
+	}
+	return &dReal, nil
+}
+
+// GetDurationPointer returns pointer towards duration, useful to detect presence of duration
+func (me MapEvent) GetDurationPtrIgnoreErrors(fldName string) (d *time.Duration) {
+	d, _ = me.GetDurationPtr(fldName)
+	return
+}
+
 // GetTime returns a field as Time
 func (me MapEvent) GetTime(fldName string, timezone string) (t time.Time, err error) {
 	fldIface, has := me[fldName]
