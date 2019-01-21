@@ -1505,7 +1505,7 @@ func (ms *MongoStorage) AddLoadHistory(ldInst *utils.LoadInstance,
 			)
 			return err
 		})
-	}, 0, utils.LOADINST_KEY)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.LOADINST_KEY)
 
 	Cache.Remove(utils.LOADINST_KEY, "",
 		cacheCommit(transactionID), transactionID)

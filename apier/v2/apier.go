@@ -28,6 +28,7 @@ import (
 	"strings"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -72,11 +73,8 @@ func (self *ApierV2) LoadAccountActions(attrs AttrLoadAccountActions, reply *str
 	tpAa := &utils.TPAccountActions{TPid: attrs.TPid}
 	tpAa.SetAccountActionsId(attrs.AccountActionsId)
 	if _, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		if err := dbReader.LoadAccountActionsFiltered(tpAa); err != nil {
-			return 0, err
-		}
-		return 0, nil
-	}, 0, attrs.AccountActionsId); err != nil {
+		return 0, dbReader.LoadAccountActionsFiltered(tpAa)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, attrs.AccountActionsId); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	sched := self.ServManager.GetScheduler()

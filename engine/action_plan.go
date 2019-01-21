@@ -353,7 +353,7 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 				dm.DataDB().SetAccount(acc)
 			}
 			return 0, nil
-		}, 0, accID)
+		}, config.CgrConfig().GeneralCfg().LockingTimeout, accID)
 	}
 	if len(at.accountIDs) == 0 { // action timing executing without accounts
 		for _, a := range aac {

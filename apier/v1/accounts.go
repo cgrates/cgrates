@@ -25,6 +25,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -73,7 +74,7 @@ func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*Accoun
 			}
 		}
 		return accountATs, nil
-	}, 0, utils.ACTION_PLAN_PREFIX)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACTION_PLAN_PREFIX)
 	if err != nil {
 		return err
 	}
@@ -154,7 +155,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) (
 			}
 		}
 		return 0, nil
-	}, 0, utils.ACTION_PLAN_PREFIX)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACTION_PLAN_PREFIX)
 	if err != nil {
 		*reply = err.Error()
 		return utils.NewErrServerError(err)
@@ -251,7 +252,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 					return 0, err
 				}
 				return 0, nil
-			}, 0, utils.ACTION_PLAN_PREFIX)
+			}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACTION_PLAN_PREFIX)
 			if err != nil {
 				return 0, err
 			}
@@ -277,7 +278,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 			return 0, err
 		}
 		return 0, nil
-	}, 0, accID)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, accID)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -324,7 +325,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 				}
 			}
 			return 0, nil
-		}, 0, utils.ACTION_PLAN_PREFIX)
+		}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACTION_PLAN_PREFIX)
 		if err != nil {
 			return 0, err
 		}
@@ -332,7 +333,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 			return 0, err
 		}
 		return 0, nil
-	}, 0, accID)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, accID)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

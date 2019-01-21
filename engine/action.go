@@ -565,7 +565,7 @@ func removeAccountAction(ub *Account, a *Action, acs Actions, extraData interfac
 		}
 		return 0, nil
 
-	}, 0, utils.ACTION_PLAN_PREFIX)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACTION_PLAN_PREFIX)
 	if err != nil {
 		return err
 	}

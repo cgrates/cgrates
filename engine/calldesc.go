@@ -761,9 +761,9 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err e
 		_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) {
 			duration, err = cd.getMaxSessionDuration(account)
 			return
-		}, 0, lkIDs...)
+		}, config.CgrConfig().GeneralCfg().LockingTimeout, lkIDs...)
 		return
-	}, 0, utils.ACCOUNT_PREFIX+cd.GetAccountKey())
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+cd.GetAccountKey())
 	return
 }
 
@@ -837,9 +837,9 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 				cc.AccountSummary = cd.AccountSummary()
 			}
 			return
-		}, 0, lkIDs...)
+		}, config.CgrConfig().GeneralCfg().LockingTimeout, lkIDs...)
 		return
-	}, 0, utils.ACCOUNT_PREFIX+cd.GetAccountKey())
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+cd.GetAccountKey())
 	return
 }
 
@@ -906,9 +906,9 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 			}
 			//log.Print(balanceMap[0].Value, balanceMap[1].Value)
 			return
-		}, 0, lkIDs...)
+		}, config.CgrConfig().GeneralCfg().LockingTimeout, lkIDs...)
 		return
-	}, 0, utils.ACCOUNT_PREFIX+cd.GetAccountKey())
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+cd.GetAccountKey())
 	return cc, err
 }
 
@@ -971,7 +971,7 @@ func (cd *CallDescriptor) RefundIncrements() (acnt *Account, err error) {
 	_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) {
 		acnt, err = cd.refundIncrements()
 		return
-	}, 0, accMap.Slice()...)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, accMap.Slice()...)
 	return
 }
 
@@ -1014,7 +1014,7 @@ func (cd *CallDescriptor) RefundRounding() (err error) {
 	_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) {
 		err = cd.refundRounding()
 		return
-	}, 0, accMap.Slice()...)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, accMap.Slice()...)
 	return
 }
 

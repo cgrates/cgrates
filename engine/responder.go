@@ -100,7 +100,7 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 	}
 	r, e := guardian.Guardian.Guard(func() (interface{}, error) {
 		return arg.GetCost()
-	}, 0, arg.GetAccountKey())
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, arg.GetAccountKey())
 	if r != nil {
 		*reply = *r.(*CallCost)
 	}
