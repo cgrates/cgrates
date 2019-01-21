@@ -164,8 +164,8 @@ func (m *Migrator) derivedChargers2Chargers(dck *v1DerivedChargersWithKey) (err 
 	}
 
 	for i, dc := range dck.Value.Chargers {
-		attr := derivedChargers2AttributeProfile(dc, skey[1], fmt.Sprintf("%s%v", dck.Key, i), filter)
-		ch := derivedChargers2Charger(dc, skey[1], fmt.Sprintf("%s%v", dck.Key, i), filter)
+		attr := derivedChargers2AttributeProfile(dc, skey[1], fmt.Sprintf("%s_%v", dck.Key, i), filter)
+		ch := derivedChargers2Charger(dc, skey[1], fmt.Sprintf("%s_%v", dck.Key, i), filter)
 		if len(attr.Attributes) != 0 {
 			if err = m.dmOut.DataManager().DataDB().SetAttributeProfileDrv(attr); err != nil {
 				return err

@@ -159,7 +159,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 	}
 	attrProf := &engine.AttributeProfile{
 		Tenant:   "cgrates.org",
-		ID:       fmt.Sprintf("%s%v", derivch.Key, 0),
+		ID:       fmt.Sprintf("%s_%v", derivch.Key, 0),
 		Contexts: []string{utils.META_ANY},
 		FilterIDs: []string{
 			"*destination:Destination:1001;1002;1003",
@@ -186,7 +186,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 	attrProf.Compile()
 	charger := &engine.ChargerProfile{
 		Tenant: defaultTenant,
-		ID:     fmt.Sprintf("%s%v", derivch.Key, 0),
+		ID:     fmt.Sprintf("%s_%v", derivch.Key, 0),
 		FilterIDs: []string{
 			"*destination:Destination:1001;1002;1003",
 			"*string:Account:1003",
