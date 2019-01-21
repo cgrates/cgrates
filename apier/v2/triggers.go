@@ -21,6 +21,7 @@ package v2
 import (
 	"errors"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -186,11 +187,8 @@ func (self *ApierV2) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 			}
 		}
 		account.ExecuteActionTriggers(nil)
-		if err := self.DataManager.DataDB().SetAccount(account); err != nil {
-			return 0, err
-		}
-		return 0, nil
-	}, 0, accID)
+		return 0, self.DataManager.DataDB().SetAccount(account)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, accID)
 	if err != nil {
 		*reply = err.Error()
 		return err

@@ -641,7 +641,7 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (err 
 			}
 		}
 		return 0, nil
-	}, 0, utils.ACTION_PLAN_PREFIX)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACTION_PLAN_PREFIX)
 	if err != nil {
 		return err
 	}
@@ -689,11 +689,8 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
 		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone)
 	if _, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		if err := dbReader.LoadAccountActionsFiltered(&attrs); err != nil {
-			return 0, err
-		}
-		return 0, nil
-	}, 0, attrs.LoadId); err != nil {
+		return 0, dbReader.LoadAccountActionsFiltered(&attrs)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, attrs.LoadId); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	// ToDo: Get the action keys loaded by dbReader so we reload only these in cache
@@ -1337,12 +1334,8 @@ func (self *ApierV1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *st
 		return utils.ErrMandatoryIeMissing
 	}
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		err := self.DataManager.RemoveRatingProfile(attr.GetId(), utils.NonTransactional)
-		if err != nil {
-			return 0, err
-		}
-		return 0, nil
-	}, 0, "RemoveRatingProfile")
+		return 0, self.DataManager.RemoveRatingProfile(attr.GetId(), utils.NonTransactional)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, "RemoveRatingProfile")
 	if err != nil {
 		*reply = err.Error()
 		return utils.NewErrServerError(err)
@@ -1513,10 +1506,7 @@ func (v1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string) (
 			if fileContent, err = ioutil.ReadFile(filePath); err != nil {
 				return 0, err
 			}
-			if err := os.Remove(filePath); err != nil {
-				return 0, err
-			}
-			return 0, nil
+			return 0, os.Remove(filePath)
 		}, v1.Config.GeneralCfg().LockingTimeout, utils.FileLockPrefix+filePath)
 		if err != nil {
 			return utils.NewErrServerError(err)
@@ -1556,11 +1546,9 @@ func (v1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string) (
 				if err != nil {
 					return 0, err
 				}
-				defer fileOut.Close()
-				if _, err := fileOut.Write(fileContent); err != nil {
-					return 0, err
-				}
-				return 0, nil
+				_, err = fileOut.Write(fileContent)
+				fileOut.Close()
+				return 0, err
 			}, v1.Config.GeneralCfg().LockingTimeout, utils.FileLockPrefix+failoverPath)
 			if err != nil {
 				return utils.NewErrServerError(err)

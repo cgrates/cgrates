@@ -991,9 +991,8 @@ func (rs *RedisStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize 
 				return nil, err
 			}
 		}
-		err = rs.Cmd("LPUSH", utils.LOADINST_KEY, marshaled).Err
-		return nil, err
-	}, 0, utils.LOADINST_KEY)
+		return nil, rs.Cmd("LPUSH", utils.LOADINST_KEY, marshaled).Err
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.LOADINST_KEY)
 
 	Cache.Remove(utils.LOADINST_KEY, "",
 		cacheCommit(transactionID), transactionID)

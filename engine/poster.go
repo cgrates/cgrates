@@ -138,11 +138,9 @@ func (poster *HTTPPoster) Post(addr string, contentType string, content interfac
 			if err != nil {
 				return nil, err
 			}
-			defer fileOut.Close()
-			if _, err := fileOut.Write(body); err != nil {
-				return nil, err
-			}
-			return nil, nil
+			_, err = fileOut.Write(body)
+			fileOut.Close()
+			return nil, err
 		}, time.Duration(2*time.Second), utils.FileLockPrefix+fallbackFilePath)
 	}
 	return
@@ -348,11 +346,9 @@ func (pstr *AMQPPoster) writeToFile(fileName string, content []byte) (err error)
 		if err != nil {
 			return nil, err
 		}
-		defer fileOut.Close()
-		if _, err := fileOut.Write(content); err != nil {
-			return nil, err
-		}
-		return nil, nil
+		_, err = fileOut.Write(content)
+		fileOut.Close()
+		return nil, err
 	}, time.Duration(2*time.Second), utils.FileLockPrefix+fallbackFilePath)
 	return
 }

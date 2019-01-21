@@ -25,6 +25,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/structmatcher"
 	"github.com/cgrates/cgrates/utils"
@@ -172,7 +173,7 @@ func (acc *Account) setBalanceAction(a *Action) error {
 				i++
 			}
 			return 0, nil
-		}, 0, balance.SharedGroups.Slice()...)
+		}, config.CgrConfig().GeneralCfg().LockingTimeout, balance.SharedGroups.Slice()...)
 		if err != nil {
 			return err
 		}
@@ -264,7 +265,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset, resetIfNegative bool) er
 			}
 			dm.CacheDataFromDB(utils.SHARED_GROUP_PREFIX, sgs, true)
 			return 0, nil
-		}, 0, bClone.SharedGroups.Slice()...)
+		}, config.CgrConfig().GeneralCfg().LockingTimeout, bClone.SharedGroups.Slice()...)
 		if err != nil {
 			return err
 		}

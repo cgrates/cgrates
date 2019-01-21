@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -189,11 +190,8 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 				if err := self.DataManager.DataDB().SetAccountActionPlans(accID, acntAPids, true); err != nil {
 					return 0, err
 				}
-				if err = self.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
-					return 0, err
-				}
-				return 0, nil
-			}, 0, utils.ACTION_PLAN_PREFIX)
+				return 0, self.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true)
+			}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACTION_PLAN_PREFIX)
 			if err != nil {
 				return 0, err
 			}
@@ -231,11 +229,8 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 			ub.Disabled = *attr.Disabled
 		}
 		// All prepared, save account
-		if err := self.DataManager.DataDB().SetAccount(ub); err != nil {
-			return 0, err
-		}
-		return 0, nil
-	}, 0, accID)
+		return 0, self.DataManager.DataDB().SetAccount(ub)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, accID)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
