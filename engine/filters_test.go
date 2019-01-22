@@ -486,7 +486,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf := &FilterRule{Type: MetaString, FieldName: "MetaString", Values: []string{"String"}}
+	erf := &FilterRule{Type: MetaString, FieldName: "MetaString", Values: []string{"String"}, negative: utils.BoolPointer(false)}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
@@ -494,7 +494,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &FilterRule{Type: MetaEmpty, FieldName: "MetaEmpty", Values: []string{}}
+	erf = &FilterRule{Type: MetaEmpty, FieldName: "MetaEmpty", Values: []string{}, negative: utils.BoolPointer(false)}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
@@ -502,7 +502,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &FilterRule{Type: MetaExists, FieldName: "MetaExists", Values: []string{}}
+	erf = &FilterRule{Type: MetaExists, FieldName: "MetaExists", Values: []string{}, negative: utils.BoolPointer(false)}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
@@ -510,7 +510,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &FilterRule{Type: MetaPrefix, FieldName: "MetaPrefix", Values: []string{"stringPrefix"}}
+	erf = &FilterRule{Type: MetaPrefix, FieldName: "MetaPrefix", Values: []string{"stringPrefix"}, negative: utils.BoolPointer(false)}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
@@ -518,7 +518,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &FilterRule{Type: MetaSuffix, FieldName: "MetaSuffix", Values: []string{"stringSuffix"}}
+	erf = &FilterRule{Type: MetaSuffix, FieldName: "MetaSuffix", Values: []string{"stringSuffix"}, negative: utils.BoolPointer(false)}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
@@ -526,7 +526,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &FilterRule{Type: MetaTimings, FieldName: "MetaTimings", Values: []string{""}}
+	erf = &FilterRule{Type: MetaTimings, FieldName: "MetaTimings", Values: []string{""}, negative: utils.BoolPointer(false)}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
@@ -534,7 +534,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &FilterRule{Type: MetaDestinations, FieldName: "MetaDestinations", Values: []string{""}}
+	erf = &FilterRule{Type: MetaDestinations, FieldName: "MetaDestinations", Values: []string{""}, negative: utils.BoolPointer(false)}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
@@ -542,7 +542,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &FilterRule{Type: MetaLessThan, FieldName: "MetaLessThan", Values: []string{"20"}}
+	erf = &FilterRule{Type: MetaLessThan, FieldName: "MetaLessThan", Values: []string{"20"}, negative: utils.BoolPointer(false)}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
@@ -550,7 +550,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &FilterRule{Type: MetaLessOrEqual, FieldName: "MetaLessOrEqual", Values: []string{"20"}}
+	erf = &FilterRule{Type: MetaLessOrEqual, FieldName: "MetaLessOrEqual", Values: []string{"20"}, negative: utils.BoolPointer(false)}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
@@ -558,7 +558,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &FilterRule{Type: MetaGreaterThan, FieldName: "MetaGreaterThan", Values: []string{"20"}}
+	erf = &FilterRule{Type: MetaGreaterThan, FieldName: "MetaGreaterThan", Values: []string{"20"}, negative: utils.BoolPointer(false)}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
@@ -566,7 +566,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &FilterRule{Type: MetaGreaterOrEqual, FieldName: "MetaGreaterOrEqual", Values: []string{"20"}}
+	erf = &FilterRule{Type: MetaGreaterOrEqual, FieldName: "MetaGreaterOrEqual", Values: []string{"20"}, negative: utils.BoolPointer(false)}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
@@ -575,7 +575,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	erf = &FilterRule{Type: "*gt", FieldName: "NotMetaGreaterOrEqual", Values: []string{"20"}, negative: true}
+	erf = &FilterRule{Type: "*notgt", FieldName: "NotMetaGreaterOrEqual", Values: []string{"20"}, negative: utils.BoolPointer(true)}
 	if !reflect.DeepEqual(erf, rf) {
 		t.Errorf("Expecting: %+v, received: %+v", erf, rf)
 	}
