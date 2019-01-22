@@ -25,6 +25,7 @@ import (
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -111,7 +112,7 @@ func testTPImportTPFromFolderPath(t *testing.T) {
 	var reply string
 	if err := tpRPC.Call("ApierV1.ImportTariffPlanFromFolder",
 		utils.AttrImportTPFromFolder{TPid: "TEST_TPID2",
-			FolderPath: path.Join(tpDataDir, "tariffplans", "oldtutorial")}, &reply); err != nil {
+			FolderPath: path.Join(tpDataDir, "tariffplans", "tutorial")}, &reply); err != nil {
 		t.Error("Got error on ApierV1.ImportTarrifPlanFromFolder: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling ApierV1.ImportTarrifPlanFromFolder got reply: ", reply)
@@ -124,10 +125,11 @@ func testTPExportTPToFolder(t *testing.T) {
 	expectedTPStas := &utils.ExportedTPStats{
 		Compressed: true,
 		ExportPath: "/tmp/",
-		ExportedFiles: []string{"RatingProfiles.csv", "Users.csv", "RatingPlans.csv", "Actions.csv", "AccountActions.csv",
-			"Timings.csv", "SharedGroups.csv", "ActionPlans.csv", "ActionTriggers.cs", "DerivedChargers.csv", "Resources.csv",
-			"Stats.csv", "Thresholds.csv", "Destinations.csv", "Rates.csv", "DestinationRates.csv", "Filters.csv", "Suppliers.csv", "Attributes.csv"},
+		ExportedFiles: []string{"RatingProfiles.csv", "RatingPlans.csv", "Actions.csv", "AccountActions.csv",
+			"Chargers.csv", "Timings.csv", "ActionPlans.csv", "Resources.csv", "Stats.csv", "Thresholds.csv",
+			"Destinations.csv", "Rates.csv", "DestinationRates.csv", "Filters.csv", "Suppliers.csv", "Attributes.csv"},
 	}
+	sort.Strings(expectedTPStas.ExportedFiles)
 	tpid := "TEST_TPID2"
 	compress := true
 	exportPath := "/tmp/"
@@ -137,8 +139,8 @@ func testTPExportTPToFolder(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", expectedTPStas.ExportPath, reply.ExportPath)
 	} else if !reflect.DeepEqual(reply.Compressed, expectedTPStas.Compressed) {
 		t.Errorf("Expecting : %+v, received: %+v", expectedTPStas.Compressed, reply.Compressed)
-	} else if !reflect.DeepEqual(len(expectedTPStas.ExportedFiles), len(reply.ExportedFiles)) {
-		t.Errorf("Expecting : %+v, received: %+v", len(expectedTPStas.ExportedFiles), len(reply.ExportedFiles))
+	} else if sort.Strings(reply.ExportedFiles); !reflect.DeepEqual(expectedTPStas.ExportedFiles, reply.ExportedFiles) {
+		t.Errorf("Expecting : %+v, received: %+v", expectedTPStas.ExportedFiles, reply.ExportedFiles)
 	}
 	time.Sleep(500 * time.Millisecond)
 
