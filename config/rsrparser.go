@@ -250,9 +250,7 @@ func (prsr *RSRParser) ParseValue(value interface{}) (out string, err error) {
 	if out, err = utils.IfaceAsString(value); err != nil {
 		return
 	}
-	fmt.Println("ParseValue 1: ", out)
 	out = prsr.parseValue(out)
-	fmt.Println("ParseValue 2: ", out)
 	if out, err = prsr.converters.ConvertString(out); err != nil {
 		return
 	}
@@ -268,7 +266,6 @@ func (prsr *RSRParser) ParseEvent(ev map[string]interface{}) (out string, err er
 	if !has && prsr.attrValue == "" {
 		return "", utils.ErrNotFound
 	}
-	fmt.Println("ParseEvent: ", val)
 	return prsr.ParseValue(val)
 }
 
