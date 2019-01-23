@@ -67,6 +67,7 @@ var sTestsAlsPrf = []func(t *testing.T){
 	testAttributeSSetAlsPrf3,
 	testAttributeSSetAlsPrf4,
 	testAttributeSPing,
+	testAttributeSProcessEventWithSearchAndReplace,
 	testAttributeSKillEngine,
 }
 
@@ -850,6 +851,65 @@ func testAttributeSPing(t *testing.T) {
 		t.Error(err)
 	} else if resp != utils.Pong {
 		t.Error("Unexpected reply returned", resp)
+	}
+}
+
+func testAttributeSProcessEventWithSearchAndReplace(t *testing.T) {
+	attrPrf1 := &engine.AttributeProfile{
+		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:        "ATTR_Search_and_replace",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"*string:Category:call"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: []*engine.Attribute{
+			{
+				FieldName:  "Category",
+				Initial:    utils.META_ANY,
+				Substitute: config.NewRSRParsersMustCompile("~Category:s/(.*)/${1}_suffix/", true, utils.INFIELD_SEP),
+				Append:     true,
+			},
+		},
+		Blocker: true,
+		Weight:  10,
+	}
+	var result string
+	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", attrPrf1, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	attrArgs := &engine.AttrArgsProcessEvent{
+		ProcessRuns: utils.IntPointer(1),
+		CGREvent: utils.CGREvent{
+			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:      "HeaderEventForAttribute",
+			Context: utils.StringPointer(utils.MetaSessionS),
+			Event: map[string]interface{}{
+				"Category": "call",
+			},
+		},
+	}
+	eRply := &engine.AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_Search_and_replace"},
+		AlteredFields:   []string{"Category"},
+		CGREvent: &utils.CGREvent{
+			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:      "HeaderEventForAttribute",
+			Context: utils.StringPointer(utils.MetaSessionS),
+			Event: map[string]interface{}{
+				"Category": "call_suffix",
+			},
+		},
+	}
+	var rplyEv engine.AttrSProcessEventReply
+	if err := attrSRPC.Call(utils.AttributeSv1ProcessEvent,
+		attrArgs, &rplyEv); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eRply, &rplyEv) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
 	}
 }
 

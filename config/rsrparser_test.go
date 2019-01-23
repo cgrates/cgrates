@@ -15,6 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
+
 package config
 
 import (
@@ -133,5 +134,35 @@ func TestRSRParsersParseEvent2(t *testing.T) {
 		t.Error(err)
 	} else if eOut != out {
 		t.Errorf("expecting: %s, received: %s", eOut, out)
+	}
+}
+
+func TestRSRParsersParseEvent3(t *testing.T) {
+	prsr, err := NewRSRParser("~Category:s/(.*)/${1}_suffix/", true)
+	if err != nil {
+		t.Error(err)
+	}
+	ev := map[string]interface{}{
+		"Category": "call",
+	}
+	eOut := "call_suffix"
+	if out, err := prsr.ParseEvent(ev); err != nil {
+		t.Error(err)
+	} else if eOut != out {
+		t.Errorf("expecting: %s, received: %s", eOut, out)
+	}
+}
+
+func TestRSRParsersParseWrong(t *testing.T) {
+	rule := "~*req.Service-Information.IN-Information.CalledPartyAddress(~^(00)*(33|0)890240004$)"
+	prsr, err := NewRSRParser(rule, true)
+	if err != nil {
+		t.Error(err)
+	}
+	expAttrName := "*req.Service-Information.IN-Information.CalledPartyAddress"
+	// we expected to get *req.Service-Information.IN-Information.CalledPartyAddress as attrName
+	// and the rest go in filters
+	if prsr.AttrName() != expAttrName {
+		t.Errorf("expecting: %s, received: %s", expAttrName, prsr.AttrName())
 	}
 }
