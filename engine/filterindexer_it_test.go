@@ -58,6 +58,9 @@ var sTests = []func(t *testing.T){
 	testITFlush,
 	testITIsDBEmpty,
 	testITTestIndexingThresholds,
+	testITFlush,
+	testITIsDBEmpty,
+	testITTestIndexingMetaNot,
 }
 
 func TestFilterIndexerITRedis(t *testing.T) {
@@ -880,6 +883,63 @@ func testITTestIndexingThresholds(t *testing.T) {
 	eMp := utils.StringMap{
 		"TH1": true,
 		"TH2": true,
+	}
+	if rcvMp, err := dataManager.MatchFilterIndex(utils.CacheThresholdFilterIndexes, th.Tenant,
+		utils.MetaString, utils.Account, "1001"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eMp, rcvMp) {
+		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
+	}
+}
+
+func testITTestIndexingMetaNot(t *testing.T) {
+	th := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH1",
+		FilterIDs: []string{"*string:Account:1001", "*notstring:Destination:+49123"},
+		ActionIDs: []string{},
+	}
+	th2 := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH2",
+		FilterIDs: []string{"*prefix:EventName:Name", "*notprefix:Destination:10"},
+		ActionIDs: []string{},
+	}
+	th3 := &ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH3",
+		FilterIDs: []string{"*notstring:Account:1002", "*notstring:Balance:1000"},
+		ActionIDs: []string{},
+	}
+	rfi := NewFilterIndexer(onStor, utils.ThresholdProfilePrefix, th.Tenant)
+	if err := dataManager.SetThresholdProfile(th, true); err != nil {
+		t.Error(err)
+	}
+	if err := dataManager.SetThresholdProfile(th2, true); err != nil {
+		t.Error(err)
+	}
+	if err := dataManager.SetThresholdProfile(th3, true); err != nil {
+		t.Error(err)
+	}
+	eIdxes := map[string]utils.StringMap{
+		"*string:Account:1001": {
+			"TH1": true,
+		},
+		"*prefix:EventName:Name": {
+			"TH2": true,
+		},
+	}
+	if rcvIdx, err := dataManager.GetFilterIndexes(
+		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
+		utils.EmptyString, nil); err != nil {
+		t.Error(err)
+	} else {
+		if !reflect.DeepEqual(eIdxes, rcvIdx) {
+			t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+		}
+	}
+	eMp := utils.StringMap{
+		"TH1": true,
 	}
 	if rcvMp, err := dataManager.MatchFilterIndex(utils.CacheThresholdFilterIndexes, th.Tenant,
 		utils.MetaString, utils.Account, "1001"); err != nil {

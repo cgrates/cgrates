@@ -51,15 +51,15 @@ var sTestsDiam = []func(t *testing.T){
 	testDiamItInitCfg,
 	testDiamItResetDataDb,
 	testDiamItResetStorDb,
-	testDiamItStartEngine,
+	//testDiamItStartEngine,
 	testDiamItConnectDiameterClient,
 	testDiamItApierRpcConn,
 	testDiamItTPFromFolder,
-	testDiamItDryRun,
+	//testDiamItDryRun,
 	testDiamItCCRInit,
 	testDiamItCCRUpdate,
 	testDiamItCCRTerminate,
-	testDiamItCCRSMS,
+	// testDiamItCCRSMS,
 	// testDiamTerminateWithoutAnswerTime,
 	testDiamItKillEngine,
 }
@@ -465,7 +465,7 @@ func testDiamItCCRInit(t *testing.T) {
 					diam.NewAVP(20339, avp.Mbit, 2011, datatype.Unsigned32(0)),                                          // Charge-Flow-Type
 					diam.NewAVP(20302, avp.Mbit, 2011, datatype.UTF8String("")),                                         // Calling-Vlr-Number
 					diam.NewAVP(20303, avp.Mbit, 2011, datatype.UTF8String("")),                                         // Calling-CellID-Or-SAI
-					diam.NewAVP(20313, avp.Mbit, 2011, datatype.UTF8String("")),                                         // Bearer-Capability
+					diam.NewAVP(20313, avp.Mbit, 2011, datatype.OctetString("")),                                        // Bearer-Capability
 					diam.NewAVP(20321, avp.Mbit, 2011, datatype.UTF8String("bb97be2b9f37c2be9614fff71c8b1d08b1acbff8")), // Call-Reference-Number
 					diam.NewAVP(20322, avp.Mbit, 2011, datatype.UTF8String("")),                                         // MSC-Address
 					diam.NewAVP(20324, avp.Mbit, 2011, datatype.Unsigned32(0)),                                          // Time-Zone
@@ -540,7 +540,7 @@ func testDiamItCCRUpdate(t *testing.T) {
 					diam.NewAVP(20339, avp.Mbit, 2011, datatype.Unsigned32(0)),                                          // Charge-Flow-Type
 					diam.NewAVP(20302, avp.Mbit, 2011, datatype.UTF8String("")),                                         // Calling-Vlr-Number
 					diam.NewAVP(20303, avp.Mbit, 2011, datatype.UTF8String("")),                                         // Calling-CellID-Or-SAI
-					diam.NewAVP(20313, avp.Mbit, 2011, datatype.UTF8String("")),                                         // Bearer-Capability
+					diam.NewAVP(20313, avp.Mbit, 2011, datatype.OctetString("")),                                        // Bearer-Capability
 					diam.NewAVP(20321, avp.Mbit, 2011, datatype.UTF8String("bb97be2b9f37c2be9614fff71c8b1d08b1acbff8")), // Call-Reference-Number
 					diam.NewAVP(20322, avp.Mbit, 2011, datatype.UTF8String("")),                                         // MSC-Address
 					diam.NewAVP(20324, avp.Mbit, 2011, datatype.Unsigned32(0)),                                          // Time-Zone
@@ -615,7 +615,7 @@ func testDiamItCCRTerminate(t *testing.T) {
 					diam.NewAVP(20339, avp.Mbit, 2011, datatype.Unsigned32(0)),                                          // Charge-Flow-Type
 					diam.NewAVP(20302, avp.Mbit, 2011, datatype.UTF8String("")),                                         // Calling-Vlr-Number
 					diam.NewAVP(20303, avp.Mbit, 2011, datatype.UTF8String("")),                                         // Calling-CellID-Or-SAI
-					diam.NewAVP(20313, avp.Mbit, 2011, datatype.UTF8String("")),                                         // Bearer-Capability
+					diam.NewAVP(20313, avp.Mbit, 2011, datatype.OctetString("")),                                        // Bearer-Capability
 					diam.NewAVP(20321, avp.Mbit, 2011, datatype.UTF8String("bb97be2b9f37c2be9614fff71c8b1d08b1acbff8")), // Call-Reference-Number
 					diam.NewAVP(20322, avp.Mbit, 2011, datatype.UTF8String("")),                                         // MSC-Address
 					diam.NewAVP(20324, avp.Mbit, 2011, datatype.Unsigned32(0)),                                          // Time-Zone
@@ -776,7 +776,7 @@ func testDiamInitWithSessionDisconnect(t *testing.T) {
 					diam.NewAVP(20339, avp.Mbit, 2011, datatype.Unsigned32(0)),                                             // Charge-Flow-Type
 					diam.NewAVP(20302, avp.Mbit, 2011, datatype.UTF8String("")),                                            // Calling-Vlr-Number
 					diam.NewAVP(20303, avp.Mbit, 2011, datatype.UTF8String("")),                                            // Calling-CellID-Or-SAI
-					diam.NewAVP(20313, avp.Mbit, 2011, datatype.UTF8String("")),                                            // Bearer-Capability
+					diam.NewAVP(20313, avp.Mbit, 2011, datatype.OctetString("")),                                           // Bearer-Capability
 					diam.NewAVP(20321, avp.Mbit, 2011, datatype.UTF8String("bb97be2b9f37c2be9614fff71c8b1d08bdisconnect")), // Call-Reference-Number
 					diam.NewAVP(20322, avp.Mbit, 2011, datatype.UTF8String("")),                                            // MSC-Address
 					diam.NewAVP(20324, avp.Mbit, 2011, datatype.Unsigned32(0)),                                             // Time-Zone
