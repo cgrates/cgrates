@@ -20,6 +20,7 @@ package engine
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"fmt"
 	"io/ioutil"
@@ -34,6 +35,7 @@ import (
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/streadway/amqp"
+	amqpv1 "pack.ag/amqp"
 )
 
 var AMQPQuery = []string{"cacertfile", "certfile", "keyfile", "verify", "server_name_indication", "auth_mechanism", "heartbeat", "connection_timeout", "channel_max"}
@@ -340,6 +342,123 @@ func (pstr *AMQPPoster) NewPostChannel() (postChan *amqp.Channel, err error) {
 
 // writeToFile writes the content in the file with fileName on amqp.fallbackFileDir
 func (pstr *AMQPPoster) writeToFile(fileName string, content []byte) (err error) {
+	fallbackFilePath := path.Join(pstr.fallbackFileDir, fileName)
+	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
+		fileOut, err := os.Create(fallbackFilePath)
+		if err != nil {
+			return nil, err
+		}
+		_, err = fileOut.Write(content)
+		fileOut.Close()
+		return nil, err
+	}, time.Duration(2*time.Second), utils.FileLockPrefix+fallbackFilePath)
+	return
+}
+
+func NewAWSPoster(dialURL string, attempts int, fallbackFileDir string) (*AWSPoster, error) {
+	amqp := &AWSPoster{
+		attempts:        attempts,
+		fallbackFileDir: fallbackFileDir,
+	}
+	if err := amqp.parseURL(dialURL); err != nil {
+		return nil, err
+	}
+	return amqp, nil
+}
+
+type AWSPoster struct {
+	sync.Mutex
+	dialURL         string
+	queueID         string // identifier of the CDR queue where we publish
+	exchange        string
+	attempts        int
+	fallbackFileDir string
+	client          *amqpv1.Client
+}
+
+func (pstr *AWSPoster) Close() {
+	pstr.Lock()
+	if pstr.client != nil {
+		pstr.client.Close()
+	}
+	pstr.client = nil
+	pstr.Unlock()
+}
+
+func (pstr *AWSPoster) parseURL(dialURL string) error {
+	// "amqp+ssl://cgrates:password@host:5671/?queue_id=cgrates_cdrs",
+	u, err := url.Parse(dialURL)
+	if err != nil {
+		return err
+	}
+	qry := u.Query()
+	pstr.dialURL = strings.Split(dialURL, "?")[0]
+	pstr.queueID = defaultQueueID
+	if vals, has := qry[queueID]; has && len(vals) != 0 {
+		pstr.queueID = "/" + vals[0]
+	}
+	return nil
+}
+
+func (pstr *AWSPoster) Post(content []byte, fallbackFileName string) (s *amqpv1.Session, err error) {
+	fib := utils.Fib()
+
+	for i := 0; i < pstr.attempts; i++ {
+		if s, err = pstr.newPosterSession(); err == nil {
+			break
+		}
+		time.Sleep(time.Duration(fib()) * time.Second)
+	}
+	if err != nil {
+		if fallbackFileName != utils.META_NONE {
+			utils.Logger.Warning(fmt.Sprintf("<AWSPoster> creating new post channel, err: %s", err.Error()))
+			err = pstr.writeToFile(fallbackFileName, content)
+		}
+		return nil, err
+	}
+
+	for i := 0; i < pstr.attempts; i++ {
+		sender, err := s.NewSender(
+			amqpv1.LinkTargetAddress(pstr.queueID),
+		)
+		if err != nil {
+			time.Sleep(time.Duration(fib()) * time.Second)
+			continue
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+
+		// Send message
+		err = sender.Send(ctx, amqpv1.NewMessage([]byte(content)))
+		if err == nil {
+			sender.Close(ctx)
+			cancel()
+			break
+		}
+		time.Sleep(time.Duration(fib()) * time.Second)
+	}
+	if err != nil && fallbackFileName != utils.META_NONE {
+		err = pstr.writeToFile(fallbackFileName, content)
+		return nil, err
+	}
+	return s, nil
+}
+
+func (pstr *AWSPoster) newPosterSession() (s *amqpv1.Session, err error) {
+	pstr.Lock()
+	defer pstr.Unlock()
+	if pstr.client == nil {
+		var client *amqpv1.Client
+		client, err = amqpv1.Dial(pstr.dialURL)
+		if err != nil {
+			return nil, err
+		}
+		pstr.client = client
+	}
+	return pstr.client.NewSession()
+}
+
+// writeToFile writes the content in the file with fileName on amqp.fallbackFileDir
+func (pstr *AWSPoster) writeToFile(fileName string, content []byte) (err error) {
 	fallbackFilePath := path.Join(pstr.fallbackFileDir, fileName)
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		fileOut, err := os.Create(fallbackFilePath)
