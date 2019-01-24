@@ -411,7 +411,7 @@ func (pstr *AWSPoster) parseURL(dialURL string) error {
 	}
 	qry := u.Query()
 	pstr.dialURL = strings.Split(dialURL, "?")[0]
-	pstr.queueID = defaultQueueID
+	pstr.queueID = "/" + defaultQueueID
 	if vals, has := qry[queueID]; has && len(vals) != 0 {
 		pstr.queueID = "/" + vals[0]
 	}
