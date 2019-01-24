@@ -35,7 +35,7 @@ import (
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/streadway/amqp"
-	amqpv1 "pack.ag/amqp"
+	amqpv1 "github.com/vcabbage/amqp"
 )
 
 var AMQPQuery = []string{"cacertfile", "certfile", "keyfile", "verify", "server_name_indication", "auth_mechanism", "heartbeat", "connection_timeout", "channel_max"}

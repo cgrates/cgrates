@@ -35,7 +35,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/streadway/amqp"
-	amqpv1 "pack.ag/amqp"
+	amqpv1 "github.com/vcabbage/amqp"
 )
 
 const (
