@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -35,6 +36,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 	"github.com/streadway/amqp"
+	amqpv1 "pack.ag/amqp"
 )
 
 const (
@@ -1533,6 +1535,18 @@ func (v1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string) (
 				if chn != nil {
 					chn.Close()
 				}
+			}
+		case utils.MetaAWSjsonMap:
+			var awsPoster *engine.AWSPoster
+			awsPoster, err = engine.AMQPPostersCache.GetAWSPoster(ffn.Address,
+				v1.Config.GeneralCfg().PosterAttempts, failedReqsOutDir)
+			if err != nil {
+				break
+			}
+			var ses *amqpv1.Session
+			ses, err = awsPoster.Post(fileContent, file.Name())
+			if ses != nil {
+				ses.Close(context.Background())
 			}
 		default:
 			err = fmt.Errorf("unsupported replication transport: %s", ffn.Transport)
