@@ -50,7 +50,10 @@ const (
 )
 
 func init() {
-	AMQPPostersCache = &AMQPCachedPosters{cache: make(map[string]*AMQPPoster)} // Initialize the cache for amqpPosters
+	AMQPPostersCache = &AMQPCachedPosters{
+		cache:  make(map[string]*AMQPPoster),
+		cache2: make(map[string]*AWSPoster),
+	} // Initialize the cache for amqpPosters
 }
 
 var AMQPPostersCache *AMQPCachedPosters
@@ -151,7 +154,8 @@ func (poster *HTTPPoster) Post(addr string, contentType string, content interfac
 // AMQPPosterCache is used to cache mutliple AMQPPoster connections based on the address
 type AMQPCachedPosters struct {
 	sync.Mutex
-	cache map[string]*AMQPPoster
+	cache  map[string]*AMQPPoster
+	cache2 map[string]*AWSPoster
 }
 
 // GetAMQPPoster creates a new poster only if not already cached
@@ -168,6 +172,20 @@ func (pc *AMQPCachedPosters) GetAMQPPoster(dialURL string, attempts int,
 		}
 	}
 	return pc.cache[dialURL], nil
+}
+
+func (pc *AMQPCachedPosters) GetAWSPoster(dialURL string, attempts int,
+	fallbackFileDir string) (amqpPoster *AWSPoster, err error) {
+	pc.Lock()
+	defer pc.Unlock()
+	if _, hasIt := pc.cache2[dialURL]; !hasIt {
+		if pstr, err := NewAWSPoster(dialURL, attempts, fallbackFileDir); err != nil {
+			return nil, err
+		} else {
+			pc.cache2[dialURL] = pstr
+		}
+	}
+	return pc.cache2[dialURL], nil
 }
 
 // "amqp://guest:guest@localhost:5672/?queueID=cgrates_cdrs"
@@ -425,13 +443,12 @@ func (pstr *AWSPoster) Post(content []byte, fallbackFileName string) (s *amqpv1.
 			time.Sleep(time.Duration(fib()) * time.Second)
 			continue
 		}
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		ctx := context.Background()
 
 		// Send message
-		err = sender.Send(ctx, amqpv1.NewMessage([]byte(content)))
+		err = sender.Send(ctx, amqpv1.NewMessage(content))
 		if err == nil {
 			sender.Close(ctx)
-			cancel()
 			break
 		}
 		time.Sleep(time.Duration(fib()) * time.Second)

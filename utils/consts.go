@@ -20,7 +20,7 @@ package utils
 
 var (
 	CDRExportFormats = []string{DRYRUN, MetaFileCSV, MetaFileFWV, MetaHTTPjsonCDR, MetaHTTPjsonMap,
-		MetaHTTPjson, META_HTTP_POST, MetaAMQPjsonCDR, MetaAMQPjsonMap}
+		MetaHTTPjson, META_HTTP_POST, MetaAMQPjsonCDR, MetaAMQPjsonMap, MetaAWSjsonMap}
 	MainCDRFields = []string{CGRID, Source, OriginHost, OriginID, ToR, RequestType, Tenant, Category,
 		Account, Subject, Destination, SetupTime, AnswerTime, Usage, COST, RATED, Partial, RunID,
 		PreRated, CostSource}
@@ -34,12 +34,14 @@ var (
 		META_HTTP_POST:  CONTENT_FORM,
 		MetaAMQPjsonCDR: CONTENT_JSON,
 		MetaAMQPjsonMap: CONTENT_JSON,
+		MetaAWSjsonMap:  CONTENT_JSON,
 	}
 	CDREFileSuffixes = map[string]string{
 		MetaHTTPjsonCDR: JSNSuffix,
 		MetaHTTPjsonMap: JSNSuffix,
 		MetaAMQPjsonCDR: JSNSuffix,
 		MetaAMQPjsonMap: JSNSuffix,
+		MetaAWSjsonMap:  JSNSuffix,
 		META_HTTP_POST:  FormSuffix,
 		MetaFileCSV:     CSVSuffix,
 		MetaFileFWV:     FWVSuffix,
@@ -273,6 +275,7 @@ const (
 	MetaHTTPjsonMap               = "*http_json_map"
 	MetaAMQPjsonCDR               = "*amqp_json_cdr"
 	MetaAMQPjsonMap               = "*amqp_json_map"
+	MetaAWSjsonMap                = "*aws_json_map"
 	NANO_MULTIPLIER               = 1000000000
 	CGR_AUTHORIZE                 = "CGR_AUTHORIZE"
 	CONFIG_DIR                    = "/etc/cgrates/"

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"context"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
@@ -34,6 +35,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/streadway/amqp"
+	amqpv1 "pack.ag/amqp"
 )
 
 const (
@@ -247,7 +249,7 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 			return err
 		}
 		body = jsn
-	case utils.MetaHTTPjsonMap, utils.MetaAMQPjsonMap:
+	case utils.MetaHTTPjsonMap, utils.MetaAMQPjsonMap, utils.MetaAWSjsonMap:
 		expMp, err := cdr.AsExportMap(cdre.exportTemplate.ContentFields, cdre.httpSkipTlsCheck, nil, cdre.roundingDecimals, cdre.filterS)
 		if err != nil {
 			return err
@@ -293,6 +295,17 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 			if chn != nil {
 				chn.Close()
 			}
+		}
+	case utils.MetaAWSjsonMap:
+		var awsPoster *AWSPoster
+		awsPoster, err = AMQPPostersCache.GetAWSPoster(cdre.exportPath, cdre.attempts, cdre.fallbackPath)
+		if err != nil {
+			break
+		}
+		var ses *amqpv1.Session
+		ses, err = awsPoster.Post(body.([]byte), fallbackFileName)
+		if ses != nil {
+			ses.Close(context.Background())
 		}
 	}
 	return
