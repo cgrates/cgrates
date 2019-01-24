@@ -35,6 +35,7 @@ import:
 - package: github.com/mitchellh/mapstructure
 - package: github.com/cgrates/aringo
 - package: github.com/streadway/amqp
+- package: github.com/vcabbage/amqp
 - package: github.com/cgrates/radigo
 - package: github.com/cgrates/ltcache
 - package: github.com/dlintw/goconf
