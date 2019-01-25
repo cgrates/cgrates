@@ -360,17 +360,7 @@ func (pstr *AMQPPoster) NewPostChannel() (postChan *amqp.Channel, err error) {
 
 // writeToFile writes the content in the file with fileName on amqp.fallbackFileDir
 func (pstr *AMQPPoster) writeToFile(fileName string, content []byte) (err error) {
-	fallbackFilePath := path.Join(pstr.fallbackFileDir, fileName)
-	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
-		fileOut, err := os.Create(fallbackFilePath)
-		if err != nil {
-			return nil, err
-		}
-		_, err = fileOut.Write(content)
-		fileOut.Close()
-		return nil, err
-	}, time.Duration(2*time.Second), utils.FileLockPrefix+fallbackFilePath)
-	return
+	return writeToFile(pstr.fallbackFileDir, fileName, content)
 }
 
 func NewAWSPoster(dialURL string, attempts int, fallbackFileDir string) (*AWSPoster, error) {
@@ -476,7 +466,11 @@ func (pstr *AWSPoster) newPosterSession() (s *amqpv1.Session, err error) {
 
 // writeToFile writes the content in the file with fileName on amqp.fallbackFileDir
 func (pstr *AWSPoster) writeToFile(fileName string, content []byte) (err error) {
-	fallbackFilePath := path.Join(pstr.fallbackFileDir, fileName)
+	return writeToFile(pstr.fallbackFileDir, fileName, content)
+}
+
+func writeToFile(fileDir, fileName string, content []byte) (err error) {
+	fallbackFilePath := path.Join(fileDir, fileName)
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		fileOut, err := os.Create(fallbackFilePath)
 		if err != nil {
