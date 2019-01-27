@@ -349,7 +349,7 @@ func (sS *SessionS) setSTerminator(s *Session) {
 			if s.sTerminator.ttlUsage != nil {
 				eUsage = *s.sTerminator.ttlUsage
 			}
-			sS.forceSTerminate(s.CGRid(), eUsage,
+			sS.forceSTerminate(s, eUsage,
 				s.sTerminator.ttlLastUsed)
 		case <-endChan:
 			s.sTerminator.timer.Stop()
@@ -361,48 +361,51 @@ func (sS *SessionS) setSTerminator(s *Session) {
 }
 
 // forceSTerminate is called when a session times-out or it is forced from CGRateS side
-func (sS *SessionS) forceSTerminate(cgrID string, extraDebit time.Duration, lastUsed *time.Duration) (err error) {
-	if cgrID == "" { // can only work for one session since we consider tenant and other info from within
-		return utils.ErrMandatoryIeMissing
-	}
-	ss := sS.getSessions(cgrID, false)
-	if len(ss) == 0 { // will not continue if the session is not longer active
-		utils.Logger.Warning(
-			fmt.Sprintf("<%s> could not force session terminate for cgrID %s, no active session found",
-				utils.SessionS, cgrID))
-		return utils.ErrNoActiveSession
-	}
-	s := ss[0]
+func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUsed *time.Duration) (err error) {
 	if extraDebit != 0 {
 		for i := range s.SRuns {
-			if err = sS.debit(s, i, extraDebit, extraDebit, nil); err != nil {
+			if _, err = sS.debitSession(s, i, extraDebit, nil); err != nil {
 				utils.Logger.Warning(
-					fmt.Sprintf("<%s> failed debitting cgrID %s, sRunIdx: %d, err: %s",
-						utils.SessionS, cgrID, i, err.Error()))
+					fmt.Sprintf(
+						"<%s> failed debitting cgrID %s, sRunIdx: %d, err: %s",
+						utils.SessionS, s.CGRid(), i, err.Error()))
 			}
 		}
 	}
-	if sS.sessionEnd(s, s.TotalUsage); err != nil {
+	if err = sS.endSession(s, nil); err != nil {
 		utils.Logger.Warning(
-			fmt.Sprintf("<%s> failed force ending session with ID %s, err: %s",
-				utils.SessionS, cgrID, err.Error()))
+			fmt.Sprintf(
+				"<%s> failed force terminating session with ID %s, err: %s",
+				utils.SessionS, s.CGRid(), err.Error()))
 	}
-	cdr, err := s.EventStart.AsCDR(sS.cgrCfg, s.Tenant, sS.tmz)
-	if err != nil {
-		utils.Logger.Warning(
-			fmt.Sprintf("<%s> could not create CDR out of event %s, err: %s",
-				utils.SessionS, s.EventStart.String(), err.Error()))
+	// Generate CDRs for each session run
+	s.Lock()
+	for _, sr := range s.SRuns {
+		cdr, err := sr.Event.AsCDR(sS.cgrCfg, s.Tenant,
+			sS.cgrCfg.GeneralCfg().DefaultTimezone)
+		if err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf(
+					"<%s> could not create CDR out of event %s, err: %s",
+					utils.SessionS, utils.ToJSON(sr.Event), err.Error()))
+		}
+		cdr.Usage = sr.TotalUsage
+		var reply string
+		cgrEv := &utils.CGREvent{
+			Tenant: s.Tenant,
+			ID:     utils.UUIDSha1Prefix(),
+			Event:  cdr.AsMapStringIface(),
+		}
+		if err = sS.cdrS.Call(utils.CdrsV2ProcessCDR, cgrEv, &reply); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf(
+					"<%s> could not create CDR out of event %s, err: %s",
+					utils.SessionS, utils.ToJSON(sr.Event), err.Error()))
+		}
 	}
-	cdr.Usage = s.TotalUsage
-	var reply string
-	cgrEv := &utils.CGREvent{
-		Tenant: s.Tenant,
-		ID:     utils.UUIDSha1Prefix(),
-		Event:  cdr.AsMapStringIface(),
-	}
-	if err = sS.cdrS.Call(utils.CdrsV2ProcessCDR, cgrEv, &reply); err != nil {
-		return
-	}
+	resID := s.ResourceID // we are still under lock
+	clntConnID := s.ClientConnID
+	s.Unlock()
 	if sS.resS != nil && s.ResourceID != "" {
 		var reply string
 		argsRU := utils.ArgRSv1ResourceUsage{
@@ -410,7 +413,7 @@ func (sS *SessionS) forceSTerminate(cgrID string, extraDebit time.Duration, last
 				Tenant: s.Tenant,
 				Event:  s.EventStart.AsMapInterface(),
 			},
-			UsageID: s.ResourceID,
+			UsageID: resID,
 			Units:   1,
 		}
 		if err := sS.resS.Call(utils.ResourceSv1ReleaseResources,
@@ -420,13 +423,13 @@ func (sS *SessionS) forceSTerminate(cgrID string, extraDebit time.Duration, last
 					utils.SessionS, err.Error(), s.ResourceID))
 		}
 	}
-	if s.clntConn != nil {
+	if clntConn := sS.biJClnt(s.ClientConnID); clntConn != nil {
 		var rply string
-		if err := s.clntConn.Call(utils.SessionSv1DisconnectSession,
+		if err := clntConn.conn.Call(utils.SessionSv1DisconnectSession,
 			utils.AttrDisconnectSession{
 				EventStart: s.EventStart.AsMapInterface(),
 				Reason:     ErrForcedDisconnect.Error()},
-			&reply); err != nil {
+			&rply); err != nil {
 			if err != utils.ErrNotImplemented {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> err: %s remotely disconnect session with id: %s",
