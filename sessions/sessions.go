@@ -966,7 +966,7 @@ func (sS *SessionS) forkSession(s *Session) (err error) {
 				Destination: me.GetStringIgnoreErrors(utils.Destination),
 				TimeStart:   startTime,
 				TimeEnd:     startTime.Add(s.EventStart.GetDurationIgnoreErrors(utils.Usage)),
-				ExtraFields: me.AsMapStringIgnoreErrors(utils.NewStringMap(utils.PrimaryCdrFields...)),
+				ExtraFields: me.AsMapStringIgnoreErrors(utils.NewStringMap(utils.MainCDRFields...)),
 			},
 		}
 	}

@@ -994,8 +994,6 @@ func buildCacheIndexesToPrefix() {
 // so we can search inside using SliceHasMember
 func sortStringSlices() {
 	sort.Strings(CDRExportFormats)
-	sort.Strings(PrimaryCdrFields)
-	sort.Strings(NotExtraCDRFields)
 }
 
 func init() {

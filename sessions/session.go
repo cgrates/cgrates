@@ -125,7 +125,7 @@ func (s *Session) AsActiveSessions(tmz, nodeID string) (aSs []*ActiveSession) {
 			AnswerTime:  sr.Event.GetTimeIgnoreErrors(utils.AnswerTime, tmz),
 			Usage:       sr.TotalUsage,
 			ExtraFields: sr.Event.AsMapStringIgnoreErrors(
-				utils.NewStringMap(utils.PrimaryCdrFields...)),
+				utils.NewStringMap(utils.MainCDRFields...)),
 			NodeID: nodeID,
 		}
 		if sr.CD != nil {
