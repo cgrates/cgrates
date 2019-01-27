@@ -2341,8 +2341,8 @@ func (sS *SessionS) BiRPCv1SyncSessions(clnt rpcclient.RpcClientConnection,
 	return nil
 }
 
-// BiRPCV1ForceDisconnect will force disconnecting sessions matching sessions
-func (sS *SessionS) BiRPCV1ForceDisconnect(clnt rpcclient.RpcClientConnection,
+// BiRPCv1ForceDisconnect will force disconnecting sessions matching sessions
+func (sS *SessionS) BiRPCv1ForceDisconnect(clnt rpcclient.RpcClientConnection,
 	fltr map[string]string, reply *string) error {
 	for fldName, fldVal := range fltr {
 		if fldVal == "" {
