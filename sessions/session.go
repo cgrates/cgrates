@@ -22,6 +22,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -133,6 +134,45 @@ func (s *Session) AsActiveSessions(tmz, nodeID string) (aSs []*ActiveSession) {
 			aSs[i].MaxRate = sr.CD.MaxRate
 			aSs[i].MaxRateUnit = sr.CD.MaxRateUnit
 			aSs[i].MaxCostSoFar = sr.CD.MaxCostSoFar
+		}
+	}
+	s.RUnlock()
+	return
+}
+
+// TotalUsage returns the first session run total usage
+func (s *Session) TotalUsage() (tDur time.Duration) {
+	if len(s.SRuns) == 0 {
+		return
+	}
+	s.RLock()
+	for _, sr := range s.SRuns {
+		tDur = sr.TotalUsage
+		break // only first
+	}
+	s.RUnlock()
+	return
+}
+
+// AsCGREvents is a thread safe method to return the Session as CGREvents
+// there will be one CGREvent for each SRun
+func (s *Session) AsCGREvents(cgrCfg *config.CGRConfig) (cgrEvs []*utils.CGREvent, err error) {
+	if len(s.SRuns) == 0 {
+		return
+	}
+	s.RLock()
+	cgrEvs = make([]*utils.CGREvent, len(s.SRuns)) // so we can gather all cdr info while under lock
+	for i, sr := range s.SRuns {
+		var cdr *engine.CDR
+		if cdr, err = sr.Event.AsCDR(cgrCfg, s.Tenant,
+			cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
+			break // will return with error
+		}
+		cdr.Usage = sr.TotalUsage
+		cgrEvs[i] = &utils.CGREvent{
+			Tenant: s.Tenant,
+			ID:     utils.UUIDSha1Prefix(),
+			Event:  cdr.AsMapStringIface(),
 		}
 	}
 	s.RUnlock()
