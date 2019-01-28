@@ -153,19 +153,15 @@ func TestRSRParsersParseEvent3(t *testing.T) {
 	}
 }
 
-/*
-// Need to review RSRParser to accept ()
-func TestRSRParsersParseWrong(t *testing.T) {
+// TestRSRParsersParseInnerBraces makes sure the inner braces are allowed in a filter rule
+func TestRSRParsersParseInnerBracket(t *testing.T) {
 	rule := "~*req.Service-Information.IN-Information.CalledPartyAddress(~^(00)*(33|0)890240004$)"
 	prsr, err := NewRSRParser(rule, true)
 	if err != nil {
 		t.Error(err)
 	}
 	expAttrName := "*req.Service-Information.IN-Information.CalledPartyAddress"
-	// we expected to get *req.Service-Information.IN-Information.CalledPartyAddress as attrName
-	// and the rest go in filters
 	if prsr.AttrName() != expAttrName {
 		t.Errorf("expecting: %s, received: %s", expAttrName, prsr.AttrName())
 	}
 }
-*/
