@@ -22,7 +22,7 @@
 "cdrs": {
 	"enabled": true,			// start the CDR Server service:  <true|false>
 	"store_cdrs": false,		// store cdrs in storDb
-	"online_cdr_exports": ["http_localhost", "amqp_localhost", "http_test_file", "amqp_test_file"],
+	"online_cdr_exports": ["http_localhost", "amqp_localhost", "http_test_file", "amqp_test_file","aws_test_file"],
 },
 
 
@@ -77,6 +77,13 @@
 		"export_path": "http://127.0.0.1:12080/invalid",
 		"content_fields": [
 			{"tag": "OriginID", "type": "*composed", "value": "~OriginID", "field_id": "OriginID"},
+		],
+	},
+	"aws_test_file": {
+		"export_format": "*aws_json_map",
+		"export_path": "amqp://guest:guest@localhost:25672/?queue_id=cgrates_cdrs",
+		"content_fields": [
+			{"tag": "CGRID", "type": "*composed", "value": "~CGRID", "field_id": "CGRID"},
 		],
 	},
 	"amqp_test_file": {
