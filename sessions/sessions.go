@@ -149,7 +149,7 @@ type SessionS struct {
 	aSessions map[string]*Session // group sessions per sessionId, multiple runs based on derived charging
 
 	aSIMux        sync.RWMutex                          // protects aSessionsIdx
-	aSessionsIdx  map[string]map[string]utils.StringMap // map[fieldName]map[fieldValue][runID]utils.StringMap[cgrID]
+	aSessionsIdx  map[string]map[string]utils.StringMap // map[fieldName]map[fieldValue]utils.StringMap[cgrID]
 	aSessionsRIdx map[string][]*riFieldNameVal          // reverse indexes for active sessions, used on remove
 
 	pSsMux    sync.RWMutex        // protects pSessions
@@ -257,7 +257,7 @@ func (sS *SessionS) biJClients() (clnts []*biJClient) {
 
 // riFieldNameVal is a reverse index entry
 type riFieldNameVal struct {
-	runID, fieldName, fieldValue string
+	fieldName, fieldValue string
 }
 
 // sTerminator holds the info needed to force-terminate sessions based on timer
@@ -2371,6 +2371,13 @@ func (sS *SessionS) BiRPCv1ForceDisconnect(clnt rpcclient.RpcClientConnection,
 	if err != nil {
 		*reply = utils.OK
 	}
+	return nil
+}
+
+func (sS *SessionS) BiRPCv1RegisterInternalBiJSONConn(clnt rpcclient.RpcClientConnection,
+	ign string, reply *string) error {
+	sS.RegisterIntBiJConn(clnt)
+	*reply = utils.OK
 	return nil
 }
 

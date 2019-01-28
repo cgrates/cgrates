@@ -18,36 +18,36 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package v2
 
-import (
-	"time"
+// import (
+// 	"time"
 
-	"github.com/cgrates/cgrates/apier/v1"
-)
+// 	v1 "github.com/cgrates/cgrates/apier/v1"
+// )
 
-type SMGenericV2 struct {
-	v1.SMGenericV1
-}
+// type SMGenericV2 struct {
+// 	v1.SMGenericV1
+// }
 
-// GetMaxUsage returns maxUsage as time.Duration/int64
-func (smgv2 *SMGenericV2) GetMaxUsage(ev map[string]interface{},
-	maxUsage *time.Duration) error {
-	return smgv2.SMG.BiRPCV2GetMaxUsage(nil, ev, maxUsage)
-}
+// // GetMaxUsage returns maxUsage as time.Duration/int64
+// func (smgv2 *SMGenericV2) GetMaxUsage(ev map[string]interface{},
+// 	maxUsage *time.Duration) error {
+// 	return smgv2.Ss.BiRPCV2GetMaxUsage(nil, ev, maxUsage)
+// }
 
-// Called on session start, returns the maximum number of seconds the session can last
-func (smgv2 *SMGenericV2) InitiateSession(ev map[string]interface{},
-	maxUsage *time.Duration) error {
-	return smgv2.SMG.BiRPCV2InitiateSession(nil, ev, maxUsage)
-}
+// // Called on session start, returns the maximum number of seconds the session can last
+// func (smgv2 *SMGenericV2) InitiateSession(ev map[string]interface{},
+// 	maxUsage *time.Duration) error {
+// 	return smgv2.Ss.BiRPCV2InitiateSession(nil, ev, maxUsage)
+// }
 
-// Interim updates, returns remaining duration from the rater
-func (smgv2 *SMGenericV2) UpdateSession(ev map[string]interface{},
-	maxUsage *time.Duration) error {
-	return smgv2.SMG.BiRPCV2UpdateSession(nil, ev, maxUsage)
-}
+// // Interim updates, returns remaining duration from the rater
+// func (smgv2 *SMGenericV2) UpdateSession(ev map[string]interface{},
+// 	maxUsage *time.Duration) error {
+// 	return smgv2.Ss.BiRPCV2UpdateSession(nil, ev, maxUsage)
+// }
 
-// Called on individual Events (eg SMS)
-func (smgv2 *SMGenericV2) ChargeEvent(ev map[string]interface{},
-	maxUsage *time.Duration) error {
-	return smgv2.SMG.BiRPCV2ChargeEvent(nil, ev, maxUsage)
-}
+// // Called on individual Events (eg SMS)
+// func (smgv2 *SMGenericV2) ChargeEvent(ev map[string]interface{},
+// 	maxUsage *time.Duration) error {
+// 	return smgv2.Ss.BiRPCV2ChargeEvent(nil, ev, maxUsage)
+// }
