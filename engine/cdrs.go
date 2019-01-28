@@ -693,10 +693,9 @@ func (cdrS *CdrServer) statSProcessEvent(cgrEv *utils.CGREvent) {
 func (cdrS *CdrServer) raStoReThStaCDR(cdr *CDR) {
 	ratedCDRs, err := cdrS.rateCDR(cdr)
 	if err != nil {
-		utils.Logger.Warning(
-			fmt.Sprintf("<%s> error: %s rating CDR  %+v.",
-				utils.CDRs, err.Error(), cdr))
-		return
+		cdr.Cost = -1.0 // If there was an error, mark the CDR
+		cdr.ExtraInfo = err.Error()
+		ratedCDRs = []*CDR{cdr}
 	}
 	for _, rtCDR := range ratedCDRs {
 		if cdrS.cgrCfg.CdrsCfg().CDRSStoreCdrs { // Store CDR
@@ -793,7 +792,6 @@ func (cdrS *CdrServer) V2ProcessCDR(cgrEv *utils.CGREvent, reply *string) (err e
 	if cdrS.chargerS != nil {
 		go cdrS.chrgrSProcessEvent(cgrEv)
 	}
-
 	*reply = utils.OK
 	return nil
 }
