@@ -273,7 +273,7 @@ func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, in
 			return
 		}
 	}
-	smgReplConns, err := sessions.NewSessionReplicationConns(cfg.SessionSCfg().SessionReplicationConns,
+	sReplConns, err := sessions.NewSReplConns(cfg.SessionSCfg().SessionReplicationConns,
 		cfg.GeneralCfg().Reconnects, cfg.GeneralCfg().ConnectTimeout,
 		cfg.GeneralCfg().ReplyTimeout)
 	if err != nil {
@@ -282,26 +282,20 @@ func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, in
 		exitChan <- true
 		return
 	}
-	sm := sessions.NewSMGeneric(cfg, ralsConns, resSConns, threshSConns,
+	sm := sessions.NewSessionS(cfg, ralsConns, resSConns, threshSConns,
 		statSConns, suplSConns, attrSConns, cdrsConn, chargerSConn,
-		smgReplConns, cfg.GeneralCfg().DefaultTimezone)
-	if err = sm.Connect(); err != nil {
+		sReplConns, cfg.GeneralCfg().DefaultTimezone)
+	//
+	if err = sm.ListenAndServe(exitChan); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.SessionS, err))
 	}
 	// Pass internal connection via BiRPCClient
 	internalSMGChan <- sm
 	// Register RPC handler
-	smgRpc := v1.NewSMGenericV1(sm)
-	server.RpcRegister(smgRpc)
-	server.RpcRegister(&v2.SMGenericV2{*smgRpc})
 	ssv1 := v1.NewSessionSv1(sm) // methods with multiple options
 	server.RpcRegister(ssv1)
 	// Register BiRpc handlers
 	if cfg.SessionSCfg().ListenBijson != "" {
-		smgBiRpc := v1.NewSMGenericBiRpcV1(sm)
-		for method, handler := range smgBiRpc.Handlers() {
-			server.BiRPCRegisterName(method, handler)
-		}
 		for method, handler := range ssv1.Handlers() {
 			server.BiRPCRegisterName(method, handler)
 		}
@@ -314,7 +308,7 @@ func startAsteriskAgent(internalSMGChan chan rpcclient.RpcClientConnection, exit
 	utils.Logger.Info("Starting Asterisk agent")
 	smgRpcConn := <-internalSMGChan
 	internalSMGChan <- smgRpcConn
-	birpcClnt := utils.NewBiRPCInternalClient(smgRpcConn.(*sessions.SMGeneric))
+	birpcClnt := utils.NewBiRPCInternalClient(smgRpcConn.(*sessions.SessionS))
 	var reply string
 	for connIdx := range cfg.AsteriskAgentCfg().AsteriskConns { // Instantiate connections towards asterisk servers
 		sma, err := agents.NewAsteriskAgent(cfg, connIdx, birpcClnt)
@@ -352,7 +346,7 @@ func startDiameterAgent(internalSsChan chan rpcclient.RpcClientConnection,
 		sSInternal = true
 		sSIntConn := <-internalSsChan
 		internalSsChan <- sSIntConn
-		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SMGeneric))
+		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
 	} else {
 		sS, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
 			cfg.TlsCfg().ClientKey,
@@ -421,7 +415,7 @@ func startFsAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan c
 	utils.Logger.Info("Starting FreeSWITCH agent")
 	smgRpcConn := <-internalSMGChan
 	internalSMGChan <- smgRpcConn
-	birpcClnt := utils.NewBiRPCInternalClient(smgRpcConn.(*sessions.SMGeneric))
+	birpcClnt := utils.NewBiRPCInternalClient(smgRpcConn.(*sessions.SessionS))
 	sm := agents.NewFSsessions(cfg.FsAgentCfg(), birpcClnt, cfg.GeneralCfg().DefaultTimezone)
 	var reply string
 	if err = birpcClnt.Call(utils.SessionSv1RegisterInternalBiJSONConn, "", &reply); err != nil { // for session sync
@@ -439,7 +433,7 @@ func startKamAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan 
 	utils.Logger.Info("Starting Kamailio agent")
 	smgRpcConn := <-internalSMGChan
 	internalSMGChan <- smgRpcConn
-	birpcClnt := utils.NewBiRPCInternalClient(smgRpcConn.(*sessions.SMGeneric))
+	birpcClnt := utils.NewBiRPCInternalClient(smgRpcConn.(*sessions.SessionS))
 	ka := agents.NewKamailioAgent(cfg.KamAgentCfg(), birpcClnt,
 		utils.FirstNonEmpty(cfg.KamAgentCfg().Timezone, cfg.GeneralCfg().DefaultTimezone))
 	var reply string

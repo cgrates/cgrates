@@ -26,11 +26,11 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var smgCfg *config.CGRConfig
+var sSCfg *config.CGRConfig
 
 func init() {
-	smgCfg, _ = config.NewDefaultCGRConfig()
-	smgCfg.SessionSCfg().SessionIndexes = utils.StringMap{
+	sSCfg, _ = config.NewDefaultCGRConfig()
+	sSCfg.SessionSCfg().SessionIndexes = utils.StringMap{
 		"Tenant":  true,
 		"Account": true,
 		"Extra3":  true,
@@ -39,8 +39,8 @@ func init() {
 }
 
 func TestSMGSessionIndexing(t *testing.T) {
-	smg := NewSMGeneric(smgCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
-	smGev := engine.NewSafEvent(map[string]interface{}{
+	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
+	sEv := engine.NewSafEvent(map[string]interface{}{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
 		utils.OriginID:         "12345",
@@ -64,69 +64,58 @@ func TestSMGSessionIndexing(t *testing.T) {
 		"Extra3":               "",
 	})
 	// Index first session
-	smgSession := &SMGSession{
+	session := &Session{
 		CGRID:      GetSetCGRID(smGev),
-		RunID:      utils.META_DEFAULT,
 		EventStart: smGev,
 	}
 	cgrID := GetSetCGRID(smGev)
-	smg.indexSession(smgSession, false)
-	eIndexes := map[string]map[string]map[string]utils.StringMap{
-		"OriginID": map[string]map[string]utils.StringMap{
-			"12345": map[string]utils.StringMap{
-				utils.META_DEFAULT: utils.StringMap{
-					cgrID: true,
-				},
+	sS.indexSession(session, false)
+	eIndexes := map[string]map[string]utils.StringMap{
+		"OriginID": map[string]utils.StringMap{
+			"12345": utils.StringMap{
+				cgrID: true,
 			},
 		},
-		"Tenant": map[string]map[string]utils.StringMap{
-			"cgrates.org": map[string]utils.StringMap{
-				utils.META_DEFAULT: utils.StringMap{
-					cgrID: true,
-				},
+		"Tenant": map[string]utils.StringMap{
+			"cgrates.org": utils.StringMap{
+				cgrID: true,
 			},
 		},
-		"Account": map[string]map[string]utils.StringMap{
+		"Account": map[string]utils.StringMap{
 			"account1": map[string]utils.StringMap{
-				utils.META_DEFAULT: utils.StringMap{
-					cgrID: true,
-				},
+				cgrID: true,
 			},
 		},
-		"Extra3": map[string]map[string]utils.StringMap{
-			utils.MetaEmpty: map[string]utils.StringMap{
-				utils.META_DEFAULT: utils.StringMap{
-					cgrID: true,
-				},
+		"Extra3": map[string]utils.StringMap{
+			utils.MetaEmpty: utils.StringMap{
+				cgrID: true,
 			},
 		},
-		"Extra4": map[string]map[string]utils.StringMap{
-			utils.NOT_AVAILABLE: map[string]utils.StringMap{
-				utils.META_DEFAULT: utils.StringMap{
-					cgrID: true,
-				},
+		"Extra4": map[string]utils.StringMap{
+			utils.NOT_AVAILABLE: utils.StringMap{
+				cgrID: true,
 			},
 		},
 	}
-	if !reflect.DeepEqual(eIndexes, smg.aSessionsIndex) {
+	if !reflect.DeepEqual(eIndexes, sS.aSessionsIdx) {
 		t.Errorf("Expecting: %s, received: %s",
-			utils.ToJSON(eIndexes), utils.ToJSON(smg.aSessionsIndex))
+			utils.ToJSON(eIndexes), utils.ToJSON(sS.aSessionsIdx))
 	}
 	eRIdxes := map[string][]*riFieldNameVal{
 		cgrID: []*riFieldNameVal{
-			&riFieldNameVal{runID: utils.META_DEFAULT, fieldName: "Tenant", fieldValue: "cgrates.org"},
-			&riFieldNameVal{runID: utils.META_DEFAULT, fieldName: "Account", fieldValue: "account1"},
-			&riFieldNameVal{runID: utils.META_DEFAULT, fieldName: "Extra3", fieldValue: utils.MetaEmpty},
-			&riFieldNameVal{runID: utils.META_DEFAULT, fieldName: "Extra4", fieldValue: utils.NOT_AVAILABLE},
-			&riFieldNameVal{runID: utils.META_DEFAULT, fieldName: "OriginID", fieldValue: "12345"},
+			&riFieldNameVal{fieldName: "Tenant", fieldValue: "cgrates.org"},
+			&riFieldNameVal{fieldName: "Account", fieldValue: "account1"},
+			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.MetaEmpty},
+			&riFieldNameVal{fieldName: "Extra4", fieldValue: utils.NOT_AVAILABLE},
+			&riFieldNameVal{fieldName: "OriginID", fieldValue: "12345"},
 		},
 	}
-	if len(eRIdxes) != len(smg.aSessionsRIndex) ||
-		len(eRIdxes[cgrID]) != len(smg.aSessionsRIndex[cgrID]) { // cannot keep order here due to field names coming from map
-		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, smg.aSessionsRIndex)
+	if len(eRIdxes) != len(sS.aSessionsRIndex) ||
+		len(eRIdxes[cgrID]) != len(sS.aSessionsRIndex[cgrID]) { // cannot keep order here due to field names coming from map
+		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, sS.aSessionsRIndex)
 	}
 	// Index second session
-	smGev2 := engine.NewSafEvent(map[string]interface{}{
+	sSEv2 := engine.NewSafEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT2",
 		utils.OriginID:    "12346",
 		utils.Direction:   "*out",
@@ -136,255 +125,195 @@ func TestSMGSessionIndexing(t *testing.T) {
 		"Extra3":          "",
 		"Extra4":          "info2",
 	})
-	cgrID2 := GetSetCGRID(smGev2)
-	smgSession2 := &SMGSession{
+	cgrID2 := GetSetCGRID(sSEv2)
+	session2 := &Session{
 		CGRID:      cgrID2,
-		RunID:      utils.META_DEFAULT,
 		EventStart: smGev2,
 	}
-	smg.indexSession(smgSession2, false)
-	smGev3 := engine.NewSafEvent(map[string]interface{}{
+	sS.indexSession(session2, false)
+	sSEv3 := engine.NewSafEvent(map[string]interface{}{
 		utils.EVENT_NAME: "TEST_EVENT3",
 		utils.Tenant:     "cgrates.org",
 		utils.OriginID:   "12347",
 		utils.Account:    "account2",
 		"Extra5":         "info5",
 	})
-	cgrID3 := GetSetCGRID(smGev3)
-	smgSession3 := &SMGSession{
+	cgrID3 := GetSetCGRID(sSEv3)
+	session3 := &Session{
 		CGRID:      cgrID3,
-		RunID:      "secondRun",
 		EventStart: smGev3,
 	}
-	smg.indexSession(smgSession3, false)
-	eIndexes = map[string]map[string]map[string]utils.StringMap{
-		"OriginID": map[string]map[string]utils.StringMap{
-			"12345": map[string]utils.StringMap{
-				utils.META_DEFAULT: utils.StringMap{
-					cgrID: true,
-				},
+	sS.indexSession(session3, false)
+	eIndexes = map[string]map[string]utils.StringMap{
+		"OriginID": map[string]utils.StringMap{
+			"12345": utils.StringMap{
+				cgrID: true,
 			},
-			"12346": map[string]utils.StringMap{
-				utils.META_DEFAULT: utils.StringMap{
-					cgrID2: true,
-				},
+			"12346": utils.StringMap{
+				cgrID2: true,
 			},
-			"12347": map[string]utils.StringMap{
-				"secondRun": utils.StringMap{
-					cgrID3: true,
-				},
+			"12347": utils.StringMap{
+				cgrID3: true,
 			},
 		},
-		"Tenant": map[string]map[string]utils.StringMap{
-			"cgrates.org": map[string]utils.StringMap{
-				utils.META_DEFAULT: utils.StringMap{
-					cgrID: true,
-				},
-				"secondRun": utils.StringMap{
-					cgrID3: true,
-				},
+		"Tenant": map[string]utils.StringMap{
+			"cgrates.org": utils.StringMap{
+				cgrID:  true,
+				cgrID3: true,
 			},
-			"itsyscom.com": map[string]utils.StringMap{
-				utils.META_DEFAULT: utils.StringMap{
-					cgrID2: true,
-				},
+			"itsyscom.com": utils.StringMap{
+				cgrID2: true,
 			},
 		},
-		"Account": map[string]map[string]utils.StringMap{
-			"account1": map[string]utils.StringMap{
-				utils.META_DEFAULT: utils.StringMap{
-					cgrID: true,
-				},
+		"Account": map[string]utils.StringMap{
+			"account1": utils.StringMap{
+				cgrID: true,
 			},
-			"account2": map[string]utils.StringMap{
-				utils.META_DEFAULT: utils.StringMap{
-					cgrID2: true,
-				},
-				"secondRun": utils.StringMap{
-					cgrID3: true,
-				},
+			"account2": utils.StringMap{
+				cgrID2: true,
+				cgrID3: true,
 			},
 		},
-		"Extra3": map[string]map[string]utils.StringMap{
-			utils.MetaEmpty: map[string]utils.StringMap{
-				utils.META_DEFAULT: utils.StringMap{
-					cgrID:  true,
-					cgrID2: true,
-				},
+		"Extra3": map[string]utils.StringMap{
+			utils.MetaEmpty: utils.StringMap{
+				cgrID:  true,
+				cgrID2: true,
 			},
-			utils.NOT_AVAILABLE: map[string]utils.StringMap{
-				"secondRun": utils.StringMap{
-					cgrID3: true,
-				},
+			utils.NOT_AVAILABLE: utils.StringMap{
+				cgrID3: true,
 			},
 		},
-		"Extra4": map[string]map[string]utils.StringMap{
-			utils.NOT_AVAILABLE: map[string]utils.StringMap{
-				utils.META_DEFAULT: utils.StringMap{
-					cgrID: true,
-				},
-				"secondRun": utils.StringMap{
-					cgrID3: true,
-				},
+		"Extra4": map[string]utils.StringMap{
+			utils.NOT_AVAILABLE: utils.StringMap{
+				cgrID:  true,
+				cgrID3: true,
 			},
-			"info2": map[string]utils.StringMap{
-				utils.META_DEFAULT: utils.StringMap{
-					cgrID2: true,
-				},
+			"info2": utils.StringMap{
+				cgrID2: true,
 			},
 		},
 	}
-	if !reflect.DeepEqual(eIndexes, smg.aSessionsIndex) {
-		t.Errorf("Expecting: %+v, received: %+v", eIndexes, smg.aSessionsIndex)
+	if !reflect.DeepEqual(eIndexes, sS.aSessionsIndex) {
+		t.Errorf("Expecting: %+v, received: %+v", eIndexes, sS.aSessionsIndex)
 	}
 	eRIdxes = map[string][]*riFieldNameVal{
 		cgrID: []*riFieldNameVal{
-			&riFieldNameVal{runID: utils.META_DEFAULT, fieldName: "Tenant", fieldValue: "cgrates.org"},
-			&riFieldNameVal{runID: utils.META_DEFAULT, fieldName: "Account", fieldValue: "account1"},
-			&riFieldNameVal{runID: utils.META_DEFAULT, fieldName: "Extra3", fieldValue: utils.MetaEmpty},
-			&riFieldNameVal{runID: utils.META_DEFAULT, fieldName: "Extra4", fieldValue: utils.NOT_AVAILABLE},
-			&riFieldNameVal{runID: utils.META_DEFAULT, fieldName: "OriginID", fieldValue: "12345"},
+			&riFieldNameVal{fieldName: "Tenant", fieldValue: "cgrates.org"},
+			&riFieldNameVal{fieldName: "Account", fieldValue: "account1"},
+			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.MetaEmpty},
+			&riFieldNameVal{fieldName: "Extra4", fieldValue: utils.NOT_AVAILABLE},
+			&riFieldNameVal{fieldName: "OriginID", fieldValue: "12345"},
 		},
 		cgrID2: []*riFieldNameVal{
-			&riFieldNameVal{runID: utils.META_DEFAULT, fieldName: "Tenant", fieldValue: "itsyscom.com"},
-			&riFieldNameVal{runID: utils.META_DEFAULT, fieldName: "Account", fieldValue: "account2"},
-			&riFieldNameVal{runID: utils.META_DEFAULT, fieldName: "Extra3", fieldValue: utils.MetaEmpty},
-			&riFieldNameVal{runID: utils.META_DEFAULT, fieldName: "Extra4", fieldValue: "info2"},
-			&riFieldNameVal{runID: utils.META_DEFAULT, fieldName: "OriginID", fieldValue: "12346"},
+			&riFieldNameVal{fieldName: "Tenant", fieldValue: "itsyscom.com"},
+			&riFieldNameVal{fieldName: "Account", fieldValue: "account2"},
+			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.MetaEmpty},
+			&riFieldNameVal{fieldName: "Extra4", fieldValue: "info2"},
+			&riFieldNameVal{fieldName: "OriginID", fieldValue: "12346"},
 		},
 		cgrID3: []*riFieldNameVal{
-			&riFieldNameVal{runID: "secondRun", fieldName: "Tenant", fieldValue: "cgrates.org"},
-			&riFieldNameVal{runID: "secondRun", fieldName: "Account", fieldValue: "account2"},
-			&riFieldNameVal{runID: "secondRun", fieldName: "Extra3", fieldValue: utils.NOT_AVAILABLE},
-			&riFieldNameVal{runID: "secondRun", fieldName: "Extra4", fieldValue: utils.NOT_AVAILABLE},
-			&riFieldNameVal{runID: "secondRun", fieldName: "OriginID", fieldValue: "12347"},
+			&riFieldNameVal{fieldName: "Tenant", fieldValue: "cgrates.org"},
+			&riFieldNameVal{fieldName: "Account", fieldValue: "account2"},
+			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.NOT_AVAILABLE},
+			&riFieldNameVal{fieldName: "Extra4", fieldValue: utils.NOT_AVAILABLE},
+			&riFieldNameVal{fieldName: "OriginID", fieldValue: "12347"},
 		},
 	}
-	if len(eRIdxes) != len(smg.aSessionsRIndex) ||
-		len(eRIdxes[cgrID]) != len(smg.aSessionsRIndex[cgrID]) ||
-		len(eRIdxes[cgrID2]) != len(smg.aSessionsRIndex[cgrID2]) { // cannot keep order here due to field names coming from map
-		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, smg.aSessionsRIndex)
+	if len(eRIdxes) != len(sS.aSessionsRIndex) ||
+		len(eRIdxes[cgrID]) != len(sS.aSessionsRIndex[cgrID]) ||
+		len(eRIdxes[cgrID2]) != len(sS.aSessionsRIndex[cgrID2]) { // cannot keep order here due to field names coming from map
+		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, sS.aSessionsRIndex)
 	}
 	// Unidex first session
-	smg.unindexSession(cgrID, false)
-	eIndexes = map[string]map[string]map[string]utils.StringMap{
-		"OriginID": map[string]map[string]utils.StringMap{
-			"12346": map[string]utils.StringMap{
-				utils.META_DEFAULT: utils.StringMap{
-					cgrID2: true,
-				},
+	sS.unindexSession(cgrID, false)
+	eIndexes = map[string]map[string]utils.StringMap{
+		"OriginID": map[string]utils.StringMap{
+			"12346": utils.StringMap{
+				cgrID2: true,
 			},
-			"12347": map[string]utils.StringMap{
-				"secondRun": utils.StringMap{
-					cgrID3: true,
-				},
+			"12347": utils.StringMap{
+				cgrID3: true,
 			},
 		},
-		"Tenant": map[string]map[string]utils.StringMap{
-			"cgrates.org": map[string]utils.StringMap{
-				"secondRun": utils.StringMap{
-					cgrID3: true,
-				},
+		"Tenant": map[string]utils.StringMap{
+			"cgrates.org": utils.StringMap{
+				cgrID3: true,
 			},
-			"itsyscom.com": map[string]utils.StringMap{
-				utils.META_DEFAULT: utils.StringMap{
-					cgrID2: true,
-				},
+			"itsyscom.com": utils.StringMap{
+				cgrID2: true,
 			},
 		},
-		"Account": map[string]map[string]utils.StringMap{
-			"account2": map[string]utils.StringMap{
-				utils.META_DEFAULT: utils.StringMap{
-					cgrID2: true,
-				},
-				"secondRun": utils.StringMap{
-					cgrID3: true,
-				},
+		"Account": map[string]utils.StringMap{
+			"account2": utils.StringMap{
+				cgrID2: true,
+				cgrID3: true,
 			},
 		},
-		"Extra3": map[string]map[string]utils.StringMap{
-			utils.MetaEmpty: map[string]utils.StringMap{
-				utils.META_DEFAULT: utils.StringMap{
-					cgrID2: true,
-				},
+		"Extra3": map[string]utils.StringMap{
+			utils.MetaEmpty: utils.StringMap{
+				cgrID2: true,
 			},
-			utils.NOT_AVAILABLE: map[string]utils.StringMap{
-				"secondRun": utils.StringMap{
-					cgrID3: true,
-				},
+			utils.NOT_AVAILABLE: utils.StringMap{
+				cgrID3: true,
 			},
 		},
-		"Extra4": map[string]map[string]utils.StringMap{
-			"info2": map[string]utils.StringMap{
-				utils.META_DEFAULT: utils.StringMap{
-					cgrID2: true,
-				},
+		"Extra4": map[string]utils.StringMap{
+			"info2": utils.StringMap{
+				cgrID2: true,
 			},
-			utils.NOT_AVAILABLE: map[string]utils.StringMap{
-				"secondRun": utils.StringMap{
-					cgrID3: true,
-				},
+			utils.NOT_AVAILABLE: utils.StringMap{
+				cgrID3: true,
 			},
 		},
 	}
-	if !reflect.DeepEqual(eIndexes, smg.aSessionsIndex) {
-		t.Errorf("Expecting: %+v, received: %+v", eIndexes, smg.aSessionsIndex)
+	if !reflect.DeepEqual(eIndexes, sS.aSessionsIndex) {
+		t.Errorf("Expecting: %+v, received: %+v", eIndexes, sS.aSessionsIndex)
 	}
 	eRIdxes = map[string][]*riFieldNameVal{
 		cgrID2: []*riFieldNameVal{
-			&riFieldNameVal{runID: utils.META_DEFAULT, fieldName: "Tenant", fieldValue: "itsyscom.com"},
-			&riFieldNameVal{runID: utils.META_DEFAULT, fieldName: "Account", fieldValue: "account2"},
-			&riFieldNameVal{runID: utils.META_DEFAULT, fieldName: "Extra3", fieldValue: utils.MetaEmpty},
-			&riFieldNameVal{runID: utils.META_DEFAULT, fieldName: "Extra4", fieldValue: "info2"},
-			&riFieldNameVal{runID: utils.META_DEFAULT, fieldName: "OriginID", fieldValue: "12346"},
+			&riFieldNameVal{fieldName: "Tenant", fieldValue: "itsyscom.com"},
+			&riFieldNameVal{fieldName: "Account", fieldValue: "account2"},
+			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.MetaEmpty},
+			&riFieldNameVal{fieldName: "Extra4", fieldValue: "info2"},
+			&riFieldNameVal{fieldName: "OriginID", fieldValue: "12346"},
 		},
 		cgrID3: []*riFieldNameVal{
-			&riFieldNameVal{runID: "secondRun", fieldName: "Tenant", fieldValue: "cgrates.org"},
-			&riFieldNameVal{runID: "secondRun", fieldName: "Account", fieldValue: "account2"},
-			&riFieldNameVal{runID: "secondRun", fieldName: "Extra3", fieldValue: utils.NOT_AVAILABLE},
-			&riFieldNameVal{runID: "secondRun", fieldName: "Extra4", fieldValue: utils.NOT_AVAILABLE},
-			&riFieldNameVal{runID: "secondRun", fieldName: "OriginID", fieldValue: "12347"},
+			&riFieldNameVal{fieldName: "Tenant", fieldValue: "cgrates.org"},
+			&riFieldNameVal{fieldName: "Account", fieldValue: "account2"},
+			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.NOT_AVAILABLE},
+			&riFieldNameVal{fieldName: "Extra4", fieldValue: utils.NOT_AVAILABLE},
+			&riFieldNameVal{fieldName: "OriginID", fieldValue: "12347"},
 		},
 	}
-	if len(eRIdxes) != len(smg.aSessionsRIndex) ||
-		len(eRIdxes[cgrID2]) != len(smg.aSessionsRIndex[cgrID2]) { // cannot keep order here due to field names coming from map
-		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, smg.aSessionsRIndex)
+	if len(eRIdxes) != len(sS.aSessionsRIndex) ||
+		len(eRIdxes[cgrID2]) != len(sS.aSessionsRIndex[cgrID2]) { // cannot keep order here due to field names coming from map
+		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, sS.aSessionsRIndex)
 	}
-	smg.unindexSession(cgrID3, false)
-	eIndexes = map[string]map[string]map[string]utils.StringMap{
-		"OriginID": map[string]map[string]utils.StringMap{
-			"12346": map[string]utils.StringMap{
-				utils.META_DEFAULT: utils.StringMap{
-					cgrID2: true,
-				},
+	sS.unindexSession(cgrID3, false)
+	eIndexes = map[string]map[string]utils.StringMap{
+		"OriginID": map[string]utils.StringMap{
+			"12346": utils.StringMap{
+				cgrID2: true,
 			},
 		},
-		"Tenant": map[string]map[string]utils.StringMap{
-			"itsyscom.com": map[string]utils.StringMap{
-				utils.META_DEFAULT: utils.StringMap{
-					cgrID2: true,
-				},
+		"Tenant": map[string]utils.StringMap{
+			"itsyscom.com": utils.StringMap{
+				cgrID2: true,
 			},
 		},
-		"Account": map[string]map[string]utils.StringMap{
-			"account2": map[string]utils.StringMap{
-				utils.META_DEFAULT: utils.StringMap{
-					cgrID2: true,
-				},
+		"Account": map[string]utils.StringMap{
+			"account2": utils.StringMap{
+				cgrID2: true,
 			},
 		},
-		"Extra3": map[string]map[string]utils.StringMap{
-			utils.MetaEmpty: map[string]utils.StringMap{
-				utils.META_DEFAULT: utils.StringMap{
-					cgrID2: true,
-				},
+		"Extra3": map[string]utils.StringMap{
+			utils.MetaEmpty: utils.StringMap{
+				cgrID2: true,
 			},
 		},
-		"Extra4": map[string]map[string]utils.StringMap{
-			"info2": map[string]utils.StringMap{
-				utils.META_DEFAULT: utils.StringMap{
-					cgrID2: true,
-				},
+		"Extra4": map[string]utils.StringMap{
+			"info2": utils.StringMap{
+				cgrID2: true,
 			},
 		},
 	}
@@ -393,16 +322,16 @@ func TestSMGSessionIndexing(t *testing.T) {
 	}
 	eRIdxes = map[string][]*riFieldNameVal{
 		cgrID2: []*riFieldNameVal{
-			&riFieldNameVal{runID: utils.META_DEFAULT, fieldName: "Tenant", fieldValue: "itsyscom.com"},
-			&riFieldNameVal{runID: utils.META_DEFAULT, fieldName: "Account", fieldValue: "account2"},
-			&riFieldNameVal{runID: utils.META_DEFAULT, fieldName: "Extra3", fieldValue: utils.MetaEmpty},
-			&riFieldNameVal{runID: utils.META_DEFAULT, fieldName: "Extra4", fieldValue: "info2"},
-			&riFieldNameVal{runID: utils.META_DEFAULT, fieldName: "OriginID", fieldValue: "12346"},
+			&riFieldNameVal{fieldName: "Tenant", fieldValue: "itsyscom.com"},
+			&riFieldNameVal{fieldName: "Account", fieldValue: "account2"},
+			&riFieldNameVal{fieldName: "Extra3", fieldValue: utils.MetaEmpty},
+			&riFieldNameVal{fieldName: "Extra4", fieldValue: "info2"},
+			&riFieldNameVal{fieldName: "OriginID", fieldValue: "12346"},
 		},
 	}
-	if len(eRIdxes) != len(smg.aSessionsRIndex) ||
-		len(eRIdxes[cgrID2]) != len(smg.aSessionsRIndex[cgrID2]) { // cannot keep order here due to field names coming from map
-		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, smg.aSessionsRIndex)
+	if len(eRIdxes) != len(sS.aSessionsRIndex) ||
+		len(eRIdxes[cgrID2]) != len(sS.aSessionsRIndex[cgrID2]) { // cannot keep order here due to field names coming from map
+		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, sS.aSessionsRIndex)
 	}
 }
 

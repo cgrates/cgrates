@@ -24,7 +24,7 @@ import (
 )
 
 func NewSessionSv1(sS *sessions.SessionS) *SessionSv1 {
-	return &SessionSv1{sS: sS}
+	return &SessionSv1{Ss: sS}
 }
 
 // SessionSv1 exports RPC from SessionSv1
@@ -82,7 +82,7 @@ func (ssv1 *SessionSv1) GetActiveSessions(args map[string]string,
 }
 
 func (ssv1 *SessionSv1) GetActiveSessionsCount(args map[string]string,
-	rply *[]*sessions.ActiveSession) error {
+	rply *int) error {
 	return ssv1.Ss.BiRPCv1GetActiveSessionsCount(nil, args, rply)
 }
 
@@ -97,7 +97,7 @@ func (ssv1 *SessionSv1) GetPassiveSessions(args map[string]string,
 }
 
 func (ssv1 *SessionSv1) GetPassiveSessionsCount(args map[string]string,
-	rply *[]*sessions.ActiveSession) error {
+	rply *int) error {
 	return ssv1.Ss.BiRPCv1GetPassiveSessionsCount(nil, args, rply)
 }
 

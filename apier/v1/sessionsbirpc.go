@@ -98,7 +98,7 @@ func (ssv1 *SessionSv1) BiRPCv1GetActiveSessions(clnt *rpc2.Client, args map[str
 }
 
 func (ssv1 *SessionSv1) BiRPCv1GetActiveSessionsCount(clnt *rpc2.Client, args map[string]string,
-	rply *[]*sessions.ActiveSession) error {
+	rply *int) error {
 	return ssv1.Ss.BiRPCv1GetActiveSessionsCount(clnt, args, rply)
 }
 
@@ -108,7 +108,7 @@ func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessions(clnt *rpc2.Client, args map[st
 }
 
 func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessionsCount(clnt *rpc2.Client, args map[string]string,
-	rply *[]*sessions.ActiveSession) error {
+	rply *int) error {
 	return ssv1.Ss.BiRPCv1GetPassiveSessionsCount(clnt, args, rply)
 }
 
