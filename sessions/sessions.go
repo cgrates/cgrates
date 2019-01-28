@@ -724,9 +724,10 @@ func (sS *SessionS) unregisterSession(cgrID string, passive bool) bool {
 	delete(sMp, cgrID)
 	sS.unindexSession(cgrID, passive)
 	if !passive {
-		s.RLock()
-		close(s.sTerminator.endChan)
-		s.RUnlock()
+		if s.sTerminator != nil &&
+			s.sTerminator.endChan != nil {
+			close(s.sTerminator.endChan)
+		}
 	}
 	sMux.Unlock()
 	return true
@@ -750,7 +751,7 @@ func (sS *SessionS) indexSession(s *Session, pSessions bool) {
 			if err == utils.ErrNotFound {
 				fieldVal = utils.NOT_AVAILABLE
 			} else {
-				utils.Logger.Err(fmt.Sprintf("<%s> retrieving field: %s from event: %+v, err: <%s>", utils.SessionS, fieldName, s.EventStart))
+				utils.Logger.Err(fmt.Sprintf("<%s> retrieving field: %s from event: %+v, err: <%s>", utils.SessionS, fieldName, s.EventStart, err))
 				continue
 			}
 		}
@@ -915,6 +916,7 @@ func (sS *SessionS) asActiveSessions(fltrs map[string]string,
 	if count {
 		return nil, len(remainingSessions), nil
 	}
+	fmt.Println(remainingSessions)
 	for _, s := range remainingSessions {
 		aSs = append(aSs,
 			s.AsActiveSessions(sS.cgrCfg.GeneralCfg().DefaultTimezone,
@@ -1093,7 +1095,7 @@ func (sS *SessionS) syncSessions() {
 			continue
 		}
 		if err := sS.forceSTerminate(ss[0], 0, nil); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%s>", utils.SessionS, cgrID))
+			utils.Logger.Warning(fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%s>", utils.SessionS, cgrID, err))
 		}
 	}
 }
