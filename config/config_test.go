@@ -728,7 +728,7 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 		utils.CacheDispatcherFilterIndexes: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		utils.CacheDiameterMessages: &CacheParamCfg{Limit: -1,
-			TTL: time.Duration(1 * time.Hour), StaticTTL: false},
+			TTL: time.Duration(3 * time.Hour), StaticTTL: false},
 	}
 
 	if !reflect.DeepEqual(eCacheCfg, cgrCfg.CacheCfg()) {
