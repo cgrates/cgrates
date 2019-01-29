@@ -1042,3 +1042,176 @@ func TestSessionSV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 }
+
+func TestSessionStransitSState(t *testing.T) {
+	sSCfg, _ := config.NewDefaultCGRConfig()
+	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
+	sSEv := engine.NewSafEvent(map[string]interface{}{
+		utils.EVENT_NAME:  "TEST_EVENT",
+		utils.ToR:         "*voice",
+		utils.OriginID:    "111",
+		utils.Direction:   "*out",
+		utils.Account:     "account1",
+		utils.Subject:     "subject1",
+		utils.Destination: "+4986517174963",
+		utils.Category:    "call",
+		utils.Tenant:      "cgrates.org",
+		utils.RequestType: "*prepaid",
+		utils.SetupTime:   "2015-11-09 14:21:24",
+		utils.AnswerTime:  "2015-11-09 14:22:02",
+		utils.Usage:       "1m23s",
+		utils.LastUsed:    "21s",
+		utils.PDD:         "300ms",
+		utils.SUPPLIER:    "supplier1",
+		utils.OriginHost:  "127.0.0.1",
+	})
+	s := &Session{
+		CGRID:      "session1",
+		EventStart: sSEv,
+	}
+	//register the session as active
+	sS.registerSession(s, false)
+	//verify if was registered
+	rcvS := sS.getSessions("session1", false)
+	if !reflect.DeepEqual(rcvS[0], s) {
+		t.Errorf("Expecting %+v, received: %+v", s, rcvS[0])
+	}
+
+	//tranzit session from active to passive
+	sS.transitSState("session1", true)
+	//verify if the session was changed
+	rcvS = sS.getSessions("session1", true)
+	if !reflect.DeepEqual(rcvS[0], s) {
+		t.Errorf("Expecting %+v, received: %+v", s, rcvS[0])
+	}
+	rcvS = sS.getSessions("session1", false)
+	if len(rcvS) != 0 {
+		t.Errorf("Expecting %+v, received: %+v", 0, len(rcvS))
+	}
+}
+
+func TestSessionSgetSessionIDsForPrefix(t *testing.T) {
+	sSCfg, _ := config.NewDefaultCGRConfig()
+	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
+	sSEv := engine.NewSafEvent(map[string]interface{}{
+		utils.EVENT_NAME:  "TEST_EVENT",
+		utils.ToR:         "*voice",
+		utils.OriginID:    "111",
+		utils.Direction:   "*out",
+		utils.Account:     "account1",
+		utils.Subject:     "subject1",
+		utils.Destination: "+4986517174963",
+		utils.Category:    "call",
+		utils.Tenant:      "cgrates.org",
+		utils.RequestType: "*prepaid",
+		utils.SetupTime:   "2015-11-09 14:21:24",
+		utils.AnswerTime:  "2015-11-09 14:22:02",
+		utils.Usage:       "1m23s",
+		utils.LastUsed:    "21s",
+		utils.PDD:         "300ms",
+		utils.SUPPLIER:    "supplier1",
+		utils.OriginHost:  "127.0.0.1",
+	})
+	s := &Session{
+		CGRID:      "session1",
+		EventStart: sSEv,
+	}
+	//register the session as active
+	sS.registerSession(s, false)
+	//verify if was registered
+	rcvS := sS.getSessions("session1", false)
+	if !reflect.DeepEqual(rcvS[0], s) {
+		t.Errorf("Expecting %+v, received: %+v", s, rcvS[0])
+	}
+
+	rcv := sS.getSessionIDsForPrefix("1", false)
+	exp := []string{"session1"}
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expecting %+v, received: %+v", exp, rcv)
+	}
+	sSEv2 := engine.NewSafEvent(map[string]interface{}{
+		utils.EVENT_NAME:  "TEST_EVENT",
+		utils.ToR:         "*voice",
+		utils.OriginID:    "121",
+		utils.Direction:   "*out",
+		utils.Account:     "account1",
+		utils.Subject:     "subject1",
+		utils.Destination: "+4986517174963",
+		utils.Category:    "call",
+		utils.Tenant:      "cgrates.org",
+		utils.RequestType: "*prepaid",
+		utils.SetupTime:   "2015-11-09 14:21:24",
+		utils.AnswerTime:  "2015-11-09 14:22:02",
+		utils.Usage:       "1m23s",
+		utils.LastUsed:    "21s",
+		utils.PDD:         "300ms",
+		utils.SUPPLIER:    "supplier1",
+		utils.OriginHost:  "127.0.0.1",
+	})
+	s2 := &Session{
+		CGRID:      "session2",
+		EventStart: sSEv2,
+	}
+	//register the session as active
+	sS.registerSession(s2, false)
+
+	//check for reverse
+	rcv = sS.getSessionIDsForPrefix("1", false)
+	exp = []string{"session1", "session2"}
+	exp2 := []string{"session2", "session1"}
+	if !reflect.DeepEqual(rcv, exp) && !reflect.DeepEqual(rcv, exp2) {
+		t.Errorf("Expecting %+v, received: %+v", exp, rcv)
+	}
+
+	rcv = sS.getSessionIDsForPrefix("12", false)
+	exp = []string{"session2"}
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expecting %+v, received: %+v", exp, rcv)
+	}
+
+	sS.unregisterSession("session2", false)
+	rcv = sS.getSessionIDsForPrefix("12", false)
+	if rcv != nil {
+		t.Errorf("Expecting nil, received: %+v", rcv)
+	}
+}
+
+func TestSessionSregisterSessionWithTerminator(t *testing.T) {
+	sSCfg, _ := config.NewDefaultCGRConfig()
+	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
+	sSEv := engine.NewSafEvent(map[string]interface{}{
+		utils.EVENT_NAME:  "TEST_EVENT",
+		utils.ToR:         "*voice",
+		utils.OriginID:    "111",
+		utils.Direction:   "*out",
+		utils.Account:     "account1",
+		utils.Subject:     "subject1",
+		utils.Destination: "+4986517174963",
+		utils.Category:    "call",
+		utils.Tenant:      "cgrates.org",
+		utils.RequestType: "*prepaid",
+		utils.SetupTime:   "2015-11-09 14:21:24",
+		utils.AnswerTime:  "2015-11-09 14:22:02",
+		utils.Usage:       "1m23s",
+		utils.LastUsed:    "21s",
+		utils.PDD:         "300ms",
+		utils.SUPPLIER:    "supplier1",
+		utils.OriginHost:  "127.0.0.1",
+		utils.SessionTTL:  "2s", //used in setSTerminator
+	})
+	s := &Session{
+		CGRID:      "session1",
+		EventStart: sSEv,
+	}
+	//register the session as active with terminator
+	sS.registerSession(s, false)
+
+	rcvS := sS.getSessions("session1", false)
+	if !reflect.DeepEqual(rcvS[0], s) {
+		t.Errorf("Expecting %+v, received: %+v", s, rcvS[0])
+	} else if rcvS[0].sTerminator.ttl != time.Duration(2*time.Second) {
+		t.Errorf("Expecting %+v, received: %+v",
+			time.Duration(2*time.Second), rcvS[0].sTerminator.ttl)
+	}
+
+}
