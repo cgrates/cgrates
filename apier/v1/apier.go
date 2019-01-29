@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -35,8 +34,6 @@ import (
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
-	"github.com/streadway/amqp"
-	amqpv1 "github.com/vcabbage/amqp"
 )
 
 const (
@@ -1524,30 +1521,13 @@ func (v1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string) (
 				utils.PosterTransportContentTypes[ffn.Transport], fileContent,
 				v1.Config.GeneralCfg().PosterAttempts, failoverPath)
 		case utils.MetaAMQPjsonCDR, utils.MetaAMQPjsonMap:
-			var amqpPoster *engine.AMQPPoster
-			amqpPoster, err = engine.AMQPPostersCache.GetAMQPPoster(ffn.Address,
-				v1.Config.GeneralCfg().PosterAttempts, failedReqsOutDir)
-			if err == nil { // error will be checked bellow
-				var chn *amqp.Channel
-				chn, err = amqpPoster.Post(
-					nil, utils.PosterTransportContentTypes[ffn.Transport],
-					fileContent, file.Name())
-				if chn != nil {
-					chn.Close()
-				}
-			}
+			err = engine.AMQPPostersCache.PostAMQP(ffn.Address,
+				v1.Config.GeneralCfg().PosterAttempts, fileContent,
+				utils.PosterTransportContentTypes[ffn.Transport],
+				failedReqsOutDir, file.Name())
 		case utils.MetaAWSjsonMap:
-			var awsPoster *engine.AWSPoster
-			awsPoster, err = engine.AMQPPostersCache.GetAWSPoster(ffn.Address,
-				v1.Config.GeneralCfg().PosterAttempts, failedReqsOutDir)
-			if err != nil {
-				break
-			}
-			var ses *amqpv1.Session
-			ses, err = awsPoster.Post(fileContent, file.Name())
-			if ses != nil {
-				ses.Close(context.Background())
-			}
+			err = engine.AMQPPostersCache.PostAWS(ffn.Address, v1.Config.GeneralCfg().PosterAttempts,
+				fileContent, failedReqsOutDir, file.Name())
 		default:
 			err = fmt.Errorf("unsupported replication transport: %s", ffn.Transport)
 		}
