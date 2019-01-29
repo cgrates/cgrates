@@ -811,13 +811,10 @@ func (sS *SessionS) getSessionIDsForPrefix(prefix string, pSessions bool) (cgrID
 		ssIndx = sS.pSessionsIdx
 	}
 	idxMux.RLock()
-	// map[OriginID:map[12372-1:map[*default:511654dc4da7ce4706276cb458437cdd81d0e2b3]]]
 	for originID := range ssIndx[utils.OriginID] {
 		if strings.HasPrefix(originID, prefix) {
-			if _, hasDefaultRun := ssIndx[utils.OriginID][originID][utils.META_DEFAULT]; hasDefaultRun {
-				cgrIDs = append(cgrIDs,
-					ssIndx[utils.OriginID][originID].Slice()...)
-			}
+			cgrIDs = append(cgrIDs,
+				ssIndx[utils.OriginID][originID].Slice()...)
 		}
 	}
 	idxMux.RUnlock()
