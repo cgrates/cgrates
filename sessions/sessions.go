@@ -916,7 +916,6 @@ func (sS *SessionS) asActiveSessions(fltrs map[string]string,
 	if count {
 		return nil, len(remainingSessions), nil
 	}
-	fmt.Println(remainingSessions)
 	for _, s := range remainingSessions {
 		aSs = append(aSs,
 			s.AsActiveSessions(sS.cgrCfg.GeneralCfg().DefaultTimezone,
