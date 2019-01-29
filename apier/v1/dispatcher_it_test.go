@@ -191,6 +191,12 @@ func testDispatcherSRemDispatcherProfile(t *testing.T) {
 		&dsp); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
+
+	if err := dispatcherRPC.Call("ApierV1.RemoveDispatcherProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"},
+		&result); err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
+	}
 }
 
 func testDispatcherSKillEngine(t *testing.T) {

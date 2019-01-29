@@ -413,6 +413,10 @@ func testV1STSRemoveStatQueueProfile(t *testing.T) {
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &sqp); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
+	if err := stsV1Rpc.Call("ApierV1.RemStatQueueProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
+	}
 }
 
 func testV1STSStatsPing(t *testing.T) {

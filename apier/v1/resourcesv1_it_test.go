@@ -662,6 +662,10 @@ func testV1RsRemResourceProfile(t *testing.T) {
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
+	if err := rlsV1Rpc.Call("ApierV1.RemoveResourceProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: rlsConfig.ID}, &resp); err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
+	}
 }
 
 func testV1RsGetResourceProfileAfterDelete(t *testing.T) {

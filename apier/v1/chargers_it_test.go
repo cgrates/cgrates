@@ -301,6 +301,10 @@ func testChargerSRemChargerProfile(t *testing.T) {
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
+	if err := chargerRPC.Call("ApierV1.RemoveChargerProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &resp); err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
+	}
 }
 
 func testChargerSPing(t *testing.T) {

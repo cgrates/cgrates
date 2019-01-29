@@ -736,8 +736,8 @@ func testAttributeSRemAlsPrf(t *testing.T) {
 	// remove twice shoud return not found
 	resp = ""
 	if err := attrSRPC.Call("ApierV1.RemoveAttributeProfile",
-		&ArgRemoveAttrProfile{Tenant: alsPrf.Tenant, ID: alsPrf.ID}, &resp); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
+		&ArgRemoveAttrProfile{Tenant: alsPrf.Tenant, ID: alsPrf.ID}, &resp); err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
 	}
 }
 

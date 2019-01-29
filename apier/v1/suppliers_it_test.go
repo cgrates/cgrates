@@ -966,6 +966,9 @@ func testV1SplSRemSupplierProfiles(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
+	if err := splSv1Rpc.Call("ApierV1.RemoveSupplierProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
+	}
 }
 
 func testV1SplSupplierPing(t *testing.T) {
