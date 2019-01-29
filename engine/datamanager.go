@@ -474,6 +474,9 @@ func (dm *DataManager) RemoveThresholdProfile(tenant, id,
 	}
 	Cache.Remove(utils.CacheThresholdProfiles, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
+	if oldTh == nil {
+		return utils.ErrNotFound
+	}
 	if withIndex {
 		return NewFilterIndexer(dm,
 			utils.ThresholdProfilePrefix, tenant).RemoveItemFromIndex(tenant, id, oldTh.FilterIDs)
@@ -550,6 +553,9 @@ func (dm *DataManager) RemoveStatQueueProfile(tenant, id,
 	}
 	Cache.Remove(utils.CacheStatQueueProfiles, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
+	if oldSts == nil {
+		return utils.ErrNotFound
+	}
 	if withIndex {
 		return NewFilterIndexer(dm, utils.StatQueueProfilePrefix, tenant).RemoveItemFromIndex(tenant, id, oldSts.FilterIDs)
 	}
@@ -714,6 +720,9 @@ func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string, w
 	}
 	Cache.Remove(utils.CacheResourceProfiles, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
+	if oldRes == nil {
+		return utils.ErrNotFound
+	}
 	if withIndex {
 		return NewFilterIndexer(dm, utils.ResourceProfilesPrefix, tenant).RemoveItemFromIndex(tenant, id, oldRes.FilterIDs)
 	}
@@ -1090,6 +1099,9 @@ func (dm *DataManager) RemoveSupplierProfile(tenant, id, transactionID string, w
 	}
 	Cache.Remove(utils.CacheSupplierProfiles, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
+	if oldSupp == nil {
+		return utils.ErrNotFound
+	}
 	if withIndex {
 		return NewFilterIndexer(dm, utils.SupplierProfilePrefix, tenant).RemoveItemFromIndex(tenant, id, oldSupp.FilterIDs)
 	}
@@ -1177,6 +1189,9 @@ func (dm *DataManager) RemoveAttributeProfile(tenant, id string, transactionID s
 	}
 	Cache.Remove(utils.CacheAttributeProfiles, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
+	if oldAttr == nil {
+		return utils.ErrNotFound
+	}
 	if withIndex {
 		for _, context := range oldAttr.Contexts {
 			if err = NewFilterIndexer(dm, utils.AttributeProfilePrefix,
@@ -1256,6 +1271,9 @@ func (dm *DataManager) RemoveChargerProfile(tenant, id string,
 	}
 	Cache.Remove(utils.CacheChargerProfiles, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
+	if oldCpp == nil {
+		return utils.ErrNotFound
+	}
 	if withIndex {
 		return NewFilterIndexer(dm, utils.ChargerProfilePrefix, tenant).RemoveItemFromIndex(tenant, id, oldCpp.FilterIDs)
 	}
@@ -1330,6 +1348,9 @@ func (dm *DataManager) RemoveDispatcherProfile(tenant, id string,
 	}
 	Cache.Remove(utils.CacheDispatcherProfiles, utils.ConcatenatedKey(tenant, id),
 		cacheCommit(transactionID), transactionID)
+	if oldDpp == nil {
+		return utils.ErrNotFound
+	}
 	if withIndex {
 		return NewFilterIndexer(dm, utils.DispatcherProfilePrefix, tenant).RemoveItemFromIndex(tenant, id, oldDpp.FilterIDs)
 	}

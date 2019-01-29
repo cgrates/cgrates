@@ -563,6 +563,9 @@ func (rs *RedisStorage) RemoveDestination(destID, transactionID string) (err err
 	}
 	Cache.Remove(utils.CacheDestinations, destID,
 		cacheCommit(transactionID), transactionID)
+	if d == nil {
+		return utils.ErrNotFound
+	}
 	for _, prefix := range d.Prefixes {
 		err = rs.Cmd("SREM", utils.REVERSE_DESTINATION_PREFIX+prefix, destID).Err
 		if err != nil {
@@ -907,6 +910,9 @@ func (rs *RedisStorage) RemoveAlias(id string, transactionID string) (err error)
 	}
 	cCommit := cacheCommit(transactionID)
 	Cache.Remove(utils.CacheAliases, id, cCommit, transactionID)
+	if al == nil {
+		return utils.ErrNotFound
+	}
 	for _, value := range al.Values {
 		tmpKey := utils.ConcatenatedKey(al.GetId(), value.DestinationId)
 		for target, pairs := range value.Pairs {
