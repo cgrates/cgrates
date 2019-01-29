@@ -124,6 +124,8 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		SetExpiry:                 setExpiryAction,
 		MetaPublishAccount:        publishAccount,
 		MetaPublishBalance:        publishBalance,
+		MetaAMQPjsonMap:           sendAMQP,
+		MetaAWSjsonMap:            sendAWS,
 	}
 	f, exists := actionFuncMap[typ]
 	return f, exists
@@ -365,15 +367,54 @@ func genericReset(ub *Account) error {
 	return nil
 }
 
-func callUrl(ub *Account, a *Action, acs Actions, extraData interface{}) error {
-	var o interface{}
+func getOneData(ub *Account, extraData interface{}) ([]byte, error) {
 	switch {
 	case ub != nil:
-		o = ub
+		return json.Marshal(ub)
 	case extraData != nil:
-		o = extraData
+		return json.Marshal(extraData)
 	}
-	jsn, err := json.Marshal(o)
+	return nil, nil
+}
+
+func sendAMQP(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+	body, err := getOneData(ub, extraData)
+	if err != nil {
+		return err
+	}
+	cfg := config.CgrConfig()
+	fallbackFileName := (&utils.FallbackFileName{
+		Module:     fmt.Sprintf("%s>%s", utils.ActionsPoster, a.ActionType),
+		Transport:  utils.MetaAMQPjsonMap,
+		Address:    a.ExtraParameters,
+		RequestID:  utils.GenUUID(),
+		FileSuffix: utils.JSNSuffix,
+	}).AsString()
+
+	return AMQPPostersCache.PostAMQP(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts,
+		body, utils.CONTENT_JSON, cfg.GeneralCfg().FailedPostsDir, fallbackFileName)
+}
+
+func sendAWS(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+	body, err := getOneData(ub, extraData)
+	if err != nil {
+		return err
+	}
+	cfg := config.CgrConfig()
+	fallbackFileName := (&utils.FallbackFileName{
+		Module:     fmt.Sprintf("%s>%s", utils.ActionsPoster, a.ActionType),
+		Transport:  utils.MetaAWSjsonMap,
+		Address:    a.ExtraParameters,
+		RequestID:  utils.GenUUID(),
+		FileSuffix: utils.JSNSuffix,
+	}).AsString()
+
+	return AMQPPostersCache.PostAWS(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts,
+		body, cfg.GeneralCfg().FailedPostsDir, fallbackFileName)
+}
+
+func callUrl(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+	jsn, err := getOneData(ub, extraData)
 	if err != nil {
 		return err
 	}
@@ -394,14 +435,7 @@ func callUrl(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 
 // Does not block for posts, no error reports
 func callUrlAsync(ub *Account, a *Action, acs Actions, extraData interface{}) error {
-	var o interface{}
-	switch {
-	case ub != nil:
-		o = ub
-	case extraData != nil:
-		o = extraData
-	}
-	jsn, err := json.Marshal(o)
+	jsn, err := getOneData(ub, extraData)
 	if err != nil {
 		return err
 	}

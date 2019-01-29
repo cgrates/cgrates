@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"context"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
@@ -34,8 +33,6 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/streadway/amqp"
-	amqpv1 "github.com/vcabbage/amqp"
 )
 
 const (
@@ -286,27 +283,10 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 	case utils.MetaHTTPjsonCDR, utils.MetaHTTPjsonMap, utils.MetaHTTPjson, utils.META_HTTP_POST:
 		_, err = cdre.httpPoster.Post(cdre.exportPath, utils.PosterTransportContentTypes[cdre.exportFormat], body, cdre.attempts, fallbackPath)
 	case utils.MetaAMQPjsonCDR, utils.MetaAMQPjsonMap:
-		var amqpPoster *AMQPPoster
-		amqpPoster, err = AMQPPostersCache.GetAMQPPoster(cdre.exportPath, cdre.attempts, cdre.fallbackPath)
-		if err == nil { // error will be checked bellow
-			var chn *amqp.Channel
-			chn, err = amqpPoster.Post(
-				nil, utils.PosterTransportContentTypes[cdre.exportFormat], body.([]byte), fallbackFileName)
-			if chn != nil {
-				chn.Close()
-			}
-		}
+		err = AMQPPostersCache.PostAMQP(cdre.exportPath, cdre.attempts, body.([]byte),
+			utils.PosterTransportContentTypes[cdre.exportFormat], cdre.fallbackPath, fallbackFileName)
 	case utils.MetaAWSjsonMap:
-		var awsPoster *AWSPoster
-		awsPoster, err = AMQPPostersCache.GetAWSPoster(cdre.exportPath, cdre.attempts, cdre.fallbackPath)
-		if err != nil {
-			break
-		}
-		var ses *amqpv1.Session
-		ses, err = awsPoster.Post(body.([]byte), fallbackFileName)
-		if ses != nil {
-			ses.Close(context.Background())
-		}
+		err = AMQPPostersCache.PostAWS(cdre.exportPath, cdre.attempts, body.([]byte), cdre.fallbackPath, fallbackFileName)
 	}
 	return
 }
