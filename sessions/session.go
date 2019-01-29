@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessions
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -106,7 +105,6 @@ func (s Session) Clone() (cln *Session) {
 }
 
 func (s *Session) AsActiveSessions(tmz, nodeID string) (aSs []*ActiveSession) {
-	fmt.Println(utils.ToJSON(s))
 	s.RLock()
 	aSs = make([]*ActiveSession, len(s.SRuns))
 	for i, sr := range s.SRuns {

@@ -285,7 +285,6 @@ func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, in
 	sm := sessions.NewSessionS(cfg, ralsConns, resSConns, threshSConns,
 		statSConns, suplSConns, attrSConns, cdrsConn, chargerSConn,
 		sReplConns, cfg.GeneralCfg().DefaultTimezone)
-	//
 	if err = sm.ListenAndServe(exitChan); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.SessionS, err))
 	}
