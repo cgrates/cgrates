@@ -1453,8 +1453,8 @@ func TestCgrLoaderCfgITDefaults(t *testing.T) {
 	}
 }
 
-func TestCgrCfgJSONDefaultDispatcherSCfg(t *testing.T) {
-	eDspSCfg := &DispatcherSCfg{
+func TestCgrCfgJSONDefaultDispatcherCfg(t *testing.T) {
+	eDspSCfg := &DispatcherCfg{
 		Enabled:             false,
 		RALsConns:           []*HaPoolConfig{},
 		ResSConns:           []*HaPoolConfig{},
@@ -1465,6 +1465,29 @@ func TestCgrCfgJSONDefaultDispatcherSCfg(t *testing.T) {
 		SessionSConns:       []*HaPoolConfig{},
 		ChargerSConns:       []*HaPoolConfig{},
 		DispatchingStrategy: utils.MetaFirst,
+	}
+	if !reflect.DeepEqual(cgrCfg.dispatcherCfg, eDspSCfg) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.dispatcherSCfg, eDspSCfg)
+	}
+}
+
+func TestCgrCfgJSONDefaultDispatcherSCfg(t *testing.T) {
+	eDspSCfg := &DispatcherSCfg{
+		Enabled: false,
+		Conns: map[string][]*HaPoolConfig{
+			"sessions_eu": []*HaPoolConfig{
+				{Address: "127.0.0.1:2012", Transport: utils.MetaJSONrpc},
+				{Address: "127.0.0.2:2012", Transport: utils.MetaJSONrpc},
+			},
+			"sessions_us": []*HaPoolConfig{
+				{Address: "127.0.0.3:2012", Transport: utils.MetaJSONrpc},
+				{Address: "127.0.0.4:2012", Transport: utils.MetaJSONrpc},
+			},
+			"sessions_others": []*HaPoolConfig{
+				{Address: "127.0.0.5:2012", Transport: utils.MetaJSONrpc},
+				{Address: "127.0.0.6:2012", Transport: utils.MetaJSONrpc},
+			},
+		},
 	}
 	if !reflect.DeepEqual(cgrCfg.dispatcherSCfg, eDspSCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.dispatcherSCfg, eDspSCfg)
