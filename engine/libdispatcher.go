@@ -24,22 +24,55 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// // DispatcherProfile is the config for one Dispatcher
+// type DispatcherProfile struct {
+// 	Tenant             string
+// 	ID                 string
+// 	FilterIDs          []string
+// 	ActivationInterval *utils.ActivationInterval // Activation interval
+// 	Strategy           string
+// 	Hosts              []string // perform data aliasing based on these Attributes
+// 	Weight             float64
+// }
+
+// func (dP *DispatcherProfile) TenantID() string {
+// 	return utils.ConcatenatedKey(dP.Tenant, dP.ID)
+// }
+
+// // ChargerProfiles is a sortable list of Charger profiles
+// type DispatcherProfiles []*DispatcherProfile
+
+// // Sort is part of sort interface, sort based on Weight
+// func (dps DispatcherProfiles) Sort() {
+// 	sort.Slice(dps, func(i, j int) bool { return dps[i].Weight > dps[j].Weight })
+// }
+
+type DispatcherConn struct {
+	ID        string
+	FilterIDs []string
+	Weight    float64                // applied in case of multiple connections need to be ordered
+	Params    map[string]interface{} // additional parameters stored for a session
+	Blocker   bool                   // no connection after this one
+}
+
 // DispatcherProfile is the config for one Dispatcher
 type DispatcherProfile struct {
 	Tenant             string
 	ID                 string
+	Subsystems         []string
 	FilterIDs          []string
-	ActivationInterval *utils.ActivationInterval // Activation interval
+	ActivationInterval *utils.ActivationInterval // activation interval
 	Strategy           string
-	Hosts              []string // perform data aliasing based on these Attributes
-	Weight             float64
+	StrategyParams     map[string]interface{} // ie for distribution, set here the pool weights
+	Weight             float64                // used for profile sorting on match
+	Connections        []*DispatcherConn      // dispatch to these connections
 }
 
 func (dP *DispatcherProfile) TenantID() string {
 	return utils.ConcatenatedKey(dP.Tenant, dP.ID)
 }
 
-// ChargerProfiles is a sortable list of Charger profiles
+// DispatcherProfiles is a sortable list of Dispatcher profiles
 type DispatcherProfiles []*DispatcherProfile
 
 // Sort is part of sort interface, sort based on Weight

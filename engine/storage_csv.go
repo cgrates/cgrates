@@ -42,19 +42,32 @@ func NewFileCSVStorage(sep rune,
 	destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn,
 	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn, usersFn, aliasesFn,
 	resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn, attributeProfilesFn, chargerProfilesFn, dispatcherProfilesFn string) *CSVStorage {
-	c := new(CSVStorage)
-	c.sep = sep
-	c.readerFunc = openFileCSVStorage
-	c.destinationsFn, c.timingsFn, c.ratesFn, c.destinationratesFn, c.destinationratetimingsFn, c.ratingprofilesFn,
-		c.sharedgroupsFn, c.actionsFn, c.actiontimingsFn, c.actiontriggersFn, c.accountactionsFn,
-		c.derivedChargersFn, c.usersFn, c.aliasesFn, c.resProfilesFn, c.statsFn, c.thresholdsFn,
-		c.filterFn, c.suppProfilesFn, c.attributeProfilesFn,
-		c.chargerProfilesFn, c.dispatcherProfilesFn = destinationsFn, timingsFn,
-		ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn,
-		actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn,
-		usersFn, aliasesFn, resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn,
-		attributeProfilesFn, chargerProfilesFn, dispatcherProfilesFn
-	return c
+	return &CSVStorage{
+		sep:                      sep,
+		readerFunc:               openFileCSVStorage,
+		destinationsFn:           destinationsFn,
+		timingsFn:                timingsFn,
+		ratesFn:                  ratesFn,
+		destinationratesFn:       destinationratesFn,
+		destinationratetimingsFn: destinationratetimingsFn,
+		ratingprofilesFn:         ratingprofilesFn,
+		sharedgroupsFn:           sharedgroupsFn,
+		actionsFn:                actionsFn,
+		actiontimingsFn:          actiontimingsFn,
+		actiontriggersFn:         actiontriggersFn,
+		accountactionsFn:         accountactionsFn,
+		derivedChargersFn:        derivedChargersFn,
+		usersFn:                  usersFn,
+		aliasesFn:                aliasesFn,
+		resProfilesFn:            resProfilesFn,
+		statsFn:                  statsFn,
+		thresholdsFn:             thresholdsFn,
+		filterFn:                 filterFn,
+		suppProfilesFn:           suppProfilesFn,
+		attributeProfilesFn:      attributeProfilesFn,
+		chargerProfilesFn:        chargerProfilesFn,
+		dispatcherProfilesFn:     dispatcherProfilesFn,
+	}
 }
 
 func NewStringCSVStorage(sep rune,
