@@ -144,3 +144,40 @@ func TestV1StatsAsStats(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", filter, fltr)
 	}
 }
+
+func TestRemakeQueue(t *testing.T) {
+	sq := &engine.StatQueue{
+		Tenant: "cgrates.org",
+		ID:     "StatsID",
+		SQItems: []struct {
+			EventID    string
+			ExpiryTime *time.Time
+		}{
+			{
+				EventID: "ev1",
+			},
+		},
+		SQMetrics: map[string]engine.StatMetric{
+			"*tcc":          nil,
+			"*sum:Usage":    nil,
+			"*avreage:Cost": nil,
+		},
+		MinItems: 2,
+	}
+	expected := &engine.StatQueue{
+		Tenant:  sq.Tenant,
+		ID:      sq.ID,
+		SQItems: sq.SQItems,
+		SQMetrics: map[string]engine.StatMetric{
+			"*tcc":          nil,
+			"*sum#Usage":    nil,
+			"*avreage#Cost": nil,
+		},
+		MinItems: sq.MinItems,
+	}
+
+	if rply := remakeQueue(sq); !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rply)
+	}
+	return
+}

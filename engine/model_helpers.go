@@ -1625,7 +1625,7 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 					paramSplit := strings.Split(tp.Parameters, utils.INFIELD_SEP)
 					for _, param := range paramSplit {
 						metricmap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][utils.ConcatenatedKey(metric, param)] = &utils.MetricWithParams{
-							MetricID: utils.ConcatenatedKey(metric, param), Parameters: param}
+							MetricID: utils.StatsJoin(metric, param), Parameters: param}
 					}
 				} else {
 					metricmap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][metric] = &utils.MetricWithParams{
