@@ -55,7 +55,8 @@ func NewDispatcherService(dm *engine.DataManager, rals, resS, thdS,
 	if chargerS != nil && reflect.ValueOf(chargerS).IsNil() {
 		chargerS = nil
 	}
-	return &DispatcherService{dm: dm,
+	return &DispatcherService{
+		dm:       dm,
 		rals:     rals,
 		resS:     resS,
 		thdS:     thdS,
@@ -66,7 +67,8 @@ func NewDispatcherService(dm *engine.DataManager, rals, resS, thdS,
 		chargerS: chargerS}, nil
 }
 
-// DispatcherService  is the service handling dispatcher
+// DispatcherService  is the service handling dispatching towards internal components
+// designed to handle automatic partitioning and failover
 type DispatcherService struct {
 	dm       *engine.DataManager
 	rals     rpcclient.RpcClientConnection // RALs connections
@@ -75,8 +77,8 @@ type DispatcherService struct {
 	statS    rpcclient.RpcClientConnection // StatS connections
 	splS     rpcclient.RpcClientConnection // SupplierS connections
 	attrS    rpcclient.RpcClientConnection // AttributeS connections
-	sessionS rpcclient.RpcClientConnection // SessionS server connections
-	chargerS rpcclient.RpcClientConnection // ChargerS server connections
+	sessionS rpcclient.RpcClientConnection // SessionS connections
+	chargerS rpcclient.RpcClientConnection // ChargerS connections
 }
 
 // ListenAndServe will initialize the service

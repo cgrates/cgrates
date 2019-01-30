@@ -737,6 +737,25 @@ const CGRATES_CFG_JSON = `
 },
 
 
+"dispatchers":{
+	"enabled": false,						// starts DispatcherS service: <true|false>.
+	"conns": {
+		"sessions_eu": [
+			{"address": "127.0.0.1:2012", "transport": "*json"},
+			{"address": "127.0.0.2:2012", "transport": "*json"},
+		],
+		"sessions_us": [
+			{"address": "127.0.0.3:2012", "transport": "*json"},
+			{"address": "127.0.0.4:2012", "transport": "*json"},
+		],
+		"sessions_others": [
+			{"address": "127.0.0.5:2012", "transport": "*json"},
+			{"address": "127.0.0.6:2012", "transport": "*json"},
+		],
+	},
+},
+
+
 "analyzers":{
 	"enabled":false							// starts AnalyzerS service: <true|false>.
 },
