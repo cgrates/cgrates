@@ -24,17 +24,25 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type DispatcherConn struct {
+	ID        string
+	FilterIDs []string
+	Weight    float64                // applied in case of multiple connections need to be ordered
+	Params    map[string]interface{} // additional parameters stored for a session
+	Blocker   bool                   // no connection after this one
+}
+
 // DispatcherProfile is the config for one Dispatcher
 type DispatcherProfile struct {
 	Tenant             string
 	ID                 string
 	Subsystems         []string
 	FilterIDs          []string
-	ActivationInterval *utils.ActivationInterval // Activation interval
+	ActivationInterval *utils.ActivationInterval // activation interval
 	Strategy           string
 	StrategyParams     map[string]interface{} // ie for distribution, set here the pool weights
-	ConnIDs            []string               // dispatch to these connections
-	Weight             float64
+	Weight             float64                // used for profile sorting on match
+	Connections        []*DispatcherConn      // dispatch to these connections
 }
 
 func (dP *DispatcherProfile) TenantID() string {
