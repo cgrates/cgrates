@@ -124,8 +124,8 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		SetExpiry:                 setExpiryAction,
 		MetaPublishAccount:        publishAccount,
 		MetaPublishBalance:        publishBalance,
-		MetaAMQPjsonMap:           sendAMQP,
-		MetaAWSjsonMap:            sendAWS,
+		utils.MetaAMQPjsonMap:     sendAMQP,
+		utils.MetaAWSjsonMap:      sendAWS,
 	}
 	f, exists := actionFuncMap[typ]
 	return f, exists
