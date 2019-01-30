@@ -1791,7 +1791,7 @@ func TestAPItoDispatcherProfile(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
-		Hosts:  []string{"localhost", "192.168.56.203"},
+		// Hosts:  []string{"localhost", "192.168.56.203"},
 		Weight: 20,
 	}
 	if rcv, err := APItoDispatcherProfile(tpDPP, "UTC"); err != nil {

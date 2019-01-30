@@ -2628,8 +2628,8 @@ func testOnStorITDispatcherProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Strategy: utils.MetaFirst,
-		Hosts:    []string{"192.168.56.203"},
-		Weight:   20,
+		// Hosts:    []string{"192.168.56.203"},
+		Weight: 20,
 	}
 	if _, rcvErr := onStor.GetDispatcherProfile("cgrates.org", "Dsp1",
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {

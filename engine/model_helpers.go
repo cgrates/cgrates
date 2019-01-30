@@ -1509,38 +1509,39 @@ func (tps TpResources) AsTPResources() (result []*utils.TPResource) {
 }
 
 func APItoModelResource(rl *utils.TPResource) (mdls TpResources) {
-	if rl != nil {
-		for i, fltr := range rl.FilterIDs {
-			mdl := &TpResource{
-				Tpid:    rl.TPid,
-				Tenant:  rl.Tenant,
-				ID:      rl.ID,
-				Blocker: rl.Blocker,
-				Stored:  rl.Stored,
-			}
-			if i == 0 {
-				mdl.UsageTTL = rl.UsageTTL
-				mdl.Weight = rl.Weight
-				mdl.Limit = rl.Limit
-				mdl.AllocationMessage = rl.AllocationMessage
-				if rl.ActivationInterval != nil {
-					if rl.ActivationInterval.ActivationTime != "" {
-						mdl.ActivationInterval = rl.ActivationInterval.ActivationTime
-					}
-					if rl.ActivationInterval.ExpiryTime != "" {
-						mdl.ActivationInterval += utils.INFIELD_SEP + rl.ActivationInterval.ExpiryTime
-					}
-				}
-				for i, val := range rl.ThresholdIDs {
-					if i != 0 {
-						mdl.ThresholdIDs += utils.INFIELD_SEP
-					}
-					mdl.ThresholdIDs += val
-				}
-			}
-			mdl.FilterIDs = fltr
-			mdls = append(mdls, mdl)
+	if rl == nil {
+		return
+	}
+	for i, fltr := range rl.FilterIDs {
+		mdl := &TpResource{
+			Tpid:    rl.TPid,
+			Tenant:  rl.Tenant,
+			ID:      rl.ID,
+			Blocker: rl.Blocker,
+			Stored:  rl.Stored,
 		}
+		if i == 0 {
+			mdl.UsageTTL = rl.UsageTTL
+			mdl.Weight = rl.Weight
+			mdl.Limit = rl.Limit
+			mdl.AllocationMessage = rl.AllocationMessage
+			if rl.ActivationInterval != nil {
+				if rl.ActivationInterval.ActivationTime != "" {
+					mdl.ActivationInterval = rl.ActivationInterval.ActivationTime
+				}
+				if rl.ActivationInterval.ExpiryTime != "" {
+					mdl.ActivationInterval += utils.INFIELD_SEP + rl.ActivationInterval.ExpiryTime
+				}
+			}
+			for i, val := range rl.ThresholdIDs {
+				if i != 0 {
+					mdl.ThresholdIDs += utils.INFIELD_SEP
+				}
+				mdl.ThresholdIDs += val
+			}
+		}
+		mdl.FilterIDs = fltr
+		mdls = append(mdls, mdl)
 	}
 	return
 }
@@ -2084,7 +2085,8 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplierProfile) {
 	suppliersMap := make(map[string]map[string]*utils.TPSupplier)
 	sortingParameterMap := make(map[string]utils.StringMap)
 	for _, tp := range tps {
-		th, found := mst[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]
+		tenID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
+		th, found := mst[tenID]
 		if !found {
 			th = &utils.TPSupplierProfile{
 				TPid:              tp.Tpid,
@@ -2095,10 +2097,10 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplierProfile) {
 			}
 		}
 		if tp.SupplierID != "" {
-			if _, has := suppliersMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]; !has {
+			if _, has := suppliersMap[tenID]; !has {
 				suppliersMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(map[string]*utils.TPSupplier)
 			}
-			sup, found := suppliersMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][tp.SupplierID]
+			sup, found := suppliersMap[tenID][tp.SupplierID]
 			if !found {
 				sup = &utils.TPSupplier{
 					ID:      tp.SupplierID,
@@ -2132,12 +2134,12 @@ func (tps TpSuppliers) AsTPSuppliers() (result []*utils.TPSupplierProfile) {
 			suppliersMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][tp.SupplierID] = sup
 		}
 		if tp.SortingParameters != "" {
-			if _, has := sortingParameterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]; !has {
-				sortingParameterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(utils.StringMap)
+			if _, has := sortingParameterMap[tenID]; !has {
+				sortingParameterMap[tenID] = make(utils.StringMap)
 			}
 			sortingParamSplit := strings.Split(tp.SortingParameters, utils.INFIELD_SEP)
 			for _, sortingParam := range sortingParamSplit {
-				sortingParameterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][sortingParam] = true
+				sortingParameterMap[tenID][sortingParam] = true
 			}
 		}
 		if tp.Weight != 0 {
@@ -2770,14 +2772,14 @@ func APItoDispatcherProfile(tpDPP *utils.TPDispatcherProfile, timezone string) (
 		Weight:    tpDPP.Weight,
 		Strategy:  tpDPP.Strategy,
 		FilterIDs: make([]string, len(tpDPP.FilterIDs)),
-		Hosts:     make([]string, len(tpDPP.Hosts)),
+		// Hosts:     make([]string, len(tpDPP.Hosts)),
 	}
 	for i, fli := range tpDPP.FilterIDs {
 		dpp.FilterIDs[i] = fli
 	}
-	for i, host := range tpDPP.Hosts {
-		dpp.Hosts[i] = host
-	}
+	// for i, host := range tpDPP.Hosts {
+	// dpp.Hosts[i] = host
+	// }
 	if tpDPP.ActivationInterval != nil {
 		if dpp.ActivationInterval, err = tpDPP.ActivationInterval.AsActivationInterval(timezone); err != nil {
 			return nil, err
