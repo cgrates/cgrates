@@ -20,44 +20,10 @@ package dispatchers
 
 import (
 	"fmt"
-	"sort"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
-
-type DispatcherConn struct {
-	ID        string
-	FilterIDs []string
-	Weight    float64                // applied in case of multiple connections need to be ordered
-	Params    map[string]interface{} // additional parameters stored for a session
-	Blocker   bool                   // no connection after this one
-}
-
-// DispatcherProfile is the config for one Dispatcher
-type DispatcherProfile struct {
-	Tenant             string
-	ID                 string
-	Subsystems         []string
-	FilterIDs          []string
-	ActivationInterval *utils.ActivationInterval // activation interval
-	Strategy           string
-	StrategyParams     map[string]interface{} // ie for distribution, set here the pool weights
-	Weight             float64                // used for profile sorting on match
-	Connections        []*DispatcherConn      // dispatch to these connections
-}
-
-func (dP *DispatcherProfile) TenantID() string {
-	return utils.ConcatenatedKey(dP.Tenant, dP.ID)
-}
-
-// DispatcherProfiles is a sortable list of Dispatcher profiles
-type DispatcherProfiles []*DispatcherProfile
-
-// Sort is part of sort interface, sort based on Weight
-func (dps DispatcherProfiles) Sort() {
-	sort.Slice(dps, func(i, j int) bool { return dps[i].Weight > dps[j].Weight })
-}
 
 // Dispatcher is responsible for routing requests to pool of connections
 // there will be different implementations based on strategy
@@ -71,6 +37,7 @@ type Dispatcher interface {
 
 // newDispatcher constructs instances of Dispatcher
 func newDispatcher(pfl *engine.DispatcherProfile) (d Dispatcher, err error) {
+	pfl.Conns.Sort() // make sure the connections are sorted
 	switch pfl.Strategy {
 	case utils.MetaWeight:
 		d = &WeightDispatcher{pfl: pfl}
@@ -80,15 +47,23 @@ func newDispatcher(pfl *engine.DispatcherProfile) (d Dispatcher, err error) {
 	return
 }
 
+// WeightDispatcher selects the next connection based on weight
 type WeightDispatcher struct {
-	pfl *engine.DispatcherProfile
+	pfl         *engine.DispatcherProfile
+	nextConnIdx int // last returned connection index
 }
 
 func (wd *WeightDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
+	pfl.Conns.Sort()
 	wd.pfl = pfl
 	return
 }
 
 func (wd *WeightDispatcher) NextConnID() (connID string) {
+	connID = wd.pfl.Conns[wd.nextConnIdx].ID
+	wd.nextConnIdx++
+	if wd.nextConnIdx > len(wd.pfl.Conns)-1 {
+		wd.nextConnIdx = 0 // start from beginning
+	}
 	return
 }

@@ -75,10 +75,20 @@ func (dS *DispatcherService) dispatcherForEvent(ev *utils.CGREvent,
 	for prflID := range prflIDs {
 		prfl, err := dS.dm.GetDispatcherProfile(ev.Tenant, prflID, true, true, utils.NonTransactional)
 		if err != nil {
-			if err == utils.ErrNotFound {
-				continue
+			if err != utils.ErrNotFound {
+				return nil, err
 			}
-			return nil, err
+			anyIdxPrfx := utils.ConcatenatedKey(ev.Tenant, utils.META_ANY)
+			if idxKeyPrfx == anyIdxPrfx {
+				continue // already checked *any
+			}
+			// check *any as subsystem
+			if prfl, err = dS.dm.GetDispatcherProfile(ev.Tenant, prflID, true, true, utils.NonTransactional); err != nil {
+				if err == utils.ErrNotFound {
+					continue
+				}
+				return nil, err
+			}
 		}
 		if prfl.ActivationInterval != nil && ev.Time != nil &&
 			!prfl.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
