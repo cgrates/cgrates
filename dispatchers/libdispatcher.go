@@ -33,6 +33,8 @@ type Dispatcher interface {
 	SetProfile(pfl *engine.DispatcherProfile)
 	// GetConnID returns an ordered list of connection IDs for the event
 	NextConnID() (connID string)
+	// MaxConns returns the maximum number of connections available in the pool
+	MaxConns() int
 }
 
 // newDispatcher constructs instances of Dispatcher
@@ -66,4 +68,8 @@ func (wd *WeightDispatcher) NextConnID() (connID string) {
 		wd.nextConnIdx = 0 // start from beginning
 	}
 	return
+}
+
+func (wd *WeightDispatcher) MaxConns() int {
+	return len(wd.pfl.Conns)
 }

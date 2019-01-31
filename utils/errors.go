@@ -21,7 +21,10 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"net"
+	"net/rpc"
 	"strings"
+	"syscall"
 )
 
 var (
@@ -57,12 +60,22 @@ var (
 	ErrUnauthorizedApi          = errors.New("UNAUTHORIZED_API")
 	ErrUnknownApiKey            = errors.New("UNKNOWN_API_KEY")
 	ErrIncompatible             = errors.New("INCOMPATIBLE")
+	ErrReqUnsynchronized        = errors.New("REQ_UNSYNCHRONIZED")
+	ErrUnsupporteServiceMethod  = errors.New("UNSUPPORTED_SERVICE_METHOD")
+	ErrWrongArgsType            = errors.New("WRONG_ARGS_TYPE")
+	ErrWrongReplyType           = errors.New("WRONG_REPLY_TYPE")
+	ErrDisconnected             = errors.New("DISCONNECTED")
+	ErrReplyTimeout             = errors.New("REPLY_TIMEOUT")
+	ErrFailedReconnect          = errors.New("FAILED_RECONNECT")
+	ErrInternallyDisconnected   = errors.New("INTERNALLY_DISCONNECTED")
+	ErrUnsupportedCodec         = errors.New("UNSUPPORTED_CODEC")
+	ErrSessionNotFound          = errors.New("SESSION_NOT_FOUND")
+	ErrJsonIncompleteComment    = errors.New("JSON_INCOMPLETE_COMMENT")
+	ErrCDRCNoProfileID          = errors.New("CDRC_PROFILE_WITHOUT_ID")
+	ErrCDRCNoInDir              = errors.New("CDRC_PROFILE_WITHOUT_IN_DIR")
+	ErrNotEnoughParameters      = errors.New("NotEnoughParameters")
 	RalsErrorPrfx               = "RALS_ERROR"
-
-	ErrJsonIncompleteComment = errors.New("JSON_INCOMPLETE_COMMENT")
-	ErrCDRCNoProfileID       = errors.New("CDRC_PROFILE_WITHOUT_ID")
-	ErrCDRCNoInDir           = errors.New("CDRC_PROFILE_WITHOUT_IN_DIR")
-	ErrNotEnoughParameters   = errors.New("NotEnoughParameters")
+	DispatcherErrorPrefix       = "DISPATCHER_ERROR"
 )
 
 // NewCGRError initialises a new CGRError
@@ -133,6 +146,10 @@ func NewErrAttributeS(err error) error {
 	return fmt.Errorf("ATTRIBUTES_ERROR:%s", err)
 }
 
+func NewErrDispatcherS(err error) error {
+	return fmt.Errorf("%s:%s", DispatcherErrorPrefix, err.Error())
+}
+
 // Centralized returns for APIs
 func APIErrorHandler(errIn error) (err error) {
 	cgrErr, ok := errIn.(*CGRError)
@@ -176,4 +193,23 @@ func ErrPrefixNotErrNotImplemented(reason string) error {
 
 func ErrEnvNotFound(key string) error {
 	return ErrPrefix(ErrNotFound, "ENV_VAR:"+key)
+}
+
+// IsNetworkError will decide if an error is network generated or RPC one
+// used by Dispatcher to figure out whether it should try another connection
+func IsNetworkError(err error) bool {
+	if err == nil {
+		return false
+	}
+	if operr, ok := err.(*net.OpError); ok &&
+		strings.HasSuffix(operr.Err.Error(),
+			syscall.ECONNRESET.Error()) { // connection reset
+		return true
+	}
+	return err == rpc.ErrShutdown ||
+		err == ErrReqUnsynchronized ||
+		err == ErrDisconnected ||
+		err == ErrReplyTimeout ||
+		err.Error() == ErrSessionNotFound.Error() ||
+		strings.HasPrefix(err.Error(), "rpc: can't find service")
 }

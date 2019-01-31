@@ -24,6 +24,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 // NewDispatcherService initializes a DispatcherService
@@ -40,6 +41,7 @@ type DispatcherService struct {
 	filterS             *engine.FilterS
 	stringIndexedFields *[]string
 	prefixIndexedFields *[]string
+	conns               map[string]*rpcclient.RpcClientPool // available connections, accessed based on connID
 }
 
 // ListenAndServe will initialize the service
@@ -89,6 +91,7 @@ func (dS *DispatcherService) dispatcherForEvent(ev *utils.CGREvent,
 				}
 				return nil, err
 			}
+
 		}
 		if prfl.ActivationInterval != nil && ev.Time != nil &&
 			!prfl.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
@@ -127,5 +130,26 @@ func (dS *DispatcherService) dispatcherForEvent(ev *utils.CGREvent,
 	}
 	engine.Cache.Set(utils.CacheDispatchers, tntID, d, nil,
 		true, utils.EmptyString)
+	return
+}
+
+// Dispatch is the method forwarding the request towards the right
+func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
+	serviceMethod string, args interface{}, reply interface{}) (err error) {
+	d, errDsp := dS.dispatcherForEvent(ev, subsys)
+	if errDsp != nil {
+		return utils.NewErrDispatcherS(errDsp)
+	}
+	for i := 0; i < d.MaxConns(); i++ {
+		connID := d.NextConnID()
+		conn, has := dS.conns[connID]
+		if !has {
+			utils.NewErrDispatcherS(
+				fmt.Errorf("no connection with id: <%s>", connID))
+		}
+		if err = conn.Call(serviceMethod, args, reply); !utils.IsNetworkError(err) {
+			break
+		}
+	}
 	return
 }
