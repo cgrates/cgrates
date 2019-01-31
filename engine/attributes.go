@@ -70,13 +70,13 @@ func (alS *AttributeService) matchingAttributeProfilesForEvent(args *AttrArgsPro
 	if len(args.AttributeIDs) != 0 {
 		attrIDs = args.AttributeIDs
 	} else {
-		aPrflIDs, err := matchingItemIDsForEvent(args.Event, alS.stringIndexedFields, alS.prefixIndexedFields,
+		aPrflIDs, err := MatchingItemIDsForEvent(args.Event, alS.stringIndexedFields, alS.prefixIndexedFields,
 			alS.dm, utils.CacheAttributeFilterIndexes, attrIdxKey, alS.filterS.cfg.FilterSCfg().IndexedSelects)
 		if err != nil {
 			if err != utils.ErrNotFound {
 				return nil, err
 			}
-			if aPrflIDs, err = matchingItemIDsForEvent(args.Event, alS.stringIndexedFields, alS.prefixIndexedFields,
+			if aPrflIDs, err = MatchingItemIDsForEvent(args.Event, alS.stringIndexedFields, alS.prefixIndexedFields,
 				alS.dm, utils.CacheAttributeFilterIndexes, utils.ConcatenatedKey(args.Tenant, utils.META_ANY),
 				alS.filterS.cfg.FilterSCfg().IndexedSelects); err != nil {
 				return nil, err

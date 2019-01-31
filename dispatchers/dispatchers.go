@@ -20,65 +20,26 @@ package dispatchers
 
 import (
 	"fmt"
-	"reflect"
-	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewDispatcherService initializes a DispatcherService
-func NewDispatcherService(dm *engine.DataManager, rals, resS, thdS,
-	statS, splS, attrS, sessionS, chargerS rpcclient.RpcClientConnection) (*DispatcherService, error) {
-	if rals != nil && reflect.ValueOf(rals).IsNil() {
-		rals = nil
-	}
-	if resS != nil && reflect.ValueOf(resS).IsNil() {
-		resS = nil
-	}
-	if thdS != nil && reflect.ValueOf(thdS).IsNil() {
-		thdS = nil
-	}
-	if statS != nil && reflect.ValueOf(statS).IsNil() {
-		statS = nil
-	}
-	if splS != nil && reflect.ValueOf(splS).IsNil() {
-		splS = nil
-	}
-	if attrS != nil && reflect.ValueOf(attrS).IsNil() {
-		attrS = nil
-	}
-	if sessionS != nil && reflect.ValueOf(sessionS).IsNil() {
-		sessionS = nil
-	}
-	if chargerS != nil && reflect.ValueOf(chargerS).IsNil() {
-		chargerS = nil
-	}
-	return &DispatcherService{
-		dm:       dm,
-		rals:     rals,
-		resS:     resS,
-		thdS:     thdS,
-		statS:    statS,
-		splS:     splS,
-		attrS:    attrS,
-		sessionS: sessionS,
-		chargerS: chargerS}, nil
+func NewDispatcherService(dm *engine.DataManager,
+	cfg *config.CGRConfig) (*DispatcherService, error) {
+	return &DispatcherService{dm: dm, cfg: cfg}, nil
 }
 
 // DispatcherService  is the service handling dispatching towards internal components
 // designed to handle automatic partitioning and failover
 type DispatcherService struct {
-	dm       *engine.DataManager
-	rals     rpcclient.RpcClientConnection // RALs connections
-	resS     rpcclient.RpcClientConnection // ResourceS connections
-	thdS     rpcclient.RpcClientConnection // ThresholdS connections
-	statS    rpcclient.RpcClientConnection // StatS connections
-	splS     rpcclient.RpcClientConnection // SupplierS connections
-	attrS    rpcclient.RpcClientConnection // AttributeS connections
-	sessionS rpcclient.RpcClientConnection // SessionS connections
-	chargerS rpcclient.RpcClientConnection // ChargerS connections
+	dm                  *engine.DataManager
+	cfg                 *config.CGRConfig
+	filterS             *engine.FilterS
+	stringIndexedFields *[]string
+	prefixIndexedFields *[]string
 }
 
 // ListenAndServe will initialize the service
@@ -96,45 +57,65 @@ func (dS *DispatcherService) Shutdown() error {
 	return nil
 }
 
-func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,
-	reply *engine.AttrSProcessEventReply) (err error) {
-	if dS.attrS == nil {
-		return utils.NewErrNotConnected(utils.AttributeS)
+// dispatcherForEvent returns a dispatcher instance configured for specific event
+// or utils.ErrNotFound if none present
+func (dS *DispatcherService) dispatcherForEvent(ev *utils.CGREvent,
+	subsys string) (d Dispatcher, err error) {
+	// find out the matching profiles
+	idxKeyPrfx := utils.ConcatenatedKey(ev.Tenant, utils.META_ANY)
+	if subsys != "" {
+		idxKeyPrfx = utils.ConcatenatedKey(ev.Tenant, subsys)
 	}
-	if err = dS.attrS.Call(utils.AttributeSv1ProcessEvent,
-		&engine.AttrArgsProcessEvent{
-			CGREvent: *ev}, reply); err != nil {
-		if err.Error() == utils.ErrNotFound.Error() {
-			err = utils.ErrUnknownApiKey
+	matchingPrfls := make(map[string]*engine.DispatcherProfile)
+	prflIDs, err := engine.MatchingItemIDsForEvent(ev.Event, dS.stringIndexedFields, dS.prefixIndexedFields,
+		dS.dm, utils.CacheDispatcherFilterIndexes, idxKeyPrfx, dS.cfg.FilterSCfg().IndexedSelects)
+	if err != nil {
+		return nil, err
+	}
+	for prflID := range prflIDs {
+		prfl, err := dS.dm.GetDispatcherProfile(ev.Tenant, prflID, true, true, utils.NonTransactional)
+		if err != nil {
+			if err == utils.ErrNotFound {
+				continue
+			}
+			return nil, err
 		}
+		if prfl.ActivationInterval != nil && ev.Time != nil &&
+			!prfl.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
+			continue
+		}
+		if pass, err := dS.filterS.Pass(ev.Tenant, prfl.FilterIDs,
+			config.NewNavigableMap(ev.Event)); err != nil {
+			return nil, err
+		} else if !pass {
+			continue
+		}
+		matchingPrfls[prflID] = prfl
+	}
+	if len(matchingPrfls) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	// All good, convert from Map to Slice so we can sort
+	prfls := make(engine.DispatcherProfiles, len(matchingPrfls))
+	i := 0
+	for _, prfl := range matchingPrfls {
+		prfls[i] = prfl
+		i++
+	}
+	prfls.Sort()
+	matchedPrlf := prfls[0] // only use the first profile
+	tntID := matchedPrlf.TenantID()
+	// get or build the Dispatcher for the config
+	if x, ok := engine.Cache.Get(utils.CacheDispatchers,
+		tntID); ok && x != nil {
+		d = x.(Dispatcher)
+		d.SetProfile(matchedPrlf)
 		return
 	}
-	return
-}
-
-func (dS *DispatcherService) authorize(method, tenant, apiKey string, evTime *time.Time) (err error) {
-	if apiKey == "" {
-		return utils.NewErrMandatoryIeMissing(utils.APIKey)
-	}
-	ev := &utils.CGREvent{
-		Tenant:  tenant,
-		ID:      utils.UUIDSha1Prefix(),
-		Context: utils.StringPointer(utils.MetaAuth),
-		Time:    evTime,
-		Event: map[string]interface{}{
-			utils.APIKey: apiKey,
-		},
-	}
-	var rplyEv engine.AttrSProcessEventReply
-	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
+	if d, err = newDispatcher(matchedPrlf); err != nil {
 		return
 	}
-	var apiMethods string
-	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
-		return
-	}
-	if !ParseStringMap(apiMethods).HasKey(method) {
-		return utils.ErrUnauthorizedApi
-	}
+	engine.Cache.Set(utils.CacheDispatchers, tntID, d, nil,
+		true, utils.EmptyString)
 	return
 }

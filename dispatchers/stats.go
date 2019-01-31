@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package dispatchers
 
+/*
 import (
 	"time"
 
@@ -67,3 +68,4 @@ func (dS *DispatcherService) StatSv1ProcessEvent(args *ArgsStatProcessEventWithA
 	}
 	return dS.statS.Call(utils.StatSv1ProcessEvent, args, reply)
 }
+*/

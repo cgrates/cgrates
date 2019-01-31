@@ -58,6 +58,7 @@ var precachedPartitions = []string{
 	utils.CacheSupplierProfiles,
 	utils.CacheAttributeProfiles,
 	utils.CacheChargerProfiles,
+	utils.CacheDispatcherProfiles,
 	utils.CacheDiameterMessages,
 }
 

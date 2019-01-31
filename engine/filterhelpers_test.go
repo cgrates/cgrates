@@ -81,7 +81,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 		utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 		"Field":          "profile",
 	}
-	aPrflIDs, err := matchingItemIDsForEvent(matchEV, nil, nil,
+	aPrflIDs, err := MatchingItemIDsForEvent(matchEV, nil, nil,
 		dmMatch, utils.CacheAttributeFilterIndexes, prefix, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -93,7 +93,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	matchEV = map[string]interface{}{
 		"Field": "profilePrefix",
 	}
-	aPrflIDs, err = matchingItemIDsForEvent(matchEV, nil, nil,
+	aPrflIDs, err = MatchingItemIDsForEvent(matchEV, nil, nil,
 		dmMatch, utils.CacheAttributeFilterIndexes, prefix, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)

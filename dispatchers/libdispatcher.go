@@ -19,8 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"fmt"
 	"sort"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -55,4 +57,38 @@ type DispatcherProfiles []*DispatcherProfile
 // Sort is part of sort interface, sort based on Weight
 func (dps DispatcherProfiles) Sort() {
 	sort.Slice(dps, func(i, j int) bool { return dps[i].Weight > dps[j].Weight })
+}
+
+// Dispatcher is responsible for routing requests to pool of connections
+// there will be different implementations based on strategy
+type Dispatcher interface {
+	// SetConfig is used to update the configuration information within dispatcher
+	// to make sure we take decisions based on latest config
+	SetProfile(pfl *engine.DispatcherProfile)
+	// GetConnID returns an ordered list of connection IDs for the event
+	NextConnID() (connID string)
+}
+
+// newDispatcher constructs instances of Dispatcher
+func newDispatcher(pfl *engine.DispatcherProfile) (d Dispatcher, err error) {
+	switch pfl.Strategy {
+	case utils.MetaWeight:
+		d = &WeightDispatcher{pfl: pfl}
+	default:
+		err = fmt.Errorf("unsupported dispatch strategy: <%s>", pfl.Strategy)
+	}
+	return
+}
+
+type WeightDispatcher struct {
+	pfl *engine.DispatcherProfile
+}
+
+func (wd *WeightDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
+	wd.pfl = pfl
+	return
+}
+
+func (wd *WeightDispatcher) NextConnID() (connID string) {
+	return
 }

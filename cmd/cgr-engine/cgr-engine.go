@@ -28,7 +28,6 @@ import (
 	"runtime"
 	"runtime/pprof"
 	"strconv"
-	"strings"
 	"syscall"
 	"time"
 
@@ -971,124 +970,26 @@ func startDispatcherService(internalDispatcherSChan, internalRaterChan chan rpcc
 	server *utils.Server, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS Dispatcher service.")
 	var err error
-	var ralsConns, resSConns, threshSConns, statSConns, suplSConns, attrSConns, sessionsSConns, chargerSConns *rpcclient.RpcClientPool
+	//var ralsConns, resSConns, threshSConns, statSConns, suplSConns, attrSConns, sessionsSConns, chargerSConns *rpcclient.RpcClientPool
 
-	cfg.DispatcherSCfg().DispatchingStrategy = strings.TrimPrefix(cfg.DispatcherSCfg().DispatchingStrategy,
-		utils.Meta) // remote * from DispatchingStrategy
-	if len(cfg.DispatcherSCfg().RALsConns) != 0 {
-		ralsConns, err = engine.NewRPCPool(cfg.DispatcherSCfg().DispatchingStrategy,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.DispatcherSCfg().RALsConns, internalRaterChan,
-			cfg.GeneralCfg().InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to RALs: %s", utils.DispatcherS, err.Error()))
-			exitChan <- true
-			return
+	/*
+		if len(cfg.DispatcherSCfg().RALsConns) != 0 {
+			ralsConns, err = engine.NewRPCPool(cfg.DispatcherSCfg().DispatchingStrategy,
+				cfg.TlsCfg().ClientKey,
+				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
+				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
+				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
+				cfg.DispatcherSCfg().RALsConns, internalRaterChan,
+				cfg.GeneralCfg().InternalTtl)
+			if err != nil {
+				utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to RALs: %s", utils.DispatcherS, err.Error()))
+				exitChan <- true
+				return
+			}
 		}
-	}
-	if len(cfg.DispatcherSCfg().ResSConns) != 0 {
-		resSConns, err = engine.NewRPCPool(cfg.DispatcherSCfg().DispatchingStrategy,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.DispatcherSCfg().ResSConns, nil,
-			cfg.GeneralCfg().InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ResoruceS: %s", utils.DispatcherS, err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	if len(cfg.DispatcherSCfg().ThreshSConns) != 0 {
-		threshSConns, err = engine.NewRPCPool(cfg.DispatcherSCfg().DispatchingStrategy,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.DispatcherSCfg().ThreshSConns, nil,
-			cfg.GeneralCfg().InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ThresholdS: %s", utils.DispatcherS, err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	if len(cfg.DispatcherSCfg().StatSConns) != 0 {
-		statSConns, err = engine.NewRPCPool(cfg.DispatcherSCfg().DispatchingStrategy,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.DispatcherSCfg().StatSConns, nil,
-			cfg.GeneralCfg().InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to StatQueueS: %s", utils.DispatcherS, err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	if len(cfg.DispatcherSCfg().SupplSConns) != 0 {
-		suplSConns, err = engine.NewRPCPool(cfg.DispatcherSCfg().DispatchingStrategy,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.DispatcherSCfg().SupplSConns, nil,
-			cfg.GeneralCfg().InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to SupplierS: %s", utils.DispatcherS, err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	if len(cfg.DispatcherSCfg().AttrSConns) != 0 {
-		attrSConns, err = engine.NewRPCPool(cfg.DispatcherSCfg().DispatchingStrategy,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.DispatcherSCfg().AttrSConns, nil,
-			cfg.GeneralCfg().InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to AttributeS: %s", utils.DispatcherS, err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	if len(cfg.DispatcherSCfg().SessionSConns) != 0 {
-		sessionsSConns, err = engine.NewRPCPool(cfg.DispatcherSCfg().DispatchingStrategy,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.DispatcherSCfg().SessionSConns, nil,
-			cfg.GeneralCfg().InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to SessionS: %s", utils.DispatcherS, err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	if len(cfg.DispatcherSCfg().ChargerSConns) != 0 {
-		chargerSConns, err = engine.NewRPCPool(cfg.DispatcherSCfg().DispatchingStrategy,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.DispatcherSCfg().ChargerSConns, nil,
-			cfg.GeneralCfg().InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ChargerS: %s", utils.DispatcherS, err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	dspS, err := dispatchers.NewDispatcherService(dm, ralsConns, resSConns,
-		threshSConns, statSConns, suplSConns, attrSConns, sessionsSConns, chargerSConns)
+	*/
+
+	dspS, err := dispatchers.NewDispatcherService(dm, cfg)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.DispatcherS, err.Error()))
 		exitChan <- true
@@ -1102,34 +1003,36 @@ func startDispatcherService(internalDispatcherSChan, internalRaterChan chan rpcc
 		exitChan <- true
 		return
 	}()
-	if !cfg.ThresholdSCfg().Enabled && len(cfg.DispatcherSCfg().ThreshSConns) != 0 {
-		server.RpcRegisterName(utils.ThresholdSv1,
-			v1.NewDispatcherThresholdSv1(dspS))
-	}
-	if !cfg.StatSCfg().Enabled && len(cfg.DispatcherSCfg().StatSConns) != 0 {
-		server.RpcRegisterName(utils.StatSv1,
-			v1.NewDispatcherStatSv1(dspS))
-	}
-	if !cfg.ResourceSCfg().Enabled && len(cfg.DispatcherSCfg().ResSConns) != 0 {
-		server.RpcRegisterName(utils.ResourceSv1,
-			v1.NewDispatcherResourceSv1(dspS))
-	}
-	if !cfg.SupplierSCfg().Enabled && len(cfg.DispatcherSCfg().SupplSConns) != 0 {
-		server.RpcRegisterName(utils.SupplierSv1,
-			v1.NewDispatcherSupplierSv1(dspS))
-	}
-	if !cfg.AttributeSCfg().Enabled && len(cfg.DispatcherSCfg().AttrSConns) != 0 {
-		server.RpcRegisterName(utils.AttributeSv1,
-			v1.NewDispatcherAttributeSv1(dspS))
-	}
-	if !cfg.SessionSCfg().Enabled && len(cfg.DispatcherSCfg().SessionSConns) != 0 {
-		server.RpcRegisterName(utils.SessionSv1,
-			v1.NewDispatcherSessionSv1(dspS))
-	}
-	if !cfg.ChargerSCfg().Enabled && len(cfg.DispatcherSCfg().ChargerSConns) != 0 {
-		server.RpcRegisterName(utils.ChargerSv1,
-			v1.NewDispatcherChargerSv1(dspS))
-	}
+	/*
+		if !cfg.ThresholdSCfg().Enabled && len(cfg.DispatcherSCfg().ThreshSConns) != 0 {
+			server.RpcRegisterName(utils.ThresholdSv1,
+				v1.NewDispatcherThresholdSv1(dspS))
+		}
+		if !cfg.StatSCfg().Enabled && len(cfg.DispatcherSCfg().StatSConns) != 0 {
+			server.RpcRegisterName(utils.StatSv1,
+				v1.NewDispatcherStatSv1(dspS))
+		}
+		if !cfg.ResourceSCfg().Enabled && len(cfg.DispatcherSCfg().ResSConns) != 0 {
+			server.RpcRegisterName(utils.ResourceSv1,
+				v1.NewDispatcherResourceSv1(dspS))
+		}
+		if !cfg.SupplierSCfg().Enabled && len(cfg.DispatcherSCfg().SupplSConns) != 0 {
+			server.RpcRegisterName(utils.SupplierSv1,
+				v1.NewDispatcherSupplierSv1(dspS))
+		}
+		if !cfg.AttributeSCfg().Enabled && len(cfg.DispatcherSCfg().AttrSConns) != 0 {
+			server.RpcRegisterName(utils.AttributeSv1,
+				v1.NewDispatcherAttributeSv1(dspS))
+		}
+		if !cfg.SessionSCfg().Enabled && len(cfg.DispatcherSCfg().SessionSConns) != 0 {
+			server.RpcRegisterName(utils.SessionSv1,
+				v1.NewDispatcherSessionSv1(dspS))
+		}
+		if !cfg.ChargerSCfg().Enabled && len(cfg.DispatcherSCfg().ChargerSConns) != 0 {
+			server.RpcRegisterName(utils.ChargerSv1,
+				v1.NewDispatcherChargerSv1(dspS))
+		}
+	*/
 }
 
 // startAnalyzerService fires up the AnalyzerS

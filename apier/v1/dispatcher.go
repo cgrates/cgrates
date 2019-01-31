@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package v1
 
+/*
 import (
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
@@ -281,3 +282,4 @@ func (dC *DispatcherChargerSv1) ProcessEvent(args *dispatchers.CGREvWithApiKey,
 	reply *[]*engine.AttrSProcessEventReply) (err error) {
 	return dC.dC.ChargerSv1ProcessEvent(args, reply)
 }
+*/

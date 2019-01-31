@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package dispatchers
 
+/*
 import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -53,3 +54,4 @@ func (dS *DispatcherService) ChargerSv1ProcessEvent(args *CGREvWithApiKey,
 	}
 	return dS.chargerS.Call(utils.ChargerSv1ProcessEvent, args.CGREvent, reply)
 }
+*/

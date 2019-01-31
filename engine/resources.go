@@ -443,7 +443,7 @@ func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources)
 // matchingResourcesForEvent returns ordered list of matching resources which are active by the time of the call
 func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent, usageTTL *time.Duration) (rs Resources, err error) {
 	matchingResources := make(map[string]*Resource)
-	rIDs, err := matchingItemIDsForEvent(ev.Event, rS.stringIndexedFields, rS.prefixIndexedFields,
+	rIDs, err := MatchingItemIDsForEvent(ev.Event, rS.stringIndexedFields, rS.prefixIndexedFields,
 		rS.dm, utils.CacheResourceFilterIndexes, ev.Tenant, rS.filterS.cfg.FilterSCfg().IndexedSelects)
 	if err != nil {
 		return nil, err

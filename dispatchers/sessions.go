@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package dispatchers
 
+/*
 import (
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
@@ -101,3 +102,4 @@ func (dS *DispatcherService) SessionSv1UpdateSession(args *UpdateSessionWithApiK
 	}
 	return dS.sessionS.Call(utils.SessionSv1UpdateSession, args.V1UpdateSessionArgs, reply)
 }
+*/

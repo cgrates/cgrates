@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package dispatchers
 
+/*
 import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -55,3 +56,4 @@ func (dS *DispatcherService) AttributeSv1ProcessEvent(args *ArgsAttrProcessEvent
 	return dS.attrS.Call(utils.AttributeSv1ProcessEvent, args.AttrArgsProcessEvent, reply)
 
 }
+*/

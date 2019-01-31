@@ -27,10 +27,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// matchingItemIDsForEvent returns the list of item IDs matching fieldName/fieldValue for an event
+// MatchingItemIDsForEvent returns the list of item IDs matching fieldName/fieldValue for an event
 // fieldIDs limits the fields which are checked against indexes
 // helper on top of dataDB.MatchFilterIndex, adding utils.ANY to list of fields queried
-func matchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldIDs *[]string,
+func MatchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldIDs *[]string,
 	dm *DataManager, cacheID, itemIDPrefix string, indexedSelects bool) (itemIDs utils.StringMap, err error) {
 	lockID := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
 	guardian.Guardian.GuardIDs(config.CgrConfig().GeneralCfg().LockingTimeout, lockID)
