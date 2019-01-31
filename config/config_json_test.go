@@ -1379,8 +1379,8 @@ func TestDfHttpJsonCfg(t *testing.T) {
 	}
 }
 
-func TestDfDispatcherSJsonCfg(t *testing.T) {
-	eCfg := &DispatcherSJsonCfg{
+func TestDfDispatcherJsonCfg(t *testing.T) {
+	eCfg := &DispatcherJsonCfg{
 		Enabled:              utils.BoolPointer(false),
 		Rals_conns:           &[]*HaPoolJsonCfg{},
 		Resources_conns:      &[]*HaPoolJsonCfg{},
@@ -1391,6 +1391,31 @@ func TestDfDispatcherSJsonCfg(t *testing.T) {
 		Sessions_conns:       &[]*HaPoolJsonCfg{},
 		Chargers_conns:       &[]*HaPoolJsonCfg{},
 		Dispatching_strategy: utils.StringPointer(utils.MetaFirst),
+	}
+	if cfg, err := dfCgrJsonCfg.DispatcherJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
+	}
+}
+
+func TestDfDispatcherSJsonCfg(t *testing.T) {
+	eCfg := &DispatcherSJsonCfg{
+		Enabled: utils.BoolPointer(false),
+		Conns: &map[string]*[]*HaPoolJsonCfg{
+			"sessions_eu": &[]*HaPoolJsonCfg{
+				{Address: utils.StringPointer("127.0.0.1:2012"), Transport: utils.StringPointer(utils.MetaJSONrpc)},
+				{Address: utils.StringPointer("127.0.0.2:2012"), Transport: utils.StringPointer(utils.MetaJSONrpc)},
+			},
+			"sessions_us": &[]*HaPoolJsonCfg{
+				{Address: utils.StringPointer("127.0.0.3:2012"), Transport: utils.StringPointer(utils.MetaJSONrpc)},
+				{Address: utils.StringPointer("127.0.0.4:2012"), Transport: utils.StringPointer(utils.MetaJSONrpc)},
+			},
+			"sessions_others": &[]*HaPoolJsonCfg{
+				{Address: utils.StringPointer("127.0.0.5:2012"), Transport: utils.StringPointer(utils.MetaJSONrpc)},
+				{Address: utils.StringPointer("127.0.0.6:2012"), Transport: utils.StringPointer(utils.MetaJSONrpc)},
+			},
+		},
 	}
 	if cfg, err := dfCgrJsonCfg.DispatcherSJsonCfg(); err != nil {
 		t.Error(err)

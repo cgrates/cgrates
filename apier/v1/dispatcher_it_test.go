@@ -121,8 +121,8 @@ func testDispatcherSSetDispatcherProfile(t *testing.T) {
 		ID:        "Dsp1",
 		FilterIDs: []string{"*string:Account:1001"},
 		Strategy:  utils.MetaFirst,
-		Hosts:     []string{"192.168.56.203", "192.168.56.204"},
-		Weight:    20,
+		// Hosts:     []string{"192.168.56.203", "192.168.56.204"},
+		Weight: 20,
 	}
 
 	if err := dispatcherRPC.Call("ApierV1.SetDispatcherProfile",

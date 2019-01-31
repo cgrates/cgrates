@@ -18,8 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
-import ()
-
 // TPReader is the data source for TPLoader
 type TPReader interface {
 	// Read will read one record from data source

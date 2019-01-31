@@ -128,6 +128,7 @@ const (
 	ZERO                          = "*zero"
 	ASAP                          = "*asap"
 	USERS                         = "*users"
+	STATS_CHAR                    = "#"
 	COMMENT_CHAR                  = '#'
 	CSV_SEP                       = ','
 	FALLBACK_SEP                  = ';'

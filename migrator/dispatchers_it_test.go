@@ -179,8 +179,8 @@ func testDspITMigrateAndMove(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 		Strategy: utils.MetaRandom,
-		Hosts:    []string{"localhost", "192.168.56.203"},
-		Weight:   20,
+		// Hosts:    []string{"localhost", "192.168.56.203"},
+		Weight: 20,
 	}
 	if err := dspMigrator.dmIN.DataManager().SetDispatcherProfile(dspPrf, false); err != nil {
 		t.Error(err)

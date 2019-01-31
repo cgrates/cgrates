@@ -61,7 +61,8 @@ const (
 	LoaderJson         = "loaders"
 	MAILER_JSN         = "mailer"
 	SURETAX_JSON       = "suretax"
-	DispatcherSJson    = "dispatcher"
+	DispatcherJson     = "dispatcher"
+	DispatcherSJson    = "dispatchers"
 	CgrLoaderCfgJson   = "loader"
 	CgrMigratorCfgJson = "migrator"
 	ChargerSCfgJson    = "chargers"
@@ -446,6 +447,18 @@ func (self CgrJsonCfg) SureTaxJsonCfg() (*SureTaxJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(SureTaxJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (self CgrJsonCfg) DispatcherJsonCfg() (*DispatcherJsonCfg, error) {
+	rawCfg, hasKey := self[DispatcherJson]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(DispatcherJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

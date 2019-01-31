@@ -1003,6 +1003,7 @@ func startDispatcherService(internalDispatcherSChan, internalRaterChan chan rpcc
 		exitChan <- true
 		return
 	}()
+
 	/*
 		if !cfg.ThresholdSCfg().Enabled && len(cfg.DispatcherSCfg().ThreshSConns) != 0 {
 			server.RpcRegisterName(utils.ThresholdSv1,
@@ -1507,7 +1508,7 @@ func main() {
 			internalRsChan, internalStatSChan,
 			cfg, dm, server, exitChan, filterSChan, internalAttributeSChan)
 	}
-	if cfg.DispatcherSCfg().Enabled {
+	if cfg.DispatcherCfg().Enabled {
 		go startDispatcherService(internalDispatcherSChan,
 			internalRaterChan, cacheS, dm, server, exitChan)
 	}

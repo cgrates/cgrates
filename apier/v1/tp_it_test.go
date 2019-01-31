@@ -125,9 +125,9 @@ func testTPExportTPToFolder(t *testing.T) {
 	expectedTPStas := &utils.ExportedTPStats{
 		Compressed: true,
 		ExportPath: "/tmp/",
-		ExportedFiles: []string{"RatingProfiles.csv", "RatingPlans.csv", "Actions.csv", "AccountActions.csv",
-			"Chargers.csv", "Timings.csv", "ActionPlans.csv", "Resources.csv", "Stats.csv", "Thresholds.csv",
-			"Destinations.csv", "Rates.csv", "DestinationRates.csv", "Filters.csv", "Suppliers.csv", "Attributes.csv"},
+		ExportedFiles: []string{utils.RATING_PROFILES_CSV, utils.RATING_PLANS_CSV, utils.ACTIONS_CSV, utils.ACCOUNT_ACTIONS_CSV,
+			utils.ChargersCsv, utils.TIMINGS_CSV, utils.ACTION_PLANS_CSV, utils.ResourcesCsv, utils.StatsCsv, utils.ThresholdsCsv,
+			utils.DESTINATIONS_CSV, utils.RATES_CSV, utils.DESTINATION_RATES_CSV, utils.FiltersCsv, utils.SuppliersCsv, utils.AttributesCsv},
 	}
 	sort.Strings(expectedTPStas.ExportedFiles)
 	tpid := "TEST_TPID2"

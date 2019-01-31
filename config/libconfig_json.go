@@ -535,7 +535,7 @@ type SureTaxJsonCfg struct {
 }
 
 // Dispatcher service config section
-type DispatcherSJsonCfg struct {
+type DispatcherJsonCfg struct {
 	Enabled              *bool
 	Rals_conns           *[]*HaPoolJsonCfg
 	Resources_conns      *[]*HaPoolJsonCfg
@@ -546,6 +546,11 @@ type DispatcherSJsonCfg struct {
 	Sessions_conns       *[]*HaPoolJsonCfg
 	Chargers_conns       *[]*HaPoolJsonCfg
 	Dispatching_strategy *string
+}
+
+type DispatcherSJsonCfg struct {
+	Enabled *bool
+	Conns   *map[string]*[]*HaPoolJsonCfg
 }
 
 type LoaderCfgJson struct {

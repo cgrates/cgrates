@@ -59,12 +59,34 @@ type v1Stat struct {
 
 type v1Stats []*v1Stat
 
+func (m *Migrator) moveStatQueueProfile() (err error) {
+	//StatQueueProfile
+	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
+	var ids []string
+	if ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.StatQueueProfilePrefix); err != nil {
+		return err
+	}
+	for _, id := range ids {
+		idg := strings.TrimPrefix(id, utils.StatQueueProfilePrefix+tenant+":")
+		sgs, err := m.dmIN.DataManager().GetStatQueueProfile(tenant, idg, false, false, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if sgs == nil || m.dryRun {
+			continue
+		}
+		if err = m.dmOut.DataManager().SetStatQueueProfile(sgs, true); err != nil {
+			return err
+		}
+	}
+	return
+}
+
 func (m *Migrator) migrateCurrentStats() (err error) {
 	var ids []string
 	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	//StatQueue
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.StatQueuePrefix)
-	if err != nil {
+	if ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.StatQueuePrefix); err != nil {
 		return err
 	}
 	for _, id := range ids {
@@ -74,36 +96,16 @@ func (m *Migrator) migrateCurrentStats() (err error) {
 
 			return err
 		}
-		if sgs != nil {
-			if m.dryRun != true {
-				if err := m.dmOut.DataManager().SetStatQueue(sgs); err != nil {
-					return err
-				}
-				m.stats[utils.StatS] += 1
-			}
+		if sgs == nil || m.dryRun {
+			continue
 		}
-	}
-	//StatQueueProfile
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.StatQueueProfilePrefix)
-	if err != nil {
-		return err
-	}
-	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.StatQueueProfilePrefix+tenant+":")
-		sgs, err := m.dmIN.DataManager().GetStatQueueProfile(tenant, idg, false, false, utils.NonTransactional)
-		if err != nil {
+		if err := m.dmOut.DataManager().SetStatQueue(sgs); err != nil {
 			return err
 		}
-		if sgs != nil {
-			if m.dryRun != true {
-				if err := m.dmOut.DataManager().SetStatQueueProfile(sgs, true); err != nil {
-					return err
-				}
-			}
-		}
+		m.stats[utils.StatS] += 1
 	}
 
-	return
+	return m.moveStatQueueProfile()
 }
 
 func (m *Migrator) migrateV1CDRSTATS() (err error) {
@@ -129,29 +131,86 @@ func (m *Migrator) migrateV1CDRSTATS() (err error) {
 			if err != nil {
 				return err
 			}
-			if !m.dryRun {
-				if err := m.dmOut.DataManager().SetFilter(filter); err != nil {
-					return err
-				}
-				if err := m.dmOut.DataManager().SetStatQueue(sq); err != nil {
-					return err
-				}
-				if err := m.dmOut.DataManager().SetStatQueueProfile(sts, true); err != nil {
-					return err
-				}
-				m.stats[utils.StatS] += 1
+			if m.dryRun {
+				continue
 			}
+			if err := m.dmOut.DataManager().SetFilter(filter); err != nil {
+				return err
+			}
+			if err := m.dmOut.DataManager().SetStatQueue(remakeQueue(sq)); err != nil {
+				return err
+			}
+			if err := m.dmOut.DataManager().SetStatQueueProfile(sts, true); err != nil {
+				return err
+			}
+			m.stats[utils.StatS] += 1
 		}
 	}
-	if m.dryRun != true {
-		// All done, update version wtih current one
-		vrs := engine.Versions{utils.StatS: engine.CurrentDataDBVersions()[utils.StatS]}
-		if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
-			return utils.NewCGRError(utils.Migrator,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error: <%s> when updating Stats version into dataDB", err.Error()))
+	if m.dryRun {
+		return
+	}
+	// All done, update version wtih current one
+	vrs := engine.Versions{utils.StatS: engine.CurrentDataDBVersions()[utils.StatS]}
+	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating Stats version into dataDB", err.Error()))
+	}
+	return
+}
+
+func remakeQueue(sq *engine.StatQueue) (out *engine.StatQueue) {
+	out = &engine.StatQueue{
+		Tenant:    sq.Tenant,
+		ID:        sq.ID,
+		SQItems:   sq.SQItems,
+		SQMetrics: make(map[string]engine.StatMetric),
+		MinItems:  sq.MinItems,
+	}
+	for mId, metric := range sq.SQMetrics {
+		id := utils.StatsJoin(utils.SplitConcatenatedKey(mId)...)
+		out.SQMetrics[id] = metric
+	}
+	return
+}
+
+func (m *Migrator) migrateV2Stats() (err error) {
+	var ids []string
+	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
+	//StatQueue
+	if ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.StatQueuePrefix); err != nil {
+		return err
+	}
+	for _, id := range ids {
+		idg := strings.TrimPrefix(id, utils.StatQueuePrefix+tenant+":")
+		sgs, err := m.dmIN.DataManager().GetStatQueue(tenant, idg, false, false, utils.NonTransactional)
+		if err != nil {
+
+			return err
 		}
+		if sgs == nil || m.dryRun {
+			continue
+		}
+		if err = m.dmOut.DataManager().SetStatQueue(remakeQueue(sgs)); err != nil {
+			return err
+		}
+		m.stats[utils.StatS] += 1
+	}
+
+	if err = m.moveStatQueueProfile(); err != nil {
+		return err
+	}
+	if m.dryRun {
+		return
+	}
+	// All done, update version wtih current one
+	vrs := engine.Versions{utils.StatS: engine.CurrentDataDBVersions()[utils.StatS]}
+	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating Stats version into dataDB", err.Error()))
 	}
 	return
 }
@@ -173,17 +232,14 @@ func (m *Migrator) migrateStats() (err error) {
 	}
 	switch vrs[utils.StatS] {
 	case 1:
-		if err := m.migrateV1CDRSTATS(); err != nil {
-			return err
-		}
+		return m.migrateV1CDRSTATS()
+	case 2:
+		return m.migrateV2Stats()
 	case current[utils.StatS]:
 		if m.sameDataDB {
 			return
 		}
-		if err := m.migrateCurrentStats(); err != nil {
-			return err
-		}
-		return
+		return m.migrateCurrentStats()
 	}
 	return
 }

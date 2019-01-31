@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 // DispatcherSCfg is the configuration of dispatcher service
-type DispatcherSCfg struct {
+type DispatcherCfg struct {
 	Enabled             bool
 	RALsConns           []*HaPoolConfig
 	ResSConns           []*HaPoolConfig
@@ -32,7 +32,7 @@ type DispatcherSCfg struct {
 	DispatchingStrategy string
 }
 
-func (dps *DispatcherSCfg) loadFromJsonCfg(jsnCfg *DispatcherSJsonCfg) (err error) {
+func (dps *DispatcherCfg) loadFromJsonCfg(jsnCfg *DispatcherJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -97,6 +97,36 @@ func (dps *DispatcherSCfg) loadFromJsonCfg(jsnCfg *DispatcherSJsonCfg) (err erro
 	}
 	if jsnCfg.Dispatching_strategy != nil {
 		dps.DispatchingStrategy = *jsnCfg.Dispatching_strategy
+	}
+	return nil
+}
+
+// DispatcherSCfg is the configuration of dispatcher service
+type DispatcherSCfg struct {
+	Enabled bool
+	Conns   map[string][]*HaPoolConfig
+}
+
+func (dps *DispatcherSCfg) loadFromJsonCfg(jsnCfg *DispatcherSJsonCfg) (err error) {
+	if jsnCfg == nil {
+		return nil
+	}
+	if jsnCfg.Enabled != nil {
+		dps.Enabled = *jsnCfg.Enabled
+	}
+	if jsnCfg.Conns != nil {
+		dps.Conns = make(map[string][]*HaPoolConfig, len(*jsnCfg.Conns))
+		for id, conns := range *jsnCfg.Conns {
+			if conns == nil {
+				continue
+			}
+			Conns := make([]*HaPoolConfig, len(*conns))
+			for idx, jsnHaCfg := range *conns {
+				Conns[idx] = NewDfltHaPoolConfig()
+				Conns[idx].loadFromJsonCfg(jsnHaCfg)
+			}
+			dps.Conns[id] = Conns
+		}
 	}
 	return nil
 }

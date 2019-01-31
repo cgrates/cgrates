@@ -188,6 +188,34 @@ func (pc *AMQPCachedPosters) GetAWSPoster(dialURL string, attempts int,
 	return pc.cache2[dialURL], nil
 }
 
+func (pc *AMQPCachedPosters) PostAMQP(dialURL string, attempts int,
+	content []byte, contentType, fallbackFileDir, fallbackFileName string) error {
+	amqpPoster, err := pc.GetAMQPPoster(dialURL, attempts, fallbackFileDir)
+	if err != nil {
+		return err
+	}
+	var chn *amqp.Channel
+	chn, err = amqpPoster.Post(nil, contentType, content, fallbackFileName)
+	if chn != nil {
+		chn.Close()
+	}
+	return nil
+}
+
+func (pc *AMQPCachedPosters) PostAWS(dialURL string, attempts int,
+	content []byte, fallbackFileDir, fallbackFileName string) error {
+	awsPoster, err := pc.GetAWSPoster(dialURL, attempts, fallbackFileDir)
+	if err != nil {
+		return err
+	}
+	var ses *amqpv1.Session
+	ses, err = awsPoster.Post(content, fallbackFileName)
+	if ses != nil {
+		ses.Close(context.Background())
+	}
+	return nil
+}
+
 // "amqp://guest:guest@localhost:5672/?queueID=cgrates_cdrs"
 func NewAMQPPoster(dialURL string, attempts int, fallbackFileDir string) (*AMQPPoster, error) {
 	amqp := &AMQPPoster{
