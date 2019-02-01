@@ -986,7 +986,7 @@ func startDispatcherService(internalDispatcherSChan,
 			haPoolCfg, nil, time.Duration(0)); err != nil {
 			utils.Logger.Crit(
 				fmt.Sprintf("<%s> could not connect to connID: <%s>, err: <%s>",
-					utils.DispatcherS, err.Error()))
+					utils.DispatcherS, connID, err.Error()))
 			exitChan <- true
 			return
 		}
