@@ -1453,27 +1453,11 @@ func TestCgrLoaderCfgITDefaults(t *testing.T) {
 	}
 }
 
-func TestCgrCfgJSONDefaultDispatcherCfg(t *testing.T) {
-	eDspSCfg := &DispatcherCfg{
-		Enabled:             false,
-		RALsConns:           []*HaPoolConfig{},
-		ResSConns:           []*HaPoolConfig{},
-		ThreshSConns:        []*HaPoolConfig{},
-		StatSConns:          []*HaPoolConfig{},
-		SupplSConns:         []*HaPoolConfig{},
-		AttrSConns:          []*HaPoolConfig{},
-		SessionSConns:       []*HaPoolConfig{},
-		ChargerSConns:       []*HaPoolConfig{},
-		DispatchingStrategy: utils.MetaFirst,
-	}
-	if !reflect.DeepEqual(cgrCfg.dispatcherCfg, eDspSCfg) {
-		t.Errorf("received: %+v, expecting: %+v", cgrCfg.dispatcherSCfg, eDspSCfg)
-	}
-}
-
 func TestCgrCfgJSONDefaultDispatcherSCfg(t *testing.T) {
 	eDspSCfg := &DispatcherSCfg{
-		Enabled: false,
+		Enabled:             false,
+		StringIndexedFields: nil,
+		PrefixIndexedFields: &[]string{},
 		Conns: map[string][]*HaPoolConfig{
 			"sessions_eu": []*HaPoolConfig{
 				{Address: "127.0.0.1:2012", Transport: utils.MetaJSONrpc},

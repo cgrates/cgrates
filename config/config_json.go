@@ -453,18 +453,6 @@ func (self CgrJsonCfg) SureTaxJsonCfg() (*SureTaxJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) DispatcherJsonCfg() (*DispatcherJsonCfg, error) {
-	rawCfg, hasKey := self[DispatcherJson]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(DispatcherJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
 func (self CgrJsonCfg) DispatcherSJsonCfg() (*DispatcherSJsonCfg, error) {
 	rawCfg, hasKey := self[DispatcherSJson]
 	if !hasKey {

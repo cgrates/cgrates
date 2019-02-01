@@ -965,31 +965,35 @@ func loaderService(cacheS *engine.CacheS, cfg *config.CGRConfig,
 }
 
 // startDispatcherService fires up the DispatcherS
-func startDispatcherService(internalDispatcherSChan, internalRaterChan chan rpcclient.RpcClientConnection,
-	cacheS *engine.CacheS, dm *engine.DataManager,
-	server *utils.Server, exitChan chan bool) {
+func startDispatcherService(internalDispatcherSChan,
+	intAttrSChan chan rpcclient.RpcClientConnection,
+	cfg *config.CGRConfig,
+	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
+	dm *engine.DataManager, server *utils.Server, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS Dispatcher service.")
+	fltrS := <-filterSChan
+	filterSChan <- fltrS
 	var err error
-	//var ralsConns, resSConns, threshSConns, statSConns, suplSConns, attrSConns, sessionsSConns, chargerSConns *rpcclient.RpcClientPool
-
-	/*
-		if len(cfg.DispatcherSCfg().RALsConns) != 0 {
-			ralsConns, err = engine.NewRPCPool(cfg.DispatcherSCfg().DispatchingStrategy,
-				cfg.TlsCfg().ClientKey,
-				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-				cfg.DispatcherSCfg().RALsConns, internalRaterChan,
-				cfg.GeneralCfg().InternalTtl)
-			if err != nil {
-				utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to RALs: %s", utils.DispatcherS, err.Error()))
-				exitChan <- true
-				return
-			}
+	conns := make(map[string]*rpcclient.RpcClientPool)
+	for connID, haPoolCfg := range cfg.DispatcherSCfg().Conns {
+		var connPool *rpcclient.RpcClientPool
+		if connPool, err = engine.NewRPCPool(
+			rpcclient.POOL_FIRST,
+			cfg.TlsCfg().ClientKey,
+			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
+			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
+			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
+			haPoolCfg, nil, time.Duration(0)); err != nil {
+			utils.Logger.Crit(
+				fmt.Sprintf("<%s> could not connect to connID: <%s>, err: <%s>",
+					utils.DispatcherS, err.Error()))
+			exitChan <- true
+			return
 		}
-	*/
+		conns[connID] = connPool
+	}
 
-	dspS, err := dispatchers.NewDispatcherService(dm, cfg)
+	dspS, err := dispatchers.NewDispatcherService(dm, cfg, fltrS, conns)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.DispatcherS, err.Error()))
 		exitChan <- true
@@ -1508,9 +1512,10 @@ func main() {
 			internalRsChan, internalStatSChan,
 			cfg, dm, server, exitChan, filterSChan, internalAttributeSChan)
 	}
-	if cfg.DispatcherCfg().Enabled {
+	if cfg.DispatcherSCfg().Enabled {
 		go startDispatcherService(internalDispatcherSChan,
-			internalRaterChan, cacheS, dm, server, exitChan)
+			internalAttributeSChan, cfg, cacheS, filterSChan,
+			dm, server, exitChan)
 	}
 
 	if cfg.AnalyzerSCfg().Enabled {

@@ -723,22 +723,10 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"dispatcher":{
-	"enabled": false,						// starts DispatcherS service: <true|false>.
-	"rals_conns": [],						// address where to reach the RALs for dispatcherS  <*internal>		
-	"resources_conns": [],					// address where to reach the ResourceS <""|127.0.0.1:2013>
-	"thresholds_conns": [],					// address where to reach the ThresholdS <""|127.0.0.1:2013>
-	"stats_conns": [],						// address where to reach the StatS <""|127.0.0.1:2013>
-	"suppliers_conns": [],					// address where to reach the SupplierS <""|127.0.0.1:2013>
-	"attributes_conns": [],					// address where to reach the AttributeS <""|127.0.0.1:2013>
-	"sessions_conns": [],					// connection towards SessionService
-	"chargers_conns": [],					// address where to reach the ChargerS <""|127.0.0.1:2013>
-	"dispatching_strategy":"*first",		// strategy for dispatching <*first|*random|*next|*broadcast>
-},
-
-
 "dispatchers":{
 	"enabled": false,						// starts DispatcherS service: <true|false>.
+	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"conns": {
 		"sessions_eu": [
 			{"address": "127.0.0.1:2012", "transport": "*json"},

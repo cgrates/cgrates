@@ -27,21 +27,21 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-// NewDispatcherService initializes a DispatcherService
+// NewDispatcherService constructs a DispatcherService
 func NewDispatcherService(dm *engine.DataManager,
-	cfg *config.CGRConfig) (*DispatcherService, error) {
-	return &DispatcherService{dm: dm, cfg: cfg}, nil
+	cfg *config.CGRConfig, fltrS *engine.FilterS,
+	conns map[string]*rpcclient.RpcClientPool) (*DispatcherService, error) {
+	return &DispatcherService{dm: dm, cfg: cfg,
+		fltrS: fltrS, conns: conns}, nil
 }
 
 // DispatcherService  is the service handling dispatching towards internal components
 // designed to handle automatic partitioning and failover
 type DispatcherService struct {
-	dm                  *engine.DataManager
-	cfg                 *config.CGRConfig
-	filterS             *engine.FilterS
-	stringIndexedFields *[]string
-	prefixIndexedFields *[]string
-	conns               map[string]*rpcclient.RpcClientPool // available connections, accessed based on connID
+	dm    *engine.DataManager
+	cfg   *config.CGRConfig
+	fltrS *engine.FilterS
+	conns map[string]*rpcclient.RpcClientPool // available connections, accessed based on connID
 }
 
 // ListenAndServe will initialize the service
@@ -69,8 +69,11 @@ func (dS *DispatcherService) dispatcherForEvent(ev *utils.CGREvent,
 		idxKeyPrfx = utils.ConcatenatedKey(ev.Tenant, subsys)
 	}
 	matchingPrfls := make(map[string]*engine.DispatcherProfile)
-	prflIDs, err := engine.MatchingItemIDsForEvent(ev.Event, dS.stringIndexedFields, dS.prefixIndexedFields,
-		dS.dm, utils.CacheDispatcherFilterIndexes, idxKeyPrfx, dS.cfg.FilterSCfg().IndexedSelects)
+	prflIDs, err := engine.MatchingItemIDsForEvent(ev.Event,
+		dS.cfg.DispatcherSCfg().StringIndexedFields,
+		dS.cfg.DispatcherSCfg().PrefixIndexedFields,
+		dS.dm, utils.CacheDispatcherFilterIndexes,
+		idxKeyPrfx, dS.cfg.FilterSCfg().IndexedSelects)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +100,7 @@ func (dS *DispatcherService) dispatcherForEvent(ev *utils.CGREvent,
 			!prfl.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
 			continue
 		}
-		if pass, err := dS.filterS.Pass(ev.Tenant, prfl.FilterIDs,
+		if pass, err := dS.fltrS.Pass(ev.Tenant, prfl.FilterIDs,
 			config.NewNavigableMap(ev.Event)); err != nil {
 			return nil, err
 		} else if !pass {

@@ -159,7 +159,6 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.supplierSCfg = new(SupplierSCfg)
 	cfg.sureTaxCfg = new(SureTaxCfg)
 	cfg.dispatcherSCfg = new(DispatcherSCfg)
-	cfg.dispatcherCfg = new(DispatcherCfg)
 	cfg.loaderCgrCfg = new(LoaderCgrCfg)
 	cfg.migratorCgrCfg = new(MigratorCgrCfg)
 	cfg.mailerCfg = new(MailerCfg)
@@ -306,7 +305,6 @@ type CGRConfig struct {
 	supplierSCfg     *SupplierSCfg     // SupplierS config
 	sureTaxCfg       *SureTaxCfg       // SureTax config
 	dispatcherSCfg   *DispatcherSCfg   // DispatcherS config
-	dispatcherCfg    *DispatcherCfg    // Dispatcher config
 	loaderCgrCfg     *LoaderCgrCfg     // LoaderCgr config
 	migratorCgrCfg   *MigratorCgrCfg   // MigratorCgr config
 	mailerCfg        *MailerCfg        // Mailer config
@@ -702,12 +700,18 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
-	// DispaterS checks
-	if self.dispatcherCfg.Enabled {
-		if !utils.IsSliceMember([]string{utils.MetaFirst, utils.MetaRandom, utils.MetaNext,
-			utils.MetaBroadcast}, self.dispatcherCfg.DispatchingStrategy) {
-			return fmt.Errorf("<%s> unsupported dispatching strategy %s",
-				utils.DispatcherS, self.dispatcherCfg.DispatchingStrategy)
+	if self.dispatcherSCfg.Enabled {
+		if len(self.dispatcherSCfg.Conns) == 0 {
+			return fmt.Errorf("<%s> no connections defined", utils.DispatcherS)
+		}
+		for connID, haPool := range self.dispatcherSCfg.Conns {
+			for _, connCfg := range haPool {
+				if connCfg.Address == utils.MetaInternal {
+					return fmt.Errorf(
+						"<%s> connID: <%s> %s connections are not supported",
+						utils.DispatcherS, connID, utils.MetaInternal)
+				}
+			}
 		}
 	}
 	// Scheduler check connection with CDR Server
@@ -939,14 +943,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return err
 	}
 
-	jsnDispatcherCfg, err := jsnCfg.DispatcherJsonCfg()
-	if err != nil {
-		return err
-	}
-	if self.dispatcherCfg.loadFromJsonCfg(jsnDispatcherCfg); err != nil {
-		return err
-	}
-
 	jsnDispatcherSCfg, err := jsnCfg.DispatcherSJsonCfg()
 	if err != nil {
 		return err
@@ -1165,10 +1161,6 @@ func (cfg *CGRConfig) CacheCfg() CacheCfg {
 
 func (cfg *CGRConfig) LoaderCfg() []*LoaderSCfg {
 	return cfg.loaderCfg
-}
-
-func (cfg *CGRConfig) DispatcherCfg() *DispatcherCfg {
-	return cfg.dispatcherCfg
 }
 
 func (cfg *CGRConfig) DispatcherSCfg() *DispatcherSCfg {

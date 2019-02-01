@@ -1379,29 +1379,11 @@ func TestDfHttpJsonCfg(t *testing.T) {
 	}
 }
 
-func TestDfDispatcherJsonCfg(t *testing.T) {
-	eCfg := &DispatcherJsonCfg{
-		Enabled:              utils.BoolPointer(false),
-		Rals_conns:           &[]*HaPoolJsonCfg{},
-		Resources_conns:      &[]*HaPoolJsonCfg{},
-		Thresholds_conns:     &[]*HaPoolJsonCfg{},
-		Stats_conns:          &[]*HaPoolJsonCfg{},
-		Suppliers_conns:      &[]*HaPoolJsonCfg{},
-		Attributes_conns:     &[]*HaPoolJsonCfg{},
-		Sessions_conns:       &[]*HaPoolJsonCfg{},
-		Chargers_conns:       &[]*HaPoolJsonCfg{},
-		Dispatching_strategy: utils.StringPointer(utils.MetaFirst),
-	}
-	if cfg, err := dfCgrJsonCfg.DispatcherJsonCfg(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
-	}
-}
-
 func TestDfDispatcherSJsonCfg(t *testing.T) {
 	eCfg := &DispatcherSJsonCfg{
-		Enabled: utils.BoolPointer(false),
+		Enabled:               utils.BoolPointer(false),
+		String_indexed_fields: nil,
+		Prefix_indexed_fields: &[]string{},
 		Conns: &map[string]*[]*HaPoolJsonCfg{
 			"sessions_eu": &[]*HaPoolJsonCfg{
 				{Address: utils.StringPointer("127.0.0.1:2012"), Transport: utils.StringPointer(utils.MetaJSONrpc)},

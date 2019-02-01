@@ -534,23 +534,11 @@ type SureTaxJsonCfg struct {
 	Tax_exemption_code_list *string
 }
 
-// Dispatcher service config section
-type DispatcherJsonCfg struct {
-	Enabled              *bool
-	Rals_conns           *[]*HaPoolJsonCfg
-	Resources_conns      *[]*HaPoolJsonCfg
-	Thresholds_conns     *[]*HaPoolJsonCfg
-	Stats_conns          *[]*HaPoolJsonCfg
-	Suppliers_conns      *[]*HaPoolJsonCfg
-	Attributes_conns     *[]*HaPoolJsonCfg
-	Sessions_conns       *[]*HaPoolJsonCfg
-	Chargers_conns       *[]*HaPoolJsonCfg
-	Dispatching_strategy *string
-}
-
 type DispatcherSJsonCfg struct {
-	Enabled *bool
-	Conns   *map[string]*[]*HaPoolJsonCfg
+	Enabled               *bool
+	String_indexed_fields *[]string
+	Prefix_indexed_fields *[]string
+	Conns                 *map[string]*[]*HaPoolJsonCfg
 }
 
 type LoaderCfgJson struct {
