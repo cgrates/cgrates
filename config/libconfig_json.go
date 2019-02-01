@@ -538,6 +538,7 @@ type DispatcherSJsonCfg struct {
 	Enabled               *bool
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
+	Attributes_conns      *[]*HaPoolJsonCfg
 	Conns                 *map[string]*[]*HaPoolJsonCfg
 }
 

@@ -23,6 +23,7 @@ type DispatcherSCfg struct {
 	Enabled             bool
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
+	AttributeSConns     []*HaPoolConfig
 	Conns               map[string][]*HaPoolConfig
 }
 
@@ -46,6 +47,13 @@ func (dps *DispatcherSCfg) loadFromJsonCfg(jsnCfg *DispatcherSJsonCfg) (err erro
 			pif[i] = fID
 		}
 		dps.PrefixIndexedFields = &pif
+	}
+	if jsnCfg.Attributes_conns != nil {
+		dps.AttributeSConns = make([]*HaPoolConfig, len(*jsnCfg.Attributes_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Attributes_conns {
+			dps.AttributeSConns[idx] = NewDfltHaPoolConfig()
+			dps.AttributeSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
 	}
 	if jsnCfg.Conns != nil {
 		dps.Conns = make(map[string][]*HaPoolConfig, len(*jsnCfg.Conns))

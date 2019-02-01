@@ -727,6 +727,7 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,						// starts DispatcherS service: <true|false>.
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"attributes_conns": [],					// address where to reach the attribute service, empty to disable auth functionality: <""|*internal|x.y.z.y:1234>
 	"conns": {
 		"sessions_eu": [
 			{"address": "127.0.0.1:2012", "transport": "*json"},

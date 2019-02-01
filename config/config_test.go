@@ -1458,6 +1458,7 @@ func TestCgrCfgJSONDefaultDispatcherSCfg(t *testing.T) {
 		Enabled:             false,
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
+		AttributeSConns:     []*HaPoolConfig{},
 		Conns: map[string][]*HaPoolConfig{
 			"sessions_eu": []*HaPoolConfig{
 				{Address: "127.0.0.1:2012", Transport: utils.MetaJSONrpc},

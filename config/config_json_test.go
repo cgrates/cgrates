@@ -1384,6 +1384,7 @@ func TestDfDispatcherSJsonCfg(t *testing.T) {
 		Enabled:               utils.BoolPointer(false),
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
+		Attributes_conns:      &[]*HaPoolJsonCfg{},
 		Conns: &map[string]*[]*HaPoolJsonCfg{
 			"sessions_eu": &[]*HaPoolJsonCfg{
 				{Address: utils.StringPointer("127.0.0.1:2012"), Transport: utils.StringPointer(utils.MetaJSONrpc)},
