@@ -934,6 +934,7 @@ const (
 	CacheChargerProfiles         = "charger_profiles"
 	CacheDispatcherProfiles      = "dispatcher_profiles"
 	CacheDispatchers             = "dispatchers"
+	CacheDispatcherRoutes        = "dispatcher_routes"
 	CacheResourceFilterIndexes   = "resource_filter_indexes"
 	CacheStatFilterIndexes       = "stat_filter_indexes"
 	CacheThresholdFilterIndexes  = "threshold_filter_indexes"

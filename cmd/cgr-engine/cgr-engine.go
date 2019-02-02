@@ -974,6 +974,22 @@ func startDispatcherService(internalDispatcherSChan,
 	fltrS := <-filterSChan
 	filterSChan <- fltrS
 	var err error
+	var attrSConn *rpcclient.RpcClientPool
+	if len(cfg.DispatcherSCfg().AttributeSConns) != 0 { // AttributeS connection init
+		attrSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
+			cfg.TlsCfg().ClientKey,
+			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
+			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
+			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
+			cfg.DispatcherSCfg().AttributeSConns, intAttrSChan,
+			cfg.GeneralCfg().InternalTtl)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
+				utils.DispatcherS, utils.AttributeS, err.Error()))
+			exitChan <- true
+			return
+		}
+	}
 	conns := make(map[string]*rpcclient.RpcClientPool)
 	for connID, haPoolCfg := range cfg.DispatcherSCfg().Conns {
 		var connPool *rpcclient.RpcClientPool
@@ -993,7 +1009,7 @@ func startDispatcherService(internalDispatcherSChan,
 		conns[connID] = connPool
 	}
 
-	dspS, err := dispatchers.NewDispatcherService(dm, cfg, fltrS, conns)
+	dspS, err := dispatchers.NewDispatcherService(dm, cfg, fltrS, attrSConn, conns)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.DispatcherS, err.Error()))
 		exitChan <- true

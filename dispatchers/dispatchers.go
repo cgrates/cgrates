@@ -30,9 +30,10 @@ import (
 // NewDispatcherService constructs a DispatcherService
 func NewDispatcherService(dm *engine.DataManager,
 	cfg *config.CGRConfig, fltrS *engine.FilterS,
+	attrS *rpcclient.RpcClientPool,
 	conns map[string]*rpcclient.RpcClientPool) (*DispatcherService, error) {
 	return &DispatcherService{dm: dm, cfg: cfg,
-		fltrS: fltrS, conns: conns}, nil
+		fltrS: fltrS, attrS: attrS, conns: conns}, nil
 }
 
 // DispatcherService  is the service handling dispatching towards internal components
@@ -41,6 +42,7 @@ type DispatcherService struct {
 	dm    *engine.DataManager
 	cfg   *config.CGRConfig
 	fltrS *engine.FilterS
+	attrS *rpcclient.RpcClientPool            // used for API auth
 	conns map[string]*rpcclient.RpcClientPool // available connections, accessed based on connID
 }
 
@@ -143,6 +145,18 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 	if errDsp != nil {
 		return utils.NewErrDispatcherS(errDsp)
 	}
+	var connID string
+	if ev.DispatcherRoute != nil &&
+		*ev.DispatcherRoute != "" {
+		// use previously discovered route
+		if x, ok := engine.Cache.Get(utils.CacheDispatcherRoutes,
+			*ev.DispatcherRoute); ok && x != nil {
+			connID = x.(string)
+			if err = dS.conns[connID].Call(serviceMethod, args, reply); !utils.IsNetworkError(err) {
+				return
+			}
+		}
+	}
 	for i := 0; i < d.MaxConns(); i++ {
 		connID := d.NextConnID()
 		conn, has := dS.conns[connID]
@@ -152,6 +166,11 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 		}
 		if err = conn.Call(serviceMethod, args, reply); !utils.IsNetworkError(err) {
 			break
+		}
+		if ev.DispatcherRoute != nil &&
+			*ev.DispatcherRoute != "" { // cache the discovered route
+			engine.Cache.Set(utils.CacheDispatcherRoutes, *ev.DispatcherRoute, connID,
+				nil, true, utils.EmptyString)
 		}
 	}
 	return

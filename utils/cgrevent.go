@@ -27,11 +27,12 @@ import (
 
 // CGREvent is a generic event processed by CGR services
 type CGREvent struct {
-	Tenant  string
-	ID      string
-	Context *string    // attach the event to a context
-	Time    *time.Time // event time
-	Event   map[string]interface{}
+	Tenant          string
+	ID              string
+	Context         *string    // attach the event to a context
+	Time            *time.Time // event time
+	DispatcherRoute *string    // route over previous computed path
+	Event           map[string]interface{}
 }
 
 func (ev *CGREvent) HasField(fldName string) (has bool) {
