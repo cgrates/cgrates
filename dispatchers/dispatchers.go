@@ -20,6 +20,8 @@ package dispatchers
 
 import (
 	"fmt"
+	"reflect"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -32,6 +34,9 @@ func NewDispatcherService(dm *engine.DataManager,
 	cfg *config.CGRConfig, fltrS *engine.FilterS,
 	attrS *rpcclient.RpcClientPool,
 	conns map[string]*rpcclient.RpcClientPool) (*DispatcherService, error) {
+	if attrS != nil && reflect.ValueOf(attrS).IsNil() {
+		attrS = nil
+	}
 	return &DispatcherService{dm: dm, cfg: cfg,
 		fltrS: fltrS, attrS: attrS, conns: conns}, nil
 }
@@ -146,11 +151,11 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 		return utils.NewErrDispatcherS(errDsp)
 	}
 	var connID string
-	if ev.DispatcherRoute != nil &&
-		*ev.DispatcherRoute != "" {
+	if ev.RouteID != nil &&
+		*ev.RouteID != "" {
 		// use previously discovered route
 		if x, ok := engine.Cache.Get(utils.CacheDispatcherRoutes,
-			*ev.DispatcherRoute); ok && x != nil {
+			*ev.RouteID); ok && x != nil {
 			connID = x.(string)
 			if err = dS.conns[connID].Call(serviceMethod, args, reply); !utils.IsNetworkError(err) {
 				return
@@ -167,11 +172,51 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 		if err = conn.Call(serviceMethod, args, reply); !utils.IsNetworkError(err) {
 			break
 		}
-		if ev.DispatcherRoute != nil &&
-			*ev.DispatcherRoute != "" { // cache the discovered route
-			engine.Cache.Set(utils.CacheDispatcherRoutes, *ev.DispatcherRoute, connID,
+		if ev.RouteID != nil &&
+			*ev.RouteID != "" { // cache the discovered route
+			engine.Cache.Set(utils.CacheDispatcherRoutes, *ev.RouteID, connID,
 				nil, true, utils.EmptyString)
 		}
+	}
+	return
+}
+
+func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,
+	reply *engine.AttrSProcessEventReply) (err error) {
+	if err = dS.attrS.Call(utils.AttributeSv1ProcessEvent,
+		&engine.AttrArgsProcessEvent{
+			CGREvent: *ev}, reply); err != nil {
+		if err.Error() == utils.ErrNotFound.Error() {
+			err = utils.ErrUnknownApiKey
+		}
+		return
+	}
+	return
+}
+
+func (dS *DispatcherService) authorize(method, tenant, apiKey string, evTime *time.Time) (err error) {
+	if apiKey == "" {
+		return utils.NewErrMandatoryIeMissing(utils.APIKey)
+	}
+	ev := &utils.CGREvent{
+		Tenant:  tenant,
+		ID:      utils.UUIDSha1Prefix(),
+		Context: utils.StringPointer(utils.MetaAuth),
+		Time:    evTime,
+		Event: map[string]interface{}{
+			utils.APIKey: apiKey,
+		},
+	}
+	var rplyEv engine.AttrSProcessEventReply
+	if err = dS.authorizeEvent(ev, &rplyEv); err != nil {
+		return
+	}
+	var apiMethods string
+	if apiMethods, err = rplyEv.CGREvent.FieldAsString(utils.APIMethods); err != nil {
+		return
+	}
+	if !ParseStringMap(apiMethods).HasKey(method) {
+		return utils.ErrUnauthorizedApi
 	}
 	return
 }
