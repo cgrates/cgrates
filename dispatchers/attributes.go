@@ -23,13 +23,21 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-/*
-func (dS *DispatcherService) AttributeSv1Ping(ign string, reply *string) error {
-	return dS.Dispatch(nil, utils.MetaAttributes,
-		utils.AttributeSv1Ping, ign, reply)
+// AttributeSv1Ping interogates AttributeS server responsible to process the event
+func (dS *DispatcherService) AttributeSv1Ping(args *ArgsAttrProcessEventWithApiKey,
+	reply *string) error {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.AttributeSv1Ping,
+			args.AttrArgsProcessEvent.CGREvent.Tenant,
+			args.APIKey, args.AttrArgsProcessEvent.CGREvent.Time); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&args.CGREvent, utils.MetaAttributes,
+		utils.AttributeSv1Ping, args.AttrArgsProcessEvent, reply)
 }
-*/
 
+// AttributeSv1GetAttributeForEvent is the dispatcher method for AttributeSv1.GetAttributeForEvent
 func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(args *ArgsAttrProcessEventWithApiKey,
 	reply *engine.AttributeProfile) (err error) {
 	if dS.attrS != nil {

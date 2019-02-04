@@ -503,6 +503,7 @@ const (
 	CGR_ACD                      = "cgr_acd"
 	FilterIDs                    = "FilterIDs"
 	FieldName                    = "FieldName"
+	APIMethod                    = "APIMethod"
 	Initial                      = "Initial"
 	Substitute                   = "Substitute"
 	Append                       = "Append"
@@ -692,6 +693,7 @@ const (
 	MetaAuth      = "*auth"
 	APIKey        = "APIKey"
 	APIMethods    = "APIMethods"
+	APIMethod     = "APIMethod"
 	NestingSep    = "."
 )
 
