@@ -1213,5 +1213,57 @@ func TestSessionSregisterSessionWithTerminator(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v",
 			time.Duration(2*time.Second), rcvS[0].sTerminator.ttl)
 	}
+}
+
+func TestSessionSrelocateSessionS(t *testing.T) {
+	sSCfg, _ := config.NewDefaultCGRConfig()
+	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
+	sSEv := engine.NewSafEvent(map[string]interface{}{
+		utils.EVENT_NAME:  "TEST_EVENT",
+		utils.ToR:         "*voice",
+		utils.OriginID:    "111",
+		utils.Direction:   "*out",
+		utils.Account:     "account1",
+		utils.Subject:     "subject1",
+		utils.Destination: "+4986517174963",
+		utils.Category:    "call",
+		utils.Tenant:      "cgrates.org",
+		utils.RequestType: "*prepaid",
+		utils.SetupTime:   "2015-11-09 14:21:24",
+		utils.AnswerTime:  "2015-11-09 14:22:02",
+		utils.Usage:       "1m23s",
+		utils.LastUsed:    "21s",
+		utils.PDD:         "300ms",
+		utils.SUPPLIER:    "supplier1",
+		utils.OriginHost:  "127.0.0.1",
+	})
+	initialCGRID := GetSetCGRID(sSEv)
+	s := &Session{
+		CGRID:      initialCGRID,
+		EventStart: sSEv,
+	}
+	//register the session as active
+	sS.registerSession(s, false)
+	//verify the session
+	rcvS := sS.getSessions(s.CGRID, false)
+	if !reflect.DeepEqual(rcvS[0], s) {
+		t.Errorf("Expecting %+v, received: %+v", s, rcvS[0])
+	}
+	//relocate the session
+	sS.relocateSessions("111", "222", "127.0.0.1")
+	//check if the session exist with old CGRID
+	rcvS = sS.getSessions(initialCGRID, false)
+	if len(rcvS) != 0 {
+		t.Errorf("Expecting 0, received: %+v", len(rcvS))
+	}
+	ev := engine.NewSafEvent(map[string]interface{}{
+		utils.OriginID:   "222",
+		utils.OriginHost: "127.0.0.1"})
+	cgrID := GetSetCGRID(ev)
+	//check the session with new CGRID
+	rcvS = sS.getSessions(cgrID, false)
+	if !reflect.DeepEqual(rcvS[0], s) {
+		t.Errorf("Expecting %+v, received: %+v", s, rcvS[0])
+	}
 
 }
