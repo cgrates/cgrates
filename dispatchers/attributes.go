@@ -25,7 +25,7 @@ import (
 
 // AttributeSv1Ping interogates AttributeS server responsible to process the event
 func (dS *DispatcherService) AttributeSv1Ping(args *ArgsAttrProcessEventWithApiKey,
-	reply *string) error {
+	reply *string) (err error) {
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.AttributeSv1Ping,
 			args.AttrArgsProcessEvent.CGREvent.Tenant,
