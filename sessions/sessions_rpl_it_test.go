@@ -36,7 +36,7 @@ var smgRplcMasterCfgPath, smgRplcSlaveCfgPath string
 var smgRplcMasterCfg, smgRplcSlaveCfg *config.CGRConfig
 var smgRplcMstrRPC, smgRplcSlvRPC *rpc.Client
 
-func TestSMGRplcInitCfg(t *testing.T) {
+func TestSessionSRplInitCfg(t *testing.T) {
 	smgRplcMasterCfgPath = path.Join(*dataDir, "conf", "samples", "smgreplcmaster")
 	if smgRplcMasterCfg, err = config.NewCGRConfigFromFolder(smgRplcMasterCfgPath); err != nil {
 		t.Fatal(err)
@@ -50,7 +50,7 @@ func TestSMGRplcInitCfg(t *testing.T) {
 }
 
 // Remove data in both rating and accounting db
-func TestSMGRplcResetDB(t *testing.T) {
+func TestSessionSRplResetDB(t *testing.T) {
 	if err := engine.InitDataDb(smgRplcMasterCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -60,7 +60,7 @@ func TestSMGRplcResetDB(t *testing.T) {
 }
 
 // Start CGR Engine
-func TestSMGRplcStartEngine(t *testing.T) {
+func TestSessionSRplStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(smgRplcSlaveCfgPath, *waitRater); err != nil { // Start slave before master
 		t.Fatal(err)
 	}
@@ -70,7 +70,7 @@ func TestSMGRplcStartEngine(t *testing.T) {
 }
 
 // Connect rpc client to rater
-func TestSMGRplcApierRpcConn(t *testing.T) {
+func TestSessionSRplApierRpcConn(t *testing.T) {
 	if smgRplcMstrRPC, err = jsonrpc.Dial("tcp", smgRplcMasterCfg.ListenCfg().RPCJSONListen); err != nil {
 		t.Fatal(err)
 	}
@@ -80,7 +80,7 @@ func TestSMGRplcApierRpcConn(t *testing.T) {
 }
 
 // Load the tariff plan, creating accounts and their balances
-func TestSMGRplcTPFromFolder(t *testing.T) {
+func TestSessionSRplTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
 	var loadInst utils.LoadInstance
 	if err := smgRplcMstrRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
@@ -89,44 +89,73 @@ func TestSMGRplcTPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-func TestSMGRplcInitiate(t *testing.T) {
+func TestSessionSRplInitiate(t *testing.T) {
 	var pSessions []*ActiveSession
-	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions",
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions,
 		nil, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	smgEv := map[string]interface{}{
-		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.ToR:         utils.VOICE,
-		utils.OriginID:    "123451",
-		utils.Direction:   utils.OUT,
-		utils.Account:     "1001",
-		utils.Subject:     "1001",
-		utils.Destination: "1004",
-		utils.Category:    "call",
-		utils.Tenant:      "cgrates.org",
-		utils.RequestType: utils.META_PREPAID,
-		utils.SetupTime:   "2016-01-05 18:30:49",
-		utils.AnswerTime:  "2016-01-05 18:31:05",
-		utils.Usage:       "1m30s",
+	args := &V1TerminateSessionArgs{
+		TerminateSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItTerminateSession",
+			Event: map[string]interface{}{
+				utils.EVENT_NAME:  "TEST_EVENT",
+				utils.Tenant:      "cgrates.org",
+				utils.OriginID:    "123451",
+				utils.ToR:         utils.VOICE,
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1004",
+				utils.Category:    "call",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       1*time.Minute + 30*time.Second,
+			},
+		},
 	}
-	var maxUsage time.Duration
 	var reply string
-	if err := smgRplcMstrRPC.Call("SMGenericV1.TerminateSession",
-		smgEv, &reply); err == nil ||
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1TerminateSession,
+		args, &reply); err == nil ||
 		err.Error() != rpcclient.ErrSessionNotFound.Error() { // Update should return rpcclient.ErrSessionNotFound
 		t.Error(err)
 	}
-	if err := smgRplcMstrRPC.Call(utils.SMGenericV2InitiateSession,
-		smgEv, &maxUsage); err != nil {
+
+	argsInit := &V1InitSessionArgs{
+		InitSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItAuth",
+			Event: map[string]interface{}{
+				utils.EVENT_NAME:  "TEST_EVENT",
+				utils.Tenant:      "cgrates.org",
+				utils.OriginID:    "123451",
+				utils.ToR:         utils.VOICE,
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1004",
+				utils.Category:    "call",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       1*time.Minute + 30*time.Second,
+			},
+		},
+	}
+
+	var initRpl *V1InitSessionReply
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1InitiateSession,
+		argsInit, &initRpl); err != nil {
 		t.Error(err)
 	}
-	if maxUsage != time.Duration(90*time.Second) {
-		t.Error("Bad max usage: ", maxUsage)
+	if initRpl.MaxUsage != utils.DurationPointer(time.Duration(90*time.Second)) {
+		t.Error("Bad max usage: ", initRpl.MaxUsage)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
 	var aSessions []*ActiveSession
-	if err := smgRplcMstrRPC.Call("SMGenericV1.GetActiveSessions",
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions,
 		map[string]string{utils.OriginID: "123451"}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
@@ -134,7 +163,7 @@ func TestSMGRplcInitiate(t *testing.T) {
 	} else if aSessions[0].Usage != time.Duration(90)*time.Second {
 		t.Errorf("Received usage: %v", aSessions[0].Usage)
 	}
-	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions",
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions,
 		map[string]string{utils.OriginID: "123451"}, &pSessions); err != nil {
 		t.Error(err)
 	} else if len(pSessions) != 1 {
@@ -145,22 +174,39 @@ func TestSMGRplcInitiate(t *testing.T) {
 }
 
 // Update on slave
-func TestSMGRplcUpdate(t *testing.T) {
-	smgEv := map[string]interface{}{
-		utils.EVENT_NAME: "TEST_EVENT",
-		utils.OriginID:   "123451",
-		utils.Usage:      "1m",
+func TestSessionSRplUpdate(t *testing.T) {
+	args := &V1UpdateSessionArgs{
+		UpdateSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItUpdateSession",
+			Event: map[string]interface{}{
+				utils.EVENT_NAME:  "TEST_EVENT",
+				utils.Tenant:      "cgrates.org",
+				utils.OriginID:    "123451",
+				utils.ToR:         utils.VOICE,
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1004",
+				utils.Category:    "call",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       1 * time.Minute,
+			},
+		},
 	}
-	var maxUsage time.Duration
-	if err := smgRplcSlvRPC.Call(utils.SMGenericV2UpdateSession,
-		smgEv, &maxUsage); err != nil {
+
+	var rply V1UpdateSessionReply
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1UpdateSession,
+		args, &rply); err != nil {
 		t.Error(err)
-	} else if maxUsage != time.Duration(time.Minute) {
-		t.Error("Bad max usage: ", maxUsage)
+	} else if rply.MaxUsage != utils.DurationPointer(time.Duration(time.Minute)) {
+		t.Error("Bad max usage: ", rply.MaxUsage)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
 	var aSessions []*ActiveSession
-	if err := smgRplcSlvRPC.Call("SMGenericV1.GetActiveSessions",
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetActiveSessions,
 		map[string]string{utils.OriginID: "123451"}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
@@ -170,19 +216,19 @@ func TestSMGRplcUpdate(t *testing.T) {
 	}
 	var pSessions []*ActiveSession
 	// Make sure we don't have passive session on active host
-	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", nil,
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions, nil,
 		&pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	// Master should not longer have activeSession
-	if err := smgRplcMstrRPC.Call("SMGenericV1.GetActiveSessions",
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions,
 		map[string]string{utils.OriginID: "123451"}, &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	cgrID := GetSetCGRID(engine.NewSafEvent(smgEv))
+	cgrID := GetSetCGRID(engine.NewSafEvent(args.CGREvent.Event))
 	// Make sure session was replicated
-	if err := smgRplcMstrRPC.Call("SMGenericV1.GetPassiveSessions",
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetPassiveSessions,
 		nil, &pSessions); err != nil {
 		t.Error(err)
 	} else if len(pSessions) != 1 {
@@ -192,43 +238,58 @@ func TestSMGRplcUpdate(t *testing.T) {
 	} else if pSessions[0].Usage != time.Duration(150*time.Second) {
 		t.Errorf("PassiveSession: %+v", pSessions[0])
 	}
-
 }
 
-func TestSMGRplcTerminate(t *testing.T) {
-	smgEv := map[string]interface{}{
-		utils.EVENT_NAME: "TEST_EVENT",
-		utils.OriginID:   "123451",
-		utils.Usage:      "3m",
+func TestSessionSRplTerminate(t *testing.T) {
+	args := &V1TerminateSessionArgs{
+		TerminateSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItTerminateSession",
+			Event: map[string]interface{}{
+				utils.EVENT_NAME:  "TEST_EVENT",
+				utils.Tenant:      "cgrates.org",
+				utils.OriginID:    "123451",
+				utils.ToR:         utils.VOICE,
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1004",
+				utils.Category:    "call",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       3 * time.Minute,
+			},
+		},
 	}
 	var reply string
-	if err := smgRplcMstrRPC.Call("SMGenericV1.TerminateSession", smgEv, &reply); err != nil {
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1TerminateSession, args, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
 	var aSessions []*ActiveSession
-	if err := smgRplcMstrRPC.Call("SMGenericV1.GetActiveSessions",
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions,
 		map[string]string{utils.OriginID: "123451"}, &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
-	if err := smgRplcSlvRPC.Call("SMGenericV1.GetActiveSessions",
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetActiveSessions,
 		map[string]string{utils.OriginID: "123451"}, &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
-	var pSessions map[string][]*SMGSession
-	if err := smgRplcMstrRPC.Call("SMGenericV1.GetPassiveSessions",
+	var pSessions map[string][]*Session
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetPassiveSessions,
 		nil, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions",
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions,
 		nil, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
 
-func TestSMGRplcManualReplicate(t *testing.T) {
+func TestSessionSRplManualReplicate(t *testing.T) {
 	masterProc, err := engine.StopStartEngine(smgRplcMasterCfgPath, *waitRater)
 	if err != nil { // Kill both and start Master
 		t.Fatal(err)
@@ -236,48 +297,63 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 	if smgRplcMstrRPC, err = jsonrpc.Dial("tcp", smgRplcMasterCfg.ListenCfg().RPCJSONListen); err != nil {
 		t.Fatal(err)
 	}
-	smgEv1 := map[string]interface{}{
-		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.ToR:         utils.VOICE,
-		utils.OriginID:    "123451",
-		utils.Direction:   utils.OUT,
-		utils.Account:     "1001",
-		utils.Subject:     "1001",
-		utils.Destination: "1004",
-		utils.Category:    "call",
-		utils.Tenant:      "cgrates.org",
-		utils.RequestType: utils.META_PREPAID,
-		utils.SetupTime:   "2016-01-05 18:30:49",
-		utils.AnswerTime:  "2016-01-05 18:31:05",
-		utils.Usage:       "1m30s",
+
+	argsInit1 := &V1InitSessionArgs{
+		InitSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItAuth",
+			Event: map[string]interface{}{
+				utils.EVENT_NAME:  "TEST_EVENT",
+				utils.Tenant:      "cgrates.org",
+				utils.OriginID:    "123451",
+				utils.ToR:         utils.VOICE,
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1004",
+				utils.Category:    "call",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       1*time.Minute + 30*time.Second,
+			},
+		},
 	}
-	smgEv2 := map[string]interface{}{
-		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.ToR:         utils.VOICE,
-		utils.OriginID:    "123481",
-		utils.Direction:   utils.OUT,
-		utils.Account:     "1002",
-		utils.Subject:     "1002",
-		utils.Destination: "1005",
-		utils.Category:    "call",
-		utils.Tenant:      "cgrates.org",
-		utils.RequestType: utils.META_PREPAID,
-		utils.SetupTime:   "2016-01-05 18:30:49",
-		utils.AnswerTime:  "2016-01-05 18:31:05",
-		utils.Usage:       "1m30s",
+
+	argsInit2 := &V1InitSessionArgs{
+		InitSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItAuth",
+			Event: map[string]interface{}{
+				utils.EVENT_NAME:  "TEST_EVENT",
+				utils.Tenant:      "cgrates.org",
+				utils.OriginID:    "123481",
+				utils.ToR:         utils.VOICE,
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "utils",
+				utils.Subject:     "utils",
+				utils.Destination: "1005",
+				utils.Category:    "call",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       1*time.Minute + 30*time.Second,
+			},
+		},
 	}
-	for _, smgEv := range []map[string]interface{}{smgEv1, smgEv2} {
-		var maxUsage time.Duration
-		if err := smgRplcMstrRPC.Call(utils.SMGenericV2InitiateSession, smgEv, &maxUsage); err != nil {
+
+	for _, args := range []*V1InitSessionArgs{argsInit1, argsInit2} {
+		var initRpl *V1InitSessionReply
+		if err := smgRplcMstrRPC.Call(utils.SessionSv1InitiateSession, args, &initRpl); err != nil {
 			t.Error(err)
 		}
-		if maxUsage != time.Duration(90*time.Second) {
-			t.Error("Bad max usage: ", maxUsage)
+		if initRpl.MaxUsage != utils.DurationPointer(time.Duration(90*time.Second)) {
+			t.Error("Bad max usage: ", initRpl.MaxUsage)
 		}
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
 	var aSessions []*ActiveSession
-	if err := smgRplcMstrRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err != nil {
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
@@ -298,7 +374,7 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 	if smgRplcSlvRPC, err = jsonrpc.Dial("tcp", smgRplcSlaveCfg.ListenCfg().RPCJSONListen); err != nil {
 		t.Fatal(err)
 	}
-	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions, nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
 	argsRepl := ArgsReplicateSessions{Connections: []*config.HaPoolConfig{
@@ -369,7 +445,7 @@ func TestSMGRplcManualReplicate(t *testing.T) {
 
 }
 
-func TestSMGRplcStopCgrEngine(t *testing.T) {
+func TestSessionSRplStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
