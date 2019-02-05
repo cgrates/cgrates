@@ -80,7 +80,7 @@ func TestSSv1ItResetStorDb(t *testing.T) {
 }
 
 func TestSSv1ItStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(sSv1CfgPath, 100); err != nil {
+	if _, err := engine.StopStartEngine(sSv1CfgPath, 1000); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -368,7 +368,7 @@ func TestSSv1ItInitiateSessionWithDigest(t *testing.T) {
 	aSessions := make([]*sessions.ActiveSession, 0)
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
 		t.Error(err)
-	} else if len(aSessions) != 4 { // the digest has increased the number of sessions
+	} else if len(aSessions) != 2 {
 		t.Errorf("wrong active sessions: %s", utils.ToJSON(aSessions))
 	}
 }
@@ -435,7 +435,7 @@ func TestSSv1ItUpdateSession(t *testing.T) {
 	aSessions := make([]*sessions.ActiveSession, 0)
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
 		t.Error(err)
-	} else if len(aSessions) != 4 { // the digest has increased the number of sessions
+	} else if len(aSessions) != 2 {
 		t.Errorf("wrong active sessions: %s", utils.ToJSON(aSessions))
 	}
 }
@@ -659,7 +659,7 @@ func TestSSv1ItForceUpdateSession(t *testing.T) {
 	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	eAcntVal := 9.25
+	eAcntVal := 9.3995
 	if err := sSApierRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
@@ -731,7 +731,7 @@ func TestSSv1ItForceUpdateSession(t *testing.T) {
 		t.Errorf("wrong active ssesions: %s", utils.ToJSON(aSessions))
 	}
 
-	eAcntVal = 9.10
+	eAcntVal = 9.2495
 	if err := sSApierRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
@@ -833,7 +833,7 @@ func TestSSv1ItDynamicDebit(t *testing.T) {
 		args1, &rply1); err != nil {
 		t.Error(err)
 		return
-	} else if *rply1.MaxUsage != -1 {
+	} else if *rply1.MaxUsage != time.Duration(0*time.Second) {
 		t.Errorf("Unexpected MaxUsage: %v", rply1.MaxUsage)
 	}
 
@@ -873,7 +873,7 @@ func TestSSv1ItDynamicDebit(t *testing.T) {
 	} else if len(aSessions) != 2 {
 		t.Errorf("wrong active sessions: %s", utils.ToJSON(aSessions))
 	}
-	rplyt := ""
+	var rplyt string
 	if err := sSv1BiRpc.Call(utils.SessionSv1ForceDisconnect,
 		nil, &rplyt); err != nil {
 		t.Error(err)
@@ -891,7 +891,7 @@ func TestSSv1ItStopCgrEngine(t *testing.T) {
 	if err := sSv1BiRpc.Close(); err != nil { // Close the connection so we don't get EOF warnings from client
 		t.Error(err)
 	}
-	if err := engine.KillEngine(100); err != nil {
+	if err := engine.KillEngine(1000); err != nil {
 		t.Error(err)
 	}
 }

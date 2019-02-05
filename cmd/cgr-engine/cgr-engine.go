@@ -285,16 +285,25 @@ func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, in
 	sm := sessions.NewSessionS(cfg, ralsConns, resSConns, threshSConns,
 		statSConns, suplSConns, attrSConns, cdrsConn, chargerSConn,
 		sReplConns, cfg.GeneralCfg().DefaultTimezone)
-	if err = sm.ListenAndServe(exitChan); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.SessionS, err))
-	}
+	//start sync session in a separate gorutine
+	go func() {
+		if err = sm.ListenAndServe(exitChan); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.SessionS, err))
+		}
+	}()
 	// Pass internal connection via BiRPCClient
 	internalSMGChan <- sm
 	// Register RPC handler
+	smgRpc := v1.NewSMGenericV1(sm)
+	server.RpcRegister(smgRpc)
+
 	ssv1 := v1.NewSessionSv1(sm) // methods with multiple options
 	server.RpcRegister(ssv1)
 	// Register BiRpc handlers
 	if cfg.SessionSCfg().ListenBijson != "" {
+		for method, handler := range smgRpc.Handlers() {
+			server.BiRPCRegisterName(method, handler)
+		}
 		for method, handler := range ssv1.Handlers() {
 			server.BiRPCRegisterName(method, handler)
 		}

@@ -362,6 +362,7 @@ func (sS *SessionS) setSTerminator(s *Session) {
 // forceSTerminate is called when a session times-out or it is forced from CGRateS side
 func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUsed *time.Duration) (err error) {
 	if extraDebit != 0 {
+
 		for i := range s.SRuns {
 			if _, err = sS.debitSession(s, i, extraDebit, nil); err != nil {
 				utils.Logger.Warning(
@@ -414,18 +415,20 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 		}
 	}
 	if clntConn := sS.biJClnt(s.ClientConnID); clntConn != nil {
-		var rply string
-		if err := clntConn.conn.Call(utils.SessionSv1DisconnectSession,
-			utils.AttrDisconnectSession{
-				EventStart: s.EventStart.AsMapInterface(),
-				Reason:     ErrForcedDisconnect.Error()},
-			&rply); err != nil {
-			if err != utils.ErrNotImplemented {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> err: %s remotely disconnect session with id: %s",
-						utils.SessionS, err.Error(), s.CGRID))
+		go func() {
+			var rply string
+			if err := clntConn.conn.Call(utils.SessionSv1DisconnectSession,
+				utils.AttrDisconnectSession{
+					EventStart: s.EventStart.AsMapInterface(),
+					Reason:     ErrForcedDisconnect.Error()},
+				&rply); err != nil {
+				if err != utils.ErrNotImplemented {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> err: %s remotely disconnect session with id: %s",
+							utils.SessionS, err.Error(), s.CGRID))
+				}
 			}
-		}
+		}()
 	}
 	sS.replicateSessions(s.CGRID, false, sS.sReplConns)
 	return
@@ -1178,6 +1181,10 @@ func (sS *SessionS) updateSession(s *Session, updtEv engine.MapEvent) (maxUsage 
 		s.EventStart.Set(k, v) // update previoius field with new one
 	}
 	sS.setSTerminator(s) // reset the terminator
+	//init has no updtEv
+	if updtEv == nil {
+		updtEv = engine.NewMapEvent(s.EventStart.AsMapInterface())
+	}
 	var reqMaxUsage time.Duration
 	if reqMaxUsage, err = updtEv.GetDuration(utils.Usage); err != nil {
 		if err != utils.ErrNotFound {
@@ -1186,7 +1193,6 @@ func (sS *SessionS) updateSession(s *Session, updtEv engine.MapEvent) (maxUsage 
 		reqMaxUsage = sS.cgrCfg.SessionSCfg().MaxCallDuration
 		err = nil
 	}
-	s.RLock()
 	var maxUsageSet bool // so we know if we have set the 0 on purpose
 	prepaidReqs := []string{utils.META_PREPAID, utils.META_PSEUDOPREPAID}
 	for i, sr := range s.SRuns {
@@ -1205,7 +1211,7 @@ func (sS *SessionS) updateSession(s *Session, updtEv engine.MapEvent) (maxUsage 
 			maxUsageSet = true
 		}
 	}
-	s.RUnlock()
+
 	return
 }
 
@@ -2366,8 +2372,10 @@ func (sS *SessionS) BiRPCv1ForceDisconnect(clnt rpcclient.RpcClientConnection,
 			err = utils.ErrPartiallyExecuted
 		}
 	}
-	if err != nil {
+	if err == nil {
 		*reply = utils.OK
+	} else {
+		*reply = err.Error()
 	}
 	return nil
 }
