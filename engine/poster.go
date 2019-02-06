@@ -621,14 +621,13 @@ func (pstr *SQSPoster) Post(message []byte, fallbackFileName string) (err error)
 		return err
 	}
 
-	// For CreateQueue
-	if _, err = svc.CreateQueue(&sqs.CreateQueueInput{
-		QueueName: aws.String(pstr.queueID),
-	}); err != nil {
-		return err
-	}
-
 	for i := 0; i < pstr.attempts; i++ {
+		// For CreateQueue
+		if _, err = svc.CreateQueue(&sqs.CreateQueueInput{
+			QueueName: aws.String(pstr.queueID),
+		}); err != nil {
+			continue
+		}
 		result, err := svc.GetQueueUrl(
 			&sqs.GetQueueUrlInput{
 				QueueName: aws.String(pstr.queueID),
