@@ -1521,12 +1521,15 @@ func (v1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string) (
 				utils.PosterTransportContentTypes[ffn.Transport], fileContent,
 				v1.Config.GeneralCfg().PosterAttempts, failoverPath)
 		case utils.MetaAMQPjsonCDR, utils.MetaAMQPjsonMap:
-			err = engine.AMQPPostersCache.PostAMQP(ffn.Address,
+			err = engine.PostersCache.PostAMQP(ffn.Address,
 				v1.Config.GeneralCfg().PosterAttempts, fileContent,
 				utils.PosterTransportContentTypes[ffn.Transport],
 				failedReqsOutDir, file.Name())
 		case utils.MetaAWSjsonMap:
-			err = engine.AMQPPostersCache.PostAWS(ffn.Address, v1.Config.GeneralCfg().PosterAttempts,
+			err = engine.PostersCache.PostAWS(ffn.Address, v1.Config.GeneralCfg().PosterAttempts,
+				fileContent, failedReqsOutDir, file.Name())
+		case utils.MetaSQSjsonMap:
+			err = engine.PostersCache.PostSQS(ffn.Address, v1.Config.GeneralCfg().PosterAttempts,
 				fileContent, failedReqsOutDir, file.Name())
 		default:
 			err = fmt.Errorf("unsupported replication transport: %s", ffn.Transport)

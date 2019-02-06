@@ -246,7 +246,7 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 			return err
 		}
 		body = jsn
-	case utils.MetaHTTPjsonMap, utils.MetaAMQPjsonMap, utils.MetaAWSjsonMap:
+	case utils.MetaHTTPjsonMap, utils.MetaAMQPjsonMap, utils.MetaAWSjsonMap, utils.MetaSQSjsonMap:
 		expMp, err := cdr.AsExportMap(cdre.exportTemplate.ContentFields, cdre.httpSkipTlsCheck, nil, cdre.roundingDecimals, cdre.filterS)
 		if err != nil {
 			return err
@@ -283,10 +283,12 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 	case utils.MetaHTTPjsonCDR, utils.MetaHTTPjsonMap, utils.MetaHTTPjson, utils.META_HTTP_POST:
 		_, err = cdre.httpPoster.Post(cdre.exportPath, utils.PosterTransportContentTypes[cdre.exportFormat], body, cdre.attempts, fallbackPath)
 	case utils.MetaAMQPjsonCDR, utils.MetaAMQPjsonMap:
-		err = AMQPPostersCache.PostAMQP(cdre.exportPath, cdre.attempts, body.([]byte),
+		err = PostersCache.PostAMQP(cdre.exportPath, cdre.attempts, body.([]byte),
 			utils.PosterTransportContentTypes[cdre.exportFormat], cdre.fallbackPath, fallbackFileName)
 	case utils.MetaAWSjsonMap:
-		err = AMQPPostersCache.PostAWS(cdre.exportPath, cdre.attempts, body.([]byte), cdre.fallbackPath, fallbackFileName)
+		err = PostersCache.PostAWS(cdre.exportPath, cdre.attempts, body.([]byte), cdre.fallbackPath, fallbackFileName)
+	case utils.MetaSQSjsonMap:
+		err = PostersCache.PostSQS(cdre.exportPath, cdre.attempts, body.([]byte), cdre.fallbackPath, fallbackFileName)
 	}
 	return
 }

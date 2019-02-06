@@ -126,6 +126,7 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		MetaPublishBalance:        publishBalance,
 		utils.MetaAMQPjsonMap:     sendAMQP,
 		utils.MetaAWSjsonMap:      sendAWS,
+		utils.MetaSQSjsonMap:      sendSQS,
 	}
 	f, exists := actionFuncMap[typ]
 	return f, exists
@@ -391,7 +392,7 @@ func sendAMQP(ub *Account, a *Action, acs Actions, extraData interface{}) error 
 		FileSuffix: utils.JSNSuffix,
 	}).AsString()
 
-	return AMQPPostersCache.PostAMQP(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts,
+	return PostersCache.PostAMQP(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts,
 		body, utils.CONTENT_JSON, cfg.GeneralCfg().FailedPostsDir, fallbackFileName)
 }
 
@@ -409,7 +410,25 @@ func sendAWS(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 		FileSuffix: utils.JSNSuffix,
 	}).AsString()
 
-	return AMQPPostersCache.PostAWS(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts,
+	return PostersCache.PostAWS(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts,
+		body, cfg.GeneralCfg().FailedPostsDir, fallbackFileName)
+}
+
+func sendSQS(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+	body, err := getOneData(ub, extraData)
+	if err != nil {
+		return err
+	}
+	cfg := config.CgrConfig()
+	fallbackFileName := (&utils.FallbackFileName{
+		Module:     fmt.Sprintf("%s>%s", utils.ActionsPoster, a.ActionType),
+		Transport:  utils.MetaSQSjsonMap,
+		Address:    a.ExtraParameters,
+		RequestID:  utils.GenUUID(),
+		FileSuffix: utils.JSNSuffix,
+	}).AsString()
+
+	return PostersCache.PostSQS(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts,
 		body, cfg.GeneralCfg().FailedPostsDir, fallbackFileName)
 }
 
