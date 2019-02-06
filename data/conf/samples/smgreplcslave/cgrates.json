@@ -21,6 +21,18 @@
 	"enabled": true,					// start the CDR Server service:  <true|false>
 },
 
+"attributes": {
+	"enabled": true,
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": [
+		{"address": "*internal"}
+	],
+},
+
 "sessions": {
 	"enabled": true,						// starts SessionManager service: <true|false>
 	"listen_bijson": "127.0.0.1:22014",		// address where to listen for bidirectional JSON-RPC requests

@@ -16,6 +16,13 @@
 
 "rals": {
 	"enabled": true,
+	"thresholds_conns": [
+		{"address": "127.0.0.1:2012", "transport":"*json"},
+	],
+},
+
+"scheduler": {
+	"enabled": true,
 },
 
 "cdrs": {
@@ -24,15 +31,20 @@
 		{"address": "*internal"},
 	],
 	"chargers_conns":[
-		{"address": "*internal"},
+		{"address": "127.0.0.1:2012", "transport":"*json"},
 	],
 	"rals_conns": [
-		{"address": "*internal"}
+		{"address": "127.0.0.1:2012", "transport":"*json"},
 	],
 },
 
 "attributes": {
 	"enabled": true,
+},
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "1s",
 },
 
 "chargers": {

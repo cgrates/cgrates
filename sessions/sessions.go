@@ -415,20 +415,18 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 		}
 	}
 	if clntConn := sS.biJClnt(s.ClientConnID); clntConn != nil {
-		go func() {
-			var rply string
-			if err := clntConn.conn.Call(utils.SessionSv1DisconnectSession,
-				utils.AttrDisconnectSession{
-					EventStart: s.EventStart.AsMapInterface(),
-					Reason:     ErrForcedDisconnect.Error()},
-				&rply); err != nil {
-				if err != utils.ErrNotImplemented {
-					utils.Logger.Warning(
-						fmt.Sprintf("<%s> err: %s remotely disconnect session with id: %s",
-							utils.SessionS, err.Error(), s.CGRID))
-				}
+		var rply string
+		if err := clntConn.conn.Call(utils.SessionSv1DisconnectSession,
+			utils.AttrDisconnectSession{
+				EventStart: s.EventStart.AsMapInterface(),
+				Reason:     ErrForcedDisconnect.Error()},
+			&rply); err != nil {
+			if err != utils.ErrNotImplemented {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> err: %s remotely disconnect session with id: %s",
+						utils.SessionS, err.Error(), s.CGRID))
 			}
-		}()
+		}
 	}
 	sS.replicateSessions(s.CGRID, false, sS.sReplConns)
 	return

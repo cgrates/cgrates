@@ -785,6 +785,7 @@ const (
 	SessionSv1Ping                       = "SessionSv1.Ping"
 	SessionSv1GetActiveSessionIDs        = "SessionSv1.GetActiveSessionIDs"
 	SessionSv1RegisterInternalBiJSONConn = "SessionSv1.RegisterInternalBiJSONConn"
+	SessionSv1ReplicateSessions          = "SessionSv1.ReplicateSessions"
 )
 
 // Responder APIs
