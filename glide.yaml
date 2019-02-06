@@ -62,3 +62,7 @@ import:
   - require
 - package: github.com/Masterminds/semver
   version: ^1.4.2
+- package: github.com/aws/aws-sdk-go
+  subpackages:
+  - aws
+  - service
