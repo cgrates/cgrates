@@ -377,18 +377,19 @@ func TestSessionSRplManualReplicate(t *testing.T) {
 	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions, nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
-	argsRepl := ArgsReplicateSessions{Connections: []*config.HaPoolConfig{
-		{
-			Address:     smgRplcSlaveCfg.ListenCfg().RPCJSONListen,
-			Transport:   utils.MetaJSONrpc,
-			Synchronous: true},
-	}}
+	argsRepl := ArgsReplicateSessions{
+		Connections: []*config.HaPoolConfig{
+			{
+				Address:     smgRplcSlaveCfg.ListenCfg().RPCJSONListen,
+				Transport:   utils.MetaJSONrpc,
+				Synchronous: true},
+		}}
 	var repply string
-	if err := smgRplcMstrRPC.Call("SMGenericV1.ReplicateActiveSessions", argsRepl, &repply); err != nil {
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1ReplicateSessions, argsRepl, &repply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
-	if err := smgRplcSlvRPC.Call("SMGenericV1.GetPassiveSessions", nil, &aSessions); err != nil {
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions, nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
@@ -414,28 +415,30 @@ func TestSessionSRplManualReplicate(t *testing.T) {
 		t.Fatal(err)
 	}
 	// Master should have no session active/passive
-	if err := smgRplcMstrRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
-	if err := smgRplcMstrRPC.Call("SMGenericV1.GetPassiveSessions", nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetPassiveSessions, nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
 	// recover passive sessions from slave
-	argsRepl = ArgsReplicateSessions{Connections: []*config.HaPoolConfig{
-		{
-			Address:     smgRplcMasterCfg.ListenCfg().RPCJSONListen,
-			Transport:   utils.MetaJSONrpc,
-			Synchronous: true},
-	}}
-	if err := smgRplcSlvRPC.Call("SMGenericV1.ReplicatePassiveSessions", argsRepl, &repply); err != nil {
+	argsRepl = ArgsReplicateSessions{
+		Passive: true,
+		Connections: []*config.HaPoolConfig{
+			{
+				Address:     smgRplcMasterCfg.ListenCfg().RPCJSONListen,
+				Transport:   utils.MetaJSONrpc,
+				Synchronous: true},
+		}}
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1ReplicateSessions, argsRepl, &repply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
 	// Master should have no session active/passive
-	if err := smgRplcMstrRPC.Call("SMGenericV1.GetActiveSessions", nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
-	if err := smgRplcMstrRPC.Call("SMGenericV1.GetPassiveSessions", nil, &aSessions); err != nil {
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetPassiveSessions, nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
@@ -446,7 +449,7 @@ func TestSessionSRplManualReplicate(t *testing.T) {
 }
 
 func TestSessionSRplStopCgrEngine(t *testing.T) {
-	if err := engine.KillEngine(100); err != nil {
+	if err := engine.KillEngine(1000); err != nil {
 		t.Error(err)
 	}
 }
