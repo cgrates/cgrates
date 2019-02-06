@@ -504,15 +504,34 @@ type TPCharger struct {
 	CreatedAt          time.Time
 }
 
+// type TPDispatcher struct {
+// 	PK                 uint `gorm:"primary_key"`
+// 	Tpid               string
+// 	Tenant             string  `index:"0" re:""`
+// 	ID                 string  `index:"1" re:""`
+// 	FilterIDs          string  `index:"2" re:""`
+// 	ActivationInterval string  `index:"3" re:""`
+// 	Strategy           string  `index:"4" re:""`
+// 	Hosts              string  `index:"5" re:""`
+// 	Weight             float64 `index:"6" re:"\d+\.?\d*"`
+// 	CreatedAt          time.Time
+// }
+
 type TPDispatcher struct {
-	PK                 uint `gorm:"primary_key"`
-	Tpid               string
-	Tenant             string  `index:"0" re:""`
-	ID                 string  `index:"1" re:""`
-	FilterIDs          string  `index:"2" re:""`
-	ActivationInterval string  `index:"3" re:""`
-	Strategy           string  `index:"4" re:""`
-	Hosts              string  `index:"5" re:""`
-	Weight             float64 `index:"6" re:"\d+\.?\d*"`
+	PK                 uint    `gorm:"primary_key"`
+	Tpid               string  //
+	Tenant             string  `index:"0" re:""`           //
+	ID                 string  `index:"1" re:""`           //
+	Contexts           string  `index:"2" re:""`           //
+	FilterIDs          string  `index:"3" re:""`           //
+	ActivationInterval string  `index:"4" re:""`           //
+	Strategy           string  `index:"5" re:""`           //
+	StrategyParameters string  `index:"6" re:""`           //
+	ConnID             string  `index:"7" re:""`           //
+	ConnFilterIDs      string  `index:"8" re:""`           //
+	ConnWeight         float64 `index:"9" re:"\d+\.?\d*"`  //
+	ConnBlocker        bool    `index:"10" re:""`          //
+	ConnParameters     string  `index:"11" re:""`          //
+	Weight             float64 `index:"12" re:"\d+\.?\d*"` //
 	CreatedAt          time.Time
 }

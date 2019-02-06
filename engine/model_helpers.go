@@ -2622,9 +2622,12 @@ type TPDispatchers []*TPDispatcher
 func (tps TPDispatchers) AsTPDispatchers() (result []*utils.TPDispatcherProfile) {
 	mst := make(map[string]*utils.TPDispatcherProfile)
 	filterMap := make(map[string]utils.StringMap)
-	hostMap := make(map[string]utils.StringMap)
+	contextMap := make(map[string]utils.StringMap)
+	connsMap := make(map[string]map[string]utils.TPDispatcherConns)
+	connsFilterMap := make(map[string]map[string]utils.StringMap)
 	for _, tp := range tps {
-		tpDPP, found := mst[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]
+		tenantID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
+		tpDPP, found := mst[tenantID]
 		if !found {
 			tpDPP = &utils.TPDispatcherProfile{
 				TPid:   tp.Tpid,
@@ -2632,8 +2635,23 @@ func (tps TPDispatchers) AsTPDispatchers() (result []*utils.TPDispatcherProfile)
 				ID:     tp.ID,
 			}
 		}
-		if tp.Weight != 0 {
-			tpDPP.Weight = tp.Weight
+		if tp.Contexts != "" {
+			if _, has := contextMap[tenantID]; !has {
+				contextMap[tenantID] = make(utils.StringMap)
+			}
+			contextSplit := strings.Split(tp.Contexts, utils.INFIELD_SEP)
+			for _, context := range contextSplit {
+				contextMap[tenantID][context] = true
+			}
+		}
+		if tp.FilterIDs != "" {
+			if _, has := filterMap[tenantID]; !has {
+				filterMap[tenantID] = make(utils.StringMap)
+			}
+			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
+			for _, filter := range filterSplit {
+				filterMap[tenantID][filter] = true
+			}
 		}
 		if len(tp.ActivationInterval) != 0 {
 			tpDPP.ActivationInterval = new(utils.TPActivationInterval)
@@ -2645,28 +2663,47 @@ func (tps TPDispatchers) AsTPDispatchers() (result []*utils.TPDispatcherProfile)
 				tpDPP.ActivationInterval.ActivationTime = aiSplt[0]
 			}
 		}
-		if tp.FilterIDs != "" {
-			if _, has := filterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]; !has {
-				filterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(utils.StringMap)
-			}
-			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
-			for _, filter := range filterSplit {
-				filterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][filter] = true
-			}
-		}
 		if tp.Strategy != "" {
 			tpDPP.Strategy = tp.Strategy
 		}
-		if tp.Hosts != "" {
-			if _, has := hostMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]; !has {
-				hostMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(utils.StringMap)
-			}
-			hostsSplit := strings.Split(tp.Hosts, utils.INFIELD_SEP)
-			for _, host := range hostsSplit {
-				hostMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][host] = true
+		if tp.StrategyParameters != "" {
+			for _, param := range strings.Split(tp.FilterIDs, utils.INFIELD_SEP) {
+				tpDPP.StrategyParams = append(tpDPP.StrategyParams, param)
 			}
 		}
-		mst[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = tpDPP
+		if tp.ConnID != "" {
+			if _, has := connsMap[tenantID]; !has {
+				connsMap[tenantID] = make(map[string]utils.TPDispatcherConns)
+			}
+			conn, has := connsMap[tenantID][tp.ConnID]
+			if !has {
+				conn = utils.TPDispatcherConns{
+					ID:      tp.ConnID,
+					Weight:  tp.ConnWeight,
+					Blocker: tp.ConnBlocker,
+				}
+			}
+			for _, param := range strings.Split(tp.ConnParameters, utils.INFIELD_SEP) {
+				conn.Params = append(conn.Params, param)
+			}
+			connsMap[tenantID][tp.ConnID] = conn
+
+			if dFilter, has := connsFilterMap[tenantID]; !has {
+				connsFilterMap[tenantID] = make(map[string]utils.StringMap)
+				connsFilterMap[tenantID][tp.ConnID] = make(utils.StringMap)
+			} else if _, has := dFilter[tp.ConnID]; !has {
+				connsFilterMap[tenantID][tp.ConnID] = make(utils.StringMap)
+			}
+
+			for _, filter := range strings.Split(tp.ConnFilterIDs, utils.INFIELD_SEP) {
+				connsFilterMap[tenantID][tp.ConnID][filter] = true
+			}
+
+		}
+		if tp.Weight != 0 {
+			tpDPP.Weight = tp.Weight
+		}
+		mst[tenantID] = tpDPP
 	}
 	result = make([]*utils.TPDispatcherProfile, len(mst))
 	i := 0
@@ -2675,8 +2712,14 @@ func (tps TPDispatchers) AsTPDispatchers() (result []*utils.TPDispatcherProfile)
 		for filterID := range filterMap[tntID] {
 			result[i].FilterIDs = append(result[i].FilterIDs, filterID)
 		}
-		for host := range hostMap[tntID] {
-			result[i].Hosts = append(result[i].Hosts, host)
+		for context := range contextMap[tntID] {
+			result[i].Subsystems = append(result[i].Subsystems, context)
+		}
+		for conID, conn := range connsMap[tntID] {
+			for filter := range connsFilterMap[tntID][conID] {
+				conn.FilterIDs = append(conn.FilterIDs, filter)
+			}
+			result[i].Conns = append(result[i].Conns, &conn)
 		}
 		i++
 	}
@@ -2684,102 +2727,122 @@ func (tps TPDispatchers) AsTPDispatchers() (result []*utils.TPDispatcherProfile)
 }
 
 func APItoModelTPDispatcher(tpDPP *utils.TPDispatcherProfile) (mdls TPDispatchers) {
-	if tpDPP != nil {
-		min := len(tpDPP.FilterIDs)
-		isFilter := true
-		if min > len(tpDPP.Hosts) {
-			min = len(tpDPP.Hosts)
-			isFilter = false
-		}
-		if min == 0 {
-			mdl := &TPDispatcher{
-				Tenant:   tpDPP.Tenant,
-				Tpid:     tpDPP.TPid,
-				ID:       tpDPP.ID,
-				Weight:   tpDPP.Weight,
-				Strategy: tpDPP.Strategy,
-			}
-			if tpDPP.ActivationInterval != nil {
-				if tpDPP.ActivationInterval.ActivationTime != "" {
-					mdl.ActivationInterval = tpDPP.ActivationInterval.ActivationTime
-				}
-				if tpDPP.ActivationInterval.ExpiryTime != "" {
-					mdl.ActivationInterval += utils.INFIELD_SEP + tpDPP.ActivationInterval.ExpiryTime
-				}
-			}
-			if isFilter && len(tpDPP.Hosts) > 0 {
-				mdl.Hosts = tpDPP.Hosts[0]
-			} else if len(tpDPP.FilterIDs) > 0 {
-				mdl.FilterIDs = tpDPP.FilterIDs[0]
-			}
-			min = 1
-			mdls = append(mdls, mdl)
-		} else {
-			for i := 0; i < min; i++ {
-				mdl := &TPDispatcher{
-					Tenant: tpDPP.Tenant,
-					Tpid:   tpDPP.TPid,
-					ID:     tpDPP.ID,
-				}
-				if i == 0 {
-					mdl.Weight = tpDPP.Weight
-					mdl.Strategy = tpDPP.Strategy
-					if tpDPP.ActivationInterval != nil {
-						if tpDPP.ActivationInterval.ActivationTime != "" {
-							mdl.ActivationInterval = tpDPP.ActivationInterval.ActivationTime
-						}
-						if tpDPP.ActivationInterval.ExpiryTime != "" {
-							mdl.ActivationInterval += utils.INFIELD_SEP + tpDPP.ActivationInterval.ExpiryTime
-						}
-					}
-				}
-				mdl.Hosts = tpDPP.Hosts[i]
-				mdl.FilterIDs = tpDPP.FilterIDs[i]
-				mdls = append(mdls, mdl)
-			}
-		}
-		if len(tpDPP.FilterIDs)-min > 0 {
-			for i := min; i < len(tpDPP.FilterIDs); i++ {
-				mdl := &TPDispatcher{
-					Tenant: tpDPP.Tenant,
-					Tpid:   tpDPP.TPid,
-					ID:     tpDPP.ID,
-				}
-				mdl.FilterIDs = tpDPP.FilterIDs[i]
-				mdls = append(mdls, mdl)
-			}
-		}
-		if len(tpDPP.Hosts)-min > 0 {
-			for i := min; i < len(tpDPP.Hosts); i++ {
-				mdl := &TPDispatcher{
-					Tenant: tpDPP.Tenant,
-					Tpid:   tpDPP.TPid,
-					ID:     tpDPP.ID,
-				}
-				mdl.Hosts = tpDPP.Hosts[i]
-				mdls = append(mdls, mdl)
-			}
-		}
+	// if tpDPP != nil {
+	// 	min := len(tpDPP.FilterIDs)
+	// 	isFilter := true
+	// 	if min > len(tpDPP.Hosts) {
+	// 		min = len(tpDPP.Hosts)
+	// 		isFilter = false
+	// 	}
+	// 	if min == 0 {
+	// 		mdl := &TPDispatcher{
+	// 			Tenant:   tpDPP.Tenant,
+	// 			Tpid:     tpDPP.TPid,
+	// 			ID:       tpDPP.ID,
+	// 			Weight:   tpDPP.Weight,
+	// 			Strategy: tpDPP.Strategy,
+	// 		}
+	// 		if tpDPP.ActivationInterval != nil {
+	// 			if tpDPP.ActivationInterval.ActivationTime != "" {
+	// 				mdl.ActivationInterval = tpDPP.ActivationInterval.ActivationTime
+	// 			}
+	// 			if tpDPP.ActivationInterval.ExpiryTime != "" {
+	// 				mdl.ActivationInterval += utils.INFIELD_SEP + tpDPP.ActivationInterval.ExpiryTime
+	// 			}
+	// 		}
+	// 		if isFilter && len(tpDPP.Hosts) > 0 {
+	// 			mdl.Hosts = tpDPP.Hosts[0]
+	// 		} else if len(tpDPP.FilterIDs) > 0 {
+	// 			mdl.FilterIDs = tpDPP.FilterIDs[0]
+	// 		}
+	// 		min = 1
+	// 		mdls = append(mdls, mdl)
+	// 	} else {
+	// 		for i := 0; i < min; i++ {
+	// 			mdl := &TPDispatcher{
+	// 				Tenant: tpDPP.Tenant,
+	// 				Tpid:   tpDPP.TPid,
+	// 				ID:     tpDPP.ID,
+	// 			}
+	// 			if i == 0 {
+	// 				mdl.Weight = tpDPP.Weight
+	// 				mdl.Strategy = tpDPP.Strategy
+	// 				if tpDPP.ActivationInterval != nil {
+	// 					if tpDPP.ActivationInterval.ActivationTime != "" {
+	// 						mdl.ActivationInterval = tpDPP.ActivationInterval.ActivationTime
+	// 					}
+	// 					if tpDPP.ActivationInterval.ExpiryTime != "" {
+	// 						mdl.ActivationInterval += utils.INFIELD_SEP + tpDPP.ActivationInterval.ExpiryTime
+	// 					}
+	// 				}
+	// 			}
+	// 			mdl.Hosts = tpDPP.Hosts[i]
+	// 			mdl.FilterIDs = tpDPP.FilterIDs[i]
+	// 			mdls = append(mdls, mdl)
+	// 		}
+	// 	}
+	// 	if len(tpDPP.FilterIDs)-min > 0 {
+	// 		for i := min; i < len(tpDPP.FilterIDs); i++ {
+	// 			mdl := &TPDispatcher{
+	// 				Tenant: tpDPP.Tenant,
+	// 				Tpid:   tpDPP.TPid,
+	// 				ID:     tpDPP.ID,
+	// 			}
+	// 			mdl.FilterIDs = tpDPP.FilterIDs[i]
+	// 			mdls = append(mdls, mdl)
+	// 		}
+	// 	}
+	// 	if len(tpDPP.Hosts)-min > 0 {
+	// 		for i := min; i < len(tpDPP.Hosts); i++ {
+	// 			mdl := &TPDispatcher{
+	// 				Tenant: tpDPP.Tenant,
+	// 				Tpid:   tpDPP.TPid,
+	// 				ID:     tpDPP.ID,
+	// 			}
+	// 			mdl.Hosts = tpDPP.Hosts[i]
+	// 			mdls = append(mdls, mdl)
+	// 		}
+	// 	}
 
-	}
+	// }
 	return
 }
 
 func APItoDispatcherProfile(tpDPP *utils.TPDispatcherProfile, timezone string) (dpp *DispatcherProfile, err error) {
 	dpp = &DispatcherProfile{
-		Tenant:    tpDPP.Tenant,
-		ID:        tpDPP.ID,
-		Weight:    tpDPP.Weight,
-		Strategy:  tpDPP.Strategy,
-		FilterIDs: make([]string, len(tpDPP.FilterIDs)),
-		// Hosts:     make([]string, len(tpDPP.Hosts)),
+		Tenant:         tpDPP.Tenant,
+		ID:             tpDPP.ID,
+		Weight:         tpDPP.Weight,
+		Strategy:       tpDPP.Strategy,
+		FilterIDs:      make([]string, len(tpDPP.FilterIDs)),
+		Subsystems:     make([]string, len(tpDPP.Subsystems)),
+		StrategyParams: make(map[string]interface{}),
+		Conns:          make(DispatcherConns, len(tpDPP.Conns)),
 	}
 	for i, fli := range tpDPP.FilterIDs {
 		dpp.FilterIDs[i] = fli
 	}
-	// for i, host := range tpDPP.Hosts {
-	// dpp.Hosts[i] = host
-	// }
+	for i, sub := range tpDPP.Subsystems {
+		dpp.Subsystems[i] = sub
+	}
+	for i, param := range tpDPP.StrategyParams {
+		dpp.StrategyParams[string(i)] = param
+	}
+	for i, conn := range tpDPP.Conns {
+		dpp.Conns[i] = &DispatcherConn{
+			ID:        conn.ID,
+			Weight:    conn.Weight,
+			Blocker:   conn.Blocker,
+			FilterIDs: make([]string, len(conn.FilterIDs)),
+			Params:    make(map[string]interface{}),
+		}
+		for j, fltr := range conn.FilterIDs {
+			dpp.Conns[i].FilterIDs[j] = fltr
+		}
+		for j, param := range conn.Params {
+			dpp.Conns[i].Params[string(j)] = param
+		}
+	}
 	if tpDPP.ActivationInterval != nil {
 		if dpp.ActivationInterval, err = tpDPP.ActivationInterval.AsActivationInterval(timezone); err != nil {
 			return nil, err

@@ -1399,13 +1399,23 @@ type TPTntID struct {
 	ID     string
 }
 
+type TPDispatcherConns struct {
+	ID        string
+	FilterIDs []string
+	Weight    float64       // applied in case of multiple connections need to be ordered
+	Params    []interface{} // additional parameters stored for a session
+	Blocker   bool          // no connection after this one
+}
+
 type TPDispatcherProfile struct {
 	TPid               string
 	Tenant             string
 	ID                 string
+	Subsystems         []string
 	FilterIDs          []string
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
 	Strategy           string
-	Hosts              []string
+	StrategyParams     []interface{} // ie for distribution, set here the pool weights
 	Weight             float64
+	Conns              []*TPDispatcherConns
 }
