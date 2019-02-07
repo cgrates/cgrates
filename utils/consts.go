@@ -778,7 +778,7 @@ const (
 	SessionSv1ForceDisconnect            = "SessionSv1.ForceDisconnect"
 	SessionSv1GetPassiveSessions         = "SessionSv1.GetPassiveSessions"
 	SessionSv1GetPassiveSessionsCount    = "SessionSv1.GetPassiveSessionsCount"
-	SessionSv1SetPassiveSession          = "SessionSV1.SetPassiveSession"
+	SessionSv1SetPassiveSession          = "SessionSv1.SetPassiveSession"
 	SMGenericV1InitiateSession           = "SMGenericV1.InitiateSession"
 	SMGenericV2InitiateSession           = "SMGenericV2.InitiateSession"
 	SMGenericV2UpdateSession             = "SMGenericV2.UpdateSession"
