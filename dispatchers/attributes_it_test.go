@@ -196,7 +196,7 @@ func testDspAttrTestMissingApiKey(t *testing.T) {
 	}
 	var attrReply *engine.AttributeProfile
 	if err := dspAttrRPC.Call(utils.AttributeSv1GetAttributeForEvent,
-		args, &attrReply); err.Error() != utils.NewErrMandatoryIeMissing(utils.APIKey).Error() {
+		args, &attrReply); err == nil || err.Error() != utils.NewErrMandatoryIeMissing(utils.APIKey).Error() {
 		t.Error(err)
 	}
 }
@@ -215,7 +215,7 @@ func testDspAttrTestUnknownApiKey(t *testing.T) {
 	}
 	var attrReply *engine.AttributeProfile
 	if err := dspAttrRPC.Call(utils.AttributeSv1GetAttributeForEvent,
-		args, &attrReply); err.Error() != utils.ErrUnknownApiKey.Error() {
+		args, &attrReply); err == nil || err.Error() != utils.ErrUnknownApiKey.Error() {
 		t.Error(err)
 	}
 }
@@ -234,7 +234,7 @@ func testDspAttrTestAuthKey(t *testing.T) {
 	}
 	var attrReply *engine.AttributeProfile
 	if err := dspAttrRPC.Call(utils.AttributeSv1GetAttributeForEvent,
-		args, &attrReply); err.Error() != utils.ErrUnauthorizedApi.Error() {
+		args, &attrReply); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
 }

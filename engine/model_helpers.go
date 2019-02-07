@@ -2719,92 +2719,98 @@ func (tps TPDispatchers) AsTPDispatchers() (result []*utils.TPDispatcherProfile)
 			for filter := range connsFilterMap[tntID][conID] {
 				conn.FilterIDs = append(conn.FilterIDs, filter)
 			}
-			result[i].Conns = append(result[i].Conns, &conn)
+			result[i].Conns = append(result[i].Conns, &utils.TPDispatcherConns{
+				ID:        conn.ID,
+				FilterIDs: conn.FilterIDs,
+				Weight:    conn.Weight,
+				Params:    conn.Params,
+				Blocker:   conn.Blocker,
+			})
 		}
 		i++
 	}
 	return
 }
 
-func APItoModelTPDispatcher(tpDPP *utils.TPDispatcherProfile) (mdls TPDispatchers) {
-	// if tpDPP != nil {
-	// 	min := len(tpDPP.FilterIDs)
-	// 	isFilter := true
-	// 	if min > len(tpDPP.Hosts) {
-	// 		min = len(tpDPP.Hosts)
-	// 		isFilter = false
-	// 	}
-	// 	if min == 0 {
-	// 		mdl := &TPDispatcher{
-	// 			Tenant:   tpDPP.Tenant,
-	// 			Tpid:     tpDPP.TPid,
-	// 			ID:       tpDPP.ID,
-	// 			Weight:   tpDPP.Weight,
-	// 			Strategy: tpDPP.Strategy,
-	// 		}
-	// 		if tpDPP.ActivationInterval != nil {
-	// 			if tpDPP.ActivationInterval.ActivationTime != "" {
-	// 				mdl.ActivationInterval = tpDPP.ActivationInterval.ActivationTime
-	// 			}
-	// 			if tpDPP.ActivationInterval.ExpiryTime != "" {
-	// 				mdl.ActivationInterval += utils.INFIELD_SEP + tpDPP.ActivationInterval.ExpiryTime
-	// 			}
-	// 		}
-	// 		if isFilter && len(tpDPP.Hosts) > 0 {
-	// 			mdl.Hosts = tpDPP.Hosts[0]
-	// 		} else if len(tpDPP.FilterIDs) > 0 {
-	// 			mdl.FilterIDs = tpDPP.FilterIDs[0]
-	// 		}
-	// 		min = 1
-	// 		mdls = append(mdls, mdl)
-	// 	} else {
-	// 		for i := 0; i < min; i++ {
-	// 			mdl := &TPDispatcher{
-	// 				Tenant: tpDPP.Tenant,
-	// 				Tpid:   tpDPP.TPid,
-	// 				ID:     tpDPP.ID,
-	// 			}
-	// 			if i == 0 {
-	// 				mdl.Weight = tpDPP.Weight
-	// 				mdl.Strategy = tpDPP.Strategy
-	// 				if tpDPP.ActivationInterval != nil {
-	// 					if tpDPP.ActivationInterval.ActivationTime != "" {
-	// 						mdl.ActivationInterval = tpDPP.ActivationInterval.ActivationTime
-	// 					}
-	// 					if tpDPP.ActivationInterval.ExpiryTime != "" {
-	// 						mdl.ActivationInterval += utils.INFIELD_SEP + tpDPP.ActivationInterval.ExpiryTime
-	// 					}
-	// 				}
-	// 			}
-	// 			mdl.Hosts = tpDPP.Hosts[i]
-	// 			mdl.FilterIDs = tpDPP.FilterIDs[i]
-	// 			mdls = append(mdls, mdl)
-	// 		}
-	// 	}
-	// 	if len(tpDPP.FilterIDs)-min > 0 {
-	// 		for i := min; i < len(tpDPP.FilterIDs); i++ {
-	// 			mdl := &TPDispatcher{
-	// 				Tenant: tpDPP.Tenant,
-	// 				Tpid:   tpDPP.TPid,
-	// 				ID:     tpDPP.ID,
-	// 			}
-	// 			mdl.FilterIDs = tpDPP.FilterIDs[i]
-	// 			mdls = append(mdls, mdl)
-	// 		}
-	// 	}
-	// 	if len(tpDPP.Hosts)-min > 0 {
-	// 		for i := min; i < len(tpDPP.Hosts); i++ {
-	// 			mdl := &TPDispatcher{
-	// 				Tenant: tpDPP.Tenant,
-	// 				Tpid:   tpDPP.TPid,
-	// 				ID:     tpDPP.ID,
-	// 			}
-	// 			mdl.Hosts = tpDPP.Hosts[i]
-	// 			mdls = append(mdls, mdl)
-	// 		}
-	// 	}
+func paramsToString(sp []interface{}) (strategy string) {
+	if len(sp) != 0 {
+		strategy = sp[0].(string)
+		for i := 1; i < len(sp); i++ {
+			strategy += utils.INFIELD_SEP + sp[i].(string)
+		}
+	}
+	return
+}
 
-	// }
+func APItoModelTPDispatcher(tpDPP *utils.TPDispatcherProfile) (mdls TPDispatchers) {
+	if tpDPP == nil {
+		return
+	}
+
+	filters := strings.Join(tpDPP.FilterIDs, utils.INFIELD_SEP)
+	context := strings.Join(tpDPP.Subsystems, utils.INFIELD_SEP)
+
+	interval := ""
+	if tpDPP.ActivationInterval != nil {
+		if tpDPP.ActivationInterval.ActivationTime != "" {
+			interval = tpDPP.ActivationInterval.ActivationTime
+		}
+		if tpDPP.ActivationInterval.ExpiryTime != "" {
+			interval += utils.INFIELD_SEP + tpDPP.ActivationInterval.ExpiryTime
+		}
+	}
+
+	strategy := paramsToString(tpDPP.StrategyParams)
+
+	if len(tpDPP.Conns) == 0 {
+		return append(mdls, &TPDispatcher{
+			Tpid:               tpDPP.TPid,
+			Tenant:             tpDPP.Tenant,
+			ID:                 tpDPP.ID,
+			Contexts:           context,
+			FilterIDs:          filters,
+			ActivationInterval: interval,
+			Strategy:           tpDPP.Strategy,
+			StrategyParameters: strategy,
+			Weight:             tpDPP.Weight,
+		})
+	}
+
+	confilter := strings.Join(tpDPP.Conns[0].FilterIDs, utils.INFIELD_SEP)
+	conparam := paramsToString(tpDPP.Conns[0].Params)
+
+	mdls = append(mdls, &TPDispatcher{
+		Tpid:               tpDPP.TPid,
+		Tenant:             tpDPP.Tenant,
+		ID:                 tpDPP.ID,
+		Contexts:           context,
+		FilterIDs:          filters,
+		ActivationInterval: interval,
+		Strategy:           tpDPP.Strategy,
+		StrategyParameters: strategy,
+		Weight:             tpDPP.Weight,
+
+		ConnID:         tpDPP.Conns[0].ID,
+		ConnFilterIDs:  confilter,
+		ConnWeight:     tpDPP.Conns[0].Weight,
+		ConnBlocker:    tpDPP.Conns[0].Blocker,
+		ConnParameters: conparam,
+	})
+	for i := 1; i < len(tpDPP.Conns); i++ {
+		confilter = strings.Join(tpDPP.Conns[i].FilterIDs, utils.INFIELD_SEP)
+		conparam = paramsToString(tpDPP.Conns[i].Params)
+		mdls = append(mdls, &TPDispatcher{
+			Tpid:   tpDPP.TPid,
+			Tenant: tpDPP.Tenant,
+			ID:     tpDPP.ID,
+
+			ConnID:         tpDPP.Conns[i].ID,
+			ConnFilterIDs:  confilter,
+			ConnWeight:     tpDPP.Conns[i].Weight,
+			ConnBlocker:    tpDPP.Conns[i].Blocker,
+			ConnParameters: conparam,
+		})
+	}
 	return
 }
 

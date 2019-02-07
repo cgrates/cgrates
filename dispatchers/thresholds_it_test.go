@@ -196,7 +196,7 @@ func testDspThTestAuthKey(t *testing.T) {
 	}
 
 	if err := dspThRPC.Call(utils.ThresholdSv1ProcessEvent,
-		args, &ids); err.Error() != utils.ErrUnauthorizedApi.Error() {
+		args, &ids); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
 	var th *engine.Thresholds

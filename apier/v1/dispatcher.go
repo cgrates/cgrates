@@ -18,11 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package v1
 
-/*
 import (
-	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -84,6 +81,8 @@ func (apierV1 *ApierV1) RemoveDispatcherProfile(arg *utils.TenantID, reply *stri
 	*reply = utils.OK
 	return nil
 }
+
+/*
 
 func NewDispatcherThresholdSv1(dps *dispatchers.DispatcherService) *DispatcherThresholdSv1 {
 	return &DispatcherThresholdSv1{dS: dps}

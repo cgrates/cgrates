@@ -297,7 +297,8 @@ cgrates.org,Charger1,*string:Account:1001,2014-07-29T15:00:00Z,*rated,ATTR_1001_
 `
 	dispatcherProfiles = `
 #Tenant,ID,FilterIDs,ActivationInterval,Strategy,Hosts,Weight
-cgrates.org,D1,*string:Account:1001,2014-07-29T15:00:00Z,*first,192.168.56.203;192.168.56.204,20
+cgrates.org,D1,*any,*string:Account:1001,2014-07-29T15:00:00Z,*first,,C1,*gt:Usage:10,10,false,192.168.56.203,20
+cgrates.org,D1,,,,*first,,C2,*lt:Usage:10,10,false,192.168.56.204,
 `
 )
 
@@ -1723,38 +1724,68 @@ func TestLoadChargerProfiles(t *testing.T) {
 }
 
 func TestLoadDispatcherProfiles(t *testing.T) {
-	eDispatcherProfiles := map[utils.TenantID]*utils.TPDispatcherProfile{
-		utils.TenantID{Tenant: "cgrates.org", ID: "D1"}: &utils.TPDispatcherProfile{
-			TPid:      testTPID,
-			Tenant:    "cgrates.org",
-			ID:        "D1",
-			FilterIDs: []string{"*string:Account:1001"},
-			ActivationInterval: &utils.TPActivationInterval{
-				ActivationTime: "2014-07-29T15:00:00Z",
-			},
-			Strategy: "*first",
-			Hosts:    []string{"192.168.56.203", "192.168.56.204"},
-			Weight:   20,
-		},
-	}
-	revHosts := &utils.TPDispatcherProfile{
-		TPid:      testTPID,
-		Tenant:    "cgrates.org",
-		ID:        "D1",
-		FilterIDs: []string{"*string:Account:1001"},
+	eDispatcherProfiles := &utils.TPDispatcherProfile{
+		TPid:       testTPID,
+		Tenant:     "cgrates.org",
+		ID:         "D1",
+		Subsystems: []string{"*any"},
+		FilterIDs:  []string{"*string:Account:1001"},
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-29T15:00:00Z",
 		},
 		Strategy: "*first",
-		Hosts:    []string{"192.168.56.204", "192.168.56.203"},
 		Weight:   20,
+		Conns: []*utils.TPDispatcherConns{
+			&utils.TPDispatcherConns{
+				ID:        "C1",
+				FilterIDs: []string{"*gt:Usage:10"},
+				Weight:    10,
+				Params:    []interface{}{"192.168.56.203"},
+				Blocker:   false,
+			},
+			&utils.TPDispatcherConns{
+				ID:        "C2",
+				FilterIDs: []string{"*lt:Usage:10"},
+				Weight:    10,
+				Params:    []interface{}{"192.168.56.204"},
+				Blocker:   false,
+			},
+		},
+	}
+	revHosts := &utils.TPDispatcherProfile{
+		TPid:       testTPID,
+		Tenant:     "cgrates.org",
+		ID:         "D1",
+		Subsystems: []string{"*any"},
+		FilterIDs:  []string{"*string:Account:1001"},
+		ActivationInterval: &utils.TPActivationInterval{
+			ActivationTime: "2014-07-29T15:00:00Z",
+		},
+		Strategy: "*first",
+		Weight:   20,
+		Conns: []*utils.TPDispatcherConns{
+			&utils.TPDispatcherConns{
+				ID:        "C2",
+				FilterIDs: []string{"*lt:Usage:10"},
+				Weight:    10,
+				Params:    []interface{}{"192.168.56.204"},
+				Blocker:   false,
+			},
+			&utils.TPDispatcherConns{
+				ID:        "C1",
+				FilterIDs: []string{"*gt:Usage:10"},
+				Weight:    10,
+				Params:    []interface{}{"192.168.56.203"},
+				Blocker:   false,
+			},
+		},
 	}
 	dppKey := utils.TenantID{Tenant: "cgrates.org", ID: "D1"}
-	if len(csvr.dispatcherProfiles) != len(eDispatcherProfiles) {
+	if len(csvr.dispatcherProfiles) != 1 {
 		t.Errorf("Failed to load chargerProfiles: %s", utils.ToIJSON(csvr.chargerProfiles))
-	} else if !reflect.DeepEqual(eDispatcherProfiles[dppKey], csvr.dispatcherProfiles[dppKey]) &&
+	} else if !reflect.DeepEqual(eDispatcherProfiles, csvr.dispatcherProfiles[dppKey]) &&
 		!reflect.DeepEqual(revHosts, csvr.dispatcherProfiles[dppKey]) {
-		t.Errorf("Expecting: %+v, received: %+v", eDispatcherProfiles[dppKey], csvr.dispatcherProfiles[dppKey])
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eDispatcherProfiles), utils.ToJSON(csvr.dispatcherProfiles[dppKey]))
 	}
 }
 
