@@ -1,7 +1,10 @@
 {
 // Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 // Copyright (C) ITsysCOM GmbH
-
+"general": {
+	"log_level": 7,
+	"node_id":"SlaveReplication",
+},
 
 "listen": {
 	"rpc_json": "127.0.0.1:22012",				// RPC JSON listening address
@@ -36,9 +39,6 @@
 "sessions": {
 	"enabled": true,						// starts SessionManager service: <true|false>
 	"listen_bijson": "127.0.0.1:22014",		// address where to listen for bidirectional JSON-RPC requests
-	"session_replication_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],
 },
 
 }

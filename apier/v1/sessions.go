@@ -109,3 +109,8 @@ func (ssv1 *SessionSv1) Ping(ign string, reply *string) error {
 func (ssv1 *SessionSv1) ReplicateSessions(args sessions.ArgsReplicateSessions, rply *string) error {
 	return ssv1.Ss.BiRPCv1ReplicateSessions(nil, args, rply)
 }
+
+func (ssv1 *SessionSv1) SetPassiveSession(args *sessions.Session,
+	reply *string) error {
+	return ssv1.Ss.BiRPCv1SetPassiveSession(nil, args, reply)
+}

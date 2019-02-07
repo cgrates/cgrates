@@ -987,6 +987,7 @@ func (sS *SessionS) getSessions(cgrID string, pSessions bool) (ss []*Session) {
 		var i int
 		for _, s := range ssMp {
 			ss[i] = s
+			i++
 		}
 		return
 	}
@@ -2109,6 +2110,28 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 		if err = sS.endSession(s,
 			me.GetDurationPtrIgnoreErrors(utils.Usage)); err != nil {
 			return utils.NewErrRALs(err)
+		}
+		//check if we have replicate connection and close the session there
+		if len(sS.sReplConns) != 0 {
+			var wg sync.WaitGroup
+			for _, rplConn := range sS.sReplConns {
+				if rplConn.Synchronous {
+					wg.Add(1)
+				}
+				go func(conn rpcclient.RpcClientConnection, sync bool, s *Session) {
+					var rply string
+					if err := conn.Call(utils.SessionSv1TerminateSession,
+						args, &rply); err != nil {
+						utils.Logger.Warning(
+							fmt.Sprintf("<%s> cannot termainte session with id <%s>, err: %s",
+								utils.SessionS, s.Clone().CGRID, err.Error()))
+					}
+					if sync {
+						wg.Done()
+					}
+				}(rplConn.Connection, rplConn.Synchronous, s)
+			}
+			wg.Wait() // wait for synchronous replication to finish
 		}
 	}
 	if args.ReleaseResources {
