@@ -1770,29 +1770,49 @@ func TestModelAsTPChargers(t *testing.T) {
 
 func TestAPItoDispatcherProfile(t *testing.T) {
 	tpDPP := &utils.TPDispatcherProfile{
-		TPid:      "TP1",
-		Tenant:    "cgrates.org",
-		ID:        "Dsp",
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		Strategy:  utils.MetaFirst,
+		TPid:       "TP1",
+		Tenant:     "cgrates.org",
+		ID:         "Dsp",
+		Subsystems: []string{"*any"},
+		FilterIDs:  []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		Strategy:   utils.MetaFirst,
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-14T14:35:00Z",
 			ExpiryTime:     "",
 		},
-		Hosts:  []string{"localhost", "192.168.56.203"},
-		Weight: 20,
+		StrategyParams: []interface{}{},
+		Weight:         20,
+		Conns: []*utils.TPDispatcherConns{
+			&utils.TPDispatcherConns{
+				ID:        "C1",
+				FilterIDs: []string{},
+				Weight:    10,
+				Params:    []interface{}{"192.168.54.203"},
+				Blocker:   false,
+			},
+		},
 	}
 
 	expected := &DispatcherProfile{
-		Tenant:    "cgrates.org",
-		ID:        "Dsp",
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		Strategy:  utils.MetaFirst,
+		Tenant:     "cgrates.org",
+		ID:         "Dsp",
+		Subsystems: []string{"*any"},
+		FilterIDs:  []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		Strategy:   utils.MetaFirst,
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
-		// Hosts:  []string{"localhost", "192.168.56.203"},
-		Weight: 20,
+		StrategyParams: map[string]interface{}{},
+		Weight:         20,
+		Conns: DispatcherConns{
+			&DispatcherConn{
+				ID:        "C1",
+				FilterIDs: []string{},
+				Weight:    10,
+				Params:    map[string]interface{}{"\u0000": "192.168.54.203"},
+				Blocker:   false,
+			},
+		},
 	}
 	if rcv, err := APItoDispatcherProfile(tpDPP, "UTC"); err != nil {
 		t.Error(err)
@@ -1803,36 +1823,58 @@ func TestAPItoDispatcherProfile(t *testing.T) {
 
 func TestAPItoModelTPDispatcher(t *testing.T) {
 	tpDPP := &utils.TPDispatcherProfile{
-		TPid:      "TP1",
-		Tenant:    "cgrates.org",
-		ID:        "Dsp",
-		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
-		Strategy:  utils.MetaFirst,
+		TPid:       "TP1",
+		Tenant:     "cgrates.org",
+		ID:         "Dsp",
+		Subsystems: []string{"*any"},
+		FilterIDs:  []string{"FLTR_ACNT_dan", "FLTR_DST_DE"},
+		Strategy:   utils.MetaFirst,
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-14T14:35:00Z",
 			ExpiryTime:     "",
 		},
-		Hosts:  []string{"localhost", "192.168.56.203"},
-		Weight: 20,
+		StrategyParams: []interface{}{},
+		Weight:         20,
+		Conns: []*utils.TPDispatcherConns{
+			&utils.TPDispatcherConns{
+				ID:        "C1",
+				FilterIDs: []string{},
+				Weight:    10,
+				Params:    []interface{}{"192.168.54.203"},
+				Blocker:   false,
+			},
+			&utils.TPDispatcherConns{
+				ID:        "C2",
+				FilterIDs: []string{},
+				Weight:    10,
+				Params:    []interface{}{"192.168.54.204"},
+				Blocker:   false,
+			},
+		},
 	}
 	expected := TPDispatchers{
 		&TPDispatcher{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Dsp",
-			FilterIDs:          "FLTR_ACNT_dan",
+			Contexts:           "*any",
+			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
 			Strategy:           utils.MetaFirst,
-			Hosts:              "localhost",
 			ActivationInterval: "2014-07-14T14:35:00Z",
 			Weight:             20,
+			ConnID:             "C1",
+			ConnWeight:         10,
+			ConnBlocker:        false,
+			ConnParameters:     "192.168.54.203",
 		},
 		&TPDispatcher{
-			Tpid:               "TP1",
-			Tenant:             "cgrates.org",
-			ID:                 "Dsp",
-			FilterIDs:          "FLTR_DST_DE",
-			Hosts:              "192.168.56.203",
-			ActivationInterval: "",
+			Tpid:           "TP1",
+			Tenant:         "cgrates.org",
+			ID:             "Dsp",
+			ConnID:         "C2",
+			ConnWeight:     10,
+			ConnBlocker:    false,
+			ConnParameters: "192.168.54.204",
 		},
 	}
 	rcv := APItoModelTPDispatcher(tpDPP)

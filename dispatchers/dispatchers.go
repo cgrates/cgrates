@@ -71,7 +71,8 @@ func (dS *DispatcherService) Shutdown() error {
 func (dS *DispatcherService) dispatcherForEvent(ev *utils.CGREvent,
 	subsys string) (d Dispatcher, err error) {
 	// find out the matching profiles
-	idxKeyPrfx := utils.ConcatenatedKey(ev.Tenant, utils.META_ANY)
+	anyIdxPrfx := utils.ConcatenatedKey(ev.Tenant, utils.META_ANY)
+	idxKeyPrfx := anyIdxPrfx
 	if subsys != "" {
 		idxKeyPrfx = utils.ConcatenatedKey(ev.Tenant, subsys)
 	}
@@ -90,7 +91,6 @@ func (dS *DispatcherService) dispatcherForEvent(ev *utils.CGREvent,
 			if err != utils.ErrNotFound {
 				return nil, err
 			}
-			anyIdxPrfx := utils.ConcatenatedKey(ev.Tenant, utils.META_ANY)
 			if idxKeyPrfx == anyIdxPrfx {
 				continue // already checked *any
 			}

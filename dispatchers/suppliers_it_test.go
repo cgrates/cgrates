@@ -200,7 +200,7 @@ func testDspSupTestAuthKey(t *testing.T) {
 		},
 	}
 	if err := dspSupRPC.Call(utils.SupplierSv1GetSuppliers,
-		args, &rpl); err.Error() != utils.ErrUnauthorizedApi.Error() {
+		args, &rpl); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
 }

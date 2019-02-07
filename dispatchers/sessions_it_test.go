@@ -214,7 +214,7 @@ func testDspSessionTestAuthKey(t *testing.T) {
 	}
 	var rply sessions.V1AuthorizeReplyWithDigest
 	if err := dspSessionRPC.Call(utils.SessionSv1AuthorizeEventWithDigest,
-		args, &rply); err.Error() != utils.ErrUnauthorizedApi.Error() {
+		args, &rply); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
 }

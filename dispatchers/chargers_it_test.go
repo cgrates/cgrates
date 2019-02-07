@@ -192,7 +192,7 @@ func testDspCppTestAuthKey(t *testing.T) {
 	}
 	var reply *engine.ChargerProfiles
 	if err := dspCppRPC.Call(utils.ChargerSv1GetChargersForEvent,
-		args, &reply); err.Error() != utils.ErrUnauthorizedApi.Error() {
+		args, &reply); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
 }

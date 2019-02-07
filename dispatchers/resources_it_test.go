@@ -197,7 +197,7 @@ func testDspResTestAuthKey(t *testing.T) {
 	}
 
 	if err := dspResRPC.Call(utils.ResourceSv1GetResourcesForEvent,
-		args, &rs); err.Error() != utils.ErrUnauthorizedApi.Error() {
+		args, &rs); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
 }

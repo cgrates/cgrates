@@ -196,7 +196,7 @@ func testDspStsTestAuthKey(t *testing.T) {
 					utils.PDD:        time.Duration(12 * time.Second)}},
 		}}
 	if err := dspStsRPC.Call(utils.StatSv1ProcessEvent,
-		args, &reply); err.Error() != utils.ErrUnauthorizedApi.Error() {
+		args, &reply); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
 
@@ -210,7 +210,7 @@ func testDspStsTestAuthKey(t *testing.T) {
 
 	var metrics map[string]string
 	if err := dspStsRPC.Call(utils.StatSv1GetQueueStringMetrics,
-		args2, &metrics); err.Error() != utils.ErrUnauthorizedApi.Error() {
+		args2, &metrics); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
 }
