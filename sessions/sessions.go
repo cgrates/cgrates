@@ -662,7 +662,8 @@ func (sS *SessionS) replicateSessions(cgrID string, psv bool, rplConns []*SReplC
 	}
 	ss := sS.getSessions(cgrID, psv)
 	if len(ss) == 0 {
-		ss = []*Session{&Session{CGRID: cgrID}} // session scheduled to be removed from remote
+		// session scheduled to be removed from remote (initiate also the EventStart to avoid the panic)
+		ss = []*Session{&Session{CGRID: cgrID, EventStart: engine.NewSafEvent(nil)}}
 	}
 	var wg sync.WaitGroup
 	for _, rplConn := range sS.sReplConns {
@@ -674,7 +675,7 @@ func (sS *SessionS) replicateSessions(cgrID string, psv bool, rplConns []*SReplC
 				sCln := s.Clone()
 				var rply string
 				if err := conn.Call(utils.SessionSv1SetPassiveSession,
-					s.Clone(), &rply); err != nil {
+					sCln, &rply); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> cannot replicate session with id <%s>, err: %s",
 							utils.SessionS, sCln.CGRID, err.Error()))
@@ -1195,6 +1196,7 @@ func (sS *SessionS) updateSession(s *Session, updtEv engine.MapEvent) (maxUsage 
 	var maxUsageSet bool // so we know if we have set the 0 on purpose
 	prepaidReqs := []string{utils.META_PREPAID, utils.META_PSEUDOPREPAID}
 	for i, sr := range s.SRuns {
+
 		var rplyMaxUsage time.Duration
 		if !utils.IsSliceMember(prepaidReqs,
 			sr.Event.GetStringIgnoreErrors(utils.RequestType)) {
@@ -1216,6 +1218,9 @@ func (sS *SessionS) updateSession(s *Session, updtEv engine.MapEvent) (maxUsage 
 
 // endSession will end a session from outside
 func (sS *SessionS) endSession(s *Session, tUsage *time.Duration) (err error) {
+	//check if we have replicate connection and close the session there
+	defer sS.replicateSessions(s.CGRID, true, sS.sReplConns)
+
 	s.Lock() // no need to release it untill end since the session should be anyway closed
 	sS.unregisterSession(s.CGRID, false)
 	for sRunIdx, sr := range s.SRuns {
@@ -1416,6 +1421,12 @@ func (sS *SessionS) BiRPCv1SetPassiveSession(clnt rpcclient.RpcClientConnection,
 			return utils.ErrServerError
 		}
 	} else {
+		//if we have an active session with the same CGRID
+		//we unregister it first then regiser the new one
+		if len(sS.getSessions(s.CGRID, false)) != 0 {
+			sS.unregisterSession(s.CGRID, false)
+
+		}
 		sS.registerSession(s, true)
 	}
 	*reply = utils.OK
@@ -2110,28 +2121,6 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 		if err = sS.endSession(s,
 			me.GetDurationPtrIgnoreErrors(utils.Usage)); err != nil {
 			return utils.NewErrRALs(err)
-		}
-		//check if we have replicate connection and close the session there
-		if len(sS.sReplConns) != 0 {
-			var wg sync.WaitGroup
-			for _, rplConn := range sS.sReplConns {
-				if rplConn.Synchronous {
-					wg.Add(1)
-				}
-				go func(conn rpcclient.RpcClientConnection, sync bool, s *Session) {
-					var rply string
-					if err := conn.Call(utils.SessionSv1TerminateSession,
-						args, &rply); err != nil {
-						utils.Logger.Warning(
-							fmt.Sprintf("<%s> cannot termainte session with id <%s>, err: %s",
-								utils.SessionS, s.Clone().CGRID, err.Error()))
-					}
-					if sync {
-						wg.Done()
-					}
-				}(rplConn.Connection, rplConn.Synchronous, s)
-			}
-			wg.Wait() // wait for synchronous replication to finish
 		}
 	}
 	if args.ReleaseResources {
