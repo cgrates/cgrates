@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -178,7 +179,7 @@ func (dSup *DispatcherSupplierSv1) Ping(ign string, reply *string) error {
 func (dSup *DispatcherSupplierSv1) GetSuppliers(args *dispatchers.ArgsGetSuppliersWithApiKey,
 	reply *engine.SortedSuppliers) error {
 	return dSup.dSup.SupplierSv1GetSuppliers(args, reply)
-}
+}*/
 
 func NewDispatcherAttributeSv1(dps *dispatchers.DispatcherService) *DispatcherAttributeSv1 {
 	return &DispatcherAttributeSv1{dA: dps}
@@ -189,9 +190,15 @@ type DispatcherAttributeSv1 struct {
 	dA *dispatchers.DispatcherService
 }
 
+// Call implements rpcclient.RpcClientConnection interface for internal RPC
+// func (alSv1 *DispatcherAttributeSv1) Call(serviceMethod string,
+// 	args interface{}, reply interface{}) error {
+// 	return utils.APIerRPCCall(alSv1, serviceMethod, args, reply)
+// }
+
 // Ping implements SupplierSv1Ping
-func (dA *DispatcherAttributeSv1) Ping(ign string, reply *string) error {
-	return dA.dA.AttributeSv1Ping(ign, reply)
+func (dA *DispatcherAttributeSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
+	return dA.dA.AttributeSv1Ping(args, reply)
 }
 
 // GetAttributeForEvent implements AttributeSv1GetAttributeForEvent
@@ -206,6 +213,7 @@ func (dA *DispatcherAttributeSv1) ProcessEvent(args *dispatchers.ArgsAttrProcess
 	return dA.dA.AttributeSv1ProcessEvent(args, reply)
 }
 
+/*
 func NewDispatcherSessionSv1(dps *dispatchers.DispatcherService) *DispatcherSessionSv1 {
 	return &DispatcherSessionSv1{dS: dps}
 }

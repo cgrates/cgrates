@@ -76,14 +76,25 @@ func (dS *DispatcherService) dispatcherForEvent(ev *utils.CGREvent,
 	if subsys != "" {
 		idxKeyPrfx = utils.ConcatenatedKey(ev.Tenant, subsys)
 	}
-	matchingPrfls := make(map[string]*engine.DispatcherProfile)
+	var matchedPrlf *engine.DispatcherProfile
 	prflIDs, err := engine.MatchingItemIDsForEvent(ev.Event,
 		dS.cfg.DispatcherSCfg().StringIndexedFields,
 		dS.cfg.DispatcherSCfg().PrefixIndexedFields,
 		dS.dm, utils.CacheDispatcherFilterIndexes,
 		idxKeyPrfx, dS.cfg.FilterSCfg().IndexedSelects)
 	if err != nil {
-		return nil, err
+		// return nil, err
+		if err != utils.ErrNotFound {
+			return nil, err
+		}
+		prflIDs, err = engine.MatchingItemIDsForEvent(ev.Event,
+			dS.cfg.DispatcherSCfg().StringIndexedFields,
+			dS.cfg.DispatcherSCfg().PrefixIndexedFields,
+			dS.dm, utils.CacheDispatcherFilterIndexes,
+			anyIdxPrfx, dS.cfg.FilterSCfg().IndexedSelects)
+		if err != nil {
+			return nil, err
+		}
 	}
 	for prflID := range prflIDs {
 		prfl, err := dS.dm.GetDispatcherProfile(ev.Tenant, prflID, true, true, utils.NonTransactional)
@@ -91,17 +102,7 @@ func (dS *DispatcherService) dispatcherForEvent(ev *utils.CGREvent,
 			if err != utils.ErrNotFound {
 				return nil, err
 			}
-			if idxKeyPrfx == anyIdxPrfx {
-				continue // already checked *any
-			}
-			// check *any as subsystem
-			if prfl, err = dS.dm.GetDispatcherProfile(ev.Tenant, prflID, true, true, utils.NonTransactional); err != nil {
-				if err == utils.ErrNotFound {
-					continue
-				}
-				return nil, err
-			}
-
+			continue
 		}
 		if prfl.ActivationInterval != nil && ev.Time != nil &&
 			!prfl.ActivationInterval.IsActiveAtTime(*ev.Time) { // not active
@@ -113,20 +114,13 @@ func (dS *DispatcherService) dispatcherForEvent(ev *utils.CGREvent,
 		} else if !pass {
 			continue
 		}
-		matchingPrfls[prflID] = prfl
+		if matchedPrlf == nil || prfl.Weight > matchedPrlf.Weight {
+			matchedPrlf = prfl
+		}
 	}
-	if len(matchingPrfls) == 0 {
+	if matchedPrlf == nil {
 		return nil, utils.ErrNotFound
 	}
-	// All good, convert from Map to Slice so we can sort
-	prfls := make(engine.DispatcherProfiles, len(matchingPrfls))
-	i := 0
-	for _, prfl := range matchingPrfls {
-		prfls[i] = prfl
-		i++
-	}
-	prfls.Sort()
-	matchedPrlf := prfls[0] // only use the first profile
 	tntID := matchedPrlf.TenantID()
 	// get or build the Dispatcher for the config
 	if x, ok := engine.Cache.Get(utils.CacheDispatchers,
@@ -166,17 +160,19 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 		connID := d.NextConnID()
 		conn, has := dS.conns[connID]
 		if !has {
-			utils.NewErrDispatcherS(
+			err = utils.NewErrDispatcherS(
 				fmt.Errorf("no connection with id: <%s>", connID))
+			continue
 		}
-		if err = conn.Call(serviceMethod, args, reply); !utils.IsNetworkError(err) {
-			break
+		if err = conn.Call(serviceMethod, args, reply); utils.IsNetworkError(err) {
+			continue
 		}
 		if ev.RouteID != nil &&
 			*ev.RouteID != "" { // cache the discovered route
 			engine.Cache.Set(utils.CacheDispatcherRoutes, *ev.RouteID, connID,
 				nil, true, utils.EmptyString)
 		}
+		break
 	}
 	return
 }

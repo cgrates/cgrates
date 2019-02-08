@@ -24,17 +24,17 @@ import (
 )
 
 // AttributeSv1Ping interogates AttributeS server responsible to process the event
-func (dS *DispatcherService) AttributeSv1Ping(args *ArgsAttrProcessEventWithApiKey,
+func (dS *DispatcherService) AttributeSv1Ping(args *CGREvWithApiKey,
 	reply *string) (err error) {
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.AttributeSv1Ping,
-			args.AttrArgsProcessEvent.CGREvent.Tenant,
-			args.APIKey, args.AttrArgsProcessEvent.CGREvent.Time); err != nil {
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&args.CGREvent, utils.MetaAttributes,
-		utils.AttributeSv1Ping, args.AttrArgsProcessEvent, reply)
+		utils.AttributeSv1Ping, args.CGREvent, reply)
 }
 
 // AttributeSv1GetAttributeForEvent is the dispatcher method for AttributeSv1.GetAttributeForEvent
@@ -52,17 +52,16 @@ func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(args *ArgsAttrProc
 
 }
 
-/*
 func (dS *DispatcherService) AttributeSv1ProcessEvent(args *ArgsAttrProcessEventWithApiKey,
 	reply *engine.AttrSProcessEventReply) (err error) {
-	if dS.attrS == nil {
-		return utils.NewErrNotConnected(utils.AttributeS)
-	}
-	if err = dS.authorize(utils.AttributeSv1ProcessEvent, args.AttrArgsProcessEvent.CGREvent.Tenant,
-		args.APIKey, args.AttrArgsProcessEvent.CGREvent.Time); err != nil {
-		return
-	}
-	return dS.attrS.Call(utils.AttributeSv1ProcessEvent, args.AttrArgsProcessEvent, reply)
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.AttributeSv1ProcessEvent,
+			args.AttrArgsProcessEvent.CGREvent.Tenant,
+			args.APIKey, args.AttrArgsProcessEvent.CGREvent.Time); err != nil {
+			return
+		}
 
+	}
+	return dS.Dispatch(&args.CGREvent, utils.MetaAttributes,
+		utils.AttributeSv1ProcessEvent, args.AttrArgsProcessEvent, reply)
 }
-*/
