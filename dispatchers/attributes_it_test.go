@@ -46,17 +46,17 @@ var sTestsDspAttr = []func(t *testing.T){
 	testDspAttrInitCfg,
 	testDspAttrInitDataDb,
 	testDspAttrResetStorDb,
-	testDspAttrStartEngine,
+	// testDspAttrStartEngine,
 	testDspAttrRPCConn,
-	testDspAttrPing,
 	testDspAttrLoadData,
+	testDspAttrPing,
 	testDspAttrAddAttributesWithPermision,
 	testDspAttrTestMissingApiKey,
 	testDspAttrTestUnknownApiKey,
 	testDspAttrTestAuthKey,
 	testDspAttrAddAttributesWithPermision2,
 	testDspAttrTestAuthKey2,
-	testDspAttrKillEngine,
+	// testDspAttrKillEngine,
 }
 
 //Test start here
@@ -68,7 +68,7 @@ func TestDspAttributeS(t *testing.T) {
 
 func testDspAttrInitCfg(t *testing.T) {
 	var err error
-	dspAttrCfgPath = path.Join(dspDataDir, "conf", "samples", "dispatcher")
+	dspAttrCfgPath = path.Join(dspDataDir, "conf", "samples", "dispatchers")
 	dspAttrCfg, err = config.NewCGRConfigFromFolder(dspAttrCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -118,31 +118,38 @@ func testDspAttrRPCConn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-}
-
-func testDspAttrPing(t *testing.T) {
-	var reply string
-	if err := instAttrRPC.Call(utils.AttributeSv1Ping, "", &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.Pong {
-		t.Errorf("Received: %s", reply)
-	}
-	if err := dspAttrRPC.Call(utils.AttributeSv1Ping, "", &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.Pong {
-		t.Errorf("Received: %s", reply)
-	}
 }
 
 func testDspAttrLoadData(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{
-		FolderPath: path.Join(dspDataDir, "tariffplans", "tutorial")}
+		FolderPath: path.Join(dspDataDir, "tariffplans", "dispatchers")}
 	if err := instAttrRPC.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
+}
+
+func testDspAttrPing(t *testing.T) {
+	var reply string
+	if err := instAttrRPC.Call(utils.AttributeSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
+	}
+	if dspAttrRPC == nil {
+		t.Fatal(dspAttrRPC)
+	}
+	if err := dspAttrRPC.Call(utils.AttributeSv1Ping, &CGREvWithApiKey{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+		},
+		APIKey: "attr12345",
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
+	}
 }
 
 func testDspAttrAddAttributesWithPermision(t *testing.T) {
@@ -197,7 +204,7 @@ func testDspAttrTestMissingApiKey(t *testing.T) {
 	var attrReply *engine.AttributeProfile
 	if err := dspAttrRPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		args, &attrReply); err == nil || err.Error() != utils.NewErrMandatoryIeMissing(utils.APIKey).Error() {
-		t.Error(err)
+		t.Errorf("Error:%v rply=%s", err, utils.ToJSON(attrReply))
 	}
 }
 
@@ -271,7 +278,9 @@ func testDspAttrAddAttributesWithPermision2(t *testing.T) {
 		&utils.TenantID{Tenant: "cgrates.org", ID: "AuthKey"}, &reply); err != nil {
 		t.Error(err)
 	}
-	reply.Compile()
+	if reply != nil {
+		reply.Compile()
+	}
 	if !reflect.DeepEqual(alsPrf, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
 	}
@@ -310,7 +319,9 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 		args, &attrReply); err != nil {
 		t.Error(err)
 	}
-	attrReply.Compile()
+	if attrReply != nil {
+		attrReply.Compile()
+	}
 	if !reflect.DeepEqual(eAttrPrf, attrReply) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eAttrPrf), utils.ToJSON(attrReply))
 	}

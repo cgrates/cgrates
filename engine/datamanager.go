@@ -1319,20 +1319,30 @@ func (dm *DataManager) SetDispatcherProfile(dpp *DispatcherProfile, withIndex bo
 	}
 	if withIndex {
 		if oldDpp != nil {
-			var needsRemove bool
-			for _, fltrID := range oldDpp.FilterIDs {
-				if !utils.IsSliceMember(dpp.FilterIDs, fltrID) {
+			for _, ctx := range oldDpp.Subsystems {
+				var needsRemove bool
+				if !utils.IsSliceMember(dpp.Subsystems, ctx) {
 					needsRemove = true
+				} else {
+					for _, fltrID := range oldDpp.FilterIDs {
+						if !utils.IsSliceMember(dpp.FilterIDs, fltrID) {
+							needsRemove = true
+						}
+					}
 				}
-			}
-			if needsRemove {
-				if err = NewFilterIndexer(dm, utils.DispatcherProfilePrefix,
-					dpp.Tenant).RemoveItemFromIndex(dpp.Tenant, dpp.ID, oldDpp.FilterIDs); err != nil {
-					return
+				if needsRemove {
+					if err = NewFilterIndexer(dm, utils.DispatcherProfilePrefix,
+						utils.ConcatenatedKey(dpp.Tenant, ctx)).RemoveItemFromIndex(dpp.Tenant, dpp.ID, oldDpp.FilterIDs); err != nil {
+						return
+					}
 				}
 			}
 		}
-		return createAndIndex(utils.DispatcherProfilePrefix, dpp.Tenant, utils.EmptyString, dpp.ID, dpp.FilterIDs, dm)
+		for _, ctx := range dpp.Subsystems {
+			if err = createAndIndex(utils.DispatcherProfilePrefix, dpp.Tenant, ctx, dpp.ID, dpp.FilterIDs, dm); err != nil {
+				return
+			}
+		}
 	}
 	return
 }
@@ -1352,7 +1362,12 @@ func (dm *DataManager) RemoveDispatcherProfile(tenant, id string,
 		return utils.ErrNotFound
 	}
 	if withIndex {
-		return NewFilterIndexer(dm, utils.DispatcherProfilePrefix, tenant).RemoveItemFromIndex(tenant, id, oldDpp.FilterIDs)
+		for _, ctx := range oldDpp.Subsystems {
+			if err = NewFilterIndexer(dm, utils.DispatcherProfilePrefix,
+				utils.ConcatenatedKey(tenant, ctx)).RemoveItemFromIndex(tenant, id, oldDpp.FilterIDs); err != nil {
+				return
+			}
+		}
 	}
 	return
 }

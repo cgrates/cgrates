@@ -965,7 +965,7 @@ func loaderService(cacheS *engine.CacheS, cfg *config.CGRConfig,
 }
 
 // startDispatcherService fires up the DispatcherS
-func startDispatcherService(internalDispatcherSChan,
+func startDispatcherService(internalDispatcherSChan chan *dispatchers.DispatcherService,
 	intAttrSChan chan rpcclient.RpcClientConnection,
 	cfg *config.CGRConfig,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
@@ -1041,10 +1041,12 @@ func startDispatcherService(internalDispatcherSChan,
 			server.RpcRegisterName(utils.SupplierSv1,
 				v1.NewDispatcherSupplierSv1(dspS))
 		}
-		if !cfg.AttributeSCfg().Enabled && len(cfg.DispatcherSCfg().AttrSConns) != 0 {
-			server.RpcRegisterName(utils.AttributeSv1,
-				v1.NewDispatcherAttributeSv1(dspS))
-		}
+	*/
+	// if !cfg.AttributeSCfg().Enabled { //dispatcer enable all methos
+	attrv1 := v1.NewDispatcherAttributeSv1(dspS)
+	server.RpcRegisterName(utils.AttributeSv1, attrv1)
+	// }
+	/*
 		if !cfg.SessionSCfg().Enabled && len(cfg.DispatcherSCfg().SessionSConns) != 0 {
 			server.RpcRegisterName(utils.SessionSv1,
 				v1.NewDispatcherSessionSv1(dspS))
@@ -1054,6 +1056,7 @@ func startDispatcherService(internalDispatcherSChan,
 				v1.NewDispatcherChargerSv1(dspS))
 		}
 	*/
+	internalDispatcherSChan <- dspS
 }
 
 // startAnalyzerService fires up the AnalyzerS
@@ -1084,8 +1087,8 @@ func startRpc(server *utils.Server, internalRaterChan,
 	internalCdrSChan, internalPubSubSChan, internalUserSChan,
 	internalAliaseSChan, internalRsChan, internalStatSChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
-	internalSMGChan, internalDispatcherSChan, internalAnalyzerSChan chan rpcclient.RpcClientConnection,
-	exitChan chan bool) {
+	internalSMGChan, internalAnalyzerSChan chan rpcclient.RpcClientConnection,
+	internalDispatcherSChan chan *dispatchers.DispatcherService, exitChan chan bool) {
 	select { // Any of the rpc methods will unlock listening to rpc requests
 	case resp := <-internalRaterChan:
 		internalRaterChan <- resp
@@ -1336,7 +1339,7 @@ func main() {
 	if cfg.RalsCfg().RALsEnabled || cfg.PubSubServerEnabled ||
 		cfg.AliasesServerEnabled || cfg.UserServerEnabled || cfg.SchedulerCfg().Enabled ||
 		cfg.AttributeSCfg().Enabled || cfg.ResourceSCfg().Enabled || cfg.StatSCfg().Enabled ||
-		cfg.ThresholdSCfg().Enabled || cfg.SupplierSCfg().Enabled { // Some services can run without db, ie: SessionS or CDRC
+		cfg.ThresholdSCfg().Enabled || cfg.SupplierSCfg().Enabled || cfg.DispatcherSCfg().Enabled { // Some services can run without db, ie: SessionS or CDRC
 		dm, err = engine.ConfigureDataStorage(cfg.DataDbCfg().DataDbType,
 			cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
 			cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
@@ -1412,7 +1415,7 @@ func main() {
 	internalThresholdSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalSupplierSChan := make(chan rpcclient.RpcClientConnection, 1)
 	filterSChan := make(chan *engine.FilterS, 1)
-	internalDispatcherSChan := make(chan rpcclient.RpcClientConnection, 1)
+	internalDispatcherSChan := make(chan *dispatchers.DispatcherService, 1)
 	internalAnalyzerSChan := make(chan rpcclient.RpcClientConnection, 1)
 
 	// Start ServiceManager
@@ -1546,7 +1549,7 @@ func main() {
 		internalStatSChan,
 		internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
 		internalSupplierSChan,
-		internalSMGChan, internalDispatcherSChan, internalAnalyzerSChan, exitChan)
+		internalSMGChan, internalAnalyzerSChan, internalDispatcherSChan, exitChan)
 	<-exitChan
 
 	if *cpuProfDir != "" { // wait to end cpuProfiling
