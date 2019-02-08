@@ -12,9 +12,20 @@
 
 
 "listen": {
- 	"rpc_json": "127.0.0.1:2012"
+ 	"rpc_json": ":2012",
+ 	"rpc_gob": ":2013",
+	"http": ":2080",
 },
 
+"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_type": "redis",						// data_db type: <redis|mongo>
+	"db_port": 6379, 						// data_db port to reach the database
+	"db_name": "10", 						// data_db database name to connect to
+},
+
+"stor_db": {
+	"db_password": "CGRateS.org",
+},
 
 "cache":{
  	"dispatcher_routes": {"limit": -1, "ttl": "2s"}
@@ -22,21 +33,22 @@
 
 
 "attributes": {
-	"enabled": true
+	"enabled": false
 },
 
 
 "dispatchers":{
- 	"enabled": false,						// starts DispatcherS service: <true|false>.
+ 	"enabled": true,						// starts DispatcherS service: <true|false>.
  	"attributes_conns": [
- 		{"address": "*internal"}
+		{"address": "127.0.0.1:5012", "transport": "*json"},
+ 		// {"address": "*internal"}
  	],
 	"conns": {
-		"AttributeS1": [
-			{"address": "127.0.0.2:2012", "transport": "*json"},
-		],
+		// "AttributeS1": [
+		// 	{"address": "127.0.0.1:2012", "transport": "*json"},
+		// ],
 		"ALL": [
-			{"address": "127.0.0.100:2012", "transport": "*json"},
+			{"address": "127.0.0.1:5012", "transport": "*json"},
 		],
 	},
 },

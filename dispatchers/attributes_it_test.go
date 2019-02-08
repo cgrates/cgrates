@@ -46,17 +46,15 @@ var sTestsDspAttr = []func(t *testing.T){
 	testDspAttrInitCfg,
 	testDspAttrInitDataDb,
 	testDspAttrResetStorDb,
-	// testDspAttrStartEngine,
+	testDspAttrStartEngine,
 	testDspAttrRPCConn,
 	testDspAttrLoadData,
 	testDspAttrPing,
-	testDspAttrAddAttributesWithPermision,
 	testDspAttrTestMissingApiKey,
 	testDspAttrTestUnknownApiKey,
 	testDspAttrTestAuthKey,
-	testDspAttrAddAttributesWithPermision2,
 	testDspAttrTestAuthKey2,
-	// testDspAttrKillEngine,
+	testDspAttrKillEngine,
 }
 
 //Test start here
@@ -68,14 +66,14 @@ func TestDspAttributeS(t *testing.T) {
 
 func testDspAttrInitCfg(t *testing.T) {
 	var err error
-	dspAttrCfgPath = path.Join(dspDataDir, "conf", "samples", "dispatchers")
+	dspAttrCfgPath = path.Join(dspDataDir, "conf", "samples", "dispatchers", "dispatchers")
 	dspAttrCfg, err = config.NewCGRConfigFromFolder(dspAttrCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
 	dspAttrCfg.DataFolderPath = dspDataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(dspAttrCfg)
-	instAttrCfgPath = path.Join(dspDataDir, "conf", "samples", "tutmysql")
+	instAttrCfgPath = path.Join(dspDataDir, "conf", "samples", "dispatchers", "attributes")
 	instAttrCfg, err = config.NewCGRConfigFromFolder(instAttrCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -152,44 +150,6 @@ func testDspAttrPing(t *testing.T) {
 	}
 }
 
-func testDspAttrAddAttributesWithPermision(t *testing.T) {
-	alsPrf := &engine.AttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "AuthKey",
-		Contexts:  []string{utils.MetaAuth},
-		FilterIDs: []string{"*string:APIKey:12345"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-		},
-		Attributes: []*engine.Attribute{
-			{
-				FieldName:  utils.APIMethods,
-				Initial:    utils.META_ANY,
-				Substitute: config.NewRSRParsersMustCompile("ThresholdSv1.GetThAttrholdsForEvent", true, utils.INFIELD_SEP),
-				Append:     true,
-			},
-		},
-		Weight: 20,
-	}
-	alsPrf.Compile()
-	var Attrult string
-	if err := instAttrRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &Attrult); err != nil {
-		t.Error(err)
-	} else if Attrult != utils.OK {
-		t.Error("Unexpected reply returned", Attrult)
-	}
-	var reply *engine.AttributeProfile
-	if err := instAttrRPC.Call("ApierV1.GetAttributeProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "AuthKey"}, &reply); err != nil {
-		t.Error(err)
-	}
-	reply.Compile()
-	if !reflect.DeepEqual(alsPrf, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
-	}
-}
-
 func testDspAttrTestMissingApiKey(t *testing.T) {
 	args := &CGREvWithApiKey{
 		CGREvent: utils.CGREvent{
@@ -246,49 +206,9 @@ func testDspAttrTestAuthKey(t *testing.T) {
 	}
 }
 
-func testDspAttrAddAttributesWithPermision2(t *testing.T) {
-	alsPrf := &engine.AttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "AuthKey",
-		Contexts:  []string{utils.MetaAuth},
-		FilterIDs: []string{"*string:APIKey:12345"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-		},
-		Attributes: []*engine.Attribute{
-			{
-				FieldName:  utils.APIMethods,
-				Initial:    utils.META_ANY,
-				Substitute: config.NewRSRParsersMustCompile("AttributeSv1.GetAttributeForEvent&AttributeSv1.ProcessEvent", true, utils.INFIELD_SEP),
-				Append:     true,
-			},
-		},
-		Weight: 20,
-	}
-	var result string
-	alsPrf.Compile()
-	if err := instAttrRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-	var reply *engine.AttributeProfile
-	if err := instAttrRPC.Call("ApierV1.GetAttributeProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "AuthKey"}, &reply); err != nil {
-		t.Error(err)
-	}
-	if reply != nil {
-		reply.Compile()
-	}
-	if !reflect.DeepEqual(alsPrf, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
-	}
-}
-
 func testDspAttrTestAuthKey2(t *testing.T) {
 	args := &CGREvWithApiKey{
-		APIKey: "12345",
+		APIKey: "attr12345",
 		CGREvent: utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSGetAttributeForEvent",
