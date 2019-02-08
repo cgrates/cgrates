@@ -156,7 +156,7 @@ func TestSessionSRplInitiate(t *testing.T) {
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", utils.ToIJSON(aSessions))
 	} else if aSessions[0].Usage != time.Duration(90)*time.Second {
-		t.Errorf("Received usage: %v", aSessions[0].Usage)
+		t.Errorf("Expecting : %+v, received: %+v", time.Duration(90)*time.Second, aSessions[0].Usage)
 	}
 
 	//check if the session was created as passive session on slave
@@ -167,7 +167,79 @@ func TestSessionSRplInitiate(t *testing.T) {
 	} else if len(pSessions) != 1 {
 		t.Errorf("PassiveSessions: %+v", pSessions)
 	} else if pSessions[0].Usage != time.Duration(90*time.Second) {
+		t.Errorf("Expecting : %+v, received: %+v", time.Duration(90)*time.Second, pSessions[0].Usage)
+	}
+}
+
+func TestSessionSRplUpdate(t *testing.T) {
+	//update the session on slave so the session should became active
+	usage := time.Duration(1 * time.Minute)
+	argsUpdate := &V1UpdateSessionArgs{
+		UpdateSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSessionSRplUpdate",
+			Event: map[string]interface{}{
+				utils.EVENT_NAME:  "TEST_EVENT",
+				utils.Tenant:      "cgrates.org",
+				utils.OriginID:    "123451",
+				utils.ToR:         utils.VOICE,
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1004",
+				utils.Category:    "call",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       usage,
+			},
+		},
+	}
+	var updtRpl V1UpdateSessionReply
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1UpdateSession,
+		argsUpdate, &updtRpl); err != nil {
+		t.Error(err)
+	}
+	if *updtRpl.MaxUsage != usage {
+		t.Errorf("Expecting : %+v, received: %+v", usage, *updtRpl.MaxUsage)
+	}
+
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
+	var aSessions []*ActiveSession
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetActiveSessions,
+		map[string]string{utils.OriginID: "123451"}, &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 1 {
+		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
+	} else if aSessions[0].Usage != time.Duration(150)*time.Second {
+		t.Errorf("Expecting : %+v, received: %+v", time.Duration(150)*time.Second, aSessions[0].Usage)
+	}
+
+	var pSessions []*ActiveSession
+	// Make sure we don't have passive session on active host
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions, nil,
+		&pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+	// Master should not longer have activeSession
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions,
+		map[string]string{utils.OriginID: "123451"}, &aSessions); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Error: %v with len(aSessions)=%v , session : %+v", err, len(aSessions), utils.ToJSON(aSessions))
+	}
+
+	cgrID := GetSetCGRID(engine.NewSafEvent(argsUpdate.Event))
+	// Make sure session was replicated
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetPassiveSessions,
+		nil, &pSessions); err != nil {
+		t.Error(err)
+	} else if len(pSessions) != 1 {
+		t.Errorf("PassiveSessions: %+v", pSessions)
+	} else if pSessions[0].CGRID != cgrID {
 		t.Errorf("PassiveSession: %+v", pSessions[0])
+	} else if pSessions[0].Usage != time.Duration(150*time.Second) {
+		t.Errorf("Expecting : %+v, received: %+v", time.Duration(150)*time.Second, pSessions[0].Usage)
 	}
 }
 
@@ -189,7 +261,7 @@ func TestSessionSRplTerminate(t *testing.T) {
 				utils.Category:    "call",
 				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       time.Duration(1*time.Minute + 30*time.Second),
+				utils.Usage:       time.Duration(2*time.Minute + 30*time.Second),
 			},
 		},
 	}
@@ -203,12 +275,21 @@ func TestSessionSRplTerminate(t *testing.T) {
 	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions,
 		map[string]string{utils.OriginID: "123451"}, &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err, aSessions)
+		t.Errorf("Error: %v with len(aSessions)=%v , session : %+v", err, len(aSessions), utils.ToIJSON(aSessions))
 	}
-	var pSessions []*ActiveSession
 	//check if the session was terminated on slave
-	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions,
-		nil, &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetActiveSessions,
+		nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Error: %v with len(aSessions)=%v , session : %+v", err, len(aSessions), utils.ToIJSON(aSessions))
+	}
+	// check to don't have passive session on master and slave
+	var pSessions []*ActiveSession
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions, nil,
+		&pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Error: %v with len(pSessions)=%v , session : %+v", err, len(pSessions), utils.ToIJSON(pSessions))
+	}
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions, nil,
+		&pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error: %v with len(pSessions)=%v , session : %+v", err, len(pSessions), utils.ToIJSON(pSessions))
 	}
 }
@@ -335,14 +416,6 @@ func TestSessionSRplManualReplicate(t *testing.T) {
 	if err := smgRplcSlvRPC.Call("Responder.Status", "", &status); err != nil { // slave should be still operational
 		t.Error(err)
 	}
-	// check if the passive sessions from slave became active
-	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
-		t.Error(err)
-	} else if len(aSessions) != 2 {
-		t.Errorf("Unexpected number of sessions received: %+v", utils.ToJSON(aSessions))
-	} else if aSessions[0].Usage != time.Duration(90)*time.Second && aSessions[1].Usage != time.Duration(90)*time.Second {
-		t.Errorf("Received usage: %v", aSessions[0].Usage)
-	}
 	// start master
 	if _, err := engine.StartEngine(smgRplcMasterCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
@@ -359,6 +432,7 @@ func TestSessionSRplManualReplicate(t *testing.T) {
 	}
 	// recover passive sessions from slave
 	argsRepl = ArgsReplicateSessions{
+		Passive: true,
 		Connections: []*config.HaPoolConfig{
 			{
 				Address:     smgRplcMasterCfg.ListenCfg().RPCJSONListen,
