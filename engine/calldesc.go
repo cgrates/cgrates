@@ -53,18 +53,17 @@ func init() {
 }
 
 var (
-	dm                       *DataManager
-	cdrStorage               CdrStorage
-	debitPeriod              = 10 * time.Second
-	globalRoundingDecimals   = 6
-	thresholdS               rpcclient.RpcClientConnection // used by RALs to communicate with ThresholdS
-	statS                    rpcclient.RpcClientConnection
-	pubSubServer             rpcclient.RpcClientConnection
-	userService              rpcclient.RpcClientConnection
-	aliasService             rpcclient.RpcClientConnection
-	schedCdrsConns           rpcclient.RpcClientConnection
-	rpSubjectPrefixMatching  bool
-	lcrSubjectPrefixMatching bool
+	dm                      *DataManager
+	cdrStorage              CdrStorage
+	debitPeriod             = 10 * time.Second
+	globalRoundingDecimals  = 6
+	thresholdS              rpcclient.RpcClientConnection // used by RALs to communicate with ThresholdS
+	statS                   rpcclient.RpcClientConnection
+	pubSubServer            rpcclient.RpcClientConnection
+	userService             rpcclient.RpcClientConnection
+	aliasService            rpcclient.RpcClientConnection
+	schedCdrsConns          rpcclient.RpcClientConnection
+	rpSubjectPrefixMatching bool
 )
 
 // Exported method to set the storage getter.
@@ -87,10 +86,6 @@ func SetRoundingDecimals(rd int) {
 
 func SetRpSubjectPrefixMatching(flag bool) {
 	rpSubjectPrefixMatching = flag
-}
-
-func SetLcrSubjectPrefixMatching(flag bool) {
-	lcrSubjectPrefixMatching = flag
 }
 
 /*

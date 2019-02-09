@@ -477,9 +477,6 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 	if cgrCfg.RalsCfg().RpSubjectPrefixMatching != false {
 		t.Errorf("Expecting: false , received: %+v", cgrCfg.RalsCfg().RpSubjectPrefixMatching)
 	}
-	if cgrCfg.RalsCfg().LcrSubjectPrefixMatching != false {
-		t.Errorf("Expecting: false , received: %+v", cgrCfg.RalsCfg().LcrSubjectPrefixMatching)
-	}
 	eMaxCU := map[string]time.Duration{
 		utils.ANY:   time.Duration(189 * time.Hour),
 		utils.VOICE: time.Duration(72 * time.Hour),

@@ -98,15 +98,14 @@ type FilterSJsonCfg struct {
 
 // Rater config section
 type RalsJsonCfg struct {
-	Enabled                     *bool
-	Thresholds_conns            *[]*HaPoolJsonCfg
-	Stats_conns                 *[]*HaPoolJsonCfg
-	Pubsubs_conns               *[]*HaPoolJsonCfg
-	Aliases_conns               *[]*HaPoolJsonCfg
-	Users_conns                 *[]*HaPoolJsonCfg
-	Rp_subject_prefix_matching  *bool
-	Lcr_subject_prefix_matching *bool
-	Max_computed_usage          *map[string]string
+	Enabled                    *bool
+	Thresholds_conns           *[]*HaPoolJsonCfg
+	Stats_conns                *[]*HaPoolJsonCfg
+	Pubsubs_conns              *[]*HaPoolJsonCfg
+	Aliases_conns              *[]*HaPoolJsonCfg
+	Users_conns                *[]*HaPoolJsonCfg
+	Rp_subject_prefix_matching *bool
+	Max_computed_usage         *map[string]string
 }
 
 // Scheduler config section

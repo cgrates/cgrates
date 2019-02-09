@@ -227,14 +227,13 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 
 func TestDfRalsJsonCfg(t *testing.T) {
 	eCfg := &RalsJsonCfg{
-		Enabled:                     utils.BoolPointer(false),
-		Thresholds_conns:            &[]*HaPoolJsonCfg{},
-		Stats_conns:                 &[]*HaPoolJsonCfg{},
-		Pubsubs_conns:               &[]*HaPoolJsonCfg{},
-		Users_conns:                 &[]*HaPoolJsonCfg{},
-		Aliases_conns:               &[]*HaPoolJsonCfg{},
-		Rp_subject_prefix_matching:  utils.BoolPointer(false),
-		Lcr_subject_prefix_matching: utils.BoolPointer(false),
+		Enabled:                    utils.BoolPointer(false),
+		Thresholds_conns:           &[]*HaPoolJsonCfg{},
+		Stats_conns:                &[]*HaPoolJsonCfg{},
+		Pubsubs_conns:              &[]*HaPoolJsonCfg{},
+		Users_conns:                &[]*HaPoolJsonCfg{},
+		Aliases_conns:              &[]*HaPoolJsonCfg{},
+		Rp_subject_prefix_matching: utils.BoolPointer(false),
 		Max_computed_usage: &map[string]string{
 			utils.ANY:   "189h",
 			utils.VOICE: "72h",

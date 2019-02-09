@@ -26,15 +26,14 @@ import (
 
 // Rater config section
 type RalsCfg struct {
-	RALsEnabled              bool            // start standalone server (no balancer)
-	RALsThresholdSConns      []*HaPoolConfig // address where to reach ThresholdS config
-	RALsStatSConns           []*HaPoolConfig
-	RALsPubSubSConns         []*HaPoolConfig
-	RALsUserSConns           []*HaPoolConfig
-	RALsAliasSConns          []*HaPoolConfig
-	RpSubjectPrefixMatching  bool // enables prefix matching for the rating profile subject
-	LcrSubjectPrefixMatching bool // enables prefix matching for the lcr subject
-	RALsMaxComputedUsage     map[string]time.Duration
+	RALsEnabled             bool            // start standalone server (no balancer)
+	RALsThresholdSConns     []*HaPoolConfig // address where to reach ThresholdS config
+	RALsStatSConns          []*HaPoolConfig
+	RALsPubSubSConns        []*HaPoolConfig
+	RALsUserSConns          []*HaPoolConfig
+	RALsAliasSConns         []*HaPoolConfig
+	RpSubjectPrefixMatching bool // enables prefix matching for the rating profile subject
+	RALsMaxComputedUsage    map[string]time.Duration
 }
 
 //loadFromJsonCfg loads Rals config from JsonCfg
@@ -82,9 +81,6 @@ func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 	}
 	if jsnRALsCfg.Rp_subject_prefix_matching != nil {
 		ralsCfg.RpSubjectPrefixMatching = *jsnRALsCfg.Rp_subject_prefix_matching
-	}
-	if jsnRALsCfg.Lcr_subject_prefix_matching != nil {
-		ralsCfg.LcrSubjectPrefixMatching = *jsnRALsCfg.Lcr_subject_prefix_matching
 	}
 	if jsnRALsCfg.Max_computed_usage != nil {
 		for k, v := range *jsnRALsCfg.Max_computed_usage {

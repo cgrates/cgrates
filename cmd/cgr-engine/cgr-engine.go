@@ -1380,7 +1380,6 @@ func main() {
 	// Done initing DBs
 	engine.SetRoundingDecimals(cfg.GeneralCfg().RoundingDecimals)
 	engine.SetRpSubjectPrefixMatching(cfg.RalsCfg().RpSubjectPrefixMatching)
-	engine.SetLcrSubjectPrefixMatching(cfg.RalsCfg().LcrSubjectPrefixMatching)
 	stopHandled := false
 
 	// Rpc/http server
