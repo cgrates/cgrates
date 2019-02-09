@@ -47,7 +47,6 @@ func TestRalsCfgFromJsonCfg(t *testing.T) {
 	"users_conns": [],						// address where to reach the user service, empty to disable user profile functionality: <""|*internal|x.y.z.y:1234>
 	"aliases_conns": [],					// address where to reach the aliases service, empty to disable aliases functionality: <""|*internal|x.y.z.y:1234>
 	"rp_subject_prefix_matching": false,	// enables prefix matching for the rating profile subject
-	"lcr_subject_prefix_matching": false,	// enables prefix matching for the lcr subject
 	"max_computed_usage": {					// do not compute usage higher than this, prevents memory overload
 		"*any": "189h",
 		"*voice": "72h",
