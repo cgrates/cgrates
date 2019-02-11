@@ -207,8 +207,8 @@ func (sr *SRun) Clone() *SRun {
 func (sr *SRun) debitReserve(dur time.Duration, lastUsage *time.Duration) (rDur time.Duration) {
 	if lastUsage != nil &&
 		sr.LastUsage != *lastUsage {
-		sr.ExtraDuration -= sr.LastUsage
-		sr.ExtraDuration += *lastUsage
+		diffUsage := sr.LastUsage - *lastUsage
+		sr.ExtraDuration += diffUsage
 		sr.TotalUsage -= sr.LastUsage
 		sr.TotalUsage += *lastUsage
 		sr.LastUsage = *lastUsage
@@ -218,7 +218,6 @@ func (sr *SRun) debitReserve(dur time.Duration, lastUsage *time.Duration) (rDur 
 		sr.ExtraDuration -= dur
 		sr.LastUsage = dur
 		sr.TotalUsage += dur
-		rDur = time.Duration(0) // complete debit from reserve
 	} else {
 		rDur = dur - sr.ExtraDuration
 		sr.ExtraDuration = 0
