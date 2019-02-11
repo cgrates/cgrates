@@ -48,6 +48,13 @@
 	"enabled": true,
 },
 
+"chargers": {
+	"enabled": true,
+	"attributes_conns": [
+		{"address": "*internal"}
+	],
+},
+
 "sessions": {
 	"enabled": true,
 	"session_ttl": "50ms",

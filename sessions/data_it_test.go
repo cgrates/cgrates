@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessions
 
 import (
+	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
 	"testing"
@@ -29,6 +30,8 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
+
+var smgRPC *rpc.Client
 
 func TestSMGDataInitCfg(t *testing.T) {
 	daCfgPath = path.Join(*dataDir, "conf", "samples", "smg")

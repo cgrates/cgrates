@@ -435,6 +435,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 // debitSession performs debit for a session run
 func (sS *SessionS) debitSession(s *Session, sRunIdx int, dur time.Duration,
 	lastUsed *time.Duration) (maxDur time.Duration, err error) {
+
 	s.Lock()
 	if sRunIdx >= len(s.SRuns) {
 		err = errors.New("sRunIdx out of range")
@@ -1202,7 +1203,7 @@ func (sS *SessionS) updateSession(s *Session, updtEv engine.MapEvent) (maxUsage 
 			sr.Event.GetStringIgnoreErrors(utils.RequestType)) {
 			rplyMaxUsage = time.Duration(-1)
 		} else if rplyMaxUsage, err = sS.debitSession(s, i, reqMaxUsage,
-			sr.Event.GetDurationPtrIgnoreErrors(utils.LastUsed)); err != nil {
+			updtEv.GetDurationPtrIgnoreErrors(utils.LastUsed)); err != nil {
 			return
 		}
 		if !maxUsageSet ||
@@ -2041,6 +2042,8 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 		} else {
 			s = ss[0]
 		}
+		fmt.Println("=====================")
+		fmt.Println("Here enter in updateSession from UPDATE API")
 		if maxUsage, err := sS.updateSession(s, ev.AsMapInterface()); err != nil {
 			return utils.NewErrRALs(err)
 		} else {

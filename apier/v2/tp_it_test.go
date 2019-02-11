@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v2
 
 import (
-	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -83,7 +82,6 @@ func TestITMongoTutorial(t *testing.T) {
 func testTPitLoadConfig(t *testing.T) {
 	tpCfgPath = path.Join(*dataDir, "conf", "samples", configDIR)
 	if tpCfg, err = config.NewCGRConfigFromFolder(tpCfgPath); err != nil {
-		fmt.Println("err : ", err)
 		t.Error(err)
 	}
 	switch configDIR {
