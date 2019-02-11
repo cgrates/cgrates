@@ -190,12 +190,6 @@ type DispatcherAttributeSv1 struct {
 	dA *dispatchers.DispatcherService
 }
 
-// Call implements rpcclient.RpcClientConnection interface for internal RPC
-// func (alSv1 *DispatcherAttributeSv1) Call(serviceMethod string,
-// 	args interface{}, reply interface{}) error {
-// 	return utils.APIerRPCCall(alSv1, serviceMethod, args, reply)
-// }
-
 // Ping implements SupplierSv1Ping
 func (dA *DispatcherAttributeSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
 	return dA.dA.AttributeSv1Ping(args, reply)
@@ -263,7 +257,7 @@ func (dS *DispatcherSessionSv1) UpdateSession(args *dispatchers.UpdateSessionWit
 	reply *sessions.V1UpdateSessionReply) (err error) {
 	return dS.dS.SessionSv1UpdateSession(args, reply)
 }
-
+*/
 func NewDispatcherChargerSv1(dps *dispatchers.DispatcherService) *DispatcherChargerSv1 {
 	return &DispatcherChargerSv1{dC: dps}
 }
@@ -274,8 +268,8 @@ type DispatcherChargerSv1 struct {
 }
 
 // Ping implements ChargerSv1Ping
-func (dC *DispatcherChargerSv1) Ping(ign string, reply *string) error {
-	return dC.dC.ChargerSv1Ping(ign, reply)
+func (dC *DispatcherChargerSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
+	return dC.dC.ChargerSv1Ping(args, reply)
 }
 
 // GetChargersForEvent implements ChargerSv1GetChargersForEvent
@@ -289,4 +283,3 @@ func (dC *DispatcherChargerSv1) ProcessEvent(args *dispatchers.CGREvWithApiKey,
 	reply *[]*engine.AttrSProcessEventReply) (err error) {
 	return dC.dC.ChargerSv1ProcessEvent(args, reply)
 }
-*/

@@ -7,7 +7,8 @@
 // This is what you get when you load CGRateS with an empty configuration file.
 
 "general": {
- 	"node_id": "DispatcherS1"
+ 	"node_id": "DispatcherS1",
+ 	"reconnects": 1,	
 },
 
 
@@ -17,14 +18,8 @@
 	"http": ":2080",
 },
 
-"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	"db_type": "redis",						// data_db type: <redis|mongo>
-	"db_port": 6379, 						// data_db port to reach the database
-	"db_name": "10", 						// data_db database name to connect to
-},
-
 "stor_db": {
-	"db_password": "CGRateS.org",
+	"db_type":"*internal",
 },
 
 "cache":{
@@ -38,17 +33,19 @@
 
 
 "dispatchers":{
- 	"enabled": true,						// starts DispatcherS service: <true|false>.
+ 	"enabled": true,
  	"attributes_conns": [
 		{"address": "127.0.0.1:5012", "transport": "*json"},
- 		// {"address": "*internal"}
  	],
 	"conns": {
-		// "AttributeS1": [
-		// 	{"address": "127.0.0.1:2012", "transport": "*json"},
-		// ],
-		"ALL": [
+		"AttributeS1": [
 			{"address": "127.0.0.1:5012", "transport": "*json"},
+		],
+		"ALL": [
+			{"address": "127.0.0.1:6012", "transport": "*json"},
+		],
+		"ALL2": [
+			{"address": "127.0.0.1:7012", "transport": "*json"},
 		],
 	},
 },

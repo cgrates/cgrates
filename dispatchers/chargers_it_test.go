@@ -66,14 +66,14 @@ func TestDspChargerS(t *testing.T) {
 
 func testDspCppInitCfg(t *testing.T) {
 	var err error
-	dspCppCfgPath = path.Join(dspDataDir, "conf", "samples", "dispatcher")
+	dspCppCfgPath = path.Join(dspDataDir, "conf", "samples", "dispatchers", "dispatchers")
 	dspCppCfg, err = config.NewCGRConfigFromFolder(dspCppCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
 	dspCppCfg.DataFolderPath = dspDataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(dspCppCfg)
-	instCppCfgPath = path.Join(dspDataDir, "conf", "samples", "tutmysql")
+	instCppCfgPath = path.Join(dspDataDir, "conf", "samples", "dispatchers", "attributes")
 	instCppCfg, err = config.NewCGRConfigFromFolder(instCppCfgPath)
 	if err != nil {
 		t.Error(err)
