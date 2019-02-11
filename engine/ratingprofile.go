@@ -34,14 +34,14 @@ type RatingProfile struct {
 }
 
 type RatingPlanActivation struct {
-	ActivationTime  time.Time
-	RatingPlanId    string
-	FallbackKeys    []string
-	CdrStatQueueIds []string
+	ActivationTime time.Time
+	RatingPlanId   string
+	FallbackKeys   []string
 }
 
 func (rpa *RatingPlanActivation) Equal(orpa *RatingPlanActivation) bool {
-	return rpa.ActivationTime == orpa.ActivationTime && rpa.RatingPlanId == orpa.RatingPlanId
+	return rpa.ActivationTime == orpa.ActivationTime &&
+		rpa.RatingPlanId == orpa.RatingPlanId
 }
 
 type RatingPlanActivations []*RatingPlanActivation

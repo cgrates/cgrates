@@ -313,9 +313,6 @@ func (ms *MongoStorage) GetTPRatingPlans(tpid, id string, pag *utils.Paginator) 
 
 func (ms *MongoStorage) GetTPRatingProfiles(tp *utils.TPRatingProfile) ([]*utils.TPRatingProfile, error) {
 	filter := bson.M{"tpid": tp.TPid}
-	if tp.Direction != "" {
-		filter["direction"] = tp.Direction
-	}
 	if tp.Tenant != "" {
 		filter["tenant"] = tp.Tenant
 	}
@@ -829,12 +826,11 @@ func (ms *MongoStorage) SetTPRatingProfiles(tps []*utils.TPRatingProfile) error 
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		for _, tp := range tps {
 			_, err = ms.getCol(utils.TBLTPRateProfiles).UpdateOne(sctx, bson.M{
-				"tpid":      tp.TPid,
-				"loadid":    tp.LoadId,
-				"direction": tp.Direction,
-				"tenant":    tp.Tenant,
-				"category":  tp.Category,
-				"subject":   tp.Subject,
+				"tpid":     tp.TPid,
+				"loadid":   tp.LoadId,
+				"tenant":   tp.Tenant,
+				"category": tp.Category,
+				"subject":  tp.Subject,
 			}, bson.M{"$set": tp}, options.Update().SetUpsert(true))
 			if err != nil {
 				return err

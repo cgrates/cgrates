@@ -215,13 +215,12 @@ func NewTPRatingProfileFromKeyId(tpid, loadId, keyId string) (*TPRatingProfile, 
 	if len(s) != 4 {
 		return nil, fmt.Errorf("Cannot parse key %s into RatingProfile", keyId)
 	}
-	return &TPRatingProfile{TPid: tpid, LoadId: loadId, Tenant: s[1], Category: s[2], Direction: s[0], Subject: s[3]}, nil
+	return &TPRatingProfile{TPid: tpid, LoadId: loadId, Tenant: s[1], Category: s[2], Subject: s[3]}, nil
 }
 
 type TPRatingProfile struct {
 	TPid                  string                // Tariff plan id
 	LoadId                string                // Gives ability to load specific RatingProfile based on load identifier, hence being able to keep history also in stordb
-	Direction             string                // Traffic direction, OUT is the only one supported for now
 	Tenant                string                // Tenant's Id
 	Category              string                // TypeOfRecord
 	Subject               string                // Rating subject, usually the same as account
@@ -230,15 +229,15 @@ type TPRatingProfile struct {
 
 // Used as key in nosql db (eg: redis)
 func (self *TPRatingProfile) KeyId() string {
-	return fmt.Sprintf("%s:%s:%s:%s", self.Direction, self.Tenant, self.Category, self.Subject)
+	return fmt.Sprintf("%s:%s:%s:%s", META_OUT, self.Tenant, self.Category, self.Subject)
 }
 
 func (self *TPRatingProfile) KeyIdA() string {
-	return fmt.Sprintf("%s:%s:%s:%s:%s", self.LoadId, self.Direction, self.Tenant, self.Category, self.Subject)
+	return fmt.Sprintf("%s:%s:%s:%s:%s", self.LoadId, META_OUT, self.Tenant, self.Category, self.Subject)
 }
 
 func (rpf *TPRatingProfile) GetRatingProfilesId() string {
-	return fmt.Sprintf("%s%s%s%s%s%s%s%s%s", rpf.LoadId, CONCATENATED_KEY_SEP, rpf.Direction, CONCATENATED_KEY_SEP, rpf.Tenant, CONCATENATED_KEY_SEP, rpf.Category, CONCATENATED_KEY_SEP, rpf.Subject)
+	return fmt.Sprintf("%s%s%s%s%s%s%s%s%s", rpf.LoadId, CONCATENATED_KEY_SEP, META_OUT, CONCATENATED_KEY_SEP, rpf.Tenant, CONCATENATED_KEY_SEP, rpf.Category, CONCATENATED_KEY_SEP, rpf.Subject)
 }
 
 func (rpf *TPRatingProfile) SetRatingProfilesId(id string) error {
@@ -247,7 +246,6 @@ func (rpf *TPRatingProfile) SetRatingProfilesId(id string) error {
 		return fmt.Errorf("Wrong TPRatingProfileId: %s", id)
 	}
 	rpf.LoadId = ids[0]
-	rpf.Direction = ids[1]
 	rpf.Tenant = ids[2]
 	rpf.Category = ids[3]
 	rpf.Subject = ids[4]
@@ -257,36 +255,33 @@ func (rpf *TPRatingProfile) SetRatingProfilesId(id string) error {
 type AttrSetRatingProfile struct {
 	Tenant                string                // Tenant's Id
 	Category              string                // TypeOfRecord
-	Direction             string                // Traffic direction, OUT is the only one supported for now
 	Subject               string                // Rating subject, usually the same as account
 	Overwrite             bool                  // Overwrite if exists
 	RatingPlanActivations []*TPRatingActivation // Activate rating plans at specific time
 }
 
 type AttrGetRatingProfile struct {
-	Tenant    string // Tenant's Id
-	Category  string // TypeOfRecord
-	Direction string // Traffic direction, OUT is the only one supported for now
-	Subject   string // Rating subject, usually the same as account
+	Tenant   string // Tenant's Id
+	Category string // TypeOfRecord
+	Subject  string // Rating subject, usually the same as account
 }
 
 func (self *AttrGetRatingProfile) GetID() string {
-	return ConcatenatedKey(self.Direction, self.Tenant, self.Category, self.Subject)
+	return ConcatenatedKey(META_OUT, self.Tenant, self.Category, self.Subject)
 }
 
 type TPRatingActivation struct {
 	ActivationTime   string // Time when this profile will become active, defined as unix epoch time
 	RatingPlanId     string // Id of RatingPlan profile
 	FallbackSubjects string // So we follow the api
-	CdrStatQueueIds  string
 }
 
 // Helper to return the subject fallback keys we need in dataDb
-func FallbackSubjKeys(direction, tenant, tor, fallbackSubjects string) []string {
+func FallbackSubjKeys(tenant, tor, fallbackSubjects string) []string {
 	var sslice sort.StringSlice
 	if len(fallbackSubjects) != 0 {
 		for _, fbs := range strings.Split(fallbackSubjects, string(FALLBACK_SEP)) {
-			newKey := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fbs)
+			newKey := fmt.Sprintf("%s:%s:%s:%s", META_OUT, tenant, tor, fbs)
 			i := sslice.Search(newKey)
 			if i < len(sslice) && sslice[i] != newKey {
 				// not found so insert it
@@ -311,11 +306,10 @@ type AttrSetDestination struct { //ToDo
 }
 
 type AttrTPRatingProfileIds struct {
-	TPid      string // Tariff plan id
-	Tenant    string // Tenant's Id
-	Category  string // TypeOfRecord
-	Direction string // Traffic direction
-	Subject   string // Rating subject, usually the same as account
+	TPid     string // Tariff plan id
+	Tenant   string // Tenant's Id
+	Category string // TypeOfRecord
+	Subject  string // Rating subject, usually the same as account
 }
 
 type TPActions struct {

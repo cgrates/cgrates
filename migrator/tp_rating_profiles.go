@@ -43,8 +43,10 @@ func (m *Migrator) migrateCurrentTPratingprofiles() (err error) {
 					return err
 				}
 				for _, ratPrf := range ratingProfile {
-					if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPRateProfiles, ratPrf.TPid, map[string]string{"loadid": ratPrf.LoadId,
-						"direction": ratPrf.Direction, "tenant": ratPrf.Tenant, "category": ratPrf.Category, "subject": ratPrf.Subject}); err != nil {
+					if err := m.storDBIn.StorDB().RemTpData(utils.TBLTPRateProfiles, ratPrf.TPid,
+						map[string]string{"loadid": ratPrf.LoadId,
+							"tenant": ratPrf.Tenant, "category": ratPrf.Category,
+							"subject": ratPrf.Subject}); err != nil {
 						return err
 					}
 				}

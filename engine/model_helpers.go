@@ -599,18 +599,16 @@ func (tps TpRatingProfiles) AsMapTPRatingProfiles() (map[string]*utils.TPRatingP
 	result := make(map[string]*utils.TPRatingProfile)
 	for _, tp := range tps {
 		rp := &utils.TPRatingProfile{
-			TPid:      tp.Tpid,
-			LoadId:    tp.Loadid,
-			Direction: tp.Direction,
-			Tenant:    tp.Tenant,
-			Category:  tp.Category,
-			Subject:   tp.Subject,
+			TPid:     tp.Tpid,
+			LoadId:   tp.Loadid,
+			Tenant:   tp.Tenant,
+			Category: tp.Category,
+			Subject:  tp.Subject,
 		}
 		ra := &utils.TPRatingActivation{
 			ActivationTime:   tp.ActivationTime,
 			RatingPlanId:     tp.RatingPlanTag,
 			FallbackSubjects: tp.FallbackSubjects,
-			CdrStatQueueIds:  tp.CdrStatQueueIds,
 		}
 		if existing, exists := result[rp.KeyIdA()]; !exists {
 			rp.RatingPlanActivations = []*utils.TPRatingActivation{ra}
@@ -651,24 +649,21 @@ func APItoModelRatingProfile(rp *utils.TPRatingProfile) (result TpRatingProfiles
 			result = append(result, TpRatingProfile{
 				Tpid:             rp.TPid,
 				Loadid:           rp.LoadId,
-				Direction:        rp.Direction,
 				Tenant:           rp.Tenant,
 				Category:         rp.Category,
 				Subject:          rp.Subject,
 				ActivationTime:   rpa.ActivationTime,
 				RatingPlanTag:    rpa.RatingPlanId,
 				FallbackSubjects: rpa.FallbackSubjects,
-				CdrStatQueueIds:  rpa.CdrStatQueueIds,
 			})
 		}
 		if len(rp.RatingPlanActivations) == 0 {
 			result = append(result, TpRatingProfile{
-				Tpid:      rp.TPid,
-				Loadid:    rp.LoadId,
-				Direction: rp.Direction,
-				Tenant:    rp.Tenant,
-				Category:  rp.Category,
-				Subject:   rp.Subject,
+				Tpid:     rp.TPid,
+				Loadid:   rp.LoadId,
+				Tenant:   rp.Tenant,
+				Category: rp.Category,
+				Subject:  rp.Subject,
 			})
 		}
 	}

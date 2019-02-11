@@ -398,10 +398,10 @@ func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *utils.TPRatingProfile)
 			}
 			resultRatingProfile.RatingPlanActivations = append(resultRatingProfile.RatingPlanActivations,
 				&RatingPlanActivation{
-					ActivationTime:  at,
-					RatingPlanId:    tpRa.RatingPlanId,
-					FallbackKeys:    utils.FallbackSubjKeys(tpRpf.Direction, tpRpf.Tenant, tpRpf.Category, tpRa.FallbackSubjects),
-					CdrStatQueueIds: strings.Split(tpRa.CdrStatQueueIds, utils.INFIELD_SEP),
+					ActivationTime: at,
+					RatingPlanId:   tpRa.RatingPlanId,
+					FallbackKeys: utils.FallbackSubjKeys(tpRpf.Tenant,
+						tpRpf.Category, tpRa.FallbackSubjects),
 				})
 		}
 		if err := tpr.dm.SetRatingProfile(resultRatingProfile, utils.NonTransactional); err != nil {
@@ -438,10 +438,10 @@ func (tpr *TpReader) LoadRatingProfiles() (err error) {
 			}
 			rpf.RatingPlanActivations = append(rpf.RatingPlanActivations,
 				&RatingPlanActivation{
-					ActivationTime:  at,
-					RatingPlanId:    tpRa.RatingPlanId,
-					FallbackKeys:    utils.FallbackSubjKeys(tpRpf.Direction, tpRpf.Tenant, tpRpf.Category, tpRa.FallbackSubjects),
-					CdrStatQueueIds: strings.Split(tpRa.CdrStatQueueIds, utils.INFIELD_SEP),
+					ActivationTime: at,
+					RatingPlanId:   tpRa.RatingPlanId,
+					FallbackKeys: utils.FallbackSubjKeys(tpRpf.Tenant,
+						tpRpf.Category, tpRa.FallbackSubjects),
 				})
 		}
 		tpr.ratingProfiles[tpRpf.KeyId()] = rpf

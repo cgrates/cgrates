@@ -102,19 +102,17 @@ CREATE TABLE tp_rating_profiles (
   id SERIAL PRIMARY KEY,
   tpid VARCHAR(64) NOT NULL,
   loadid VARCHAR(64) NOT NULL,
-  direction VARCHAR(8) NOT NULL,
   tenant VARCHAR(64) NOT NULL,
   category VARCHAR(32) NOT NULL,
   subject VARCHAR(64) NOT NULL,
   activation_time VARCHAR(26) NOT NULL,
   rating_plan_tag VARCHAR(64) NOT NULL,
   fallback_subjects VARCHAR(64),
-  cdr_stat_queue_ids VARCHAR(64),
   created_at TIMESTAMP WITH TIME ZONE,
   UNIQUE (tpid, loadid, tenant, category, direction, subject, activation_time)
 );
 CREATE INDEX tpratingprofiles_tpid_idx ON tp_rating_profiles (tpid);
-CREATE INDEX tpratingprofiles_idx ON tp_rating_profiles (tpid,loadid,direction,tenant,category,subject);
+CREATE INDEX tpratingprofiles_idx ON tp_rating_profiles (tpid,loadid,tenant,category,subject);
 
 --
 -- Table structure for table `tp_shared_groups`

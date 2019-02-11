@@ -106,19 +106,17 @@ CREATE TABLE `tp_rating_profiles` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
   `loadid` varchar(64) NOT NULL,
-  `direction` varchar(8) NOT NULL,
   `tenant` varchar(64) NOT NULL,
   `category` varchar(32) NOT NULL,
   `subject` varchar(64) NOT NULL,
   `activation_time` varchar(26) NOT NULL,
   `rating_plan_tag` varchar(64) NOT NULL,
   `fallback_subjects` varchar(64),
-  `cdr_stat_queue_ids` varchar(64),
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
    KEY `tpid` (`tpid`),
   KEY `tpid_loadid` (`tpid`, `loadid`),
-  UNIQUE KEY `tpid_loadid_tenant_category_dir_subj_atime` (`tpid`,`loadid`, `tenant`,`category`,`direction`,`subject`,`activation_time`)
+  UNIQUE KEY `tpid_loadid_tenant_category_dir_subj_atime` (`tpid`,`loadid`, `tenant`,`category`,`subject`,`activation_time`)
 );
 
 --

@@ -67,12 +67,12 @@ func (self *ApierV1) GetTPRatingProfileLoadIds(attrs utils.AttrTPRatingProfileId
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPRateProfiles, utils.TPDistinctIds{"loadid"}, map[string]string{
-		"tenant":    attrs.Tenant,
-		"category":  attrs.Category,
-		"direction": attrs.Direction,
-		"subject":   attrs.Subject,
-	}, new(utils.Paginator)); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPRateProfiles,
+		utils.TPDistinctIds{"loadid"}, map[string]string{
+			"tenant":   attrs.Tenant,
+			"category": attrs.Category,
+			"subject":  attrs.Subject,
+		}, new(utils.Paginator)); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -118,7 +118,9 @@ func (self *ApierV1) GetTPRatingProfileIds(attrs AttrGetTPRatingProfileIds, repl
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPRateProfiles, utils.TPDistinctIds{"loadid", "direction", "tenant", "category", "subject"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPRateProfiles,
+		utils.TPDistinctIds{"loadid", "direction", "tenant", "category", "subject"},
+		nil, &attrs.Paginator); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -138,7 +140,10 @@ func (self *ApierV1) RemTPRatingProfile(attrs AttrGetTPRatingProfile, reply *str
 	if err := tmpRpf.SetRatingProfileId(attrs.RatingProfileId); err != nil {
 		return err
 	}
-	if err := self.StorDb.RemTpData(utils.TBLTPRateProfiles, attrs.TPid, map[string]string{"loadid": tmpRpf.Loadid, "direction": tmpRpf.Direction, "tenant": tmpRpf.Tenant, "category": tmpRpf.Category, "subject": tmpRpf.Subject}); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBLTPRateProfiles,
+		attrs.TPid, map[string]string{"loadid": tmpRpf.Loadid,
+			"tenant": tmpRpf.Tenant, "category": tmpRpf.Category,
+			"subject": tmpRpf.Subject}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = utils.OK

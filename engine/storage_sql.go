@@ -389,7 +389,9 @@ func (self *SQLStorage) SetTPRatingProfiles(rpfs []*utils.TPRatingProfile) error
 	}
 	tx := self.db.Begin()
 	for _, rpf := range rpfs {
-		if err := tx.Where(&TpRatingProfile{Tpid: rpf.TPid, Loadid: rpf.LoadId, Direction: rpf.Direction, Tenant: rpf.Tenant, Category: rpf.Category, Subject: rpf.Subject}).Delete(TpRatingProfile{}).Error; err != nil {
+		if err := tx.Where(&TpRatingProfile{Tpid: rpf.TPid, Loadid: rpf.LoadId,
+			Tenant: rpf.Tenant, Category: rpf.Category,
+			Subject: rpf.Subject}).Delete(TpRatingProfile{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -1225,9 +1227,6 @@ func (self *SQLStorage) GetTPRatingProfiles(filter *utils.TPRatingProfile) ([]*u
 	q := self.db.Where("tpid = ?", filter.TPid)
 	if len(filter.LoadId) != 0 {
 		q = q.Where("loadid = ?", filter.LoadId)
-	}
-	if len(filter.Direction) != 0 {
-		q = q.Where("direction = ?", filter.Direction)
 	}
 	if len(filter.Tenant) != 0 {
 		q = q.Where("tenant = ?", filter.Tenant)

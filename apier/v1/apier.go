@@ -392,7 +392,8 @@ func (self *ApierV1) SetRatingProfile(attrs utils.AttrSetRatingProfile, reply *s
 			return fmt.Errorf("%s:RatingPlanActivation:%v", utils.ErrMandatoryIeMissing.Error(), missing)
 		}
 	}
-	tpRpf := utils.TPRatingProfile{Tenant: attrs.Tenant, Category: attrs.Category, Direction: attrs.Direction, Subject: attrs.Subject}
+	tpRpf := utils.TPRatingProfile{Tenant: attrs.Tenant,
+		Category: attrs.Category, Subject: attrs.Subject}
 	keyId := tpRpf.KeyId()
 	var rpfl *engine.RatingProfile
 	if !attrs.Overwrite {
@@ -419,8 +420,8 @@ func (self *ApierV1) SetRatingProfile(attrs utils.AttrSetRatingProfile, reply *s
 			&engine.RatingPlanActivation{
 				ActivationTime: at,
 				RatingPlanId:   ra.RatingPlanId,
-				FallbackKeys: utils.FallbackSubjKeys(tpRpf.Direction,
-					tpRpf.Tenant, tpRpf.Category, ra.FallbackSubjects)})
+				FallbackKeys: utils.FallbackSubjKeys(tpRpf.Tenant,
+					tpRpf.Category, ra.FallbackSubjects)})
 	}
 	if err := self.DataManager.SetRatingProfile(rpfl, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)

@@ -47,9 +47,9 @@ func TestAuthLoadCsv(t *testing.T) {
 DR_ANY_1CNT,*any,RT_1CENTWITHCF,*up,8,,`
 	ratingPlans := `RP_1,DR_GERMANY,*any,10
 RP_ANY,DR_ANY_1CNT,*any,10`
-	ratingProfiles := `*out,cgrates.org,call,testauthpostpaid1,2013-01-06T00:00:00Z,RP_1,,
-*out,cgrates.org,call,testauthpostpaid2,2013-01-06T00:00:00Z,RP_1,*any,
-*out,cgrates.org,call,*any,2013-01-06T00:00:00Z,RP_ANY,,`
+	ratingProfiles := `cgrates.org,call,testauthpostpaid1,2013-01-06T00:00:00Z,RP_1,
+cgrates.org,call,testauthpostpaid2,2013-01-06T00:00:00Z,RP_1,*any
+cgrates.org,call,*any,2013-01-06T00:00:00Z,RP_ANY,`
 	sharedGroups := ``
 	actions := `TOPUP10_AC,*topup_reset,,,,*monetary,*out,,*any,,,*unlimited,,0,10,false,false,10`
 	actionPlans := `TOPUP10_AT,TOPUP10_AC,*asap,10`

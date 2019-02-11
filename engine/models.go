@@ -88,14 +88,12 @@ type TpRatingProfile struct {
 	Id               int64
 	Tpid             string
 	Loadid           string
-	Direction        string `index:"0" re:"\*out\s*"`
-	Tenant           string `index:"1" re:"[0-9A-Za-z_\.]+\s*"`
-	Category         string `index:"2" re:"\w+\s*"`
-	Subject          string `index:"3" re:"\*any\s*|(\w+;?)+\s*"`
-	ActivationTime   string `index:"4" re:"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z"`
-	RatingPlanTag    string `index:"5" re:"\w+\s*"`
-	FallbackSubjects string `index:"6" re:"\w+\s*"`
-	CdrStatQueueIds  string `index:"7" re:"\w+\s*"`
+	Tenant           string `index:"0" re:"[0-9A-Za-z_\.]+\s*"`
+	Category         string `index:"1" re:"\w+\s*"`
+	Subject          string `index:"2" re:"\*any\s*|(\w+;?)+\s*"`
+	ActivationTime   string `index:"3" re:"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z"`
+	RatingPlanTag    string `index:"4" re:"\w+\s*"`
+	FallbackSubjects string `index:"5" re:"\w+\s*"`
 	CreatedAt        time.Time
 }
 
@@ -105,7 +103,6 @@ func (rpf *TpRatingProfile) SetRatingProfileId(id string) error {
 		return fmt.Errorf("Wrong TP Rating Profile Id: %s", id)
 	}
 	rpf.Loadid = ids[0]
-	rpf.Direction = ids[1]
 	rpf.Tenant = ids[2]
 	rpf.Category = ids[3]
 	rpf.Subject = ids[4]
@@ -113,7 +110,8 @@ func (rpf *TpRatingProfile) SetRatingProfileId(id string) error {
 }
 
 func (rpf *TpRatingProfile) GetRatingProfileId() string {
-	return utils.ConcatenatedKey(rpf.Loadid, rpf.Direction, rpf.Tenant, rpf.Category, rpf.Subject)
+	return utils.ConcatenatedKey(rpf.Loadid, utils.META_OUT,
+		rpf.Tenant, rpf.Category, rpf.Subject)
 }
 
 type TpAction struct {

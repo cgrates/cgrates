@@ -296,12 +296,11 @@ func TestTPRatingPlanAsExportSlice(t *testing.T) {
 
 func TestTPRatingProfileAsExportSlice(t *testing.T) {
 	tpRpf := &utils.TPRatingProfile{
-		TPid:      "TEST_TPID",
-		LoadId:    "TEST_LOADID",
-		Direction: utils.OUT,
-		Tenant:    "cgrates.org",
-		Category:  "call",
-		Subject:   "*any",
+		TPid:     "TEST_TPID",
+		LoadId:   "TEST_LOADID",
+		Tenant:   "cgrates.org",
+		Category: "call",
+		Subject:  "*any",
 		RatingPlanActivations: []*utils.TPRatingActivation{
 			&utils.TPRatingActivation{
 				ActivationTime:   "2014-01-14T00:00:00Z",
@@ -314,8 +313,8 @@ func TestTPRatingProfileAsExportSlice(t *testing.T) {
 		},
 	}
 	expectedSlc := [][]string{
-		[]string{utils.OUT, "cgrates.org", "call", "*any", "2014-01-14T00:00:00Z", "TEST_RPLAN1", "subj1;subj2", ""},
-		[]string{utils.OUT, "cgrates.org", "call", "*any", "2014-01-15T00:00:00Z", "TEST_RPLAN2", "subj1;subj2", ""},
+		[]string{"cgrates.org", "call", "*any", "2014-01-14T00:00:00Z", "TEST_RPLAN1", "subj1;subj2"},
+		[]string{"cgrates.org", "call", "*any", "2014-01-15T00:00:00Z", "TEST_RPLAN2", "subj1;subj2"},
 	}
 
 	ms := APItoModelRatingProfile(tpRpf)
