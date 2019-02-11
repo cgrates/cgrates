@@ -1,1 +1,2 @@
-*out,cgrates.org,call,test,2014-01-14T00:00:00Z,RPL_100x,,
+#Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
+cgrates.org,call,test,2014-01-14T00:00:00Z,RPL_100x,

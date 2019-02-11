@@ -98,7 +98,7 @@ func TestTutSMGCacheStats(t *testing.T) {
 		t.Error(reply)
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 5, ReverseDestinations: 7, RatingPlans: 4, RatingProfiles: 10,
+	expectedStats := &utils.CacheStats{Destinations: 5, ReverseDestinations: 7, RatingPlans: 4, RatingProfiles: 5,
 		Actions: 9, ActionPlans: 4, AccountActionPlans: 5, SharedGroups: 1, DerivedChargers: 1,
 		Users: 3, Aliases: 1, ReverseAliases: 2, ResourceProfiles: 3, Resources: 3, StatQueues: 1,
 		StatQueueProfiles: 1, Thresholds: 7, ThresholdProfiles: 7, Filters: 16, SupplierProfiles: 3, AttributeProfiles: 1}
@@ -109,49 +109,6 @@ func TestTutSMGCacheStats(t *testing.T) {
 		t.Errorf("Calling ApierV2.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)
 	}
 }
-
-/*
-// Make sure account was debited properly
-func TestTutSMGAccountsBefore(t *testing.T) {
-	var reply *engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := tutSMGRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 { // Make sure we debitted
-		jsn, _ := json.Marshal(reply)
-		t.Errorf("Calling ApierV2.GetBalance received: %s", jsn)
-	}
-	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1002"}
-	if err := tutSMGRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 { // Make sure we debitted
-		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
-	}
-	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1003"}
-	if err := tutSMGRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 { // Make sure we debitted
-		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
-	}
-	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1004"}
-	if err := tutSMGRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 { // Make sure we debitted
-		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
-	}
-	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1007"}
-	if err := tutSMGRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 0.0 { // Make sure we debitted
-		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
-	}
-	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1005"}
-	if err := tutSMGRpc.Call("ApierV2.GetAccount", attrs, &reply); err == nil || !strings.HasSuffix(err.Error(), "does not exist") {
-		t.Error("Got error on ApierV2.GetAccount: %v", err)
-	}
-}
-
-*/
 
 func TestTutSMGStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {

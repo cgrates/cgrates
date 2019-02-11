@@ -27,7 +27,8 @@ import (
 
 // Creates a new RatingProfile within a tariff plan
 func (self *ApierV1) SetTPRatingProfile(attrs utils.TPRatingProfile, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "Category", "Direction", "Subject", "RatingPlanActivations"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attrs,
+		[]string{"TPid", "LoadId", "Tenant", "Category", "Subject", "RatingPlanActivations"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := self.StorDb.SetTPRatingProfiles([]*utils.TPRatingProfile{&attrs}); err != nil {

@@ -517,34 +517,30 @@ func testStorDBitCRUDTpRatingProfiles(t *testing.T) {
 	// WRITE
 	var snd = []*utils.TPRatingProfile{
 		{
-			TPid:      "testTPid",
-			LoadId:    "TEST_LOADID",
-			Direction: "*out",
-			Tenant:    "cgrates.org",
-			Category:  "call",
-			Subject:   "test",
+			TPid:     "testTPid",
+			LoadId:   "TEST_LOADID",
+			Tenant:   "cgrates.org",
+			Category: "call",
+			Subject:  "test",
 			RatingPlanActivations: []*utils.TPRatingActivation{
 				{
 					ActivationTime:   "2014-07-29T15:00:00Z",
 					RatingPlanId:     "test",
 					FallbackSubjects: "",
-					CdrStatQueueIds:  "",
 				},
 			},
 		},
 		{
-			TPid:      "testTPid",
-			LoadId:    "TEST_LOADID2",
-			Direction: "*out",
-			Tenant:    "cgrates.org",
-			Category:  "call",
-			Subject:   "test",
+			TPid:     "testTPid",
+			LoadId:   "TEST_LOADID2",
+			Tenant:   "cgrates.org",
+			Category: "call",
+			Subject:  "test",
 			RatingPlanActivations: []*utils.TPRatingActivation{
 				{
 					ActivationTime:   "2014-07-29T15:00:00Z",
 					RatingPlanId:     "test",
 					FallbackSubjects: "",
-					CdrStatQueueIds:  "",
 				},
 			},
 		},
@@ -556,13 +552,25 @@ func testStorDBitCRUDTpRatingProfiles(t *testing.T) {
 	if rcv, err := storDB.GetTPRatingProfiles(&filter); err != nil {
 		t.Error(err)
 	} else {
-		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+		if !(reflect.DeepEqual(snd[0], rcv[0]) ||
+			reflect.DeepEqual(snd[0], rcv[1])) {
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v",
+				utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// UPDATE
-	snd[0].RatingPlanActivations[0].CdrStatQueueIds = "test"
-	snd[1].RatingPlanActivations[0].CdrStatQueueIds = "test"
+	snd[0].RatingPlanActivations = append(snd[0].RatingPlanActivations,
+		&utils.TPRatingActivation{
+			ActivationTime:   "2019-02-11T15:00:00Z",
+			RatingPlanId:     "test",
+			FallbackSubjects: "",
+		})
+	snd[1].RatingPlanActivations = append(snd[1].RatingPlanActivations,
+		&utils.TPRatingActivation{
+			ActivationTime:   "2019-02-11T15:00:00Z",
+			RatingPlanId:     "test",
+			FallbackSubjects: "",
+		})
 	if err := storDB.SetTPRatingProfiles(snd); err != nil {
 		t.Error(err)
 	}
@@ -571,7 +579,8 @@ func testStorDBitCRUDTpRatingProfiles(t *testing.T) {
 		t.Error(err)
 	} else {
 		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
+			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v",
+				utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
 	}
 	// REMOVE
@@ -831,7 +840,6 @@ func testStorDBitCRUDTpActionTriggers(t *testing.T) {
 					ActivationDate:        "2014-07-29T15:00:00Z",
 					BalanceId:             "test",
 					BalanceType:           "*monetary",
-					BalanceDirections:     "*out",
 					BalanceDestinationIds: "call",
 					BalanceWeight:         "0.0",
 					BalanceExpirationDate: "2014-07-29T15:00:00Z",
@@ -841,7 +849,6 @@ func testStorDBitCRUDTpActionTriggers(t *testing.T) {
 					BalanceSharedGroups:   "SHARED_1",
 					BalanceBlocker:        "false",
 					BalanceDisabled:       "false",
-					MinQueuedItems:        0,
 					ActionsId:             "test",
 					Weight:                1.0,
 				},
@@ -862,7 +869,6 @@ func testStorDBitCRUDTpActionTriggers(t *testing.T) {
 					ActivationDate:        "2014-07-29T15:00:00Z",
 					BalanceId:             "test",
 					BalanceType:           "*monetary",
-					BalanceDirections:     "*out",
 					BalanceDestinationIds: "call",
 					BalanceWeight:         "0.0",
 					BalanceExpirationDate: "2014-07-29T15:00:00Z",
@@ -872,7 +878,6 @@ func testStorDBitCRUDTpActionTriggers(t *testing.T) {
 					BalanceSharedGroups:   "SHARED_1",
 					BalanceBlocker:        "false",
 					BalanceDisabled:       "false",
-					MinQueuedItems:        0,
 					ActionsId:             "test",
 					Weight:                1.0,
 				},
@@ -891,8 +896,8 @@ func testStorDBitCRUDTpActionTriggers(t *testing.T) {
 		}
 	}
 	// UPDATE
-	snd[0].ActionTriggers[0].MinQueuedItems = 2
-	snd[1].ActionTriggers[0].MinQueuedItems = 2
+	snd[0].ActionTriggers[0].ActionsId = "test2"
+	snd[1].ActionTriggers[0].ActionsId = "test2"
 	if err := storDB.SetTPActionTriggers(snd); err != nil {
 		t.Error(err)
 	}

@@ -390,7 +390,8 @@ func TestApierTPRatingPlan(t *testing.T) {
 // Test here TPRatingPlan APIs
 func TestApierTPRatingProfile(t *testing.T) {
 	reply := ""
-	rpf := &utils.TPRatingProfile{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org", Category: "call", Direction: "*out", Subject: "*any",
+	rpf := &utils.TPRatingProfile{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL,
+		Tenant: "cgrates.org", Category: "call", Subject: "*any",
 		RatingPlanActivations: []*utils.TPRatingActivation{
 			{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RETAIL1", FallbackSubjects: ""},
 		}}
@@ -413,7 +414,7 @@ func TestApierTPRatingProfile(t *testing.T) {
 	// Check missing params
 	if err := rater.Call("ApierV1.SetTPRatingProfile", new(utils.TPRatingProfile), &reply); err == nil {
 		t.Error("Calling ApierV1.SetTPRatingProfile, expected error, received: ", reply)
-	} else if err.Error() != "MANDATORY_IE_MISSING: [TPid LoadId Tenant Category Direction Subject RatingPlanActivations]" {
+	} else if err.Error() != "MANDATORY_IE_MISSING: [TPid LoadId Tenant Category Subject RatingPlanActivations]" {
 		t.Error("Calling ApierV1.SetTPRatingProfile got unexpected error: ", err.Error())
 	}
 	// Test get
@@ -673,7 +674,9 @@ func TestApierLoadRatingPlan(t *testing.T) {
 // Test here LoadRatingProfile
 func TestApierLoadRatingProfile(t *testing.T) {
 	reply := ""
-	rpf := &utils.TPRatingProfile{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org", Category: "call", Direction: "*out", Subject: "*any"}
+	rpf := &utils.TPRatingProfile{
+		TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL,
+		Tenant: "cgrates.org", Category: "call", Subject: "*any"}
 	if err := rater.Call("ApierV1.LoadRatingProfile", rpf, &reply); err != nil {
 		t.Error("Got error on ApierV1.LoadRatingProfile: ", err.Error())
 	} else if reply != "OK" {
@@ -723,7 +726,7 @@ func TestApierSetRatingProfile(t *testing.T) {
 	reply := ""
 	rpa := &utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RETAIL1", FallbackSubjects: "dan2"}
 	rpf := &utils.AttrSetRatingProfile{Tenant: "cgrates.org", Category: "call",
-		Direction: "*out", Subject: "dan", RatingPlanActivations: []*utils.TPRatingActivation{rpa}}
+		Subject: "dan", RatingPlanActivations: []*utils.TPRatingActivation{rpa}}
 	if err := rater.Call("ApierV1.SetRatingProfile", rpf, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetRatingProfile: ", err.Error())
 	} else if reply != "OK" {
@@ -781,7 +784,8 @@ func TestApierSetRatingProfile(t *testing.T) {
 
 func TestApierV1GetRatingProfile(t *testing.T) {
 	var rpl engine.RatingProfile
-	attrGetRatingPlan := &utils.AttrGetRatingProfile{Tenant: "cgrates.org", Category: "call", Direction: "*out", Subject: "dan"}
+	attrGetRatingPlan := &utils.AttrGetRatingProfile{
+		Tenant: "cgrates.org", Category: "call", Subject: "dan"}
 	actTime, err := utils.ParseTimeDetectLayout("2012-01-01T00:00:00Z", "")
 	if err != nil {
 		t.Error(err)
@@ -790,16 +794,14 @@ func TestApierV1GetRatingProfile(t *testing.T) {
 		Id: "*out:cgrates.org:call:dan",
 		RatingPlanActivations: engine.RatingPlanActivations{
 			{
-				ActivationTime:  actTime,
-				RatingPlanId:    "RETAIL1",
-				FallbackKeys:    []string{"*out:cgrates.org:call:dan2"},
-				CdrStatQueueIds: nil,
+				ActivationTime: actTime,
+				RatingPlanId:   "RETAIL1",
+				FallbackKeys:   []string{"*out:cgrates.org:call:dan2"},
 			},
 			{
-				ActivationTime:  actTime,
-				RatingPlanId:    "RETAIL1",
-				FallbackKeys:    []string{"*out:cgrates.org:call:dan2"},
-				CdrStatQueueIds: nil,
+				ActivationTime: actTime,
+				RatingPlanId:   "RETAIL1",
+				FallbackKeys:   []string{"*out:cgrates.org:call:dan2"},
 			},
 		},
 	}

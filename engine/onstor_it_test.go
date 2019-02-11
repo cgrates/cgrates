@@ -678,10 +678,9 @@ func testOnStorITRatingProfile(t *testing.T) {
 		Id: "*out:test:1:trp",
 		RatingPlanActivations: RatingPlanActivations{
 			&RatingPlanActivation{
-				ActivationTime:  time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC),
-				RatingPlanId:    "TDRT",
-				FallbackKeys:    []string{"*out:test:1:danb", "*out:test:1:rif"},
-				CdrStatQueueIds: []string{},
+				ActivationTime: time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC),
+				RatingPlanId:   "TDRT",
+				FallbackKeys:   []string{"*out:test:1:danb", "*out:test:1:rif"},
 			}},
 	}
 	if _, rcvErr := onStor.GetRatingProfile(rpf.Id, false,
@@ -716,10 +715,9 @@ func testOnStorITRatingProfile(t *testing.T) {
 	//update
 	rpf.RatingPlanActivations = RatingPlanActivations{
 		&RatingPlanActivation{
-			ActivationTime:  time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC),
-			RatingPlanId:    "TDRT",
-			FallbackKeys:    []string{"*out:test:1:danb", "*out:test:1:teo"},
-			CdrStatQueueIds: []string{},
+			ActivationTime: time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC),
+			RatingPlanId:   "TDRT",
+			FallbackKeys:   []string{"*out:test:1:danb", "*out:test:1:teo"},
 		},
 	}
 	if err := onStor.SetRatingProfile(rpf, utils.NonTransactional); err != nil {

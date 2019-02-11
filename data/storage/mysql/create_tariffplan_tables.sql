@@ -116,7 +116,7 @@ CREATE TABLE `tp_rating_profiles` (
   PRIMARY KEY (`id`),
    KEY `tpid` (`tpid`),
   KEY `tpid_loadid` (`tpid`, `loadid`),
-  UNIQUE KEY `tpid_loadid_tenant_category_dir_subj_atime` (`tpid`,`loadid`, `tenant`,`category`,`subject`,`activation_time`)
+  UNIQUE KEY `tpid_loadid_tenant_category_subj_atime` (`tpid`,`loadid`, `tenant`,`category`,`subject`,`activation_time`)
 );
 
 --
@@ -205,7 +205,6 @@ CREATE TABLE `tp_action_triggers` (
   `activation_time` varchar(26) NOT NULL,
   `balance_tag` varchar(64) NOT NULL,
   `balance_type` varchar(24) NOT NULL,
-  `balance_directions` varchar(8) NOT NULL,
   `balance_categories` varchar(32) NOT NULL,
   `balance_destination_tags` varchar(64) NOT NULL,
   `balance_rating_subject` varchar(64) NOT NULL,
@@ -220,7 +219,7 @@ CREATE TABLE `tp_action_triggers` (
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_trigger_definition` (`tpid`,`tag`,`balance_tag`,`balance_type`,`balance_directions`,`threshold_type`,`threshold_value`,`balance_destination_tags`,`actions_tag`)
+  UNIQUE KEY `unique_trigger_definition` (`tpid`,`tag`,`balance_tag`,`balance_type`,`threshold_type`,`threshold_value`,`balance_destination_tags`,`actions_tag`)
 );
 
 --

@@ -277,6 +277,7 @@ func (self *SQLStorage) SetTPTimings(timings []*utils.ApierTPTiming) error {
 		}
 		t := APItoModelTiming(timing)
 		if err := tx.Save(&t).Error; err != nil {
+			tx.Rollback()
 			return err
 		}
 	}
@@ -297,15 +298,10 @@ func (self *SQLStorage) SetTPDestinations(dests []*utils.TPDestination) error {
 		}
 		for _, d := range APItoModelDestination(dst) {
 			if err := tx.Save(&d).Error; err != nil {
+				tx.Rollback()
 				return err
 			}
 		}
-		// for _, dstPrfx := range dst.Prefixes {
-		// 	if err := tx.Save(&TpDestination{Tpid: dst.TPid, Tag: dst.Tag, Prefix: dstPrfx}).Error; err != nil {
-		// 		tx.Rollback()
-		// 		return err
-		// 	}
-		// }
 	}
 	tx.Commit()
 	return nil
@@ -327,6 +323,7 @@ func (self *SQLStorage) SetTPRates(rs []*utils.TPRate) error {
 		}
 		for _, r := range APItoModelRate(rate) {
 			if err := tx.Save(&r).Error; err != nil {
+				tx.Rollback()
 				return err
 			}
 		}
@@ -351,6 +348,7 @@ func (self *SQLStorage) SetTPDestinationRates(drs []*utils.TPDestinationRate) er
 		}
 		for _, d := range APItoModelDestinationRate(dRate) {
 			if err := tx.Save(&d).Error; err != nil {
+				tx.Rollback()
 				return err
 			}
 		}
@@ -375,6 +373,7 @@ func (self *SQLStorage) SetTPRatingPlans(rps []*utils.TPRatingPlan) error {
 		}
 		for _, r := range APItoModelRatingPlan(rPlan) {
 			if err := tx.Save(&r).Error; err != nil {
+				tx.Rollback()
 				return err
 			}
 		}
@@ -397,6 +396,7 @@ func (self *SQLStorage) SetTPRatingProfiles(rpfs []*utils.TPRatingProfile) error
 		}
 		for _, r := range APItoModelRatingProfile(rpf) {
 			if err := tx.Save(&r).Error; err != nil {
+				tx.Rollback()
 				return err
 			}
 		}
@@ -421,6 +421,7 @@ func (self *SQLStorage) SetTPSharedGroups(sgs []*utils.TPSharedGroups) error {
 		}
 		for _, s := range APItoModelSharedGroup(sGroup) {
 			if err := tx.Save(&s).Error; err != nil {
+				tx.Rollback()
 				return err
 			}
 		}
@@ -453,6 +454,7 @@ func (self *SQLStorage) SetTPDerivedChargers(sgs []*utils.TPDerivedChargers) err
 		}
 		for _, d := range APItoModelDerivedCharger(dCharger) {
 			if err := tx.Save(&d).Error; err != nil {
+				tx.Rollback()
 				return err
 			}
 		}
@@ -477,6 +479,7 @@ func (self *SQLStorage) SetTPActions(acts []*utils.TPActions) error {
 		}
 		for _, sa := range APItoModelAction(a) {
 			if err := tx.Save(&sa).Error; err != nil {
+				tx.Rollback()
 				return err
 			}
 		}
@@ -502,6 +505,7 @@ func (self *SQLStorage) SetTPActionPlans(ats []*utils.TPActionPlan) error {
 		}
 		for _, a := range APItoModelActionPlan(aPlan) {
 			if err := tx.Save(&a).Error; err != nil {
+				tx.Rollback()
 				return err
 			}
 		}
@@ -526,6 +530,7 @@ func (self *SQLStorage) SetTPActionTriggers(ats []*utils.TPActionTriggers) error
 		}
 		for _, a := range APItoModelActionTrigger(aTrigger) {
 			if err := tx.Save(&a).Error; err != nil {
+				tx.Rollback()
 				return err
 			}
 		}
@@ -552,6 +557,7 @@ func (self *SQLStorage) SetTPAccountActions(aas []*utils.TPAccountActions) error
 		}
 		sa := APItoModelAccountAction(aa)
 		if err := tx.Save(&sa).Error; err != nil {
+			tx.Rollback()
 			return err
 		}
 	}
@@ -1401,6 +1407,7 @@ func (self *SQLStorage) SetTPUsers(users []*utils.TPUsers) error {
 		}
 		for _, u := range APItoModelUsers(user) {
 			if err := tx.Save(&u).Error; err != nil {
+				tx.Rollback()
 				return err
 			}
 		}
@@ -1455,6 +1462,7 @@ func (self *SQLStorage) SetTPAliases(aliases []*utils.TPAliases) error {
 		}
 		for _, a := range APItoModelAliases(alias) {
 			if err := tx.Save(&a).Error; err != nil {
+				tx.Rollback()
 				return err
 			}
 		}

@@ -202,10 +202,9 @@ func testV2CDRsGetCdrs(t *testing.T) {
 // Should re-rate the supplier1 cost with RP_ANY2CNT
 func testV2CDRsRateCDRs(t *testing.T) {
 	rpf := &utils.AttrSetRatingProfile{
-		Tenant:    "cgrates.org",
-		Category:  "call",
-		Direction: "*out",
-		Subject:   "SUPPLIER1",
+		Tenant:   "cgrates.org",
+		Category: "call",
+		Subject:  "SUPPLIER1",
 		RatingPlanActivations: []*utils.TPRatingActivation{
 			{
 				ActivationTime: "2018-01-01T00:00:00Z",

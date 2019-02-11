@@ -109,24 +109,21 @@ func testTpRatPrfITFlush(t *testing.T) {
 func testTpRatPrfITPopulate(t *testing.T) {
 	tpRatingProfile = []*utils.TPRatingProfile{
 		{
-			TPid:      "TPRProf1",
-			LoadId:    "RPrf",
-			Direction: "*out",
-			Tenant:    "Tenant1",
-			Category:  "Category",
-			Subject:   "Subject",
+			TPid:     "TPRProf1",
+			LoadId:   "RPrf",
+			Tenant:   "Tenant1",
+			Category: "Category",
+			Subject:  "Subject",
 			RatingPlanActivations: []*utils.TPRatingActivation{
 				{
 					ActivationTime:   "2014-07-29T15:00:00Z",
 					RatingPlanId:     "PlanOne",
 					FallbackSubjects: "FallBack",
-					CdrStatQueueIds:  "RandomId",
 				},
 				{
 					ActivationTime:   "2015-07-29T10:00:00Z",
 					RatingPlanId:     "PlanTwo",
 					FallbackSubjects: "FallOut",
-					CdrStatQueueIds:  "RandomIdTwo",
 				},
 			},
 		},

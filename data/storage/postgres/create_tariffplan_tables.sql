@@ -109,7 +109,7 @@ CREATE TABLE tp_rating_profiles (
   rating_plan_tag VARCHAR(64) NOT NULL,
   fallback_subjects VARCHAR(64),
   created_at TIMESTAMP WITH TIME ZONE,
-  UNIQUE (tpid, loadid, tenant, category, direction, subject, activation_time)
+  UNIQUE (tpid, loadid, tenant, category, subject, activation_time)
 );
 CREATE INDEX tpratingprofiles_tpid_idx ON tp_rating_profiles (tpid);
 CREATE INDEX tpratingprofiles_idx ON tp_rating_profiles (tpid,loadid,tenant,category,subject);
@@ -200,7 +200,6 @@ CREATE TABLE tp_action_triggers (
   activation_time VARCHAR(26) NOT NULL,
   balance_tag VARCHAR(64) NOT NULL,
   balance_type VARCHAR(24) NOT NULL,
-  balance_directions VARCHAR(8) NOT NULL,
   balance_categories VARCHAR(32) NOT NULL,
   balance_destination_tags VARCHAR(64) NOT NULL,
   balance_rating_subject VARCHAR(64) NOT NULL,
@@ -213,7 +212,7 @@ CREATE TABLE tp_action_triggers (
   actions_tag VARCHAR(64) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE,
-  UNIQUE (tpid, tag, balance_tag, balance_type, balance_directions, threshold_type, threshold_value, balance_destination_tags, actions_tag)
+  UNIQUE (tpid, tag, balance_tag, balance_type, threshold_type, threshold_value, balance_destination_tags, actions_tag)
 );
 CREATE INDEX tpactiontrigers_tpid_idx ON tp_action_triggers (tpid);
 CREATE INDEX tpactiontrigers_idx ON tp_action_triggers (tpid,tag);

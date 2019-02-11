@@ -360,7 +360,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"rating_profiles": {
-			Items:  10, // expected to have 10 items
+			Items:  5, // expected to have 10 items
 			Groups: 0,
 		},
 		"resource_filter_indexes": {
