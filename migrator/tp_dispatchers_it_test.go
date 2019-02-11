@@ -120,7 +120,6 @@ func testTpDispITPopulate(t *testing.T) {
 				ExpiryTime:     "",
 			},
 			Strategy: utils.MetaFirst,
-			Hosts:    []string{"localhost"},
 			Weight:   10,
 		},
 	}

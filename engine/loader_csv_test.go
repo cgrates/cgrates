@@ -195,16 +195,11 @@ EXP_AT,EXP,*asap,10
 `
 
 	actionTriggers = `
-STANDARD_TRIGGER,st0,*min_event_counter,10,false,0,,,,*voice,*out,,GERMANY_O2,,,,,,,,,SOME_1,10
-STANDARD_TRIGGER,st1,*max_balance,200,false,0,,,,*voice,*out,,GERMANY,,,,,,,,,SOME_2,10
-STANDARD_TRIGGERS,,*min_balance,2,false,0,,,,*monetary,*out,,,,,,,,,,,LOG_WARNING,10
-STANDARD_TRIGGERS,,*max_balance,20,false,0,,,,*monetary,*out,,,,,,,,,,,LOG_WARNING,10
-STANDARD_TRIGGERS,,*max_event_counter,5,false,0,,,,*monetary,*out,,FS_USERS,,,,,,,,,LOG_WARNING,10
-CDRST1_WARN_ASR,,*min_asr,45,true,1h,,,,,,,,,,,,,,,3,CDRST_WARN_HTTP,10
-CDRST1_WARN_ACD,,*min_acd,10,true,1h,,,,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
-CDRST1_WARN_ACC,,*max_acc,10,true,10m,,,,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
-CDRST2_WARN_ASR,,*min_asr,30,true,0,,,,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
-CDRST2_WARN_ACD,,*min_acd,3,true,0,,,,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
+STANDARD_TRIGGER,st0,*min_event_counter,10,false,0,,,,*voice,,GERMANY_O2,,,,,,,,SOME_1,10
+STANDARD_TRIGGER,st1,*max_balance,200,false,0,,,,*voice,,GERMANY,,,,,,,,SOME_2,10
+STANDARD_TRIGGERS,,*min_balance,2,false,0,,,,*monetary,,,,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGERS,,*max_balance,20,false,0,,,,*monetary,,,,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGERS,,*max_event_counter,5,false,0,,,,*monetary,,FS_USERS,,,,,,,,LOG_WARNING,10
 `
 	accountActions = `
 vdf,minitsboy,MORE_MINUTES,STANDARD_TRIGGER,,
@@ -931,7 +926,6 @@ func TestLoadActions(t *testing.T) {
 			Balance: &BalanceFilter{
 				Type:           utils.StringPointer(utils.MONETARY),
 				Uuid:           as1[0].Balance.Uuid,
-				Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 				Value:          &utils.ValueFormula{Static: 10},
 				Weight:         utils.Float64Pointer(10),
 				DestinationIDs: nil,
@@ -951,7 +945,6 @@ func TestLoadActions(t *testing.T) {
 			Balance: &BalanceFilter{
 				Type:           utils.StringPointer(utils.VOICE),
 				Uuid:           as1[1].Balance.Uuid,
-				Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 				Value:          &utils.ValueFormula{Static: 100 * float64(time.Second)},
 				Weight:         utils.Float64Pointer(10),
 				RatingSubject:  utils.StringPointer("test"),
@@ -965,7 +958,8 @@ func TestLoadActions(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(as1, expected) {
-		t.Errorf("Error loading action1: %s", utils.ToIJSON(as1))
+		t.Errorf("expecting: %s received: %s",
+			utils.ToIJSON(expected), utils.ToIJSON(as1))
 	}
 	as2 := csvr.actions["SHARED"]
 	expected = []*Action{
@@ -976,7 +970,6 @@ func TestLoadActions(t *testing.T) {
 			Weight:           10,
 			Balance: &BalanceFilter{
 				Type:           utils.StringPointer(utils.MONETARY),
-				Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 				DestinationIDs: nil,
 				Uuid:           as2[0].Balance.Uuid,
 				Value:          &utils.ValueFormula{Static: 100},
@@ -1001,7 +994,6 @@ func TestLoadActions(t *testing.T) {
 			Weight:          10,
 			Balance: &BalanceFilter{
 				Uuid:           as3[0].Balance.Uuid,
-				Directions:     nil,
 				DestinationIDs: nil,
 				TimingIDs:      nil,
 				Categories:     nil,
@@ -1024,10 +1016,8 @@ func TestLoadActions(t *testing.T) {
 			Weight:           10,
 			ExpirationString: utils.UNLIMITED,
 			Balance: &BalanceFilter{
-				Uuid:       asGnrc[0].Balance.Uuid,
-				Type:       utils.StringPointer(utils.GENERIC),
-				Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-				//DestinationIDs: utils.StringMapPointer(utils.NewStringMap("*any")),
+				Uuid:     asGnrc[0].Balance.Uuid,
+				Type:     utils.StringPointer(utils.GENERIC),
 				Value:    &utils.ValueFormula{Static: 1000},
 				Weight:   utils.Float64Pointer(20),
 				Disabled: utils.BoolPointer(false),
@@ -1132,7 +1122,7 @@ func TestLoadActionTimings(t *testing.T) {
 }
 
 func TestLoadActionTriggers(t *testing.T) {
-	if len(csvr.actionsTriggers) != 7 {
+	if len(csvr.actionsTriggers) != 2 {
 		t.Error("Failed to load action triggers: ", len(csvr.actionsTriggers))
 	}
 	atr := csvr.actionsTriggers["STANDARD_TRIGGER"][0]
@@ -1144,7 +1134,6 @@ func TestLoadActionTriggers(t *testing.T) {
 		Balance: &BalanceFilter{
 			ID:             nil,
 			Type:           utils.StringPointer(utils.VOICE),
-			Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 			DestinationIDs: utils.StringMapPointer(utils.NewStringMap("GERMANY_O2")),
 			Categories:     nil,
 			TimingIDs:      nil,
@@ -1167,7 +1156,6 @@ func TestLoadActionTriggers(t *testing.T) {
 		ThresholdValue: 200,
 		Balance: &BalanceFilter{
 			Type:           utils.StringPointer(utils.VOICE),
-			Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 			DestinationIDs: utils.StringMapPointer(utils.NewStringMap("GERMANY")),
 			Categories:     nil,
 			TimingIDs:      nil,
@@ -1199,7 +1187,6 @@ func TestLoadAccountActions(t *testing.T) {
 							Filter: &BalanceFilter{
 								ID:             utils.StringPointer("st0"),
 								Type:           utils.StringPointer(utils.VOICE),
-								Directions:     utils.StringMapPointer(utils.NewStringMap("*out")),
 								DestinationIDs: utils.StringMapPointer(utils.NewStringMap("GERMANY_O2")),
 								SharedGroups:   nil,
 								Categories:     nil,

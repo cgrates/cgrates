@@ -212,7 +212,6 @@ CREATE TABLE tp_action_triggers (
   balance_weight VARCHAR(10) NOT NULL,
   balance_blocker VARCHAR(5) NOT NULL,
   balance_disabled VARCHAR(5) NOT NULL,
-  min_queued_items INTEGER NOT NULL,
   actions_tag VARCHAR(64) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE,

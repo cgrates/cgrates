@@ -533,7 +533,6 @@ type TPActionTrigger struct {
 	ActivationDate        string  // Trigger activation
 	BalanceId             string  // The id of the balance in the account
 	BalanceType           string  // Type of balance this trigger monitors
-	BalanceDirections     string  // Traffic direction
 	BalanceDestinationIds string  // filter for balance
 	BalanceWeight         string  // filter for balance
 	BalanceExpirationDate string  // filter for balance
@@ -543,7 +542,6 @@ type TPActionTrigger struct {
 	BalanceSharedGroups   string  // filter for balance
 	BalanceBlocker        string  // filter for balance
 	BalanceDisabled       string  // filter for balance
-	MinQueuedItems        int     // Trigger actions only if this number is hit (stats only)
 	ActionsId             string  // Actions which will execute on threshold reached
 	Weight                float64 // weight
 }

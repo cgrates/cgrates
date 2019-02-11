@@ -502,9 +502,8 @@ func (tpr *TpReader) LoadActions() (err error) {
 				}
 			}
 			acts[idx] = &Action{
-				Id:         tag,
-				ActionType: tpact.Identifier,
-				//BalanceType:      tpact.BalanceType,
+				Id:               tag,
+				ActionType:       tpact.Identifier,
 				Weight:           tpact.Weight,
 				ExtraParameters:  tpact.ExtraParameters,
 				ExpirationString: tpact.ExpiryTime,
@@ -540,9 +539,6 @@ func (tpr *TpReader) LoadActions() (err error) {
 
 			if tpact.Categories != "" && tpact.Categories != utils.ANY {
 				acts[idx].Balance.Categories = utils.StringMapPointer(utils.ParseStringMap(tpact.Categories))
-			}
-			if tpact.Directions != "" && tpact.Directions != utils.ANY {
-				acts[idx].Balance.Directions = utils.StringMapPointer(utils.ParseStringMap(tpact.Directions))
 			}
 			if tpact.DestinationIds != "" && tpact.DestinationIds != utils.ANY {
 				acts[idx].Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(tpact.DestinationIds))
@@ -677,7 +673,6 @@ func (tpr *TpReader) LoadActionTriggers() (err error) {
 				Balance:        &BalanceFilter{},
 				Weight:         atr.Weight,
 				ActionsID:      atr.ActionsId,
-				MinQueuedItems: atr.MinQueuedItems,
 			}
 			if atr.BalanceId != "" && atr.BalanceId != utils.ANY {
 				atrs[idx].Balance.ID = utils.StringPointer(atr.BalanceId)
@@ -707,9 +702,6 @@ func (tpr *TpReader) LoadActionTriggers() (err error) {
 
 			if atr.BalanceCategories != "" && atr.BalanceCategories != utils.ANY {
 				atrs[idx].Balance.Categories = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceCategories))
-			}
-			if atr.BalanceDirections != "" && atr.BalanceDirections != utils.ANY {
-				atrs[idx].Balance.Directions = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceDirections))
 			}
 			if atr.BalanceDestinationIds != "" && atr.BalanceDestinationIds != utils.ANY {
 				atrs[idx].Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceDestinationIds))
@@ -904,9 +896,6 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 
 					if atr.BalanceCategories != "" && atr.BalanceCategories != utils.ANY {
 						atrs[idx].Balance.Categories = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceCategories))
-					}
-					if atr.BalanceDirections != "" && atr.BalanceDirections != utils.ANY {
-						atrs[idx].Balance.Directions = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceDirections))
 					}
 					if atr.BalanceDestinationIds != "" && atr.BalanceDestinationIds != utils.ANY {
 						atrs[idx].Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceDestinationIds))

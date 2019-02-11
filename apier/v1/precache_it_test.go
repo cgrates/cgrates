@@ -300,11 +300,11 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"action_triggers": {
-			Items:  4, // expected to have 4 items
+			Items:  1,
 			Groups: 0,
 		},
 		"actions": {
-			Items:  9, // expected to have 9 items
+			Items:  9,
 			Groups: 0,
 		},
 		"aliases": {

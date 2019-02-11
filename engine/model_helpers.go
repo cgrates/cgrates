@@ -969,7 +969,6 @@ func (tps TpActionTriggers) AsMapTPActionTriggers() (map[string]*utils.TPActionT
 			ActivationDate:        tp.ActivationTime,
 			BalanceId:             tp.BalanceTag,
 			BalanceType:           tp.BalanceType,
-			BalanceDirections:     tp.BalanceDirections,
 			BalanceDestinationIds: tp.BalanceDestinationTags,
 			BalanceWeight:         tp.BalanceWeight,
 			BalanceExpirationDate: tp.BalanceExpiryTime,
@@ -981,7 +980,6 @@ func (tps TpActionTriggers) AsMapTPActionTriggers() (map[string]*utils.TPActionT
 			BalanceDisabled:       tp.BalanceDisabled,
 			Weight:                tp.Weight,
 			ActionsId:             tp.ActionsTag,
-			MinQueuedItems:        tp.MinQueuedItems,
 		}
 		if existing, exists := result[ats.ID]; !exists {
 			ats.ActionTriggers = []*utils.TPActionTrigger{at}
@@ -1033,7 +1031,6 @@ func APItoModelActionTrigger(ats *utils.TPActionTriggers) (result TpActionTrigge
 				ActivationTime:         at.ActivationDate,
 				BalanceTag:             at.BalanceId,
 				BalanceType:            at.BalanceType,
-				BalanceDirections:      at.BalanceDirections,
 				BalanceDestinationTags: at.BalanceDestinationIds,
 				BalanceWeight:          at.BalanceWeight,
 				BalanceExpiryTime:      at.BalanceExpirationDate,
@@ -1043,7 +1040,6 @@ func APItoModelActionTrigger(ats *utils.TPActionTriggers) (result TpActionTrigge
 				BalanceSharedGroups:    at.BalanceSharedGroups,
 				BalanceBlocker:         at.BalanceBlocker,
 				BalanceDisabled:        at.BalanceDisabled,
-				MinQueuedItems:         at.MinQueuedItems,
 				ActionsTag:             at.ActionsId,
 				Weight:                 at.Weight,
 			})

@@ -847,7 +847,7 @@ func testAttributeSSetAlsPrf4(t *testing.T) {
 
 func testAttributeSPing(t *testing.T) {
 	var resp string
-	if err := attrSRPC.Call(utils.AttributeSv1Ping, utils.CGREvent{}, &resp); err != nil {
+	if err := attrSRPC.Call(utils.AttributeSv1Ping, new(utils.CGREvent), &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.Pong {
 		t.Error("Unexpected reply returned", resp)

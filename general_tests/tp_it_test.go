@@ -27,8 +27,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/apier/v1"
-	"github.com/cgrates/cgrates/apier/v2"
+	v1 "github.com/cgrates/cgrates/apier/v1"
+	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -121,7 +121,7 @@ func TestTpActionTriggers(t *testing.T) {
 	var atrs engine.ActionTriggers
 	if err := tpRPC.Call("ApierV1.GetActionTriggers", v1.AttrGetActionTriggers{GroupIDs: []string{}}, &atrs); err != nil {
 		t.Error("Got error on ApierV1.GetActionTriggers: ", err.Error())
-	} else if len(atrs) != 9 {
+	} else if len(atrs) != 4 {
 		t.Errorf("Calling v1.GetActionTriggers got: %v", atrs)
 	}
 	var reply string
@@ -136,7 +136,7 @@ func TestTpActionTriggers(t *testing.T) {
 	}
 	if err := tpRPC.Call("ApierV1.GetActionTriggers", v1.AttrGetActionTriggers{GroupIDs: []string{}}, &atrs); err != nil {
 		t.Error(err)
-	} else if len(atrs) != 10 {
+	} else if len(atrs) != 5 {
 		t.Errorf("Calling v1.GetActionTriggers got: %v", atrs)
 	}
 	if err := tpRPC.Call("ApierV1.GetActionTriggers", v1.AttrGetActionTriggers{GroupIDs: []string{"TestATR"}}, &atrs); err != nil {

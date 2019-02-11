@@ -32,16 +32,22 @@ type CSVStorage struct {
 	sep        rune
 	readerFunc func(string, rune, int) (*csv.Reader, *os.File, error)
 	// file names
-	destinationsFn, ratesFn, destinationratesFn, timingsFn, destinationratetimingsFn, ratingprofilesFn,
-	sharedgroupsFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn,
-	usersFn, aliasesFn, resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn, attributeProfilesFn,
+	destinationsFn, ratesFn, destinationratesFn, timingsFn,
+	destinationratetimingsFn, ratingprofilesFn,
+	sharedgroupsFn, actionsFn, actiontimingsFn, actiontriggersFn,
+	accountactionsFn, derivedChargersFn,
+	usersFn, aliasesFn, resProfilesFn, statsFn, thresholdsFn,
+	filterFn, suppProfilesFn, attributeProfilesFn,
 	chargerProfilesFn, dispatcherProfilesFn string
 }
 
 func NewFileCSVStorage(sep rune,
-	destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn,
-	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn, usersFn, aliasesFn,
-	resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn, attributeProfilesFn, chargerProfilesFn, dispatcherProfilesFn string) *CSVStorage {
+	destinationsFn, timingsFn, ratesFn, destinationratesFn,
+	destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn,
+	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn,
+	derivedChargersFn, usersFn, aliasesFn,
+	resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn,
+	attributeProfilesFn, chargerProfilesFn, dispatcherProfilesFn string) *CSVStorage {
 	return &CSVStorage{
 		sep:                      sep,
 		readerFunc:               openFileCSVStorage,
@@ -71,19 +77,28 @@ func NewFileCSVStorage(sep rune,
 }
 
 func NewStringCSVStorage(sep rune,
-	destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn,
-	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn, usersFn,
-	aliasesFn, resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn,
-	attributeProfilesFn, chargerProfilesFn, dispatcherProfilesFn string) *CSVStorage {
-	c := NewFileCSVStorage(sep, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn,
-		ratingprofilesFn, sharedgroupsFn, actionsFn, actiontimingsFn, actiontriggersFn,
-		accountactionsFn, derivedChargersFn, usersFn, aliasesFn, resProfilesFn,
-		statsFn, thresholdsFn, filterFn, suppProfilesFn, attributeProfilesFn, chargerProfilesFn, dispatcherProfilesFn)
+	destinationsFn, timingsFn, ratesFn, destinationratesFn,
+	destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn,
+	actionsFn, actiontimingsFn, actiontriggersFn,
+	accountactionsFn, derivedChargersFn, usersFn,
+	aliasesFn, resProfilesFn, statsFn,
+	thresholdsFn, filterFn, suppProfilesFn,
+	attributeProfilesFn, chargerProfilesFn,
+	dispatcherProfilesFn string) *CSVStorage {
+	c := NewFileCSVStorage(sep, destinationsFn, timingsFn,
+		ratesFn, destinationratesFn, destinationratetimingsFn,
+		ratingprofilesFn, sharedgroupsFn, actionsFn,
+		actiontimingsFn, actiontriggersFn,
+		accountactionsFn, derivedChargersFn,
+		usersFn, aliasesFn, resProfilesFn,
+		statsFn, thresholdsFn, filterFn, suppProfilesFn,
+		attributeProfilesFn, chargerProfilesFn, dispatcherProfilesFn)
 	c.readerFunc = openStringCSVStorage
 	return c
 }
 
-func openFileCSVStorage(fn string, comma rune, nrFields int) (csvReader *csv.Reader, fp *os.File, err error) {
+func openFileCSVStorage(fn string, comma rune,
+	nrFields int) (csvReader *csv.Reader, fp *os.File, err error) {
 	fp, err = os.Open(fn)
 	if err != nil {
 		return
@@ -96,7 +111,8 @@ func openFileCSVStorage(fn string, comma rune, nrFields int) (csvReader *csv.Rea
 	return
 }
 
-func openStringCSVStorage(data string, comma rune, nrFields int) (csvReader *csv.Reader, fp *os.File, err error) {
+func openStringCSVStorage(data string, comma rune,
+	nrFields int) (csvReader *csv.Reader, fp *os.File, err error) {
 	csvReader = csv.NewReader(strings.NewReader(data))
 	csvReader.Comma = comma
 	csvReader.Comment = utils.COMMENT_CHAR

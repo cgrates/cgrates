@@ -217,7 +217,6 @@ CREATE TABLE `tp_action_triggers` (
   `balance_weight` varchar(10) NOT NULL,
   `balance_blocker` varchar(5) NOT NULL,
   `balance_disabled` varchar(5) NOT NULL,
-  `min_queued_items` int(11) NOT NULL,
   `actions_tag` varchar(64) NOT NULL,
   `weight` DECIMAL(8,2) NOT NULL,
   `created_at` TIMESTAMP,

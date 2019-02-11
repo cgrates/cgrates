@@ -548,9 +548,14 @@ func TestApierTPActionPlan(t *testing.T) {
 
 func TestApierTPActionTriggers(t *testing.T) {
 	reply := ""
-	at := &utils.TPActionTriggers{TPid: utils.TEST_SQL, ID: "STANDARD_TRIGGERS", ActionTriggers: []*utils.TPActionTrigger{
-		{Id: "STANDARD_TRIGGERS", UniqueID: "MYFIRSTTRIGGER", BalanceType: "*monetary", BalanceDirections: "*out", ThresholdType: "*min_balance", ThresholdValue: 2, ActionsId: "LOG_BALANCE", Weight: 10},
-	}}
+	at := &utils.TPActionTriggers{
+		TPid: utils.TEST_SQL,
+		ID:   "STANDARD_TRIGGERS",
+		ActionTriggers: []*utils.TPActionTrigger{
+			{Id: "STANDARD_TRIGGERS", UniqueID: "MYFIRSTTRIGGER",
+				BalanceType: "*monetary", ThresholdType: "*min_balance",
+				ThresholdValue: 2, ActionsId: "LOG_BALANCE", Weight: 10},
+		}}
 	atTst := new(utils.TPActionTriggers)
 	*atTst = *at
 	atTst.ID = utils.TEST_SQL
@@ -1304,7 +1309,7 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 	expStats := &utils.CacheStats{
 		Destinations:       3,
-		Actions:            6,
+		Actions:            5,
 		ActionPlans:        7,
 		AccountActionPlans: 13,
 		Aliases:            1,
@@ -1937,18 +1942,6 @@ func TestApierGetStorDBVesions(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(engine.CurrentStorDBVersions(), *reply) {
 		t.Errorf("Expecting : %+v, received: %+v", engine.CurrentStorDBVersions(), *reply)
-	}
-}
-
-func TestApierPing(t *testing.T) {
-	var reply string
-	for _, method := range []string{utils.StatSv1Ping, utils.ResourceSv1Ping,
-		utils.SupplierSv1Ping, utils.ThresholdSv1Ping, utils.AttributeSv1Ping} {
-		if err := rater.Call(method, utils.CGREvent{}, &reply); err != nil {
-			t.Error(err)
-		} else if reply != utils.Pong {
-			t.Errorf("Received: %s", reply)
-		}
 	}
 }
 
