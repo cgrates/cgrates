@@ -58,6 +58,7 @@ type WeightDispatcher struct {
 func (wd *WeightDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
 	pfl.Conns.Sort()
 	wd.pfl = pfl
+	wd.nextConnIdx = 0
 	return
 }
 

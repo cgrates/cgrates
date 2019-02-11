@@ -23,8 +23,10 @@ package dispatchers
 import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
+	"os/exec"
 	"path"
 	"reflect"
+	"strconv"
 	"testing"
 	"time"
 
@@ -33,112 +35,260 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type testDipatcer struct {
+	CfgParh string
+	Cfg     *config.CGRConfig
+	RCP     *rpc.Client
+	cmd     *exec.Cmd
+}
+
+func newTestEngine(t *testing.T, cfgPath string, initDataDB, intitStoreDB bool) (d *testDipatcer) {
+	d = new(testDipatcer)
+	d.CfgParh = cfgPath
+	var err error
+	d.Cfg, err = config.NewCGRConfigFromFolder(d.CfgParh)
+	if err != nil {
+		t.Fatalf("Error at config init :%v\n", err)
+	}
+	d.Cfg.DataFolderPath = dspDataDir // Share DataFolderPath through config towards StoreDb for Flush()
+
+	if initDataDB {
+		d.initDataDb(t)
+	}
+
+	if intitStoreDB {
+		d.resetStorDb(t)
+	}
+	d.startEngine(t)
+	return d
+}
+
+func (d *testDipatcer) startEngine(t *testing.T) {
+	var err error
+	if d.cmd, err = engine.StartEngine(d.CfgParh, dspDelay); err != nil {
+		t.Fatalf("Error at engine start:%v\n", err)
+	}
+
+	if d.RCP, err = jsonrpc.Dial("tcp", d.Cfg.ListenCfg().RPCJSONListen); err != nil {
+		t.Fatalf("Error at dialing rcp client:%v\n", err)
+	}
+}
+
+func (d *testDipatcer) stopEngine(t *testing.T) {
+	pid := strconv.Itoa(d.cmd.Process.Pid)
+	if err := exec.Command("kill", "-9", pid).Run(); err != nil {
+		t.Fatalf("Error at stop engine:%v\n", err)
+	}
+	// // if err := d.cmd.Process.Kill(); err != nil {
+	// // 	t.Fatalf("Error at stop engine:%v\n", err)
+	// }
+}
+
+func (d *testDipatcer) initDataDb(t *testing.T) {
+	if err := engine.InitDataDb(d.Cfg); err != nil {
+		t.Fatalf("Error at DataDB init:%v\n", err)
+	}
+}
+
+// Wipe out the cdr database
+func (d *testDipatcer) resetStorDb(t *testing.T) {
+	if err := engine.InitStorDb(d.Cfg); err != nil {
+		t.Fatalf("Error at DataDB init:%v\n", err)
+	}
+}
+func (d *testDipatcer) loadData(t *testing.T, path string) {
+	var reply string
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path}
+	if err := d.RCP.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+		t.Errorf("Error at loading data from folder:%v", err)
+	}
+}
+
 var (
-	dspAttrCfgPath  string
-	dspAttrCfg      *config.CGRConfig
-	dspAttrRPC      *rpc.Client
-	instAttrCfgPath string
-	instAttrCfg     *config.CGRConfig
-	instAttrRPC     *rpc.Client
+	attrEngine *testDipatcer
+	dispEngine *testDipatcer
+	allEngine  *testDipatcer
+	allEngine2 *testDipatcer
 )
 
 var sTestsDspAttr = []func(t *testing.T){
-	testDspAttrInitCfg,
-	testDspAttrInitDataDb,
-	testDspAttrResetStorDb,
-	testDspAttrStartEngine,
-	testDspAttrRPCConn,
-	testDspAttrLoadData,
+	testDspAttrPingFailover,
+	testDspAttrGetAttrFailover,
+
 	testDspAttrPing,
 	testDspAttrTestMissingApiKey,
 	testDspAttrTestUnknownApiKey,
 	testDspAttrTestAuthKey,
 	testDspAttrTestAuthKey2,
-	testDspAttrKillEngine,
+	testDspAttrTestAuthKey3,
 }
 
 //Test start here
 func TestDspAttributeS(t *testing.T) {
-	for _, stest := range sTestsDspAttr {
-		t.Run("", stest)
-	}
-}
-
-func testDspAttrInitCfg(t *testing.T) {
-	var err error
-	dspAttrCfgPath = path.Join(dspDataDir, "conf", "samples", "dispatchers", "dispatchers")
-	dspAttrCfg, err = config.NewCGRConfigFromFolder(dspAttrCfgPath)
-	if err != nil {
-		t.Error(err)
-	}
-	dspAttrCfg.DataFolderPath = dspDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(dspAttrCfg)
-	instAttrCfgPath = path.Join(dspDataDir, "conf", "samples", "dispatchers", "attributes")
-	instAttrCfg, err = config.NewCGRConfigFromFolder(instAttrCfgPath)
-	if err != nil {
-		t.Error(err)
-	}
-	instAttrCfg.DataFolderPath = dspDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(instAttrCfg)
-}
-
-func testDspAttrInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(instAttrCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// Wipe out the cdr database
-func testDspAttrResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(instAttrCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// Start CGR Engine
-func testDspAttrStartEngine(t *testing.T) {
-	if _, err := engine.StartEngine(instAttrCfgPath, dspDelay); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := engine.StartEngine(dspAttrCfgPath, dspDelay); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// Connect rpc client to rater
-func testDspAttrRPCConn(t *testing.T) {
-	var err error
-	instAttrRPC, err = jsonrpc.Dial("tcp", instAttrCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
-	dspAttrRPC, err = jsonrpc.Dial("tcp", dspAttrCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testDspAttrLoadData(t *testing.T) {
-	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{
-		FolderPath: path.Join(dspDataDir, "tariffplans", "dispatchers")}
-	if err := instAttrRPC.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
-		t.Error(err)
-	}
+	allEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "all"), true, true)
+	allEngine2 = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "all2"), true, true)
+	attrEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "attributes"), true, true)
+	dispEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "dispatchers"), true, true)
+	allEngine.loadData(t, path.Join(dspDataDir, "tariffplans", "tutorial"))
+	allEngine2.loadData(t, path.Join(dspDataDir, "tariffplans", "oldtutorial"))
+	attrEngine.loadData(t, path.Join(dspDataDir, "tariffplans", "dispatchers"))
 	time.Sleep(500 * time.Millisecond)
+	for _, stest := range sTestsDspAttr {
+		t.Run("TestDspAttributeS", stest)
+	}
+	attrEngine.stopEngine(t)
+	dispEngine.stopEngine(t)
+	allEngine.stopEngine(t)
+	allEngine2.stopEngine(t)
 }
 
-func testDspAttrPing(t *testing.T) {
+func testDspAttrPingFailover(t *testing.T) {
 	var reply string
-	if err := instAttrRPC.Call(utils.AttributeSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+	if err := allEngine.RCP.Call(utils.AttributeSv1Ping, &utils.CGREvent{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if dspAttrRPC == nil {
-		t.Fatal(dspAttrRPC)
+	reply = ""
+	if err := allEngine2.RCP.Call(utils.AttributeSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
 	}
-	if err := dspAttrRPC.Call(utils.AttributeSv1Ping, &CGREvWithApiKey{
+	reply = ""
+	if err := dispEngine.RCP.Call(utils.AttributeSv1Ping, &CGREvWithApiKey{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+		},
+		APIKey: "attr12345",
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
+	}
+	allEngine.stopEngine(t)
+	reply = ""
+	if err := dispEngine.RCP.Call(utils.AttributeSv1Ping, &CGREvWithApiKey{
+		CGREvent: utils.CGREvent{
+			ID:     "PING",
+			Tenant: "cgrates.org",
+		},
+		APIKey: "attr12345",
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
+	}
+	allEngine2.stopEngine(t)
+	reply = ""
+	if err := dispEngine.RCP.Call(utils.AttributeSv1Ping, &CGREvWithApiKey{
+		CGREvent: utils.CGREvent{
+			ID:     "PING",
+			Tenant: "cgrates.org",
+		},
+		APIKey: "attr12345",
+	}, &reply); err == nil {
+		t.Errorf("Expected error but recived %v and reply %v\n", err, reply)
+	}
+	allEngine.startEngine(t)
+	allEngine2.startEngine(t)
+}
+
+func testDspAttrGetAttrFailover(t *testing.T) {
+	args := &CGREvWithApiKey{
+		APIKey: "attr12345",
+		CGREvent: utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "testAttributeSGetAttributeForEvent",
+			Context: utils.StringPointer("simpleauth"),
+			Event: map[string]interface{}{
+				utils.Account:    "1002",
+				utils.EVENT_NAME: "Event1",
+			},
+		},
+	}
+	eAttrPrf := &engine.AttributeProfile{
+		Tenant:    args.Tenant,
+		ID:        "ATTR_1002_SIMPLEAUTH",
+		FilterIDs: []string{"*string:Account:1002"},
+		Contexts:  []string{"simpleauth"},
+		Attributes: []*engine.Attribute{
+			{
+				FieldName:  "Password",
+				Initial:    utils.ANY,
+				Substitute: config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
+				Append:     true,
+			},
+		},
+		Weight: 20.0,
+	}
+	eAttrPrf.Compile()
+
+	eRply := &engine.AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_1002_SIMPLEAUTH"},
+		AlteredFields:   []string{"Password"},
+		CGREvent: &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "testAttributeSGetAttributeForEvent",
+			Context: utils.StringPointer("simpleauth"),
+			Event: map[string]interface{}{
+				utils.Account:    "1002",
+				utils.EVENT_NAME: "Event1",
+				"Password":       "CGRateS.org",
+			},
+		},
+	}
+
+	var attrReply *engine.AttributeProfile
+	var rplyEv engine.AttrSProcessEventReply
+	if err := dispEngine.RCP.Call(utils.AttributeSv1GetAttributeForEvent,
+		args, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+	if err := dispEngine.RCP.Call(utils.AttributeSv1ProcessEvent,
+		args, &rplyEv); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	} else if reflect.DeepEqual(eRply, &rplyEv) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
+	}
+
+	allEngine2.stopEngine(t)
+
+	if err := dispEngine.RCP.Call(utils.AttributeSv1GetAttributeForEvent,
+		args, &attrReply); err != nil {
+		t.Error(err)
+	}
+	if attrReply != nil {
+		attrReply.Compile()
+	}
+	if !reflect.DeepEqual(eAttrPrf, attrReply) {
+		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eAttrPrf), utils.ToJSON(attrReply))
+	}
+
+	if err := dispEngine.RCP.Call(utils.AttributeSv1ProcessEvent,
+		args, &rplyEv); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eRply, &rplyEv) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
+	}
+
+	allEngine2.startEngine(t)
+}
+
+func testDspAttrPing(t *testing.T) {
+	var reply string
+	if err := allEngine.RCP.Call(utils.AttributeSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
+	}
+	if dispEngine.RCP == nil {
+		t.Fatal(dispEngine.RCP)
+	}
+	if err := dispEngine.RCP.Call(utils.AttributeSv1Ping, &CGREvWithApiKey{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
@@ -162,7 +312,7 @@ func testDspAttrTestMissingApiKey(t *testing.T) {
 		},
 	}
 	var attrReply *engine.AttributeProfile
-	if err := dspAttrRPC.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := dispEngine.RCP.Call(utils.AttributeSv1GetAttributeForEvent,
 		args, &attrReply); err == nil || err.Error() != utils.NewErrMandatoryIeMissing(utils.APIKey).Error() {
 		t.Errorf("Error:%v rply=%s", err, utils.ToJSON(attrReply))
 	}
@@ -181,7 +331,7 @@ func testDspAttrTestUnknownApiKey(t *testing.T) {
 		},
 	}
 	var attrReply *engine.AttributeProfile
-	if err := dspAttrRPC.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := dispEngine.RCP.Call(utils.AttributeSv1GetAttributeForEvent,
 		args, &attrReply); err == nil || err.Error() != utils.ErrUnknownApiKey.Error() {
 		t.Error(err)
 	}
@@ -200,7 +350,7 @@ func testDspAttrTestAuthKey(t *testing.T) {
 		},
 	}
 	var attrReply *engine.AttributeProfile
-	if err := dspAttrRPC.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := dispEngine.RCP.Call(utils.AttributeSv1GetAttributeForEvent,
 		args, &attrReply); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
@@ -235,7 +385,7 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 	}
 	eAttrPrf.Compile()
 	var attrReply *engine.AttributeProfile
-	if err := dspAttrRPC.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := dispEngine.RCP.Call(utils.AttributeSv1GetAttributeForEvent,
 		args, &attrReply); err != nil {
 		t.Error(err)
 	}
@@ -261,7 +411,7 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 	}
 
 	var rplyEv engine.AttrSProcessEventReply
-	if err := dspAttrRPC.Call(utils.AttributeSv1ProcessEvent,
+	if err := dispEngine.RCP.Call(utils.AttributeSv1ProcessEvent,
 		args, &rplyEv); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRply, &rplyEv) {
@@ -270,11 +420,22 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 	}
 }
 
-func testDspAttrKillEngine(t *testing.T) {
-	if err := engine.KillEngine(dspDelay); err != nil {
-		t.Error(err)
+func testDspAttrTestAuthKey3(t *testing.T) {
+	args := &CGREvWithApiKey{
+		APIKey: "attr12345",
+		CGREvent: utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "testAttributeSGetAttributeForEvent",
+			Context: utils.StringPointer("simpleauth"),
+			Event: map[string]interface{}{
+				utils.Account:    "1001",
+				utils.EVENT_NAME: "Event1",
+			},
+		},
 	}
-	if err := engine.KillEngine(dspDelay); err != nil {
+	var attrReply *engine.AttributeProfile
+	if err := dispEngine.RCP.Call(utils.AttributeSv1GetAttributeForEvent,
+		args, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

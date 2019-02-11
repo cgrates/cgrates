@@ -206,10 +206,10 @@ func IsNetworkError(err error) bool {
 			syscall.ECONNRESET.Error()) { // connection reset
 		return true
 	}
-	return err == rpc.ErrShutdown ||
-		err == ErrReqUnsynchronized ||
-		err == ErrDisconnected ||
-		err == ErrReplyTimeout ||
+	return err.Error() == rpc.ErrShutdown.Error() ||
+		err.Error() == ErrReqUnsynchronized.Error() ||
+		err.Error() == ErrDisconnected.Error() ||
+		err.Error() == ErrReplyTimeout.Error() ||
 		err.Error() == ErrSessionNotFound.Error() ||
 		strings.HasPrefix(err.Error(), "rpc: can't find service")
 }

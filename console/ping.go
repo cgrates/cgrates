@@ -19,8 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/utils"
 	"strings"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
@@ -79,7 +80,7 @@ func (self *CmdApierPing) RpcParams(reset bool) interface{} {
 		self.rpcParams = &StringWrapper{}
 	}
 
-	return self.rpcParams
+	return utils.CGREvent{}
 }
 
 func (self *CmdApierPing) PostprocessRpcParams() error {

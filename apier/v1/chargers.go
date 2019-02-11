@@ -97,7 +97,7 @@ func (cSv1 *ChargerSv1) Call(serviceMethod string,
 	return utils.APIerRPCCall(cSv1, serviceMethod, args, reply)
 }
 
-func (cSv1 *ChargerSv1) Ping(ign string, reply *string) error {
+func (cSv1 *ChargerSv1) Ping(ign utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

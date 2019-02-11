@@ -18,40 +18,46 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package dispatchers
 
-/*
 import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) ChargerSv1Ping(ign string, reply *string) error {
-	if dS.chargerS == nil {
-		return utils.NewErrNotConnected(utils.ChargerS)
+func (dS *DispatcherService) ChargerSv1Ping(args *CGREvWithApiKey, reply *string) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.ChargerSv1Ping,
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
+			return
+		}
 	}
-	return dS.chargerS.Call(utils.ChargerSv1Ping, ign, reply)
+	return dS.Dispatch(&args.CGREvent, utils.MetaChargers,
+		utils.ChargerSv1Ping, args.CGREvent, reply)
 }
 
 func (dS *DispatcherService) ChargerSv1GetChargersForEvent(args *CGREvWithApiKey,
 	reply *engine.ChargerProfiles) (err error) {
-	if dS.chargerS == nil {
-		return utils.NewErrNotConnected(utils.ChargerS)
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.ChargerSv1GetChargersForEvent,
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
+			return
+		}
 	}
-	if err = dS.authorize(utils.ChargerSv1GetChargersForEvent, args.CGREvent.Tenant,
-		args.APIKey, args.CGREvent.Time); err != nil {
-		return
-	}
-	return dS.chargerS.Call(utils.ChargerSv1GetChargersForEvent, args.CGREvent, reply)
+	return dS.Dispatch(&args.CGREvent, utils.MetaChargers,
+		utils.ChargerSv1GetChargersForEvent, args.CGREvent, reply)
 }
 
 func (dS *DispatcherService) ChargerSv1ProcessEvent(args *CGREvWithApiKey,
 	reply *[]*engine.AttrSProcessEventReply) (err error) {
-	if dS.chargerS == nil {
-		return utils.NewErrNotConnected(utils.ChargerS)
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.ChargerSv1ProcessEvent,
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
+			return
+		}
+
 	}
-	if err = dS.authorize(utils.ChargerSv1ProcessEvent, args.CGREvent.Tenant,
-		args.APIKey, args.CGREvent.Time); err != nil {
-		return
-	}
-	return dS.chargerS.Call(utils.ChargerSv1ProcessEvent, args.CGREvent, reply)
+	return dS.Dispatch(&args.CGREvent, utils.MetaChargers,
+		utils.ChargerSv1ProcessEvent, args.CGREvent, reply)
 }
-*/

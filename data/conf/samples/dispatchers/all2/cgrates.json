@@ -1,0 +1,43 @@
+{
+// CGRateS Configuration file
+//
+
+
+"general": {
+	"node_id": "ALL2",
+	"log_level": 7
+},
+
+
+"listen": {
+ 	"rpc_json": ":7012",
+	"rpc_gob": ":7013",
+	"http": ":7080",
+},
+
+"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_type": "redis",						// data_db type: <redis|mongo>
+	"db_port": 6379, 						// data_db port to reach the database
+	"db_name": "12", 						// data_db database name to connect to
+},
+
+"stor_db": {
+	"db_type":"*internal",
+},
+
+"attributes": {
+	"enabled": true
+},
+
+"rals": {
+	"enabled": true,
+},
+
+// "chargers": {
+// 	"enabled": true,
+// 	"attributes_conns": [
+// 		{"address": "*internal"},
+// 	],
+// },
+
+}

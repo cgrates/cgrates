@@ -49,7 +49,6 @@ func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(args *ArgsAttrProc
 	}
 	return dS.Dispatch(&args.CGREvent, utils.MetaAttributes,
 		utils.AttributeSv1GetAttributeForEvent, args.AttrArgsProcessEvent, reply)
-
 }
 
 func (dS *DispatcherService) AttributeSv1ProcessEvent(args *ArgsAttrProcessEventWithApiKey,
