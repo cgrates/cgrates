@@ -185,7 +185,7 @@ func (sS *SessionS) ListenAndServe(exitChan chan bool) (err error) {
 // Shutdown is called by engine to clear states
 func (sS *SessionS) Shutdown() (err error) {
 	for _, s := range sS.getSessions("", false) { // Force sessions shutdown
-		sS.endSession(s, nil)
+		sS.endSession(s, nil, nil)
 	}
 	return
 }
@@ -333,30 +333,30 @@ func (sS *SessionS) setSTerminator(s *Session) {
 		return
 	}
 	timer := time.NewTimer(ttl)
-	endChan := make(chan struct{}, 1)
 	s.sTerminator = &sTerminator{
 		timer:       timer,
-		endChan:     endChan,
+		endChan:     make(chan struct{}, 1),
 		ttl:         ttl,
 		ttlLastUsed: ttlLastUsed,
 		ttlUsage:    ttlUsage,
 	}
-	go func() { // schedule automatic termination
+
+	go func(sTerm *sTerminator) { // schedule automatic termination
 		select {
 		case <-timer.C:
-			eUsage := s.sTerminator.ttl
-			if s.sTerminator.ttlUsage != nil {
-				eUsage = *s.sTerminator.ttlUsage
+			eUsage := sTerm.ttl
+			if sTerm.ttlUsage != nil {
+				eUsage = *sTerm.ttlUsage
 			}
 			sS.forceSTerminate(s, eUsage,
 				s.sTerminator.ttlLastUsed)
-		case <-endChan:
-			s.sTerminator.timer.Stop()
+		case <-sTerm.endChan:
+			sTerm.timer.Stop()
 		}
 		s.Lock()
 		s.sTerminator = nil
 		s.Unlock()
-	}()
+	}(s.sTerminator)
 }
 
 // forceSTerminate is called when a session times-out or it is forced from CGRateS side
@@ -372,7 +372,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 			}
 		}
 	}
-	if err = sS.endSession(s, nil); err != nil {
+	if err = sS.endSession(s, nil, nil); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf(
 				"<%s> failed force terminating session with ID <%s>, err: <%s>",
@@ -712,6 +712,7 @@ func (sS *SessionS) registerSession(s *Session, passive bool) {
 // uregisterSession will unregister an active or passive session based on it's CGRID
 // called on session terminate or relocate
 func (sS *SessionS) unregisterSession(cgrID string, passive bool) bool {
+	fmt.Println("entering in unregisterSession ")
 	sMux := &sS.aSsMux
 	sMp := sS.aSessions
 	if passive {
@@ -729,6 +730,7 @@ func (sS *SessionS) unregisterSession(cgrID string, passive bool) bool {
 	if !passive {
 		if s.sTerminator != nil &&
 			s.sTerminator.endChan != nil {
+			s.sTerminator.endChan <- struct{}{}
 			close(s.sTerminator.endChan)
 		}
 	}
@@ -1034,6 +1036,10 @@ func (sS *SessionS) relocateSessions(initOriginID, originID, originHost string) 
 		// Overwrite initial CGRID with new one
 		s.EventStart.Set(utils.CGRID, newCGRID)    // Overwrite CGRID for final CDR
 		s.EventStart.Set(utils.OriginID, originID) // Overwrite OriginID for session indexing
+		for _, sRun := range s.SRuns {
+			sRun.Event[utils.CGRID] = newCGRID // needed for CDR generation
+			sRun.Event[utils.OriginID] = originID
+		}
 		s.Unlock()
 		sS.registerSession(s, false)
 		sS.replicateSessions(initCGRID, false, sS.sReplConns)
@@ -1218,7 +1224,7 @@ func (sS *SessionS) updateSession(s *Session, updtEv engine.MapEvent) (maxUsage 
 }
 
 // endSession will end a session from outside
-func (sS *SessionS) endSession(s *Session, tUsage *time.Duration) (err error) {
+func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration) (err error) {
 	//check if we have replicate connection and close the session there
 	defer sS.replicateSessions(s.CGRID, true, sS.sReplConns)
 
@@ -1229,12 +1235,18 @@ func (sS *SessionS) endSession(s *Session, tUsage *time.Duration) (err error) {
 		if tUsage != nil {
 			sUsage = *tUsage
 			sr.TotalUsage = *tUsage
+		} else if lastUsage != nil &&
+			sr.LastUsage != *lastUsage {
+			sr.TotalUsage -= sr.LastUsage
+			sr.TotalUsage += *lastUsage
+			sUsage = sr.TotalUsage
 		}
 		if s.debitStop != nil {
 			close(s.debitStop) // Stop automatic debits
 			s.debitStop = nil
 		}
 		if sr.EventCost != nil {
+
 			if notCharged := sUsage - sr.EventCost.GetUsage(); notCharged > 0 { // we did not charge enough, make a manual debit here
 				if sr.CD.LoopIndex > 0 {
 					sr.CD.TimeStart = sr.CD.TimeEnd
@@ -1274,14 +1286,14 @@ func (sS *SessionS) chargeEvent(tnt string, ev *engine.SafEvent) (maxUsage time.
 		return
 	}
 	if maxUsage, err = sS.updateSession(s, ev.AsMapInterface()); err != nil {
-		if errEnd := sS.endSession(s, utils.DurationPointer(time.Duration(0))); errEnd != nil {
+		if errEnd := sS.endSession(s, utils.DurationPointer(time.Duration(0)), nil); errEnd != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error when force-ending charged event: <%s>, err: <%s>",
 					utils.SessionS, cgrID, err.Error()))
 		}
 		return
 	}
-	if errEnd := sS.endSession(s, utils.DurationPointer(maxUsage)); errEnd != nil {
+	if errEnd := sS.endSession(s, utils.DurationPointer(maxUsage), nil); errEnd != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error when ending charged event: <%s>, err: <%s>",
 				utils.SessionS, cgrID, err.Error()))
@@ -2042,8 +2054,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 		} else {
 			s = ss[0]
 		}
-		fmt.Println("=====================")
-		fmt.Println("Here enter in updateSession from UPDATE API")
+
 		if maxUsage, err := sS.updateSession(s, ev.AsMapInterface()); err != nil {
 			return utils.NewErrRALs(err)
 		} else {
@@ -2122,7 +2133,8 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 			s = ss[0]
 		}
 		if err = sS.endSession(s,
-			me.GetDurationPtrIgnoreErrors(utils.Usage)); err != nil {
+			me.GetDurationPtrIgnoreErrors(utils.Usage),
+			me.GetDurationPtrIgnoreErrors(utils.LastUsed)); err != nil {
 			return utils.NewErrRALs(err)
 		}
 	}
