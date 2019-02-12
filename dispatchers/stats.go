@@ -32,7 +32,7 @@ func (dS *DispatcherService) StatSv1Ping(args *CGREvWithApiKey, reply *string) (
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaStats,
+	return dS.Dispatch(&args.CGREvent, utils.MetaStats, args.RouteID,
 		utils.StatSv1Ping, args.CGREvent, reply)
 }
 
@@ -45,7 +45,7 @@ func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *ArgsStatProcessE
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaStats,
+	return dS.Dispatch(&args.CGREvent, utils.MetaStats, args.RouteID,
 		utils.StatSv1GetStatQueuesForEvent, args.StatsArgsProcessEvent, reply)
 }
 
@@ -61,7 +61,7 @@ func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *TntIDWithApiKey,
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant: args.Tenant,
 		ID:     args.ID,
-	}, utils.MetaStats, utils.StatSv1GetQueueStringMetrics,
+	}, utils.MetaStats, args.RouteID, utils.StatSv1GetQueueStringMetrics,
 		args.TenantID, reply)
 }
 
@@ -74,6 +74,6 @@ func (dS *DispatcherService) StatSv1ProcessEvent(args *ArgsStatProcessEventWithA
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaStats,
+	return dS.Dispatch(&args.CGREvent, utils.MetaStats, args.RouteID,
 		utils.StatSv1ProcessEvent, args.StatsArgsProcessEvent, reply)
 }

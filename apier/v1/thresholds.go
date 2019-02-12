@@ -39,8 +39,8 @@ func (tSv1 *ThresholdSv1) Call(serviceMethod string, args interface{}, reply int
 }
 
 // GetThresholdIDs returns list of threshold IDs registered for a tenant
-func (tSv1 *ThresholdSv1) GetThresholdIDs(tenant string, tIDs *[]string) error {
-	return tSv1.tS.V1GetThresholdIDs(tenant, tIDs)
+func (tSv1 *ThresholdSv1) GetThresholdIDs(tenant *utils.TenantArg, tIDs *[]string) error {
+	return tSv1.tS.V1GetThresholdIDs(tenant.Tenant, tIDs)
 }
 
 // GetThresholdsForEvent returns a list of thresholds matching an event

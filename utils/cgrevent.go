@@ -31,7 +31,6 @@ type CGREvent struct {
 	ID      string
 	Context *string    // attach the event to a context
 	Time    *time.Time // event time
-	RouteID *string    // route over previous computed path
 	Event   map[string]interface{}
 }
 

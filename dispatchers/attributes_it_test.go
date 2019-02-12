@@ -35,15 +35,34 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type testDipatcer struct {
+var (
+	attrEngine *testDispatcher
+	dispEngine *testDispatcher
+	allEngine  *testDispatcher
+	allEngine2 *testDispatcher
+)
+
+var sTestsDspAttr = []func(t *testing.T){
+	testDspAttrPingFailover,
+	testDspAttrGetAttrFailover,
+
+	testDspAttrPing,
+	testDspAttrTestMissingApiKey,
+	testDspAttrTestUnknownApiKey,
+	testDspAttrTestAuthKey,
+	testDspAttrTestAuthKey2,
+	testDspAttrTestAuthKey3,
+}
+
+type testDispatcher struct {
 	CfgParh string
 	Cfg     *config.CGRConfig
 	RCP     *rpc.Client
 	cmd     *exec.Cmd
 }
 
-func newTestEngine(t *testing.T, cfgPath string, initDataDB, intitStoreDB bool) (d *testDipatcer) {
-	d = new(testDipatcer)
+func newTestEngine(t *testing.T, cfgPath string, initDataDB, intitStoreDB bool) (d *testDispatcher) {
+	d = new(testDispatcher)
 	d.CfgParh = cfgPath
 	var err error
 	d.Cfg, err = config.NewCGRConfigFromFolder(d.CfgParh)
@@ -63,7 +82,7 @@ func newTestEngine(t *testing.T, cfgPath string, initDataDB, intitStoreDB bool) 
 	return d
 }
 
-func (d *testDipatcer) startEngine(t *testing.T) {
+func (d *testDispatcher) startEngine(t *testing.T) {
 	var err error
 	if d.cmd, err = engine.StartEngine(d.CfgParh, dspDelay); err != nil {
 		t.Fatalf("Error at engine start:%v\n", err)
@@ -74,7 +93,7 @@ func (d *testDipatcer) startEngine(t *testing.T) {
 	}
 }
 
-func (d *testDipatcer) stopEngine(t *testing.T) {
+func (d *testDispatcher) stopEngine(t *testing.T) {
 	pid := strconv.Itoa(d.cmd.Process.Pid)
 	if err := exec.Command("kill", "-9", pid).Run(); err != nil {
 		t.Fatalf("Error at stop engine:%v\n", err)
@@ -84,43 +103,24 @@ func (d *testDipatcer) stopEngine(t *testing.T) {
 	// }
 }
 
-func (d *testDipatcer) initDataDb(t *testing.T) {
+func (d *testDispatcher) initDataDb(t *testing.T) {
 	if err := engine.InitDataDb(d.Cfg); err != nil {
 		t.Fatalf("Error at DataDB init:%v\n", err)
 	}
 }
 
 // Wipe out the cdr database
-func (d *testDipatcer) resetStorDb(t *testing.T) {
+func (d *testDispatcher) resetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(d.Cfg); err != nil {
 		t.Fatalf("Error at DataDB init:%v\n", err)
 	}
 }
-func (d *testDipatcer) loadData(t *testing.T, path string) {
+func (d *testDispatcher) loadData(t *testing.T, path string) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path}
 	if err := d.RCP.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Errorf("Error at loading data from folder:%v", err)
 	}
-}
-
-var (
-	attrEngine *testDipatcer
-	dispEngine *testDipatcer
-	allEngine  *testDipatcer
-	allEngine2 *testDipatcer
-)
-
-var sTestsDspAttr = []func(t *testing.T){
-	testDspAttrPingFailover,
-	testDspAttrGetAttrFailover,
-
-	testDspAttrPing,
-	testDspAttrTestMissingApiKey,
-	testDspAttrTestUnknownApiKey,
-	testDspAttrTestAuthKey,
-	testDspAttrTestAuthKey2,
-	testDspAttrTestAuthKey3,
 }
 
 //Test start here

@@ -31,7 +31,7 @@ func (dS *DispatcherService) ThresholdSv1Ping(args *CGREvWithApiKey, reply *stri
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaThresholds,
+	return dS.Dispatch(&args.CGREvent, utils.MetaThresholds, args.RouteID,
 		utils.ThresholdSv1Ping, args.CGREvent, reply)
 }
 
@@ -44,7 +44,7 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(args *ArgsProcess
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaThresholds,
+	return dS.Dispatch(&args.CGREvent, utils.MetaThresholds, args.RouteID,
 		utils.ThresholdSv1GetThresholdsForEvent, args.ArgsProcessEvent, t)
 }
 
@@ -57,6 +57,6 @@ func (dS *DispatcherService) ThresholdSv1ProcessEvent(args *ArgsProcessEventWith
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaThresholds,
+	return dS.Dispatch(&args.CGREvent, utils.MetaThresholds, args.RouteID,
 		utils.ThresholdSv1ProcessEvent, args.ArgsProcessEvent, tIDs)
 }
