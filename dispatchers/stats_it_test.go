@@ -21,24 +21,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
-	"net/rpc"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-)
-
-var (
-	dspStsCfgPath  string
-	dspStsCfg      *config.CGRConfig
-	dspStsRPC      *rpc.Client
-	instStsCfgPath string
-	instStsCfg     *config.CGRConfig
-	instStsRPC     *rpc.Client
 )
 
 var sTestsDspSts = []func(t *testing.T){

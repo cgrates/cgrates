@@ -18,29 +18,34 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package dispatchers
 
-/*
 import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) ResourceSv1Ping(ign string, rpl *string) (err error) {
-	if dS.resS == nil {
-		return utils.NewErrNotConnected(utils.ResourceS)
+func (dS *DispatcherService) ResourceSv1Ping(args *CGREvWithApiKey, rpl *string) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.ResourceSv1Ping,
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
+			return
+		}
 	}
-	return dS.resS.Call(utils.ResourceSv1Ping, ign, rpl)
+	return dS.Dispatch(&args.CGREvent, utils.MetaResources,
+		utils.ResourceSv1Ping, args.CGREvent, rpl)
 }
 
 func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args *ArgsV1ResUsageWithApiKey,
 	reply *engine.Resources) (err error) {
-	if dS.resS == nil {
-		return utils.NewErrNotConnected(utils.ResourceS)
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.ResourceSv1GetResourcesForEvent,
+			args.ArgRSv1ResourceUsage.CGREvent.Tenant,
+			args.APIKey, args.ArgRSv1ResourceUsage.CGREvent.Time); err != nil {
+			return
+		}
+
 	}
-	if err = dS.authorize(utils.ResourceSv1GetResourcesForEvent, args.ArgRSv1ResourceUsage.CGREvent.Tenant,
-		args.APIKey, args.ArgRSv1ResourceUsage.CGREvent.Time); err != nil {
-		return
-	}
-	return dS.resS.Call(utils.ResourceSv1GetResourcesForEvent, args.ArgRSv1ResourceUsage, reply)
+	return dS.Dispatch(&args.CGREvent, utils.MetaResources,
+		utils.ResourceSv1GetResourcesForEvent, args.ArgRSv1ResourceUsage, reply)
 
 }
-*/

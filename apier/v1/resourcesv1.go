@@ -121,7 +121,7 @@ func (apierV1 *ApierV1) RemoveResourceProfile(arg utils.TenantID, reply *string)
 	return nil
 }
 
-func (rsv1 *ResourceSv1) Ping(ign string, reply *string) error {
+func (rsv1 *ResourceSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
