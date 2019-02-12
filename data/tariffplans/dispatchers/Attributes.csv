@@ -4,5 +4,6 @@ cgrates.org,ATTR_API_ATTR_FAKE_AUTH,*auth,*string:APIKey:12345,,APIMethods,*any,
 cgrates.org,ATTR_API_ATTR_AUTH,*auth,*string:APIKey:attr12345,,APIMethods,*any,AttributeSv1.Ping&AttributeSv1.GetAttributeForEvent&AttributeSv1.ProcessEvent,true,false,20
 cgrates.org,ATTR_API_CHRG_AUTH,*auth,*string:APIKey:chrg12345,,APIMethods,*any,ChargerSv1.Ping&ChargerSv1.GetChargersForEvent&ChargerSv1.ProcessEvent,true,false,20
 cgrates.org,ATTR_API_THR_AUTH,*auth,*string:APIKey:thr12345,,APIMethods,*any,ThresholdSv1.Ping&ThresholdSv1.GetThresholdsForEvent&ThresholdSv1.ProcessEvent,true,false,20
+cgrates.org,ATTR_API_SUP_AUTH,*auth,*string:APIKey:sup12345,,APIMethods,*any,SupplierSv1.Ping&SupplierSv1.GetSuppliers,true,false,20
 
 

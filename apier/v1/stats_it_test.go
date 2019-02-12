@@ -421,7 +421,7 @@ func testV1STSRemoveStatQueueProfile(t *testing.T) {
 
 func testV1STSStatsPing(t *testing.T) {
 	var resp string
-	if err := stsV1Rpc.Call(utils.StatSv1Ping, "", &resp); err != nil {
+	if err := stsV1Rpc.Call(utils.StatSv1Ping, &utils.CGREvent{}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.Pong {
 		t.Error("Unexpected reply returned", resp)
