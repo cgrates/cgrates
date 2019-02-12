@@ -142,3 +142,30 @@ func TestSRunDebitReserve5(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", time.Duration(3*time.Minute+30*time.Second), sr.TotalUsage)
 	}
 }
+
+//Test6 ExtraDuration 3m ( > initialDuration) and LastUsage > initial
+func TestSRunDebitReserve6(t *testing.T) {
+	lastUsage := time.Duration(2*time.Minute + 30*time.Second)
+	duration := time.Duration(2 * time.Minute)
+	sr := &SRun{
+		ExtraDuration: time.Duration(3 * time.Minute),
+		LastUsage:     duration,
+		TotalUsage:    duration,
+	}
+	//in debit reserve we start with an extraDuration 3m
+	//after we add the different dur-lastUsed (-30s)
+	if rDur := sr.debitReserve(duration, &lastUsage); rDur != time.Duration(0) {
+		t.Errorf("Expecting: %+v, received: %+v", time.Duration(0), rDur)
+	}
+	//ExtraDuration (2m30s - 2m)
+	if sr.ExtraDuration != time.Duration(30*time.Second) {
+		t.Errorf("Expecting: %+v, received: %+v", time.Duration(30*time.Second), sr.ExtraDuration)
+	}
+	if sr.LastUsage != duration {
+		t.Errorf("Expecting: %+v, received: %+v", duration, sr.LastUsage)
+	}
+	// 2m(initial Total) + 2m30s(correction)
+	if sr.TotalUsage != time.Duration(4*time.Minute+30*time.Second) {
+		t.Errorf("Expecting: %+v, received: %+v", time.Duration(4*time.Minute+30*time.Second), sr.TotalUsage)
+	}
+}
