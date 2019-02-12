@@ -1944,7 +1944,7 @@ func TestApierPing(t *testing.T) {
 	var reply string
 	for _, method := range []string{utils.StatSv1Ping, utils.ResourceSv1Ping,
 		utils.SupplierSv1Ping, utils.ThresholdSv1Ping, utils.AttributeSv1Ping} {
-		if err := rater.Call(method, utils.CGREvent{}, &reply); err != nil {
+		if err := rater.Call(method, &utils.CGREvent{}, &reply); err != nil {
 			t.Error(err)
 		} else if reply != utils.Pong {
 			t.Errorf("Received: %s", reply)

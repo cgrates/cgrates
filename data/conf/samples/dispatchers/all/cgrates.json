@@ -44,5 +44,11 @@
 	"enabled": true,
 },
 
+"suppliers": {
+	"enabled": true,
+	// "stats_conns": [
+		// {"address": "*internal"},
+	// ],
+},
 
 }

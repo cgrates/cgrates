@@ -109,7 +109,6 @@ func (dT *DispatcherThresholdSv1) ProcessEvent(args *dispatchers.ArgsProcessEven
 	return dT.dS.ThresholdSv1ProcessEvent(args, tIDs)
 }
 
-/*
 func NewDispatcherStatSv1(dps *dispatchers.DispatcherService) *DispatcherStatSv1 {
 	return &DispatcherStatSv1{dS: dps}
 }
@@ -120,8 +119,8 @@ type DispatcherStatSv1 struct {
 }
 
 // Ping implements StatSv1Ping
-func (dSts *DispatcherStatSv1) Ping(ign string, reply *string) error {
-	return dSts.dS.StatSv1Ping(ign, reply)
+func (dSts *DispatcherStatSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
+	return dSts.dS.StatSv1Ping(args, reply)
 }
 
 // GetStatQueuesForEvent implements StatSv1GetStatQueuesForEvent
@@ -140,6 +139,7 @@ func (dSts *DispatcherStatSv1) ProcessEvent(args *dispatchers.ArgsStatProcessEve
 	return dSts.dS.StatSv1ProcessEvent(args, reply)
 }
 
+/*
 func NewDispatcherResourceSv1(dps *dispatchers.DispatcherService) *DispatcherResourceSv1 {
 	return &DispatcherResourceSv1{dRs: dps}
 }
@@ -159,7 +159,7 @@ func (dRs *DispatcherResourceSv1) GetResourcesForEvent(args *dispatchers.ArgsV1R
 	reply *engine.Resources) error {
 	return dRs.dRs.ResourceSv1GetResourcesForEvent(args, reply)
 }
-
+*/
 func NewDispatcherSupplierSv1(dps *dispatchers.DispatcherService) *DispatcherSupplierSv1 {
 	return &DispatcherSupplierSv1{dSup: dps}
 }
@@ -170,15 +170,15 @@ type DispatcherSupplierSv1 struct {
 }
 
 // Ping implements SupplierSv1Ping
-func (dSup *DispatcherSupplierSv1) Ping(ign string, reply *string) error {
-	return dSup.dSup.SupplierSv1Ping(ign, reply)
+func (dSup *DispatcherSupplierSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
+	return dSup.dSup.SupplierSv1Ping(args, reply)
 }
 
 // GetSuppliers implements SupplierSv1GetSuppliers
 func (dSup *DispatcherSupplierSv1) GetSuppliers(args *dispatchers.ArgsGetSuppliersWithApiKey,
 	reply *engine.SortedSuppliers) error {
 	return dSup.dSup.SupplierSv1GetSuppliers(args, reply)
-}*/
+}
 
 func NewDispatcherAttributeSv1(dps *dispatchers.DispatcherService) *DispatcherAttributeSv1 {
 	return &DispatcherAttributeSv1{dA: dps}

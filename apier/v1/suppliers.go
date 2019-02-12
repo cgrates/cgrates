@@ -102,7 +102,7 @@ func (splv1 *SupplierSv1) GetSuppliers(args *engine.ArgsGetSuppliers,
 	return splv1.splS.V1GetSuppliers(args, reply)
 }
 
-func (splv1 *SupplierSv1) Ping(ign string, reply *string) error {
+func (splv1 *SupplierSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

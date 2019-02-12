@@ -1026,20 +1026,18 @@ func startDispatcherService(internalDispatcherSChan chan *dispatchers.Dispatcher
 
 	server.RpcRegisterName(utils.ThresholdSv1,
 		v1.NewDispatcherThresholdSv1(dspS))
+
+	server.RpcRegisterName(utils.StatSv1,
+		v1.NewDispatcherStatSv1(dspS))
 	/*
-		if !cfg.StatSCfg().Enabled && len(cfg.DispatcherSCfg().StatSConns) != 0 {
-			server.RpcRegisterName(utils.StatSv1,
-				v1.NewDispatcherStatSv1(dspS))
-		}
 		if !cfg.ResourceSCfg().Enabled && len(cfg.DispatcherSCfg().ResSConns) != 0 {
 			server.RpcRegisterName(utils.ResourceSv1,
 				v1.NewDispatcherResourceSv1(dspS))
 		}
-		if !cfg.SupplierSCfg().Enabled && len(cfg.DispatcherSCfg().SupplSConns) != 0 {
-			server.RpcRegisterName(utils.SupplierSv1,
-				v1.NewDispatcherSupplierSv1(dspS))
-		}
 	*/
+	server.RpcRegisterName(utils.SupplierSv1,
+		v1.NewDispatcherSupplierSv1(dspS))
+
 	server.RpcRegisterName(utils.AttributeSv1,
 		v1.NewDispatcherAttributeSv1(dspS))
 	/*
