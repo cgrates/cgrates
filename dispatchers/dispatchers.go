@@ -138,18 +138,18 @@ func (dS *DispatcherService) dispatcherForEvent(ev *utils.CGREvent,
 }
 
 // Dispatch is the method forwarding the request towards the right
-func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
+func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string, RouteID *string,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
 	d, errDsp := dS.dispatcherForEvent(ev, subsys)
 	if errDsp != nil {
 		return utils.NewErrDispatcherS(errDsp)
 	}
 	var connID string
-	if ev.RouteID != nil &&
-		*ev.RouteID != "" {
+	if RouteID != nil &&
+		*RouteID != "" {
 		// use previously discovered route
 		if x, ok := engine.Cache.Get(utils.CacheDispatcherRoutes,
-			*ev.RouteID); ok && x != nil {
+			*RouteID); ok && x != nil {
 			connID = x.(string)
 			if err = dS.conns[connID].Call(serviceMethod, args, reply); !utils.IsNetworkError(err) {
 				return
@@ -167,9 +167,9 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string,
 		if err = conn.Call(serviceMethod, args, reply); utils.IsNetworkError(err) {
 			continue
 		}
-		if ev.RouteID != nil &&
-			*ev.RouteID != "" { // cache the discovered route
-			engine.Cache.Set(utils.CacheDispatcherRoutes, *ev.RouteID, connID,
+		if RouteID != nil &&
+			*RouteID != "" { // cache the discovered route
+			engine.Cache.Set(utils.CacheDispatcherRoutes, *RouteID, connID,
 				nil, true, utils.EmptyString)
 		}
 		break

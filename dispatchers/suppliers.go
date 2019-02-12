@@ -31,7 +31,7 @@ func (dS *DispatcherService) SupplierSv1Ping(args *CGREvWithApiKey, reply *strin
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaSuppliers,
+	return dS.Dispatch(&args.CGREvent, utils.MetaSuppliers, args.RouteID,
 		utils.SupplierSv1Ping, args.CGREvent, reply)
 }
 
@@ -44,6 +44,6 @@ func (dS *DispatcherService) SupplierSv1GetSuppliers(args *ArgsGetSuppliersWithA
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaSuppliers,
+	return dS.Dispatch(&args.CGREvent, utils.MetaSuppliers, args.RouteID,
 		utils.SupplierSv1GetSuppliers, args.ArgsGetSuppliers, reply)
 }

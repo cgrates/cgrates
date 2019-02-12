@@ -779,6 +779,10 @@ func NewTenantID(tntID string) *TenantID {
 	return &TenantID{Tenant: tIDSplt[0], ID: tIDSplt[1]}
 }
 
+type TenantArg struct {
+	Tenant string
+}
+
 type TenantID struct {
 	Tenant string
 	ID     string

@@ -40,7 +40,7 @@ func (aSv1 *AnalyzerSv1) Call(serviceMethod string,
 }
 
 // Ping return pong if the service is active
-func (alSv1 *AnalyzerSv1) Ping(ign string, reply *string) error {
+func (alSv1 *AnalyzerSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

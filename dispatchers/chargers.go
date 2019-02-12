@@ -31,7 +31,7 @@ func (dS *DispatcherService) ChargerSv1Ping(args *CGREvWithApiKey, reply *string
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaChargers,
+	return dS.Dispatch(&args.CGREvent, utils.MetaChargers, args.RouteID,
 		utils.ChargerSv1Ping, args.CGREvent, reply)
 }
 
@@ -44,7 +44,7 @@ func (dS *DispatcherService) ChargerSv1GetChargersForEvent(args *CGREvWithApiKey
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaChargers,
+	return dS.Dispatch(&args.CGREvent, utils.MetaChargers, args.RouteID,
 		utils.ChargerSv1GetChargersForEvent, args.CGREvent, reply)
 }
 
@@ -58,6 +58,6 @@ func (dS *DispatcherService) ChargerSv1ProcessEvent(args *CGREvWithApiKey,
 		}
 
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaChargers,
+	return dS.Dispatch(&args.CGREvent, utils.MetaChargers, args.RouteID,
 		utils.ChargerSv1ProcessEvent, args.CGREvent, reply)
 }

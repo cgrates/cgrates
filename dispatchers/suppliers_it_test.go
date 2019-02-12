@@ -31,6 +31,9 @@ import (
 )
 
 var sTestsDspSup = []func(t *testing.T){
+	testDspSupPingFailover,
+	testDspSupGetSupFailover,
+
 	testDspSupPing,
 	testDspSupTestAuthKey,
 	testDspSupTestAuthKey2,
@@ -108,6 +111,19 @@ func testDspSupPingFailover(t *testing.T) {
 
 func testDspSupGetSupFailover(t *testing.T) {
 	var rpl *engine.SortedSuppliers
+	eRpl1 := &engine.SortedSuppliers{
+		ProfileID: "SPL_WEIGHT_2",
+		Sorting:   utils.MetaWeight,
+		SortedSuppliers: []*engine.SortedSupplier{
+			{
+				SupplierID:         "supplier1",
+				SupplierParameters: "",
+				SortingData: map[string]interface{}{
+					utils.Weight: 10.0,
+				},
+			},
+		},
+	}
 	eRpl := &engine.SortedSuppliers{
 		ProfileID: "SPL_ACNT_1002",
 		Sorting:   utils.MetaLeastCost,
@@ -151,8 +167,10 @@ func testDspSupGetSupFailover(t *testing.T) {
 		},
 	}
 	if err := dispEngine.RCP.Call(utils.SupplierSv1GetSuppliers,
-		args, &rpl); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected error NOT_FOUND but recived %v and reply %v\n", err, rpl)
+		args, &rpl); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eRpl1, rpl) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eRpl1), utils.ToJSON(rpl))
 	}
 	allEngine2.stopEngine(t)
 	if err := dispEngine.RCP.Call(utils.SupplierSv1GetSuppliers,

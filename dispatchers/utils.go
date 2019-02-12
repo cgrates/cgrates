@@ -33,68 +33,73 @@ var ( //var used in all tests
 	nowTime    = time.Now()
 )
 
+type DispatcherResource struct {
+	APIKey  string
+	RouteID *string // route over previous computed path
+}
+
 type CGREvWithApiKey struct {
-	APIKey string
+	DispatcherResource
 	utils.CGREvent
 }
 
 type TntIDWithApiKey struct {
 	utils.TenantID
-	APIKey string
+	DispatcherResource
 }
 
 type TntWithApiKey struct {
-	Tenant string
-	ApiKey string
+	utils.TenantArg
+	DispatcherResource
 }
 
 type ArgsV1ResUsageWithApiKey struct {
-	APIKey string
+	DispatcherResource
 	utils.ArgRSv1ResourceUsage
 }
 
 type ArgsProcessEventWithApiKey struct {
-	APIKey string
+	DispatcherResource
 	engine.ArgsProcessEvent
 }
 
 type ArgsAttrProcessEventWithApiKey struct {
-	APIKey string
+	DispatcherResource
 	engine.AttrArgsProcessEvent
 }
 
 type ArgsGetSuppliersWithApiKey struct {
-	APIKey string
+	DispatcherResource
 	engine.ArgsGetSuppliers
 }
 
 type ArgsStatProcessEventWithApiKey struct {
-	APIKey string
+	DispatcherResource
 	engine.StatsArgsProcessEvent
 }
 
 type AuthorizeArgsWithApiKey struct {
-	APIKey string
+	DispatcherResource
 	sessions.V1AuthorizeArgs
 }
 
 type InitArgsWithApiKey struct {
-	APIKey string
+	DispatcherResource
 	sessions.V1InitSessionArgs
 }
 
 type ProcessEventWithApiKey struct {
-	APIKey string
+	DispatcherResource
 	sessions.V1ProcessEventArgs
 }
 
 type TerminateSessionWithApiKey struct {
-	APIKey string
+	DispatcherResource
 	sessions.V1TerminateSessionArgs
 }
 
 type UpdateSessionWithApiKey struct {
-	APIKey string
+	DispatcherResource
 	sessions.V1UpdateSessionArgs
 }
 
