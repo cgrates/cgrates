@@ -116,7 +116,7 @@ func (apierV1 *ApierV1) RemoveThresholdProfile(args *utils.TenantID, reply *stri
 	return nil
 }
 
-func (tSv1 *ThresholdSv1) Ping(ign string, reply *string) error {
+func (tSv1 *ThresholdSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

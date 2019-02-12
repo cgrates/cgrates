@@ -60,7 +60,7 @@ func TestDspChargerS(t *testing.T) {
 
 func testDspCppPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.ChargerSv1Ping, utils.CGREvent{}, &reply); err != nil {
+	if err := allEngine.RCP.Call(utils.ChargerSv1Ping, &utils.CGREvent{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -132,7 +132,7 @@ func testDspCppGetChtgFailover(t *testing.T) {
 
 func testDspCppPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.ChargerSv1Ping, utils.CGREvent{}, &reply); err != nil {
+	if err := allEngine.RCP.Call(utils.ChargerSv1Ping, &utils.CGREvent{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)

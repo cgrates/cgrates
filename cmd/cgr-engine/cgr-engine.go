@@ -1024,11 +1024,9 @@ func startDispatcherService(internalDispatcherSChan chan *dispatchers.Dispatcher
 		return
 	}()
 
+	server.RpcRegisterName(utils.ThresholdSv1,
+		v1.NewDispatcherThresholdSv1(dspS))
 	/*
-		if !cfg.ThresholdSCfg().Enabled && len(cfg.DispatcherSCfg().ThreshSConns) != 0 {
-			server.RpcRegisterName(utils.ThresholdSv1,
-				v1.NewDispatcherThresholdSv1(dspS))
-		}
 		if !cfg.StatSCfg().Enabled && len(cfg.DispatcherSCfg().StatSConns) != 0 {
 			server.RpcRegisterName(utils.StatSv1,
 				v1.NewDispatcherStatSv1(dspS))

@@ -40,4 +40,9 @@
 	],
 },
 
+"thresholds": {
+	"enabled": true,
+},
+
+
 }
