@@ -83,8 +83,6 @@ func (apierV1 *ApierV1) RemoveDispatcherProfile(arg *utils.TenantID, reply *stri
 	return nil
 }
 
-/*
-
 func NewDispatcherThresholdSv1(dps *dispatchers.DispatcherService) *DispatcherThresholdSv1 {
 	return &DispatcherThresholdSv1{dS: dps}
 }
@@ -95,8 +93,8 @@ type DispatcherThresholdSv1 struct {
 }
 
 // Ping implements ThresholdSv1Ping
-func (dT *DispatcherThresholdSv1) Ping(ign string, reply *string) error {
-	return dT.dS.ThresholdSv1Ping(ign, reply)
+func (dT *DispatcherThresholdSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
+	return dT.dS.ThresholdSv1Ping(args, reply)
 }
 
 // GetThresholdsForEvent implements ThresholdSv1GetThresholdsForEvent
@@ -111,6 +109,7 @@ func (dT *DispatcherThresholdSv1) ProcessEvent(args *dispatchers.ArgsProcessEven
 	return dT.dS.ThresholdSv1ProcessEvent(args, tIDs)
 }
 
+/*
 func NewDispatcherStatSv1(dps *dispatchers.DispatcherService) *DispatcherStatSv1 {
 	return &DispatcherStatSv1{dS: dps}
 }
