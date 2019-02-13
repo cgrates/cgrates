@@ -18,40 +18,45 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package dispatchers
 
-/*
 import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) ThresholdSv1Ping(ign string, reply *string) error {
-	if dS.thdS == nil {
-		return utils.NewErrNotConnected(utils.ThresholdS)
+func (dS *DispatcherService) ThresholdSv1Ping(args *CGREvWithApiKey, reply *string) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.ThresholdSv1Ping,
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
+			return
+		}
 	}
-	return dS.thdS.Call(utils.ThresholdSv1Ping, ign, reply)
+	return dS.Dispatch(&args.CGREvent, utils.MetaThresholds, args.RouteID,
+		utils.ThresholdSv1Ping, args.CGREvent, reply)
 }
 
 func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(args *ArgsProcessEventWithApiKey,
 	t *engine.Thresholds) (err error) {
-	if dS.thdS == nil {
-		return utils.NewErrNotConnected(utils.ThresholdS)
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.ThresholdSv1GetThresholdsForEvent,
+			args.ArgsProcessEvent.CGREvent.Tenant,
+			args.APIKey, args.ArgsProcessEvent.CGREvent.Time); err != nil {
+			return
+		}
 	}
-	if err = dS.authorize(utils.ThresholdSv1GetThresholdsForEvent, args.ArgsProcessEvent.CGREvent.Tenant,
-		args.APIKey, args.ArgsProcessEvent.CGREvent.Time); err != nil {
-		return
-	}
-	return dS.thdS.Call(utils.ThresholdSv1GetThresholdsForEvent, args.ArgsProcessEvent, t)
+	return dS.Dispatch(&args.CGREvent, utils.MetaThresholds, args.RouteID,
+		utils.ThresholdSv1GetThresholdsForEvent, args.ArgsProcessEvent, t)
 }
 
 func (dS *DispatcherService) ThresholdSv1ProcessEvent(args *ArgsProcessEventWithApiKey,
 	tIDs *[]string) (err error) {
-	if dS.thdS == nil {
-		return utils.NewErrNotConnected(utils.ThresholdS)
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.ThresholdSv1ProcessEvent,
+			args.ArgsProcessEvent.CGREvent.Tenant,
+			args.APIKey, args.ArgsProcessEvent.CGREvent.Time); err != nil {
+			return
+		}
 	}
-	if err = dS.authorize(utils.ThresholdSv1ProcessEvent, args.ArgsProcessEvent.CGREvent.Tenant,
-		args.APIKey, args.ArgsProcessEvent.CGREvent.Time); err != nil {
-		return
-	}
-	return dS.thdS.Call(utils.ThresholdSv1ProcessEvent, args.ArgsProcessEvent, tIDs)
+	return dS.Dispatch(&args.CGREvent, utils.MetaThresholds, args.RouteID,
+		utils.ThresholdSv1ProcessEvent, args.ArgsProcessEvent, tIDs)
 }
-*/

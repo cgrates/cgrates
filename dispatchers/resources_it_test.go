@@ -21,162 +21,90 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-var (
-	dspResCfgPath  string
-	dspResCfg      *config.CGRConfig
-	dspResRPC      *rpc.Client
-	instResCfgPath string
-	instResCfg     *config.CGRConfig
-	instResRPC     *rpc.Client
-)
-
 var sTestsDspRes = []func(t *testing.T){
-	testDspResInitCfg,
-	testDspResInitDataDb,
-	testDspResResetStorDb,
-	testDspResStartEngine,
-	testDspResRPCConn,
+	testDspResPingFailover,
+
 	testDspResPing,
-	testDspResLoadData,
-	testDspResAddAttributesWithPermision,
 	testDspResTestAuthKey,
-	testDspResAddAttributesWithPermision2,
 	testDspResTestAuthKey2,
-	testDspResKillEngine,
 }
 
 //Test start here
 func TestDspResourceS(t *testing.T) {
+	allEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "all"), true, true)
+	allEngine2 = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "all2"), true, true)
+	attrEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "attributes"), true, true)
+	dispEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "dispatchers"), true, true)
+	allEngine.loadData(t, path.Join(dspDataDir, "tariffplans", "tutorial"))
+	allEngine2.loadData(t, path.Join(dspDataDir, "tariffplans", "oldtutorial"))
+	attrEngine.loadData(t, path.Join(dspDataDir, "tariffplans", "dispatchers"))
+	time.Sleep(500 * time.Millisecond)
 	for _, stest := range sTestsDspRes {
 		t.Run("", stest)
 	}
+	attrEngine.stopEngine(t)
+	dispEngine.stopEngine(t)
+	allEngine.stopEngine(t)
+	allEngine2.stopEngine(t)
 }
 
-func testDspResInitCfg(t *testing.T) {
-	var err error
-	dspResCfgPath = path.Join(dspDataDir, "conf", "samples", "dispatcher")
-	dspResCfg, err = config.NewCGRConfigFromFolder(dspResCfgPath)
-	if err != nil {
+func testDspResPingFailover(t *testing.T) {
+	var reply string
+	if err := allEngine.RCP.Call(utils.ResourceSv1Ping, &utils.CGREvent{}, &reply); err != nil {
 		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
 	}
-	dspResCfg.DataFolderPath = dspDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(dspResCfg)
-	instResCfgPath = path.Join(dspDataDir, "conf", "samples", "tutmysql")
-	instResCfg, err = config.NewCGRConfigFromFolder(instResCfgPath)
-	if err != nil {
+	ev := CGREvWithApiKey{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+		},
+		APIKey: "res12345",
+	}
+	if err := dispEngine.RCP.Call(utils.ResourceSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
 	}
-	instResCfg.DataFolderPath = dspDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(instResCfg)
-}
-
-func testDspResInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(instResCfg); err != nil {
-		t.Fatal(err)
+	allEngine.stopEngine(t)
+	if err := dispEngine.RCP.Call(utils.ResourceSv1Ping, &ev, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
 	}
-}
-
-// Wipe out the cdr database
-func testDspResResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(instResCfg); err != nil {
-		t.Fatal(err)
+	allEngine2.stopEngine(t)
+	if err := dispEngine.RCP.Call(utils.ResourceSv1Ping, &ev, &reply); err == nil {
+		t.Errorf("Expected error but recived %v and reply %v\n", err, reply)
 	}
-}
-
-// Start CGR Engine
-func testDspResStartEngine(t *testing.T) {
-	if _, err := engine.StartEngine(instResCfgPath, dspDelay); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := engine.StartEngine(dspResCfgPath, dspDelay); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// Connect rpc client to rater
-func testDspResRPCConn(t *testing.T) {
-	var err error
-	instResRPC, err = jsonrpc.Dial("tcp", instResCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
-	dspResRPC, err = jsonrpc.Dial("tcp", dspResCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
-
+	allEngine.startEngine(t)
+	allEngine2.startEngine(t)
 }
 
 func testDspResPing(t *testing.T) {
 	var reply string
-	if err := instResRPC.Call(utils.ResourceSv1Ping, "", &reply); err != nil {
+	if err := allEngine.RCP.Call(utils.ResourceSv1Ping, &utils.CGREvent{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dspResRPC.Call(utils.ResourceSv1Ping, "", &reply); err != nil {
+	if err := dispEngine.RCP.Call(utils.ResourceSv1Ping, &CGREvWithApiKey{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+		},
+		APIKey: "res12345",
+	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
-	}
-}
-
-func testDspResLoadData(t *testing.T) {
-	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{
-		FolderPath: path.Join(dspDataDir, "tariffplans", "tutorial")}
-	if err := instResRPC.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
-		t.Error(err)
-	}
-	time.Sleep(500 * time.Millisecond)
-}
-
-func testDspResAddAttributesWithPermision(t *testing.T) {
-	alsPrf := &engine.AttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "AuthKey",
-		Contexts:  []string{utils.MetaAuth},
-		FilterIDs: []string{"*string:APIKey:12345"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-		},
-		Attributes: []*engine.Attribute{
-			{
-				FieldName:  utils.APIMethods,
-				Initial:    utils.META_ANY,
-				Substitute: config.NewRSRParsersMustCompile("ThresholdSv1.GetThresholdsForEvent", true, utils.INFIELD_SEP),
-				Append:     true,
-			},
-		},
-		Weight: 20,
-	}
-	var result string
-	if err := instResRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-	alsPrf.Compile()
-	var reply *engine.AttributeProfile
-	if err := instResRPC.Call("ApierV1.GetAttributeProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "AuthKey"}, &reply); err != nil {
-		t.Error(err)
-	}
-	reply.Compile()
-	if !reflect.DeepEqual(alsPrf, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
 	}
 }
 
@@ -196,53 +124,16 @@ func testDspResTestAuthKey(t *testing.T) {
 		},
 	}
 
-	if err := dspResRPC.Call(utils.ResourceSv1GetResourcesForEvent,
+	if err := dispEngine.RCP.Call(utils.ResourceSv1GetResourcesForEvent,
 		args, &rs); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
-	}
-}
-
-func testDspResAddAttributesWithPermision2(t *testing.T) {
-	alsPrf := &engine.AttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "AuthKey",
-		Contexts:  []string{utils.MetaAuth},
-		FilterIDs: []string{"*string:APIKey:12345"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-		},
-		Attributes: []*engine.Attribute{
-			{
-				FieldName:  utils.APIMethods,
-				Initial:    utils.META_ANY,
-				Substitute: config.NewRSRParsersMustCompile("ThresholdSv1.ProcessEvent&ResourceSv1.GetResourcesForEvent", true, utils.INFIELD_SEP),
-				Append:     true,
-			},
-		},
-		Weight: 20,
-	}
-	var result string
-	if err := instResRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-	alsPrf.Compile()
-	var reply *engine.AttributeProfile
-	if err := instResRPC.Call("ApierV1.GetAttributeProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "AuthKey"}, &reply); err != nil {
-		t.Error(err)
-	}
-	reply.Compile()
-	if !reflect.DeepEqual(alsPrf, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
 	}
 }
 
 func testDspResTestAuthKey2(t *testing.T) {
 	var rs *engine.Resources
 	args := &ArgsV1ResUsageWithApiKey{
-		APIKey: "12345",
+		APIKey: "res12345",
 		ArgRSv1ResourceUsage: utils.ArgRSv1ResourceUsage{
 			CGREvent: utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -262,19 +153,10 @@ func testDspResTestAuthKey2(t *testing.T) {
 		},
 	}
 
-	if err := dspResRPC.Call(utils.ResourceSv1GetResourcesForEvent,
+	if err := dispEngine.RCP.Call(utils.ResourceSv1GetResourcesForEvent,
 		args, &rs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRs, rs) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eRs), utils.ToJSON(rs))
-	}
-}
-
-func testDspResKillEngine(t *testing.T) {
-	if err := engine.KillEngine(dspDelay); err != nil {
-		t.Error(err)
-	}
-	if err := engine.KillEngine(dspDelay); err != nil {
-		t.Error(err)
 	}
 }

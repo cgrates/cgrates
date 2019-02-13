@@ -18,29 +18,32 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package dispatchers
 
-/*
 import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) SupplierSv1Ping(ign string, reply *string) error {
-	if dS.splS == nil {
-		return utils.NewErrNotConnected(utils.SupplierS)
+func (dS *DispatcherService) SupplierSv1Ping(args *CGREvWithApiKey, reply *string) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.SupplierSv1Ping,
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
+			return
+		}
 	}
-	return dS.splS.Call(utils.SupplierSv1Ping, ign, reply)
+	return dS.Dispatch(&args.CGREvent, utils.MetaSuppliers, args.RouteID,
+		utils.SupplierSv1Ping, args.CGREvent, reply)
 }
 
 func (dS *DispatcherService) SupplierSv1GetSuppliers(args *ArgsGetSuppliersWithApiKey,
 	reply *engine.SortedSuppliers) (err error) {
-	if dS.splS == nil {
-		return utils.NewErrNotConnected(utils.SupplierS)
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.SupplierSv1GetSuppliers,
+			args.ArgsGetSuppliers.CGREvent.Tenant,
+			args.APIKey, args.ArgsGetSuppliers.CGREvent.Time); err != nil {
+			return
+		}
 	}
-	if err = dS.authorize(utils.SupplierSv1GetSuppliers, args.ArgsGetSuppliers.CGREvent.Tenant,
-		args.APIKey, args.ArgsGetSuppliers.CGREvent.Time); err != nil {
-		return
-	}
-	return dS.splS.Call(utils.SupplierSv1GetSuppliers, args.ArgsGetSuppliers, reply)
-
+	return dS.Dispatch(&args.CGREvent, utils.MetaSuppliers, args.RouteID,
+		utils.SupplierSv1GetSuppliers, args.ArgsGetSuppliers, reply)
 }
-*/

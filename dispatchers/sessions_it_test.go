@@ -44,22 +44,22 @@ var (
 )
 
 var sTestsDspSession = []func(t *testing.T){
-	testDspSessionInitCfg,
-	testDspSessionInitDataDb,
-	testDspSessionResetStorDb,
-	testDspSessionStartEngine,
-	testDspSessionRPCConn,
-	testDspSessionPing,
-	testDspSessionLoadData,
-	testDspSessionAddAttributesWithPermision,
-	testDspSessionTestAuthKey,
-	testDspSessionAddAttributesWithPermision2,
-	testDspSessionAuthorize,
-	testDspSessionInit,
-	testDspSessionUpdate,
-	testDspSessionTerminate,
-	testDspSessionProcessCDR,
-	testDspSessionKillEngine,
+	// testDspSessionInitCfg,
+	// testDspSessionInitDataDb,
+	// testDspSessionResetStorDb,
+	// testDspSessionStartEngine,
+	// testDspSessionRPCConn,
+	// testDspSessionPing,
+	// testDspSessionLoadData,
+	// testDspSessionAddAttributesWithPermision,
+	// testDspSessionTestAuthKey,
+	// testDspSessionAddAttributesWithPermision2,
+	// testDspSessionAuthorize,
+	// testDspSessionInit,
+	// testDspSessionUpdate,
+	// testDspSessionTerminate,
+	// testDspSessionProcessCDR,
+	// testDspSessionKillEngine,
 }
 
 //Test start here

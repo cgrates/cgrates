@@ -33,7 +33,7 @@ func (dS *DispatcherService) AttributeSv1Ping(args *CGREvWithApiKey,
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaAttributes,
+	return dS.Dispatch(&args.CGREvent, utils.MetaAttributes, args.RouteID,
 		utils.AttributeSv1Ping, args.CGREvent, reply)
 }
 
@@ -47,7 +47,7 @@ func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(args *ArgsAttrProc
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaAttributes,
+	return dS.Dispatch(&args.CGREvent, utils.MetaAttributes, args.RouteID,
 		utils.AttributeSv1GetAttributeForEvent, args.AttrArgsProcessEvent, reply)
 }
 
@@ -61,6 +61,6 @@ func (dS *DispatcherService) AttributeSv1ProcessEvent(args *ArgsAttrProcessEvent
 		}
 
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaAttributes,
+	return dS.Dispatch(&args.CGREvent, utils.MetaAttributes, args.RouteID,
 		utils.AttributeSv1ProcessEvent, args.AttrArgsProcessEvent, reply)
 }

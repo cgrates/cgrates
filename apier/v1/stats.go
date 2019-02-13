@@ -106,8 +106,8 @@ func (stsv1 *StatSv1) Call(serviceMethod string, args interface{}, reply interfa
 }
 
 // GetQueueIDs returns list of queueIDs registered for a tenant
-func (stsv1 *StatSv1) GetQueueIDs(tenant string, qIDs *[]string) error {
-	return stsv1.sS.V1GetQueueIDs(tenant, qIDs)
+func (stsv1 *StatSv1) GetQueueIDs(tenant *utils.TenantArg, qIDs *[]string) error {
+	return stsv1.sS.V1GetQueueIDs(tenant.Tenant, qIDs)
 }
 
 // ProcessEvent returns processes a new Event
@@ -130,7 +130,7 @@ func (stsv1 *StatSv1) GetQueueFloatMetrics(args *utils.TenantID, reply *map[stri
 	return stsv1.sS.V1GetQueueFloatMetrics(args, reply)
 }
 
-func (stSv1 *StatSv1) Ping(ign string, reply *string) error {
+func (stSv1 *StatSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

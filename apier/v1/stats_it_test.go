@@ -142,7 +142,7 @@ func testV1STSFromFolder(t *testing.T) {
 func testV1STSGetStats(t *testing.T) {
 	var reply []string
 	expectedIDs := []string{"Stats1"}
-	if err := stsV1Rpc.Call(utils.StatSv1GetQueueIDs, "cgrates.org", &reply); err != nil {
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueIDs, &utils.TenantArg{"cgrates.org"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedIDs, reply) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedIDs, reply)
@@ -421,7 +421,7 @@ func testV1STSRemoveStatQueueProfile(t *testing.T) {
 
 func testV1STSStatsPing(t *testing.T) {
 	var resp string
-	if err := stsV1Rpc.Call(utils.StatSv1Ping, "", &resp); err != nil {
+	if err := stsV1Rpc.Call(utils.StatSv1Ping, &utils.CGREvent{}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.Pong {
 		t.Error("Unexpected reply returned", resp)

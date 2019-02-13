@@ -33,11 +33,27 @@
 	"enabled": true,
 },
 
-// "chargers": {
-// 	"enabled": true,
-// 	"attributes_conns": [
-// 		{"address": "*internal"},
-// 	],
-// },
+"chargers": {
+	"enabled": true,
+	"attributes_conns": [
+		{"address": "*internal"},
+	],
+},
+
+"thresholds": {
+	"enabled": true,
+},
+
+"suppliers": {
+	"enabled": true,
+},
+
+"stats": {
+	"enabled": true,
+},
+
+"resources": {
+	"enabled": true,
+},
 
 }

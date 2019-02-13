@@ -18,54 +18,62 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package dispatchers
 
-/*
 import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) StatSv1Ping(ign string, reply *string) error {
-	if dS.statS == nil {
-		return utils.NewErrNotConnected(utils.StatS)
+func (dS *DispatcherService) StatSv1Ping(args *CGREvWithApiKey, reply *string) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.StatSv1Ping,
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
+			return
+		}
 	}
-	return dS.statS.Call(utils.StatSv1Ping, ign, reply)
+	return dS.Dispatch(&args.CGREvent, utils.MetaStats, args.RouteID,
+		utils.StatSv1Ping, args.CGREvent, reply)
 }
 
 func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *ArgsStatProcessEventWithApiKey,
 	reply *[]string) (err error) {
-	if dS.statS == nil {
-		return utils.NewErrNotConnected(utils.StatS)
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.StatSv1GetStatQueuesForEvent,
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
+			return
+		}
 	}
-	if err = dS.authorize(utils.StatSv1GetStatQueuesForEvent, args.CGREvent.Tenant,
-		args.APIKey, args.CGREvent.Time); err != nil {
-		return
-	}
-	return dS.statS.Call(utils.StatSv1GetStatQueuesForEvent, args, reply)
+	return dS.Dispatch(&args.CGREvent, utils.MetaStats, args.RouteID,
+		utils.StatSv1GetStatQueuesForEvent, args.StatsArgsProcessEvent, reply)
 }
 
 func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *TntIDWithApiKey,
 	reply *map[string]string) (err error) {
-	if dS.statS == nil {
-		return utils.NewErrNotConnected(utils.StatS)
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.StatSv1GetQueueStringMetrics,
+			args.TenantID.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
 	}
-	nowTime := time.Now()
-	if err = dS.authorize(utils.StatSv1GetQueueStringMetrics, args.TenantID.Tenant,
-		args.APIKey, &nowTime); err != nil {
-		return
-	}
-	return dS.statS.Call(utils.StatSv1GetQueueStringMetrics, args.TenantID, reply)
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: args.Tenant,
+		ID:     args.ID,
+	}, utils.MetaStats, args.RouteID, utils.StatSv1GetQueueStringMetrics,
+		args.TenantID, reply)
 }
 
 func (dS *DispatcherService) StatSv1ProcessEvent(args *ArgsStatProcessEventWithApiKey,
 	reply *[]string) (err error) {
-	if dS.statS == nil {
-		return utils.NewErrNotConnected(utils.StatS)
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.StatSv1ProcessEvent,
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
+			return
+		}
 	}
-	if err = dS.authorize(utils.StatSv1ProcessEvent, args.CGREvent.Tenant,
-		args.APIKey, args.CGREvent.Time); err != nil {
-		return
-	}
-	return dS.statS.Call(utils.StatSv1ProcessEvent, args, reply)
+	return dS.Dispatch(&args.CGREvent, utils.MetaStats, args.RouteID,
+		utils.StatSv1ProcessEvent, args.StatsArgsProcessEvent, reply)
 }
-*/

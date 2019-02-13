@@ -83,8 +83,6 @@ func (apierV1 *ApierV1) RemoveDispatcherProfile(arg *utils.TenantID, reply *stri
 	return nil
 }
 
-/*
-
 func NewDispatcherThresholdSv1(dps *dispatchers.DispatcherService) *DispatcherThresholdSv1 {
 	return &DispatcherThresholdSv1{dS: dps}
 }
@@ -95,8 +93,8 @@ type DispatcherThresholdSv1 struct {
 }
 
 // Ping implements ThresholdSv1Ping
-func (dT *DispatcherThresholdSv1) Ping(ign string, reply *string) error {
-	return dT.dS.ThresholdSv1Ping(ign, reply)
+func (dT *DispatcherThresholdSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
+	return dT.dS.ThresholdSv1Ping(args, reply)
 }
 
 // GetThresholdsForEvent implements ThresholdSv1GetThresholdsForEvent
@@ -121,8 +119,8 @@ type DispatcherStatSv1 struct {
 }
 
 // Ping implements StatSv1Ping
-func (dSts *DispatcherStatSv1) Ping(ign string, reply *string) error {
-	return dSts.dS.StatSv1Ping(ign, reply)
+func (dSts *DispatcherStatSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
+	return dSts.dS.StatSv1Ping(args, reply)
 }
 
 // GetStatQueuesForEvent implements StatSv1GetStatQueuesForEvent
@@ -151,8 +149,8 @@ type DispatcherResourceSv1 struct {
 }
 
 // Ping implements ResourceSv1Ping
-func (dRs *DispatcherResourceSv1) Ping(ign string, reply *string) error {
-	return dRs.dRs.ResourceSv1Ping(ign, reply)
+func (dRs *DispatcherResourceSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
+	return dRs.dRs.ResourceSv1Ping(args, reply)
 }
 
 // GetResourcesForEvent implements ResourceSv1GetResourcesForEvent
@@ -171,15 +169,15 @@ type DispatcherSupplierSv1 struct {
 }
 
 // Ping implements SupplierSv1Ping
-func (dSup *DispatcherSupplierSv1) Ping(ign string, reply *string) error {
-	return dSup.dSup.SupplierSv1Ping(ign, reply)
+func (dSup *DispatcherSupplierSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
+	return dSup.dSup.SupplierSv1Ping(args, reply)
 }
 
 // GetSuppliers implements SupplierSv1GetSuppliers
 func (dSup *DispatcherSupplierSv1) GetSuppliers(args *dispatchers.ArgsGetSuppliersWithApiKey,
 	reply *engine.SortedSuppliers) error {
 	return dSup.dSup.SupplierSv1GetSuppliers(args, reply)
-}*/
+}
 
 func NewDispatcherAttributeSv1(dps *dispatchers.DispatcherService) *DispatcherAttributeSv1 {
 	return &DispatcherAttributeSv1{dA: dps}

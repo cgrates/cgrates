@@ -94,7 +94,7 @@ func (chSv1 *CacheSv1) RemoveGroup(args *engine.ArgsGetGroup,
 	return chSv1.cacheS.V1RemoveGroup(args, rply)
 }
 
-func (chSv1 *CacheSv1) Ping(ign string, reply *string) error {
+func (chSv1 *CacheSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
