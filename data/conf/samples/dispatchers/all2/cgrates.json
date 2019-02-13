@@ -56,4 +56,28 @@
 	"enabled": true,
 },
 
+"cdrs": {
+	"enabled": true,
+	"chargers_conns":[
+		{"address": "*internal"},
+	],
+},
+
+"sessions": {
+	"enabled": true,
+	"listen_bijson": ":7014",
+	"suppliers_conns": [
+		{"address": "*internal"}
+	],
+	"resources_conns": [
+		{"address": "*internal"}
+	],
+	"attributes_conns": [
+		{"address": "*internal"}
+	],
+	"rals_conns": [
+		{"address": "*internal"}
+	],
+},
+
 }

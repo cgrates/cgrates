@@ -125,6 +125,7 @@ func (d *testDispatcher) loadData(t *testing.T, path string) {
 
 //Test start here
 func TestDspAttributeS(t *testing.T) {
+	engine.KillEngine(0)
 	allEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "all"), true, true)
 	allEngine2 = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "all2"), true, true)
 	attrEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "attributes"), true, true)
@@ -140,6 +141,7 @@ func TestDspAttributeS(t *testing.T) {
 	dispEngine.stopEngine(t)
 	allEngine.stopEngine(t)
 	allEngine2.stopEngine(t)
+	engine.KillEngine(0)
 }
 
 func testDspAttrPingFailover(t *testing.T) {
@@ -156,38 +158,29 @@ func testDspAttrPingFailover(t *testing.T) {
 		t.Errorf("Received: %s", reply)
 	}
 	reply = ""
-	if err := dispEngine.RCP.Call(utils.AttributeSv1Ping, &CGREvWithApiKey{
+	ev := CGREvWithApiKey{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		APIKey: "attr12345",
-	}, &reply); err != nil {
+		DispatcherResource: DispatcherResource{
+			APIKey: "attr12345",
+		},
+	}
+	if err := dispEngine.RCP.Call(utils.AttributeSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	allEngine.stopEngine(t)
 	reply = ""
-	if err := dispEngine.RCP.Call(utils.AttributeSv1Ping, &CGREvWithApiKey{
-		CGREvent: utils.CGREvent{
-			ID:     "PING",
-			Tenant: "cgrates.org",
-		},
-		APIKey: "attr12345",
-	}, &reply); err != nil {
+	if err := dispEngine.RCP.Call(utils.AttributeSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	allEngine2.stopEngine(t)
 	reply = ""
-	if err := dispEngine.RCP.Call(utils.AttributeSv1Ping, &CGREvWithApiKey{
-		CGREvent: utils.CGREvent{
-			ID:     "PING",
-			Tenant: "cgrates.org",
-		},
-		APIKey: "attr12345",
-	}, &reply); err == nil {
+	if err := dispEngine.RCP.Call(utils.AttributeSv1Ping, &ev, &reply); err == nil {
 		t.Errorf("Expected error but recived %v and reply %v\n", err, reply)
 	}
 	allEngine.startEngine(t)
@@ -196,7 +189,9 @@ func testDspAttrPingFailover(t *testing.T) {
 
 func testDspAttrGetAttrFailover(t *testing.T) {
 	args := &CGREvWithApiKey{
-		APIKey: "attr12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "attr12345",
+		},
 		CGREvent: utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSGetAttributeForEvent",
@@ -292,7 +287,9 @@ func testDspAttrPing(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		APIKey: "attr12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "attr12345",
+		},
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
@@ -320,7 +317,9 @@ func testDspAttrTestMissingApiKey(t *testing.T) {
 
 func testDspAttrTestUnknownApiKey(t *testing.T) {
 	args := &CGREvWithApiKey{
-		APIKey: "1234",
+		DispatcherResource: DispatcherResource{
+			APIKey: "1234",
+		},
 		CGREvent: utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSGetAttributeForEvent",
@@ -339,7 +338,9 @@ func testDspAttrTestUnknownApiKey(t *testing.T) {
 
 func testDspAttrTestAuthKey(t *testing.T) {
 	args := &CGREvWithApiKey{
-		APIKey: "12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "12345",
+		},
 		CGREvent: utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSGetAttributeForEvent",
@@ -358,7 +359,9 @@ func testDspAttrTestAuthKey(t *testing.T) {
 
 func testDspAttrTestAuthKey2(t *testing.T) {
 	args := &CGREvWithApiKey{
-		APIKey: "attr12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "attr12345",
+		},
 		CGREvent: utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSGetAttributeForEvent",
@@ -422,7 +425,9 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 
 func testDspAttrTestAuthKey3(t *testing.T) {
 	args := &CGREvWithApiKey{
-		APIKey: "attr12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "attr12345",
+		},
 		CGREvent: utils.CGREvent{
 			Tenant:  "cgrates.org",
 			ID:      "testAttributeSGetAttributeForEvent",

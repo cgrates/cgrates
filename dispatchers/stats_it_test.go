@@ -41,6 +41,7 @@ var sTestsDspSts = []func(t *testing.T){
 
 //Test start here
 func TestDspStatS(t *testing.T) {
+	engine.KillEngine(0)
 	allEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "all"), true, true)
 	allEngine2 = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "all2"), true, true)
 	attrEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "attributes"), true, true)
@@ -56,6 +57,7 @@ func TestDspStatS(t *testing.T) {
 	dispEngine.stopEngine(t)
 	allEngine.stopEngine(t)
 	allEngine2.stopEngine(t)
+	engine.KillEngine(0)
 }
 
 func testDspStsPingFailover(t *testing.T) {
@@ -69,7 +71,9 @@ func testDspStsPingFailover(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		APIKey: "stat12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "stat12345",
+		},
 	}
 	if err := dispEngine.RCP.Call(utils.StatSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
@@ -95,7 +99,9 @@ func testDspStsGetStatFailover(t *testing.T) {
 	var metrics map[string]string
 	expected := []string{"Stats1"}
 	args := ArgsStatProcessEventWithApiKey{
-		APIKey: "stat12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "stat12345",
+		},
 		StatsArgsProcessEvent: engine.StatsArgsProcessEvent{
 			CGREvent: utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -118,7 +124,9 @@ func testDspStsGetStatFailover(t *testing.T) {
 	}
 
 	args2 := TntIDWithApiKey{
-		APIKey: "stat12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "stat12345",
+		},
 		TenantID: utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "Stats1",
@@ -151,7 +159,9 @@ func testDspStsPing(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		APIKey: "stat12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "stat12345",
+		},
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
@@ -162,7 +172,9 @@ func testDspStsPing(t *testing.T) {
 func testDspStsTestAuthKey(t *testing.T) {
 	var reply []string
 	args := ArgsStatProcessEventWithApiKey{
-		APIKey: "12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "12345",
+		},
 		StatsArgsProcessEvent: engine.StatsArgsProcessEvent{
 			CGREvent: utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -180,7 +192,9 @@ func testDspStsTestAuthKey(t *testing.T) {
 	}
 
 	args2 := TntIDWithApiKey{
-		APIKey: "12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "12345",
+		},
 		TenantID: utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "Stats2",
@@ -199,7 +213,9 @@ func testDspStsTestAuthKey2(t *testing.T) {
 	var metrics map[string]string
 	expected := []string{"Stats2"}
 	args := ArgsStatProcessEventWithApiKey{
-		APIKey: "stat12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "stat12345",
+		},
 		StatsArgsProcessEvent: engine.StatsArgsProcessEvent{
 			CGREvent: utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -221,7 +237,9 @@ func testDspStsTestAuthKey2(t *testing.T) {
 	}
 
 	args2 := TntIDWithApiKey{
-		APIKey: "stat12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "stat12345",
+		},
 		TenantID: utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "Stats2",
@@ -240,7 +258,9 @@ func testDspStsTestAuthKey2(t *testing.T) {
 	}
 
 	args = ArgsStatProcessEventWithApiKey{
-		APIKey: "stat12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "stat12345",
+		},
 		StatsArgsProcessEvent: engine.StatsArgsProcessEvent{
 			CGREvent: utils.CGREvent{
 				Tenant: "cgrates.org",

@@ -41,6 +41,7 @@ var sTestsDspTh = []func(t *testing.T){
 
 //Test start here
 func TestDspThresholdS(t *testing.T) {
+	engine.KillEngine(0)
 	allEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "all"), true, true)
 	allEngine2 = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "all2"), true, true)
 	attrEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "attributes"), true, true)
@@ -56,6 +57,7 @@ func TestDspThresholdS(t *testing.T) {
 	dispEngine.stopEngine(t)
 	allEngine.stopEngine(t)
 	allEngine2.stopEngine(t)
+	engine.KillEngine(0)
 }
 
 func testDspThPingFailover(t *testing.T) {
@@ -69,7 +71,9 @@ func testDspThPingFailover(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		APIKey: "thr12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "thr12345",
+		},
 	}
 	if err := dispEngine.RCP.Call(utils.ThresholdSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
@@ -95,7 +99,9 @@ func testDspThProcessEventFailover(t *testing.T) {
 	eIDs := []string{"THD_ACNT_1001"}
 	nowTime := time.Now()
 	args := &ArgsProcessEventWithApiKey{
-		APIKey: "thr12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "thr12345",
+		},
 		ArgsProcessEvent: engine.ArgsProcessEvent{
 			CGREvent: utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -132,7 +138,9 @@ func testDspThPing(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		APIKey: "thr12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "thr12345",
+		},
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
@@ -144,7 +152,9 @@ func testDspThTestAuthKey(t *testing.T) {
 	var ids []string
 	nowTime := time.Now()
 	args := &ArgsProcessEventWithApiKey{
-		APIKey: "12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "12345",
+		},
 		ArgsProcessEvent: engine.ArgsProcessEvent{
 			CGREvent: utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -172,7 +182,9 @@ func testDspThTestAuthKey2(t *testing.T) {
 	eIDs := []string{"THD_ACNT_1002"}
 	nowTime := time.Now()
 	args := &ArgsProcessEventWithApiKey{
-		APIKey: "thr12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "thr12345",
+		},
 		ArgsProcessEvent: engine.ArgsProcessEvent{
 			CGREvent: utils.CGREvent{
 				Tenant: "cgrates.org",
