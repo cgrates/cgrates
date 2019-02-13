@@ -45,9 +45,7 @@ func Testv2ActionTriggerAsThreshold(t *testing.T) {
 		Executed:          false,
 		LastExecutionTime: time.Now(),
 	}
-	x, _ := engine.NewFilterRule(engine.MetaRSR, "Directions", v2ATR.Balance.Directions.Slice())
-	filters = append(filters, x)
-	x, _ = engine.NewFilterRule(engine.MetaDestinations, "DestinationIDs", v2ATR.Balance.DestinationIDs.Slice())
+	x, _ := engine.NewFilterRule(engine.MetaDestinations, "DestinationIDs", v2ATR.Balance.DestinationIDs.Slice())
 	filters = append(filters, x)
 	x, _ = engine.NewFilterRule(engine.MetaPrefix, "RatingSubject", []string{*v2ATR.Balance.RatingSubject})
 	filters = append(filters, x)

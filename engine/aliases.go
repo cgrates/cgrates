@@ -144,8 +144,8 @@ func (al *Alias) SetId(id string) error {
 }
 
 type AttrMatchingAlias struct {
-	Destination string
 	Direction   string
+	Destination string
 	Tenant      string
 	Category    string
 	Account     string

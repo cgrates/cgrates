@@ -112,9 +112,6 @@ func (attr *AttrSetAccountActionTriggers) UpdateActionTrigger(at *engine.ActionT
 	if attr.BalanceType != nil {
 		at.Balance.Type = attr.BalanceType
 	}
-	if attr.BalanceDirections != nil {
-		at.Balance.Directions = utils.StringMapPointer(utils.NewStringMap(*attr.BalanceDirections...))
-	}
 	if attr.BalanceDestinationIds != nil {
 		at.Balance.DestinationIDs = utils.StringMapPointer(utils.NewStringMap(*attr.BalanceDestinationIds...))
 	}

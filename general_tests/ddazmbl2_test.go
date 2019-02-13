@@ -48,8 +48,8 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 	ratingProfiles := `cgrates.org,call,*any,2013-01-06T00:00:00Z,RP_UK,
 cgrates.org,call,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,`
 	sharedGroups := ``
-	actions := `TOPUP10_AC,*topup_reset,,,,*monetary,*out,,*any,,,*unlimited,,0,10,false,false,10
-TOPUP10_AC1,*topup_reset,,,,*voice,*out,,DST_UK_Mobile_BIG5,discounted_minutes,,*unlimited,,40s,10,false,false,10`
+	actions := `TOPUP10_AC,*topup_reset,,,,*monetary,,*any,,,*unlimited,,0,10,false,false,10
+TOPUP10_AC1,*topup_reset,,,,*voice,,DST_UK_Mobile_BIG5,discounted_minutes,,*unlimited,,40s,10,false,false,10`
 	actionPlans := `TOPUP10_AT,TOPUP10_AC,ASAP,10
 TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	actionTriggers := ``
@@ -145,7 +145,6 @@ func TestExecuteActions2(t *testing.T) {
 
 func TestDebit2(t *testing.T) {
 	cd := &engine.CallDescriptor{
-		Direction:   "*out",
 		Category:    "call",
 		Tenant:      "cgrates.org",
 		Subject:     "12345",

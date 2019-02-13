@@ -119,7 +119,6 @@ func TestGetSecondsForPrefix(t *testing.T) {
 		TimeEnd:       time.Date(2013, 10, 4, 15, 46, 10, 0, time.UTC),
 		LoopIndex:     0,
 		DurationIndex: 10 * time.Second,
-		Direction:     utils.OUT,
 		Destination:   "0723",
 		TOR:           utils.VOICE,
 	}
@@ -150,7 +149,6 @@ func TestGetSpecialPricedSeconds(t *testing.T) {
 		TimeStart:   time.Date(2013, 10, 4, 15, 46, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 4, 15, 46, 60, 0, time.UTC),
 		LoopIndex:   0,
-		Direction:   utils.OUT,
 		Destination: "0723",
 		TOR:         utils.VOICE,
 	}
@@ -158,10 +156,6 @@ func TestGetSpecialPricedSeconds(t *testing.T) {
 	expected := 20 * time.Second
 	if credit != 0 || seconds != expected ||
 		len(bucketList) != 2 || bucketList[0].Weight < bucketList[1].Weight {
-		t.Log(seconds, credit, bucketList)
-		for _, b := range bucketList {
-			t.Logf("Balance: %+v", b)
-		}
 		t.Errorf("Expected %v was %v", expected, seconds)
 	}
 }
@@ -195,7 +189,6 @@ func TestDebitCreditZeroSecond(t *testing.T) {
 		DestinationIDs: utils.StringMap{"NAT": true},
 		RatingSubject:  "*zero1s"}
 	cc := &CallCost{
-		Direction:   utils.OUT,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
@@ -213,7 +206,6 @@ func TestDebitCreditZeroSecond(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 		TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
-		Direction:    utils.OUT,
 		Destination:  "0723045326",
 		Category:     "0",
 		TOR:          utils.VOICE,
@@ -245,7 +237,6 @@ func TestDebitCreditBlocker(t *testing.T) {
 		RatingSubject: "passmonde", Blocker: true}
 	b2 := &Balance{Uuid: "*default", Value: 1.5, Weight: 0}
 	cc := &CallCost{
-		Direction:   utils.OUT,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
@@ -265,7 +256,6 @@ func TestDebitCreditBlocker(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 		TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
-		Direction:    utils.OUT,
 		Destination:  "0723045326",
 		Category:     "0",
 		TOR:          utils.VOICE,
@@ -290,7 +280,6 @@ func TestDebitCreditBlocker(t *testing.T) {
 
 func TestDebitFreeEmpty(t *testing.T) {
 	cc := &CallCost{
-		Direction:   utils.OUT,
 		Destination: "112",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
@@ -310,7 +299,6 @@ func TestDebitFreeEmpty(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 		TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
-		Direction:    utils.OUT,
 		Tenant:       "CUSTOMER_1",
 		Subject:      "rif:from:tm",
 		Destination:  "112",
@@ -340,7 +328,6 @@ func TestDebitCreditZeroMinute(t *testing.T) {
 		Weight: 10, DestinationIDs: utils.StringMap{"NAT": true},
 		RatingSubject: "*zero1m"}
 	cc := &CallCost{
-		Direction:   utils.OUT,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
@@ -359,7 +346,6 @@ func TestDebitCreditZeroMinute(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 		TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
-		Direction:    utils.OUT,
 		Destination:  "0723045326",
 		Category:     "0",
 		TOR:          utils.VOICE,
@@ -397,7 +383,6 @@ func TestDebitCreditZeroMixedMinute(t *testing.T) {
 	b2 := &Balance{Uuid: "tests", Value: 10 * float64(time.Second), Weight: 10,
 		DestinationIDs: utils.StringMap{"NAT": true}, RatingSubject: "*zero1s"}
 	cc := &CallCost{
-		Direction:   utils.OUT,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
@@ -417,7 +402,6 @@ func TestDebitCreditZeroMixedMinute(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
-		Direction:     cc.Direction,
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.Timespans[0].GetDuration(),
@@ -451,7 +435,6 @@ func TestDebitCreditNoCredit(t *testing.T) {
 		DestinationIDs: utils.StringMap{"NAT": true},
 		RatingSubject:  "*zero1m", Weight: 10}
 	cc := &CallCost{
-		Direction:   utils.OUT,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
@@ -482,7 +465,6 @@ func TestDebitCreditNoCredit(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[1].TimeEnd,
-		Direction:     cc.Direction,
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
@@ -517,7 +499,6 @@ func TestDebitCreditHasCredit(t *testing.T) {
 		DestinationIDs: utils.StringMap{"NAT": true},
 		Weight:         10, RatingSubject: "*zero1m"}
 	cc := &CallCost{
-		Direction:   utils.OUT,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
@@ -547,7 +528,6 @@ func TestDebitCreditHasCredit(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[1].TimeEnd,
-		Direction:     cc.Direction,
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
@@ -583,7 +563,6 @@ func TestDebitCreditSplitMinutesMoney(t *testing.T) {
 		DestinationIDs: utils.StringMap{"NAT": true},
 		Weight:         10, RatingSubject: "*zero1s"}
 	cc := &CallCost{
-		Direction:   utils.OUT,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
@@ -604,7 +583,6 @@ func TestDebitCreditSplitMinutesMoney(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
-		Direction:     cc.Direction,
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
@@ -645,7 +623,6 @@ func TestDebitCreditMoreTimespans(t *testing.T) {
 		DestinationIDs: utils.StringMap{"NAT": true},
 		Weight:         10, RatingSubject: "*zero1m"}
 	cc := &CallCost{
-		Direction:   utils.OUT,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
@@ -675,7 +652,6 @@ func TestDebitCreditMoreTimespans(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[1].TimeEnd,
-		Direction:     cc.Direction,
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
@@ -709,7 +685,6 @@ func TestDebitCreditMoreTimespansMixed(t *testing.T) {
 		DestinationIDs: utils.StringMap{"NAT": true},
 		Weight:         5, RatingSubject: "*zero1s"}
 	cc := &CallCost{
-		Direction:   utils.OUT,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
@@ -741,7 +716,6 @@ func TestDebitCreditMoreTimespansMixed(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[1].TimeEnd,
-		Direction:     cc.Direction,
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
@@ -774,7 +748,6 @@ func TestDebitCreditNoConectFeeCredit(t *testing.T) {
 		DestinationIDs: utils.StringMap{"NAT": true},
 		Weight:         10, RatingSubject: "*zero1m"}
 	cc := &CallCost{
-		Direction:   utils.OUT,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
@@ -808,7 +781,6 @@ func TestDebitCreditNoConectFeeCredit(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[1].TimeEnd,
-		Direction:     cc.Direction,
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
@@ -832,7 +804,6 @@ func TestDebitCreditNoConectFeeCredit(t *testing.T) {
 
 func TestDebitCreditMoneyOnly(t *testing.T) {
 	cc := &CallCost{
-		Direction:   utils.OUT,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
@@ -866,7 +837,6 @@ func TestDebitCreditMoneyOnly(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[1].TimeEnd,
-		Direction:     cc.Direction,
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
@@ -908,7 +878,6 @@ func TestDebitCreditSubjectMinutes(t *testing.T) {
 	cc := &CallCost{
 		Tenant:      "vdf",
 		Category:    "0",
-		Direction:   utils.OUT,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
@@ -931,7 +900,6 @@ func TestDebitCreditSubjectMinutes(t *testing.T) {
 		Category:      "0",
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
-		Direction:     cc.Direction,
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
@@ -972,7 +940,6 @@ func TestDebitCreditSubjectMoney(t *testing.T) {
 	cc := &CallCost{
 		Tenant:      "vdf",
 		Category:    "0",
-		Direction:   utils.OUT,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
@@ -996,7 +963,6 @@ func TestDebitCreditSubjectMoney(t *testing.T) {
 		Category:      cc.Category,
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
-		Direction:     cc.Direction,
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
@@ -1029,62 +995,6 @@ func TestDebitCreditSubjectMoney(t *testing.T) {
 	}
 }
 
-/*func TestDebitCreditSubjectMixed(t *testing.T) {
-	b1 := &Balance{Uuid: "testb", Value: 40, Weight: 10, DestinationId: "NAT", RatingSubject: "minu"}
-	cc := &CallCost{
-		Tenant:      "vdf",
-		Category:    "0",
-		Direction:   utils.OUT,
-		Destination: "0723045326",
-		Timespans: []*TimeSpan{
-			&TimeSpan{
-				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
-				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 55, 0, time.UTC),
-				DurationIndex: 55 * time.Second,
-				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-			},
-		},
-		TOR:              utils.VOICE,
-		deductConnectFee: true,
-	}
-	cd := &CallDescriptor{
-		Tenant:        cc.Tenant,
-		Category:      cc.Category,
-		TimeStart:     cc.Timespans[0].TimeStart,
-		TimeEnd:       cc.Timespans[0].TimeEnd,
-		Direction:     cc.Direction,
-		Destination:   cc.Destination,
-		TOR:           cc.TOR,
-		DurationIndex: cc.GetDuration(),
-		testCallcost: cc,
-	}
-	rifsBalance := &Account{ID: "other", BalanceMap: map[string]Balances{
-		utils.VOICE: Balances{b1},
-		utils.MONETARY:  Balances{&Balance{Uuid: "moneya", Value: 19500, RatingSubject: "minu"}},
-	}}
-	var err error
-	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
-	if err != nil {
-		t.Error("Error debiting balance: ", err)
-	}
-	if cc.Timespans[0].Increments[0].BalanceInfo.Unit.UUID != "testb" ||
-		cc.Timespans[0].Increments[0].BalanceInfo.Money.UUID != "moneya" ||
-		cc.Timespans[0].Increments[0].Duration != 10*time.Second {
-		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
-	}
-	if rifsBalance.BalanceMap[utils.VOICE][0].GetValue() != 0 ||
-		rifsBalance.BalanceMap[utils.MONETARY][0].GetValue() != 7 {
-		t.Errorf("Error extracting minutes from balance: %+v, %+v",
-			rifsBalance.BalanceMap[utils.VOICE][0].GetValue(), rifsBalance.BalanceMap[utils.MONETARY][0].GetValue())
-	}
-	if len(cc.Timespans) != 2 || cc.Timespans[0].GetDuration() != 40*time.Second {
-		for _, ts := range cc.Timespans {
-			t.Log(ts)
-		}
-		t.Error("Error truncating extra timespans: ", len(cc.Timespans), cc.Timespans[0].GetDuration())
-	}
-}*/
-
 func TestAccountdebitBalance(t *testing.T) {
 	ub := &Account{
 		ID:            "rif",
@@ -1102,7 +1012,6 @@ func TestAccountdebitBalance(t *testing.T) {
 		Type:           utils.StringPointer(utils.VOICE),
 		Weight:         utils.Float64Pointer(20),
 		DestinationIDs: utils.StringMapPointer(utils.StringMap{"NEW": true}),
-		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 	}
 	a := &Action{Balance: newMb}
 	ub.debitBalanceAction(a, false, false)
@@ -1112,28 +1021,6 @@ func TestAccountdebitBalance(t *testing.T) {
 			len(ub.BalanceMap[utils.VOICE]), ub.BalanceMap[utils.VOICE][2], newMb)
 	}
 }
-
-/*func TestAccountDisableBalance(t *testing.T) {
-	ub := &Account{
-		Id:            "rif",
-		AllowNegative: true,
-		BalanceMap:    map[string]Balances{utils.SMS: Balances{&Balance{Value: 14}}, utils.DATA: Balances{&Balance{Value: 1204}}, utils.VOICE: Balances{&Balance{Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}, Directions: utils.NewStringMap(utils.OUT)}, &Balance{Weight: 10, DestinationIDs: utils.StringMap{"RET": true}}}},
-	}
-	newMb := &BalanceFilter{
-		Type:           utils.StringPointer(utils.VOICE),
-		Weight:         utils.Float64Pointer(20),
-		DestinationIDs: utils.StringMapPointer(utils.StringMap{"NAT": true}),
-		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-	}
-	a := &Action{Balance: newMb}
-	ub.enableDisableBalanceAction(a)
-	if len(ub.BalanceMap[utils.VOICE]) != 2 || ub.BalanceMap[utils.VOICE][0].Disabled != true {
-		for _, b := range ub.BalanceMap[utils.VOICE] {
-			t.Logf("Balance: %+v", b)
-		}
-		t.Errorf("Error disabling balance! %d %+v %+v", len(ub.BalanceMap[utils.VOICE]), ub.BalanceMap[utils.VOICE][0], newMb)
-	}
-}*/
 
 func TestAccountdebitBalanceExists(t *testing.T) {
 	ub := &Account{
@@ -1145,8 +1032,7 @@ func TestAccountdebitBalanceExists(t *testing.T) {
 			utils.VOICE: Balances{
 				&Balance{
 					Value: 15, Weight: 20,
-					DestinationIDs: utils.StringMap{"NAT": true},
-					Directions:     utils.NewStringMap(utils.OUT)},
+					DestinationIDs: utils.StringMap{"NAT": true}},
 				&Balance{Weight: 10,
 					DestinationIDs: utils.StringMap{"RET": true}}}},
 	}
@@ -1155,11 +1041,11 @@ func TestAccountdebitBalanceExists(t *testing.T) {
 		Type:           utils.StringPointer(utils.VOICE),
 		Weight:         utils.Float64Pointer(20),
 		DestinationIDs: utils.StringMapPointer(utils.StringMap{"NAT": true}),
-		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 	}
 	a := &Action{Balance: newMb}
 	ub.debitBalanceAction(a, false, false)
-	if len(ub.BalanceMap[utils.VOICE]) != 2 || ub.BalanceMap[utils.VOICE][0].GetValue() != 25 {
+	if len(ub.BalanceMap[utils.VOICE]) != 2 ||
+		ub.BalanceMap[utils.VOICE][0].GetValue() != 25 {
 		t.Error("Error adding minute bucket!")
 	}
 }
@@ -1186,19 +1072,16 @@ func TestAccountAddMinutBucketEmpty(t *testing.T) {
 		Value:          &utils.ValueFormula{Static: -10},
 		Type:           utils.StringPointer(utils.VOICE),
 		DestinationIDs: utils.StringMapPointer(utils.StringMap{"NAT": true}),
-		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 	}
 	mb2 := &BalanceFilter{
 		Value:          &utils.ValueFormula{Static: -10},
 		Type:           utils.StringPointer(utils.VOICE),
 		DestinationIDs: utils.StringMapPointer(utils.StringMap{"NAT": true}),
-		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 	}
 	mb3 := &BalanceFilter{
 		Value:          &utils.ValueFormula{Static: -10},
 		Type:           utils.StringPointer(utils.VOICE),
 		DestinationIDs: utils.StringMapPointer(utils.StringMap{"OTHER": true}),
-		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 	}
 	ub := &Account{}
 	a := &Action{Balance: mb1}
@@ -1223,12 +1106,11 @@ func TestAccountExecuteTriggeredActions(t *testing.T) {
 		ID: "TEST_UB",
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: Balances{
-				&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100}},
+				&Balance{Value: 100}},
 			utils.VOICE: Balances{
 				&Balance{Value: 10 * float64(time.Second),
 					Weight:         20,
-					DestinationIDs: utils.StringMap{"NAT": true},
-					Directions:     utils.StringMap{utils.OUT: true}},
+					DestinationIDs: utils.StringMap{"NAT": true}},
 				&Balance{Weight: 10,
 					DestinationIDs: utils.StringMap{"RET": true}}}},
 		UnitCounters: UnitCounters{
@@ -1236,17 +1118,15 @@ func TestAccountExecuteTriggeredActions(t *testing.T) {
 				&UnitCounter{Counters: CounterFilters{
 					&CounterFilter{Value: 1,
 						Filter: &BalanceFilter{
-							Type:       utils.StringPointer(utils.MONETARY),
-							Directions: utils.StringMapPointer(utils.StringMap{utils.OUT: true})}}}}}},
+							Type: utils.StringPointer(utils.MONETARY)}}}}}},
 		ActionTriggers: ActionTriggers{
 			&ActionTrigger{
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.MONETARY),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))},
+					Type: utils.StringPointer(utils.MONETARY)},
 				ThresholdValue: 2, ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER,
 				ActionsID: "TEST_ACTIONS"}},
 	}
-	ub.countUnits(1, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
+	ub.countUnits(1, utils.MONETARY, new(CallCost), nil)
 	if ub.BalanceMap[utils.MONETARY][0].GetValue() != 110 ||
 		ub.BalanceMap[utils.VOICE][0].GetValue() != 20*float64(time.Second) {
 		t.Error("Error executing triggered actions",
@@ -1277,30 +1157,25 @@ func TestAccountExecuteTriggeredActionsBalance(t *testing.T) {
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: Balances{
 				&Balance{
-					Directions: utils.NewStringMap(utils.OUT),
-					Value:      100}},
+					Value: 100}},
 			utils.VOICE: Balances{
 				&Balance{
-					Directions:     utils.NewStringMap(utils.OUT),
 					Value:          10 * float64(time.Second),
 					Weight:         20,
 					DestinationIDs: utils.StringMap{"NAT": true}},
 				&Balance{
-					Directions:     utils.NewStringMap(utils.OUT),
 					Weight:         10,
 					DestinationIDs: utils.StringMap{"RET": true}}}},
 		UnitCounters: UnitCounters{
 			utils.MONETARY: []*UnitCounter{
 				&UnitCounter{Counters: CounterFilters{
 					&CounterFilter{Filter: &BalanceFilter{
-						Type:       utils.StringPointer(utils.MONETARY),
-						Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))},
+						Type: utils.StringPointer(utils.MONETARY)},
 						Value: 1.0}}}}},
 		ActionTriggers: ActionTriggers{
 			&ActionTrigger{
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.MONETARY),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))},
+					Type: utils.StringPointer(utils.MONETARY)},
 				ThresholdValue: 100,
 				ThresholdType:  utils.TRIGGER_MIN_EVENT_COUNTER,
 				ActionsID:      "TEST_ACTIONS"}},
@@ -1320,24 +1195,22 @@ func TestAccountExecuteTriggeredActionsOrder(t *testing.T) {
 		ID: "TEST_UB_OREDER",
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: Balances{
-				&Balance{Directions: utils.NewStringMap(utils.OUT),
-					Value: 100}}},
+				&Balance{Value: 100}}},
 		UnitCounters: UnitCounters{
 			utils.MONETARY: []*UnitCounter{
 				&UnitCounter{Counters: CounterFilters{
-					&CounterFilter{Value: 1, Filter: &BalanceFilter{
-						Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-						Type:       utils.StringPointer(utils.MONETARY)}}}}}},
+					&CounterFilter{Value: 1,
+						Filter: &BalanceFilter{
+							Type: utils.StringPointer(utils.MONETARY)}}}}}},
 		ActionTriggers: ActionTriggers{
 			&ActionTrigger{Balance: &BalanceFilter{
-				Type:       utils.StringPointer(utils.MONETARY),
-				Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))},
+				Type: utils.StringPointer(utils.MONETARY)},
 				ThresholdValue: 2,
 				ThresholdType:  utils.TRIGGER_MAX_EVENT_COUNTER,
 				ActionsID:      "TEST_ACTIONS_ORDER"}},
 	}
 
-	ub.countUnits(1, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
+	ub.countUnits(1, utils.MONETARY, new(CallCost), nil)
 	if len(ub.BalanceMap[utils.MONETARY]) != 1 ||
 		ub.BalanceMap[utils.MONETARY][0].GetValue() != 10 {
 
@@ -1348,11 +1221,22 @@ func TestAccountExecuteTriggeredActionsOrder(t *testing.T) {
 
 func TestAccountExecuteTriggeredDayWeek(t *testing.T) {
 	ub := &Account{
-		ID:         "TEST_UB",
-		BalanceMap: map[string]Balances{utils.MONETARY: Balances{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100}}, utils.VOICE: Balances{&Balance{Value: 10, Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}, Directions: utils.StringMap{utils.OUT: true}}, &Balance{Weight: 10, DestinationIDs: utils.StringMap{"RET": true}}}},
+		ID: "TEST_UB",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
+				&Balance{Value: 100}},
+			utils.VOICE: Balances{
+				&Balance{Value: 10, Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}},
+				&Balance{Weight: 10, DestinationIDs: utils.StringMap{"RET": true}}}},
 		ActionTriggers: ActionTriggers{
-			&ActionTrigger{UniqueID: "day_trigger", Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ThresholdValue: 10, ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, ActionsID: "TEST_ACTIONS"},
-			&ActionTrigger{UniqueID: "week_trigger", Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ThresholdValue: 100, ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, ActionsID: "TEST_ACTIONS"},
+			&ActionTrigger{UniqueID: "day_trigger",
+				Balance:        &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+				ThresholdValue: 10, ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER,
+				ActionsID: "TEST_ACTIONS"},
+			&ActionTrigger{UniqueID: "week_trigger",
+				Balance:        &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+				ThresholdValue: 100, ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER,
+				ActionsID: "TEST_ACTIONS"},
 		},
 	}
 	ub.InitCounters()
@@ -1360,17 +1244,23 @@ func TestAccountExecuteTriggeredDayWeek(t *testing.T) {
 		t.Error("Error initializing counters: ", ub.UnitCounters[utils.MONETARY][0].Counters[0])
 	}
 
-	ub.countUnits(1, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
+	ub.countUnits(1, utils.MONETARY, new(CallCost), nil)
 	if ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 1 ||
 		ub.UnitCounters[utils.MONETARY][0].Counters[1].Value != 1 {
-		t.Error("Error incrementing both counters", ub.UnitCounters[utils.MONETARY][0].Counters[0].Value, ub.UnitCounters[utils.MONETARY][0].Counters[1].Value)
+		t.Error("Error incrementing both counters",
+			ub.UnitCounters[utils.MONETARY][0].Counters[0].Value,
+			ub.UnitCounters[utils.MONETARY][0].Counters[1].Value)
 	}
 
 	// we can reset them
-	resetCountersAction(ub, &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), ID: utils.StringPointer("day_trigger")}}, nil, nil)
+	resetCountersAction(ub, &Action{
+		Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY),
+			ID: utils.StringPointer("day_trigger")}}, nil, nil)
 	if ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 0 ||
 		ub.UnitCounters[utils.MONETARY][0].Counters[1].Value != 1 {
-		t.Error("Error reseting both counters", ub.UnitCounters[utils.MONETARY][0].Counters[0].Value, ub.UnitCounters[utils.MONETARY][0].Counters[1].Value)
+		t.Error("Error reseting both counters",
+			ub.UnitCounters[utils.MONETARY][0].Counters[0].Value,
+			ub.UnitCounters[utils.MONETARY][0].Counters[1].Value)
 	}
 }
 
@@ -1379,18 +1269,16 @@ func TestAccountExpActionTrigger(t *testing.T) {
 		ID: "TEST_UB",
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: Balances{
-				&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100,
+				&Balance{Value: 100,
 					ExpirationDate: time.Date(2015, time.November, 9, 9, 48, 0, 0, time.UTC)}},
 			utils.VOICE: Balances{
 				&Balance{Value: 10 * float64(time.Second), Weight: 20,
-					DestinationIDs: utils.StringMap{"NAT": true},
-					Directions:     utils.StringMap{utils.OUT: true}},
+					DestinationIDs: utils.StringMap{"NAT": true}},
 				&Balance{Weight: 10 * float64(time.Second),
 					DestinationIDs: utils.StringMap{"RET": true}}}},
 		ActionTriggers: ActionTriggers{
 			&ActionTrigger{ID: "check expired balances", Balance: &BalanceFilter{
-				Type:       utils.StringPointer(utils.MONETARY),
-				Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))},
+				Type: utils.StringPointer(utils.MONETARY)},
 				ThresholdValue: 10, ThresholdType: utils.TRIGGER_BALANCE_EXPIRED,
 				ActionsID: "TEST_ACTIONS"},
 		},
@@ -1410,10 +1298,20 @@ func TestAccountExpActionTrigger(t *testing.T) {
 
 func TestAccountExpActionTriggerNotActivated(t *testing.T) {
 	ub := &Account{
-		ID:         "TEST_UB",
-		BalanceMap: map[string]Balances{utils.MONETARY: Balances{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100}}, utils.VOICE: Balances{&Balance{Value: 10, Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}, Directions: utils.StringMap{utils.OUT: true}}, &Balance{Weight: 10, DestinationIDs: utils.StringMap{"RET": true}}}},
+		ID: "TEST_UB",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{&Balance{Value: 100}},
+			utils.VOICE: Balances{
+				&Balance{Value: 10, Weight: 20,
+					DestinationIDs: utils.StringMap{"NAT": true}},
+				&Balance{Weight: 10,
+					DestinationIDs: utils.StringMap{"RET": true}}}},
 		ActionTriggers: ActionTriggers{
-			&ActionTrigger{ID: "check expired balances", ActivationDate: time.Date(2116, 2, 5, 18, 0, 0, 0, time.UTC), Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ThresholdValue: 10, ThresholdType: utils.TRIGGER_BALANCE_EXPIRED, ActionsID: "TEST_ACTIONS"},
+			&ActionTrigger{ID: "check expired balances",
+				ActivationDate: time.Date(2116, 2, 5, 18, 0, 0, 0, time.UTC),
+				Balance:        &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+				ThresholdValue: 10, ThresholdType: utils.TRIGGER_BALANCE_EXPIRED,
+				ActionsID: "TEST_ACTIONS"},
 		},
 	}
 	ub.ExecuteActionTriggers(nil)
@@ -1428,10 +1326,18 @@ func TestAccountExpActionTriggerNotActivated(t *testing.T) {
 
 func TestAccountExpActionTriggerExpired(t *testing.T) {
 	ub := &Account{
-		ID:         "TEST_UB",
-		BalanceMap: map[string]Balances{utils.MONETARY: Balances{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100}}, utils.VOICE: Balances{&Balance{Value: 10, Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}, Directions: utils.StringMap{utils.OUT: true}}, &Balance{Weight: 10, DestinationIDs: utils.StringMap{"RET": true}}}},
+		ID: "TEST_UB",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{&Balance{Value: 100}},
+			utils.VOICE: Balances{&Balance{Value: 10, Weight: 20,
+				DestinationIDs: utils.StringMap{"NAT": true}},
+				&Balance{Weight: 10, DestinationIDs: utils.StringMap{"RET": true}}}},
 		ActionTriggers: ActionTriggers{
-			&ActionTrigger{ID: "check expired balances", ExpirationDate: time.Date(2016, 2, 4, 18, 0, 0, 0, time.UTC), Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ThresholdValue: 10, ThresholdType: utils.TRIGGER_BALANCE_EXPIRED, ActionsID: "TEST_ACTIONS"},
+			&ActionTrigger{ID: "check expired balances",
+				ExpirationDate: time.Date(2016, 2, 4, 18, 0, 0, 0, time.UTC),
+				Balance:        &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
+				ThresholdValue: 10, ThresholdType: utils.TRIGGER_BALANCE_EXPIRED,
+				ActionsID: "TEST_ACTIONS"},
 		},
 	}
 	ub.ExecuteActionTriggers(nil)
@@ -1440,7 +1346,10 @@ func TestAccountExpActionTriggerExpired(t *testing.T) {
 		ub.BalanceMap[utils.VOICE][0].GetValue() != 10 ||
 		len(ub.ActionTriggers) != 0 {
 		t.Log(ub.BalanceMap[utils.MONETARY][0].IsExpired())
-		t.Error("Error executing triggered actions", ub.BalanceMap[utils.MONETARY][0].GetValue(), ub.BalanceMap[utils.VOICE][0].GetValue(), len(ub.BalanceMap[utils.MONETARY]))
+		t.Error("Error executing triggered actions",
+			ub.BalanceMap[utils.MONETARY][0].GetValue(),
+			ub.BalanceMap[utils.VOICE][0].GetValue(),
+			len(ub.BalanceMap[utils.MONETARY]))
 	}
 }
 
@@ -1492,33 +1401,38 @@ func TestAccountUnitCounting(t *testing.T) {
 }
 
 func TestAccountUnitCountingOutbound(t *testing.T) {
-	ub := &Account{UnitCounters: UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 0, Filter: &BalanceFilter{Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}}}}}}
-	ub.countUnits(10, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
-	if len(ub.UnitCounters[utils.MONETARY]) != 1 || ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 10 {
+	ub := &Account{UnitCounters: UnitCounters{utils.MONETARY: []*UnitCounter{
+		&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 0}}}}}}
+	ub.countUnits(10, utils.MONETARY, new(CallCost), nil)
+	if len(ub.UnitCounters[utils.MONETARY]) != 1 ||
+		ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 10 {
 		t.Error("Error counting units")
 	}
-	ub.countUnits(10, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
-	if len(ub.UnitCounters[utils.MONETARY]) != 1 || ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 20 {
+	ub.countUnits(10, utils.MONETARY, new(CallCost), nil)
+	if len(ub.UnitCounters[utils.MONETARY]) != 1 ||
+		ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 20 {
 		t.Error("Error counting units")
 	}
-	ub.countUnits(10, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
-	if len(ub.UnitCounters[utils.MONETARY]) != 1 || ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 30 {
+	ub.countUnits(10, utils.MONETARY, new(CallCost), nil)
+	if len(ub.UnitCounters[utils.MONETARY]) != 1 ||
+		ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 30 {
 		t.Error("Error counting units")
 	}
 }
 
 func TestAccountUnitCountingOutboundInbound(t *testing.T) {
-	ub := &Account{UnitCounters: UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 0, Filter: &BalanceFilter{Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}}}}}}
-	ub.countUnits(10, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
-	if len(ub.UnitCounters[utils.MONETARY]) != 1 || ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 10 {
-		t.Errorf("Error counting units: %+v", ub.UnitCounters[utils.MONETARY][0].Counters[0])
+	ub := &Account{UnitCounters: UnitCounters{
+		utils.MONETARY: []*UnitCounter{
+			&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 0}}}}}}
+	ub.countUnits(10, utils.MONETARY, new(CallCost), nil)
+	if len(ub.UnitCounters[utils.MONETARY]) != 1 ||
+		ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 10 {
+		t.Errorf("Error counting units: %+v",
+			ub.UnitCounters[utils.MONETARY][0].Counters[0])
 	}
-	ub.countUnits(10, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
-	if len(ub.UnitCounters[utils.MONETARY]) != 1 || ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 20 {
-		t.Error("Error counting units")
-	}
-	ub.countUnits(10, utils.MONETARY, &CallCost{Direction: utils.IN}, nil)
-	if len(ub.UnitCounters[utils.MONETARY]) != 1 || ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 20 {
+	ub.countUnits(10, utils.MONETARY, new(CallCost), nil)
+	if len(ub.UnitCounters[utils.MONETARY]) != 1 ||
+		ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 20 {
 		t.Error("Error counting units")
 	}
 }
@@ -1527,14 +1441,17 @@ func TestDebitShared(t *testing.T) {
 	cc := &CallCost{
 		Tenant:      "vdf",
 		Category:    "0",
-		Direction:   utils.OUT,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 0, 0, time.UTC),
 				DurationIndex: 55 * time.Second,
-				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 2, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				RateInterval: &RateInterval{Rating: &RIRate{
+					Rates: RateGroups{
+						&Rate{GroupIntervalStart: 0, Value: 2,
+							RateIncrement: 10 * time.Second,
+							RateUnit:      time.Second}}}},
 			},
 		},
 		deductConnectFee: true,
@@ -1544,7 +1461,6 @@ func TestDebitShared(t *testing.T) {
 		Category:      cc.Category,
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
-		Direction:     cc.Direction,
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
@@ -1596,14 +1512,17 @@ func TestMaxDurationShared(t *testing.T) {
 	cc := &CallCost{
 		Tenant:      "vdf",
 		Category:    "0",
-		Direction:   utils.OUT,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
 				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 0, 0, time.UTC),
 				DurationIndex: 55 * time.Second,
-				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 2, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				RateInterval: &RateInterval{
+					Rating: &RIRate{Rates: RateGroups{
+						&Rate{GroupIntervalStart: 0, Value: 2,
+							RateIncrement: 10 * time.Second,
+							RateUnit:      time.Second}}}},
 			},
 		},
 		deductConnectFee: true,
@@ -1613,7 +1532,6 @@ func TestMaxDurationShared(t *testing.T) {
 		Category:      cc.Category,
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
-		Direction:     cc.Direction,
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
@@ -1646,7 +1564,6 @@ func TestMaxDurationConnectFeeOnly(t *testing.T) {
 		Category:      "call",
 		TimeStart:     time.Date(2015, 9, 24, 10, 48, 0, 0, time.UTC),
 		TimeEnd:       time.Date(2015, 9, 24, 10, 58, 1, 0, time.UTC),
-		Direction:     utils.OUT,
 		Destination:   "4444",
 		Subject:       "dy",
 		Account:       "dy",
@@ -1669,7 +1586,6 @@ func TestMaxDurationConnectFeeOnly(t *testing.T) {
 
 func TestDebitSMS(t *testing.T) {
 	cc := &CallCost{
-		Direction:   utils.OUT,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
@@ -1691,7 +1607,6 @@ func TestDebitSMS(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
-		Direction:     cc.Direction,
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
@@ -1725,7 +1640,6 @@ func TestDebitSMS(t *testing.T) {
 
 func TestDebitGeneric(t *testing.T) {
 	cc := &CallCost{
-		Direction:   utils.OUT,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
@@ -1746,7 +1660,6 @@ func TestDebitGeneric(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
-		Direction:     cc.Direction,
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
@@ -1765,18 +1678,20 @@ func TestDebitGeneric(t *testing.T) {
 		t.Error("Error debiting balance: ", err)
 	}
 	if cc.Timespans[0].Increments[0].BalanceInfo.Unit.UUID != "testm" {
-		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
+		t.Error("Error setting balance id to increment: ",
+			cc.Timespans[0].Increments[0])
 	}
 	if rifsBalance.BalanceMap[utils.GENERIC][0].GetValue() != 99 ||
 		rifsBalance.BalanceMap[utils.MONETARY][0].GetValue() != 21 {
 		t.Log(cc.Timespans[0].Increments)
-		t.Error("Error extracting minutes from balance: ", rifsBalance.BalanceMap[utils.GENERIC][0].GetValue(), rifsBalance.BalanceMap[utils.MONETARY][0].GetValue())
+		t.Error("Error extracting minutes from balance: ",
+			rifsBalance.BalanceMap[utils.GENERIC][0].GetValue(),
+			rifsBalance.BalanceMap[utils.MONETARY][0].GetValue())
 	}
 }
 
 func TestDebitGenericBalance(t *testing.T) {
 	cc := &CallCost{
-		Direction:   utils.OUT,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
@@ -1798,7 +1713,6 @@ func TestDebitGenericBalance(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
-		Direction:     cc.Direction,
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
@@ -1831,7 +1745,6 @@ func TestDebitGenericBalance(t *testing.T) {
 
 func TestDebitGenericBalanceWithRatingSubject(t *testing.T) {
 	cc := &CallCost{
-		Direction:   utils.OUT,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
@@ -1852,7 +1765,6 @@ func TestDebitGenericBalanceWithRatingSubject(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
-		Direction:     cc.Direction,
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
@@ -1886,7 +1798,6 @@ func TestDebitGenericBalanceWithRatingSubject(t *testing.T) {
 
 func TestDebitDataUnits(t *testing.T) {
 	cc := &CallCost{
-		Direction:   utils.OUT,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
@@ -1914,7 +1825,6 @@ func TestDebitDataUnits(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
-		Direction:     cc.Direction,
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
@@ -1953,7 +1863,6 @@ func TestDebitDataUnits(t *testing.T) {
 
 func TestDebitDataMoney(t *testing.T) {
 	cc := &CallCost{
-		Direction:   utils.OUT,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
@@ -1975,7 +1884,6 @@ func TestDebitDataMoney(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:     cc.Timespans[0].TimeStart,
 		TimeEnd:       cc.Timespans[0].TimeEnd,
-		Direction:     cc.Direction,
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
@@ -2022,54 +1930,48 @@ func TestAccountInitCounters(t *testing.T) {
 				UniqueID:      "TestTR1",
 				ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.MONETARY),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.MONETARY),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR11",
 				ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.MONETARY),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.MONETARY),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR2",
 				ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.VOICE),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.VOICE),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR3",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.VOICE),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.VOICE),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR4",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.SMS),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.SMS),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR5",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.SMS),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.SMS),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 		},
@@ -2100,54 +2002,48 @@ func TestAccountDoubleInitCounters(t *testing.T) {
 				UniqueID:      "TestTR1",
 				ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.MONETARY),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.MONETARY),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR11",
 				ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.MONETARY),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.MONETARY),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR2",
 				ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.VOICE),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.VOICE),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR3",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.VOICE),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.VOICE),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR4",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.SMS),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.SMS),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR5",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.SMS),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.SMS),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 		},
@@ -2183,7 +2079,7 @@ func TestAccountGetBalancesForPrefixMixed(t *testing.T) {
 			},
 		},
 	}
-	bcs := acc.getBalancesForPrefix("999123", "", utils.OUT, utils.MONETARY, "")
+	bcs := acc.getBalancesForPrefix("999123", "", utils.MONETARY, "")
 	if len(bcs) != 0 {
 		t.Error("error excluding on mixed balances")
 	}
@@ -2200,7 +2096,7 @@ func TestAccountGetBalancesForPrefixAllExcl(t *testing.T) {
 			},
 		},
 	}
-	bcs := acc.getBalancesForPrefix("999123", "", utils.OUT, utils.MONETARY, "")
+	bcs := acc.getBalancesForPrefix("999123", "", utils.MONETARY, "")
 	if len(bcs) == 0 {
 		t.Error("error finding balance on all excluded")
 	}
@@ -2218,7 +2114,7 @@ func TestAccountGetBalancesForPrefixMixedGood(t *testing.T) {
 		},
 	}
 
-	bcs := acc.getBalancesForPrefix("999123", "", utils.OUT, utils.MONETARY, "")
+	bcs := acc.getBalancesForPrefix("999123", "", utils.MONETARY, "")
 	if len(bcs) == 0 {
 		t.Error("error finding on mixed balances good")
 	}
@@ -2235,7 +2131,7 @@ func TestAccountGetBalancesForPrefixMixedBad(t *testing.T) {
 			},
 		},
 	}
-	bcs := acc.getBalancesForPrefix("999123", "", utils.OUT, utils.MONETARY, "")
+	bcs := acc.getBalancesForPrefix("999123", "", utils.MONETARY, "")
 	if len(bcs) != 0 {
 		t.Error("error excluding on mixed balances bad")
 	}

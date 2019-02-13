@@ -903,8 +903,6 @@ func (cdrP *cdrLogProvider) FieldAsInterface(fldPath []string) (data interface{}
 	switch fldPath[0] {
 	case "AccountID":
 		data = cdrP.acnt.ID
-	case "Directions":
-		data = b.Directions.String()
 	case utils.Tenant:
 		data = dta.Tenant
 	case utils.Account:

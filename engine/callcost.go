@@ -27,14 +27,14 @@ import (
 
 // The output structure that will be returned with the call cost information.
 type CallCost struct {
-	Direction, Category, Tenant, Subject, Account, Destination, TOR string
-	Cost                                                            float64
-	Timespans                                                       TimeSpans
-	RatedUsage                                                      float64
-	AccountSummary                                                  *AccountSummary
-	deductConnectFee                                                bool
-	negativeConnectFee                                              bool // the connect fee went negative on default balance
-	maxCostDisconect                                                bool
+	Category, Tenant, Subject, Account, Destination, TOR string
+	Cost                                                 float64
+	Timespans                                            TimeSpans
+	RatedUsage                                           float64
+	AccountSummary                                       *AccountSummary
+	deductConnectFee                                     bool
+	negativeConnectFee                                   bool // the connect fee went negative on default balance
+	maxCostDisconect                                     bool
 }
 
 // Merges the received timespan if they are similar (same activation period, same interval, same minute info.
@@ -85,7 +85,6 @@ func (cc *CallCost) GetConnectFee() float64 {
 // Creates a CallDescriptor structure copying related data from CallCost
 func (cc *CallCost) CreateCallDescriptor() *CallDescriptor {
 	return &CallDescriptor{
-		Direction:   cc.Direction,
 		Category:    cc.Category,
 		Tenant:      cc.Tenant,
 		Subject:     cc.Subject,
@@ -109,7 +108,6 @@ func (cc *CallCost) ToDataCost() (*DataCost, error) {
 		return nil, errors.New("Not a data call!")
 	}
 	dc := &DataCost{
-		Direction:        cc.Direction,
 		Category:         cc.Category,
 		Tenant:           cc.Tenant,
 		Subject:          cc.Subject,
@@ -231,15 +229,12 @@ func (cc *CallCost) MatchCCFilter(bf *BalanceFilter) bool {
 	if bf.Categories != nil && cc.Category != "" && (*bf.Categories)[cc.Category] == false {
 		return false
 	}
-	if bf.Directions != nil && cc.Direction != "" && (*bf.Directions)[cc.Direction] == false {
-		return false
-	}
-
 	// match destination ids
 	foundMatchingDestID := false
 	if bf.DestinationIDs != nil && cc.Destination != "" {
 		for _, p := range utils.SplitPrefix(cc.Destination, MIN_PREFIX_MATCH) {
-			if destIDs, err := dm.DataDB().GetReverseDestination(p, false, utils.NonTransactional); err == nil {
+			if destIDs, err := dm.DataDB().GetReverseDestination(p,
+				false, utils.NonTransactional); err == nil {
 				for _, dID := range destIDs {
 					if _, ok := (*bf.DestinationIDs)[dID]; ok {
 						foundMatchingDestID = true

@@ -144,7 +144,6 @@ CREATE TABLE tp_actions (
   action VARCHAR(24) NOT NULL,
   balance_tag VARCHAR(64) NOT NULL,
   balance_type VARCHAR(24) NOT NULL,
-  directions VARCHAR(8) NOT NULL,
   units VARCHAR(256) NOT NULL,
   expiry_time VARCHAR(26) NOT NULL,
   timing_tags VARCHAR(128) NOT NULL,
@@ -159,7 +158,7 @@ CREATE TABLE tp_actions (
   filter VARCHAR(256) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE,
-  UNIQUE (tpid, tag, action, balance_tag, balance_type, directions, expiry_time, timing_tags, destination_tags, shared_groups, balance_weight, weight)
+  UNIQUE (tpid, tag, action, balance_tag, balance_type, expiry_time, timing_tags, destination_tags, shared_groups, balance_weight, weight)
 );
 CREATE INDEX tpactions_tpid_idx ON tp_actions (tpid);
 CREATE INDEX tpactions_idx ON tp_actions (tpid,tag);

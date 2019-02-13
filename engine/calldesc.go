@@ -124,7 +124,7 @@ func Publish(event CgrEvent) {
 // NewCallDescriptorFromCGREvent converts a CGREvent into CallDescriptor
 func NewCallDescriptorFromCGREvent(cgrEv *utils.CGREvent,
 	timezone string) (cd *CallDescriptor, err error) {
-	cd = &CallDescriptor{Direction: utils.OUT, Tenant: cgrEv.Tenant}
+	cd = &CallDescriptor{Tenant: cgrEv.Tenant}
 	if _, has := cgrEv.Event[utils.Category]; has {
 		if cd.Category, err = cgrEv.FieldAsString(utils.Category); err != nil {
 			return nil, err
@@ -171,7 +171,6 @@ func NewCallDescriptorFromCGREvent(cgrEv *utils.CGREvent,
 The input stucture that contains call information.
 */
 type CallDescriptor struct {
-	Direction                             string
 	Category                              string
 	Tenant, Subject, Account, Destination string
 	TimeStart, TimeEnd                    time.Time
@@ -346,7 +345,6 @@ func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int
 			if len(ri.FallbackKeys) > 0 {
 				tempCD := &CallDescriptor{
 					Category:    cd.Category,
-					Direction:   cd.Direction,
 					Tenant:      cd.Tenant,
 					Destination: cd.Destination,
 				}
@@ -434,7 +432,7 @@ func (cd *CallDescriptor) addRatingInfos(ris RatingInfos) bool {
 // GetKey constructs the key for the storage lookup.
 // The prefixLen is limiting the length of the destination prefix.
 func (cd *CallDescriptor) GetKey(subject string) string {
-	return utils.ConcatenatedKey(cd.Direction, cd.Tenant, cd.Category, subject)
+	return utils.ConcatenatedKey(utils.META_OUT, cd.Tenant, cd.Category, subject)
 }
 
 // GetAccountKey returns the key used to retrive the user balance involved in this call
@@ -448,7 +446,8 @@ func (cd *CallDescriptor) GetAccountKey() string {
 
 // Splits the received timespan into sub time spans according to the activation periods intervals.
 func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
-	firstSpan := &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd, DurationIndex: cd.DurationIndex}
+	firstSpan := &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd,
+		DurationIndex: cd.DurationIndex}
 
 	timespans = append(timespans, firstSpan)
 	if len(cd.RatingInfos) == 0 {
@@ -632,10 +631,7 @@ func (cd *CallDescriptor) getCost() (*CallCost, error) {
 		cd.TOR = utils.VOICE
 	}
 	err := cd.LoadRatingPlans()
-	//log.Print("ERR: ", err)
-	//log.Print("RI: ", utils.ToJSON(cd.RatingInfos))
 	if err != nil {
-		//utils.Logger.Err(fmt.Sprintf("error getting cost for key <%s>: %s", cd.GetKey(cd.Subject), err.Error()))
 		return &CallCost{Cost: -1}, err
 	}
 	timespans := cd.splitInTimeSpans()
@@ -644,14 +640,12 @@ func (cd *CallDescriptor) getCost() (*CallCost, error) {
 	for i, ts := range timespans {
 		ts.createIncrementsSlice()
 		// only add connect fee if this is the first/only call cost request
-		//log.Printf("Interval: %+v", ts.RateInterval.Timing)
 		if cd.LoopIndex == 0 && i == 0 && ts.RateInterval != nil {
 			cost += ts.RateInterval.Rating.ConnectFee
 		}
 		cost += ts.CalculateCost()
 	}
 
-	//startIndex := len(fmt.Sprintf("%s:%s:%s:", cd.Direction, cd.Tenant, cd.Category))
 	cc := cd.CreateCallCost()
 	cc.Cost = cost
 	cc.Timespans = timespans
@@ -659,7 +653,6 @@ func (cd *CallDescriptor) getCost() (*CallCost, error) {
 	// global rounding
 	roundingDecimals, roundingMethod := cc.GetLongestRounding()
 	cc.Cost = utils.Round(cc.Cost, roundingDecimals, roundingMethod)
-	//utils.Logger.Info(fmt.Sprintf("<Rater> Get Cost: %s => %v", cd.GetKey(), cc))
 	cc.Timespans.Compress()
 	cc.UpdateRatedUsage()
 	return cc, err
@@ -1016,7 +1009,6 @@ func (cd *CallDescriptor) RefundRounding() (err error) {
 // Creates a CallCost structure copying related data from CallDescriptor
 func (cd *CallDescriptor) CreateCallCost() *CallCost {
 	return &CallCost{
-		Direction:        cd.Direction,
 		Category:         cd.Category,
 		Tenant:           cd.Tenant,
 		Subject:          cd.Subject,
@@ -1029,7 +1021,6 @@ func (cd *CallDescriptor) CreateCallCost() *CallCost {
 
 func (cd *CallDescriptor) Clone() *CallDescriptor {
 	return &CallDescriptor{
-		Direction:       cd.Direction,
 		Category:        cd.Category,
 		Tenant:          cd.Tenant,
 		Subject:         cd.Subject,
@@ -1043,8 +1034,6 @@ func (cd *CallDescriptor) Clone() *CallDescriptor {
 		MaxRateUnit:     cd.MaxRateUnit,
 		MaxCostSoFar:    cd.MaxCostSoFar,
 		FallbackSubject: cd.FallbackSubject,
-		//RatingInfos:     cd.RatingInfos,
-		//Increments:      cd.Increments,
 		TOR:             cd.TOR,
 		ForceDuration:   cd.ForceDuration,
 		PerformRounding: cd.PerformRounding,

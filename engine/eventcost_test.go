@@ -314,7 +314,6 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 		Disabled:      false,
 	}
 	cc := &CallCost{
-		Direction:   utils.META_OUT,
 		Category:    "call",
 		Tenant:      "cgrates.org",
 		Subject:     "dan",

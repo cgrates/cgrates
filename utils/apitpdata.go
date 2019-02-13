@@ -229,15 +229,18 @@ type TPRatingProfile struct {
 
 // Used as key in nosql db (eg: redis)
 func (self *TPRatingProfile) KeyId() string {
-	return fmt.Sprintf("%s:%s:%s:%s", META_OUT, self.Tenant, self.Category, self.Subject)
+	return fmt.Sprintf("%s:%s:%s:%s", META_OUT,
+		self.Tenant, self.Category, self.Subject)
 }
 
 func (self *TPRatingProfile) KeyIdA() string {
-	return fmt.Sprintf("%s:%s:%s:%s:%s", self.LoadId, META_OUT, self.Tenant, self.Category, self.Subject)
+	return fmt.Sprintf("%s:%s:%s:%s:%s", self.LoadId, META_OUT,
+		self.Tenant, self.Category, self.Subject)
 }
 
 func (rpf *TPRatingProfile) GetRatingProfilesId() string {
-	return fmt.Sprintf("%s%s%s%s%s%s%s%s%s", rpf.LoadId, CONCATENATED_KEY_SEP, META_OUT, CONCATENATED_KEY_SEP, rpf.Tenant, CONCATENATED_KEY_SEP, rpf.Category, CONCATENATED_KEY_SEP, rpf.Subject)
+	return ConcatenatedKey(rpf.LoadId, META_OUT,
+		rpf.Tenant, rpf.Category, rpf.Subject)
 }
 
 func (rpf *TPRatingProfile) SetRatingProfilesId(id string) error {
@@ -323,7 +326,6 @@ type TPAction struct {
 	BalanceId       string // Balance identification string (account scope)
 	BalanceUuid     string // Balance identification string (global scope)
 	BalanceType     string // Type of balance the action will operate on
-	Directions      string // Balance direction
 	Units           string // Number of units to add/deduct
 	ExpiryTime      string // Time when the units will expire
 	Filter          string // The condition on balances that is checked before the action

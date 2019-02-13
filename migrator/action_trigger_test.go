@@ -43,7 +43,6 @@ func TestV1ActionTriggersAsActionTriggers(t *testing.T) {
 		Balance: &engine.BalanceFilter{
 			ExpirationDate: utils.TimePointer(tim),
 			Type:           utils.StringPointer(utils.MONETARY),
-			Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 		},
 		ExpirationDate:    tim,
 		LastExecutionTime: tim,

@@ -254,7 +254,8 @@ func RatingProfileSubjectPrefixMatching(key string) (rp *RatingProfile, err erro
 	subject := key[lastIndex:]
 	lenSubject := len(subject)
 	for i := 1; i < lenSubject-1; i++ {
-		if rp, err = dm.GetRatingProfile(baseKey+subject[:lenSubject-i], false, utils.NonTransactional); err == nil && rp != nil {
+		if rp, err = dm.GetRatingProfile(baseKey+subject[:lenSubject-i],
+			false, utils.NonTransactional); err == nil && rp != nil {
 			return
 		}
 	}

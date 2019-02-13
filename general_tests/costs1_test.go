@@ -89,7 +89,6 @@ func TestCosts1GetCost1(t *testing.T) {
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:30Z", "")
 	cd := &engine.CallDescriptor{
-		Direction:   "*out",
 		Category:    "call",
 		Tenant:      "cgrates.org",
 		Subject:     "1001",
@@ -109,7 +108,6 @@ func TestCosts1GetCostZeroDuration(t *testing.T) {
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	cd := &engine.CallDescriptor{
-		Direction:   "*out",
 		Category:    "call",
 		Tenant:      "cgrates.org",
 		Subject:     "1001",

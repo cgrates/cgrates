@@ -47,16 +47,16 @@ type Account struct {
 
 // User's available minutes for the specified destination
 func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duration, credit float64, balances Balances) {
-	creditBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, utils.MONETARY, "")
+	creditBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, utils.MONETARY, "")
 
-	unitBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, cd.TOR, "")
+	unitBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, cd.TOR, "")
 	// gather all balances from shared groups
 	var extendedCreditBalances Balances
 	for _, cb := range creditBalances {
 		if len(cb.SharedGroups) > 0 {
 			for sg := range cb.SharedGroups {
 				if sharedGroup, _ := dm.GetSharedGroup(sg, false, utils.NonTransactional); sharedGroup != nil {
-					sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, cd.Direction, utils.MONETARY, ub)
+					sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, utils.MONETARY, ub)
 					sgb = sharedGroup.SortBalancesByStrategy(cb, sgb)
 					extendedCreditBalances = append(extendedCreditBalances, sgb...)
 				}
@@ -70,7 +70,7 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 		if len(mb.SharedGroups) > 0 {
 			for sg := range mb.SharedGroups {
 				if sharedGroup, _ := dm.GetSharedGroup(sg, false, utils.NonTransactional); sharedGroup != nil {
-					sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, cd.Direction, cd.TOR, ub)
+					sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, cd.TOR, ub)
 					sgb = sharedGroup.SortBalancesByStrategy(mb, sgb)
 					extendedMinuteBalances = append(extendedMinuteBalances, sgb...)
 				}
@@ -275,7 +275,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset, resetIfNegative bool) er
 	return nil
 }
 
-func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string, sharedGroup string) Balances {
+func (ub *Account) getBalancesForPrefix(prefix, category, tor string, sharedGroup string) Balances {
 	var balances Balances
 	balances = append(balances, ub.BalanceMap[tor]...)
 	if tor != utils.MONETARY && tor != utils.GENERIC {
@@ -294,9 +294,6 @@ func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string,
 			continue
 		}
 		if !b.MatchCategory(category) {
-			continue
-		}
-		if b.HasDirection() && b.Directions[direction] == false {
 			continue
 		}
 		b.account = ub
@@ -348,8 +345,8 @@ func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string,
 }
 
 // like getBalancesForPrefix but expanding shared balances
-func (account *Account) getAlldBalancesForPrefix(destination, category, direction, balanceType string) (bc Balances) {
-	balances := account.getBalancesForPrefix(destination, category, direction, balanceType, "")
+func (account *Account) getAlldBalancesForPrefix(destination, category, balanceType string) (bc Balances) {
+	balances := account.getBalancesForPrefix(destination, category, balanceType, "")
 	for _, b := range balances {
 		if len(b.SharedGroups) > 0 {
 			for sgId := range b.SharedGroups {
@@ -358,7 +355,7 @@ func (account *Account) getAlldBalancesForPrefix(destination, category, directio
 					utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgId))
 					continue
 				}
-				sharedBalances := sharedGroup.GetBalances(destination, category, direction, balanceType, account)
+				sharedBalances := sharedGroup.GetBalances(destination, category, balanceType, account)
 				sharedBalances = sharedGroup.SortBalancesByStrategy(b, sharedBalances)
 				bc = append(bc, sharedBalances...)
 			}
@@ -370,11 +367,8 @@ func (account *Account) getAlldBalancesForPrefix(destination, category, directio
 }
 
 func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bool, goNegative bool) (cc *CallCost, err error) {
-	usefulUnitBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, cd.TOR)
-	usefulMoneyBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, utils.MONETARY)
-	//utils.Logger.Info(fmt.Sprintf("%+v, %+v", usefulMoneyBalances, usefulUnitBalances))
-	//utils.Logger.Info(fmt.Sprintf("STARTCD: %+v", cd))
-	//log.Printf("%+v, %+v", usefulMoneyBalances, usefulUnitBalances)
+	usefulUnitBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, cd.TOR)
+	usefulMoneyBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, utils.MONETARY)
 	var leftCC *CallCost
 	cc = cd.CreateCallCost()
 	var hadBalanceSubj bool
@@ -387,10 +381,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 		for unitBalanceChecker {
 			// try every balance multiple times in case one becomes active or ratig changes
 			unitBalanceChecker = false
-			//log.Printf("InitialCD: %+v", cd)
 			for _, balance := range usefulUnitBalances {
-				//utils.Logger.Info(fmt.Sprintf("Unit balance: %+v", balance))
-				//utils.Logger.Info(fmt.Sprintf("CD BEFORE UNIT: %+v", cd))
 				partCC, debitErr := balance.debitUnits(cd, balance.account,
 					usefulMoneyBalances, count, dryRun, len(cc.Timespans) == 0)
 				if debitErr != nil {
@@ -400,17 +391,10 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 					!strings.HasPrefix(balance.RatingSubject, utils.ZERO_RATING_SUBJECT_PREFIX) {
 					hadBalanceSubj = true
 				}
-				//utils.Logger.Info(fmt.Sprintf("CD AFTER UNIT: %+v", cd))
 				if partCC != nil {
-					//log.Printf("partCC: %+v", partCC.Timespans[0])
 					cc.Timespans = append(cc.Timespans, partCC.Timespans...)
 					cc.negativeConnectFee = partCC.negativeConnectFee
-					// for i, ts := range cc.Timespans {
-					//  log.Printf("cc.times[an[%d]: %+v\n", i, ts)
-					// }
 					cd.TimeStart = cc.GetEndTime()
-					//log.Printf("CD: %+v", cd)
-					//log.Printf("CD: %+v - %+v", cd.TimeStart, cd.TimeEnd)
 					// check if the calldescriptor is covered
 					if cd.GetDuration() <= 0 {
 						goto COMMIT
@@ -561,7 +545,6 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 						utils.MONETARY,
 						leftCC,
 						&Balance{
-							Directions:     utils.StringMap{leftCC.Direction: true},
 							Value:          cost,
 							DestinationIDs: utils.NewStringMap(leftCC.Destination),
 						})
@@ -799,8 +782,8 @@ func (acc *Account) GetSharedGroups() (groups []string) {
 
 func (account *Account) GetUniqueSharedGroupMembers(cd *CallDescriptor) (utils.StringMap, error) { // ToDo: make sure we return accountIDs
 	var balances []*Balance
-	balances = append(balances, account.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, utils.MONETARY, "")...)
-	balances = append(balances, account.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, cd.TOR, "")...)
+	balances = append(balances, account.getBalancesForPrefix(cd.Destination, cd.Category, utils.MONETARY, "")...)
+	balances = append(balances, account.getBalancesForPrefix(cd.Destination, cd.Category, cd.TOR, "")...)
 	// gather all shared group ids
 	var sharedGroupIds []string
 	for _, b := range balances {
@@ -988,7 +971,6 @@ func (acc *Account) AsOldStructure() interface{} {
 				Balances:    make(Balances, len(uc.Counters)),
 			}
 			if len(uc.Counters) > 0 {
-				result.UnitCounters[i].Direction = (*uc.Counters[0].Filter.Directions).String()
 				for j, c := range uc.Counters {
 					result.UnitCounters[i].Balances[j] = &Balance{
 						Uuid:           c.Filter.GetUuid(),
@@ -1018,7 +1000,7 @@ func (acc *Account) AsOldStructure() interface{} {
 			MinSleep:              at.MinSleep,
 			BalanceType:           at.Balance.GetType(),
 			BalanceId:             b.ID,
-			BalanceDirection:      b.Directions.String(),
+			BalanceDirection:      utils.META_OUT,
 			BalanceDestinationIds: b.DestinationIDs.String(),
 			BalanceWeight:         b.Weight,
 			BalanceExpirationDate: b.ExpirationDate,

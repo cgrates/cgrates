@@ -158,27 +158,27 @@ SG2,*any,*lowest,one
 SG3,*any,*lowest,
 `
 	actions = `
-MINI,*topup_reset,,,,*monetary,*out,,,,,*unlimited,,10,10,false,false,10
-MINI,*topup,,,,*voice,*out,,NAT,test,,*unlimited,,100s,10,false,false,10
-SHARED,*topup,,,,*monetary,*out,,,,SG1,*unlimited,,100,10,false,false,10
-TOPUP10_AC,*topup_reset,,,,*monetary,*out,,*any,,,*unlimited,,1,10,false,false,10
-TOPUP10_AC1,*topup_reset,,,,*voice,*out,,DST_UK_Mobile_BIG5,discounted_minutes,,*unlimited,,40s,10,false,false,10
-SE0,*topup_reset,,,,*monetary,*out,,,,SG2,*unlimited,,0,10,false,false,10
-SE10,*topup_reset,,,,*monetary,*out,,,,SG2,*unlimited,,10,5,false,false,10
-SE10,*topup,,,,*monetary,*out,,,,,*unlimited,,10,10,false,false,10
-EE0,*topup_reset,,,,*monetary,*out,,,,SG3,*unlimited,,0,10,false,false,10
-EE0,*allow_negative,,,,*monetary,*out,,,,,*unlimited,,0,10,false,false,10
-DEFEE,*cdrlog,"{""Category"":""^ddi"",""MediationRunId"":""^did_run""}",,,,,,,,,,,,,false,false,10
-NEG,*allow_negative,,,,*monetary,*out,,,,,*unlimited,,0,10,false,false,10
-BLOCK,*topup,,,bblocker,*monetary,*out,,NAT,,,*unlimited,,1,20,true,false,20
-BLOCK,*topup,,,bfree,*monetary,*out,,,,,*unlimited,,20,10,false,false,10
-BLOCK_EMPTY,*topup,,,bblocker,*monetary,*out,,NAT,,,*unlimited,,0,20,true,false,20
-BLOCK_EMPTY,*topup,,,bfree,*monetary,*out,,,,,*unlimited,,20,10,false,false,10
-FILTER,*topup,,"{""*and"":[{""Value"":{""*lt"":0}},{""Id"":{""*eq"":""*default""}}]}",bfree,*monetary,*out,,,,,*unlimited,,20,10,false,false,10
-EXP,*topup,,,,*voice,*out,,,,,*monthly,*any,300s,10,false,false,10
-NOEXP,*topup,,,,*voice,*out,,,,,*unlimited,*any,50s,10,false,false,10
-VF,*debit,,,,*monetary,*out,,,,,*unlimited,*any,"{""Method"":""*incremental"",""Params"":{""Units"":10, ""Interval"":""month"", ""Increment"":""day""}}",10,false,false,10
-TOPUP_RST_GNR_1000,*topup_reset,"{""*voice"": 60.0,""*data"":1024.0,""*sms"":1.0}",,,*generic,*out,,*any,,,*unlimited,,1000,20,false,false,10
+MINI,*topup_reset,,,,*monetary,,,,,*unlimited,,10,10,false,false,10
+MINI,*topup,,,,*voice,,NAT,test,,*unlimited,,100s,10,false,false,10
+SHARED,*topup,,,,*monetary,,,,SG1,*unlimited,,100,10,false,false,10
+TOPUP10_AC,*topup_reset,,,,*monetary,,*any,,,*unlimited,,1,10,false,false,10
+TOPUP10_AC1,*topup_reset,,,,*voice,,DST_UK_Mobile_BIG5,discounted_minutes,,*unlimited,,40s,10,false,false,10
+SE0,*topup_reset,,,,*monetary,,,,SG2,*unlimited,,0,10,false,false,10
+SE10,*topup_reset,,,,*monetary,,,,SG2,*unlimited,,10,5,false,false,10
+SE10,*topup,,,,*monetary,,,,,*unlimited,,10,10,false,false,10
+EE0,*topup_reset,,,,*monetary,,,,SG3,*unlimited,,0,10,false,false,10
+EE0,*allow_negative,,,,*monetary,,,,,*unlimited,,0,10,false,false,10
+DEFEE,*cdrlog,"{""Category"":""^ddi"",""MediationRunId"":""^did_run""}",,,,,,,,,,,,false,false,10
+NEG,*allow_negative,,,,*monetary,,,,,*unlimited,,0,10,false,false,10
+BLOCK,*topup,,,bblocker,*monetary,,NAT,,,*unlimited,,1,20,true,false,20
+BLOCK,*topup,,,bfree,*monetary,,,,,*unlimited,,20,10,false,false,10
+BLOCK_EMPTY,*topup,,,bblocker,*monetary,,NAT,,,*unlimited,,0,20,true,false,20
+BLOCK_EMPTY,*topup,,,bfree,*monetary,,,,,*unlimited,,20,10,false,false,10
+FILTER,*topup,,"{""*and"":[{""Value"":{""*lt"":0}},{""Id"":{""*eq"":""*default""}}]}",bfree,*monetary,,,,,*unlimited,,20,10,false,false,10
+EXP,*topup,,,,*voice,,,,,*monthly,*any,300s,10,false,false,10
+NOEXP,*topup,,,,*voice,,,,,*unlimited,*any,50s,10,false,false,10
+VF,*debit,,,,*monetary,,,,,*unlimited,*any,"{""Method"":""*incremental"",""Params"":{""Units"":10, ""Interval"":""month"", ""Increment"":""day""}}",10,false,false,10
+TOPUP_RST_GNR_1000,*topup_reset,"{""*voice"": 60.0,""*data"":1024.0,""*sms"":1.0}",,,*generic,,*any,,,*unlimited,,1000,20,false,false,10
 `
 	actionPlans = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10

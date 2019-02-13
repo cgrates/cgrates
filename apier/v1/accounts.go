@@ -474,9 +474,6 @@ func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *st
 			Disabled:       attr.Disabled,
 		},
 	}
-	if attr.Directions != nil {
-		a.Balance.Directions = utils.StringMapPointer(utils.ParseStringMap(*attr.Directions))
-	}
 	if attr.DestinationIds != nil {
 		a.Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.DestinationIds))
 	}
@@ -548,9 +545,6 @@ func (self *ApierV1) SetBalance(attr *utils.AttrSetBalance, reply *string) error
 	if attr.Value != nil {
 		a.Balance.Value = &utils.ValueFormula{Static: *attr.Value}
 	}
-	if attr.Directions != nil {
-		a.Balance.Directions = utils.StringMapPointer(utils.ParseStringMap(*attr.Directions))
-	}
 	if attr.DestinationIds != nil {
 		a.Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.DestinationIds))
 	}
@@ -611,9 +605,6 @@ func (self *ApierV1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) e
 	}
 	if attr.Value != nil {
 		a.Balance.Value = &utils.ValueFormula{Static: *attr.Value}
-	}
-	if attr.Directions != nil {
-		a.Balance.Directions = utils.StringMapPointer(utils.ParseStringMap(*attr.Directions))
 	}
 	if attr.DestinationIds != nil {
 		a.Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.DestinationIds))

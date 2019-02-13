@@ -848,7 +848,6 @@ func (self *UsageRecord) AsCallDescriptor(timezone string, denyNegative bool) (*
 	cd := &CallDescriptor{
 		CgrID:               self.GetId(),
 		TOR:                 self.ToR,
-		Direction:           utils.OUT,
 		Tenant:              self.Tenant,
 		Category:            self.Category,
 		Subject:             self.Subject,

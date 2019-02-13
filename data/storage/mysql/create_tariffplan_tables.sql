@@ -149,7 +149,6 @@ CREATE TABLE `tp_actions` (
   `action` varchar(24) NOT NULL,
   `balance_tag` varchar(64) NOT NULL,
   `balance_type` varchar(24) NOT NULL,
-  `directions` varchar(8) NOT NULL,
   `units` varchar(256) NOT NULL,
   `expiry_time` varchar(26) NOT NULL,
   `timing_tags` varchar(128) NOT NULL,
@@ -166,7 +165,7 @@ CREATE TABLE `tp_actions` (
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_action` (`tpid`,`tag`,`action`,`balance_tag`,`balance_type`,`directions`,`expiry_time`,`timing_tags`,`destination_tags`,`shared_groups`,`balance_weight`,`weight`)
+  UNIQUE KEY `unique_action` (`tpid`,`tag`,`action`,`balance_tag`,`balance_type`,`expiry_time`,`timing_tags`,`destination_tags`,`shared_groups`,`balance_weight`,`weight`)
 );
 
 --

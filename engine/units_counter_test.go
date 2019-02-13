@@ -25,9 +25,14 @@ import (
 
 func TestUnitsCounterAddBalance(t *testing.T) {
 	uc := &UnitCounter{
-		Counters: CounterFilters{&CounterFilter{Value: 1}, &CounterFilter{Filter: &BalanceFilter{Weight: utils.Float64Pointer(20), DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT"))}}, &CounterFilter{Filter: &BalanceFilter{Weight: utils.Float64Pointer(10), DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET"))}}},
+		Counters: CounterFilters{&CounterFilter{Value: 1},
+			&CounterFilter{Filter: &BalanceFilter{Weight: utils.Float64Pointer(20),
+				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT"))}},
+			&CounterFilter{Filter: &BalanceFilter{Weight: utils.Float64Pointer(10),
+				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET"))}}},
 	}
-	UnitCounters{utils.SMS: []*UnitCounter{uc}}.addUnits(20, utils.SMS, &CallCost{Destination: "test"}, nil)
+	UnitCounters{utils.SMS: []*UnitCounter{uc}}.addUnits(20, utils.SMS,
+		&CallCost{Destination: "test"}, nil)
 	if len(uc.Counters) != 3 {
 		t.Error("Error adding minute bucket: ", uc.Counters)
 	}
@@ -35,9 +40,14 @@ func TestUnitsCounterAddBalance(t *testing.T) {
 
 func TestUnitsCounterAddBalanceExists(t *testing.T) {
 	uc := &UnitCounter{
-		Counters: CounterFilters{&CounterFilter{Value: 1}, &CounterFilter{Value: 10, Filter: &BalanceFilter{Weight: utils.Float64Pointer(20), DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT"))}}, &CounterFilter{Filter: &BalanceFilter{Weight: utils.Float64Pointer(10), DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET"))}}},
+		Counters: CounterFilters{&CounterFilter{Value: 1}, &CounterFilter{Value: 10,
+			Filter: &BalanceFilter{Weight: utils.Float64Pointer(20),
+				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT"))}},
+			&CounterFilter{Filter: &BalanceFilter{Weight: utils.Float64Pointer(10),
+				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET"))}}},
 	}
-	UnitCounters{utils.SMS: []*UnitCounter{uc}}.addUnits(5, utils.SMS, &CallCost{Destination: "0723"}, nil)
+	UnitCounters{utils.SMS: []*UnitCounter{uc}}.addUnits(5,
+		utils.SMS, &CallCost{Destination: "0723"}, nil)
 	if len(uc.Counters) != 3 || uc.Counters[1].Value != 15 {
 		t.Error("Error adding minute bucket!")
 	}
@@ -50,54 +60,48 @@ func TestUnitCountersCountAllMonetary(t *testing.T) {
 				UniqueID:      "TestTR1",
 				ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.MONETARY),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.MONETARY),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR11",
 				ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.MONETARY),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.MONETARY),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR2",
 				ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.VOICE),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.VOICE),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR3",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.VOICE),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.VOICE),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR4",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.SMS),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.SMS),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR5",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.SMS),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.SMS),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 		},
@@ -129,60 +133,54 @@ func TestUnitCountersCountAllMonetaryId(t *testing.T) {
 				UniqueID:      "TestTR1",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.MONETARY),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.MONETARY),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR11",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.MONETARY),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-					Weight:     utils.Float64Pointer(20),
+					Type:   utils.StringPointer(utils.MONETARY),
+					Weight: utils.Float64Pointer(20),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR2",
 				ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.VOICE),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.VOICE),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR3",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.VOICE),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.VOICE),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR4",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.SMS),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.SMS),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR5",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.SMS),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.SMS),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 		},
 	}
 	a.InitCounters()
-	a.UnitCounters.addUnits(10, utils.MONETARY, nil, &Balance{Weight: 20, Directions: utils.NewStringMap(utils.OUT)})
+	a.UnitCounters.addUnits(10, utils.MONETARY, nil, &Balance{Weight: 20})
 	if len(a.UnitCounters) != 3 ||
 		len(a.UnitCounters[utils.MONETARY][0].Counters) != 2 ||
 		a.UnitCounters[utils.MONETARY][0].Counters[0].Value != 0 ||
@@ -207,18 +205,16 @@ func TestUnitCountersCountAllVoiceDestinationEvent(t *testing.T) {
 				UniqueID:      "TestTR1",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.MONETARY),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.MONETARY),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR11",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.MONETARY),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-					Weight:     utils.Float64Pointer(20),
+					Type:   utils.StringPointer(utils.MONETARY),
+					Weight: utils.Float64Pointer(20),
 				},
 			},
 			&ActionTrigger{
@@ -226,7 +222,6 @@ func TestUnitCountersCountAllVoiceDestinationEvent(t *testing.T) {
 				ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER,
 				Balance: &BalanceFilter{
 					Type:           utils.StringPointer(utils.VOICE),
-					Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 					DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),
 					Weight:         utils.Float64Pointer(10),
 				},
@@ -244,27 +239,24 @@ func TestUnitCountersCountAllVoiceDestinationEvent(t *testing.T) {
 				UniqueID:      "TestTR3",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.VOICE),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.VOICE),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR4",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.SMS),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.SMS),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR5",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.SMS),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.SMS),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 		},
@@ -296,18 +288,16 @@ func TestUnitCountersKeepValuesAfterInit(t *testing.T) {
 				UniqueID:      "TestTR1",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.MONETARY),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.MONETARY),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR11",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.MONETARY),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-					Weight:     utils.Float64Pointer(20),
+					Type:   utils.StringPointer(utils.MONETARY),
+					Weight: utils.Float64Pointer(20),
 				},
 			},
 			&ActionTrigger{
@@ -315,7 +305,6 @@ func TestUnitCountersKeepValuesAfterInit(t *testing.T) {
 				ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER,
 				Balance: &BalanceFilter{
 					Type:           utils.StringPointer(utils.VOICE),
-					Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 					DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),
 					Weight:         utils.Float64Pointer(10),
 				},
@@ -333,27 +322,24 @@ func TestUnitCountersKeepValuesAfterInit(t *testing.T) {
 				UniqueID:      "TestTR3",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.VOICE),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.VOICE),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR4",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.SMS),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.SMS),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR5",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.SMS),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.SMS),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 		},
@@ -402,54 +388,48 @@ func TestUnitCountersResetCounterById(t *testing.T) {
 				UniqueID:      "TestTR1",
 				ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.MONETARY),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.MONETARY),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR11",
 				ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.MONETARY),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.MONETARY),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR2",
 				ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.VOICE),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.VOICE),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR3",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.VOICE),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.VOICE),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR4",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE_COUNTER,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.SMS),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.SMS),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 			&ActionTrigger{
 				UniqueID:      "TestTR5",
 				ThresholdType: utils.TRIGGER_MAX_BALANCE,
 				Balance: &BalanceFilter{
-					Type:       utils.StringPointer(utils.SMS),
-					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
-					Weight:     utils.Float64Pointer(10),
+					Type:   utils.StringPointer(utils.SMS),
+					Weight: utils.Float64Pointer(10),
 				},
 			},
 		},

@@ -318,7 +318,6 @@ func GetUB() *Account {
 		ThresholdValue: 100.0,
 		Balance: &BalanceFilter{
 			Type:           utils.StringPointer(utils.MONETARY),
-			Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 			DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),
 		},
 		Weight:    10.0,
@@ -327,9 +326,13 @@ func GetUB() *Account {
 	var zeroTime time.Time
 	zeroTime = zeroTime.UTC() // for deep equal to find location
 	ub := &Account{
-		ID:             "rif",
-		AllowNegative:  true,
-		BalanceMap:     map[string]Balances{utils.SMS: Balances{&Balance{Value: 14, ExpirationDate: zeroTime}}, utils.DATA: Balances{&Balance{Value: 1024, ExpirationDate: zeroTime}}, utils.VOICE: Balances{&Balance{Weight: 20, DestinationIDs: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")}}},
+		ID:            "rif",
+		AllowNegative: true,
+		BalanceMap: map[string]Balances{
+			utils.SMS:  Balances{&Balance{Value: 14, ExpirationDate: zeroTime}},
+			utils.DATA: Balances{&Balance{Value: 1024, ExpirationDate: zeroTime}},
+			utils.VOICE: Balances{&Balance{Weight: 20, DestinationIDs: utils.NewStringMap("NAT")},
+				&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")}}},
 		UnitCounters:   UnitCounters{utils.SMS: []*UnitCounter{uc, uc}},
 		ActionTriggers: ActionTriggers{at, at, at},
 	}

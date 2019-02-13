@@ -276,9 +276,6 @@ func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 				if attr.BalanceType != nil {
 					at.Balance.Type = attr.BalanceType
 				}
-				if attr.BalanceDirections != nil {
-					at.Balance.Directions = utils.StringMapPointer(utils.NewStringMap(*attr.BalanceDirections...))
-				}
 				if attr.BalanceDestinationIds != nil {
 					at.Balance.DestinationIDs = utils.StringMapPointer(utils.NewStringMap(*attr.BalanceDestinationIds...))
 				}
@@ -468,9 +465,6 @@ func (self *ApierV1) SetActionTrigger(attr AttrSetActionTrigger, reply *string) 
 	if attr.BalanceType != nil {
 		newAtr.Balance.Type = attr.BalanceType
 	}
-	if attr.BalanceDirections != nil {
-		newAtr.Balance.Directions = utils.StringMapPointer(utils.NewStringMap(*attr.BalanceDirections...))
-	}
 	if attr.BalanceDestinationIds != nil {
 		newAtr.Balance.DestinationIDs = utils.StringMapPointer(utils.NewStringMap(*attr.BalanceDestinationIds...))
 	}
@@ -586,9 +580,6 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 	}
 	if attr.BalanceType != "" {
 		at.Balance.Type = utils.StringPointer(attr.BalanceType)
-	}
-	if attr.BalanceDirection != "" {
-		at.Balance.Directions = &utils.StringMap{attr.BalanceDirection: true}
 	}
 	if attr.BalanceDestinationIds != "" {
 		dstIDsMp := utils.StringMapFromSlice(strings.Split(attr.BalanceDestinationIds, utils.INFIELD_SEP))

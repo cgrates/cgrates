@@ -195,7 +195,6 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 	}
 	for _, anctID := range acntIDs {
 		cd := &CallDescriptor{
-			Direction:     utils.OUT,
 			Category:      utils.MetaSuppliers,
 			Tenant:        ev.Tenant,
 			Subject:       subj,
@@ -231,7 +230,6 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 		Cache.Set(utils.CacheRatingProfiles, rPrfl.Id, rPrfl, nil,
 			true, utils.NonTransactional)
 		cd := &CallDescriptor{
-			Direction:     utils.OUT,
 			Category:      utils.MetaSuppliers,
 			Tenant:        ev.Tenant,
 			Subject:       subj,

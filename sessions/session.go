@@ -252,7 +252,6 @@ func (self *SMGSession) refund(usage time.Duration) (err error) {
 	cd := &engine.CallDescriptor{
 		CgrID:       self.CGRID,
 		RunID:       self.RunID,
-		Direction:   self.CD.Direction,
 		Category:    self.CD.Category,
 		Tenant:      self.CD.Tenant,
 		Subject:     self.CD.Subject,

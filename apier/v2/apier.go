@@ -347,7 +347,6 @@ func (self *ApierV2) SetActions(attrs utils.AttrSetActions, reply *string) error
 				Type:           utils.StringPointer(apiAct.BalanceType),
 				Value:          vf,
 				Weight:         weight,
-				Directions:     utils.StringMapPointer(utils.ParseStringMap(apiAct.Directions)),
 				DestinationIDs: utils.StringMapPointer(utils.ParseStringMap(apiAct.DestinationIds)),
 				RatingSubject:  utils.StringPointer(apiAct.RatingSubject),
 				SharedGroups:   utils.StringMapPointer(utils.ParseStringMap(apiAct.SharedGroups)),

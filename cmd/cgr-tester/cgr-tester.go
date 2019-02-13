@@ -221,7 +221,6 @@ func main() {
 		TimeStart:     tstart,
 		TimeEnd:       tend,
 		DurationIndex: 60 * time.Second,
-		Direction:     "*out",
 		TOR:           *tor,
 		Category:      *category,
 		Tenant:        *tenant,

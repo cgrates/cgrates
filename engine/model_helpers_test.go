@@ -340,7 +340,6 @@ func TestTPActionsAsExportSlice(t *testing.T) {
 			&utils.TPAction{
 				Identifier:      "*topup_reset",
 				BalanceType:     "*monetary",
-				Directions:      utils.OUT,
 				Units:           "5.0",
 				ExpiryTime:      "*never",
 				DestinationIds:  "*any",
@@ -353,7 +352,6 @@ func TestTPActionsAsExportSlice(t *testing.T) {
 			&utils.TPAction{
 				Identifier:      "*http_post",
 				BalanceType:     "",
-				Directions:      "",
 				Units:           "0.0",
 				ExpiryTime:      "",
 				DestinationIds:  "",
@@ -366,8 +364,8 @@ func TestTPActionsAsExportSlice(t *testing.T) {
 		},
 	}
 	expectedSlc := [][]string{
-		[]string{"TEST_ACTIONS", "*topup_reset", "", "", "", "*monetary", utils.OUT, "call", "*any", "special1", "GROUP1", "*never", "", "5.0", "10.0", "", "", "10"},
-		[]string{"TEST_ACTIONS", "*http_post", "http://localhost/&param1=value1", "", "", "", "", "", "", "", "", "", "", "0.0", "0.0", "", "", "20"},
+		[]string{"TEST_ACTIONS", "*topup_reset", "", "", "", "*monetary", "call", "*any", "special1", "GROUP1", "*never", "", "5.0", "10.0", "", "", "10"},
+		[]string{"TEST_ACTIONS", "*http_post", "http://localhost/&param1=value1", "", "", "", "", "", "", "", "", "", "0.0", "0.0", "", "", "20"},
 	}
 
 	ms := APItoModelAction(tpActs)

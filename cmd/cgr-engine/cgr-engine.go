@@ -1306,7 +1306,6 @@ func main() {
 			return
 		}()
 	}
-	utils.Logger.Debug(fmt.Sprintf("Starting CGRateS with version <%s>", vers))
 	var err error
 	// Init config
 	cfg, err = config.NewCGRConfigFromFolder(*cfgDir)

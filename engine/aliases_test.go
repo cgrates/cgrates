@@ -192,7 +192,6 @@ func TestAliasesSetters(t *testing.T) {
 func TestAliasesLoadAlias(t *testing.T) {
 	var response string
 	cd := &CallDescriptor{
-		Direction:   "*out",
 		Tenant:      "cgrates.org",
 		Category:    "call",
 		Account:     "rif",

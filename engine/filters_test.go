@@ -25,7 +25,6 @@ import (
 
 func TestFilterPassString(t *testing.T) {
 	cd := &CallDescriptor{
-		Direction:     "*out",
 		Category:      "call",
 		Tenant:        "cgrates.org",
 		Subject:       "dan",
@@ -35,26 +34,30 @@ func TestFilterPassString(t *testing.T) {
 		DurationIndex: 132 * time.Second,
 		ExtraFields:   map[string]string{"navigation": "off"},
 	}
-	rf := &FilterRule{Type: MetaString, FieldName: "Category", Values: []string{"call"}}
+	rf := &FilterRule{Type: MetaString,
+		FieldName: "Category", Values: []string{"call"}}
 	if passes, err := rf.passString(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
-	rf = &FilterRule{Type: MetaString, FieldName: "Category", Values: []string{"cal"}}
+	rf = &FilterRule{Type: MetaString,
+		FieldName: "Category", Values: []string{"cal"}}
 	if passes, err := rf.passString(cd); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Filter passes")
 	}
 	//not
-	rf = &FilterRule{Type: "*notstring", FieldName: "Category", Values: []string{"call"}}
+	rf = &FilterRule{Type: "*notstring",
+		FieldName: "Category", Values: []string{"call"}}
 	if passes, err := rf.Pass(cd, nil); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Filter passes")
 	}
-	rf = &FilterRule{Type: "*notstring", FieldName: "Category", Values: []string{"cal"}}
+	rf = &FilterRule{Type: "*notstring",
+		FieldName: "Category", Values: []string{"cal"}}
 	if passes, err := rf.Pass(cd, nil); err != nil {
 		t.Error(err)
 	} else if !passes {
@@ -64,7 +67,6 @@ func TestFilterPassString(t *testing.T) {
 
 func TestFilterPassEmpty(t *testing.T) {
 	cd := &CallDescriptor{
-		Direction:     "*out",
 		Category:      "",
 		Tenant:        "cgrates.org",
 		Subject:       "dan",
@@ -80,12 +82,6 @@ func TestFilterPassEmpty(t *testing.T) {
 	} else if !passes {
 		t.Error("Not passes filter")
 	}
-	rf = &FilterRule{Type: MetaEmpty, FieldName: "Direction", Values: []string{}}
-	if passes, err := rf.passEmpty(cd); err != nil {
-		t.Error(err)
-	} else if passes {
-		t.Error("Filter passes")
-	}
 	rf = &FilterRule{Type: MetaEmpty, FieldName: "ExtraFields", Values: []string{}}
 	if passes, err := rf.passEmpty(cd); err != nil {
 		t.Error(err)
@@ -100,12 +96,6 @@ func TestFilterPassEmpty(t *testing.T) {
 		t.Error("Not passes filter")
 	}
 	//not
-	rf = &FilterRule{Type: "*notempty", FieldName: "Direction", Values: []string{}}
-	if passes, err := rf.Pass(cd, nil); err != nil {
-		t.Error(err)
-	} else if !passes {
-		t.Error("Not passes filter")
-	}
 	rf = &FilterRule{Type: "*notempty", FieldName: "Category", Values: []string{}}
 	if passes, err := rf.Pass(cd, nil); err != nil {
 		t.Error(err)
@@ -116,7 +106,6 @@ func TestFilterPassEmpty(t *testing.T) {
 
 func TestFilterPassExists(t *testing.T) {
 	cd := &CallDescriptor{
-		Direction:     "*out",
 		Category:      "",
 		Tenant:        "cgrates.org",
 		Subject:       "dan",
@@ -127,12 +116,6 @@ func TestFilterPassExists(t *testing.T) {
 		ExtraFields:   map[string]string{"navigation": "off"},
 	}
 	rf := &FilterRule{Type: MetaExists, FieldName: "Category", Values: []string{}}
-	if passes, err := rf.passExists(cd); err != nil {
-		t.Error(err)
-	} else if !passes {
-		t.Error("Not passes filter")
-	}
-	rf = &FilterRule{Type: MetaExists, FieldName: "Direction", Values: []string{}}
 	if passes, err := rf.passExists(cd); err != nil {
 		t.Error(err)
 	} else if !passes {
@@ -152,12 +135,6 @@ func TestFilterPassExists(t *testing.T) {
 		t.Error("Not passes filter")
 	}
 	//not
-	rf = &FilterRule{Type: "*notexists", FieldName: "Direction", Values: []string{}}
-	if passes, err := rf.Pass(cd, nil); err != nil {
-		t.Error(err)
-	} else if passes {
-		t.Error("Filter passes")
-	}
 	rf = &FilterRule{Type: "*notexists", FieldName: "Category1", Values: []string{}}
 	if passes, err := rf.Pass(cd, nil); err != nil {
 		t.Error(err)
@@ -168,7 +145,6 @@ func TestFilterPassExists(t *testing.T) {
 
 func TestFilterPassStringPrefix(t *testing.T) {
 	cd := &CallDescriptor{
-		Direction:     "*out",
 		Category:      "call",
 		Tenant:        "cgrates.org",
 		Subject:       "dan",
@@ -225,7 +201,6 @@ func TestFilterPassStringPrefix(t *testing.T) {
 
 func TestFilterPassStringSuffix(t *testing.T) {
 	cd := &CallDescriptor{
-		Direction:     "*out",
 		Category:      "call",
 		Tenant:        "cgrates.org",
 		Subject:       "dan",
@@ -282,7 +257,6 @@ func TestFilterPassStringSuffix(t *testing.T) {
 
 func TestFilterPassRSRFields(t *testing.T) {
 	cd := &CallDescriptor{
-		Direction:     "*out",
 		Category:      "call",
 		Tenant:        "cgrates.org",
 		Subject:       "dan",
@@ -335,7 +309,6 @@ func TestFilterPassDestinations(t *testing.T) {
 	Cache.Set(utils.CacheReverseDestinations, "+49",
 		[]string{"DE", "EU_LANDLINE"}, nil, true, "")
 	cd := &CallDescriptor{
-		Direction:     "*out",
 		Category:      "call",
 		Tenant:        "cgrates.org",
 		Subject:       "dan",

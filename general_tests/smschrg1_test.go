@@ -74,7 +74,6 @@ func TestSMSGetDataCostSmsChrg1(t *testing.T) {
 	usageDur := time.Duration(1)
 	timeStart := time.Date(2014, 3, 4, 0, 0, 0, 0, time.Local)
 	cd := &engine.CallDescriptor{
-		Direction:     "*out",
 		Category:      "sms",
 		Tenant:        "cgrates.org",
 		Subject:       "12345",

@@ -457,7 +457,6 @@ func (self *CdrServer) getCostFromRater(cdr *CDR) (*CallCost, error) {
 	}
 	cd := &CallDescriptor{
 		TOR:             cdr.ToR,
-		Direction:       utils.OUT,
 		Tenant:          cdr.Tenant,
 		Category:        cdr.Category,
 		Subject:         cdr.Subject,

@@ -86,7 +86,6 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 	if err := LoadAlias(
 		&AttrMatchingAlias{
 			Destination: arg.Destination,
-			Direction:   arg.Direction,
 			Tenant:      arg.Tenant,
 			Category:    arg.Category,
 			Account:     arg.Account,
@@ -122,7 +121,6 @@ func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
 	if err := LoadAlias(
 		&AttrMatchingAlias{
 			Destination: arg.Destination,
-			Direction:   arg.Direction,
 			Tenant:      arg.Tenant,
 			Category:    arg.Category,
 			Account:     arg.Account,
@@ -162,7 +160,6 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 	if err := LoadAlias(
 		&AttrMatchingAlias{
 			Destination: arg.Destination,
-			Direction:   arg.Direction,
 			Tenant:      arg.Tenant,
 			Category:    arg.Category,
 			Account:     arg.Account,
@@ -209,7 +206,6 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *Account) (err 
 	if err := LoadAlias(
 		&AttrMatchingAlias{
 			Destination: arg.Destination,
-			Direction:   arg.Direction,
 			Tenant:      arg.Tenant,
 			Category:    arg.Category,
 			Account:     arg.Account,
@@ -262,7 +258,6 @@ func (rs *Responder) RefundRounding(arg *CallDescriptor, reply *float64) (err er
 	if err := LoadAlias(
 		&AttrMatchingAlias{
 			Destination: arg.Destination,
-			Direction:   arg.Direction,
 			Tenant:      arg.Tenant,
 			Category:    arg.Category,
 			Account:     arg.Account,
@@ -297,7 +292,6 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *time.Duration
 	if err := LoadAlias(
 		&AttrMatchingAlias{
 			Destination: arg.Destination,
-			Direction:   arg.Direction,
 			Tenant:      arg.Tenant,
 			Category:    arg.Category,
 			Account:     arg.Account,
@@ -396,7 +390,6 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *time.Duration) (er
 			CgrID:       forkedCDR.CGRID,
 			RunID:       forkedCDR.RunID,
 			TOR:         forkedCDR.ToR,
-			Direction:   utils.OUT,
 			Tenant:      forkedCDR.Tenant,
 			Category:    forkedCDR.Category,
 			Subject:     forkedCDR.Subject,
@@ -490,7 +483,6 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) (err error) {
 			CgrID:       forkedCDR.CGRID,
 			RunID:       forkedCDR.RunID,
 			TOR:         forkedCDR.ToR,
-			Direction:   utils.OUT,
 			Tenant:      forkedCDR.Tenant,
 			Category:    forkedCDR.Category,
 			Subject:     forkedCDR.Subject,

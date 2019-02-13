@@ -34,7 +34,6 @@ type Balance struct {
 	Uuid           string //system wide unique
 	ID             string // account wide unique
 	Value          float64
-	Directions     utils.StringMap
 	ExpirationDate time.Time
 	Weight         float64
 	DestinationIDs utils.StringMap
@@ -63,7 +62,6 @@ func (b *Balance) Equal(o *Balance) bool {
 		b.ExpirationDate.Equal(o.ExpirationDate) &&
 		b.Weight == o.Weight &&
 		b.DestinationIDs.Equal(o.DestinationIDs) &&
-		b.Directions.Equal(o.Directions) &&
 		b.RatingSubject == o.RatingSubject &&
 		b.Categories.Equal(o.Categories) &&
 		b.SharedGroups.Equal(o.SharedGroups) &&
@@ -90,7 +88,6 @@ func (b *Balance) MatchFilter(o *BalanceFilter, skipIds, skipExpiry bool) bool {
 		(o.Blocker == nil || b.Blocker == *o.Blocker) &&
 		(o.Disabled == nil || b.Disabled == *o.Disabled) &&
 		(o.DestinationIDs == nil || b.DestinationIDs.Includes(*o.DestinationIDs)) &&
-		(o.Directions == nil || b.Directions.Includes(*o.Directions)) &&
 		(o.Categories == nil || b.Categories.Includes(*o.Categories)) &&
 		(o.TimingIDs == nil || b.TimingIDs.Includes(*o.TimingIDs)) &&
 		(o.SharedGroups == nil || b.SharedGroups.Includes(*o.SharedGroups)) &&
@@ -112,7 +109,6 @@ func (b *Balance) HardMatchFilter(o *BalanceFilter, skipIds bool) bool {
 		(o.Blocker == nil || b.Blocker == *o.Blocker) &&
 		(o.Disabled == nil || b.Disabled == *o.Disabled) &&
 		(o.DestinationIDs == nil || b.DestinationIDs.Equal(*o.DestinationIDs)) &&
-		(o.Directions == nil || b.Directions.Equal(*o.Directions)) &&
 		(o.Categories == nil || b.Categories.Equal(*o.Categories)) &&
 		(o.TimingIDs == nil || b.TimingIDs.Equal(*o.TimingIDs)) &&
 		(o.SharedGroups == nil || b.SharedGroups.Equal(*o.SharedGroups)) &&
@@ -156,10 +152,6 @@ func (b *Balance) HasDestination() bool {
 	return len(b.DestinationIDs) > 0 && b.DestinationIDs[utils.ANY] == false
 }
 
-func (b *Balance) HasDirection() bool {
-	return len(b.Directions) > 0
-}
-
 func (b *Balance) MatchDestination(destinationID string) bool {
 	return !b.HasDestination() || b.DestinationIDs[destinationID] == true
 }
@@ -189,9 +181,6 @@ func (b *Balance) Clone() *Balance {
 	}
 	if b.DestinationIDs != nil {
 		n.DestinationIDs = b.DestinationIDs.Clone()
-	}
-	if b.Directions != nil {
-		n.Directions = b.Directions.Clone()
 	}
 	return n
 }
@@ -856,7 +845,6 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 				"ExpirationDate":       b.ExpirationDate.String(),
 				"Weight":               strconv.FormatFloat(b.Weight, 'f', -1, 64),
 				"DestinationIDs":       b.DestinationIDs.String(),
-				"Directions":           b.Directions.String(),
 				"RatingSubject":        b.RatingSubject,
 				"Categories":           b.Categories.String(),
 				"SharedGroups":         b.SharedGroups.String(),

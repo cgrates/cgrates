@@ -18,7 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"github.com/cgrates/cgrates/utils"
+)
 
 // Amount of a trafic of a certain type
 type UnitCounter struct {

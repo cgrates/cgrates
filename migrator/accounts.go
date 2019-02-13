@@ -237,7 +237,6 @@ func (v1Acc v1Account) V1toV3Account() (ac *engine.Account) {
 	for oldBalKey, oldBalChain := range v1Acc.BalanceMap {
 		keyElements := strings.Split(oldBalKey, "*")
 		newBalKey := "*" + keyElements[1]
-		newBalDirection := idElements[0]
 		ac.BalanceMap[newBalKey] = make(engine.Balances, len(oldBalChain))
 		for index, oldBal := range oldBalChain {
 			balVal := oldBal.Value
@@ -251,7 +250,6 @@ func (v1Acc v1Account) V1toV3Account() (ac *engine.Account) {
 				Uuid:           oldBal.Uuid,
 				ID:             oldBal.Id,
 				Value:          balVal,
-				Directions:     utils.ParseStringMap(newBalDirection),
 				ExpirationDate: oldBal.ExpirationDate,
 				Weight:         oldBal.Weight,
 				DestinationIDs: utils.ParseStringMap(oldBal.DestinationIds),
@@ -278,9 +276,6 @@ func (v1Acc v1Account) V1toV3Account() (ac *engine.Account) {
 			}
 			if oldUc.BalanceType != "" {
 				bf.Type = utils.StringPointer(oldUc.BalanceType)
-			}
-			if oldUc.Direction != "" {
-				bf.Directions = utils.StringMapPointer(utils.ParseStringMap(oldUc.Direction))
 			}
 			if !oldUcBal.ExpirationDate.IsZero() {
 				bf.ExpirationDate = utils.TimePointer(oldUcBal.ExpirationDate)
@@ -338,9 +333,6 @@ func (v1Acc v1Account) V1toV3Account() (ac *engine.Account) {
 		if oldAtr.BalanceRatingSubject != "" {
 			bf.RatingSubject = utils.StringPointer(oldAtr.BalanceRatingSubject)
 		}
-		if oldAtr.BalanceDirection != "" {
-			bf.Directions = utils.StringMapPointer(utils.ParseStringMap(oldAtr.BalanceDirection))
-		}
 		if oldAtr.BalanceDestinationIds != "" {
 			bf.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(oldAtr.BalanceDestinationIds))
 		}
@@ -393,7 +385,6 @@ func (v2Acc v2Account) V2toV3Account() (ac *engine.Account) {
 				Uuid:           oldBal.Uuid,
 				ID:             oldBal.ID,
 				Value:          balVal,
-				Directions:     oldBal.Directions,
 				ExpirationDate: oldBal.ExpirationDate,
 				Weight:         oldBal.Weight,
 				DestinationIDs: oldBal.DestinationIDs,

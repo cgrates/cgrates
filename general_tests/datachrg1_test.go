@@ -77,7 +77,6 @@ func TestGetDataCostDtChrg1(t *testing.T) {
 	usageDur := time.Duration(usedData) * time.Second
 	timeStart := time.Date(2014, 3, 4, 0, 0, 0, 0, time.Local)
 	cd := &engine.CallDescriptor{
-		Direction:     "*out",
 		Category:      "data",
 		Tenant:        "cgrates.org",
 		Subject:       "12345",
@@ -99,7 +98,6 @@ func TestGetDataCostSecondIntDtChrg1(t *testing.T) {
 	usageDur := time.Duration(usedData)
 	timeStart := time.Date(2014, 3, 4, 1, 0, 0, 0, time.Local)
 	cd := &engine.CallDescriptor{
-		Direction:     "*out",
 		Category:      "data",
 		Tenant:        "cgrates.org",
 		Subject:       "12345",
@@ -121,7 +119,6 @@ func TestGetDataBetweenCostDtChrg1(t *testing.T) {
 	usageDur := time.Duration(usedData) * time.Second
 	timeStart := time.Date(2014, 3, 4, 0, 59, 50, 0, time.Local)
 	cd := &engine.CallDescriptor{
-		Direction:     "*out",
 		Category:      "data",
 		Tenant:        "cgrates.org",
 		Subject:       "12345",

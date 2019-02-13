@@ -30,7 +30,6 @@ type BalanceFilter struct {
 	ID             *string
 	Type           *string
 	Value          *utils.ValueFormula
-	Directions     *utils.StringMap
 	ExpirationDate *time.Time
 	Weight         *float64
 	DestinationIDs *utils.StringMap
@@ -49,7 +48,6 @@ func (bp *BalanceFilter) CreateBalance() *Balance {
 		Uuid:           bp.GetUuid(),
 		ID:             bp.GetID(),
 		Value:          bp.GetValue(),
-		Directions:     bp.GetDirections(),
 		ExpirationDate: bp.GetExpirationDate(),
 		Weight:         bp.GetWeight(),
 		DestinationIDs: bp.GetDestinationIDs(),
@@ -107,9 +105,6 @@ func (bf *BalanceFilter) Clone() *BalanceFilter {
 		result.Factor = new(ValueFactor)
 		*result.Factor = *bf.Factor
 	}
-	if bf.Directions != nil {
-		result.Directions = utils.StringMapPointer(bf.Directions.Clone())
-	}
 	if bf.DestinationIDs != nil {
 		result.DestinationIDs = utils.StringMapPointer(bf.DestinationIDs.Clone())
 	}
@@ -135,9 +130,6 @@ func (bf *BalanceFilter) LoadFromBalance(b *Balance) *BalanceFilter {
 	}
 	if b.Value != 0 {
 		bf.Value.Static = b.Value
-	}
-	if !b.Directions.IsEmpty() {
-		bf.Directions = &b.Directions
 	}
 	if !b.ExpirationDate.IsZero() {
 		bf.ExpirationDate = &b.ExpirationDate
@@ -223,13 +215,6 @@ func (bp *BalanceFilter) GetID() string {
 	return *bp.ID
 }
 
-func (bp *BalanceFilter) GetDirections() utils.StringMap {
-	if bp == nil || bp.Directions == nil {
-		return utils.StringMap{}
-	}
-	return *bp.Directions
-}
-
 func (bp *BalanceFilter) GetDestinationIDs() utils.StringMap {
 	if bp == nil || bp.DestinationIDs == nil {
 		return utils.StringMap{}
@@ -313,9 +298,6 @@ func (bf *BalanceFilter) ModifyBalance(b *Balance) {
 	}
 	if bf.ID != nil {
 		b.ID = *bf.ID
-	}
-	if bf.Directions != nil {
-		b.Directions = *bf.Directions
 	}
 	if bf.Value != nil {
 		b.Value = bf.GetValue()

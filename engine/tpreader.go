@@ -991,9 +991,6 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 					if tpact.Categories != "" && tpact.Categories != utils.ANY {
 						acts[idx].Balance.Categories = utils.StringMapPointer(utils.ParseStringMap(tpact.Categories))
 					}
-					if tpact.Directions != "" && tpact.Directions != utils.ANY {
-						acts[idx].Balance.Directions = utils.StringMapPointer(utils.ParseStringMap(tpact.Directions))
-					}
 					if tpact.DestinationIds != "" && tpact.DestinationIds != utils.ANY {
 						acts[idx].Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(tpact.DestinationIds))
 					}

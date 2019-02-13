@@ -504,7 +504,7 @@ func TestUsageReqAsCD(t *testing.T) {
 		Usage: "10",
 	}
 	eCD := &CallDescriptor{CgrID: "c4630df20b2a0c5b11311e4b5a8c3178cf314344", TOR: req.ToR,
-		Direction: utils.OUT, Tenant: req.Tenant,
+		Tenant:   req.Tenant,
 		Category: req.Category, Account: req.Account,
 		Subject: req.Subject, Destination: req.Destination,
 		TimeStart:           time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),

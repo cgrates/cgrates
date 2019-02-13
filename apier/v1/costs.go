@@ -46,7 +46,6 @@ func (apier *ApierV1) GetCost(attrs AttrGetCost, ec *engine.EventCost) error {
 	}
 
 	cd := &engine.CallDescriptor{
-		Direction:     utils.OUT,
 		Category:      attrs.Category,
 		Tenant:        attrs.Tenant,
 		Subject:       attrs.Subject,
@@ -79,7 +78,6 @@ func (apier *ApierV1) GetDataCost(attrs AttrGetDataCost, reply *engine.DataCost)
 		return err
 	}
 	cd := &engine.CallDescriptor{
-		Direction:     utils.OUT,
 		Category:      attrs.Category,
 		Tenant:        attrs.Tenant,
 		Subject:       attrs.Subject,

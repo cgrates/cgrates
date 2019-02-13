@@ -208,13 +208,6 @@ func (v2ATR v2ActionTrigger) AsThreshold() (thp *engine.ThresholdProfile, th *en
 	var filterIDS []string
 	var filters []*engine.FilterRule
 	if v2ATR.Balance.ID != nil && *v2ATR.Balance.ID != "" {
-		if v2ATR.Balance.Directions != nil {
-			x, err := engine.NewFilterRule(engine.MetaRSR, "Directions", v2ATR.Balance.Directions.Slice())
-			if err != nil {
-				return nil, nil, nil, err
-			}
-			filters = append(filters, x)
-		}
 		//TO DO:
 		// if v2ATR.Balance.ExpirationDate != nil { //MetaLess
 		// 	x, err := engine.NewRequestFilter(engine.MetaTimings, "ExpirationDate", v2ATR.Balance.ExpirationDate)
@@ -331,13 +324,6 @@ func AsThreshold2(v2ATR engine.ActionTrigger) (thp *engine.ThresholdProfile, th 
 	var filterIDS []string
 	var filters []*engine.FilterRule
 	if v2ATR.Balance.ID != nil && *v2ATR.Balance.ID != "" {
-		if v2ATR.Balance.Directions != nil {
-			x, err := engine.NewFilterRule(engine.MetaRSR, "Directions", v2ATR.Balance.Directions.Slice())
-			if err != nil {
-				return nil, nil, nil, err
-			}
-			filters = append(filters, x)
-		}
 		if v2ATR.Balance.DestinationIDs != nil { //MetaLess /RSRfields
 			x, err := engine.NewFilterRule(engine.MetaDestinations, "DestinationIDs", v2ATR.Balance.DestinationIDs.Slice())
 			if err != nil {

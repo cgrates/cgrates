@@ -168,9 +168,6 @@ func (v1Act v1ActionTrigger) AsActionTrigger() (at *engine.ActionTrigger) {
 	if v1Act.BalanceRatingSubject != "" {
 		bf.RatingSubject = utils.StringPointer(v1Act.BalanceRatingSubject)
 	}
-	if v1Act.BalanceDirection != "" {
-		bf.Directions = utils.StringMapPointer(utils.ParseStringMap(v1Act.BalanceDirection))
-	}
 	if v1Act.BalanceDestinationIds != "" {
 		bf.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(v1Act.BalanceDestinationIds))
 	}
