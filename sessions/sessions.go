@@ -362,9 +362,8 @@ func (sS *SessionS) setSTerminator(s *Session) {
 // forceSTerminate is called when a session times-out or it is forced from CGRateS side
 func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUsed *time.Duration) (err error) {
 	if extraDebit != 0 {
-
 		for i := range s.SRuns {
-			if _, err = sS.debitSession(s, i, extraDebit, nil); err != nil {
+			if _, err = sS.debitSession(s, i, extraDebit, lastUsed); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf(
 						"<%s> failed debitting cgrID %s, sRunIdx: %d, err: %s",
@@ -372,6 +371,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 			}
 		}
 	}
+	//we apply the correction before
 	if err = sS.endSession(s, nil, nil); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf(
@@ -712,7 +712,6 @@ func (sS *SessionS) registerSession(s *Session, passive bool) {
 // uregisterSession will unregister an active or passive session based on it's CGRID
 // called on session terminate or relocate
 func (sS *SessionS) unregisterSession(cgrID string, passive bool) bool {
-	fmt.Println("entering in unregisterSession ")
 	sMux := &sS.aSsMux
 	sMp := sS.aSessions
 	if passive {
@@ -2054,7 +2053,6 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 		} else {
 			s = ss[0]
 		}
-
 		if maxUsage, err := sS.updateSession(s, ev.AsMapInterface()); err != nil {
 			return utils.NewErrRALs(err)
 		} else {
