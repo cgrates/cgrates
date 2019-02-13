@@ -37,6 +37,7 @@ var sTestsDspSts = []func(t *testing.T){
 	testDspStsPing,
 	testDspStsTestAuthKey,
 	testDspStsTestAuthKey2,
+	testDspStsTestAuthKey3,
 }
 
 //Test start here
@@ -292,4 +293,46 @@ func testDspStsTestAuthKey2(t *testing.T) {
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
 	}
+}
+
+func testDspStsTestAuthKey3(t *testing.T) {
+	var reply []string
+	var metrics map[string]float64
+
+	args2 := TntIDWithApiKey{
+		DispatcherResource: DispatcherResource{
+			APIKey: "stat12345",
+		},
+		TenantID: utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "Stats2",
+		},
+	}
+	expectedMetrics := map[string]float64{
+		utils.MetaTCC: 133,
+		utils.MetaTCD: 180,
+	}
+
+	if err := dispEngine.RCP.Call(utils.StatSv1GetQueueFloatMetrics,
+		args2, &metrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
+		t.Errorf("expecting: %+v, received reply: %v", expectedMetrics, metrics)
+	}
+
+	estats := []string{"Stats2", "Stats2_1"}
+	if err := dispEngine.RCP.Call(utils.StatSv1GetQueueIDs,
+		&TntWithApiKey{
+			TenantArg: utils.TenantArg{
+				Tenant: "cgrates.org",
+			},
+			DispatcherResource: DispatcherResource{
+				APIKey: "stat12345",
+			},
+		}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(estats, reply) {
+		t.Errorf("expecting: %+v, received reply: %v", estats, reply)
+	}
+
 }
