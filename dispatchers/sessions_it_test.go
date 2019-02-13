@@ -101,7 +101,7 @@ func testDspSessionAddBalacne(t *testing.T) {
 
 func testDspSessionPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.SessionSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+	if err := allEngine.RCP.Call(utils.SessionSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -122,7 +122,7 @@ func testDspSessionPing(t *testing.T) {
 
 func testDspSessionPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.SessionSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+	if err := allEngine.RCP.Call(utils.SessionSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)

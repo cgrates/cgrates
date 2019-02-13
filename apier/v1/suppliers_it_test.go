@@ -973,7 +973,7 @@ func testV1SplSRemSupplierProfiles(t *testing.T) {
 
 func testV1SplSupplierPing(t *testing.T) {
 	var resp string
-	if err := splSv1Rpc.Call(utils.SupplierSv1Ping, &utils.CGREvent{}, &resp); err != nil {
+	if err := splSv1Rpc.Call(utils.SupplierSv1Ping, new(utils.CGREvent), &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.Pong {
 		t.Error("Unexpected reply returned", resp)

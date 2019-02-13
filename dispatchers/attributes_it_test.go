@@ -146,13 +146,13 @@ func TestDspAttributeS(t *testing.T) {
 
 func testDspAttrPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.AttributeSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+	if err := allEngine.RCP.Call(utils.AttributeSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	reply = ""
-	if err := allEngine2.RCP.Call(utils.AttributeSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+	if err := allEngine2.RCP.Call(utils.AttributeSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -275,7 +275,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 
 func testDspAttrPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.AttributeSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+	if err := allEngine.RCP.Call(utils.AttributeSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)

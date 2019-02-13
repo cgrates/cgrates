@@ -309,7 +309,7 @@ func testChargerSRemChargerProfile(t *testing.T) {
 
 func testChargerSPing(t *testing.T) {
 	var resp string
-	if err := chargerRPC.Call(utils.ChargerSv1Ping, &utils.CGREvent{}, &resp); err != nil {
+	if err := chargerRPC.Call(utils.ChargerSv1Ping, new(utils.CGREvent), &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.Pong {
 		t.Error("Unexpected reply returned", resp)

@@ -62,7 +62,7 @@ func TestDspStatS(t *testing.T) {
 
 func testDspStsPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.StatSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+	if err := allEngine.RCP.Call(utils.StatSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -150,7 +150,7 @@ func testDspStsGetStatFailover(t *testing.T) {
 
 func testDspStsPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.StatSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+	if err := allEngine.RCP.Call(utils.StatSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)

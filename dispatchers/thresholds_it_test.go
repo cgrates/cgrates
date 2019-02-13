@@ -64,7 +64,7 @@ func TestDspThresholdS(t *testing.T) {
 
 func testDspThPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.ThresholdSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+	if err := allEngine.RCP.Call(utils.ThresholdSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -131,7 +131,7 @@ func testDspThProcessEventFailover(t *testing.T) {
 
 func testDspThPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.ThresholdSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+	if err := allEngine.RCP.Call(utils.ThresholdSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -223,13 +223,11 @@ func testDspThTestAuthKey2(t *testing.T) {
 }
 
 func testDspThTestAuthKey3(t *testing.T) {
-	var th *engine.Thresholds
-	eTh := &engine.Thresholds{
-		&engine.Threshold{
-			Tenant: "cgrates.org",
-			ID:     "THD_ACNT_1002",
-			Hits:   1,
-		},
+	var th *engine.Threshold
+	eTh := &engine.Threshold{
+		Tenant: "cgrates.org",
+		ID:     "THD_ACNT_1002",
+		Hits:   1,
 	}
 	if err := dispEngine.RCP.Call(utils.ThresholdSv1GetThreshold, &TntIDWithApiKey{
 		TenantID: utils.TenantID{
@@ -241,17 +239,16 @@ func testDspThTestAuthKey3(t *testing.T) {
 		},
 	}, &th); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual((*eTh)[0].Tenant, (*th)[0].Tenant) {
-		t.Errorf("expecting: %+v, received: %+v", (*eTh)[0].Tenant, (*th)[0].Tenant)
-	} else if !reflect.DeepEqual((*eTh)[0].ID, (*th)[0].ID) {
-		t.Errorf("expecting: %+v, received: %+v", (*eTh)[0].ID, (*th)[0].ID)
-	} else if !reflect.DeepEqual((*eTh)[0].Hits, (*th)[0].Hits) {
-		t.Errorf("expecting: %+v, received: %+v", (*eTh)[0].Hits, (*th)[0].Hits)
+	} else if !reflect.DeepEqual((*eTh).Tenant, (*th).Tenant) {
+		t.Errorf("expecting: %+v, received: %+v", (*eTh).Tenant, (*th).Tenant)
+	} else if !reflect.DeepEqual((*eTh).ID, (*th).ID) {
+		t.Errorf("expecting: %+v, received: %+v", (*eTh).ID, (*th).ID)
+	} else if !reflect.DeepEqual((*eTh).Hits, (*th).Hits) {
+		t.Errorf("expecting: %+v, received: %+v", (*eTh).Hits, (*th).Hits)
 	}
 
 	var ids []string
-	eIDs := []string{"THD_ACNT_1002", "THD_ACNT_1002"}
-	nowTime := time.Now()
+	eIDs := []string{"THD_ACNT_1002"}
 
 	if err := dispEngine.RCP.Call(utils.ThresholdSv1GetThresholdIDs, &TntWithApiKey{
 		TenantArg: utils.TenantArg{
