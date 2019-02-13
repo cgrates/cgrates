@@ -81,7 +81,7 @@ func TestSessionsBiRPCStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func TestSessionsBiRPCApierRpcConn(t *testing.T) {
-	clntHandlers := map[string]interface{}{"SessionSv1.DisconnectSession": handleDisconnectSession}
+	clntHandlers := map[string]interface{}{utils.SessionSv1DisconnectSession: handleDisconnectSession}
 	dummyClnt, err := utils.NewBiJSONrpcClient(sessionsBiRPCCfg.SessionSCfg().ListenBijson,
 		clntHandlers)
 	if err != nil { // First attempt is to make sure multiple clients are supported
