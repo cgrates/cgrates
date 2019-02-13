@@ -110,6 +110,16 @@ func (dT *DispatcherThresholdSv1) ProcessEvent(args *dispatchers.ArgsProcessEven
 	return dT.dS.ThresholdSv1ProcessEvent(args, tIDs)
 }
 
+func (dT *DispatcherThresholdSv1) GetThresholdIDs(args *dispatchers.TntWithApiKey,
+	tIDs *[]string) error {
+	return dT.dS.ThresholdSv1GetThresholdIDs(args, tIDs)
+}
+
+func (dT *DispatcherThresholdSv1) GetThreshold(args *dispatchers.TntIDWithApiKey,
+	th *engine.Threshold) error {
+	return dT.dS.ThresholdSv1GetThreshold(args, th)
+}
+
 func NewDispatcherStatSv1(dps *dispatchers.DispatcherService) *DispatcherStatSv1 {
 	return &DispatcherStatSv1{dS: dps}
 }

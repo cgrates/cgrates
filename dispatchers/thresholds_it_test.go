@@ -23,6 +23,7 @@ package dispatchers
 import (
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -37,6 +38,7 @@ var sTestsDspTh = []func(t *testing.T){
 	testDspThPing,
 	testDspThTestAuthKey,
 	testDspThTestAuthKey2,
+	testDspThTestAuthKey3,
 }
 
 //Test start here
@@ -217,5 +219,52 @@ func testDspThTestAuthKey2(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", (*eTh)[0].ID, (*th)[0].ID)
 	} else if !reflect.DeepEqual((*eTh)[0].Hits, (*th)[0].Hits) {
 		t.Errorf("expecting: %+v, received: %+v", (*eTh)[0].Hits, (*th)[0].Hits)
+	}
+}
+
+func testDspThTestAuthKey3(t *testing.T) {
+	var th *engine.Thresholds
+	eTh := &engine.Thresholds{
+		&engine.Threshold{
+			Tenant: "cgrates.org",
+			ID:     "THD_ACNT_1002",
+			Hits:   1,
+		},
+	}
+	if err := dispEngine.RCP.Call(utils.ThresholdSv1GetThreshold, &TntIDWithApiKey{
+		TenantID: utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "THD_ACNT_1002",
+		},
+		DispatcherResource: DispatcherResource{
+			APIKey: "thr12345",
+		},
+	}, &th); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual((*eTh)[0].Tenant, (*th)[0].Tenant) {
+		t.Errorf("expecting: %+v, received: %+v", (*eTh)[0].Tenant, (*th)[0].Tenant)
+	} else if !reflect.DeepEqual((*eTh)[0].ID, (*th)[0].ID) {
+		t.Errorf("expecting: %+v, received: %+v", (*eTh)[0].ID, (*th)[0].ID)
+	} else if !reflect.DeepEqual((*eTh)[0].Hits, (*th)[0].Hits) {
+		t.Errorf("expecting: %+v, received: %+v", (*eTh)[0].Hits, (*th)[0].Hits)
+	}
+
+	var ids []string
+	eIDs := []string{"THD_ACNT_1002", "THD_ACNT_1002"}
+	nowTime := time.Now()
+
+	if err := dispEngine.RCP.Call(utils.ThresholdSv1GetThresholdIDs, &TntWithApiKey{
+		TenantArg: utils.TenantArg{
+			Tenant: "cgrates.org",
+		},
+		DispatcherResource: DispatcherResource{
+			APIKey: "thr12345",
+		},
+	}, &ids); err != nil {
+		t.Fatal(err)
+	}
+	sort.Strings(ids)
+	if !reflect.DeepEqual(eIDs, ids) {
+		t.Errorf("expecting: %+v, received: %+v", eIDs, ids)
 	}
 }
