@@ -40,9 +40,8 @@ var (
 	sSv1Cfg     *config.CGRConfig
 	sSv1BiRpc   *rpc2.Client
 	sSApierRpc  *rpc.Client
+	discEvChan  = make(chan *utils.AttrDisconnectSession)
 )
-
-var discEvChan = make(chan *utils.AttrDisconnectSession, 1)
 
 func handleDisconnectSession(clnt *rpc2.Client,
 	args *utils.AttrDisconnectSession, reply *string) error {
@@ -50,6 +49,11 @@ func handleDisconnectSession(clnt *rpc2.Client,
 	// free the channel
 	<-discEvChan
 	*reply = utils.OK
+	return nil
+}
+
+func handleGetSessionIDs(clnt *rpc2.Client,
+	ignParam string, sessionIDs *[]*sessions.SessionID) error {
 	return nil
 }
 
@@ -84,9 +88,15 @@ func TestSSv1ItStartEngine(t *testing.T) {
 }
 
 func TestSSv1ItRpcConn(t *testing.T) {
-	clntHandlers := map[string]interface{}{utils.SessionSv1DisconnectSession: handleDisconnectSession}
 	dummyClnt, err := utils.NewBiJSONrpcClient(sSv1Cfg.SessionSCfg().ListenBijson,
-		clntHandlers)
+		nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	clntHandlers := map[string]interface{}{
+		utils.SessionSv1DisconnectSession:   handleDisconnectSession,
+		utils.SessionSv1GetActiveSessionIDs: handleGetSessionIDs,
+	}
 	if sSv1BiRpc, err = utils.NewBiJSONrpcClient(sSv1Cfg.SessionSCfg().ListenBijson,
 		clntHandlers); err != nil {
 		t.Fatal(err)
