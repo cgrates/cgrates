@@ -41,6 +41,7 @@ var sTestsDspCpp = []func(t *testing.T){
 
 //Test start here
 func TestDspChargerS(t *testing.T) {
+	engine.KillEngine(0)
 	allEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "all"), true, true)
 	allEngine2 = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "all2"), true, true)
 	attrEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "attributes"), true, true)
@@ -56,11 +57,12 @@ func TestDspChargerS(t *testing.T) {
 	dispEngine.stopEngine(t)
 	allEngine.stopEngine(t)
 	allEngine2.stopEngine(t)
+	engine.KillEngine(0)
 }
 
 func testDspCppPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.ChargerSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+	if err := allEngine.RCP.Call(utils.ChargerSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -69,7 +71,9 @@ func testDspCppPingFailover(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		APIKey: "chrg12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "chrg12345",
+		},
 	}
 	if err := dispEngine.RCP.Call(utils.ChargerSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
@@ -92,7 +96,9 @@ func testDspCppPingFailover(t *testing.T) {
 
 func testDspCppGetChtgFailover(t *testing.T) {
 	args := CGREvWithApiKey{
-		APIKey: "chrg12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "chrg12345",
+		},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
@@ -132,7 +138,7 @@ func testDspCppGetChtgFailover(t *testing.T) {
 
 func testDspCppPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.ChargerSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+	if err := allEngine.RCP.Call(utils.ChargerSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -141,7 +147,9 @@ func testDspCppPing(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		APIKey: "chrg12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "chrg12345",
+		},
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
@@ -151,7 +159,9 @@ func testDspCppPing(t *testing.T) {
 
 func testDspCppTestAuthKey(t *testing.T) {
 	args := CGREvWithApiKey{
-		APIKey: "12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "12345",
+		},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
@@ -169,7 +179,9 @@ func testDspCppTestAuthKey(t *testing.T) {
 
 func testDspCppTestAuthKey2(t *testing.T) {
 	args := CGREvWithApiKey{
-		APIKey: "chrg12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "chrg12345",
+		},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",

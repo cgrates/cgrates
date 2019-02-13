@@ -23,6 +23,7 @@ package dispatchers
 import (
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -37,10 +38,12 @@ var sTestsDspTh = []func(t *testing.T){
 	testDspThPing,
 	testDspThTestAuthKey,
 	testDspThTestAuthKey2,
+	testDspThTestAuthKey3,
 }
 
 //Test start here
 func TestDspThresholdS(t *testing.T) {
+	engine.KillEngine(0)
 	allEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "all"), true, true)
 	allEngine2 = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "all2"), true, true)
 	attrEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "attributes"), true, true)
@@ -56,11 +59,12 @@ func TestDspThresholdS(t *testing.T) {
 	dispEngine.stopEngine(t)
 	allEngine.stopEngine(t)
 	allEngine2.stopEngine(t)
+	engine.KillEngine(0)
 }
 
 func testDspThPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.ThresholdSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+	if err := allEngine.RCP.Call(utils.ThresholdSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -69,7 +73,9 @@ func testDspThPingFailover(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		APIKey: "thr12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "thr12345",
+		},
 	}
 	if err := dispEngine.RCP.Call(utils.ThresholdSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
@@ -95,7 +101,9 @@ func testDspThProcessEventFailover(t *testing.T) {
 	eIDs := []string{"THD_ACNT_1001"}
 	nowTime := time.Now()
 	args := &ArgsProcessEventWithApiKey{
-		APIKey: "thr12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "thr12345",
+		},
 		ArgsProcessEvent: engine.ArgsProcessEvent{
 			CGREvent: utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -123,7 +131,7 @@ func testDspThProcessEventFailover(t *testing.T) {
 
 func testDspThPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.ThresholdSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+	if err := allEngine.RCP.Call(utils.ThresholdSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -132,7 +140,9 @@ func testDspThPing(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		APIKey: "thr12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "thr12345",
+		},
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
@@ -144,7 +154,9 @@ func testDspThTestAuthKey(t *testing.T) {
 	var ids []string
 	nowTime := time.Now()
 	args := &ArgsProcessEventWithApiKey{
-		APIKey: "12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "12345",
+		},
 		ArgsProcessEvent: engine.ArgsProcessEvent{
 			CGREvent: utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -172,7 +184,9 @@ func testDspThTestAuthKey2(t *testing.T) {
 	eIDs := []string{"THD_ACNT_1002"}
 	nowTime := time.Now()
 	args := &ArgsProcessEventWithApiKey{
-		APIKey: "thr12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "thr12345",
+		},
 		ArgsProcessEvent: engine.ArgsProcessEvent{
 			CGREvent: utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -205,5 +219,49 @@ func testDspThTestAuthKey2(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", (*eTh)[0].ID, (*th)[0].ID)
 	} else if !reflect.DeepEqual((*eTh)[0].Hits, (*th)[0].Hits) {
 		t.Errorf("expecting: %+v, received: %+v", (*eTh)[0].Hits, (*th)[0].Hits)
+	}
+}
+
+func testDspThTestAuthKey3(t *testing.T) {
+	var th *engine.Threshold
+	eTh := &engine.Threshold{
+		Tenant: "cgrates.org",
+		ID:     "THD_ACNT_1002",
+		Hits:   1,
+	}
+	if err := dispEngine.RCP.Call(utils.ThresholdSv1GetThreshold, &TntIDWithApiKey{
+		TenantID: utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "THD_ACNT_1002",
+		},
+		DispatcherResource: DispatcherResource{
+			APIKey: "thr12345",
+		},
+	}, &th); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual((*eTh).Tenant, (*th).Tenant) {
+		t.Errorf("expecting: %+v, received: %+v", (*eTh).Tenant, (*th).Tenant)
+	} else if !reflect.DeepEqual((*eTh).ID, (*th).ID) {
+		t.Errorf("expecting: %+v, received: %+v", (*eTh).ID, (*th).ID)
+	} else if !reflect.DeepEqual((*eTh).Hits, (*th).Hits) {
+		t.Errorf("expecting: %+v, received: %+v", (*eTh).Hits, (*th).Hits)
+	}
+
+	var ids []string
+	eIDs := []string{"THD_ACNT_1002"}
+
+	if err := dispEngine.RCP.Call(utils.ThresholdSv1GetThresholdIDs, &TntWithApiKey{
+		TenantArg: utils.TenantArg{
+			Tenant: "cgrates.org",
+		},
+		DispatcherResource: DispatcherResource{
+			APIKey: "thr12345",
+		},
+	}, &ids); err != nil {
+		t.Fatal(err)
+	}
+	sort.Strings(ids)
+	if !reflect.DeepEqual(eIDs, ids) {
+		t.Errorf("expecting: %+v, received: %+v", eIDs, ids)
 	}
 }

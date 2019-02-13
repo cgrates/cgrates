@@ -107,7 +107,7 @@ func TestSSv1ItRpcConn(t *testing.T) {
 
 func TestSSv1ItPing(t *testing.T) {
 	var resp string
-	if err := sSv1BiRpc.Call(utils.SessionSv1Ping, "", &resp); err != nil {
+	if err := sSv1BiRpc.Call(utils.SessionSv1Ping, new(utils.CGREvent), &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.Pong {
 		t.Error("Unexpected reply returned", resp)

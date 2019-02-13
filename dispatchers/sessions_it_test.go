@@ -21,175 +21,145 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
+	"sort"
+	"strings"
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
-var (
-	dspSessionCfgPath  string
-	dspSessionCfg      *config.CGRConfig
-	dspSessionRPC      *rpc.Client
-	instSessionCfgPath string
-	instSessionCfg     *config.CGRConfig
-	instSessionRPC     *rpc.Client
-)
-
 var sTestsDspSession = []func(t *testing.T){
-	// testDspSessionInitCfg,
-	// testDspSessionInitDataDb,
-	// testDspSessionResetStorDb,
-	// testDspSessionStartEngine,
-	// testDspSessionRPCConn,
-	// testDspSessionPing,
-	// testDspSessionLoadData,
-	// testDspSessionAddAttributesWithPermision,
-	// testDspSessionTestAuthKey,
-	// testDspSessionAddAttributesWithPermision2,
-	// testDspSessionAuthorize,
-	// testDspSessionInit,
-	// testDspSessionUpdate,
-	// testDspSessionTerminate,
-	// testDspSessionProcessCDR,
-	// testDspSessionKillEngine,
+	testDspSessionAddBalacne,
+
+	testDspSessionPingFailover,
+
+	testDspSessionPing,
+	testDspSessionTestAuthKey,
+	testDspSessionAuthorize,
+	testDspSessionInit,
+	testDspSessionUpdate,
+	testDspSessionTerminate,
+	testDspSessionProcessCDR,
+	testDspSessionProcessEvent,
 }
 
 //Test start here
 func TestDspSessionS(t *testing.T) {
+	engine.KillEngine(0)
+	allEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "all"), true, true)
+	allEngine2 = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "all2"), true, true)
+	attrEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "attributes"), true, true)
+	dispEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "dispatchers"), true, true)
+	allEngine.loadData(t, path.Join(dspDataDir, "tariffplans", "testit"))
+	allEngine2.loadData(t, path.Join(dspDataDir, "tariffplans", "oldtutorial"))
+	attrEngine.loadData(t, path.Join(dspDataDir, "tariffplans", "dispatchers"))
+	time.Sleep(500 * time.Millisecond)
 	for _, stest := range sTestsDspSession {
 		t.Run("", stest)
 	}
+	attrEngine.stopEngine(t)
+	dispEngine.stopEngine(t)
+	allEngine.stopEngine(t)
+	allEngine2.stopEngine(t)
+	engine.KillEngine(0)
 }
 
-func testDspSessionInitCfg(t *testing.T) {
-	var err error
-	dspSessionCfgPath = path.Join(dspDataDir, "conf", "samples", "dispatcher")
-	dspSessionCfg, err = config.NewCGRConfigFromFolder(dspSessionCfgPath)
-	if err != nil {
+func testDspSessionAddBalacne(t *testing.T) {
+	initUsage := 15 * time.Minute
+	attrSetBalance := utils.AttrSetBalance{
+		Tenant:        "cgrates.org",
+		Account:       "1001",
+		BalanceType:   utils.VOICE,
+		BalanceID:     utils.StringPointer("SessionBalance"),
+		Value:         utils.Float64Pointer(float64(initUsage)),
+		RatingSubject: utils.StringPointer("*zero5ms"),
+	}
+	var reply string
+	if err := allEngine.RCP.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
 		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
 	}
-	dspSessionCfg.DataFolderPath = dspDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(dspSessionCfg)
-	instSessionCfgPath = path.Join(dspDataDir, "conf", "samples", "sessions")
-	instSessionCfg, err = config.NewCGRConfigFromFolder(instSessionCfgPath)
-	if err != nil {
+	var acnt *engine.Account
+	attrs := &utils.AttrGetAccount{
+		Tenant:  attrSetBalance.Tenant,
+		Account: attrSetBalance.Account,
+	}
+	eAcntVal := float64(initUsage)
+	if err := allEngine.RCP.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
+		t.Errorf("Expecting: %v, received: %v",
+			time.Duration(eAcntVal), time.Duration(acnt.BalanceMap[utils.VOICE].GetTotalValue()))
 	}
-	instSessionCfg.DataFolderPath = dspDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(instSessionCfg)
-}
-
-func testDspSessionInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(instSessionCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// Wipe out the cdr database
-func testDspSessionResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(instSessionCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// Start CGR Engine
-func testDspSessionStartEngine(t *testing.T) {
-	if _, err := engine.StartEngine(instSessionCfgPath, dspDelay); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := engine.StartEngine(dspSessionCfgPath, dspDelay); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// Connect rpc client to rater
-func testDspSessionRPCConn(t *testing.T) {
-	var err error
-
-	instSessionRPC, err = jsonrpc.Dial("tcp", instSessionCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
-	dspSessionRPC, err = jsonrpc.Dial("tcp", dspSessionCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
-
 }
 
 func testDspSessionPing(t *testing.T) {
 	var reply string
-	if err := instSessionRPC.Call(utils.SessionSv1Ping, "", &reply); err != nil {
+	if err := allEngine.RCP.Call(utils.SessionSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dspSessionRPC.Call(utils.SessionSv1Ping, "", &reply); err != nil {
+	if err := dispEngine.RCP.Call(utils.SessionSv1Ping, &CGREvWithApiKey{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+		},
+		DispatcherResource: DispatcherResource{
+			APIKey: "ses12345",
+		},
+	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 }
 
-func testDspSessionLoadData(t *testing.T) {
+func testDspSessionPingFailover(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{
-		FolderPath: path.Join(dspDataDir, "tariffplans", "testit")}
-	if err := instSessionRPC.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+	if err := allEngine.RCP.Call(utils.SessionSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
 	}
-	time.Sleep(500 * time.Millisecond)
-}
-
-func testDspSessionAddAttributesWithPermision(t *testing.T) {
-	alsPrf := &engine.AttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "AuthKey",
-		Contexts:  []string{utils.MetaAuth},
-		FilterIDs: []string{"*string:APIKey:12345"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+	ev := CGREvWithApiKey{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
 		},
-		Attributes: []*engine.Attribute{
-			{
-				FieldName:  utils.APIMethods,
-				Initial:    utils.META_ANY,
-				Substitute: config.NewRSRParsersMustCompile("ThresholdSv1.GetThSessionholdsForEvent", true, utils.INFIELD_SEP),
-				Append:     true,
-			},
+		DispatcherResource: DispatcherResource{
+			APIKey: "ses12345",
 		},
-		Weight: 20,
 	}
-	var result string
-	if err := instSessionRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
+	if err := dispEngine.RCP.Call(utils.SessionSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
 	}
-	alsPrf.Compile()
-	var reply *engine.AttributeProfile
-	if err := instSessionRPC.Call("ApierV1.GetAttributeProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "AuthKey"}, &reply); err != nil {
+	allEngine.stopEngine(t)
+	if err := dispEngine.RCP.Call(utils.SessionSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
 	}
-	reply.Compile()
-	if !reflect.DeepEqual(alsPrf, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
+	allEngine2.stopEngine(t)
+	if err := dispEngine.RCP.Call(utils.SessionSv1Ping, &ev, &reply); err == nil {
+		t.Errorf("Expected error but recived %v and reply %v\n", err, reply)
 	}
+	allEngine.startEngine(t)
+	allEngine2.startEngine(t)
 }
 
 func testDspSessionTestAuthKey(t *testing.T) {
 	authUsage := 5 * time.Minute
 	args := AuthorizeArgsWithApiKey{
-		APIKey: "12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "12345",
+		},
 		V1AuthorizeArgs: sessions.V1AuthorizeArgs{
 			GetMaxUsage:        true,
 			AuthorizeResources: true,
@@ -213,53 +183,18 @@ func testDspSessionTestAuthKey(t *testing.T) {
 		},
 	}
 	var rply sessions.V1AuthorizeReplyWithDigest
-	if err := dspSessionRPC.Call(utils.SessionSv1AuthorizeEventWithDigest,
+	if err := dispEngine.RCP.Call(utils.SessionSv1AuthorizeEventWithDigest,
 		args, &rply); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
-	}
-}
-
-func testDspSessionAddAttributesWithPermision2(t *testing.T) {
-	alsPrf := &engine.AttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "AuthKey",
-		Contexts:  []string{utils.MetaAuth},
-		FilterIDs: []string{"*string:APIKey:12345"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-		},
-		Attributes: []*engine.Attribute{
-			{
-				FieldName:  utils.APIMethods,
-				Initial:    utils.META_ANY,
-				Substitute: config.NewRSRParsersMustCompile("SessionSv1.AuthorizeEventWithDigest&SessionSv1.InitiateSessionWithDigest&SessionSv1.UpdateSession&SessionSv1.TerminateSession&SessionSv1.ProcessCDR&SessionSv1.ProcessEvent", true, utils.INFIELD_SEP),
-				Append:     true,
-			},
-		},
-		Weight: 20,
-	}
-	var result string
-	if err := instSessionRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-	alsPrf.Compile()
-	var reply *engine.AttributeProfile
-	if err := instSessionRPC.Call("ApierV1.GetAttributeProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "AuthKey"}, &reply); err != nil {
-		t.Error(err)
-	}
-	reply.Compile()
-	if !reflect.DeepEqual(alsPrf, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
 	}
 }
 
 func testDspSessionAuthorize(t *testing.T) {
 	authUsage := 5 * time.Minute
 	argsAuth := &AuthorizeArgsWithApiKey{
-		APIKey: "12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "ses12345",
+		},
 		V1AuthorizeArgs: sessions.V1AuthorizeArgs{
 			GetMaxUsage:        true,
 			AuthorizeResources: true,
@@ -283,30 +218,36 @@ func testDspSessionAuthorize(t *testing.T) {
 		},
 	}
 	var rply sessions.V1AuthorizeReplyWithDigest
-	if err := dspSessionRPC.Call(utils.SessionSv1AuthorizeEventWithDigest,
+	if err := dispEngine.RCP.Call(utils.SessionSv1AuthorizeEventWithDigest,
 		argsAuth, &rply); err != nil {
 		t.Error(err)
+		return
 	}
 	if *rply.MaxUsage != authUsage.Seconds() {
-		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
+		t.Errorf("Unexpected MaxUsage: %v", *rply.MaxUsage)
 	}
 	if *rply.ResourceAllocation == "" {
 		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
 	}
-	eSplrs := utils.StringPointer("supplier1,supplier2")
-	if *eSplrs != *rply.SuppliersDigest {
-		t.Errorf("expecting: %v, received: %v", *eSplrs, *rply.SuppliersDigest)
+	eSplrs := "supplier1,supplier2"
+	tp := strings.Split(*rply.SuppliersDigest, ",")
+	sort.Strings(tp)
+	*rply.SuppliersDigest = strings.Join(tp, ",")
+	if eSplrs != *rply.SuppliersDigest {
+		t.Errorf("expecting: %v, received: %v", eSplrs, *rply.SuppliersDigest)
 	}
-	eAttrs := utils.StringPointer("OfficeGroup:Marketing")
-	if *eAttrs != *rply.AttributesDigest {
-		t.Errorf("expecting: %v, received: %v", *eAttrs, *rply.AttributesDigest)
+	eAttrs := "OfficeGroup:Marketing"
+	if eAttrs != *rply.AttributesDigest {
+		t.Errorf("expecting: %v, received: %v", eAttrs, *rply.AttributesDigest)
 	}
 }
 
 func testDspSessionInit(t *testing.T) {
 	initUsage := time.Duration(5 * time.Minute)
 	argsInit := &InitArgsWithApiKey{
-		APIKey: "12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "ses12345",
+		},
 		V1InitSessionArgs: sessions.V1InitSessionArgs{
 			InitSession:       true,
 			AllocateResources: true,
@@ -330,12 +271,12 @@ func testDspSessionInit(t *testing.T) {
 		},
 	}
 	var rply sessions.V1InitReplyWithDigest
-	if err := dspSessionRPC.Call(utils.SessionSv1InitiateSessionWithDigest,
+	if err := dispEngine.RCP.Call(utils.SessionSv1InitiateSessionWithDigest,
 		argsInit, &rply); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if *rply.MaxUsage != initUsage.Seconds() {
-		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
+		t.Errorf("Unexpected MaxUsage: %v", *rply.MaxUsage)
 	}
 	if *rply.ResourceAllocation != "RES_ACNT_1001" {
 		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
@@ -345,7 +286,9 @@ func testDspSessionInit(t *testing.T) {
 func testDspSessionUpdate(t *testing.T) {
 	reqUsage := 5 * time.Minute
 	argsUpdate := &UpdateSessionWithApiKey{
-		APIKey: "12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "ses12345",
+		},
 		V1UpdateSessionArgs: sessions.V1UpdateSessionArgs{
 			GetAttributes: true,
 			UpdateSession: true,
@@ -368,7 +311,7 @@ func testDspSessionUpdate(t *testing.T) {
 		},
 	}
 	var rply sessions.V1UpdateSessionReply
-	if err := dspSessionRPC.Call(utils.SessionSv1UpdateSession,
+	if err := dispEngine.RCP.Call(utils.SessionSv1UpdateSession,
 		argsUpdate, &rply); err != nil {
 		t.Error(err)
 	}
@@ -406,7 +349,9 @@ func testDspSessionUpdate(t *testing.T) {
 
 func testDspSessionTerminate(t *testing.T) {
 	args := &TerminateSessionWithApiKey{
-		APIKey: "12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "ses12345",
+		},
 		V1TerminateSessionArgs: sessions.V1TerminateSessionArgs{
 			TerminateSession: true,
 			ReleaseResources: true,
@@ -429,7 +374,7 @@ func testDspSessionTerminate(t *testing.T) {
 		},
 	}
 	var rply string
-	if err := dspSessionRPC.Call(utils.SessionSv1TerminateSession,
+	if err := dispEngine.RCP.Call(utils.SessionSv1TerminateSession,
 		args, &rply); err != nil {
 		t.Error(err)
 	}
@@ -440,7 +385,9 @@ func testDspSessionTerminate(t *testing.T) {
 
 func testDspSessionProcessCDR(t *testing.T) {
 	args := CGREvWithApiKey{
-		APIKey: "12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "ses12345",
+		},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessCDR",
@@ -460,9 +407,9 @@ func testDspSessionProcessCDR(t *testing.T) {
 	}
 
 	var rply string
-	if err := dspSessionRPC.Call(utils.SessionSv1ProcessCDR,
+	if err := dispEngine.RCP.Call(utils.SessionSv1ProcessCDR,
 		args, &rply); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if rply != utils.OK {
 		t.Errorf("Unexpected reply: %s", rply)
@@ -472,7 +419,9 @@ func testDspSessionProcessCDR(t *testing.T) {
 func testDspSessionProcessEvent(t *testing.T) {
 	initUsage := 5 * time.Minute
 	args := ProcessEventWithApiKey{
-		APIKey: "12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "ses12345",
+		},
 		V1ProcessEventArgs: sessions.V1ProcessEventArgs{
 			AllocateResources: true,
 			Debit:             true,
@@ -481,6 +430,7 @@ func testDspSessionProcessEvent(t *testing.T) {
 				Tenant: "cgrates.org",
 				ID:     "TestSSv1ItProcessEvent",
 				Event: map[string]interface{}{
+					"CGRID":           "c87609aa1cb6e9529ab1836cfeeeb0ab7aa7ebaf",
 					utils.Tenant:      "cgrates.org",
 					utils.Category:    "call",
 					utils.ToR:         utils.VOICE,
@@ -496,9 +446,9 @@ func testDspSessionProcessEvent(t *testing.T) {
 		},
 	}
 	var rply sessions.V1ProcessEventReply
-	if err := dspSessionRPC.Call(utils.SessionSv1ProcessEvent,
+	if err := dispEngine.RCP.Call(utils.SessionSv1ProcessEvent,
 		args, &rply); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if *rply.MaxUsage != initUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
@@ -514,6 +464,7 @@ func testDspSessionProcessEvent(t *testing.T) {
 			ID:      "TestSSv1ItProcessEvent",
 			Context: utils.StringPointer(utils.MetaSessionS),
 			Event: map[string]interface{}{
+				"CGRID":           "c87609aa1cb6e9529ab1836cfeeeb0ab7aa7ebaf",
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
@@ -531,14 +482,5 @@ func testDspSessionProcessEvent(t *testing.T) {
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
 		t.Errorf("expecting: %+v, received: %+v",
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
-	}
-}
-
-func testDspSessionKillEngine(t *testing.T) {
-	if err := engine.KillEngine(dspDelay); err != nil {
-		t.Error(err)
-	}
-	if err := engine.KillEngine(dspDelay); err != nil {
-		t.Error(err)
 	}
 }

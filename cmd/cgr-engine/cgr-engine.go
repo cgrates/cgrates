@@ -1038,12 +1038,10 @@ func startDispatcherService(internalDispatcherSChan chan *dispatchers.Dispatcher
 
 	server.RpcRegisterName(utils.AttributeSv1,
 		v1.NewDispatcherAttributeSv1(dspS))
-	/*
-		if !cfg.SessionSCfg().Enabled && len(cfg.DispatcherSCfg().SessionSConns) != 0 {
-			server.RpcRegisterName(utils.SessionSv1,
-				v1.NewDispatcherSessionSv1(dspS))
-		}
-	*/
+
+	server.RpcRegisterName(utils.SessionSv1,
+		v1.NewDispatcherSessionSv1(dspS))
+
 	server.RpcRegisterName(utils.ChargerSv1,
 		v1.NewDispatcherChargerSv1(dspS))
 
