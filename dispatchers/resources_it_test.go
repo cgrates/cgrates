@@ -40,6 +40,7 @@ var sTestsDspRes = []func(t *testing.T){
 
 //Test start here
 func TestDspResourceS(t *testing.T) {
+	engine.KillEngine(0)
 	allEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "all"), true, true)
 	allEngine2 = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "all2"), true, true)
 	attrEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "attributes"), true, true)
@@ -55,6 +56,7 @@ func TestDspResourceS(t *testing.T) {
 	dispEngine.stopEngine(t)
 	allEngine.stopEngine(t)
 	allEngine2.stopEngine(t)
+	engine.KillEngine(0)
 }
 
 func testDspResPingFailover(t *testing.T) {
@@ -68,7 +70,9 @@ func testDspResPingFailover(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		APIKey: "res12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "res12345",
+		},
 	}
 	if err := dispEngine.RCP.Call(utils.ResourceSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
@@ -100,7 +104,9 @@ func testDspResPing(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		APIKey: "res12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "res12345",
+		},
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
@@ -111,7 +117,9 @@ func testDspResPing(t *testing.T) {
 func testDspResTestAuthKey(t *testing.T) {
 	var rs *engine.Resources
 	args := &ArgsV1ResUsageWithApiKey{
-		APIKey: "12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "12345",
+		},
 		ArgRSv1ResourceUsage: utils.ArgRSv1ResourceUsage{
 			CGREvent: utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -133,7 +141,9 @@ func testDspResTestAuthKey(t *testing.T) {
 func testDspResTestAuthKey2(t *testing.T) {
 	var rs *engine.Resources
 	args := &ArgsV1ResUsageWithApiKey{
-		APIKey: "res12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "res12345",
+		},
 		ArgRSv1ResourceUsage: utils.ArgRSv1ResourceUsage{
 			CGREvent: utils.CGREvent{
 				Tenant: "cgrates.org",

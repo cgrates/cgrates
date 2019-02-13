@@ -143,7 +143,7 @@ func testTpDispITMove(t *testing.T) {
 func testTpDispITCheckData(t *testing.T) {
 	result, err := tpDispMigrator.storDBOut.StorDB().GetTPDispatchers("TP1", "cgrates.org", "Dsp1")
 	if err != nil {
-		t.Error("Error when getting TpDispatchers ", err.Error())
+		t.Fatal("Error when getting TpDispatchers ", err.Error())
 	}
 	if !reflect.DeepEqual(tpDisps[0], result[0]) {
 		t.Errorf("Expecting: %+v, received: %+v",

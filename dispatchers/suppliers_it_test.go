@@ -41,6 +41,7 @@ var sTestsDspSup = []func(t *testing.T){
 
 //Test start here
 func TestDspSupplierS(t *testing.T) {
+	engine.KillEngine(0)
 	allEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "all"), true, true)
 	allEngine2 = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "all2"), true, true)
 	attrEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "attributes"), true, true)
@@ -56,6 +57,7 @@ func TestDspSupplierS(t *testing.T) {
 	dispEngine.stopEngine(t)
 	allEngine.stopEngine(t)
 	allEngine2.stopEngine(t)
+	engine.KillEngine(0)
 }
 
 func testDspSupPing(t *testing.T) {
@@ -69,7 +71,9 @@ func testDspSupPing(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		APIKey: "sup12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "sup12345",
+		},
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
@@ -88,7 +92,9 @@ func testDspSupPingFailover(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		APIKey: "sup12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "sup12345",
+		},
 	}
 	if err := dispEngine.RCP.Call(utils.SupplierSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
@@ -149,7 +155,9 @@ func testDspSupGetSupFailover(t *testing.T) {
 		},
 	}
 	args := &ArgsGetSuppliersWithApiKey{
-		APIKey: "sup12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "sup12345",
+		},
 		ArgsGetSuppliers: engine.ArgsGetSuppliers{
 			CGREvent: utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -185,7 +193,9 @@ func testDspSupGetSupFailover(t *testing.T) {
 func testDspSupTestAuthKey(t *testing.T) {
 	var rpl *engine.SortedSuppliers
 	args := &ArgsGetSuppliersWithApiKey{
-		APIKey: "12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "12345",
+		},
 		ArgsGetSuppliers: engine.ArgsGetSuppliers{
 			CGREvent: utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -234,7 +244,9 @@ func testDspSupTestAuthKey2(t *testing.T) {
 		},
 	}
 	args := &ArgsGetSuppliersWithApiKey{
-		APIKey: "sup12345",
+		DispatcherResource: DispatcherResource{
+			APIKey: "sup12345",
+		},
 		ArgsGetSuppliers: engine.ArgsGetSuppliers{
 			CGREvent: utils.CGREvent{
 				Tenant: "cgrates.org",

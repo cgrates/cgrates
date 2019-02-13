@@ -173,11 +173,11 @@ func (ssv1 *SessionSv1) BiRPCv1RegisterInternalBiJSONConn(clnt *rpc2.Client, arg
 	return ssv1.SMG.BiRPCv1RegisterInternalBiJSONConn(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCPing(clnt *rpc2.Client, ign string, reply *string) error {
+func (ssv1 *SessionSv1) BiRPCPing(clnt *rpc2.Client, ign *utils.CGREvent, reply *string) error {
 	return ssv1.Ping(ign, reply)
 }
 
-func (ssv1 *SessionSv1) Ping(ign string, reply *string) error {
+func (ssv1 *SessionSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
