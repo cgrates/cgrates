@@ -34,7 +34,6 @@ import (
 var smgRplcMasterCfgPath, smgRplcSlaveCfgPath string
 var smgRplcMasterCfg, smgRplcSlaveCfg *config.CGRConfig
 var smgRplcMstrRPC, smgRplcSlvRPC *rpc.Client
-var err error
 
 func TestSessionSRplInitCfg(t *testing.T) {
 	smgRplcMasterCfgPath = path.Join(*dataDir, "conf", "samples", "smgreplcmaster")
