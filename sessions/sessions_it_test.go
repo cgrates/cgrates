@@ -1,5 +1,242 @@
+// +build integration
+
+/*
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
 package sessions
 
-//terminate pentru o sesiune pasiva
+import (
+	"net/rpc"
+	"net/rpc/jsonrpc"
+	"path"
+	"testing"
+	"time"
 
-//pentru update fara sesiune si terminate fara sesiune
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+)
+
+var sItCfgPath string
+var sItCfg *config.CGRConfig
+var sItRPC *rpc.Client
+
+func TestSessionsItInitCfg(t *testing.T) {
+	sItCfgPath = path.Join(*dataDir, "conf", "samples", "smg")
+	// Init config first
+	var err error
+	sItCfg, err = config.NewCGRConfigFromFolder(sItCfgPath)
+	if err != nil {
+		t.Error(err)
+	}
+	sItCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	config.SetCgrConfig(sItCfg)
+}
+
+// Remove data in both rating and accounting db
+func TestSessionsItResetDataDb(t *testing.T) {
+	if err := engine.InitDataDb(sItCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Wipe out the cdr database
+func TestSessionsItResetStorDb(t *testing.T) {
+	if err := engine.InitStorDb(sItCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Start CGR Engine
+func TestSessionsItStartEngine(t *testing.T) {
+	if _, err := engine.StopStartEngine(sItCfgPath, *waitRater); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Connect rpc client to rater
+func TestSessionsItApierRpcConn(t *testing.T) {
+	var err error
+	sItRPC, err = jsonrpc.Dial("tcp", sItCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Load the tariff plan, creating accounts and their balances
+func TestSessionsItTPFromFolder(t *testing.T) {
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	var loadInst utils.LoadInstance
+	if err := sItRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+}
+
+func TestSessionsItTerminatUnexist(t *testing.T) {
+	var acnt *engine.Account
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
+	eAcntVal := 10.0
+	if err := sItRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+
+	usage := time.Duration(2 * time.Minute)
+	termArgs := &V1TerminateSessionArgs{
+		TerminateSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSessionsItTerminatUnexist",
+			Event: map[string]interface{}{
+				utils.EVENT_NAME:       "TerminateEvent",
+				utils.ToR:              utils.VOICE,
+				utils.OriginID:         "123451",
+				utils.Account:          "1001",
+				utils.Subject:          "1001",
+				utils.Destination:      "1002",
+				utils.Category:         "call",
+				utils.Tenant:           "cgrates.org",
+				utils.RequestType:      utils.META_PREPAID,
+				utils.SetupTime:        time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+				utils.AnswerTime:       time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+				utils.Usage:            usage,
+				utils.CGRDebitInterval: "10s",
+			},
+		},
+	}
+
+	var rpl string
+	if err := sItRPC.Call(utils.SessionSv1TerminateSession, termArgs, &rpl); err != nil || rpl != utils.OK {
+		t.Error(err)
+	}
+	time.Sleep(10 * time.Millisecond)
+
+	eAcntVal = 9.40
+	if err := sItRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+	time.Sleep(100 * time.Millisecond)
+
+	if err := sItRPC.Call(utils.SessionSv1ProcessCDR, termArgs.CGREvent, &rpl); err != nil {
+		t.Error(err)
+	} else if rpl != utils.OK {
+		t.Errorf("Received reply: %s", rpl)
+	}
+
+	var cdrs []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{DestinationPrefixes: []string{"1002"}}
+	if err := sItRPC.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Usage != "2m0s" {
+			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
+		}
+	}
+
+}
+
+func TestSessionsItUpdateUnexist(t *testing.T) {
+	var acnt *engine.Account
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
+	eAcntVal := 9.4
+	if err := sItRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+
+	usage := time.Duration(2 * time.Minute)
+	updtArgs := &V1UpdateSessionArgs{
+		UpdateSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSessionsItUpdateUnexist",
+			Event: map[string]interface{}{
+				utils.EVENT_NAME:       "UpdateEvent",
+				utils.ToR:              utils.VOICE,
+				utils.OriginID:         "123789",
+				utils.Account:          "1001",
+				utils.Subject:          "1001",
+				utils.Destination:      "1002",
+				utils.Category:         "call",
+				utils.Tenant:           "cgrates.org",
+				utils.RequestType:      utils.META_PREPAID,
+				utils.SetupTime:        time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+				utils.AnswerTime:       time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+				utils.Usage:            usage,
+				utils.CGRDebitInterval: "10s",
+			},
+		},
+	}
+
+	var updtRpl V1UpdateSessionReply
+	if err := sItRPC.Call(utils.SessionSv1UpdateSession, updtArgs, &updtRpl); err != nil {
+		t.Error(err)
+	}
+	if *updtRpl.MaxUsage != usage {
+		t.Errorf("Expecting : %+v, received: %+v", usage, *updtRpl.MaxUsage)
+	}
+
+	time.Sleep(10 * time.Millisecond)
+
+	eAcntVal = 8.283100
+	if err := sItRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+	var rpl string
+	termArgs := &V1TerminateSessionArgs{
+		TerminateSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSessionsItTerminatUnexist",
+			Event: map[string]interface{}{
+				utils.EVENT_NAME:  "TerminateEvent",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "123789",
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002",
+				utils.Category:    "call",
+				utils.Tenant:      "cgrates.org",
+				utils.RequestType: utils.META_PREPAID,
+				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+				utils.Usage:       usage,
+			},
+		},
+	}
+
+	if err := sItRPC.Call(utils.SessionSv1TerminateSession, termArgs, &rpl); err != nil || rpl != utils.OK {
+		t.Error(err)
+	}
+}
+
+//terminate for a passive session
+
+func TestSessionsItStopCgrEngine(t *testing.T) {
+	if err := engine.KillEngine(*waitRater); err != nil {
+		t.Error(err)
+	}
+}
