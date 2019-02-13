@@ -386,6 +386,7 @@ const (
 	MetaActionTriggers           = "*action_triggers"
 	MetaActions                  = "*actions"
 	MetaSharedGroups             = "*shared_groups"
+	MetaRALs                     = "*rals"
 	MetaStats                    = "*stats"
 	MetaThresholds               = "*thresholds"
 	MetaSuppliers                = "*suppliers"
@@ -701,10 +702,13 @@ const (
 
 // ApierV1 APIs
 const (
-	ApierV1ComputeFilterIndexes = "ApierV1.ComputeFilterIndexes"
-	ApierV1ReloadCache          = "ApierV1.ReloadCache"
-	ApierV1ReloadScheduler      = "ApierV1.ReloadScheduler"
-	ApierV1Ping                 = "ApierV1.Ping"
+	ApierV1ComputeFilterIndexes    = "ApierV1.ComputeFilterIndexes"
+	ApierV1ReloadCache             = "ApierV1.ReloadCache"
+	ApierV1ReloadScheduler         = "ApierV1.ReloadScheduler"
+	ApierV1Ping                    = "ApierV1.Ping"
+	ApierV1SetDispatcherProfile    = "ApierV1.SetDispatcherProfile"
+	ApierV1GetDispatcherProfile    = "ApierV1.GetDispatcherProfile"
+	ApierV1RemoveDispatcherProfile = "ApierV1.RemoveDispatcherProfile"
 )
 
 const (
