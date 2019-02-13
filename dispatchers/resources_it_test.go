@@ -61,7 +61,7 @@ func TestDspResourceS(t *testing.T) {
 
 func testDspResPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.ResourceSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+	if err := allEngine.RCP.Call(utils.ResourceSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -95,7 +95,7 @@ func testDspResPingFailover(t *testing.T) {
 
 func testDspResPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.ResourceSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+	if err := allEngine.RCP.Call(utils.ResourceSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)

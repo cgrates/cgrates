@@ -62,7 +62,7 @@ func TestDspSupplierS(t *testing.T) {
 
 func testDspSupPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.SupplierSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+	if err := allEngine.RCP.Call(utils.SupplierSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -83,7 +83,7 @@ func testDspSupPing(t *testing.T) {
 
 func testDspSupPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.SupplierSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+	if err := allEngine.RCP.Call(utils.SupplierSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)

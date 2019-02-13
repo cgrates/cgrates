@@ -106,17 +106,17 @@ func testTLSRpcConn(t *testing.T) {
 func testTLSPing(t *testing.T) {
 	var reply string
 
-	if err := tlsRpcClientJson.Call(utils.ThresholdSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+	if err := tlsRpcClientJson.Call(utils.ThresholdSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := tlsRpcClientGob.Call(utils.ThresholdSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+	if err := tlsRpcClientGob.Call(utils.ThresholdSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := tlsHTTPJson.Call(utils.ThresholdSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+	if err := tlsHTTPJson.Call(utils.ThresholdSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
