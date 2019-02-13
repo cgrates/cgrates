@@ -77,3 +77,33 @@ func (dS *DispatcherService) StatSv1ProcessEvent(args *ArgsStatProcessEventWithA
 	return dS.Dispatch(&args.CGREvent, utils.MetaStats, args.RouteID,
 		utils.StatSv1ProcessEvent, args.StatsArgsProcessEvent, reply)
 }
+
+func (dS *DispatcherService) StatSv1GetQueueFloatMetrics(args *TntIDWithApiKey,
+	reply *map[string]float64) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.StatSv1GetQueueFloatMetrics,
+			args.TenantID.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: args.Tenant,
+		ID:     args.ID,
+	}, utils.MetaStats, args.RouteID, utils.StatSv1GetQueueFloatMetrics,
+		args.TenantID, reply)
+}
+
+func (dS *DispatcherService) StatSv1GetQueueIDs(args *TntWithApiKey,
+	reply *[]string) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.StatSv1GetQueueIDs,
+			args.TenantArg.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant},
+		utils.MetaStats, args.RouteID, utils.StatSv1GetQueueIDs,
+		args.TenantArg, reply)
+}

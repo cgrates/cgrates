@@ -145,6 +145,16 @@ func (dSts *DispatcherStatSv1) GetQueueStringMetrics(args *dispatchers.TntIDWith
 	return dSts.dS.StatSv1GetQueueStringMetrics(args, reply)
 }
 
+func (dSts *DispatcherStatSv1) GetQueueFloatMetrics(args *dispatchers.TntIDWithApiKey,
+	reply *map[string]float64) error {
+	return dSts.dS.StatSv1GetQueueFloatMetrics(args, reply)
+}
+
+func (dSts *DispatcherStatSv1) GetQueueIDs(args *dispatchers.TntWithApiKey,
+	reply *[]string) error {
+	return dSts.dS.StatSv1GetQueueIDs(args, reply)
+}
+
 // GetQueueStringMetrics implements StatSv1ProcessEvent
 func (dSts *DispatcherStatSv1) ProcessEvent(args *dispatchers.ArgsStatProcessEventWithApiKey, reply *[]string) error {
 	return dSts.dS.StatSv1ProcessEvent(args, reply)
