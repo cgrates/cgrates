@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"time"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -59,4 +61,29 @@ func (dS *DispatcherService) ThresholdSv1ProcessEvent(args *ArgsProcessEventWith
 	}
 	return dS.Dispatch(&args.CGREvent, utils.MetaThresholds, args.RouteID,
 		utils.ThresholdSv1ProcessEvent, args.ArgsProcessEvent, tIDs)
+}
+
+func (dS *DispatcherService) ThresholdSv1GetThresholdIDs(args *TntWithApiKey, tIDs *[]string) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.ThresholdSv1GetThresholdIDs,
+			args.Tenant, args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaThresholds, args.RouteID,
+		utils.ThresholdSv1GetThresholdIDs, args.TenantArg, tIDs)
+}
+
+func (dS *DispatcherService) ThresholdSv1GetThreshold(args *TntIDWithApiKey, th *engine.Threshold) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.ThresholdSv1GetThreshold,
+			args.TenantID.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: args.Tenant,
+		ID:     args.ID,
+	}, utils.MetaThresholds, args.RouteID, utils.ThresholdSv1GetThreshold, args.TenantID, th)
 }
