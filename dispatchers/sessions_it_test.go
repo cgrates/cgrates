@@ -34,6 +34,8 @@ import (
 )
 
 var sTestsDspSession = []func(t *testing.T){
+	testDspSessionAddBalacne,
+
 	testDspSessionPingFailover,
 
 	testDspSessionPing,
@@ -65,6 +67,36 @@ func TestDspSessionS(t *testing.T) {
 	allEngine.stopEngine(t)
 	allEngine2.stopEngine(t)
 	engine.KillEngine(0)
+}
+
+func testDspSessionAddBalacne(t *testing.T) {
+	initUsage := 15 * time.Minute
+	attrSetBalance := utils.AttrSetBalance{
+		Tenant:        "cgrates.org",
+		Account:       "1001",
+		BalanceType:   utils.VOICE,
+		BalanceID:     utils.StringPointer("SessionBalance"),
+		Value:         utils.Float64Pointer(float64(initUsage)),
+		RatingSubject: utils.StringPointer("*zero5ms"),
+	}
+	var reply string
+	if err := allEngine.RCP.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
+	}
+	var acnt *engine.Account
+	attrs := &utils.AttrGetAccount{
+		Tenant:  attrSetBalance.Tenant,
+		Account: attrSetBalance.Account,
+	}
+	eAcntVal := float64(initUsage)
+	if err := allEngine.RCP.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
+		t.Errorf("Expecting: %v, received: %v",
+			time.Duration(eAcntVal), time.Duration(acnt.BalanceMap[utils.VOICE].GetTotalValue()))
+	}
 }
 
 func testDspSessionPing(t *testing.T) {
@@ -386,20 +418,6 @@ func testDspSessionProcessCDR(t *testing.T) {
 
 func testDspSessionProcessEvent(t *testing.T) {
 	initUsage := 5 * time.Minute
-	attrSetBalance := utils.AttrSetBalance{
-		Tenant:        "cgrates.org",
-		Account:       "1001",
-		BalanceType:   utils.VOICE,
-		BalanceID:     utils.StringPointer("TestDynamicDebitBalance"),
-		Value:         utils.Float64Pointer(float64(initUsage)),
-		RatingSubject: utils.StringPointer("*zero5ms"),
-	}
-	var reply string
-	if err := allEngine.RCP.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Received: %s", reply)
-	}
 	args := ProcessEventWithApiKey{
 		DispatcherResource: DispatcherResource{
 			APIKey: "ses12345",
