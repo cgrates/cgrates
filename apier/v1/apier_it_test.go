@@ -442,10 +442,12 @@ func TestApierTPRatingProfile(t *testing.T) {
 
 func TestApierTPActions(t *testing.T) {
 	reply := ""
-	act := &utils.TPActions{TPid: utils.TEST_SQL, ID: "PREPAID_10", Actions: []*utils.TPAction{
-		{Identifier: "*topup_reset", BalanceType: "*monetary", Directions: "*out", Units: "10", ExpiryTime: "*unlimited",
-			DestinationIds: "*any", BalanceWeight: "10", Weight: 10},
-	}}
+	act := &utils.TPActions{TPid: utils.TEST_SQL,
+		ID: "PREPAID_10", Actions: []*utils.TPAction{
+			{Identifier: "*topup_reset", BalanceType: "*monetary",
+				Units: "10", ExpiryTime: "*unlimited",
+				DestinationIds: "*any", BalanceWeight: "10", Weight: 10},
+		}}
 	actWarn := &utils.TPActions{TPid: utils.TEST_SQL, ID: "WARN_VIA_HTTP", Actions: []*utils.TPAction{
 		{Identifier: "*call_url", ExtraParameters: "http://localhost:8000", Weight: 10},
 	}}
@@ -749,7 +751,6 @@ func TestApierSetRatingProfile(t *testing.T) {
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:30Z", "")
 	cd := engine.CallDescriptor{
-		Direction:     "*out",
 		Category:      "call",
 		Tenant:        "cgrates.org",
 		Subject:       "dan",
@@ -970,7 +971,9 @@ func TestApierSetActions(t *testing.T) {
 
 func TestApierGetActions(t *testing.T) {
 	expectActs := []*utils.TPAction{
-		{Identifier: engine.TOPUP_RESET, BalanceType: utils.MONETARY, Directions: utils.OUT, Units: "75", BalanceWeight: "0", BalanceBlocker: "false", BalanceDisabled: "false", ExpiryTime: engine.UNLIMITED, Weight: 20.0}}
+		{Identifier: engine.TOPUP_RESET, BalanceType: utils.MONETARY,
+			Units: "75", BalanceWeight: "0", BalanceBlocker: "false",
+			BalanceDisabled: "false", ExpiryTime: engine.UNLIMITED, Weight: 20.0}}
 
 	var reply []*utils.TPAction
 	if err := rater.Call("ApierV1.GetActions", "ACTS_1", &reply); err != nil {
@@ -1311,7 +1314,7 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 	expStats := &utils.CacheStats{
 		Destinations:       3,
-		Actions:            5,
+		Actions:            6,
 		ActionPlans:        7,
 		AccountActionPlans: 13,
 		Aliases:            1,
@@ -1368,7 +1371,6 @@ func TestApierResponderGetCost(t *testing.T) {
 	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:30Z", "")
 	cd := engine.CallDescriptor{
-		Direction:     "*out",
 		Category:      "call",
 		Tenant:        "cgrates.org",
 		Subject:       "1001",
@@ -1391,7 +1393,6 @@ func TestApierMaxDebitInexistentAcnt(t *testing.T) {
 
 	cc := &engine.CallCost{}
 	cd := engine.CallDescriptor{
-		Direction:   "*out",
 		Tenant:      "cgrates.org",
 		Category:    "call",
 		Subject:     "INVALID",

@@ -1,3 +1,3 @@
-#ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Directions[6],Categories[7],DestinationIds[8],RatingSubject[9],SharedGroup[10],ExpiryTime[11],TimingIds[12],Units[13],BalanceWeight[14],BalanceBlocker[15],BalanceDisabled[16],Weight[17]
-ACT_TOPUP_RST_10,*topup_reset,,,,*monetary,*out,,*any,,,*unlimited,,10,10,false,false,10
-ACT_LOG_WARNING,*log,,,,,,,,,,,,,,false,false,10
+#ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceBlocker[14],BalanceDisabled[15],Weight[16]
+ACT_TOPUP_RST_10,*topup_reset,,,,*monetary,,*any,,,*unlimited,,10,10,false,false,10
+ACT_LOG_WARNING,*log,,,,,,,,,,,,,false,false,10

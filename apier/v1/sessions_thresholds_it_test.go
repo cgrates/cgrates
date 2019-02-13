@@ -141,10 +141,7 @@ func TestSessionSv1ItGetThreshold(t *testing.T) {
 		BalanceMap: map[string]engine.Balances{
 			utils.MONETARY: []*engine.Balance{
 				{
-					//Uuid:  "c9a2c620-5256-483a-a92d-c51e94bb7667",
-					Value: 10,
-					Directions: utils.StringMap{
-						"*out": true},
+					Value:  10,
 					Weight: 10,
 				},
 			},
@@ -203,10 +200,7 @@ func TestSessionSv1ItAuth(t *testing.T) {
 		BalanceMap: map[string]engine.Balances{
 			utils.MONETARY: []*engine.Balance{
 				{
-					//Uuid:  "c9a2c620-5256-483a-a92d-c51e94bb7667",
-					Value: 20,
-					Directions: utils.StringMap{
-						"*out": true},
+					Value:  20,
 					Weight: 10,
 				},
 			},
@@ -269,10 +263,7 @@ func TestSessionSv1ItInitiateSession(t *testing.T) {
 		BalanceMap: map[string]engine.Balances{
 			utils.MONETARY: []*engine.Balance{
 				{
-					//Uuid:  "c9a2c620-5256-483a-a92d-c51e94bb7667",
-					Value: 29.898000,
-					Directions: utils.StringMap{
-						"*out": true},
+					Value:  29.898000,
 					Weight: 10,
 				},
 			},
@@ -329,10 +320,7 @@ func TestSessionSv1ItTerminateSession(t *testing.T) {
 		BalanceMap: map[string]engine.Balances{
 			utils.MONETARY: []*engine.Balance{
 				{
-					//Uuid:  "c9a2c620-5256-483a-a92d-c51e94bb7667",
-					Value: 39.796000,
-					Directions: utils.StringMap{
-						"*out": true},
+					Value:  39.796000,
 					Weight: 10,
 				},
 			},

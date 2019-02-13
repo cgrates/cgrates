@@ -94,7 +94,6 @@ func TestSMGDataLastUsedData(t *testing.T) {
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2016-01-05T18:31:05Z", "")
 	cd := engine.CallDescriptor{
-		Direction:   "*out",
 		Category:    "data",
 		Tenant:      "cgrates.org",
 		Subject:     "1001",
@@ -114,7 +113,6 @@ func TestSMGDataLastUsedData(t *testing.T) {
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         utils.DATA,
 		utils.OriginID:    "123491",
-		utils.Direction:   utils.OUT,
 		utils.Account:     "1001",
 		utils.Subject:     "1001",
 		utils.Destination: utils.DATA,

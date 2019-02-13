@@ -29,8 +29,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/apier/v1"
-	"github.com/cgrates/cgrates/apier/v2"
+	v1 "github.com/cgrates/cgrates/apier/v1"
+	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -87,7 +87,6 @@ func TestA1itLoadTPFromFolder(t *testing.T) {
 	tStart := time.Date(2017, 3, 3, 10, 39, 33, 0, time.UTC)
 	tEnd := time.Date(2017, 3, 3, 10, 39, 33, 10240, time.UTC)
 	cd := engine.CallDescriptor{
-		Direction:   "*out",
 		Category:    "data1",
 		Tenant:      "cgrates.org",
 		Subject:     "rpdata1",

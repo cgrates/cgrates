@@ -578,7 +578,8 @@ func testStorDBitCRUDTpRatingProfiles(t *testing.T) {
 	if rcv, err := storDB.GetTPRatingProfiles(&filter); err != nil {
 		t.Error(err)
 	} else {
-		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
+		if len(snd) != len(rcv) ||
+			len(snd[0].RatingPlanActivations) != len(rcv[0].RatingPlanActivations) {
 			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v",
 				utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
 		}
@@ -674,7 +675,6 @@ func testStorDBitCRUDTpActions(t *testing.T) {
 					BalanceId:       "",
 					BalanceUuid:     "",
 					BalanceType:     "*monetary",
-					Directions:      "*out",
 					Units:           "10",
 					ExpiryTime:      "*unlimited",
 					Filter:          "",
@@ -700,7 +700,6 @@ func testStorDBitCRUDTpActions(t *testing.T) {
 					BalanceId:       "",
 					BalanceUuid:     "",
 					BalanceType:     "*monetary",
-					Directions:      "*out",
 					Units:           "10",
 					ExpiryTime:      "*unlimited",
 					Filter:          "",

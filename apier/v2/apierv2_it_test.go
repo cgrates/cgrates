@@ -30,7 +30,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/apier/v1"
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -203,7 +203,8 @@ func TestApierV2itFraudMitigation(t *testing.T) {
 func TestApierV2itSetAccountWithAP(t *testing.T) {
 	argActs1 := utils.AttrSetActions{ActionsId: "TestApierV2itSetAccountWithAP_ACT_1",
 		Actions: []*utils.TPAction{
-			{Identifier: engine.TOPUP_RESET, BalanceType: utils.MONETARY, Directions: utils.OUT, Units: "5.0", Weight: 20.0},
+			{Identifier: engine.TOPUP_RESET,
+				BalanceType: utils.MONETARY, Units: "5.0", Weight: 20.0},
 		}}
 	var reply string
 	if err := apierRPC.Call("ApierV2.SetActions", argActs1, &reply); err != nil {

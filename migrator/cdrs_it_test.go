@@ -110,7 +110,6 @@ func testCdrITFlush(t *testing.T) {
 
 func testCdrITMigrateAndMove(t *testing.T) {
 	cc := &engine.CallCost{
-		Direction:   utils.OUT,
 		Destination: "0723045326",
 		Timespans: []*engine.TimeSpan{
 			{

@@ -148,7 +148,6 @@ func testSessionCostITFlush(t *testing.T) {
 
 func testSessionCostITMigrate(t *testing.T) {
 	cc := &engine.CallCost{
-		Direction:   utils.OUT,
 		Cost:        1.23,
 		Destination: "0723045326",
 		Timespans: []*engine.TimeSpan{

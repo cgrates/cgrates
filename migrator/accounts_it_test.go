@@ -220,7 +220,6 @@ func testAccITMigrateAndMove(t *testing.T) {
 	v2d := &engine.Balance{
 		Uuid: "", ID: "",
 		Value:          100000,
-		Directions:     utils.StringMap{"*OUT": true},
 		ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 		Weight:         10,
 		DestinationIDs: utils.StringMap{"NAT": true},
@@ -233,7 +232,6 @@ func testAccITMigrateAndMove(t *testing.T) {
 	v2b := &engine.Balance{
 		Uuid: "", ID: "",
 		Value:          0.0001,
-		Directions:     utils.StringMap{"*OUT": true},
 		ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 		Weight:         10,
 		DestinationIDs: utils.StringMap{"NAT": true},
@@ -247,7 +245,6 @@ func testAccITMigrateAndMove(t *testing.T) {
 		Uuid:           "",
 		ID:             "",
 		Value:          21,
-		Directions:     utils.StringMap{"*OUT": true},
 		ExpirationDate: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 		DestinationIDs: utils.NewStringMap(""),
 		RatingSubject:  "",

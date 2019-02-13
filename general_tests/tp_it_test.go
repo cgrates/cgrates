@@ -93,7 +93,6 @@ func TestTpLoadTariffPlanFromFolder(t *testing.T) {
 func TestTpBalanceCounter(t *testing.T) {
 	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
 	cd := engine.CallDescriptor{
-		Direction:     "*out",
 		Category:      "call",
 		Tenant:        "cgrates.org",
 		Subject:       "1001",
@@ -174,7 +173,6 @@ func TestTpZeroCost(t *testing.T) {
 	balanceValueBefore := acnt.BalanceMap[utils.MONETARY][0].Value
 	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
 	cd := engine.CallDescriptor{
-		Direction:     "*out",
 		Category:      "call",
 		Tenant:        "cgrates.org",
 		Subject:       "free",
@@ -200,7 +198,6 @@ func TestTpZeroCost(t *testing.T) {
 func TestTpZeroNegativeCost(t *testing.T) {
 	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
 	cd := engine.CallDescriptor{
-		Direction:     "*out",
 		Category:      "call",
 		Tenant:        "cgrates.org",
 		Subject:       "free",
@@ -281,7 +278,6 @@ func TestTpCreateExecuteActionMatch(t *testing.T) {
 		Actions: []*utils.TPAction{
 			{
 				BalanceType:   "*monetary",
-				Directions:    "*out",
 				Identifier:    "*topup",
 				RatingSubject: "",
 				Units:         "10.500000",
@@ -330,7 +326,6 @@ func TestTpSetRemoveActions(t *testing.T) {
 		Actions: []*utils.TPAction{
 			{
 				BalanceType:   "*monetary",
-				Directions:    "*out",
 				Identifier:    "*topup",
 				RatingSubject: "",
 				Units:         "10.500000",

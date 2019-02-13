@@ -318,8 +318,9 @@ func testOnStorITCacheAccountActionPlans(t *testing.T) {
 func testOnStorITCacheActionTriggers(t *testing.T) {
 	ats := ActionTriggers{
 		&ActionTrigger{
-			ID:                "testOnStorITCacheActionTrigger",
-			Balance:           &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)), Timings: make([]*RITiming, 0)},
+			ID: "testOnStorITCacheActionTrigger",
+			Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY),
+				Timings: make([]*RITiming, 0)},
 			ThresholdValue:    2,
 			ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
 			ActionsID:         "TEST_ACTIONS",
@@ -845,9 +846,8 @@ func testOnStorITActions(t *testing.T) {
 			ExpirationString: UNLIMITED,
 			Weight:           10,
 			Balance: &BalanceFilter{
-				Type:       utils.StringPointer(utils.MONETARY),
-				Uuid:       utils.StringPointer(utils.GenUUID()),
-				Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+				Type: utils.StringPointer(utils.MONETARY),
+				Uuid: utils.StringPointer(utils.GenUUID()),
 				Value: &utils.ValueFormula{Static: 10,
 					Params: make(map[string]interface{})},
 				Weight:   utils.Float64Pointer(10),
@@ -870,9 +870,8 @@ func testOnStorITActions(t *testing.T) {
 			ExpirationString: UNLIMITED,
 			Weight:           10,
 			Balance: &BalanceFilter{
-				Type:       utils.StringPointer(utils.VOICE),
-				Uuid:       utils.StringPointer(utils.GenUUID()),
-				Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+				Type: utils.StringPointer(utils.VOICE),
+				Uuid: utils.StringPointer(utils.GenUUID()),
 				Value: &utils.ValueFormula{Static: 100,
 					Params: make(map[string]interface{})},
 				Weight:         utils.Float64Pointer(10),
@@ -928,9 +927,8 @@ func testOnStorITActions(t *testing.T) {
 			ExpirationString: UNLIMITED,
 			Weight:           10,
 			Balance: &BalanceFilter{
-				Type:       utils.StringPointer(utils.MONETARY),
-				Uuid:       utils.StringPointer(utils.GenUUID()),
-				Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+				Type: utils.StringPointer(utils.MONETARY),
+				Uuid: utils.StringPointer(utils.GenUUID()),
 				Value: &utils.ValueFormula{Static: 10,
 					Params: make(map[string]interface{})},
 				Weight:   utils.Float64Pointer(10),
@@ -953,9 +951,8 @@ func testOnStorITActions(t *testing.T) {
 			ExpirationString: UNLIMITED,
 			Weight:           10,
 			Balance: &BalanceFilter{
-				Type:       utils.StringPointer(utils.VOICE),
-				Uuid:       utils.StringPointer(utils.GenUUID()),
-				Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+				Type: utils.StringPointer(utils.VOICE),
+				Uuid: utils.StringPointer(utils.GenUUID()),
 				Value: &utils.ValueFormula{Static: 100,
 					Params: make(map[string]interface{})},
 				Weight:         utils.Float64Pointer(10),
@@ -980,9 +977,8 @@ func testOnStorITActions(t *testing.T) {
 			ExpirationString: UNLIMITED,
 			Weight:           20,
 			Balance: &BalanceFilter{
-				Type:       utils.StringPointer(utils.VOICE),
-				Uuid:       utils.StringPointer(utils.GenUUID()),
-				Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+				Type: utils.StringPointer(utils.VOICE),
+				Uuid: utils.StringPointer(utils.GenUUID()),
 				Value: &utils.ValueFormula{Static: 200,
 					Params: make(map[string]interface{})},
 				Weight:         utils.Float64Pointer(20),
@@ -1114,8 +1110,9 @@ func testOnStorITSharedGroup(t *testing.T) {
 func testOnStorITCRUDActionTriggers(t *testing.T) {
 	ats := ActionTriggers{
 		&ActionTrigger{
-			ID:                "testOnStorITCRUDActionTriggers",
-			Balance:           &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)), Timings: make([]*RITiming, 0)},
+			ID: "testOnStorITCRUDActionTriggers",
+			Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY),
+				Timings: make([]*RITiming, 0)},
 			ThresholdValue:    2,
 			ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
 			ActionsID:         "TEST_ACTIONS",

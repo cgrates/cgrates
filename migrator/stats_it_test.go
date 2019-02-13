@@ -167,7 +167,6 @@ func testStsITMigrateAndMove(t *testing.T) {
 					Timings:        []*engine.RITiming{},
 					ExpirationDate: utils.TimePointer(tim),
 					Type:           utils.StringPointer(utils.MONETARY),
-					Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 				},
 				ExpirationDate:    tim,
 				LastExecutionTime: tim,

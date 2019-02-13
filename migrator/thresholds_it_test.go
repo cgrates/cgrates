@@ -169,7 +169,6 @@ func testTrsITFlush(t *testing.T) {
 
 func testTrsITMigrateAndMove(t *testing.T) {
 	tim := time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC)
-	var filters []*engine.FilterRule
 	v1trs := &v2ActionTrigger{
 		ID:             "test2",              // original csv tag
 		UniqueID:       "testUUID",           // individual id
@@ -184,7 +183,6 @@ func testTrsITMigrateAndMove(t *testing.T) {
 			Timings:        []*engine.RITiming{},
 			ExpirationDate: utils.TimePointer(tim),
 			Type:           utils.StringPointer(utils.MONETARY),
-			Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 		},
 		Weight:            0,
 		ActionsID:         "Action1",
@@ -192,11 +190,6 @@ func testTrsITMigrateAndMove(t *testing.T) {
 		Executed:          false,
 		LastExecutionTime: time.Now(),
 	}
-	x, err := engine.NewFilterRule(engine.MetaRSR, "Directions", v1trs.Balance.Directions.Slice())
-	if err != nil {
-		t.Error("Error when creating new NewFilterRule", err.Error())
-	}
-	filters = append(filters, x)
 
 	tresProf := &engine.ThresholdProfile{
 		ID:                 v1trs.ID,
