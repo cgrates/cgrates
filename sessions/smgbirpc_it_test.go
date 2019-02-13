@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package sessions
 
+/*
 import (
 	"net/rpc/jsonrpc"
 	"path"
@@ -284,3 +285,4 @@ func TestSMGBiRPCStopCgrEngine(t *testing.T) {
 		t.Error(err)
 	}
 }
+*/

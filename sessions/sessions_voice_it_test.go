@@ -35,39 +35,39 @@ import (
 var waitRater = flag.Int("wait_rater", 150, "Number of miliseconds to wait for rater to start and cache")
 var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 
-var daCfgPath string
-var daCfg *config.CGRConfig
+var voiceCfgPath string
+var voiceCfg *config.CGRConfig
 var sessionsRPC *rpc.Client
 
 func TestSessionsVoiceInitCfg(t *testing.T) {
-	daCfgPath = path.Join(*dataDir, "conf", "samples", "smg")
+	voiceCfgPath = path.Join(*dataDir, "conf", "samples", "smg")
 	// Init config first
 	var err error
-	daCfg, err = config.NewCGRConfigFromFolder(daCfgPath)
+	voiceCfg, err = config.NewCGRConfigFromFolder(voiceCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	daCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(daCfg)
+	voiceCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	config.SetCgrConfig(voiceCfg)
 }
 
 // Remove data in both rating and accounting db
 func TestSessionsVoiceResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(daCfg); err != nil {
+	if err := engine.InitDataDb(voiceCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
 func TestSessionsVoiceResetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(daCfg); err != nil {
+	if err := engine.InitStorDb(voiceCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Start CGR Engine
 func TestSessionsVoiceStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(daCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(voiceCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -75,7 +75,7 @@ func TestSessionsVoiceStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestSessionsVoiceApierRpcConn(t *testing.T) {
 	var err error
-	sessionsRPC, err = jsonrpc.Dial("tcp", daCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	sessionsRPC, err = jsonrpc.Dial("tcp", voiceCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -106,7 +106,6 @@ func TestSessionsVoiceTPFromFolder(t *testing.T) {
 	}
 }
 
-/*
 func TestSessionsVoiceMonetaryRefund(t *testing.T) {
 	usage := time.Duration(1*time.Minute + 30*time.Second)
 	initArgs := &V1InitSessionArgs{
@@ -897,8 +896,10 @@ func TestSessionsVoiceSessionTTL(t *testing.T) {
 		}
 	}
 }
-*/
 
+/*
+//For the moment we let these tests commented
+//Need to investigate them
 func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:        "cgrates.org",
@@ -1061,7 +1062,6 @@ func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 	}
 }
 
-/*
 func TestSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:        "cgrates.org",
