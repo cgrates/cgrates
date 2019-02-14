@@ -1043,3 +1043,157 @@ cgrates.org,Charge2,*string:Account:1003,2014-07-29T15:00:00Z,*default,Attr3,10
 	}
 
 }
+
+func TestLoaderProcessDispatches(t *testing.T) {
+	dipatcherCSV := `
+#Tenant,ID,Contexts,FilterIDs,ActivationInterval,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters,Weight
+cgrates.org,EVENT1,*any,*string:EventName:Event1,,*weight,,ALL2,,20,false,,20
+cgrates.org,EVENT1,,,,,,ALL,,10,,,
+
+`
+	data, _ := engine.NewMapStorage()
+	ldr := &Loader{
+		ldrID:         "TestLoaderProcessContent",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaDispatchers: []*config.FCTemplate{
+			&config.FCTemplate{
+				Tag:       "TenantID",
+				FieldId:   "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~0", true, utils.INFIELD_SEP),
+				Mandatory: true,
+			},
+			&config.FCTemplate{
+				Tag:       "ProfileID",
+				FieldId:   "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~1", true, utils.INFIELD_SEP),
+				Mandatory: true,
+			},
+			&config.FCTemplate{
+				Tag:       "Contexts",
+				FieldId:   "Contexts",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~2", true, utils.INFIELD_SEP),
+				Mandatory: true,
+			},
+			&config.FCTemplate{
+				Tag:     "FilterIDs",
+				FieldId: "FilterIDs",
+				Type:    utils.META_COMPOSED,
+				Value:   config.NewRSRParsersMustCompile("~3", true, utils.INFIELD_SEP),
+			},
+			&config.FCTemplate{
+				Tag:     "ActivationInterval",
+				FieldId: "ActivationInterval",
+				Type:    utils.META_COMPOSED,
+				Value:   config.NewRSRParsersMustCompile("~4", true, utils.INFIELD_SEP),
+			},
+			&config.FCTemplate{
+				Tag:     "Strategy",
+				FieldId: "Strategy",
+				Type:    utils.META_COMPOSED,
+				Value:   config.NewRSRParsersMustCompile("~5", true, utils.INFIELD_SEP),
+			},
+			&config.FCTemplate{
+				Tag:     "StrategyParameters",
+				FieldId: "StrategyParameters",
+				Type:    utils.META_COMPOSED,
+				Value:   config.NewRSRParsersMustCompile("~6", true, utils.INFIELD_SEP),
+			},
+			&config.FCTemplate{
+				Tag:     "ConnID",
+				FieldId: "ConnID",
+				Type:    utils.META_COMPOSED,
+				Value:   config.NewRSRParsersMustCompile("~7", true, utils.INFIELD_SEP),
+			},
+			&config.FCTemplate{
+				Tag:     "ConnFilterIDs",
+				FieldId: "ConnFilterIDs",
+				Type:    utils.META_COMPOSED,
+				Value:   config.NewRSRParsersMustCompile("~8", true, utils.INFIELD_SEP),
+			},
+			&config.FCTemplate{
+				Tag:     "ConnWeight",
+				FieldId: "ConnWeight",
+				Type:    utils.META_COMPOSED,
+				Value:   config.NewRSRParsersMustCompile("~9", true, utils.INFIELD_SEP),
+			},
+			&config.FCTemplate{
+				Tag:     "ConnBlocker",
+				FieldId: "ConnBlocker",
+				Type:    utils.META_COMPOSED,
+				Value:   config.NewRSRParsersMustCompile("~10", true, utils.INFIELD_SEP),
+			},
+			&config.FCTemplate{
+				Tag:     "ConnParameters",
+				FieldId: "ConnParameters",
+				Type:    utils.META_COMPOSED,
+				Value:   config.NewRSRParsersMustCompile("~11", true, utils.INFIELD_SEP),
+			},
+			&config.FCTemplate{
+				Tag:     "Weight",
+				FieldId: "Weight",
+				Type:    utils.META_COMPOSED,
+				Value:   config.NewRSRParsersMustCompile("~12", true, utils.INFIELD_SEP),
+			},
+		},
+	}
+	rdr := ioutil.NopCloser(strings.NewReader(dipatcherCSV))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaDispatchers: map[string]*openedCSVFile{
+			utils.DispatchersCsv: &openedCSVFile{
+				fileName: utils.DispatchersCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	if err := ldr.processContent(utils.MetaDispatchers); err != nil {
+		t.Error(err)
+	}
+	if len(ldr.bufLoaderData) != 0 {
+		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
+	}
+	eDisp := &engine.DispatcherProfile{
+		Tenant:         "cgrates.org",
+		ID:             "EVENT1",
+		Subsystems:     []string{"*any"},
+		FilterIDs:      []string{"*string:EventName:Event1"},
+		Strategy:       "*weight",
+		StrategyParams: map[string]interface{}{},
+		Weight:         20,
+		Conns: engine.DispatcherConns{
+			&engine.DispatcherConn{
+				ID:        "ALL2",
+				FilterIDs: make([]string, 0),
+				Weight:    20,
+				Params:    map[string]interface{}{},
+			},
+			&engine.DispatcherConn{
+				ID:        "ALL",
+				FilterIDs: make([]string, 0),
+				Weight:    10,
+				Params:    map[string]interface{}{},
+			},
+		},
+	}
+
+	rcv, err := ldr.dm.GetDispatcherProfile("cgrates.org", "EVENT1",
+		true, false, utils.NonTransactional)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rcv.Conns.Sort()
+	eDisp.Conns.Sort()
+	if !reflect.DeepEqual(eDisp, rcv) {
+		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eDisp), utils.ToJSON(rcv))
+	}
+
+}

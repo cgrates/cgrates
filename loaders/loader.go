@@ -448,6 +448,32 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				}
 			}
 		}
+	case utils.MetaDispatchers:
+		for _, lDataSet := range lds {
+			dispModels := make(engine.TPDispatchers, len(lDataSet))
+			for i, ld := range lDataSet {
+				dispModels[i] = new(engine.TPDispatcher)
+				if err = utils.UpdateStructWithIfaceMap(dispModels[i], ld); err != nil {
+					return
+				}
+			}
+			for _, tpDsp := range dispModels.AsTPDispatchers() {
+				dsp, err := engine.APItoDispatcherProfile(tpDsp, ldr.timezone)
+				if err != nil {
+					return err
+				}
+				if ldr.dryRun {
+					utils.Logger.Info(
+						fmt.Sprintf("<%s-%s> DRY_RUN: AttributeProfile: %s",
+							utils.LoaderS, ldr.ldrID, utils.ToJSON(dsp)))
+					continue
+				}
+				if err := ldr.dm.SetDispatcherProfile(dsp, true); err != nil {
+					return err
+				}
+			}
+		}
 	}
+
 	return
 }

@@ -2699,14 +2699,20 @@ func (tps TPDispatchers) AsTPDispatchers() (result []*utils.TPDispatcherProfile)
 	for tntID, tp := range mst {
 		result[i] = tp
 		for filterID := range filterMap[tntID] {
-			result[i].FilterIDs = append(result[i].FilterIDs, filterID)
+			if filterID != "" {
+				result[i].FilterIDs = append(result[i].FilterIDs, filterID)
+			}
 		}
 		for context := range contextMap[tntID] {
-			result[i].Subsystems = append(result[i].Subsystems, context)
+			if context != "" {
+				result[i].Subsystems = append(result[i].Subsystems, context)
+			}
 		}
 		for conID, conn := range connsMap[tntID] {
 			for filter := range connsFilterMap[tntID][conID] {
-				conn.FilterIDs = append(conn.FilterIDs, filter)
+				if filter != "" {
+					conn.FilterIDs = append(conn.FilterIDs, filter)
+				}
 			}
 			result[i].Conns = append(result[i].Conns, &utils.TPDispatcherConns{
 				ID:        conn.ID,
