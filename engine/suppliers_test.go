@@ -390,24 +390,24 @@ func TestSuppliersmatchingSupplierProfilesForEvent(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if !reflect.DeepEqual(sppTest[0], sprf[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf[0])
+	if !reflect.DeepEqual(sppTest[0], sprf) {
+		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf)
 	}
 
 	sprf, err = splService.matchingSupplierProfilesForEvent(&argsGetSuppliers[1].CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if !reflect.DeepEqual(sppTest[1], sprf[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf[0])
+	if !reflect.DeepEqual(sppTest[1], sprf) {
+		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf)
 	}
 
 	sprf, err = splService.matchingSupplierProfilesForEvent(&argsGetSuppliers[2].CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if !reflect.DeepEqual(sppTest[2], sprf[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", sppTest[2], sprf[0])
+	if !reflect.DeepEqual(sppTest[2], sprf) {
+		t.Errorf("Expecting: %+v, received: %+v", sppTest[2], sprf)
 	}
 }
 
@@ -634,23 +634,23 @@ func TestSuppliersMatchWithIndexFalse(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if !reflect.DeepEqual(sppTest[0], sprf[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf[0])
+	if !reflect.DeepEqual(sppTest[0], sprf) {
+		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf)
 	}
 
 	sprf, err = splService.matchingSupplierProfilesForEvent(&argsGetSuppliers[1].CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if !reflect.DeepEqual(sppTest[1], sprf[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf[0])
+	if !reflect.DeepEqual(sppTest[1], sprf) {
+		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf)
 	}
 
 	sprf, err = splService.matchingSupplierProfilesForEvent(&argsGetSuppliers[2].CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if !reflect.DeepEqual(sppTest[2], sprf[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", sppTest[2], sprf[0])
+	if !reflect.DeepEqual(sppTest[2], sprf) {
+		t.Errorf("Expecting: %+v, received: %+v", sppTest[2], sprf)
 	}
 }

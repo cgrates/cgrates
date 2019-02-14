@@ -126,8 +126,7 @@ func (spS *SupplierService) Shutdown() error {
 }
 
 // matchingSupplierProfilesForEvent returns ordered list of matching resources which are active by the time of the call
-func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent) (sPrfls SupplierProfiles, err error) {
-	matchingLPs := make(map[string]*SupplierProfile)
+func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent) (matchingLP *SupplierProfile, err error) {
 	sPrflIDs, err := MatchingItemIDsForEvent(ev.Event, spS.stringIndexedFields, spS.prefixIndexedFields,
 		spS.dm, utils.CacheSupplierFilterIndexes, ev.Tenant, spS.filterS.cfg.FilterSCfg().IndexedSelects)
 	if err != nil {
@@ -151,16 +150,13 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent)
 		} else if !pass {
 			continue
 		}
-		matchingLPs[lpID] = splPrfl
+		if matchingLP == nil || matchingLP.Weight < splPrfl.Weight {
+			matchingLP = splPrfl
+		}
 	}
-	// All good, convert from Map to Slice so we can sort
-	sPrfls = make(SupplierProfiles, len(matchingLPs))
-	i := 0
-	for _, sPrfl := range matchingLPs {
-		sPrfls[i] = sPrfl
-		i++
+	if matchingLP == nil {
+		return nil, utils.ErrNotFound
 	}
-	sPrfls.Sort()
 	return
 }
 
@@ -386,13 +382,10 @@ func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sor
 	if _, has := args.CGREvent.Event[utils.Usage]; !has {
 		args.CGREvent.Event[utils.Usage] = time.Duration(time.Minute) // make sure we have default set for Usage
 	}
-	var suppPrfls SupplierProfiles
-	if suppPrfls, err = spS.matchingSupplierProfilesForEvent(&args.CGREvent); err != nil {
+	var splPrfl *SupplierProfile
+	if splPrfl, err = spS.matchingSupplierProfilesForEvent(&args.CGREvent); err != nil {
 		return
-	} else if len(suppPrfls) == 0 {
-		return nil, utils.ErrNotFound
 	}
-	splPrfl := suppPrfls[0]                     // pick up the first lcr profile as winner
 	extraOpts, err := args.asOptsGetSuppliers() // convert suppliers arguments into internal options used to limit data
 	if err != nil {
 		return nil, err

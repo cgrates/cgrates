@@ -1802,7 +1802,7 @@ func TestAPItoDispatcherProfile(t *testing.T) {
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
-				Params:    map[string]interface{}{"\u0000": "192.168.54.203"},
+				Params:    map[string]interface{}{"0": "192.168.54.203"},
 				Blocker:   false,
 			},
 		},
