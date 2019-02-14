@@ -36,6 +36,7 @@ var sTestsDspRes = []func(t *testing.T){
 	testDspResPing,
 	testDspResTestAuthKey,
 	testDspResTestAuthKey2,
+	testDspResTestAuthKey3,
 }
 
 //Test start here
@@ -168,5 +169,139 @@ func testDspResTestAuthKey2(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRs, rs) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eRs), utils.ToJSON(rs))
+	}
+}
+
+func testDspResTestAuthKey3(t *testing.T) {
+	// first event matching Resource1
+	var reply string
+	argsRU := ArgsV1ResUsageWithApiKey{
+		DispatcherResource: DispatcherResource{
+			APIKey: "res12345",
+		},
+		ArgRSv1ResourceUsage: utils.ArgRSv1ResourceUsage{
+			UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
+			CGREvent: utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event: map[string]interface{}{
+					"Account":     "1002",
+					"Subject":     "1001",
+					"Destination": "1002"},
+			},
+			Units: 1,
+		},
+	}
+	if err := dispEngine.RCP.Call(utils.ResourceSv1AllocateResources,
+		argsRU, &reply); err != nil {
+		t.Error(err)
+	}
+	eAllocationMsg := "ResGroup1"
+	if reply != eAllocationMsg {
+		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
+	}
+
+	if err := dispEngine.RCP.Call(utils.ResourceSv1AuthorizeResources, argsRU, &reply); err != nil {
+		t.Error(err)
+	} else if reply != eAllocationMsg { // already 3 usages active before allow call, we should have now more than allowed
+		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
+	}
+	argsRU = ArgsV1ResUsageWithApiKey{
+		DispatcherResource: DispatcherResource{
+			APIKey: "res12345",
+		},
+		ArgRSv1ResourceUsage: utils.ArgRSv1ResourceUsage{
+			UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
+			CGREvent: utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event: map[string]interface{}{
+					"Account":     "1002",
+					"Subject":     "1001",
+					"Destination": "1002"},
+			},
+			Units: 17,
+		},
+	}
+	if err := dispEngine.RCP.Call(utils.ResourceSv1AuthorizeResources,
+		argsRU, &reply); err == nil || err.Error() != utils.ErrResourceUnauthorized.Error() {
+		t.Error(err)
+	}
+
+	// relase the only resource active for Resource1
+	argsRU = ArgsV1ResUsageWithApiKey{
+		DispatcherResource: DispatcherResource{
+			APIKey: "res12345",
+		},
+		ArgRSv1ResourceUsage: utils.ArgRSv1ResourceUsage{
+			UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e55",
+			CGREvent: utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event: map[string]interface{}{
+					"Account":     "1002",
+					"Subject":     "1001",
+					"Destination": "1002"},
+			},
+		},
+	}
+	if err := dispEngine.RCP.Call(utils.ResourceSv1ReleaseResources,
+		argsRU, &reply); err != nil {
+		t.Error(err)
+	}
+	// try reserving with full units for Resource1, case which did not work in previous test
+	// only match Resource1 since we don't want for storing of the resource2 bellow
+	argsRU = ArgsV1ResUsageWithApiKey{
+		DispatcherResource: DispatcherResource{
+			APIKey: "res12345",
+		},
+		ArgRSv1ResourceUsage: utils.ArgRSv1ResourceUsage{
+			UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
+			CGREvent: utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event: map[string]interface{}{
+					"Account":     "1002",
+					"Subject":     "1001",
+					"Destination": "1002"},
+			},
+			Units: 7,
+		},
+	}
+	if err := dispEngine.RCP.Call(utils.ResourceSv1AuthorizeResources, argsRU, &reply); err != nil {
+		t.Error(err)
+	} else if reply != "ResGroup1" {
+		t.Error("Unexpected reply returned", reply)
+	}
+	var rs *engine.Resources
+	args := &ArgsV1ResUsageWithApiKey{
+		DispatcherResource: DispatcherResource{
+			APIKey: "res12345",
+		},
+		ArgRSv1ResourceUsage: utils.ArgRSv1ResourceUsage{
+			CGREvent: utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "Event5",
+				Event: map[string]interface{}{
+					"Account":     "1002",
+					"Subject":     "1001",
+					"Destination": "1002"},
+			},
+		},
+	}
+	if err := dispEngine.RCP.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
+		t.Error(err)
+	} else if len(*rs) != 1 {
+		t.Errorf("Resources: %+v", utils.ToJSON(rs))
+	}
+	if rs == nil {
+		t.Errorf("Expecting rs to not be nil")
+		// rs shoud not be nil so exit function
+		// to avoid nil segmentation fault;
+		// if this happens try to run this test manualy
+		return
+	}
+	// make sure Resource1 have no more active resources
+	for _, r := range *rs {
+		if r.ID == "ResGroup1" &&
+			(len(r.Usages) != 0 || len(r.TTLIdx) != 0) {
+			t.Errorf("Unexpected resource: %+v", r)
+		}
 	}
 }
