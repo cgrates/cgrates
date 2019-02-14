@@ -233,7 +233,90 @@ func TestSessionsItUpdateUnexist(t *testing.T) {
 	}
 }
 
-//terminate for a passive session
+func TestSessionsItTerminatePassive(t *testing.T) {
+	//create the event for session
+	sEv := engine.NewSafEvent(map[string]interface{}{
+		utils.EVENT_NAME:  "UpdateEvent",
+		utils.ToR:         utils.VOICE,
+		utils.OriginID:    "123789",
+		utils.Account:     "1001",
+		utils.Subject:     "1001",
+		utils.Destination: "1002",
+		utils.Category:    "call",
+		utils.Tenant:      "cgrates.org",
+		utils.RequestType: utils.META_PREPAID,
+		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+		utils.Usage:       time.Minute,
+	})
+
+	cgrID := GetSetCGRID(sEv)
+	s := &Session{
+		CGRID:      cgrID,
+		EventStart: sEv,
+		SRuns: []*SRun{
+			&SRun{
+				Event:      engine.NewMapEvent(sEv.AsMapInterface()),
+				TotalUsage: time.Minute,
+			},
+		},
+	}
+
+	var rply string
+	//transfer the session from active to pasive
+	if err := sItRPC.Call(utils.SessionSv1SetPassiveSession,
+		s, &rply); err != nil {
+		t.Error(err)
+	} else if rply != utils.OK {
+		t.Errorf("Expecting : %+v, received: %+v", utils.OK, rply)
+	}
+	var pSessions []*ActiveSession
+	//check if the passive session was created
+	if err := sItRPC.Call(utils.SessionSv1GetPassiveSessions,
+		map[string]string{utils.OriginID: "123789"}, &pSessions); err != nil {
+		t.Error(err)
+	} else if len(pSessions) != 1 {
+		t.Errorf("Unexpected number of sessions received: %+v", pSessions)
+	} else if pSessions[0].Usage != time.Minute {
+		t.Errorf("Expecting 1m, received usage: %v", pSessions[0].Usage)
+	}
+
+	termArgs := &V1TerminateSessionArgs{
+		TerminateSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSessionsItTerminatUnexist",
+			Event: map[string]interface{}{
+				utils.EVENT_NAME:  "TerminateEvent",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "123789",
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002",
+				utils.Category:    "call",
+				utils.Tenant:      "cgrates.org",
+				utils.RequestType: utils.META_PREPAID,
+				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+				utils.Usage:       time.Minute,
+			},
+		},
+	}
+
+	var rpl string
+	if err := sItRPC.Call(utils.SessionSv1TerminateSession, termArgs, &rpl); err != nil || rpl != utils.OK {
+		t.Error(err)
+	}
+	time.Sleep(10 * time.Millisecond)
+
+	//check if the passive session was terminate
+	if err := sItRPC.Call(utils.SessionSv1GetPassiveSessions,
+		map[string]string{utils.OriginID: "123789"}, &pSessions); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Error: %v with len(aSessions)=%v , session : %+v", err, len(pSessions), utils.ToJSON(pSessions))
+	}
+
+}
 
 func TestSessionsItStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(*waitRater); err != nil {
