@@ -180,6 +180,21 @@ func (dRs *DispatcherResourceSv1) GetResourcesForEvent(args *dispatchers.ArgsV1R
 	return dRs.dRs.ResourceSv1GetResourcesForEvent(args, reply)
 }
 
+func (dRs *DispatcherResourceSv1) AuthorizeResources(args *dispatchers.ArgsV1ResUsageWithApiKey,
+	reply *string) error {
+	return dRs.dRs.ResourceSv1AuthorizeResources(args, reply)
+}
+
+func (dRs *DispatcherResourceSv1) AllocateResources(args *dispatchers.ArgsV1ResUsageWithApiKey,
+	reply *string) error {
+	return dRs.dRs.ResourceSv1AllocateResources(args, reply)
+}
+
+func (dRs *DispatcherResourceSv1) ReleaseResources(args *dispatchers.ArgsV1ResUsageWithApiKey,
+	reply *string) error {
+	return dRs.dRs.ResourceSv1ReleaseResources(args, reply)
+}
+
 func NewDispatcherSupplierSv1(dps *dispatchers.DispatcherService) *DispatcherSupplierSv1 {
 	return &DispatcherSupplierSv1{dSup: dps}
 }

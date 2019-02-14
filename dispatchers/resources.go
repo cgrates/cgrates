@@ -47,5 +47,46 @@ func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args *ArgsV1ResUsag
 	}
 	return dS.Dispatch(&args.CGREvent, utils.MetaResources, args.RouteID,
 		utils.ResourceSv1GetResourcesForEvent, args.ArgRSv1ResourceUsage, reply)
+}
 
+func (dS *DispatcherService) ResourceSv1AuthorizeResources(args *ArgsV1ResUsageWithApiKey,
+	reply *string) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.ResourceSv1AuthorizeResources,
+			args.ArgRSv1ResourceUsage.CGREvent.Tenant,
+			args.APIKey, args.ArgRSv1ResourceUsage.CGREvent.Time); err != nil {
+			return
+		}
+
+	}
+	return dS.Dispatch(&args.CGREvent, utils.MetaResources, args.RouteID,
+		utils.ResourceSv1AuthorizeResources, args.ArgRSv1ResourceUsage, reply)
+}
+
+func (dS *DispatcherService) ResourceSv1AllocateResources(args *ArgsV1ResUsageWithApiKey,
+	reply *string) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.ResourceSv1AllocateResources,
+			args.ArgRSv1ResourceUsage.CGREvent.Tenant,
+			args.APIKey, args.ArgRSv1ResourceUsage.CGREvent.Time); err != nil {
+			return
+		}
+
+	}
+	return dS.Dispatch(&args.CGREvent, utils.MetaResources, args.RouteID,
+		utils.ResourceSv1AllocateResources, args.ArgRSv1ResourceUsage, reply)
+}
+
+func (dS *DispatcherService) ResourceSv1ReleaseResources(args *ArgsV1ResUsageWithApiKey,
+	reply *string) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.ResourceSv1ReleaseResources,
+			args.ArgRSv1ResourceUsage.CGREvent.Tenant,
+			args.APIKey, args.ArgRSv1ResourceUsage.CGREvent.Time); err != nil {
+			return
+		}
+
+	}
+	return dS.Dispatch(&args.CGREvent, utils.MetaResources, args.RouteID,
+		utils.ResourceSv1ReleaseResources, args.ArgRSv1ResourceUsage, reply)
 }

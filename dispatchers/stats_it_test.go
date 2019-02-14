@@ -335,4 +335,29 @@ func testDspStsTestAuthKey3(t *testing.T) {
 		t.Errorf("expecting: %+v, received reply: %v", estats, reply)
 	}
 
+	estats = []string{"Stats2"}
+	if err := dispEngine.RCP.Call(utils.StatSv1GetStatQueuesForEvent,
+		&ArgsStatProcessEventWithApiKey{
+			StatsArgsProcessEvent: engine.StatsArgsProcessEvent{
+				CGREvent: utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "GetStats",
+					Event: map[string]interface{}{
+						utils.Account:     "1002",
+						utils.AnswerTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+						utils.Usage:       time.Duration(45 * time.Second),
+						utils.RunID:       utils.DEFAULT_RUNID,
+						utils.COST:        10.0,
+						utils.Destination: "1001",
+					},
+				},
+			},
+			DispatcherResource: DispatcherResource{
+				APIKey: "stat12345",
+			},
+		}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(estats, reply) {
+		t.Errorf("expecting: %+v, received reply: %v", estats, reply)
+	}
 }
