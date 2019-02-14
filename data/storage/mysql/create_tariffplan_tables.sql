@@ -511,16 +511,22 @@ CREATE TABLE tp_dispatchers (
   `tpid` varchar(64) NOT NULL,
   `tenant` varchar(64) NOT NULL,
   `id` varchar(64) NOT NULL,
+  `contexts` varchar(64) NOT NULL,
   `filter_ids` varchar(64) NOT NULL,
   `activation_interval` varchar(64) NOT NULL,
   `strategy` varchar(64) NOT NULL,
-  `hosts` varchar(64) NOT NULL,
+  `strategy_parameters` varchar(64) NOT NULL,
+  `conn_id` varchar(64) NOT NULL,
+  `conn_filter_ids` varchar(64) NOT NULL,
+  `conn_weight` decimal(8,2) NOT NULL,
+  `conn_blocker` BOOLEAN NOT NULL,
+  `conn_parameters` varchar(64) NOT NULL,
   `weight` decimal(8,2) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),
   UNIQUE KEY `unique_tp_dispatchers` (`tpid`,`tenant`,
-    `id`,`filter_ids`,`strategy`,`hosts`)
+    `id`,`filter_ids`,`strategy`,`conn_id`,`conn_filter_ids`)
 );
 
 --
