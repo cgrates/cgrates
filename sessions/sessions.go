@@ -333,30 +333,30 @@ func (sS *SessionS) setSTerminator(s *Session) {
 		return
 	}
 	timer := time.NewTimer(ttl)
+	endChan := make(chan struct{})
 	s.sTerminator = &sTerminator{
 		timer:       timer,
-		endChan:     make(chan struct{}, 1),
+		endChan:     endChan,
 		ttl:         ttl,
 		ttlLastUsed: ttlLastUsed,
 		ttlUsage:    ttlUsage,
 	}
-
-	go func(sTerm *sTerminator) { // schedule automatic termination
+	go func() { // schedule automatic termination
 		select {
 		case <-timer.C:
-			eUsage := sTerm.ttl
-			if sTerm.ttlUsage != nil {
-				eUsage = *sTerm.ttlUsage
+			eUsage := s.sTerminator.ttl
+			if s.sTerminator.ttlUsage != nil {
+				eUsage = *s.sTerminator.ttlUsage
 			}
 			sS.forceSTerminate(s, eUsage,
 				s.sTerminator.ttlLastUsed)
-		case <-sTerm.endChan:
-			sTerm.timer.Stop()
+		case <-endChan:
+			timer.Stop()
 		}
 		s.Lock()
 		s.sTerminator = nil
 		s.Unlock()
-	}(s.sTerminator)
+	}()
 }
 
 // forceSTerminate is called when a session times-out or it is forced from CGRateS side
@@ -729,8 +729,8 @@ func (sS *SessionS) unregisterSession(cgrID string, passive bool) bool {
 	if !passive {
 		if s.sTerminator != nil &&
 			s.sTerminator.endChan != nil {
-			s.sTerminator.endChan <- struct{}{}
 			close(s.sTerminator.endChan)
+			time.Sleep(1) // ensure context switching so that the goroutine can remove old terminator
 		}
 	}
 	sMux.Unlock()

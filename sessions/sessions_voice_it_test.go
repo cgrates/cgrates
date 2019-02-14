@@ -897,9 +897,6 @@ func TestSessionsVoiceSessionTTL(t *testing.T) {
 	}
 }
 
-/*
-//For the moment we let these tests commented
-//Need to investigate them
 func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:        "cgrates.org",
@@ -1256,7 +1253,6 @@ func TestSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		}
 	}
 }
-*/
 
 //This test was commented before
 /*
