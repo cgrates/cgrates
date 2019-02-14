@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -39,6 +41,12 @@ func (hcs *HightCostSorter) SortSuppliers(prflID string, suppls []*Supplier,
 		Sorting:         hcs.sorting,
 		SortedSuppliers: make([]*SortedSupplier, 0)}
 	for _, s := range suppls {
+		if len(s.RatingPlanIDs) == 0 {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> RatingPlanIDs is empty for suplier with ID: %s",
+					utils.SupplierS, s.ID))
+			return nil, utils.NewErrMandatoryIeMissing("RatingPlanIDs")
+		}
 		if srtSpl, pass, err := hcs.spS.populateSortingData(ev, s, extraOpts); err != nil {
 			return nil, err
 		} else if pass && srtSpl != nil {
