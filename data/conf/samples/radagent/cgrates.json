@@ -54,6 +54,10 @@
 	"enabled": true,
 },
 
+"chargers": {
+	"enabled": true,
+},
+
 "sessions": {
 	"enabled": true,
 	"attributes_conns": [

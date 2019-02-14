@@ -50,6 +50,12 @@
 	"enabled": true,
 },
 
+"chargers": {
+	"enabled": true,
+	"attributes_conns": [
+		{"address": "*internal"}
+	],
+},
 
 "sessions": {
 	"enabled": true,

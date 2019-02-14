@@ -40,7 +40,7 @@ var (
 	sSv1Cfg     *config.CGRConfig
 	sSv1BiRpc   *rpc2.Client
 	sSApierRpc  *rpc.Client
-	discEvChan  = make(chan *utils.AttrDisconnectSession)
+	discEvChan  = make(chan *utils.AttrDisconnectSession, 1)
 )
 
 func handleDisconnectSession(clnt *rpc2.Client,
@@ -655,14 +655,13 @@ func TestSSv1ItCDRsGetCdrs(t *testing.T) {
 }
 
 func TestSSv1ItForceUpdateSession(t *testing.T) {
-	var aSessions []*sessions.ActiveSession
-	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions,
-		nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	aSessions := make([]*sessions.ActiveSession, 0)
+	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error: %v with len(asessions)=%v", err, len(aSessions))
 	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	eAcntVal := 9.3995
+	eAcntVal := 9.399500
 	if err := sSApierRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
@@ -720,7 +719,6 @@ func TestSSv1ItForceUpdateSession(t *testing.T) {
 			},
 		},
 	}
-
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
 		t.Errorf("expecting: %+v, received: %+v",
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
@@ -728,31 +726,30 @@ func TestSSv1ItForceUpdateSession(t *testing.T) {
 	if *rply.MaxUsage != reqUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
-
+	aSessions = make([]*sessions.ActiveSession, 0)
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
 		t.Errorf("wrong active ssesions: %s", utils.ToJSON(aSessions))
 	}
 
-	eAcntVal = 9.2495
+	eAcntVal = 9.249500
 	if err := sSApierRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
-
-	var rplyt string
+	rplyt := ""
 	if err := sSv1BiRpc.Call(utils.SessionSv1ForceDisconnect,
 		map[string]string{utils.OriginID: "TestSSv1It"}, &rplyt); err != nil {
 		t.Error(err)
 	} else if rplyt != utils.OK {
 		t.Errorf("Unexpected reply: %s", rplyt)
 	}
-
+	aSessions = make([]*sessions.ActiveSession, 0)
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Error: %v with len(asessions)=%v and sessions : %+v", err, len(aSessions), utils.ToJSON(aSessions))
+		t.Error(err)
 	}
 	if err := sSApierRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
