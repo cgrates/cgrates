@@ -58,15 +58,13 @@ func (alS *AttributeService) Shutdown() (err error) {
 }
 
 // matchingAttributeProfilesForEvent returns ordered list of matching resources which are active by the time of the call
-func (alS *AttributeService) matchingAttributeProfilesForEvent(args *AttrArgsProcessEvent) (aPrfls AttributeProfiles, err error) {
-	var attrIdxKey string
+func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent) (matchAttrPrfl *AttributeProfile, err error) {
 	var attrIDs []string
 	contextVal := utils.META_DEFAULT
 	if args.Context != nil && *args.Context != "" {
 		contextVal = *args.Context
 	}
-	attrIdxKey = utils.ConcatenatedKey(args.Tenant, contextVal)
-	matchingAPs := make(map[string]*AttributeProfile)
+	attrIdxKey := utils.ConcatenatedKey(args.Tenant, contextVal)
 	if len(args.AttributeIDs) != 0 {
 		attrIDs = args.AttributeIDs
 	} else {
@@ -102,27 +100,15 @@ func (alS *AttributeService) matchingAttributeProfilesForEvent(args *AttrArgsPro
 		} else if !pass {
 			continue
 		}
-		matchingAPs[apID] = aPrfl
+		if matchAttrPrfl == nil || matchAttrPrfl.Weight < aPrfl.Weight {
+			matchAttrPrfl = aPrfl
+		}
 	}
 	// All good, convert from Map to Slice so we can sort
-	aPrfls = make(AttributeProfiles, len(matchingAPs))
-	i := 0
-	for _, aPrfl := range matchingAPs {
-		aPrfls[i] = aPrfl
-		i++
-	}
-	aPrfls.Sort()
-	return
-}
-
-func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent) (attrPrfl *AttributeProfile, err error) {
-	var attrPrfls AttributeProfiles
-	if attrPrfls, err = alS.matchingAttributeProfilesForEvent(args); err != nil {
-		return
-	} else if len(attrPrfls) == 0 {
+	if matchAttrPrfl == nil {
 		return nil, utils.ErrNotFound
 	}
-	return attrPrfls[0], nil
+	return
 }
 
 // AttrSFldNameValue is a helper struct for AttrSDigest deserialization

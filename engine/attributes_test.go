@@ -265,30 +265,6 @@ func TestAttributeCache(t *testing.T) {
 	}
 }
 
-func TestAttributeMatchingAttributeProfilesForEvent(t *testing.T) {
-	atrp, err := attrService.matchingAttributeProfilesForEvent(attrEvs[0])
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	if !reflect.DeepEqual(atrPs[0], atrp[0]) {
-		t.Errorf("Expecting: %+v, received: %+v ", atrPs[0], atrp[0])
-	}
-	atrp, err = attrService.matchingAttributeProfilesForEvent(attrEvs[1])
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	if !reflect.DeepEqual(atrPs[1], atrp[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(atrPs), utils.ToJSON(atrp))
-	}
-	atrp, err = attrService.matchingAttributeProfilesForEvent(attrEvs[2])
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	if !reflect.DeepEqual(atrPs[2], atrp[0]) {
-		t.Errorf("Expecting: %+v, received: %+v ", atrPs[2], atrp[0])
-	}
-}
-
 func TestAttributeProfileForEvent(t *testing.T) {
 	atrp, err := attrService.attributeProfileForEvent(attrEvs[0])
 	if err != nil {
