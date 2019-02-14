@@ -149,6 +149,20 @@ func testHAitTPFromFolder(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	//add a default charger
+	chargerProfile := &engine.ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "Default",
+		RunID:        "*default",
+		AttributeIDs: []string{"*none"},
+		Weight:       20,
+	}
+	var result string
+	if err := haRPC.Call("ApierV1.SetChargerProfile", chargerProfile, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
 }
 
 func testHAitAuthDryRun(t *testing.T) {
@@ -197,14 +211,15 @@ func testHAitAuth1001(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
+	time.Sleep(10 * time.Millisecond)
 
 	httpConst := "http"
 	addr := haCfg.ListenCfg().HTTPListen
 	if isTls {
 		addr = haCfg.ListenCfg().HTTPTLSListen
 		httpConst = "https"
-
 	}
+
 	reqUrl := fmt.Sprintf("%s://%s%s?request_type=OutboundAUTH&CallID=123456&Msisdn=%s&Imsi=2343000000000123&Destination=1002&MSRN=0102220233444488999&ProfileID=1&AgentID=176&GlobalMSISDN=497700056129&GlobalIMSI=214180000175129&ICCID=8923418450000089629&MCC=234&MNC=10&calltype=callback",
 		httpConst, addr, haCfg.HttpAgentCfg()[0].Url, acnt)
 	rply, err := httpC.Get(reqUrl)
