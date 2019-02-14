@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
-	"path"
 	"reflect"
 	"testing"
 	"time"
@@ -41,24 +40,12 @@ var sTestsDspSts = []func(t *testing.T){
 }
 
 //Test start here
-func TestDspStatS(t *testing.T) {
-	engine.KillEngine(0)
-	allEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "all"), true, true)
-	allEngine2 = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "all2"), true, true)
-	attrEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "attributes"), true, true)
-	dispEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "dispatchers"), true, true)
-	allEngine.loadData(t, path.Join(dspDataDir, "tariffplans", "tutorial"))
-	allEngine2.loadData(t, path.Join(dspDataDir, "tariffplans", "oldtutorial"))
-	attrEngine.loadData(t, path.Join(dspDataDir, "tariffplans", "dispatchers"))
-	time.Sleep(500 * time.Millisecond)
-	for _, stest := range sTestsDspSts {
-		t.Run("", stest)
-	}
-	attrEngine.stopEngine(t)
-	dispEngine.stopEngine(t)
-	allEngine.stopEngine(t)
-	allEngine2.stopEngine(t)
-	engine.KillEngine(0)
+func TestDspStatSTMySQL(t *testing.T) {
+	testDsp(t, sTestsDspSts, "TestDspStatS", "all", "all2", "attributes", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+}
+
+func TestDspStatSMongo(t *testing.T) {
+	testDsp(t, sTestsDspSts, "TestDspStatS", "all", "all2", "attributes_mongo", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
 }
 
 func testDspStsPingFailover(t *testing.T) {
