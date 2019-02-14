@@ -32,11 +32,40 @@ type DispatcherConn struct {
 	Blocker   bool                   // no connection after this one
 }
 
+func (dC *DispatcherConn) Clone() (cln *DispatcherConn) {
+	cln = &DispatcherConn{
+		ID:      dC.ID,
+		Weight:  dC.Weight,
+		Blocker: dC.Blocker,
+	}
+	if dC.FilterIDs != nil {
+		cln.FilterIDs = make([]string, len(dC.FilterIDs))
+		for i, fltr := range dC.FilterIDs {
+			cln.FilterIDs[i] = fltr
+		}
+	}
+	if dC.Params != nil {
+		cln.Params = make(map[string]interface{})
+		for k, v := range dC.Params {
+			cln.Params[k] = v
+		}
+	}
+	return
+}
+
 type DispatcherConns []*DispatcherConn
 
 // Sort is part of sort interface, sort based on Weight
 func (dConns DispatcherConns) Sort() {
 	sort.Slice(dConns, func(i, j int) bool { return dConns[i].Weight > dConns[j].Weight })
+}
+
+func (dConns DispatcherConns) Clone() (cln DispatcherConns) {
+	cln = make(DispatcherConns, len(dConns))
+	for i, dConn := range dConns {
+		cln[i] = dConn.Clone()
+	}
+	return
 }
 
 // DispatcherProfile is the config for one Dispatcher

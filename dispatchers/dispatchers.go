@@ -125,8 +125,7 @@ func (dS *DispatcherService) dispatcherForEvent(ev *utils.CGREvent,
 	// get or build the Dispatcher for the config
 	if x, ok := engine.Cache.Get(utils.CacheDispatchers,
 		tntID); ok && x != nil {
-		d = x.(Dispatcher)
-		d.SetProfile(matchedPrlf)
+		d = x.(Dispatcher).GetInstance()
 		return
 	}
 	if d, err = newDispatcher(matchedPrlf); err != nil {
@@ -134,7 +133,7 @@ func (dS *DispatcherService) dispatcherForEvent(ev *utils.CGREvent,
 	}
 	engine.Cache.Set(utils.CacheDispatchers, tntID, d, nil,
 		true, utils.EmptyString)
-	return
+	return d.GetInstance(), nil
 }
 
 // Dispatch is the method forwarding the request towards the right
