@@ -21,25 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
-	"net/rpc"
-	"net/rpc/jsonrpc"
-	"os/exec"
-	"path"
 	"reflect"
-	"strconv"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-)
-
-var (
-	attrEngine *testDispatcher
-	dispEngine *testDispatcher
-	allEngine  *testDispatcher
-	allEngine2 *testDispatcher
 )
 
 var sTestsDspAttr = []func(t *testing.T){
@@ -54,94 +41,13 @@ var sTestsDspAttr = []func(t *testing.T){
 	testDspAttrTestAuthKey3,
 }
 
-type testDispatcher struct {
-	CfgParh string
-	Cfg     *config.CGRConfig
-	RCP     *rpc.Client
-	cmd     *exec.Cmd
-}
-
-func newTestEngine(t *testing.T, cfgPath string, initDataDB, intitStoreDB bool) (d *testDispatcher) {
-	d = new(testDispatcher)
-	d.CfgParh = cfgPath
-	var err error
-	d.Cfg, err = config.NewCGRConfigFromFolder(d.CfgParh)
-	if err != nil {
-		t.Fatalf("Error at config init :%v\n", err)
-	}
-	d.Cfg.DataFolderPath = dspDataDir // Share DataFolderPath through config towards StoreDb for Flush()
-
-	if initDataDB {
-		d.initDataDb(t)
-	}
-
-	if intitStoreDB {
-		d.resetStorDb(t)
-	}
-	d.startEngine(t)
-	return d
-}
-
-func (d *testDispatcher) startEngine(t *testing.T) {
-	var err error
-	if d.cmd, err = engine.StartEngine(d.CfgParh, dspDelay); err != nil {
-		t.Fatalf("Error at engine start:%v\n", err)
-	}
-
-	if d.RCP, err = jsonrpc.Dial("tcp", d.Cfg.ListenCfg().RPCJSONListen); err != nil {
-		t.Fatalf("Error at dialing rcp client:%v\n", err)
-	}
-}
-
-func (d *testDispatcher) stopEngine(t *testing.T) {
-	pid := strconv.Itoa(d.cmd.Process.Pid)
-	if err := exec.Command("kill", "-9", pid).Run(); err != nil {
-		t.Fatalf("Error at stop engine:%v\n", err)
-	}
-	// // if err := d.cmd.Process.Kill(); err != nil {
-	// // 	t.Fatalf("Error at stop engine:%v\n", err)
-	// }
-}
-
-func (d *testDispatcher) initDataDb(t *testing.T) {
-	if err := engine.InitDataDb(d.Cfg); err != nil {
-		t.Fatalf("Error at DataDB init:%v\n", err)
-	}
-}
-
-// Wipe out the cdr database
-func (d *testDispatcher) resetStorDb(t *testing.T) {
-	if err := engine.InitStorDb(d.Cfg); err != nil {
-		t.Fatalf("Error at DataDB init:%v\n", err)
-	}
-}
-func (d *testDispatcher) loadData(t *testing.T, path string) {
-	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path}
-	if err := d.RCP.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
-		t.Errorf("Error at loading data from folder:%v", err)
-	}
-}
-
 //Test start here
-func TestDspAttributeS(t *testing.T) {
-	engine.KillEngine(0)
-	allEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "all"), true, true)
-	allEngine2 = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "all2"), true, true)
-	attrEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "attributes"), true, true)
-	dispEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "dispatchers"), true, true)
-	allEngine.loadData(t, path.Join(dspDataDir, "tariffplans", "tutorial"))
-	allEngine2.loadData(t, path.Join(dspDataDir, "tariffplans", "oldtutorial"))
-	attrEngine.loadData(t, path.Join(dspDataDir, "tariffplans", "dispatchers"))
-	time.Sleep(500 * time.Millisecond)
-	for _, stest := range sTestsDspAttr {
-		t.Run("TestDspAttributeS", stest)
-	}
-	attrEngine.stopEngine(t)
-	dispEngine.stopEngine(t)
-	allEngine.stopEngine(t)
-	allEngine2.stopEngine(t)
-	engine.KillEngine(0)
+func TestDspAttributeSTMySQL(t *testing.T) {
+	testDsp(t, sTestsDspAttr, "TestDspAttributeS", "all", "all2", "attributes", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+}
+
+func TestDspAttributeSMongo(t *testing.T) {
+	testDsp(t, sTestsDspAttr, "TestDspAttributeS", "all", "all2", "attributes_mongo", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
 }
 
 func testDspAttrPingFailover(t *testing.T) {

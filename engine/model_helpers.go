@@ -2821,7 +2821,9 @@ func APItoDispatcherProfile(tpDPP *utils.TPDispatcherProfile, timezone string) (
 		dpp.Subsystems[i] = sub
 	}
 	for i, param := range tpDPP.StrategyParams {
-		dpp.StrategyParams[string(i)] = param
+		if param != "" {
+			dpp.StrategyParams[strconv.Itoa(i)] = param
+		}
 	}
 	for i, conn := range tpDPP.Conns {
 		dpp.Conns[i] = &DispatcherConn{
@@ -2835,7 +2837,9 @@ func APItoDispatcherProfile(tpDPP *utils.TPDispatcherProfile, timezone string) (
 			dpp.Conns[i].FilterIDs[j] = fltr
 		}
 		for j, param := range conn.Params {
-			dpp.Conns[i].Params[string(j)] = param
+			if param != "" {
+				dpp.Conns[i].Params[strconv.Itoa(j)] = param
+			}
 		}
 	}
 	if tpDPP.ActivationInterval != nil {

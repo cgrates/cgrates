@@ -1,0 +1,39 @@
+{
+// CGRateS Configuration file
+//
+
+
+"general": {
+	"node_id": "AttributeS1",
+	"log_level": 7
+},
+
+"listen": {
+ 	"rpc_json": ":5012",
+	"rpc_gob": ":5013",
+	"http": ":5080",
+},
+
+"data_db": {
+	"db_type": "mongo",
+	"db_name": "10",
+	"db_port": 27017,
+},
+
+
+"stor_db": {
+	"db_type": "mongo",
+	"db_name": "cgrates",
+	"db_port": 27017,
+},
+
+
+"attributes": {
+	"enabled": true
+},
+
+"rals": {
+	"enabled": true,
+},
+}
+ 
