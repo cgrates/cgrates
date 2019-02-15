@@ -1205,6 +1205,7 @@ type AttrSetBalance struct {
 	SharedGroups   *string
 	Blocker        *bool
 	Disabled       *bool
+	Cdrlog         *bool
 }
 
 type TPResource struct {
