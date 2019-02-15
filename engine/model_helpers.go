@@ -1501,6 +1501,35 @@ func APItoModelResource(rl *utils.TPResource) (mdls TpResources) {
 	if rl == nil {
 		return
 	}
+	// In case that TPResource don't have filter
+	if len(rl.FilterIDs) == 0 {
+		mdl := &TpResource{
+			Tpid:              rl.TPid,
+			Tenant:            rl.Tenant,
+			ID:                rl.ID,
+			Blocker:           rl.Blocker,
+			Stored:            rl.Stored,
+			UsageTTL:          rl.UsageTTL,
+			Weight:            rl.Weight,
+			Limit:             rl.Limit,
+			AllocationMessage: rl.AllocationMessage,
+		}
+		if rl.ActivationInterval != nil {
+			if rl.ActivationInterval.ActivationTime != "" {
+				mdl.ActivationInterval = rl.ActivationInterval.ActivationTime
+			}
+			if rl.ActivationInterval.ExpiryTime != "" {
+				mdl.ActivationInterval += utils.INFIELD_SEP + rl.ActivationInterval.ExpiryTime
+			}
+		}
+		for i, val := range rl.ThresholdIDs {
+			if i != 0 {
+				mdl.ThresholdIDs += utils.INFIELD_SEP
+			}
+			mdl.ThresholdIDs += val
+		}
+		mdls = append(mdls, mdl)
+	}
 	for i, fltr := range rl.FilterIDs {
 		mdl := &TpResource{
 			Tpid:    rl.TPid,
@@ -1684,6 +1713,53 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
 	var paramSlice []string
 	if st != nil {
+		// In case that TPStats don't have filter
+		if len(st.FilterIDs) == 0 {
+			mdl := &TpStats{
+				Tenant:      st.Tenant,
+				Tpid:        st.TPid,
+				ID:          st.ID,
+				MinItems:    st.MinItems,
+				TTL:         st.TTL,
+				Blocker:     st.Blocker,
+				Stored:      st.Stored,
+				Weight:      st.Weight,
+				QueueLength: st.QueueLength,
+			}
+			for i, val := range st.Metrics {
+				if i != 0 {
+					mdl.Metrics += utils.INFIELD_SEP
+				}
+				mdl.Metrics += val.MetricID
+			}
+
+			for _, val := range st.Metrics {
+				if val.Parameters != "" {
+					paramSlice = append(paramSlice, val.Parameters)
+				}
+			}
+			for i, val := range utils.StringMapFromSlice(paramSlice).Slice() {
+				if i != 0 {
+					mdl.Parameters += utils.INFIELD_SEP
+				}
+				mdl.Parameters += val
+			}
+			for i, val := range st.ThresholdIDs {
+				if i != 0 {
+					mdl.ThresholdIDs += utils.INFIELD_SEP
+				}
+				mdl.ThresholdIDs += val
+			}
+			if st.ActivationInterval != nil {
+				if st.ActivationInterval.ActivationTime != "" {
+					mdl.ActivationInterval = st.ActivationInterval.ActivationTime
+				}
+				if st.ActivationInterval.ExpiryTime != "" {
+					mdl.ActivationInterval += utils.INFIELD_SEP + st.ActivationInterval.ExpiryTime
+				}
+			}
+			mdls = append(mdls, mdl)
+		}
 		for i, fltr := range st.FilterIDs {
 			mdl := &TpStats{
 				Tenant:   st.Tenant,
