@@ -711,6 +711,35 @@ func TestAPItoResource(t *testing.T) {
 	}
 }
 
+func TestAPItoModelResource(t *testing.T) {
+	tpRL := &utils.TPResource{
+		Tenant:             "cgrates.org",
+		TPid:               testTPID,
+		ID:                 "ResGroup1",
+		ActivationInterval: &utils.TPActivationInterval{ActivationTime: "2014-07-29T15:00:00Z"},
+		Weight:             10,
+		Limit:              "2",
+		ThresholdIDs:       []string{"TRes1"},
+		AllocationMessage:  "test",
+	}
+	expModel := &TpResource{
+		Tpid:               testTPID,
+		Tenant:             "cgrates.org",
+		ID:                 "ResGroup1",
+		ActivationInterval: "2014-07-29T15:00:00Z",
+		Weight:             10.0,
+		Limit:              "2",
+		ThresholdIDs:       "TRes1",
+		AllocationMessage:  "test",
+	}
+	rcv := APItoModelResource(tpRL)
+	if len(rcv) != 1 {
+		t.Errorf("Expecting: 1, received: %+v", len(rcv))
+	} else if !reflect.DeepEqual(rcv[0], expModel) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expModel), utils.ToJSON(rcv[0]))
+	}
+}
+
 func TestTPStatsAsTPStats(t *testing.T) {
 	tps := []*TpStats{
 		&TpStats{
