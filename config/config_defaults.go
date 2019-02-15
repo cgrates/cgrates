@@ -651,6 +651,25 @@ const CGRATES_CFG_JSON = `
 					{"tag": "Weight", "field_id": "Weight", "type": "*composed", "value": "~6"},
 				],
 			},
+			{
+				"type": "*dispatchers",						// data source type
+				"file_name": "Dispatchers.csv",				// file name in the tp_in_dir
+				"fields": [
+					{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~0", "mandatory": true},
+					{"tag": "ID", "field_id": "ID", "type": "*composed", "value": "~1", "mandatory": true},
+					{"tag": "Contexts", "field_id": "Contexts", "type": "*composed", "value": "~2"},
+					{"tag": "FilterIDs", "field_id": "FilterIDs", "type": "*composed", "value": "~3"},
+					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*composed", "value": "~4"},
+					{"tag": "Strategy", "field_id": "Strategy", "type": "*composed", "value": "~5"},
+					{"tag": "StrategyParameters", "field_id": "StrategyParameters", "type": "*composed", "value": "~6"},
+					{"tag": "ConnID", "field_id": "ConnID", "type": "*composed", "value": "~7"},
+					{"tag": "ConnFilterIDs", "field_id": "ConnFilterIDs", "type": "*composed", "value": "~8"},
+					{"tag": "ConnWeight", "field_id": "ConnWeight", "type": "*composed", "value": "~9"},
+					{"tag": "ConnBlocker", "field_id": "ConnBlocker", "type": "*composed", "value": "~10"},
+					{"tag": "ConnParameters", "field_id": "ConnParameters", "type": "*composed", "value": "~11"},
+					{"tag": "Weight", "field_id": "Weight", "type": "*composed", "value": "~12"},
+				],
+			},
 		],
 	},
 ],
