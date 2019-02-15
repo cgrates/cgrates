@@ -420,6 +420,7 @@ type AttrAddBalance struct {
 	Overwrite      bool // When true it will reset if the balance is already there
 	Blocker        *bool
 	Disabled       *bool
+	Cdrlog         *bool
 }
 
 func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
@@ -489,7 +490,13 @@ func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *st
 	publishAction := &engine.Action{
 		ActionType: engine.MetaPublishBalance,
 	}
-	at.SetActions(engine.Actions{a, publishAction})
+	acts := engine.Actions{a, publishAction}
+	if attr.Cdrlog != nil && *attr.Cdrlog == true {
+		acts = engine.Actions{a, publishAction, &engine.Action{
+			ActionType: engine.CDRLOG,
+		}}
+	}
+	at.SetActions(acts)
 	if err := at.Execute(nil, nil); err != nil {
 		return err
 	}
@@ -560,9 +567,14 @@ func (self *ApierV1) SetBalance(attr *utils.AttrSetBalance, reply *string) error
 	publishAction := &engine.Action{
 		ActionType: engine.MetaPublishBalance,
 	}
-	at.SetActions(engine.Actions{a, publishAction})
+	acts := engine.Actions{a, publishAction}
+	if attr.Cdrlog != nil && *attr.Cdrlog == true {
+		acts = engine.Actions{a, publishAction, &engine.Action{
+			ActionType: engine.CDRLOG,
+		}}
+	}
+	at.SetActions(acts)
 	if err := at.Execute(nil, nil); err != nil {
-		*reply = err.Error()
 		return err
 	}
 	*reply = OK
