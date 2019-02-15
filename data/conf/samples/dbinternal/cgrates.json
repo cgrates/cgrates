@@ -72,7 +72,7 @@
 
 
 "attributes": {							// Attribute service
-	"enabled": true,				// starts Alias service: <true|false>.
+	"enabled": true,				// starts Attribute service: <true|false>.
 },
 
 

@@ -36,7 +36,7 @@ type CSVStorage struct {
 	destinationratetimingsFn, ratingprofilesFn,
 	sharedgroupsFn, actionsFn, actiontimingsFn, actiontriggersFn,
 	accountactionsFn, derivedChargersFn,
-	usersFn, aliasesFn, resProfilesFn, statsFn, thresholdsFn,
+	usersFn, resProfilesFn, statsFn, thresholdsFn,
 	filterFn, suppProfilesFn, attributeProfilesFn,
 	chargerProfilesFn, dispatcherProfilesFn string
 }
@@ -45,7 +45,7 @@ func NewFileCSVStorage(sep rune,
 	destinationsFn, timingsFn, ratesFn, destinationratesFn,
 	destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn,
 	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn,
-	derivedChargersFn, usersFn, aliasesFn,
+	derivedChargersFn, usersFn,
 	resProfilesFn, statsFn, thresholdsFn, filterFn, suppProfilesFn,
 	attributeProfilesFn, chargerProfilesFn, dispatcherProfilesFn string) *CSVStorage {
 	return &CSVStorage{
@@ -64,7 +64,6 @@ func NewFileCSVStorage(sep rune,
 		accountactionsFn:         accountactionsFn,
 		derivedChargersFn:        derivedChargersFn,
 		usersFn:                  usersFn,
-		aliasesFn:                aliasesFn,
 		resProfilesFn:            resProfilesFn,
 		statsFn:                  statsFn,
 		thresholdsFn:             thresholdsFn,
@@ -81,7 +80,7 @@ func NewStringCSVStorage(sep rune,
 	destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn,
 	actionsFn, actiontimingsFn, actiontriggersFn,
 	accountactionsFn, derivedChargersFn, usersFn,
-	aliasesFn, resProfilesFn, statsFn,
+	resProfilesFn, statsFn,
 	thresholdsFn, filterFn, suppProfilesFn,
 	attributeProfilesFn, chargerProfilesFn,
 	dispatcherProfilesFn string) *CSVStorage {
@@ -90,7 +89,7 @@ func NewStringCSVStorage(sep rune,
 		ratingprofilesFn, sharedgroupsFn, actionsFn,
 		actiontimingsFn, actiontriggersFn,
 		accountactionsFn, derivedChargersFn,
-		usersFn, aliasesFn, resProfilesFn,
+		usersFn, resProfilesFn,
 		statsFn, thresholdsFn, filterFn, suppProfilesFn,
 		attributeProfilesFn, chargerProfilesFn, dispatcherProfilesFn)
 	c.readerFunc = openStringCSVStorage
@@ -533,40 +532,6 @@ func (csvs *CSVStorage) GetTPUsers(filter *utils.TPUsers) ([]*utils.TPUsers, err
 		return nil, err
 	} else {
 		return us, nil
-	}
-}
-
-func (csvs *CSVStorage) GetTPAliases(filter *utils.TPAliases) ([]*utils.TPAliases, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.aliasesFn, csvs.sep, getColumnCount(TpAlias{}))
-	if err != nil {
-		//log.Print("Could not load aliases file: ", err)
-		// allow writing of the other values
-		return nil, nil
-	}
-	if fp != nil {
-		defer fp.Close()
-	}
-	var tpAliases TpAliases
-	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
-		if err != nil {
-			log.Printf("bad line in %s, %s\n", csvs.aliasesFn, err.Error())
-			return nil, err
-		}
-		if tpAlias, err := csvLoad(TpAlias{}, record); err != nil {
-			log.Print("error loading alias: ", err)
-			return nil, err
-		} else {
-			u := tpAlias.(TpAlias)
-			if filter != nil {
-				u.Tpid = filter.TPid
-			}
-			tpAliases = append(tpAliases, u)
-		}
-	}
-	if as, err := tpAliases.AsTPAliases(); err != nil {
-		return nil, err
-	} else {
-		return as, nil
 	}
 }
 

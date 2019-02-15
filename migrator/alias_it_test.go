@@ -185,7 +185,7 @@ func testAlsITMigrateAndMove(t *testing.T) {
 		if err != nil {
 			t.Error("Error when setting v1 Alias ", err.Error())
 		}
-		currentVersion := engine.Versions{utils.Alias: 1}
+		currentVersion := engine.Versions{Alias: 1}
 		err = alsMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for Alias ", err.Error())
@@ -193,8 +193,8 @@ func testAlsITMigrateAndMove(t *testing.T) {
 		//check if version was set correctly
 		if vrs, err := alsMigrator.dmIN.DataManager().DataDB().GetVersions(""); err != nil {
 			t.Error(err)
-		} else if vrs[utils.Alias] != 1 {
-			t.Errorf("Unexpected version returned: %d", vrs[utils.Alias])
+		} else if vrs[Alias] != 1 {
+			t.Errorf("Unexpected version returned: %d", vrs[Alias])
 		}
 		//migrate alias
 		err, _ = alsMigrator.Migrate([]string{utils.MetaAlias})
@@ -204,8 +204,8 @@ func testAlsITMigrateAndMove(t *testing.T) {
 		//check if version was updated
 		if vrs, err := alsMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 			t.Error(err)
-		} else if vrs[utils.Alias] != 2 {
-			t.Errorf("Unexpected version returned: %d", vrs[utils.Alias])
+		} else if vrs[Alias] != 2 {
+			t.Errorf("Unexpected version returned: %d", vrs[Alias])
 		}
 		//check if alias was migrate correctly
 		result, err := alsMigrator.dmOut.DataManager().DataDB().GetAttributeProfileDrv("cgrates.org", alias.GetId())

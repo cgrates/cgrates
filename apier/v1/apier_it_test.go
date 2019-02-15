@@ -774,7 +774,6 @@ func TestApierSetRatingProfile(t *testing.T) {
 		Actions:             1,
 		ActionPlans:         1,
 		AccountActionPlans:  1,
-		Aliases:             6,
 	}
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
@@ -841,7 +840,6 @@ func TestApierReloadCache(t *testing.T) {
 		Actions:             1,
 		ActionPlans:         1,
 		AccountActionPlans:  1,
-		Aliases:             6,
 	}
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
@@ -1298,11 +1296,6 @@ func TestApierComputeReverse(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Received: ", reply)
 	}
-	if err := rater.Call("ApierV1.ComputeReverseAliases", "", &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Received: ", reply)
-	}
 	if err := rater.Call("ApierV1.ComputeAccountActionPlans", "", &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -1317,7 +1310,6 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 		Actions:            6,
 		ActionPlans:        7,
 		AccountActionPlans: 13,
-		Aliases:            1,
 		AttributeProfiles:  0} // Did not cache because it wasn't previously cached
 	var rcvStats *utils.CacheStats
 	if err := rater.Call("ApierV1.GetCacheStats", utils.AttrCacheStats{}, &rcvStats); err != nil {
@@ -1345,8 +1337,6 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 			rcvStats.ActionPlans != 7 ||
 			rcvStats.SharedGroups != 0 ||
 			rcvStats.DerivedChargers != 3 ||
-			rcvStats.Aliases != 1 ||
-			rcvStats.ReverseAliases != 2 ||
 			rcvStats.ResourceProfiles != 3 ||
 			rcvStats.Resources != 3 {
 			t.Errorf("Expecting: %+v, received: %+v", expStats, rcvStats)
@@ -1602,87 +1592,6 @@ func TestApierITSetDestination(t *testing.T) {
 		t.Error("Unexpected error", err.Error())
 	} else if !reflect.DeepEqual(eRcvIDs, rcvIDs) {
 		t.Errorf("Expecting: %+v, received: %+v", eRcvIDs, rcvIDs)
-	}
-}
-
-func TestApierITGetAliases(t *testing.T) {
-	var alias engine.Alias
-	if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.MetaRating, Direction: "*out",
-		Tenant: "cgrates.org", Category: "call", Account: "2001", Subject: "2001"}, &alias); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-}
-
-func TestApierITAddRatingSubjectAliases(t *testing.T) {
-	/*var reply string
-	if err := rater.Call("ApierV1.FlushCache", utils.AttrReloadCache{FlushAll: true}, &reply); err != nil {
-		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
-	} else if reply != utils.OK {
-		t.Error("Calling ApierV1.ReloadCache got reply: ", reply)
-	}
-	*/
-	addRtSubjAliases := &AttrAddRatingSubjectAliases{Tenant: "cgrates.org", Category: "call", Subject: "1001", Aliases: []string{"2001", "2002", "2003"}}
-	var rply string
-	if err := rater.Call("ApierV1.AddRatingSubjectAliases", addRtSubjAliases, &rply); err != nil {
-		t.Error("Unexpected error", err.Error())
-	} else if rply != utils.OK {
-		t.Error("Unexpected reply: ", rply)
-	}
-	var alias engine.Alias
-	for _, als := range addRtSubjAliases.Aliases {
-		if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.MetaRating, Direction: "*out",
-			Tenant: addRtSubjAliases.Tenant, Category: addRtSubjAliases.Category,
-			Account: als, Subject: als}, &alias); err != nil {
-			t.Error("Unexpected error", err.Error())
-		}
-	}
-}
-
-func TestApierITRemRatingSubjectAliases(t *testing.T) {
-	tenantRatingSubj := engine.TenantRatingSubject{Tenant: "cgrates.org", Subject: "1001"}
-	var rply string
-	if err := rater.Call("ApierV1.RemRatingSubjectAliases", tenantRatingSubj, &rply); err != nil {
-		t.Error("Unexpected error", err.Error())
-	} else if rply != utils.OK {
-		t.Error("Unexpected reply: ", rply)
-	}
-	var alias engine.Alias
-	//al.Direction, al.Tenant, al.Category, al.Account, al.Subject, al.Group
-	if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.MetaRating, Direction: "*out",
-		Tenant: "cgrates.org", Category: "call", Account: "2001", Subject: "2001"}, &alias); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Unexpected error %v, alias: %+v, values: %+v", err, alias, alias.Values[0])
-	}
-}
-
-func TestApierITAddAccountAliases(t *testing.T) {
-	addAcntAliases := &AttrAddAccountAliases{Tenant: "cgrates.org", Category: "call", Account: "1001", Aliases: []string{"2001", "2002", "2003"}}
-	var rply string
-	if err := rater.Call("ApierV1.AddAccountAliases", addAcntAliases, &rply); err != nil {
-		t.Error("Unexpected error", err.Error())
-	} else if rply != utils.OK {
-		t.Error("Unexpected reply: ", rply)
-	}
-	var alias engine.Alias
-	for _, als := range addAcntAliases.Aliases {
-		if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.MetaRating, Direction: "*out", Tenant: addAcntAliases.Tenant, Category: addAcntAliases.Category,
-			Account: als, Subject: als}, &alias); err != nil {
-			t.Error("Unexpected error", err.Error())
-		}
-	}
-}
-
-func TestApierITRemAccountAliases(t *testing.T) {
-	tenantAcnt := engine.TenantAccount{Tenant: "cgrates.org", Account: "1001"}
-	var rply string
-	if err := rater.Call("ApierV1.RemAccountAliases", tenantAcnt, &rply); err != nil {
-		t.Error("Unexpected error", err.Error())
-	} else if rply != utils.OK {
-		t.Error("Unexpected reply: ", rply)
-	}
-	var alias engine.Alias
-	//al.Direction, al.Tenant, al.Category, al.Account, al.Subject, al.Group
-	if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.MetaRating, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "2001", Subject: "2001"}, &alias); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Unexpected error %v, alias: %+v", err, alias)
 	}
 }
 

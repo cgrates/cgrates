@@ -1122,35 +1122,6 @@ func TestGetCostWithMaxCostFree(t *testing.T) {
 	}
 }
 
-func TestMaxSessionTimeWithAccountAlias(t *testing.T) {
-	aliasService = NewAliasHandler(dm)
-	cd := &CallDescriptor{
-		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
-		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
-		Category:    "0",
-		Tenant:      "vdf",
-		Subject:     "a1",
-		Account:     "a1",
-		Destination: "0723",
-	}
-	LoadAlias(
-		&AttrMatchingAlias{
-			Direction:   utils.META_OUT,
-			Destination: cd.Destination,
-			Tenant:      cd.Tenant,
-			Category:    cd.Category,
-			Account:     cd.Account,
-			Subject:     cd.Subject,
-			Context:     utils.MetaRating,
-		}, cd, utils.EXTRA_FIELDS)
-
-	result, err := cd.GetMaxSessionDuration()
-	expected := time.Minute
-	if result != expected || err != nil {
-		t.Errorf("Expected %v was %v, %v", expected, result, err)
-	}
-}
-
 func TestMaxSessionTimeWithAccountShared(t *testing.T) {
 	ap, _ := dm.DataDB().GetActionPlan("TOPUP_SHARED0_AT", false, utils.NonTransactional)
 	for _, at := range ap.ActionTimings {

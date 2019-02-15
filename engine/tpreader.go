@@ -38,8 +38,6 @@ type TpReader struct {
 	actionPlans        map[string]*ActionPlan
 	actionsTriggers    map[string]ActionTriggers
 	accountActions     map[string]*Account
-	dirtyRpAliases     []*TenantRatingSubject // used to clean aliases that might have changed
-	dirtyAccAliases    []*TenantAccount       // used to clean aliases that might have changed
 	destinations       map[string]*Destination
 	timings            map[string]*utils.TPTiming
 	rates              map[string]*utils.TPRate
@@ -49,7 +47,6 @@ type TpReader struct {
 	sharedGroups       map[string]*SharedGroup
 	derivedChargers    map[string]*utils.DerivedChargers
 	users              map[string]*UserProfile
-	aliases            map[string]*Alias
 	resProfiles        map[utils.TenantID]*utils.TPResource
 	sqProfiles         map[utils.TenantID]*utils.TPStats
 	thProfiles         map[utils.TenantID]*utils.TPThreshold
@@ -66,7 +63,6 @@ type TpReader struct {
 	chargers           []*utils.TenantID // IDs of chargers which need creation based on chargerProfiles
 	dpps               []*utils.TenantID // IDs of chargers which need creation based on dispatcherProfiles
 	revDests,
-	revAliases,
 	acntActionPlans map[string][]string
 }
 
@@ -131,7 +127,6 @@ func (tpr *TpReader) Init() {
 	tpr.sharedGroups = make(map[string]*SharedGroup)
 	tpr.accountActions = make(map[string]*Account)
 	tpr.users = make(map[string]*UserProfile)
-	tpr.aliases = make(map[string]*Alias)
 	tpr.derivedChargers = make(map[string]*utils.DerivedChargers)
 	tpr.resProfiles = make(map[utils.TenantID]*utils.TPResource)
 	tpr.sqProfiles = make(map[utils.TenantID]*utils.TPStats)
@@ -142,7 +137,6 @@ func (tpr *TpReader) Init() {
 	tpr.dispatcherProfiles = make(map[utils.TenantID]*utils.TPDispatcherProfile)
 	tpr.filters = make(map[utils.TenantID]*utils.TPFilterProfile)
 	tpr.revDests = make(map[string][]string)
-	tpr.revAliases = make(map[string][]string)
 	tpr.acntActionPlans = make(map[string][]string)
 }
 
@@ -1195,89 +1189,6 @@ func (tpr *TpReader) LoadUsers() error {
 	return err
 }
 
-func (tpr *TpReader) LoadAliasesFiltered(filter *utils.TPAliases) (bool, error) {
-	tpAliases, err := tpr.lr.GetTPAliases(filter)
-
-	alias := &Alias{
-		Direction: filter.Direction,
-		Tenant:    filter.Tenant,
-		Category:  filter.Category,
-		Account:   filter.Account,
-		Subject:   filter.Subject,
-		Context:   filter.Context,
-		Values:    make(AliasValues, 0),
-	}
-	for _, tpAlias := range tpAliases {
-		for _, aliasValue := range tpAlias.Values {
-			av := alias.Values.GetValueByDestId(aliasValue.DestinationId)
-			if av == nil {
-				av = &AliasValue{
-					DestinationId: aliasValue.DestinationId,
-					Pairs:         make(AliasPairs),
-					Weight:        aliasValue.Weight,
-				}
-				alias.Values = append(alias.Values, av)
-			}
-			if av.Pairs[aliasValue.Target] == nil {
-				av.Pairs[aliasValue.Target] = make(map[string]string)
-			}
-			av.Pairs[aliasValue.Target][aliasValue.Original] = aliasValue.Alias
-
-		}
-	}
-	tpr.dm.DataDB().SetAlias(alias, utils.NonTransactional)
-	tpr.dm.DataDB().SetReverseAlias(alias, utils.NonTransactional)
-	return len(tpAliases) > 0, err
-}
-
-func (tpr *TpReader) LoadAliases() error {
-	tps, err := tpr.lr.GetTPAliases(&utils.TPAliases{TPid: tpr.tpid})
-	if err != nil {
-		return err
-	}
-	alMap, err := MapTPAliases(tps)
-	if err != nil {
-		return err
-	}
-	for key, tal := range alMap {
-		al, found := tpr.aliases[key]
-		if !found {
-			al = &Alias{
-				Direction: tal.Direction,
-				Tenant:    tal.Tenant,
-				Category:  tal.Category,
-				Account:   tal.Account,
-				Subject:   tal.Subject,
-				Context:   tal.Context,
-				Values:    make(AliasValues, 0),
-			}
-			tpr.aliases[key] = al
-		}
-		for _, v := range tal.Values {
-			av := al.Values.GetValueByDestId(v.DestinationId)
-			if av == nil {
-				av = &AliasValue{
-					DestinationId: v.DestinationId,
-					Pairs:         make(AliasPairs),
-					Weight:        v.Weight,
-				}
-				al.Values = append(al.Values, av)
-			}
-			if av.Pairs[v.Target] == nil {
-				av.Pairs[v.Target] = make(map[string]string)
-			}
-			av.Pairs[v.Target][v.Original] = v.Alias
-			// Report reverse aliases keys which we need to reload late
-			rvAlsKey := v.Alias + v.Target + tal.Context
-			if _, hasIt := tpr.revAliases[rvAlsKey]; !hasIt {
-				tpr.revAliases[rvAlsKey] = make([]string, 0)
-			}
-			tpr.revAliases[rvAlsKey] = append(tpr.revAliases[rvAlsKey], utils.ConcatenatedKey(al.GetId(), v.DestinationId))
-		}
-	}
-	return err
-}
-
 func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) (err error) {
 	rls, err := tpr.lr.GetTPResources(tpr.tpid, "", tag)
 	if err != nil {
@@ -1503,9 +1414,6 @@ func (tpr *TpReader) LoadAll() (err error) {
 	if err = tpr.LoadUsers(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
-	if err = tpr.LoadAliases(); err != nil && err.Error() != utils.NotFoundCaps {
-		return
-	}
 	if err = tpr.LoadFilters(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
@@ -1724,24 +1632,6 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		}
 	}
 	if verbose {
-		log.Print("Aliases:")
-	}
-	for _, al := range tpr.aliases {
-		err = tpr.dm.DataDB().SetAlias(al, utils.NonTransactional)
-		if err != nil {
-			return err
-		}
-		if verbose {
-			log.Print("\t", al.GetId())
-		}
-	}
-	if verbose {
-		log.Print("Reverse Aliases:")
-		for id, vals := range tpr.revAliases {
-			log.Printf("\t %s : %+v", id, vals)
-		}
-	}
-	if verbose {
 		log.Print("Filters:")
 	}
 	for _, tpTH := range tpr.filters {
@@ -1939,14 +1829,6 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				return err
 			}
 		}
-		if len(tpr.aliases) > 0 {
-			if verbose {
-				log.Print("Rebuilding reverse aliases")
-			}
-			if err = tpr.dm.DataDB().RebuildReverseForPrefix(utils.REVERSE_ALIASES_PREFIX); err != nil {
-				return err
-			}
-		}
 	}
 	return
 }
@@ -2101,22 +1983,6 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(tpr.users))
 		i := 0
 		for k := range tpr.users {
-			keys[i] = k
-			i++
-		}
-		return keys, nil
-	case utils.ALIASES_PREFIX:
-		keys := make([]string, len(tpr.aliases))
-		i := 0
-		for k := range tpr.aliases {
-			keys[i] = k
-			i++
-		}
-		return keys, nil
-	case utils.REVERSE_ALIASES_PREFIX:
-		keys := make([]string, len(tpr.revAliases))
-		i := 0
-		for k := range tpr.revAliases {
 			keys[i] = k
 			i++
 		}
@@ -2328,24 +2194,6 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 		}
 	}
 	if verbose {
-		log.Print("Aliases:")
-	}
-	for _, al := range tpr.aliases {
-		err = tpr.dm.DataDB().RemoveAlias(al.GetId(), utils.NonTransactional)
-		if err != nil {
-			return err
-		}
-		if verbose {
-			log.Print("\t", al.GetId())
-		}
-	}
-	if verbose {
-		log.Print("Reverse Aliases:")
-		for id, vals := range tpr.revAliases {
-			log.Printf("\t %s : %+v", id, vals)
-		}
-	}
-	if verbose {
 		log.Print("Filters:")
 	}
 	for _, tpTH := range tpr.filters {
@@ -2497,14 +2345,6 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 				log.Print("Removing account action plans")
 			}
 			if err = tpr.dm.DataDB().RemoveReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
-				return err
-			}
-		}
-		if len(tpr.aliases) > 0 {
-			if verbose {
-				log.Print("Removing reverse aliases")
-			}
-			if err = tpr.dm.DataDB().RemoveReverseForPrefix(utils.REVERSE_ALIASES_PREFIX); err != nil {
 				return err
 			}
 		}

@@ -109,7 +109,6 @@ func TestLoaderITRemoveLoad(t *testing.T) {
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACCOUNT_ACTIONS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DERIVED_CHARGERS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.USERS_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ALIASES_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ResourcesCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.StatsCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ThresholdsCsv),
@@ -156,9 +155,6 @@ func TestLoaderITRemoveLoad(t *testing.T) {
 	if err = loader.LoadUsers(); err != nil {
 		t.Error("Failed loading users: ", err.Error())
 	}
-	if err = loader.LoadAliases(); err != nil {
-		t.Error("Failed loading aliases: ", err.Error())
-	}
 	if err = loader.LoadFilters(); err != nil {
 		t.Error("Failed loading filters: ", err.Error())
 	}
@@ -175,7 +171,7 @@ func TestLoaderITRemoveLoad(t *testing.T) {
 		t.Error("Failed loading Supplier profiles: ", err.Error())
 	}
 	if err = loader.LoadAttributeProfiles(); err != nil {
-		t.Error("Failed loading Alias profiles: ", err.Error())
+		t.Error("Failed loading Attribute profiles: ", err.Error())
 	}
 	if err = loader.LoadChargerProfiles(); err != nil {
 		t.Error("Failed loading Charger profiles: ", err.Error())
@@ -213,7 +209,6 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACCOUNT_ACTIONS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DERIVED_CHARGERS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.USERS_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ALIASES_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ResourcesCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.StatsCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ThresholdsCsv),
@@ -260,9 +255,6 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 	if err = loader.LoadUsers(); err != nil {
 		t.Error("Failed loading users: ", err.Error())
 	}
-	if err = loader.LoadAliases(); err != nil {
-		t.Error("Failed loading aliases: ", err.Error())
-	}
 	if err = loader.LoadFilters(); err != nil {
 		t.Error("Failed loading filters: ", err.Error())
 	}
@@ -279,10 +271,10 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 		t.Error("Failed loading Supplier profiles: ", err.Error())
 	}
 	if err = loader.LoadAttributeProfiles(); err != nil {
-		t.Error("Failed loading Alias profiles: ", err.Error())
+		t.Error("Failed loading Attribute profiles: ", err.Error())
 	}
 	if err = loader.LoadChargerProfiles(); err != nil {
-		t.Error("Failed loading Alias profiles: ", err.Error())
+		t.Error("Failed loading Charger profiles: ", err.Error())
 	}
 	if err = loader.LoadDispatcherProfiles(); err != nil {
 		t.Error("Failed loading Charger profiles: ", err.Error())
@@ -400,16 +392,6 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 		}
 		if !reflect.DeepEqual(u, rcv) {
 			t.Errorf("Expecting: %v, received: %v", u, rcv)
-		}
-	}
-
-	for k, al := range loader.aliases {
-		rcv, err := loader.dm.DataDB().GetAlias(k, true, utils.NonTransactional)
-		if err != nil {
-			t.Error("Failed GetAlias: ", err.Error())
-		}
-		if !reflect.DeepEqual(al, rcv) {
-			t.Errorf("Expecting: %v, received: %v", al, rcv)
 		}
 	}
 
@@ -572,9 +554,6 @@ func TestLoaderITLoadFromStorDb(t *testing.T) {
 	if err := loader.LoadUsers(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading users: ", err.Error())
 	}
-	if err := loader.LoadAliases(); err != nil && err.Error() != utils.NotFoundCaps {
-		t.Error("Failed loading aliases: ", err.Error())
-	}
 }
 
 func TestLoaderITLoadIndividualProfiles(t *testing.T) {
@@ -626,18 +605,6 @@ func TestLoaderITLoadIndividualProfiles(t *testing.T) {
 		for _, u := range us {
 			if found, err := loader.LoadUsersFiltered(u); found && err != nil {
 				t.Fatalf("Could not user with id: %s, error: %s", u.GetId(), err.Error())
-			}
-		}
-	}
-	// Load aliases
-	if aliases, err := storDb.GetTPAliases(&utils.TPAliases{TPid: utils.TEST_SQL}); err != nil {
-		t.Fatal("Could not retrieve aliases, error: ", err.Error())
-	} else if len(aliases) == 0 {
-		t.Fatal("Could not retrieve aliases")
-	} else {
-		for _, a := range aliases {
-			if found, err := loader.LoadAliasesFiltered(a); found && err != nil {
-				t.Fatalf("Could not load aliase with id: %s, error: %s", a.GetId(), err.Error())
 			}
 		}
 	}

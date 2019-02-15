@@ -353,59 +353,6 @@ type TPSharedGroup struct {
 	RatingSubject string
 }
 
-type TpAlias struct {
-	Direction string
-	Tenant    string
-	Category  string
-	Account   string
-	Subject   string
-	Group     string
-	Values    []*AliasValue
-}
-
-type AliasValue struct {
-	DestinationId string
-	Alias         string
-	Weight        float64
-}
-
-type TPAliases struct {
-	TPid      string
-	Direction string
-	Tenant    string
-	Category  string
-	Account   string
-	Subject   string
-	Context   string
-	Values    []*TPAliasValue
-}
-
-type TPAliasValue struct {
-	DestinationId string
-	Target        string
-	Original      string
-	Alias         string
-	Weight        float64
-}
-
-func (a *TPAliases) GetId() string {
-	return ConcatenatedKey(a.Direction, a.Tenant, a.Category, a.Account, a.Subject, a.Context)
-}
-
-func (a *TPAliases) SetId(id string) error {
-	vals := strings.Split(id, CONCATENATED_KEY_SEP)
-	if len(vals) != 6 {
-		return ErrInvalidKey
-	}
-	a.Direction = vals[0]
-	a.Tenant = vals[1]
-	a.Category = vals[2]
-	a.Account = vals[3]
-	a.Subject = vals[4]
-	a.Context = vals[5]
-	return nil
-}
-
 type TPUsers struct {
 	TPid     string
 	Tenant   string
@@ -610,8 +557,6 @@ type ArgsCache struct {
 	ActionTriggerIDs      *[]string
 	SharedGroupIDs        *[]string
 	DerivedChargerIDs     *[]string
-	AliasIDs              *[]string
-	ReverseAliasIDs       *[]string
 	ResourceProfileIDs    *[]string
 	ResourceIDs           *[]string
 	StatsQueueIDs         *[]string
@@ -653,8 +598,6 @@ type CacheStats struct {
 	SharedGroups        int
 	DerivedChargers     int
 	Users               int
-	Aliases             int
-	ReverseAliases      int
 	ResourceProfiles    int
 	Resources           int
 	StatQueues          int

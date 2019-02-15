@@ -55,9 +55,6 @@ func (ms *MapStorage) GetTPSharedGroups(tpid, id string) (sGroups []*utils.TPSha
 func (ms *MapStorage) GetTPUsers(filter *utils.TPUsers) (users []*utils.TPUsers, err error) {
 	return nil, utils.ErrNotImplemented
 }
-func (ms *MapStorage) GetTPAliases(filter *utils.TPAliases) (aliases []*utils.TPAliases, err error) {
-	return nil, utils.ErrNotImplemented
-}
 func (ms *MapStorage) GetTPDerivedChargers(*utils.TPDerivedChargers) (dCharges []*utils.TPDerivedChargers, err error) {
 	return nil, utils.ErrNotImplemented
 }
@@ -126,9 +123,7 @@ func (ms *MapStorage) SetTPSharedGroups(groups []*utils.TPSharedGroups) (err err
 func (ms *MapStorage) SetTPUsers(users []*utils.TPUsers) (err error) {
 	return utils.ErrNotImplemented
 }
-func (ms *MapStorage) SetTPAliases(aliases []*utils.TPAliases) (err error) {
-	return utils.ErrNotImplemented
-}
+
 func (ms *MapStorage) SetTPDerivedChargers(dc []*utils.TPDerivedChargers) (err error) {
 	return utils.ErrNotImplemented
 }

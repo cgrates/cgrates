@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"path"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
@@ -83,12 +82,8 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITDispatcherProfile,
 
 	//testOnStorITCacheActionTriggers,
-	//testOnStorITCacheAlias,
-	//testOnStorITCacheReverseAlias,
 	//testOnStorITCRUDActionTriggers,
 	//testOnStorITCRUDUser,
-	//testOnStorITCRUDAlias,
-	//testOnStorITCRUDReverseAlias,
 }
 
 func TestOnStorITRedis(t *testing.T) {
@@ -378,106 +373,6 @@ func testOnStorITCacheDerivedChargers(t *testing.T) {
 		t.Error("Did not cache")
 	} else if rcv := itm.(*utils.DerivedChargers); !reflect.DeepEqual(dcs, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", dcs, rcv)
-	}
-}
-
-func testOnStorITCacheAlias(t *testing.T) {
-	als := &Alias{
-		Direction: "*out",
-		Tenant:    "cgrates.org",
-		Category:  "call",
-		Account:   "dan",
-		Subject:   "dan",
-		Context:   "*rating",
-		Values: AliasValues{
-			&AliasValue{
-				DestinationId: "EU_LANDLINE",
-				Pairs: AliasPairs{
-					"Subject": map[string]string{
-						"dan": "dan1",
-						"rif": "rif1",
-					},
-					"Cli": map[string]string{
-						"0723": "0724",
-					},
-				},
-				Weight: 10,
-			},
-
-			&AliasValue{
-				DestinationId: "GLOBAL1",
-				Pairs:         AliasPairs{"Subject": map[string]string{"dan": "dan2"}},
-				Weight:        20,
-			},
-		},
-	}
-	if err := onStor.DataDB().SetAlias(als, utils.NonTransactional); err != nil {
-		t.Error(err)
-	}
-	expectedCA := []string{"als_*out:cgrates.org:call:dan:dan:*rating"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ALIASES_PREFIX); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expectedCA, itm) {
-		t.Errorf("Expected : %+v, but received %+v", expectedCA, itm)
-	}
-	if _, hasIt := Cache.Get(utils.CacheAliases, als.GetId()); hasIt {
-		t.Error("Already in cache")
-	}
-	if err := onStor.CacheDataFromDB(utils.ALIASES_PREFIX, []string{als.GetId()}, false); err != nil {
-		t.Error(err)
-	}
-	if itm, hasIt := Cache.Get(utils.CacheAliases, als.GetId()); !hasIt {
-		t.Error("Did not cache")
-	} else if rcv := itm.(*Alias); !reflect.DeepEqual(als, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", als, rcv)
-	}
-}
-
-func testOnStorITCacheReverseAlias(t *testing.T) {
-	als := &Alias{
-		Direction: "*out",
-		Tenant:    "itsyscom.com",
-		Category:  "call",
-		Account:   "dan",
-		Subject:   "dan",
-		Context:   "*rating",
-		Values: AliasValues{
-			&AliasValue{
-				DestinationId: "EU",
-				Pairs: AliasPairs{
-					"Account": map[string]string{
-						"dan": "dan1",
-						"rif": "rif1",
-					},
-					"Calling": map[string]string{
-						"11234": "2234",
-					},
-				},
-				Weight: 10,
-			},
-
-			&AliasValue{
-				DestinationId: "US",
-				Pairs:         AliasPairs{"Account": map[string]string{"dan": "dan2"}},
-				Weight:        20,
-			},
-		},
-	}
-	if err := onStor.DataDB().SetReverseAlias(als, utils.NonTransactional); err != nil {
-		t.Error(err)
-	}
-	rvAlsID := strings.Join([]string{als.Values[1].Pairs["Account"]["dan"], "Account", als.Context}, "")
-	if _, hasIt := Cache.Get(utils.CacheReverseAliases, rvAlsID); hasIt {
-		t.Error("Already in cache")
-	}
-	if err := onStor.CacheDataFromDB(utils.REVERSE_ALIASES_PREFIX, []string{rvAlsID}, false); err != nil {
-		t.Error(err)
-	}
-	eRvrsAls := []string{utils.ConcatenatedKey(als.GetId(), als.Values[1].DestinationId)}
-	if itm, hasIt := Cache.Get(utils.CacheReverseAliases, rvAlsID); !hasIt {
-		t.Error("Did not cache")
-	} else if rcv := itm.([]string); !reflect.DeepEqual(eRvrsAls, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", eRvrsAls, rcv)
 	}
 }
 
@@ -1368,133 +1263,6 @@ func testOnStorITCRUDUser(t *testing.T) {
 	if _, rcvErr := onStor.GetUser(usr.GetId()); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-}
-
-func testOnStorITCRUDAlias(t *testing.T) {
-	als := &Alias{
-		Direction: "*out",
-		Tenant:    "cgrates.org2",
-		Category:  "call",
-		Account:   "dan",
-		Subject:   "dan",
-		Context:   "*rating",
-		Values: AliasValues{
-			&AliasValue{
-				DestinationId: "EU_LANDLINE",
-				Pairs: AliasPairs{
-					"Subject": map[string]string{
-						"dan": "dan1",
-						"rif": "rif1",
-					},
-					"Cli": map[string]string{
-						"0723": "0724",
-					},
-				},
-				Weight: 10,
-			},
-
-			&AliasValue{
-				DestinationId: "GLOBAL2",
-				Pairs:         AliasPairs{"Subject": map[string]string{"dan": "dan2"}},
-				Weight:        20,
-			},
-		},
-	}
-
-	if _, rcvErr := onStor.DataDB().GetAlias(als.GetId(), true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
-	}
-	if err := onStor.DataDB().SetAlias(als, utils.NonTransactional); err != nil {
-		t.Error(err)
-	}
-	if rcv, err := onStor.DataDB().GetAlias(als.GetId(), true, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(als, rcv) {
-		t.Errorf("Expecting: %v, received: %v", als, rcv)
-	}
-	// FixMe
-	// if err = onStor.DataDB().SelectDatabase("13"); err != nil {
-	// 	t.Error(err)
-	// }
-	// if _, rcvErr := onStor.DataDB().GetAlias(als.GetId(), false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-	// 	t.Error(rcvErr)
-	// }
-	//
-	if rcv, err := onStor.DataDB().GetAlias(als.GetId(), false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(als, rcv) {
-		t.Errorf("Expecting: %v, received: %v", als, rcv)
-	}
-	// if err = onStor.DataDB().SelectDatabase(onStorCfg); err != nil {
-	// 	t.Error(err)
-	// }
-	if err := onStor.DataDB().RemoveAlias(als.GetId(), utils.NonTransactional); err != nil {
-		t.Error(err)
-	}
-	if _, rcvErr := onStor.DataDB().GetAlias(als.GetId(), true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
-	}
-}
-
-func testOnStorITCRUDReverseAlias(t *testing.T) {
-	als := &Alias{
-		Direction: "*out",
-		Tenant:    "itsyscom.com",
-		Category:  "call",
-		Account:   "testOnStorITCRUDReverseAlias",
-		Subject:   "testOnStorITCRUDReverseAlias",
-		Context:   "*rating",
-		Values: AliasValues{
-			&AliasValue{
-				DestinationId: "EU",
-				Pairs: AliasPairs{
-					"Account": map[string]string{
-						"dan": "testOnStorITCRUDReverseAlias1",
-						"rif": "testOnStorITCRUDReverseAlias2",
-					},
-					"Calling": map[string]string{
-						"11234": "2234",
-					},
-				},
-				Weight: 10,
-			},
-
-			&AliasValue{
-				DestinationId: "US",
-				Pairs:         AliasPairs{"Account": map[string]string{"dan": "testOnStorITCRUDReverseAlias3"}},
-				Weight:        20,
-			},
-		},
-	}
-	rvAlsID := strings.Join([]string{als.Values[1].Pairs["Account"]["dan"], "Account", als.Context}, "")
-	exp := strings.Join([]string{als.Direction, ":", als.Tenant, ":", als.Category, ":", als.Account, ":", als.Subject, ":", als.Context, ":", als.Values[1].DestinationId}, "")
-	if _, rcvErr := onStor.DataDB().GetReverseAlias(rvAlsID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
-	}
-	if err := onStor.DataDB().SetReverseAlias(als, utils.NonTransactional); err != nil {
-		t.Error(err)
-	}
-	if rcv, err := onStor.DataDB().GetReverseAlias(rvAlsID, true, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(exp, rcv[0]) {
-		t.Errorf("Expecting: %v, received: %v", exp, rcv[0])
-	}
-	// FixMe
-	// if err = onStor.DataDB().SelectDatabase("13"); err != nil {
-	// 	t.Error(err)
-	// }
-	// if _, rcvErr := onStor.DataDB().GetReverseAlias(rvAlsID, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-	// 	t.Error(rcvErr)
-	// }
-	//
-	if rcv, err := onStor.DataDB().GetReverseAlias(rvAlsID, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(exp, rcv[0]) {
-		t.Errorf("Expecting: %v, received: %v", exp, rcv[0])
-	}
-	// if err = onStor.DataDB().SelectDatabase(onStorCfg); err != nil {
-	// 	t.Error(err)
-	// }
 }
 
 func testOnStorITResourceProfile(t *testing.T) {

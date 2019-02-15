@@ -60,8 +60,6 @@ var (
 		CacheAccountActionPlans:      AccountActionPlansPrefix,
 		CacheActionTriggers:          ACTION_TRIGGER_PREFIX,
 		CacheSharedGroups:            SHARED_GROUP_PREFIX,
-		CacheAliases:                 ALIASES_PREFIX,
-		CacheReverseAliases:          REVERSE_ALIASES_PREFIX,
 		CacheDerivedChargers:         DERIVEDCHARGERS_PREFIX,
 		CacheResourceProfiles:        ResourceProfilesPrefix,
 		CacheResources:               ResourcesPrefix,
@@ -236,8 +234,6 @@ const (
 	DERIVEDCHARGERS_PREFIX        = "dcs_"
 	PUBSUB_SUBSCRIBERS_PREFIX     = "pss_"
 	USERS_PREFIX                  = "usr_"
-	ALIASES_PREFIX                = "als_"
-	REVERSE_ALIASES_PREFIX        = "rls_"
 	ResourcesPrefix               = "res_"
 	ResourceProfilesPrefix        = "rsp_"
 	ThresholdPrefix               = "thd_"
@@ -465,8 +461,6 @@ const (
 	Timing                       = "Timing"
 	RQF                          = "RQF"
 	Resource                     = "Resource"
-	ReverseAlias                 = "ReverseAlias"
-	Alias                        = "Alias"
 	User                         = "User"
 	Subscribers                  = "Subscribers"
 	DerivedChargersV             = "DerivedChargers"
@@ -485,8 +479,6 @@ const (
 	MetaTiming                   = "*Timing"
 	MetaRQF                      = "*RQF"
 	MetaResource                 = "*Resource"
-	MetaReverseAlias             = "*ReverseAlias"
-	MetaAlias                    = "*Alias"
 	MetaUser                     = "*User"
 	MetaSubscribers              = "*Subscribers"
 	MetaDerivedChargersV         = "*DerivedChargers"
@@ -633,7 +625,6 @@ const (
 	MetaTpRates             = "*tp_rates"
 	MetaTpTiming            = "*tp_timing"
 	MetaTpResource          = "*tp_resource"
-	MetaTpAliases           = "*tp_aliases"
 	MetaTpUsers             = "*tp_users"
 	MetaTpDerivedChargersV  = "*tp_derived_chargers"
 	MetaTpCdrStats          = "*tp_cdrstats"
@@ -671,7 +662,6 @@ const (
 	TpRates            = "TpRates"
 	TpTiming           = "TpTiming"
 	TpResource         = "TpResource"
-	TpAliases          = "TpAliases"
 	TpUsers            = "TpUsers"
 	TpDerivedChargersV = "TpDerivedChargers"
 	TpCdrStats         = "TpCdrStats"
@@ -887,7 +877,6 @@ const (
 	ACCOUNT_ACTIONS_CSV   = "AccountActions.csv"
 	DERIVED_CHARGERS_CSV  = "DerivedChargers.csv"
 	USERS_CSV             = "Users.csv"
-	ALIASES_CSV           = "Aliases.csv"
 	ResourcesCsv          = "Resources.csv"
 	StatsCsv              = "Stats.csv"
 	ThresholdsCsv         = "Thresholds.csv"
@@ -913,7 +902,6 @@ const (
 	TBLTPAccountActions   = "tp_account_actions"
 	TBLTPDerivedChargers  = "tp_derived_chargers"
 	TBLTPUsers            = "tp_users"
-	TBLTPAliases          = "tp_aliases"
 	TBLTPResources        = "tp_resources"
 	TBLTPStats            = "tp_stats"
 	TBLTPThresholds       = "tp_thresholds"
@@ -939,8 +927,6 @@ const (
 	CacheAccountActionPlans      = "account_action_plans"
 	CacheActionTriggers          = "action_triggers"
 	CacheSharedGroups            = "shared_groups"
-	CacheAliases                 = "aliases"
-	CacheReverseAliases          = "reverse_aliases"
 	CacheDerivedChargers         = "derived_chargers"
 	CacheResources               = "resources"
 	CacheResourceProfiles        = "resource_profiles"

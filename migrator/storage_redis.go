@@ -33,6 +33,10 @@ type redisMigrator struct {
 	qryIdx   *int
 }
 
+var (
+	REVERSE_ALIASES_PREFIX = "rls_"
+)
+
 func newRedisMigrator(dm *engine.DataManager) (rM *redisMigrator) {
 	return &redisMigrator{
 		dm:  dm,
@@ -482,7 +486,7 @@ func (v1rs *redisMigrator) remV2ThresholdProfile(tenant, id string) (err error) 
 func (v1rs *redisMigrator) getV1Alias() (v1a *v1Alias, err error) {
 	v1a = &v1Alias{Values: make(v1AliasValues, 0)}
 	if v1rs.qryIdx == nil {
-		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(utils.ALIASES_PREFIX)
+		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(ALIASES_PREFIX)
 		if err != nil {
 			return
 		} else if len(v1rs.dataKeys) == 0 {
@@ -496,7 +500,7 @@ func (v1rs *redisMigrator) getV1Alias() (v1a *v1Alias, err error) {
 		if err != nil {
 			return nil, err
 		}
-		v1a.SetId(strings.TrimPrefix(key, utils.ALIASES_PREFIX))
+		v1a.SetId(strings.TrimPrefix(key, ALIASES_PREFIX))
 		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v1a.Values); err != nil {
 			return nil, err
 		}
@@ -515,7 +519,7 @@ func (v1rs *redisMigrator) setV1Alias(al *v1Alias) (err error) {
 	if err != nil {
 		return
 	}
-	key := utils.ALIASES_PREFIX + al.GetId()
+	key := ALIASES_PREFIX + al.GetId()
 	if err = v1rs.rds.Cmd("SET", key, result).Err; err != nil {
 		return
 	}
@@ -529,7 +533,7 @@ func (v1rs *redisMigrator) remV1Alias(key string) (err error) {
 
 	var values []byte
 	if values, err = v1rs.rds.Cmd("GET",
-		utils.ALIASES_PREFIX+key).Bytes(); err != nil {
+		ALIASES_PREFIX+key).Bytes(); err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
 			err = utils.ErrNotFound
 		}
@@ -541,7 +545,7 @@ func (v1rs *redisMigrator) remV1Alias(key string) (err error) {
 		return err
 	}
 
-	err = v1rs.rds.Cmd("DEL", utils.ALIASES_PREFIX+key).Err
+	err = v1rs.rds.Cmd("DEL", ALIASES_PREFIX+key).Err
 	if err != nil {
 		return err
 	}
@@ -550,7 +554,7 @@ func (v1rs *redisMigrator) remV1Alias(key string) (err error) {
 		for target, pairs := range value.Pairs {
 			for _, alias := range pairs {
 				revID := alias + target + al.Context
-				err = v1rs.rds.Cmd("SREM", utils.REVERSE_ALIASES_PREFIX+revID, tmpKey).Err
+				err = v1rs.rds.Cmd("SREM", REVERSE_ALIASES_PREFIX+revID, tmpKey).Err
 				if err != nil {
 					return err
 				}

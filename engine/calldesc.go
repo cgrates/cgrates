@@ -61,7 +61,6 @@ var (
 	statS                   rpcclient.RpcClientConnection
 	pubSubServer            rpcclient.RpcClientConnection
 	userService             rpcclient.RpcClientConnection
-	aliasService            rpcclient.RpcClientConnection
 	schedCdrsConns          rpcclient.RpcClientConnection
 	rpSubjectPrefixMatching bool
 )
@@ -101,10 +100,6 @@ func SetPubSub(ps rpcclient.RpcClientConnection) {
 
 func SetUserService(us rpcclient.RpcClientConnection) {
 	userService = us
-}
-
-func SetAliasService(as rpcclient.RpcClientConnection) {
-	aliasService = as
 }
 
 func SetSchedCdrsConns(sc rpcclient.RpcClientConnection) {

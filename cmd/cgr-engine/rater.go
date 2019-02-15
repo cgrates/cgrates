@@ -32,7 +32,7 @@ import (
 // Starts rater and reports on chan
 func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *engine.CacheS,
 	internalThdSChan, internalStatSChan, internalPubSubSChan,
-	internalUserSChan, internalAliaseSChan chan rpcclient.RpcClientConnection,
+	internalUserSChan chan rpcclient.RpcClientConnection,
 	serviceManager *servmanager.ServiceManager, server *utils.Server,
 	dm *engine.DataManager, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, stopHandled *bool,
 	exitChan chan bool, filterSChan chan *engine.FilterS) {
@@ -53,8 +53,6 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		<-cacheS.GetPrecacheChannel(utils.CacheActionTriggers)
 		<-cacheS.GetPrecacheChannel(utils.CacheSharedGroups)
 		<-cacheS.GetPrecacheChannel(utils.CacheDerivedChargers)
-		<-cacheS.GetPrecacheChannel(utils.CacheAliases)
-		<-cacheS.GetPrecacheChannel(utils.CacheReverseAliases)
 	}()
 
 	var thdS *rpcclient.RpcClientPool
@@ -122,27 +120,6 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		}()
 	}
 
-	if len(cfg.RalsCfg().RALsAliasSConns) != 0 { // Connection to AliasService
-		aliasesTaskChan := make(chan struct{})
-		waitTasks = append(waitTasks, aliasesTaskChan)
-		go func() {
-			defer close(aliasesTaskChan)
-			if aliaseSCons, err := engine.NewRPCPool(rpcclient.POOL_FIRST,
-				cfg.TlsCfg().ClientKey,
-				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-				cfg.RalsCfg().RALsAliasSConns, internalAliaseSChan,
-				cfg.GeneralCfg().InternalTtl); err != nil {
-				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to AliaseS, error: %s", err.Error()))
-				exitChan <- true
-				return
-			} else {
-				engine.SetAliasService(aliaseSCons)
-			}
-		}()
-	}
-
 	var usersConns rpcclient.RpcClientConnection
 	if len(cfg.RalsCfg().RALsUserSConns) != 0 { // Connection to UserService
 		usersTaskChan := make(chan struct{})
@@ -200,7 +177,6 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 	server.RpcRegister(apierRpcV2)
 
 	utils.RegisterRpcParams("PubSubV1", &engine.PubSub{})
-	utils.RegisterRpcParams("AliasesV1", &engine.AliasHandler{})
 	utils.RegisterRpcParams("UsersV1", &engine.UserMap{})
 	utils.RegisterRpcParams("", &v1.CdrsV1{})
 	utils.RegisterRpcParams("", &v2.CdrsV2{})

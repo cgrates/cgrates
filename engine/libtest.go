@@ -138,7 +138,6 @@ func LoadTariffPlanFromFolder(tpPath, timezone string, dm *DataManager, disable_
 		path.Join(tpPath, utils.DERIVED_CHARGERS_CSV),
 
 		path.Join(tpPath, utils.USERS_CSV),
-		path.Join(tpPath, utils.ALIASES_CSV),
 		path.Join(tpPath, utils.ResourcesCsv),
 		path.Join(tpPath, utils.StatsCsv),
 		path.Join(tpPath, utils.ThresholdsCsv),

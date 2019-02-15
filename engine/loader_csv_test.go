@@ -234,19 +234,6 @@ cgrates.org,rif,,test1,val1,10
 cgrates.org,dan,,another,value,10
 cgrates.org,mas,true,another,value,10
 `
-	aliases = `
-#Direction[0],Tenant[1],Category[2],Account[3],Subject[4],DestinationId[5],Context[6],Target[7],Original[8],Alias[9],Weight[10]
-*out,cgrates.org,call,dan,dan,EU_LANDLINE,*rating,Subject,dan,dan1,10
-*out,cgrates.org,call,dan,dan,EU_LANDLINE,*rating,Subject,rif,rif1,10
-*out,cgrates.org,call,dan,dan,EU_LANDLINE,*rating,Cli,0723,0724,10
-*out,cgrates.org,call,dan,dan,GLOBAL1,*rating,Subject,dan,dan2,20
-*any,*any,*any,*any,*any,*any,*rating,Subject,*any,rif1,20
-*any,*any,*any,*any,*any,*any,*rating,Account,*any,dan1,10
-*out,vdf,0,a1,a1,*any,*rating,Subject,a1,minu,10
-*out,vdf,0,a1,a1,*any,*rating,Account,a1,minu,10
-*out,cgrates.org,call,remo,remo,*any,*rating,Subject,remo,minu,10
-*out,cgrates.org,call,remo,remo,*any,*rating,Account,remo,minu,10
-`
 	resProfiles = `
 #Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],Weight[9],Thresholds[10]
 cgrates.org,ResGroup21,FLTR_1,2014-07-29T15:00:00Z,1s,2,call,true,true,10,
@@ -302,7 +289,7 @@ var csvr *TpReader
 func init() {
 	csvr = NewTpReader(dm.dataDB, NewStringCSVStorage(',', destinations, timings, rates, destinationRates,
 		ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans, actionTriggers,
-		accountActions, derivedCharges, users, aliases, resProfiles, stats, thresholds,
+		accountActions, derivedCharges, users, resProfiles, stats, thresholds,
 		filters, sppProfiles, attributeProfiles, chargerProfiles, dispatcherProfiles), testTPID, "")
 
 	if err := csvr.LoadDestinations(); err != nil {
@@ -343,9 +330,6 @@ func init() {
 	}
 	if err := csvr.LoadUsers(); err != nil {
 		log.Print("error in LoadUsers:", err)
-	}
-	if err := csvr.LoadAliases(); err != nil {
-		log.Print("error in LoadAliases:", err)
 	}
 	if err := csvr.LoadFilters(); err != nil {
 		log.Print("error in LoadFilter:", err)
@@ -1268,63 +1252,6 @@ func TestLoadUsers(t *testing.T) {
 
 	if !reflect.DeepEqual(csvr.users[user1.GetId()], user1) {
 		t.Errorf("Unexpected user %+v", csvr.users[user1.GetId()])
-	}
-}
-
-func TestLoadAliases(t *testing.T) {
-	if len(csvr.aliases) != 4 {
-		t.Error("Failed to load aliases: ", len(csvr.aliases))
-	}
-	alias1 := &Alias{
-		Direction: "*out",
-		Tenant:    "cgrates.org",
-		Category:  "call",
-		Account:   "dan",
-		Subject:   "dan",
-		Context:   "*rating",
-		Values: AliasValues{
-			&AliasValue{
-				DestinationId: "EU_LANDLINE",
-				Pairs: AliasPairs{
-					"Subject": map[string]string{
-						"dan": "dan1",
-						"rif": "rif1",
-					},
-					"Cli": map[string]string{
-						"0723": "0724",
-					},
-				},
-				Weight: 10,
-			},
-
-			&AliasValue{
-				DestinationId: "GLOBAL1",
-				Pairs:         AliasPairs{"Subject": map[string]string{"dan": "dan2"}},
-				Weight:        20,
-			},
-		},
-	}
-
-	if !reflect.DeepEqual(csvr.aliases[alias1.GetId()], alias1) {
-		for _, value := range csvr.aliases[alias1.GetId()].Values {
-			t.Logf("Value: %+v", value)
-		}
-		t.Errorf("Unexpected alias %+v", csvr.aliases[alias1.GetId()])
-	}
-}
-
-func TestLoadReverseAliases(t *testing.T) {
-	eRevAliases := map[string][]string{
-		"minuAccount*rating": []string{"*out:cgrates.org:call:remo:remo:*rating:*any", "*out:vdf:0:a1:a1:*rating:*any"},
-		"dan1Subject*rating": []string{"*out:cgrates.org:call:dan:dan:*rating:EU_LANDLINE"},
-		"rif1Subject*rating": []string{"*out:cgrates.org:call:dan:dan:*rating:EU_LANDLINE", "*any:*any:*any:*any:*any:*rating:*any"},
-		"0724Cli*rating":     []string{"*out:cgrates.org:call:dan:dan:*rating:EU_LANDLINE"},
-		"dan2Subject*rating": []string{"*out:cgrates.org:call:dan:dan:*rating:GLOBAL1"},
-		"dan1Account*rating": []string{"*any:*any:*any:*any:*any:*rating:*any"},
-		"minuSubject*rating": []string{"*out:cgrates.org:call:remo:remo:*rating:*any", "*out:vdf:0:a1:a1:*rating:*any"},
-	}
-	if len(eRevAliases) != len(csvr.revAliases) {
-		t.Errorf("Expecting: %+v, received: %+v", eRevAliases, csvr.revAliases)
 	}
 }
 

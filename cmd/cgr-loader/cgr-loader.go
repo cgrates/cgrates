@@ -292,7 +292,6 @@ func main() {
 			path.Join(*dataPath, utils.ACCOUNT_ACTIONS_CSV),
 			path.Join(*dataPath, utils.DERIVED_CHARGERS_CSV),
 			path.Join(*dataPath, utils.USERS_CSV),
-			path.Join(*dataPath, utils.ALIASES_CSV),
 			path.Join(*dataPath, utils.ResourcesCsv),
 			path.Join(*dataPath, utils.StatsCsv),
 			path.Join(*dataPath, utils.ThresholdsCsv),
@@ -354,8 +353,8 @@ func main() {
 		if err := tpReader.WriteToDatabase(*flush, *verbose, *disableReverse); err != nil {
 			log.Fatal("Could not write to database: ", err)
 		}
-		var dstIds, revDstIDs, rplIds, rpfIds, actIds, aapIDs, shgIds, alsIds, dcsIds, rspIDs, resIDs,
-			aatIDs, ralsIDs, stqIDs, stqpIDs, trsIDs, trspfIDs, flrIDs, spfIDs, apfIDs, chargerIDs, dppIDs []string
+		var dstIds, revDstIDs, rplIds, rpfIds, actIds, aapIDs, shgIds, dcsIds, rspIDs, resIDs,
+			aatIDs, stqIDs, stqpIDs, trsIDs, trspfIDs, flrIDs, spfIDs, apfIDs, chargerIDs, dppIDs []string
 		if cacheS != nil {
 			dstIds, _ = tpReader.GetLoadedIds(utils.DESTINATION_PREFIX)
 			revDstIDs, _ = tpReader.GetLoadedIds(utils.REVERSE_DESTINATION_PREFIX)
@@ -364,12 +363,10 @@ func main() {
 			actIds, _ = tpReader.GetLoadedIds(utils.ACTION_PREFIX)
 			aapIDs, _ = tpReader.GetLoadedIds(utils.AccountActionPlansPrefix)
 			shgIds, _ = tpReader.GetLoadedIds(utils.SHARED_GROUP_PREFIX)
-			alsIds, _ = tpReader.GetLoadedIds(utils.ALIASES_PREFIX)
 			dcsIds, _ = tpReader.GetLoadedIds(utils.DERIVEDCHARGERS_PREFIX)
 			rspIDs, _ = tpReader.GetLoadedIds(utils.ResourceProfilesPrefix)
 			resIDs, _ = tpReader.GetLoadedIds(utils.ResourcesPrefix)
 			aatIDs, _ = tpReader.GetLoadedIds(utils.ACTION_TRIGGER_PREFIX)
-			ralsIDs, _ = tpReader.GetLoadedIds(utils.REVERSE_ALIASES_PREFIX)
 			stqIDs, _ = tpReader.GetLoadedIds(utils.StatQueuePrefix)
 			stqpIDs, _ = tpReader.GetLoadedIds(utils.StatQueueProfilePrefix)
 			trsIDs, _ = tpReader.GetLoadedIds(utils.ThresholdPrefix)
@@ -406,12 +403,10 @@ func main() {
 					ActionPlanIDs:         &aps,
 					AccountActionPlanIDs:  &aapIDs,
 					SharedGroupIDs:        &shgIds,
-					AliasIDs:              &alsIds,
 					DerivedChargerIDs:     &dcsIds,
 					ResourceProfileIDs:    &rspIDs,
 					ResourceIDs:           &resIDs,
 					ActionTriggerIDs:      &aatIDs,
-					ReverseAliasIDs:       &ralsIDs,
 					StatsQueueIDs:         &stqIDs,
 					StatsQueueProfileIDs:  &stqpIDs,
 					ThresholdIDs:          &trsIDs,

@@ -45,7 +45,6 @@ func TestRalsCfgFromJsonCfg(t *testing.T) {
 	"stats_conns": [],						// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"pubsubs_conns": [],					// address where to reach the pubusb service, empty to disable pubsub functionality: <""|*internal|x.y.z.y:1234>
 	"users_conns": [],						// address where to reach the user service, empty to disable user profile functionality: <""|*internal|x.y.z.y:1234>
-	"aliases_conns": [],					// address where to reach the aliases service, empty to disable aliases functionality: <""|*internal|x.y.z.y:1234>
 	"rp_subject_prefix_matching": false,	// enables prefix matching for the rating profile subject
 	"max_computed_usage": {					// do not compute usage higher than this, prevents memory overload
 		"*any": "189h",
@@ -62,7 +61,6 @@ func TestRalsCfgFromJsonCfg(t *testing.T) {
 		RALsStatSConns:          []*HaPoolConfig{},
 		RALsPubSubSConns:        []*HaPoolConfig{},
 		RALsUserSConns:          []*HaPoolConfig{},
-		RALsAliasSConns:         []*HaPoolConfig{},
 		RpSubjectPrefixMatching: false,
 		RALsMaxComputedUsage: map[string]time.Duration{
 			utils.ANY:   time.Duration(189 * time.Hour),

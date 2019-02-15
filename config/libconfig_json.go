@@ -102,7 +102,6 @@ type RalsJsonCfg struct {
 	Thresholds_conns           *[]*HaPoolJsonCfg
 	Stats_conns                *[]*HaPoolJsonCfg
 	Pubsubs_conns              *[]*HaPoolJsonCfg
-	Aliases_conns              *[]*HaPoolJsonCfg
 	Users_conns                *[]*HaPoolJsonCfg
 	Rp_subject_prefix_matching *bool
 	Remove_expired             *bool
@@ -126,7 +125,6 @@ type CdrsJsonCfg struct {
 	Pubsubs_conns         *[]*HaPoolJsonCfg
 	Attributes_conns      *[]*HaPoolJsonCfg
 	Users_conns           *[]*HaPoolJsonCfg
-	Aliases_conns         *[]*HaPoolJsonCfg
 	Thresholds_conns      *[]*HaPoolJsonCfg
 	Stats_conns           *[]*HaPoolJsonCfg
 	Online_cdr_exports    *[]string
@@ -409,11 +407,6 @@ type HistServJsonCfg struct {
 
 // PubSub server config section
 type PubSubServJsonCfg struct {
-	Enabled *bool
-}
-
-// Aliases server config section
-type AliasesServJsonCfg struct {
 	Enabled *bool
 }
 

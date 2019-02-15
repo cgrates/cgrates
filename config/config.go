@@ -311,11 +311,10 @@ type CGRConfig struct {
 	analyzerSCfg     *AnalyzerSCfg     // AnalyzerS config
 
 	// Deprecated
-	SmOsipsConfig        *SmOsipsConfig // SMOpenSIPS Configuration
-	PubSubServerEnabled  bool           // Starts PubSub as server: <true|false>.
-	AliasesServerEnabled bool           // Starts PubSub as server: <true|false>.
-	UserServerEnabled    bool           // Starts User as server: <true|false>
-	UserServerIndexes    []string       // List of user profile field indexes
+	SmOsipsConfig       *SmOsipsConfig // SMOpenSIPS Configuration
+	PubSubServerEnabled bool           // Starts PubSub as server: <true|false>.
+	UserServerEnabled   bool           // Starts User as server: <true|false>
+	UserServerIndexes   []string       // List of user profile field indexes
 }
 
 func (self *CGRConfig) checkConfigSanity() error {
@@ -332,13 +331,6 @@ func (self *CGRConfig) checkConfigSanity() error {
 			for _, connCfg := range self.ralsCfg.RALsPubSubSConns {
 				if connCfg.Address == utils.MetaInternal {
 					return errors.New("PubSub server not enabled but requested by RALs component.")
-				}
-			}
-		}
-		if !self.AliasesServerEnabled {
-			for _, connCfg := range self.ralsCfg.RALsAliasSConns {
-				if connCfg.Address == utils.MetaInternal {
-					return errors.New("Alias server not enabled but requested by RALs component.")
 				}
 			}
 		}
@@ -391,13 +383,6 @@ func (self *CGRConfig) checkConfigSanity() error {
 			for _, connCfg := range self.cdrsCfg.CDRSUserSConns {
 				if connCfg.Address == utils.MetaInternal {
 					return errors.New("UserS not enabled but requested by CDRS component.")
-				}
-			}
-		}
-		if !self.AliasesServerEnabled {
-			for _, connCfg := range self.cdrsCfg.CDRSAliaseSConns {
-				if connCfg.Address == utils.MetaInternal {
-					return errors.New("AliaseS not enabled but requested by CDRS component.")
 				}
 			}
 		}
@@ -1064,16 +1049,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnPubSubServCfg != nil {
 		if jsnPubSubServCfg.Enabled != nil {
 			self.PubSubServerEnabled = *jsnPubSubServCfg.Enabled
-		}
-	}
-
-	jsnAliasesServCfg, err := jsnCfg.AliasesServJsonCfg()
-	if err != nil {
-		return err
-	}
-	if jsnAliasesServCfg != nil {
-		if jsnAliasesServCfg.Enabled != nil {
-			self.AliasesServerEnabled = *jsnAliasesServCfg.Enabled
 		}
 	}
 

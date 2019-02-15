@@ -31,7 +31,6 @@ type RalsCfg struct {
 	RALsStatSConns          []*HaPoolConfig
 	RALsPubSubSConns        []*HaPoolConfig
 	RALsUserSConns          []*HaPoolConfig
-	RALsAliasSConns         []*HaPoolConfig
 	RpSubjectPrefixMatching bool // enables prefix matching for the rating profile subject
 	RemoveExpired           bool
 	RALsMaxComputedUsage    map[string]time.Duration
@@ -64,13 +63,6 @@ func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 		for idx, jsnHaCfg := range *jsnRALsCfg.Pubsubs_conns {
 			ralsCfg.RALsPubSubSConns[idx] = NewDfltHaPoolConfig()
 			ralsCfg.RALsPubSubSConns[idx].loadFromJsonCfg(jsnHaCfg)
-		}
-	}
-	if jsnRALsCfg.Aliases_conns != nil {
-		ralsCfg.RALsAliasSConns = make([]*HaPoolConfig, len(*jsnRALsCfg.Aliases_conns))
-		for idx, jsnHaCfg := range *jsnRALsCfg.Aliases_conns {
-			ralsCfg.RALsAliasSConns[idx] = NewDfltHaPoolConfig()
-			ralsCfg.RALsAliasSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnRALsCfg.Users_conns != nil {

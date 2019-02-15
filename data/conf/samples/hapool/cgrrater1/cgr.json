@@ -13,9 +13,6 @@
 	"users_conns": [
 		{"address": "*internal"}
 	],
-	"aliases_conns": [
-		{"address": "*internal"}
-	],
 },
 
 "scheduler": {
@@ -23,10 +20,6 @@
 },
 
 "pubsubs": {
-	"enabled": true,
-},
-
-"aliases": {
 	"enabled": true,
 },
 

@@ -69,7 +69,7 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, rater, pubsub,
-	attrs, users, aliases, thdS, stats, chargerS rpcclient.RpcClientConnection, filterS *FilterS) (*CdrServer, error) {
+	attrs, users, thdS, stats, chargerS rpcclient.RpcClientConnection, filterS *FilterS) (*CdrServer, error) {
 	if rater != nil && reflect.ValueOf(rater).IsNil() { // Work around so we store actual nil instead of nil interface value, faster to check here than in CdrServer code
 		rater = nil
 	}
@@ -82,10 +82,6 @@ func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, r
 	if users != nil && reflect.ValueOf(users).IsNil() {
 		users = nil
 	}
-	if aliases != nil && reflect.ValueOf(aliases).IsNil() {
-		aliases = nil
-	}
-
 	if thdS != nil && reflect.ValueOf(thdS).IsNil() {
 		thdS = nil
 	}
@@ -97,7 +93,7 @@ func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, r
 	}
 	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, dm: dm,
 		rals: rater, pubsub: pubsub, attrS: attrs,
-		users: users, aliases: aliases,
+		users: users,
 		stats: stats, thdS: thdS,
 		chargerS: chargerS, guard: guardian.Guardian,
 		httpPoster: NewHTTPPoster(cgrCfg.GeneralCfg().HttpSkipTlsVerify,
@@ -112,7 +108,6 @@ type CdrServer struct {
 	pubsub        rpcclient.RpcClientConnection
 	attrS         rpcclient.RpcClientConnection
 	users         rpcclient.RpcClientConnection
-	aliases       rpcclient.RpcClientConnection
 	thdS          rpcclient.RpcClientConnection
 	stats         rpcclient.RpcClientConnection
 	chargerS      rpcclient.RpcClientConnection
@@ -245,18 +240,6 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, cdrstats, 
 			utils.Logger.Err(fmt.Sprintf("<CDRS> UserS handling for CDR %+v, got error: %s", cdrRun, err.Error()))
 			continue
 		}
-		if err := LoadAlias(&AttrMatchingAlias{
-			Destination: cdrRun.Destination,
-			Direction:   utils.OUT,
-			Tenant:      cdrRun.Tenant,
-			Category:    cdrRun.Category,
-			Account:     cdrRun.Account,
-			Subject:     cdrRun.Subject,
-			Context:     utils.MetaRating,
-		}, cdrRun, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
-			utils.Logger.Err(fmt.Sprintf("<CDRS> Aliasing CDR %+v, got error: %s", cdrRun, err.Error()))
-			continue
-		}
 		rcvRatedCDRs, err := self.rateCDR(cdrRun)
 		if err != nil {
 			cdrRun.Cost = -1.0 // If there was an error, mark the CDR
@@ -317,17 +300,6 @@ func (self *CdrServer) deriveCdrs(cdr *CDR) (drvdCDRs []*CDR, err error) {
 		}
 	}
 	if err := LoadUserProfile(cdr, utils.EXTRA_FIELDS); err != nil {
-		return nil, err
-	}
-	if err := LoadAlias(&AttrMatchingAlias{
-		Destination: cdr.Destination,
-		Direction:   utils.OUT,
-		Tenant:      cdr.Tenant,
-		Category:    cdr.Category,
-		Account:     cdr.Account,
-		Subject:     cdr.Subject,
-		Context:     utils.MetaRating,
-	}, cdr, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return nil, err
 	}
 	attrsDC := &utils.AttrDerivedChargers{Tenant: cdr.Tenant, Category: cdr.Category, Direction: utils.OUT,

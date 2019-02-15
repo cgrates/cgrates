@@ -98,12 +98,6 @@ func TestCacheJsonCfg(t *testing.T) {
 		utils.CacheSharedGroups: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 			Precache: utils.BoolPointer(false)},
-		utils.CacheAliases: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
-			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-			Precache: utils.BoolPointer(false)},
-		utils.CacheReverseAliases: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
-			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-			Precache: utils.BoolPointer(false)},
 		utils.CacheDerivedChargers: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 			Precache: utils.BoolPointer(false)},
@@ -232,7 +226,6 @@ func TestDfRalsJsonCfg(t *testing.T) {
 		Stats_conns:                &[]*HaPoolJsonCfg{},
 		Pubsubs_conns:              &[]*HaPoolJsonCfg{},
 		Users_conns:                &[]*HaPoolJsonCfg{},
-		Aliases_conns:              &[]*HaPoolJsonCfg{},
 		Rp_subject_prefix_matching: utils.BoolPointer(false),
 		Remove_expired:             utils.BoolPointer(true),
 		Max_computed_usage: &map[string]string{
@@ -274,7 +267,6 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		Pubsubs_conns:      &[]*HaPoolJsonCfg{},
 		Attributes_conns:   &[]*HaPoolJsonCfg{},
 		Users_conns:        &[]*HaPoolJsonCfg{},
-		Aliases_conns:      &[]*HaPoolJsonCfg{},
 		Thresholds_conns:   &[]*HaPoolJsonCfg{},
 		Stats_conns:        &[]*HaPoolJsonCfg{},
 		Online_cdr_exports: &[]string{},
@@ -740,17 +732,6 @@ func TestDfPubSubServJsonCfg(t *testing.T) {
 		Enabled: utils.BoolPointer(false),
 	}
 	if cfg, err := dfCgrJsonCfg.PubSubServJsonCfg(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg)
-	}
-}
-
-func TestDfAliasesServJsonCfg(t *testing.T) {
-	eCfg := &AliasesServJsonCfg{
-		Enabled: utils.BoolPointer(false),
-	}
-	if cfg, err := dfCgrJsonCfg.AliasesServJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)

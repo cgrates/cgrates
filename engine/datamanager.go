@@ -56,7 +56,7 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 			if utils.IsSliceMember([]string{utils.DESTINATION_PREFIX, utils.REVERSE_DESTINATION_PREFIX,
 				utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
 				utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACTION_TRIGGER_PREFIX,
-				utils.SHARED_GROUP_PREFIX, utils.ALIASES_PREFIX, utils.REVERSE_ALIASES_PREFIX, utils.StatQueuePrefix,
+				utils.SHARED_GROUP_PREFIX, utils.StatQueuePrefix,
 				utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
 				utils.FilterPrefix, utils.SupplierProfilePrefix,
 				utils.AttributeProfilePrefix, utils.ChargerProfilePrefix, utils.DispatcherProfilePrefix}, k) && cacheCfg.Precache {
@@ -78,8 +78,6 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 			utils.ACTION_TRIGGER_PREFIX:      atrgIDs,
 			utils.SHARED_GROUP_PREFIX:        sgIDs,
 			utils.DERIVEDCHARGERS_PREFIX:     dcIDs,
-			utils.ALIASES_PREFIX:             alsIDs,
-			utils.REVERSE_ALIASES_PREFIX:     rvAlsIDs,
 			utils.ResourceProfilesPrefix:     rpIDs,
 			utils.ResourcesPrefix:            resIDs,
 			utils.StatQueuePrefix:            stqIDs,
@@ -138,8 +136,6 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		utils.ACTION_TRIGGER_PREFIX,
 		utils.SHARED_GROUP_PREFIX,
 		utils.DERIVEDCHARGERS_PREFIX,
-		utils.ALIASES_PREFIX,
-		utils.REVERSE_ALIASES_PREFIX,
 		utils.ResourceProfilesPrefix,
 		utils.TimingsPrefix,
 		utils.ResourcesPrefix,
@@ -208,10 +204,6 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.GetSharedGroup(dataID, true, utils.NonTransactional)
 		case utils.DERIVEDCHARGERS_PREFIX:
 			_, err = dm.GetDerivedChargers(dataID, true, utils.NonTransactional)
-		case utils.ALIASES_PREFIX:
-			_, err = dm.DataDB().GetAlias(dataID, true, utils.NonTransactional)
-		case utils.REVERSE_ALIASES_PREFIX:
-			_, err = dm.DataDB().GetReverseAlias(dataID, true, utils.NonTransactional)
 		case utils.ResourceProfilesPrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetResourceProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)

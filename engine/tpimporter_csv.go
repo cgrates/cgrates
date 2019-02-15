@@ -54,7 +54,6 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 	utils.ACCOUNT_ACTIONS_CSV:   (*TPCSVImporter).importAccountActions,
 	utils.DERIVED_CHARGERS_CSV:  (*TPCSVImporter).importDerivedChargers,
 	utils.USERS_CSV:             (*TPCSVImporter).importUsers,
-	utils.ALIASES_CSV:           (*TPCSVImporter).importAliases,
 	utils.ResourcesCsv:          (*TPCSVImporter).importResources,
 	utils.StatsCsv:              (*TPCSVImporter).importStats,
 	utils.ThresholdsCsv:         (*TPCSVImporter).importThresholds,
@@ -80,7 +79,6 @@ func (self *TPCSVImporter) Run() error {
 		path.Join(self.DirPath, utils.ACCOUNT_ACTIONS_CSV),
 		path.Join(self.DirPath, utils.DERIVED_CHARGERS_CSV),
 		path.Join(self.DirPath, utils.USERS_CSV),
-		path.Join(self.DirPath, utils.ALIASES_CSV),
 		path.Join(self.DirPath, utils.ResourcesCsv),
 		path.Join(self.DirPath, utils.StatsCsv),
 		path.Join(self.DirPath, utils.ThresholdsCsv),
@@ -312,20 +310,6 @@ func (self *TPCSVImporter) importUsers(fn string) error {
 	}
 
 	return self.StorDb.SetTPUsers(tps)
-}
-
-func (self *TPCSVImporter) importAliases(fn string) error {
-	if self.Verbose {
-		log.Printf("Processing file: <%s> ", fn)
-	}
-	tps, err := self.csvr.GetTPAliases(nil)
-	if err != nil {
-		return err
-	}
-	for i := 0; i < len(tps); i++ {
-		tps[i].TPid = self.TPid
-	}
-	return self.StorDb.SetTPAliases(tps)
 }
 
 func (self *TPCSVImporter) importResources(fn string) error {

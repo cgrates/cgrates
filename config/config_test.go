@@ -471,9 +471,6 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 	if !reflect.DeepEqual(cgrCfg.RalsCfg().RALsUserSConns, eHaPoolcfg) {
 		t.Errorf("Expecting: %+v , received: %+v", eHaPoolcfg, cgrCfg.RalsCfg().RALsUserSConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.RalsCfg().RALsAliasSConns, eHaPoolcfg) {
-		t.Errorf("Expecting: %+v , received: %+v", eHaPoolcfg, cgrCfg.RalsCfg().RALsAliasSConns)
-	}
 	if cgrCfg.RalsCfg().RpSubjectPrefixMatching != false {
 		t.Errorf("Expecting: false , received: %+v", cgrCfg.RalsCfg().RpSubjectPrefixMatching)
 	}
@@ -528,9 +525,6 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	}
 	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSUserSConns, eHaPoolCfg) {
 		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().CDRSUserSConns)
-	}
-	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSAliaseSConns, eHaPoolCfg) {
-		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().CDRSAliaseSConns)
 	}
 	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSThresholdSConns, eHaPoolCfg) {
 		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().CDRSThresholdSConns)
@@ -679,10 +673,6 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		utils.CacheSharedGroups: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheAliases: &CacheParamCfg{Limit: -1,
-			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheReverseAliases: &CacheParamCfg{Limit: -1,
-			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		utils.CacheDerivedChargers: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		utils.CacheTimings: &CacheParamCfg{Limit: -1,
@@ -801,12 +791,6 @@ func TestCgrCfgJSONDefaultsPubSubS(t *testing.T) {
 	}
 }
 
-func TestCgrCfgJSONDefaultsAliasesS(t *testing.T) {
-	if cgrCfg.AliasesServerEnabled != false {
-		t.Error(cgrCfg.AliasesServerEnabled)
-	}
-}
-
 func TestCgrCfgJSONDefaultsUserS(t *testing.T) {
 	eStrSlc := []string{}
 	if cgrCfg.UserServerEnabled != false {
@@ -825,18 +809,6 @@ func TestCgrCfgJSONDefaultFiltersCfg(t *testing.T) {
 	}
 	if !reflect.DeepEqual(cgrCfg.filterSCfg, eFiltersCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.filterSCfg, eFiltersCfg)
-	}
-}
-
-func TestCgrCfgJSONDefaultSAttributeSCfg(t *testing.T) {
-	eAliasSCfg := &AttributeSCfg{
-		Enabled:             false,
-		StringIndexedFields: nil,
-		PrefixIndexedFields: &[]string{},
-		ProcessRuns:         1,
-	}
-	if !reflect.DeepEqual(eAliasSCfg, cgrCfg.attributeSCfg) {
-		t.Errorf("received: %+v, expecting: %+v", eAliasSCfg, cgrCfg.attributeSCfg)
 	}
 }
 

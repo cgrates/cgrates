@@ -93,11 +93,6 @@ type DataDB interface {
 	GetUserDrv(string) (*UserProfile, error)
 	GetUsersDrv() ([]*UserProfile, error)
 	RemoveUserDrv(string) error
-	SetAlias(*Alias, string) error
-	GetAlias(string, bool, string) (*Alias, error)
-	RemoveAlias(string, string) error
-	SetReverseAlias(*Alias, string) error
-	GetReverseAlias(string, bool, string) ([]string, error)
 	GetResourceProfileDrv(string, string) (*ResourceProfile, error)
 	SetResourceProfileDrv(*ResourceProfile) error
 	RemoveResourceProfileDrv(string, string) error
@@ -179,7 +174,6 @@ type LoadReader interface {
 	GetTPRatingProfiles(*utils.TPRatingProfile) ([]*utils.TPRatingProfile, error)
 	GetTPSharedGroups(string, string) ([]*utils.TPSharedGroups, error)
 	GetTPUsers(*utils.TPUsers) ([]*utils.TPUsers, error)
-	GetTPAliases(*utils.TPAliases) ([]*utils.TPAliases, error)
 	GetTPDerivedChargers(*utils.TPDerivedChargers) ([]*utils.TPDerivedChargers, error)
 	GetTPActions(string, string) ([]*utils.TPActions, error)
 	GetTPActionPlans(string, string) ([]*utils.TPActionPlan, error)
@@ -205,7 +199,6 @@ type LoadWriter interface {
 	SetTPRatingProfiles([]*utils.TPRatingProfile) error
 	SetTPSharedGroups([]*utils.TPSharedGroups) error
 	SetTPUsers([]*utils.TPUsers) error
-	SetTPAliases([]*utils.TPAliases) error
 	SetTPDerivedChargers([]*utils.TPDerivedChargers) error
 	SetTPActions([]*utils.TPActions) error
 	SetTPActionPlans([]*utils.TPActionPlan) error
