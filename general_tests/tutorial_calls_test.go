@@ -384,7 +384,7 @@ func testCallGetActiveSessions(t *testing.T) {
 	var reply *[]*sessions.ActiveSession
 	expected := &[]*sessions.ActiveSession{
 		{
-			ReqType:     "*prepaid",
+			RequestType: "*prepaid",
 			Tenant:      "cgrates.org",
 			Category:    "call",
 			Account:     "1001",
@@ -397,8 +397,8 @@ func testCallGetActiveSessions(t *testing.T) {
 		t.Error("Got error on SessionSv1.GetActiveSessions: ", err.Error())
 	} else {
 		// compare some fields (eg. CGRId is generated)
-		if !reflect.DeepEqual((*expected)[0].ReqType, (*reply)[0].ReqType) {
-			t.Errorf("Expected: %s, received: %s", (*expected)[0].ReqType, (*reply)[0].ReqType)
+		if !reflect.DeepEqual((*expected)[0].RequestType, (*reply)[0].RequestType) {
+			t.Errorf("Expected: %s, received: %s", (*expected)[0].RequestType, (*reply)[0].RequestType)
 		} else if !reflect.DeepEqual((*expected)[0].Account, (*reply)[0].Account) {
 			t.Errorf("Expected: %s, received: %s", (*expected)[0].Account, (*reply)[0].Account)
 		} else if !reflect.DeepEqual((*expected)[0].Destination, (*reply)[0].Destination) {

@@ -1091,7 +1091,7 @@ func (sS *SessionS) syncSessions() {
 	var toBeRemoved []string
 	sS.aSsMux.RLock()
 	for cgrid := range sS.aSessions {
-		if queriedCGRIDs.HasField(cgrid) {
+		if !queriedCGRIDs.HasField(cgrid) {
 			toBeRemoved = append(toBeRemoved, cgrid)
 		}
 	}
