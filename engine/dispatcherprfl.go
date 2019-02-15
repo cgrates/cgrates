@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"math/rand"
 	"sort"
 
 	"github.com/cgrates/cgrates/utils"
@@ -60,10 +61,39 @@ func (dConns DispatcherConns) Sort() {
 	sort.Slice(dConns, func(i, j int) bool { return dConns[i].Weight > dConns[j].Weight })
 }
 
+// ReorderFromIndex will consider idx as starting point for the reordered slice
+func (dConns DispatcherConns) ReorderFromIndex(idx int) {
+	initConns := dConns.Clone()
+	for i := 0; i < len(dConns); i++ {
+		if idx > len(dConns)-1 {
+			idx = 0
+		}
+		dConns[i] = initConns[idx]
+		idx++
+	}
+	return
+}
+
+// Shuffle will mix the connections in place
+func (dConns DispatcherConns) Shuffle() {
+	rand.Shuffle(len(dConns), func(i, j int) {
+		dConns[i], dConns[j] = dConns[j], dConns[i]
+	})
+	return
+}
+
 func (dConns DispatcherConns) Clone() (cln DispatcherConns) {
 	cln = make(DispatcherConns, len(dConns))
 	for i, dConn := range dConns {
 		cln[i] = dConn.Clone()
+	}
+	return
+}
+
+func (dConns DispatcherConns) ConnIDs() (connIDs []string) {
+	connIDs = make([]string, len(dConns))
+	for i, conn := range dConns {
+		connIDs[i] = conn.ID
 	}
 	return
 }

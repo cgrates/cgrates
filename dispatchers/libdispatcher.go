@@ -29,16 +29,11 @@ import (
 // Dispatcher is responsible for routing requests to pool of connections
 // there will be different implementations based on strategy
 type Dispatcher interface {
-	// SetConfig is used to update the configuration information within dispatcher
+	// SetProfile is used to update the configuration information within dispatcher
 	// to make sure we take decisions based on latest config
 	SetProfile(pfl *engine.DispatcherProfile)
-	// GetInstance will clone Dispatcher and update the internal states of original
-	// it is needed so the dispatcher logic can be apply per request
-	GetInstance() (d Dispatcher)
-	// GetConnID returns an ordered list of connection IDs for the event
-	NextConnID() (connID string)
-	// MaxConns returns the maximum number of connections available in the pool
-	MaxConns() int
+	// ConnIDs returns the ordered list of hosts IDs
+	ConnIDs() (conns []string)
 }
 
 // newDispatcher constructs instances of Dispatcher
@@ -56,41 +51,30 @@ func newDispatcher(pfl *engine.DispatcherProfile) (d Dispatcher, err error) {
 // WeightDispatcher selects the next connection based on weight
 type WeightDispatcher struct {
 	sync.RWMutex
-	conns       engine.DispatcherConns
-	nextConnIdx int // last returned connection index
+	conns engine.DispatcherConns
 }
 
 // incrNextConnIdx will increment the nextConnIidx
 // not thread safe, it needs to be locked in a layer above
-func (wd *WeightDispatcher) incrNextConnIdx() {
+/*func (wd *WeightDispatcher) incrNextConnIdx() {
 	wd.nextConnIdx++
 	if wd.nextConnIdx > len(wd.conns)-1 {
 		wd.nextConnIdx = 0 // start from beginning
 	}
 }
+*/
 
 func (wd *WeightDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
 	pfl.Conns.Sort()
 	wd.Lock()
 	wd.conns = pfl.Conns.Clone()
-	wd.nextConnIdx = 0
 	wd.Unlock()
 	return
 }
 
-func (wd *WeightDispatcher) GetInstance() (d Dispatcher) {
+func (wd *WeightDispatcher) ConnIDs() (connIDs []string) {
 	wd.RLock()
-	wdInst := &WeightDispatcher{conns: wd.conns.Clone()}
+	connIDs = wd.conns.ConnIDs()
 	wd.RUnlock()
-	return wdInst
-}
-
-func (wd *WeightDispatcher) NextConnID() (connID string) {
-	connID = wd.conns[wd.nextConnIdx].ID
-	wd.incrNextConnIdx()
 	return
-}
-
-func (wd *WeightDispatcher) MaxConns() int {
-	return len(wd.conns)
 }

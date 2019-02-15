@@ -125,7 +125,7 @@ func (dS *DispatcherService) dispatcherForEvent(ev *utils.CGREvent,
 	// get or build the Dispatcher for the config
 	if x, ok := engine.Cache.Get(utils.CacheDispatchers,
 		tntID); ok && x != nil {
-		d = x.(Dispatcher).GetInstance()
+		d = x.(Dispatcher)
 		return
 	}
 	if d, err = newDispatcher(matchedPrlf); err != nil {
@@ -133,30 +133,29 @@ func (dS *DispatcherService) dispatcherForEvent(ev *utils.CGREvent,
 	}
 	engine.Cache.Set(utils.CacheDispatchers, tntID, d, nil,
 		true, utils.EmptyString)
-	return d.GetInstance(), nil
+	return
 }
 
-// Dispatch is the method forwarding the request towards the right
-func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string, RouteID *string,
+// Dispatch is the method forwarding the request towards the right connection
+func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string, routeID *string,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
 	d, errDsp := dS.dispatcherForEvent(ev, subsys)
 	if errDsp != nil {
 		return utils.NewErrDispatcherS(errDsp)
 	}
 	var connID string
-	if RouteID != nil &&
-		*RouteID != "" {
+	if routeID != nil &&
+		*routeID != "" {
 		// use previously discovered route
 		if x, ok := engine.Cache.Get(utils.CacheDispatcherRoutes,
-			*RouteID); ok && x != nil {
+			*routeID); ok && x != nil {
 			connID = x.(string)
 			if err = dS.conns[connID].Call(serviceMethod, args, reply); !utils.IsNetworkError(err) {
 				return
 			}
 		}
 	}
-	for i := 0; i < d.MaxConns(); i++ {
-		connID := d.NextConnID()
+	for _, connID = range d.ConnIDs() {
 		conn, has := dS.conns[connID]
 		if !has {
 			err = utils.NewErrDispatcherS(
@@ -166,9 +165,9 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string, RouteID
 		if err = conn.Call(serviceMethod, args, reply); utils.IsNetworkError(err) {
 			continue
 		}
-		if RouteID != nil &&
-			*RouteID != "" { // cache the discovered route
-			engine.Cache.Set(utils.CacheDispatcherRoutes, *RouteID, connID,
+		if routeID != nil &&
+			*routeID != "" { // cache the discovered route
+			engine.Cache.Set(utils.CacheDispatcherRoutes, *routeID, connID,
 				nil, true, utils.EmptyString)
 		}
 		break
