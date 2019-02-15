@@ -147,7 +147,6 @@ func TestSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 			acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 
-	usage := time.Duration(10 * time.Millisecond)
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
 		CGREvent: utils.CGREvent{
@@ -175,9 +174,9 @@ func TestSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		initArgs, &initRpl); err != nil {
 		t.Error(err)
 	}
-
-	if *initRpl.MaxUsage != usage {
-		t.Errorf("Expecting : %+v, received: %+v", usage, *initRpl.MaxUsage)
+	expMaxUsage := time.Duration(-1)
+	if *initRpl.MaxUsage != expMaxUsage {
+		t.Errorf("Expecting : %+v, received: %+v", expMaxUsage, *initRpl.MaxUsage)
 	}
 
 	// Make sure we are receiving a disconnect event
@@ -271,7 +270,6 @@ func TestSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 		t.Errorf("Expecting: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 
-	usage := time.Duration(200 * time.Millisecond)
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
 		CGREvent: utils.CGREvent{
@@ -300,8 +298,9 @@ func TestSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 		t.Error(err)
 	}
 
-	if *initRpl.MaxUsage != usage {
-		t.Errorf("Expecting : %+v, received: %+v", usage, *initRpl.MaxUsage)
+	expMaxUsage := time.Duration(-1)
+	if *initRpl.MaxUsage != expMaxUsage {
+		t.Errorf("Expecting : %+v, received: %+v", expMaxUsage, *initRpl.MaxUsage)
 	}
 
 	time.Sleep(time.Duration(10 * time.Millisecond)) // Give time for  debits to occur

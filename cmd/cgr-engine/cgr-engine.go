@@ -378,6 +378,14 @@ func startDiameterAgent(internalSsChan chan rpcclient.RpcClientConnection,
 	}
 	if sSInternal { // bidirectional client backwards connection
 		sS.(*utils.BiRPCInternalClient).SetClientConn(da)
+		var rply string
+		if err := sS.Call(utils.SessionSv1RegisterInternalBiJSONConn,
+			utils.EmptyString, &rply); err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
+				utils.DiameterAgent, utils.SessionS, err.Error()))
+			exitChan <- true
+			return
+		}
 	}
 	if err = da.ListenAndServe(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> error: %s!", err))

@@ -90,6 +90,21 @@ func TestRAitTPFromFolder(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+
+	//add a default charger
+	chargerProfile := &engine.ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "Default",
+		RunID:        "*default",
+		AttributeIDs: []string{"*none"},
+		Weight:       20,
+	}
+	var result string
+	if err := raRPC.Call("ApierV1.SetChargerProfile", chargerProfile, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
 }
 
 func TestRAitAuth(t *testing.T) {
@@ -260,7 +275,7 @@ func TestRAitAcctStop(t *testing.T) {
 	}
 	// Make sure the sessin was disconnected from SMG
 	var aSessions []*sessions.ActiveSession
-	if err := raRPC.Call("SMGenericV1.GetActiveSessions",
+	if err := raRPC.Call(utils.SessionSv1GetActiveSessions,
 		map[string]string{utils.RunID: utils.META_DEFAULT, utils.OriginID: "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"},
 		&aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

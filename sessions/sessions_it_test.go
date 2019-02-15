@@ -199,7 +199,7 @@ func TestSessionsItUpdateUnexist(t *testing.T) {
 
 	time.Sleep(10 * time.Millisecond)
 
-	eAcntVal = 8.283100
+	eAcntVal = 8.099800
 	if err := sItRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
