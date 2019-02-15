@@ -835,7 +835,7 @@ func TestSSv1ItDynamicDebit(t *testing.T) {
 		args1, &rply1); err != nil {
 		t.Error(err)
 		return
-	} else if *rply1.MaxUsage != time.Duration(0*time.Second) {
+	} else if *rply1.MaxUsage != time.Duration(-1) {
 		t.Errorf("Unexpected MaxUsage: %v", rply1.MaxUsage)
 	}
 

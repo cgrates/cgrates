@@ -442,7 +442,9 @@ func (sS *SessionS) debitSession(s *Session, sRunIdx int, dur time.Duration,
 		s.Unlock()
 		return
 	}
+
 	sr := s.SRuns[sRunIdx]
+
 	rDur := sr.debitReserve(dur, lastUsed) // debit out of reserve, rDur is still to be debited
 	if rDur == time.Duration(0) {
 		s.Unlock()
@@ -1164,6 +1166,7 @@ func (sS *SessionS) initSession(tnt string, evStart *engine.SafEvent, clntConnID
 		if dbtItval != 0 &&
 			sr.Event.GetStringIgnoreErrors(utils.RequestType) == utils.META_PREPAID {
 			go sS.debitLoopSession(s, i, dbtItval)
+			time.Sleep(1)
 		}
 	}
 	sS.registerSession(s, false) // make the session available to the rest of the system
@@ -1202,7 +1205,6 @@ func (sS *SessionS) updateSession(s *Session, updtEv engine.MapEvent) (maxUsage 
 	var maxUsageSet bool // so we know if we have set the 0 on purpose
 	prepaidReqs := []string{utils.META_PREPAID, utils.META_PSEUDOPREPAID}
 	for i, sr := range s.SRuns {
-
 		var rplyMaxUsage time.Duration
 		if !utils.IsSliceMember(prepaidReqs,
 			sr.Event.GetStringIgnoreErrors(utils.RequestType)) {
@@ -1864,10 +1866,14 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		if err != nil {
 			return utils.NewErrRALs(err)
 		}
-		if maxUsage, err := sS.updateSession(s, nil); err != nil {
-			return utils.NewErrRALs(err)
+		if dbtItvl > 0 { //active debit
+			rply.MaxUsage = utils.DurationPointer(time.Duration(-1))
 		} else {
-			rply.MaxUsage = &maxUsage
+			if maxUsage, err := sS.updateSession(s, nil); err != nil {
+				return utils.NewErrRALs(err)
+			} else {
+				rply.MaxUsage = &maxUsage
+			}
 		}
 	}
 	if args.ProcessThresholds {

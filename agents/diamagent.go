@@ -61,7 +61,6 @@ func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 			procsr.ReplyFields = tpls
 		}
 	}
-	//da.sS.SetClientConn(da) // pass the connection to sessionS back so we can receive the disconnects
 	return da, nil
 }
 
