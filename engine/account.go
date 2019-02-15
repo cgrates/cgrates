@@ -740,14 +740,16 @@ func (acc *Account) InitCounters() {
 }
 
 func (acc *Account) CleanExpiredStuff() {
-	for key, bm := range acc.BalanceMap {
-		for i := 0; i < len(bm); i++ {
-			if bm[i].IsExpired() {
-				// delete it
-				bm = append(bm[:i], bm[i+1:]...)
+	if config.CgrConfig().RalsCfg().RemoveExpired {
+		for key, bm := range acc.BalanceMap {
+			for i := 0; i < len(bm); i++ {
+				if bm[i].IsExpired() {
+					// delete it
+					bm = append(bm[:i], bm[i+1:]...)
+				}
 			}
+			acc.BalanceMap[key] = bm
 		}
-		acc.BalanceMap[key] = bm
 	}
 
 	for i := 0; i < len(acc.ActionTriggers); i++ {

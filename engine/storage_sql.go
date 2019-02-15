@@ -106,7 +106,7 @@ func (self *SQLStorage) IsDBEmpty() (resp bool, err error) {
 		utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles,
 		utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionTriggers,
 		utils.TBLTPAccountActions, utils.TBLTPDerivedChargers, utils.TBLTPUsers,
-		utils.TBLTPAliases, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
+		utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
 		utils.TBLTPFilters, utils.SessionsCostsTBL, utils.CDRsTBL, utils.TBLTPActionPlans,
 		utils.TBLVersions, utils.TBLTPSuppliers, utils.TBLTPAttributes, utils.TBLTPChargers,
 	}
@@ -127,7 +127,7 @@ func (self *SQLStorage) GetTpIds(colName string) ([]string, error) {
 	qryStr := fmt.Sprintf(" (SELECT tpid FROM %s)", colName)
 	if colName == "" {
 		qryStr = fmt.Sprintf(
-			"(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)",
+			"(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)",
 			utils.TBLTPTimings,
 			utils.TBLTPDestinations,
 			utils.TBLTPRates,
@@ -140,7 +140,6 @@ func (self *SQLStorage) GetTpIds(colName string) ([]string, error) {
 			utils.TBLTPAccountActions,
 			utils.TBLTPDerivedChargers,
 			utils.TBLTPUsers,
-			utils.TBLTPAliases,
 			utils.TBLTPResources,
 			utils.TBLTPStats,
 			utils.TBLTPThresholds,
@@ -239,7 +238,7 @@ func (self *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 			utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles,
 			utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionPlans,
 			utils.TBLTPActionTriggers, utils.TBLTPAccountActions,
-			utils.TBLTPDerivedChargers, utils.TBLTPAliases, utils.TBLTPUsers, utils.TBLTPResources,
+			utils.TBLTPDerivedChargers, utils.TBLTPUsers, utils.TBLTPResources,
 			utils.TBLTPStats, utils.TBLTPFilters, utils.TBLTPSuppliers, utils.TBLTPAttributes,
 			utils.TBLTPChargers, utils.TBLTPDispatchers} {
 			if err := tx.Table(tblName).Where("tpid = ?", tpid).Delete(nil).Error; err != nil {
@@ -1435,73 +1434,6 @@ func (self *SQLStorage) GetTPUsers(filter *utils.TPUsers) ([]*utils.TPUsers, err
 			return us, utils.ErrNotFound
 		}
 		return us, nil
-	}
-}
-
-func (self *SQLStorage) SetTPAliases(aliases []*utils.TPAliases) error {
-	if len(aliases) == 0 {
-		return nil
-	}
-	m := make(map[string]bool)
-	tx := self.db.Begin()
-	for _, alias := range aliases {
-		if found, _ := m[alias.GetId()]; !found {
-			m[alias.GetId()] = true
-			if err := tx.Where(&TpAlias{
-				Tpid:      alias.TPid,
-				Direction: alias.Direction,
-				Tenant:    alias.Tenant,
-				Category:  alias.Category,
-				Account:   alias.Account,
-				Subject:   alias.Subject,
-				Context:   alias.Context,
-			}).Delete(TpAlias{}).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-		for _, a := range APItoModelAliases(alias) {
-			if err := tx.Save(&a).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-	}
-	tx.Commit()
-	return nil
-}
-
-func (self *SQLStorage) GetTPAliases(filter *utils.TPAliases) ([]*utils.TPAliases, error) {
-	var tpAliases TpAliases
-	q := self.db.Where("tpid = ?", filter.TPid)
-	if len(filter.Direction) != 0 {
-		q = q.Where("direction = ?", filter.Direction)
-	}
-	if len(filter.Tenant) != 0 {
-		q = q.Where("tenant = ?", filter.Tenant)
-	}
-	if len(filter.Category) != 0 {
-		q = q.Where("category = ?", filter.Category)
-	}
-	if len(filter.Account) != 0 {
-		q = q.Where("account = ?", filter.Account)
-	}
-	if len(filter.Subject) != 0 {
-		q = q.Where("subject = ?", filter.Subject)
-	}
-	if len(filter.Context) != 0 {
-		q = q.Where("context = ?", filter.Context)
-	}
-	if err := q.Find(&tpAliases).Error; err != nil {
-		return nil, err
-	}
-	if as, err := tpAliases.AsTPAliases(); err != nil {
-		return nil, err
-	} else {
-		if len(as) == 0 {
-			return as, utils.ErrNotFound
-		}
-		return as, nil
 	}
 }
 

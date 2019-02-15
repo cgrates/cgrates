@@ -106,8 +106,8 @@ func testVrsDataDB(t *testing.T) {
 	var result engine.Versions
 	expectedVrs := engine.Versions{"ActionTriggers": 2,
 		"Actions": 2, "DerivedChargers": 1, "RQF": 1, "ReverseDestinations": 1, "Attributes": 2, "RatingPlan": 1,
-		"RatingProfile": 1, "User": 1, "Accounts": 3, "ActionPlans": 2, "Alias": 1, "Chargers": 1,
-		"Destinations": 1, "SharedGroups": 2, "Stats": 2, "Resource": 1, "ReverseAlias": 1,
+		"RatingProfile": 1, "User": 1, "Accounts": 3, "ActionPlans": 2, "Chargers": 1,
+		"Destinations": 1, "SharedGroups": 2, "Stats": 2, "Resource": 1,
 		"Subscribers": 1, "Suppliers": 1, "Thresholds": 3, "Timing": 1}
 	if err := vrsRPC.Call("ApierV1.GetDataDBVersions", "", &result); err != nil {
 		t.Error(err)
@@ -122,7 +122,7 @@ func testVrsStorDB(t *testing.T) {
 		"TpActions": 1, "TpDestinationRates": 1, "TpFilters": 1, "TpRates": 1, "CDRs": 2, "TpActionTriggers": 1, "TpRatingPlans": 1,
 		"TpSharedGroups": 1, "TpSuppliers": 1, "SessionSCosts": 3, "TpDerivedCharges": 1, "TpRatingProfiles": 1, "TpStats": 1, "TpTiming": 1,
 		"CostDetails": 2, "TpAccountActions": 1, "TpActionPlans": 1, "TpChargers": 1, "TpRatingProfile": 1, "TpUsers": 1,
-		"TpAliases": 1, "TpRatingPlan": 1, "TpResources": 1}
+		"TpRatingPlan": 1, "TpResources": 1}
 	if err := vrsRPC.Call("ApierV1.GetStorDBVersions", "", &result); err != nil {
 		t.Error(err)
 	} else if expectedVrs.Compare(result, vrsStorageType, true) != "" {

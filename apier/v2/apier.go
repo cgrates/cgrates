@@ -137,7 +137,6 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 			path.Join(attrs.FolderPath, utils.ACCOUNT_ACTIONS_CSV),
 			path.Join(attrs.FolderPath, utils.DERIVED_CHARGERS_CSV),
 			path.Join(attrs.FolderPath, utils.USERS_CSV),
-			path.Join(attrs.FolderPath, utils.ALIASES_CSV),
 			path.Join(attrs.FolderPath, utils.ResourcesCsv),
 			path.Join(attrs.FolderPath, utils.StatsCsv),
 			path.Join(attrs.FolderPath, utils.ThresholdsCsv),
@@ -172,8 +171,7 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		utils.ACTION_PLAN_PREFIX,
 		utils.AccountActionPlansPrefix,
 		utils.DERIVEDCHARGERS_PREFIX,
-		utils.ALIASES_PREFIX,
-		utils.REVERSE_ALIASES_PREFIX} {
+	} {
 		loadedIDs, _ := loader.GetLoadedIds(prfx)
 		if err := self.DataManager.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
 			return utils.NewErrServerError(err)

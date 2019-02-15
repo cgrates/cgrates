@@ -98,12 +98,6 @@ func TestCacheJsonCfg(t *testing.T) {
 		utils.CacheSharedGroups: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 			Precache: utils.BoolPointer(false)},
-		utils.CacheAliases: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
-			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-			Precache: utils.BoolPointer(false)},
-		utils.CacheReverseAliases: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
-			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
-			Precache: utils.BoolPointer(false)},
 		utils.CacheDerivedChargers: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 			Precache: utils.BoolPointer(false)},
@@ -232,8 +226,8 @@ func TestDfRalsJsonCfg(t *testing.T) {
 		Stats_conns:                &[]*HaPoolJsonCfg{},
 		Pubsubs_conns:              &[]*HaPoolJsonCfg{},
 		Users_conns:                &[]*HaPoolJsonCfg{},
-		Aliases_conns:              &[]*HaPoolJsonCfg{},
 		Rp_subject_prefix_matching: utils.BoolPointer(false),
+		Remove_expired:             utils.BoolPointer(true),
 		Max_computed_usage: &map[string]string{
 			utils.ANY:   "189h",
 			utils.VOICE: "72h",
@@ -273,7 +267,6 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		Pubsubs_conns:      &[]*HaPoolJsonCfg{},
 		Attributes_conns:   &[]*HaPoolJsonCfg{},
 		Users_conns:        &[]*HaPoolJsonCfg{},
-		Aliases_conns:      &[]*HaPoolJsonCfg{},
 		Thresholds_conns:   &[]*HaPoolJsonCfg{},
 		Stats_conns:        &[]*HaPoolJsonCfg{},
 		Online_cdr_exports: &[]string{},
@@ -739,17 +732,6 @@ func TestDfPubSubServJsonCfg(t *testing.T) {
 		Enabled: utils.BoolPointer(false),
 	}
 	if cfg, err := dfCgrJsonCfg.PubSubServJsonCfg(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg)
-	}
-}
-
-func TestDfAliasesServJsonCfg(t *testing.T) {
-	eCfg := &AliasesServJsonCfg{
-		Enabled: utils.BoolPointer(false),
-	}
-	if cfg, err := dfCgrJsonCfg.AliasesServJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
@@ -1239,6 +1221,66 @@ func TestDfLoaderJsonCfg(t *testing.T) {
 							Field_id: utils.StringPointer("Weight"),
 							Type:     utils.StringPointer(utils.META_COMPOSED),
 							Value:    utils.StringPointer("~6")},
+					},
+				},
+				{
+					Type:      utils.StringPointer(utils.MetaDispatchers),
+					File_name: utils.StringPointer(utils.DispatchersCsv),
+					Fields: &[]*FcTemplateJsonCfg{
+						{Tag: utils.StringPointer(utils.Tenant),
+							Field_id:  utils.StringPointer(utils.Tenant),
+							Type:      utils.StringPointer(utils.META_COMPOSED),
+							Value:     utils.StringPointer("~0"),
+							Mandatory: utils.BoolPointer(true)},
+						{Tag: utils.StringPointer(utils.ID),
+							Field_id:  utils.StringPointer(utils.ID),
+							Type:      utils.StringPointer(utils.META_COMPOSED),
+							Value:     utils.StringPointer("~1"),
+							Mandatory: utils.BoolPointer(true)},
+						{Tag: utils.StringPointer("Contexts"),
+							Field_id: utils.StringPointer("Contexts"),
+							Type:     utils.StringPointer(utils.META_COMPOSED),
+							Value:    utils.StringPointer("~2")},
+						{Tag: utils.StringPointer("FilterIDs"),
+							Field_id: utils.StringPointer("FilterIDs"),
+							Type:     utils.StringPointer(utils.META_COMPOSED),
+							Value:    utils.StringPointer("~3")},
+						{Tag: utils.StringPointer("ActivationInterval"),
+							Field_id: utils.StringPointer("ActivationInterval"),
+							Type:     utils.StringPointer(utils.META_COMPOSED),
+							Value:    utils.StringPointer("~4")},
+						{Tag: utils.StringPointer("Strategy"),
+							Field_id: utils.StringPointer("Strategy"),
+							Type:     utils.StringPointer(utils.META_COMPOSED),
+							Value:    utils.StringPointer("~5")},
+						{Tag: utils.StringPointer("StrategyParameters"),
+							Field_id: utils.StringPointer("StrategyParameters"),
+							Type:     utils.StringPointer(utils.META_COMPOSED),
+							Value:    utils.StringPointer("~6")},
+						{Tag: utils.StringPointer("ConnID"),
+							Field_id: utils.StringPointer("ConnID"),
+							Type:     utils.StringPointer(utils.META_COMPOSED),
+							Value:    utils.StringPointer("~7")},
+						{Tag: utils.StringPointer("ConnFilterIDs"),
+							Field_id: utils.StringPointer("ConnFilterIDs"),
+							Type:     utils.StringPointer(utils.META_COMPOSED),
+							Value:    utils.StringPointer("~8")},
+						{Tag: utils.StringPointer("ConnWeight"),
+							Field_id: utils.StringPointer("ConnWeight"),
+							Type:     utils.StringPointer(utils.META_COMPOSED),
+							Value:    utils.StringPointer("~9")},
+						{Tag: utils.StringPointer("ConnBlocker"),
+							Field_id: utils.StringPointer("ConnBlocker"),
+							Type:     utils.StringPointer(utils.META_COMPOSED),
+							Value:    utils.StringPointer("~10")},
+						{Tag: utils.StringPointer("ConnParameters"),
+							Field_id: utils.StringPointer("ConnParameters"),
+							Type:     utils.StringPointer(utils.META_COMPOSED),
+							Value:    utils.StringPointer("~11")},
+						{Tag: utils.StringPointer("Weight"),
+							Field_id: utils.StringPointer("Weight"),
+							Type:     utils.StringPointer(utils.META_COMPOSED),
+							Value:    utils.StringPointer("~12")},
 					},
 				},
 			},

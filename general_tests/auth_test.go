@@ -57,17 +57,16 @@ cgrates.org,call,*any,2013-01-06T00:00:00Z,RP_ANY,`
 	accountActions := `cgrates.org,testauthpostpaid1,TOPUP10_AT,,,`
 	derivedCharges := ``
 	users := ``
-	aliases := ``
 	resLimits := ``
 	stats := ``
 	thresholds := ``
 	filters := ``
 	suppliers := ``
-	aliasProfiles := ``
+	attrProfiles := ``
 	chargerProfiles := ``
 	csvr := engine.NewTpReader(dbAuth.DataDB(), engine.NewStringCSVStorage(',', destinations, timings, rates, destinationRates,
 		ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans, actionTriggers, accountActions,
-		derivedCharges, users, aliases, resLimits, stats, thresholds, filters, suppliers, aliasProfiles, chargerProfiles, ``), "", "")
+		derivedCharges, users, resLimits, stats, thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``), "", "")
 	if err := csvr.LoadAll(); err != nil {
 		t.Fatal(err)
 	}

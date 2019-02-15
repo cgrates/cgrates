@@ -38,6 +38,11 @@ type v1Alias struct {
 	Values    v1AliasValues
 }
 
+var (
+	ALIASES_PREFIX = "als_"
+	Alias          = "Alias"
+)
+
 type v1AliasValues []*v1AliasValue
 
 type v1AliasValue struct {
@@ -138,13 +143,13 @@ func (m *Migrator) migrateAlias2Attributes() (err error) {
 		if err := m.dmOut.DataManager().DataDB().SetAttributeProfileDrv(attr); err != nil {
 			return err
 		}
-		m.stats[utils.Alias] += 1
+		m.stats[Alias] += 1
 	}
 	if m.dryRun {
 		return
 	}
 	// All done, update version wtih current one
-	vrs := engine.Versions{utils.Alias: engine.CurrentDataDBVersions()[utils.Alias]}
+	vrs := engine.Versions{Alias: 0} //engine.CurrentDataDBVersions()[utils.Alias]}
 	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -154,63 +159,25 @@ func (m *Migrator) migrateAlias2Attributes() (err error) {
 	return
 }
 
-func (m *Migrator) migrateV1Alias() (err error) {
-	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ALIASES_PREFIX)
-	if err != nil {
-		return err
-	}
-	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.ALIASES_PREFIX)
-		usr, err := m.dmIN.DataManager().DataDB().GetAlias(idg, true, utils.NonTransactional)
-		if err != nil {
-			return err
-		}
-		if usr == nil || m.dryRun {
-			continue
-		}
-		if err := m.dmOut.DataManager().DataDB().SetAlias(usr, utils.NonTransactional); err != nil {
-			return err
-		}
-		m.stats[utils.Alias] += 1
-	}
-	return
-}
-
-// func (m *Migrator) migrateCurrentReverseAlias() (err error) {
+// func (m *Migrator) migrateV1Alias() (err error) {
 // 	var ids []string
-// 	ids, err = m.dmIN.DataDB().GetKeysForPrefix(utils.REVERSE_ALIASES_PREFIX)
+// 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(ALIASES_PREFIX)
 // 	if err != nil {
 // 		return err
 // 	}
-// 	log.Print("ids: ", ids)
 // 	for _, id := range ids {
-// 		idg := strings.TrimPrefix(id, utils.REVERSE_ALIASES_PREFIX)
-// 		usrs, err := m.dmIN.DataDB().GetReverseAlias(idg, true, utils.NonTransactional)
+// 		idg := strings.TrimPrefix(id, ALIASES_PREFIX)
+// 		usr, err := m.dmIN.DataManager().DataDB().GetAlias(idg, true, utils.NonTransactional)
 // 		if err != nil {
 // 			return err
 // 		}
-// 		log.Print(id)
-// 		log.Print(idg)
-// 		log.Print("values: ", usrs)
-
-// 		for _, usr := range usrs {
-// 			log.Print(usr)
-
-// 			alias, err := m.dmIN.DataDB().GetAlias(usr, true, utils.NonTransactional)
-// 			if err != nil {
-// 				log.Print("erorr")
-// 				return err
-// 			}
-// 			if alias != nil {
-// 				if m.dryRun != true {
-// 					if err := m.dmOut.DataDB().SetReverseAlias(alias, utils.NonTransactional); err != nil {
-// 						return err
-// 					}
-// 					m.stats[utils.ReverseAlias] += 1
-// 				}
-// 			}
+// 		if usr == nil || m.dryRun {
+// 			continue
 // 		}
+// 		if err := m.dmOut.DataManager().DataDB().SetAlias(usr, utils.NonTransactional); err != nil {
+// 			return err
+// 		}
+// 		m.stats[utils.Alias] += 1
 // 	}
 // 	return
 // }
@@ -230,12 +197,12 @@ func (m *Migrator) migrateAlias() (err error) {
 			utils.UndefinedVersion,
 			"version number is not defined for ActionTriggers model")
 	}
-	switch vrs[utils.Alias] {
-	case current[utils.Alias]:
+	switch vrs[Alias] {
+	case current[Alias]:
 		if m.sameDataDB {
 			return
 		}
-		return m.migrateV1Alias()
+		return utils.ErrNotImplemented
 	case 1:
 		return m.migrateAlias2Attributes()
 	}

@@ -36,9 +36,6 @@
 		"users_conns": [
 			{"address": "*internal"}
 		],
-		"aliases_conns": [
-			{"address": "*internal"}
-		],
 },
 
 "scheduler": {
@@ -52,9 +49,5 @@
 "users": {
 	"enabled": true,							// starts users service: <true|false>.
 },
-
-"aliases": {
-	"enabled": true,
-}
 
 }

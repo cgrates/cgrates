@@ -44,38 +44,36 @@ import (
 )
 
 const (
-	colDst   = "destinations"
-	colRds   = "reverse_destinations"
-	colAct   = "actions"
-	colApl   = "action_plans"
-	colAAp   = "account_action_plans"
-	colTsk   = "tasks"
-	colAtr   = "action_triggers"
-	colRpl   = "rating_plans"
-	colRpf   = "rating_profiles"
-	colAcc   = "accounts"
-	colShg   = "shared_groups"
-	colDcs   = "derived_chargers"
-	colAls   = "aliases"
-	colRCfgs = "reverse_aliases"
-	colPbs   = "pubsub"
-	colUsr   = "users"
-	colLht   = "load_history"
-	colVer   = "versions"
-	colRsP   = "resource_profiles"
-	colRFI   = "request_filter_indexes"
-	colTmg   = "timings"
-	colRes   = "resources"
-	colSqs   = "statqueues"
-	colSqp   = "statqueue_profiles"
-	colTps   = "threshold_profiles"
-	colThs   = "thresholds"
-	colFlt   = "filters"
-	colSpp   = "supplier_profiles"
-	colAttr  = "attribute_profiles"
-	ColCDRs  = "cdrs"
-	colCpp   = "charger_profiles"
-	colDpp   = "dispatcher_profiles"
+	colDst  = "destinations"
+	colRds  = "reverse_destinations"
+	colAct  = "actions"
+	colApl  = "action_plans"
+	colAAp  = "account_action_plans"
+	colTsk  = "tasks"
+	colAtr  = "action_triggers"
+	colRpl  = "rating_plans"
+	colRpf  = "rating_profiles"
+	colAcc  = "accounts"
+	colShg  = "shared_groups"
+	colDcs  = "derived_chargers"
+	colPbs  = "pubsub"
+	colUsr  = "users"
+	colLht  = "load_history"
+	colVer  = "versions"
+	colRsP  = "resource_profiles"
+	colRFI  = "request_filter_indexes"
+	colTmg  = "timings"
+	colRes  = "resources"
+	colSqs  = "statqueues"
+	colSqp  = "statqueue_profiles"
+	colTps  = "threshold_profiles"
+	colThs  = "thresholds"
+	colFlt  = "filters"
+	colSpp  = "supplier_profiles"
+	colAttr = "attribute_profiles"
+	ColCDRs = "cdrs"
+	colCpp  = "charger_profiles"
+	colDpp  = "dispatcher_profiles"
 )
 
 var (
@@ -241,7 +239,7 @@ func (ms *MongoStorage) GetContext() context.Context {
 func (ms *MongoStorage) EnsureIndexes() (err error) {
 	if ms.storageType == utils.DataDB {
 		for _, col := range []string{colAct, colApl, colAAp, colAtr,
-			colDcs, colRpl, colDst, colRds, colAls, colUsr, colLht} {
+			colDcs, colRpl, colDst, colRds, colUsr, colLht} {
 			if err = ms.EnusureIndex(col, true, "key"); err != nil {
 				return
 			}
@@ -332,8 +330,6 @@ func (ms *MongoStorage) getColNameForPrefix(prefix string) (string, bool) {
 		utils.ACCOUNT_PREFIX:             colAcc,
 		utils.SHARED_GROUP_PREFIX:        colShg,
 		utils.DERIVEDCHARGERS_PREFIX:     colDcs,
-		utils.ALIASES_PREFIX:             colAls,
-		utils.REVERSE_ALIASES_PREFIX:     colRCfgs,
 		utils.PUBSUB_SUBSCRIBERS_PREFIX:  colPbs,
 		utils.USERS_PREFIX:               colUsr,
 		utils.LOADINST_KEY:               colLht,
@@ -383,8 +379,7 @@ func (ms *MongoStorage) SelectDatabase(dbName string) (err error) {
 
 // RebuildReverseForPrefix implementation
 func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) (err error) {
-	if !utils.IsSliceMember([]string{utils.REVERSE_DESTINATION_PREFIX,
-		utils.REVERSE_ALIASES_PREFIX, utils.AccountActionPlansPrefix}, prefix) {
+	if !utils.IsSliceMember([]string{utils.REVERSE_DESTINATION_PREFIX, utils.AccountActionPlansPrefix}, prefix) {
 		return utils.ErrInvalidKey
 	}
 	colName, ok := ms.getColNameForPrefix(prefix)
@@ -411,19 +406,6 @@ func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) (err error) {
 					return err
 				}
 			}
-		case utils.REVERSE_ALIASES_PREFIX:
-			if keys, err = ms.GetKeysForPrefix(utils.ALIASES_PREFIX); err != nil {
-				return err
-			}
-			for _, key := range keys {
-				al, err := ms.GetAlias(key[len(utils.ALIASES_PREFIX):], true, utils.NonTransactional)
-				if err != nil {
-					return err
-				}
-				if err = ms.SetReverseAlias(al, utils.NonTransactional); err != nil {
-					return err
-				}
-			}
 		case utils.AccountActionPlansPrefix:
 			if keys, err = ms.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX); err != nil {
 				return err
@@ -446,8 +428,7 @@ func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) (err error) {
 
 // RemoveReverseForPrefix implementation
 func (ms *MongoStorage) RemoveReverseForPrefix(prefix string) (err error) {
-	if !utils.IsSliceMember([]string{utils.REVERSE_DESTINATION_PREFIX,
-		utils.REVERSE_ALIASES_PREFIX, utils.AccountActionPlansPrefix}, prefix) {
+	if !utils.IsSliceMember([]string{utils.REVERSE_DESTINATION_PREFIX, utils.AccountActionPlansPrefix}, prefix) {
 		return utils.ErrInvalidKey
 	}
 	colName, ok := ms.getColNameForPrefix(prefix)
@@ -475,19 +456,6 @@ func (ms *MongoStorage) RemoveReverseForPrefix(prefix string) (err error) {
 					return err
 				}
 				if err := ms.RemoveDestination(dest.Id, utils.NonTransactional); err != nil {
-					return err
-				}
-			}
-		case utils.REVERSE_ALIASES_PREFIX:
-			if keys, err = ms.GetKeysForPrefix(utils.ALIASES_PREFIX); err != nil {
-				return err
-			}
-			for _, key := range keys {
-				al, err := ms.GetAlias(key[len(utils.ALIASES_PREFIX):], true, utils.NonTransactional)
-				if err != nil {
-					return err
-				}
-				if err := ms.RemoveAlias(al.GetId(), utils.NonTransactional); err != nil {
 					return err
 				}
 			}
@@ -611,10 +579,6 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result, err = ms.getField(sctx, colDcs, utils.DERIVEDCHARGERS_PREFIX, subject, "key")
 		case utils.ACCOUNT_PREFIX:
 			result, err = ms.getField(sctx, colAcc, utils.ACCOUNT_PREFIX, subject, "id")
-		case utils.ALIASES_PREFIX:
-			result, err = ms.getField(sctx, colAls, utils.ALIASES_PREFIX, subject, "key")
-		case utils.REVERSE_ALIASES_PREFIX:
-			result, err = ms.getField(sctx, colRCfgs, utils.REVERSE_ALIASES_PREFIX, subject, "key")
 		case utils.ResourceProfilesPrefix:
 			result, err = ms.getField2(sctx, colRsP, utils.ResourceProfilesPrefix, subject, tntID)
 		case utils.ResourcesPrefix:
@@ -1250,165 +1214,6 @@ func (ms *MongoStorage) RemoveUserDrv(key string) (err error) {
 		}
 		return err
 	})
-}
-
-func (ms *MongoStorage) GetAlias(key string, skipCache bool,
-	transactionID string) (al *Alias, err error) {
-	if !skipCache {
-		if x, ok := Cache.Get(utils.CacheAliases, key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			al = x.(*Alias)
-			return
-		}
-	}
-	var kv struct {
-		Key   string
-		Value AliasValues
-	}
-	cCommit := cacheCommit(transactionID)
-
-	if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		cur := ms.getCol(colAls).FindOne(sctx, bson.M{"key": key})
-		if err := cur.Decode(&kv); err != nil {
-			if err == mongo.ErrNoDocuments {
-				Cache.Set(utils.CacheAliases, key, nil, nil,
-					cacheCommit(transactionID), transactionID)
-				return utils.ErrNotFound
-			}
-			return err
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-	al = &Alias{Values: kv.Value}
-	al.SetId(key)
-	Cache.Set(utils.CacheAliases, key, al, nil,
-		cCommit, transactionID)
-	return
-}
-
-func (ms *MongoStorage) SetAlias(al *Alias, transactionID string) (err error) {
-	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(colAls).UpdateOne(sctx, bson.M{"key": al.GetId()},
-			bson.M{"$set": struct {
-				Key   string
-				Value AliasValues
-			}{Key: al.GetId(), Value: al.Values}},
-			options.Update().SetUpsert(true),
-		)
-		return err
-	})
-}
-
-func (ms *MongoStorage) RemoveAlias(key, transactionID string) (err error) {
-	al := new(Alias)
-	al.SetId(key)
-	origKey := key
-	key = utils.ALIASES_PREFIX + key
-	var kv struct {
-		Key   string
-		Value AliasValues
-	}
-	if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		cur := ms.getCol(colAls).FindOne(sctx, bson.M{"key": origKey})
-		if err := cur.Decode(&kv); err != nil {
-			if err == mongo.ErrNoDocuments {
-				return utils.ErrNotFound
-			}
-			return err
-		}
-		return nil
-	}); err != nil {
-		return err
-	}
-	al.Values = kv.Value
-	if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		dr, err := ms.getCol(colAls).DeleteOne(sctx, bson.M{"key": origKey})
-		if dr.DeletedCount == 0 {
-			return utils.ErrNotFound
-		}
-		return err
-	}); err != nil {
-		return err
-	}
-	cCommit := cacheCommit(transactionID)
-	Cache.Remove(utils.CacheAliases, key, cCommit, transactionID)
-
-	for _, value := range al.Values {
-		tmpKey := utils.ConcatenatedKey(al.GetId(), value.DestinationId)
-		for target, pairs := range value.Pairs {
-			for _, alias := range pairs {
-				rKey := alias + target + al.Context
-				if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-					_, err = ms.getCol(colAls).UpdateOne(sctx, bson.M{"key": rKey},
-						bson.M{"$pull": bson.M{"value": tmpKey}})
-					return err
-				}); err != nil {
-					return err
-				}
-				Cache.Remove(utils.CacheReverseAliases, rKey, cCommit, transactionID)
-			}
-		}
-	}
-	return
-}
-
-func (ms *MongoStorage) GetReverseAlias(reverseID string, skipCache bool,
-	transactionID string) (ids []string, err error) {
-	if !skipCache {
-		if x, ok := Cache.Get(utils.CacheReverseAliases, reverseID); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.([]string), nil
-		}
-	}
-	var result struct {
-		Key   string
-		Value []string
-	}
-	if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		cur := ms.getCol(colRCfgs).FindOne(sctx, bson.M{"key": reverseID})
-		if err := cur.Decode(&result); err != nil {
-			if err == mongo.ErrNoDocuments {
-				Cache.Set(utils.CacheReverseAliases, reverseID, nil, nil,
-					cacheCommit(transactionID), transactionID)
-				return utils.ErrNotFound
-			}
-			return err
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-	ids = result.Value
-	Cache.Set(utils.CacheReverseAliases, reverseID, ids, nil,
-		cacheCommit(transactionID), transactionID)
-	return
-}
-
-func (ms *MongoStorage) SetReverseAlias(al *Alias, transactionID string) (err error) {
-	for _, value := range al.Values {
-		for target, pairs := range value.Pairs {
-			for _, alias := range pairs {
-				rKey := strings.Join([]string{alias, target, al.Context}, "")
-				id := utils.ConcatenatedKey(al.GetId(), value.DestinationId)
-				if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-					_, err = ms.getCol(colRCfgs).UpdateOne(sctx, bson.M{"key": rKey},
-						bson.M{"$addToSet": bson.M{"value": id}},
-						options.Update().SetUpsert(true),
-					)
-					return err
-				}); err != nil {
-					return err
-				}
-			}
-		}
-	}
-	return
 }
 
 // Limit will only retrieve the last n items out of history, newest first

@@ -20,8 +20,6 @@
 	"account_action_plans": {"limit": 10000, "ttl":"0s", "precache": true},
 	"action_triggers": {"limit": 10000, "ttl":"0s", "precache": true},
 	"shared_groups": {"limit": 10000, "ttl":"0s", "precache": true},
-	"aliases": {"limit": 10000, "ttl":"0s", "precache": true},
-	"reverse_aliases": {"limit": 10000, "ttl":"0s", "precache": true},
 	"derived_chargers": {"limit": 10000, "ttl":"0s", "precache": true},
 	"resource_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
 	"resources": {"limit": 10000, "ttl":"0s", "precache": true},
@@ -47,9 +45,7 @@
 
 "rals": {
 	"enabled": true,						// enable Rater service: <true|false>
-	"aliases_conns": [
-		{"address": "*internal"}
-	],
+
 },
 
 "scheduler": {
@@ -64,7 +60,7 @@
 },
 
 "attributes": {								// Attribute service
-	"enabled": true,						// starts Alias service: <true|false>.
+	"enabled": true,						// starts Attribute service: <true|false>.
 },
 
 
@@ -84,10 +80,6 @@
 
 "suppliers": {
 	"enabled": true,
-},
-
-"aliases": {
-	"enabled": true,						// start the CDR Server service:  <true|false>
 },
 
 "cdre": {

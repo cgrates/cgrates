@@ -471,9 +471,6 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 	if !reflect.DeepEqual(cgrCfg.RalsCfg().RALsUserSConns, eHaPoolcfg) {
 		t.Errorf("Expecting: %+v , received: %+v", eHaPoolcfg, cgrCfg.RalsCfg().RALsUserSConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.RalsCfg().RALsAliasSConns, eHaPoolcfg) {
-		t.Errorf("Expecting: %+v , received: %+v", eHaPoolcfg, cgrCfg.RalsCfg().RALsAliasSConns)
-	}
 	if cgrCfg.RalsCfg().RpSubjectPrefixMatching != false {
 		t.Errorf("Expecting: false , received: %+v", cgrCfg.RalsCfg().RpSubjectPrefixMatching)
 	}
@@ -528,9 +525,6 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	}
 	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSUserSConns, eHaPoolCfg) {
 		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().CDRSUserSConns)
-	}
-	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSAliaseSConns, eHaPoolCfg) {
-		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().CDRSAliaseSConns)
 	}
 	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSThresholdSConns, eHaPoolCfg) {
 		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().CDRSThresholdSConns)
@@ -679,10 +673,6 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		utils.CacheSharedGroups: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheAliases: &CacheParamCfg{Limit: -1,
-			TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		utils.CacheReverseAliases: &CacheParamCfg{Limit: -1,
-			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		utils.CacheDerivedChargers: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		utils.CacheTimings: &CacheParamCfg{Limit: -1,
@@ -801,12 +791,6 @@ func TestCgrCfgJSONDefaultsPubSubS(t *testing.T) {
 	}
 }
 
-func TestCgrCfgJSONDefaultsAliasesS(t *testing.T) {
-	if cgrCfg.AliasesServerEnabled != false {
-		t.Error(cgrCfg.AliasesServerEnabled)
-	}
-}
-
 func TestCgrCfgJSONDefaultsUserS(t *testing.T) {
 	eStrSlc := []string{}
 	if cgrCfg.UserServerEnabled != false {
@@ -825,18 +809,6 @@ func TestCgrCfgJSONDefaultFiltersCfg(t *testing.T) {
 	}
 	if !reflect.DeepEqual(cgrCfg.filterSCfg, eFiltersCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.filterSCfg, eFiltersCfg)
-	}
-}
-
-func TestCgrCfgJSONDefaultSAttributeSCfg(t *testing.T) {
-	eAliasSCfg := &AttributeSCfg{
-		Enabled:             false,
-		StringIndexedFields: nil,
-		PrefixIndexedFields: &[]string{},
-		ProcessRuns:         1,
-	}
-	if !reflect.DeepEqual(eAliasSCfg, cgrCfg.attributeSCfg) {
-		t.Errorf("received: %+v, expecting: %+v", eAliasSCfg, cgrCfg.attributeSCfg)
 	}
 }
 
@@ -1442,6 +1414,77 @@ func TestCgrLoaderCfgITDefaults(t *testing.T) {
 							FieldId: "Weight",
 							Type:    utils.META_COMPOSED,
 							Value:   NewRSRParsersMustCompile("~6", true, utils.INFIELD_SEP)},
+					},
+				},
+				{
+					Type:     utils.MetaDispatchers,
+					Filename: utils.DispatchersCsv,
+					Fields: []*FCTemplate{
+						{Tag: "Tenant",
+							FieldId:   "Tenant",
+							Type:      utils.META_COMPOSED,
+							Value:     NewRSRParsersMustCompile("~0", true, utils.INFIELD_SEP),
+							Mandatory: true},
+						{Tag: "ID",
+							FieldId:   "ID",
+							Type:      utils.META_COMPOSED,
+							Value:     NewRSRParsersMustCompile("~1", true, utils.INFIELD_SEP),
+							Mandatory: true},
+						{Tag: "Contexts",
+							FieldId: "Contexts",
+							Type:    utils.META_COMPOSED,
+							Value:   NewRSRParsersMustCompile("~2", true, utils.INFIELD_SEP),
+						},
+						{Tag: "FilterIDs",
+							FieldId: "FilterIDs",
+							Type:    utils.META_COMPOSED,
+							Value:   NewRSRParsersMustCompile("~3", true, utils.INFIELD_SEP),
+						},
+						{Tag: "ActivationInterval",
+							FieldId: "ActivationInterval",
+							Type:    utils.META_COMPOSED,
+							Value:   NewRSRParsersMustCompile("~4", true, utils.INFIELD_SEP),
+						},
+						{Tag: "Strategy",
+							FieldId: "Strategy",
+							Type:    utils.META_COMPOSED,
+							Value:   NewRSRParsersMustCompile("~5", true, utils.INFIELD_SEP),
+						},
+						{Tag: "StrategyParameters",
+							FieldId: "StrategyParameters",
+							Type:    utils.META_COMPOSED,
+							Value:   NewRSRParsersMustCompile("~6", true, utils.INFIELD_SEP),
+						},
+						{Tag: "ConnID",
+							FieldId: "ConnID",
+							Type:    utils.META_COMPOSED,
+							Value:   NewRSRParsersMustCompile("~7", true, utils.INFIELD_SEP),
+						},
+						{Tag: "ConnFilterIDs",
+							FieldId: "ConnFilterIDs",
+							Type:    utils.META_COMPOSED,
+							Value:   NewRSRParsersMustCompile("~8", true, utils.INFIELD_SEP),
+						},
+						{Tag: "ConnWeight",
+							FieldId: "ConnWeight",
+							Type:    utils.META_COMPOSED,
+							Value:   NewRSRParsersMustCompile("~9", true, utils.INFIELD_SEP),
+						},
+						{Tag: "ConnBlocker",
+							FieldId: "ConnBlocker",
+							Type:    utils.META_COMPOSED,
+							Value:   NewRSRParsersMustCompile("~10", true, utils.INFIELD_SEP),
+						},
+						{Tag: "ConnParameters",
+							FieldId: "ConnParameters",
+							Type:    utils.META_COMPOSED,
+							Value:   NewRSRParsersMustCompile("~11", true, utils.INFIELD_SEP),
+						},
+						{Tag: "Weight",
+							FieldId: "Weight",
+							Type:    utils.META_COMPOSED,
+							Value:   NewRSRParsersMustCompile("~12", true, utils.INFIELD_SEP),
+						},
 					},
 				},
 			},

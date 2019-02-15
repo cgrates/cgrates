@@ -135,10 +135,6 @@ func testPrecacheGetCacheStatsBeforeLoad(t *testing.T) {
 			Items:  0,
 			Groups: 0,
 		},
-		"aliases": {
-			Items:  0,
-			Groups: 0,
-		},
 		"attribute_filter_indexes": {
 			Items:  0,
 			Groups: 0,
@@ -200,10 +196,6 @@ func testPrecacheGetCacheStatsBeforeLoad(t *testing.T) {
 			Groups: 0,
 		},
 		"resources": {
-			Items:  0,
-			Groups: 0,
-		},
-		"reverse_aliases": {
 			Items:  0,
 			Groups: 0,
 		},
@@ -307,10 +299,6 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Items:  9,
 			Groups: 0,
 		},
-		"aliases": {
-			Items:  1,
-			Groups: 0,
-		},
 		"attribute_filter_indexes": {
 			Items:  0,
 			Groups: 0,
@@ -373,10 +361,6 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 		},
 		"resources": {
 			Items:  3, //expected to have 3 items
-			Groups: 0,
-		},
-		"reverse_aliases": {
-			Items:  2,
 			Groups: 0,
 		},
 		"reverse_destinations": {

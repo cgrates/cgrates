@@ -501,15 +501,14 @@ func startHTTPAgent(internalSMGChan chan rpcclient.RpcClientConnection,
 func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 	cdrDb engine.CdrStorage, dm *engine.DataManager,
 	internalRaterChan, internalPubSubSChan, internalAttributeSChan,
-	internalUserSChan, internalAliaseSChan,
-	internalThresholdSChan, internalStatSChan,
+	internalUserSChan, internalThresholdSChan, internalStatSChan,
 	internalChargerSChan chan rpcclient.RpcClientConnection,
 	server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
 	var err error
 	utils.Logger.Info("Starting CGRateS CDRS service.")
-	var ralConn, pubSubConn, usersConn, attrSConn, aliasesConn,
+	var ralConn, pubSubConn, usersConn, attrSConn,
 		thresholdSConn, statsConn, chargerSConn *rpcclient.RpcClientPool
 	if len(cfg.CdrsCfg().CDRSChargerSConns) != 0 { // Conn pool towards RAL
 		chargerSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
@@ -583,20 +582,6 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 			return
 		}
 	}
-	if len(cfg.CdrsCfg().CDRSAliaseSConns) != 0 { // Aliases connection init
-		aliasesConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.CdrsCfg().CDRSAliaseSConns, internalAliaseSChan,
-			cfg.GeneralCfg().InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to AliaseS: %s", err.Error()))
-			exitChan <- true
-			return
-		}
-	}
 	if len(cfg.CdrsCfg().CDRSThresholdSConns) != 0 { // Stats connection init
 		thresholdSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
 			cfg.TlsCfg().ClientKey,
@@ -626,7 +611,7 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 		}
 	}
 	cdrServer, _ := engine.NewCdrServer(cfg, cdrDb, dm, ralConn, pubSubConn,
-		attrSConn, usersConn, aliasesConn,
+		attrSConn, usersConn,
 		thresholdSConn, statsConn, chargerSConn, filterS)
 	cdrServer.SetTimeToLive(cfg.GeneralCfg().ResponseCacheTTL, nil)
 	utils.Logger.Info("Registering CDRS HTTP Handlers.")
@@ -661,20 +646,6 @@ func startPubSubServer(internalPubSubSChan chan rpcclient.RpcClientConnection, d
 	}
 	server.RpcRegisterName("PubSubV1", pubSubServer)
 	internalPubSubSChan <- pubSubServer
-}
-
-// ToDo: Make sure we are caching before starting this one
-func startAliasesServer(internalAliaseSChan chan rpcclient.RpcClientConnection, dm *engine.DataManager, server *utils.Server, exitChan chan bool) {
-	aliasesServer := engine.NewAliasHandler(dm)
-	server.RpcRegisterName("AliasesV1", aliasesServer)
-	/*loadHist, err := dm.DataDB().GetLoadHistory(1, true, utils.NonTransactional)
-	if err != nil || len(loadHist) == 0 {
-		utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHist, err))
-		internalAliaseSChan <- aliasesServer
-		return
-	}
-	*/
-	internalAliaseSChan <- aliasesServer
 }
 
 func startUsersServer(internalUserSChan chan rpcclient.RpcClientConnection, dm *engine.DataManager, server *utils.Server, exitChan chan bool) {
@@ -1090,8 +1061,7 @@ func startAnalyzerService(internalAnalyzerSChan chan rpcclient.RpcClientConnecti
 }
 
 func startRpc(server *utils.Server, internalRaterChan,
-	internalCdrSChan, internalPubSubSChan, internalUserSChan,
-	internalAliaseSChan, internalRsChan, internalStatSChan,
+	internalCdrSChan, internalPubSubSChan, internalUserSChan, internalRsChan, internalStatSChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
 	internalSMGChan, internalAnalyzerSChan chan rpcclient.RpcClientConnection,
 	internalDispatcherSChan chan *dispatchers.DispatcherService, exitChan chan bool) {
@@ -1104,8 +1074,6 @@ func startRpc(server *utils.Server, internalRaterChan,
 		internalPubSubSChan <- pubsubs
 	case users := <-internalUserSChan:
 		internalUserSChan <- users
-	case aliases := <-internalAliaseSChan:
-		internalAliaseSChan <- aliases
 	case smg := <-internalSMGChan:
 		internalSMGChan <- smg
 	case rls := <-internalRsChan:
@@ -1342,7 +1310,7 @@ func main() {
 	var cdrDb engine.CdrStorage
 	var dm *engine.DataManager
 	if cfg.RalsCfg().RALsEnabled || cfg.PubSubServerEnabled ||
-		cfg.AliasesServerEnabled || cfg.UserServerEnabled || cfg.SchedulerCfg().Enabled ||
+		cfg.UserServerEnabled || cfg.SchedulerCfg().Enabled ||
 		cfg.AttributeSCfg().Enabled || cfg.ResourceSCfg().Enabled || cfg.StatSCfg().Enabled ||
 		cfg.ThresholdSCfg().Enabled || cfg.SupplierSCfg().Enabled || cfg.DispatcherSCfg().Enabled { // Some services can run without db, ie: SessionS or CDRC
 		dm, err = engine.ConfigureDataStorage(cfg.DataDbCfg().DataDbType,
@@ -1410,7 +1378,6 @@ func main() {
 	internalCdrSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalPubSubSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalUserSChan := make(chan rpcclient.RpcClientConnection, 1)
-	internalAliaseSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalSMGChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalAttributeSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalChargerSChan := make(chan rpcclient.RpcClientConnection, 1)
@@ -1428,7 +1395,7 @@ func main() {
 	// Start rater service
 	if cfg.RalsCfg().RALsEnabled {
 		go startRater(internalRaterChan, cacheS, internalThresholdSChan,
-			internalStatSChan, internalPubSubSChan, internalUserSChan, internalAliaseSChan,
+			internalStatSChan, internalPubSubSChan, internalUserSChan,
 			srvManager, server, dm, loadDb, cdrDb, &stopHandled, exitChan, filterSChan)
 	}
 
@@ -1441,7 +1408,7 @@ func main() {
 	if cfg.CdrsCfg().CDRSEnabled {
 		go startCDRS(internalCdrSChan, cdrDb, dm,
 			internalRaterChan, internalPubSubSChan, internalAttributeSChan,
-			internalUserSChan, internalAliaseSChan,
+			internalUserSChan,
 			internalThresholdSChan, internalStatSChan, internalChargerSChan,
 			server, exitChan, filterSChan)
 	}
@@ -1491,11 +1458,6 @@ func main() {
 	// Start PubSubS service
 	if cfg.PubSubServerEnabled {
 		go startPubSubServer(internalPubSubSChan, dm, server, exitChan)
-	}
-
-	// Start Aliases service
-	if cfg.AliasesServerEnabled {
-		go startAliasesServer(internalAliaseSChan, dm, server, exitChan)
 	}
 
 	// Start users service
@@ -1549,7 +1511,7 @@ func main() {
 
 	// Serve rpc connections
 	go startRpc(server, internalRaterChan, internalCdrSChan,
-		internalPubSubSChan, internalUserSChan, internalAliaseSChan, internalRsChan,
+		internalPubSubSChan, internalUserSChan, internalRsChan,
 		internalStatSChan,
 		internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
 		internalSupplierSChan,

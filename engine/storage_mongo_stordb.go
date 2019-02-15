@@ -404,48 +404,6 @@ func (ms *MongoStorage) GetTPUsers(tp *utils.TPUsers) ([]*utils.TPUsers, error) 
 	return results, err
 }
 
-func (ms *MongoStorage) GetTPAliases(tp *utils.TPAliases) ([]*utils.TPAliases, error) {
-	filter := bson.M{"tpid": tp.TPid}
-	if tp.Direction != "" {
-		filter["direction"] = tp.Direction
-	}
-	if tp.Tenant != "" {
-		filter["tenant"] = tp.Tenant
-	}
-	if tp.Category != "" {
-		filter["category"] = tp.Category
-	}
-	if tp.Account != "" {
-		filter["account"] = tp.Account
-	}
-	if tp.Subject != "" {
-		filter["subject"] = tp.Subject
-	}
-	if tp.Context != "" {
-		filter["context"] = tp.Context
-	}
-	var results []*utils.TPAliases
-	err := ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(utils.TBLTPAliases).Find(sctx, filter)
-		if err != nil {
-			return err
-		}
-		for cur.Next(sctx) {
-			var el utils.TPAliases
-			err := cur.Decode(&el)
-			if err != nil {
-				return err
-			}
-			results = append(results, &el)
-		}
-		if len(results) == 0 {
-			return utils.ErrNotFound
-		}
-		return cur.Close(sctx)
-	})
-	return results, err
-}
-
 func (ms *MongoStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPResource, error) {
 	filter := bson.M{"tpid": tpid}
 	if id != "" {
@@ -881,34 +839,6 @@ func (ms *MongoStorage) SetTPUsers(tps []*utils.TPUsers) error {
 				}
 			}
 			if _, err := ms.getCol(utils.TBLTPUsers).InsertOne(sctx, tp); err != nil {
-				return err
-			}
-		}
-		return nil
-	})
-}
-
-func (ms *MongoStorage) SetTPAliases(tps []*utils.TPAliases) error {
-	if len(tps) == 0 {
-		return nil
-	}
-	m := make(map[string]bool)
-	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		for _, tp := range tps {
-			if found, _ := m[tp.Direction]; !found {
-				m[tp.Direction] = true
-				if _, err := ms.getCol(utils.TBLTPAliases).DeleteMany(sctx, bson.M{
-					"tpid":      tp.TPid,
-					"direction": tp.Direction,
-					"tenant":    tp.Tenant,
-					"category":  tp.Category,
-					"account":   tp.Account,
-					"subject":   tp.Subject,
-					"context":   tp.Context}); err != nil {
-					return err
-				}
-			}
-			if _, err := ms.getCol(utils.TBLTPAliases).InsertOne(sctx, tp); err != nil {
 				return err
 			}
 		}

@@ -123,20 +123,6 @@ func (ms *MapStorage) RebuildReverseForPrefix(prefix string) error {
 				return err
 			}
 		}
-	case utils.REVERSE_ALIASES_PREFIX:
-		keys, err = ms.GetKeysForPrefix(utils.ALIASES_PREFIX)
-		if err != nil {
-			return err
-		}
-		for _, key := range keys {
-			al, err := ms.GetAlias(key[len(utils.ALIASES_PREFIX):], false, utils.NonTransactional)
-			if err != nil {
-				return err
-			}
-			if err := ms.SetReverseAlias(al, utils.NonTransactional); err != nil {
-				return err
-			}
-		}
 	case utils.AccountActionPlansPrefix:
 		return nil
 	default:
@@ -168,20 +154,6 @@ func (ms *MapStorage) RemoveReverseForPrefix(prefix string) error {
 				return err
 			}
 			if err := ms.RemoveDestination(dest.Id, utils.NonTransactional); err != nil {
-				return err
-			}
-		}
-	case utils.REVERSE_ALIASES_PREFIX:
-		keys, err = ms.GetKeysForPrefix(utils.ALIASES_PREFIX)
-		if err != nil {
-			return err
-		}
-		for _, key := range keys {
-			al, err := ms.GetAlias(key[len(utils.ALIASES_PREFIX):], false, utils.NonTransactional)
-			if err != nil {
-				return err
-			}
-			if err := ms.RemoveAlias(al.GetId(), utils.NonTransactional); err != nil {
 				return err
 			}
 		}
@@ -635,121 +607,6 @@ func (ms *MapStorage) RemoveUserDrv(key string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	delete(ms.dict, utils.USERS_PREFIX+key)
-	return nil
-}
-
-func (ms *MapStorage) GetAlias(key string, skipCache bool,
-	transactionID string) (al *Alias, err error) {
-	ms.mu.RLock()
-	defer ms.mu.RUnlock()
-	cCommit := cacheCommit(transactionID)
-	if !skipCache {
-		if x, ok := Cache.Get(utils.CacheAliases, key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.(*Alias), nil
-		}
-	}
-	if values, ok := ms.dict[utils.ALIASES_PREFIX+key]; ok {
-		al = &Alias{Values: make(AliasValues, 0)}
-		al.SetId(key)
-		if err = ms.ms.Unmarshal(values, &al.Values); err != nil {
-			return nil, err
-		}
-	} else {
-		Cache.Set(utils.CacheAliases, key, nil, nil,
-			cCommit, transactionID)
-		return nil, utils.ErrNotFound
-	}
-	Cache.Set(utils.CacheAliases, key, al, nil,
-		cCommit, transactionID)
-	return
-
-}
-
-func (ms *MapStorage) SetAlias(al *Alias, transactionID string) error {
-	result, err := ms.ms.Marshal(al.Values)
-	if err != nil {
-		return err
-	}
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
-	ms.dict[utils.ALIASES_PREFIX+al.GetId()] = result
-	Cache.Remove(utils.CacheAliases, al.GetId(),
-		cacheCommit(transactionID), transactionID)
-	return nil
-}
-
-func (ms *MapStorage) GetReverseAlias(reverseID string,
-	skipCache bool, transactionID string) (ids []string, err error) {
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
-	if !skipCache {
-		if x, ok := Cache.Get(utils.CacheReverseAliases, reverseID); ok {
-			if x != nil {
-				return x.([]string), nil
-			}
-			return nil, utils.ErrNotFound
-		}
-	}
-	cCommit := cacheCommit(transactionID)
-	if idMap, ok := ms.dict.smembers(utils.REVERSE_ALIASES_PREFIX+reverseID,
-		ms.ms); len(idMap) > 0 && ok {
-		ids = idMap.Slice()
-	} else {
-		Cache.Set(utils.CacheReverseAliases, reverseID, nil, nil,
-			cCommit, transactionID)
-		return nil, utils.ErrNotFound
-	}
-	Cache.Set(utils.CacheReverseAliases, reverseID, ids,
-		nil, cCommit, transactionID)
-	return
-}
-
-func (ms *MapStorage) SetReverseAlias(al *Alias, transactionID string) (err error) {
-	cCommit := cacheCommit(transactionID)
-	for _, value := range al.Values {
-		for target, pairs := range value.Pairs {
-			for _, alias := range pairs {
-				rAlID := strings.Join([]string{alias, target, al.Context}, "")
-				id := utils.ConcatenatedKey(al.GetId(), value.DestinationId)
-				ms.mu.Lock()
-				ms.dict.sadd(utils.REVERSE_ALIASES_PREFIX+rAlID, id, ms.ms)
-				ms.mu.Unlock()
-				Cache.Remove(utils.CacheReverseAliases, rAlID,
-					cCommit, transactionID)
-			}
-		}
-	}
-	return
-}
-
-func (ms *MapStorage) RemoveAlias(key string, transactionID string) error {
-	// get alias for values list
-	al, err := ms.GetAlias(key, false, utils.NonTransactional)
-	if err != nil {
-		return err
-	}
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
-	aliasValues := make(AliasValues, 0)
-	if values, ok := ms.dict[utils.ALIASES_PREFIX+key]; ok {
-		ms.ms.Unmarshal(values, &aliasValues)
-	}
-	delete(ms.dict, utils.ALIASES_PREFIX+key)
-	cCommit := cacheCommit(transactionID)
-	Cache.Remove(utils.CacheAliases, key, cCommit, transactionID)
-	for _, value := range al.Values {
-		tmpKey := utils.ConcatenatedKey(al.GetId(), value.DestinationId)
-		for target, pairs := range value.Pairs {
-			for _, alias := range pairs {
-				rID := alias + target + al.Context
-				ms.dict.srem(utils.REVERSE_ALIASES_PREFIX+rID, tmpKey, ms.ms)
-				Cache.Remove(utils.CacheReverseAliases, rID, cCommit, transactionID)
-			}
-		}
-	}
 	return nil
 }
 

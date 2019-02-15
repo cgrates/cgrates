@@ -227,7 +227,7 @@ func (rs *RedisStorage) IsDBEmpty() (resp bool, err error) {
 }
 
 func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) (err error) {
-	if !utils.IsSliceMember([]string{utils.REVERSE_DESTINATION_PREFIX, utils.REVERSE_ALIASES_PREFIX, utils.AccountActionPlansPrefix}, prefix) {
+	if !utils.IsSliceMember([]string{utils.REVERSE_DESTINATION_PREFIX, utils.AccountActionPlansPrefix}, prefix) {
 		return utils.ErrInvalidKey
 	}
 	var keys []string
@@ -254,19 +254,6 @@ func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) (err error) {
 				return err
 			}
 		}
-	case utils.REVERSE_ALIASES_PREFIX:
-		if keys, err = rs.GetKeysForPrefix(utils.ALIASES_PREFIX); err != nil {
-			return
-		}
-		for _, key := range keys {
-			al, err := rs.GetAlias(key[len(utils.ALIASES_PREFIX):], true, utils.NonTransactional)
-			if err != nil {
-				return err
-			}
-			if err = rs.SetReverseAlias(al, utils.NonTransactional); err != nil {
-				return err
-			}
-		}
 	case utils.AccountActionPlansPrefix:
 		if keys, err = rs.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX); err != nil {
 			return
@@ -287,7 +274,7 @@ func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) (err error) {
 }
 
 func (rs *RedisStorage) RemoveReverseForPrefix(prefix string) (err error) {
-	if !utils.IsSliceMember([]string{utils.REVERSE_DESTINATION_PREFIX, utils.REVERSE_ALIASES_PREFIX, utils.AccountActionPlansPrefix}, prefix) {
+	if !utils.IsSliceMember([]string{utils.REVERSE_DESTINATION_PREFIX, utils.AccountActionPlansPrefix}, prefix) {
 		return utils.ErrInvalidKey
 	}
 	var keys []string
@@ -311,19 +298,6 @@ func (rs *RedisStorage) RemoveReverseForPrefix(prefix string) (err error) {
 				return err
 			}
 			if err := rs.RemoveDestination(dest.Id, utils.NonTransactional); err != nil {
-				return err
-			}
-		}
-	case utils.REVERSE_ALIASES_PREFIX:
-		if keys, err = rs.GetKeysForPrefix(utils.ALIASES_PREFIX); err != nil {
-			return
-		}
-		for _, key := range keys {
-			al, err := rs.GetAlias(key[len(utils.ALIASES_PREFIX):], true, utils.NonTransactional)
-			if err != nil {
-				return err
-			}
-			if err := rs.RemoveAlias(al.GetId(), utils.NonTransactional); err != nil {
 				return err
 			}
 		}
@@ -812,122 +786,6 @@ func (rs *RedisStorage) GetUsersDrv() (result []*UserProfile, err error) {
 
 func (rs *RedisStorage) RemoveUserDrv(key string) error {
 	return rs.Cmd("DEL", utils.USERS_PREFIX+key).Err
-}
-
-func (rs *RedisStorage) GetAlias(key string, skipCache bool,
-	transactionID string) (al *Alias, err error) {
-	cCommit := cacheCommit(transactionID)
-	if !skipCache {
-		if x, ok := Cache.Get(utils.CacheAliases, key); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			al = x.(*Alias)
-			return
-		}
-	}
-	var values []byte
-	if values, err = rs.Cmd("GET",
-		utils.ALIASES_PREFIX+key).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
-			Cache.Set(utils.CacheAliases, key, nil, nil,
-				cCommit, transactionID)
-			err = utils.ErrNotFound
-		}
-		return
-	}
-	al = &Alias{Values: make(AliasValues, 0)}
-	al.SetId(key)
-	if err = rs.ms.Unmarshal(values, &al.Values); err != nil {
-		return nil, err
-	}
-	Cache.Set(utils.CacheAliases, key, al, nil,
-		cCommit, transactionID)
-	return
-}
-
-func (rs *RedisStorage) SetAlias(al *Alias, transactionID string) (err error) {
-	var result []byte
-	result, err = rs.ms.Marshal(al.Values)
-	if err != nil {
-		return
-	}
-	key := utils.ALIASES_PREFIX + al.GetId()
-	if err = rs.Cmd("SET", key, result).Err; err != nil {
-		return
-	}
-	return
-}
-
-func (rs *RedisStorage) GetReverseAlias(reverseID string, skipCache bool,
-	transactionID string) (ids []string, err error) {
-	if !skipCache {
-		if x, ok := Cache.Get(utils.CacheReverseAliases, reverseID); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.([]string), nil
-		}
-	}
-	if ids, err = rs.Cmd("SMEMBERS",
-		utils.REVERSE_ALIASES_PREFIX+reverseID).List(); err != nil {
-		return
-	} else if len(ids) == 0 {
-		Cache.Set(utils.CacheReverseAliases, reverseID, nil, nil,
-			cacheCommit(transactionID), transactionID)
-		err = utils.ErrNotFound
-		return
-	}
-	Cache.Set(utils.CacheReverseAliases, reverseID, ids, nil,
-		cacheCommit(transactionID), transactionID)
-	return
-}
-
-func (rs *RedisStorage) SetReverseAlias(al *Alias, transactionID string) (err error) {
-	for _, value := range al.Values {
-		for target, pairs := range value.Pairs {
-			for _, alias := range pairs {
-				rKey := strings.Join([]string{utils.REVERSE_ALIASES_PREFIX, alias, target, al.Context}, "")
-				id := utils.ConcatenatedKey(al.GetId(), value.DestinationId)
-				if err = rs.Cmd("SADD", rKey, id).Err; err != nil {
-					break
-				}
-			}
-		}
-	}
-	return
-}
-
-func (rs *RedisStorage) RemoveAlias(id string, transactionID string) (err error) {
-	// get alias for values list
-	al, err := rs.GetAlias(id, false, transactionID)
-	if err != nil {
-		return
-	}
-	err = rs.Cmd("DEL", utils.ALIASES_PREFIX+id).Err
-	if err != nil {
-		return err
-	}
-	cCommit := cacheCommit(transactionID)
-	Cache.Remove(utils.CacheAliases, id, cCommit, transactionID)
-	if al == nil {
-		return utils.ErrNotFound
-	}
-	for _, value := range al.Values {
-		tmpKey := utils.ConcatenatedKey(al.GetId(), value.DestinationId)
-		for target, pairs := range value.Pairs {
-			for _, alias := range pairs {
-				revID := alias + target + al.Context
-				err = rs.Cmd("SREM", utils.REVERSE_ALIASES_PREFIX+revID, tmpKey).Err
-				if err != nil {
-					return err
-				}
-				Cache.Remove(utils.CacheReverseAliases, revID,
-					cCommit, transactionID)
-			}
-		}
-	}
-	return
 }
 
 // Limit will only retrieve the last n items out of history, newest first

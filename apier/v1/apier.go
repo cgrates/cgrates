@@ -108,16 +108,7 @@ func (v1 *ApierV1) ComputeReverseDestinations(ignr string, reply *string) (err e
 	return
 }
 
-// ComputeReverseAliases will rebuild complete reverse aliases data
-func (v1 *ApierV1) ComputeReverseAliases(ignr string, reply *string) (err error) {
-	if err = v1.DataManager.DataDB().RebuildReverseForPrefix(utils.REVERSE_ALIASES_PREFIX); err != nil {
-		return
-	}
-	*reply = utils.OK
-	return
-}
-
-// ComputeReverseAliases will rebuild complete reverse aliases data
+// ComputeAccountActionPlans will rebuild complete reverse accountActions data
 func (v1 *ApierV1) ComputeAccountActionPlans(ignr string, reply *string) (err error) {
 	if err = v1.DataManager.DataDB().RebuildReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
 		return
@@ -322,15 +313,13 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 		utils.ACTION_PLAN_PREFIX,
 		utils.AccountActionPlansPrefix,
 		utils.DERIVEDCHARGERS_PREFIX,
-		utils.ALIASES_PREFIX,
-		utils.REVERSE_ALIASES_PREFIX} {
+	} {
 		loadedIDs, _ := dbReader.GetLoadedIds(prfx)
 		if err := self.DataManager.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
 			return utils.NewErrServerError(err)
 		}
 	}
 	aps, _ := dbReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
-	userKeys, _ := dbReader.GetLoadedIds(utils.USERS_PREFIX)
 
 	// relase tp data
 	dbReader.Init()
@@ -342,12 +331,6 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 		}
 	}
 
-	if len(userKeys) != 0 && self.Users != nil {
-		var r string
-		if err := self.Users.Call("AliasV1.ReloadUsers", "", &r); err != nil {
-			return err
-		}
-	}
 	*reply = OK
 	return nil
 }
@@ -769,14 +752,6 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 	if err = self.reloadCache(utils.DERIVEDCHARGERS_PREFIX, attrs.DerivedChargerIDs); err != nil {
 		return
 	}
-	// Aliases
-	if err = self.reloadCache(utils.ALIASES_PREFIX, attrs.AliasIDs); err != nil {
-		return
-	}
-	// ReverseAliases
-	if err = self.reloadCache(utils.REVERSE_ALIASES_PREFIX, attrs.ReverseAliasIDs); err != nil {
-		return
-	}
 	// ResourceProfiles
 	if err = self.reloadCache(utils.ResourceProfilesPrefix, attrs.ResourceProfileIDs); err != nil {
 		return
@@ -881,16 +856,6 @@ func (self *ApierV1) LoadCache(args utils.AttrReloadCache, reply *string) (err e
 	} else {
 		dcIDs = *args.DerivedChargerIDs
 	}
-	if args.AliasIDs == nil {
-		alsIDs = nil
-	} else {
-		alsIDs = *args.AliasIDs
-	}
-	if args.ReverseAliasIDs == nil {
-		rvAlsIDs = nil
-	} else {
-		rvAlsIDs = *args.ReverseAliasIDs
-	}
 	if args.ResourceProfileIDs == nil {
 		rspIDs = nil
 	} else {
@@ -982,8 +947,6 @@ func (self *ApierV1) FlushCache(args utils.AttrReloadCache, reply *string) (err 
 	flushCache(utils.CacheActionTriggers, args.ActionTriggerIDs)
 	flushCache(utils.CacheSharedGroups, args.SharedGroupIDs)
 	flushCache(utils.CacheDerivedChargers, args.DerivedChargerIDs)
-	flushCache(utils.CacheAliases, args.AliasIDs)
-	flushCache(utils.CacheReverseAliases, args.ReverseAliasIDs)
 	flushCache(utils.CacheResourceProfiles, args.ResourceProfileIDs)
 	flushCache(utils.CacheResources, args.ResourceIDs)
 	flushCache(utils.CacheStatQueues, args.StatsQueueIDs)
@@ -1011,8 +974,6 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	cs.AccountActionPlans = len(engine.Cache.GetItemIDs(utils.CacheAccountActionPlans, ""))
 	cs.SharedGroups = len(engine.Cache.GetItemIDs(utils.CacheSharedGroups, ""))
 	cs.DerivedChargers = len(engine.Cache.GetItemIDs(utils.CacheDerivedChargers, ""))
-	cs.Aliases = len(engine.Cache.GetItemIDs(utils.CacheAliases, ""))
-	cs.ReverseAliases = len(engine.Cache.GetItemIDs(utils.CacheReverseAliases, ""))
 	cs.ResourceProfiles = len(engine.Cache.GetItemIDs(utils.CacheResourceProfiles, ""))
 	cs.Resources = len(engine.Cache.GetItemIDs(utils.CacheResources, ""))
 	cs.StatQueues = len(engine.Cache.GetItemIDs(utils.CacheStatQueues, ""))
@@ -1114,18 +1075,6 @@ func (v1 *ApierV1) GetCacheKeys(args utils.ArgsCacheKeys, reply *utils.ArgsCache
 			reply.DerivedChargerIDs = &ids
 		}
 	}
-	if args.AliasIDs != nil {
-		ids := getCacheKeys(utils.CacheAliases, args.AliasIDs, args.Paginator)
-		if len(ids) != 0 {
-			reply.AliasIDs = &ids
-		}
-	}
-	if args.ReverseAliasIDs != nil {
-		ids := getCacheKeys(utils.CacheReverseAliases, args.ReverseAliasIDs, args.Paginator)
-		if len(ids) != 0 {
-			reply.ReverseAliasIDs = &ids
-		}
-	}
 	if args.ResourceProfileIDs != nil {
 		ids := getCacheKeys(utils.CacheResourceProfiles, args.ResourceProfileIDs, args.Paginator)
 		if len(ids) != 0 {
@@ -1225,7 +1174,6 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 			path.Join(attrs.FolderPath, utils.ACCOUNT_ACTIONS_CSV),
 			path.Join(attrs.FolderPath, utils.DERIVED_CHARGERS_CSV),
 			path.Join(attrs.FolderPath, utils.USERS_CSV),
-			path.Join(attrs.FolderPath, utils.ALIASES_CSV),
 			path.Join(attrs.FolderPath, utils.ResourcesCsv),
 			path.Join(attrs.FolderPath, utils.StatsCsv),
 			path.Join(attrs.FolderPath, utils.ThresholdsCsv),
@@ -1259,8 +1207,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		utils.ACTION_PLAN_PREFIX,
 		utils.AccountActionPlansPrefix,
 		utils.DERIVEDCHARGERS_PREFIX,
-		utils.ALIASES_PREFIX,
-		utils.REVERSE_ALIASES_PREFIX} {
+	} {
 		loadedIDs, _ := loader.GetLoadedIds(prfx)
 		if err := self.DataManager.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
 			return utils.NewErrServerError(err)

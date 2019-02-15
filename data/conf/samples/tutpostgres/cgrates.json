@@ -37,9 +37,6 @@
 	"users_conns": [
 		{"address": "*internal"}
 	],
-	"aliases_conns": [
-		{"address": "*internal"}
-	],
 },
 
 
@@ -61,11 +58,6 @@
 "users": {
 	"enabled": true,
 	"indexes": ["Uuid"],
-},
-
-
-"aliases": {
-	"enabled": true,							// starts Aliases service: <true|false>.
 },
 
 

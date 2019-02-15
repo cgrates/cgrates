@@ -36,8 +36,6 @@ GetCacheStats returns datadb cache status. Empty params return all stats:
    		"LcrProfiles": 0,
    		"CdrStats": 6,
    		"Users": 3,
-   		"Aliases": 0,
-   		"ReverseAliases": 0,
    		"ResourceProfiles": 0,
    		"Resources": 0,
    		"StatQueues": 0,

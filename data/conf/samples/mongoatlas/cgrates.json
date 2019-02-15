@@ -45,8 +45,6 @@
 	"account_action_plans": {"limit": 10000, "ttl":"0s", "precache": true},
 	"action_triggers": {"limit": 10000, "ttl":"0s", "precache": true},
 	"shared_groups": {"limit": 10000, "ttl":"0s", "precache": true},
-	"aliases": {"limit": 10000, "ttl":"0s", "precache": true},
-	"reverse_aliases": {"limit": 10000, "ttl":"0s", "precache": true},
 	"derived_chargers": {"limit": 10000, "ttl":"0s", "precache": true},
 	"resource_profiles": {"limit": 10000, "ttl":"0s", "precache": true},
 	"resources": {"limit": 10000, "ttl":"0s", "precache": true},

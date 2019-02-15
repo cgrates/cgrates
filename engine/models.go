@@ -286,44 +286,6 @@ func (tu *TpUser) SetId(id string) error {
 	return nil
 }
 
-type TpAlias struct {
-	Id            int64
-	Tpid          string
-	Direction     string  `index:"0" re:""`
-	Tenant        string  `index:"1" re:""`
-	Category      string  `index:"2" re:""`
-	Account       string  `index:"3" re:""`
-	Subject       string  `index:"4" re:""`
-	DestinationId string  `index:"5" re:""`
-	Context       string  `index:"6" re:""`
-	Target        string  `index:"7" re:""`
-	Original      string  `index:"8" re:""`
-	Alias         string  `index:"9" re:""`
-	Weight        float64 `index:"10" re:""`
-}
-
-func (ta *TpAlias) TableName() string {
-	return utils.TBLTPAliases
-}
-
-func (ta *TpAlias) SetId(id string) error {
-	vals := strings.Split(id, utils.CONCATENATED_KEY_SEP)
-	if len(vals) != 6 {
-		return utils.ErrInvalidKey
-	}
-	ta.Direction = vals[0]
-	ta.Tenant = vals[1]
-	ta.Category = vals[2]
-	ta.Account = vals[3]
-	ta.Subject = vals[4]
-	ta.Context = vals[5]
-	return nil
-}
-
-func (ta *TpAlias) GetId() string {
-	return utils.ConcatenatedKey(ta.Direction, ta.Tenant, ta.Category, ta.Account, ta.Subject, ta.Context)
-}
-
 type TpResource struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string

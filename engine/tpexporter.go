@@ -273,11 +273,11 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	storDataAlias, err := self.storDb.GetTPAttributes(self.tpID, "", "")
+	storeDataAttributes, err := self.storDb.GetTPAttributes(self.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
 		return err
 	}
-	for _, sd := range storDataAlias {
+	for _, sd := range storeDataAttributes {
 		sdModels := APItoModelTPAttribute(sd)
 		for _, sdModel := range sdModels {
 			toExportMap[utils.AttributesCsv] = append(toExportMap[utils.AttributesCsv], sdModel)

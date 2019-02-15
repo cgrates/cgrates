@@ -22,6 +22,7 @@ package dispatchers
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -318,7 +319,10 @@ func testDspStsTestAuthKey3(t *testing.T) {
 			},
 		}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(estats, reply) {
+	}
+	sort.Strings(estats)
+	sort.Strings(reply)
+	if !reflect.DeepEqual(estats, reply) {
 		t.Errorf("expecting: %+v, received reply: %v", estats, reply)
 	}
 

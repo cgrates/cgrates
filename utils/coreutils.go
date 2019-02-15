@@ -356,14 +356,6 @@ func LCRKey(direction, tenant, category, account, subject string) string {
 	return ConcatenatedKey(direction, tenant, category, account, subject)
 }
 
-func RatingSubjectAliasKey(tenant, subject string) string {
-	return ConcatenatedKey(tenant, subject)
-}
-
-func AccountAliasKey(tenant, account string) string {
-	return ConcatenatedKey(tenant, account)
-}
-
 func InfieldJoin(vals ...string) string {
 	return strings.Join(vals, INFIELD_SEP)
 }

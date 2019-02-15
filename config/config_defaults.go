@@ -126,8 +126,6 @@ const CGRATES_CFG_JSON = `
 	"account_action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// account action plans index caching
 	"action_triggers": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// action triggers caching
 	"shared_groups": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// shared groups caching
-	"aliases": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// aliases caching
-	"reverse_aliases": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// reverse aliases index caching
 	"derived_chargers": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// derived charging rule caching
 	"timings": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// timings caching
 	"resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control resource profiles caching
@@ -166,8 +164,8 @@ const CGRATES_CFG_JSON = `
 	"stats_conns": [],						// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"pubsubs_conns": [],					// address where to reach the pubusb service, empty to disable pubsub functionality: <""|*internal|x.y.z.y:1234>
 	"users_conns": [],						// address where to reach the user service, empty to disable user profile functionality: <""|*internal|x.y.z.y:1234>
-	"aliases_conns": [],					// address where to reach the aliases service, empty to disable aliases functionality: <""|*internal|x.y.z.y:1234>
 	"rp_subject_prefix_matching": false,	// enables prefix matching for the rating profile subject
+	"remove_expired":true,					// enables remove of expired balances
 	"max_computed_usage": {					// do not compute usage higher than this, prevents memory overload
 		"*any": "189h",
 		"*voice": "72h",
@@ -189,7 +187,6 @@ const CGRATES_CFG_JSON = `
 	"pubsubs_conns": [],					// address where to reach the pubusb service, empty to disable pubsub functionality: <""|*internal|x.y.z.y:1234>
 	"attributes_conns": [],					// address where to reach the attribute service, empty to disable attributes functionality: <""|*internal|x.y.z.y:1234>
 	"users_conns": [],						// address where to reach the user service, empty to disable user profile functionality: <""|*internal|x.y.z.y:1234>
-	"aliases_conns": [],					// address where to reach the aliases service, empty to disable aliases functionality: <""|*internal|x.y.z.y:1234>
 	"thresholds_conns": [],					// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
 	"stats_conns": [],						// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"online_cdr_exports":[],				// list of CDRE profiles to use for real-time CDR exports
@@ -454,11 +451,6 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"aliases": {
-	"enabled": false,				// starts Aliases service: <true|false>.
-},
-
-
 "users": {
 	"enabled": false,				// starts User service: <true|false>.
 	"indexes": [],					// user profile field indexes
@@ -649,6 +641,25 @@ const CGRATES_CFG_JSON = `
 					{"tag": "RunID", "field_id": "RunID", "type": "*composed", "value": "~4"},
 					{"tag": "AttributeIDs", "field_id": "AttributeIDs", "type": "*composed", "value": "~5"},
 					{"tag": "Weight", "field_id": "Weight", "type": "*composed", "value": "~6"},
+				],
+			},
+			{
+				"type": "*dispatchers",						// data source type
+				"file_name": "Dispatchers.csv",				// file name in the tp_in_dir
+				"fields": [
+					{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~0", "mandatory": true},
+					{"tag": "ID", "field_id": "ID", "type": "*composed", "value": "~1", "mandatory": true},
+					{"tag": "Contexts", "field_id": "Contexts", "type": "*composed", "value": "~2"},
+					{"tag": "FilterIDs", "field_id": "FilterIDs", "type": "*composed", "value": "~3"},
+					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*composed", "value": "~4"},
+					{"tag": "Strategy", "field_id": "Strategy", "type": "*composed", "value": "~5"},
+					{"tag": "StrategyParameters", "field_id": "StrategyParameters", "type": "*composed", "value": "~6"},
+					{"tag": "ConnID", "field_id": "ConnID", "type": "*composed", "value": "~7"},
+					{"tag": "ConnFilterIDs", "field_id": "ConnFilterIDs", "type": "*composed", "value": "~8"},
+					{"tag": "ConnWeight", "field_id": "ConnWeight", "type": "*composed", "value": "~9"},
+					{"tag": "ConnBlocker", "field_id": "ConnBlocker", "type": "*composed", "value": "~10"},
+					{"tag": "ConnParameters", "field_id": "ConnParameters", "type": "*composed", "value": "~11"},
+					{"tag": "Weight", "field_id": "Weight", "type": "*composed", "value": "~12"},
 				],
 			},
 		],

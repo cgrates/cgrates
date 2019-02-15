@@ -43,7 +43,7 @@ func (lcs *LeastCostSorter) SortSuppliers(prflID string, suppls []*Supplier,
 	for _, s := range suppls {
 		if len(s.RatingPlanIDs) == 0 {
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> RatingPlanIDs is empty for suplier with ID: %s",
+				fmt.Sprintf("<%s> supplier: <%s> - empty RatingPlanIDs",
 					utils.SupplierS, s.ID))
 			return nil, utils.NewErrMandatoryIeMissing("RatingPlanIDs")
 		}

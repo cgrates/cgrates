@@ -82,18 +82,6 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
 		return err
 	}
-	// replace aliases
-	if err := LoadAlias(
-		&AttrMatchingAlias{
-			Destination: arg.Destination,
-			Tenant:      arg.Tenant,
-			Category:    arg.Category,
-			Account:     arg.Account,
-			Subject:     arg.Subject,
-			Context:     utils.MetaRating,
-		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
-		return err
-	}
 	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
 		return utils.ErrMaxUsageExceeded
 	}
@@ -115,18 +103,6 @@ func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
 	}
 	// replace user profile fields
 	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
-		return err
-	}
-	// replace aliases
-	if err := LoadAlias(
-		&AttrMatchingAlias{
-			Destination: arg.Destination,
-			Tenant:      arg.Tenant,
-			Category:    arg.Category,
-			Account:     arg.Account,
-			Subject:     arg.Subject,
-			Context:     utils.MetaRating,
-		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return err
 	}
 	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
@@ -154,18 +130,6 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 	}
 	// replace user profile fields
 	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
-		return err
-	}
-	// replace aliases
-	if err := LoadAlias(
-		&AttrMatchingAlias{
-			Destination: arg.Destination,
-			Tenant:      arg.Tenant,
-			Category:    arg.Category,
-			Account:     arg.Account,
-			Subject:     arg.Subject,
-			Context:     utils.MetaRating,
-		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return err
 	}
 	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
@@ -200,21 +164,6 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *Account) (err 
 	}
 	// replace user profile fields
 	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
-		return err
-	}
-	// replace aliases
-	if err := LoadAlias(
-		&AttrMatchingAlias{
-			Destination: arg.Destination,
-			Tenant:      arg.Tenant,
-			Category:    arg.Category,
-			Account:     arg.Account,
-			Subject:     arg.Subject,
-			Context:     utils.MetaRating,
-		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
-		rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{
-			Err: err,
-		})
 		return err
 	}
 	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
@@ -254,21 +203,6 @@ func (rs *Responder) RefundRounding(arg *CallDescriptor, reply *float64) (err er
 	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
 		return err
 	}
-	// replace aliases
-	if err := LoadAlias(
-		&AttrMatchingAlias{
-			Destination: arg.Destination,
-			Tenant:      arg.Tenant,
-			Category:    arg.Category,
-			Account:     arg.Account,
-			Subject:     arg.Subject,
-			Context:     utils.MetaRating,
-		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
-		rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{
-			Err: err,
-		})
-		return err
-	}
 	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
 		return utils.ErrMaxUsageExceeded
 	}
@@ -286,18 +220,6 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *time.Duration
 	}
 	// replace user profile fields
 	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
-		return err
-	}
-	// replace aliases
-	if err := LoadAlias(
-		&AttrMatchingAlias{
-			Destination: arg.Destination,
-			Tenant:      arg.Tenant,
-			Category:    arg.Category,
-			Account:     arg.Account,
-			Subject:     arg.Subject,
-			Context:     utils.MetaRating,
-		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return err
 	}
 	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
@@ -322,20 +244,6 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *time.Duration) (er
 	}
 	// replace user profile fields
 	if err := LoadUserProfile(ev, utils.EXTRA_FIELDS); err != nil {
-		rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
-		return err
-	}
-	// replace aliases
-	if err := LoadAlias(
-		&AttrMatchingAlias{
-			Destination: ev.Destination,
-			Direction:   utils.OUT,
-			Tenant:      ev.Tenant,
-			Category:    ev.Category,
-			Account:     ev.Account,
-			Subject:     ev.Subject,
-			Context:     utils.MetaRating,
-		}, ev, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
 		return err
 	}
@@ -434,20 +342,6 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) (err error) {
 	if err := LoadUserProfile(ev, utils.EXTRA_FIELDS); err != nil {
 		return err
 	}
-	// replace aliases
-	if err := LoadAlias(
-		&AttrMatchingAlias{
-			Destination: ev.Destination,
-			Direction:   utils.OUT,
-			Tenant:      ev.Tenant,
-			Category:    ev.Category,
-			Account:     ev.Account,
-			Subject:     ev.Subject,
-			Context:     utils.MetaRating,
-		}, ev, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
-		return err
-	}
-
 	//utils.Logger.Info(fmt.Sprintf("DC after: %+v", ev))
 	attrsDC := &utils.AttrDerivedChargers{Tenant: ev.Tenant,
 		Category: ev.Category, Direction: utils.OUT,
