@@ -114,7 +114,6 @@ func TestSessionsDataLastUsedData(t *testing.T) {
 	}
 	tStart, _ := utils.ParseTimeDetectLayout("2016-01-05T18:31:05Z", "")
 	cd := engine.CallDescriptor{
-		Direction:   "*out",
 		Category:    "data",
 		Tenant:      "cgrates.org",
 		Subject:     "1001",
