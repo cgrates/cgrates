@@ -428,14 +428,21 @@ func startRadiusAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitCh
 
 func startFsAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
 	var err error
+	var sS rpcclient.RpcClientConnection
 	utils.Logger.Info("Starting FreeSWITCH agent")
 	smgRpcConn := <-internalSMGChan
 	internalSMGChan <- smgRpcConn
-	birpcClnt := utils.NewBiRPCInternalClient(smgRpcConn.(*sessions.SessionS))
-	sm := agents.NewFSsessions(cfg.FsAgentCfg(), birpcClnt, cfg.GeneralCfg().DefaultTimezone)
-	var reply string
-	if err = birpcClnt.Call(utils.SessionSv1RegisterInternalBiJSONConn, "", &reply); err != nil { // for session sync
-		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))
+	sS = utils.NewBiRPCInternalClient(smgRpcConn.(*sessions.SessionS))
+
+	sm := agents.NewFSsessions(cfg.FsAgentCfg(), sS, cfg.GeneralCfg().DefaultTimezone)
+	sS.(*utils.BiRPCInternalClient).SetClientConn(sm)
+	var rply string
+	if err := sS.Call(utils.SessionSv1RegisterInternalBiJSONConn,
+		utils.EmptyString, &rply); err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
+			utils.FreeSWITCHAgent, utils.SessionS, err.Error()))
+		exitChan <- true
+		return
 	}
 	if err = sm.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))

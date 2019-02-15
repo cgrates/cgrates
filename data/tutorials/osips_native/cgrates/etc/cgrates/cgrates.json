@@ -38,13 +38,18 @@
 
 "cdrs": {
 	"enabled": true,
-	"sessions_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
-	],
 	"stats_conns": [
 		{"address": "*internal"}
 	],
 	"sessions_cost_retries": 5,
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": [
+		{"address": "*internal"}
+	],
 },
 
 
