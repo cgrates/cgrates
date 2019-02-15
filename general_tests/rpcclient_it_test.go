@@ -172,7 +172,7 @@ func TestRPCITLclStatusFirstFailback(t *testing.T) {
 // Make sure it executes on the first node supporting the command
 func TestRPCITLclTDirectedRPC(t *testing.T) {
 	var sessions []*sessions.ActiveSession
-	if err := rpcPoolFirst.Call("SMGenericV1.GetActiveSessions", map[string]string{}, &sessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := rpcPoolFirst.Call(utils.SessionSv1GetActiveSessions, map[string]string{}, &sessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

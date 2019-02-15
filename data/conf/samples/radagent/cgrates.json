@@ -54,6 +54,10 @@
 	"enabled": true,
 },
 
+"chargers": {
+	"enabled": true,
+},
+
 "sessions": {
 	"enabled": true,
 	"attributes_conns": [
@@ -83,11 +87,14 @@
 			"flags": ["*auth", "*accounts"],
 			"continue_on_success": false,
 			"request_fields":[
+				{"tag": "Category", "field_id": "Category", "type": "*constant", "value": "call"},
 				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
 					"value": "*prepaid", "mandatory": true},	
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 
 					"value": "~*req.Acct-Session-Id;-;~*req.Sip-From-Tag", "mandatory": true},
 				{"tag": "Account", "field_id": "Account", "type": "*composed", 
+					"value": "~*req.User-Name", "mandatory": true},
+				{"tag": "Subject", "field_id": "Subject", "type": "*variable",
 					"value": "~*req.User-Name", "mandatory": true},
 				{"tag": "Destination", "field_id": "Destination", "type": "*composed", 
 					"value": "~*req.Called-Station-Id", "mandatory": true},
@@ -107,6 +114,7 @@
 			"flags": ["*initiate", "*attributes", "*resources", "*accounts"],
 			"continue_on_success": false,
 			"request_fields":[	
+				{"tag": "Category", "field_id": "Category", "type": "*constant", "value": "call"},
 				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
 					"value": "*prepaid", "mandatory": true},	
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 
@@ -114,6 +122,8 @@
 				{"tag": "OriginHost", "field_id": "OriginHost", "type": "*composed", 
 					"value": "~*req.NAS-IP-Address", "mandatory": true},
 				{"tag": "Account", "field_id": "Account", "type": "*composed", 
+					"value": "~*req.User-Name", "mandatory": true},
+				{"tag": "Subject", "field_id": "Subject", "type": "*variable",
 					"value": "~*req.User-Name", "mandatory": true},
 				{"tag": "Destination", "field_id": "Destination", "type": "*composed", 
 					"value": "~*req.Called-Station-Id", "mandatory": true},
@@ -130,6 +140,7 @@
 			"flags": ["*terminate", "*resources", "*accounts", "*cdrs"],
 			"continue_on_success": false,
 			"request_fields":[	
+				{"tag": "Category", "field_id": "Category", "type": "*constant", "value": "call"},
 				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
 					"value": "*prepaid", "mandatory": true},	
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 
@@ -137,6 +148,8 @@
 				{"tag": "OriginHost", "field_id": "OriginHost", "type": "*composed", 
 					"value": "~*req.NAS-IP-Address", "mandatory": true},
 				{"tag": "Account", "field_id": "Account", "type": "*composed", 
+					"value": "~*req.User-Name", "mandatory": true},
+				{"tag": "Subject", "field_id": "Subject", "type": "*variable",
 					"value": "~*req.User-Name", "mandatory": true},
 				{"tag": "Destination", "field_id": "Destination", "type": "*composed", 
 					"value": "~*req.Called-Station-Id", "mandatory": true},

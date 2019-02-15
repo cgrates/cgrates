@@ -168,6 +168,12 @@ func (se *SafEvent) GetDurationPtr(fldName string) (d *time.Duration, err error)
 }
 
 // GetDurationPointer returns pointer towards duration, useful to detect presence of duration
+func (se *SafEvent) GetDurationPtrIgnoreErrors(fldName string) (d *time.Duration) {
+	d, _ = se.GetDurationPtr(fldName)
+	return
+}
+
+// GetDurationPointer returns pointer towards duration, useful to detect presence of duration
 func (se *SafEvent) GetDurationPtrOrDefault(fldName string, dflt *time.Duration) (d *time.Duration, err error) {
 	fldIface, has := se.Get(fldName)
 	if !has {

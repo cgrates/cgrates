@@ -470,17 +470,17 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 
 func TestSmgJsonCfg(t *testing.T) {
 	eCfg := &SessionSJsonCfg{
-		Enabled:        utils.BoolPointer(false),
-		Listen_bijson:  utils.StringPointer("127.0.0.1:2014"),
-		Chargers_conns: &[]*HaPoolJsonCfg{},
-		Rals_conns: &[]*HaPoolJsonCfg{
-			{
-				Address: utils.StringPointer(utils.MetaInternal),
-			}},
-		Cdrs_conns: &[]*HaPoolJsonCfg{
-			{
-				Address: utils.StringPointer(utils.MetaInternal),
-			}},
+		Enabled:       utils.BoolPointer(false),
+		Listen_bijson: utils.StringPointer("127.0.0.1:2014"),
+		Chargers_conns: &[]*HaPoolJsonCfg{{
+			Address: utils.StringPointer(utils.MetaInternal),
+		}},
+		Rals_conns: &[]*HaPoolJsonCfg{{
+			Address: utils.StringPointer(utils.MetaInternal),
+		}},
+		Cdrs_conns: &[]*HaPoolJsonCfg{{
+			Address: utils.StringPointer(utils.MetaInternal),
+		}},
 		Resources_conns:           &[]*HaPoolJsonCfg{},
 		Thresholds_conns:          &[]*HaPoolJsonCfg{},
 		Stats_conns:               &[]*HaPoolJsonCfg{},

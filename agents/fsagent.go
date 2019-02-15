@@ -21,6 +21,7 @@ package agents
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -28,6 +29,7 @@ import (
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
+	"github.com/cgrates/rpcclient"
 )
 
 type fsSockWithConfig struct {
@@ -36,15 +38,17 @@ type fsSockWithConfig struct {
 }
 
 func NewFSsessions(fsAgentConfig *config.FsAgentCfg,
-	smg *utils.BiRPCInternalClient, timezone string) (fsa *FSsessions) {
+	sS rpcclient.RpcClientConnection, timezone string) (fsa *FSsessions) {
+	if sS != nil && reflect.ValueOf(sS).IsNil() {
+		sS = nil
+	}
 	fsa = &FSsessions{
 		cfg:         fsAgentConfig,
 		conns:       make(map[string]*fsSockWithConfig),
 		senderPools: make(map[string]*fsock.FSockPool),
-		smg:         smg,
+		sS:          sS,
 		timezone:    timezone,
 	}
-	fsa.smg.SetClientConn(fsa) // pass the connection to FsA back into smg so we can receive the disconnects
 	return
 }
 
@@ -52,9 +56,9 @@ func NewFSsessions(fsAgentConfig *config.FsAgentCfg,
 // and the active sessions
 type FSsessions struct {
 	cfg         *config.FsAgentCfg
-	conns       map[string]*fsSockWithConfig // Keep the list here for connection management purposes
-	senderPools map[string]*fsock.FSockPool  // Keep sender pools here
-	smg         *utils.BiRPCInternalClient
+	conns       map[string]*fsSockWithConfig  // Keep the list here for connection management purposes
+	senderPools map[string]*fsock.FSockPool   // Keep sender pools here
+	sS          rpcclient.RpcClientConnection // Connection towards CGR-SessionS component
 	timezone    string
 }
 
@@ -146,7 +150,7 @@ func (sm *FSsessions) onChannelPark(fsev FSEvent, connId string) {
 	fsev[VarCGROriginHost] = sm.conns[connId].cfg.Alias
 	authArgs := fsev.V1AuthorizeArgs()
 	var authReply sessions.V1AuthorizeReply
-	if err := sm.smg.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
+	if err := sm.sS.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> Could not authorize event %s, error: %s",
 				utils.FreeSWITCHAgent, fsev.GetUUID(), err.Error()))
@@ -232,7 +236,7 @@ func (sm *FSsessions) onChannelAnswer(fsev FSEvent, connId string) {
 	initSessionArgs := fsev.V1InitSessionArgs()
 	initSessionArgs.CGREvent.Event[FsConnID] = connId // Attach the connection ID so we can properly disconnect later
 	var initReply sessions.V1InitSessionReply
-	if err := sm.smg.Call(utils.SessionSv1InitiateSession,
+	if err := sm.sS.Call(utils.SessionSv1InitiateSession,
 		initSessionArgs, &initReply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> could not process answer for event %s, error: %s",
@@ -249,7 +253,7 @@ func (sm *FSsessions) onChannelHangupComplete(fsev FSEvent, connId string) {
 	var reply string
 	fsev[VarCGROriginHost] = sm.conns[connId].cfg.Alias
 	if fsev[VarAnswerEpoch] != "0" { // call was answered
-		if err := sm.smg.Call(utils.SessionSv1TerminateSession,
+		if err := sm.sS.Call(utils.SessionSv1TerminateSession,
 			fsev.V1TerminateSessionArgs(), &reply); err != nil {
 			utils.Logger.Err(
 				fmt.Sprintf("<%s> Could not terminate session with event %s, error: %s",
@@ -261,7 +265,7 @@ func (sm *FSsessions) onChannelHangupComplete(fsev FSEvent, connId string) {
 		if err != nil {
 			return
 		}
-		if err := sm.smg.Call(utils.SessionSv1ProcessCDR, cgrEv, &reply); err != nil {
+		if err := sm.sS.Call(utils.SessionSv1ProcessCDR, cgrEv, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Failed processing CGREvent: %s,  error: <%s>",
 				utils.FreeSWITCHAgent, utils.ToJSON(cgrEv), err.Error()))
 		}

@@ -37,6 +37,7 @@
 				"tenant": "cgrates.org",
 				"flags": [ "*auth", "*accounts", "*attributes"],
 				"request_fields":[
+					{"tag": "Category", "field_id": "Category", "type": "*constant", "value": "call"},
 					{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
 						"value": "*pseudoprepaid", "mandatory": true},	
 					{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 

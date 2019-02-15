@@ -17,6 +17,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
+
 package v2
 
 import (
@@ -26,7 +27,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/cgrates/cgrates/apier/v1"
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -44,7 +45,6 @@ var (
 )
 
 // subtests to be executed for each confDIR
-// FixMe#alin104n: add tests for rest of TP methods in loader interface
 var sTestsTutIT = []func(t *testing.T){
 	testTPitLoadConfig,
 	testTPitResetDataDb,

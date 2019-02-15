@@ -80,6 +80,21 @@ func TestSrItLoadFromFolder(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
+
+	//add a default charger
+	chargerProfile := &engine.ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "Default",
+		RunID:        "*default",
+		AttributeIDs: []string{"*none"},
+		Weight:       20,
+	}
+	var result string
+	if err := srrpc.Call("ApierV1.SetChargerProfile", chargerProfile, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
 }
 
 func testAccountBalance(t *testing.T, sracc, srten, balType string, expected float64) {

@@ -54,19 +54,9 @@ type WeightDispatcher struct {
 	conns engine.DispatcherConns
 }
 
-// incrNextConnIdx will increment the nextConnIidx
-// not thread safe, it needs to be locked in a layer above
-/*func (wd *WeightDispatcher) incrNextConnIdx() {
-	wd.nextConnIdx++
-	if wd.nextConnIdx > len(wd.conns)-1 {
-		wd.nextConnIdx = 0 // start from beginning
-	}
-}
-*/
-
 func (wd *WeightDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
-	pfl.Conns.Sort()
 	wd.Lock()
+	pfl.Conns.Sort()
 	wd.conns = pfl.Conns.Clone()
 	wd.Unlock()
 	return

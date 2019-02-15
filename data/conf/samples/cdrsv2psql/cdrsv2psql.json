@@ -16,18 +16,25 @@
 
 "rals": {
 	"enabled": true,						// enable Rater service: <true|false>
+	"thresholds_conns": [
+		{"address": "127.0.0.1:2012", "transport":"*json"},
+	],
+},
+
+"scheduler": {
+	"enabled": true,
 },
 
 "cdrs": {
 	"enabled": true,
 	"attributes_conns":[
-		{"address": "127.0.0.1:2012", "transport":"*json"},
+		{"address": "*internal"}
 	],
 	"chargers_conns":[
 		{"address": "127.0.0.1:2012", "transport":"*json"},
 	],
 	"rals_conns": [
-		{"address": "*internal"}
+		{"address": "127.0.0.1:2012", "transport":"*json"},
 	],
 },
 
@@ -35,10 +42,15 @@
 	"enabled": true,
 },
 
+"thresholds": {
+	"enabled": true,
+	"store_interval": "1s",
+},
+
 "chargers": {
 	"enabled": true,
 	"attributes_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"},
+		{"address": "*internal"}
 	],
 },
 

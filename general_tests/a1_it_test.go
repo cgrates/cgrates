@@ -33,6 +33,7 @@ import (
 	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -100,6 +101,21 @@ func TestA1itLoadTPFromFolder(t *testing.T) {
 	} else if cc.Cost != 0.0 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc)
 	}
+
+	//add a default charger
+	chargerProfile := &engine.ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "Default",
+		RunID:        "*default",
+		AttributeIDs: []string{"*none"},
+		Weight:       20,
+	}
+	var result string
+	if err := a1rpc.Call("ApierV1.SetChargerProfile", chargerProfile, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
 }
 
 func TestA1itAddBalance1(t *testing.T) {
@@ -124,82 +140,115 @@ func TestA1itAddBalance1(t *testing.T) {
 }
 
 func TestA1itDataSession1(t *testing.T) {
-	smgEv := map[string]interface{}{
-		utils.EVENT_NAME:         "INITIATE_SESSION",
-		utils.ToR:                utils.DATA,
-		utils.OriginID:           "504966119",
-		utils.Direction:          utils.OUT,
-		utils.Account:            "rpdata1",
-		utils.Subject:            "rpdata1",
-		utils.Destination:        "data",
-		utils.Category:           "data1",
-		utils.Tenant:             "cgrates.org",
-		utils.RequestType:        utils.META_PREPAID,
-		utils.SetupTime:          "2017-03-03 11:39:32 +0100 CET",
-		utils.AnswerTime:         "2017-03-03 11:39:32 +0100 CET",
-		utils.Usage:              "10240",
-		utils.SessionTTL:         "28800s",
-		utils.SessionTTLLastUsed: "0s",
-		utils.SessionTTLUsage:    "0s",
+
+	usage := time.Duration(10240)
+	initArgs := &sessions.V1InitSessionArgs{
+		InitSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestA1itDataSession1",
+			Event: map[string]interface{}{
+				utils.EVENT_NAME:         "INITIATE_SESSION",
+				utils.ToR:                utils.DATA,
+				utils.OriginID:           "504966119",
+				utils.Account:            "rpdata1",
+				utils.Subject:            "rpdata1",
+				utils.Destination:        "data",
+				utils.Category:           "data1",
+				utils.Tenant:             "cgrates.org",
+				utils.RequestType:        utils.META_PREPAID,
+				utils.SetupTime:          "2017-03-03 11:39:32 +0100 CET",
+				utils.AnswerTime:         "2017-03-03 11:39:32 +0100 CET",
+				utils.Usage:              "10240",
+				utils.SessionTTL:         "28800s",
+				utils.SessionTTLLastUsed: "0s",
+				utils.SessionTTLUsage:    "0s",
+			},
+		},
 	}
-	var maxUsage float64
-	if err := a1rpc.Call(utils.SMGenericV2InitiateSession, smgEv, &maxUsage); err != nil {
+
+	var initRpl *sessions.V1InitSessionReply
+	if err := a1rpc.Call(utils.SessionSv1InitiateSession,
+		initArgs, &initRpl); err != nil {
 		t.Error(err)
-	} else if maxUsage != 10240 {
-		t.Error("Received: ", maxUsage)
 	}
-	smgEv = map[string]interface{}{
-		utils.EVENT_NAME:         "UPDATE_SESSION",
-		utils.Account:            "rpdata1",
-		utils.Category:           "data1",
-		utils.Destination:        "data",
-		utils.Direction:          utils.OUT,
-		utils.InitialOriginID:    "504966119",
-		utils.LastUsed:           "0s",
-		utils.OriginID:           "504966119-1",
-		utils.RequestType:        utils.META_PREPAID,
-		utils.SessionTTL:         "28800s",
-		utils.SessionTTLLastUsed: "2097152s",
-		utils.SessionTTLUsage:    "0s",
-		utils.Subject:            "rpdata1",
-		utils.Tenant:             "cgrates.org",
-		utils.ToR:                utils.DATA,
-		utils.SetupTime:          "2017-03-03 11:39:32 +0100 CET",
-		utils.AnswerTime:         "2017-03-03 11:39:32 +0100 CET",
-		utils.Usage:              "2097152",
+	if *initRpl.MaxUsage != usage {
+		t.Errorf("Expecting : %+v, received: %+v", usage, *initRpl.MaxUsage)
 	}
-	if err := a1rpc.Call(utils.SMGenericV2UpdateSession,
-		smgEv, &maxUsage); err != nil {
+
+	updateArgs := &sessions.V1UpdateSessionArgs{
+		UpdateSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSessionsVoiceLastUsed",
+			Event: map[string]interface{}{
+				utils.EVENT_NAME:         "UPDATE_SESSION",
+				utils.Account:            "rpdata1",
+				utils.Category:           "data1",
+				utils.Destination:        "data",
+				utils.InitialOriginID:    "504966119",
+				utils.LastUsed:           "0s",
+				utils.OriginID:           "504966119-1",
+				utils.RequestType:        utils.META_PREPAID,
+				utils.SessionTTL:         "28800s",
+				utils.SessionTTLLastUsed: "2097152s",
+				utils.SessionTTLUsage:    "0s",
+				utils.Subject:            "rpdata1",
+				utils.Tenant:             "cgrates.org",
+				utils.ToR:                utils.DATA,
+				utils.SetupTime:          "2017-03-03 11:39:32 +0100 CET",
+				utils.AnswerTime:         "2017-03-03 11:39:32 +0100 CET",
+				utils.Usage:              "2097152",
+			},
+		},
+	}
+
+	usage = time.Duration(2097152)
+	var updateRpl *sessions.V1UpdateSessionReply
+	if err := a1rpc.Call(utils.SessionSv1UpdateSession, updateArgs, &updateRpl); err != nil {
 		t.Error(err)
-	} else if maxUsage != 2097152 {
-		t.Error("Bad max usage: ", maxUsage)
 	}
-	smgEv = map[string]interface{}{
-		utils.EVENT_NAME:     "TERMINATE_SESSION",
-		utils.Account:        "rpdata1",
-		utils.Category:       "data1",
-		utils.Destination:    "data",
-		utils.Direction:      utils.OUT,
-		utils.LastUsed:       "2202800",
-		utils.OriginID:       "504966119-1",
-		utils.OriginIDPrefix: "504966119-1",
-		utils.RequestType:    utils.META_PREPAID,
-		utils.SetupTime:      "2017-03-03 11:39:32 +0100 CET",
-		utils.AnswerTime:     "2017-03-03 11:39:32 +0100 CET",
-		utils.Subject:        "rpdata1",
-		utils.Tenant:         "cgrates.org",
-		utils.ToR:            utils.DATA,
+	if *updateRpl.MaxUsage != usage {
+		t.Errorf("Expected: %+v, received: %+v", usage, *updateRpl.MaxUsage)
 	}
+
+	usage = time.Duration(1 * time.Minute)
+	termArgs := &sessions.V1TerminateSessionArgs{
+		TerminateSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSessionsVoiceLastUsed",
+			Event: map[string]interface{}{
+				utils.EVENT_NAME:     "TERMINATE_SESSION",
+				utils.Account:        "rpdata1",
+				utils.Category:       "data1",
+				utils.Destination:    "data",
+				utils.LastUsed:       "2202800",
+				utils.OriginID:       "504966119-1",
+				utils.OriginIDPrefix: "504966119-1",
+				utils.RequestType:    utils.META_PREPAID,
+				utils.SetupTime:      "2017-03-03 11:39:32 +0100 CET",
+				utils.AnswerTime:     "2017-03-03 11:39:32 +0100 CET",
+				utils.Subject:        "rpdata1",
+				utils.Tenant:         "cgrates.org",
+				utils.ToR:            utils.DATA,
+			},
+		},
+	}
+
 	var rpl string
-	if err = a1rpc.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
+	if err := a1rpc.Call(utils.SessionSv1TerminateSession, termArgs, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
-	if err := a1rpc.Call("SMGenericV1.ProcessCDR", smgEv, &rpl); err != nil {
+
+	if err := a1rpc.Call(utils.SessionSv1ProcessCDR, termArgs.CGREvent, &rpl); err != nil {
 		t.Error(err)
 	} else if rpl != utils.OK {
 		t.Errorf("Received reply: %s", rpl)
 	}
+
 	time.Sleep(time.Duration(20) * time.Millisecond)
+
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}}
 	if err := a1rpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
