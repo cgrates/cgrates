@@ -234,6 +234,7 @@ func TestDfRalsJsonCfg(t *testing.T) {
 		Users_conns:                &[]*HaPoolJsonCfg{},
 		Aliases_conns:              &[]*HaPoolJsonCfg{},
 		Rp_subject_prefix_matching: utils.BoolPointer(false),
+		Remove_expired:             utils.BoolPointer(true),
 		Max_computed_usage: &map[string]string{
 			utils.ANY:   "189h",
 			utils.VOICE: "72h",

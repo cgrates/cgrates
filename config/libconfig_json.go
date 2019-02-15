@@ -105,6 +105,7 @@ type RalsJsonCfg struct {
 	Aliases_conns              *[]*HaPoolJsonCfg
 	Users_conns                *[]*HaPoolJsonCfg
 	Rp_subject_prefix_matching *bool
+	Remove_expired             *bool
 	Max_computed_usage         *map[string]string
 }
 

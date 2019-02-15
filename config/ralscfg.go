@@ -33,6 +33,7 @@ type RalsCfg struct {
 	RALsUserSConns          []*HaPoolConfig
 	RALsAliasSConns         []*HaPoolConfig
 	RpSubjectPrefixMatching bool // enables prefix matching for the rating profile subject
+	RemoveExpired           bool
 	RALsMaxComputedUsage    map[string]time.Duration
 }
 
@@ -81,6 +82,9 @@ func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 	}
 	if jsnRALsCfg.Rp_subject_prefix_matching != nil {
 		ralsCfg.RpSubjectPrefixMatching = *jsnRALsCfg.Rp_subject_prefix_matching
+	}
+	if jsnRALsCfg.Remove_expired != nil {
+		ralsCfg.RemoveExpired = *jsnRALsCfg.Remove_expired
 	}
 	if jsnRALsCfg.Max_computed_usage != nil {
 		for k, v := range *jsnRALsCfg.Max_computed_usage {
