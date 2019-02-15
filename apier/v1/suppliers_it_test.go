@@ -66,6 +66,7 @@ var sTestsSupplierSV1 = []func(t *testing.T){
 	testV1SplSUpdateSupplierProfiles,
 	testV1SplSRemSupplierProfiles,
 	testV1SplSupplierPing,
+	testV1SplSSetSupplierProfilesWithoutRatingPlanIDs,
 	testV1SplSStopEngine,
 }
 
@@ -968,6 +969,60 @@ func testV1SplSRemSupplierProfiles(t *testing.T) {
 	}
 	if err := splSv1Rpc.Call("ApierV1.RemoveSupplierProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
+	}
+}
+
+func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
+	var reply *engine.SupplierProfile
+	if err := splSv1Rpc.Call("ApierV1.GetSupplierProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE2"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	splPrf = &engine.SupplierProfile{
+		Tenant:  "cgrates.org",
+		ID:      "TEST_PROFILE2",
+		Sorting: utils.MetaLeastCost,
+		Suppliers: []*engine.Supplier{
+			{
+				ID:         "SPL1",
+				FilterIDs:  []string{"FLTR_1"},
+				AccountIDs: []string{"accc"},
+				Weight:     20,
+				Blocker:    false,
+			},
+		},
+		Weight: 10,
+	}
+	var result string
+	if err := splSv1Rpc.Call("ApierV1.SetSupplierProfile", splPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := splSv1Rpc.Call("ApierV1.GetSupplierProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE2"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(splPrf, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", splPrf, reply)
+	}
+	ev := &engine.ArgsGetSuppliers{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1SplSGetLeastCostSuppliers",
+			Event: map[string]interface{}{
+				utils.Account:     "accc",
+				utils.Subject:     "1003",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+				utils.Usage:       "1m20s",
+			},
+		},
+	}
+	var suplsReply engine.SortedSuppliers
+	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
+		ev, &suplsReply); err.Error() != utils.NewErrServerError(utils.NewErrMandatoryIeMissing("RatingPlanIDs")).Error() {
+		t.Errorf("Expected error MANDATORY_IE_MISSING: [RatingPlanIDs] recieved:%v\n", err)
 	}
 }
 
