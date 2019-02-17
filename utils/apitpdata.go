@@ -765,67 +765,6 @@ type AttrRemCdrs struct {
 	CgrIds []string // List of CgrIds to remove from storeDb
 }
 
-type AttrRateCdrs struct {
-	CgrIds              []string // If provided, it will filter based on the cgrids present in list
-	MediationRunIds     []string // If provided, it will filter on mediation runid
-	TORs                []string // If provided, filter on TypeOfRecord
-	CdrHosts            []string // If provided, it will filter cdrhost
-	CdrSources          []string // If provided, it will filter cdrsource
-	ReqTypes            []string // If provided, it will fiter reqtype
-	Tenants             []string // If provided, it will filter tenant
-	Categories          []string // If provided, it will filter çategory
-	Accounts            []string // If provided, it will filter account
-	Subjects            []string // If provided, it will filter the rating subject
-	DestinationPrefixes []string // If provided, it will filter on destination prefix
-	OrderIdStart        *int64   // Export from this order identifier
-	OrderIdEnd          *int64   // Export smaller than this order identifier
-	TimeStart           string   // If provided, it will represent the starting of the CDRs interval (>=)
-	TimeEnd             string   // If provided, it will represent the end of the CDRs interval (<)
-	RerateErrors        bool     // Rerate previous CDRs with errors (makes sense for reqtype rated and pseudoprepaid
-	RerateRated         bool     // Rerate CDRs which were previously rated (makes sense for reqtype rated and pseudoprepaid)
-	SendToStats         bool     // Set to true if the CDRs should be sent to stats server
-}
-
-func (attrRateCDRs *AttrRateCdrs) AsCDRsFilter(timezone string) (*CDRsFilter, error) {
-	cdrFltr := &CDRsFilter{
-		CGRIDs:              attrRateCDRs.CgrIds,
-		RunIDs:              attrRateCDRs.MediationRunIds,
-		OriginHosts:         attrRateCDRs.CdrHosts,
-		Sources:             attrRateCDRs.CdrSources,
-		ToRs:                attrRateCDRs.TORs,
-		RequestTypes:        attrRateCDRs.ReqTypes,
-		Tenants:             attrRateCDRs.Tenants,
-		Categories:          attrRateCDRs.Categories,
-		Accounts:            attrRateCDRs.Accounts,
-		Subjects:            attrRateCDRs.Subjects,
-		DestinationPrefixes: attrRateCDRs.DestinationPrefixes,
-		OrderIDStart:        attrRateCDRs.OrderIdStart,
-		OrderIDEnd:          attrRateCDRs.OrderIdEnd,
-	}
-	if aTime, err := ParseTimeDetectLayout(attrRateCDRs.TimeStart, timezone); err != nil {
-		return nil, err
-	} else if !aTime.IsZero() {
-		cdrFltr.AnswerTimeStart = &aTime
-	}
-	if aTimeEnd, err := ParseTimeDetectLayout(attrRateCDRs.TimeEnd, timezone); err != nil {
-		return nil, err
-	} else if !aTimeEnd.IsZero() {
-		cdrFltr.AnswerTimeEnd = &aTimeEnd
-	}
-	if attrRateCDRs.RerateErrors {
-		cdrFltr.MinCost = Float64Pointer(-1.0)
-		if !attrRateCDRs.RerateRated {
-			cdrFltr.MaxCost = Float64Pointer(0.0)
-		}
-	} else if attrRateCDRs.RerateRated {
-		cdrFltr.MinCost = Float64Pointer(0.0)
-	}
-	if attrRateCDRs.RerateErrors || attrRateCDRs.RerateRated {
-		cdrFltr.NotRunIDs = append(cdrFltr.NotRunIDs, MetaRaw)
-	}
-	return cdrFltr, nil
-}
-
 type AttrLoadTpFromFolder struct {
 	FolderPath string // Take files from folder absolute path
 	DryRun     bool   // Do not write to database but parse only
@@ -1122,13 +1061,6 @@ type AttrGetSMASessions struct {
 type AttrGetCallCost struct {
 	CgrId string // Unique id of the CDR
 	RunId string // Run Id
-}
-
-type AttrRateCDRs struct {
-	RPCCDRsFilter
-	StoreCDRs     *bool
-	SendToStatS   *bool // Set to true if the CDRs should be sent to stats server
-	ReplicateCDRs *bool // Replicate results
 }
 
 type AttrSetBalance struct {

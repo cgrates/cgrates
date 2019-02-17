@@ -993,7 +993,7 @@ func (ms *MongoStorage) SetSMCost(smc *SMCost) error {
 		return nil
 	}
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(utils.SessionsCostsTBL).InsertOne(sctx, smc)
+		_, err = ms.getCol(utils.SessionCostsTBL).InsertOne(sctx, smc)
 		return err
 	})
 }
@@ -1004,7 +1004,7 @@ func (ms *MongoStorage) RemoveSMCost(smc *SMCost) error {
 		remParams = bson.M{"cgrid": smc.CGRID, "runid": smc.RunID}
 	}
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(utils.SessionsCostsTBL).DeleteMany(sctx, remParams)
+		_, err = ms.getCol(utils.SessionCostsTBL).DeleteMany(sctx, remParams)
 		return err
 	})
 }
@@ -1024,7 +1024,7 @@ func (ms *MongoStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix stri
 		filter[OriginIDLow] = bsonx.Regex(fmt.Sprintf("^%s", originIDPrefix), "")
 	}
 	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(utils.SessionsCostsTBL).Find(sctx, filter)
+		cur, err := ms.getCol(utils.SessionCostsTBL).Find(sctx, filter)
 		if err != nil {
 			return err
 		}

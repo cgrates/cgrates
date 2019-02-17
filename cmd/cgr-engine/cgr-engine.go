@@ -610,16 +610,15 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 			return
 		}
 	}
-	cdrServer, _ := engine.NewCdrServer(cfg, cdrDb, dm, ralConn, pubSubConn,
-		attrSConn, usersConn,
+	cdrServer := engine.NewCDRServer(cfg, cdrDb, dm,
+		ralConn, pubSubConn, attrSConn, usersConn,
 		thresholdSConn, statsConn, chargerSConn, filterS)
-	cdrServer.SetTimeToLive(cfg.GeneralCfg().ResponseCacheTTL, nil)
 	utils.Logger.Info("Registering CDRS HTTP Handlers.")
 	cdrServer.RegisterHandlersToServer(server)
 	utils.Logger.Info("Registering CDRS RPC service.")
-	cdrSrv := v1.CdrsV1{CdrSrv: cdrServer}
+	cdrSrv := v1.CDRsV1{CDRs: cdrServer}
 	server.RpcRegister(&cdrSrv)
-	server.RpcRegister(&v2.CdrsV2{CdrsV1: cdrSrv})
+	server.RpcRegister(&v2.CDRsV2{CDRsV1: cdrSrv})
 	// Make the cdr server available for internal communication
 	server.RpcRegister(cdrServer) // register CdrServer for internal usage (TODO: refactor this)
 	internalCdrSChan <- cdrServer // Signal that cdrS is operational

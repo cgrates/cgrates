@@ -19,14 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v2
 
 import (
-	"github.com/cgrates/cgrates/apier/v1"
+	v1 "github.com/cgrates/cgrates/apier/v1"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // Retrieves CDRs based on the filters
-func (apier *ApierV2) GetCdrs(attrs utils.RPCCDRsFilter, reply *[]*engine.ExternalCDR) error {
+func (apier *ApierV2) GetCDRs(attrs utils.RPCCDRsFilter, reply *[]*engine.ExternalCDR) error {
 	cdrsFltr, err := attrs.AsCDRsFilter(apier.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -46,7 +46,7 @@ func (apier *ApierV2) GetCdrs(attrs utils.RPCCDRsFilter, reply *[]*engine.Extern
 	return nil
 }
 
-func (apier *ApierV2) CountCdrs(attrs utils.RPCCDRsFilter, reply *int64) error {
+func (apier *ApierV2) CountCDRs(attrs utils.RPCCDRsFilter, reply *int64) error {
 	cdrsFltr, err := attrs.AsCDRsFilter(apier.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		if err.Error() != utils.NotFoundCaps {
@@ -64,19 +64,14 @@ func (apier *ApierV2) CountCdrs(attrs utils.RPCCDRsFilter, reply *int64) error {
 }
 
 // Receive CDRs via RPC methods, not included with APIer because it has way less dependencies and can be standalone
-type CdrsV2 struct {
-	v1.CdrsV1
+type CDRsV2 struct {
+	v1.CDRsV1
 }
 
-func (self *CdrsV2) StoreSMCost(args engine.ArgsV2CDRSStoreSMCost, reply *string) error {
-	return self.CdrSrv.V2StoreSMCost(args, reply)
+func (cdrSv2 *CDRsV2) StoreSessionCost(args *engine.ArgsV2CDRSStoreSMCost, reply *string) error {
+	return cdrSv2.CDRs.V2StoreSessionCost(args, reply)
 }
 
-func (self *CdrsV2) ProcessCDR(cgrEv *utils.CGREvent, reply *string) error {
-	return self.CdrSrv.V2ProcessCDR(cgrEv, reply)
-}
-
-// RateCDRs will rate/re-rate CDRs using ChargerS
-func (self *CdrsV2) RateCDRs(args *utils.RPCCDRsFilter, reply *string) error {
-	return self.CdrSrv.V2RateCDRs(args, reply)
+func (cdrSv2 *CDRsV2) ProcessCDR(arg *engine.ArgV2ProcessCDR, reply *string) error {
+	return cdrSv2.CDRs.V2ProcessCDR(arg, reply)
 }

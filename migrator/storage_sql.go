@@ -125,7 +125,7 @@ func (mgSQL *migratorSQL) getV2SMCost() (v2Cost *v2SessionsCost, err error) {
 			return nil, err
 		}
 	}
-	scSql := new(engine.SessionsCostsSQL)
+	scSql := new(engine.SessionCostsSQL)
 	mgSQL.rowIter.Scan(&scSql)
 	v2Cost, err = NewV2SessionsCostFromSessionsCostSql(scSql)
 
@@ -151,12 +151,12 @@ func (mgSQL *migratorSQL) setV2SMCost(v2Cost *v2SessionsCost) (err error) {
 
 func (mgSQL *migratorSQL) remV2SMCost(v2Cost *v2SessionsCost) (err error) {
 	tx := mgSQL.sqlStorage.ExportGormDB().Begin()
-	var rmParam *engine.SessionsCostsSQL
+	var rmParam *engine.SessionCostsSQL
 	if v2Cost != nil {
-		rmParam = &engine.SessionsCostsSQL{Cgrid: v2Cost.CGRID,
+		rmParam = &engine.SessionCostsSQL{Cgrid: v2Cost.CGRID,
 			RunID: v2Cost.RunID}
 	}
-	if err := tx.Where(rmParam).Delete(engine.SessionsCostsSQL{}).Error; err != nil {
+	if err := tx.Where(rmParam).Delete(engine.SessionCostsSQL{}).Error; err != nil {
 		tx.Rollback()
 		return err
 	}

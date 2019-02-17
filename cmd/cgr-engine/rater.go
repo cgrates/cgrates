@@ -21,8 +21,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/cgrates/cgrates/apier/v1"
-	"github.com/cgrates/cgrates/apier/v2"
+	v1 "github.com/cgrates/cgrates/apier/v1"
+	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -178,8 +178,8 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 
 	utils.RegisterRpcParams("PubSubV1", &engine.PubSub{})
 	utils.RegisterRpcParams("UsersV1", &engine.UserMap{})
-	utils.RegisterRpcParams("", &v1.CdrsV1{})
-	utils.RegisterRpcParams("", &v2.CdrsV2{})
+	utils.RegisterRpcParams("", &v1.CDRsV1{})
+	utils.RegisterRpcParams("", &v2.CDRsV2{})
 	utils.RegisterRpcParams("", &v1.SMGenericV1{})
 	utils.RegisterRpcParams("", responder)
 	utils.RegisterRpcParams("", apierRpcV1)

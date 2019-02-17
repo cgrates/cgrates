@@ -35,8 +35,8 @@ DROP INDEX IF EXISTS deleted_at_cp_idx;
 CREATE INDEX deleted_at_cp_idx ON cdrs (deleted_at);
 
 
-DROP TABLE IF EXISTS sessions_costs;
-CREATE TABLE sessions_costs (
+DROP TABLE IF EXISTS session_costs;
+CREATE TABLE session_costs (
   id SERIAL PRIMARY KEY,
   cgrid VARCHAR(40) NOT NULL,
   run_id  VARCHAR(64) NOT NULL,
@@ -50,10 +50,10 @@ CREATE TABLE sessions_costs (
   UNIQUE (cgrid, run_id)
 );
 DROP INDEX IF EXISTS cgrid_sessionscost_idx;
-CREATE INDEX cgrid_sessionscost_idx ON sessions_costs (cgrid, run_id);
+CREATE INDEX cgrid_sessionscost_idx ON session_costs (cgrid, run_id);
 DROP INDEX IF EXISTS origin_sessionscost_idx;
-CREATE INDEX origin_sessionscost_idx ON sessions_costs (origin_host, origin_id);
+CREATE INDEX origin_sessionscost_idx ON session_costs (origin_host, origin_id);
 DROP INDEX IF EXISTS run_origin_sessionscost_idx;
-CREATE INDEX run_origin_sessionscost_idx ON sessions_costs (run_id, origin_id);
+CREATE INDEX run_origin_sessionscost_idx ON session_costs (run_id, origin_id);
 DROP INDEX IF EXISTS deleted_at_sessionscost_idx;
-CREATE INDEX deleted_at_sessionscost_idx ON sessions_costs (deleted_at);
+CREATE INDEX deleted_at_sessionscost_idx ON session_costs (deleted_at);

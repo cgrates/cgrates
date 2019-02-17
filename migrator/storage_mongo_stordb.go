@@ -79,12 +79,12 @@ func (v1ms *mongoStorDBMigrator) renameV1SMCosts() (err error) {
 		return err
 	}
 	return v1ms.mgoDB.DB().RunCommand(v1ms.mgoDB.GetContext(),
-		bson.D{{"create", utils.SessionsCostsTBL}}).Err()
+		bson.D{{"create", utils.SessionCostsTBL}}).Err()
 }
 
 func (v1ms *mongoStorDBMigrator) createV1SMCosts() (err error) {
 	v1ms.mgoDB.DB().Collection(utils.OldSMCosts).Drop(v1ms.mgoDB.GetContext())
-	v1ms.mgoDB.DB().Collection(utils.SessionsCostsTBL).Drop(v1ms.mgoDB.GetContext())
+	v1ms.mgoDB.DB().Collection(utils.SessionCostsTBL).Drop(v1ms.mgoDB.GetContext())
 	return v1ms.mgoDB.DB().RunCommand(v1ms.mgoDB.GetContext(),
 		bson.D{{"create", utils.OldSMCosts}, {"size", 1024}}).Err()
 }
@@ -93,7 +93,7 @@ func (v1ms *mongoStorDBMigrator) createV1SMCosts() (err error) {
 func (v1ms *mongoStorDBMigrator) getV2SMCost() (v2Cost *v2SessionsCost, err error) {
 	if v1ms.cursor == nil {
 		var cursor mongo.Cursor
-		cursor, err = v1ms.mgoDB.DB().Collection(utils.SessionsCostsTBL).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		cursor, err = v1ms.mgoDB.DB().Collection(utils.SessionCostsTBL).Find(v1ms.mgoDB.GetContext(), bson.D{})
 		if err != nil {
 			return nil, err
 		}
@@ -113,12 +113,12 @@ func (v1ms *mongoStorDBMigrator) getV2SMCost() (v2Cost *v2SessionsCost, err erro
 
 //set
 func (v1ms *mongoStorDBMigrator) setV2SMCost(v2Cost *v2SessionsCost) (err error) {
-	_, err = v1ms.mgoDB.DB().Collection(utils.SessionsCostsTBL).InsertOne(v1ms.mgoDB.GetContext(), v2Cost)
+	_, err = v1ms.mgoDB.DB().Collection(utils.SessionCostsTBL).InsertOne(v1ms.mgoDB.GetContext(), v2Cost)
 	return
 }
 
 //remove
 func (v1ms *mongoStorDBMigrator) remV2SMCost(v2Cost *v2SessionsCost) (err error) {
-	_, err = v1ms.mgoDB.DB().Collection(utils.SessionsCostsTBL).DeleteMany(v1ms.mgoDB.GetContext(), bson.D{})
+	_, err = v1ms.mgoDB.DB().Collection(utils.SessionCostsTBL).DeleteMany(v1ms.mgoDB.GetContext(), bson.D{})
 	return
 }

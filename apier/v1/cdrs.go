@@ -19,9 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"errors"
-	"fmt"
-
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -52,7 +49,7 @@ func (apier *ApierV1) GetEventCost(attrs utils.AttrGetCallCost, reply *engine.Ev
 }
 
 // Retrieves CDRs based on the filters
-func (apier *ApierV1) GetCdrs(attrs utils.AttrGetCdrs, reply *[]*engine.ExternalCDR) error {
+func (apier *ApierV1) GetCDRs(attrs utils.AttrGetCdrs, reply *[]*engine.ExternalCDR) error {
 	cdrsFltr, err := attrs.AsCDRsFilter(apier.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -69,18 +66,6 @@ func (apier *ApierV1) GetCdrs(attrs utils.AttrGetCdrs, reply *[]*engine.External
 	return nil
 }
 
-// Remove Cdrs out of CDR storage
-func (apier *ApierV1) RemCdrs(attrs utils.AttrRemCdrs, reply *string) error {
-	if len(attrs.CgrIds) == 0 {
-		return fmt.Errorf("%s:CgrIds", utils.ErrMandatoryIeMissing.Error())
-	}
-	if _, _, err := apier.CdrDb.GetCDRs(&utils.CDRsFilter{CGRIDs: attrs.CgrIds}, true); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	*reply = utils.OK
-	return nil
-}
-
 // New way of removing CDRs
 func (apier *ApierV1) RemoveCDRs(attrs utils.RPCCDRsFilter, reply *string) error {
 	cdrsFilter, err := attrs.AsCDRsFilter(apier.Config.GeneralCfg().DefaultTimezone)
@@ -94,10 +79,35 @@ func (apier *ApierV1) RemoveCDRs(attrs utils.RPCCDRsFilter, reply *string) error
 	return nil
 }
 
-// New way of (re-)rating CDRs
-func (apier *ApierV1) RateCDRs(attrs utils.AttrRateCDRs, reply *string) error {
-	if apier.CDRs == nil {
-		return errors.New("CDRS_NOT_ENABLED")
-	}
-	return apier.CDRs.Call("CDRsV1.RateCDRs", attrs, reply)
+// Receive CDRs via RPC methods
+type CDRsV1 struct {
+	CDRs *engine.CDRServer
+}
+
+// ProcessCDR will process a CDR in CGRateS internal format
+func (cdrSv1 *CDRsV1) ProcessCDR(cdr *engine.CDR, reply *string) error {
+	return cdrSv1.CDRs.V1ProcessCDR(cdr, reply)
+}
+
+// ProcessExternalCDR will process a CDR in external format
+func (cdrSv1 *CDRsV1) ProcessExternalCDR(cdr *engine.ExternalCDR, reply *string) error {
+	return cdrSv1.CDRs.V1ProcessExternalCDR(cdr, reply)
+}
+
+// RateCDRs can re-/rate remotely CDRs
+func (cdrSv1 *CDRsV1) RateCDRs(arg *engine.ArgRateCDRs, reply *string) error {
+	return cdrSv1.CDRs.V1RateCDRs(arg, reply)
+}
+
+// StoreSMCost will store
+func (cdrSv1 *CDRsV1) StoreSessionCost(attr *engine.AttrCDRSStoreSMCost, reply *string) error {
+	return cdrSv1.CDRs.V1StoreSessionCost(attr, reply)
+}
+
+func (cdrSv1 *CDRsV1) CountCDRs(args *utils.RPCCDRsFilter, reply *int64) error {
+	return cdrSv1.CDRs.V1CountCDRs(args, reply)
+}
+
+func (cdrSv1 *CDRsV1) GetCDRs(args utils.RPCCDRsFilter, reply *[]*engine.CDR) error {
+	return cdrSv1.CDRs.V1GetCDRs(args, reply)
 }

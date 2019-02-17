@@ -153,7 +153,7 @@ func (v2Cost *v2SessionsCost) V2toV3Cost() (cost *engine.SMCost) {
 	return
 }
 
-func NewV2SessionsCostFromSessionsCostSql(smSql *engine.SessionsCostsSQL) (smV2 *v2SessionsCost, err error) {
+func NewV2SessionsCostFromSessionsCostSql(smSql *engine.SessionCostsSQL) (smV2 *v2SessionsCost, err error) {
 	smV2 = new(v2SessionsCost)
 	smV2.CGRID = smSql.Cgrid
 	smV2.RunID = smSql.RunID
@@ -168,8 +168,8 @@ func NewV2SessionsCostFromSessionsCostSql(smSql *engine.SessionsCostsSQL) (smV2 
 	return
 }
 
-func (v2Cost *v2SessionsCost) AsSessionsCostSql() (smSql *engine.SessionsCostsSQL) {
-	smSql = new(engine.SessionsCostsSQL)
+func (v2Cost *v2SessionsCost) AsSessionsCostSql() (smSql *engine.SessionCostsSQL) {
+	smSql = new(engine.SessionCostsSQL)
 	smSql.Cgrid = v2Cost.CGRID
 	smSql.RunID = v2Cost.RunID
 	smSql.OriginHost = v2Cost.OriginHost

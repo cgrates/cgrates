@@ -298,17 +298,17 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 			}
 		}
 
-		if err = ms.EnusureIndex(utils.SessionsCostsTBL, true, CGRIDLow,
+		if err = ms.EnusureIndex(utils.SessionCostsTBL, true, CGRIDLow,
 			RunIDLow); err != nil {
 			return
 		}
 
-		if err = ms.EnusureIndex(utils.SessionsCostsTBL, false, OriginHostLow,
+		if err = ms.EnusureIndex(utils.SessionCostsTBL, false, OriginHostLow,
 			OriginIDLow); err != nil {
 			return
 		}
 
-		if err = ms.EnusureIndex(utils.SessionsCostsTBL, false, RunIDLow,
+		if err = ms.EnusureIndex(utils.SessionCostsTBL, false, RunIDLow,
 			OriginIDLow); err != nil {
 			return
 		}

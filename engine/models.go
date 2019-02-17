@@ -382,7 +382,7 @@ func (t CDRsql) TableName() string {
 	return utils.CDRsTBL
 }
 
-type SessionsCostsSQL struct {
+type SessionCostsSQL struct {
 	ID          int64
 	Cgrid       string
 	RunID       string
@@ -395,8 +395,8 @@ type SessionsCostsSQL struct {
 	DeletedAt   *time.Time
 }
 
-func (t SessionsCostsSQL) TableName() string {
-	return utils.SessionsCostsTBL
+func (t SessionCostsSQL) TableName() string {
+	return utils.SessionCostsTBL
 }
 
 type TBLVersion struct {
