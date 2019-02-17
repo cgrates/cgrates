@@ -174,6 +174,7 @@ func testAccITDebitBalance(t *testing.T) {
 		t.Fatalf("Balance with ID %s should %sexist", accBallID, exstr)
 	}
 	t.Run("TestAddVoiceBalance", func(t *testing.T) { testAccountBalance(t, accAcount, accTenant, utils.VOICE, 0) })
+
 }
 
 func testAccITAddBalance(t *testing.T) {
