@@ -48,6 +48,8 @@ var (
 		testAccITRPCConn,
 		testAccITAddVoiceBalance,
 		testAccITDebitBalance,
+		testAccITAddBalance,
+		testAccITSetBalance,
 		testAccITStopCgrEngine,
 	}
 )
@@ -149,7 +151,6 @@ func testAccITAddVoiceBalance(t *testing.T) {
 		t.Errorf("Received: %s", reply)
 	}
 	t.Run("TestAddVoiceBalance", func(t *testing.T) { testAccountBalance(t, accAcount, accTenant, utils.VOICE, 2*float64(time.Second)) })
-
 }
 
 func testAccITDebitBalance(t *testing.T) {
@@ -173,6 +174,48 @@ func testAccITDebitBalance(t *testing.T) {
 		t.Fatalf("Balance with ID %s should %sexist", accBallID, exstr)
 	}
 	t.Run("TestAddVoiceBalance", func(t *testing.T) { testAccountBalance(t, accAcount, accTenant, utils.VOICE, 0) })
+
+}
+
+func testAccITAddBalance(t *testing.T) {
+	var reply string
+	attrs := &AttrAddBalance{Tenant: "cgrates.org", Account: "testAccAddBalance",
+		BalanceType: "*monetary", Value: 1.5, Cdrlog: utils.BoolPointer(true)}
+	if err := accRPC.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
+	}
+	time.Sleep(50 * time.Millisecond)
+	// verify the cdr from CdrLog
+	var cdrs []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{Sources: []string{engine.CDRLOG}}
+	if err := accRPC.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	}
+}
+
+func testAccITSetBalance(t *testing.T) {
+	var reply string
+	attrs := &AttrAddBalance{Tenant: "cgrates.org", Account: "testAccSetBalance",
+		BalanceId:   utils.StringPointer("testAccSetBalance"),
+		BalanceType: "*monetary", Value: 1.5, Cdrlog: utils.BoolPointer(true)}
+	if err := accRPC.Call("ApierV1.SetBalance", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.SetBalance: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.SetBalance received: %s", reply)
+	}
+	time.Sleep(50 * time.Millisecond)
+	// verify the cdr from CdrLog
+	var cdrs []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{Sources: []string{engine.CDRLOG}}
+	if err := accRPC.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 2 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	}
 }
 
 func testAccITStopCgrEngine(t *testing.T) {
