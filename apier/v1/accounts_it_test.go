@@ -49,7 +49,7 @@ var (
 		testAccITAddVoiceBalance,
 		testAccITDebitBalance,
 		testAccITAddBalance,
-		// testAccITSetBalance,
+		testAccITSetBalance,
 		testAccITStopCgrEngine,
 	}
 )
@@ -199,7 +199,7 @@ func testAccITAddBalance(t *testing.T) {
 func testAccITSetBalance(t *testing.T) {
 	var reply string
 	attrs := &AttrAddBalance{Tenant: "cgrates.org", Account: "testAccSetBalance",
-		BalanceUuid: utils.StringPointer(utils.GenUUID()),
+		BalanceId:   utils.StringPointer("testAccSetBalance"),
 		BalanceType: "*monetary", Value: 1.5, Cdrlog: utils.BoolPointer(true)}
 	if err := accRPC.Call("ApierV1.SetBalance", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetBalance: ", err.Error())
