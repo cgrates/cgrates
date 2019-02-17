@@ -263,7 +263,7 @@ func (dC *DispatcherChargerSv1) GetChargersForEvent(args *dispatchers.CGREvWithA
 
 // ProcessEvent implements ChargerSv1ProcessEvent
 func (dC *DispatcherChargerSv1) ProcessEvent(args *dispatchers.CGREvWithApiKey,
-	reply *[]*engine.AttrSProcessEventReply) (err error) {
+	reply *[]*engine.ChrgSProcessEventReply) (err error) {
 	return dC.dC.ChargerSv1ProcessEvent(args, reply)
 }
 

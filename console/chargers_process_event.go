@@ -66,6 +66,6 @@ func (self *CmdChargersProcessEvent) PostprocessRpcParams() error {
 }
 
 func (self *CmdChargersProcessEvent) RpcResult() interface{} {
-	atr := *[]*engine.ChrgSProcessEventReply
+	atr := []*engine.ChrgSProcessEventReply{}
 	return &atr
 }
