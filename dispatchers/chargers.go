@@ -49,14 +49,13 @@ func (dS *DispatcherService) ChargerSv1GetChargersForEvent(args *CGREvWithApiKey
 }
 
 func (dS *DispatcherService) ChargerSv1ProcessEvent(args *CGREvWithApiKey,
-	reply *[]*engine.AttrSProcessEventReply) (err error) {
+	reply *[]*engine.ChrgSProcessEventReply) (err error) {
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.ChargerSv1ProcessEvent,
 			args.CGREvent.Tenant,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
-
 	}
 	return dS.Dispatch(&args.CGREvent, utils.MetaChargers, args.RouteID,
 		utils.ChargerSv1ProcessEvent, args.CGREvent, reply)
