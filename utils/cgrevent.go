@@ -27,11 +27,10 @@ import (
 
 // CGREvent is a generic event processed by CGR services
 type CGREvent struct {
-	Tenant  string
-	ID      string
-	Context *string    // attach the event to a context
-	Time    *time.Time // event time
-	Event   map[string]interface{}
+	Tenant string
+	ID     string
+	Time   *time.Time // event time
+	Event  map[string]interface{}
 }
 
 func (ev *CGREvent) HasField(fldName string) (has bool) {
@@ -153,9 +152,6 @@ func (ev *CGREvent) Clone() (clned *CGREvent) {
 		Tenant: ev.Tenant,
 		ID:     ev.ID,
 		Event:  make(map[string]interface{}), // a bit forced but safe
-	}
-	if ev.Context != nil {
-		clned.Context = StringPointer(*ev.Context)
 	}
 	if ev.Time != nil {
 		clned.Time = TimePointer(*ev.Time)

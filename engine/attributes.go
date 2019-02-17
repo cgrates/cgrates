@@ -142,7 +142,8 @@ func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
 
 type AttrArgsProcessEvent struct {
 	AttributeIDs []string
-	ProcessRuns  *int // number of loops for ProcessEvent
+	Context      *string // attach the event to a context
+	ProcessRuns  *int    // number of loops for ProcessEvent
 	utils.CGREvent
 }
 

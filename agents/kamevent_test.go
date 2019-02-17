@@ -111,8 +111,7 @@ func TestKamEvAsCGREvent(t *testing.T) {
 		"cgr_destination": "1002", "cgr_answertime": "1419839310",
 		"cgr_duration": "3", "cgr_pdd": "4",
 		utils.CGR_SUPPLIER:         "supplier2",
-		utils.CGR_DISCONNECT_CAUSE: "200",
-		KamCGRContext:              "account_profile"}
+		utils.CGR_DISCONNECT_CAUSE: "200"}
 	sTime, err := utils.ParseTimeDetectLayout(kamEv[utils.AnswerTime], timezone)
 	if err != nil {
 		return
@@ -120,10 +119,9 @@ func TestKamEvAsCGREvent(t *testing.T) {
 	expected := &utils.CGREvent{
 		Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 			config.CgrConfig().GeneralCfg().DefaultTenant),
-		ID:      utils.UUIDSha1Prefix(),
-		Time:    &sTime,
-		Context: utils.StringPointer("account_profile"),
-		Event:   kamEv.AsMapStringInterface(),
+		ID:    utils.UUIDSha1Prefix(),
+		Time:  &sTime,
+		Event: kamEv.AsMapStringInterface(),
 	}
 	if rcv, err := kamEv.AsCGREvent(timezone); err != nil {
 		t.Error(err)
@@ -240,9 +238,8 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 			MatchedProfiles: []string{"ATTR_1001_ACCOUNT_PROFILE"},
 			AlteredFields:   []string{"Password", utils.RequestType},
 			CGREvent: &utils.CGREvent{
-				Tenant:  "cgrates.org",
-				ID:      "TestKamEvAsKamAuthReply",
-				Context: utils.StringPointer("account_profile"),
+				Tenant: "cgrates.org",
+				ID:     "TestKamEvAsKamAuthReply",
 				Event: map[string]interface{}{
 					utils.Tenant:      "cgrates.org",
 					utils.Account:     "1001",

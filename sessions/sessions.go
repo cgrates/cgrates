@@ -1584,10 +1584,8 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		if sS.attrS == nil {
 			return utils.NewErrNotConnected(utils.AttributeS)
 		}
-		if args.CGREvent.Context == nil { // populate if not already in
-			args.CGREvent.Context = utils.StringPointer(utils.MetaSessionS)
-		}
 		attrArgs := &engine.AttrArgsProcessEvent{
+			Context:  utils.StringPointer(utils.MetaSessionS),
 			CGREvent: args.CGREvent,
 		}
 		var rplyEv engine.AttrSProcessEventReply
@@ -1816,10 +1814,8 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		if sS.attrS == nil {
 			return utils.NewErrNotConnected(utils.AttributeS)
 		}
-		if args.CGREvent.Context == nil { // populate if not already in
-			args.CGREvent.Context = utils.StringPointer(utils.MetaSessionS)
-		}
 		attrArgs := &engine.AttrArgsProcessEvent{
+			Context:  utils.StringPointer(utils.MetaSessionS),
 			CGREvent: args.CGREvent,
 		}
 		var rplyEv engine.AttrSProcessEventReply
@@ -2018,10 +2014,8 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 		if sS.attrS == nil {
 			return utils.NewErrNotConnected(utils.AttributeS)
 		}
-		if args.CGREvent.Context == nil { // populate if not already in
-			args.CGREvent.Context = utils.StringPointer(utils.MetaSessionS)
-		}
 		attrArgs := &engine.AttrArgsProcessEvent{
+			Context:  utils.StringPointer(utils.MetaSessionS),
 			CGREvent: args.CGREvent,
 		}
 		var rplyEv engine.AttrSProcessEventReply
@@ -2290,10 +2284,8 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 		if sS.attrS == nil {
 			return utils.NewErrNotConnected(utils.AttributeS)
 		}
-		if args.CGREvent.Context == nil { // populate if not already in
-			args.CGREvent.Context = utils.StringPointer(utils.MetaSessionS)
-		}
 		attrArgs := &engine.AttrArgsProcessEvent{
+			Context:  utils.StringPointer(utils.MetaSessionS),
 			CGREvent: args.CGREvent,
 		}
 		var rplyEv engine.AttrSProcessEventReply

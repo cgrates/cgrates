@@ -330,7 +330,7 @@ func testDspSessionUpdate(t *testing.T) {
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
 	}
 	if *rply.MaxUsage != reqUsage {
-		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
+		t.Errorf("Unexpected MaxUsage: %v", utils.ToJSON(rply))
 	}
 }
 

@@ -66,9 +66,8 @@ var (
 	}
 	chargerEvents = []*utils.CGREvent{
 		{
-			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:      utils.GenUUID(),
-			Context: utils.StringPointer(utils.MetaSessionS),
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
 				"Charger":        "ChargerProfile1",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
@@ -77,18 +76,16 @@ var (
 			},
 		},
 		{
-			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:      utils.GenUUID(),
-			Context: utils.StringPointer(utils.MetaSessionS),
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
 				"Charger":        "ChargerProfile2",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
 			},
 		},
 		{
-			Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:      utils.GenUUID(),
-			Context: utils.StringPointer(utils.MetaSessionS),
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
 				"Charger":        "DistinctMatch",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
