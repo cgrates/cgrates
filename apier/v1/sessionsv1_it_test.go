@@ -187,9 +187,8 @@ func TestSSv1ItAuth(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{"OfficeGroup"},
 		CGREvent: &utils.CGREvent{
-			Tenant:  "cgrates.org",
-			ID:      "TestSSv1ItAuth",
-			Context: utils.StringPointer(utils.MetaSessionS),
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItAuth",
 			Event: map[string]interface{}{
 				utils.CGRID:       "5668666d6b8e44eb949042f25ce0796ec3592ff9",
 				utils.Tenant:      "cgrates.org",
@@ -295,9 +294,8 @@ func TestSSv1ItInitiateSession(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{"OfficeGroup"},
 		CGREvent: &utils.CGREvent{
-			Tenant:  "cgrates.org",
-			ID:      "TestSSv1ItInitiateSession",
-			Context: utils.StringPointer(utils.MetaSessionS),
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItInitiateSession",
 			Event: map[string]interface{}{
 				utils.CGRID:       "5668666d6b8e44eb949042f25ce0796ec3592ff9",
 				utils.Tenant:      "cgrates.org",
@@ -407,9 +405,8 @@ func TestSSv1ItUpdateSession(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{"OfficeGroup"},
 		CGREvent: &utils.CGREvent{
-			Tenant:  "cgrates.org",
-			ID:      "TestSSv1ItUpdateSession",
-			Context: utils.StringPointer(utils.MetaSessionS),
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItUpdateSession",
 			Event: map[string]interface{}{
 				utils.CGRID:       "5668666d6b8e44eb949042f25ce0796ec3592ff9",
 				utils.Tenant:      "cgrates.org",
@@ -548,9 +545,8 @@ func TestSSv1ItProcessEvent(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{"OfficeGroup"},
 		CGREvent: &utils.CGREvent{
-			Tenant:  "cgrates.org",
-			ID:      "TestSSv1ItProcessEvent",
-			Context: utils.StringPointer(utils.MetaSessionS),
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItProcessEvent",
 			Event: map[string]interface{}{
 				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeeb0ab7aa7ebaf",
 				utils.Tenant:      "cgrates.org",
@@ -699,9 +695,8 @@ func TestSSv1ItForceUpdateSession(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{"OfficeGroup"},
 		CGREvent: &utils.CGREvent{
-			Tenant:  "cgrates.org",
-			ID:      "TestSSv1ItUpdateSession",
-			Context: utils.StringPointer(utils.MetaSessionS),
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItUpdateSession",
 			Event: map[string]interface{}{
 				utils.CGRID:       "70876773b294f0e1476065f8d18bb9ec6bcb3d5f",
 				utils.Tenant:      "cgrates.org",
