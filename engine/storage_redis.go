@@ -744,50 +744,6 @@ func (rs *RedisStorage) RemoveSubscriberDrv(key string) (err error) {
 	return
 }
 
-func (rs *RedisStorage) SetUserDrv(up *UserProfile) (err error) {
-	var result []byte
-	if result, err = rs.ms.Marshal(up); err != nil {
-		return
-	}
-	return rs.Cmd("SET", utils.USERS_PREFIX+up.GetId(), result).Err
-}
-
-func (rs *RedisStorage) GetUserDrv(key string) (up *UserProfile, err error) {
-	var values []byte
-	if values, err = rs.Cmd("GET", utils.USERS_PREFIX+key).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
-			err = utils.ErrNotFound
-		}
-		return
-	}
-	up = new(UserProfile)
-	if err = rs.ms.Unmarshal(values, &up); err != nil {
-		return nil, err
-	}
-	return
-}
-
-func (rs *RedisStorage) GetUsersDrv() (result []*UserProfile, err error) {
-	keys, err := rs.Cmd("KEYS", utils.USERS_PREFIX+"*").List()
-	if err != nil {
-		return nil, err
-	}
-	for _, key := range keys {
-		if values, err := rs.Cmd("GET", key).Bytes(); err == nil {
-			up := &UserProfile{}
-			err = rs.ms.Unmarshal(values, up)
-			result = append(result, up)
-		} else {
-			return nil, utils.ErrNotFound
-		}
-	}
-	return
-}
-
-func (rs *RedisStorage) RemoveUserDrv(key string) error {
-	return rs.Cmd("DEL", utils.USERS_PREFIX+key).Err
-}
-
 // Limit will only retrieve the last n items out of history, newest first
 func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool,
 	transactionID string) ([]*utils.LoadInstance, error) {

@@ -52,9 +52,6 @@ func (ms *MapStorage) GetTPRatingProfiles(filter *utils.TPRatingProfile) (rProfi
 func (ms *MapStorage) GetTPSharedGroups(tpid, id string) (sGroups []*utils.TPSharedGroups, err error) {
 	return nil, utils.ErrNotImplemented
 }
-func (ms *MapStorage) GetTPUsers(filter *utils.TPUsers) (users []*utils.TPUsers, err error) {
-	return nil, utils.ErrNotImplemented
-}
 func (ms *MapStorage) GetTPDerivedChargers(*utils.TPDerivedChargers) (dCharges []*utils.TPDerivedChargers, err error) {
 	return nil, utils.ErrNotImplemented
 }
@@ -118,9 +115,6 @@ func (ms *MapStorage) SetTPRatingProfiles(ratingProfiles []*utils.TPRatingProfil
 	return utils.ErrNotImplemented
 }
 func (ms *MapStorage) SetTPSharedGroups(groups []*utils.TPSharedGroups) (err error) {
-	return utils.ErrNotImplemented
-}
-func (ms *MapStorage) SetTPUsers(users []*utils.TPUsers) (err error) {
 	return utils.ErrNotImplemented
 }
 

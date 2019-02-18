@@ -227,13 +227,6 @@ cgrates.org,round,TOPUP10_AT,,false,false
 *out,cgrates.org,call,dan,dan,,extra2,,,,,,ivo,ivo,,,,,,,,,
 *out,cgrates.org,call,dan,*any,,extra1,,,,,,rif2,rif2,,,,,,,,,
 `
-	users = `
-#Tenant[0],UserName[1],AttributeName[2],AttributeValue[3],Weight[4]
-cgrates.org,rif,false,test0,val0,10
-cgrates.org,rif,,test1,val1,10
-cgrates.org,dan,,another,value,10
-cgrates.org,mas,true,another,value,10
-`
 	resProfiles = `
 #Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],Weight[9],Thresholds[10]
 cgrates.org,ResGroup21,FLTR_1,2014-07-29T15:00:00Z,1s,2,call,true,true,10,
@@ -289,7 +282,7 @@ var csvr *TpReader
 func init() {
 	csvr = NewTpReader(dm.dataDB, NewStringCSVStorage(',', destinations, timings, rates, destinationRates,
 		ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans, actionTriggers,
-		accountActions, derivedCharges, users, resProfiles, stats, thresholds,
+		accountActions, derivedCharges, resProfiles, stats, thresholds,
 		filters, sppProfiles, attributeProfiles, chargerProfiles, dispatcherProfiles), testTPID, "")
 
 	if err := csvr.LoadDestinations(); err != nil {
@@ -327,9 +320,6 @@ func init() {
 	}
 	if err := csvr.LoadDerivedChargers(); err != nil {
 		log.Print("error in LoadDerivedChargers:", err)
-	}
-	if err := csvr.LoadUsers(); err != nil {
-		log.Print("error in LoadUsers:", err)
 	}
 	if err := csvr.LoadFilters(); err != nil {
 		log.Print("error in LoadFilter:", err)
@@ -1234,24 +1224,6 @@ func TestLoadDerivedChargers(t *testing.T) {
 	if !csvr.derivedChargers[keyCharger1].Equal(expCharger1) {
 		t.Errorf("Expecting: %+v, received: %+v",
 			expCharger1.Chargers[0], csvr.derivedChargers[keyCharger1].Chargers[0])
-	}
-}
-
-func TestLoadUsers(t *testing.T) {
-	if len(csvr.users) != 3 {
-		t.Error("Failed to load users: ", csvr.users)
-	}
-	user1 := &UserProfile{
-		Tenant:   "cgrates.org",
-		UserName: "rif",
-		Profile: map[string]string{
-			"test0": "val0",
-			"test1": "val1",
-		},
-	}
-
-	if !reflect.DeepEqual(csvr.users[user1.GetId()], user1) {
-		t.Errorf("Unexpected user %+v", csvr.users[user1.GetId()])
 	}
 }
 

@@ -1,17 +1,14 @@
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
-
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
-
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
@@ -72,7 +69,7 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 
 // NewCDRServer is a constructor for CDRServer
 func NewCDRServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, rater, pubsub,
-	attrS, users, thdS, statS, chargerS rpcclient.RpcClientConnection, filterS *FilterS) *CDRServer {
+	attrS, thdS, statS, chargerS rpcclient.RpcClientConnection, filterS *FilterS) *CDRServer {
 	if rater != nil && reflect.ValueOf(rater).IsNil() {
 		rater = nil
 	}
@@ -81,9 +78,6 @@ func NewCDRServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, r
 	}
 	if attrS != nil && reflect.ValueOf(attrS).IsNil() {
 		attrS = nil
-	}
-	if users != nil && reflect.ValueOf(users).IsNil() {
-		users = nil
 	}
 	if thdS != nil && reflect.ValueOf(thdS).IsNil() {
 		thdS = nil
@@ -96,7 +90,6 @@ func NewCDRServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, r
 	}
 	return &CDRServer{cgrCfg: cgrCfg, cdrDb: cdrDb, dm: dm,
 		rals: rater, pubsub: pubsub, attrS: attrS,
-		users: users,
 		statS: statS, thdS: thdS,
 		chargerS: chargerS, guard: guardian.Guardian,
 		respCache: utils.NewResponseCache(cgrCfg.GeneralCfg().ResponseCacheTTL),
@@ -112,7 +105,6 @@ type CDRServer struct {
 	rals       rpcclient.RpcClientConnection
 	pubsub     rpcclient.RpcClientConnection
 	attrS      rpcclient.RpcClientConnection
-	users      rpcclient.RpcClientConnection
 	thdS       rpcclient.RpcClientConnection
 	statS      rpcclient.RpcClientConnection
 	chargerS   rpcclient.RpcClientConnection

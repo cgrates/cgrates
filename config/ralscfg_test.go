@@ -60,7 +60,6 @@ func TestRalsCfgFromJsonCfg(t *testing.T) {
 		RALsThresholdSConns:     []*HaPoolConfig{},
 		RALsStatSConns:          []*HaPoolConfig{},
 		RALsPubSubSConns:        []*HaPoolConfig{},
-		RALsUserSConns:          []*HaPoolConfig{},
 		RpSubjectPrefixMatching: false,
 		RALsMaxComputedUsage: map[string]time.Duration{
 			utils.ANY:   time.Duration(189 * time.Hour),

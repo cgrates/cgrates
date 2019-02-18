@@ -501,14 +501,14 @@ func startHTTPAgent(internalSMGChan chan rpcclient.RpcClientConnection,
 func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 	cdrDb engine.CdrStorage, dm *engine.DataManager,
 	internalRaterChan, internalPubSubSChan, internalAttributeSChan,
-	internalUserSChan, internalThresholdSChan, internalStatSChan,
+	internalThresholdSChan, internalStatSChan,
 	internalChargerSChan chan rpcclient.RpcClientConnection,
 	server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
 	var err error
 	utils.Logger.Info("Starting CGRateS CDRS service.")
-	var ralConn, pubSubConn, usersConn, attrSConn,
+	var ralConn, pubSubConn, attrSConn,
 		thresholdSConn, statsConn, chargerSConn *rpcclient.RpcClientPool
 	if len(cfg.CdrsCfg().CDRSChargerSConns) != 0 { // Conn pool towards RAL
 		chargerSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
@@ -568,20 +568,6 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 			return
 		}
 	}
-	if len(cfg.CdrsCfg().CDRSUserSConns) != 0 { // Users connection init
-		usersConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.CdrsCfg().CDRSUserSConns, internalUserSChan,
-			cfg.GeneralCfg().InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to UserS: %s", err.Error()))
-			exitChan <- true
-			return
-		}
-	}
 	if len(cfg.CdrsCfg().CDRSThresholdSConns) != 0 { // Stats connection init
 		thresholdSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
 			cfg.TlsCfg().ClientKey,
@@ -611,7 +597,7 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 		}
 	}
 	cdrServer := engine.NewCDRServer(cfg, cdrDb, dm,
-		ralConn, pubSubConn, attrSConn, usersConn,
+		ralConn, pubSubConn, attrSConn,
 		thresholdSConn, statsConn, chargerSConn, filterS)
 	utils.Logger.Info("Registering CDRS HTTP Handlers.")
 	cdrServer.RegisterHandlersToServer(server)
@@ -645,19 +631,6 @@ func startPubSubServer(internalPubSubSChan chan rpcclient.RpcClientConnection, d
 	}
 	server.RpcRegisterName("PubSubV1", pubSubServer)
 	internalPubSubSChan <- pubSubServer
-}
-
-func startUsersServer(internalUserSChan chan rpcclient.RpcClientConnection, dm *engine.DataManager, server *utils.Server, exitChan chan bool) {
-	utils.Logger.Info("Starting User service.")
-	userServer, err := engine.NewUserMap(dm, cfg.UserServerIndexes)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<UsersService> Could not start, error: %s", err.Error()))
-		exitChan <- true
-		return
-	}
-	utils.Logger.Info("Started User service.")
-	server.RpcRegisterName("UsersV1", userServer)
-	internalUserSChan <- userServer
 }
 
 // startAttributeService fires up the AttributeS
@@ -1060,7 +1033,7 @@ func startAnalyzerService(internalAnalyzerSChan chan rpcclient.RpcClientConnecti
 }
 
 func startRpc(server *utils.Server, internalRaterChan,
-	internalCdrSChan, internalPubSubSChan, internalUserSChan, internalRsChan, internalStatSChan,
+	internalCdrSChan, internalPubSubSChan, internalRsChan, internalStatSChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
 	internalSMGChan, internalAnalyzerSChan chan rpcclient.RpcClientConnection,
 	internalDispatcherSChan chan *dispatchers.DispatcherService, exitChan chan bool) {
@@ -1071,8 +1044,6 @@ func startRpc(server *utils.Server, internalRaterChan,
 		internalCdrSChan <- cdrs
 	case pubsubs := <-internalPubSubSChan:
 		internalPubSubSChan <- pubsubs
-	case users := <-internalUserSChan:
-		internalUserSChan <- users
 	case smg := <-internalSMGChan:
 		internalSMGChan <- smg
 	case rls := <-internalRsChan:
@@ -1308,8 +1279,7 @@ func main() {
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
 	var dm *engine.DataManager
-	if cfg.RalsCfg().RALsEnabled || cfg.PubSubServerEnabled ||
-		cfg.UserServerEnabled || cfg.SchedulerCfg().Enabled ||
+	if cfg.RalsCfg().RALsEnabled || cfg.PubSubServerEnabled || cfg.SchedulerCfg().Enabled ||
 		cfg.AttributeSCfg().Enabled || cfg.ResourceSCfg().Enabled || cfg.StatSCfg().Enabled ||
 		cfg.ThresholdSCfg().Enabled || cfg.SupplierSCfg().Enabled || cfg.DispatcherSCfg().Enabled { // Some services can run without db, ie: SessionS or CDRC
 		dm, err = engine.ConfigureDataStorage(cfg.DataDbCfg().DataDbType,
@@ -1376,7 +1346,6 @@ func main() {
 	internalRaterChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalCdrSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalPubSubSChan := make(chan rpcclient.RpcClientConnection, 1)
-	internalUserSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalSMGChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalAttributeSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalChargerSChan := make(chan rpcclient.RpcClientConnection, 1)
@@ -1394,7 +1363,7 @@ func main() {
 	// Start rater service
 	if cfg.RalsCfg().RALsEnabled {
 		go startRater(internalRaterChan, cacheS, internalThresholdSChan,
-			internalStatSChan, internalPubSubSChan, internalUserSChan,
+			internalStatSChan, internalPubSubSChan,
 			srvManager, server, dm, loadDb, cdrDb, &stopHandled, exitChan, filterSChan)
 	}
 
@@ -1407,7 +1376,6 @@ func main() {
 	if cfg.CdrsCfg().CDRSEnabled {
 		go startCDRS(internalCdrSChan, cdrDb, dm,
 			internalRaterChan, internalPubSubSChan, internalAttributeSChan,
-			internalUserSChan,
 			internalThresholdSChan, internalStatSChan, internalChargerSChan,
 			server, exitChan, filterSChan)
 	}
@@ -1459,10 +1427,6 @@ func main() {
 		go startPubSubServer(internalPubSubSChan, dm, server, exitChan)
 	}
 
-	// Start users service
-	if cfg.UserServerEnabled {
-		go startUsersServer(internalUserSChan, dm, server, exitChan)
-	}
 	// Start FilterS
 	go startFilterService(filterSChan, cacheS, internalStatSChan, cfg, dm, exitChan)
 
@@ -1510,11 +1474,10 @@ func main() {
 
 	// Serve rpc connections
 	go startRpc(server, internalRaterChan, internalCdrSChan,
-		internalPubSubSChan, internalUserSChan, internalRsChan,
-		internalStatSChan,
+		internalPubSubSChan, internalRsChan, internalStatSChan,
 		internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
-		internalSupplierSChan,
-		internalSMGChan, internalAnalyzerSChan, internalDispatcherSChan, exitChan)
+		internalSupplierSChan, internalSMGChan, internalAnalyzerSChan,
+		internalDispatcherSChan, exitChan)
 	<-exitChan
 
 	if *cpuProfDir != "" { // wait to end cpuProfiling

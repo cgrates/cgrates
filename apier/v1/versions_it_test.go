@@ -121,7 +121,7 @@ func testVrsStorDB(t *testing.T) {
 	expectedVrs := engine.Versions{"TpDerivedChargers": 1, "TpDestinations": 1, "TpResource": 1, "TpThresholds": 1,
 		"TpActions": 1, "TpDestinationRates": 1, "TpFilters": 1, "TpRates": 1, "CDRs": 2, "TpActionTriggers": 1, "TpRatingPlans": 1,
 		"TpSharedGroups": 1, "TpSuppliers": 1, "SessionSCosts": 3, "TpDerivedCharges": 1, "TpRatingProfiles": 1, "TpStats": 1, "TpTiming": 1,
-		"CostDetails": 2, "TpAccountActions": 1, "TpActionPlans": 1, "TpChargers": 1, "TpRatingProfile": 1, "TpUsers": 1,
+		"CostDetails": 2, "TpAccountActions": 1, "TpActionPlans": 1, "TpChargers": 1, "TpRatingProfile": 1,
 		"TpRatingPlan": 1, "TpResources": 1}
 	if err := vrsRPC.Call("ApierV1.GetStorDBVersions", "", &result); err != nil {
 		t.Error(err)

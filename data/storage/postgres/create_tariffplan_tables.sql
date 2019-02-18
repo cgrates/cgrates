@@ -276,26 +276,6 @@ CREATE INDEX tpderivedchargers_tpid_idx ON tp_derived_chargers (tpid);
 CREATE INDEX tpderivedchargers_idx ON tp_derived_chargers (tpid,loadid,direction,tenant,category,account,subject);
 
 --
--- Table structure for table `tp_users`
---
-
-DROP TABLE IF EXISTS tp_users;
-CREATE TABLE tp_users (
-  id SERIAL PRIMARY KEY,
-  tpid VARCHAR(64) NOT NULL,
-  tenant VARCHAR(64) NOT NULL,
-  user_name VARCHAR(64) NOT NULL,
-  masked BOOLEAN NOT NULL,
-  attribute_name VARCHAR(64) NOT NULL,
-  attribute_value VARCHAR(64) NOT NULL,
-  weight NUMERIC(8,2) NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE
-);
-CREATE INDEX tpusers_tpid_idx ON tp_users (tpid);
-CREATE INDEX tpusers_idx ON tp_users (tpid,tenant,user_name);
-
-
---
 -- Table structure for table `tp_resources`
 --
 

@@ -46,12 +46,6 @@ func (apier *ApierV1) DebitUsageWithOptions(args AttrDebitUsageWithOptions, repl
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 
-	err := engine.LoadUserProfile(args.UsageRecord, "")
-	if err != nil {
-		*reply = err.Error()
-		return err
-	}
-
 	// Set values for optional parameters
 	if usageRecord.ToR == "" {
 		usageRecord.ToR = utils.VOICE

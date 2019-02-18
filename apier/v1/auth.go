@@ -28,10 +28,6 @@ import (
 
 // Returns MaxUsage (for calls in seconds), -1 for no limit
 func (self *ApierV1) GetMaxUsage(usageRecord engine.UsageRecord, maxUsage *int64) error {
-	err := engine.LoadUserProfile(&usageRecord, "ExtraFields")
-	if err != nil {
-		return utils.NewErrServerError(err)
-	}
 	if usageRecord.ToR == "" {
 		usageRecord.ToR = utils.VOICE
 	}

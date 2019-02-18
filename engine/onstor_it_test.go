@@ -83,7 +83,6 @@ var sTestsOnStorIT = []func(t *testing.T){
 
 	//testOnStorITCacheActionTriggers,
 	//testOnStorITCRUDActionTriggers,
-	//testOnStorITCRUDUser,
 }
 
 func TestOnStorITRedis(t *testing.T) {
@@ -1230,38 +1229,6 @@ func testOnStorITCRUDSubscribers(t *testing.T) {
 		t.Error(err)
 	} else if len(sbs) != 0 {
 		t.Errorf("Received subscribers: %+v", sbs)
-	}
-}
-
-func testOnStorITCRUDUser(t *testing.T) {
-	usr := &UserProfile{
-		Tenant:   "test",
-		UserName: "user",
-		Profile: map[string]string{
-			"t": "v",
-		},
-	}
-	if _, rcvErr := onStor.GetUser(usr.GetId()); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
-	}
-	if err := onStor.SetUser(usr); err != nil {
-		t.Error(err)
-	}
-	if rcv, err := onStor.GetUser(usr.GetId()); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(usr, rcv) {
-		t.Errorf("Expecting: %v, received: %v", usr, rcv)
-	}
-	if rcv, err := onStor.GetUsers(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(usr, rcv[0]) {
-		t.Errorf("Expecting: %v, received: %v", usr, rcv[0])
-	}
-	if err := onStor.RemoveUser(usr.GetId()); err != nil {
-		t.Error(err)
-	}
-	if _, rcvErr := onStor.GetUser(usr.GetId()); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
 	}
 }
 

@@ -19,8 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
-	"fmt"
+
 	//"log"
+	"fmt"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
@@ -183,30 +184,33 @@ func (m *Migrator) migrateAlias2Attributes() (err error) {
 // }
 
 func (m *Migrator) migrateAlias() (err error) {
-	var vrs engine.Versions
-	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmIN.DataManager().DataDB().GetVersions("")
-	if err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
-	} else if len(vrs) == 0 {
-		return utils.NewCGRError(utils.Migrator,
-			utils.MandatoryIEMissingCaps,
-			utils.UndefinedVersion,
-			"version number is not defined for ActionTriggers model")
-	}
-	switch vrs[Alias] {
-	case current[Alias]:
-		if m.sameDataDB {
-			return
+	return m.migrateAlias2Attributes()
+	/*
+		var vrs engine.Versions
+		current := engine.CurrentDataDBVersions()
+		vrs, err = m.dmIN.DataManager().DataDB().GetVersions("")
+		if err != nil {
+			return utils.NewCGRError(utils.Migrator,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
+		} else if len(vrs) == 0 {
+			return utils.NewCGRError(utils.Migrator,
+				utils.MandatoryIEMissingCaps,
+				utils.UndefinedVersion,
+				"version number is not defined for ActionTriggers model")
 		}
-		return utils.ErrNotImplemented
-	case 1:
-		return m.migrateAlias2Attributes()
-	}
-	return
+		switch vrs[Alias] {
+		case current[Alias]:
+			if m.sameDataDB {
+				return
+			}
+			return utils.ErrNotImplemented
+		case 1:
+			return m.migrateAlias2Attributes()
+		}
+		return
+	*/
 }
 
 func (m *Migrator) migrateReverseAlias() (err error) {

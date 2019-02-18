@@ -89,11 +89,7 @@ func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 	for k, v := range filter {
 		findMap[k] = v
 	}
-	for k, v := range distinct { //fix for MongoStorage on TPUsers
-		if v == "user_name" {
-			distinct[k] = "username"
-		}
-	}
+
 	if pag != nil && pag.SearchTerm != "" {
 		var searchItems []bson.M
 		for _, d := range distinct {
@@ -374,36 +370,6 @@ func (ms *MongoStorage) GetTPSharedGroups(tpid, id string) ([]*utils.TPSharedGro
 	return results, err
 }
 
-func (ms *MongoStorage) GetTPUsers(tp *utils.TPUsers) ([]*utils.TPUsers, error) {
-	filter := bson.M{"tpid": tp.TPid}
-	if tp.Tenant != "" {
-		filter["tenant"] = tp.Tenant
-	}
-	if tp.UserName != "" {
-		filter["username"] = tp.UserName
-	}
-	var results []*utils.TPUsers
-	err := ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(utils.TBLTPUsers).Find(sctx, filter)
-		if err != nil {
-			return err
-		}
-		for cur.Next(sctx) {
-			var el utils.TPUsers
-			err := cur.Decode(&el)
-			if err != nil {
-				return err
-			}
-			results = append(results, &el)
-		}
-		if len(results) == 0 {
-			return utils.ErrNotFound
-		}
-		return cur.Close(sctx)
-	})
-	return results, err
-}
-
 func (ms *MongoStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPResource, error) {
 	filter := bson.M{"tpid": tpid}
 	if id != "" {
@@ -649,12 +615,6 @@ func (ms *MongoStorage) RemTpData(table, tpid string, args map[string]string) er
 	if args == nil {
 		args = make(map[string]string)
 	}
-	for arg, val := range args { //fix for Mongo TPUsers tables
-		if arg == "user_name" {
-			delete(args, arg)
-			args["username"] = val
-		}
-	}
 
 	if _, has := args["tag"]; has { // API uses tag to be compatible with SQL models, fix it here
 		args["id"] = args["tag"]
@@ -814,31 +774,6 @@ func (ms *MongoStorage) SetTPSharedGroups(tps []*utils.TPSharedGroups) error {
 			}
 			_, err := ms.getCol(utils.TBLTPSharedGroups).InsertOne(sctx, tp)
 			if err != nil {
-				return err
-			}
-		}
-		return nil
-	})
-}
-
-func (ms *MongoStorage) SetTPUsers(tps []*utils.TPUsers) error {
-	if len(tps) == 0 {
-		return nil
-	}
-	m := make(map[string]bool)
-	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		for _, tp := range tps {
-			if found, _ := m[tp.GetId()]; !found {
-				m[tp.GetId()] = true
-				if _, err := ms.getCol(utils.TBLTPUsers).DeleteMany(sctx, bson.M{
-					"tpid":     tp.TPid,
-					"tenant":   tp.Tenant,
-					"username": tp.UserName,
-				}); err != nil {
-					return err
-				}
-			}
-			if _, err := ms.getCol(utils.TBLTPUsers).InsertOne(sctx, tp); err != nil {
 				return err
 			}
 		}

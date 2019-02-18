@@ -105,7 +105,7 @@ func (self *SQLStorage) IsDBEmpty() (resp bool, err error) {
 		utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates,
 		utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles,
 		utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionTriggers,
-		utils.TBLTPAccountActions, utils.TBLTPDerivedChargers, utils.TBLTPUsers,
+		utils.TBLTPAccountActions, utils.TBLTPDerivedChargers,
 		utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
 		utils.TBLTPFilters, utils.SessionCostsTBL, utils.CDRsTBL, utils.TBLTPActionPlans,
 		utils.TBLVersions, utils.TBLTPSuppliers, utils.TBLTPAttributes, utils.TBLTPChargers,
@@ -127,7 +127,7 @@ func (self *SQLStorage) GetTpIds(colName string) ([]string, error) {
 	qryStr := fmt.Sprintf(" (SELECT tpid FROM %s)", colName)
 	if colName == "" {
 		qryStr = fmt.Sprintf(
-			"(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)",
+			"(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)",
 			utils.TBLTPTimings,
 			utils.TBLTPDestinations,
 			utils.TBLTPRates,
@@ -139,7 +139,6 @@ func (self *SQLStorage) GetTpIds(colName string) ([]string, error) {
 			utils.TBLTPActionTriggers,
 			utils.TBLTPAccountActions,
 			utils.TBLTPDerivedChargers,
-			utils.TBLTPUsers,
 			utils.TBLTPResources,
 			utils.TBLTPStats,
 			utils.TBLTPThresholds,
@@ -238,7 +237,7 @@ func (self *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 			utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles,
 			utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionPlans,
 			utils.TBLTPActionTriggers, utils.TBLTPAccountActions,
-			utils.TBLTPDerivedChargers, utils.TBLTPUsers, utils.TBLTPResources,
+			utils.TBLTPDerivedChargers, utils.TBLTPResources,
 			utils.TBLTPStats, utils.TBLTPFilters, utils.TBLTPSuppliers, utils.TBLTPAttributes,
 			utils.TBLTPChargers, utils.TBLTPDispatchers} {
 			if err := tx.Table(tblName).Where("tpid = ?", tpid).Delete(nil).Error; err != nil {
@@ -1387,53 +1386,6 @@ func (self *SQLStorage) GetTPDerivedChargers(filter *utils.TPDerivedChargers) ([
 			return dcs, utils.ErrNotFound
 		}
 		return dcs, nil
-	}
-}
-
-func (self *SQLStorage) SetTPUsers(users []*utils.TPUsers) error {
-	if len(users) == 0 {
-		return nil
-	}
-	m := make(map[string]bool)
-	tx := self.db.Begin()
-	for _, user := range users {
-		if found, _ := m[user.Tenant]; !found {
-			m[user.Tenant] = true
-			if err := tx.Where(&TpUser{Tpid: user.TPid, Tenant: user.Tenant, UserName: user.UserName}).Delete(&TpUser{}).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-		for _, u := range APItoModelUsers(user) {
-			if err := tx.Save(&u).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-	}
-	tx.Commit()
-	return nil
-}
-
-func (self *SQLStorage) GetTPUsers(filter *utils.TPUsers) ([]*utils.TPUsers, error) {
-	var tpUsers TpUsers
-	q := self.db.Where("tpid = ?", filter.TPid)
-	if len(filter.Tenant) != 0 {
-		q = q.Where("tenant = ?", filter.Tenant)
-	}
-	if len(filter.UserName) != 0 {
-		q = q.Where("user_name = ?", filter.UserName)
-	}
-	if err := q.Find(&tpUsers).Error; err != nil {
-		return nil, err
-	}
-	if us, err := tpUsers.AsTPUsers(); err != nil {
-		return nil, err
-	} else {
-		if len(us) == 0 {
-			return us, utils.ErrNotFound
-		}
-		return us, nil
 	}
 }
 

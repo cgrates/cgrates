@@ -31,7 +31,6 @@ type CdrsCfg struct {
 	CDRSRaterConns       []*HaPoolConfig // address where to reach the Rater for cost calculation: <""|internal|x.y.z.y:1234>
 	CDRSPubSubSConns     []*HaPoolConfig // address where to reach the pubsub service: <""|internal|x.y.z.y:1234>
 	CDRSAttributeSConns  []*HaPoolConfig // address where to reach the users service: <""|internal|x.y.z.y:1234>
-	CDRSUserSConns       []*HaPoolConfig // address where to reach the users service: <""|internal|x.y.z.y:1234>
 	CDRSThresholdSConns  []*HaPoolConfig // address where to reach the thresholds service
 	CDRSStatSConns       []*HaPoolConfig
 	CDRSOnlineCDRExports []string // list of CDRE templates to use for real-time CDR exports
@@ -82,13 +81,6 @@ func (cdrscfg *CdrsCfg) loadFromJsonCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 		for idx, jsnHaCfg := range *jsnCdrsCfg.Attributes_conns {
 			cdrscfg.CDRSAttributeSConns[idx] = NewDfltHaPoolConfig()
 			cdrscfg.CDRSAttributeSConns[idx].loadFromJsonCfg(jsnHaCfg)
-		}
-	}
-	if jsnCdrsCfg.Users_conns != nil {
-		cdrscfg.CDRSUserSConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Users_conns))
-		for idx, jsnHaCfg := range *jsnCdrsCfg.Users_conns {
-			cdrscfg.CDRSUserSConns[idx] = NewDfltHaPoolConfig()
-			cdrscfg.CDRSUserSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCdrsCfg.Thresholds_conns != nil {

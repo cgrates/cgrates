@@ -89,10 +89,6 @@ type DataDB interface {
 	GetSubscribersDrv() (map[string]*SubscriberData, error)
 	SetSubscriberDrv(string, *SubscriberData) error
 	RemoveSubscriberDrv(string) error
-	SetUserDrv(*UserProfile) error
-	GetUserDrv(string) (*UserProfile, error)
-	GetUsersDrv() ([]*UserProfile, error)
-	RemoveUserDrv(string) error
 	GetResourceProfileDrv(string, string) (*ResourceProfile, error)
 	SetResourceProfileDrv(*ResourceProfile) error
 	RemoveResourceProfileDrv(string, string) error
@@ -173,7 +169,6 @@ type LoadReader interface {
 	GetTPRatingPlans(string, string, *utils.Paginator) ([]*utils.TPRatingPlan, error)
 	GetTPRatingProfiles(*utils.TPRatingProfile) ([]*utils.TPRatingProfile, error)
 	GetTPSharedGroups(string, string) ([]*utils.TPSharedGroups, error)
-	GetTPUsers(*utils.TPUsers) ([]*utils.TPUsers, error)
 	GetTPDerivedChargers(*utils.TPDerivedChargers) ([]*utils.TPDerivedChargers, error)
 	GetTPActions(string, string) ([]*utils.TPActions, error)
 	GetTPActionPlans(string, string) ([]*utils.TPActionPlan, error)
@@ -198,7 +193,6 @@ type LoadWriter interface {
 	SetTPRatingPlans([]*utils.TPRatingPlan) error
 	SetTPRatingProfiles([]*utils.TPRatingProfile) error
 	SetTPSharedGroups([]*utils.TPSharedGroups) error
-	SetTPUsers([]*utils.TPUsers) error
 	SetTPDerivedChargers([]*utils.TPDerivedChargers) error
 	SetTPActions([]*utils.TPActions) error
 	SetTPActionPlans([]*utils.TPActionPlan) error

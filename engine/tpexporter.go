@@ -295,17 +295,6 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	storDataUsers, err := self.storDb.GetTPUsers(&utils.TPUsers{TPid: self.tpID})
-	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		return err
-	}
-	for _, sd := range storDataUsers {
-		sdModels := APItoModelUsers(sd)
-		for _, sdModel := range sdModels {
-			toExportMap[utils.USERS_CSV] = append(toExportMap[utils.USERS_CSV], sdModel)
-		}
-	}
-
 	for fileName, storData := range toExportMap {
 		if err := self.writeOut(fileName, storData); err != nil {
 			self.removeFiles()

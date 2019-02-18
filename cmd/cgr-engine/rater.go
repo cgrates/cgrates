@@ -31,8 +31,7 @@ import (
 
 // Starts rater and reports on chan
 func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *engine.CacheS,
-	internalThdSChan, internalStatSChan, internalPubSubSChan,
-	internalUserSChan chan rpcclient.RpcClientConnection,
+	internalThdSChan, internalStatSChan, internalPubSubSChan chan rpcclient.RpcClientConnection,
 	serviceManager *servmanager.ServiceManager, server *utils.Server,
 	dm *engine.DataManager, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, stopHandled *bool,
 	exitChan chan bool, filterSChan chan *engine.FilterS) {
@@ -120,28 +119,6 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		}()
 	}
 
-	var usersConns rpcclient.RpcClientConnection
-	if len(cfg.RalsCfg().RALsUserSConns) != 0 { // Connection to UserService
-		usersTaskChan := make(chan struct{})
-		waitTasks = append(waitTasks, usersTaskChan)
-		go func() {
-			defer close(usersTaskChan)
-			var err error
-			if usersConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
-				cfg.TlsCfg().ClientKey,
-				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-				cfg.RalsCfg().RALsUserSConns, internalUserSChan,
-				cfg.GeneralCfg().InternalTtl); err != nil {
-				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect UserS, error: %s", err.Error()))
-				exitChan <- true
-				return
-			} else {
-				engine.SetUserService(usersConns)
-			}
-		}()
-	}
 	// Wait for all connections to complete before going further
 	for _, chn := range waitTasks {
 		<-chn
@@ -166,9 +143,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 	if stats != nil {
 		engine.SetStatS(stats)
 	}
-	if usersConns != nil {
-		apierRpcV1.Users = usersConns
-	}
+
 	apierRpcV2 := &v2.ApierV2{
 		ApierV1: *apierRpcV1}
 
@@ -177,7 +152,6 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 	server.RpcRegister(apierRpcV2)
 
 	utils.RegisterRpcParams("PubSubV1", &engine.PubSub{})
-	utils.RegisterRpcParams("UsersV1", &engine.UserMap{})
 	utils.RegisterRpcParams("", &v1.CDRsV1{})
 	utils.RegisterRpcParams("", &v2.CDRsV2{})
 	utils.RegisterRpcParams("", &v1.SMGenericV1{})

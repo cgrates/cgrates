@@ -42,9 +42,6 @@
 
 "rals": {
 	"enabled": true,						// enable Rater service: <true|false>
-	"users_conns": [
-		{"address": "*internal"}
-	],
 },
 
 

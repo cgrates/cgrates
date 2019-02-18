@@ -50,7 +50,6 @@ const (
 	HttpAgentJson      = "http_agent"
 	HISTSERV_JSN       = "historys"
 	PUBSUBSERV_JSN     = "pubsubs"
-	USERSERV_JSN       = "users"
 	ATTRIBUTE_JSN      = "attributes"
 	RESOURCES_JSON     = "resources"
 	STATS_JSON         = "stats"
@@ -314,18 +313,6 @@ func (self CgrJsonCfg) PubSubServJsonCfg() (*PubSubServJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(PubSubServJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (self CgrJsonCfg) UserServJsonCfg() (*UserServJsonCfg, error) {
-	rawCfg, hasKey := self[USERSERV_JSN]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(UserServJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}
