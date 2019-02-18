@@ -143,7 +143,7 @@ func TestSessionsItTerminatUnexist(t *testing.T) {
 
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{DestinationPrefixes: []string{"1002"}}
-	if err := sItRPC.Call("ApierV2.GetCDRs", req, &cdrs); err != nil {
+	if err := sItRPC.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))

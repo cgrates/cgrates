@@ -190,7 +190,7 @@ func testAccITAddBalance(t *testing.T) {
 	// verify the cdr from CdrLog
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{Sources: []string{engine.CDRLOG}}
-	if err := accRPC.Call("ApierV2.GetCDRs", req, &cdrs); err != nil {
+	if err := accRPC.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -211,7 +211,7 @@ func testAccITSetBalance(t *testing.T) {
 	// verify the cdr from CdrLog
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{Sources: []string{engine.CDRLOG}}
-	if err := accRPC.Call("ApierV2.GetCDRs", req, &cdrs); err != nil {
+	if err := accRPC.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))

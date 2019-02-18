@@ -283,7 +283,7 @@ func TestRAitAcctStop(t *testing.T) {
 	time.Sleep(150 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	args := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, DestinationPrefixes: []string{"1002"}}
-	if err := raRPC.Call("ApierV2.GetCDRs", args, &cdrs); err != nil {
+	if err := raRPC.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))

@@ -159,7 +159,7 @@ func testV2CDRsGetCdrs(t *testing.T) {
 	}
 	var cdrs []*engine.ExternalCDR
 	args := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}}
-	if err := cdrsRpc.Call("ApierV2.GetCDRs", args, &cdrs); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -173,7 +173,7 @@ func testV2CDRsGetCdrs(t *testing.T) {
 		}
 	}
 	args = utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"}}
-	if err := cdrsRpc.Call("ApierV2.GetCDRs", args, &cdrs); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -187,7 +187,7 @@ func testV2CDRsGetCdrs(t *testing.T) {
 		}
 	}
 	args = utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"}}
-	if err := cdrsRpc.Call("ApierV2.GetCDRs", args, &cdrs); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -238,7 +238,7 @@ func testV2CDRsGetCdrs2(t *testing.T) {
 	}
 	var cdrs []*engine.ExternalCDR
 	args := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}}
-	if err := cdrsRpc.Call("ApierV2.GetCDRs", args, &cdrs); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -248,7 +248,7 @@ func testV2CDRsGetCdrs2(t *testing.T) {
 		}
 	}
 	args = utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"}}
-	if err := cdrsRpc.Call("ApierV2.GetCDRs", args, &cdrs); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -258,7 +258,7 @@ func testV2CDRsGetCdrs2(t *testing.T) {
 		}
 	}
 	args = utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"}}
-	if err := cdrsRpc.Call("ApierV2.GetCDRs", args, &cdrs); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -299,7 +299,7 @@ func testV2CDRsUsageNegative(t *testing.T) {
 
 	var cdrs []*engine.ExternalCDR
 	args := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}, OriginIDs: []string{"testV2CDRsUsageNegative"}}
-	if err := cdrsRpc.Call("ApierV2.GetCDRs", args, &cdrs); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -312,7 +312,7 @@ func testV2CDRsUsageNegative(t *testing.T) {
 		}
 	}
 	args = utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"}, OriginIDs: []string{"testV2CDRsUsageNegative"}}
-	if err := cdrsRpc.Call("ApierV2.GetCDRs", args, &cdrs); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -325,7 +325,7 @@ func testV2CDRsUsageNegative(t *testing.T) {
 		}
 	}
 	args = utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"}, OriginIDs: []string{"testV2CDRsUsageNegative"}}
-	if err := cdrsRpc.Call("ApierV2.GetCDRs", args, &cdrs); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))

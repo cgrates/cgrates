@@ -267,7 +267,7 @@ func testHAitCDRmtcall(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}}
-	if err := haRPC.Call("ApierV2.GetCDRs", req, &cdrs); err != nil {
+	if err := haRPC.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -308,7 +308,7 @@ func testHAitCDRmtcall2(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	fltr := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{"447700086788"}}
-	if err := haRPC.Call("ApierV2.GetCDRs", fltr, &cdrs); err != nil {
+	if err := haRPC.Call(utils.ApierV2GetCDRs, fltr, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))

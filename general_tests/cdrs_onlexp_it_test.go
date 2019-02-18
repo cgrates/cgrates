@@ -167,7 +167,7 @@ func TestCDRsOnExpHttpCdrReplication(t *testing.T) {
 	// ToDo: Fix cdr_http to be compatible with rest of processCdr methods
 	time.Sleep(100 * time.Millisecond)
 	var rcvedCdrs []*engine.ExternalCDR
-	if err := cdrsSlaveRpc.Call("ApierV2.GetCDRs",
+	if err := cdrsSlaveRpc.Call(utils.ApierV2GetCDRs,
 		utils.RPCCDRsFilter{CGRIDs: []string{testCdr1.CGRID}, RunIDs: []string{utils.META_DEFAULT}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {

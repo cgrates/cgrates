@@ -158,12 +158,12 @@ func TestFwvitProcessFiles(t *testing.T) {
 
 func TestFwvitAnalyseCDRs(t *testing.T) {
 	var reply []*engine.ExternalCDR
-	if err := fwvRpc.Call("ApierV2.GetCDRs", utils.RPCCDRsFilter{}, &reply); err != nil {
+	if err := fwvRpc.Call(utils.ApierV2GetCDRs, utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 4 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
-	if err := fwvRpc.Call("ApierV2.GetCDRs", utils.RPCCDRsFilter{OriginIDs: []string{"CDR0000010"}}, &reply); err != nil {
+	if err := fwvRpc.Call(utils.ApierV2GetCDRs, utils.RPCCDRsFilter{OriginIDs: []string{"CDR0000010"}}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -252,7 +252,7 @@ func TestFwvit2ProcessFiles(t *testing.T) {
 
 func TestFwvit2AnalyseCDRs(t *testing.T) {
 	var reply []*engine.ExternalCDR
-	if err := fwvRpc.Call("ApierV2.GetCDRs", utils.RPCCDRsFilter{}, &reply); err != nil {
+	if err := fwvRpc.Call(utils.ApierV2GetCDRs, utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -361,7 +361,7 @@ func TestFwvit3ProcessFiles(t *testing.T) {
 
 func TestFwvit3AnalyseCDRs(t *testing.T) {
 	var reply []*engine.ExternalCDR
-	if err := fwvRpc.Call("ApierV2.GetCDRs", utils.RPCCDRsFilter{}, &reply); err != nil {
+	if err := fwvRpc.Call(utils.ApierV2GetCDRs, utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
