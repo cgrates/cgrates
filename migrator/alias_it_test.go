@@ -197,7 +197,7 @@ func testAlsITMigrateAndMove(t *testing.T) {
 			t.Errorf("Unexpected version returned: %d", vrs[Alias])
 		}
 		//migrate alias
-		err, _ = alsMigrator.Migrate([]string{MetaAlias})
+		err, _ = alsMigrator.Migrate([]string{MetaAliases})
 		if err != nil {
 			t.Error("Error when migrating Alias ", err.Error())
 		}
@@ -238,7 +238,7 @@ func testAlsITMigrateAndMove(t *testing.T) {
 			t.Error("Error when setting version for Alias ", err.Error())
 		}
 		//migrate accounts
-		err, _ = alsMigrator.Migrate([]string{MetaAlias})
+		err, _ = alsMigrator.Migrate([]string{MetaAliases})
 		if err != nil {
 			t.Error("Error when alsMigratorrating Alias ", err.Error())
 		}
