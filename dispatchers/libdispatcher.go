@@ -42,6 +42,10 @@ func newDispatcher(pfl *engine.DispatcherProfile) (d Dispatcher, err error) {
 	switch pfl.Strategy {
 	case utils.MetaWeight:
 		d = &WeightDispatcher{conns: pfl.Conns.Clone()}
+	case utils.MetaRandom:
+		d = &RandomDispatcher{conns: pfl.Conns.Clone()}
+	case utils.MetaRoundRobin:
+		d = &RoundRobinDispatcher{conns: pfl.Conns.Clone()}
 	default:
 		err = fmt.Errorf("unsupported dispatch strategy: <%s>", pfl.Strategy)
 	}
@@ -57,7 +61,7 @@ type WeightDispatcher struct {
 func (wd *WeightDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
 	wd.Lock()
 	pfl.Conns.Sort()
-	wd.conns = pfl.Conns.Clone()
+	wd.conns = pfl.Conns.Clone() // avoid concurrency on profile
 	wd.Unlock()
 	return
 }
@@ -67,4 +71,52 @@ func (wd *WeightDispatcher) ConnIDs() (connIDs []string) {
 	connIDs = wd.conns.ConnIDs()
 	wd.RUnlock()
 	return
+}
+
+// RandomDispatcher selects the next connection randomly
+// together with RouteID can serve as load-balancer
+type RandomDispatcher struct {
+	sync.RWMutex
+	conns engine.DispatcherConns
+}
+
+func (d *RandomDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
+	d.Lock()
+	d.conns = pfl.Conns.Clone()
+	d.Unlock()
+	return
+}
+
+func (d *RandomDispatcher) ConnIDs() (connIDs []string) {
+	d.RLock()
+	conns := d.conns.Clone()
+	d.RUnlock()
+	conns.Shuffle() // randomize the connections
+	return conns.ConnIDs()
+}
+
+// RoundRobinDispatcher selects the next connection in round-robin fashion
+type RoundRobinDispatcher struct {
+	sync.RWMutex
+	conns   engine.DispatcherConns
+	connIdx int // used for the next connection
+}
+
+func (d *RoundRobinDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
+	d.Lock()
+	d.conns = pfl.Conns.Clone()
+	d.Unlock()
+	return
+}
+
+func (d *RoundRobinDispatcher) ConnIDs() (connIDs []string) {
+	d.RLock()
+	conns := d.conns.Clone()
+	conns.ReorderFromIndex(d.connIdx)
+	d.connIdx++
+	if d.connIdx >= len(d.conns) {
+		d.connIdx = 0
+	}
+	d.RUnlock()
+	return conns.ConnIDs()
 }
