@@ -456,10 +456,8 @@ func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *Sorted
 		return utils.NewErrMandatoryIeMissing("Event")
 	}
 	if spS.attributeS != nil {
-		if args.CGREvent.Context == nil { // populate if not already in
-			args.CGREvent.Context = utils.StringPointer(utils.MetaSuppliers)
-		}
 		attrArgs := &AttrArgsProcessEvent{
+			Context:  utils.StringPointer(utils.MetaSuppliers),
 			CGREvent: args.CGREvent,
 		}
 		var rplyEv AttrSProcessEventReply

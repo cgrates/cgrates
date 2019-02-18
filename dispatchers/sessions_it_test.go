@@ -306,9 +306,8 @@ func testDspSessionUpdate(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{"OfficeGroup"},
 		CGREvent: &utils.CGREvent{
-			Tenant:  "cgrates.org",
-			ID:      "TestSSv1ItUpdateSession",
-			Context: utils.StringPointer(utils.MetaSessionS),
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItUpdateSession",
 			Event: map[string]interface{}{
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
@@ -330,7 +329,7 @@ func testDspSessionUpdate(t *testing.T) {
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
 	}
 	if *rply.MaxUsage != reqUsage {
-		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
+		t.Errorf("Unexpected MaxUsage: %v", utils.ToJSON(rply))
 	}
 }
 
@@ -447,9 +446,8 @@ func testDspSessionProcessEvent(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
 		AlteredFields:   []string{"OfficeGroup"},
 		CGREvent: &utils.CGREvent{
-			Tenant:  "cgrates.org",
-			ID:      "TestSSv1ItProcessEvent",
-			Context: utils.StringPointer(utils.MetaSessionS),
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItProcessEvent",
 			Event: map[string]interface{}{
 				"CGRID":           "c87609aa1cb6e9529ab1836cfeeeb0ab7aa7ebaf",
 				utils.Tenant:      "cgrates.org",

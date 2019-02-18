@@ -179,6 +179,7 @@ func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,
 	reply *engine.AttrSProcessEventReply) (err error) {
 	if err = dS.attrS.Call(utils.AttributeSv1ProcessEvent,
 		&engine.AttrArgsProcessEvent{
+			Context:  utils.StringPointer(utils.MetaAuth),
 			CGREvent: *ev}, reply); err != nil {
 		if err.Error() == utils.ErrNotFound.Error() {
 			err = utils.ErrUnknownApiKey
@@ -193,10 +194,9 @@ func (dS *DispatcherService) authorize(method, tenant, apiKey string, evTime *ti
 		return utils.NewErrMandatoryIeMissing(utils.APIKey)
 	}
 	ev := &utils.CGREvent{
-		Tenant:  tenant,
-		ID:      utils.UUIDSha1Prefix(),
-		Context: utils.StringPointer(utils.MetaAuth),
-		Time:    evTime,
+		Tenant: tenant,
+		ID:     utils.UUIDSha1Prefix(),
+		Time:   evTime,
 		Event: map[string]interface{}{
 			utils.APIKey: apiKey,
 		},

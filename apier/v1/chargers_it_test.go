@@ -209,9 +209,8 @@ func testChargerSProcessEvent(t *testing.T) {
 			AttributeSProfiles: []string{"ATTR_1001_SIMPLEAUTH"},
 			AlteredFields:      []string{"Password"},
 			CGREvent: &utils.CGREvent{ // matching Charger1
-				Tenant:  "cgrates.org",
-				ID:      "event1",
-				Context: utils.StringPointer(utils.MetaChargers),
+				Tenant: "cgrates.org",
+				ID:     "event1",
 				Event: map[string]interface{}{
 					utils.Account: "1001",
 					"Password":    "CGRateS.org",

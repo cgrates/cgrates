@@ -330,12 +330,10 @@ func (cdrS *CDRServer) raStoReThStaCDR(cdr *CDR,
 
 // statSProcessEvent will send the event to StatS if the connection is configured
 func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREvent) (err error) {
-	if cgrEv.Context == nil { // populate if not already in
-		cgrEv.Context = utils.StringPointer(utils.MetaCDRs)
-	}
 	var rplyEv AttrSProcessEventReply
 	if err = cdrS.attrS.Call(utils.AttributeSv1ProcessEvent,
 		&AttrArgsProcessEvent{
+			Context:  utils.StringPointer(utils.MetaCDRs),
 			CGREvent: *cgrEv},
 		&rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 		*cgrEv = *rplyEv.CGREvent

@@ -40,13 +40,12 @@ const (
 	KamHashEntry           = "h_entry"
 	KamHashID              = "h_id"
 	KamReplyRoute          = "reply_route"
-	KamCGRContext          = "cgr_context"
 	EvapiConnID            = "EvapiConnID" // used to share connID info in event for remote disconnects
 	CGR_DLG_LIST           = "CGR_DLG_LIST"
 )
 
 var (
-	kamReservedEventFields = []string{EVENT, KamTRIndex, KamTRLabel, utils.CGRSubsystems, KamCGRContext, KamReplyRoute}
+	kamReservedEventFields = []string{EVENT, KamTRIndex, KamTRLabel, utils.CGRSubsystems, KamReplyRoute}
 	kamReservedCDRFields   = append(kamReservedEventFields, KamHashEntry, KamHashID) // HashEntry and id are needed in events for disconnects
 )
 
@@ -159,9 +158,6 @@ func (kev KamEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err erro
 		ID:    utils.UUIDSha1Prefix(),
 		Time:  &sTime,
 		Event: kev.AsMapStringInterface(),
-	}
-	if ctx, has := kev[KamCGRContext]; has {
-		cgrEv.Context = utils.StringPointer(ctx)
 	}
 	return cgrEv, nil
 }

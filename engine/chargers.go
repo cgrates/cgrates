@@ -127,12 +127,11 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREvent) (rply []*ChrgSProc
 		if cS.attrS == nil {
 			return nil, errors.New("no connection to AttributeS")
 		}
-		if clonedEv.Context == nil {
-			clonedEv.Context = utils.StringPointer(utils.MetaChargers)
-		}
+
 		var evReply AttrSProcessEventReply
 		if err = cS.attrS.Call(utils.AttributeSv1ProcessEvent,
-			&AttrArgsProcessEvent{cP.AttributeIDs, nil, *clonedEv},
+			&AttrArgsProcessEvent{cP.AttributeIDs,
+				utils.StringPointer(utils.MetaChargers), nil, *clonedEv},
 			&evReply); err != nil {
 			return nil, err
 		}

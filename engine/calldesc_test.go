@@ -1847,11 +1847,9 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 	}
 }
 func TestCallDescriptorUpdateFromCGREvent(t *testing.T) {
-	context := "*rating"
 	cgrEv := &utils.CGREvent{
-		Tenant:  "cgrates.org",
-		ID:      "Generated",
-		Context: &context,
+		Tenant: "cgrates.org",
+		ID:     "Generated",
 		Event: map[string]interface{}{
 			"Account":     "acc1",
 			"AnswerTime":  time.Date(2015, 3, 23, 6, 0, 0, 0, time.UTC),
@@ -1891,9 +1889,8 @@ func TestCallDescriptorUpdateFromCGREvent(t *testing.T) {
 		}
 	}
 	cgrEv = &utils.CGREvent{
-		Tenant:  "cgrates.org",
-		ID:      "Generated",
-		Context: &context,
+		Tenant: "cgrates.org",
+		ID:     "Generated",
 		Event: map[string]interface{}{
 			"Account":     "acc1",
 			"AnswerTime":  time.Date(2015, 3, 23, 6, 0, 0, 0, time.UTC),
@@ -1926,10 +1923,8 @@ func TestCallDescriptorAsCGREvent(t *testing.T) {
 		TimeEnd:      time.Date(2015, 3, 23, 6, 30, 0, 0, time.UTC),
 		MaxCostSoFar: 0,
 	}
-	context := "*rating"
 	eCGREvent := &utils.CGREvent{Tenant: "cgrates.org",
-		ID:      "Generated",
-		Context: &context,
+		ID: "Generated",
 		Event: map[string]interface{}{
 			"Account":     "max",
 			"AnswerTime":  time.Date(2015, 3, 23, 6, 0, 0, 0, time.UTC),

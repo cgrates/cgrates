@@ -163,13 +163,11 @@ func TestCGREventFieldAsFloat64(t *testing.T) {
 	}
 }
 func TestCGREventClone(t *testing.T) {
-	contest := "cntxt"
 	now := time.Now()
 	ev := &CGREvent{
-		Tenant:  "cgrates.org",
-		ID:      "supplierEvent1",
-		Context: &contest,
-		Time:    &now,
+		Tenant: "cgrates.org",
+		ID:     "supplierEvent1",
+		Time:   &now,
 		Event: map[string]interface{}{
 			AnswerTime:         time.Now(),
 			"supplierprofile1": "Supplier",
@@ -181,9 +179,6 @@ func TestCGREventClone(t *testing.T) {
 	cloned := ev.Clone()
 	if !reflect.DeepEqual(ev, cloned) {
 		t.Errorf("Expecting: %+v, received: %+v", ev, cloned)
-	}
-	if cloned.Context == ev.Context {
-		t.Errorf("Expecting: different pointer but received: %+v", cloned.Context)
 	}
 	if cloned.Time == ev.Time {
 		t.Errorf("Expecting: different pointer but received: %+v", cloned.Time)

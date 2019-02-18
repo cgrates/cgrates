@@ -94,17 +94,19 @@ func testDspAttrPingFailover(t *testing.T) {
 }
 
 func testDspAttrGetAttrFailover(t *testing.T) {
-	args := &CGREvWithApiKey{
+	args := &ArgsAttrProcessEventWithApiKey{
 		DispatcherResource: DispatcherResource{
 			APIKey: "attr12345",
 		},
-		CGREvent: utils.CGREvent{
-			Tenant:  "cgrates.org",
-			ID:      "testAttributeSGetAttributeForEvent",
+		AttrArgsProcessEvent: engine.AttrArgsProcessEvent{
 			Context: utils.StringPointer("simpleauth"),
-			Event: map[string]interface{}{
-				utils.Account:    "1002",
-				utils.EVENT_NAME: "Event1",
+			CGREvent: utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSGetAttributeForEvent",
+				Event: map[string]interface{}{
+					utils.Account:    "1002",
+					utils.EVENT_NAME: "Event1",
+				},
 			},
 		},
 	}
@@ -129,9 +131,8 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_1002_SIMPLEAUTH"},
 		AlteredFields:   []string{"Password"},
 		CGREvent: &utils.CGREvent{
-			Tenant:  "cgrates.org",
-			ID:      "testAttributeSGetAttributeForEvent",
-			Context: utils.StringPointer("simpleauth"),
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSGetAttributeForEvent",
 			Event: map[string]interface{}{
 				utils.Account:    "1002",
 				utils.EVENT_NAME: "Event1",
@@ -204,13 +205,15 @@ func testDspAttrPing(t *testing.T) {
 }
 
 func testDspAttrTestMissingApiKey(t *testing.T) {
-	args := &CGREvWithApiKey{
-		CGREvent: utils.CGREvent{
-			Tenant:  "cgrates.org",
-			ID:      "testAttributeSGetAttributeForEvent",
+	args := &ArgsAttrProcessEventWithApiKey{
+		AttrArgsProcessEvent: engine.AttrArgsProcessEvent{
 			Context: utils.StringPointer("simpleauth"),
-			Event: map[string]interface{}{
-				utils.Account: "1001",
+			CGREvent: utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSGetAttributeForEvent",
+				Event: map[string]interface{}{
+					utils.Account: "1001",
+				},
 			},
 		},
 	}
@@ -222,16 +225,18 @@ func testDspAttrTestMissingApiKey(t *testing.T) {
 }
 
 func testDspAttrTestUnknownApiKey(t *testing.T) {
-	args := &CGREvWithApiKey{
+	args := &ArgsAttrProcessEventWithApiKey{
 		DispatcherResource: DispatcherResource{
 			APIKey: "1234",
 		},
-		CGREvent: utils.CGREvent{
-			Tenant:  "cgrates.org",
-			ID:      "testAttributeSGetAttributeForEvent",
+		AttrArgsProcessEvent: engine.AttrArgsProcessEvent{
 			Context: utils.StringPointer("simpleauth"),
-			Event: map[string]interface{}{
-				utils.Account: "1001",
+			CGREvent: utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSGetAttributeForEvent",
+				Event: map[string]interface{}{
+					utils.Account: "1001",
+				},
 			},
 		},
 	}
@@ -243,16 +248,18 @@ func testDspAttrTestUnknownApiKey(t *testing.T) {
 }
 
 func testDspAttrTestAuthKey(t *testing.T) {
-	args := &CGREvWithApiKey{
+	args := &ArgsAttrProcessEventWithApiKey{
 		DispatcherResource: DispatcherResource{
 			APIKey: "12345",
 		},
-		CGREvent: utils.CGREvent{
-			Tenant:  "cgrates.org",
-			ID:      "testAttributeSGetAttributeForEvent",
+		AttrArgsProcessEvent: engine.AttrArgsProcessEvent{
 			Context: utils.StringPointer("simpleauth"),
-			Event: map[string]interface{}{
-				utils.Account: "1001",
+			CGREvent: utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSGetAttributeForEvent",
+				Event: map[string]interface{}{
+					utils.Account: "1001",
+				},
 			},
 		},
 	}
@@ -264,16 +271,18 @@ func testDspAttrTestAuthKey(t *testing.T) {
 }
 
 func testDspAttrTestAuthKey2(t *testing.T) {
-	args := &CGREvWithApiKey{
+	args := &ArgsAttrProcessEventWithApiKey{
 		DispatcherResource: DispatcherResource{
 			APIKey: "attr12345",
 		},
-		CGREvent: utils.CGREvent{
-			Tenant:  "cgrates.org",
-			ID:      "testAttributeSGetAttributeForEvent",
+		AttrArgsProcessEvent: engine.AttrArgsProcessEvent{
 			Context: utils.StringPointer("simpleauth"),
-			Event: map[string]interface{}{
-				utils.Account: "1001",
+			CGREvent: utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSGetAttributeForEvent",
+				Event: map[string]interface{}{
+					utils.Account: "1001",
+				},
 			},
 		},
 	}
@@ -309,9 +318,8 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 		MatchedProfiles: []string{"ATTR_1001_SIMPLEAUTH"},
 		AlteredFields:   []string{"Password"},
 		CGREvent: &utils.CGREvent{
-			Tenant:  "cgrates.org",
-			ID:      "testAttributeSGetAttributeForEvent",
-			Context: utils.StringPointer("simpleauth"),
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSGetAttributeForEvent",
 			Event: map[string]interface{}{
 				utils.Account: "1001",
 				"Password":    "CGRateS.org",
@@ -330,17 +338,19 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 }
 
 func testDspAttrTestAuthKey3(t *testing.T) {
-	args := &CGREvWithApiKey{
+	args := &ArgsAttrProcessEventWithApiKey{
 		DispatcherResource: DispatcherResource{
 			APIKey: "attr12345",
 		},
-		CGREvent: utils.CGREvent{
-			Tenant:  "cgrates.org",
-			ID:      "testAttributeSGetAttributeForEvent",
+		AttrArgsProcessEvent: engine.AttrArgsProcessEvent{
 			Context: utils.StringPointer("simpleauth"),
-			Event: map[string]interface{}{
-				utils.Account:    "1001",
-				utils.EVENT_NAME: "Event1",
+			CGREvent: utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSGetAttributeForEvent",
+				Event: map[string]interface{}{
+					utils.Account:    "1001",
+					utils.EVENT_NAME: "Event1",
+				},
 			},
 		},
 	}

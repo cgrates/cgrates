@@ -32,9 +32,8 @@ var attrs = &engine.AttrSProcessEventReply{
 	MatchedProfiles: []string{"ATTR_ACNT_1001"},
 	AlteredFields:   []string{"OfficeGroup"},
 	CGREvent: &utils.CGREvent{
-		Tenant:  "cgrates.org",
-		ID:      "TestSSv1ItAuth",
-		Context: utils.StringPointer(utils.MetaSessionS),
+		Tenant: "cgrates.org",
+		ID:     "TestSSv1ItAuth",
 		Event: map[string]interface{}{
 			utils.CGRID:       "5668666d6b8e44eb949042f25ce0796ec3592ff9",
 			utils.Tenant:      "cgrates.org",
@@ -736,9 +735,8 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 
 func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 	cgrEv := utils.CGREvent{
-		Tenant:  "cgrates.org",
-		ID:      "Event",
-		Context: utils.StringPointer(utils.MetaSessionS),
+		Tenant: "cgrates.org",
+		ID:     "Event",
 		Event: map[string]interface{}{
 			utils.Account:     "1001",
 			utils.Destination: "1002",
@@ -772,9 +770,8 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 
 func TestSessionSNewV1UpdateSessionArgs(t *testing.T) {
 	cgrEv := utils.CGREvent{
-		Tenant:  "cgrates.org",
-		ID:      "Event",
-		Context: utils.StringPointer(utils.MetaSessionS),
+		Tenant: "cgrates.org",
+		ID:     "Event",
 		Event: map[string]interface{}{
 			utils.Account:     "1001",
 			utils.Destination: "1002",
@@ -802,9 +799,8 @@ func TestSessionSNewV1UpdateSessionArgs(t *testing.T) {
 
 func TestSessionSNewV1TerminateSessionArgs(t *testing.T) {
 	cgrEv := utils.CGREvent{
-		Tenant:  "cgrates.org",
-		ID:      "Event",
-		Context: utils.StringPointer(utils.MetaSessionS),
+		Tenant: "cgrates.org",
+		ID:     "Event",
 		Event: map[string]interface{}{
 			utils.Account:     "1001",
 			utils.Destination: "1002",
@@ -830,9 +826,8 @@ func TestSessionSNewV1TerminateSessionArgs(t *testing.T) {
 
 func TestSessionSNewV1ProcessEventArgs(t *testing.T) {
 	cgrEv := utils.CGREvent{
-		Tenant:  "cgrates.org",
-		ID:      "Event",
-		Context: utils.StringPointer(utils.MetaSessionS),
+		Tenant: "cgrates.org",
+		ID:     "Event",
 		Event: map[string]interface{}{
 			utils.Account:     "1001",
 			utils.Destination: "1002",
@@ -861,9 +856,8 @@ func TestSessionSNewV1ProcessEventArgs(t *testing.T) {
 
 func TestSessionSNewV1InitSessionArgs(t *testing.T) {
 	cgrEv := utils.CGREvent{
-		Tenant:  "cgrates.org",
-		ID:      "Event",
-		Context: utils.StringPointer(utils.MetaSessionS),
+		Tenant: "cgrates.org",
+		ID:     "Event",
 		Event: map[string]interface{}{
 			utils.Account:     "1001",
 			utils.Destination: "1002",
