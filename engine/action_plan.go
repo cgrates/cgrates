@@ -390,12 +390,6 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 		utils.Logger.Warning(fmt.Sprintf("Error executing action plan: %v", err))
 		return err
 	}
-	Publish(CgrEvent{
-		"EventName": utils.EVT_ACTION_TIMING_FIRED,
-		"Uuid":      at.Uuid,
-		"Id":        at.actionPlanID,
-		"ActionIds": at.ActionsID,
-	})
 	return
 }
 

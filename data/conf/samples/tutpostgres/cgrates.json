@@ -31,9 +31,6 @@
 	"thresholds_conns": [
 		{"address": "*internal"}
 	],
-	"pubsubs_conns": [
-		{"address": "*internal"}
-	],
 },
 
 
@@ -44,11 +41,6 @@
 
 "cdrs": {
 	"enabled": true,					// start the CDR Server service:  <true|false>
-},
-
-
-"pubsubs": {
-	"enabled": true,				// starts PubSub service: <true|false>.
 },
 
 

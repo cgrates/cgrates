@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 
@@ -803,14 +802,10 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 	for _, b := range bc {
 		if b.dirty {
 			// publish event
-			accountId := ""
-			allowNegative := ""
-			disabled := ""
 			if b.account == nil { // only publish modifications for balances with account set
 				continue
 			}
-			accountId = b.account.ID
-			acntTnt := utils.NewTenantID(accountId)
+			acntTnt := utils.NewTenantID(b.account.ID)
 			thEv := &ArgsProcessEvent{
 				CGREvent: utils.CGREvent{
 					Tenant: acntTnt.Tenant,
@@ -833,26 +828,6 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 							err.Error(), thEv))
 				}
 			}
-			//utils.LogStack()
-
-			allowNegative = strconv.FormatBool(b.account.AllowNegative)
-			disabled = strconv.FormatBool(b.account.Disabled)
-			Publish(CgrEvent{
-				"EventName":            utils.EVT_ACCOUNT_BALANCE_MODIFIED,
-				"Uuid":                 b.Uuid,
-				"Id":                   b.ID,
-				"Value":                strconv.FormatFloat(b.Value, 'f', -1, 64),
-				"ExpirationDate":       b.ExpirationDate.String(),
-				"Weight":               strconv.FormatFloat(b.Weight, 'f', -1, 64),
-				"DestinationIDs":       b.DestinationIDs.String(),
-				"RatingSubject":        b.RatingSubject,
-				"Categories":           b.Categories.String(),
-				"SharedGroups":         b.SharedGroups.String(),
-				"TimingIDs":            b.TimingIDs.String(),
-				"Account":              accountId,
-				"AccountAllowNegative": allowNegative,
-				"AccountDisabled":      disabled,
-			})
 		}
 		if b.account != nil && b.account != acc && b.dirty && savedAccounts[b.account.ID] == nil {
 			dm.DataDB().SetAccount(b.account)

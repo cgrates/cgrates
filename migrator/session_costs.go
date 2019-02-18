@@ -105,7 +105,7 @@ func (m *Migrator) migrateV2SessionSCosts() (err error) {
 			break
 		}
 		if v2Cost == nil {
-			break
+			continue
 		}
 		smCost := v2Cost.V2toV3Cost()
 		if m.dryRun != true {

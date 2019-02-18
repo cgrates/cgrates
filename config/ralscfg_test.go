@@ -43,7 +43,6 @@ func TestRalsCfgFromJsonCfg(t *testing.T) {
 	"enabled": false,						// enable Rater service: <true|false>
 	"thresholds_conns": [],					// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
 	"stats_conns": [],						// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
-	"pubsubs_conns": [],					// address where to reach the pubusb service, empty to disable pubsub functionality: <""|*internal|x.y.z.y:1234>
 	"users_conns": [],						// address where to reach the user service, empty to disable user profile functionality: <""|*internal|x.y.z.y:1234>
 	"rp_subject_prefix_matching": false,	// enables prefix matching for the rating profile subject
 	"max_computed_usage": {					// do not compute usage higher than this, prevents memory overload
@@ -59,7 +58,6 @@ func TestRalsCfgFromJsonCfg(t *testing.T) {
 		RALsEnabled:             false,
 		RALsThresholdSConns:     []*HaPoolConfig{},
 		RALsStatSConns:          []*HaPoolConfig{},
-		RALsPubSubSConns:        []*HaPoolConfig{},
 		RpSubjectPrefixMatching: false,
 		RALsMaxComputedUsage: map[string]time.Duration{
 			utils.ANY:   time.Duration(189 * time.Hour),

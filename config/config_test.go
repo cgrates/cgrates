@@ -465,9 +465,6 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 	if !reflect.DeepEqual(cgrCfg.RalsCfg().RALsThresholdSConns, eHaPoolcfg) {
 		t.Errorf("Expecting: %+v , received: %+v", eHaPoolcfg, cgrCfg.RalsCfg().RALsThresholdSConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.RalsCfg().RALsPubSubSConns, eHaPoolcfg) {
-		t.Errorf("Expecting: %+v , received: %+v", eHaPoolcfg, cgrCfg.RalsCfg().RALsPubSubSConns)
-	}
 	if cgrCfg.RalsCfg().RpSubjectPrefixMatching != false {
 		t.Errorf("Expecting: false , received: %+v", cgrCfg.RalsCfg().RpSubjectPrefixMatching)
 	}
@@ -513,9 +510,6 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	}
 	if expected := []*HaPoolConfig{{Address: utils.MetaInternal}}; !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSChargerSConns, expected) {
 		t.Errorf("Expecting: %+v , received: %+v", expected, cgrCfg.CdrsCfg().CDRSChargerSConns)
-	}
-	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSPubSubSConns, eHaPoolCfg) {
-		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().CDRSPubSubSConns)
 	}
 	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSAttributeSConns, eHaPoolCfg) {
 		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().CDRSAttributeSConns)
@@ -774,12 +768,6 @@ func TestCgrCfgJSONDefaultssteriskAgentCfg(t *testing.T) {
 
 	if !reflect.DeepEqual(cgrCfg.asteriskAgentCfg, eAstAgentCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.asteriskAgentCfg, eAstAgentCfg)
-	}
-}
-
-func TestCgrCfgJSONDefaultsPubSubS(t *testing.T) {
-	if cgrCfg.PubSubServerEnabled != false {
-		t.Error(cgrCfg.PubSubServerEnabled)
 	}
 }
 

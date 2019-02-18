@@ -31,7 +31,7 @@ import (
 
 // Starts rater and reports on chan
 func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *engine.CacheS,
-	internalThdSChan, internalStatSChan, internalPubSubSChan chan rpcclient.RpcClientConnection,
+	internalThdSChan, internalStatSChan chan rpcclient.RpcClientConnection,
 	serviceManager *servmanager.ServiceManager, server *utils.Server,
 	dm *engine.DataManager, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, stopHandled *bool,
 	exitChan chan bool, filterSChan chan *engine.FilterS) {
@@ -97,27 +97,6 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		}()
 	}
 
-	if len(cfg.RalsCfg().RALsPubSubSConns) != 0 { // Connection to pubsubs
-		pubsubTaskChan := make(chan struct{})
-		waitTasks = append(waitTasks, pubsubTaskChan)
-		go func() {
-			defer close(pubsubTaskChan)
-			if pubSubSConns, err := engine.NewRPCPool(rpcclient.POOL_FIRST,
-				cfg.TlsCfg().ClientKey,
-				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-				cfg.RalsCfg().RALsPubSubSConns, internalPubSubSChan,
-				cfg.GeneralCfg().InternalTtl); err != nil {
-				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to PubSubS: %s", err.Error()))
-				exitChan <- true
-				return
-			} else {
-				engine.SetPubSub(pubSubSConns)
-			}
-		}()
-	}
-
 	// Wait for all connections to complete before going further
 	for _, chn := range waitTasks {
 		<-chn
@@ -150,7 +129,6 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 	server.RpcRegister(apierRpcV1)
 	server.RpcRegister(apierRpcV2)
 
-	utils.RegisterRpcParams("PubSubV1", &engine.PubSub{})
 	utils.RegisterRpcParams("", &v1.CDRsV1{})
 	utils.RegisterRpcParams("", &v2.CDRsV2{})
 	utils.RegisterRpcParams("", &v1.SMGenericV1{})

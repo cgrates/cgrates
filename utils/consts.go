@@ -230,7 +230,6 @@ const (
 	DESTINATION_PREFIX            = "dst_"
 	REVERSE_DESTINATION_PREFIX    = "rds_"
 	DERIVEDCHARGERS_PREFIX        = "dcs_"
-	PUBSUB_SUBSCRIBERS_PREFIX     = "pss_"
 	USERS_PREFIX                  = "usr_"
 	ResourcesPrefix               = "res_"
 	ResourceProfilesPrefix        = "rsp_"

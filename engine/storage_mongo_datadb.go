@@ -55,7 +55,6 @@ const (
 	colRpf  = "rating_profiles"
 	colAcc  = "accounts"
 	colShg  = "shared_groups"
-	colPbs  = "pubsub"
 	colLht  = "load_history"
 	colVer  = "versions"
 	colRsP  = "resource_profiles"
@@ -312,7 +311,6 @@ func (ms *MongoStorage) getColNameForPrefix(prefix string) (string, bool) {
 		utils.RATING_PROFILE_PREFIX:      colRpf,
 		utils.ACCOUNT_PREFIX:             colAcc,
 		utils.SHARED_GROUP_PREFIX:        colShg,
-		utils.PUBSUB_SUBSCRIBERS_PREFIX:  colPbs,
 		utils.LOADINST_KEY:               colLht,
 		utils.VERSION_PREFIX:             colVer,
 		utils.TimingsPrefix:              colTmg,
@@ -1075,54 +1073,6 @@ func (ms *MongoStorage) SetAccount(acc *Account) error {
 func (ms *MongoStorage) RemoveAccount(key string) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(colAcc).DeleteOne(sctx, bson.M{"id": key})
-		if dr.DeletedCount == 0 {
-			return utils.ErrNotFound
-		}
-		return err
-	})
-}
-
-func (ms *MongoStorage) GetSubscribersDrv() (result map[string]*SubscriberData, err error) {
-	result = make(map[string]*SubscriberData)
-	var kv struct {
-		Key   string
-		Value *SubscriberData
-	}
-	if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(colPbs).Find(sctx, bson.D{})
-		if err != nil {
-			return err
-		}
-		for cur.Next(sctx) {
-			err := cur.Decode(&kv)
-			if err != nil {
-				return err
-			}
-			result[kv.Key] = kv.Value
-		}
-		return cur.Close(sctx)
-	}); err != nil {
-		return nil, err
-	}
-	return
-}
-
-func (ms *MongoStorage) SetSubscriberDrv(key string, sub *SubscriberData) (err error) {
-	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(colPbs).UpdateOne(sctx, bson.M{"key": key},
-			bson.M{"$set": struct {
-				Key   string
-				Value *SubscriberData
-			}{Key: key, Value: sub}},
-			options.Update().SetUpsert(true),
-		)
-		return err
-	})
-}
-
-func (ms *MongoStorage) RemoveSubscriberDrv(key string) (err error) {
-	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		dr, err := ms.getCol(colPbs).DeleteOne(sctx, bson.M{"key": key})
 		if dr.DeletedCount == 0 {
 			return utils.ErrNotFound
 		}

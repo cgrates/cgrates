@@ -29,7 +29,6 @@ type CdrsCfg struct {
 	CDRSSMCostRetries    int
 	CDRSChargerSConns    []*HaPoolConfig
 	CDRSRaterConns       []*HaPoolConfig // address where to reach the Rater for cost calculation: <""|internal|x.y.z.y:1234>
-	CDRSPubSubSConns     []*HaPoolConfig // address where to reach the pubsub service: <""|internal|x.y.z.y:1234>
 	CDRSAttributeSConns  []*HaPoolConfig // address where to reach the users service: <""|internal|x.y.z.y:1234>
 	CDRSThresholdSConns  []*HaPoolConfig // address where to reach the thresholds service
 	CDRSStatSConns       []*HaPoolConfig
@@ -67,13 +66,6 @@ func (cdrscfg *CdrsCfg) loadFromJsonCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 		for idx, jsnHaCfg := range *jsnCdrsCfg.Rals_conns {
 			cdrscfg.CDRSRaterConns[idx] = NewDfltHaPoolConfig()
 			cdrscfg.CDRSRaterConns[idx].loadFromJsonCfg(jsnHaCfg)
-		}
-	}
-	if jsnCdrsCfg.Pubsubs_conns != nil {
-		cdrscfg.CDRSPubSubSConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Pubsubs_conns))
-		for idx, jsnHaCfg := range *jsnCdrsCfg.Pubsubs_conns {
-			cdrscfg.CDRSPubSubSConns[idx] = NewDfltHaPoolConfig()
-			cdrscfg.CDRSPubSubSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCdrsCfg.Attributes_conns != nil {

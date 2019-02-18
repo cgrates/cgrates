@@ -500,7 +500,7 @@ func startHTTPAgent(internalSMGChan chan rpcclient.RpcClientConnection,
 
 func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 	cdrDb engine.CdrStorage, dm *engine.DataManager,
-	internalRaterChan, internalPubSubSChan, internalAttributeSChan,
+	internalRaterChan, internalAttributeSChan,
 	internalThresholdSChan, internalStatSChan,
 	internalChargerSChan chan rpcclient.RpcClientConnection,
 	server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
@@ -508,7 +508,7 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 	filterSChan <- filterS
 	var err error
 	utils.Logger.Info("Starting CGRateS CDRS service.")
-	var ralConn, pubSubConn, attrSConn,
+	var ralConn, attrSConn,
 		thresholdSConn, statsConn, chargerSConn *rpcclient.RpcClientPool
 	if len(cfg.CdrsCfg().CDRSChargerSConns) != 0 { // Conn pool towards RAL
 		chargerSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
@@ -535,20 +535,6 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 			cfg.GeneralCfg().InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to RAL: %s", err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	if len(cfg.CdrsCfg().CDRSPubSubSConns) != 0 { // Pubsub connection init
-		pubSubConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.CdrsCfg().CDRSPubSubSConns, internalPubSubSChan,
-			cfg.GeneralCfg().InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to PubSubSystem: %s", err.Error()))
 			exitChan <- true
 			return
 		}
@@ -597,7 +583,7 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 		}
 	}
 	cdrServer := engine.NewCDRServer(cfg, cdrDb, dm,
-		ralConn, pubSubConn, attrSConn,
+		ralConn, attrSConn,
 		thresholdSConn, statsConn, chargerSConn, filterS)
 	utils.Logger.Info("Registering CDRS HTTP Handlers.")
 	cdrServer.RegisterHandlersToServer(server)
@@ -620,17 +606,6 @@ func startScheduler(internalSchedulerChan chan *scheduler.Scheduler, cacheDoneCh
 
 	sched.Loop()
 	exitChan <- true // Should not get out of loop though
-}
-
-func startPubSubServer(internalPubSubSChan chan rpcclient.RpcClientConnection, dm *engine.DataManager, server *utils.Server, exitChan chan bool) {
-	pubSubServer, err := engine.NewPubSub(dm, cfg.GeneralCfg().HttpSkipTlsVerify)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<PubSubS> Could not start, error: %s", err.Error()))
-		exitChan <- true
-		return
-	}
-	server.RpcRegisterName("PubSubV1", pubSubServer)
-	internalPubSubSChan <- pubSubServer
 }
 
 // startAttributeService fires up the AttributeS
@@ -1033,7 +1008,7 @@ func startAnalyzerService(internalAnalyzerSChan chan rpcclient.RpcClientConnecti
 }
 
 func startRpc(server *utils.Server, internalRaterChan,
-	internalCdrSChan, internalPubSubSChan, internalRsChan, internalStatSChan,
+	internalCdrSChan, internalRsChan, internalStatSChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
 	internalSMGChan, internalAnalyzerSChan chan rpcclient.RpcClientConnection,
 	internalDispatcherSChan chan *dispatchers.DispatcherService, exitChan chan bool) {
@@ -1042,8 +1017,6 @@ func startRpc(server *utils.Server, internalRaterChan,
 		internalRaterChan <- resp
 	case cdrs := <-internalCdrSChan:
 		internalCdrSChan <- cdrs
-	case pubsubs := <-internalPubSubSChan:
-		internalPubSubSChan <- pubsubs
 	case smg := <-internalSMGChan:
 		internalSMGChan <- smg
 	case rls := <-internalRsChan:
@@ -1279,7 +1252,7 @@ func main() {
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
 	var dm *engine.DataManager
-	if cfg.RalsCfg().RALsEnabled || cfg.PubSubServerEnabled || cfg.SchedulerCfg().Enabled ||
+	if cfg.RalsCfg().RALsEnabled || cfg.SchedulerCfg().Enabled ||
 		cfg.AttributeSCfg().Enabled || cfg.ResourceSCfg().Enabled || cfg.StatSCfg().Enabled ||
 		cfg.ThresholdSCfg().Enabled || cfg.SupplierSCfg().Enabled || cfg.DispatcherSCfg().Enabled { // Some services can run without db, ie: SessionS or CDRC
 		dm, err = engine.ConfigureDataStorage(cfg.DataDbCfg().DataDbType,
@@ -1345,7 +1318,6 @@ func main() {
 	// Define internal connections via channels
 	internalRaterChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalCdrSChan := make(chan rpcclient.RpcClientConnection, 1)
-	internalPubSubSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalSMGChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalAttributeSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalChargerSChan := make(chan rpcclient.RpcClientConnection, 1)
@@ -1363,8 +1335,8 @@ func main() {
 	// Start rater service
 	if cfg.RalsCfg().RALsEnabled {
 		go startRater(internalRaterChan, cacheS, internalThresholdSChan,
-			internalStatSChan, internalPubSubSChan,
-			srvManager, server, dm, loadDb, cdrDb, &stopHandled, exitChan, filterSChan)
+			internalStatSChan, srvManager, server, dm, loadDb, cdrDb,
+			&stopHandled, exitChan, filterSChan)
 	}
 
 	// Start Scheduler
@@ -1375,7 +1347,7 @@ func main() {
 	// Start CDR Server
 	if cfg.CdrsCfg().CDRSEnabled {
 		go startCDRS(internalCdrSChan, cdrDb, dm,
-			internalRaterChan, internalPubSubSChan, internalAttributeSChan,
+			internalRaterChan, internalAttributeSChan,
 			internalThresholdSChan, internalStatSChan, internalChargerSChan,
 			server, exitChan, filterSChan)
 	}
@@ -1420,11 +1392,6 @@ func main() {
 	if len(cfg.HttpAgentCfg()) != 0 {
 		go startHTTPAgent(internalSMGChan, exitChan, server, filterSChan,
 			cfg.GeneralCfg().DefaultTenant)
-	}
-
-	// Start PubSubS service
-	if cfg.PubSubServerEnabled {
-		go startPubSubServer(internalPubSubSChan, dm, server, exitChan)
 	}
 
 	// Start FilterS
@@ -1474,7 +1441,7 @@ func main() {
 
 	// Serve rpc connections
 	go startRpc(server, internalRaterChan, internalCdrSChan,
-		internalPubSubSChan, internalRsChan, internalStatSChan,
+		internalRsChan, internalStatSChan,
 		internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
 		internalSupplierSChan, internalSMGChan, internalAnalyzerSChan,
 		internalDispatcherSChan, exitChan)

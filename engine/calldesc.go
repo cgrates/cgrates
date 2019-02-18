@@ -59,8 +59,6 @@ var (
 	globalRoundingDecimals  = 6
 	thresholdS              rpcclient.RpcClientConnection // used by RALs to communicate with ThresholdS
 	statS                   rpcclient.RpcClientConnection
-	pubSubServer            rpcclient.RpcClientConnection
-	userService             rpcclient.RpcClientConnection
 	schedCdrsConns          rpcclient.RpcClientConnection
 	rpSubjectPrefixMatching bool
 )
@@ -94,25 +92,10 @@ func SetCdrStorage(cStorage CdrStorage) {
 	cdrStorage = cStorage
 }
 
-func SetPubSub(ps rpcclient.RpcClientConnection) {
-	pubSubServer = ps
-}
-
-func SetUserService(us rpcclient.RpcClientConnection) {
-	userService = us
-}
-
 func SetSchedCdrsConns(sc rpcclient.RpcClientConnection) {
 	schedCdrsConns = sc
 	if schedCdrsConns != nil && reflect.ValueOf(schedCdrsConns).IsNil() {
 		schedCdrsConns = nil
-	}
-}
-
-func Publish(event CgrEvent) {
-	if pubSubServer != nil {
-		var s string
-		pubSubServer.Call("PubSubV1.Publish", event, &s)
 	}
 }
 

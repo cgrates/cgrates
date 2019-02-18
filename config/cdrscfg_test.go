@@ -47,7 +47,6 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 	"rals_conns": [
 		{"address": "*internal"}			// address where to reach the Rater for cost calculation, empty to disable functionality: <""|*internal|x.y.z.y:1234>
 	],
-	"pubsubs_conns": [],					// address where to reach the pubusb service, empty to disable pubsub functionality: <""|*internal|x.y.z.y:1234>
 	"attributes_conns": [],					// address where to reach the attribute service, empty to disable attributes functionality: <""|*internal|x.y.z.y:1234>
 	"thresholds_conns": [],					// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
 	"stats_conns": [],						// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
@@ -59,7 +58,6 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 		CDRSSMCostRetries:   5,
 		CDRSChargerSConns:   []*HaPoolConfig{},
 		CDRSRaterConns:      []*HaPoolConfig{{Address: utils.MetaInternal}},
-		CDRSPubSubSConns:    []*HaPoolConfig{},
 		CDRSAttributeSConns: []*HaPoolConfig{},
 		CDRSThresholdSConns: []*HaPoolConfig{},
 		CDRSStatSConns:      []*HaPoolConfig{},

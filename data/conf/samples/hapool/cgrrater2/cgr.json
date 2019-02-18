@@ -8,16 +8,9 @@
 
 "rals": {
 	"enabled": true,
-	"pubsubs_conns": [
-		{"address": "*internal"}
-	],
 },
 
 "scheduler": {
-	"enabled": true,
-},
-
-"pubsubs": {
 	"enabled": true,
 },
 

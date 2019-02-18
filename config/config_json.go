@@ -49,7 +49,6 @@ const (
 	RA_JSN             = "radius_agent"
 	HttpAgentJson      = "http_agent"
 	HISTSERV_JSN       = "historys"
-	PUBSUBSERV_JSN     = "pubsubs"
 	ATTRIBUTE_JSN      = "attributes"
 	RESOURCES_JSON     = "resources"
 	STATS_JSON         = "stats"
@@ -305,18 +304,6 @@ func (self CgrJsonCfg) HttpAgentJsonCfg() (*[]*HttpAgentJsonCfg, error) {
 		return nil, err
 	}
 	return &httpAgnt, nil
-}
-
-func (self CgrJsonCfg) PubSubServJsonCfg() (*PubSubServJsonCfg, error) {
-	rawCfg, hasKey := self[PUBSUBSERV_JSN]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(PubSubServJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
 }
 
 func (cgrJsn CgrJsonCfg) AttributeServJsonCfg() (*AttributeSJsonCfg, error) {
