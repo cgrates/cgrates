@@ -537,35 +537,6 @@ func (ms *MapStorage) RemoveAccount(key string) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetSubscribersDrv() (result map[string]*SubscriberData, err error) {
-	ms.mu.RLock()
-	defer ms.mu.RUnlock()
-	result = make(map[string]*SubscriberData)
-	for key, value := range ms.dict {
-		if strings.HasPrefix(key, utils.PUBSUB_SUBSCRIBERS_PREFIX) {
-			sub := &SubscriberData{}
-			if err = ms.ms.Unmarshal(value, sub); err == nil {
-				result[key[len(utils.PUBSUB_SUBSCRIBERS_PREFIX):]] = sub
-			}
-		}
-	}
-	return
-}
-func (ms *MapStorage) SetSubscriberDrv(key string, sub *SubscriberData) (err error) {
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
-	result, err := ms.ms.Marshal(sub)
-	ms.dict[utils.PUBSUB_SUBSCRIBERS_PREFIX+key] = result
-	return
-}
-
-func (ms *MapStorage) RemoveSubscriberDrv(key string) (err error) {
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
-	delete(ms.dict, utils.PUBSUB_SUBSCRIBERS_PREFIX+key)
-	return
-}
-
 func (ms *MapStorage) GetLoadHistory(limitItems int,
 	skipCache bool, transactionID string) ([]*utils.LoadInstance, error) {
 	ms.mu.RLock()

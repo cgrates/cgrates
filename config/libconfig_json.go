@@ -101,7 +101,6 @@ type RalsJsonCfg struct {
 	Enabled                    *bool
 	Thresholds_conns           *[]*HaPoolJsonCfg
 	Stats_conns                *[]*HaPoolJsonCfg
-	Pubsubs_conns              *[]*HaPoolJsonCfg
 	Rp_subject_prefix_matching *bool
 	Remove_expired             *bool
 	Max_computed_usage         *map[string]string
@@ -121,7 +120,6 @@ type CdrsJsonCfg struct {
 	Sessions_cost_retries *int
 	Chargers_conns        *[]*HaPoolJsonCfg
 	Rals_conns            *[]*HaPoolJsonCfg
-	Pubsubs_conns         *[]*HaPoolJsonCfg
 	Attributes_conns      *[]*HaPoolJsonCfg
 	Thresholds_conns      *[]*HaPoolJsonCfg
 	Stats_conns           *[]*HaPoolJsonCfg
@@ -401,11 +399,6 @@ type HistServJsonCfg struct {
 	Enabled       *bool
 	History_dir   *string
 	Save_interval *string
-}
-
-// PubSub server config section
-type PubSubServJsonCfg struct {
-	Enabled *bool
 }
 
 // Attribute service config section

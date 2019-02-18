@@ -708,42 +708,6 @@ func (rs *RedisStorage) RemoveAccount(key string) (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetSubscribersDrv() (result map[string]*SubscriberData, err error) {
-	keys, err := rs.Cmd("KEYS", utils.PUBSUB_SUBSCRIBERS_PREFIX+"*").List()
-	if err != nil {
-		return nil, err
-	}
-	result = make(map[string]*SubscriberData)
-	for _, key := range keys {
-		var values []byte
-		if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
-			if err == redis.ErrRespNil { // did not find the destination
-				err = utils.ErrNotFound
-			}
-			return
-		}
-		sub := new(SubscriberData)
-		if err = rs.ms.Unmarshal(values, sub); err != nil {
-			return nil, err
-		}
-		result[key[len(utils.PUBSUB_SUBSCRIBERS_PREFIX):]] = sub
-	}
-	return
-}
-
-func (rs *RedisStorage) SetSubscriberDrv(key string, sub *SubscriberData) (err error) {
-	result, err := rs.ms.Marshal(sub)
-	if err != nil {
-		return err
-	}
-	return rs.Cmd("SET", utils.PUBSUB_SUBSCRIBERS_PREFIX+key, result).Err
-}
-
-func (rs *RedisStorage) RemoveSubscriberDrv(key string) (err error) {
-	err = rs.Cmd("DEL", utils.PUBSUB_SUBSCRIBERS_PREFIX+key).Err
-	return
-}
-
 // Limit will only retrieve the last n items out of history, newest first
 func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool,
 	transactionID string) ([]*utils.LoadInstance, error) {

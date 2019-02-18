@@ -25,23 +25,23 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (m *Migrator) migrateCurrentSubscribers() (err error) {
-	subs, err := m.dmIN.DataManager().GetSubscribers()
-	if err != nil {
-		return err
-	}
-	for id, sub := range subs {
-		if sub != nil {
-			if m.dryRun != true {
-				if err := m.dmOut.DataManager().SetSubscriber(id, sub); err != nil {
-					return err
-				}
-				m.stats[utils.Subscribers] += 1
-			}
-		}
-	}
-	return
-}
+// func (m *Migrator) migrateCurrentSubscribers() (err error) {
+// 	subs, err := m.dmIN.DataManager().GetSubscribers()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	for id, sub := range subs {
+// 		if sub != nil {
+// 			if m.dryRun != true {
+// 				if err := m.dmOut.DataManager().SetSubscriber(id, sub); err != nil {
+// 					return err
+// 				}
+// 				m.stats[utils.Subscribers] += 1
+// 			}
+// 		}
+// 	}
+// 	return
+// }
 
 func (m *Migrator) migrateSubscribers() (err error) {
 	var vrs engine.Versions
@@ -63,10 +63,8 @@ func (m *Migrator) migrateSubscribers() (err error) {
 		if m.sameDataDB {
 			return
 		}
-		if err := m.migrateCurrentSubscribers(); err != nil {
-			return err
-		}
-		return
+		return utils.ErrNotImplemented
+		// return  m.migrateCurrentSubscribers()
 	}
 	return
 }

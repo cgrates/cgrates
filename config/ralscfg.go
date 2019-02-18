@@ -29,7 +29,6 @@ type RalsCfg struct {
 	RALsEnabled             bool            // start standalone server (no balancer)
 	RALsThresholdSConns     []*HaPoolConfig // address where to reach ThresholdS config
 	RALsStatSConns          []*HaPoolConfig
-	RALsPubSubSConns        []*HaPoolConfig
 	RpSubjectPrefixMatching bool // enables prefix matching for the rating profile subject
 	RemoveExpired           bool
 	RALsMaxComputedUsage    map[string]time.Duration
@@ -55,13 +54,6 @@ func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 		for idx, jsnHaCfg := range *jsnRALsCfg.Stats_conns {
 			ralsCfg.RALsStatSConns[idx] = NewDfltHaPoolConfig()
 			ralsCfg.RALsStatSConns[idx].loadFromJsonCfg(jsnHaCfg)
-		}
-	}
-	if jsnRALsCfg.Pubsubs_conns != nil {
-		ralsCfg.RALsPubSubSConns = make([]*HaPoolConfig, len(*jsnRALsCfg.Pubsubs_conns))
-		for idx, jsnHaCfg := range *jsnRALsCfg.Pubsubs_conns {
-			ralsCfg.RALsPubSubSConns[idx] = NewDfltHaPoolConfig()
-			ralsCfg.RALsPubSubSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnRALsCfg.Rp_subject_prefix_matching != nil {

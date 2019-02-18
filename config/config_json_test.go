@@ -221,7 +221,6 @@ func TestDfRalsJsonCfg(t *testing.T) {
 		Enabled:                    utils.BoolPointer(false),
 		Thresholds_conns:           &[]*HaPoolJsonCfg{},
 		Stats_conns:                &[]*HaPoolJsonCfg{},
-		Pubsubs_conns:              &[]*HaPoolJsonCfg{},
 		Rp_subject_prefix_matching: utils.BoolPointer(false),
 		Remove_expired:             utils.BoolPointer(true),
 		Max_computed_usage: &map[string]string{
@@ -263,7 +262,6 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 			{
 				Address: utils.StringPointer("*internal"),
 			}},
-		Pubsubs_conns:      &[]*HaPoolJsonCfg{},
 		Attributes_conns:   &[]*HaPoolJsonCfg{},
 		Thresholds_conns:   &[]*HaPoolJsonCfg{},
 		Stats_conns:        &[]*HaPoolJsonCfg{},
@@ -722,17 +720,6 @@ func TestHttpAgentJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
-	}
-}
-
-func TestDfPubSubServJsonCfg(t *testing.T) {
-	eCfg := &PubSubServJsonCfg{
-		Enabled: utils.BoolPointer(false),
-	}
-	if cfg, err := dfCgrJsonCfg.PubSubServJsonCfg(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg)
 	}
 }
 

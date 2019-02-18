@@ -919,18 +919,6 @@ func (dm *DataManager) RemoveRatingProfile(key string,
 	return
 }
 
-func (dm *DataManager) GetSubscribers() (result map[string]*SubscriberData, err error) {
-	return dm.DataDB().GetSubscribersDrv()
-}
-
-func (dm *DataManager) SetSubscriber(key string, sub *SubscriberData) (err error) {
-	return dm.DataDB().SetSubscriberDrv(key, sub)
-}
-
-func (dm *DataManager) RemoveSubscriber(key string) (err error) {
-	return dm.DataDB().RemoveSubscriberDrv(key)
-}
-
 func (dm *DataManager) HasData(category, subject, tenant string) (has bool, err error) {
 	return dm.DataDB().HasDataDrv(category, subject, tenant)
 }

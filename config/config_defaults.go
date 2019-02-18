@@ -161,7 +161,6 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,						// enable Rater service: <true|false>
 	"thresholds_conns": [],					// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
 	"stats_conns": [],						// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
-	"pubsubs_conns": [],					// address where to reach the pubusb service, empty to disable pubsub functionality: <""|*internal|x.y.z.y:1234>
 	"rp_subject_prefix_matching": false,	// enables prefix matching for the rating profile subject
 	"remove_expired":true,					// enables remove of expired balances
 	"max_computed_usage": {					// do not compute usage higher than this, prevents memory overload
@@ -184,7 +183,6 @@ const CGRATES_CFG_JSON = `
 	"rals_conns": [
 		{"address": "*internal"}			// address where to reach the Rater for cost calculation, empty to disable functionality: <""|*internal|x.y.z.y:1234>
 	],
-	"pubsubs_conns": [],					// address where to reach the pubusb service, empty to disable pubsub functionality: <""|*internal|x.y.z.y:1234>
 	"attributes_conns": [],					// address where to reach the attribute service, empty to disable attributes functionality: <""|*internal|x.y.z.y:1234>
 	"thresholds_conns": [],					// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
 	"stats_conns": [],						// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
@@ -443,11 +441,6 @@ const CGRATES_CFG_JSON = `
 
 "http_agent": [						// HTTP Agents, ie towards cnc.to MVNE platform
 ],
-
-
-"pubsubs": {
-	"enabled": false,				// starts PubSub service: <true|false>.
-},
 
 
 "attributes": {								// Attribute service

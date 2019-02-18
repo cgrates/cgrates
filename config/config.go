@@ -309,10 +309,7 @@ type CGRConfig struct {
 	migratorCgrCfg   *MigratorCgrCfg   // MigratorCgr config
 	mailerCfg        *MailerCfg        // Mailer config
 	analyzerSCfg     *AnalyzerSCfg     // AnalyzerS config
-
-	// Deprecated
-	SmOsipsConfig       *SmOsipsConfig // SMOpenSIPS Configuration
-	PubSubServerEnabled bool           // Starts PubSub as server: <true|false>.
+	SmOsipsConfig    *SmOsipsConfig    // SMOpenSIPS Configuration
 }
 
 func (self *CGRConfig) checkConfigSanity() error {
@@ -322,13 +319,6 @@ func (self *CGRConfig) checkConfigSanity() error {
 			for _, connCfg := range self.ralsCfg.RALsStatSConns {
 				if connCfg.Address == utils.MetaInternal {
 					return errors.New("StatS not enabled but requested by RALs component.")
-				}
-			}
-		}
-		if !self.PubSubServerEnabled {
-			for _, connCfg := range self.ralsCfg.RALsPubSubSConns {
-				if connCfg.Address == utils.MetaInternal {
-					return errors.New("PubSub server not enabled but requested by RALs component.")
 				}
 			}
 		}
@@ -353,13 +343,6 @@ func (self *CGRConfig) checkConfigSanity() error {
 			for _, cdrsRaterConn := range self.cdrsCfg.CDRSRaterConns {
 				if cdrsRaterConn.Address == utils.MetaInternal {
 					return errors.New("RALs not enabled but requested by CDRS component.")
-				}
-			}
-		}
-		if !self.PubSubServerEnabled {
-			for _, connCfg := range self.cdrsCfg.CDRSPubSubSConns {
-				if connCfg.Address == utils.MetaInternal {
-					return errors.New("PubSubS not enabled but requested by CDRS component.")
 				}
 			}
 		}
@@ -1023,20 +1006,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			}
 		}
 	}
-
-	//Depricated
-
-	jsnPubSubServCfg, err := jsnCfg.PubSubServJsonCfg()
-	if err != nil {
-		return err
-	}
-	if jsnPubSubServCfg != nil {
-		if jsnPubSubServCfg.Enabled != nil {
-			self.PubSubServerEnabled = *jsnPubSubServCfg.Enabled
-		}
-	}
-
-	///depricated^^^
 	return nil
 }
 

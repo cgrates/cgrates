@@ -83,9 +83,6 @@ type DataDB interface {
 	GetAccount(string) (*Account, error)
 	SetAccount(*Account) error
 	RemoveAccount(string) error
-	GetSubscribersDrv() (map[string]*SubscriberData, error)
-	SetSubscriberDrv(string, *SubscriberData) error
-	RemoveSubscriberDrv(string) error
 	GetResourceProfileDrv(string, string) (*ResourceProfile, error)
 	SetResourceProfileDrv(*ResourceProfile) error
 	RemoveResourceProfileDrv(string, string) error

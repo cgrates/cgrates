@@ -30,17 +30,10 @@
 
 "rals": {
 	"enabled": true,						// enable Rater service: <true|false>
-		"pubsubs_conns": [
-			{"address": "*internal"}
-		],
 },
 
 "scheduler": {
 	"enabled": true,						// start Scheduler service: <true|false>
-},
-
-"pubsubs": {
-	"enabled": true,							// starts pubsub service: <true|false>.
 },
 
 "users": {

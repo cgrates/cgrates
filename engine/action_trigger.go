@@ -109,12 +109,6 @@ func (at *ActionTrigger) Execute(ub *Account) (err error) {
 		at.Executed = false
 	}
 	if !transactionFailed && ub != nil && !removeAccountActionFound {
-		Publish(CgrEvent{
-			"EventName": utils.EVT_ACTION_TRIGGER_FIRED,
-			"Uuid":      at.UniqueID,
-			"Id":        at.ID,
-			"ActionIds": at.ActionsID,
-		})
 		dm.DataDB().SetAccount(ub)
 	}
 	return

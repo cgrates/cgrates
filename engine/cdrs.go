@@ -68,13 +68,10 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // NewCDRServer is a constructor for CDRServer
-func NewCDRServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, rater, pubsub,
+func NewCDRServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, rater,
 	attrS, thdS, statS, chargerS rpcclient.RpcClientConnection, filterS *FilterS) *CDRServer {
 	if rater != nil && reflect.ValueOf(rater).IsNil() {
 		rater = nil
-	}
-	if pubsub != nil && reflect.ValueOf(pubsub).IsNil() {
-		pubsub = nil
 	}
 	if attrS != nil && reflect.ValueOf(attrS).IsNil() {
 		attrS = nil
@@ -89,7 +86,7 @@ func NewCDRServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, r
 		chargerS = nil
 	}
 	return &CDRServer{cgrCfg: cgrCfg, cdrDb: cdrDb, dm: dm,
-		rals: rater, pubsub: pubsub, attrS: attrS,
+		rals: rater, attrS: attrS,
 		statS: statS, thdS: thdS,
 		chargerS: chargerS, guard: guardian.Guardian,
 		respCache: utils.NewResponseCache(cgrCfg.GeneralCfg().ResponseCacheTTL),
@@ -103,7 +100,6 @@ type CDRServer struct {
 	cdrDb      CdrStorage
 	dm         *DataManager
 	rals       rpcclient.RpcClientConnection
-	pubsub     rpcclient.RpcClientConnection
 	attrS      rpcclient.RpcClientConnection
 	thdS       rpcclient.RpcClientConnection
 	statS      rpcclient.RpcClientConnection

@@ -60,7 +60,6 @@ var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITCRUDActionPlan,
 	testOnStorITCRUDAccountActionPlans,
 	testOnStorITCRUDAccount,
-	testOnStorITCRUDSubscribers,
 	testOnStorITResource,
 	testOnStorITResourceProfile,
 	testOnStorITTiming,
@@ -1129,34 +1128,6 @@ func testOnStorITCRUDAccount(t *testing.T) {
 	}
 	if _, rcvErr := onStor.DataDB().GetAccount(acc.ID); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
-	}
-}
-
-func testOnStorITCRUDSubscribers(t *testing.T) {
-	if sbs, err := onStor.GetSubscribers(); err != nil {
-		t.Error(err)
-	} else if len(sbs) != 0 {
-		t.Errorf("Received subscribers: %+v", sbs)
-	}
-	sbsc := &SubscriberData{
-		ExpTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
-		Filters: utils.ParseRSRFieldsMustCompile("^*default", utils.INFIELD_SEP)}
-	sbscID := "testOnStorITCRUDSubscribers"
-	if err := onStor.SetSubscriber(sbscID, sbsc); err != nil {
-		t.Error(err)
-	}
-	if rcv, err := onStor.GetSubscribers(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(sbsc.ExpTime, rcv[sbscID].ExpTime) { // Test just ExpTime since RSRField is more complex behind
-		t.Errorf("Expecting: %v, received: %v", sbsc, rcv[sbscID])
-	}
-	if err := onStor.RemoveSubscriber(sbscID); err != nil {
-		t.Error(err)
-	}
-	if sbs, err := onStor.GetSubscribers(); err != nil {
-		t.Error(err)
-	} else if len(sbs) != 0 {
-		t.Errorf("Received subscribers: %+v", sbs)
 	}
 }
 
