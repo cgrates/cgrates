@@ -55,7 +55,6 @@ const (
 	colRpf  = "rating_profiles"
 	colAcc  = "accounts"
 	colShg  = "shared_groups"
-	colDcs  = "derived_chargers"
 	colPbs  = "pubsub"
 	colLht  = "load_history"
 	colVer  = "versions"
@@ -238,7 +237,7 @@ func (ms *MongoStorage) GetContext() context.Context {
 func (ms *MongoStorage) EnsureIndexes() (err error) {
 	if ms.storageType == utils.DataDB {
 		for _, col := range []string{colAct, colApl, colAAp, colAtr,
-			colDcs, colRpl, colDst, colRds, colLht} {
+			colRpl, colDst, colRds, colLht} {
 			if err = ms.EnusureIndex(col, true, "key"); err != nil {
 				return
 			}
@@ -268,16 +267,6 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 
 		if err = ms.EnusureIndex(utils.TBLTPRateProfiles, true, "tpid", "direction",
 			"tenant", "category", "subject", "loadid"); err != nil {
-			return
-		}
-
-		if err = ms.EnusureIndex(utils.TBLTPDerivedChargers, true, "tpid", "tenant",
-			"category", "subject", "account", "loadid"); err != nil {
-			return
-		}
-
-		if err = ms.EnusureIndex(utils.TBLTPDerivedChargers, true, "tpid", "direction",
-			"tenant", "account", "loadid"); err != nil {
 			return
 		}
 
@@ -323,7 +312,6 @@ func (ms *MongoStorage) getColNameForPrefix(prefix string) (string, bool) {
 		utils.RATING_PROFILE_PREFIX:      colRpf,
 		utils.ACCOUNT_PREFIX:             colAcc,
 		utils.SHARED_GROUP_PREFIX:        colShg,
-		utils.DERIVEDCHARGERS_PREFIX:     colDcs,
 		utils.PUBSUB_SUBSCRIBERS_PREFIX:  colPbs,
 		utils.LOADINST_KEY:               colLht,
 		utils.VERSION_PREFIX:             colVer,
@@ -568,8 +556,6 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result, err = ms.getField(sctx, colAtr, utils.ACTION_TRIGGER_PREFIX, subject, "key")
 		case utils.SHARED_GROUP_PREFIX:
 			result, err = ms.getField(sctx, colShg, utils.SHARED_GROUP_PREFIX, subject, "id")
-		case utils.DERIVEDCHARGERS_PREFIX:
-			result, err = ms.getField(sctx, colDcs, utils.DERIVEDCHARGERS_PREFIX, subject, "key")
 		case utils.ACCOUNT_PREFIX:
 			result, err = ms.getField(sctx, colAcc, utils.ACCOUNT_PREFIX, subject, "id")
 		case utils.ResourceProfilesPrefix:
@@ -1542,63 +1528,6 @@ func (ms *MongoStorage) PopTask() (t *Task, err error) {
 		return nil, err
 	}
 	return v.Task, nil
-}
-
-func (ms *MongoStorage) GetDerivedChargersDrv(key string) (dcs *utils.DerivedChargers, err error) {
-	var kv struct {
-		Key   string
-		Value *utils.DerivedChargers
-	}
-	if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		cur := ms.getCol(colDcs).FindOne(sctx, bson.M{"key": key})
-		if err := cur.Decode(&kv); err != nil {
-			if err == mongo.ErrNoDocuments {
-				return utils.ErrNotFound
-			}
-			return err
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-	return kv.Value, nil
-}
-
-func (ms *MongoStorage) SetDerivedChargers(key string,
-	dcs *utils.DerivedChargers, transactionID string) (err error) {
-	cCommit := cacheCommit(transactionID)
-	if dcs == nil || len(dcs.Chargers) == 0 {
-		if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-			_, err = ms.getCol(colDcs).DeleteOne(sctx, bson.M{"key": key})
-			return err
-		}); err != nil {
-			return err
-		}
-		Cache.Remove(utils.CacheDerivedChargers, key, cCommit, transactionID)
-		return nil
-	}
-	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(colDcs).UpdateOne(sctx, bson.M{"key": key},
-			bson.M{"$set": struct {
-				Key   string
-				Value *utils.DerivedChargers
-			}{Key: key, Value: dcs}},
-			options.Update().SetUpsert(true),
-		)
-		return err
-	})
-}
-
-func (ms *MongoStorage) RemoveDerivedChargersDrv(id, transactionID string) (err error) {
-	cCommit := cacheCommit(transactionID)
-	if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(colDcs).DeleteOne(sctx, bson.M{"key": id})
-		return err
-	}); err != nil {
-		return err
-	}
-	Cache.Remove(utils.CacheDerivedChargers, id, cCommit, transactionID)
-	return nil
 }
 
 func (ms *MongoStorage) GetResourceProfileDrv(tenant, id string) (rp *ResourceProfile, err error) {

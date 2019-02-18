@@ -60,7 +60,6 @@ var (
 		CacheAccountActionPlans:      AccountActionPlansPrefix,
 		CacheActionTriggers:          ACTION_TRIGGER_PREFIX,
 		CacheSharedGroups:            SHARED_GROUP_PREFIX,
-		CacheDerivedChargers:         DERIVEDCHARGERS_PREFIX,
 		CacheResourceProfiles:        ResourceProfilesPrefix,
 		CacheResources:               ResourcesPrefix,
 		CacheEventResources:          EventResourcesPrefix,
@@ -613,7 +612,6 @@ const (
 	MetaTpAccountActions    = "*tp_account_actions"
 	MetaTpActionPlans       = "*tp_action_plans"
 	MetaTpActions           = "*tp_actions"
-	MetaTpDerivedChargers   = "*tp_derived_charges"
 	MetaTpThresholds        = "*tp_thresholds"
 	MetaTpSuppliers         = "*tp_suppliers"
 	MetaTpStats             = "*tp_stats"
@@ -623,7 +621,6 @@ const (
 	MetaTpRates             = "*tp_rates"
 	MetaTpTimings           = "*tp_timings"
 	MetaTpResource          = "*tp_resources"
-	MetaTpDerivedChargersV  = "*tp_derived_chargers"
 	MetaTpCdrStats          = "*tp_cdrstats"
 	MetaTpDestinations      = "*tp_destinations"
 	MetaTpRatingPlan        = "*tp_rating_plans"
@@ -649,7 +646,6 @@ const (
 	TpAccountActionsV  = "TpAccountActions"
 	TpActionPlans      = "TpActionPlans"
 	TpActions          = "TpActions"
-	TpDerivedCharges   = "TpDerivedCharges"
 	TpThresholds       = "TpThresholds"
 	TpSuppliers        = "TpSuppliers"
 	TpStats            = "TpStats"
@@ -659,7 +655,6 @@ const (
 	TpRates            = "TpRates"
 	TpTiming           = "TpTiming"
 	TpResource         = "TpResource"
-	TpDerivedChargersV = "TpDerivedChargers"
 	TpCdrStats         = "TpCdrStats"
 	TpDestinations     = "TpDestinations"
 	TpRatingPlan       = "TpRatingPlan"
@@ -868,7 +863,6 @@ const (
 	ACTION_PLANS_CSV      = "ActionPlans.csv"
 	ACTION_TRIGGERS_CSV   = "ActionTriggers.csv"
 	ACCOUNT_ACTIONS_CSV   = "AccountActions.csv"
-	DERIVED_CHARGERS_CSV  = "DerivedChargers.csv"
 	ResourcesCsv          = "Resources.csv"
 	StatsCsv              = "Stats.csv"
 	ThresholdsCsv         = "Thresholds.csv"
@@ -892,7 +886,6 @@ const (
 	TBLTPActionPlans      = "tp_action_plans"
 	TBLTPActionTriggers   = "tp_action_triggers"
 	TBLTPAccountActions   = "tp_account_actions"
-	TBLTPDerivedChargers  = "tp_derived_chargers"
 	TBLTPResources        = "tp_resources"
 	TBLTPStats            = "tp_stats"
 	TBLTPThresholds       = "tp_thresholds"
@@ -918,7 +911,6 @@ const (
 	CacheAccountActionPlans      = "account_action_plans"
 	CacheActionTriggers          = "action_triggers"
 	CacheSharedGroups            = "shared_groups"
-	CacheDerivedChargers         = "derived_chargers"
 	CacheResources               = "resources"
 	CacheResourceProfiles        = "resource_profiles"
 	CacheTimings                 = "timings"

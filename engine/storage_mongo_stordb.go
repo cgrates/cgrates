@@ -431,47 +431,6 @@ func (ms *MongoStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStats, e
 	})
 	return results, err
 }
-func (ms *MongoStorage) GetTPDerivedChargers(tp *utils.TPDerivedChargers) ([]*utils.TPDerivedChargers, error) {
-	filter := bson.M{"tpid": tp.TPid}
-	if tp.Direction != "" {
-		filter["direction"] = tp.Direction
-	}
-	if tp.Tenant != "" {
-		filter["tenant"] = tp.Tenant
-	}
-	if tp.Category != "" {
-		filter["category"] = tp.Category
-	}
-	if tp.Subject != "" {
-		filter["subject"] = tp.Subject
-	}
-	if tp.Account != "" {
-		filter["account"] = tp.Account
-	}
-	if tp.LoadId != "" {
-		filter["loadid"] = tp.LoadId
-	}
-	var results []*utils.TPDerivedChargers
-	err := ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(utils.TBLTPDerivedChargers).Find(sctx, filter)
-		if err != nil {
-			return err
-		}
-		for cur.Next(sctx) {
-			var el utils.TPDerivedChargers
-			err := cur.Decode(&el)
-			if err != nil {
-				return err
-			}
-			results = append(results, &el)
-		}
-		if len(results) == 0 {
-			return utils.ErrNotFound
-		}
-		return cur.Close(sctx)
-	})
-	return results, err
-}
 
 func (ms *MongoStorage) GetTPActions(tpid, id string) ([]*utils.TPActions, error) {
 	filter := bson.M{"tpid": tpid}
@@ -774,33 +733,6 @@ func (ms *MongoStorage) SetTPSharedGroups(tps []*utils.TPSharedGroups) error {
 			}
 			_, err := ms.getCol(utils.TBLTPSharedGroups).InsertOne(sctx, tp)
 			if err != nil {
-				return err
-			}
-		}
-		return nil
-	})
-}
-
-func (ms *MongoStorage) SetTPDerivedChargers(tps []*utils.TPDerivedChargers) error {
-	if len(tps) == 0 {
-		return nil
-	}
-	m := make(map[string]bool)
-	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		for _, tp := range tps {
-			if found, _ := m[tp.Direction]; !found {
-				m[tp.Direction] = true
-				if _, err := ms.getCol(utils.TBLTPDerivedChargers).DeleteMany(sctx, bson.M{
-					"tpid":      tp.TPid,
-					"direction": tp.Direction,
-					"tenant":    tp.Tenant,
-					"category":  tp.Category,
-					"account":   tp.Account,
-					"subject":   tp.Subject}); err != nil {
-					return err
-				}
-			}
-			if _, err := ms.getCol(utils.TBLTPDerivedChargers).InsertOne(sctx, tp); err != nil {
 				return err
 			}
 		}

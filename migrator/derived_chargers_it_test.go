@@ -222,7 +222,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 		//check if version was updated
 		if vrs, err := dcMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 			t.Error(err)
-		} else if vrs[utils.DerivedChargersV] != 2 {
+		} else if vrs[utils.DerivedChargersV] != 0 {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.DerivedChargersV])
 		}
 		//check if derivch was migrate correctly

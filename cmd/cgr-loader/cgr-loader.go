@@ -95,11 +95,11 @@ var (
 	flushStorDB    = flag.Bool("flush_stordb", false, "Remove tariff plan data for id from the database")
 	remove         = flag.Bool("remove", false, "Will remove instead of adding data from DB")
 
-	err           error
-	dm            *engine.DataManager
-	storDb        engine.LoadStorage
-	cacheS, userS rpcclient.RpcClientConnection
-	loader        engine.LoadReader
+	err    error
+	dm     *engine.DataManager
+	storDb engine.LoadStorage
+	cacheS rpcclient.RpcClientConnection
+	loader engine.LoadReader
 )
 
 func main() {
@@ -288,7 +288,6 @@ func main() {
 			path.Join(*dataPath, utils.ACTION_PLANS_CSV),
 			path.Join(*dataPath, utils.ACTION_TRIGGERS_CSV),
 			path.Join(*dataPath, utils.ACCOUNT_ACTIONS_CSV),
-			path.Join(*dataPath, utils.DERIVED_CHARGERS_CSV),
 			path.Join(*dataPath, utils.ResourcesCsv),
 			path.Join(*dataPath, utils.StatsCsv),
 			path.Join(*dataPath, utils.ThresholdsCsv),
@@ -330,7 +329,7 @@ func main() {
 		if err := tpReader.WriteToDatabase(*flush, *verbose, *disableReverse); err != nil {
 			log.Fatal("Could not write to database: ", err)
 		}
-		var dstIds, revDstIDs, rplIds, rpfIds, actIds, aapIDs, shgIds, dcsIds, rspIDs, resIDs,
+		var dstIds, revDstIDs, rplIds, rpfIds, actIds, aapIDs, shgIds, rspIDs, resIDs,
 			aatIDs, stqIDs, stqpIDs, trsIDs, trspfIDs, flrIDs, spfIDs, apfIDs, chargerIDs, dppIDs []string
 		if cacheS != nil {
 			dstIds, _ = tpReader.GetLoadedIds(utils.DESTINATION_PREFIX)
@@ -340,7 +339,6 @@ func main() {
 			actIds, _ = tpReader.GetLoadedIds(utils.ACTION_PREFIX)
 			aapIDs, _ = tpReader.GetLoadedIds(utils.AccountActionPlansPrefix)
 			shgIds, _ = tpReader.GetLoadedIds(utils.SHARED_GROUP_PREFIX)
-			dcsIds, _ = tpReader.GetLoadedIds(utils.DERIVEDCHARGERS_PREFIX)
 			rspIDs, _ = tpReader.GetLoadedIds(utils.ResourceProfilesPrefix)
 			resIDs, _ = tpReader.GetLoadedIds(utils.ResourcesPrefix)
 			aatIDs, _ = tpReader.GetLoadedIds(utils.ACTION_TRIGGER_PREFIX)
@@ -375,7 +373,6 @@ func main() {
 					ActionPlanIDs:         &aps,
 					AccountActionPlanIDs:  &aapIDs,
 					SharedGroupIDs:        &shgIds,
-					DerivedChargerIDs:     &dcsIds,
 					ResourceProfileIDs:    &rspIDs,
 					ResourceIDs:           &resIDs,
 					ActionTriggerIDs:      &aatIDs,

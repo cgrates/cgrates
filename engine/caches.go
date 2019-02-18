@@ -43,7 +43,6 @@ var precachedPartitions = []string{
 	utils.CacheAccountActionPlans,
 	utils.CacheActionTriggers,
 	utils.CacheSharedGroups,
-	utils.CacheDerivedChargers,
 	utils.CacheResourceProfiles,
 	utils.CacheResources,
 	utils.CacheEventResources,

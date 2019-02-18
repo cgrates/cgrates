@@ -204,7 +204,7 @@ func (m *Migrator) migrateV1DerivedChargers() (err error) {
 		return
 	}
 	// All done, update version wtih current one
-	vrs := engine.Versions{utils.DerivedChargersV: engine.CurrentDataDBVersions()[utils.DerivedChargersV]}
+	vrs := engine.Versions{utils.DerivedChargersV: 0}
 	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -214,6 +214,7 @@ func (m *Migrator) migrateV1DerivedChargers() (err error) {
 	return
 }
 
+/*
 func (m *Migrator) migrateCurrentDerivedChargers() (err error) {
 	var ids []string
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.DERIVEDCHARGERS_PREFIX)
@@ -237,34 +238,37 @@ func (m *Migrator) migrateCurrentDerivedChargers() (err error) {
 	}
 	return
 }
+*/
 
 func (m *Migrator) migrateDerivedChargers() (err error) {
-	var vrs engine.Versions
-	current := engine.CurrentDataDBVersions()
-	vrs, err = m.dmIN.DataManager().DataDB().GetVersions("")
-	if err != nil {
-		return utils.NewCGRError(utils.Migrator,
-			utils.ServerErrorCaps,
-			err.Error(),
-			fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
-	} else if len(vrs) == 0 {
-		return utils.NewCGRError(utils.Migrator,
-			utils.MandatoryIEMissingCaps,
-			utils.UndefinedVersion,
-			"version number is not defined for DerivedChargers model")
-	}
+	return m.migrateV1DerivedChargers()
+	/*
+		var vrs engine.Versions
+		current := engine.CurrentDataDBVersions()
+		vrs, err = m.dmIN.DataManager().DataDB().GetVersions("")
+		if err != nil {
+			return utils.NewCGRError(utils.Migrator,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
+		} else if len(vrs) == 0 {
+			return utils.NewCGRError(utils.Migrator,
+				utils.MandatoryIEMissingCaps,
+				utils.UndefinedVersion,
+				"version number is not defined for DerivedChargers model")
+		}
 
-	switch vrs[utils.DerivedChargersV] {
-	case 1:
-		return m.migrateV1DerivedChargers()
-	case current[utils.DerivedChargersV]:
-		if m.sameDataDB {
+		switch vrs[utils.DerivedChargersV] {
+		case 1:
+		case current[utils.DerivedChargersV]:
+			if m.sameDataDB {
+				return
+			}
+			if err := m.migrateCurrentDerivedChargers(); err != nil {
+				return err
+			}
 			return
 		}
-		if err := m.migrateCurrentDerivedChargers(); err != nil {
-			return err
-		}
 		return
-	}
-	return
+	*/
 }

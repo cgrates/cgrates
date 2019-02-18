@@ -195,7 +195,7 @@ func testUsrITMigrateAndMove(t *testing.T) {
 		//check if version was updated
 		if vrs, err := usrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 			t.Error(err)
-		} else if vrs[utils.User] != 2 {
+		} else if vrs[utils.User] != 0 {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.User])
 		}
 		//check if user was migrate correctly

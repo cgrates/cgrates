@@ -154,8 +154,6 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			err = m.migrateTPactionplans()
 		case utils.MetaTpActions:
 			err = m.migrateTPactions()
-		case utils.MetaTpDerivedChargers:
-			err = m.migrateTPderivedchargers()
 		case utils.MetaTpThresholds:
 			err = m.migrateTPthresholds()
 		case utils.MetaTpSuppliers:
@@ -264,9 +262,6 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			if err := m.migrateTPactions(); err != nil {
 				log.Print("ERROR: ", utils.MetaTpActions, " ", err)
 			}
-			if err := m.migrateTPderivedchargers(); err != nil {
-				log.Print("ERROR: ", utils.MetaTpDerivedChargers, " ", err)
-			}
 			if err := m.migrateTPthresholds(); err != nil {
 				log.Print("ERROR: ", utils.MetaTpThresholds, " ", err)
 			}
@@ -290,9 +285,6 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			}
 			if err := m.migrateTpTimings(); err != nil {
 				log.Print("ERROR: ", utils.MetaTpTimings, " ", err)
-			}
-			if err := m.migrateTPderivedchargers(); err != nil {
-				log.Print("ERROR: ", utils.MetaTpDerivedChargersV, " ", err)
 			}
 			if err := m.migrateTPDestinations(); err != nil {
 				log.Print("ERROR: ", utils.MetaTpDestinations, " ", err)

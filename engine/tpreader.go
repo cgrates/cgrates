@@ -45,7 +45,6 @@ type TpReader struct {
 	ratingPlans        map[string]*RatingPlan
 	ratingProfiles     map[string]*RatingProfile
 	sharedGroups       map[string]*SharedGroup
-	derivedChargers    map[string]*utils.DerivedChargers
 	resProfiles        map[utils.TenantID]*utils.TPResource
 	sqProfiles         map[utils.TenantID]*utils.TPStats
 	thProfiles         map[utils.TenantID]*utils.TPThreshold
@@ -125,7 +124,6 @@ func (tpr *TpReader) Init() {
 	tpr.ratingProfiles = make(map[string]*RatingProfile)
 	tpr.sharedGroups = make(map[string]*SharedGroup)
 	tpr.accountActions = make(map[string]*Account)
-	tpr.derivedChargers = make(map[string]*utils.DerivedChargers)
 	tpr.resProfiles = make(map[utils.TenantID]*utils.TPResource)
 	tpr.sqProfiles = make(map[utils.TenantID]*utils.TPStats)
 	tpr.thProfiles = make(map[utils.TenantID]*utils.TPThreshold)
@@ -1100,48 +1098,6 @@ func (tpr *TpReader) LoadAccountActions() (err error) {
 	return nil
 }
 
-func (tpr *TpReader) LoadDerivedChargersFiltered(filter *utils.TPDerivedChargers, save bool) (err error) {
-	tps, err := tpr.lr.GetTPDerivedChargers(filter)
-	if err != nil {
-		return err
-	}
-	storDcs, err := MapTPDerivedChargers(tps)
-	if err != nil {
-		return err
-	}
-	for _, tpDcs := range storDcs {
-		tag := tpDcs.GetDerivedChargersKey()
-		if _, hasIt := tpr.derivedChargers[tag]; !hasIt {
-			tpr.derivedChargers[tag] = &utils.DerivedChargers{
-				DestinationIDs: make(utils.StringMap),
-				Chargers:       make([]*utils.DerivedCharger, 0),
-			} // Load object map since we use this method also from LoadDerivedChargers
-		}
-		for _, tpDc := range tpDcs.DerivedChargers {
-			dc, err := utils.NewDerivedCharger(tpDc.RunId, tpDc.RunFilters, tpDc.ReqTypeField, tpDc.DirectionField, tpDc.TenantField, tpDc.CategoryField,
-				tpDc.AccountField, tpDc.SubjectField, tpDc.DestinationField, tpDc.SetupTimeField, tpDc.PddField, tpDc.AnswerTimeField, tpDc.UsageField, tpDc.SupplierField,
-				tpDc.DisconnectCauseField, tpDc.RatedField, tpDc.CostField)
-			if err != nil {
-				return err
-			}
-			tpr.derivedChargers[tag].DestinationIDs.Copy(utils.ParseStringMap(tpDcs.DestinationIds))
-			tpr.derivedChargers[tag].Chargers = append(tpr.derivedChargers[tag].Chargers, dc)
-		}
-	}
-	if save {
-		for dcsKey, dcs := range tpr.derivedChargers {
-			if err := tpr.dm.DataDB().SetDerivedChargers(dcsKey, dcs, utils.NonTransactional); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
-func (tpr *TpReader) LoadDerivedChargers() (err error) {
-	return tpr.LoadDerivedChargersFiltered(&utils.TPDerivedChargers{TPid: tpr.tpid}, false)
-}
-
 func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) (err error) {
 	rls, err := tpr.lr.GetTPResources(tpr.tpid, "", tag)
 	if err != nil {
@@ -1361,9 +1317,6 @@ func (tpr *TpReader) LoadAll() (err error) {
 	if err = tpr.LoadAccountActions(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
-	if err = tpr.LoadDerivedChargers(); err != nil && err.Error() != utils.NotFoundCaps {
-		return
-	}
 	if err = tpr.LoadFilters(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
@@ -1555,18 +1508,6 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		}
 		if verbose {
 			log.Println("\t", ub.ID)
-		}
-	}
-	if verbose {
-		log.Print("Derived Chargers:")
-	}
-	for key, dcs := range tpr.derivedChargers {
-		err = tpr.dm.DataDB().SetDerivedChargers(key, dcs, utils.NonTransactional)
-		if err != nil {
-			return err
-		}
-		if verbose {
-			log.Print("\t", key)
 		}
 	}
 	if verbose {
@@ -1822,8 +1763,6 @@ func (tpr *TpReader) ShowStatistics() {
 	log.Print("Action triggers: ", len(tpr.actionsTriggers))
 	// account actions
 	log.Print("Account actions: ", len(tpr.accountActions))
-	// derivedChargers
-	log.Print("Derived Chargers: ", len(tpr.derivedChargers))
 	// resource profiles
 	log.Print("ResourceProfiles: ", len(tpr.resProfiles))
 	// stats
@@ -1897,14 +1836,6 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(tpr.acntActionPlans))
 		i := 0
 		for k := range tpr.acntActionPlans {
-			keys[i] = k
-			i++
-		}
-		return keys, nil
-	case utils.DERIVEDCHARGERS_PREFIX: // derived chargers
-		keys := make([]string, len(tpr.derivedChargers))
-		i := 0
-		for k := range tpr.derivedChargers {
 			keys[i] = k
 			i++
 		}
@@ -2097,18 +2028,6 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 		}
 		if verbose {
 			log.Println("\t", ub.ID)
-		}
-	}
-	if verbose {
-		log.Print("Derived Chargers:")
-	}
-	for key := range tpr.derivedChargers {
-		err = tpr.dm.RemoveDerivedChargers(key, utils.NonTransactional)
-		if err != nil {
-			return err
-		}
-		if verbose {
-			log.Print("\t", key)
 		}
 	}
 	if verbose {

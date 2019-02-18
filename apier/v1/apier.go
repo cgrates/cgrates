@@ -204,23 +204,6 @@ func (self *ApierV1) LoadDestination(attrs AttrLoadDestination, reply *string) e
 	return nil
 }
 
-// Load derived chargers from storDb into dataDb.
-func (self *ApierV1) LoadDerivedChargers(attrs utils.TPDerivedChargers, reply *string) error {
-	if len(attrs.TPid) == 0 {
-		return utils.NewErrMandatoryIeMissing("TPid")
-	}
-	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
-		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone)
-	if err := dbReader.LoadDerivedChargersFiltered(&attrs, true); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	if err := self.DataManager.CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX, []string{attrs.GetDerivedChargersKey()}, true); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	*reply = OK
-	return nil
-}
-
 type AttrLoadRatingPlan struct {
 	TPid         string
 	RatingPlanId string
@@ -311,7 +294,6 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 		utils.REVERSE_DESTINATION_PREFIX,
 		utils.ACTION_PLAN_PREFIX,
 		utils.AccountActionPlansPrefix,
-		utils.DERIVEDCHARGERS_PREFIX,
 	} {
 		loadedIDs, _ := dbReader.GetLoadedIds(prfx)
 		if err := self.DataManager.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
@@ -747,10 +729,6 @@ func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 	if err = self.reloadCache(utils.SHARED_GROUP_PREFIX, attrs.SharedGroupIDs); err != nil {
 		return
 	}
-	// DerivedChargers
-	if err = self.reloadCache(utils.DERIVEDCHARGERS_PREFIX, attrs.DerivedChargerIDs); err != nil {
-		return
-	}
 	// ResourceProfiles
 	if err = self.reloadCache(utils.ResourceProfilesPrefix, attrs.ResourceProfileIDs); err != nil {
 		return
@@ -850,11 +828,6 @@ func (self *ApierV1) LoadCache(args utils.AttrReloadCache, reply *string) (err e
 	} else {
 		sgIDs = *args.SharedGroupIDs
 	}
-	if args.DerivedChargerIDs == nil {
-		dcIDs = nil
-	} else {
-		dcIDs = *args.DerivedChargerIDs
-	}
 	if args.ResourceProfileIDs == nil {
 		rspIDs = nil
 	} else {
@@ -945,7 +918,6 @@ func (self *ApierV1) FlushCache(args utils.AttrReloadCache, reply *string) (err 
 	flushCache(utils.CacheActionPlans, args.ActionPlanIDs)
 	flushCache(utils.CacheActionTriggers, args.ActionTriggerIDs)
 	flushCache(utils.CacheSharedGroups, args.SharedGroupIDs)
-	flushCache(utils.CacheDerivedChargers, args.DerivedChargerIDs)
 	flushCache(utils.CacheResourceProfiles, args.ResourceProfileIDs)
 	flushCache(utils.CacheResources, args.ResourceIDs)
 	flushCache(utils.CacheStatQueues, args.StatsQueueIDs)
@@ -972,7 +944,6 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	cs.ActionPlans = len(engine.Cache.GetItemIDs(utils.CacheActionPlans, ""))
 	cs.AccountActionPlans = len(engine.Cache.GetItemIDs(utils.CacheAccountActionPlans, ""))
 	cs.SharedGroups = len(engine.Cache.GetItemIDs(utils.CacheSharedGroups, ""))
-	cs.DerivedChargers = len(engine.Cache.GetItemIDs(utils.CacheDerivedChargers, ""))
 	cs.ResourceProfiles = len(engine.Cache.GetItemIDs(utils.CacheResourceProfiles, ""))
 	cs.Resources = len(engine.Cache.GetItemIDs(utils.CacheResources, ""))
 	cs.StatQueues = len(engine.Cache.GetItemIDs(utils.CacheStatQueues, ""))
@@ -1059,12 +1030,6 @@ func (v1 *ApierV1) GetCacheKeys(args utils.ArgsCacheKeys, reply *utils.ArgsCache
 		ids := getCacheKeys(utils.CacheSharedGroups, args.SharedGroupIDs, args.Paginator)
 		if len(ids) != 0 {
 			reply.SharedGroupIDs = &ids
-		}
-	}
-	if args.DerivedChargerIDs != nil {
-		ids := getCacheKeys(utils.CacheDerivedChargers, args.DerivedChargerIDs, args.Paginator)
-		if len(ids) != 0 {
-			reply.DerivedChargerIDs = &ids
 		}
 	}
 	if args.ResourceProfileIDs != nil {
@@ -1164,7 +1129,6 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 			path.Join(attrs.FolderPath, utils.ACTION_PLANS_CSV),
 			path.Join(attrs.FolderPath, utils.ACTION_TRIGGERS_CSV),
 			path.Join(attrs.FolderPath, utils.ACCOUNT_ACTIONS_CSV),
-			path.Join(attrs.FolderPath, utils.DERIVED_CHARGERS_CSV),
 			path.Join(attrs.FolderPath, utils.ResourcesCsv),
 			path.Join(attrs.FolderPath, utils.StatsCsv),
 			path.Join(attrs.FolderPath, utils.ThresholdsCsv),
@@ -1197,7 +1161,6 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		utils.REVERSE_DESTINATION_PREFIX,
 		utils.ACTION_PLAN_PREFIX,
 		utils.AccountActionPlansPrefix,
-		utils.DERIVEDCHARGERS_PREFIX,
 	} {
 		loadedIDs, _ := loader.GetLoadedIds(prfx)
 		if err := self.DataManager.CacheDataFromDB(prfx, loadedIDs, true); err != nil {

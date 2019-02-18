@@ -42,12 +42,10 @@ var (
 var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITFlush,
 	testOnStorITIsDBEmpty,
-	testOnStorITSetGetDerivedCharges,
 	testOnStorITCacheDestinations,
 	testOnStorITCacheReverseDestinations,
 	testOnStorITCacheActionPlan,
 	testOnStorITCacheAccountActionPlans,
-	testOnStorITCacheDerivedChargers,
 
 	// ToDo: test cache flush for a prefix
 	// ToDo: testOnStorITLoadAccountingCache
@@ -134,46 +132,6 @@ func testOnStorITIsDBEmpty(t *testing.T) {
 		t.Error(err)
 	} else if test != true {
 		t.Errorf("\nExpecting: true got :%+v", test)
-	}
-}
-
-func testOnStorITSetGetDerivedCharges(t *testing.T) {
-	keyCharger1 := utils.ConcatenatedKey("*out", "cgrates.org", "call", "dan", "dan")
-	if _, err := onStor.GetDerivedChargers(keyCharger1, true, utils.NonTransactional); err == nil {
-		t.Error("DC exists")
-	}
-	charger1 := &utils.DerivedChargers{DestinationIDs: make(utils.StringMap),
-		Chargers: []*utils.DerivedCharger{
-			{RunID: "extra1", RequestTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
-				AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
-			{RunID: "extra2", RequestTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
-				AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
-		}}
-	if err := onStor.DataDB().SetDerivedChargers(keyCharger1, charger1, utils.NonTransactional); err != nil {
-		t.Error("Error on setting DerivedChargers", err.Error())
-	}
-	// Retrieve from db
-	if rcvCharger, err := onStor.GetDerivedChargers(keyCharger1, true, utils.NonTransactional); err != nil {
-		t.Error("Error when retrieving DerivedCHarger", err.Error())
-	} else if !reflect.DeepEqual(rcvCharger, charger1) {
-		for i, eChrg := range charger1.Chargers {
-			if !reflect.DeepEqual(eChrg, rcvCharger.Chargers[i]) {
-				t.Logf("Expecting: %+v, received: %+v", eChrg, rcvCharger.Chargers[i])
-			}
-		}
-		t.Errorf("Expecting %v, received: %v", charger1, rcvCharger)
-	}
-	// Retrieve from cache
-	if rcvCharger, err := onStor.GetDerivedChargers(keyCharger1, false, utils.NonTransactional); err != nil {
-		t.Error("Error when retrieving DerivedCHarger", err.Error())
-	} else if !reflect.DeepEqual(rcvCharger, charger1) {
-		t.Errorf("Expecting %v, received: %v", charger1, rcvCharger)
-	}
-	if err := onStor.RemoveDerivedChargers(keyCharger1, utils.NonTransactional); err != nil {
-		t.Error(err)
-	}
-	if _, rcvErr := onStor.GetDerivedChargers(keyCharger1, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
 	}
 }
 
@@ -342,36 +300,6 @@ func testOnStorITCacheActionTriggers(t *testing.T) {
 		t.Error("Did not cache")
 	} else if rcv := itm.(ActionTriggers); !reflect.DeepEqual(ats, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", ats, rcv)
-	}
-}
-
-func testOnStorITCacheDerivedChargers(t *testing.T) {
-	dcs := &utils.DerivedChargers{
-		DestinationIDs: make(utils.StringMap),
-		Chargers: []*utils.DerivedCharger{
-			{RunID: "extra1", RunFilters: "^filteredHeader1/filterValue1/", RequestTypeField: "^prepaid", DirectionField: utils.META_DEFAULT,
-				TenantField: utils.META_DEFAULT, CategoryField: utils.META_DEFAULT, AccountField: "rif", SubjectField: "rif", DestinationField: utils.META_DEFAULT,
-				SetupTimeField: utils.META_DEFAULT, PDDField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT,
-				SupplierField: utils.META_DEFAULT, DisconnectCauseField: utils.META_DEFAULT, CostField: utils.META_DEFAULT, PreRatedField: utils.META_DEFAULT},
-			{RunID: "extra2", RequestTypeField: utils.META_DEFAULT, DirectionField: utils.META_DEFAULT, TenantField: utils.META_DEFAULT,
-				CategoryField: utils.META_DEFAULT, AccountField: "ivo", SubjectField: "ivo", DestinationField: utils.META_DEFAULT,
-				SetupTimeField: utils.META_DEFAULT, PDDField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT,
-				SupplierField: utils.META_DEFAULT, DisconnectCauseField: utils.META_DEFAULT, CostField: utils.META_DEFAULT, PreRatedField: utils.META_DEFAULT},
-		}}
-	keyDCS := utils.ConcatenatedKey("*out", "itsyscom.com", "call", "dan", "dan")
-	if err := onStor.DataDB().SetDerivedChargers(keyDCS, dcs, utils.NonTransactional); err != nil {
-		t.Error(err)
-	}
-	if _, hasIt := Cache.Get(utils.CacheDerivedChargers, keyDCS); hasIt {
-		t.Error("Already in cache")
-	}
-	if err := onStor.CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX, []string{keyDCS}, false); err != nil {
-		t.Error(err)
-	}
-	if itm, hasIt := Cache.Get(utils.CacheDerivedChargers, keyDCS); !hasIt {
-		t.Error("Did not cache")
-	} else if rcv := itm.(*utils.DerivedChargers); !reflect.DeepEqual(dcs, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", dcs, rcv)
 	}
 }
 

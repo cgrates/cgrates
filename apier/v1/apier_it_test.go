@@ -1336,7 +1336,6 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 			rcvStats.Actions != 13 ||
 			rcvStats.ActionPlans != 7 ||
 			rcvStats.SharedGroups != 0 ||
-			rcvStats.DerivedChargers != 3 ||
 			rcvStats.ResourceProfiles != 3 ||
 			rcvStats.Resources != 3 {
 			t.Errorf("Expecting: %+v, received: %+v", expStats, rcvStats)
@@ -1530,49 +1529,6 @@ func TestApierGetCallCostLog(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, cc) {
 		t.Errorf("Expecting %s ,recived %s", utils.ToJSON(expected), utils.ToJSON(cc))
-	}
-}
-
-func TestApierITSetDC(t *testing.T) {
-	dcs1 := []*utils.DerivedCharger{
-		{RunID: "extra1", RequestTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
-			AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
-		{RunID: "extra2", RequestTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
-			AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
-	}
-	attrs := AttrSetDerivedChargers{Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "dan", Subject: "dan", DerivedChargers: dcs1, Overwrite: true}
-	var reply string
-	if err := rater.Call("ApierV1.SetDerivedChargers", attrs, &reply); err != nil {
-		t.Error("Unexpected error", err.Error())
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned", reply)
-	}
-}
-
-func TestApierITGetDC(t *testing.T) {
-	attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "dan", Subject: "dan"}
-	eDcs := utils.DerivedChargers{DestinationIDs: utils.NewStringMap(),
-		Chargers: []*utils.DerivedCharger{
-			{RunID: "extra1", RequestTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
-				AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
-			{RunID: "extra2", RequestTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
-				AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
-		}}
-	var dcs utils.DerivedChargers
-	if err := rater.Call("ApierV1.GetDerivedChargers", attrs, &dcs); err != nil {
-		t.Error("Unexpected error", err.Error())
-	} else if !reflect.DeepEqual(dcs, eDcs) {
-		t.Errorf("Expecting: %v, received: %v", eDcs, dcs)
-	}
-}
-
-func TestApierITRemDC(t *testing.T) {
-	attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "dan", Subject: "dan"}
-	var reply string
-	if err := rater.Call("ApierV1.RemDerivedChargers", attrs, &reply); err != nil {
-		t.Error("Unexpected error", err.Error())
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned", reply)
 	}
 }
 

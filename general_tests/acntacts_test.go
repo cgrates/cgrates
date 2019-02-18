@@ -47,7 +47,6 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,false,false,10`
 	actionPlans := `TOPUP10_AT,TOPUP10_AC,ASAP,10`
 	actionTriggers := ``
 	accountActions := `cgrates.org,1,TOPUP10_AT,,,`
-	derivedCharges := ``
 	resLimits := ``
 	stats := ``
 	thresholds := ``
@@ -57,7 +56,7 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,false,false,10`
 	chargerProfiles := ``
 	csvr := engine.NewTpReader(dbAcntActs.DataDB(), engine.NewStringCSVStorage(',', destinations, timings,
 		rates, destinationRates, ratingPlans, ratingProfiles, sharedGroups,
-		actions, actionPlans, actionTriggers, accountActions, derivedCharges,
+		actions, actionPlans, actionTriggers, accountActions,
 		resLimits, stats, thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``), "", "")
 	if err := csvr.LoadAll(); err != nil {
 		t.Fatal(err)

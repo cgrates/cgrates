@@ -353,72 +353,6 @@ type TPSharedGroup struct {
 	RatingSubject string
 }
 
-type TPDerivedChargers struct {
-	TPid            string
-	LoadId          string
-	Direction       string
-	Tenant          string
-	Category        string
-	Account         string
-	Subject         string
-	DestinationIds  string
-	DerivedChargers []*TPDerivedCharger
-}
-
-type TPDerivedCharger struct {
-	RunId                string
-	RunFilters           string
-	ReqTypeField         string
-	DirectionField       string
-	TenantField          string
-	CategoryField        string
-	AccountField         string
-	SubjectField         string
-	DestinationField     string
-	SetupTimeField       string
-	PddField             string
-	AnswerTimeField      string
-	UsageField           string
-	SupplierField        string
-	DisconnectCauseField string
-	CostField            string
-	RatedField           string
-}
-
-// Key used in dataDb to identify DerivedChargers set
-func (tpdc *TPDerivedChargers) GetDerivedChargersKey() string {
-	return DerivedChargersKey(tpdc.Direction, tpdc.Tenant, tpdc.Category, tpdc.Account, tpdc.Subject)
-
-}
-
-func (tpdc *TPDerivedChargers) GetDerivedChargesId() string {
-	return tpdc.LoadId +
-		CONCATENATED_KEY_SEP +
-		tpdc.Direction +
-		CONCATENATED_KEY_SEP +
-		tpdc.Tenant +
-		CONCATENATED_KEY_SEP +
-		tpdc.Category +
-		CONCATENATED_KEY_SEP +
-		tpdc.Account +
-		CONCATENATED_KEY_SEP +
-		tpdc.Subject
-}
-
-func (tpdc *TPDerivedChargers) SetDerivedChargersId(id string) error {
-	ids := strings.Split(id, CONCATENATED_KEY_SEP)
-	if len(ids) != 6 {
-		return fmt.Errorf("Wrong TP Derived Charge Id: %s", id)
-	}
-	tpdc.LoadId = ids[0]
-	tpdc.Direction = ids[1]
-	tpdc.Tenant = ids[2]
-	tpdc.Category = ids[3]
-	tpdc.Account = ids[4]
-	tpdc.Subject = ids[5]
-	return nil
-}
-
 type TPActionPlan struct {
 	TPid       string            // Tariff plan id
 	ID         string            // ActionPlan id
@@ -528,7 +462,6 @@ type ArgsCache struct {
 	AccountActionPlanIDs  *[]string
 	ActionTriggerIDs      *[]string
 	SharedGroupIDs        *[]string
-	DerivedChargerIDs     *[]string
 	ResourceProfileIDs    *[]string
 	ResourceIDs           *[]string
 	StatsQueueIDs         *[]string
@@ -568,7 +501,6 @@ type CacheStats struct {
 	ActionPlans         int
 	AccountActionPlans  int
 	SharedGroups        int
-	DerivedChargers     int
 	ResourceProfiles    int
 	Resources           int
 	StatQueues          int
@@ -752,10 +684,6 @@ type AttrImportTPFromFolder struct {
 
 type AttrGetDestination struct {
 	Id string
-}
-
-type AttrDerivedChargers struct {
-	Direction, Tenant, Category, Account, Subject, Destination string
 }
 
 func NewTAFromAccountKey(accountKey string) (*TenantAccount, error) {

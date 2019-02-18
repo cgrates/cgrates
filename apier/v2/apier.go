@@ -85,31 +85,6 @@ func (self *ApierV2) LoadAccountActions(attrs AttrLoadAccountActions, reply *str
 	return nil
 }
 
-type AttrLoadDerivedChargers struct {
-	TPid              string
-	DerivedChargersId string
-}
-
-// Load derived chargers from storDb into dataDb.
-func (self *ApierV2) LoadDerivedChargers(attrs AttrLoadDerivedChargers, reply *string) error {
-	if len(attrs.TPid) == 0 {
-		return utils.NewErrMandatoryIeMissing("TPid")
-	}
-	tpDc := &utils.TPDerivedChargers{TPid: attrs.TPid}
-	tpDc.SetDerivedChargersId(attrs.DerivedChargersId)
-	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
-		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone)
-	if err := dbReader.LoadDerivedChargersFiltered(tpDc, true); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	if err := self.DataManager.CacheDataFromDB(utils.DERIVEDCHARGERS_PREFIX,
-		[]string{attrs.DerivedChargersId}, true); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	*reply = v1.OK
-	return nil
-}
-
 func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, reply *utils.LoadInstance) error {
 	if len(attrs.FolderPath) == 0 {
 		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "FolderPath")
@@ -135,7 +110,6 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 			path.Join(attrs.FolderPath, utils.ACTION_PLANS_CSV),
 			path.Join(attrs.FolderPath, utils.ACTION_TRIGGERS_CSV),
 			path.Join(attrs.FolderPath, utils.ACCOUNT_ACTIONS_CSV),
-			path.Join(attrs.FolderPath, utils.DERIVED_CHARGERS_CSV),
 			path.Join(attrs.FolderPath, utils.ResourcesCsv),
 			path.Join(attrs.FolderPath, utils.StatsCsv),
 			path.Join(attrs.FolderPath, utils.ThresholdsCsv),
@@ -169,7 +143,6 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		utils.REVERSE_DESTINATION_PREFIX,
 		utils.ACTION_PLAN_PREFIX,
 		utils.AccountActionPlansPrefix,
-		utils.DERIVEDCHARGERS_PREFIX,
 	} {
 		loadedIDs, _ := loader.GetLoadedIds(prfx)
 		if err := self.DataManager.CacheDataFromDB(prfx, loadedIDs, true); err != nil {

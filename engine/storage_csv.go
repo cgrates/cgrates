@@ -35,8 +35,7 @@ type CSVStorage struct {
 	destinationsFn, ratesFn, destinationratesFn, timingsFn,
 	destinationratetimingsFn, ratingprofilesFn,
 	sharedgroupsFn, actionsFn, actiontimingsFn, actiontriggersFn,
-	accountactionsFn, derivedChargersFn,
-	resProfilesFn, statsFn, thresholdsFn,
+	accountactionsFn, resProfilesFn, statsFn, thresholdsFn,
 	filterFn, suppProfilesFn, attributeProfilesFn,
 	chargerProfilesFn, dispatcherProfilesFn string
 }
@@ -45,7 +44,7 @@ func NewFileCSVStorage(sep rune,
 	destinationsFn, timingsFn, ratesFn, destinationratesFn,
 	destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn,
 	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn,
-	derivedChargersFn, resProfilesFn, statsFn, thresholdsFn,
+	resProfilesFn, statsFn, thresholdsFn,
 	filterFn, suppProfilesFn, attributeProfilesFn,
 	chargerProfilesFn, dispatcherProfilesFn string) *CSVStorage {
 	return &CSVStorage{
@@ -62,7 +61,6 @@ func NewFileCSVStorage(sep rune,
 		actiontimingsFn:          actiontimingsFn,
 		actiontriggersFn:         actiontriggersFn,
 		accountactionsFn:         accountactionsFn,
-		derivedChargersFn:        derivedChargersFn,
 		resProfilesFn:            resProfilesFn,
 		statsFn:                  statsFn,
 		thresholdsFn:             thresholdsFn,
@@ -78,8 +76,7 @@ func NewStringCSVStorage(sep rune,
 	destinationsFn, timingsFn, ratesFn, destinationratesFn,
 	destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn,
 	actionsFn, actiontimingsFn, actiontriggersFn,
-	accountactionsFn, derivedChargersFn,
-	resProfilesFn, statsFn,
+	accountactionsFn, resProfilesFn, statsFn,
 	thresholdsFn, filterFn, suppProfilesFn,
 	attributeProfilesFn, chargerProfilesFn,
 	dispatcherProfilesFn string) *CSVStorage {
@@ -87,8 +84,8 @@ func NewStringCSVStorage(sep rune,
 		ratesFn, destinationratesFn, destinationratetimingsFn,
 		ratingprofilesFn, sharedgroupsFn, actionsFn,
 		actiontimingsFn, actiontriggersFn, accountactionsFn,
-		derivedChargersFn, resProfilesFn, statsFn,
-		thresholdsFn, filterFn, suppProfilesFn, attributeProfilesFn,
+		resProfilesFn, statsFn, thresholdsFn, filterFn,
+		suppProfilesFn, attributeProfilesFn,
 		chargerProfilesFn, dispatcherProfilesFn)
 	c.readerFunc = openStringCSVStorage
 	return c
@@ -461,41 +458,6 @@ func (csvs *CSVStorage) GetTPAccountActions(filter *utils.TPAccountActions) ([]*
 		return nil, err
 	} else {
 		return ats, nil
-	}
-}
-
-func (csvs *CSVStorage) GetTPDerivedChargers(filter *utils.TPDerivedChargers) ([]*utils.TPDerivedChargers, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.derivedChargersFn, csvs.sep, getColumnCount(TpDerivedCharger{}))
-	if err != nil {
-		//log.Print("Could not load derivedChargers file: ", err)
-		// allow writing of the other values
-		return nil, nil
-	}
-	if fp != nil {
-		defer fp.Close()
-	}
-	var tpDerivedChargers TpDerivedChargers
-	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
-		if err != nil {
-			log.Printf("bad line in %s, %s\n", csvs.derivedChargersFn, err.Error())
-			return nil, err
-		}
-		if tp, err := csvLoad(TpDerivedCharger{}, record); err != nil {
-			log.Print("error loading derived charger: ", err)
-			return nil, err
-		} else {
-			dc := tp.(TpDerivedCharger)
-			if filter != nil {
-				dc.Tpid = filter.TPid
-				dc.Loadid = filter.LoadId
-			}
-			tpDerivedChargers = append(tpDerivedChargers, dc)
-		}
-	}
-	if dcs, err := tpDerivedChargers.AsTPDerivedChargers(); err != nil {
-		return nil, err
-	} else {
-		return dcs, nil
 	}
 }
 

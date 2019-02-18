@@ -126,7 +126,6 @@ const CGRATES_CFG_JSON = `
 	"account_action_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// account action plans index caching
 	"action_triggers": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// action triggers caching
 	"shared_groups": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// shared groups caching
-	"derived_chargers": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// derived charging rule caching
 	"timings": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// timings caching
 	"resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control resource profiles caching
 	"resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control resources caching
