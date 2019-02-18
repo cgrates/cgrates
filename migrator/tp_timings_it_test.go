@@ -129,7 +129,7 @@ func testTpTimITPopulate(t *testing.T) {
 }
 
 func testTpTimITMove(t *testing.T) {
-	err, _ := tpTimMigrator.Migrate([]string{utils.MetaTpTiming})
+	err, _ := tpTimMigrator.Migrate([]string{utils.MetaTpTimings})
 	if err != nil {
 		t.Error("Error when migrating TpTimings ", err.Error())
 	}
