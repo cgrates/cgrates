@@ -48,7 +48,7 @@ func NewMigrator(
 	return m, err
 }
 
-var MetaAlias = "*Alias"
+var MetaAlias = "*alias"
 
 type Migrator struct {
 	dmIN       MigratorDataDB

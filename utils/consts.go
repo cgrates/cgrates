@@ -479,7 +479,7 @@ const (
 	MetaTiming                   = "*Timing"
 	MetaRQF                      = "*RQF"
 	MetaResource                 = "*Resource"
-	MetaUser                     = "*User"
+	MetaUser                     = "*user"
 	MetaSubscribers              = "*Subscribers"
 	MetaDerivedChargersV         = "*DerivedChargers"
 	MetaStorDB                   = "*stordb"
