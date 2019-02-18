@@ -77,9 +77,9 @@ func (mgSQL *migratorSQL) setV1CDR(v1Cdr *v1Cdrs) (err error) {
 }
 
 func (mgSQL *migratorSQL) renameV1SMCosts() (err error) {
-	qry := "RENAME TABLE sm_costs TO sessions_costs;"
+	qry := "RENAME TABLE sm_costs TO session_costs;"
 	if mgSQL.StorDB().GetStorageType() == utils.POSTGRES {
-		qry = "ALTER TABLE sm_costs RENAME TO sessions_costs"
+		qry = "ALTER TABLE sm_costs RENAME TO session_costs"
 	}
 	if _, err := mgSQL.sqlStorage.Db.Exec(qry); err != nil {
 		return err
@@ -106,7 +106,7 @@ func (mgSQL *migratorSQL) createV1SMCosts() (err error) {
 	);
 		`
 	}
-	if _, err := mgSQL.sqlStorage.Db.Exec("DROP TABLE IF EXISTS sessions_costs;"); err != nil {
+	if _, err := mgSQL.sqlStorage.Db.Exec("DROP TABLE IF EXISTS session_costs;"); err != nil {
 		return err
 	}
 	if _, err := mgSQL.sqlStorage.Db.Exec("DROP TABLE IF EXISTS sm_costs;"); err != nil {
@@ -120,7 +120,7 @@ func (mgSQL *migratorSQL) createV1SMCosts() (err error) {
 
 func (mgSQL *migratorSQL) getV2SMCost() (v2Cost *v2SessionsCost, err error) {
 	if mgSQL.rowIter == nil {
-		mgSQL.rowIter, err = mgSQL.sqlStorage.Db.Query("SELECT * FROM sessions_costs")
+		mgSQL.rowIter, err = mgSQL.sqlStorage.Db.Query("SELECT * FROM session_costs")
 		if err != nil {
 			return nil, err
 		}

@@ -24,6 +24,9 @@
 	"rals_conns": [], 					// no rating support, just *raw CDR testing
 },
 
+"chargers": {
+	"enabled": true,
+},
 
  "cdrc": [
  	{

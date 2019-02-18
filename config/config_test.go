@@ -511,8 +511,8 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	if expected := []*HaPoolConfig{{Address: utils.MetaInternal}}; !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSRaterConns, expected) {
 		t.Errorf("Expecting: %+v , received: %+v", expected, cgrCfg.CdrsCfg().CDRSRaterConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSChargerSConns, eHaPoolCfg) {
-		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().CDRSChargerSConns)
+	if expected := []*HaPoolConfig{{Address: utils.MetaInternal}}; !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSChargerSConns, expected) {
+		t.Errorf("Expecting: %+v , received: %+v", expected, cgrCfg.CdrsCfg().CDRSChargerSConns)
 	}
 	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSPubSubSConns, eHaPoolCfg) {
 		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().CDRSPubSubSConns)

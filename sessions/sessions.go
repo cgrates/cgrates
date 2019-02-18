@@ -389,7 +389,8 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 	// post the CDRs
 	for _, cgrEv := range cgrEvs {
 		var reply string
-		if err = sS.cdrS.Call(utils.CdrsV2ProcessCDR, cgrEv, &reply); err != nil {
+		if err = sS.cdrS.Call(utils.CDRsV2ProcessCDR,
+			&engine.ArgV2ProcessCDR{CGREvent: *cgrEv}, &reply); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> could not post CDR for event %s, err: %s",
@@ -611,8 +612,8 @@ func (sS *SessionS) storeSCost(s *Session, sRunIdx int) (err error) {
 		CostDetails: sr.EventCost,
 	}
 	var reply string
-	if err := sS.cdrS.Call(utils.CdrsV2StoreSMCost,
-		engine.ArgsV2CDRSStoreSMCost{Cost: smCost,
+	if err := sS.cdrS.Call(utils.CDRsV2StoreSessionCost,
+		&engine.ArgsV2CDRSStoreSMCost{Cost: smCost,
 			CheckDuplicate: true}, &reply); err != nil {
 		if err == utils.ErrExists {
 			utils.Logger.Warning(
@@ -1307,7 +1308,7 @@ func (sS *SessionS) processCDR(tnt string, ev *engine.SafEvent) (err error) {
 		Event:  ev.AsMapInterface(),
 	}
 	var reply string
-	return sS.cdrS.Call(utils.CdrsV2ProcessCDR, cgrEv, &reply)
+	return sS.cdrS.Call(utils.CDRsV2ProcessCDR, &engine.ArgV2ProcessCDR{CGREvent: *cgrEv}, &reply)
 }
 
 // APIs start here
@@ -2200,7 +2201,7 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 	defer sS.respCache.Cache(cacheKey,
 		&utils.ResponseCacheItem{Value: rply, Err: err})
 
-	return sS.cdrS.Call(utils.CdrsV2ProcessCDR, cgrEv, rply)
+	return sS.cdrS.Call(utils.CDRsV2ProcessCDR, &engine.ArgV2ProcessCDR{CGREvent: *cgrEv}, rply)
 }
 
 // NewV1ProcessEventArgs is a constructor for EventArgs used by ProcessEvent

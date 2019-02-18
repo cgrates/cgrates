@@ -135,7 +135,7 @@ func testCDReAddCDRs(t *testing.T) {
 	}
 	for _, cdr := range storedCdrs {
 		var reply string
-		if err := cdreRPC.Call("CdrsV1.ProcessCDR", cdr, &reply); err != nil {
+		if err := cdreRPC.Call("CDRsV1.ProcessCDR", cdr, &reply); err != nil {
 			t.Error("Unexpected error: ", err.Error())
 		} else if reply != utils.OK {
 			t.Error("Unexpected reply received: ", reply)
@@ -152,7 +152,7 @@ func testCDReExportCDRs(t *testing.T) {
 	var rply *RplExportedCDRs
 	if err := cdreRPC.Call("ApierV1.ExportCDRs", attr, &rply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if len(rply.ExportedCGRIDs) != 4 {
+	} else if len(rply.ExportedCGRIDs) != 2 {
 		t.Errorf("Unexpected number of CDR exported: %s ", utils.ToJSON(rply))
 	}
 }
@@ -185,7 +185,7 @@ func testCDReProcessExternalCdr(t *testing.T) {
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
 	var reply string
-	if err := cdreRPC.Call("CdrsV1.ProcessExternalCdr", cdr, &reply); err != nil {
+	if err := cdreRPC.Call("CDRsV1.ProcessExternalCDR", cdr, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
@@ -193,7 +193,7 @@ func testCDReProcessExternalCdr(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	args := utils.RPCCDRsFilter{OriginIDs: []string{"testextcdr1"}}
-	if err := cdreRPC.Call("ApierV2.GetCdrs", args, &cdrs); err != nil {
+	if err := cdreRPC.Call("ApierV2.GetCDRs", args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 2 {
 		t.Errorf("Unexpected number of CDRs returned: %v, cdrs=%s ", len(cdrs), utils.ToJSON(cdrs))

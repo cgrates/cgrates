@@ -883,7 +883,7 @@ func TestSessionsVoiceSessionTTL(t *testing.T) {
 	time.Sleep(time.Duration(500 * time.Millisecond))
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, DestinationPrefixes: []string{"1008"}}
-	if err := sessionsRPC.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+	if err := sessionsRPC.Call("ApierV2.GetCDRs", req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -1048,7 +1048,7 @@ func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, DestinationPrefixes: []string{"1009"}}
-	if err := sessionsRPC.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+	if err := sessionsRPC.Call("ApierV2.GetCDRs", req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -1243,7 +1243,7 @@ func TestSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT},
 		DestinationPrefixes: []string{"12371"}}
-	if err := sessionsRPC.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+	if err := sessionsRPC.Call("ApierV2.GetCDRs", req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))

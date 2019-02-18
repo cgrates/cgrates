@@ -48,9 +48,11 @@
 
 },
 
+
 "scheduler": {
 	"enabled": true,						// start Scheduler service: <true|false>
 },
+
 
 "cdrs": {
 	"enabled": true,						// start the CDR Server service:  <true|false>
@@ -58,6 +60,7 @@
 		{"address": "*internal"}     // address where to reach the Rater <""|*internal|127.0.0.1:2013>
 	],
 },
+
 
 "attributes": {								// Attribute service
 	"enabled": true,						// starts Attribute service: <true|false>.
@@ -73,7 +76,13 @@
 	"enabled": true,
 },
 
+
 "thresholds": {
+	"enabled": true,
+},
+
+
+"chargers": {
 	"enabled": true,
 },
 
@@ -81,6 +90,7 @@
 "suppliers": {
 	"enabled": true,
 },
+
 
 "cdre": {
 	"*default": {

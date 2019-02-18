@@ -100,7 +100,7 @@ func TestActionsitSetCdrlogDebit(t *testing.T) {
 		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
 	}
 	var rcvedCdrs []*ExternalCDR
-	if err := actsLclRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{Sources: []string{CDRLOG},
+	if err := actsLclRpc.Call("ApierV2.GetCDRs", utils.RPCCDRsFilter{Sources: []string{CDRLOG},
 		Accounts: []string{attrsSetAccount.Account}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
@@ -143,7 +143,7 @@ func TestActionsitSetCdrlogTopup(t *testing.T) {
 		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
 	}
 	var rcvedCdrs []*ExternalCDR
-	if err := actsLclRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{Sources: []string{CDRLOG},
+	if err := actsLclRpc.Call("ApierV2.GetCDRs", utils.RPCCDRsFilter{Sources: []string{CDRLOG},
 		Accounts: []string{attrsSetAccount.Account}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
@@ -182,7 +182,7 @@ func TestActionsitCdrlogEmpty(t *testing.T) {
 		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
 	}
 	var rcvedCdrs []*ExternalCDR
-	if err := actsLclRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{Sources: []string{CDRLOG},
+	if err := actsLclRpc.Call("ApierV2.GetCDRs", utils.RPCCDRsFilter{Sources: []string{CDRLOG},
 		Accounts: []string{attrsSetAccount.Account}, RunIDs: []string{DEBIT}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 2 {
@@ -221,13 +221,13 @@ func TestActionsitCdrlogWithParams(t *testing.T) {
 		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
 	}
 	var rcvedCdrs []*ExternalCDR
-	if err := actsLclRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{Sources: []string{CDRLOG},
+	if err := actsLclRpc.Call("ApierV2.GetCDRs", utils.RPCCDRsFilter{Sources: []string{CDRLOG},
 		Accounts: []string{attrsSetAccount.Account}, RunIDs: []string{DEBIT}, RequestTypes: []string{"*pseudoprepaid"}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(rcvedCdrs))
 	}
-	if err := actsLclRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{Sources: []string{CDRLOG},
+	if err := actsLclRpc.Call("ApierV2.GetCDRs", utils.RPCCDRsFilter{Sources: []string{CDRLOG},
 		Accounts: []string{attrsSetAccount.Account}, RunIDs: []string{DEBIT_RESET}, RequestTypes: []string{"*pseudoprepaid"}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
@@ -324,7 +324,7 @@ func TestActionsitThresholdCDrLog(t *testing.T) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
 	var rcvedCdrs []*ExternalCDR
-	if err := actsLclRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{Sources: []string{CDRLOG},
+	if err := actsLclRpc.Call("ApierV2.GetCDRs", utils.RPCCDRsFilter{Sources: []string{CDRLOG},
 		Accounts: []string{attrsSetAccount.Account}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {

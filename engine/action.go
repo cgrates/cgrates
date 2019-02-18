@@ -210,7 +210,8 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 		cdrs = append(cdrs, cdr)
 		var rply string
 		// After compute the CDR send it to CDR Server to be processed
-		if err := schedCdrsConns.Call(utils.CdrsV2ProcessCDR, cdr.AsCGREvent(), &rply); err != nil {
+		if err := schedCdrsConns.Call(utils.CDRsV2ProcessCDR,
+			&ArgV2ProcessCDR{CGREvent: *cdr.AsCGREvent()}, &rply); err != nil {
 			return err
 		}
 	}

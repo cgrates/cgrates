@@ -117,6 +117,20 @@ func TestCDRsOnExpHttpCdrReplication(t *testing.T) {
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
+	//add a default charger
+	chargerProfile := &engine.ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "Default",
+		RunID:        "*default",
+		AttributeIDs: []string{"*none"},
+		Weight:       20,
+	}
+	var result string
+	if err := cdrsMasterRpc.Call("ApierV1.SetChargerProfile", chargerProfile, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
 	testCdr1 := &engine.CDR{
 		CGRID:       utils.Sha1("httpjsonrpc1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
 		ToR:         utils.VOICE,
@@ -138,7 +152,8 @@ func TestCDRsOnExpHttpCdrReplication(t *testing.T) {
 		PreRated:    true,
 	}
 	var reply string
-	if err := cdrsMasterRpc.Call("CdrsV2.ProcessCdr", testCdr1, &reply); err != nil {
+	if err := cdrsMasterRpc.Call(utils.CDRsV2ProcessCDR,
+		&engine.ArgV2ProcessCDR{CGREvent: *testCdr1.AsCGREvent()}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
@@ -152,7 +167,7 @@ func TestCDRsOnExpHttpCdrReplication(t *testing.T) {
 	// ToDo: Fix cdr_http to be compatible with rest of processCdr methods
 	time.Sleep(100 * time.Millisecond)
 	var rcvedCdrs []*engine.ExternalCDR
-	if err := cdrsSlaveRpc.Call("ApierV2.GetCdrs",
+	if err := cdrsSlaveRpc.Call("ApierV2.GetCDRs",
 		utils.RPCCDRsFilter{CGRIDs: []string{testCdr1.CGRID}, RunIDs: []string{utils.META_DEFAULT}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
@@ -260,7 +275,8 @@ func TestCDRsOnExpAMQPReplication(t *testing.T) {
 		PreRated:    true,
 	}
 	var reply string
-	if err := cdrsMasterRpc.Call("CdrsV2.ProcessCdr", testCdr, &reply); err != nil {
+	if err := cdrsMasterRpc.Call(utils.CDRsV2ProcessCDR,
+		&engine.ArgV2ProcessCDR{CGREvent: *testCdr.AsCGREvent()}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
