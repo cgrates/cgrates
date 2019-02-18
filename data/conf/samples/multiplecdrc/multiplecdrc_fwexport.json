@@ -20,6 +20,10 @@
 	"enabled": true,						// start the CDR Server service:  <true|false>
 },
 
+"chargers": {
+	"enabled": true,
+},
+
 "cdrc": [
 	{
 		"id": "CDRC-CSV1",

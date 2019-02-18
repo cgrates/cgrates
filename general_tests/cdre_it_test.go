@@ -27,7 +27,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/apier/v1"
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -110,7 +110,7 @@ func testCDRERpcConn(t *testing.T) {
 func testCDREGetCdrs(t *testing.T) {
 	var reply []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{}
-	if err := cdreRPC.Call("ApierV1.GetCdrs", req, &reply); err.Error() != utils.ErrNotFound.Error() {
+	if err := cdreRPC.Call("ApierV1.GetCDRs", req, &reply); err.Error() != utils.ErrNotFound.Error() {
 		t.Error("Unexpected error: ", err.Error())
 	}
 }
@@ -140,7 +140,8 @@ func testCDREProcessCdr(t *testing.T) {
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}
 	cdr.ComputeCGRID()
 	var reply string
-	if err := cdreRPC.Call(utils.CdrsV2ProcessCDR, cdr, &reply); err != nil {
+	if err := cdreRPC.Call(utils.CDRsV2ProcessCDR,
+		&engine.ArgV2ProcessCDR{CGREvent: *cdr.AsCGREvent()}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)

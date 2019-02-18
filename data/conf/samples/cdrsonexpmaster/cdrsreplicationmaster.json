@@ -25,6 +25,10 @@
 	"online_cdr_exports": ["http_localhost", "amqp_localhost", "http_test_file", "amqp_test_file","aws_test_file","sqs_test_file"],
 },
 
+"chargers": {
+	"enabled": true,
+},
+
 
 "cdre": {
 	"http_localhost": {

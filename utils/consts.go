@@ -25,7 +25,7 @@ var (
 		MetaHTTPjson, META_HTTP_POST, MetaAMQPjsonCDR, MetaAMQPjsonMap, MetaAWSjsonMap, MetaSQSjsonMap}
 	MainCDRFields = []string{CGRID, Source, OriginHost, OriginID, ToR, RequestType, Tenant, Category,
 		Account, Subject, Destination, SetupTime, AnswerTime, Usage, COST, RATED, Partial, RunID,
-		PreRated, CostSource}
+		PreRated, CostSource, CostDetails, ExtraInfo, OrderID}
 	MainCDRFieldsMap StringMap
 
 	GitLastLog                  string // If set, it will be processed as part of versioning
@@ -819,11 +819,11 @@ const (
 
 // Cdrs APIs
 const (
-	CdrsV1CountCDRs   = "CdrsV1.CountCDRs"
-	CdrsV1GetCDRs     = "CdrsV1.GetCDRs"
-	CdrsV2ProcessCDR  = "CdrsV2.ProcessCDR"
-	CdrsV2RateCDRs    = "CdrsV2.RateCDRs"
-	CdrsV2StoreSMCost = "CdrsV2.StoreSMCost"
+	CDRsV1CountCDRs        = "CDRsV1.CountCDRs"
+	CDRsV1RateCDRs         = "CDRsV1.RateCDRs"
+	CDRsV1GetCDRs          = "CDRsV1.GetCDRs"
+	CDRsV2ProcessCDR       = "CDRsV2.ProcessCDR"
+	CDRsV2StoreSessionCost = "CDRsV2.StoreSessionCost"
 )
 
 // Scheduler

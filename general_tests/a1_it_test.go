@@ -251,7 +251,7 @@ func TestA1itDataSession1(t *testing.T) {
 
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}}
-	if err := a1rpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+	if err := a1rpc.Call("ApierV2.GetCDRs", req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))

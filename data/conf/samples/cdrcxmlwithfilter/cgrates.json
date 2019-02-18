@@ -16,6 +16,10 @@
 	"rals_conns": [],
 },
 
+"chargers": {
+  "enabled": true,
+},
+
 
  "cdrc": [
  	{

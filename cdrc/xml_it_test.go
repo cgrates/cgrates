@@ -119,12 +119,12 @@ func TestXmlITProcessedFiles(t *testing.T) {
 
 func TestXmlITAnalyseCDRs(t *testing.T) {
 	var reply []*engine.ExternalCDR
-	if err := cdrcXmlRPC.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{}, &reply); err != nil {
+	if err := cdrcXmlRPC.Call("ApierV2.GetCDRs", utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
-	if err := cdrcXmlRPC.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{DestinationPrefixes: []string{"+4986517174963"}}, &reply); err != nil {
+	if err := cdrcXmlRPC.Call("ApierV2.GetCDRs", utils.RPCCDRsFilter{DestinationPrefixes: []string{"+4986517174963"}}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -211,7 +211,7 @@ func TestXmlIT2ProcessedFiles(t *testing.T) {
 
 func TestXmlIT2AnalyseCDRs(t *testing.T) {
 	var reply []*engine.ExternalCDR
-	if err := cdrcXmlRPC.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{}, &reply); err != nil {
+	if err := cdrcXmlRPC.Call("ApierV2.GetCDRs", utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -297,7 +297,7 @@ func TestXmlIT3ProcessedFiles(t *testing.T) {
 
 func TestXmlIT3AnalyseCDRs(t *testing.T) {
 	var reply []*engine.ExternalCDR
-	if err := cdrcXmlRPC.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{}, &reply); err != nil {
+	if err := cdrcXmlRPC.Call("ApierV2.GetCDRs", utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -383,7 +383,7 @@ func TestXmlIT4ProcessedFiles(t *testing.T) {
 
 func TestXmlIT4AnalyseCDRs(t *testing.T) {
 	var reply []*engine.ExternalCDR
-	if err := cdrcXmlRPC.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{}, &reply); err != nil {
+	if err := cdrcXmlRPC.Call("ApierV2.GetCDRs", utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -494,7 +494,7 @@ func TestXmlIT5ProcessedFiles(t *testing.T) {
 
 func TestXmlIT5AnalyseCDRs(t *testing.T) {
 	var reply []*engine.ExternalCDR
-	if err := cdrcXmlRPC.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{}, &reply); err != nil {
+	if err := cdrcXmlRPC.Call("ApierV2.GetCDRs", utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -580,7 +580,7 @@ func TestXmlIT6ProcessedFiles(t *testing.T) {
 
 func TestXmlIT6AnalyseCDRs(t *testing.T) {
 	var reply []*engine.ExternalCDR
-	if err := cdrcXmlRPC.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{}, &reply); err != nil {
+	if err := cdrcXmlRPC.Call("ApierV2.GetCDRs", utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))

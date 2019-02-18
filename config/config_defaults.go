@@ -179,7 +179,9 @@ const CGRATES_CFG_JSON = `
 	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs
 	"store_cdrs": true,						// store cdrs in storDb
 	"sessions_cost_retries": 5,				// number of queries to sessions_costs before recalculating CDR
-	"chargers_conns": [],					// address where to reach the charger service, empty to disable charger functionality: <""|*internal|x.y.z.y:1234>
+	"chargers_conns": [
+		{"address": "*internal"}			// address where to reach the charger service, empty to disable charger functionality: <""|*internal|x.y.z.y:1234>
+	],					
 	"rals_conns": [
 		{"address": "*internal"}			// address where to reach the Rater for cost calculation, empty to disable functionality: <""|*internal|x.y.z.y:1234>
 	],

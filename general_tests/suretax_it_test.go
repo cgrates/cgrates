@@ -127,7 +127,7 @@ func TestSTIProcessExternalCdr(t *testing.T) {
 func TestSTIGetCdrs(t *testing.T) {
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}}
-	if err := stiRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+	if err := stiRpc.Call("ApierV2.GetCDRs", req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -137,7 +137,7 @@ func TestSTIGetCdrs(t *testing.T) {
 		}
 	}
 	req = utils.RPCCDRsFilter{RunIDs: []string{utils.META_SURETAX}, Accounts: []string{"1001"}}
-	if err := stiRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+	if err := stiRpc.Call("ApierV2.GetCDRs", req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))

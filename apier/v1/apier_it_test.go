@@ -1422,7 +1422,7 @@ func TestApierCdrServer(t *testing.T) {
 func TestApierITGetCdrs(t *testing.T) {
 	var reply []*engine.ExternalCDR
 	req := utils.AttrGetCdrs{MediationRunIds: []string{utils.MetaRaw}}
-	if err := rater.Call("ApierV1.GetCdrs", req, &reply); err != nil {
+	if err := rater.Call("ApierV1.GetCDRs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -1437,14 +1437,14 @@ func TestApierITProcessCdr(t *testing.T) {
 		SetupTime:   time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
-	if err := rater.Call("CdrsV1.ProcessCDR", cdr, &reply); err != nil {
+	if err := rater.Call("CDRsV1.ProcessCDR", cdr, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	var cdrs []*engine.ExternalCDR
 	req := utils.AttrGetCdrs{MediationRunIds: []string{utils.MetaRaw}}
-	if err := rater.Call("ApierV1.GetCdrs", req, &cdrs); err != nil {
+	if err := rater.Call("ApierV1.GetCDRs", req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 3 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -1486,7 +1486,7 @@ func TestApierGetCallCostLog(t *testing.T) {
 		Cost:        1.01,
 	}
 	var reply string
-	if err := rater.Call("CdrsV1.ProcessCDR", cdr, &reply); err != nil {
+	if err := rater.Call("CDRsV1.ProcessCDR", cdr, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
