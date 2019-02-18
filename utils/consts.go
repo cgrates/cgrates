@@ -703,6 +703,7 @@ const (
 
 const (
 	ApierV2LoadTariffPlanFromFolder = "ApierV2.LoadTariffPlanFromFolder"
+	ApierV2GetCDRs                  = "ApierV2.GetCDRs"
 )
 
 // SupplierS APIs

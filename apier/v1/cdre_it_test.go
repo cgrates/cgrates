@@ -193,7 +193,7 @@ func testCDReProcessExternalCdr(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	args := utils.RPCCDRsFilter{OriginIDs: []string{"testextcdr1"}}
-	if err := cdreRPC.Call("ApierV2.GetCDRs", args, &cdrs); err != nil {
+	if err := cdreRPC.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 2 {
 		t.Errorf("Unexpected number of CDRs returned: %v, cdrs=%s ", len(cdrs), utils.ToJSON(cdrs))

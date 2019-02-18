@@ -489,7 +489,7 @@ func testCallAccount1001(t *testing.T) {
 func testCall1001Cdrs(t *testing.T) {
 	var reply []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}}
-	if err := tutorialCallsRpc.Call("ApierV2.GetCDRs", req, &reply); err != nil {
+	if err := tutorialCallsRpc.Call(utils.ApierV2GetCDRs, req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -530,7 +530,7 @@ func testCall1002Cdrs(t *testing.T) {
 	var reply []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT},
 		Accounts: []string{"1002"}, DestinationPrefixes: []string{"1001"}}
-	if err := tutorialCallsRpc.Call("ApierV2.GetCDRs", req, &reply); err != nil {
+	if err := tutorialCallsRpc.Call(utils.ApierV2GetCDRs, req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -556,7 +556,7 @@ func testCall1003Cdrs(t *testing.T) {
 	var reply []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT},
 		Accounts: []string{"1003"}, DestinationPrefixes: []string{"1001"}}
-	if err := tutorialCallsRpc.Call("ApierV2.GetCDRs", req, &reply); err != nil {
+	if err := tutorialCallsRpc.Call(utils.ApierV2GetCDRs, req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -774,7 +774,7 @@ func testCallSyncSessions(t *testing.T) {
 	var rplCdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{Sources: []string{sourceForCDR}, MaxUsage: "20s",
 		RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}}
-	if err := tutorialCallsRpc.Call("ApierV2.GetCDRs", req, &rplCdrs); err != nil {
+	if err := tutorialCallsRpc.Call(utils.ApierV2GetCDRs, req, &rplCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rplCdrs) != numberOfCDR { // cdr from sync session + cdr from before
 		t.Error("Unexpected number of CDRs returned: ", len(rplCdrs))

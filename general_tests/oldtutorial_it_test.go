@@ -605,7 +605,7 @@ package general_tests
 // 	var cdrs []*engine.ExternalCDR
 // 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT},
 // 		Accounts: []string{"1004"}, DestinationPrefixes: []string{"1001"}}
-// 	if err := tutLocalRpc.Call("ApierV2.GetCDRs", req, &cdrs); err != nil {
+// 	if err := tutLocalRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
 // 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -665,7 +665,7 @@ package general_tests
 // 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 // 	var cdrs []*engine.ExternalCDR
 // 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{cdr.Account}, DestinationPrefixes: []string{cdr.Destination}}
-// 	if err := tutLocalRpc.Call("ApierV2.GetCDRs", req, &cdrs); err != nil {
+// 	if err := tutLocalRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
 // 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -690,7 +690,7 @@ package general_tests
 // 	}
 // 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for CDR to be processed
 // 	req = utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{cdr2.Account}, DestinationPrefixes: []string{cdr2.Destination}}
-// 	if err := tutLocalRpc.Call("ApierV2.GetCDRs", req, &cdrs); err != nil {
+// 	if err := tutLocalRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
 // 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -715,7 +715,7 @@ package general_tests
 // 	}
 // 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for CDR to be processed
 // 	req = utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{cdr3.Account}, DestinationPrefixes: []string{cdr3.Destination}}
-// 	if err := tutLocalRpc.Call("ApierV2.GetCDRs", req, &cdrs); err != nil {
+// 	if err := tutLocalRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
 // 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -1387,7 +1387,7 @@ package general_tests
 // 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for CDR to be processed
 // 	var cdrs []*engine.ExternalCDR
 // 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, CGRIDs: []string{cdr.CGRID}}
-// 	if err := tutLocalRpc.Call("ApierV2.GetCDRs", req, &cdrs); err != nil {
+// 	if err := tutLocalRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
 // 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -1419,7 +1419,7 @@ package general_tests
 // 		time.Sleep(time.Duration(7000) * time.Millisecond) // Give time for CDR to be processed
 // 		var cdrs []*engine.ExternalCDR
 // 		req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, CGRIDs: []string{cdr.CGRID}}
-// 		if err := tutLocalRpc.Call("ApierV2.GetCDRs", req, &cdrs); err != nil {
+// 		if err := tutLocalRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 // 			t.Error("Unexpected error: ", err.Error())
 // 		} else if len(cdrs) != 1 {
 // 			t.Error("Unexpected number of CDRs returned: ", len(cdrs))
@@ -1450,7 +1450,7 @@ package general_tests
 // 	time.Sleep(time.Duration(50) * time.Millisecond) // Give time for CDR to be processed
 // 	var cdrs []*engine.ExternalCDR
 // 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, CGRIDs: []string{cdr.CGRID}}
-// 	if err := tutLocalRpc.Call("ApierV2.GetCDRs", req, &cdrs); err != nil {
+// 	if err := tutLocalRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
 // 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
