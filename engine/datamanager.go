@@ -77,7 +77,6 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 			utils.AccountActionPlansPrefix:   aaPlIDs,
 			utils.ACTION_TRIGGER_PREFIX:      atrgIDs,
 			utils.SHARED_GROUP_PREFIX:        sgIDs,
-			utils.DERIVEDCHARGERS_PREFIX:     dcIDs,
 			utils.ResourceProfilesPrefix:     rpIDs,
 			utils.ResourcesPrefix:            resIDs,
 			utils.StatQueuePrefix:            stqIDs,
@@ -135,7 +134,6 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		utils.AccountActionPlansPrefix,
 		utils.ACTION_TRIGGER_PREFIX,
 		utils.SHARED_GROUP_PREFIX,
-		utils.DERIVEDCHARGERS_PREFIX,
 		utils.ResourceProfilesPrefix,
 		utils.TimingsPrefix,
 		utils.ResourcesPrefix,
@@ -202,8 +200,6 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.GetActionTriggers(dataID, true, utils.NonTransactional)
 		case utils.SHARED_GROUP_PREFIX:
 			_, err = dm.GetSharedGroup(dataID, true, utils.NonTransactional)
-		case utils.DERIVEDCHARGERS_PREFIX:
-			_, err = dm.GetDerivedChargers(dataID, true, utils.NonTransactional)
 		case utils.ResourceProfilesPrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetResourceProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
@@ -798,38 +794,6 @@ func (dm *DataManager) RemoveSharedGroup(id, transactionID string) (err error) {
 		return
 	}
 	Cache.Remove(utils.CacheSharedGroups, id,
-		cacheCommit(transactionID), transactionID)
-	return
-}
-
-func (dm *DataManager) GetDerivedChargers(key string, skipCache bool,
-	transactionID string) (dcs *utils.DerivedChargers, err error) {
-	if !skipCache {
-		if x, ok := Cache.Get(utils.CacheDerivedChargers, key); ok {
-			if x != nil {
-				return x.(*utils.DerivedChargers), nil
-			}
-			return nil, utils.ErrNotFound
-		}
-	}
-	dcs, err = dm.DataDB().GetDerivedChargersDrv(key)
-	if err != nil {
-		if err == utils.ErrNotFound {
-			Cache.Set(utils.CacheDerivedChargers, key, nil, nil,
-				cacheCommit(transactionID), transactionID)
-		}
-		return nil, err
-	}
-	Cache.Set(utils.CacheDerivedChargers, key, dcs, nil,
-		cacheCommit(transactionID), transactionID)
-	return
-}
-
-func (dm *DataManager) RemoveDerivedChargers(id, transactionID string) (err error) {
-	if err = dm.DataDB().RemoveDerivedChargersDrv(id, transactionID); err != nil {
-		return
-	}
-	Cache.Remove(utils.CacheDerivedChargers, id,
 		cacheCommit(transactionID), transactionID)
 	return
 }

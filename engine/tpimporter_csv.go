@@ -52,7 +52,6 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 	utils.ACTION_PLANS_CSV:      (*TPCSVImporter).importActionTimings,
 	utils.ACTION_TRIGGERS_CSV:   (*TPCSVImporter).importActionTriggers,
 	utils.ACCOUNT_ACTIONS_CSV:   (*TPCSVImporter).importAccountActions,
-	utils.DERIVED_CHARGERS_CSV:  (*TPCSVImporter).importDerivedChargers,
 	utils.ResourcesCsv:          (*TPCSVImporter).importResources,
 	utils.StatsCsv:              (*TPCSVImporter).importStats,
 	utils.ThresholdsCsv:         (*TPCSVImporter).importThresholds,
@@ -76,7 +75,6 @@ func (self *TPCSVImporter) Run() error {
 		path.Join(self.DirPath, utils.ACTION_PLANS_CSV),
 		path.Join(self.DirPath, utils.ACTION_TRIGGERS_CSV),
 		path.Join(self.DirPath, utils.ACCOUNT_ACTIONS_CSV),
-		path.Join(self.DirPath, utils.DERIVED_CHARGERS_CSV),
 		path.Join(self.DirPath, utils.ResourcesCsv),
 		path.Join(self.DirPath, utils.StatsCsv),
 		path.Join(self.DirPath, utils.ThresholdsCsv),
@@ -274,25 +272,6 @@ func (self *TPCSVImporter) importAccountActions(fn string) error {
 		tps[i].LoadId = loadId
 	}
 	return self.StorDb.SetTPAccountActions(tps)
-}
-
-func (self *TPCSVImporter) importDerivedChargers(fn string) error {
-	if self.Verbose {
-		log.Printf("Processing file: <%s> ", fn)
-	}
-	tps, err := self.csvr.GetTPDerivedChargers(nil)
-	if err != nil {
-		return err
-	}
-	loadId := utils.CSV_LOAD //Autogenerate rating profile id
-	if self.ImportId != "" {
-		loadId += "_" + self.ImportId
-	}
-	for i := 0; i < len(tps); i++ {
-		tps[i].TPid = self.TPid
-		tps[i].LoadId = loadId
-	}
-	return self.StorDb.SetTPDerivedChargers(tps)
 }
 
 func (self *TPCSVImporter) importResources(fn string) error {

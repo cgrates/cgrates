@@ -61,9 +61,6 @@ type DataDB interface {
 	SetReverseDestination(*Destination, string) error
 	GetReverseDestination(string, bool, string) ([]string, error)
 	UpdateReverseDestination(*Destination, *Destination, string) error
-	GetDerivedChargersDrv(string) (*utils.DerivedChargers, error)
-	SetDerivedChargers(string, *utils.DerivedChargers, string) error
-	RemoveDerivedChargersDrv(id, transactionID string) (err error)
 	GetActionsDrv(string) (Actions, error)
 	SetActionsDrv(string, Actions) error
 	RemoveActionsDrv(string) error
@@ -169,7 +166,6 @@ type LoadReader interface {
 	GetTPRatingPlans(string, string, *utils.Paginator) ([]*utils.TPRatingPlan, error)
 	GetTPRatingProfiles(*utils.TPRatingProfile) ([]*utils.TPRatingProfile, error)
 	GetTPSharedGroups(string, string) ([]*utils.TPSharedGroups, error)
-	GetTPDerivedChargers(*utils.TPDerivedChargers) ([]*utils.TPDerivedChargers, error)
 	GetTPActions(string, string) ([]*utils.TPActions, error)
 	GetTPActionPlans(string, string) ([]*utils.TPActionPlan, error)
 	GetTPActionTriggers(string, string) ([]*utils.TPActionTriggers, error)
@@ -193,7 +189,6 @@ type LoadWriter interface {
 	SetTPRatingPlans([]*utils.TPRatingPlan) error
 	SetTPRatingProfiles([]*utils.TPRatingProfile) error
 	SetTPSharedGroups([]*utils.TPSharedGroups) error
-	SetTPDerivedChargers([]*utils.TPDerivedChargers) error
 	SetTPActions([]*utils.TPActions) error
 	SetTPActionPlans([]*utils.TPActionPlan) error
 	SetTPActionTriggers([]*utils.TPActionTriggers) error

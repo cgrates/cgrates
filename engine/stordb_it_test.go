@@ -52,7 +52,6 @@ var sTestsStorDBit = []func(t *testing.T){
 	testStorDBitCRUDTpActionPlans,
 	testStorDBitCRUDTpActionTriggers,
 	testStorDBitCRUDTpAccountActions,
-	testStorDBitCRUDTpDerivedChargers,
 	testStorDBitCRUDTpResources,
 	testStorDBitCRUDTpStats,
 	testStorDBitCRUDCDRs,
@@ -979,114 +978,6 @@ func testStorDBitCRUDTpAccountActions(t *testing.T) {
 	}
 	// READ
 	if _, err := storDB.GetTPAccountActions(&filter); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-}
-
-func testStorDBitCRUDTpDerivedChargers(t *testing.T) {
-	// READ
-	var filter = utils.TPDerivedChargers{
-		TPid: "testTPid",
-	}
-	if _, err := storDB.GetTPDerivedChargers(&filter); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-	// WRITE
-	var snd = []*utils.TPDerivedChargers{
-		{
-			TPid:           "testTPid",
-			LoadId:         "TEST_LOADID",
-			Direction:      "*out",
-			Tenant:         "cgrates.org",
-			Category:       "call",
-			Account:        "1000",
-			Subject:        "test",
-			DestinationIds: "",
-			DerivedChargers: []*utils.TPDerivedCharger{
-				{
-					RunId:                "default",
-					RunFilters:           "test",
-					ReqTypeField:         "test",
-					DirectionField:       "test",
-					TenantField:          "test",
-					CategoryField:        "test",
-					AccountField:         "test",
-					SubjectField:         "test",
-					DestinationField:     "^+49151708707",
-					SetupTimeField:       "test",
-					PddField:             "~pdd:s/sip:(.+)/$1/",
-					AnswerTimeField:      "~answertime2:s/sip:(.+)/$1/",
-					UsageField:           "test",
-					SupplierField:        "~supplier2:s/(.+)/$1/",
-					DisconnectCauseField: "test",
-					CostField:            "1",
-					RatedField:           "0",
-				},
-			},
-		},
-		{
-			TPid:           "testTPid",
-			LoadId:         "TEST_LOADID2",
-			Direction:      "*out",
-			Tenant:         "cgrates.org",
-			Category:       "call",
-			Account:        "1000",
-			Subject:        "test",
-			DestinationIds: "",
-			DerivedChargers: []*utils.TPDerivedCharger{
-				{
-					RunId:                "default",
-					RunFilters:           "test",
-					ReqTypeField:         "test",
-					DirectionField:       "test",
-					TenantField:          "test",
-					CategoryField:        "test",
-					AccountField:         "test",
-					SubjectField:         "test",
-					DestinationField:     "^+49151708707",
-					SetupTimeField:       "test",
-					PddField:             "~pdd:s/sip:(.+)/$1/",
-					AnswerTimeField:      "~answertime2:s/sip:(.+)/$1/",
-					UsageField:           "test",
-					SupplierField:        "~supplier2:s/(.+)/$1/",
-					DisconnectCauseField: "test",
-					CostField:            "1",
-					RatedField:           "0",
-				},
-			},
-		},
-	}
-	if err := storDB.SetTPDerivedChargers(snd); err != nil {
-		t.Error(err)
-	}
-	// READ
-	if rcv, err := storDB.GetTPDerivedChargers(&filter); err != nil {
-		t.Error(err)
-	} else {
-		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
-		}
-	}
-	// UPDATE
-	snd[0].DerivedChargers[0].CostField = "test"
-	snd[1].DerivedChargers[0].CostField = "test"
-	if err := storDB.SetTPDerivedChargers(snd); err != nil {
-		t.Error(err)
-	}
-	// READ
-	if rcv, err := storDB.GetTPDerivedChargers(&filter); err != nil {
-		t.Error(err)
-	} else {
-		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
-		}
-	}
-	// REMOVE
-	if err := storDB.RemTpData("", "testTPid", nil); err != nil {
-		t.Error(err)
-	}
-	// READ
-	if _, err := storDB.GetTPDerivedChargers(&filter); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }

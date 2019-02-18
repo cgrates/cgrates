@@ -207,17 +207,6 @@ func (self *TPExporter) Run() error {
 		toExportMap[utils.ACCOUNT_ACTIONS_CSV] = append(toExportMap[utils.ACCOUNT_ACTIONS_CSV], sdModel)
 	}
 
-	storDataDerivedCharges, err := self.storDb.GetTPDerivedChargers(&utils.TPDerivedChargers{TPid: self.tpID})
-	if err != nil && err.Error() != utils.ErrNotFound.Error() {
-		return err
-	}
-	for _, sd := range storDataDerivedCharges {
-		sdModels := APItoModelDerivedCharger(sd)
-		for _, sdModel := range sdModels {
-			toExportMap[utils.DERIVED_CHARGERS_CSV] = append(toExportMap[utils.DERIVED_CHARGERS_CSV], sdModel)
-		}
-	}
-
 	storDataResources, err := self.storDb.GetTPResources(self.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
 		return err

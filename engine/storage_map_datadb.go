@@ -189,7 +189,7 @@ func (ms *MapStorage) HasDataDrv(category, subject, tenant string) (bool, error)
 	defer ms.mu.RUnlock()
 	switch category {
 	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
-		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX:
+		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX:
 		_, exists := ms.dict[category+subject]
 		return exists, nil
 	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,
@@ -794,44 +794,6 @@ func (ms *MapStorage) PopTask() (t *Task, err error) {
 	} else {
 		err = utils.ErrNotFound
 	}
-	return
-}
-
-func (ms *MapStorage) GetDerivedChargersDrv(key string) (dcs *utils.DerivedChargers, err error) {
-	ms.mu.RLock()
-	defer ms.mu.RUnlock()
-	if values, ok := ms.dict[utils.DERIVEDCHARGERS_PREFIX+key]; ok {
-		err = ms.ms.Unmarshal(values, &dcs)
-	} else {
-		return nil, utils.ErrNotFound
-	}
-	return
-}
-
-func (ms *MapStorage) SetDerivedChargers(key string,
-	dcs *utils.DerivedChargers, transactionID string) error {
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
-	cCommit := cacheCommit(transactionID)
-	if dcs == nil || len(dcs.Chargers) == 0 {
-		delete(ms.dict, utils.DERIVEDCHARGERS_PREFIX+key)
-		Cache.Remove(utils.CacheDerivedChargers, key,
-			cCommit, transactionID)
-		return nil
-	}
-	result, err := ms.ms.Marshal(dcs)
-	ms.dict[utils.DERIVEDCHARGERS_PREFIX+key] = result
-	Cache.Remove(utils.CacheDerivedChargers, key,
-		cCommit, transactionID)
-	return err
-}
-
-func (ms *MapStorage) RemoveDerivedChargersDrv(id, transactionID string) (err error) {
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
-	cCommit := cacheCommit(transactionID)
-	delete(ms.dict, id)
-	Cache.Remove(utils.CacheDerivedChargers, id, cCommit, transactionID)
 	return
 }
 

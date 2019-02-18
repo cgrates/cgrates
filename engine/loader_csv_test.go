@@ -220,13 +220,6 @@ cgrates.org,expnoexp,,,false,false
 cgrates.org,vf,,,false,false
 cgrates.org,round,TOPUP10_AT,,false,false
 `
-
-	derivedCharges = `
-#Direction,Tenant,Category,Account,Subject,DestinationIds,RunId,RunFilter,RequestTypeField,DirectionField,TenantField,TorField,AccountField,SubjectField,DestinationField,SetupTimeField,PddField,AnswerTimeField,UsageField,SupplierField,DisconnectCauseField,CostField,RatedField
-*out,cgrates.org,call,dan,dan,,extra1,^filteredHeader1/filterValue1/,^prepaid,,,,rif,rif,,,,,,,,,
-*out,cgrates.org,call,dan,dan,,extra2,,,,,,ivo,ivo,,,,,,,,,
-*out,cgrates.org,call,dan,*any,,extra1,,,,,,rif2,rif2,,,,,,,,,
-`
 	resProfiles = `
 #Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],Weight[9],Thresholds[10]
 cgrates.org,ResGroup21,FLTR_1,2014-07-29T15:00:00Z,1s,2,call,true,true,10,
@@ -282,7 +275,7 @@ var csvr *TpReader
 func init() {
 	csvr = NewTpReader(dm.dataDB, NewStringCSVStorage(',', destinations, timings, rates, destinationRates,
 		ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans, actionTriggers,
-		accountActions, derivedCharges, resProfiles, stats, thresholds,
+		accountActions, resProfiles, stats, thresholds,
 		filters, sppProfiles, attributeProfiles, chargerProfiles, dispatcherProfiles), testTPID, "")
 
 	if err := csvr.LoadDestinations(); err != nil {
@@ -317,9 +310,6 @@ func init() {
 	}
 	if err := csvr.LoadAccountActions(); err != nil {
 		log.Print("error in LoadAccountActions:", err)
-	}
-	if err := csvr.LoadDerivedChargers(); err != nil {
-		log.Print("error in LoadDerivedChargers:", err)
 	}
 	if err := csvr.LoadFilters(); err != nil {
 		log.Print("error in LoadFilter:", err)
@@ -1192,38 +1182,6 @@ func TestLoadAccountActions(t *testing.T) {
 	existing, err = dm.DataDB().GetAccount(aa.ID)
 	if err != nil || len(existing.BalanceMap) != 2 {
 		t.Errorf("The set account altered the balances: %+v", existing)
-	}
-}
-
-func TestLoadDerivedChargers(t *testing.T) {
-	if len(csvr.derivedChargers) != 2 {
-		t.Error("Failed to load derivedChargers: ", csvr.derivedChargers)
-	}
-	expCharger1 := &utils.DerivedChargers{
-		DestinationIDs: nil,
-		Chargers: []*utils.DerivedCharger{
-			&utils.DerivedCharger{RunID: "extra1", RunFilters: "^filteredHeader1/filterValue1/",
-				RequestTypeField: "^prepaid", DirectionField: utils.META_DEFAULT,
-				TenantField: utils.META_DEFAULT, CategoryField: utils.META_DEFAULT,
-				AccountField: "rif", SubjectField: "rif", DestinationField: utils.META_DEFAULT,
-				SetupTimeField: utils.META_DEFAULT, PDDField: utils.META_DEFAULT,
-				AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT,
-				SupplierField: utils.META_DEFAULT, DisconnectCauseField: utils.META_DEFAULT,
-				CostField: utils.META_DEFAULT, PreRatedField: utils.META_DEFAULT},
-			&utils.DerivedCharger{RunID: "extra2", RequestTypeField: utils.META_DEFAULT,
-				DirectionField: utils.META_DEFAULT, TenantField: utils.META_DEFAULT,
-				CategoryField: utils.META_DEFAULT, AccountField: "ivo",
-				SubjectField: "ivo", DestinationField: utils.META_DEFAULT,
-				SetupTimeField: utils.META_DEFAULT, PDDField: utils.META_DEFAULT,
-				AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT,
-				SupplierField: utils.META_DEFAULT, DisconnectCauseField: utils.META_DEFAULT,
-				CostField: utils.META_DEFAULT, PreRatedField: utils.META_DEFAULT},
-		}}
-	keyCharger1 := utils.DerivedChargersKey("*out", "cgrates.org", "call", "dan", "dan")
-
-	if !csvr.derivedChargers[keyCharger1].Equal(expCharger1) {
-		t.Errorf("Expecting: %+v, received: %+v",
-			expCharger1.Chargers[0], csvr.derivedChargers[keyCharger1].Chargers[0])
 	}
 }
 

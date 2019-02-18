@@ -335,7 +335,7 @@ func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 func (rs *RedisStorage) HasDataDrv(category, subject, tenant string) (bool, error) {
 	switch category {
 	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
-		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX:
+		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX:
 		i, err := rs.Cmd("EXISTS", category+subject).Int()
 		return i == 1, err
 	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,
@@ -1039,51 +1039,6 @@ func (rs *RedisStorage) PopTask() (t *Task, err error) {
 		t = &Task{}
 		err = rs.ms.Unmarshal(values, t)
 	}
-	return
-}
-
-func (rs *RedisStorage) GetDerivedChargersDrv(key string) (dcs *utils.DerivedChargers, err error) {
-	key = utils.DERIVEDCHARGERS_PREFIX + key
-	var values []byte
-	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
-		if err == redis.ErrRespNil { // did not find the destination
-			err = utils.ErrNotFound
-		}
-		return
-	}
-	if err = rs.ms.Unmarshal(values, &dcs); err != nil {
-		return
-	}
-	return
-}
-
-func (rs *RedisStorage) SetDerivedChargers(key string,
-	dcs *utils.DerivedChargers, transactionID string) (err error) {
-	cCommit := cacheCommit(transactionID)
-	if dcs == nil || len(dcs.Chargers) == 0 {
-		if err = rs.Cmd("DEL", utils.DERIVEDCHARGERS_PREFIX+key).Err; err != nil {
-			return
-		}
-		Cache.Remove(utils.CacheDerivedChargers, key,
-			cCommit, transactionID)
-		return
-	}
-	var marshaled []byte
-	if marshaled, err = rs.ms.Marshal(dcs); err != nil {
-		return
-	}
-	if err = rs.Cmd("SET", utils.DERIVEDCHARGERS_PREFIX+key, marshaled).Err; err != nil {
-		return
-	}
-	return
-}
-
-func (rs *RedisStorage) RemoveDerivedChargersDrv(id, transactionID string) (err error) {
-	cCommit := cacheCommit(transactionID)
-	if err = rs.Cmd("DEL", utils.DERIVEDCHARGERS_PREFIX+id).Err; err != nil {
-		return err
-	}
-	Cache.Remove(utils.CacheDerivedChargers, id, cCommit, transactionID)
 	return
 }
 

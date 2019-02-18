@@ -104,17 +104,18 @@ func (m *Migrator) migrateV2SessionSCosts() (err error) {
 		if err == utils.ErrNoMoreData {
 			break
 		}
-		if v2Cost != nil {
-			smCost := v2Cost.V2toV3Cost()
-			if m.dryRun != true {
-				if err = m.storDBOut.StorDB().SetSMCost(smCost); err != nil {
-					return err
-				}
-				if err = m.storDBIn.remV2SMCost(v2Cost); err != nil {
-					return err
-				}
-				m.stats[utils.SessionSCosts] += 1
+		if v2Cost == nil {
+			break
+		}
+		smCost := v2Cost.V2toV3Cost()
+		if m.dryRun != true {
+			if err = m.storDBOut.StorDB().SetSMCost(smCost); err != nil {
+				return err
 			}
+			if err = m.storDBIn.remV2SMCost(v2Cost); err != nil {
+				return err
+			}
+			m.stats[utils.SessionSCosts] += 1
 		}
 	}
 	if m.dryRun != true {

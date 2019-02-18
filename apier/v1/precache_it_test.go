@@ -163,10 +163,6 @@ func testPrecacheGetCacheStatsBeforeLoad(t *testing.T) {
 			Items:  0,
 			Groups: 0,
 		},
-		"derived_chargers": {
-			Items:  0,
-			Groups: 0,
-		},
 		"destinations": {
 			Items:  0,
 			Groups: 0,
@@ -325,10 +321,6 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 		},
 		"dispatcher_routes": {
 			Items:  0,
-			Groups: 0,
-		},
-		"derived_chargers": {
-			Items:  1, // expected to have 1 item
 			Groups: 0,
 		},
 		"destinations": {

@@ -50,12 +50,12 @@ func (self *ApierV1) GetMaxUsage(usageRecord engine.UsageRecord, maxUsage *int64
 		usageRecord.Usage = strconv.FormatFloat(
 			self.Config.MaxCallDuration.Seconds(), 'f', -1, 64)
 	}
-	storedCdr, err := usageRecord.AsCDR(self.Config.GeneralCfg().DefaultTimezone)
+	cd, err := usageRecord.AsCallDescriptor(self.Config.GeneralCfg().DefaultTimezone, false)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
 	var maxDur time.Duration
-	if err := self.Responder.GetDerivedMaxSessionTime(storedCdr, &maxDur); err != nil {
+	if err := self.Responder.GetMaxSessionTime(cd, &maxDur); err != nil {
 		return err
 	}
 	if maxDur == time.Duration(-1) {

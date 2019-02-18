@@ -52,7 +52,6 @@ cgrates.org,call,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,`
 	actionPlans := `TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	actionTriggers := ``
 	accountActions := `cgrates.org,12346,TOPUP10_AT,,,`
-	derivedCharges := ``
 	resLimits := ``
 	stats := ``
 	thresholds := ``
@@ -62,7 +61,7 @@ cgrates.org,call,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,`
 	chargerProfiles := ``
 	csvr := engine.NewTpReader(dataDB3.DataDB(), engine.NewStringCSVStorage(',', destinations, timings, rates,
 		destinationRates, ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans, actionTriggers,
-		accountActions, derivedCharges, resLimits, stats,
+		accountActions, resLimits, stats,
 		thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``), "", "")
 	if err := csvr.LoadDestinations(); err != nil {
 		t.Fatal(err)
@@ -97,9 +96,7 @@ cgrates.org,call,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,`
 	if err := csvr.LoadAccountActions(); err != nil {
 		t.Fatal(err)
 	}
-	if err := csvr.LoadDerivedChargers(); err != nil {
-		t.Fatal(err)
-	}
+
 	csvr.WriteToDatabase(false, false, false)
 	if acnt, err := dataDB3.DataDB().GetAccount("cgrates.org:12346"); err != nil {
 		t.Error(err)

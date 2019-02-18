@@ -105,8 +105,7 @@ func (self *SQLStorage) IsDBEmpty() (resp bool, err error) {
 		utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates,
 		utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles,
 		utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionTriggers,
-		utils.TBLTPAccountActions, utils.TBLTPDerivedChargers,
-		utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
+		utils.TBLTPAccountActions, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
 		utils.TBLTPFilters, utils.SessionCostsTBL, utils.CDRsTBL, utils.TBLTPActionPlans,
 		utils.TBLVersions, utils.TBLTPSuppliers, utils.TBLTPAttributes, utils.TBLTPChargers,
 	}
@@ -127,7 +126,7 @@ func (self *SQLStorage) GetTpIds(colName string) ([]string, error) {
 	qryStr := fmt.Sprintf(" (SELECT tpid FROM %s)", colName)
 	if colName == "" {
 		qryStr = fmt.Sprintf(
-			"(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)",
+			"(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)",
 			utils.TBLTPTimings,
 			utils.TBLTPDestinations,
 			utils.TBLTPRates,
@@ -138,7 +137,6 @@ func (self *SQLStorage) GetTpIds(colName string) ([]string, error) {
 			utils.TBLTPActions,
 			utils.TBLTPActionTriggers,
 			utils.TBLTPAccountActions,
-			utils.TBLTPDerivedChargers,
 			utils.TBLTPResources,
 			utils.TBLTPStats,
 			utils.TBLTPThresholds,
@@ -237,8 +235,8 @@ func (self *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 			utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles,
 			utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionPlans,
 			utils.TBLTPActionTriggers, utils.TBLTPAccountActions,
-			utils.TBLTPDerivedChargers, utils.TBLTPResources,
-			utils.TBLTPStats, utils.TBLTPFilters, utils.TBLTPSuppliers, utils.TBLTPAttributes,
+			utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPFilters,
+			utils.TBLTPSuppliers, utils.TBLTPAttributes,
 			utils.TBLTPChargers, utils.TBLTPDispatchers} {
 			if err := tx.Table(tblName).Where("tpid = ?", tpid).Delete(nil).Error; err != nil {
 				tx.Rollback()
@@ -419,39 +417,6 @@ func (self *SQLStorage) SetTPSharedGroups(sgs []*utils.TPSharedGroups) error {
 		}
 		for _, s := range APItoModelSharedGroup(sGroup) {
 			if err := tx.Save(&s).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-	}
-	tx.Commit()
-	return nil
-}
-
-func (self *SQLStorage) SetTPDerivedChargers(sgs []*utils.TPDerivedChargers) error {
-	if len(sgs) == 0 {
-		return nil //Nothing to set
-	}
-	m := make(map[string]bool)
-	tx := self.db.Begin()
-	for _, dCharger := range sgs {
-		dcKey := dCharger.GetDerivedChargersKey()
-		if found, _ := m[dcKey]; !found {
-			m[dcKey] = true
-			if err := tx.Where(TpDerivedCharger{
-				Tpid:      dCharger.TPid,
-				Direction: dCharger.Direction,
-				Tenant:    dCharger.Tenant,
-				Category:  dCharger.Category,
-				Account:   dCharger.Account,
-				Subject:   dCharger.Subject,
-			}).Delete(TpDerivedCharger{}).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-		for _, d := range APItoModelDerivedCharger(dCharger) {
-			if err := tx.Save(&d).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -1352,40 +1317,6 @@ func (self *SQLStorage) GetTPAccountActions(filter *utils.TPAccountActions) ([]*
 			return aas, utils.ErrNotFound
 		}
 		return aas, nil
-	}
-}
-
-func (self *SQLStorage) GetTPDerivedChargers(filter *utils.TPDerivedChargers) ([]*utils.TPDerivedChargers, error) {
-	var tpDerivedChargers TpDerivedChargers
-	q := self.db.Where("tpid = ?", filter.TPid)
-	if len(filter.Direction) != 0 {
-		q = q.Where("direction = ?", filter.Direction)
-	}
-	if len(filter.Tenant) != 0 {
-		q = q.Where("tenant = ?", filter.Tenant)
-	}
-	if len(filter.Account) != 0 {
-		q = q.Where("account = ?", filter.Account)
-	}
-	if len(filter.Category) != 0 {
-		q = q.Where("category = ?", filter.Category)
-	}
-	if len(filter.Subject) != 0 {
-		q = q.Where("subject = ?", filter.Subject)
-	}
-	if len(filter.LoadId) != 0 {
-		q = q.Where("loadid = ?", filter.LoadId)
-	}
-	if err := q.Find(&tpDerivedChargers).Error; err != nil {
-		return nil, err
-	}
-	if dcs, err := tpDerivedChargers.AsTPDerivedChargers(); err != nil {
-		return nil, err
-	} else {
-		if len(dcs) == 0 {
-			return dcs, utils.ErrNotFound
-		}
-		return dcs, nil
 	}
 }
 
