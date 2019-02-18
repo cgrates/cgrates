@@ -4,7 +4,7 @@
 `CGRateS`_ is a *very fast* and *easily scalable* **(charging, rating, accounting, lcr, mediation, billing, authorization)** *ENGINE* targeted especially for ISPs and Telecom Operators.
 
 It is written in `Go`_ programming language and is accessible from any programming language via JSON RPC.
-The code is well documented (**go doc** compliant `API docs`_) and heavily tested. (also **1300+** tests are part of the build system).
+The code is well documented (**go doc** compliant `API docs`_) and heavily tested. (also **5000+** tests are part of the test suite).
 
 After testing various databases like `Kyoto Cabinet`_, `Apache Cassandra`_, `Redis`_ and `MongoDB`_,
 the project focused on **Redis** as it delivers the best trade-off between speed, configuration and scalability.
