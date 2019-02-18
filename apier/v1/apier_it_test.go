@@ -1430,6 +1430,20 @@ func TestApierITGetCdrs(t *testing.T) {
 }
 
 func TestApierITProcessCdr(t *testing.T) {
+	//add a default charger
+	chargerProfile := &engine.ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "Default",
+		RunID:        "*default",
+		AttributeIDs: []string{"*none"},
+		Weight:       20,
+	}
+	var result string
+	if err := rater.Call("ApierV1.SetChargerProfile", chargerProfile, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
 	var reply string
 	cdr := engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsaf",
 		OriginHost: "192.168.1.1", Source: "test", RequestType: utils.META_RATED, Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001",
