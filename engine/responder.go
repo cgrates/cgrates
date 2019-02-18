@@ -78,10 +78,6 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
-	// replace user profile fields
-	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
-		return err
-	}
 	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
 		return utils.ErrMaxUsageExceeded
 	}
@@ -100,10 +96,6 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
-	}
-	// replace user profile fields
-	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
-		return err
 	}
 	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
 		return utils.ErrMaxUsageExceeded
@@ -127,10 +119,6 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 	}
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
-	}
-	// replace user profile fields
-	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
-		return err
 	}
 	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
 		return utils.ErrMaxUsageExceeded
@@ -161,10 +149,6 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *Account) (err 
 	}
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
-	}
-	// replace user profile fields
-	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
-		return err
 	}
 	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
 		err = utils.ErrMaxUsageExceeded
@@ -199,10 +183,6 @@ func (rs *Responder) RefundRounding(arg *CallDescriptor, reply *float64) (err er
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
-	// replace user profile fields
-	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
-		return err
-	}
 	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
 		return utils.ErrMaxUsageExceeded
 	}
@@ -217,10 +197,6 @@ func (rs *Responder) RefundRounding(arg *CallDescriptor, reply *float64) (err er
 func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *time.Duration) (err error) {
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
-	}
-	// replace user profile fields
-	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
-		return err
 	}
 	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
 		return utils.ErrMaxUsageExceeded
@@ -241,11 +217,6 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *time.Duration) (er
 	}
 	if ev.Subject == "" {
 		ev.Subject = ev.Account
-	}
-	// replace user profile fields
-	if err := LoadUserProfile(ev, utils.EXTRA_FIELDS); err != nil {
-		rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{Err: err})
-		return err
 	}
 	if !rs.usageAllowed(ev.ToR, ev.Usage) {
 		return utils.ErrMaxUsageExceeded
@@ -338,11 +309,6 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) (err error) {
 		ev.Subject = ev.Account
 	}
 	//utils.Logger.Info(fmt.Sprintf("DC before: %+v", ev))
-	// replace user profile fields
-	if err := LoadUserProfile(ev, utils.EXTRA_FIELDS); err != nil {
-		return err
-	}
-	//utils.Logger.Info(fmt.Sprintf("DC after: %+v", ev))
 	attrsDC := &utils.AttrDerivedChargers{Tenant: ev.Tenant,
 		Category: ev.Category, Direction: utils.OUT,
 		Account: ev.Account, Subject: ev.Subject,

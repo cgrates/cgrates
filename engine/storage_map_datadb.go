@@ -566,50 +566,6 @@ func (ms *MapStorage) RemoveSubscriberDrv(key string) (err error) {
 	return
 }
 
-func (ms *MapStorage) SetUserDrv(up *UserProfile) error {
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
-	result, err := ms.ms.Marshal(up)
-	if err != nil {
-		return err
-	}
-	ms.dict[utils.USERS_PREFIX+up.GetId()] = result
-	return nil
-}
-
-func (ms *MapStorage) GetUserDrv(key string) (up *UserProfile, err error) {
-	ms.mu.RLock()
-	defer ms.mu.RUnlock()
-	up = &UserProfile{}
-	if values, ok := ms.dict[utils.USERS_PREFIX+key]; ok {
-		err = ms.ms.Unmarshal(values, &up)
-	} else {
-		return nil, utils.ErrNotFound
-	}
-	return
-}
-
-func (ms *MapStorage) GetUsersDrv() (result []*UserProfile, err error) {
-	ms.mu.RLock()
-	defer ms.mu.RUnlock()
-	for key, value := range ms.dict {
-		if strings.HasPrefix(key, utils.USERS_PREFIX) {
-			up := &UserProfile{}
-			if err = ms.ms.Unmarshal(value, up); err == nil {
-				result = append(result, up)
-			}
-		}
-	}
-	return
-}
-
-func (ms *MapStorage) RemoveUserDrv(key string) error {
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
-	delete(ms.dict, utils.USERS_PREFIX+key)
-	return nil
-}
-
 func (ms *MapStorage) GetLoadHistory(limitItems int,
 	skipCache bool, transactionID string) ([]*utils.LoadInstance, error) {
 	ms.mu.RLock()

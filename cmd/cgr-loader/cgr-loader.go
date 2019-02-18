@@ -95,8 +95,6 @@ var (
 	flushStorDB    = flag.Bool("flush_stordb", false, "Remove tariff plan data for id from the database")
 	remove         = flag.Bool("remove", false, "Will remove instead of adding data from DB")
 
-	usersAddress = flag.String("users", "", "Users service to contact for data reloads, empty to disable automatic data reloads")
-
 	err           error
 	dm            *engine.DataManager
 	storDb        engine.LoadStorage
@@ -291,7 +289,6 @@ func main() {
 			path.Join(*dataPath, utils.ACTION_TRIGGERS_CSV),
 			path.Join(*dataPath, utils.ACCOUNT_ACTIONS_CSV),
 			path.Join(*dataPath, utils.DERIVED_CHARGERS_CSV),
-			path.Join(*dataPath, utils.USERS_CSV),
 			path.Join(*dataPath, utils.ResourcesCsv),
 			path.Join(*dataPath, utils.StatsCsv),
 			path.Join(*dataPath, utils.ThresholdsCsv),
@@ -328,26 +325,6 @@ func main() {
 		log.Print("WARNING: automatic cache reloading is disabled!")
 	}
 
-	// FixMe: remove users reloading as soon as not longer supported
-	if *usersAddress != "" { // Init connection to rater so we can reload it's data
-		if len(ldrCfg.LoaderCgrCfg().CachesConns) != 0 &&
-			*usersAddress == ldrCfg.LoaderCgrCfg().CachesConns[0].Address {
-			userS = cacheS
-		} else {
-			if userS, err = rpcclient.NewRpcClient("tcp", *usersAddress,
-				ldrCfg.LoaderCgrCfg().CachesConns[0].Tls,
-				ldrCfg.TlsCfg().ClientKey, ldrCfg.TlsCfg().ClientCerificate,
-				ldrCfg.TlsCfg().CaCertificate, 3, 3,
-				time.Duration(1*time.Second), time.Duration(5*time.Minute),
-				strings.TrimPrefix(*rpcEncoding, utils.Meta), nil, false); err != nil {
-				log.Fatalf("Could not connect to UserS API: %s", err.Error())
-				return
-			}
-		}
-	} else {
-		log.Print("WARNING: Users automatic data reload is disabled!")
-	}
-
 	if !*remove {
 		// write maps to database
 		if err := tpReader.WriteToDatabase(*flush, *verbose, *disableReverse); err != nil {
@@ -378,11 +355,6 @@ func main() {
 			dppIDs, _ = tpReader.GetLoadedIds(utils.DispatcherProfilePrefix)
 		}
 		aps, _ := tpReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
-		// for users reloading
-		var userIds []string
-		if userS != nil {
-			userIds, _ = tpReader.GetLoadedIds(utils.USERS_PREFIX)
-		}
 		// release the reader with it's structures
 		tpReader.Init()
 
@@ -455,16 +427,6 @@ func main() {
 				}
 				if err = cacheS.Call(utils.ApierV1ReloadScheduler, "", &reply); err != nil {
 					log.Printf("WARNING: Got error on scheduler reload: %s\n", err.Error())
-				}
-			}
-
-			if userS != nil && len(userIds) > 0 {
-				if *verbose {
-					log.Print("Reloading Users data")
-				}
-				var reply string
-				if err := userS.Call(utils.UsersV1ReloadUsers, "", &reply); err != nil {
-					log.Printf("WARNING: Failed reloading users data, error: %s\n", err.Error())
 				}
 			}
 

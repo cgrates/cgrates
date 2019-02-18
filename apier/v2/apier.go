@@ -136,7 +136,6 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 			path.Join(attrs.FolderPath, utils.ACTION_TRIGGERS_CSV),
 			path.Join(attrs.FolderPath, utils.ACCOUNT_ACTIONS_CSV),
 			path.Join(attrs.FolderPath, utils.DERIVED_CHARGERS_CSV),
-			path.Join(attrs.FolderPath, utils.USERS_CSV),
 			path.Join(attrs.FolderPath, utils.ResourcesCsv),
 			path.Join(attrs.FolderPath, utils.StatsCsv),
 			path.Join(attrs.FolderPath, utils.ThresholdsCsv),
@@ -178,7 +177,6 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		}
 	}
 	aps, _ := loader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
-	userKeys, _ := loader.GetLoadedIds(utils.USERS_PREFIX)
 
 	// relase tp data
 	loader.Init()
@@ -188,12 +186,6 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		if sched != nil {
 			utils.Logger.Info("ApierV2.LoadTariffPlanFromFolder, reloading scheduler.")
 			sched.Reload()
-		}
-	}
-	if len(userKeys) != 0 && self.Users != nil {
-		var r string
-		if err := self.Users.Call("UsersV1.ReloadUsers", "", &r); err != nil {
-			return err
 		}
 	}
 	loadHistList, err := self.DataManager.DataDB().GetLoadHistory(1, true, utils.NonTransactional)

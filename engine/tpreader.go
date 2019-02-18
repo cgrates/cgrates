@@ -46,7 +46,6 @@ type TpReader struct {
 	ratingProfiles     map[string]*RatingProfile
 	sharedGroups       map[string]*SharedGroup
 	derivedChargers    map[string]*utils.DerivedChargers
-	users              map[string]*UserProfile
 	resProfiles        map[utils.TenantID]*utils.TPResource
 	sqProfiles         map[utils.TenantID]*utils.TPStats
 	thProfiles         map[utils.TenantID]*utils.TPThreshold
@@ -126,7 +125,6 @@ func (tpr *TpReader) Init() {
 	tpr.ratingProfiles = make(map[string]*RatingProfile)
 	tpr.sharedGroups = make(map[string]*SharedGroup)
 	tpr.accountActions = make(map[string]*Account)
-	tpr.users = make(map[string]*UserProfile)
 	tpr.derivedChargers = make(map[string]*utils.DerivedChargers)
 	tpr.resProfiles = make(map[utils.TenantID]*utils.TPResource)
 	tpr.sqProfiles = make(map[utils.TenantID]*utils.TPStats)
@@ -1144,51 +1142,6 @@ func (tpr *TpReader) LoadDerivedChargers() (err error) {
 	return tpr.LoadDerivedChargersFiltered(&utils.TPDerivedChargers{TPid: tpr.tpid}, false)
 }
 
-func (tpr *TpReader) LoadUsersFiltered(filter *utils.TPUsers) (bool, error) {
-	tpUsers, err := tpr.lr.GetTPUsers(filter)
-	if err != nil {
-		return false, err
-	}
-	for _, tpUser := range tpUsers {
-		user := &UserProfile{
-			Tenant:   tpUser.Tenant,
-			UserName: tpUser.UserName,
-			Profile:  make(map[string]string),
-		}
-		for _, up := range tpUser.Profile {
-			user.Profile[up.AttrName] = up.AttrValue
-		}
-		tpr.dm.SetUser(user)
-	}
-	return len(tpUsers) > 0, err
-}
-
-func (tpr *TpReader) LoadUsers() error {
-	tps, err := tpr.lr.GetTPUsers(&utils.TPUsers{TPid: tpr.tpid})
-	if err != nil {
-		return err
-	}
-	userMap, err := MapTPUsers(tps)
-	if err != nil {
-		return err
-	}
-	for key, usr := range userMap {
-		up, found := tpr.users[key]
-		if !found {
-			up = &UserProfile{
-				Tenant:   usr.Tenant,
-				UserName: usr.UserName,
-				Profile:  make(map[string]string),
-			}
-			tpr.users[key] = up
-		}
-		for _, p := range usr.Profile {
-			up.Profile[p.AttrName] = p.AttrValue
-		}
-	}
-	return err
-}
-
 func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) (err error) {
 	rls, err := tpr.lr.GetTPResources(tpr.tpid, "", tag)
 	if err != nil {
@@ -1411,9 +1364,6 @@ func (tpr *TpReader) LoadAll() (err error) {
 	if err = tpr.LoadDerivedChargers(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
-	if err = tpr.LoadUsers(); err != nil && err.Error() != utils.NotFoundCaps {
-		return
-	}
 	if err = tpr.LoadFilters(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
@@ -1617,18 +1567,6 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		}
 		if verbose {
 			log.Print("\t", key)
-		}
-	}
-	if verbose {
-		log.Print("Users:")
-	}
-	for _, u := range tpr.users {
-		err = tpr.dm.SetUser(u)
-		if err != nil {
-			return err
-		}
-		if verbose {
-			log.Print("\t", u.GetId())
 		}
 	}
 	if verbose {
@@ -1979,14 +1917,6 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case utils.USERS_PREFIX:
-		keys := make([]string, len(tpr.users))
-		i := 0
-		for k := range tpr.users {
-			keys[i] = k
-			i++
-		}
-		return keys, nil
 	case utils.ResourceProfilesPrefix:
 		keys := make([]string, len(tpr.resProfiles))
 		i := 0
@@ -2179,18 +2109,6 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 		}
 		if verbose {
 			log.Print("\t", key)
-		}
-	}
-	if verbose {
-		log.Print("Users:")
-	}
-	for _, u := range tpr.users {
-		err = tpr.dm.RemoveUser(u.GetId())
-		if err != nil {
-			return err
-		}
-		if verbose {
-			log.Print("\t", u.GetId())
 		}
 	}
 	if verbose {

@@ -353,34 +353,6 @@ type TPSharedGroup struct {
 	RatingSubject string
 }
 
-type TPUsers struct {
-	TPid     string
-	Tenant   string
-	UserName string
-	Masked   bool
-	Weight   float64
-	Profile  []*TPUserProfile
-}
-
-type TPUserProfile struct {
-	AttrName  string
-	AttrValue string
-}
-
-func (u *TPUsers) GetId() string {
-	return ConcatenatedKey(u.Tenant, u.UserName)
-}
-
-func (tu *TPUsers) SetId(id string) error {
-	vals := strings.Split(id, CONCATENATED_KEY_SEP)
-	if len(vals) != 2 {
-		return ErrInvalidKey
-	}
-	tu.Tenant = vals[0]
-	tu.UserName = vals[1]
-	return nil
-}
-
 type TPDerivedChargers struct {
 	TPid            string
 	LoadId          string
@@ -597,7 +569,6 @@ type CacheStats struct {
 	AccountActionPlans  int
 	SharedGroups        int
 	DerivedChargers     int
-	Users               int
 	ResourceProfiles    int
 	Resources           int
 	StatQueues          int

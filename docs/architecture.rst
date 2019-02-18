@@ -386,8 +386,6 @@ Can be used to:
          Timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB> (default "Local")
    -to_stordb
          Import the tariff plan from files to storDb
-   -users_address string
-         Users service to contact for data reloads, empty to disable automatic data reloads (default "127.0.0.1:2013")
    -validate
          When true will run various check on the loaded data to check for structural errors
    -verbose

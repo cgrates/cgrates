@@ -11,9 +11,6 @@
 	"pubsubs_conns": [
 		{"address": "*internal"}
 	],
-	"users_conns": [
-		{"address": "*internal"}
-	],
 },
 
 "scheduler": {

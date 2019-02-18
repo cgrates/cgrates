@@ -955,22 +955,6 @@ func (dm *DataManager) RemoveRatingProfile(key string,
 	return
 }
 
-func (dm *DataManager) SetUser(up *UserProfile) (err error) {
-	return dm.DataDB().SetUserDrv(up)
-}
-
-func (dm *DataManager) GetUser(key string) (up *UserProfile, err error) {
-	return dm.DataDB().GetUserDrv(key)
-}
-
-func (dm *DataManager) GetUsers() (result []*UserProfile, err error) {
-	return dm.DataDB().GetUsersDrv()
-}
-
-func (dm *DataManager) RemoveUser(key string) error {
-	return dm.DataDB().RemoveUserDrv(key)
-}
-
 func (dm *DataManager) GetSubscribers() (result map[string]*SubscriberData, err error) {
 	return dm.DataDB().GetSubscribersDrv()
 }

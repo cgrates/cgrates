@@ -129,7 +129,6 @@ const (
 	UNLIMITED                     = "*unlimited"
 	ZERO                          = "*zero"
 	ASAP                          = "*asap"
-	USERS                         = "*users"
 	STATS_CHAR                    = "#"
 	COMMENT_CHAR                  = '#'
 	CSV_SEP                       = ','
@@ -471,17 +470,17 @@ const (
 	RatingPlan                   = "RatingPlan"
 	RatingProfile                = "RatingProfile"
 	MetaRatingPlans              = "*ratingplans"
-	MetaRatingProfile            = "*ratingprofile"
+	MetaRatingProfile            = "*ratingprofiles"
 	MetaDestinations             = "*destinations"
 	MetaReverseDestinations      = "*reversedestinations"
 	MetaLCR                      = "*lcr"
 	MetaCdrStats                 = "*cdrstats"
-	MetaTiming                   = "*Timing"
-	MetaRQF                      = "*RQF"
-	MetaResource                 = "*Resource"
-	MetaUser                     = "*User"
-	MetaSubscribers              = "*Subscribers"
-	MetaDerivedChargersV         = "*DerivedChargers"
+	MetaTiming                   = "*timings"
+	MetaReqFilters               = "*reqfilters"
+	MetaResource                 = "*resources"
+	MetaUser                     = "*users"
+	MetaSubscribers              = "*subscribers"
+	MetaDerivedChargersV         = "*derivedchargers"
 	MetaStorDB                   = "*stordb"
 	MetaDataDB                   = "*datadb"
 	MetaWeight                   = "*weight"
@@ -624,13 +623,12 @@ const (
 	MetaTpResources         = "*tp_resources"
 	MetaTpRates             = "*tp_rates"
 	MetaTpTiming            = "*tp_timing"
-	MetaTpResource          = "*tp_resource"
-	MetaTpUsers             = "*tp_users"
+	MetaTpResource          = "*tp_resources"
 	MetaTpDerivedChargersV  = "*tp_derived_chargers"
 	MetaTpCdrStats          = "*tp_cdrstats"
 	MetaTpDestinations      = "*tp_destinations"
-	MetaTpRatingPlan        = "*tp_rating_plan"
-	MetaTpRatingProfile     = "*tp_rating_profile"
+	MetaTpRatingPlan        = "*tp_rating_plans"
+	MetaTpRatingProfile     = "*tp_rating_profiles"
 	MetaTpChargers          = "*tp_chargers"
 	MetaTpDispatchers       = "*tp_dispatchers"
 	MetaDurationSeconds     = "*duration_seconds"
@@ -662,7 +660,6 @@ const (
 	TpRates            = "TpRates"
 	TpTiming           = "TpTiming"
 	TpResource         = "TpResource"
-	TpUsers            = "TpUsers"
 	TpDerivedChargersV = "TpDerivedChargers"
 	TpCdrStats         = "TpCdrStats"
 	TpDestinations     = "TpDestinations"
@@ -705,11 +702,6 @@ const (
 
 const (
 	ApierV2LoadTariffPlanFromFolder = "ApierV2.LoadTariffPlanFromFolder"
-)
-
-// UserS APIs
-const (
-	UsersV1ReloadUsers = "UsersV1.ReloadUsers"
 )
 
 // SupplierS APIs
@@ -876,7 +868,6 @@ const (
 	ACTION_TRIGGERS_CSV   = "ActionTriggers.csv"
 	ACCOUNT_ACTIONS_CSV   = "AccountActions.csv"
 	DERIVED_CHARGERS_CSV  = "DerivedChargers.csv"
-	USERS_CSV             = "Users.csv"
 	ResourcesCsv          = "Resources.csv"
 	StatsCsv              = "Stats.csv"
 	ThresholdsCsv         = "Thresholds.csv"
@@ -901,7 +892,6 @@ const (
 	TBLTPActionTriggers   = "tp_action_triggers"
 	TBLTPAccountActions   = "tp_account_actions"
 	TBLTPDerivedChargers  = "tp_derived_chargers"
-	TBLTPUsers            = "tp_users"
 	TBLTPResources        = "tp_resources"
 	TBLTPStats            = "tp_stats"
 	TBLTPThresholds       = "tp_thresholds"

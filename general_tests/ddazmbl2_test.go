@@ -55,7 +55,6 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	actionTriggers := ``
 	accountActions := `cgrates.org,12345,TOPUP10_AT,,,`
 	derivedCharges := ``
-	users := ``
 	resLimits := ``
 	stats := ``
 	thresholds := ``
@@ -65,7 +64,7 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	chargerProfiles := ``
 	csvr := engine.NewTpReader(dataDB2.DataDB(), engine.NewStringCSVStorage(',', destinations, timings,
 		rates, destinationRates, ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans,
-		actionTriggers, accountActions, derivedCharges, users, resLimits,
+		actionTriggers, accountActions, derivedCharges, resLimits,
 		stats, thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``), "", "")
 	if err := csvr.LoadDestinations(); err != nil {
 		t.Fatal(err)

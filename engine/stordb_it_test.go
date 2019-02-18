@@ -53,7 +53,6 @@ var sTestsStorDBit = []func(t *testing.T){
 	testStorDBitCRUDTpActionTriggers,
 	testStorDBitCRUDTpAccountActions,
 	testStorDBitCRUDTpDerivedChargers,
-	testStorDBitCRUDTpUsers,
 	testStorDBitCRUDTpResources,
 	testStorDBitCRUDTpStats,
 	testStorDBitCRUDCDRs,
@@ -1088,78 +1087,6 @@ func testStorDBitCRUDTpDerivedChargers(t *testing.T) {
 	}
 	// READ
 	if _, err := storDB.GetTPDerivedChargers(&filter); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-}
-
-func testStorDBitCRUDTpUsers(t *testing.T) {
-	// READ
-	var filter = utils.TPUsers{
-		TPid: "testTPid",
-	}
-	if _, err := storDB.GetTPUsers(&filter); err != utils.ErrNotFound {
-		t.Error(err)
-	}
-	// WRITE
-	var snd = []*utils.TPUsers{
-		{
-			TPid:     "testTPid",
-			Tenant:   "cgrates.org",
-			Masked:   true,
-			UserName: "1001",
-			Weight:   0.1,
-			Profile: []*utils.TPUserProfile{
-				{
-					AttrName:  "Account",
-					AttrValue: "1001",
-				},
-			},
-		},
-		{
-			TPid:     "testTPid",
-			Tenant:   "cgrates.org",
-			Masked:   true,
-			UserName: "1002",
-			Weight:   0.1,
-			Profile: []*utils.TPUserProfile{
-				{
-					AttrName:  "Account",
-					AttrValue: "1001",
-				},
-			},
-		},
-	}
-	if err := storDB.SetTPUsers(snd); err != nil {
-		t.Error(err)
-	}
-	// READ
-	if rcv, err := storDB.GetTPUsers(&filter); err != nil {
-		t.Error(err)
-	} else {
-		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
-		}
-	}
-	// UPDATE
-	snd[0].Masked = false
-	snd[1].Masked = false
-	if err := storDB.SetTPUsers(snd); err != nil {
-		t.Error(err)
-	}
-	// READ
-	if rcv, err := storDB.GetTPUsers(&filter); err != nil {
-		t.Error(err)
-	} else {
-		if !(reflect.DeepEqual(snd[0], rcv[0]) || reflect.DeepEqual(snd[0], rcv[1])) {
-			t.Errorf("\nExpecting:\n%+v\nReceived:\n%+v\n||\n%+v", utils.ToIJSON(snd[0]), utils.ToIJSON(rcv[0]), utils.ToIJSON(rcv[1]))
-		}
-	}
-	// REMOVE
-	if err := storDB.RemTpData("", "testTPid", nil); err != nil {
-		t.Error(err)
-	}
-	// READ
-	if _, err := storDB.GetTPUsers(&filter); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }

@@ -57,7 +57,6 @@ const (
 	colShg  = "shared_groups"
 	colDcs  = "derived_chargers"
 	colPbs  = "pubsub"
-	colUsr  = "users"
 	colLht  = "load_history"
 	colVer  = "versions"
 	colRsP  = "resource_profiles"
@@ -239,7 +238,7 @@ func (ms *MongoStorage) GetContext() context.Context {
 func (ms *MongoStorage) EnsureIndexes() (err error) {
 	if ms.storageType == utils.DataDB {
 		for _, col := range []string{colAct, colApl, colAAp, colAtr,
-			colDcs, colRpl, colDst, colRds, colUsr, colLht} {
+			colDcs, colRpl, colDst, colRds, colLht} {
 			if err = ms.EnusureIndex(col, true, "key"); err != nil {
 				return
 			}
@@ -269,11 +268,6 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 
 		if err = ms.EnusureIndex(utils.TBLTPRateProfiles, true, "tpid", "direction",
 			"tenant", "category", "subject", "loadid"); err != nil {
-			return
-		}
-
-		if err = ms.EnusureIndex(utils.TBLTPUsers, true, "tpid", "tenant",
-			"username"); err != nil {
 			return
 		}
 
@@ -331,7 +325,6 @@ func (ms *MongoStorage) getColNameForPrefix(prefix string) (string, bool) {
 		utils.SHARED_GROUP_PREFIX:        colShg,
 		utils.DERIVEDCHARGERS_PREFIX:     colDcs,
 		utils.PUBSUB_SUBSCRIBERS_PREFIX:  colPbs,
-		utils.USERS_PREFIX:               colUsr,
 		utils.LOADINST_KEY:               colLht,
 		utils.VERSION_PREFIX:             colVer,
 		utils.TimingsPrefix:              colTmg,
@@ -1144,71 +1137,6 @@ func (ms *MongoStorage) SetSubscriberDrv(key string, sub *SubscriberData) (err e
 func (ms *MongoStorage) RemoveSubscriberDrv(key string) (err error) {
 	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(colPbs).DeleteOne(sctx, bson.M{"key": key})
-		if dr.DeletedCount == 0 {
-			return utils.ErrNotFound
-		}
-		return err
-	})
-}
-
-func (ms *MongoStorage) GetUserDrv(key string) (up *UserProfile, err error) {
-	var kv struct {
-		Key   string
-		Value *UserProfile
-	}
-	if err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		cur := ms.getCol(colUsr).FindOne(sctx, bson.M{"key": key})
-		if err := cur.Decode(&kv); err != nil {
-			if err == mongo.ErrNoDocuments {
-				return utils.ErrNotFound
-			}
-			return err
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-	return kv.Value, nil
-}
-
-func (ms *MongoStorage) GetUsersDrv() (result []*UserProfile, err error) {
-	err = ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(colUsr).Find(sctx, bson.D{})
-		if err != nil {
-			return err
-		}
-		for cur.Next(sctx) {
-			var kv struct {
-				Key   string
-				Value *UserProfile
-			}
-			err := cur.Decode(&kv)
-			if err != nil {
-				return err
-			}
-			result = append(result, kv.Value)
-		}
-		return cur.Close(sctx)
-	})
-	return
-}
-
-func (ms *MongoStorage) SetUserDrv(up *UserProfile) (err error) {
-	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(colUsr).UpdateOne(sctx, bson.M{"key": up.GetId()},
-			bson.M{"$set": struct {
-				Key   string
-				Value *UserProfile
-			}{Key: up.GetId(), Value: up}},
-			options.Update().SetUpsert(true),
-		)
-		return err
-	})
-}
-
-func (ms *MongoStorage) RemoveUserDrv(key string) (err error) {
-	return ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
-		dr, err := ms.getCol(colUsr).DeleteOne(sctx, bson.M{"key": key})
 		if dr.DeletedCount == 0 {
 			return utils.ErrNotFound
 		}

@@ -51,7 +51,7 @@ RP_SMS1,DR_SMS_1,ALWAYS,10`
 cgrates.org,data,*any,2012-01-01T00:00:00Z,RP_DATA1,
 cgrates.org,sms,*any,2012-01-01T00:00:00Z,RP_SMS1,`
 	csvr := engine.NewTpReader(dataDB.DataDB(), engine.NewStringCSVStorage(',', dests, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		"", "", "", "", "", "", "", "", "", "", "", "", "", "", ""), "", "")
+		"", "", "", "", "", "", "", "", "", "", "", "", "", ""), "", "")
 
 	if err := csvr.LoadTimings(); err != nil {
 		t.Fatal(err)

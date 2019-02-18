@@ -313,8 +313,6 @@ type CGRConfig struct {
 	// Deprecated
 	SmOsipsConfig       *SmOsipsConfig // SMOpenSIPS Configuration
 	PubSubServerEnabled bool           // Starts PubSub as server: <true|false>.
-	UserServerEnabled   bool           // Starts User as server: <true|false>
-	UserServerIndexes   []string       // List of user profile field indexes
 }
 
 func (self *CGRConfig) checkConfigSanity() error {
@@ -331,13 +329,6 @@ func (self *CGRConfig) checkConfigSanity() error {
 			for _, connCfg := range self.ralsCfg.RALsPubSubSConns {
 				if connCfg.Address == utils.MetaInternal {
 					return errors.New("PubSub server not enabled but requested by RALs component.")
-				}
-			}
-		}
-		if !self.UserServerEnabled {
-			for _, connCfg := range self.ralsCfg.RALsUserSConns {
-				if connCfg.Address == utils.MetaInternal {
-					return errors.New("User service not enabled but requested by RALs component.")
 				}
 			}
 		}
@@ -376,13 +367,6 @@ func (self *CGRConfig) checkConfigSanity() error {
 			for _, connCfg := range self.cdrsCfg.CDRSAttributeSConns {
 				if connCfg.Address == utils.MetaInternal {
 					return errors.New("AttributeS not enabled but requested by CDRS component.")
-				}
-			}
-		}
-		if !self.UserServerEnabled {
-			for _, connCfg := range self.cdrsCfg.CDRSUserSConns {
-				if connCfg.Address == utils.MetaInternal {
-					return errors.New("UserS not enabled but requested by CDRS component.")
 				}
 			}
 		}
@@ -1052,18 +1036,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		}
 	}
 
-	jsnUserServCfg, err := jsnCfg.UserServJsonCfg()
-	if err != nil {
-		return err
-	}
-	if jsnUserServCfg != nil {
-		if jsnUserServCfg.Enabled != nil {
-			self.UserServerEnabled = *jsnUserServCfg.Enabled
-		}
-		if jsnUserServCfg.Indexes != nil {
-			self.UserServerIndexes = *jsnUserServCfg.Indexes
-		}
-	}
 	///depricated^^^
 	return nil
 }
