@@ -1807,7 +1807,7 @@ func TestAPItoModelTPDispatcher(t *testing.T) {
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Dsp",
-			Contexts:           "*any",
+			Subsystems:         "*any",
 			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
 			Strategy:           utils.MetaFirst,
 			ActivationInterval: "2014-07-14T14:35:00Z",

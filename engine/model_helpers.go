@@ -2406,11 +2406,11 @@ func (tps TPDispatchers) AsTPDispatchers() (result []*utils.TPDispatcherProfile)
 				ID:     tp.ID,
 			}
 		}
-		if tp.Contexts != "" {
+		if tp.Subsystems != "" {
 			if _, has := contextMap[tenantID]; !has {
 				contextMap[tenantID] = make(utils.StringMap)
 			}
-			contextSplit := strings.Split(tp.Contexts, utils.INFIELD_SEP)
+			contextSplit := strings.Split(tp.Subsystems, utils.INFIELD_SEP)
 			for _, context := range contextSplit {
 				contextMap[tenantID][context] = true
 			}
@@ -2525,7 +2525,7 @@ func APItoModelTPDispatcher(tpDPP *utils.TPDispatcherProfile) (mdls TPDispatcher
 	}
 
 	filters := strings.Join(tpDPP.FilterIDs, utils.INFIELD_SEP)
-	context := strings.Join(tpDPP.Subsystems, utils.INFIELD_SEP)
+	subsystems := strings.Join(tpDPP.Subsystems, utils.INFIELD_SEP)
 
 	interval := ""
 	if tpDPP.ActivationInterval != nil {
@@ -2544,7 +2544,7 @@ func APItoModelTPDispatcher(tpDPP *utils.TPDispatcherProfile) (mdls TPDispatcher
 			Tpid:               tpDPP.TPid,
 			Tenant:             tpDPP.Tenant,
 			ID:                 tpDPP.ID,
-			Contexts:           context,
+			Subsystems:         subsystems,
 			FilterIDs:          filters,
 			ActivationInterval: interval,
 			Strategy:           tpDPP.Strategy,
@@ -2560,7 +2560,7 @@ func APItoModelTPDispatcher(tpDPP *utils.TPDispatcherProfile) (mdls TPDispatcher
 		Tpid:               tpDPP.TPid,
 		Tenant:             tpDPP.Tenant,
 		ID:                 tpDPP.ID,
-		Contexts:           context,
+		Subsystems:         subsystems,
 		FilterIDs:          filters,
 		ActivationInterval: interval,
 		Strategy:           tpDPP.Strategy,
