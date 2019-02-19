@@ -26,6 +26,7 @@ import (
 	"testing"
 	"time"
 
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -57,6 +58,7 @@ var sTestsAcc = []func(t *testing.T){
 	testV1AccGetAccountSetAfterDelete,
 	//testV1AccRemAccountAfterDelete,
 	testV1AccMonthly,
+	testV1AccSendToThreshold,
 	testV1AccStopEngine,
 }
 
@@ -227,6 +229,62 @@ func testV1AccMonthly(t *testing.T) {
 		t.Error("Unexpected expiration date returned: ", reply.BalanceMap[utils.DATA][0].ExpirationDate)
 	}
 
+}
+
+//Add test to check if AccountS send event to ThresholdS
+func testV1AccSendToThreshold(t *testing.T) {
+	var reply string
+
+	// Add a disable and log action
+	attrsAA := &utils.AttrSetActions{ActionsId: "DISABLE_LOG", Actions: []*utils.TPAction{
+		{Identifier: engine.DISABLE_ACCOUNT},
+		{Identifier: engine.LOG},
+	}}
+	if err := accRpc.Call("ApierV2.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+		t.Error("Got error on ApierV2.SetActions: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
+	}
+	time.Sleep(10 * time.Millisecond)
+
+	tPrfl := &engine.ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "THD_AccDisableAndLog",
+		FilterIDs: []string{"*string:Account:testAccThreshold"},
+		MaxHits:   -1,
+		MinSleep:  time.Duration(1 * time.Second),
+		Weight:    20.0,
+		ActionIDs: []string{"DISABLE_LOG"},
+	}
+
+	if err := accRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	// Add an account
+	attrs := &v1.AttrAddBalance{Tenant: "cgrates.org", Account: "testAccThreshold",
+		BalanceId:   utils.StringPointer("testAccSetBalance"),
+		BalanceType: "*monetary", Value: 1.5}
+	if err := accRpc.Call("ApierV1.SetBalance", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.SetBalance: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.SetBalance received: %s", reply)
+	}
+
+	// give time to threshold to made the change
+	time.Sleep(10 * time.Millisecond)
+	//verify the account
+	var acnt *engine.Account
+	attrAcc := &utils.AttrGetAccount{
+		Tenant:  "cgrates.org",
+		Account: "testAccThreshold",
+	}
+	if err := accRpc.Call("ApierV2.GetAccount", attrAcc, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.Disabled != true {
+		t.Errorf("Expecting: true, received: %v", acnt.Disabled)
+	}
 }
 
 func testV1AccStopEngine(t *testing.T) {
