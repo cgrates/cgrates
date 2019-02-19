@@ -247,6 +247,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 		t.Errorf("Calling ApierV2.SetAccount received: %s", reply)
 	}
 
+	time.Sleep(50 * time.Millisecond)
 	var acnt *engine.Account
 	//verify if the third balance was added
 	if err := cdrsOfflineRpc.Call("ApierV2.GetAccount",
