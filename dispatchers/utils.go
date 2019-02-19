@@ -103,6 +103,23 @@ type UpdateSessionWithApiKey struct {
 	sessions.V1UpdateSessionArgs
 }
 
+type FilterSessionWithApiKey struct {
+	DispatcherResource
+	utils.TenantArg
+	Filters map[string]string
+}
+
+type ArgsReplicateSessionsWithApiKey struct {
+	DispatcherResource
+	utils.TenantArg
+	sessions.ArgsReplicateSessions
+}
+
+type SessionWithApiKey struct {
+	DispatcherResource
+	sessions.Session
+}
+
 func ParseStringMap(s string) utils.StringMap {
 	if s == utils.ZERO {
 		return make(utils.StringMap)

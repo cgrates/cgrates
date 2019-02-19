@@ -327,3 +327,38 @@ func (dS *DispatcherSessionSv1) UpdateSession(args *dispatchers.UpdateSessionWit
 	reply *sessions.V1UpdateSessionReply) (err error) {
 	return dS.dS.SessionSv1UpdateSession(args, reply)
 }
+
+func (dS *DispatcherSessionSv1) GetActiveSessions(args *dispatchers.FilterSessionWithApiKey,
+	reply *[]*sessions.ActiveSession) (err error) {
+	return dS.dS.SessionSv1GetActiveSessions(args, reply)
+}
+
+func (dS *DispatcherSessionSv1) GetActiveSessionsCount(args *dispatchers.FilterSessionWithApiKey,
+	reply *int) (err error) {
+	return dS.dS.SessionSv1GetActiveSessionsCount(args, reply)
+}
+
+func (dS *DispatcherSessionSv1) ForceDisconnect(args *dispatchers.FilterSessionWithApiKey,
+	reply *string) (err error) {
+	return dS.dS.SessionSv1ForceDisconnect(args, reply)
+}
+
+func (dS *DispatcherSessionSv1) GetPassiveSessions(args *dispatchers.FilterSessionWithApiKey,
+	reply *[]*sessions.ActiveSession) (err error) {
+	return dS.dS.SessionSv1GetPassiveSessions(args, reply)
+}
+
+func (dS *DispatcherSessionSv1) GetPassiveSessionsCount(args *dispatchers.FilterSessionWithApiKey,
+	reply *int) (err error) {
+	return dS.dS.SessionSv1GetPassiveSessionsCount(args, reply)
+}
+
+func (dS *DispatcherSessionSv1) ReplicateSessions(args *dispatchers.ArgsReplicateSessionsWithApiKey,
+	reply *string) (err error) {
+	return dS.dS.SessionSv1ReplicateSessions(args, reply)
+}
+
+func (dS *DispatcherSessionSv1) SetPassiveSession(args *dispatchers.SessionWithApiKey,
+	reply *string) (err error) {
+	return dS.dS.SessionSv1SetPassiveSession(args, reply)
+}

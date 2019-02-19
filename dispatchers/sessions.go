@@ -153,3 +153,94 @@ func (dS *DispatcherService) SessionSv1ProcessEvent(args *ProcessEventWithApiKey
 	return dS.Dispatch(&args.CGREvent, utils.MetaSessionS, args.RouteID,
 		utils.SessionSv1ProcessEvent, args.V1ProcessEventArgs, reply)
 }
+
+func (dS *DispatcherService) SessionSv1GetActiveSessions(args *FilterSessionWithApiKey,
+	reply *[]*sessions.ActiveSession) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.SessionSv1GetActiveSessions,
+			args.TenantArg.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaSessionS, args.RouteID,
+		utils.SessionSv1GetActiveSessions, args.Filters, reply)
+}
+
+func (dS *DispatcherService) SessionSv1GetActiveSessionsCount(args *FilterSessionWithApiKey,
+	reply *int) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.SessionSv1GetActiveSessionsCount,
+			args.TenantArg.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaSessionS, args.RouteID,
+		utils.SessionSv1GetActiveSessionsCount, args.Filters, reply)
+}
+
+func (dS *DispatcherService) SessionSv1ForceDisconnect(args *FilterSessionWithApiKey,
+	reply *string) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.SessionSv1ForceDisconnect,
+			args.TenantArg.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaSessionS, args.RouteID,
+		utils.SessionSv1ForceDisconnect, args.Filters, reply)
+}
+
+func (dS *DispatcherService) SessionSv1GetPassiveSessions(args *FilterSessionWithApiKey,
+	reply *[]*sessions.ActiveSession) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.SessionSv1GetPassiveSessions,
+			args.TenantArg.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaSessionS, args.RouteID,
+		utils.SessionSv1GetPassiveSessions, args.Filters, reply)
+}
+
+func (dS *DispatcherService) SessionSv1GetPassiveSessionsCount(args *FilterSessionWithApiKey,
+	reply *int) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.SessionSv1GetPassiveSessionsCount,
+			args.TenantArg.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaSessionS, args.RouteID,
+		utils.SessionSv1GetPassiveSessionsCount, args.Filters, reply)
+}
+
+func (dS *DispatcherService) SessionSv1ReplicateSessions(args *ArgsReplicateSessionsWithApiKey,
+	reply *string) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.SessionSv1ReplicateSessions,
+			args.TenantArg.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaSessionS, args.RouteID,
+		utils.SessionSv1ReplicateSessions, args.ArgsReplicateSessions, reply)
+}
+
+func (dS *DispatcherService) SessionSv1SetPassiveSession(args *SessionWithApiKey,
+	reply *string) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.SessionSv1SetPassiveSession,
+			args.Session.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.Session.Tenant}, utils.MetaSessionS, args.RouteID,
+		utils.SessionSv1SetPassiveSession, args.Session, reply)
+}
