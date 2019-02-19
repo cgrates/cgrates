@@ -57,7 +57,7 @@ func TestDspSessionSMongo(t *testing.T) {
 }
 
 func testDspSessionAddBalacne(t *testing.T) {
-	initUsage := 15 * time.Minute
+	initUsage := 30 * time.Minute
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:        "cgrates.org",
 		Account:       "1001",
@@ -319,7 +319,7 @@ func testDspSessionUpdate(t *testing.T) {
 				utils.RequestType: utils.META_PREPAID,
 				utils.SetupTime:   "2018-01-07T17:00:00Z",
 				utils.AnswerTime:  "2018-01-07T17:00:10Z",
-				utils.Usage:       300000000000.0,
+				utils.Usage:       float64(reqUsage),
 				"CGRID":           "5668666d6b8e44eb949042f25ce0796ec3592ff9",
 			},
 		},

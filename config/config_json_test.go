@@ -51,7 +51,7 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Default_category:     utils.StringPointer("call"),
 		Default_tenant:       utils.StringPointer("cgrates.org"),
 		Default_timezone:     utils.StringPointer("Local"),
-		Connect_attempts:     utils.IntPointer(3),
+		Connect_attempts:     utils.IntPointer(5),
 		Reconnects:           utils.IntPointer(-1),
 		Connect_timeout:      utils.StringPointer("1s"),
 		Reply_timeout:        utils.StringPointer("2s"),

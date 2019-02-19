@@ -41,7 +41,7 @@ const CGRATES_CFG_JSON = `
 	"default_category": "call",								// default category to consider when missing from requests
 	"default_tenant": "cgrates.org",						// default tenant to consider when missing from requests
 	"default_timezone": "Local",							// default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-	"connect_attempts": 3,									// initial server connect attempts
+	"connect_attempts": 5,									// initial server connect attempts
 	"reconnects": -1,										// number of retries in case of connection lost
 	"connect_timeout": "1s",								// consider connection unsuccessful on timeout, 0 to disable the feature
 	"reply_timeout": "2s",									// consider connection down for replies taking longer than this value

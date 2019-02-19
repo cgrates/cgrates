@@ -349,7 +349,7 @@ func TestCgrCfgJSONDefaultsGeneral(t *testing.T) {
 	if cgrCfg.GeneralCfg().DefaultTimezone != "Local" {
 		t.Errorf("Expected: Local, received: %+v", cgrCfg.GeneralCfg().DefaultTimezone)
 	}
-	if cgrCfg.GeneralCfg().ConnectAttempts != 3 {
+	if cgrCfg.GeneralCfg().ConnectAttempts != 5 {
 		t.Errorf("Expected: 3, received: %+v", cgrCfg.GeneralCfg().ConnectAttempts)
 	}
 	if cgrCfg.GeneralCfg().Reconnects != -1 {
