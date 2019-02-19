@@ -1046,7 +1046,7 @@ cgrates.org,Charge2,*string:Account:1003,2014-07-29T15:00:00Z,*default,Attr3,10
 
 func TestLoaderProcessDispatches(t *testing.T) {
 	dipatcherCSV := `
-#Tenant,ID,Contexts,FilterIDs,ActivationInterval,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters,Weight
+#Tenant,ID,Subsystems,FilterIDs,ActivationInterval,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters,Weight
 cgrates.org,EVENT1,*any,*string:EventName:Event1,,*weight,,ALL2,,20,false,,20
 cgrates.org,EVENT1,,,,,,ALL,,10,,,
 
@@ -1075,8 +1075,8 @@ cgrates.org,EVENT1,,,,,,ALL,,10,,,
 				Mandatory: true,
 			},
 			&config.FCTemplate{
-				Tag:     "Contexts",
-				FieldId: "Contexts",
+				Tag:     "Subsystems",
+				FieldId: "Subsystems",
 				Type:    utils.META_COMPOSED,
 				Value:   config.NewRSRParsersMustCompile("~2", true, utils.INFIELD_SEP),
 			},

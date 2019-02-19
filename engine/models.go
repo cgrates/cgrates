@@ -392,7 +392,7 @@ type TPDispatcher struct {
 	Tpid               string  //
 	Tenant             string  `index:"0" re:""`
 	ID                 string  `index:"1" re:""`
-	Contexts           string  `index:"2" re:""`
+	Subsystems         string  `index:"2" re:""`
 	FilterIDs          string  `index:"3" re:""`
 	ActivationInterval string  `index:"4" re:""`
 	Strategy           string  `index:"5" re:""`

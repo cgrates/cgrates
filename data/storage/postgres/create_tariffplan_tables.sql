@@ -415,16 +415,22 @@ CREATE INDEX tp_suppliers_unique ON tp_suppliers  ("tpid",  "tenant", "id",
 
   DROP TABLE IF EXISTS tp_dispatchers;
   CREATE TABLE tp_dispatchers (
-    "pk" SERIAL PRIMARY KEY,
-    "tpid" varchar(64) NOT NULL,
-    "tenant"varchar(64) NOT NULL,
-    "id" varchar(64) NOT NULL,
-    "filter_ids" varchar(64) NOT NULL,
-    "activation_interval" varchar(64) NOT NULL,
-    "strategy" varchar(64) NOT NULL,
-    "hosts" varchar(64) NOT NULL,
-    "weight" decimal(8,2) NOT NULL,
-    "created_at" TIMESTAMP WITH TIME ZONE
+  "pk" SERIAL PRIMARY KEY,
+  "tpid" varchar(64) NOT NULL,
+  "tenant" varchar(64) NOT NULL,
+  "id" varchar(64) NOT NULL,
+  "subsystems" varchar(64) NOT NULL,
+  "filter_ids" varchar(64) NOT NULL,
+  "activation_interval" varchar(64) NOT NULL,
+  "strategy" varchar(64) NOT NULL,
+  "strategy_parameters" varchar(64) NOT NULL,
+  "conn_id" varchar(64) NOT NULL,
+  "conn_filter_ids" varchar(64) NOT NULL,
+  "conn_weight" decimal(8,2) NOT NULL,
+  "conn_blocker" BOOLEAN NOT NULL,
+  "conn_parameters" varchar(64) NOT NULL,
+  "weight" decimal(8,2) NOT NULL,
+  "created_at" TIMESTAMP WITH TIME ZONE
   );
   CREATE INDEX tp_dispatchers_ids ON tp_dispatchers (tpid);
   CREATE INDEX tp_dispatchers_unique ON tp_dispatchers  ("tpid",  "tenant", "id",

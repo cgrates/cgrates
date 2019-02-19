@@ -430,7 +430,7 @@ CREATE TABLE tp_dispatchers (
   `tpid` varchar(64) NOT NULL,
   `tenant` varchar(64) NOT NULL,
   `id` varchar(64) NOT NULL,
-  `contexts` varchar(64) NOT NULL,
+  `subsystems` varchar(64) NOT NULL,
   `filter_ids` varchar(64) NOT NULL,
   `activation_interval` varchar(64) NOT NULL,
   `strategy` varchar(64) NOT NULL,
