@@ -61,6 +61,7 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Digest_separator:     utils.StringPointer(","),
 		Digest_equal:         utils.StringPointer(":"),
 		Rsr_separator:        utils.StringPointer(";"),
+		Enable_http_pprof:    utils.BoolPointer(false),
 	}
 	if gCfg, err := dfCgrJsonCfg.GeneralJsonCfg(); err != nil {
 		t.Error(err)
@@ -171,6 +172,7 @@ func TestDfListenJsonCfg(t *testing.T) {
 		Rpc_json_tls: utils.StringPointer("127.0.0.1:2022"),
 		Rpc_gob_tls:  utils.StringPointer("127.0.0.1:2023"),
 		Http_tls:     utils.StringPointer("127.0.0.1:2280"),
+		Http_pprof:   utils.StringPointer("127.0.0.1:2081"),
 	}
 	if cfg, err := dfCgrJsonCfg.ListenJsonCfg(); err != nil {
 		t.Error(err)

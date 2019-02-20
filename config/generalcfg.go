@@ -27,14 +27,14 @@ import (
 
 // General config section
 type GeneralCfg struct {
-	NodeID            string // Identifier for this engine instance
-	Logger            string // dictates the way logs are displayed/stored
-	LogLevel          int    // system wide log level, nothing higher than this will be logged
-	HttpSkipTlsVerify bool   // If enabled Http Client will accept any TLS certificate
-	RoundingDecimals  int    // Number of decimals to round end prices at
-	DBDataEncoding    string // The encoding used to store object data in strings: <msgpack|json>
-	TpExportPath      string // Path towards export folder for offline Tariff Plans
-	PosterAttempts    int
+	NodeID            string        // Identifier for this engine instance
+	Logger            string        // dictates the way logs are displayed/stored
+	LogLevel          int           // system wide log level, nothing higher than this will be logged
+	HttpSkipTlsVerify bool          // If enabled Http Client will accept any TLS certificate
+	RoundingDecimals  int           // Number of decimals to round end prices at
+	DBDataEncoding    string        // The encoding used to store object data in strings: <msgpack|json>
+	TpExportPath      string        // Path towards export folder for offline Tariff Plans
+	PosterAttempts    int           //
 	FailedPostsDir    string        // Directory path where we store failed http requests
 	DefaultReqType    string        // Use this request type if not defined on top
 	DefaultCategory   string        // set default type of record
@@ -47,9 +47,10 @@ type GeneralCfg struct {
 	ResponseCacheTTL  time.Duration // the life span of a cached response
 	InternalTtl       time.Duration // maximum duration to wait for internal connections before giving up
 	LockingTimeout    time.Duration // locking mechanism timeout to avoid deadlocks
-	DigestSeparator   string
-	DigestEqual       string
-	RsrSepatarot      string // separator used to split RSRParser (by degault is used ";")
+	DigestSeparator   string        //
+	DigestEqual       string        //
+	RsrSepatarot      string        // separator used to split RSRParser (by degault is used ";")
+	EnableHTTPPprof   bool          // enables the http server used for profiling
 }
 
 //loadFromJsonCfg loads General config from JsonCfg
@@ -136,6 +137,9 @@ func (gencfg *GeneralCfg) loadFromJsonCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 	}
 	if jsnGeneralCfg.Rsr_separator != nil {
 		gencfg.RsrSepatarot = *jsnGeneralCfg.Rsr_separator
+	}
+	if jsnGeneralCfg.Enable_http_pprof != nil {
+		gencfg.EnableHTTPPprof = *jsnGeneralCfg.Enable_http_pprof
 	}
 	return nil
 }

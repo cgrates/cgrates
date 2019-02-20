@@ -22,6 +22,8 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"path"
@@ -1138,6 +1140,14 @@ func schedCDRsConns(internalCDRSChan chan rpcclient.RpcClientConnection, exitCha
 	engine.SetSchedCdrsConns(cdrsConn)
 }
 
+func startProfServer(adress string) {
+	go func() {
+		if err := http.ListenAndServe(adress, nil); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<HTTPPprof> could not start HTTP server for profiling: %v", err.Error()))
+		}
+	}()
+}
+
 func memProfFile(memProfPath string) bool {
 	f, err := os.Create(memProfPath)
 	if err != nil {
@@ -1248,7 +1258,9 @@ func main() {
 		lgLevel = *logLevel
 	}
 	utils.Logger.SetLogLevel(lgLevel)
-
+	if cfg.GeneralCfg().EnableHTTPPprof {
+		startProfServer(cfg.ListenCfg().HTTPPprof)
+	}
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
 	var dm *engine.DataManager
