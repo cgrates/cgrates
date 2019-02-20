@@ -118,10 +118,8 @@ func alias2AtttributeProfile(alias *v1Alias, defaultTenant string) *engine.Attri
 }
 
 func (m *Migrator) migrateAlias2Attributes() (err error) {
-	cfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		return err
-	}
+	cfg := config.CgrConfig()
+
 	defaultTenant := cfg.GeneralCfg().DefaultTenant
 	for {
 		alias, err := m.dmIN.getV1Alias()
