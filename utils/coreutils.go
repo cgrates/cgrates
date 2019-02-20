@@ -46,6 +46,20 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
+var startCGRateSTime time.Time
+
+func init() {
+	startCGRateSTime = time.Now()
+}
+
+func GetTimeElapsedFromStart() string {
+	return time.Now().Sub(startCGRateSTime).Round(time.Second).String()
+}
+
+func GetStartTime() string {
+	return startCGRateSTime.Format(time.UnixDate)
+}
+
 func NewCounter(start, limit int64) *Counter {
 	return &Counter{
 		value: start,

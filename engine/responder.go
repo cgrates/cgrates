@@ -219,6 +219,7 @@ func (rs *Responder) Status(arg string, reply *map[string]interface{}) (err erro
 	response[utils.ActiveGoroutines] = runtime.NumGoroutine()
 	response["Footprint"] = utils.SizeFmt(float64(memstats.Sys), "")
 	response[utils.Version] = utils.GetCGRVersion()
+	response["RunningSince"] = utils.GetStartTime()
 	*reply = response
 	return
 }
