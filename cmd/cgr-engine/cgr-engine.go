@@ -128,7 +128,7 @@ func startCdrc(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConne
 		cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 		cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 		cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-		cdrcCfg.CdrsConns, internalCdrSChan, cfg.GeneralCfg().InternalTtl)
+		cdrcCfg.CdrsConns, internalCdrSChan, cfg.GeneralCfg().InternalTtl, false)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<CDRC> Could not connect to CDRS via RPC: %s", err.Error()))
 		exitChan <- true
@@ -161,7 +161,7 @@ func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, in
 			cfg.TlsCfg().CaCertificate, cfg.GeneralCfg().ConnectAttempts,
 			cfg.GeneralCfg().Reconnects, cfg.GeneralCfg().ConnectTimeout,
 			cfg.GeneralCfg().ReplyTimeout, cfg.SessionSCfg().ChargerSConns,
-			internalChargerSChan, cfg.GeneralCfg().InternalTtl)
+			internalChargerSChan, cfg.GeneralCfg().InternalTtl, false)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 				utils.SessionS, utils.ChargerS, err.Error()))
@@ -175,7 +175,7 @@ func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, in
 			cfg.TlsCfg().CaCertificate, cfg.GeneralCfg().ConnectAttempts,
 			cfg.GeneralCfg().Reconnects, cfg.GeneralCfg().ConnectTimeout,
 			cfg.GeneralCfg().ReplyTimeout, cfg.SessionSCfg().RALsConns,
-			internalRaterChan, cfg.GeneralCfg().InternalTtl)
+			internalRaterChan, cfg.GeneralCfg().InternalTtl, false)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to RALs: %s",
 				utils.SessionS, err.Error()))
@@ -190,7 +190,7 @@ func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, in
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 			cfg.SessionSCfg().ResSConns, internalResourceSChan,
-			cfg.GeneralCfg().InternalTtl)
+			cfg.GeneralCfg().InternalTtl, false)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ResourceS: %s",
 				utils.SessionS, err.Error()))
@@ -205,7 +205,7 @@ func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, in
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 			cfg.SessionSCfg().ThreshSConns, internalThresholdSChan,
-			cfg.GeneralCfg().InternalTtl)
+			cfg.GeneralCfg().InternalTtl, false)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ThresholdS: %s",
 				utils.SessionS, err.Error()))
@@ -220,7 +220,7 @@ func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, in
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 			cfg.SessionSCfg().StatSConns, internalStatSChan,
-			cfg.GeneralCfg().InternalTtl)
+			cfg.GeneralCfg().InternalTtl, false)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to StatS: %s",
 				utils.SessionS, err.Error()))
@@ -235,7 +235,7 @@ func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, in
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 			cfg.SessionSCfg().SupplSConns, internalSupplierSChan,
-			cfg.GeneralCfg().InternalTtl)
+			cfg.GeneralCfg().InternalTtl, false)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to SupplierS: %s",
 				utils.SessionS, err.Error()))
@@ -250,7 +250,7 @@ func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, in
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 			cfg.SessionSCfg().AttrSConns, internalAttrSChan,
-			cfg.GeneralCfg().InternalTtl)
+			cfg.GeneralCfg().InternalTtl, false)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to AttributeS: %s",
 				utils.SessionS, err.Error()))
@@ -265,7 +265,7 @@ func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, in
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 			cfg.SessionSCfg().CDRsConns, internalCDRSChan,
-			cfg.GeneralCfg().InternalTtl)
+			cfg.GeneralCfg().InternalTtl, false)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to RALs: %s",
 				utils.SessionS, err.Error()))
@@ -362,7 +362,7 @@ func startDiameterAgent(internalSsChan chan rpcclient.RpcClientConnection,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 			cfg.DiameterAgentCfg().SessionSConns, internalSsChan,
-			cfg.GeneralCfg().InternalTtl)
+			cfg.GeneralCfg().InternalTtl, false)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 				utils.DiameterAgent, utils.SessionS, err.Error()))
@@ -407,7 +407,7 @@ func startRadiusAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitCh
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 			cfg.RadiusAgentCfg().SessionSConns, internalSMGChan,
-			cfg.GeneralCfg().InternalTtl)
+			cfg.GeneralCfg().InternalTtl, false)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<RadiusAgent> Could not connect to SMG: %s", err.Error()))
 			exitChan <- true
@@ -485,7 +485,7 @@ func startHTTPAgent(internalSMGChan chan rpcclient.RpcClientConnection,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 				agntCfg.SessionSConns, internalSMGChan,
-				cfg.GeneralCfg().InternalTtl)
+				cfg.GeneralCfg().InternalTtl, false)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<%s> could not connect to %s, error: %s",
 					utils.HTTPAgent, utils.SessionS, err.Error()))
@@ -518,7 +518,7 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 			cfg.CdrsCfg().CDRSChargerSConns, internalChargerSChan,
-			cfg.GeneralCfg().InternalTtl)
+			cfg.GeneralCfg().InternalTtl, false)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
 				utils.ChargerS, err.Error()))
@@ -533,7 +533,7 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 			cfg.CdrsCfg().CDRSRaterConns, internalRaterChan,
-			cfg.GeneralCfg().InternalTtl)
+			cfg.GeneralCfg().InternalTtl, false)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to RAL: %s", err.Error()))
 			exitChan <- true
@@ -547,7 +547,7 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 			cfg.CdrsCfg().CDRSAttributeSConns, internalAttributeSChan,
-			cfg.GeneralCfg().InternalTtl)
+			cfg.GeneralCfg().InternalTtl, false)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
 				utils.AttributeS, err.Error()))
@@ -562,7 +562,7 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 			cfg.CdrsCfg().CDRSThresholdSConns, internalThresholdSChan,
-			cfg.GeneralCfg().InternalTtl)
+			cfg.GeneralCfg().InternalTtl, false)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to ThresholdS: %s", err.Error()))
 			exitChan <- true
@@ -576,7 +576,7 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 			cfg.CdrsCfg().CDRSStatSConns, internalStatSChan,
-			cfg.GeneralCfg().InternalTtl)
+			cfg.GeneralCfg().InternalTtl, false)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to StatS: %s", err.Error()))
 			exitChan <- true
@@ -660,7 +660,7 @@ func startChargerService(internalChargerSChan chan rpcclient.RpcClientConnection
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 			cfg.ChargerSCfg().AttributeSConns, internalAttributeSChan,
-			cfg.GeneralCfg().InternalTtl)
+			cfg.GeneralCfg().InternalTtl, false)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 				utils.ChargerS, utils.AttributeS, err.Error()))
@@ -705,7 +705,7 @@ func startResourceService(internalRsChan chan rpcclient.RpcClientConnection, cac
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 			cfg.ResourceSCfg().ThresholdSConns, internalThresholdSChan,
-			cfg.GeneralCfg().InternalTtl)
+			cfg.GeneralCfg().InternalTtl, false)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<ResourceS> Could not connect to ThresholdS: %s", err.Error()))
 			exitChan <- true
@@ -752,7 +752,7 @@ func startStatService(internalStatSChan chan rpcclient.RpcClientConnection, cach
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 			cfg.StatSCfg().ThresholdSConns, internalThresholdSChan,
-			cfg.GeneralCfg().InternalTtl)
+			cfg.GeneralCfg().InternalTtl, false)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<StatS> Could not connect to ThresholdS: %s", err.Error()))
 			exitChan <- true
@@ -830,7 +830,7 @@ func startSupplierService(internalSupplierSChan chan rpcclient.RpcClientConnecti
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 			cfg.SupplierSCfg().AttributeSConns, internalAttrSChan,
-			cfg.GeneralCfg().InternalTtl)
+			cfg.GeneralCfg().InternalTtl, false)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 				utils.SupplierS, utils.AttributeS, err.Error()))
@@ -845,7 +845,7 @@ func startSupplierService(internalSupplierSChan chan rpcclient.RpcClientConnecti
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 			cfg.SupplierSCfg().StatSConns, internalStatSChan,
-			cfg.GeneralCfg().InternalTtl)
+			cfg.GeneralCfg().InternalTtl, false)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to StatS: %s",
 				utils.SupplierS, err.Error()))
@@ -918,7 +918,7 @@ func startDispatcherService(internalDispatcherSChan chan *dispatchers.Dispatcher
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 			cfg.DispatcherSCfg().AttributeSConns, intAttrSChan,
-			cfg.GeneralCfg().InternalTtl)
+			cfg.GeneralCfg().InternalTtl, false)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 				utils.DispatcherS, utils.AttributeS, err.Error()))
@@ -935,7 +935,7 @@ func startDispatcherService(internalDispatcherSChan chan *dispatchers.Dispatcher
 			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			haPoolCfg, nil, time.Duration(0)); err != nil {
+			haPoolCfg, nil, time.Duration(0), false); err != nil {
 			utils.Logger.Crit(
 				fmt.Sprintf("<%s> could not connect to connID: <%s>, err: <%s>",
 					utils.DispatcherS, connID, err.Error()))
@@ -1130,7 +1130,7 @@ func schedCDRsConns(internalCDRSChan chan rpcclient.RpcClientConnection, exitCha
 		cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 		cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 		cfg.SchedulerCfg().CDRsConns, internalCDRSChan,
-		cfg.GeneralCfg().InternalTtl)
+		cfg.GeneralCfg().InternalTtl, false)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to CDRServer: %s", utils.SchedulerS, err.Error()))
 		exitChan <- true

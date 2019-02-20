@@ -65,13 +65,20 @@ const (
 )
 
 func NewFilterS(cfg *config.CGRConfig,
-	statSChan, resSChan chan rpcclient.RpcClientConnection, dm *DataManager) *FilterS {
-	return &FilterS{
+	statSChan, resSChan chan rpcclient.RpcClientConnection, dm *DataManager) (fS *FilterS) {
+	fS = &FilterS{
 		statSChan: statSChan,
 		resSChan:  resSChan,
 		dm:        dm,
 		cfg:       cfg,
 	}
+	if len(cfg.FilterSCfg().StatSConns) != 0 {
+		fS.connStatS()
+	}
+	if len(cfg.FilterSCfg().ResourceSConns) != 0 {
+		fS.connResourceS()
+	}
+	return
 }
 
 // FilterS is a service used to take decisions in case of filters
@@ -96,7 +103,7 @@ func (fS *FilterS) connStatS() (err error) {
 		fS.cfg.TlsCfg().CaCertificate, fS.cfg.GeneralCfg().ConnectAttempts,
 		fS.cfg.GeneralCfg().Reconnects, fS.cfg.GeneralCfg().ConnectTimeout,
 		fS.cfg.GeneralCfg().ReplyTimeout, fS.cfg.FilterSCfg().StatSConns,
-		fS.statSChan, fS.cfg.GeneralCfg().InternalTtl)
+		fS.statSChan, fS.cfg.GeneralCfg().InternalTtl, true)
 	return
 }
 
@@ -112,7 +119,7 @@ func (fS *FilterS) connResourceS() (err error) {
 		fS.cfg.TlsCfg().CaCertificate, fS.cfg.GeneralCfg().ConnectAttempts,
 		fS.cfg.GeneralCfg().Reconnects, fS.cfg.GeneralCfg().ConnectTimeout,
 		fS.cfg.GeneralCfg().ReplyTimeout, fS.cfg.FilterSCfg().ResourceSConns,
-		fS.resSChan, fS.cfg.GeneralCfg().InternalTtl)
+		fS.resSChan, fS.cfg.GeneralCfg().InternalTtl, true)
 	return
 }
 
@@ -138,7 +145,7 @@ func (fS *FilterS) Pass(tenant string, filterIDs []string,
 			continue
 		}
 		for _, fltr := range f.Rules {
-			if pass, err = fltr.Pass(ev, fS.statSConns); err != nil || !pass {
+			if pass, err = fltr.Pass(ev, fS.statSConns, tenant); err != nil || !pass {
 				return pass, err
 			}
 		}
@@ -272,7 +279,8 @@ func (rf *FilterRule) CompileValues() (err error) {
 }
 
 // Pass is the method which should be used from outside.
-func (fltr *FilterRule) Pass(dP config.DataProvider, rpcClnt rpcclient.RpcClientConnection) (result bool, err error) {
+func (fltr *FilterRule) Pass(dP config.DataProvider,
+	rpcClnt rpcclient.RpcClientConnection, tenant string) (result bool, err error) {
 	if fltr.negative == nil {
 		fltr.negative = utils.BoolPointer(strings.HasPrefix(fltr.Type, MetaNot))
 	}
@@ -295,7 +303,7 @@ func (fltr *FilterRule) Pass(dP config.DataProvider, rpcClnt rpcclient.RpcClient
 	case MetaRSR, MetaNotRSR:
 		result, err = fltr.passRSR(dP)
 	case MetaStatS, MetaNotStatS:
-		result, err = fltr.passStatS(dP, rpcClnt)
+		result, err = fltr.passStatS(dP, rpcClnt, tenant)
 	case MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual,
 		MetaNotLessThan, MetaNotLessOrEqual, MetaNotGreaterThan, MetaNotGreaterOrEqual:
 		result, err = fltr.passGreaterThan(dP)
@@ -436,13 +444,13 @@ func (fltr *FilterRule) passRSR(dP config.DataProvider) (bool, error) {
 }
 
 func (fltr *FilterRule) passStatS(dP config.DataProvider,
-	stats rpcclient.RpcClientConnection) (bool, error) {
+	stats rpcclient.RpcClientConnection, tenant string) (bool, error) {
 	if stats == nil || reflect.ValueOf(stats).IsNil() {
 		return false, errors.New("Missing StatS information")
 	}
 	for _, threshold := range fltr.statSThresholds {
 		statValues := make(map[string]float64)
-		if err := stats.Call("StatSV1.GetFloatMetrics", threshold.QueueID, &statValues); err != nil {
+		if err := stats.Call(utils.StatSv1GetQueueFloatMetrics, &utils.TenantID{Tenant: tenant, ID: threshold.QueueID}, &statValues); err != nil {
 			return false, err
 		}
 		val, hasIt := statValues[utils.Meta+threshold.ThresholdType[len(MetaMinCapPrefix):]]
