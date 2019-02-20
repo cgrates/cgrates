@@ -66,7 +66,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 				cfg.RalsCfg().RALsThresholdSConns, internalThdSChan,
-				cfg.GeneralCfg().InternalTtl)
+				cfg.GeneralCfg().InternalTtl, false)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to ThresholdS, error: %s", err.Error()))
 				exitChan <- true
@@ -88,7 +88,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 				cfg.RalsCfg().RALsStatSConns, internalStatSChan,
-				cfg.GeneralCfg().InternalTtl)
+				cfg.GeneralCfg().InternalTtl, false)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to StatS, error: %s", err.Error()))
 				exitChan <- true

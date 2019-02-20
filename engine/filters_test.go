@@ -51,14 +51,14 @@ func TestFilterPassString(t *testing.T) {
 	//not
 	rf = &FilterRule{Type: "*notstring",
 		FieldName: "Category", Values: []string{"call"}}
-	if passes, err := rf.Pass(cd, nil); err != nil {
+	if passes, err := rf.Pass(cd, nil, "cgrates.org"); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Filter passes")
 	}
 	rf = &FilterRule{Type: "*notstring",
 		FieldName: "Category", Values: []string{"cal"}}
-	if passes, err := rf.Pass(cd, nil); err != nil {
+	if passes, err := rf.Pass(cd, nil, "cgrates.org"); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
@@ -97,7 +97,7 @@ func TestFilterPassEmpty(t *testing.T) {
 	}
 	//not
 	rf = &FilterRule{Type: "*notempty", FieldName: "Category", Values: []string{}}
-	if passes, err := rf.Pass(cd, nil); err != nil {
+	if passes, err := rf.Pass(cd, nil, "cgrates.org"); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Filter passes")
@@ -136,7 +136,7 @@ func TestFilterPassExists(t *testing.T) {
 	}
 	//not
 	rf = &FilterRule{Type: "*notexists", FieldName: "Category1", Values: []string{}}
-	if passes, err := rf.Pass(cd, nil); err != nil {
+	if passes, err := rf.Pass(cd, nil, "cgrates.org"); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
@@ -192,7 +192,7 @@ func TestFilterPassStringPrefix(t *testing.T) {
 	}
 	//not
 	rf = &FilterRule{Type: "*notprefix", FieldName: "Category", Values: []string{"premium"}}
-	if passes, err := rf.Pass(cd, nil); err != nil {
+	if passes, err := rf.Pass(cd, nil, "cgrates.org"); err != nil {
 		t.Error(err)
 	} else if !passes {
 		t.Error("Not passes filter")
@@ -248,7 +248,7 @@ func TestFilterPassStringSuffix(t *testing.T) {
 	}
 	//not
 	rf = &FilterRule{Type: "*notsuffix", FieldName: "Destination", Values: []string{"963"}}
-	if passes, err := rf.Pass(cd, nil); err != nil {
+	if passes, err := rf.Pass(cd, nil, "cgrates.org"); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passes filter")
@@ -298,7 +298,7 @@ func TestFilterPassRSRFields(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.Pass(cd, nil); err != nil {
+	if passes, err := rf.Pass(cd, nil, "cgrates.org"); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passing")
@@ -341,7 +341,7 @@ func TestFilterPassDestinations(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if passes, err := rf.Pass(cd, nil); err != nil {
+	if passes, err := rf.Pass(cd, nil, "cgrates.org"); err != nil {
 		t.Error(err)
 	} else if passes {
 		t.Error("Passing")

@@ -434,7 +434,7 @@ CREATE INDEX tp_suppliers_unique ON tp_suppliers  ("tpid",  "tenant", "id",
   );
   CREATE INDEX tp_dispatchers_ids ON tp_dispatchers (tpid);
   CREATE INDEX tp_dispatchers_unique ON tp_dispatchers  ("tpid",  "tenant", "id",
-    "filter_ids","strategy","hosts");
+    "filter_ids","strategy","conn_id","conn_filter_ids");
 
 --
 -- Table structure for table `versions`
