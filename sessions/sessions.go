@@ -669,7 +669,7 @@ func (sS *SessionS) replicateSessions(cgrID string, psv bool, rplConns []*SReplC
 		ss = []*Session{&Session{CGRID: cgrID, EventStart: engine.NewSafEvent(nil)}}
 	}
 	var wg sync.WaitGroup
-	for _, rplConn := range sS.sReplConns {
+	for _, rplConn := range rplConns {
 		if rplConn.Synchronous {
 			wg.Add(1)
 		}
@@ -916,13 +916,13 @@ func (sS *SessionS) asActiveSessions(fltrs map[string]string,
 			i++
 		}
 	}
-	if count {
-		return nil, len(remainingSessions), nil
-	}
 	for _, s := range remainingSessions {
 		aSs = append(aSs,
 			s.AsActiveSessions(sS.cgrCfg.GeneralCfg().DefaultTimezone,
 				sS.cgrCfg.GeneralCfg().NodeID)...) // Expensive for large number of sessions
+	}
+	if count {
+		return nil, len(aSs), nil
 	}
 	return
 }
@@ -1438,7 +1438,6 @@ func (sS *SessionS) BiRPCv1SetPassiveSession(clnt rpcclient.RpcClientConnection,
 		//we unregister it first then regiser the new one
 		if len(sS.getSessions(s.CGRID, false)) != 0 {
 			sS.unregisterSession(s.CGRID, false)
-
 		}
 		sS.registerSession(s, true)
 	}
