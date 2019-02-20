@@ -65,9 +65,10 @@ const (
 )
 
 func NewFilterS(cfg *config.CGRConfig,
-	statSChan chan rpcclient.RpcClientConnection, dm *DataManager) *FilterS {
+	statSChan, resSChan chan rpcclient.RpcClientConnection, dm *DataManager) *FilterS {
 	return &FilterS{
 		statSChan: statSChan,
+		resSChan:  resSChan,
 		dm:        dm,
 		cfg:       cfg,
 	}
@@ -76,11 +77,11 @@ func NewFilterS(cfg *config.CGRConfig,
 // FilterS is a service used to take decisions in case of filters
 // uses lazy connections where necessary to avoid deadlocks on service startup
 type FilterS struct {
-	cfg        *config.CGRConfig
-	statSChan  chan rpcclient.RpcClientConnection // reference towards internal statS connection, used for lazy connect
-	statSConns rpcclient.RpcClientConnection
-	sSConnMux  sync.RWMutex // make sure only one goroutine attempts connecting
-	dm         *DataManager
+	cfg                   *config.CGRConfig
+	statSChan, resSChan   chan rpcclient.RpcClientConnection // reference towards internal statS connection, used for lazy connect
+	statSConns, resSConns rpcclient.RpcClientConnection
+	sSConnMux, rSConnMux  sync.RWMutex // make sure only one goroutine attempts connecting
+	dm                    *DataManager
 }
 
 // connStatS returns will connect towards StatS
@@ -96,6 +97,22 @@ func (fS *FilterS) connStatS() (err error) {
 		fS.cfg.GeneralCfg().Reconnects, fS.cfg.GeneralCfg().ConnectTimeout,
 		fS.cfg.GeneralCfg().ReplyTimeout, fS.cfg.FilterSCfg().StatSConns,
 		fS.statSChan, fS.cfg.GeneralCfg().InternalTtl)
+	return
+}
+
+// connResourceS returns will connect towards ResourceS
+func (fS *FilterS) connResourceS() (err error) {
+	fS.rSConnMux.Lock()
+	defer fS.rSConnMux.Unlock()
+	if fS.resSConns != nil { // connection was populated between locks
+		return
+	}
+	fS.resSConns, err = NewRPCPool(rpcclient.POOL_FIRST,
+		fS.cfg.TlsCfg().ClientKey, fS.cfg.TlsCfg().ClientCerificate,
+		fS.cfg.TlsCfg().CaCertificate, fS.cfg.GeneralCfg().ConnectAttempts,
+		fS.cfg.GeneralCfg().Reconnects, fS.cfg.GeneralCfg().ConnectTimeout,
+		fS.cfg.GeneralCfg().ReplyTimeout, fS.cfg.FilterSCfg().ResourceSConns,
+		fS.resSChan, fS.cfg.GeneralCfg().InternalTtl)
 	return
 }
 

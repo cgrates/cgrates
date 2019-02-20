@@ -94,6 +94,7 @@ type DbJsonCfg struct {
 type FilterSJsonCfg struct {
 	Stats_conns     *[]*HaPoolJsonCfg
 	Indexed_selects *bool
+	Resources_conns *[]*HaPoolJsonCfg
 }
 
 // Rater config section

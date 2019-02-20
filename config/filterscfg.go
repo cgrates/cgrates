@@ -20,6 +20,7 @@ package config
 
 type FilterSCfg struct {
 	StatSConns     []*HaPoolConfig
+	ResourceSConns []*HaPoolConfig
 	IndexedSelects bool
 }
 
@@ -32,6 +33,13 @@ func (fSCfg *FilterSCfg) loadFromJsonCfg(jsnCfg *FilterSJsonCfg) (err error) {
 		for idx, jsnHaCfg := range *jsnCfg.Stats_conns {
 			fSCfg.StatSConns[idx] = NewDfltHaPoolConfig()
 			fSCfg.StatSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
+	}
+	if jsnCfg.Resources_conns != nil {
+		fSCfg.ResourceSConns = make([]*HaPoolConfig, len(*jsnCfg.Resources_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Resources_conns {
+			fSCfg.ResourceSConns[idx] = NewDfltHaPoolConfig()
+			fSCfg.ResourceSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Indexed_selects != nil {

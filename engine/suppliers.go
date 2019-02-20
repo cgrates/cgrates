@@ -360,11 +360,13 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 		}
 		sortedSpl.globalStats = globalStats
 	}
+	//reas
+	//reds
 	//filter the supplier
 	if len(spl.FilterIDs) != 0 {
 		nM := config.NewNavigableMap(nil)
-		nM.Set([]string{"*req"}, ev.Event, false, false)
-		nM.Set([]string{"*sd"}, sortedSpl.SortingData, false, false)
+		nM.Set([]string{utils.MetaReq}, ev.Event, false, false)
+		nM.Set([]string{utils.MetaVars}, sortedSpl.SortingData, false, false)
 		nM.Set([]string{"*gs"}, metricForFilter, false, false)
 		if pass, err = spS.filterS.Pass(ev.Tenant, spl.FilterIDs,
 			nM); err != nil {
