@@ -774,6 +774,7 @@ func TestCgrCfgJSONDefaultssteriskAgentCfg(t *testing.T) {
 func TestCgrCfgJSONDefaultFiltersCfg(t *testing.T) {
 	eFiltersCfg := &FilterSCfg{
 		StatSConns:     []*HaPoolConfig{},
+		ResourceSConns: []*HaPoolConfig{},
 		IndexedSelects: true,
 	}
 	if !reflect.DeepEqual(cgrCfg.filterSCfg, eFiltersCfg) {

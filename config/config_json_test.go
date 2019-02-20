@@ -754,6 +754,7 @@ func TestDfChargerServJsonCfg(t *testing.T) {
 func TestDfFilterSJsonCfg(t *testing.T) {
 	eCfg := &FilterSJsonCfg{
 		Stats_conns:     &[]*HaPoolJsonCfg{},
+		Resources_conns: &[]*HaPoolJsonCfg{},
 		Indexed_selects: utils.BoolPointer(true),
 	}
 	if cfg, err := dfCgrJsonCfg.FilterSJsonCfg(); err != nil {
