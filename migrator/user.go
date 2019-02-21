@@ -66,6 +66,15 @@ func userProfile2attributeProfile(user *v1UserProfile) (attr *engine.AttributePr
 			attr.FilterIDs = append(attr.FilterIDs, fmt.Sprintf("*string:%s:%s", fieldname, substitute))
 			continue
 		}
+		if fieldname == utils.Tenant {
+			attr.Attributes = append(attr.Attributes, &engine.Attribute{
+				FieldName:  utils.MetaTenant,
+				Initial:    utils.META_ANY,
+				Substitute: config.NewRSRParsersMustCompile(substitute, true, utils.INFIELD_SEP),
+				Append:     true,
+			})
+			continue
+		}
 		attr.Attributes = append(attr.Attributes, &engine.Attribute{
 			FieldName:  fieldname,
 			Initial:    utils.META_ANY,
