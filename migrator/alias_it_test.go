@@ -227,6 +227,19 @@ func testAlsITMigrateAndMove(t *testing.T) {
 			t.Error("Error should be not found : ", err)
 		}
 
+		expAlsIdx := map[string]utils.StringMap{
+			"*string:Account:1001": utils.StringMap{
+				"*out:*any:*any:1001:call_1001:*rated": true,
+			},
+			"*string:Subject:call_1001": utils.StringMap{
+				"*out:*any:*any:1001:call_1001:*rated": true,
+			},
+		}
+		if alsidx, err := alsMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix], utils.ConcatenatedKey("cgrates.org", utils.META_ANY), utils.MetaString, nil); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(expAlsIdx, alsidx) {
+			t.Errorf("Expected %v, recived: %v", utils.ToJSON(expAlsIdx), utils.ToJSON(alsidx))
+		}
 	case utils.Move:
 		/* // No Move tests
 		if err := alsMigrator.dmIN.DataManager().DataDB().SetAlias(alias, utils.NonTransactional); err != nil {

@@ -131,7 +131,7 @@ func testUsrITFlush(t *testing.T) {
 
 func testUsrITMigrateAndMove(t *testing.T) {
 	user := &v1UserProfile{
-		Tenant:   defaultTenant,
+		Tenant:   "cgrates.com",
 		UserName: "1001",
 		Masked:   false,
 		Profile: map[string]string{
@@ -149,7 +149,13 @@ func testUsrITMigrateAndMove(t *testing.T) {
 		ActivationInterval: nil,
 		Attributes: []*engine.Attribute{
 			{
-				FieldName:  "ReqType",
+				FieldName:  utils.MetaTenant,
+				Initial:    utils.META_ANY,
+				Substitute: config.NewRSRParsersMustCompile("cgrates.com", true, utils.INFIELD_SEP),
+				Append:     true,
+			},
+			{
+				FieldName:  utils.RequestType,
 				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("*prepaid", true, utils.INFIELD_SEP),
 				Append:     true,
@@ -194,7 +200,7 @@ func testUsrITMigrateAndMove(t *testing.T) {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.User])
 		}
 		//check if user was migrate correctly
-		result, err := usrMigrator.dmOut.DataManager().DataDB().GetAttributeProfileDrv(user.Tenant, user.UserName)
+		result, err := usrMigrator.dmOut.DataManager().DataDB().GetAttributeProfileDrv(defaultTenant, user.UserName)
 		if err != nil {
 			t.Fatalf("Error when getting Attributes %v", err.Error())
 		}
@@ -211,6 +217,17 @@ func testUsrITMigrateAndMove(t *testing.T) {
 		//check if old account was deleted
 		if _, err = usrMigrator.dmIN.getV1Alias(); err != utils.ErrNoMoreData {
 			t.Error("Error should be not found : ", err)
+		}
+
+		expUsrIdx := map[string]utils.StringMap{
+			"*string:Account:1002": utils.StringMap{
+				"1001": true,
+			},
+		}
+		if usridx, err := usrMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix], utils.ConcatenatedKey("cgrates.org", utils.META_ANY), utils.MetaString, nil); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(expUsrIdx, usridx) {
+			t.Errorf("Expected %v, recived: %v", utils.ToJSON(expUsrIdx), utils.ToJSON(usridx))
 		}
 
 	case utils.Move:

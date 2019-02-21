@@ -146,8 +146,8 @@ func testDCITMigrateAndMove(t *testing.T) {
 			DestinationIDs: utils.StringMap{"1001": true, "1002": true, "1003": true},
 			Chargers: []*v1DerivedCharger{
 				&v1DerivedCharger{
-					RunID:      "RunID",
-					RunFilters: "~filterhdr1:s/(.+)/special_run3/",
+					RunID: "RunID",
+					// RunFilters: "~filterhdr1:s/(.+)/special_run3/",
 
 					RequestTypeField: utils.MetaDefault,
 					CategoryField:    utils.MetaDefault,
@@ -190,7 +190,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 		FilterIDs: []string{
 			"*destination:Destination:1001;1002;1003",
 			"*string:Account:1003",
-			"*rsr::~filterhdr1:s/(.+)/special_run3/",
+			// "*rsr::~filterhdr1:s/(.+)/special_run3/",
 		},
 		ActivationInterval: nil,
 		RunID:              "RunID",
@@ -251,6 +251,25 @@ func testDCITMigrateAndMove(t *testing.T) {
 		//check if old account was deleted
 		if _, err = dcMigrator.dmIN.getV1DerivedChargers(); err != utils.ErrNoMoreData {
 			t.Error("Error should be not found : ", err)
+		}
+		expDcIdx := map[string]utils.StringMap{
+			"*string:Account:1003": utils.StringMap{
+				"*out:cgrates.org:*any:1003:*any_0": true,
+			},
+		}
+		if dcidx, err := dcMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix], utils.ConcatenatedKey("cgrates.org", utils.META_ANY), utils.MetaString, nil); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(expDcIdx, dcidx) {
+			t.Errorf("Expected %v, recived: %v", utils.ToJSON(expDcIdx), utils.ToJSON(dcidx))
+		}
+		expDcIdx = map[string]utils.StringMap{
+			"*string:Account:1003": utils.StringMap{
+				"*out:cgrates.org:*any:1003:*any_0": true,
+			},
+		}
+		if dcidx, err := dcMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.ChargerProfilePrefix], utils.ConcatenatedKey("cgrates.org", utils.META_ANY),
+			utils.MetaString, nil); err == nil || err.Error() != utils.ErrNotFound.Error() {
+			t.Errorf("Expected error %v, recived: %v with reply: %v", utils.ErrNotFound, err, utils.ToJSON(dcidx))
 		}
 
 	case utils.Move:
