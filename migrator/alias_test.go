@@ -56,7 +56,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 							"1001": "1002",
 						},
 					},
-					Weight: 10,
+					Weight: 20,
 				},
 			},
 		},
@@ -154,7 +154,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			ActivationInterval: nil,
 			Attributes:         make([]*engine.Attribute, 0),
 			Blocker:            false,
-			Weight:             10,
+			Weight:             20,
 		},
 		1: {
 			Tenant:             defaultTenant,
@@ -171,7 +171,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 				},
 			},
 			Blocker: false,
-			Weight:  10,
+			Weight:  20,
 		},
 		2: {
 			Tenant:             defaultTenant,
@@ -194,7 +194,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 				},
 			},
 			Blocker: false,
-			Weight:  10,
+			Weight:  20,
 		},
 		3: {
 			Tenant:             defaultTenant,
@@ -217,7 +217,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 				},
 			},
 			Blocker: false,
-			Weight:  10,
+			Weight:  20,
 		},
 		4: {
 			Tenant:   "notDefaultTenant",
@@ -244,7 +244,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 				},
 			},
 			Blocker: false,
-			Weight:  10,
+			Weight:  20,
 		},
 		5: {
 			Tenant:   "notDefaultTenant",
@@ -271,7 +271,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 				},
 			},
 			Blocker: false,
-			Weight:  10,
+			Weight:  20,
 		},
 	}
 	for i := range expected {

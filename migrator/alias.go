@@ -76,12 +76,12 @@ func alias2AtttributeProfile(alias *v1Alias, defaultTenant string) *engine.Attri
 	out := &engine.AttributeProfile{
 		Tenant:             alias.Tenant,
 		ID:                 alias.GetId(),
-		Contexts:           []string{"*any"},
+		Contexts:           []string{utils.META_ANY},
 		FilterIDs:          make([]string, 0),
 		ActivationInterval: nil,
 		Attributes:         make([]*engine.Attribute, 0),
 		Blocker:            false,
-		Weight:             10,
+		Weight:             20, // should have prio against attributes out of users
 	}
 	if len(out.Tenant) == 0 || out.Tenant == utils.META_ANY {
 		out.Tenant = defaultTenant
