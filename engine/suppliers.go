@@ -23,7 +23,6 @@ import (
 	"reflect"
 	"sort"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -254,8 +253,8 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 
 // statMetrics will query a list of statIDs and return composed metric values
 // first metric found is always returned
-func (spS *SupplierService) statMetrics(statIDs []string, tenant string) (stsMetric map[string]float64, err error) {
-	stsMetric = make(map[string]float64)
+func (spS *SupplierService) statMetrics(statIDs []string, tenant string) (stsMetric map[string]SplStatMetrics, err error) {
+	stsMetric = make(map[string]SplStatMetrics)
 	if spS.statS != nil {
 		for _, statID := range statIDs {
 			var metrics map[string]float64
@@ -266,9 +265,8 @@ func (spS *SupplierService) statMetrics(statIDs []string, tenant string) (stsMet
 					fmt.Sprintf("<SupplierS> error: %s getting statMetrics for stat : %s", err.Error(), statID))
 			}
 			for key, val := range metrics {
-				stsMetric[utils.ConcatenatedKey(key, statID)] = val
+				stsMetric[key] = append(stsMetric[key], &SplStatMetric{StatID: statID, metricType: key, MetricValue: val})
 			}
-
 		}
 	}
 	return
@@ -281,9 +279,6 @@ func (spS *SupplierService) resourceUsage(resIDs []string) (tUsage float64, err 
 
 func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplier,
 	extraOpts *optsGetSuppliers) (srtSpl *SortedSupplier, pass bool, err error) {
-	globalStats := map[string]float64{ //used for QOS strategy
-		utils.Weight: spl.Weight,
-	}
 	sortedSpl := &SortedSupplier{
 		SupplierID: spl.ID,
 		SortingData: map[string]interface{}{
@@ -317,9 +312,7 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 			}
 		}
 	}
-	metricForFilter := map[string]interface{}{
-		utils.Weight: spl.Weight,
-	}
+	provStatsMetrics := make(map[string]SplStatMetrics)
 	//calculate metrics
 	if len(spl.StatIDs) != 0 {
 		metricSupp, err := spS.statMetrics(spl.StatIDs, ev.Tenant) //create metric map for suppier
@@ -333,32 +326,22 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 				return nil, false, err
 			}
 		}
+		//check if we
 		for _, metric := range extraOpts.sortingParameters {
-			hasMetric := false                         //check if metricSupp have sortingParameter
-			for keyWithID, value := range metricSupp { //transfer data from metric into globalStats
-				if metric == strings.Split(keyWithID, utils.InInFieldSep)[0] {
-					if val, hasKey := globalStats[metric]; !hasKey ||
-						(metric == utils.MetaPDD && val < value) || //worst values
-						(metric != utils.MetaPDD && val > value) {
-						globalStats[metric] = value
-						hasMetric = true
-					}
-				}
-			}
-			if !hasMetric { //if not have populate with default value
+			if val, hasMetric := metricSupp[metric]; !hasMetric {
 				switch metric {
 				default:
-					globalStats[metric] = -1
+					sortedSpl.SortingData[metric] = SplStatMetrics{&SplStatMetric{StatID: utils.META_NONE, metricType: metric, MetricValue: -1.0}}
+					provStatsMetrics[metric] = SplStatMetrics{&SplStatMetric{StatID: utils.META_NONE, metricType: metric, MetricValue: -1.0}}
 				case utils.MetaPDD:
-					globalStats[metric] = 1000000
+					sortedSpl.SortingData[metric] = SplStatMetrics{&SplStatMetric{StatID: utils.META_NONE, metricType: metric, MetricValue: 10000000.0}}
+					provStatsMetrics[metric] = SplStatMetrics{&SplStatMetric{StatID: utils.META_NONE, metricType: metric, MetricValue: 10000000.0}}
 				}
+			} else {
+				sortedSpl.SortingData[metric] = val
+				provStatsMetrics[metric] = val
 			}
 		}
-		for k, v := range metricSupp {
-			sortedSpl.SortingData[k] = v
-			metricForFilter[strings.Split(k, utils.InInFieldSep)[0]] = v
-		}
-		sortedSpl.globalStats = globalStats
 	}
 	//reas
 	//reds
@@ -367,7 +350,8 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 		nM := config.NewNavigableMap(nil)
 		nM.Set([]string{utils.MetaReq}, ev.Event, false, false)
 		nM.Set([]string{utils.MetaVars}, sortedSpl.SortingData, false, false)
-		nM.Set([]string{"*gs"}, metricForFilter, false, false)
+		nM.Set([]string{"*metrics"}, newSplStsDP(provStatsMetrics), false, false)
+
 		if pass, err = spS.filterS.Pass(ev.Tenant, spl.FilterIDs,
 			nM); err != nil {
 			return nil, false, err

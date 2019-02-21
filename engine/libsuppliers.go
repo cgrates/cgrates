@@ -20,9 +20,11 @@ package engine
 
 import (
 	"fmt"
+	"net"
 	"sort"
 	"strings"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -31,7 +33,6 @@ type SortedSupplier struct {
 	SupplierID         string
 	SupplierParameters string
 	SortingData        map[string]interface{} // store here extra info like cost or stats
-	globalStats        map[string]float64
 }
 
 // SuppliersReply is returned as part of GetSuppliers call
@@ -93,24 +94,41 @@ func (sSpls *SortedSuppliers) SortHighestCost() {
 
 // SortQOS is part of sort interface,
 // sort based on Stats
+
+//map[*acd][]float64{10,20} => 10
+//map[*tcd][]float64{40,50} => 40
+//map[*pdd][]float64{40,50} => 50
 func (sSpls *SortedSuppliers) SortQOS(params []string) {
-	sort.Slice(sSpls.SortedSuppliers, func(i, j int) bool {
-		for _, param := range params {
-			// skip to next param
-			if sSpls.SortedSuppliers[i].globalStats[param] == sSpls.SortedSuppliers[j].globalStats[param] {
-				continue
-			}
-			if (param != utils.MetaPDD && sSpls.SortedSuppliers[i].globalStats[param] == -1) ||
-				(param == utils.MetaPDD && sSpls.SortedSuppliers[i].globalStats[param] == 1000000) {
-				return false
-			}
-			switch param {
-			default:
-				return sSpls.SortedSuppliers[i].globalStats[param] > sSpls.SortedSuppliers[j].globalStats[param]
-			case utils.MetaPDD:
-				return sSpls.SortedSuppliers[i].globalStats[param] < sSpls.SortedSuppliers[j].globalStats[param]
+	//sort the metrics before sorting the suppliers
+	for _, val := range sSpls.SortedSuppliers {
+		for _, iface := range val.SortingData {
+			if castedVal, canCast := iface.(SplStatMetrics); !canCast {
+				castedVal.Sort()
 			}
 		}
+	}
+	//sort suppliers
+	sort.Slice(sSpls.SortedSuppliers, func(i, j int) bool {
+		for _, param := range params {
+			//in case we have the same value for the current param we skip to the next one
+			if sSpls.SortedSuppliers[i].SortingData[param].(SplStatMetrics)[0].MetricValue == sSpls.SortedSuppliers[j].SortingData[param].(SplStatMetrics)[0].MetricValue {
+				continue
+			}
+			switch sSpls.SortedSuppliers[i].SortingData[param].(SplStatMetrics)[0].metricType {
+			default:
+				if sSpls.SortedSuppliers[i].SortingData[param].(SplStatMetrics)[0].MetricValue > sSpls.SortedSuppliers[j].SortingData[param].(SplStatMetrics)[0].MetricValue {
+					return true
+				}
+				return false
+			case utils.MetaPDD: //in case of pdd the smalles value if the best
+				if sSpls.SortedSuppliers[i].SortingData[param].(SplStatMetrics)[0].MetricValue < sSpls.SortedSuppliers[j].SortingData[param].(SplStatMetrics)[0].MetricValue {
+					return true
+				}
+				return false
+			}
+
+		}
+		//in case that we have the same value for all params we sort base on weight
 		return sSpls.SortedSuppliers[i].SortingData[utils.Weight].(float64) > sSpls.SortedSuppliers[j].SortingData[utils.Weight].(float64)
 	})
 }
@@ -152,4 +170,85 @@ func (ssd SupplierSortDispatcher) SortSuppliers(prflID, strategy string,
 		return nil, fmt.Errorf("unsupported sorting strategy: %s", strategy)
 	}
 	return sd.SortSuppliers(prflID, suppls, suplEv, extraOpts)
+}
+
+//StatMetric used to store the statID and the metric value
+type SplStatMetric struct {
+	StatID      string
+	MetricValue float64
+
+	metricType string
+}
+
+//StatMetrics  is a sortable list of StatMetric
+type SplStatMetrics []*SplStatMetric
+
+// Sort is part of sort interface, sort based on Weight
+func (sm SplStatMetrics) Sort() {
+	sort.Slice(sm, func(i, j int) bool {
+		switch sm[i].metricType {
+		default:
+			return sm[i].MetricValue < sm[j].MetricValue
+		case utils.MetaPDD: // in case of PDD we take the greater value
+			return sm[i].MetricValue > sm[j].MetricValue
+		}
+	})
+}
+
+// newRADataProvider constructs a DataProvider
+func newSplStsDP(req map[string]SplStatMetrics) (dP config.DataProvider) {
+	for key, _ := range req {
+		req[key].Sort()
+	}
+	dP = &splStsDP{req: req, cache: config.NewNavigableMap(nil)}
+	return
+}
+
+type splStsDP struct {
+	req   map[string]SplStatMetrics
+	cache *config.NavigableMap
+}
+
+// String is part of engine.DataProvider interface
+// when called, it will display the already parsed values out of cache
+func (sm *splStsDP) String() string {
+	return ""
+}
+
+// FieldAsInterface is part of engine.DataProvider interface
+func (sm *splStsDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+	fmt.Println("enter here ??? ")
+	if data, err = sm.cache.FieldAsInterface(fldPath); err != nil {
+		if err != utils.ErrNotFound { // item found in cache
+			return
+		}
+		err = nil // cancel previous err
+	} else {
+		return // data found in cache
+	}
+	data = sm.req[fldPath[0]][0].MetricValue
+	sm.cache.Set(fldPath, data, false, false)
+	return
+}
+
+// FieldAsString is part of engine.DataProvider interface
+func (sm *splStsDP) FieldAsString(fldPath []string) (data string, err error) {
+	var valIface interface{}
+	valIface, err = sm.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	data, err = utils.IfaceAsString(valIface)
+	return
+}
+
+// AsNavigableMap is part of engine.DataProvider interface
+func (sm *splStsDP) AsNavigableMap([]*config.FCTemplate) (
+	nm *config.NavigableMap, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// RemoteHost is part of engine.DataProvider interface
+func (sm *splStsDP) RemoteHost() net.Addr {
+	return nil
 }
