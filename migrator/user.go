@@ -61,12 +61,14 @@ func userProfile2attributeProfile(user *v1UserProfile) (attr *engine.AttributePr
 		Blocker:            false,
 		Weight:             user.Weight,
 	}
-	attr.Attributes = append(attr.Attributes, &engine.Attribute{
-		FieldName:  utils.MetaTenant,
-		Initial:    utils.META_ANY,
-		Substitute: config.NewRSRParsersMustCompile(user.Tenant, true, utils.INFIELD_SEP),
-		Append:     true,
-	})
+	if user.Tenant != attr.Tenant {
+		attr.Attributes = append(attr.Attributes, &engine.Attribute{
+			FieldName:  utils.MetaTenant,
+			Initial:    utils.META_ANY,
+			Substitute: config.NewRSRParsersMustCompile(user.Tenant, true, utils.INFIELD_SEP),
+			Append:     true,
+		})
+	}
 	for fieldname, substitute := range user.Profile {
 		if utils.IsSliceMember(usrFltr, fieldname) {
 			attr.FilterIDs = append(attr.FilterIDs, fmt.Sprintf("*string:%s:%s", fieldname, substitute))

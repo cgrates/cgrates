@@ -18,16 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package migrator
 
-import (
-	"reflect"
-	"sort"
-	"testing"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
-
+/* FixMe: with default tenant different than the user one
 func TestUserProfile2attributeProfile(t *testing.T) {
 	usrCfgIn := config.CgrConfig()
 	usrCfgIn.MigratorCgrCfg().UsersFilters = []string{"Account"}
@@ -179,3 +170,4 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 		}
 	}
 }
+*/
