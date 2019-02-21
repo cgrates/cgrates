@@ -28,6 +28,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	_ "net/http/pprof"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"reflect"

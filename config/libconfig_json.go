@@ -43,7 +43,6 @@ type GeneralJsonCfg struct {
 	Digest_separator     *string
 	Digest_equal         *string
 	Rsr_separator        *string
-	Enable_http_pprof    *bool
 }
 
 // Listen config section
@@ -54,7 +53,6 @@ type ListenJsonCfg struct {
 	Rpc_json_tls *string
 	Rpc_gob_tls  *string
 	Http_tls     *string
-	Http_pprof   *string
 }
 
 // HTTP config section
