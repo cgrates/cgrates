@@ -1592,6 +1592,11 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		if err := sS.attrS.Call(utils.AttributeSv1ProcessEvent,
 			attrArgs, &rplyEv); err == nil {
 			args.CGREvent = *rplyEv.CGREvent
+			if tntIface, has := args.CGREvent.Event[utils.MetaTenant]; has {
+				// special case when we want to overwrite the tenant
+				args.CGREvent.Tenant = tntIface.(string)
+				delete(args.CGREvent.Event, utils.MetaTenant)
+			}
 			authReply.Attributes = &rplyEv
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
@@ -1822,6 +1827,11 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		if err := sS.attrS.Call(utils.AttributeSv1ProcessEvent,
 			attrArgs, &rplyEv); err == nil {
 			args.CGREvent = *rplyEv.CGREvent
+			if tntIface, has := args.CGREvent.Event[utils.MetaTenant]; has {
+				// special case when we want to overwrite the tenant
+				args.CGREvent.Tenant = tntIface.(string)
+				delete(args.CGREvent.Event, utils.MetaTenant)
+			}
 			rply.Attributes = &rplyEv
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
@@ -2022,6 +2032,11 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 		if err := sS.attrS.Call(utils.AttributeSv1ProcessEvent,
 			attrArgs, &rplyEv); err == nil {
 			args.CGREvent = *rplyEv.CGREvent
+			if tntIface, has := args.CGREvent.Event[utils.MetaTenant]; has {
+				// special case when we want to overwrite the tenant
+				args.CGREvent.Tenant = tntIface.(string)
+				delete(args.CGREvent.Event, utils.MetaTenant)
+			}
 			rply.Attributes = &rplyEv
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
@@ -2292,6 +2307,11 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 		if err := sS.attrS.Call(utils.AttributeSv1ProcessEvent,
 			attrArgs, &rplyEv); err == nil {
 			args.CGREvent = *rplyEv.CGREvent
+			if tntIface, has := args.CGREvent.Event[utils.MetaTenant]; has {
+				// special case when we want to overwrite the tenant
+				args.CGREvent.Tenant = tntIface.(string)
+				delete(args.CGREvent.Event, utils.MetaTenant)
+			}
 			rply.Attributes = &rplyEv
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)

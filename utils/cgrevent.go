@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -160,4 +161,13 @@ func (ev *CGREvent) Clone() (clned *CGREvent) {
 		clned.Event[k] = v
 	}
 	return
+}
+
+// RemFldsWithPrefix will remove fields starting with prefix from event
+func (ev *CGREvent) RemFldsWithPrefix(prfx string) {
+	for fldName := range ev.Event {
+		if strings.HasPrefix(fldName, prfx) {
+			delete(ev.Event, fldName)
+		}
+	}
 }

@@ -550,6 +550,7 @@ const (
 	CGRDebitInterval             = "CGRDebitInterval"
 	MetaAsr                      = "*asr"
 	Version                      = "Version"
+	MetaTenant                   = "*tenant"
 )
 
 // Migrator Action
