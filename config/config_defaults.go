@@ -721,6 +721,7 @@ const CGRATES_CFG_JSON = `
 	"out_stordb_name": "cgrates",
 	"out_stordb_user": "cgrates",
 	"out_stordb_password": "",
+	"users_filters":[],
 },
 
 

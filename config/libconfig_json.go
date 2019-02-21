@@ -546,6 +546,7 @@ type MigratorCfgJson struct {
 	Out_storDB_name           *string
 	Out_storDB_user           *string
 	Out_storDB_password       *string
+	Users_filters             *[]string
 }
 
 type FcTemplateJsonCfg struct {

@@ -85,6 +85,7 @@ func testUsrStart(testName, inPath, outPath, action string, t *testing.T) {
 	if usrCfgIn, err = config.NewCGRConfigFromFolder(inPath); err != nil {
 		t.Fatal(err)
 	}
+	config.SetCgrConfig(usrCfgIn)
 	if usrCfgOut, err = config.NewCGRConfigFromFolder(outPath); err != nil {
 		t.Fatal(err)
 	}
@@ -144,15 +145,9 @@ func testUsrITMigrateAndMove(t *testing.T) {
 		Tenant:             defaultTenant,
 		ID:                 "1001",
 		Contexts:           []string{utils.META_ANY},
-		FilterIDs:          make([]string, 0),
+		FilterIDs:          []string{"*string:Account:1002"},
 		ActivationInterval: nil,
 		Attributes: []*engine.Attribute{
-			{
-				FieldName:  "Account",
-				Initial:    utils.META_ANY,
-				Substitute: config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
-				Append:     true,
-			},
 			{
 				FieldName:  "ReqType",
 				Initial:    utils.META_ANY,

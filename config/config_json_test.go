@@ -1465,6 +1465,7 @@ func TestDfMigratorCfg(t *testing.T) {
 		Out_storDB_name:     utils.StringPointer("cgrates"),
 		Out_storDB_user:     utils.StringPointer("cgrates"),
 		Out_storDB_password: utils.StringPointer(""),
+		Users_filters:       &[]string{},
 	}
 	if cfg, err := dfCgrJsonCfg.MigratorCfgJson(); err != nil {
 		t.Error(err)
