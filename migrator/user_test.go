@@ -18,11 +18,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package migrator
 
-/* FixMe: with default tenant different than the user one
+import (
+	"reflect"
+	"sort"
+	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+)
+
 func TestUserProfile2attributeProfile(t *testing.T) {
 	usrCfgIn := config.CgrConfig()
 	usrCfgIn.MigratorCgrCfg().UsersFilters = []string{"Account"}
 	config.SetCgrConfig(usrCfgIn)
+	usrTenant := "cgrates.com"
 	users := map[int]*v1UserProfile{
 		0: &v1UserProfile{
 			Tenant:   defaultTenant,
@@ -32,7 +42,7 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			Weight:   10,
 		},
 		1: &v1UserProfile{
-			Tenant:   defaultTenant,
+			Tenant:   usrTenant,
 			UserName: "1001",
 			Masked:   true,
 			Profile: map[string]string{
@@ -53,7 +63,7 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			Weight: 10,
 		},
 		3: &v1UserProfile{
-			Tenant:   defaultTenant,
+			Tenant:   usrTenant,
 			UserName: "1001",
 			Masked:   false,
 			Profile: map[string]string{
@@ -70,16 +80,9 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			Contexts:           []string{utils.META_ANY},
 			FilterIDs:          make([]string, 0),
 			ActivationInterval: nil,
-			Attributes: []*engine.Attribute{
-				{
-					FieldName:  utils.MetaTenant,
-					Initial:    utils.META_ANY,
-					Substitute: config.NewRSRParsersMustCompile(defaultTenant, true, utils.INFIELD_SEP),
-					Append:     true,
-				},
-			},
-			Blocker: false,
-			Weight:  10,
+			Attributes:         []*engine.Attribute{},
+			Blocker:            false,
+			Weight:             10,
 		},
 		1: {
 			Tenant:             defaultTenant,
@@ -91,7 +94,7 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 				{
 					FieldName:  utils.MetaTenant,
 					Initial:    utils.META_ANY,
-					Substitute: config.NewRSRParsersMustCompile(defaultTenant, true, utils.INFIELD_SEP),
+					Substitute: config.NewRSRParsersMustCompile(usrTenant, true, utils.INFIELD_SEP),
 					Append:     true,
 				},
 				{
@@ -112,13 +115,7 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
 				{
-					FieldName:  utils.MetaTenant,
-					Initial:    utils.META_ANY,
-					Substitute: config.NewRSRParsersMustCompile(defaultTenant, true, utils.INFIELD_SEP),
-					Append:     true,
-				},
-				{
-					FieldName:  "ReqType",
+					FieldName:  utils.RequestType,
 					Initial:    utils.META_ANY,
 					Substitute: config.NewRSRParsersMustCompile("*prepaid", true, utils.INFIELD_SEP),
 					Append:     true,
@@ -143,11 +140,11 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 				{
 					FieldName:  utils.MetaTenant,
 					Initial:    utils.META_ANY,
-					Substitute: config.NewRSRParsersMustCompile(defaultTenant, true, utils.INFIELD_SEP),
+					Substitute: config.NewRSRParsersMustCompile(usrTenant, true, utils.INFIELD_SEP),
 					Append:     true,
 				},
 				{
-					FieldName:  "ReqType",
+					FieldName:  utils.RequestType,
 					Initial:    utils.META_ANY,
 					Substitute: config.NewRSRParsersMustCompile("*prepaid", true, utils.INFIELD_SEP),
 					Append:     true,
@@ -166,8 +163,7 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			return rply.Attributes[i].FieldName < rply.Attributes[j].FieldName
 		}) // only for test; map returns random keys
 		if !reflect.DeepEqual(expected[i], rply) {
-			t.Errorf("For %v expected: %s ,recived: %s ", i, utils.ToJSON(expected[i]), utils.ToJSON(rply))
+			t.Errorf("For %v expected: %s ,received: %s ", i, utils.ToJSON(expected[i]), utils.ToJSON(rply))
 		}
 	}
 }
-*/
