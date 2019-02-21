@@ -69,13 +69,16 @@ func userProfile2attributeProfile(user *v1UserProfile) (attr *engine.AttributePr
 			Append:     true,
 		})
 	}
-	for fieldname, substitute := range user.Profile {
-		if utils.IsSliceMember(usrFltr, fieldname) {
-			attr.FilterIDs = append(attr.FilterIDs, fmt.Sprintf("*string:%s:%s", fieldname, substitute))
+	for fieldName, substitute := range user.Profile {
+		if fieldName == "ReqType" { // old style
+			fieldName = utils.RequestType
+		}
+		if utils.IsSliceMember(usrFltr, fieldName) {
+			attr.FilterIDs = append(attr.FilterIDs, fmt.Sprintf("*string:%s:%s", fieldName, substitute))
 			continue
 		}
 		attr.Attributes = append(attr.Attributes, &engine.Attribute{
-			FieldName:  fieldname,
+			FieldName:  fieldName,
 			Initial:    utils.META_ANY,
 			Substitute: config.NewRSRParsersMustCompile(substitute, true, utils.INFIELD_SEP),
 			Append:     true,
@@ -103,7 +106,7 @@ func (m *Migrator) migrateV1User2AttributeProfile() (err error) {
 		if err := m.dmIN.remV1User(user.GetId()); err != nil {
 			return err
 		}
-		if err := m.dmOut.DataManager().DataDB().SetAttributeProfileDrv(attr); err != nil {
+		if err := m.dmOut.DataManager().SetAttributeProfile(attr, true); err != nil {
 			return err
 		}
 		m.stats[utils.User] += 1

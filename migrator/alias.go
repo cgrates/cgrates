@@ -139,7 +139,7 @@ func (m *Migrator) migrateAlias2Attributes() (err error) {
 		if err := m.dmIN.remV1Alias(alias.GetId()); err != nil {
 			return err
 		}
-		if err := m.dmOut.DataManager().DataDB().SetAttributeProfileDrv(attr); err != nil {
+		if err := m.dmOut.DataManager().SetAttributeProfile(attr, true); err != nil {
 			return err
 		}
 		m.stats[Alias] += 1
