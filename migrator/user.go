@@ -50,6 +50,7 @@ func (ud *v1UserProfile) SetId(id string) error {
 }
 
 func userProfile2attributeProfile(user *v1UserProfile) (attr *engine.AttributeProfile) {
+	usrFltr := config.CgrConfig().MigratorCgrCfg().UsersFilters
 	attr = &engine.AttributeProfile{
 		Tenant:             user.Tenant,
 		ID:                 user.UserName,
@@ -61,6 +62,10 @@ func userProfile2attributeProfile(user *v1UserProfile) (attr *engine.AttributePr
 		Weight:             user.Weight,
 	}
 	for fieldname, substitute := range user.Profile {
+		if utils.IsSliceMember(usrFltr, fieldname) {
+			attr.FilterIDs = append(attr.FilterIDs, fmt.Sprintf("*string:%s:%s", fieldname, substitute))
+			continue
+		}
 		attr.Attributes = append(attr.Attributes, &engine.Attribute{
 			FieldName:  fieldname,
 			Initial:    utils.META_ANY,

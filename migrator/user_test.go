@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
+	"path"
 	"reflect"
 	"sort"
 	"testing"
@@ -29,6 +30,13 @@ import (
 )
 
 func TestUserProfile2attributeProfile(t *testing.T) {
+	inPath := path.Join("/usr/share/cgrates", "samples", "tutmongo")
+	usrCfgIn, err := config.NewCGRConfigFromFolder(inPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	usrCfgIn.MigratorCgrCfg().UsersFilters = []string{"Account"}
+	config.SetCgrConfig(usrCfgIn)
 	users := map[int]*v1UserProfile{
 		0: &v1UserProfile{
 			Tenant:   defaultTenant,
@@ -74,15 +82,9 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			Tenant:             defaultTenant,
 			ID:                 "1001",
 			Contexts:           []string{utils.META_ANY},
-			FilterIDs:          make([]string, 0),
+			FilterIDs:          []string{"*string:Account:1002"},
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
-				{
-					FieldName:  "Account",
-					Initial:    utils.META_ANY,
-					Substitute: config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
-					Append:     true,
-				},
 				{
 					FieldName:  "Subject",
 					Initial:    utils.META_ANY,
@@ -97,15 +99,9 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			Tenant:             defaultTenant,
 			ID:                 "1001",
 			Contexts:           []string{utils.META_ANY},
-			FilterIDs:          make([]string, 0),
+			FilterIDs:          []string{"*string:Account:1002"},
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
-				{
-					FieldName:  "Account",
-					Initial:    utils.META_ANY,
-					Substitute: config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
-					Append:     true,
-				},
 				{
 					FieldName:  "ReqType",
 					Initial:    utils.META_ANY,

@@ -327,6 +327,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	config.SetCgrConfig(mgrCfg)
 	if migrate != nil && *migrate != "" { // Run migrator
 		migrstats := make(map[string]int)
 		mig := strings.Split(*migrate, ",")

@@ -155,6 +155,7 @@
 	"out_stordb_type": "mongo",
 	"out_stordb_port": "27017",
 	"out_stordb_name": "cgrates",
+	"users_filters":["Account"],
 },
 
 

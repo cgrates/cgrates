@@ -37,6 +37,7 @@ type MigratorCgrCfg struct {
 	OutStorDBName          string
 	OutStorDBUser          string
 	OutStorDBPassword      string
+	UsersFilters           []string
 }
 
 func (mg *MigratorCgrCfg) loadFromJsonCfg(jsnCfg *MigratorCfgJson) (err error) {
@@ -84,6 +85,12 @@ func (mg *MigratorCgrCfg) loadFromJsonCfg(jsnCfg *MigratorCfgJson) (err error) {
 	}
 	if jsnCfg.Out_storDB_password != nil {
 		mg.OutStorDBPassword = *jsnCfg.Out_storDB_password
+	}
+	if jsnCfg.Users_filters != nil && len(*jsnCfg.Users_filters) != 0 {
+		mg.UsersFilters = make([]string, len(*jsnCfg.Users_filters))
+		for i, v := range *jsnCfg.Users_filters {
+			mg.UsersFilters[i] = v
+		}
 	}
 	return nil
 }
