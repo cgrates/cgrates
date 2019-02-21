@@ -547,50 +547,24 @@ func testV1SplSGetQOSSuppliers(t *testing.T) {
 			},
 		},
 	}
-	eSpls := engine.SortedSuppliers{
-		ProfileID: "SPL_QOS_1",
-		Sorting:   utils.MetaQOS,
-		SortedSuppliers: []*engine.SortedSupplier{
-			{
-				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
-					"*acd:Stat_1":   11.0,
-					"*acd:Stat_1_1": 13.0,
-					"*asr:Stat_1":   100.0,
-					"*pdd:Stat_1_1": 13.5,
-					"*tcd:Stat_1":   22.0,
-					"*tcd:Stat_1_1": 26.0,
-					utils.Weight:    10.0,
-				},
-			},
-			{
-				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
-					"*acd:Stat_3": 11.0,
-					"*asr:Stat_3": 100.0,
-					"*tcd:Stat_3": 11.0,
-					utils.Weight:  35.0,
-				},
-			},
-
-			{
-				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
-					"*acd:Stat_2": 5.5,
-					"*asr:Stat_2": 100.0,
-					"*tcd:Stat_2": 11.0,
-					utils.Weight:  20.0,
-				},
-			},
-		},
-	}
+	expSupplierIDs := []string{"supplier1", "supplier3", "supplier2"}
 	var suplsReply engine.SortedSuppliers
 	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eSpls, suplsReply) {
-		t.Errorf("Expecting: %s, received: %s",
-			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
+	} else {
+		rcvSupl := make([]string, len(suplsReply.SortedSuppliers))
+		for i, supl := range suplsReply.SortedSuppliers {
+			rcvSupl[i] = supl.SupplierID
+		}
+		if suplsReply.ProfileID != "SPL_QOS_1" {
+			t.Errorf("Expecting: SPL_QOS_1, received: %s",
+				suplsReply.ProfileID)
+		}
+		if !reflect.DeepEqual(rcvSupl, expSupplierIDs) {
+			t.Errorf("Expecting: %+v, \n received: %+v",
+				expSupplierIDs, utils.ToJSON(rcvSupl))
+		}
 	}
 }
 
@@ -604,49 +578,24 @@ func testV1SplSGetQOSSuppliers2(t *testing.T) {
 			},
 		},
 	}
-	eSpls := engine.SortedSuppliers{
-		ProfileID: "SPL_QOS_2",
-		Sorting:   utils.MetaQOS,
-		SortedSuppliers: []*engine.SortedSupplier{
-			{
-				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
-					"*acd:Stat_3": 11.0,
-					"*asr:Stat_3": 100.0,
-					"*tcd:Stat_3": 11.0,
-					utils.Weight:  35.0,
-				},
-			},
-			{
-				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
-					"*acd:Stat_2": 5.5,
-					"*asr:Stat_2": 100.0,
-					"*tcd:Stat_2": 11.0,
-					utils.Weight:  20.0,
-				},
-			},
-			{
-				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
-					"*acd:Stat_1":   11.0,
-					"*acd:Stat_1_1": 13.0,
-					"*asr:Stat_1":   100.0,
-					"*pdd:Stat_1_1": 13.5,
-					"*tcd:Stat_1":   22.0,
-					"*tcd:Stat_1_1": 26.0,
-					utils.Weight:    10.0,
-				},
-			},
-		},
-	}
+	expSupplierIDs := []string{"supplier3", "supplier2", "supplier1"}
 	var suplsReply engine.SortedSuppliers
 	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eSpls, suplsReply) {
-		t.Errorf("Expecting: %s, received: %s",
-			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
+	} else {
+		rcvSupl := make([]string, len(suplsReply.SortedSuppliers))
+		for i, supl := range suplsReply.SortedSuppliers {
+			rcvSupl[i] = supl.SupplierID
+		}
+		if suplsReply.ProfileID != "SPL_QOS_2" {
+			t.Errorf("Expecting: SPL_QOS_2, received: %s",
+				suplsReply.ProfileID)
+		}
+		if !reflect.DeepEqual(rcvSupl, expSupplierIDs) {
+			t.Errorf("Expecting: %+v, \n received: %+v",
+				expSupplierIDs, utils.ToJSON(rcvSupl))
+		}
 	}
 }
 
@@ -660,49 +609,24 @@ func testV1SplSGetQOSSuppliers3(t *testing.T) {
 			},
 		},
 	}
-	eSpls := engine.SortedSuppliers{
-		ProfileID: "SPL_QOS_3",
-		Sorting:   utils.MetaQOS,
-		SortedSuppliers: []*engine.SortedSupplier{
-			{
-				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
-					"*acd:Stat_1":   11.0,
-					"*acd:Stat_1_1": 13.0,
-					"*asr:Stat_1":   100.0,
-					"*pdd:Stat_1_1": 13.5,
-					"*tcd:Stat_1":   22.0,
-					"*tcd:Stat_1_1": 26.0,
-					utils.Weight:    10.0,
-				},
-			},
-			{
-				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
-					"*acd:Stat_3": 11.0,
-					"*asr:Stat_3": 100.0,
-					"*tcd:Stat_3": 11.0,
-					utils.Weight:  35.0,
-				},
-			},
-			{
-				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
-					"*acd:Stat_2": 5.5,
-					"*asr:Stat_2": 100.0,
-					"*tcd:Stat_2": 11.0,
-					utils.Weight:  20.0,
-				},
-			},
-		},
-	}
+	expSupplierIDs := []string{"supplier1", "supplier3", "supplier2"}
 	var suplsReply engine.SortedSuppliers
 	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eSpls, suplsReply) {
-		t.Errorf("Expecting: %s, received: %s",
-			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
+	} else {
+		rcvSupl := make([]string, len(suplsReply.SortedSuppliers))
+		for i, supl := range suplsReply.SortedSuppliers {
+			rcvSupl[i] = supl.SupplierID
+		}
+		if suplsReply.ProfileID != "SPL_QOS_3" {
+			t.Errorf("Expecting: SPL_QOS_3, received: %s",
+				suplsReply.ProfileID)
+		}
+		if !reflect.DeepEqual(rcvSupl, expSupplierIDs) {
+			t.Errorf("Expecting: %+v, \n received: %+v",
+				expSupplierIDs, utils.ToJSON(rcvSupl))
+		}
 	}
 }
 
@@ -716,40 +640,24 @@ func testV1SplSGetQOSSuppliersFiltred(t *testing.T) {
 			},
 		},
 	}
-	eSpls := engine.SortedSuppliers{
-		ProfileID: "SPL_QOS_FILTRED",
-		Sorting:   utils.MetaQOS,
-		SortedSuppliers: []*engine.SortedSupplier{
-			{
-				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
-					"*acd:Stat_1":   11.0,
-					"*acd:Stat_1_1": 13.0,
-					"*asr:Stat_1":   100.0,
-					"*pdd:Stat_1_1": 13.5,
-					"*tcd:Stat_1":   22.0,
-					"*tcd:Stat_1_1": 26.0,
-					utils.Weight:    10.0,
-				},
-			},
-			{
-				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
-					"*acd:Stat_3": 11.0,
-					"*asr:Stat_3": 100.0,
-					"*tcd:Stat_3": 11.0,
-					utils.Weight:  35.0,
-				},
-			},
-		},
-	}
+	expSupplierIDs := []string{"supplier3"}
 	var suplsReply engine.SortedSuppliers
 	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eSpls, suplsReply) {
-		t.Errorf("Expecting: %s, received: %s",
-			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
+	} else {
+		rcvSupl := make([]string, len(suplsReply.SortedSuppliers))
+		for i, supl := range suplsReply.SortedSuppliers {
+			rcvSupl[i] = supl.SupplierID
+		}
+		if suplsReply.ProfileID != "SPL_QOS_FILTRED" {
+			t.Errorf("Expecting: SPL_QOS_FILTRED, received: %s",
+				suplsReply.ProfileID)
+		}
+		if !reflect.DeepEqual(rcvSupl, expSupplierIDs) {
+			t.Errorf("Expecting: %+v, \n received: %+v",
+				expSupplierIDs, utils.ToJSON(suplsReply))
+		}
 	}
 }
 
@@ -767,39 +675,24 @@ func testV1SplSGetQOSSuppliersFiltred2(t *testing.T) {
 			},
 		},
 	}
-	eSpls := engine.SortedSuppliers{
-		ProfileID: "SPL_QOS_FILTRED2",
-		Sorting:   utils.MetaQOS,
-		SortedSuppliers: []*engine.SortedSupplier{
-			{
-				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
-					"*acd:Stat_3": 11.0,
-					"*asr:Stat_3": 100.0,
-					"*tcd:Stat_3": 11.0,
-					utils.Weight:  35.0,
-				},
-			},
-			{
-				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
-					"*acd:Stat_2":      5.5,
-					"*asr:Stat_2":      100.0,
-					"*tcd:Stat_2":      11.0,
-					utils.Cost:         0.46666,
-					utils.RatingPlanID: "RP_RETAIL1",
-					utils.Weight:       20.0,
-				},
-			},
-		},
-	}
+	expSupplierIDs := []string{"supplier3", "supplier2"}
 	var suplsReply engine.SortedSuppliers
 	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eSpls, suplsReply) {
-		t.Errorf("Expecting: %s, received: %s",
-			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
+	} else {
+		rcvSupl := make([]string, len(suplsReply.SortedSuppliers))
+		for i, supl := range suplsReply.SortedSuppliers {
+			rcvSupl[i] = supl.SupplierID
+		}
+		if suplsReply.ProfileID != "SPL_QOS_FILTRED2" {
+			t.Errorf("Expecting: SPL_QOS_FILTRED2, received: %s",
+				suplsReply.ProfileID)
+		}
+		if !reflect.DeepEqual(rcvSupl, expSupplierIDs) {
+			t.Errorf("Expecting: %+v, \n received: %+v",
+				expSupplierIDs, utils.ToJSON(rcvSupl))
+		}
 	}
 }
 
