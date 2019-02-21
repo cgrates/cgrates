@@ -51,7 +51,6 @@ const CGRATES_CFG_JSON = `
 	"digest_separator": ",",
 	"digest_equal": ":",
 	"rsr_separator": ";",
-	"enable_http_pprof":false,								// enables the http server used for profiling
 },
 
 
@@ -87,7 +86,6 @@ const CGRATES_CFG_JSON = `
 	"rpc_json_tls" : "127.0.0.1:2022",		// RPC JSON TLS listening address
 	"rpc_gob_tls": "127.0.0.1:2023",		// RPC GOB TLS listening address
 	"http_tls": "127.0.0.1:2280",			// HTTP TLS listening address
-	"http_pprof": "127.0.0.1:2081"			// HTTP pprof server address
 },
 
 

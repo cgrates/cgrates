@@ -26,8 +26,6 @@ type ListenCfg struct {
 	RPCJSONTLSListen string // RPC JSON TLS listening address
 	RPCGOBTLSListen  string // RPC GOB TLS listening address
 	HTTPTLSListen    string // HTTP TLS listening address
-	HTTPPprof        string // HTTP pprof server address
-
 }
 
 //loadFromJsonCfg loads Database config from JsonCfg
@@ -52,9 +50,6 @@ func (lstcfg *ListenCfg) loadFromJsonCfg(jsnListenCfg *ListenJsonCfg) (err error
 	}
 	if jsnListenCfg.Http_tls != nil && *jsnListenCfg.Http_tls != "" {
 		lstcfg.HTTPTLSListen = *jsnListenCfg.Http_tls
-	}
-	if jsnListenCfg.Http_pprof != nil && *jsnListenCfg.Http_pprof != "" {
-		lstcfg.HTTPPprof = *jsnListenCfg.Http_pprof
 	}
 	return nil
 }

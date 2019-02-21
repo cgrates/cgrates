@@ -50,7 +50,6 @@ type GeneralCfg struct {
 	DigestSeparator   string        //
 	DigestEqual       string        //
 	RsrSepatarot      string        // separator used to split RSRParser (by degault is used ";")
-	EnableHTTPPprof   bool          // enables the http server used for profiling
 }
 
 //loadFromJsonCfg loads General config from JsonCfg
@@ -138,8 +137,6 @@ func (gencfg *GeneralCfg) loadFromJsonCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 	if jsnGeneralCfg.Rsr_separator != nil {
 		gencfg.RsrSepatarot = *jsnGeneralCfg.Rsr_separator
 	}
-	if jsnGeneralCfg.Enable_http_pprof != nil {
-		gencfg.EnableHTTPPprof = *jsnGeneralCfg.Enable_http_pprof
-	}
+
 	return nil
 }
