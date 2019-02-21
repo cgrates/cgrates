@@ -52,7 +52,7 @@ func (ud *v1UserProfile) SetId(id string) error {
 func userProfile2attributeProfile(user *v1UserProfile) (attr *engine.AttributeProfile) {
 	usrFltr := config.CgrConfig().MigratorCgrCfg().UsersFilters
 	attr = &engine.AttributeProfile{
-		Tenant:             user.Tenant,
+		Tenant:             config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:                 user.UserName,
 		Contexts:           []string{utils.META_ANY},
 		FilterIDs:          make([]string, 0),
@@ -61,18 +61,15 @@ func userProfile2attributeProfile(user *v1UserProfile) (attr *engine.AttributePr
 		Blocker:            false,
 		Weight:             user.Weight,
 	}
+	attr.Attributes = append(attr.Attributes, &engine.Attribute{
+		FieldName:  utils.MetaTenant,
+		Initial:    utils.META_ANY,
+		Substitute: config.NewRSRParsersMustCompile(user.Tenant, true, utils.INFIELD_SEP),
+		Append:     true,
+	})
 	for fieldname, substitute := range user.Profile {
 		if utils.IsSliceMember(usrFltr, fieldname) {
 			attr.FilterIDs = append(attr.FilterIDs, fmt.Sprintf("*string:%s:%s", fieldname, substitute))
-			continue
-		}
-		if fieldname == utils.Tenant {
-			attr.Attributes = append(attr.Attributes, &engine.Attribute{
-				FieldName:  utils.MetaTenant,
-				Initial:    utils.META_ANY,
-				Substitute: config.NewRSRParsersMustCompile(substitute, true, utils.INFIELD_SEP),
-				Append:     true,
-			})
 			continue
 		}
 		attr.Attributes = append(attr.Attributes, &engine.Attribute{

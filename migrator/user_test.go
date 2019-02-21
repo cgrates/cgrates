@@ -66,9 +66,8 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			UserName: "1001",
 			Masked:   false,
 			Profile: map[string]string{
-				"Account":    "1002",
-				"ReqType":    "*prepaid",
-				utils.Tenant: "cgrates2.org",
+				"Account": "1002",
+				"ReqType": "*prepaid",
 			},
 			Weight: 10,
 		},
@@ -80,9 +79,16 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			Contexts:           []string{utils.META_ANY},
 			FilterIDs:          make([]string, 0),
 			ActivationInterval: nil,
-			Attributes:         make([]*engine.Attribute, 0),
-			Blocker:            false,
-			Weight:             10,
+			Attributes: []*engine.Attribute{
+				{
+					FieldName:  utils.MetaTenant,
+					Initial:    utils.META_ANY,
+					Substitute: config.NewRSRParsersMustCompile(defaultTenant, true, utils.INFIELD_SEP),
+					Append:     true,
+				},
+			},
+			Blocker: false,
+			Weight:  10,
 		},
 		1: {
 			Tenant:             defaultTenant,
@@ -91,6 +97,12 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			FilterIDs:          []string{"*string:Account:1002"},
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
+				{
+					FieldName:  utils.MetaTenant,
+					Initial:    utils.META_ANY,
+					Substitute: config.NewRSRParsersMustCompile(defaultTenant, true, utils.INFIELD_SEP),
+					Append:     true,
+				},
 				{
 					FieldName:  "Subject",
 					Initial:    utils.META_ANY,
@@ -108,6 +120,12 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			FilterIDs:          []string{"*string:Account:1002"},
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
+				{
+					FieldName:  utils.MetaTenant,
+					Initial:    utils.META_ANY,
+					Substitute: config.NewRSRParsersMustCompile(defaultTenant, true, utils.INFIELD_SEP),
+					Append:     true,
+				},
 				{
 					FieldName:  "ReqType",
 					Initial:    utils.META_ANY,
@@ -134,7 +152,7 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 				{
 					FieldName:  utils.MetaTenant,
 					Initial:    utils.META_ANY,
-					Substitute: config.NewRSRParsersMustCompile("cgrates2.org", true, utils.INFIELD_SEP),
+					Substitute: config.NewRSRParsersMustCompile(defaultTenant, true, utils.INFIELD_SEP),
 					Append:     true,
 				},
 				{
