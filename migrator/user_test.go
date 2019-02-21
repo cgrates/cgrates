@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package migrator
 
 import (
-	"path"
 	"reflect"
 	"sort"
 	"testing"
@@ -30,11 +29,7 @@ import (
 )
 
 func TestUserProfile2attributeProfile(t *testing.T) {
-	inPath := path.Join("/usr/share/cgrates", "samples", "tutmongo")
-	usrCfgIn, err := config.NewCGRConfigFromFolder(inPath)
-	if err != nil {
-		t.Fatal(err)
-	}
+	usrCfgIn := config.CgrConfig()
 	usrCfgIn.MigratorCgrCfg().UsersFilters = []string{"Account"}
 	config.SetCgrConfig(usrCfgIn)
 	users := map[int]*v1UserProfile{
@@ -63,6 +58,17 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 				"Account": "1002",
 				"ReqType": "*prepaid",
 				"msisdn":  "123423534646752",
+			},
+			Weight: 10,
+		},
+		3: &v1UserProfile{
+			Tenant:   defaultTenant,
+			UserName: "1001",
+			Masked:   false,
+			Profile: map[string]string{
+				"Account":    "1002",
+				"ReqType":    "*prepaid",
+				utils.Tenant: "cgrates2.org",
 			},
 			Weight: 10,
 		},
@@ -112,6 +118,29 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 					FieldName:  "msisdn",
 					Initial:    utils.META_ANY,
 					Substitute: config.NewRSRParsersMustCompile("123423534646752", true, utils.INFIELD_SEP),
+					Append:     true,
+				},
+			},
+			Blocker: false,
+			Weight:  10,
+		},
+		3: {
+			Tenant:             defaultTenant,
+			ID:                 "1001",
+			Contexts:           []string{utils.META_ANY},
+			FilterIDs:          []string{"*string:Account:1002"},
+			ActivationInterval: nil,
+			Attributes: []*engine.Attribute{
+				{
+					FieldName:  utils.MetaTenant,
+					Initial:    utils.META_ANY,
+					Substitute: config.NewRSRParsersMustCompile("cgrates2.org", true, utils.INFIELD_SEP),
+					Append:     true,
+				},
+				{
+					FieldName:  "ReqType",
+					Initial:    utils.META_ANY,
+					Substitute: config.NewRSRParsersMustCompile("*prepaid", true, utils.INFIELD_SEP),
 					Append:     true,
 				},
 			},
