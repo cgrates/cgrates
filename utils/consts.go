@@ -551,7 +551,6 @@ const (
 	Local                        = "local"
 	TCP                          = "tcp"
 	CGRDebitInterval             = "CGRDebitInterval"
-	MetaAsr                      = "*asr"
 	Version                      = "Version"
 	MetaTenant                   = "*tenant"
 )
