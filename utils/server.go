@@ -28,7 +28,7 @@ import (
 	"log"
 	"net"
 	"net/http"
-	_ "net/http/pprof"
+	"net/http/pprof"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"reflect"
@@ -38,8 +38,13 @@ import (
 	"github.com/cenkalti/rpc2"
 	rpc2_jsonrpc "github.com/cenkalti/rpc2/jsonrpc"
 	"golang.org/x/net/websocket"
-	_ "net/http/pprof"
 )
+
+func NewServer() (s *Server) {
+	s = new(Server)
+	s.httpMux = http.NewServeMux()
+	return s
+}
 
 type Server struct {
 	rpcEnabled  bool
@@ -47,6 +52,7 @@ type Server struct {
 	birpcSrv    *rpc2.Server
 	sync.RWMutex
 	httpsMux *http.ServeMux
+	httpMux  *http.ServeMux
 }
 
 func (s *Server) RpcRegister(rcvr interface{}) {
@@ -64,7 +70,9 @@ func (s *Server) RpcRegisterName(name string, rcvr interface{}) {
 }
 
 func (s *Server) RegisterHttpFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
-	http.HandleFunc(pattern, handler)
+	if s.httpMux != nil {
+		s.httpMux.HandleFunc(pattern, handler)
+	}
 	if s.httpsMux != nil {
 		s.httpsMux.HandleFunc(pattern, handler)
 	}
@@ -74,7 +82,9 @@ func (s *Server) RegisterHttpFunc(pattern string, handler func(http.ResponseWrit
 }
 
 func (s *Server) RegisterHttpHandler(pattern string, handler http.Handler) {
-	http.Handle(pattern, handler)
+	if s.httpMux != nil {
+		s.httpMux.Handle(pattern, handler)
+	}
 	if s.httpsMux != nil {
 		s.httpsMux.Handle(pattern, handler)
 	}
@@ -192,6 +202,20 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 	io.Copy(w, res)
 }
 
+func (s *Server) RegisterProfiler(addr string) {
+	s.httpMux.HandleFunc(addr, pprof.Index)
+	s.httpMux.HandleFunc(addr+"cmdline", pprof.Cmdline)
+	s.httpMux.HandleFunc(addr+"profile", pprof.Profile)
+	s.httpMux.HandleFunc(addr+"symbol", pprof.Symbol)
+	s.httpMux.HandleFunc(addr+"trace", pprof.Trace)
+	s.httpMux.Handle(addr+"goroutine", pprof.Handler("goroutine"))
+	s.httpMux.Handle(addr+"heap", pprof.Handler("heap"))
+	s.httpMux.Handle(addr+"threadcreate", pprof.Handler("threadcreate"))
+	s.httpMux.Handle(addr+"block", pprof.Handler("block"))
+	s.httpMux.Handle(addr+"allocs", pprof.Handler("allocs"))
+	s.httpMux.Handle(addr+"mutex", pprof.Handler("mutex"))
+}
+
 func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 	useBasicAuth bool, userList map[string]string, exitChan chan bool) {
 	s.RLock()
@@ -200,6 +224,7 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 	if !enabled {
 		return
 	}
+	// s.httpMux = http.NewServeMux()
 	if enabled && jsonRPCURL != "" {
 		s.Lock()
 		s.httpEnabled = true
@@ -207,9 +232,9 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 
 		Logger.Info("<HTTP> enabling handler for JSON-RPC")
 		if useBasicAuth {
-			http.HandleFunc(jsonRPCURL, use(handleRequest, basicAuth(userList)))
+			s.httpMux.HandleFunc(jsonRPCURL, use(handleRequest, basicAuth(userList)))
 		} else {
-			http.HandleFunc(jsonRPCURL, handleRequest)
+			s.httpMux.HandleFunc(jsonRPCURL, handleRequest)
 		}
 	}
 	if enabled && wsRPCURL != "" {
@@ -221,11 +246,11 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 			jsonrpc.ServeConn(ws)
 		})
 		if useBasicAuth {
-			http.HandleFunc(wsRPCURL, use(func(w http.ResponseWriter, r *http.Request) {
+			s.httpMux.HandleFunc(wsRPCURL, use(func(w http.ResponseWriter, r *http.Request) {
 				wsHandler.ServeHTTP(w, r)
 			}, basicAuth(userList)))
 		} else {
-			http.Handle(wsRPCURL, wsHandler)
+			s.httpMux.Handle(wsRPCURL, wsHandler)
 		}
 	}
 	if !s.httpEnabled {
@@ -235,7 +260,7 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 		Logger.Info("<HTTP> enabling basic auth")
 	}
 	Logger.Info(fmt.Sprintf("<HTTP> start listening at <%s>", addr))
-	http.ListenAndServe(addr, nil)
+	http.ListenAndServe(addr, s.httpMux)
 	exitChan <- true
 }
 
