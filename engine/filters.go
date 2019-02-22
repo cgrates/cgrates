@@ -133,7 +133,7 @@ func (fS *FilterS) Pass(tenant string, filterIDs []string,
 // NewFilterFromInline parses an inline rule into a compiled Filter
 func NewFilterFromInline(tenant, inlnRule string) (f *Filter, err error) {
 	ruleSplt := strings.Split(inlnRule, utils.InInFieldSep)
-	if len(ruleSplt) != 3 {
+	if len(ruleSplt) < 3 {
 		return nil, fmt.Errorf("inline parse error for string: <%s>", inlnRule)
 	}
 	f = &Filter{
@@ -142,7 +142,7 @@ func NewFilterFromInline(tenant, inlnRule string) (f *Filter, err error) {
 		Rules: []*FilterRule{{
 			Type:      ruleSplt[0],
 			FieldName: ruleSplt[1],
-			Values:    strings.Split(ruleSplt[2], utils.INFIELD_SEP),
+			Values:    strings.Split(strings.Join(ruleSplt[2:], utils.InInFieldSep), utils.INFIELD_SEP),
 		}},
 	}
 	if err = f.Compile(); err != nil {
