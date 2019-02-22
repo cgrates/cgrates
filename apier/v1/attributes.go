@@ -41,6 +41,9 @@ func (apierV1 *ApierV1) GetAttributeProfile(arg utils.TenantID, reply *engine.At
 
 // GetAttributeProfileIDs returns list of attributeProfile IDs registered for a tenant
 func (apierV1 *ApierV1) GetAttributeProfileIDs(tenant string, attrPrfIDs *[]string) error {
+	if tenant == "" {
+		return utils.NewErrMandatoryIeMissing("Tenant")
+	}
 	prfx := utils.AttributeProfilePrefix + tenant + ":"
 	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {

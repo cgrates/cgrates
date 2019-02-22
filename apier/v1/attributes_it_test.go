@@ -652,6 +652,9 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 func testAttributeSGetAttPrfIDs(t *testing.T) {
 	expected := []string{"ATTR_2", "ATTR_1", "ATTR_3", "ATTR_Header", "AttributeWithNonSubstitute"}
 	var result []string
+	if err := attrSRPC.Call("ApierV1.GetAttributeProfileIDs", "", &result); err == nil || err.Error() != utils.NewErrMandatoryIeMissing("Tenant").Error() {
+		t.Errorf("Expected error recived reply %+v with err=%v", result, err)
+	}
 	if err := attrSRPC.Call("ApierV1.GetAttributeProfileIDs", "cgrates.org", &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
