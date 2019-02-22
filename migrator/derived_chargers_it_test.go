@@ -146,8 +146,8 @@ func testDCITMigrateAndMove(t *testing.T) {
 			DestinationIDs: utils.StringMap{"1001": true, "1002": true, "1003": true},
 			Chargers: []*v1DerivedCharger{
 				&v1DerivedCharger{
-					RunID: "RunID",
-					// RunFilters: "~filterhdr1:s/(.+)/special_run3/",
+					RunID:      "RunID",
+					RunFilters: "~filterhdr1:s/(.+)/special_run3/",
 
 					RequestTypeField: utils.MetaDefault,
 					CategoryField:    utils.MetaDefault,
@@ -190,7 +190,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 		FilterIDs: []string{
 			"*destination:Destination:1001;1002;1003",
 			"*string:Account:1003",
-			// "*rsr::~filterhdr1:s/(.+)/special_run3/",
+			"*rsr::~filterhdr1:s/(.+)/special_run3/",
 		},
 		ActivationInterval: nil,
 		RunID:              "RunID",

@@ -176,7 +176,7 @@ func testAlsITMigrateAndMove(t *testing.T) {
 			},
 		},
 		Blocker: false,
-		Weight:  10,
+		Weight:  20,
 	}
 	attrProf.Compile()
 	switch alsAction {

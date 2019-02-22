@@ -568,9 +568,11 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	passEvent := map[string]interface{}{
 		"Account": "1007",
 	}
-	if _, err := filterS.Pass("cgrates.org",
-		[]string{"*string:Account:1007:error"}, nil); err == nil {
-		t.Errorf(err.Error())
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*string:Account:1007:error"}, config.NewNavigableMap(failEvent)); err != nil {
+		t.Error(err)
+	} else if pass {
+		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*string:Account:1007"}, config.NewNavigableMap(failEvent)); err != nil {
