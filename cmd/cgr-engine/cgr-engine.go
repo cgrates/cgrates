@@ -64,6 +64,7 @@ var (
 	cfgDir            = flag.String("config_dir", utils.CONFIG_DIR, "Configuration directory path.")
 	version           = flag.Bool("version", false, "Prints the application version.")
 	pidFile           = flag.String("pid", "", "Write pid file")
+	httpPprofPath     = flag.String("http_pprof_path", "", "http address used for program profiling")
 	cpuProfDir        = flag.String("cpuprof_dir", "", "write cpu profile to files")
 	memProfDir        = flag.String("memprof_dir", "", "write memory profile to file")
 	memProfInterval   = flag.Duration("memprof_interval", 5*time.Second, "Time betwen memory profile saves")
@@ -1138,7 +1139,6 @@ func schedCDRsConns(internalCDRSChan chan rpcclient.RpcClientConnection, exitCha
 	engine.SetSchedCdrsConns(cdrsConn)
 }
 
-
 func memProfFile(memProfPath string) bool {
 	f, err := os.Create(memProfPath)
 	if err != nil {
@@ -1299,7 +1299,7 @@ func main() {
 	stopHandled := false
 
 	// Rpc/http server
-	server := new(utils.Server)
+	server := utils.NewServer()
 
 	// init cache
 	cacheS := engine.NewCacheS(cfg, dm)
@@ -1314,6 +1314,9 @@ func main() {
 		}
 	}()
 
+	if *httpPprofPath != "" {
+		go server.RegisterProfiler(*httpPprofPath)
+	}
 	// Async starts here, will follow cgrates.json start order
 
 	// Define internal connections via channels
