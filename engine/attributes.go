@@ -152,15 +152,6 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 	rply *AttrSProcessEventReply, err error) {
 	attrPrf, err := alS.attributeProfileForEvent(args)
 	if err != nil {
-		if err == utils.ErrNotFound {
-			// change the error in case that at least one field need to be processed by attributes
-			for _, valIface := range args.CGREvent.Event {
-				if valIface == interface{}(utils.MetaAttributes) {
-					err = utils.ErrMandatoryIeMissing
-					break
-				}
-			}
-		}
 		return nil, err
 	}
 	rply = &AttrSProcessEventReply{
@@ -198,16 +189,6 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 			rply.AlteredFields = append(rply.AlteredFields, fldName)
 		}
 	}
-	for _, valIface := range rply.CGREvent.Event {
-		if valIface == interface{}(utils.MetaAttributes) {
-			// mandatory IE missing
-			return nil, utils.NewCGRError(
-				utils.AttributeSv1ProcessEvent,
-				utils.ErrMandatoryIeMissing.Error(),
-				utils.ErrMandatoryIeMissing.Error(),
-				utils.ErrMandatoryIeMissing.Error())
-		}
-	}
 	return
 }
 
@@ -236,13 +217,12 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 	for i := 0; i < *args.ProcessRuns; i++ {
 		evRply, err := alS.processEvent(args)
 		if err != nil {
-			if err != utils.ErrNotFound && err != utils.ErrMandatoryIeMissing {
+			if err != utils.ErrNotFound {
 				err = utils.NewErrServerError(err)
 			} else if i != 0 { // ignore "not found" in a loop different than 0
 				err = nil
-				break
 			}
-			return err
+			break
 		}
 		if len(evRply.AlteredFields) != 0 {
 			args.CGREvent = *evRply.CGREvent // for next loop
@@ -269,6 +249,26 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 		if evRply.blocker {
 			break
 		}
+	}
+	// Make sure the requested fields were populated
+	if err == utils.ErrNotFound {
+		for _, valIface := range args.CGREvent.Event {
+			if valIface == interface{}(utils.MetaAttributes) {
+				err = utils.ErrMandatoryIeMissing
+				break
+			}
+		}
+	} else if apiRply != nil {
+		for _, valIface := range apiRply.CGREvent.Event {
+			if valIface == interface{}(utils.MetaAttributes) {
+				// mandatory IE missing
+				err = utils.ErrMandatoryIeMissing
+				break
+			}
+		}
+	}
+	if err != nil {
+		return
 	}
 	*reply = *apiRply
 	return
