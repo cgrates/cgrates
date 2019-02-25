@@ -312,7 +312,6 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 			}
 		}
 	}
-	provStatsMetrics := make(map[string]SplStatMetrics)
 	//calculate metrics
 	if len(spl.StatIDs) != 0 {
 		metricSupp, err := spS.statMetrics(spl.StatIDs, ev.Tenant) //create metric map for suppier
@@ -332,25 +331,19 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 				switch metric {
 				default:
 					sortedSpl.SortingData[metric] = SplStatMetrics{&SplStatMetric{StatID: utils.META_NONE, metricType: metric, MetricValue: -1.0}}
-					provStatsMetrics[metric] = SplStatMetrics{&SplStatMetric{StatID: utils.META_NONE, metricType: metric, MetricValue: -1.0}}
 				case utils.MetaPDD:
 					sortedSpl.SortingData[metric] = SplStatMetrics{&SplStatMetric{StatID: utils.META_NONE, metricType: metric, MetricValue: 10000000.0}}
-					provStatsMetrics[metric] = SplStatMetrics{&SplStatMetric{StatID: utils.META_NONE, metricType: metric, MetricValue: 10000000.0}}
 				}
 			} else {
 				sortedSpl.SortingData[metric] = val
-				provStatsMetrics[metric] = val
 			}
 		}
 	}
-	//reas
-	//reds
 	//filter the supplier
 	if len(spl.FilterIDs) != 0 {
 		nM := config.NewNavigableMap(nil)
 		nM.Set([]string{utils.MetaReq}, ev.Event, false, false)
-		nM.Set([]string{utils.MetaVars}, sortedSpl.SortingData, false, false)
-		nM.Set([]string{"*metrics"}, newSplStsDP(provStatsMetrics), false, false)
+		nM.Set([]string{utils.MetaVars}, convertSortingData(sortedSpl.SortingData), false, false)
 
 		if pass, err = spS.filterS.Pass(ev.Tenant, spl.FilterIDs,
 			nM); err != nil {

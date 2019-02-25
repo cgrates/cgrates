@@ -921,23 +921,18 @@ func TestPassFilterNavigableMap(t *testing.T) {
 		dm:  dmFilterPass,
 	}
 
-	//ev1 simulate event
 	ev1 := map[string]interface{}{
-		"sampleField": "sampleValue",
+		"test": "call",
 	}
 
 	//ev2 simulate sortingData
 	ev2 := map[string]interface{}{
+		utils.Cost: 12.45,
 		utils.MetaACD: SplStatMetrics{
 			&SplStatMetric{
 				StatID:      utils.META_NONE,
 				metricType:  utils.MetaACD,
-				MetricValue: 10.0},
-		},
-	}
-	//ev3 simulate sortingData
-	ev3 := map[string]SplStatMetrics{
-		utils.MetaACD: SplStatMetrics{
+				MetricValue: 9.0},
 			&SplStatMetric{
 				StatID:      utils.META_NONE,
 				metricType:  utils.MetaACD,
@@ -948,27 +943,34 @@ func TestPassFilterNavigableMap(t *testing.T) {
 	//nM simulate the DP sent to filterS in SupplierS
 	nM := config.NewNavigableMap(nil)
 	nM.Set([]string{utils.MetaReq}, ev1, false, false)
-	nM.Set([]string{utils.MetaVars}, ev2, false, false)
-	nM.Set([]string{"*metrics"}, newSplStsDP(ev3), false, false)
+	nM.Set([]string{utils.MetaVars}, convertSortingData(ev2), false, false)
 
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*string:*req.sampleField:sampleValue"}, nM); err != nil {
+		[]string{"*string:*req.test:call"}, nM); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: true , received: %+v", pass)
 	}
 
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*gte:*metrics.*acd:10"}, nM); err != nil {
+		[]string{"*gte:*vars.Cost:10.0"}, nM); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: true , received: %+v", pass)
 	}
 
-	// if pass, err := filterS.Pass("cgrates.org",
-	// 	[]string{"*gte:*vars.*acd:10"}, nM); err != nil {
-	// 	t.Errorf(err.Error())
-	// } else if !pass {
-	// 	t.Errorf("Expecting: true , received: %+v", pass)
-	// }
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*gte:*vars.*acd:10.0"}, nM); err != nil {
+		t.Errorf(err.Error())
+	} else if pass {
+		t.Errorf("Expecting: false , received: %+v", pass)
+	}
+
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*gte:*vars.*acd:9.0"}, nM); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: true , received: %+v", pass)
+	}
+
 }

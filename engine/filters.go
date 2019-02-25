@@ -46,6 +46,7 @@ const (
 	MetaLessOrEqual    = "*lte"
 	MetaGreaterThan    = "*gt"
 	MetaGreaterOrEqual = "*gte"
+	MetaResources      = "*resources"
 
 	MetaNotString         = "*notstring"
 	MetaNotPrefix         = "*notprefix"
@@ -62,6 +63,7 @@ const (
 	MetaNotLessOrEqual    = "*notlte"
 	MetaNotGreaterThan    = "*notgt"
 	MetaNotGreaterOrEqual = "*notgte"
+	MetaNotResources      = "*notresources"
 )
 
 func NewFilterS(cfg *config.CGRConfig,
@@ -204,8 +206,9 @@ func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error)
 		negative = true
 	}
 	if !utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaSuffix,
-		MetaTimings, MetaRSR, MetaStatS, MetaDestinations, MetaEmpty, MetaExists,
-		MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rType) {
+		MetaTimings, MetaRSR, MetaStatS, MetaDestinations, MetaEmpty,
+		MetaExists, MetaLessThan, MetaLessOrEqual, MetaGreaterThan,
+		MetaGreaterOrEqual, MetaResources}, rType) {
 		return nil, fmt.Errorf("Unsupported filter Type: %s", rfType)
 	}
 	if fieldName == "" && utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaSuffix,
@@ -307,6 +310,8 @@ func (fltr *FilterRule) Pass(dP config.DataProvider,
 	case MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual,
 		MetaNotLessThan, MetaNotLessOrEqual, MetaNotGreaterThan, MetaNotGreaterOrEqual:
 		result, err = fltr.passGreaterThan(dP)
+	case MetaResources, MetaNotResources:
+		result, err = fltr.passResourceS(dP, rpcClnt, tenant)
 	default:
 		err = utils.ErrPrefixNotErrNotImplemented(fltr.Type)
 	}
@@ -493,5 +498,35 @@ func (fltr *FilterRule) passGreaterThan(dP config.DataProvider) (bool, error) {
 			return true, nil
 		}
 	}
+	return false, nil
+}
+
+//
+//Type *resources
+//FieldName
+//Value ResourceID:
+
+func (fltr *FilterRule) passResourceS(dP config.DataProvider,
+	resourceS rpcclient.RpcClientConnection, tenant string) (bool, error) {
+	// if resourceS == nil || reflect.ValueOf(resourceS).IsNil() {
+	// 	return false, errors.New("Missing ResourceS information")
+	// }
+	// for _, threshold := range fltr.statSThresholds {
+	// 	statValues := make(map[string]float64)
+	// 	if err := resourceS.Call(utils.StatSv1GetQueueFloatMetrics, &utils.TenantID{Tenant: tenant, ID: threshold.QueueID}, &statValues); err != nil {
+	// 		return false, err
+	// 	}
+	// 	val, hasIt := statValues[utils.Meta+threshold.ThresholdType[len(MetaMinCapPrefix):]]
+	// 	if !hasIt {
+	// 		continue
+	// 	}
+	// 	if strings.HasPrefix(threshold.ThresholdType, MetaMinCapPrefix) &&
+	// 		val >= threshold.ThresholdValue {
+	// 		return true, nil
+	// 	} else if strings.HasPrefix(threshold.ThresholdType, MetaMaxCapPrefix) &&
+	// 		val < threshold.ThresholdValue {
+	// 		return true, nil
+	// 	}
+	// }
 	return false, nil
 }

@@ -20,11 +20,9 @@ package engine
 
 import (
 	"fmt"
-	"net"
 	"sort"
 	"strings"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -94,15 +92,11 @@ func (sSpls *SortedSuppliers) SortHighestCost() {
 
 // SortQOS is part of sort interface,
 // sort based on Stats
-
-//map[*acd][]float64{10,20} => 10
-//map[*tcd][]float64{40,50} => 40
-//map[*pdd][]float64{40,50} => 50
 func (sSpls *SortedSuppliers) SortQOS(params []string) {
 	//sort the metrics before sorting the suppliers
 	for _, val := range sSpls.SortedSuppliers {
 		for _, iface := range val.SortingData {
-			if castedVal, canCast := iface.(SplStatMetrics); !canCast {
+			if castedVal, canCast := iface.(SplStatMetrics); canCast {
 				castedVal.Sort()
 			}
 		}
@@ -195,60 +189,17 @@ func (sm SplStatMetrics) Sort() {
 	})
 }
 
-// newRADataProvider constructs a DataProvider
-func newSplStsDP(req map[string]SplStatMetrics) (dP config.DataProvider) {
-	for key, _ := range req {
-		req[key].Sort()
-	}
-	dP = &splStsDP{req: req, cache: config.NewNavigableMap(nil)}
-	return
-}
-
-type splStsDP struct {
-	req   map[string]SplStatMetrics
-	cache *config.NavigableMap
-}
-
-// String is part of engine.DataProvider interface
-// when called, it will display the already parsed values out of cache
-func (sm *splStsDP) String() string {
-	return ""
-}
-
-// FieldAsInterface is part of engine.DataProvider interface
-func (sm *splStsDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
-	fmt.Println("enter here ??? ")
-	if data, err = sm.cache.FieldAsInterface(fldPath); err != nil {
-		if err != utils.ErrNotFound { // item found in cache
-			return
+// convert SortingData to map[string]interface{} with the worst value in case of stats
+func convertSortingData(req map[string]interface{}) (reply map[string]interface{}) {
+	reply = make(map[string]interface{})
+	// in case that we have metrics sort them
+	for key, iface := range req {
+		if castedVal, canCast := iface.(SplStatMetrics); canCast {
+			castedVal.Sort()
+			reply[key] = castedVal[0].MetricValue
+		} else {
+			reply[key] = iface
 		}
-		err = nil // cancel previous err
-	} else {
-		return // data found in cache
 	}
-	data = sm.req[fldPath[0]][0].MetricValue
-	sm.cache.Set(fldPath, data, false, false)
 	return
-}
-
-// FieldAsString is part of engine.DataProvider interface
-func (sm *splStsDP) FieldAsString(fldPath []string) (data string, err error) {
-	var valIface interface{}
-	valIface, err = sm.FieldAsInterface(fldPath)
-	if err != nil {
-		return
-	}
-	data, err = utils.IfaceAsString(valIface)
-	return
-}
-
-// AsNavigableMap is part of engine.DataProvider interface
-func (sm *splStsDP) AsNavigableMap([]*config.FCTemplate) (
-	nm *config.NavigableMap, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// RemoteHost is part of engine.DataProvider interface
-func (sm *splStsDP) RemoteHost() net.Addr {
-	return nil
 }
