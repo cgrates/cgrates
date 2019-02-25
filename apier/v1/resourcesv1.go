@@ -57,6 +57,8 @@ func (rsv1 *ResourceSv1) ReleaseResources(args utils.ArgRSv1ResourceUsage, reply
 	return rsv1.rls.V1ReleaseResource(args, reply)
 }
 
+//func for getResource
+
 // GetResourceProfile returns a resource configuration
 func (apierV1 *ApierV1) GetResourceProfile(arg utils.TenantID, reply *engine.ResourceProfile) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing

@@ -339,6 +339,71 @@ func TestLibSuppliersStatMetricSort2(t *testing.T) {
 	}
 }
 
+func TestLibSuppliersConvertSortingData(t *testing.T) {
+	//simulatedData simulate sortingData
+	simulatedData := map[string]interface{}{
+		utils.Cost: 12.45,
+		utils.MetaACD: SplStatMetrics{
+			&SplStatMetric{
+				StatID:      utils.META_NONE,
+				metricType:  utils.MetaACD,
+				MetricValue: 9.0},
+			&SplStatMetric{
+				StatID:      utils.META_NONE,
+				metricType:  utils.MetaACD,
+				MetricValue: 10.0},
+		},
+	}
+	rcv := convertSortingData(simulatedData)
+	expected := map[string]interface{}{
+		utils.Cost:    12.45,
+		utils.MetaACD: 9.0,
+	}
+	if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %s, received: %s",
+			expected, rcv)
+	}
+}
+
+func TestLibSuppliersConvertSortingData2(t *testing.T) {
+	//simulatedData simulate sortingData
+	simulatedData := map[string]interface{}{
+		utils.Cost:   12.45,
+		utils.Weight: 12.0,
+		utils.MetaACD: SplStatMetrics{
+			&SplStatMetric{
+				StatID:      utils.META_NONE,
+				metricType:  utils.MetaACD,
+				MetricValue: 19.0},
+			&SplStatMetric{
+				StatID:      utils.META_NONE,
+				metricType:  utils.MetaACD,
+				MetricValue: 10.0},
+		},
+		utils.MetaPDD: SplStatMetrics{
+			&SplStatMetric{
+				StatID:      utils.META_NONE,
+				metricType:  utils.MetaPDD,
+				MetricValue: 12.0},
+			&SplStatMetric{
+				StatID:      utils.META_NONE,
+				metricType:  utils.MetaPDD,
+				MetricValue: 5.0},
+		},
+	}
+	rcv := convertSortingData(simulatedData)
+	expected := map[string]interface{}{
+		utils.Cost:    12.45,
+		utils.MetaACD: 10.0,
+		utils.MetaPDD: 12.0,
+		utils.Weight:  12.0,
+	}
+	if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v",
+			expected, rcv)
+	}
+}
+
 //sort based on *acd and *tcd
 func TestLibSuppliersSortQOS(t *testing.T) {
 	sSpls := &SortedSuppliers{
@@ -429,92 +494,15 @@ func TestLibSuppliersSortQOS(t *testing.T) {
 
 	//sort base on *acd and *tcd
 	sSpls.SortQOS([]string{utils.MetaACD, utils.MetaTCD})
+	rcv := make([]string, len(sSpls.SortedSuppliers))
+	eIds := []string{"supplier2", "supplier1", "supplier3"}
+	for i, spl := range sSpls.SortedSuppliers {
+		rcv[i] = spl.SupplierID
 
-	eOrderedSpls := &SortedSuppliers{
-		SortedSuppliers: []*SortedSupplier{
-			&SortedSupplier{
-				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
-					utils.Cost:   0.1,
-					utils.Weight: 15.0,
-					utils.MetaACD: SplStatMetrics{
-						&SplStatMetric{StatID: "SampleStat",
-							metricType:  utils.MetaACD,
-							MetricValue: 1.1},
-						&SplStatMetric{StatID: "SampleStat2",
-							metricType:  utils.MetaACD,
-							MetricValue: 12.1},
-						&SplStatMetric{StatID: "SampleStat3",
-							metricType:  utils.MetaACD,
-							MetricValue: 0.5},
-					},
-					utils.MetaTCD: SplStatMetrics{
-						&SplStatMetric{StatID: "SampleStat",
-							metricType:  utils.MetaTCD,
-							MetricValue: 12.1},
-						&SplStatMetric{StatID: "SampleStat2",
-							metricType:  utils.MetaTCD,
-							MetricValue: 4.1},
-					},
-				},
-			},
-			&SortedSupplier{
-				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
-					utils.Cost:   0.5,
-					utils.Weight: 10.0,
-					utils.MetaACD: SplStatMetrics{
-						&SplStatMetric{StatID: "SampleStat",
-							metricType:  utils.MetaACD,
-							MetricValue: 0.5},
-						&SplStatMetric{StatID: "SampleStat2",
-							metricType:  utils.MetaACD,
-							MetricValue: 23.1},
-						&SplStatMetric{StatID: "SampleStat3",
-							metricType:  utils.MetaACD,
-							MetricValue: 10.0},
-					},
-					utils.MetaTCD: SplStatMetrics{
-						&SplStatMetric{StatID: "SampleStat",
-							metricType:  utils.MetaTCD,
-							MetricValue: 1.1},
-						&SplStatMetric{StatID: "SampleStat2",
-							metricType:  utils.MetaTCD,
-							MetricValue: 12.1},
-					},
-				},
-			},
-			&SortedSupplier{
-				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
-					utils.Cost:   1.1,
-					utils.Weight: 17.8,
-					utils.MetaACD: SplStatMetrics{
-						&SplStatMetric{StatID: "SampleStat",
-							metricType:  utils.MetaACD,
-							MetricValue: 0.4},
-						&SplStatMetric{StatID: "SampleStat2",
-							metricType:  utils.MetaACD,
-							MetricValue: 2.1},
-						&SplStatMetric{StatID: "SampleStat3",
-							metricType:  utils.MetaACD,
-							MetricValue: 0.5},
-					},
-					utils.MetaTCD: SplStatMetrics{
-						&SplStatMetric{StatID: "SampleStat",
-							metricType:  utils.MetaTCD,
-							MetricValue: 6.1},
-						&SplStatMetric{StatID: "SampleStat2",
-							metricType:  utils.MetaTCD,
-							MetricValue: 5.1},
-					},
-				},
-			},
-		},
 	}
-	if !reflect.DeepEqual(eOrderedSpls, sSpls) {
-		t.Errorf("Expecting: %s, \n received: %s",
-			utils.ToJSON(eOrderedSpls), utils.ToJSON(sSpls))
+	if !reflect.DeepEqual(eIds, rcv) {
+		t.Errorf("Expecting: %+v, \n received: %+v",
+			eIds, rcv)
 	}
 }
 
@@ -603,86 +591,15 @@ func TestLibSuppliersSortQOS2(t *testing.T) {
 		},
 	}
 	sSpls.SortQOS([]string{utils.MetaACD, utils.MetaTCD})
-	eOrderedSpls := &SortedSuppliers{
-		SortedSuppliers: []*SortedSupplier{
-			&SortedSupplier{
-				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
-					utils.Cost:   0.5,
-					utils.Weight: 10.0,
-					utils.MetaACD: SplStatMetrics{
-						&SplStatMetric{StatID: "SampleStat",
-							metricType:  utils.MetaACD,
-							MetricValue: 0.5},
-						&SplStatMetric{StatID: "SampleStat2",
-							metricType:  utils.MetaACD,
-							MetricValue: 0.5},
-						&SplStatMetric{StatID: "SampleStat3",
-							metricType:  utils.MetaACD,
-							MetricValue: 0.5},
-					},
-					utils.MetaTCD: SplStatMetrics{
-						&SplStatMetric{StatID: "SampleStat",
-							metricType:  utils.MetaTCD,
-							MetricValue: 1.2},
-					},
-				},
-			},
-			&SortedSupplier{
-				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
-					utils.Weight: 17.0,
-					utils.MetaACD: SplStatMetrics{
-						&SplStatMetric{StatID: "SampleStat",
-							metricType:  utils.MetaACD,
-							MetricValue: 0.5},
-						&SplStatMetric{StatID: "SampleStat2",
-							metricType:  utils.MetaACD,
-							MetricValue: 0.5},
-						&SplStatMetric{StatID: "SampleStat3",
-							metricType:  utils.MetaACD,
-							MetricValue: 0.5},
-					},
-					utils.MetaTCD: SplStatMetrics{
-						&SplStatMetric{StatID: "SampleStat",
-							metricType:  utils.MetaTCD,
-							MetricValue: 1.1},
-						&SplStatMetric{StatID: "SampleStat2",
-							metricType:  utils.MetaTCD,
-							MetricValue: 12.1},
-					},
-				},
-			},
-			&SortedSupplier{
-				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
-					utils.Weight: 10.0,
-					utils.MetaACD: SplStatMetrics{
-						&SplStatMetric{StatID: "SampleStat",
-							metricType:  utils.MetaACD,
-							MetricValue: 0.5},
-						&SplStatMetric{StatID: "SampleStat2",
-							metricType:  utils.MetaACD,
-							MetricValue: 0.7},
-						&SplStatMetric{StatID: "SampleStat3",
-							metricType:  utils.MetaACD,
-							MetricValue: 0.6},
-					},
-					utils.MetaTCD: SplStatMetrics{
-						&SplStatMetric{StatID: "SampleStat",
-							metricType:  utils.MetaTCD,
-							MetricValue: 1.1},
-						&SplStatMetric{StatID: "SampleStat2",
-							metricType:  utils.MetaTCD,
-							MetricValue: 12.1},
-					},
-				},
-			},
-		},
+	rcv := make([]string, len(sSpls.SortedSuppliers))
+	eIds := []string{"supplier3", "supplier2", "supplier1"}
+	for i, spl := range sSpls.SortedSuppliers {
+		rcv[i] = spl.SupplierID
+
 	}
-	if !reflect.DeepEqual(eOrderedSpls, sSpls) {
-		t.Errorf("Expecting: %s, received: %s",
-			utils.ToJSON(eOrderedSpls), utils.ToJSON(sSpls))
+	if !reflect.DeepEqual(eIds, rcv) {
+		t.Errorf("Expecting: %+v, \n received: %+v",
+			eIds, rcv)
 	}
 }
 
@@ -755,143 +672,15 @@ func TestLibSuppliersSortQOS3(t *testing.T) {
 		},
 	}
 	sSpls.SortQOS([]string{utils.MetaPDD})
-	eOrderedSpls := &SortedSuppliers{
-		SortedSuppliers: []*SortedSupplier{
-			&SortedSupplier{
-				SupplierID: "supplier1",
-				SortingData: map[string]interface{}{
-					utils.Weight: 15.0,
-					utils.MetaPDD: SplStatMetrics{
-						&SplStatMetric{StatID: "SampleStat",
-							metricType:  utils.MetaPDD,
-							MetricValue: 0.5},
-						&SplStatMetric{StatID: "SampleStat2",
-							metricType:  utils.MetaACD,
-							MetricValue: 0.7},
-					},
-					utils.MetaTCD: SplStatMetrics{
-						&SplStatMetric{StatID: "SampleStat",
-							metricType:  utils.MetaTCD,
-							MetricValue: 1.1},
-						&SplStatMetric{StatID: "SampleStat2",
-							metricType:  utils.MetaTCD,
-							MetricValue: 12.1},
-					},
-				},
-			},
-			&SortedSupplier{
-				SupplierID: "supplier3",
-				SortingData: map[string]interface{}{
-					utils.Weight: 10.0,
-					utils.MetaPDD: SplStatMetrics{
-						&SplStatMetric{StatID: "SampleStat",
-							metricType:  utils.MetaPDD,
-							MetricValue: 0.7},
-					},
-					utils.MetaTCD: SplStatMetrics{
-						&SplStatMetric{StatID: "SampleStat",
-							metricType:  utils.MetaTCD,
-							MetricValue: 10.1},
-					},
-				},
-			},
-			&SortedSupplier{
-				SupplierID: "supplier2",
-				SortingData: map[string]interface{}{
-					utils.Weight: 10.0,
-					utils.MetaPDD: SplStatMetrics{
-						&SplStatMetric{StatID: "SampleStat",
-							metricType:  utils.MetaPDD,
-							MetricValue: 0.9},
-						&SplStatMetric{StatID: "SampleStat2",
-							metricType:  utils.MetaACD,
-							MetricValue: 1.2},
-					},
-					utils.MetaTCD: SplStatMetrics{
-						&SplStatMetric{StatID: "SampleStat",
-							metricType:  utils.MetaTCD,
-							MetricValue: 1.1},
-					},
-				},
-			},
-		},
-	}
-	if !reflect.DeepEqual(eOrderedSpls, sSpls) {
-		t.Errorf("Expecting: %s, received: %s",
-			utils.ToJSON(eOrderedSpls), utils.ToJSON(sSpls))
-	}
-}
+	rcv := make([]string, len(sSpls.SortedSuppliers))
+	eIds := []string{"supplier1", "supplier3", "supplier2"}
+	for i, spl := range sSpls.SortedSuppliers {
+		rcv[i] = spl.SupplierID
 
-//Modify the rest of the test
-//to cover multiple cases
-/*
-func TestLibSuppliersSortQOS3(t *testing.T) {
-	sSpls := &SortedSuppliers{
-		SortedSuppliers: []*SortedSupplier{
-			&SortedSupplier{
-				SupplierID: "supplier1",
-				globalStats: map[string]float64{
-					utils.MetaACD: 0.2,
-					utils.MetaTCD: 15.0,
-					utils.MetaASR: 1.2,
-				},
-				SupplierParameters: "param1",
-			},
-			&SortedSupplier{
-				SupplierID: "supplier2",
-				globalStats: map[string]float64{
-					utils.MetaACD: 0.2,
-					utils.MetaTCD: 20.0,
-					utils.MetaASR: -1.0,
-				},
-				SupplierParameters: "param2",
-			},
-			&SortedSupplier{
-				SupplierID: "supplier3",
-				globalStats: map[string]float64{
-					utils.MetaACD: 0.1,
-					utils.MetaTCD: 10.0,
-					utils.MetaASR: 1.2,
-				},
-				SupplierParameters: "param3",
-			},
-		},
 	}
-	sSpls.SortQOS([]string{utils.MetaASR, utils.MetaACD, utils.MetaTCD})
-	eOrderedSpls := &SortedSuppliers{
-		SortedSuppliers: []*SortedSupplier{
-			&SortedSupplier{
-				SupplierID: "supplier1",
-				globalStats: map[string]float64{
-					utils.MetaACD: 0.2,
-					utils.MetaTCD: 15.0,
-					utils.MetaASR: 1.2,
-				},
-				SupplierParameters: "param1",
-			},
-			&SortedSupplier{
-				SupplierID: "supplier3",
-				globalStats: map[string]float64{
-					utils.MetaACD: 0.1,
-					utils.MetaTCD: 10.0,
-					utils.MetaASR: 1.2,
-				},
-				SupplierParameters: "param3",
-			},
-			&SortedSupplier{
-				SupplierID: "supplier2",
-				globalStats: map[string]float64{
-					utils.MetaACD: 0.2,
-					utils.MetaTCD: 20.0,
-					utils.MetaASR: -1.0,
-				},
-				SupplierParameters: "param2",
-			},
-		},
-	}
-	if !reflect.DeepEqual(eOrderedSpls, sSpls) {
-		t.Errorf("Expecting: %s, received: %s",
-			utils.ToJSON(eOrderedSpls), utils.ToJSON(sSpls))
+	if !reflect.DeepEqual(eIds, rcv) {
+		t.Errorf("Expecting: %+v, \n received: %+v",
+			eIds, rcv)
 	}
 }
 
@@ -900,74 +689,169 @@ func TestLibSuppliersSortQOS4(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			&SortedSupplier{
 				SupplierID: "supplier1",
-				globalStats: map[string]float64{
-					utils.MetaACD: 0.2,
-					utils.MetaTCD: 15.0,
-					utils.MetaASR: -1.0,
-					utils.MetaTCC: 10.1,
+				SortingData: map[string]interface{}{
+					utils.MetaACD: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaACD,
+							MetricValue: 0.2},
+					},
+					utils.MetaTCD: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaTCD,
+							MetricValue: 15.0},
+					},
+					utils.MetaASR: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaASR,
+							MetricValue: 1.2},
+					},
 				},
-				SupplierParameters: "param1",
 			},
 			&SortedSupplier{
 				SupplierID: "supplier2",
-				globalStats: map[string]float64{
-					utils.MetaACD: 0.2,
-					utils.MetaTCD: 20.0,
-					utils.MetaASR: 1.2,
-					utils.MetaTCC: 10.1,
+				SortingData: map[string]interface{}{
+					utils.MetaACD: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaACD,
+							MetricValue: 0.2},
+					},
+					utils.MetaTCD: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaTCD,
+							MetricValue: 20.0},
+					},
+					utils.MetaASR: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaASR,
+							MetricValue: -1.0},
+					},
 				},
-				SupplierParameters: "param2",
 			},
 			&SortedSupplier{
 				SupplierID: "supplier3",
-				globalStats: map[string]float64{
-					utils.MetaACD: 0.1,
-					utils.MetaTCD: 10.0,
-					utils.MetaASR: 1.2,
-					utils.MetaTCC: 10.1,
+				SortingData: map[string]interface{}{
+					utils.MetaACD: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaACD,
+							MetricValue: 0.1},
+					},
+					utils.MetaTCD: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaTCD,
+							MetricValue: 10.0},
+					},
+					utils.MetaASR: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaASR,
+							MetricValue: 1.2},
+					},
 				},
-				SupplierParameters: "param3",
+			},
+		},
+	}
+	sSpls.SortQOS([]string{utils.MetaASR, utils.MetaACD, utils.MetaTCD})
+	rcv := make([]string, len(sSpls.SortedSuppliers))
+	eIds := []string{"supplier1", "supplier3", "supplier2"}
+	for i, spl := range sSpls.SortedSuppliers {
+		rcv[i] = spl.SupplierID
+
+	}
+	if !reflect.DeepEqual(eIds, rcv) {
+		t.Errorf("Expecting: %+v, \n received: %+v",
+			eIds, rcv)
+	}
+}
+
+func TestLibSuppliersSortQOS5(t *testing.T) {
+	sSpls := &SortedSuppliers{
+		SortedSuppliers: []*SortedSupplier{
+			&SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaACD,
+							MetricValue: 0.2},
+					},
+					utils.MetaTCD: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaTCD,
+							MetricValue: 15.0},
+					},
+					utils.MetaASR: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaASR,
+							MetricValue: -1.0},
+					},
+					utils.MetaTCC: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaTCC,
+							MetricValue: 10.1},
+					},
+				},
+			},
+			&SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaACD,
+							MetricValue: 0.2},
+					},
+					utils.MetaTCD: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaTCD,
+							MetricValue: 20.0},
+					},
+					utils.MetaASR: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaASR,
+							MetricValue: 1.2},
+					},
+					utils.MetaTCC: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaTCC,
+							MetricValue: 10.1},
+					},
+				},
+			},
+			&SortedSupplier{
+				SupplierID: "supplier3",
+				SortingData: map[string]interface{}{
+					utils.MetaACD: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaACD,
+							MetricValue: 0.1},
+					},
+					utils.MetaTCD: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaTCD,
+							MetricValue: 10.0},
+					},
+					utils.MetaASR: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaASR,
+							MetricValue: 1.2},
+					},
+					utils.MetaTCC: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaTCC,
+							MetricValue: 10.1},
+					},
+				},
 			},
 		},
 	}
 	sSpls.SortQOS([]string{utils.MetaTCC, utils.MetaASR, utils.MetaACD, utils.MetaTCD})
-	eOrderedSpls := &SortedSuppliers{
-		SortedSuppliers: []*SortedSupplier{
-			&SortedSupplier{
-				SupplierID: "supplier2",
-				globalStats: map[string]float64{
-					utils.MetaACD: 0.2,
-					utils.MetaTCD: 20.0,
-					utils.MetaASR: 1.2,
-					utils.MetaTCC: 10.1,
-				},
-				SupplierParameters: "param2",
-			},
-			&SortedSupplier{
-				SupplierID: "supplier3",
-				globalStats: map[string]float64{
-					utils.MetaACD: 0.1,
-					utils.MetaTCD: 10.0,
-					utils.MetaASR: 1.2,
-					utils.MetaTCC: 10.1,
-				},
-				SupplierParameters: "param3",
-			},
-			&SortedSupplier{
-				SupplierID: "supplier1",
-				globalStats: map[string]float64{
-					utils.MetaACD: 0.2,
-					utils.MetaTCD: 15.0,
-					utils.MetaASR: -1.0,
-					utils.MetaTCC: 10.1,
-				},
-				SupplierParameters: "param1",
-			},
-		},
+	rcv := make([]string, len(sSpls.SortedSuppliers))
+	eIds := []string{"supplier2", "supplier3", "supplier1"}
+	for i, spl := range sSpls.SortedSuppliers {
+		rcv[i] = spl.SupplierID
+
 	}
-	if !reflect.DeepEqual(eOrderedSpls, sSpls) {
-		t.Errorf("Expecting: %s, received: %s",
-			utils.ToJSON(eOrderedSpls), utils.ToJSON(sSpls))
+	if !reflect.DeepEqual(eIds, rcv) {
+		t.Errorf("Expecting: %+v, \n received: %+v",
+			eIds, rcv)
 	}
 }
 
@@ -976,75 +860,49 @@ func TestLibSuppliersSortQOS6(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			&SortedSupplier{
 				SupplierID: "supplier1",
-				globalStats: map[string]float64{
-					utils.MetaACD: 0.2,
-				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 15.0,
+					utils.MetaACD: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaACD,
+							MetricValue: 0.2},
+					},
 				},
-				SupplierParameters: "param1",
 			},
 			&SortedSupplier{
 				SupplierID: "supplier2",
-				globalStats: map[string]float64{
-					utils.MetaACD: 0.2,
-				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 25.0,
+					utils.MetaACD: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaACD,
+							MetricValue: 0.2},
+					},
 				},
-				SupplierParameters: "param2",
 			},
 			&SortedSupplier{
 				SupplierID: "supplier3",
-				globalStats: map[string]float64{
-					utils.MetaACD: 0.1,
-				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 20.0,
+					utils.MetaACD: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaACD,
+							MetricValue: 0.1},
+					},
 				},
-				SupplierParameters: "param3",
 			},
 		},
 	}
 	sSpls.SortQOS([]string{utils.MetaACD})
-	eOrderedSpls := &SortedSuppliers{
-		SortedSuppliers: []*SortedSupplier{
-			&SortedSupplier{
-				SupplierID: "supplier2",
-				globalStats: map[string]float64{
-					utils.MetaACD: 0.2,
-				},
-				SortingData: map[string]interface{}{
-					utils.Weight: 25.0,
-				},
-				SupplierParameters: "param2",
-			},
-			&SortedSupplier{
-				SupplierID: "supplier1",
-				globalStats: map[string]float64{
-					utils.MetaACD: 0.2,
-				},
-				SortingData: map[string]interface{}{
-					utils.Weight: 15.0,
-				},
-				SupplierParameters: "param1",
-			},
+	rcv := make([]string, len(sSpls.SortedSuppliers))
+	eIds := []string{"supplier2", "supplier1", "supplier3"}
+	for i, spl := range sSpls.SortedSuppliers {
+		rcv[i] = spl.SupplierID
 
-			&SortedSupplier{
-				SupplierID: "supplier3",
-				globalStats: map[string]float64{
-					utils.MetaACD: 0.1,
-				},
-				SortingData: map[string]interface{}{
-					utils.Weight: 20.0,
-				},
-				SupplierParameters: "param3",
-			},
-		},
 	}
-	if !reflect.DeepEqual(eOrderedSpls, sSpls) {
-		t.Errorf("Expecting: %s, received: %s",
-			utils.ToJSON(eOrderedSpls), utils.ToJSON(sSpls))
+	if !reflect.DeepEqual(eIds, rcv) {
+		t.Errorf("Expecting: %+v, \n received: %+v",
+			eIds, rcv)
 	}
 }
 
@@ -1053,74 +911,49 @@ func TestLibSuppliersSortQOS7(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			&SortedSupplier{
 				SupplierID: "supplier1",
-				globalStats: map[string]float64{
-					utils.MetaACD: -1.0,
-				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 15.0,
+					utils.MetaACD: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaACD,
+							MetricValue: -1.0},
+					},
 				},
-				SupplierParameters: "param1",
 			},
 			&SortedSupplier{
 				SupplierID: "supplier2",
-				globalStats: map[string]float64{
-					utils.MetaACD: -1.0,
-				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 25.0,
+					utils.MetaACD: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaACD,
+							MetricValue: -1.0},
+					},
 				},
-				SupplierParameters: "param2",
 			},
 			&SortedSupplier{
 				SupplierID: "supplier3",
-				globalStats: map[string]float64{
-					utils.MetaACD: -1.0,
-				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 20.0,
+					utils.MetaACD: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaACD,
+							MetricValue: -1.0},
+					},
 				},
-				SupplierParameters: "param3",
 			},
 		},
 	}
 	sSpls.SortQOS([]string{utils.MetaACD})
-	eOrderedSpls := &SortedSuppliers{
-		SortedSuppliers: []*SortedSupplier{
-			&SortedSupplier{
-				SupplierID: "supplier2",
-				globalStats: map[string]float64{
-					utils.MetaACD: -1.0,
-				},
-				SortingData: map[string]interface{}{
-					utils.Weight: 25.0,
-				},
-				SupplierParameters: "param2",
-			},
-			&SortedSupplier{
-				SupplierID: "supplier3",
-				globalStats: map[string]float64{
-					utils.MetaACD: -1.0,
-				},
-				SortingData: map[string]interface{}{
-					utils.Weight: 20.0,
-				},
-				SupplierParameters: "param3",
-			},
-			&SortedSupplier{
-				SupplierID: "supplier1",
-				globalStats: map[string]float64{
-					utils.MetaACD: -1.0,
-				},
-				SortingData: map[string]interface{}{
-					utils.Weight: 15.0,
-				},
-				SupplierParameters: "param1",
-			},
-		},
+	rcv := make([]string, len(sSpls.SortedSuppliers))
+	eIds := []string{"supplier2", "supplier3", "supplier1"}
+	for i, spl := range sSpls.SortedSuppliers {
+		rcv[i] = spl.SupplierID
+
 	}
-	if !reflect.DeepEqual(eOrderedSpls, sSpls) {
-		t.Errorf("Expecting: %s, received: %s",
-			utils.ToJSON(eOrderedSpls), utils.ToJSON(sSpls))
+	if !reflect.DeepEqual(eIds, rcv) {
+		t.Errorf("Expecting: %+v, \n received: %+v",
+			eIds, rcv)
 	}
 }
 
@@ -1129,75 +962,49 @@ func TestLibSuppliersSortQOS8(t *testing.T) {
 		SortedSuppliers: []*SortedSupplier{
 			&SortedSupplier{
 				SupplierID: "supplier1",
-				globalStats: map[string]float64{
-					utils.MetaACD: -1.0,
-				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 15.0,
+					utils.MetaACD: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaACD,
+							MetricValue: -1.0},
+					},
 				},
-				SupplierParameters: "param1",
 			},
 			&SortedSupplier{
 				SupplierID: "supplier2",
-				globalStats: map[string]float64{
-					utils.MetaACD: -1.0,
-				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 25.0,
+					utils.MetaACD: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaACD,
+							MetricValue: -1.0},
+					},
 				},
 				SupplierParameters: "param2",
 			},
 			&SortedSupplier{
 				SupplierID: "supplier3",
-				globalStats: map[string]float64{
-					utils.MetaACD: 10.0,
-				},
 				SortingData: map[string]interface{}{
 					utils.Weight: 20.0,
+					utils.MetaACD: SplStatMetrics{
+						&SplStatMetric{StatID: "SampleStat",
+							metricType:  utils.MetaACD,
+							MetricValue: 10.0},
+					},
 				},
-				SupplierParameters: "param3",
 			},
 		},
 	}
 	sSpls.SortQOS([]string{utils.MetaACD})
-	eOrderedSpls := &SortedSuppliers{
-		SortedSuppliers: []*SortedSupplier{
-			&SortedSupplier{
-				SupplierID: "supplier3",
-				globalStats: map[string]float64{
-					utils.MetaACD: 10.0,
-				},
-				SortingData: map[string]interface{}{
-					utils.Weight: 20.0,
-				},
-				SupplierParameters: "param3",
-			},
-			&SortedSupplier{
-				SupplierID: "supplier2",
-				globalStats: map[string]float64{
-					utils.MetaACD: -1.0,
-				},
-				SortingData: map[string]interface{}{
-					utils.Weight: 25.0,
-				},
-				SupplierParameters: "param2",
-			},
+	rcv := make([]string, len(sSpls.SortedSuppliers))
+	eIds := []string{"supplier3", "supplier2", "supplier1"}
+	for i, spl := range sSpls.SortedSuppliers {
+		rcv[i] = spl.SupplierID
 
-			&SortedSupplier{
-				SupplierID: "supplier1",
-				globalStats: map[string]float64{
-					utils.MetaACD: -1.0,
-				},
-				SortingData: map[string]interface{}{
-					utils.Weight: 15.0,
-				},
-				SupplierParameters: "param1",
-			},
-		},
 	}
-	if !reflect.DeepEqual(eOrderedSpls, sSpls) {
-		t.Errorf("Expecting: %s, received: %s",
-			utils.ToJSON(eOrderedSpls), utils.ToJSON(sSpls))
+	if !reflect.DeepEqual(eIds, rcv) {
+		t.Errorf("Expecting: %+v, \n received: %+v",
+			eIds, rcv)
 	}
 }
-*/
