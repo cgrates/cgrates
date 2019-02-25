@@ -31,6 +31,7 @@ import (
 var sTestsDspCpp = []func(t *testing.T){
 	testDspCppPingFailover,
 	testDspCppGetChtgFailover,
+	testDspCppGetChtgRoundRobin,
 
 	testDspCppPing,
 	testDspCppTestAuthKey,
@@ -193,4 +194,45 @@ func testDspCppTestAuthKey2(t *testing.T) {
 	} else if !reflect.DeepEqual(eChargers, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eChargers), utils.ToJSON(reply))
 	}
+}
+
+func testDspCppGetChtgRoundRobin(t *testing.T) {
+	args := CGREvWithApiKey{
+		DispatcherResource: DispatcherResource{
+			APIKey: "chrg12345",
+		},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.EVENT_NAME: "RoundRobin",
+				utils.Account:    "1001",
+			},
+		},
+	}
+	eChargers := &engine.ChargerProfiles{
+		&engine.ChargerProfile{
+			Tenant:       "cgrates.org",
+			ID:           "DEFAULT",
+			FilterIDs:    []string{},
+			RunID:        "*default",
+			AttributeIDs: []string{"*none"},
+			Weight:       0,
+		},
+	}
+	var reply *engine.ChargerProfiles
+	// To ALL2
+	if err := dispEngine.RCP.Call(utils.ChargerSv1GetChargersForEvent,
+		args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected error NOT_FOUND but recived %v and reply %v\n", err, reply)
+	}
+
+	// To ALL
+	if err := dispEngine.RCP.Call(utils.ChargerSv1GetChargersForEvent,
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eChargers, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eChargers), utils.ToJSON(reply))
+	}
+
 }

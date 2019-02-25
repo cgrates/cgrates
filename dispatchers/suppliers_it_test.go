@@ -32,6 +32,7 @@ import (
 var sTestsDspSup = []func(t *testing.T){
 	testDspSupPingFailover,
 	testDspSupGetSupFailover,
+	testDspSupGetSupRoundRobin,
 
 	testDspSupPing,
 	testDspSupTestAuthKey,
@@ -248,6 +249,79 @@ func testDspSupTestAuthKey2(t *testing.T) {
 				},
 			},
 		},
+	}
+	if err := dispEngine.RCP.Call(utils.SupplierSv1GetSuppliers,
+		args, &rpl); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eRpl, rpl) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eRpl), utils.ToJSON(rpl))
+	}
+}
+
+func testDspSupGetSupRoundRobin(t *testing.T) {
+	var rpl *engine.SortedSuppliers
+	eRpl1 := &engine.SortedSuppliers{
+		ProfileID: "SPL_WEIGHT_2",
+		Sorting:   utils.MetaWeight,
+		SortedSuppliers: []*engine.SortedSupplier{
+			{
+				SupplierID:         "supplier1",
+				SupplierParameters: "",
+				SortingData: map[string]interface{}{
+					utils.Weight: 10.0,
+				},
+			},
+		},
+	}
+	eRpl := &engine.SortedSuppliers{
+		ProfileID: "SPL_ACNT_1002",
+		Sorting:   utils.MetaLeastCost,
+		SortedSuppliers: []*engine.SortedSupplier{
+			{
+				SupplierID:         "supplier1",
+				SupplierParameters: "",
+				SortingData: map[string]interface{}{
+					utils.Cost:         0.1166,
+					utils.RatingPlanID: "RP_1002_LOW",
+					utils.Weight:       10.0,
+				},
+			},
+			{
+				SupplierID:         "supplier2",
+				SupplierParameters: "",
+				SortingData: map[string]interface{}{
+					utils.Cost:         0.2334,
+					utils.RatingPlanID: "RP_1002",
+					utils.Weight:       20.0,
+				},
+			},
+		},
+	}
+	args := &ArgsGetSuppliersWithApiKey{
+		DispatcherResource: DispatcherResource{
+			APIKey: "sup12345",
+		},
+		ArgsGetSuppliers: engine.ArgsGetSuppliers{
+			CGREvent: utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     utils.UUIDSha1Prefix(),
+				Time:   &nowTime,
+				Event: map[string]interface{}{
+					utils.EVENT_NAME:  "RoundRobin",
+					utils.Account:     "1002",
+					utils.Subject:     "1002",
+					utils.Destination: "1001",
+					utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+					utils.Usage:       "1m20s",
+				},
+			},
+		},
+	}
+	if err := dispEngine.RCP.Call(utils.SupplierSv1GetSuppliers,
+		args, &rpl); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eRpl1, rpl) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eRpl1), utils.ToJSON(rpl))
 	}
 	if err := dispEngine.RCP.Call(utils.SupplierSv1GetSuppliers,
 		args, &rpl); err != nil {
