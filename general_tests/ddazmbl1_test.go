@@ -159,7 +159,7 @@ func TestDZ1Debit(t *testing.T) {
 	}
 	acnt, err := dataDB.DataDB().GetAccount("cgrates.org:12344")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if acnt.BalanceMap[utils.VOICE][0].Value != 20000000000 {
 		t.Error("Account does not have expected *voice units in balance",
