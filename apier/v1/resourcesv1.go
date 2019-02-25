@@ -57,7 +57,21 @@ func (rsv1 *ResourceSv1) ReleaseResources(args utils.ArgRSv1ResourceUsage, reply
 	return rsv1.rls.V1ReleaseResource(args, reply)
 }
 
-//func for getResource
+// GetResource returns a resource configuration
+func (apierV1 *ApierV1) GetResource(arg utils.TenantID, reply *engine.Resource) error {
+	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if res, err := apierV1.DataManager.GetResource(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
+	} else {
+		*reply = *res
+	}
+	return nil
+}
 
 // GetResourceProfile returns a resource configuration
 func (apierV1 *ApierV1) GetResourceProfile(arg utils.TenantID, reply *engine.ResourceProfile) error {
