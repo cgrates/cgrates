@@ -64,7 +64,7 @@ var (
 	cfgDir            = flag.String("config_dir", utils.CONFIG_DIR, "Configuration directory path.")
 	version           = flag.Bool("version", false, "Prints the application version.")
 	pidFile           = flag.String("pid", "", "Write pid file")
-	httpPprofPath     = flag.String("http_pprof_path", "", "http address used for program profiling")
+	httpPprofPath     = flag.String("httprof_path", "", "http address used for program profiling")
 	cpuProfDir        = flag.String("cpuprof_dir", "", "write cpu profile to files")
 	memProfDir        = flag.String("memprof_dir", "", "write memory profile to file")
 	memProfInterval   = flag.Duration("memprof_interval", 5*time.Second, "Time betwen memory profile saves")
