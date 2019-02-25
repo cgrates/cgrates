@@ -51,6 +51,7 @@ var sTestsFltr = []func(t *testing.T){
 	testV1FltrAddStats,
 	testV1FltrPupulateThreshold,
 	testV1FltrGetThresholdForEvent,
+	testV1FltrGetThresholdForEvent2,
 	testV1FltrStopEngine,
 }
 
@@ -241,7 +242,7 @@ func testV1FltrPupulateThreshold(t *testing.T) {
 		Rules: []*engine.FilterRule{
 			{
 				Type:   "*stats",
-				Values: []string{"Stat_1:*min_acd:10"},
+				Values: []string{"*gt#acd:Stat_1:10.0"},
 			},
 		},
 	}
@@ -274,7 +275,7 @@ func testV1FltrPupulateThreshold(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		MaxHits:   -1,
-		MinSleep:  time.Duration(1 * time.Second),
+		MinSleep:  time.Duration(1 * time.Millisecond),
 		Blocker:   false,
 		Weight:    10.0,
 		ActionIDs: []string{"LOG"},
@@ -320,7 +321,7 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 		Rules: []*engine.FilterRule{
 			{
 				Type:   "*stats",
-				Values: []string{"Stat_1:*max_acd:10"},
+				Values: []string{"*lt#acd:Stat_1:10.0"},
 			},
 		},
 	}
@@ -342,7 +343,7 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
 		MaxHits:   -1,
-		MinSleep:  time.Duration(1 * time.Second),
+		MinSleep:  time.Duration(1 * time.Millisecond),
 		Blocker:   false,
 		Weight:    10.0,
 		ActionIDs: []string{"LOG"},
