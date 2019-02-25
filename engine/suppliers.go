@@ -325,7 +325,9 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 				return nil, false, err
 			}
 		}
-		//check if we
+		//check if the supplier have the metric from sortingParameters
+		//in case that the metric don't exist
+		//we use 10000000 for *pdd and -1 for others
 		for _, metric := range extraOpts.sortingParameters {
 			if val, hasMetric := metricSupp[metric]; !hasMetric {
 				switch metric {
