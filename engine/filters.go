@@ -47,22 +47,17 @@ const (
 	MetaGreaterOrEqual = "*gte"
 	MetaResources      = "*resources"
 
-	MetaNotString         = "*notstring"
-	MetaNotPrefix         = "*notprefix"
-	MetaNotSuffix         = "*notsuffix"
-	MetaNotEmpty          = "*notempty"
-	MetaNotExists         = "*notexists"
-	MetaNotTimings        = "*nottimings"
-	MetaNotRSR            = "*notrsr"
-	MetaNotStatS          = "*notstats"
-	MetaNotDestinations   = "*notdestinations"
-	MetaNotMinCapPrefix   = "*notmin_"
-	MetaNotMaxCapPrefix   = "*notmax_"
-	MetaNotLessThan       = "*notlt"
-	MetaNotLessOrEqual    = "*notlte"
-	MetaNotGreaterThan    = "*notgt"
-	MetaNotGreaterOrEqual = "*notgte"
-	MetaNotResources      = "*notresources"
+	MetaNotString       = "*notstring"
+	MetaNotPrefix       = "*notprefix"
+	MetaNotSuffix       = "*notsuffix"
+	MetaNotEmpty        = "*notempty"
+	MetaNotExists       = "*notexists"
+	MetaNotTimings      = "*nottimings"
+	MetaNotRSR          = "*notrsr"
+	MetaNotStatS        = "*notstats"
+	MetaNotDestinations = "*notdestinations"
+	MetaNotMinCapPrefix = "*notmin_"
+	MetaNotMaxCapPrefix = "*notmax_"
 )
 
 func NewFilterS(cfg *config.CGRConfig,
@@ -324,8 +319,7 @@ func (fltr *FilterRule) Pass(dP config.DataProvider,
 		result, err = fltr.passRSR(dP)
 	case MetaStatS, MetaNotStatS:
 		result, err = fltr.passStatS(dP, rpcClnt, tenant)
-	case MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual,
-		MetaNotLessThan, MetaNotLessOrEqual, MetaNotGreaterThan, MetaNotGreaterOrEqual:
+	case MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual:
 		result, err = fltr.passGreaterThan(dP)
 	case MetaResources, MetaNotResources:
 		result, err = fltr.passResourceS(dP, rpcClnt, tenant)
