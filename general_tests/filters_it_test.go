@@ -52,6 +52,7 @@ var sTestsFltr = []func(t *testing.T){
 	testV1FltrPupulateThreshold,
 	testV1FltrGetThresholdForEvent,
 	testV1FltrGetThresholdForEvent2,
+	testV1FltrPopulateResources,
 	testV1FltrStopEngine,
 }
 
@@ -276,7 +277,6 @@ func testV1FltrPupulateThreshold(t *testing.T) {
 		},
 		MaxHits:   -1,
 		MinSleep:  time.Duration(1 * time.Millisecond),
-		Blocker:   false,
 		Weight:    10.0,
 		ActionIDs: []string{"LOG"},
 		Async:     true,
@@ -344,10 +344,8 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 		},
 		MaxHits:   -1,
 		MinSleep:  time.Duration(1 * time.Millisecond),
-		Blocker:   false,
 		Weight:    10.0,
 		ActionIDs: []string{"LOG"},
-		Async:     true,
 	}
 	if err := fltrRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
 		t.Error(err)
@@ -362,6 +360,149 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 			utils.Account: "1010"},
 	}
 	var ids []string
+	if err := fltrRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &ids); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testV1FltrPopulateResources(t *testing.T) {
+	//create a resourceProfile
+	rlsConfig := &engine.ResourceProfile{
+		Tenant: "cgrates.org",
+		ID:     "ResTest",
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		UsageTTL:          time.Duration(1) * time.Minute,
+		Limit:             10,
+		AllocationMessage: "MessageAllocation",
+		Stored:            true,
+		Weight:            20,
+		ThresholdIDs:      []string{utils.META_NONE},
+	}
+
+	var result string
+	if err := fltrRpc.Call("ApierV1.SetResourceProfile", rlsConfig, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	var reply *engine.ResourceProfile
+	if err := fltrRpc.Call("ApierV1.GetResourceProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: rlsConfig.ID}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, rlsConfig) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(rlsConfig), utils.ToJSON(reply))
+	}
+
+	// Allocate 3 units for resource ResTest
+	argsRU := utils.ArgRSv1ResourceUsage{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				"Account":     "3001",
+				"Destination": "3002"},
+		},
+		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e21",
+		Units:   3,
+	}
+	if err := fltrRpc.Call(utils.ResourceSv1AllocateResources,
+		argsRU, &result); err != nil {
+		t.Error(err)
+	}
+
+	//we allocate 3 units to resource and add a filter for Usages > 2
+	//should match (3>2)
+	filter := &engine.Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_TH_Resource",
+		Rules: []*engine.FilterRule{
+			{
+				Type:   "*resources",
+				Values: []string{"*gt:ResTest:2.0"},
+			},
+		},
+	}
+
+	if err := fltrRpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	tPrfl := &engine.ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH_ResTest",
+		FilterIDs: []string{"FLTR_TH_Resource", "*string:Account:2020"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		MaxHits:   -1,
+		MinSleep:  time.Duration(1 * time.Millisecond),
+		Weight:    10.0,
+		ActionIDs: []string{"LOG"},
+		Async:     true,
+	}
+	if err := fltrRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var rcvTh *engine.ThresholdProfile
+	if err := fltrRpc.Call("ApierV1.GetThresholdProfile",
+		&utils.TenantID{Tenant: tPrfl.Tenant, ID: tPrfl.ID}, &rcvTh); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(tPrfl, rcvTh) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl, rcvTh)
+	}
+
+	// check the event
+	tEv := utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.Account: "2020"},
+	}
+	var ids []string
+	eIDs := []string{"TH_ResTest"}
+	if err := fltrRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &ids); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ids, eIDs) {
+		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
+	}
+
+	//change the filter
+	//we allocate 3 units to resource and add a filter for Usages < 2
+	//should fail (3<2)
+	filter = &engine.Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_TH_Resource",
+		Rules: []*engine.FilterRule{
+			{
+				Type:   "*resources",
+				Values: []string{"*lt:ResTest:2.0"},
+			},
+		},
+	}
+
+	if err := fltrRpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	//Overwrite the threshold
+	if err := fltrRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	//expect NotFound error because filter doesn't match
 	if err := fltrRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &ids); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

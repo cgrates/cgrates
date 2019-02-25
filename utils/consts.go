@@ -695,6 +695,7 @@ const (
 	ApierV1SetDispatcherProfile    = "ApierV1.SetDispatcherProfile"
 	ApierV1GetDispatcherProfile    = "ApierV1.GetDispatcherProfile"
 	ApierV1RemoveDispatcherProfile = "ApierV1.RemoveDispatcherProfile"
+	ApierV1GetResource             = "ApierV1.GetResource"
 )
 
 const (

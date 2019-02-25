@@ -481,7 +481,7 @@ func (fltr *FilterRule) passStatS(dP config.DataProvider,
 		for key, val := range statValues {
 			ifaceStatValues[key] = val
 		}
-		//convert convert into a NavigableMap so we can send it to passGreaterThan
+		//convert ifaceStatValues into a NavigableMap so we can send it to passGreaterThan
 		nM := config.NewNavigableMap(ifaceStatValues)
 		//split the type in exact 2 parts
 		//special cases like *gt#sum#Usage
@@ -538,17 +538,30 @@ func (fltr *FilterRule) passResourceS(dP config.DataProvider,
 	if resourceS == nil || reflect.ValueOf(resourceS).IsNil() {
 		return false, errors.New("Missing ResourceS information")
 	}
-	// for _, resItem := range fltr.resourceItems {
-	// 	//take total usage for resource
-
-	// 	//compose the newFilter
-
-	// 	//send it to passGreaterThan
-	// 	// if val, err := fltr.passGreaterThan(nM); err != nil || !val {
-	// 	// 	//in case of error return false and error
-	// 	// 	//and in case of not pass return false and nil
-	// 	// 	return false, err
-	// 	// }
-	// }
+	for _, resItem := range fltr.resourceItems {
+		//take total usage for resource
+		var reply *Resource
+		if err := resourceS.Call(utils.ApierV1GetResource,
+			&utils.TenantID{Tenant: tenant, ID: resItem.ItemID}, &reply); err != nil {
+			return false, err
+		}
+		data := map[string]interface{}{
+			utils.Usage: reply.totalUsage(),
+		}
+		//convert data into a NavigableMap so we can send it to passGreaterThan
+		nM := config.NewNavigableMap(data)
+		//compose the newFilter
+		fltr, err := NewFilterRule(resItem.FilterType,
+			utils.Usage, []string{resItem.FilterValue})
+		if err != nil {
+			return false, err
+		}
+		// send it to passGreaterThan
+		if val, err := fltr.passGreaterThan(nM); err != nil || !val {
+			//in case of error return false and error
+			//and in case of not pass return false and nil
+			return false, err
+		}
+	}
 	return true, nil
 }
