@@ -32,6 +32,7 @@ import (
 var sTestsDspAttr = []func(t *testing.T){
 	testDspAttrPingFailover,
 	testDspAttrGetAttrFailover,
+	testDspAttrGetAttrRoundRobin,
 
 	testDspAttrPing,
 	testDspAttrTestMissingApiKey,
@@ -358,5 +359,92 @@ func testDspAttrTestAuthKey3(t *testing.T) {
 	if err := dispEngine.RCP.Call(utils.AttributeSv1GetAttributeForEvent,
 		args, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
+	}
+}
+
+func testDspAttrGetAttrRoundRobin(t *testing.T) {
+	args := &ArgsAttrProcessEventWithApiKey{
+		DispatcherResource: DispatcherResource{
+			APIKey: "attr12345",
+		},
+		AttrArgsProcessEvent: engine.AttrArgsProcessEvent{
+			Context: utils.StringPointer("simpleauth"),
+			CGREvent: utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "testAttributeSGetAttributeForEvent",
+				Event: map[string]interface{}{
+					utils.Account:    "1002",
+					utils.EVENT_NAME: "RoundRobin",
+				},
+			},
+		},
+	}
+	eAttrPrf := &engine.AttributeProfile{
+		Tenant:    args.Tenant,
+		ID:        "ATTR_1002_SIMPLEAUTH",
+		FilterIDs: []string{"*string:Account:1002"},
+		Contexts:  []string{"simpleauth"},
+		Attributes: []*engine.Attribute{
+			{
+				FieldName:  "Password",
+				Initial:    utils.ANY,
+				Substitute: config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
+				Append:     true,
+			},
+		},
+		Weight: 20.0,
+	}
+	eAttrPrf.Compile()
+
+	eRply := &engine.AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_1002_SIMPLEAUTH"},
+		AlteredFields:   []string{"Password"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSGetAttributeForEvent",
+			Event: map[string]interface{}{
+				utils.Account:    "1002",
+				utils.EVENT_NAME: "RoundRobin",
+				"Password":       "CGRateS.org",
+			},
+		},
+	}
+
+	var attrReply *engine.AttributeProfile
+	var rplyEv engine.AttrSProcessEventReply
+	// To ALL2
+	if err := dispEngine.RCP.Call(utils.AttributeSv1GetAttributeForEvent,
+		args, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+	// To ALL
+	if err := dispEngine.RCP.Call(utils.AttributeSv1GetAttributeForEvent,
+		args, &attrReply); err != nil {
+		t.Error(err)
+	}
+	if attrReply != nil {
+		attrReply.Compile()
+	}
+	if !reflect.DeepEqual(eAttrPrf, attrReply) {
+		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eAttrPrf), utils.ToJSON(attrReply))
+	}
+
+	// To ALL2
+	if err := dispEngine.RCP.Call(utils.AttributeSv1ProcessEvent,
+		args, &rplyEv); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	} else if reflect.DeepEqual(eRply, &rplyEv) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
+	}
+
+	// To ALL
+	if err := dispEngine.RCP.Call(utils.AttributeSv1ProcessEvent,
+		args, &rplyEv); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eRply, &rplyEv) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
 	}
 }
