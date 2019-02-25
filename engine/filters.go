@@ -232,33 +232,36 @@ func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error)
 	return rf, nil
 }
 
-type RFStatSThreshold struct {
-	QueueID        string
-	ThresholdType  string
-	ThresholdValue string
+//itemFilter is used for *stats and *resources filter type
+type itemFilter struct {
+	ItemID      string
+	FilterType  string
+	FilterValue string
 }
 
 // FilterRule filters requests coming into various places
 // Pass rule: default negative, one mathing rule should pass the filter
 type FilterRule struct {
-	Type            string            // Filter type (*string, *timing, *rsr_filters, *stats, *lt, *lte, *gt, *gte)
-	FieldName       string            // Name of the field providing us the Values to check (used in case of some )
-	Values          []string          // Filter definition
-	rsrFields       config.RSRParsers // Cache here the RSRFilter Values
-	negative        *bool
-	statSThresholds []*RFStatSThreshold // Cached compiled RFStatsThreshold out of Values
+	Type          string            // Filter type (*string, *timing, *rsr_filters, *stats, *lt, *lte, *gt, *gte)
+	FieldName     string            // Name of the field providing us the Values to check (used in case of some )
+	Values        []string          // Filter definition
+	rsrFields     config.RSRParsers // Cache here the RSRFilter Values
+	negative      *bool
+	statItems     []*itemFilter // Cached compiled itemFilter out of Values
+	resourceItems []*itemFilter // Cached compiled itemFilter out of Values
 }
 
 // Separate method to compile RSR fields
 func (rf *FilterRule) CompileValues() (err error) {
-	if rf.Type == MetaRSR || rf.Type == MetaNotRSR {
+	switch rf.Type {
+	case MetaRSR, MetaNotRSR:
 		if rf.rsrFields, err = config.NewRSRParsersFromSlice(rf.Values, true); err != nil {
 			return
 		}
-	} else if rf.Type == MetaStatS || rf.Type == MetaNotStatS {
+	case MetaStatS, MetaNotStatS:
 		//value for filter of type *stats needs to be in the following form:
 		//*gt#acd:StatID:ValueOfMetric
-		rf.statSThresholds = make([]*RFStatSThreshold, len(rf.Values))
+		rf.statItems = make([]*itemFilter, len(rf.Values))
 		for i, val := range rf.Values {
 			valSplt := strings.Split(val, utils.InInFieldSep)
 			if len(valSplt) != 3 {
@@ -267,10 +270,28 @@ func (rf *FilterRule) CompileValues() (err error) {
 			// valSplt[0] filter type with metric
 			// valSplt[1] id of the statQueue
 			// valSplt[2] value to compare
-			rf.statSThresholds[i] = &RFStatSThreshold{
-				ThresholdType:  valSplt[0],
-				QueueID:        valSplt[1],
-				ThresholdValue: valSplt[2],
+			rf.statItems[i] = &itemFilter{
+				FilterType:  valSplt[0],
+				ItemID:      valSplt[1],
+				FilterValue: valSplt[2],
+			}
+		}
+	case MetaResources, MetaNotResources:
+		//value for filter of type *resources needs to be in the following form:
+		//*gt:ResourceID:ValueOfUsage
+		rf.resourceItems = make([]*itemFilter, len(rf.Values))
+		for i, val := range rf.Values {
+			valSplt := strings.Split(val, utils.InInFieldSep)
+			if len(valSplt) != 3 {
+				return fmt.Errorf("Value %s needs to contain at least 3 items", val)
+			}
+			// valSplt[0] filter type
+			// valSplt[1] id of the Resource
+			// valSplt[2] value to compare
+			rf.resourceItems[i] = &itemFilter{
+				FilterType:  valSplt[0],
+				ItemID:      valSplt[1],
+				FilterValue: valSplt[2],
 			}
 		}
 	}
@@ -449,10 +470,10 @@ func (fltr *FilterRule) passStatS(dP config.DataProvider,
 	if stats == nil || reflect.ValueOf(stats).IsNil() {
 		return false, errors.New("Missing StatS information")
 	}
-	for _, threshold := range fltr.statSThresholds {
+	for _, statItem := range fltr.statItems {
 		statValues := make(map[string]float64)
 		if err := stats.Call(utils.StatSv1GetQueueFloatMetrics,
-			&utils.TenantID{Tenant: tenant, ID: threshold.QueueID}, &statValues); err != nil {
+			&utils.TenantID{Tenant: tenant, ID: statItem.ItemID}, &statValues); err != nil {
 			return false, err
 		}
 		//convert statValues to map[string]interface{}
@@ -464,13 +485,13 @@ func (fltr *FilterRule) passStatS(dP config.DataProvider,
 		nM := config.NewNavigableMap(ifaceStatValues)
 		//split the type in exact 2 parts
 		//special cases like *gt#sum#Usage
-		fltrType := strings.SplitN(threshold.ThresholdType, utils.STATS_CHAR, 2)
+		fltrType := strings.SplitN(statItem.FilterType, utils.STATS_CHAR, 2)
 		if len(fltrType) < 2 {
 			return false, errors.New(fmt.Sprintf("<%s> Invalid format for filter of type *stats", utils.FilterS))
 		}
 		//compose the newFilter
 		fltr, err := NewFilterRule(fltrType[0],
-			utils.Meta+fltrType[1], []string{threshold.ThresholdValue})
+			utils.Meta+fltrType[1], []string{statItem.FilterValue})
 		if err != nil {
 			return false, err
 		}
@@ -512,32 +533,22 @@ func (fltr *FilterRule) passGreaterThan(dP config.DataProvider) (bool, error) {
 	return false, nil
 }
 
-//
-//Type *resources
-//FieldName
-//Value ResourceID:
-
 func (fltr *FilterRule) passResourceS(dP config.DataProvider,
 	resourceS rpcclient.RpcClientConnection, tenant string) (bool, error) {
-	// if resourceS == nil || reflect.ValueOf(resourceS).IsNil() {
-	// 	return false, errors.New("Missing ResourceS information")
-	// }
-	// for _, threshold := range fltr.statSThresholds {
-	// 	statValues := make(map[string]float64)
-	// 	if err := resourceS.Call(utils.StatSv1GetQueueFloatMetrics, &utils.TenantID{Tenant: tenant, ID: threshold.QueueID}, &statValues); err != nil {
-	// 		return false, err
-	// 	}
-	// 	val, hasIt := statValues[utils.Meta+threshold.ThresholdType[len(MetaMinCapPrefix):]]
-	// 	if !hasIt {
-	// 		continue
-	// 	}
-	// 	if strings.HasPrefix(threshold.ThresholdType, MetaMinCapPrefix) &&
-	// 		val >= threshold.ThresholdValue {
-	// 		return true, nil
-	// 	} else if strings.HasPrefix(threshold.ThresholdType, MetaMaxCapPrefix) &&
-	// 		val < threshold.ThresholdValue {
-	// 		return true, nil
-	// 	}
-	// }
-	return false, nil
+	if resourceS == nil || reflect.ValueOf(resourceS).IsNil() {
+		return false, errors.New("Missing ResourceS information")
+	}
+	for _, resItem := range fltr.resourceItems {
+		//take total usage for resource
+
+		//compose the newFilter
+
+		//send it to passGreaterThan
+		// if val, err := fltr.passGreaterThan(nM); err != nil || !val {
+		// 	//in case of error return false and error
+		// 	//and in case of not pass return false and nil
+		// 	return false, err
+		// }
+	}
+	return true, nil
 }
