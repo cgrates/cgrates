@@ -215,7 +215,8 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 	}
 	var apiRply *AttrSProcessEventReply // aggregate response here
 	for i := 0; i < *args.ProcessRuns; i++ {
-		evRply, err := alS.processEvent(args)
+		var evRply *AttrSProcessEventReply
+		evRply, err = alS.processEvent(args)
 		if err != nil {
 			if err != utils.ErrNotFound {
 				err = utils.NewErrServerError(err)

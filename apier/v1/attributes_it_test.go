@@ -238,7 +238,7 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_3"}, &reply); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	reply.Compile()
 	if !reflect.DeepEqual(eAttrPrf2, reply) {
@@ -290,7 +290,7 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_2"}, &reply); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	reply.Compile()
 	if !reflect.DeepEqual(eAttrPrf2, reply) {
@@ -299,7 +299,7 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 	var attrReply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	attrReply.Compile()
 	if !reflect.DeepEqual(eAttrPrf2, attrReply) {
@@ -692,7 +692,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	reply.Compile()
 	if !reflect.DeepEqual(alsPrf, reply) {
@@ -725,7 +725,7 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	reply.Compile()
 	if !reflect.DeepEqual(alsPrf, reply) {
@@ -791,7 +791,7 @@ func testAttributeSSetAlsPrf2(t *testing.T) {
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
 		&utils.TenantID{Tenant: "golant", ID: "ATTR_972587832508_SESSIONAUTH"}, &reply); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	reply.Compile()
 	if !reflect.DeepEqual(alsPrf, reply) {
