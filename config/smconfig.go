@@ -55,7 +55,7 @@ func (self *HaPoolConfig) loadFromJsonCfg(jsnCfg *HaPoolJsonCfg) error {
 		self.Synchronous = *jsnCfg.Synchronous
 	}
 	if jsnCfg.Tls != nil {
-		self.Tls = *jsnCfg.Synchronous
+		self.Tls = *jsnCfg.Tls
 	}
 	return nil
 }
