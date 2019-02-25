@@ -203,6 +203,9 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) RegisterProfiler(addr string) {
+	if addr[len(addr)-1] != '/' {
+		addr = addr + "/"
+	}
 	s.httpMux.HandleFunc(addr, pprof.Index)
 	s.httpMux.HandleFunc(addr+"cmdline", pprof.Cmdline)
 	s.httpMux.HandleFunc(addr+"profile", pprof.Profile)
