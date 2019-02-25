@@ -19,7 +19,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -236,7 +235,7 @@ func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error)
 type RFStatSThreshold struct {
 	QueueID        string
 	ThresholdType  string
-	ThresholdValue float64
+	ThresholdValue string
 }
 
 // FilterRule filters requests coming into various places
@@ -257,25 +256,22 @@ func (rf *FilterRule) CompileValues() (err error) {
 			return
 		}
 	} else if rf.Type == MetaStatS || rf.Type == MetaNotStatS {
+		//value for filter of type *stats needs to be in the following form:
+		//*gt#acd:StatID:ValueOfMetric
 		rf.statSThresholds = make([]*RFStatSThreshold, len(rf.Values))
 		for i, val := range rf.Values {
 			valSplt := strings.Split(val, utils.InInFieldSep)
 			if len(valSplt) != 3 {
 				return fmt.Errorf("Value %s needs to contain at least 3 items", val)
 			}
-			st := &RFStatSThreshold{QueueID: valSplt[0], ThresholdType: valSplt[1]}
-			if len(st.ThresholdType) < len(MetaMinCapPrefix)+1 {
-				return fmt.Errorf("Value %s contains a unsupported ThresholdType format", val)
-			} else if !strings.HasPrefix(st.ThresholdType, MetaMinCapPrefix) &&
-				!strings.HasPrefix(st.ThresholdType, MetaMaxCapPrefix) {
-				return fmt.Errorf("Value %s contains unsupported ThresholdType prefix", val)
+			// valSplt[0] filter type with metric
+			// valSplt[1] id of the statQueue
+			// valSplt[2] value to compare
+			rf.statSThresholds[i] = &RFStatSThreshold{
+				ThresholdType:  valSplt[0],
+				QueueID:        valSplt[1],
+				ThresholdValue: valSplt[2],
 			}
-			if tv, err := strconv.ParseFloat(valSplt[2], 64); err != nil {
-				return err
-			} else {
-				st.ThresholdValue = tv
-			}
-			rf.statSThresholds[i] = st
 		}
 	}
 	return
@@ -455,22 +451,37 @@ func (fltr *FilterRule) passStatS(dP config.DataProvider,
 	}
 	for _, threshold := range fltr.statSThresholds {
 		statValues := make(map[string]float64)
-		if err := stats.Call(utils.StatSv1GetQueueFloatMetrics, &utils.TenantID{Tenant: tenant, ID: threshold.QueueID}, &statValues); err != nil {
+		if err := stats.Call(utils.StatSv1GetQueueFloatMetrics,
+			&utils.TenantID{Tenant: tenant, ID: threshold.QueueID}, &statValues); err != nil {
 			return false, err
 		}
-		val, hasIt := statValues[utils.Meta+threshold.ThresholdType[len(MetaMinCapPrefix):]]
-		if !hasIt {
-			continue
+		//convert statValues to map[string]interface{}
+		ifaceStatValues := make(map[string]interface{})
+		for key, val := range statValues {
+			ifaceStatValues[key] = val
 		}
-		if strings.HasPrefix(threshold.ThresholdType, MetaMinCapPrefix) &&
-			val >= threshold.ThresholdValue {
-			return true, nil
-		} else if strings.HasPrefix(threshold.ThresholdType, MetaMaxCapPrefix) &&
-			val < threshold.ThresholdValue {
-			return true, nil
+		//convert convert into a NavigableMap so we can send it to passGreaterThan
+		nM := config.NewNavigableMap(ifaceStatValues)
+		//split the type in exact 2 parts
+		//special cases like *gt#sum#Usage
+		fltrType := strings.SplitN(threshold.ThresholdType, utils.STATS_CHAR, 2)
+		if len(fltrType) < 2 {
+			return false, errors.New(fmt.Sprintf("<%s> Invalid format for filter of type *stats", utils.FilterS))
+		}
+		//compose the newFilter
+		fltr, err := NewFilterRule(fltrType[0],
+			utils.Meta+fltrType[1], []string{threshold.ThresholdValue})
+		if err != nil {
+			return false, err
+		}
+		//send it to passGreaterThan
+		if val, err := fltr.passGreaterThan(nM); err != nil || !val {
+			//in case of error return false and error
+			//and in case of not pass return false and nil
+			return false, err
 		}
 	}
-	return false, nil
+	return true, nil
 }
 
 func (fltr *FilterRule) passGreaterThan(dP config.DataProvider) (bool, error) {
