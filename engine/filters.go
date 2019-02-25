@@ -538,17 +538,17 @@ func (fltr *FilterRule) passResourceS(dP config.DataProvider,
 	if resourceS == nil || reflect.ValueOf(resourceS).IsNil() {
 		return false, errors.New("Missing ResourceS information")
 	}
-	for _, resItem := range fltr.resourceItems {
-		//take total usage for resource
+	// for _, resItem := range fltr.resourceItems {
+	// 	//take total usage for resource
 
-		//compose the newFilter
+	// 	//compose the newFilter
 
-		//send it to passGreaterThan
-		// if val, err := fltr.passGreaterThan(nM); err != nil || !val {
-		// 	//in case of error return false and error
-		// 	//and in case of not pass return false and nil
-		// 	return false, err
-		// }
-	}
+	// 	//send it to passGreaterThan
+	// 	// if val, err := fltr.passGreaterThan(nM); err != nil || !val {
+	// 	// 	//in case of error return false and error
+	// 	// 	//and in case of not pass return false and nil
+	// 	// 	return false, err
+	// 	// }
+	// }
 	return true, nil
 }
