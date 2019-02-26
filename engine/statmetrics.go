@@ -32,7 +32,7 @@ const STATS_NA = -1.0
 
 // NewStatMetric instantiates the StatMetric
 // cfg serves as general purpose container to pass config options to metric
-func NewStatMetric(metricID string, minItems int, extraParams string) (sm StatMetric, err error) {
+func NewStatMetric(metricID string, minItems int) (sm StatMetric, err error) {
 	metrics := map[string]func(int, string) (StatMetric, error){
 		utils.MetaASR:     NewASR,
 		utils.MetaACD:     NewACD,
@@ -44,11 +44,17 @@ func NewStatMetric(metricID string, minItems int, extraParams string) (sm StatMe
 		utils.MetaSum:     NewStatSum,
 		utils.MetaAverage: NewStatAverage,
 	}
-	metricType := utils.SplitStats(metricID)[0]
-	if _, has := metrics[metricType]; !has {
-		return nil, fmt.Errorf("unsupported metric type <%s>", metricType)
+	// split the metricID
+	// in case of *sum we have *sum#FieldName
+	metricSplit := utils.SplitStats(metricID)
+	if _, has := metrics[metricSplit[0]]; !has {
+		return nil, fmt.Errorf("unsupported metric type <%s>", metricSplit[0])
 	}
-	return metrics[metricType](minItems, extraParams)
+	var extraParams string
+	if len(metricSplit[1:]) > 0 {
+		extraParams = metricSplit[1]
+	}
+	return metrics[metricSplit[0]](minItems, extraParams)
 }
 
 // StatMetric is the interface which a metric should implement

@@ -480,6 +480,8 @@ const (
 	MetaLeastCost                = "*least_cost"
 	MetaHighestCost              = "*highest_cost"
 	MetaQOS                      = "*qos"
+	MetaReas                     = "*reas"
+	MetaReds                     = "*reds"
 	Weight                       = "Weight"
 	Cost                         = "Cost"
 	RatingPlanID                 = "RatingPlanID"

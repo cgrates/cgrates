@@ -91,10 +91,10 @@ func TestV1StatsAsStats(t *testing.T) {
 		FilterIDs:   []string{v1Sts.Id},
 		QueueLength: 10,
 		TTL:         time.Duration(0) * time.Second,
-		Metrics: []*utils.MetricWithParams{
-			{MetricID: "*asr", Parameters: ""},
-			{MetricID: "*acd", Parameters: ""},
-			{MetricID: "*acc", Parameters: ""},
+		Metrics: []string{
+			"*asr",
+			"*acd",
+			"*acc",
 		},
 		Blocker:      false,
 		ThresholdIDs: []string{"TestB"},

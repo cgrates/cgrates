@@ -227,10 +227,10 @@ cgrates.org,ResGroup22,FLTR_ACNT_dan,2014-07-29T15:00:00Z,3600s,2,premium_call,t
 `
 	stats = `
 #Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],Metrics[6],Blocker[7],Stored[8],Weight[9],MinItems[10],Thresholds[11]
-cgrates.org,TestStats,FLTR_1,2014-07-29T15:00:00Z,100,1s,*sum;*average,Value,true,true,20,2,Th1;Th2
-cgrates.org,TestStats,,,,,*sum,Usage,true,true,20,2,
-cgrates.org,TestStats2,FLTR_1,2014-07-29T15:00:00Z,100,1s,*sum;*average,Value;Usage,true,true,20,2,Th
-cgrates.org,TestStats2,,,,,*sum;*average,Cost,true,true,20,2,
+cgrates.org,TestStats,FLTR_1,2014-07-29T15:00:00Z,100,1s,*sum#Value;*average#Value,true,true,20,2,Th1;Th2
+cgrates.org,TestStats,,,,,*sum#Usage,true,true,20,2,
+cgrates.org,TestStats2,FLTR_1,2014-07-29T15:00:00Z,100,1s,*sum#Value;*sum#Usage;*average#Value;*average#Usage,true,true,20,2,Th
+cgrates.org,TestStats2,,,,,*sum#Cost;*average#Cost,true,true,20,2,
 `
 
 	thresholds = `
@@ -1238,19 +1238,9 @@ func TestLoadStatQueueProfiles(t *testing.T) {
 			},
 			QueueLength: 100,
 			TTL:         "1s",
-			Metrics: []*utils.MetricWithParams{
-				&utils.MetricWithParams{
-					MetricID:   "*sum:Value",
-					Parameters: "Value",
-				},
-				&utils.MetricWithParams{
-					MetricID:   "*average:Value",
-					Parameters: "Value",
-				},
-				&utils.MetricWithParams{
-					MetricID:   "*sum:Usage",
-					Parameters: "Usage",
-				},
+			Metrics: []string{"*sum:Value",
+				"*average:Value",
+				"*sum:Usage",
 			},
 			ThresholdIDs: []string{"Th1", "Th2"},
 			Blocker:      true,
@@ -1268,31 +1258,12 @@ func TestLoadStatQueueProfiles(t *testing.T) {
 			},
 			QueueLength: 100,
 			TTL:         "1s",
-			Metrics: []*utils.MetricWithParams{
-				&utils.MetricWithParams{
-					MetricID:   "*sum:Value",
-					Parameters: "Value",
-				},
-				&utils.MetricWithParams{
-					MetricID:   "*average:Value",
-					Parameters: "Value",
-				},
-				&utils.MetricWithParams{
-					MetricID:   "*sum:Usage",
-					Parameters: "Usage",
-				},
-				&utils.MetricWithParams{
-					MetricID:   "*average:Usage",
-					Parameters: "Usage",
-				},
-				&utils.MetricWithParams{
-					MetricID:   "*sum:Cost",
-					Parameters: "Cost",
-				},
-				&utils.MetricWithParams{
-					MetricID:   "*average:Cost",
-					Parameters: "Cost",
-				},
+			Metrics: []string{"*sum:Value",
+				"*average:Value",
+				"*sum:Usage",
+				"*average:Usage",
+				"*sum:Cost",
+				"*average:Cost",
 			},
 			ThresholdIDs: []string{"Th"},
 			Blocker:      true,

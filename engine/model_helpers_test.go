@@ -195,27 +195,11 @@ func TestAPItoModelStats(t *testing.T) {
 		},
 		QueueLength: 100,
 		TTL:         "1s",
-		Metrics: []*utils.MetricWithParams{
-			&utils.MetricWithParams{
-				MetricID:   "*tcc",
-				Parameters: "",
-			},
-			&utils.MetricWithParams{
-				MetricID:   "*sum:Value",
-				Parameters: "Value",
-			},
-			&utils.MetricWithParams{
-				MetricID:   "*average:Value",
-				Parameters: "Value",
-			},
-			&utils.MetricWithParams{
-				MetricID:   "*sum:Cost",
-				Parameters: "Cost",
-			},
-			&utils.MetricWithParams{
-				MetricID:   "*average:Usage",
-				Parameters: "Usage",
-			},
+		Metrics: []string{"*tcc",
+			"*sum:Value",
+			"*average:Value",
+			"*sum:Cost",
+			"*average:Usage",
 		},
 		Blocker:      true,
 		Stored:       true,
@@ -235,7 +219,6 @@ func TestAPItoModelStats(t *testing.T) {
 			TTL:                "1s",
 			MinItems:           2,
 			Metrics:            "*tcc;*sum:Value;*average:Value;*sum:Cost;*average:Usage",
-			Parameters:         "Value;Cost;Usage",
 			ThresholdIDs:       "Th1;Th2;Th3;Th4",
 			Stored:             true,
 			Blocker:            true,
@@ -254,8 +237,6 @@ func TestAPItoModelStats(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eRcv[0].QueueLength, rcv[0].QueueLength)
 	} else if !reflect.DeepEqual(len(eRcv[0].Metrics), len(rcv[0].Metrics)) {
 		t.Errorf("Expecting: %+v, received: %+v", len(eRcv[0].Metrics), len(rcv[0].Metrics))
-	} else if !reflect.DeepEqual(len(eRcv[0].Parameters), len(rcv[0].Parameters)) {
-		t.Errorf("Expecting: %+v, received: %+v", len(eRcv[0].Parameters), len(rcv[0].Parameters))
 	} else if !reflect.DeepEqual(len(eRcv[0].ThresholdIDs), len(rcv[0].ThresholdIDs)) {
 		t.Errorf("Expecting: %+v, received: %+v", len(eRcv[0].ThresholdIDs), len(rcv[0].ThresholdIDs))
 	}
@@ -680,7 +661,6 @@ func TestTPStatsAsTPStats(t *testing.T) {
 			TTL:                "1s",
 			MinItems:           2,
 			Metrics:            "*asr;*acc;*tcc;*acd;*tcd;*pdd",
-			Parameters:         "",
 			ThresholdIDs:       "THRESH1;THRESH2",
 			Stored:             true,
 			Blocker:            true,
@@ -695,8 +675,7 @@ func TestTPStatsAsTPStats(t *testing.T) {
 			QueueLength:        100,
 			TTL:                "1s",
 			MinItems:           2,
-			Metrics:            "*sum;*average;*tcc",
-			Parameters:         "BalanceValue",
+			Metrics:            "*sum#BalanceValue;*average#BalanceValue;*tcc",
 			ThresholdIDs:       "THRESH3",
 			Stored:             true,
 			Blocker:            true,
@@ -711,8 +690,7 @@ func TestTPStatsAsTPStats(t *testing.T) {
 			QueueLength:        100,
 			TTL:                "1s",
 			MinItems:           2,
-			Metrics:            "*sum;*average;*tcc",
-			Parameters:         "BalanceValue",
+			Metrics:            "*sum#BalanceValue;*average#BalanceValue;*tcc",
 			ThresholdIDs:       "THRESH4",
 			Stored:             true,
 			Blocker:            true,
@@ -730,15 +708,9 @@ func TestTPStatsAsTPStats(t *testing.T) {
 			},
 			QueueLength: tps[0].QueueLength,
 			TTL:         tps[0].TTL,
-			Metrics: []*utils.MetricWithParams{
-				&utils.MetricWithParams{MetricID: "*asr", Parameters: ""},
-				&utils.MetricWithParams{MetricID: "*acc", Parameters: ""},
-				&utils.MetricWithParams{MetricID: "*acd", Parameters: ""},
-				&utils.MetricWithParams{MetricID: "*tcd", Parameters: ""},
-				&utils.MetricWithParams{MetricID: "*pdd", Parameters: ""},
-				&utils.MetricWithParams{MetricID: "*sum:BalanceValue", Parameters: "BalanceValue"},
-				&utils.MetricWithParams{MetricID: "*average:BalanceValue", Parameters: "BalanceValue"},
-				&utils.MetricWithParams{MetricID: "*tcc:BalanceValue", Parameters: "BalanceValue"},
+			Metrics: []string{
+				"*asr", "*acc", "*acd", "*tcd", "*pdd",
+				"*sum:BalanceValue", "*average:BalanceValue", "*tcc",
 			},
 			MinItems:     tps[0].MinItems,
 			ThresholdIDs: []string{"THRESH1", "THRESH2", "THRESH3"},
@@ -754,13 +726,9 @@ func TestTPStatsAsTPStats(t *testing.T) {
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: tps[0].ActivationInterval,
 			},
-			QueueLength: tps[0].QueueLength,
-			TTL:         tps[0].TTL,
-			Metrics: []*utils.MetricWithParams{
-				&utils.MetricWithParams{MetricID: "*sum:BalanceValue", Parameters: "BalanceValue"},
-				&utils.MetricWithParams{MetricID: "*average:BalanceValue", Parameters: "BalanceValue"},
-				&utils.MetricWithParams{MetricID: "*tcc:BalanceValue", Parameters: "BalanceValue"},
-			},
+			QueueLength:  tps[0].QueueLength,
+			TTL:          tps[0].TTL,
+			Metrics:      []string{"*sum:BalanceValue", "*average:BalanceValue", "*tcc"},
 			MinItems:     tps[0].MinItems,
 			ThresholdIDs: []string{"THRESH4"},
 			Stored:       tps[0].Stored,
@@ -803,25 +771,17 @@ func TestAPItoTPStats(t *testing.T) {
 		ActivationInterval: &utils.TPActivationInterval{ActivationTime: "2014-07-29T15:00:00Z"},
 		QueueLength:        100,
 		TTL:                "1s",
-		Metrics: []*utils.MetricWithParams{
-			&utils.MetricWithParams{MetricID: "*asr", Parameters: ""},
-			&utils.MetricWithParams{MetricID: "*acd", Parameters: ""},
-			&utils.MetricWithParams{MetricID: "*acc", Parameters: ""},
-		},
-		MinItems:     1,
-		ThresholdIDs: []string{"THRESH1", "THRESH2"},
-		Stored:       false,
-		Blocker:      false,
-		Weight:       20.0,
+		Metrics:            []string{"*asr", "*acd", "*acc"},
+		MinItems:           1,
+		ThresholdIDs:       []string{"THRESH1", "THRESH2"},
+		Stored:             false,
+		Blocker:            false,
+		Weight:             20.0,
 	}
 
 	eTPs := &StatQueueProfile{ID: tps.ID,
-		QueueLength: tps.QueueLength,
-		Metrics: []*utils.MetricWithParams{
-			&utils.MetricWithParams{MetricID: "*asr", Parameters: ""},
-			&utils.MetricWithParams{MetricID: "*acd", Parameters: ""},
-			&utils.MetricWithParams{MetricID: "*acc", Parameters: ""},
-		},
+		QueueLength:  tps.QueueLength,
+		Metrics:      []string{"*asr", "*acd", "*acc"},
 		ThresholdIDs: []string{"THRESH1", "THRESH2"},
 		FilterIDs:    []string{"FLTR_1"},
 		Stored:       tps.Stored,

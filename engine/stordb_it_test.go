@@ -1092,22 +1092,9 @@ func testStorDBitCRUDTpStats(t *testing.T) {
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
-			QueueLength: 100,
-			TTL:         "1s",
-			Metrics: []*utils.MetricWithParams{
-				{
-					MetricID:   "*asr",
-					Parameters: "",
-				},
-				{
-					MetricID:   "*acd",
-					Parameters: "",
-				},
-				{
-					MetricID:   "*acc",
-					Parameters: "",
-				},
-			},
+			QueueLength:  100,
+			TTL:          "1s",
+			Metrics:      []string{"*asr", "*acd", "*acc"},
 			ThresholdIDs: []string{"THRESH1", "THRESH2"},
 			Weight:       20.0,
 			MinItems:     1,

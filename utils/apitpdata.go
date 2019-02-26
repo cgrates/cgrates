@@ -1069,17 +1069,12 @@ type TPStats struct {
 	ActivationInterval *TPActivationInterval
 	QueueLength        int
 	TTL                string
-	Metrics            []*MetricWithParams
+	Metrics            []string
 	Blocker            bool // blocker flag to stop processing on filters matched
 	Stored             bool
 	Weight             float64
 	MinItems           int
 	ThresholdIDs       []string
-}
-
-type MetricWithParams struct {
-	MetricID   string
-	Parameters string
 }
 
 type TPThreshold struct {

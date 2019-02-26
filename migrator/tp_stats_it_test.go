@@ -117,13 +117,8 @@ func testTpStatsITPopulate(t *testing.T) {
 				ActivationTime: "2014-07-29T15:00:00Z",
 				ExpiryTime:     "",
 			},
-			TTL: "1",
-			Metrics: []*utils.MetricWithParams{
-				{
-					MetricID:   "*sum",
-					Parameters: "Param1",
-				},
-			},
+			TTL:          "1",
+			Metrics:      []string{"*sum#Param1"},
 			Blocker:      false,
 			Stored:       false,
 			Weight:       20,
@@ -154,7 +149,7 @@ func testTpStatsITCheckData(t *testing.T) {
 	if err != nil {
 		t.Error("Error when getting TpStat ", err.Error())
 	}
-	tpStats[0].Metrics[0].MetricID = "*sum#Param1" //add parametrics to metricID to use multiple parameters for same metric
+	tpStats[0].Metrics[0] = "*sum#Param1" //add parametrics to metricID to use multiple parameters for same metric
 	if !reflect.DeepEqual(tpStats[0], result[0]) {
 		t.Errorf("Expecting: %+v, received: %+v",
 			utils.ToJSON(tpStats[0]), utils.ToJSON(result[0]))

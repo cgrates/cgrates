@@ -20,9 +20,10 @@ package engine
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/utils"
 	"sort"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 // StatsConfig represents the configuration of a  StatsInstance in StatS
@@ -33,9 +34,9 @@ type StatQueueProfile struct {
 	ActivationInterval *utils.ActivationInterval // Activation interval
 	QueueLength        int
 	TTL                time.Duration
-	Metrics            []*utils.MetricWithParams // list of metrics to build
-	ThresholdIDs       []string                  // list of thresholds to be checked after changes
-	Blocker            bool                      // blocker flag to stop processing on filters matched
+	Metrics            []string // list of metrics to build
+	ThresholdIDs       []string // list of thresholds to be checked after changes
+	Blocker            bool     // blocker flag to stop processing on filters matched
 	Stored             bool
 	Weight             float64
 	MinItems           int
@@ -103,7 +104,7 @@ func (ssq *StoredStatQueue) AsStatQueue(ms Marshaler) (sq *StatQueue, err error)
 		sq.SQItems[i] = sqItm
 	}
 	for metricID, marshaled := range ssq.SQMetrics {
-		if metric, err := NewStatMetric(metricID, ssq.MinItems, ""); err != nil {
+		if metric, err := NewStatMetric(metricID, ssq.MinItems); err != nil {
 			return nil, err
 		} else if err := metric.LoadMarshaled(ms, marshaled); err != nil {
 			return nil, err

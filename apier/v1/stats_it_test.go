@@ -324,15 +324,9 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 		},
 		QueueLength: 10,
 		TTL:         time.Duration(10) * time.Second,
-		Metrics: []*utils.MetricWithParams{
-			{
-				MetricID:   utils.MetaSum,
-				Parameters: "",
-			},
-			{
-				MetricID:   utils.MetaAverage,
-				Parameters: "",
-			},
+		Metrics: []string{
+			utils.MetaACD,
+			utils.MetaTCC,
 		},
 		ThresholdIDs: []string{"Val1", "Val2"},
 		Blocker:      true,

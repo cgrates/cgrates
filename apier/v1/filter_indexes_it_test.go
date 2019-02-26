@@ -453,15 +453,8 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 		},
 		QueueLength: 10,
 		TTL:         time.Duration(10) * time.Second,
-		Metrics: []*utils.MetricWithParams{
-			{
-				MetricID:   "*sum",
-				Parameters: "",
-			},
-			{
-				MetricID:   "*acd",
-				Parameters: "",
-			},
+		Metrics: []string{"*sum",
+			"*acd",
 		},
 		ThresholdIDs: []string{"Val1", "Val2"},
 		Blocker:      true,
@@ -560,15 +553,8 @@ func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 		},
 		QueueLength: 10,
 		TTL:         time.Duration(10) * time.Second,
-		Metrics: []*utils.MetricWithParams{
-			{
-				MetricID:   "*sum",
-				Parameters: "",
-			},
-			{
-				MetricID:   "*acd",
-				Parameters: "",
-			},
+		Metrics: []string{"*sum",
+			"*acd",
 		},
 		ThresholdIDs: []string{"Val1", "Val2"},
 		Blocker:      true,
