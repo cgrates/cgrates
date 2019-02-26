@@ -58,6 +58,7 @@ const (
 	MetaNotDestinations = "*notdestinations"
 	MetaNotMinCapPrefix = "*notmin_"
 	MetaNotMaxCapPrefix = "*notmax_"
+	MetaNotResources    = "*notresources"
 )
 
 func NewFilterS(cfg *config.CGRConfig,
