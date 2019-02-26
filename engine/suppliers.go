@@ -325,30 +325,31 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 				return nil, false, err
 			}
 		}
+		//add metrics from statIDs in SortingData
+		for key, val := range metricSupp {
+			sortedSpl.SortingData[key] = val
+		}
 		//check if the supplier have the metric from sortingParameters
 		//in case that the metric don't exist
 		//we use 10000000 for *pdd and -1 for others
 		for _, metric := range extraOpts.sortingParameters {
-			if val, hasMetric := metricSupp[metric]; !hasMetric {
+			if _, hasMetric := metricSupp[metric]; !hasMetric {
 				switch metric {
 				default:
 					sortedSpl.SortingData[metric] = SplStatMetrics{&SplStatMetric{StatID: utils.META_NONE, metricType: metric, MetricValue: -1.0}}
 				case utils.MetaPDD:
 					sortedSpl.SortingData[metric] = SplStatMetrics{&SplStatMetric{StatID: utils.META_NONE, metricType: metric, MetricValue: 10000000.0}}
 				}
-			} else {
-				sortedSpl.SortingData[metric] = val
 			}
 		}
 	}
 	//filter the supplier
 	if len(spl.FilterIDs) != 0 {
-		nM := config.NewNavigableMap(nil)
-		nM.Set([]string{utils.MetaReq}, ev.Event, false, false)
-		nM.Set([]string{utils.MetaVars}, convertSortingData(sortedSpl.SortingData), false, false)
+		//construct the DP and pass it to filterS
+		sDP := newSplDataProvider(ev.Event, sortedSpl.SortingData)
 
 		if pass, err = spS.filterS.Pass(ev.Tenant, spl.FilterIDs,
-			nM); err != nil {
+			sDP); err != nil {
 			return nil, false, err
 		} else if !pass {
 			return nil, false, nil

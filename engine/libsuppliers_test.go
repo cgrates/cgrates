@@ -339,7 +339,7 @@ func TestLibSuppliersStatMetricSort2(t *testing.T) {
 	}
 }
 
-func TestLibSuppliersConvertSortingData(t *testing.T) {
+func TestLibSuppliersSplDataProvide(t *testing.T) {
 	//simulatedData simulate sortingData
 	simulatedData := map[string]interface{}{
 		utils.Cost: 12.45,
@@ -348,33 +348,6 @@ func TestLibSuppliersConvertSortingData(t *testing.T) {
 				StatID:      utils.META_NONE,
 				metricType:  utils.MetaACD,
 				MetricValue: 9.0},
-			&SplStatMetric{
-				StatID:      utils.META_NONE,
-				metricType:  utils.MetaACD,
-				MetricValue: 10.0},
-		},
-	}
-	rcv := convertSortingData(simulatedData)
-	expected := map[string]interface{}{
-		utils.Cost:    12.45,
-		utils.MetaACD: 9.0,
-	}
-	if !reflect.DeepEqual(expected, rcv) {
-		t.Errorf("Expecting: %s, received: %s",
-			expected, rcv)
-	}
-}
-
-func TestLibSuppliersConvertSortingData2(t *testing.T) {
-	//simulatedData simulate sortingData
-	simulatedData := map[string]interface{}{
-		utils.Cost:   12.45,
-		utils.Weight: 12.0,
-		utils.MetaACD: SplStatMetrics{
-			&SplStatMetric{
-				StatID:      utils.META_NONE,
-				metricType:  utils.MetaACD,
-				MetricValue: 19.0},
 			&SplStatMetric{
 				StatID:      utils.META_NONE,
 				metricType:  utils.MetaACD,
@@ -391,16 +364,33 @@ func TestLibSuppliersConvertSortingData2(t *testing.T) {
 				MetricValue: 5.0},
 		},
 	}
-	rcv := convertSortingData(simulatedData)
-	expected := map[string]interface{}{
-		utils.Cost:    12.45,
-		utils.MetaACD: 10.0,
-		utils.MetaPDD: 12.0,
-		utils.Weight:  12.0,
+	ev := map[string]interface{}{
+		utils.Account: "1001",
 	}
-	if !reflect.DeepEqual(expected, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v",
-			expected, rcv)
+	sDP := newSplDataProvider(ev, simulatedData)
+	exp := "1001"
+	if rcv, err := sDP.FieldAsInterface([]string{utils.MetaReq, utils.Account}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+	exp2 := 12.45
+	if rcv, err := sDP.FieldAsInterface([]string{utils.MetaVars, utils.Cost}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, exp2) {
+		t.Errorf("Expecting: %+v, received: %+v", exp2, rcv)
+	}
+	exp3 := 9.0
+	if rcv, err := sDP.FieldAsInterface([]string{utils.MetaVars, utils.MetaACD}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, exp3) {
+		t.Errorf("Expecting: %+v, received: %+v", exp3, rcv)
+	}
+	exp4 := 12.0
+	if rcv, err := sDP.FieldAsInterface([]string{utils.MetaVars, utils.MetaPDD}); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, exp4) {
+		t.Errorf("Expecting: %+v, received: %+v", exp4, rcv)
 	}
 }
 

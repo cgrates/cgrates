@@ -640,7 +640,7 @@ func testV1SplSGetQOSSuppliersFiltred(t *testing.T) {
 			},
 		},
 	}
-	expSupplierIDs := []string{"supplier3"}
+	expSupplierIDs := []string{"supplier1", "supplier3"}
 	var suplsReply engine.SortedSuppliers
 	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
 		ev, &suplsReply); err != nil {
