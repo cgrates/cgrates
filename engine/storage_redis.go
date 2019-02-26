@@ -94,8 +94,14 @@ func NewRedisStorage(address string, db int, pass, mrshlerStr string,
 			sentinelInsts[i] = &sentinelInst{addr: addr}
 			if sentinelInsts[i].conn, err = sentinel.NewClientCustom("tcp",
 				addr, maxConns, df, sentinelName); err != nil {
-				return nil, err
+				sentinelInsts[i].conn = nil
+				utils.Logger.Warning(fmt.Sprintf("<RedisStorage> could not connenct to sentinel at address: %s because error: %s ",
+					sentinelInsts[i].addr, err.Error()))
+				// return nil, err
 			}
+		}
+		if err != nil {
+			return nil, err
 		}
 		return &RedisStorage{maxConns: maxConns, ms: mrshler,
 			cacheCfg: cacheCfg, sentinelName: sentinelName,
