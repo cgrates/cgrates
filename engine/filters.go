@@ -56,8 +56,6 @@ const (
 	MetaNotRSR          = "*notrsr"
 	MetaNotStatS        = "*notstats"
 	MetaNotDestinations = "*notdestinations"
-	MetaNotMinCapPrefix = "*notmin_"
-	MetaNotMaxCapPrefix = "*notmax_"
 	MetaNotResources    = "*notresources"
 )
 
