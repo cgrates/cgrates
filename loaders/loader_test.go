@@ -592,9 +592,9 @@ cgrates.org,THD_ACNT_1002,*string:Account:1002,2014-07-29T15:00:00Z,-1,1,1s,true
 
 func TestLoaderProcessStats(t *testing.T) {
 	statsCSV := `
-#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],Metrics[6],MetricParams[7],Blocker[8],Stored[9],Weight[10],MinItems[11],ThresholdIDs[12]
-cgrates.org,Stats1,*string:Account:1001;*string:Account:1002,2014-07-29T15:00:00Z,100,1s,*asr;*acc;*tcc;*acd;*tcd;*pdd,,true,true,20,2,THRESH1;THRESH2
-cgrates.org,Stats1,*string:Account:1003,2014-07-29T15:00:00Z,100,1s,*sum;*average,Value,true,true,20,2,THRESH1;THRESH2
+#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],Metrics[6],Blocker[7],Stored[8],Weight[9],MinItems[10],ThresholdIDs[11]
+cgrates.org,Stats1,*string:Account:1001;*string:Account:1002,2014-07-29T15:00:00Z,100,1s,*asr;*acc;*tcc;*acd;*tcd;*pdd,true,true,20,2,THRESH1;THRESH2
+cgrates.org,Stats1,*string:Account:1003,2014-07-29T15:00:00Z,100,1s,*sum#Value;*average#Value,true,true,20,2,THRESH1;THRESH2
 `
 	data, _ := engine.NewMapStorage()
 	ldr := &Loader{
@@ -635,30 +635,26 @@ cgrates.org,Stats1,*string:Account:1003,2014-07-29T15:00:00Z,100,1s,*sum;*averag
 				FieldId: "Metrics",
 				Type:    utils.META_COMPOSED,
 				Value:   config.NewRSRParsersMustCompile("~6", true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: "MetricParams",
-				FieldId: "Parameters",
-				Type:    utils.META_COMPOSED,
-				Value:   config.NewRSRParsersMustCompile("~7", true, utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Blocker",
 				FieldId: "Blocker",
 				Type:    utils.META_COMPOSED,
-				Value:   config.NewRSRParsersMustCompile("~8", true, utils.INFIELD_SEP)},
+				Value:   config.NewRSRParsersMustCompile("~7", true, utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Stored",
 				FieldId: "Stored",
 				Type:    utils.META_COMPOSED,
-				Value:   config.NewRSRParsersMustCompile("~9", true, utils.INFIELD_SEP)},
+				Value:   config.NewRSRParsersMustCompile("~8", true, utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Weight",
 				FieldId: "Weight",
 				Type:    utils.META_COMPOSED,
-				Value:   config.NewRSRParsersMustCompile("~10", true, utils.INFIELD_SEP)},
+				Value:   config.NewRSRParsersMustCompile("~9", true, utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "MinItems",
 				FieldId: "MinItems",
 				Type:    utils.META_COMPOSED,
-				Value:   config.NewRSRParsersMustCompile("~11", true, utils.INFIELD_SEP)},
+				Value:   config.NewRSRParsersMustCompile("~10", true, utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "ThresholdIDs",
 				FieldId: "ThresholdIDs",
 				Type:    utils.META_COMPOSED,
-				Value:   config.NewRSRParsersMustCompile("~12", true, utils.INFIELD_SEP)},
+				Value:   config.NewRSRParsersMustCompile("~11", true, utils.INFIELD_SEP)},
 		},
 	}
 	rdr := ioutil.NopCloser(strings.NewReader(statsCSV))
@@ -684,33 +680,15 @@ cgrates.org,Stats1,*string:Account:1003,2014-07-29T15:00:00Z,100,1s,*sum;*averag
 		},
 		QueueLength: 100,
 		TTL:         time.Duration(1 * time.Second),
-		Metrics: []*utils.MetricWithParams{
-			&utils.MetricWithParams{
-				MetricID: utils.MetaASR,
-			},
-			&utils.MetricWithParams{
-				MetricID: utils.MetaACC,
-			},
-			&utils.MetricWithParams{
-				MetricID: utils.MetaTCC,
-			},
-			&utils.MetricWithParams{
-				MetricID: utils.MetaACD,
-			},
-			&utils.MetricWithParams{
-				MetricID: utils.MetaTCD,
-			},
-			&utils.MetricWithParams{
-				MetricID: utils.MetaPDD,
-			},
-			&utils.MetricWithParams{
-				MetricID:   utils.MetaSum,
-				Parameters: "Value",
-			},
-			&utils.MetricWithParams{
-				MetricID:   utils.MetaAverage,
-				Parameters: "Value",
-			},
+		Metrics: []string{
+			utils.MetaASR,
+			utils.MetaACC,
+			utils.MetaTCC,
+			utils.MetaACD,
+			utils.MetaTCD,
+			utils.MetaPDD,
+			utils.MetaSum + "#Value",
+			utils.MetaAverage + "#Value",
 		},
 		Blocker:      true,
 		Stored:       true,

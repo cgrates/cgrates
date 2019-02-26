@@ -355,11 +355,11 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 					return err
 				}
 				metrics := make(map[string]engine.StatMetric)
-				for _, metricwithparam := range stsPrf.Metrics {
-					if metric, err := engine.NewStatMetric(metricwithparam.MetricID, stsPrf.MinItems, metricwithparam.Parameters); err != nil {
+				for _, metricID := range stsPrf.Metrics {
+					if metric, err := engine.NewStatMetric(metricID, stsPrf.MinItems); err != nil {
 						return utils.APIErrorHandler(err)
 					} else {
-						metrics[metricwithparam.MetricID] = metric
+						metrics[metricID] = metric
 					}
 				}
 				if err := ldr.dm.SetStatQueue(&engine.StatQueue{Tenant: stsPrf.Tenant, ID: stsPrf.ID, SQMetrics: metrics}); err != nil {

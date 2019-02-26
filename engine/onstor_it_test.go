@@ -1440,11 +1440,9 @@ func testOnStorITStatQueueProfile(t *testing.T) {
 		FilterIDs:          []string{"FLTR_1"},
 		QueueLength:        2,
 		TTL:                time.Duration(0 * time.Second),
-		Metrics: []*utils.MetricWithParams{
-			{},
-		},
-		Stored:       true,
-		ThresholdIDs: []string{"Thresh1"},
+		Metrics:            []string{},
+		Stored:             true,
+		ThresholdIDs:       []string{"Thresh1"},
 	}
 	if _, rcvErr := onStor.GetStatQueueProfile(sq.Tenant, sq.ID,
 		true, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {

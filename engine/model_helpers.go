@@ -1310,11 +1310,12 @@ type TpStatsS []*TpStats
 //to be modify
 func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 	filterMap := make(map[string]utils.StringMap)
-	metricmap := make(map[string]map[string]*utils.MetricWithParams)
+	metricmap := make(map[string]utils.StringMap)
 	thresholdMap := make(map[string]utils.StringMap)
 	mst := make(map[string]*utils.TPStats)
 	for _, tp := range tps {
-		st, found := mst[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]
+		key := &utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}
+		st, found := mst[key.TenantID()]
 		if !found {
 			st = &utils.TPStats{
 				Tenant:   tp.Tenant,
@@ -1341,33 +1342,21 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 			st.TTL = tp.TTL
 		}
 		if tp.Metrics != "" {
-			if _, has := metricmap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]; !has {
-				metricmap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(map[string]*utils.MetricWithParams)
+			if _, has := metricmap[key.TenantID()]; !has {
+				metricmap[key.TenantID()] = make(utils.StringMap)
 			}
 			metricSplit := strings.Split(tp.Metrics, utils.INFIELD_SEP)
 			for _, metric := range metricSplit {
-				if tp.Parameters != "" {
-					paramSplit := strings.Split(tp.Parameters, utils.INFIELD_SEP)
-					for _, param := range paramSplit {
-						metricmap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][utils.ConcatenatedKey(metric, param)] = &utils.MetricWithParams{
-							MetricID: utils.StatsJoin(metric, param), Parameters: param}
-					}
-				} else {
-					metricmap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][metric] = &utils.MetricWithParams{
-						MetricID: metric, Parameters: tp.Parameters}
-				}
+				metricmap[key.TenantID()][metric] = true
 			}
 		}
 		if tp.ThresholdIDs != "" {
-			if _, has := thresholdMap[(&utils.TenantID{Tenant: tp.Tenant,
-				ID: tp.ID}).TenantID()]; !has {
-				thresholdMap[(&utils.TenantID{Tenant: tp.Tenant,
-					ID: tp.ID}).TenantID()] = make(utils.StringMap)
+			if _, has := thresholdMap[key.TenantID()]; !has {
+				thresholdMap[key.TenantID()] = make(utils.StringMap)
 			}
 			trshSplt := strings.Split(tp.ThresholdIDs, utils.INFIELD_SEP)
 			for _, trsh := range trshSplt {
-				thresholdMap[(&utils.TenantID{Tenant: tp.Tenant,
-					ID: tp.ID}).TenantID()][trsh] = true
+				thresholdMap[key.TenantID()][trsh] = true
 			}
 		}
 		if tp.Weight != 0 {
@@ -1384,19 +1373,15 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 			}
 		}
 		if tp.FilterIDs != "" {
-			if _, has := filterMap[(&utils.TenantID{Tenant: tp.Tenant,
-				ID: tp.ID}).TenantID()]; !has {
-				filterMap[(&utils.TenantID{Tenant: tp.Tenant,
-					ID: tp.ID}).TenantID()] = make(utils.StringMap)
+			if _, has := filterMap[key.TenantID()]; !has {
+				filterMap[key.TenantID()] = make(utils.StringMap)
 			}
 			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
 			for _, filter := range filterSplit {
-				filterMap[(&utils.TenantID{Tenant: tp.Tenant,
-					ID: tp.ID}).TenantID()][filter] = true
+				filterMap[key.TenantID()][filter] = true
 			}
 		}
-		mst[(&utils.TenantID{Tenant: tp.Tenant,
-			ID: tp.ID}).TenantID()] = st
+		mst[key.TenantID()] = st
 	}
 	result = make([]*utils.TPStats, len(mst))
 	i := 0
@@ -1409,7 +1394,7 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 			result[i].ThresholdIDs = append(result[i].ThresholdIDs, threshold)
 		}
 		for metricdata := range metricmap[tntID] {
-			result[i].Metrics = append(result[i].Metrics, metricmap[tntID][metricdata])
+			result[i].Metrics = append(result[i].Metrics, metricdata)
 		}
 		i++
 	}
@@ -1417,7 +1402,6 @@ func (tps TpStatsS) AsTPStats() (result []*utils.TPStats) {
 }
 
 func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
-	var paramSlice []string
 	if st != nil {
 		// In case that TPStats don't have filter
 		if len(st.FilterIDs) == 0 {
@@ -1436,19 +1420,7 @@ func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
 				if i != 0 {
 					mdl.Metrics += utils.INFIELD_SEP
 				}
-				mdl.Metrics += val.MetricID
-			}
-
-			for _, val := range st.Metrics {
-				if val.Parameters != "" {
-					paramSlice = append(paramSlice, val.Parameters)
-				}
-			}
-			for i, val := range utils.StringMapFromSlice(paramSlice).Slice() {
-				if i != 0 {
-					mdl.Parameters += utils.INFIELD_SEP
-				}
-				mdl.Parameters += val
+				mdl.Metrics += val
 			}
 			for i, val := range st.ThresholdIDs {
 				if i != 0 {
@@ -1484,19 +1456,7 @@ func APItoModelStats(st *utils.TPStats) (mdls TpStatsS) {
 					if i != 0 {
 						mdl.Metrics += utils.INFIELD_SEP
 					}
-					mdl.Metrics += val.MetricID
-				}
-
-				for _, val := range st.Metrics {
-					if val.Parameters != "" {
-						paramSlice = append(paramSlice, val.Parameters)
-					}
-				}
-				for i, val := range utils.StringMapFromSlice(paramSlice).Slice() {
-					if i != 0 {
-						mdl.Parameters += utils.INFIELD_SEP
-					}
-					mdl.Parameters += val
+					mdl.Metrics += val
 				}
 				for i, val := range st.ThresholdIDs {
 					if i != 0 {
