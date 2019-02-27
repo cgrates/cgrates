@@ -140,7 +140,6 @@ func TestSSv1ItAuth(t *testing.T) {
 			ID:     "TestSSv1ItAuth",
 			Event: map[string]interface{}{
 				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "TestSSv1It1",
 				utils.RequestType: utils.META_PREPAID,
@@ -154,7 +153,7 @@ func TestSSv1ItAuth(t *testing.T) {
 	}
 	var rply sessions.V1AuthorizeReply
 	if err := sSv1BiRpc.Call(utils.SessionSv1AuthorizeEvent, args, &rply); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if *rply.MaxUsage != authUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
@@ -192,7 +191,6 @@ func TestSSv1ItAuth(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.CGRID:       "5668666d6b8e44eb949042f25ce0796ec3592ff9",
 				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
 				utils.Account:     "1001",
 				utils.Subject:     "ANY2CNT",
@@ -223,7 +221,6 @@ func TestSSv1ItAuthWithDigest(t *testing.T) {
 			ID:     "TestSSv1ItAuth",
 			Event: map[string]interface{}{
 				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "TestSSv1It1",
 				utils.RequestType: utils.META_PREPAID,
@@ -266,7 +263,6 @@ func TestSSv1ItInitiateSession(t *testing.T) {
 			ID:     "TestSSv1ItInitiateSession",
 			Event: map[string]interface{}{
 				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "TestSSv1It1",
 				utils.RequestType: utils.META_PREPAID,
@@ -299,7 +295,6 @@ func TestSSv1ItInitiateSession(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.CGRID:       "5668666d6b8e44eb949042f25ce0796ec3592ff9",
 				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
 				utils.Account:     "1001",
 				utils.Subject:     "ANY2CNT",
@@ -336,7 +331,6 @@ func TestSSv1ItInitiateSessionWithDigest(t *testing.T) {
 			ID:     "TestSSv1ItInitiateSession",
 			Event: map[string]interface{}{
 				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "TestSSv1It1",
 				utils.RequestType: utils.META_PREPAID,
@@ -383,7 +377,6 @@ func TestSSv1ItUpdateSession(t *testing.T) {
 			ID:     "TestSSv1ItUpdateSession",
 			Event: map[string]interface{}{
 				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "TestSSv1It1",
 				utils.RequestType: utils.META_PREPAID,
@@ -410,7 +403,6 @@ func TestSSv1ItUpdateSession(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.CGRID:       "5668666d6b8e44eb949042f25ce0796ec3592ff9",
 				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
 				utils.Account:     "1001",
 				utils.Subject:     "ANY2CNT",
@@ -448,7 +440,6 @@ func TestSSv1ItTerminateSession(t *testing.T) {
 			ID:     "TestSSv1ItUpdateSession",
 			Event: map[string]interface{}{
 				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "TestSSv1It1",
 				utils.RequestType: utils.META_PREPAID,
@@ -482,7 +473,6 @@ func TestSSv1ItProcessCDR(t *testing.T) {
 		ID:     "TestSSv1ItProcessCDR",
 		Event: map[string]interface{}{
 			utils.Tenant:      "cgrates.org",
-			utils.Category:    "call",
 			utils.ToR:         utils.VOICE,
 			utils.OriginID:    "TestSSv1It1",
 			utils.RequestType: utils.META_PREPAID,
@@ -517,7 +507,6 @@ func TestSSv1ItProcessEvent(t *testing.T) {
 			ID:     "TestSSv1ItProcessEvent",
 			Event: map[string]interface{}{
 				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "TestSSv1It2",
 				utils.RequestType: utils.META_PREPAID,
@@ -550,7 +539,6 @@ func TestSSv1ItProcessEvent(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeeb0ab7aa7ebaf",
 				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
 				utils.Account:     "1001",
 				utils.Subject:     "ANY2CNT",

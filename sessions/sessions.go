@@ -956,6 +956,14 @@ func (sS *SessionS) forkSession(s *Session) (err error) {
 			startTime = s.EventStart.GetTimeIgnoreErrors(utils.SetupTime,
 				sS.cgrCfg.GeneralCfg().DefaultTimezone)
 		}
+		category := me.GetStringIgnoreErrors(utils.Category)
+		if len(category) == 0 {
+			category = sS.cgrCfg.GeneralCfg().DefaultCategory
+		}
+		subject := me.GetStringIgnoreErrors(utils.Subject)
+		if len(subject) == 0 {
+			subject = me.GetStringIgnoreErrors(utils.Account)
+		}
 		s.SRuns[i] = &SRun{
 			Event: me,
 			CD: &engine.CallDescriptor{
@@ -963,8 +971,8 @@ func (sS *SessionS) forkSession(s *Session) (err error) {
 				RunID:       me.GetStringIgnoreErrors(utils.RunID),
 				TOR:         me.GetStringIgnoreErrors(utils.ToR),
 				Tenant:      s.Tenant,
-				Category:    me.GetStringIgnoreErrors(utils.Category),
-				Subject:     me.GetStringIgnoreErrors(utils.Subject),
+				Category:    category,
+				Subject:     subject,
 				Account:     me.GetStringIgnoreErrors(utils.Account),
 				Destination: me.GetStringIgnoreErrors(utils.Destination),
 				TimeStart:   startTime,
