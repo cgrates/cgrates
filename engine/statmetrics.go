@@ -34,15 +34,16 @@ const STATS_NA = -1.0
 // cfg serves as general purpose container to pass config options to metric
 func NewStatMetric(metricID string, minItems int) (sm StatMetric, err error) {
 	metrics := map[string]func(int, string) (StatMetric, error){
-		utils.MetaASR:     NewASR,
-		utils.MetaACD:     NewACD,
-		utils.MetaTCD:     NewTCD,
-		utils.MetaACC:     NewACC,
-		utils.MetaTCC:     NewTCC,
-		utils.MetaPDD:     NewPDD,
-		utils.MetaDDC:     NewDCC,
-		utils.MetaSum:     NewStatSum,
-		utils.MetaAverage: NewStatAverage,
+		utils.MetaASR:      NewASR,
+		utils.MetaACD:      NewACD,
+		utils.MetaTCD:      NewTCD,
+		utils.MetaACC:      NewACC,
+		utils.MetaTCC:      NewTCC,
+		utils.MetaPDD:      NewPDD,
+		utils.MetaDDC:      NewDCC,
+		utils.MetaSum:      NewStatSum,
+		utils.MetaAverage:  NewStatAverage,
+		utils.MetaDistinct: NewStatDistinct,
 	}
 	// split the metricID
 	// in case of *sum we have *sum#FieldName
@@ -661,6 +662,7 @@ func (ddc *StatDDC) Marshal(ms Marshaler) (marshaled []byte, err error) {
 func (ddc *StatDDC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, ddc)
 }
+
 func NewStatSum(minItems int, extraParams string) (StatMetric, error) {
 	return &StatSum{Events: make(map[string]float64), MinItems: minItems, FieldName: extraParams}, nil
 }
@@ -819,4 +821,75 @@ func (avg *StatAverage) Marshal(ms Marshaler) (marshaled []byte, err error) {
 
 func (avg *StatAverage) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, avg)
+}
+
+func NewStatDistinct(minItems int, extraParams string) (StatMetric, error) {
+	return &StatDistinct{Events: make(map[string]struct{}), MinItems: minItems, FieldName: extraParams}, nil
+}
+
+type StatDistinct struct {
+	Numbers   float64
+	Events    map[string]struct{} // map[EventTenantID]Cost
+	MinItems  int
+	FieldName string
+	val       *float64 // cached sum value
+}
+
+// getValue returns tcd.val
+func (sum *StatDistinct) getValue() float64 {
+	if sum.val == nil {
+		if len(sum.Events) == 0 || len(sum.Events) < sum.MinItems {
+			sum.val = utils.Float64Pointer(STATS_NA)
+		} else {
+			sum.val = utils.Float64Pointer(utils.Round(sum.Numbers,
+				config.CgrConfig().GeneralCfg().RoundingDecimals,
+				utils.ROUNDING_MIDDLE))
+		}
+	}
+	return *sum.val
+}
+
+func (sum *StatDistinct) GetStringValue(fmtOpts string) (valStr string) {
+	if val := sum.getValue(); val == STATS_NA {
+		valStr = utils.NOT_AVAILABLE
+	} else {
+		valStr = strconv.FormatFloat(sum.getValue(), 'f', -1, 64)
+	}
+	return
+}
+
+func (sum *StatDistinct) GetValue() (v interface{}) {
+	return sum.getValue()
+}
+
+func (sum *StatDistinct) GetFloat64Value() (v float64) {
+	return sum.getValue()
+}
+
+func (sum *StatDistinct) AddEvent(ev *utils.CGREvent) (err error) {
+	if has := ev.HasField(sum.FieldName); has {
+		sum.Numbers += 1
+	}
+	sum.Events[ev.ID] = struct{}{}
+	sum.val = nil
+	return
+}
+
+func (sum *StatDistinct) RemEvent(evID string) (err error) {
+	_, has := sum.Events[evID]
+	if !has {
+		return utils.ErrNotFound
+	}
+	delete(sum.Events, evID)
+	sum.Numbers -= 1
+	sum.val = nil
+	return
+}
+
+func (sum *StatDistinct) Marshal(ms Marshaler) (marshaled []byte, err error) {
+	return ms.Marshal(sum)
+}
+
+func (sum *StatDistinct) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
+	return ms.Unmarshal(marshaled, sum)
 }

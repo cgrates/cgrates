@@ -559,15 +559,16 @@ const (
 
 // MetaMetrics
 const (
-	MetaASR     = "*asr"
-	MetaACD     = "*acd"
-	MetaTCD     = "*tcd"
-	MetaACC     = "*acc"
-	MetaTCC     = "*tcc"
-	MetaPDD     = "*pdd"
-	MetaDDC     = "*ddc"
-	MetaSum     = "*sum"
-	MetaAverage = "*average"
+	MetaASR      = "*asr"
+	MetaACD      = "*acd"
+	MetaTCD      = "*tcd"
+	MetaACC      = "*acc"
+	MetaTCC      = "*tcc"
+	MetaPDD      = "*pdd"
+	MetaDDC      = "*ddc"
+	MetaSum      = "*sum"
+	MetaAverage  = "*average"
+	MetaDistinct = "*distinct"
 )
 
 // Services
