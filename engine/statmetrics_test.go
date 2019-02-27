@@ -1152,6 +1152,112 @@ func TestStatAverageGetStringValue(t *testing.T) {
 	}
 }
 
+func TestStatDistinctGetFloat64Value(t *testing.T) {
+	statDistinct, _ := NewStatDistinct(2, "Usage")
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{
+			"Cost":            "20",
+			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Usage":           time.Duration(10 * time.Second),
+			utils.PDD:         time.Duration(5 * time.Second),
+			utils.Destination: "1002"}}
+	statDistinct.AddEvent(ev)
+	if v := statDistinct.GetFloat64Value(); v != -1.0 {
+		t.Errorf("wrong statDistinct value: %v", v)
+	}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
+	statDistinct.AddEvent(ev2)
+	if v := statDistinct.GetFloat64Value(); v != 1.0 {
+		t.Errorf("wrong statDistinct value: %v", v)
+	}
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
+		Event: map[string]interface{}{
+			"Cost":            "20",
+			"Usage":           time.Duration(1 * time.Minute),
+			"AnswerTime":      time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.PDD:         time.Duration(10 * time.Second),
+			utils.Destination: "1001",
+		},
+	}
+	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
+		Event: map[string]interface{}{
+			"Cost":            "20",
+			"Usage":           time.Duration(1*time.Minute + 30*time.Second),
+			"AnswerTime":      time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Destination: "1003",
+		},
+	}
+	statDistinct.AddEvent(ev4)
+	if strVal := statDistinct.GetFloat64Value(); strVal != 2 {
+		t.Errorf("wrong statDistinct value: %v", strVal)
+	}
+	statDistinct.AddEvent(ev5)
+	if strVal := statDistinct.GetFloat64Value(); strVal != 3 {
+		t.Errorf("wrong statDistinct value: %v", strVal)
+	}
+	statDistinct.RemEvent(ev2.ID)
+	if strVal := statDistinct.GetFloat64Value(); strVal != 2 {
+		t.Errorf("wrong statDistinct value: %v", strVal)
+	}
+	statDistinct.RemEvent(ev4.ID)
+	if strVal := statDistinct.GetFloat64Value(); strVal != 1 {
+		t.Errorf("wrong statDistinct value: %v", strVal)
+	}
+	statDistinct.RemEvent(ev.ID)
+	if strVal := statDistinct.GetFloat64Value(); strVal != -1 {
+		t.Errorf("wrong statDistinct value: %v", strVal)
+	}
+	statDistinct.RemEvent(ev5.ID)
+	if strVal := statDistinct.GetFloat64Value(); strVal != -1 {
+		t.Errorf("wrong statDistinct value: %v", strVal)
+	}
+}
+
+func TestStatDistinctGetStringValue(t *testing.T) {
+	statDistinct, _ := NewStatDistinct(2, "Cost")
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{
+			"Cost":            "20",
+			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Destination: "1002"}}
+	if strVal := statDistinct.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
+		t.Errorf("wrong statDistinct value: %s", strVal)
+	}
+
+	statDistinct.AddEvent(ev)
+	if strVal := statDistinct.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
+		t.Errorf("wrong statDistinct value: %s", strVal)
+	}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{
+			"Cost":            "20",
+			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Destination: "1002"}}
+
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
+		Event: map[string]interface{}{
+			"Cost":            "20",
+			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Destination: "1001"}}
+	statDistinct.AddEvent(ev2)
+	statDistinct.AddEvent(ev3)
+	if strVal := statDistinct.GetStringValue(""); strVal != "3" {
+		t.Errorf("wrong statDistinct value: %s", strVal)
+	}
+	statDistinct.RemEvent(ev.ID)
+	if strVal := statDistinct.GetStringValue(""); strVal != "2" {
+		t.Errorf("wrong statDistinct value: %s", strVal)
+	}
+	statDistinct.RemEvent(ev2.ID)
+	if strVal := statDistinct.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
+		t.Errorf("wrong statDistinct value: %s", strVal)
+	}
+	statDistinct.RemEvent(ev3.ID)
+	if strVal := statDistinct.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
+		t.Errorf("wrong statDistinct value: %s", strVal)
+	}
+}
+
 var jMarshaler JSONMarshaler
 
 func TestASRMarshal(t *testing.T) {
@@ -1339,5 +1445,28 @@ func TestStatAverageMarshal(t *testing.T) {
 		t.Error(err)
 	} else if reflect.DeepEqual(statAvg, nstatAvg) {
 		t.Errorf("Expected: %s , recived: %s", utils.ToJSON(statAvg), utils.ToJSON(nstatAvg))
+	}
+}
+
+func TestStatDistrictMarshal(t *testing.T) {
+	statDistinct, _ := NewStatDistinct(2, "Usage")
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{
+			"Cost":            "20",
+			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Usage":           time.Duration(10 * time.Second),
+			utils.PDD:         time.Duration(5 * time.Second),
+			utils.Destination: "1002"}}
+	statDistinct.AddEvent(ev)
+	var nStatDistinct StatDistinct
+	expected := []byte(`{"Numbers":1,"Events":{"EVENT_1":{}},"MinItems":2,"FieldName":"Usage"}`)
+	if b, err := statDistinct.Marshal(&jMarshaler); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, b) {
+		t.Errorf("Expected: %s , recived: %s", string(expected), string(b))
+	} else if err := nStatDistinct.LoadMarshaled(&jMarshaler, b); err != nil {
+		t.Error(err)
+	} else if reflect.DeepEqual(statDistinct, nStatDistinct) {
+		t.Errorf("Expected: %s , recived: %s", utils.ToJSON(statDistinct), utils.ToJSON(nStatDistinct))
 	}
 }
