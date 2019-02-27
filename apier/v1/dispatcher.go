@@ -362,3 +362,16 @@ func (dS *DispatcherSessionSv1) SetPassiveSession(args *dispatchers.SessionWithA
 	reply *string) (err error) {
 	return dS.dS.SessionSv1SetPassiveSession(args, reply)
 }
+
+func NewDispatcherResponder(dps *dispatchers.DispatcherService) *DispatcherResponder {
+	return &DispatcherResponder{dS: dps}
+}
+
+// Exports RPC from RLs
+type DispatcherResponder struct {
+	dS *dispatchers.DispatcherService
+}
+
+func (dS *DispatcherResponder) Status(args *dispatchers.TntWithApiKey, reply *map[string]interface{}) error {
+	return dS.dS.ResponderStatus(args, reply)
+}
