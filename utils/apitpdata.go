@@ -473,6 +473,7 @@ type ArgsCache struct {
 	AttributeProfileIDs   *[]string
 	ChargerProfileIDs     *[]string
 	DispatcherProfileIDs  *[]string
+	DispatcherRoutesIDs   *[]string
 }
 
 // Data used to do remote cache reloads via api
@@ -512,6 +513,7 @@ type CacheStats struct {
 	AttributeProfiles   int
 	ChargerProfiles     int
 	DispatcherProfiles  int
+	DispatcherRoutes    int
 }
 
 type AttrExpFileCdrs struct {
