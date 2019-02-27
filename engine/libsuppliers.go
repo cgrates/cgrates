@@ -129,6 +129,28 @@ func (sSpls *SortedSuppliers) SortQOS(params []string) {
 	})
 }
 
+// SortResourceAscendent is part of sort interface,
+// sort ascendent based on ResourceUsage with fallback on Weight
+func (sSpls *SortedSuppliers) SortResourceAscendent() {
+	sort.Slice(sSpls.SortedSuppliers, func(i, j int) bool {
+		if sSpls.SortedSuppliers[i].SortingData[utils.ResourceUsage].(float64) == sSpls.SortedSuppliers[j].SortingData[utils.ResourceUsage].(float64) {
+			return sSpls.SortedSuppliers[i].SortingData[utils.Weight].(float64) > sSpls.SortedSuppliers[j].SortingData[utils.Weight].(float64)
+		}
+		return sSpls.SortedSuppliers[i].SortingData[utils.ResourceUsage].(float64) < sSpls.SortedSuppliers[j].SortingData[utils.ResourceUsage].(float64)
+	})
+}
+
+// SortResourceDescendent is part of sort interface,
+// sort descendent based on ResourceUsage with fallback on Weight
+func (sSpls *SortedSuppliers) SortResourceDescendent() {
+	sort.Slice(sSpls.SortedSuppliers, func(i, j int) bool {
+		if sSpls.SortedSuppliers[i].SortingData[utils.ResourceUsage].(float64) == sSpls.SortedSuppliers[j].SortingData[utils.ResourceUsage].(float64) {
+			return sSpls.SortedSuppliers[i].SortingData[utils.Weight].(float64) > sSpls.SortedSuppliers[j].SortingData[utils.Weight].(float64)
+		}
+		return sSpls.SortedSuppliers[i].SortingData[utils.ResourceUsage].(float64) > sSpls.SortedSuppliers[j].SortingData[utils.ResourceUsage].(float64)
+	})
+}
+
 // Digest returns list of supplierIDs + parameters for easier outside access
 // format suppl1:suppl1params,suppl2:suppl2params
 func (sSpls *SortedSuppliers) Digest() string {
@@ -152,6 +174,8 @@ func NewSupplierSortDispatcher(lcrS *SupplierService) (ssd SupplierSortDispatche
 	ssd[utils.MetaLeastCost] = NewLeastCostSorter(lcrS)
 	ssd[utils.MetaHighestCost] = NewHighestCostSorter(lcrS)
 	ssd[utils.MetaQOS] = NewQOSSupplierSorter(lcrS)
+	ssd[utils.MetaReas] = NewResourceAscendetSorter(lcrS)
+	ssd[utils.MetaReds] = NewResourceDescendentSorter(lcrS)
 	return
 }
 

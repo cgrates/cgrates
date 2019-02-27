@@ -853,6 +853,21 @@ func startSupplierService(internalSupplierSChan chan rpcclient.RpcClientConnecti
 			return
 		}
 	}
+	if len(cfg.SupplierSCfg().ResourceSConns) != 0 {
+		resourceSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
+			cfg.TlsCfg().ClientKey,
+			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
+			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
+			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
+			cfg.SupplierSCfg().ResourceSConns, internalRsChan,
+			cfg.GeneralCfg().InternalTtl, false)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to StatS: %s",
+				utils.SupplierS, err.Error()))
+			exitChan <- true
+			return
+		}
+	}
 	<-cacheS.GetPrecacheChannel(utils.CacheSupplierProfiles)
 
 	splS, err := engine.NewSupplierService(dm, cfg.GeneralCfg().DefaultTimezone,
