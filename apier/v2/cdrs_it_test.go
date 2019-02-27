@@ -128,7 +128,7 @@ func testV2CDRsProcessCDR(t *testing.T) {
 				utils.OriginHost:  "192.168.1.1",
 				utils.Source:      "testV2CDRsProcessCDR",
 				utils.RequestType: utils.META_RATED,
-				utils.Category:    "call",
+				// utils.Category:    "call", //it will be populated as default in MapEvent.AsCDR
 				utils.Account:     "testV2CDRsProcessCDR",
 				utils.Subject:     "ANY2CNT",
 				utils.Destination: "+4986517174963",
