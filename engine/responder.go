@@ -253,11 +253,6 @@ func (rs *Responder) Shutdown(arg string, reply *string) (err error) {
 	return
 }
 
-func (rs *Responder) GetTimeout(i int, d *time.Duration) error {
-	*d = rs.Timeout
-	return nil
-}
-
 func (rs *Responder) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
