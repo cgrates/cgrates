@@ -133,7 +133,10 @@
 "suppliers": {
 	"enabled": true,
 	"stats_conns": [
-		{"address": "*internal"},
+		{"address": "127.0.0.1:2012", "transport":"*json"},
+	],
+	"resources_conns": [
+		{"address": "127.0.0.1:2012", "transport":"*json"},
 	],
 },
 

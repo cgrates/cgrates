@@ -256,9 +256,12 @@
 
 "suppliers": {
 	"enabled": true,
-	"prefix_indexed_fields":["Destination",],
+	"prefix_indexed_fields":["Destination"],
 	"stats_conns": [
 		{"address": "*internal"},
+	],
+	"resources_conns": [
+		{"address": "127.0.0.1:2012", "transport":"*json"},
 	],
 },
 

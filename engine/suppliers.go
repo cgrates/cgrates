@@ -258,7 +258,7 @@ func (spS *SupplierService) statMetrics(statIDs []string, tenant string) (stsMet
 	if spS.statS != nil {
 		for _, statID := range statIDs {
 			var metrics map[string]float64
-			if err := spS.statS.Call(utils.StatSv1GetQueueFloatMetrics,
+			if err = spS.statS.Call(utils.StatSv1GetQueueFloatMetrics,
 				&utils.TenantID{Tenant: tenant, ID: statID}, &metrics); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
@@ -273,7 +273,19 @@ func (spS *SupplierService) statMetrics(statIDs []string, tenant string) (stsMet
 }
 
 // resourceUsage returns sum of all resource usages out of list
-func (spS *SupplierService) resourceUsage(resIDs []string) (tUsage float64, err error) {
+func (spS *SupplierService) resourceUsage(resIDs []string, tenant string) (tUsage float64, err error) {
+	if spS.resourceS != nil {
+		for _, resID := range resIDs {
+			var res *Resource
+			if err = spS.resourceS.Call(utils.ApierV1GetResource,
+				&utils.TenantID{Tenant: tenant, ID: resID}, &res); err != nil &&
+				err.Error() != utils.ErrNotFound.Error() {
+				utils.Logger.Warning(
+					fmt.Sprintf("<SupplierS> error: %s getting resource for ID : %s", err.Error(), resID))
+			}
+			tUsage += res.totalUsage()
+		}
+	}
 	return
 }
 
@@ -342,6 +354,21 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 				}
 			}
 		}
+	}
+	//calculate resourceUsage
+	if len(spl.ResourceIDs) != 0 {
+		resTotalUsage, err := spS.resourceUsage(spl.ResourceIDs, ev.Tenant)
+		if err != nil {
+			if extraOpts.ignoreErrors {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> ignoring supplier with ID: %s, err: %s",
+						utils.SupplierS, spl.ID, err.Error()))
+				return nil, false, nil
+			} else {
+				return nil, false, err
+			}
+		}
+		sortedSpl.SortingData[utils.ResourceUsage] = resTotalUsage
 	}
 	//filter the supplier
 	if len(spl.FilterIDs) != 0 {
