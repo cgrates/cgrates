@@ -929,6 +929,7 @@ func (self *ApierV1) FlushCache(args utils.AttrReloadCache, reply *string) (err 
 	flushCache(utils.CacheAttributeProfiles, args.AttributeProfileIDs)
 	flushCache(utils.CacheChargerProfiles, args.ChargerProfileIDs)
 	flushCache(utils.CacheDispatcherProfiles, args.DispatcherProfileIDs)
+	flushCache(utils.CacheDispatcherRoutes, args.DispatcherRoutesIDs)
 
 	*reply = utils.OK
 	return
@@ -955,6 +956,7 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	cs.AttributeProfiles = len(engine.Cache.GetItemIDs(utils.CacheAttributeProfiles, ""))
 	cs.ChargerProfiles = len(engine.Cache.GetItemIDs(utils.CacheChargerProfiles, ""))
 	cs.DispatcherProfiles = len(engine.Cache.GetItemIDs(utils.CacheDispatcherProfiles, ""))
+	cs.DispatcherRoutes = len(engine.Cache.GetItemIDs(utils.CacheDispatcherRoutes, ""))
 
 	*reply = *cs
 	return nil
@@ -1097,7 +1099,13 @@ func (v1 *ApierV1) GetCacheKeys(args utils.ArgsCacheKeys, reply *utils.ArgsCache
 	if args.DispatcherProfileIDs != nil {
 		ids := getCacheKeys(utils.CacheDispatcherProfiles, args.DispatcherProfileIDs, args.Paginator)
 		if len(ids) != 0 {
-			reply.ChargerProfileIDs = &ids
+			reply.DispatcherProfileIDs = &ids
+		}
+	}
+	if args.DispatcherRoutesIDs != nil {
+		ids := getCacheKeys(utils.CacheDispatcherRoutes, args.DispatcherRoutesIDs, args.Paginator)
+		if len(ids) != 0 {
+			reply.DispatcherRoutesIDs = &ids
 		}
 	}
 
