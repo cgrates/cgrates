@@ -253,8 +253,9 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 
 // statMetrics will query a list of statIDs and return composed metric values
 // first metric found is always returned
-func (spS *SupplierService) statMetrics(statIDs []string, tenant string) (stsMetric map[string]SplStatMetrics, err error) {
-	stsMetric = make(map[string]SplStatMetrics)
+func (spS *SupplierService) statMetrics(statIDs []string, tenant string) (stsMetric map[string]float64, err error) {
+	stsMetric = make(map[string]float64)
+	provStsMetrics := make(map[string][]float64)
 	if spS.statS != nil {
 		for _, statID := range statIDs {
 			var metrics map[string]float64
@@ -265,8 +266,16 @@ func (spS *SupplierService) statMetrics(statIDs []string, tenant string) (stsMet
 					fmt.Sprintf("<SupplierS> error: %s getting statMetrics for stat : %s", err.Error(), statID))
 			}
 			for key, val := range metrics {
-				stsMetric[key] = append(stsMetric[key], &SplStatMetric{StatID: statID, metricType: key, MetricValue: val})
+				//add value of metric in a slice in case that we get the same metric from different stat
+				provStsMetrics[key] = append(provStsMetrics[key], val)
 			}
+		}
+		for metric, slice := range provStsMetrics {
+			sum := 0.0
+			for _, val := range slice {
+				sum += val
+			}
+			stsMetric[metric] = sum / float64(len(slice))
 		}
 	}
 	return
@@ -348,9 +357,9 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 			if _, hasMetric := metricSupp[metric]; !hasMetric {
 				switch metric {
 				default:
-					sortedSpl.SortingData[metric] = SplStatMetrics{&SplStatMetric{StatID: utils.META_NONE, metricType: metric, MetricValue: -1.0}}
+					sortedSpl.SortingData[metric] = -1.0
 				case utils.MetaPDD:
-					sortedSpl.SortingData[metric] = SplStatMetrics{&SplStatMetric{StatID: utils.META_NONE, metricType: metric, MetricValue: 10000000.0}}
+					sortedSpl.SortingData[metric] = 10000000.0
 				}
 			}
 		}
@@ -373,10 +382,12 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 	//filter the supplier
 	if len(spl.FilterIDs) != 0 {
 		//construct the DP and pass it to filterS
-		sDP := newSplDataProvider(ev.Event, sortedSpl.SortingData)
+		nM := config.NewNavigableMap(nil)
+		nM.Set([]string{utils.MetaReq}, ev.Event, false, false)
+		nM.Set([]string{utils.MetaVars}, sortedSpl.SortingData, false, false)
 
 		if pass, err = spS.filterS.Pass(ev.Tenant, spl.FilterIDs,
-			sDP); err != nil {
+			nM); err != nil {
 			return nil, false, err
 		} else if !pass {
 			return nil, false, nil
