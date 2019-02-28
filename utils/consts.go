@@ -780,9 +780,11 @@ const (
 
 // Responder APIs
 const (
+	Responder                  = "Responder"
 	ResponderDebit             = "Responder.Debit"
 	ResponderRefundIncrements  = "Responder.RefundIncrements"
 	ResponderGetMaxSessionTime = "Responder.GetMaxSessionTime"
+	ResponderStatus            = "Responder.Status"
 )
 
 // DispatcherS APIs
