@@ -397,6 +397,107 @@ func (ec *EventCost) appendChargingIntervalFromEventCost(oEC *EventCost, cIlIdx 
 	}
 }
 
+// SyncKeys will sync the keys present into ec with the ones in refEC
+func (ec *EventCost) SyncKeys(refEC *EventCost) {
+	// sync RatingFilters
+	sncedRFilterIDs := make(map[string]string)
+	for key, rf := range ec.RatingFilters {
+		for refKey, refRf := range refEC.RatingFilters {
+			if rf.Equals(refRf) {
+				delete(ec.RatingFilters, key)
+				sncedRFilterIDs[key] = refKey
+				ec.RatingFilters[refKey] = rf
+				break
+			}
+		}
+	}
+	// sync Rates
+	sncedRateIDs := make(map[string]string)
+	for key, rt := range ec.Rates {
+		for refKey, refRt := range refEC.Rates {
+			if rt.Equals(refRt) {
+				delete(ec.Rates, key)
+				sncedRateIDs[key] = refKey
+				ec.Rates[refKey] = rt
+				break
+			}
+		}
+	}
+	// sync Timings
+	sncedTimingIDs := make(map[string]string)
+	for key, tm := range ec.Timings {
+		for refKey, refTm := range refEC.Timings {
+			if tm.Equals(refTm) {
+				delete(ec.Timings, key)
+				sncedTimingIDs[key] = refKey
+				ec.Timings[refKey] = tm
+				break
+			}
+		}
+	}
+	// sync Rating
+	sncedRatingIDs := make(map[string]string)
+	for key, ru := range ec.Rating {
+		if tmRefKey, has := sncedTimingIDs[ru.TimingID]; has {
+			ru.TimingID = tmRefKey
+		}
+		if rtRefID, has := sncedRateIDs[ru.RatesID]; has {
+			ru.RatesID = rtRefID
+		}
+		if rfRefID, has := sncedRFilterIDs[ru.RatingFiltersID]; has {
+			ru.RatingFiltersID = rfRefID
+		}
+		for refKey, refRU := range refEC.Rating {
+			if ru.Equals(refRU) {
+				delete(ec.Rating, key)
+				sncedRatingIDs[key] = refKey
+				ec.Rating[refKey] = ru
+				break
+			}
+		}
+	}
+	// sync Accounting
+	sncedAcntIDs := make(map[string]string)
+	for key, acnt := range ec.Accounting {
+		for refKey, refAcnt := range refEC.Accounting {
+			if acnt.Equals(refAcnt) {
+				delete(ec.Accounting, key)
+				sncedAcntIDs[key] = refKey
+				ec.Accounting[refKey] = acnt
+				break
+			}
+		}
+	}
+	// correct the ExtraCharge
+	for _, acnt := range ec.Accounting {
+		if acntRefID, has := sncedAcntIDs[acnt.ExtraChargeID]; has {
+			acnt.ExtraChargeID = acntRefID
+		}
+	}
+	// need another sync for the corrected ExtraChargeIDs
+	for key, acnt := range ec.Accounting {
+		for refKey, refAcnt := range refEC.Accounting {
+			if acnt.Equals(refAcnt) {
+				delete(ec.Accounting, key)
+				sncedAcntIDs[key] = refKey
+				ec.Accounting[refKey] = acnt
+				break
+			}
+		}
+	}
+	// sync Charges
+	for _, ci := range ec.Charges {
+		if refRatingID, has := sncedRatingIDs[ci.RatingID]; has {
+			ci.RatingID = refRatingID
+		}
+		for _, cIcrmt := range ci.Increments {
+			if refAcntID, has := sncedAcntIDs[cIcrmt.AccountingID]; has {
+				cIcrmt.AccountingID = refAcntID
+			}
+		}
+	}
+}
+
 // Merge will merge a list of EventCosts into this one
 func (ec *EventCost) Merge(ecs ...*EventCost) {
 	for _, newEC := range ecs {

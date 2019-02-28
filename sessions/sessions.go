@@ -460,7 +460,7 @@ func (sS *SessionS) debitSession(s *Session, sRunIdx int, dur time.Duration,
 	cd := sr.CD.Clone()
 	s.Unlock()
 	cc := new(engine.CallCost)
-	if err := sS.ralS.Call("Responder.MaxDebit", cd, cc); err != nil {
+	if err := sS.ralS.Call(utils.ResponderMaxDebit, cd, cc); err != nil {
 		s.Lock()
 		sr.ExtraDuration += dbtRsrv
 		s.Unlock()
@@ -489,6 +489,7 @@ func (sS *SessionS) debitSession(s *Session, sRunIdx int, dur time.Duration,
 			sr.EventCost = ec
 		}
 	} else {
+		ec.SyncKeys(sr.EventCost)
 		sr.EventCost.Merge(ec)
 	}
 	maxDur = sr.LastUsage

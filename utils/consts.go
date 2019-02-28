@@ -785,6 +785,7 @@ const (
 	ResponderRefundIncrements  = "Responder.RefundIncrements"
 	ResponderGetMaxSessionTime = "Responder.GetMaxSessionTime"
 	ResponderStatus            = "Responder.Status"
+	ResponderMaxDebit          = "Responder.MaxDebit"
 )
 
 // DispatcherS APIs

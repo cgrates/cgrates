@@ -53,6 +53,7 @@ var sTestsAlsPrf = []func(t *testing.T){
 	testAttributeSGetAttributeForEventNotFound,
 	testAttributeSGetAttributeForEventWithMetaAnyContext,
 	testAttributeSProcessEvent,
+	testAttributeSProcessEventNotFound,
 	testAttributeSProcessEventMissing,
 	testAttributeSProcessEventWithNoneSubstitute,
 	testAttributeSProcessEventWithNoneSubstitute2,
@@ -356,6 +357,26 @@ func testAttributeSProcessEvent(t *testing.T) {
 	}
 }
 
+func testAttributeSProcessEventNotFound(t *testing.T) {
+	ev := &engine.AttrArgsProcessEvent{
+		Context: utils.StringPointer(utils.MetaSessionS),
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSProcessEventNotFound",
+			Event: map[string]interface{}{
+				utils.Account:     "Inexistent",
+				utils.Destination: "+491511231234",
+			},
+		},
+	}
+	var rplyEv engine.AttrSProcessEventReply
+	if err := attrSRPC.Call(utils.AttributeSv1ProcessEvent,
+		ev, &rplyEv); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
 func testAttributeSProcessEventMissing(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
@@ -369,10 +390,10 @@ func testAttributeSProcessEventMissing(t *testing.T) {
 			},
 		},
 	}
-
 	var rplyEv engine.AttrSProcessEventReply
 	if err := attrSRPC.Call(utils.AttributeSv1ProcessEvent,
-		ev, &rplyEv); err == nil && err != utils.ErrMandatoryIeMissing {
+		ev, &rplyEv); err == nil ||
+		err.Error() != utils.ErrMandatoryIeMissing.Error() {
 		t.Error(err)
 	}
 }
@@ -652,7 +673,8 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 func testAttributeSGetAttPrfIDs(t *testing.T) {
 	expected := []string{"ATTR_2", "ATTR_1", "ATTR_3", "ATTR_Header", "AttributeWithNonSubstitute"}
 	var result []string
-	if err := attrSRPC.Call("ApierV1.GetAttributeProfileIDs", "", &result); err == nil || err.Error() != utils.NewErrMandatoryIeMissing("Tenant").Error() {
+	if err := attrSRPC.Call("ApierV1.GetAttributeProfileIDs", "", &result); err == nil ||
+		err.Error() != utils.NewErrMandatoryIeMissing("Tenant").Error() {
 		t.Errorf("Expected error recived reply %+v with err=%v", result, err)
 	}
 	if err := attrSRPC.Call("ApierV1.GetAttributeProfileIDs", "cgrates.org", &result); err != nil {

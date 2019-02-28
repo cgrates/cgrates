@@ -2030,3 +2030,244 @@ func TestECAppendCIlFromEC(t *testing.T) {
 		t.Errorf("expecting: %s, received: %s", utils.ToJSON(eEC), utils.ToJSON(ec))
 	}
 }
+
+func TestECSyncKeys(t *testing.T) {
+	ec := testEC.Clone()
+
+	refEC := &EventCost{
+		Rating: Rating{
+			"21a5ab9": &RatingUnit{
+				ConnectFee:       0.1,
+				RoundingMethod:   "*up",
+				RoundingDecimals: 5,
+				TimingID:         "2f324ab",
+				RatesID:          "2c1a177",
+				RatingFiltersID:  "23e77dc",
+			},
+		},
+		Accounting: Accounting{
+			"2012888": &BalanceCharge{
+				AccountID:   "cgrates.org:dan",
+				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+				Units:       0.01,
+			},
+			"288bfa6": &BalanceCharge{
+				AccountID:   "cgrates.org:dan",
+				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+				Units:       0.005,
+			},
+			"24d6c02": &BalanceCharge{
+				AccountID:     "cgrates.org:dan",
+				BalanceUUID:   "7a54a9e9-d610-4c82-bcb5-a315b9a65010",
+				RatingID:      "3cd6425",
+				Units:         1,
+				ExtraChargeID: "288bfa6",
+			},
+		},
+		RatingFilters: RatingFilters{
+			"23e77dc": RatingMatchedFilters{
+				"DestinationID":     "GERMANY",
+				"DestinationPrefix": "+49",
+				"RatingPlanID":      "RPL_RETAIL1",
+				"Subject":           "*out:cgrates.org:call:*any",
+			},
+		},
+		Timings: ChargedTimings{
+			"2f324ab": &ChargedTiming{
+				StartTime: "00:00:00",
+			},
+		},
+		Rates: ChargedRates{
+			"2c1a177": RateGroups{
+				&Rate{
+					GroupIntervalStart: time.Duration(0),
+					Value:              0.01,
+					RateIncrement:      time.Duration(1 * time.Minute),
+					RateUnit:           time.Duration(1 * time.Second)},
+			},
+		},
+	}
+
+	eEC := &EventCost{
+		CGRID:     "164b0422fdc6a5117031b427439482c6a4f90e41",
+		RunID:     utils.META_DEFAULT,
+		StartTime: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
+		Charges: []*ChargingInterval{
+			&ChargingInterval{
+				RatingID: "21a5ab9",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(0),
+						Cost:           0.1,
+						AccountingID:   "9bdad10",
+						CompressFactor: 1,
+					},
+					&ChargingIncrement{
+						Usage:          time.Duration(1 * time.Second),
+						Cost:           0,
+						AccountingID:   "3455b83",
+						CompressFactor: 10,
+					},
+					&ChargingIncrement{
+						Usage:          time.Duration(10 * time.Second),
+						Cost:           0.01,
+						AccountingID:   "2012888",
+						CompressFactor: 2,
+					},
+					&ChargingIncrement{
+						Usage:          time.Duration(1 * time.Second),
+						Cost:           0.005,
+						AccountingID:   "24d6c02",
+						CompressFactor: 30,
+					},
+				},
+				CompressFactor: 1,
+			},
+			&ChargingInterval{
+				RatingID: "21a5ab9",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(1 * time.Second),
+						Cost:           0.01,
+						AccountingID:   "2012888",
+						CompressFactor: 60,
+					},
+				},
+				CompressFactor: 4,
+			},
+			&ChargingInterval{
+				RatingID: "21a5ab9",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(1 * time.Second),
+						Cost:           0,
+						AccountingID:   "3455b83",
+						CompressFactor: 10,
+					},
+					&ChargingIncrement{
+						Usage:          time.Duration(10 * time.Second),
+						Cost:           0.01,
+						AccountingID:   "2012888",
+						CompressFactor: 2,
+					},
+					&ChargingIncrement{
+						Usage:          time.Duration(1 * time.Second),
+						Cost:           0.005,
+						AccountingID:   "24d6c02",
+						CompressFactor: 30,
+					},
+				},
+				CompressFactor: 5,
+			},
+		},
+		AccountSummary: &AccountSummary{
+			Tenant: "cgrates.org",
+			ID:     "dan",
+			BalanceSummaries: []*BalanceSummary{
+				&BalanceSummary{
+					Type:     "*monetary",
+					Value:    50,
+					Disabled: false},
+				&BalanceSummary{
+					ID:       "4b8b53d7-c1a1-4159-b845-4623a00a0165",
+					Type:     "*monetary",
+					Value:    25,
+					Disabled: false},
+				&BalanceSummary{
+					Type:     "*voice",
+					Value:    200,
+					Disabled: false,
+				},
+			},
+			AllowNegative: false,
+			Disabled:      false,
+		},
+		Rating: Rating{
+			"3cd6425": &RatingUnit{
+				RoundingMethod:   "*up",
+				RoundingDecimals: 5,
+				TimingID:         "2f324ab",
+				RatesID:          "4910ecf",
+				RatingFiltersID:  "23e77dc",
+			},
+			"21a5ab9": &RatingUnit{
+				ConnectFee:       0.1,
+				RoundingMethod:   "*up",
+				RoundingDecimals: 5,
+				TimingID:         "2f324ab",
+				RatesID:          "2c1a177",
+				RatingFiltersID:  "23e77dc",
+			},
+		},
+		Accounting: Accounting{
+			"2012888": &BalanceCharge{
+				AccountID:   "cgrates.org:dan",
+				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+				Units:       0.01,
+			},
+			"288bfa6": &BalanceCharge{
+				AccountID:   "cgrates.org:dan",
+				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+				Units:       0.005,
+			},
+			"9bdad10": &BalanceCharge{
+				AccountID:   "cgrates.org:dan",
+				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+				Units:       0.1,
+			},
+			"24d6c02": &BalanceCharge{
+				AccountID:     "cgrates.org:dan",
+				BalanceUUID:   "7a54a9e9-d610-4c82-bcb5-a315b9a65010",
+				RatingID:      "3cd6425",
+				Units:         1,
+				ExtraChargeID: "288bfa6",
+			},
+			"3455b83": &BalanceCharge{
+				AccountID:     "cgrates.org:dan",
+				BalanceUUID:   "9d54a9e9-d610-4c82-bcb5-a315b9a65089",
+				Units:         1,
+				ExtraChargeID: "*none",
+			},
+		},
+		RatingFilters: RatingFilters{
+			"23e77dc": RatingMatchedFilters{
+				"DestinationID":     "GERMANY",
+				"DestinationPrefix": "+49",
+				"RatingPlanID":      "RPL_RETAIL1",
+				"Subject":           "*out:cgrates.org:call:*any",
+			},
+		},
+		Rates: ChargedRates{
+			"2c1a177": RateGroups{
+				&Rate{
+					GroupIntervalStart: time.Duration(0),
+					Value:              0.01,
+					RateIncrement:      time.Duration(1 * time.Minute),
+					RateUnit:           time.Duration(1 * time.Second)},
+			},
+			"4910ecf": RateGroups{
+				&Rate{
+					GroupIntervalStart: time.Duration(0),
+					Value:              0.005,
+					RateIncrement:      time.Duration(1 * time.Second),
+					RateUnit:           time.Duration(1 * time.Second)},
+				&Rate{
+					GroupIntervalStart: time.Duration(60 * time.Second),
+					Value:              0.005,
+					RateIncrement:      time.Duration(1 * time.Second),
+					RateUnit:           time.Duration(1 * time.Second)},
+			},
+		},
+		Timings: ChargedTimings{
+			"2f324ab": &ChargedTiming{
+				StartTime: "00:00:00",
+			},
+		},
+	}
+
+	ec.SyncKeys(refEC)
+	if !reflect.DeepEqual(eEC, ec) {
+		t.Errorf("expecting: %s \nreceived: %s",
+			utils.ToIJSON(eEC), utils.ToIJSON(ec))
+	}
+}
