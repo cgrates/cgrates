@@ -663,8 +663,7 @@ func (pstr *SQSPoster) newPosterSession() (s *sqs.SQS, err error) {
 			cfg.Region = aws.String(pstr.awsRegion)
 		}
 		if len(pstr.awsID) != 0 &&
-			len(pstr.awsKey) != 0 &&
-			len(pstr.awsToken) != 0 {
+			len(pstr.awsKey) != 0 {
 			cfg.Credentials = credentials.NewStaticCredentials(pstr.awsID, pstr.awsKey, pstr.awsToken)
 		}
 		ses, err = session.NewSessionWithOptions(
