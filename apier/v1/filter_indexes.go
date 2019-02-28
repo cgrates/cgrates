@@ -58,6 +58,8 @@ func (self *ApierV1) RemoveFilterIndexes(arg AttrRemFilterIndexes, reply *string
 		arg.ItemType = utils.ResourceProfilesPrefix
 	case utils.MetaChargers:
 		arg.ItemType = utils.ChargerProfilePrefix
+	case utils.MetaDispatchers:
+		arg.ItemType = utils.DispatcherProfilePrefix
 	case utils.MetaAttributes:
 		if missing := utils.MissingStructFields(&arg, []string{"Context"}); len(missing) != 0 { //Params missing
 			return utils.NewErrMandatoryIeMissing(missing...)
@@ -91,6 +93,8 @@ func (self *ApierV1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string)
 		arg.ItemType = utils.ResourceProfilesPrefix
 	case utils.MetaChargers:
 		arg.ItemType = utils.ChargerProfilePrefix
+	case utils.MetaDispatchers:
+		arg.ItemType = utils.DispatcherProfilePrefix
 	case utils.MetaAttributes:
 		if missing := utils.MissingStructFields(&arg, []string{"Context"}); len(missing) != 0 { //Params missing
 			return utils.NewErrMandatoryIeMissing(missing...)
@@ -220,6 +224,11 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	if err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
+	dspIndexes, err := self.computeDispatcherIndexes(args.Tenant, args.DispatcherIDs, transactionID)
+	if err != nil && err != utils.ErrNotFound {
+		return utils.APIErrorHandler(err)
+	}
+
 	//Now we move from tmpKey to the right key for each type
 	//ThresholdProfile Indexes
 	if thdsIndexers != nil {
@@ -307,6 +316,21 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 					return err
 				}
 				if err := cppIndexes.RemoveItemFromIndex(args.Tenant, id, cpp.FilterIDs); err != nil {
+					return err
+				}
+			}
+			return err
+		}
+	}
+	//DispatcherProfile Indexes
+	if dspIndexes != nil {
+		if err := dspIndexes.StoreIndexes(true, transactionID); err != nil {
+			for _, id := range *args.DispatcherIDs {
+				cpp, err := self.DataManager.GetDispatcherProfile(args.Tenant, id, true, false, utils.NonTransactional)
+				if err != nil {
+					return err
+				}
+				if err := dspIndexes.RemoveItemFromIndex(args.Tenant, id, cpp.FilterIDs); err != nil {
 					return err
 				}
 			}
@@ -718,4 +742,71 @@ func (self *ApierV1) computeChargerIndexes(tenant string, cppIDs *[]string,
 		}
 	}
 	return cppIndexes, nil
+}
+
+func (self *ApierV1) computeDispatcherIndexes(tenant string, dspIDs *[]string,
+	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
+	var dispatcherIDs []string
+	dspIndexes := engine.NewFilterIndexer(self.DataManager, utils.DispatcherProfilePrefix, tenant)
+	if dspIDs == nil {
+		ids, err := self.DataManager.DataDB().GetKeysForPrefix(utils.DispatcherProfilePrefix)
+		if err != nil {
+			return nil, err
+		}
+		for _, id := range ids {
+			dispatcherIDs = append(dispatcherIDs, strings.Split(id, utils.CONCATENATED_KEY_SEP)[1])
+		}
+	} else {
+		dispatcherIDs = *dspIDs
+		transactionID = utils.NonTransactional
+	}
+	for _, id := range dispatcherIDs {
+		dsp, err := self.DataManager.GetDispatcherProfile(tenant, id, true, false, utils.NonTransactional)
+		if err != nil {
+			return nil, err
+		}
+		fltrIDs := make([]string, len(dsp.FilterIDs))
+		for i, fltrID := range dsp.FilterIDs {
+			fltrIDs[i] = fltrID
+		}
+		if len(fltrIDs) == 0 {
+			fltrIDs = []string{utils.META_NONE}
+		}
+		for _, fltrID := range fltrIDs {
+			var fltr *engine.Filter
+			if fltrID == utils.META_NONE {
+				fltr = &engine.Filter{
+					Tenant: dsp.Tenant,
+					ID:     dsp.ID,
+					Rules: []*engine.FilterRule{
+						{
+							Type:      utils.META_NONE,
+							FieldName: utils.META_ANY,
+							Values:    []string{utils.META_ANY},
+						},
+					},
+				}
+			} else if fltr, err = self.DataManager.GetFilter(dsp.Tenant, fltrID,
+				true, false, utils.NonTransactional); err != nil {
+				if err == utils.ErrNotFound {
+					err = fmt.Errorf("broken reference to filter: %+v for dispatcher: %+v",
+						fltrID, dsp)
+				}
+				return nil, err
+			} else {
+				dspIndexes.IndexTPFilter(engine.FilterToTPFilter(fltr), dsp.ID)
+			}
+		}
+	}
+	if transactionID == utils.NonTransactional {
+		if err := dspIndexes.StoreIndexes(true, transactionID); err != nil {
+			return nil, err
+		}
+		return nil, nil
+	} else {
+		if err := dspIndexes.StoreIndexes(false, transactionID); err != nil {
+			return nil, err
+		}
+	}
+	return dspIndexes, nil
 }
