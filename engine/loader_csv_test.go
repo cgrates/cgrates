@@ -255,9 +255,9 @@ cgrates.org,SPP_1,,,,,supplier1,FLTR_DST_DE,Account2,RPL_3,ResGroup3,Stat2,10,,,
 cgrates.org,SPP_1,,,,,supplier1,,,,ResGroup4,Stat3,10,,,
 `
 	attributeProfiles = `
-#Tenant,ID,Contexts,FilterIDs,ActivationInterval,FieldName,Initial,Substitute,Append,Blocker,Weight
-cgrates.org,ALS1,con1,FLTR_1,2014-07-29T15:00:00Z,Field1,Initial1,Sub1,true,true,20
-cgrates.org,ALS1,con2;con3,,,Field2,Initial2,Sub2,false,,
+#Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,FieldName,Substitute,Blocker,Weight
+cgrates.org,ALS1,con1,FLTR_1,2014-07-29T15:00:00Z,*string:Field1:Initial,Field1,Sub1,true,20
+cgrates.org,ALS1,con2;con3,,,,Field2,Sub2,true,20
 `
 	chargerProfiles = `
 #Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
@@ -1479,16 +1479,14 @@ func TestLoadAttributeProfiles(t *testing.T) {
 			},
 			Attributes: []*utils.TPAttribute{
 				&utils.TPAttribute{
+					FilterIDs:  []string{"*string:Field1:Initial"},
 					FieldName:  "Field1",
-					Initial:    "Initial1",
 					Substitute: "Sub1",
-					Append:     true,
 				},
 				&utils.TPAttribute{
+					FilterIDs:  []string{},
 					FieldName:  "Field2",
-					Initial:    "Initial2",
 					Substitute: "Sub2",
-					Append:     false,
 				},
 			},
 			Blocker: true,

@@ -169,15 +169,11 @@ func testDCITMigrateAndMove(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FieldName:  utils.Account,
-				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("1004", true, utils.INFIELD_SEP),
-				Append:     true,
 			},
 			{
 				FieldName:  utils.Subject,
-				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("call_1003", true, utils.INFIELD_SEP),
-				Append:     true,
 			},
 		},
 		Blocker: false,
@@ -232,9 +228,6 @@ func testDCITMigrateAndMove(t *testing.T) {
 		}
 		result.Compile()
 		sort.Slice(result.Attributes, func(i, j int) bool {
-			if result.Attributes[i].FieldName == result.Attributes[j].FieldName {
-				return result.Attributes[i].Initial.(string) < result.Attributes[j].Initial.(string)
-			}
 			return result.Attributes[i].FieldName < result.Attributes[j].FieldName
 		}) // only for test; map returns random keys
 		if !reflect.DeepEqual(*attrProf, *result) {
@@ -257,7 +250,8 @@ func testDCITMigrateAndMove(t *testing.T) {
 				"*out:cgrates.org:*any:1003:*any_0": true,
 			},
 		}
-		if dcidx, err := dcMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix], utils.ConcatenatedKey("cgrates.org", utils.META_ANY), utils.MetaString, nil); err != nil {
+		if dcidx, err := dcMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
+			utils.ConcatenatedKey("cgrates.org", utils.META_ANY), utils.MetaString, nil); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(expDcIdx, dcidx) {
 			t.Errorf("Expected %v, recived: %v", utils.ToJSON(expDcIdx), utils.ToJSON(dcidx))
@@ -267,7 +261,8 @@ func testDCITMigrateAndMove(t *testing.T) {
 				"*out:cgrates.org:*any:1003:*any_0": true,
 			},
 		}
-		if dcidx, err := dcMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.ChargerProfilePrefix], utils.ConcatenatedKey("cgrates.org", utils.META_ANY),
+		if dcidx, err := dcMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.ChargerProfilePrefix],
+			utils.ConcatenatedKey("cgrates.org", utils.META_ANY),
 			utils.MetaString, nil); err == nil || err.Error() != utils.ErrNotFound.Error() {
 			t.Errorf("Expected error %v, recived: %v with reply: %v", utils.ErrNotFound, err, utils.ToJSON(dcidx))
 		}

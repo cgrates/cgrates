@@ -84,11 +84,10 @@ func fieldinfo2Attribute(attr []*engine.Attribute, fieldName, fieldInfo string) 
 	}
 	return append(attr, &engine.Attribute{
 		FieldName:  fieldName,
-		Initial:    utils.META_ANY,
 		Substitute: rp,
-		Append:     true,
 	})
 }
+
 func derivedChargers2AttributeProfile(dc *v1DerivedCharger, tenant, key string, filters []string) (attr *engine.AttributeProfile) {
 	attr = &engine.AttributeProfile{
 		Tenant:             tenant,

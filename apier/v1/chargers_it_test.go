@@ -163,7 +163,6 @@ func testChargerSLoadAddCharger(t *testing.T) {
 						AllFiltersMatch: true,
 					},
 				},
-				Append: true,
 			},
 		},
 		Blocker: false,

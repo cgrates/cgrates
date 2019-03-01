@@ -26,10 +26,9 @@ import (
 )
 
 type Attribute struct {
+	FilterIDs  []string
 	FieldName  string
-	Initial    interface{}
 	Substitute config.RSRParsers
-	Append     bool
 }
 
 type AttributeProfile struct {
@@ -41,19 +40,6 @@ type AttributeProfile struct {
 	Attributes         []*Attribute
 	Blocker            bool // blocker flag to stop processing on multiple runs
 	Weight             float64
-
-	attributesIdx map[string]map[interface{}]*Attribute // map[FieldName][InitialValue]*Attribute, used as event match index
-}
-
-// computeAttributesIndex populates .attributes
-func (ap *AttributeProfile) computeAttributesIndex() {
-	ap.attributesIdx = make(map[string]map[interface{}]*Attribute)
-	for _, attr := range ap.Attributes {
-		if _, has := ap.attributesIdx[attr.FieldName]; !has {
-			ap.attributesIdx[attr.FieldName] = make(map[interface{}]*Attribute)
-		}
-		ap.attributesIdx[attr.FieldName][attr.Initial] = attr
-	}
 }
 
 func (ap *AttributeProfile) compileSubstitutes() (err error) {
@@ -67,7 +53,6 @@ func (ap *AttributeProfile) compileSubstitutes() (err error) {
 
 // Compile is a wrapper for convenience setting up the AttributeProfile
 func (ap *AttributeProfile) Compile() error {
-	ap.computeAttributesIndex()
 	return ap.compileSubstitutes()
 }
 

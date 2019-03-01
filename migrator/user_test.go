@@ -93,15 +93,11 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					FieldName:  utils.MetaTenant,
-					Initial:    utils.META_ANY,
 					Substitute: config.NewRSRParsersMustCompile(usrTenant, true, utils.INFIELD_SEP),
-					Append:     true,
 				},
 				{
 					FieldName:  "Subject",
-					Initial:    utils.META_ANY,
 					Substitute: config.NewRSRParsersMustCompile("call_1001", true, utils.INFIELD_SEP),
-					Append:     true,
 				},
 			},
 			Blocker: false,
@@ -116,15 +112,11 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					FieldName:  utils.RequestType,
-					Initial:    utils.META_ANY,
 					Substitute: config.NewRSRParsersMustCompile("*prepaid", true, utils.INFIELD_SEP),
-					Append:     true,
 				},
 				{
 					FieldName:  "msisdn",
-					Initial:    utils.META_ANY,
 					Substitute: config.NewRSRParsersMustCompile("123423534646752", true, utils.INFIELD_SEP),
-					Append:     true,
 				},
 			},
 			Blocker: false,
@@ -139,15 +131,11 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					FieldName:  utils.MetaTenant,
-					Initial:    utils.META_ANY,
 					Substitute: config.NewRSRParsersMustCompile(usrTenant, true, utils.INFIELD_SEP),
-					Append:     true,
 				},
 				{
 					FieldName:  utils.RequestType,
-					Initial:    utils.META_ANY,
 					Substitute: config.NewRSRParsersMustCompile("*prepaid", true, utils.INFIELD_SEP),
-					Append:     true,
 				},
 			},
 			Blocker: false,
@@ -158,7 +146,7 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 		rply := userProfile2attributeProfile(users[i])
 		sort.Slice(rply.Attributes, func(i, j int) bool {
 			if rply.Attributes[i].FieldName == rply.Attributes[j].FieldName {
-				return rply.Attributes[i].Initial.(string) < rply.Attributes[j].Initial.(string)
+				return rply.Attributes[i].FilterIDs[0] < rply.Attributes[j].FilterIDs[0]
 			}
 			return rply.Attributes[i].FieldName < rply.Attributes[j].FieldName
 		}) // only for test; map returns random keys

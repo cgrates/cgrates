@@ -384,17 +384,16 @@ CREATE TABLE tp_attributes (
   `contexts` varchar(64) NOT NULL,
   `filter_ids` varchar(64) NOT NULL,
   `activation_interval` varchar(64) NOT NULL,
+  `attribute_filter_ids` varchar(64) NOT NULL,
   `field_name` varchar(64) NOT NULL,
-  `initial` varchar(64) NOT NULL,
   `substitute` varchar(64) NOT NULL,
-  `append` BOOLEAN NOT NULL,
   `blocker` BOOLEAN NOT NULL,
   `weight` decimal(8,2) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),
   UNIQUE KEY `unique_tp_attributes` (`tpid`,`tenant`,
-    `id`,`filter_ids`,`field_name`,`initial`,`substitute` )
+    `id`,`filter_ids`,`field_name`,`substitute` )
 );
 
 --

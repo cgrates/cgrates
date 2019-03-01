@@ -2031,6 +2031,7 @@ func (tps TPAttributes) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 	filterMap := make(map[string]utils.StringMap)
 	contextMap := make(map[string]utils.StringMap)
 	for _, tp := range tps {
+		key := &utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}
 		th, found := mst[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]
 		if !found {
 			th = &utils.TPAttributeProfile{
@@ -2054,32 +2055,38 @@ func (tps TPAttributes) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 			}
 		}
 		if tp.FilterIDs != "" {
-			if _, has := filterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]; !has {
-				filterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(utils.StringMap)
+			if _, has := filterMap[key.TenantID()]; !has {
+				filterMap[key.TenantID()] = make(utils.StringMap)
 			}
 			filterSplit := strings.Split(tp.FilterIDs, utils.INFIELD_SEP)
 			for _, filter := range filterSplit {
-				filterMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][filter] = true
+				filterMap[key.TenantID()][filter] = true
 			}
 		}
 		if tp.Contexts != "" {
 			if _, has := contextMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]; !has {
-				contextMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = make(utils.StringMap)
+				contextMap[key.TenantID()] = make(utils.StringMap)
 			}
 			contextSplit := strings.Split(tp.Contexts, utils.INFIELD_SEP)
 			for _, context := range contextSplit {
-				contextMap[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()][context] = true
+				contextMap[key.TenantID()][context] = true
 			}
 		}
 		if tp.FieldName != "" {
+			filterIDs := make([]string, 0)
+			if tp.AttributeFilterIDs != "" {
+				filterAttrSplit := strings.Split(tp.AttributeFilterIDs, utils.INFIELD_SEP)
+				for _, filterAttr := range filterAttrSplit {
+					filterIDs = append(filterIDs, filterAttr)
+				}
+			}
 			th.Attributes = append(th.Attributes, &utils.TPAttribute{
+				FilterIDs:  filterIDs,
 				FieldName:  tp.FieldName,
-				Initial:    tp.Initial,
 				Substitute: tp.Substitute,
-				Append:     tp.Append,
 			})
 		}
-		mst[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = th
+		mst[key.TenantID()] = th
 	}
 	result = make([]*utils.TPAttributeProfile, len(mst))
 	i := 0
@@ -2131,11 +2138,15 @@ func APItoModelTPAttribute(th *utils.TPAttributeProfile) (mdls TPAttributes) {
 			if th.Weight != 0 {
 				mdl.Weight = th.Weight
 			}
+			for i, val := range reqAttribute.FilterIDs {
+				if i != 0 {
+					mdl.AttributeFilterIDs += utils.INFIELD_SEP
+				}
+				mdl.AttributeFilterIDs += val
+			}
 		}
 		mdl.FieldName = reqAttribute.FieldName
-		mdl.Initial = reqAttribute.Initial
 		mdl.Substitute = reqAttribute.Substitute
-		mdl.Append = reqAttribute.Append
 		mdls = append(mdls, mdl)
 	}
 	return
@@ -2163,9 +2174,8 @@ func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (a
 			return nil, err
 		}
 		attrPrf.Attributes[i] = &Attribute{
-			Append:     reqAttr.Append,
+			FilterIDs:  reqAttr.FilterIDs,
 			FieldName:  reqAttr.FieldName,
-			Initial:    reqAttr.Initial,
 			Substitute: sbstPrsr,
 		}
 	}

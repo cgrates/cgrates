@@ -214,3 +214,19 @@ func (v1ms *mapMigrator) setV1DerivedChargers(dc *v1DerivedChargersWithKey) (err
 func (v1ms *mapMigrator) remV1DerivedChargers(key string) (err error) {
 	return utils.ErrNotImplemented
 }
+
+//AttributeProfile methods
+//get
+func (v1ms *mapMigrator) getV2AttributeProfile() (v2attrPrf *v2AttributeProfile, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+//set
+func (v1ms *mapMigrator) setV2AttributeProfile(x *v2AttributeProfile) (err error) {
+	return utils.ErrNotImplemented
+}
+
+//rem
+func (v1ms *mapMigrator) remV2AttributeProfile(tenant, id string) (err error) {
+	return utils.ErrNotImplemented
+}

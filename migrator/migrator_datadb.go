@@ -55,6 +55,9 @@ type MigratorDataDB interface {
 	getV1DerivedChargers() (v1d *v1DerivedChargersWithKey, err error)
 	setV1DerivedChargers(dc *v1DerivedChargersWithKey) (err error)
 	remV1DerivedChargers(key string) (err error)
+	getV2AttributeProfile() (v2attrPrf *v2AttributeProfile, err error)
+	setV2AttributeProfile(x *v2AttributeProfile) (err error)
+	remV2AttributeProfile(tenant, id string) (err error)
 
 	DataManager() *engine.DataManager
 }

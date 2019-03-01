@@ -654,3 +654,51 @@ func (v1rs *redisMigrator) setV1DerivedChargers(dc *v1DerivedChargersWithKey) (e
 func (v1rs *redisMigrator) remV1DerivedChargers(key string) (err error) {
 	return v1rs.rds.Cmd("DEL", utils.DERIVEDCHARGERS_PREFIX+key).Err
 }
+
+//AttributeProfile methods
+//get
+func (v1rs *redisMigrator) getV2AttributeProfile() (v2attrPrf *v2AttributeProfile, err error) {
+	var v2attr *v2AttributeProfile
+	if v1rs.qryIdx == nil {
+		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(utils.AttributeProfilePrefix)
+		if err != nil {
+			return
+		} else if len(v1rs.dataKeys) == 0 {
+			return nil, utils.ErrNotFound
+		}
+		v1rs.qryIdx = utils.IntPointer(0)
+	}
+	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
+		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
+		if err != nil {
+			return nil, err
+		}
+		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v2attr); err != nil {
+			return nil, err
+		}
+		*v1rs.qryIdx = *v1rs.qryIdx + 1
+	} else {
+		v1rs.qryIdx = nil
+		return nil, utils.ErrNoMoreData
+	}
+	return v2attr, nil
+}
+
+//set
+func (v1rs *redisMigrator) setV2AttributeProfile(x *v2AttributeProfile) (err error) {
+	key := utils.AttributeProfilePrefix + utils.ConcatenatedKey(x.Tenant, x.ID)
+	bit, err := v1rs.rds.Marshaler().Marshal(x)
+	if err != nil {
+		return err
+	}
+	if err = v1rs.rds.Cmd("SET", key, bit).Err; err != nil {
+		return err
+	}
+	return
+}
+
+//rem
+func (v1rs *redisMigrator) remV2AttributeProfile(tenant, id string) (err error) {
+	key := utils.AttributeProfilePrefix + utils.ConcatenatedKey(tenant, id)
+	return v1rs.rds.Cmd("DEL", key).Err
+}
