@@ -383,6 +383,68 @@ func TestRateIntervalCost(t *testing.T) {
 	}
 }
 
+func TestRateGroupsEquals(t *testing.T) {
+	rg1 := RateGroups{
+		&Rate{
+			GroupIntervalStart: time.Duration(0),
+			Value:              0.1,
+			RateIncrement:      time.Minute,
+			RateUnit:           60 * time.Second,
+		},
+		&Rate{
+			GroupIntervalStart: time.Duration(60 * time.Second),
+			Value:              0.05,
+			RateIncrement:      time.Second,
+			RateUnit:           time.Second,
+		},
+	}
+	rg2 := RateGroups{
+		&Rate{
+			GroupIntervalStart: time.Duration(0),
+			Value:              0.1,
+			RateIncrement:      time.Minute,
+			RateUnit:           60 * time.Second,
+		},
+		&Rate{
+			GroupIntervalStart: time.Duration(60 * time.Second),
+			Value:              0.05,
+			RateIncrement:      time.Second,
+			RateUnit:           time.Second,
+		},
+	}
+	if !rg1.Equals(rg2) {
+		t.Error("not equal")
+	}
+	rg2 = RateGroups{
+		&Rate{
+			GroupIntervalStart: time.Duration(0),
+			Value:              0.1,
+			RateIncrement:      time.Minute,
+			RateUnit:           60 * time.Second,
+		},
+		&Rate{
+			GroupIntervalStart: time.Duration(60 * time.Second),
+			Value:              0.3,
+			RateIncrement:      time.Second,
+			RateUnit:           time.Second,
+		},
+	}
+	if rg1.Equals(rg2) {
+		t.Error("equals")
+	}
+	rg2 = RateGroups{
+		&Rate{
+			GroupIntervalStart: time.Duration(0),
+			Value:              0.1,
+			RateIncrement:      time.Minute,
+			RateUnit:           60 * time.Second,
+		},
+	}
+	if rg1.Equals(rg2) {
+		t.Error("equals")
+	}
+}
+
 /*********************************Benchmarks**************************************/
 
 func BenchmarkRateIntervalContainsDate(b *testing.B) {

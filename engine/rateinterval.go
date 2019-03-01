@@ -294,7 +294,7 @@ func (pg RateGroups) Equals(oRG RateGroups) bool {
 		return false
 	}
 	for i := range pg {
-		if !pg[0].Equal(oRG[i]) {
+		if !pg[i].Equal(oRG[i]) {
 			return false
 		}
 	}
