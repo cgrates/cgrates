@@ -92,6 +92,7 @@
 	},
 	"sqs_test_file": {
 		"export_format": "*sqs_json_map",
+		// export_path for sqs:  "endpoint/?aws_region=region&aws_key=IDkey&aws_secret=secret&aws_token=sessionToken"  
 		"export_path": "http://sqs.eu-west-2.amazonaws.com/?aws_region=eu-west-2&aws_key=testkey&aws_secret=testsecret",
 		"content_fields": [
 			{"tag": "CGRID", "type": "*composed", "value": "~CGRID", "field_id": "CGRID"},
