@@ -236,7 +236,7 @@ func (ms *MongoStorage) GetContext() context.Context {
 func (ms *MongoStorage) EnsureIndexes() (err error) {
 	if ms.storageType == utils.DataDB {
 		for _, col := range []string{colAct, colApl, colAAp, colAtr,
-			colRpl, colDst, colRds, colLht} {
+			colRpl, colDst, colRds, colLht, colRFI} {
 			if err = ms.EnusureIndex(col, true, "key"); err != nil {
 				return
 			}
