@@ -102,11 +102,14 @@ func alias2AtttributeProfile(alias *v1Alias, defaultTenant string) *engine.Attri
 		}
 		for fieldname, vals := range av.Pairs {
 			for initial, substitute := range vals {
+				filterIDs := make([]string, 0)
+				if initial != utils.META_ANY {
+					filterIDs = append(filterIDs, utils.MetaString+":"+fieldname+":"+initial)
+				}
 				out.Attributes = append(out.Attributes, &engine.Attribute{
+					FilterIDs:  filterIDs,
 					FieldName:  fieldname,
-					Initial:    initial,
 					Substitute: config.NewRSRParsersMustCompile(substitute, true, utils.INFIELD_SEP),
-					Append:     true,
 				})
 			}
 		}

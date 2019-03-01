@@ -112,6 +112,45 @@ func (m *Migrator) migrateV1Attributes() (err error) {
 	return
 }
 
+func (m *Migrator) migrateV2Attributes() (err error) {
+	var v2Attr *v2AttributeProfile
+	for {
+		v2Attr, err = m.dmIN.getV2AttributeProfile()
+		if err != nil && err != utils.ErrNoMoreData {
+			return err
+		}
+		if err == utils.ErrNoMoreData {
+			break
+		}
+		if v2Attr != nil {
+			attrPrf, err := v2Attr.AsAttributeProfile()
+			if err != nil {
+				return err
+			}
+			if m.dryRun != true {
+				if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
+					return err
+				}
+				if err := m.dmIN.remV2AttributeProfile(v2Attr.Tenant, v2Attr.ID); err != nil {
+					return err
+				}
+				m.stats[utils.Attributes] += 1
+			}
+		}
+	}
+	if m.dryRun != true {
+		// All done, update version wtih current one
+		vrs := engine.Versions{utils.Attributes: engine.CurrentDataDBVersions()[utils.Attributes]}
+		if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
+			return utils.NewCGRError(utils.Migrator,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error: <%s> when updating Thresholds version into dataDB", err.Error()))
+		}
+	}
+	return
+}
+
 func (m *Migrator) migrateAttributeProfile() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
@@ -140,6 +179,10 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 		if err := m.migrateV1Attributes(); err != nil {
 			return err
 		}
+	case 2:
+		if err := m.migrateV2Attributes(); err != nil {
+			return err
+		}
 	}
 	return
 }
@@ -155,18 +198,70 @@ func (v1AttrPrf v1AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 	}
 	for _, mp := range v1AttrPrf.Attributes {
 		for _, attr := range mp {
-			initIface := utils.StringToInterface(attr.Initial)
+			filterIDs := make([]string, 0)
+			//append false translate to  if FieldName exist do stuff
+			if attr.Append == false {
+				filterIDs = append(filterIDs, utils.MetaExists+":"+attr.FieldName+":")
+			}
+			//Initial not *any translate to if value of fieldName = initial do stuff
+			if attr.Initial != utils.META_ANY {
+				filterIDs = append(filterIDs, utils.MetaString+":"+attr.FieldName+":"+attr.Initial)
+			}
 			sbstPrsr, err := config.NewRSRParsers(attr.Substitute, true, config.CgrConfig().GeneralCfg().RsrSepatarot)
 			if err != nil {
 				return nil, err
 			}
 			attrPrf.Attributes = append(attrPrf.Attributes, &engine.Attribute{
+				FilterIDs:  filterIDs,
 				FieldName:  attr.FieldName,
-				Initial:    initIface,
 				Substitute: sbstPrsr,
-				Append:     attr.Append,
 			})
 		}
+	}
+	return
+}
+
+type v2Attribute struct {
+	FieldName  string
+	Initial    interface{}
+	Substitute config.RSRParsers
+	Append     bool
+}
+
+type v2AttributeProfile struct {
+	Tenant             string
+	ID                 string
+	Contexts           []string // bind this AttributeProfile to multiple contexts
+	FilterIDs          []string
+	ActivationInterval *utils.ActivationInterval // Activation interval
+	Attributes         []*v2Attribute
+	Weight             float64
+}
+
+func (v2AttrPrf v2AttributeProfile) AsAttributeProfile() (attrPrf *engine.AttributeProfile, err error) {
+	attrPrf = &engine.AttributeProfile{
+		Tenant:             v2AttrPrf.Tenant,
+		ID:                 v2AttrPrf.ID,
+		Contexts:           v2AttrPrf.Contexts,
+		FilterIDs:          v2AttrPrf.FilterIDs,
+		Weight:             v2AttrPrf.Weight,
+		ActivationInterval: v2AttrPrf.ActivationInterval,
+	}
+	for _, attr := range v2AttrPrf.Attributes {
+		filterIDs := make([]string, 0)
+		//append false translate to  if FieldName exist do stuff
+		if attr.Append == false {
+			filterIDs = append(filterIDs, utils.MetaExists+":"+attr.FieldName+":")
+		}
+		//Initial not *any translate to if value of fieldName = initial do stuff
+		if attr.Initial.(string) != utils.META_ANY {
+			filterIDs = append(filterIDs, utils.MetaString+":"+attr.FieldName+":"+attr.Initial.(string))
+		}
+		attrPrf.Attributes = append(attrPrf.Attributes, &engine.Attribute{
+			FilterIDs:  filterIDs,
+			FieldName:  attr.FieldName,
+			Substitute: attr.Substitute,
+		})
 	}
 	return
 }

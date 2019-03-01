@@ -54,9 +54,7 @@ func TestFieldinfo2Attribute(t *testing.T) {
 			Expected: []*engine.Attribute{
 				&engine.Attribute{
 					FieldName:  utils.Account,
-					Initial:    utils.META_ANY,
 					Substitute: config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
-					Append:     true,
 				},
 			},
 		},
@@ -67,9 +65,7 @@ func TestFieldinfo2Attribute(t *testing.T) {
 			Expected: []*engine.Attribute{
 				&engine.Attribute{
 					FieldName:  utils.Subject,
-					Initial:    utils.META_ANY,
 					Substitute: config.NewRSRParsersMustCompile(`~effective_caller_id_number:s/(\d+)/+$1/`, true, utils.INFIELD_SEP),
-					Append:     true,
 				},
 			},
 		},
@@ -79,23 +75,17 @@ func TestFieldinfo2Attribute(t *testing.T) {
 			Initial: []*engine.Attribute{
 				&engine.Attribute{
 					FieldName:  utils.Account,
-					Initial:    utils.META_ANY,
 					Substitute: config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
-					Append:     true,
 				},
 			},
 			Expected: []*engine.Attribute{
 				&engine.Attribute{
 					FieldName:  utils.Account,
-					Initial:    utils.META_ANY,
 					Substitute: config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
-					Append:     true,
 				},
 				&engine.Attribute{
 					FieldName:  utils.Subject,
-					Initial:    utils.META_ANY,
 					Substitute: config.NewRSRParsersMustCompile("call_1003", true, utils.INFIELD_SEP),
-					Append:     true,
 				},
 			},
 		},
@@ -134,15 +124,11 @@ func TestDerivedChargers2AttributeProfile(t *testing.T) {
 				Attributes: []*engine.Attribute{
 					&engine.Attribute{
 						FieldName:  utils.Category,
-						Initial:    utils.META_ANY,
 						Substitute: config.NewRSRParsersMustCompile("*voice", true, utils.INFIELD_SEP),
-						Append:     true,
 					},
 					&engine.Attribute{
 						FieldName:  utils.Account,
-						Initial:    utils.META_ANY,
 						Substitute: config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
-						Append:     true,
 					},
 				},
 				Blocker: false,
@@ -169,27 +155,19 @@ func TestDerivedChargers2AttributeProfile(t *testing.T) {
 				Attributes: []*engine.Attribute{
 					&engine.Attribute{
 						FieldName:  utils.Category,
-						Initial:    utils.META_ANY,
 						Substitute: config.NewRSRParsersMustCompile("*voice", true, utils.INFIELD_SEP),
-						Append:     true,
 					},
 					&engine.Attribute{
 						FieldName:  utils.Account,
-						Initial:    utils.META_ANY,
 						Substitute: config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
-						Append:     true,
 					},
 					&engine.Attribute{
 						FieldName:  utils.Subject,
-						Initial:    utils.META_ANY,
 						Substitute: config.NewRSRParsersMustCompile("call_1003_to_1004", true, utils.INFIELD_SEP),
-						Append:     true,
 					},
 					&engine.Attribute{
 						FieldName:  utils.Destination,
-						Initial:    utils.META_ANY,
 						Substitute: config.NewRSRParsersMustCompile("1004", true, utils.INFIELD_SEP),
-						Append:     true,
 					},
 				},
 				Blocker: false,

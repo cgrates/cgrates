@@ -163,16 +163,14 @@ func testAlsITMigrateAndMove(t *testing.T) {
 		ActivationInterval: nil,
 		Attributes: []*engine.Attribute{
 			{
+				FilterIDs:  []string{"*string:Account:1001"},
 				FieldName:  "Account",
-				Initial:    "1001",
 				Substitute: config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
-				Append:     true,
 			},
 			{
+				FilterIDs:  []string{"*string:Category:call_1001"},
 				FieldName:  "Category",
-				Initial:    "call_1001",
 				Substitute: config.NewRSRParsersMustCompile("call_1002", true, utils.INFIELD_SEP),
-				Append:     true,
 			},
 		},
 		Blocker: false,
@@ -215,7 +213,7 @@ func testAlsITMigrateAndMove(t *testing.T) {
 		result.Compile()
 		sort.Slice(result.Attributes, func(i, j int) bool {
 			if result.Attributes[i].FieldName == result.Attributes[j].FieldName {
-				return result.Attributes[i].Initial.(string) < result.Attributes[j].Initial.(string)
+				return result.Attributes[i].FilterIDs[0] < result.Attributes[j].FilterIDs[0]
 			}
 			return result.Attributes[i].FieldName < result.Attributes[j].FieldName
 		}) // only for test; map returns random keys
@@ -235,7 +233,8 @@ func testAlsITMigrateAndMove(t *testing.T) {
 				"*out:*any:*any:1001:call_1001:*rated": true,
 			},
 		}
-		if alsidx, err := alsMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix], utils.ConcatenatedKey("cgrates.org", utils.META_ANY), utils.MetaString, nil); err != nil {
+		if alsidx, err := alsMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
+			utils.ConcatenatedKey("cgrates.org", utils.META_ANY), utils.MetaString, nil); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(expAlsIdx, alsidx) {
 			t.Errorf("Expected %v, recived: %v", utils.ToJSON(expAlsIdx), utils.ToJSON(alsidx))

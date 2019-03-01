@@ -158,36 +158,27 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 		MatchedProfiles: []string{attrPrf.ID},
 		CGREvent:        args.Clone(),
 		blocker:         attrPrf.Blocker}
-	for fldName, initialMp := range attrPrf.attributesIdx {
-		initEvValIf, has := args.Event[fldName]
-		if !has {
-			anyInitial, hasAny := initialMp[utils.ANY]
-			if hasAny && anyInitial.Append { // add field name
-				substitute, err := anyInitial.Substitute.ParseEvent(args.Event)
-				if err != nil {
-					return nil, err
-				}
-				rply.CGREvent.Event[fldName] = substitute
-				rply.AlteredFields = append(rply.AlteredFields, fldName)
-			}
-			continue
-		}
-		attrVal, has := initialMp[initEvValIf]
-		if !has {
-			attrVal, has = initialMp[utils.ANY]
-		}
-		if has {
-			substitute, err := attrVal.Substitute.ParseEvent(args.Event)
-			if err != nil {
+
+	for _, attribute := range attrPrf.Attributes {
+		//in case that we have filter for attribute send them to FilterS to be processed
+		if len(attribute.FilterIDs) != 0 {
+			if pass, err := alS.filterS.Pass(args.Tenant, attribute.FilterIDs,
+				config.NewNavigableMap(args.Event)); err != nil {
 				return nil, err
+			} else if !pass {
+				continue
 			}
-			if substitute == utils.META_NONE {
-				delete(rply.CGREvent.Event, fldName)
-			} else {
-				rply.CGREvent.Event[fldName] = substitute
-			}
-			rply.AlteredFields = append(rply.AlteredFields, fldName)
 		}
+		substitute, err := attribute.Substitute.ParseEvent(args.Event)
+		if err != nil {
+			return nil, err
+		}
+		if substitute == utils.META_NONE {
+			delete(rply.CGREvent.Event, attribute.FieldName)
+		} else {
+			rply.CGREvent.Event[attribute.FieldName] = substitute
+		}
+		rply.AlteredFields = append(rply.AlteredFields, attribute.FieldName)
 	}
 	return
 }

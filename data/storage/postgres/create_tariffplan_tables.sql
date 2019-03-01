@@ -375,17 +375,16 @@ CREATE INDEX tp_suppliers_unique ON tp_suppliers  ("tpid",  "tenant", "id",
     "contexts" varchar(64) NOT NULL,
     "filter_ids" varchar(64) NOT NULL,
     "activation_interval" varchar(64) NOT NULL,
+    "attribute_filter_ids" varchar(64) NOT NULL,
     "field_name" varchar(64) NOT NULL,
-    "initial" varchar(64) NOT NULL,
     "substitute" varchar(64) NOT NULL,
-    "append" BOOLEAN NOT NULL,
     "blocker" BOOLEAN NOT NULL,
     "weight" decimal(8,2) NOT NULL,
     "created_at" TIMESTAMP WITH TIME ZONE
   );
   CREATE INDEX tp_attributes_ids ON tp_attributes (tpid);
   CREATE INDEX tp_attributes_unique ON tp_attributes  ("tpid",  "tenant", "id",
-    "filter_ids","field_name","initial","substitute");
+    "filter_ids","field_name","substitute");
 
   --
   -- Table structure for table `tp_chargers`

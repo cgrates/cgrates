@@ -164,10 +164,9 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
 				{
+					FilterIDs:  []string{"*string:Account:1001"},
 					FieldName:  "Account",
-					Initial:    "1001",
 					Substitute: config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
-					Append:     true,
 				},
 			},
 			Blocker: false,
@@ -181,16 +180,14 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
 				{
+					FilterIDs:  []string{"*string:Account:1001"},
 					FieldName:  "Account",
-					Initial:    "1001",
 					Substitute: config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
-					Append:     true,
 				},
 				{
+					FilterIDs:  []string{"*string:Account:1003"},
 					FieldName:  "Account",
-					Initial:    "1003",
 					Substitute: config.NewRSRParsersMustCompile("1004", true, utils.INFIELD_SEP),
-					Append:     true,
 				},
 			},
 			Blocker: false,
@@ -204,16 +201,14 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
 				{
+					FilterIDs:  []string{"*string:Account:1001"},
 					FieldName:  "Account",
-					Initial:    "1001",
 					Substitute: config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
-					Append:     true,
 				},
 				{
+					FilterIDs:  []string{"*string:Account:1003"},
 					FieldName:  "Account",
-					Initial:    "1003",
 					Substitute: config.NewRSRParsersMustCompile("1004", true, utils.INFIELD_SEP),
-					Append:     true,
 				},
 			},
 			Blocker: false,
@@ -231,16 +226,14 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
 				{
+					FilterIDs:  []string{"*string:Account:1001"},
 					FieldName:  "Account",
-					Initial:    "1001",
 					Substitute: config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
-					Append:     true,
 				},
 				{
+					FilterIDs:  []string{"*string:Subject:1001"},
 					FieldName:  "Subject",
-					Initial:    "1001",
 					Substitute: config.NewRSRParsersMustCompile("call_1001", true, utils.INFIELD_SEP),
-					Append:     true,
 				},
 			},
 			Blocker: false,
@@ -258,16 +251,14 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
 				{
+					FilterIDs:  []string{"*string:Account:1001"},
 					FieldName:  "Account",
-					Initial:    "1001",
 					Substitute: config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
-					Append:     true,
 				},
 				{
+					FilterIDs:  []string{"*string:Category:call_1001"},
 					FieldName:  "Category",
-					Initial:    "call_1001",
 					Substitute: config.NewRSRParsersMustCompile("call_1002", true, utils.INFIELD_SEP),
-					Append:     true,
 				},
 			},
 			Blocker: false,
@@ -278,7 +269,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 		rply := alias2AtttributeProfile(aliases[i], defaultTenant)
 		sort.Slice(rply.Attributes, func(i, j int) bool {
 			if rply.Attributes[i].FieldName == rply.Attributes[j].FieldName {
-				return rply.Attributes[i].Initial.(string) < rply.Attributes[j].Initial.(string)
+				return rply.Attributes[i].FilterIDs[0] < rply.Attributes[j].FilterIDs[0]
 			}
 			return rply.Attributes[i].FieldName < rply.Attributes[j].FieldName
 		}) // only for test; map returns random keys

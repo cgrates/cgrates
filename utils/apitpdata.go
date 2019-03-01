@@ -1131,10 +1131,9 @@ type TPSupplierProfile struct {
 }
 
 type TPAttribute struct {
+	FilterIDs  []string
 	FieldName  string
-	Initial    string
 	Substitute string
-	Append     bool
 }
 
 type TPAttributeProfile struct {

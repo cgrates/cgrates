@@ -32,9 +32,9 @@ import (
 )
 
 func TestLoaderProcessContentSingleFile(t *testing.T) {
-	attrsCSV := `#Tenant,ID,Contexts,FilterIDs,ActivationInterval,FieldName,Initial,Substitute,Append,Weight
-cgrates.org,TestLoader1,*sessions;*cdrs,*string:Account:1007,2014-01-14T00:00:00Z,Account,*any,1001,false,10
-cgrates.org,TestLoader1,lcr,*string:Account:1008;*string:Account:1009,,Subject,*any,1001,true,
+	attrsCSV := `#Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,FieldName,Substitute,Weight
+cgrates.org,TestLoader1,*sessions;*cdrs,*string:Account:1007,2014-01-14T00:00:00Z,*exist:Account:,Account,1001,10
+cgrates.org,TestLoader1,lcr,*string:Account:1008;*string:Account:1009,,,Subject,1001,
 `
 	data, _ := engine.NewMapStorage()
 	ldr := &Loader{
@@ -67,26 +67,22 @@ cgrates.org,TestLoader1,lcr,*string:Account:1008;*string:Account:1009,,Subject,*
 				FieldId: "ActivationInterval",
 				Type:    utils.META_COMPOSED,
 				Value:   config.NewRSRParsersMustCompile("~4", true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: "FieldName",
-				FieldId: "FieldName",
+			&config.FCTemplate{Tag: "AttributeFilterIDs",
+				FieldId: "AttributeFilterIDs",
 				Type:    utils.META_COMPOSED,
 				Value:   config.NewRSRParsersMustCompile("~5", true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: "Initial",
-				FieldId: "Initial",
+			&config.FCTemplate{Tag: "FieldName",
+				FieldId: "FieldName",
 				Type:    utils.META_COMPOSED,
 				Value:   config.NewRSRParsersMustCompile("~6", true, utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Substitute",
 				FieldId: "Substitute",
 				Type:    utils.META_COMPOSED,
 				Value:   config.NewRSRParsersMustCompile("~7", true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: "Append",
-				FieldId: "Append",
-				Type:    utils.META_COMPOSED,
-				Value:   config.NewRSRParsersMustCompile("~8", true, utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Weight",
 				FieldId: "Weight",
 				Type:    utils.META_COMPOSED,
-				Value:   config.NewRSRParsersMustCompile("~9", true, utils.INFIELD_SEP)},
+				Value:   config.NewRSRParsersMustCompile("~8", true, utils.INFIELD_SEP)},
 		},
 	}
 	rdr := ioutil.NopCloser(strings.NewReader(attrsCSV))
@@ -110,16 +106,14 @@ cgrates.org,TestLoader1,lcr,*string:Account:1008;*string:Account:1009,,Subject,*
 			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
+				FilterIDs:  []string{"*exist:Account:"},
 				FieldName:  "Account",
-				Initial:    utils.ANY,
 				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
-				Append:     false,
 			},
 			&engine.Attribute{
+				FilterIDs:  []string{},
 				FieldName:  "Subject",
-				Initial:    utils.ANY,
 				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
-				Append:     true,
 			}},
 		Weight: 10.0,
 	}
@@ -130,13 +124,13 @@ cgrates.org,TestLoader1,lcr,*string:Account:1008;*string:Account:1009,,Subject,*
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eAP.Attributes, ap.Attributes) {
-		t.Errorf("expecting: %s, received: %s",
+		t.Errorf("expecting: %s, \n received: %s",
 			utils.ToJSON(eAP), utils.ToJSON(ap))
 	}
 }
 
 func TestLoaderProcessContentMultiFiles(t *testing.T) {
-	file1CSV := `ignored,ignored,ignored,ignored,ignored,Subject,*any,1001,ignored,ignored`
+	file1CSV := `ignored,ignored,ignored,ignored,ignored,,Subject,1001,ignored,ignored`
 	file2CSV := `ignored,TestLoader2`
 	data, _ := engine.NewMapStorage()
 	ldr := &Loader{
@@ -164,19 +158,11 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 			&config.FCTemplate{Tag: "FieldName",
 				FieldId: "FieldName",
 				Type:    utils.META_COMPOSED,
-				Value:   config.NewRSRParsersMustCompile("~File1.csv:5", true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: "Initial",
-				FieldId: "Initial",
-				Type:    utils.META_COMPOSED,
 				Value:   config.NewRSRParsersMustCompile("~File1.csv:6", true, utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Substitute",
 				FieldId: "Substitute",
 				Type:    utils.META_COMPOSED,
 				Value:   config.NewRSRParsersMustCompile("~File1.csv:7", true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: "Append",
-				FieldId: "Append",
-				Type:    utils.MetaString,
-				Value:   config.NewRSRParsersMustCompile("true", true, utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Weight",
 				FieldId: "Weight",
 				Type:    utils.MetaString,
@@ -206,9 +192,8 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
 				FieldName:  "Subject",
-				Initial:    utils.ANY,
+				FilterIDs:  []string{},
 				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
-				Append:     true,
 			}},
 		Weight: 10.0,
 	}
@@ -219,7 +204,7 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eAP.Attributes, ap.Attributes) {
-		t.Errorf("expecting: %s, received: %s",
+		t.Errorf("expecting: %s, \n received: %s",
 			utils.ToJSON(eAP), utils.ToJSON(ap))
 	}
 }
