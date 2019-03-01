@@ -1963,13 +1963,6 @@ func testOnStorITSupplierProfile(t *testing.T) {
 }
 
 func testOnStorITAttributeProfile(t *testing.T) {
-	mapSubstitutes := make(map[string]map[interface{}]*Attribute)
-	mapSubstitutes["FN1"] = make(map[interface{}]*Attribute)
-	mapSubstitutes["FN1"]["Init1"] = &Attribute{
-		FieldName:  "FN1",
-		Initial:    "Init1",
-		Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
-	}
 	attrProfile := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf1",
@@ -1981,12 +1974,10 @@ func testOnStorITAttributeProfile(t *testing.T) {
 		Attributes: []*Attribute{
 			{
 				FieldName:  "FN1",
-				Initial:    "Init1",
 				Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 			},
 		},
-		Weight:        20,
-		attributesIdx: mapSubstitutes,
+		Weight: 20,
 	}
 	if _, rcvErr := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
@@ -2052,14 +2043,6 @@ func testOnStorITAttributeProfile(t *testing.T) {
 }
 
 func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
-	//set Substitue with type string
-	mapSubstitutes := make(map[string]map[interface{}]*Attribute)
-	mapSubstitutes["FN1"] = make(map[interface{}]*Attribute)
-	mapSubstitutes["FN1"]["Init1"] = &Attribute{
-		FieldName:  "FN1",
-		Initial:    "Init1",
-		Substitute: config.NewRSRParsersMustCompile("Val1", true, utils.INFIELD_SEP),
-	}
 	attrProfile := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf1",
@@ -2071,12 +2054,10 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 		Attributes: []*Attribute{
 			{
 				FieldName:  "FN1",
-				Initial:    "Init1",
 				Substitute: config.NewRSRParsersMustCompile("Val1", true, utils.INFIELD_SEP),
 			},
 		},
-		Weight:        20,
-		attributesIdx: mapSubstitutes,
+		Weight: 20,
 	}
 	if _, rcvErr := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
@@ -2099,23 +2080,15 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
 	}
-	//set Substitue with type float
-	mapSubstitutes["FN1"]["Init1"] = &Attribute{
-		FieldName:  "FN1",
-		Initial:    "Init1",
-		Substitute: config.NewRSRParsersMustCompile("123.123", true, utils.INFIELD_SEP),
-	}
 	attrProfile.Attributes = []*Attribute{
 		{
 			FieldName:  "FN1",
-			Initial:    "Init1",
 			Substitute: config.NewRSRParsersMustCompile("123.123", true, utils.INFIELD_SEP),
 		},
 	}
 	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
 		t.Error(err)
 	}
-	attrProfile.attributesIdx = mapSubstitutes
 	//check cache
 	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
 		true, false, utils.NonTransactional); err != nil {
@@ -2130,23 +2103,15 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(attrProfile), utils.ToJSON(rcv))
 	}
-	//set Substitue with type bool
-	mapSubstitutes["FN1"]["Init1"] = &Attribute{
-		FieldName:  "FN1",
-		Initial:    "Init1",
-		Substitute: config.NewRSRParsersMustCompile("true", true, utils.INFIELD_SEP),
-	}
 	attrProfile.Attributes = []*Attribute{
 		{
 			FieldName:  "FN1",
-			Initial:    "Init1",
 			Substitute: config.NewRSRParsersMustCompile("true", true, utils.INFIELD_SEP),
 		},
 	}
 	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
 		t.Error(err)
 	}
-	attrProfile.attributesIdx = mapSubstitutes
 	//check cache
 	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
 		true, false, utils.NonTransactional); err != nil {

@@ -131,7 +131,6 @@ func testRedisSentinelSetGetAttribute(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FieldName:  utils.Subject,
-				Initial:    utils.ANY,
 				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 			},
 		},
@@ -166,7 +165,6 @@ func testRedisSentinelInsertion(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FieldName:  utils.Subject,
-				Initial:    utils.ANY,
 				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 			},
 		},
@@ -251,7 +249,6 @@ func testRedisSentinelGetAttrAfterFailover(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FieldName:  utils.Subject,
-				Initial:    utils.ANY,
 				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 			},
 		},

@@ -156,7 +156,6 @@ func testChargerSLoadAddCharger(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FieldName: "Password",
-				Initial:   utils.ANY,
 				Substitute: config.RSRParsers{
 					&config.RSRParser{
 						Rules:           "CGRateS.org",

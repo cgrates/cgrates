@@ -168,12 +168,10 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FieldName:  utils.Account,
-				Initial:    utils.ANY,
 				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 			},
 			{
 				FieldName:  utils.Subject,
-				Initial:    utils.ANY,
 				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 			},
 		},
@@ -220,7 +218,6 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FieldName:  utils.Account,
-				Initial:    utils.ANY,
 				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 			},
 		},
@@ -271,7 +268,6 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FieldName:  utils.Account,
-				Initial:    utils.ANY,
 				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 			},
 		},
@@ -417,13 +413,12 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			{
+				FilterIDs:  []string{"*string:Account:1008"},
 				FieldName:  utils.Account,
-				Initial:    "1008",
 				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 			},
 			{
 				FieldName:  utils.Subject,
-				Initial:    utils.ANY,
 				Substitute: config.NewRSRParsersMustCompile(utils.META_NONE, true, utils.INFIELD_SEP),
 			},
 		},
@@ -438,7 +433,7 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 	}
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"AttributeWithNonSubstitute"},
-		AlteredFields:   []string{utils.Account},
+		AlteredFields:   []string{utils.Account, utils.Subject},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSWithNoneSubstitute",
@@ -483,13 +478,12 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			{
+				FilterIDs:  []string{"*string:Account:1008"},
 				FieldName:  utils.Account,
-				Initial:    "1008",
 				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 			},
 			{
 				FieldName:  utils.Subject,
-				Initial:    utils.ANY,
 				Substitute: config.NewRSRParsersMustCompile(utils.META_NONE, true, utils.INFIELD_SEP),
 			},
 		},
@@ -560,13 +554,13 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			{
+				FilterIDs:  []string{"*string:Account:1008"},
 				FieldName:  utils.Account,
-				Initial:    "1008",
 				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 			},
 			{
+				FilterIDs:  []string{"*string:Subject:1008"},
 				FieldName:  utils.Subject,
-				Initial:    "1008",
 				Substitute: config.NewRSRParsersMustCompile(utils.META_NONE, true, utils.INFIELD_SEP),
 			},
 		},
@@ -613,7 +607,6 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FieldName:  "Field2",
-				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("~Field1", true, utils.INFIELD_SEP),
 			},
 		},
@@ -686,7 +679,6 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FieldName:  "FL1",
-				Initial:    "In1",
 				Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 			},
 		},
@@ -714,12 +706,10 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 	alsPrf.Attributes = []*engine.Attribute{
 		{
 			FieldName:  "FL1",
-			Initial:    "In1",
 			Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 		},
 		{
 			FieldName:  "FL2",
-			Initial:    "In2",
 			Substitute: config.NewRSRParsersMustCompile("Al2", true, utils.INFIELD_SEP),
 		},
 	}
@@ -776,7 +766,6 @@ func testAttributeSSetAlsPrf2(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FieldName: utils.Subject,
-				Initial:   utils.ANY,
 				Substitute: config.RSRParsers{
 					&config.RSRParser{
 						Rules:           "roam",
@@ -819,7 +808,6 @@ func testAttributeSSetAlsPrf3(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FieldName: utils.Subject,
-				Initial:   utils.ANY,
 				Substitute: config.RSRParsers{
 					&config.RSRParser{
 						Rules: "",
@@ -849,7 +837,6 @@ func testAttributeSSetAlsPrf4(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FieldName: utils.Subject,
-				Initial:   utils.ANY,
 				Substitute: config.RSRParsers{
 					&config.RSRParser{},
 				},
@@ -885,7 +872,6 @@ func testAttributeSProcessEventWithSearchAndReplace(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FieldName:  "Category",
-				Initial:    utils.META_ANY,
 				Substitute: config.NewRSRParsersMustCompile("~Category:s/(.*)/${1}_suffix/", true, utils.INFIELD_SEP),
 			},
 		},
