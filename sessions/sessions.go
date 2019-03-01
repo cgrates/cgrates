@@ -485,7 +485,9 @@ func (sS *SessionS) debitSession(s *Session, sRunIdx int, dur time.Duration,
 	ec := engine.NewEventCostFromCallCost(cc, s.CGRID,
 		sr.Event.GetStringIgnoreErrors(utils.RunID))
 	if sr.EventCost == nil {
-		sr.EventCost = ec
+		if ccDuration != time.Duration(0) {
+			sr.EventCost = ec
+		}
 	} else {
 		sr.EventCost.Merge(ec)
 	}
