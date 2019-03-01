@@ -59,7 +59,11 @@ func (self *ApierV1) RemoveFilterIndexes(arg AttrRemFilterIndexes, reply *string
 	case utils.MetaChargers:
 		arg.ItemType = utils.ChargerProfilePrefix
 	case utils.MetaDispatchers:
+		if missing := utils.MissingStructFields(&arg, []string{"Context"}); len(missing) != 0 { //Params missing
+			return utils.NewErrMandatoryIeMissing(missing...)
+		}
 		arg.ItemType = utils.DispatcherProfilePrefix
+		key = utils.ConcatenatedKey(arg.Tenant, arg.Context)
 	case utils.MetaAttributes:
 		if missing := utils.MissingStructFields(&arg, []string{"Context"}); len(missing) != 0 { //Params missing
 			return utils.NewErrMandatoryIeMissing(missing...)
@@ -94,7 +98,11 @@ func (self *ApierV1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string)
 	case utils.MetaChargers:
 		arg.ItemType = utils.ChargerProfilePrefix
 	case utils.MetaDispatchers:
+		if missing := utils.MissingStructFields(&arg, []string{"Context"}); len(missing) != 0 { //Params missing
+			return utils.NewErrMandatoryIeMissing(missing...)
+		}
 		arg.ItemType = utils.DispatcherProfilePrefix
+		key = utils.ConcatenatedKey(arg.Tenant, arg.Context)
 	case utils.MetaAttributes:
 		if missing := utils.MissingStructFields(&arg, []string{"Context"}); len(missing) != 0 { //Params missing
 			return utils.NewErrMandatoryIeMissing(missing...)
@@ -224,7 +232,7 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	if err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
-	dspIndexes, err := self.computeDispatcherIndexes(args.Tenant, args.DispatcherIDs, transactionID)
+	dspIndexes, err := self.computeDispatcherIndexes(args.Tenant, args.Context, args.DispatcherIDs, transactionID)
 	if err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
@@ -250,13 +258,15 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	//StatQueueProfile Indexes
 	if sqpIndexers != nil {
 		if err := sqpIndexers.StoreIndexes(true, transactionID); err != nil {
-			for _, id := range *args.StatIDs {
-				sqp, err := self.DataManager.GetStatQueueProfile(args.Tenant, id, true, false, utils.NonTransactional)
-				if err != nil {
-					return err
-				}
-				if err := sqpIndexers.RemoveItemFromIndex(args.Tenant, id, sqp.FilterIDs); err != nil {
-					return err
+			if args.StatIDs != nil {
+				for _, id := range *args.StatIDs {
+					sqp, err := self.DataManager.GetStatQueueProfile(args.Tenant, id, true, false, utils.NonTransactional)
+					if err != nil {
+						return err
+					}
+					if err := sqpIndexers.RemoveItemFromIndex(args.Tenant, id, sqp.FilterIDs); err != nil {
+						return err
+					}
 				}
 			}
 			return err
@@ -265,13 +275,15 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	//ResourceProfile Indexes
 	if rsIndexes != nil {
 		if err := rsIndexes.StoreIndexes(true, transactionID); err != nil {
-			for _, id := range *args.ResourceIDs {
-				rp, err := self.DataManager.GetResourceProfile(args.Tenant, id, true, false, utils.NonTransactional)
-				if err != nil {
-					return err
-				}
-				if err := rsIndexes.RemoveItemFromIndex(args.Tenant, id, rp.FilterIDs); err != nil {
-					return err
+			if args.ResourceIDs != nil {
+				for _, id := range *args.ResourceIDs {
+					rp, err := self.DataManager.GetResourceProfile(args.Tenant, id, true, false, utils.NonTransactional)
+					if err != nil {
+						return err
+					}
+					if err := rsIndexes.RemoveItemFromIndex(args.Tenant, id, rp.FilterIDs); err != nil {
+						return err
+					}
 				}
 			}
 			return err
@@ -280,13 +292,15 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	//SupplierProfile Indexes
 	if sppIndexes != nil {
 		if err := sppIndexes.StoreIndexes(true, transactionID); err != nil {
-			for _, id := range *args.SupplierIDs {
-				spp, err := self.DataManager.GetSupplierProfile(args.Tenant, id, true, false, utils.NonTransactional)
-				if err != nil {
-					return err
-				}
-				if err := sppIndexes.RemoveItemFromIndex(args.Tenant, id, spp.FilterIDs); err != nil {
-					return err
+			if args.SupplierIDs != nil {
+				for _, id := range *args.SupplierIDs {
+					spp, err := self.DataManager.GetSupplierProfile(args.Tenant, id, true, false, utils.NonTransactional)
+					if err != nil {
+						return err
+					}
+					if err := sppIndexes.RemoveItemFromIndex(args.Tenant, id, spp.FilterIDs); err != nil {
+						return err
+					}
 				}
 			}
 			return err
@@ -295,13 +309,15 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	//AttributeProfile Indexes
 	if attrIndexes != nil {
 		if err := attrIndexes.StoreIndexes(true, transactionID); err != nil {
-			for _, id := range *args.AttributeIDs {
-				ap, err := self.DataManager.GetAttributeProfile(args.Tenant, id, true, false, utils.NonTransactional)
-				if err != nil {
-					return err
-				}
-				if err := attrIndexes.RemoveItemFromIndex(args.Tenant, id, ap.FilterIDs); err != nil {
-					return err
+			if args.AttributeIDs != nil {
+				for _, id := range *args.AttributeIDs {
+					ap, err := self.DataManager.GetAttributeProfile(args.Tenant, id, true, false, utils.NonTransactional)
+					if err != nil {
+						return err
+					}
+					if err := attrIndexes.RemoveItemFromIndex(args.Tenant, id, ap.FilterIDs); err != nil {
+						return err
+					}
 				}
 			}
 			return err
@@ -310,13 +326,15 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	//ChargerProfile Indexes
 	if cppIndexes != nil {
 		if err := cppIndexes.StoreIndexes(true, transactionID); err != nil {
-			for _, id := range *args.ChargerIDs {
-				cpp, err := self.DataManager.GetChargerProfile(args.Tenant, id, true, false, utils.NonTransactional)
-				if err != nil {
-					return err
-				}
-				if err := cppIndexes.RemoveItemFromIndex(args.Tenant, id, cpp.FilterIDs); err != nil {
-					return err
+			if args.ChargerIDs != nil {
+				for _, id := range *args.ChargerIDs {
+					cpp, err := self.DataManager.GetChargerProfile(args.Tenant, id, true, false, utils.NonTransactional)
+					if err != nil {
+						return err
+					}
+					if err := cppIndexes.RemoveItemFromIndex(args.Tenant, id, cpp.FilterIDs); err != nil {
+						return err
+					}
 				}
 			}
 			return err
@@ -325,13 +343,15 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	//DispatcherProfile Indexes
 	if dspIndexes != nil {
 		if err := dspIndexes.StoreIndexes(true, transactionID); err != nil {
-			for _, id := range *args.DispatcherIDs {
-				cpp, err := self.DataManager.GetDispatcherProfile(args.Tenant, id, true, false, utils.NonTransactional)
-				if err != nil {
-					return err
-				}
-				if err := dspIndexes.RemoveItemFromIndex(args.Tenant, id, cpp.FilterIDs); err != nil {
-					return err
+			if args.DispatcherIDs != nil {
+				for _, id := range *args.DispatcherIDs {
+					cpp, err := self.DataManager.GetDispatcherProfile(args.Tenant, id, true, false, utils.NonTransactional)
+					if err != nil {
+						return err
+					}
+					if err := dspIndexes.RemoveItemFromIndex(args.Tenant, id, cpp.FilterIDs); err != nil {
+						return err
+					}
 				}
 			}
 			return err
@@ -744,10 +764,11 @@ func (self *ApierV1) computeChargerIndexes(tenant string, cppIDs *[]string,
 	return cppIndexes, nil
 }
 
-func (self *ApierV1) computeDispatcherIndexes(tenant string, dspIDs *[]string,
+func (self *ApierV1) computeDispatcherIndexes(tenant, context string, dspIDs *[]string,
 	transactionID string) (filterIndexer *engine.FilterIndexer, err error) {
 	var dispatcherIDs []string
-	dspIndexes := engine.NewFilterIndexer(self.DataManager, utils.DispatcherProfilePrefix, tenant)
+	dspIndexes := engine.NewFilterIndexer(self.DataManager, utils.DispatcherProfilePrefix,
+		utils.ConcatenatedKey(tenant, context))
 	if dspIDs == nil {
 		ids, err := self.DataManager.DataDB().GetKeysForPrefix(utils.DispatcherProfilePrefix)
 		if err != nil {
@@ -780,7 +801,7 @@ func (self *ApierV1) computeDispatcherIndexes(tenant string, dspIDs *[]string,
 					ID:     dsp.ID,
 					Rules: []*engine.FilterRule{
 						{
-							Type:      utils.META_NONE,
+							Type:      utils.MetaDefault,
 							FieldName: utils.META_ANY,
 							Values:    []string{utils.META_ANY},
 						},
