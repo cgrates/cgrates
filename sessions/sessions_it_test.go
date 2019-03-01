@@ -318,6 +318,114 @@ func TestSessionsItTerminatePassive(t *testing.T) {
 
 }
 
+func TestSessionsItEventCostCompressing(t *testing.T) {
+	attrSetBalance := utils.AttrSetBalance{
+		Tenant:        "cgrates.org",
+		Account:       "TestSessionsItEventCostCompressing",
+		BalanceType:   utils.VOICE,
+		BalanceID:     utils.StringPointer("TestSessionsItEventCostCompressing"),
+		Value:         utils.Float64Pointer(float64(5) * float64(time.Second)),
+		RatingSubject: utils.StringPointer("*zero50ms"),
+	}
+	var reply string
+	if err := sItRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
+	}
+	// Init the session
+	initArgs := &V1InitSessionArgs{
+		InitSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSessionsItEventCostCompressing",
+			Event: map[string]interface{}{
+				utils.OriginID:    "TestSessionsItEventCostCompressing",
+				utils.Account:     "TestSessionsItEventCostCompressing",
+				utils.Destination: "1002",
+				utils.RequestType: utils.META_PREPAID,
+				utils.AnswerTime:  time.Date(2019, time.March, 1, 13, 57, 05, 0, time.UTC),
+				utils.Usage:       "1s",
+			},
+		},
+	}
+	var initRpl *V1InitSessionReply
+	if err := sItRPC.Call(utils.SessionSv1InitiateSession,
+		initArgs, &initRpl); err != nil {
+		t.Error(err)
+	}
+	if *initRpl.MaxUsage != time.Duration(1*time.Second) {
+		t.Errorf("received: %+v", initRpl.MaxUsage)
+	}
+	updateArgs := &V1UpdateSessionArgs{
+		UpdateSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSessionsItEventCostCompressing",
+			Event: map[string]interface{}{
+				utils.OriginID: "TestSessionsItEventCostCompressing",
+				utils.Usage:    "1s",
+			},
+		},
+	}
+	var updateRpl *V1UpdateSessionReply
+	if err := sItRPC.Call(utils.SessionSv1UpdateSession,
+		updateArgs, &updateRpl); err != nil {
+		t.Error(err)
+	}
+	if err := sItRPC.Call(utils.SessionSv1UpdateSession,
+		updateArgs, &updateRpl); err != nil {
+		t.Error(err)
+	}
+	if err := sItRPC.Call(utils.SessionSv1UpdateSession,
+		updateArgs, &updateRpl); err != nil {
+		t.Error(err)
+	}
+	termArgs := &V1TerminateSessionArgs{
+		TerminateSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSessionsDataLastUsedData",
+			Event: map[string]interface{}{
+				utils.OriginID:    "TestSessionsItEventCostCompressing",
+				utils.Account:     "TestSessionsItEventCostCompressing",
+				utils.Destination: "1002",
+				utils.RequestType: utils.META_PREPAID,
+				utils.AnswerTime:  time.Date(2019, time.March, 1, 13, 57, 05, 0, time.UTC),
+				utils.Usage:       "4s",
+			},
+		},
+	}
+	var rpl string
+	if err := sItRPC.Call(utils.SessionSv1TerminateSession,
+		termArgs, &rpl); err != nil ||
+		rpl != utils.OK {
+		t.Error(err)
+	}
+	if err := sItRPC.Call(utils.SessionSv1ProcessCDR,
+		termArgs.CGREvent, &reply); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(20 * time.Millisecond)
+	cgrID := utils.Sha1("TestSessionsItEventCostCompressing", "")
+	var ec *engine.EventCost
+	if err := sItRPC.Call(utils.ApierV1GetEventCost,
+		utils.AttrGetCallCost{CgrId: cgrID, RunId: utils.META_DEFAULT},
+		&ec); err != nil {
+		t.Error(err)
+	}
+	// make sure we only have one aggregated Charge
+	if len(ec.Charges) != 1 ||
+		ec.Charges[0].CompressFactor != 4 ||
+		len(ec.Rating) != 1 ||
+		len(ec.Accounting) != 1 ||
+		len(ec.RatingFilters) != 1 ||
+		len(ec.Rates) != 1 {
+		t.Errorf("unexpected EC returned: %s", utils.ToIJSON(ec))
+	}
+
+}
+
 func TestSessionsItStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
