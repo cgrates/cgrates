@@ -918,3 +918,9 @@ func (ffn *FallbackFileName) AsString() string {
 	}
 	return fmt.Sprintf("%s%s%s%s%s%s%s%s", ffn.Module, HandlerArgSep, ffn.Transport, HandlerArgSep, url.QueryEscape(ffn.Address), HandlerArgSep, ffn.RequestID, ffn.FileSuffix)
 }
+
+// CachedRPCResponse is used to cache a RPC response
+type CachedRPCResponse struct {
+	Result interface{}
+	Error  error
+}

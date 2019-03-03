@@ -1383,7 +1383,7 @@ func (sS *SessionS) CallBiRPC(clnt rpcclient.RpcClientConnection,
 
 // BiRPCv1GetActiveSessions returns the list of active sessions based on filter
 func (sS *SessionS) BiRPCv1GetActiveSessions(clnt rpcclient.RpcClientConnection,
-	fltr map[string]string, reply *[]*ActiveSession) error {
+	fltr map[string]string, reply *[]*ActiveSession) (err error) {
 	for fldName, fldVal := range fltr {
 		if fldVal == "" {
 			fltr[fldName] = utils.META_NONE
@@ -1455,9 +1455,23 @@ func (sS *SessionS) BiRPCv1SetPassiveSession(clnt rpcclient.RpcClientConnection,
 	if s.CGRID == "" {
 		return utils.NewErrMandatoryIeMissing(utils.CGRID)
 	}
+	// handle RPC caching
+	cacheKey := utils.ConcatenatedKey("BiRPCv1SetPassiveSession", s.CGRID)
+	if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+		cachedResp := itm.(*utils.CachedRPCResponse)
+		if cachedResp.Error == nil {
+			*reply = *cachedResp.Result.(*string)
+		}
+		return cachedResp.Error
+	}
+	defer engine.Cache.Set(utils.CacheRPCResponses, cacheKey,
+		&utils.CachedRPCResponse{Result: reply, Error: err},
+		nil, true, utils.NonTransactional)
+	// end of RPC caching
 	if s.EventStart == nil { // remove instead of
 		if removed := sS.unregisterSession(s.CGRID, true); !removed {
-			return utils.ErrServerError
+			err = utils.ErrServerError
+			return
 		}
 	} else {
 		//if we have an active session with the same CGRID

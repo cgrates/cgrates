@@ -705,7 +705,7 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		utils.CacheDiameterMessages: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(3 * time.Hour), StaticTTL: false},
-		utils.CacheRPCResponses: &CacheParamCfg{Limit: -1,
+		utils.CacheRPCResponses: &CacheParamCfg{Limit: 0,
 			TTL: time.Duration(2 * time.Second), StaticTTL: false},
 	}
 

@@ -148,7 +148,7 @@ const CGRATES_CFG_JSON = `
 	"dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control dispatcher filter indexes caching
 	"dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false}, 						// control dispatcher routes caching
 	"diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false},						// diameter messages caching
-	"rpc_responses": {"limit": -1, "ttl": "2s", "static_ttl": false},							// RPC responses caching
+	"rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false},							// RPC responses caching
 },
 
 
