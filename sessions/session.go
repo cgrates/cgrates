@@ -60,17 +60,19 @@ type ActiveSession struct {
 	MaxRate       float64
 	MaxRateUnit   time.Duration
 	MaxCostSoFar  float64
+	DebitInterval time.Duration
 }
 
 type Session struct {
 	sync.RWMutex
 
-	CGRID        string
-	Tenant       string
-	ResourceID   string
-	ClientConnID string           // connection ID towards the client so we can recover from passive
-	EventStart   *engine.SafEvent // Event which started the session
-	SRuns        []*SRun          // forked based on ChargerS
+	CGRID         string
+	Tenant        string
+	ResourceID    string
+	ClientConnID  string           // connection ID towards the client so we can recover from passive
+	EventStart    *engine.SafEvent // Event which started the session
+	DebitInterval time.Duration    // execute debits for *prepaid runs
+	SRuns         []*SRun          // forked based on ChargerS
 
 	debitStop   chan struct{}
 	sTerminator *sTerminator // automatic timeout for the session
@@ -80,6 +82,14 @@ type Session struct {
 func (s *Session) CGRid() (cgrID string) {
 	s.RLock()
 	cgrID = s.CGRID
+	s.RUnlock()
+	return
+}
+
+// DebitStopChan reads the debit stop
+func (s *Session) DebitStopChan() (dbtStop chan struct{}) {
+	s.RLock()
+	dbtStop = s.debitStop
 	s.RUnlock()
 	return
 }
@@ -126,7 +136,8 @@ func (s *Session) AsActiveSessions(tmz, nodeID string) (aSs []*ActiveSession) {
 			Usage:       sr.TotalUsage,
 			ExtraFields: sr.Event.AsMapStringIgnoreErrors(
 				utils.NewStringMap(utils.MainCDRFields...)),
-			NodeID: nodeID,
+			NodeID:        nodeID,
+			DebitInterval: s.DebitInterval,
 		}
 		if sr.CD != nil {
 			aSs[i].LoopIndex = sr.CD.LoopIndex
