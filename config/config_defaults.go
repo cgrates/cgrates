@@ -130,8 +130,8 @@ const CGRATES_CFG_JSON = `
 	"resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control resource profiles caching
 	"resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control resources caching
 	"event_resources": {"limit": -1, "ttl": "", "static_ttl": false},							// matching resources to events
-	"statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// statqueue profiles
-	"statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// statqueues with metrics
+	"statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// statqueue profiles
+	"statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// statqueues with metrics
 	"threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control threshold profiles caching
 	"thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control thresholds caching
 	"filters": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control filters caching
@@ -148,6 +148,7 @@ const CGRATES_CFG_JSON = `
 	"dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control dispatcher filter indexes caching
 	"dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false}, 						// control dispatcher routes caching
 	"diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false},						// diameter messages caching
+	"rpc_responses": {"limit": -1, "ttl": "2s", "static_ttl": false},							// RPC responses caching
 },
 
 

@@ -941,6 +941,7 @@ const (
 	CacheChargerFilterIndexes    = "charger_filter_indexes"
 	CacheDispatcherFilterIndexes = "dispatcher_filter_indexes"
 	CacheDiameterMessages        = "diameter_messages"
+	CacheRPCResponses            = "rpc_responses"
 	MetaPrecaching               = "*precaching"
 	MetaReady                    = "*ready"
 )
