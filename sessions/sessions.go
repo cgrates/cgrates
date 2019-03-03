@@ -1123,11 +1123,11 @@ func (sS *SessionS) syncSessions() {
 }
 
 // initSessionDebitLoops will init the debit loops for a session
+// not thread-safe, it should be protected in another layer
 func (sS *SessionS) initSessionDebitLoops(s *Session) {
-	if s.DebitStopChan() != nil { // already initialized
+	if s.debitStop != nil { // already initialized
 		return
 	}
-	s.Lock()
 	s.debitStop = make(chan struct{})
 	for i, sr := range s.SRuns {
 		if s.DebitInterval != 0 &&
@@ -1136,7 +1136,6 @@ func (sS *SessionS) initSessionDebitLoops(s *Session) {
 			time.Sleep(1) // allow the goroutine to be executed
 		}
 	}
-	s.Unlock()
 }
 
 // authSession calculates maximum usage allowed for given session
@@ -1479,7 +1478,9 @@ func (sS *SessionS) BiRPCv1SetPassiveSession(clnt rpcclient.RpcClientConnection,
 		if len(sS.getSessions(s.CGRID, false)) != 0 {
 			sS.unregisterSession(s.CGRID, false)
 		}
+		s.Lock()
 		sS.initSessionDebitLoops(s)
+		s.Unlock()
 		sS.registerSession(s, true)
 	}
 	*reply = utils.OK
