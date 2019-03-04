@@ -82,7 +82,7 @@ func StartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	if err != nil {
 		return nil, err
 	}
-	engine := exec.Command(enginePath, "-config_dir", cfgPath)
+	engine := exec.Command(enginePath, "-config_path", cfgPath)
 	if err := engine.Start(); err != nil {
 		return nil, err
 	}

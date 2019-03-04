@@ -277,7 +277,7 @@ const (
 	MetaSQSjsonMap                = "*sqs_json_map"
 	NANO_MULTIPLIER               = 1000000000
 	CGR_AUTHORIZE                 = "CGR_AUTHORIZE"
-	CONFIG_DIR                    = "/etc/cgrates/"
+	CONFIG_PATH                   = "/etc/cgrates/"
 	DISCONNECT_CAUSE              = "DisconnectCause"
 	KAM_FLATSTORE                 = "kamailio_flatstore"
 	OSIPS_FLATSTORE               = "opensips_flatstore"

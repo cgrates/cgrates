@@ -199,6 +199,10 @@ func testPrecacheGetCacheStatsBeforeLoad(t *testing.T) {
 			Items:  0,
 			Groups: 0,
 		},
+		"rpc_responses": {
+			Items:  0,
+			Groups: 0,
+		},
 		"shared_groups": {
 			Items:  0,
 			Groups: 0,
@@ -357,6 +361,10 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 		},
 		"reverse_destinations": {
 			Items:  7,
+			Groups: 0,
+		},
+		"rpc_responses": {
+			Items:  0,
 			Groups: 0,
 		},
 		"shared_groups": {
