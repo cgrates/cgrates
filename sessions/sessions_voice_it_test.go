@@ -873,14 +873,13 @@ func TestSessionsVoiceSessionTTL(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 	time.Sleep(100 * time.Millisecond)
-	eAcntVal = 4.0565
+	eAcntVal = 4.0566
 	if err := sessionsRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 
-	time.Sleep(time.Duration(500 * time.Millisecond))
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, DestinationPrefixes: []string{"1008"}}
 	if err := sessionsRPC.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
