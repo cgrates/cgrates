@@ -93,103 +93,137 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 }
 
 func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
-	if arg.Subject == "" {
-		arg.Subject = arg.Account
-	}
-	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
-		return utils.ErrMaxUsageExceeded
-	}
-	r, e := arg.Debit()
-	if e != nil {
-		return e
-	} else if r != nil {
-		*reply = *r
-	}
-	return
-}
+	// RPC caching
+	if config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
+		cacheKey := utils.ConcatenatedKey(utils.ResponderDebit, arg.CgrID)
+		guardian.Guardian.GuardIDs(config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+		defer guardian.Guardian.UnguardIDs(cacheKey)
 
-func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) {
-	cacheKey := utils.MAX_DEBIT_CACHE_PREFIX + arg.CgrID + arg.RunID + arg.DurationIndex.String()
-	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
-		if item.Value != nil {
-			*reply = *(item.Value.(*CallCost))
+		if itm, has := Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+			cachedResp := itm.(*utils.CachedRPCResponse)
+			if cachedResp.Error == nil {
+				*reply = *cachedResp.Result.(*CallCost)
+			}
+			return cachedResp.Error
 		}
-		return item.Err
+		defer Cache.Set(utils.CacheRPCResponses, cacheKey,
+			&utils.CachedRPCResponse{Result: reply, Error: err},
+			nil, true, utils.NonTransactional)
 	}
-	if arg.Subject == "" {
-		arg.Subject = arg.Account
-	}
-	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
-		return utils.ErrMaxUsageExceeded
-	}
-	r, e := arg.MaxDebit()
-	if e != nil {
-		rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{
-			Err: e,
-		})
-		return e
-	} else if r != nil {
-		*reply = *r
-	}
-	rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{
-		Value: reply,
-		Err:   err,
-	})
-	return
-}
+	// end of RPC caching
 
-func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *Account) (err error) {
-	cacheKey := utils.REFUND_INCR_CACHE_PREFIX + arg.CgrID + arg.RunID
-	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
-		if item.Value != nil {
-			*reply = *(item.Value.(*Account))
-		}
-		return item.Err
-	}
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
 	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
 		err = utils.ErrMaxUsageExceeded
-		rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{
-			Err: err,
-		})
 		return
 	}
-	if acnt, err := arg.RefundIncrements(); err != nil {
-		rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{
-			Err: err,
-		})
-		return err
-	} else if acnt != nil {
-		*reply = *acnt
+	var r *CallCost
+	if r, err = arg.Debit(); err != nil {
+		return
 	}
-	rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{
-		Value: reply,
-		Err:   err,
-	})
+	*reply = *r
 	return
 }
 
-func (rs *Responder) RefundRounding(arg *CallDescriptor, reply *float64) (err error) {
-	cacheKey := utils.REFUND_ROUND_CACHE_PREFIX + arg.CgrID + arg.RunID + arg.DurationIndex.String()
-	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
-		if item.Value != nil {
-			*reply = *(item.Value.(*float64))
+func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) {
+	// RPC caching
+	if config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
+		cacheKey := utils.ConcatenatedKey(utils.ResponderMaxDebit, arg.CgrID)
+		guardian.Guardian.GuardIDs(config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+		defer guardian.Guardian.UnguardIDs(cacheKey)
+
+		if itm, has := Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+			cachedResp := itm.(*utils.CachedRPCResponse)
+			if cachedResp.Error == nil {
+				*reply = *cachedResp.Result.(*CallCost)
+			}
+			return cachedResp.Error
 		}
-		return item.Err
+		defer Cache.Set(utils.CacheRPCResponses, cacheKey,
+			&utils.CachedRPCResponse{Result: reply, Error: err},
+			nil, true, utils.NonTransactional)
 	}
+	// end of RPC caching
+
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
 	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
-		return utils.ErrMaxUsageExceeded
+		err = utils.ErrMaxUsageExceeded
+		return
+	}
+	var r *CallCost
+	if r, err = arg.MaxDebit(); err != nil {
+		return
+	}
+	*reply = *r
+	return
+}
+
+func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *Account) (err error) {
+	// RPC caching
+	if config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
+		cacheKey := utils.ConcatenatedKey(utils.ResponderRefundIncrements, arg.CgrID)
+		guardian.Guardian.GuardIDs(config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+		defer guardian.Guardian.UnguardIDs(cacheKey)
+
+		if itm, has := Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+			cachedResp := itm.(*utils.CachedRPCResponse)
+			if cachedResp.Error == nil {
+				*reply = *cachedResp.Result.(*Account)
+			}
+			return cachedResp.Error
+		}
+		defer Cache.Set(utils.CacheRPCResponses, cacheKey,
+			&utils.CachedRPCResponse{Result: reply, Error: err},
+			nil, true, utils.NonTransactional)
+	}
+	// end of RPC caching
+
+	if arg.Subject == "" {
+		arg.Subject = arg.Account
+	}
+	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
+		err = utils.ErrMaxUsageExceeded
+		return
+	}
+	var acnt *Account
+	if acnt, err = arg.RefundIncrements(); err != nil {
+		return
+	}
+	*reply = *acnt
+	return
+}
+
+func (rs *Responder) RefundRounding(arg *CallDescriptor, reply *float64) (err error) {
+	// RPC caching
+	if config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
+		cacheKey := utils.ConcatenatedKey(utils.ResponderRefundRounding, arg.CgrID)
+		guardian.Guardian.GuardIDs(config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+		defer guardian.Guardian.UnguardIDs(cacheKey)
+
+		if itm, has := Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+			cachedResp := itm.(*utils.CachedRPCResponse)
+			if cachedResp.Error == nil {
+				*reply = *cachedResp.Result.(*float64)
+			}
+			return cachedResp.Error
+		}
+		defer Cache.Set(utils.CacheRPCResponses, cacheKey,
+			&utils.CachedRPCResponse{Result: reply, Error: err},
+			nil, true, utils.NonTransactional)
+	}
+
+	if arg.Subject == "" {
+		arg.Subject = arg.Account
+	}
+	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
+		err = utils.ErrMaxUsageExceeded
+		return
 	}
 	err = arg.RefundRounding()
-	rs.getCache().Cache(cacheKey, &utils.ResponseCacheItem{
-		Value: reply,
-		Err:   err,
-	})
 	return
 }
 

@@ -281,13 +281,6 @@ const (
 	DISCONNECT_CAUSE              = "DisconnectCause"
 	KAM_FLATSTORE                 = "kamailio_flatstore"
 	OSIPS_FLATSTORE               = "opensips_flatstore"
-	MAX_DEBIT_CACHE_PREFIX        = "MAX_DEBIT_"
-	REFUND_INCR_CACHE_PREFIX      = "REFUND_INCR_"
-	REFUND_ROUND_CACHE_PREFIX     = "REFUND_ROUND_"
-	GET_SESS_RUNS_CACHE_PREFIX    = "GET_SESS_RUNS_"
-	GET_DERIV_MAX_SESS_TIME       = "GET_DERIV_MAX_SESS_TIME_"
-	LOG_CALL_COST_CACHE_PREFIX    = "LOG_CALL_COSTS_"
-	LCRCachePrefix                = "LCR_"
 	MetaRating                    = "*rating"
 	NOT_AVAILABLE                 = "N/A"
 	MetaEmpty                     = "*empty"
@@ -787,6 +780,7 @@ const (
 	ResponderGetMaxSessionTime = "Responder.GetMaxSessionTime"
 	ResponderStatus            = "Responder.Status"
 	ResponderMaxDebit          = "Responder.MaxDebit"
+	ResponderRefundRounding    = "Responder.RefundRounding"
 )
 
 // DispatcherS APIs

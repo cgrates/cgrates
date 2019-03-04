@@ -30,6 +30,7 @@ import (
 	"github.com/cenkalti/rpc2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/guardian"
 
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -1454,19 +1455,6 @@ func (sS *SessionS) BiRPCv1SetPassiveSession(clnt rpcclient.RpcClientConnection,
 	if s.CGRID == "" {
 		return utils.NewErrMandatoryIeMissing(utils.CGRID)
 	}
-	// handle RPC caching
-	cacheKey := utils.ConcatenatedKey("BiRPCv1SetPassiveSession", s.CGRID)
-	if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
-		cachedResp := itm.(*utils.CachedRPCResponse)
-		if cachedResp.Error == nil {
-			*reply = *cachedResp.Result.(*string)
-		}
-		return cachedResp.Error
-	}
-	defer engine.Cache.Set(utils.CacheRPCResponses, cacheKey,
-		&utils.CachedRPCResponse{Result: reply, Error: err},
-		nil, true, utils.NonTransactional)
-	// end of RPC caching
 	if s.EventStart == nil { // remove instead of
 		if removed := sS.unregisterSession(s.CGRID, true); !removed {
 			err = utils.ErrServerError
@@ -1497,15 +1485,6 @@ type ArgsReplicateSessions struct {
 // args.Filter is used to filter the sessions which are replicated, CGRID is the only one possible for now
 func (sS *SessionS) BiRPCv1ReplicateSessions(clnt rpcclient.RpcClientConnection,
 	args ArgsReplicateSessions, reply *string) (err error) {
-	cacheKey := "BiRPCv1ReplicateSessions" + args.CGRID
-	if item, err := sS.respCache.Get(cacheKey); err == nil && item != nil {
-		if item.Err == nil {
-			*reply = *item.Value.(*string)
-		}
-		return item.Err
-	}
-	defer sS.respCache.Cache(cacheKey,
-		&utils.ResponseCacheItem{Value: reply, Err: err})
 	sSConns := sS.sReplConns
 	if len(args.Connections) != 0 {
 		if sSConns, err = NewSReplConns(args.Connections,
@@ -1605,15 +1584,24 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
 	}
-	cacheKey := "BiRPCv1AuthorizeEventWithDigest" + args.CGREvent.ID
-	if item, err := sS.respCache.Get(cacheKey); err == nil && item != nil {
-		if item.Err == nil {
-			*authReply = *item.Value.(*V1AuthorizeReply)
+	// RPC caching
+	if sS.cgrCfg.CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
+		cacheKey := utils.ConcatenatedKey(utils.SessionSv1AuthorizeEvent, args.CGREvent.ID)
+		guardian.Guardian.GuardIDs(sS.cgrCfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+		defer guardian.Guardian.UnguardIDs(cacheKey)
+
+		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+			cachedResp := itm.(*utils.CachedRPCResponse)
+			if cachedResp.Error == nil {
+				*authReply = *cachedResp.Result.(*V1AuthorizeReply)
+			}
+			return cachedResp.Error
 		}
-		return item.Err
+		defer engine.Cache.Set(utils.CacheRPCResponses, cacheKey,
+			&utils.CachedRPCResponse{Result: authReply, Error: err},
+			nil, true, utils.NonTransactional)
 	}
-	defer sS.respCache.Cache(cacheKey,
-		&utils.ResponseCacheItem{Value: authReply, Err: err})
+	// end of RPC caching
 
 	if !args.GetAttributes && !args.AuthorizeResources &&
 		!args.GetMaxUsage && !args.GetSuppliers {
@@ -1840,15 +1828,25 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
 	}
-	cacheKey := "BiRPCv1InitiateSession" + args.CGREvent.ID
-	if item, err := sS.respCache.Get(cacheKey); err == nil && item != nil {
-		if item.Err == nil {
-			*rply = *item.Value.(*V1InitSessionReply)
+
+	// RPC caching
+	if sS.cgrCfg.CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
+		cacheKey := utils.ConcatenatedKey(utils.SessionSv1InitiateSession, args.CGREvent.ID)
+		guardian.Guardian.GuardIDs(sS.cgrCfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+		defer guardian.Guardian.UnguardIDs(cacheKey)
+
+		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+			cachedResp := itm.(*utils.CachedRPCResponse)
+			if cachedResp.Error == nil {
+				*rply = *cachedResp.Result.(*V1InitSessionReply)
+			}
+			return cachedResp.Error
 		}
-		return item.Err
+		defer engine.Cache.Set(utils.CacheRPCResponses, cacheKey,
+			&utils.CachedRPCResponse{Result: rply, Error: err},
+			nil, true, utils.NonTransactional)
 	}
-	defer sS.respCache.Cache(cacheKey,
-		&utils.ResponseCacheItem{Value: rply, Err: err})
+	// end of RPC caching
 
 	if !args.GetAttributes && !args.AllocateResources && !args.InitSession {
 		return utils.NewErrMandatoryIeMissing("subsystems")
@@ -2046,15 +2044,25 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
 	}
-	cacheKey := "BiRPCv1UpdateSession" + args.CGREvent.ID
-	if item, err := sS.respCache.Get(cacheKey); err == nil && item != nil {
-		if item.Err == nil {
-			*rply = *item.Value.(*V1UpdateSessionReply)
+
+	// RPC caching
+	if sS.cgrCfg.CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
+		cacheKey := utils.ConcatenatedKey(utils.SessionSv1UpdateSession, args.CGREvent.ID)
+		guardian.Guardian.GuardIDs(sS.cgrCfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+		defer guardian.Guardian.UnguardIDs(cacheKey)
+
+		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+			cachedResp := itm.(*utils.CachedRPCResponse)
+			if cachedResp.Error == nil {
+				*rply = *cachedResp.Result.(*V1UpdateSessionReply)
+			}
+			return cachedResp.Error
 		}
-		return item.Err
+		defer engine.Cache.Set(utils.CacheRPCResponses, cacheKey,
+			&utils.CachedRPCResponse{Result: rply, Error: err},
+			nil, true, utils.NonTransactional)
 	}
-	defer sS.respCache.Cache(cacheKey,
-		&utils.ResponseCacheItem{Value: rply, Err: err})
+	// end of RPC caching
 
 	if !args.GetAttributes && !args.UpdateSession {
 		return utils.NewErrMandatoryIeMissing("subsystems")
@@ -2141,15 +2149,25 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
 	}
-	cacheKey := "BiRPCv1TerminateSession" + args.CGREvent.ID
-	if item, err := sS.respCache.Get(cacheKey); err == nil && item != nil {
-		if item.Err == nil {
-			*rply = *item.Value.(*string)
+
+	// RPC caching
+	if sS.cgrCfg.CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
+		cacheKey := utils.ConcatenatedKey(utils.SessionSv1TerminateSession, args.CGREvent.ID)
+		guardian.Guardian.GuardIDs(sS.cgrCfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+		defer guardian.Guardian.UnguardIDs(cacheKey)
+
+		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+			cachedResp := itm.(*utils.CachedRPCResponse)
+			if cachedResp.Error == nil {
+				*rply = *cachedResp.Result.(*string)
+			}
+			return cachedResp.Error
 		}
-		return item.Err
+		defer engine.Cache.Set(utils.CacheRPCResponses, cacheKey,
+			&utils.CachedRPCResponse{Result: rply, Error: err},
+			nil, true, utils.NonTransactional)
 	}
-	defer sS.respCache.Cache(cacheKey,
-		&utils.ResponseCacheItem{Value: rply, Err: err})
+	// end of RPC caching
 
 	if !args.TerminateSession && !args.ReleaseResources {
 		return utils.NewErrMandatoryIeMissing("subsystems")
@@ -2247,15 +2265,25 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 	if cgrEv.ID == "" {
 		cgrEv.ID = utils.GenUUID()
 	}
-	cacheKey := "BiRPCv1ProcessCDR" + cgrEv.ID
-	if item, err := sS.respCache.Get(cacheKey); err == nil && item != nil {
-		if item.Err == nil {
-			*rply = *item.Value.(*string)
+
+	// RPC caching
+	if sS.cgrCfg.CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
+		cacheKey := utils.ConcatenatedKey(utils.SessionSv1ProcessCDR, cgrEv.ID)
+		guardian.Guardian.GuardIDs(sS.cgrCfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+		defer guardian.Guardian.UnguardIDs(cacheKey)
+
+		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+			cachedResp := itm.(*utils.CachedRPCResponse)
+			if cachedResp.Error == nil {
+				*rply = *cachedResp.Result.(*string)
+			}
+			return cachedResp.Error
 		}
-		return item.Err
+		defer engine.Cache.Set(utils.CacheRPCResponses, cacheKey,
+			&utils.CachedRPCResponse{Result: rply, Error: err},
+			nil, true, utils.NonTransactional)
 	}
-	defer sS.respCache.Cache(cacheKey,
-		&utils.ResponseCacheItem{Value: rply, Err: err})
+	// end of RPC caching
 
 	return sS.cdrS.Call(utils.CDRsV2ProcessCDR, &engine.ArgV2ProcessCDR{CGREvent: *cgrEv}, rply)
 }
@@ -2321,15 +2349,25 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
 	}
-	cacheKey := "BiRPCv1ProcessEvent" + args.CGREvent.ID
-	if item, err := sS.respCache.Get(cacheKey); err == nil && item != nil {
-		if item.Err == nil {
-			*rply = *item.Value.(*V1ProcessEventReply)
+
+	// RPC caching
+	if sS.cgrCfg.CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
+		cacheKey := utils.ConcatenatedKey(utils.SessionSv1ProcessEvent, args.CGREvent.ID)
+		guardian.Guardian.GuardIDs(sS.cgrCfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+		defer guardian.Guardian.UnguardIDs(cacheKey)
+
+		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+			cachedResp := itm.(*utils.CachedRPCResponse)
+			if cachedResp.Error == nil {
+				*rply = *cachedResp.Result.(*V1ProcessEventReply)
+			}
+			return cachedResp.Error
 		}
-		return item.Err
+		defer engine.Cache.Set(utils.CacheRPCResponses, cacheKey,
+			&utils.CachedRPCResponse{Result: rply, Error: err},
+			nil, true, utils.NonTransactional)
 	}
-	defer sS.respCache.Cache(cacheKey,
-		&utils.ResponseCacheItem{Value: rply, Err: err})
+	// end of RPC caching
 
 	if args.CGREvent.Tenant == "" {
 		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
