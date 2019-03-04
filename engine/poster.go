@@ -605,7 +605,8 @@ func (pstr *SQSPoster) parseURL(dialURL string) (err error) {
 	} else {
 		utils.Logger.Warning("<SQSPoster> No session token present for AWS.")
 	}
-	return pstr.getQueueURL()
+	pstr.getQueueURL()
+	return nil
 }
 
 func (pstr *SQSPoster) getQueueURL() (err error) {

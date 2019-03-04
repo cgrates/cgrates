@@ -37,7 +37,7 @@
 		{
 			"id": "VoiceUpdate",
 			"filters": ["*string:~*vars.*cmd:CCR", "*string:~*req.CC-Request-Type:2",
-				"*prefix:*req.Service-Context-Id:voice"],
+				"*prefix:~*req.Service-Context-Id:voice"],
 			"flags": ["*update", "*accounts", "*attributes"],
 			"request_fields":[
 				{"tag": "TOR", "field_id": "ToR", "type": "*constant", "value": "*voice"},
@@ -70,7 +70,7 @@
 		{
 			"id": "VoiceTerminate",
 			"filters": ["*string:~*vars.*cmd:CCR", "*string:~*req.CC-Request-Type:3",
-				"*prefix:*req.Service-Context-Id:voice"],
+				"*prefix:~*req.Service-Context-Id:voice"],
 			"flags": ["*terminate", "*accounts", "*attributes", "*cdrs"],
 			"request_fields":[
 				{"tag": "TOR", "field_id": "ToR", "type": "*constant", "value": "*voice"},
