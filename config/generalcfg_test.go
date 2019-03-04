@@ -80,7 +80,6 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 		Reconnects:        -1,
 		ConnectTimeout:    time.Duration(1 * time.Second),
 		ReplyTimeout:      time.Duration(2 * time.Second),
-		ResponseCacheTTL:  time.Duration(0),
 		InternalTtl:       time.Duration(2 * time.Minute),
 		LockingTimeout:    time.Duration(0),
 		DigestSeparator:   ",",

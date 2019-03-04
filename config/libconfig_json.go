@@ -37,7 +37,6 @@ type GeneralJsonCfg struct {
 	Reconnects           *int
 	Connect_timeout      *string
 	Reply_timeout        *string
-	Response_cache_ttl   *string
 	Internal_ttl         *string
 	Locking_timeout      *string
 	Digest_separator     *string

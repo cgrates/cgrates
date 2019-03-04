@@ -818,6 +818,8 @@ const (
 	CDRsV1CountCDRs        = "CDRsV1.CountCDRs"
 	CDRsV1RateCDRs         = "CDRsV1.RateCDRs"
 	CDRsV1GetCDRs          = "CDRsV1.GetCDRs"
+	CDRsV1ProcessCDR       = "CDRsV1.ProcessCDR"
+	CDRsV1StoreSessionCost = "CDRsV1.StoreSessionCost"
 	CDRsV2ProcessCDR       = "CDRsV2.ProcessCDR"
 	CDRsV2StoreSessionCost = "CDRsV2.StoreSessionCost"
 )

@@ -43,19 +43,6 @@ type Responder struct {
 	Timeout          time.Duration
 	Timezone         string
 	MaxComputedUsage map[string]time.Duration
-	responseCache    *utils.ResponseCache
-}
-
-func (rs *Responder) SetTimeToLive(timeToLive time.Duration, out *int) error {
-	rs.responseCache = utils.NewResponseCache(timeToLive)
-	return nil
-}
-
-func (rs *Responder) getCache() *utils.ResponseCache {
-	if rs.responseCache == nil {
-		rs.responseCache = utils.NewResponseCache(0)
-	}
-	return rs.responseCache
 }
 
 // usageAllowed checks requested usage against configured MaxComputedUsage

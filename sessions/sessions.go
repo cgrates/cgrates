@@ -108,7 +108,6 @@ func NewSessionS(cgrCfg *config.CGRConfig, ralS, resS, thdS,
 		splS:          splS,
 		attrS:         attrS,
 		cdrS:          cdrS,
-		respCache:     utils.NewResponseCache(cgrCfg.GeneralCfg().ResponseCacheTTL),
 		sReplConns:    sReplConns,
 		biJClnts:      make(map[rpcclient.RpcClientConnection]string),
 		biJIDs:        make(map[string]*biJClient),
@@ -139,8 +138,7 @@ type SessionS struct {
 	attrS    rpcclient.RpcClientConnection // AttributeS connections
 	cdrS     rpcclient.RpcClientConnection // CDR server connections
 
-	respCache  *utils.ResponseCache // cache replies
-	sReplConns []*SReplConn         // list of connections where we will replicate our session data
+	sReplConns []*SReplConn // list of connections where we will replicate our session data
 
 	biJMux   sync.RWMutex                             // mux protecting BI-JSON connections
 	biJClnts map[rpcclient.RpcClientConnection]string // index BiJSONConnection so we can sync them later

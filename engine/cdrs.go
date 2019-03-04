@@ -89,7 +89,6 @@ func NewCDRServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, r
 		rals: rater, attrS: attrS,
 		statS: statS, thdS: thdS,
 		chargerS: chargerS, guard: guardian.Guardian,
-		respCache: utils.NewResponseCache(cgrCfg.GeneralCfg().ResponseCacheTTL),
 		httpPoster: NewHTTPPoster(cgrCfg.GeneralCfg().HttpSkipTlsVerify,
 			cgrCfg.GeneralCfg().ReplyTimeout), filterS: filterS}
 }
@@ -105,7 +104,6 @@ type CDRServer struct {
 	statS      rpcclient.RpcClientConnection
 	chargerS   rpcclient.RpcClientConnection
 	guard      *guardian.GuardianLocker
-	respCache  *utils.ResponseCache
 	httpPoster *HTTPPoster // used for replication
 	filterS    *FilterS
 }
@@ -412,15 +410,24 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDR, reply *string) (err error) {
 	if cdr.CGRID == utils.EmptyString { // Populate CGRID if not present
 		cdr.ComputeCGRID()
 	}
-	cacheKey := "V1ProcessCDR" + cdr.CGRID + cdr.RunID
-	if item, err := cdrS.respCache.Get(cacheKey); err == nil && item != nil {
-		if item.Err == nil {
-			*reply = *item.Value.(*string)
+	// RPC caching
+	if config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
+		cacheKey := utils.ConcatenatedKey(utils.CDRsV1ProcessCDR, cdr.CGRID, cdr.RunID)
+		guardian.Guardian.GuardIDs(config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+		defer guardian.Guardian.UnguardIDs(cacheKey)
+
+		if itm, has := Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+			cachedResp := itm.(*utils.CachedRPCResponse)
+			if cachedResp.Error == nil {
+				*reply = *cachedResp.Result.(*string)
+			}
+			return cachedResp.Error
 		}
-		return item.Err
+		defer Cache.Set(utils.CacheRPCResponses, cacheKey,
+			&utils.CachedRPCResponse{Result: reply, Error: err},
+			nil, true, utils.NonTransactional)
 	}
-	defer cdrS.respCache.Cache(cacheKey,
-		&utils.ResponseCacheItem{Value: reply, Err: err})
+	// end of RPC caching
 
 	if cdr.RequestType == utils.EmptyString {
 		cdr.RequestType = cdrS.cgrCfg.GeneralCfg().DefaultReqType
@@ -447,7 +454,8 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDR, reply *string) (err error) {
 	}
 	if cdrS.attrS != nil {
 		if err = cdrS.attrSProcessEvent(cgrEv); err != nil {
-			return utils.NewErrServerError(err)
+			err = utils.NewErrServerError(err)
+			return
 		}
 	}
 	if cdrS.cgrCfg.CdrsCfg().CDRSStoreCdrs { // Store *raw CDR
@@ -455,7 +463,8 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDR, reply *string) (err error) {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> storing primary CDR %+v, got error: %s",
 					utils.CDRs, cdr, err.Error()))
-			return utils.NewErrServerError(err) // Cannot store CDR
+			err = utils.NewErrServerError(err) // Cannot store CDR
+			return
 		}
 	}
 	if len(cdrS.cgrCfg.CdrsCfg().CDRSOnlineCDRExports) != 0 {
@@ -488,20 +497,43 @@ type ArgV2ProcessCDR struct {
 
 // V2ProcessCDR will process the CDR out of CGREvent
 func (cdrS *CDRServer) V2ProcessCDR(arg *ArgV2ProcessCDR, reply *string) (err error) {
+	if arg.CGREvent.ID == "" {
+		arg.CGREvent.ID = utils.GenUUID()
+	}
+	// RPC caching
+	if config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
+		cacheKey := utils.ConcatenatedKey(utils.CDRsV2ProcessCDR, arg.CGREvent.ID)
+		guardian.Guardian.GuardIDs(config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+		defer guardian.Guardian.UnguardIDs(cacheKey)
+
+		if itm, has := Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+			cachedResp := itm.(*utils.CachedRPCResponse)
+			if cachedResp.Error == nil {
+				*reply = *cachedResp.Result.(*string)
+			}
+			return cachedResp.Error
+		}
+		defer Cache.Set(utils.CacheRPCResponses, cacheKey,
+			&utils.CachedRPCResponse{Result: reply, Error: err},
+			nil, true, utils.NonTransactional)
+	}
+	// end of RPC caching
 	attrS := cdrS.attrS != nil
 	if arg.AttributeS != nil {
 		attrS = *arg.AttributeS
 	}
 	cgrEv := &arg.CGREvent
 	if attrS {
-		if err := cdrS.attrSProcessEvent(cgrEv); err != nil {
-			return utils.NewErrServerError(err)
+		if err = cdrS.attrSProcessEvent(cgrEv); err != nil {
+			err = utils.NewErrServerError(err)
+			return
 		}
 	}
-	rawCDR, err := NewMapEvent(cgrEv.Event).AsCDR(cdrS.cgrCfg,
-		cgrEv.Tenant, cdrS.cgrCfg.GeneralCfg().DefaultTimezone)
-	if err != nil {
-		return utils.NewErrServerError(err)
+	var rawCDR *CDR
+	if rawCDR, err = NewMapEvent(cgrEv.Event).AsCDR(cdrS.cgrCfg,
+		cgrEv.Tenant, cdrS.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
+		err = utils.NewErrServerError(err)
+		return
 	}
 	store := cdrS.cgrCfg.CdrsCfg().CDRSStoreCdrs
 	if arg.Store != nil {
@@ -509,7 +541,8 @@ func (cdrS *CDRServer) V2ProcessCDR(arg *ArgV2ProcessCDR, reply *string) (err er
 	}
 	if store { // Store *raw CDR
 		if err = cdrS.cdrDb.SetCDR(rawCDR, false); err != nil {
-			return utils.NewErrServerError(err) // Cannot store CDR
+			err = utils.NewErrServerError(err) // Cannot store CDR
+			return
 		}
 	}
 	export := len(cdrS.cgrCfg.CdrsCfg().CDRSOnlineCDRExports) != 0
@@ -546,26 +579,63 @@ func (cdrS *CDRServer) V2ProcessCDR(arg *ArgV2ProcessCDR, reply *string) (err er
 }
 
 // V1StoreSMCost handles storing of the cost into session_costs table
-func (cdrS *CDRServer) V1StoreSessionCost(attr *AttrCDRSStoreSMCost, reply *string) error {
+func (cdrS *CDRServer) V1StoreSessionCost(attr *AttrCDRSStoreSMCost, reply *string) (err error) {
 	if attr.Cost.CGRID == "" {
 		return utils.NewCGRError(utils.CDRSCtx,
 			utils.MandatoryIEMissingCaps, fmt.Sprintf("%s: CGRID", utils.MandatoryInfoMissing),
 			"SMCost: %+v with empty CGRID")
 	}
-	if err := cdrS.storeSMCost(attr.Cost, attr.CheckDuplicate); err != nil {
-		return utils.NewErrServerError(err)
+	// RPC caching
+	if config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
+		cacheKey := utils.ConcatenatedKey(utils.CDRsV1StoreSessionCost, attr.Cost.CGRID, attr.Cost.RunID)
+		guardian.Guardian.GuardIDs(config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+		defer guardian.Guardian.UnguardIDs(cacheKey)
+
+		if itm, has := Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+			cachedResp := itm.(*utils.CachedRPCResponse)
+			if cachedResp.Error == nil {
+				*reply = *cachedResp.Result.(*string)
+			}
+			return cachedResp.Error
+		}
+		defer Cache.Set(utils.CacheRPCResponses, cacheKey,
+			&utils.CachedRPCResponse{Result: reply, Error: err},
+			nil, true, utils.NonTransactional)
+	}
+	// end of RPC caching
+	if err = cdrS.storeSMCost(attr.Cost, attr.CheckDuplicate); err != nil {
+		err = utils.NewErrServerError(err)
+		return
 	}
 	*reply = utils.OK
 	return nil
 }
 
 // V2StoreSessionCost will store the SessionCost into session_costs table
-func (cdrS *CDRServer) V2StoreSessionCost(args *ArgsV2CDRSStoreSMCost, reply *string) error {
+func (cdrS *CDRServer) V2StoreSessionCost(args *ArgsV2CDRSStoreSMCost, reply *string) (err error) {
 	if args.Cost.CGRID == "" {
 		return utils.NewCGRError(utils.CDRSCtx,
 			utils.MandatoryIEMissingCaps, fmt.Sprintf("%s: CGRID", utils.MandatoryInfoMissing),
 			"SMCost: %+v with empty CGRID")
 	}
+	// RPC caching
+	if config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
+		cacheKey := utils.ConcatenatedKey(utils.CDRsV1StoreSessionCost, args.Cost.CGRID, args.Cost.RunID)
+		guardian.Guardian.GuardIDs(config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+		defer guardian.Guardian.UnguardIDs(cacheKey)
+
+		if itm, has := Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+			cachedResp := itm.(*utils.CachedRPCResponse)
+			if cachedResp.Error == nil {
+				*reply = *cachedResp.Result.(*string)
+			}
+			return cachedResp.Error
+		}
+		defer Cache.Set(utils.CacheRPCResponses, cacheKey,
+			&utils.CachedRPCResponse{Result: reply, Error: err},
+			nil, true, utils.NonTransactional)
+	}
+	// end of RPC caching
 	cc := args.Cost.CostDetails.AsCallCost()
 	cc.Round()
 	roundIncrements := cc.GetRoundIncrements()
@@ -575,14 +645,14 @@ func (cdrS *CDRServer) V2StoreSessionCost(args *ArgsV2CDRSStoreSMCost, reply *st
 		cd.RunID = args.Cost.RunID
 		cd.Increments = roundIncrements
 		var response float64
-		if err := cdrS.rals.Call("Responder.RefundRounding",
+		if err := cdrS.rals.Call(utils.ResponderRefundRounding,
 			cd, &response); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<CDRS> RefundRounding for cc: %+v, got error: %s",
 					cc, err.Error()))
 		}
 	}
-	if err := cdrS.storeSMCost(
+	if err = cdrS.storeSMCost(
 		&SMCost{
 			CGRID:       args.Cost.CGRID,
 			RunID:       args.Cost.RunID,
@@ -592,10 +662,11 @@ func (cdrS *CDRServer) V2StoreSessionCost(args *ArgsV2CDRSStoreSMCost, reply *st
 			Usage:       args.Cost.Usage,
 			CostDetails: args.Cost.CostDetails},
 		args.CheckDuplicate); err != nil {
-		return utils.NewErrServerError(err)
+		err = utils.NewErrServerError(err)
+		return
 	}
 	*reply = utils.OK
-	return nil
+	return
 
 }
 
@@ -609,6 +680,7 @@ type ArgRateCDRs struct {
 }
 
 // V1RateCDRs is used for re-/rate CDRs which are already stored within StorDB
+// FixMe: add RPC caching
 func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
 	cdrFltr, err := arg.RPCCDRsFilter.AsCDRsFilter(cdrS.cgrCfg.GeneralCfg().DefaultTimezone)
 	if err != nil {

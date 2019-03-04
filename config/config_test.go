@@ -361,9 +361,6 @@ func TestCgrCfgJSONDefaultsGeneral(t *testing.T) {
 	if cgrCfg.GeneralCfg().ReplyTimeout != 2*time.Second {
 		t.Errorf("Expected: 2s, received: %+v", cgrCfg.GeneralCfg().ReplyTimeout)
 	}
-	if cgrCfg.GeneralCfg().ResponseCacheTTL != 0*time.Second {
-		t.Errorf("Expected: 0s, received: %+v", cgrCfg.GeneralCfg().ResponseCacheTTL)
-	}
 	if cgrCfg.GeneralCfg().InternalTtl != 2*time.Minute {
 		t.Errorf("Expected: 2m, received: %+v", cgrCfg.GeneralCfg().InternalTtl)
 	}
