@@ -575,7 +575,10 @@ func (sS *SessionS) refundSession(s *Session, sRunIdx int, rUsage time.Duration)
 					incr.BalanceInfo.Monetary == nil) {
 				continue // not enough information for refunds, most probably free units uncounted
 			}
-			incrmts = append(incrmts, incr)
+			for i := 0; i < tmspn.CompressFactor; i++ {
+				incrmts = append(incrmts, incr)
+
+			}
 		}
 	}
 	cd := &engine.CallDescriptor{
