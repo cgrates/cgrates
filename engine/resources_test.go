@@ -409,22 +409,22 @@ func TestResourceAddFilters(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:      MetaString,
-				FieldName: "Resources",
+				FieldName: "~Resources",
 				Values:    []string{"ResourceProfile1"},
 			},
 			{
 				Type:      MetaGreaterOrEqual,
-				FieldName: "UsageInterval",
+				FieldName: "~UsageInterval",
 				Values:    []string{(1 * time.Second).String()},
 			},
 			{
 				Type:      MetaGreaterOrEqual,
-				FieldName: utils.Usage,
+				FieldName: utils.DynamicDataPrefix + utils.Usage,
 				Values:    []string{(1 * time.Second).String()},
 			},
 			{
 				Type:      MetaGreaterOrEqual,
-				FieldName: utils.Weight,
+				FieldName: utils.DynamicDataPrefix + utils.Weight,
 				Values:    []string{"9.0"},
 			},
 		},
@@ -436,22 +436,22 @@ func TestResourceAddFilters(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:      MetaString,
-				FieldName: "Resources",
+				FieldName: "~Resources",
 				Values:    []string{"ResourceProfile2"},
 			},
 			{
 				Type:      MetaGreaterOrEqual,
-				FieldName: "PddInterval",
+				FieldName: "~PddInterval",
 				Values:    []string{(1 * time.Second).String()},
 			},
 			{
 				Type:      MetaGreaterOrEqual,
-				FieldName: utils.Usage,
+				FieldName: utils.DynamicDataPrefix + utils.Usage,
 				Values:    []string{(1 * time.Second).String()},
 			},
 			{
 				Type:      MetaGreaterOrEqual,
-				FieldName: utils.Weight,
+				FieldName: utils.DynamicDataPrefix + utils.Weight,
 				Values:    []string{"15.0"},
 			},
 		},
@@ -463,7 +463,7 @@ func TestResourceAddFilters(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:      MetaPrefix,
-				FieldName: "Resources",
+				FieldName: "~Resources",
 				Values:    []string{"ResourceProfilePrefix"},
 			},
 		},

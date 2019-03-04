@@ -76,28 +76,28 @@ func TestAgReqAsNavigableMap(t *testing.T) {
 
 		&config.FCTemplate{Tag: "RequestedUsageVoice",
 			FieldId: "RequestedUsage", Type: utils.META_COMPOSED,
-			Filters: []string{"*string:*cgreq.ToR:*voice"},
+			Filters: []string{"*string:~*cgreq.ToR:*voice"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgreq.Usage{*duration_seconds}", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "RequestedUsageData",
 			FieldId: "RequestedUsage", Type: utils.META_COMPOSED,
-			Filters: []string{"*string:*cgreq.ToR:*data"},
+			Filters: []string{"*string:~*cgreq.ToR:*data"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgreq.Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "RequestedUsageSMS",
 			FieldId: "RequestedUsage", Type: utils.META_COMPOSED,
-			Filters: []string{"*string:*cgreq.ToR:*sms"},
+			Filters: []string{"*string:~*cgreq.ToR:*sms"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgreq.Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
 
 		&config.FCTemplate{Tag: "AttrPaypalAccount",
 			FieldId: "PaypalAccount", Type: utils.META_COMPOSED,
-			Filters: []string{"*string:*cgrep.Error:"},
+			Filters: []string{"*string:~*cgrep.Error:"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgrep.Attributes.PaypalAccount", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "MaxUsage",
 			FieldId: "MaxUsage", Type: utils.META_COMPOSED,
-			Filters: []string{"*string:*cgrep.Error:"},
+			Filters: []string{"*string:~*cgrep.Error:"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgrep.MaxUsage{*duration_seconds}", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Error",
