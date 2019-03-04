@@ -30,7 +30,7 @@ type AttrReloadConfig struct {
 // Retrieves the callCost out of CGR logDb
 func (apier *ApierV1) ReloadCdrcConfig(attrs AttrReloadConfig, reply *string) error {
 	if attrs.ConfigDir == "" {
-		attrs.ConfigDir = utils.CONFIG_DIR
+		attrs.ConfigDir = utils.CONFIG_PATH
 	}
 	newCfg, err := config.NewCGRConfigFromFolder(attrs.ConfigDir)
 	if err != nil {

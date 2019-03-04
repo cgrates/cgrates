@@ -41,7 +41,7 @@ var (
 	memprofile   = flag.String("memprofile", "", "write memory profile to this file")
 	runs         = flag.Int("runs", 10000, "stress cycle number")
 
-	cfgDir = flag.String("config_dir", "",
+	cfgPath = flag.String("config_path", "",
 		"Configuration directory path.")
 
 	parallel        = flag.Int("parallel", 0, "run n requests in parallel")
@@ -161,8 +161,8 @@ func main() {
 	}
 
 	tstCfg := cgrConfig
-	if *cfgDir != "" {
-		if tstCfg, err = config.NewCGRConfigFromFolder(*cfgDir); err != nil {
+	if *cfgPath != "" {
+		if tstCfg, err = config.NewCGRConfigFromFolder(*cfgPath); err != nil {
 			log.Fatalf("error loading config file %s", err.Error())
 		}
 	}

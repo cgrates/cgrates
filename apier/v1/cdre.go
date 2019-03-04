@@ -189,7 +189,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 // Reloads CDRE configuration out of folder specified
 func (apier *ApierV1) ReloadCdreConfig(attrs AttrReloadConfig, reply *string) error {
 	if attrs.ConfigDir == "" {
-		attrs.ConfigDir = utils.CONFIG_DIR
+		attrs.ConfigDir = utils.CONFIG_PATH
 	}
 	newCfg, err := config.NewCGRConfigFromFolder(attrs.ConfigDir)
 	if err != nil {

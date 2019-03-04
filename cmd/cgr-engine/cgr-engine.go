@@ -61,7 +61,7 @@ const (
 )
 
 var (
-	cfgDir            = flag.String("config_dir", utils.CONFIG_DIR, "Configuration directory path.")
+	cfgPath           = flag.String("config_path", utils.CONFIG_PATH, "Configuration directory path.")
 	version           = flag.Bool("version", false, "Prints the application version.")
 	pidFile           = flag.String("pid", "", "Write pid file")
 	httpPprofPath     = flag.String("httprof_path", "", "http address used for program profiling")
@@ -1247,7 +1247,7 @@ func main() {
 	}
 	var err error
 	// Init config
-	cfg, err = config.NewCGRConfigFromFolder(*cfgDir)
+	cfg, err = config.NewCGRConfigFromFolder(*cfgPath)
 	if err != nil {
 		log.Fatalf("Could not parse config: <%s>", err.Error())
 		return
