@@ -1149,3 +1149,81 @@ func TestAttributeProcessSubstitute(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.CGREvent.Event, reply.CGREvent.Event)
 	}
 }
+
+func TestAttributeAttributeFilterIDs(t *testing.T) {
+	//refresh the DM
+	if err := dmAtr.DataDB().Flush(""); err != nil {
+		t.Error(err)
+	}
+	if test, err := dmAtr.DataDB().IsDBEmpty(); err != nil {
+		t.Error(err)
+	} else if test != true {
+		t.Errorf("\nExpecting: true got :%+v", test)
+	}
+	attrPrf1 := &AttributeProfile{
+		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:       "ATTR_1",
+		Contexts: []string{utils.META_ANY},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		Attributes: []*Attribute{
+			{
+				FilterIDs:  []string{"*string:PassField:Test"},
+				FieldName:  "PassField",
+				Substitute: config.NewRSRParsersMustCompile("Pass", true, utils.INFIELD_SEP),
+			},
+			{
+				FilterIDs:  []string{"*string:PassField:RandomValue"},
+				FieldName:  "NotPassField",
+				Substitute: config.NewRSRParsersMustCompile("NotPass", true, utils.INFIELD_SEP),
+			},
+			{
+				FilterIDs:  []string{"*notexists:RandomField:"},
+				FieldName:  "RandomField",
+				Substitute: config.NewRSRParsersMustCompile("RandomValue", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 10,
+	}
+	// Add attribute in DM
+	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+		t.Error(err)
+	}
+	attrArgs := &AttrArgsProcessEvent{
+		Context:     utils.StringPointer(utils.MetaSessionS),
+		ProcessRuns: utils.IntPointer(1),
+		CGREvent: utils.CGREvent{
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     utils.GenUUID(),
+			Event: map[string]interface{}{
+				"PassField": "Test",
+			},
+		},
+	}
+	eRply := &AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_1"},
+		AlteredFields:   []string{"PassField", "RandomField"},
+		CGREvent: &utils.CGREvent{
+			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:     utils.GenUUID(),
+			Event: map[string]interface{}{
+				"PassField":   "Pass",
+				"RandomField": "RandomValue",
+			},
+		},
+	}
+	var reply AttrSProcessEventReply
+	if err := attrService.V1ProcessEvent(attrArgs, &reply); err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
+		t.Errorf("Expecting %+v, received: %+v", eRply.MatchedProfiles, reply.MatchedProfiles)
+	}
+	if !reflect.DeepEqual(eRply.AlteredFields, reply.AlteredFields) {
+		t.Errorf("Expecting %+v, received: %+v", eRply.AlteredFields, reply.AlteredFields)
+	}
+	if !reflect.DeepEqual(eRply.CGREvent.Event, reply.CGREvent.Event) {
+		t.Errorf("Expecting %+v, received: %+v", eRply.CGREvent.Event, reply.CGREvent.Event)
+	}
+}
