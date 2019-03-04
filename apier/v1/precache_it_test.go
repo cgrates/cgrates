@@ -247,6 +247,10 @@ func testPrecacheGetCacheStatsBeforeLoad(t *testing.T) {
 			Items:  0,
 			Groups: 0,
 		},
+		"rpc_responses": {
+			Items:  0,
+			Groups: 0,
+		},
 	}
 	if err := precacheRPC.Call(utils.CacheSv1GetCacheStats, cacheIDs, &reply); err != nil {
 		t.Error(err.Error())
@@ -336,7 +340,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"filters": {
-			Items:  16, // expected to have 16 items
+			Items:  15, // expected to have 16 items
 			Groups: 0,
 		},
 		"rating_plans": {
@@ -408,6 +412,10 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"diameter_messages": {
+			Items:  0,
+			Groups: 0,
+		},
+		"rpc_responses": {
 			Items:  0,
 			Groups: 0,
 		},

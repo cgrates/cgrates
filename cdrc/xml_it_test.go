@@ -453,12 +453,12 @@ func TestXmlIT5AddFilters(t *testing.T) {
 		Rules: []*engine.FilterRule{
 			{
 				Type:      "*string",
-				FieldName: "broadWorksCDR.cdrData.basicModule.userNumber",
+				FieldName: "~broadWorksCDR.cdrData.basicModule.userNumber",
 				Values:    []string{"1002"},
 			},
 			{
 				Type:      "*string",
-				FieldName: "broadWorksCDR.cdrData.headerModule.type",
+				FieldName: "~broadWorksCDR.cdrData.headerModule.type",
 				Values:    []string{"Normal"},
 			},
 		},

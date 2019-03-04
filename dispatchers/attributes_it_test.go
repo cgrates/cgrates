@@ -114,7 +114,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 	eAttrPrf := &engine.AttributeProfile{
 		Tenant:    args.Tenant,
 		ID:        "ATTR_1002_SIMPLEAUTH",
-		FilterIDs: []string{"*string:Account:1002"},
+		FilterIDs: []string{"*string:~Account:1002"},
 		Contexts:  []string{"simpleauth"},
 		Attributes: []*engine.Attribute{
 			{
@@ -289,7 +289,7 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 	eAttrPrf := &engine.AttributeProfile{
 		Tenant:    args.Tenant,
 		ID:        "ATTR_1001_SIMPLEAUTH",
-		FilterIDs: []string{"*string:Account:1001"},
+		FilterIDs: []string{"*string:~Account:1001"},
 		Contexts:  []string{"simpleauth"},
 		Attributes: []*engine.Attribute{
 			{
@@ -380,7 +380,7 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 	eAttrPrf := &engine.AttributeProfile{
 		Tenant:    args.Tenant,
 		ID:        "ATTR_1002_SIMPLEAUTH",
-		FilterIDs: []string{"*string:Account:1002"},
+		FilterIDs: []string{"*string:~Account:1002"},
 		Contexts:  []string{"simpleauth"},
 		Attributes: []*engine.Attribute{
 			{

@@ -161,7 +161,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 	eAttrPrf := &engine.AttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_1",
-		FilterIDs: []string{"*string:Account:1007"},
+		FilterIDs: []string{"*string:~Account:1007"},
 		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
@@ -261,7 +261,7 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 	eAttrPrf2 := &engine.AttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_2",
-		FilterIDs: []string{"*string:Account:dan"},
+		FilterIDs: []string{"*string:~Account:dan"},
 		Contexts:  []string{utils.META_ANY},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
@@ -406,7 +406,7 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "AttributeWithNonSubstitute",
 		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
-		FilterIDs: []string{"*string:Account:1008"},
+		FilterIDs: []string{"*string:~Account:1008"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -471,7 +471,7 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "AttributeWithNonSubstitute",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Account:1008"},
+		FilterIDs: []string{"*string:~Account:1008"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -547,7 +547,7 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "AttributeWithNonSubstitute",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Account:1008"},
+		FilterIDs: []string{"*string:~Account:1008"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -600,7 +600,7 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_Header",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Field1:Value1"},
+		FilterIDs: []string{"*string:~Field1:Value1"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
@@ -758,7 +758,7 @@ func testAttributeSSetAlsPrf2(t *testing.T) {
 		Tenant:    "golant",
 		ID:        "ATTR_972587832508_SESSIONAUTH",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Account:972587832508"},
+		FilterIDs: []string{"*string:~Account:972587832508"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -829,7 +829,7 @@ func testAttributeSSetAlsPrf4(t *testing.T) {
 		Tenant:    "golant",
 		ID:        "ATTR_972587832508_SESSIONAUTH",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Account:972587832508"},
+		FilterIDs: []string{"*string:~Account:972587832508"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -865,7 +865,7 @@ func testAttributeSProcessEventWithSearchAndReplace(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_Search_and_replace",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Category:call"},
+		FilterIDs: []string{"*string:~Category:call"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},

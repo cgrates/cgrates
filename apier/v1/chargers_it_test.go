@@ -135,7 +135,7 @@ func testChargerSLoadAddCharger(t *testing.T) {
 	chargerProfile := &engine.ChargerProfile{
 		Tenant:    "cgrates.org",
 		ID:        "Charger1",
-		FilterIDs: []string{"*string:Account:1001"},
+		FilterIDs: []string{"*string:~Account:1001"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
 		},
@@ -179,7 +179,7 @@ func testChargerSGetChargersForEvent(t *testing.T) {
 		&engine.ChargerProfile{
 			Tenant:    "cgrates.org",
 			ID:        "Charger1",
-			FilterIDs: []string{"*string:Account:1001"},
+			FilterIDs: []string{"*string:~Account:1001"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
 			},
@@ -233,7 +233,7 @@ func testChargerSSetChargerProfile(t *testing.T) {
 	chargerProfile = &engine.ChargerProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ApierTest",
-		FilterIDs: []string{"*string:Account:1001", "*string:Account:1002"},
+		FilterIDs: []string{"*string:~Account:1001", "*string:~Account:1002"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),

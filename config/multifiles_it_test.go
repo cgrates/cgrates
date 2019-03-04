@@ -156,7 +156,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 				},
 				{
 					Id:      "OutboundAUTH",
-					Filters: []string{"*string:*req.request_type:OutboundAUTH"},
+					Filters: []string{"*string:~*req.request_type:OutboundAUTH"},
 					Tenant:  NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 					Flags: utils.StringMap{"*accounts": true,
 						"*attributes": true, "*auth": true},
@@ -181,7 +181,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 				},
 				{
 					Id:      "mtcall_cdr",
-					Filters: []string{"*string:*req.request_type:MTCALL_CDR"},
+					Filters: []string{"*string:~*req.request_type:MTCALL_CDR"},
 					Tenant:  NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 					Flags:   utils.StringMap{"*cdrs": true},
 					RequestFields: []*FCTemplate{{
