@@ -45,7 +45,7 @@
 		"cdr_in_dir": "/tmp/cgr_fwv/cdrc/in",		// absolute path towards the directory where the CDRs are stored
 		"cdr_out_dir": "/tmp/cgr_fwv/cdrc/out",		// absolute path towards the directory where processed CDRs will be moved
 		"cdr_source_id": "cdrc",			// free form field, id identifying the source of the CDRs within CDRS database
-		"filters":["*string:0-10:CDR0000010"],
+		"filters":["*string:~0-10:CDR0000010"],
 		"header_fields": [
 			{"tag": "FileName", "field_id": "CdrFileName", "type": "*composed", "value": "~95-135", "padding":"right"},
 			{"tag": "FileSeqNr", "field_id": "FileSeqNr", "type": "*composed", "value": "~135-141", "padding":"zeroleft"},

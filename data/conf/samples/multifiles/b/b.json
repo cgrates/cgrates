@@ -32,7 +32,7 @@
 		"request_processors": [
 			{
 				"id": "mtcall_cdr",
-				"filters": ["*string:*req.request_type:MTCALL_CDR"],
+				"filters": ["*string:~*req.request_type:MTCALL_CDR"],
 				"tenant": "cgrates.org",
 				"flags": ["*cdrs"],
 				"request_fields":[

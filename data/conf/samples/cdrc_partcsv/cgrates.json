@@ -52,7 +52,7 @@
 			{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~4", "mandatory": true},
 			{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~4", "mandatory": true},
 			{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "~6:s/^(\\d+)$/${1}s/", "mandatory": true},
-			{"tag": "Partial", "field_id": "Partial", "type": "*composed", "value": "true", "filters":["*string:10:partial"]},
+			{"tag": "Partial", "field_id": "Partial", "type": "*composed", "value": "true", "filters":["*string:~10:partial"]},
 		],
 		"cache_dump_fields": [
 			{"tag": "OriginID", "type": "*composed", "value": "~OriginID"},
@@ -92,7 +92,7 @@
 			{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~4", "mandatory": true},
 			{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~4", "mandatory": true},
 			{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "~6:s/^(\\d+)$/${1}s/", "mandatory": true},
-			{"tag": "Partial", "field_id": "Partial", "type": "*composed", "value": "true", "filters":["*string:10:partial"]},
+			{"tag": "Partial", "field_id": "Partial", "type": "*composed", "value": "true", "filters":["*string:~10:partial"]},
 		],
 	},
 ],

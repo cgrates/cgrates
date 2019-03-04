@@ -83,7 +83,7 @@
 	"request_processors": [
 		{
 			"id": "KamailioAuth",
-			"filters": ["*string:*vars.*radReqType:*radAuth"],
+			"filters": ["*string:~*vars.*radReqType:*radAuth"],
 			"flags": ["*auth", "*accounts"],
 			"continue_on_success": false,
 			"request_fields":[
@@ -110,7 +110,7 @@
 		},
 		{
 			"id": "KamailioAccountingStart",
-			"filters": ["*string:*req.Acct-Status-Type:Start"],
+			"filters": ["*string:~*req.Acct-Status-Type:Start"],
 			"flags": ["*initiate", "*attributes", "*resources", "*accounts"],
 			"continue_on_success": false,
 			"request_fields":[	
@@ -136,7 +136,7 @@
 		},
 		{
 			"id": "KamailioAccountingStop",
-			"filters": ["*string:*req.Acct-Status-Type:Stop"],
+			"filters": ["*string:~*req.Acct-Status-Type:Stop"],
 			"flags": ["*terminate", "*resources", "*accounts", "*cdrs"],
 			"continue_on_success": false,
 			"request_fields":[	
