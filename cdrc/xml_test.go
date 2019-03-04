@@ -280,7 +280,7 @@ func TestXMLRPProcessWithNewFilters(t *testing.T) {
 			DataUsageMultiplyFactor: 1024,
 			CDRPath:                 utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}),
 			CdrSourceId:             "XMLWithFilters",
-			Filters:                 []string{"*string:broadWorksCDR.cdrData.headerModule.type:Normal"},
+			Filters:                 []string{"*string:~broadWorksCDR.cdrData.headerModule.type:Normal"},
 			ContentFields: []*config.FCTemplate{
 				{Tag: "TOR", Type: utils.META_COMPOSED, FieldId: utils.ToR,
 					Value: config.NewRSRParsersMustCompile("*voice", true, utils.INFIELD_SEP), Mandatory: true},

@@ -132,7 +132,7 @@ var (
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "AttributeIDMatch",
 			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"*gte:DistinctMatch:20"},
+			FilterIDs: []string{"*gte:~DistinctMatch:20"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     cloneExpTimeAttributes,
@@ -172,17 +172,17 @@ func TestAttributeAddFilters(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:      MetaString,
-				FieldName: "Attribute",
+				FieldName: "~Attribute",
 				Values:    []string{"AttributeProfile1"},
 			},
 			{
 				Type:      MetaGreaterOrEqual,
-				FieldName: "UsageInterval",
+				FieldName: "~UsageInterval",
 				Values:    []string{(1 * time.Second).String()},
 			},
 			{
 				Type:      MetaGreaterOrEqual,
-				FieldName: utils.Weight,
+				FieldName: utils.DynamicDataPrefix + utils.Weight,
 				Values:    []string{"9.0"},
 			},
 		},
@@ -194,7 +194,7 @@ func TestAttributeAddFilters(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:      MetaString,
-				FieldName: "Attribute",
+				FieldName: "~Attribute",
 				Values:    []string{"AttributeProfile2"},
 			},
 		},
@@ -206,7 +206,7 @@ func TestAttributeAddFilters(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:      MetaPrefix,
-				FieldName: "Attribute",
+				FieldName: "~Attribute",
 				Values:    []string{"AttributeProfilePrefix"},
 			},
 		},
@@ -218,7 +218,7 @@ func TestAttributeAddFilters(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:      MetaGreaterOrEqual,
-				FieldName: utils.Weight,
+				FieldName: utils.DynamicDataPrefix + utils.Weight,
 				Values:    []string{"200.00"},
 			},
 		},
@@ -403,7 +403,7 @@ func TestAttributeIndexer(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf",
 		Contexts:  []string{utils.META_ANY},
-		FilterIDs: []string{"*string:Account:1007"},
+		FilterIDs: []string{"*string:~Account:1007"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			ExpiryTime:     cloneExpTimeAttributes,
@@ -420,7 +420,7 @@ func TestAttributeIndexer(t *testing.T) {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringMap{
-		"*string:Account:1007": {
+		"*string:~Account:1007": {
 			"AttrPrf": true,
 		},
 	}
@@ -470,7 +470,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:InitialField:InitialValue"},
+		FilterIDs: []string{"*string:~InitialField:InitialValue"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
@@ -486,7 +486,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_2",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Field1:Value1"},
+		FilterIDs: []string{"*string:~Field1:Value1"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
@@ -502,7 +502,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_3",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Field2:Value2"},
+		FilterIDs: []string{"*string:~Field2:Value2"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
@@ -578,7 +578,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:InitialField:InitialValue"},
+		FilterIDs: []string{"*string:~InitialField:InitialValue"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
@@ -594,7 +594,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_2",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Field1:Value1"},
+		FilterIDs: []string{"*string:~Field1:Value1"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
@@ -610,7 +610,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_3",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:NotFound:NotFound"},
+		FilterIDs: []string{"*string:~NotFound:NotFound"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
@@ -685,7 +685,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:InitialField:InitialValue"},
+		FilterIDs: []string{"*string:~InitialField:InitialValue"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
@@ -701,7 +701,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_2",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Field1:Value1"},
+		FilterIDs: []string{"*string:~Field1:Value1"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
@@ -717,7 +717,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_3",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Field2:Value2"},
+		FilterIDs: []string{"*string:~Field2:Value2"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
@@ -792,7 +792,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:InitialField:InitialValue"},
+		FilterIDs: []string{"*string:~InitialField:InitialValue"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
@@ -808,7 +808,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_2",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Field1:Value1"},
+		FilterIDs: []string{"*string:~Field1:Value1"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
@@ -880,7 +880,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:InitialField:InitialValue"},
+		FilterIDs: []string{"*string:~InitialField:InitialValue"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
@@ -896,7 +896,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_2",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Field1:Value1"},
+		FilterIDs: []string{"*string:~Field1:Value1"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
@@ -913,7 +913,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_3",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Field2:Value2"},
+		FilterIDs: []string{"*string:~Field2:Value2"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
@@ -988,7 +988,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:InitialField:InitialValue"},
+		FilterIDs: []string{"*string:~InitialField:InitialValue"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
@@ -1005,7 +1005,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_2",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Field1:Value1"},
+		FilterIDs: []string{"*string:~Field1:Value1"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
@@ -1021,7 +1021,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_3",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Field2:Value2"},
+		FilterIDs: []string{"*string:~Field2:Value2"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
@@ -1095,7 +1095,7 @@ func TestAttributeProcessSubstitute(t *testing.T) {
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:        "ATTR_1",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:Field1:Value1"},
+		FilterIDs: []string{"*string:~Field1:Value1"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
