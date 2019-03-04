@@ -13,7 +13,7 @@
 		"request_processors": [
 			{
 				"id": "OutboundAUTHDryRun",
-				"filters": ["*string:*req.request_type:OutboundAUTH","*string:*req.Msisdn:497700056231"],
+				"filters": ["*string:~*req.request_type:OutboundAUTH","*string:~*req.Msisdn:497700056231"],
 				"tenant": "cgrates.org",
 				"flags": ["*dryrun"],
 				"request_fields":[
@@ -33,7 +33,7 @@
 			},
 			{
 				"id": "OutboundAUTH",
-				"filters": ["*string:*req.request_type:OutboundAUTH"],
+				"filters": ["*string:~*req.request_type:OutboundAUTH"],
 				"tenant": "cgrates.org",
 				"flags": [ "*auth", "*accounts", "*attributes"],
 				"request_fields":[
@@ -58,7 +58,7 @@
 			},
 			{
 				"id": "mtcall_cdr",
-				"filters": ["*string:*req.request_type:MTCALL_CDR"],
+				"filters": ["*string:~*req.request_type:MTCALL_CDR"],
 				"tenant": "cgrates.org",
 				"flags": ["*cdrs"],
 				"request_fields":[

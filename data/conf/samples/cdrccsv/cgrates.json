@@ -68,7 +68,7 @@
  		"cdr_in_dir": "/tmp/csvwithfilter1/csvit1/in",	// absolute path towards the directory where the CDRs are stored
  		"cdr_out_dir": "/tmp/csvwithfilter1/csvit1/out",	// absolute path towards the directory where processed CDRs will be moved
  		"cdr_source_id": "csvit1",			// free form field, tag identifying the source of the CDRs within CDRS database
- 		"filters":["*string:3:1002"],		//filter Account to be 1002
+ 		"filters":["*string:~3:1002"],		//filter Account to be 1002
 		"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},
 			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~0", "mandatory": true},
@@ -94,7 +94,7 @@
  		"cdr_in_dir": "/tmp/csvwithfilter2/csvit2/in",	// absolute path towards the directory where the CDRs are stored
  		"cdr_out_dir": "/tmp/csvwithfilter2/csvit2/out",	// absolute path towards the directory where processed CDRs will be moved
  		"cdr_source_id": "csvit2",			// free form field, tag identifying the source of the CDRs within CDRS database
- 		"filters":["*string:3:1002","*string:1:*prepaid","*gte:6:70"],		//filter Account to be 1002 and RequestType *prepaid
+ 		"filters":["*string:~3:1002","*string:~1:*prepaid","*gte:~6:70"],		//filter Account to be 1002 and RequestType *prepaid
 		"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},
 			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~0", "mandatory": true},
@@ -120,7 +120,7 @@
  		"cdr_in_dir": "/tmp/csvwithfilter3/csvit3/in",	// absolute path towards the directory where the CDRs are stored
  		"cdr_out_dir": "/tmp/csvwithfilter3/csvit3/out",	// absolute path towards the directory where processed CDRs will be moved
  		"cdr_source_id": "csvit4",			// free form field, tag identifying the source of the CDRs within CDRS database
- 		"filters":["*string:1:*postpaid"],		//filter Account to be 1002
+ 		"filters":["*string:~1:*postpaid"],		//filter Account to be 1002
 		"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},
 			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~0", "mandatory": true},
@@ -137,7 +137,7 @@
 			{"tag": "HDRExtra3", "field_id": "HDRExtra3", "type": "*composed", "value": "~6", "mandatory": true},
 			{"tag": "HDRExtra2", "field_id": "HDRExtra2", "type": "*composed", "value": "~6", "mandatory": true},
 			{"tag": "HDRExtra1", "field_id": "HDRExtra1", "type": "*composed", "value": "~6", "mandatory": true},
-			{"tag": "RandomVal", "field_id": "RandomVal", "type": "*composed", "value": "*randomValue","filters":["*string:3:1001"]},
+			{"tag": "RandomVal", "field_id": "RandomVal", "type": "*composed", "value": "*randomValue","filters":["*string:~3:1001"]},
 		],
 	},
 	{
@@ -166,7 +166,7 @@
 			{"tag": "HDRExtra3", "field_id": "HDRExtra3", "type": "*composed", "value": "~6", "mandatory": true},
 			{"tag": "HDRExtra2", "field_id": "HDRExtra2", "type": "*composed", "value": "~6", "mandatory": true},
 			{"tag": "HDRExtra1", "field_id": "HDRExtra1", "type": "*composed", "value": "~6", "mandatory": true},
-			{"tag": "RandomVal", "field_id": "RandomVal", "type": "*composed", "value": "*randomValue","filters":["*string:3:1001"]},
+			{"tag": "RandomVal", "field_id": "RandomVal", "type": "*composed", "value": "*randomValue","filters":["*string:~3:1001"]},
 		],
 	},
 ],

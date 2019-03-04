@@ -50,7 +50,7 @@
 			},
 			{
 				"id": "OutboundAUTH",
-				"filters": ["*string:*req.request_type:OutboundAUTH"],
+				"filters": ["*string:~*req.request_type:OutboundAUTH"],
 				"tenant": "cgrates.org",
 				"flags": ["*auth", "*accounts", "*attributes"],
 				"request_fields":[
