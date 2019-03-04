@@ -18,7 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "net"
+import (
+	"net"
+	"strings"
+
+	"github.com/cgrates/cgrates/utils"
+)
 
 // DataProvider is a data source from multiple formats
 type DataProvider interface {
@@ -27,4 +32,20 @@ type DataProvider interface {
 	FieldAsString(fldPath []string) (string, error)
 	AsNavigableMap([]*FCTemplate) (*NavigableMap, error)
 	RemoteHost() net.Addr
+}
+
+func GetDynamicInterface(dnVal string, dP DataProvider) (interface{}, error) {
+	if strings.HasPrefix(dnVal, utils.DynamicDataPrefix) {
+		dnVal = strings.TrimPrefix(dnVal, utils.DynamicDataPrefix)
+		return dP.FieldAsInterface(strings.Split(dnVal, utils.NestingSep))
+	}
+	return utils.StringToInterface(dnVal), nil
+}
+
+func GetDynamicString(dnVal string, dP DataProvider) (string, error) {
+	if strings.HasPrefix(dnVal, utils.DynamicDataPrefix) {
+		dnVal = strings.TrimPrefix(dnVal, utils.DynamicDataPrefix)
+		return dP.FieldAsString(strings.Split(dnVal, utils.NestingSep))
+	}
+	return dnVal, nil
 }

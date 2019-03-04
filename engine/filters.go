@@ -332,7 +332,7 @@ func (fltr *FilterRule) Pass(dP config.DataProvider,
 }
 
 func (fltr *FilterRule) passString(dP config.DataProvider) (bool, error) {
-	strVal, err := dP.FieldAsString(strings.Split(fltr.FieldName, utils.NestingSep))
+	strVal, err := config.GetDynamicString(fltr.FieldName, dP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -340,7 +340,11 @@ func (fltr *FilterRule) passString(dP config.DataProvider) (bool, error) {
 		return false, err
 	}
 	for _, val := range fltr.Values {
-		if strVal == val {
+		sval, err := config.GetDynamicString(val, dP)
+		if err != nil {
+			continue
+		}
+		if strVal == sval {
 			return true, nil
 		}
 	}
@@ -348,7 +352,7 @@ func (fltr *FilterRule) passString(dP config.DataProvider) (bool, error) {
 }
 
 func (fltr *FilterRule) passExists(dP config.DataProvider) (bool, error) {
-	_, err := dP.FieldAsInterface(strings.Split(fltr.FieldName, utils.NestingSep))
+	_, err := config.GetDynamicInterface(fltr.FieldName, dP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -359,7 +363,7 @@ func (fltr *FilterRule) passExists(dP config.DataProvider) (bool, error) {
 }
 
 func (fltr *FilterRule) passEmpty(dP config.DataProvider) (bool, error) {
-	val, err := dP.FieldAsInterface(strings.Split(fltr.FieldName, utils.NestingSep))
+	val, err := config.GetDynamicInterface(fltr.FieldName, dP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return true, nil
@@ -389,7 +393,7 @@ func (fltr *FilterRule) passEmpty(dP config.DataProvider) (bool, error) {
 }
 
 func (fltr *FilterRule) passStringPrefix(dP config.DataProvider) (bool, error) {
-	strVal, err := dP.FieldAsString(strings.Split(fltr.FieldName, utils.NestingSep))
+	strVal, err := config.GetDynamicString(fltr.FieldName, dP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -397,6 +401,10 @@ func (fltr *FilterRule) passStringPrefix(dP config.DataProvider) (bool, error) {
 		return false, err
 	}
 	for _, prfx := range fltr.Values {
+		prfx, err := config.GetDynamicString(prfx, dP)
+		if err != nil {
+			continue
+		}
 		if strings.HasPrefix(strVal, prfx) {
 			return true, nil
 		}
@@ -405,7 +413,7 @@ func (fltr *FilterRule) passStringPrefix(dP config.DataProvider) (bool, error) {
 }
 
 func (fltr *FilterRule) passStringSuffix(dP config.DataProvider) (bool, error) {
-	strVal, err := dP.FieldAsString(strings.Split(fltr.FieldName, utils.NestingSep))
+	strVal, err := config.GetDynamicString(fltr.FieldName, dP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -413,6 +421,10 @@ func (fltr *FilterRule) passStringSuffix(dP config.DataProvider) (bool, error) {
 		return false, err
 	}
 	for _, prfx := range fltr.Values {
+		prfx, err := config.GetDynamicString(prfx, dP)
+		if err != nil {
+			continue
+		}
 		if strings.HasSuffix(strVal, prfx) {
 			return true, nil
 		}
@@ -426,7 +438,7 @@ func (fltr *FilterRule) passTimings(dP config.DataProvider) (bool, error) {
 }
 
 func (fltr *FilterRule) passDestinations(dP config.DataProvider) (bool, error) {
-	dst, err := dP.FieldAsString(strings.Split(fltr.FieldName, utils.NestingSep))
+	dst, err := config.GetDynamicString(fltr.FieldName, dP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -437,6 +449,10 @@ func (fltr *FilterRule) passDestinations(dP config.DataProvider) (bool, error) {
 		if destIDs, err := dm.DataDB().GetReverseDestination(p, false, utils.NonTransactional); err == nil {
 			for _, dID := range destIDs {
 				for _, valDstID := range fltr.Values {
+					valDstID, err := config.GetDynamicString(valDstID, dP)
+					if err != nil {
+						continue
+					}
 					if valDstID == dID {
 						return true, nil
 					}
@@ -484,7 +500,7 @@ func (fltr *FilterRule) passStatS(dP config.DataProvider,
 		}
 		//compose the newFilter
 		fltr, err := NewFilterRule(fltrType[0],
-			utils.Meta+fltrType[1], []string{statItem.FilterValue})
+			utils.DynamicDataPrefix+utils.Meta+fltrType[1], []string{statItem.FilterValue})
 		if err != nil {
 			return false, err
 		}
@@ -499,7 +515,7 @@ func (fltr *FilterRule) passStatS(dP config.DataProvider,
 }
 
 func (fltr *FilterRule) passGreaterThan(dP config.DataProvider) (bool, error) {
-	fldIf, err := dP.FieldAsInterface(strings.Split(fltr.FieldName, utils.NestingSep))
+	fldIf, err := config.GetDynamicInterface(fltr.FieldName, dP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -509,13 +525,17 @@ func (fltr *FilterRule) passGreaterThan(dP config.DataProvider) (bool, error) {
 	if fldStr, castStr := fldIf.(string); castStr { // attempt converting string since deserialization fails here (ie: time.Time fields)
 		fldIf = utils.StringToInterface(fldStr)
 	}
+	orEqual := false
+	if fltr.Type == MetaGreaterOrEqual ||
+		fltr.Type == MetaLessThan {
+		orEqual = true
+	}
 	for _, val := range fltr.Values {
-		orEqual := false
-		if fltr.Type == MetaGreaterOrEqual ||
-			fltr.Type == MetaLessThan {
-			orEqual = true
+		sval, err := config.GetDynamicInterface(val, dP)
+		if err != nil {
+			continue
 		}
-		if gte, err := utils.GreaterThan(fldIf, utils.StringToInterface(val), orEqual); err != nil {
+		if gte, err := utils.GreaterThan(fldIf, sval, orEqual); err != nil {
 			return false, err
 		} else if utils.IsSliceMember([]string{MetaGreaterThan, MetaGreaterOrEqual}, fltr.Type) && gte {
 			return true, nil
@@ -545,7 +565,7 @@ func (fltr *FilterRule) passResourceS(dP config.DataProvider,
 		nM := config.NewNavigableMap(data)
 		//compose the newFilter
 		fltr, err := NewFilterRule(resItem.FilterType,
-			utils.Usage, []string{resItem.FilterValue})
+			utils.DynamicDataPrefix+utils.Usage, []string{resItem.FilterValue})
 		if err != nil {
 			return false, err
 		}

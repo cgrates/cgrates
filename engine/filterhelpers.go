@@ -83,6 +83,9 @@ func MatchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 			if filterIndexTypes[i] == MetaPrefix {
 				fldVals = utils.SplitPrefix(fldVal, 1) // all prefixes till last digit
 			}
+			if fldName != utils.META_ANY {
+				fldName = utils.DynamicDataPrefix + fldName
+			}
 			var dbItemIDs utils.StringMap // list of items matched in DB
 			for _, val := range fldVals {
 				dbItemIDs, err = dm.MatchFilterIndex(cacheID, itemIDPrefix, filterIndexTypes[i], fldName, val)
