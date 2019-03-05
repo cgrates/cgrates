@@ -17,7 +17,7 @@
 
 
 "cache":{
-	"rpc_responses": {"limit": -1, "ttl": "2s"},
+	"rpc_responses": {"limit": -1, "ttl": "1s"},
 },
 
 
@@ -46,6 +46,12 @@
 	"attributes_conns": [
 		{"address": "*internal"}
 	],
+},
+
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "1s",
 },
 
 
