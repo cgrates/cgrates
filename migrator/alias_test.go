@@ -219,9 +219,9 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			ID:       aliases[4].GetId(),
 			Contexts: []string{utils.META_ANY},
 			FilterIDs: []string{
-				"*string:Category:*voice",
-				"*string:Account:1001",
-				"*destination:Destination:DST_1003",
+				"*string:~Category:*voice",
+				"*string:~Account:1001",
+				"*destination:~Destination:DST_1003",
 			},
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
@@ -244,9 +244,9 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			ID:       aliases[5].GetId(),
 			Contexts: []string{utils.META_ANY},
 			FilterIDs: []string{
-				"*string:Account:1001",
-				"*string:Subject:call_1001",
-				"*destination:Destination:DST_1003",
+				"*string:~Account:1001",
+				"*string:~Subject:call_1001",
+				"*destination:~Destination:DST_1003",
 			},
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{

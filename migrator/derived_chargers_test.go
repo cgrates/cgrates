@@ -145,12 +145,12 @@ func TestDerivedChargers2AttributeProfile(t *testing.T) {
 			},
 			Tenant:  defaultTenant,
 			Key:     "key1",
-			Filters: []string{"*string:Subject:1005"},
+			Filters: []string{"*string:~Subject:1005"},
 			Expected: &engine.AttributeProfile{
 				Tenant:             defaultTenant,
 				ID:                 "key1",
 				Contexts:           []string{utils.META_ANY},
-				FilterIDs:          []string{"*string:Subject:1005"},
+				FilterIDs:          []string{"*string:~Subject:1005"},
 				ActivationInterval: nil,
 				Attributes: []*engine.Attribute{
 					&engine.Attribute{
@@ -202,15 +202,15 @@ func TestDerivedChargers2Charger(t *testing.T) {
 			Tenant: defaultTenant,
 			Key:    "key2",
 			Filters: []string{
-				"*string:Category:*voice1",
-				"*string:Account:1001",
+				"*string:~Category:*voice1",
+				"*string:~Account:1001",
 			},
 			Expected: &engine.ChargerProfile{
 				Tenant: defaultTenant,
 				ID:     "key2",
 				FilterIDs: []string{
-					"*string:Category:*voice1",
-					"*string:Account:1001",
+					"*string:~Category:*voice1",
+					"*string:~Account:1001",
 					"*rsr::~Header4:s/a/${1}b/{*duration_seconds&*round:2}(b&c)",
 				},
 				ActivationInterval: nil,

@@ -162,8 +162,8 @@ func testDCITMigrateAndMove(t *testing.T) {
 		ID:       fmt.Sprintf("%s_%v", derivch.Key, 0),
 		Contexts: []string{utils.META_ANY},
 		FilterIDs: []string{
-			"*destination:Destination:1001;1002;1003",
-			"*string:Account:1003",
+			"*destination:~Destination:1001;1002;1003",
+			"*string:~Account:1003",
 		},
 		ActivationInterval: nil,
 		Attributes: []*engine.Attribute{
@@ -184,8 +184,8 @@ func testDCITMigrateAndMove(t *testing.T) {
 		Tenant: defaultTenant,
 		ID:     fmt.Sprintf("%s_%v", derivch.Key, 0),
 		FilterIDs: []string{
-			"*destination:Destination:1001;1002;1003",
-			"*string:Account:1003",
+			"*destination:~Destination:1001;1002;1003",
+			"*string:~Account:1003",
 			"*rsr::~filterhdr1:s/(.+)/special_run3/",
 		},
 		ActivationInterval: nil,
@@ -246,7 +246,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 			t.Error("Error should be not found : ", err)
 		}
 		expDcIdx := map[string]utils.StringMap{
-			"*string:Account:1003": utils.StringMap{
+			"*string:~Account:1003": utils.StringMap{
 				"*out:cgrates.org:*any:1003:*any_0": true,
 			},
 		}
@@ -257,7 +257,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expected %v, recived: %v", utils.ToJSON(expDcIdx), utils.ToJSON(dcidx))
 		}
 		expDcIdx = map[string]utils.StringMap{
-			"*string:Account:1003": utils.StringMap{
+			"*string:~Account:1003": utils.StringMap{
 				"*out:cgrates.org:*any:1003:*any_0": true,
 			},
 		}

@@ -156,9 +156,9 @@ func testAlsITMigrateAndMove(t *testing.T) {
 		ID:       alias.GetId(),
 		Contexts: []string{utils.META_ANY},
 		FilterIDs: []string{
-			"*string:Account:1001",
-			"*string:Subject:call_1001",
-			"*destination:Destination:DST_1003",
+			"*string:~Account:1001",
+			"*string:~Subject:call_1001",
+			"*destination:~Destination:DST_1003",
 		},
 		ActivationInterval: nil,
 		Attributes: []*engine.Attribute{
@@ -226,10 +226,10 @@ func testAlsITMigrateAndMove(t *testing.T) {
 		}
 
 		expAlsIdx := map[string]utils.StringMap{
-			"*string:Account:1001": utils.StringMap{
+			"*string:~Account:1001": utils.StringMap{
 				"*out:*any:*any:1001:call_1001:*rated": true,
 			},
-			"*string:Subject:call_1001": utils.StringMap{
+			"*string:~Subject:call_1001": utils.StringMap{
 				"*out:*any:*any:1001:call_1001:*rated": true,
 			},
 		}
