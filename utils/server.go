@@ -43,6 +43,7 @@ import (
 func NewServer() (s *Server) {
 	s = new(Server)
 	s.httpMux = http.NewServeMux()
+	s.httpsMux = http.NewServeMux()
 	return s
 }
 
@@ -202,21 +203,26 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 	io.Copy(w, res)
 }
 
+func registerProfiler(addr string, mux *http.ServeMux) {
+	mux.HandleFunc(addr, pprof.Index)
+	mux.HandleFunc(addr+"cmdline", pprof.Cmdline)
+	mux.HandleFunc(addr+"profile", pprof.Profile)
+	mux.HandleFunc(addr+"symbol", pprof.Symbol)
+	mux.HandleFunc(addr+"trace", pprof.Trace)
+	mux.Handle(addr+"goroutine", pprof.Handler("goroutine"))
+	mux.Handle(addr+"heap", pprof.Handler("heap"))
+	mux.Handle(addr+"threadcreate", pprof.Handler("threadcreate"))
+	mux.Handle(addr+"block", pprof.Handler("block"))
+	mux.Handle(addr+"allocs", pprof.Handler("allocs"))
+	mux.Handle(addr+"mutex", pprof.Handler("mutex"))
+}
+
 func (s *Server) RegisterProfiler(addr string) {
 	if addr[len(addr)-1] != '/' {
 		addr = addr + "/"
 	}
-	s.httpMux.HandleFunc(addr, pprof.Index)
-	s.httpMux.HandleFunc(addr+"cmdline", pprof.Cmdline)
-	s.httpMux.HandleFunc(addr+"profile", pprof.Profile)
-	s.httpMux.HandleFunc(addr+"symbol", pprof.Symbol)
-	s.httpMux.HandleFunc(addr+"trace", pprof.Trace)
-	s.httpMux.Handle(addr+"goroutine", pprof.Handler("goroutine"))
-	s.httpMux.Handle(addr+"heap", pprof.Handler("heap"))
-	s.httpMux.Handle(addr+"threadcreate", pprof.Handler("threadcreate"))
-	s.httpMux.Handle(addr+"block", pprof.Handler("block"))
-	s.httpMux.Handle(addr+"allocs", pprof.Handler("allocs"))
-	s.httpMux.Handle(addr+"mutex", pprof.Handler("mutex"))
+	registerProfiler(addr, s.httpMux)
+	registerProfiler(addr, s.httpsMux)
 }
 
 func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
@@ -455,7 +461,7 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 	if !enabled {
 		return
 	}
-	s.httpsMux = http.NewServeMux()
+	// s.httpsMux = http.NewServeMux()
 	if enabled && jsonRPCURL != "" {
 		s.Lock()
 		s.httpEnabled = true
