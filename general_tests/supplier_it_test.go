@@ -116,7 +116,7 @@ func testV1SplSFromFolder(t *testing.T) {
 	if err := splSv1Rpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 }
 
 func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
