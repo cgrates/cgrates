@@ -34,7 +34,7 @@ import (
 
 var (
 	dfltCfg = config.CgrConfig()
-	cfgDir  = flag.String("config_dir", "",
+	cfgPath = flag.String("config_path", "",
 		"Configuration directory path.")
 
 	dataDBType = flag.String("datadb_type", dfltCfg.DataDbCfg().DataDbType,
@@ -110,8 +110,8 @@ func main() {
 	}
 
 	ldrCfg := config.CgrConfig()
-	if *cfgDir != "" {
-		if ldrCfg, err = config.NewCGRConfigFromFolder(*cfgDir); err != nil {
+	if *cfgPath != "" {
+		if ldrCfg, err = config.NewCGRConfigFromFolder(*cfgPath); err != nil {
 			log.Fatalf("Error loading config file %s", err.Error())
 		}
 	}
