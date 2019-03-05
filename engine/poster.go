@@ -581,6 +581,7 @@ func (pstr *SQSPoster) parseURL(dialURL string) (err error) {
 	qry := u.Query()
 
 	pstr.dialURL = strings.Split(dialURL, "?")[0]
+	pstr.dialURL = strings.TrimSuffix(pstr.dialURL, "/") // used to remove / to point to correct endpoint
 	pstr.queueID = defaultQueueID
 	if vals, has := qry[queueID]; has && len(vals) != 0 {
 		pstr.queueID = vals[0]
