@@ -190,14 +190,9 @@ func (m *Migrator) migrateThresholds() (err error) {
 		if m.sameDataDB {
 			return
 		}
-		if err := m.migrateCurrentThresholds(); err != nil {
-			return err
-		}
-		return
-
+		return m.migrateCurrentThresholds()
 	case 1:
 		return m.migrateV2ActionTriggers()
-
 	case 2:
 		return m.migrateV2Thresholds()
 	}

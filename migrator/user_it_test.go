@@ -145,7 +145,7 @@ func testUsrITMigrateAndMove(t *testing.T) {
 		Tenant:             defaultTenant,
 		ID:                 "1001",
 		Contexts:           []string{utils.META_ANY},
-		FilterIDs:          []string{"*string:Account:1002"},
+		FilterIDs:          []string{"*string:~Account:1002"},
 		ActivationInterval: nil,
 		Attributes: []*engine.Attribute{
 			{
@@ -211,7 +211,7 @@ func testUsrITMigrateAndMove(t *testing.T) {
 		}
 
 		expUsrIdx := map[string]utils.StringMap{
-			"*string:Account:1002": utils.StringMap{
+			"*string:~Account:1002": utils.StringMap{
 				"1001": true,
 			},
 		}
