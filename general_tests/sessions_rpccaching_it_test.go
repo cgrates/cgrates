@@ -471,11 +471,10 @@ func testRPCMethodsTerminateSession(t *testing.T) {
 		},
 	}
 	var rply string
-	if err := sSv1BiRpc.Call(utils.SessionSv1TerminateSession,
+	if err := rpcRpc.Call(utils.SessionSv1TerminateSession,
 		args, &rply); err != nil {
 		t.Error(err)
-	}
-	if rply != utils.OK {
+	} else if rply != utils.OK {
 		t.Errorf("Unexpected reply: %s", rply)
 	}
 }
