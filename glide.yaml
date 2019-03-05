@@ -6,7 +6,7 @@ import:
 - package: github.com/cgrates/kamevapi
 - package: github.com/cgrates/osipsdagram
 - package: github.com/cgrates/rpcclient
-- package: github.com/fiorix/go-diameter
+- package: github.com/cgrates/go-diameter
   subpackages:
   - diam
   - diam/avp

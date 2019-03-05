@@ -29,10 +29,10 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/fiorix/go-diameter/diam"
-	"github.com/fiorix/go-diameter/diam/avp"
-	"github.com/fiorix/go-diameter/diam/datatype"
-	"github.com/fiorix/go-diameter/diam/dict"
+	"github.com/cgrates/go-diameter/diam"
+	"github.com/cgrates/go-diameter/diam/avp"
+	"github.com/cgrates/go-diameter/diam/datatype"
+	"github.com/cgrates/go-diameter/diam/dict"
 )
 
 var waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
