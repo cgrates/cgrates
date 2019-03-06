@@ -246,6 +246,7 @@ func (rs *Responder) Status(arg string, reply *map[string]interface{}) (err erro
 	response[utils.Footprint] = utils.SizeFmt(float64(memstats.Sys), "")
 	response[utils.Version] = utils.GetCGRVersion()
 	response[utils.RunningSince] = utils.GetStartTime()
+	response[utils.GoVersion] = runtime.Version()
 	*reply = response
 	return
 }

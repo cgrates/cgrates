@@ -332,6 +332,7 @@ const (
 	MemoryUsage                  = "MemoryUsage"
 	Footprint                    = "Footprint"
 	RunningSince                 = "RunningSince"
+	GoVersion                    = "GoVersion"
 	SessionTTL                   = "SessionTTL"
 	SessionTTLMaxDelay           = "SessionTTLMaxDelay"
 	SessionTTLLastUsed           = "SessionTTLLastUsed"
