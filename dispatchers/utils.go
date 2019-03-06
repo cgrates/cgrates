@@ -120,6 +120,11 @@ type SessionWithApiKey struct {
 	sessions.Session
 }
 
+type CallDescriptorWithApiKey struct {
+	DispatcherResource
+	engine.CallDescriptor
+}
+
 func ParseStringMap(s string) utils.StringMap {
 	if s == utils.ZERO {
 		return make(utils.StringMap)
