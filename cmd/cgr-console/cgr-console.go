@@ -36,15 +36,16 @@ import (
 )
 
 var (
+	cgrConsoleFlags = flag.NewFlagSet("cgr-console", flag.ContinueOnError)
 	historyFN       = os.Getenv("HOME") + "/.cgr_history"
-	version         = flag.Bool("version", false, "Prints the application version.")
-	verbose         = flag.Bool("verbose", false, "Show extra info about command execution.")
-	server          = flag.String("server", "127.0.0.1:2012", "server address host:port")
-	rpcEncoding     = flag.String("rpc_encoding", "*json", "RPC encoding used <*gob|*json>")
-	certificatePath = flag.String("crt_path", "", "path to certificate for tls connection")
-	keyPath         = flag.String("key_path", "", "path to key for tls connection")
-	caPath          = flag.String("ca_path", "", "path to CA for tls connection(only for self sign certificate)")
-	tls             = flag.Bool("tls", false, "Tls connection")
+	version         = cgrConsoleFlags.Bool("version", false, "Prints the application version.")
+	verbose         = cgrConsoleFlags.Bool("verbose", false, "Show extra info about command execution.")
+	server          = cgrConsoleFlags.String("server", "127.0.0.1:2012", "server address host:port")
+	rpcEncoding     = cgrConsoleFlags.String("rpc_encoding", "*json", "RPC encoding used <*gob|*json>")
+	certificatePath = cgrConsoleFlags.String("crt_path", "", "path to certificate for tls connection")
+	keyPath         = cgrConsoleFlags.String("key_path", "", "path to key for tls connection")
+	caPath          = cgrConsoleFlags.String("ca_path", "", "path to CA for tls connection(only for self sign certificate)")
+	tls             = cgrConsoleFlags.Bool("tls", false, "Tls connection")
 	client          *rpcclient.RpcClient
 )
 
@@ -117,7 +118,9 @@ func executeCommand(command string) {
 }
 
 func main() {
-	flag.Parse()
+	if err := cgrConsoleFlags.Parse(os.Args[1:]); err != nil {
+		return
+	}
 	if *version {
 		fmt.Println(utils.GetCGRVersion())
 		return
