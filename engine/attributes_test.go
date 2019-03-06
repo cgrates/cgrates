@@ -1169,17 +1169,17 @@ func TestAttributeAttributeFilterIDs(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FilterIDs:  []string{"*string:PassField:Test"},
+				FilterIDs:  []string{"*string:~PassField:Test"},
 				FieldName:  "PassField",
 				Substitute: config.NewRSRParsersMustCompile("Pass", true, utils.INFIELD_SEP),
 			},
 			{
-				FilterIDs:  []string{"*string:PassField:RandomValue"},
+				FilterIDs:  []string{"*string:~PassField:RandomValue"},
 				FieldName:  "NotPassField",
 				Substitute: config.NewRSRParsersMustCompile("NotPass", true, utils.INFIELD_SEP),
 			},
 			{
-				FilterIDs:  []string{"*notexists:RandomField:"},
+				FilterIDs:  []string{"*notexists:~RandomField:"},
 				FieldName:  "RandomField",
 				Substitute: config.NewRSRParsersMustCompile("RandomValue", true, utils.INFIELD_SEP),
 			},

@@ -22,16 +22,13 @@ package dispatchers
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
 var sTestsDspRsp = []func(t *testing.T){
 	testDspResponderStatus,
-	testDspResponderGetTimeout,
 	testDspResponderShutdown,
 
 	testDspResponderRandom,
@@ -119,36 +116,6 @@ func testDspResponderRandom(t *testing.T) {
 		}
 	}
 	t.Errorf("Random strategy fail with 0.0009765625%% probability")
-}
-
-func testDspResponderGetTimeout(t *testing.T) {
-	var reply time.Duration
-	expected := time.Duration(0)
-	if err := allEngine.RCP.Call(utils.ResponderGetTimeout, 0, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, reply) {
-		t.Errorf("Expected: %s ,received: %s", expected, reply)
-	}
-	ev := TntWithApiKey{
-		TenantArg: utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
-		DispatcherResource: DispatcherResource{
-			APIKey: "rsp12345",
-		},
-	}
-	if err := dispEngine.RCP.Call(utils.ResponderGetTimeout, &ev, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, reply) {
-		t.Errorf("Expected: %s ,received: %s", expected, reply)
-	}
-	allEngine.stopEngine(t)
-	if err := dispEngine.RCP.Call(utils.ResponderGetTimeout, &ev, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, reply) {
-		t.Errorf("Expected: %s ,received: %s", expected, reply)
-	}
-	allEngine.startEngine(t)
 }
 
 func testDspResponderShutdown(t *testing.T) {

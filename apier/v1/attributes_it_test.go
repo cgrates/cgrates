@@ -211,7 +211,7 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 	eAttrPrf2 := &engine.AttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_3",
-		FilterIDs: []string{"*string:Account:dan"},
+		FilterIDs: []string{"*string:~Account:dan"},
 		Contexts:  []string{utils.MetaSessionS},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
@@ -413,7 +413,7 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			{
-				FilterIDs:  []string{"*string:Account:1008"},
+				FilterIDs:  []string{"*string:~Account:1008"},
 				FieldName:  utils.Account,
 				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 			},
@@ -478,7 +478,7 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			{
-				FilterIDs:  []string{"*string:Account:1008"},
+				FilterIDs:  []string{"*string:~Account:1008"},
 				FieldName:  utils.Account,
 				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 			},
@@ -554,12 +554,12 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			{
-				FilterIDs:  []string{"*string:Account:1008"},
+				FilterIDs:  []string{"*string:~Account:1008"},
 				FieldName:  utils.Account,
 				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 			},
 			{
-				FilterIDs:  []string{"*string:Subject:1008"},
+				FilterIDs:  []string{"*string:~Subject:1008"},
 				FieldName:  utils.Subject,
 				Substitute: config.NewRSRParsersMustCompile(utils.META_NONE, true, utils.INFIELD_SEP),
 			},

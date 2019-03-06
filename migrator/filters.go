@@ -290,6 +290,11 @@ func (m *Migrator) migrateAttributeProfileFiltersV1() (err error) {
 		for i, fl := range attrPrf.FilterIDs {
 			attrPrf.FilterIDs[i] = migrateInlineFilter(fl)
 		}
+		for i, attr := range attrPrf.Attributes {
+			for j, fl := range attr.FilterIDs {
+				attrPrf.Attributes[i].FilterIDs[j] = migrateInlineFilter(fl)
+			}
+		}
 		if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
 			return err
 		}
