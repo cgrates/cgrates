@@ -38,7 +38,7 @@ var (
 	storDBIn, storDBOut    migrator.MigratorStorDB
 	err                    error
 	dfltCfg, _             = config.NewDefaultCGRConfig()
-	cfgDir                 = cgrMigratorFlags.String("config_dir", "",
+	cfgPath                = cgrMigratorFlags.String("config_path", "",
 		"Configuration directory path.")
 
 	migrate = cgrMigratorFlags.String("migrate", "", "fire up automatic migration "+
@@ -120,8 +120,8 @@ func main() {
 	}
 
 	mgrCfg := dfltCfg
-	if *cfgDir != "" {
-		if mgrCfg, err = config.NewCGRConfigFromFolder(*cfgDir); err != nil {
+	if *cfgPath != "" {
+		if mgrCfg, err = config.NewCGRConfigFromFolder(*cfgPath); err != nil {
 			log.Fatalf("error loading config file %s", err.Error())
 		}
 	}
