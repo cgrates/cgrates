@@ -158,7 +158,7 @@ func testAlsITMigrateAndMove(t *testing.T) {
 		FilterIDs: []string{
 			"*string:~Account:1001",
 			"*string:~Subject:call_1001",
-			"*destination:~Destination:DST_1003",
+			"*destinations:~Destination:DST_1003",
 		},
 		ActivationInterval: nil,
 		Attributes: []*engine.Attribute{

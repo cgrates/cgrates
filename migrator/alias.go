@@ -87,13 +87,16 @@ func alias2AtttributeProfile(alias *v1Alias, defaultTenant string) *engine.Attri
 		out.Tenant = defaultTenant
 	}
 	if len(alias.Category) != 0 && alias.Category != utils.META_ANY {
-		out.FilterIDs = append(out.FilterIDs, "*string:~Category:"+alias.Category)
+		out.FilterIDs = append(out.FilterIDs,
+			fmt.Sprintf("%s:~%s:%s", utils.MetaString, utils.Category, alias.Category))
 	}
 	if len(alias.Account) != 0 && alias.Account != utils.META_ANY {
-		out.FilterIDs = append(out.FilterIDs, "*string:~Account:"+alias.Account)
+		out.FilterIDs = append(out.FilterIDs,
+			fmt.Sprintf("%s:~%s:%s", utils.MetaString, utils.Account, alias.Account))
 	}
 	if len(alias.Subject) != 0 && alias.Subject != utils.META_ANY {
-		out.FilterIDs = append(out.FilterIDs, "*string:~Subject:"+alias.Subject)
+		out.FilterIDs = append(out.FilterIDs,
+			fmt.Sprintf("%s:~%s:%s", utils.MetaString, utils.Subject, alias.Subject))
 	}
 	var destination string
 	for _, av := range alias.Values {
@@ -115,7 +118,8 @@ func alias2AtttributeProfile(alias *v1Alias, defaultTenant string) *engine.Attri
 		}
 	}
 	if len(destination) != 0 && destination != utils.META_ANY {
-		out.FilterIDs = append(out.FilterIDs, "*destination:~Destination:"+destination)
+		out.FilterIDs = append(out.FilterIDs,
+			fmt.Sprintf("%s:~%s:%s", utils.MetaDestinations, utils.Destination, destination))
 	}
 	return out
 }

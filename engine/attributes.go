@@ -250,7 +250,7 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 				break
 			}
 		}
-	} else if apiRply != nil {
+	} else if err == nil {
 		for _, valIface := range apiRply.CGREvent.Event {
 			if valIface == interface{}(utils.MetaAttributes) {
 				// mandatory IE missing
