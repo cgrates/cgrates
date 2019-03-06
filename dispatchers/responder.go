@@ -21,6 +21,7 @@ package dispatchers
 import (
 	"time"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -34,6 +35,106 @@ func (dS *DispatcherService) ResponderStatus(args *TntWithApiKey,
 	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant: args.Tenant,
-	}, utils.MetaStats, args.RouteID, utils.ResponderStatus,
+	}, utils.MetaResponder, args.RouteID, utils.ResponderStatus,
 		"", reply)
+}
+
+func (dS *DispatcherService) ResponderGetCost(args *CallDescriptorWithApiKey,
+	reply *engine.CallCost) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.ResponderGetCost, args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(args.CallDescriptor.AsCGREvent(), utils.MetaResponder,
+		args.RouteID, utils.ResponderGetCost, args.CallDescriptor, reply)
+}
+
+func (dS *DispatcherService) ResponderDebit(args *CallDescriptorWithApiKey,
+	reply *engine.CallCost) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.ResponderDebit, args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(args.CallDescriptor.AsCGREvent(), utils.MetaResponder,
+		args.RouteID, utils.ResponderDebit, args.CallDescriptor, reply)
+}
+
+func (dS *DispatcherService) ResponderMaxDebit(args *CallDescriptorWithApiKey,
+	reply *engine.CallCost) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.ResponderMaxDebit, args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(args.CallDescriptor.AsCGREvent(), utils.MetaResponder,
+		args.RouteID, utils.ResponderMaxDebit, args.CallDescriptor, reply)
+}
+
+func (dS *DispatcherService) ResponderRefundIncrements(args *CallDescriptorWithApiKey,
+	reply *engine.Account) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.ResponderRefundIncrements, args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(args.CallDescriptor.AsCGREvent(), utils.MetaResponder,
+		args.RouteID, utils.ResponderRefundIncrements, args.CallDescriptor, reply)
+}
+
+func (dS *DispatcherService) ResponderRefundRounding(args *CallDescriptorWithApiKey,
+	reply *float64) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.ResponderRefundRounding, args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(args.CallDescriptor.AsCGREvent(), utils.MetaResponder,
+		args.RouteID, utils.ResponderRefundRounding, args.CallDescriptor, reply)
+}
+
+func (dS *DispatcherService) ResponderGetMaxSessionTime(args *CallDescriptorWithApiKey,
+	reply *time.Duration) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.ResponderGetMaxSessionTime, args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(args.CallDescriptor.AsCGREvent(), utils.MetaResponder,
+		args.RouteID, utils.ResponderGetMaxSessionTime, args.CallDescriptor, reply)
+}
+
+func (dS *DispatcherService) ResponderShutdown(args *TntWithApiKey,
+	reply *string) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.ResponderShutdown, args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: args.Tenant,
+	}, utils.MetaResponder, args.RouteID, utils.ResponderShutdown,
+		"", reply)
+}
+
+func (dS *DispatcherService) ResponderGetTimeout(args *TntWithApiKey,
+	reply *time.Duration) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.ResponderGetTimeout, args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{
+		Tenant: args.Tenant,
+	}, utils.MetaResponder, args.RouteID, utils.ResponderGetTimeout,
+		0, reply)
 }

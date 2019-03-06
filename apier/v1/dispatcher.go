@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"time"
+
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -374,4 +376,36 @@ type DispatcherResponder struct {
 
 func (dS *DispatcherResponder) Status(args *dispatchers.TntWithApiKey, reply *map[string]interface{}) error {
 	return dS.dS.ResponderStatus(args, reply)
+}
+
+func (dS *DispatcherResponder) GetCost(args *dispatchers.CallDescriptorWithApiKey, reply *engine.CallCost) error {
+	return dS.dS.ResponderGetCost(args, reply)
+}
+
+func (dS *DispatcherResponder) Debit(args *dispatchers.CallDescriptorWithApiKey, reply *engine.CallCost) error {
+	return dS.dS.ResponderDebit(args, reply)
+}
+
+func (dS *DispatcherResponder) MaxDebit(args *dispatchers.CallDescriptorWithApiKey, reply *engine.CallCost) error {
+	return dS.dS.ResponderMaxDebit(args, reply)
+}
+
+func (dS *DispatcherResponder) RefundIncrements(args *dispatchers.CallDescriptorWithApiKey, reply *engine.Account) error {
+	return dS.dS.ResponderRefundIncrements(args, reply)
+}
+
+func (dS *DispatcherResponder) RefundRounding(args *dispatchers.CallDescriptorWithApiKey, reply *float64) error {
+	return dS.dS.ResponderRefundRounding(args, reply)
+}
+
+func (dS *DispatcherResponder) GetMaxSessionTime(args *dispatchers.CallDescriptorWithApiKey, reply *time.Duration) error {
+	return dS.dS.ResponderGetMaxSessionTime(args, reply)
+}
+
+func (dS *DispatcherResponder) Shutdown(args *dispatchers.TntWithApiKey, reply *string) error {
+	return dS.dS.ResponderShutdown(args, reply)
+}
+
+func (dS *DispatcherResponder) GetTimeout(args *dispatchers.TntWithApiKey, reply *time.Duration) error {
+	return dS.dS.ResponderGetTimeout(args, reply)
 }

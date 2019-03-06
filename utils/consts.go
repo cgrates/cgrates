@@ -380,6 +380,7 @@ const (
 	MetaSharedGroups             = "*shared_groups"
 	MetaRALs                     = "*rals"
 	MetaStats                    = "*stats"
+	MetaResponder                = "*responder"
 	MetaThresholds               = "*thresholds"
 	MetaSuppliers                = "*suppliers"
 	MetaAttributes               = "*attributes"
@@ -786,6 +787,9 @@ const (
 	ResponderStatus            = "Responder.Status"
 	ResponderMaxDebit          = "Responder.MaxDebit"
 	ResponderRefundRounding    = "Responder.RefundRounding"
+	ResponderGetCost           = "Responder.GetCost"
+	ResponderShutdown          = "Responder.Shutdown"
+	ResponderGetTimeout        = "Responder.GetTimeout"
 )
 
 // DispatcherS APIs
