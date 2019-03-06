@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	// "fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -91,6 +90,8 @@ var sTestsFilterIndexesSV1 = []func(t *testing.T){
 	testV1FIdxdxInitDataDb,
 	testV1FIdxSetDispatcherProfile,
 	testV1FIdxComputeDispatcherProfileIndexes,
+	testV1FIdxSetDispatcherProfile2,
+	testV1FIdxComputeDispatcherProfileIndexes2,
 
 	testV1FIdxStopEngine,
 }
@@ -1623,15 +1624,6 @@ func testV1FIdxSetDispatcherProfile(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.OK, reply)
 	}
 
-	var dsp *engine.DispatcherProfile
-	if err := tFIdxRpc.Call(utils.ApierV1GetDispatcherProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "DSP_Test1"},
-		&dsp); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(dispatcherProfile, dsp) {
-		t.Errorf("Expecting : %+v, received: %+v", dispatcherProfile, dsp)
-	}
-
 	//verify *string index for *attributes subsystem
 	arg := &AttrGetFilterIndexes{
 		Tenant:     tenant,
@@ -1758,6 +1750,188 @@ func testV1FIdxComputeDispatcherProfileIndexes(t *testing.T) {
 	}
 }
 
+func testV1FIdxSetDispatcherProfile2(t *testing.T) {
+	var reply string
+	//add a new dispatcherProfile with empty filterIDs
+	//should create an index of type *none:*any:*any for *attributes subsystem
+	dispatcherProfile = &engine.DispatcherProfile{
+		Tenant:     "cgrates.org",
+		ID:         "DSP_Test2",
+		Subsystems: []string{utils.MetaAttributes},
+		Weight:     20,
+	}
+
+	if err := tFIdxRpc.Call(utils.ApierV1SetDispatcherProfile,
+		dispatcherProfile,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting : %+v, received: %+v", utils.OK, reply)
+	}
+
+	//add a new dispatcherProfile with empty filterIDs
+	//should create an index of type *none:*any:*any for *sessions subsystem
+	dispatcherProfile2 := &engine.DispatcherProfile{
+		Tenant:     "cgrates.org",
+		ID:         "DSP_Test3",
+		Subsystems: []string{utils.MetaSessionS},
+		Weight:     20,
+	}
+
+	if err := tFIdxRpc.Call(utils.ApierV1SetDispatcherProfile,
+		dispatcherProfile2,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting : %+v, received: %+v", utils.OK, reply)
+	}
+
+	//verify indexes for *attributes subsystem
+	arg := &AttrGetFilterIndexes{
+		Tenant:   tenant,
+		Context:  utils.MetaAttributes,
+		ItemType: utils.MetaDispatchers,
+	}
+	expectedIndexes := []string{
+		"*none:*any:*any:DSP_Test2",
+		"*prefix:~RandomField:RandomValue:DSP_Test1",
+		"*string:~Account:1001:DSP_Test1",
+		"*string:~Subject:2012:DSP_Test1",
+	}
+	sort.Strings(expectedIndexes)
+	var idx []string
+	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", arg, &idx); err != nil {
+		t.Error(err)
+	} else if sort.Strings(idx); !reflect.DeepEqual(expectedIndexes, idx) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedIndexes, idx)
+	}
+
+	//verify  indexes for *sessions subsystem
+	arg = &AttrGetFilterIndexes{
+		Tenant:   tenant,
+		Context:  utils.MetaSessionS,
+		ItemType: utils.MetaDispatchers,
+	}
+	expectedIndexes = []string{
+		"*none:*any:*any:DSP_Test3",
+		"*prefix:~RandomField:RandomValue:DSP_Test1",
+		"*string:~Account:1001:DSP_Test1",
+		"*string:~Subject:2012:DSP_Test1",
+	}
+	sort.Strings(expectedIndexes)
+	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", arg, &idx); err != nil {
+		t.Error(err)
+	} else if sort.Strings(idx); !reflect.DeepEqual(expectedIndexes, idx) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedIndexes, idx)
+	}
+	//remove the indexes for *sessions subsystem
+	if err := tFIdxRpc.Call("ApierV1.RemoveFilterIndexes", &AttrRemFilterIndexes{
+		ItemType: utils.MetaDispatchers,
+		Tenant:   tenant,
+		Context:  utils.MetaSessionS}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	//verify if indexes was removed for *sessions
+	var indexes []string
+	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", arg,
+		&indexes); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+	//remove the indexes for *attribute subsystem
+	if err := tFIdxRpc.Call("ApierV1.RemoveFilterIndexes", &AttrRemFilterIndexes{
+		ItemType: utils.MetaDispatchers,
+		Tenant:   tenant,
+		Context:  utils.MetaAttributes}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	//verify indexes for *attributes subsystem
+	arg = &AttrGetFilterIndexes{
+		Tenant:   tenant,
+		Context:  utils.MetaAttributes,
+		ItemType: utils.MetaDispatchers,
+	}
+	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", arg,
+		&idx); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testV1FIdxComputeDispatcherProfileIndexes2(t *testing.T) {
+	var result string
+	//recompute indexes for dispatcherProfile for *sessions subsystem
+	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes,
+		utils.ArgsComputeFilterIndexes{
+			Tenant:        tenant,
+			Context:       utils.MetaSessionS,
+			ThresholdIDs:  &emptySlice,
+			AttributeIDs:  &emptySlice,
+			ResourceIDs:   &emptySlice,
+			StatIDs:       &emptySlice,
+			SupplierIDs:   &emptySlice,
+			ChargerIDs:    &emptySlice,
+			DispatcherIDs: nil,
+		}, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Errorf("Error: %+v", result)
+	}
+	expectedIndexes := []string{
+		"*none:*any:*any:DSP_Test3",
+		"*prefix:~RandomField:RandomValue:DSP_Test1",
+		"*string:~Account:1001:DSP_Test1",
+		"*string:~Subject:2012:DSP_Test1",
+	}
+	sort.Strings(expectedIndexes)
+	var indexes []string
+	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
+		ItemType: utils.MetaDispatchers,
+		Tenant:   tenant,
+		Context:  utils.MetaSessionS}, &indexes); err != nil {
+		t.Error(err)
+	} else if sort.Strings(indexes); !reflect.DeepEqual(expectedIndexes, indexes) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedIndexes, utils.ToJSON(indexes))
+	}
+
+	//recompute indexes for dispatcherProfile for *attributes subsystem
+	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes,
+		utils.ArgsComputeFilterIndexes{
+			Tenant:        tenant,
+			Context:       utils.MetaAttributes,
+			ThresholdIDs:  &emptySlice,
+			AttributeIDs:  &emptySlice,
+			ResourceIDs:   &emptySlice,
+			StatIDs:       &emptySlice,
+			SupplierIDs:   &emptySlice,
+			ChargerIDs:    &emptySlice,
+			DispatcherIDs: nil,
+		}, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Errorf("Error: %+v", result)
+	}
+	expectedIndexes = []string{
+		"*none:*any:*any:DSP_Test2",
+		"*prefix:~RandomField:RandomValue:DSP_Test1",
+		"*string:~Account:1001:DSP_Test1",
+		"*string:~Subject:2012:DSP_Test1",
+	}
+	sort.Strings(expectedIndexes)
+	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
+		ItemType: utils.MetaDispatchers,
+		Tenant:   tenant,
+		Context:  utils.MetaAttributes}, &indexes); err != nil {
+		t.Error(err)
+	} else if sort.Strings(indexes); !reflect.DeepEqual(expectedIndexes, indexes) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedIndexes, utils.ToJSON(indexes))
+	}
+}
 func testV1FIdxStopEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
