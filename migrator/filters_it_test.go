@@ -151,7 +151,6 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		},
 	}
 	expFilters.Compile()
-
 	attrProf := &engine.AttributeProfile{
 		Tenant:             "cgrates.org",
 		ID:                 "ATTR_1",
@@ -160,10 +159,9 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		ActivationInterval: nil,
 		Attributes: []*engine.Attribute{
 			{
+				FilterIDs:  []string{"*string:Account:1001"},
 				FieldName:  "Account",
-				Initial:    "1001",
 				Substitute: config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
-				Append:     true,
 			},
 		},
 		Weight: 10,
@@ -176,10 +174,9 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		ActivationInterval: nil,
 		Attributes: []*engine.Attribute{
 			{
+				FilterIDs:  []string{"*string:~Account:1001"},
 				FieldName:  "Account",
-				Initial:    "1001",
 				Substitute: config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
-				Append:     true,
 			},
 		},
 		Weight: 10,
