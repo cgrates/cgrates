@@ -232,6 +232,8 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 	if err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
 	}
+	//DispatcherProfile Indexes
+	fmt.Println("Args : ", utils.ToJSON(args))
 	dspIndexes, err := self.computeDispatcherIndexes(args.Tenant, args.Context, args.DispatcherIDs, transactionID)
 	if err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
@@ -410,9 +412,8 @@ func (self *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string,
 						fltrID, th)
 				}
 				return nil, err
-			} else {
-				thdsIndexers.IndexTPFilter(engine.FilterToTPFilter(fltr), th.ID)
 			}
+			thdsIndexers.IndexTPFilter(engine.FilterToTPFilter(fltr), th.ID)
 		}
 	}
 	if transactionID == utils.NonTransactional {
@@ -450,6 +451,9 @@ func (self *ApierV1) computeAttributeIndexes(tenant, context string, attrIDs *[]
 		if err != nil {
 			return nil, err
 		}
+		if !utils.IsSliceMember(ap.Contexts, context) {
+			continue
+		}
 		fltrIDs := make([]string, len(ap.FilterIDs))
 		for i, fltrID := range ap.FilterIDs {
 			fltrIDs[i] = fltrID
@@ -478,9 +482,8 @@ func (self *ApierV1) computeAttributeIndexes(tenant, context string, attrIDs *[]
 						fltrID, ap)
 				}
 				return nil, err
-			} else {
-				attrIndexers.IndexTPFilter(engine.FilterToTPFilter(fltr), ap.ID)
 			}
+			attrIndexers.IndexTPFilter(engine.FilterToTPFilter(fltr), ap.ID)
 		}
 	}
 	if transactionID == utils.NonTransactional {
@@ -545,9 +548,8 @@ func (self *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string,
 						fltrID, rp)
 				}
 				return nil, err
-			} else {
-				rpIndexers.IndexTPFilter(engine.FilterToTPFilter(fltr), rp.ID)
 			}
+			rpIndexers.IndexTPFilter(engine.FilterToTPFilter(fltr), rp.ID)
 		}
 	}
 	if transactionID == utils.NonTransactional {
@@ -612,9 +614,8 @@ func (self *ApierV1) computeStatIndexes(tenant string, stIDs *[]string,
 						fltrID, sqp)
 				}
 				return nil, err
-			} else {
-				sqpIndexers.IndexTPFilter(engine.FilterToTPFilter(fltr), sqp.ID)
 			}
+			sqpIndexers.IndexTPFilter(engine.FilterToTPFilter(fltr), sqp.ID)
 		}
 	}
 	if transactionID == utils.NonTransactional {
@@ -679,9 +680,8 @@ func (self *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string,
 						fltrID, spp)
 				}
 				return nil, err
-			} else {
-				sppIndexers.IndexTPFilter(engine.FilterToTPFilter(fltr), spp.ID)
 			}
+			sppIndexers.IndexTPFilter(engine.FilterToTPFilter(fltr), spp.ID)
 		}
 	}
 	if transactionID == utils.NonTransactional {
@@ -746,9 +746,8 @@ func (self *ApierV1) computeChargerIndexes(tenant string, cppIDs *[]string,
 						fltrID, cpp)
 				}
 				return nil, err
-			} else {
-				cppIndexes.IndexTPFilter(engine.FilterToTPFilter(fltr), cpp.ID)
 			}
+			cppIndexes.IndexTPFilter(engine.FilterToTPFilter(fltr), cpp.ID)
 		}
 	}
 	if transactionID == utils.NonTransactional {
@@ -786,6 +785,9 @@ func (self *ApierV1) computeDispatcherIndexes(tenant, context string, dspIDs *[]
 		if err != nil {
 			return nil, err
 		}
+		if !utils.IsSliceMember(dsp.Subsystems, context) {
+			continue
+		}
 		fltrIDs := make([]string, len(dsp.FilterIDs))
 		for i, fltrID := range dsp.FilterIDs {
 			fltrIDs[i] = fltrID
@@ -814,9 +816,8 @@ func (self *ApierV1) computeDispatcherIndexes(tenant, context string, dspIDs *[]
 						fltrID, dsp)
 				}
 				return nil, err
-			} else {
-				dspIndexes.IndexTPFilter(engine.FilterToTPFilter(fltr), dsp.ID)
 			}
+			dspIndexes.IndexTPFilter(engine.FilterToTPFilter(fltr), dsp.ID)
 		}
 	}
 	if transactionID == utils.NonTransactional {
