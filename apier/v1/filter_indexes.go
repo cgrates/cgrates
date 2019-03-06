@@ -397,7 +397,7 @@ func (self *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string,
 					ID:     th.ID,
 					Rules: []*engine.FilterRule{
 						{
-							Type:      utils.MetaDefault,
+							Type:      utils.META_NONE,
 							FieldName: utils.META_ANY,
 							Values:    []string{utils.META_ANY},
 						},
@@ -465,7 +465,7 @@ func (self *ApierV1) computeAttributeIndexes(tenant, context string, attrIDs *[]
 					ID:     ap.ID,
 					Rules: []*engine.FilterRule{
 						{
-							Type:      utils.MetaDefault,
+							Type:      utils.META_NONE,
 							FieldName: utils.META_ANY,
 							Values:    []string{utils.META_ANY},
 						},
@@ -532,7 +532,7 @@ func (self *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string,
 					ID:     rp.ID,
 					Rules: []*engine.FilterRule{
 						{
-							Type:      utils.MetaDefault,
+							Type:      utils.META_NONE,
 							FieldName: utils.META_ANY,
 							Values:    []string{utils.META_ANY},
 						},
@@ -599,7 +599,7 @@ func (self *ApierV1) computeStatIndexes(tenant string, stIDs *[]string,
 					ID:     sqp.ID,
 					Rules: []*engine.FilterRule{
 						{
-							Type:      utils.MetaDefault,
+							Type:      utils.META_NONE,
 							FieldName: utils.META_ANY,
 							Values:    []string{utils.META_ANY},
 						},
@@ -666,7 +666,7 @@ func (self *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string,
 					ID:     spp.ID,
 					Rules: []*engine.FilterRule{
 						{
-							Type:      utils.MetaDefault,
+							Type:      utils.META_NONE,
 							FieldName: utils.META_ANY,
 							Values:    []string{utils.META_ANY},
 						},
@@ -801,7 +801,7 @@ func (self *ApierV1) computeDispatcherIndexes(tenant, context string, dspIDs *[]
 					ID:     dsp.ID,
 					Rules: []*engine.FilterRule{
 						{
-							Type:      utils.MetaDefault,
+							Type:      utils.META_NONE,
 							FieldName: utils.META_ANY,
 							Values:    []string{utils.META_ANY},
 						},

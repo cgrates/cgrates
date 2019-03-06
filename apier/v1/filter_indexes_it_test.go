@@ -88,6 +88,10 @@ var sTestsFilterIndexesSV1 = []func(t *testing.T){
 	testV1FIdxGetFilterIndexes3,
 	testV1FIdxGetFilterIndexes4,
 
+	testV1FIdxdxInitDataDb,
+	testV1FIdxSetDispatcherProfile,
+	testV1FIdxComputeDispatcherProfileIndexes,
+
 	testV1FIdxStopEngine,
 }
 
@@ -1596,6 +1600,161 @@ func testV1FIdxGetFilterIndexes4(t *testing.T) {
 		t.Error(err)
 	} else if sort.Strings(reply); !reflect.DeepEqual(len(expectedIndexes), len(reply)) {
 		t.Errorf("Expecting: %+v, received: %+v", len(expectedIndexes), len(reply))
+	}
+}
+
+func testV1FIdxSetDispatcherProfile(t *testing.T) {
+	var reply string
+	//add a dispatcherProfile for 2 subsystems and verify if the index was created for both
+	dispatcherProfile = &engine.DispatcherProfile{
+		Tenant:     "cgrates.org",
+		ID:         "DSP_Test1",
+		FilterIDs:  []string{"*string:~Account:1001", "*string:~Subject:2012", "*prefix:~RandomField:RandomValue"},
+		Strategy:   utils.MetaFirst,
+		Subsystems: []string{utils.MetaAttributes, utils.MetaSessionS},
+		Weight:     20,
+	}
+
+	if err := tFIdxRpc.Call(utils.ApierV1SetDispatcherProfile,
+		dispatcherProfile,
+		&reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting : %+v, received: %+v", utils.OK, reply)
+	}
+
+	var dsp *engine.DispatcherProfile
+	if err := tFIdxRpc.Call(utils.ApierV1GetDispatcherProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "DSP_Test1"},
+		&dsp); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(dispatcherProfile, dsp) {
+		t.Errorf("Expecting : %+v, received: %+v", dispatcherProfile, dsp)
+	}
+
+	//verify *string index for *attributes subsystem
+	arg := &AttrGetFilterIndexes{
+		Tenant:     tenant,
+		Context:    utils.MetaAttributes,
+		ItemType:   utils.MetaDispatchers,
+		FilterType: utils.MetaString,
+	}
+	expectedIndexes := []string{
+		"*string:~Account:1001:DSP_Test1",
+		"*string:~Subject:2012:DSP_Test1",
+	}
+	sort.Strings(expectedIndexes)
+	var idx []string
+	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", arg, &idx); err != nil {
+		t.Error(err)
+	} else if sort.Strings(idx); !reflect.DeepEqual(len(expectedIndexes), len(idx)) {
+		t.Errorf("Expecting: %+v, received: %+v", len(expectedIndexes), len(idx))
+	}
+
+	//verify *string index for *sessions subsystem
+	arg = &AttrGetFilterIndexes{
+		Tenant:     tenant,
+		Context:    utils.MetaSessionS,
+		ItemType:   utils.MetaDispatchers,
+		FilterType: utils.MetaString,
+	}
+	expectedIndexes = []string{
+		"*string:~Account:1001:DSP_Test1",
+		"*string:~Subject:2012:DSP_Test1",
+	}
+	sort.Strings(expectedIndexes)
+	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", arg, &idx); err != nil {
+		t.Error(err)
+	} else if sort.Strings(idx); !reflect.DeepEqual(len(expectedIndexes), len(idx)) {
+		t.Errorf("Expecting: %+v, received: %+v", len(expectedIndexes), len(idx))
+	}
+
+	//verify  indexes for *sessions subsystem
+	arg = &AttrGetFilterIndexes{
+		Tenant:   tenant,
+		Context:  utils.MetaSessionS,
+		ItemType: utils.MetaDispatchers,
+	}
+	expectedIndexes = []string{
+		"*prefix:~RandomField:RandomValue:DSP_Test1",
+		"*string:~Account:1001:DSP_Test1",
+		"*string:~Subject:2012:DSP_Test1",
+	}
+	sort.Strings(expectedIndexes)
+	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", arg, &idx); err != nil {
+		t.Error(err)
+	} else if sort.Strings(idx); !reflect.DeepEqual(expectedIndexes, idx) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedIndexes, idx)
+	}
+	//remove the indexes for *sessions subsystem
+	if err := tFIdxRpc.Call("ApierV1.RemoveFilterIndexes", &AttrRemFilterIndexes{
+		ItemType: utils.MetaDispatchers,
+		Tenant:   tenant,
+		Context:  utils.MetaSessionS}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	//verify if was removed
+	var indexes []string
+	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", arg,
+		&indexes); err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+	//verify *string index for *attributes subsystem
+	arg = &AttrGetFilterIndexes{
+		Tenant:   tenant,
+		Context:  utils.MetaAttributes,
+		ItemType: utils.MetaDispatchers,
+	}
+	expectedIndexes = []string{
+		"*prefix:~RandomField:RandomValue:DSP_Test1",
+		"*string:~Account:1001:DSP_Test1",
+		"*string:~Subject:2012:DSP_Test1",
+	}
+	sort.Strings(expectedIndexes)
+	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", arg, &idx); err != nil {
+		t.Error(err)
+	} else if sort.Strings(idx); !reflect.DeepEqual(len(expectedIndexes), len(idx)) {
+		t.Errorf("Expecting: %+v, received: %+v", len(expectedIndexes), len(idx))
+	}
+}
+
+func testV1FIdxComputeDispatcherProfileIndexes(t *testing.T) {
+	var result string
+	//recompute indexes for dispatcherProfile for *sessions subsystem
+	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes,
+		utils.ArgsComputeFilterIndexes{
+			Tenant:        tenant,
+			Context:       utils.MetaSessionS,
+			ThresholdIDs:  &emptySlice,
+			AttributeIDs:  &emptySlice,
+			ResourceIDs:   &emptySlice,
+			StatIDs:       &emptySlice,
+			SupplierIDs:   &emptySlice,
+			ChargerIDs:    &emptySlice,
+			DispatcherIDs: nil,
+		}, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Errorf("Error: %+v", result)
+	}
+	expectedIndexes := []string{
+		"*prefix:~RandomField:RandomValue:DSP_Test1",
+		"*string:~Account:1001:DSP_Test1",
+		"*string:~Subject:2012:DSP_Test1",
+	}
+	sort.Strings(expectedIndexes)
+	var indexes []string
+	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
+		ItemType: utils.MetaDispatchers,
+		Tenant:   tenant,
+		Context:  utils.MetaSessionS}, &indexes); err != nil {
+		t.Error(err)
+	} else if sort.Strings(indexes); !reflect.DeepEqual(expectedIndexes, indexes) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedIndexes, utils.ToJSON(indexes))
 	}
 }
 
