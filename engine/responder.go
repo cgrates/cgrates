@@ -110,7 +110,9 @@ func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
 	if r, err = arg.Debit(); err != nil {
 		return
 	}
-	*reply = *r
+	if r != nil {
+		*reply = *r
+	}
 	return
 }
 
@@ -145,7 +147,9 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 	if r, err = arg.MaxDebit(); err != nil {
 		return
 	}
-	*reply = *r
+	if r != nil {
+		*reply = *r
+	}
 	return
 }
 
@@ -180,7 +184,9 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *Account) (err 
 	if acnt, err = arg.RefundIncrements(); err != nil {
 		return
 	}
-	*reply = *acnt
+	if acnt != nil {
+		*reply = *acnt
+	}
 	return
 }
 
@@ -221,8 +227,7 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *time.Duration
 	if !rs.usageAllowed(arg.TOR, arg.GetDuration()) {
 		return utils.ErrMaxUsageExceeded
 	}
-	r, e := arg.GetMaxSessionDuration()
-	*reply, err = r, e
+	*reply, err = arg.GetMaxSessionDuration()
 	return
 }
 
