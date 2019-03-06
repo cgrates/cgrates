@@ -35,36 +35,37 @@ import (
 )
 
 var (
-	cgrConfig, _ = config.NewDefaultCGRConfig()
-	tstCfg       = config.CgrConfig()
-	cpuprofile   = flag.String("cpuprofile", "", "write cpu profile to file")
-	memprofile   = flag.String("memprofile", "", "write memory profile to this file")
-	runs         = flag.Int("runs", 10000, "stress cycle number")
+	cgrTesterFlags = flag.NewFlagSet("cgr-tester", flag.ContinueOnError)
+	cgrConfig, _   = config.NewDefaultCGRConfig()
+	tstCfg         = config.CgrConfig()
+	cpuprofile     = cgrTesterFlags.String("cpuprofile", "", "write cpu profile to file")
+	memprofile     = cgrTesterFlags.String("memprofile", "", "write memory profile to this file")
+	runs           = cgrTesterFlags.Int("runs", 10000, "stress cycle number")
 
-	cfgPath = flag.String("config_path", "",
+	cfgPath = cgrTesterFlags.String("config_path", "",
 		"Configuration directory path.")
 
-	parallel        = flag.Int("parallel", 0, "run n requests in parallel")
-	datadb_type     = flag.String("datadb_type", cgrConfig.DataDbCfg().DataDbType, "The type of the DataDb database <redis>")
-	datadb_host     = flag.String("datadb_host", cgrConfig.DataDbCfg().DataDbHost, "The DataDb host to connect to.")
-	datadb_port     = flag.String("datadb_port", cgrConfig.DataDbCfg().DataDbPort, "The DataDb port to bind to.")
-	datadb_name     = flag.String("datadb_name", cgrConfig.DataDbCfg().DataDbName, "The name/number of the DataDb to connect to.")
-	datadb_user     = flag.String("datadb_user", cgrConfig.DataDbCfg().DataDbUser, "The DataDb user to sign in as.")
-	datadb_pass     = flag.String("datadb_pass", cgrConfig.DataDbCfg().DataDbPass, "The DataDb user's password.")
-	dbdata_encoding = flag.String("dbdata_encoding", cgrConfig.GeneralCfg().DBDataEncoding, "The encoding used to store object data in strings.")
-	redis_sentinel  = flag.String("redis_sentinel", cgrConfig.DataDbCfg().DataDbSentinelName, "The name of redis sentinel")
-	raterAddress    = flag.String("rater_address", "", "Rater address for remote tests. Empty for internal rater.")
-	tor             = flag.String("tor", utils.VOICE, "The type of record to use in queries.")
-	category        = flag.String("category", "call", "The Record category to test.")
-	tenant          = flag.String("tenant", "cgrates.org", "The type of record to use in queries.")
-	subject         = flag.String("subject", "1001", "The rating subject to use in queries.")
-	destination     = flag.String("destination", "1002", "The destination to use in queries.")
-	json            = flag.Bool("json", false, "Use JSON RPC")
-	version         = flag.Bool("version", false, "Prints the application version.")
+	parallel        = cgrTesterFlags.Int("parallel", 0, "run n requests in parallel")
+	datadb_type     = cgrTesterFlags.String("datadb_type", cgrConfig.DataDbCfg().DataDbType, "The type of the DataDb database <redis>")
+	datadb_host     = cgrTesterFlags.String("datadb_host", cgrConfig.DataDbCfg().DataDbHost, "The DataDb host to connect to.")
+	datadb_port     = cgrTesterFlags.String("datadb_port", cgrConfig.DataDbCfg().DataDbPort, "The DataDb port to bind to.")
+	datadb_name     = cgrTesterFlags.String("datadb_name", cgrConfig.DataDbCfg().DataDbName, "The name/number of the DataDb to connect to.")
+	datadb_user     = cgrTesterFlags.String("datadb_user", cgrConfig.DataDbCfg().DataDbUser, "The DataDb user to sign in as.")
+	datadb_pass     = cgrTesterFlags.String("datadb_pass", cgrConfig.DataDbCfg().DataDbPass, "The DataDb user's password.")
+	dbdata_encoding = cgrTesterFlags.String("dbdata_encoding", cgrConfig.GeneralCfg().DBDataEncoding, "The encoding used to store object data in strings.")
+	redis_sentinel  = cgrTesterFlags.String("redis_sentinel", cgrConfig.DataDbCfg().DataDbSentinelName, "The name of redis sentinel")
+	raterAddress    = cgrTesterFlags.String("rater_address", "", "Rater address for remote tests. Empty for internal rater.")
+	tor             = cgrTesterFlags.String("tor", utils.VOICE, "The type of record to use in queries.")
+	category        = cgrTesterFlags.String("category", "call", "The Record category to test.")
+	tenant          = cgrTesterFlags.String("tenant", "cgrates.org", "The type of record to use in queries.")
+	subject         = cgrTesterFlags.String("subject", "1001", "The rating subject to use in queries.")
+	destination     = cgrTesterFlags.String("destination", "1002", "The destination to use in queries.")
+	json            = cgrTesterFlags.Bool("json", false, "Use JSON RPC")
+	version         = cgrTesterFlags.Bool("version", false, "Prints the application version.")
 	nilDuration     = time.Duration(0)
-	usage           = flag.String("usage", "1m", "The duration to use in call simulation.")
-	fPath           = flag.String("file_path", "", "read requests from file with path")
-	reqSep          = flag.String("req_separator", "\n\n", "separator for requests in file")
+	usage           = cgrTesterFlags.String("usage", "1m", "The duration to use in call simulation.")
+	fPath           = cgrTesterFlags.String("file_path", "", "read requests from file with path")
+	reqSep          = cgrTesterFlags.String("req_separator", "\n\n", "separator for requests in file")
 
 	err error
 )
@@ -154,7 +155,9 @@ func durRemoteRater(cd *engine.CallDescriptor) (time.Duration, error) {
 }
 
 func main() {
-	flag.Parse()
+	if err := cgrTesterFlags.Parse(os.Args[1:]); err != nil {
+		return
+	}
 	if *version {
 		fmt.Println(utils.GetCGRVersion())
 		return

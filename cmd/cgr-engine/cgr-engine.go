@@ -61,19 +61,20 @@ const (
 )
 
 var (
-	cfgPath           = flag.String("config_path", utils.CONFIG_PATH, "Configuration directory path.")
-	version           = flag.Bool("version", false, "Prints the application version.")
-	pidFile           = flag.String("pid", "", "Write pid file")
-	httpPprofPath     = flag.String("httprof_path", "", "http address used for program profiling")
-	cpuProfDir        = flag.String("cpuprof_dir", "", "write cpu profile to files")
-	memProfDir        = flag.String("memprof_dir", "", "write memory profile to file")
-	memProfInterval   = flag.Duration("memprof_interval", 5*time.Second, "Time betwen memory profile saves")
-	memProfNrFiles    = flag.Int("memprof_nrfiles", 1, "Number of memory profile to write")
-	scheduledShutdown = flag.String("scheduled_shutdown", "", "shutdown the engine after this duration")
-	singlecpu         = flag.Bool("singlecpu", false, "Run on single CPU core")
-	syslogger         = flag.String("logger", "", "logger <*syslog|*stdout>")
-	nodeID            = flag.String("node_id", "", "The node ID of the engine")
-	logLevel          = flag.Int("log_level", -1, "Log level (0-emergency to 7-debug)")
+	cgrEngineFlags    = flag.NewFlagSet("cgr-engine", flag.ContinueOnError)
+	cfgPath           = cgrEngineFlags.String("config_path", utils.CONFIG_PATH, "Configuration directory path.")
+	version           = cgrEngineFlags.Bool("version", false, "Prints the application version.")
+	pidFile           = cgrEngineFlags.String("pid", "", "Write pid file")
+	httpPprofPath     = cgrEngineFlags.String("httprof_path", "", "http address used for program profiling")
+	cpuProfDir        = cgrEngineFlags.String("cpuprof_dir", "", "write cpu profile to files")
+	memProfDir        = cgrEngineFlags.String("memprof_dir", "", "write memory profile to file")
+	memProfInterval   = cgrEngineFlags.Duration("memprof_interval", 5*time.Second, "Time betwen memory profile saves")
+	memProfNrFiles    = cgrEngineFlags.Int("memprof_nrfiles", 1, "Number of memory profile to write")
+	scheduledShutdown = cgrEngineFlags.String("scheduled_shutdown", "", "shutdown the engine after this duration")
+	singlecpu         = cgrEngineFlags.Bool("singlecpu", false, "Run on single CPU core")
+	syslogger         = cgrEngineFlags.String("logger", "", "logger <*syslog|*stdout>")
+	nodeID            = cgrEngineFlags.String("node_id", "", "The node ID of the engine")
+	logLevel          = cgrEngineFlags.Int("log_level", -1, "Log level (0-emergency to 7-debug)")
 
 	cfg *config.CGRConfig
 )
@@ -1209,7 +1210,9 @@ func shutdownSingnalHandler(exitChan chan bool) {
 }
 
 func main() {
-	flag.Parse()
+	if err := cgrEngineFlags.Parse(os.Args[1:]); err != nil {
+		return
+	}
 	vers := utils.GetCGRVersion()
 	if *version {
 		fmt.Println(vers)
