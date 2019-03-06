@@ -53,6 +53,8 @@ var sTestsRPCMethods = []func(t *testing.T){
 	testRPCMethodsInitSession,
 	testRPCMethodsUpdateSession,
 	testRPCMethodsTerminateSession,
+	testRPCMethodsProcessCDR,
+	testRPCMethodsProcessEvent,
 
 	testRPCMethodsStopEngine,
 }
@@ -476,6 +478,188 @@ func testRPCMethodsTerminateSession(t *testing.T) {
 		t.Error(err)
 	} else if rply != utils.OK {
 		t.Errorf("Unexpected reply: %s", rply)
+	}
+
+	//replace event with empty
+	args.CGREvent.Event = map[string]interface{}{}
+
+	if err := rpcRpc.Call(utils.SessionSv1TerminateSession,
+		args, &rply); err != nil {
+		t.Error(err)
+	} else if rply != utils.OK {
+		t.Errorf("Unexpected reply: %s", rply)
+	}
+
+	//give time to CGRateS to delete the response from cache
+	time.Sleep(1*time.Second + 500*time.Millisecond)
+
+	if err := rpcRpc.Call(utils.SessionSv1TerminateSession,
+		args, &rply); err == nil || err.Error() != "MANDATORY_IE_MISSING: [OriginID]" {
+		t.Error(err)
+	}
+
+}
+
+func testRPCMethodsProcessCDR(t *testing.T) {
+	args := utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testRPCMethodsProcessCDR",
+		Event: map[string]interface{}{
+			utils.Tenant:      "cgrates.org",
+			utils.ToR:         utils.VOICE,
+			utils.OriginID:    "testRPCMethodsProcessCDR",
+			utils.RequestType: utils.META_PREPAID,
+			utils.Account:     "1001",
+			utils.Subject:     "ANY2CNT",
+			utils.Destination: "1002",
+			utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+			utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+			utils.Usage:       10 * time.Minute,
+		},
+	}
+	var rply string
+	if err := rpcRpc.Call(utils.SessionSv1ProcessCDR,
+		args, &rply); err != nil {
+		t.Error(err)
+	} else if rply != utils.OK {
+		t.Errorf("Unexpected reply: %s", rply)
+	}
+	time.Sleep(100 * time.Millisecond)
+	//verify the CDR
+	var cdrs []*engine.CDR
+	argsCDR := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}}
+	if err := rpcRpc.Call(utils.CDRsV1GetCDRs, argsCDR, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	}
+	//change originID so CGRID be different
+	args.Event[utils.OriginID] = "testRPCMethodsProcessCDR2"
+	// we should get response from cache
+	if err := rpcRpc.Call(utils.SessionSv1ProcessCDR,
+		args, &rply); err != nil {
+		t.Error(err)
+	} else if rply != utils.OK {
+		t.Errorf("Unexpected reply: %s", rply)
+	}
+	time.Sleep(100 * time.Millisecond)
+	//verify the CDR
+	if err := rpcRpc.Call(utils.CDRsV1GetCDRs, argsCDR, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	}
+
+	//give time to CGRateS to delete the response from cache
+	time.Sleep(1*time.Second + 500*time.Millisecond)
+
+	//change originID so CGRID be different
+	args.Event[utils.OriginID] = "testRPCMethodsProcessCDR3"
+	if err := rpcRpc.Call(utils.SessionSv1ProcessCDR,
+		args, &rply); err != nil {
+		t.Error(err)
+	} else if rply != utils.OK {
+		t.Errorf("Unexpected reply: %s", rply)
+	}
+	time.Sleep(100 * time.Millisecond)
+	//verify the CDR
+	if err := rpcRpc.Call(utils.CDRsV1GetCDRs, argsCDR, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 2 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	}
+}
+
+func testRPCMethodsProcessEvent(t *testing.T) {
+	initUsage := 5 * time.Minute
+	args := &sessions.V1ProcessEventArgs{
+		Debit: true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testRPCMethodsProcessEvent",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "testRPCMethodsProcessEvent",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Subject:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       initUsage,
+			},
+		},
+	}
+	var rplyFirst sessions.V1ProcessEventReply
+	if err := rpcRpc.Call(utils.SessionSv1ProcessEvent,
+		args, &rplyFirst); err != nil {
+		t.Error(err)
+	} else if *rplyFirst.MaxUsage != initUsage {
+		t.Errorf("Unexpected MaxUsage: %v", rplyFirst.MaxUsage)
+	}
+
+	//disable the account
+	var ids []string
+	thEvent := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "DisableAccount",
+		Event: map[string]interface{}{
+			utils.Account:   "1001",
+			"DisableAction": "DisableAction",
+		},
+	}
+	//process event
+	if err := rpcRpc.Call(utils.ThresholdSv1ProcessEvent, thEvent, &ids); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ids, []string{"THD_AccDisableAndLog"}) {
+		t.Errorf("Expecting ids: %s, received: %s", []string{"THD_AccDisableAndLog"}, ids)
+	}
+
+	//verify if account was disabled
+	var acnt *engine.Account
+	attrAcc := &utils.AttrGetAccount{
+		Tenant:  "cgrates.org",
+		Account: "1001",
+	}
+	if err := rpcRpc.Call("ApierV2.GetAccount", attrAcc, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.Disabled != true {
+		t.Errorf("Expecting: true, received: %v", acnt.Disabled)
+	}
+
+	//get response from cache
+	var rply sessions.V1ProcessEventReply
+	if err := rpcRpc.Call(utils.SessionSv1ProcessEvent,
+		args, &rply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rply, rplyFirst) {
+		t.Errorf("Expecting: %+v, \n received: %+v",
+			utils.ToJSON(rplyFirst), utils.ToJSON(rply))
+	}
+
+	//give time to CGRateS to delete the response from cache
+	time.Sleep(1*time.Second + 500*time.Millisecond)
+
+	if err := rpcRpc.Call(utils.SessionSv1ProcessEvent,
+		args, &rplyFirst); err == nil || err.Error() != "RALS_ERROR:ACCOUNT_DISABLED" {
+		t.Error("Unexpected error returned", err)
+	}
+
+	//enable the account
+	thEvent = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EnableAccount",
+		Event: map[string]interface{}{
+			utils.Account:  "1001",
+			"EnableAction": "EnableAction",
+		},
+	}
+	//process event
+	if err := rpcRpc.Call(utils.ThresholdSv1ProcessEvent, thEvent, &ids); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ids, []string{"THD_AccEnableAndLog"}) {
+		t.Errorf("Expecting ids: %s, received: %s", []string{"THD_AccEnableAndLog"}, ids)
 	}
 }
 
