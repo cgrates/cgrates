@@ -233,7 +233,6 @@ func (self *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, r
 		return utils.APIErrorHandler(err)
 	}
 	//DispatcherProfile Indexes
-	fmt.Println("Args : ", utils.ToJSON(args))
 	dspIndexes, err := self.computeDispatcherIndexes(args.Tenant, args.Context, args.DispatcherIDs, transactionID)
 	if err != nil && err != utils.ErrNotFound {
 		return utils.APIErrorHandler(err)
