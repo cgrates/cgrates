@@ -55,7 +55,6 @@ var sTestsRPCMethods = []func(t *testing.T){
 	testRPCMethodsTerminateSession,
 	testRPCMethodsProcessCDR,
 	testRPCMethodsProcessEvent,
-
 	testRPCMethodsStopEngine,
 }
 
