@@ -1,12 +1,12 @@
-#Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,FieldName,Substitute,Blocker,Weight
-cgrates.org,ATTR_1001_SIMPLEAUTH,simpleauth,*string:~Account:1001,,,Password,CGRateS.org,false,20
-cgrates.org,ATTR_API_ATTR_FAKE_AUTH,*auth,*string:~APIKey:12345,,,APIMethods,,false,20
-cgrates.org,ATTR_API_ATTR_AUTH,*auth,*string:~APIKey:attr12345,,,APIMethods,AttributeSv1.Ping&AttributeSv1.GetAttributeForEvent&AttributeSv1.ProcessEvent,false,20
-cgrates.org,ATTR_API_CHRG_AUTH,*auth,*string:~APIKey:chrg12345,,,APIMethods,ChargerSv1.Ping&ChargerSv1.GetChargersForEvent&ChargerSv1.ProcessEvent,false,20
-cgrates.org,ATTR_API_THR_AUTH,*auth,*string:~APIKey:thr12345,,,APIMethods,ThresholdSv1.Ping&ThresholdSv1.GetThresholdsForEvent&ThresholdSv1.ProcessEvent&ThresholdSv1.GetThreshold&ThresholdSv1.GetThresholdIDs,false,20
-cgrates.org,ATTR_API_SUP_AUTH,*auth,*string:~APIKey:sup12345,,,APIMethods,SupplierSv1.Ping&SupplierSv1.GetSuppliers,false,20
-cgrates.org,ATTR_API_STAT_AUTH,*auth,*string:~APIKey:stat12345,,,APIMethods,StatSv1.Ping&StatSv1.GetStatQueuesForEvent&StatSv1.GetQueueStringMetrics&StatSv1.ProcessEvent&StatSv1.GetQueueIDs&StatSv1.GetQueueFloatMetrics,false,20
-cgrates.org,ATTR_API_RES_AUTH,*auth,*string:~APIKey:res12345,,,APIMethods,ResourceSv1.Ping&ResourceSv1.GetResourcesForEvent&ResourceSv1.AuthorizeResources&ResourceSv1.AllocateResources&ResourceSv1.ReleaseResources,false,20
-cgrates.org,ATTR_API_SES_AUTH,*auth,*string:~APIKey:ses12345,,,APIMethods,SessionSv1.Ping&SessionSv1.AuthorizeEventWithDigest&SessionSv1.InitiateSessionWithDigest&SessionSv1.UpdateSession&SessionSv1.TerminateSession&SessionSv1.ProcessCDR&SessionSv1.ProcessEvent&SessionSv1.GetActiveSessions&SessionSv1.GetActiveSessionsCount&SessionSv1.ForceDisconnect&SessionSv1.GetPassiveSessions&SessionSv1.GetPassiveSessionsCount&SessionSv1.SetPassiveSession&SessionSv1.ReplicateSessions,false,20
-cgrates.org,ATTR_API_RSP_AUTH,*auth,*string:~APIKey:rsp12345,,,APIMethods,Responder.Status,false,20
+#Tenant,ID,Contexts,FilterIDs,ActivationInterval,FieldName,Initial,Substitute,Append,Blocker,Weight
+cgrates.org,ATTR_1001_SIMPLEAUTH,simpleauth,*string:~Account:1001,,Password,*any,CGRateS.org,true,false,20
+cgrates.org,ATTR_API_ATTR_FAKE_AUTH,*auth,*string:~APIKey:12345,,APIMethods,*any,,true,false,20
+cgrates.org,ATTR_API_ATTR_AUTH,*auth,*string:~APIKey:attr12345,,APIMethods,*any,AttributeSv1.Ping&AttributeSv1.GetAttributeForEvent&AttributeSv1.ProcessEvent,true,false,20
+cgrates.org,ATTR_API_CHRG_AUTH,*auth,*string:~APIKey:chrg12345,,APIMethods,*any,ChargerSv1.Ping&ChargerSv1.GetChargersForEvent&ChargerSv1.ProcessEvent,true,false,20
+cgrates.org,ATTR_API_THR_AUTH,*auth,*string:~APIKey:thr12345,,APIMethods,*any,ThresholdSv1.Ping&ThresholdSv1.GetThresholdsForEvent&ThresholdSv1.ProcessEvent&ThresholdSv1.GetThreshold&ThresholdSv1.GetThresholdIDs,true,false,20
+cgrates.org,ATTR_API_SUP_AUTH,*auth,*string:~APIKey:sup12345,,APIMethods,*any,SupplierSv1.Ping&SupplierSv1.GetSuppliers,true,false,20
+cgrates.org,ATTR_API_STAT_AUTH,*auth,*string:~APIKey:stat12345,,APIMethods,*any,StatSv1.Ping&StatSv1.GetStatQueuesForEvent&StatSv1.GetQueueStringMetrics&StatSv1.ProcessEvent&StatSv1.GetQueueIDs&StatSv1.GetQueueFloatMetrics,true,false,20
+cgrates.org,ATTR_API_RES_AUTH,*auth,*string:~APIKey:res12345,,APIMethods,*any,ResourceSv1.Ping&ResourceSv1.GetResourcesForEvent&ResourceSv1.AuthorizeResources&ResourceSv1.AllocateResources&ResourceSv1.ReleaseResources,true,false,20
+cgrates.org,ATTR_API_SES_AUTH,*auth,*string:~APIKey:ses12345,,APIMethods,*any,SessionSv1.Ping&SessionSv1.AuthorizeEventWithDigest&SessionSv1.InitiateSessionWithDigest&SessionSv1.UpdateSession&SessionSv1.TerminateSession&SessionSv1.ProcessCDR&SessionSv1.ProcessEvent&SessionSv1.GetActiveSessions&SessionSv1.GetActiveSessionsCount&SessionSv1.ForceDisconnect&SessionSv1.GetPassiveSessions&SessionSv1.GetPassiveSessionsCount&SessionSv1.SetPassiveSession&SessionSv1.ReplicateSessions,true,false,20
+cgrates.org,ATTR_API_RSP_AUTH,*auth,*string:~APIKey:rsp12345,,APIMethods,*any,Responder.Status&Responder.GetTimeout&Responder.Shutdown,true,false,20
 
