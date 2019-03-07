@@ -40,14 +40,13 @@ func (m *Migrator) migrateCurrentResource() (err error) {
 		if err != nil {
 			return err
 		}
-		if res != nil {
-			if m.dryRun != true {
-				if err := m.dmOut.DataManager().SetResourceProfile(res, true); err != nil {
-					return err
-				}
-				m.stats[utils.Resource] += 1
-			}
+		if res == nil || m.dryRun {
+			continue
 		}
+		if err := m.dmOut.DataManager().SetResourceProfile(res, true); err != nil {
+			return err
+		}
+		m.stats[utils.Resource] += 1
 	}
 	return
 }
@@ -72,10 +71,7 @@ func (m *Migrator) migrateResources() (err error) {
 		if m.sameDataDB {
 			return
 		}
-		if err := m.migrateCurrentResource(); err != nil {
-			return err
-		}
-		return
+		return m.migrateCurrentResource()
 	}
 	return
 }

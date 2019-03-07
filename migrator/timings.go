@@ -38,14 +38,13 @@ func (m *Migrator) migrateCurrentTiming() (err error) {
 		if err != nil {
 			return err
 		}
-		if tm != nil {
-			if m.dryRun != true {
-				if err := m.dmOut.DataManager().SetTiming(tm); err != nil {
-					return err
-				}
-				m.stats[utils.Timing] += 1
-			}
+		if tm == nil || m.dryRun {
+			continue
 		}
+		if err := m.dmOut.DataManager().SetTiming(tm); err != nil {
+			return err
+		}
+		m.stats[utils.Timing] += 1
 	}
 	return
 }
@@ -70,10 +69,7 @@ func (m *Migrator) migrateTimings() (err error) {
 		if m.sameDataDB {
 			return
 		}
-		if err := m.migrateCurrentTiming(); err != nil {
-			return err
-		}
-		return
+		return m.migrateCurrentTiming()
 	}
 	return
 }

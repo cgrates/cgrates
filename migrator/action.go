@@ -51,14 +51,13 @@ func (m *Migrator) migrateCurrentActions() (err error) {
 		if err != nil {
 			return err
 		}
-		if acts != nil {
-			if m.dryRun != true {
-				if err := m.dmOut.DataManager().SetActions(idg, acts, utils.NonTransactional); err != nil {
-					return err
-				}
-				m.stats[utils.Actions] += 1
-			}
+		if acts == nil || m.dryRun {
+			continue
 		}
+		if err := m.dmOut.DataManager().SetActions(idg, acts, utils.NonTransactional); err != nil {
+			return err
+		}
+		m.stats[utils.Actions] += 1
 	}
 	return
 }
@@ -74,29 +73,29 @@ func (m *Migrator) migrateV1Actions() (err error) {
 		if err == utils.ErrNoMoreData {
 			break
 		}
-		if *v1ACs != nil {
-			for _, v1ac := range *v1ACs {
-				act := v1ac.AsAction()
-				acts = append(acts, act)
+		if *v1ACs == nil || m.dryRun {
+			continue
+		}
+		for _, v1ac := range *v1ACs {
+			act := v1ac.AsAction()
+			acts = append(acts, act)
 
-			}
-			if !m.dryRun {
-				if err := m.dmOut.DataManager().SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
-					return err
-				}
-				m.stats[utils.Actions] += 1
-			}
 		}
+		if err := m.dmOut.DataManager().SetActions(acts[0].Id, acts, utils.NonTransactional); err != nil {
+			return err
+		}
+		m.stats[utils.Actions] += 1
 	}
-	if !m.dryRun {
-		// All done, update version wtih current one
-		vrs := engine.Versions{utils.Actions: engine.CurrentStorDBVersions()[utils.Actions]}
-		if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
-			return utils.NewCGRError(utils.Migrator,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error: <%s> when updating Actions version into dataDB", err.Error()))
-		}
+	if m.dryRun {
+		return
+	}
+	// All done, update version wtih current one
+	vrs := engine.Versions{utils.Actions: engine.CurrentStorDBVersions()[utils.Actions]}
+	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating Actions version into dataDB", err.Error()))
 	}
 	return
 }
@@ -121,15 +120,9 @@ func (m *Migrator) migrateActions() (err error) {
 		if m.sameDataDB {
 			return
 		}
-		if err := m.migrateCurrentActions(); err != nil {
-			return err
-		}
-		return
-
+		return m.migrateCurrentActions()
 	case 1:
-		if err := m.migrateV1Actions(); err != nil {
-			return err
-		}
+		return m.migrateV1Actions()
 	}
 	return
 }

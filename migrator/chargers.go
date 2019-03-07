@@ -40,14 +40,13 @@ func (m *Migrator) migrateCurrentCharger() (err error) {
 		if err != nil {
 			return err
 		}
-		if cpp != nil {
-			if m.dryRun != true {
-				if err := m.dmOut.DataManager().SetChargerProfile(cpp, true); err != nil {
-					return err
-				}
-				m.stats[utils.Chargers] += 1
-			}
+		if cpp == nil || m.dryRun {
+			continue
 		}
+		if err := m.dmOut.DataManager().SetChargerProfile(cpp, true); err != nil {
+			return err
+		}
+		m.stats[utils.Chargers] += 1
 	}
 	return
 }
@@ -72,10 +71,7 @@ func (m *Migrator) migrateChargers() (err error) {
 		if m.sameDataDB {
 			return
 		}
-		if err := m.migrateCurrentCharger(); err != nil {
-			return err
-		}
-		return
+		return m.migrateCurrentCharger()
 	}
 	return
 }

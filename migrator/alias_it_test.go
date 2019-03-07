@@ -36,7 +36,6 @@ var (
 	alsCfgIn    *config.CGRConfig
 	alsCfgOut   *config.CGRConfig
 	alsMigrator *Migrator
-	alsAction   string
 )
 
 var sTestsAlsIT = []func(t *testing.T){
@@ -47,41 +46,22 @@ var sTestsAlsIT = []func(t *testing.T){
 
 func TestAliasMigrateITRedis(t *testing.T) {
 	inPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
-	testStart("TestAliasMigrateITRedis", inPath, inPath, utils.Migrate, t)
+	testStart("TestAliasMigrateITRedis", inPath, inPath, t)
 }
 
 func TestAliasMigrateITMongo(t *testing.T) {
 	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	testStart("TestAliasMigrateITMongo", inPath, inPath, utils.Migrate, t)
-}
-
-func TestAliasITMove(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	outPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
-	testStart("TestAliasITMove", inPath, outPath, utils.Move, t)
+	testStart("TestAliasMigrateITMongo", inPath, inPath, t)
 }
 
 func TestAliasITMigrateMongo2Redis(t *testing.T) {
 	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
 	outPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
-	testStart("TestAliasITMigrateMongo2Redis", inPath, outPath, utils.Migrate, t)
+	testStart("TestAliasITMigrateMongo2Redis", inPath, outPath, t)
 }
 
-func TestAliasITMoveEncoding(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	outPath := path.Join(*dataDir, "conf", "samples", "tutmongojson")
-	testStart("TestAliasITMoveEncoding", inPath, outPath, utils.Move, t)
-}
-
-func TestAliasITMoveEncoding2(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
-	outPath := path.Join(*dataDir, "conf", "samples", "tutmysqljson")
-	testStart("TestAliasITMoveEncoding2", inPath, outPath, utils.Move, t)
-}
-
-func testStart(testName, inPath, outPath, action string, t *testing.T) {
+func testStart(testName, inPath, outPath string, t *testing.T) {
 	var err error
-	alsAction = action
 	if alsCfgIn, err = config.NewCGRConfigFromFolder(inPath); err != nil {
 		t.Fatal(err)
 	}
@@ -176,96 +156,65 @@ func testAlsITMigrateAndMove(t *testing.T) {
 		Weight:  20,
 	}
 	attrProf.Compile()
-	switch alsAction {
-	case utils.Migrate:
-		err := alsMigrator.dmIN.setV1Alias(alias)
-		if err != nil {
-			t.Error("Error when setting v1 Alias ", err.Error())
-		}
-		currentVersion := engine.Versions{Alias: 1}
-		err = alsMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for Alias ", err.Error())
-		}
-		//check if version was set correctly
-		if vrs, err := alsMigrator.dmIN.DataManager().DataDB().GetVersions(""); err != nil {
-			t.Error(err)
-		} else if vrs[Alias] != 1 {
-			t.Errorf("Unexpected version returned: %d", vrs[Alias])
-		}
-		//migrate alias
-		err, _ = alsMigrator.Migrate([]string{MetaAliases})
-		if err != nil {
-			t.Error("Error when migrating Alias ", err.Error())
-		}
-		//check if version was updated
-		if vrs, err := alsMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
-			t.Error(err)
-		} else if vrs[Alias] != 0 {
-			t.Errorf("Unexpected version returned: %d", vrs[Alias])
-		}
-		//check if alias was migrate correctly
-		result, err := alsMigrator.dmOut.DataManager().DataDB().GetAttributeProfileDrv("cgrates.org", alias.GetId())
-		if err != nil {
-			t.Fatalf("Error when getting Attributes %v", err.Error())
-		}
-		result.Compile()
-		sort.Slice(result.Attributes, func(i, j int) bool {
-			if result.Attributes[i].FieldName == result.Attributes[j].FieldName {
-				return result.Attributes[i].FilterIDs[0] < result.Attributes[j].FilterIDs[0]
-			}
-			return result.Attributes[i].FieldName < result.Attributes[j].FieldName
-		}) // only for test; map returns random keys
-		if !reflect.DeepEqual(*attrProf, *result) {
-			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(attrProf), utils.ToJSON(result))
-		}
-		//check if old account was deleted
-		if _, err = alsMigrator.dmIN.getV1Alias(); err != utils.ErrNoMoreData {
-			t.Error("Error should be not found : ", err)
-		}
 
-		expAlsIdx := map[string]utils.StringMap{
-			"*string:~Account:1001": utils.StringMap{
-				"*out:*any:*any:1001:call_1001:*rated": true,
-			},
-			"*string:~Subject:call_1001": utils.StringMap{
-				"*out:*any:*any:1001:call_1001:*rated": true,
-			},
+	err := alsMigrator.dmIN.setV1Alias(alias)
+	if err != nil {
+		t.Error("Error when setting v1 Alias ", err.Error())
+	}
+	currentVersion := engine.Versions{Alias: 1}
+	err = alsMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
+	if err != nil {
+		t.Error("Error when setting version for Alias ", err.Error())
+	}
+	//check if version was set correctly
+	if vrs, err := alsMigrator.dmIN.DataManager().DataDB().GetVersions(""); err != nil {
+		t.Error(err)
+	} else if vrs[Alias] != 1 {
+		t.Errorf("Unexpected version returned: %d", vrs[Alias])
+	}
+	//migrate alias
+	err, _ = alsMigrator.Migrate([]string{MetaAliases})
+	if err != nil {
+		t.Error("Error when migrating Alias ", err.Error())
+	}
+	//check if version was updated
+	if vrs, err := alsMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
+		t.Error(err)
+	} else if vrs[Alias] != 0 {
+		t.Errorf("Unexpected version returned: %d", vrs[Alias])
+	}
+	//check if alias was migrate correctly
+	result, err := alsMigrator.dmOut.DataManager().DataDB().GetAttributeProfileDrv("cgrates.org", alias.GetId())
+	if err != nil {
+		t.Fatalf("Error when getting Attributes %v", err.Error())
+	}
+	result.Compile()
+	sort.Slice(result.Attributes, func(i, j int) bool {
+		if result.Attributes[i].FieldName == result.Attributes[j].FieldName {
+			return result.Attributes[i].FilterIDs[0] < result.Attributes[j].FilterIDs[0]
 		}
-		if alsidx, err := alsMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
-			utils.ConcatenatedKey("cgrates.org", utils.META_ANY), utils.MetaString, nil); err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(expAlsIdx, alsidx) {
-			t.Errorf("Expected %v, recived: %v", utils.ToJSON(expAlsIdx), utils.ToJSON(alsidx))
-		}
-	case utils.Move:
-		/* // No Move tests
-		if err := alsMigrator.dmIN.DataManager().DataDB().SetAlias(alias, utils.NonTransactional); err != nil {
-			t.Error(err)
-		}
-		currentVersion := engine.CurrentDataDBVersions()
-		err := alsMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for Alias ", err.Error())
-		}
-		//migrate accounts
-		err, _ = alsMigrator.Migrate([]string{MetaAliases})
-		if err != nil {
-			t.Error("Error when alsMigratorrating Alias ", err.Error())
-		}
-		//check if account was migrate correctly
-		result, err := alsMigrator.dmOut.DataManager().DataDB().GetAlias(alias.GetId(), false)
-		if err != nil {
-			t.Error(err)
-		}
-		if !reflect.DeepEqual(alias, result) {
-			t.Errorf("Expecting: %+v, received: %+v", alias, result)
-		}
-		//check if old account was deleted
-		result, err = alsMigrator.dmIN.DataManager().DataDB().GetAlias(alias.GetId(), false)
-		if err != utils.ErrNotFound {
-			t.Error(err)
-		}
-		// */
+		return result.Attributes[i].FieldName < result.Attributes[j].FieldName
+	}) // only for test; map returns random keys
+	if !reflect.DeepEqual(*attrProf, *result) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(attrProf), utils.ToJSON(result))
+	}
+	//check if old account was deleted
+	if _, err = alsMigrator.dmIN.getV1Alias(); err != utils.ErrNoMoreData {
+		t.Error("Error should be not found : ", err)
+	}
+
+	expAlsIdx := map[string]utils.StringMap{
+		"*string:~Account:1001": utils.StringMap{
+			"*out:*any:*any:1001:call_1001:*rated": true,
+		},
+		"*string:~Subject:call_1001": utils.StringMap{
+			"*out:*any:*any:1001:call_1001:*rated": true,
+		},
+	}
+	if alsidx, err := alsMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
+		utils.ConcatenatedKey("cgrates.org", utils.META_ANY), utils.MetaString, nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expAlsIdx, alsidx) {
+		t.Errorf("Expected %v, recived: %v", utils.ToJSON(expAlsIdx), utils.ToJSON(alsidx))
 	}
 }

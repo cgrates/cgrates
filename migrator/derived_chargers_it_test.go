@@ -37,7 +37,6 @@ var (
 	dcCfgIn    *config.CGRConfig
 	dcCfgOut   *config.CGRConfig
 	dcMigrator *Migrator
-	dcAction   string
 )
 
 var sTestsDCIT = []func(t *testing.T){
@@ -48,41 +47,22 @@ var sTestsDCIT = []func(t *testing.T){
 
 func TestDerivedChargersVMigrateITRedis(t *testing.T) {
 	inPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
-	testStartDC("TestDerivedChargersVMigrateITRedis", inPath, inPath, utils.Migrate, t)
+	testStartDC("TestDerivedChargersVMigrateITRedis", inPath, inPath, t)
 }
 
 func TestDerivedChargersVMigrateITMongo(t *testing.T) {
 	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	testStartDC("TestDerivedChargersVMigrateITMongo", inPath, inPath, utils.Migrate, t)
-}
-
-func TestDerivedChargersVITMove(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	outPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
-	testStartDC("TestDerivedChargersVITMove", inPath, outPath, utils.Move, t)
+	testStartDC("TestDerivedChargersVMigrateITMongo", inPath, inPath, t)
 }
 
 func TestDerivedChargersVITMigrateMongo2Redis(t *testing.T) {
 	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
 	outPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
-	testStartDC("TestDerivedChargersVITMigrateMongo2Redis", inPath, outPath, utils.Migrate, t)
+	testStartDC("TestDerivedChargersVITMigrateMongo2Redis", inPath, outPath, t)
 }
 
-func TestDerivedChargersVITMoveEncoding(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	outPath := path.Join(*dataDir, "conf", "samples", "tutmongojson")
-	testStartDC("TestDerivedChargersVITMoveEncoding", inPath, outPath, utils.Move, t)
-}
-
-func TestDerivedChargersVITMoveEncoding2(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
-	outPath := path.Join(*dataDir, "conf", "samples", "tutmysqljson")
-	testStartDC("TestDerivedChargersVITMoveEncoding2", inPath, outPath, utils.Move, t)
-}
-
-func testStartDC(testName, inPath, outPath, action string, t *testing.T) {
+func testStartDC(testName, inPath, outPath string, t *testing.T) {
 	var err error
-	dcAction = action
 	if dcCfgIn, err = config.NewCGRConfigFromFolder(inPath); err != nil {
 		t.Fatal(err)
 	}
@@ -193,108 +173,77 @@ func testDCITMigrateAndMove(t *testing.T) {
 		AttributeIDs:       []string{attrProf.ID},
 		Weight:             10,
 	}
-	switch dcAction {
-	case utils.Migrate:
-		err := dcMigrator.dmIN.setV1DerivedChargers(derivch)
-		if err != nil {
-			t.Error("Error when setting v1 DerivedChargersV ", err.Error())
-		}
-		currentVersion := engine.Versions{utils.DerivedChargersV: 1}
-		err = dcMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for DerivedChargersV ", err.Error())
-		}
-		//check if version was set correctly
-		if vrs, err := dcMigrator.dmIN.DataManager().DataDB().GetVersions(""); err != nil {
-			t.Error(err)
-		} else if vrs[utils.DerivedChargersV] != 1 {
-			t.Errorf("Unexpected version returned: %d", vrs[utils.DerivedChargersV])
-		}
-		//migrate derivch
-		err, _ = dcMigrator.Migrate([]string{utils.MetaDerivedChargersV})
-		if err != nil {
-			t.Error("Error when migrating DerivedChargersV ", err.Error())
-		}
-		//check if version was updated
-		if vrs, err := dcMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
-			t.Error(err)
-		} else if vrs[utils.DerivedChargersV] != 0 {
-			t.Errorf("Unexpected version returned: %d", vrs[utils.DerivedChargersV])
-		}
-		//check if derivch was migrate correctly
-		result, err := dcMigrator.dmOut.DataManager().DataDB().GetAttributeProfileDrv(defaultTenant, attrProf.ID)
-		if err != nil {
-			t.Fatalf("Error when getting Attributes %v", err.Error())
-		}
-		result.Compile()
-		sort.Slice(result.Attributes, func(i, j int) bool {
-			return result.Attributes[i].FieldName < result.Attributes[j].FieldName
-		}) // only for test; map returns random keys
-		if !reflect.DeepEqual(*attrProf, *result) {
-			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(attrProf), utils.ToJSON(result))
-		}
-		result2, err := dcMigrator.dmOut.DataManager().DataDB().GetChargerProfileDrv(defaultTenant, charger.ID)
-		if err != nil {
-			t.Fatalf("Error when getting Attributes %v", err.Error())
-		}
-		if !reflect.DeepEqual(*charger, *result2) {
-			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(charger), utils.ToJSON(result2))
-		}
 
-		//check if old account was deleted
-		if _, err = dcMigrator.dmIN.getV1DerivedChargers(); err != utils.ErrNoMoreData {
-			t.Error("Error should be not found : ", err)
-		}
-		expDcIdx := map[string]utils.StringMap{
-			"*string:~Account:1003": utils.StringMap{
-				"*out:cgrates.org:*any:1003:*any_0": true,
-			},
-		}
-		if dcidx, err := dcMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
-			utils.ConcatenatedKey("cgrates.org", utils.MetaChargers), utils.MetaString, nil); err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(expDcIdx, dcidx) {
-			t.Errorf("Expected %v, recived: %v", utils.ToJSON(expDcIdx), utils.ToJSON(dcidx))
-		}
-		expDcIdx = map[string]utils.StringMap{
-			"*string:~Account:1003": utils.StringMap{
-				"*out:cgrates.org:*any:1003:*any_0": true,
-			},
-		}
-		if dcidx, err := dcMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.ChargerProfilePrefix],
-			utils.ConcatenatedKey("cgrates.org", utils.MetaChargers),
-			utils.MetaString, nil); err == nil || err.Error() != utils.ErrNotFound.Error() {
-			t.Errorf("Expected error %v, recived: %v with reply: %v", utils.ErrNotFound, err, utils.ToJSON(dcidx))
-		}
-
-	case utils.Move:
-		/* // No Move tests
-		if err := dcMigrator.dmIN.DataManager().DataDB().SetDerivedChargersV(derivch, utils.NonTransactional); err != nil {
-			t.Error(err)
-		}
-		currentVersion := engine.CurrentDataDBVersions()
-		err := dcMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for DerivedChargersV ", err.Error())
-		}
-		//migrate accounts
-		err, _ = dcMigrator.Migrate([]string{utils.MetaDerivedChargersV})
-		if err != nil {
-			t.Error("Error when dcMigratorrating DerivedChargersV ", err.Error())
-		}
-		//check if account was migrate correctly
-		result, err := dcMigrator.dmOut.DataManager().DataDB().GetDerivedChargersV(derivch.GetId(), false)
-		if err != nil {
-			t.Error(err)
-		}
-		if !reflect.DeepEqual(derivch, result) {
-			t.Errorf("Expecting: %+v, received: %+v", derivch, result)
-		}
-		//check if old account was deleted
-		result, err = dcMigrator.dmIN.DataManager().DataDB().GetDerivedChargersV(derivch.GetId(), false)
-		if err != utils.ErrNotFound {
-			t.Error(err)
-		}
-		// */
+	err := dcMigrator.dmIN.setV1DerivedChargers(derivch)
+	if err != nil {
+		t.Error("Error when setting v1 DerivedChargersV ", err.Error())
 	}
+	currentVersion := engine.Versions{utils.DerivedChargersV: 1}
+	err = dcMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
+	if err != nil {
+		t.Error("Error when setting version for DerivedChargersV ", err.Error())
+	}
+	//check if version was set correctly
+	if vrs, err := dcMigrator.dmIN.DataManager().DataDB().GetVersions(""); err != nil {
+		t.Error(err)
+	} else if vrs[utils.DerivedChargersV] != 1 {
+		t.Errorf("Unexpected version returned: %d", vrs[utils.DerivedChargersV])
+	}
+	//migrate derivch
+	err, _ = dcMigrator.Migrate([]string{utils.MetaDerivedChargersV})
+	if err != nil {
+		t.Error("Error when migrating DerivedChargersV ", err.Error())
+	}
+	//check if version was updated
+	if vrs, err := dcMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
+		t.Error(err)
+	} else if vrs[utils.DerivedChargersV] != 0 {
+		t.Errorf("Unexpected version returned: %d", vrs[utils.DerivedChargersV])
+	}
+	//check if derivch was migrate correctly
+	result, err := dcMigrator.dmOut.DataManager().DataDB().GetAttributeProfileDrv(defaultTenant, attrProf.ID)
+	if err != nil {
+		t.Fatalf("Error when getting Attributes %v", err.Error())
+	}
+	result.Compile()
+	sort.Slice(result.Attributes, func(i, j int) bool {
+		return result.Attributes[i].FieldName < result.Attributes[j].FieldName
+	}) // only for test; map returns random keys
+	if !reflect.DeepEqual(*attrProf, *result) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(attrProf), utils.ToJSON(result))
+	}
+	result2, err := dcMigrator.dmOut.DataManager().DataDB().GetChargerProfileDrv(defaultTenant, charger.ID)
+	if err != nil {
+		t.Fatalf("Error when getting Attributes %v", err.Error())
+	}
+	if !reflect.DeepEqual(*charger, *result2) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(charger), utils.ToJSON(result2))
+	}
+
+	//check if old account was deleted
+	if _, err = dcMigrator.dmIN.getV1DerivedChargers(); err != utils.ErrNoMoreData {
+		t.Error("Error should be not found : ", err)
+	}
+	expDcIdx := map[string]utils.StringMap{
+		"*string:~Account:1003": utils.StringMap{
+			"*out:cgrates.org:*any:1003:*any_0": true,
+		},
+	}
+	if dcidx, err := dcMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
+		utils.ConcatenatedKey("cgrates.org", utils.META_ANY), utils.MetaString, nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expDcIdx, dcidx) {
+		t.Errorf("Expected %v, recived: %v", utils.ToJSON(expDcIdx), utils.ToJSON(dcidx))
+	}
+	expDcIdx = map[string]utils.StringMap{
+		"*string:~Account:1003": utils.StringMap{
+			"*out:cgrates.org:*any:1003:*any_0": true,
+		},
+	}
+	if dcidx, err := dcMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.ChargerProfilePrefix],
+		utils.ConcatenatedKey("cgrates.org", utils.META_ANY),
+		utils.MetaString, nil); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected error %v, recived: %v with reply: %v", utils.ErrNotFound, err, utils.ToJSON(dcidx))
+	}
+
 }

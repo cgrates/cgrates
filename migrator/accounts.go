@@ -46,17 +46,16 @@ func (m *Migrator) migrateCurrentAccounts() (err error) {
 		if err != nil {
 			return err
 		}
-		if acc != nil {
-			if m.dryRun != true {
-				if err := m.dmOut.DataManager().DataDB().SetAccount(acc); err != nil {
-					return err
-				}
-				if err := m.dmIN.DataManager().DataDB().RemoveAccount(idg); err != nil {
-					return err
-				}
-				m.stats[utils.Accounts] += 1
-			}
+		if acc == nil || m.dryRun {
+			continue
 		}
+		if err := m.dmOut.DataManager().DataDB().SetAccount(acc); err != nil {
+			return err
+		}
+		if err := m.dmIN.DataManager().DataDB().RemoveAccount(idg); err != nil {
+			return err
+		}
+		m.stats[utils.Accounts] += 1
 	}
 	return
 }
@@ -71,28 +70,28 @@ func (m *Migrator) migrateV1Accounts() (err error) {
 		if err == utils.ErrNoMoreData {
 			break
 		}
-		if v1Acnt != nil {
-			acnt := v1Acnt.V1toV3Account()
-			if m.dryRun != true {
-				if err = m.dmOut.DataManager().DataDB().SetAccount(acnt); err != nil {
-					return err
-				}
-				if err = m.dmIN.remV1Account(v1Acnt.Id); err != nil {
-					return err
-				}
-				m.stats[utils.Accounts] += 1
-			}
+		if v1Acnt == nil || m.dryRun {
+			continue
 		}
+		acnt := v1Acnt.V1toV3Account()
+		if err = m.dmOut.DataManager().DataDB().SetAccount(acnt); err != nil {
+			return err
+		}
+		if err = m.dmIN.remV1Account(v1Acnt.Id); err != nil {
+			return err
+		}
+		m.stats[utils.Accounts] += 1
 	}
-	if m.dryRun != true {
-		// All done, update version wtih current one
-		vrs := engine.Versions{utils.Accounts: engine.CurrentDataDBVersions()[utils.Accounts]}
-		if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
-			return utils.NewCGRError(utils.Migrator,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
-		}
+	if m.dryRun {
+		return
+	}
+	// All done, update version wtih current one
+	vrs := engine.Versions{utils.Accounts: engine.CurrentDataDBVersions()[utils.Accounts]}
+	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
 	}
 	return
 }
@@ -107,28 +106,28 @@ func (m *Migrator) migrateV2Accounts() (err error) {
 		if err == utils.ErrNoMoreData {
 			break
 		}
-		if v2Acnt != nil {
-			acnt := v2Acnt.V2toV3Account()
-			if m.dryRun != true {
-				if err = m.dmOut.DataManager().DataDB().SetAccount(acnt); err != nil {
-					return err
-				}
-				if err = m.dmIN.remV2Account(v2Acnt.ID); err != nil {
-					return err
-				}
-				m.stats[utils.Accounts] += 1
-			}
+		if v2Acnt == nil || m.dryRun {
+			continue
 		}
+		acnt := v2Acnt.V2toV3Account()
+		if err = m.dmOut.DataManager().DataDB().SetAccount(acnt); err != nil {
+			return err
+		}
+		if err = m.dmIN.remV2Account(v2Acnt.ID); err != nil {
+			return err
+		}
+		m.stats[utils.Accounts] += 1
 	}
-	if m.dryRun != true {
-		// All done, update version wtih current one
-		vrs := engine.Versions{utils.Accounts: engine.CurrentDataDBVersions()[utils.Accounts]}
-		if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
-			return utils.NewCGRError(utils.Migrator,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
-		}
+	if m.dryRun {
+		return
+	}
+	// All done, update version wtih current one
+	vrs := engine.Versions{utils.Accounts: engine.CurrentDataDBVersions()[utils.Accounts]}
+	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating Accounts version into StorDB", err.Error()))
 	}
 	return
 }
@@ -149,7 +148,6 @@ func (m *Migrator) migrateAccounts() (err error) {
 	}
 	current := engine.CurrentDataDBVersions()
 	switch vrs[utils.Accounts] {
-
 	case 1:
 		return m.migrateV1Accounts()
 	case 2:

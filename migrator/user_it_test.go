@@ -36,7 +36,6 @@ var (
 	usrCfgIn    *config.CGRConfig
 	usrCfgOut   *config.CGRConfig
 	usrMigrator *Migrator
-	usrAction   string
 )
 
 var sTestsUsrIT = []func(t *testing.T){
@@ -47,41 +46,22 @@ var sTestsUsrIT = []func(t *testing.T){
 
 func TestUserMigrateITRedis(t *testing.T) {
 	inPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
-	testUsrStart("TestUserMigrateITRedis", inPath, inPath, utils.Migrate, t)
+	testUsrStart("TestUserMigrateITRedis", inPath, inPath, t)
 }
 
 func TestUserMigrateITMongo(t *testing.T) {
 	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	testUsrStart("TestUserMigrateITMongo", inPath, inPath, utils.Migrate, t)
-}
-
-func TestUserITMove(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	outPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
-	testUsrStart("TestUserITMove", inPath, outPath, utils.Move, t)
+	testUsrStart("TestUserMigrateITMongo", inPath, inPath, t)
 }
 
 func TestUserITMigrateMongo2Redis(t *testing.T) {
 	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
 	outPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
-	testUsrStart("TestUserITMigrateMongo2Redis", inPath, outPath, utils.Migrate, t)
+	testUsrStart("TestUserITMigrateMongo2Redis", inPath, outPath, t)
 }
 
-func TestUserITMoveEncoding(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	outPath := path.Join(*dataDir, "conf", "samples", "tutmongojson")
-	testUsrStart("TestUserITMoveEncoding", inPath, outPath, utils.Move, t)
-}
-
-func TestUserITMoveEncoding2(t *testing.T) {
-	inPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
-	outPath := path.Join(*dataDir, "conf", "samples", "tutmysqljson")
-	testUsrStart("TestUserITMoveEncoding2", inPath, outPath, utils.Move, t)
-}
-
-func testUsrStart(testName, inPath, outPath, action string, t *testing.T) {
+func testUsrStart(testName, inPath, outPath string, t *testing.T) {
 	var err error
-	usrAction = action
 	if usrCfgIn, err = config.NewCGRConfigFromFolder(inPath); err != nil {
 		t.Fatal(err)
 	}
@@ -165,91 +145,59 @@ func testUsrITMigrateAndMove(t *testing.T) {
 		Weight:  10,
 	}
 	attrProf.Compile()
-	switch usrAction {
-	case utils.Migrate:
-		err := usrMigrator.dmIN.setV1User(user)
-		if err != nil {
-			t.Error("Error when setting v1 User ", err.Error())
-		}
-		currentVersion := engine.Versions{utils.User: 1}
-		err = usrMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for User ", err.Error())
-		}
-		//check if version was set correctly
-		if vrs, err := usrMigrator.dmIN.DataManager().DataDB().GetVersions(""); err != nil {
-			t.Error(err)
-		} else if vrs[utils.User] != 1 {
-			t.Errorf("Unexpected version returned: %d", vrs[utils.User])
-		}
-		//migrate user
-		err, _ = usrMigrator.Migrate([]string{utils.MetaUsers})
-		if err != nil {
-			t.Error("Error when migrating User ", err.Error())
-		}
-		//check if version was updated
-		if vrs, err := usrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
-			t.Error(err)
-		} else if vrs[utils.User] != 0 {
-			t.Errorf("Unexpected version returned: %d", vrs[utils.User])
-		}
-		//check if user was migrate correctly
-		result, err := usrMigrator.dmOut.DataManager().DataDB().GetAttributeProfileDrv(defaultTenant, user.UserName)
-		if err != nil {
-			t.Fatalf("Error when getting Attributes %v", err.Error())
-		}
-		result.Compile()
-		sort.Slice(result.Attributes, func(i, j int) bool {
-			return result.Attributes[i].FieldName < result.Attributes[j].FieldName
-		}) // only for test; map returns random keys
-		if !reflect.DeepEqual(*attrProf, *result) {
-			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(attrProf), utils.ToJSON(result))
-		}
-		//check if old account was deleted
-		if _, err = usrMigrator.dmIN.getV1Alias(); err != utils.ErrNoMoreData {
-			t.Error("Error should be not found : ", err)
-		}
 
-		expUsrIdx := map[string]utils.StringMap{
-			"*string:~Account:1002": utils.StringMap{
-				"1001": true,
-			},
-		}
-		if usridx, err := usrMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
-			utils.ConcatenatedKey("cgrates.org", utils.META_ANY), utils.MetaString, nil); err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(expUsrIdx, usridx) {
-			t.Errorf("Expected %v, recived: %v", utils.ToJSON(expUsrIdx), utils.ToJSON(usridx))
-		}
+	err := usrMigrator.dmIN.setV1User(user)
+	if err != nil {
+		t.Error("Error when setting v1 User ", err.Error())
+	}
+	currentVersion := engine.Versions{utils.User: 1}
+	err = usrMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
+	if err != nil {
+		t.Error("Error when setting version for User ", err.Error())
+	}
+	//check if version was set correctly
+	if vrs, err := usrMigrator.dmIN.DataManager().DataDB().GetVersions(""); err != nil {
+		t.Error(err)
+	} else if vrs[utils.User] != 1 {
+		t.Errorf("Unexpected version returned: %d", vrs[utils.User])
+	}
+	//migrate user
+	err, _ = usrMigrator.Migrate([]string{utils.MetaUsers})
+	if err != nil {
+		t.Error("Error when migrating User ", err.Error())
+	}
+	//check if version was updated
+	if vrs, err := usrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
+		t.Error(err)
+	} else if vrs[utils.User] != 0 {
+		t.Errorf("Unexpected version returned: %d", vrs[utils.User])
+	}
+	//check if user was migrate correctly
+	result, err := usrMigrator.dmOut.DataManager().DataDB().GetAttributeProfileDrv(defaultTenant, user.UserName)
+	if err != nil {
+		t.Fatalf("Error when getting Attributes %v", err.Error())
+	}
+	result.Compile()
+	sort.Slice(result.Attributes, func(i, j int) bool {
+		return result.Attributes[i].FieldName < result.Attributes[j].FieldName
+	}) // only for test; map returns random keys
+	if !reflect.DeepEqual(*attrProf, *result) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(attrProf), utils.ToJSON(result))
+	}
+	//check if old account was deleted
+	if _, err = usrMigrator.dmIN.getV1Alias(); err != utils.ErrNoMoreData {
+		t.Error("Error should be not found : ", err)
+	}
 
-	case utils.Move:
-		/* // No Move tests
-		if err := usrMigrator.dmIN.DataManager().DataDB().SetUserDrv(user); err != nil {
-			t.Error(err)
-		}
-		currentVersion := engine.CurrentDataDBVersions()
-		err := usrMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
-		if err != nil {
-			t.Error("Error when setting version for User ", err.Error())
-		}
-		//migrate accounts
-		err, _ = usrMigrator.Migrate([]string{utils.MetaUsers})
-		if err != nil {
-			t.Error("Error when usrMigratorrating User ", err.Error())
-		}
-		//check if account was migrate correctly
-		result, err := usrMigrator.dmOut.DataManager().DataDB().GetUserDrv(user.GetId(), false)
-		if err != nil {
-			t.Error(err)
-		}
-		if !reflect.DeepEqual(user, result) {
-			t.Errorf("Expecting: %+v, received: %+v", user, result)
-		}
-		//check if old account was deleted
-		result, err = usrMigrator.dmIN.DataManager().DataDB().GetUserDrv(user.GetId(), false)
-		if err != utils.ErrNotFound {
-			t.Error(err)
-		}
-		// */
+	expUsrIdx := map[string]utils.StringMap{
+		"*string:~Account:1002": utils.StringMap{
+			"1001": true,
+		},
+	}
+	if usridx, err := usrMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
+		utils.ConcatenatedKey("cgrates.org", utils.META_ANY), utils.MetaString, nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expUsrIdx, usridx) {
+		t.Errorf("Expected %v, recived: %v", utils.ToJSON(expUsrIdx), utils.ToJSON(usridx))
 	}
 }

@@ -59,17 +59,16 @@ func (m *Migrator) migrateCurrentActionPlans() (err error) {
 		if err != nil {
 			return err
 		}
-		if acts != nil {
-			if m.dryRun != true {
-				if err := m.dmOut.DataManager().DataDB().SetActionPlan(idg, acts, true, utils.NonTransactional); err != nil {
-					return err
-				}
-				if err := m.dmIN.DataManager().DataDB().RemoveActionPlan(idg, utils.NonTransactional); err != nil {
-					return err
-				}
-				m.stats[utils.ActionPlans] += 1
-			}
+		if acts == nil || m.dryRun {
+			continue
 		}
+		if err := m.dmOut.DataManager().DataDB().SetActionPlan(idg, acts, true, utils.NonTransactional); err != nil {
+			return err
+		}
+		if err := m.dmIN.DataManager().DataDB().RemoveActionPlan(idg, utils.NonTransactional); err != nil {
+			return err
+		}
+		m.stats[utils.ActionPlans] += 1
 	}
 	return
 }
@@ -84,27 +83,27 @@ func (m *Migrator) migrateV1ActionPlans() (err error) {
 		if err == utils.ErrNoMoreData {
 			break
 		}
-		if *v1APs != nil {
-			for _, v1ap := range *v1APs {
-				ap := v1ap.AsActionPlan()
-				if m.dryRun != true {
-					if err = m.dmOut.DataManager().DataDB().SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
-						return err
-					}
-					m.stats[utils.ActionPlans] += 1
-				}
+		if *v1APs == nil || m.dryRun {
+			continue
+		}
+		for _, v1ap := range *v1APs {
+			ap := v1ap.AsActionPlan()
+			if err = m.dmOut.DataManager().DataDB().SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
+				return err
 			}
+			m.stats[utils.ActionPlans] += 1
 		}
 	}
-	if m.dryRun != true {
-		// All done, update version wtih current one
-		vrs := engine.Versions{utils.ActionPlans: engine.CurrentDataDBVersions()[utils.ActionPlans]}
-		if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
-			return utils.NewCGRError(utils.Migrator,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error: <%s> when updating ActionPlans version into dataDB", err.Error()))
-		}
+	if m.dryRun {
+		return
+	}
+	// All done, update version wtih current one
+	vrs := engine.Versions{utils.ActionPlans: engine.CurrentDataDBVersions()[utils.ActionPlans]}
+	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating ActionPlans version into dataDB", err.Error()))
 	}
 	return
 }
@@ -129,14 +128,9 @@ func (m *Migrator) migrateActionPlans() (err error) {
 		if m.sameDataDB {
 			return
 		}
-		if err := m.migrateCurrentActionPlans(); err != nil {
-			return err
-		}
-		return
+		return m.migrateCurrentActionPlans()
 	case 1:
-		if err := m.migrateV1ActionPlans(); err != nil {
-			return err
-		}
+		return m.migrateV1ActionPlans()
 	}
 	return
 }
