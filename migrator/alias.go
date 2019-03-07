@@ -103,17 +103,34 @@ func alias2AtttributeProfile(alias *v1Alias, defaultTenant string) *engine.Attri
 		if len(destination) == 0 || destination == utils.META_ANY {
 			destination = av.DestinationId
 		}
-		for fieldname, vals := range av.Pairs {
+		for fieldName, vals := range av.Pairs {
 			for initial, substitute := range vals {
-				filterIDs := make([]string, 0)
-				if initial != utils.META_ANY {
-					filterIDs = append(filterIDs, utils.MetaString+":"+fieldname+":"+initial)
+				if fieldName == utils.Tenant {
+					fieldName = utils.MetaTenant
 				}
-				out.Attributes = append(out.Attributes, &engine.Attribute{
-					FilterIDs:  filterIDs,
-					FieldName:  fieldname,
+				attr := &engine.Attribute{
+					FieldName:  fieldName,
 					Substitute: config.NewRSRParsersMustCompile(substitute, true, utils.INFIELD_SEP),
-				})
+				}
+				out.Attributes = append(out.Attributes, attr)
+				// Add attribute filters if needed
+				if initial == "" || initial == utils.META_ANY {
+					continue
+				}
+				if fieldName == utils.MetaTenant { // no filter for tenant
+					continue
+				}
+				if fieldName == utils.Category && alias.Category == initial {
+					continue
+				}
+				if fieldName == utils.Account && alias.Account == initial {
+					continue
+				}
+				if fieldName == utils.Subject && alias.Subject == initial {
+					continue
+				}
+				attr.FilterIDs = append(attr.FilterIDs,
+					fmt.Sprintf("%s:~%s:%s", utils.MetaString, fieldName, initial))
 			}
 		}
 	}

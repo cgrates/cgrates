@@ -72,6 +72,18 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			},
 			Weight: 10,
 		},
+		4: &v1UserProfile{
+			Tenant:   usrTenant,
+			UserName: "acstmusername",
+			Profile: map[string]string{
+				"Account": "acnt63",
+				"Subject": "acnt63",
+				"ReqType": "*prepaid",
+				"msisdn":  "12345",
+				"imsi":    "12345",
+			},
+			Weight: 10,
+		},
 	}
 	expected := map[int]*engine.AttributeProfile{
 		0: {
@@ -104,10 +116,12 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			Weight:  10,
 		},
 		2: {
-			Tenant:             defaultTenant,
-			ID:                 "1001",
-			Contexts:           []string{utils.META_ANY},
-			FilterIDs:          []string{"*string:~Account:1002"},
+			Tenant:   defaultTenant,
+			ID:       "1001",
+			Contexts: []string{utils.META_ANY},
+			FilterIDs: []string{
+				"*string:~Account:1002",
+			},
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
 				{
@@ -141,6 +155,39 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			Blocker: false,
 			Weight:  10,
 		},
+		4: {
+			Tenant:   defaultTenant,
+			ID:       "acstmusername",
+			Contexts: []string{utils.META_ANY},
+			FilterIDs: []string{
+				"*string:~Account:acnt63",
+			},
+			ActivationInterval: nil,
+			Attributes: []*engine.Attribute{
+				{
+					FieldName:  utils.MetaTenant,
+					Substitute: config.NewRSRParsersMustCompile(usrTenant, true, utils.INFIELD_SEP),
+				},
+				{
+					FieldName:  utils.RequestType,
+					Substitute: config.NewRSRParsersMustCompile("*prepaid", true, utils.INFIELD_SEP),
+				},
+				{
+					FieldName:  utils.Subject,
+					Substitute: config.NewRSRParsersMustCompile("acnt63", true, utils.INFIELD_SEP),
+				},
+				{
+					FieldName:  "imsi",
+					Substitute: config.NewRSRParsersMustCompile("12345", true, utils.INFIELD_SEP),
+				},
+				{
+					FieldName:  "msisdn",
+					Substitute: config.NewRSRParsersMustCompile("12345", true, utils.INFIELD_SEP),
+				},
+			},
+			Blocker: false,
+			Weight:  10,
+		},
 	}
 	for i := range expected {
 		rply := userProfile2attributeProfile(users[i])
@@ -151,7 +198,7 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			return rply.Attributes[i].FieldName < rply.Attributes[j].FieldName
 		}) // only for test; map returns random keys
 		if !reflect.DeepEqual(expected[i], rply) {
-			t.Errorf("For %v expected: %s ,received: %s ", i, utils.ToJSON(expected[i]), utils.ToJSON(rply))
+			t.Errorf("For %v expected: %s ,\nreceived: %s ", i, utils.ToIJSON(expected[i]), utils.ToIJSON(rply))
 		}
 	}
 }

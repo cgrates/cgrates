@@ -112,10 +112,10 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 					DestinationId: "DST_1003",
 					Pairs: map[string]map[string]string{
 						"Account": map[string]string{
-							"1001": "1002",
+							"": "1002",
 						},
 						"Subject": map[string]string{
-							"1001": "call_1001",
+							"": "call_1001",
 						},
 					},
 					Weight: 10,
@@ -144,6 +144,22 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 				},
 			},
 		},
+		6: {
+			Tenant:   utils.META_ANY,
+			Category: "somecateg_5141",
+			Account:  utils.META_ANY,
+			Subject:  utils.META_ANY,
+			Context:  "*rated",
+			Values: v1AliasValues{
+				&v1AliasValue{
+					Pairs: map[string]map[string]string{
+						utils.Category: map[string]string{
+							"somecateg_5141": "somecateg_roam_fromz4",
+						},
+					},
+				},
+			},
+		},
 	}
 	expected := map[int]*engine.AttributeProfile{
 		0: {
@@ -164,7 +180,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
 				{
-					FilterIDs:  []string{"*string:Account:1001"},
+					FilterIDs:  []string{"*string:~Account:1001"},
 					FieldName:  "Account",
 					Substitute: config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 				},
@@ -180,12 +196,12 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
 				{
-					FilterIDs:  []string{"*string:Account:1001"},
+					FilterIDs:  []string{"*string:~Account:1001"},
 					FieldName:  "Account",
 					Substitute: config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 				},
 				{
-					FilterIDs:  []string{"*string:Account:1003"},
+					FilterIDs:  []string{"*string:~Account:1003"},
 					FieldName:  "Account",
 					Substitute: config.NewRSRParsersMustCompile("1004", true, utils.INFIELD_SEP),
 				},
@@ -201,12 +217,12 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
 				{
-					FilterIDs:  []string{"*string:Account:1001"},
+					FilterIDs:  []string{"*string:~Account:1001"},
 					FieldName:  "Account",
 					Substitute: config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 				},
 				{
-					FilterIDs:  []string{"*string:Account:1003"},
+					FilterIDs:  []string{"*string:~Account:1003"},
 					FieldName:  "Account",
 					Substitute: config.NewRSRParsersMustCompile("1004", true, utils.INFIELD_SEP),
 				},
@@ -226,12 +242,10 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
 				{
-					FilterIDs:  []string{"*string:Account:1001"},
 					FieldName:  "Account",
 					Substitute: config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 				},
 				{
-					FilterIDs:  []string{"*string:Subject:1001"},
 					FieldName:  "Subject",
 					Substitute: config.NewRSRParsersMustCompile("call_1001", true, utils.INFIELD_SEP),
 				},
@@ -251,18 +265,32 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
 				{
-					FilterIDs:  []string{"*string:Account:1001"},
 					FieldName:  "Account",
 					Substitute: config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 				},
 				{
-					FilterIDs:  []string{"*string:Category:call_1001"},
 					FieldName:  "Category",
+					FilterIDs:  []string{"*string:~Category:call_1001"},
 					Substitute: config.NewRSRParsersMustCompile("call_1002", true, utils.INFIELD_SEP),
 				},
 			},
 			Blocker: false,
 			Weight:  20,
+		},
+		6: {
+			Tenant:   "cgrates.org",
+			ID:       aliases[6].GetId(),
+			Contexts: []string{utils.META_ANY},
+			FilterIDs: []string{
+				"*string:~Category:somecateg_5141",
+			},
+			Attributes: []*engine.Attribute{
+				{
+					FieldName:  utils.Category,
+					Substitute: config.NewRSRParsersMustCompile("somecateg_roam_fromz4", true, utils.INFIELD_SEP),
+				},
+			},
+			Weight: 20,
 		},
 	}
 	for i := range expected {
