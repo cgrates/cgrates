@@ -111,13 +111,18 @@ func (da *DiameterAgent) handlers() diam.Handler {
 
 	dSM := sm.New(settings)
 
-	dSM.HandleFunc("ALL", da.handleMessage) // route all commands to one dispatcher
+	dSM.HandleFunc("ALL", da.handleMessageAsync) // route all commands to one dispatcher
 	go func() {
 		for err := range dSM.ErrorReports() {
 			utils.Logger.Err(fmt.Sprintf("<%s> sm error: %v", utils.DiameterAgent, err))
 		}
 	}()
 	return dSM
+}
+
+// handleMessageAsync will dispatch the message into it's own goroutine
+func (da *DiameterAgent) handleMessageAsync(c diam.Conn, m *diam.Message) {
+	go da.handleMessage(c, m)
 }
 
 // handleALL is the handler of all messages coming in via Diameter
