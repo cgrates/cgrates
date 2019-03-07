@@ -55,7 +55,7 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Reconnects:           utils.IntPointer(-1),
 		Connect_timeout:      utils.StringPointer("1s"),
 		Reply_timeout:        utils.StringPointer("2s"),
-		Internal_ttl:         utils.StringPointer("2m"),
+		Internal_ttl:         utils.StringPointer("5s"),
 		Locking_timeout:      utils.StringPointer("0"),
 		Digest_separator:     utils.StringPointer(","),
 		Digest_equal:         utils.StringPointer(":"),
@@ -64,7 +64,7 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 	if gCfg, err := dfCgrJsonCfg.GeneralJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, gCfg) {
-		t.Error("Received: ", utils.ToIJSON(gCfg))
+		t.Errorf("expecting: %s, \nreceived: %s", utils.ToIJSON(eCfg), utils.ToIJSON(gCfg))
 	}
 }
 
@@ -182,7 +182,7 @@ func TestDfListenJsonCfg(t *testing.T) {
 
 func TestDfDataDbJsonCfg(t *testing.T) {
 	eCfg := &DbJsonCfg{
-		Db_type:        utils.StringPointer("redis"),
+		Db_type:        utils.StringPointer("*redis"),
 		Db_host:        utils.StringPointer("127.0.0.1"),
 		Db_port:        utils.IntPointer(6379),
 		Db_name:        utils.StringPointer("10"),
@@ -193,13 +193,13 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 	if cfg, err := dfCgrJsonCfg.DbJsonCfg(DATADB_JSN); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", utils.ToJSON(cfg))
+		t.Errorf("expecting: %s, \nreceived: %s", utils.ToIJSON(eCfg), utils.ToIJSON(cfg))
 	}
 }
 
 func TestDfStorDBJsonCfg(t *testing.T) {
 	eCfg := &DbJsonCfg{
-		Db_type:           utils.StringPointer("mysql"),
+		Db_type:           utils.StringPointer("*mysql"),
 		Db_host:           utils.StringPointer("127.0.0.1"),
 		Db_port:           utils.IntPointer(3306),
 		Db_name:           utils.StringPointer("cgrates"),
@@ -251,10 +251,10 @@ func TestDfSchedulerJsonCfg(t *testing.T) {
 
 func TestDfCdrsJsonCfg(t *testing.T) {
 	eCfg := &CdrsJsonCfg{
-		Enabled:               utils.BoolPointer(false),
-		Extra_fields:          &[]string{},
-		Store_cdrs:            utils.BoolPointer(true),
-		Sessions_cost_retries: utils.IntPointer(5),
+		Enabled:              utils.BoolPointer(false),
+		Extra_fields:         &[]string{},
+		Store_cdrs:           utils.BoolPointer(true),
+		Session_cost_retries: utils.IntPointer(5),
 		Chargers_conns: &[]*HaPoolJsonCfg{
 			{
 				Address: utils.StringPointer("*internal"),
@@ -330,7 +330,7 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 			Export_path:           utils.StringPointer("/var/spool/cgrates/cdre"),
 			Synchronous:           utils.BoolPointer(false),
 			Attempts:              utils.IntPointer(1),
-			Tenant:                utils.StringPointer("cgrates.org"),
+			Tenant:                utils.StringPointer(""),
 			Field_separator:       utils.StringPointer(","),
 			Usage_multiply_factor: &map[string]float64{utils.ANY: 1.0},
 			Cost_multiply_factor:  utils.Float64Pointer(1.0),
@@ -441,7 +441,7 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 			Cdr_path:                    utils.StringPointer(""),
 			Cdr_source_id:               utils.StringPointer("freeswitch_csv"),
 			Filters:                     &[]string{},
-			Tenant:                      utils.StringPointer("cgrates.org"),
+			Tenant:                      utils.StringPointer(""),
 			Continue_on_success:         utils.BoolPointer(false),
 			Partial_record_cache:        utils.StringPointer("10s"),
 			Partial_cache_expiry_action: utils.StringPointer(utils.MetaDumpToFile),
@@ -835,7 +835,7 @@ func TestDfLoaderJsonCfg(t *testing.T) {
 		{
 			ID:            utils.StringPointer(utils.META_DEFAULT),
 			Enabled:       utils.BoolPointer(false),
-			Tenant:        utils.StringPointer("cgrates.org"),
+			Tenant:        utils.StringPointer(""),
 			Dry_run:       utils.BoolPointer(false),
 			Run_delay:     utils.IntPointer(0),
 			Lock_filename: utils.StringPointer(".cgr.lck"),
@@ -1395,20 +1395,7 @@ func TestDfDispatcherSJsonCfg(t *testing.T) {
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
 		Attributes_conns:      &[]*HaPoolJsonCfg{},
-		Conns: &map[string]*[]*HaPoolJsonCfg{
-			"sessions_eu": &[]*HaPoolJsonCfg{
-				{Address: utils.StringPointer("127.0.0.1:2012"), Transport: utils.StringPointer(utils.MetaJSONrpc)},
-				{Address: utils.StringPointer("127.0.0.2:2012"), Transport: utils.StringPointer(utils.MetaJSONrpc)},
-			},
-			"sessions_us": &[]*HaPoolJsonCfg{
-				{Address: utils.StringPointer("127.0.0.3:2012"), Transport: utils.StringPointer(utils.MetaJSONrpc)},
-				{Address: utils.StringPointer("127.0.0.4:2012"), Transport: utils.StringPointer(utils.MetaJSONrpc)},
-			},
-			"sessions_others": &[]*HaPoolJsonCfg{
-				{Address: utils.StringPointer("127.0.0.5:2012"), Transport: utils.StringPointer(utils.MetaJSONrpc)},
-				{Address: utils.StringPointer("127.0.0.6:2012"), Transport: utils.StringPointer(utils.MetaJSONrpc)},
-			},
-		},
+		Conns:                 &map[string]*[]*HaPoolJsonCfg{},
 	}
 	if cfg, err := dfCgrJsonCfg.DispatcherSJsonCfg(); err != nil {
 		t.Error(err)

@@ -114,16 +114,16 @@ type SchedulerJsonCfg struct {
 
 // Cdrs config section
 type CdrsJsonCfg struct {
-	Enabled               *bool
-	Extra_fields          *[]string
-	Store_cdrs            *bool
-	Sessions_cost_retries *int
-	Chargers_conns        *[]*HaPoolJsonCfg
-	Rals_conns            *[]*HaPoolJsonCfg
-	Attributes_conns      *[]*HaPoolJsonCfg
-	Thresholds_conns      *[]*HaPoolJsonCfg
-	Stats_conns           *[]*HaPoolJsonCfg
-	Online_cdr_exports    *[]string
+	Enabled              *bool
+	Extra_fields         *[]string
+	Store_cdrs           *bool
+	Session_cost_retries *int
+	Chargers_conns       *[]*HaPoolJsonCfg
+	Rals_conns           *[]*HaPoolJsonCfg
+	Attributes_conns     *[]*HaPoolJsonCfg
+	Thresholds_conns     *[]*HaPoolJsonCfg
+	Stats_conns          *[]*HaPoolJsonCfg
+	Online_cdr_exports   *[]string
 }
 
 type CdrReplicationJsonCfg struct {

@@ -51,8 +51,8 @@ func (cdrscfg *CdrsCfg) loadFromJsonCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 	if jsnCdrsCfg.Store_cdrs != nil {
 		cdrscfg.CDRSStoreCdrs = *jsnCdrsCfg.Store_cdrs
 	}
-	if jsnCdrsCfg.Sessions_cost_retries != nil {
-		cdrscfg.CDRSSMCostRetries = *jsnCdrsCfg.Sessions_cost_retries
+	if jsnCdrsCfg.Session_cost_retries != nil {
+		cdrscfg.CDRSSMCostRetries = *jsnCdrsCfg.Session_cost_retries
 	}
 	if jsnCdrsCfg.Chargers_conns != nil {
 		cdrscfg.CDRSChargerSConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Chargers_conns))

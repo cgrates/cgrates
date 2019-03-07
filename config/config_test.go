@@ -217,7 +217,6 @@ func TestCgrCfgCDRC(t *testing.T) {
 			CDRPath:                  utils.HierarchyPath([]string{""}),
 			CdrSourceId:              "freeswitch_csv",
 			Filters:                  []string{},
-			Tenant:                   NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 			ContinueOnSuccess:        false,
 			PartialRecordCache:       time.Duration(10 * time.Second),
 			PartialCacheExpiryAction: "*dump_to_file",
@@ -361,7 +360,7 @@ func TestCgrCfgJSONDefaultsGeneral(t *testing.T) {
 	if cgrCfg.GeneralCfg().ReplyTimeout != 2*time.Second {
 		t.Errorf("Expected: 2s, received: %+v", cgrCfg.GeneralCfg().ReplyTimeout)
 	}
-	if cgrCfg.GeneralCfg().InternalTtl != 2*time.Minute {
+	if cgrCfg.GeneralCfg().InternalTtl != 5*time.Second {
 		t.Errorf("Expected: 2m, received: %+v", cgrCfg.GeneralCfg().InternalTtl)
 	}
 	if cgrCfg.GeneralCfg().LockingTimeout != 0 {
@@ -592,7 +591,6 @@ func TestCgrCfgJSONDefaultsCdreProfiles(t *testing.T) {
 			ExportFormat:        utils.MetaFileCSV,
 			ExportPath:          "/var/spool/cgrates/cdre",
 			Filters:             []string{},
-			Tenant:              "cgrates.org",
 			Synchronous:         false,
 			Attempts:            1,
 			FieldSeparator:      ',',
@@ -1020,7 +1018,6 @@ func TestCgrLoaderCfgITDefaults(t *testing.T) {
 		{
 			Id:           utils.META_DEFAULT,
 			Enabled:      false,
-			Tenant:       NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 			DryRun:       false,
 			RunDelay:     0,
 			LockFileName: ".cgr.lck",
@@ -1463,20 +1460,7 @@ func TestCgrCfgJSONDefaultDispatcherSCfg(t *testing.T) {
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
 		AttributeSConns:     []*HaPoolConfig{},
-		Conns: map[string][]*HaPoolConfig{
-			"sessions_eu": []*HaPoolConfig{
-				{Address: "127.0.0.1:2012", Transport: utils.MetaJSONrpc},
-				{Address: "127.0.0.2:2012", Transport: utils.MetaJSONrpc},
-			},
-			"sessions_us": []*HaPoolConfig{
-				{Address: "127.0.0.3:2012", Transport: utils.MetaJSONrpc},
-				{Address: "127.0.0.4:2012", Transport: utils.MetaJSONrpc},
-			},
-			"sessions_others": []*HaPoolConfig{
-				{Address: "127.0.0.5:2012", Transport: utils.MetaJSONrpc},
-				{Address: "127.0.0.6:2012", Transport: utils.MetaJSONrpc},
-			},
-		},
+		Conns:               map[string][]*HaPoolConfig{},
 	}
 	if !reflect.DeepEqual(cgrCfg.dispatcherSCfg, eDspSCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.dispatcherSCfg, eDspSCfg)
@@ -1547,7 +1531,6 @@ func TestCDRCWithDefault(t *testing.T) {
 			CDRPath:                  utils.HierarchyPath([]string{""}),
 			CdrSourceId:              "freeswitch_csv",
 			Filters:                  []string{},
-			Tenant:                   NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 			ContinueOnSuccess:        false,
 			PartialRecordCache:       time.Duration(10 * time.Second),
 			PartialCacheExpiryAction: "*dump_to_file",
