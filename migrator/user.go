@@ -121,52 +121,6 @@ func (m *Migrator) migrateV1User2AttributeProfile() (err error) {
 	return
 }
 
-// func (m *Migrator) migrateCurrentUser() (err error) {
-// 	var ids []string
-// 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.USERS_PREFIX)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	for _, id := range ids {
-// 		idg := strings.TrimPrefix(id, utils.USERS_PREFIX)
-// 		usr, err := m.dmIN.DataManager().GetUser(idg)
-// 		if err != nil {
-// 			return err
-// 		}
-// 		if usr != nil {
-// 			if m.dryRun != true {
-// 				if err := m.dmOut.DataManager().SetUser(usr); err != nil {
-// 					return err
-// 				}
-// 				m.stats[utils.User] += 1
-// 			}
-// 		}
-// 	}
-// 	return
-// }
-
 func (m *Migrator) migrateUser() (err error) {
 	return m.migrateV1User2AttributeProfile()
-	/*
-		var vrs engine.Versions
-		current := engine.CurrentDataDBVersions()
-		vrs, err = m.dmIN.DataManager().DataDB().GetVersions("")
-		if err != nil {
-			return utils.NewCGRError(utils.Migrator, utils.ServerErrorCaps,
-				err.Error(), fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
-		} else if len(vrs) == 0 {
-			return utils.NewCGRError(utils.Migrator, utils.MandatoryIEMissingCaps,
-				utils.UndefinedVersion, "version number is not defined for Users model")
-		}
-		switch vrs[utils.User] {
-		case 1:
-			return m.migrateV1User2AttributeProfile()
-		case current[utils.User]:
-			if !m.sameStorDB {
-				return utils.ErrNotImplemented
-				// return m.migrateCurrentUser()
-			}
-		}
-		return
-	*/
 }

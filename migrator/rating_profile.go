@@ -38,14 +38,13 @@ func (m *Migrator) migrateCurrentRatingProfiles() (err error) {
 		if err != nil {
 			return err
 		}
-		if rp != nil {
-			if m.dryRun != true {
-				if err := m.dmOut.DataManager().SetRatingProfile(rp, utils.NonTransactional); err != nil {
-					return err
-				}
-				m.stats[utils.RatingProfile] += 1
-			}
+		if rp == nil || m.dryRun {
+			continue
 		}
+		if err := m.dmOut.DataManager().SetRatingProfile(rp, utils.NonTransactional); err != nil {
+			return err
+		}
+		m.stats[utils.RatingProfile] += 1
 	}
 	return
 }
@@ -70,10 +69,7 @@ func (m *Migrator) migrateRatingProfiles() (err error) {
 		if m.sameDataDB {
 			return
 		}
-		if err := m.migrateCurrentRatingProfiles(); err != nil {
-			return err
-		}
-		return
+		return m.migrateCurrentRatingProfiles()
 	}
 	return
 }

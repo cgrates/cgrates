@@ -212,61 +212,6 @@ func (m *Migrator) migrateV1DerivedChargers() (err error) {
 	return
 }
 
-/*
-func (m *Migrator) migrateCurrentDerivedChargers() (err error) {
-	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.DERIVEDCHARGERS_PREFIX)
-	if err != nil {
-		return err
-	}
-	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.DERIVEDCHARGERS_PREFIX)
-		drc, err := m.dmIN.DataManager().GetDerivedChargers(idg, true, utils.NonTransactional)
-		if err != nil {
-			return err
-		}
-		if drc != nil {
-			if m.dryRun != true {
-				if err := m.dmOut.DataManager().DataDB().SetDerivedChargers(idg, drc, utils.NonTransactional); err != nil {
-					return err
-				}
-				m.stats[utils.DerivedChargersV] += 1
-			}
-		}
-	}
-	return
-}
-*/
-
 func (m *Migrator) migrateDerivedChargers() (err error) {
 	return m.migrateV1DerivedChargers()
-	/*
-		var vrs engine.Versions
-		current := engine.CurrentDataDBVersions()
-		vrs, err = m.dmIN.DataManager().DataDB().GetVersions("")
-		if err != nil {
-			return utils.NewCGRError(utils.Migrator,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error: <%s> when querying oldDataDB for versions", err.Error()))
-		} else if len(vrs) == 0 {
-			return utils.NewCGRError(utils.Migrator,
-				utils.MandatoryIEMissingCaps,
-				utils.UndefinedVersion,
-				"version number is not defined for DerivedChargers model")
-		}
-
-		switch vrs[utils.DerivedChargersV] {
-		case 1:
-		case current[utils.DerivedChargersV]:
-			if m.sameDataDB {
-				return
-			}
-			if err := m.migrateCurrentDerivedChargers(); err != nil {
-				return err
-			}
-			return
-		}
-		return
-	*/
 }

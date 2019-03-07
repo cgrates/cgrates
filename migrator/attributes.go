@@ -57,18 +57,17 @@ func (m *Migrator) migrateCurrentAttributeProfile() (err error) {
 		if err != nil {
 			return err
 		}
-		if attrPrf != nil {
-			if m.dryRun != true {
-				if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
-					return err
-				}
-				if err := m.dmIN.DataManager().RemoveAttributeProfile(tenant,
-					idg, utils.NonTransactional, false); err != nil {
-					return err
-				}
-				m.stats[utils.Attributes] += 1
-			}
+		if attrPrf == nil || m.dryRun {
+			continue
 		}
+		if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
+			return err
+		}
+		if err := m.dmIN.DataManager().RemoveAttributeProfile(tenant,
+			idg, utils.NonTransactional, false); err != nil {
+			return err
+		}
+		m.stats[utils.Attributes] += 1
 	}
 	return
 }
@@ -83,31 +82,34 @@ func (m *Migrator) migrateV1Attributes() (err error) {
 		if err == utils.ErrNoMoreData {
 			break
 		}
-		if v1Attr != nil {
-			attrPrf, err := v1Attr.AsAttributeProfile()
-			if err != nil {
-				return err
-			}
-			if m.dryRun != true {
-				if err := m.dmOut.DataManager().DataDB().SetAttributeProfileDrv(attrPrf); err != nil {
-					return err
-				}
-				if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
-					return err
-				}
-				m.stats[utils.Attributes] += 1
-			}
+		if v1Attr == nil {
+			continue
 		}
+		attrPrf, err := v1Attr.AsAttributeProfile()
+		if err != nil {
+			return err
+		}
+		if m.dryRun {
+			continue
+		}
+		if err := m.dmOut.DataManager().DataDB().SetAttributeProfileDrv(attrPrf); err != nil {
+			return err
+		}
+		if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
+			return err
+		}
+		m.stats[utils.Attributes] += 1
 	}
-	if m.dryRun != true {
-		// All done, update version wtih current one
-		vrs := engine.Versions{utils.Attributes: engine.CurrentDataDBVersions()[utils.Attributes]}
-		if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
-			return utils.NewCGRError(utils.Migrator,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error: <%s> when updating Thresholds version into dataDB", err.Error()))
-		}
+	if m.dryRun {
+		return
+	}
+	// All done, update version wtih current one
+	vrs := engine.Versions{utils.Attributes: engine.CurrentDataDBVersions()[utils.Attributes]}
+	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating Thresholds version into dataDB", err.Error()))
 	}
 	return
 }
@@ -122,31 +124,34 @@ func (m *Migrator) migrateV2Attributes() (err error) {
 		if err == utils.ErrNoMoreData {
 			break
 		}
-		if v2Attr != nil {
-			attrPrf, err := v2Attr.AsAttributeProfile()
-			if err != nil {
-				return err
-			}
-			if m.dryRun != true {
-				if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
-					return err
-				}
-				if err := m.dmIN.remV2AttributeProfile(v2Attr.Tenant, v2Attr.ID); err != nil {
-					return err
-				}
-				m.stats[utils.Attributes] += 1
-			}
+		if v2Attr == nil {
+			continue
 		}
+		attrPrf, err := v2Attr.AsAttributeProfile()
+		if err != nil {
+			return err
+		}
+		if m.dryRun {
+			continue
+		}
+		if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
+			return err
+		}
+		if err := m.dmIN.remV2AttributeProfile(v2Attr.Tenant, v2Attr.ID); err != nil {
+			return err
+		}
+		m.stats[utils.Attributes] += 1
 	}
-	if m.dryRun != true {
-		// All done, update version wtih current one
-		vrs := engine.Versions{utils.Attributes: engine.CurrentDataDBVersions()[utils.Attributes]}
-		if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
-			return utils.NewCGRError(utils.Migrator,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error: <%s> when updating Thresholds version into dataDB", err.Error()))
-		}
+	if m.dryRun {
+		return
+	}
+	// All done, update version wtih current one
+	vrs := engine.Versions{utils.Attributes: engine.CurrentDataDBVersions()[utils.Attributes]}
+	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating Thresholds version into dataDB", err.Error()))
 	}
 	return
 }
@@ -171,18 +176,11 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 		if m.sameDataDB {
 			return
 		}
-		if err := m.migrateCurrentAttributeProfile(); err != nil {
-			return err
-		}
-		return
+		return m.migrateCurrentAttributeProfile()
 	case 1:
-		if err := m.migrateV1Attributes(); err != nil {
-			return err
-		}
+		return m.migrateV1Attributes()
 	case 2:
-		if err := m.migrateV2Attributes(); err != nil {
-			return err
-		}
+		return m.migrateV2Attributes()
 	}
 	return
 }

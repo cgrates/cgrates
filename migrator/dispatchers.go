@@ -40,18 +40,17 @@ func (m *Migrator) migrateCurrentDispatcher() (err error) {
 		if err != nil {
 			return err
 		}
-		if dpp != nil {
-			if m.dryRun != true {
-				if err := m.dmOut.DataManager().SetDispatcherProfile(dpp, true); err != nil {
-					return err
-				}
-				if err := m.dmIN.DataManager().RemoveDispatcherProfile(tenant,
-					idg, utils.NonTransactional, false); err != nil {
-					return err
-				}
-				m.stats[utils.Dispatchers] += 1
-			}
+		if dpp == nil || m.dryRun {
+			continue
 		}
+		if err := m.dmOut.DataManager().SetDispatcherProfile(dpp, true); err != nil {
+			return err
+		}
+		if err := m.dmIN.DataManager().RemoveDispatcherProfile(tenant,
+			idg, utils.NonTransactional, false); err != nil {
+			return err
+		}
+		m.stats[utils.Dispatchers] += 1
 	}
 	return
 }
@@ -76,10 +75,7 @@ func (m *Migrator) migrateDispatchers() (err error) {
 		if m.sameDataDB {
 			return
 		}
-		if err := m.migrateCurrentDispatcher(); err != nil {
-			return err
-		}
-		return
+		return m.migrateCurrentDispatcher()
 	}
 	return
 }

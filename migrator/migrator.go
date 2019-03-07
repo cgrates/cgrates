@@ -92,8 +92,6 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			err = m.migrateCDRs()
 		case utils.MetaSessionsCosts:
 			err = m.migrateSessionSCosts()
-		// case utils.MetaCostDetails:
-		// 	err = m.migrateCostDetails()
 		case utils.MetaAccounts:
 			err = m.migrateAccounts()
 		case utils.MetaActionPlans:

@@ -40,14 +40,13 @@ func (m *Migrator) migrateCurrentSupplierProfile() (err error) {
 		if err != nil {
 			return err
 		}
-		if splp != nil {
-			if m.dryRun != true {
-				if err := m.dmOut.DataManager().SetSupplierProfile(splp, true); err != nil {
-					return err
-				}
-				m.stats[utils.Suppliers] += 1
-			}
+		if splp == nil || m.dryRun {
+			continue
 		}
+		if err := m.dmOut.DataManager().SetSupplierProfile(splp, true); err != nil {
+			return err
+		}
+		m.stats[utils.Suppliers] += 1
 	}
 	return
 }
@@ -72,10 +71,7 @@ func (m *Migrator) migrateSupplierProfiles() (err error) {
 		if m.sameDataDB {
 			return
 		}
-		if err := m.migrateCurrentSupplierProfile(); err != nil {
-			return err
-		}
-		return
+		return m.migrateCurrentSupplierProfile()
 	}
 	return
 }

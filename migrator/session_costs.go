@@ -63,17 +63,11 @@ func (m *Migrator) migrateSessionSCosts() (err error) {
 	}
 	switch vrs[utils.SessionSCosts] {
 	case 0, 1:
-		if err := m.migrateV1SessionSCosts(); err != nil {
-			return err
-		}
+		return m.migrateV1SessionSCosts()
 	case 2:
-		if err := m.migrateV2SessionSCosts(); err != nil {
-			return err
-		}
+		return m.migrateV2SessionSCosts()
 	case current[utils.SessionSCosts]:
-		if err := m.migrateCurrentSessionSCost(); err != nil {
-			return err
-		}
+		return m.migrateCurrentSessionSCost()
 	}
 	return nil
 }
@@ -82,14 +76,15 @@ func (m *Migrator) migrateV1SessionSCosts() (err error) {
 	if err = m.storDBIn.renameV1SMCosts(); err != nil {
 		return err
 	}
-	if m.dryRun != true {
-		vrs := engine.Versions{utils.SessionSCosts: 2}
-		if err = m.storDBOut.StorDB().SetVersions(vrs, false); err != nil {
-			return utils.NewCGRError(utils.Migrator,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error: <%s> when updating SessionSCosts version into StorDB", err.Error()))
-		}
+	if m.dryRun {
+		return
+	}
+	vrs := engine.Versions{utils.SessionSCosts: 2}
+	if err = m.storDBOut.StorDB().SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating SessionSCosts version into StorDB", err.Error()))
 	}
 	return
 }
@@ -104,29 +99,28 @@ func (m *Migrator) migrateV2SessionSCosts() (err error) {
 		if err == utils.ErrNoMoreData {
 			break
 		}
-		if v2Cost == nil {
+		if v2Cost == nil || m.dryRun {
 			continue
 		}
 		smCost := v2Cost.V2toV3Cost()
-		if m.dryRun != true {
-			if err = m.storDBOut.StorDB().SetSMCost(smCost); err != nil {
-				return err
-			}
-			if err = m.storDBIn.remV2SMCost(v2Cost); err != nil {
-				return err
-			}
-			m.stats[utils.SessionSCosts] += 1
+		if err = m.storDBOut.StorDB().SetSMCost(smCost); err != nil {
+			return err
 		}
+		if err = m.storDBIn.remV2SMCost(v2Cost); err != nil {
+			return err
+		}
+		m.stats[utils.SessionSCosts] += 1
 	}
-	if m.dryRun != true {
-		// All done, update version wtih current one
-		vrs := engine.Versions{utils.SessionSCosts: engine.CurrentStorDBVersions()[utils.SessionSCosts]}
-		if err = m.storDBOut.StorDB().SetVersions(vrs, false); err != nil {
-			return utils.NewCGRError(utils.Migrator,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error: <%s> when updating SessionSCosts version into StorDB", err.Error()))
-		}
+	if m.dryRun {
+		return
+	}
+	// All done, update version wtih current one
+	vrs := engine.Versions{utils.SessionSCosts: engine.CurrentStorDBVersions()[utils.SessionSCosts]}
+	if err = m.storDBOut.StorDB().SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating SessionSCosts version into StorDB", err.Error()))
 	}
 	return
 }

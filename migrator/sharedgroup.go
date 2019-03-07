@@ -44,12 +44,11 @@ func (m *Migrator) migrateCurrentSharedGroups() (err error) {
 		if err != nil {
 			return err
 		}
-		if sgs != nil {
-			if m.dryRun != true {
-				if err := m.dmOut.DataManager().SetSharedGroup(sgs, utils.NonTransactional); err != nil {
-					return err
-				}
-			}
+		if sgs == nil || m.dryRun {
+			continue
+		}
+		if err := m.dmOut.DataManager().SetSharedGroup(sgs, utils.NonTransactional); err != nil {
+			return err
 		}
 	}
 	return
@@ -65,15 +64,14 @@ func (m *Migrator) migrateV1SharedGroups() (err error) {
 		if err == utils.ErrNoMoreData {
 			break
 		}
-		if v1SG != nil {
-			acnt := v1SG.AsSharedGroup()
-			if m.dryRun != true {
-				if err = m.dmOut.DataManager().SetSharedGroup(acnt, utils.NonTransactional); err != nil {
-					return err
-				}
-				m.stats[utils.SharedGroups] += 1
-			}
+		if v1SG == nil || m.dryRun {
+			continue
 		}
+		acnt := v1SG.AsSharedGroup()
+		if err = m.dmOut.DataManager().SetSharedGroup(acnt, utils.NonTransactional); err != nil {
+			return err
+		}
+		m.stats[utils.SharedGroups] += 1
 	}
 	// All done, update version wtih current one
 	vrs := engine.Versions{utils.SharedGroups: engine.CurrentStorDBVersions()[utils.SharedGroups]}
@@ -106,15 +104,9 @@ func (m *Migrator) migrateSharedGroups() (err error) {
 		if m.sameDataDB {
 			return
 		}
-		if err := m.migrateCurrentSharedGroups(); err != nil {
-			return err
-		}
-		return
-
+		return m.migrateCurrentSharedGroups()
 	case 1:
-		if err := m.migrateV1SharedGroups(); err != nil {
-			return err
-		}
+		return m.migrateV1SharedGroups()
 	}
 	return
 }

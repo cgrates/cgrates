@@ -60,13 +60,9 @@ func (m *Migrator) migrateCDRs() (err error) {
 	}
 	switch vrs[utils.CDRs] {
 	case 1:
-		if err := m.migrateV1CDRs(); err != nil {
-			return err
-		}
+		return m.migrateV1CDRs()
 	case current[utils.CDRs]:
-		if err := m.migrateCurrentCDRs(); err != nil {
-			return err
-		}
+		return m.migrateCurrentCDRs()
 	}
 	return
 }
@@ -81,25 +77,25 @@ func (m *Migrator) migrateV1CDRs() (err error) {
 		if err == utils.ErrNoMoreData {
 			break
 		}
-		if v1CDR != nil {
-			cdr := v1CDR.V1toV2Cdr()
-			if m.dryRun != true {
-				if err = m.storDBOut.StorDB().SetCDR(cdr, true); err != nil {
-					return err
-				}
-				m.stats[utils.CDRs] += 1
-			}
+		if v1CDR == nil || m.dryRun {
+			continue
 		}
+		cdr := v1CDR.V1toV2Cdr()
+		if err = m.storDBOut.StorDB().SetCDR(cdr, true); err != nil {
+			return err
+		}
+		m.stats[utils.CDRs] += 1
 	}
-	if m.dryRun != true {
-		// All done, update version wtih current one
-		vrs := engine.Versions{utils.CDRs: engine.CurrentStorDBVersions()[utils.CDRs]}
-		if err = m.storDBOut.StorDB().SetVersions(vrs, false); err != nil {
-			return utils.NewCGRError(utils.Migrator,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error: <%s> when updating CDRs version into StorDB", err.Error()))
-		}
+	if m.dryRun {
+		return
+	}
+	// All done, update version wtih current one
+	vrs := engine.Versions{utils.CDRs: engine.CurrentStorDBVersions()[utils.CDRs]}
+	if err = m.storDBOut.StorDB().SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating CDRs version into StorDB", err.Error()))
 	}
 	return
 }
