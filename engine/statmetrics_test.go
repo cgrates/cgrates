@@ -130,14 +130,20 @@ func TestACDGetStringValue(t *testing.T) {
 	if strVal := acd.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
-	acd.AddEvent(ev)
+	if err := acd.AddEvent(ev); err != nil {
+		t.Error(err)
+	}
 	if strVal := acd.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong acd value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3"}
-	acd.AddEvent(ev2)
-	acd.AddEvent(ev3)
+	if err := acd.AddEvent(ev2); err != nil {
+		t.Error(err)
+	}
+	if err := acd.AddEvent(ev3); err != nil {
+		t.Error(err)
+	}
 	if strVal := acd.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong acd value: %s", strVal)
 	}

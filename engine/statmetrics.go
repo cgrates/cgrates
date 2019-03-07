@@ -117,10 +117,13 @@ func (asr *StatASR) GetFloat64Value() (val float64) {
 // AddEvent is part of StatMetric interface
 func (asr *StatASR) AddEvent(ev *utils.CGREvent) (err error) {
 	var answered bool
-	if at, err := ev.FieldAsTime(utils.AnswerTime,
-		config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil &&
-		err != utils.ErrNotFound {
-		return err
+	var at time.Time
+	if at, err = ev.FieldAsTime(utils.AnswerTime,
+		config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
+		if err == utils.ErrNotFound {
+			err = utils.ErrPrefix(err, utils.AnswerTime)
+		}
+		return
 	} else if !at.IsZero() {
 		answered = true
 	}
@@ -205,20 +208,15 @@ func (acd *StatACD) GetFloat64Value() (v float64) {
 }
 
 func (acd *StatACD) AddEvent(ev *utils.CGREvent) (err error) {
-	var value time.Duration
-	if at, err := ev.FieldAsTime(utils.AnswerTime,
-		config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
-		return err
-	} else if !at.IsZero() {
-		if duration, err := ev.FieldAsDuration(utils.Usage); err != nil &&
-			err != utils.ErrNotFound {
-			return err
-		} else {
-			value = duration
-			acd.Sum += duration
+	var dur time.Duration
+	if dur, err = ev.FieldAsDuration(utils.Usage); err != nil {
+		if err == utils.ErrNotFound {
+			err = utils.ErrPrefix(err, utils.Usage)
 		}
+		return
 	}
-	acd.Events[ev.ID] = value
+	acd.Sum += dur
+	acd.Events[ev.ID] = dur
 	acd.Count += 1
 	acd.val = nil
 	return
@@ -293,21 +291,15 @@ func (tcd *StatTCD) GetFloat64Value() (v float64) {
 }
 
 func (tcd *StatTCD) AddEvent(ev *utils.CGREvent) (err error) {
-	var value time.Duration
-	if at, err := ev.FieldAsTime(utils.AnswerTime,
-		config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
-		return err
-	} else if !at.IsZero() {
-		if duration, err := ev.FieldAsDuration(utils.Usage); err != nil &&
-			err != utils.ErrNotFound {
-			return err
-		} else {
-			value = duration
-			tcd.Sum += duration
+	var dur time.Duration
+	if dur, err = ev.FieldAsDuration(utils.Usage); err != nil {
+		if err == utils.ErrNotFound {
+			err = utils.ErrPrefix(err, utils.Usage)
 		}
-
+		return
 	}
-	tcd.Events[ev.ID] = value
+	acd.Sum += dur
+	tcd.Events[ev.ID] = dur
 	tcd.Count += 1
 	tcd.val = nil
 	return
@@ -380,20 +372,15 @@ func (acc *StatACC) GetFloat64Value() (v float64) {
 }
 
 func (acc *StatACC) AddEvent(ev *utils.CGREvent) (err error) {
-	var value float64
-	if at, err := ev.FieldAsTime(utils.AnswerTime,
-		config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
-		return err
-	} else if !at.IsZero() {
-		if cost, err := ev.FieldAsFloat64(utils.COST); err != nil &&
-			err != utils.ErrNotFound {
-			return err
-		} else if cost >= 0 {
-			value = cost
-			acc.Sum += cost
+	var cost float64
+	if cost, err = ev.FieldAsFloat64(utils.COST); err != nil {
+		if err == utils.ErrNotFound {
+			err = utils.ErrPrefix(err, utils.COST)
 		}
+		return
 	}
-	acc.Events[ev.ID] = value
+	acc.Sum += cost
+	acc.Events[ev.ID] = cost
 	acc.Count += 1
 	acc.val = nil
 	return
@@ -404,9 +391,7 @@ func (acc *StatACC) RemEvent(evID string) (err error) {
 	if !has {
 		return utils.ErrNotFound
 	}
-	if cost >= 0 {
-		acc.Sum -= cost
-	}
+	acc.Sum -= cost
 	acc.Count -= 1
 	delete(acc.Events, evID)
 	acc.val = nil
@@ -466,20 +451,15 @@ func (tcc *StatTCC) GetFloat64Value() (v float64) {
 }
 
 func (tcc *StatTCC) AddEvent(ev *utils.CGREvent) (err error) {
-	var value float64
-	if at, err := ev.FieldAsTime(utils.AnswerTime,
-		config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
-		return err
-	} else if !at.IsZero() {
-		if cost, err := ev.FieldAsFloat64(utils.COST); err != nil &&
-			err != utils.ErrNotFound {
-			return err
-		} else if cost >= 0 {
-			value = cost
-			tcc.Sum += cost
+	var cost float64
+	if cost, err = ev.FieldAsFloat64(utils.COST); err != nil {
+		if err == utils.ErrNotFound {
+			err = utils.ErrPrefix(err, utils.COST)
 		}
+		return
 	}
-	tcc.Events[ev.ID] = value
+	acc.Sum += cost
+	tcc.Events[ev.ID] = cost
 	tcc.Count += 1
 	tcc.val = nil
 	return
@@ -555,21 +535,15 @@ func (pdd *StatPDD) GetFloat64Value() (v float64) {
 }
 
 func (pdd *StatPDD) AddEvent(ev *utils.CGREvent) (err error) {
-	var value time.Duration
-	if at, err := ev.FieldAsTime(utils.AnswerTime,
-		config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil &&
-		err != utils.ErrNotFound {
-		return err
-	} else if !at.IsZero() {
-		if duration, err := ev.FieldAsDuration(utils.PDD); err != nil &&
-			err != utils.ErrNotFound {
-			return err
-		} else {
-			value = duration
-			pdd.Sum += duration
+	var dur time.Duration
+	if dur, err = ev.FieldAsDuration(utils.PDD); err != nil {
+		if err == utils.ErrNotFound {
+			err = utils.ErrPrefix(err, utils.PDD)
 		}
+		return
 	}
-	pdd.Events[ev.ID] = value
+	pdd.Sum += dur
+	pdd.Events[ev.ID] = dur
 	pdd.Count += 1
 	pdd.val = nil
 	return
@@ -707,15 +681,15 @@ func (sum *StatSum) GetFloat64Value() (v float64) {
 }
 
 func (sum *StatSum) AddEvent(ev *utils.CGREvent) (err error) {
-	var value float64
-	if val, err := ev.FieldAsFloat64(sum.FieldName); err != nil &&
-		err != utils.ErrNotFound {
-		return err
-	} else if val >= 0 {
-		value = val
-		sum.Sum += val
+	var val float64
+	if val, err = ev.FieldAsFloat64(sum.FieldName); err != nil {
+		if err == utils.ErrNotFound {
+			err = utils.ErrPrefix(err, sum.FieldName)
+		}
+		return
 	}
-	sum.Events[ev.ID] = value
+	sum.Sum += val
+	sum.Events[ev.ID] = val
 	sum.val = nil
 	return
 }
@@ -787,17 +761,17 @@ func (avg *StatAverage) GetFloat64Value() (v float64) {
 }
 
 func (avg *StatAverage) AddEvent(ev *utils.CGREvent) (err error) {
-	var value float64
-	if val, err := ev.FieldAsFloat64(avg.FieldName); err != nil &&
-		err != utils.ErrNotFound {
-		return err
-	} else if val > 0 {
-		value = val
-		avg.Sum += val
-		avg.Events[ev.ID] = value
-		avg.Count += 1
-		avg.val = nil
+	var val float64
+	if val, err = ev.FieldAsFloat64(avg.FieldName); err != nil {
+		if err == utils.ErrNotFound {
+			err = utils.ErrPrefix(err, sum.FieldName)
+		}
+		return
 	}
+	avg.Sum += val
+	avg.Events[ev.ID] = val
+	avg.Count += 1
+	avg.val = nil
 	return
 }
 
