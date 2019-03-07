@@ -163,12 +163,11 @@ func testAlsITMigrateAndMove(t *testing.T) {
 		ActivationInterval: nil,
 		Attributes: []*engine.Attribute{
 			{
-				FilterIDs:  []string{"*string:Account:1001"},
 				FieldName:  "Account",
 				Substitute: config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 			},
 			{
-				FilterIDs:  []string{"*string:Category:call_1001"},
+				FilterIDs:  []string{"*string:~Category:call_1001"},
 				FieldName:  "Category",
 				Substitute: config.NewRSRParsersMustCompile("call_1002", true, utils.INFIELD_SEP),
 			},
