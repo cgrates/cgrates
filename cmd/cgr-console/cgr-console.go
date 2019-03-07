@@ -129,12 +129,12 @@ func main() {
 	client, err = rpcclient.NewRpcClient("tcp", *server, *tls, *keyPath, *certificatePath, *caPath, 3, 3,
 		time.Duration(1*time.Second), time.Duration(5*time.Minute), strings.TrimPrefix(*rpcEncoding, utils.Meta), nil, false)
 	if err != nil {
-		flag.PrintDefaults()
+		cgrConsoleFlags.PrintDefaults()
 		log.Fatal("Could not connect to server " + *server)
 	}
 
-	if len(flag.Args()) != 0 {
-		executeCommand(strings.Join(flag.Args(), " "))
+	if len(cgrConsoleFlags.Args()) != 0 {
+		executeCommand(strings.Join(cgrConsoleFlags.Args(), " "))
 		return
 	}
 
