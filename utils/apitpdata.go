@@ -984,7 +984,8 @@ type AttrSetBalance struct {
 	Cdrlog         *bool
 }
 
-type TPResource struct {
+// TPResourceProfile is used in APIs to manage remotely offline ResourceProfile
+type TPResourceProfile struct {
 	TPid               string
 	Tenant             string
 	ID                 string // Identifier of this limit
@@ -1060,8 +1061,14 @@ type AttrDisconnectSession struct {
 	Reason     string
 }
 
-// TPStats is used in APIs to manage remotely offline Stats config
-type TPStats struct {
+//MetricsWithFilters is used in TPStatProfile
+type MetricsWithFilters struct {
+	FilterIDs []string
+	MetricIDs []string
+}
+
+// TPStatProfile is used in APIs to manage remotely offline StatProfile
+type TPStatProfile struct {
 	TPid               string
 	Tenant             string
 	ID                 string
@@ -1069,7 +1076,7 @@ type TPStats struct {
 	ActivationInterval *TPActivationInterval
 	QueueLength        int
 	TTL                string
-	Metrics            []string
+	Metrics            []*MetricsWithFilters
 	Blocker            bool // blocker flag to stop processing on filters matched
 	Stored             bool
 	Weight             float64
@@ -1077,7 +1084,8 @@ type TPStats struct {
 	ThresholdIDs       []string
 }
 
-type TPThreshold struct {
+// TPThresholdProfile is used in APIs to manage remotely offline ThresholdProfile
+type TPThresholdProfile struct {
 	TPid               string
 	Tenant             string
 	ID                 string
@@ -1092,6 +1100,7 @@ type TPThreshold struct {
 	Async              bool
 }
 
+// TPFilterProfile is used in APIs to manage remotely offline FilterProfile
 type TPFilterProfile struct {
 	TPid               string
 	Tenant             string
@@ -1100,12 +1109,14 @@ type TPFilterProfile struct {
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
 }
 
+// TPFilterProfile is used in TPFilterProfile
 type TPFilter struct {
 	Type      string   // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
 	FieldName string   // Name of the field providing us the Values to check (used in case of some )
 	Values    []string // Filter definition
 }
 
+// TPSupplier is used in TPSupplierProfile
 type TPSupplier struct {
 	ID                 string // SupplierID
 	FilterIDs          []string
@@ -1118,6 +1129,7 @@ type TPSupplier struct {
 	SupplierParameters string
 }
 
+// TPSupplierProfile is used in APIs to manage remotely offline SupplierProfile
 type TPSupplierProfile struct {
 	TPid               string
 	Tenant             string
@@ -1130,12 +1142,14 @@ type TPSupplierProfile struct {
 	Weight             float64
 }
 
+// TPAttribute is used in TPAttributeProfile
 type TPAttribute struct {
 	FilterIDs  []string
 	FieldName  string
 	Substitute string
 }
 
+// TPAttributeProfile is used in APIs to manage remotely offline AttributeProfile
 type TPAttributeProfile struct {
 	TPid               string
 	Tenant             string
@@ -1148,6 +1162,7 @@ type TPAttributeProfile struct {
 	Weight             float64
 }
 
+// TPChargerProfile is used in APIs to manage remotely offline ChargerProfile
 type TPChargerProfile struct {
 	TPid               string
 	Tenant             string
@@ -1165,6 +1180,7 @@ type TPTntID struct {
 	ID     string
 }
 
+// TPDispatcherConns is used in TPDispatcherProfile
 type TPDispatcherConns struct {
 	ID        string
 	FilterIDs []string
@@ -1173,6 +1189,7 @@ type TPDispatcherConns struct {
 	Blocker   bool          // no connection after this one
 }
 
+// TPDispatcherProfile is used in APIs to manage remotely offline DispatcherProfile
 type TPDispatcherProfile struct {
 	TPid               string
 	Tenant             string

@@ -34,16 +34,21 @@ type StatQueueProfile struct {
 	ActivationInterval *utils.ActivationInterval // Activation interval
 	QueueLength        int
 	TTL                time.Duration
-	Metrics            []string // list of metrics to build
-	ThresholdIDs       []string // list of thresholds to be checked after changes
-	Blocker            bool     // blocker flag to stop processing on filters matched
-	Stored             bool
-	Weight             float64
 	MinItems           int
+	Metrics            []*MetricsWithFilters // list of metrics to build
+	Stored             bool
+	Blocker            bool // blocker flag to stop processing on filters matched
+	Weight             float64
+	ThresholdIDs       []string // list of thresholds to be checked after changes
 }
 
 func (sqp *StatQueueProfile) TenantID() string {
 	return utils.ConcatenatedKey(sqp.Tenant, sqp.ID)
+}
+
+type MetricsWithFilters struct {
+	FilterIDs []string
+	MetricIDs []string
 }
 
 // NewStoredStatQueue initiates a StoredStatQueue out of StatQueue

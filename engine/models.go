@@ -238,12 +238,13 @@ type TpStats struct {
 	ActivationInterval string  `index:"3" re:""`
 	QueueLength        int     `index:"4" re:""`
 	TTL                string  `index:"5" re:""`
-	Metrics            string  `index:"6" re:""`
-	Blocker            bool    `index:"7" re:""`
-	Stored             bool    `index:"8" re:""`
-	Weight             float64 `index:"9" re:"\d+\.?\d*"`
-	MinItems           int     `index:"10" re:""`
-	ThresholdIDs       string  `index:"11" re:""`
+	MinItems           int     `index:"6" re:""`
+	MetricFilterIDs    string  `index:"7" re:""`
+	MetricIDs          string  `index:"8" re:""`
+	Blocker            bool    `index:"9" re:""`
+	Stored             bool    `index:"10" re:""`
+	Weight             float64 `index:"11" re:"\d+\.?\d*"`
+	ThresholdIDs       string  `index:"12" re:""`
 	CreatedAt          time.Time
 }
 
@@ -359,17 +360,17 @@ type TpSupplier struct {
 type TPAttribute struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string
-	Tenant             string  `index:"0" re:""`
-	ID                 string  `index:"1" re:""`
-	Contexts           string  `index:"2" re:""`
-	FilterIDs          string  `index:"3" re:""`
-	ActivationInterval string  `index:"4" re:""`
-	AttributeFilterIDs string  `index:"5" re:""`
-	FieldName          string  `index:"6" re:""`
-	Substitute         string  `index:"7" re:""`
-	Blocker            bool    `index:"8" re:""`
-	Weight             float64 `index:"9" re:"\d+\.?\d*"`
-	CreatedAt          time.Time
+	Tenant             string `index:"0" re:""`
+	ID                 string `index:"1" re:""`
+	Contexts           string `index:"2" re:""`
+	FilterIDs          string `index:"3" re:""`
+	ActivationInterval string `index:"4" re:""`
+	AttributeFilterIDs string `index:"5" re:""`
+
+	Substitute string  `index:"7" re:""`
+	Blocker    bool    `index:"8" re:""`
+	Weight     float64 `index:"9" re:"\d+\.?\d*"`
+	CreatedAt  time.Time
 }
 
 type TPCharger struct {
