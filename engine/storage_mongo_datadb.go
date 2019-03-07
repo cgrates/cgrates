@@ -253,7 +253,7 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 			}
 		}
 		for _, col := range []string{colRsP, colRes, colSqs, colSqp,
-			colTps, colThs, colSpp, colAttr, colFlt, colCpp} {
+			colTps, colThs, colSpp, colAttr, colFlt, colCpp, colDpp} {
 			if err = ms.EnusureIndex(col, true, "tenant", "id"); err != nil {
 				return
 			}
