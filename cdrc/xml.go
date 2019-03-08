@@ -121,6 +121,9 @@ func (xmlProc *XMLRecordsProcessor) ProcessNextRecord() (cdrs []*engine.CDR, err
 		if err != nil {
 			return nil, err
 		}
+		if tenant == "" {
+			tenant = config.CgrConfig().GeneralCfg().DefaultTenant
+		}
 		if len(cdrcCfg.Filters) != 0 {
 			if pass, err := xmlProc.filterS.Pass(tenant,
 				cdrcCfg.Filters, xmlProvider); err != nil || !pass {
