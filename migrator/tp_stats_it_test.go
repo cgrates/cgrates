@@ -88,7 +88,7 @@ func testTpStatsITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	tpStatsMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false)
+	tpStatsMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false, false)
 	if err != nil {
 		log.Fatal(err)
 	}

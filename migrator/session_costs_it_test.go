@@ -104,7 +104,7 @@ func testSessionCostITConnect(t *testing.T) {
 	}
 	sCostMigrator, err = NewMigrator(nil, nil,
 		storDBIn, storDBOut,
-		false, false, false)
+		false, false, false, false)
 	if err != nil {
 		t.Error(err)
 	}

@@ -88,7 +88,7 @@ func testTpDispITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	tpDispMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false)
+	tpDispMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false, false)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -89,7 +89,7 @@ func testTpTresITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	tpTresMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false)
+	tpTresMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false, false)
 	if err != nil {
 		log.Fatal(err)
 	}

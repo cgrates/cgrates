@@ -174,7 +174,7 @@ func testAccITConnect(t *testing.T) {
 	}
 	accMigrator, err = NewMigrator(dataDBIn, dataDBOut,
 		nil, nil,
-		false, false, false)
+		false, false, false, false)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -64,9 +64,6 @@ func (self *SQLStorage) Flush(scriptsPath string) (err error) {
 	if _, err := self.Db.Query(fmt.Sprintf("SELECT 1 FROM %s", utils.CDRsTBL)); err != nil {
 		return err
 	}
-	if err := SetDBVersions(self); err != nil {
-		return err
-	}
 	return nil
 }
 

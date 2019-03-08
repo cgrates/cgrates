@@ -92,7 +92,7 @@ func testUsrITConnect(t *testing.T) {
 		log.Fatal(err)
 	}
 	usrMigrator, err = NewMigrator(dataDBIn, dataDBOut,
-		nil, nil, false, false, false)
+		nil, nil, false, false, false, false)
 	if err != nil {
 		log.Fatal(err)
 	}

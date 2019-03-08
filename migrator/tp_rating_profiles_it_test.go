@@ -88,7 +88,7 @@ func testTpRatPrfITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	tpRatPrfMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false)
+	tpRatPrfMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false, false)
 	if err != nil {
 		log.Fatal(err)
 	}
