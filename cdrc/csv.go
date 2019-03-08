@@ -110,6 +110,9 @@ func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.CDR, 
 		if err != nil {
 			return nil, err
 		}
+		if tenant == "" {
+			tenant = config.CgrConfig().GeneralCfg().DefaultTenant
+		}
 		// Make sure filters are matching
 		if len(cdrcCfg.Filters) != 0 {
 			if pass, err := self.filterS.Pass(tenant,

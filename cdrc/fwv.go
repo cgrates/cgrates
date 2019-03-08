@@ -121,6 +121,9 @@ func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.CDR, error) {
 		if err != nil {
 			return nil, err
 		}
+		if tenant == "" {
+			tenant = config.CgrConfig().GeneralCfg().DefaultTenant
+		}
 		if len(cdrcCfg.Filters) != 0 {
 			if pass, err := self.filterS.Pass(tenant,
 				cdrcCfg.Filters, fwvProvider); err != nil || !pass {

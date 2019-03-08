@@ -171,6 +171,14 @@ func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 		ev, &suplsReply); err.Error() != utils.NewErrServerError(utils.NewErrMandatoryIeMissing("RatingPlanIDs")).Error() {
 		t.Errorf("Expected error MANDATORY_IE_MISSING: [RatingPlanIDs] recieved:%v\n", err)
 	}
+	if err := splSv1Rpc.Call("ApierV1.RemoveSupplierProfile", utils.TenantID{
+		Tenant: splPrf.Tenant,
+		ID:     splPrf.ID,
+	}, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
 }
 
 func testV1SplSAddNewSplPrf(t *testing.T) {
