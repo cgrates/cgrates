@@ -88,7 +88,7 @@ func testTpShrGrITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	tpShrGrMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false)
+	tpShrGrMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false, false)
 	if err != nil {
 		log.Fatal(err)
 	}

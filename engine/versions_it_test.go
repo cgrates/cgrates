@@ -137,6 +137,7 @@ func testVersionsFlush(t *testing.T) {
 	if err := storageDb.Flush(path.Join(cfg.DataFolderPath, "storage", cfg.StorDbCfg().StorDBType)); err != nil {
 		t.Error(err)
 	}
+	SetDBVersions(storageDb)
 }
 
 func testVersion(t *testing.T) {

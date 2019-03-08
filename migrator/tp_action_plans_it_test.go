@@ -88,7 +88,7 @@ func testTpActPlnITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	tpActPlnMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false)
+	tpActPlnMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false, false)
 	if err != nil {
 		log.Fatal(err)
 	}

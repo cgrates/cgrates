@@ -88,7 +88,7 @@ func testTpActTrgITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	tpActTrgMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false)
+	tpActTrgMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false, false)
 	if err != nil {
 		log.Fatal(err)
 	}

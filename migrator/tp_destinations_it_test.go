@@ -88,7 +88,7 @@ func testTpDstITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	tpDstMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false)
+	tpDstMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false, false)
 	if err != nil {
 		log.Fatal(err)
 	}

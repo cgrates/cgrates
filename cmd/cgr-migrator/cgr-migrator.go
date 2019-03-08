@@ -33,12 +33,16 @@ import (
 var (
 	cgrMigratorFlags = flag.NewFlagSet("cgr-migrator", flag.ContinueOnError)
 
-	sameDataDB, sameStorDB bool
-	dmIN, dmOUT            migrator.MigratorDataDB
-	storDBIn, storDBOut    migrator.MigratorStorDB
-	err                    error
-	dfltCfg, _             = config.NewDefaultCGRConfig()
-	cfgPath                = cgrMigratorFlags.String("config_path", "",
+	sameDataDB bool
+	sameStorDB bool
+	sameOutDB  bool
+	dmIN       migrator.MigratorDataDB
+	dmOUT      migrator.MigratorDataDB
+	storDBIn   migrator.MigratorStorDB
+	storDBOut  migrator.MigratorStorDB
+	err        error
+	dfltCfg, _ = config.NewDefaultCGRConfig()
+	cfgPath    = cgrMigratorFlags.String("config_path", "",
 		"Configuration directory path.")
 
 	migrate = cgrMigratorFlags.String("migrate", "", "fire up automatic migration "+
@@ -326,9 +330,14 @@ func main() {
 		log.Fatal(err)
 	}
 
+	sameOutDB = mgrCfg.MigratorCgrCfg().OutStorDBType == mgrCfg.MigratorCgrCfg().OutDataDBType &&
+		mgrCfg.MigratorCgrCfg().OutStorDBHost == mgrCfg.MigratorCgrCfg().OutDataDBHost &&
+		mgrCfg.MigratorCgrCfg().OutStorDBPort == mgrCfg.MigratorCgrCfg().OutDataDBPort &&
+		mgrCfg.MigratorCgrCfg().OutStorDBName == mgrCfg.MigratorCgrCfg().OutDataDBName
+
 	m, err := migrator.NewMigrator(dmIN, dmOUT,
 		storDBIn, storDBOut,
-		*dryRun, sameDataDB, sameStorDB)
+		*dryRun, sameDataDB, sameStorDB, sameOutDB)
 	if err != nil {
 		log.Fatal(err)
 	}

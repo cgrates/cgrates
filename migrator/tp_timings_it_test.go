@@ -88,7 +88,7 @@ func testTpTimITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	tpTimMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false)
+	tpTimMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false, false)
 	if err != nil {
 		log.Fatal(err)
 	}

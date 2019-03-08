@@ -26,14 +26,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewMigrator(
-	dmIN MigratorDataDB,
-	dmOut MigratorDataDB,
-	storDBIn MigratorStorDB,
-	storDBOut MigratorStorDB,
-	dryRun bool,
-	sameDataDB bool,
-	sameStorDB bool) (m *Migrator, err error) {
+func NewMigrator(dmIN, dmOut MigratorDataDB,
+	storDBIn, storDBOut MigratorStorDB,
+	dryRun, sameDataDB, sameStorDB, sameOutDB bool) (m *Migrator, err error) {
 	stats := make(map[string]int)
 	m = &Migrator{
 		dmOut:      dmOut,
@@ -43,6 +38,7 @@ func NewMigrator(
 		dryRun:     dryRun,
 		sameDataDB: sameDataDB,
 		sameStorDB: sameStorDB,
+		sameOutDB:  sameOutDB,
 		stats:      stats,
 	}
 	return m, err
@@ -58,6 +54,7 @@ type Migrator struct {
 	dryRun     bool
 	sameDataDB bool
 	sameStorDB bool
+	sameOutDB  bool
 	stats      map[string]int
 }
 
@@ -72,21 +69,23 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 				utils.UnsupportedMigrationTask,
 				fmt.Sprintf("task <%s> is not a supported migration task", taskID))
 		case utils.MetaSetVersions:
-			if m.dryRun != true {
-				if err := engine.OverwriteDBVersions(m.dmOut.DataManager().DataDB()); err != nil {
-					return utils.NewCGRError(utils.Migrator,
-						utils.ServerErrorCaps,
-						err.Error(),
-						fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error())), nil
-				}
-				if err := engine.OverwriteDBVersions(m.storDBOut.StorDB()); err != nil {
-					return utils.NewCGRError(utils.Migrator,
-						utils.ServerErrorCaps,
-						err.Error(),
-						fmt.Sprintf("error: <%s> when updating CostDetails version into StorDB", err.Error())), nil
-				}
-			} else {
+			if m.dryRun {
 				log.Print("Cannot dryRun SetVersions!")
+				return
+			}
+			err = engine.OverwriteDBVersions(m.dmOut.DataManager().DataDB())
+			if err != nil {
+				return utils.NewCGRError(utils.Migrator, utils.ServerErrorCaps, err.Error(),
+					fmt.Sprintf("error: <%s> when seting versions for DataDB", err.Error())), nil
+			}
+			if m.sameOutDB {
+				err = engine.SetDBVersions(m.storDBOut.StorDB())
+			} else {
+				err = engine.OverwriteDBVersions(m.storDBOut.StorDB())
+			}
+			if err != nil {
+				return utils.NewCGRError(utils.Migrator, utils.ServerErrorCaps, err.Error(),
+					fmt.Sprintf("error: <%s> when seting versions for StorDB", err.Error())), nil
 			}
 		case utils.MetaCDRs:
 			err = m.migrateCDRs()

@@ -89,7 +89,7 @@ func testTpSplITConnect(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	tpSplMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false)
+	tpSplMigrator, err = NewMigrator(nil, nil, storDBIn, storDBOut, false, false, false, false)
 	if err != nil {
 		log.Fatal(err)
 	}
