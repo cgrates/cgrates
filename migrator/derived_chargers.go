@@ -143,7 +143,7 @@ func (m *Migrator) derivedChargers2Chargers(dck *v1DerivedChargersWithKey) (err 
 	skey := utils.SplitConcatenatedKey(dck.Key)
 	destination := ""
 	if len(dck.Value.DestinationIDs) != 0 {
-		destination = "*destination:~Destination:"
+		destination = fmt.Sprintf("%s:~%s:", utils.MetaDestinations, utils.Destination)
 		keys := dcGetMapKeys(dck.Value.DestinationIDs)
 		destination += strings.Join(keys, utils.INFIELD_SEP)
 	}
@@ -153,15 +153,14 @@ func (m *Migrator) derivedChargers2Chargers(dck *v1DerivedChargersWithKey) (err 
 		filter = append(filter, destination)
 	}
 	if len(skey[2]) != 0 && skey[2] != utils.META_ANY {
-		filter = append(filter, "*string:~Category:"+skey[2])
+		filter = append(filter, fmt.Sprintf("%s:~%s:%s", utils.MetaString, utils.Category, skey[2]))
 	}
 	if len(skey[3]) != 0 && skey[3] != utils.META_ANY {
-		filter = append(filter, "*string:~Account:"+skey[3])
+		filter = append(filter, fmt.Sprintf("%s:~%s:%s", utils.MetaString, utils.Account, skey[3]))
 	}
 	if len(skey[4]) != 0 && skey[4] != utils.META_ANY {
-		filter = append(filter, "*string:~Subject:"+skey[4])
+		filter = append(filter, fmt.Sprintf("%s:~%s:%s", utils.MetaString, utils.Subject, skey[4]))
 	}
-
 	for i, dc := range dck.Value.Chargers {
 		attr := derivedChargers2AttributeProfile(dc, skey[1], fmt.Sprintf("%s_%v", dck.Key, i), filter)
 		ch := derivedChargers2Charger(dc, skey[1], fmt.Sprintf("%s_%v", dck.Key, i), filter)
