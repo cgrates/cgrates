@@ -472,7 +472,6 @@ const (
 	MetaLCR                      = "*lcr"
 	MetaCdrStats                 = "*cdrstats"
 	MetaTimings                  = "*timings"
-	MetaReqFilters               = "*reqfilters"
 	MetaUsers                    = "*users"
 	MetaSubscribers              = "*subscribers"
 	MetaDerivedChargersV         = "*derivedchargers"
