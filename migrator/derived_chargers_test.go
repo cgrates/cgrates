@@ -118,7 +118,7 @@ func TestDerivedChargers2AttributeProfile(t *testing.T) {
 			Expected: &engine.AttributeProfile{
 				Tenant:             defaultTenant,
 				ID:                 "key1",
-				Contexts:           []string{utils.META_ANY},
+				Contexts:           []string{utils.MetaChargers},
 				FilterIDs:          make([]string, 0),
 				ActivationInterval: nil,
 				Attributes: []*engine.Attribute{
@@ -149,7 +149,7 @@ func TestDerivedChargers2AttributeProfile(t *testing.T) {
 			Expected: &engine.AttributeProfile{
 				Tenant:             defaultTenant,
 				ID:                 "key1",
-				Contexts:           []string{utils.META_ANY},
+				Contexts:           []string{utils.MetaChargers},
 				FilterIDs:          []string{"*string:~Subject:1005"},
 				ActivationInterval: nil,
 				Attributes: []*engine.Attribute{

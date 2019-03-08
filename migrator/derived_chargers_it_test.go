@@ -160,7 +160,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 	attrProf := &engine.AttributeProfile{
 		Tenant:   "cgrates.org",
 		ID:       fmt.Sprintf("%s_%v", derivch.Key, 0),
-		Contexts: []string{utils.META_ANY},
+		Contexts: []string{utils.MetaChargers},
 		FilterIDs: []string{
 			"*destinations:~Destination:1001;1002;1003",
 			"*string:~Account:1003",
@@ -251,7 +251,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 			},
 		}
 		if dcidx, err := dcMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
-			utils.ConcatenatedKey("cgrates.org", utils.META_ANY), utils.MetaString, nil); err != nil {
+			utils.ConcatenatedKey("cgrates.org", utils.MetaChargers), utils.MetaString, nil); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(expDcIdx, dcidx) {
 			t.Errorf("Expected %v, recived: %v", utils.ToJSON(expDcIdx), utils.ToJSON(dcidx))
@@ -262,7 +262,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 			},
 		}
 		if dcidx, err := dcMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.ChargerProfilePrefix],
-			utils.ConcatenatedKey("cgrates.org", utils.META_ANY),
+			utils.ConcatenatedKey("cgrates.org", utils.MetaChargers),
 			utils.MetaString, nil); err == nil || err.Error() != utils.ErrNotFound.Error() {
 			t.Errorf("Expected error %v, recived: %v with reply: %v", utils.ErrNotFound, err, utils.ToJSON(dcidx))
 		}

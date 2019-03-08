@@ -92,7 +92,7 @@ func derivedChargers2AttributeProfile(dc *v1DerivedCharger, tenant, key string, 
 	attr = &engine.AttributeProfile{
 		Tenant:             tenant,
 		ID:                 key,
-		Contexts:           []string{utils.META_ANY},
+		Contexts:           []string{utils.MetaChargers},
 		FilterIDs:          filters,
 		ActivationInterval: nil,
 		Attributes:         make([]*engine.Attribute, 0),
