@@ -230,7 +230,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 		},
 	}
 	if dcidx, err := dcMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix],
-		utils.ConcatenatedKey("cgrates.org", utils.META_ANY), utils.MetaString, nil); err != nil {
+		utils.ConcatenatedKey("cgrates.org", utils.MetaChargers), utils.MetaString, nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expDcIdx, dcidx) {
 		t.Errorf("Expected %v, recived: %v", utils.ToJSON(expDcIdx), utils.ToJSON(dcidx))
@@ -241,7 +241,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 		},
 	}
 	if dcidx, err := dcMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.ChargerProfilePrefix],
-		utils.ConcatenatedKey("cgrates.org", utils.META_ANY),
+		utils.ConcatenatedKey("cgrates.org", utils.MetaChargers),
 		utils.MetaString, nil); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error %v, recived: %v with reply: %v", utils.ErrNotFound, err, utils.ToJSON(dcidx))
 	}

@@ -136,7 +136,7 @@ func (m *Migrator) migrateRequestFilterV1() (err error) {
 	return
 }
 
-func (m *Migrator) migrateRequestFilter() (err error) {
+func (m *Migrator) migrateFilters() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
 	vrs, err = m.dmIN.DataManager().DataDB().GetVersions("")
