@@ -4,8 +4,8 @@
 
 
 "general": {
-	"node_id": "CGRateSTutorial"
-	"log_level": 7,
+	"node_id": "CGRateSTutorial",
+	"log_level": 7
 },
 
 

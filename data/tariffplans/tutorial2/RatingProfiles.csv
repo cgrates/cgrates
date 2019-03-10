@@ -1,0 +1,5 @@
+#Tenant,Category,Subject,ActivationTime,RatingPlanID,FallbackSubject
+cgrates.org,call,*any,2019-03-01T00:00:00Z,RP_STANDARD,
+cgrates.org,call,1001,2019-03-01T00:00:00Z,RP_1001,*any
+cgrates.org,data,*any,2019-03-01T00:00:00Z,RP_DATA,
+cgrates.org,sms,*any,2019-03-01T00:00:00Z,RP_SMS,
