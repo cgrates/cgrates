@@ -202,15 +202,22 @@ type SRun struct {
 }
 
 // Clone returns the cloned version of SRun
-func (sr *SRun) Clone() *SRun {
-	return &SRun{
-		Event:         sr.Event.Clone(),
-		CD:            sr.CD.Clone(),
-		EventCost:     sr.EventCost.Clone(),
+func (sr *SRun) Clone() (clsr *SRun) {
+	clsr = &SRun{
+		Event: sr.Event.Clone(),
+		// CD:            sr.CD.Clone(),
+		// EventCost:     sr.EventCost.Clone(),
 		ExtraDuration: sr.ExtraDuration,
 		LastUsage:     sr.LastUsage,
 		TotalUsage:    sr.TotalUsage,
 	}
+	if sr.CD != nil {
+		clsr.CD = sr.CD.Clone()
+	}
+	if sr.EventCost != nil {
+		clsr.EventCost = sr.EventCost.Clone()
+	}
+	return
 }
 
 // debitReserve attempty to debit from ExtraDuration and returns remaining duration
