@@ -61,6 +61,12 @@ func (rs *Responder) usageAllowed(tor string, reqUsage time.Duration) (allowed b
 RPC method thet provides the external RPC interface for getting the rating information.
 */
 func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
+	if arg.Tenant == "" {
+		arg.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
+	}
+	if arg.Category == "" {
+		arg.Category = config.CgrConfig().GeneralCfg().DefaultCategory
+	}
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}

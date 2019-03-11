@@ -686,15 +686,17 @@ const (
 
 // ApierV1 APIs
 const (
-	ApierV1ComputeFilterIndexes    = "ApierV1.ComputeFilterIndexes"
-	ApierV1ReloadCache             = "ApierV1.ReloadCache"
-	ApierV1ReloadScheduler         = "ApierV1.ReloadScheduler"
-	ApierV1Ping                    = "ApierV1.Ping"
-	ApierV1SetDispatcherProfile    = "ApierV1.SetDispatcherProfile"
-	ApierV1GetDispatcherProfile    = "ApierV1.GetDispatcherProfile"
-	ApierV1RemoveDispatcherProfile = "ApierV1.RemoveDispatcherProfile"
-	ApierV1GetResource             = "ApierV1.GetResource"
-	ApierV1GetEventCost            = "ApierV1.GetEventCost"
+	ApierV1ComputeFilterIndexes     = "ApierV1.ComputeFilterIndexes"
+	ApierV1ReloadCache              = "ApierV1.ReloadCache"
+	ApierV1ReloadScheduler          = "ApierV1.ReloadScheduler"
+	ApierV1Ping                     = "ApierV1.Ping"
+	ApierV1SetDispatcherProfile     = "ApierV1.SetDispatcherProfile"
+	ApierV1GetDispatcherProfile     = "ApierV1.GetDispatcherProfile"
+	ApierV1RemoveDispatcherProfile  = "ApierV1.RemoveDispatcherProfile"
+	ApierV1GetResource              = "ApierV1.GetResource"
+	ApierV1GetEventCost             = "ApierV1.GetEventCost"
+	ApierV1LoadTariffPlanFromFolder = "ApierV1.LoadTariffPlanFromFolder"
+	ApierV1GetCost                  = "ApierV1.GetCost"
 )
 
 const (
