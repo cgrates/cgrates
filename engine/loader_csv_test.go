@@ -227,14 +227,10 @@ cgrates.org,ResGroup22,FLTR_ACNT_dan,2014-07-29T15:00:00Z,3600s,2,premium_call,t
 `
 	stats = `
 #Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],Weight[11],ThresholdIDs[12]
-cgrates.org,TestStats,FLTR_1,2014-07-29T15:00:00Z,100,1s,2,*sum#Value,,true,true,20,Th1;Th2
-cgrates.org,TestStats,,,,,,*sum#Usage,,,,,
-cgrates.org,TestStats,,,,,,*average#Value,,,,,
-cgrates.org,TestStats2,FLTR_1,2014-07-29T15:00:00Z,100,1s,2,*sum#Value;,,true,true,20,Th
-cgrates.org,TestStats2,,,,,,*sum#Usage,,,,,
-cgrates.org,TestStats2,,,,,,*average#Value,,,,,
-cgrates.org,TestStats2,,,,,,*average#Usage,,,,,
-cgrates.org,TestStats2,,,,,,*sum#Cost;*average#Cost,*string:Account:1001,,,,
+cgrates.org,TestStats,FLTR_1,2014-07-29T15:00:00Z,100,1s,2,*sum#Value;*average#Value,,true,true,20,Th1;Th2
+cgrates.org,TestStats,,,,,2,*sum#Usage,,true,true,20,
+cgrates.org,TestStats2,FLTR_1,2014-07-29T15:00:00Z,100,1s,2,*sum#Value;*sum#Usage;*average#Value;*average#Usage,,true,true,20,Th
+cgrates.org,TestStats2,,,,,2,*sum#Cost;*average#Cost,,true,true,20,
 `
 
 	thresholds = `
@@ -337,7 +333,7 @@ func init() {
 		log.Print("error in LoadChargerProfiles:", err)
 	}
 	if err := csvr.LoadDispatcherProfiles(); err != nil {
-		log.Print("error in LoadChargerProfiles:", err)
+		log.Print("error in LoadDispatcherProfiles:", err)
 	}
 	csvr.WriteToDatabase(false, false, false)
 	Cache.Clear(nil)

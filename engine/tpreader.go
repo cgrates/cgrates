@@ -1572,12 +1572,12 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 	for _, sqTntID := range tpr.statQueues {
 		metrics := make(map[string]StatMetric)
 		for _, metric := range tpr.sqProfiles[utils.TenantID{Tenant: sqTntID.Tenant, ID: sqTntID.ID}].Metrics {
-			if statMetric, err := NewStatMetric(metric.MetricID,
+			if stsMetric, err := NewStatMetric(metric.MetricID,
 				tpr.sqProfiles[utils.TenantID{Tenant: sqTntID.Tenant, ID: sqTntID.ID}].MinItems,
 				metric.FilterIDs); err != nil {
 				return err
 			} else {
-				metrics[metric.MetricID] = statMetric
+				metrics[metric.MetricID] = stsMetric
 			}
 		}
 		sq := &StatQueue{Tenant: sqTntID.Tenant, ID: sqTntID.ID, SQMetrics: metrics}
