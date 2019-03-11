@@ -377,19 +377,20 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 				"<%s> failed force terminating session with ID <%s>, err: <%s>",
 				utils.SessionS, s.CGRid(), err.Error()))
 	}
-	// Generate CDRs for each session run
-	var cgrEvs []*utils.CGREvent
-	if cgrEvs, err = s.AsCGREvents(sS.cgrCfg); err != nil {
-		utils.Logger.Warning(
-			fmt.Sprintf(
-				"<%s> could not create CDRs for session: <%s>, err: <%s>",
-				utils.SessionS, s.CGRid(), err.Error()))
+	cgrEv := utils.CGREvent{
+		Tenant: s.Tenant,
+		Event:  s.EventStart.AsMapInterface(),
 	}
+	for _, sr := range s.SRuns {
+		cgrEv.Event[utils.Usage] = sr.TotalUsage
+		break
+	}
+
 	// post the CDRs
-	for _, cgrEv := range cgrEvs {
+	if sS.cdrS != nil {
 		var reply string
 		if err = sS.cdrS.Call(utils.CDRsV2ProcessCDR,
-			&engine.ArgV2ProcessCDR{CGREvent: *cgrEv}, &reply); err != nil {
+			&engine.ArgV2ProcessCDR{CGREvent: cgrEv}, &reply); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> could not post CDR for event %s, err: %s",
@@ -400,12 +401,9 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 	if sS.resS != nil && s.ResourceID != "" {
 		var reply string
 		argsRU := utils.ArgRSv1ResourceUsage{
-			CGREvent: utils.CGREvent{
-				Tenant: s.Tenant,
-				Event:  s.EventStart.AsMapInterface(),
-			},
-			UsageID: s.ResourceID,
-			Units:   1,
+			CGREvent: cgrEv,
+			UsageID:  s.ResourceID,
+			Units:    1,
 		}
 		if err := sS.resS.Call(utils.ResourceSv1ReleaseResources,
 			argsRU, &reply); err != nil {
@@ -905,7 +903,7 @@ func (sS *SessionS) asActiveSessions(fltrs map[string]string,
 	var remainingSessions []*Session // Survived index matching
 	ss := sS.getSessions(fltrs[utils.CGRID], psv)
 	for _, s := range ss {
-		remainingSessions = append(remainingSessions, s)
+		remainingSessions = append(remainingSessions, s.Clone())
 	}
 	if len(fltrs) != 0 { // Still have some filters to match
 		for i := 0; i < len(remainingSessions); {
