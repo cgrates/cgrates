@@ -379,7 +379,7 @@ func (ms *MongoStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPReso
 		filter["tenant"] = tenant
 	}
 	var results []*utils.TPResourceProfile
-	err := ms.query( func(sctx mongo.SessionContext) (err error) {
+	err := ms.query(func(sctx mongo.SessionContext) (err error) {
 		cur, err := ms.getCol(utils.TBLTPResources).Find(sctx, filter)
 		if err != nil {
 			return err
@@ -411,7 +411,7 @@ func (ms *MongoStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStatProf
 		filter["tenant"] = tenant
 	}
 	var results []*utils.TPStatProfile
-	err := ms.query( func(sctx mongo.SessionContext) (err error) {
+	err := ms.query(func(sctx mongo.SessionContext) (err error) {
 		cur, err := ms.getCol(utils.TBLTPStats).Find(sctx, filter)
 		if err != nil {
 			return err
@@ -1178,19 +1178,8 @@ func (ms *MongoStorage) GetTPThresholds(tpid, tenant, id string) ([]*utils.TPThr
 	if tenant != "" {
 		filter["tenant"] = tenant
 	}
-<<<<<<< HEAD
 	var results []*utils.TPThreshold
-<<<<<<< HEAD
 	err := ms.query(func(sctx mongo.SessionContext) (err error) {
-=======
-	ctxSession, ctxSessionCancel := context.WithTimeout(ms.ctx, ms.ctxTTL)
-	defer ctxSessionCancel()
-	err := ms.client.UseSession(ctxSession, func(sctx mongo.SessionContext) (err error) {
-=======
-	var results []*utils.TPThresholdProfile
-	err := ms.client.UseSession(ms.ctx, func(sctx mongo.SessionContext) (err error) {
->>>>>>> Make Engine build
->>>>>>> Make Engine build
 		cur, err := ms.getCol(utils.TBLTPThresholds).Find(sctx, filter)
 		if err != nil {
 			return err

@@ -1310,6 +1310,7 @@ type TpStats []*TpStat
 func (models TpStats) AsTPStats() (result []*utils.TPStatProfile) {
 	filterMap := make(map[string]utils.StringMap)
 	thresholdMap := make(map[string]utils.StringMap)
+	statMetricsMap := make(map[string]map[string]*utils.MetricWithFilters)
 	mst := make(map[string]*utils.TPStatProfile)
 	for _, model := range models {
 		key := &utils.TenantID{Tenant: model.Tenant, ID: model.ID}
@@ -1325,6 +1326,7 @@ func (models TpStats) AsTPStats() (result []*utils.TPStatProfile) {
 				TTL:         model.TTL,
 				Weight:      model.Weight,
 				QueueLength: model.QueueLength,
+				Metrics:     make([]*utils.MetricWithFilters, 0),
 			}
 		}
 		if model.ThresholdIDs != "" {
@@ -1356,14 +1358,22 @@ func (models TpStats) AsTPStats() (result []*utils.TPStatProfile) {
 			}
 		}
 		if model.MetricIDs != "" {
+			if _, has := statMetricsMap[key.TenantID()]; !has {
+				statMetricsMap[key.TenantID()] = make(map[string]*utils.MetricWithFilters)
+			}
 			metricIDsSplit := strings.Split(model.MetricIDs, utils.INFIELD_SEP)
-			for i, metricID := range metricIDsSplit {
-				st.Metrics = append(st.Metrics, &utils.MetricWithFilters{
-					MetricID: metricID,
-				})
-				if model.MetricFilterIDs != "" {
-					st.Metrics[i].FilterIDs = strings.Split(model.MetricFilterIDs, utils.INFIELD_SEP)
+			for _, metricID := range metricIDsSplit {
+				stsMetric, found := statMetricsMap[key.TenantID()][metricID]
+				if !found {
+					stsMetric = &utils.MetricWithFilters{
+						MetricID: metricID,
+					}
 				}
+				if model.MetricFilterIDs != "" {
+					filterIDs := strings.Split(model.MetricFilterIDs, utils.INFIELD_SEP)
+					stsMetric.FilterIDs = append(stsMetric.FilterIDs, filterIDs...)
+				}
+				statMetricsMap[key.TenantID()][metricID] = stsMetric
 			}
 		}
 		mst[key.TenantID()] = st
@@ -1377,6 +1387,9 @@ func (models TpStats) AsTPStats() (result []*utils.TPStatProfile) {
 		}
 		for threshold := range thresholdMap[tntID] {
 			result[i].ThresholdIDs = append(result[i].ThresholdIDs, threshold)
+		}
+		for _, metric := range statMetricsMap[tntID] {
+			result[i].Metrics = append(result[i].Metrics, metric)
 		}
 		i++
 	}
