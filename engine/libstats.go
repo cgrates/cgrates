@@ -35,7 +35,7 @@ type StatQueueProfile struct {
 	QueueLength        int
 	TTL                time.Duration
 	MinItems           int
-	Metrics            []*MetricsWithFilters // list of metrics to build
+	Metrics            []*MetricWithFilters // list of metrics to build
 	Stored             bool
 	Blocker            bool // blocker flag to stop processing on filters matched
 	Weight             float64
@@ -46,9 +46,9 @@ func (sqp *StatQueueProfile) TenantID() string {
 	return utils.ConcatenatedKey(sqp.Tenant, sqp.ID)
 }
 
-type MetricsWithFilters struct {
+type MetricWithFilters struct {
 	FilterIDs []string
-	MetricIDs []string
+	MetricID  string
 }
 
 // NewStoredStatQueue initiates a StoredStatQueue out of StatQueue
@@ -109,7 +109,7 @@ func (ssq *StoredStatQueue) AsStatQueue(ms Marshaler) (sq *StatQueue, err error)
 		sq.SQItems[i] = sqItm
 	}
 	for metricID, marshaled := range ssq.SQMetrics {
-		if metric, err := NewStatMetric(metricID, ssq.MinItems); err != nil {
+		if metric, err := NewStatMetric(metricID, ssq.MinItems, []string{}); err != nil {
 			return nil, err
 		} else if err := metric.LoadMarshaled(ms, marshaled); err != nil {
 			return nil, err

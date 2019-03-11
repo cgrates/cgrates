@@ -26,7 +26,7 @@ import (
 )
 
 func TestASRGetStringValue(t *testing.T) {
-	asr, _ := NewASR(2, "")
+	asr, _ := NewASR(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
@@ -75,7 +75,7 @@ func TestASRGetStringValue(t *testing.T) {
 }
 
 func TestASRGetValue(t *testing.T) {
-	asr, _ := NewASR(2, "")
+	asr, _ := NewASR(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
@@ -121,7 +121,7 @@ func TestASRGetValue(t *testing.T) {
 }
 
 func TestACDGetStringValue(t *testing.T) {
-	acd, _ := NewACD(2, "")
+	acd, _ := NewACD(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			utils.Usage:  time.Duration(10 * time.Second),
@@ -138,10 +138,10 @@ func TestACDGetStringValue(t *testing.T) {
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3"}
-	if err := acd.AddEvent(ev2); err != nil {
+	if err := acd.AddEvent(ev2); err == nil || err.Error() != "NOT_FOUND:Usage" {
 		t.Error(err)
 	}
-	if err := acd.AddEvent(ev3); err != nil {
+	if err := acd.AddEvent(ev3); err == nil || err.Error() != "NOT_FOUND:Usage" {
 		t.Error(err)
 	}
 	if strVal := acd.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
@@ -187,7 +187,7 @@ func TestACDGetStringValue(t *testing.T) {
 }
 
 func TestACDGetFloat64Value(t *testing.T) {
-	acd, _ := NewACD(2, "")
+	acd, _ := NewACD(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -240,7 +240,7 @@ func TestACDGetFloat64Value(t *testing.T) {
 }
 
 func TestACDGetValue(t *testing.T) {
-	acd, _ := NewACD(2, "")
+	acd, _ := NewACD(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -296,7 +296,7 @@ func TestACDGetValue(t *testing.T) {
 }
 
 func TestTCDGetStringValue(t *testing.T) {
-	tcd, _ := NewTCD(2, "")
+	tcd, _ := NewTCD(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"Usage":      time.Duration(10 * time.Second),
@@ -357,7 +357,7 @@ func TestTCDGetStringValue(t *testing.T) {
 }
 
 func TestTCDGetFloat64Value(t *testing.T) {
-	tcd, _ := NewTCD(2, "")
+	tcd, _ := NewTCD(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -410,7 +410,7 @@ func TestTCDGetFloat64Value(t *testing.T) {
 }
 
 func TestTCDGetValue(t *testing.T) {
-	tcd, _ := NewTCD(2, "")
+	tcd, _ := NewTCD(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -466,7 +466,7 @@ func TestTCDGetValue(t *testing.T) {
 }
 
 func TestACCGetStringValue(t *testing.T) {
-	acc, _ := NewACC(2, "")
+	acc, _ := NewACC(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -518,7 +518,7 @@ func TestACCGetStringValue(t *testing.T) {
 }
 
 func TestACCGetValue(t *testing.T) {
-	acc, _ := NewACC(2, "")
+	acc, _ := NewACC(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -567,7 +567,7 @@ func TestACCGetValue(t *testing.T) {
 }
 
 func TestTCCGetStringValue(t *testing.T) {
-	tcc, _ := NewTCC(2, "")
+	tcc, _ := NewTCC(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -619,7 +619,7 @@ func TestTCCGetStringValue(t *testing.T) {
 }
 
 func TestTCCGetValue(t *testing.T) {
-	tcc, _ := NewTCC(2, "")
+	tcc, _ := NewTCC(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -671,7 +671,7 @@ func TestTCCGetValue(t *testing.T) {
 }
 
 func TestPDDGetStringValue(t *testing.T) {
-	pdd, _ := NewPDD(2, "")
+	pdd, _ := NewPDD(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			utils.Usage:  time.Duration(10 * time.Second),
@@ -689,11 +689,11 @@ func TestPDDGetStringValue(t *testing.T) {
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3"}
 	pdd.AddEvent(ev2)
 	pdd.AddEvent(ev3)
-	if strVal := pdd.GetStringValue(""); strVal != "1.666666666s" {
+	if strVal := pdd.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
 	pdd.RemEvent(ev3.ID)
-	if strVal := pdd.GetStringValue(""); strVal != "2.5s" {
+	if strVal := pdd.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
 	pdd.RemEvent(ev.ID)
@@ -713,15 +713,15 @@ func TestPDDGetStringValue(t *testing.T) {
 		},
 	}
 	pdd.AddEvent(ev4)
-	if strVal := pdd.GetStringValue(""); strVal != "5s" {
+	if strVal := pdd.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
 	pdd.AddEvent(ev5)
-	if strVal := pdd.GetStringValue(""); strVal != "3.333333333s" {
+	if strVal := pdd.GetStringValue(""); strVal != "10s" {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
 	pdd.RemEvent(ev2.ID)
-	if strVal := pdd.GetStringValue(""); strVal != "5s" {
+	if strVal := pdd.GetStringValue(""); strVal != "10s" {
 		t.Errorf("wrong pdd value: %s", strVal)
 	}
 	pdd.RemEvent(ev5.ID)
@@ -733,7 +733,7 @@ func TestPDDGetStringValue(t *testing.T) {
 }
 
 func TestPDDGetFloat64Value(t *testing.T) {
-	pdd, _ := NewPDD(2, "")
+	pdd, _ := NewPDD(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -745,7 +745,7 @@ func TestPDDGetFloat64Value(t *testing.T) {
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
 	pdd.AddEvent(ev2)
-	if v := pdd.GetFloat64Value(); v != 2.5 {
+	if v := pdd.GetFloat64Value(); v != -1.0 {
 		t.Errorf("wrong pdd value: %v", v)
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
@@ -762,19 +762,19 @@ func TestPDDGetFloat64Value(t *testing.T) {
 		},
 	}
 	pdd.AddEvent(ev4)
-	if strVal := pdd.GetFloat64Value(); strVal != 5 {
+	if strVal := pdd.GetFloat64Value(); strVal != 7.5 {
 		t.Errorf("wrong pdd value: %v", strVal)
 	}
 	pdd.AddEvent(ev5)
-	if strVal := pdd.GetFloat64Value(); strVal != 3.75 {
+	if strVal := pdd.GetFloat64Value(); strVal != 7.5 {
 		t.Errorf("wrong pdd value: %v", strVal)
 	}
 	pdd.RemEvent(ev2.ID)
-	if strVal := pdd.GetFloat64Value(); strVal != 5 {
+	if strVal := pdd.GetFloat64Value(); strVal != 7.5 {
 		t.Errorf("wrong pdd value: %v", strVal)
 	}
 	pdd.RemEvent(ev4.ID)
-	if strVal := pdd.GetFloat64Value(); strVal != 2.5 {
+	if strVal := pdd.GetFloat64Value(); strVal != -1.0 {
 		t.Errorf("wrong pdd value: %v", strVal)
 	}
 	pdd.RemEvent(ev.ID)
@@ -788,7 +788,7 @@ func TestPDDGetFloat64Value(t *testing.T) {
 }
 
 func TestPDDGetValue(t *testing.T) {
-	pdd, _ := NewPDD(2, "")
+	pdd, _ := NewPDD(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -804,16 +804,24 @@ func TestPDDGetValue(t *testing.T) {
 			"Usage":      time.Duration(8 * time.Second),
 			utils.PDD:    time.Duration(10 * time.Second)}}
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3"}
-	pdd.AddEvent(ev2)
-	pdd.AddEvent(ev3)
-	if v := pdd.GetValue(); v != time.Duration(6333333333*time.Nanosecond) {
+	if err := pdd.AddEvent(ev2); err != nil {
+		t.Error(err)
+	}
+	if err := pdd.AddEvent(ev3); err == nil || err.Error() != "NOT_FOUND:PDD" {
+		t.Error(err)
+	}
+	if v := pdd.GetValue(); v != time.Duration(9*time.Second+500*time.Millisecond) {
 		t.Errorf("wrong pdd value: %+v", v)
 	}
-	pdd.RemEvent(ev.ID)
-	if v := pdd.GetValue(); v != time.Duration(5*time.Second) {
+	if err := pdd.RemEvent(ev.ID); err != nil {
+		t.Error(err)
+	}
+	if v := pdd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
 		t.Errorf("wrong pdd value: %+v", v)
 	}
-	pdd.RemEvent(ev2.ID)
+	if err := pdd.RemEvent(ev2.ID); err != nil {
+		t.Error(err)
+	}
 	if v := pdd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
 		t.Errorf("wrong pdd value: %+v", v)
 	}
@@ -830,24 +838,28 @@ func TestPDDGetValue(t *testing.T) {
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-	pdd.AddEvent(ev4)
-	pdd.AddEvent(ev5)
-	if v := pdd.GetValue(); v != time.Duration(2666666666*time.Nanosecond) {
-		t.Errorf("wrong pdd value: %+v", v)
+	if err := pdd.AddEvent(ev4); err != nil {
+		t.Error(err)
 	}
-	pdd.RemEvent(ev5.ID)
-	pdd.RemEvent(ev4.ID)
+	if err := pdd.AddEvent(ev5); err == nil || err.Error() != "NOT_FOUND:PDD" {
+		t.Error(err)
+	}
 	if v := pdd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
 		t.Errorf("wrong pdd value: %+v", v)
 	}
-	pdd.RemEvent(ev3.ID)
+	if err := pdd.RemEvent(ev5.ID); err == nil || err.Error() != "NOT_FOUND" {
+		t.Error(err)
+	}
+	if err := pdd.RemEvent(ev4.ID); err != nil {
+		t.Error(err)
+	}
 	if v := pdd.GetValue(); v != time.Duration((-1)*time.Nanosecond) {
 		t.Errorf("wrong pdd value: %+v", v)
 	}
 }
 
 func TestDDCGetStringValue(t *testing.T) {
-	ddc, _ := NewDCC(2, "")
+	ddc, _ := NewDCC(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -889,7 +901,7 @@ func TestDDCGetStringValue(t *testing.T) {
 }
 
 func TestDDCGetFloat64Value(t *testing.T) {
-	ddc, _ := NewDCC(2, "")
+	ddc, _ := NewDCC(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -947,7 +959,7 @@ func TestDDCGetFloat64Value(t *testing.T) {
 }
 
 func TestStatSumGetFloat64Value(t *testing.T) {
-	statSum, _ := NewStatSum(2, "Cost")
+	statSum, _ := NewStatSum(2, "Cost", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"Cost":            "20",
@@ -960,8 +972,10 @@ func TestStatSumGetFloat64Value(t *testing.T) {
 		t.Errorf("wrong statSum value: %v", v)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
-	statSum.AddEvent(ev2)
-	if v := statSum.GetFloat64Value(); v != 20.0 {
+	if err := statSum.AddEvent(ev2); err == nil || err.Error() != "NOT_FOUND:Cost" {
+		t.Error(err)
+	}
+	if v := statSum.GetFloat64Value(); v != -1.0 {
 		t.Errorf("wrong statSum value: %v", v)
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
@@ -1008,7 +1022,7 @@ func TestStatSumGetFloat64Value(t *testing.T) {
 }
 
 func TestStatSumGetStringValue(t *testing.T) {
-	statSum, _ := NewStatSum(2, "Cost")
+	statSum, _ := NewStatSum(2, "Cost", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"Cost":            "20",
@@ -1053,7 +1067,7 @@ func TestStatSumGetStringValue(t *testing.T) {
 }
 
 func TestStatAverageGetFloat64Value(t *testing.T) {
-	statAvg, _ := NewStatAverage(2, "Cost")
+	statAvg, _ := NewStatAverage(2, "Cost", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"Cost":            "20",
@@ -1114,7 +1128,7 @@ func TestStatAverageGetFloat64Value(t *testing.T) {
 }
 
 func TestStatAverageGetStringValue(t *testing.T) {
-	statAvg, _ := NewStatAverage(2, "Cost")
+	statAvg, _ := NewStatAverage(2, "Cost", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"Cost":            "20",
@@ -1159,7 +1173,7 @@ func TestStatAverageGetStringValue(t *testing.T) {
 }
 
 func TestStatDistinctGetFloat64Value(t *testing.T) {
-	statDistinct, _ := NewStatDistinct(2, "Usage")
+	statDistinct, _ := NewStatDistinct(2, "Usage", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"Cost":            "20",
@@ -1220,7 +1234,7 @@ func TestStatDistinctGetFloat64Value(t *testing.T) {
 }
 
 func TestStatDistinctGetStringValue(t *testing.T) {
-	statDistinct, _ := NewStatDistinct(2, "Cost")
+	statDistinct, _ := NewStatDistinct(2, "Cost", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"Cost":            "20",
@@ -1267,13 +1281,13 @@ func TestStatDistinctGetStringValue(t *testing.T) {
 var jMarshaler JSONMarshaler
 
 func TestASRMarshal(t *testing.T) {
-	asr, _ := NewASR(2, "")
+	asr, _ := NewASR(2, "", []string{"*string:Account:1001"})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
 	asr.AddEvent(ev)
 	var nasr StatASR
-	expected := []byte(`{"Answered":1,"Count":1,"Events":{"EVENT_1":true},"MinItems":2}`)
+	expected := []byte(`{"FilterIDs":["*string:Account:1001"],"Answered":1,"Count":1,"Events":{"EVENT_1":true},"MinItems":2}`)
 	if b, err := asr.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -1286,14 +1300,14 @@ func TestASRMarshal(t *testing.T) {
 }
 
 func TestACDMarshal(t *testing.T) {
-	acd, _ := NewACD(2, "")
+	acd, _ := NewACD(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Usage":      time.Duration(10 * time.Second)}}
 	acd.AddEvent(ev)
 	var nacd StatACD
-	expected := []byte(`{"Sum":10000000000,"Count":1,"Events":{"EVENT_1":10000000000},"MinItems":2}`)
+	expected := []byte(`{"FilterIDs":[],"Sum":10000000000,"Count":1,"Events":{"EVENT_1":10000000000},"MinItems":2}`)
 	if b, err := acd.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -1306,14 +1320,14 @@ func TestACDMarshal(t *testing.T) {
 }
 
 func TestTCDMarshal(t *testing.T) {
-	tcd, _ := NewTCD(2, "")
+	tcd, _ := NewTCD(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Usage":      time.Duration(10 * time.Second)}}
 	tcd.AddEvent(ev)
 	var ntcd StatTCD
-	expected := []byte(`{"Sum":10000000000,"Count":1,"Events":{"EVENT_1":10000000000},"MinItems":2}`)
+	expected := []byte(`{"FilterIDs":[],"Sum":10000000000,"Count":1,"Events":{"EVENT_1":10000000000},"MinItems":2}`)
 	if b, err := tcd.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -1326,14 +1340,14 @@ func TestTCDMarshal(t *testing.T) {
 }
 
 func TestACCMarshal(t *testing.T) {
-	acc, _ := NewACC(2, "")
+	acc, _ := NewACC(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Cost":       "12.3"}}
 	acc.AddEvent(ev)
 	var nacc StatACC
-	expected := []byte(`{"Sum":12.3,"Count":1,"Events":{"EVENT_1":12.3},"MinItems":2}`)
+	expected := []byte(`{"FilterIDs":[],"Sum":12.3,"Count":1,"Events":{"EVENT_1":12.3},"MinItems":2}`)
 	if b, err := acc.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -1346,14 +1360,14 @@ func TestACCMarshal(t *testing.T) {
 }
 
 func TestTCCMarshal(t *testing.T) {
-	tcc, _ := NewTCC(2, "")
+	tcc, _ := NewTCC(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			"Cost":       "12.3"}}
 	tcc.AddEvent(ev)
 	var ntcc StatTCC
-	expected := []byte(`{"Sum":12.3,"Count":1,"Events":{"EVENT_1":12.3},"MinItems":2}`)
+	expected := []byte(`{"FilterIDs":[],"Sum":12.3,"Count":1,"Events":{"EVENT_1":12.3},"MinItems":2}`)
 	if b, err := tcc.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -1366,7 +1380,7 @@ func TestTCCMarshal(t *testing.T) {
 }
 
 func TestPDDMarshal(t *testing.T) {
-	pdd, _ := NewPDD(2, "")
+	pdd, _ := NewPDD(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -1374,7 +1388,7 @@ func TestPDDMarshal(t *testing.T) {
 			utils.PDD:    time.Duration(5 * time.Second)}}
 	pdd.AddEvent(ev)
 	var ntdd StatPDD
-	expected := []byte(`{"Sum":5000000000,"Count":1,"Events":{"EVENT_1":5000000000},"MinItems":2}`)
+	expected := []byte(`{"FilterIDs":[],"Sum":5000000000,"Count":1,"Events":{"EVENT_1":5000000000},"MinItems":2}`)
 	if b, err := pdd.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -1387,7 +1401,7 @@ func TestPDDMarshal(t *testing.T) {
 }
 
 func TestDCCMarshal(t *testing.T) {
-	ddc, _ := NewDCC(2, "")
+	ddc, _ := NewDCC(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -1396,7 +1410,7 @@ func TestDCCMarshal(t *testing.T) {
 			utils.Destination: "1002"}}
 	ddc.AddEvent(ev)
 	var nddc StatDDC
-	expected := []byte(`{"Destinations":{"1002":{"EVENT_1":true}},"Events":{"EVENT_1":"1002"},"MinItems":2}`)
+	expected := []byte(`{"FilterIDs":[],"Destinations":{"1002":{"EVENT_1":true}},"Events":{"EVENT_1":"1002"},"MinItems":2}`)
 	if b, err := ddc.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -1409,7 +1423,7 @@ func TestDCCMarshal(t *testing.T) {
 }
 
 func TestStatSumMarshal(t *testing.T) {
-	statSum, _ := NewStatSum(2, "Cost")
+	statSum, _ := NewStatSum(2, "Cost", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"Cost":            "20",
@@ -1419,7 +1433,7 @@ func TestStatSumMarshal(t *testing.T) {
 			utils.Destination: "1002"}}
 	statSum.AddEvent(ev)
 	var nstatSum StatSum
-	expected := []byte(`{"Sum":20,"Events":{"EVENT_1":20},"MinItems":2,"FieldName":"Cost"}`)
+	expected := []byte(`{"FilterIDs":[],"Sum":20,"Events":{"EVENT_1":20},"MinItems":2,"FieldName":"Cost"}`)
 	if b, err := statSum.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -1432,7 +1446,7 @@ func TestStatSumMarshal(t *testing.T) {
 }
 
 func TestStatAverageMarshal(t *testing.T) {
-	statAvg, _ := NewStatAverage(2, "Cost")
+	statAvg, _ := NewStatAverage(2, "Cost", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"Cost":            "20",
@@ -1442,7 +1456,7 @@ func TestStatAverageMarshal(t *testing.T) {
 			utils.Destination: "1002"}}
 	statAvg.AddEvent(ev)
 	var nstatAvg StatAverage
-	expected := []byte(`{"Sum":20,"Count":1,"Events":{"EVENT_1":20},"MinItems":2,"FieldName":"Cost"}`)
+	expected := []byte(`{"FilterIDs":[],"Sum":20,"Count":1,"Events":{"EVENT_1":20},"MinItems":2,"FieldName":"Cost"}`)
 	if b, err := statAvg.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -1455,7 +1469,7 @@ func TestStatAverageMarshal(t *testing.T) {
 }
 
 func TestStatDistrictMarshal(t *testing.T) {
-	statDistinct, _ := NewStatDistinct(2, "Usage")
+	statDistinct, _ := NewStatDistinct(2, "Usage", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"Cost":            "20",
@@ -1465,7 +1479,7 @@ func TestStatDistrictMarshal(t *testing.T) {
 			utils.Destination: "1002"}}
 	statDistinct.AddEvent(ev)
 	var nStatDistinct StatDistinct
-	expected := []byte(`{"Numbers":1,"Events":{"EVENT_1":{}},"MinItems":2,"FieldName":"Usage"}`)
+	expected := []byte(`{"FilterIDs":[],"Numbers":1,"Events":{"EVENT_1":{}},"MinItems":2,"FieldName":"Usage"}`)
 	if b, err := statDistinct.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {

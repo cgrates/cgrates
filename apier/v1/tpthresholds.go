@@ -23,11 +23,11 @@ import (
 )
 
 // Creates a new threshold within a tariff plan
-func (self *ApierV1) SetTPThreshold(attr *utils.TPThreshold, reply *string) error {
+func (self *ApierV1) SetTPThreshold(attr *utils.TPThresholdProfile, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.SetTPThresholds([]*utils.TPThreshold{attr}); err != nil {
+	if err := self.StorDb.SetTPThresholds([]*utils.TPThresholdProfile{attr}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -35,7 +35,7 @@ func (self *ApierV1) SetTPThreshold(attr *utils.TPThreshold, reply *string) erro
 }
 
 // Queries specific Threshold on Tariff plan
-func (self *ApierV1) GetTPThreshold(attr *utils.TPTntID, reply *utils.TPThreshold) error {
+func (self *ApierV1) GetTPThreshold(attr *utils.TPTntID, reply *utils.TPThresholdProfile) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

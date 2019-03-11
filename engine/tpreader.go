@@ -45,9 +45,9 @@ type TpReader struct {
 	ratingPlans        map[string]*RatingPlan
 	ratingProfiles     map[string]*RatingProfile
 	sharedGroups       map[string]*SharedGroup
-	resProfiles        map[utils.TenantID]*utils.TPResource
-	sqProfiles         map[utils.TenantID]*utils.TPStats
-	thProfiles         map[utils.TenantID]*utils.TPThreshold
+	resProfiles        map[utils.TenantID]*utils.TPResourceProfile
+	sqProfiles         map[utils.TenantID]*utils.TPStatProfile
+	thProfiles         map[utils.TenantID]*utils.TPThresholdProfile
 	filters            map[utils.TenantID]*utils.TPFilterProfile
 	sppProfiles        map[utils.TenantID]*utils.TPSupplierProfile
 	attributeProfiles  map[utils.TenantID]*utils.TPAttributeProfile
@@ -124,9 +124,9 @@ func (tpr *TpReader) Init() {
 	tpr.ratingProfiles = make(map[string]*RatingProfile)
 	tpr.sharedGroups = make(map[string]*SharedGroup)
 	tpr.accountActions = make(map[string]*Account)
-	tpr.resProfiles = make(map[utils.TenantID]*utils.TPResource)
-	tpr.sqProfiles = make(map[utils.TenantID]*utils.TPStats)
-	tpr.thProfiles = make(map[utils.TenantID]*utils.TPThreshold)
+	tpr.resProfiles = make(map[utils.TenantID]*utils.TPResourceProfile)
+	tpr.sqProfiles = make(map[utils.TenantID]*utils.TPStatProfile)
+	tpr.thProfiles = make(map[utils.TenantID]*utils.TPThresholdProfile)
 	tpr.sppProfiles = make(map[utils.TenantID]*utils.TPSupplierProfile)
 	tpr.attributeProfiles = make(map[utils.TenantID]*utils.TPAttributeProfile)
 	tpr.chargerProfiles = make(map[utils.TenantID]*utils.TPChargerProfile)
@@ -1103,7 +1103,7 @@ func (tpr *TpReader) LoadResourceProfilesFiltered(tag string) (err error) {
 	if err != nil {
 		return err
 	}
-	mapRsPfls := make(map[utils.TenantID]*utils.TPResource)
+	mapRsPfls := make(map[utils.TenantID]*utils.TPResourceProfile)
 	for _, rl := range rls {
 		mapRsPfls[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
@@ -1127,7 +1127,7 @@ func (tpr *TpReader) LoadStatsFiltered(tag string) (err error) {
 	if err != nil {
 		return err
 	}
-	mapSTs := make(map[utils.TenantID]*utils.TPStats)
+	mapSTs := make(map[utils.TenantID]*utils.TPStatProfile)
 	for _, st := range tps {
 		mapSTs[utils.TenantID{Tenant: st.Tenant, ID: st.ID}] = st
 	}
@@ -1151,7 +1151,7 @@ func (tpr *TpReader) LoadThresholdsFiltered(tag string) (err error) {
 	if err != nil {
 		return err
 	}
-	mapTHs := make(map[utils.TenantID]*utils.TPThreshold)
+	mapTHs := make(map[utils.TenantID]*utils.TPThresholdProfile)
 	for _, th := range tps {
 		mapTHs[utils.TenantID{Tenant: th.Tenant, ID: th.ID}] = th
 	}
@@ -1571,12 +1571,13 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 	}
 	for _, sqTntID := range tpr.statQueues {
 		metrics := make(map[string]StatMetric)
-		for _, metricID := range tpr.sqProfiles[utils.TenantID{Tenant: sqTntID.Tenant, ID: sqTntID.ID}].Metrics {
-			if metric, err := NewStatMetric(metricID,
-				tpr.sqProfiles[utils.TenantID{Tenant: sqTntID.Tenant, ID: sqTntID.ID}].MinItems); err != nil {
+		for _, metric := range tpr.sqProfiles[utils.TenantID{Tenant: sqTntID.Tenant, ID: sqTntID.ID}].Metrics {
+			if statMetric, err := NewStatMetric(metric.MetricID,
+				tpr.sqProfiles[utils.TenantID{Tenant: sqTntID.Tenant, ID: sqTntID.ID}].MinItems,
+				metric.FilterIDs); err != nil {
 				return err
 			} else {
-				metrics[metricID] = metric
+				metrics[metric.MetricID] = statMetric
 			}
 		}
 		sq := &StatQueue{Tenant: sqTntID.Tenant, ID: sqTntID.ID, SQMetrics: metrics}

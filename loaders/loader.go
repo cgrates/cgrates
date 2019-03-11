@@ -333,9 +333,9 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 		}
 	case utils.MetaStats:
 		for _, lDataSet := range lds {
-			stsModels := make(engine.TpStatsS, len(lDataSet))
+			stsModels := make(engine.TpStats, len(lDataSet))
 			for i, ld := range lDataSet {
-				stsModels[i] = new(engine.TpStats)
+				stsModels[i] = new(engine.TpStat)
 				if err = utils.UpdateStructWithIfaceMap(stsModels[i], ld); err != nil {
 					return
 				}
@@ -355,11 +355,11 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 					return err
 				}
 				metrics := make(map[string]engine.StatMetric)
-				for _, metricID := range stsPrf.Metrics {
-					if metric, err := engine.NewStatMetric(metricID, stsPrf.MinItems); err != nil {
+				for _, metric := range stsPrf.Metrics {
+					if stsMetric, err := engine.NewStatMetric(metric.MetricID, stsPrf.MinItems, metric.FilterIDs); err != nil {
 						return utils.APIErrorHandler(err)
 					} else {
-						metrics[metricID] = metric
+						metrics[metric.MetricID] = stsMetric
 					}
 				}
 				if err := ldr.dm.SetStatQueue(&engine.StatQueue{Tenant: stsPrf.Tenant, ID: stsPrf.ID, SQMetrics: metrics}); err != nil {
@@ -369,14 +369,13 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 		}
 	case utils.MetaThresholds:
 		for _, lDataSet := range lds {
-			thModels := make(engine.TpThresholdS, len(lDataSet))
+			thModels := make(engine.TpThresholds, len(lDataSet))
 			for i, ld := range lDataSet {
 				thModels[i] = new(engine.TpThreshold)
 				if err = utils.UpdateStructWithIfaceMap(thModels[i], ld); err != nil {
 					return
 				}
 			}
-
 			for _, tpTh := range thModels.AsTPThreshold() {
 				thPrf, err := engine.APItoThresholdProfile(tpTh, ldr.timezone)
 				if err != nil {

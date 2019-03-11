@@ -61,11 +61,11 @@ func (apierV1 *ApierV1) SetStatQueueProfile(sqp *engine.StatQueueProfile, reply 
 		return utils.APIErrorHandler(err)
 	}
 	metrics := make(map[string]engine.StatMetric)
-	for _, metricID := range sqp.Metrics {
-		if metric, err := engine.NewStatMetric(metricID, sqp.MinItems); err != nil {
+	for _, metric := range sqp.Metrics {
+		if stsMetric, err := engine.NewStatMetric(metric.MetricID, sqp.MinItems, metric.FilterIDs); err != nil {
 			return utils.APIErrorHandler(err)
 		} else {
-			metrics[metricID] = metric
+			metrics[metric.MetricID] = stsMetric
 		}
 	}
 	if err := apierV1.DataManager.SetStatQueue(&engine.StatQueue{Tenant: sqp.Tenant, ID: sqp.ID, SQMetrics: metrics}); err != nil {

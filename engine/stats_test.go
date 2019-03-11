@@ -39,9 +39,13 @@ var (
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-			QueueLength:  10,
-			TTL:          time.Duration(10) * time.Second,
-			Metrics:      []string{"*sum#Usage"},
+			QueueLength: 10,
+			TTL:         time.Duration(10) * time.Second,
+			Metrics: []*MetricWithFilters{
+				&MetricWithFilters{
+					MetricID: "*sum#Usage",
+				},
+			},
 			ThresholdIDs: []string{},
 			Blocker:      false,
 			Stored:       true,
@@ -55,9 +59,13 @@ var (
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-			QueueLength:  10,
-			TTL:          time.Duration(10) * time.Second,
-			Metrics:      []string{"*sum#Usage"},
+			QueueLength: 10,
+			TTL:         time.Duration(10) * time.Second,
+			Metrics: []*MetricWithFilters{
+				&MetricWithFilters{
+					MetricID: "*sum#Usage",
+				},
+			},
 			ThresholdIDs: []string{},
 			Blocker:      false,
 			Stored:       true,
@@ -71,9 +79,13 @@ var (
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-			QueueLength:  10,
-			TTL:          time.Duration(10) * time.Second,
-			Metrics:      []string{"*sum#Usage"},
+			QueueLength: 10,
+			TTL:         time.Duration(10) * time.Second,
+			Metrics: []*MetricWithFilters{
+				&MetricWithFilters{
+					MetricID: "*sum#Usage",
+				},
+			},
 			ThresholdIDs: []string{},
 			Blocker:      false,
 			Stored:       true,
@@ -351,9 +363,13 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
-		QueueLength:  10,
-		TTL:          time.Duration(10) * time.Second,
-		Metrics:      []string{"*sum#Usage"},
+		QueueLength: 10,
+		TTL:         time.Duration(10) * time.Second,
+		Metrics: []*MetricWithFilters{
+			&MetricWithFilters{
+				MetricID: "*sum#Usage",
+			},
+		},
 		ThresholdIDs: []string{},
 		Stored:       true,
 		Weight:       20,

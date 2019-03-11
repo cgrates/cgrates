@@ -525,7 +525,7 @@ func (self *SQLStorage) SetTPAccountActions(aas []*utils.TPAccountActions) error
 	return nil
 }
 
-func (self *SQLStorage) SetTPResources(rls []*utils.TPResource) error {
+func (self *SQLStorage) SetTPResources(rls []*utils.TPResourceProfile) error {
 	if len(rls) == 0 {
 		return nil
 	}
@@ -547,14 +547,14 @@ func (self *SQLStorage) SetTPResources(rls []*utils.TPResource) error {
 	return nil
 }
 
-func (self *SQLStorage) SetTPStats(sts []*utils.TPStats) error {
+func (self *SQLStorage) SetTPStats(sts []*utils.TPStatProfile) error {
 	if len(sts) == 0 {
 		return nil
 	}
 	tx := self.db.Begin()
 	for _, stq := range sts {
 		// Remove previous
-		if err := tx.Where(&TpStats{Tpid: stq.TPid, ID: stq.ID}).Delete(TpStats{}).Error; err != nil {
+		if err := tx.Where(&TpStat{Tpid: stq.TPid, ID: stq.ID}).Delete(TpStat{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -569,7 +569,7 @@ func (self *SQLStorage) SetTPStats(sts []*utils.TPStats) error {
 	return nil
 }
 
-func (self *SQLStorage) SetTPThresholds(ths []*utils.TPThreshold) error {
+func (self *SQLStorage) SetTPThresholds(ths []*utils.TPThresholdProfile) error {
 	if len(ths) == 0 {
 		return nil
 	}
@@ -1317,7 +1317,7 @@ func (self *SQLStorage) GetTPAccountActions(filter *utils.TPAccountActions) ([]*
 	}
 }
 
-func (self *SQLStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPResource, error) {
+func (self *SQLStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPResourceProfile, error) {
 	var rls TpResources
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
@@ -1336,8 +1336,8 @@ func (self *SQLStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPReso
 	return arls, nil
 }
 
-func (self *SQLStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStats, error) {
-	var sts TpStatsS
+func (self *SQLStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStatProfile, error) {
+	var sts TpStats
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("id = ?", id)
@@ -1355,8 +1355,8 @@ func (self *SQLStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStats, e
 	return asts, nil
 }
 
-func (self *SQLStorage) GetTPThresholds(tpid, tenant, id string) ([]*utils.TPThreshold, error) {
-	var ths TpThresholdS
+func (self *SQLStorage) GetTPThresholds(tpid, tenant, id string) ([]*utils.TPThresholdProfile, error) {
+	var ths TpThresholds
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("id = ?", id)

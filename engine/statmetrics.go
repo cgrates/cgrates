@@ -32,8 +32,8 @@ const STATS_NA = -1.0
 
 // NewStatMetric instantiates the StatMetric
 // cfg serves as general purpose container to pass config options to metric
-func NewStatMetric(metricID string, minItems int) (sm StatMetric, err error) {
-	metrics := map[string]func(int, string) (StatMetric, error){
+func NewStatMetric(metricID string, minItems int, filterIDs []string) (sm StatMetric, err error) {
+	metrics := map[string]func(int, string, []string) (StatMetric, error){
 		utils.MetaASR:      NewASR,
 		utils.MetaACD:      NewACD,
 		utils.MetaTCD:      NewTCD,
@@ -55,7 +55,7 @@ func NewStatMetric(metricID string, minItems int) (sm StatMetric, err error) {
 	if len(metricSplit[1:]) > 0 {
 		extraParams = metricSplit[1]
 	}
-	return metrics[metricSplit[0]](minItems, extraParams)
+	return metrics[metricSplit[0]](minItems, extraParams, filterIDs)
 }
 
 // StatMetric is the interface which a metric should implement
@@ -69,17 +69,19 @@ type StatMetric interface {
 	LoadMarshaled(ms Marshaler, marshaled []byte) (err error)
 }
 
-func NewASR(minItems int, extraParams string) (StatMetric, error) {
-	return &StatASR{Events: make(map[string]bool), MinItems: minItems}, nil
+func NewASR(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
+	return &StatASR{Events: make(map[string]bool),
+		MinItems: minItems, FilterIDs: filterIDs}, nil
 }
 
 // ASR implements AverageSuccessRatio metric
 type StatASR struct {
-	Answered float64
-	Count    float64
-	Events   map[string]bool // map[EventTenantID]Answered
-	MinItems int
-	val      *float64 // cached ASR value
+	FilterIDs []string
+	Answered  float64
+	Count     float64
+	Events    map[string]bool // map[EventTenantID]Answered
+	MinItems  int
+	val       *float64 // cached ASR value
 }
 
 // getValue returns asr.val
@@ -117,13 +119,10 @@ func (asr *StatASR) GetFloat64Value() (val float64) {
 // AddEvent is part of StatMetric interface
 func (asr *StatASR) AddEvent(ev *utils.CGREvent) (err error) {
 	var answered bool
-	var at time.Time
-	if at, err = ev.FieldAsTime(utils.AnswerTime,
-		config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
-		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, utils.AnswerTime)
-		}
-		return
+	if at, err := ev.FieldAsTime(utils.AnswerTime,
+		config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil &&
+		err != utils.ErrNotFound {
+		return err
 	} else if !at.IsZero() {
 		answered = true
 	}
@@ -160,17 +159,18 @@ func (asr *StatASR) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, asr)
 }
 
-func NewACD(minItems int, extraParams string) (StatMetric, error) {
-	return &StatACD{Events: make(map[string]time.Duration), MinItems: minItems}, nil
+func NewACD(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
+	return &StatACD{Events: make(map[string]time.Duration), MinItems: minItems, FilterIDs: filterIDs}, nil
 }
 
 // ACD implements AverageCallDuration metric
 type StatACD struct {
-	Sum      time.Duration
-	Count    int64
-	Events   map[string]time.Duration // map[EventTenantID]Duration
-	MinItems int
-	val      *time.Duration // cached ACD value
+	FilterIDs []string
+	Sum       time.Duration
+	Count     int64
+	Events    map[string]time.Duration // map[EventTenantID]Duration
+	MinItems  int
+	val       *time.Duration // cached ACD value
 }
 
 // getValue returns acr.val
@@ -243,17 +243,18 @@ func (acd *StatACD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, acd)
 }
 
-func NewTCD(minItems int, extraParams string) (StatMetric, error) {
-	return &StatTCD{Events: make(map[string]time.Duration), MinItems: minItems}, nil
+func NewTCD(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
+	return &StatTCD{Events: make(map[string]time.Duration), MinItems: minItems, FilterIDs: filterIDs}, nil
 }
 
 // TCD implements TotalCallDuration metric
 type StatTCD struct {
-	Sum      time.Duration
-	Count    int64
-	Events   map[string]time.Duration // map[EventTenantID]Duration
-	MinItems int
-	val      *time.Duration // cached TCD value
+	FilterIDs []string
+	Sum       time.Duration
+	Count     int64
+	Events    map[string]time.Duration // map[EventTenantID]Duration
+	MinItems  int
+	val       *time.Duration // cached TCD value
 }
 
 // getValue returns tcd.val
@@ -298,7 +299,7 @@ func (tcd *StatTCD) AddEvent(ev *utils.CGREvent) (err error) {
 		}
 		return
 	}
-	acd.Sum += dur
+	tcd.Sum += dur
 	tcd.Events[ev.ID] = dur
 	tcd.Count += 1
 	tcd.val = nil
@@ -327,17 +328,18 @@ func (tcd *StatTCD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, tcd)
 }
 
-func NewACC(minItems int, extraParams string) (StatMetric, error) {
-	return &StatACC{Events: make(map[string]float64), MinItems: minItems}, nil
+func NewACC(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
+	return &StatACC{Events: make(map[string]float64), MinItems: minItems, FilterIDs: filterIDs}, nil
 }
 
 // ACC implements AverageCallCost metric
 type StatACC struct {
-	Sum      float64
-	Count    float64
-	Events   map[string]float64 // map[EventTenantID]Cost
-	MinItems int
-	val      *float64 // cached ACC value
+	FilterIDs []string
+	Sum       float64
+	Count     float64
+	Events    map[string]float64 // map[EventTenantID]Cost
+	MinItems  int
+	val       *float64 // cached ACC value
 }
 
 // getValue returns tcd.val
@@ -406,17 +408,18 @@ func (acc *StatACC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, acc)
 }
 
-func NewTCC(minItems int, extraParams string) (StatMetric, error) {
-	return &StatTCC{Events: make(map[string]float64), MinItems: minItems}, nil
+func NewTCC(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
+	return &StatTCC{Events: make(map[string]float64), MinItems: minItems, FilterIDs: filterIDs}, nil
 }
 
 // TCC implements TotalCallCost metric
 type StatTCC struct {
-	Sum      float64
-	Count    float64
-	Events   map[string]float64 // map[EventTenantID]Cost
-	MinItems int
-	val      *float64 // cached TCC value
+	FilterIDs []string
+	Sum       float64
+	Count     float64
+	Events    map[string]float64 // map[EventTenantID]Cost
+	MinItems  int
+	val       *float64 // cached TCC value
 }
 
 // getValue returns tcd.val
@@ -458,7 +461,7 @@ func (tcc *StatTCC) AddEvent(ev *utils.CGREvent) (err error) {
 		}
 		return
 	}
-	acc.Sum += cost
+	tcc.Sum += cost
 	tcc.Events[ev.ID] = cost
 	tcc.Count += 1
 	tcc.val = nil
@@ -487,17 +490,18 @@ func (tcc *StatTCC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, tcc)
 }
 
-func NewPDD(minItems int, extraParams string) (StatMetric, error) {
-	return &StatPDD{Events: make(map[string]time.Duration), MinItems: minItems}, nil
+func NewPDD(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
+	return &StatPDD{Events: make(map[string]time.Duration), MinItems: minItems, FilterIDs: filterIDs}, nil
 }
 
 // PDD implements Post Dial Delay (average) metric
 type StatPDD struct {
-	Sum      time.Duration
-	Count    int64
-	Events   map[string]time.Duration // map[EventTenantID]Duration
-	MinItems int
-	val      *time.Duration // cached PDD value
+	FilterIDs []string
+	Sum       time.Duration
+	Count     int64
+	Events    map[string]time.Duration // map[EventTenantID]Duration
+	MinItems  int
+	val       *time.Duration // cached PDD value
 }
 
 // getValue returns pdd.val
@@ -570,12 +574,14 @@ func (pdd *StatPDD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, pdd)
 }
 
-func NewDCC(minItems int, extraParams string) (StatMetric, error) {
-	return &StatDDC{Destinations: make(map[string]utils.StringMap), Events: make(map[string]string), MinItems: minItems}, nil
+func NewDCC(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
+	return &StatDDC{Destinations: make(map[string]utils.StringMap),
+		Events: make(map[string]string), MinItems: minItems, FilterIDs: filterIDs}, nil
 }
 
 // DDC implements Destination Distinct Count metric
 type StatDDC struct {
+	FilterIDs    []string
 	Destinations map[string]utils.StringMap
 	Events       map[string]string // map[EventTenantID]Destination
 	MinItems     int
@@ -637,11 +643,13 @@ func (ddc *StatDDC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, ddc)
 }
 
-func NewStatSum(minItems int, extraParams string) (StatMetric, error) {
-	return &StatSum{Events: make(map[string]float64), MinItems: minItems, FieldName: extraParams}, nil
+func NewStatSum(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
+	return &StatSum{Events: make(map[string]float64),
+		MinItems: minItems, FieldName: extraParams, FilterIDs: filterIDs}, nil
 }
 
 type StatSum struct {
+	FilterIDs []string
 	Sum       float64
 	Events    map[string]float64 // map[EventTenantID]Cost
 	MinItems  int
@@ -715,12 +723,14 @@ func (sum *StatSum) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, sum)
 }
 
-func NewStatAverage(minItems int, extraParams string) (StatMetric, error) {
-	return &StatAverage{Events: make(map[string]float64), MinItems: minItems, FieldName: extraParams}, nil
+func NewStatAverage(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
+	return &StatAverage{Events: make(map[string]float64),
+		MinItems: minItems, FieldName: extraParams, FilterIDs: filterIDs}, nil
 }
 
 // StatAverage implements TotalCallCost metric
 type StatAverage struct {
+	FilterIDs []string
 	Sum       float64
 	Count     float64
 	Events    map[string]float64 // map[EventTenantID]Cost
@@ -764,7 +774,7 @@ func (avg *StatAverage) AddEvent(ev *utils.CGREvent) (err error) {
 	var val float64
 	if val, err = ev.FieldAsFloat64(avg.FieldName); err != nil {
 		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, sum.FieldName)
+			err = utils.ErrPrefix(err, avg.FieldName)
 		}
 		return
 	}
@@ -797,11 +807,13 @@ func (avg *StatAverage) LoadMarshaled(ms Marshaler, marshaled []byte) (err error
 	return ms.Unmarshal(marshaled, avg)
 }
 
-func NewStatDistinct(minItems int, extraParams string) (StatMetric, error) {
-	return &StatDistinct{Events: make(map[string]struct{}), MinItems: minItems, FieldName: extraParams}, nil
+func NewStatDistinct(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
+	return &StatDistinct{Events: make(map[string]struct{}),
+		MinItems: minItems, FieldName: extraParams, FilterIDs: filterIDs}, nil
 }
 
 type StatDistinct struct {
+	FilterIDs []string
 	Numbers   float64
 	Events    map[string]struct{} // map[EventTenantID]Cost
 	MinItems  int
