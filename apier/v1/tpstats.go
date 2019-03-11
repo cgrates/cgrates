@@ -23,11 +23,11 @@ import (
 )
 
 // Creates a new stat within a tariff plan
-func (self *ApierV1) SetTPStat(attr *utils.TPStats, reply *string) error {
+func (self *ApierV1) SetTPStat(attr *utils.TPStatProfile, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.SetTPStats([]*utils.TPStats{attr}); err != nil {
+	if err := self.StorDb.SetTPStats([]*utils.TPStatProfile{attr}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -35,7 +35,7 @@ func (self *ApierV1) SetTPStat(attr *utils.TPStats, reply *string) error {
 }
 
 // Queries specific Stat on Tariff plan
-func (self *ApierV1) GetTPStat(attr *utils.TPTntID, reply *utils.TPStats) error {
+func (self *ApierV1) GetTPStat(attr *utils.TPTntID, reply *utils.TPStatProfile) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

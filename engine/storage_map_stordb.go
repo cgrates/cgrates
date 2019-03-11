@@ -64,13 +64,13 @@ func (ms *MapStorage) GetTPActionTriggers(tpid, id string) (aTriggers []*utils.T
 func (ms *MapStorage) GetTPAccountActions(filter *utils.TPAccountActions) (accounts []*utils.TPAccountActions, err error) {
 	return nil, utils.ErrNotImplemented
 }
-func (ms *MapStorage) GetTPResources(tpid, tenant, id string) (resources []*utils.TPResource, err error) {
+func (ms *MapStorage) GetTPResources(tpid, tenant, id string) (resources []*utils.TPResourceProfile, err error) {
 	return nil, utils.ErrNotImplemented
 }
-func (ms *MapStorage) GetTPStats(tpid, tenant, id string) (stats []*utils.TPStats, err error) {
+func (ms *MapStorage) GetTPStats(tpid, tenant, id string) (stats []*utils.TPStatProfile, err error) {
 	return nil, utils.ErrNotImplemented
 }
-func (ms *MapStorage) GetTPThresholds(tpid, tenant, id string) (ths []*utils.TPThreshold, err error) {
+func (ms *MapStorage) GetTPThresholds(tpid, tenant, id string) (ths []*utils.TPThresholdProfile, err error) {
 	return nil, utils.ErrNotImplemented
 }
 func (ms *MapStorage) GetTPFilters(tpid, tenant, id string) (fltrs []*utils.TPFilterProfile, err error) {
@@ -126,17 +126,15 @@ func (ms *MapStorage) SetTPActionTriggers(aTriggers []*utils.TPActionTriggers) (
 func (ms *MapStorage) SetTPAccountActions(accActions []*utils.TPAccountActions) (err error) {
 	return utils.ErrNotImplemented
 }
-func (ms *MapStorage) SetTPResources(resources []*utils.TPResource) (err error) {
+func (ms *MapStorage) SetTPResources(resources []*utils.TPResourceProfile) (err error) {
 	return utils.ErrNotImplemented
 }
-func (ms *MapStorage) SetTPStats(stats []*utils.TPStats) (err error) {
+func (ms *MapStorage) SetTPStats(stats []*utils.TPStatProfile) (err error) {
 	return utils.ErrNotImplemented
 }
-
-func (ms *MapStorage) SetTPThresholds(thresholds []*utils.TPThreshold) (err error) {
+func (ms *MapStorage) SetTPThresholds(thresholds []*utils.TPThresholdProfile) (err error) {
 	return utils.ErrNotImplemented
 }
-
 func (ms *MapStorage) SetTPFilters(filters []*utils.TPFilterProfile) (err error) {
 	return utils.ErrNotImplemented
 }

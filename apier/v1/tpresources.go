@@ -23,11 +23,11 @@ import (
 )
 
 // Creates a new resource within a tariff plan
-func (self *ApierV1) SetTPResource(attr *utils.TPResource, reply *string) error {
+func (self *ApierV1) SetTPResource(attr *utils.TPResourceProfile, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID", "Limit"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.SetTPResources([]*utils.TPResource{attr}); err != nil {
+	if err := self.StorDb.SetTPResources([]*utils.TPResourceProfile{attr}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -35,7 +35,7 @@ func (self *ApierV1) SetTPResource(attr *utils.TPResource, reply *string) error 
 }
 
 // Queries specific Resource on Tariff plan
-func (self *ApierV1) GetTPResource(attr *utils.TPTntID, reply *utils.TPResource) error {
+func (self *ApierV1) GetTPResource(attr *utils.TPTntID, reply *utils.TPResourceProfile) error {
 	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

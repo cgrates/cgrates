@@ -1061,10 +1061,10 @@ type AttrDisconnectSession struct {
 	Reason     string
 }
 
-//MetricsWithFilters is used in TPStatProfile
-type MetricsWithFilters struct {
+//MetricWithFilters is used in TPStatProfile
+type MetricWithFilters struct {
 	FilterIDs []string
-	MetricIDs []string
+	MetricID  string
 }
 
 // TPStatProfile is used in APIs to manage remotely offline StatProfile
@@ -1076,7 +1076,7 @@ type TPStatProfile struct {
 	ActivationInterval *TPActivationInterval
 	QueueLength        int
 	TTL                string
-	Metrics            []*MetricsWithFilters
+	Metrics            []*MetricWithFilters
 	Blocker            bool // blocker flag to stop processing on filters matched
 	Stored             bool
 	Weight             float64

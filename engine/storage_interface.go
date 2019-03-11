@@ -167,9 +167,9 @@ type LoadReader interface {
 	GetTPActionPlans(string, string) ([]*utils.TPActionPlan, error)
 	GetTPActionTriggers(string, string) ([]*utils.TPActionTriggers, error)
 	GetTPAccountActions(*utils.TPAccountActions) ([]*utils.TPAccountActions, error)
-	GetTPResources(string, string, string) ([]*utils.TPResource, error)
-	GetTPStats(string, string, string) ([]*utils.TPStats, error)
-	GetTPThresholds(string, string, string) ([]*utils.TPThreshold, error)
+	GetTPResources(string, string, string) ([]*utils.TPResourceProfile, error)
+	GetTPStats(string, string, string) ([]*utils.TPStatProfile, error)
+	GetTPThresholds(string, string, string) ([]*utils.TPThresholdProfile, error)
 	GetTPFilters(string, string, string) ([]*utils.TPFilterProfile, error)
 	GetTPSuppliers(string, string, string) ([]*utils.TPSupplierProfile, error)
 	GetTPAttributes(string, string, string) ([]*utils.TPAttributeProfile, error)
@@ -190,9 +190,9 @@ type LoadWriter interface {
 	SetTPActionPlans([]*utils.TPActionPlan) error
 	SetTPActionTriggers([]*utils.TPActionTriggers) error
 	SetTPAccountActions([]*utils.TPAccountActions) error
-	SetTPResources([]*utils.TPResource) error
-	SetTPStats([]*utils.TPStats) error
-	SetTPThresholds([]*utils.TPThreshold) error
+	SetTPResources([]*utils.TPResourceProfile) error
+	SetTPStats([]*utils.TPStatProfile) error
+	SetTPThresholds([]*utils.TPThresholdProfile) error
 	SetTPFilters([]*utils.TPFilterProfile) error
 	SetTPSuppliers([]*utils.TPSupplierProfile) error
 	SetTPAttributes([]*utils.TPAttributeProfile) error

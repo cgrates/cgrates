@@ -1123,14 +1123,14 @@ func APItoModelAccountActions(aas []*utils.TPAccountActions) (result TpAccountAc
 
 type TpResources []*TpResource
 
-func (tps TpResources) AsTPResources() (result []*utils.TPResource) {
-	mrl := make(map[string]*utils.TPResource)
+func (tps TpResources) AsTPResources() (result []*utils.TPResourceProfile) {
+	mrl := make(map[string]*utils.TPResourceProfile)
 	filterMap := make(map[string]utils.StringMap)
 	thresholdMap := make(map[string]utils.StringMap)
 	for _, tp := range tps {
 		rl, found := mrl[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]
 		if !found {
-			rl = &utils.TPResource{
+			rl = &utils.TPResourceProfile{
 				TPid:    tp.Tpid,
 				Tenant:  tp.Tenant,
 				ID:      tp.ID,
@@ -1188,7 +1188,7 @@ func (tps TpResources) AsTPResources() (result []*utils.TPResource) {
 		}
 		mrl[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = rl
 	}
-	result = make([]*utils.TPResource, len(mrl))
+	result = make([]*utils.TPResourceProfile, len(mrl))
 	i := 0
 	for tntID, rl := range mrl {
 		result[i] = rl
@@ -1203,11 +1203,11 @@ func (tps TpResources) AsTPResources() (result []*utils.TPResource) {
 	return
 }
 
-func APItoModelResource(rl *utils.TPResource) (mdls TpResources) {
+func APItoModelResource(rl *utils.TPResourceProfile) (mdls TpResources) {
 	if rl == nil {
 		return
 	}
-	// In case that TPResource don't have filter
+	// In case that TPResourceProfile don't have filter
 	if len(rl.FilterIDs) == 0 {
 		mdl := &TpResource{
 			Tpid:              rl.TPid,
@@ -1270,7 +1270,7 @@ func APItoModelResource(rl *utils.TPResource) (mdls TpResources) {
 	return
 }
 
-func APItoResource(tpRL *utils.TPResource, timezone string) (rp *ResourceProfile, err error) {
+func APItoResource(tpRL *utils.TPResourceProfile, timezone string) (rp *ResourceProfile, err error) {
 	rp = &ResourceProfile{
 		Tenant:            tpRL.Tenant,
 		ID:                tpRL.ID,
@@ -1305,11 +1305,10 @@ func APItoResource(tpRL *utils.TPResource, timezone string) (rp *ResourceProfile
 	return rp, nil
 }
 
-type TpStatsS []*TpStats
+type TpStats []*TpStat
 
-func (models TpStatsS) AsTPStats() (result []*utils.TPStatProfile) {
+func (models TpStats) AsTPStats() (result []*utils.TPStatProfile) {
 	filterMap := make(map[string]utils.StringMap)
-	metricmap := make(map[string]utils.StringMap)
 	thresholdMap := make(map[string]utils.StringMap)
 	mst := make(map[string]*utils.TPStatProfile)
 	for _, model := range models {
@@ -1317,23 +1316,15 @@ func (models TpStatsS) AsTPStats() (result []*utils.TPStatProfile) {
 		st, found := mst[key.TenantID()]
 		if !found {
 			st = &utils.TPStatProfile{
-				Tenant:   model.Tenant,
-				TPid:     model.Tpid,
-				ID:       model.ID,
-				Blocker:  model.Blocker,
-				Stored:   model.Stored,
-				MinItems: model.MinItems,
-				TTL:      model.TTL,
-				Weight:   model.Weight,
-			}
-		}
-		if model.Metrics != "" {
-			if _, has := metricmap[key.TenantID()]; !has {
-				metricmap[key.TenantID()] = make(utils.StringMap)
-			}
-			metricSplit := strings.Split(model.Metrics, utils.INFIELD_SEP)
-			for _, metric := range metricSplit {
-				metricmap[key.TenantID()][metric] = true
+				Tenant:      model.Tenant,
+				TPid:        model.Tpid,
+				ID:          model.ID,
+				Blocker:     model.Blocker,
+				Stored:      model.Stored,
+				MinItems:    model.MinItems,
+				TTL:         model.TTL,
+				Weight:      model.Weight,
+				QueueLength: model.QueueLength,
 			}
 		}
 		if model.ThresholdIDs != "" {
@@ -1364,6 +1355,17 @@ func (models TpStatsS) AsTPStats() (result []*utils.TPStatProfile) {
 				filterMap[key.TenantID()][filter] = true
 			}
 		}
+		if model.MetricIDs != "" {
+			metricIDsSplit := strings.Split(model.MetricIDs, utils.INFIELD_SEP)
+			for i, metricID := range metricIDsSplit {
+				st.Metrics = append(st.Metrics, &utils.MetricWithFilters{
+					MetricID: metricID,
+				})
+				if model.MetricFilterIDs != "" {
+					st.Metrics[i].FilterIDs = strings.Split(model.MetricFilterIDs, utils.INFIELD_SEP)
+				}
+			}
+		}
 		mst[key.TenantID()] = st
 	}
 	result = make([]*utils.TPStatProfile, len(mst))
@@ -1376,18 +1378,15 @@ func (models TpStatsS) AsTPStats() (result []*utils.TPStatProfile) {
 		for threshold := range thresholdMap[tntID] {
 			result[i].ThresholdIDs = append(result[i].ThresholdIDs, threshold)
 		}
-		for metricdata := range metricmap[tntID] {
-			result[i].Metrics = append(result[i].Metrics, metricdata)
-		}
 		i++
 	}
 	return
 }
 
-func APItoModelStats(st *utils.TPStatProfile) (mdls TpStatsS) {
+func APItoModelStats(st *utils.TPStatProfile) (mdls TpStats) {
 	if st != nil && len(st.Metrics) != 0 {
 		for i, metric := range st.Metrics {
-			mdl := &TpStats{
+			mdl := &TpStat{
 				Tpid:   st.TPid,
 				Tenant: st.Tenant,
 				ID:     st.ID,
@@ -1413,14 +1412,12 @@ func APItoModelStats(st *utils.TPStatProfile) (mdls TpStatsS) {
 				mdl.Stored = st.Stored
 				mdl.Blocker = st.Blocker
 				mdl.Weight = st.Weight
-
 				for i, val := range st.ThresholdIDs {
 					if i != 0 {
 						mdl.ThresholdIDs += utils.INFIELD_SEP
 					}
 					mdl.ThresholdIDs += val
 				}
-
 			}
 			for i, val := range metric.FilterIDs {
 				if i != 0 {
@@ -1428,12 +1425,7 @@ func APItoModelStats(st *utils.TPStatProfile) (mdls TpStatsS) {
 				}
 				mdl.MetricFilterIDs += val
 			}
-			for i, val := range metric.MetricIDs {
-				if i != 0 {
-					mdl.MetricIDs += utils.INFIELD_SEP
-				}
-				mdl.MetricIDs += val
-			}
+			mdl.MetricIDs = metric.MetricID
 			mdls = append(mdls, mdl)
 		}
 	}
@@ -1447,7 +1439,7 @@ func APItoStats(tpST *utils.TPStatProfile, timezone string) (st *StatQueueProfil
 		FilterIDs:    make([]string, len(tpST.FilterIDs)),
 		QueueLength:  tpST.QueueLength,
 		MinItems:     tpST.MinItems,
-		Metrics:      make([]*MetricsWithFilters, tpST.Metrics),
+		Metrics:      make([]*MetricWithFilters, len(tpST.Metrics)),
 		Stored:       tpST.Stored,
 		Blocker:      tpST.Blocker,
 		Weight:       tpST.Weight,
@@ -1459,7 +1451,10 @@ func APItoStats(tpST *utils.TPStatProfile, timezone string) (st *StatQueueProfil
 		}
 	}
 	for i, metric := range tpST.Metrics {
-		st.Metrics[i] = metric
+		st.Metrics[i] = &MetricWithFilters{
+			MetricID:  metric.MetricID,
+			FilterIDs: metric.FilterIDs,
+		}
 	}
 	for i, trh := range tpST.ThresholdIDs {
 		st.ThresholdIDs[i] = trh
@@ -1475,16 +1470,16 @@ func APItoStats(tpST *utils.TPStatProfile, timezone string) (st *StatQueueProfil
 	return st, nil
 }
 
-type TpThresholdS []*TpThreshold
+type TpThresholds []*TpThreshold
 
-func (tps TpThresholdS) AsTPThreshold() (result []*utils.TPThreshold) {
-	mst := make(map[string]*utils.TPThreshold)
+func (tps TpThresholds) AsTPThreshold() (result []*utils.TPThresholdProfile) {
+	mst := make(map[string]*utils.TPThresholdProfile)
 	filterMap := make(map[string]utils.StringMap)
 	actionMap := make(map[string]utils.StringMap)
 	for _, tp := range tps {
 		th, found := mst[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()]
 		if !found {
-			th = &utils.TPThreshold{
+			th = &utils.TPThresholdProfile{
 				TPid:     tp.Tpid,
 				Tenant:   tp.Tenant,
 				ID:       tp.ID,
@@ -1529,7 +1524,7 @@ func (tps TpThresholdS) AsTPThreshold() (result []*utils.TPThreshold) {
 
 		mst[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = th
 	}
-	result = make([]*utils.TPThreshold, len(mst))
+	result = make([]*utils.TPThresholdProfile, len(mst))
 	i := 0
 	for tntID, th := range mst {
 		result[i] = th
@@ -1544,7 +1539,7 @@ func (tps TpThresholdS) AsTPThreshold() (result []*utils.TPThreshold) {
 	return
 }
 
-func APItoModelTPThreshold(th *utils.TPThreshold) (mdls TpThresholdS) {
+func APItoModelTPThreshold(th *utils.TPThresholdProfile) (mdls TpThresholds) {
 	if th != nil {
 		if len(th.ActionIDs) == 0 {
 			return
@@ -1622,7 +1617,7 @@ func APItoModelTPThreshold(th *utils.TPThreshold) (mdls TpThresholdS) {
 	return
 }
 
-func APItoThresholdProfile(tpTH *utils.TPThreshold, timezone string) (th *ThresholdProfile, err error) {
+func APItoThresholdProfile(tpTH *utils.TPThresholdProfile, timezone string) (th *ThresholdProfile, err error) {
 	th = &ThresholdProfile{
 		Tenant:    tpTH.Tenant,
 		ID:        tpTH.ID,

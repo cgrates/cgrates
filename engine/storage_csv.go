@@ -461,7 +461,7 @@ func (csvs *CSVStorage) GetTPAccountActions(filter *utils.TPAccountActions) ([]*
 	}
 }
 
-func (csvs *CSVStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPResource, error) {
+func (csvs *CSVStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPResourceProfile, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.resProfilesFn, csvs.sep, getColumnCount(TpResource{}))
 	if err != nil {
 		//log.Print("Could not load resource limits file: ", err)
@@ -489,8 +489,8 @@ func (csvs *CSVStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPReso
 	return tpResLimits.AsTPResources(), nil
 }
 
-func (csvs *CSVStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStats, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.statsFn, csvs.sep, getColumnCount(TpStats{}))
+func (csvs *CSVStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStatProfile, error) {
+	csvReader, fp, err := csvs.readerFunc(csvs.statsFn, csvs.sep, getColumnCount(TpStat{}))
 	if err != nil {
 		//log.Print("Could not load stats file: ", err)
 		// allow writing of the other values
@@ -499,17 +499,17 @@ func (csvs *CSVStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStats, e
 	if fp != nil {
 		defer fp.Close()
 	}
-	var tpStats TpStatsS
+	var tpStats TpStats
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Printf("bad line in %s, %s\n", csvs.statsFn, err.Error())
 			return nil, err
 		}
-		if tpstats, err := csvLoad(TpStats{}, record); err != nil {
+		if tpstats, err := csvLoad(TpStat{}, record); err != nil {
 			log.Print("error loading TPStats: ", err)
 			return nil, err
 		} else {
-			tPstats := tpstats.(TpStats)
+			tPstats := tpstats.(TpStat)
 			tPstats.Tpid = tpid
 			tpStats = append(tpStats, &tPstats)
 		}
@@ -517,7 +517,7 @@ func (csvs *CSVStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStats, e
 	return tpStats.AsTPStats(), nil
 }
 
-func (csvs *CSVStorage) GetTPThresholds(tpid, tenant, id string) ([]*utils.TPThreshold, error) {
+func (csvs *CSVStorage) GetTPThresholds(tpid, tenant, id string) ([]*utils.TPThresholdProfile, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.thresholdsFn, csvs.sep, getColumnCount(TpThreshold{}))
 	if err != nil {
 		//log.Print("Could not load threshold file: ", err)
@@ -527,7 +527,7 @@ func (csvs *CSVStorage) GetTPThresholds(tpid, tenant, id string) ([]*utils.TPThr
 	if fp != nil {
 		defer fp.Close()
 	}
-	var tpThreshold TpThresholdS
+	var tpThreshold TpThresholds
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Printf("bad line in %s, %s\n", csvs.thresholdsFn, err.Error())
