@@ -620,8 +620,8 @@ cgrates.org,Stats1,*string:Account:1003,2014-07-29T15:00:00Z,100,1s,2,*sum#Value
 				FieldId: "MinItems",
 				Type:    utils.META_COMPOSED,
 				Value:   config.NewRSRParsersMustCompile("~6", true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: "Metrics",
-				FieldId: "Metrics",
+			&config.FCTemplate{Tag: "MetricIDs",
+				FieldId: "MetricIDs",
 				Type:    utils.META_COMPOSED,
 				Value:   config.NewRSRParsersMustCompile("~7", true, utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "MetricFilterIDs",
@@ -670,15 +670,31 @@ cgrates.org,Stats1,*string:Account:1003,2014-07-29T15:00:00Z,100,1s,2,*sum#Value
 		},
 		QueueLength: 100,
 		TTL:         time.Duration(1 * time.Second),
-		Metrics: []string{
-			utils.MetaASR,
-			utils.MetaACC,
-			utils.MetaTCC,
-			utils.MetaACD,
-			utils.MetaTCD,
-			utils.MetaPDD,
-			utils.MetaSum + "#Value",
-			utils.MetaAverage + "#Value",
+		Metrics: []*engine.MetricWithFilters{
+			&engine.MetricWithFilters{
+				MetricID: utils.MetaASR,
+			},
+			&engine.MetricWithFilters{
+				MetricID: utils.MetaACC,
+			},
+			&engine.MetricWithFilters{
+				MetricID: utils.MetaTCC,
+			},
+			&engine.MetricWithFilters{
+				MetricID: utils.MetaACD,
+			},
+			&engine.MetricWithFilters{
+				MetricID: utils.MetaTCD,
+			},
+			&engine.MetricWithFilters{
+				MetricID: utils.MetaPDD,
+			},
+			&engine.MetricWithFilters{
+				MetricID: utils.MetaSum + "#Value",
+			},
+			&engine.MetricWithFilters{
+				MetricID: utils.MetaAverage + "#Value",
+			},
 		},
 		Blocker:      true,
 		Stored:       true,
