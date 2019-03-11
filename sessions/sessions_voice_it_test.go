@@ -872,7 +872,7 @@ func TestSessionsVoiceSessionTTL(t *testing.T) {
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 	eAcntVal = 4.0566
 	if err := sessionsRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
