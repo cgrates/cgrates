@@ -69,14 +69,14 @@ func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent
 		attrIDs = args.AttributeIDs
 	} else {
 		aPrflIDs, err := MatchingItemIDsForEvent(args.Event, alS.stringIndexedFields, alS.prefixIndexedFields,
-			alS.dm, utils.CacheAttributeFilterIndexes, attrIdxKey, alS.filterS.cfg.FilterSCfg().IndexedSelects)
+			alS.dm, utils.CacheAttributeFilterIndexes, attrIdxKey, alS.filterS.cfg.AttributeSCfg().IndexedSelects)
 		if err != nil {
 			if err != utils.ErrNotFound {
 				return nil, err
 			}
 			if aPrflIDs, err = MatchingItemIDsForEvent(args.Event, alS.stringIndexedFields, alS.prefixIndexedFields,
 				alS.dm, utils.CacheAttributeFilterIndexes, utils.ConcatenatedKey(args.Tenant, utils.META_ANY),
-				alS.filterS.cfg.FilterSCfg().IndexedSelects); err != nil {
+				alS.filterS.cfg.AttributeSCfg().IndexedSelects); err != nil {
 				return nil, err
 			}
 		}

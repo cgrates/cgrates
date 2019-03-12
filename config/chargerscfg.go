@@ -21,6 +21,7 @@ package config
 // SupplierSCfg is the configuration of supplier service
 type ChargerSCfg struct {
 	Enabled             bool
+	IndexedSelects      bool
 	AttributeSConns     []*HaPoolConfig
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
@@ -32,6 +33,9 @@ func (cS *ChargerSCfg) loadFromJsonCfg(jsnCfg *ChargerSJsonCfg) (err error) {
 	}
 	if jsnCfg.Enabled != nil {
 		cS.Enabled = *jsnCfg.Enabled
+	}
+	if jsnCfg.Indexed_selects != nil {
+		cS.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	if jsnCfg.Attributes_conns != nil {
 		cS.AttributeSConns = make([]*HaPoolConfig, len(*jsnCfg.Attributes_conns))

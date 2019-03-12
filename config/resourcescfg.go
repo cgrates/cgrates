@@ -26,6 +26,7 @@ import (
 
 type ResourceSConfig struct {
 	Enabled             bool
+	IndexedSelects      bool
 	ThresholdSConns     []*HaPoolConfig // Connections towards StatS
 	StoreInterval       time.Duration   // Dump regularly from cache into dataDB
 	StringIndexedFields *[]string
@@ -38,6 +39,9 @@ func (rlcfg *ResourceSConfig) loadFromJsonCfg(jsnCfg *ResourceSJsonCfg) (err err
 	}
 	if jsnCfg.Enabled != nil {
 		rlcfg.Enabled = *jsnCfg.Enabled
+	}
+	if jsnCfg.Indexed_selects != nil {
+		rlcfg.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	if jsnCfg.Thresholds_conns != nil {
 		rlcfg.ThresholdSConns = make([]*HaPoolConfig, len(*jsnCfg.Thresholds_conns))

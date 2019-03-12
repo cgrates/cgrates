@@ -40,12 +40,10 @@ func TestFilterSCfgloadFromJsonCfg(t *testing.T) {
 	cfgJSONStr := `{
 "filters": {								// Filters configuration (*new)
 	"stats_conns": [{"Address":"127.0.0.1","Transport":"","Synchronous":true}],		// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
-	"indexed_selects":true,					// enable profile matching exclusively on indexes
 	},
 }`
 	expected = FilterSCfg{
-		IndexedSelects: true,
-		StatSConns:     []*HaPoolConfig{{Address: "127.0.0.1", Transport: "", Synchronous: true}},
+		StatSConns: []*HaPoolConfig{{Address: "127.0.0.1", Transport: "", Synchronous: true}},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
 		t.Error(err)

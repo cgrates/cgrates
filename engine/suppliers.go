@@ -127,7 +127,7 @@ func (spS *SupplierService) Shutdown() error {
 // matchingSupplierProfilesForEvent returns ordered list of matching resources which are active by the time of the call
 func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent) (matchingLP *SupplierProfile, err error) {
 	sPrflIDs, err := MatchingItemIDsForEvent(ev.Event, spS.stringIndexedFields, spS.prefixIndexedFields,
-		spS.dm, utils.CacheSupplierFilterIndexes, ev.Tenant, spS.filterS.cfg.FilterSCfg().IndexedSelects)
+		spS.dm, utils.CacheSupplierFilterIndexes, ev.Tenant, spS.filterS.cfg.SupplierSCfg().IndexedSelects)
 	if err != nil {
 		return nil, err
 	}
