@@ -38,7 +38,7 @@ var (
 	tpTresCfgIn    *config.CGRConfig
 	tpTresCfgOut   *config.CGRConfig
 	tpTresMigrator *Migrator
-	tpThresholds   []*utils.TPThreshold
+	tpThresholds   []*utils.TPThresholdProfile
 )
 
 var sTestsTpTresIT = []func(t *testing.T){
@@ -108,7 +108,7 @@ func testTpTresITFlush(t *testing.T) {
 }
 
 func testTpTresITPopulate(t *testing.T) {
-	tpThresholds = []*utils.TPThreshold{
+	tpThresholds = []*utils.TPThresholdProfile{
 		{
 			TPid:      "TH1",
 			Tenant:    "cgrates.org",

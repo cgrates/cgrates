@@ -38,7 +38,7 @@ var (
 	tpResCfgIn    *config.CGRConfig
 	tpResCfgOut   *config.CGRConfig
 	tpResMigrator *Migrator
-	tpResources   []*utils.TPResource
+	tpResources   []*utils.TPResourceProfile
 )
 
 var sTestsTpResIT = []func(t *testing.T){
@@ -109,7 +109,7 @@ func testTpResITFlush(t *testing.T) {
 }
 
 func testTpResITPopulate(t *testing.T) {
-	tpResources = []*utils.TPResource{
+	tpResources = []*utils.TPResourceProfile{
 		{
 			Tenant:    "cgrates.org",
 			TPid:      "TPR1",

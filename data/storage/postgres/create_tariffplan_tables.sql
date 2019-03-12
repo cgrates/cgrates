@@ -277,11 +277,12 @@ CREATE TABLE tp_stats (
   "activation_interval" varchar(64) NOT NULL,
   "queue_length" INTEGER NOT NULL,
   "ttl" varchar(32) NOT NULL,
-  "metrics" VARCHAR(128) NOT NULL,
+  "min_items" INTEGER NOT NULL,
+  "metric_ids" VARCHAR(128) NOT NULL,
+  "metric_filter_ids" VARCHAR(128) NOT NULL,
   "blocker" BOOLEAN NOT NULL,
   "stored" BOOLEAN NOT NULL,
   "weight" decimal(8,2) NOT NULL,
-  "min_items" INTEGER NOT NULL,
   "threshold_ids" varchar(64) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );

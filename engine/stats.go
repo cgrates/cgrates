@@ -236,7 +236,7 @@ func (sS *StatService) processEvent(args *StatsArgsProcessEvent) (statQueueIDs [
 		stsIDs = append(stsIDs, sq.ID)
 		lkID := utils.StatQueuePrefix + sq.TenantID()
 		guardian.Guardian.GuardIDs(config.CgrConfig().GeneralCfg().LockingTimeout, lkID)
-		err = sq.ProcessEvent(&args.CGREvent)
+		err = sq.ProcessEvent(&args.CGREvent, sS.filterS)
 		guardian.Guardian.UnguardIDs(lkID)
 		if err != nil {
 			utils.Logger.Warning(

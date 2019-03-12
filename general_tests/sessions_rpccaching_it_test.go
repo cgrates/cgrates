@@ -55,6 +55,11 @@ var sTestsRPCMethods = []func(t *testing.T){
 	testRPCMethodsTerminateSession,
 	testRPCMethodsProcessCDR,
 	testRPCMethodsProcessEvent,
+	//reset the storDB and dataDB
+	testRPCMethodsInitDataDb,
+	testRPCMethodsResetStorDb,
+	testRPCMethodsCdrsProcessCDR,
+	testRPCMethodsCdrsStoreSessionCost,
 	testRPCMethodsStopEngine,
 }
 
@@ -659,6 +664,123 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, []string{"THD_AccEnableAndLog"}) {
 		t.Errorf("Expecting ids: %s, received: %s", []string{"THD_AccEnableAndLog"}, ids)
+	}
+}
+
+func testRPCMethodsCdrsProcessCDR(t *testing.T) {
+	args := utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "testRPCMethodsCdrsProcessCDR",
+		Event: map[string]interface{}{
+			utils.Tenant:      "cgrates.org",
+			utils.ToR:         utils.VOICE,
+			utils.OriginID:    "testRPCMethodsCdrsProcessCDR",
+			utils.RequestType: utils.META_PREPAID,
+			utils.Account:     "1001",
+			utils.Subject:     "ANY2CNT",
+			utils.Destination: "1002",
+			utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+			utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+			utils.Usage:       10 * time.Minute,
+		},
+	}
+
+	var reply string
+	if err := rpcRpc.Call(utils.CDRsV2ProcessCDR, args, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
+	//verify the CDR
+	var cdrs []*engine.CDR
+	argsCDR := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}}
+	if err := rpcRpc.Call(utils.CDRsV1GetCDRs, argsCDR, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	}
+	//change originID so CGRID be different
+	args.Event[utils.OriginID] = "testRPCMethodsProcessCDR2"
+	// we should get response from cache
+	if err := rpcRpc.Call(utils.CDRsV2ProcessCDR, args, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	time.Sleep(100 * time.Millisecond)
+	//verify the CDR
+	if err := rpcRpc.Call(utils.CDRsV1GetCDRs, argsCDR, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	}
+
+	//give time to CGRateS to delete the response from cache
+	time.Sleep(1*time.Second + 500*time.Millisecond)
+	//change originID so CGRID be different
+	args.Event[utils.OriginID] = "testRPCMethodsProcessCDR3"
+	if err := rpcRpc.Call(utils.CDRsV2ProcessCDR, args, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
+	//verify the CDR
+	if err := rpcRpc.Call(utils.CDRsV1GetCDRs, argsCDR, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 2 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	}
+}
+
+func testRPCMethodsCdrsStoreSessionCost(t *testing.T) {
+	cc := &engine.CallCost{
+		Category:    "generic",
+		Tenant:      "cgrates.org",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "data",
+		TOR:         "*data",
+		Cost:        0,
+	}
+	args := &engine.ArgsV2CDRSStoreSMCost{
+		CheckDuplicate: true,
+		Cost: &engine.V2SMCost{
+			CGRID:       "testRPCMethodsCdrsStoreSessionCost",
+			RunID:       utils.META_DEFAULT,
+			OriginHost:  "",
+			OriginID:    "testdatagrp_grp1",
+			CostSource:  "SMR",
+			Usage:       1536,
+			CostDetails: engine.NewEventCostFromCallCost(cc, "testRPCMethodsCdrsStoreSessionCost", utils.META_DEFAULT),
+		},
+	}
+
+	var reply string
+	if err := rpcRpc.Call(utils.CDRsV2StoreSessionCost, args, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	time.Sleep(time.Duration(150) * time.Millisecond)
+
+	//change originID so CGRID be different
+	args.Cost.CGRID = "testRPCMethodsCdrsStoreSessionCost"
+	// we should get response from cache
+	if err := rpcRpc.Call(utils.CDRsV2StoreSessionCost, args, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+
+	//give time to CGRateS to delete the response from cache
+	time.Sleep(1*time.Second + 500*time.Millisecond)
+	//change originID so CGRID be different
+	args.Cost.CGRID = "testRPCMethodsCdrsStoreSessionCost"
+	if err := rpcRpc.Call(utils.CDRsV2StoreSessionCost, args,
+		&reply); err == nil || err.Error() != "SERVER_ERROR: EXISTS" {
+		t.Error("Unexpected error: ", err.Error())
 	}
 }
 

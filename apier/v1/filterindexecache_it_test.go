@@ -511,9 +511,13 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
-		QueueLength:  10,
-		TTL:          time.Duration(10) * time.Second,
-		Metrics:      []string{"*sum#Val"},
+		QueueLength: 10,
+		TTL:         time.Duration(10) * time.Second,
+		Metrics: []*engine.MetricWithFilters{
+			&engine.MetricWithFilters{
+				MetricID: "*sum#Val",
+			},
+		},
 		ThresholdIDs: []string{"Val1", "Val2"},
 		Blocker:      true,
 		Stored:       true,
@@ -633,9 +637,13 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
-		QueueLength:  10,
-		TTL:          time.Duration(10) * time.Second,
-		Metrics:      []string{"*sum"},
+		QueueLength: 10,
+		TTL:         time.Duration(10) * time.Second,
+		Metrics: []*engine.MetricWithFilters{
+			&engine.MetricWithFilters{
+				MetricID: "*sum",
+			},
+		},
 		ThresholdIDs: []string{"Val1", "Val2"},
 		Blocker:      true,
 		Stored:       true,

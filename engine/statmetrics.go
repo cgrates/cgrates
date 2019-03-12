@@ -67,6 +67,7 @@ type StatMetric interface {
 	RemEvent(evTenantID string) error
 	Marshal(ms Marshaler) (marshaled []byte, err error)
 	LoadMarshaled(ms Marshaler, marshaled []byte) (err error)
+	GetFilterIDs() (filterIDs []string)
 }
 
 func NewASR(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
@@ -159,6 +160,11 @@ func (asr *StatASR) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, asr)
 }
 
+// GetFilterIDs is part of StatMetric interface
+func (asr *StatASR) GetFilterIDs() []string {
+	return asr.FilterIDs
+}
+
 func NewACD(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
 	return &StatACD{Events: make(map[string]time.Duration), MinItems: minItems, FilterIDs: filterIDs}, nil
 }
@@ -241,6 +247,11 @@ func (acd *StatACD) Marshal(ms Marshaler) (marshaled []byte, err error) {
 }
 func (acd *StatACD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, acd)
+}
+
+// GetFilterIDs is part of StatMetric interface
+func (acd *StatACD) GetFilterIDs() []string {
+	return acd.FilterIDs
 }
 
 func NewTCD(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
@@ -328,6 +339,11 @@ func (tcd *StatTCD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, tcd)
 }
 
+// GetFilterIDs is part of StatMetric interface
+func (tcd *StatTCD) GetFilterIDs() []string {
+	return tcd.FilterIDs
+}
+
 func NewACC(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
 	return &StatACC{Events: make(map[string]float64), MinItems: minItems, FilterIDs: filterIDs}, nil
 }
@@ -406,6 +422,11 @@ func (acc *StatACC) Marshal(ms Marshaler) (marshaled []byte, err error) {
 
 func (acc *StatACC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, acc)
+}
+
+// GetFilterIDs is part of StatMetric interface
+func (acc *StatACC) GetFilterIDs() []string {
+	return acc.FilterIDs
 }
 
 func NewTCC(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
@@ -488,6 +509,11 @@ func (tcc *StatTCC) Marshal(ms Marshaler) (marshaled []byte, err error) {
 
 func (tcc *StatTCC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, tcc)
+}
+
+// GetFilterIDs is part of StatMetric interface
+func (tcc *StatTCC) GetFilterIDs() []string {
+	return tcc.FilterIDs
 }
 
 func NewPDD(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
@@ -574,6 +600,11 @@ func (pdd *StatPDD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, pdd)
 }
 
+// GetFilterIDs is part of StatMetric interface
+func (pdd *StatPDD) GetFilterIDs() []string {
+	return pdd.FilterIDs
+}
+
 func NewDCC(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
 	return &StatDDC{Destinations: make(map[string]utils.StringMap),
 		Events: make(map[string]string), MinItems: minItems, FilterIDs: filterIDs}, nil
@@ -639,8 +670,14 @@ func (ddc *StatDDC) RemEvent(evID string) (err error) {
 func (ddc *StatDDC) Marshal(ms Marshaler) (marshaled []byte, err error) {
 	return ms.Marshal(ddc)
 }
+
 func (ddc *StatDDC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, ddc)
+}
+
+// GetFilterIDs is part of StatMetric interface
+func (ddc *StatDDC) GetFilterIDs() []string {
+	return ddc.FilterIDs
 }
 
 func NewStatSum(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
@@ -721,6 +758,11 @@ func (sum *StatSum) Marshal(ms Marshaler) (marshaled []byte, err error) {
 
 func (sum *StatSum) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, sum)
+}
+
+// GetFilterIDs is part of StatMetric interface
+func (sum *StatSum) GetFilterIDs() []string {
+	return sum.FilterIDs
 }
 
 func NewStatAverage(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
@@ -807,6 +849,11 @@ func (avg *StatAverage) LoadMarshaled(ms Marshaler, marshaled []byte) (err error
 	return ms.Unmarshal(marshaled, avg)
 }
 
+// GetFilterIDs is part of StatMetric interface
+func (avg *StatAverage) GetFilterIDs() []string {
+	return avg.FilterIDs
+}
+
 func NewStatDistinct(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
 	return &StatDistinct{Events: make(map[string]struct{}),
 		MinItems: minItems, FieldName: extraParams, FilterIDs: filterIDs}, nil
@@ -878,4 +925,9 @@ func (sum *StatDistinct) Marshal(ms Marshaler) (marshaled []byte, err error) {
 
 func (sum *StatDistinct) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 	return ms.Unmarshal(marshaled, sum)
+}
+
+// GetFilterIDs is part of StatMetric interface
+func (sum *StatDistinct) GetFilterIDs() []string {
+	return sum.FilterIDs
 }
