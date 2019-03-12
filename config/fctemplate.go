@@ -27,14 +27,15 @@ import (
 func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg, separator string) (*FCTemplate, error) {
 	fcTmp := new(FCTemplate)
 	var err error
-	if jsnCfg.Tag != nil {
-		fcTmp.Tag = *jsnCfg.Tag
-	}
 	if jsnCfg.Type != nil {
 		fcTmp.Type = *jsnCfg.Type
 	}
 	if jsnCfg.Field_id != nil {
 		fcTmp.FieldId = *jsnCfg.Field_id
+	}
+	fcTmp.Tag = fcTmp.FieldId
+	if jsnCfg.Tag != nil {
+		fcTmp.Tag = *jsnCfg.Tag
 	}
 	if jsnCfg.Filters != nil {
 		fcTmp.Filters = make([]string, len(*jsnCfg.Filters))
