@@ -200,12 +200,22 @@ func testStsITMigrateAndMove(t *testing.T) {
 		Rules:  filters}
 
 	sqp := &engine.StatQueueProfile{
-		Tenant:       "cgrates.org",
-		ID:           "test",
-		FilterIDs:    []string{v1Sts.Id},
-		QueueLength:  10,
-		TTL:          time.Duration(0) * time.Second,
-		Metrics:      []string{"*asr", "*acd", "*acc"},
+		Tenant:      "cgrates.org",
+		ID:          "test",
+		FilterIDs:   []string{v1Sts.Id},
+		QueueLength: 10,
+		TTL:         time.Duration(0) * time.Second,
+		Metrics: []*engine.MetricWithFilters{
+			&engine.MetricWithFilters{
+				MetricID: "*asr",
+			},
+			&engine.MetricWithFilters{
+				MetricID: "*acd",
+			},
+			&engine.MetricWithFilters{
+				MetricID: "*acc",
+			},
+		},
 		ThresholdIDs: []string{"Test"},
 		Blocker:      false,
 		Stored:       true,
@@ -217,12 +227,12 @@ func testStsITMigrateAndMove(t *testing.T) {
 		ID:        v1Sts.Id,
 		SQMetrics: make(map[string]engine.StatMetric),
 	}
-	for _, metricID := range sqp.Metrics {
-		if metric, err := engine.NewStatMetric(metricID, 0); err != nil {
+	for _, metric := range sqp.Metrics {
+		if stsMetric, err := engine.NewStatMetric(metric.MetricID, 0, []string{}); err != nil {
 			t.Error("Error when creating newstatMETRIc ", err.Error())
 		} else {
-			if _, has := sq.SQMetrics[metricID]; !has {
-				sq.SQMetrics[metricID] = metric
+			if _, has := sq.SQMetrics[metric.MetricID]; !has {
+				sq.SQMetrics[metric.MetricID] = stsMetric
 			}
 		}
 	}

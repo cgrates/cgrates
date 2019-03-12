@@ -989,7 +989,7 @@ func testStorDBitCRUDTpResources(t *testing.T) {
 		t.Error(err)
 	}
 	//WRITE
-	var snd = []*utils.TPResource{
+	var snd = []*utils.TPResourceProfile{
 		{
 			TPid:         "testTPid",
 			ID:           "testTag1",
@@ -1088,7 +1088,7 @@ func testStorDBitCRUDTpStats(t *testing.T) {
 		t.Error(err)
 	}
 	//WRITE
-	eTPs := []*utils.TPStats{
+	eTPs := []*utils.TPStatProfile{
 		{
 			TPid:      "TEST_TPID",
 			Tenant:    "Test",
@@ -1097,9 +1097,19 @@ func testStorDBitCRUDTpStats(t *testing.T) {
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
-			QueueLength:  100,
-			TTL:          "1s",
-			Metrics:      []string{"*asr", "*acd", "*acc"},
+			QueueLength: 100,
+			TTL:         "1s",
+			Metrics: []*utils.MetricWithFilters{
+				&utils.MetricWithFilters{
+					MetricID: "*asr",
+				},
+				&utils.MetricWithFilters{
+					MetricID: "*acd",
+				},
+				&utils.MetricWithFilters{
+					MetricID: "*acc",
+				},
+			},
 			ThresholdIDs: []string{"THRESH1", "THRESH2"},
 			Weight:       20.0,
 			MinItems:     1,

@@ -23,6 +23,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -141,10 +142,10 @@ func (sq *StatQueue) TenantID() string {
 }
 
 // ProcessEvent processes a utils.CGREvent, returns true if processed
-func (sq *StatQueue) ProcessEvent(ev *utils.CGREvent) (err error) {
+func (sq *StatQueue) ProcessEvent(ev *utils.CGREvent, filterS *FilterS) (err error) {
 	sq.remExpired()
 	sq.remOnQueueLength()
-	sq.addStatEvent(ev)
+	sq.addStatEvent(ev, filterS)
 	return
 }
 
@@ -189,7 +190,7 @@ func (sq *StatQueue) remOnQueueLength() {
 }
 
 // addStatEvent computes metrics for an event
-func (sq *StatQueue) addStatEvent(ev *utils.CGREvent) {
+func (sq *StatQueue) addStatEvent(ev *utils.CGREvent, filterS *FilterS) {
 	var expTime *time.Time
 	if sq.ttl != nil {
 		expTime = utils.TimePointer(time.Now().Add(*sq.ttl))
@@ -201,6 +202,14 @@ func (sq *StatQueue) addStatEvent(ev *utils.CGREvent) {
 		}{ev.ID, expTime})
 
 	for metricID, metric := range sq.SQMetrics {
+		if pass, err := filterS.Pass(ev.Tenant, metric.GetFilterIDs(),
+			config.NewNavigableMap(ev.Event)); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<StatQueue> ignore metricID: %s with error: %s",
+				metricID, err.Error()))
+			continue
+		} else if !pass {
+			continue
+		}
 		if err := metric.AddEvent(ev); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, add eventID: %s, error: %s",
 				metricID, ev.ID, err.Error()))

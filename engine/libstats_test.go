@@ -190,7 +190,7 @@ func TestStatAddStatEvent(t *testing.T) {
 		t.Errorf("received ASR: %v", asr)
 	}
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
-	sq.addStatEvent(ev1)
+	sq.addStatEvent(ev1, nil)
 	if asr := asrMetric.GetFloat64Value(); asr != 50 {
 		t.Errorf("received ASR: %v", asr)
 	} else if asrMetric.Answered != 1 || asrMetric.Count != 2 {
@@ -198,7 +198,7 @@ func TestStatAddStatEvent(t *testing.T) {
 	}
 	ev1.Event = map[string]interface{}{
 		utils.AnswerTime: time.Now()}
-	sq.addStatEvent(ev1)
+	sq.addStatEvent(ev1, nil)
 	if asr := asrMetric.GetFloat64Value(); asr != 66.66667 {
 		t.Errorf("received ASR: %v", asr)
 	} else if asrMetric.Answered != 2 || asrMetric.Count != 3 {

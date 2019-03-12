@@ -1440,7 +1440,6 @@ func testOnStorITStatQueueProfile(t *testing.T) {
 		FilterIDs:          []string{"FLTR_1"},
 		QueueLength:        2,
 		TTL:                time.Duration(0 * time.Second),
-		Metrics:            []string{},
 		Stored:             true,
 		ThresholdIDs:       []string{"Thresh1"},
 	}
