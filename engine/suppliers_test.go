@@ -629,7 +629,7 @@ func TestSuppliersAsOptsGetSuppliersMaxCost(t *testing.T) {
 }
 
 func TestSuppliersMatchWithIndexFalse(t *testing.T) {
-	splService.filterS.cfg.FilterSCfg().IndexedSelects = false
+	splService.filterS.cfg.SupplierSCfg().IndexedSelects = false
 	sprf, err := splService.matchingSupplierProfilesForEvent(&argsGetSuppliers[0].CGREvent)
 	if err != nil {
 		t.Errorf("Error: %+v", err)

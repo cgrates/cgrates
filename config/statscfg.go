@@ -26,6 +26,7 @@ import (
 
 type StatSCfg struct {
 	Enabled             bool
+	IndexedSelects      bool
 	StoreInterval       time.Duration // Dump regularly from cache into dataDB
 	ThresholdSConns     []*HaPoolConfig
 	StringIndexedFields *[]string
@@ -38,6 +39,9 @@ func (st *StatSCfg) loadFromJsonCfg(jsnCfg *StatServJsonCfg) (err error) {
 	}
 	if jsnCfg.Enabled != nil {
 		st.Enabled = *jsnCfg.Enabled
+	}
+	if jsnCfg.Indexed_selects != nil {
+		st.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	if jsnCfg.Store_interval != nil {
 		if st.StoreInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Store_interval); err != nil {

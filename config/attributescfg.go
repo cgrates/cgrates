@@ -21,6 +21,7 @@ package config
 // AttributeSCfg is the configuration of attribute service
 type AttributeSCfg struct {
 	Enabled             bool
+	IndexedSelects      bool
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
 	ProcessRuns         int
@@ -32,6 +33,9 @@ func (alS *AttributeSCfg) loadFromJsonCfg(jsnCfg *AttributeSJsonCfg) (err error)
 	}
 	if jsnCfg.Enabled != nil {
 		alS.Enabled = *jsnCfg.Enabled
+	}
+	if jsnCfg.Indexed_selects != nil {
+		alS.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	if jsnCfg.String_indexed_fields != nil {
 		sif := make([]string, len(*jsnCfg.String_indexed_fields))

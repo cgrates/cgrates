@@ -21,7 +21,6 @@ package config
 type FilterSCfg struct {
 	StatSConns     []*HaPoolConfig
 	ResourceSConns []*HaPoolConfig
-	IndexedSelects bool
 }
 
 func (fSCfg *FilterSCfg) loadFromJsonCfg(jsnCfg *FilterSJsonCfg) (err error) {
@@ -41,9 +40,6 @@ func (fSCfg *FilterSCfg) loadFromJsonCfg(jsnCfg *FilterSJsonCfg) (err error) {
 			fSCfg.ResourceSConns[idx] = NewDfltHaPoolConfig()
 			fSCfg.ResourceSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
-	}
-	if jsnCfg.Indexed_selects != nil {
-		fSCfg.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	return
 }

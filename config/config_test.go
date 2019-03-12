@@ -772,7 +772,6 @@ func TestCgrCfgJSONDefaultFiltersCfg(t *testing.T) {
 	eFiltersCfg := &FilterSCfg{
 		StatSConns:     []*HaPoolConfig{},
 		ResourceSConns: []*HaPoolConfig{},
-		IndexedSelects: true,
 	}
 	if !reflect.DeepEqual(cgrCfg.filterSCfg, eFiltersCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.filterSCfg, eFiltersCfg)
@@ -782,6 +781,7 @@ func TestCgrCfgJSONDefaultFiltersCfg(t *testing.T) {
 func TestCgrCfgJSONDefaultSChargerSCfg(t *testing.T) {
 	eChargerSCfg := &ChargerSCfg{
 		Enabled:             false,
+		IndexedSelects:      true,
 		AttributeSConns:     []*HaPoolConfig{},
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
@@ -794,6 +794,7 @@ func TestCgrCfgJSONDefaultSChargerSCfg(t *testing.T) {
 func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 	eResLiCfg := &ResourceSConfig{
 		Enabled:             false,
+		IndexedSelects:      true,
 		ThresholdSConns:     []*HaPoolConfig{},
 		StoreInterval:       0,
 		StringIndexedFields: nil,
@@ -808,6 +809,7 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 func TestCgrCfgJSONDefaultStatsCfg(t *testing.T) {
 	eStatsCfg := &StatSCfg{
 		Enabled:             false,
+		IndexedSelects:      true,
 		StoreInterval:       0,
 		ThresholdSConns:     []*HaPoolConfig{},
 		StringIndexedFields: nil,
@@ -821,6 +823,7 @@ func TestCgrCfgJSONDefaultStatsCfg(t *testing.T) {
 func TestCgrCfgJSONDefaultThresholdSCfg(t *testing.T) {
 	eThresholdSCfg := &ThresholdSCfg{
 		Enabled:             false,
+		IndexedSelects:      true,
 		StoreInterval:       0,
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
@@ -833,6 +836,7 @@ func TestCgrCfgJSONDefaultThresholdSCfg(t *testing.T) {
 func TestCgrCfgJSONDefaultSupplierSCfg(t *testing.T) {
 	eSupplSCfg := &SupplierSCfg{
 		Enabled:             false,
+		IndexedSelects:      true,
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
 		AttributeSConns:     []*HaPoolConfig{},
@@ -1457,6 +1461,7 @@ func TestCgrLoaderCfgITDefaults(t *testing.T) {
 func TestCgrCfgJSONDefaultDispatcherSCfg(t *testing.T) {
 	eDspSCfg := &DispatcherSCfg{
 		Enabled:             false,
+		IndexedSelects:      true,
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
 		AttributeSConns:     []*HaPoolConfig{},

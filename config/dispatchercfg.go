@@ -21,6 +21,7 @@ package config
 // DispatcherSCfg is the configuration of dispatcher service
 type DispatcherSCfg struct {
 	Enabled             bool
+	IndexedSelects      bool
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
 	AttributeSConns     []*HaPoolConfig
@@ -33,6 +34,9 @@ func (dps *DispatcherSCfg) loadFromJsonCfg(jsnCfg *DispatcherSJsonCfg) (err erro
 	}
 	if jsnCfg.Enabled != nil {
 		dps.Enabled = *jsnCfg.Enabled
+	}
+	if jsnCfg.Indexed_selects != nil {
+		dps.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	if jsnCfg.String_indexed_fields != nil {
 		sif := make([]string, len(*jsnCfg.String_indexed_fields))

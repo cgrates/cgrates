@@ -81,7 +81,7 @@ func (dS *DispatcherService) dispatcherForEvent(ev *utils.CGREvent,
 		dS.cfg.DispatcherSCfg().StringIndexedFields,
 		dS.cfg.DispatcherSCfg().PrefixIndexedFields,
 		dS.dm, utils.CacheDispatcherFilterIndexes,
-		idxKeyPrfx, dS.cfg.FilterSCfg().IndexedSelects)
+		idxKeyPrfx, dS.cfg.DispatcherSCfg().IndexedSelects)
 	if err != nil {
 		// return nil, err
 		if err != utils.ErrNotFound {
@@ -91,7 +91,7 @@ func (dS *DispatcherService) dispatcherForEvent(ev *utils.CGREvent,
 			dS.cfg.DispatcherSCfg().StringIndexedFields,
 			dS.cfg.DispatcherSCfg().PrefixIndexedFields,
 			dS.dm, utils.CacheDispatcherFilterIndexes,
-			anyIdxPrfx, dS.cfg.FilterSCfg().IndexedSelects)
+			anyIdxPrfx, dS.cfg.DispatcherSCfg().IndexedSelects)
 		if err != nil {
 			return nil, err
 		}

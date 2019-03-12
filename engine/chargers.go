@@ -65,7 +65,7 @@ func (cS *ChargerService) Shutdown() (err error) {
 func (cS *ChargerService) matchingChargerProfilesForEvent(cgrEv *utils.CGREvent) (cPs ChargerProfiles, err error) {
 	cpIDs, err := MatchingItemIDsForEvent(cgrEv.Event,
 		cS.cfg.ChargerSCfg().StringIndexedFields, cS.cfg.ChargerSCfg().PrefixIndexedFields,
-		cS.dm, utils.CacheChargerFilterIndexes, cgrEv.Tenant, cS.cfg.FilterSCfg().IndexedSelects)
+		cS.dm, utils.CacheChargerFilterIndexes, cgrEv.Tenant, cS.cfg.ChargerSCfg().IndexedSelects)
 	if err != nil {
 		return nil, err
 	}

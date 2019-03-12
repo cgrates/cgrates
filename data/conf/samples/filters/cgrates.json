@@ -43,24 +43,26 @@
 	"resources_conns": [
 		{"address": "127.0.0.1:2012", "transport":"*json"},
 	],
-	"indexed_selects":false,					
 },
 
 
 "resources": {
 	"enabled": true,
+	"indexed_selects":false,					
 	"store_interval": "1s",
 },
 
 
 "stats": {
 	"enabled": true,
+	"indexed_selects":false,					
 	"store_interval": "1s",
 },
 
 
 "thresholds": {
 	"enabled": true,
+	"indexed_selects":false,					
 	"store_interval": "1s",
 },
 

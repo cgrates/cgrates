@@ -444,7 +444,7 @@ func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources)
 func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent, usageTTL *time.Duration) (rs Resources, err error) {
 	matchingResources := make(map[string]*Resource)
 	rIDs, err := MatchingItemIDsForEvent(ev.Event, rS.stringIndexedFields, rS.prefixIndexedFields,
-		rS.dm, utils.CacheResourceFilterIndexes, ev.Tenant, rS.filterS.cfg.FilterSCfg().IndexedSelects)
+		rS.dm, utils.CacheResourceFilterIndexes, ev.Tenant, rS.filterS.cfg.ResourceSCfg().IndexedSelects)
 	if err != nil {
 		return nil, err
 	}

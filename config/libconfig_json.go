@@ -92,7 +92,6 @@ type DbJsonCfg struct {
 // Filters config
 type FilterSJsonCfg struct {
 	Stats_conns     *[]*HaPoolJsonCfg
-	Indexed_selects *bool
 	Resources_conns *[]*HaPoolJsonCfg
 }
 
@@ -404,6 +403,7 @@ type HistServJsonCfg struct {
 // Attribute service config section
 type AttributeSJsonCfg struct {
 	Enabled               *bool
+	Indexed_selects       *bool
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
 	Process_runs          *int
@@ -412,6 +412,7 @@ type AttributeSJsonCfg struct {
 // ChargerSJsonCfg service config section
 type ChargerSJsonCfg struct {
 	Enabled               *bool
+	Indexed_selects       *bool
 	Attributes_conns      *[]*HaPoolJsonCfg
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
@@ -420,6 +421,7 @@ type ChargerSJsonCfg struct {
 // ResourceLimiter service config section
 type ResourceSJsonCfg struct {
 	Enabled               *bool
+	Indexed_selects       *bool
 	Thresholds_conns      *[]*HaPoolJsonCfg
 	Store_interval        *string
 	String_indexed_fields *[]string
@@ -429,6 +431,7 @@ type ResourceSJsonCfg struct {
 // Stat service config section
 type StatServJsonCfg struct {
 	Enabled               *bool
+	Indexed_selects       *bool
 	Store_interval        *string
 	Thresholds_conns      *[]*HaPoolJsonCfg
 	String_indexed_fields *[]string
@@ -438,6 +441,7 @@ type StatServJsonCfg struct {
 // Threshold service config section
 type ThresholdSJsonCfg struct {
 	Enabled               *bool
+	Indexed_selects       *bool
 	Store_interval        *string
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
@@ -446,6 +450,7 @@ type ThresholdSJsonCfg struct {
 // Supplier service config section
 type SupplierSJsonCfg struct {
 	Enabled               *bool
+	Indexed_selects       *bool
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
 	Attributes_conns      *[]*HaPoolJsonCfg
@@ -514,6 +519,7 @@ type SureTaxJsonCfg struct {
 
 type DispatcherSJsonCfg struct {
 	Enabled               *bool
+	Indexed_selects       *bool
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
 	Attributes_conns      *[]*HaPoolJsonCfg
