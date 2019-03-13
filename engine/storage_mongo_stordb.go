@@ -1178,7 +1178,7 @@ func (ms *MongoStorage) GetTPThresholds(tpid, tenant, id string) ([]*utils.TPThr
 	if tenant != "" {
 		filter["tenant"] = tenant
 	}
-	var results []*utils.TPThreshold
+	var results []*utils.TPThresholdProfile
 	err := ms.query(func(sctx mongo.SessionContext) (err error) {
 		cur, err := ms.getCol(utils.TBLTPThresholds).Find(sctx, filter)
 		if err != nil {
