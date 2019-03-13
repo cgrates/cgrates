@@ -241,8 +241,8 @@ type TpStat struct {
 	MinItems           int     `index:"6" re:""`
 	MetricIDs          string  `index:"7" re:""`
 	MetricFilterIDs    string  `index:"8" re:""`
-	Blocker            bool    `index:"9" re:""`
-	Stored             bool    `index:"10" re:""`
+	Stored             bool    `index:"9" re:""`
+	Blocker            bool    `index:"10" re:""`
 	Weight             float64 `index:"11" re:"\d+\.?\d*"`
 	ThresholdIDs       string  `index:"12" re:""`
 	CreatedAt          time.Time

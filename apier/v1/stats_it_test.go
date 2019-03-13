@@ -71,20 +71,20 @@ func init() {
 }
 
 var sTestsStatSV1 = []func(t *testing.T){
-	// testV1STSLoadConfig,
-	// testV1STSInitDataDb,
-	// testV1STSStartEngine,
-	// testV1STSRpcConn,
-	// testV1STSFromFolder,
-	// testV1STSGetStats,
-	// testV1STSProcessEvent,
-	// testV1STSGetStatsAfterRestart,
-	// testV1STSSetStatQueueProfile,
-	// testV1STSGetStatQueueProfileIDs,
-	// testV1STSUpdateStatQueueProfile,
-	// testV1STSRemoveStatQueueProfile,
-	// testV1STSStatsPing,
-	// testV1STSStopEngine,
+	testV1STSLoadConfig,
+	testV1STSInitDataDb,
+	testV1STSStartEngine,
+	testV1STSRpcConn,
+	testV1STSFromFolder,
+	testV1STSGetStats,
+	testV1STSProcessEvent,
+	testV1STSGetStatsAfterRestart,
+	testV1STSSetStatQueueProfile,
+	testV1STSGetStatQueueProfileIDs,
+	testV1STSUpdateStatQueueProfile,
+	testV1STSRemoveStatQueueProfile,
+	testV1STSStatsPing,
+	testV1STSStopEngine,
 }
 
 //Test start here
@@ -155,8 +155,6 @@ func testV1STSGetStats(t *testing.T) {
 		utils.MetaTCD: utils.NOT_AVAILABLE,
 		utils.MetaACC: utils.NOT_AVAILABLE,
 		utils.MetaPDD: utils.NOT_AVAILABLE,
-		utils.StatsJoin(utils.MetaSum, utils.Value):     utils.NOT_AVAILABLE,
-		utils.StatsJoin(utils.MetaAverage, utils.Value): utils.NOT_AVAILABLE,
 		utils.StatsJoin(utils.MetaSum, utils.Usage):     utils.NOT_AVAILABLE,
 		utils.StatsJoin(utils.MetaAverage, utils.Usage): utils.NOT_AVAILABLE,
 	}
@@ -194,8 +192,6 @@ func testV1STSProcessEvent(t *testing.T) {
 		utils.MetaTCD: utils.NOT_AVAILABLE,
 		utils.MetaACC: utils.NOT_AVAILABLE,
 		utils.MetaPDD: utils.NOT_AVAILABLE,
-		utils.StatsJoin(utils.MetaSum, utils.Value):     utils.NOT_AVAILABLE,
-		utils.StatsJoin(utils.MetaAverage, utils.Value): utils.NOT_AVAILABLE,
 		utils.StatsJoin(utils.MetaSum, utils.Usage):     utils.NOT_AVAILABLE,
 		utils.StatsJoin(utils.MetaAverage, utils.Usage): utils.NOT_AVAILABLE,
 	}
@@ -214,7 +210,8 @@ func testV1STSProcessEvent(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.Account:    "1002",
 				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:      time.Duration(45 * time.Second)}}}
+				utils.Usage:      time.Duration(45 * time.Second),
+				utils.Cost:       12.1}}}
 	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &args2, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
@@ -227,7 +224,8 @@ func testV1STSProcessEvent(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.Account:   "1002",
 				utils.SetupTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				utils.Usage:     0}}}
+				utils.Usage:     0,
+				utils.Cost:      0}}}
 	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &args3, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
@@ -235,15 +233,13 @@ func testV1STSProcessEvent(t *testing.T) {
 	}
 	expectedMetrics2 := map[string]string{
 		utils.MetaASR: "66.66667%",
-		utils.MetaACD: "1m30s",
-		utils.MetaACC: "61.5",
+		utils.MetaACD: "1m0s",
+		utils.MetaACC: "45.03333",
 		utils.MetaTCD: "3m0s",
-		utils.MetaTCC: "123",
-		utils.MetaPDD: "4s",
-		utils.StatsJoin(utils.MetaSum, utils.Value):     utils.NOT_AVAILABLE,
-		utils.StatsJoin(utils.MetaAverage, utils.Value): utils.NOT_AVAILABLE,
+		utils.MetaTCC: "135.1",
+		utils.MetaPDD: utils.NOT_AVAILABLE,
 		utils.StatsJoin(utils.MetaSum, utils.Usage):     "180000000000",
-		utils.StatsJoin(utils.MetaAverage, utils.Usage): "90000000000",
+		utils.StatsJoin(utils.MetaAverage, utils.Usage): "60000000000",
 	}
 	var metrics2 map[string]string
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics, &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics2); err != nil {
@@ -268,15 +264,13 @@ func testV1STSGetStatsAfterRestart(t *testing.T) {
 	//get stats metrics after restart
 	expectedMetrics2 := map[string]string{
 		utils.MetaASR: "66.66667%",
-		utils.MetaACD: "1m30s",
-		utils.MetaACC: "61.5",
+		utils.MetaACD: "1m0s",
+		utils.MetaACC: "45.03333",
 		utils.MetaTCD: "3m0s",
-		utils.MetaTCC: "123",
-		utils.MetaPDD: "4s",
-		utils.StatsJoin(utils.MetaSum, utils.Value):     "0",
-		utils.StatsJoin(utils.MetaAverage, utils.Value): utils.NOT_AVAILABLE,
+		utils.MetaTCC: "135.1",
+		utils.MetaPDD: utils.NOT_AVAILABLE,
 		utils.StatsJoin(utils.MetaSum, utils.Usage):     "180000000000",
-		utils.StatsJoin(utils.MetaAverage, utils.Usage): "90000000000",
+		utils.StatsJoin(utils.MetaAverage, utils.Usage): "60000000000",
 	}
 	var metrics2 map[string]string
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics, &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics2); err != nil {

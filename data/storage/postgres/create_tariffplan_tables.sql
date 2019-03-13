@@ -280,14 +280,14 @@ CREATE TABLE tp_stats (
   "min_items" INTEGER NOT NULL,
   "metric_ids" VARCHAR(128) NOT NULL,
   "metric_filter_ids" VARCHAR(128) NOT NULL,
-  "blocker" BOOLEAN NOT NULL,
   "stored" BOOLEAN NOT NULL,
+  "blocker" BOOLEAN NOT NULL,
   "weight" decimal(8,2) NOT NULL,
   "threshold_ids" varchar(64) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );
 CREATE INDEX tp_stats_idx ON tp_stats (tpid);
-CREATE INDEX tp_stats_unique ON tp_stats  ("tpid","tenant", "id", "filter_ids");
+CREATE INDEX tp_stats_unique ON tp_stats  ("tpid","tenant", "id", "filter_ids","metric_ids");
 
 --
 -- Table structure for table `tp_threshold_cfgs`
