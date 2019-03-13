@@ -71,7 +71,7 @@ func TestVrsITMongo(t *testing.T) {
 func testVrsInitCfg(t *testing.T) {
 	var err error
 	vrsCfgPath = path.Join(vrsDataDir, "conf", "samples", vrsConfigDIR)
-	vrsCfg, err = config.NewCGRConfigFromFolder(vrsCfgPath)
+	vrsCfg, err = config.NewCGRConfigFromPath(vrsCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

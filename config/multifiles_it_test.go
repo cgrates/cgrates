@@ -37,7 +37,7 @@ func TestMfInitConfig(t *testing.T) {
 		os.Setenv(key, val)
 	}
 	var err error
-	if mfCgrCfg, err = NewCGRConfigFromFolder("/usr/share/cgrates/conf/samples/multifiles"); err != nil {
+	if mfCgrCfg, err = NewCGRConfigFromPath("/usr/share/cgrates/conf/samples/multifiles"); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }

@@ -60,7 +60,7 @@ var sTestsStorDBit = []func(t *testing.T){
 }
 
 func TestStorDBitMySQL(t *testing.T) {
-	if cfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "storage", "mysql")); err != nil {
+	if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "mysql")); err != nil {
 		t.Fatal(err)
 	}
 	if storDB, err = NewMySQLStorage(cfg.StorDbCfg().StorDBHost,
@@ -80,7 +80,7 @@ func TestStorDBitMySQL(t *testing.T) {
 }
 
 func TestStorDBitPostgresSQL(t *testing.T) {
-	if cfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "storage", "postgres")); err != nil {
+	if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "postgres")); err != nil {
 		t.Fatal(err)
 	}
 	if storDB, err = NewPostgresStorage(cfg.StorDbCfg().StorDBHost,
@@ -100,7 +100,7 @@ func TestStorDBitPostgresSQL(t *testing.T) {
 }
 
 func TestStorDBitMongo(t *testing.T) {
-	if cfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "storage", "mongo")); err != nil {
+	if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "mongo")); err != nil {
 		t.Fatal(err)
 	}
 	if storDB, err = NewMongoStorage(cfg.StorDbCfg().StorDBHost,

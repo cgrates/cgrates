@@ -94,7 +94,7 @@ func testRedisSentinelStartNodes(t *testing.T) {
 
 func testRedisSentinelInitConfig(t *testing.T) {
 	var err error
-	sentinelConfig, err = config.NewCGRConfigFromFolder(engineConfigPath)
+	sentinelConfig, err = config.NewCGRConfigFromPath(engineConfigPath)
 	if err != nil {
 		t.Error(err)
 	}

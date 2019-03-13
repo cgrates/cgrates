@@ -76,7 +76,7 @@ func TestTPDispatcherITMongo(t *testing.T) {
 func testTPDispatcherInitCfg(t *testing.T) {
 	var err error
 	tpDispatcherCfgPath = path.Join(tpDispatcherDataDir, "conf", "samples", tpDispatcherConfigDIR)
-	tpDispatcherCfg, err = config.NewCGRConfigFromFolder(tpDispatcherCfgPath)
+	tpDispatcherCfg, err = config.NewCGRConfigFromPath(tpDispatcherCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

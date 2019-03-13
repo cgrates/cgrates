@@ -62,10 +62,10 @@ func TestAliasITMigrateMongo2Redis(t *testing.T) {
 
 func testStart(testName, inPath, outPath string, t *testing.T) {
 	var err error
-	if alsCfgIn, err = config.NewCGRConfigFromFolder(inPath); err != nil {
+	if alsCfgIn, err = config.NewCGRConfigFromPath(inPath); err != nil {
 		t.Fatal(err)
 	}
-	if alsCfgOut, err = config.NewCGRConfigFromFolder(outPath); err != nil {
+	if alsCfgOut, err = config.NewCGRConfigFromPath(outPath); err != nil {
 		t.Fatal(err)
 	}
 	for _, stest := range sTestsAlsIT {

@@ -83,7 +83,7 @@ func TestTPTimingITPG(t *testing.T) {
 func testTPTimingsInitCfg(t *testing.T) {
 	var err error
 	tpTimingCfgPath = path.Join(tpTimingDataDir, "conf", "samples", tpTimingConfigDIR)
-	tpTimingCfg, err = config.NewCGRConfigFromFolder(tpTimingCfgPath)
+	tpTimingCfg, err = config.NewCGRConfigFromPath(tpTimingCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

@@ -50,12 +50,12 @@ var sTestsDspIT = []func(t *testing.T){
 func TestDispatcherITMove1(t *testing.T) {
 	var err error
 	dspPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	dspCfgIn, err = config.NewCGRConfigFromFolder(dspPathIn)
+	dspCfgIn, err = config.NewCGRConfigFromPath(dspPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	dspPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	dspCfgOut, err = config.NewCGRConfigFromFolder(dspPathOut)
+	dspCfgOut, err = config.NewCGRConfigFromPath(dspPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -68,12 +68,12 @@ func TestDispatcherITMove1(t *testing.T) {
 func TestDispatcherITMove2(t *testing.T) {
 	var err error
 	dspPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	dspCfgIn, err = config.NewCGRConfigFromFolder(dspPathIn)
+	dspCfgIn, err = config.NewCGRConfigFromPath(dspPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	dspPathOut = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	dspCfgOut, err = config.NewCGRConfigFromFolder(dspPathOut)
+	dspCfgOut, err = config.NewCGRConfigFromPath(dspPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -86,12 +86,12 @@ func TestDispatcherITMove2(t *testing.T) {
 func TestDispatcherITMoveEncoding(t *testing.T) {
 	var err error
 	dspPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	dspCfgIn, err = config.NewCGRConfigFromFolder(dspPathIn)
+	dspCfgIn, err = config.NewCGRConfigFromPath(dspPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	dspPathOut = path.Join(*dataDir, "conf", "samples", "tutmongojson")
-	dspCfgOut, err = config.NewCGRConfigFromFolder(dspPathOut)
+	dspCfgOut, err = config.NewCGRConfigFromPath(dspPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -104,12 +104,12 @@ func TestDispatcherITMoveEncoding(t *testing.T) {
 func TestDispatcherITMoveEncoding2(t *testing.T) {
 	var err error
 	dspPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	dspCfgIn, err = config.NewCGRConfigFromFolder(dspPathIn)
+	dspCfgIn, err = config.NewCGRConfigFromPath(dspPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	dspPathOut = path.Join(*dataDir, "conf", "samples", "tutmysqljson")
-	dspCfgOut, err = config.NewCGRConfigFromFolder(dspPathOut)
+	dspCfgOut, err = config.NewCGRConfigFromPath(dspPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}

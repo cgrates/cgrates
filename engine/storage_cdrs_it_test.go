@@ -32,7 +32,7 @@ import (
 )
 
 func TestITCDRsMySQL(t *testing.T) {
-	cfg, err := config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "storage", "mysql"))
+	cfg, err := config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "mysql"))
 	if err != nil {
 		t.Error(err)
 	}
@@ -48,7 +48,7 @@ func TestITCDRsMySQL(t *testing.T) {
 }
 
 func TestITCDRsPSQL(t *testing.T) {
-	cfg, err := config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "storage", "postgres"))
+	cfg, err := config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "postgres"))
 	if err != nil {
 		t.Error(err)
 	}
@@ -64,7 +64,7 @@ func TestITCDRsPSQL(t *testing.T) {
 }
 
 func TestITCDRsMongo(t *testing.T) {
-	cfg, err := config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "storage", "mongo"))
+	cfg, err := config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "mongo"))
 	if err != nil {
 		t.Error(err)
 	}

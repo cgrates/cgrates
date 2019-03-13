@@ -42,7 +42,7 @@ var sTestsITVersions = []func(t *testing.T){
 
 func TestVersionsITMongo(t *testing.T) {
 	var err error
-	if cfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "tutmongo")); err != nil {
+	if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "tutmongo")); err != nil {
 		t.Fatal(err)
 	}
 	if dm3, err = ConfigureDataStorage(cfg.DataDbCfg().DataDbType,
@@ -71,7 +71,7 @@ func TestVersionsITMongo(t *testing.T) {
 
 func TestVersionsITRedisMYSQL(t *testing.T) {
 	var err error
-	if cfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "tutmysql")); err != nil {
+	if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "tutmysql")); err != nil {
 		t.Fatal(err)
 	}
 	dm3, err = ConfigureDataStorage(cfg.DataDbCfg().DataDbType,
@@ -101,7 +101,7 @@ func TestVersionsITRedisMYSQL(t *testing.T) {
 
 func TestVersionsITRedisPostgres(t *testing.T) {
 	var err error
-	if cfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "storage", "postgres")); err != nil {
+	if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "postgres")); err != nil {
 		t.Fatal(err)
 	}
 	dm3, err = ConfigureDataStorage(cfg.DataDbCfg().DataDbType,

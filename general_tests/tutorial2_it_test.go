@@ -69,7 +69,7 @@ func TestTutorial2Mongo(t *testing.T) {
 func testTutLoadConfig(t *testing.T) {
 	var err error
 	tutCfgPath = path.Join(*dataDir, "conf", "samples", tutCfgDir)
-	if tutCfg, err = config.NewCGRConfigFromFolder(tutCfgPath); err != nil {
+	if tutCfg, err = config.NewCGRConfigFromPath(tutCfgPath); err != nil {
 		t.Error(err)
 	}
 	switch tutCfgDir {

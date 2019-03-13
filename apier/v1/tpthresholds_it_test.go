@@ -83,7 +83,7 @@ func TestTPThresholdITPG(t *testing.T) {
 func testTPThreholdInitCfg(t *testing.T) {
 	var err error
 	tpThresholdCfgPath = path.Join(tpThresholdDataDir, "conf", "samples", tpThresholdConfigDIR)
-	tpThresholdCfg, err = config.NewCGRConfigFromFolder(tpThresholdCfgPath)
+	tpThresholdCfg, err = config.NewCGRConfigFromPath(tpThresholdCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

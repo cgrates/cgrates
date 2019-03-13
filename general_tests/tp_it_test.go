@@ -43,7 +43,7 @@ func TestTpInitCfg(t *testing.T) {
 	tpCfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
 	// Init config first
 	var err error
-	tpCfg, err = config.NewCGRConfigFromFolder(tpCfgPath)
+	tpCfg, err = config.NewCGRConfigFromPath(tpCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

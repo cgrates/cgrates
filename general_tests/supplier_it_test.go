@@ -78,7 +78,7 @@ func TestSuplSV1ITMongo(t *testing.T) {
 func testV1SplSLoadConfig(t *testing.T) {
 	var err error
 	splSv1CfgPath = path.Join(*dataDir, "conf", "samples", splSv1ConfDIR)
-	if splSv1Cfg, err = config.NewCGRConfigFromFolder(splSv1CfgPath); err != nil {
+	if splSv1Cfg, err = config.NewCGRConfigFromPath(splSv1CfgPath); err != nil {
 		t.Error(err)
 	}
 }

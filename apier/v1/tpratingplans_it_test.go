@@ -83,7 +83,7 @@ func TestTPRatingPlansITPG(t *testing.T) {
 func testTPRatingPlansInitCfg(t *testing.T) {
 	var err error
 	tpRatingPlanCfgPath = path.Join(tpRatingPlanDataDir, "conf", "samples", tpRatingPlanConfigDIR)
-	tpRatingPlanCfg, err = config.NewCGRConfigFromFolder(tpRatingPlanCfgPath)
+	tpRatingPlanCfg, err = config.NewCGRConfigFromPath(tpRatingPlanCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

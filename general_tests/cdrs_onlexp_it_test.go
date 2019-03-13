@@ -45,11 +45,11 @@ var cdrsMasterRpc *rpcclient.RpcClient
 func TestCDRsOnExpInitConfig(t *testing.T) {
 	var err error
 	cdrsMasterCfgPath = path.Join(*dataDir, "conf", "samples", "cdrsonexpmaster")
-	if cdrsMasterCfg, err = config.NewCGRConfigFromFolder(cdrsMasterCfgPath); err != nil {
+	if cdrsMasterCfg, err = config.NewCGRConfigFromPath(cdrsMasterCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 	cdrsSlaveCfgPath = path.Join(*dataDir, "conf", "samples", "cdrsonexpslave")
-	if cdrsSlaveCfg, err = config.NewCGRConfigFromFolder(cdrsSlaveCfgPath); err != nil {
+	if cdrsSlaveCfg, err = config.NewCGRConfigFromPath(cdrsSlaveCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }

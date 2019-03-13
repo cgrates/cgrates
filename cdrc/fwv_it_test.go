@@ -79,7 +79,7 @@ TRL0001DDB     ABC                                     Some Connect A.B.        
 func TestFwvitInitCfg(t *testing.T) {
 	var err error
 	fwvCfgPath = path.Join(*dataDir, "conf", "samples", "cdrcfwv")
-	if fwvCfg, err = config.NewCGRConfigFromFolder(fwvCfgPath); err != nil {
+	if fwvCfg, err = config.NewCGRConfigFromPath(fwvCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }
@@ -180,7 +180,7 @@ func TestFwvitKillEngine(t *testing.T) {
 func TestFwvit2InitCfg(t *testing.T) {
 	var err error
 	fwvCfgPath = path.Join(*dataDir, "conf", "samples", "cdrcfwvwithfilter")
-	if fwvCfg, err = config.NewCGRConfigFromFolder(fwvCfgPath); err != nil {
+	if fwvCfg, err = config.NewCGRConfigFromPath(fwvCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }
@@ -269,7 +269,7 @@ func TestFwvit2KillEngine(t *testing.T) {
 func TestFwvit3InitCfg(t *testing.T) {
 	var err error
 	fwvCfgPath = path.Join(*dataDir, "conf", "samples", "cdrcfwvwithfilter")
-	if fwvCfg, err = config.NewCGRConfigFromFolder(fwvCfgPath); err != nil {
+	if fwvCfg, err = config.NewCGRConfigFromPath(fwvCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }

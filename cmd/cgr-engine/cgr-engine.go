@@ -1250,7 +1250,7 @@ func main() {
 	}
 	var err error
 	// Init config
-	cfg, err = config.NewCGRConfigFromFolder(*cfgPath)
+	cfg, err = config.NewCGRConfigFromPath(*cfgPath)
 	if err != nil {
 		log.Fatalf("Could not parse config: <%s>", err.Error())
 		return

@@ -125,7 +125,7 @@ func main() {
 
 	mgrCfg := dfltCfg
 	if *cfgPath != "" {
-		if mgrCfg, err = config.NewCGRConfigFromFolder(*cfgPath); err != nil {
+		if mgrCfg, err = config.NewCGRConfigFromPath(*cfgPath); err != nil {
 			log.Fatalf("error loading config file %s", err.Error())
 		}
 	}

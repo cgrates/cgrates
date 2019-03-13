@@ -72,7 +72,7 @@ func TestDispatcherSITMongo(t *testing.T) {
 func testDispatcherSInitCfg(t *testing.T) {
 	var err error
 	dispatcherCfgPath = path.Join(*dataDir, "conf", "samples", dispatcherConfigDIR)
-	dispatcherCfg, err = config.NewCGRConfigFromFolder(dispatcherCfgPath)
+	dispatcherCfg, err = config.NewCGRConfigFromPath(dispatcherCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

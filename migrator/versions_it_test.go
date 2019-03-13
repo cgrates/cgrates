@@ -46,7 +46,7 @@ var sTestsVrsIT = []func(t *testing.T){
 func TestVersionITRedis(t *testing.T) {
 	var err error
 	vrsPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	vrsCfg, err = config.NewCGRConfigFromFolder(vrsPath)
+	vrsCfg, err = config.NewCGRConfigFromPath(vrsPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +59,7 @@ func TestVersionITRedis(t *testing.T) {
 func TestVersionITMongo(t *testing.T) {
 	var err error
 	vrsPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	vrsCfg, err = config.NewCGRConfigFromFolder(vrsPath)
+	vrsCfg, err = config.NewCGRConfigFromPath(vrsPath)
 	if err != nil {
 		t.Fatal(err)
 	}

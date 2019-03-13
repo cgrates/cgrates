@@ -72,7 +72,7 @@ func TestCDREITMongo(t *testing.T) {
 func testCDREInitCfg(t *testing.T) {
 	var err error
 	cdreCfgPath = path.Join(cdreDataDir, "conf", "samples", cdreConfigDIR)
-	cdreCfg, err = config.NewCGRConfigFromFolder(cdreCfgPath)
+	cdreCfg, err = config.NewCGRConfigFromPath(cdreCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

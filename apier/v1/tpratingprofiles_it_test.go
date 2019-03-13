@@ -85,7 +85,7 @@ func TestTPRatingProfilesITPG(t *testing.T) {
 func testTPRatingProfilesInitCfg(t *testing.T) {
 	var err error
 	tpRatingProfileCfgPath = path.Join(tpRatingProfileDataDir, "conf", "samples", tpRatingProfileConfigDIR)
-	tpRatingProfileCfg, err = config.NewCGRConfigFromFolder(tpRatingProfileCfgPath)
+	tpRatingProfileCfg, err = config.NewCGRConfigFromPath(tpRatingProfileCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

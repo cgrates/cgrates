@@ -185,7 +185,7 @@ func TestTSV1ITMongo(t *testing.T) {
 func testV1TSLoadConfig(t *testing.T) {
 	var err error
 	tSv1CfgPath = path.Join(*dataDir, "conf", "samples", tSv1ConfDIR)
-	if tSv1Cfg, err = config.NewCGRConfigFromFolder(tSv1CfgPath); err != nil {
+	if tSv1Cfg, err = config.NewCGRConfigFromPath(tSv1CfgPath); err != nil {
 		t.Error(err)
 	}
 }

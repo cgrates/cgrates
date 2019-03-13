@@ -53,7 +53,7 @@ var eCacheDumpFile1 = `4986517174963_004986517174964_04.07.2016 18:58:55,1467651
 func TestPartcsvITInitConfig(t *testing.T) {
 	var err error
 	partpartcsvCfgPath = path.Join(*dataDir, "conf", "samples", "cdrc_partcsv")
-	if partcsvCfg, err = config.NewCGRConfigFromFolder(partpartcsvCfgPath); err != nil {
+	if partcsvCfg, err = config.NewCGRConfigFromPath(partpartcsvCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }

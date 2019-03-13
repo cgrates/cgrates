@@ -83,7 +83,7 @@ func TestTPSharedGroupsITPG(t *testing.T) {
 func testTPSharedGroupsInitCfg(t *testing.T) {
 	var err error
 	tpSharedGroupCfgPath = path.Join(tpSharedGroupDataDir, "conf", "samples", tpSharedGroupConfigDIR)
-	tpSharedGroupCfg, err = config.NewCGRConfigFromFolder(tpSharedGroupCfgPath)
+	tpSharedGroupCfg, err = config.NewCGRConfigFromPath(tpSharedGroupCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

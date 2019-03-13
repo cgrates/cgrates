@@ -76,7 +76,7 @@ func TestFilterITMongo(t *testing.T) {
 func testFilterInitCfg(t *testing.T) {
 	var err error
 	filterCfgPath = path.Join(filterDataDir, "conf", "samples", filterConfigDIR)
-	filterCfg, err = config.NewCGRConfigFromFolder(filterCfgPath)
+	filterCfg, err = config.NewCGRConfigFromPath(filterCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

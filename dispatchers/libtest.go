@@ -50,7 +50,7 @@ func newTestEngine(t *testing.T, cfgPath string, initDataDB, intitStoreDB bool) 
 	d = new(testDispatcher)
 	d.CfgParh = cfgPath
 	var err error
-	d.Cfg, err = config.NewCGRConfigFromFolder(d.CfgParh)
+	d.Cfg, err = config.NewCGRConfigFromPath(d.CfgParh)
 	if err != nil {
 		t.Fatalf("Error at config init :%v\n", err)
 	}

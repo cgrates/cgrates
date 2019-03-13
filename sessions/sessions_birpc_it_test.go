@@ -50,7 +50,7 @@ func handleDisconnectSession(clnt *rpc2.Client,
 func TestSessionsBiRPCInitCfg(t *testing.T) {
 	sessionsBiRPCCfgPath = path.Join(*dataDir, "conf", "samples", "smg_automatic_debits")
 	// Init config first
-	sessionsBiRPCCfg, err = config.NewCGRConfigFromFolder(sessionsBiRPCCfgPath)
+	sessionsBiRPCCfg, err = config.NewCGRConfigFromPath(sessionsBiRPCCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

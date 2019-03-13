@@ -48,7 +48,7 @@ var stiLoadInst utils.LoadInstance
 func TestSTIInitCfg(t *testing.T) {
 	// Init config first
 	var err error
-	stiCfg, err = config.NewCGRConfigFromFolder(*configDir)
+	stiCfg, err = config.NewCGRConfigFromPath(*configDir)
 	if err != nil {
 		t.Error(err)
 	}

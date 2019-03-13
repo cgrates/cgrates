@@ -43,7 +43,7 @@ var (
 // test for 0 balance with session terminate with 1s usage
 func TestSesItLoadConfig(t *testing.T) {
 	sesCfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql_internal")
-	if sesCfg, err = config.NewCGRConfigFromFolder(sesCfgPath); err != nil {
+	if sesCfg, err = config.NewCGRConfigFromPath(sesCfgPath); err != nil {
 		t.Error(err)
 	}
 }

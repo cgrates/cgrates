@@ -101,7 +101,7 @@ func testDiamItInitCfg(t *testing.T) {
 	daCfgPath = path.Join(*dataDir, "conf", "samples", diamConfigDIR)
 	// Init config first
 	var err error
-	daCfg, err = config.NewCGRConfigFromFolder(daCfgPath)
+	daCfg, err = config.NewCGRConfigFromPath(daCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

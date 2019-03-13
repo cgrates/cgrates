@@ -42,7 +42,7 @@ var (
 
 func TestSrItLoadConfig(t *testing.T) {
 	srCfgPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	if srCfg, err = config.NewCGRConfigFromFolder(srCfgPath); err != nil {
+	if srCfg, err = config.NewCGRConfigFromPath(srCfgPath); err != nil {
 		t.Error(err)
 	}
 }

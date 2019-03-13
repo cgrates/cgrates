@@ -39,7 +39,7 @@ func TestSessionsDataInitCfg(t *testing.T) {
 	dataCfgPath = path.Join(*dataDir, "conf", "samples", "smg")
 	// Init config first
 	var err error
-	dataCfg, err = config.NewCGRConfigFromFolder(dataCfgPath)
+	dataCfg, err = config.NewCGRConfigFromPath(dataCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

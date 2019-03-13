@@ -68,7 +68,7 @@ accid23;*rated;cgrates.org;1001;086517174963;2013-02-03 19:54:00;26;val_extra3;"
 func TestCsvITInitConfig(t *testing.T) {
 	var err error
 	csvCfgPath = path.Join(*dataDir, "conf", "samples", "cdrccsv")
-	if csvCfg, err = config.NewCGRConfigFromFolder(csvCfgPath); err != nil {
+	if csvCfg, err = config.NewCGRConfigFromPath(csvCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }
@@ -182,7 +182,7 @@ accid23;*rated;cgrates.org;1001;086517174963;2013-02-03 19:54:00;26;val_extra3;"
 func TestCsvIT2InitConfig(t *testing.T) {
 	var err error
 	csvCfgPath = path.Join(*dataDir, "conf", "samples", "cdrccsv")
-	if csvCfg, err = config.NewCGRConfigFromFolder(csvCfgPath); err != nil {
+	if csvCfg, err = config.NewCGRConfigFromPath(csvCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }
@@ -274,7 +274,7 @@ accid23;*prepaid;cgrates.org;1002;086517174963;2013-02-03 19:54:00;76;val_extra3
 func TestCsvIT3InitConfig(t *testing.T) {
 	var err error
 	csvCfgPath = path.Join(*dataDir, "conf", "samples", "cdrccsv")
-	if csvCfg, err = config.NewCGRConfigFromFolder(csvCfgPath); err != nil {
+	if csvCfg, err = config.NewCGRConfigFromPath(csvCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }
@@ -361,7 +361,7 @@ accid23;*postpaid;cgrates.org;1002;086517174963;2013-02-03 19:54:00;76;val_extra
 func TestCsvIT4InitConfig(t *testing.T) {
 	var err error
 	csvCfgPath = path.Join(*dataDir, "conf", "samples", "cdrccsv")
-	if csvCfg, err = config.NewCGRConfigFromFolder(csvCfgPath); err != nil {
+	if csvCfg, err = config.NewCGRConfigFromPath(csvCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }
@@ -448,7 +448,7 @@ accid24;*postpaid;cgrates.org;1001;+4986517174963;2013-02-03 19:54:00;76;val_ext
 func TestCsvIT5InitConfig(t *testing.T) {
 	var err error
 	csvCfgPath = path.Join(*dataDir, "conf", "samples", "cdrccsv")
-	if csvCfg, err = config.NewCGRConfigFromFolder(csvCfgPath); err != nil {
+	if csvCfg, err = config.NewCGRConfigFromPath(csvCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }

@@ -65,7 +65,7 @@ func TestCDRExportMySql(t *testing.T) {
 func testCDReInitCfg(t *testing.T) {
 	var err error
 	cdreCfgPath = path.Join(alsPrfDataDir, "conf", "samples", cdreConfigDIR)
-	cdreCfg, err = config.NewCGRConfigFromFolder(cdreCfgPath)
+	cdreCfg, err = config.NewCGRConfigFromPath(cdreCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

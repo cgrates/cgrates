@@ -64,7 +64,7 @@ func TestHAitSimple(t *testing.T) {
 	haCfgPath = path.Join(*dataDir, "conf", "samples", "httpagent")
 	// Init config first
 	var err error
-	haCfg, err = config.NewCGRConfigFromFolder(haCfgPath)
+	haCfg, err = config.NewCGRConfigFromPath(haCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
@@ -80,7 +80,7 @@ func TestHA2itWithTls(t *testing.T) {
 	haCfgPath = path.Join(*dataDir, "conf", "samples", "httpagenttls")
 	// Init config first
 	var err error
-	haCfg, err = config.NewCGRConfigFromFolder(haCfgPath)
+	haCfg, err = config.NewCGRConfigFromPath(haCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

@@ -82,7 +82,7 @@ func TestTPResITPG(t *testing.T) {
 func testTPResInitCfg(t *testing.T) {
 	var err error
 	tpResCfgPath = path.Join(tpResDataDir, "conf", "samples", tpResConfigDIR)
-	tpResCfg, err = config.NewCGRConfigFromFolder(tpResCfgPath)
+	tpResCfg, err = config.NewCGRConfigFromPath(tpResCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

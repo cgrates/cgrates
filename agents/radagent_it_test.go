@@ -44,7 +44,7 @@ func TestRAitInitCfg(t *testing.T) {
 	raCfgPath = path.Join(*dataDir, "conf", "samples", "radagent")
 	// Init config first
 	var err error
-	raCfg, err = config.NewCGRConfigFromFolder(raCfgPath)
+	raCfg, err = config.NewCGRConfigFromPath(raCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

@@ -81,7 +81,7 @@ func TestITMongoTutorial(t *testing.T) {
 
 func testTPitLoadConfig(t *testing.T) {
 	tpCfgPath = path.Join(*dataDir, "conf", "samples", configDIR)
-	if tpCfg, err = config.NewCGRConfigFromFolder(tpCfgPath); err != nil {
+	if tpCfg, err = config.NewCGRConfigFromPath(tpCfgPath); err != nil {
 		t.Error(err)
 	}
 	switch configDIR {

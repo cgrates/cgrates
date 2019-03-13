@@ -47,7 +47,7 @@ var waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for r
 func TestMCDRCLoadConfig(t *testing.T) {
 	var err error
 	cfgPath = path.Join(*dataDir, "conf", "samples", "multiplecdrc")
-	if cfg, err = config.NewCGRConfigFromFolder(cfgPath); err != nil {
+	if cfg, err = config.NewCGRConfigFromPath(cfgPath); err != nil {
 		t.Error(err)
 	}
 }

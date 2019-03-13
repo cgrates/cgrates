@@ -114,7 +114,7 @@ func TestFIdxV1ITMongo(t *testing.T) {
 func testV1FIdxLoadConfig(t *testing.T) {
 	tSv1CfgPath = path.Join(*dataDir, "conf", "samples", tSv1ConfDIR)
 	var err error
-	if tSv1Cfg, err = config.NewCGRConfigFromFolder(tSv1CfgPath); err != nil {
+	if tSv1Cfg, err = config.NewCGRConfigFromPath(tSv1CfgPath); err != nil {
 		t.Error(err)
 	}
 }

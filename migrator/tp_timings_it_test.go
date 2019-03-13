@@ -57,12 +57,12 @@ func TestTpTimMove(t *testing.T) {
 func testTpTimITConnect(t *testing.T) {
 	var err error
 	tpTimPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	tpTimCfgIn, err = config.NewCGRConfigFromFolder(tpTimPathIn)
+	tpTimCfgIn, err = config.NewCGRConfigFromPath(tpTimPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	tpTimPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	tpTimCfgOut, err = config.NewCGRConfigFromFolder(tpTimPathOut)
+	tpTimCfgOut, err = config.NewCGRConfigFromPath(tpTimPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -21,7 +21,9 @@ package config
 import (
 	"encoding/json"
 	"io"
+	"net/http"
 	"os"
+	"time"
 )
 
 const (
@@ -85,6 +87,17 @@ func NewCgrJsonCfgFromFile(fpath string) (*CgrJsonCfg, error) {
 	}
 	defer cfgFile.Close()
 	return NewCgrJsonCfgFromReader(cfgFile)
+}
+
+// Loads the config out of http request
+func NewCgrJsonCfgFromHttp(fpath string) (*CgrJsonCfg, error) {
+	var myClient = &http.Client{Timeout: 10 * time.Second}
+	cfgReq, err := myClient.Get(fpath)
+	if err != nil {
+		return nil, err
+	}
+	defer cfgReq.Body.Close()
+	return NewCgrJsonCfgFromReader(cfgReq.Body)
 }
 
 // Main object holding the loaded config as section raw messages

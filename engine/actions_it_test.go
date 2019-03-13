@@ -42,7 +42,7 @@ var waitRater = flag.Int("wait_rater", 500, "Number of miliseconds to wait for r
 func TestActionsitInitCfg(t *testing.T) {
 	// Init config first
 	var err error
-	actsLclCfg, err = config.NewCGRConfigFromFolder(actsLclCfgPath)
+	actsLclCfg, err = config.NewCGRConfigFromPath(actsLclCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
