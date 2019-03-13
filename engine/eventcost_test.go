@@ -2033,6 +2033,7 @@ func TestECAppendCIlFromEC(t *testing.T) {
 
 func TestECSyncKeys(t *testing.T) {
 	ec := testEC.Clone()
+	ec.Accounting["a012888"].RatingID = "c1a5ab9"
 
 	refEC := &EventCost{
 		Rating: Rating{
@@ -2050,6 +2051,7 @@ func TestECSyncKeys(t *testing.T) {
 				AccountID:   "cgrates.org:dan",
 				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
 				Units:       0.01,
+				RatingID:    "21a5ab9",
 			},
 			"288bfa6": &BalanceCharge{
 				AccountID:   "cgrates.org:dan",
@@ -2204,6 +2206,7 @@ func TestECSyncKeys(t *testing.T) {
 				AccountID:   "cgrates.org:dan",
 				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
 				Units:       0.01,
+				RatingID:    "21a5ab9",
 			},
 			"288bfa6": &BalanceCharge{
 				AccountID:   "cgrates.org:dan",

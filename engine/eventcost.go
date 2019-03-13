@@ -459,6 +459,9 @@ func (ec *EventCost) SyncKeys(refEC *EventCost) {
 	// sync Accounting
 	sncedAcntIDs := make(map[string]string)
 	for key, acnt := range ec.Accounting {
+		if rtRefKey, has := sncedRatingIDs[acnt.RatingID]; has {
+			acnt.RatingID = rtRefKey
+		}
 		for refKey, refAcnt := range refEC.Accounting {
 			if acnt.Equals(refAcnt) {
 				delete(ec.Accounting, key)
