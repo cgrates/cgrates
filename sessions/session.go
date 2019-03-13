@@ -150,6 +150,39 @@ func (s *Session) AsActiveSessions(tmz, nodeID string) (aSs []*ActiveSession) {
 	s.RUnlock()
 	return
 }
+func (s *Session) asActiveSessions(sr *SRun, tmz, nodeID string) (aS *ActiveSession) {
+	s.RLock()
+	aS = &ActiveSession{
+		CGRID:       s.CGRID,
+		RunID:       sr.Event.GetStringIgnoreErrors(utils.RunID),
+		ToR:         sr.Event.GetStringIgnoreErrors(utils.ToR),
+		OriginID:    s.EventStart.GetStringIgnoreErrors(utils.OriginID),
+		OriginHost:  s.EventStart.GetStringIgnoreErrors(utils.OriginHost),
+		Source:      utils.SessionS + "_" + s.EventStart.GetStringIgnoreErrors(utils.EVENT_NAME),
+		RequestType: sr.Event.GetStringIgnoreErrors(utils.RequestType),
+		Tenant:      s.Tenant,
+		Category:    sr.Event.GetStringIgnoreErrors(utils.Category),
+		Account:     sr.Event.GetStringIgnoreErrors(utils.Account),
+		Subject:     sr.Event.GetStringIgnoreErrors(utils.Subject),
+		Destination: sr.Event.GetStringIgnoreErrors(utils.Destination),
+		SetupTime:   sr.Event.GetTimeIgnoreErrors(utils.SetupTime, tmz),
+		AnswerTime:  sr.Event.GetTimeIgnoreErrors(utils.AnswerTime, tmz),
+		Usage:       sr.TotalUsage,
+		ExtraFields: sr.Event.AsMapStringIgnoreErrors(
+			utils.NewStringMap(utils.MainCDRFields...)),
+		NodeID:        nodeID,
+		DebitInterval: s.DebitInterval,
+	}
+	if sr.CD != nil {
+		aS.LoopIndex = sr.CD.LoopIndex
+		aS.DurationIndex = sr.CD.DurationIndex
+		aS.MaxRate = sr.CD.MaxRate
+		aS.MaxRateUnit = sr.CD.MaxRateUnit
+		aS.MaxCostSoFar = sr.CD.MaxCostSoFar
+	}
+	s.RUnlock()
+	return
+}
 
 // TotalUsage returns the first session run total usage
 func (s *Session) TotalUsage() (tDur time.Duration) {

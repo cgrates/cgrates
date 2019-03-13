@@ -903,31 +903,30 @@ func (sS *SessionS) asActiveSessions(fltrs map[string]string,
 	var remainingSessions []*Session // Survived index matching
 	ss := sS.getSessions(fltrs[utils.CGRID], psv)
 	for _, s := range ss {
-		remainingSessions = append(remainingSessions, s.Clone())
+		remainingSessions = append(remainingSessions, s)
 	}
 	if len(fltrs) != 0 { // Still have some filters to match
-		for i := 0; i < len(remainingSessions); {
-			if !remainingSessions[i].EventStart.HasField(utils.RunID) { // ToDo: try removing dependency on default run
-				remainingSessions[i].EventStart.Set(utils.RunID, utils.META_DEFAULT)
-			}
-			matchingAll := true
-			for fltrFldName, fltrFldVal := range fltrs {
-				if remainingSessions[i].EventStart.GetStringIgnoreErrors(fltrFldName) != fltrFldVal { // No Match
-					matchingAll = false
-					break
+		for _, s := range remainingSessions {
+			for _, sr := range s.SRuns {
+				matchingAll := true
+				for fltrFldName, fltrFldVal := range fltrs {
+					if sr.Event.GetStringIgnoreErrors(fltrFldName) != fltrFldVal { // No Match
+						matchingAll = false
+						break
+					}
+				}
+				if matchingAll {
+					aSs = append(aSs, s.asActiveSessions(sr, sS.cgrCfg.GeneralCfg().DefaultTimezone,
+						sS.cgrCfg.GeneralCfg().NodeID))
 				}
 			}
-			if !matchingAll {
-				remainingSessions = append(remainingSessions[:i], remainingSessions[i+1:]...)
-				continue // if we have stripped, don't increase index so we can check next element by next run
-			}
-			i++
 		}
-	}
-	for _, s := range remainingSessions {
-		aSs = append(aSs,
-			s.AsActiveSessions(sS.cgrCfg.GeneralCfg().DefaultTimezone,
-				sS.cgrCfg.GeneralCfg().NodeID)...) // Expensive for large number of sessions
+	} else {
+		for _, s := range remainingSessions {
+			aSs = append(aSs,
+				s.AsActiveSessions(sS.cgrCfg.GeneralCfg().DefaultTimezone,
+					sS.cgrCfg.GeneralCfg().NodeID)...) // Expensive for large number of sessions
+		}
 	}
 	if count {
 		return nil, len(aSs), nil
