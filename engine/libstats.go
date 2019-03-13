@@ -143,23 +143,28 @@ func (sq *StatQueue) TenantID() string {
 
 // ProcessEvent processes a utils.CGREvent, returns true if processed
 func (sq *StatQueue) ProcessEvent(ev *utils.CGREvent, filterS *FilterS) (err error) {
-	sq.remExpired()
-	sq.remOnQueueLength()
-	sq.addStatEvent(ev, filterS)
-	return
+	if err = sq.remExpired(); err != nil {
+		return
+	}
+	if err = sq.remOnQueueLength(); err != nil {
+		return
+	}
+	return sq.addStatEvent(ev, filterS)
 }
 
 // remStatEvent removes an event from metrics
-func (sq *StatQueue) remEventWithID(evID string) {
+func (sq *StatQueue) remEventWithID(evID string) (err error) {
 	for metricID, metric := range sq.SQMetrics {
-		if err := metric.RemEvent(evID); err != nil {
+		if err = metric.RemEvent(evID); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, remove eventID: %s, error: %s", metricID, evID, err.Error()))
+			return
 		}
 	}
+	return
 }
 
 // remExpired expires items in queue
-func (sq *StatQueue) remExpired() {
+func (sq *StatQueue) remExpired() (err error) {
 	var expIdx *int // index of last item to be expired
 	for i, item := range sq.SQItems {
 		if item.ExpiryTime == nil {
@@ -168,29 +173,35 @@ func (sq *StatQueue) remExpired() {
 		if item.ExpiryTime.After(time.Now()) {
 			break
 		}
-		sq.remEventWithID(item.EventID)
+		if err = sq.remEventWithID(item.EventID); err != nil {
+			return
+		}
 		expIdx = utils.IntPointer(i)
 	}
 	if expIdx == nil {
 		return
 	}
 	sq.SQItems = sq.SQItems[*expIdx+1:]
+	return
 }
 
 // remOnQueueLength removes elements based on QueueLength setting
-func (sq *StatQueue) remOnQueueLength() {
+func (sq *StatQueue) remOnQueueLength() (err error) {
 	if sq.sqPrfl.QueueLength <= 0 { // infinite length
 		return
 	}
 	if len(sq.SQItems) == sq.sqPrfl.QueueLength { // reached limit, rem first element
-		itm := sq.SQItems[0]
-		sq.remEventWithID(itm.EventID)
+		item := sq.SQItems[0]
+		if err = sq.remEventWithID(item.EventID); err != nil {
+			return
+		}
 		sq.SQItems = sq.SQItems[1:]
 	}
+	return
 }
 
 // addStatEvent computes metrics for an event
-func (sq *StatQueue) addStatEvent(ev *utils.CGREvent, filterS *FilterS) {
+func (sq *StatQueue) addStatEvent(ev *utils.CGREvent, filterS *FilterS) (err error) {
 	var expTime *time.Time
 	if sq.ttl != nil {
 		expTime = utils.TimePointer(time.Now().Add(*sq.ttl))
@@ -200,21 +211,21 @@ func (sq *StatQueue) addStatEvent(ev *utils.CGREvent, filterS *FilterS) {
 			EventID    string
 			ExpiryTime *time.Time
 		}{ev.ID, expTime})
-
+	var pass bool
 	for metricID, metric := range sq.SQMetrics {
-		if pass, err := filterS.Pass(ev.Tenant, metric.GetFilterIDs(),
+		if pass, err = filterS.Pass(ev.Tenant, metric.GetFilterIDs(),
 			config.NewNavigableMap(ev.Event)); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<StatQueue> ignore metricID: %s with error: %s",
-				metricID, err.Error()))
-			continue
+			return
 		} else if !pass {
 			continue
 		}
-		if err := metric.AddEvent(ev); err != nil {
+		if err = metric.AddEvent(ev); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, add eventID: %s, error: %s",
 				metricID, ev.ID, err.Error()))
+			return
 		}
 	}
+	return
 }
 
 // StatQueues is a sortable list of StatQueue

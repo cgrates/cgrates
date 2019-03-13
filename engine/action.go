@@ -151,7 +151,7 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 	defaultTemplate := map[string]config.RSRParsers{
 		utils.ToR:         config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"BalanceType", true, utils.INFIELD_SEP),
 		utils.OriginHost:  config.NewRSRParsersMustCompile("127.0.0.1", true, utils.INFIELD_SEP),
-		utils.RequestType: config.NewRSRParsersMustCompile(utils.META_PREPAID, true, utils.INFIELD_SEP),
+		utils.RequestType: config.NewRSRParsersMustCompile(utils.META_NONE, true, utils.INFIELD_SEP),
 		utils.Tenant:      config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Tenant, true, utils.INFIELD_SEP),
 		utils.Account:     config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Account, true, utils.INFIELD_SEP),
 		utils.Subject:     config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Account, true, utils.INFIELD_SEP),

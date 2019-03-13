@@ -536,6 +536,7 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.EventType: utils.AccountUpdate,
 			utils.Account:   "1001",
+			"Val":           10,
 		},
 	}
 	var reply []string
@@ -557,7 +558,8 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.Account:    "1002",
 			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(45 * time.Second)}}
+			utils.Usage:      time.Duration(45 * time.Second),
+			utils.Cost:       12.1}}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, &ev2, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
@@ -567,9 +569,10 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]interface{}{
-			utils.Account:   "1002",
-			utils.SetupTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:     0}}
+			utils.Account:    "1002",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:      time.Duration(45 * time.Second),
+			utils.Cost:       12.1}}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, &ev3, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
@@ -580,9 +583,11 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]interface{}{
-			utils.EventType: utils.AccountUpdate,
-			utils.Account:   "1001",
-			"Val":           7,
+			utils.EventType:  utils.AccountUpdate,
+			utils.Account:    "1001",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:      time.Duration(45 * time.Second),
+			utils.Cost:       12.1,
 		}}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, &tEv, &reply); err != nil {
 		t.Error(err)
@@ -593,9 +598,11 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]interface{}{
-			utils.EventType: utils.AccountUpdate,
-			utils.Account:   "1001",
-			"Val":           8,
+			utils.EventType:  utils.AccountUpdate,
+			utils.Account:    "1001",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:      time.Duration(45 * time.Second),
+			utils.Cost:       12.1,
 		}}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, &tEv2, &reply); err != nil {
 		t.Error(err)
@@ -641,10 +648,10 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 		TTL:         time.Duration(10) * time.Second,
 		Metrics: []*engine.MetricWithFilters{
 			&engine.MetricWithFilters{
-				MetricID: "*sum",
+				MetricID: "*sum#Val",
 			},
 		},
-		ThresholdIDs: []string{"Val1", "Val2"},
+		ThresholdIDs: []string{"*none"},
 		Blocker:      true,
 		Stored:       true,
 		Weight:       20,
@@ -663,6 +670,7 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.EventType: utils.BalanceUpdate,
 			utils.Account:   "1003",
+			"Val":           10,
 		}}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, tEv, &reply); err != nil {
 		t.Error(err)
@@ -714,8 +722,11 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]interface{}{
-			utils.EventType: utils.AccountUpdate,
-			utils.Account:   "1003",
+			utils.EventType:  utils.AccountUpdate,
+			utils.Account:    "1003",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:      time.Duration(45 * time.Second),
+			utils.Cost:       12.1,
 		}}
 	var ids []string
 	expected := []string{"Stats1"}
@@ -736,6 +747,7 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.EventType: utils.BalanceUpdate,
 			utils.Account:   "1003",
+			"Val":           10,
 		}}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, tEv, &reply); err != nil {
 		t.Error(err)
@@ -747,9 +759,11 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "event1",
 		Event: map[string]interface{}{
-			utils.EventType: utils.AccountUpdate,
-			utils.Account:   "1003",
-		}}
+			utils.EventType:  utils.AccountUpdate,
+			utils.Account:    "1003",
+			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			utils.Usage:      time.Duration(45 * time.Second),
+			utils.Cost:       12.1}}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, tEv2, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {

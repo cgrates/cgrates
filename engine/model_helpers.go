@@ -1317,21 +1317,35 @@ func (models TpStats) AsTPStats() (result []*utils.TPStatProfile) {
 		st, found := mst[key.TenantID()]
 		if !found {
 			st = &utils.TPStatProfile{
-				Tenant:  model.Tenant,
-				TPid:    model.Tpid,
-				ID:      model.ID,
-				Blocker: model.Blocker,
-				Stored:  model.Stored,
-				Weight:  model.Weight,
-				Metrics: make([]*utils.MetricWithFilters, 0),
+				Tenant:      model.Tenant,
+				TPid:        model.Tpid,
+				ID:          model.ID,
+				Blocker:     model.Blocker,
+				Stored:      model.Stored,
+				Weight:      model.Weight,
+				MinItems:    model.MinItems,
+				TTL:         model.TTL,
+				QueueLength: model.QueueLength,
 			}
+		}
+		if model.Blocker {
+			st.Blocker = model.Blocker
+		}
+		if model.Stored {
+			st.Stored = model.Stored
+		}
+		if model.Weight != 0 {
+			st.Weight = model.Weight
 		}
 		if model.MinItems != 0 {
 			st.MinItems = model.MinItems
 		}
-
-		st.TTL = model.TTL
-		st.QueueLength = model.QueueLength
+		if model.TTL != "" {
+			st.TTL = model.TTL
+		}
+		if model.QueueLength != 0 {
+			st.QueueLength = model.QueueLength
+		}
 		if model.ThresholdIDs != "" {
 			if _, has := thresholdMap[key.TenantID()]; !has {
 				thresholdMap[key.TenantID()] = make(utils.StringMap)

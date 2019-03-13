@@ -284,14 +284,14 @@ CREATE TABLE tp_stats (
   `min_items` int(11) NOT NULL,
   `metric_ids` varchar(128) NOT NULL,
   `metric_filter_ids` varchar(64) NOT NULL,
-  `blocker` BOOLEAN NOT NULL,
   `stored` BOOLEAN NOT NULL,
+  `blocker` BOOLEAN NOT NULL,
   `weight` decimal(8,2) NOT NULL,
   `threshold_ids` varchar(64) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_tp_stats` (`tpid`,  `tenant`, `id`, `filter_ids`)
+  UNIQUE KEY `unique_tp_stats` (`tpid`,  `tenant`, `id`, `filter_ids`,`metric_ids`)
 );
 
 --
