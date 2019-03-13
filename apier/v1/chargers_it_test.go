@@ -94,7 +94,7 @@ func TestChargerSITMongo(t *testing.T) {
 func testChargerSInitCfg(t *testing.T) {
 	var err error
 	chargerCfgPath = path.Join(*dataDir, "conf", "samples", chargerConfigDIR)
-	chargerCfg, err = config.NewCGRConfigFromFolder(chargerCfgPath)
+	chargerCfg, err = config.NewCGRConfigFromPath(chargerCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

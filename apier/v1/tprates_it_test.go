@@ -83,7 +83,7 @@ func TestTPRatesITPG(t *testing.T) {
 func testTPRatesInitCfg(t *testing.T) {
 	var err error
 	tpRateCfgPath = path.Join(tpRateDataDir, "conf", "samples", tpRateConfigDIR)
-	tpRateCfg, err = config.NewCGRConfigFromFolder(tpRateCfgPath)
+	tpRateCfg, err = config.NewCGRConfigFromPath(tpRateCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

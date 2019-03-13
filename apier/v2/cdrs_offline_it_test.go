@@ -78,7 +78,7 @@ func TestCDRsOfflineITMongo(t *testing.T) {
 func testV2CDRsOfflineInitConfig(t *testing.T) {
 	var err error
 	cdrsOfflineCfgPath = path.Join(*dataDir, "conf", "samples", cdrsOfflineConfDIR)
-	if cdrsOfflineCfg, err = config.NewCGRConfigFromFolder(cdrsOfflineCfgPath); err != nil {
+	if cdrsOfflineCfg, err = config.NewCGRConfigFromPath(cdrsOfflineCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }

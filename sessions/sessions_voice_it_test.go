@@ -43,7 +43,7 @@ func TestSessionsVoiceInitCfg(t *testing.T) {
 	voiceCfgPath = path.Join(*dataDir, "conf", "samples", "smg")
 	// Init config first
 	var err error
-	voiceCfg, err = config.NewCGRConfigFromFolder(voiceCfgPath)
+	voiceCfg, err = config.NewCGRConfigFromPath(voiceCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

@@ -84,7 +84,7 @@ func TestTPActionsITPG(t *testing.T) {
 func testTPActionsInitCfg(t *testing.T) {
 	var err error
 	tpActionCfgPath = path.Join(tpActionDataDir, "conf", "samples", tpActionConfigDIR)
-	tpActionCfg, err = config.NewCGRConfigFromFolder(tpActionCfgPath)
+	tpActionCfg, err = config.NewCGRConfigFromPath(tpActionCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

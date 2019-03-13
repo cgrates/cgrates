@@ -46,7 +46,7 @@ package general_tests
 // 	tutLocalCfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
 // 	// Init config first
 // 	var err error
-// 	tutFsLocalCfg, err = config.NewCGRConfigFromFolder(tutLocalCfgPath)
+// 	tutFsLocalCfg, err = config.NewCGRConfigFromPath(tutLocalCfgPath)
 // 	if err != nil {
 // 		t.Error(err)
 // 	}

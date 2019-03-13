@@ -49,11 +49,11 @@ var sTestsAcc2IT = []func(t *testing.T){
 func TestAccMigrateWithInternal(t *testing.T) {
 	var err error
 	acc2PathIn = path.Join(*dataDir, "conf", "samples", "migwithinternal")
-	acc2CfgIn, err = config.NewCGRConfigFromFolder(acc2PathIn)
+	acc2CfgIn, err = config.NewCGRConfigFromPath(acc2PathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	acc2CfgOut, err = config.NewCGRConfigFromFolder(acc2PathIn)
+	acc2CfgOut, err = config.NewCGRConfigFromPath(acc2PathIn)
 	if err != nil {
 		t.Fatal(err)
 	}

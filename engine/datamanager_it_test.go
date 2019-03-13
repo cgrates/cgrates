@@ -56,7 +56,7 @@ func TestDMitRedis(t *testing.T) {
 
 func TestDMitMongo(t *testing.T) {
 	cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "cdrsv2mongo")
-	mgoITCfg, err := config.NewCGRConfigFromFolder(cdrsMongoCfgPath)
+	mgoITCfg, err := config.NewCGRConfigFromPath(cdrsMongoCfgPath)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -50,11 +50,11 @@ var sTestsTrsIT = []func(t *testing.T){
 func TestThresholdsITRedis(t *testing.T) {
 	var err error
 	trsPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	trsCfgIn, err = config.NewCGRConfigFromFolder(trsPathIn)
+	trsCfgIn, err = config.NewCGRConfigFromPath(trsPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	trsCfgOut, err = config.NewCGRConfigFromFolder(trsPathIn)
+	trsCfgOut, err = config.NewCGRConfigFromPath(trsPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,11 +67,11 @@ func TestThresholdsITRedis(t *testing.T) {
 func TestThresholdsITMongo(t *testing.T) {
 	var err error
 	trsPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	trsCfgIn, err = config.NewCGRConfigFromFolder(trsPathIn)
+	trsCfgIn, err = config.NewCGRConfigFromPath(trsPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	trsCfgOut, err = config.NewCGRConfigFromFolder(trsPathIn)
+	trsCfgOut, err = config.NewCGRConfigFromPath(trsPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -84,12 +84,12 @@ func TestThresholdsITMongo(t *testing.T) {
 func TestThresholdsITMove(t *testing.T) {
 	var err error
 	trsPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	trsCfgIn, err = config.NewCGRConfigFromFolder(trsPathIn)
+	trsCfgIn, err = config.NewCGRConfigFromPath(trsPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	trsPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	trsCfgOut, err = config.NewCGRConfigFromFolder(trsPathOut)
+	trsCfgOut, err = config.NewCGRConfigFromPath(trsPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -102,12 +102,12 @@ func TestThresholdsITMove(t *testing.T) {
 func TestThresholdsITMoveEncoding(t *testing.T) {
 	var err error
 	trsPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	trsCfgIn, err = config.NewCGRConfigFromFolder(trsPathIn)
+	trsCfgIn, err = config.NewCGRConfigFromPath(trsPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	trsPathOut = path.Join(*dataDir, "conf", "samples", "tutmongojson")
-	trsCfgOut, err = config.NewCGRConfigFromFolder(trsPathOut)
+	trsCfgOut, err = config.NewCGRConfigFromPath(trsPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -120,12 +120,12 @@ func TestThresholdsITMoveEncoding(t *testing.T) {
 func TestThresholdsITMoveEncoding2(t *testing.T) {
 	var err error
 	trsPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	trsCfgIn, err = config.NewCGRConfigFromFolder(trsPathIn)
+	trsCfgIn, err = config.NewCGRConfigFromPath(trsPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	trsPathOut = path.Join(*dataDir, "conf", "samples", "tutmysqljson")
-	trsCfgOut, err = config.NewCGRConfigFromFolder(trsPathOut)
+	trsCfgOut, err = config.NewCGRConfigFromPath(trsPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}

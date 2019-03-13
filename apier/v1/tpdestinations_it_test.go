@@ -83,7 +83,7 @@ func TestTPDestinationsITPG(t *testing.T) {
 func testTPDestinationsInitCfg(t *testing.T) {
 	var err error
 	tpDestinationCfgPath = path.Join(tpDestinationDataDir, "conf", "samples", tpDestinationConfigDIR)
-	tpDestinationCfg, err = config.NewCGRConfigFromFolder(tpDestinationCfgPath)
+	tpDestinationCfg, err = config.NewCGRConfigFromPath(tpDestinationCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

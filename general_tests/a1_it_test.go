@@ -45,7 +45,7 @@ var (
 
 func TestA1itLoadConfig(t *testing.T) {
 	a1CfgPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	if a1Cfg, err = config.NewCGRConfigFromFolder(a1CfgPath); err != nil {
+	if a1Cfg, err = config.NewCGRConfigFromPath(a1CfgPath); err != nil {
 		t.Error(err)
 	}
 }

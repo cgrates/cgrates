@@ -76,7 +76,7 @@ func TestTPSplPrfITMongo(t *testing.T) {
 func testTPSplPrfInitCfg(t *testing.T) {
 	var err error
 	tpSplPrfCfgPath = path.Join(tpSplPrfDataDire, "conf", "samples", tpSplPrfConfigDIR)
-	tpSplPrfCfg, err = config.NewCGRConfigFromFolder(tpSplPrfCfgPath)
+	tpSplPrfCfg, err = config.NewCGRConfigFromPath(tpSplPrfCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

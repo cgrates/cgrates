@@ -74,7 +74,7 @@ func TestRPCMethods(t *testing.T) {
 func testRPCMethodsLoadConfig(t *testing.T) {
 	var err error
 	rpcCfgPath = path.Join(*dataDir, "conf", "samples", rpcConfDIR)
-	if rpcCfg, err = config.NewCGRConfigFromFolder(rpcCfgPath); err != nil {
+	if rpcCfg, err = config.NewCGRConfigFromPath(rpcCfgPath); err != nil {
 		t.Error(err)
 	}
 }

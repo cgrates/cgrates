@@ -191,7 +191,7 @@ func (apier *ApierV1) ReloadCdreConfig(attrs AttrReloadConfig, reply *string) er
 	if attrs.ConfigDir == "" {
 		attrs.ConfigDir = utils.CONFIG_PATH
 	}
-	newCfg, err := config.NewCGRConfigFromFolder(attrs.ConfigDir)
+	newCfg, err := config.NewCGRConfigFromPath(attrs.ConfigDir)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

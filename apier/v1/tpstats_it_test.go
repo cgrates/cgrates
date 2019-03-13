@@ -82,7 +82,7 @@ func TestTPStatITPG(t *testing.T) {
 func testTPStatsInitCfg(t *testing.T) {
 	var err error
 	tpStatCfgPath = path.Join(tpStatDataDir, "conf", "samples", tpStatConfigDIR)
-	tpStatCfg, err = config.NewCGRConfigFromFolder(tpStatCfgPath)
+	tpStatCfg, err = config.NewCGRConfigFromPath(tpStatCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

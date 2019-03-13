@@ -81,7 +81,7 @@ func TestFilterIndexerITRedis(t *testing.T) {
 
 func TestFilterIndexerITMongo(t *testing.T) {
 	cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	mgoITCfg, err := config.NewCGRConfigFromFolder(cdrsMongoCfgPath)
+	mgoITCfg, err := config.NewCGRConfigFromPath(cdrsMongoCfgPath)
 	if err != nil {
 		t.Fatal(err)
 	}

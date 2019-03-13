@@ -62,11 +62,11 @@ func TestUserITMigrateMongo2Redis(t *testing.T) {
 
 func testUsrStart(testName, inPath, outPath string, t *testing.T) {
 	var err error
-	if usrCfgIn, err = config.NewCGRConfigFromFolder(inPath); err != nil {
+	if usrCfgIn, err = config.NewCGRConfigFromPath(inPath); err != nil {
 		t.Fatal(err)
 	}
 	config.SetCgrConfig(usrCfgIn)
-	if usrCfgOut, err = config.NewCGRConfigFromFolder(outPath); err != nil {
+	if usrCfgOut, err = config.NewCGRConfigFromPath(outPath); err != nil {
 		t.Fatal(err)
 	}
 	for _, stest := range sTestsUsrIT {

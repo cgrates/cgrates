@@ -57,12 +57,12 @@ func TestTpDstMove(t *testing.T) {
 func testTpDstITConnect(t *testing.T) {
 	var err error
 	tpDstPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	tpDstCfgIn, err = config.NewCGRConfigFromFolder(tpDstPathIn)
+	tpDstCfgIn, err = config.NewCGRConfigFromPath(tpDstPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	tpDstPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	tpDstCfgOut, err = config.NewCGRConfigFromFolder(tpDstPathOut)
+	tpDstCfgOut, err = config.NewCGRConfigFromPath(tpDstPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}

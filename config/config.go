@@ -21,6 +21,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -210,53 +211,76 @@ func NewCGRConfigFromJsonStringWithDefaults(cfgJsonStr string) (*CGRConfig, erro
 }
 
 // Reads all .json files out of a folder/subfolders and loads them up in lexical order
-func NewCGRConfigFromFolder(cfgDir string) (*CGRConfig, error) {
+func NewCGRConfigFromPath(path string) (*CGRConfig, error) {
 	cfg, err := NewDefaultCGRConfig()
 	if err != nil {
-
 		return nil, err
 	}
-	fi, err := os.Stat(cfgDir)
+	fi, err := os.Stat(path)
 	if err != nil {
-		if strings.HasSuffix(err.Error(), "no such file or directory") {
-			return cfg, nil
+		if os.IsNotExist(err) {
+			return loadConfigFromHttp(cfg, path)
 		}
 		return nil, err
-	} else if !fi.IsDir() && cfgDir != utils.CONFIG_PATH { // If config dir defined, needs to exist, not checking for default
-		return nil, fmt.Errorf("Path: %s not a directory.", cfgDir)
+	} else if !fi.IsDir() && path != utils.CONFIG_PATH { // If config dir defined, needs to exist, not checking for default
+		return nil, fmt.Errorf("Path: %s not a directory.", path)
 	}
 	if fi.IsDir() {
-		jsonFilesFound := false
-		err = filepath.Walk(cfgDir, func(path string, info os.FileInfo, err error) error {
-			if !info.IsDir() {
-				return nil
-			}
-			cfgFiles, err := filepath.Glob(filepath.Join(path, "*.json"))
-			if err != nil {
+		return loadConfigFromFolder(cfg, path)
+	}
+	return cfg, nil
+}
+
+func loadConfigFromFolder(cfg *CGRConfig, cfgDir string) (*CGRConfig, error) {
+	jsonFilesFound := false
+	err := filepath.Walk(cfgDir, func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() {
+			return nil
+		}
+		cfgFiles, err := filepath.Glob(filepath.Join(path, "*.json"))
+		if err != nil {
+			return err
+		}
+		if cfgFiles == nil { // No need of processing further since there are no config files in the folder
+			return nil
+		}
+		if !jsonFilesFound {
+			jsonFilesFound = true
+		}
+		for _, jsonFilePath := range cfgFiles {
+			if cgrJsonCfg, err := NewCgrJsonCfgFromFile(jsonFilePath); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<CGR-CFG> Error <%s> reading config from path: <%s>", err.Error(), jsonFilePath))
+				return err
+			} else if err := cfg.loadFromJsonCfg(cgrJsonCfg); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<CGR-CFG> Error <%s> loading config from path: <%s>", err.Error(), jsonFilePath))
 				return err
 			}
-			if cfgFiles == nil { // No need of processing further since there are no config files in the folder
-				return nil
-			}
-			if !jsonFilesFound {
-				jsonFilesFound = true
-			}
-			for _, jsonFilePath := range cfgFiles {
-				if cgrJsonCfg, err := NewCgrJsonCfgFromFile(jsonFilePath); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<CGR-CFG> Error <%s> reading config from path: <%s>", err.Error(), jsonFilePath))
-					return err
-				} else if err := cfg.loadFromJsonCfg(cgrJsonCfg); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<CGR-CFG> Error <%s> loading config from path: <%s>", err.Error(), jsonFilePath))
-					return err
-				}
-			}
-			return nil
-		})
-		if err != nil {
-			return nil, err
-		} else if !jsonFilesFound {
-			return nil, fmt.Errorf("No config file found on path %s", cfgDir)
 		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if !jsonFilesFound {
+		return nil, fmt.Errorf("No config file found on path %s", cfgDir)
+	}
+	if err := cfg.checkConfigSanity(); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func loadConfigFromHttp(cfg *CGRConfig, urlPath string) (*CGRConfig, error) {
+	_, err := url.ParseRequestURI(urlPath)
+	if err != nil {
+		return nil, err
+	}
+	if cgrJsonCfg, err := NewCgrJsonCfgFromHttp(urlPath); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<CGR-CFG> Error <%s> reading config from path: <%s>", err.Error(), urlPath))
+		return nil, err
+	} else if err := cfg.loadFromJsonCfg(cgrJsonCfg); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<CGR-CFG> Error <%s> loading config from path: <%s>", err.Error(), urlPath))
+		return nil, err
 	}
 	if err := cfg.checkConfigSanity(); err != nil {
 		return nil, err

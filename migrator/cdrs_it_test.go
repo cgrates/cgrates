@@ -48,7 +48,7 @@ var sTestsCdrIT = []func(t *testing.T){
 func TestCdrITMongo(t *testing.T) {
 	var err error
 	cdrPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	cdrCfgIn, err = config.NewCGRConfigFromFolder(cdrPathIn)
+	cdrCfgIn, err = config.NewCGRConfigFromPath(cdrPathIn)
 	if err != nil {
 		t.Error(err)
 	}
@@ -60,7 +60,7 @@ func TestCdrITMongo(t *testing.T) {
 func TestCdrITMySql(t *testing.T) {
 	var err error
 	cdrPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	cdrCfgIn, err = config.NewCGRConfigFromFolder(cdrPathIn)
+	cdrCfgIn, err = config.NewCGRConfigFromPath(cdrPathIn)
 	if err != nil {
 		t.Error(err)
 	}

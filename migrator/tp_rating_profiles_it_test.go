@@ -57,12 +57,12 @@ func TestTpRatPrfMove(t *testing.T) {
 func testTpRatPrfITConnect(t *testing.T) {
 	var err error
 	tpRatPrfPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	tpRatPrfCfgIn, err = config.NewCGRConfigFromFolder(tpRatPrfPathIn)
+	tpRatPrfCfgIn, err = config.NewCGRConfigFromPath(tpRatPrfPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	tpRatPrfPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	tpRatPrfCfgOut, err = config.NewCGRConfigFromFolder(tpRatPrfPathOut)
+	tpRatPrfCfgOut, err = config.NewCGRConfigFromPath(tpRatPrfPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}

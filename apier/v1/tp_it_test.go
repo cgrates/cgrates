@@ -77,7 +77,7 @@ func TestTPITPG(t *testing.T) {
 func testTPInitCfg(t *testing.T) {
 	var err error
 	tpCfgPath = path.Join(tpDataDir, "conf", "samples", tpConfigDIR)
-	tpCfg, err = config.NewCGRConfigFromFolder(tpCfgPath)
+	tpCfg, err = config.NewCGRConfigFromPath(tpCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

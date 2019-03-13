@@ -42,7 +42,7 @@ func TestTutSMGInitCfg(t *testing.T) {
 	tutSMGCfgPath = path.Join(*dataDir, "conf", "samples", "smgeneric")
 	// Init config first
 	var err error
-	tutSMGCfg, err = config.NewCGRConfigFromFolder(tutSMGCfgPath)
+	tutSMGCfg, err = config.NewCGRConfigFromPath(tutSMGCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

@@ -83,7 +83,7 @@ func TestTPFilterITPG(t *testing.T) {
 func testTPFilterInitCfg(t *testing.T) {
 	var err error
 	tpFilterCfgPath = path.Join(tpFilterDataDir, "conf", "samples", tpFilterConfigDIR)
-	tpFilterCfg, err = config.NewCGRConfigFromFolder(tpFilterCfgPath)
+	tpFilterCfg, err = config.NewCGRConfigFromPath(tpFilterCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

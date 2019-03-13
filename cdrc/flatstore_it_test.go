@@ -61,7 +61,7 @@ INVITE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9p@0:0:0:0:0:0:0:0|200|OK
 func TestFlatstoreitInitCfg(t *testing.T) {
 	var err error
 	flatstoreCfgPath = path.Join(*dataDir, "conf", "samples", "cdrcflatstore")
-	if flatstoreCfg, err = config.NewCGRConfigFromFolder(flatstoreCfgPath); err != nil {
+	if flatstoreCfg, err = config.NewCGRConfigFromPath(flatstoreCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }

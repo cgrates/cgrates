@@ -57,12 +57,12 @@ func TestTpShrGrMove(t *testing.T) {
 func testTpShrGrITConnect(t *testing.T) {
 	var err error
 	tpShrGrPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	tpShrGrCfgIn, err = config.NewCGRConfigFromFolder(tpShrGrPathIn)
+	tpShrGrCfgIn, err = config.NewCGRConfigFromPath(tpShrGrPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	tpShrGrPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	tpShrGrCfgOut, err = config.NewCGRConfigFromFolder(tpShrGrPathOut)
+	tpShrGrCfgOut, err = config.NewCGRConfigFromPath(tpShrGrPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}

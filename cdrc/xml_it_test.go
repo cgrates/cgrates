@@ -43,7 +43,7 @@ var xmlPathIn1, xmlPathOut1 string
 func TestXmlITInitConfig(t *testing.T) {
 	var err error
 	xmlCfgPath = path.Join(*dataDir, "conf", "samples", "cdrcxml")
-	if xmlCfg, err = config.NewCGRConfigFromFolder(xmlCfgPath); err != nil {
+	if xmlCfg, err = config.NewCGRConfigFromPath(xmlCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }
@@ -142,7 +142,7 @@ func TestXmlITKillEngine(t *testing.T) {
 func TestXmlIT2InitConfig(t *testing.T) {
 	var err error
 	xmlCfgPath = path.Join(*dataDir, "conf", "samples", "cdrcxmlwithfilter")
-	if xmlCfg, err = config.NewCGRConfigFromFolder(xmlCfgPath); err != nil {
+	if xmlCfg, err = config.NewCGRConfigFromPath(xmlCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }
@@ -228,7 +228,7 @@ func TestXmlIT2KillEngine(t *testing.T) {
 func TestXmlIT3InitConfig(t *testing.T) {
 	var err error
 	xmlCfgPath = path.Join(*dataDir, "conf", "samples", "cdrcxmlwithfilter")
-	if xmlCfg, err = config.NewCGRConfigFromFolder(xmlCfgPath); err != nil {
+	if xmlCfg, err = config.NewCGRConfigFromPath(xmlCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }
@@ -314,7 +314,7 @@ func TestXmlIT3KillEngine(t *testing.T) {
 func TestXmlIT4InitConfig(t *testing.T) {
 	var err error
 	xmlCfgPath = path.Join(*dataDir, "conf", "samples", "cdrcxmlwithfilter")
-	if xmlCfg, err = config.NewCGRConfigFromFolder(xmlCfgPath); err != nil {
+	if xmlCfg, err = config.NewCGRConfigFromPath(xmlCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }
@@ -400,7 +400,7 @@ func TestXmlIT4KillEngine(t *testing.T) {
 func TestXmlIT5InitConfig(t *testing.T) {
 	var err error
 	xmlCfgPath = path.Join(*dataDir, "conf", "samples", "cdrcxmlwithfilter")
-	if xmlCfg, err = config.NewCGRConfigFromFolder(xmlCfgPath); err != nil {
+	if xmlCfg, err = config.NewCGRConfigFromPath(xmlCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }
@@ -511,7 +511,7 @@ func TestXmlIT5KillEngine(t *testing.T) {
 func TestXmlIT6InitConfig(t *testing.T) {
 	var err error
 	xmlCfgPath = path.Join(*dataDir, "conf", "samples", "cdrcxmlwithfilter")
-	if xmlCfg, err = config.NewCGRConfigFromFolder(xmlCfgPath); err != nil {
+	if xmlCfg, err = config.NewCGRConfigFromPath(xmlCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
 }

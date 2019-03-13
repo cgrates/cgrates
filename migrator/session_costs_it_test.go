@@ -50,11 +50,11 @@ func TestSessionCostITMongo(t *testing.T) {
 	var err error
 	sCostPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
 	sCostPathOut = path.Join(*dataDir, "conf", "samples", "tutmongojson")
-	sCostCfgIn, err = config.NewCGRConfigFromFolder(sCostPathIn)
+	sCostCfgIn, err = config.NewCGRConfigFromPath(sCostPathIn)
 	if err != nil {
 		t.Error(err)
 	}
-	sCostCfgOut, err = config.NewCGRConfigFromFolder(sCostPathOut)
+	sCostCfgOut, err = config.NewCGRConfigFromPath(sCostPathOut)
 	if err != nil {
 		t.Error(err)
 	}
@@ -66,11 +66,11 @@ func TestSessionCostITMongo(t *testing.T) {
 func TestSessionCostITMySql(t *testing.T) {
 	var err error
 	sCostPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	sCostCfgIn, err = config.NewCGRConfigFromFolder(sCostPathIn)
+	sCostCfgIn, err = config.NewCGRConfigFromPath(sCostPathIn)
 	if err != nil {
 		t.Error(err)
 	}
-	sCostCfgOut, err = config.NewCGRConfigFromFolder(sCostPathIn)
+	sCostCfgOut, err = config.NewCGRConfigFromPath(sCostPathIn)
 	if err != nil {
 		t.Error(err)
 	}

@@ -49,11 +49,11 @@ var sTestsShrGrpIT = []func(t *testing.T){
 func TestSharedGroupITRedis(t *testing.T) {
 	var err error
 	shrGrpPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	shrGrpCfgIn, err = config.NewCGRConfigFromFolder(shrGrpPathIn)
+	shrGrpCfgIn, err = config.NewCGRConfigFromPath(shrGrpPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	shrGrpCfgOut, err = config.NewCGRConfigFromFolder(shrGrpPathIn)
+	shrGrpCfgOut, err = config.NewCGRConfigFromPath(shrGrpPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -66,11 +66,11 @@ func TestSharedGroupITRedis(t *testing.T) {
 func TestSharedGroupITMongo(t *testing.T) {
 	var err error
 	shrGrpPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	shrGrpCfgIn, err = config.NewCGRConfigFromFolder(shrGrpPathIn)
+	shrGrpCfgIn, err = config.NewCGRConfigFromPath(shrGrpPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	shrGrpCfgOut, err = config.NewCGRConfigFromFolder(shrGrpPathIn)
+	shrGrpCfgOut, err = config.NewCGRConfigFromPath(shrGrpPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -83,12 +83,12 @@ func TestSharedGroupITMongo(t *testing.T) {
 func TestSharedGroupITMove(t *testing.T) {
 	var err error
 	shrGrpPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	shrGrpCfgIn, err = config.NewCGRConfigFromFolder(shrGrpPathIn)
+	shrGrpCfgIn, err = config.NewCGRConfigFromPath(shrGrpPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	shrGrpPathOut = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	shrGrpCfgOut, err = config.NewCGRConfigFromFolder(shrGrpPathOut)
+	shrGrpCfgOut, err = config.NewCGRConfigFromPath(shrGrpPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -101,12 +101,12 @@ func TestSharedGroupITMove(t *testing.T) {
 func TestSharedGroupITMoveEncoding(t *testing.T) {
 	var err error
 	shrGrpPathIn = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	shrGrpCfgIn, err = config.NewCGRConfigFromFolder(shrGrpPathIn)
+	shrGrpCfgIn, err = config.NewCGRConfigFromPath(shrGrpPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	shrGrpPathOut = path.Join(*dataDir, "conf", "samples", "tutmongojson")
-	shrGrpCfgOut, err = config.NewCGRConfigFromFolder(shrGrpPathOut)
+	shrGrpCfgOut, err = config.NewCGRConfigFromPath(shrGrpPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -119,12 +119,12 @@ func TestSharedGroupITMoveEncoding(t *testing.T) {
 func TestSharedGroupITMoveEncoding2(t *testing.T) {
 	var err error
 	shrGrpPathIn = path.Join(*dataDir, "conf", "samples", "tutmysql")
-	shrGrpCfgIn, err = config.NewCGRConfigFromFolder(shrGrpPathIn)
+	shrGrpCfgIn, err = config.NewCGRConfigFromPath(shrGrpPathIn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	shrGrpPathOut = path.Join(*dataDir, "conf", "samples", "tutmysqljson")
-	shrGrpCfgOut, err = config.NewCGRConfigFromFolder(shrGrpPathOut)
+	shrGrpCfgOut, err = config.NewCGRConfigFromPath(shrGrpPathOut)
 	if err != nil {
 		t.Fatal(err)
 	}

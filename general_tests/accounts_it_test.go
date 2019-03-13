@@ -80,7 +80,7 @@ func TestAccITMongo(t *testing.T) {
 func testV1AccLoadConfig(t *testing.T) {
 	var err error
 	accCfgPath = path.Join(*dataDir, "conf", "samples", accConfDIR)
-	if accCfg, err = config.NewCGRConfigFromFolder(accCfgPath); err != nil {
+	if accCfg, err = config.NewCGRConfigFromPath(accCfgPath); err != nil {
 		t.Error(err)
 	}
 	accDelay = 1000

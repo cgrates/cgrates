@@ -61,7 +61,7 @@ func TestTLS(t *testing.T) {
 func testTLSLoadConfig(t *testing.T) {
 	var err error
 	tlsCfgPath = path.Join(*dataDir, "conf", "samples", tlsConfDIR)
-	if tlsCfg, err = config.NewCGRConfigFromFolder(tlsCfgPath); err != nil {
+	if tlsCfg, err = config.NewCGRConfigFromPath(tlsCfgPath); err != nil {
 		t.Error(err)
 	}
 	tlsDelay = 2000

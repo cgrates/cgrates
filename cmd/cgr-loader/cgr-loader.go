@@ -115,7 +115,7 @@ func main() {
 
 	ldrCfg := config.CgrConfig()
 	if *cfgPath != "" {
-		if ldrCfg, err = config.NewCGRConfigFromFolder(*cfgPath); err != nil {
+		if ldrCfg, err = config.NewCGRConfigFromPath(*cfgPath); err != nil {
 			log.Fatalf("Error loading config file %s", err.Error())
 		}
 	}

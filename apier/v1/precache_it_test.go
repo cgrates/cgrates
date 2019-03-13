@@ -72,7 +72,7 @@ func TestPrecacheITMongo(t *testing.T) {
 func testPrecacheInitCfg(t *testing.T) {
 	var err error
 	precacheCfgPath = path.Join(precacheDataDir, "conf", "samples", precacheConfigDIR)
-	precacheCfg, err = config.NewCGRConfigFromFolder(precacheCfgPath)
+	precacheCfg, err = config.NewCGRConfigFromPath(precacheCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

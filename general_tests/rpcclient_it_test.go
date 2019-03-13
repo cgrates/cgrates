@@ -56,11 +56,11 @@ var ( // configuration opts
 func TestRPCITLclInitCfg(t *testing.T) {
 	rpcITCfgPath1 = path.Join(*dataDir, "conf", "samples", "multiral1")
 	rpcITCfgPath2 = path.Join(*dataDir, "conf", "samples", "multiral2")
-	rpcITCfg1, err = config.NewCGRConfigFromFolder(rpcITCfgPath1)
+	rpcITCfg1, err = config.NewCGRConfigFromPath(rpcITCfgPath1)
 	if err != nil {
 		t.Error(err)
 	}
-	rpcITCfg2, err = config.NewCGRConfigFromFolder(rpcITCfgPath2)
+	rpcITCfg2, err = config.NewCGRConfigFromPath(rpcITCfgPath2)
 	if err != nil {
 		t.Error(err)
 	}

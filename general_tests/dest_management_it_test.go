@@ -42,7 +42,7 @@ func TestDestManagInitCfg(t *testing.T) {
 	destCfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
 	// Init config first
 	var err error
-	destCfg, err = config.NewCGRConfigFromFolder(destCfgPath)
+	destCfg, err = config.NewCGRConfigFromPath(destCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

@@ -26,7 +26,7 @@ import (
 )
 
 func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
-	cgrCfg, err := NewCGRConfigFromFolder(".")
+	cgrCfg, err := NewCGRConfigFromPath(".")
 	if err != nil {
 		t.Error(err)
 	}

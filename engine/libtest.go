@@ -86,7 +86,7 @@ func StartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	if err := engine.Start(); err != nil {
 		return nil, err
 	}
-	cfg, err := config.NewCGRConfigFromFolder(cfgPath)
+	cfg, err := config.NewCGRConfigFromPath(cfgPath)
 	if err != nil {
 		return nil, err
 	}

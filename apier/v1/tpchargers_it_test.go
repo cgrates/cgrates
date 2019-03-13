@@ -76,7 +76,7 @@ func TestTPChrgsITMongo(t *testing.T) {
 func testTPChrgsInitCfg(t *testing.T) {
 	var err error
 	tpChrgsCfgPath = path.Join(tpChrgsDataDir, "conf", "samples", tpChrgsConfigDIR)
-	tpChrgsCfg, err = config.NewCGRConfigFromFolder(tpChrgsCfgPath)
+	tpChrgsCfg, err = config.NewCGRConfigFromPath(tpChrgsCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

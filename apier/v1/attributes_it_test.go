@@ -90,7 +90,7 @@ func TestAttributeSITMongo(t *testing.T) {
 func testAttributeSInitCfg(t *testing.T) {
 	var err error
 	alsPrfCfgPath = path.Join(alsPrfDataDir, "conf", "samples", alsPrfConfigDIR)
-	alsPrfCfg, err = config.NewCGRConfigFromFolder(alsPrfCfgPath)
+	alsPrfCfg, err = config.NewCGRConfigFromPath(alsPrfCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

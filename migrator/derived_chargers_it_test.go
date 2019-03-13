@@ -63,10 +63,10 @@ func TestDerivedChargersVITMigrateMongo2Redis(t *testing.T) {
 
 func testStartDC(testName, inPath, outPath string, t *testing.T) {
 	var err error
-	if dcCfgIn, err = config.NewCGRConfigFromFolder(inPath); err != nil {
+	if dcCfgIn, err = config.NewCGRConfigFromPath(inPath); err != nil {
 		t.Fatal(err)
 	}
-	if dcCfgOut, err = config.NewCGRConfigFromFolder(outPath); err != nil {
+	if dcCfgOut, err = config.NewCGRConfigFromPath(outPath); err != nil {
 		t.Fatal(err)
 	}
 	for _, stest := range sTestsDCIT {

@@ -81,7 +81,7 @@ func TestTutorialMySQL(t *testing.T) {
 func testTutorialLoadConfig(t *testing.T) {
 	var err error
 	tutorialCfgPath = path.Join(*dataDir, "conf", "samples", tutorialConfDIR)
-	if tutorialCfg, err = config.NewCGRConfigFromFolder(tutorialCfgPath); err != nil {
+	if tutorialCfg, err = config.NewCGRConfigFromPath(tutorialCfgPath); err != nil {
 		t.Error(err)
 	}
 	switch tutorialConfDIR {

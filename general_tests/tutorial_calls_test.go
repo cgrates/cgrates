@@ -118,22 +118,22 @@ func testCallInitCfg(t *testing.T) {
 	var err error
 	switch optConf {
 	case utils.Freeswitch:
-		tutorialCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*fsConfig, "cgrates", "etc", "cgrates"))
+		tutorialCallsCfg, err = config.NewCGRConfigFromPath(path.Join(*fsConfig, "cgrates", "etc", "cgrates"))
 		if err != nil {
 			t.Error(err)
 		}
 	case utils.Kamailio:
-		tutorialCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*kamConfig, "cgrates", "etc", "cgrates"))
+		tutorialCallsCfg, err = config.NewCGRConfigFromPath(path.Join(*kamConfig, "cgrates", "etc", "cgrates"))
 		if err != nil {
 			t.Error(err)
 		}
 	case utils.Opensips:
-		tutorialCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*oSipsConfig, "cgrates", "etc", "cgrates"))
+		tutorialCallsCfg, err = config.NewCGRConfigFromPath(path.Join(*oSipsConfig, "cgrates", "etc", "cgrates"))
 		if err != nil {
 			t.Error(err)
 		}
 	case utils.Asterisk:
-		tutorialCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*ariConf, "cgrates", "etc", "cgrates"))
+		tutorialCallsCfg, err = config.NewCGRConfigFromPath(path.Join(*ariConf, "cgrates", "etc", "cgrates"))
 		if err != nil {
 			t.Error(err)
 		}

@@ -71,7 +71,7 @@ func TestAccITWithoutRemove(t *testing.T) {
 
 func testAccITLoadConfig(t *testing.T) {
 	var err error
-	if accCfg, err = config.NewCGRConfigFromFolder(accCfgPath); err != nil {
+	if accCfg, err = config.NewCGRConfigFromPath(accCfgPath); err != nil {
 		t.Error(err)
 	}
 }
