@@ -137,9 +137,6 @@ func (m *Migrator) migrateV2Attributes() (err error) {
 		if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
 			return err
 		}
-		if err := m.dmIN.remV2AttributeProfile(v2Attr.Tenant, v2Attr.ID); err != nil {
-			return err
-		}
 		m.stats[utils.Attributes] += 1
 	}
 	if m.dryRun {
@@ -248,7 +245,7 @@ func (v2AttrPrf v2AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 	for _, attr := range v2AttrPrf.Attributes {
 		filterIDs := make([]string, 0)
 		//append false translate to  if FieldName exist do stuff
-		if attr.Append == false {
+		if !attr.Append {
 			filterIDs = append(filterIDs, utils.MetaExists+":"+attr.FieldName+":")
 		}
 		//Initial not *any translate to if value of fieldName = initial do stuff
