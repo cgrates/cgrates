@@ -271,16 +271,18 @@ func loadConfigFromFolder(cfg *CGRConfig, cfgDir string) (*CGRConfig, error) {
 	return cfg, nil
 }
 
-func loadConfigFromHttp(cfg *CGRConfig, urlPath string) (*CGRConfig, error) {
-	if _, err := url.ParseRequestURI(urlPath); err != nil {
-		return nil, err
-	}
-	if cgrJsonCfg, err := NewCgrJsonCfgFromHttp(urlPath); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<CGR-CFG> Error <%s> reading config from path: <%s>", err.Error(), urlPath))
-		return nil, err
-	} else if err := cfg.loadFromJsonCfg(cgrJsonCfg); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<CGR-CFG> Error <%s> loading config from path: <%s>", err.Error(), urlPath))
-		return nil, err
+func loadConfigFromHttp(cfg *CGRConfig, urlPaths string) (*CGRConfig, error) {
+	for _, urlPath := range strings.Split(urlPaths, utils.INFIELD_SEP) {
+		if _, err := url.ParseRequestURI(urlPath); err != nil {
+			return nil, err
+		}
+		if cgrJsonCfg, err := NewCgrJsonCfgFromHttp(urlPath); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<CGR-CFG> Error <%s> reading config from path: <%s>", err.Error(), urlPath))
+			return nil, err
+		} else if err := cfg.loadFromJsonCfg(cgrJsonCfg); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<CGR-CFG> Error <%s> loading config from path: <%s>", err.Error(), urlPath))
+			return nil, err
+		}
 	}
 	if err := cfg.checkConfigSanity(); err != nil {
 		return nil, err
