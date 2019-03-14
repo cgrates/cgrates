@@ -49,6 +49,7 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 	"origin_realm": "cgrates.org",								// diameter Origin-Realm AVP used in replies
 	"vendor_id": 0,												// diameter Vendor-Id AVP used in replies
 	"product_name": "CGRateS",									// diameter Product-Name AVP used in replies
+	"synced_conn_requests": true,
 	"templates":{},
 	"request_processors": [],
 },
@@ -61,6 +62,7 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 		OriginRealm:      "cgrates.org",
 		VendorId:         0,
 		ProductName:      "CGRateS",
+		SyncedConnReqs:   true,
 		Templates:        make(map[string][]*FCTemplate),
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {

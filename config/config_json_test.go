@@ -578,12 +578,13 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 			{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
-		Origin_host:         utils.StringPointer("CGR-DA"),
-		Origin_realm:        utils.StringPointer("cgrates.org"),
-		Vendor_id:           utils.IntPointer(0),
-		Product_name:        utils.StringPointer("CGRateS"),
-		Max_active_requests: utils.IntPointer(-1),
-		Asr_template:        utils.StringPointer(""),
+		Origin_host:          utils.StringPointer("CGR-DA"),
+		Origin_realm:         utils.StringPointer("cgrates.org"),
+		Vendor_id:            utils.IntPointer(0),
+		Product_name:         utils.StringPointer("CGRateS"),
+		Max_active_requests:  utils.IntPointer(-1),
+		Synced_conn_requests: utils.BoolPointer(false),
+		Asr_template:         utils.StringPointer(""),
 		Templates: map[string][]*FcTemplateJsonCfg{
 			utils.MetaErr: {
 				{Tag: utils.StringPointer("SessionId"),

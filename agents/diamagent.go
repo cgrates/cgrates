@@ -110,8 +110,12 @@ func (da *DiameterAgent) handlers() diam.Handler {
 	}
 
 	dSM := sm.New(settings)
+	if da.cgrCfg.DiameterAgentCfg().SyncedConnReqs {
+		dSM.HandleFunc("ALL", da.handleMessage)
+	} else {
+		dSM.HandleFunc("ALL", da.handleMessageAsync)
+	}
 
-	dSM.HandleFunc("ALL", da.handleMessageAsync) // route all commands to one dispatcher
 	go func() {
 		for err := range dSM.ErrorReports() {
 			utils.Logger.Err(fmt.Sprintf("<%s> sm error: %v", utils.DiameterAgent, err))
