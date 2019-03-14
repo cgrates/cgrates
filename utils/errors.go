@@ -213,3 +213,7 @@ func IsNetworkError(err error) bool {
 		err.Error() == ErrSessionNotFound.Error() ||
 		strings.HasPrefix(err.Error(), "rpc: can't find service")
 }
+
+func ErrPathNotReachable(path string) error {
+	return fmt.Errorf("path:%+q is not reachable", path)
+}

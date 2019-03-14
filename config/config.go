@@ -164,8 +164,6 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.migratorCgrCfg = new(MigratorCgrCfg)
 	cfg.mailerCfg = new(MailerCfg)
 	cfg.loaderCfg = make([]*LoaderSCfg, 0)
-
-	//Depricated
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
 
 	cfg.ConfigReloads = make(map[string]chan struct{})
@@ -216,10 +214,13 @@ func NewCGRConfigFromPath(path string) (*CGRConfig, error) {
 	if err != nil {
 		return nil, err
 	}
+	if isUrl(path) {
+		return loadConfigFromHttp(cfg, path) // prefix protocol
+	}
 	fi, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return loadConfigFromHttp(cfg, path)
+			return nil, utils.ErrPathNotReachable(path)
 		}
 		return nil, err
 	} else if !fi.IsDir() && path != utils.CONFIG_PATH { // If config dir defined, needs to exist, not checking for default
@@ -271,8 +272,7 @@ func loadConfigFromFolder(cfg *CGRConfig, cfgDir string) (*CGRConfig, error) {
 }
 
 func loadConfigFromHttp(cfg *CGRConfig, urlPath string) (*CGRConfig, error) {
-	_, err := url.ParseRequestURI(urlPath)
-	if err != nil {
+	if _, err := url.ParseRequestURI(urlPath); err != nil {
 		return nil, err
 	}
 	if cgrJsonCfg, err := NewCgrJsonCfgFromHttp(urlPath); err != nil {

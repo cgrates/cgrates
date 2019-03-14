@@ -23,7 +23,8 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 const (
@@ -91,10 +92,12 @@ func NewCgrJsonCfgFromFile(fpath string) (*CgrJsonCfg, error) {
 
 // Loads the config out of http request
 func NewCgrJsonCfgFromHttp(fpath string) (*CgrJsonCfg, error) {
-	var myClient = &http.Client{Timeout: 10 * time.Second}
+	var myClient = &http.Client{
+		Timeout: CgrConfig().GeneralCfg().ReplyTimeout,
+	}
 	cfgReq, err := myClient.Get(fpath)
 	if err != nil {
-		return nil, err
+		return nil, utils.ErrPathNotReachable(fpath)
 	}
 	defer cfgReq.Body.Close()
 	return NewCgrJsonCfgFromReader(cfgReq.Body)
