@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"path"
 	"reflect"
 	"testing"
 	"time"
@@ -1672,5 +1673,27 @@ func TestCgrCfgJSONDefaultAnalyzerSCfg(t *testing.T) {
 	}
 	if !reflect.DeepEqual(cgrCfg.analyzerSCfg, aSCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.analyzerSCfg, aSCfg)
+	}
+}
+
+func TestNewCGRConfigFromPathNotFound(t *testing.T) {
+	fpath := path.Join("/usr", "share", "cgrates", "conf", "samples", "notValid")
+	_, err := NewCGRConfigFromPath(fpath)
+	if err == nil || err.Error() != utils.ErrPathNotReachable(fpath).Error() {
+		t.Fatalf("Expected %s ,received %s", utils.ErrPathNotReachable(fpath), err)
+	}
+	fpath = path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo", "cgrates.json")
+	cfg, err := NewCGRConfigFromPath(fpath)
+	if err == nil {
+		t.Fatalf("Expected error,received %v", cfg)
+	}
+	fpath = "https://not_a_reacheble_website"
+	_, err = NewCGRConfigFromPath(fpath)
+	if err == nil || err.Error() != utils.ErrPathNotReachable(fpath).Error() {
+		t.Fatalf("Expected %s ,received %s", utils.ErrPathNotReachable(fpath), err)
+	}
+	cfg, err = NewCGRConfigFromPath("https://github.com/")
+	if err == nil {
+		t.Fatalf("Expected error,received %v", cfg)
 	}
 }
