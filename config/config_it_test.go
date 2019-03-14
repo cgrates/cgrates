@@ -21,6 +21,7 @@ package config
 
 import (
 	"net"
+	"os"
 	"path"
 	"reflect"
 	"testing"
@@ -49,8 +50,13 @@ func TestNewCgrJsonCfgFromHttp(t *testing.T) {
 }
 
 func TestNewCGRConfigFromPath(t *testing.T) {
-	addr := "https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/tutmongo/cgrates.json"
-	expVal, err := NewCGRConfigFromPath(path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"))
+	for key, val := range map[string]string{"LOGGER": "*syslog", "LOG_LEVEL": "6", "TLS_VERIFY": "false", "ROUND_DEC": "5",
+		"DB_ENCODING": "*msgpack", "TP_EXPORT_DIR": "/var/spool/cgrates/tpe", "FAILED_POSTS_DIR": "/var/spool/cgrates/failed_posts",
+		"DF_TENANT": "cgrates.org", "TIMEZONE": "Local"} {
+		os.Setenv(key, val)
+	}
+	addr := "https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/multifiles/a.json;https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/multifiles/b/b.json;https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/multifiles/c.json;https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/multifiles/d.json"
+	expVal, err := NewCGRConfigFromPath(path.Join("/usr", "share", "cgrates", "conf", "samples", "multifiles"))
 	if err != nil {
 		t.Fatal(err)
 	}
