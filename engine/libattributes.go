@@ -67,3 +67,47 @@ type AttributeProfiles []*AttributeProfile
 func (aps AttributeProfiles) Sort() {
 	sort.Slice(aps, func(i, j int) bool { return aps[i].Weight > aps[j].Weight })
 }
+
+type ExternalAttribute struct {
+	FilterIDs  []string
+	FieldName  string
+	Substitute string
+}
+
+type ExternalAttributeProfile struct {
+	Tenant             string
+	ID                 string
+	Contexts           []string // bind this AttributeProfile to multiple contexts
+	FilterIDs          []string
+	ActivationInterval *utils.ActivationInterval // Activation interval
+	Attributes         []*ExternalAttribute
+	Blocker            bool // blocker flag to stop processing on multiple runs
+	Weight             float64
+}
+
+func (ext *ExternalAttributeProfile) ConvertExtToAttrPrf() (attr *AttributeProfile, err error) {
+	attr = new(AttributeProfile)
+	if len(ext.Attributes) == 0 {
+		return nil, utils.NewErrMandatoryIeMissing("Attributes")
+	}
+	attr.Attributes = make([]*Attribute, len(ext.Attributes))
+	for i, extAttr := range ext.Attributes {
+		if len(extAttr.Substitute) == 0 {
+			return nil, utils.NewErrMandatoryIeMissing("Substitute")
+		}
+		attr.Attributes[i] = new(Attribute)
+		if attr.Attributes[i].Substitute, err = config.NewRSRParsers(extAttr.Substitute, true, utils.INFIELD_SEP); err != nil {
+			return nil, err
+		}
+		attr.Attributes[i].FilterIDs = extAttr.FilterIDs
+		attr.Attributes[i].FieldName = extAttr.FieldName
+	}
+	attr.Tenant = ext.Tenant
+	attr.ID = ext.ID
+	attr.Contexts = ext.Contexts
+	attr.FilterIDs = ext.FilterIDs
+	attr.ActivationInterval = ext.ActivationInterval
+	attr.Blocker = ext.Blocker
+	attr.Weight = ext.Weight
+	return
+}
