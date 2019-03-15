@@ -429,7 +429,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 			},
 			&engine.MetricWithFilters{
 				MetricID:  "*tcd",
-				FilterIDs: []string{"*rsr::~Usage{*duration}(>5s)"},
+				FilterIDs: []string{"*gt:~Usage:5s"},
 			},
 			&engine.MetricWithFilters{
 				MetricID:  "*sum#CustomValue",
