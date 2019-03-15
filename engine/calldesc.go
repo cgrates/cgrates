@@ -556,8 +556,8 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	for i, ts := range cc.Timespans {
 		// only add connect fee if this is the first/only call cost request
 		if cd.LoopIndex == 0 && i == 0 && ts.RateInterval != nil {
-			//Add an increment for ConnectFee
-			ts.AddIncrement(&Increment{
+			//Add the ConnectFee increment at the beggining
+			ts.Increments = append(Increments{&Increment{
 				Duration:       0,
 				Cost:           ts.RateInterval.Rating.ConnectFee,
 				CompressFactor: 1,
@@ -566,7 +566,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 					Unit:      nil,
 					AccountID: "",
 				},
-			})
+			}}, ts.Increments...)
 			//Add the cost from ConnectFee to TimeSpan
 			ts.Cost = ts.Cost + ts.RateInterval.Rating.ConnectFee
 		}
