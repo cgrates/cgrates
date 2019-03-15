@@ -253,27 +253,31 @@ func AsMapStringIface(item interface{}) (map[string]interface{}, error) {
 	return out, nil
 }
 
+func GetUniformType(item interface{}) (interface{}, error) {
+	valItm := reflect.ValueOf(item)
+	switch valItm.Kind() { // convert evreting to float64
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return float64(valItm.Int()), nil
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return float64(valItm.Uint()), nil
+	case reflect.Float32, reflect.Float64:
+		return valItm.Float(), nil
+	case reflect.Struct: // used only for time
+		return valItm.Interface(), nil
+	default:
+		return nil, errors.New("incomparable")
+	}
+	return item, nil
+}
+
 // GreaterThan attempts to compare two items
 // returns the result or error if not comparable
 func GreaterThan(item, oItem interface{}, orEqual bool) (gte bool, err error) {
-	valItm := reflect.ValueOf(item)
-	valOtItm := reflect.ValueOf(oItem)
-	// convert to wider type so we can be compatible with StringToInterface function
-	switch valItm.Kind() {
-	case reflect.Float32:
-		item = valItm.Float()
-		valItm = reflect.ValueOf(item)
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32:
-		item = valItm.Int()
-		valItm = reflect.ValueOf(item)
+	if item, err = GetUniformType(item); err != nil {
+		return false, err
 	}
-	switch valOtItm.Kind() {
-	case reflect.Float32:
-		oItem = valOtItm.Float()
-		valOtItm = reflect.ValueOf(oItem)
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32:
-		oItem = valOtItm.Int()
-		valOtItm = reflect.ValueOf(oItem)
+	if oItem, err = GetUniformType(oItem); err != nil {
+		return false, err
 	}
 	typItem := reflect.TypeOf(item)
 	typOItem := reflect.TypeOf(oItem)
@@ -282,21 +286,15 @@ func GreaterThan(item, oItem interface{}, orEqual bool) (gte bool, err error) {
 		typItem != typOItem {
 		return false, errors.New("incomparable")
 	}
-	switch item.(type) {
+	switch tVal := item.(type) {
 	case float64:
+		tOVal := oItem.(float64)
 		if orEqual {
-			gte = valItm.Float() >= valOtItm.Float()
+			gte = tVal >= tOVal
 		} else {
-			gte = valItm.Float() > valOtItm.Float()
-		}
-	case int64:
-		if orEqual {
-			gte = valItm.Int() >= valOtItm.Int()
-		} else {
-			gte = valItm.Int() > valOtItm.Int()
+			gte = tVal > tOVal
 		}
 	case time.Time:
-		tVal := item.(time.Time)
 		tOVal := oItem.(time.Time)
 		if orEqual {
 			gte = tVal == tOVal
@@ -304,16 +302,6 @@ func GreaterThan(item, oItem interface{}, orEqual bool) (gte bool, err error) {
 		if !gte {
 			gte = tVal.After(tOVal)
 		}
-	case time.Duration:
-		tVal := item.(time.Duration)
-		tOVal := oItem.(time.Duration)
-		if orEqual {
-			gte = tVal == tOVal
-		}
-		if !gte {
-			gte = tVal > tOVal
-		}
-
 	default: // unsupported comparison
 		err = fmt.Errorf("unsupported comparison type: %v, kind: %v", typItem, typItem.Kind())
 	}
