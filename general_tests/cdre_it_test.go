@@ -77,7 +77,6 @@ func testCDREInitCfg(t *testing.T) {
 		t.Error(err)
 	}
 	cdreCfg.DataFolderPath = cdreDataDir
-	config.SetCgrConfig(cdreCfg)
 	cdreDelay = 1000
 }
 
