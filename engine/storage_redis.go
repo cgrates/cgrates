@@ -326,12 +326,31 @@ func (rs *RedisStorage) RemoveReverseForPrefix(prefix string) (err error) {
 	return nil
 }
 
+func (rs *RedisStorage) getKeysForFilterIndexesKeys(fkeys []string) (keys []string, err error) {
+	for _, itemIDPrefix := range fkeys {
+		mp := make(map[string]string)
+		mp, err = rs.Cmd("HGETALL", itemIDPrefix).Map()
+		if err != nil {
+			return
+		} else if len(mp) == 0 {
+			return nil, utils.ErrNotFound
+		}
+		for k := range mp {
+			keys = append(keys, utils.ConcatenatedKey(itemIDPrefix, k))
+		}
+	}
+	return
+}
+
 func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	r := rs.Cmd("KEYS", prefix+"*")
 	if r.Err != nil {
 		return nil, r.Err
 	}
 	if keys, _ := r.List(); len(keys) != 0 {
+		if filterIndexesPrefixMap.HasKey(prefix) {
+			return rs.getKeysForFilterIndexesKeys(keys)
+		}
 		return keys, nil
 	}
 	return nil, nil
@@ -1136,9 +1155,6 @@ func (rs *RedisStorage) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType st
 		var sm utils.StringMap
 		if err = rs.ms.Unmarshal([]byte(v), &sm); err != nil {
 			return
-		}
-		if _, hasKey := indexes[k]; !hasKey {
-			indexes[k] = make(utils.StringMap)
 		}
 		indexes[k] = sm
 	}

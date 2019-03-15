@@ -33,30 +33,37 @@ func init() {
 	InitCache(nil)
 }
 
-var precachedPartitions = []string{
-	utils.CacheDestinations,
-	utils.CacheReverseDestinations,
-	utils.CacheRatingPlans,
-	utils.CacheRatingProfiles,
-	utils.CacheActions,
-	utils.CacheActionPlans,
-	utils.CacheAccountActionPlans,
-	utils.CacheActionTriggers,
-	utils.CacheSharedGroups,
-	utils.CacheResourceProfiles,
-	utils.CacheResources,
-	utils.CacheEventResources,
-	utils.CacheTimings,
-	utils.CacheStatQueueProfiles,
-	utils.CacheStatQueues,
-	utils.CacheThresholdProfiles,
-	utils.CacheThresholds,
-	utils.CacheFilters,
-	utils.CacheSupplierProfiles,
-	utils.CacheAttributeProfiles,
-	utils.CacheChargerProfiles,
-	utils.CacheDispatcherProfiles,
-	utils.CacheDiameterMessages,
+var precachedPartitions = utils.StringMap{
+	utils.CacheDestinations:            true,
+	utils.CacheReverseDestinations:     true,
+	utils.CacheRatingPlans:             true,
+	utils.CacheRatingProfiles:          true,
+	utils.CacheActions:                 true,
+	utils.CacheActionPlans:             true,
+	utils.CacheAccountActionPlans:      true,
+	utils.CacheActionTriggers:          true,
+	utils.CacheSharedGroups:            true,
+	utils.CacheResourceProfiles:        true,
+	utils.CacheResources:               true,
+	utils.CacheEventResources:          true,
+	utils.CacheTimings:                 true,
+	utils.CacheStatQueueProfiles:       true,
+	utils.CacheStatQueues:              true,
+	utils.CacheThresholdProfiles:       true,
+	utils.CacheThresholds:              true,
+	utils.CacheFilters:                 true,
+	utils.CacheSupplierProfiles:        true,
+	utils.CacheAttributeProfiles:       true,
+	utils.CacheChargerProfiles:         true,
+	utils.CacheDispatcherProfiles:      true,
+	utils.CacheDiameterMessages:        true,
+	utils.CacheAttributeFilterIndexes:  true,
+	utils.CacheResourceFilterIndexes:   true,
+	utils.CacheStatFilterIndexes:       true,
+	utils.CacheThresholdFilterIndexes:  true,
+	utils.CacheSupplierFilterIndexes:   true,
+	utils.CacheChargerFilterIndexes:    true,
+	utils.CacheDispatcherFilterIndexes: true,
 }
 
 // InitCache will instantiate the cache with specific or default configuraiton
@@ -73,7 +80,7 @@ func NewCacheS(cfg *config.CGRConfig, dm *DataManager) (c *CacheS) {
 	c = &CacheS{cfg: cfg, dm: dm,
 		pcItems: make(map[string]chan struct{})}
 	for cacheID := range cfg.CacheCfg() {
-		if !utils.IsSliceMember(precachedPartitions, cacheID) {
+		if !precachedPartitions.HasKey(cacheID) {
 			continue
 		}
 		c.pcItems[cacheID] = make(chan struct{})
@@ -96,7 +103,7 @@ func (chS *CacheS) GetPrecacheChannel(chID string) chan struct{} {
 // Precache loads data from DataDB into cache at engine start
 func (chS *CacheS) Precache() (err error) {
 	for cacheID, cacheCfg := range chS.cfg.CacheCfg() {
-		if !utils.IsSliceMember(precachedPartitions, cacheID) {
+		if !precachedPartitions.HasKey(cacheID) {
 			continue
 		}
 		if cacheCfg.Precache {
@@ -170,7 +177,7 @@ func (chS *CacheS) V1GetCacheStats(cacheIDs []string,
 
 func (chS *CacheS) V1PrecacheStatus(cacheIDs []string, rply *map[string]string) (err error) {
 	if len(cacheIDs) == 0 {
-		for _, cacheID := range precachedPartitions {
+		for cacheID := range precachedPartitions {
 			cacheIDs = append(cacheIDs, cacheID)
 		}
 	}
