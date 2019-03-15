@@ -62,7 +62,7 @@ func TestCostIT(t *testing.T) {
 func testCostInitCfg(t *testing.T) {
 	var err error
 	costCfgPath = path.Join(costDataDir, "conf", "samples", costConfigDIR)
-	costCfg, err = config.NewCGRConfigFromFolder(costCfgPath)
+	costCfg, err = config.NewCGRConfigFromPath(costCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
