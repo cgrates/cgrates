@@ -24,9 +24,72 @@ import (
 	"github.com/cgrates/ltcache"
 )
 
+var (
+	filterIndexesPrefixMap = utils.StringMap{
+		utils.AttributeFilterIndexes:  true,
+		utils.ResourceFilterIndexes:   true,
+		utils.StatFilterIndexes:       true,
+		utils.ThresholdFilterIndexes:  true,
+		utils.SupplierFilterIndexes:   true,
+		utils.ChargerFilterIndexes:    true,
+		utils.DispatcherFilterIndexes: true,
+	}
+	loadCachePrefixMap = utils.StringMap{
+		utils.DESTINATION_PREFIX:         true,
+		utils.REVERSE_DESTINATION_PREFIX: true,
+		utils.RATING_PLAN_PREFIX:         true,
+		utils.RATING_PROFILE_PREFIX:      true,
+		utils.ACTION_PREFIX:              true,
+		utils.ACTION_PLAN_PREFIX:         true,
+		utils.ACTION_TRIGGER_PREFIX:      true,
+		utils.SHARED_GROUP_PREFIX:        true,
+		utils.StatQueuePrefix:            true,
+		utils.StatQueueProfilePrefix:     true,
+		utils.ThresholdPrefix:            true,
+		utils.ThresholdProfilePrefix:     true,
+		utils.FilterPrefix:               true,
+		utils.SupplierProfilePrefix:      true,
+		utils.AttributeProfilePrefix:     true,
+		utils.ChargerProfilePrefix:       true,
+		utils.DispatcherProfilePrefix:    true,
+	}
+	cachePrefixMap = utils.StringMap{
+		utils.DESTINATION_PREFIX:         true,
+		utils.REVERSE_DESTINATION_PREFIX: true,
+		utils.RATING_PLAN_PREFIX:         true,
+		utils.RATING_PROFILE_PREFIX:      true,
+		utils.ACTION_PREFIX:              true,
+		utils.ACTION_PLAN_PREFIX:         true,
+		utils.AccountActionPlansPrefix:   true,
+		utils.ACTION_TRIGGER_PREFIX:      true,
+		utils.SHARED_GROUP_PREFIX:        true,
+		utils.ResourceProfilesPrefix:     true,
+		utils.TimingsPrefix:              true,
+		utils.ResourcesPrefix:            true,
+		utils.StatQueuePrefix:            true,
+		utils.StatQueueProfilePrefix:     true,
+		utils.ThresholdPrefix:            true,
+		utils.ThresholdProfilePrefix:     true,
+		utils.FilterPrefix:               true,
+		utils.SupplierProfilePrefix:      true,
+		utils.AttributeProfilePrefix:     true,
+		utils.ChargerProfilePrefix:       true,
+		utils.DispatcherProfilePrefix:    true,
+		utils.AttributeFilterIndexes:     true,
+		utils.ResourceFilterIndexes:      true,
+		utils.StatFilterIndexes:          true,
+		utils.ThresholdFilterIndexes:     true,
+		utils.SupplierFilterIndexes:      true,
+		utils.ChargerFilterIndexes:       true,
+		utils.DispatcherFilterIndexes:    true,
+	}
+)
+
 func NewDataManager(dataDB DataDB) *DataManager {
-	return &DataManager{dataDB: dataDB,
-		cacheCfg: config.CgrConfig().CacheCfg()}
+	return &DataManager{
+		dataDB:   dataDB,
+		cacheCfg: config.CgrConfig().CacheCfg(),
+	}
 }
 
 // DataManager is the data storage manager for CGRateS
@@ -53,13 +116,7 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 		}
 		for k, cacheCfg := range dm.cacheCfg {
 			k = utils.CacheInstanceToPrefix[k] // alias into prefixes understood by storage
-			if utils.IsSliceMember([]string{utils.DESTINATION_PREFIX, utils.REVERSE_DESTINATION_PREFIX,
-				utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
-				utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACTION_TRIGGER_PREFIX,
-				utils.SHARED_GROUP_PREFIX, utils.StatQueuePrefix,
-				utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
-				utils.FilterPrefix, utils.SupplierProfilePrefix,
-				utils.AttributeProfilePrefix, utils.ChargerProfilePrefix, utils.DispatcherProfilePrefix}, k) && cacheCfg.Precache {
+			if loadCachePrefixMap.HasKey(k) && cacheCfg.Precache {
 				if err := dm.PreloadCacheForPrefix(k); err != nil && err != utils.ErrInvalidKey {
 					return err
 				}
@@ -124,28 +181,7 @@ func (dm *DataManager) PreloadCacheForPrefix(prefix string) error {
 }
 
 func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached bool) (err error) {
-	if !utils.IsSliceMember([]string{
-		utils.DESTINATION_PREFIX,
-		utils.REVERSE_DESTINATION_PREFIX,
-		utils.RATING_PLAN_PREFIX,
-		utils.RATING_PROFILE_PREFIX,
-		utils.ACTION_PREFIX,
-		utils.ACTION_PLAN_PREFIX,
-		utils.AccountActionPlansPrefix,
-		utils.ACTION_TRIGGER_PREFIX,
-		utils.SHARED_GROUP_PREFIX,
-		utils.ResourceProfilesPrefix,
-		utils.TimingsPrefix,
-		utils.ResourcesPrefix,
-		utils.StatQueuePrefix,
-		utils.StatQueueProfilePrefix,
-		utils.ThresholdPrefix,
-		utils.ThresholdProfilePrefix,
-		utils.FilterPrefix,
-		utils.SupplierProfilePrefix,
-		utils.AttributeProfilePrefix,
-		utils.ChargerProfilePrefix,
-		utils.DispatcherProfilePrefix}, prfx) {
+	if !cachePrefixMap.HasKey(prfx) {
 		return utils.NewCGRError(utils.DataManager,
 			utils.MandatoryIEMissingCaps,
 			utils.UnsupportedCachePrefix,
@@ -235,6 +271,20 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.DispatcherProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetDispatcherProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+		case utils.AttributeFilterIndexes:
+			err = dm.MatchFilterIndexFromKey(utils.CacheAttributeFilterIndexes, dataID)
+		case utils.ResourceFilterIndexes:
+			err = dm.MatchFilterIndexFromKey(utils.CacheResourceFilterIndexes, dataID)
+		case utils.StatFilterIndexes:
+			err = dm.MatchFilterIndexFromKey(utils.CacheStatFilterIndexes, dataID)
+		case utils.ThresholdFilterIndexes:
+			err = dm.MatchFilterIndexFromKey(utils.CacheThresholdFilterIndexes, dataID)
+		case utils.SupplierFilterIndexes:
+			err = dm.MatchFilterIndexFromKey(utils.CacheSupplierFilterIndexes, dataID)
+		case utils.ChargerFilterIndexes:
+			err = dm.MatchFilterIndexFromKey(utils.CacheChargerFilterIndexes, dataID)
+		case utils.DispatcherFilterIndexes:
+			err = dm.MatchFilterIndexFromKey(utils.CacheDispatcherFilterIndexes, dataID)
 		}
 		if err != nil {
 			return utils.NewCGRError(utils.DataManager,
@@ -937,6 +987,19 @@ func (dm *DataManager) RemoveFilterIndexes(cacheID, itemIDPrefix string) (err er
 	return dm.DataDB().RemoveFilterIndexesDrv(cacheID, itemIDPrefix)
 }
 
+func (dm *DataManager) MatchFilterIndexFromKey(cacheID, key string) (err error) {
+	splt := utils.SplitConcatenatedKey(key) // prefix:filterType:fieldName:fieldVal
+	lsplt := len(splt)
+	if lsplt < 4 {
+		return utils.ErrNotFound
+	}
+	fieldVal := splt[lsplt-1]
+	fieldName := splt[lsplt-2]
+	filterType := splt[lsplt-3]
+	itemIDPrefix := utils.ConcatenatedKey(splt[:lsplt-3]...) // prefix may contain context/subsystems
+	_, err = dm.MatchFilterIndex(cacheID, itemIDPrefix, filterType, fieldName, fieldVal)
+	return
+}
 func (dm *DataManager) MatchFilterIndex(cacheID, itemIDPrefix,
 	filterType, fieldName, fieldVal string) (itemIDs utils.StringMap, err error) {
 	fieldValKey := utils.ConcatenatedKey(itemIDPrefix, filterType, fieldName, fieldVal)

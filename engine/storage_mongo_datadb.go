@@ -511,6 +511,7 @@ func (ms *MongoStorage) getField(sctx mongo.SessionContext, col, prefix, subject
 	}
 	return result, iter.Close(sctx)
 }
+
 func (ms *MongoStorage) getField2(sctx mongo.SessionContext, col, prefix, subject string, tntID *utils.TenantID) (result []string, err error) {
 	idResult := struct{ Tenant, Id string }{}
 	elem := bson.M{}
@@ -532,6 +533,27 @@ func (ms *MongoStorage) getField2(sctx mongo.SessionContext, col, prefix, subjec
 			return
 		}
 		result = append(result, prefix+utils.ConcatenatedKey(idResult.Tenant, idResult.Id))
+	}
+	return result, iter.Close(sctx)
+}
+
+func (ms *MongoStorage) getField3(sctx mongo.SessionContext, col, prefix, field string) (result []string, err error) {
+	fieldResult := bson.D{}
+	iter, err := ms.getCol(col).Find(sctx,
+		bson.M{field: bsonx.Regex(fmt.Sprintf("^%s", prefix), "")},
+		options.Find().SetProjection(
+			bson.M{field: 1},
+		),
+	)
+	if err != nil {
+		return
+	}
+	for iter.Next(sctx) {
+		err = iter.Decode(&fieldResult)
+		if err != nil {
+			return
+		}
+		result = append(result, fieldResult.Map()[field].(string))
 	}
 	return result, iter.Close(sctx)
 }
@@ -592,6 +614,20 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result, err = ms.getField2(sctx, colCpp, utils.ChargerProfilePrefix, subject, tntID)
 		case utils.DispatcherProfilePrefix:
 			result, err = ms.getField2(sctx, colDpp, utils.DispatcherProfilePrefix, subject, tntID)
+		case utils.AttributeFilterIndexes:
+			result, err = ms.getField3(sctx, colRFI, utils.AttributeFilterIndexes, "key")
+		case utils.ResourceFilterIndexes:
+			result, err = ms.getField3(sctx, colRFI, utils.ResourceFilterIndexes, "key")
+		case utils.StatFilterIndexes:
+			result, err = ms.getField3(sctx, colRFI, utils.StatFilterIndexes, "key")
+		case utils.ThresholdFilterIndexes:
+			result, err = ms.getField3(sctx, colRFI, utils.ThresholdFilterIndexes, "key")
+		case utils.SupplierFilterIndexes:
+			result, err = ms.getField3(sctx, colRFI, utils.SupplierFilterIndexes, "key")
+		case utils.ChargerFilterIndexes:
+			result, err = ms.getField3(sctx, colRFI, utils.ChargerFilterIndexes, "key")
+		case utils.DispatcherFilterIndexes:
+			result, err = ms.getField3(sctx, colRFI, utils.DispatcherFilterIndexes, "key")
 		default:
 			err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
 		}
@@ -1661,9 +1697,6 @@ func (ms *MongoStorage) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType st
 		//check here if itemIDPrefix has context
 		if len(strings.Split(itemIDPrefix, ":")) == 2 {
 			indexKey = utils.ConcatenatedKey(keys[2], keys[3], keys[4])
-		}
-		if _, hasIt := indexes[indexKey]; !hasIt {
-			indexes[indexKey] = make(utils.StringMap)
 		}
 		indexes[indexKey] = utils.StringMapFromSlice(res.Value)
 	}
