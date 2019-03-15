@@ -490,8 +490,8 @@ func TestRSRFilterPass(t *testing.T) {
 	if fltr.Pass("0s") {
 		t.Error("passing!")
 	}
-	if fltr.Pass("13") {
-		t.Error("passing!")
+	if !fltr.Pass("13") {
+		t.Error("not passing!")
 	}
 	if !fltr.Pass("12s") {
 		t.Error("not passing!")
@@ -523,8 +523,8 @@ func TestRSRFilterPass(t *testing.T) {
 	if !fltr.Pass("0s") {
 		t.Error("not passing!")
 	}
-	if fltr.Pass("13") {
-		t.Error("passing!")
+	if !fltr.Pass("13") {
+		t.Error("not passing!")
 	}
 	if !fltr.Pass("12s") {
 		t.Error("not passing!")
@@ -574,8 +574,8 @@ func TestRSRFilterPass(t *testing.T) {
 	if !fltr.Pass("1ns") {
 		t.Error("not passing!")
 	}
-	if fltr.Pass("13") {
-		t.Error("passing!")
+	if !fltr.Pass("13") {
+		t.Error("not passing!")
 	}
 	if !fltr.Pass("12s") {
 		t.Error("not passing!")
@@ -613,8 +613,8 @@ func TestRSRFilterPass(t *testing.T) {
 	if fltr.Pass("0s") {
 		t.Error("passing!")
 	}
-	if fltr.Pass("13") {
-		t.Error("passing!")
+	if !fltr.Pass("13") {
+		t.Error("not passing!")
 	}
 	if !fltr.Pass("12s") {
 		t.Error("not passing!")

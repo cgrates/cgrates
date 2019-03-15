@@ -142,8 +142,10 @@ func TestReflectAsMapStringIface(t *testing.T) {
 }
 
 func TestGreaterThan(t *testing.T) {
-	if _, err := GreaterThan(1, 1.2, false); err == nil || err.Error() != "incomparable" {
+	if gte, err := GreaterThan(1, 1.2, false); err != nil {
 		t.Error(err)
+	} else if gte {
+		t.Error("should be not greater than")
 	}
 	if _, err := GreaterThan(struct{}{},
 		map[string]interface{}{"a": "a"}, false); err == nil || err.Error() != "incomparable" {
