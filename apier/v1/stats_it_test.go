@@ -86,7 +86,7 @@ var sTestsStatSV1 = []func(t *testing.T){
 	testV1STSStatsPing,
 	// Need to make a decision about
 	// converter in filters
-	// testV1STSProcessMetricsWithFilter,
+	testV1STSProcessMetricsWithFilter,
 	testV1STSStopEngine,
 }
 
@@ -427,11 +427,11 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 		Metrics: []*engine.MetricWithFilters{
 			&engine.MetricWithFilters{
 				MetricID:  "*acd",
-				FilterIDs: []string{"*gte:~Usage{*duration_seconds}:10.0"},
+				FilterIDs: []string{"*rsr::~Usage{*duration}(>10s)"},
 			},
 			&engine.MetricWithFilters{
 				MetricID:  "*tcd",
-				FilterIDs: []string{"*gte:~Usage:5.0"},
+				FilterIDs: []string{"*rsr::~Usage{*duration}(>5s)"},
 			},
 			&engine.MetricWithFilters{
 				MetricID:  "*sum#CustomValue",
@@ -517,9 +517,9 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 	}
 
 	expectedMetrics = map[string]string{
-		utils.MetaACD: "18s",
+		utils.MetaACD: "12s",
 		utils.MetaTCD: "18s",
-		utils.StatsJoin(utils.MetaSum, "CustomValue"): "10.0",
+		utils.StatsJoin(utils.MetaSum, "CustomValue"): "10",
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}, &metrics); err != nil {

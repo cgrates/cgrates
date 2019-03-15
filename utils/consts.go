@@ -550,6 +550,7 @@ const (
 	Version                      = "Version"
 	MetaTenant                   = "*tenant"
 	ResourceUsage                = "ResourceUsage"
+	MetaDuration                 = "*duration"
 )
 
 // Migrator Action

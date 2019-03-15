@@ -198,3 +198,31 @@ func TestDivideConverter(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", expOut, out)
 	}
 }
+
+func TestDurationConverter(t *testing.T) {
+	d, err := NewDataConverter(MetaDuration)
+	if err != nil {
+		t.Error(err.Error())
+	}
+	expVal := time.Duration(10 * time.Second)
+	if i, err := d.Convert(10000000000.0); err != nil {
+		t.Error(err.Error())
+	} else if expVal != i {
+		t.Errorf("expecting: %d, received: %d", expVal, i)
+	}
+	if i, err := d.Convert(10000000000); err != nil {
+		t.Error(err.Error())
+	} else if expVal != i {
+		t.Errorf("expecting: %d, received: %d", expVal, i)
+	}
+	if i, err := d.Convert(time.Duration(10 * time.Second)); err != nil {
+		t.Error(err.Error())
+	} else if expVal != i {
+		t.Errorf("expecting: %d, received: %d", expVal, i)
+	}
+	if i, err := d.Convert("10s"); err != nil {
+		t.Error(err.Error())
+	} else if expVal != i {
+		t.Errorf("expecting: %d, received: %d", expVal, i)
+	}
+}
