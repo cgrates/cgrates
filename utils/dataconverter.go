@@ -72,6 +72,8 @@ func NewDataConverter(params string) (
 			return NewDivideConverter("")
 		}
 		return NewDivideConverter(params[len(MetaDivide)+1:])
+	case params == MetaDuration:
+		return NewDurationConverter("")
 	default:
 		return nil,
 			fmt.Errorf("unsupported converter definition: <%s>",
@@ -218,4 +220,17 @@ func (m *DivideConverter) Convert(in interface{}) (
 	}
 	out = inFloat64 / m.Value
 	return
+}
+
+func NewDurationConverter(params string) (
+	hdlr DataConverter, err error) {
+	return new(DurationConverter), nil
+}
+
+// DurationConverter converts duration into seconds encapsulated in float64
+type DurationConverter struct{}
+
+func (mS *DurationConverter) Convert(in interface{}) (
+	out interface{}, err error) {
+	return IfaceAsDuration(in)
 }
