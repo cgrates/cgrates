@@ -71,7 +71,7 @@ func TestPrecacheITMongo(t *testing.T) {
 
 func testPrecacheInitCfg(t *testing.T) {
 	var err error
-	precacheCfgPath = path.Join(precacheDataDir, "conf", "samples", precacheConfigDIR)
+	precacheCfgPath = path.Join(precacheDataDir, "conf", "samples", "precache", precacheConfigDIR)
 	precacheCfg, err = config.NewCGRConfigFromPath(precacheCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -300,7 +300,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"attribute_filter_indexes": {
-			Items:  0,
+			Items:  2,
 			Groups: 0,
 		},
 		"attribute_profiles": {
@@ -336,19 +336,19 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"filters": {
-			Items:  15, // expected to have 16 items
+			Items:  15,
 			Groups: 0,
 		},
 		"rating_plans": {
-			Items:  4, // expected to have 4 items
+			Items:  4,
 			Groups: 0,
 		},
 		"rating_profiles": {
-			Items:  5, // expected to have 10 items
+			Items:  5,
 			Groups: 0,
 		},
 		"resource_filter_indexes": {
-			Items:  0,
+			Items:  6,
 			Groups: 0,
 		},
 		"resource_profiles": {
@@ -356,7 +356,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"resources": {
-			Items:  3, //expected to have 3 items
+			Items:  3,
 			Groups: 0,
 		},
 		"reverse_destinations": {
@@ -372,7 +372,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"stat_filter_indexes": {
-			Items:  0,
+			Items:  2,
 			Groups: 0,
 		},
 		"statqueue_profiles": {
@@ -380,19 +380,19 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"statqueues": {
-			Items:  1, // expected to have 1 item
+			Items:  1,
 			Groups: 0,
 		},
 		"supplier_filter_indexes": {
-			Items:  0,
+			Items:  6,
 			Groups: 0,
 		},
 		"supplier_profiles": {
-			Items:  3, // expected to have 3 items
+			Items:  3,
 			Groups: 0,
 		},
 		"threshold_filter_indexes": {
-			Items:  0,
+			Items:  10,
 			Groups: 0,
 		},
 		"threshold_profiles": {
@@ -400,7 +400,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		"thresholds": {
-			Items:  7, // expected to have 7 items
+			Items:  7,
 			Groups: 0,
 		},
 		"timings": {
