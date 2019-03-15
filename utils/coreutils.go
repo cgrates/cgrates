@@ -366,10 +366,6 @@ func SplitStats(key string) []string {
 	return strings.Split(key, STATS_CHAR)
 }
 
-func LCRKey(direction, tenant, category, account, subject string) string {
-	return ConcatenatedKey(direction, tenant, category, account, subject)
-}
-
 func InfieldJoin(vals ...string) string {
 	return strings.Join(vals, INFIELD_SEP)
 }
@@ -782,7 +778,7 @@ func NewTenantID(tntID string) *TenantID {
 	if len(tIDSplt) == 1 { // only Tenant present
 		return &TenantID{Tenant: tIDSplt[0]}
 	}
-	return &TenantID{Tenant: tIDSplt[0], ID: tIDSplt[1]}
+	return &TenantID{Tenant: tIDSplt[0], ID: ConcatenatedKey(tIDSplt[1:]...)}
 }
 
 type TenantArg struct {

@@ -84,8 +84,6 @@ var sTestsStatSV1 = []func(t *testing.T){
 	testV1STSUpdateStatQueueProfile,
 	testV1STSRemoveStatQueueProfile,
 	testV1STSStatsPing,
-	// Need to make a decision about
-	// converter in filters
 	testV1STSProcessMetricsWithFilter,
 	testV1STSStopEngine,
 }
