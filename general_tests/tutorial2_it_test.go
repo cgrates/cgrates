@@ -122,7 +122,7 @@ func testTutGetCost(t *testing.T) {
 	var rply *engine.EventCost
 	if err := tutRpc.Call(utils.ApierV1GetCost, attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
-	} else if *rply.Cost != 0.45 { // FixMe: missing ConnectFee out of Cost
+	} else if *rply.Cost != 0.550000 {
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)
 	}
 	// Fallback pricing from *any, Usage will be rounded to 60s
@@ -134,7 +134,7 @@ func testTutGetCost(t *testing.T) {
 	}
 	if err := tutRpc.Call(utils.ApierV1GetCost, attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
-	} else if *rply.Cost != 1.2 { // FixMe: missing ConnectFee out of Cost
+	} else if *rply.Cost != 1.4 {
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)
 	}
 	// Fallback pricing from *any, Usage will be rounded to 60s
@@ -167,7 +167,7 @@ func testTutGetCost(t *testing.T) {
 	}
 	if err := tutRpc.Call(utils.ApierV1GetCost, attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
-	} else if *rply.Cost != 0.45 {
+	} else if *rply.Cost != 0.55 {
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)
 	}
 	// Fallback pricing from *any, Usage will be rounded to 60s
@@ -179,7 +179,7 @@ func testTutGetCost(t *testing.T) {
 	}
 	if err := tutRpc.Call(utils.ApierV1GetCost, attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
-	} else if *rply.Cost != 0.45 { // FixMe: missing ConnectFee out of Cost
+	} else if *rply.Cost != 0.55 {
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)
 	}
 	// Unauthorized destination

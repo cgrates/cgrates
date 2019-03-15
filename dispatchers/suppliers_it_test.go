@@ -126,7 +126,7 @@ func testDspSupGetSupFailover(t *testing.T) {
 				SupplierID:         "supplier1",
 				SupplierParameters: "",
 				SortingData: map[string]interface{}{
-					utils.Cost:         0.1166,
+					utils.Cost:         0.3166,
 					utils.RatingPlanID: "RP_1002_LOW",
 					utils.Weight:       10.0,
 				},
@@ -135,7 +135,7 @@ func testDspSupGetSupFailover(t *testing.T) {
 				SupplierID:         "supplier2",
 				SupplierParameters: "",
 				SortingData: map[string]interface{}{
-					utils.Cost:         0.2334,
+					utils.Cost:         0.6334,
 					utils.RatingPlanID: "RP_1002",
 					utils.Weight:       20.0,
 				},
@@ -215,7 +215,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 				SupplierID:         "supplier1",
 				SupplierParameters: "",
 				SortingData: map[string]interface{}{
-					utils.Cost:         0.1166,
+					utils.Cost:         0.3166,
 					utils.RatingPlanID: "RP_1002_LOW",
 					utils.Weight:       10.0,
 				},
@@ -224,7 +224,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 				SupplierID:         "supplier2",
 				SupplierParameters: "",
 				SortingData: map[string]interface{}{
-					utils.Cost:         0.2334,
+					utils.Cost:         0.6334,
 					utils.RatingPlanID: "RP_1002",
 					utils.Weight:       20.0,
 				},
@@ -281,7 +281,7 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 				SupplierID:         "supplier1",
 				SupplierParameters: "",
 				SortingData: map[string]interface{}{
-					utils.Cost:         0.1166,
+					utils.Cost:         0.3166,
 					utils.RatingPlanID: "RP_1002_LOW",
 					utils.Weight:       10.0,
 				},
@@ -290,7 +290,7 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 				SupplierID:         "supplier2",
 				SupplierParameters: "",
 				SortingData: map[string]interface{}{
-					utils.Cost:         0.2334,
+					utils.Cost:         0.6334,
 					utils.RatingPlanID: "RP_1002",
 					utils.Weight:       20.0,
 				},
