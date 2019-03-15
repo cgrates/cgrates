@@ -20,11 +20,14 @@ package general_tests
 import (
 	"testing"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func TestCosts1SetStorage(t *testing.T) {
+	config.CgrConfig().CacheCfg()[utils.CacheRatingPlans].Precache = true // precache rating plan
+
 	data, _ := engine.NewMapStorageJson()
 	dataDB = engine.NewDataManager(data)
 	engine.SetDataStorage(dataDB)
