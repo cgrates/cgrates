@@ -161,6 +161,11 @@ func TestGreaterThan(t *testing.T) {
 	} else if !gte {
 		t.Error("should be greater than")
 	}
+	if gte, err := GreaterThan(1.3, int(1), false); err != nil {
+		t.Error(err)
+	} else if !gte {
+		t.Error("should be greater than")
+	}
 	if gte, err := GreaterThan(1.2, 1.3, false); err != nil {
 		t.Error(err)
 	} else if gte {
@@ -171,8 +176,25 @@ func TestGreaterThan(t *testing.T) {
 	} else if !gte {
 		t.Error("should be greater than")
 	}
+	if gte, err := GreaterThan(2, float64(1.5), false); err != nil {
+		t.Error(err)
+	} else if !gte {
+		t.Error("should be greater than")
+	}
 	if gte, err := GreaterThan(time.Duration(2*time.Second),
 		time.Duration(1*time.Second), false); err != nil {
+		t.Error(err)
+	} else if !gte {
+		t.Error("should be greater than")
+	}
+	if gte, err := GreaterThan(time.Duration(2*time.Second),
+		20, false); err != nil {
+		t.Error(err)
+	} else if !gte {
+		t.Error("should be greater than")
+	}
+	if gte, err := GreaterThan(time.Duration(2*time.Second),
+		float64(1*time.Second), false); err != nil {
 		t.Error(err)
 	} else if !gte {
 		t.Error("should be greater than")
@@ -473,5 +495,61 @@ func TestSum(t *testing.T) {
 		t.Error(err)
 	} else if sum != time.Duration(2*time.Second+10*time.Millisecond) {
 		t.Errorf("Expecting: 2s10ms, received: %+v", sum)
+	}
+}
+
+func TestGetUniformType(t *testing.T) {
+	var arg, expected interface{}
+	arg = time.Second
+	expected = float64(time.Second)
+	if rply, err := GetUniformType(arg); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rply, expected) {
+		t.Errorf("Expected: %v of type %T, recived: %v of type %T", expected, expected, rply, rply)
+	}
+	arg = uint(10)
+	expected = float64(10)
+	if rply, err := GetUniformType(arg); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rply, expected) {
+		t.Errorf("Expected: %v of type %T, recived: %v of type %T", expected, expected, rply, rply)
+	}
+	arg = int64(10)
+	if rply, err := GetUniformType(arg); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rply, expected) {
+		t.Errorf("Expected: %v of type %T, recived: %v of type %T", expected, expected, rply, rply)
+	}
+
+	arg = time.Now()
+	expected = arg
+	if rply, err := GetUniformType(arg); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rply, expected) {
+		t.Errorf("Expected: %v of type %T, recived: %v of type %T", expected, expected, rply, rply)
+	}
+	arg = struct{ b int }{b: 10}
+	expected = arg
+	if rply, err := GetUniformType(arg); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rply, expected) {
+		t.Errorf("Expected: %v of type %T, recived: %v of type %T", expected, expected, rply, rply)
+	}
+
+	arg = time.Now()
+	if _, err := GetUniformType(&arg); err == nil || err.Error() != "incomparable" {
+		t.Errorf("Exppected \"incomparable\" error received:%v ", err)
+	}
+	arg = uint(10)
+	if _, err := GetUniformType(&arg); err == nil || err.Error() != "incomparable" {
+		t.Errorf("Exppected \"incomparable\" error received:%v ", err)
+	}
+	arg = true
+	if _, err := GetUniformType(arg); err == nil || err.Error() != "incomparable" {
+		t.Errorf("Exppected \"incomparable\" error received:%v ", err)
+	}
+	arg = "String"
+	if _, err := GetUniformType(arg); err == nil || err.Error() != "incomparable" {
+		t.Errorf("Exppected \"incomparable\" error received:%v ", err)
 	}
 }
