@@ -94,6 +94,28 @@ func (chSv1 *CacheSv1) RemoveGroup(args *engine.ArgsGetGroup,
 	return chSv1.cacheS.V1RemoveGroup(args, rply)
 }
 
+// ReloadCache reloads cache from DB for a prefix or completely
+func (chSv1 *CacheSv1) ReloadCache(attrs utils.AttrReloadCache, reply *string) (err error) {
+	return chSv1.cacheS.V1ReloadCache(attrs, reply)
+}
+
+// LoadCache loads cache from DB for a prefix or completely
+func (chSv1 *CacheSv1) LoadCache(args utils.AttrReloadCache, reply *string) (err error) {
+	return chSv1.cacheS.V1LoadCache(args, reply)
+}
+
+// FlushCache wipes out cache for a prefix or completely
+func (chSv1 *CacheSv1) FlushCache(args utils.AttrReloadCache, reply *string) (err error) {
+	return chSv1.cacheS.V1FlushCache(args, reply)
+}
+
+// GetCacheKeys returns a list of keys available in cache based on query arguments
+// If keys are provided in arguments, they will be checked for existence
+func (chSv1 *CacheSv1) GetCacheKeys(args utils.ArgsCacheKeys, reply *utils.ArgsCache) (err error) {
+	return chSv1.cacheS.V1GetCacheKeys(args, reply)
+}
+
+// Ping used to detreminate if component is active
 func (chSv1 *CacheSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil

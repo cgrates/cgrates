@@ -104,9 +104,8 @@ cgrates.org,call,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,`
 		t.Error("No account saved")
 	}
 	engine.Cache.Clear(nil)
-	dataDB3.LoadDataDBCache(nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	dataDB3.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	if cachedDests := len(engine.Cache.GetItemIDs(utils.CacheDestinations, "")); cachedDests != 0 {
 		t.Error("Wrong number of cached destinations found", cachedDests)

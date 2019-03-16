@@ -108,9 +108,8 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	}
 	engine.Cache.Clear(nil)
 
-	dataDB.LoadDataDBCache(nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	dataDB.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	if cachedDests := len(engine.Cache.GetItemIDs(utils.CacheDestinations, "")); cachedDests != 0 {
 		t.Error("Wrong number of cached destinations found", cachedDests)
