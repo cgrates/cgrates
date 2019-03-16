@@ -269,18 +269,38 @@ func GetUniformType(item interface{}) (interface{}, error) {
 	}
 	return item, nil
 }
+func GetBasicType(item interface{}) interface{} {
+	valItm := reflect.ValueOf(item)
+	switch valItm.Kind() { // convert evreting to float64
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return valItm.Int()
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return valItm.Uint()
+	case reflect.Float32, reflect.Float64:
+		return valItm.Float()
+	default:
+		return item
+	}
+	return item
+}
 
 // GreaterThan attempts to compare two items
 // returns the result or error if not comparable
 func GreaterThan(item, oItem interface{}, orEqual bool) (gte bool, err error) {
-	if item, err = GetUniformType(item); err != nil {
-		return false, err
-	}
-	if oItem, err = GetUniformType(oItem); err != nil {
-		return false, err
-	}
+	item = GetBasicType(item)
+	oItem = GetBasicType(oItem)
 	typItem := reflect.TypeOf(item)
 	typOItem := reflect.TypeOf(oItem)
+	if typItem != typOItem {
+		if item, err = GetUniformType(item); err != nil {
+			return false, err
+		}
+		if oItem, err = GetUniformType(oItem); err != nil {
+			return false, err
+		}
+		typItem = reflect.TypeOf(item)
+		typOItem = reflect.TypeOf(oItem)
+	}
 	if !typItem.Comparable() ||
 		!typOItem.Comparable() ||
 		typItem != typOItem {
@@ -289,6 +309,20 @@ func GreaterThan(item, oItem interface{}, orEqual bool) (gte bool, err error) {
 	switch tVal := item.(type) {
 	case float64:
 		tOVal := oItem.(float64)
+		if orEqual {
+			gte = tVal >= tOVal
+		} else {
+			gte = tVal > tOVal
+		}
+	case uint64:
+		tOVal := oItem.(uint64)
+		if orEqual {
+			gte = tVal >= tOVal
+		} else {
+			gte = tVal > tOVal
+		}
+	case int64:
+		tOVal := oItem.(int64)
 		if orEqual {
 			gte = tVal >= tOVal
 		} else {
