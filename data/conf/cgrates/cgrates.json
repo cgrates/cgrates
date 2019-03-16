@@ -40,7 +40,7 @@
 // 	"db_user": "cgrates", 					// username to use when connecting to data_db
 // 	"db_password": "", 						// password to use when connecting to data_db
 // 	"redis_sentinel":"",					// the name of sentinel when used
-//	"query_timeout":"30s",
+//	"query_timeout":"10s",
 // },
 
 
@@ -55,7 +55,7 @@
 // 	"max_idle_conns": 10,					// maximum database connections idle, not applying for mongo
 // 	"conn_max_lifetime": 0, 				// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
 // 	"cdrs_indexes": [],						// indexes on cdrs table to speed up queries, used only in case of mongo
-//	"query_timeout":"30s",
+//	"query_timeout":"10s",
 // },
 
 
