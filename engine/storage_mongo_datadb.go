@@ -136,10 +136,15 @@ func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes
 		dbName = strings.Split(db, "?")[0] // remove extra info after ?
 	}
 	ctx := context.Background()
+	ttl := config.CgrConfig().DataDbCfg().QueryTimeout
+	if !isDataDB {
+		ttl = config.CgrConfig().StorDbCfg().QueryTimeout
+	}
 	url = "mongodb://" + url
 	reg := bson.NewRegistryBuilder().RegisterDecoder(tTime, bsoncodec.ValueDecoderFunc(TimeDecodeValue1)).Build()
-	opt := options.Client().SetRegistry(reg).
-		SetServerSelectionTimeout(config.CgrConfig().GeneralCfg().ConnectTimeout)
+	opt := options.Client().
+		SetRegistry(reg).
+		SetServerSelectionTimeout(ttl)
 
 	client, err := mongo.NewClientWithOptions(url, opt)
 	// client, err := mongo.NewClient(url)
@@ -147,7 +152,6 @@ func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes
 	if err != nil {
 		return nil, err
 	}
-	ctxTTL := config.CgrConfig().GeneralCfg().ReplyTimeout
 	err = client.Connect(ctx)
 	if err != nil {
 		return nil, err
@@ -155,7 +159,7 @@ func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes
 	ms = &MongoStorage{
 		client:      client,
 		ctx:         ctx,
-		ctxTTL:      ctxTTL,
+		ctxTTL:      ttl,
 		db:          dbName,
 		storageType: storageType,
 		ms:          NewCodecMsgpackMarshaler(),

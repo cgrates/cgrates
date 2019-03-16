@@ -40,6 +40,7 @@
 // 	"db_user": "cgrates", 					// username to use when connecting to data_db
 // 	"db_password": "", 						// password to use when connecting to data_db
 // 	"redis_sentinel":"",					// the name of sentinel when used
+//	"query_timeout":"30s",
 // },
 
 
@@ -54,6 +55,7 @@
 // 	"max_idle_conns": 10,					// maximum database connections idle, not applying for mongo
 // 	"conn_max_lifetime": 0, 				// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
 // 	"cdrs_indexes": [],						// indexes on cdrs table to speed up queries, used only in case of mongo
+//	"query_timeout":"30s",
 // },
 
 
@@ -78,7 +80,7 @@
 // },
 
 
-// "http": {										// HTTP server configuration
+// "http": {									// HTTP server configuration
 // 	"json_rpc_url": "/jsonrpc",					// JSON RPC relative URL ("" to disable)
 // 	"ws_url": "/ws",							// WebSockets relative URL ("" to disable)
 // 	"freeswitch_cdrs_url": "/freeswitch_json",	// Freeswitch CDRS relative URL ("" to disable)
@@ -151,7 +153,7 @@
 // },
 
 
-// "cdrs": {									// CDRs config
+// "cdrs": {								// CDRs config
 // 	"enabled": false,						// start the CDR Server:  <true|false>
 // 	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs (ie: FreeSWITCH JSON)
 // 	"store_cdrs": true,						// store cdrs in StorDB
@@ -169,7 +171,7 @@
 // },
 
 
-// "cdre": {												// CDRe config
+// "cdre": {											// CDRe config
 // 	"*default": {
 // 		"export_format": "*file_csv",					// exported CDRs format <*file_csv|*file_fwv|*http_post|*http_json_cdr|*http_json_map|*amqp_json_cdr|*amqp_json_map|*sqs_json_map>
 // 		"export_path": "/var/spool/cgrates/cdre",		// path where the exported CDRs will be placed
@@ -204,7 +206,7 @@
 // },
 
 
-// "cdrc": [												// CDRc config
+// "cdrc": [											// CDRc config
 // 	{
 // 		"id": "*default",								// identifier of the CDRC runner
 // 		"enabled": false,								// enable CDR client functionality
@@ -420,11 +422,11 @@
 // },
 
 
-// "http_agent": [						// HTTP Agents, ie towards cnc.to MVNE platform
+// "http_agent": [							// HTTP Agents, ie towards cnc.to MVNE platform
 // ],
 
 
-// "attributes": {								// AttributeS config
+// "attributes": {							// AttributeS config
 // 	"enabled": false,						// starts attribute service: <true|false>.
 //	"indexed_selects":true,					// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
@@ -433,7 +435,7 @@
 // },
 
 
-// "chargers": {								// ChargerS config
+// "chargers": {							// ChargerS config
 // 	"enabled": false,						// starts charger service: <true|false>.
 // 	"attributes_conns": [],					// connections to AttributeS for event fields altering <""|127.0.0.1:2013>
 //	"indexed_selects":true,					// enable profile matching exclusively on indexes
@@ -442,7 +444,7 @@
 // },
 
 
-// "resources": {								// ResourceS config
+// "resources": {							// ResourceS config
 // 	"enabled": false,						// starts ResourceLimiter service: <true|false>.
 // 	"store_interval": "",					// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
 // 	"thresholds_conns": [],					// connections to ThresholdS for resource reporting, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
@@ -452,7 +454,7 @@
 // },
 
 
-// "stats": {									// StatS config
+// "stats": {								// StatS config
 // 	"enabled": false,						// starts Stat service: <true|false>.
 // 	"store_interval": "",					// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
 // 	"thresholds_conns": [],					// connections to ThresholdS for StatUpdates, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
@@ -462,7 +464,7 @@
 // },
 
 
-// "thresholds": {								// ThresholdS
+// "thresholds": {							// ThresholdS
 // 	"enabled": false,						// starts ThresholdS service: <true|false>.
 // 	"store_interval": "",					// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
 //	"indexed_selects":true,					// enable profile matching exclusively on indexes
@@ -471,7 +473,7 @@
 // },
 
 
-// "suppliers": {								// SupplierS config
+// "suppliers": {							// SupplierS config
 // 	"enabled": false,						// starts SupplierS service: <true|false>.
 //	"indexed_selects":true,					// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
@@ -516,8 +518,8 @@
 // 				],
 // 			},
 // 			{
-// 				"type": "*filters",						// data source type
-// 				"file_name": "Filters.csv",				// file name in the tp_in_dir
+// 				"type": "*filters",							// data source type
+// 				"file_name": "Filters.csv",					// file name in the tp_in_dir
 // 				"fields": [
 // 					{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~0", "mandatory": true},
 // 					{"tag": "ID", "field_id": "ID", "type": "*composed", "value": "~1", "mandatory": true},
@@ -545,8 +547,8 @@
 // 				],
 // 			},
 // 			{
-// 				"type": "*stats",						// data source type
-// 				"file_name": "Stats.csv",				// file name in the tp_in_dir
+// 				"type": "*stats",							// data source type
+// 				"file_name": "Stats.csv",					// file name in the tp_in_dir
 // 				"fields": [
 // 					{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~0", "mandatory": true},
 // 					{"tag": "ID", "field_id": "ID", "type": "*composed", "value": "~1", "mandatory": true},
@@ -676,7 +678,7 @@
 // },
 
 
-// "loader": {									// loader for tariff plans out of .csv files
+// "loader": {								// loader for tariff plans out of .csv files
 // 	"tpid": "",								// tariff plan identificator
 // 	"data_path": "./",						// path towards tariff plan files
 // 	"disable_reverse": false,				// disable reverse computing
@@ -708,7 +710,7 @@
 // },
 
 
-// "dispatchers":{								// DispatcherS config
+// "dispatchers":{							// DispatcherS config
 // 	"enabled": false,						// starts DispatcherS service: <true|false>.
 //	"indexed_selects":true,					// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
@@ -719,7 +721,7 @@
 // },
 
 
-// "analyzers":{								// AnalyzerS config
+// "analyzers":{							// AnalyzerS config
 // 	"enabled":false							// starts AnalyzerS service: <true|false>.
 // },
 

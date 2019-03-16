@@ -21,6 +21,7 @@ package config
 import (
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -34,6 +35,7 @@ type DataDbCfg struct {
 	DataDbUser         string // The user to sign in as.
 	DataDbPass         string // The user's password.
 	DataDbSentinelName string
+	QueryTimeout       time.Duration
 }
 
 //loadFromJsonCfg loads Database config from JsonCfg
@@ -65,6 +67,11 @@ func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	}
 	if jsnDbCfg.Redis_sentinel != nil {
 		dbcfg.DataDbSentinelName = *jsnDbCfg.Redis_sentinel
+	}
+	if jsnDbCfg.Query_timeout != nil {
+		if dbcfg.QueryTimeout, err = utils.ParseDurationWithNanosecs(*jsnDbCfg.Query_timeout); err != nil {
+			return err
+		}
 	}
 	return nil
 }
