@@ -189,6 +189,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 		Db_user:        utils.StringPointer("cgrates"),
 		Db_password:    utils.StringPointer(""),
 		Redis_sentinel: utils.StringPointer(""),
+		Query_timeout:  utils.StringPointer("30s"),
 	}
 	if cfg, err := dfCgrJsonCfg.DbJsonCfg(DATADB_JSN); err != nil {
 		t.Error(err)
@@ -209,6 +210,7 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 		Max_idle_conns:    utils.IntPointer(10),
 		Conn_max_lifetime: utils.IntPointer(0),
 		Cdrs_indexes:      &[]string{},
+		Query_timeout:     utils.StringPointer("30s"),
 	}
 	if cfg, err := dfCgrJsonCfg.DbJsonCfg(STORDB_JSN); err != nil {
 		t.Error(err)

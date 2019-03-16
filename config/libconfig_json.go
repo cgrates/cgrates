@@ -87,6 +87,7 @@ type DbJsonCfg struct {
 	Conn_max_lifetime *int // Used only in case of storDb
 	Cdrs_indexes      *[]string
 	Redis_sentinel    *string
+	Query_timeout     *string
 }
 
 // Filters config

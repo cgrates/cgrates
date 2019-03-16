@@ -21,6 +21,7 @@ package config
 import (
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -37,6 +38,7 @@ type StorDbCfg struct {
 	StorDBMaxIdleConns    int    // Maximum idle connections to keep opened
 	StorDBConnMaxLifetime int
 	StorDBCDRSIndexes     []string
+	QueryTimeout          time.Duration
 }
 
 //loadFromJsonCfg loads StoreDb config from JsonCfg
@@ -77,6 +79,11 @@ func (dbcfg *StorDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	}
 	if jsnDbCfg.Cdrs_indexes != nil {
 		dbcfg.StorDBCDRSIndexes = *jsnDbCfg.Cdrs_indexes
+	}
+	if jsnDbCfg.Query_timeout != nil {
+		if dbcfg.QueryTimeout, err = utils.ParseDurationWithNanosecs(*jsnDbCfg.Query_timeout); err != nil {
+			return err
+		}
 	}
 	return nil
 }
