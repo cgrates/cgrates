@@ -1965,7 +1965,7 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 				"*monetary": Balances{
 					&Balance{
 						Uuid:  "9fa1847a-f36a-41a7-8ec0-dfaab370141e",
-						ID:    "*default",
+						ID:    utils.MetaDefault,
 						Value: -1.95001,
 					},
 				},
@@ -2404,7 +2404,7 @@ func TestClonedAction(t *testing.T) {
 		Id:         "test1",
 		ActionType: TOPUP,
 		Balance: &BalanceFilter{
-			ID:    utils.StringPointer("*default"),
+			ID:    utils.StringPointer(utils.MetaDefault),
 			Value: &utils.ValueFormula{Static: 1},
 			Type:  utils.StringPointer(utils.MONETARY),
 		},
@@ -2424,7 +2424,7 @@ func TestClonedActions(t *testing.T) {
 			Id:         "RECUR_FOR_V3HSILLMILLD1G",
 			ActionType: TOPUP,
 			Balance: &BalanceFilter{
-				ID:    utils.StringPointer("*default"),
+				ID:    utils.StringPointer(utils.MetaDefault),
 				Value: &utils.ValueFormula{Static: 1},
 				Type:  utils.StringPointer(utils.MONETARY),
 			},
@@ -2434,7 +2434,7 @@ func TestClonedActions(t *testing.T) {
 			Id:         "RECUR_FOR_V3HSILLMILLD5G",
 			ActionType: DEBIT,
 			Balance: &BalanceFilter{
-				ID:    utils.StringPointer("*default"),
+				ID:    utils.StringPointer(utils.MetaDefault),
 				Value: &utils.ValueFormula{Static: 2},
 				Type:  utils.StringPointer(utils.MONETARY),
 			},
@@ -2460,7 +2460,7 @@ func TestCacheGetClonedActions(t *testing.T) {
 			Id:         "RECUR_FOR_V3HSILLMILLD1G",
 			ActionType: TOPUP,
 			Balance: &BalanceFilter{
-				ID:    utils.StringPointer("*default"),
+				ID:    utils.StringPointer(utils.MetaDefault),
 				Value: &utils.ValueFormula{Static: 1},
 				Type:  utils.StringPointer(utils.MONETARY),
 			},

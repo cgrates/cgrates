@@ -153,7 +153,7 @@ func testHAitTPFromFolder(t *testing.T) {
 	chargerProfile := &engine.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "Default",
-		RunID:        "*default",
+		RunID:        utils.MetaDefault,
 		AttributeIDs: []string{"*none"},
 		Weight:       20,
 	}

@@ -588,7 +588,7 @@ func TestCgrCfgJSONDefaultsCdreProfiles(t *testing.T) {
 			RoundingDecimals: 4},
 	}
 	eCdreCfg := map[string]*CdreCfg{
-		"*default": {
+		utils.MetaDefault: {
 			ExportFormat:        utils.MetaFileCSV,
 			ExportPath:          "/var/spool/cgrates/cdre",
 			Filters:             []string{},

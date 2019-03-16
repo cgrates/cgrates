@@ -31,6 +31,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
 var tutSMGCfgPath string
@@ -92,21 +93,40 @@ func TestTutSMGLoadTariffPlanFromFolder(t *testing.T) {
 // Check loaded stats
 func TestTutSMGCacheStats(t *testing.T) {
 	var reply string
-	if err := tutSMGRpc.Call("ApierV1.LoadCache", utils.AttrReloadCache{}, &reply); err != nil {
+	if err := tutSMGRpc.Call("CacheSv1.LoadCache", utils.AttrReloadCache{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "OK" {
 		t.Error(reply)
 	}
-	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 5, ReverseDestinations: 7, RatingPlans: 4, RatingProfiles: 5,
-		Actions: 9, ActionPlans: 4, AccountActionPlans: 5, SharedGroups: 1, ResourceProfiles: 3,
-		Resources: 3, StatQueues: 1, StatQueueProfiles: 1, Thresholds: 7, ThresholdProfiles: 7, Filters: 15,
-		SupplierProfiles: 3, AttributeProfiles: 1}
-	var args utils.AttrCacheStats
-	if err := tutSMGRpc.Call("ApierV2.GetCacheStats", args, &rcvStats); err != nil {
-		t.Error("Got error on ApierV2.GetCacheStats: ", err.Error())
+	// expectedStats := &utils.CacheStats{Destinations: 5, ReverseDestinations: 7, RatingPlans: 4, RatingProfiles: 5,
+	// 	Actions: 9, ActionPlans: 4, AccountActionPlans: 5, SharedGroups: 1, ResourceProfiles: 3,
+	// 	Resources: 3, StatQueues: 1, StatQueueProfiles: 1, Thresholds: 7, ThresholdProfiles: 7, Filters: 15,
+	// 	SupplierProfiles: 3, AttributeProfiles: 1}
+	var rcvStats map[string]*ltcache.CacheStats
+	expectedStats := engine.GetDefaultEmptyCacheStats()
+	expectedStats[utils.CacheDestinations].Items = 5
+	expectedStats[utils.CacheReverseDestinations].Items = 7
+	expectedStats[utils.CacheRatingPlans].Items = 4
+	expectedStats[utils.CacheRatingProfiles].Items = 5
+	expectedStats[utils.CacheActions].Items = 9
+	expectedStats[utils.CacheActionPlans].Items = 4
+	expectedStats[utils.CacheAccountActionPlans].Items = 5
+	expectedStats[utils.CacheSharedGroups].Items = 1
+	expectedStats[utils.CacheResourceProfiles].Items = 3
+	expectedStats[utils.CacheResources].Items = 3
+	expectedStats[utils.CacheStatQueues].Items = 1
+	expectedStats[utils.CacheStatQueueProfiles].Items = 1
+	expectedStats[utils.CacheThresholds].Items = 7
+	expectedStats[utils.CacheThresholdProfiles].Items = 7
+	expectedStats[utils.CacheFilters].Items = 15
+	expectedStats[utils.CacheSupplierProfiles].Items = 3
+	expectedStats[utils.CacheAttributeProfiles].Items = 1
+	expectedStats[utils.MetaDefault].Items = 1
+	expectedStats[utils.CacheActionTriggers].Items = 1
+	if err := tutSMGRpc.Call("CacheSv1.GetCacheStats", nil, &rcvStats); err != nil {
+		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
-		t.Errorf("Calling ApierV2.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)
+		t.Errorf("Calling ApierV2.CacheSv1 expected: %+v, received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))
 	}
 }
 

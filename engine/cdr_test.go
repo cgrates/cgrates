@@ -529,9 +529,9 @@ func TestCDRParseFieldValue(t *testing.T) {
 	} else if cdr.OrderID != 5 {
 		t.Errorf("Received cdr: %+v", cdr)
 	}
-	if err := cdr.ParseFieldValue(utils.RunID, "*default", ""); err != nil {
+	if err := cdr.ParseFieldValue(utils.RunID, utils.MetaDefault, ""); err != nil {
 		t.Error(err)
-	} else if cdr.RunID != "*default" {
+	} else if cdr.RunID != utils.MetaDefault {
 		t.Errorf("Received cdr: %+v", cdr)
 	}
 }
@@ -766,7 +766,7 @@ func TestCDRNewCDRFromSQL(t *testing.T) {
 	cdrSql := &CDRsql{
 		ID:          123,
 		Cgrid:       "abecd993d06672714c4218a6dcf8278e0589a171",
-		RunID:       "*default",
+		RunID:       utils.MetaDefault,
 		OriginID:    "dsafdsaf",
 		TOR:         utils.VOICE,
 		Source:      utils.UNIT_TEST,
@@ -852,7 +852,7 @@ func TestCDRAsCGREvent(t *testing.T) {
 			"OriginID":    "dsafdsaf",
 			"Partial":     false,
 			"RequestType": utils.META_RATED,
-			"RunID":       "*default",
+			"RunID":       utils.MetaDefault,
 			"SetupTime":   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 			"Source":      "UNIT_TEST",
 			"Subject":     "1001",
@@ -918,7 +918,7 @@ func TestCDRUpdateFromCGREvent(t *testing.T) {
 			"OriginID":    "dsafdsaf",
 			"Partial":     false,
 			"RequestType": "*PreRated",
-			"RunID":       "*default",
+			"RunID":       utils.MetaDefault,
 			"SetupTime":   time.Date(2013, 11, 7, 8, 42, 23, 0, time.UTC),
 			"Source":      "UNIT_TEST",
 			"Subject":     "1001",
@@ -959,9 +959,9 @@ func TestCDRUpdateFromCGREvent(t *testing.T) {
 
 func TestCDRParseFieldValue2(t *testing.T) {
 	cdr := new(CDR)
-	if err := cdr.ParseFieldValue(utils.RunID, "*default", ""); err != nil {
+	if err := cdr.ParseFieldValue(utils.RunID, utils.MetaDefault, ""); err != nil {
 		t.Error(err)
-	} else if cdr.RunID != "*default" {
+	} else if cdr.RunID != utils.MetaDefault {
 		t.Errorf("Received cdr: %+v", cdr)
 	}
 	if err := cdr.ParseFieldValue(utils.OriginID, "FirstID", ""); err != nil {

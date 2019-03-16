@@ -44,7 +44,7 @@ func TestCsvCdrWriter(t *testing.T) {
 			"extra2": "val_extra2", "extra3": "val_extra3"},
 	}
 	cdre, err := NewCDRExporter([]*CDR{storedCdr1},
-		cfg.CdreProfiles["*default"], utils.MetaFileCSV, "", "", "firstexport",
+		cfg.CdreProfiles[utils.MetaDefault], utils.MetaFileCSV, "", "", "firstexport",
 		true, 1, ',', map[string]float64{}, 0.0, cfg.GeneralCfg().RoundingDecimals,
 		cfg.GeneralCfg().HttpSkipTlsVerify, nil, nil)
 	if err != nil {
@@ -82,7 +82,7 @@ func TestAlternativeFieldSeparator(t *testing.T) {
 		ExtraFields: map[string]string{"extra1": "val_extra1",
 			"extra2": "val_extra2", "extra3": "val_extra3"},
 	}
-	cdre, err := NewCDRExporter([]*CDR{storedCdr1}, cfg.CdreProfiles["*default"],
+	cdre, err := NewCDRExporter([]*CDR{storedCdr1}, cfg.CdreProfiles[utils.MetaDefault],
 		utils.MetaFileCSV, "", "", "firstexport", true, 1, '|',
 		map[string]float64{}, 0.0, cfg.GeneralCfg().RoundingDecimals,
 		cfg.GeneralCfg().HttpSkipTlsVerify, nil, nil)
@@ -109,7 +109,7 @@ func TestAlternativeFieldSeparator(t *testing.T) {
 func TestExportVoiceWithConvert(t *testing.T) {
 	writer := &bytes.Buffer{}
 	cfg, _ := config.NewDefaultCGRConfig()
-	cdreCfg := cfg.CdreProfiles["*default"]
+	cdreCfg := cfg.CdreProfiles[utils.MetaDefault]
 	cdreCfg.ContentFields = []*config.FCTemplate{
 		{Tag: "ToR", Type: "*composed",
 			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"ToR", true, utils.INFIELD_SEP)},
@@ -206,7 +206,7 @@ func TestExportVoiceWithConvert(t *testing.T) {
 func TestExportWithFilter(t *testing.T) {
 	writer := &bytes.Buffer{}
 	cfg, _ := config.NewDefaultCGRConfig()
-	cdreCfg := cfg.CdreProfiles["*default"]
+	cdreCfg := cfg.CdreProfiles[utils.MetaDefault]
 	cdreCfg.Filters = []string{"*string:~Tenant:cgrates.org"}
 	cdreCfg.ContentFields = []*config.FCTemplate{
 		{Tag: "ToR", Type: "*composed",
@@ -303,7 +303,7 @@ func TestExportWithFilter(t *testing.T) {
 func TestExportWithFilter2(t *testing.T) {
 	writer := &bytes.Buffer{}
 	cfg, _ := config.NewDefaultCGRConfig()
-	cdreCfg := cfg.CdreProfiles["*default"]
+	cdreCfg := cfg.CdreProfiles[utils.MetaDefault]
 	cdreCfg.Filters = []string{"*string:~Tenant:cgrates.org", "*lte:~Cost:0.5"}
 	cdreCfg.ContentFields = []*config.FCTemplate{
 		{Tag: "ToR", Type: "*composed",

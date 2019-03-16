@@ -102,7 +102,7 @@ func testPrecacheRpcConn(t *testing.T) {
 
 func testPrecacheGetItemIDs(t *testing.T) {
 	args := &engine.ArgsGetCacheItemIDs{
-		CacheID: "*default",
+		CacheID: utils.MetaDefault,
 	}
 	var reply *[]string
 	if err := precacheRPC.Call(utils.CacheSv1GetItemIDs, args, &reply); err == nil ||
@@ -114,140 +114,8 @@ func testPrecacheGetItemIDs(t *testing.T) {
 func testPrecacheGetCacheStatsBeforeLoad(t *testing.T) {
 	var reply *map[string]*ltcache.CacheStats
 	cacheIDs := []string{}
-	expectedStats := &map[string]*ltcache.CacheStats{
-		"*default": {
-			Items:  0,
-			Groups: 0,
-		},
-		"account_action_plans": {
-			Items:  0,
-			Groups: 0,
-		},
-		"action_plans": {
-			Items:  0,
-			Groups: 0,
-		},
-		"action_triggers": {
-			Items:  0,
-			Groups: 0,
-		},
-		"actions": {
-			Items:  0,
-			Groups: 0,
-		},
-		"attribute_filter_indexes": {
-			Items:  0,
-			Groups: 0,
-		},
-		"attribute_profiles": {
-			Items:  0,
-			Groups: 0,
-		},
-		"charger_filter_indexes": {
-			Items:  0,
-			Groups: 0,
-		},
-		"charger_profiles": {
-			Items:  0,
-			Groups: 0,
-		},
-		"dispatcher_filter_indexes": {
-			Items:  0,
-			Groups: 0,
-		},
-		"dispatcher_profiles": {
-			Items:  0,
-			Groups: 0,
-		},
-		"dispatcher_routes": {
-			Items:  0,
-			Groups: 0,
-		},
-		"destinations": {
-			Items:  0,
-			Groups: 0,
-		},
-		"event_resources": {
-			Items:  0,
-			Groups: 0,
-		},
-		"filters": {
-			Items:  0,
-			Groups: 0,
-		},
-		"rating_plans": {
-			Items:  0,
-			Groups: 0,
-		},
-		"rating_profiles": {
-			Items:  0,
-			Groups: 0,
-		},
-		"resource_filter_indexes": {
-			Items:  0,
-			Groups: 0,
-		},
-		"resource_profiles": {
-			Items:  0,
-			Groups: 0,
-		},
-		"resources": {
-			Items:  0,
-			Groups: 0,
-		},
-		"reverse_destinations": {
-			Items:  0,
-			Groups: 0,
-		},
-		"rpc_responses": {
-			Items:  0,
-			Groups: 0,
-		},
-		"shared_groups": {
-			Items:  0,
-			Groups: 0,
-		},
-		"stat_filter_indexes": {
-			Items:  0,
-			Groups: 0,
-		},
-		"statqueue_profiles": {
-			Items:  0,
-			Groups: 0,
-		},
-		"statqueues": {
-			Items:  0,
-			Groups: 0,
-		},
-		"supplier_filter_indexes": {
-			Items:  0,
-			Groups: 0,
-		},
-		"supplier_profiles": {
-			Items:  0,
-			Groups: 0,
-		},
-		"threshold_filter_indexes": {
-			Items:  0,
-			Groups: 0,
-		},
-		"threshold_profiles": {
-			Items:  0,
-			Groups: 0,
-		},
-		"thresholds": {
-			Items:  0,
-			Groups: 0,
-		},
-		"timings": {
-			Items:  0,
-			Groups: 0,
-		},
-		"diameter_messages": {
-			Items:  0,
-			Groups: 0,
-		},
-	}
+	dfltStats := engine.GetDefaultEmptyCacheStats()
+	expectedStats := &dfltStats
 	if err := precacheRPC.Call(utils.CacheSv1GetCacheStats, cacheIDs, &reply); err != nil {
 		t.Error(err.Error())
 	} else if !reflect.DeepEqual(reply, expectedStats) {
@@ -279,135 +147,135 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 	var reply *map[string]*ltcache.CacheStats
 	cacheIDs := []string{}
 	expectedStats := &map[string]*ltcache.CacheStats{
-		"*default": {
+		utils.MetaDefault: {
 			Items:  0,
 			Groups: 0,
 		},
-		"account_action_plans": {
-			Items:  5, //5
+		utils.CacheAccountActionPlans: {
+			Items:  5,
 			Groups: 0,
 		},
-		"action_plans": {
+		utils.CacheActionPlans: {
 			Items:  4,
 			Groups: 0,
 		},
-		"action_triggers": {
+		utils.CacheActionTriggers: {
 			Items:  1,
 			Groups: 0,
 		},
-		"actions": {
+		utils.CacheActions: {
 			Items:  9,
 			Groups: 0,
 		},
-		"attribute_filter_indexes": {
+		utils.CacheAttributeFilterIndexes: {
 			Items:  2,
 			Groups: 0,
 		},
-		"attribute_profiles": {
+		utils.CacheAttributeProfiles: {
 			Items:  1,
 			Groups: 0,
 		},
-		"charger_filter_indexes": {
+		utils.CacheChargerFilterIndexes: {
 			Items:  0,
 			Groups: 0,
 		},
-		"charger_profiles": {
+		utils.CacheChargerProfiles: {
 			Items:  0,
 			Groups: 0,
 		},
-		"dispatcher_filter_indexes": {
+		utils.CacheDispatcherFilterIndexes: {
 			Items:  0,
 			Groups: 0,
 		},
-		"dispatcher_profiles": {
+		utils.CacheDispatcherProfiles: {
 			Items:  0,
 			Groups: 0,
 		},
-		"dispatcher_routes": {
+		utils.CacheDispatcherRoutes: {
 			Items:  0,
 			Groups: 0,
 		},
-		"destinations": {
+		utils.CacheDestinations: {
 			Items:  5,
 			Groups: 0,
 		},
-		"event_resources": {
+		utils.CacheEventResources: {
 			Items:  0,
 			Groups: 0,
 		},
-		"filters": {
+		utils.CacheFilters: {
 			Items:  15,
 			Groups: 0,
 		},
-		"rating_plans": {
+		utils.CacheRatingPlans: {
 			Items:  4,
 			Groups: 0,
 		},
-		"rating_profiles": {
+		utils.CacheRatingProfiles: {
 			Items:  5,
 			Groups: 0,
 		},
-		"resource_filter_indexes": {
+		utils.CacheResourceFilterIndexes: {
 			Items:  6,
 			Groups: 0,
 		},
-		"resource_profiles": {
+		utils.CacheResourceProfiles: {
 			Items:  3,
 			Groups: 0,
 		},
-		"resources": {
+		utils.CacheResources: {
 			Items:  3,
 			Groups: 0,
 		},
-		"reverse_destinations": {
+		utils.CacheReverseDestinations: {
 			Items:  7,
 			Groups: 0,
 		},
-		"rpc_responses": {
+		utils.CacheRPCResponses: {
 			Items:  0,
 			Groups: 0,
 		},
-		"shared_groups": {
+		utils.CacheSharedGroups: {
 			Items:  1,
 			Groups: 0,
 		},
-		"stat_filter_indexes": {
+		utils.CacheStatFilterIndexes: {
 			Items:  2,
 			Groups: 0,
 		},
-		"statqueue_profiles": {
+		utils.CacheStatQueueProfiles: {
 			Items:  1,
 			Groups: 0,
 		},
-		"statqueues": {
+		utils.CacheStatQueues: {
 			Items:  1,
 			Groups: 0,
 		},
-		"supplier_filter_indexes": {
+		utils.CacheSupplierFilterIndexes: {
 			Items:  6,
 			Groups: 0,
 		},
-		"supplier_profiles": {
+		utils.CacheSupplierProfiles: {
 			Items:  3,
 			Groups: 0,
 		},
-		"threshold_filter_indexes": {
+		utils.CacheThresholdFilterIndexes: {
 			Items:  10,
 			Groups: 0,
 		},
-		"threshold_profiles": {
+		utils.CacheThresholdProfiles: {
 			Items:  7,
 			Groups: 0,
 		},
-		"thresholds": {
+		utils.CacheThresholds: {
 			Items:  7,
 			Groups: 0,
 		},
-		"timings": {
+		utils.CacheTimings: {
 			Items:  0,
 			Groups: 0,
 		},
-		"diameter_messages": {
+		utils.CacheDiameterMessages: {
 			Items:  0,
 			Groups: 0,
 		},

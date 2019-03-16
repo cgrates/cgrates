@@ -52,12 +52,12 @@ func TestMfGeneralItems(t *testing.T) {
 }
 
 func TestMfCdreDefaultInstance(t *testing.T) {
-	for _, prflName := range []string{"*default", "export1"} {
+	for _, prflName := range []string{utils.MetaDefault, "export1"} {
 		if _, hasIt := mfCgrCfg.CdreProfiles[prflName]; !hasIt {
 			t.Error("Cdre does not contain profile ", prflName)
 		}
 	}
-	prfl := "*default"
+	prfl := utils.MetaDefault
 	if mfCgrCfg.CdreProfiles[prfl].ExportFormat != utils.MetaFileCSV {
 		t.Error("Default instance has cdrFormat: ", mfCgrCfg.CdreProfiles[prfl].ExportFormat)
 	}

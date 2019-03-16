@@ -235,7 +235,7 @@ func TestDebitCreditBlocker(t *testing.T) {
 	b1 := &Balance{Uuid: "testa", Value: 0.1152,
 		Weight: 20, DestinationIDs: utils.StringMap{"NAT": true},
 		RatingSubject: "passmonde", Blocker: true}
-	b2 := &Balance{Uuid: "*default", Value: 1.5, Weight: 0}
+	b2 := &Balance{Uuid: utils.MetaDefault, Value: 1.5, Weight: 0}
 	cc := &CallCost{
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{

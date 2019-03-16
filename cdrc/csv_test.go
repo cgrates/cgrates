@@ -33,7 +33,7 @@ func TestCsvRecordToCDR(t *testing.T) {
 	cdrcConfig.CdrSourceId = "TEST_CDRC"
 	cdrcConfig.ContentFields = append(cdrcConfig.ContentFields, &config.FCTemplate{
 		Tag: utils.RunID, Type: utils.META_COMPOSED, FieldId: utils.RunID,
-		Value: config.NewRSRParsersMustCompile("*default", true, utils.INFIELD_SEP)})
+		Value: config.NewRSRParsersMustCompile(utils.MetaDefault, true, utils.INFIELD_SEP)})
 	csvProcessor := &CsvRecordsProcessor{dfltCdrcCfg: cdrcConfig, cdrcCfgs: []*config.CdrcCfg{cdrcConfig}}
 	cdrRow := []string{"firstField", "secondField"}
 	_, err := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig, "cgrates.org")
@@ -49,7 +49,7 @@ func TestCsvRecordToCDR(t *testing.T) {
 	}
 	expectedCdr := &engine.CDR{
 		CGRID:       utils.Sha1(cdrRow[3], time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC).String()),
-		RunID:       "*default",
+		RunID:       utils.MetaDefault,
 		ToR:         cdrRow[2],
 		OriginID:    cdrRow[3],
 		OriginHost:  "0.0.0.0", // Got it over internal interface

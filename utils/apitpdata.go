@@ -490,32 +490,6 @@ type ArgsCacheKeys struct {
 type CacheKeys struct {
 }
 
-type AttrCacheStats struct { // Add in the future filters here maybe so we avoid counting complete cache
-}
-
-type CacheStats struct {
-	Destinations        int
-	ReverseDestinations int
-	RatingPlans         int
-	RatingProfiles      int
-	Actions             int
-	ActionPlans         int
-	AccountActionPlans  int
-	SharedGroups        int
-	ResourceProfiles    int
-	Resources           int
-	StatQueues          int
-	StatQueueProfiles   int
-	Thresholds          int
-	ThresholdProfiles   int
-	Filters             int
-	SupplierProfiles    int
-	AttributeProfiles   int
-	ChargerProfiles     int
-	DispatcherProfiles  int
-	DispatcherRoutes    int
-}
-
 type AttrExpFileCdrs struct {
 	CdrFormat                  *string  // Cdr output file format <CdreCdrFormats>
 	FieldSeparator             *string  // Separator used between fields

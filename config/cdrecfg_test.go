@@ -156,7 +156,7 @@ func TestCdreCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	} else if jsnCdreCfg, err := jsnCfg.CdreJsonCfgs(); err != nil {
 		t.Error(err)
-	} else if err = lstcfg.loadFromJsonCfg(jsnCdreCfg["*default"], utils.INFIELD_SEP); err != nil {
+	} else if err = lstcfg.loadFromJsonCfg(jsnCdreCfg[utils.MetaDefault], utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, lstcfg) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(lstcfg))
