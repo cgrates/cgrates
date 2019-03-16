@@ -1942,6 +1942,7 @@ func testV1FIdxComputeDispatcherProfileIndexes2(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedIndexes, utils.ToJSON(indexes))
 	}
 }
+
 func testV1FIdxStopEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
