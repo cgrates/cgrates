@@ -385,6 +385,15 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	} else if !passes {
 		t.Error("not passing")
 	}
+	rf, err = NewFilterRule(MetaGreaterOrEqual, "~ASR", []string{"35.5"})
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.passGreaterThan(ev); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("not passing")
+	}
 	ev = config.NewNavigableMap(nil)
 	ev.Set([]string{"ASR"}, 20, false, true)
 	if passes, err := rf.passGreaterThan(ev); err != nil {
@@ -416,6 +425,26 @@ func TestFilterPassGreaterThan(t *testing.T) {
 		t.Error("passing")
 	}
 
+	rf, err = NewFilterRule("*gte", "~ASR", []string{"10"})
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.passGreaterThan(ev); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("passing")
+	}
+	ev = config.NewNavigableMap(nil)
+	ev.Set([]string{"ASR"}, float64(20*time.Second), false, true)
+	rf, err = NewFilterRule("*gte", "~ASR", []string{"10s"})
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.passGreaterThan(ev); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("passing")
+	}
 	//Here converter will be consider part of path and will get error : NOT_FOUND
 	ev = config.NewNavigableMap(nil)
 	ev.Set([]string{"ASR"}, 20, false, true)
