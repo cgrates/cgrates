@@ -72,7 +72,7 @@ func TestLoaderSCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	}
 	expected = LoaderSCfg{
-		Id:             "*default",
+		Id:             utils.MetaDefault,
 		Tenant:         ten,
 		LockFileName:   ".cgr.lck",
 		CacheSConns:    []*HaPoolConfig{{Address: utils.MetaInternal}},

@@ -139,7 +139,7 @@ func testChargerSLoadAddCharger(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
 		},
-		RunID:        "*default",
+		RunID:        utils.MetaDefault,
 		AttributeIDs: []string{"ATTR_1001_SIMPLEAUTH"},
 		Weight:       20,
 	}
@@ -183,7 +183,7 @@ func testChargerSGetChargersForEvent(t *testing.T) {
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
 			},
-			RunID:        "*default",
+			RunID:        utils.MetaDefault,
 			AttributeIDs: []string{"ATTR_1001_SIMPLEAUTH"},
 			Weight:       20,
 		},
@@ -212,7 +212,7 @@ func testChargerSProcessEvent(t *testing.T) {
 				Event: map[string]interface{}{
 					utils.Account: "1001",
 					"Password":    "CGRateS.org",
-					"RunID":       "*default",
+					"RunID":       utils.MetaDefault,
 				},
 			},
 		},
@@ -238,7 +238,7 @@ func testChargerSSetChargerProfile(t *testing.T) {
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 		},
-		RunID:        "*default",
+		RunID:        utils.MetaDefault,
 		AttributeIDs: []string{"Attr1", "Attr2"},
 		Weight:       20,
 	}

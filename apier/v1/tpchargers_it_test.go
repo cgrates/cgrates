@@ -128,7 +128,7 @@ func testTPChrgsSetTPChrgs(t *testing.T) {
 			ActivationTime: "2014-07-29T15:00:00Z",
 			ExpiryTime:     "",
 		},
-		RunID:        "*default",
+		RunID:        utils.MetaDefault,
 		AttributeIDs: []string{"Attr1", "Attr2"},
 		Weight:       20,
 	}

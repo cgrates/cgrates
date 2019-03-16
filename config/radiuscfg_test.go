@@ -59,8 +59,8 @@ func TestRadiusAgentCfgloadFromJsonCfg(t *testing.T) {
 		ListenNet:          "udp",
 		ListenAuth:         "127.0.0.1:1812",
 		ListenAcct:         "127.0.0.1:1813",
-		ClientSecrets:      map[string]string{"*default": "CGRateS.org"},
-		ClientDictionaries: map[string]string{"*default": "/usr/share/cgrates/radius/dict/"},
+		ClientSecrets:      map[string]string{utils.MetaDefault: "CGRateS.org"},
+		ClientDictionaries: map[string]string{utils.MetaDefault: "/usr/share/cgrates/radius/dict/"},
 		SessionSConns:      []*HaPoolConfig{{Address: "*internal"}},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {

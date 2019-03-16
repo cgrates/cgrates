@@ -1009,7 +1009,7 @@ cgrates.org,Charge2,*string:Account:1003,2014-07-29T15:00:00Z,*default,Attr3,10
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 00, 0, 0, time.UTC),
 		},
-		RunID:        "*default",
+		RunID:        utils.MetaDefault,
 		AttributeIDs: []string{"Attr3"},
 		Weight:       10,
 	}
