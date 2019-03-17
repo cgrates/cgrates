@@ -72,10 +72,7 @@ func testTutLoadConfig(t *testing.T) {
 	if tutCfg, err = config.NewCGRConfigFromPath(tutCfgPath); err != nil {
 		t.Error(err)
 	}
-	switch tutCfgDir {
-	default:
-		tutDelay = 2000
-	}
+	tutDelay = 2000
 }
 
 func testTutResetDB(t *testing.T) {
@@ -144,20 +141,18 @@ func testTutGetCost(t *testing.T) {
 		AnswerTime:  "2019-03-11T21:00:00Z",
 		Usage:       "45s",
 	}
-	/*
-		// *any to 2001
-		attrs = v1.AttrGetCost{
-			Subject:     "1002",
-			Destination: "2001",
-			AnswerTime:  "*now",
-			Usage:       "45s",
-		}
-		if err := tutRpc.Call(utils.ApierV1GetCost, attrs, &rply); err != nil {
-			t.Error("Unexpected nil error received: ", err.Error())
-		} else if *rply.Cost != 1.2 { // FixMe: missing ConnectFee out of Cost
-			t.Errorf("Unexpected cost received: %f", *rply.Cost)
-		}
-	*/
+	// *any to 2001
+	attrs = v1.AttrGetCost{
+		Subject:     "1002",
+		Destination: "2001",
+		AnswerTime:  "*now",
+		Usage:       "45s",
+	}
+	if err := tutRpc.Call(utils.ApierV1GetCost, attrs, &rply); err != nil {
+		t.Error("Unexpected nil error received: ", err.Error())
+	} else if *rply.Cost != 1.4 {
+		t.Errorf("Unexpected cost received: %f", *rply.Cost)
+	}
 	// *any to 2001 on NEW_YEAR
 	attrs = v1.AttrGetCost{
 		Subject:     "1002",
