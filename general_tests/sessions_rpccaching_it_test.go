@@ -60,6 +60,12 @@ var sTestsRPCMethods = []func(t *testing.T){
 	testRPCMethodsResetStorDb,
 	testRPCMethodsCdrsProcessCDR,
 	testRPCMethodsCdrsStoreSessionCost,
+	//reset the storDB and dataDB
+	testRPCMethodsInitDataDb,
+	testRPCMethodsResetStorDb,
+	testRPCMethodsLoadData,
+	testRPCMethodsResponderDebit,
+	testRPCMethodsResponderMaxDebit,
 	testRPCMethodsStopEngine,
 }
 
@@ -781,6 +787,98 @@ func testRPCMethodsCdrsStoreSessionCost(t *testing.T) {
 	if err := rpcRpc.Call(utils.CDRsV2StoreSessionCost, args,
 		&reply); err == nil || err.Error() != "SERVER_ERROR: EXISTS" {
 		t.Error("Unexpected error: ", err.Error())
+	}
+}
+
+// Load the tariff plan, creating accounts and their balances
+func testRPCMethodsLoadData(t *testing.T) {
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testtp")}
+	if err := rpcRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &tpLoadInst); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+}
+
+func testRPCMethodsResponderDebit(t *testing.T) {
+	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
+	cd := engine.CallDescriptor{
+		CgrID:         "testRPCMethodsResponderDebit",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "1001",
+		Destination:   "+49",
+		DurationIndex: 0,
+		TimeStart:     tStart,
+		TimeEnd:       tStart.Add(time.Duration(15) * time.Second),
+	}
+	var cc engine.CallCost
+	//cache the response
+	if err := rpcRpc.Call(utils.ResponderDebit, cd, &cc); err != nil {
+		t.Error(err)
+	} else if cc.GetDuration() != 15*time.Second {
+		t.Errorf("Expecting: %+v, \n received: %+v",
+			15*time.Second, cc.GetDuration())
+	} else if cc.Cost != 15 {
+		t.Errorf("Expecting: %+v, \n received: %+v",
+			15, cc.Cost)
+	}
+	cd2 := engine.CallDescriptor{
+		CgrID: "testRPCMethodsResponderDebit",
+	}
+	var ccCache engine.CallCost
+	//cache the response
+	if err := rpcRpc.Call(utils.ResponderDebit, cd2, &ccCache); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ccCache, cc) {
+		t.Errorf("Expecting: %+v, \n received: %+v",
+			utils.ToJSON(cc), utils.ToJSON(ccCache))
+	}
+	//give time to CGRateS to delete the response from cache
+	time.Sleep(1*time.Second + 500*time.Millisecond)
+	if err := rpcRpc.Call(utils.ResponderDebit, cd2, &cc); err == nil || err.Error() != "ACCOUNT_NOT_FOUND" {
+		t.Error("Unexpected error returned", err)
+	}
+}
+
+func testRPCMethodsResponderMaxDebit(t *testing.T) {
+	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
+	cd := engine.CallDescriptor{
+		CgrID:         "testRPCMethodsResponderMaxDebit",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Account:       "1001",
+		Subject:       "free",
+		Destination:   "+49",
+		DurationIndex: 0,
+		TimeStart:     tStart,
+		TimeEnd:       tStart.Add(time.Duration(15) * time.Second),
+	}
+	var cc engine.CallCost
+	//cache the response
+	if err := rpcRpc.Call(utils.ResponderMaxDebit, cd, &cc); err != nil {
+		t.Error(err)
+	} else if cc.GetDuration() != 15*time.Second {
+		t.Errorf("Expecting: %+v, \n received: %+v",
+			15*time.Second, cc.GetDuration())
+	} else if cc.Cost != 0 {
+		t.Errorf("Expecting: %+v, \n received: %+v",
+			0, cc.Cost)
+	}
+	cd2 := engine.CallDescriptor{
+		CgrID: "testRPCMethodsResponderMaxDebit",
+	}
+	var ccCache engine.CallCost
+	//cache the response
+	if err := rpcRpc.Call(utils.ResponderMaxDebit, cd2, &ccCache); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ccCache, cc) {
+		t.Errorf("Expecting: %+v, \n received: %+v",
+			utils.ToJSON(cc), utils.ToJSON(ccCache))
+	}
+	//give time to CGRateS to delete the response from cache
+	time.Sleep(1*time.Second + 500*time.Millisecond)
+	if err := rpcRpc.Call(utils.ResponderMaxDebit, cd2, &cc); err == nil || err.Error() != "ACCOUNT_NOT_FOUND" {
+		t.Error("Unexpected error returned", err)
 	}
 }
 
