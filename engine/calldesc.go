@@ -551,7 +551,6 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	if err != nil || cd.GetDuration() == 0 {
 		return cc, err
 	}
-
 	cost := 0.0
 	for i, ts := range cc.Timespans {
 		// only add connect fee if this is the first/only call cost request
