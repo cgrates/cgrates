@@ -32,79 +32,83 @@ import (
 // helper on top of dataDB.MatchFilterIndex, adding utils.ANY to list of fields queried
 func MatchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldIDs *[]string,
 	dm *DataManager, cacheID, itemIDPrefix string, indexedSelects bool) (itemIDs utils.StringMap, err error) {
-	lockID := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
-	guardian.Guardian.GuardIDs(config.CgrConfig().GeneralCfg().LockingTimeout, lockID)
-	defer guardian.Guardian.UnguardIDs(lockID)
 	itemIDs = make(utils.StringMap)
-	if !indexedSelects {
-		keysWithID, err := dm.DataDB().GetKeysForPrefix(utils.CacheIndexesToPrefix[cacheID])
-		if err != nil {
-			return nil, err
-		}
-		var sliceIDs []string
-		for _, id := range keysWithID {
-			sliceIDs = append(sliceIDs, strings.Split(id, ":")[1])
-		}
-		itemIDs = utils.StringMapFromSlice(sliceIDs)
-		return itemIDs, nil
-	}
-	allFieldIDs := make([]string, len(ev))
-	i := 0
-	for fldID := range ev {
-		allFieldIDs[i] = fldID
-		i += 1
-	}
-	stringFieldVals := map[string]string{utils.ANY: utils.ANY} // cache here field string values, start with default one
-	filterIndexTypes := []string{MetaString, MetaPrefix, utils.META_NONE}
-	for i, fieldIDs := range []*[]string{stringFldIDs, prefixFldIDs, nil} { // same routine for both string and prefix filter types
-		if filterIndexTypes[i] == utils.META_NONE {
-			fieldIDs = &[]string{utils.ANY} // so we can query DB for unindexed filters
-		}
-		if fieldIDs == nil {
-			fieldIDs = &allFieldIDs
-		}
-		for _, fldName := range *fieldIDs {
-			fieldValIf, has := ev[fldName]
-			if !has && filterIndexTypes[i] != utils.META_NONE {
-				continue
+
+	// Guard will protect the function with automatic locking
+	lockID := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
+	guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
+
+		if !indexedSelects {
+			var keysWithID []string
+			if keysWithID, err = dm.DataDB().GetKeysForPrefix(utils.CacheIndexesToPrefix[cacheID]); err != nil {
+				return
 			}
-			if _, cached := stringFieldVals[fldName]; !cached {
-				strVal, err := utils.IfaceAsString(fieldValIf)
-				if err != nil {
-					utils.Logger.Warning(
-						fmt.Sprintf("<%s> cannot cast field: %s into string", utils.FilterS, fldName))
+			var sliceIDs []string
+			for _, id := range keysWithID {
+				sliceIDs = append(sliceIDs, strings.Split(id, ":")[1])
+			}
+			itemIDs = utils.StringMapFromSlice(sliceIDs)
+			return
+		}
+		allFieldIDs := make([]string, len(ev))
+		i := 0
+		for fldID := range ev {
+			allFieldIDs[i] = fldID
+			i += 1
+		}
+		stringFieldVals := map[string]string{utils.ANY: utils.ANY} // cache here field string values, start with default one
+		filterIndexTypes := []string{MetaString, MetaPrefix, utils.META_NONE}
+		for i, fieldIDs := range []*[]string{stringFldIDs, prefixFldIDs, nil} { // same routine for both string and prefix filter types
+			if filterIndexTypes[i] == utils.META_NONE {
+				fieldIDs = &[]string{utils.ANY} // so we can query DB for unindexed filters
+			}
+			if fieldIDs == nil {
+				fieldIDs = &allFieldIDs
+			}
+			for _, fldName := range *fieldIDs {
+				fieldValIf, has := ev[fldName]
+				if !has && filterIndexTypes[i] != utils.META_NONE {
 					continue
 				}
-				stringFieldVals[fldName] = strVal
-			}
-			fldVal := stringFieldVals[fldName]
-			fldVals := []string{fldVal}
-			// default is only one fieldValue checked
-			if filterIndexTypes[i] == MetaPrefix {
-				fldVals = utils.SplitPrefix(fldVal, 1) // all prefixes till last digit
-			}
-			if fldName != utils.META_ANY {
-				fldName = utils.DynamicDataPrefix + fldName
-			}
-			var dbItemIDs utils.StringMap // list of items matched in DB
-			for _, val := range fldVals {
-				dbItemIDs, err = dm.MatchFilterIndex(cacheID, itemIDPrefix, filterIndexTypes[i], fldName, val)
-				if err != nil {
-					if err == utils.ErrNotFound {
-						err = nil
+				if _, cached := stringFieldVals[fldName]; !cached {
+					strVal, err := utils.IfaceAsString(fieldValIf)
+					if err != nil {
+						utils.Logger.Warning(
+							fmt.Sprintf("<%s> cannot cast field: %s into string", utils.FilterS, fldName))
 						continue
 					}
-					return nil, err
+					stringFieldVals[fldName] = strVal
 				}
-				break // we got at least one answer back, longest prefix wins
-			}
-			for itemID := range dbItemIDs {
-				if _, hasIt := itemIDs[itemID]; !hasIt { // Add it to list if not already there
-					itemIDs[itemID] = dbItemIDs[itemID]
+				fldVal := stringFieldVals[fldName]
+				fldVals := []string{fldVal}
+				// default is only one fieldValue checked
+				if filterIndexTypes[i] == MetaPrefix {
+					fldVals = utils.SplitPrefix(fldVal, 1) // all prefixes till last digit
+				}
+				if fldName != utils.META_ANY {
+					fldName = utils.DynamicDataPrefix + fldName
+				}
+				var dbItemIDs utils.StringMap // list of items matched in DB
+				for _, val := range fldVals {
+					if dbItemIDs, err = dm.MatchFilterIndex(cacheID, itemIDPrefix, filterIndexTypes[i], fldName, val); err != nil {
+						if err == utils.ErrNotFound {
+							err = nil
+							continue
+						}
+						return
+					}
+					break // we got at least one answer back, longest prefix wins
+				}
+				for itemID := range dbItemIDs {
+					if _, hasIt := itemIDs[itemID]; !hasIt { // Add it to list if not already there
+						itemIDs[itemID] = dbItemIDs[itemID]
+					}
 				}
 			}
 		}
-	}
+		return
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, lockID)
+
 	if len(itemIDs) == 0 {
 		return nil, utils.ErrNotFound
 	}

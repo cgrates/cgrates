@@ -248,37 +248,37 @@ func (rs Resources) allocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 		return "", utils.ErrResourceUnavailable
 	}
 	lockIDs := utils.PrefixSliceItems(rs.tenatIDsStr(), utils.ResourcesPrefix)
-	guardian.Guardian.GuardIDs(config.CgrConfig().GeneralCfg().LockingTimeout, lockIDs...)
-	defer guardian.Guardian.UnguardIDs(lockIDs...)
-	// Simulate resource usage
-	for _, r := range rs {
-		r.removeExpiredUnits()
-		if _, hasID := r.Usages[ru.ID]; hasID { // update
-			r.clearUsage(ru.ID)
-		}
-		if r.rPrf == nil {
-			return "", fmt.Errorf("empty configuration for resourceID: %s", r.TenantID())
-		}
-		if r.rPrf.Limit >= r.totalUsage()+ru.Units {
-			if alcMessage == "" {
-				if r.rPrf.AllocationMessage != "" {
-					alcMessage = r.rPrf.AllocationMessage
-				} else {
-					alcMessage = r.rPrf.ID
+	guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
+		// Simulate resource usage
+		for _, r := range rs {
+			r.removeExpiredUnits()
+			if _, hasID := r.Usages[ru.ID]; hasID { // update
+				r.clearUsage(ru.ID)
+			}
+			if r.rPrf == nil {
+				err = fmt.Errorf("empty configuration for resourceID: %s", r.TenantID())
+				return
+			}
+			if r.rPrf.Limit >= r.totalUsage()+ru.Units {
+				if alcMessage == "" {
+					if r.rPrf.AllocationMessage != "" {
+						alcMessage = r.rPrf.AllocationMessage
+					} else {
+						alcMessage = r.rPrf.ID
+					}
 				}
 			}
 		}
-	}
-	if alcMessage == "" {
-		return "", utils.ErrResourceUnavailable
-	}
-	if dryRun {
+		if alcMessage == "" {
+			err = utils.ErrResourceUnavailable
+			return
+		}
+		if dryRun {
+			return
+		}
+		err = rs.recordUsage(ru)
 		return
-	}
-	err = rs.recordUsage(ru)
-	if err != nil {
-		return
-	}
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, lockIDs...)
 	return
 }
 
@@ -417,26 +417,27 @@ func (rS *ResourceService) cachedResourcesForEvent(evUUID string) (rs Resources)
 	for i, rTid := range rIDs {
 		lockIDs[i] = utils.ResourcesPrefix + rTid.TenantID()
 	}
-	guardian.Guardian.GuardIDs(config.CgrConfig().GeneralCfg().LockingTimeout, lockIDs...)
-	defer guardian.Guardian.UnguardIDs(lockIDs...)
-	for i, rTid := range rIDs {
-		if r, err := rS.dm.GetResource(rTid.Tenant, rTid.ID, true, true, ""); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<ResourceS> force-uncaching resources for evUUID: <%s>, error: <%s>",
-					evUUID, err.Error()))
-			// on errors, cleanup cache so we recache
-			if shortCached {
-				Cache.Remove(utils.CacheEventResources, evUUID, true, "")
+	guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
+		for i, rTid := range rIDs {
+			if r, err := rS.dm.GetResource(rTid.Tenant, rTid.ID, true, true, ""); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<ResourceS> force-uncaching resources for evUUID: <%s>, error: <%s>",
+						evUUID, err.Error()))
+				// on errors, cleanup cache so we recache
+				if shortCached {
+					Cache.Remove(utils.CacheEventResources, evUUID, true, "")
+				} else {
+					rS.lcERMux.Lock()
+					delete(rS.lcEventResources, evUUID)
+					rS.lcERMux.Unlock()
+				}
+				return
 			} else {
-				rS.lcERMux.Lock()
-				delete(rS.lcEventResources, evUUID)
-				rS.lcERMux.Unlock()
+				rs[i] = r
 			}
-			return nil
-		} else {
-			rs[i] = r
 		}
-	}
+		return
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, lockIDs...)
 	return
 }
 

@@ -21,6 +21,7 @@ package engine
 import (
 	"fmt"
 	"sort"
+	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -123,9 +124,10 @@ func (ssq *StoredStatQueue) AsStatQueue(ms Marshaler) (sq *StatQueue, err error)
 
 // StatQueue represents an individual stats instance
 type StatQueue struct {
-	Tenant  string
-	ID      string
-	SQItems []struct {
+	sync.RWMutex // protect the elements from within
+	Tenant       string
+	ID           string
+	SQItems      []struct {
 		EventID    string     // Bounded to the original utils.CGREvent
 		ExpiryTime *time.Time // Used to auto-expire events
 	}

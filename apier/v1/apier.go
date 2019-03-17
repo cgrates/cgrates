@@ -1331,20 +1331,21 @@ func (self *ApierV1) RemoveActions(attr AttrRemoveActions, reply *string) error 
 }
 
 type AttrRemoteLock struct {
-	LockIDs []string      // List of IDs to obtain lock for
-	Timeout time.Duration // Automatically unlock on timeout
+	ReferenceID string        // reference ID for this lock if available
+	LockIDs     []string      // List of IDs to obtain lock for
+	Timeout     time.Duration // Automatically unlock on timeout
 }
 
-func (self *ApierV1) RemoteLock(attr AttrRemoteLock, reply *string) error {
-	guardian.Guardian.GuardIDs(attr.Timeout, attr.LockIDs...)
-	*reply = utils.OK
-	return nil
+// RemoteLock will lock a key from remote
+func (self *ApierV1) RemoteLock(attr AttrRemoteLock, reply *string) (err error) {
+	*reply = guardian.Guardian.GuardIDs(attr.ReferenceID, attr.Timeout, attr.LockIDs...)
+	return
 }
 
-func (self *ApierV1) RemoteUnlock(lockIDs []string, reply *string) error {
-	guardian.Guardian.UnguardIDs(lockIDs...)
-	*reply = utils.OK
-	return nil
+// RemoteUnlock will unlock a key from remote based on reference ID
+func (self *ApierV1) RemoteUnlock(refID string, reply *[]string) (err error) {
+	*reply = guardian.Guardian.UnguardIDs(refID)
+	return
 }
 
 func (v1 *ApierV1) StartService(args servmanager.ArgStartService, reply *string) (err error) {
