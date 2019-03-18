@@ -750,4 +750,11 @@ const CGRATES_CFG_JSON = `
 },
 
 
+"apier": {	
+	"caches_conns":[						// connections to CacheS for reloads
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"default_cache":"",						// default actions to do when caching items(""-default caching by data manager, "*none"-disable caching)
+},
+
 }`

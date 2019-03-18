@@ -1700,3 +1700,18 @@ func TestNewCGRConfigFromPathNotFound(t *testing.T) {
 		t.Fatalf("Expected error,received %v", cfg)
 	}
 }
+
+func TestCgrCfgJSONDefaultApierCfg(t *testing.T) {
+	aCfg := &ApierCfg{
+		CachesConns: []*HaPoolConfig{
+			{
+				Address:   "127.0.0.1:2012",
+				Transport: utils.MetaJSONrpc,
+			},
+		},
+		DefaultCache: utils.EmptyString,
+	}
+	if !reflect.DeepEqual(cgrCfg.apier, aCfg) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.apier, aCfg)
+	}
+}
