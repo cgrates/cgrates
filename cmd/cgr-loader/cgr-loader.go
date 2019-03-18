@@ -367,7 +367,7 @@ func main() {
 			if *verbose {
 				log.Print("Reloading cache")
 			}
-			if err = cacheS.Call(utils.ApierV1ReloadCache,
+			if err = cacheS.Call(utils.CacheSv1ReloadCache,
 				utils.AttrReloadCache{ArgsCache: utils.ArgsCache{
 					DestinationIDs:        &dstIds,
 					ReverseDestinationIDs: &revDstIDs,
