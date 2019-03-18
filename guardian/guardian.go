@@ -146,6 +146,7 @@ func (gl *GuardianLocker) Guard(handler func() (interface{}, error), timeout tim
 		case err = <-errChan:
 		case reply = <-rplyChan:
 		case <-time.After(timeout):
+			utils.Logger.Warning(fmt.Sprintf("<Guardian> force timing-out locks: %+v", lockIDs))
 		}
 	} else { // a bit dangerous but wait till handler finishes
 		select {
@@ -168,7 +169,7 @@ func (gl *GuardianLocker) GuardIDs(refID string, timeout time.Duration, lkIDs ..
 			time.Sleep(timeout)
 			lkIDs := gl.unlockWithReference(retRefID)
 			if len(lkIDs) != 0 {
-				utils.Logger.Warning(fmt.Sprintf("<Guardian> WARNING: force timing-out locks: %+v", lkIDs))
+				utils.Logger.Warning(fmt.Sprintf("<Guardian> force timing-out locks: %+v", lkIDs))
 			}
 		}()
 	}
