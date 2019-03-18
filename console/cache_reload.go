@@ -23,7 +23,7 @@ import "github.com/cgrates/cgrates/utils"
 func init() {
 	c := &CmdReloadCache{
 		name:      "cache_reload",
-		rpcMethod: "ApierV1.ReloadCache",
+		rpcMethod: utils.CacheSv1ReloadCache,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

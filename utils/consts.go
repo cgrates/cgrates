@@ -688,7 +688,6 @@ const (
 // ApierV1 APIs
 const (
 	ApierV1ComputeFilterIndexes     = "ApierV1.ComputeFilterIndexes"
-	ApierV1ReloadCache              = "ApierV1.ReloadCache"
 	ApierV1ReloadScheduler          = "ApierV1.ReloadScheduler"
 	ApierV1Ping                     = "ApierV1.Ping"
 	ApierV1SetDispatcherProfile     = "ApierV1.SetDispatcherProfile"
@@ -822,6 +821,10 @@ const (
 	CacheSv1GetGroupItemIDs   = "CacheSv1.GetGroupItemIDs"
 	CacheSv1RemoveGroup       = "CacheSv1.RemoveGroup"
 	CacheSv1Clear             = "CacheSv1.Clear"
+	CacheSv1ReloadCache       = "CacheSv1.ReloadCache"
+	CacheSv1LoadCache         = "CacheSv1.LoadCache"
+	CacheSv1FlushCache        = "CacheSv1.FlushCache"
+	CacheSv1Ping              = "CacheSv1.Ping"
 )
 
 // Cdrs APIs

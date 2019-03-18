@@ -125,11 +125,11 @@ type ArgsGetCacheItemIDs struct {
 
 func (chS *CacheS) V1GetItemIDs(args *ArgsGetCacheItemIDs,
 	reply *[]string) (err error) {
-	if itmIDs := Cache.GetItemIDs(args.CacheID, args.ItemIDPrefix); len(itmIDs) == 0 {
+	itmIDs := Cache.GetItemIDs(args.CacheID, args.ItemIDPrefix)
+	if len(itmIDs) == 0 {
 		return utils.ErrNotFound
-	} else {
-		*reply = itmIDs
 	}
+	*reply = itmIDs
 	return
 }
 
@@ -146,11 +146,11 @@ func (chS *CacheS) V1HasItem(args *ArgsGetCacheItem,
 
 func (chS *CacheS) V1GetItemExpiryTime(args *ArgsGetCacheItem,
 	reply *time.Time) (err error) {
-	if expTime, has := Cache.GetItemExpiryTime(args.CacheID, args.ItemID); !has {
+	expTime, has := Cache.GetItemExpiryTime(args.CacheID, args.ItemID)
+	if !has {
 		return utils.ErrNotFound
-	} else {
-		*reply = expTime
 	}
+	*reply = expTime
 	return
 }
 
@@ -399,155 +399,5 @@ func (chS *CacheS) V1FlushCache(args utils.AttrReloadCache, reply *string) (err 
 	flushCache(utils.CacheDispatcherRoutes, args.DispatcherRoutesIDs)
 
 	*reply = utils.OK
-	return
-}
-
-func getCacheKeys(chID string, IDs *[]string, paginator utils.Paginator) (ids []string) {
-	if len(*IDs) != 0 {
-		for _, id := range *IDs {
-			if _, hasIt := Cache.Get(chID, id); hasIt {
-				ids = append(ids, id)
-			}
-		}
-	} else {
-		for _, id := range Cache.GetItemIDs(chID, "") {
-			ids = append(ids, id)
-		}
-	}
-	return paginator.PaginateStringSlice(ids)
-}
-
-// GetCacheKeys returns a list of keys available in cache based on query arguments
-// If keys are provided in arguments, they will be checked for existence
-func (chS *CacheS) V1GetCacheKeys(args utils.ArgsCacheKeys, reply *utils.ArgsCache) (err error) {
-	if args.DestinationIDs != nil {
-		ids := getCacheKeys(utils.CacheDestinations, args.DestinationIDs, args.Paginator)
-		if len(ids) != 0 {
-			reply.DestinationIDs = &ids
-		}
-	}
-	if args.ReverseDestinationIDs != nil {
-		ids := getCacheKeys(utils.CacheReverseDestinations, args.ReverseDestinationIDs, args.Paginator)
-		if len(ids) != 0 {
-			reply.ReverseDestinationIDs = &ids
-		}
-	}
-	if args.RatingPlanIDs != nil {
-		ids := getCacheKeys(utils.CacheRatingPlans, args.RatingPlanIDs, args.Paginator)
-		if len(ids) != 0 {
-			reply.RatingPlanIDs = &ids
-		}
-	}
-	if args.RatingProfileIDs != nil {
-		ids := getCacheKeys(utils.CacheRatingProfiles, args.RatingProfileIDs, args.Paginator)
-		if len(ids) != 0 {
-			reply.RatingProfileIDs = &ids
-		}
-	}
-	if args.ActionIDs != nil {
-		ids := getCacheKeys(utils.CacheActions, args.ActionIDs, args.Paginator)
-		if len(ids) != 0 {
-			reply.ActionIDs = &ids
-		}
-	}
-	if args.ActionPlanIDs != nil {
-		ids := getCacheKeys(utils.CacheActionPlans, args.ActionPlanIDs, args.Paginator)
-		if len(ids) != 0 {
-			reply.ActionPlanIDs = &ids
-		}
-	}
-	if args.AccountActionPlanIDs != nil {
-		ids := getCacheKeys(utils.CacheAccountActionPlans, args.AccountActionPlanIDs, args.Paginator)
-		if len(ids) != 0 {
-			reply.AccountActionPlanIDs = &ids
-		}
-	}
-	if args.ActionTriggerIDs != nil {
-		ids := getCacheKeys(utils.CacheActionTriggers, args.ActionTriggerIDs, args.Paginator)
-		if len(ids) != 0 {
-			reply.ActionTriggerIDs = &ids
-		}
-	}
-	if args.SharedGroupIDs != nil {
-		ids := getCacheKeys(utils.CacheSharedGroups, args.SharedGroupIDs, args.Paginator)
-		if len(ids) != 0 {
-			reply.SharedGroupIDs = &ids
-		}
-	}
-	if args.ResourceProfileIDs != nil {
-		ids := getCacheKeys(utils.CacheResourceProfiles, args.ResourceProfileIDs, args.Paginator)
-		if len(ids) != 0 {
-			reply.ResourceProfileIDs = &ids
-		}
-	}
-	if args.ResourceIDs != nil {
-		ids := getCacheKeys(utils.CacheResources, args.ResourceIDs, args.Paginator)
-		if len(ids) != 0 {
-			reply.ResourceIDs = &ids
-		}
-	}
-	if args.StatsQueueIDs != nil {
-		ids := getCacheKeys(utils.CacheStatQueues, args.StatsQueueIDs, args.Paginator)
-		if len(ids) != 0 {
-			reply.StatsQueueIDs = &ids
-		}
-	}
-	if args.StatsQueueProfileIDs != nil {
-		ids := getCacheKeys(utils.CacheStatQueueProfiles, args.StatsQueueProfileIDs, args.Paginator)
-		if len(ids) != 0 {
-			reply.StatsQueueProfileIDs = &ids
-		}
-	}
-
-	if args.ThresholdIDs != nil {
-		ids := getCacheKeys(utils.CacheThresholds, args.ThresholdIDs, args.Paginator)
-		if len(ids) != 0 {
-			reply.ThresholdIDs = &ids
-		}
-	}
-
-	if args.ThresholdProfileIDs != nil {
-		ids := getCacheKeys(utils.CacheThresholdProfiles, args.ThresholdProfileIDs, args.Paginator)
-		if len(ids) != 0 {
-			reply.ThresholdProfileIDs = &ids
-		}
-	}
-	if args.FilterIDs != nil {
-		ids := getCacheKeys(utils.CacheFilters, args.FilterIDs, args.Paginator)
-		if len(ids) != 0 {
-			reply.FilterIDs = &ids
-		}
-	}
-	if args.SupplierProfileIDs != nil {
-		ids := getCacheKeys(utils.CacheSupplierProfiles, args.SupplierProfileIDs, args.Paginator)
-		if len(ids) != 0 {
-			reply.SupplierProfileIDs = &ids
-		}
-	}
-	if args.AttributeProfileIDs != nil {
-		ids := getCacheKeys(utils.CacheAttributeProfiles, args.AttributeProfileIDs, args.Paginator)
-		if len(ids) != 0 {
-			reply.AttributeProfileIDs = &ids
-		}
-	}
-	if args.ChargerProfileIDs != nil {
-		ids := getCacheKeys(utils.CacheChargerProfiles, args.ChargerProfileIDs, args.Paginator)
-		if len(ids) != 0 {
-			reply.ChargerProfileIDs = &ids
-		}
-	}
-	if args.DispatcherProfileIDs != nil {
-		ids := getCacheKeys(utils.CacheDispatcherProfiles, args.DispatcherProfileIDs, args.Paginator)
-		if len(ids) != 0 {
-			reply.DispatcherProfileIDs = &ids
-		}
-	}
-	if args.DispatcherRoutesIDs != nil {
-		ids := getCacheKeys(utils.CacheDispatcherRoutes, args.DispatcherRoutesIDs, args.Paginator)
-		if len(ids) != 0 {
-			reply.DispatcherRoutesIDs = &ids
-		}
-	}
-
 	return
 }
