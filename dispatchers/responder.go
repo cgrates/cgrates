@@ -25,6 +25,20 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// ResponderPing interogates Responder server responsible to process the event
+func (dS *DispatcherService) ResponderPing(args *CGREvWithApiKey,
+	reply *string) (err error) {
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.ResponderPing,
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&args.CGREvent, utils.MetaResponder, args.RouteID,
+		utils.ResponderPing, args.CGREvent, reply)
+}
+
 func (dS *DispatcherService) ResponderStatus(args *TntWithApiKey,
 	reply *map[string]interface{}) (err error) {
 	if dS.attrS != nil {

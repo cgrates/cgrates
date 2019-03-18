@@ -125,6 +125,36 @@ type CallDescriptorWithApiKey struct {
 	engine.CallDescriptor
 }
 
+type ArgsGetCacheItemIDsWithApiKey struct {
+	DispatcherResource
+	utils.TenantArg
+	engine.ArgsGetCacheItemIDs
+}
+
+type ArgsGetCacheItemWithApiKey struct {
+	DispatcherResource
+	utils.TenantArg
+	engine.ArgsGetCacheItem
+}
+
+type AttrReloadCacheWithApiKey struct {
+	DispatcherResource
+	utils.TenantArg
+	utils.AttrReloadCache
+}
+
+type AttrCacheIDsWithApiKey struct {
+	DispatcherResource
+	utils.TenantArg
+	CacheIDs []string
+}
+
+type ArgsGetGroupWithApiKey struct {
+	DispatcherResource
+	utils.TenantArg
+	engine.ArgsGetGroup
+}
+
 func ParseStringMap(s string) utils.StringMap {
 	if s == utils.ZERO {
 		return make(utils.StringMap)

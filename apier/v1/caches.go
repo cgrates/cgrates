@@ -35,7 +35,7 @@ type CacheSv1 struct {
 	cacheS *engine.CacheS
 }
 
-// GetItemExpiryTime returns the expiryTime for an item
+// GetItemIDs returns the IDs for cacheID with given prefix
 func (chSv1 *CacheSv1) GetItemIDs(args *engine.ArgsGetCacheItemIDs,
 	reply *[]string) error {
 	return chSv1.cacheS.V1GetItemIDs(args, reply)
