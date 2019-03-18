@@ -583,3 +583,8 @@ type FcTemplateJsonCfg struct {
 type AnalyzerSJsonCfg struct {
 	Enabled *bool
 }
+
+type ApierJsonCfg struct {
+	Caches_conns  *[]*HaPoolJsonCfg
+	Default_cache *string
+}

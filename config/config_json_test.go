@@ -1492,3 +1492,20 @@ func TestDfAnalyzerCfg(t *testing.T) {
 		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }
+
+func TestDfApierCfg(t *testing.T) {
+	eCfg := &ApierJsonCfg{
+		Caches_conns: &[]*HaPoolJsonCfg{
+			{
+				Address:   utils.StringPointer("127.0.0.1:2012"),
+				Transport: utils.StringPointer(utils.MetaJSONrpc),
+			},
+		},
+		Default_cache: utils.StringPointer(utils.EmptyString),
+	}
+	if cfg, err := dfCgrJsonCfg.ApierCfgJson(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
+	}
+}

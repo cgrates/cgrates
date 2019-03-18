@@ -38,20 +38,17 @@ const (
 	RALS_JSN           = "rals"
 	SCHEDULER_JSN      = "scheduler"
 	CDRS_JSN           = "cdrs"
-	MEDIATOR_JSN       = "mediator"
 	CDRE_JSN           = "cdre"
 	CDRC_JSN           = "cdrc"
 	SessionSJson       = "sessions"
 	FreeSWITCHAgentJSN = "freeswitch_agent"
 	KamailioAgentJSN   = "kamailio_agent"
 	AsteriskAgentJSN   = "asterisk_agent"
-	SM_JSN             = "session_manager"
 	FS_JSN             = "freeswitch"
 	OSIPS_JSN          = "opensips"
 	DA_JSN             = "diameter_agent"
 	RA_JSN             = "radius_agent"
 	HttpAgentJson      = "http_agent"
-	HISTSERV_JSN       = "historys"
 	ATTRIBUTE_JSN      = "attributes"
 	RESOURCES_JSON     = "resources"
 	STATS_JSON         = "stats"
@@ -68,6 +65,7 @@ const (
 	ChargerSCfgJson    = "chargers"
 	TlsCfgJson         = "tls"
 	AnalyzerCfgJson    = "analyzers"
+	Apier              = "apier"
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -484,6 +482,18 @@ func (self CgrJsonCfg) AnalyzerCfgJson() (*AnalyzerSJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(AnalyzerSJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (self CgrJsonCfg) ApierCfgJson() (*ApierJsonCfg, error) {
+	rawCfg, hasKey := self[Apier]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(ApierJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

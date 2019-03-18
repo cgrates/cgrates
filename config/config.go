@@ -165,6 +165,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.mailerCfg = new(MailerCfg)
 	cfg.loaderCfg = make([]*LoaderSCfg, 0)
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
+	cfg.apier = new(ApierCfg)
 
 	cfg.ConfigReloads = make(map[string]chan struct{})
 	cfg.ConfigReloads[utils.CDRC] = make(chan struct{}, 1)
@@ -336,6 +337,7 @@ type CGRConfig struct {
 	mailerCfg        *MailerCfg        // Mailer config
 	analyzerSCfg     *AnalyzerSCfg     // AnalyzerS config
 	SmOsipsConfig    *SmOsipsConfig    // SMOpenSIPS Configuration
+	apier            *ApierCfg
 }
 
 func (self *CGRConfig) checkConfigSanity() error {
@@ -964,6 +966,14 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return nil
 	}
 	if err := self.analyzerSCfg.loadFromJsonCfg(jsnAnalyzerCgrCfg); err != nil {
+		return err
+	}
+
+	jsnApierCfg, err := jsnCfg.ApierCfgJson()
+	if err != nil {
+		return nil
+	}
+	if err := self.apier.loadFromJsonCfg(jsnApierCfg); err != nil {
 		return err
 	}
 
