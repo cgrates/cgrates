@@ -1327,7 +1327,9 @@ func main() {
 
 	// init cache
 	cacheS := engine.NewCacheS(cfg, dm)
-	server.RpcRegister(v1.NewCacheSv1(cacheS)) // before pre-caching so we can check status via API
+	if !cfg.DispatcherSCfg().Enabled {
+		server.RpcRegister(v1.NewCacheSv1(cacheS)) // before pre-caching so we can check status via API
+	}
 	go func() {
 		if err := cacheS.Precache(); err != nil {
 			errCGR := err.(*utils.CGRError)
