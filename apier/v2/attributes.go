@@ -24,7 +24,7 @@ import (
 )
 
 //SetAttributeProfile add/update a new Attribute Profile
-func (apierV1 *ApierV2) SetExternalAttributeProfile(extAlsPrf *engine.ExternalAttributeProfile, reply *string) error {
+func (apierV2 *ApierV2) SetAttributeProfile(extAlsPrf *engine.ExternalAttributeProfile, reply *string) error {
 	if missing := utils.MissingStructFields(extAlsPrf, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -32,7 +32,7 @@ func (apierV1 *ApierV2) SetExternalAttributeProfile(extAlsPrf *engine.ExternalAt
 	if err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierV1.DataManager.SetAttributeProfile(alsPrf, true); err != nil {
+	if err := apierV2.DataManager.SetAttributeProfile(alsPrf, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
