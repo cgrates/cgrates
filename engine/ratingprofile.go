@@ -173,8 +173,8 @@ func (rpf *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error
 			for _, p := range utils.SplitPrefix(cd.Destination, MIN_PREFIX_MATCH) {
 				if destIDs, err := dm.DataDB().GetReverseDestination(p, false, utils.NonTransactional); err == nil {
 					var bestWeight *float64
-					var timeChecker bool
 					for _, dID := range destIDs {
+						var timeChecker bool
 						if _, ok := rpl.DestinationRates[dID]; ok {
 							ril := rpl.RateIntervalList(dID)
 							//check if RateInverval is active for call descriptor time

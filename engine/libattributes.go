@@ -85,7 +85,7 @@ type ExternalAttributeProfile struct {
 	Weight             float64
 }
 
-func (ext *ExternalAttributeProfile) ConvertExtToAttrPrf() (attr *AttributeProfile, err error) {
+func (ext *ExternalAttributeProfile) AsAttributeProfile() (attr *AttributeProfile, err error) {
 	attr = new(AttributeProfile)
 	if len(ext.Attributes) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing("Attributes")
