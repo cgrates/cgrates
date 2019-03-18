@@ -28,7 +28,7 @@ func (apierV1 *ApierV2) SetExternalAttributeProfile(extAlsPrf *engine.ExternalAt
 	if missing := utils.MissingStructFields(extAlsPrf, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	alsPrf, err := extAlsPrf.ConvertExtToAttrPrf()
+	alsPrf, err := extAlsPrf.AsAttributeProfile()
 	if err != nil {
 		return utils.APIErrorHandler(err)
 	}

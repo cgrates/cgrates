@@ -64,7 +64,7 @@ func TestConvertExternalToProfile(t *testing.T) {
 		Weight: 20,
 	}
 
-	rcv, err := external.ConvertExtToAttrPrf()
+	rcv, err := external.AsAttributeProfile()
 	if err != nil {
 		t.Error(err)
 	}
@@ -89,7 +89,7 @@ func TestConvertExternalToProfileMissing(t *testing.T) {
 		Weight:     20,
 	}
 
-	_, err := external.ConvertExtToAttrPrf()
+	_, err := external.AsAttributeProfile()
 	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [Attributes]" {
 		t.Error(err)
 	}
@@ -114,7 +114,7 @@ func TestConvertExternalToProfileMissing2(t *testing.T) {
 		Weight: 20,
 	}
 
-	_, err := external.ConvertExtToAttrPrf()
+	_, err := external.AsAttributeProfile()
 	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [Substitute]" {
 		t.Error(err)
 	}
