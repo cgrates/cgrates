@@ -389,6 +389,7 @@ const (
 	MetaResources                = "*resources"
 	MetaFilters                  = "*filters"
 	MetaCDRs                     = "*cdrs"
+	MetaCache                    = "*cache"
 	Migrator                     = "migrator"
 	UnsupportedMigrationTask     = "unsupported migration task"
 	NoStorDBConnection           = "not connected to StorDB"
@@ -791,6 +792,7 @@ const (
 	ResponderGetCost           = "Responder.GetCost"
 	ResponderShutdown          = "Responder.Shutdown"
 	ResponderGetTimeout        = "Responder.GetTimeout"
+	ResponderPing              = "Responder.Ping"
 )
 
 // DispatcherS APIs
@@ -811,6 +813,7 @@ const (
 
 // CacheS APIs
 const (
+	CacheSv1                  = "CacheSv1"
 	CacheSv1GetCacheStats     = "CacheSv1.GetCacheStats"
 	CacheSv1GetItemIDs        = "CacheSv1.GetItemIDs"
 	CacheSv1HasItem           = "CacheSv1.HasItem"

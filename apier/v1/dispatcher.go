@@ -25,6 +25,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
 // GetDispatcherProfile returns a Dispatcher Profile
@@ -408,4 +409,97 @@ func (dS *DispatcherResponder) Shutdown(args *dispatchers.TntWithApiKey, reply *
 
 func (dS *DispatcherResponder) GetTimeout(args *dispatchers.TntWithApiKey, reply *time.Duration) error {
 	return dS.dS.ResponderGetTimeout(args, reply)
+}
+
+// Ping used to detreminate if component is active
+func (dS *DispatcherResponder) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
+	return dS.dS.ResponderPing(args, reply)
+}
+
+func NewDispatcherCacheSv1(dps *dispatchers.DispatcherService) *DispatcherCacheSv1 {
+	return &DispatcherCacheSv1{dS: dps}
+}
+
+// Exports RPC from CacheSv1
+type DispatcherCacheSv1 struct {
+	dS *dispatchers.DispatcherService
+}
+
+// GetItemIDs returns the IDs for cacheID with given prefix
+func (dS *DispatcherCacheSv1) GetItemIDs(args *dispatchers.ArgsGetCacheItemIDsWithApiKey,
+	reply *[]string) error {
+	return dS.dS.CacheSv1GetItemIDs(args, reply)
+}
+
+// HasItem verifies the existence of an Item in cache
+func (dS *DispatcherCacheSv1) HasItem(args *dispatchers.ArgsGetCacheItemWithApiKey,
+	reply *bool) error {
+	return dS.dS.CacheSv1HasItem(args, reply)
+}
+
+// GetItemExpiryTime returns the expiryTime for an item
+func (dS *DispatcherCacheSv1) GetItemExpiryTime(args *dispatchers.ArgsGetCacheItemWithApiKey,
+	reply *time.Time) error {
+	return dS.dS.CacheSv1GetItemExpiryTime(args, reply)
+}
+
+// RemoveItem removes the Item with ID from cache
+func (dS *DispatcherCacheSv1) RemoveItem(args *dispatchers.ArgsGetCacheItemWithApiKey,
+	reply *string) error {
+	return dS.dS.CacheSv1RemoveItem(args, reply)
+}
+
+// Clear will clear partitions in the cache (nil fol all, empty slice for none)
+func (dS *DispatcherCacheSv1) Clear(args *dispatchers.AttrCacheIDsWithApiKey,
+	reply *string) error {
+	return dS.dS.CacheSv1Clear(args, reply)
+}
+
+// FlushCache wipes out cache for a prefix or completely
+func (dS *DispatcherCacheSv1) FlushCache(args dispatchers.AttrReloadCacheWithApiKey, reply *string) (err error) {
+	return dS.dS.CacheSv1FlushCache(args, reply)
+}
+
+// GetCacheStats returns CacheStats filtered by cacheIDs
+func (dS *DispatcherCacheSv1) GetCacheStats(args *dispatchers.AttrCacheIDsWithApiKey,
+	reply *map[string]*ltcache.CacheStats) error {
+	return dS.dS.CacheSv1GetCacheStats(args, reply)
+}
+
+// PrecacheStatus checks status of active precache processes
+func (dS *DispatcherCacheSv1) PrecacheStatus(args *dispatchers.AttrCacheIDsWithApiKey, reply *map[string]string) error {
+	return dS.dS.CacheSv1PrecacheStatus(args, reply)
+}
+
+// HasGroup checks existence of a group in cache
+func (dS *DispatcherCacheSv1) HasGroup(args *dispatchers.ArgsGetGroupWithApiKey,
+	reply *bool) (err error) {
+	return dS.dS.CacheSv1HasGroup(args, reply)
+}
+
+// GetGroupItemIDs returns a list of itemIDs in a cache group
+func (dS *DispatcherCacheSv1) GetGroupItemIDs(args *dispatchers.ArgsGetGroupWithApiKey,
+	reply *[]string) (err error) {
+	return dS.dS.CacheSv1GetGroupItemIDs(args, reply)
+}
+
+// RemoveGroup will remove a group and all items belonging to it from cache
+func (dS *DispatcherCacheSv1) RemoveGroup(args *dispatchers.ArgsGetGroupWithApiKey,
+	reply *string) (err error) {
+	return dS.dS.CacheSv1RemoveGroup(args, reply)
+}
+
+// ReloadCache reloads cache from DB for a prefix or completely
+func (dS *DispatcherCacheSv1) ReloadCache(args dispatchers.AttrReloadCacheWithApiKey, reply *string) (err error) {
+	return dS.dS.CacheSv1ReloadCache(args, reply)
+}
+
+// LoadCache loads cache from DB for a prefix or completely
+func (dS *DispatcherCacheSv1) LoadCache(args dispatchers.AttrReloadCacheWithApiKey, reply *string) (err error) {
+	return dS.dS.CacheSv1LoadCache(args, reply)
+}
+
+// Ping used to detreminate if component is active
+func (dS *DispatcherCacheSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
+	return dS.dS.CacheSv1Ping(args, reply)
 }

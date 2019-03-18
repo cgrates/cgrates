@@ -269,6 +269,12 @@ func (rs *Responder) Shutdown(arg string, reply *string) (err error) {
 	return
 }
 
+// Ping used to detreminate if component is active
+func (chSv1 *Responder) Ping(ign *utils.CGREvent, reply *string) error {
+	*reply = utils.Pong
+	return nil
+}
+
 func (rs *Responder) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
