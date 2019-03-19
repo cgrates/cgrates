@@ -7,3 +7,5 @@ cgrates.org,EVENT2,*any,*string:~EventName:RoundRobin,,*round_robin,,ALL2,,20,fa
 cgrates.org,EVENT2,,,,,,ALL,,10,,,
 cgrates.org,EVENT3,*any,*string:~EventName:Random,,*random,,ALL2,,20,false,,20
 cgrates.org,EVENT3,,,,,,ALL,,10,,,
+cgrates.org,EVENT4,*any,*string:~EventName:Broadcast,,*broadcast,,ALL2,,20,false,,20
+cgrates.org,EVENT4,,,,,,ALL,,10,,,

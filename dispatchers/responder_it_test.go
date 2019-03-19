@@ -32,6 +32,7 @@ var sTestsDspRsp = []func(t *testing.T){
 	testDspResponderShutdown,
 
 	testDspResponderRandom,
+	testDspResponderBroadcast,
 }
 
 //Test start here
@@ -83,7 +84,7 @@ func getNodeWithRoute(route string, t *testing.T) string {
 			},
 		},
 		DispatcherResource: DispatcherResource{
-			APIKey:  "attr12345",
+			APIKey:  "rsp12345",
 			RouteID: &route,
 		},
 	}
@@ -97,7 +98,7 @@ func getNodeWithRoute(route string, t *testing.T) string {
 		},
 	}
 
-	if err := dispEngine.RCP.Call(utils.AttributeSv1Ping, pingEv, &pingReply); err != nil {
+	if err := dispEngine.RCP.Call(utils.ResponderPing, pingEv, &pingReply); err != nil {
 		t.Error(err)
 	} else if pingReply != utils.Pong {
 		t.Errorf("Received: %s", pingReply)
@@ -143,6 +144,41 @@ func testDspResponderShutdown(t *testing.T) {
 		t.Error(err)
 	} else if reply != "Done!" {
 		t.Errorf("Received: %s", utils.ToJSON(reply))
+	}
+	allEngine.startEngine(t)
+	allEngine2.startEngine(t)
+}
+
+func testDspResponderBroadcast(t *testing.T) {
+	var pingReply string
+	pingEv := CGREvWithApiKey{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.EVENT_NAME: "Broadcast",
+			},
+		},
+		DispatcherResource: DispatcherResource{
+			APIKey: "rsp12345",
+		},
+	}
+	if err := dispEngine.RCP.Call(utils.ResponderPing, pingEv, &pingReply); err != nil {
+		t.Error(err)
+	} else if pingReply != utils.Pong {
+		t.Errorf("Received: %s", pingReply)
+	}
+
+	allEngine2.stopEngine(t)
+	pingReply = ""
+	if err := dispEngine.RCP.Call(utils.ResponderPing, pingEv, &pingReply); err == nil ||
+		err.Error() != utils.ErrPartiallyExecuted.Error() {
+		t.Errorf("Expected error: %s received error: %v	 and reply %q", utils.ErrPartiallyExecuted.Error(), err, pingReply)
+	}
+	allEngine.stopEngine(t)
+	pingReply = ""
+	if err := dispEngine.RCP.Call(utils.ResponderPing, pingEv, &pingReply); err == nil ||
+		err.Error() != utils.ErrNotExecuted.Error() {
+		t.Errorf("Expected error: %s received error: %v	 and reply %q", utils.ErrNotExecuted.Error(), err, pingReply)
 	}
 	allEngine.startEngine(t)
 	allEngine2.startEngine(t)
