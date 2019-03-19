@@ -143,36 +143,7 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string, routeID
 	if errDsp != nil {
 		return utils.NewErrDispatcherS(errDsp)
 	}
-	var connID string
-	if routeID != nil &&
-		*routeID != "" {
-		// use previously discovered route
-		if x, ok := engine.Cache.Get(utils.CacheDispatcherRoutes,
-			*routeID); ok && x != nil {
-			connID = x.(string)
-			if err = dS.conns[connID].Call(serviceMethod, args, reply); !utils.IsNetworkError(err) {
-				return
-			}
-		}
-	}
-	for _, connID = range d.ConnIDs() {
-		conn, has := dS.conns[connID]
-		if !has {
-			err = utils.NewErrDispatcherS(
-				fmt.Errorf("no connection with id: <%s>", connID))
-			continue
-		}
-		if err = conn.Call(serviceMethod, args, reply); utils.IsNetworkError(err) {
-			continue
-		}
-		if routeID != nil &&
-			*routeID != "" { // cache the discovered route
-			engine.Cache.Set(utils.CacheDispatcherRoutes, *routeID, connID,
-				nil, true, utils.EmptyString)
-		}
-		break
-	}
-	return
+	return d.Dispatch(dS.conns, routeID, serviceMethod, args, reply)
 }
 
 func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,

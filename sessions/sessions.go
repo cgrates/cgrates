@@ -42,10 +42,9 @@ const (
 )
 
 var (
-	ErrPartiallyExecuted = errors.New("PARTIALLY_EXECUTED")
-	ErrActiveSession     = errors.New("ACTIVE_SESSION")
-	ErrForcedDisconnect  = errors.New("FORCED_DISCONNECT")
-	debug                bool
+	ErrActiveSession    = errors.New("ACTIVE_SESSION")
+	ErrForcedDisconnect = errors.New("FORCED_DISCONNECT")
+	debug               bool
 )
 
 // NewSReplConns initiates the connections configured for session replication
