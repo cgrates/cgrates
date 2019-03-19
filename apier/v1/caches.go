@@ -114,3 +114,9 @@ func (chSv1 *CacheSv1) Ping(ign *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
+
+// Call implements rpcclient.RpcClientConnection interface for internal RPC
+func (chSv1 *CacheSv1) Call(serviceMethod string,
+	args interface{}, reply interface{}) error {
+	return utils.APIerRPCCall(chSv1, serviceMethod, args, reply)
+}

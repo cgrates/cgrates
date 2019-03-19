@@ -1639,7 +1639,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		if err != nil {
 			return err
 		}
-		if err = tpr.dm.SetAttributeProfile(th, true); err != nil {
+		if err = tpr.dm.SetAttributeProfile(th, true, true); err != nil {
 			return err
 		}
 		if verbose {

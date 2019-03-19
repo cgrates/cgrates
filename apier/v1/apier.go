@@ -50,6 +50,7 @@ type ApierV1 struct {
 	ServManager *servmanager.ServiceManager   // Need to have them capitalize so we can export in V2
 	HTTPPoster  *engine.HTTPPoster
 	FilterS     *engine.FilterS //Used for CDR Exporter
+	CacheS      rpcclient.RpcClientConnection
 }
 
 func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) error {
@@ -1019,4 +1020,20 @@ func (v1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string) (
 	}
 	*reply = utils.OK
 	return nil
+}
+
+func (v1 *ApierV1) callCache(cacheOpt string, args engine.ArgsGetCacheItem) (err error) {
+	switch cacheOpt {
+	case utils.META_NONE: // nimic
+		return
+	case utils.MetaReload: // reload pentru cache id
+		//construct args for ReloadCache based on args
+		if err = v1.CacheS.Call(utils.CacheSv1ReloadCache, args, reply); err != nil {
+			return err
+		}
+	case "load": // load pentru cache id
+	case "remove": // pentru cache id
+	case "clear": // pentru un tip
+	}
+	return
 }

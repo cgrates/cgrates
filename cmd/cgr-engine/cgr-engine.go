@@ -903,8 +903,9 @@ func startFilterService(filterSChan chan *engine.FilterS, cacheS *engine.CacheS,
 }
 
 // loaderService will start and register APIs for LoaderService if enabled
-func loaderService(cacheS *engine.CacheS, cfg *config.CGRConfig,
-	dm *engine.DataManager, server *utils.Server, exitChan chan bool, filterSChan chan *engine.FilterS) {
+func startloaderS(cacheS *engine.CacheS, cfg *config.CGRConfig,
+	dm *engine.DataManager, server *utils.Server,
+	exitChan chan bool, filterSChan chan *engine.FilterS) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
 	ldrS := loaders.NewLoaderService(dm, cfg.LoaderCfg(),
@@ -1358,6 +1359,7 @@ func main() {
 	filterSChan := make(chan *engine.FilterS, 1)
 	internalDispatcherSChan := make(chan *dispatchers.DispatcherService, 1)
 	internalAnalyzerSChan := make(chan rpcclient.RpcClientConnection, 1)
+	internalCacheSChan := make(chan rpcclient.RpcClientConnection, 1)
 
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, dm, exitChan, cacheS)
@@ -1366,7 +1368,7 @@ func main() {
 	if cfg.RalsCfg().RALsEnabled {
 		go startRater(internalRaterChan, cacheS, internalThresholdSChan,
 			internalStatSChan, srvManager, server, dm, loadDb, cdrDb,
-			&stopHandled, exitChan, filterSChan)
+			&stopHandled, exitChan, filterSChan, internalCacheSChan)
 	}
 
 	// Start Scheduler
@@ -1467,7 +1469,7 @@ func main() {
 		go startAnalyzerService(internalAnalyzerSChan, server, exitChan)
 	}
 
-	go loaderService(cacheS, cfg, dm, server, exitChan, filterSChan)
+	go startloaderS(cacheS, cfg, dm, server, exitChan, filterSChan)
 
 	// Serve rpc connections
 	go startRpc(server, internalRaterChan, internalCdrSChan,

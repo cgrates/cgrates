@@ -1128,7 +1128,7 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, cacheRead, cacheWr
 	return
 }
 
-func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex, withCache bool) (err error) {
 	oldAP, err := dm.GetAttributeProfile(ap.Tenant, ap.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
@@ -1136,8 +1136,10 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 	if err = dm.DataDB().SetAttributeProfileDrv(ap); err != nil {
 		return err
 	}
-	if err = dm.CacheDataFromDB(utils.AttributeProfilePrefix, []string{ap.TenantID()}, true); err != nil {
-		return
+	if withCache {
+		if err = dm.CacheDataFromDB(utils.AttributeProfilePrefix, []string{ap.TenantID()}, true); err != nil {
+			return
+		}
 	}
 	if withIndex {
 		if oldAP != nil {
