@@ -20,7 +20,6 @@ package dispatchers
 
 import (
 	"fmt"
-	"reflect"
 	"sync"
 
 	"github.com/cgrates/cgrates/engine"
@@ -41,55 +40,41 @@ type Dispatcher interface {
 		serviceMethod string, args interface{}, reply interface{}) (err error)
 }
 
+type StrategyDispatcher interface {
+	// Dispatch is used to send the method over the connections given
+	Dispatch(connIDs []string, conns map[string]*rpcclient.RpcClientPool, routeID *string,
+		serviceMethod string, args interface{}, reply interface{}) (err error)
+}
+
+type singleResultStrategyDispatcher struct{}
+type brodcastStrategyDispatcher struct{}
+
 // newDispatcher constructs instances of Dispatcher
 func newDispatcher(pfl *engine.DispatcherProfile) (d Dispatcher, err error) {
 	pfl.Conns.Sort() // make sure the connections are sorted
 	switch pfl.Strategy {
 	case utils.MetaWeight:
-		d = &WeightDispatcher{conns: pfl.Conns.Clone()}
+		d = &WeightDispatcher{
+			conns:    pfl.Conns.Clone(),
+			strategy: new(singleResultStrategyDispatcher),
+		}
 	case utils.MetaRandom:
-		d = &RandomDispatcher{conns: pfl.Conns.Clone()}
+		d = &RandomDispatcher{
+			conns:    pfl.Conns.Clone(),
+			strategy: new(singleResultStrategyDispatcher),
+		}
 	case utils.MetaRoundRobin:
-		d = &RoundRobinDispatcher{conns: pfl.Conns.Clone()}
+		d = &RoundRobinDispatcher{
+			conns:    pfl.Conns.Clone(),
+			strategy: new(singleResultStrategyDispatcher),
+		}
 	case utils.MetaBroadcast:
-		d = &BroadcastDispatcher{conns: pfl.Conns.Clone()}
+		d = &BroadcastDispatcher{
+			conns:    pfl.Conns.Clone(),
+			strategy: new(brodcastStrategyDispatcher),
+		}
 	default:
 		err = fmt.Errorf("unsupported dispatch strategy: <%s>", pfl.Strategy)
-	}
-	return
-}
-
-// Dispatch is used to send the method over the connections given until one is send corectly
-func DispatchOne(d Dispatcher, conns map[string]*rpcclient.RpcClientPool, routeID *string,
-	serviceMethod string, args interface{}, reply interface{}) (err error) {
-	var connID string
-	if routeID != nil &&
-		*routeID != "" {
-		// use previously discovered route
-		if x, ok := engine.Cache.Get(utils.CacheDispatcherRoutes,
-			*routeID); ok && x != nil {
-			connID = x.(string)
-			if err = conns[connID].Call(serviceMethod, args, reply); !utils.IsNetworkError(err) {
-				return
-			}
-		}
-	}
-	for _, connID = range d.ConnIDs() {
-		conn, has := conns[connID]
-		if !has {
-			err = utils.NewErrDispatcherS(
-				fmt.Errorf("no connection with id: <%s>", connID))
-			continue
-		}
-		if err = conn.Call(serviceMethod, args, reply); utils.IsNetworkError(err) {
-			continue
-		}
-		if routeID != nil &&
-			*routeID != "" { // cache the discovered route
-			engine.Cache.Set(utils.CacheDispatcherRoutes, *routeID, connID,
-				nil, true, utils.EmptyString)
-		}
-		break
 	}
 	return
 }
@@ -97,7 +82,8 @@ func DispatchOne(d Dispatcher, conns map[string]*rpcclient.RpcClientPool, routeI
 // WeightDispatcher selects the next connection based on weight
 type WeightDispatcher struct {
 	sync.RWMutex
-	conns engine.DispatcherConns
+	conns    engine.DispatcherConns
+	strategy StrategyDispatcher
 }
 
 func (wd *WeightDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
@@ -117,14 +103,15 @@ func (wd *WeightDispatcher) ConnIDs() (connIDs []string) {
 
 func (wd *WeightDispatcher) Dispatch(conns map[string]*rpcclient.RpcClientPool, routeID *string,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
-	return DispatchOne(wd, conns, routeID, serviceMethod, args, reply)
+	return wd.strategy.Dispatch(wd.ConnIDs(), conns, routeID, serviceMethod, args, reply)
 }
 
 // RandomDispatcher selects the next connection randomly
 // together with RouteID can serve as load-balancer
 type RandomDispatcher struct {
 	sync.RWMutex
-	conns engine.DispatcherConns
+	conns    engine.DispatcherConns
+	strategy StrategyDispatcher
 }
 
 func (d *RandomDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
@@ -144,14 +131,15 @@ func (d *RandomDispatcher) ConnIDs() (connIDs []string) {
 
 func (d *RandomDispatcher) Dispatch(conns map[string]*rpcclient.RpcClientPool, routeID *string,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
-	return DispatchOne(d, conns, routeID, serviceMethod, args, reply)
+	return d.strategy.Dispatch(d.ConnIDs(), conns, routeID, serviceMethod, args, reply)
 }
 
 // RoundRobinDispatcher selects the next connection in round-robin fashion
 type RoundRobinDispatcher struct {
 	sync.RWMutex
-	conns   engine.DispatcherConns
-	connIdx int // used for the next connection
+	conns    engine.DispatcherConns
+	connIdx  int // used for the next connection
+	strategy StrategyDispatcher
 }
 
 func (d *RoundRobinDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
@@ -175,14 +163,14 @@ func (d *RoundRobinDispatcher) ConnIDs() (connIDs []string) {
 
 func (d *RoundRobinDispatcher) Dispatch(conns map[string]*rpcclient.RpcClientPool, routeID *string,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
-	return DispatchOne(d, conns, routeID, serviceMethod, args, reply)
+	return d.strategy.Dispatch(d.ConnIDs(), conns, routeID, serviceMethod, args, reply)
 }
 
 // RoundRobinDispatcher selects the next connection in round-robin fashion
 type BroadcastDispatcher struct {
 	sync.RWMutex
-	conns   engine.DispatcherConns
-	connIdx int // used for the next connection
+	conns    engine.DispatcherConns
+	strategy StrategyDispatcher
 }
 
 func (d *BroadcastDispatcher) SetProfile(pfl *engine.DispatcherProfile) {
@@ -202,38 +190,75 @@ func (d *BroadcastDispatcher) ConnIDs() (connIDs []string) {
 
 func (d *BroadcastDispatcher) Dispatch(conns map[string]*rpcclient.RpcClientPool, routeID *string,
 	serviceMethod string, args interface{}, reply interface{}) (lastErr error) { // no cache needed for this strategy because we need to call all connections
-	var firstReply interface{} = nil
-	var err error
-	for _, connID := range d.ConnIDs() {
+	return d.strategy.Dispatch(d.ConnIDs(), conns, routeID, serviceMethod, args, reply)
+}
+
+func (ign *singleResultStrategyDispatcher) Dispatch(connIDs []string, conns map[string]*rpcclient.RpcClientPool, routeID *string,
+	serviceMethod string, args interface{}, reply interface{}) (err error) {
+	var connID string
+	if routeID != nil &&
+		*routeID != "" {
+		// use previously discovered route
+		if x, ok := engine.Cache.Get(utils.CacheDispatcherRoutes,
+			*routeID); ok && x != nil {
+			connID = x.(string)
+			if err = conns[connID].Call(serviceMethod, args, reply); !utils.IsNetworkError(err) {
+				return
+			}
+		}
+	}
+	for _, connID = range connIDs {
+		conn, has := conns[connID]
+		if !has {
+			err = utils.NewErrDispatcherS(
+				fmt.Errorf("no connection with id: <%s>", connID))
+			continue
+		}
+		if err = conn.Call(serviceMethod, args, reply); utils.IsNetworkError(err) {
+			continue
+		}
+		if routeID != nil &&
+			*routeID != "" { // cache the discovered route
+			engine.Cache.Set(utils.CacheDispatcherRoutes, *routeID, connID,
+				nil, true, utils.EmptyString)
+		}
+		break
+	}
+	return
+}
+
+func (ign *brodcastStrategyDispatcher) Dispatch(connIDs []string, conns map[string]*rpcclient.RpcClientPool, routeID *string,
+	serviceMethod string, args interface{}, reply interface{}) (err error) {
+	var hasErrors bool
+	var hasOnlyErrors bool = true
+	for _, connID := range connIDs {
 		conn, has := conns[connID]
 		if !has {
 			err = utils.NewErrDispatcherS(
 				fmt.Errorf("no connection with id: <%s>", connID))
 			utils.Logger.Err(fmt.Sprintf("<%s> Error at %s strategy for connID %q : %s",
 				utils.DispatcherS, utils.MetaBroadcast, connID, err.Error()))
-			lastErr = err
+			hasErrors = true
 			continue
 		}
 		if err = conn.Call(serviceMethod, args, reply); utils.IsNetworkError(err) {
-			utils.Logger.Err(fmt.Sprintf("<%s> Error at %s strategy for connID %q : %s",
+			utils.Logger.Err(fmt.Sprintf("<%s> Network Error at %s strategy for connID %q : %s",
 				utils.DispatcherS, utils.MetaBroadcast, connID, err.Error()))
-			lastErr = err
+			hasErrors = true
 			continue
 		} else if err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Error at %s strategy for connID %q : %s",
 				utils.DispatcherS, utils.MetaBroadcast, connID, err.Error()))
-			lastErr = err
+			hasErrors = true
+			continue
 		}
-		if firstReply == nil { // save first value
-			firstReply = reflect.ValueOf(reply).Elem().Interface()
-		}
+		hasOnlyErrors = false
 	}
-	if firstReply == nil { // do not rewrite lastErr if no call was succcesful
-		return
+	if hasOnlyErrors {
+		return utils.ErrNotExecuted
 	}
-	reflect.ValueOf(reply).Elem().Set(reflect.ValueOf(firstReply)) // set reply value to the first succesfuly call
-	if lastErr != nil {                                            // rewrite err if not all call were succesfull
-		lastErr = utils.ErrPartiallyExecuted
+	if hasErrors { // rewrite err if not all call were succesfull
+		return utils.ErrPartiallyExecuted
 	}
 	return
 }
