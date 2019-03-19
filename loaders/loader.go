@@ -268,7 +268,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 							utils.LoaderS, ldr.ldrID, utils.ToJSON(apf)))
 					continue
 				}
-				if err := ldr.dm.SetAttributeProfile(apf, true); err != nil {
+				if err := ldr.dm.SetAttributeProfile(apf, true, true); err != nil {
 					return err
 				}
 			}

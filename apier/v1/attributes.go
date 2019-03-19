@@ -57,13 +57,18 @@ func (apierV1 *ApierV1) GetAttributeProfileIDs(tenant string, attrPrfIDs *[]stri
 	return nil
 }
 
+type AttributeWrapper struct {
+	AlsPrf        *engine.AttributeProfile
+	CachesOptions *string
+}
+
 //SetAttributeProfile add/update a new Attribute Profile
-func (apierV1 *ApierV1) SetAttributeProfile(alsPrf *engine.AttributeProfile, reply *string) error {
-	if missing := utils.MissingStructFields(alsPrf, []string{"Tenant", "ID"}); len(missing) != 0 {
+func (apierV1 *ApierV1) SetAttributeProfile(alsWrp *AttributeWrapper, reply *string) error {
+	if missing := utils.MissingStructFields(alsWrp.AlsPrf, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if len(alsPrf.Attributes) != 0 {
-		for _, attr := range alsPrf.Attributes {
+	if len(alsWrp.AlsPrf.Attributes) != 0 {
+		for _, attr := range alsWrp.AlsPrf.Attributes {
 			for _, sub := range attr.Substitute {
 				if sub.Rules == "" {
 					return utils.NewErrMandatoryIeMissing("Rules")
@@ -74,8 +79,15 @@ func (apierV1 *ApierV1) SetAttributeProfile(alsPrf *engine.AttributeProfile, rep
 			}
 		}
 	}
-
-	if err := apierV1.DataManager.SetAttributeProfile(alsPrf, true); err != nil {
+	cacheOpt := getCacheOpt(alsWrp.CachesOptions, apierV1.Config.ApierCfg().DefaultCache)
+	if err := apierV1.DataManager.SetAttributeProfile(alsWrp.AlsPrf, true, cacheOpt == utils.EmptyString); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	args := engine.ArgsGetCacheItem{
+		CacheID: utils.CacheAttributeProfiles,
+		ItemID:  alsWrp.AlsPrf.TenantID(),
+	}
+	if err := apierV1.callCache(cacheOpt, args); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

@@ -552,6 +552,7 @@ const (
 	MetaTenant                   = "*tenant"
 	ResourceUsage                = "ResourceUsage"
 	MetaDuration                 = "*duration"
+	MetaReload                   = "*reload"
 )
 
 // Migrator Action

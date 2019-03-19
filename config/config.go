@@ -1176,3 +1176,7 @@ func (cfg *CGRConfig) MailerCfg() *MailerCfg {
 func (cfg *CGRConfig) AnalyzerSCfg() *AnalyzerSCfg {
 	return cfg.analyzerSCfg
 }
+
+func (cfg *CGRConfig) ApierCfg() *ApierCfg {
+	return cfg.apier
+}

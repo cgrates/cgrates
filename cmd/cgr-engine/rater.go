@@ -20,6 +20,7 @@ package main
 
 import (
 	"fmt"
+	"reflect"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	v2 "github.com/cgrates/cgrates/apier/v2"
@@ -34,7 +35,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 	internalThdSChan, internalStatSChan chan rpcclient.RpcClientConnection,
 	serviceManager *servmanager.ServiceManager, server *utils.Server,
 	dm *engine.DataManager, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, stopHandled *bool,
-	exitChan chan bool, filterSChan chan *engine.FilterS) {
+	exitChan chan bool, filterSChan chan *engine.FilterS, internalCacheSChan chan rpcclient.RpcClientConnection) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
 	var waitTasks []chan struct{}
@@ -97,6 +98,33 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		}()
 	}
 
+	//create cache connection
+	var caches *rpcclient.RpcClientPool
+	if len(cfg.ApierCfg().CachesConns) != 0 {
+		cachesTaskChan := make(chan struct{})
+		waitTasks = append(waitTasks, cachesTaskChan)
+		go func() {
+			defer close(cachesTaskChan)
+			var err error
+			caches, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
+				cfg.TlsCfg().ClientKey,
+				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
+				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
+				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
+				cfg.ApierCfg().CachesConns, internalCacheSChan,
+				cfg.GeneralCfg().InternalTtl, false)
+			if err != nil {
+				utils.Logger.Crit(fmt.Sprintf("<APIer> Could not connect to CacheS, error: %s", err.Error()))
+				exitChan <- true
+				return
+			}
+		}()
+	}
+	//add verification here
+	if caches != nil && reflect.ValueOf(caches).IsNil() {
+		caches = nil
+	}
+
 	// Wait for all connections to complete before going further
 	for _, chn := range waitTasks {
 		<-chn
@@ -113,7 +141,8 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		ServManager: serviceManager,
 		HTTPPoster: engine.NewHTTPPoster(cfg.GeneralCfg().HttpSkipTlsVerify,
 			cfg.GeneralCfg().ReplyTimeout),
-		FilterS: filterS}
+		FilterS: filterS,
+		CacheS:  caches}
 	if thdS != nil {
 		engine.SetThresholdS(thdS) // temporary architectural fix until we will have separate AccountS
 	}

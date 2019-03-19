@@ -16,25 +16,23 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package v2
+package v1
 
 import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-//SetAttributeProfile add/update a new Attribute Profile
-func (apierV2 *ApierV2) SetAttributeProfile(extAlsPrf *engine.ExternalAttributeProfile, reply *string) error {
-	if missing := utils.MissingStructFields(extAlsPrf, []string{"Tenant", "ID"}); len(missing) != 0 {
-		return utils.NewErrMandatoryIeMissing(missing...)
+// getCacheOpt receive the apiOpt and compare with default value
+// overwrite the default if it's present
+func (v1 *ApierV1) getCacheOpt(apiOpt *string) string {
+	cacheOpt := v1.Config.ApierCfg().DefaultCache
+	if apiOpt != nil && *apiOpt != utils.EmptyString {
+		cacheOpt = *apiOpt
 	}
-	alsPrf, err := extAlsPrf.AsAttributeProfile()
-	if err != nil {
-		return utils.APIErrorHandler(err)
-	}
-	if err := apierV2.DataManager.SetAttributeProfile(alsPrf, true, true); err != nil {
-		return utils.APIErrorHandler(err)
-	}
-	*reply = utils.OK
-	return nil
+	return cacheOpt
+}
+
+func composeArgsCache(engine.ArgsGetCacheItem) {
+
 }
