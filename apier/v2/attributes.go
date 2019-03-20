@@ -23,16 +23,29 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type AttributeWrapper struct {
+	*engine.ExternalAttributeProfile
+	Cache *string
+}
+
 //SetAttributeProfile add/update a new Attribute Profile
-func (apierV2 *ApierV2) SetAttributeProfile(extAlsPrf *engine.ExternalAttributeProfile, reply *string) error {
-	if missing := utils.MissingStructFields(extAlsPrf, []string{"Tenant", "ID"}); len(missing) != 0 {
+func (apierV2 *ApierV2) SetAttributeProfile(extAlsPrfWrp *AttributeWrapper, reply *string) error {
+	if missing := utils.MissingStructFields(extAlsPrfWrp.ExternalAttributeProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	alsPrf, err := extAlsPrf.AsAttributeProfile()
+	alsPrf, err := extAlsPrfWrp.ExternalAttributeProfile.AsAttributeProfile()
 	if err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierV2.DataManager.SetAttributeProfile(alsPrf, true, true); err != nil {
+	cacheOpt := apierV2.GetCacheOpt(extAlsPrfWrp.Cache)
+	if err := apierV2.DataManager.SetAttributeProfile(alsPrf, true, cacheOpt == utils.EmptyString); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	args := engine.ArgsGetCacheItem{
+		CacheID: utils.CacheAttributeProfiles,
+		ItemID:  alsPrf.TenantID(),
+	}
+	if err := apierV2.CallCache(cacheOpt, args); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

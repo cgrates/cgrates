@@ -1197,23 +1197,25 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	alsPrf = &engine.AttributeProfile{
-		Tenant:    tenant,
-		ID:        "ApierTest",
-		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"FLTR_1"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-		},
-		Attributes: []*engine.Attribute{
-			{
-				FilterIDs:  []string{"*string:FL1:In1"},
-				FieldName:  "FL1",
-				Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+	alsPrf = &AttributeWrapper{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    tenant,
+			ID:        "ApierTest",
+			Contexts:  []string{utils.MetaSessionS},
+			FilterIDs: []string{"FLTR_1"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
+			Attributes: []*engine.Attribute{
+				{
+					FilterIDs:  []string{"*string:FL1:In1"},
+					FieldName:  "FL1",
+					Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+				},
+			},
+			Weight: 20,
 		},
-		Weight: 20,
 	}
 	if err := tFIdxRpc.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
 		t.Error(err)
@@ -1307,21 +1309,23 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	alsPrf = &engine.AttributeProfile{
-		Tenant:    tenant,
-		ID:        "ApierTest2",
-		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"FLTR_2"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+	alsPrf = &AttributeWrapper{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    tenant,
+			ID:        "ApierTest2",
+			Contexts:  []string{utils.MetaSessionS},
+			FilterIDs: []string{"FLTR_2"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			Attributes: []*engine.Attribute{{
+				FilterIDs:  []string{"*string:FL1:In1"},
+				FieldName:  "FL1",
+				Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+			}},
+			Weight: 20,
 		},
-		Attributes: []*engine.Attribute{{
-			FilterIDs:  []string{"*string:FL1:In1"},
-			FieldName:  "FL1",
-			Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
-		}},
-		Weight: 20,
 	}
 	if err := tFIdxRpc.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
 		t.Error(err)
@@ -1409,14 +1413,14 @@ func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call("ApierV1.RemoveAttributeProfile", &ArgRemoveAttrProfile{
+	if err := tFIdxRpc.Call("ApierV1.RemoveAttributeProfile", &ArgRemoveAttrPrfWrapper{
 		Tenant: tenant,
 		ID:     "ApierTest"}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call("ApierV1.RemoveAttributeProfile", &ArgRemoveAttrProfile{
+	if err := tFIdxRpc.Call("ApierV1.RemoveAttributeProfile", &ArgRemoveAttrPrfWrapper{
 		Tenant: tenant,
 		ID:     "ApierTest2"}, &result); err != nil {
 		t.Error(err)

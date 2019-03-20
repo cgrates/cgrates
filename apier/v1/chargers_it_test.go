@@ -149,23 +149,25 @@ func testChargerSLoadAddCharger(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	alsPrf = &engine.AttributeProfile{
-		Tenant:   "cgrates.org",
-		ID:       "ATTR_1001_SIMPLEAUTH",
-		Contexts: []string{"simpleauth"},
-		Attributes: []*engine.Attribute{
-			{
-				FieldName: "Password",
-				Substitute: config.RSRParsers{
-					&config.RSRParser{
-						Rules:           "CGRateS.org",
-						AllFiltersMatch: true,
+	alsPrf = &AttributeWrapper{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:   "cgrates.org",
+			ID:       "ATTR_1001_SIMPLEAUTH",
+			Contexts: []string{"simpleauth"},
+			Attributes: []*engine.Attribute{
+				{
+					FieldName: "Password",
+					Substitute: config.RSRParsers{
+						&config.RSRParser{
+							Rules:           "CGRateS.org",
+							AllFiltersMatch: true,
+						},
 					},
 				},
 			},
+			Blocker: false,
+			Weight:  10,
 		},
-		Blocker: false,
-		Weight:  10,
 	}
 	if err := chargerRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
 		t.Error(err)

@@ -28,6 +28,7 @@ import (
 	"testing"
 	"time"
 
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -109,22 +110,24 @@ func testAttributeSRPCConn(t *testing.T) {
 }
 
 func testAttributeSSetAlsPrf(t *testing.T) {
-	extAlsPrf := &engine.ExternalAttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ExternalAttribute",
-		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
-		FilterIDs: []string{"*string:Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-		},
-		Attributes: []*engine.ExternalAttribute{
-			{
-				FieldName:  "Account",
-				Substitute: "1001",
+	extAlsPrf := &AttributeWrapper{
+		ExternalAttributeProfile: &engine.ExternalAttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ExternalAttribute",
+			Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
+			FilterIDs: []string{"*string:Account:1001"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
+			Attributes: []*engine.ExternalAttribute{
+				{
+					FieldName:  "Account",
+					Substitute: "1001",
+				},
+			},
+			Weight: 20,
 		},
-		Weight: 20,
 	}
 	var result string
 	if err := attrSRPC.Call("ApierV2.SetAttributeProfile", extAlsPrf, &result); err != nil {
@@ -133,22 +136,24 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	alsPrf := &engine.AttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ExternalAttribute",
-		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
-		FilterIDs: []string{"*string:Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-		},
-		Attributes: []*engine.Attribute{
-			{
-				FieldName:  "Account",
-				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+	alsPrf := &v1.AttributeWrapper{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ExternalAttribute",
+			Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
+			FilterIDs: []string{"*string:Account:1001"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
+			Attributes: []*engine.Attribute{
+				{
+					FieldName:  "Account",
+					Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+				},
+			},
+			Weight: 20,
 		},
-		Weight: 20,
 	}
 	alsPrf.Compile()
 	var reply *engine.AttributeProfile
@@ -157,32 +162,34 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 		t.Fatal(err)
 	}
 	reply.Compile()
-	if !reflect.DeepEqual(alsPrf, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
+	if !reflect.DeepEqual(alsPrf.AttributeProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, reply)
 	}
 }
 
 func testAttributeSUpdateAlsPrf(t *testing.T) {
-	extAlsPrf := &engine.ExternalAttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ExternalAttribute",
-		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
-		FilterIDs: []string{"*string:Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-		},
-		Attributes: []*engine.ExternalAttribute{
-			{
-				FieldName:  "Account",
-				Substitute: "1001",
+	extAlsPrf := &AttributeWrapper{
+		ExternalAttributeProfile: &engine.ExternalAttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ExternalAttribute",
+			Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
+			FilterIDs: []string{"*string:Account:1001"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
-			{
-				FieldName:  "Subject",
-				Substitute: "~Account",
+			Attributes: []*engine.ExternalAttribute{
+				{
+					FieldName:  "Account",
+					Substitute: "1001",
+				},
+				{
+					FieldName:  "Subject",
+					Substitute: "~Account",
+				},
 			},
+			Weight: 20,
 		},
-		Weight: 20,
 	}
 	var result string
 	if err := attrSRPC.Call("ApierV2.SetAttributeProfile", extAlsPrf, &result); err != nil {
@@ -191,26 +198,28 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	alsPrf := &engine.AttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ExternalAttribute",
-		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
-		FilterIDs: []string{"*string:Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-		},
-		Attributes: []*engine.Attribute{
-			{
-				FieldName:  "Account",
-				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+	alsPrf := &v1.AttributeWrapper{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ExternalAttribute",
+			Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
+			FilterIDs: []string{"*string:Account:1001"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
-			{
-				FieldName:  "Subject",
-				Substitute: config.NewRSRParsersMustCompile("~Account", true, utils.INFIELD_SEP),
+			Attributes: []*engine.Attribute{
+				{
+					FieldName:  "Account",
+					Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+				},
+				{
+					FieldName:  "Subject",
+					Substitute: config.NewRSRParsersMustCompile("~Account", true, utils.INFIELD_SEP),
+				},
 			},
+			Weight: 20,
 		},
-		Weight: 20,
 	}
 	alsPrf.Compile()
 	var reply *engine.AttributeProfile
@@ -219,8 +228,8 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 		t.Fatal(err)
 	}
 	reply.Compile()
-	if !reflect.DeepEqual(alsPrf, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf, reply)
+	if !reflect.DeepEqual(alsPrf.AttributeProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, reply)
 	}
 }
 

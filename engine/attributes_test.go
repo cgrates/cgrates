@@ -228,7 +228,7 @@ func TestAttributeAddFilters(t *testing.T) {
 
 func TestAttributeCache(t *testing.T) {
 	for _, atr := range atrPs {
-		if err = dmAtr.SetAttributeProfile(atr, true); err != nil {
+		if err = dmAtr.SetAttributeProfile(atr, true, true); err != nil {
 			t.Errorf("Error: %+v", err)
 		}
 	}
@@ -416,7 +416,7 @@ func TestAttributeIndexer(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(attrPrf, true, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringMap{
@@ -436,7 +436,7 @@ func TestAttributeIndexer(t *testing.T) {
 	}
 	//Set AttributeProfile with new context (*sessions)
 	attrPrf.Contexts = []string{utils.MetaSessionS}
-	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(attrPrf, true, true); err != nil {
 		t.Error(err)
 	}
 	rfi2 := NewFilterIndexer(dmAtr, utils.AttributeProfilePrefix,
@@ -515,13 +515,13 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		Weight: 30,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(attrPrf1, true, true); err != nil {
 		t.Error(err)
 	}
-	if err = dmAtr.SetAttributeProfile(attrPrf2, true); err != nil {
+	if err = dmAtr.SetAttributeProfile(attrPrf2, true, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if err = dmAtr.SetAttributeProfile(attrPrf3, true); err != nil {
+	if err = dmAtr.SetAttributeProfile(attrPrf3, true, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
@@ -623,13 +623,13 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		Weight: 30,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(attrPrf1, true, true); err != nil {
 		t.Error(err)
 	}
-	if err = dmAtr.SetAttributeProfile(attrPrf2, true); err != nil {
+	if err = dmAtr.SetAttributeProfile(attrPrf2, true, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if err = dmAtr.SetAttributeProfile(attrPrf3, true); err != nil {
+	if err = dmAtr.SetAttributeProfile(attrPrf3, true, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
@@ -730,13 +730,13 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		Weight: 30,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(attrPrf1, true, true); err != nil {
 		t.Error(err)
 	}
-	if err = dmAtr.SetAttributeProfile(attrPrf2, true); err != nil {
+	if err = dmAtr.SetAttributeProfile(attrPrf2, true, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if err = dmAtr.SetAttributeProfile(attrPrf3, true); err != nil {
+	if err = dmAtr.SetAttributeProfile(attrPrf3, true, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
@@ -821,10 +821,10 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 		Weight: 20,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(attrPrf1, true, true); err != nil {
 		t.Error(err)
 	}
-	if err = dmAtr.SetAttributeProfile(attrPrf2, true); err != nil {
+	if err = dmAtr.SetAttributeProfile(attrPrf2, true, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
@@ -926,13 +926,13 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		Weight: 30,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(attrPrf1, true, true); err != nil {
 		t.Error(err)
 	}
-	if err = dmAtr.SetAttributeProfile(attrPrf2, true); err != nil {
+	if err = dmAtr.SetAttributeProfile(attrPrf2, true, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if err = dmAtr.SetAttributeProfile(attrPrf3, true); err != nil {
+	if err = dmAtr.SetAttributeProfile(attrPrf3, true, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
@@ -1034,13 +1034,13 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		Weight: 30,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(attrPrf1, true, true); err != nil {
 		t.Error(err)
 	}
-	if err = dmAtr.SetAttributeProfile(attrPrf2, true); err != nil {
+	if err = dmAtr.SetAttributeProfile(attrPrf2, true, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	if err = dmAtr.SetAttributeProfile(attrPrf3, true); err != nil {
+	if err = dmAtr.SetAttributeProfile(attrPrf3, true, true); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
@@ -1109,7 +1109,7 @@ func TestAttributeProcessSubstitute(t *testing.T) {
 		Weight:  10,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(attrPrf1, true, true); err != nil {
 		t.Error(err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
@@ -1187,7 +1187,7 @@ func TestAttributeAttributeFilterIDs(t *testing.T) {
 		Weight: 10,
 	}
 	// Add attribute in DM
-	if err := dmAtr.SetAttributeProfile(attrPrf1, true); err != nil {
+	if err := dmAtr.SetAttributeProfile(attrPrf1, true, true); err != nil {
 		t.Error(err)
 	}
 	attrArgs := &AttrArgsProcessEvent{
