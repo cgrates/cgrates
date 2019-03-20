@@ -854,25 +854,27 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	alsPrf := &engine.AttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TEST_PROFILE1",
-		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"TestFilter"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-		},
-		Attributes: []*engine.Attribute{
-			{
-				FieldName:  utils.Account,
-				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+	alsPrf := &AttributeWrapper{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "TEST_PROFILE1",
+			Contexts:  []string{utils.MetaSessionS},
+			FilterIDs: []string{"TestFilter"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
-			{
-				FieldName:  utils.Subject,
-				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+			Attributes: []*engine.Attribute{
+				{
+					FieldName:  utils.Account,
+					Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+				},
+				{
+					FieldName:  utils.Subject,
+					Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+				},
 			},
+			Weight: 20,
 		},
-		Weight: 20,
 	}
 	if err := tFIdxCaRpc.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
 		t.Error(err)
@@ -943,25 +945,27 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	alsPrf := &engine.AttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TEST_PROFILE1",
-		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"TestFilter2"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-		},
-		Attributes: []*engine.Attribute{
-			{
-				FieldName:  utils.Account,
-				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+	alsPrf := &AttributeWrapper{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "TEST_PROFILE1",
+			Contexts:  []string{utils.MetaSessionS},
+			FilterIDs: []string{"TestFilter2"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
-			{
-				FieldName:  utils.Subject,
-				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+			Attributes: []*engine.Attribute{
+				{
+					FieldName:  utils.Account,
+					Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+				},
+				{
+					FieldName:  utils.Subject,
+					Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+				},
 			},
+			Weight: 20,
 		},
-		Weight: 20,
 	}
 	if err := tFIdxCaRpc.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
 		t.Error(err)
@@ -1073,7 +1077,7 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 		t.Error(err)
 	}
 	//Remove threshold profile that was set form api
-	if err := tFIdxCaRpc.Call("ApierV1.RemoveAttributeProfile", &ArgRemoveAttrProfile{Tenant: "cgrates.org",
+	if err := tFIdxCaRpc.Call("ApierV1.RemoveAttributeProfile", &ArgRemoveAttrPrfWrapper{Tenant: "cgrates.org",
 		ID: "TEST_PROFILE1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -1087,7 +1091,7 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 		t.Error(err)
 	}
 	//Remove threshold profile that was set form tariffplan
-	if err := tFIdxCaRpc.Call("ApierV1.RemoveAttributeProfile", &ArgRemoveAttrProfile{Tenant: "cgrates.org",
+	if err := tFIdxCaRpc.Call("ApierV1.RemoveAttributeProfile", &ArgRemoveAttrPrfWrapper{Tenant: "cgrates.org",
 		ID: "ATTR_1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {

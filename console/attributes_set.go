@@ -18,13 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/engine"
+import "github.com/cgrates/cgrates/apier/v2"
 
 func init() {
 	c := &CmdSetAttributes{
 		name:      "attributes_set",
-		rpcMethod: "ApierV1.SetAttributeProfile",
-		rpcParams: &engine.AttributeProfile{},
+		rpcMethod: "ApierV2.SetAttributeProfile",
+		rpcParams: &v2.AttributeWrapper{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -33,7 +33,7 @@ func init() {
 type CmdSetAttributes struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.AttributeProfile
+	rpcParams *v2.AttributeWrapper
 	*CommandExecuter
 }
 
@@ -47,7 +47,7 @@ func (self *CmdSetAttributes) RpcMethod() string {
 
 func (self *CmdSetAttributes) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.AttributeProfile{}
+		self.rpcParams = &v2.AttributeWrapper{}
 	}
 	return self.rpcParams
 }

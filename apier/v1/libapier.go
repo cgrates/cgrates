@@ -23,9 +23,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// getCacheOpt receive the apiOpt and compare with default value
+// GetCacheOpt receive the apiOpt and compare with default value
 // overwrite the default if it's present
-func (v1 *ApierV1) getCacheOpt(apiOpt *string) string {
+// visible in ApierV2
+func (v1 *ApierV1) GetCacheOpt(apiOpt *string) string {
 	cacheOpt := v1.Config.ApierCfg().DefaultCache
 	if apiOpt != nil && *apiOpt != utils.EmptyString {
 		cacheOpt = *apiOpt
@@ -33,6 +34,59 @@ func (v1 *ApierV1) getCacheOpt(apiOpt *string) string {
 	return cacheOpt
 }
 
-func composeArgsCache(engine.ArgsGetCacheItem) {
+// composeArgsReload add the ItemID to AttrReloadCache
+// for a specific CacheID
+func composeArgsReload(args engine.ArgsGetCacheItem) (rpl utils.AttrReloadCache) {
+	rpl = initAttrReloadCache()
+	switch args.CacheID {
+	case utils.CacheResourceProfiles:
+		rpl.ResourceProfileIDs = &[]string{args.ItemID}
+	case utils.CacheResources:
+		rpl.ResourceIDs = &[]string{args.ItemID}
+	case utils.CacheStatQueues:
+		rpl.StatsQueueIDs = &[]string{args.ItemID}
+	case utils.CacheStatQueueProfiles:
+		rpl.StatsQueueProfileIDs = &[]string{args.ItemID}
+	case utils.CacheThresholds:
+		rpl.ThresholdIDs = &[]string{args.ItemID}
+	case utils.CacheThresholdProfiles:
+		rpl.ThresholdProfileIDs = &[]string{args.ItemID}
+	case utils.CacheFilters:
+		rpl.FilterIDs = &[]string{args.ItemID}
+	case utils.CacheSupplierProfiles:
+		rpl.SupplierProfileIDs = &[]string{args.ItemID}
+	case utils.CacheAttributeProfiles:
+		rpl.AttributeProfileIDs = &[]string{args.ItemID}
+	case utils.CacheChargerProfiles:
+		rpl.ChargerProfileIDs = &[]string{args.ItemID}
+	case utils.CacheDispatcherProfiles:
+		rpl.DispatcherProfileIDs = &[]string{args.ItemID}
+	}
+	return
+}
 
+// initAttrReloadCache initialize AttrReloadCache with empty string slice
+func initAttrReloadCache() (rpl utils.AttrReloadCache) {
+	rpl.DestinationIDs = &[]string{}
+	rpl.ReverseDestinationIDs = &[]string{}
+	rpl.RatingPlanIDs = &[]string{}
+	rpl.RatingProfileIDs = &[]string{}
+	rpl.ActionIDs = &[]string{}
+	rpl.ActionPlanIDs = &[]string{}
+	rpl.AccountActionPlanIDs = &[]string{}
+	rpl.ActionTriggerIDs = &[]string{}
+	rpl.SharedGroupIDs = &[]string{}
+	rpl.ResourceProfileIDs = &[]string{}
+	rpl.ResourceIDs = &[]string{}
+	rpl.StatsQueueIDs = &[]string{}
+	rpl.StatsQueueProfileIDs = &[]string{}
+	rpl.ThresholdIDs = &[]string{}
+	rpl.ThresholdProfileIDs = &[]string{}
+	rpl.FilterIDs = &[]string{}
+	rpl.SupplierProfileIDs = &[]string{}
+	rpl.AttributeProfileIDs = &[]string{}
+	rpl.ChargerProfileIDs = &[]string{}
+	rpl.DispatcherProfileIDs = &[]string{}
+	rpl.DispatcherRoutesIDs = &[]string{}
+	return rpl
 }

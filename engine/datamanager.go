@@ -1172,7 +1172,7 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex, with
 	return
 }
 
-func (dm *DataManager) RemoveAttributeProfile(tenant, id string, transactionID string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveAttributeProfile(tenant, id string, transactionID string, withIndex, withCache bool) (err error) {
 	oldAttr, err := dm.GetAttributeProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil {
 		return err
@@ -1180,8 +1180,10 @@ func (dm *DataManager) RemoveAttributeProfile(tenant, id string, transactionID s
 	if err = dm.DataDB().RemoveAttributeProfileDrv(tenant, id); err != nil {
 		return
 	}
-	Cache.Remove(utils.CacheAttributeProfiles, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(transactionID), transactionID)
+	if withCache {
+		Cache.Remove(utils.CacheAttributeProfiles, utils.ConcatenatedKey(tenant, id),
+			cacheCommit(transactionID), transactionID)
+	}
 	if oldAttr == nil {
 		return utils.ErrNotFound
 	}

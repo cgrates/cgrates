@@ -553,6 +553,9 @@ const (
 	ResourceUsage                = "ResourceUsage"
 	MetaDuration                 = "*duration"
 	MetaReload                   = "*reload"
+	MetaLoad                     = "*load"
+	MetaRemove                   = "*remove"
+	MetaClear                    = "*clear"
 )
 
 // Migrator Action

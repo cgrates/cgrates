@@ -1022,18 +1022,29 @@ func (v1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string) (
 	return nil
 }
 
-func (v1 *ApierV1) callCache(cacheOpt string, args engine.ArgsGetCacheItem) (err error) {
+// CallCache caching the item based on cacheopt
+// visible in ApierV2
+func (v1 *ApierV1) CallCache(cacheOpt string, args engine.ArgsGetCacheItem) (err error) {
+	var reply string
 	switch cacheOpt {
-	case utils.META_NONE: // nimic
+	case utils.META_NONE:
 		return
-	case utils.MetaReload: // reload pentru cache id
-		//construct args for ReloadCache based on args
-		if err = v1.CacheS.Call(utils.CacheSv1ReloadCache, args, reply); err != nil {
+	case utils.MetaReload:
+		if err = v1.CacheS.Call(utils.CacheSv1ReloadCache, composeArgsReload(args), &reply); err != nil {
 			return err
 		}
-	case "load": // load pentru cache id
-	case "remove": // pentru cache id
-	case "clear": // pentru un tip
+	case utils.MetaLoad:
+		if err = v1.CacheS.Call(utils.CacheSv1LoadCache, composeArgsReload(args), &reply); err != nil {
+			return err
+		}
+	case utils.MetaRemove:
+		if err = v1.CacheS.Call(utils.CacheSv1RemoveItem, args, &reply); err != nil {
+			return err
+		}
+	case utils.MetaClear:
+		if err = v1.CacheS.Call(utils.CacheSv1FlushCache, composeArgsReload(args), &reply); err != nil {
+			return err
+		}
 	}
 	return
 }
