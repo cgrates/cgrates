@@ -51,7 +51,6 @@ var (
 	ErrResourceUnauthorized     = errors.New("RESOURCE_UNAUTHORIZED")
 	ErrNoActiveSession          = errors.New("NO_ACTIVE_SESSION")
 	ErrPartiallyExecuted        = errors.New("PARTIALLY_EXECUTED")
-	ErrNotExecuted              = errors.New("NOT_EXECUTED")
 	ErrMaxUsageExceeded         = errors.New("MAX_USAGE_EXCEEDED")
 	ErrUnallocatedResource      = errors.New("UNALLOCATED_RESOURCE")
 	ErrNotFoundNoCaps           = errors.New("not found")

@@ -230,7 +230,6 @@ func (ign *singleResultStrategyDispatcher) Dispatch(connIDs []string, conns map[
 func (ign *brodcastStrategyDispatcher) Dispatch(connIDs []string, conns map[string]*rpcclient.RpcClientPool, routeID *string,
 	serviceMethod string, args interface{}, reply interface{}) (err error) {
 	var hasErrors bool
-	var hasOnlyErrors bool = true
 	for _, connID := range connIDs {
 		conn, has := conns[connID]
 		if !has {
@@ -245,17 +244,11 @@ func (ign *brodcastStrategyDispatcher) Dispatch(connIDs []string, conns map[stri
 			utils.Logger.Err(fmt.Sprintf("<%s> Network Error at %s strategy for connID %q : %s",
 				utils.DispatcherS, utils.MetaBroadcast, connID, err.Error()))
 			hasErrors = true
-			continue
 		} else if err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Error at %s strategy for connID %q : %s",
 				utils.DispatcherS, utils.MetaBroadcast, connID, err.Error()))
 			hasErrors = true
-			continue
 		}
-		hasOnlyErrors = false
-	}
-	if hasOnlyErrors {
-		return utils.ErrNotExecuted
 	}
 	if hasErrors { // rewrite err if not all call were succesfull
 		return utils.ErrPartiallyExecuted

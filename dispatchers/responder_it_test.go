@@ -177,8 +177,8 @@ func testDspResponderBroadcast(t *testing.T) {
 	allEngine.stopEngine(t)
 	pingReply = ""
 	if err := dispEngine.RCP.Call(utils.ResponderPing, pingEv, &pingReply); err == nil ||
-		err.Error() != utils.ErrNotExecuted.Error() {
-		t.Errorf("Expected error: %s received error: %v	 and reply %q", utils.ErrNotExecuted.Error(), err, pingReply)
+		err.Error() != utils.ErrPartiallyExecuted.Error() {
+		t.Errorf("Expected error: %s received error: %v	 and reply %q", utils.ErrPartiallyExecuted.Error(), err, pingReply)
 	}
 	allEngine.startEngine(t)
 	allEngine2.startEngine(t)
