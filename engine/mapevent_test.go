@@ -400,6 +400,182 @@ func TestMapEventAsCDR(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
+	ec1 := &EventCost{
+		CGRID:     "164b0422fdc6a5117031b427439482c6a4f90e41",
+		RunID:     utils.META_DEFAULT,
+		StartTime: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
+		Charges: []*ChargingInterval{
+			&ChargingInterval{
+				RatingID: "c1a5ab9",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(0),
+						Cost:           0.1,
+						AccountingID:   "9bdad10",
+						CompressFactor: 1,
+					},
+					&ChargingIncrement{
+						Usage:          time.Duration(1 * time.Second),
+						Cost:           0,
+						AccountingID:   "3455b83",
+						CompressFactor: 10,
+					},
+					&ChargingIncrement{
+						Usage:          time.Duration(10 * time.Second),
+						Cost:           0.01,
+						AccountingID:   "a012888",
+						CompressFactor: 2,
+					},
+					&ChargingIncrement{
+						Usage:          time.Duration(1 * time.Second),
+						Cost:           0.005,
+						AccountingID:   "44d6c02",
+						CompressFactor: 30,
+					},
+				},
+				CompressFactor: 1,
+			},
+			&ChargingInterval{
+				RatingID: "c1a5ab9",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(1 * time.Second),
+						Cost:           0.01,
+						AccountingID:   "a012888",
+						CompressFactor: 60,
+					},
+				},
+				CompressFactor: 4,
+			},
+			&ChargingInterval{
+				RatingID: "c1a5ab9",
+				Increments: []*ChargingIncrement{
+					&ChargingIncrement{
+						Usage:          time.Duration(1 * time.Second),
+						Cost:           0,
+						AccountingID:   "3455b83",
+						CompressFactor: 10,
+					},
+					&ChargingIncrement{
+						Usage:          time.Duration(10 * time.Second),
+						Cost:           0.01,
+						AccountingID:   "a012888",
+						CompressFactor: 2,
+					},
+					&ChargingIncrement{
+						Usage:          time.Duration(1 * time.Second),
+						Cost:           0.005,
+						AccountingID:   "44d6c02",
+						CompressFactor: 30,
+					},
+				},
+				CompressFactor: 5,
+			},
+		},
+		AccountSummary: &AccountSummary{
+			Tenant: "cgrates.org",
+			ID:     "dan",
+			BalanceSummaries: []*BalanceSummary{
+				&BalanceSummary{
+					Type:     "*monetary",
+					Value:    50,
+					Disabled: false},
+				&BalanceSummary{
+					ID:       "4b8b53d7-c1a1-4159-b845-4623a00a0165",
+					Type:     "*monetary",
+					Value:    25,
+					Disabled: false},
+				&BalanceSummary{
+					Type:     "*voice",
+					Value:    200,
+					Disabled: false,
+				},
+			},
+			AllowNegative: false,
+			Disabled:      false,
+		},
+		Rating: Rating{
+			"3cd6425": &RatingUnit{
+				RoundingMethod:   "*up",
+				RoundingDecimals: 5,
+				TimingID:         "7f324ab",
+				RatesID:          "4910ecf",
+				RatingFiltersID:  "43e77dc",
+			},
+			"c1a5ab9": &RatingUnit{
+				ConnectFee:       0.1,
+				RoundingMethod:   "*up",
+				RoundingDecimals: 5,
+				TimingID:         "7f324ab",
+				RatesID:          "ec1a177",
+				RatingFiltersID:  "43e77dc",
+			},
+		},
+		Accounting: Accounting{
+			"a012888": &BalanceCharge{
+				AccountID:   "cgrates.org:dan",
+				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+				Units:       0.01,
+			},
+			"188bfa6": &BalanceCharge{
+				AccountID:   "cgrates.org:dan",
+				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+				Units:       0.005,
+			},
+			"9bdad10": &BalanceCharge{
+				AccountID:   "cgrates.org:dan",
+				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+				Units:       0.1,
+			},
+			"44d6c02": &BalanceCharge{
+				AccountID:     "cgrates.org:dan",
+				BalanceUUID:   "7a54a9e9-d610-4c82-bcb5-a315b9a65010",
+				RatingID:      "3cd6425",
+				Units:         1,
+				ExtraChargeID: "188bfa6",
+			},
+			"3455b83": &BalanceCharge{
+				AccountID:     "cgrates.org:dan",
+				BalanceUUID:   "9d54a9e9-d610-4c82-bcb5-a315b9a65089",
+				Units:         1,
+				ExtraChargeID: "*none",
+			},
+		},
+		RatingFilters: RatingFilters{
+			"43e77dc": RatingMatchedFilters{
+				"DestinationID":     "GERMANY",
+				"DestinationPrefix": "+49",
+				"RatingPlanID":      "RPL_RETAIL1",
+				"Subject":           "*out:cgrates.org:call:*any",
+			},
+		},
+		Rates: ChargedRates{
+			"ec1a177": RateGroups{
+				&Rate{
+					GroupIntervalStart: time.Duration(0),
+					Value:              0.01,
+					RateIncrement:      time.Duration(1 * time.Minute),
+					RateUnit:           time.Duration(1 * time.Second)},
+			},
+			"4910ecf": RateGroups{
+				&Rate{
+					GroupIntervalStart: time.Duration(0),
+					Value:              0.005,
+					RateIncrement:      time.Duration(1 * time.Second),
+					RateUnit:           time.Duration(1 * time.Second)},
+				&Rate{
+					GroupIntervalStart: time.Duration(60 * time.Second),
+					Value:              0.005,
+					RateIncrement:      time.Duration(1 * time.Second),
+					RateUnit:           time.Duration(1 * time.Second)},
+			},
+		},
+		Timings: ChargedTimings{
+			"7f324ab": &ChargedTiming{
+				StartTime: "00:00:00",
+			},
+		},
+	}
 	me = MapEvent{
 		"ExtraField1": 5,
 		"Source":      1001,
@@ -409,6 +585,7 @@ func TestMapEventAsCDR(t *testing.T) {
 		"Usage":       "42s",
 		"PreRated":    "True",
 		"Cost":        "42.3",
+		"CostDetails": ec1,
 	}
 	expected = &CDR{
 		CGRID:      "da39a3ee5e6b4b0d3255bfef95601890afd80709",
@@ -427,6 +604,7 @@ func TestMapEventAsCDR(t *testing.T) {
 		ToR:         utils.VOICE,
 		RequestType: cfg.GeneralCfg().DefaultReqType,
 		Category:    cfg.GeneralCfg().DefaultCategory,
+		CostDetails: ec1,
 	}
 	if rply, err := me.AsCDR(cfg, "itsyscom.com", utils.EmptyString); err != nil {
 		t.Error(err)

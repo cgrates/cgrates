@@ -171,3 +171,12 @@ func (ev *CGREvent) RemFldsWithPrefix(prfx string) {
 		}
 	}
 }
+
+// CGREvents is a group of generic events processed by CGR services
+// ie: derived CDRs
+type CGREvents struct {
+	Tenant string
+	ID     string
+	Time   *time.Time // event time
+	Events []map[string]interface{}
+}

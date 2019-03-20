@@ -233,14 +233,43 @@ func (cdrS *CDRServer) getCostFromRater(cdr *CDR) (*CallCost, error) {
 	return cc, nil
 }
 
-// chrgRaStoReThStaCDR will process the CGREvent with ChargerS subsystem
+// processEvent will process a CGREvent with the configured subsystems
+func (cdrS *CDRServer) processEvent(cgrEv *utils.CGREvent,
+	attrS, store, export, thdS, statS bool) (err error) {
+	if attrS {
+		if err = cdrS.attrSProcessEvent(cgrEv); err != nil {
+			return
+		}
+	}
+	if thdS {
+		go cdrS.thdSProcessEvent(cgrEv)
+	}
+	if statS {
+		go cdrS.statSProcessEvent(cgrEv)
+	}
+	var cdr *CDR
+	if cdr, err = NewMapEvent(cgrEv.Event).AsCDR(cdrS.cgrCfg,
+		cgrEv.Tenant, cdrS.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
+		return
+	}
+	if store {
+		if err = cdrS.cdrDb.SetCDR(cdr, false); err != nil {
+			return
+		}
+	}
+	if export {
+		go cdrS.exportCDRs([]*CDR{cdr})
+	}
+	return
+}
+
+// chrgProcessEvent will process the CGREvent with ChargerS subsystem
 // it is designed to run in it's own goroutine
-func (cdrS *CDRServer) chrgRaStoReThStaCDR(cgrEv *utils.CGREvent,
-	store, export, thdS, statS *bool) (err error) {
+func (cdrS *CDRServer) chrgProcessEvent(cgrEv *utils.CGREvent,
+	attrS, store, export, thdS, statS bool) (err error) {
 	var chrgrs []*ChrgSProcessEventReply
 	if err = cdrS.chargerS.Call(utils.ChargerSv1ProcessEvent,
-		cgrEv, &chrgrs); err != nil &&
-		err.Error() != utils.ErrNotFound.Error() {
+		cgrEv, &chrgrs); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s processing CGR event %+v with %s.",
 				utils.CDRs, err.Error(), cgrEv, utils.ChargerS))
@@ -248,70 +277,19 @@ func (cdrS *CDRServer) chrgRaStoReThStaCDR(cgrEv *utils.CGREvent,
 	}
 	var partExec bool
 	for _, chrgr := range chrgrs {
-		cdr, errCdr := NewMapEvent(chrgr.CGREvent.Event).AsCDR(cdrS.cgrCfg,
-			cgrEv.Tenant, cdrS.cgrCfg.GeneralCfg().DefaultTimezone)
-		if errCdr != nil {
+		if errProc := cdrS.processEvent(chrgr.CGREvent,
+			attrS, store, export, thdS, statS); errProc != nil {
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error: %s converting CDR event %+v with %s.",
-					utils.CDRs, errCdr.Error(), cgrEv, utils.ChargerS))
+				fmt.Sprintf("<%s> error: %s converting CDR event %+v with %s",
+					utils.CDRs, errProc.Error(), cgrEv, utils.ChargerS))
 			partExec = true
 			continue
 		}
-		cdrS.raStoReThStaCDR(cdr, store, export, thdS, statS)
 	}
 	if partExec {
 		err = utils.ErrPartiallyExecuted
 	}
 	return
-}
-
-// raStoReThStaCDR will RAte/STOtore/REplicate/THresholds/STAts the CDR received
-// used by both chargerS as well as re-/rating
-func (cdrS *CDRServer) raStoReThStaCDR(cdr *CDR,
-	store, export, thdS, statS *bool) {
-	ratedCDRs, err := cdrS.rateCDR(cdr)
-	if err != nil {
-		cdr.Cost = -1.0 // If there was an error, mark the CDR
-		cdr.ExtraInfo = err.Error()
-		ratedCDRs = []*CDR{cdr}
-	}
-	for _, rtCDR := range ratedCDRs {
-		shouldStore := cdrS.cgrCfg.CdrsCfg().CDRSStoreCdrs
-		if store != nil {
-			shouldStore = *store
-		}
-		if shouldStore { // Store CDR
-			go func(rtCDR *CDR) {
-				if err := cdrS.cdrDb.SetCDR(rtCDR, true); err != nil {
-					utils.Logger.Warning(
-						fmt.Sprintf("<%s> error: %s storing CDR  %+v.",
-							utils.CDRs, err.Error(), rtCDR))
-				}
-			}(rtCDR)
-		}
-		shouldExport := len(cdrS.cgrCfg.CdrsCfg().CDRSOnlineCDRExports) != 0
-		if export != nil {
-			shouldExport = *export
-		}
-		if shouldExport {
-			go cdrS.exportCDRs([]*CDR{rtCDR})
-		}
-		cgrEv := rtCDR.AsCGREvent()
-		shouldThdS := cdrS.thdS != nil
-		if thdS != nil {
-			shouldThdS = *thdS
-		}
-		if shouldThdS {
-			go cdrS.thdSProcessEvent(cgrEv)
-		}
-		shouldStatS := cdrS.statS != nil
-		if statS != nil {
-			shouldStatS = *statS
-		}
-		if shouldStatS {
-			go cdrS.statSProcessEvent(cgrEv)
-		}
-	}
 }
 
 // statSProcessEvent will send the event to StatS if the connection is configured
@@ -478,7 +456,8 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDR, reply *string) (err error) {
 	}
 	if cdrS.chargerS != nil &&
 		utils.IsSliceMember([]string{"", utils.MetaRaw}, cdr.RunID) {
-		go cdrS.chrgRaStoReThStaCDR(cgrEv, nil, nil, nil, nil)
+		go cdrS.chrgProcessEvent(cgrEv, cdrS.attrS != nil, cdrS.cgrCfg.CdrsCfg().CDRSStoreCdrs,
+			len(cdrS.cgrCfg.CdrsCfg().CDRSOnlineCDRExports) != 0, cdrS.thdS != nil, cdrS.statS != nil)
 	}
 	*reply = utils.OK
 
@@ -519,61 +498,40 @@ func (cdrS *CDRServer) V2ProcessCDR(arg *ArgV2ProcessCDR, reply *string) (err er
 			nil, true, utils.NonTransactional)
 	}
 	// end of RPC caching
+
 	attrS := cdrS.attrS != nil
 	if arg.AttributeS != nil {
 		attrS = *arg.AttributeS
-	}
-	cgrEv := &arg.CGREvent
-	if attrS {
-		if err = cdrS.attrSProcessEvent(cgrEv); err != nil {
-			err = utils.NewErrServerError(err)
-			return
-		}
-	}
-	var rawCDR *CDR
-	if rawCDR, err = NewMapEvent(cgrEv.Event).AsCDR(cdrS.cgrCfg,
-		cgrEv.Tenant, cdrS.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
-		err = utils.NewErrServerError(err)
-		return
 	}
 	store := cdrS.cgrCfg.CdrsCfg().CDRSStoreCdrs
 	if arg.Store != nil {
 		store = *arg.Store
 	}
-	if store { // Store *raw CDR
-		if err = cdrS.cdrDb.SetCDR(rawCDR, false); err != nil {
-			err = utils.NewErrServerError(err) // Cannot store CDR
-			return
-		}
-	}
 	export := len(cdrS.cgrCfg.CdrsCfg().CDRSOnlineCDRExports) != 0
 	if arg.Export != nil {
 		export = *arg.Export
 	}
-	if export {
-		cdrS.exportCDRs([]*CDR{rawCDR}) // Replicate raw CDR
-	}
-	thrdS := cdrS.thdS != nil
+	thdS := cdrS.thdS != nil
 	if arg.ThresholdS != nil {
-		thrdS = *arg.ThresholdS
-	}
-	if thrdS {
-		go cdrS.thdSProcessEvent(cgrEv)
+		thdS = *arg.ThresholdS
 	}
 	statS := cdrS.statS != nil
 	if arg.StatS != nil {
 		statS = *arg.StatS
 	}
-	if statS {
-		go cdrS.statSProcessEvent(cgrEv)
-	}
 	chrgS := cdrS.chargerS != nil
 	if arg.ChargerS != nil {
 		chrgS = *arg.ChargerS
 	}
+	cgrEv := &arg.CGREvent
+	if err = cdrS.processEvent(cgrEv,
+		attrS, store, export, thdS, statS); err != nil {
+		err = utils.NewErrServerError(err)
+		return
+	}
 	if chrgS {
-		go cdrS.chrgRaStoReThStaCDR(cgrEv,
-			arg.Store, arg.Export, arg.ThresholdS, arg.StatS)
+		go cdrS.chrgProcessEvent(cgrEv,
+			attrS, store, export, thdS, statS)
 	}
 	*reply = utils.OK
 	return nil
@@ -692,18 +650,31 @@ func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
 	if err != nil {
 		return err
 	}
+	store := cdrS.cgrCfg.CdrsCfg().CDRSStoreCdrs
+	if arg.Store != nil {
+		store = *arg.Store
+	}
+	export := len(cdrS.cgrCfg.CdrsCfg().CDRSOnlineCDRExports) != 0
+	if arg.Export != nil {
+		export = *arg.Export
+	}
+	thdS := cdrS.thdS != nil
+	if arg.ThresholdS != nil {
+		thdS = *arg.ThresholdS
+	}
+	statS := cdrS.statS != nil
+	if arg.StatS != nil {
+		statS = *arg.StatS
+	}
 	for _, cdr := range cdrs {
 		if arg.ChargerS != nil && *arg.ChargerS {
 			if cdrS.chargerS == nil {
 				return utils.NewErrNotConnected(utils.ChargerS)
 			}
-			if err = cdrS.chrgRaStoReThStaCDR(cdr.AsCGREvent(),
-				arg.Store, arg.Export, arg.ThresholdS, arg.StatS); err != nil {
+			if err = cdrS.chrgProcessEvent(cdr.AsCGREvent(),
+				false, store, export, thdS, statS); err != nil {
 				return utils.NewErrServerError(err)
 			}
-		} else {
-			cdrS.raStoReThStaCDR(cdr, arg.Store,
-				arg.Export, arg.ThresholdS, arg.StatS)
 		}
 	}
 	*reply = utils.OK
