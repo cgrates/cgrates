@@ -1202,3 +1202,124 @@ type TPDispatcherProfile struct {
 	Weight             float64
 	Conns              []*TPDispatcherConns
 }
+
+type SMCostFilter struct { //id cu litere mare
+	CgrIDs         []string
+	NotCgrIDs      []string
+	RunIDs         []string
+	NotRunIDs      []string
+	OriginHosts    []string
+	NotOriginHosts []string
+	OriginIDs      []string
+	NotOriginIDs   []string
+	CostSources    []string
+	NotCostSources []string
+	Usage          []*time.Duration // slice min=Usage[0]&max=Usage[1]
+	CreatedAtStart *time.Time       // Start of interval, bigger or equal than configured
+	CreatedAtEnd   *time.Time       // End interval, smaller than
+}
+
+func AppendToSMCostFilter(smcFilter *SMCostFilter, fieldType, fieldName string, values []string, timezone string) (smcf *SMCostFilter, err error) {
+	const (
+		MetaString         = "*string"
+		MetaNotString      = "*notstring"
+		MetaLessThan       = "*lt"
+		MetaGreaterOrEqual = "*gte"
+	)
+	switch fieldName {
+	case DynamicDataPrefix + CGRID:
+		switch fieldType {
+		case MetaString:
+			smcFilter.CgrIDs = append(smcFilter.CgrIDs, values...)
+		case MetaNotString:
+			smcFilter.NotCgrIDs = append(smcFilter.NotCgrIDs, values...)
+		default:
+			err = fmt.Errorf("FilterType: %q not supported for FieldName: %q", fieldType, fieldName)
+		}
+	case DynamicDataPrefix + RunID:
+		switch fieldType {
+		case MetaString:
+			smcFilter.RunIDs = append(smcFilter.RunIDs, values...)
+		case MetaNotString:
+			smcFilter.NotRunIDs = append(smcFilter.NotRunIDs, values...)
+		default:
+			err = fmt.Errorf("FilterType: %q not supported for FieldName: %q", fieldType, fieldName)
+		}
+	case DynamicDataPrefix + OriginHost:
+		switch fieldType {
+		case MetaString:
+			smcFilter.OriginHosts = append(smcFilter.OriginHosts, values...)
+		case MetaNotString:
+			smcFilter.NotOriginHosts = append(smcFilter.NotOriginHosts, values...)
+		default:
+			err = fmt.Errorf("FilterType: %q not supported for FieldName: %q", fieldType, fieldName)
+		}
+	case DynamicDataPrefix + OriginID:
+		switch fieldType {
+		case MetaString:
+			smcFilter.OriginIDs = append(smcFilter.OriginIDs, values...)
+		case MetaNotString:
+			smcFilter.NotOriginIDs = append(smcFilter.NotOriginIDs, values...)
+		default:
+			err = fmt.Errorf("FilterType: %q not supported for FieldName: %q", fieldType, fieldName)
+		}
+	case DynamicDataPrefix + CostSource:
+		switch fieldType {
+		case MetaString:
+			smcFilter.CostSources = append(smcFilter.CostSources, values...)
+		case MetaNotString:
+			smcFilter.CostSources = append(smcFilter.NotCostSources, values...)
+		default:
+			err = fmt.Errorf("FilterType: %q not supported for FieldName: %q", fieldType, fieldName)
+		}
+	case DynamicDataPrefix + Usage:
+		switch fieldType {
+		case MetaGreaterOrEqual:
+			var minUsage time.Duration
+			minUsage, err = ParseDurationWithNanosecs(values[0])
+			if err != nil {
+				err = fmt.Errorf("Error when converting field: %q  value: %q in float ", fieldType, fieldName)
+				break
+			}
+			smcFilter.Usage[0] = &minUsage
+		case MetaLessThan:
+			var maxUsage time.Duration
+			maxUsage, err = ParseDurationWithNanosecs(values[0])
+			if err != nil {
+				err = fmt.Errorf("Error when converting field: %q  value: %q in float ", fieldType, fieldName)
+				break
+			}
+			smcFilter.Usage[1] = &maxUsage
+		default:
+			err = fmt.Errorf("FilterType: %q not supported for FieldName: %q", fieldType, fieldName)
+		}
+	case DynamicDataPrefix + CreatedAt:
+		switch fieldType {
+		case MetaGreaterOrEqual:
+			var start time.Time
+			start, err = ParseTimeDetectLayout(values[0], timezone)
+			if err != nil {
+				err = fmt.Errorf("Error when converting field: %q  value: %q in time.Time ", fieldType, fieldName)
+				break
+			}
+			if !start.IsZero() {
+				smcFilter.CreatedAtStart = &start
+			}
+		case MetaLessThan:
+			var end time.Time
+			end, err = ParseTimeDetectLayout(values[0], timezone)
+			if err != nil {
+				err = fmt.Errorf("Error when converting field: %q  value: %q in time.Time ", fieldType, fieldName)
+				break
+			}
+			if !end.IsZero() {
+				smcFilter.CreatedAtEnd = &end
+			}
+		default:
+			err = fmt.Errorf("FilterType: %q not supported for FieldName: %q", fieldType, fieldName)
+		}
+	default:
+		err = fmt.Errorf("FieldName: %q not supported", fieldName)
+	}
+	return smcFilter, err
+}

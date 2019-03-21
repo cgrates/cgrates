@@ -158,6 +158,9 @@ func (ms *MapStorage) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
 func (ms *MapStorage) RemoveSMCost(smc *SMCost) (err error) {
 	return utils.ErrNotImplemented
 }
+func (ms *MapStorage) RemoveSMCosts(qryFltr *utils.SMCostFilter) error {
+	return utils.ErrNotImplemented
+}
 func (ms *MapStorage) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*CDR, count int64, err error) {
 	return nil, 0, utils.ErrNotImplemented
 }
