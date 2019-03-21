@@ -742,11 +742,11 @@ func (self *SQLStorage) RemoveSMCost(smc *SMCost) error {
 func (self *SQLStorage) RemoveSMCosts(qryFltr *utils.SMCostFilter) error {
 	q := self.db.Table(utils.SessionCostsTBL).Select("*")
 	// Add filters, use in to replace the high number of ORs
-	if len(qryFltr.CgrIDs) != 0 {
-		q = q.Where("cgrid in (?)", qryFltr.CgrIDs)
+	if len(qryFltr.CGRIDs) != 0 {
+		q = q.Where("cgrid in (?)", qryFltr.CGRIDs)
 	}
-	if len(qryFltr.NotCgrIDs) != 0 {
-		q = q.Where("cgrid not in (?)", qryFltr.NotCgrIDs)
+	if len(qryFltr.NotCGRIDs) != 0 {
+		q = q.Where("cgrid not in (?)", qryFltr.NotCGRIDs)
 	}
 	if len(qryFltr.RunIDs) != 0 {
 		q = q.Where("run_id in (?)", qryFltr.RunIDs)
@@ -772,24 +772,24 @@ func (self *SQLStorage) RemoveSMCosts(qryFltr *utils.SMCostFilter) error {
 	if len(qryFltr.NotCostSources) != 0 {
 		q = q.Where("costsource not in (?)", qryFltr.NotCostSources)
 	}
-	if qryFltr.CreatedAtStart != nil {
-		q = q.Where("created_at >= ?", qryFltr.CreatedAtStart)
+	if qryFltr.CreatedAt.Begin != nil {
+		q = q.Where("created_at >= ?", qryFltr.CreatedAt.Begin)
 	}
-	if qryFltr.CreatedAtEnd != nil {
-		q = q.Where("created_at < ?", qryFltr.CreatedAtEnd)
+	if qryFltr.CreatedAt.End != nil {
+		q = q.Where("created_at < ?", qryFltr.CreatedAt.End)
 	}
-	if qryFltr.Usage[0] != nil {
+	if qryFltr.Usage.Min != nil {
 		if self.db.Dialect().GetName() == utils.MYSQL { // MySQL needs escaping for usage
-			q = q.Where("`usage` >= ?", qryFltr.Usage[0].Nanoseconds())
+			q = q.Where("`usage` >= ?", qryFltr.Usage.Min.Nanoseconds())
 		} else {
-			q = q.Where("usage >= ?", qryFltr.Usage[0].Nanoseconds())
+			q = q.Where("usage >= ?", qryFltr.Usage.Min.Nanoseconds())
 		}
 	}
-	if qryFltr.Usage[1] != nil {
+	if qryFltr.Usage.Max != nil {
 		if self.db.Dialect().GetName() == utils.MYSQL { // MySQL needs escaping for usage
-			q = q.Where("`usage` < ?", qryFltr.Usage[1].Nanoseconds())
+			q = q.Where("`usage` < ?", qryFltr.Usage.Max.Nanoseconds())
 		} else {
-			q = q.Where("usage < ?", qryFltr.Usage[1].Nanoseconds())
+			q = q.Where("usage < ?", qryFltr.Usage.Max.Nanoseconds())
 		}
 	}
 	if err := q.Delete(nil).Error; err != nil {

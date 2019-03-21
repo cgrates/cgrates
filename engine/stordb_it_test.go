@@ -57,6 +57,7 @@ var sTestsStorDBit = []func(t *testing.T){
 	testStorDBitCRUDTpStats,
 	testStorDBitCRUDCDRs,
 	testStorDBitCRUDSMCosts,
+	testStorDBitCRUDSMCosts2,
 }
 
 func TestStorDBitMySQL(t *testing.T) {
@@ -1362,6 +1363,71 @@ func testStorDBitCRUDSMCosts(t *testing.T) {
 		if err := storDB.RemoveSMCost(smc); err != nil {
 			t.Error(err)
 		}
+	}
+	// READ
+	if _, err := storDB.GetSMCosts("", "", "", ""); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+}
+
+func testStorDBitCRUDSMCosts2(t *testing.T) {
+	// READ
+	if _, err := storDB.GetSMCosts("", "", "", ""); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	// WRITE
+	var snd = []*SMCost{
+		{
+			CGRID:       "CGRID1",
+			RunID:       "11",
+			OriginHost:  "host22",
+			OriginID:    "O1",
+			CostDetails: NewBareEventCost(),
+		},
+		{
+			CGRID:       "CGRID2",
+			RunID:       "12",
+			OriginHost:  "host22",
+			OriginID:    "O2",
+			CostDetails: NewBareEventCost(),
+		},
+		{
+			CGRID:       "CGRID3",
+			RunID:       "13",
+			OriginHost:  "host23",
+			OriginID:    "O3",
+			CostDetails: NewBareEventCost(),
+		},
+	}
+	for _, smc := range snd {
+		if err := storDB.SetSMCost(smc); err != nil {
+			t.Error(err)
+		}
+	}
+	// READ
+	if rcv, err := storDB.GetSMCosts("", "", "host22", ""); err != nil {
+		t.Fatal(err)
+	} else if len(rcv) != 2 {
+		t.Errorf("Expected 2 results received %v ", len(rcv))
+	}
+	// REMOVE
+	if err := storDB.RemoveSMCosts(&utils.SMCostFilter{
+		RunIDs:         []string{"12", "13"},
+		NotRunIDs:      []string{"11"},
+		OriginHosts:    []string{"host22", "host23"},
+		NotOriginHosts: []string{"host21"},
+	}); err != nil {
+		t.Error(err)
+	}
+	// READ
+	if rcv, err := storDB.GetSMCosts("", "", "", ""); err != nil {
+		t.Error(err)
+	} else if len(rcv) != 1 {
+		t.Errorf("Expected 1 result received %v ", len(rcv))
+	}
+	// REMOVE
+	if err := storDB.RemoveSMCosts(&utils.SMCostFilter{}); err != nil {
+		t.Error(err)
 	}
 	// READ
 	if _, err := storDB.GetSMCosts("", "", "", ""); err != utils.ErrNotFound {

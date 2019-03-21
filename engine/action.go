@@ -128,7 +128,7 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		utils.MetaAMQPjsonMap:     sendAMQP,
 		utils.MetaAWSjsonMap:      sendAWS,
 		utils.MetaSQSjsonMap:      sendSQS,
-		MetaRemoveSessionCosts:    cleanSessionCosts,
+		MetaRemoveSessionCosts:    removeSessionCosts,
 	}
 	f, exists := actionFuncMap[typ]
 	return f, exists
@@ -963,14 +963,13 @@ func (cdrP *cdrLogProvider) RemoteHost() net.Addr {
 	return utils.LocalAddr()
 }
 
-func cleanSessionCosts(_ *Account, _ *Action, _ Actions, extraData interface{}) error { // FiltersID;inlineFilter
+func removeSessionCosts(_ *Account, _ *Action, _ Actions, extraData interface{}) error { // FiltersID;inlineFilter
 	fltrs, err := utils.IfaceAsString(extraData)
 	if err != nil {
 		return err
 	}
 	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	smcFilter := new(utils.SMCostFilter)
-	smcFilter.Usage = make([]*time.Duration, 2)
 	for _, fltrID := range strings.Split(fltrs, utils.INFIELD_SEP) {
 		fltr, err := dm.GetFilter(tenant, fltrID, true, true, utils.NonTransactional)
 		if err != nil {
