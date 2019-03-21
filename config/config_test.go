@@ -1703,12 +1703,7 @@ func TestNewCGRConfigFromPathNotFound(t *testing.T) {
 
 func TestCgrCfgJSONDefaultApierCfg(t *testing.T) {
 	aCfg := &ApierCfg{
-		CachesConns: []*HaPoolConfig{
-			{
-				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSONrpc,
-			},
-		},
+		CachesConns:  []*HaPoolConfig{},
 		DefaultCache: utils.EmptyString,
 	}
 	if !reflect.DeepEqual(cgrCfg.apier, aCfg) {

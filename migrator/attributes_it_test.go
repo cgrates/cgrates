@@ -301,7 +301,7 @@ func testAttrITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(attrPrf), utils.ToJSON(result))
 		}
 	case utils.Move:
-		if err := attrMigrator.dmIN.DataManager().SetAttributeProfile(attrPrf, false); err != nil {
+		if err := attrMigrator.dmIN.DataManager().SetAttributeProfile(attrPrf, false, false); err != nil {
 			t.Error(err)
 		}
 		currentVersion := engine.CurrentDataDBVersions()

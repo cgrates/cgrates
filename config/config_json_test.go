@@ -1495,12 +1495,7 @@ func TestDfAnalyzerCfg(t *testing.T) {
 
 func TestDfApierCfg(t *testing.T) {
 	eCfg := &ApierJsonCfg{
-		Caches_conns: &[]*HaPoolJsonCfg{
-			{
-				Address:   utils.StringPointer("127.0.0.1:2012"),
-				Transport: utils.StringPointer(utils.MetaJSONrpc),
-			},
-		},
+		Caches_conns:  &[]*HaPoolJsonCfg{},
 		Default_cache: utils.StringPointer(utils.EmptyString),
 	}
 	if cfg, err := dfCgrJsonCfg.ApierCfgJson(); err != nil {
