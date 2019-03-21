@@ -1203,9 +1203,19 @@ type TPDispatcherProfile struct {
 	Conns              []*TPDispatcherConns
 }
 
+type UsageInterval struct {
+	Min *time.Duration
+	Max *time.Duration
+}
+
+type TimeInterval struct {
+	Begin *time.Time
+	End   *time.Time
+}
+
 type SMCostFilter struct { //id cu litere mare
-	CgrIDs         []string
-	NotCgrIDs      []string
+	CGRIDs         []string
+	NotCGRIDs      []string
 	RunIDs         []string
 	NotRunIDs      []string
 	OriginHosts    []string
@@ -1214,9 +1224,8 @@ type SMCostFilter struct { //id cu litere mare
 	NotOriginIDs   []string
 	CostSources    []string
 	NotCostSources []string
-	Usage          []*time.Duration // slice min=Usage[0]&max=Usage[1]
-	CreatedAtStart *time.Time       // Start of interval, bigger or equal than configured
-	CreatedAtEnd   *time.Time       // End interval, smaller than
+	Usage          UsageInterval
+	CreatedAt      TimeInterval
 }
 
 func AppendToSMCostFilter(smcFilter *SMCostFilter, fieldType, fieldName string, values []string, timezone string) (smcf *SMCostFilter, err error) {
@@ -1230,9 +1239,9 @@ func AppendToSMCostFilter(smcFilter *SMCostFilter, fieldType, fieldName string, 
 	case DynamicDataPrefix + CGRID:
 		switch fieldType {
 		case MetaString:
-			smcFilter.CgrIDs = append(smcFilter.CgrIDs, values...)
+			smcFilter.CGRIDs = append(smcFilter.CGRIDs, values...)
 		case MetaNotString:
-			smcFilter.NotCgrIDs = append(smcFilter.NotCgrIDs, values...)
+			smcFilter.NotCGRIDs = append(smcFilter.NotCGRIDs, values...)
 		default:
 			err = fmt.Errorf("FilterType: %q not supported for FieldName: %q", fieldType, fieldName)
 		}
@@ -1268,7 +1277,7 @@ func AppendToSMCostFilter(smcFilter *SMCostFilter, fieldType, fieldName string, 
 		case MetaString:
 			smcFilter.CostSources = append(smcFilter.CostSources, values...)
 		case MetaNotString:
-			smcFilter.CostSources = append(smcFilter.NotCostSources, values...)
+			smcFilter.NotCostSources = append(smcFilter.NotCostSources, values...)
 		default:
 			err = fmt.Errorf("FilterType: %q not supported for FieldName: %q", fieldType, fieldName)
 		}
@@ -1278,18 +1287,18 @@ func AppendToSMCostFilter(smcFilter *SMCostFilter, fieldType, fieldName string, 
 			var minUsage time.Duration
 			minUsage, err = ParseDurationWithNanosecs(values[0])
 			if err != nil {
-				err = fmt.Errorf("Error when converting field: %q  value: %q in float ", fieldType, fieldName)
+				err = fmt.Errorf("Error when converting field: %q  value: %q in time.Duration ", fieldType, fieldName)
 				break
 			}
-			smcFilter.Usage[0] = &minUsage
+			smcFilter.Usage.Min = &minUsage
 		case MetaLessThan:
 			var maxUsage time.Duration
 			maxUsage, err = ParseDurationWithNanosecs(values[0])
 			if err != nil {
-				err = fmt.Errorf("Error when converting field: %q  value: %q in float ", fieldType, fieldName)
+				err = fmt.Errorf("Error when converting field: %q  value: %q in time.Duration ", fieldType, fieldName)
 				break
 			}
-			smcFilter.Usage[1] = &maxUsage
+			smcFilter.Usage.Max = &maxUsage
 		default:
 			err = fmt.Errorf("FilterType: %q not supported for FieldName: %q", fieldType, fieldName)
 		}
@@ -1303,7 +1312,7 @@ func AppendToSMCostFilter(smcFilter *SMCostFilter, fieldType, fieldName string, 
 				break
 			}
 			if !start.IsZero() {
-				smcFilter.CreatedAtStart = &start
+				smcFilter.CreatedAt.Begin = &start
 			}
 		case MetaLessThan:
 			var end time.Time
@@ -1313,7 +1322,7 @@ func AppendToSMCostFilter(smcFilter *SMCostFilter, fieldType, fieldName string, 
 				break
 			}
 			if !end.IsZero() {
-				smcFilter.CreatedAtEnd = &end
+				smcFilter.CreatedAt.End = &end
 			}
 		default:
 			err = fmt.Errorf("FilterType: %q not supported for FieldName: %q", fieldType, fieldName)

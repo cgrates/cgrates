@@ -914,13 +914,13 @@ func (ms *MongoStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix stri
 
 func (ms *MongoStorage) RemoveSMCosts(qryFltr *utils.SMCostFilter) error {
 	filters := bson.M{
-		CGRIDLow:      bson.M{"$in": qryFltr.CgrIDs, "$nin": qryFltr.NotCgrIDs},
+		CGRIDLow:      bson.M{"$in": qryFltr.CGRIDs, "$nin": qryFltr.NotCGRIDs},
 		RunIDLow:      bson.M{"$in": qryFltr.RunIDs, "$nin": qryFltr.NotRunIDs},
 		OriginHostLow: bson.M{"$in": qryFltr.OriginHosts, "$nin": qryFltr.NotOriginHosts},
 		OriginIDLow:   bson.M{"$in": qryFltr.OriginIDs, "$nin": qryFltr.NotOriginIDs},
 		CostSourceLow: bson.M{"$in": qryFltr.CostSources, "$nin": qryFltr.NotCostSources},
-		UsageLow:      bson.M{"$gte": qryFltr.Usage[0], "$lt": qryFltr.Usage[1]},
-		CreatedAtLow:  bson.M{"$gte": qryFltr.CreatedAtStart, "$lt": qryFltr.CreatedAtEnd},
+		UsageLow:      bson.M{"$gte": qryFltr.Usage.Min, "$lt": qryFltr.Usage.Max},
+		CreatedAtLow:  bson.M{"$gte": qryFltr.CreatedAt.Begin, "$lt": qryFltr.CreatedAt.End},
 	}
 	ms.cleanEmptyFilters(filters)
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
