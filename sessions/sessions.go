@@ -387,13 +387,22 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 
 	// post the CDRs
 	if sS.cdrS != nil {
-		var reply string
-		if err = sS.cdrS.Call(utils.CDRsV2ProcessCDR,
-			&engine.ArgV2ProcessCDR{CGREvent: cgrEv}, &reply); err != nil {
+		if cgrEvs, err := s.asCGREvents(); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> could not post CDR for event %s, err: %s",
 					utils.SessionS, utils.ToJSON(cgrEv), err.Error()))
+		} else {
+			var reply string
+			for _, cgrEv := range cgrEvs {
+				if err = sS.cdrS.Call(utils.CDRsV2ProcessCDR,
+					&engine.ArgV2ProcessCDR{CGREvent: *cgrEv}, &reply); err != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf(
+							"<%s> could not post CDR for event %s, err: %s",
+							utils.SessionS, utils.ToJSON(cgrEv), err.Error()))
+				}
+			}
 		}
 	}
 	// release the resources for the session

@@ -955,6 +955,7 @@ const (
 	CacheDispatcherFilterIndexes = "dispatcher_filter_indexes"
 	CacheDiameterMessages        = "diameter_messages"
 	CacheRPCResponses            = "rpc_responses"
+	CacheClosedSessions          = "closed_sessions"
 	MetaPrecaching               = "*precaching"
 	MetaReady                    = "*ready"
 )

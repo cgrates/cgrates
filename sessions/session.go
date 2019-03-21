@@ -22,7 +22,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -198,28 +197,23 @@ func (s *Session) TotalUsage() (tDur time.Duration) {
 	return
 }
 
-// AsCGREvents is a thread safe method to return the Session as CGREvents
-// there will be one CGREvent for each SRun
-func (s *Session) AsCGREvents(cgrCfg *config.CGRConfig) (cgrEvs []*utils.CGREvent, err error) {
-	if len(s.SRuns) == 0 {
-		return
+// AsCGREvents is a  method to return the Session as CGREvents
+// there will be one CGREvent for each SRun plus one *raw for EventStart
+// AsCGREvents is not thread safe since it is supposed to run by the time Session is closed
+func (s *Session) asCGREvents() (cgrEvs []*utils.CGREvent, err error) {
+	cgrEvs = make([]*utils.CGREvent, len(s.SRuns)+1) // so we can gather all cdr info while under lock
+	cgrEvs[0] = &utils.CGREvent{
+		Tenant: s.Tenant,
+		ID:     utils.UUIDSha1Prefix(),
+		Event:  s.EventStart.MapEvent(),
 	}
-	s.RLock()
-	cgrEvs = make([]*utils.CGREvent, len(s.SRuns)) // so we can gather all cdr info while under lock
 	for i, sr := range s.SRuns {
-		var cdr *engine.CDR
-		if cdr, err = sr.Event.AsCDR(cgrCfg, s.Tenant,
-			cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
-			break // will return with error
-		}
-		cdr.Usage = sr.TotalUsage
-		cgrEvs[i] = &utils.CGREvent{
+		cgrEvs[i+1] = &utils.CGREvent{
 			Tenant: s.Tenant,
 			ID:     utils.UUIDSha1Prefix(),
-			Event:  cdr.AsMapStringIface(),
+			Event:  sr.Event,
 		}
 	}
-	s.RUnlock()
 	return
 }
 

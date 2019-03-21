@@ -155,6 +155,8 @@ func TestCacheJsonCfg(t *testing.T) {
 			Ttl: utils.StringPointer("3h"), Static_ttl: utils.BoolPointer(false)},
 		utils.CacheRPCResponses: &CacheParamJsonCfg{Limit: utils.IntPointer(0),
 			Ttl: utils.StringPointer("2s"), Static_ttl: utils.BoolPointer(false)},
+		utils.CacheClosedSessions: &CacheParamJsonCfg{Limit: utils.IntPointer(0),
+			Ttl: utils.StringPointer("10s"), Static_ttl: utils.BoolPointer(false)},
 	}
 
 	if gCfg, err := dfCgrJsonCfg.CacheJsonCfg(); err != nil {

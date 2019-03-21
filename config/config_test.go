@@ -703,6 +703,8 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 			TTL: time.Duration(3 * time.Hour), StaticTTL: false},
 		utils.CacheRPCResponses: &CacheParamCfg{Limit: 0,
 			TTL: time.Duration(2 * time.Second), StaticTTL: false},
+		utils.CacheClosedSessions: &CacheParamCfg{Limit: 0,
+			TTL: time.Duration(10 * time.Second), StaticTTL: false},
 	}
 
 	if !reflect.DeepEqual(eCacheCfg, cgrCfg.CacheCfg()) {
