@@ -219,6 +219,7 @@ type SessionSJsonCfg struct {
 	Session_replication_conns *[]*HaPoolJsonCfg
 	Attributes_conns          *[]*HaPoolJsonCfg
 	Debit_interval            *string
+	Store_session_costs       *bool
 	Min_call_duration         *string
 	Max_call_duration         *string
 	Session_ttl               *string

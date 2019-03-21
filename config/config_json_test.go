@@ -482,6 +482,7 @@ func TestSmgJsonCfg(t *testing.T) {
 		Attributes_conns:          &[]*HaPoolJsonCfg{},
 		Session_replication_conns: &[]*HaPoolJsonCfg{},
 		Debit_interval:            utils.StringPointer("0s"),
+		Store_session_costs:       utils.BoolPointer(true),
 		Min_call_duration:         utils.StringPointer("0s"),
 		Max_call_duration:         utils.StringPointer("3h"),
 		Session_ttl:               utils.StringPointer("0s"),

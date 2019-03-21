@@ -624,6 +624,7 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 		AttrSConns:              []*HaPoolConfig{},
 		SessionReplicationConns: []*HaPoolConfig{},
 		DebitInterval:           0 * time.Second,
+		StoreSCosts:             true,
 		MinCallDuration:         0 * time.Second,
 		MaxCallDuration:         3 * time.Hour,
 		SessionTTL:              0 * time.Second,

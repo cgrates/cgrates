@@ -111,6 +111,7 @@ type SessionSCfg struct {
 	CDRsConns               []*HaPoolConfig
 	SessionReplicationConns []*HaPoolConfig
 	DebitInterval           time.Duration
+	StoreSCosts             bool
 	MinCallDuration         time.Duration
 	MaxCallDuration         time.Duration
 	SessionTTL              time.Duration
@@ -199,6 +200,9 @@ func (self *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		if self.DebitInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Debit_interval); err != nil {
 			return err
 		}
+	}
+	if jsnCfg.Store_session_costs != nil {
+		self.StoreSCosts = *jsnCfg.Store_session_costs
 	}
 	if jsnCfg.Min_call_duration != nil {
 		if self.MinCallDuration, err = utils.ParseDurationWithNanosecs(*jsnCfg.Min_call_duration); err != nil {
