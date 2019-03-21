@@ -84,6 +84,7 @@ const (
 	SetExpiry                 = "*set_expiry"
 	MetaPublishAccount        = "*publish_account"
 	MetaPublishBalance        = "*publish_balance"
+	MetaRemoveSessionCosts    = "*remove_session_costs"
 )
 
 func (a *Action) Clone() *Action {
@@ -127,6 +128,7 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		utils.MetaAMQPjsonMap:     sendAMQP,
 		utils.MetaAWSjsonMap:      sendAWS,
 		utils.MetaSQSjsonMap:      sendSQS,
+		MetaRemoveSessionCosts:    cleanSessionCosts,
 	}
 	f, exists := actionFuncMap[typ]
 	return f, exists
@@ -959,4 +961,29 @@ func (cdrP *cdrLogProvider) AsNavigableMap([]*config.FCTemplate) (
 // RemoteHost is part of engine.DataProvider interface
 func (cdrP *cdrLogProvider) RemoteHost() net.Addr {
 	return utils.LocalAddr()
+}
+
+func cleanSessionCosts(_ *Account, _ *Action, _ Actions, extraData interface{}) error { // FiltersID;inlineFilter
+	fltrs, err := utils.IfaceAsString(extraData)
+	if err != nil {
+		return err
+	}
+	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
+	smcFilter := new(utils.SMCostFilter)
+	smcFilter.Usage = make([]*time.Duration, 2)
+	for _, fltrID := range strings.Split(fltrs, utils.INFIELD_SEP) {
+		fltr, err := dm.GetFilter(tenant, fltrID, true, true, utils.NonTransactional)
+		if err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<%s>  Error: %s for filter: %s in action: <%s>",
+				utils.Actions, err.Error(), fltrID, MetaRemoveSessionCosts))
+			continue
+		}
+		for _, rule := range fltr.Rules {
+			smcFilter, err = utils.AppendToSMCostFilter(smcFilter, rule.Type, rule.FieldName, rule.Values, config.CgrConfig().GeneralCfg().DefaultTimezone)
+			if err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> %s in action: <%s>", utils.Actions, err.Error(), MetaRemoveSessionCosts))
+			}
+		}
+	}
+	return cdrStorage.RemoveSMCosts(smcFilter)
 }

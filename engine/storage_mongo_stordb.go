@@ -912,6 +912,23 @@ func (ms *MongoStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix stri
 	return smcs, err
 }
 
+func (ms *MongoStorage) RemoveSMCosts(qryFltr *utils.SMCostFilter) error {
+	filters := bson.M{
+		CGRIDLow:      bson.M{"$in": qryFltr.CgrIDs, "$nin": qryFltr.NotCgrIDs},
+		RunIDLow:      bson.M{"$in": qryFltr.RunIDs, "$nin": qryFltr.NotRunIDs},
+		OriginHostLow: bson.M{"$in": qryFltr.OriginHosts, "$nin": qryFltr.NotOriginHosts},
+		OriginIDLow:   bson.M{"$in": qryFltr.OriginIDs, "$nin": qryFltr.NotOriginIDs},
+		CostSourceLow: bson.M{"$in": qryFltr.CostSources, "$nin": qryFltr.NotCostSources},
+		UsageLow:      bson.M{"$gte": qryFltr.Usage[0], "$lt": qryFltr.Usage[1]},
+		CreatedAtLow:  bson.M{"$gte": qryFltr.CreatedAtStart, "$lt": qryFltr.CreatedAtEnd},
+	}
+	ms.cleanEmptyFilters(filters)
+	return ms.query(func(sctx mongo.SessionContext) (err error) {
+		_, err = ms.getCol(utils.SessionCostsTBL).DeleteMany(sctx, filters)
+		return err
+	})
+}
+
 func (ms *MongoStorage) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
 	if cdr.OrderID == 0 {
 		cdr.OrderID = ms.cnter.Next()

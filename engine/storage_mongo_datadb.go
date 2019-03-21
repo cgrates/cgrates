@@ -99,6 +99,7 @@ var (
 	CostDetailsLow     = strings.ToLower(utils.CostDetails)
 	DestinationLow     = strings.ToLower(utils.Destination)
 	CostLow            = strings.ToLower(utils.COST)
+	CostSourceLow      = strings.ToLower(utils.CostSource)
 
 	tTime = reflect.TypeOf(time.Time{})
 )

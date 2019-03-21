@@ -142,6 +142,7 @@ type CdrStorage interface {
 	SetSMCost(smc *SMCost) error
 	GetSMCosts(cgrid, runid, originHost, originIDPrfx string) ([]*SMCost, error)
 	RemoveSMCost(*SMCost) error
+	RemoveSMCosts(qryFltr *utils.SMCostFilter) error
 	GetCDRs(*utils.CDRsFilter, bool) ([]*CDR, int64, error)
 }
 

@@ -739,6 +739,66 @@ func (self *SQLStorage) RemoveSMCost(smc *SMCost) error {
 	return nil
 }
 
+func (self *SQLStorage) RemoveSMCosts(qryFltr *utils.SMCostFilter) error {
+	q := self.db.Table(utils.SessionCostsTBL).Select("*")
+	// Add filters, use in to replace the high number of ORs
+	if len(qryFltr.CgrIDs) != 0 {
+		q = q.Where("cgrid in (?)", qryFltr.CgrIDs)
+	}
+	if len(qryFltr.NotCgrIDs) != 0 {
+		q = q.Where("cgrid not in (?)", qryFltr.NotCgrIDs)
+	}
+	if len(qryFltr.RunIDs) != 0 {
+		q = q.Where("run_id in (?)", qryFltr.RunIDs)
+	}
+	if len(qryFltr.NotRunIDs) != 0 {
+		q = q.Where("run_id not in (?)", qryFltr.NotRunIDs)
+	}
+	if len(qryFltr.OriginIDs) != 0 {
+		q = q.Where("origin_id in (?)", qryFltr.OriginIDs)
+	}
+	if len(qryFltr.NotOriginIDs) != 0 {
+		q = q.Where("origin_id not in (?)", qryFltr.NotOriginIDs)
+	}
+	if len(qryFltr.OriginHosts) != 0 {
+		q = q.Where("origin_host in (?)", qryFltr.OriginHosts)
+	}
+	if len(qryFltr.NotOriginHosts) != 0 {
+		q = q.Where("origin_host not in (?)", qryFltr.NotOriginHosts)
+	}
+	if len(qryFltr.CostSources) != 0 {
+		q = q.Where("costsource in (?)", qryFltr.CostSources)
+	}
+	if len(qryFltr.NotCostSources) != 0 {
+		q = q.Where("costsource not in (?)", qryFltr.NotCostSources)
+	}
+	if qryFltr.CreatedAtStart != nil {
+		q = q.Where("created_at >= ?", qryFltr.CreatedAtStart)
+	}
+	if qryFltr.CreatedAtEnd != nil {
+		q = q.Where("created_at < ?", qryFltr.CreatedAtEnd)
+	}
+	if qryFltr.Usage[0] != nil {
+		if self.db.Dialect().GetName() == utils.MYSQL { // MySQL needs escaping for usage
+			q = q.Where("`usage` >= ?", qryFltr.Usage[0].Nanoseconds())
+		} else {
+			q = q.Where("usage >= ?", qryFltr.Usage[0].Nanoseconds())
+		}
+	}
+	if qryFltr.Usage[1] != nil {
+		if self.db.Dialect().GetName() == utils.MYSQL { // MySQL needs escaping for usage
+			q = q.Where("`usage` < ?", qryFltr.Usage[1].Nanoseconds())
+		} else {
+			q = q.Where("usage < ?", qryFltr.Usage[1].Nanoseconds())
+		}
+	}
+	if err := q.Delete(nil).Error; err != nil {
+		q.Rollback()
+		return err
+	}
+	return nil
+}
+
 // GetSMCosts is used to retrieve one or multiple SMCosts based on filter
 func (self *SQLStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix string) ([]*SMCost, error) {
 	var smCosts []*SMCost
