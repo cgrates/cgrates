@@ -26,6 +26,13 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+var protectedSFlds = engine.MapEvent{
+	utils.CGRID:      struct{}{},
+	utils.OriginHost: struct{}{},
+	utils.OriginID:   struct{}{},
+	utils.Usage:      struct{}{},
+}
+
 // SessionSClient is the interface implemented by Agents which are able to
 // communicate bidirectionally with SessionS and remote Communication Switch
 type SessionSClient interface {

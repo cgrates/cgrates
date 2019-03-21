@@ -202,10 +202,12 @@ func (s *Session) TotalUsage() (tDur time.Duration) {
 // AsCGREvents is not thread safe since it is supposed to run by the time Session is closed
 func (s *Session) asCGREvents() (cgrEvs []*utils.CGREvent, err error) {
 	cgrEvs = make([]*utils.CGREvent, len(s.SRuns)+1) // so we can gather all cdr info while under lock
+	rawEv := s.EventStart.MapEvent()
+	rawEv[utils.RunID] = utils.MetaRaw
 	cgrEvs[0] = &utils.CGREvent{
 		Tenant: s.Tenant,
 		ID:     utils.UUIDSha1Prefix(),
-		Event:  s.EventStart.MapEvent(),
+		Event:  rawEv,
 	}
 	for i, sr := range s.SRuns {
 		cgrEvs[i+1] = &utils.CGREvent{
