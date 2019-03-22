@@ -142,11 +142,14 @@ func TestSessionsItTerminatUnexist(t *testing.T) {
 	}
 
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{DestinationPrefixes: []string{"1002"}}
+	req := utils.RPCCDRsFilter{
+		DestinationPrefixes: []string{"1002"},
+		RunIDs:              []string{utils.MetaDefault},
+	}
 	if err := sItRPC.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
-		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+		t.Errorf("Unexpected number of CDRs returned: %v \n cdrs=%s", len(cdrs), utils.ToJSON(cdrs))
 	} else {
 		if cdrs[0].Usage != "2m0s" {
 			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
@@ -412,7 +415,7 @@ func TestSessionsItEventCostCompressing(t *testing.T) {
 	if err := sItRPC.Call(utils.ApierV1GetEventCost,
 		utils.AttrGetCallCost{CgrId: cgrID, RunId: utils.META_DEFAULT},
 		&ec); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	// make sure we only have one aggregated Charge
 	if len(ec.Charges) != 1 ||

@@ -179,8 +179,13 @@ func testAccITDebitBalance(t *testing.T) {
 
 func testAccITAddBalance(t *testing.T) {
 	var reply string
-	attrs := &AttrAddBalance{Tenant: "cgrates.org", Account: "testAccAddBalance",
-		BalanceType: "*monetary", Value: 1.5, Cdrlog: utils.BoolPointer(true)}
+	attrs := &AttrAddBalance{
+		Tenant:      "cgrates.org",
+		Account:     "testAccAddBalance",
+		BalanceType: "*monetary",
+		Value:       1.5,
+		Cdrlog:      utils.BoolPointer(true),
+	}
 	if err := accRPC.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
