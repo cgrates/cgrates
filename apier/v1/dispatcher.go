@@ -524,3 +524,27 @@ func (dS *DispatcherCacheSv1) LoadCache(args dispatchers.AttrReloadCacheWithApiK
 func (dS *DispatcherCacheSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
 	return dS.dS.CacheSv1Ping(args, reply)
 }
+
+func NewDispatcherGuardianSv1(dps *dispatchers.DispatcherService) *DispatcherGuardianSv1 {
+	return &DispatcherGuardianSv1{dS: dps}
+}
+
+// Exports RPC from CacheSv1
+type DispatcherGuardianSv1 struct {
+	dS *dispatchers.DispatcherService
+}
+
+// RemoteLock will lock a key from remote
+func (dS *DispatcherGuardianSv1) RemoteLock(attr *dispatchers.AttrRemoteLockWithApiKey, reply *string) (err error) {
+	return dS.dS.GuardianSv1RemoteLock(attr, reply)
+}
+
+// RemoteUnlock will unlock a key from remote based on reference ID
+func (dS *DispatcherGuardianSv1) RemoteUnlock(attr *dispatchers.AttrRemoteUnlockWithApiKey, reply *[]string) (err error) {
+	return dS.dS.GuardianSv1RemoteUnlock(attr, reply)
+}
+
+// Ping used to detreminate if component is active
+func (dS *DispatcherGuardianSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
+	return dS.dS.GuardianSv1Ping(args, reply)
+}

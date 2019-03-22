@@ -1004,6 +1004,9 @@ func startDispatcherService(internalDispatcherSChan chan *dispatchers.Dispatcher
 	server.RpcRegisterName(utils.CacheSv1,
 		v1.NewDispatcherCacheSv1(dspS))
 
+	server.RpcRegisterName(utils.GuardianSv1,
+		v1.NewDispatcherGuardianSv1(dspS))
+
 	internalDispatcherSChan <- dspS
 }
 

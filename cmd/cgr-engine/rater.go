@@ -153,7 +153,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 	apierRpcV2 := &v2.ApierV2{
 		ApierV1: *apierRpcV1}
 
-	guardianSv1 := &v1.GuardianSv1{}
+	guardianSv1 := v1.NewGuardianSv1()
 
 	server.RpcRegister(responder)
 	server.RpcRegister(apierRpcV1)

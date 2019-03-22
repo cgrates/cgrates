@@ -155,6 +155,18 @@ type ArgsGetGroupWithApiKey struct {
 	engine.ArgsGetGroup
 }
 
+type AttrRemoteLockWithApiKey struct {
+	DispatcherResource
+	utils.TenantArg
+	utils.AttrRemoteLock
+}
+
+type AttrRemoteUnlockWithApiKey struct {
+	DispatcherResource
+	utils.TenantArg
+	RefID string
+}
+
 func ParseStringMap(s string) utils.StringMap {
 	if s == utils.ZERO {
 		return make(utils.StringMap)
