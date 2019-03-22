@@ -46,6 +46,9 @@ func (apierV1 *ApierV1) GetChargerProfileIDs(tenant string, chPrfIDs *[]string) 
 	if err != nil {
 		return err
 	}
+	if len(keys) == 0 {
+		return utils.ErrNotFound
+	}
 	retIDs := make([]string, len(keys))
 	for i, key := range keys {
 		retIDs[i] = key[len(prfx):]
