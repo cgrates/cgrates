@@ -72,6 +72,18 @@ var sTestsAlsPrf = []func(t *testing.T){
 	testAttributeSProcessWithMultipleRuns,
 	testAttributeSProcessWithMultipleRuns2,
 	testAttributeSKillEngine,
+	//start test for cache options
+	testAttributeSInitCfg,
+	testAttributeSInitDataDb,
+	testAttributeSResetStorDb,
+	testAttributeSStartEngine,
+	testAttributeSRPCConn,
+	testAttributeSCachingMetaNone,
+	testAttributeSCachingMetaLoad,
+	testAttributeSCachingMetaReload1,
+	testAttributeSCachingMetaReload2,
+	testAttributeSCachingMetaRemove,
+	testAttributeSKillEngine,
 }
 
 //Test start here
@@ -1167,4 +1179,395 @@ func testAttributeSKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
+}
+
+//Start tests for caching
+func testAttributeSCachingMetaNone(t *testing.T) {
+	//*none option should not add attribute in cache only in Datamanager
+	attrPrf1 := &AttributeWrapper{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:        "ATTR_1",
+			Contexts:  []string{utils.MetaSessionS},
+			FilterIDs: []string{"*string:~InitialField:InitialValue"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			Attributes: []*engine.Attribute{
+				{
+					FieldName:  "Field1",
+					Substitute: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+				},
+			},
+			Weight: 10,
+		},
+		Cache: utils.StringPointer(utils.META_NONE),
+	}
+	// set the profile
+	var result string
+	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", attrPrf1, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var reply bool
+	argsCache := engine.ArgsGetCacheItem{
+		CacheID: utils.CacheAttributeProfiles,
+		ItemID:  "cgrates.org:ATTR_1",
+	}
+	if err := attrSRPC.Call(utils.CacheSv1HasItem, argsCache, &reply); err != nil {
+		t.Error(err)
+	} else if reply {
+		t.Errorf("Expected: false, received:%v", reply)
+	}
+
+	var rcvKeys []string
+	argsCache2 := engine.ArgsGetCacheItemIDs{
+		CacheID: utils.CacheAttributeProfiles,
+	}
+	if err := attrSRPC.Call(utils.CacheSv1GetItemIDs, argsCache2, &rcvKeys); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Expected error: %s received error: %s and reply: %v ",
+			utils.ErrNotFound, err.Error(), rcvKeys)
+	}
+
+	//check in dataManager
+	expected := []string{"ATTR_1"}
+	var rcvIDs []string
+	if err := attrSRPC.Call("ApierV1.GetAttributeProfileIDs", "cgrates.org", &rcvIDs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcvIDs) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, rcvIDs)
+	}
+}
+
+func testAttributeSCachingMetaLoad(t *testing.T) {
+	//*load option should add attribute in cache and in Datamanager
+	attrPrf1 := &AttributeWrapper{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:        "ATTR_1",
+			Contexts:  []string{utils.MetaSessionS},
+			FilterIDs: []string{"*string:~InitialField:InitialValue"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			Attributes: []*engine.Attribute{
+				{
+					FieldName:  "Field1",
+					Substitute: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+				},
+			},
+			Weight: 10,
+		},
+		Cache: utils.StringPointer(utils.MetaLoad),
+	}
+	// set the profile
+	var result string
+	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", attrPrf1, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var reply bool
+	argsCache := engine.ArgsGetCacheItem{
+		CacheID: utils.CacheAttributeProfiles,
+		ItemID:  "cgrates.org:ATTR_1",
+	}
+	if err := attrSRPC.Call(utils.CacheSv1HasItem, argsCache, &reply); err != nil {
+		t.Error(err)
+	} else if !reply {
+		t.Errorf("Expected: true, received:%v", reply)
+	}
+
+	var rcvKeys []string
+	expectedIDs := []string{"cgrates.org:ATTR_1"}
+	argsCache2 := engine.ArgsGetCacheItemIDs{
+		CacheID: utils.CacheAttributeProfiles,
+	}
+	if err := attrSRPC.Call(utils.CacheSv1GetItemIDs, argsCache2, &rcvKeys); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(rcvKeys, expectedIDs) {
+		t.Errorf("Expecting : %+v, received: %+v", expectedIDs, rcvKeys)
+	}
+
+	//check in dataManager
+	expected := []string{"ATTR_1"}
+	var rcvIDs []string
+	if err := attrSRPC.Call("ApierV1.GetAttributeProfileIDs", "cgrates.org", &rcvIDs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcvIDs) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, rcvIDs)
+	}
+	//remove from cache and DataManager the profile
+	var resp string
+	if err := attrSRPC.Call("ApierV1.RemoveAttributeProfile",
+		&utils.TenantIDWrapper{Tenant: attrPrf1.Tenant, ID: attrPrf1.ID,
+			Cache: utils.StringPointer(utils.MetaRemove)}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+
+	argsCache = engine.ArgsGetCacheItem{
+		CacheID: utils.CacheAttributeProfiles,
+		ItemID:  "cgrates.org:ATTR_1",
+	}
+	if err := attrSRPC.Call(utils.CacheSv1HasItem, argsCache, &reply); err != nil {
+		t.Error(err)
+	} else if reply {
+		t.Errorf("Expected: false, received:%v", reply)
+	}
+
+	if err := attrSRPC.Call(utils.CacheSv1GetItemIDs, argsCache2, &rcvKeys); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Expected error: %s received error: %s and reply: %v ",
+			utils.ErrNotFound, err, rcvKeys)
+	}
+
+	//check in dataManager
+	if err := attrSRPC.Call("ApierV1.GetAttributeProfileIDs", "cgrates.org", &rcvIDs); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Expected error: %s received error: %s and reply: %v ",
+			utils.ErrNotFound, err, rcvIDs)
+	}
+}
+
+func testAttributeSCachingMetaReload1(t *testing.T) {
+	//*reload add the attributes in cache if was there before
+	attrPrf1 := &AttributeWrapper{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:        "ATTR_1",
+			Contexts:  []string{utils.MetaSessionS},
+			FilterIDs: []string{"*string:~InitialField:InitialValue"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			Attributes: []*engine.Attribute{
+				{
+					FieldName:  "Field1",
+					Substitute: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+				},
+			},
+			Weight: 10,
+		},
+		Cache: utils.StringPointer(utils.MetaReload),
+	}
+	// set the profile
+	var result string
+	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", attrPrf1, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var reply bool
+	argsCache := engine.ArgsGetCacheItem{
+		CacheID: utils.CacheAttributeProfiles,
+		ItemID:  "cgrates.org:ATTR_1",
+	}
+	if err := attrSRPC.Call(utils.CacheSv1HasItem, argsCache, &reply); err != nil {
+		t.Error(err)
+	} else if reply {
+		t.Errorf("Expected: false, received:%v", reply)
+	}
+
+	var rcvKeys []string
+	argsCache2 := engine.ArgsGetCacheItemIDs{
+		CacheID: utils.CacheAttributeProfiles,
+	}
+	if err := attrSRPC.Call(utils.CacheSv1GetItemIDs, argsCache2, &rcvKeys); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Expected error: %s received error: %s and reply: %v ",
+			utils.ErrNotFound, err, rcvKeys)
+	}
+
+	//check in dataManager
+	expected := []string{"ATTR_1"}
+	var rcvIDs []string
+	if err := attrSRPC.Call("ApierV1.GetAttributeProfileIDs", "cgrates.org", &rcvIDs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcvIDs) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, rcvIDs)
+	}
+}
+
+func testAttributeSCachingMetaReload2(t *testing.T) {
+	//add cache with *load option
+	attrPrf1 := &AttributeWrapper{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:        "ATTR_1",
+			Contexts:  []string{utils.MetaSessionS},
+			FilterIDs: []string{"*string:~InitialField:InitialValue"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			Attributes: []*engine.Attribute{
+				{
+					FieldName:  "Field1",
+					Substitute: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+				},
+			},
+			Weight: 10,
+		},
+		Cache: utils.StringPointer(utils.MetaLoad),
+	}
+	// set the profile
+	var result string
+	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", attrPrf1, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	var reply *engine.AttributeProfile
+	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	attrPrf1.Compile()
+	reply.Compile()
+	if !reflect.DeepEqual(attrPrf1.AttributeProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", attrPrf1.AttributeProfile, reply)
+	}
+
+	//add cache with *reload option
+	// should overwrite the first
+	attrPrf2 := &AttributeWrapper{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:        "ATTR_1",
+			Contexts:  []string{utils.MetaSessionS},
+			FilterIDs: []string{"*string:~Test:Test"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			Attributes: []*engine.Attribute{
+				{
+					FieldName:  "Field1",
+					Substitute: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+				},
+			},
+			Weight: 10,
+		},
+		Cache: utils.StringPointer(utils.MetaReload),
+	}
+	// set the profile
+	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", attrPrf2, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	attrPrf2.Compile()
+	reply.Compile()
+	if !reflect.DeepEqual(attrPrf2.AttributeProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", attrPrf2.AttributeProfile, reply)
+	}
+}
+
+func testAttributeSCachingMetaRemove(t *testing.T) {
+	//add cache with *load option
+	attrPrf1 := &AttributeWrapper{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:        "ATTR_1",
+			Contexts:  []string{utils.MetaSessionS},
+			FilterIDs: []string{"*string:~InitialField:InitialValue"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			Attributes: []*engine.Attribute{
+				{
+					FieldName:  "Field1",
+					Substitute: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+				},
+			},
+			Weight: 10,
+		},
+		Cache: utils.StringPointer(utils.MetaLoad),
+	}
+	// set the profile
+	var result string
+	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", attrPrf1, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var reply bool
+	argsCache := engine.ArgsGetCacheItem{
+		CacheID: utils.CacheAttributeProfiles,
+		ItemID:  "cgrates.org:ATTR_1",
+	}
+	if err := attrSRPC.Call(utils.CacheSv1HasItem, argsCache, &reply); err != nil {
+		t.Error(err)
+	} else if !reply {
+		t.Errorf("Expected: true, received:%v", reply)
+	}
+
+	var rcvKeys []string
+	expectedIDs := []string{"cgrates.org:ATTR_1"}
+	argsCache2 := engine.ArgsGetCacheItemIDs{
+		CacheID: utils.CacheAttributeProfiles,
+	}
+	if err := attrSRPC.Call(utils.CacheSv1GetItemIDs, argsCache2, &rcvKeys); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(rcvKeys, expectedIDs) {
+		t.Errorf("Expecting : %+v, received: %+v", expectedIDs, rcvKeys)
+	}
+
+	// add with *remove cache option
+	// should delete it from cache
+	attrPrf2 := &AttributeWrapper{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
+			ID:        "ATTR_1",
+			Contexts:  []string{utils.MetaSessionS},
+			FilterIDs: []string{"*string:~Test:Test"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			Attributes: []*engine.Attribute{
+				{
+					FieldName:  "Field1",
+					Substitute: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+				},
+			},
+			Weight: 10,
+		},
+		Cache: utils.StringPointer(utils.MetaRemove),
+	}
+	// set the profile
+	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", attrPrf2, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	if err := attrSRPC.Call(utils.CacheSv1HasItem, argsCache, &reply); err != nil {
+		t.Error(err)
+	} else if reply {
+		t.Errorf("Expected: false, received:%v", reply)
+	}
+
+	if err := attrSRPC.Call(utils.CacheSv1GetItemIDs, argsCache2, &rcvKeys); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("Expected error: %s received error: %s and reply: %v ",
+			utils.ErrNotFound, err.Error(), rcvKeys)
+	}
+
+	//check in dataManager
+	expected := []string{"ATTR_1"}
+	var rcvIDs []string
+	if err := attrSRPC.Call("ApierV1.GetAttributeProfileIDs", "cgrates.org", &rcvIDs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcvIDs) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, rcvIDs)
+	}
+
 }
