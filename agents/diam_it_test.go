@@ -238,6 +238,17 @@ func testDiamItDryRun(t *testing.T) {
 		t.Error(err)
 	}
 	for i := 0; i < *interations; i++ {
+		// ============================================
+		// prevent nil pointer dereference
+		// ============================================
+		if diamClnt.conn == nil {
+			t.Fatal("Diameter conection should not be nil")
+		}
+		if ccr == nil {
+			t.Fatal("The mesage to diameter should not be nil")
+		}
+		// ============================================
+
 		if err := diamClnt.SendMessage(ccr); err != nil {
 			t.Error(err)
 		}
