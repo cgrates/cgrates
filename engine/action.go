@@ -963,14 +963,13 @@ func (cdrP *cdrLogProvider) RemoteHost() net.Addr {
 	return utils.LocalAddr()
 }
 
-func removeSessionCosts(_ *Account, _ *Action, _ Actions, extraData interface{}) error { // FiltersID;inlineFilter
-	fltrs, err := utils.IfaceAsString(extraData)
-	if err != nil {
-		return err
-	}
+func removeSessionCosts(_ *Account, action *Action, _ Actions, _ interface{}) error { // FiltersID;inlineFilter
 	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	smcFilter := new(utils.SMCostFilter)
-	for _, fltrID := range strings.Split(fltrs, utils.INFIELD_SEP) {
+	for _, fltrID := range strings.Split(action.ExtraParameters, utils.INFIELD_SEP) {
+		if len(fltrID) == 0 {
+			continue
+		}
 		fltr, err := dm.GetFilter(tenant, fltrID, true, true, utils.NonTransactional)
 		if err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s>  Error: %s for filter: %s in action: <%s>",
